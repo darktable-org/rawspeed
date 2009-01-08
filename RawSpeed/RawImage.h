@@ -1,5 +1,4 @@
 #pragma once
-#include "RawImagePlane.h"
 #include "ColorFilterArray.h"
 
 
