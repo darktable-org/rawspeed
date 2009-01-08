@@ -1,0 +1,198 @@
+===========================================
+Whence - SoftWire - where it all came from.
+===========================================
+Home page
+  https://gna.org/projects/softwire/
+    Nicolas Capens <c0d1f1ed>
+    Sebastien Metrot <meeloo>
+    Frank Richter <res>
+    Marten Svanfeldt <thebolt>
+
+CVS tarball
+  http://cvs.gna.org/daily/softwire.tar.gz
+
+Downloads
+  http://download.gna.org/softwire/SoftWire.zip
+  http://download.gna.org/softwire/SoftWire-64.zip
+
+Browse CVS
+  http://cvs.gna.org/cvsweb/?cvsroot=softwire
+
+Old home page
+  http://softwire.sourceforge.net
+    SoftWire and swShader are now owned by TransGaming Technologies
+    Inc. You will automatically be redirected to
+    http://www.transgaming.com/products/swiftshader/ in 3 seconds.
+    If your browser doesn't automatically load, click HERE.
+
+Old Project page
+  http://sourceforge.net/projects/softwire
+    Project Admins: c0d1f1ed, gavriels
+    Operating System: 32-bit MS Windows (95/98), All 32-bit MS Windows
+    (95/98/NT/2000/XP), All POSIX (Linux/BSD/UNIX-like OSes), Linux,
+    Other Operating Systems
+    License: GNU Library or Lesser General Public License (LGPL)
+    Category: 3D Rendering, Code Generators, Compilers (Suggest?)
+
+  User ID: 628186
+  Login Name: c0d1f1ed
+  Publicly Displayed Name:  Nicolas Capens
+  Email Address:  c0d1f1ed@users.sourceforge.net
+  Site Member Since: 10/12/2002
+
+  User ID: 9126
+  Login Name: gavriels
+  Publicly Displayed Name:  Gavriel State
+  Email Address:  gavriels@users.sourceforge.net
+  Site Member Since: 01/26/2000
+
+Relevant news items
+  http://sourceforge.net/forum/forum.php?thread_id=1371369&forum_id=184692
+  ---------------------------------------
+  Why has the SF.net project been purged?
+  ---------------------------------------
+  By: Sebastien Metrot (meeloo) - 2005-10-21 07:46
+    I have just learned that softwire and swShader has been acquired by
+    transgaming. While I can understand Nicolas' motivations to keep the
+    forthcoming versions of his work proprietary I don't see any reason to kill
+    the original projects. Once the source has been released under the LGPL one
+    can not revoque the licence retroactivelly, so I have downloaded ALL the
+    existing source tarballs from the servers that still have it and I plan to put
+    them on some server (for example gna.org where my other OSS projects are) in
+    order to keep the ball rolling on this great project. Is anyone interested?
+  ---------------------------------------
+  By: RAZOR (razorunreal) - 2005-10-21 15:10
+    I'm personally not too concerned whether the projects continue to be
+    developed, softwire is an excellent tool for me as it stands. I would prefer,
+    however, if they stayed online so others can make use of them too. I'm sure
+    there are people who will.
+
+    And Nicolas: Firstly, congratulations. Secondly, thanks. Random note, I
+    learned assembly just to use softwire :-).
+  ---------------------------------------
+  By: Nicolas Capens (c0d1f1ed) - 2005-10-21 11:53
+    Hi Sebastien,
+
+    It is hard to have a commercial product while there is still an open-source
+    project. So to clearly break between the two we had to take these measures.
+    Any further development on swShader would be bad for TransGaming's
+    SwiftShader.
+
+    While it's probably your legal right to take the last LGPL code and use it for
+    a new project, I hope you're realistic about the possibilities. Over the years
+    of swShader's development I recieved only about five lines of contributed
+    code. And I spent nearly all of my 'free time' on its development. So to "keep
+    the ball rolling" you will need to find a way to motivate contributors to work
+    on this complex project. Or you or another individual would have to spend a
+    lot of time on it. But then maybe it becomes more useful to work on
+    SwiftShader...
+
+    So, I don't want to discourage you, in fact I wish you all the luck. But the
+    evolution from swShader to SwiftShader was really very natural. The swShader
+    project has been completely inactive for about a year and now that it has been
+    almost entirely removed you wish to start contributing? With all respect, I
+    don't understand your goals...
+
+    Sincerely,
+
+    Nicolas Capens
+  ---------------------------------------
+  By: Sebastien Metrot (meeloo) - 2005-10-21 16:11
+    Hi Nicolas,
+
+    I think softwire is probably stable enough for many people to continue using
+    it even if there isn't any new new developement on it. I have started hacking
+    an equivalent of softwire for the PPC some month ago and one of my goals was
+    to end up merging it with softwire one of those days. Another goal is to make
+    sure that softwire works well with Apple's new developer transition systems.
+
+    The swiftAsm and swiftShader announcement reveals that you made a breakthrough
+    and that they are much better than their original OSS version. If that is the
+    case then I don't really understand why there is such an urge to kill the
+    project.
+
+    On a side note I was kinda disapointed as I've been a big fan of softwire and
+    I have read many of your posts about rasterizing and asm tricks on developpers
+    forum and I naively thought that I would be able to profit from your wisdom a
+    bit longer than that :-).
+
+    I'm not too much interested in swShader personnaly as I'm mainly doing Audio
+    programming. However I imagine that it is a good idea to keep the sources
+    available for reference and learning new tricks from the gurus...
+  ---------------------------------------
+  By: Xepo Epicmoon (xepo) - 2005-10-21 08:39
+    I'm interested. Though, why GNA instead of just starting another SF project?
+  ---------------------------------------
+  By: Sebastien Metrot (meeloo) - 2005-10-21 16:15
+    Well, the first reason would be that we will not be able to create a
+    "softwire" and "swShader" project on SF.net as the name is already taken by
+    the deprecated project. Unless Nicolas would let us do it of course. I was
+    just naming gna as a possible solution. I have suffered from the quirks of
+    SF.net and Savanah in the past so I moved to gna which is much smaller but
+    very stable. Also two of the GNA admins are very good friends of mine (I'm not
+    sure if that counts as a + or a - ;-) ).
+  ---------------------------------------
+  By: Nicolas Capens (c0d1f1ed) - 2005-10-22 17:17
+    As a backup I would recommend to use:
+    http://prdownloads.sourceforge.net/softwire
+    http://prdownloads.sourceforge.net/sw-shader
+
+    Please understand that not much has changed. The projects have been inactive
+    for very long, I just removed the development page. I hope you still
+    appreciate the backups.
+  ---------------------------------------
+  By: Sebastien Metrot (meeloo) - 2005-10-22 19:56
+    Yes, I have already downloaded a backup of these files as I don't know how
+    long they will stay available once the official download section have been
+    emptied. One thing that is still missing is the tutorial page. I guess I'll be
+    able to salvage it from the google cache or something, in order to provide a
+    complete zip with the sources and the docs.
+
+    Thanks
+  ---------------------------------------
+  By: RAZOR (razorunreal) - 2005-10-22 21:12
+    Wasn't the tutorial out of date? And I know pretty much nothing about legal
+    stuff, but would you be within your rights to distribute it anyway?
+  ---------------------------------------
+  By: Xepo Epicmoon (xepo) - 2005-10-22 23:46
+    Ahh, thanks for helping; that's quite nice of ya, since you have commercial
+    interest in us not succeeding.
+  ---------------------------------------
+  By: Klaus Post (sh0dan) - 2005-10-27 03:58
+    Bummer :(
+
+    Sorry that your new employee cannot see the benefit of keeping softwire open.
+
+    Guess we'll have to develop an x86-64 version ourselves! :(
+  ---------------------------------------
+  By: Sebastien Metrot (meeloo) - 2005-11-21 22:01
+    Hi :)
+
+    Ok, I got the approval from gna and the project is registered there. I'll
+    start uploading the sources of all the tarballs to the cvs repository as soons
+    as possible. The project page is here: https://gna.org/projects/softwire/
+    Meanwhile you can subscribe to two mailling list:
+    softwire-commit will receive a commit repport for any cvs operation.
+    softwire-devel is the discussion ML where all the parties interested in the
+    developpement of softwire can meet and talk.
+
+    See you there!
+  ---------------------------------------
+  By: Paul Sokolovsky (pfalcon) - 2006-09-12 02:23
+    Except that project GNA project is (still? yet? already?) empty. Was there
+    some behind-the-schenes communication we should know around?
+
+    Otherwise, there's nothing wrong with author's position, it's really the
+    community interest what judges success of open-source project and if community
+    is not interested in even upkeep of software given to it, let it be that way.
+    Nothing wrong, I mean, if they don't violate formal an ethical aspects of GPL.
+  ---------------------------------------
+  By: Nicolas Capens (c0d1f1ed) - 2006-09-12 21:24
+    The GNA SoftWire projec is not empty, it's just only accessible with CVS.
+
+    But there has also been some communication on the mailing list. In just a
+    couple weeks I will start a new dynamic code generation project for my
+    Master's thesis. It will be [insert favorite superlative here] than SoftWire
+    and include every feature ever asked for. It will be open-source but the
+    license might be a little more restrictive than LGPL...
+  ---------------------------------------
