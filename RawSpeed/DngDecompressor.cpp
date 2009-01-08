@@ -124,7 +124,8 @@ RawImage DngDecompressor::decodeRaw() {
             LJpegDecompressor* l = new LJpegDecompressor(mFile, mRaw);
             try {
               l->startDecoder(offsets[x+y*tilesX], counts[x+y*tilesX], tilew*x, tileh*y);
-            } catch (RawDecompressorException* e) {
+            } catch (RawDecompressorException* e) { 
+              // These may just be single tile error - store the error and move on
             	errors.push_back(_strdup(e->what()));
             }
             delete(l);
@@ -140,7 +141,8 @@ RawImage DngDecompressor::decodeRaw() {
         if (counts->count != offsets->count) {
           ThrowRDE("DNG Decoder: Byte count number does not match strip size: count:%u, stips:%u ",counts->count, offsets->count);
         }
-        
+
+        ThrowRDE("DNG Decoder: Unsupported format.");
       }
    } else {
       ThrowRDE("DNG Decoder: Unknown compression: %u",compression);
