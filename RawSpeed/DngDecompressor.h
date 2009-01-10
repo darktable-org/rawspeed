@@ -12,4 +12,5 @@ public:
   virtual RawImage decodeRaw();
 protected:
   TiffIFD *mRootIFD;
+  gboolean mFixLjpeg;
 };

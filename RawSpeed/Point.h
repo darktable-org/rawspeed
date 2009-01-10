@@ -234,10 +234,10 @@ public:
 	// 2D iPoint
 	iPoint2D( int a, int b) {
 		dimn=2; x=a; y=b; z=0;  }
-	iPoint2D( double a, double b) {
-		dimn=2; x=a; y=b; z=0;  }
-	iPoint2D( int n, int a[]);
-	iPoint2D( int n, double a[]);
+//	iPoint2D( double a, double b) {
+//		dimn=2; x=a; y=b; z=0;  }
+//	iPoint2D( int n, int a[]);
+//	iPoint2D( int n, double a[]);
 	// Destructor
 	~iPoint2D() {};
 private:

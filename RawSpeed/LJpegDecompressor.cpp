@@ -2,13 +2,16 @@
 #include "LJpegDecompressor.h"
 
 
-LJpegDecompressor::LJpegDecompressor(FileMap* file, RawImage img): mFile(file), mRaw(img)
+LJpegDecompressor::LJpegDecompressor(FileMap* file, RawImage img): 
+ mFile(file), mRaw(img)
 {
   input = 0;
   skipX = skipY = 0;
   for (int i = 0; i< 4; i++) {
     huff[i].initialized = false;
   }
+  mDNGCompatible = false;
+  slicesW.clear();
 }
 
 LJpegDecompressor::~LJpegDecompressor(void)
@@ -16,6 +19,32 @@ LJpegDecompressor::~LJpegDecompressor(void)
   if (input)
     delete input;
   input = 0;
+}
+
+void LJpegDecompressor::getSOF( SOFInfo* sof, guint offset, guint size )
+{
+  if (!mFile->isValid(offset+size-1))
+    ThrowRDE("LJpegDecompressor::getSOF: Max offset before out of file, invalid data");
+  try {
+    input = new ByteStream(mFile->getData(offset), size);
+
+    if (getNextMarker(false) != M_SOI)
+      ThrowRDE("LJpegDecompressor::getSOF: Image did not start with SOI. Probably not an LJPEG");
+
+    while (true) {
+      JpegMarker m = getNextMarker(true);
+      if (M_SOF3 == m) {
+         parseSOF(sof);
+         return;
+      }
+      if (M_EOI == m) {
+        ThrowRDE("LJpegDecompressor: Could not locate Start of Frame.");
+        return;
+      }
+    }
+  } catch (IOException) {
+    ThrowRDE("LJpegDecompressor: IO exception, read outside file. Corrupt File.");
+  }
 }
 
 void LJpegDecompressor::startDecoder(guint offset, guint size, guint offsetX, guint offsetY) {
@@ -33,6 +62,8 @@ void LJpegDecompressor::startDecoder(guint offset, guint size, guint offsetX, gu
 
     if (getNextMarker(false) != M_SOI)
       ThrowRDE("LJpegDecompressor::startDecoder: Image did not start with SOI. Probably not an LJPEG");
+    _RPT0(0,"Found SOI marker\n");
+
     gboolean moreImage = true;
     while (moreImage) {
         JpegMarker m = getNextMarker(true);
@@ -66,7 +97,7 @@ void LJpegDecompressor::startDecoder(guint offset, guint size, guint offsetX, gu
 
         case M_SOF3:
           _RPT0(0,"Found SOF 3 marker:\n");
-          parseSOF();
+          parseSOF(&frame);
           break;
 
         default:  // Just let it skip to next marker
@@ -80,25 +111,25 @@ void LJpegDecompressor::startDecoder(guint offset, guint size, guint offsetX, gu
   }
 }
 
-void LJpegDecompressor::parseSOF() {
+void LJpegDecompressor::parseSOF(SOFInfo* sof) {
   guint headerLength = input->getShort();
-  bpc = input->getByte();
-  h = input->getShort();
-  w = input->getShort();
+  sof->prec = input->getByte();
+  sof->h = input->getShort();
+  sof->w = input->getShort();
   
-  cps = input->getByte();
+  sof->cps = input->getByte();
   
-  if (bpc>16)
+  if (sof->prec>16)
     ThrowRDE("LJpegDecompressor: More than 16 bits per channel is not supported.");
 
-  if (cps>4 || cps<2)
+  if (sof->cps>4 || sof->cps<2)
     ThrowRDE("LJpegDecompressor: Only from 2 to 4 components are supported.");
 
-  if(headerLength!=8+cps*3) 
+  if(headerLength!=8+sof->cps*3) 
     ThrowRDE("LJpegDecompressor: Header size mismatch.");
 
-  for (guint i = 0; i< cps; i++) {
-    compInfo[i].componentId = input->getByte();
+  for (guint i = 0; i< sof->cps; i++) {
+    sof->compInfo[i].componentId = input->getByte();
     guint subs = input->getByte();
     if (subs!=0x11)
       ThrowRDE("LJpegDecompressor: Subsamples components not supported.");
@@ -106,25 +137,29 @@ void LJpegDecompressor::parseSOF() {
     if (Tq!=0)
       ThrowRDE("LJpegDecompressor: Quantized components not supported.");
   }
-  // If image attempts to decode beyond the image bounds, strip it.
-  if (w*cps+offX > mRaw->dim.x)
-    skipX = ((w*cps+offX)-mRaw->dim.x) / cps;
-  if (h+offY > mRaw->dim.y)
-    skipY = h+offY - mRaw->dim.y;
-
+  sof->initialized = true;
 }
 
 void LJpegDecompressor::parseSOS()
 {
+  if (!frame.initialized)
+    ThrowRDE("LJpegDecompressor::parseSOS: Frame not yet initialized (SOF Marker not parsed)");
+
   guint headerLength = input->getShort();
   guint soscps = input->getByte();
-  if (cps != soscps)
+  if (frame.cps != soscps)
     ThrowRDE("LJpegDecompressor::parseSOS: Component number mismatch.");
 
-  for (guint i=0;i<cps;i++) {
+  for (guint i=0;i<frame.cps;i++) {
     guint cs = input->getByte();
-    if (cs>=cps)
-      ThrowRDE("LJpegDecompressor::parseSOS: Invalid Component Selector");
+
+    guint count = 0;  // Find the correct component
+    while (frame.compInfo[count].componentId != cs) {
+      if (count>=frame.cps)
+        ThrowRDE("LJpegDecompressor::parseSOS: Invalid Component Selector");
+      count++;
+    }
+
     guint b = input->getByte();
     guint td = b>>4;
     if (td>3)
@@ -132,7 +167,7 @@ void LJpegDecompressor::parseSOS()
     if (!huff[td].initialized)
       ThrowRDE("LJpegDecompressor::parseSOS: Invalid Huffman table selection, not defined.");
 
-    compInfo[cs].dcTblNo = td;
+    frame.compInfo[count].dcTblNo = td;
     _RPT2(0,"Component Selector:%u, Table Dest:%u\n",cs, td);
   }
 
@@ -145,6 +180,7 @@ void LJpegDecompressor::parseSOS()
   guint b = input->getByte();
   Pt = b&0xf;          // Point Transform
   _RPT1(0,"Point transform:%u\n",pred);
+
   bits = new BitPump(input);
   try {
     decodeScan();
@@ -157,49 +193,61 @@ void LJpegDecompressor::parseSOS()
 }
 
 void LJpegDecompressor::parseDHT() {
-  guint headerLength = input->getShort();
+  guint headerLength = input->getShort() -2;  // Extract myself
 
-  guint b = input->getByte();
-
-  guint Tc = (b>>4);
-  if (Tc!=0)
-    ThrowRDE("LJpegDecompressor::parseDHT: Unsupported Table class.");
-
-  guint Th = b&0xf;
-  if (Th>3)
-    ThrowRDE("LJpegDecompressor::parseDHT: Invalid huffman table destination id.");
-
-  int acc = 0;
-  HuffmanTable* t = &huff[Th];
-
-  for (guint i = 0; i < 16 ;i++) {
-    t->bits[i+1] = input->getByte();
-    acc+=t->bits[i+1];
+  while (headerLength)  {
+	  guint b = input->getByte();
+	
+	  guint Tc = (b>>4);
+	  if (Tc!=0)
+	    ThrowRDE("LJpegDecompressor::parseDHT: Unsupported Table class.");
+	
+	  guint Th = b&0xf;
+	  if (Th>3)
+	    ThrowRDE("LJpegDecompressor::parseDHT: Invalid huffman table destination id.");
+	
+	  int acc = 0;
+	  HuffmanTable* t = &huff[Th];
+	
+	  for (guint i = 0; i < 16 ;i++) {
+	    t->bits[i+1] = input->getByte();
+	    acc+=t->bits[i+1];
+	  }
+	  t->bits[0] = 0;
+	
+	  if (acc > 256) 
+	    ThrowRDE("LJpegDecompressor::parseDHT: Invalid DHT table.");
+	
+	  if (headerLength < 1+16+acc)
+	    ThrowRDE("LJpegDecompressor::parseDHT: Invalid DHT table length.");
+	
+	  for(int i =0 ; i<acc; i++) {
+	    t->huffval[i] = input->getByte();
+	  }
+	  createHuffmanTable(t);
+    headerLength -= 1+16+acc;
   }
-  t->bits[0] = 0;
-
-  if (acc > 256) 
-    ThrowRDE("LJpegDecompressor::parseDHT: Invalid DHT table.");
-
-  if (headerLength != 3+16+acc)
-    ThrowRDE("LJpegDecompressor::parseDHT: Invalid DHT table length.");
-
-  for(int i =0 ; i<acc; i++) {
-    t->huffval[i] = input->getByte();
-  }
-  createHuffmanTable(t);
 }
 
 void LJpegDecompressor::decodeScan() {
+  // If image attempts to decode beyond the image bounds, strip it.
+  if (frame.w*frame.cps+offX > mRaw->dim.x)
+    skipX = ((frame.w*frame.cps+offX)-mRaw->dim.x) / frame.cps;
+  if (frame.h+offY > mRaw->dim.y)
+    skipY = frame.h+offY - mRaw->dim.y;
+
+  if (slicesW.empty())
+    slicesW.push_back(frame.w*frame.cps);
+
   if (pred == 1) {
-    if (cps==2)
+    if (frame.cps==2)
       decodeScanLeft2Comps();
-    else if (cps==3)
+    else if (frame.cps==3)
       decodeScanLeft3Comps();
-    else if (cps==4)
+    else if (frame.cps==4)
       decodeScanLeft4Comps();
     else 
-      ThrowRDE("LJpegDecompressor::decodeScan: Unsupported component directioncount.");
+      ThrowRDE("LJpegDecompressor::decodeScan: Unsupported component direction count.");
     return;
   }
   ThrowRDE("LJpegDecompressor::decodeScan: Unsupported prediction direction.");
@@ -210,28 +258,61 @@ void LJpegDecompressor::decodeScan() {
 #define COMPS 2
 void LJpegDecompressor::decodeScanLeft2Comps() {
   guchar *draw = mRaw->getData();
-  gushort *dest = (gushort*)&draw[offX*COMPS+(offY*mRaw->pitch)];
   // First line
-  HuffmanTable *dctbl1 = &huff[compInfo[0].dcTblNo];
-  HuffmanTable *dctbl2 = &huff[compInfo[1].dcTblNo];
+  HuffmanTable *dctbl1 = &huff[frame.compInfo[0].dcTblNo];
+  HuffmanTable *dctbl2 = &huff[frame.compInfo[1].dcTblNo];
 
-  // First two pixels are obviously not predicted
+  //Prepare slices (for CR2)
+  guint slices =  (guint)slicesW.size()*(frame.h-skipY);
+  guint *offset = new guint[slices+1];
+
+  guint t_y = 0;
+  guint t_x = 0;
+  guint t_s = 0;
+  guint slice = 0;
+  for (slice = 0; slice< slices; slice++) {
+    offset[slice] = ((t_x+offX)*sizeof(gushort)+((offY+t_y)*mRaw->pitch)) | (t_s<<28);
+    _ASSERTE((offset[slice]&0x0fffffff)<mRaw->dim.x*mRaw->dim.y*mRaw->bpp);
+    t_y++;
+    if (t_y == (frame.h-skipY)) {
+      t_y = 0;
+      t_x += slicesW[t_s++];
+    }
+  }
+  offset[slices] = offset[slices-1];        // Extra offset to avoid branch in loop.
+
+  if (skipX)
+    slicesW[slicesW.size()-1] -= skipX*frame.cps;
+
+  // First pixels are obviously not predicted
   gint p1;
   gint p2;
-  dest[0] = p1 = (1<<(bpc-Pt-1)) + HuffDecode (dctbl1);
-  dest[1] = p2 = (1<<(bpc-Pt-1)) + HuffDecode (dctbl2);
+  gushort *dest = (gushort*)&draw[offset[0]&0x0fffffff];
+  gushort *predict = dest;
+  *dest++ = p1 = (1<<(frame.prec-Pt-1)) + HuffDecode(dctbl1);
+  *dest++ = p2 = (1<<(frame.prec-Pt-1)) + HuffDecode(dctbl2);
 
-  guint cw = (w-skipX)*COMPS;
+  slices =  (guint)slicesW.size();
+  slice = 1;
+  guint pixInSlice = slicesW[0]/COMPS-1;    // This is divided by comps, since comps pixels are processed at the time
+  
+  guint cw = (frame.w-skipX);
+  gint x = 1;                            // Skip first pixels on first line.
 
-  for (guint y=0;y<(h-skipY);y++) {
-    dest = (gushort*)&draw[offX*COMPS+(((offY+y)*mRaw->pitch))];  // Adjust destination
-    guint x = y ? 0 : COMPS;   // Skip first pixels on first line.
-    for (; x < cw ; x+=COMPS) {
+  for (guint y=0;y<(frame.h-skipY);y++) {
+    for (; x < cw ; x++) {
       p1 += HuffDecode(dctbl1);
-      dest[x] = (gushort)p1;
+      *dest++ = (gushort)p1;
 
       p2 += HuffDecode(dctbl2);
-      dest[x+1] = (gushort)p2;
+      *dest++ = (gushort)p2;
+
+      if (0 == --pixInSlice) { // Next slice
+        guint o = offset[slice++];
+        dest = (gushort*)&draw[o&0x0fffffff];  // Adjust destination for next pixel
+        _ASSERTE((o&0x0fffffff)<mRaw->dim.x*mRaw->dim.y*mRaw->bpp);    
+        pixInSlice = slicesW[o>>28]/COMPS;
+      }
     }
     if (skipX) {
       for (guint i = 0; i < skipX; i++) {
@@ -239,45 +320,79 @@ void LJpegDecompressor::decodeScanLeft2Comps() {
         HuffDecode(dctbl2);
       }
     }
-    p1 = dest[0];  // Predictors for next row
-    p2 = dest[1];
+    p1 = predict[0];  // Predictors for next row
+    p2 = predict[1];
+    predict = dest;  // Adjust destination for next prediction
+    x = 0;
   }
 }
+
 #undef COMPS
 #define COMPS 3
 
 void LJpegDecompressor::decodeScanLeft3Comps() {
   guchar *draw = mRaw->getData();
-  gushort *dest = (gushort*)&draw[offX*COMPS+(offY*mRaw->pitch)];
   // First line
-  HuffmanTable *dctbl1 = &huff[compInfo[0].dcTblNo];
-  HuffmanTable *dctbl2 = &huff[compInfo[1].dcTblNo];
-  HuffmanTable *dctbl3 = &huff[compInfo[2].dcTblNo];
+  HuffmanTable *dctbl1 = &huff[frame.compInfo[0].dcTblNo];
+  HuffmanTable *dctbl2 = &huff[frame.compInfo[1].dcTblNo];
+  HuffmanTable *dctbl3 = &huff[frame.compInfo[2].dcTblNo];
 
+  //Prepare slices (for CR2)
+  guint slices =  (guint)slicesW.size()*(frame.h-skipY);
+  guint *offset = new guint[slices+1];
 
-  // First two pixels are obviously not predicted
+  guint t_y = 0;
+  guint t_x = 0;
+  guint t_s = 0;
+  guint slice = 0;
+  for (slice = 0; slice< slices; slice++) {
+    offset[slice] = ((t_x+offX)*sizeof(gushort)+((offY+t_y)*mRaw->pitch)) | (t_s<<28);
+    _ASSERTE((offset[slice]&0x0fffffff)<mRaw->dim.x*mRaw->dim.y*mRaw->bpp);
+    t_y++;
+    if (t_y == (frame.h-skipY)) {
+      t_y = 0;
+      t_x += slicesW[t_s++];
+    }
+  }
+  offset[slices] = offset[slices-1];        // Extra offset to avoid branch in loop.
+
+  if (skipX)
+    slicesW[slicesW.size()-1] -= skipX*frame.cps;
+
+  // First pixels are obviously not predicted
   gint p1;
   gint p2;
   gint p3;
-  dest[0] = p1 = (1<<(bpc-Pt-1)) + HuffDecode (dctbl1);
-  dest[1] = p2 = (1<<(bpc-Pt-1)) + HuffDecode (dctbl2);
-  dest[2] = p3 = (1<<(bpc-Pt-1)) + HuffDecode (dctbl3);
+  gushort *dest = (gushort*)&draw[offset[0]&0x0fffffff];
+  gushort *predict = dest;
+  *dest++ = p1 = (1<<(frame.prec-Pt-1)) + HuffDecode(dctbl1);
+  *dest++ = p2 = (1<<(frame.prec-Pt-1)) + HuffDecode(dctbl2);
+  *dest++ = p3 = (1<<(frame.prec-Pt-1)) + HuffDecode(dctbl3);
 
-  guint cw = (w-skipX)*COMPS;
+  slices =  (guint)slicesW.size();
+  slice = 1;
+  guint pixInSlice = slicesW[0]/COMPS-1;    // This is divided by comps, since comps pixels are processed at the time
 
-  for (guint y=0;y<(h-skipY);y++) {
-    dest = (gushort*)&draw[offX*COMPS+(((offY+y)*mRaw->pitch))];  // Adjust destination
-    guint x = y ? 0 : COMPS;   // Skip first pixels on first line.
-    for (; x < cw ; x+=COMPS) {
+  guint cw = (frame.w-skipX);
+  gint x = 1;                            // Skip first pixels on first line.
+
+  for (guint y=0;y<(frame.h-skipY);y++) {
+    for (; x < cw ; x++) {
       p1 += HuffDecode(dctbl1);
-      dest[x] = (gushort)p1;
+      *dest++ = (gushort)p1;
 
       p2 += HuffDecode(dctbl2);
-      dest[x+1] = (gushort)p2;
+      *dest++ = (gushort)p2;
 
       p3 += HuffDecode(dctbl3);
-      dest[x+2] = (gushort)p3;
+      *dest++ = (gushort)p3;
 
+      if (0 == --pixInSlice) { // Next slice
+        guint o = offset[slice++];
+        dest = (gushort*)&draw[o&0x0fffffff];  // Adjust destination for next pixel
+        _ASSERTE((o&0x0fffffff)<mRaw->dim.x*mRaw->dim.y*mRaw->bpp);    
+        pixInSlice = slicesW[o>>28]/COMPS;
+      }
     }
     if (skipX) {
       for (guint i = 0; i < skipX; i++) {
@@ -286,9 +401,11 @@ void LJpegDecompressor::decodeScanLeft3Comps() {
         HuffDecode(dctbl3);
       }
     }
-    p1 = dest[0];  // Predictors for next row
-    p2 = dest[1];
-    p3 = dest[2];  
+    p1 = predict[0];  // Predictors for next row
+    p2 = predict[1];
+    p3 = predict[2];  // Predictors for next row
+    predict = dest;  // Adjust destination for next prediction
+    x = 0;
   }
 }
 
@@ -297,53 +414,88 @@ void LJpegDecompressor::decodeScanLeft3Comps() {
 
 void LJpegDecompressor::decodeScanLeft4Comps() {
   guchar *draw = mRaw->getData();
-  gushort *dest = (gushort*)&draw[offX*COMPS+(offY*mRaw->pitch)];
   // First line
-  HuffmanTable *dctbl1 = &huff[compInfo[0].dcTblNo];
-  HuffmanTable *dctbl2 = &huff[compInfo[1].dcTblNo];
-  HuffmanTable *dctbl3 = &huff[compInfo[2].dcTblNo];
-  HuffmanTable *dctbl4 = &huff[compInfo[3].dcTblNo];
+  HuffmanTable *dctbl1 = &huff[frame.compInfo[0].dcTblNo];
+  HuffmanTable *dctbl2 = &huff[frame.compInfo[1].dcTblNo];
+  HuffmanTable *dctbl3 = &huff[frame.compInfo[2].dcTblNo];
+  HuffmanTable *dctbl4 = &huff[frame.compInfo[3].dcTblNo];
 
+  //Prepare slices (for CR2)
+  guint slices =  (guint)slicesW.size()*(frame.h-skipY);
+  guint *offset = new guint[slices+1];
 
-  // First two pixels are obviously not predicted
+  guint t_y = 0;
+  guint t_x = 0;
+  guint t_s = 0;
+  guint slice = 0;
+  for (slice = 0; slice< slices; slice++) {
+    offset[slice] = ((t_x+offX)*sizeof(gushort)+((offY+t_y)*mRaw->pitch)) | (t_s<<28);
+    _ASSERTE((offset[slice]&0x0fffffff)<mRaw->dim.x*mRaw->dim.y*mRaw->bpp);
+    t_y++;
+    if (t_y == (frame.h-skipY)) {
+      t_y = 0;
+      t_x += slicesW[t_s++];
+    }
+  }
+  offset[slices] = offset[slices-1];        // Extra offset to avoid branch in loop.
+
+  if (skipX)
+    slicesW[slicesW.size()-1] -= skipX*frame.cps;
+
+  // First pixels are obviously not predicted
   gint p1;
   gint p2;
   gint p3;
   gint p4;
-  dest[0] = p1 = (1<<(bpc-Pt-1)) + HuffDecode (dctbl1);
-  dest[1] = p2 = (1<<(bpc-Pt-1)) + HuffDecode (dctbl2);
-  dest[2] = p3 = (1<<(bpc-Pt-1)) + HuffDecode (dctbl3);
-  dest[3] = p4 = (1<<(bpc-Pt-1)) + HuffDecode (dctbl4);
-  guint cw = (w-skipX)*COMPS;
+  gushort *dest = (gushort*)&draw[offset[0]&0x0fffffff];
+  gushort *predict = dest;
+  *dest++ = p1 = (1<<(frame.prec-Pt-1)) + HuffDecode(dctbl1);
+  *dest++ = p2 = (1<<(frame.prec-Pt-1)) + HuffDecode(dctbl2);
+  *dest++ = p3 = (1<<(frame.prec-Pt-1)) + HuffDecode(dctbl3);
+  *dest++ = p4 = (1<<(frame.prec-Pt-1)) + HuffDecode(dctbl4);
 
-  for (guint y=0;y<(h-skipY);y++) {
-    dest = (gushort*)&draw[offX*COMPS+(((offY+y)*mRaw->pitch))];  // Adjust destination
-    guint x = y ? 0 : COMPS;   // Skip first pixels on first line.
-    for (; x < cw ; x+=COMPS) {
+  slices =  (guint)slicesW.size();
+  slice = 1;
+  guint pixInSlice = slicesW[0]/COMPS-1;    // This is divided by comps, since comps pixels are processed at the time
+
+  guint cw = (frame.w-skipX);
+  gint x = 1;                            // Skip first pixels on first line.
+
+  for (guint y=0;y<(frame.h-skipY);y++) {
+    for (; x < cw ; x++) {
       p1 += HuffDecode(dctbl1);
-      dest[x] = (gushort)p1;
+      *dest++ = (gushort)p1;
 
       p2 += HuffDecode(dctbl2);
-      dest[x+1] = (gushort)p2;
+      *dest++ = (gushort)p2;
 
       p3 += HuffDecode(dctbl3);
-      dest[x+2] = (gushort)p3;
+      *dest++ = (gushort)p3;
 
       p4 += HuffDecode(dctbl4);
-      dest[x+3] = (gushort)p4;
+      *dest++ = (gushort)p4;
+
+      if (0 == --pixInSlice) { // Next slice
+        guint o = offset[slice++];
+        dest = (gushort*)&draw[o&0x0fffffff];  // Adjust destination for next pixel
+        _ASSERTE((o&0x0fffffff)<mRaw->dim.x*mRaw->dim.y*mRaw->bpp);    
+        pixInSlice = slicesW[o>>28]/COMPS;
+      }
     }
     if (skipX) {
       for (guint i = 0; i < skipX; i++) {
         HuffDecode(dctbl1);
         HuffDecode(dctbl2);
         HuffDecode(dctbl3);
-        HuffDecode(dctbl4);
+        HuffDecode(dctbl4);      
       }
     }
-    p1 = dest[0];  // Predictors for next row
-    p2 = dest[1];
-    p3 = dest[2];  
-    p4 = dest[3];
+    p1 = predict[0];  // Predictors for next row
+    p2 = predict[1];
+    p3 = predict[2];  // Predictors for next row
+    p4 = predict[3];
+    predict = dest;  // Adjust destination for next prediction
+    x = 0;
   }
 }
 JpegMarker LJpegDecompressor::getNextMarker(bool allowskip) {
@@ -512,6 +664,11 @@ __inline gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl)
       rv = htbl->huffval[htbl->valptr[l] +
         ((int)(code - htbl->mincode[l]))];
     }
+    if (l == 16) {
+      if (mDNGCompatible)
+        bits->skipBits(16);
+      return -32768;
+    }
   }
   /*
   * Section F.2.2.1: decode the difference and
@@ -530,3 +687,4 @@ __inline gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl)
   } 
   return 0;
 }
+

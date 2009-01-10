@@ -7,6 +7,14 @@
 #include "RawDecompressor.h"
 #include "libgfl.h"
 
+void BitBlt(BYTE* dstp, int dst_pitch, const BYTE* srcp, int src_pitch, int row_size, int height) {
+  for (int y=height; y>0; --y) {
+    memcpy(dstp, srcp, row_size);
+    dstp += dst_pitch;
+    srcp += src_pitch;
+  }
+}
+
 int wmain(int argc, _TCHAR* argv[])
 {
   GFL_ERROR err;
@@ -16,35 +24,30 @@ int wmain(int argc, _TCHAR* argv[])
     return 1;
   }
 
-  FileReader f(L"5d-raw.dng");
-  //FileReader f(L"IMG_3304.dng");
+  FileReader f(L"..\\testimg\\Canon_EOS_40D.cr2");
   FileMap* m = f.readFile();
-//  RgbImage *img;
   int startTime;
   try {
     TiffParser t(m);
     t.parseData();
     RawDecompressor *d = t.getDecompressor();
-/*    try {
-      img = d->readPreview(TiffParser::PT_smallest);
-    } catch (ThumbnailGeneratorException) {
-      try {
-        img = t.readPreview(TiffParser::PT_smallest);
-      } catch (ThumbnailGeneratorException) {
-        img = 0;
-      }
-    }*/
+
     startTime = GetTickCount();
     d->decodeRaw();
+
     wchar_t buf[200];
     swprintf(buf,200,L"Load took: %u ms\n", GetTickCount()-startTime);
+    
+    RawImage r = d->mRaw;
+
     GFL_BITMAP* b;
-    if (d->mRaw->isCFA)
+    if (r->isCFA)
       b = gflAllockBitmapEx(GFL_GREY,d->mRaw->dim.x, d->mRaw->dim.y,16,16,NULL);
     else
       b = gflAllockBitmapEx(GFL_RGB,d->mRaw->dim.x, d->mRaw->dim.y,16,8,NULL);
 
-    memcpy(b->Data,d->mRaw->getData(),b->BytesPerLine*b->Height);
+    BitBlt(b->Data,b->BytesPerLine, r->getData(),r->pitch, r->dim.x*r->bpp, r->dim.y );
+
     GFL_SAVE_PARAMS s;
     gflGetDefaultSaveParams(&s);
     s.FormatIndex = gflGetFormatIndexByName("tiff");

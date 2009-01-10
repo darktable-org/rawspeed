@@ -87,7 +87,7 @@ RawDecompressor* TiffParser::getDecompressor() {
     for (vector<TiffIFD*>::iterator i = potentials.begin(); i != potentials.end(); ++i) {
       string make = (*i)->getEntry(MAKE)->getString();
       if (!make.compare("Canon")) {
-        throw new TiffParserException("Canon not supported. Sorry.");
+        return new Cr2Decompressor(mRootIFD,mInput);
       }
       if (!make.compare("NIKON CORPORATION")) {
         throw new TiffParserException("Nikon not supported. Sorry.");

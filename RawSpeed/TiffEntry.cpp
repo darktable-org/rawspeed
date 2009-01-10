@@ -2,6 +2,7 @@
 #include "TiffEntry.h"
 #include <math.h>
 
+//TODO: Harden type checks, to be able to error out if type is wrong
 
 TiffEntry::TiffEntry() {
 }

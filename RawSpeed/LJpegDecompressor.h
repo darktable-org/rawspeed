@@ -73,6 +73,7 @@ typedef enum {		/* JPEG marker codes			*/
 
 } JpegMarker;
 
+
 /*
 * The following structure stores basic information about one component.
 */
@@ -119,37 +120,49 @@ struct HuffmanTable {
   gboolean initialized;
 };
 
+class SOFInfo {
+public:
+  SOFInfo() { w = h = cps = prec = 0; initialized = false;};
+  ~SOFInfo() {initialized = false;};
+  guint w;    // Width
+  guint h;    // Height
+  guint cps;  // Components
+  guint prec; // Precision
+  JpegComponentInfo compInfo[4];
+  gboolean initialized;  
+};
+
 class LJpegDecompressor
 {
 public:
   LJpegDecompressor(FileMap* file, RawImage img);
   virtual ~LJpegDecompressor(void);
   virtual void startDecoder(guint offset, guint size, guint offsetX, guint offsetY);
-protected:
-  virtual void parseSOF();
+  virtual void getSOF(SOFInfo* i, guint offset, guint size);
+  gboolean mDNGCompatible;  // DNG v1.0.x compatibility
+  virtual void addSlices(vector<int> slices) {slicesW=slices;};  // CR2 slices.
+private:
+  virtual void parseSOF(SOFInfo* i);
   virtual void parseSOS();
   virtual void createHuffmanTable(HuffmanTable *htbl);
   virtual void decodeScan();
   JpegMarker getNextMarker(bool allowskip);
   void parseDHT();
-  ByteStream* input;
-  BitPump* bits;
-  RawImage mRaw; 
-  FileMap *mFile;
-private:
   __inline gint HuffDecode(HuffmanTable *htbl);
   void decodeScanLeft4Comps();
   void decodeScanLeft2Comps();
   void decodeScanLeft3Comps();
-  guint bpc;  // Bits per component
-  guint w;
-  guint h;
-  guint cps;  // Components
+  ByteStream* input;
+  BitPump* bits;
+  RawImage mRaw; 
+  FileMap *mFile;
+
+  SOFInfo frame;
+  vector<int> slicesW;
   guint pred;
   guint Pt;
   guint offX, offY;  // Offset into image where decoding should start
   guint skipX, skipY;   // Tile is larger than output, skip these border pixels
-  JpegComponentInfo compInfo[4];
   HuffmanTable huff[4];
 };
 

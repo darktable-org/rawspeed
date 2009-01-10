@@ -6,6 +6,7 @@
 #include "ThumbnailGenerator.h"
 #include "RawDecompressor.h"
 #include "DngDecompressor.h"
+#include "Cr2Decompressor.h"
 #include "libgfl.h"
 
 class TiffParser 

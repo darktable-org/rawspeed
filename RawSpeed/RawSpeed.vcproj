@@ -199,6 +199,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Cr2Decompressor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\DngDecompressor.cpp"
 				>
 			</File>
@@ -310,6 +314,10 @@
 			</File>
 			<File
 				RelativePath=".\Common.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Cr2Decompressor.h"
 				>
 			</File>
 			<File

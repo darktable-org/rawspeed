@@ -5,10 +5,16 @@ DngDecompressor::DngDecompressor(TiffIFD *rootIFD, FileMap* file) : RawDecompres
 {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(DNGVERSION);
   const unsigned char* v = data[0]->getEntry(DNGVERSION)->getData();
+
   if (v[0] != 1)
     ThrowRDE("Not a supported DNG image format: v%u.%u.%u.%u",(int)v[0],(int)v[1],(int)v[2],(int)v[3]);
   if (v[1] > 2)
     ThrowRDE("Not a supported DNG image format: v%u.%u.%u.%u",(int)v[0],(int)v[1],(int)v[2],(int)v[3]);
+
+  if ((v[0] <= 1) && (v[1] < 1) ) // Prior to v1.1.xxx  fix LJPEG encoding bug
+    mFixLjpeg = true;
+  else
+    mFixLjpeg = false;
 }
 
 DngDecompressor::~DngDecompressor(void)
@@ -119,9 +125,11 @@ RawImage DngDecompressor::decodeRaw() {
 
         if (TEoffsets->count != TEcounts->count || TEoffsets->count != nTiles)
           ThrowRDE("DNG Decoder: Tile count mismatch: offsets:%u count:%u, calculated:%u",TEoffsets->count,TEcounts->count, nTiles );
-        for (guint y=0; y< tilesY; y++) {
+
+        for (guint y=0; y< tilesY; y++) { // This loop is obvious for threading, as tiles are independent
           for (guint x=0; x< tilesX; x++) {
             LJpegDecompressor* l = new LJpegDecompressor(mFile, mRaw);
+            l->mDNGCompatible = mFixLjpeg;
             try {
               l->startDecoder(offsets[x+y*tilesX], counts[x+y*tilesX], tilew*x, tileh*y);
             } catch (RawDecompressorException* e) { 
