@@ -95,6 +95,9 @@ RawDecompressor* TiffParser::getDecompressor() {
       if (!make.compare("OLYMPUS IMAGING CORP.  ")) {
         throw new TiffParserException("Olympus not supported. Sorry.");
       }
+      if (!make.compare("SONY ")) {
+        return new ARWDecompressor(mRootIFD,mInput);
+      }
 
     }
   }

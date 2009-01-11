@@ -9,14 +9,24 @@
 
 BitPump::BitPump( ByteStream *s ):
   buffer(s->getData()), size(s->getRemainSize()+sizeof(guint)), mLeft(0),mCurr(0), off(0)
-  {
-    for (int i = 0; i < 31; i++) {
-      masks[i] = (1<<i)-1;
-    }
-    fill();
-  }
+{
+  init();
+}
 
-  void __inline BitPump::fill() {
+BitPump::BitPump( const guchar* _buffer, guint _size ) : 
+ buffer(_buffer), size(_size+sizeof(guint)), mLeft(0),mCurr(0), off(0)
+{
+  init();
+}
+
+ void __inline BitPump::init() {
+   for (int i = 0; i < 31; i++) {
+     masks[i] = (1<<i)-1;
+   }
+   fill();
+ }
+
+void __inline BitPump::fill() {
     guchar c, c2;
     while (mLeft < MIN_GET_BITS) {
       _ASSERTE(off<size);

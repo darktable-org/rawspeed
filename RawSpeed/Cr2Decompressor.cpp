@@ -22,7 +22,7 @@ RawImage Cr2Decompressor::decodeRaw()
   mRaw = RawImage::create();
   mRaw->isCFA = true;
   vector<Cr2Slice> slices;
-  int completeW = 0;
+  int completeH = 0;
 
   try {
     TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
@@ -38,11 +38,11 @@ RawImage Cr2Decompressor::decodeRaw()
       slice.w = sof.w*sof.cps;
       slice.h = sof.h;
       if (!slices.empty())
-        if (slices[0].h != slice.h)
-          ThrowRDE("CR2 Decoder: Slice height does not match.");
+        if (slices[0].w != slice.w)
+          ThrowRDE("CR2 Decoder: Slice width does not match.");
 
       slices.push_back(slice);
-      completeW += slice.w;
+      completeH += slice.h;
     }
   } catch (TiffParserException) {
     ThrowRDE("CR2 Decoder: Unsupported format.");
@@ -53,10 +53,9 @@ RawImage Cr2Decompressor::decodeRaw()
   }
 
   mRaw->bpp = 2;
-  mRaw->dim = iPoint2D(completeW, slices[0].h);
+  mRaw->dim = iPoint2D(slices[0].w, completeH);
   mRaw->createData();
 
-  guint offX = 0;
 
   vector<int> s_width;
   if (raw->hasEntry(CANONCR2SLICE)) {
@@ -66,20 +65,21 @@ RawImage Cr2Decompressor::decodeRaw()
     }
     s_width.push_back(ss[2]);
   } else {
-    s_width.push_back(completeW);
+    s_width.push_back(slices[0].w);
   }
+  guint offY = 0;
 
   for (int i = 0; i < slices.size(); i++ ) {  // This loop is obvious for threading, as slices are independent
     Cr2Slice slice = slices[i];
     try {
       LJpegPlain l(mFile,mRaw);
       l.addSlices(s_width);
-      l.startDecoder(slice.offset, slice.count, offX, 0);
+      l.startDecoder(slice.offset, slice.count, 0, offY);
     } catch (RawDecompressorException* e) { 
       // These may just be single slice error - store the error and move on
       errors.push_back(_strdup(e->what()));
     }
-    offX += slice.w;
+    offY += slice.w;
   }
 
   return mRaw;

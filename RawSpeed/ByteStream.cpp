@@ -42,6 +42,12 @@ gushort ByteStream::getShort()
   return (a<<8)|b;
 }
 
+gint ByteStream::getInt() {
+  if (off+4>=size)
+    throw IOException("Out of buffer read");
+  return *(gint*)&buffer[off+=4];
+}
+
 void ByteStream::setAbsoluteOffset( guint offset )
 {
   if (offset >= size) 

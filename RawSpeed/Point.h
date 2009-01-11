@@ -132,17 +132,11 @@ public:
 	// 1D iPoint
 	iPoint( int a) {
 		dimn=1; x=a; y=z=0;  }
-	iPoint( double a) {
-		dimn=1; x=a; y=z=0;  }
 	// 2D iPoint
 	iPoint( int a, int b) {
 		dimn=2; x=a; y=b; z=0;  }
-	iPoint( double a, double b) {
-		dimn=2; x=a; y=b; z=0;  }
 	// 3D iPoint
 	iPoint( int a, int b, int c) {
-		dimn=3; x=a; y=b; z=c;  }
-	iPoint( double a, double b, double c) {
 		dimn=3; x=a; y=b; z=c;  }
 	// n-dim iPoint
 	iPoint( int n, int a[]);

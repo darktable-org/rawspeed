@@ -187,55 +187,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\BitPump.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ByteStream.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ColorFilterArray.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Cr2Decompressor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\DngDecompressor.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\FileIOException.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\FileMap.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\FileReader.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\LJpegDecompressor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\LJpegPlain.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Point.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\RawDecompressor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\RawDecompressorException.cpp"
 				>
 			</File>
 			<File
@@ -270,34 +226,98 @@
 					/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath=".\TiffEntry.cpp"
+			<Filter
+				Name="Tiff"
 				>
-			</File>
-			<File
-				RelativePath=".\TiffEntryBE.cpp"
+				<File
+					RelativePath=".\TiffEntry.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffEntryBE.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffIFD.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffIFDBE.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffParser.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffParserException.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Decompressors"
 				>
-			</File>
-			<File
-				RelativePath=".\TiffIFD.cpp"
+				<File
+					RelativePath=".\ARWDecompressor.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Cr2Decompressor.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DngDecompressor.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\LJpegDecompressor.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\LJpegPlain.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RawDecompressor.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RawDecompressorException.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Tools"
 				>
-			</File>
-			<File
-				RelativePath=".\TiffIFDBE.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TiffParser.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TiffParserException.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Vec.cpp"
-				>
-			</File>
+				<File
+					RelativePath=".\BitPump.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BitPumpPlain.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ByteStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileMap.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Point.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Vec.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -305,59 +325,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\BitPump.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ByteStream.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ColorFilterArray.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Common.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Cr2Decompressor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\DngDecompressor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\FileIOException.h"
-				>
-			</File>
-			<File
-				RelativePath=".\FileMap.h"
-				>
-			</File>
-			<File
-				RelativePath=".\FileReader.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LJpegDecompressor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LJpegPlain.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Point.h"
-				>
-			</File>
-			<File
-				RelativePath=".\RawDecompressor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\RawDecompressorException.h"
 				>
 			</File>
 			<File
@@ -372,38 +340,110 @@
 				RelativePath=".\stdafx.h"
 				>
 			</File>
-			<File
-				RelativePath=".\TiffEntry.h"
+			<Filter
+				Name="Tiff"
 				>
-			</File>
-			<File
-				RelativePath=".\TiffEntryBE.h"
+				<File
+					RelativePath=".\TiffEntry.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffEntryBE.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffIFD.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffIFDBE.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffParser.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffParserException.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffTag.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Tools"
 				>
-			</File>
-			<File
-				RelativePath=".\TiffIFD.h"
+				<File
+					RelativePath=".\BitPump.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BitPumpPlain.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ByteStream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Common.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileIOException.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileMap.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileReader.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Point.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Vec.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Decompressors"
 				>
-			</File>
-			<File
-				RelativePath=".\TiffIFDBE.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TiffParser.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TiffParserException.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TiffTag.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Vec.h"
-				>
-			</File>
+				<File
+					RelativePath=".\ARWDecompressor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Cr2Decompressor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DngDecompressor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\LJpegDecompressor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\LJpegPlain.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RawDecompressor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RawDecompressorException.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

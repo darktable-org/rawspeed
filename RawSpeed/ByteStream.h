@@ -13,6 +13,7 @@ public:
   void skipToMarker();
   guint getRemainSize() { return off-size;}
   const guchar* getData() {return &buffer[off];}
+  gint getInt();
 private:
   const guchar* buffer;
   guint off;                  // Offset in bytes (this is next byte to deliver)
