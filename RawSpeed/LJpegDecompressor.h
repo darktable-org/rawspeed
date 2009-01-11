@@ -148,7 +148,7 @@ private:
   virtual void decodeScan();
   JpegMarker getNextMarker(bool allowskip);
   void parseDHT();
-  __inline gint HuffDecode(HuffmanTable *htbl);
+  gint HuffDecode(HuffmanTable *htbl);
   void decodeScanLeft4Comps();
   void decodeScanLeft2Comps();
   void decodeScanLeft3Comps();

@@ -257,6 +257,9 @@ void LJpegDecompressor::decodeScan() {
 
 #define COMPS 2
 void LJpegDecompressor::decodeScanLeft2Comps() {
+  _ASSERTE(slicesW.size()<16);  // We only have 4 bits for slice number.
+  _ASSERTE(!(slicesW.size()>1 && skipX));   // Check if this is a valid state
+
   guchar *draw = mRaw->getData();
   // First line
   HuffmanTable *dctbl1 = &huff[frame.compInfo[0].dcTblNo];
@@ -313,6 +316,7 @@ void LJpegDecompressor::decodeScanLeft2Comps() {
         _ASSERTE((o&0x0fffffff)<mRaw->dim.x*mRaw->dim.y*mRaw->bpp);    
         pixInSlice = slicesW[o>>28]/COMPS;
       }
+      bits->checkPos();
     }
     if (skipX) {
       for (guint i = 0; i < skipX; i++) {
@@ -393,6 +397,7 @@ void LJpegDecompressor::decodeScanLeft3Comps() {
         _ASSERTE((o&0x0fffffff)<mRaw->dim.x*mRaw->dim.y*mRaw->bpp);    
         pixInSlice = slicesW[o>>28]/COMPS;
       }
+      bits->checkPos();
     }
     if (skipX) {
       for (guint i = 0; i < skipX; i++) {
@@ -481,6 +486,7 @@ void LJpegDecompressor::decodeScanLeft4Comps() {
         _ASSERTE((o&0x0fffffff)<mRaw->dim.x*mRaw->dim.y*mRaw->bpp);    
         pixInSlice = slicesW[o>>28]/COMPS;
       }
+      bits->checkPos();
     }
     if (skipX) {
       for (guint i = 0; i < skipX; i++) {

@@ -16,6 +16,7 @@ public:
 	guint peekBit();
   guint peekByte();
   void skipBits(guint nbits);
+  __inline void checkPos()  { if (off>size) throw IOException("Out of buffer read");};        // Check if we have a valid position
 	guchar getByte();
 	guchar getByteSafe();
 	void setAbsoluteOffset(guint offset);

@@ -126,6 +126,8 @@ void BitPump::setAbsoluteOffset(unsigned int offset) {
 }
 
 
+
 BitPump::~BitPump(void)
 {
 }
+
