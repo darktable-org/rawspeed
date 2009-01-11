@@ -1,6 +1,6 @@
 #pragma once
 #include "RawDecompressor.h"
-#include "LJpegDecompressor.h"
+#include "LJpegPlain.h"
 #include "TiffIFD.h"
 
 class Cr2Decompressor :

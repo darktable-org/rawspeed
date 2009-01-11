@@ -223,6 +223,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LJpegPlain.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Point.cpp"
 				>
 			</File>
@@ -338,6 +342,10 @@
 			</File>
 			<File
 				RelativePath=".\LJpegDecompressor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LJpegPlain.h"
 				>
 			</File>
 			<File

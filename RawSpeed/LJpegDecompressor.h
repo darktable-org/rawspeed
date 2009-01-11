@@ -129,6 +129,8 @@ public:
   guint cps;  // Components
   guint prec; // Precision
   JpegComponentInfo compInfo[4];
+  guint superH; // Horizontal Supersampling
+  guint superV; // Vertical Supersampling
   gboolean initialized;  
 };
 
@@ -141,17 +143,14 @@ public:
   virtual void getSOF(SOFInfo* i, guint offset, guint size);
   gboolean mDNGCompatible;  // DNG v1.0.x compatibility
   virtual void addSlices(vector<int> slices) {slicesW=slices;};  // CR2 slices.
-private:
+protected:
   virtual void parseSOF(SOFInfo* i);
   virtual void parseSOS();
   virtual void createHuffmanTable(HuffmanTable *htbl);
-  virtual void decodeScan();
+  virtual void decodeScan() = 0;
   JpegMarker getNextMarker(bool allowskip);
   void parseDHT();
   gint HuffDecode(HuffmanTable *htbl);
-  void decodeScanLeft4Comps();
-  void decodeScanLeft2Comps();
-  void decodeScanLeft3Comps();
   ByteStream* input;
   BitPump* bits;
   RawImage mRaw; 

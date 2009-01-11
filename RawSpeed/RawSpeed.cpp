@@ -24,7 +24,7 @@ int wmain(int argc, _TCHAR* argv[])
     return 1;
   }
 
-  FileReader f(L"..\\testimg\\Canon_EOS_40D.cr2");
+  FileReader f(L"..\\testimg\\5d.cr2");
   FileMap* m = f.readFile();
   int startTime;
   try {

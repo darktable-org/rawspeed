@@ -1,5 +1,5 @@
 #pragma once
-#include "ljpegdecompressor.h"
+#include "LJpegPlain.h"
 #include "TiffIFD.h"
 
 

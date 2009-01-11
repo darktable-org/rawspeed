@@ -33,7 +33,7 @@ RawImage Cr2Decompressor::decodeRaw()
       slice.offset = offsets[0].getInt();
       slice.count = counts[0].getInt();
       SOFInfo sof;
-      LJpegDecompressor l(mFile,mRaw);
+      LJpegPlain l(mFile,mRaw);
       l.getSOF(&sof,slice.offset,slice.count);
       slice.w = sof.w*sof.cps;
       slice.h = sof.h;
@@ -72,7 +72,7 @@ RawImage Cr2Decompressor::decodeRaw()
   for (int i = 0; i < slices.size(); i++ ) {  // This loop is obvious for threading, as slices are independent
     Cr2Slice slice = slices[i];
     try {
-      LJpegDecompressor l(mFile,mRaw);
+      LJpegPlain l(mFile,mRaw);
       l.addSlices(s_width);
       l.startDecoder(slice.offset, slice.count, offX, 0);
     } catch (RawDecompressorException* e) { 

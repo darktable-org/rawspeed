@@ -128,15 +128,14 @@ RawImage DngDecompressor::decodeRaw() {
 
         for (guint y=0; y< tilesY; y++) { // This loop is obvious for threading, as tiles are independent
           for (guint x=0; x< tilesX; x++) {
-            LJpegDecompressor* l = new LJpegDecompressor(mFile, mRaw);
-            l->mDNGCompatible = mFixLjpeg;
+            LJpegPlain l(mFile, mRaw);
+            l.mDNGCompatible = mFixLjpeg;
             try {
-              l->startDecoder(offsets[x+y*tilesX], counts[x+y*tilesX], tilew*x, tileh*y);
+              l.startDecoder(offsets[x+y*tilesX], counts[x+y*tilesX], tilew*x, tileh*y);
             } catch (RawDecompressorException* e) { 
               // These may just be single tile error - store the error and move on
             	errors.push_back(_strdup(e->what()));
             }
-            delete(l);
           }
         }
       } catch (TiffParserException) {
