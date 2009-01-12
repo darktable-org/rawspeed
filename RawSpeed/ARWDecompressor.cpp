@@ -20,6 +20,10 @@ RawImage ARWDecompressor::decodeRaw()
     ThrowRDE("ARW Decoder: No image data found");
 
   TiffIFD* raw = data[0];
+  int compression = raw->getEntry(COMPRESSION)->getInt();
+  if (32767 != compression)
+    ThrowRDE("ARW Decoder: Unsupported compression");
+
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
 
@@ -32,6 +36,10 @@ RawImage ARWDecompressor::decodeRaw()
   guint width = raw->getEntry(IMAGEWIDTH)->getInt();
   guint height = raw->getEntry(IMAGELENGTH)->getInt();
   guint bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();
+
+  gboolean arw1 = counts->getInt()*8 != width*height*bitPerPixel;
+  if (arw1)
+    height += 8;
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->bpp = 2;
@@ -50,18 +58,47 @@ RawImage ARWDecompressor::decodeRaw()
     for (guint j = sony_curve[i]+1; j <= sony_curve[i+1]; j++)
       curve[j] = curve[j-1] + (1 << i);
 
-  ByteStream input(mFile->getData(offsets->getInt()), counts->getInt());
+  guint c2 = counts->getInt();
+  guint off = offsets->getInt();
+  if (!mFile->isValid(off+c2))
+    c2 = mFile->getSize()-off;
 
-  if (raw->getEntry(COMPRESSION)->getInt() == 32767) {
-    DecodeARW(input,width,height,bitPerPixel);
-  } else {
-    ThrowRDE("ARWDecompression: Unknown compression");
-  }
+  ByteStream input(mFile->getData(off), c2);
+
+  if (arw1)
+    DecodeARW(input,width,height);
+  else
+    DecodeARW2(input,width,height,bitPerPixel);
+
   return mRaw;
 }
 
+void ARWDecompressor::DecodeARW(ByteStream &input, guint w, guint h) {
+  BitPumpMSB bits(&input);
+  guchar* data = mRaw->getData();
+  gushort* dest = (gushort*)&data[0];
+  guint pitch = mRaw->pitch/sizeof(gushort);
+  gint sum = 0;
+  for (guint x = w; x--; )
+    for (guint y=0; y < h+1; y+=2) {
+      bits.checkPos();
+      bits.fill();
+      if (y == h) y = 1;
+      guint len = 4 - bits.getBitsNoFill(2);
+      if (len == 3 && bits.getBitNoFill()) len = 0;
+      if (len == 4)
+        while (len < 17 && !bits.getBitNoFill()) len++;
+      bits.fill();
+      gint diff = bits.getBitsNoFill(len);
+      if ((diff & (1 << (len-1))) == 0)
+        diff -= (1 << len) - 1;
+      sum += diff;
+      _ASSERTE(!(sum >> 12));
+      if (y < h) dest[x+y*pitch] = sum;
+    }
+}
 
-void ARWDecompressor::DecodeARW(ByteStream &input, guint w, guint h, guint bpp) {
+void ARWDecompressor::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
   guchar* data = mRaw->getData();
   guint pitch = mRaw->pitch;
   if (bpp == 8) {
@@ -95,8 +132,8 @@ void ARWDecompressor::DecodeARW(ByteStream &input, guint w, guint h, guint bpp) 
   } // End bpp = 8
   if (bpp==12) {
     const guchar *in = input.getData();
-    if (input.getRemainSize()<(w*h*3/2)) {
-      h = input.getRemainSize() / (w*3/2);
+    if (input.getRemainSize()< (w*h*3/2) ) {
+      h = input.getRemainSize() / (w*3/2) - 1;
     }
     for (guint y=0; y < h; y++) {
       gushort* dest = (gushort*)&data[y*pitch];

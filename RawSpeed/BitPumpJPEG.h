@@ -4,11 +4,11 @@
 // Note: Allocated buffer MUST be at least size+sizeof(guint) large.
 
 
-class BitPump
+class BitPumpJPEG
 {
 public:
-  BitPump(ByteStream *s);
-  BitPump(const guchar* _buffer, guint _size );
+  BitPumpJPEG(ByteStream *s);
+  BitPumpJPEG(const guchar* _buffer, guint _size );
 	guint getBits(guint nbits);
 	guint getBit();
 	guint getBitsSafe(guint nbits);
@@ -23,12 +23,12 @@ public:
 	void setAbsoluteOffset(guint offset);     // Set offset in bytes
   guint getOffset() { return off-(mLeft>>3);}
   __inline guint getBitNoFill() {return (mCurr >> (--mLeft)) & 1;}
-  __inline guint BitPump::peekByteNoFill() {return ((mCurr >> (mLeft-8))) & 0xff; }
-  __inline guint BitPump::getBitsNoFill(guint nbits) {return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];}
+  __inline guint BitPumpJPEG::peekByteNoFill() {return ((mCurr >> (mLeft-8))) & 0xff; }
+  __inline guint BitPumpJPEG::getBitsNoFill(guint nbits) {return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];}
   void fill();  // Fill the buffer with at least 24 bits
 
 
-  virtual ~BitPump(void);
+  virtual ~BitPumpJPEG(void);
 protected:
   void __inline init();
   const guchar* buffer;

@@ -12,7 +12,8 @@ public:
   virtual ~ARWDecompressor(void);
   virtual RawImage decodeRaw();
 protected:
-  void DecodeARW(ByteStream &input, guint w, guint h, guint bpp);
+  void DecodeARW(ByteStream &input, guint w, guint h);
+  void DecodeARW2(ByteStream &input, guint w, guint h, guint bpp);
   TiffIFD *mRootIFD;
   guint curve[0x4001];
 };

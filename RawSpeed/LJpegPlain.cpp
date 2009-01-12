@@ -21,9 +21,11 @@ void LJpegPlain::decodeScan() {
 
   if (slicesW.empty())
     slicesW.push_back(frame.w*frame.cps);
-
-  if (frame.superH != 1 || frame.superV != 1)
-    ThrowRDE("LJpegDecompressor: Subsamples components not supported.");
+  
+  for (int i = 0; i < frame.cps;  i++) {
+    if (frame.compInfo[i].superH != 1 || frame.compInfo[i].superV != 1)
+      ThrowRDE("LJpegDecompressor: Supersampled components not supported.");
+  }
 
   if (pred == 1) {
     if (frame.cps==2)
@@ -60,7 +62,7 @@ void LJpegPlain::decodeScanLeft2Comps() {
   guint slice = 0;
   for (slice = 0; slice< slices; slice++) {
     offset[slice] = ((t_x+offX)*sizeof(gushort)+((offY+t_y)*mRaw->pitch)) | (t_s<<28);
-    _ASSERTE((offset[slice]&0x0fffffff)<mRaw->dim.x*mRaw->dim.y*mRaw->bpp);
+    _ASSERTE((offset[slice]&0x0fffffff)<mRaw->pitch*mRaw->dim.y);
     t_y++;
     if (t_y == (frame.h-skipY)) {
       t_y = 0;
@@ -98,7 +100,7 @@ void LJpegPlain::decodeScanLeft2Comps() {
       if (0 == --pixInSlice) { // Next slice
         guint o = offset[slice++];
         dest = (gushort*)&draw[o&0x0fffffff];  // Adjust destination for next pixel
-        _ASSERTE((o&0x0fffffff)<mRaw->dim.x*mRaw->dim.y*mRaw->bpp);    
+        _ASSERTE((o&0x0fffffff)<mRaw->pitch*mRaw->dim.y);    
         pixInSlice = slicesW[o>>28]/COMPS;
       }
       bits->checkPos();
@@ -114,6 +116,7 @@ void LJpegPlain::decodeScanLeft2Comps() {
     predict = dest;  // Adjust destination for next prediction
     x = 0;
   }
+  delete(offset);
 }
 
 #undef COMPS
@@ -136,7 +139,7 @@ void LJpegPlain::decodeScanLeft3Comps() {
   guint slice = 0;
   for (slice = 0; slice< slices; slice++) {
     offset[slice] = ((t_x+offX)*sizeof(gushort)+((offY+t_y)*mRaw->pitch)) | (t_s<<28);
-    _ASSERTE((offset[slice]&0x0fffffff)<mRaw->dim.x*mRaw->dim.y*mRaw->bpp);
+    _ASSERTE((offset[slice]&0x0fffffff)<mRaw->pitch*mRaw->dim.y);
     t_y++;
     if (t_y == (frame.h-skipY)) {
       t_y = 0;
@@ -179,7 +182,7 @@ void LJpegPlain::decodeScanLeft3Comps() {
       if (0 == --pixInSlice) { // Next slice
         guint o = offset[slice++];
         dest = (gushort*)&draw[o&0x0fffffff];  // Adjust destination for next pixel
-        _ASSERTE((o&0x0fffffff)<mRaw->dim.x*mRaw->dim.y*mRaw->bpp);    
+        _ASSERTE((o&0x0fffffff)<mRaw->pitch*mRaw->dim.y);    
         pixInSlice = slicesW[o>>28]/COMPS;
       }
       bits->checkPos();
@@ -197,6 +200,7 @@ void LJpegPlain::decodeScanLeft3Comps() {
     predict = dest;  // Adjust destination for next prediction
     x = 0;
   }
+  delete(offset);
 }
 
 #undef COMPS
@@ -220,7 +224,7 @@ void LJpegPlain::decodeScanLeft4Comps() {
   guint slice = 0;
   for (slice = 0; slice< slices; slice++) {
     offset[slice] = ((t_x+offX)*sizeof(gushort)+((offY+t_y)*mRaw->pitch)) | (t_s<<28);
-    _ASSERTE((offset[slice]&0x0fffffff)<mRaw->dim.x*mRaw->dim.y*mRaw->bpp);
+    _ASSERTE((offset[slice]&0x0fffffff)<mRaw->pitch*mRaw->dim.y);
     t_y++;
     if (t_y == (frame.h-skipY)) {
       t_y = 0;
@@ -268,7 +272,7 @@ void LJpegPlain::decodeScanLeft4Comps() {
       if (0 == --pixInSlice) { // Next slice
         guint o = offset[slice++];
         dest = (gushort*)&draw[o&0x0fffffff];  // Adjust destination for next pixel
-        _ASSERTE((o&0x0fffffff)<mRaw->dim.x*mRaw->dim.y*mRaw->bpp);    
+        _ASSERTE((o&0x0fffffff)<mRaw->pitch*mRaw->dim.y);    
         pixInSlice = slicesW[o>>28]/COMPS;
       }
       bits->checkPos();
@@ -288,6 +292,7 @@ void LJpegPlain::decodeScanLeft4Comps() {
     predict = dest;  // Adjust destination for next prediction
     x = 0;
   }
+  delete(offset);
 }
 
 void LJpegPlain::decodePentax( guint offset, guint size )
@@ -296,7 +301,6 @@ void LJpegPlain::decodePentax( guint offset, guint size )
   static const guchar pentax_tree[] =  { 0,2,3,1,1,1,1,1,1,2,0,0,0,0,0,0,
                                          3,4,2,5,1,6,0,7,8,9,10,11,12 };
   //                                     0 1 2 3 4 5 6 7 8 9  0  1  2 = 13 entries
-  gushort vpred[2][2] = {{0,0},{0,0}}, hpred[2];
   HuffmanTable *dctbl1 = &huff[0];
   guint acc = 0;
   for (guint i = 0; i < 16 ;i++) {
@@ -315,16 +319,24 @@ void LJpegPlain::decodePentax( guint offset, guint size )
   gushort *dest;
   guint w = mRaw->dim.x;
   guint h = mRaw->dim.y;
-  gint diff; 
+  gint pUp1[2] = {0,0};
+  gint pUp2[2] = {0,0};
+  gint pLeft1 = 0;
+  gint pLeft2 = 0;
 
   for (guint y=0;y<h;y++) {
     dest = (gushort*)&draw[y*mRaw->pitch];  // Adjust destination
-    for (guint x = 0; x < w ; x++) {
-      diff = HuffDecodePentax(dctbl1);
-      if (x < 2) hpred[x] = vpred[y & 1][x] += diff;
-      else hpred[x & 1] += diff;
-      dest[x] =  hpred[x & 1];
-      _ASSERTE(0 == (hpred[x & 1] >> 12));
+    pUp1[y&1] += HuffDecodePentax(dctbl1);
+    pUp2[y&1] += HuffDecodePentax(dctbl1);
+    dest[0] = pLeft1 = pUp1[y&1];
+    dest[1] = pLeft2 = pUp2[y&1];
+    for (guint x = 2; x < w ; x+=2) {
+      pLeft1 += HuffDecodePentax(dctbl1);
+      pLeft2 += HuffDecodePentax(dctbl1);
+      dest[x] =  pLeft1;
+      dest[x+1] =  pLeft2;
+      _ASSERTE(pLeft1 >= 0 && pLeft1 <= (65536>>3));
+      _ASSERTE(pLeft2 >= 0 && pLeft2 <= (65536>>3));
     }
   }
   delete pentaxBits;

@@ -90,6 +90,8 @@ typedef struct JpegComponentInfo {
   * between scans. It is read from the SOS marker.
   */
   guint dcTblNo;
+  guint superH; // Horizontal Supersampling
+  guint superV; // Vertical Supersampling
 } JpegComponentInfo;
 
 /*
@@ -129,8 +131,6 @@ public:
   guint cps;  // Components
   guint prec; // Precision
   JpegComponentInfo compInfo[4];
-  guint superH; // Horizontal Supersampling
-  guint superV; // Vertical Supersampling
   gboolean initialized;  
 };
 
@@ -152,7 +152,7 @@ protected:
   void parseDHT();
   gint HuffDecode(HuffmanTable *htbl);
   ByteStream* input;
-  BitPump* bits;
+  BitPumpJPEG* bits;
   RawImage mRaw; 
   FileMap *mFile;
 

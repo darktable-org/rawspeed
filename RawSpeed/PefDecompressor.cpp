@@ -18,6 +18,11 @@ RawImage PefDecompressor::decodeRaw()
     ThrowRDE("PEF Decoder: No image data found");
 
   TiffIFD* raw = data[0];
+
+  int compression = raw->getEntry(COMPRESSION)->getInt();
+  if (65535 != compression)
+    ThrowRDE("PEF Decoder: Unsupported compression");
+
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
 
@@ -27,6 +32,9 @@ RawImage PefDecompressor::decodeRaw()
   if (counts->count != offsets->count) {
     ThrowRDE("PEF Decoder: Byte count number does not match strip size: count:%u, strips:%u ",counts->count, offsets->count);
   }
+  if (!mFile->isValid(offsets->getInt()+counts->getInt()))
+    ThrowRDE("PEF Decoder: Truncated file.");
+
   guint width = raw->getEntry(IMAGEWIDTH)->getInt();
   guint height = raw->getEntry(IMAGELENGTH)->getInt();
   guint bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();

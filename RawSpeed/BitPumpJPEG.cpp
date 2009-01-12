@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "BitPump.h"
+#include "BitPumpJPEG.h"
 
 /*** Used for entropy encoded sections ***/
 
@@ -7,26 +7,26 @@
 #define MIN_GET_BITS  (BITS_PER_LONG-7)	   /* max value for long getBuffer */
 
 
-BitPump::BitPump( ByteStream *s ):
+BitPumpJPEG::BitPumpJPEG( ByteStream *s ):
   buffer(s->getData()), size(s->getRemainSize()+sizeof(guint)), mLeft(0),mCurr(0), off(0)
 {
   init();
 }
 
-BitPump::BitPump( const guchar* _buffer, guint _size ) : 
+BitPumpJPEG::BitPumpJPEG( const guchar* _buffer, guint _size ) : 
  buffer(_buffer), size(_size+sizeof(guint)), mLeft(0),mCurr(0), off(0)
 {
   init();
 }
 
- void __inline BitPump::init() {
+ void __inline BitPumpJPEG::init() {
    for (int i = 0; i < 31; i++) {
      masks[i] = (1<<i)-1;
    }
    fill();
  }
 
-void __inline BitPump::fill() {
+void __inline BitPumpJPEG::fill() {
     guchar c, c2;
     while (mLeft < MIN_GET_BITS) {
       _ASSERTE(off<size);
@@ -50,31 +50,31 @@ void __inline BitPump::fill() {
     }
   }
 
-guint BitPump::getBit() {
+guint BitPumpJPEG::getBit() {
   if (!mLeft) fill();
   return (mCurr >> (--mLeft)) & 1;
 }
 
-guint BitPump::getBits(guint nbits) {
+guint BitPumpJPEG::getBits(guint nbits) {
   if (mLeft < nbits) {
     fill();
   }
   return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];
 }
 
-guint BitPump::peekBit() {
+guint BitPumpJPEG::peekBit() {
   if (!mLeft) fill();
   return (mCurr >> (mLeft-1)) & 1;
 }
 
-guint BitPump::peekBits(guint nbits) {
+guint BitPumpJPEG::peekBits(guint nbits) {
   if (mLeft < nbits) {
     fill();
   }
   return ((mCurr >> (mLeft-nbits))) & masks[nbits];
 }
 
-guint BitPump::peekByte() {
+guint BitPumpJPEG::peekByte() {
   if (mLeft < 8) {
     fill();
   }
@@ -83,7 +83,7 @@ guint BitPump::peekByte() {
   return ((mCurr >> (mLeft-8))) & 0xff;
 }
 
-guint BitPump::getBitSafe() {
+guint BitPumpJPEG::getBitSafe() {
   if (!mLeft) {
     fill();
     if (off>size)
@@ -92,7 +92,7 @@ guint BitPump::getBitSafe() {
   return (mCurr >> (--mLeft)) & 1;
 }
 
-guint BitPump::getBitsSafe(unsigned int nbits) { 
+guint BitPumpJPEG::getBitsSafe(unsigned int nbits) { 
   if (nbits>MIN_GET_BITS)
     throw IOException("Too many bits requested");
   if (mLeft < nbits) {
@@ -103,7 +103,7 @@ guint BitPump::getBitsSafe(unsigned int nbits) {
   return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];
 }
 
-void BitPump::skipBits(unsigned int nbits) {
+void BitPumpJPEG::skipBits(unsigned int nbits) {
   if (mLeft < nbits) {
     fill();
     if (off>size)
@@ -112,14 +112,14 @@ void BitPump::skipBits(unsigned int nbits) {
   mLeft -= nbits;
 }
 
-unsigned char BitPump::getByte() {
+unsigned char BitPumpJPEG::getByte() {
   if (mLeft < 8) {
     fill();
   }
   return ((mCurr >> (mLeft -= 8))) & 0xff;
 }
 
-unsigned char BitPump::getByteSafe() {
+unsigned char BitPumpJPEG::getByteSafe() {
   if (mLeft < 8) {
     fill();
     if (off>size)
@@ -128,7 +128,7 @@ unsigned char BitPump::getByteSafe() {
   return ((mCurr >> (mLeft -= 8))) & 0xff;
 }
 
-void BitPump::setAbsoluteOffset(unsigned int offset) {
+void BitPumpJPEG::setAbsoluteOffset(unsigned int offset) {
   if (offset >= size) 
       throw IOException("Offset set out of buffer");
   mLeft = 0;
@@ -137,7 +137,7 @@ void BitPump::setAbsoluteOffset(unsigned int offset) {
 
 
 
-BitPump::~BitPump(void)
+BitPumpJPEG::~BitPumpJPEG(void)
 {
 }
 

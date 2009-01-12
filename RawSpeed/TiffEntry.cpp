@@ -14,7 +14,7 @@ TiffEntry::TiffEntry(FileMap* f, guint offset)
   type = (TiffDataType)p[1];
   count = *(int*)f->getData(offset+4);
   if (type>13)
-    throw new TiffParserException("Error reading TIFF structure. Unknown Type encountered.");
+    throw TiffParserException("Error reading TIFF structure. Unknown Type encountered.");
   int bytesize = count << datashifts[type];
   if (bytesize <=4) {
     data = f->getDataWrt(offset+8);
@@ -40,7 +40,7 @@ TiffEntry::~TiffEntry(void)
 
 unsigned int TiffEntry::getInt() {
   if(!(type == TIFF_LONG || type == TIFF_SHORT))
-    throw new TiffParserException("TIFF, getInt: Wrong type encountered. Expected Long");
+    throw TiffParserException("TIFF, getInt: Wrong type encountered. Expected Long");
   if (type == TIFF_SHORT)
     return getShort();
   return *(unsigned int*)&data[0];
@@ -48,31 +48,31 @@ unsigned int TiffEntry::getInt() {
 
 unsigned short TiffEntry::getShort() {
   if (type != TIFF_SHORT)
-    throw new TiffParserException("TIFF, getShort: Wrong type encountered. Expected Short");
+    throw TiffParserException("TIFF, getShort: Wrong type encountered. Expected Short");
   return *(unsigned short*)&data[0];
 }
 
 unsigned const int* TiffEntry::getIntArray() {
   if (type != TIFF_LONG)
-    throw new TiffParserException("TIFF, getIntArray: Wrong type encountered. Expected Long");
+    throw TiffParserException("TIFF, getIntArray: Wrong type encountered. Expected Long");
   return (unsigned int*)&data[0];
 }
 
 unsigned const short* TiffEntry::getShortArray() {
   if (type != TIFF_SHORT)
-    throw new TiffParserException("TIFF, getShortArray: Wrong type encountered. Expected Short");
+    throw TiffParserException("TIFF, getShortArray: Wrong type encountered. Expected Short");
   return (unsigned short*)&data[0];
 }
 
 unsigned char TiffEntry::getByte() {
   if (type != TIFF_BYTE)
-    throw new TiffParserException("TIFF, getByte: Wrong type encountered. Expected Byte");
+    throw TiffParserException("TIFF, getByte: Wrong type encountered. Expected Byte");
   return data[0];
 }
 
 float TiffEntry::getFloat() {
   if (!(type == TIFF_FLOAT || type == TIFF_DOUBLE))
-    throw new TiffParserException("TIFF, getFloat: Wrong type encountered. Expected Float");
+    throw TiffParserException("TIFF, getFloat: Wrong type encountered. Expected Float");
   if (type == TIFF_DOUBLE) {
     return (float)*(double*)&data[0];
   } else {
@@ -82,7 +82,7 @@ float TiffEntry::getFloat() {
 
 string TiffEntry::getString() {
   if (type != TIFF_ASCII)
-    throw new TiffParserException("TIFF, getString: Wrong type encountered. Expected Ascii");
+    throw TiffParserException("TIFF, getString: Wrong type encountered. Expected Ascii");
   data[count-1] = 0;  // Ensure string is not larger than count defines
   return string((char*)&data[0]);
 }

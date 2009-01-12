@@ -9,7 +9,8 @@ public:
 public:
 	FileMap* readFile();
 	virtual ~FileReader();
+  LPCWSTR Filename() const { return mFilename; }
+//  void Filename(LPCWSTR val) { mFilename = val; }
 private:
-//	VOID CALLBACK FileIOCompletionRoutine(DWORD dwErrorCode, DWORD dwNumberOfBytesTransfered, LPOVERLAPPED lpOverlapped);
   LPCWSTR mFilename;
 };

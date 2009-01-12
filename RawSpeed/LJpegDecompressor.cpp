@@ -131,8 +131,8 @@ void LJpegDecompressor::parseSOF(SOFInfo* sof) {
   for (guint i = 0; i< sof->cps; i++) {
     sof->compInfo[i].componentId = input->getByte();
     guint subs = input->getByte();
-    frame.superV = subs&0xf;
-    frame.superH = subs>>4;
+    frame.compInfo[i].superV = subs&0xf;
+    frame.compInfo[i].superH = subs>>4;
     guint Tq = input->getByte();
     if (Tq!=0)
       ThrowRDE("LJpegDecompressor: Quantized components not supported.");
@@ -181,7 +181,7 @@ void LJpegDecompressor::parseSOS()
   Pt = b&0xf;          // Point Transform
   _RPT1(0,"Point transform:%u\n",pred);
 
-  bits = new BitPump(input);
+  bits = new BitPumpJPEG(input);
   try {
     decodeScan();
   } catch (...) {
@@ -390,7 +390,7 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl)
     * With garbage input we may reach the sentinel value l = 17.
     */
 
-    if (l > 16) {
+    if (l > frame.prec) {
       ThrowRDE("Corrupt JPEG data: bad Huffman code:%u\n",l);
     } else {
       rv = htbl->huffval[htbl->valptr[l] +

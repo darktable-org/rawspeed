@@ -19,11 +19,9 @@ public:
 
   void parseData();
   RawDecompressor* getDecompressor();
-  //RgbImage* readPreview(PreviewType preferedPreview);
   Endianness endian;
 private:
   FileMap *mInput;
   TiffIFD* mRootIFD;
-  GFL_BITMAP *thumb_bmp;
 };
 

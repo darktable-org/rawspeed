@@ -25,7 +25,7 @@ TiffIFD::TiffIFD(FileMap* f, guint offset)
     if (t->tag == 330) {   // subIFD tag
       const unsigned int* sub_offsets = t->getIntArray();
       for (int j = 0; j < t->count; j++ ) {
-        mSubIFD.push_back(TiffIFD(f, sub_offsets[j]));
+        mSubIFD.push_back(new TiffIFD(f, sub_offsets[j]));
       }
     } else {  // Store as entry
       mEntry[t->tag] = t;
@@ -36,6 +36,12 @@ TiffIFD::TiffIFD(FileMap* f, guint offset)
 
 TiffIFD::~TiffIFD(void)
 {
+  for (map<TiffTag, TiffEntry*>::iterator i = mEntry.begin(); i != mEntry.end(); ++i) {
+    delete((*i).second);
+  }
+  for (vector<TiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
+    delete(*i);
+  }
 }
 
 vector<TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) {
@@ -43,8 +49,8 @@ vector<TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) {
   if (mEntry.find(tag) != mEntry.end()) {
     matchingIFDs.push_back(this);
   }
-  for (vector<TiffIFD>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
-    vector<TiffIFD*> t = (*i).getIFDsWithTag(tag);
+  for (vector<TiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
+    vector<TiffIFD*> t = (*i)->getIFDsWithTag(tag);
     for (int j = 0; j < t.size(); j++) {
       matchingIFDs.push_back(t[j]);
     }

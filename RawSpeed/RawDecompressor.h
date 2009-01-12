@@ -1,7 +1,7 @@
 #pragma once
 #include "RawDecompressorException.h"
 #include "FileMap.h"
-#include "Bitpump.h"  // Includes bytestream
+#include "BitPumpJPEG.h" // Includes bytestream
 #include "RawImage.h"
 
 class RawDecompressor 

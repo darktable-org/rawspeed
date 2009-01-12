@@ -13,8 +13,8 @@ class TiffIFD
 public:
   TiffIFD();
   TiffIFD(FileMap* f, guint offset);
-  ~TiffIFD(void);
-  vector<TiffIFD> mSubIFD;
+  virtual ~TiffIFD(void);
+  vector<TiffIFD*> mSubIFD;
   map<TiffTag, TiffEntry*> mEntry;
   gint getNextIFD() {return nextIFD;}
   vector<TiffIFD*> getIFDsWithTag(TiffTag tag);

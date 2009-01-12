@@ -11,7 +11,7 @@ public:
   guchar getByte();
   void setAbsoluteOffset(guint offset);
   void skipToMarker();
-  guint getRemainSize() { return off-size;}
+  guint getRemainSize() { return size-off;}
   const guchar* getData() {return &buffer[off];}
   gint getInt();
 private:

@@ -17,7 +17,7 @@ public:
   const guchar* getData(guint offset) {return &data[offset];}
   guchar* getDataWrt(guint offset) {return &data[offset];}
   guint getSize() {return size;}
-  gboolean isValid(guint offset) {return offset<size;}
+  gboolean isValid(guint offset) {return offset<=size;}
 private:
  guint size;
  guchar* data;

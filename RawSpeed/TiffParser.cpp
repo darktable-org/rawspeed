@@ -1,15 +1,15 @@
 #include "StdAfx.h"
 #include "TiffParser.h"
 
-TiffParser::TiffParser(FileMap* inputData): mInput(inputData), thumb_bmp(0), mRootIFD(0)
+TiffParser::TiffParser(FileMap* inputData): mInput(inputData), mRootIFD(0)
 {
   const unsigned char* data = mInput->getData(0);
   if (mInput->getSize() < 16)
-    throw new TiffParserException("Not a TIFF file (size too small)");
+    throw TiffParserException("Not a TIFF file (size too small)");
   if (data[0] != 0x49 || data[1] != 0x49) {
     endian = big;
     if (data[0] != 0x4D || data[1] != 0x4D) 
-      throw new TiffParserException("Not a TIFF file (ID)");
+      throw TiffParserException("Not a TIFF file (ID)");
     
     if (data[3] != 42) 
       throw TiffParserException("Not a TIFF file (magic 42)");
@@ -32,9 +32,6 @@ TiffParser::~TiffParser(void)
   if (mRootIFD)
     delete mRootIFD;  
   mRootIFD = NULL;
-  if (thumb_bmp)
-    gflFreeBitmap(thumb_bmp);
-  thumb_bmp = 0;
 }
 
 #ifdef CHECKSIZE
@@ -44,8 +41,8 @@ TiffParser::~TiffParser(void)
 #undef CHECKPTR
 #endif
 
-#define CHECKSIZE(A) if (A >= mInput->getSize()) throw new TiffParserException("Error reading TIFF structure. File Corrupt")
-#define CHECKPTR(A) if ((int)A >= ((int)(mInput->data) + size))) throw new TiffParserException("Error reading TIFF structure. File Corrupt")
+#define CHECKSIZE(A) if (A >= mInput->getSize()) throw TiffParserException("Error reading TIFF structure. File Corrupt")
+#define CHECKPTR(A) if ((int)A >= ((int)(mInput->data) + size))) throw TiffParserException("Error reading TIFF structure. File Corrupt")
 
 void TiffParser::parseData() {
   guint nextIFD;
@@ -59,11 +56,11 @@ void TiffParser::parseData() {
     CHECKSIZE(nextIFD);
 
     if (endian == little)
-      mRootIFD->mSubIFD.push_back(TiffIFD(mInput, nextIFD));
+      mRootIFD->mSubIFD.push_back(new TiffIFD(mInput, nextIFD));
     else
-      mRootIFD->mSubIFD.push_back(TiffIFDBE(mInput, nextIFD));
+      mRootIFD->mSubIFD.push_back(new TiffIFDBE(mInput, nextIFD));
 
-    nextIFD = mRootIFD->mSubIFD.back().getNextIFD();
+    nextIFD = mRootIFD->mSubIFD.back()->getNextIFD();
   }
 }
 
@@ -75,9 +72,9 @@ RawDecompressor* TiffParser::getDecompressor() {
     TiffIFD *t = potentials[0];
     const unsigned char* c = t->getEntry(DNGVERSION)->getData();
     if (c[0] > 1)
-      throw new TiffParserException("DNG version too new.");
+      throw TiffParserException("DNG version too new.");
     if (c[1] > 2)
-      throw new TiffParserException("DNG version not supported.");
+      throw TiffParserException("DNG version not supported.");
     return new DngDecompressor(mRootIFD, mInput);
   }
 
@@ -90,10 +87,10 @@ RawDecompressor* TiffParser::getDecompressor() {
         return new Cr2Decompressor(mRootIFD,mInput);
       }
       if (!make.compare("NIKON CORPORATION")) {
-        throw new TiffParserException("Nikon not supported. Sorry.");
+        throw TiffParserException("Nikon not supported. Sorry.");
       }
       if (!make.compare("OLYMPUS IMAGING CORP.  ")) {
-        throw new TiffParserException("Olympus not supported. Sorry.");
+        throw TiffParserException("Olympus not supported. Sorry.");
       }
       if (!make.compare("SONY ")) {
         return new ARWDecompressor(mRootIFD,mInput);
@@ -103,6 +100,6 @@ RawDecompressor* TiffParser::getDecompressor() {
       }
     }
   }
-  throw new TiffParserException("No decoder found. Sorry.");
+  throw TiffParserException("No decoder found. Sorry.");
   return NULL;
 }

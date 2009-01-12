@@ -294,7 +294,7 @@
 				Name="Tools"
 				>
 				<File
-					RelativePath=".\BitPump.cpp"
+					RelativePath=".\BitPumpJPEG.cpp"
 					>
 				</File>
 				<File
@@ -384,7 +384,7 @@
 				Name="Tools"
 				>
 				<File
-					RelativePath=".\BitPump.h"
+					RelativePath=".\BitPumpJPEG.h"
 					>
 				</File>
 				<File

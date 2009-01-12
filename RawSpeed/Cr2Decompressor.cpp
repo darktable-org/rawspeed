@@ -41,7 +41,8 @@ RawImage Cr2Decompressor::decodeRaw()
         if (slices[0].w != slice.w)
           ThrowRDE("CR2 Decoder: Slice width does not match.");
 
-      slices.push_back(slice);
+      if (mFile->isValid(slice.offset+slice.count)) // Only decode if size is valid
+        slices.push_back(slice);
       completeH += slice.h;
     }
   } catch (TiffParserException) {
