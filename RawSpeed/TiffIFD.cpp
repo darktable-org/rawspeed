@@ -20,15 +20,15 @@ TiffIFD::TiffIFD(FileMap* f, guint offset)
 
   CHECKSIZE(offset+2+entries*4);
   for (int i = 0; i < entries; i++) {
-    TiffEntry t(f, offset+2+i*12);
+    TiffEntry *t = new TiffEntry(f, offset+2+i*12);
 
-    if (t.tag == 330) {   // subIFD tag
-      const unsigned int* sub_offsets = t.getIntArray();
-      for (int j = 0; j < t.count; j++ ) {
+    if (t->tag == 330) {   // subIFD tag
+      const unsigned int* sub_offsets = t->getIntArray();
+      for (int j = 0; j < t->count; j++ ) {
         mSubIFD.push_back(TiffIFD(f, sub_offsets[j]));
       }
     } else {  // Store as entry
-      mEntry[t.tag] = t;
+      mEntry[t->tag] = t;
     }
   }
   nextIFD = *(int*)f->getData(offset+2+entries*12);
@@ -55,7 +55,7 @@ vector<TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) {
 
 TiffEntry* TiffIFD::getEntry(TiffTag tag) {
   if (mEntry.find(tag) != mEntry.end()) {
-    return &(mEntry[tag]);
+    return mEntry[tag];
   }
   throw TiffParserException("TIFF Parser entry not found.");
 }

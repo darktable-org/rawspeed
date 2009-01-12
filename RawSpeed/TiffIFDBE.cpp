@@ -15,15 +15,15 @@ TiffIFDBE::TiffIFDBE(FileMap* f, guint offset)
 
   CHECKSIZE(offset+2+entries*4);
   for (int i = 0; i < entries; i++) {
-    TiffEntryBE t(f, offset+2+i*12);
+    TiffEntryBE *t = new TiffEntryBE(f, offset+2+i*12);
 
-    if (t.tag == 330) {   // subIFD tag
-      const unsigned int* sub_offsets = t.getIntArray();
-      for (int j = 0; j < t.count; j++ ) {
+    if (t->tag == 330) {   // subIFD tag
+      const unsigned int* sub_offsets = t->getIntArray();
+      for (int j = 0; j < t->count; j++ ) {
         mSubIFD.push_back(TiffIFDBE(f, sub_offsets[j]));
       }
     } else {  // Store as entry
-      mEntry[t.tag] = t;
+      mEntry[t->tag] = t;
     }
   }
   data = f->getDataWrt(offset+2+entries*12);

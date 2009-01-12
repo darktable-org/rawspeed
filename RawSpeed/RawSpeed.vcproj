@@ -278,6 +278,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\PefDecompressor.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\RawDecompressor.cpp"
 					>
 				</File>
@@ -291,6 +295,10 @@
 				>
 				<File
 					RelativePath=".\BitPump.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BitPumpMSB.cpp"
 					>
 				</File>
 				<File
@@ -380,6 +388,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BitPumpMSB.h"
+					>
+				</File>
+				<File
 					RelativePath=".\BitPumpPlain.h"
 					>
 				</File>
@@ -433,6 +445,10 @@
 				</File>
 				<File
 					RelativePath=".\LJpegPlain.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PefDecompressor.h"
 					>
 				</File>
 				<File

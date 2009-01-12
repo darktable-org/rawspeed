@@ -1,9 +1,6 @@
 #include "StdAfx.h"
 #include "TiffEntryBE.h"
 
-TiffEntryBE::TiffEntryBE(void)
-{
-}
 
 TiffEntryBE::TiffEntryBE(FileMap* f, guint offset) : mDataSwapped(false)
 {

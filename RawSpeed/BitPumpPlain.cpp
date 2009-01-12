@@ -9,11 +9,19 @@
 
 BitPumpPlain::BitPumpPlain( ByteStream *s ):
   buffer(s->getData()), size(8*s->getRemainSize()), off(0)
-  {
-    for (int i = 0; i < 31; i++) {
-      masks[i] = (1<<i)-1;
-    }
+{
+  for (int i = 0; i < 31; i++) {
+    masks[i] = (1<<i)-1;
   }
+}
+
+BitPumpPlain::BitPumpPlain( const guchar* _buffer, guint _size ) : 
+ buffer(_buffer), size(_size*8), off(0)
+{
+  for (int i = 0; i < 31; i++) {
+    masks[i] = (1<<i)-1;
+  }
+}
 
 guint BitPumpPlain::getBit() {
   guint v = *(guint*)&buffer[off>>3] >> (off&7) & 1;

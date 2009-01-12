@@ -6,15 +6,15 @@ TiffParser::TiffParser(FileMap* inputData): mInput(inputData), thumb_bmp(0), mRo
   const unsigned char* data = mInput->getData(0);
   if (mInput->getSize() < 16)
     throw new TiffParserException("Not a TIFF file (size too small)");
-  endian = little;
   if (data[0] != 0x49 || data[1] != 0x49) {
     endian = big;
     if (data[0] != 0x4D || data[1] != 0x4D) 
       throw new TiffParserException("Not a TIFF file (ID)");
-
+    
     if (data[3] != 42) 
       throw TiffParserException("Not a TIFF file (magic 42)");
   } else {
+    endian = little;
     if (data[2] != 42 && data[2] != 0x52) // ORF has 0x52 - Brillant!
       throw TiffParserException("Not a TIFF file (magic 42)");
   }
@@ -98,7 +98,9 @@ RawDecompressor* TiffParser::getDecompressor() {
       if (!make.compare("SONY ")) {
         return new ARWDecompressor(mRootIFD,mInput);
       }
-
+      if (!make.compare("PENTAX Corporation ")) {
+        return new PefDecompressor(mRootIFD,mInput);
+      }
     }
   }
   throw new TiffParserException("No decoder found. Sorry.");

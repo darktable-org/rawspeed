@@ -8,6 +8,7 @@ class BitPumpPlain
 {
 public:
   BitPumpPlain(ByteStream *s);
+  BitPumpPlain(const guchar* _buffer, guint _size );
 	guint getBits(guint nbits);
 	guint getBit();
 	guint getBitsSafe(guint nbits);

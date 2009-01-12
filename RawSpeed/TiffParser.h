@@ -8,6 +8,7 @@
 #include "DngDecompressor.h"
 #include "Cr2Decompressor.h"
 #include "ARWDecompressor.h"
+#include "PefDecompressor.h"
 #include "libgfl.h"
 
 class TiffParser 

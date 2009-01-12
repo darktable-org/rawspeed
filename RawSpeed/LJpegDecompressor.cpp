@@ -411,10 +411,8 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl)
 
   if (rv) {
     gint x = bits->getBitsNoFill(rv);
-    gint t = extendTest[rv];
-    if ((x) < (t&0xffff)) {
-      (x) += t>>16;
-    }
+    if ((x & (1 << (rv-1))) == 0)
+      x -= (1 << rv) - 1;
     return x;
   } 
   return 0;
