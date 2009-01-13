@@ -1,5 +1,5 @@
 #pragma once
-#include "RawDecompressor.h"
+#include "RawDecoder.h"
 
 /* The following enum is stolen from the IJG JPEG library
  * Comments added by tm
@@ -147,7 +147,7 @@ protected:
   virtual void parseSOF(SOFInfo* i);
   virtual void parseSOS();
   virtual void createHuffmanTable(HuffmanTable *htbl);
-  virtual void decodeScan() = 0;
+  virtual void decodeScan() {ThrowRDE("LJpegDecompressor: No Scan decoder found");};
   JpegMarker getNextMarker(bool allowskip);
   void parseDHT();
   gint HuffDecode(HuffmanTable *htbl);

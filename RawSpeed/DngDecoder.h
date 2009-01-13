@@ -3,12 +3,12 @@
 #include "TiffIFD.h"
 
 
-class DngDecompressor : 
-  public RawDecompressor
+class DngDecoder : 
+  public RawDecoder
 {
 public:
-  DngDecompressor(TiffIFD *rootIFD, FileMap* file);
-  virtual ~DngDecompressor(void);
+  DngDecoder(TiffIFD *rootIFD, FileMap* file);
+  virtual ~DngDecoder(void);
   virtual RawImage decodeRaw();
 protected:
   TiffIFD *mRootIFD;

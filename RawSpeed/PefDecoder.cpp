@@ -1,16 +1,16 @@
 #include "StdAfx.h"
-#include "PefDecompressor.h"
+#include "PefDecoder.h"
 
-PefDecompressor::PefDecompressor(TiffIFD *rootIFD, FileMap* file) :
-RawDecompressor(file), mRootIFD(rootIFD)
+PefDecoder::PefDecoder(TiffIFD *rootIFD, FileMap* file) :
+RawDecoder(file), mRootIFD(rootIFD)
 {
 }
 
-PefDecompressor::~PefDecompressor(void)
+PefDecoder::~PefDecoder(void)
 {
 }
 
-RawImage PefDecompressor::decodeRaw()
+RawImage PefDecoder::decodeRaw()
 {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 
@@ -43,7 +43,7 @@ RawImage PefDecompressor::decodeRaw()
   mRaw->bpp = 2;
   mRaw->createData();
   
-  LJpegPlain l(mFile,mRaw);
+  PentaxDecompressor l(mFile,mRaw);
   l.decodePentax(offsets->getInt(), counts->getInt());
 
   return mRaw;

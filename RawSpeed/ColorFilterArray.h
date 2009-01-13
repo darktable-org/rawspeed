@@ -1,5 +1,5 @@
 #pragma once
-#include "RawDecompressorException.h"
+#include "RawDecoderException.h"
 
 typedef enum {
   CFA_COLOR_MIN = 0,

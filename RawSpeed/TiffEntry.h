@@ -55,11 +55,10 @@ public:
   TiffTag tag;
   TiffDataType type;
   int count;
+protected:
+  unsigned char* data;
 #ifdef _DEBUG
-private:
   int debug_intVal;
   float debug_floatVal;
 #endif
-protected:
-  unsigned char* data;
 };

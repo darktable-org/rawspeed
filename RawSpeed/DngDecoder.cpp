@@ -1,7 +1,7 @@
 #include "StdAfx.h"
-#include "DngDecompressor.h"
+#include "DngDecoder.h"
 
-DngDecompressor::DngDecompressor(TiffIFD *rootIFD, FileMap* file) : RawDecompressor(file), mRootIFD(rootIFD)
+DngDecoder::DngDecoder(TiffIFD *rootIFD, FileMap* file) : RawDecoder(file), mRootIFD(rootIFD)
 {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(DNGVERSION);
   const unsigned char* v = data[0]->getEntry(DNGVERSION)->getData();
@@ -17,11 +17,11 @@ DngDecompressor::DngDecompressor(TiffIFD *rootIFD, FileMap* file) : RawDecompres
     mFixLjpeg = false;
 }
 
-DngDecompressor::~DngDecompressor(void)
+DngDecoder::~DngDecoder(void)
 {
 }
 
-RawImage DngDecompressor::decodeRaw() {
+RawImage DngDecoder::decodeRaw() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(COMPRESSION);
 
   if (data.empty())
@@ -132,7 +132,7 @@ RawImage DngDecompressor::decodeRaw() {
             l.mDNGCompatible = mFixLjpeg;
             try {
               l.startDecoder(offsets[x+y*tilesX], counts[x+y*tilesX], tilew*x, tileh*y);
-            } catch (RawDecompressorException* e) { 
+            } catch (RawDecoderException* e) { 
               // These may just be single tile error - store the error and move on
             	errors.push_back(_strdup(e->what()));
             }

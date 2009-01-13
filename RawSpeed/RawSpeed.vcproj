@@ -258,15 +258,15 @@
 				Name="Decompressors"
 				>
 				<File
-					RelativePath=".\ARWDecompressor.cpp"
+					RelativePath=".\ARWDecoder.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\Cr2Decompressor.cpp"
+					RelativePath=".\Cr2Decoder.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\DngDecompressor.cpp"
+					RelativePath=".\DngDecoder.cpp"
 					>
 				</File>
 				<File
@@ -278,15 +278,27 @@
 					>
 				</File>
 				<File
-					RelativePath=".\PefDecompressor.cpp"
+					RelativePath=".\NefDecoder.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\RawDecompressor.cpp"
+					RelativePath=".\NikonDecompressor.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\RawDecompressorException.cpp"
+					RelativePath=".\PefDecoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PentaxDecompressor.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RawDecoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RawDecoderException.cpp"
 					>
 				</File>
 			</Filter>
@@ -428,15 +440,15 @@
 				Name="Decompressors"
 				>
 				<File
-					RelativePath=".\ARWDecompressor.h"
+					RelativePath=".\ARWDecoder.h"
 					>
 				</File>
 				<File
-					RelativePath=".\Cr2Decompressor.h"
+					RelativePath=".\Cr2Decoder.h"
 					>
 				</File>
 				<File
-					RelativePath=".\DngDecompressor.h"
+					RelativePath=".\DngDecoder.h"
 					>
 				</File>
 				<File
@@ -448,15 +460,27 @@
 					>
 				</File>
 				<File
-					RelativePath=".\PefDecompressor.h"
+					RelativePath=".\NefDecoder.h"
 					>
 				</File>
 				<File
-					RelativePath=".\RawDecompressor.h"
+					RelativePath=".\NikonDecompressor.h"
 					>
 				</File>
 				<File
-					RelativePath=".\RawDecompressorException.h"
+					RelativePath=".\PefDecoder.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PentaxDecompressor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RawDecoder.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RawDecoderException.h"
 					>
 				</File>
 			</Filter>

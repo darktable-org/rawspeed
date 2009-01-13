@@ -1,18 +1,18 @@
 #include "StdAfx.h"
-#include "RawDecompressor.h"
+#include "RawDecoder.h"
 
-RawDecompressor::RawDecompressor(FileMap* file) : mFile(file), mRaw(RawImage::create())
+RawDecoder::RawDecoder(FileMap* file) : mFile(file), mRaw(RawImage::create())
 {
 }
 
-RawDecompressor::~RawDecompressor(void)
+RawDecoder::~RawDecoder(void)
 {
 
 }
-void RawDecompressor::readUncompressedRaw(unsigned int offset, int max_offset, int* colorOrder) {
+void RawDecoder::readUncompressedRaw(unsigned int offset, int max_offset, int* colorOrder) {
   _ASSERTE(mRaw->dim.Area());
   if (mRaw->bpp != 2)
-    ThrowRDE("RawDecompressor: Unsupported bit depth.");
+    ThrowRDE("RawDecoder: Unsupported bit depth.");
   // Prepare local variables.
   const unsigned short* raw = (const unsigned short*)mFile->getData(offset);
   iPoint2D p(mRaw->cfa.getSize());

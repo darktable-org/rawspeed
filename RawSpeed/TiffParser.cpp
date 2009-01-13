@@ -64,7 +64,7 @@ void TiffParser::parseData() {
   }
 }
 
-RawDecompressor* TiffParser::getDecompressor() {
+RawDecoder* TiffParser::getDecompressor() {
   vector<TiffIFD*> potentials;
   potentials = mRootIFD->getIFDsWithTag(DNGVERSION);
 
@@ -75,7 +75,7 @@ RawDecompressor* TiffParser::getDecompressor() {
       throw TiffParserException("DNG version too new.");
     if (c[1] > 2)
       throw TiffParserException("DNG version not supported.");
-    return new DngDecompressor(mRootIFD, mInput);
+    return new DngDecoder(mRootIFD, mInput);
   }
 
   potentials = mRootIFD->getIFDsWithTag(MAKE);
@@ -84,19 +84,19 @@ RawDecompressor* TiffParser::getDecompressor() {
     for (vector<TiffIFD*>::iterator i = potentials.begin(); i != potentials.end(); ++i) {
       string make = (*i)->getEntry(MAKE)->getString();
       if (!make.compare("Canon")) {
-        return new Cr2Decompressor(mRootIFD,mInput);
+        return new Cr2Decoder(mRootIFD,mInput);
       }
       if (!make.compare("NIKON CORPORATION")) {
-        throw TiffParserException("Nikon not supported. Sorry.");
+        return new NefDecoder(mRootIFD,mInput);
       }
       if (!make.compare("OLYMPUS IMAGING CORP.  ")) {
         throw TiffParserException("Olympus not supported. Sorry.");
       }
       if (!make.compare("SONY ")) {
-        return new ARWDecompressor(mRootIFD,mInput);
+        return new ARWDecoder(mRootIFD,mInput);
       }
       if (!make.compare("PENTAX Corporation ")) {
-        return new PefDecompressor(mRootIFD,mInput);
+        return new PefDecoder(mRootIFD,mInput);
       }
     }
   }

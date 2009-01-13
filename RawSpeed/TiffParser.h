@@ -4,11 +4,13 @@
 #include "TiffIFDBE.h"
 #include "TiffParserException.h"
 #include "ThumbnailGenerator.h"
-#include "RawDecompressor.h"
-#include "DngDecompressor.h"
-#include "Cr2Decompressor.h"
-#include "ARWDecompressor.h"
-#include "PefDecompressor.h"
+#include "RawDecoder.h"
+#include "DngDecoder.h"
+#include "Cr2Decoder.h"
+#include "ARWDecoder.h"
+#include "PefDecoder.h"
+#include "NefDecoder.h"
+
 #include "libgfl.h"
 
 class TiffParser 
@@ -18,7 +20,7 @@ public:
   virtual ~TiffParser(void);
 
   void parseData();
-  RawDecompressor* getDecompressor();
+  RawDecoder* getDecompressor();
   Endianness endian;
 private:
   FileMap *mInput;

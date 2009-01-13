@@ -1,15 +1,15 @@
 #pragma once
-#include "RawDecompressor.h"
+#include "RawDecoder.h"
 #include "LJpegPlain.h"
 #include "TiffIFD.h"
 #include "BitPumpPlain.h"
 
-class ARWDecompressor :
-  public RawDecompressor
+class ARWDecoder :
+  public RawDecoder
 {
 public:
-  ARWDecompressor(TiffIFD *rootIFD, FileMap* file);
-  virtual ~ARWDecompressor(void);
+  ARWDecoder(TiffIFD *rootIFD, FileMap* file);
+  virtual ~ARWDecoder(void);
   virtual RawImage decodeRaw();
 protected:
   void DecodeARW(ByteStream &input, guint w, guint h);

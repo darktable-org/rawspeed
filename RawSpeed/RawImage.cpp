@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "RawImage.h"
-#include "RawDecompressor.h"  // For exceptions
+#include "RawDecoder.h"  // For exceptions
 
 RawImageData::RawImageData(void): 
 dim(0,0), bpp(0), dataRefCount(0),data(0),isCFA(true)

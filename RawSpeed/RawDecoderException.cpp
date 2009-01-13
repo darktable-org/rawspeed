@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "RawDecompressorException.h"
+#include "RawDecoderException.h"
 
 
 
@@ -10,5 +10,5 @@ void ThrowRDE(const char* fmt, ...) {
   sprintf_s(buf, 8192, fmt, val);
   va_end(val);
   _RPT1(0, "EXCEPTION: %s\n",buf);
-  throw RawDecompressorException(buf);
+  throw RawDecoderException(buf);
 }

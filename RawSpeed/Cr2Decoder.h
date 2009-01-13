@@ -1,15 +1,15 @@
 #pragma once
-#include "RawDecompressor.h"
+#include "RawDecoder.h"
 #include "LJpegPlain.h"
 #include "TiffIFD.h"
 
-class Cr2Decompressor :
-  public RawDecompressor
+class Cr2Decoder :
+  public RawDecoder
 {
 public:
-  Cr2Decompressor(TiffIFD *rootIFD, FileMap* file);
+  Cr2Decoder(TiffIFD *rootIFD, FileMap* file);
   virtual RawImage decodeRaw();
-  virtual ~Cr2Decompressor(void);
+  virtual ~Cr2Decoder(void);
 protected:
   TiffIFD *mRootIFD;
 

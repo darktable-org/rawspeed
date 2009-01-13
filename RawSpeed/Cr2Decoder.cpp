@@ -1,17 +1,17 @@
 #include "StdAfx.h"
-#include "Cr2Decompressor.h"
+#include "Cr2Decoder.h"
 
-Cr2Decompressor::Cr2Decompressor(TiffIFD *rootIFD, FileMap* file) :
- RawDecompressor(file), mRootIFD(rootIFD) 
+Cr2Decoder::Cr2Decoder(TiffIFD *rootIFD, FileMap* file) :
+ RawDecoder(file), mRootIFD(rootIFD) 
 {
 
 }
 
-Cr2Decompressor::~Cr2Decompressor(void)
+Cr2Decoder::~Cr2Decoder(void)
 {
 }
 
-RawImage Cr2Decompressor::decodeRaw()
+RawImage Cr2Decoder::decodeRaw()
 {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag((TiffTag)0xc5d8);
 
@@ -76,7 +76,7 @@ RawImage Cr2Decompressor::decodeRaw()
       LJpegPlain l(mFile,mRaw);
       l.addSlices(s_width);
       l.startDecoder(slice.offset, slice.count, 0, offY);
-    } catch (RawDecompressorException* e) { 
+    } catch (RawDecoderException* e) { 
       // These may just be single slice error - store the error and move on
       errors.push_back(_strdup(e->what()));
     }

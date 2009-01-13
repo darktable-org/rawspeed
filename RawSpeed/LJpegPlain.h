@@ -12,13 +12,10 @@ class LJpegPlain :
 public:
   LJpegPlain(FileMap* file, RawImage img);
   virtual ~LJpegPlain(void);
-  void decodePentax(guint offset, guint size);
 protected:
   virtual void decodeScan();
 private:
   void decodeScanLeft4Comps();
   void decodeScanLeft2Comps();
   void decodeScanLeft3Comps();
-  gint HuffDecodePentax(HuffmanTable *htbl);
-  BitPumpMSB *pentaxBits;
 };

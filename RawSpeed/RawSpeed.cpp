@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "FileReader.h"
 #include "TiffParser.h"
-#include "RawDecompressor.h"
+#include "RawDecoder.h"
 #include "libgfl.h"
 
 void BitBlt(BYTE* dstp, int dst_pitch, const BYTE* srcp, int src_pitch, int row_size, int height) {
@@ -18,7 +18,7 @@ void BitBlt(BYTE* dstp, int dst_pitch, const BYTE* srcp, int src_pitch, int row_
 int startTime;
 
 void OpenFile(FileReader f) {
-  RawDecompressor *d = 0;
+  RawDecoder *d = 0;
   FileMap* m = 0;
   try {
     wprintf(L"Opening:%s\n",f.Filename());
@@ -54,7 +54,7 @@ void OpenFile(FileReader f) {
 
       gflSaveBitmap((char*)savename.c_str(),b,&s);
       gflFreeBitmap(b);
-    } catch (RawDecompressorException e) {
+    } catch (RawDecoderException e) {
       wchar_t uni[1024];
       MultiByteToWideChar(CP_ACP, 0, e.what(), -1, uni, 1024);
       //    MessageBox(0,uni, L"RawDecoder Exception",0);
@@ -108,11 +108,34 @@ int wmain(int argc, _TCHAR* argv[])
   
   OpenFile(FileReader(L"..\\testimg\\SONY-DSLR-A700.arw"));
   OpenFile(FileReader(L"..\\testimg\\SONY_A200.ARW"));
-  OpenFile(FileReader(L"..\\testimg\\Sony_A300.arw"));*/
+  OpenFile(FileReader(L"..\\testimg\\Sony_A300.arw"));
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A100-1.arw"));
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A350.arw"));
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A900-2.arw"));
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A900.arw"));
+*/
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D200_compressed-1.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D200-1.nef"));
+  OpenFile(FileReader(L"..\\testimg\\NikonCoolPix8800.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D100-1.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D1H.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D1X.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D2H.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D2X_sRGB.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D3.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D300.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D40X.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D40_(sRGB).nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D60-2.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D60.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D70.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D700.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D70s-3.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D80_(sRGB).nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D90.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_E5400.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_E5700.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_E5700_(sRGB).nef"));
 
   MessageBox(0,L"Finished", L"Finished",0);
   gflLibraryExit();

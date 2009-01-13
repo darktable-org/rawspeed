@@ -1,18 +1,18 @@
 #include "StdAfx.h"
-#include "ARWDecompressor.h"
+#include "ARWDecoder.h"
 
 
-ARWDecompressor::ARWDecompressor( TiffIFD *rootIFD, FileMap* file ) : 
- RawDecompressor(file), mRootIFD(rootIFD)
+ARWDecoder::ARWDecoder( TiffIFD *rootIFD, FileMap* file ) : 
+ RawDecoder(file), mRootIFD(rootIFD)
 {
 
 }
 
-ARWDecompressor::~ARWDecompressor(void)
+ARWDecoder::~ARWDecoder(void)
 {
 }
 
-RawImage ARWDecompressor::decodeRaw()
+RawImage ARWDecoder::decodeRaw()
 {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 
@@ -73,7 +73,7 @@ RawImage ARWDecompressor::decodeRaw()
   return mRaw;
 }
 
-void ARWDecompressor::DecodeARW(ByteStream &input, guint w, guint h) {
+void ARWDecoder::DecodeARW(ByteStream &input, guint w, guint h) {
   BitPumpMSB bits(&input);
   guchar* data = mRaw->getData();
   gushort* dest = (gushort*)&data[0];
@@ -98,7 +98,7 @@ void ARWDecompressor::DecodeARW(ByteStream &input, guint w, guint h) {
     }
 }
 
-void ARWDecompressor::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
+void ARWDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
   guchar* data = mRaw->getData();
   guint pitch = mRaw->pitch;
   if (bpp == 8) {
