@@ -3,6 +3,8 @@
 #include "LJpegPlain.h"
 #include "TiffIFD.h"
 #include "BitPumpPlain.h"
+#include "TiffParser.h"
+#include "NikonDecompressor.h"
 
 class NefDecoder :
   public RawDecoder
@@ -12,5 +14,6 @@ public:
   virtual ~NefDecoder(void);
   virtual RawImage decodeRaw();
   TiffIFD *mRootIFD;
-  guint curve[0x4001];
+private:
+  gboolean D100IsCompressed(guint offset);
 };

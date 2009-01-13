@@ -22,6 +22,7 @@ public:
   void parseData();
   RawDecoder* getDecompressor();
   Endianness endian;
+  TiffIFD* RootIFD() const { return mRootIFD; }
 private:
   FileMap *mInput;
   TiffIFD* mRootIFD;

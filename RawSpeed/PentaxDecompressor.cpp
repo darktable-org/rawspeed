@@ -4,11 +4,14 @@
 PentaxDecompressor::PentaxDecompressor(FileMap* file, RawImage img ) :
 LJpegDecompressor(file,img)
 {
-
+  pentaxBits = 0;
 }
 
 PentaxDecompressor::~PentaxDecompressor(void)
 {
+  if (pentaxBits)
+    delete(pentaxBits);
+  pentaxBits = 0;
 }
 
 
@@ -43,20 +46,19 @@ void PentaxDecompressor::decodePentax( guint offset, guint size )
 
   for (guint y=0;y<h;y++) {
     dest = (gushort*)&draw[y*mRaw->pitch];  // Adjust destination
-    pUp1[y&1] += HuffDecodePentax(dctbl1);
-    pUp2[y&1] += HuffDecodePentax(dctbl1);
+    pUp1[y&1] += HuffDecodePentax();
+    pUp2[y&1] += HuffDecodePentax();
     dest[0] = pLeft1 = pUp1[y&1];
     dest[1] = pLeft2 = pUp2[y&1];
     for (guint x = 2; x < w ; x+=2) {
-      pLeft1 += HuffDecodePentax(dctbl1);
-      pLeft2 += HuffDecodePentax(dctbl1);
+      pLeft1 += HuffDecodePentax();
+      pLeft2 += HuffDecodePentax();
       dest[x] =  pLeft1;
       dest[x+1] =  pLeft2;
       _ASSERTE(pLeft1 >= 0 && pLeft1 <= (65536>>3));
       _ASSERTE(pLeft2 >= 0 && pLeft2 <= (65536>>3));
     }
   }
-  delete pentaxBits;
 }
 
 /*
@@ -75,12 +77,13 @@ void PentaxDecompressor::decodePentax( guint offset, guint size )
 *
 *--------------------------------------------------------------
 */
-gint PentaxDecompressor::HuffDecodePentax(HuffmanTable *htbl)
+gint PentaxDecompressor::HuffDecodePentax()
 {
   gint rv;
   gint l, temp;
   gint code;
 
+  HuffmanTable *dctbl1 = &huff[0];
   /*
   * If the huffman code is less than 8 bits, we can use the fast
   * table lookup to get its value.  It's more than 8 bits about
@@ -88,7 +91,7 @@ gint PentaxDecompressor::HuffDecodePentax(HuffmanTable *htbl)
   */
   pentaxBits->fill();
   code = pentaxBits->peekByteNoFill();
-  gint val = htbl->numbits[code];
+  gint val = dctbl1->numbits[code];
   l = val&7;
   if (l) {
     pentaxBits->skipBits(l);
@@ -96,7 +99,7 @@ gint PentaxDecompressor::HuffDecodePentax(HuffmanTable *htbl)
   }  else {
     pentaxBits->skipBits(8);
     l = 8;
-    while (code > htbl->maxcode[l]) {
+    while (code > dctbl1->maxcode[l]) {
       temp = pentaxBits->getBitNoFill();
       code = (code << 1) | temp;
       l++;
@@ -109,8 +112,8 @@ gint PentaxDecompressor::HuffDecodePentax(HuffmanTable *htbl)
     if (l > 12) {
       ThrowRDE("Corrupt JPEG data: bad Huffman code:%u\n",l);
     } else {
-      rv = htbl->huffval[htbl->valptr[l] +
-        ((int)(code - htbl->mincode[l]))];
+      rv = dctbl1->huffval[dctbl1->valptr[l] +
+        ((int)(code - dctbl1->mincode[l]))];
     }
   }
   /*

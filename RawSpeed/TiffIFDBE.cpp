@@ -17,7 +17,7 @@ TiffIFDBE::TiffIFDBE(FileMap* f, guint offset)
   for (int i = 0; i < entries; i++) {
     TiffEntryBE *t = new TiffEntryBE(f, offset+2+i*12);
 
-    if (t->tag == 330) {   // subIFD tag
+    if (t->tag == SUBIFDS || t->tag == EXIFIFDPOINTER) {   // subIFD tag
       const unsigned int* sub_offsets = t->getIntArray();
       for (int j = 0; j < t->count; j++ ) {
         mSubIFD.push_back(new TiffIFDBE(f, sub_offsets[j]));
