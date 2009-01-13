@@ -15,6 +15,7 @@ public:
   RawImage mRaw; 
   vector<const char*> errors;
 protected:
+  void Decode12BitRaw(ByteStream &input, guint w, guint h, guint bpp);
 };
 
 

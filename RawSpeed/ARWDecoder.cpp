@@ -131,20 +131,7 @@ void ARWDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
     return;
   } // End bpp = 8
   if (bpp==12) {
-    const guchar *in = input.getData();
-    if (input.getRemainSize()< (w*h*3/2) ) {
-      h = input.getRemainSize() / (w*3/2) - 1;
-    }
-    for (guint y=0; y < h; y++) {
-      gushort* dest = (gushort*)&data[y*pitch];
-      for(guint x =0 ; x < w; x+=2) {
-        guint g1 = *in++;
-        guint g2 = *in++;
-        dest[x] = g1 | ((g2<<8)&0xf);
-        guint g3 = *in++;
-        dest[x+1] = (g2>>4) | (g3<<4);
-      }
-    }
+    Decode12BitRaw(input,w,h,bpp);
     return;
   }
   ThrowRDE("Unsupported bit depth");

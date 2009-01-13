@@ -79,8 +79,8 @@ int wmain(int argc, _TCHAR* argv[])
     string errSt = string("Could not initialize GFL library. Library returned: ") + string(gflGetErrorString(err));
     return 1;
   }
-
-/*  OpenFile(FileReader(L"..\\testimg\\5d.CR2"));
+/*
+  OpenFile(FileReader(L"..\\testimg\\5d.CR2"));
   OpenFile(FileReader(L"..\\testimg\\5d-raw.dng"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1Ds_Mk3-2.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_20D-demosaic.cr2"));
@@ -88,7 +88,7 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_450D.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_350d.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_40D.cr2"));
-  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D.cr2"));
+//  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_450D-2.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_G10.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_PowerShot_G9.cr2"));
@@ -110,10 +110,10 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\SONY_A200.ARW"));
   OpenFile(FileReader(L"..\\testimg\\Sony_A300.arw"));
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A100-1.arw"));
-  OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A350.arw"));
+  OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A350.arw"));*/
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A900-2.arw"));
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A900.arw"));
-*/
+
   OpenFile(FileReader(L"..\\testimg\\Nikon_D200_compressed-1.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D200-1.nef"));
   OpenFile(FileReader(L"..\\testimg\\NikonCoolPix8800.nef"));
