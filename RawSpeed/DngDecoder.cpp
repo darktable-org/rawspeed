@@ -98,7 +98,7 @@ RawImage DngDecoder::decodeRaw() {
           ThrowRDE("DNG Decoder: Byte count number does not match strip size: count:%u, stips:%u ",counts->count, offsets->count);
         }
 
-        this->readUncompressedRaw(offsets->getInt(),offsets->getInt()+counts->getInt(),0);
+        //this->readUncompressedRaw(offsets->getInt(),offsets->getInt()+counts->getInt(),0);
       } catch (TiffParserException) {
           ThrowRDE("DNG Decoder: Unsupported format.");
         // LOAD TILES??

@@ -20,8 +20,24 @@ RawImage NefDecoder::decodeRaw()
 
   TiffIFD* raw = data[0];
   int compression = raw->getEntry(COMPRESSION)->getInt();
+
+  data = mRootIFD->getIFDsWithTag(MODEL);
+
+  if (data.empty())
+    ThrowRDE("NEF Decoder: No model data found");
+
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
+
+  if (!data[0]->getEntry(MODEL)->getString().compare("NIKON D100 ")) {
+    if (!D100IsCompressed(offsets->getInt()))
+      compression = 1;
+  }
+
+  if (compression==1) {
+    DecodeUncompressed();
+    return mRaw;
+  }
 
   if (offsets->count != 1) {
     ThrowRDE("NEF Decoder: Multiple Strips found: %u",offsets->count);
@@ -32,15 +48,7 @@ RawImage NefDecoder::decodeRaw()
   if (!mFile->isValid(offsets->getInt()+counts->getInt()))
     ThrowRDE("NEF Decoder: Invalid strip byte count. File probably truncated.");
 
-  data = mRootIFD->getIFDsWithTag(MODEL);
 
-  if (data.empty())
-    ThrowRDE("NEF Decoder: No model data found");
-
-  if (!data[0]->getEntry(MODEL)->getString().compare("NIKON D100 ")) {
-    if (!D100IsCompressed(offsets->getInt()))
-      compression = 1;
-  }
   if (34713 != compression)
     ThrowRDE("NEF Decoder: Unsupported compression");
 
@@ -93,7 +101,52 @@ gboolean NefDecoder::D100IsCompressed(guint offset)
   const guchar *test = mFile->getData(offset);
   gint i;
 
-  for (i=15; i < 256; i+=16)
+  for (i=15; i < 1024; i+=16)
     if (test[i]) return true;
   return false;
 } 
+
+void NefDecoder::DecodeUncompressed() {
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
+  TiffIFD* raw = data[0];
+  guint nslices = raw->getEntry(STRIPOFFSETS)->count;
+  const guint *offsets = raw->getEntry(STRIPOFFSETS)->getIntArray();
+  const guint *counts = raw->getEntry(STRIPBYTECOUNTS)->getIntArray();
+  guint yPerSlice = raw->getEntry(ROWSPERSTRIP)->getInt();
+  guint width = raw->getEntry(IMAGEWIDTH)->getInt();
+  guint height = raw->getEntry(IMAGELENGTH)->getInt();
+  guint bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();
+
+  vector<NefSlice> slices;
+  guint offY = 0;
+
+  for (guint s = 0; s<nslices; s++) {
+    NefSlice slice;
+    slice.offset = offsets[s];
+    slice.count = counts[s];
+    if (offY+yPerSlice>height)
+      slice.h = height-offY;
+    else
+      slice.h = yPerSlice;
+
+    offY +=yPerSlice;
+
+    if (mFile->isValid(slice.offset+slice.count)) // Only decode if size is valid
+      slices.push_back(slice);
+  }
+
+  mRaw->dim = iPoint2D(width, offY);
+  mRaw->bpp = 2;
+  mRaw->createData();
+
+  offY = 0;
+  for (int i = 0; i< slices.size(); i++) {
+    NefSlice slice = slices[i];
+    ByteStream in(mFile->getData(slice.offset),slice.count);
+    iPoint2D size(width,slice.h);
+    iPoint2D pos(0,offY);
+    readUncompressedRaw(in,size,pos,width*bitPerPixel/8,bitPerPixel,false);
+    offY += slice.h;
+}
+
+}

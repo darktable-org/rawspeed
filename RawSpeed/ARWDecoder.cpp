@@ -131,7 +131,7 @@ void ARWDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
     return;
   } // End bpp = 8
   if (bpp==12) {
-    Decode12BitRaw(input,w,h,bpp);
+    Decode12BitRaw(input,w,h);
     return;
   }
   ThrowRDE("Unsupported bit depth");

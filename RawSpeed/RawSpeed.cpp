@@ -110,7 +110,7 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\SONY_A200.ARW"));
   OpenFile(FileReader(L"..\\testimg\\Sony_A300.arw"));
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A100-1.arw"));
-  OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A350.arw"));*/
+  OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A350.arw"));
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A900-2.arw"));
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A900.arw"));
 
@@ -121,8 +121,8 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Nikon_D1H.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D1X.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D2H.nef"));
-  OpenFile(FileReader(L"..\\testimg\\Nikon_D2X_sRGB.nef"));
-  OpenFile(FileReader(L"..\\testimg\\Nikon_D3.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D2X_sRGB.nef"));*/
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D3.nef")); /*
   OpenFile(FileReader(L"..\\testimg\\Nikon_D300.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D40X.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D40_(sRGB).nef"));
@@ -136,7 +136,7 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Nikon_E5400.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_E5700.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_E5700_(sRGB).nef"));
-
+*/
   MessageBox(0,L"Finished", L"Finished",0);
   gflLibraryExit();
   _CrtDumpMemoryLeaks();

@@ -16,4 +16,14 @@ public:
   TiffIFD *mRootIFD;
 private:
   gboolean D100IsCompressed(guint offset);
+  void DecodeUncompressed();
+};
+
+class NefSlice {
+public:
+  NefSlice() { h = offset = count = 0;};
+  ~NefSlice() {};
+  guint h;
+  guint offset;
+  guint count;
 };
