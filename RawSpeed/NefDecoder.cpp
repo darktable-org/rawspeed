@@ -29,9 +29,11 @@ RawImage NefDecoder::decodeRaw()
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
 
-  if (!data[0]->getEntry(MODEL)->getString().compare("NIKON D100 ")) {
-    if (!D100IsCompressed(offsets->getInt()))
-      compression = 1;
+  if (!data[0]->getEntry(MODEL)->getString().compare("NIKON D100 ")) {  /**Sigh**/
+    if (!D100IsCompressed(offsets->getInt())) {
+      DecodeD100Uncompressed();
+      return mRaw;
+    }
   }
 
   if (compression==1) {
@@ -101,7 +103,7 @@ gboolean NefDecoder::D100IsCompressed(guint offset)
   const guchar *test = mFile->getData(offset);
   gint i;
 
-  for (i=15; i < 1024; i+=16)
+  for (i=15; i < 256; i+=16)
     if (test[i]) return true;
   return false;
 } 
@@ -138,6 +140,8 @@ void NefDecoder::DecodeUncompressed() {
   mRaw->dim = iPoint2D(width, offY);
   mRaw->bpp = 2;
   mRaw->createData();
+  if (bitPerPixel == 14 && width*slices[0].h*2 == slices[0].count)
+    bitPerPixel = 16; // D3
 
   offY = 0;
   for (int i = 0; i< slices.size(); i++) {
@@ -145,8 +149,43 @@ void NefDecoder::DecodeUncompressed() {
     ByteStream in(mFile->getData(slice.offset),slice.count);
     iPoint2D size(width,slice.h);
     iPoint2D pos(0,offY);
-    readUncompressedRaw(in,size,pos,width*bitPerPixel/8,bitPerPixel,false);
+    readUncompressedRaw(in,size,pos,width*bitPerPixel/8,bitPerPixel,true);
     offY += slice.h;
+  }
 }
 
+void NefDecoder::DecodeD100Uncompressed() {
+
+  ThrowRDE("NEF DEcoder: D100 uncompressed not supported");
+/*
+  TiffIFD* raw = mRootIFD->getIFDsWithTag(CFAPATTERN)[0];
+
+  guint nslices = raw->getEntry(STRIPOFFSETS)->count;
+  guint offset = raw->getEntry(STRIPOFFSETS)->getInt();
+  guint count = raw->getEntry(STRIPBYTECOUNTS)->getInt();
+  if (!mFile->isValid(offset+count))
+    ThrowRDE("DecodeD100Uncompressed: Truncated file");
+
+  const guchar *in =  mFile->getData(offset);
+
+  guint w = raw->getEntry(IMAGEWIDTH)->getInt();
+  guint h = raw->getEntry(IMAGELENGTH)->getInt();
+
+  mRaw->dim = iPoint2D(w, h);
+  mRaw->bpp = 2;
+  mRaw->createData();
+
+  guchar* data = mRaw->getData();
+  guint outPitch = mRaw->pitch;
+
+  BitPumpMSB bits(mFile->getData(offset),count);
+  for (guint y = 0; y < h; y++) {
+    gushort* dest = (gushort*)&data[y*outPitch];
+    for(guint x =0 ; x < w; x++) {
+      guint b = bits.getBits(12);
+      dest[x] = b;
+      if ((x % 10) == 9)
+        bits.skipBits(8);
+    }
+  }*/
 }

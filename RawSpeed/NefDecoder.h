@@ -17,6 +17,7 @@ public:
 private:
   gboolean D100IsCompressed(guint offset);
   void DecodeUncompressed();
+  void DecodeD100Uncompressed();
 };
 
 class NefSlice {

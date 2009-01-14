@@ -115,14 +115,14 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A900.arw"));
 
   OpenFile(FileReader(L"..\\testimg\\Nikon_D200_compressed-1.nef"));
-  OpenFile(FileReader(L"..\\testimg\\Nikon_D200-1.nef"));
   OpenFile(FileReader(L"..\\testimg\\NikonCoolPix8800.nef"));
-  OpenFile(FileReader(L"..\\testimg\\Nikon_D100-1.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D1H.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D1X.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D2H.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D2X_sRGB.nef"));*/
-  OpenFile(FileReader(L"..\\testimg\\Nikon_D3.nef")); /*
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D100-1.nef"));
+/*  OpenFile(FileReader(L"..\\testimg\\Nikon_D200-1.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D3.nef")); 
   OpenFile(FileReader(L"..\\testimg\\Nikon_D300.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D40X.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D40_(sRGB).nef"));
