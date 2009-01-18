@@ -4,12 +4,12 @@
 #include "TiffIFD.h"
 #include "BitPumpPlain.h"
 
-class ARWDecoder :
+class ArwDecoder :
   public RawDecoder
 {
 public:
-  ARWDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~ARWDecoder(void);
+  ArwDecoder(TiffIFD *rootIFD, FileMap* file);
+  virtual ~ArwDecoder(void);
   virtual RawImage decodeRaw();
 protected:
   void DecodeARW(ByteStream &input, guint w, guint h);

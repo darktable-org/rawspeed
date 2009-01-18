@@ -2,17 +2,17 @@
 #include "ARWDecoder.h"
 
 
-ARWDecoder::ARWDecoder( TiffIFD *rootIFD, FileMap* file ) : 
+ArwDecoder::ArwDecoder( TiffIFD *rootIFD, FileMap* file ) : 
  RawDecoder(file), mRootIFD(rootIFD)
 {
 
 }
 
-ARWDecoder::~ARWDecoder(void)
+ArwDecoder::~ArwDecoder(void)
 {
 }
 
-RawImage ARWDecoder::decodeRaw()
+RawImage ArwDecoder::decodeRaw()
 {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 
@@ -73,7 +73,7 @@ RawImage ARWDecoder::decodeRaw()
   return mRaw;
 }
 
-void ARWDecoder::DecodeARW(ByteStream &input, guint w, guint h) {
+void ArwDecoder::DecodeARW(ByteStream &input, guint w, guint h) {
   BitPumpMSB bits(&input);
   guchar* data = mRaw->getData();
   gushort* dest = (gushort*)&data[0];
@@ -98,7 +98,7 @@ void ARWDecoder::DecodeARW(ByteStream &input, guint w, guint h) {
     }
 }
 
-void ARWDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
+void ArwDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
   guchar* data = mRaw->getData();
   guint pitch = mRaw->pitch;
   if (bpp == 8) {

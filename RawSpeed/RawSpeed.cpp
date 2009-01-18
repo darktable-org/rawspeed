@@ -7,13 +7,7 @@
 #include "RawDecoder.h"
 #include "libgfl.h"
 
-void BitBlt(BYTE* dstp, int dst_pitch, const BYTE* srcp, int src_pitch, int row_size, int height) {
-  for (int y=height; y>0; --y) {
-    memcpy(dstp, srcp, row_size);
-    dstp += dst_pitch;
-    srcp += src_pitch;
-  }
-}
+
 
 int startTime;
 
@@ -119,9 +113,9 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Nikon_D1H.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D1X.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D2H.nef"));
-  OpenFile(FileReader(L"..\\testimg\\Nikon_D2X_sRGB.nef"));*/
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D2X_sRGB.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D100-1.nef"));
-/*  OpenFile(FileReader(L"..\\testimg\\Nikon_D200-1.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D200-1.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D3.nef")); 
   OpenFile(FileReader(L"..\\testimg\\Nikon_D300.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D40X.nef"));
@@ -137,6 +131,32 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Nikon_E5700.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_E5700_(sRGB).nef"));
 */
+  OpenFile(FileReader(L"..\\testimg\\Olympus_500UZ.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_C7070WZ.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_C8080.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E1.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E10.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E20.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E3-2.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E3-3.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E3-4.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E3.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E300.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E330.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E400.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E410-2.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E410.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E420.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E500.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E510-2.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E510.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E520-2.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E520-3.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E520-4.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E520-5.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_E520.orf"));
+  OpenFile(FileReader(L"..\\testimg\\Olympus_SP350.orf"));
+
   MessageBox(0,L"Finished", L"Finished",0);
   gflLibraryExit();
   _CrtDumpMemoryLeaks();

@@ -43,6 +43,23 @@ inline std::string toNarrowString( const std::string& str )
     return str ;
 }
 
+inline void BitBlt(BYTE* dstp, int dst_pitch, const BYTE* srcp, int src_pitch, int row_size, int height) {
+  for (int y=height; y>0; --y) {
+    memcpy(dstp, srcp, row_size);
+    dstp += dst_pitch;
+    srcp += src_pitch;
+  }
+}
+
+inline int lmin(int p0, int p1) {
+  return p1 + ((p0 - p1) & ((p0 - p1) >> 31));
+}
+inline int lmax(int p0, int p1) {
+  return p0 - ((p0 - p1) & ((p0 - p1) >> 31));
+}
+#define CLAMPBITS(x,n) { guint32 _y_temp; if( _y_temp=x>>n ) x = ~_y_temp >> (32-n);}
+
+
 
 /* -------------------------------------------------------------------- */
 

@@ -253,6 +253,10 @@
 					RelativePath=".\TiffParserException.cpp"
 					>
 				</File>
+				<File
+					RelativePath=".\TiffParserOlympus.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Decompressors"
@@ -283,6 +287,10 @@
 				</File>
 				<File
 					RelativePath=".\NikonDecompressor.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\OrfDecoder.cpp"
 					>
 				</File>
 				<File
@@ -388,6 +396,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\TiffParserOlympus.h"
+					>
+				</File>
+				<File
 					RelativePath=".\TiffTag.h"
 					>
 				</File>
@@ -465,6 +477,10 @@
 				</File>
 				<File
 					RelativePath=".\NikonDecompressor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\OrfDecoder.h"
 					>
 				</File>
 				<File

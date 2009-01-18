@@ -3,26 +3,6 @@
 
 TiffParser::TiffParser(FileMap* inputData): mInput(inputData), mRootIFD(0)
 {
-  const unsigned char* data = mInput->getData(0);
-  if (mInput->getSize() < 16)
-    throw TiffParserException("Not a TIFF file (size too small)");
-  if (data[0] != 0x49 || data[1] != 0x49) {
-    endian = big;
-    if (data[0] != 0x4D || data[1] != 0x4D) 
-      throw TiffParserException("Not a TIFF file (ID)");
-    
-    if (data[3] != 42) 
-      throw TiffParserException("Not a TIFF file (magic 42)");
-  } else {
-    endian = little;
-    if (data[2] != 42 && data[2] != 0x52) // ORF has 0x52 - Brillant!
-      throw TiffParserException("Not a TIFF file (magic 42)");
-  }
-
-  if (endian == little)
-    mRootIFD = new TiffIFD();
-  else
-    mRootIFD = new TiffIFDBE();
 
 }
 
@@ -45,8 +25,29 @@ TiffParser::~TiffParser(void)
 #define CHECKPTR(A) if ((int)A >= ((int)(mInput->data) + size))) throw TiffParserException("Error reading TIFF structure. File Corrupt")
 
 void TiffParser::parseData() {
+  const unsigned char* data = mInput->getData(0);
+  if (mInput->getSize() < 16)
+    throw TiffParserException("Not a TIFF file (size too small)");
+  if (data[0] != 0x49 || data[1] != 0x49) {
+    endian = big;
+    if (data[0] != 0x4D || data[1] != 0x4D) 
+      throw TiffParserException("Not a TIFF file (ID)");
+
+    if (data[3] != 42) 
+      throw TiffParserException("Not a TIFF file (magic 42)");
+  } else {
+    endian = little;
+    if (data[2] != 42 && data[2] != 0x52) // ORF has 0x52 - Brillant!
+      throw TiffParserException("Not a TIFF file (magic 42)");
+  }
+
+  if (endian == little)
+    mRootIFD = new TiffIFD();
+  else
+    mRootIFD = new TiffIFDBE();
+
   guint nextIFD;
-  const unsigned char *data = mInput->getData(4);
+  data = mInput->getData(4);
   if (endian == little) {
     nextIFD = *(int*)data;
   } else {
@@ -90,10 +91,10 @@ RawDecoder* TiffParser::getDecompressor() {
         return new NefDecoder(mRootIFD,mInput);
       }
       if (!make.compare("OLYMPUS IMAGING CORP.  ")) {
-        throw TiffParserException("Olympus not supported. Sorry.");
+        return new OrfDecoder(mRootIFD,mInput);
       }
       if (!make.compare("SONY ")) {
-        return new ARWDecoder(mRootIFD,mInput);
+        return new ArwDecoder(mRootIFD,mInput);
       }
       if (!make.compare("PENTAX Corporation ")) {
         return new PefDecoder(mRootIFD,mInput);

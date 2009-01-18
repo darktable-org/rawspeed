@@ -27,6 +27,7 @@ TiffIFD::TiffIFD(FileMap* f, guint offset)
       for (int j = 0; j < t->count; j++ ) {
         mSubIFD.push_back(new TiffIFD(f, sub_offsets[j]));
       }
+      delete(t);
     } else {  // Store as entry
       mEntry[t->tag] = t;
     }
@@ -39,9 +40,11 @@ TiffIFD::~TiffIFD(void)
   for (map<TiffTag, TiffEntry*>::iterator i = mEntry.begin(); i != mEntry.end(); ++i) {
     delete((*i).second);
   }
+  mEntry.clear();
   for (vector<TiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
     delete(*i);
   }
+  mSubIFD.clear();
 }
 
 vector<TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) {
