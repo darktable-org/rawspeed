@@ -139,4 +139,4 @@ public:
 	friend iVec sum( int, double[], iVec[]);  // iVec sum
 };
 
-#endif SS_Vec_H
+#endif // SS_Vec_H

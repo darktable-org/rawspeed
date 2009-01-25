@@ -3,7 +3,7 @@
 #include "TiffIFD.h"
 #include "TiffIFDBE.h"
 #include "TiffParserException.h"
-#include "ThumbnailGenerator.h"
+//#include "ThumbnailGenerator.h"
 #include "RawDecoder.h"
 #include "DngDecoder.h"
 #include "Cr2Decoder.h"
@@ -11,7 +11,7 @@
 #include "PefDecoder.h"
 #include "NefDecoder.h"
 #include "OrfDecoder.h"
-#include "libgfl.h"
+//#include "libgfl.h"
 
 class TiffParser 
 {

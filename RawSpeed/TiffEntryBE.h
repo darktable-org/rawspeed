@@ -1,5 +1,5 @@
 #pragma once
-#include "tiffentry.h"
+#include "TiffEntry.h"
 
 class TiffEntryBE :
   public TiffEntry

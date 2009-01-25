@@ -32,7 +32,7 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
     ThrowRDE("readUncompressedRaw: Invalid x offset");
 
   guint y = offset.y;
-  h = min(h+offset.y,mRaw->dim.y);
+  h = MIN(h+offset.y,mRaw->dim.y);
   if (bitPerPixel==16)  {
     BitBlt(&data[offset.x*sizeof(gushort)+y*outPitch],outPitch,
       in,inputPitch,w*2,h);

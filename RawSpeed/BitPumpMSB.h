@@ -23,8 +23,8 @@ public:
 	void setAbsoluteOffset(guint offset);     // Set offset in bytes
   guint getOffset() { return off-(mLeft>>3);}
   __inline guint getBitNoFill() {return (mCurr >> (--mLeft)) & 1;}
-  __inline guint BitPumpMSB::peekByteNoFill() {return ((mCurr >> (mLeft-8))) & 0xff; }
-  __inline guint BitPumpMSB::getBitsNoFill(guint nbits) {return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];}
+  __inline guint peekByteNoFill() {return ((mCurr >> (mLeft-8))) & 0xff; }
+  __inline guint getBitsNoFill(guint nbits) {return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];}
   void fill();  // Fill the buffer with at least 24 bits
 
 

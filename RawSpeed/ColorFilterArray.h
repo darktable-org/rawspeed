@@ -32,7 +32,7 @@ public:
   int getColorNumInCol(int n, CFAColor c);      // Get the number of this color in col n
   int getWidthMultiplier(CFAColor c);        // This will return the maximum number of this color in one row.
   int getHeightMultiplier(CFAColor c);       // This will get the accumulated number of rows where the color is present.
-  ColorFilterArray& ColorFilterArray::operator= (const ColorFilterArray& f);
+  ColorFilterArray& operator= (const ColorFilterArray& f);
 protected:
   iPoint2D size;
 };

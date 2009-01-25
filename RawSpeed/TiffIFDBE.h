@@ -3,7 +3,7 @@
  */
 
 #pragma once
-#include "tiffifd.h"
+#include "TiffIFD.h"
 
 class TiffIFDBE :
   public TiffIFD

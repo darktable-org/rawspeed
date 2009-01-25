@@ -1,5 +1,5 @@
 #pragma once
-#include "ljpegdecompressor.h"
+#include "LJpegDecompressor.h"
 #include "BitPumpMSB.h"
 
 class PentaxDecompressor :

@@ -1,5 +1,4 @@
 #pragma once
-#include "ColorFilterArray.h"
 #include "pthread.h"
 
 class RawImage;
@@ -11,8 +10,7 @@ public:
   iPoint2D dim;
   guint bpp;      // Bytes per pixel.
   guint pitch;
-  void RawImageData::createData();
-  ColorFilterArray cfa;
+  void createData();
   guchar* getData() {return data;}
   gboolean isCFA;
 private:

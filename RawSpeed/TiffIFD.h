@@ -1,11 +1,11 @@
 #pragma once
 #include "FileMap.h"
-#include "tiffEntry.h"
+#include "TiffEntry.h"
 #include "TiffParserException.h"
 
 typedef enum Endianness {
   big, little
-};
+} Endianness;
 
 
 class TiffIFD
@@ -19,7 +19,7 @@ public:
   gint getNextIFD() {return nextIFD;}
   vector<TiffIFD*> getIFDsWithTag(TiffTag tag);
   TiffEntry* getEntry(TiffTag tag);
-  gboolean hasEntry(TiffTag tag);
+  bool hasEntry(TiffTag tag);
 protected:
   gint nextIFD;
 };

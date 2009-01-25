@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "DNGDecoderSlices.h"
+#include "DngDecoderSlices.h"
 
 void *DecodeThread(void *_this) {
   DngDecoderThread* me = (DngDecoderThread*)_this;
@@ -31,7 +31,11 @@ void DngDecoderSlices::addSlice( DngSliceElement slice )
 void DngDecoderSlices::startDecoding()
 {
   // Create threads
+#ifdef __WIN32__
   int nThreads = pthread_num_processors_np();
+#else
+  int nThreads = 2; // FIXME: Port this to unix
+#endif
   int slicesPerThread = (slices.size() + nThreads - 1) / nThreads;
 //  decodedSlices = 0;
   pthread_attr_t attr;

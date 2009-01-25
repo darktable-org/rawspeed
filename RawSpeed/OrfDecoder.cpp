@@ -1,7 +1,9 @@
 #include "StdAfx.h"
 #include "OrfDecoder.h"
 #include "TiffParserOlympus.h"
-
+#ifdef __unix__
+#include <stdlib.h>
+#endif
 
 OrfDecoder::OrfDecoder(TiffIFD *rootIFD, FileMap* file):
 RawDecoder(file), mRootIFD(rootIFD)

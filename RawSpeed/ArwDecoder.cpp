@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "ARWDecoder.h"
+#include "ArwDecoder.h"
 
 
 ArwDecoder::ArwDecoder( TiffIFD *rootIFD, FileMap* file ) : 

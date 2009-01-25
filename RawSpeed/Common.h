@@ -1,9 +1,31 @@
 #pragma once
 
+#ifndef __unix__
 #include <intrin.h>
-
 #pragma intrinsic(_ReturnAddress)
+#else
+#include <rawstudio.h>
+#include <exception>
+#include <string.h>
+#include <assert.h>
+#define BYTE unsigned char
+#define _ASSERTE assert
+#include <stdexcept>
+#define _RPT0(a,b) 
+#define _RPT1(a,b,c) 
+#define _RPT2(a,b,c,d) 
+#define _RPT3(a,b,c,d,e) 
+#define _RPT4(a,b,c,d,e,f) 
+#define __inline inline
+#define _strdup(a) strdup(a)
+#define _aligned_malloc(a, alignment) malloc(a)
+#define _aligned_free(a) do { free(a); } while (0)
+#define MIN(a, b)  (((a) < (b)) ? (a) : (b))
+#define MAX(a, b)  (((a) > (b)) ? (a) : (b))
+typedef char* LPCWSTR;
+#endif // __unix__
 
+#ifndef __unix__
 class MathException : public std::runtime_error
 {
 public:
@@ -13,6 +35,7 @@ public:
 };
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
+#endif // __unix__
 
 #define THROW_MATH(x) throw MathException("Math Exception: " x " in " TOSTRING(__FILE__) " Ln " TOSTRING(__LINE__), _ReturnAddress() )
 
@@ -62,7 +85,7 @@ inline int lmax(int p0, int p1) {
 
 
 /* -------------------------------------------------------------------- */
-
+#ifndef __unix__
 std::wstring 
 toWideString( const char* pStr , int len )
 {
@@ -117,7 +140,6 @@ toNarrowString( const wchar_t* pStr , int len )
 
     return buf ; 
 }
-
 
 class wruntime_error
     : public std::runtime_error
@@ -198,7 +220,6 @@ wruntime_error::~wruntime_error()
 
 const wstring& wruntime_error::errorMsg() const { return mErrorMsg ; }
 
-
 typedef   bool          gboolean;
 typedef   void*         gpointer;
 typedef   const void*   gconstpointer;
@@ -219,8 +240,8 @@ typedef  unsigned short           guint16;
 typedef  int           gint32;
 typedef  unsigned int           guint32;
 
-typedef  __int64       gint64;
-typedef  unsigned __int64          guint64;
+typedef  long long       gint64;
+typedef  unsigned long long          guint64;
 
 typedef float            gfloat;
 typedef double            gdouble;
@@ -228,3 +249,5 @@ typedef double            gdouble;
 typedef unsigned int            gsize;
 typedef signed int            gssize;
 typedef gint64            goffset;
+#endif // __unix__
+
