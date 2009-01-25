@@ -105,6 +105,9 @@ RawImage DngDecoder::decodeRaw() {
       }
     } else if (compression == 7) {
       try {
+        if (raw->getEntry(SAMPLESPERPIXEL)->getInt()>1)
+          ThrowRDE("DNG Decoder: Multiple Samples per pixel not supported.");
+
         // Let's try loading it as tiles instead
         if (!mRaw->isCFA) {
           mRaw->bpp*=raw->getEntry(SAMPLESPERPIXEL)->getInt();
@@ -139,6 +142,8 @@ RawImage DngDecoder::decodeRaw() {
         slices.startDecoding();
         if (!slices.errors.empty())
           errors = slices.errors;
+        if (errors.size()>=nTiles)
+          ThrowRDE("DNG Decoding: Too many errors encountered. Giving up.\nFirst Error:%s",errors[0]);
       } catch (TiffParserException) {
         TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
         TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);

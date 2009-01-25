@@ -1,6 +1,6 @@
 #pragma once
 #include "ColorFilterArray.h"
-
+#include "pthread.h"
 
 class RawImage;
 class RawImageData
@@ -21,6 +21,7 @@ private:
   guchar* data; 
   guint dataRefCount;
   friend class RawImage;
+  pthread_mutex_t mymutex;
 };
 
 
@@ -28,19 +29,12 @@ private:
  public:
    static RawImage create();
    static RawImage create(iPoint2D dim, int bitsPerComponent);
-   RawImageData* operator-> () { return p_; }
-   RawImageData& operator* ()  { return *p_; }
-   RawImage(RawImageData* p)    : p_(p) { ++p_->dataRefCount; }  // p must not be NULL
-  ~RawImage()           { if (--p_->dataRefCount == 0) delete p_; }
-   RawImage(const RawImage& p) : p_(p.p_) { ++p_->dataRefCount; }
-   RawImage& operator= (const RawImage& p)
-         { 
-           RawImageData* const old = p_;
-           p_ = p.p_;
-           ++p_->dataRefCount;
-           if (--old->dataRefCount == 0) delete old;
-           return *this;
-         }
+   RawImageData* operator-> ();
+   RawImageData& operator* ();
+   RawImage(RawImageData* p);  // p must not be NULL
+  ~RawImage();
+   RawImage(const RawImage& p);
+   RawImage& operator= (const RawImage& p);
 
  private:
    RawImageData* p_;    // p_ is never NULL

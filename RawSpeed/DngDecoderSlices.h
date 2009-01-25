@@ -40,7 +40,6 @@ public:
   vector<DngDecoderThread*> threads;
   FileMap *mFile; 
   RawImage mRaw;
-  guint decodedSlices;
   vector<const char*> errors;
   gboolean mFixLjpeg;
 };

@@ -159,7 +159,7 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Olympus_SP350.orf"));
   */
   OpenFile(FileReader(L"..\\testimg\\dng\\5d-raw.dng"));// 719ms
-/*  OpenFile(FileReader(L"..\\testimg\\dng\\5d.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\5d.dng"));
   OpenFile(FileReader(L"..\\testimg\\dng\\20D.dng"));
   OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_1000D.dng"));
   OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_1Ds_Mk2.dng"));
@@ -250,7 +250,7 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A350.dng"));
   OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A900-2.dng"));
   OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A900.dng"));
-*/
+
   MessageBox(0,L"Finished", L"Finished",0);
   gflLibraryExit();
   _CrtDumpMemoryLeaks();
