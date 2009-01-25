@@ -3,7 +3,7 @@
 
 FileMap::FileMap(guint _size) : size(_size)
 {
-  data = (unsigned char*)_aligned_malloc(size,16);   
+  data = (unsigned char*)_aligned_malloc(size+4,16);   
   if (!data) {
 		throw new FileIOException("Not enough memory to open file.");
   }

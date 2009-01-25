@@ -1,7 +1,7 @@
 #pragma once
 #include "LJpegPlain.h"
 #include "TiffIFD.h"
-
+#include "DNGDecoderSlices.h"
 
 class DngDecoder : 
   public RawDecoder

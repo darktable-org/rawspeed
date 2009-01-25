@@ -68,7 +68,7 @@ RawImage DngDecoder::decodeRaw() {
   try {
 
     int compression = raw->getEntry(COMPRESSION)->getShort();
-    if (mRaw->isCFA) {
+/*    if (mRaw->isCFA) {
       const unsigned short* pDim = raw->getEntry(CFAREPEATPATTERNDIM)->getShortArray(); // Get the size
       const unsigned char* cPat = raw->getEntry(CFAPATTERN)->getData();                 // Does NOT contain dimensions as some documents state
       const unsigned char* cPlaneOrder = raw->getEntry(CFAPLANECOLOR)->getData();       // Map from the order in the image, to the position in the CFA
@@ -84,7 +84,7 @@ RawImage DngDecoder::decodeRaw() {
         }
       }
     }
-
+*/
     
     // Now load the image
     if (compression == 1) {  // Uncompressed.
@@ -95,7 +95,7 @@ RawImage DngDecoder::decodeRaw() {
           ThrowRDE("DNG Decoder: Multiple Strips found: %u",offsets->count);
         }
         if (counts->count != offsets->count) {
-          ThrowRDE("DNG Decoder: Byte count number does not match strip size: count:%u, stips:%u ",counts->count, offsets->count);
+          ThrowRDE("DNG Decoder: Byte count number does not match strip size: count:%u, strips:%u ",counts->count, offsets->count);
         }
 
         //this->readUncompressedRaw(offsets->getInt(),offsets->getInt()+counts->getInt(),0);
@@ -126,18 +126,19 @@ RawImage DngDecoder::decodeRaw() {
         if (TEoffsets->count != TEcounts->count || TEoffsets->count != nTiles)
           ThrowRDE("DNG Decoder: Tile count mismatch: offsets:%u count:%u, calculated:%u",TEoffsets->count,TEcounts->count, nTiles );
 
+        DngDecoderSlices slices(mFile, mRaw);
+
         for (guint y=0; y< tilesY; y++) { // This loop is obvious for threading, as tiles are independent
           for (guint x=0; x< tilesX; x++) {
             LJpegPlain l(mFile, mRaw);
             l.mDNGCompatible = mFixLjpeg;
-            try {
-              l.startDecoder(offsets[x+y*tilesX], counts[x+y*tilesX], tilew*x, tileh*y);
-            } catch (RawDecoderException* e) { 
-              // These may just be single tile error - store the error and move on
-            	errors.push_back(_strdup(e->what()));
-            }
+            DngSliceElement e(offsets[x+y*tilesX], counts[x+y*tilesX], tilew*x, tileh*y);
+            slices.addSlice(e);
           }
         }
+        slices.startDecoding();
+        if (!slices.errors.empty())
+          errors = slices.errors;
       } catch (TiffParserException) {
         TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
         TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);

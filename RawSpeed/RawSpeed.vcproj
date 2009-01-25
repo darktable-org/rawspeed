@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib $(NoInherit) libgfl.lib User32.lib"
+				AdditionalDependencies="kernel32.lib $(NoInherit) libgfl.lib User32.lib pthreadVC2.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\lib"
 				GenerateDebugInformation="true"
@@ -143,7 +143,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib $(NoInherit) libgfl.lib User32.lib"
+				AdditionalDependencies="kernel32.lib $(NoInherit) libgfl.lib User32.lib pthreadVC2.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\lib"
 				GenerateDebugInformation="true"
@@ -271,6 +271,10 @@
 				</File>
 				<File
 					RelativePath=".\DngDecoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DngDecoderSlices.cpp"
 					>
 				</File>
 				<File
@@ -461,6 +465,10 @@
 				</File>
 				<File
 					RelativePath=".\DngDecoder.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DngDecoderSlices.h"
 					>
 				</File>
 				<File

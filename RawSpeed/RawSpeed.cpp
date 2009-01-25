@@ -24,6 +24,7 @@ void OpenFile(FileReader f) {
     startTime = GetTickCount();
     try {
       d->decodeRaw();
+
       wprintf(L"Decoding %s took: %u ms\n", f.Filename(), GetTickCount()-startTime);
 
       RawImage r = d->mRaw;
@@ -73,8 +74,8 @@ int wmain(int argc, _TCHAR* argv[])
     string errSt = string("Could not initialize GFL library. Library returned: ") + string(gflGetErrorString(err));
     return 1;
   }
-/*
-  OpenFile(FileReader(L"..\\testimg\\5d.CR2"));
+
+/*  OpenFile(FileReader(L"..\\testimg\\5d.CR2"));
   OpenFile(FileReader(L"..\\testimg\\5d-raw.dng"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1Ds_Mk3-2.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_20D-demosaic.cr2"));
@@ -130,7 +131,7 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Nikon_E5400.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_E5700.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_E5700_(sRGB).nef"));
-*/
+
   OpenFile(FileReader(L"..\\testimg\\Olympus_500UZ.orf"));
   OpenFile(FileReader(L"..\\testimg\\Olympus_C7070WZ.orf"));
   OpenFile(FileReader(L"..\\testimg\\Olympus_C8080.orf"));
@@ -156,7 +157,100 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Olympus_E520-5.orf"));
   OpenFile(FileReader(L"..\\testimg\\Olympus_E520.orf"));
   OpenFile(FileReader(L"..\\testimg\\Olympus_SP350.orf"));
-
+  */
+  OpenFile(FileReader(L"..\\testimg\\dng\\5d-raw.dng"));// 719ms
+/*  OpenFile(FileReader(L"..\\testimg\\dng\\5d.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\20D.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_1000D.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_1Ds_Mk2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_1Ds_Mk3-2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_1Ds_Mk3.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_1D_Mk2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_1D_Mk2_N.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_1D_Mk3.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_20D-demosaic.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_20d.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_30D-uga1.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_30D-uga2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_30D.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_350d-2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_350D-3.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_350d.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_400D.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_40D-2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_40D.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_450D-2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_450D-3.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_450D-4.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_450D-5.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_450D.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_5D.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_5D_Mk2-ISO100_sRAW1.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_5D_Mk2-ISO12800_sRAW1.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_5D_Mk2-ISO12800_sRAW2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_Mk2-ISO100_sRAW2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_Powershot_G10.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_Powershot_G9-1.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_Powershot_G9-2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Canon_PowerShot_G9.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\NikonCoolPix8800.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D100-1.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D1H.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D1X.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D200-1.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D200_compressed-1.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D2H.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D2X_sRGB.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D3.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D300.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D40X.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D40_(sRGB).dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D60-2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D60.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D70.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D700.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D70s-3.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D80_(sRGB).dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_D90.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_E5400.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_E5700.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Nikon_E5700_(sRGB).dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_500UZ.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_C7070WZ.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_C8080.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E1.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E10.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E20.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E3-2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E3-3.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E3-4.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E3.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E300.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E330.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E400.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E410-2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E410.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E420.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E500.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E510-2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E510.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E520-2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E520-3.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E520-4.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E520-5.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E520.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_SP350.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Pentax_K100D.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Pentax_K10D.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Pentax_K20D.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\SONY-DSLR-A700.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\SONY_A200.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Sony_A300.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A100-1.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A350.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A900-2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A900.dng"));
+*/
   MessageBox(0,L"Finished", L"Finished",0);
   gflLibraryExit();
   _CrtDumpMemoryLeaks();
