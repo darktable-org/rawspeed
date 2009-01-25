@@ -337,7 +337,6 @@ void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
       _ASSERTE(size<=8);
       for (i=ll; i<=ul; i++) {
         htbl->numbits[i] = size | (value<<4);
-        //htbl->value[i] = value;
       }
     }
   }

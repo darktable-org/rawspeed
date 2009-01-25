@@ -3,6 +3,8 @@
 #ifndef __unix__
 #include <intrin.h>
 #pragma intrinsic(_ReturnAddress)
+#define MIN(a,b) min(a,b)
+#define MAX(a,b) max(a,b)
 #else
 #include <rawstudio.h>
 #include <exception>

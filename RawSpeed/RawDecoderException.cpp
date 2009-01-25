@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "RawDecoderException.h"
-#ifndef __WIN32__
+#ifndef WIN32
 #include <stdarg.h>
 #define vsprintf_s(...) vsnprintf(__VA_ARGS__)
 #endif
