@@ -5,11 +5,13 @@
 LJpegPlain::LJpegPlain( FileMap* file, RawImage img ) :
  LJpegDecompressor(file,img)
 {
-
+  offset = 0;
 }
 
 LJpegPlain::~LJpegPlain(void)
 {
+  if (offset)
+    delete(offset);
 }
 
 void LJpegPlain::decodeScan() {
@@ -54,7 +56,7 @@ void LJpegPlain::decodeScanLeft2Comps() {
 
   //Prepare slices (for CR2)
   guint slices =  (guint)slicesW.size()*(frame.h-skipY);
-  guint *offset = new guint[slices+1];
+  offset = new guint[slices+1];
 
   guint t_y = 0;
   guint t_x = 0;
@@ -116,7 +118,6 @@ void LJpegPlain::decodeScanLeft2Comps() {
     predict = dest;  // Adjust destination for next prediction
     x = 0;
   }
-  delete(offset);
 }
 
 #undef COMPS
@@ -131,7 +132,7 @@ void LJpegPlain::decodeScanLeft3Comps() {
 
   //Prepare slices (for CR2)
   guint slices =  (guint)slicesW.size()*(frame.h-skipY);
-  guint *offset = new guint[slices+1];
+  offset = new guint[slices+1];
 
   guint t_y = 0;
   guint t_x = 0;
@@ -200,7 +201,6 @@ void LJpegPlain::decodeScanLeft3Comps() {
     predict = dest;  // Adjust destination for next prediction
     x = 0;
   }
-  delete(offset);
 }
 
 #undef COMPS
@@ -216,7 +216,7 @@ void LJpegPlain::decodeScanLeft4Comps() {
 
   //Prepare slices (for CR2)
   guint slices =  (guint)slicesW.size()*(frame.h-skipY);
-  guint *offset = new guint[slices+1];
+  offset = new guint[slices+1];
 
   guint t_y = 0;
   guint t_x = 0;
@@ -292,5 +292,4 @@ void LJpegPlain::decodeScanLeft4Comps() {
     predict = dest;  // Adjust destination for next prediction
     x = 0;
   }
-  delete(offset);
 }

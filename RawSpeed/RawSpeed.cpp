@@ -26,6 +26,9 @@ void OpenFile(FileReader f) {
       d->decodeRaw();
 
       wprintf(L"Decoding %s took: %u ms\n", f.Filename(), GetTickCount()-startTime);
+      for (int i = 0; i < d->errors.size(); i++) {
+        printf("Error Encoutered:%s\n", d->errors[i]);
+      }
 
       RawImage r = d->mRaw;
 
@@ -157,7 +160,7 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Olympus_E520-5.orf"));
   OpenFile(FileReader(L"..\\testimg\\Olympus_E520.orf"));
   OpenFile(FileReader(L"..\\testimg\\Olympus_SP350.orf"));
-  */
+  
   OpenFile(FileReader(L"..\\testimg\\dng\\5d-raw.dng"));// 719ms
   OpenFile(FileReader(L"..\\testimg\\dng\\5d.dng"));
   OpenFile(FileReader(L"..\\testimg\\dng\\20D.dng"));
@@ -245,7 +248,7 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\dng\\Pentax_K20D.dng"));
   OpenFile(FileReader(L"..\\testimg\\dng\\SONY-DSLR-A700.dng"));
   OpenFile(FileReader(L"..\\testimg\\dng\\SONY_A200.dng"));
-  OpenFile(FileReader(L"..\\testimg\\dng\\Sony_A300.dng"));
+  OpenFile(FileReader(L"..\\testimg\\dng\\Sony_A300.dng"));*/
   OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A100-1.dng"));
   OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A350.dng"));
   OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A900-2.dng"));

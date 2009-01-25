@@ -68,8 +68,8 @@ void DngDecoderSlices::decodeSlice( DngDecoderThread* t ) {
     t->slices.pop();
     try {
       l.startDecoder(e.byteOffset, e.byteCount, e.offX, e.offY);
-    } catch (RawDecoderException* e) { 
-      errors.push_back(_strdup(e->what()));
+    } catch (RawDecoderException e) { 
+      errors.push_back(_strdup(e.what()));
     }
   }
 }

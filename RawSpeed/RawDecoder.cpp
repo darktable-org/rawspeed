@@ -7,7 +7,10 @@ RawDecoder::RawDecoder(FileMap* file) : mFile(file), mRaw(RawImage::create())
 
 RawDecoder::~RawDecoder(void)
 {
-
+  for (int i = 0 ; i < errors.size(); i++) {
+    free((void*)errors[i]);
+  }
+  errors.clear();
 }
 
 void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch, int bitPerPixel, gboolean MSBOrder) {
