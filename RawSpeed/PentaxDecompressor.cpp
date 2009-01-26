@@ -92,10 +92,10 @@ gint PentaxDecompressor::HuffDecodePentax()
   pentaxBits->fill();
   code = pentaxBits->peekByteNoFill();
   gint val = dctbl1->numbits[code];
-  l = val&7;
+  l = val&15;
   if (l) {
     pentaxBits->skipBits(l);
-    rv=val>>3;
+    rv=val>>4;
   }  else {
     pentaxBits->skipBits(8);
     l = 8;

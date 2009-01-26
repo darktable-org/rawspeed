@@ -131,10 +131,10 @@ gint NikonDecompressor::HuffDecodeNikon()
   bits->fill();
   code = bits->peekByteNoFill();
   gint val = dctbl1->numbits[code];
-  l = val&7;
+  l = val&15;
   if (l) {
     bits->skipBits(l);
-    rv=val>>3;
+    rv=val>>4;
   }  else {
     bits->skipBits(8);
     l = 8;
