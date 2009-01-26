@@ -16,8 +16,8 @@ LJpegPlain::~LJpegPlain(void)
 
 void LJpegPlain::decodeScan() {
   // If image attempts to decode beyond the image bounds, strip it.
-  if (frame.w*frame.cps+offX > mRaw->dim.x)
-    skipX = ((frame.w*frame.cps+offX)-mRaw->dim.x) / frame.cps;
+  if ( (frame.w * frame.cps + offX * mRaw->getCpp()) > mRaw->dim.x * mRaw->getCpp() )
+    skipX = ( ( ( frame.w * frame.cps + offX * mRaw->getCpp() ) ) - mRaw->dim.x * mRaw->getCpp() ) / frame.cps;
   if (frame.h+offY > mRaw->dim.y)
     skipY = frame.h+offY - mRaw->dim.y;
 
@@ -63,7 +63,7 @@ void LJpegPlain::decodeScanLeft2Comps() {
   guint t_s = 0;
   guint slice = 0;
   for (slice = 0; slice< slices; slice++) {
-    offset[slice] = ((t_x+offX)*sizeof(gushort)+((offY+t_y)*mRaw->pitch)) | (t_s<<28);
+    offset[slice] = ((t_x+offX)*mRaw->bpp+((offY+t_y)*mRaw->pitch)) | (t_s<<28);
     _ASSERTE((offset[slice]&0x0fffffff)<mRaw->pitch*mRaw->dim.y);
     t_y++;
     if (t_y == (frame.h-skipY)) {
@@ -139,7 +139,7 @@ void LJpegPlain::decodeScanLeft3Comps() {
   guint t_s = 0;
   guint slice = 0;
   for (slice = 0; slice< slices; slice++) {
-    offset[slice] = ((t_x+offX)*sizeof(gushort)+((offY+t_y)*mRaw->pitch)) | (t_s<<28);
+    offset[slice] = ((t_x+offX)*mRaw->bpp+((offY+t_y)*mRaw->pitch)) | (t_s<<28);
     _ASSERTE((offset[slice]&0x0fffffff)<mRaw->pitch*mRaw->dim.y);
     t_y++;
     if (t_y == (frame.h-skipY)) {
@@ -223,7 +223,7 @@ void LJpegPlain::decodeScanLeft4Comps() {
   guint t_s = 0;
   guint slice = 0;
   for (slice = 0; slice< slices; slice++) {
-    offset[slice] = ((t_x+offX)*sizeof(gushort)+((offY+t_y)*mRaw->pitch)) | (t_s<<28);
+    offset[slice] = ((t_x+offX)*mRaw->bpp+((offY+t_y)*mRaw->pitch)) | (t_s<<28);
     _ASSERTE((offset[slice]&0x0fffffff)<mRaw->pitch*mRaw->dim.y);
     t_y++;
     if (t_y == (frame.h-skipY)) {

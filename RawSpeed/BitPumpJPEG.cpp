@@ -40,7 +40,10 @@ void __inline BitPumpJPEG::fill() {
 
         if (c2 == 0) { // Increment, if not a stuffed ff
           off++;
-        }  // Otherwise just keep going
+        }  else {
+          c = 0;
+          off--;  // Don't return more bytes, rewind, so this will be hit next          
+        }
       }
       /*
       * OK, load c into mCurr
@@ -56,6 +59,7 @@ guint BitPumpJPEG::getBit() {
 }
 
 guint BitPumpJPEG::getBits(guint nbits) {
+  _ASSERTE(nbits<24);
   if (mLeft < nbits) {
     fill();
   }
@@ -104,6 +108,7 @@ guint BitPumpJPEG::getBitsSafe(unsigned int nbits) {
 }
 
 void BitPumpJPEG::skipBits(unsigned int nbits) {
+  _ASSERTE(nbits<24);
   if (mLeft < nbits) {
     fill();
     if (off>size)

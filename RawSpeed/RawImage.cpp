@@ -3,13 +3,13 @@
 #include "RawDecoder.h"  // For exceptions
 
 RawImageData::RawImageData(void): 
-dim(0,0), bpp(0), dataRefCount(0),data(0),isCFA(true)
+dim(0,0), bpp(0), dataRefCount(0),data(0),isCFA(true), cpp(1)
 {
   pthread_mutex_init(&mymutex, NULL);
 }
 
-RawImageData::RawImageData(iPoint2D _dim, guint _bpp) : 
-dim(_dim), bpp(_bpp), dataRefCount(0),data(0) {
+RawImageData::RawImageData(iPoint2D _dim, guint _bpc, guint cpp) : 
+dim(_dim), bpp(_bpc), dataRefCount(0),data(0) {
   createData();
   pthread_mutex_init(&mymutex, NULL);
 }
@@ -31,6 +31,14 @@ void RawImageData::createData() {
     ThrowRDE("RawImageData::createData: Memory Allocation failed.");
 }
 
+void RawImageData::setCpp( guint val )
+{
+  if (data)
+    ThrowRDE("RawImageData: Attempted to set Components per pixel after data allocation");
+  bpp /= cpp;
+  cpp = val;
+  bpp *= val;
+}
 RawImage::RawImage( RawImageData* p ) : p_(p)
 {
   pthread_mutex_lock(&p_->mymutex);

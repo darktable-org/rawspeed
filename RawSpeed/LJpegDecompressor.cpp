@@ -181,6 +181,9 @@ void LJpegDecompressor::parseSOS()
   Pt = b&0xf;          // Point Transform
   _RPT1(0,"Point transform:%u\n",pred);
 
+  int cheadersize = 3+frame.cps * 2 + 3;
+  _ASSERTE(cheadersize == headerLength);
+
   bits = new BitPumpJPEG(input);
   try {
     decodeScan();

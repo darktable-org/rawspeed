@@ -105,12 +105,10 @@ RawImage DngDecoder::decodeRaw() {
       }
     } else if (compression == 7) {
       try {
-        if (raw->getEntry(SAMPLESPERPIXEL)->getInt()>1)
-          ThrowRDE("DNG Decoder: Multiple Samples per pixel not supported.");
-
         // Let's try loading it as tiles instead
+
         if (!mRaw->isCFA) {
-          mRaw->bpp*=raw->getEntry(SAMPLESPERPIXEL)->getInt();
+          mRaw->setCpp(raw->getEntry(SAMPLESPERPIXEL)->getInt());
         }
         mRaw->createData();
 
@@ -130,12 +128,11 @@ RawImage DngDecoder::decodeRaw() {
           ThrowRDE("DNG Decoder: Tile count mismatch: offsets:%u count:%u, calculated:%u",TEoffsets->count,TEcounts->count, nTiles );
 
         DngDecoderSlices slices(mFile, mRaw);
+        slices.mFixLjpeg = mFixLjpeg;
 
         for (guint y=0; y< tilesY; y++) { // This loop is obvious for threading, as tiles are independent
           for (guint x=0; x< tilesX; x++) {
-            LJpegPlain l(mFile, mRaw);
-            l.mDNGCompatible = mFixLjpeg;
-            DngSliceElement e(offsets[x+y*tilesX], counts[x+y*tilesX], tilew*x, tileh*y);
+            DngSliceElement e(offsets[x+y*tilesX], counts[x+y*tilesX], tilew*x, tileh*y);            
             slices.addSlice(e);
           }
         }
