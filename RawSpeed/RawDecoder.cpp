@@ -33,10 +33,10 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
 
   guint y = offset.y;
   h = MIN(h+offset.y,mRaw->dim.y);
-  if (bitPerPixel==16)  {
+  /*if (bitPerPixel==16)  {
     BitBlt(&data[offset.x*sizeof(gushort)+y*outPitch],outPitch,
       in,inputPitch,w*2,h);
-  }
+  }*/
 
   if (MSBOrder) {
     BitPumpMSB bits(&input);

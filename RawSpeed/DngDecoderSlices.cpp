@@ -7,7 +7,9 @@ void *DecodeThread(void *_this) {
   try {
     parent->decodeSlice(me);
   } catch (...) {
+    pthread_mutex_lock(&parent->errMutex);
     parent->errors.push_back("DNGDEcodeThread: Caught exception.");
+    pthread_mutex_unlock(&parent->errMutex);
   }
   pthread_exit(NULL);
   return NULL;
@@ -42,6 +44,7 @@ void DngDecoderSlices::startDecoding()
   /* Initialize and set thread detached attribute */
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+  pthread_mutex_init(&errMutex, NULL);
 
   for (int i = 0; i< nThreads; i++) {
     DngDecoderThread* t = new DngDecoderThread();
@@ -62,6 +65,8 @@ void DngDecoderSlices::startDecoding()
     pthread_join(threads[i]->threadid, &status);
     delete(threads[i]);
   }
+  pthread_mutex_destroy(&errMutex);
+
 }
 
 void DngDecoderSlices::decodeSlice( DngDecoderThread* t ) {
@@ -73,7 +78,9 @@ void DngDecoderSlices::decodeSlice( DngDecoderThread* t ) {
     try {
       l.startDecoder(e.byteOffset, e.byteCount, e.offX, e.offY);
     } catch (RawDecoderException e) { 
+      pthread_mutex_lock(&errMutex);
       errors.push_back(_strdup(e.what()));
+      pthread_mutex_unlock(&errMutex);
     }
   }
 }

@@ -41,6 +41,7 @@ public:
   FileMap *mFile; 
   RawImage mRaw;
   vector<const char*> errors;
+  pthread_mutex_t errMutex;   // Mutex for above
   gboolean mFixLjpeg;
 };
 
