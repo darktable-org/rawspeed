@@ -34,9 +34,9 @@ void DngDecoderSlices::startDecoding()
 {
   // Create threads
 #ifdef WIN32
-  int nThreads = pthread_num_processors_np();
+  guint nThreads = pthread_num_processors_np();
 #else
-  int nThreads = 2; // FIXME: Port this to unix
+  guint nThreads = 2; // FIXME: Port this to unix
 #endif
   int slicesPerThread = (slices.size() + nThreads - 1) / nThreads;
 //  decodedSlices = 0;
@@ -46,7 +46,7 @@ void DngDecoderSlices::startDecoding()
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
   pthread_mutex_init(&errMutex, NULL);
 
-  for (int i = 0; i< nThreads; i++) {
+  for (guint i = 0; i< nThreads; i++) {
     DngDecoderThread* t = new DngDecoderThread();
     for (int j = 0; j<slicesPerThread ; j++) {
       if (!slices.empty()) {

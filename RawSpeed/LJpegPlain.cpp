@@ -24,7 +24,7 @@ void LJpegPlain::decodeScan() {
   if (slicesW.empty())
     slicesW.push_back(frame.w*frame.cps);
   
-  for (int i = 0; i < frame.cps;  i++) {
+  for (guint i = 0; i < frame.cps;  i++) {
     if (frame.compInfo[i].superH != 1 || frame.compInfo[i].superV != 1)
       ThrowRDE("LJpegDecompressor: Supersampled components not supported.");
   }
@@ -89,7 +89,7 @@ void LJpegPlain::decodeScanLeft2Comps() {
   guint pixInSlice = slicesW[0]/COMPS-1;    // This is divided by comps, since comps pixels are processed at the time
 
   guint cw = (frame.w-skipX);
-  gint x = 1;                            // Skip first pixels on first line.
+  guint x = 1;                            // Skip first pixels on first line.
 
   for (guint y=0;y<(frame.h-skipY);y++) {
     for (; x < cw ; x++) {
@@ -167,7 +167,7 @@ void LJpegPlain::decodeScanLeft3Comps() {
   guint pixInSlice = slicesW[0]/COMPS-1;    // This is divided by comps, since comps pixels are processed at the time
 
   guint cw = (frame.w-skipX);
-  gint x = 1;                            // Skip first pixels on first line.
+  guint x = 1;                            // Skip first pixels on first line.
 
   for (guint y=0;y<(frame.h-skipY);y++) {
     for (; x < cw ; x++) {
@@ -253,7 +253,7 @@ void LJpegPlain::decodeScanLeft4Comps() {
   guint pixInSlice = slicesW[0]/COMPS-1;    // This is divided by comps, since comps pixels are processed at the time
 
   guint cw = (frame.w-skipX);
-  gint x = 1;                            // Skip first pixels on first line.
+  guint x = 1;                            // Skip first pixels on first line.
 
   for (guint y=0;y<(frame.h-skipY);y++) {
     for (; x < cw ; x++) {

@@ -7,7 +7,7 @@ RawDecoder::RawDecoder(FileMap* file) : mFile(file), mRaw(RawImage::create())
 
 RawDecoder::~RawDecoder(void)
 {
-  for (int i = 0 ; i < errors.size(); i++) {
+  for (guint i = 0 ; i < errors.size(); i++) {
     free((void*)errors[i]);
   }
   errors.clear();
@@ -33,10 +33,10 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
 
   guint y = offset.y;
   h = MIN(h+offset.y,mRaw->dim.y);
-  /*if (bitPerPixel==16)  {
+  if (bitPerPixel==16)  {
     BitBlt(&data[offset.x*sizeof(gushort)+y*outPitch],outPitch,
-      in,inputPitch,w*2,h);
-  }*/
+      in,inputPitch,w*sizeof(short),h-y);
+  }
 
   if (MSBOrder) {
     BitPumpMSB bits(&input);

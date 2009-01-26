@@ -144,7 +144,7 @@ void NefDecoder::DecodeUncompressed() {
     bitPerPixel = 16; // D3
 
   offY = 0;
-  for (int i = 0; i< slices.size(); i++) {
+  for (guint i = 0; i< slices.size(); i++) {
     NefSlice slice = slices[i];
     ByteStream in(mFile->getData(slice.offset),slice.count);
     iPoint2D size(width,slice.h);

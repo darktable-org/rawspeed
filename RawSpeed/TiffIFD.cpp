@@ -13,13 +13,13 @@ TiffIFD::TiffIFD() {
 
 TiffIFD::TiffIFD(FileMap* f, guint offset) 
 {
-  int size = f->getSize();
-  int entries;
+  guint size = f->getSize();
+  guint entries;
 
   entries = *(unsigned short*)f->getData(offset);    // Directory entries in this IFD
 
   CHECKSIZE(offset+2+entries*4);
-  for (int i = 0; i < entries; i++) {
+  for (guint i = 0; i < entries; i++) {
     TiffEntry *t = new TiffEntry(f, offset+2+i*12);
 
     if (t->tag == SUBIFDS || t->tag == EXIFIFDPOINTER) {   // subIFD tag
@@ -54,7 +54,7 @@ vector<TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) {
   }
   for (vector<TiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
     vector<TiffIFD*> t = (*i)->getIFDsWithTag(tag);
-    for (int j = 0; j < t.size(); j++) {
+    for (guint j = 0; j < t.size(); j++) {
       matchingIFDs.push_back(t[j]);
     }
   }

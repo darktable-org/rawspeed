@@ -70,7 +70,7 @@ RawImage Cr2Decoder::decodeRaw()
   }
   guint offY = 0;
 
-  for (int i = 0; i < slices.size(); i++ ) {  // This loop is obvious for threading, as slices are independent
+  for (guint i = 0; i < slices.size(); i++ ) {  // This loop is obvious for threading, as slices are independent
     Cr2Slice slice = slices[i];
     try {
       LJpegPlain l(mFile,mRaw);

@@ -19,7 +19,7 @@ TiffEntry::TiffEntry(FileMap* f, guint offset)
   if (bytesize <=4) {
     data = f->getDataWrt(offset+8);
   } else { // offset
-    int data_offset = *(int*)f->getData(offset+8);
+    guint data_offset = *(guint*)f->getData(offset+8);
     CHECKSIZE(data_offset+bytesize);
     data = f->getDataWrt(data_offset);
   }

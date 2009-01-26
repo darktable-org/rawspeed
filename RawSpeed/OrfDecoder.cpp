@@ -85,7 +85,7 @@ void OrfDecoder::decodeCompressed(ByteStream& s,guint w, guint h)
   for (guint y=0; y < h; y++) {
     memset (acarry, 0, sizeof acarry);
     gushort* dest = (gushort*)&data[y*pitch];
-    for (gint x=0; x < w; x++) {
+    for (guint x=0; x < w; x++) {
       bits.fill();
       carry = acarry[x & 1];
       i = 2 * (carry[2] < 3);

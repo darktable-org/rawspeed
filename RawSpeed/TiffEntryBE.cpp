@@ -20,7 +20,7 @@ TiffEntryBE::TiffEntryBE(FileMap* f, guint offset) : mDataSwapped(false)
     data = f->getDataWrt(offset+8);
   } else { // offset
     data = f->getDataWrt(offset+8);
-    int data_offset = (unsigned int)data[0] << 24 | (unsigned int)data[1] << 16 | (unsigned int)data[2] << 8 | (unsigned int)data[3];
+    guint data_offset = (unsigned int)data[0] << 24 | (unsigned int)data[1] << 16 | (unsigned int)data[2] << 8 | (unsigned int)data[3];
     CHECKSIZE(data_offset+bytesize);
     data = f->getDataWrt(data_offset);
   }

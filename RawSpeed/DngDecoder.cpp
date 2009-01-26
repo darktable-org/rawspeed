@@ -118,7 +118,7 @@ RawImage DngDecoder::decodeRaw() {
         guint tileh = raw->getEntry(TILELENGTH)->getInt();
         guint tilesX = (mRaw->dim.x + tilew -1) / tilew;
         guint tilesY = (mRaw->dim.y + tileh -1) / tileh;
-        int nTiles = tilesX*tilesY;
+        guint nTiles = tilesX*tilesY;
 
         TiffEntry *TEoffsets = raw->getEntry(TILEOFFSETS);
         const guint* offsets = TEoffsets->getIntArray();
