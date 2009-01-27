@@ -19,6 +19,8 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
   const guchar *in = input.getData();
   guint w = size.x;
   guint h = size.y;
+  guint cpp = mRaw->getCpp();
+
   if (input.getRemainSize()< (inputPitch*h) ) {
     h = input.getRemainSize() / inputPitch - 1;
   }
@@ -33,15 +35,18 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
 
   guint y = offset.y;
   h = MIN(h+offset.y,mRaw->dim.y);
+
   if (bitPerPixel==16)  {
-    BitBlt(&data[offset.x*sizeof(gushort)+y*outPitch],outPitch,
-      in,inputPitch,w*sizeof(short),h-y);
+    BitBlt(&data[offset.x*sizeof(gushort)*cpp+y*outPitch],outPitch,
+      in,inputPitch,w*mRaw->bpp,h-y);
+    return;
   }
 
   if (MSBOrder) {
     BitPumpMSB bits(&input);
+    w *= cpp;
     for (; y < h; y++) {
-      gushort* dest = (gushort*)&data[offset.x*sizeof(gushort)+y*outPitch];
+      gushort* dest = (gushort*)&data[offset.x*sizeof(gushort)*cpp+y*outPitch];
       for(guint x =0 ; x < w; x++) {
         guint b = bits.getBits(bitPerPixel);
         dest[x] = b;
@@ -50,6 +55,7 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
     }
   } else {
     BitPumpPlain bits(&input);
+    w *= cpp;
     for (; y < h; y++) {
       gushort* dest = (gushort*)&data[offset.x*sizeof(gushort)+y*outPitch];
       for(guint x =0 ; x < w; x++) {

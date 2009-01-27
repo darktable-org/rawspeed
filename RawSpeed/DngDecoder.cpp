@@ -89,19 +89,52 @@ RawImage DngDecoder::decodeRaw() {
     // Now load the image
     if (compression == 1) {  // Uncompressed.
       try {
-        TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
-        TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
-        if (offsets->count != 1) {
-          ThrowRDE("DNG Decoder: Multiple Strips found: %u",offsets->count);
-        }
-        if (counts->count != offsets->count) {
-          ThrowRDE("DNG Decoder: Byte count number does not match strip size: count:%u, strips:%u ",counts->count, offsets->count);
+        if (!mRaw->isCFA)
+          mRaw->setCpp(raw->getEntry(SAMPLESPERPIXEL)->getInt());
+        guint nslices = raw->getEntry(STRIPOFFSETS)->count;
+        TiffEntry *TEoffsets = raw->getEntry(STRIPOFFSETS);
+        TiffEntry *TEcounts = raw->getEntry(STRIPBYTECOUNTS);
+        const guint* offsets = TEoffsets->getIntArray();
+        const guint* counts = TEcounts->getIntArray();
+        guint yPerSlice = raw->getEntry(ROWSPERSTRIP)->getInt();
+        guint width = raw->getEntry(IMAGEWIDTH)->getInt();
+        guint height = raw->getEntry(IMAGELENGTH)->getInt();
+        guint bps = raw->getEntry(BITSPERSAMPLE)->getShort();
+
+        if (TEcounts->count != TEoffsets->count) {
+          ThrowRDE("DNG Decoder: Byte count number does not match strip size: count:%u, strips:%u ",TEcounts->count, TEoffsets->count);
         }
 
-        //this->readUncompressedRaw(offsets->getInt(),offsets->getInt()+counts->getInt(),0);
+        guint offY = 0;
+        vector<DngStrip> slices;
+        for (guint s = 0; s<nslices; s++) {
+          DngStrip slice;
+          slice.offset = offsets[s];
+          slice.count = counts[s];
+          slice.offsetY = offY;
+          if (offY+yPerSlice>height)
+            slice.h = height-offY;
+          else
+            slice.h = yPerSlice;
+
+          offY +=yPerSlice;
+
+          if (mFile->isValid(slice.offset+slice.count)) // Only decode if size is valid
+            slices.push_back(slice);
+        }
+
+        mRaw->createData();
+
+        for (guint i = 0; i< slices.size(); i++) {
+          DngStrip slice = slices[i];
+          ByteStream in(mFile->getData(slice.offset),slice.count);
+          iPoint2D size(width,slice.h);
+          iPoint2D pos(0,slice.offsetY);
+          readUncompressedRaw(in,size,pos,width*mRaw->bpp,bps,false);
+        }
+
       } catch (TiffParserException) {
-          ThrowRDE("DNG Decoder: Unsupported format.");
-        // LOAD TILES??
+          ThrowRDE("DNG Decoder: Unsupported format, uncompressed with no strips.");
       }
     } else if (compression == 7) {
       try {

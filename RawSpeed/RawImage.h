@@ -13,7 +13,7 @@ public:
   void setCpp(guint val);
   guint pitch;
   void createData();
-  guchar* getData() {return data;}
+  guchar* getData();
   gboolean isCFA;
 private:
   guint cpp;      // Components per pixel

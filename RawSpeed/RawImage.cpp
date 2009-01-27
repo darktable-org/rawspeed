@@ -39,6 +39,14 @@ void RawImageData::setCpp( guint val )
   cpp = val;
   bpp *= val;
 }
+
+guchar* RawImageData::getData()
+{
+  if (!data)
+    ThrowRDE("RawImageData::getData - Data not yet allocated.");
+  return data;
+}
+
 RawImage::RawImage( RawImageData* p ) : p_(p)
 {
   pthread_mutex_lock(&p_->mymutex);
