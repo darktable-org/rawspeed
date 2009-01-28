@@ -116,6 +116,10 @@ gint PentaxDecompressor::HuffDecodePentax()
         ((int)(code - dctbl1->mincode[l]))];
     }
   }
+
+  if (rv == 16)
+    return -32768;
+
   /*
   * Section F.2.2.1: decode the difference and
   * Figure F.12: extend sign bit

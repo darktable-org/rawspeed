@@ -34,8 +34,7 @@ void DngDecoderSlices::startDecoding()
 {
   // Create threads
 #ifdef WIN32
-//  guint nThreads = pthread_num_processors_np();
-  guint nThreads = 1;
+  guint nThreads = pthread_num_processors_np();
 #else
   guint nThreads = 2; // FIXME: Port this to unix
 #endif

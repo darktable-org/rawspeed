@@ -27,16 +27,18 @@ void OpenFile(FileReader f) {
 
       wprintf(L"Decoding %s took: %u ms\n", f.Filename(), GetTickCount()-startTime);
       for (guint i = 0; i < d->errors.size(); i++) {
-        printf("Error Encoutered:%s\n", d->errors[i]);
+        printf("Error Encoutered:%s", d->errors[i]);
       }
-/*
+#if 1
       RawImage r = d->mRaw;
 
       GFL_BITMAP* b;
-      if (r->isCFA)
+      if (r->getCpp() == 1)
         b = gflAllockBitmapEx(GFL_GREY,d->mRaw->dim.x, d->mRaw->dim.y,16,16,NULL);
-      else
+      else if (r->getCpp() == 3)
         b = gflAllockBitmapEx(GFL_RGB,d->mRaw->dim.x, d->mRaw->dim.y,16,8,NULL);
+      else
+        ThrowRDE("Unable to save image.");
 
       BitBlt(b->Data,b->BytesPerLine, r->getData(),r->pitch, r->dim.x*r->bpp, r->dim.y );
 
@@ -51,7 +53,8 @@ void OpenFile(FileReader f) {
       savename = savename.substr(0,index).append(".tiff");
 
       gflSaveBitmap((char*)savename.c_str(),b,&s);
-      gflFreeBitmap(b);*/
+      gflFreeBitmap(b);
+#endif
     } catch (RawDecoderException e) {
       wchar_t uni[1024];
       MultiByteToWideChar(CP_ACP, 0, e.what(), -1, uni, 1024);
@@ -159,7 +162,7 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Olympus_E520-5.orf"));
   OpenFile(FileReader(L"..\\testimg\\Olympus_E520.orf"));
   OpenFile(FileReader(L"..\\testimg\\Olympus_SP350.orf"));
-  
+
   OpenFile(FileReader(L"..\\testimg\\dng\\5d-raw.dng"));
   OpenFile(FileReader(L"..\\testimg\\dng\\5d.dng"));
   OpenFile(FileReader(L"..\\testimg\\dng\\CANON-EOS10-linear.dng"));
@@ -297,6 +300,9 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A350.dng"));
   OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A900-2.dng"));
   OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A900.dng"));
+OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed.dng"));
+OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed2.dng"));
+OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed3.dng"));
 
 
   MessageBox(0,L"Finished", L"Finished",0);

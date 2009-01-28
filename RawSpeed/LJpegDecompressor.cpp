@@ -179,7 +179,7 @@ void LJpegDecompressor::parseSOS()
   input->skipBytes(1);                    // Se + Ah Not used in LJPEG
   guint b = input->getByte();
   Pt = b&0xf;          // Point Transform
-  _RPT1(0,"Point transform:%u\n",pred);
+  _RPT1(0,"Point transform:%u\n",Pt);
 
   int cheadersize = 3+frame.cps * 2 + 3;
   _ASSERTE(cheadersize == headerLength);
@@ -196,7 +196,7 @@ void LJpegDecompressor::parseSOS()
 }
 
 void LJpegDecompressor::parseDHT() {
-  guint headerLength = input->getShort() -2;  // Extract myself
+  guint headerLength = input->getShort() -2;  // Subtract myself
 
   while (headerLength)  {
 	  guint b = input->getByte();
@@ -208,8 +208,9 @@ void LJpegDecompressor::parseDHT() {
 	  guint Th = b&0xf;
 	  if (Th>3)
 	    ThrowRDE("LJpegDecompressor::parseDHT: Invalid huffman table destination id.");
-	
-	  int acc = 0;
+    _RPT1(0, "Decoding Table:%u\n",Th);
+
+	  guint acc = 0;
 	  HuffmanTable* t = &huff[Th];
 	
 	  for (guint i = 0; i < 16 ;i++) {
@@ -217,14 +218,14 @@ void LJpegDecompressor::parseDHT() {
 	    acc+=t->bits[i+1];
 	  }
 	  t->bits[0] = 0;
-	
+	  memset(t->huffval,0,sizeof(t->huffval));
 	  if (acc > 256) 
 	    ThrowRDE("LJpegDecompressor::parseDHT: Invalid DHT table.");
 	
 	  if (headerLength < 1+16+acc)
 	    ThrowRDE("LJpegDecompressor::parseDHT: Invalid DHT table length.");
 	
-	  for(int i =0 ; i<acc; i++) {
+	  for(guint i =0 ; i<acc; i++) {
 	    t->huffval[i] = input->getByte();
 	  }
 	  createHuffmanTable(t);
@@ -399,11 +400,12 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl)
       rv = htbl->huffval[htbl->valptr[l] +
         ((int)(code - htbl->mincode[l]))];
     }
-    if (l == 16) {
-      if (mDNGCompatible)
-        bits->skipBits(16);
-      return -32768;
-    }
+  }
+
+  if (rv == 16) {
+    if (mDNGCompatible)
+      bits->skipBits(16);
+    return -32768;
   }
   /*
   * Section F.2.2.1: decode the difference and

@@ -93,11 +93,15 @@ void LJpegPlain::decodeScanLeft2Comps() {
 
   for (guint y=0;y<(frame.h-skipY);y++) {
     for (; x < cw ; x++) {
-      p1 += HuffDecode(dctbl1);
+      gint diff = HuffDecode(dctbl1);
+      p1 += diff;
       *dest++ = (gushort)p1;
-
-      p2 += HuffDecode(dctbl2);
+      _ASSERTE(p1>=0 && p1<65536);
+      
+      diff = HuffDecode(dctbl2);
+      p2 += diff;
       *dest++ = (gushort)p2;
+      _ASSERTE(p2>=0 && p2<65536);
 
       if (0 == --pixInSlice) { // Next slice
         guint o = offset[slice++];

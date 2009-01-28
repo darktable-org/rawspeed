@@ -118,7 +118,7 @@ struct HuffmanTable {
   gushort mincode[17];
   gint maxcode[18];
   gshort valptr[17];
-  gint numbits[256];
+  guint numbits[256];
   gboolean initialized;
 };
 
