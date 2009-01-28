@@ -75,6 +75,7 @@ RawImage Cr2Decoder::decodeRaw()
     try {
       LJpegPlain l(mFile,mRaw);
       l.addSlices(s_width);
+      l.mUseBigtable = true;
       l.startDecoder(slice.offset, slice.count, 0, offY);
     } catch (RawDecoderException* e) { 
       // These may just be single slice error - store the error and move on

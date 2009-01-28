@@ -9,9 +9,11 @@ LJpegDecompressor::LJpegDecompressor(FileMap* file, RawImage img):
   skipX = skipY = 0;
   for (int i = 0; i< 4; i++) {
     huff[i].initialized = false;
+    huff[i].bigTable = 0;
   }
   mDNGCompatible = false;
   slicesW.clear();
+  mUseBigtable = false;
 }
 
 LJpegDecompressor::~LJpegDecompressor(void)
@@ -19,6 +21,11 @@ LJpegDecompressor::~LJpegDecompressor(void)
   if (input)
     delete input;
   input = 0;
+  for (int i = 0; i< 4; i++) {
+    if (huff[i].bigTable)
+      _aligned_free(huff[i].bigTable);
+  }
+
 }
 
 void LJpegDecompressor::getSOF( SOFInfo* sof, guint offset, guint size )
@@ -307,6 +314,7 @@ void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
       p += htbl->bits[l];
       htbl->maxcode[l] = huffcode[p - 1];
     } else {
+      htbl->valptr[l] = 0xff;   // This check must be present to avoid crash on junk
       htbl->maxcode[l] = -1;
     }
   }
@@ -344,8 +352,101 @@ void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
       }
     }
   }
+  if (mUseBigtable)
+    createBigTable(htbl);
   htbl->initialized = true;
 }
+
+/************************************
+ * Bitable creation
+ * 
+ * This is expanding the concept of fast lookups
+ *
+ * A complete table for 14 arbitrary bytes will be
+ * created that enables fast lookup of number of bytes, and
+ * final delta result.
+ * Hit rate is about 90-95%
+ *
+ ************************************/
+
+void LJpegDecompressor::createBigTable( HuffmanTable *htbl ) {
+  const guint bits = 14;
+  const guint size = 1<<bits;
+  gint rv;
+  gint l, temp;
+  htbl->bigTable = (gint*)_aligned_malloc(size*sizeof(gint),16);
+  BitPumpMSB *b = new BitPumpMSB((const guchar*)&BitFeedTable[0],sizeof(BitFeedTable));
+  for (guint i = 0; i <size; i++) {
+
+#if 0    
+    guint iup = i<<2;
+    guint swapped = (iup&0xff)<<8 | (iup>>8);
+    _RPT1(0,"0x%04x,",swapped);
+    if ((i&0xff)==0xff)
+      _RPT0(0,"\n");*/
+#endif
+
+    b->setAbsoluteOffset(i*2);
+    b->fill();
+    guint code=b->peekByteNoFill();
+    guint val = htbl->numbits[code];
+    l = val&15;
+    if (l) {
+      b->skipBits(l);
+      rv=val>>4;
+    }  else {
+      b->skipBits(8);
+      l = 8;
+      while (code > htbl->maxcode[l]) {
+        temp = b->getBitNoFill();
+        code = (code << 1) | temp;
+        l++;
+      }
+
+      /*
+      * With garbage input we may reach the sentinel value l = 17.
+      */
+
+      if (l > frame.prec) {
+        htbl->bigTable[i] = 0xff;
+        goto next;
+      } else {
+        if (htbl->valptr[l] == 0xff) {
+          htbl->bigTable[i] = 0xff;
+          goto next;
+        }
+        rv = htbl->huffval[htbl->valptr[l] +
+          ((int)(code - htbl->mincode[l]))];
+      }
+    }
+  
+
+    if (rv == 16) {
+      if (mDNGCompatible)
+        htbl->bigTable[i] = (-32768<<8) | (16+l);
+      else 
+        htbl->bigTable[i] = (-32768<<8) | l;
+      goto next;
+    }
+
+    if (rv + l > bits) {
+      htbl->bigTable[i] = 0xff;
+      goto next;
+    }
+
+    if (rv) {
+      gint x = b->getBitsNoFill(rv);
+      if ((x & (1 << (rv-1))) == 0)
+        x -= (1 << rv) - 1;
+      htbl->bigTable[i] = (x<<8) | (l+rv);
+    } else {
+      htbl->bigTable[i] = l;
+    }
+next:
+    ;
+  }
+}
+
 
 /*
 *--------------------------------------------------------------
@@ -367,16 +468,26 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl)
 {
   gint rv;
   gint l, temp;
-  gint code;
+  gint code, val;
 
+
+  bits->fill();
+  if (htbl->bigTable) {
+    code = bits->peekBitsNoFill(14);
+    val = htbl->bigTable[code];
+    if ((val&0xff) !=  0xff) {
+      bits->skipBits(val&0xff);
+      return val>>8;
+    }
+  }
   /*
   * If the huffman code is less than 8 bits, we can use the fast
   * table lookup to get its value.  It's more than 8 bits about
   * 3-4% of the time.
   */
-  bits->fill();
+
   code = bits->peekByteNoFill();
-  gint val = htbl->numbits[code];
+  val = htbl->numbits[code];
   l = val&15;
   if (l) {
     bits->skipBits(l);
@@ -394,7 +505,7 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl)
     * With garbage input we may reach the sentinel value l = 17.
     */
 
-    if (l > frame.prec) {
+    if (l > frame.prec || htbl->valptr[l] == 0xff) {
       ThrowRDE("Corrupt JPEG data: bad Huffman code:%u\n",l);
     } else {
       rv = htbl->huffval[htbl->valptr[l] +
@@ -407,6 +518,7 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl)
       bits->skipBits(16);
     return -32768;
   }
+
   /*
   * Section F.2.2.1: decode the difference and
   * Figure F.12: extend sign bit

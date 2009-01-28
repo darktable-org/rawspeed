@@ -32,6 +32,7 @@ void PentaxDecompressor::decodePentax( guint offset, guint size )
   for(guint i =0 ; i<acc; i++) {
     dctbl1->huffval[i] = pentax_tree[i+16];
   }
+  mUseBigtable = true;
   createHuffmanTable(dctbl1);
 
   pentaxBits = new BitPumpMSB(mFile->getData(offset), size);
@@ -81,7 +82,7 @@ gint PentaxDecompressor::HuffDecodePentax()
 {
   gint rv;
   gint l, temp;
-  gint code;
+  gint code,val;
 
   HuffmanTable *dctbl1 = &huff[0];
   /*
@@ -90,8 +91,15 @@ gint PentaxDecompressor::HuffDecodePentax()
   * 3-4% of the time.
   */
   pentaxBits->fill();
+  code = pentaxBits->peekBitsNoFill(14);
+  val = dctbl1->bigTable[code];
+  if ((val&0xff) !=  0xff) {
+    pentaxBits->skipBits(val&0xff);
+    return val>>8;
+  }
+
   code = pentaxBits->peekByteNoFill();
-  gint val = dctbl1->numbits[code];
+  val = dctbl1->numbits[code];
   l = val&15;
   if (l) {
     pentaxBits->skipBits(l);

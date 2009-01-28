@@ -118,6 +118,7 @@ void BitPumpMSB::setAbsoluteOffset(unsigned int offset) {
   if (offset >= size) 
       throw IOException("Offset set out of buffer");
   mLeft = 0;
+  mCurr = 0;
   off = offset;
 }
 

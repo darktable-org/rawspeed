@@ -39,6 +39,7 @@ void NikonDecompressor::DecompressNikon( ByteStream &metadata, guint w, guint h,
   guint split = 0;
   gint pUp1[2];
   gint pUp2[2];
+  mUseBigtable = true;
 
   _RPT2(0, "Nef version v0:%u, v1:%u\n",v0, v1);
 
@@ -124,13 +125,20 @@ gint NikonDecompressor::HuffDecodeNikon()
 {
   gint rv;
   gint l, temp;
-  gint code ;
+  gint code,val ;
 
   HuffmanTable *dctbl1 = &huff[0];
 
   bits->fill();
+  code = bits->peekBitsNoFill(14);
+  val = dctbl1->bigTable[code];
+  if ((val&0xff) !=  0xff) {
+    bits->skipBits(val&0xff);
+    return val>>8;
+  }
+
   code = bits->peekByteNoFill();
-  gint val = dctbl1->numbits[code];
+  val = dctbl1->numbits[code];
   l = val&15;
   if (l) {
     bits->skipBits(l);

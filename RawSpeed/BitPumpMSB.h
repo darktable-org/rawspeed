@@ -25,6 +25,7 @@ public:
   __inline guint getBitNoFill() {return (mCurr >> (--mLeft)) & 1;}
   __inline guint peekByteNoFill() {return ((mCurr >> (mLeft-8))) & 0xff; }
   __inline guint getBitsNoFill(guint nbits) {return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];}
+  __inline guint peekBitsNoFill(guint nbits) {return ((mCurr >> (mLeft-nbits))) &masks[nbits]; }
   void fill();  // Fill the buffer with at least 24 bits
 
 
