@@ -23,6 +23,7 @@
 #include "FileReader.h"
 #include "TiffParser.h"
 #include "RawDecoder.h"
+#define _USE_GFL_
 #ifdef _USE_GFL_
 #include "libgfl.h"
 #pragma comment(lib, "libgfl.lib") 
@@ -49,6 +50,7 @@ void OpenFile(FileReader f) {
       for (guint i = 0; i < d->errors.size(); i++) {
         printf("Error Encoutered:%s", d->errors[i]);
       }
+
       RawImage r = d->mRaw;
 
 #ifdef _USE_GFL_
@@ -102,6 +104,7 @@ int wmain(int argc, _TCHAR* argv[])
     return 1;
   }
 #endif
+
   OpenFile(FileReader(L"..\\testimg\\5d.CR2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1Ds_Mk3-2.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_20D-demosaic.cr2"));
