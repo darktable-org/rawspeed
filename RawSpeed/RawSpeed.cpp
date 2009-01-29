@@ -1,12 +1,32 @@
-// RawSpeed.cpp : Defines the entry point for the console application.
-//
-
 #include "stdafx.h"
+/* 
+    RawSpeed - RAW file decoder.
+
+    Copyright (C) 2009 Klaus Post
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+    http://www.klauspost.com
+*/
 #include "FileReader.h"
 #include "TiffParser.h"
 #include "RawDecoder.h"
+#ifdef _USE_GFL_
 #include "libgfl.h"
-
+#pragma comment(lib, "libgfl.lib") 
+#endif
 
 
 int startTime;
@@ -29,9 +49,9 @@ void OpenFile(FileReader f) {
       for (guint i = 0; i < d->errors.size(); i++) {
         printf("Error Encoutered:%s", d->errors[i]);
       }
-#if 1
       RawImage r = d->mRaw;
 
+#ifdef _USE_GFL_
       GFL_BITMAP* b;
       if (r->getCpp() == 1)
         b = gflAllockBitmapEx(GFL_GREY,d->mRaw->dim.x, d->mRaw->dim.y,16,16,NULL);
@@ -74,13 +94,14 @@ void OpenFile(FileReader f) {
 
 int wmain(int argc, _TCHAR* argv[])
 {
+#ifdef _USE_GFL_
   GFL_ERROR err;
   err = gflLibraryInit();
   if (err) {
     string errSt = string("Could not initialize GFL library. Library returned: ") + string(gflGetErrorString(err));
     return 1;
   }
-
+#endif
   OpenFile(FileReader(L"..\\testimg\\5d.CR2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1Ds_Mk3-2.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_20D-demosaic.cr2"));
@@ -306,7 +327,9 @@ OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed3.dng"));
 
 
   MessageBox(0,L"Finished", L"Finished",0);
+#ifdef _USE_GFL_
   gflLibraryExit();
+#endif
   _CrtDumpMemoryLeaks();
 	return 0;
 }

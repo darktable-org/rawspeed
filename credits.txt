@@ -1,0 +1,13 @@
+RawSpeed - RAW file decoder.
+Copyright (C) 2009 Klaus Post
+
+http://www.klauspost.com
+
+
+Contains code from the following projects:
+
+ * libopenraw by Hubert Figuiere, et al.
+ * http://libopenraw.freedesktop.org
+	
+ * dcraw by David Coffin 
+ * http://www.cybercom.net/~dcoffin/

@@ -1,5 +1,26 @@
 #include "StdAfx.h"
 #include "LJpegDecompressor.h"
+/* 
+    RawSpeed - RAW file decoder.
+
+    Copyright (C) 2009 Klaus Post
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+    http://www.klauspost.com
+*/
 
 
 LJpegDecompressor::LJpegDecompressor(FileMap* file, RawImage img): 
@@ -362,15 +383,15 @@ void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
  * 
  * This is expanding the concept of fast lookups
  *
- * A complete table for 14 arbitrary bytes will be
- * created that enables fast lookup of number of bytes, and
- * final delta result.
- * Hit rate is about 90-95%
+ * A complete table for 14 arbitrary bits will be
+ * created that enables fast lookup of number of bits used, 
+ * and final delta result.
+ * Hit rate is about 90-99% for typical LJPEGS, usually about 98%
  *
  ************************************/
 
 void LJpegDecompressor::createBigTable( HuffmanTable *htbl ) {
-  const guint bits = 14;
+  const guint bits = 14;      // HuffDecode functions must be changed, if this is modified.
   const guint size = 1<<bits;
   gint rv;
   gint l, temp;
@@ -407,14 +428,10 @@ void LJpegDecompressor::createBigTable( HuffmanTable *htbl ) {
       * With garbage input we may reach the sentinel value l = 17.
       */
 
-      if (l > frame.prec) {
+      if (l > frame.prec || htbl->valptr[l] == 0xff) {
         htbl->bigTable[i] = 0xff;
-        goto next;
+        continue;
       } else {
-        if (htbl->valptr[l] == 0xff) {
-          htbl->bigTable[i] = 0xff;
-          goto next;
-        }
         rv = htbl->huffval[htbl->valptr[l] +
           ((int)(code - htbl->mincode[l]))];
       }
@@ -426,12 +443,12 @@ void LJpegDecompressor::createBigTable( HuffmanTable *htbl ) {
         htbl->bigTable[i] = (-32768<<8) | (16+l);
       else 
         htbl->bigTable[i] = (-32768<<8) | l;
-      goto next;
+      continue;
     }
 
     if (rv + l > bits) {
       htbl->bigTable[i] = 0xff;
-      goto next;
+      continue;
     }
 
     if (rv) {
@@ -442,8 +459,6 @@ void LJpegDecompressor::createBigTable( HuffmanTable *htbl ) {
     } else {
       htbl->bigTable[i] = l;
     }
-next:
-    ;
   }
 }
 
@@ -470,6 +485,9 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl)
   gint l, temp;
   gint code, val;
 
+  /**
+   * First attempt to do complete decode, by using the first 14 bits
+   */
 
   bits->fill();
   if (htbl->bigTable) {

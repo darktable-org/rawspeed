@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib $(NoInherit) libgfl.lib User32.lib pthreadVC2.lib"
+				AdditionalDependencies="kernel32.lib $(NoInherit) User32.lib pthreadVC2.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\lib"
 				GenerateDebugInformation="true"
@@ -143,7 +143,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib $(NoInherit) libgfl.lib User32.lib pthreadVC2.lib"
+				AdditionalDependencies="kernel32.lib $(NoInherit) User32.lib pthreadVC2.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\lib"
 				GenerateDebugInformation="true"
