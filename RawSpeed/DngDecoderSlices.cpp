@@ -19,6 +19,11 @@ void *DecodeThread(void *_this) {
 DngDecoderSlices::DngDecoderSlices( FileMap* file, RawImage img ) :
 mFile(file), mRaw(img) {
   mFixLjpeg = false;
+#ifdef WIN32
+  nThreads = pthread_num_processors_np();
+#else
+  nThreads = 2; // FIXME: Port this to unix
+#endif
 }
 
 DngDecoderSlices::~DngDecoderSlices(void)
@@ -33,12 +38,8 @@ void DngDecoderSlices::addSlice( DngSliceElement slice )
 void DngDecoderSlices::startDecoding()
 {
   // Create threads
-#ifdef WIN32
-  guint nThreads = pthread_num_processors_np();
-#else
-  guint nThreads = 2; // FIXME: Port this to unix
-#endif
-  int slicesPerThread = (slices.size() + nThreads - 1) / nThreads;
+
+  int slicesPerThread = ((int)slices.size() + nThreads - 1) / nThreads;
 //  decodedSlices = 0;
   pthread_attr_t attr;
   /* Initialize and set thread detached attribute */
@@ -73,6 +74,7 @@ void DngDecoderSlices::decodeSlice( DngDecoderThread* t ) {
   while (!t->slices.empty()) {
     LJpegPlain l(mFile, mRaw);
     l.mDNGCompatible = mFixLjpeg;
+    l.mUseBigtable = false;
     DngSliceElement e = t->slices.front();
     t->slices.pop();
     try {

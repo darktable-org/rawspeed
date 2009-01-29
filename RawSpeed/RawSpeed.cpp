@@ -23,7 +23,7 @@
 #include "FileReader.h"
 #include "TiffParser.h"
 #include "RawDecoder.h"
-#define _USE_GFL_
+//#define _USE_GFL_
 #ifdef _USE_GFL_
 #include "libgfl.h"
 #pragma comment(lib, "libgfl.lib") 
@@ -45,13 +45,16 @@ void OpenFile(FileReader f) {
     startTime = GetTickCount();
     try {
       d->decodeRaw();
+      RawImage r = d->mRaw;
 
-      wprintf(L"Decoding %s took: %u ms\n", f.Filename(), GetTickCount()-startTime);
+      guint time = GetTickCount()-startTime;
+      float mpps = (float)r->dim.x * (float)r->dim.y * (float)r->getCpp()  / (1000.0f * (float)time);
+      wprintf(L"Decoding %s took: %u ms, %4.2f Mpixel/s\n", f.Filename(), time, mpps);
+
       for (guint i = 0; i < d->errors.size(); i++) {
         printf("Error Encoutered:%s", d->errors[i]);
       }
 
-      RawImage r = d->mRaw;
 
 #ifdef _USE_GFL_
       GFL_BITMAP* b;

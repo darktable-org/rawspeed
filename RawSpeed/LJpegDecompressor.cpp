@@ -396,30 +396,17 @@ void LJpegDecompressor::createBigTable( HuffmanTable *htbl ) {
   gint rv;
   gint l, temp;
   htbl->bigTable = (gint*)_aligned_malloc(size*sizeof(gint),16);
-  BitPumpMSB *b = new BitPumpMSB((const guchar*)&BitFeedTable[0],sizeof(BitFeedTable));
-  for (guint i = 0; i <size; i++) {
-
-#if 0    
-    guint iup = i<<2;
-    guint swapped = (iup&0xff)<<8 | (iup>>8);
-    _RPT1(0,"0x%04x,",swapped);
-    if ((i&0xff)==0xff)
-      _RPT0(0,"\n");*/
-#endif
-
-    b->setAbsoluteOffset(i*2);
-    b->fill();
-    guint code=b->peekByteNoFill();
+  for (guint i = 0; i <size; i++) {   
+    gushort input = ((i<<2)&0xff)<<8 | ((i<<2)>>8); // Calculate input value
+    guint code=input>>10;   // Get 8 bits
     guint val = htbl->numbits[code];
     l = val&15;
     if (l) {
-      b->skipBits(l);
       rv=val>>4;
     }  else {
-      b->skipBits(8);
       l = 8;
       while (code > htbl->maxcode[l]) {
-        temp = b->getBitNoFill();
+        temp = input>>(14-l)&1;
         code = (code << 1) | temp;
         l++;
       }
@@ -452,7 +439,7 @@ void LJpegDecompressor::createBigTable( HuffmanTable *htbl ) {
     }
 
     if (rv) {
-      gint x = b->getBitsNoFill(rv);
+      gint x = input>>(14-l) & ((1<<rv)-1);
       if ((x & (1 << (rv-1))) == 0)
         x -= (1 << rv) - 1;
       htbl->bigTable[i] = (x<<8) | (l+rv);
