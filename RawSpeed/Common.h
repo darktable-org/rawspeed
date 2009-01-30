@@ -43,8 +43,12 @@
 #define _strdup(a) strdup(a)
 #define _aligned_malloc(a, alignment) malloc(a)
 #define _aligned_free(a) do { free(a); } while (0)
+#ifndef MIN
 #define MIN(a, b)  lmin(a,b)
+#endif
+#ifndef MAX
 #define MAX(a, b)  lmin(a,b)
+#endif
 typedef char* LPCWSTR;
 #endif // __unix__
 
