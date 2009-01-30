@@ -397,8 +397,8 @@ void LJpegDecompressor::createBigTable( HuffmanTable *htbl ) {
   gint l, temp;
   htbl->bigTable = (gint*)_aligned_malloc(size*sizeof(gint),16);
   for (guint i = 0; i <size; i++) {   
-    gushort input = ((i<<2)&0xff)<<8 | ((i<<2)>>8); // Calculate input value
-    guint code=input>>10;   // Get 8 bits
+    gushort input = i<<2; // Calculate input value
+    guint code=input>>8;   // Get 8 bits
     guint val = htbl->numbits[code];
     l = val&15;
     if (l) {
@@ -406,7 +406,7 @@ void LJpegDecompressor::createBigTable( HuffmanTable *htbl ) {
     }  else {
       l = 8;
       while (code > htbl->maxcode[l]) {
-        temp = input>>(14-l)&1;
+        temp = input>>(15-l)&1;
         code = (code << 1) | temp;
         l++;
       }
@@ -439,7 +439,7 @@ void LJpegDecompressor::createBigTable( HuffmanTable *htbl ) {
     }
 
     if (rv) {
-      gint x = input>>(14-l) & ((1<<rv)-1);
+      gint x = input>>(16-l-rv) & ((1<<rv)-1);
       if ((x & (1 << (rv-1))) == 0)
         x -= (1 << rv) - 1;
       htbl->bigTable[i] = (x<<8) | (l+rv);
