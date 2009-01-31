@@ -32,7 +32,7 @@
 #include <string.h>
 #include <assert.h>
 #define BYTE unsigned char
-#define _ASSERTE(a)
+#define _ASSERTE(a) g_assert(a)
 #include <stdexcept>
 #define _RPT0(a,b) 
 #define _RPT1(a,b,c) 
