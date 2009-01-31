@@ -94,9 +94,9 @@ void LJpegDecompressor::getSOF( SOFInfo* sof, guint offset, guint size )
 void LJpegDecompressor::startDecoder(guint offset, guint size, guint offsetX, guint offsetY) {
   if (!mFile->isValid(offset+size-1))
     ThrowRDE("LJpegDecompressor::startDecoder: Max offset before out of file, invalid data");
-  if (offsetX>=mRaw->dim.x)
+  if ((gint)offsetX>=mRaw->dim.x)
     ThrowRDE("LJpegDecompressor::startDecoder: X offset outside of image");
-  if (offsetY>=mRaw->dim.y)
+  if ((gint)offsetY>=mRaw->dim.y)
     ThrowRDE("LJpegDecompressor::startDecoder: Y offset outside of image");
   offX = offsetX;
   offY = offsetY;
@@ -410,11 +410,13 @@ void LJpegDecompressor::createBigTable( HuffmanTable *htbl ) {
   const guint bits = 14;      // HuffDecode functions must be changed, if this is modified.
   const guint size = 1<<bits;
   gint rv;
-  gint l, temp;
+  gint temp;
+  guint l;
+
   htbl->bigTable = (gint*)_aligned_malloc(size*sizeof(gint),16);
   for (guint i = 0; i <size; i++) {   
     gushort input = i<<2; // Calculate input value
-    guint code=input>>8;   // Get 8 bits
+    gint code=input>>8;   // Get 8 bits
     guint val = htbl->numbits[code];
     l = val&15;
     if (l) {
@@ -485,9 +487,9 @@ void LJpegDecompressor::createBigTable( HuffmanTable *htbl ) {
 gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl)
 {
   gint rv;
-  gint l, temp;
+  gint temp;
   gint code, val;
-
+  guint l;
   /**
    * First attempt to do complete decode, by using the first 14 bits
    */

@@ -39,7 +39,7 @@ void LJpegPlain::decodeScan() {
   // If image attempts to decode beyond the image bounds, strip it.
   if ( (frame.w * frame.cps + offX * mRaw->getCpp()) > mRaw->dim.x * mRaw->getCpp() )
     skipX = ( ( ( frame.w * frame.cps + offX * mRaw->getCpp() ) ) - mRaw->dim.x * mRaw->getCpp() ) / frame.cps;
-  if (frame.h+offY > mRaw->dim.y)
+  if (frame.h+offY > (guint)mRaw->dim.y)
     skipY = frame.h+offY - mRaw->dim.y;
 
   if (slicesW.empty())
