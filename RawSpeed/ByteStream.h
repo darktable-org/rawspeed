@@ -37,8 +37,8 @@ public:
   gint getInt();
 private:
   const guchar* buffer;
-  guint off;                  // Offset in bytes (this is next byte to deliver)
   const guint size;            // This if the end of buffer.
+  guint off;                  // Offset in bytes (this is next byte to deliver)
 
 };
 

@@ -29,7 +29,7 @@ public:
   virtual ~ColorFilterArray(void);
   void setCFA(CFAColor up_left, CFAColor up_right, CFAColor down_left, CFAColor down_right);
   void setCFA(guint dcrawCode);
-  __inline CFAColor getColorAt(guint x, guint y) {return cfa[x&1+((y&1)<<1)];}
+  __inline CFAColor getColorAt(guint x, guint y) {return cfa[(x&1)+((y&1)<<1)];}
   guint toDcrawColor(CFAColor c);
   guint getDcrawFilter();
   void printOrder();

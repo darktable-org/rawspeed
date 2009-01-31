@@ -39,11 +39,11 @@ public:
   gboolean isCFA;
   ColorFilterArray cfa;
 private:
-  guint cpp;      // Components per pixel
   RawImageData(void);
   RawImageData(iPoint2D dim, guint bpp, guint cpp=1);
-  guchar* data; 
   guint dataRefCount;
+  guchar* data;
+  guint cpp;      // Components per pixel
   friend class RawImage;
   pthread_mutex_t mymutex;
 };

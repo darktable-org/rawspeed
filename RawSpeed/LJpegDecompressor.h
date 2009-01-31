@@ -177,8 +177,8 @@ protected:
   gint HuffDecode(HuffmanTable *htbl);
   ByteStream* input;
   BitPumpJPEG* bits;
-  RawImage mRaw; 
   FileMap *mFile;
+  RawImage mRaw; 
 
   SOFInfo frame;
   vector<int> slicesW;

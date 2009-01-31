@@ -40,7 +40,7 @@ public:
   guint getSize() {return size;}
   gboolean isValid(guint offset) {return offset<=size;}
 private:
- guint size;
  guchar* data;
+ guint size;
  gboolean mOwnAlloc;
 };

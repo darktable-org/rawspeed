@@ -24,7 +24,7 @@
 */
 
 RawImageData::RawImageData(void): 
-dim(0,0), bpp(0), dataRefCount(0),data(0),isCFA(true), cpp(1)
+dim(0,0), bpp(0), isCFA(true), dataRefCount(0),data(0), cpp(1)
 {
   pthread_mutex_init(&mymutex, NULL);
 }

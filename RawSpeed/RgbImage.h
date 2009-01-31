@@ -32,7 +32,7 @@ public:
   virtual ~RgbImage(void);
   const bool owned;
   const int w,h;
-  const int bpp;
   int pitch;
+  const int bpp;
   unsigned char* data;
 };
