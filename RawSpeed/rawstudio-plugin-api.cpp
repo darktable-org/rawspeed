@@ -54,6 +54,7 @@ load_rawspeed(const gchar *filename)
 
 			GTimer *gt = g_timer_new();
 			d->decodeRaw();
+      d->decodeMetaData();
 			printf("%s: %.03f\n", filename, g_timer_elapsed(gt, NULL));
 			g_timer_destroy(gt);
 
@@ -68,7 +69,7 @@ load_rawspeed(const gchar *filename)
 			BitBlt((guchar *) GET_PIXEL(image, 0, 0), image->pitch*2, r->getData(), r->pitch, r->dim.x*r->bpp, r->dim.y);
 
 			/* FIXME: Update RawSpeed to take an educated guess about CFA filters */
-			image->filters = 0xb4b4b4b4;
+			image->filters = r->cfa.getDcrawFilter();
 
 			/* Calculate black and white point */
 			for(row=100;row<image->h-100;row++)

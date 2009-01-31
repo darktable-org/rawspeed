@@ -203,6 +203,30 @@
 				>
 			</File>
 			<File
+				RelativePath=".\rawstudio-plugin-api.cpp"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\rawstudio-plugin.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\RgbImage.cpp"
 				>
 			</File>
@@ -473,6 +497,10 @@
 				</File>
 				<File
 					RelativePath=".\RawDecoderException.h"
+					>
+				</File>
+				<File
+					RelativePath=".\rawstudio-plugin-api.h"
 					>
 				</File>
 			</Filter>
