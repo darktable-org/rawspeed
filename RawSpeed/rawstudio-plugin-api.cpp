@@ -65,19 +65,21 @@ load_rawspeed(const gchar *filename)
 
 			cpp = r->getCpp();
 
-			image = rs_image16_new(r->dim.x, r->dim.y, 1, 1);
-			BitBlt((guchar *) GET_PIXEL(image, 0, 0), image->pitch*2, r->getData(), r->pitch, r->dim.x*r->bpp, r->dim.y);
+			image = rs_image16_new(r->dim.x, r->dim.y, cpp, cpp);
+			BitBlt((guchar *) GET_PIXEL(image, 0, 0), image->pitch*2*cpp, r->getData(), r->pitch, r->dim.x*r->bpp, r->dim.y);
 
-			/* FIXME: Update RawSpeed to take an educated guess about CFA filters */
-			image->filters = r->cfa.getDcrawFilter();
+			if (cpp==1)
+				image->filters = r->cfa.getDcrawFilter();
 
 			/* Calculate black and white point */
 			for(row=100;row<image->h-100;row++)
 			{
-				for(col=100;col<image->w-100;col++)
+				gushort *pixel = GET_PIXEL(image, 100, row);
+				for(col=100;col<image->w*cpp-100;col++)
 				{
-					max = MAX(*GET_PIXEL(image, col, row), max);
-					black = MIN(*GET_PIXEL(image, col, row), black);
+					max = MAX(*pixel, max);
+					black = MIN(*pixel, black);
+					pixel++;
 				}
 			}
 			
@@ -86,11 +88,11 @@ load_rawspeed(const gchar *filename)
 			/* Apply black and whitepoint */
 			for(row=0;row<image->h;row++)
 			{
-				for(col=0;col<image->w;col++)
+				gushort *pixel = GET_PIXEL(image, 0, row);
+				for(col=0;col<image->w*cpp;col++)
 				{
-					gushort *pixel = GET_PIXEL(image, col, row);
-
 					*pixel = (*pixel-black)<<shift;
+					pixel++;
 				}
 			}
 		}
