@@ -206,6 +206,14 @@
 				RelativePath=".\rawstudio-plugin-api.cpp"
 				>
 				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Release|Win32"
 					ExcludedFromBuild="true"
 					>
@@ -217,6 +225,14 @@
 			<File
 				RelativePath=".\rawstudio-plugin.c"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
 					ExcludedFromBuild="true"
@@ -385,6 +401,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FileReader.h"
+				>
+			</File>
+			<File
 				RelativePath=".\RawImage.h"
 				>
 			</File>
@@ -396,42 +416,6 @@
 				RelativePath=".\stdafx.h"
 				>
 			</File>
-			<Filter
-				Name="Tiff"
-				>
-				<File
-					RelativePath=".\TiffEntry.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TiffEntryBE.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TiffIFD.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TiffIFDBE.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TiffParser.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TiffParserException.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TiffParserOlympus.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TiffTag.h"
-					>
-				</File>
-			</Filter>
 			<Filter
 				Name="Tools"
 				>
@@ -464,13 +448,45 @@
 					>
 				</File>
 				<File
-					RelativePath=".\FileReader.h"
-					>
-				</File>
-				<File
 					RelativePath=".\Point.h"
 					>
 				</File>
+				<Filter
+					Name="Tiff"
+					>
+					<File
+						RelativePath=".\TiffEntry.h"
+						>
+					</File>
+					<File
+						RelativePath=".\TiffEntryBE.h"
+						>
+					</File>
+					<File
+						RelativePath=".\TiffIFD.h"
+						>
+					</File>
+					<File
+						RelativePath=".\TiffIFDBE.h"
+						>
+					</File>
+					<File
+						RelativePath=".\TiffParser.h"
+						>
+					</File>
+					<File
+						RelativePath=".\TiffParserException.h"
+						>
+					</File>
+					<File
+						RelativePath=".\TiffParserOlympus.h"
+						>
+					</File>
+					<File
+						RelativePath=".\TiffTag.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="Decompressors"

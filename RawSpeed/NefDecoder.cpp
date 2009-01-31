@@ -214,5 +214,30 @@ void NefDecoder::DecodeD100Uncompressed() {
 void NefDecoder::decodeMetaData()
 {
   mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
+
+  if (data.empty())
+    ThrowRDE("CR2 Decoder: Model name found");
+
+  string model(data[0]->getEntry(MODEL)->getString());
+
+  if (!model.compare("NIKON D100 ") ||
+      !model.compare("NIKON D200") ||
+      !model.compare("NIKON D2H")  ||
+      !model.compare("NIKON D40X") ||
+      !model.compare("NIKON D60") ||
+      !model.compare("NIKON D90") ) 
+  {
+    mRaw->cfa.setCFA(CFA_GREEN2, CFA_BLUE, CFA_RED, CFA_GREEN);   
+  }
+
+  if (!model.compare("NIKON D1 ") ||
+    !model.compare("NIKON D1H") ||
+    !model.compare("NIKON D40")  ||
+    !model.compare("NIKON D50") ||
+    !model.compare("NIKON D70s"))  
+  {
+    mRaw->cfa.setCFA(CFA_BLUE, CFA_GREEN, CFA_GREEN2, CFA_RED);
+  }
 
 }
