@@ -59,7 +59,6 @@ RawImage OrfDecoder::decodeRaw()
   }
   guint width = raw->getEntry(IMAGEWIDTH)->getInt();
   guint height = raw->getEntry(IMAGELENGTH)->getInt();
-  guint bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();
 
 /*  if (!mFile->isValid(offsets->getInt()+counts->getInt())) {
     height = (mFile->getSize()-offsets->getInt()) / (width*bitPerPixel/8) - 1;

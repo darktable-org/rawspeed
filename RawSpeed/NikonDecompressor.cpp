@@ -99,7 +99,6 @@ void NikonDecompressor::DecompressNikon( ByteStream &metadata, guint w, guint h,
 
   guint x, y;
   bits = new BitPumpMSB(mFile->getData(offset), size);
-  guint left_margin = 1;
   guchar *draw = mRaw->getData();
   guint *dest;
   guint pitch = mRaw->pitch;
@@ -144,7 +143,7 @@ void NikonDecompressor::DecompressNikon( ByteStream &metadata, guint w, guint h,
 */
 gint NikonDecompressor::HuffDecodeNikon()
 {
-  gint rv;
+  gint rv = 0; // Shut up gcc
   gint l, temp;
   gint code,val ;
 

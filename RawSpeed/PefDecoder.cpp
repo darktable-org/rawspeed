@@ -58,7 +58,6 @@ RawImage PefDecoder::decodeRaw()
 
   guint width = raw->getEntry(IMAGEWIDTH)->getInt();
   guint height = raw->getEntry(IMAGELENGTH)->getInt();
-  guint bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->bpp = 2;

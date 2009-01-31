@@ -292,7 +292,6 @@ JpegMarker LJpegDecompressor::getNextMarker(bool allowskip) {
 
     return mark;
   }
-  guint skipped = 0;
   input->skipToMarker();
   guchar id = input->getByte();
   _ASSERTE(0xff == id);
