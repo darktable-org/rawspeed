@@ -115,7 +115,9 @@ void Cr2Decoder::decodeMetaData() {
   if (data.empty())
     ThrowRDE("CR2 Decoder: Model name found");
 
-  if (!data[0]->getEntry(MODEL)->getString().compare("Canon PowerShot G10")) {
+  string model = data[0]->getEntry(MODEL)->getString();
+  if (!model.compare("Canon EOS-1Ds Mark II") ||
+    !model.compare("Canon EOS 5D Mark II") ) {
     mRaw->cfa.setCFA(CFA_GREEN2, CFA_BLUE, CFA_RED, CFA_GREEN);
   }
 
