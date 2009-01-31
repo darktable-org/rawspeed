@@ -48,7 +48,7 @@ BitPumpJPEG::BitPumpJPEG( const guchar* _buffer, guint _size ) :
    fill();
  }
 
-void __inline BitPumpJPEG::fill() {
+void BitPumpJPEG::fill() {
     guchar c, c2;
     while (mLeft < MIN_GET_BITS) {
       _ASSERTE(off<size);

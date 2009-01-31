@@ -47,7 +47,7 @@ BitPumpMSB::BitPumpMSB( const guchar* _buffer, guint _size ) :
    fill();
  }
 
-void __inline BitPumpMSB::fill() {
+void BitPumpMSB::fill() {
     guchar c;
     while (mLeft < MIN_GET_BITS) {
       _ASSERTE(off<size);
