@@ -75,7 +75,7 @@ public:
 // variables:
   TiffTag tag;
   TiffDataType type;
-  int count;
+  guint count;
 protected:
   unsigned char* data;
 #ifdef _DEBUG

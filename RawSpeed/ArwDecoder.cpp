@@ -138,8 +138,8 @@ void ArwDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
         guint sh;
         for (sh=0; sh < 4 && 0x80 << sh <= _max-_min; sh++);
         for (guint i=0; i < 16; i++) {
-          if      (i == _imax) pix[i] = _max;
-          else if (i == _imin) pix[i] = _min;
+          if      ((gint)i == _imax) pix[i] = _max;
+          else if ((gint)i == _imin) pix[i] = _min;
           else {
             pix[i] = (bits.getBits(7) << sh) + _min;
             if (pix[i] > 0x7ff) pix[i] = 0x7ff;

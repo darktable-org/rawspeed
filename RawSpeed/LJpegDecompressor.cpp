@@ -408,7 +408,7 @@ void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
 void LJpegDecompressor::createBigTable( HuffmanTable *htbl ) {
   const guint bits = 14;      // HuffDecode functions must be changed, if this is modified.
   const guint size = 1<<bits;
-  gint rv;
+  gint rv = 0;
   gint temp;
   guint l;
 
@@ -507,7 +507,7 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl)
   * table lookup to get its value.  It's more than 8 bits about
   * 3-4% of the time.
   */
-
+  rv = 0;
   code = bits->peekByteNoFill();
   val = htbl->numbits[code];
   l = val&15;

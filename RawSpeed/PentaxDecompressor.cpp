@@ -119,6 +119,7 @@ gint PentaxDecompressor::HuffDecodePentax()
     return val>>8;
   }
 
+  rv = 0;
   code = pentaxBits->peekByteNoFill();
   val = dctbl1->numbits[code];
   l = val&15;

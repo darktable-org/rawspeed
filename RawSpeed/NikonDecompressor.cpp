@@ -143,7 +143,7 @@ void NikonDecompressor::DecompressNikon( ByteStream &metadata, guint w, guint h,
 */
 gint NikonDecompressor::HuffDecodeNikon()
 {
-  gint rv = 0; // Shut up gcc
+  gint rv;
   gint l, temp;
   gint code,val ;
 
@@ -157,6 +157,7 @@ gint NikonDecompressor::HuffDecodeNikon()
     return val>>8;
   }
 
+  rv = 0;
   code = bits->peekByteNoFill();
   val = dctbl1->numbits[code];
   l = val&15;

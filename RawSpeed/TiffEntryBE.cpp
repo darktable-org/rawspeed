@@ -82,7 +82,7 @@ const unsigned int* TiffEntryBE::getIntArray() {
     return (unsigned int*)&data[0];
 
   unsigned int* d = (unsigned int*)&data[0];
-  for (int i = 0; i < count; i++) {
+  for (guint i = 0; i < count; i++) {
     d[i] = (unsigned int)data[i*4+0] << 24 | (unsigned int)data[i*4+1] << 16 | (unsigned int)data[i*4+2] << 8 | (unsigned int)data[i*4+3];
   }
   mDataSwapped = true;
@@ -98,7 +98,7 @@ const unsigned short* TiffEntryBE::getShortArray() {
     return (unsigned short*)&data[0];
 
   unsigned short* d = (unsigned short*)&data[0];
-  for (int i = 0; i < count; i++) {
+  for (guint i = 0; i < count; i++) {
     d[i] = (unsigned short)data[i*2+0] << 8 | (unsigned short)data[i*2+1];
   }
   mDataSwapped = true;

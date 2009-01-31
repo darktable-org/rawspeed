@@ -49,7 +49,7 @@ RawImage Cr2Decoder::decodeRaw()
     TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
     TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
     // Iterate through all slices
-    for (int s = 0; s<offsets->count; s++) {
+    for (guint s = 0; s<offsets->count; s++) {
       Cr2Slice slice;
       slice.offset = offsets[0].getInt();
       slice.count = counts[0].getInt();

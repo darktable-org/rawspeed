@@ -45,7 +45,7 @@ TiffIFD::TiffIFD(FileMap* f, guint offset)
 
     if (t->tag == SUBIFDS || t->tag == EXIFIFDPOINTER) {   // subIFD tag
       const unsigned int* sub_offsets = t->getIntArray();
-      for (int j = 0; j < t->count; j++ ) {
+      for (guint j = 0; j < t->count; j++ ) {
         mSubIFD.push_back(new TiffIFD(f, sub_offsets[j]));
       }
       delete(t);
