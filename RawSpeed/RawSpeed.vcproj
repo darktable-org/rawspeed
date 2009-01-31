@@ -262,18 +262,6 @@
 				Name="Decompressors"
 				>
 				<File
-					RelativePath=".\ARWDecoder.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Cr2Decoder.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\DngDecoder.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\DngDecoderSlices.cpp"
 					>
 				</File>
@@ -286,19 +274,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\NefDecoder.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\NikonDecompressor.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\OrfDecoder.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\PefDecoder.cpp"
 					>
 				</File>
 				<File
@@ -306,15 +282,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\RawDecoder.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\RawDecoderException.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Rw2Decoder.cpp"
 					>
 				</File>
 			</Filter>
@@ -343,6 +311,42 @@
 				</File>
 				<File
 					RelativePath=".\FileReader.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Decoders"
+				>
+				<File
+					RelativePath=".\ARWDecoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Cr2Decoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DngDecoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\NefDecoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\OrfDecoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PefDecoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RawDecoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Rw2Decoder.cpp"
 					>
 				</File>
 			</Filter>
@@ -448,18 +452,6 @@
 				Name="Decompressors"
 				>
 				<File
-					RelativePath=".\ARWDecoder.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Cr2Decoder.h"
-					>
-				</File>
-				<File
-					RelativePath=".\DngDecoder.h"
-					>
-				</File>
-				<File
 					RelativePath=".\DngDecoderSlices.h"
 					>
 				</File>
@@ -472,11 +464,35 @@
 					>
 				</File>
 				<File
-					RelativePath=".\NefDecoder.h"
+					RelativePath=".\NikonDecompressor.h"
 					>
 				</File>
 				<File
-					RelativePath=".\NikonDecompressor.h"
+					RelativePath=".\PentaxDecompressor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RawDecoderException.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Decoders"
+				>
+				<File
+					RelativePath=".\ARWDecoder.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Cr2Decoder.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DngDecoder.h"
+					>
+				</File>
+				<File
+					RelativePath=".\NefDecoder.h"
 					>
 				</File>
 				<File
@@ -488,15 +504,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\PentaxDecompressor.h"
-					>
-				</File>
-				<File
 					RelativePath=".\RawDecoder.h"
-					>
-				</File>
-				<File
-					RelativePath=".\RawDecoderException.h"
 					>
 				</File>
 				<File

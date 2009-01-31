@@ -216,3 +216,9 @@ RawImage DngDecoder::decodeRaw() {
   }
   return mRaw;
 }
+
+void DngDecoder::decodeMetaData()
+{
+  mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
+
+}

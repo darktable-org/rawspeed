@@ -6,11 +6,12 @@ typedef enum {
   CFA_RED = 0,
   CFA_GREEN = 1,
   CFA_BLUE = 2,
-  CFA_CYAN = 3,
-  CFA_MAGENTA = 4,
-  CFA_YELLOW = 5,
-  CFA_WHITE = 6,
-  CFA_COLOR_MAX = 6,
+  CFA_GREEN2 = 3,
+  CFA_CYAN = 4,
+  CFA_MAGENTA = 5,
+  CFA_YELLOW = 6,
+  CFA_WHITE = 7,
+  CFA_COLOR_MAX = 8,
   CFA_UNKNOWN = 255
 } CFAColor;
 
@@ -28,11 +29,12 @@ public:
   ColorFilterArray(CFAColor up_left, CFAColor up_right, CFAColor down_left, CFAColor down_right);
   virtual ~ColorFilterArray(void);
   void setCFA(CFAColor up_left, CFAColor up_right, CFAColor down_left, CFAColor down_right);
-  void setCFA(guint dcrawCode);
+  void setCFA(guchar dcrawCode);
   __inline CFAColor getColorAt(guint x, guint y) {return cfa[(x&1)+((y&1)<<1)];}
   guint toDcrawColor(CFAColor c);
   guint getDcrawFilter();
-  void printOrder();
+  std::string asString();
 private:
+  std::string colorToString(CFAColor c);
   CFAColor cfa[4];
 };

@@ -33,6 +33,7 @@ public:
   DngDecoder(TiffIFD *rootIFD, FileMap* file);
   virtual ~DngDecoder(void);
   virtual RawImage decodeRaw();
+  virtual void decodeMetaData();
 protected:
   TiffIFD *mRootIFD;
   gboolean mFixLjpeg;

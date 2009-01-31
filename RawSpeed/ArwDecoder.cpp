@@ -65,7 +65,6 @@ RawImage ArwDecoder::decodeRaw()
   mRaw->dim = iPoint2D(width, height);
   mRaw->bpp = 2;
   mRaw->createData();
-  mRaw->cfa.setCFA(CFA_GREEN, CFA_BLUE, CFA_RED, CFA_GREEN);
 
   const gushort* c = raw->getEntry(SONY_CURVE)->getShortArray();
   guint sony_curve[] = { 0,0,0,0,0,4095 };
@@ -157,4 +156,10 @@ void ArwDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
     return;
   }
   ThrowRDE("Unsupported bit depth");
+}
+
+void ArwDecoder::decodeMetaData()
+{
+  mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
+
 }

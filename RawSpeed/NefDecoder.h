@@ -34,6 +34,7 @@ public:
   NefDecoder(TiffIFD *rootIFD, FileMap* file);
   virtual ~NefDecoder(void);
   virtual RawImage decodeRaw();
+  virtual void decodeMetaData();
   TiffIFD *mRootIFD;
 private:
   gboolean D100IsCompressed(guint offset);

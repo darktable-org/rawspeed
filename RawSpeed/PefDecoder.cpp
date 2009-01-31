@@ -68,3 +68,9 @@ RawImage PefDecoder::decodeRaw()
 
   return mRaw;
 }
+
+void PefDecoder::decodeMetaData()
+{
+  mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
+
+}

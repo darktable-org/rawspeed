@@ -32,7 +32,8 @@ class OrfDecoder :
 public:
   OrfDecoder(TiffIFD *rootIFD, FileMap* file);
   virtual ~OrfDecoder(void);
-  RawImage decodeRaw();
+  virtual RawImage decodeRaw();
+  virtual void decodeMetaData();
 private:
   void decodeCompressed(ByteStream& s,guint w, guint h);
   TiffIFD *mRootIFD;

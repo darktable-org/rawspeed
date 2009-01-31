@@ -30,7 +30,8 @@ class PefDecoder :
 public:
   PefDecoder(TiffIFD *rootIFD, FileMap* file);
   virtual ~PefDecoder(void);
-  RawImage decodeRaw();
-  TiffIFD *mRootIFD;
+  virtual RawImage decodeRaw();
+  virtual void decodeMetaData();
+ TiffIFD *mRootIFD;
 
 };

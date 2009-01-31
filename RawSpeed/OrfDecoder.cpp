@@ -60,14 +60,12 @@ RawImage OrfDecoder::decodeRaw()
   guint width = raw->getEntry(IMAGEWIDTH)->getInt();
   guint height = raw->getEntry(IMAGELENGTH)->getInt();
 
-/*  if (!mFile->isValid(offsets->getInt()+counts->getInt())) {
-    height = (mFile->getSize()-offsets->getInt()) / (width*bitPerPixel/8) - 1;
-  }*/
+  if (!mFile->isValid(offsets->getInt()+counts->getInt())) 
+    ThrowRDE("ORF Decoder: Truncated file");
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->bpp = 2;
   mRaw->createData();
-  mRaw->cfa.setCFA(CFA_GREEN, CFA_BLUE, CFA_RED, CFA_GREEN);
 
   data = mRootIFD->getIFDsWithTag(MAKERNOTE);
   if (data.empty())
@@ -139,4 +137,10 @@ void OrfDecoder::decodeCompressed(ByteStream& s,guint w, guint h)
        _ASSERTE(0 == dest[x]>>12) ;
     }
   }
+}
+
+void OrfDecoder::decodeMetaData()
+{
+  mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
+
 }
