@@ -106,3 +106,7 @@ void RawDecoder::Decode12BitRaw(ByteStream &input, guint w, guint h) {
     }
   }
 }
+
+void RawDecoder::decodeMetaData() {
+
+}

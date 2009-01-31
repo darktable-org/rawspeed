@@ -79,6 +79,7 @@ RawImage NefDecoder::decodeRaw()
   guint height = raw->getEntry(IMAGELENGTH)->getInt();
   guint bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();
 
+  mRaw->cfa.setCFA(CFA_GREEN, CFA_BLUE, CFA_RED, CFA_GREEN);
   mRaw->dim = iPoint2D(width, height);
   mRaw->bpp = 2;
   mRaw->createData();

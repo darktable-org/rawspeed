@@ -29,6 +29,7 @@
 #pragma comment(lib, "libgfl.lib") 
 #endif
 
+#include "ColorFilterArray.h"
 
 int startTime;
 
@@ -45,6 +46,7 @@ void OpenFile(FileReader f) {
     startTime = GetTickCount();
     try {
       d->decodeRaw();
+      d->decodeMetaData();
       RawImage r = d->mRaw;
 
       guint time = GetTickCount()-startTime;
@@ -54,7 +56,6 @@ void OpenFile(FileReader f) {
       for (guint i = 0; i < d->errors.size(); i++) {
         printf("Error Encoutered:%s", d->errors[i]);
       }
-
 
 #ifdef _USE_GFL_
       GFL_BITMAP* b;
@@ -107,7 +108,9 @@ int wmain(int argc, _TCHAR* argv[])
     return 1;
   }
 #endif
-
+/*
+//  OpenFile(FileReader(L"..\\testimg\\dng\\Panasonic_LX3(300109).dng"));
+  //OpenFile(FileReader(L"..\\testimg\\Panasonic_LX3.rw2"));
   OpenFile(FileReader(L"..\\testimg\\5d.CR2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1Ds_Mk3-2.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_20D-demosaic.cr2"));
@@ -117,8 +120,8 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_40D.cr2"));
 //  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_450D-2.cr2"));
-  OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_G10.cr2"));
-  OpenFile(FileReader(L"..\\testimg\\Canon_PowerShot_G9.cr2"));
+*/  OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_G10.cr2"));
+  OpenFile(FileReader(L"..\\testimg\\Canon_PowerShot_G9.cr2"));/*
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1D_Mk2.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1000D.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1D_Mk3.cr2"));
@@ -330,7 +333,7 @@ int wmain(int argc, _TCHAR* argv[])
 OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed.dng"));
 OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed2.dng"));
 OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed3.dng"));
-
+*/
 
   MessageBox(0,L"Finished", L"Finished",0);
 #ifdef _USE_GFL_

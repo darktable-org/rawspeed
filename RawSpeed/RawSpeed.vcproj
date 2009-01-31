@@ -187,6 +187,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\ColorFilterArray.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\FileIOException.cpp"
 				>
 			</File>
@@ -309,6 +313,10 @@
 					RelativePath=".\RawDecoderException.cpp"
 					>
 				</File>
+				<File
+					RelativePath=".\Rw2Decoder.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Tools"
@@ -344,6 +352,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\ColorFilterArray.h"
+				>
+			</File>
 			<File
 				RelativePath=".\RawImage.h"
 				>
@@ -485,6 +497,10 @@
 				</File>
 				<File
 					RelativePath=".\RawDecoderException.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Rw2Decoder.h"
 					>
 				</File>
 			</Filter>

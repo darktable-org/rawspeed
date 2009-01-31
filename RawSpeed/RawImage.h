@@ -21,6 +21,7 @@
 */
 #pragma once
 #include "pthread.h"
+#include "ColorFilterArray.h"
 
 class RawImage;
 class RawImageData
@@ -36,6 +37,7 @@ public:
   void createData();
   guchar* getData();
   gboolean isCFA;
+  ColorFilterArray cfa;
 private:
   guint cpp;      // Components per pixel
   RawImageData(void);

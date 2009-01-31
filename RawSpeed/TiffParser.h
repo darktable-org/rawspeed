@@ -33,6 +33,7 @@
 #include "PefDecoder.h"
 #include "NefDecoder.h"
 #include "OrfDecoder.h"
+#include "Rw2Decoder.h"
 //#include "libgfl.h"
 
 class TiffParser 

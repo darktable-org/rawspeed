@@ -107,3 +107,16 @@ RawImage Cr2Decoder::decodeRaw()
 
   return mRaw;
 }
+
+void Cr2Decoder::decodeMetaData() {
+  mRaw->cfa.setCFA(CFA_GREEN, CFA_BLUE, CFA_RED, CFA_GREEN);
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
+
+  if (data.empty())
+    ThrowRDE("CR2 Decoder: Model name found");
+
+  if (!data[0]->getEntry(MODEL)->getString().compare("Canon PowerShot G10")) {
+    mRaw->cfa.setCFA(CFA_RED,CFA_GREEN,CFA_GREEN,CFA_BLUE);
+  }
+
+}

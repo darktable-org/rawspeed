@@ -58,7 +58,7 @@ void TiffParser::parseData() {
       throw TiffParserException("Not a TIFF file (magic 42)");
   } else {
     endian = little;
-    if (data[2] != 42 && data[2] != 0x52) // ORF has 0x52 - Brillant!
+    if (data[2] != 42 && data[2] != 0x52 && data[2] != 0x55) // ORF has 0x52, RW2 0x55 - Brillant!
       throw TiffParserException("Not a TIFF file (magic 42)");
   }
 
@@ -119,6 +119,9 @@ RawDecoder* TiffParser::getDecompressor() {
       }
       if (!make.compare("PENTAX Corporation ")) {
         return new PefDecoder(mRootIFD,mInput);
+      }
+      if (!make.compare("Panasonic")) {
+        return new Rw2Decoder(mRootIFD,mInput);
       }
     }
   }

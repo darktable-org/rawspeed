@@ -12,6 +12,7 @@ public:
   RawDecoder(FileMap* file);
   virtual ~RawDecoder(void);
   virtual RawImage decodeRaw() = 0;
+  virtual void decodeMetaData();
   FileMap *mFile; 
   void readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch, int bitPerPixel, gboolean MSBOrder);
   RawImage mRaw; 

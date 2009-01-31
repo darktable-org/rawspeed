@@ -68,6 +68,8 @@ RawImage OrfDecoder::decodeRaw()
   mRaw->dim = iPoint2D(width, height);
   mRaw->bpp = 2;
   mRaw->createData();
+  mRaw->cfa.setCFA(CFA_GREEN, CFA_BLUE, CFA_RED, CFA_GREEN);
+
   data = mRootIFD->getIFDsWithTag(MAKERNOTE);
   if (data.empty())
     ThrowRDE("ORF Decoder: No Makernote found");

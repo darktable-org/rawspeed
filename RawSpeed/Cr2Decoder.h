@@ -33,6 +33,7 @@ public:
   virtual ~Cr2Decoder(void);
 protected:
   TiffIFD *mRootIFD;
+  virtual void decodeMetaData();
 
 };
 

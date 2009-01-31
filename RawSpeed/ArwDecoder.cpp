@@ -65,6 +65,7 @@ RawImage ArwDecoder::decodeRaw()
   mRaw->dim = iPoint2D(width, height);
   mRaw->bpp = 2;
   mRaw->createData();
+  mRaw->cfa.setCFA(CFA_GREEN, CFA_BLUE, CFA_RED, CFA_GREEN);
 
   const gushort* c = raw->getEntry(SONY_CURVE)->getShortArray();
   guint sony_curve[] = { 0,0,0,0,0,4095 };

@@ -28,7 +28,6 @@ TiffIFDBE::TiffIFDBE() {
 
 TiffIFDBE::TiffIFDBE(FileMap* f, guint offset)
 {
-  int size = f->getSize();
   int entries;
 
    const unsigned char* data = f->getData(offset);
