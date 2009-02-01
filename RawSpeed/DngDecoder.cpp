@@ -81,7 +81,7 @@ RawImage DngDecoder::decodeRaw() {
   try {
     mRaw->dim.x = raw->getEntry(IMAGEWIDTH)->getInt();
     mRaw->dim.y = raw->getEntry(IMAGELENGTH)->getInt();
-    mRaw->bpp = raw->getEntry(BITSPERSAMPLE)->getShort()/8;    
+    mRaw->bpp = 2;    
   } catch (TiffParserException) {
     ThrowRDE("DNG Decoder: Could not read basic image information.");
   }
@@ -89,23 +89,42 @@ RawImage DngDecoder::decodeRaw() {
   try {
 
     int compression = raw->getEntry(COMPRESSION)->getShort();
-/*    if (mRaw->isCFA) {
+    if (mRaw->isCFA) {
+      if (raw->getEntry(CFALAYOUT)->getShort() != 1)
+        ThrowRDE("DNG Decoder: Unsupported CFA Layout.");
+
       const unsigned short* pDim = raw->getEntry(CFAREPEATPATTERNDIM)->getShortArray(); // Get the size
       const unsigned char* cPat = raw->getEntry(CFAPATTERN)->getData();                 // Does NOT contain dimensions as some documents state
-      const unsigned char* cPlaneOrder = raw->getEntry(CFAPLANECOLOR)->getData();       // Map from the order in the image, to the position in the CFA
+//      const unsigned char* cPlaneOrder = raw->getEntry(CFAPLANECOLOR)->getData();       // Map from the order in the image, to the position in the CFA
 
-      int patternSize = pDim[0]*pDim[1];
-      if (patternSize != raw->getEntry(CFAPATTERN)->count)
-        ThrowRDE("DNG Decoder: CFA pattern dimension and pattern count does not match: %d.");
       iPoint2D cfaSize(pDim[1],pDim[0]);
-      mRaw->cfa = ColorFilterArray(cfaSize);
+      if (pDim[0] != 2)
+        ThrowRDE("DNG Decoder: Unsupported CFA configuration.");
+      if (pDim[1] != 2)
+        ThrowRDE("DNG Decoder: Unsupported CFA configuration.");
+      
+      if (cfaSize.area() != raw->getEntry(CFAPATTERN)->count)
+        ThrowRDE("DNG Decoder: CFA pattern dimension and pattern count does not match: %d.");
+
       for (int y = 0; y < cfaSize.y; y++) {
         for (int x = 0; x < cfaSize.x; x++) {
-          mRaw->cfa.setColorAt(iPoint2D(x,y),(CFAColor)cPat[x+y*cfaSize.x]);
+          guint c1 = cPat[x+y*cfaSize.x];
+          CFAColor c2;
+          switch (c1) {
+            case 0:
+              c2 = CFA_RED; break;
+            case 1:
+              c2 = CFA_GREEN; break;
+            case 2:
+              c2 = CFA_BLUE; break;
+            default:
+              c2 = CFA_UNKNOWN;
+          }
+          mRaw->cfa.setColorAt(iPoint2D(x,y),c2);
         }
       }
     }
-*/
+
     
     // Now load the image
     if (compression == 1) {  // Uncompressed.
@@ -151,7 +170,7 @@ RawImage DngDecoder::decodeRaw() {
           ByteStream in(mFile->getData(slice.offset),slice.count);
           iPoint2D size(width,slice.h);
           iPoint2D pos(0,slice.offsetY);
-          readUncompressedRaw(in,size,pos,width*mRaw->bpp,bps,false);
+          readUncompressedRaw(in,size,pos,width*bps/8,bps,true);
         }
 
       } catch (TiffParserException) {
@@ -222,3 +241,4 @@ void DngDecoder::decodeMetaData()
   mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
 
 }
+

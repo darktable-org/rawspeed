@@ -26,9 +26,9 @@
 class iPoint2D {
 public:
 	iPoint2D() {x = y = 0;  }
-	iPoint2D( int a, int b) {
-		x=a; y=b;}
-	~iPoint2D() {};
+	iPoint2D( int a, int b) {x=a; y=b;}
+	~iPoint2D();
+  guint area() {return abs(x*y);}
   int x,y;
 };
 

@@ -29,6 +29,7 @@ public:
   ColorFilterArray(CFAColor up_left, CFAColor up_right, CFAColor down_left, CFAColor down_right);
   virtual ~ColorFilterArray(void);
   void setCFA(CFAColor up_left, CFAColor up_right, CFAColor down_left, CFAColor down_right);
+  void setColorAt(iPoint2D pos, CFAColor c);
   void setCFA(guchar dcrawCode);
   __inline CFAColor getColorAt(guint x, guint y) {return cfa[(x&1)+((y&1)<<1)];}
   guint toDcrawColor(CFAColor c);

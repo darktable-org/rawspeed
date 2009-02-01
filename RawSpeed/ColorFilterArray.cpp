@@ -79,3 +79,11 @@ std::string ColorFilterArray::colorToString( CFAColor c ) {
     return string("UNKNOWN");
   }
 }
+
+void ColorFilterArray::setColorAt( iPoint2D pos, CFAColor c ) {
+  if (pos.x > 1 || pos.x < 0)
+    ThrowRDE("ColorFilterArray::SetColor: position out of CFA pattern");
+  if (pos.y > 1 || pos.y < 0)
+    ThrowRDE("ColorFilterArray::SetColor: position out of CFA pattern");
+  cfa[pos.x+pos.y*2] = c;
+}

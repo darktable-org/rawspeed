@@ -161,5 +161,13 @@ void ArwDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
 void ArwDecoder::decodeMetaData()
 {
   mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
+  if (data.empty())
+    ThrowRDE("CR2 Decoder: Model name found");
+
+  string model = data[0]->getEntry(MODEL)->getString();
+  if (!model.compare("DSLR-A700"))
+    mRaw->cfa.setCFA(CFA_GREEN2, CFA_BLUE, CFA_RED, CFA_GREEN);
+  
 }
