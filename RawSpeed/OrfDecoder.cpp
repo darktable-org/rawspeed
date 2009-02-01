@@ -122,11 +122,11 @@ void OrfDecoder::decodeCompressed(ByteStream& s,guint w, guint h)
       carry[2] = carry[0] > 16 ? 0 : carry[2]+1;
       if (y < 2 && x < 2) pred = 0;
       else if (y < 2) pred = dest[x-2];
-      else if (x < 2) pred = dest[-pitch+x];  // Pitch is in bytes, and dest is in short, so we skip two lines
+      else if (x < 2) pred = dest[-pitch+((gint)x)];  // Pitch is in bytes, and dest is in short, so we skip two lines
       else {
         wo  = dest[x-2];
-        n  = dest[-pitch+x];
-        nw = dest[-pitch+x-2];
+        n  = dest[-pitch+((gint)x)];
+        nw = dest[-pitch+((gint)x)-2];
         if ((wo < nw && nw < n) || (n < nw && nw < wo)) {
           if (abs(wo-nw) > 32 || abs(n-nw) > 32)
             pred = wo + n - nw;
