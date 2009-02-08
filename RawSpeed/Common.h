@@ -32,7 +32,7 @@
 #include <string.h>
 #include <assert.h>
 #define BYTE unsigned char
-#define _ASSERTE(a) g_assert(a)
+#define _ASSERTE(a) void(a)
 #include <stdexcept>
 #define _RPT0(a,b) 
 #define _RPT1(a,b,c) 
@@ -108,5 +108,5 @@ typedef signed int            gssize;
 typedef gint64            goffset;
 #endif // __unix__
 
-inline guint clampbits(gint x, guint n) { guint32 _y_temp; if( _y_temp=x>>n ) x = ~_y_temp >> (32-n); return x;}
+inline guint clampbits(gint x, guint n) { guint32 _y_temp; if( (_y_temp=x>>n) ) x = ~_y_temp >> (32-n); return x;}
 
