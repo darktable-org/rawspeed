@@ -233,12 +233,32 @@ RawImage DngDecoder::decodeRaw() {
   } catch (TiffParserException) {
     ThrowRDE("DNG Decoder: Image could not be read.");
   }
+
+  // Linearization
+
+  if (raw->hasEntry(LINEARIZATIONTABLE)) {
+    const gushort* intable = raw->getEntry(LINEARIZATIONTABLE)->getShortArray();
+    guint len =  raw->getEntry(LINEARIZATIONTABLE)->count;
+    gushort table[65536];
+    for (guint i = 0; i < 65536 ; i++ ) {
+      if (i<len)
+        table[i] = intable[i];
+      else
+        table[i] = intable[len-1];
+    }
+    for (guint y = 0; y < mRaw->dim.y; y++) {
+      guint cw = mRaw->dim.x*mRaw->getCpp();
+      gushort* pixels = (gushort*)mRaw->getData(0,y);
+      for (guint x = 0; x < cw; x++) {
+        *pixels++  = table[*pixels];
+      }
+    }
+  }
   return mRaw;
 }
 
 void DngDecoder::decodeMetaData()
 {
-  mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
 
 }
 

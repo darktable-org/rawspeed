@@ -36,6 +36,7 @@ public:
   guint pitch;
   void createData();
   guchar* getData();
+  guchar* getData(guint x, guint y);    // Not super fast, but safe. Don't use per pixel.
   gboolean isCFA;
   ColorFilterArray cfa;
 private:

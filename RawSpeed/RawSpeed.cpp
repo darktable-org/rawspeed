@@ -23,7 +23,7 @@
 #include "FileReader.h"
 #include "TiffParser.h"
 #include "RawDecoder.h"
-//#define _USE_GFL_
+#define _USE_GFL_
 #ifdef _USE_GFL_
 #include "libgfl.h"
 #pragma comment(lib, "libgfl.lib") 
@@ -55,6 +55,10 @@ void OpenFile(FileReader f) {
 
       for (guint i = 0; i < d->errors.size(); i++) {
         printf("Error Encoutered:%s", d->errors[i]);
+      }
+      if (r->isCFA) {
+        printf("DCRAW filter:%x\n",r->cfa.getDcrawFilter());
+        printf(r->cfa.asString().c_str());
       }
 
 #ifdef _USE_GFL_
@@ -108,9 +112,10 @@ int wmain(int argc, _TCHAR* argv[])
     return 1;
   }
 #endif
-
+/*
 //  OpenFile(FileReader(L"..\\testimg\\dng\\Panasonic_LX3(300109).dng"));
   //OpenFile(FileReader(L"..\\testimg\\Panasonic_LX3.rw2"));
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1Ds_Mk2.cr2"));
   OpenFile(FileReader(L"..\\testimg\\5d.CR2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1Ds_Mk3-2.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_20D-demosaic.cr2"));
@@ -125,11 +130,13 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1D_Mk2.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1000D.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1D_Mk3.cr2"));
-  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1Ds_Mk2.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1Ds_Mk3.cr2"));
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_400D.cr2"));
   
     
+  
+  OpenFile(FileReader(L"..\\testimg\\Pentax_K10D-2.dng"));
+  OpenFile(FileReader(L"..\\testimg\\Pentax_K10D.pef"));
   OpenFile(FileReader(L"..\\testimg\\Pentax_K100D.pef"));
   OpenFile(FileReader(L"..\\testimg\\Pentax_K10D.pef"));
   OpenFile(FileReader(L"..\\testimg\\Pentax_K20D.pef"));
@@ -144,6 +151,8 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A900-2.arw"));
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A900.arw"));
 
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D1.nef"));
+  OpenFile(FileReader(L"..\\testimg\\Nikon_D100-backhigh.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D200_compressed-1.nef"));
   OpenFile(FileReader(L"..\\testimg\\NikonCoolPix8800.nef"));
   OpenFile(FileReader(L"..\\testimg\\Nikon_D1H.nef"));
@@ -192,7 +201,7 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Olympus_E520-5.orf"));
   OpenFile(FileReader(L"..\\testimg\\Olympus_E520.orf"));
   OpenFile(FileReader(L"..\\testimg\\Olympus_SP350.orf"));
-
+*/
   OpenFile(FileReader(L"..\\testimg\\dng\\5d-raw.dng"));
   OpenFile(FileReader(L"..\\testimg\\dng\\5d.dng"));
   OpenFile(FileReader(L"..\\testimg\\dng\\CANON-EOS10-linear.dng"));
