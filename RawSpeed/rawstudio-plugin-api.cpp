@@ -91,7 +91,7 @@ load_rawspeed(const gchar *filename)
 				gushort *pixel = GET_PIXEL(image, 0, row);
 				for(col=0;col<image->w*cpp;col++)
 				{
-					*pixel = (*pixel-black)<<shift;
+					*pixel =  clampbits(((gint)*pixel-black)<<shift,16);
 					pixel++;
 				}
 			}

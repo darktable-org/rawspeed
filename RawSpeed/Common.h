@@ -71,7 +71,6 @@ inline int lmin(int p0, int p1) {
 inline int lmax(int p0, int p1) {
   return p0 - ((p0 - p1) & ((p0 - p1) >> 31));
 }
-#define CLAMPBITS(x,n) { guint32 _y_temp; if( _y_temp=x>>n ) x = ~_y_temp >> (32-n);}
 
 
 
@@ -108,4 +107,6 @@ typedef unsigned int            gsize;
 typedef signed int            gssize;
 typedef gint64            goffset;
 #endif // __unix__
+
+inline guint clampbits(gint x, guint n) { guint32 _y_temp; if( _y_temp=x>>n ) x = ~_y_temp >> (32-n); return x;}
 
