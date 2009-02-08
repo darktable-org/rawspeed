@@ -41,6 +41,7 @@ RawImageData::~RawImageData(void)
   if (data)
 	  _aligned_free(data);
   data = 0;
+  mOffset = iPoint2D(0,0);
   pthread_mutex_destroy(&mymutex);
 }
 
@@ -75,9 +76,9 @@ guchar* RawImageData::getData( guint x, guint y )
 
   if (!data)
     ThrowRDE("RawImageData::getData - Data not yet allocated.");
-  if (x>=dim.x)
+  if ((int)x>=dim.x)
     ThrowRDE("RawImageData::getData - X Position outside image requested.");
-  if (y>=dim.y)
+  if ((int)y>=dim.y)
     ThrowRDE("RawImageData::getData - Y Position outside image requested.");
 
   return &data[y*pitch+x*bpp];
@@ -85,7 +86,7 @@ guchar* RawImageData::getData( guint x, guint y )
 
 void RawImageData::subFrame( iPoint2D offset, iPoint2D new_size )
 {
-  if (!new_size.isThisInside(dim+offset+mOffset))
+  if (!new_size.isThisInside(dim-offset))
     ThrowRDE("RawImageData::subFrame - Attempted to create new subframe larger than original size.");
 
   mOffset += offset;

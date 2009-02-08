@@ -30,15 +30,15 @@ class iPoint2D {
 public:
 	iPoint2D() {x = y = 0;  }
 	iPoint2D( int a, int b) {x=a; y=b;}
-  iPoint2D( iPoint2D& pt) {x=pt.x; y=pt.y;}
-  iPoint2D operator+= (const iPoint2D other) { x += other.x; y += other.y; return *this;}
-  iPoint2D operator-= (const iPoint2D other) { x -= other.x; y -= other.y; return *this;}
-  iPoint2D operator- (const iPoint2D b) { return iPoint2D(x-b.x,y-b.y); }
-  iPoint2D operator+ (const iPoint2D b) { return iPoint2D(x+b.x,y+b.y); }
-  iPoint2D iPoint2D::operator=(iPoint2D b) { x = b.x; y = b.y; return *this;}
+  iPoint2D( const iPoint2D& pt) {x=pt.x; y=pt.y;}
+  iPoint2D operator += (const iPoint2D& other) { x += other.x; y += other.y; return *this;}
+  iPoint2D operator -= (const iPoint2D& other) { x -= other.x; y -= other.y; return *this;}
+  iPoint2D operator - (const iPoint2D& b) { return iPoint2D(x-b.x,y-b.y); }
+  iPoint2D operator + (const iPoint2D& b) { return iPoint2D(x+b.x,y+b.y); }
+  iPoint2D operator = (const iPoint2D& b) { x = b.x; y = b.y; return *this;}
 	~iPoint2D() {};
   guint area() {return abs(x*y);}
-  gboolean isThisInside(iPoint2D &otherPoint) {return (x<otherPoint.x && y<otherPoint.y); };
+  gboolean isThisInside(const iPoint2D &otherPoint) {return (x<=otherPoint.x && y<=otherPoint.y); };
   int x,y;
 };
 
