@@ -64,9 +64,28 @@ load_rawspeed(const gchar *filename)
 			RawImage r = d->mRaw;
 
 			cpp = r->getCpp();
-
-			image = rs_image16_new(r->dim.x, r->dim.y, cpp, cpp);
-			BitBlt((guchar *) GET_PIXEL(image, 0, 0), image->pitch*2*cpp, r->getData(), r->pitch, r->dim.x*r->bpp, r->dim.y);
+      if (cpp == 1) {
+			  image = rs_image16_new(r->dim.x, r->dim.y, cpp, cpp);
+			  BitBlt((guchar *) GET_PIXEL(image, 0, 0), image->pitch*2*cpp, r->getData(), r->pitch, r->dim.x*r->bpp, r->dim.y);
+      } else if (cpp == 3) {
+        image = rs_image16_new(r->dim.x, r->dim.y, 3, 4);
+        for(row=0;row<image->h;row++)
+        {
+          gushort *inpixel = (gushort*)&r->getData()[row*r->pitch];
+          gushort *outpixel = GET_PIXEL(image, 0, row);
+          for(col=0;col<image->w;col++)
+          {
+            *outpixel++ =  *inpixel++;
+            *outpixel++ =  *inpixel++;
+            *outpixel++ =  *inpixel++;
+             outpixel++;
+          }
+        }
+        
+      } else {
+        printf("Unsupported component per pixel count");
+        return NULL;
+      }
 
 			if (cpp==1)
 				image->filters = r->cfa.getDcrawFilter();

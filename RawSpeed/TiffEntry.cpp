@@ -23,7 +23,6 @@
     http://www.klauspost.com
 */
 
-//TODO: Harden type checks, to be able to error out if type is wrong
 
 TiffEntry::TiffEntry() {
 }
