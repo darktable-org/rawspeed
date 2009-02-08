@@ -54,7 +54,7 @@ load_rawspeed(const gchar *filename)
 
 			GTimer *gt = g_timer_new();
 			d->decodeRaw();
-      d->decodeMetaData();
+			d->decodeMetaData();
 			printf("%s: %.03f\n", filename, g_timer_elapsed(gt, NULL));
 			g_timer_destroy(gt);
 
@@ -64,37 +64,23 @@ load_rawspeed(const gchar *filename)
 			RawImage r = d->mRaw;
 
 			cpp = r->getCpp();
-      if (cpp == 1) {
-			  image = rs_image16_new(r->dim.x, r->dim.y, cpp, cpp);
-			  BitBlt((guchar *) GET_PIXEL(image, 0, 0), image->pitch*2*cpp, r->getData(), r->pitch, r->dim.x*r->bpp, r->dim.y);
-      } else if (cpp == 3) {
-        image = rs_image16_new(r->dim.x, r->dim.y, 3, 4);
-        for(row=0;row<image->h;row++)
-        {
-          gushort *inpixel = (gushort*)&r->getData()[row*r->pitch];
-          gushort *outpixel = GET_PIXEL(image, 0, row);
-          for(col=0;col<image->w;col++)
-          {
-            *outpixel++ =  *inpixel++;
-            *outpixel++ =  *inpixel++;
-            *outpixel++ =  *inpixel++;
-             outpixel++;
-          }
-        }
-        
-      } else {
-        printf("Unsupported component per pixel count");
-        return NULL;
-      }
+			if (cpp == 1) 
+				image = rs_image16_new(r->dim.x, r->dim.y, cpp, cpp);
+			else if (cpp == 3) 
+				image = rs_image16_new(r->dim.x, r->dim.y, 3, 4);
+			else {
+				printf("Unsupported component per pixel count");
+				return NULL;
+			}
 
-			if (cpp==1)
+			if (r->isCFA)
 				image->filters = r->cfa.getDcrawFilter();
 
 			/* Calculate black and white point */
 			for(row=100;row<image->h-100;row++)
 			{
-				gushort *pixel = GET_PIXEL(image, 100, row);
-				for(col=100;col<image->w*cpp-100;col++)
+				gushort *pixel = (gushort*)&r->getData()[row*r->pitch+100*r->bpp];
+				for(col=100*cpp;col<(image->w-200)*cpp;col++)
 				{
 					max = MAX(*pixel, max);
 					black = MIN(*pixel, black);
@@ -105,13 +91,30 @@ load_rawspeed(const gchar *filename)
 			shift = (gint) (16.0-log((gdouble) max)/log(2.0));
 
 			/* Apply black and whitepoint */
-			for(row=0;row<image->h;row++)
+			if ( cpp == 1 ) 
 			{
-				gushort *pixel = GET_PIXEL(image, 0, row);
-				for(col=0;col<image->w*cpp;col++)
+				for(row=0;row<image->h;row++)
 				{
-					*pixel =  clampbits(((gint)*pixel-black)<<shift,16);
-					pixel++;
+					gushort *inpixel = (gushort*)&r->getData()[row*r->pitch];
+					gushort *outpixel = GET_PIXEL(image, 0, row);
+					for(col=0;col<image->w;col++)
+					{
+						*outpixel++ =  clampbits(((gint)(*inpixel++)-black)<<shift,16);
+					}
+				}
+			} else if (cpp == 3) 
+			{
+				for(row=0;row<image->h;row++)
+				{
+					gushort *inpixel = (gushort*)&r->getData()[row*r->pitch];
+					gushort *outpixel = GET_PIXEL(image, 0, row);
+					for(col=0;col<image->w;col++)
+					{
+						*outpixel++ =  clampbits(((gint)(*inpixel++)-black)<<shift,16);
+						*outpixel++ =  clampbits(((gint)(*inpixel++)-black)<<shift,16);
+						*outpixel++ =  clampbits(((gint)(*inpixel++)-black)<<shift,16);
+						outpixel++;
+					}
 				}
 			}
 		}
