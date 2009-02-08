@@ -42,7 +42,7 @@ public:
 	guchar getByte();
 	guchar getByteSafe();
 	void setAbsoluteOffset(guint offset);     // Set offset in bytes
-  guint getOffset() { return off-(mLeft>>3);}
+  guint getOffset() { return off-(mLeft>>3)+stuffed;}
   __inline guint getBitNoFill() {return (mCurr >> (--mLeft)) & 1;}
   __inline guint peekByteNoFill() {return ((mCurr >> (mLeft-8))) & 0xff; }
   __inline guint peekBitsNoFill(guint nbits) {return ((mCurr >> (mLeft-nbits))) &masks[nbits]; }
@@ -59,6 +59,7 @@ protected:
   guint mLeft;
   guint mCurr;
   guint off;                  // Offset in bytes
+  guint stuffed;              // How many bytes has been stuffed?
 private:
 };
 

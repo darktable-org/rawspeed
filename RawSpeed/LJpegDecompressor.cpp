@@ -106,7 +106,7 @@ void LJpegDecompressor::startDecoder(guint offset, guint size, guint offsetX, gu
 
     if (getNextMarker(false) != M_SOI)
       ThrowRDE("LJpegDecompressor::startDecoder: Image did not start with SOI. Probably not an LJPEG");
-    _RPT0(0,"Found SOI marker\n");
+//    _RPT0(0,"Found SOI marker\n");
 
     gboolean moreImage = true;
     while (moreImage) {
@@ -114,16 +114,16 @@ void LJpegDecompressor::startDecoder(guint offset, guint size, guint offsetX, gu
 
         switch (m) {
         case M_SOS:
-          _RPT0(0,"Found SOS marker\n");
+//          _RPT0(0,"Found SOS marker\n");
           parseSOS();
             break;
         case M_EOI:
-          _RPT0(0,"Found EOI marker\n");
+//          _RPT0(0,"Found EOI marker\n");
           moreImage = false;
           break;
 
         case M_DHT:
-          _RPT0(0,"Found DHT marker\n");
+//          _RPT0(0,"Found DHT marker\n");
             parseDHT();
             break;
 
@@ -132,15 +132,15 @@ void LJpegDecompressor::startDecoder(guint offset, guint size, guint offsetX, gu
             break;
 
         case M_DRI:
-          _RPT0(0,"Found DRI marker\n");
+//          _RPT0(0,"Found DRI marker\n");
             break;
 
         case M_APP0:
-          _RPT0(0,"Found APP0 marker\n");
+//          _RPT0(0,"Found APP0 marker\n");
             break;
 
         case M_SOF3:
-          _RPT0(0,"Found SOF 3 marker:\n");
+//          _RPT0(0,"Found SOF 3 marker:\n");
           parseSOF(&frame);
           break;
 
@@ -212,18 +212,18 @@ void LJpegDecompressor::parseSOS()
       ThrowRDE("LJpegDecompressor::parseSOS: Invalid Huffman table selection, not defined.");
 
     frame.compInfo[count].dcTblNo = td;
-    _RPT2(0,"Component Selector:%u, Table Dest:%u\n",cs, td);
+//    _RPT2(0,"Component Selector:%u, Table Dest:%u\n",cs, td);
   }
 
   pred = input->getByte();
-  _RPT1(0,"Predictor:%u, ",pred);
+//  _RPT1(0,"Predictor:%u, ",pred);
   if (pred>7)
     ThrowRDE("LJpegDecompressor::parseSOS: Invalid predictor mode.");
 
   input->skipBytes(1);                    // Se + Ah Not used in LJPEG
   guint b = input->getByte();
   Pt = b&0xf;          // Point Transform
-  _RPT1(0,"Point transform:%u\n",Pt);
+//  _RPT1(0,"Point transform:%u\n",Pt);
 
   guint cheadersize = 3+frame.cps * 2 + 3;
   _ASSERTE(cheadersize == headerLength);
@@ -252,7 +252,7 @@ void LJpegDecompressor::parseDHT() {
 	  guint Th = b&0xf;
 	  if (Th>3)
 	    ThrowRDE("LJpegDecompressor::parseDHT: Invalid huffman table destination id.");
-    _RPT1(0, "Decoding Table:%u\n",Th);
+//    _RPT1(0, "Decoding Table:%u\n",Th);
 
 	  guint acc = 0;
 	  HuffmanTable* t = &huff[Th];

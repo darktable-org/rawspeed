@@ -45,6 +45,7 @@ BitPumpJPEG::BitPumpJPEG( const guchar* _buffer, guint _size ) :
    for (int i = 0; i < 31; i++) {
      masks[i] = (1<<i)-1;
    }
+   stuffed = 0;
    fill();
  }
 
@@ -65,6 +66,7 @@ void BitPumpJPEG::fill() {
         }  else {
           c = 0;
           off--;  // Don't return more bytes, rewind, so this will be hit next          
+          stuffed++;
         }
       }
       /*

@@ -95,7 +95,16 @@ RawImage DngDecoder::decodeRaw() {
 
       const unsigned short* pDim = raw->getEntry(CFAREPEATPATTERNDIM)->getShortArray(); // Get the size
       const unsigned char* cPat = raw->getEntry(CFAPATTERN)->getData();                 // Does NOT contain dimensions as some documents state
-//      const unsigned char* cPlaneOrder = raw->getEntry(CFAPLANECOLOR)->getData();       // Map from the order in the image, to the position in the CFA
+
+      if (raw->hasEntry(CFAPLANECOLOR)) {
+        TiffEntry* e = raw->getEntry(CFAPLANECOLOR);
+        const unsigned char* cPlaneOrder = e->getData();       // Map from the order in the image, to the position in the CFA
+        printf("Planecolor: ");
+        for (guint i = 0; i < e->count; i++) {
+          printf("%u,",cPlaneOrder[i]);
+        }
+        printf("\n");        
+      }
 
       iPoint2D cfaSize(pDim[1],pDim[0]);
       if (pDim[0] != 2)
@@ -105,7 +114,7 @@ RawImage DngDecoder::decodeRaw() {
       
       if (cfaSize.area() != raw->getEntry(CFAPATTERN)->count)
         ThrowRDE("DNG Decoder: CFA pattern dimension and pattern count does not match: %d.");
-
+      
       for (int y = 0; y < cfaSize.y; y++) {
         for (int x = 0; x < cfaSize.x; x++) {
           guint c1 = cPat[x+y*cfaSize.x];
@@ -234,6 +243,13 @@ RawImage DngDecoder::decodeRaw() {
     ThrowRDE("DNG Decoder: Image could not be read.");
   }
 
+  // Crop
+  if (raw->hasEntry(ACTIVEAREA)) {
+    const guint *corners = raw->getEntry(ACTIVEAREA)->getIntArray();
+    iPoint2D top_left(corners[1], corners[0]);
+    iPoint2D new_size(corners[3]-corners[1], corners[2]-corners[0]);
+    mRaw->subFrame(top_left,new_size);
+  }
   // Linearization
 
   if (raw->hasEntry(LINEARIZATIONTABLE)) {

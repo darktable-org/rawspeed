@@ -65,18 +65,31 @@ guchar* RawImageData::getData()
 {
   if (!data)
     ThrowRDE("RawImageData::getData - Data not yet allocated.");
-  return data;
+  return &data[mOffset.y*pitch+mOffset.x*bpp];
 }
 
 guchar* RawImageData::getData( guint x, guint y )
 {
+  x+= mOffset.x;
+  y+= mOffset.y;
+
   if (!data)
     ThrowRDE("RawImageData::getData - Data not yet allocated.");
   if (x>=dim.x)
     ThrowRDE("RawImageData::getData - X Position outside image requested.");
   if (y>=dim.y)
     ThrowRDE("RawImageData::getData - Y Position outside image requested.");
+
   return &data[y*pitch+x*bpp];
+}
+
+void RawImageData::subFrame( iPoint2D offset, iPoint2D new_size )
+{
+  if (!new_size.isThisInside(dim+offset+mOffset))
+    ThrowRDE("RawImageData::subFrame - Attempted to create new subframe larger than original size.");
+
+  mOffset += offset;
+  dim = new_size;
 }
 
 RawImage::RawImage( RawImageData* p ) : p_(p)

@@ -39,6 +39,7 @@ public:
   guchar* getData(guint x, guint y);    // Not super fast, but safe. Don't use per pixel.
   gboolean isCFA;
   ColorFilterArray cfa;
+  void subFrame( iPoint2D offset, iPoint2D new_size );
 private:
   RawImageData(void);
   RawImageData(iPoint2D dim, guint bpp, guint cpp=1);
@@ -47,6 +48,7 @@ private:
   guint cpp;      // Components per pixel
   friend class RawImage;
   pthread_mutex_t mymutex;
+  iPoint2D mOffset;
 };
 
 

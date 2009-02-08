@@ -85,5 +85,5 @@ void ByteStream::skipToMarker()
     if (off>=size)
       throw IOException("No marker found inside rest of buffer");
   }
-  _RPT1(0,"Skipped %u bytes.\n", c);
+//  _RPT1(0,"Skipped %u bytes.\n", c);
 }
