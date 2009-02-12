@@ -1,8 +1,9 @@
-RawSpeed - RAW file decoder.
+RawSpeed - a fast RAW file decoder.
 Copyright (C) 2009 Klaus Post
 
-http://www.klauspost.com
+Web: http://www.klauspost.com
 
+Email: klauspost (at) gmail (dot) com
 
 Contains code from the following projects:
 
