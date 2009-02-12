@@ -167,7 +167,7 @@ void ArwDecoder::decodeMetaData()
     ThrowRDE("CR2 Decoder: Model name found");
 
   string model = data[0]->getEntry(MODEL)->getString();
-  if (!model.compare("DSLR-A700"))
-    mRaw->cfa.setCFA(CFA_GREEN2, CFA_BLUE, CFA_RED, CFA_GREEN);
+
+//  printf("Model:\"%s\"\n",model.c_str());
   
 }

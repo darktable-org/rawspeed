@@ -224,7 +224,8 @@ void NefDecoder::decodeMetaData()
   if (!model.compare("NIKON D2H")  ||
       !model.compare("NIKON D40X") ||
       !model.compare("NIKON D60") ||
-      !model.compare("NIKON D90") ) 
+      !model.compare("NIKON D90") ||
+      !model.compare("NIKON D80") )
   {
     mRaw->cfa.setCFA(CFA_GREEN2, CFA_BLUE, CFA_RED, CFA_GREEN);   
   }
@@ -239,7 +240,8 @@ void NefDecoder::decodeMetaData()
     !model.compare("NIKON D1H") ||
     !model.compare("NIKON D40")  ||
     !model.compare("NIKON D50") ||
-    !model.compare("NIKON D70s"))  
+    !model.compare("NIKON D70s") ||  
+    !model.compare("NIKON D70") )
   {
     mRaw->cfa.setCFA(CFA_BLUE, CFA_GREEN, CFA_GREEN2, CFA_RED);
   }

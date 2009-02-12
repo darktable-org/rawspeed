@@ -72,5 +72,16 @@ RawImage PefDecoder::decodeRaw()
 void PefDecoder::decodeMetaData()
 {
   mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
+  if (data.empty())
+    ThrowRDE("PEF Decoder: Model name found");
+
+  string model(data[0]->getEntry(MODEL)->getString());
+  //printf("Model:\"%s\"\n",model.c_str());
+
+  if (!model.compare("PENTAX K20D        "))
+  {
+    mRaw->cfa.setCFA(CFA_BLUE, CFA_GREEN, CFA_GREEN2, CFA_RED);
+  }
 }
