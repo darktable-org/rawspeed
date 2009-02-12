@@ -76,6 +76,12 @@ load_rawspeed(const gchar *filename)
 			if (r->isCFA)
 				image->filters = r->cfa.getDcrawFilter();
 
+			if (r->isCFA) 
+			{
+				printf("DCRAW filter:%x\n",r->cfa.getDcrawFilter());
+				printf(r->cfa.asString().c_str());
+			}
+
 			/* Calculate black and white point */
 			for(row=100;row<image->h-100;row++)
 			{

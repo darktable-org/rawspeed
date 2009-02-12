@@ -98,9 +98,11 @@ RawImage Cr2Decoder::decodeRaw()
       l.addSlices(s_width);
       l.mUseBigtable = true;
       l.startDecoder(slice.offset, slice.count, 0, offY);
-    } catch (RawDecoderException* e) { 
+    } catch (RawDecoderException e) { 
+      if (i == 0)
+        throw;
       // These may just be single slice error - store the error and move on
-      errors.push_back(_strdup(e->what()));
+      errors.push_back(_strdup(e.what()));
     }
     offY += slice.w;
   }
