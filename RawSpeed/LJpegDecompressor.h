@@ -22,8 +22,10 @@
 #pragma once
 #include "RawDecoder.h"
 #include "BitPumpMSB.h"
-/* The following enum is stolen from the IJG JPEG library
- * Comments added by tm
+
+/*
+ * The following enum and two structs are stolen from the IJG JPEG library
+ * Comments added by tm. See Copyright in LJpegDecompressor.cpp
  */ 
 
 typedef enum {		/* JPEG marker codes			*/
@@ -189,5 +191,4 @@ protected:
   HuffmanTable huff[4]; 
 };
 
-extern const guint bitMask[];
 

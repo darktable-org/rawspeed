@@ -31,7 +31,7 @@ public:
   PefDecoder(TiffIFD *rootIFD, FileMap* file);
   virtual ~PefDecoder(void);
   virtual RawImage decodeRaw();
-  virtual void decodeMetaData();
+  virtual void decodeMetaData(CameraMetaData *meta);
  TiffIFD *mRootIFD;
 
 };

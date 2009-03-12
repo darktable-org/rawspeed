@@ -158,16 +158,17 @@ void ArwDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
   ThrowRDE("Unsupported bit depth");
 }
 
-void ArwDecoder::decodeMetaData()
+void ArwDecoder::decodeMetaData(CameraMetaData *meta)
 {
-  mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
+  //Default
+  mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE); 
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
   if (data.empty())
-    ThrowRDE("CR2 Decoder: Model name found");
+    ThrowRDE("ARW Meta Decoder: Model name found");
 
+  string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
 
-//  printf("Model:\"%s\"\n",model.c_str());
-  
+  setMetaData(meta, make, model);
 }

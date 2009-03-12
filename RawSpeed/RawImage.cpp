@@ -24,13 +24,16 @@
 */
 
 RawImageData::RawImageData(void): 
-dim(0,0), bpp(0), isCFA(true), dataRefCount(0),data(0), cpp(1)
+dim(0,0), bpp(0), isCFA(true), dataRefCount(0),data(0), cpp(1),
+blackLevel(-1), whitePoint(65536)
 {
   pthread_mutex_init(&mymutex, NULL);
 }
 
 RawImageData::RawImageData(iPoint2D _dim, guint _bpc, guint cpp) : 
-dim(_dim), bpp(_bpc), dataRefCount(0),data(0) {
+dim(_dim), bpp(_bpc), dataRefCount(0),data(0),
+blackLevel(-1), whitePoint(65536)
+{
   createData();
   pthread_mutex_init(&mymutex, NULL);
 }
@@ -93,6 +96,36 @@ void RawImageData::subFrame( iPoint2D offset, iPoint2D new_size )
   dim = new_size;
 }
 
+void RawImageData::scaleBlackWhite()
+{
+  gint gw = (dim.x-20)*cpp;
+  if (blackLevel < 0 || whitePoint == 65536) {  // Estimate
+    int b = 65536;
+    int m = 0;
+    for(int row=10;row<dim.y-10;row++) {
+      gushort *pixel = (gushort*)&data[row*pitch+10*bpp];
+      for(int col = 10 ; col < gw ; col++) {
+        b = MIN(*pixel, b);
+        m = MAX(*pixel, m);
+        pixel++;
+      }
+    }
+    if (blackLevel<0)
+      blackLevel = b;
+    if (whitePoint==65536)
+      whitePoint = m;
+  }
+  gw = dim.x*cpp;
+  float f = 65535.0f / (float)whitePoint;
+  int scale = (int)(16384.0f*f);  // 14 bit fraction
+  for (int y = 0; y < dim.y; y++) {
+    gushort *pixel = (gushort*)&data[y*pitch];
+    for (int x = 0 ; x < gw; x++) {
+      pixel[x] = clampbits(((pixel[x]-blackLevel)*scale+8192)>>14,16);
+    }
+  }
+}
+
 RawImage::RawImage( RawImageData* p ) : p_(p)
 {
   pthread_mutex_lock(&p_->mymutex);
@@ -106,6 +139,7 @@ RawImage::RawImage( const RawImage& p ) : p_(p.p_)
   ++p_->dataRefCount;
   pthread_mutex_unlock(&p_->mymutex);
 }
+
 RawImage::~RawImage()
 {
   pthread_mutex_lock(&p_->mymutex);

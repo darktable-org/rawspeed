@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 #include "DngDecoder.h"
+#include <iostream>
+
 /* 
     RawSpeed - RAW file decoder.
 
@@ -21,6 +23,8 @@
 
     http://www.klauspost.com
 */
+
+//#define PRINT_INFO
 
 DngDecoder::DngDecoder(TiffIFD *rootIFD, FileMap* file) : RawDecoder(file), mRootIFD(rootIFD)
 {
@@ -99,11 +103,11 @@ RawImage DngDecoder::decodeRaw() {
       if (raw->hasEntry(CFAPLANECOLOR)) {
         TiffEntry* e = raw->getEntry(CFAPLANECOLOR);
         const unsigned char* cPlaneOrder = e->getData();       // Map from the order in the image, to the position in the CFA
-        printf("Planecolor: ");
+/*        printf("Planecolor: ");
         for (guint i = 0; i < e->count; i++) {
           printf("%u,",cPlaneOrder[i]);
         }
-        printf("\n");        
+        printf("\n");        */
       }
 
       iPoint2D cfaSize(pDim[1],pDim[0]);
@@ -242,7 +246,7 @@ RawImage DngDecoder::decodeRaw() {
   } catch (TiffParserException) {
     ThrowRDE("DNG Decoder: Image could not be read.");
   }
-
+#ifndef PRINT_INFO
   // Crop
   if (raw->hasEntry(ACTIVEAREA)) {
     const guint *corners = raw->getEntry(ACTIVEAREA)->getIntArray();
@@ -250,6 +254,7 @@ RawImage DngDecoder::decodeRaw() {
     iPoint2D new_size(corners[3]-corners[1], corners[2]-corners[0]);
     mRaw->subFrame(top_left,new_size);
   }
+#endif
   // Linearization
 
   if (raw->hasEntry(LINEARIZATIONTABLE)) {
@@ -262,7 +267,7 @@ RawImage DngDecoder::decodeRaw() {
       else
         table[i] = intable[len-1];
     }
-    for (guint y = 0; y < mRaw->dim.y; y++) {
+    for (gint y = 0; y < mRaw->dim.y; y++) {
       guint cw = mRaw->dim.x*mRaw->getCpp();
       gushort* pixels = (gushort*)mRaw->getData(0,y);
       for (guint x = 0; x < cw; x++) {
@@ -270,11 +275,71 @@ RawImage DngDecoder::decodeRaw() {
       }
     }
   }
+  mRaw->whitePoint = raw->getEntry(WHITELEVEL)->getInt();
+
   return mRaw;
 }
 
-void DngDecoder::decodeMetaData()
+void DngDecoder::decodeMetaData(CameraMetaData *meta)
 {
+#ifdef PRINT_INFO
+  if (mRaw->isCFA)
+    printMetaData();
+#endif
+}
+
+void DngDecoder::printMetaData()
+{  
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
+  if (data.empty())
+    ThrowRDE("Model name found");
+  TiffIFD* raw = data[0];
+
+  string model = raw->getEntry(MODEL)->getString();
+  string make = raw->getEntry(MAKE)->getString();
+  TrimSpaces(model);
+  TrimSpaces(make);
+
+  data = mRootIFD->getIFDsWithTag(ACTIVEAREA);
+  if (data.empty())
+    ThrowRDE("Model name found");
+  raw = data[0];
+
+  ColorFilterArray cfa(mRaw->cfa);
+  const guint *corners = raw->getEntry(ACTIVEAREA)->getIntArray();
+  iPoint2D top_left(corners[1], corners[0]);
+  iPoint2D new_size(corners[3]-corners[1], corners[2]-corners[0]);
+
+  if (top_left.x & 1)
+    cfa.shiftLeft();
+  if (top_left.y & 1)
+    cfa.shiftDown();
+
+  cout << "<Camera make=\"" << make << "\" model = \"" << model << "\">" << endl;
+  cout << "<CFA width=\"2\" height=\"2\">" << endl;
+  cout << "<Color x=\"0\" y=\"0\">" << ColorFilterArray::colorToString(cfa.getColorAt(0,0)) << "</Color>";
+  cout << "<Color x=\"1\" y=\"0\">" << ColorFilterArray::colorToString(cfa.getColorAt(1,0)) << "</Color>" << endl;
+  cout << "<Color x=\"0\" y=\"1\">" << ColorFilterArray::colorToString(cfa.getColorAt(0,1)) << "</Color>";
+  cout << "<Color x=\"1\" y=\"1\">" << ColorFilterArray::colorToString(cfa.getColorAt(1,1)) << "</Color>" << endl;
+  cout << "</CFA>" << endl;
+  cout << "<Crop x=\"" << top_left.x << "\" y=\"" << top_left.y << "\" ";
+  cout << "width=\"" << new_size.x << "\" height=\"" << new_size.y << "\"/>" << endl;
+  int white = raw->getEntry(WHITELEVEL)->getInt();
+  int b = 65536;
+  for(int row=10;row<mRaw->dim.y-10;row++)
+  {
+    gushort *pixel = (gushort*)&mRaw->getData()[row*mRaw->pitch+10*mRaw->bpp];
+    for(int col=10;col<(mRaw->dim.x-20);col++)
+    {
+      b = MIN(*pixel, b);
+      pixel++;
+    }
+  }
+
+  cout << "<Sensor black=\"" << b << "\" white=\"" << white << "\"/>" << endl;
+
+  cout << "</Camera>" <<endl;
 
 }
+
 

@@ -32,7 +32,7 @@ public:
   ArwDecoder(TiffIFD *rootIFD, FileMap* file);
   virtual ~ArwDecoder(void);
   virtual RawImage decodeRaw();
-  virtual void decodeMetaData();
+  virtual void decodeMetaData(CameraMetaData *meta);
 protected:
   void DecodeARW(ByteStream &input, guint w, guint h);
   void DecodeARW2(ByteStream &input, guint w, guint h, guint bpp);

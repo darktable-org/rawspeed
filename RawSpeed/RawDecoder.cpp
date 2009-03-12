@@ -107,6 +107,38 @@ void RawDecoder::Decode12BitRaw(ByteStream &input, guint w, guint h) {
   }
 }
 
-void RawDecoder::decodeMetaData() {
 
+void RawDecoder::setMetaData( CameraMetaData *meta, string make, string model )
+{
+  TrimSpaces(make);
+  TrimSpaces(model);
+  Camera *cam = meta->getCamera(make, model);
+  if (!cam) {
+    printf("Unable to find camera in database: %s %s\n", make.c_str(), model.c_str());
+    return;
+  }
+  mRaw->subFrame(cam->cropPos, cam->cropSize);
+  mRaw->cfa = cam->cfa;
+  if (cam->cropPos.x & 1)
+    mRaw->cfa.shiftLeft();
+  if (cam->cropPos.y & 1)
+    mRaw->cfa.shiftDown();
+
+  mRaw->blackLevel = cam->black;
+  mRaw->whitePoint = cam->white;
 }
+void RawDecoder::TrimSpaces( string& str)
+{  
+  // Trim Both leading and trailing spaces  
+  size_t startpos = str.find_first_not_of(" \t"); // Find the first character position after excluding leading blank spaces  
+  size_t endpos = str.find_last_not_of(" \t"); // Find the first character position from reverse af  
+
+  // if all spaces or empty return an empty string  
+  if(( string::npos == startpos ) || ( string::npos == endpos))  
+  {  
+    str = "";  
+  }  
+  else  
+    str = str.substr( startpos, endpos-startpos+1 );  
+
+}  

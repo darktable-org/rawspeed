@@ -34,8 +34,10 @@ public:
   __inline CFAColor getColorAt(guint x, guint y) {return cfa[(x&1)+((y&1)<<1)];}
   guint toDcrawColor(CFAColor c);
   guint getDcrawFilter();
+  void shiftLeft();
+  void shiftDown();
   std::string asString();
+  static std::string colorToString(CFAColor c);
 private:
-  std::string colorToString(CFAColor c);
   CFAColor cfa[4];
 };

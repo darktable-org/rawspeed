@@ -64,6 +64,110 @@ void LJpegPlain::decodeScan() {
   ThrowRDE("LJpegDecompressor::decodeScan: Unsupported prediction direction.");
 }
 
+void LJpegPlain::decodeScanLeftGeneric() {
+  _ASSERTE(slicesW.size()<16);  // We only have 4 bits for slice number.
+  _ASSERTE(!(slicesW.size()>1 && skipX));   // Check if this is a valid state
+
+  guint comps = frame.cps;  // Components
+  HuffmanTable *dctbl[4];   // Tables for up to 4 components
+  gushort *predict[4];      // Prediction pointers for each of the four components
+  guint samplesH[4];
+  guint samplesV[4];
+  guint skipEveryH[4];
+  guint skipEveryV[4];
+
+  guchar *draw = mRaw->getData();
+  guint maxSuperH = 1;
+  guint maxSuperV = 1;
+  for (guint i = 0; i < comps; i++) {
+    dctbl[i] = &huff[frame.compInfo[i].dcTblNo];
+    samplesH[i] = frame.compInfo[i].superH;
+    maxSuperH = max(samplesH[i], maxSuperH);
+    samplesV[i] = frame.compInfo[i].superV;
+    maxSuperV = max(samplesV[i], maxSuperV);
+  }
+  for (guint i = 0; i < comps; i++) {
+    skipEveryH[i] = maxSuperH / samplesH[i] - 1;  // Mask for determining if we should skip
+    skipEveryV[i] = maxSuperV / samplesV[i] - 1;  // 0 = skip no lines, 1 = skip odd, 3 = skip 1-2-3
+  }
+
+  //Prepare slices (for CR2)
+  guint slices =  (guint)slicesW.size()*(frame.h-skipY);
+  offset = new guint[slices+1];
+
+  guint t_y = 0;
+  guint t_x = 0;
+  guint t_s = 0;
+  guint slice = 0;
+  for (slice = 0; slice< slices; slice++) {
+    offset[slice] = ((t_x+offX)*mRaw->bpp+((offY+t_y)*mRaw->pitch)) | (t_s<<28);
+    _ASSERTE((offset[slice]&0x0fffffff)<mRaw->pitch*mRaw->dim.y);
+    t_y++;
+    if (t_y == (frame.h-skipY)) {
+      t_y = 0;
+      t_x += slicesW[t_s++];
+    }
+  }
+  offset[slices] = offset[slices-1];        // Extra offset to avoid branch in loop.
+
+  if (skipX)
+    slicesW[slicesW.size()-1] -= skipX*frame.cps;
+
+  // First pixels are obviously not predicted
+  gint p[4];
+  gushort *dest = (gushort*)&draw[offset[0]&0x0fffffff];
+
+  // First pixels
+  for (guint i = 0; i < comps; i++) {
+    predict[i] = dest;
+    *dest++ = p[i] = (1<<(frame.prec-Pt-1)) + HuffDecode(dctbl[i]);
+    for (guint j = 0; j < samplesH[i]; j++) {
+      p[i] += HuffDecode(dctbl[i]);
+      *dest++ = p[i];
+    }
+  }
+
+  slices =  (guint)slicesW.size();
+  slice = 1;
+  guint pixInSlice = slicesW[0]/comps-1;    // This is divided by comps, since comps pixels are processed at the time
+
+  guint cw = (frame.w-skipX);
+  guint x = 1;                            // Skip first pixels on first line.
+
+  for (guint y=0;y<(frame.h-skipY);y++) {
+    for (; x < cw ; x++) {
+      for (guint i = 0; i < comps; i++) {
+        if (((y&skipEveryV[i])==0) && ((x&skipEveryH[i])==0)) {  // Should this component be decoded?
+          p[i] += HuffDecode(dctbl[i]);
+          _ASSERTE(p[i]>=0 && p[i]<65536);
+          *dest++ = p[i];          
+        }
+      }
+
+      if (0 == --pixInSlice) { // Next slice
+        guint o = offset[slice++];
+        dest = (gushort*)&draw[o&0x0fffffff];  // Adjust destination for next pixel
+        _ASSERTE((o&0x0fffffff)<mRaw->pitch*mRaw->dim.y);    
+        pixInSlice = slicesW[o>>28]/comps;
+      }
+      bits->checkPos();
+    }
+    if (skipX) {
+      for (guint i = 0; i < skipX; i++) {
+        for (guint i = 0; i < comps; i++)
+          if ((y&skipEveryV[i])==0 && (x&skipEveryV[i])==0)
+            HuffDecode(dctbl[i]);
+      }
+    }
+    for (guint i = 0; i < comps; i++) {
+      if ((y&skipEveryV[i])==0) {
+        p[i] = *predict[i];
+        predict[i] = dest;
+      }
+    }
+    x = 0;
+  }
+}
 
 #define COMPS 2
 void LJpegPlain::decodeScanLeft2Comps() {

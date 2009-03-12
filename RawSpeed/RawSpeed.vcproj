@@ -61,9 +61,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib $(NoInherit) User32.lib pthreadVC2.lib"
+				AdditionalDependencies="kernel32.lib $(NoInherit) User32.lib pthreadVC2.lib iconv.lib libxml2.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\lib"
+				IgnoreAllDefaultLibraries="false"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -143,7 +144,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib $(NoInherit) User32.lib pthreadVC2.lib"
+				AdditionalDependencies="kernel32.lib $(NoInherit) User32.lib pthreadVC2.lib iconv.lib libxml2.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\lib"
 				GenerateDebugInformation="true"
@@ -186,10 +187,6 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
-			<File
-				RelativePath=".\ColorFilterArray.cpp"
-				>
-			</File>
 			<File
 				RelativePath=".\FileIOException.cpp"
 				>
@@ -321,10 +318,6 @@
 					RelativePath=".\PentaxDecompressor.cpp"
 					>
 				</File>
-				<File
-					RelativePath=".\RawDecoderException.cpp"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="Tools"
@@ -386,7 +379,35 @@
 					>
 				</File>
 				<File
+					RelativePath=".\RawDecoderException.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\Rw2Decoder.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="CameraMetadata"
+				>
+				<File
+					RelativePath=".\BlackArea.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Camera.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CameraMetaData.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CameraMetadataException.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ColorFilterArray.cpp"
 					>
 				</File>
 			</Filter>
@@ -396,10 +417,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath=".\ColorFilterArray.h"
-				>
-			</File>
 			<File
 				RelativePath=".\FileReader.h"
 				>
@@ -512,10 +529,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\RawDecoderException.h"
-					>
-				</File>
-				<File
 					RelativePath=".\rawstudio-plugin-api.h"
 					>
 				</File>
@@ -552,7 +565,35 @@
 					>
 				</File>
 				<File
+					RelativePath=".\RawDecoderException.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Rw2Decoder.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="CameraMetadata"
+				>
+				<File
+					RelativePath=".\BlackArea.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Camera.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CameraMetaData.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CameraMetadataException.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ColorFilterArray.h"
 					>
 				</File>
 			</Filter>

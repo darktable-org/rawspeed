@@ -32,5 +32,6 @@ public:
   Rw2Decoder(TiffIFD *rootIFD, FileMap* file);
   virtual ~Rw2Decoder(void);
   RawImage decodeRaw();
+  virtual void decodeMetaData(CameraMetaData *meta);
   TiffIFD *mRootIFD;
 };

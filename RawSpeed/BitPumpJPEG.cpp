@@ -20,6 +20,9 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
     http://www.klauspost.com
+
+    This is based on code by Hubert Figuiere.
+    Copyright (C) 2007 Hubert Figuiere, released under LGPL
 */
 
 

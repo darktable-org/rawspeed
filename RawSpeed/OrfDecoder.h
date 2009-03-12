@@ -33,7 +33,7 @@ public:
   OrfDecoder(TiffIFD *rootIFD, FileMap* file);
   virtual ~OrfDecoder(void);
   virtual RawImage decodeRaw();
-  virtual void decodeMetaData();
+  virtual void decodeMetaData(CameraMetaData *meta);
 private:
   void decodeCompressed(ByteStream& s,guint w, guint h);
   TiffIFD *mRootIFD;

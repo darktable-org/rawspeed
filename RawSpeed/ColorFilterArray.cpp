@@ -86,5 +86,25 @@ void ColorFilterArray::setColorAt( iPoint2D pos, CFAColor c ) {
   if (pos.y > 1 || pos.y < 0)
     ThrowRDE("ColorFilterArray::SetColor: position out of CFA pattern");
   cfa[pos.x+pos.y*2] = c;
-  _RPT2(0, "cfa[%u] = %u\n",pos.x+pos.y*2, c);
+//  _RPT2(0, "cfa[%u] = %u\n",pos.x+pos.y*2, c);
+}
+
+void ColorFilterArray::shiftLeft()
+{
+  CFAColor tmp1 = cfa[0];
+  CFAColor tmp2 = cfa[2];
+  cfa[0] = cfa[1];
+  cfa[2] = cfa[3];
+  cfa[1] = tmp1;
+  cfa[3] = tmp2;
+}
+
+void ColorFilterArray::shiftDown() 
+{
+  CFAColor tmp1 = cfa[0];
+  CFAColor tmp2 = cfa[1];
+  cfa[0] = cfa[2];
+  cfa[1] = cfa[3];
+  cfa[2] = tmp1;
+  cfa[3] = tmp2;
 }

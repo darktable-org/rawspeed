@@ -30,7 +30,7 @@ class Cr2Decoder :
 public:
   Cr2Decoder(TiffIFD *rootIFD, FileMap* file);
   virtual RawImage decodeRaw();
-  virtual void decodeMetaData();
+  virtual void decodeMetaData(CameraMetaData *meta);
   virtual ~Cr2Decoder(void);
 protected:
   TiffIFD *mRootIFD;

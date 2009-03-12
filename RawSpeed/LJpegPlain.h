@@ -39,5 +39,6 @@ private:
   void decodeScanLeft4Comps();
   void decodeScanLeft2Comps();
   void decodeScanLeft3Comps();
+  void decodeScanLeftGeneric();
   guint *offset;
 };

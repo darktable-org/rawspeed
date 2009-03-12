@@ -33,3 +33,8 @@ RawImage Rw2Decoder::decodeRaw()
   guint bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();
   return mRaw;
 }
+
+void Rw2Decoder::decodeMetaData( CameraMetaData *meta )
+{
+
+}

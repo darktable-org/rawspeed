@@ -110,17 +110,16 @@ RawImage Cr2Decoder::decodeRaw()
   return mRaw;
 }
 
-void Cr2Decoder::decodeMetaData() {
+void Cr2Decoder::decodeMetaData(CameraMetaData *meta) {
   mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
   if (data.empty())
-    ThrowRDE("CR2 Decoder: Model name found");
+    ThrowRDE("ARW Meta Decoder: Model name found");
 
+  string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
-  if (!model.compare("Canon EOS-1Ds Mark II") ||
-    !model.compare("Canon EOS 5D Mark II") ) {
-    mRaw->cfa.setCFA(CFA_GREEN2, CFA_BLUE, CFA_RED, CFA_GREEN);
-  }
+
+  setMetaData(meta, make, model);
 
 }

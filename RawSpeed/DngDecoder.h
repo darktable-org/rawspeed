@@ -33,10 +33,11 @@ public:
   DngDecoder(TiffIFD *rootIFD, FileMap* file);
   virtual ~DngDecoder(void);
   virtual RawImage decodeRaw();
-  virtual void decodeMetaData();
+  virtual void decodeMetaData(CameraMetaData *meta);
 protected:
   TiffIFD *mRootIFD;
   gboolean mFixLjpeg;
+  void printMetaData();
 };
 
 class DngStrip {

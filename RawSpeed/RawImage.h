@@ -34,13 +34,16 @@ public:
   guint getCpp() const { return cpp; }
   void setCpp(guint val);
   guint pitch;
-  void createData();
+  virtual void createData();
   guchar* getData();
   guchar* getData(guint x, guint y);    // Not super fast, but safe. Don't use per pixel.
+  virtual void subFrame( iPoint2D offset, iPoint2D new_size );
+  void scaleBlackWhite();
   gboolean isCFA;
   ColorFilterArray cfa;
-  void subFrame( iPoint2D offset, iPoint2D new_size );
-private:
+  int blackLevel;
+  int whitePoint;
+protected:
   RawImageData(void);
   RawImageData(iPoint2D dim, guint bpp, guint cpp=1);
   guint dataRefCount;
