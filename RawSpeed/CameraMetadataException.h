@@ -7,6 +7,4 @@ class CameraMetadataException :
 {
 public:
   CameraMetadataException(const string _msg);
-public:
-  ~CameraMetadataException(void);
 };

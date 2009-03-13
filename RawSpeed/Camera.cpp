@@ -131,7 +131,11 @@ int Camera::StringToInt( const xmlChar *in, const xmlChar *tag, const char* attr
 {
   int i;
 
+#ifdef __unix__
+  if (EOF == sscanf((const char*)in, "%d", &i))
+#else
   if (EOF == sscanf_s((const char*)in, "%d", &i))
+#endif
     ThrowCME("Error parsing attribute %s in tag %s, in camera %s %s.", attribute, tag, make.c_str(), model.c_str());
   
   return i;

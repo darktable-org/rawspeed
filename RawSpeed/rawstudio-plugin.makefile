@@ -1,14 +1,18 @@
 CC=g++
-CFLAGS=-fPIC -Wall -O4 `pkg-config --cflags rawstudio-1.1`
-LDFLAGS=`pkg-config --libs rawstudio-1.1`
-INSTALLPATH=`pkg-config --variable=plugindir rawstudio-1.1`
+CFLAGS=-fPIC -Wall -O4 `pkg-config --cflags rawstudio-1.1 libxml-2.0`
+LDFLAGS=`pkg-config --libs rawstudio-1.1 libxml-2.0`
+INSTALLPATH=`pkg-config --variable=plugindir rawstudio-1.1 libxml-2.0`
 
 CPP_SOURCES= rawstudio-plugin-api.cpp \
 	ArwDecoder.cpp \
 	BitPumpJPEG.cpp \
 	BitPumpMSB.cpp \
 	BitPumpPlain.cpp \
+	BlackArea.cpp \
 	ByteStream.cpp \
+	Camera.cpp \
+	CameraMetaData.cpp \
+	CameraMetadataException.cpp \
 	ColorFilterArray.cpp \
 	Common.cpp \
 	Cr2Decoder.cpp \

@@ -25,17 +25,21 @@
 #include "FileReader.h"
 #include "TiffParser.h"
 #include "RawDecoder.h"
+#include "CameraMetaData.h"
 #include "rawstudio-plugin-api.h"
 
 extern "C" {
 
-CameraMetaData c* = 0;
-
 RS_IMAGE16 *
 load_rawspeed(const gchar *filename)
 {
-  if (!c)
-    c = new CameraMetaData("~/.rawstudio/cameras.xml");
+	static CameraMetaData *c = NULL;
+	if (!c)
+	{
+		gchar *path = g_build_filename(rs_confdir_get(), "cameras.xml", NULL);
+		c = new CameraMetaData(path);
+		g_free(path);
+	}
 	RS_IMAGE16 *image = NULL;
 	FileReader f((char *) filename);
 	RawDecoder *d = 0;
@@ -51,9 +55,6 @@ load_rawspeed(const gchar *filename)
 		try
 		{
 			gint col, row;
-			gint black = 0xffff;
-			gint max = 0x0;
-			gint shift = 0;
 			gint cpp;
 
 			GTimer *gt = g_timer_new();
@@ -84,12 +85,12 @@ load_rawspeed(const gchar *filename)
 			if (r->isCFA) 
 			{
 				printf("DCRAW filter:%x\n",r->cfa.getDcrawFilter());
-				printf(r->cfa.asString().c_str());
+				printf("%s", r->cfa.asString().c_str());
 			}
-      if (cpp = 1) 
+      if (cpp == 1) 
       {
-        BitBlt(GET_PIXEL(image,0,0),image->pitch/2,
-          r->getData(0,0), r->pitch, r->bpp*r->dim.x,r->pitch, r->dim.y);
+        BitBlt((guchar *)(GET_PIXEL(image,0,0)),image->pitch/2,
+          r->getData(0,0), r->pitch, r->bpp*r->dim.x, r->dim.y);
       } else 
       {
         for(row=0;row<image->h;row++)
