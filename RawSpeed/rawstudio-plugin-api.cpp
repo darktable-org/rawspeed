@@ -89,8 +89,8 @@ load_rawspeed(const gchar *filename)
 			}
       if (cpp == 1) 
       {
-        BitBlt((guchar *)(GET_PIXEL(image,0,0)),image->pitch/2,
-          r->getData(0,0), r->pitch, r->bpp*r->dim.x, r->dim.y);
+        BitBlt((guchar *)(GET_PIXEL(image,0,0)),image->pitch*2,
+          r->getData(0,0), r->pitch, r->dim.x*2, r->dim.y);
       } else 
       {
         for(row=0;row<image->h;row++)
