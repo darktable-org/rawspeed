@@ -55,6 +55,7 @@ load-rawspeed.so: $(CPP_OBJECTS) load-rawspeed.o
 
 install: load-rawspeed.so
 	cp -a load-rawspeed.so $(INSTALLPATH)
+	cp -a ../cameras.xml ~/.rawstudio
 
 clean:
 	rm -f *.o *.so

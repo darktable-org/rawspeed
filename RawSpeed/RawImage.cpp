@@ -102,8 +102,8 @@ void RawImageData::scaleBlackWhite()
   if (blackLevel < 0 || whitePoint == 65536) {  // Estimate
     int b = 65536;
     int m = 0;
-    for(int row=10;row<dim.y-10;row++) {
-      gushort *pixel = (gushort*)&data[row*pitch+10*bpp];
+    for(int row=10;row<(dim.y-10);row++) {
+      gushort *pixel = (gushort*)getData(10,row);
       for(int col = 10 ; col < gw ; col++) {
         b = MIN(*pixel, b);
         m = MAX(*pixel, m);
@@ -119,7 +119,7 @@ void RawImageData::scaleBlackWhite()
   float f = 65535.0f / (float)whitePoint;
   int scale = (int)(16384.0f*f);  // 14 bit fraction
   for (int y = 0; y < dim.y; y++) {
-    gushort *pixel = (gushort*)&data[y*pitch];
+    gushort *pixel = (gushort*)getData(0,y);
     for (int x = 0 ; x < gw; x++) {
       pixel[x] = clampbits(((pixel[x]-blackLevel)*scale+8192)>>14,16);
     }
