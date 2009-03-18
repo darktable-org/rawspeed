@@ -315,6 +315,23 @@ void DngDecoder::printMetaData()
   if (top_left.y & 1)
     cfa.shiftDown();
 
+  const gushort *blackdim = raw->getEntry(BLACKLEVELREPEATDIM)->getShortArray();
+  int black = 65536;
+  if (blackdim[0] != 0 && blackdim[1] != 0) {    
+    if (raw->hasEntry(BLACKLEVELDELTAV)) {
+      const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
+      int blackbase = blackarray[0] / blackarray[1];
+      const guint *blackarrayv = raw->getEntry(BLACKLEVELDELTAV)->getIntArray();
+      for (int i = 0; i < new_size.y; i++)
+        black = min(black, blackbase + blackarrayv[i*2] / blackarrayv[i*2+1]);
+    } else {
+      const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
+      black = blackarray[0] / blackarray[1];
+    }
+  } else {
+    black = 0;
+  }
+
   cout << "<Camera make=\"" << make << "\" model = \"" << model << "\">" << endl;
   cout << "<CFA width=\"2\" height=\"2\">" << endl;
   cout << "<Color x=\"0\" y=\"0\">" << ColorFilterArray::colorToString(cfa.getColorAt(0,0)) << "</Color>";
@@ -325,18 +342,8 @@ void DngDecoder::printMetaData()
   cout << "<Crop x=\"" << top_left.x << "\" y=\"" << top_left.y << "\" ";
   cout << "width=\"" << new_size.x << "\" height=\"" << new_size.y << "\"/>" << endl;
   int white = raw->getEntry(WHITELEVEL)->getInt();
-  int b = 65536;
-  for(int row=10;row<mRaw->dim.y-10;row++)
-  {
-    gushort *pixel = (gushort*)&mRaw->getData()[row*mRaw->pitch+10*mRaw->bpp];
-    for(int col=10;col<(mRaw->dim.x-20);col++)
-    {
-      b = MIN(*pixel, b);
-      pixel++;
-    }
-  }
 
-  cout << "<Sensor black=\"" << b << "\" white=\"" << white << "\"/>" << endl;
+  cout << "<Sensor black=\"" << black << "\" white=\"" << white << "\"/>" << endl;
 
   cout << "</Camera>" <<endl;
 

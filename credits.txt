@@ -12,3 +12,9 @@ Contains code from the following projects:
 	
  * dcraw by David Coffin 
  * http://www.cybercom.net/~dcoffin/
+
+Thanks to:
+
+ * Laurent Clevy for his excellent CR2 documentation project:
+ * http://lclevy.free.fr/cr2/index.html
+

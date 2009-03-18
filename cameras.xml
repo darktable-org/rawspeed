@@ -9,7 +9,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="74" y="12" width="3522" height="2348"/>
-    <Sensor black="117" white="4095"/>
+    <Sensor black="126" white="4095"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS 30D">
     <CFA width="2" height="2">
@@ -19,7 +19,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="74" y="12" width="3522" height="2348"/>
-    <Sensor black="120" white="3398"/>
+    <Sensor black="127" white="3398"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS 350D DIGITAL">
     <CFA width="2" height="2">
@@ -29,7 +29,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="42" y="14" width="3474" height="2314"/>
-    <Sensor black="245" white="4095"/>
+    <Sensor black="255" white="4095"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS 40D">
     <CFA width="2" height="2">
@@ -39,7 +39,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="30" y="18" width="3908" height="2602"/>
-    <Sensor black="999" white="13600"/>
+    <Sensor black="1021" white="13600"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS 450D">
     <CFA width="2" height="2">
@@ -49,7 +49,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="22" y="18" width="4290" height="2856"/>
-    <Sensor black="847" white="16000"/>
+    <Sensor black="1020" white="16000"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS 5D">
     <CFA width="2" height="2">
@@ -59,7 +59,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="90" y="34" width="4386" height="2920"/>
-    <Sensor black="115" white="3692"/>
+    <Sensor black="127" white="3692"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS 5D Mark II">
     <CFA width="2" height="2">
@@ -69,7 +69,7 @@
       <Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="158" y="51" width="5634" height="3753"/>
-    <Sensor black="982" white="15600"/>
+    <Sensor black="1024" white="15600"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS DIGITAL REBEL XS">
     <CFA width="2" height="2">
@@ -79,7 +79,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="42" y="18" width="3906" height="2602"/>
-    <Sensor black="245" white="3600"/>
+    <Sensor black="255" white="3600"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS DIGITAL REBEL XSi">
     <CFA width="2" height="2">
@@ -89,7 +89,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="22" y="18" width="4290" height="2856"/>
-    <Sensor black="973" white="16000"/>
+    <Sensor black="1021" white="16000"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS DIGITAL REBEL XTi">
     <CFA width="2" height="2">
@@ -99,7 +99,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="42" y="18" width="3906" height="2602"/>
-    <Sensor black="248" white="3726"/>
+    <Sensor black="255" white="3726"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS-1D Mark II">
     <CFA width="2" height="2">
@@ -109,7 +109,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="74" y="12" width="3522" height="2348"/>
-    <Sensor black="121" white="3700"/>
+    <Sensor black="127" white="3700"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS-1D Mark II N">
     <CFA width="2" height="2">
@@ -119,7 +119,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="74" y="12" width="3522" height="2348"/>
-    <Sensor black="114" white="3700"/>
+    <Sensor black="127" white="3700"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS-1D Mark III">
     <CFA width="2" height="2">
@@ -129,7 +129,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="78" y="20" width="3906" height="2600"/>
-    <Sensor black="1" white="15100"/>
+    <Sensor black="1023" white="15100"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS-1Ds Mark II">
     <CFA width="2" height="2">
@@ -139,7 +139,7 @@
       <Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="98" y="13" width="5010" height="3336"/>
-    <Sensor black="97" white="4060"/>
+    <Sensor black="126" white="4060"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS-1Ds Mark III">
     <CFA width="2" height="2">
@@ -149,7 +149,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="62" y="20" width="5640" height="3752"/>
-    <Sensor black="1" white="15100"/>
+    <Sensor black="1021" white="15100"/>
   </Camera>
   <Camera make="Canon" model="Canon PowerShot G10">
     <CFA width="2" height="2">
@@ -159,7 +159,7 @@
       <Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="12" y="13" width="4432" height="3323"/>
-    <Sensor black="109" white="4095"/>
+    <Sensor black="128" white="4095"/>
   </Camera>
   <Camera make="Canon" model="Canon PowerShot G9">
     <CFA width="2" height="2">
@@ -169,7 +169,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="48" y="12" width="4032" height="3024"/>
-    <Sensor black="84" white="4095"/>
+    <Sensor black="125" white="4095"/>
   </Camera>
   <Camera make="NIKON CORPORATION" model="NIKON D100">
     <CFA width="2" height="2">
@@ -179,7 +179,7 @@
       <Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="3032" height="2024"/>
-    <Sensor black="2" white="4095"/>
+    <Sensor black="0" white="4095"/>
   </Camera>
   <Camera make="NIKON CORPORATION" model="NIKON D1H">
     <CFA width="2" height="2">
@@ -199,7 +199,7 @@
       <Color x="1" y="1">RED</Color>
     </CFA>
     <Crop x="0" y="0" width="4024" height="1324"/>
-    <Sensor black="1" white="4095"/>
+    <Sensor black="0" white="4095"/>
   </Camera>
   <Camera make="NIKON CORPORATION" model="NIKON D200">
     <CFA width="2" height="2">
@@ -209,7 +209,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="3900" height="2616"/>
-    <Sensor black="10" white="3880"/>
+    <Sensor black="0" white="3880"/>
   </Camera>
   <Camera make="NIKON CORPORATION" model="NIKON D2H">
     <CFA width="2" height="2">
@@ -219,7 +219,7 @@
       <Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="2482" height="1648"/>
-    <Sensor black="9" white="3880"/>
+    <Sensor black="0" white="3880"/>
   </Camera>
   <Camera make="NIKON CORPORATION" model="NIKON D2X">
     <CFA width="2" height="2">
@@ -289,7 +289,7 @@
       <Color x="1" y="1">RED</Color>
     </CFA>
     <Crop x="0" y="0" width="3040" height="2014"/>
-    <Sensor black="73" white="4095"/>
+    <Sensor black="0" white="4095"/>
   </Camera>
   <Camera make="NIKON CORPORATION" model="NIKON D700">
     <CFA width="2" height="2">
@@ -339,7 +339,7 @@
       <Color x="1" y="1">RED</Color>
     </CFA>
     <Crop x="0" y="0" width="2608" height="1950"/>
-    <Sensor black="2" white="4095"/>
+    <Sensor black="0" white="4095"/>
   </Camera>
   <Camera make="NIKON" model="E5700">
     <CFA width="2" height="2">
@@ -349,7 +349,7 @@
       <Color x="1" y="1">UNKNOWN</Color>
     </CFA>
     <Crop x="0" y="0" width="2576" height="1924"/>
-    <Sensor black="6" white="4095"/>
+    <Sensor black="0" white="4095"/>
   </Camera>
   <Camera make="NIKON" model="E8800">
     <CFA width="2" height="2">
@@ -369,7 +369,7 @@
       <Color x="1" y="1">RED</Color>
     </CFA>
     <Crop x="0" y="0" width="3280" height="2453"/>
-    <Sensor black="16" white="4095"/>
+    <Sensor black="0" white="4095"/>
   </Camera>
   <Camera make="OLYMPUS CORPORATION" model="E-1">
     <CFA width="2" height="2">
@@ -379,7 +379,7 @@
       <Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="2624" height="1966"/>
-    <Sensor black="64" white="4095"/>
+    <Sensor black="65" white="4095"/>
   </Camera>
   <Camera make="OLYMPUS IMAGING CORP." model="C7070WZ">
     <CFA width="2" height="2">
@@ -399,7 +399,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="3720" height="2800"/>
-    <Sensor black="64" white="4015"/>
+    <Sensor black="65" white="4015"/>
   </Camera>
   <Camera make="OLYMPUS IMAGING CORP." model="E-300">
     <CFA width="2" height="2">
@@ -409,7 +409,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="3340" height="2504"/>
-    <Sensor black="66" white="4095"/>
+    <Sensor black="63" white="4095"/>
   </Camera>
   <Camera make="OLYMPUS IMAGING CORP." model="E-330">
     <CFA width="2" height="2">
@@ -419,7 +419,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="3250" height="2450"/>
-    <Sensor black="0" white="4095"/>
+    <Sensor black="77" white="4095"/>
   </Camera>
   <Camera make="OLYMPUS IMAGING CORP." model="E-400">
     <CFA width="2" height="2">
@@ -429,7 +429,7 @@
       <Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="3768" height="2840"/>
-    <Sensor black="93" white="4095"/>
+    <Sensor black="96" white="4095"/>
   </Camera>
   <Camera make="OLYMPUS IMAGING CORP." model="E-410">
     <CFA width="2" height="2">
@@ -439,7 +439,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="3720" height="2800"/>
-    <Sensor black="70" white="3500"/>
+    <Sensor black="72" white="3500"/>
   </Camera>
   <Camera make="OLYMPUS IMAGING CORP." model="E-420">
     <CFA width="2" height="2">
@@ -449,7 +449,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="3720" height="2800"/>
-    <Sensor black="65" white="4015"/>
+    <Sensor black="68" white="4015"/>
   </Camera>
   <Camera make="OLYMPUS IMAGING CORP." model="E-500">
     <CFA width="2" height="2">
@@ -459,7 +459,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="3340" height="2504"/>
-    <Sensor black="56" white="3967"/>
+    <Sensor black="63" white="3967"/>
   </Camera>
   <Camera make="OLYMPUS IMAGING CORP." model="E-510">
     <CFA width="2" height="2">
@@ -469,7 +469,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="3720" height="2800"/>
-    <Sensor black="70" white="3500"/>
+    <Sensor black="72" white="3500"/>
   </Camera>
   <Camera make="OLYMPUS IMAGING CORP." model="E-520">
     <CFA width="2" height="2">
@@ -479,7 +479,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="3720" height="2800"/>
-    <Sensor black="87" white="4015"/>
+    <Sensor black="69" white="4015"/>
   </Camera>
   <Camera make="OLYMPUS IMAGING CORP." model="SP350">
     <CFA width="2" height="2">
@@ -499,7 +499,7 @@
       <Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="2832" height="2117"/>
-    <Sensor black="3" white="4095"/>
+    <Sensor black="0" white="4095"/>
   </Camera>
   <Camera make="OLYMPUS OPTICAL CO.,LTD" model="E-10">
     <CFA width="2" height="2">
@@ -509,7 +509,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="2256" height="1684"/>
-    <Sensor black="34" white="1023"/>
+    <Sensor black="32" white="1023"/>
   </Camera>
   <Camera make="OLYMPUS OPTICAL CO.,LTD" model="E-20,E-20N,E-20P">
     <CFA width="2" height="2">
@@ -519,7 +519,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="2576" height="1924"/>
-    <Sensor black="46" white="1023"/>
+    <Sensor black="32" white="1023"/>
   </Camera>
   <Camera make="PENTAX Corporation" model="PENTAX K100D">
     <CFA width="2" height="2">
@@ -529,7 +529,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="3040" height="2024"/>
-    <Sensor black="130" white="3950"/>
+    <Sensor black="127" white="3950"/>
   </Camera>
   <Camera make="PENTAX Corporation" model="PENTAX K10D">
     <CFA width="2" height="2">
@@ -539,7 +539,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="3888" height="2608"/>
-    <Sensor black="3" white="4095"/>
+    <Sensor black="0" white="4095"/>
   </Camera>
   <Camera make="PENTAX Corporation" model="PENTAX K20D">
     <CFA width="2" height="2">
@@ -589,7 +589,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="4599" height="3064"/>
-    <Sensor black="1" white="4095"/>
+    <Sensor black="0" white="4095"/>
   </Camera>
   <Camera make="SONY" model="DSLR-A700">
     <CFA width="2" height="2">
@@ -599,7 +599,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="4288" height="2856"/>
-    <Sensor black="396" white="16383"/>
+    <Sensor black="512" white="16383"/>
   </Camera>
   <Camera make="SONY" model="DSLR-A900">
     <CFA width="2" height="2">
@@ -609,8 +609,6 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="6080" height="4048"/>
-    <Sensor black="468" white="16383"/>
+    <Sensor black="512" white="16383"/>
   </Camera>
-
-
 </Cameras>
