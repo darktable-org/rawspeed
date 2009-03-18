@@ -24,15 +24,17 @@
 */
 
 RawImageData::RawImageData(void): 
-dim(0,0), bpp(0), isCFA(true), dataRefCount(0),data(0), cpp(1),
-blackLevel(-1), whitePoint(65536)
+dim(0,0), bpp(0), isCFA(true),  
+blackLevel(-1), whitePoint(65536), 
+dataRefCount(0), data(0), cpp(1)
 {
   pthread_mutex_init(&mymutex, NULL);
 }
 
-RawImageData::RawImageData(iPoint2D _dim, guint _bpc, guint cpp) : 
-dim(_dim), bpp(_bpc), dataRefCount(0),data(0),
-blackLevel(-1), whitePoint(65536)
+RawImageData::RawImageData(iPoint2D _dim, guint _bpc, guint _cpp) : 
+dim(_dim), bpp(_bpc), 
+blackLevel(-1), whitePoint(65536), 
+dataRefCount(0),data(0), cpp(cpp)
 {
   createData();
   pthread_mutex_init(&mymutex, NULL);

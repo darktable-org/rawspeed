@@ -99,17 +99,17 @@ RawImage DngDecoder::decodeRaw() {
 
       const unsigned short* pDim = raw->getEntry(CFAREPEATPATTERNDIM)->getShortArray(); // Get the size
       const unsigned char* cPat = raw->getEntry(CFAPATTERN)->getData();                 // Does NOT contain dimensions as some documents state
-
+/*
       if (raw->hasEntry(CFAPLANECOLOR)) {
         TiffEntry* e = raw->getEntry(CFAPLANECOLOR);
         const unsigned char* cPlaneOrder = e->getData();       // Map from the order in the image, to the position in the CFA
-/*        printf("Planecolor: ");
+        printf("Planecolor: ");
         for (guint i = 0; i < e->count; i++) {
           printf("%u,",cPlaneOrder[i]);
         }
-        printf("\n");        */
+        printf("\n");        
       }
-
+*/
       iPoint2D cfaSize(pDim[1],pDim[0]);
       if (pDim[0] != 2)
         ThrowRDE("DNG Decoder: Unsupported CFA configuration.");
@@ -246,13 +246,18 @@ RawImage DngDecoder::decodeRaw() {
   } catch (TiffParserException) {
     ThrowRDE("DNG Decoder: Image could not be read.");
   }
+  iPoint2D new_size(mRaw->dim.x, mRaw->dim.y);
 #ifndef PRINT_INFO
   // Crop
   if (raw->hasEntry(ACTIVEAREA)) {
     const guint *corners = raw->getEntry(ACTIVEAREA)->getIntArray();
     iPoint2D top_left(corners[1], corners[0]);
-    iPoint2D new_size(corners[3]-corners[1], corners[2]-corners[0]);
+    new_size = iPoint2D(corners[3]-corners[1], corners[2]-corners[0]);
     mRaw->subFrame(top_left,new_size);
+    if (top_left.x & 1) 
+      mRaw->cfa.shiftLeft();
+    if (top_left.y & 1)
+      mRaw->cfa.shiftDown();
   }
 #endif
   // Linearization
@@ -271,12 +276,29 @@ RawImage DngDecoder::decodeRaw() {
       guint cw = mRaw->dim.x*mRaw->getCpp();
       gushort* pixels = (gushort*)mRaw->getData(0,y);
       for (guint x = 0; x < cw; x++) {
-        *pixels++  = table[*pixels];
+        pixels[x]  = table[pixels[x]];
       }
     }
   }
   mRaw->whitePoint = raw->getEntry(WHITELEVEL)->getInt();
 
+  const gushort *blackdim = raw->getEntry(BLACKLEVELREPEATDIM)->getShortArray();
+  int black = 65536;
+  if (blackdim[0] != 0 && blackdim[1] != 0) {    
+    if (raw->hasEntry(BLACKLEVELDELTAV)) {
+      const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
+      int blackbase = blackarray[0] / blackarray[1];
+      const gint *blackarrayv = (const gint*)raw->getEntry(BLACKLEVELDELTAV)->getIntArray();
+      for (int i = 0; i < new_size.y; i++)
+        black = MIN(black, blackbase + blackarrayv[i*2] / blackarrayv[i*2+1]);
+    } else {
+      const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
+      black = blackarray[0] / blackarray[1];
+    }
+  } else {
+    black = 0;
+  }
+  mRaw->blackLevel = black;
   return mRaw;
 }
 
@@ -321,9 +343,9 @@ void DngDecoder::printMetaData()
     if (raw->hasEntry(BLACKLEVELDELTAV)) {
       const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
       int blackbase = blackarray[0] / blackarray[1];
-      const guint *blackarrayv = raw->getEntry(BLACKLEVELDELTAV)->getIntArray();
+      const gint *blackarrayv = (const gint*)raw->getEntry(BLACKLEVELDELTAV)->getIntArray();
       for (int i = 0; i < new_size.y; i++)
-        black = min(black, blackbase + blackarrayv[i*2] / blackarrayv[i*2+1]);
+        black = MIN(black, blackbase + blackarrayv[i*2] / blackarrayv[i*2+1]);
     } else {
       const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
       black = blackarray[0] / blackarray[1];

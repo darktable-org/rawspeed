@@ -73,7 +73,7 @@ load_rawspeed(const gchar *filename)
 			if (cpp == 1) 
 				image = rs_image16_new(r->dim.x, r->dim.y, cpp, cpp);
 			else if (cpp == 3) 
-				image = rs_image16_new(r->dim.x, r->dim.y, 3, 3);
+				image = rs_image16_new(r->dim.x, r->dim.y, 3, 4);
 			else {
 				printf("Unsupported component per pixel count");
 				return NULL;
@@ -84,8 +84,8 @@ load_rawspeed(const gchar *filename)
 
 			if (r->isCFA) 
 			{
-				printf("DCRAW filter:%x\n",r->cfa.getDcrawFilter());
-				printf("%s", r->cfa.asString().c_str());
+//				printf("DCRAW filter:%x\n",r->cfa.getDcrawFilter());
+//				printf("%s", r->cfa.asString().c_str());
 			}
       if (cpp == 1) 
       {

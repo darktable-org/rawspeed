@@ -14,7 +14,7 @@ Rw2Decoder::~Rw2Decoder(void)
 RawImage Rw2Decoder::decodeRaw()
 {
   ThrowRDE("RW2 Decoder: Not supported");
-
+/*
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(PANASONIC_STRIPOFFSET);
 
   if (data.empty())
@@ -30,8 +30,8 @@ RawImage Rw2Decoder::decodeRaw()
 
 //  guint width = raw->getEntry()->getInt();
   guint height = raw->getEntry((TiffTag)3)->getInt();
-  guint bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();
-  return mRaw;
+  guint bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();*/
+  return NULL;
 }
 
 void Rw2Decoder::decodeMetaData( CameraMetaData *meta )
