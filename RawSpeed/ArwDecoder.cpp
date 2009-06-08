@@ -35,10 +35,22 @@ ArwDecoder::~ArwDecoder(void)
 
 RawImage ArwDecoder::decodeRaw()
 {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
+
+  // TODO: Add support for these models.
+  if (!data[0]->getEntry(MODEL)->getString().compare("DSLR-A900")) {
+    ThrowRDE("ARW Decoder: Model not supported");
+  }
+  if (!data[0]->getEntry(MODEL)->getString().compare("DSLR-A700")) {
+    ThrowRDE("ARW Decoder: Model not supported");
+  }
+
+  data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 
   if (data.empty())
     ThrowRDE("ARW Decoder: No image data found");
+
+  string model = data[0]->getEntry(MODEL)->getString();
 
   TiffIFD* raw = data[0];
   int compression = raw->getEntry(COMPRESSION)->getInt();
