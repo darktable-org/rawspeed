@@ -76,15 +76,17 @@ guchar* RawImageData::getData()
 
 guchar* RawImageData::getData( guint x, guint y )
 {
+  if ((int)x>=dim.x)
+    ThrowRDE("RawImageData::getData - X Position outside image requested.");
+  if ((int)y>=dim.y) {
+    ThrowRDE("RawImageData::getData - Y Position outside image requested.");
+  }
+
   x+= mOffset.x;
   y+= mOffset.y;
 
   if (!data)
     ThrowRDE("RawImageData::getData - Data not yet allocated.");
-  if ((int)x>=dim.x)
-    ThrowRDE("RawImageData::getData - X Position outside image requested.");
-  if ((int)y>=dim.y)
-    ThrowRDE("RawImageData::getData - Y Position outside image requested.");
 
   return &data[y*pitch+x*bpp];
 }

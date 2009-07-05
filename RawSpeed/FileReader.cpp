@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/mman.h>
 #endif // __unix__
 /* 
     RawSpeed - RAW file decoder.
@@ -41,14 +42,22 @@ FileMap* FileReader::readFile() {
   char *dest;
 
   stat(mFilename, &st);
-  FileMap *fileData = new FileMap(st.st_size);
-
   fd = open(mFilename, O_RDONLY);
+#if 0
+  // Not used, as it is slower than sync read
+
+  guchar* pa = (guchar*)mmap(0, st.st_size, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
+  FileMap *fileData = new FileMap(pa, st.st_size);
+
+#else 
+  FileMap *fileData = new FileMap(st.st_size);
 
   while(bytes_read < st.st_size) {
     dest = (char *) fileData->getDataWrt(bytes_read);
     bytes_read += read(fd, dest, st.st_size-bytes_read);
   }
+#endif
+
 #else // __unix__
   HANDLE file_h;  // File handle
   file_h = CreateFile(mFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN, NULL);
@@ -68,7 +77,8 @@ FileMap* FileReader::readFile() {
     throw new FileIOException("Could not read file.");
   }
   CloseHandle(file_h);
-#endif // __unix__
+
+#endif // __unix__
   return fileData;
 }
 

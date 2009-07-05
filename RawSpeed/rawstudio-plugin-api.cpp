@@ -28,6 +28,8 @@
 #include "CameraMetaData.h"
 #include "rawstudio-plugin-api.h"
 
+//#define TIME_LOAD 1
+
 extern "C" {
 
 RS_IMAGE16 *
@@ -47,7 +49,17 @@ load_rawspeed(const gchar *filename)
 
 	try
 	{
+#ifdef TIME_LOAD
+		GTimer *gt = g_timer_new();
+#endif
+
 		m = f.readFile();
+
+#ifdef TIME_LOAD
+		printf("Open %s: %.03fs\n", filename, g_timer_elapsed(gt, NULL));
+		g_timer_destroy(gt);
+#endif
+
 		TiffParser t(m);
 		t.parseData();
 		d = t.getDecompressor();
@@ -57,11 +69,17 @@ load_rawspeed(const gchar *filename)
 			gint col, row;
 			gint cpp;
 
-			GTimer *gt = g_timer_new();
+#ifdef TIME_LOAD
+			gt = g_timer_new();
+#endif
+
 			d->decodeRaw();
 			d->decodeMetaData(c);
-			printf("%s: %.03f\n", filename, g_timer_elapsed(gt, NULL));
+
+#ifdef TIME_LOAD
+			printf("Decode %s: %.03fs\n", filename, g_timer_elapsed(gt, NULL));
 			g_timer_destroy(gt);
+#endif
 
 			for (guint i = 0; i < d->errors.size(); i++)
 				printf("Error Encountered:%s\n", d->errors[i]);
@@ -82,11 +100,13 @@ load_rawspeed(const gchar *filename)
 			if (r->isCFA)
 				image->filters = r->cfa.getDcrawFilter();
 
+
 			if (r->isCFA) 
 			{
 //				printf("DCRAW filter:%x\n",r->cfa.getDcrawFilter());
 //				printf("%s", r->cfa.asString().c_str());
 			}
+
       if (cpp == 1) 
       {
         BitBlt((guchar *)(GET_PIXEL(image,0,0)),image->pitch*2,
