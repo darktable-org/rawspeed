@@ -120,7 +120,7 @@ void RawImageData::scaleBlackWhite()
       whitePoint = m;
   }
   gw = dim.x*cpp;
-  float f = 65535.0f / (float)whitePoint;
+  float f = 65535.0f / (float)(whitePoint-blackLevel);
   int scale = (int)(16384.0f*f);  // 14 bit fraction
   for (int y = 0; y < dim.y; y++) {
     gushort *pixel = (gushort*)getData(0,y);
