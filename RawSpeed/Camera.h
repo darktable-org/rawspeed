@@ -12,9 +12,11 @@ public:
   virtual ~Camera(void);
   string make;
   string model;
+  string mode;
   ColorFilterArray cfa;
   guint black;
   guint white;
+  gboolean supported;
   iPoint2D cropSize;
   iPoint2D cropPos;
   vector<BlackArea> blackAreas;

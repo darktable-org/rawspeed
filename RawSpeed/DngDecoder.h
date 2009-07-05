@@ -34,6 +34,7 @@ public:
   virtual ~DngDecoder(void);
   virtual RawImage decodeRaw();
   virtual void decodeMetaData(CameraMetaData *meta);
+  virtual void checkSupport(CameraMetaData *meta);
 protected:
   TiffIFD *mRootIFD;
   gboolean mFixLjpeg;

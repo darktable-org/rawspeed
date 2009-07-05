@@ -33,5 +33,6 @@ public:
   virtual ~Rw2Decoder(void);
   RawImage decodeRaw();
   virtual void decodeMetaData(CameraMetaData *meta);
+  virtual void checkSupport(CameraMetaData *meta);
   TiffIFD *mRootIFD;
 };

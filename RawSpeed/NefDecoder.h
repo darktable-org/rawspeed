@@ -35,6 +35,7 @@ public:
   virtual ~NefDecoder(void);
   virtual RawImage decodeRaw();
   virtual void decodeMetaData(CameraMetaData *meta);
+  virtual void checkSupport(CameraMetaData *meta);
   TiffIFD *mRootIFD;
 private:
   gboolean D100IsCompressed(guint offset);

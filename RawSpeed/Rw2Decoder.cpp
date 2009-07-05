@@ -34,6 +34,17 @@ RawImage Rw2Decoder::decodeRaw()
   return NULL;
 }
 
+void Rw2Decoder::checkSupport(CameraMetaData *meta) {
+  ThrowRDE("RW2 Decoder: Not supported");
+/*  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
+  if (data.empty())
+    ThrowRDE("PEF Support check: Model name found");
+
+  string make = data[0]->getEntry(MAKE)->getString();
+  string model = data[0]->getEntry(MODEL)->getString();
+  this->checkCameraSupported(meta, make, model, "");*/
+}
+
 void Rw2Decoder::decodeMetaData( CameraMetaData *meta )
 {
 

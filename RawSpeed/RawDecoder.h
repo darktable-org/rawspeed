@@ -13,13 +13,15 @@ public:
   RawDecoder(FileMap* file);
   virtual ~RawDecoder(void);
   virtual RawImage decodeRaw() = 0;
+  virtual void checkSupport(CameraMetaData *meta) = 0;
   virtual void decodeMetaData(CameraMetaData *meta) = 0;
   FileMap *mFile; 
   void readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch, int bitPerPixel, gboolean MSBOrder);
   RawImage mRaw; 
   vector<const char*> errors;
 protected:
-  virtual void setMetaData(CameraMetaData *meta, string make, string model);
+  void checkCameraSupported(CameraMetaData *meta, string make, string model, string mode);
+  virtual void setMetaData(CameraMetaData *meta, string make, string model, string mode);
   void Decode12BitRaw(ByteStream &input, guint w, guint h);
   void TrimSpaces( string& str);
 };

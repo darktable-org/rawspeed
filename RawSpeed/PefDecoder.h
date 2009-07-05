@@ -32,6 +32,6 @@ public:
   virtual ~PefDecoder(void);
   virtual RawImage decodeRaw();
   virtual void decodeMetaData(CameraMetaData *meta);
- TiffIFD *mRootIFD;
-
+  virtual void checkSupport(CameraMetaData *meta);
+  TiffIFD *mRootIFD;
 };

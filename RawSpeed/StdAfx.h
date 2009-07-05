@@ -35,6 +35,7 @@
 #include <malloc.h>
 #include <math.h>
 // STL
+#include <iostream>
 #include <string>
 #include <vector>
 #include <map>

@@ -33,7 +33,7 @@ DngDecoder::DngDecoder(TiffIFD *rootIFD, FileMap* file) : RawDecoder(file), mRoo
 
   if (v[0] != 1)
     ThrowRDE("Not a supported DNG image format: v%u.%u.%u.%u",(int)v[0],(int)v[1],(int)v[2],(int)v[3]);
-  if (v[1] > 2)
+  if (v[1] > 3)
     ThrowRDE("Not a supported DNG image format: v%u.%u.%u.%u",(int)v[0],(int)v[1],(int)v[2],(int)v[3]);
 
   if ((v[0] <= 1) && (v[1] < 1) ) // Prior to v1.1.xxx  fix LJPEG encoding bug
@@ -132,6 +132,7 @@ RawImage DngDecoder::decodeRaw() {
               c2 = CFA_BLUE; break;
             default:
               c2 = CFA_UNKNOWN;
+              ThrowRDE("DNG Decoder: Unsupported CFA Color.");
           }
           mRaw->cfa.setColorAt(iPoint2D(x,y),c2);
         }
@@ -289,7 +290,10 @@ RawImage DngDecoder::decodeRaw() {
         black = MIN(black, blackbase + blackarrayv[i*2] / blackarrayv[i*2+1]);
     } else {
       const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
-      black = blackarray[0] / blackarray[1];
+      if (blackarray[1])
+        black = blackarray[0] / blackarray[1];
+      else 
+        black = 0;
     }
   } else {
     black = 0;
@@ -304,6 +308,15 @@ void DngDecoder::decodeMetaData(CameraMetaData *meta)
   if (mRaw->isCFA)
     printMetaData();
 #endif
+}
+
+void DngDecoder::checkSupport(CameraMetaData *meta) {
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
+  if (data.empty())
+    ThrowRDE("DNG Support check: Model name found");
+  string make = data[0]->getEntry(MAKE)->getString();
+  string model = data[0]->getEntry(MODEL)->getString();
+  this->checkCameraSupported(meta, make, model, "dng");
 }
 
 void DngDecoder::printMetaData()
@@ -344,7 +357,10 @@ void DngDecoder::printMetaData()
         black = MIN(black, blackbase + blackarrayv[i*2] / blackarrayv[i*2+1]);
     } else {
       const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
-      black = blackarray[0] / blackarray[1];
+      if ( blackarray[1] )
+        black = blackarray[0] / blackarray[1];
+      else 
+        black = 0;
     }
   } else {
     black = 0;

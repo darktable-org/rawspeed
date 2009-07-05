@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Camera.h"
+#include <iostream>
 
 Camera::Camera(xmlDocPtr doc, xmlNodePtr cur) {
   xmlChar *key;
@@ -14,6 +15,23 @@ Camera::Camera(xmlDocPtr doc, xmlNodePtr cur) {
     ThrowCME("Camera XML Parser: \"model\" attribute not found.");
   model = string((const char*)key);
   xmlFree(key);
+
+  supported = true;
+  key = xmlGetProp(cur,(const xmlChar *)"supported");
+  if (key) {
+    string s = string((const char*)key);
+    if (s.compare("no") == 0)
+      supported = false;
+    xmlFree(key);
+  }
+
+  key = xmlGetProp(cur,(const xmlChar *)"mode");
+  if (key) {
+    mode = string((const char*)key);
+    xmlFree(key);
+  } else {
+    mode = string("");
+  }
 
   cur = cur->xmlChildrenNode;
   while (cur != NULL) {

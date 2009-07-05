@@ -28,7 +28,7 @@
 #include "CameraMetaData.h"
 #include "rawstudio-plugin-api.h"
 
-//#define TIME_LOAD 1
+#define TIME_LOAD 1
 
 extern "C" {
 
@@ -72,7 +72,7 @@ load_rawspeed(const gchar *filename)
 #ifdef TIME_LOAD
 			gt = g_timer_new();
 #endif
-
+      d->checkSupport(c);
 			d->decodeRaw();
 			d->decodeMetaData(c);
 

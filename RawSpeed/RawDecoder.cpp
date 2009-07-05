@@ -107,12 +107,24 @@ void RawDecoder::Decode12BitRaw(ByteStream &input, guint w, guint h) {
   }
 }
 
+  void RawDecoder::checkCameraSupported(CameraMetaData *meta, string make, string model, string mode) {
+  TrimSpaces(make);
+  TrimSpaces(model);
+  Camera* cam = meta->getCamera(make, model, mode);
+  if (!cam && mode.length() == 0) {
+    printf("Unable to find camera in database: %s %s\n", make.c_str(), model.c_str());
+    return;    // Assume true.
+  }
 
-void RawDecoder::setMetaData( CameraMetaData *meta, string make, string model )
+  if (!cam->supported)
+    ThrowRDE("Camera not supported (explicit). Sorry.");
+}
+
+void RawDecoder::setMetaData( CameraMetaData *meta, string make, string model, string mode )
 {
   TrimSpaces(make);
   TrimSpaces(model);
-  Camera *cam = meta->getCamera(make, model);
+  Camera *cam = meta->getCamera(make, model, mode);
   if (!cam) {
     printf("Unable to find camera in database: %s %s\n", make.c_str(), model.c_str());
     return;

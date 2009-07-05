@@ -37,14 +37,6 @@ RawImage ArwDecoder::decodeRaw()
 {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
-  // TODO: Add support for these models.
-  if (!data[0]->getEntry(MODEL)->getString().compare("DSLR-A900")) {
-    ThrowRDE("ARW Decoder: Model not supported");
-  }
-  if (!data[0]->getEntry(MODEL)->getString().compare("DSLR-A700")) {
-    ThrowRDE("ARW Decoder: Model not supported");
-  }
-
   data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 
   if (data.empty())
@@ -170,6 +162,15 @@ void ArwDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
   ThrowRDE("Unsupported bit depth");
 }
 
+void ArwDecoder::checkSupport(CameraMetaData *meta) {
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
+  if (data.empty())
+    ThrowRDE("ARW Support check: Model name found");
+  string make = data[0]->getEntry(MAKE)->getString();
+  string model = data[0]->getEntry(MODEL)->getString();
+  this->checkCameraSupported(meta, make, model, "");
+}
+
 void ArwDecoder::decodeMetaData(CameraMetaData *meta)
 {
   //Default
@@ -182,5 +183,5 @@ void ArwDecoder::decodeMetaData(CameraMetaData *meta)
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
 
-  setMetaData(meta, make, model);
+  setMetaData(meta, make, model, "");
 }

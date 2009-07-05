@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "CameraMetaData.h"
-#include <iostream>
 
 CameraMetaData::CameraMetaData(char *docname)
 {
@@ -30,7 +29,7 @@ CameraMetaData::CameraMetaData(char *docname)
   while (cur != NULL) {
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"Camera"))){
       Camera *camera = new Camera(doc, cur);
-      string id = string(camera->make).append(camera->model);
+      string id = string(camera->make).append(camera->model).append(camera->mode);
       if (cameras.end() !=cameras.find(id))
         printf("CameraMetaData: Duplicate entry found for camera: %s %s, Skipping!\n",camera->make.c_str(), camera->model.c_str());
       else 
@@ -84,9 +83,9 @@ void CameraMetaData::dumpCameraXML( Camera* cam )
   cout << "</Camera>" <<endl;
 }
 
-Camera* CameraMetaData::getCamera( string make, string model )
+Camera* CameraMetaData::getCamera( string make, string model, string mode )
 {
-  string id = string(make).append(model);
+  string id = string(make).append(model).append(mode);
   if (cameras.end() ==cameras.find(id))
     return NULL;
   return cameras[id];
