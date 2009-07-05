@@ -111,8 +111,10 @@ void RawDecoder::Decode12BitRaw(ByteStream &input, guint w, guint h) {
   TrimSpaces(make);
   TrimSpaces(model);
   Camera* cam = meta->getCamera(make, model, mode);
-  if (!cam && mode.length() == 0) {
-    printf("Unable to find camera in database: %s %s\n", make.c_str(), model.c_str());
+  if (!cam) {
+    if (mode.length() == 0) 
+      printf("Unable to find camera in database: %s %s\n", make.c_str(), model.c_str());
+    
     return;    // Assume true.
   }
 
