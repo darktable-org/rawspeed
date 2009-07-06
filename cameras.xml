@@ -601,6 +601,46 @@
     <Crop x="0" y="0" width="4688" height="3124"/>
     <Sensor black="0" white="4095"/>
   </Camera>
+  <Camera make="PENTAX Corporation" model="PENTAX K200D">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">RED</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="1" y="1">BLUE</Color>
+    </CFA>
+    <Crop x="0" y="0" width="3880" height="2604"/>
+    <Sensor black="0" white="4095"/>
+  </Camera>
+  <Camera make="PENTAX" model="PENTAX K-7">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">BLUE</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="1" y="1">RED</Color>
+    </CFA>
+    <Crop x="0" y="0" width="4672" height="3104"/>
+    <Sensor black="0" white="4095"/>
+  </Camera>
+  <Camera make="PENTAX" model="PENTAX K-m">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">RED</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="1" y="1">BLUE</Color>
+    </CFA>
+    <Crop x="0" y="0" width="3900" height="2616"/>
+    <Sensor black="0" white="4095"/>
+  </Camera>
+  <Camera make="PENTAX" model="PENTAX K2000">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">RED</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="1" y="1">BLUE</Color>
+    </CFA>
+    <Crop x="0" y="0" width="3900" height="2616"/>
+    <Sensor black="0" white="4095"/>
+  </Camera>
   <Camera make="SONY" model="DSLR-A100">
     <CFA width="2" height="2">
       <Color x="0" y="0">GREEN</Color>
