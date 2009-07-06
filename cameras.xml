@@ -191,6 +191,16 @@
     <Crop x="48" y="12" width="4032" height="3024"/>
     <Sensor black="125" white="4095"/>
   </Camera>
+  <Camera make="Canon" model="Canon PowerShot SX1 IS">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">RED</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="1" y="1">BLUE</Color>
+    </CFA>
+    <Crop x="192" y="12" width="3958" height="2760"/>
+    <Sensor black="125" white="4095"/>
+  </Camera>
   <Camera make="NIKON CORPORATION" model="NIKON D100">
     <CFA width="2" height="2">
       <Color x="0" y="0">GREEN</Color>
