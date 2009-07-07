@@ -35,14 +35,12 @@ ArwDecoder::~ArwDecoder(void)
 
 RawImage ArwDecoder::decodeRaw()
 {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 
   data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 
   if (data.empty())
     ThrowRDE("ARW Decoder: No image data found");
-
-  string model = data[0]->getEntry(MODEL)->getString();
 
   TiffIFD* raw = data[0];
   int compression = raw->getEntry(COMPRESSION)->getInt();
