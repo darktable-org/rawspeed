@@ -111,6 +111,9 @@ RawDecoder* TiffParser::getDecompressor() {
       if (!make.compare("NIKON CORPORATION")) {
         return new NefDecoder(mRootIFD,mInput);
       }
+      if (!make.compare("NIKON")) {
+        return new NefDecoder(mRootIFD,mInput);
+      }
       if (!make.compare("OLYMPUS IMAGING CORP.  ")) {
         return new OrfDecoder(mRootIFD,mInput);
       }
