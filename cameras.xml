@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+<?xml-stylesheet type="text/xsl" href="showcameras.xsl" ?>
 <!DOCTYPE Cameras SYSTEM "http://rawspeed.klauspost.com/dtd/cameras/1.1/cameras.dtd">
+
 <Cameras>
   <Camera make="Canon" model="Canon EOS 20D">
     <CFA width="2" height="2">
