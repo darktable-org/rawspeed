@@ -118,6 +118,7 @@ void RawImageData::scaleBlackWhite()
       blackLevel = b;
     if (whitePoint==65536)
       whitePoint = m;
+    printf("Estimated black:%d, Estimated white: %d\n", blackLevel, whitePoint);
   }
   gw = dim.x*cpp;
   float f = 65535.0f / (float)(whitePoint-blackLevel);

@@ -593,6 +593,16 @@
     <Crop x="0" y="0" width="2576" height="1924"/>
     <Sensor black="32" white="1023"/>
   </Camera>
+  <Camera make="OLYMPUS IMAGING CORP." model="E-P1">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">RED</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="1" y="1">BLUE</Color>
+    </CFA>
+    <Crop x="0" y="0" width="4094" height="3082"/>
+    <Sensor black="55" white="4095"/>
+  </Camera>
   <Camera make="PENTAX Corporation" model="PENTAX K100D">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
