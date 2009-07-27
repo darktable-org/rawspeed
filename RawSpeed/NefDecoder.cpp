@@ -229,9 +229,17 @@ void NefDecoder::decodeMetaData(CameraMetaData *meta)
   if (data.empty())
     ThrowRDE("NEF Meta Decoder: Model name found");
 
+  int white = mRaw->whitePoint;
+  int black = mRaw->blackLevel;
+
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
 
   setMetaData(meta, make, model,"");
+
+  if (white!=65536)
+    mRaw->whitePoint = white;
+  if (black>=0)
+    mRaw->blackLevel = black;
 
 }

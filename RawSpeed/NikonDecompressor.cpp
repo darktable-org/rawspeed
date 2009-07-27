@@ -97,6 +97,9 @@ void NikonDecompressor::DecompressNikon( ByteStream &metadata, guint w, guint h,
   while (curve[_max-2] == curve[_max-1]) _max--; 
   initTable(huffSelect);
 
+  mRaw->whitePoint = curve[_max-1];
+  mRaw->blackLevel = curve[0];
+
   guint x, y;
   bits = new BitPumpMSB(mFile->getData(offset), size);
   guchar *draw = mRaw->getData();
