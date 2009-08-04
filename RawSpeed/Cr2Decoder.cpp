@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Cr2Decoder.h"
+
 /* 
     RawSpeed - RAW file decoder.
 
@@ -34,10 +35,12 @@ Cr2Decoder::~Cr2Decoder(void)
 
 RawImage Cr2Decoder::decodeRaw()
 {
+  
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag((TiffTag)0xc5d8);
 
   if (data.empty())
     ThrowRDE("CR2 Decoder: No image data found");
+
 
   TiffIFD* raw = data[0];
   mRaw = RawImage::create();
@@ -91,7 +94,7 @@ RawImage Cr2Decoder::decodeRaw()
   }
   guint offY = 0;
 
-  for (guint i = 0; i < slices.size(); i++ ) {  // This loop is obvious for threading, as slices are independent
+  for (guint i = 0; i < slices.size(); i++ ) {
     Cr2Slice slice = slices[i];
     try {
       LJpegPlain l(mFile,mRaw);
@@ -106,6 +109,9 @@ RawImage Cr2Decoder::decodeRaw()
     }
     offY += slice.w;
   }
+
+  if (mRaw->subsampling.x >1 || mRaw->subsampling.y >1)
+    sRawInterpolate();
 
   return mRaw;
 }
@@ -124,10 +130,208 @@ void Cr2Decoder::decodeMetaData(CameraMetaData *meta) {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
   if (data.empty())
-    ThrowRDE("ARW Meta Decoder: Model name found");
+    ThrowRDE("CR2 Meta Decoder: Model name found");
 
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
 
   setMetaData(meta, make, model,"");
+
 }
+
+// Interpolate and convert sRaw data.
+void Cr2Decoder::sRawInterpolate()
+{
+  if (mRaw->subsampling.y == 1 && mRaw->subsampling.x == 2) {
+    interpolate_422(mRaw->dim.x / 2, mRaw->dim.y ,0, mRaw->dim.y);
+  } else {
+    interpolate_420(mRaw->dim.x / 2, mRaw->dim.y / 2 ,0 , mRaw->dim.y / 2);
+  }
+}
+
+#define YUV_TO_RGB(Y, Cb, Cr) r = (int)Y + (( 200*(int)Cb + 22929*(int)Cr) >> 12);\
+  g = (int)Y + ((-5640*(int)Cb - 11751*(int)Cb) >> 12);\
+  b = (int)Y + ((29040*(int)Cb - 101*(int)Cb) >> 12);
+
+/* sRaw interpolators - ugly as sin, but does the job in reasonably speed */
+
+// Note: Thread safe.
+
+void Cr2Decoder::interpolate_422(int w, int h, int start_h , int end_h)
+{
+  // Last pixel should not be interpolated
+  w--; 
+
+  // Current line
+  gushort* c_line;
+
+  for (int y = start_h; y < end_h; y++) {
+    c_line = (gushort*)mRaw->getData(0,y);
+    gint r,g,b;
+    int off = 0;
+    for (int x = 0; x < w; x++) {
+      int Y = c_line[off];
+      int Cb = c_line[off+1]- 16384;
+      int Cr = c_line[off+2]- 16384;
+      YUV_TO_RGB(Y, Cb, Cr);
+      c_line[off++] = clampbits(r,16); 
+      c_line[off++] = clampbits(g,16); 
+      c_line[off++] = clampbits(b,16);
+
+      Y = c_line[off];
+      int Cb2 = (Cb + c_line[off+1+3] - 16384)>>1;
+      int Cr2 = (Cr + c_line[off+2+3] - 16384)>>1;
+      YUV_TO_RGB(Y, Cb2, Cr2);
+      c_line[off++] = clampbits(r,16); 
+      c_line[off++] = clampbits(g,16); 
+      c_line[off++] = clampbits(b,16);
+    }
+    // Last two pixels
+    int Y = c_line[off];
+    int Cb = c_line[off+1]- 16384;
+    int Cr = c_line[off+2]- 16384;
+    YUV_TO_RGB(Y, Cb, Cr);
+    c_line[off++] = clampbits(r,16); 
+    c_line[off++] = clampbits(g,16); 
+    c_line[off++] = clampbits(b,16);
+
+    Y = c_line[off];
+    YUV_TO_RGB(Y, Cb, Cr);
+    c_line[off++] = clampbits(r,16); 
+    c_line[off++] = clampbits(g,16); 
+    c_line[off++] = clampbits(b,16);
+  }
+}
+
+
+// Note: Not thread safe, since it writes inplace.
+void Cr2Decoder::interpolate_420(int w, int h, int start_h , int end_h)
+{
+  // Last pixel should not be interpolated
+  w--; 
+
+  gboolean atLastLine = FALSE;
+
+  if (end_h == h) {
+    end_h--;
+    atLastLine = TRUE;
+  }
+
+  // Current line
+  gushort* c_line;
+  // Next line
+  gushort* n_line;
+  // Next line again
+  gushort* nn_line;
+
+  int off;
+  gint r,g,b;
+
+  for (int y = start_h; y < end_h; y++) {
+    c_line = (gushort*)mRaw->getData(0,y*2);
+    n_line = (gushort*)mRaw->getData(0,y*2+1);
+    nn_line = (gushort*)mRaw->getData(0,y*2+2);
+    off = 0;
+    for (int x = 0; x < w; x++) {
+      int Y = c_line[off];
+      int Cb = c_line[off+1]- 16384;
+      int Cr = c_line[off+2]- 16384;
+      YUV_TO_RGB(Y, Cb, Cr);
+      c_line[off] = clampbits(r,16); 
+      c_line[off+1] = clampbits(g,16); 
+      c_line[off+2] = clampbits(b,16);
+
+      Y = c_line[off+3];
+      int Cb2 = (Cb + c_line[off+1+6] - 16383)>>1;
+      int Cr2 = (Cr + c_line[off+2+6] - 16383)>>1;
+      YUV_TO_RGB(Y, Cb2, Cr2);
+      c_line[off+3] = clampbits(r,16); 
+      c_line[off+4] = clampbits(g,16); 
+      c_line[off+5] = clampbits(b,16);
+
+      // Next line
+      Y = n_line[off];
+      int Cb3 = (Cb + nn_line[off+1]- 16383)>>1;
+      int Cr3 = (Cr + nn_line[off+2]- 16383)>>1;
+      YUV_TO_RGB(Y, Cb3, Cr3);
+      n_line[off] = clampbits(r,16); 
+      n_line[off+1] = clampbits(g,16); 
+      n_line[off+2] = clampbits(b,16);
+
+      Y = n_line[off+3];
+      Cb = (Cb + Cb2 + Cb3 + nn_line[off+1+6] - 16382)>>2;  //Left + Above + Right +Below
+      Cr = (Cr + Cr2 + Cr3 + nn_line[off+2+6] - 16382)>>2;
+      YUV_TO_RGB(Y, Cb, Cr);
+      n_line[off+3] = clampbits(r,16); 
+      n_line[off+4] = clampbits(g,16); 
+      n_line[off+5] = clampbits(b,16);
+      off+=6;
+    }
+    int Y = c_line[off];
+    int Cb = c_line[off+1]- 16384;
+    int Cr = c_line[off+2]- 16384;
+    YUV_TO_RGB(Y, Cb, Cr);
+    c_line[off] = clampbits(r,16); 
+    c_line[off+1] = clampbits(g,16); 
+    c_line[off+2] = clampbits(b,16);
+
+    Y = c_line[off+3];
+    YUV_TO_RGB(Y, Cb, Cr);
+    c_line[off+3] = clampbits(r,16); 
+    c_line[off+4] = clampbits(g,16); 
+    c_line[off+5] = clampbits(b,16);
+
+    // Next line
+    Y = n_line[off];
+    Cb = (Cb + nn_line[off+1]- 16383)>>1;
+    Cr = (Cr + nn_line[off+2]- 16383)>>1;
+    YUV_TO_RGB(Y, Cb, Cr);
+    n_line[off] = clampbits(r,16); 
+    n_line[off+1] = clampbits(g,16); 
+    n_line[off+2] = clampbits(b,16);
+
+    Y = n_line[off+3];
+    YUV_TO_RGB(Y, Cb, Cr);
+    n_line[off+3] = clampbits(r,16); 
+    n_line[off+4] = clampbits(g,16); 
+    n_line[off+5] = clampbits(b,16);
+  }
+
+  if (atLastLine) {
+    c_line = (gushort*)mRaw->getData(0,end_h*2);
+    n_line = (gushort*)mRaw->getData(0,end_h*2);
+    off = 0;
+
+    // Last line
+    for (int x = 0; x < w; x++) {
+      int Y = c_line[off];
+      int Cb = c_line[off+1]- 16384;
+      int Cr = c_line[off+2]- 16384;
+      YUV_TO_RGB(Y, Cb, Cr);
+      c_line[off] = clampbits(r,16); 
+      c_line[off+1] = clampbits(g,16); 
+      c_line[off+2] = clampbits(b,16);
+
+      Y = c_line[off+3];
+      YUV_TO_RGB(Y, Cb, Cr);
+      c_line[off+3] = clampbits(r,16); 
+      c_line[off+4] = clampbits(g,16); 
+      c_line[off+5] = clampbits(b,16);
+
+      // Next line
+      Y = n_line[off];
+      YUV_TO_RGB(Y, Cb, Cr);
+      n_line[off] = clampbits(r,16); 
+      n_line[off+1] = clampbits(g,16); 
+      n_line[off+2] = clampbits(b,16);
+
+      Y = n_line[off+3];
+      YUV_TO_RGB(Y, Cb, Cr);
+      n_line[off+3] = clampbits(r,16); 
+      n_line[off+4] = clampbits(g,16); 
+      n_line[off+5] = clampbits(b,16);
+      off+=6;
+    }
+  }
+}
+

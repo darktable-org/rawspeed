@@ -34,6 +34,9 @@ public:
   virtual void decodeMetaData(CameraMetaData *meta);
   virtual ~Cr2Decoder(void);
 protected:
+  void sRawInterpolate();
+  void interpolate_420(int w, int h, int start_h , int end_h);
+  void interpolate_422(int w, int h, int start_h , int end_h);
   TiffIFD *mRootIFD;
 };
 

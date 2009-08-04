@@ -29,6 +29,7 @@ blackLevel(-1), whitePoint(65536),
 dataRefCount(0), data(0), cpp(1)
 {
   pthread_mutex_init(&mymutex, NULL);
+  subsampling.x = subsampling.y = 1;
 }
 
 RawImageData::RawImageData(iPoint2D _dim, guint _bpc, guint _cpp) : 
@@ -36,6 +37,7 @@ dim(_dim), bpp(_bpc),
 blackLevel(-1), whitePoint(65536), 
 dataRefCount(0),data(0), cpp(cpp)
 {
+  subsampling.x = subsampling.y = 1;
   createData();
   pthread_mutex_init(&mymutex, NULL);
 }
@@ -52,10 +54,19 @@ RawImageData::~RawImageData(void)
 
 
 void RawImageData::createData() {  
+  if (data)
+    ThrowRDE("RawImageData: Duplicate data allocation in createData.");
   pitch = (((dim.x*bpp) + 15)/16)*16;
   data = (guchar*)_aligned_malloc(pitch*dim.y,16);
   if (!data)
     ThrowRDE("RawImageData::createData: Memory Allocation failed.");
+}
+
+void RawImageData::destroyData()
+{
+  if (data)
+    _aligned_free(data);
+  data = 0;
 }
 
 void RawImageData::setCpp( guint val )
@@ -93,8 +104,10 @@ guchar* RawImageData::getData( guint x, guint y )
 
 void RawImageData::subFrame( iPoint2D offset, iPoint2D new_size )
 {
-  if (!new_size.isThisInside(dim-offset))
-    ThrowRDE("RawImageData::subFrame - Attempted to create new subframe larger than original size.");
+  if (!new_size.isThisInside(dim-offset)) {
+    printf("WARNING: RawImageData::subFrame - Attempted to create new subframe larger than original size. Crop skipped.\n");
+    return;
+  }
 
   mOffset += offset;
   dim = new_size;
@@ -130,6 +143,7 @@ void RawImageData::scaleBlackWhite()
     }
   }
 }
+
 
 RawImage::RawImage( RawImageData* p ) : p_(p)
 {

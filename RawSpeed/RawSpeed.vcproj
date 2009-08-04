@@ -291,6 +291,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\TiffParserHeaderless.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\TiffParserOlympus.cpp"
 					>
 				</File>
@@ -468,42 +472,6 @@
 					RelativePath=".\Point.h"
 					>
 				</File>
-				<Filter
-					Name="Tiff"
-					>
-					<File
-						RelativePath=".\TiffEntry.h"
-						>
-					</File>
-					<File
-						RelativePath=".\TiffEntryBE.h"
-						>
-					</File>
-					<File
-						RelativePath=".\TiffIFD.h"
-						>
-					</File>
-					<File
-						RelativePath=".\TiffIFDBE.h"
-						>
-					</File>
-					<File
-						RelativePath=".\TiffParser.h"
-						>
-					</File>
-					<File
-						RelativePath=".\TiffParserException.h"
-						>
-					</File>
-					<File
-						RelativePath=".\TiffParserOlympus.h"
-						>
-					</File>
-					<File
-						RelativePath=".\TiffTag.h"
-						>
-					</File>
-				</Filter>
 			</Filter>
 			<Filter
 				Name="Decompressors"
@@ -594,6 +562,46 @@
 				</File>
 				<File
 					RelativePath=".\ColorFilterArray.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Tiff"
+				>
+				<File
+					RelativePath=".\TiffEntry.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffEntryBE.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffIFD.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffIFDBE.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffParser.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffParserException.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffParserHeaderless.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffParserOlympus.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffTag.h"
 					>
 				</File>
 			</Filter>

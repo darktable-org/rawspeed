@@ -22,6 +22,7 @@
 #pragma once
 #include "pthread.h"
 #include "ColorFilterArray.h"
+#include "BlackArea.h"
 
 class RawImage;
 class RawImageData
@@ -35,6 +36,7 @@ public:
   void setCpp(guint val);
   guint pitch;
   virtual void createData();
+  virtual void destroyData();
   guchar* getData();
   guchar* getData(guint x, guint y);    // Not super fast, but safe. Don't use per pixel.
   virtual void subFrame( iPoint2D offset, iPoint2D new_size );
@@ -43,6 +45,8 @@ public:
   ColorFilterArray cfa;
   int blackLevel;
   int whitePoint;
+  vector<BlackArea> blackAreas;
+  iPoint2D subsampling;
 protected:
   RawImageData(void);
   RawImageData(iPoint2D dim, guint bpp, guint cpp=1);

@@ -64,6 +64,9 @@ inline void BitBlt(BYTE* dstp, int dst_pitch, const BYTE* srcp, int src_pitch, i
     srcp += src_pitch;
   }
 }
+inline bool isPowerOfTwo (int val) {
+  return (val & (~val+1)) == val;
+}
 
 inline int lmin(int p0, int p1) {
   return p1 + ((p0 - p1) & ((p0 - p1) >> 31));
