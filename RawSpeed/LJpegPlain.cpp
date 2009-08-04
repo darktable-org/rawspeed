@@ -283,7 +283,6 @@ void LJpegPlain::decodeScanLeft4_2_0() {
   mRaw->subsampling.y = 2;
 
   guchar *draw = mRaw->getData();
-  guint pixGroup = 6;   // How many pixels per group.
 
   //Prepare slices (for CR2)
   guint slices =  (guint)slicesW.size()*(frame.h-skipY)/2;
@@ -410,7 +409,6 @@ void LJpegPlain::decodeScanLeft4_2_2()
   */
 
   guchar *draw = mRaw->getData();
-  guint pixGroup = 4;   // How many pixels per group.
 
   //Prepare slices (for CR2)
   guint slices =  (guint)slicesW.size()*(frame.h-skipY);
@@ -420,7 +418,6 @@ void LJpegPlain::decodeScanLeft4_2_2()
   guint t_x = 0;
   guint t_s = 0;
   guint slice = 0;
-  guint pitch_s = mRaw->pitch/2;  // Pitch in shorts
 
   // This is divided by comps, since comps pixels are processed at the time
   for (guint i = 0 ; i <  slicesW.size(); i++)

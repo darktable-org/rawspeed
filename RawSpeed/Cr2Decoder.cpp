@@ -150,8 +150,8 @@ void Cr2Decoder::sRawInterpolate()
 }
 
 #define YUV_TO_RGB(Y, Cb, Cr) r = (int)Y + (( 200*(int)Cb + 22929*(int)Cr) >> 12);\
-  g = (int)Y + ((-5640*(int)Cb - 11751*(int)Cb) >> 12);\
-  b = (int)Y + ((29040*(int)Cb - 101*(int)Cb) >> 12);
+  g = (int)Y + ((-5640*(int)Cb - 11751*(int)Cr) >> 12);\
+  b = (int)Y + ((29040*(int)Cb - 101*(int)Cr) >> 12);
 
 /* sRaw interpolators - ugly as sin, but does the job in reasonably speed */
 
