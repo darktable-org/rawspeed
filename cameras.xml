@@ -93,6 +93,14 @@
     <Crop x="158" y="51" width="5634" height="3753"/>
     <Sensor black="1024" white="15600"/>
   </Camera>
+  <Camera make="Canon" model="Canon EOS 5D Mark II-sRaw1">
+    <Crop x="0" y="0" width="3872" height="2574"/>
+    <Sensor black="0" white="15600"/>
+  </Camera>
+  <Camera make="Canon" model="Canon EOS 5D Mark II-sRaw2">
+    <Crop x="0" y="0" width="2808" height="1872"/>
+    <Sensor black="0" white="15600"/>
+  </Camera>
   <Camera make="Canon" model="Canon EOS DIGITAL REBEL XS">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
