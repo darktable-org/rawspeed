@@ -55,10 +55,10 @@
   </Camera>
   <Camera make="Canon" model="Canon EOS 50D">
     <CFA width="2" height="2">
-      <Color x="0" y="0">RED</Color>
-      <Color x="1" y="0">GREEN</Color>
-      <Color x="0" y="1">GREEN</Color>
-      <Color x="1" y="1">BLUE</Color>
+      <Color x="0" y="0">GREEN</Color>
+      <Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color>
+      <Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="64" y="52" width="4752" height="3158"/>
     <Sensor black="900" white="16383"/>
