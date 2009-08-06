@@ -87,7 +87,8 @@ TiffEntry* TiffIFD::getEntry(TiffTag tag) {
   if (mEntry.find(tag) != mEntry.end()) {
     return mEntry[tag];
   }
-  throw TiffParserException("TIFF Parser entry not found.");
+  ThrowTPE("TiffIFD: TIFF Parser entry 0x%x not found.", tag);
+  return 0;
 }
 
 bool TiffIFD::hasEntry(TiffTag tag) {

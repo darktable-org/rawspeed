@@ -1,5 +1,10 @@
 #include "StdAfx.h"
 #include "TiffParserException.h"
+#ifndef WIN32
+#include <stdarg.h>
+#define vsprintf_s(...) vsnprintf(__VA_ARGS__)
+#endif
+
 /* 
     RawSpeed - RAW file decoder.
 
@@ -22,7 +27,17 @@
     http://www.klauspost.com
 */
 
+
 TiffParserException::TiffParserException(const string _msg) : runtime_error(_msg) {
   _RPT1(0, "TIFF Exception: %s\n", _msg.c_str());
 };
 
+void ThrowTPE(const char* fmt, ...) {
+  va_list val;
+  va_start(val, fmt);
+  char buf[8192];
+  vsprintf_s(buf, 8192, fmt, val);
+  va_end(val);
+  _RPT1(0, "EXCEPTION: %s\n",buf);
+  throw TiffParserException(buf);
+}

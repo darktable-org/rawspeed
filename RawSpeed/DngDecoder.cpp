@@ -228,7 +228,7 @@ RawImage DngDecoder::decodeRaw() {
           errors = slices.errors;
         if (errors.size()>=nTiles)
           ThrowRDE("DNG Decoding: Too many errors encountered. Giving up.\nFirst Error:%s",errors[0]);
-      } catch (TiffParserException) {
+      } catch (TiffParserException e) {
         TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
         TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
 
@@ -239,13 +239,13 @@ RawImage DngDecoder::decodeRaw() {
           ThrowRDE("DNG Decoder: Byte count number does not match strip size: count:%u, stips:%u ",counts->count, offsets->count);
         }
 
-        ThrowRDE("DNG Decoder: Unsupported format.");
+        ThrowRDE("DNG Decoder: Unsupported format:\n%s", e.what());
       }
    } else {
       ThrowRDE("DNG Decoder: Unknown compression: %u",compression);
     }
-  } catch (TiffParserException) {
-    ThrowRDE("DNG Decoder: Image could not be read.");
+  } catch (TiffParserException e) {
+    ThrowRDE("DNG Decoder: Image could not be read:\n%s", e.what());
   }
   iPoint2D new_size(mRaw->dim.x, mRaw->dim.y);
 #ifndef PRINT_INFO

@@ -21,6 +21,8 @@
 */
 #pragma once
 
+void ThrowTPE(const char* fmt, ...);
+
 class TiffParserException : public std::runtime_error
 {
 public:
