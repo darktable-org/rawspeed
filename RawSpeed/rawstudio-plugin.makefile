@@ -53,9 +53,13 @@ load-rawspeed.o: rawstudio-plugin.c
 load-rawspeed.so: $(CPP_OBJECTS) load-rawspeed.o
 	g++ $(CFLAGS) $(LDFLAGS) -shared -o load-rawspeed.so $(CPP_OBJECTS) load-rawspeed.o -lc
 
-install: load-rawspeed.so
+install: load-rawspeed.so ~/.rawstudio
 	cp -a load-rawspeed.so $(INSTALLPATH)
-	cp -a ../cameras.xml ~/.rawstudio
+	cp -a ../cameras.xml ~/.rawstudio/
+
+~/.rawstudio:
+	echo Please start Rawstudio once before installing
+	exit 1
 
 clean:
 	rm -f *.o *.so
