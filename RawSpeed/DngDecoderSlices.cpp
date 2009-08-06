@@ -86,3 +86,8 @@ void DngDecoderSlices::decodeSlice( DngDecoderThread* t ) {
     }
   }
 }
+
+int DngDecoderSlices::size()
+{
+  return (int)slices.size();
+}

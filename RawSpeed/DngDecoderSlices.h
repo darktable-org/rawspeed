@@ -57,6 +57,7 @@ public:
   void addSlice(DngSliceElement slice);
   void startDecoding();
   void decodeSlice(DngDecoderThread* t);
+  int size();
   queue<DngSliceElement> slices;
   vector<DngDecoderThread*> threads;
   FileMap *mFile; 

@@ -107,6 +107,7 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
 
 int wmain(int argc, _TCHAR* argv[])
 {
+  if (1) {  // for memory detection
 #ifdef _USE_GFL_
   GFL_ERROR err;
   err = gflLibraryInit();
@@ -119,7 +120,26 @@ int wmain(int argc, _TCHAR* argv[])
   //meta.dumpXML();
 //  OpenFile(FileReader(L"..\\testimg\\dng\\Panasonic_LX3(300109).dng"),&meta);
   //OpenFile(FileReader(L"..\\testimg\\Panasonic_LX3.rw2"),&meta);
-  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D.cr2"),&meta);
+/*
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\K7FARI0200.DNG"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\K7FARI6400.DNG"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\K7hMULTII0200.DNG"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\K7hVFAO.DNG"),&meta);*/
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Leica_M8.dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Leica_M_8.dng"),&meta);
+
+/*  
+  OpenFile(FileReader(L"..\\testimg\\Canon_5DMk2-sRaw2.CR2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_5DMk2-sRaw1.CR2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_5D_Mk2-ISO100_sRAW1.CR2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D-1.cr2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D-2.cr2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D-3.cr2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D-4.cr2"),&meta);
+  */
+//  OpenFile(FileReader(L"..\\testimg\\kp.CR2"),&meta);
+
+/*
   OpenFile(FileReader(L"..\\testimg\\kp.CR2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1Ds_Mk2.cr2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\5d.CR2"),&meta);
@@ -156,6 +176,7 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A900-2.arw"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A900.arw"),&meta);
 
+  OpenFile(FileReader(L"..\\testimg\\nikon_coolpix_p6000_05.nrw"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon_D1.nef"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon_D100-backhigh.nef"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon_D200_compressed-1.nef"),&meta);
@@ -206,6 +227,8 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Olympus_E520-5.orf"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Olympus_E520.orf"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Olympus_SP350.orf"),&meta);
+
+  OpenFile(FileReader(L"..\\testimg\\Nikon-D3XFARI0100.NEF"),&meta);
 
   OpenFile(FileReader(L"..\\testimg\\dng\\5d-raw.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\5d.dng"),&meta);
@@ -344,6 +367,7 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A350.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A900-2.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A900.dng"),&meta);
+*/
 OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed.dng"),&meta);
 OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed2.dng"),&meta);
 OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed3.dng"),&meta);
@@ -353,6 +377,7 @@ OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed3.dng"),&meta);
 #ifdef _USE_GFL_
   gflLibraryExit();
 #endif
+  } // Dump objects
   _CrtDumpMemoryLeaks();
 	return 0;
 }

@@ -94,8 +94,11 @@ RawImage DngDecoder::decodeRaw() {
 
     int compression = raw->getEntry(COMPRESSION)->getShort();
     if (mRaw->isCFA) {
-      if (raw->getEntry(CFALAYOUT)->getShort() != 1)
-        ThrowRDE("DNG Decoder: Unsupported CFA Layout.");
+
+      // Check if layout is OK, if present
+      if (raw->hasEntry(CFALAYOUT))
+        if (raw->getEntry(CFALAYOUT)->getShort() != 1)
+          ThrowRDE("DNG Decoder: Unsupported CFA Layout.");
 
       const unsigned short* pDim = raw->getEntry(CFAREPEATPATTERNDIM)->getShortArray(); // Get the size
       const unsigned char* cPat = raw->getEntry(CFAPATTERN)->getData();                 // Does NOT contain dimensions as some documents state
@@ -184,7 +187,7 @@ RawImage DngDecoder::decodeRaw() {
           ByteStream in(mFile->getData(slice.offset),slice.count);
           iPoint2D size(width,slice.h);
           iPoint2D pos(0,slice.offsetY);
-          readUncompressedRaw(in,size,pos,width*bps/8,bps,true);
+          readUncompressedRaw(in,size,pos,width*bps/8,bps,false);
         }
 
       } catch (TiffParserException) {
@@ -199,47 +202,62 @@ RawImage DngDecoder::decodeRaw() {
         }
         mRaw->createData();
 
-        guint tilew = raw->getEntry(TILEWIDTH)->getInt();
-        guint tileh = raw->getEntry(TILELENGTH)->getInt();
-        guint tilesX = (mRaw->dim.x + tilew -1) / tilew;
-        guint tilesY = (mRaw->dim.y + tileh -1) / tileh;
-        guint nTiles = tilesX*tilesY;
-
-        TiffEntry *TEoffsets = raw->getEntry(TILEOFFSETS);
-        const guint* offsets = TEoffsets->getIntArray();
-
-        TiffEntry *TEcounts = raw->getEntry(TILEBYTECOUNTS);
-        const guint* counts = TEcounts->getIntArray();
-
-        if (TEoffsets->count != TEcounts->count || TEoffsets->count != nTiles)
-          ThrowRDE("DNG Decoder: Tile count mismatch: offsets:%u count:%u, calculated:%u",TEoffsets->count,TEcounts->count, nTiles );
-
         DngDecoderSlices slices(mFile, mRaw);
-        slices.mFixLjpeg = mFixLjpeg;
+        if (raw->hasEntry(TILEOFFSETS)) {
+          guint tilew = raw->getEntry(TILEWIDTH)->getInt();
+          guint tileh = raw->getEntry(TILELENGTH)->getInt();
+          guint tilesX = (mRaw->dim.x + tilew -1) / tilew;
+          guint tilesY = (mRaw->dim.y + tileh -1) / tileh;
+          guint nTiles = tilesX*tilesY;
 
-        for (guint y=0; y< tilesY; y++) { // This loop is obvious for threading, as tiles are independent
-          for (guint x=0; x< tilesX; x++) {
-            DngSliceElement e(offsets[x+y*tilesX], counts[x+y*tilesX], tilew*x, tileh*y);            
-            slices.addSlice(e);
+          TiffEntry *TEoffsets = raw->getEntry(TILEOFFSETS);
+          const guint* offsets = TEoffsets->getIntArray();
+
+          TiffEntry *TEcounts = raw->getEntry(TILEBYTECOUNTS);
+          const guint* counts = TEcounts->getIntArray();
+
+          if (TEoffsets->count != TEcounts->count || TEoffsets->count != nTiles)
+            ThrowRDE("DNG Decoder: Tile count mismatch: offsets:%u count:%u, calculated:%u",TEoffsets->count,TEcounts->count, nTiles );
+  
+          slices.mFixLjpeg = mFixLjpeg;
+
+          for (guint y=0; y< tilesY; y++) {
+            for (guint x=0; x< tilesX; x++) {
+              DngSliceElement e(offsets[x+y*tilesX], counts[x+y*tilesX], tilew*x, tileh*y);            
+              slices.addSlice(e);
+            }
+          }
+        } else {  // Strips
+          TiffEntry *TEoffsets = raw->getEntry(STRIPOFFSETS);
+          TiffEntry *TEcounts = raw->getEntry(STRIPBYTECOUNTS);
+
+          const guint* offsets = TEoffsets->getIntArray();
+          const guint* counts = TEcounts->getIntArray();
+          guint yPerSlice = raw->getEntry(ROWSPERSTRIP)->getInt();
+
+          if (TEcounts->count != TEoffsets->count) {
+            ThrowRDE("DNG Decoder: Byte count number does not match strip size: count:%u, stips:%u ",TEcounts->count, TEoffsets->count);
+          }
+
+          guint offY = 0;
+          for (guint s = 0; s<TEcounts->count; s++) {
+            DngSliceElement e(offsets[s], counts[s], 0, offY);
+            offY +=yPerSlice;
+
+            if (mFile->isValid(e.byteOffset+e.byteCount)) // Only decode if size is valid
+              slices.addSlice(e);
           }
         }
+        guint nSlices = slices.size();
         slices.startDecoding();
+
         if (!slices.errors.empty())
           errors = slices.errors;
-        if (errors.size()>=nTiles)
+
+        if (errors.size() >= nSlices)
           ThrowRDE("DNG Decoding: Too many errors encountered. Giving up.\nFirst Error:%s",errors[0]);
       } catch (TiffParserException e) {
-        TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
-        TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
-
-        if (offsets->count != 1) {
-          ThrowRDE("DNG Decoder: Multiple Strips found: %u",offsets->count);
-        }
-        if (counts->count != offsets->count) {
-          ThrowRDE("DNG Decoder: Byte count number does not match strip size: count:%u, stips:%u ",counts->count, offsets->count);
-        }
-
-        ThrowRDE("DNG Decoder: Unsupported format:\n%s", e.what());
+        ThrowRDE("DNG Decoder: Unsupported format, tried strips and tiles:\n%s", e.what());
       }
    } else {
       ThrowRDE("DNG Decoder: Unknown compression: %u",compression);
@@ -279,24 +297,27 @@ RawImage DngDecoder::decodeRaw() {
   }
   mRaw->whitePoint = raw->getEntry(WHITELEVEL)->getInt();
 
-  const gushort *blackdim = raw->getEntry(BLACKLEVELREPEATDIM)->getShortArray();
-  int black = 65536;
-  if (blackdim[0] != 0 && blackdim[1] != 0) {    
-    if (raw->hasEntry(BLACKLEVELDELTAV)) {
-      const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
-      int blackbase = blackarray[0] / blackarray[1];
-      const gint *blackarrayv = (const gint*)raw->getEntry(BLACKLEVELDELTAV)->getIntArray();
-      for (int i = 0; i < new_size.y; i++)
-        black = MIN(black, blackbase + blackarrayv[i*2] / blackarrayv[i*2+1]);
+  int black = -1; // Estimate, if no blacklevel
+  if (raw->hasEntry(BLACKLEVELREPEATDIM)) {
+    black = 65536;
+    const gushort *blackdim = raw->getEntry(BLACKLEVELREPEATDIM)->getShortArray();
+    if (blackdim[0] != 0 && blackdim[1] != 0) {    
+      if (raw->hasEntry(BLACKLEVELDELTAV)) {
+        const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
+        int blackbase = blackarray[0] / blackarray[1];
+        const gint *blackarrayv = (const gint*)raw->getEntry(BLACKLEVELDELTAV)->getIntArray();
+        for (int i = 0; i < new_size.y; i++)
+          black = MIN(black, blackbase + blackarrayv[i*2] / blackarrayv[i*2+1]);
+      } else {
+        const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
+        if (blackarray[1])
+          black = blackarray[0] / blackarray[1];
+        else 
+          black = 0;
+      }
     } else {
-      const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
-      if (blackarray[1])
-        black = blackarray[0] / blackarray[1];
-      else 
-        black = 0;
+      black = 0;
     }
-  } else {
-    black = 0;
   }
   mRaw->blackLevel = black;
   return mRaw;
