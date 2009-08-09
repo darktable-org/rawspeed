@@ -37,7 +37,6 @@ RawDecoder::~RawDecoder(void)
 void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch, int bitPerPixel, gboolean MSBOrder) {
   guchar* data = mRaw->getData();
   guint outPitch = mRaw->pitch;
-  const guchar *in = input.getData();
   guint w = size.x;
   guint h = size.y;
   guint cpp = mRaw->getCpp();
@@ -71,6 +70,11 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
 
   } else {
 
+    if (bitPerPixel==16)  {
+      BitBlt(&data[offset.x*sizeof(gushort)*cpp+y*outPitch],outPitch,
+        input.getData(),inputPitch,w*mRaw->bpp,h-y);
+      return;
+    }
     BitPumpPlain bits(&input);
     w *= cpp;
     for (; y < h; y++) {

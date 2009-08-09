@@ -187,7 +187,8 @@ RawImage DngDecoder::decodeRaw() {
           ByteStream in(mFile->getData(slice.offset),slice.count);
           iPoint2D size(width,slice.h);
           iPoint2D pos(0,slice.offsetY);
-          readUncompressedRaw(in,size,pos,width*bps/8,bps,true);
+          gboolean big_endian = (mRootIFD->endian == big);
+          readUncompressedRaw(in,size,pos,width*bps/8,bps,big_endian);
         }
 
       } catch (TiffParserException) {

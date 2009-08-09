@@ -24,10 +24,12 @@
 */
 
 TiffIFDBE::TiffIFDBE() {
+  endian = big;
 }
 
 TiffIFDBE::TiffIFDBE(FileMap* f, guint offset)
 {
+  endian = big;
   int entries;
 
    const unsigned char* data = f->getData(offset);

@@ -41,6 +41,7 @@ public:
   vector<TiffIFD*> getIFDsWithTag(TiffTag tag);
   TiffEntry* getEntry(TiffTag tag);
   bool hasEntry(TiffTag tag);
+  Endianness endian;
 protected:
   gint nextIFD;
 };
