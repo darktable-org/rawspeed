@@ -43,6 +43,8 @@ FileMap* FileReader::readFile() {
 
   stat(mFilename, &st);
   fd = open(mFilename, O_RDONLY);
+  if (fd < 0)
+    throw new FileIOException("Could not open file.");
 #if 0
   // Not used, as it is slower than sync read
 
@@ -52,7 +54,7 @@ FileMap* FileReader::readFile() {
 #else 
   FileMap *fileData = new FileMap(st.st_size);
 
-  while(bytes_read < st.st_size) {
+  while((st.st_size > 0) && (bytes_read < st.st_size)) {
     dest = (char *) fileData->getDataWrt(bytes_read);
     bytes_read += read(fd, dest, st.st_size-bytes_read);
   }
