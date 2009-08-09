@@ -21,9 +21,11 @@ TiffParserHeaderless::~TiffParserHeaderless(void)
 #define CHECKSIZE(A) if (A >= mInput->getSize()) throw TiffParserException("Error reading TIFF structure. File Corrupt")
 #define CHECKPTR(A) if ((int)A >= ((int)(mInput->data) + size))) throw TiffParserException("Error reading TIFF structure. File Corrupt")
 
+void TiffParserHeaderless::parseData() {
+  parseData(0);
+}
 
 void TiffParserHeaderless::parseData(guint firstIfdOffset) {
-  const unsigned char* data = mInput->getData(0);
   if (mInput->getSize() < 12)
     throw TiffParserException("Not a TIFF file (size too small)");
 

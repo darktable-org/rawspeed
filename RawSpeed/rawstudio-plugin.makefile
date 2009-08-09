@@ -39,6 +39,7 @@ CPP_SOURCES= rawstudio-plugin-api.cpp \
 	TiffIFD.cpp \
 	TiffParser.cpp \
 	TiffParserException.cpp \
+	TiffParserHeaderless.cpp \
 	TiffParserOlympus.cpp
 CPP_OBJECTS=$(CPP_SOURCES:.cpp=.o)
 

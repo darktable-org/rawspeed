@@ -8,5 +8,5 @@ public:
   TiffParserHeaderless(FileMap* input, Endianness _end);
   virtual ~TiffParserHeaderless(void);
   void parseData(guint firstIfdOffset);
-  virtual void parseData() {parseData(0);}
+  virtual void parseData();
 };
