@@ -71,12 +71,6 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
 
   } else {
 
-    if (bitPerPixel==16)  {
-      BitBlt(&data[offset.x*sizeof(gushort)*cpp+y*outPitch],outPitch,
-        in,inputPitch,w*mRaw->bpp,h-y);
-      return;
-    }
-
     BitPumpPlain bits(&input);
     w *= cpp;
     for (; y < h; y++) {

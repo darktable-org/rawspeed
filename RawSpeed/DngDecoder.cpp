@@ -187,7 +187,7 @@ RawImage DngDecoder::decodeRaw() {
           ByteStream in(mFile->getData(slice.offset),slice.count);
           iPoint2D size(width,slice.h);
           iPoint2D pos(0,slice.offsetY);
-          readUncompressedRaw(in,size,pos,width*bps/8,bps,false);
+          readUncompressedRaw(in,size,pos,width*bps/8,bps,true);
         }
 
       } catch (TiffParserException) {
@@ -325,7 +325,8 @@ RawImage DngDecoder::decodeRaw() {
         int blackbase = blackarray[0] / blackarray[1];
         const gint *blackarrayv = (const gint*)raw->getEntry(BLACKLEVELDELTAV)->getIntArray();
         for (int i = 0; i < new_size.y; i++)
-          black = MIN(black, blackbase + blackarrayv[i*2] / blackarrayv[i*2+1]);
+          if (blackarrayv[i*2+1])
+            black = MIN(black, blackbase + blackarrayv[i*2] / blackarrayv[i*2+1]);
       } else {
         const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
         if (blackarray[1])
@@ -434,7 +435,8 @@ void DngDecoder::printMetaData()
         int blackbase = blackarray[0] / blackarray[1];
         const gint *blackarrayv = (const gint*)raw->getEntry(BLACKLEVELDELTAV)->getIntArray();
         for (int i = 0; i < new_size.y; i++)
-          black = MIN(black, blackbase + blackarrayv[i*2] / blackarrayv[i*2+1]);
+          if (blackarrayv[i*2+1])
+            black = MIN(black, blackbase + blackarrayv[i*2] / blackarrayv[i*2+1]);
       } else {
         const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
         if ( blackarray[1] )
