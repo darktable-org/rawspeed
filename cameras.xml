@@ -63,7 +63,7 @@
     <Crop x="64" y="52" width="4752" height="3158"/>
     <Sensor black="900" white="16383"/>
   </Camera>
-  <Camera make="Canon" model="Canon EOS 50D-sRaw1">
+  <Camera make="Canon" model="Canon EOS 50D" mode="sRaw1">
     <Crop x="0" y="0" width="3272" height="2178"/>
     <Sensor black="0" white="16383"/>
   </Camera>
@@ -107,11 +107,11 @@
     <Crop x="158" y="51" width="5634" height="3753"/>
     <Sensor black="1024" white="15600"/>
   </Camera>
-  <Camera make="Canon" model="Canon EOS 5D Mark II-sRaw1">
+  <Camera make="Canon" model="Canon EOS 5D Mark II" mode="sRaw1">
     <Crop x="0" y="0" width="3872" height="2574"/>
     <Sensor black="0" white="15600"/>
   </Camera>
-  <Camera make="Canon" model="Canon EOS 5D Mark II-sRaw2">
+  <Camera make="Canon" model="Canon EOS 5D Mark II" mode="sRaw2">
     <Crop x="0" y="0" width="2808" height="1872"/>
     <Sensor black="0" white="15600"/>
   </Camera>

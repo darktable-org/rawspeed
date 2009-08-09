@@ -268,10 +268,28 @@ RawImage DngDecoder::decodeRaw() {
   iPoint2D new_size(mRaw->dim.x, mRaw->dim.y);
 #ifndef PRINT_INFO
   // Crop
+
   if (raw->hasEntry(ACTIVEAREA)) {
     const guint *corners = raw->getEntry(ACTIVEAREA)->getIntArray();
     iPoint2D top_left(corners[1], corners[0]);
     new_size = iPoint2D(corners[3]-corners[1], corners[2]-corners[0]);
+    mRaw->subFrame(top_left,new_size);
+
+  } else if (raw->hasEntry(DEFAULTCROPORIGIN)) {
+
+    iPoint2D top_left(0,0);
+
+    if (raw->getEntry(DEFAULTCROPORIGIN)->type == TIFF_LONG) {
+      const guint* tl = raw->getEntry(DEFAULTCROPORIGIN)->getIntArray();
+      const guint* sz = raw->getEntry(DEFAULTCROPSIZE)->getIntArray();
+      top_left = iPoint2D(tl[0], tl[1]);
+      new_size = iPoint2D(sz[0], sz[1]);
+    } else if (raw->getEntry(DEFAULTCROPORIGIN)->type == TIFF_SHORT) {
+      const gushort* tl = raw->getEntry(DEFAULTCROPORIGIN)->getShortArray();
+      const gushort* sz = raw->getEntry(DEFAULTCROPSIZE)->getShortArray();
+      top_left = iPoint2D(tl[0], tl[1]);
+      new_size = iPoint2D(sz[0], sz[1]);
+    }
     mRaw->subFrame(top_left,new_size);
   }
 #endif
@@ -352,39 +370,81 @@ void DngDecoder::printMetaData()
   TrimSpaces(model);
   TrimSpaces(make);
 
-  data = mRootIFD->getIFDsWithTag(ACTIVEAREA);
-  if (data.empty())
-    ThrowRDE("Model name found");
-  raw = data[0];
+  data = mRootIFD->getIFDsWithTag(COMPRESSION);
 
+  if (data.empty())
+    ThrowRDE("DNG Decoder: No image data found");
+
+  // Erase the ones not with JPEG compression
+  for (vector<TiffIFD*>::iterator i = data.begin(); i != data.end(); ) {
+    int compression = (*i)->getEntry(COMPRESSION)->getShort();
+    bool isSubsampled = false;
+    try {
+      isSubsampled = (*i)->getEntry(NEWSUBFILETYPE)->getInt()&1; // bit 0 is on if image is subsampled
+    } catch (TiffParserException) {}
+    if ((compression != 7 && compression != 1) || isSubsampled) {  // Erase if subsampled, or not JPEG or uncompressed
+      i = data.erase(i);
+    } else {
+      i++;
+    }
+  }
+
+  if (data.empty())
+    ThrowRDE("RAW section not found");
+
+  raw = data[0];
   ColorFilterArray cfa(mRaw->cfa);
-  const guint *corners = raw->getEntry(ACTIVEAREA)->getIntArray();
-  iPoint2D top_left(corners[1], corners[0]);
-  iPoint2D new_size(corners[3]-corners[1], corners[2]-corners[0]);
+
+  // Crop
+  iPoint2D top_left(0,0);
+  iPoint2D new_size(mRaw->dim.x, mRaw->dim.y);
+
+  if (raw->hasEntry(ACTIVEAREA)) {
+    const guint *corners = raw->getEntry(ACTIVEAREA)->getIntArray();
+    top_left = iPoint2D(corners[1], corners[0]);
+    new_size = iPoint2D(corners[3]-corners[1], corners[2]-corners[0]);
+
+  } else if (raw->hasEntry(DEFAULTCROPORIGIN)) {
+
+    if (raw->getEntry(DEFAULTCROPORIGIN)->type == TIFF_LONG) {
+      const guint* tl = raw->getEntry(DEFAULTCROPORIGIN)->getIntArray();
+      const guint* sz = raw->getEntry(DEFAULTCROPSIZE)->getIntArray();
+      top_left = iPoint2D(tl[0], tl[1]);
+      new_size = iPoint2D(sz[0], sz[1]);
+    } else if (raw->getEntry(DEFAULTCROPORIGIN)->type == TIFF_SHORT) {
+      const gushort* tl = raw->getEntry(DEFAULTCROPORIGIN)->getShortArray();
+      const gushort* sz = raw->getEntry(DEFAULTCROPSIZE)->getShortArray();
+      top_left = iPoint2D(tl[0], tl[1]);
+      new_size = iPoint2D(sz[0], sz[1]);
+    }
+  }
 
   if (top_left.x & 1)
     cfa.shiftLeft();
   if (top_left.y & 1)
     cfa.shiftDown();
 
-  const gushort *blackdim = raw->getEntry(BLACKLEVELREPEATDIM)->getShortArray();
-  int black = 65536;
-  if (blackdim[0] != 0 && blackdim[1] != 0) {    
-    if (raw->hasEntry(BLACKLEVELDELTAV)) {
-      const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
-      int blackbase = blackarray[0] / blackarray[1];
-      const gint *blackarrayv = (const gint*)raw->getEntry(BLACKLEVELDELTAV)->getIntArray();
-      for (int i = 0; i < new_size.y; i++)
-        black = MIN(black, blackbase + blackarrayv[i*2] / blackarrayv[i*2+1]);
+  int black = -1;
+  if (raw->hasEntry(BLACKLEVELREPEATDIM)) {
+    const gushort *blackdim = raw->getEntry(BLACKLEVELREPEATDIM)->getShortArray();
+    black = 65536;
+    if (blackdim[0] != 0 && blackdim[1] != 0) {    
+      if (raw->hasEntry(BLACKLEVELDELTAV)) {
+        const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
+        int blackbase = blackarray[0] / blackarray[1];
+        const gint *blackarrayv = (const gint*)raw->getEntry(BLACKLEVELDELTAV)->getIntArray();
+        for (int i = 0; i < new_size.y; i++)
+          black = MIN(black, blackbase + blackarrayv[i*2] / blackarrayv[i*2+1]);
+      } else {
+        const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
+        if ( blackarray[1] )
+          black = blackarray[0] / blackarray[1];
+        else 
+          black = 0;
+      }
     } else {
-      const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
-      if ( blackarray[1] )
-        black = blackarray[0] / blackarray[1];
-      else 
-        black = 0;
+      black = 0;
     }
-  } else {
-    black = 0;
   }
 
   cout << "<Camera make=\"" << make << "\" model = \"" << model << "\">" << endl;

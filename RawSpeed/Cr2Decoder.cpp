@@ -134,14 +134,15 @@ void Cr2Decoder::decodeMetaData(CameraMetaData *meta) {
 
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
+  string mode = "";
 
   if (mRaw->subsampling.y == 2 && mRaw->subsampling.x == 2)
-    model += "-sRaw1";
+    mode = "sRaw1";
 
   if (mRaw->subsampling.y == 1 && mRaw->subsampling.x == 2)
-    model += "-sRaw2";
+    mode = "sRaw2";
 
-  setMetaData(meta, make, model,"");
+  setMetaData(meta, make, model, mode);
 
 }
 
