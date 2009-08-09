@@ -76,8 +76,10 @@ public:
   TiffTag tag;
   TiffDataType type;
   guint count;
+  guint getDataOffset() const { return data_offset; }
 protected:
   unsigned char* data;
+  guint data_offset;
 #ifdef _DEBUG
   int debug_intVal;
   float debug_floatVal;

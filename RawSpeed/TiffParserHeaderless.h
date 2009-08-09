@@ -7,5 +7,6 @@ class TiffParserHeaderless :
 public:
   TiffParserHeaderless(FileMap* input, Endianness _end);
   virtual ~TiffParserHeaderless(void);
-  virtual void parseData();
+  void parseData(guint firstIfdOffset);
+  virtual void parseData() {parseData(0);}
 };

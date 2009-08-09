@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Cr2Decoder.h"
+#include "TiffParserHeaderless.h"
 
 /* 
     RawSpeed - RAW file decoder.
@@ -130,7 +131,7 @@ void Cr2Decoder::decodeMetaData(CameraMetaData *meta) {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
   if (data.empty())
-    ThrowRDE("CR2 Meta Decoder: Model name found");
+    ThrowRDE("CR2 Meta Decoder: Model name not found");
 
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
@@ -149,6 +150,29 @@ void Cr2Decoder::decodeMetaData(CameraMetaData *meta) {
 // Interpolate and convert sRaw data.
 void Cr2Decoder::sRawInterpolate()
 {
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MAKERNOTE);
+  if (data.empty())
+    ThrowRDE("CR2 sRaw: Makernote not found");
+
+  TiffIFD* exif = data[0];
+  TiffEntry *makernoteEntry = exif->getEntry(MAKERNOTE);
+  const guchar* makernote = makernoteEntry->getData();
+  TiffParserHeaderless makertiff(mFile, mRootIFD->endian);
+  makertiff.parseData(makernoteEntry->getDataOffset());
+
+  data = makertiff.RootIFD()->getIFDsWithTag((TiffTag)0x4001);
+  if (data.empty())
+    ThrowRDE("CR2 sRaw: Unable to locate WB info.");
+
+  const gushort *wb_data = data[0]->getEntry((TiffTag)0x4001)->getShortArray();
+
+  // Offset to sRaw coefficients used to reconstruct uncorrected RGB data.
+  wb_data = &wb_data[4+(126+22)/2];
+
+  sraw_coeffs[0] = wb_data[0];
+  sraw_coeffs[1] = (wb_data[1] + wb_data[2] + 1 )>>1;
+  sraw_coeffs[2] = wb_data[3];
+
   if (mRaw->subsampling.y == 1 && mRaw->subsampling.x == 2) {
     interpolate_422(mRaw->dim.x / 2, mRaw->dim.y ,0, mRaw->dim.y);
   } else {
@@ -156,9 +180,10 @@ void Cr2Decoder::sRawInterpolate()
   }
 }
 
-#define YUV_TO_RGB(Y, Cb, Cr) r = (int)Y + (( 200*(int)Cb + 22929*(int)Cr) >> 12);\
-  g = (int)Y + ((-5640*(int)Cb - 11751*(int)Cr) >> 12);\
-  b = (int)Y + ((29040*(int)Cb - 101*(int)Cr) >> 12);
+#define YUV_TO_RGB(Y, Cb, Cr) r = sraw_coeffs[0] * ((int)Y + (( 200*(int)Cb + 22929*(int)Cr) >> 12));\
+  g = sraw_coeffs[1] * ((int)Y + ((-5640*(int)Cb - 11751*(int)Cr) >> 12));\
+  b = sraw_coeffs[2] * ((int)Y + ((29040*(int)Cb - 101*(int)Cr) >> 12));\
+  r >>= 10; g >>=10; b >>=10;
 
 /* sRaw interpolators - ugly as sin, but does the job in reasonably speed */
 
