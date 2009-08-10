@@ -34,6 +34,7 @@
       <h2>
         <span style="font-weight:bold"><xsl:value-of select="@make"/></span>
         - <xsl:value-of select="@model"/>
+          <xsl:if test="@mode != ''">, Mode: <span style="font-style:italic;"><xsl:value-of select="@mode"/></span></xsl:if>
       </h2>
       <div class="text">
         <xsl:variable name = "supported" ><xsl:value-of select="@supported"/></xsl:variable>
