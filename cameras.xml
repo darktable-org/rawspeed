@@ -43,6 +43,10 @@
     <Crop x="30" y="18" width="3908" height="2602"/>
     <Sensor black="1021" white="13600"/>
   </Camera>
+  <Camera make="Canon" model="Canon EOS 40D" mode="sRaw2">
+    <Crop x="0" y="0" width="1944" height="1296"/>
+    <Sensor black="0" white="16383"/>
+  </Camera>
   <Camera make="Canon" model="Canon EOS 450D">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
@@ -65,6 +69,10 @@
   </Camera>
   <Camera make="Canon" model="Canon EOS 50D" mode="sRaw1">
     <Crop x="0" y="0" width="3272" height="2178"/>
+    <Sensor black="0" white="16383"/>
+  </Camera>
+  <Camera make="Canon" model="Canon EOS 50D" mode="sRaw2">
+    <Crop x="0" y="0" width="2376" height="1584"/>
     <Sensor black="0" white="16383"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS 500D">
