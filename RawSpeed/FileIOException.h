@@ -1,3 +1,5 @@
+#include "RawDecoderException.h"
+
 /* 
     RawSpeed - RAW file decoder.
 
@@ -21,9 +23,10 @@
 */
 #pragma once
 
-class FileIOException
+void ThrowTPE(const char* fmt, ...);
+
+class FileIOException: public RawDecoderException
 {
 public:
   FileIOException(const string);
-  virtual ~FileIOException(void);
 };

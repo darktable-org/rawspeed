@@ -44,7 +44,7 @@ FileMap* FileReader::readFile() {
   stat(mFilename, &st);
   fd = open(mFilename, O_RDONLY);
   if (fd < 0)
-    throw new FileIOException("Could not open file.");
+    throw FileIOException("Could not open file.");
 #if 0
   // Not used, as it is slower than sync read
 
@@ -64,7 +64,7 @@ FileMap* FileReader::readFile() {
   HANDLE file_h;  // File handle
   file_h = CreateFile(mFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN, NULL);
   if (file_h == INVALID_HANDLE_VALUE) {
-    throw new FileIOException("Could not open file.");
+    throw FileIOException("Could not open file.");
   }
 
   LARGE_INTEGER f_size;
@@ -76,7 +76,7 @@ FileMap* FileReader::readFile() {
   if (! ReadFile(file_h, fileData->getDataWrt(0), fileData->getSize(), &bytes_read, NULL)) {
     CloseHandle(file_h);
     delete fileData;
-    throw new FileIOException("Could not read file.");
+    throw FileIOException("Could not read file.");
   }
   CloseHandle(file_h);
 

@@ -42,6 +42,7 @@ load_rawspeed(const gchar *filename)
 		c = new CameraMetaData(path);
 		g_free(path);
 	}
+
 	RS_IMAGE16 *image = NULL;
 	FileReader f((char *) filename);
 	RawDecoder *d = 0;
@@ -53,7 +54,14 @@ load_rawspeed(const gchar *filename)
 		GTimer *gt = g_timer_new();
 #endif
 
-		m = f.readFile();
+		try
+		{
+			m = f.readFile();
+		} catch (FileIOException e) {
+			printf("RawSpeed: IO Error occured:%s\n", e.what());
+			g_timer_destroy(gt);
+			return image;
+		}
 
 #ifdef TIME_LOAD
 		printf("Open %s: %.03fs\n", filename, g_timer_elapsed(gt, NULL));
