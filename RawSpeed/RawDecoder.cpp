@@ -113,7 +113,7 @@ void RawDecoder::Decode12BitRaw(ByteStream &input, guint w, guint h) {
   Camera* cam = meta->getCamera(make, model, mode);
   if (!cam) {
     if (mode.length() == 0) 
-      printf("Unable to find camera in database: %s %s\n", make.c_str(), model.c_str());
+      printf("Unable to find camera in database: %s %s %s\n", make.c_str(), model.c_str(), mode.c_str());
     
     return;    // Assume true.
   }
@@ -128,7 +128,7 @@ void RawDecoder::setMetaData( CameraMetaData *meta, string make, string model, s
   TrimSpaces(model);
   Camera *cam = meta->getCamera(make, model, mode);
   if (!cam) {
-    printf("Unable to find camera in database: %s %s\n", make.c_str(), model.c_str());
+    printf("Unable to find camera in database: %s %s %s\n", make.c_str(), model.c_str(), mode.c_str());
     return;
   }
   mRaw->subFrame(cam->cropPos, cam->cropSize);
