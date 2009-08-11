@@ -400,7 +400,7 @@
       <Color x="0" y="1">GREEN</Color>
       <Color x="1" y="1">RED</Color>
     </CFA>
-    <Crop x="0" y="0" width="3040" height="2014"/>
+    <Crop x="0" y="0" width="3038" height="2014"/>
     <Sensor black="0" white="4095"/>
   </Camera>
   <Camera make="NIKON CORPORATION" model="NIKON D700">
