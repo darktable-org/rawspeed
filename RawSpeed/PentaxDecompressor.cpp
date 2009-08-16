@@ -67,6 +67,7 @@ void PentaxDecompressor::decodePentax( guint offset, guint size )
   gint pLeft2 = 0;
 
   for (guint y=0;y<h;y++) {
+    pentaxBits->checkPos();
     dest = (gushort*)&draw[y*mRaw->pitch];  // Adjust destination
     pUp1[y&1] += HuffDecodePentax();
     pUp2[y&1] += HuffDecodePentax();

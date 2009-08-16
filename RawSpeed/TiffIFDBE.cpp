@@ -31,9 +31,10 @@ TiffIFDBE::TiffIFDBE(FileMap* f, guint offset)
 {
   endian = big;
   int entries;
+  CHECKSIZE(offset);
 
-   const unsigned char* data = f->getData(offset);
-   entries = (unsigned short)data[0] << 8 | (unsigned short)data[1];    // Directory entries in this IFD
+  const unsigned char* data = f->getData(offset);
+  entries = (unsigned short)data[0] << 8 | (unsigned short)data[1];    // Directory entries in this IFD
 
   CHECKSIZE(offset+2+entries*4);
   for (int i = 0; i < entries; i++) {

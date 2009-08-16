@@ -225,6 +225,7 @@ RawImage DngDecoder::decodeRaw() {
           for (guint y=0; y< tilesY; y++) {
             for (guint x=0; x< tilesX; x++) {
               DngSliceElement e(offsets[x+y*tilesX], counts[x+y*tilesX], tilew*x, tileh*y);            
+              e.mUseBigtable = tilew*tileh > 1024*1024;
               slices.addSlice(e);
             }
           }
@@ -243,6 +244,7 @@ RawImage DngDecoder::decodeRaw() {
           guint offY = 0;
           for (guint s = 0; s<TEcounts->count; s++) {
             DngSliceElement e(offsets[s], counts[s], 0, offY);
+            e.mUseBigtable = yPerSlice*mRaw->dim.y > 1024*1024;
             offY +=yPerSlice;
 
             if (mFile->isValid(e.byteOffset+e.byteCount)) // Only decode if size is valid

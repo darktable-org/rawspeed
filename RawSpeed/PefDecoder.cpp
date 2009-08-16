@@ -62,9 +62,12 @@ RawImage PefDecoder::decodeRaw()
   mRaw->dim = iPoint2D(width, height);
   mRaw->bpp = 2;
   mRaw->createData();
-  
-  PentaxDecompressor l(mFile,mRaw);
-  l.decodePentax(offsets->getInt(), counts->getInt());
+  try {
+    PentaxDecompressor l(mFile,mRaw);
+    l.decodePentax(offsets->getInt(), counts->getInt());
+  } catch (IOException e) {
+    // Let's ignore it, it may have delivered somewhat useful data.
+  }
 
   return mRaw;
 }

@@ -43,4 +43,5 @@ private:
   void decodeScanLeft4_2_0();
   void decodeScanLeft4_2_2();
   guint *offset;
+  int* slice_width;
 };

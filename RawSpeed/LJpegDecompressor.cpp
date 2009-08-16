@@ -104,7 +104,7 @@ LJpegDecompressor::~LJpegDecompressor(void)
 void LJpegDecompressor::getSOF( SOFInfo* sof, guint offset, guint size )
 {
   if (!mFile->isValid(offset+size-1))
-    ThrowRDE("LJpegDecompressor::getSOF: Max offset before out of file, invalid data");
+    ThrowRDE("LJpegDecompressor::getSOF: Start offset plus size is longer than file. Truncated file.");
   try {
     input = new ByteStream(mFile->getData(offset), size);
 
@@ -129,7 +129,7 @@ void LJpegDecompressor::getSOF( SOFInfo* sof, guint offset, guint size )
 
 void LJpegDecompressor::startDecoder(guint offset, guint size, guint offsetX, guint offsetY) {
   if (!mFile->isValid(offset+size-1))
-    ThrowRDE("LJpegDecompressor::startDecoder: Max offset before out of file, invalid data");
+    ThrowRDE("LJpegDecompressor::startDecoder: Start offset plus size is longer than file. Truncated file.");
   if ((gint)offsetX>=mRaw->dim.x)
     ThrowRDE("LJpegDecompressor::startDecoder: X offset outside of image");
   if ((gint)offsetY>=mRaw->dim.y)
@@ -187,7 +187,7 @@ void LJpegDecompressor::startDecoder(guint offset, guint size, guint offsetX, gu
     }
     
   } catch (IOException) {
-    ThrowRDE("LJpegDecompressor: Bitpump exception, read outside file. Corrupt File.");
+    throw;
   }
 }
 
@@ -248,18 +248,16 @@ void LJpegDecompressor::parseSOS()
       ThrowRDE("LJpegDecompressor::parseSOS: Invalid Huffman table selection, not defined.");
 
     frame.compInfo[count].dcTblNo = td;
-//    _RPT2(0,"Component Selector:%u, Table Dest:%u\n",cs, td);
   }
 
+  // Get predictor
   pred = input->getByte();
-//  _RPT1(0,"Predictor:%u, ",pred);
   if (pred>7)
     ThrowRDE("LJpegDecompressor::parseSOS: Invalid predictor mode.");
 
   input->skipBytes(1);                    // Se + Ah Not used in LJPEG
   guint b = input->getByte();
   Pt = b&0xf;          // Point Transform
-//  _RPT1(0,"Point transform:%u\n",Pt);
 
   guint cheadersize = 3+frame.cps * 2 + 3;
   _ASSERTE(cheadersize == headerLength);
@@ -288,7 +286,6 @@ void LJpegDecompressor::parseDHT() {
 	  guint Th = b&0xf;
 	  if (Th>3)
 	    ThrowRDE("LJpegDecompressor::parseDHT: Invalid huffman table destination id.");
-//    _RPT1(0, "Decoding Table:%u\n",Th);
 
 	  guint acc = 0;
 	  HuffmanTable* t = &huff[Th];
@@ -564,7 +561,7 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl)
     */
 
     if (l > frame.prec || htbl->valptr[l] == 0xff) {
-      ThrowRDE("Corrupt JPEG data: bad Huffman code:%u\n",l);
+      ThrowRDE("Corrupt JPEG data: bad Huffman code:%u",l);
     } else {
       rv = htbl->huffval[htbl->valptr[l] +
         ((int)(code - htbl->mincode[l]))];
@@ -582,7 +579,10 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl)
   * Figure F.12: extend sign bit
   */
   if ((rv+l)>24)  // Ensure we have enough bits
-    bits->fill();
+    if (rv>16) // There is no values above 16 bits.   
+      ThrowRDE("Corrupt JPEG data: Too many bits requested.");
+    else
+      bits->fill();
 
   if (rv) {
     gint x = bits->getBitsNoFill(rv);

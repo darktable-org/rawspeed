@@ -23,15 +23,15 @@
 #include "TiffParserException.h"
 #include "FileMap.h"
 
-const int datasizes[] = {0,1,1,2,4,8,1,1,2,4, 8, 4, 8, 4};
+const guint datasizes[] = {0,1,1,2,4,8,1,1,2,4, 8, 4, 8, 4};
                       // 0-1-2-3-4-5-6-7-8-9-10-11-12-13
-const int datashifts[] = {0,0,0,1,2,3,0,0,1,2, 3, 2, 3, 2};
+const guint datashifts[] = {0,0,0,1,2,3,0,0,1,2, 3, 2, 3, 2};
 
 #ifdef CHECKSIZE
 #undef CHECKSIZE
 #endif
 
-#define CHECKSIZE(A) if (A >= f->getSize()) throw TiffParserException("Error reading TIFF structure. File Corrupt")
+#define CHECKSIZE(A) if (A >= f->getSize() || A < 1) throw TiffParserException("Error reading TIFF structure. File Corrupt")
 
 // 0-1-2-3-4-5-6-7-8-9-10-11-12-13
 /*

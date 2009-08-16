@@ -107,9 +107,12 @@ RawImage NefDecoder::decodeRaw()
   }
  
   ByteStream metadata(meta->getData(), meta->count);
-  
-  NikonDecompressor decompressor(mFile,mRaw);
-  decompressor.DecompressNikon(metadata, width, height, bitPerPixel,offsets->getInt(),counts->getInt());
+  try {
+    NikonDecompressor decompressor(mFile,mRaw);
+    decompressor.DecompressNikon(metadata, width, height, bitPerPixel,offsets->getInt(),counts->getInt());
+  } catch (IOException e) {
+  	// Let's ignore it, it may have delivered somewhat useful data.
+  }
 
   return mRaw;
 }

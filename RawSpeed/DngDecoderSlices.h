@@ -29,12 +29,13 @@ class DngSliceElement
 {
 public:
   DngSliceElement(guint off, guint count, guint offsetX, guint offsetY) : 
-      byteOffset(off), byteCount(count), offX(offsetX), offY(offsetY) {};
+      byteOffset(off), byteCount(count), offX(offsetX), offY(offsetY), mUseBigtable(false) {};
   ~DngSliceElement(void) {};
   const guint byteOffset;
   const guint byteCount;
   const guint offX;
   const guint offY;
+  gboolean mUseBigtable;
 };
 class DngDecoderSlices;
 

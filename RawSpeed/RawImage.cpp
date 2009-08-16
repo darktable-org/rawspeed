@@ -53,7 +53,9 @@ RawImageData::~RawImageData(void)
 }
 
 
-void RawImageData::createData() {  
+void RawImageData::createData() {
+  if (dim.x > 65535 || dim.y > 65535)
+    ThrowRDE("RawImageData: Dimensions too large for allocation.");
   if (data)
     ThrowRDE("RawImageData: Duplicate data allocation in createData.");
   pitch = (((dim.x*bpp) + 15)/16)*16;

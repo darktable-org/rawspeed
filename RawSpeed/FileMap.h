@@ -39,6 +39,8 @@ public:
   guchar* getDataWrt(guint offset) {return &data[offset];}
   guint getSize() {return size;}
   gboolean isValid(guint offset) {return offset<=size;}
+  FileMap* clone();
+  void corrupt(int errors);
 private:
  guchar* data;
  guint size;

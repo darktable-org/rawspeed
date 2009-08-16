@@ -25,7 +25,7 @@
 #include "RawDecoder.h"
 #include "CameraMetaData.h"
 
-#define _USE_GFL_
+//#define _USE_GFL_
 #ifdef _USE_GFL_
 #include "libgfl.h"
 #pragma comment(lib, "libgfl.lib") 
@@ -35,6 +35,9 @@
 
 int startTime;
 
+// Open file, or test corrupt file
+#if 1
+// Open file and save as tiff
 void OpenFile(FileReader f, CameraMetaData *meta) {
   RawDecoder *d = 0;
   FileMap* m = 0;
@@ -47,6 +50,7 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
 
     startTime = GetTickCount();
     try {
+      
       d->decodeRaw();
       d->decodeMetaData(meta);
       RawImage r = d->mRaw;
@@ -57,11 +61,11 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
       r->scaleBlackWhite();
 
       for (guint i = 0; i < d->errors.size(); i++) {
-        printf("Error Encoutered:%s", d->errors[i]);
+        printf("Error Encountered:%s", d->errors[i]);
       }
       if (r->isCFA) {
-//        printf("DCRAW filter:%x\n",r->cfa.getDcrawFilter());
-//        printf(r->cfa.asString().c_str());
+        printf("DCRAW filter:%x\n",r->cfa.getDcrawFilter());
+        printf(r->cfa.asString().c_str());
       }
 
 #ifdef _USE_GFL_
@@ -105,6 +109,58 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
 
 }
 
+#else
+
+// Test single file multiple times in corrupted state
+// Used to test for states that might crash the app.
+
+void OpenFile(FileReader f, CameraMetaData *meta) {
+  RawDecoder *d = 0;
+  FileMap* m = 0;
+  wprintf(L"Opening:%s\n",f.Filename());
+  m = f.readFile();
+  srand(0xC0CAC01A);  // Hardcoded seed for re-producability (on the same platform)
+
+  int tests = 50;
+  // Try 50 permutations
+  for (int i = 0 ; i < tests; i++) {  
+    FileMap *m2 = m->clone();
+    try {    
+      // Insert 1000 random errors in file
+      m2->corrupt(1000);
+      TiffParser t(m2);
+      t.parseData();
+      d = t.getDecompressor();
+
+      startTime = GetTickCount();
+
+      d->decodeRaw();
+      d->decodeMetaData(meta);
+      RawImage r = d->mRaw;
+
+      guint time = GetTickCount()-startTime;
+      float mpps = (float)r->dim.x * (float)r->dim.y * (float)r->getCpp()  / (1000.0f * (float)time);
+      wprintf(L"(%d/%d) Decoding %s took: %u ms, %4.2f Mpixel/s\n", i+1, tests, f.Filename(), time, mpps);
+      for (guint i = 0; i < d->errors.size(); i++) {
+        printf("Error Encountered:%s\n", d->errors[i]);
+      }
+    } catch (RawDecoderException e) {
+      wchar_t uni[1024];
+      MultiByteToWideChar(CP_ACP, 0, e.what(), -1, uni, 1024);
+      wprintf(L"Raw Decoder Exception:%s\n",uni);
+    } catch (TiffParserException e) {
+      wchar_t uni[1024];
+      MultiByteToWideChar(CP_ACP, 0, e.what(), -1, uni, 1024);
+      wprintf(L"Tiff Parser Exception:%s\n",uni);
+    }
+      delete m2;
+      if (d)
+        delete d;
+      d = 0;
+  }
+}
+#endif
+
 int wmain(int argc, _TCHAR* argv[])
 {
   if (1) {  // for memory detection
@@ -118,28 +174,27 @@ int wmain(int argc, _TCHAR* argv[])
 #endif
   CameraMetaData meta("..\\cameras.xml");  
   //meta.dumpXML();
-//  OpenFile(FileReader(L"..\\testimg\\dng\\Panasonic_LX3(300109).dng"),&meta);
-  //OpenFile(FileReader(L"..\\testimg\\Panasonic_LX3.rw2"),&meta);
-/*
-  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\K7FARI0200.DNG"),&meta);
-  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\K7FARI6400.DNG"),&meta);
-  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\K7hMULTII0200.DNG"),&meta);
-  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\K7hVFAO.DNG"),&meta);*/
+
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K7FARI0200.DNG"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K7FARI6400.DNG"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K7hMULTII0200.DNG"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K7hVFAO.DNG"),&meta);
   OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Leica_M8.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Leica_M_8.dng"),&meta);
 
-/*  
+  
   OpenFile(FileReader(L"..\\testimg\\Canon_5DMk2-sRaw2.CR2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_450D.cr2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_5DMk2-sRaw1.CR2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_5D_Mk2-ISO100_sRAW1.CR2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D-1.cr2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D-2.cr2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D-3.cr2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D-4.cr2"),&meta);
-  */
-//  OpenFile(FileReader(L"..\\testimg\\kp.CR2"),&meta);
+  
+  OpenFile(FileReader(L"..\\testimg\\kp.CR2"),&meta);
 
-/*
+
   OpenFile(FileReader(L"..\\testimg\\kp.CR2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1Ds_Mk2.cr2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\5d.CR2"),&meta);
@@ -367,10 +422,10 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A350.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A900-2.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\Sony_DSLR-A900.dng"),&meta);
-*/
-OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed.dng"),&meta);
-OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed2.dng"),&meta);
-OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed3.dng"),&meta);
+
+  OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed.dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed2.dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed3.dng"),&meta);
 
 
   MessageBox(0,L"Finished", L"Finished",0);

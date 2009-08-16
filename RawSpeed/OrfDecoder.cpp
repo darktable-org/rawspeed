@@ -86,8 +86,15 @@ RawImage OrfDecoder::decodeRaw()
   if (oly->type == TIFF_UNDEFINED)
     ThrowRDE("ORF Decoder: Unsupported compression");
 
-  ByteStream s(mFile->getData(offsets->getInt()),counts->getInt());
-  decodeCompressed(s, width, height);
+  // We add 3 bytes slack, since the bitpump might be a few bytes ahead. 
+  ByteStream s(mFile->getData(offsets->getInt()),counts->getInt()+3);
+
+  try {
+    decodeCompressed(s, width, height);
+  } catch (IOException) {
+    // Let's ignore it, it may have delivered somewhat useful data.
+  }
+
   return mRaw;
 }
 
@@ -106,6 +113,7 @@ void OrfDecoder::decodeCompressed(ByteStream& s,guint w, guint h)
     memset (acarry, 0, sizeof acarry);
     gushort* dest = (gushort*)&data[y*pitch];
     for (guint x=0; x < w; x++) {
+      bits.checkPos();
       bits.fill();
       carry = acarry[x & 1];
       i = 2 * (carry[2] < 3);

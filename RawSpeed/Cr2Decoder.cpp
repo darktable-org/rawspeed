@@ -80,8 +80,18 @@ RawImage Cr2Decoder::decodeRaw()
 
   mRaw->bpp = 2;
   mRaw->dim = iPoint2D(slices[0].w, completeH);
-  mRaw->createData();
 
+  if(raw->hasEntry((TiffTag)0xc6c5)) {
+    gushort ss = raw->getEntry((TiffTag)0xc6c5)->getInt();
+    // sRaw
+    if (ss == 4) { 
+      mRaw->dim.x /= 3;
+      mRaw->setCpp(3);
+      mRaw->isCFA = false;
+    }
+  }
+ 
+  mRaw->createData();
 
   vector<int> s_width;
   if (raw->hasEntry(CANONCR2SLICE)) {
@@ -107,6 +117,9 @@ RawImage Cr2Decoder::decodeRaw()
         throw;
       // These may just be single slice error - store the error and move on
       errors.push_back(_strdup(e.what()));
+    }
+    catch (IOException e) {
+      // Let's try to ignore this - it might be truncated data, so something might be useful.
     }
     offY += slice.w;
   }

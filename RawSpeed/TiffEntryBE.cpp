@@ -36,7 +36,7 @@ TiffEntryBE::TiffEntryBE(FileMap* f, guint offset) : mDataSwapped(false)
 
   if (type>13)
     throw TiffParserException("Error reading TIFF structure. Unknown Type encountered.");
-  int bytesize = count << datashifts[type];
+  guint bytesize = count << datashifts[type];
   if (bytesize <=4) {
     data = f->getDataWrt(offset+8);
   } else { // offset

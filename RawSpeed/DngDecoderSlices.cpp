@@ -79,9 +79,14 @@ void DngDecoderSlices::decodeSlice( DngDecoderThread* t ) {
     t->slices.pop();
     try {
       l.startDecoder(e.byteOffset, e.byteCount, e.offX, e.offY);
-    } catch (RawDecoderException e) { 
+    } catch (RawDecoderException err) { 
       pthread_mutex_lock(&errMutex);
-      errors.push_back(_strdup(e.what()));
+      errors.push_back(_strdup(err.what()));
+      pthread_mutex_unlock(&errMutex);
+    }
+    catch (IOException err) {
+      pthread_mutex_lock(&errMutex);
+      errors.push_back("DngDecoderSlices::decodeSlice: IO error occurred, probably attempted to read past end of file.");
       pthread_mutex_unlock(&errMutex);
     }
   }

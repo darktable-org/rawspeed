@@ -44,3 +44,18 @@ FileMap::~FileMap(void)
   data = 0;
   size = 0;
 }
+
+FileMap* FileMap::clone()
+{
+  FileMap *new_map = new FileMap(size);
+  memcpy(new_map->data, data, size);
+  return new_map;
+}
+
+void FileMap::corrupt( int errors )
+{
+  for (int i = 0; i < errors; i++) {
+    guint pos = ( rand() | (rand()<<15) ) % size;
+    data[pos] = rand()&0xff;
+  }
+}

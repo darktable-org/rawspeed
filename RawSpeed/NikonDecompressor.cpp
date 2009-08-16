@@ -123,6 +123,8 @@ void NikonDecompressor::DecompressNikon( ByteStream &metadata, guint w, guint h,
     for (x=1; x < cw; x++) {
       pLeft1 += HuffDecodeNikon();
       pLeft2 += HuffDecodeNikon();
+      if (pLeft1 < 0 || pLeft1 > 65535 || pLeft2 < 0 || pLeft2 > 65535)
+        ThrowRDE("DecompressNikon: Image value out of range. Corrupt image.");
       dest[x] =  curve[pLeft1] | (curve[pLeft2]<<16);
     }
   }
