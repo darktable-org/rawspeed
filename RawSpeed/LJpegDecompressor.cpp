@@ -574,16 +574,19 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl)
     return -32768;
   }
 
-  /*
-  * Section F.2.2.1: decode the difference and
-  * Figure F.12: extend sign bit
-  */
-  if ((rv+l)>24)  // Ensure we have enough bits
+  // Ensure we have enough bits
+  if ((rv+l)>24) {
     if (rv>16) // There is no values above 16 bits.   
       ThrowRDE("Corrupt JPEG data: Too many bits requested.");
     else
       bits->fill();
+  }
 
+  /*
+  * Section F.2.2.1: decode the difference and
+  * Figure F.12: extend sign bit
+  */
+  
   if (rv) {
     gint x = bits->getBitsNoFill(rv);
     if ((x & (1 << (rv-1))) == 0)
