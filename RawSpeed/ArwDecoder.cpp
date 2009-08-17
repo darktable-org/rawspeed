@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "ArwDecoder.h"
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -17,13 +17,13 @@
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
     http://www.klauspost.com
 */
 
 
-ArwDecoder::ArwDecoder( TiffIFD *rootIFD, FileMap* file ) : 
+ArwDecoder::ArwDecoder( TiffIFD *rootIFD, FileMap* file ) :
  RawDecoder(file), mRootIFD(rootIFD)
 {
 
@@ -71,10 +71,10 @@ RawImage ArwDecoder::decodeRaw()
   const gushort* c = raw->getEntry(SONY_CURVE)->getShortArray();
   guint sony_curve[] = { 0,0,0,0,0,4095 };
 
-  for (guint i = 0; i < 4; i++) 
+  for (guint i = 0; i < 4; i++)
     sony_curve[i+1] = (c[i]>> 2) & 0xfff;
 
-  for (guint i = 0; i < 0x4001; i++) 
+  for (guint i = 0; i < 0x4001; i++)
     curve[i] = i;
 
   for (guint i=0; i < 5; i++)
@@ -172,7 +172,7 @@ void ArwDecoder::checkSupport(CameraMetaData *meta) {
 void ArwDecoder::decodeMetaData(CameraMetaData *meta)
 {
   //Default
-  mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE); 
+  mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
   if (data.empty())

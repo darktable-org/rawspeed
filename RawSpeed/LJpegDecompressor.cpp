@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "LJpegDecompressor.h"
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -17,16 +17,16 @@
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
     http://www.klauspost.com
 */
 
 /*
 * Huffman table generation:
-* LJpegDecompressor::HuffDecode, 
+* LJpegDecompressor::HuffDecode,
 * LJpegDecompressor::createHuffmanTable
-* and used data structures are originally grabbed from the IJG software, 
+* and used data structures are originally grabbed from the IJG software,
 * and adapted by Hubert Figuiere.
 *
 * Copyright (C) 1991, 1992, Thomas G. Lane.
@@ -36,46 +36,46 @@
 * Copyright (c) 1993 Brian C. Smith, The Regents of the University
 * of California
 * All rights reserved.
-* 
+*
 * Copyright (c) 1994 Kongji Huang and Brian C. Smith.
 * Cornell University
 * All rights reserved.
-* 
+*
 * Permission to use, copy, modify, and distribute this software and its
 * documentation for any purpose, without fee, and without written agreement is
 * hereby granted, provided that the above copyright notice and the following
 * two paragraphs appear in all copies of this software.
-* 
+*
 * IN NO EVENT SHALL CORNELL UNIVERSITY BE LIABLE TO ANY PARTY FOR
 * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
 * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF CORNELL
 * UNIVERSITY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-* 
+*
 * CORNELL UNIVERSITY SPECIFICALLY DISCLAIMS ANY WARRANTIES,
 * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
 * ON AN "AS IS" BASIS, AND CORNELL UNIVERSITY HAS NO OBLIGATION TO
 * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-*/ 
+*/
 
-const guint bitMask[] = {  0xffffffff, 0x7fffffff, 
+const guint bitMask[] = {  0xffffffff, 0x7fffffff,
 0x3fffffff, 0x1fffffff,
-0x0fffffff, 0x07ffffff, 
+0x0fffffff, 0x07ffffff,
 0x03ffffff, 0x01ffffff,
-0x00ffffff, 0x007fffff, 
+0x00ffffff, 0x007fffff,
 0x003fffff, 0x001fffff,
-0x000fffff, 0x0007ffff, 
+0x000fffff, 0x0007ffff,
 0x0003ffff, 0x0001ffff,
-0x0000ffff, 0x00007fff, 
+0x0000ffff, 0x00007fff,
 0x00003fff, 0x00001fff,
-0x00000fff, 0x000007ff, 
+0x00000fff, 0x000007ff,
 0x000003ff, 0x000001ff,
-0x000000ff, 0x0000007f, 
+0x000000ff, 0x0000007f,
 0x0000003f, 0x0000001f,
-0x0000000f, 0x00000007, 
+0x0000000f, 0x00000007,
 0x00000003, 0x00000001};
 
-LJpegDecompressor::LJpegDecompressor(FileMap* file, RawImage img): 
+LJpegDecompressor::LJpegDecompressor(FileMap* file, RawImage img):
  mFile(file), mRaw(img)
 {
   input = 0;
@@ -185,7 +185,7 @@ void LJpegDecompressor::startDecoder(guint offset, guint size, guint offsetX, gu
           break;
         }
     }
-    
+
   } catch (IOException) {
     throw;
   }
@@ -196,16 +196,16 @@ void LJpegDecompressor::parseSOF(SOFInfo* sof) {
   sof->prec = input->getByte();
   sof->h = input->getShort();
   sof->w = input->getShort();
-  
+
   sof->cps = input->getByte();
-  
+
   if (sof->prec>16)
     ThrowRDE("LJpegDecompressor: More than 16 bits per channel is not supported.");
 
   if (sof->cps>4 || sof->cps<2)
     ThrowRDE("LJpegDecompressor: Only from 2 to 4 components are supported.");
 
-  if(headerLength!=8+sof->cps*3) 
+  if(headerLength!=8+sof->cps*3)
     ThrowRDE("LJpegDecompressor: Header size mismatch.");
 
   for (guint i = 0; i< sof->cps; i++) {
@@ -278,30 +278,30 @@ void LJpegDecompressor::parseDHT() {
 
   while (headerLength)  {
 	  guint b = input->getByte();
-	
+
 	  guint Tc = (b>>4);
 	  if (Tc!=0)
 	    ThrowRDE("LJpegDecompressor::parseDHT: Unsupported Table class.");
-	
+
 	  guint Th = b&0xf;
 	  if (Th>3)
 	    ThrowRDE("LJpegDecompressor::parseDHT: Invalid huffman table destination id.");
 
 	  guint acc = 0;
 	  HuffmanTable* t = &huff[Th];
-	
+
 	  for (guint i = 0; i < 16 ;i++) {
 	    t->bits[i+1] = input->getByte();
 	    acc+=t->bits[i+1];
 	  }
 	  t->bits[0] = 0;
 	  memset(t->huffval,0,sizeof(t->huffval));
-	  if (acc > 256) 
+	  if (acc > 256)
 	    ThrowRDE("LJpegDecompressor::parseDHT: Invalid DHT table.");
-	
+
 	  if (headerLength < 1+16+acc)
 	    ThrowRDE("LJpegDecompressor::parseDHT: Invalid DHT table length.");
-	
+
 	  for(guint i =0 ; i<acc; i++) {
 	    t->huffval[i] = input->getByte();
 	  }
@@ -428,11 +428,11 @@ void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
 
 /************************************
  * Bitable creation
- * 
+ *
  * This is expanding the concept of fast lookups
  *
  * A complete table for 14 arbitrary bits will be
- * created that enables fast lookup of number of bits used, 
+ * created that enables fast lookup of number of bits used,
  * and final delta result.
  * Hit rate is about 90-99% for typical LJPEGS, usually about 98%
  *
@@ -446,7 +446,7 @@ void LJpegDecompressor::createBigTable( HuffmanTable *htbl ) {
   guint l;
 
   htbl->bigTable = (gint*)_aligned_malloc(size*sizeof(gint),16);
-  for (guint i = 0; i <size; i++) {   
+  for (guint i = 0; i <size; i++) {
     gushort input = i<<2; // Calculate input value
     gint code=input>>8;   // Get 8 bits
     guint val = htbl->numbits[code];
@@ -473,12 +473,12 @@ void LJpegDecompressor::createBigTable( HuffmanTable *htbl ) {
           ((int)(code - htbl->mincode[l]))];
       }
     }
-  
+
 
     if (rv == 16) {
       if (mDNGCompatible)
         htbl->bigTable[i] = (-32768<<8) | (16+l);
-      else 
+      else
         htbl->bigTable[i] = (-32768<<8) | l;
       continue;
     }
@@ -576,7 +576,7 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl)
 
   // Ensure we have enough bits
   if ((rv+l)>24) {
-    if (rv>16) // There is no values above 16 bits.   
+    if (rv>16) // There is no values above 16 bits.
       ThrowRDE("Corrupt JPEG data: Too many bits requested.");
     else
       bits->fill();
@@ -586,13 +586,13 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl)
   * Section F.2.2.1: decode the difference and
   * Figure F.12: extend sign bit
   */
-  
+
   if (rv) {
     gint x = bits->getBitsNoFill(rv);
     if ((x & (1 << (rv-1))) == 0)
       x -= (1 << rv) - 1;
     return x;
-  } 
+  }
   return 0;
 }
 

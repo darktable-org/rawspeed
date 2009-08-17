@@ -1,3 +1,8 @@
+#pragma once
+#include "FileMap.h"
+#include "TiffEntry.h"
+#include "TiffParserException.h"
+
 /* 
     RawSpeed - RAW file decoder.
 
@@ -15,14 +20,11 @@
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
     http://www.klauspost.com
 */
-#pragma once
-#include "FileMap.h"
-#include "TiffEntry.h"
-#include "TiffParserException.h"
+
 
 typedef enum Endianness {
   big, little

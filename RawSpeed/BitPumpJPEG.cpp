@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "BitPumpJPEG.h"
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -17,7 +17,7 @@
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
     http://www.klauspost.com
 
@@ -38,7 +38,7 @@ BitPumpJPEG::BitPumpJPEG( ByteStream *s ):
   init();
 }
 
-BitPumpJPEG::BitPumpJPEG( const guchar* _buffer, guint _size ) : 
+BitPumpJPEG::BitPumpJPEG( const guchar* _buffer, guint _size ) :
  buffer(_buffer), size(_size+sizeof(guint)), mLeft(0),mCurr(0), off(0)
 {
   init();
@@ -68,7 +68,7 @@ void BitPumpJPEG::fill() {
           off++;
         }  else {
           c = 0;
-          off--;  // Don't return more bytes, rewind, so this will be hit next          
+          off--;  // Don't return more bytes, rewind, so this will be hit next
           stuffed++;
         }
       }
@@ -123,7 +123,7 @@ guint BitPumpJPEG::getBitSafe() {
   return (mCurr >> (--mLeft)) & 1;
 }
 
-guint BitPumpJPEG::getBitsSafe(unsigned int nbits) { 
+guint BitPumpJPEG::getBitsSafe(unsigned int nbits) {
   if (nbits>MIN_GET_BITS)
     throw IOException("Too many bits requested");
   if (mLeft < nbits) {
@@ -161,7 +161,7 @@ unsigned char BitPumpJPEG::getByteSafe() {
 }
 
 void BitPumpJPEG::setAbsoluteOffset(unsigned int offset) {
-  if (offset >= size) 
+  if (offset >= size)
       throw IOException("Offset set out of buffer");
   mLeft = 0;
   off = offset;

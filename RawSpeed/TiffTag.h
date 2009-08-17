@@ -1,4 +1,3 @@
-//
 // Authors:
 //     Larry Ewing <lewing@novell.com>
 //

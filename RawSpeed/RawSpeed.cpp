@@ -1,4 +1,10 @@
 #include "stdafx.h"
+#include "FileReader.h"
+#include "TiffParser.h"
+#include "RawDecoder.h"
+#include "CameraMetaData.h"
+#include "ColorFilterArray.h"
+
 /* 
     RawSpeed - RAW file decoder.
 
@@ -16,22 +22,16 @@
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
     http://www.klauspost.com
 */
-#include "FileReader.h"
-#include "TiffParser.h"
-#include "RawDecoder.h"
-#include "CameraMetaData.h"
 
 //#define _USE_GFL_
 #ifdef _USE_GFL_
 #include "libgfl.h"
 #pragma comment(lib, "libgfl.lib") 
 #endif
-
-#include "ColorFilterArray.h"
 
 int startTime;
 

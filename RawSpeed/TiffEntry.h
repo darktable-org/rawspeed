@@ -1,3 +1,7 @@
+#pragma once
+#include "TiffParserException.h"
+#include "FileMap.h"
+
 /* 
     RawSpeed - RAW file decoder.
 
@@ -15,13 +19,10 @@
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
     http://www.klauspost.com
 */
-#pragma once
-#include "TiffParserException.h"
-#include "FileMap.h"
 
 const guint datasizes[] = {0,1,1,2,4,8,1,1,2,4, 8, 4, 8, 4};
                       // 0-1-2-3-4-5-6-7-8-9-10-11-12-13
