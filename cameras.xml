@@ -163,6 +163,16 @@
     <Crop x="42" y="18" width="3906" height="2602"/>
     <Sensor black="255" white="3726"/>
   </Camera>
+  <Camera make="Canon" model="Canon EOS 400D DIGITAL">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">RED</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="1" y="1">BLUE</Color>
+    </CFA>
+    <Crop x="42" y="18" width="3906" height="2602"/>
+    <Sensor black="255" white="3726"/>
+  </Camera>
   <Camera make="Canon" model="Canon EOS-1D Mark II">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
