@@ -331,11 +331,20 @@ RawImage DngDecoder::decodeRaw() {
           if (blackarrayv[i*2+1])
             black = MIN(black, blackbase + blackarrayv[i*2] / blackarrayv[i*2+1]);
       } else {
-        const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
-        if (blackarray[1])
-          black = blackarray[0] / blackarray[1];
-        else 
-          black = 0;
+        TiffEntry* black_entry = raw->getEntry(BLACKLEVEL);
+        if (black_entry->type == TIFF_LONG) {
+          const guint* blackarray = black_entry->getIntArray();
+          if (blackarray[1])
+            black = blackarray[0] / blackarray[1];
+          else 
+            black = 0;
+        } else if (black_entry->type == TIFF_RATIONAL){
+          const guint* blackarray = (const guint*)black_entry->getData();
+          if (blackarray[1])
+            black = blackarray[0] / blackarray[1];
+          else 
+            black = 0;
+        }
       }
     } else {
       black = 0;
