@@ -17,4 +17,5 @@ Thanks to:
 
  * Laurent Clevy for his excellent CR2 documentation project:
  * http://lclevy.free.fr/cr2/index.html
-
+ * All who supplied RAW test images to Rawstudio
+ * Of course all involved with the Rawstudio project
