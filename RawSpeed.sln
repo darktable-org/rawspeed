@@ -1,12 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual C++ Express 2005
+# Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RawSpeed", "RawSpeed\RawSpeed.vcproj", "{482A0ABF-1AE3-4EE4-815A-428880DAE0C6}"
-	ProjectSection(ProjectDependencies) = postProject
-		{13E6F43F-CC20-4861-BC80-FA1A1F4CBB72} = {13E6F43F-CC20-4861-BC80-FA1A1F4CBB72}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Softwire-StaticLibrary", "include\SoftWire\StaticLibrary-VC8.vcproj", "{13E6F43F-CC20-4861-BC80-FA1A1F4CBB72}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,10 +13,6 @@ Global
 		{482A0ABF-1AE3-4EE4-815A-428880DAE0C6}.Debug|Win32.Build.0 = Debug|Win32
 		{482A0ABF-1AE3-4EE4-815A-428880DAE0C6}.Release|Win32.ActiveCfg = Release|Win32
 		{482A0ABF-1AE3-4EE4-815A-428880DAE0C6}.Release|Win32.Build.0 = Release|Win32
-		{13E6F43F-CC20-4861-BC80-FA1A1F4CBB72}.Debug|Win32.ActiveCfg = Debug|Win32
-		{13E6F43F-CC20-4861-BC80-FA1A1F4CBB72}.Debug|Win32.Build.0 = Debug|Win32
-		{13E6F43F-CC20-4861-BC80-FA1A1F4CBB72}.Release|Win32.ActiveCfg = Release|Win32
-		{13E6F43F-CC20-4861-BC80-FA1A1F4CBB72}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
