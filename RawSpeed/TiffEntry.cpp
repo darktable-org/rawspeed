@@ -72,13 +72,13 @@ unsigned short TiffEntry::getShort() {
   return *(unsigned short*)&data[0];
 }
 
-unsigned const int* TiffEntry::getIntArray() {
+const unsigned int* TiffEntry::getIntArray() {
   if (type != TIFF_LONG && type != TIFF_RATIONAL && type != TIFF_SRATIONAL)
     throw TiffParserException("TIFF, getIntArray: Wrong type encountered. Expected Long");
   return (unsigned int*)&data[0];
 }
 
-unsigned const short* TiffEntry::getShortArray() {
+const unsigned short* TiffEntry::getShortArray() {
   if (type != TIFF_SHORT)
     throw TiffParserException("TIFF, getShortArray: Wrong type encountered. Expected Short");
   return (unsigned short*)&data[0];
