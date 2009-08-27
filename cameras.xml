@@ -793,7 +793,7 @@
     <Crop x="0" y="0" width="4599" height="3064"/>
     <Sensor black="0" white="4095"/>
   </Camera>
-  <Camera make="SONY" model="DSLR-A700" supported="no">
+  <Camera make="SONY" model="DSLR-A700" supported="yes">
     <CFA width="2" height="2">
       <Color x="1" y="1">BLUE</Color>
       <Color x="1" y="0">GREEN</Color>
@@ -801,9 +801,9 @@
       <Color x="0" y="0">RED</Color>
     </CFA>
     <Crop x="0" y="0" width="4288" height="2856"/>
-    <Sensor black="512" white="4095"/>
+    <Sensor black="520" white="16383"/>
   </Camera>
-  <Camera make="SONY" model="DSLR-A900" supported="no">
+  <Camera make="SONY" model="DSLR-A900" supported="yes">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
       <Color x="1" y="0">GREEN</Color>
@@ -811,6 +811,6 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="6080" height="4048"/>
-    <Sensor black="150" white="4095"/>
+    <Sensor black="520" white="16383"/>
   </Camera>
 </Cameras>

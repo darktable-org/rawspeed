@@ -125,29 +125,30 @@ void ArwDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
   guchar* data = mRaw->getData();
   guint pitch = mRaw->pitch;
   if (bpp == 8) {
-    gushort pix[16];
     BitPumpPlain bits(&input);
     for (guint y = 0; y < h; y++ ) {
       gushort* dest = (gushort*)&data[y*pitch];
       bits.setAbsoluteOffset((w*bpp*y)>>3); // Realign
-      for (guint x = 0; x < w-30; ) { // Process 32 pixels (16x2) per loop.
+      // Process 32 pixels (16x2) per loop.
+      for (guint x = 0; x < w-30; ) { 
         bits.checkPos();
         gint _max = bits.getBits(11);
         gint _min = bits.getBits(11);
         gint _imax = bits.getBits(4);
         gint _imin = bits.getBits(4);
-        guint sh;
-        for (sh=0; sh < 4 && 0x80 << sh <= _max-_min; sh++);
-        for (guint i=0; i < 16; i++) {
-          if      ((gint)i == _imax) pix[i] = _max;
-          else if ((gint)i == _imin) pix[i] = _min;
+        gint sh;
+        for (sh = 0; sh < 4 && 0x80 << sh <= _max-_min; sh++);
+        for (gint i = 0; i < 16; i++) {
+          gint p;
+          if (i == _imax) p = _max;
+          else if (i == _imin) p = _min;
           else {
-            pix[i] = (bits.getBits(7) << sh) + _min;
-            if (pix[i] > 0x7ff) pix[i] = 0x7ff;
+            p = (bits.getBits(7) << sh) + _min;
+            if (p > 0x7ff)
+              p = 0x7ff;
           }
+          dest[x+i*2] = curve[p << 1];
         }
-        for (guint i=0; i < 16; i++)
-          dest[x+i*2] = curve[pix[i] << 1] >> 1;
         x += x & 1 ? 31 : 1;  // Skip to next 32 pixels
       }
     }
@@ -165,9 +166,10 @@ void ArwDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
       for(guint x =0 ; x < w; x+=2) {
         guint g1 = *in++;
         guint g2 = *in++;
-        dest[x] = curve[g1 | ((g2&0xf)<<8)];
+        // Shift up to match compressed precision
+        dest[x] = (g1 | ((g2&0xf)<<8)) << 2;  
         guint g3 = *in++;
-        dest[x+1] = curve[(g2>>2) | (g3<<4)];
+        dest[x+1] = ((g2>>4) | (g3<<4)) << 2;
       }
     }
     return;
