@@ -163,11 +163,11 @@ void ArwDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
     for (guint y=0; y < h; y++) {
       gushort* dest = (gushort*)&data[y*pitch];
       for(guint x =0 ; x < w; x+=2) {
-        guint g1 = curve[*in++];
-        guint g2 = curve[*in++];
-        dest[x] = g1 | ((g2&0xf)<<8);
-        guint g3 = curve[*in++];
-        dest[x+1] = (g2>>2) | (g3<<4);
+        guint g1 = *in++;
+        guint g2 = *in++;
+        dest[x] = curve[g1 | ((g2&0xf)<<8)];
+        guint g3 = *in++;
+        dest[x+1] = curve[(g2>>2) | (g3<<4)];
       }
     }
     return;
