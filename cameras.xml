@@ -803,6 +803,16 @@
     <Crop x="0" y="0" width="4288" height="2856"/>
     <Sensor black="520" white="16383"/>
   </Camera>
+  <Camera make="SONY" model="DSLR-A850" supported="yes">
+    <CFA width="2" height="2">
+      <Color x="1" y="1">BLUE</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="0" y="0">RED</Color>
+    </CFA>
+    <Crop x="0" y="0" width="6080" height="4048"/>
+    <Sensor black="500" white="15000"/>
+  </Camera>
   <Camera make="SONY" model="DSLR-A900" supported="yes">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
