@@ -136,4 +136,18 @@ void Rw2Decoder::checkSupport(CameraMetaData *meta) {
 void Rw2Decoder::decodeMetaData( CameraMetaData *meta )
 {
   mRaw->cfa.setCFA(CFA_BLUE, CFA_GREEN, CFA_GREEN2, CFA_RED);
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
+
+  if (data.empty())
+    ThrowRDE("CR2 Meta Decoder: Model name not found");
+
+  string make = data[0]->getEntry(MAKE)->getString();
+  string model = data[0]->getEntry(MODEL)->getString();
+  string mode = "";
+
+  if (!model.compare("DMC-LX3") && (mRaw->dim.x > 4000))
+    mode ="wide";
+
+  setMetaData(meta, make, model, mode);
+
 }
