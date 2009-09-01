@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2009 Anders Brander <anders@brander.dk> and 
+ * Copyright (C) 2006-2009 Anders Brander <anders@brander.dk> and
  * Anders Kvist <akv@lnxbx.dk>
  *
  * This program is free software; you can redistribute it and/or
@@ -29,4 +29,5 @@ rs_plugin_load(RSPlugin *plugin)
 	rs_filetype_register_loader(".nef", "Nikon NEF", load_rawspeed, 5);
 	rs_filetype_register_loader(".orf", "Olympus", load_rawspeed, 5);
 	rs_filetype_register_loader(".pef", "Pentax raw", load_rawspeed, 5);
+	rs_filetype_register_loader(".rw2", "Panasonic raw", load_rawspeed, 5);
 }

@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "Rw2Decoder.h"
 
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -77,7 +77,6 @@ void Rw2Decoder::DecodeRw2()
   int w = mRaw->dim.x;
   int h = mRaw->dim.y;
 
-  pana_bits(0);
   for (y=0; y < h; y++) {
     gushort* dest = (gushort*)mRaw->getData(0,y);
     for (x=0; x < w; x++) {
@@ -93,10 +92,10 @@ void Rw2Decoder::DecodeRw2()
       } else if ((nonz[i & 1] = pana_bits(8)) || i > 11)
         pred[i & 1] = nonz[i & 1] << 4 | pana_bits(4);
       dest[x] = pred[x&1];
-      _ASSERTE(dest < 4098);
+      _ASSERTE(dest[x] < 4098);
     }
   }
-} 
+}
 
 unsigned Rw2Decoder::pana_bits (int nbits)
 {
@@ -135,5 +134,5 @@ void Rw2Decoder::checkSupport(CameraMetaData *meta) {
 
 void Rw2Decoder::decodeMetaData( CameraMetaData *meta )
 {
-  mRaw->cfa.setCFA(CFA_GREEN, CFA_RED, CFA_BLUE, CFA_GREEN2);
+  mRaw->cfa.setCFA(CFA_BLUE, CFA_GREEN, CFA_GREEN2, CFA_RED);
 }
