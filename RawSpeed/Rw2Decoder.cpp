@@ -65,7 +65,8 @@ RawImage Rw2Decoder::decodeRaw()
   try {
     DecodeRw2();
   } catch (IOException e) {
-  	errors.push_back(e.what()); // We attempt to ignore, since truncated files may be ok.
+    // We attempt to ignore, since truncated files may be ok.
+    errors.push_back(e.what());
   }
 
   return mRaw;
@@ -97,7 +98,7 @@ void Rw2Decoder::DecodeRw2()
   }
 }
 
-unsigned Rw2Decoder::pana_bits (int nbits)
+guint Rw2Decoder::pana_bits (int nbits)
 {
   int byte;
 

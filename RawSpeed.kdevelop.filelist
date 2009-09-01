@@ -84,3 +84,4 @@ RawSpeed/TiffTag.h
 RawSpeed/rawstudio-plugin-api.cpp
 RawSpeed/rawstudio-plugin-api.h
 RawSpeed/rawstudio-plugin.c
+cameras.xml

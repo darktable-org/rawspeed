@@ -281,9 +281,6 @@ void LJpegPlain::decodeScanLeft4_2_0() {
   HuffmanTable *dctbl3 = &huff[frame.compInfo[2].dcTblNo];
 
   gushort *predict;      // Prediction pointer
-  /* Fast access to supersampling component settings
-  * this is the number of components in a given block.
-  */
 
   mRaw->subsampling.x = 2;
   mRaw->subsampling.y = 2;
@@ -411,9 +408,6 @@ void LJpegPlain::decodeScanLeft4_2_2()
   mRaw->subsampling.y = 1;
 
   gushort *predict;      // Prediction pointer
-  /* Fast access to supersampling component settings
-  * this is the number of components in a given block.
-  */
 
   guchar *draw = mRaw->getData();
 
@@ -431,7 +425,7 @@ void LJpegPlain::decodeScanLeft4_2_2()
   for (guint i = 0 ; i <  slicesW.size(); i++)
     slice_width[i] = slicesW[i]/2;
 
-  for (slice = 0; slice< slices; slice++) {
+  for (slice = 0; slice < slices; slice++) {
     offset[slice] = ((t_x+offX)*mRaw->bpp+((offY+t_y)*mRaw->pitch)) | (t_s<<28);
     _ASSERTE((offset[slice]&0x0fffffff)<mRaw->pitch*mRaw->dim.y);
     t_y ++;
@@ -465,7 +459,7 @@ void LJpegPlain::decodeScanLeft4_2_2()
   dest[1] = p2 = (1<<(frame.prec-Pt-1)) + HuffDecode(dctbl2);  
   dest[2] = p3 = (1<<(frame.prec-Pt-1)) + HuffDecode(dctbl3);
 
-  // Skip next
+  // Skip to next
   dest+=COMPS*2;
 
   x = 2;
@@ -505,7 +499,6 @@ void LJpegPlain::decodeScanLeft4_2_2()
     p2 = predict[1];
     p3 = predict[2];
     predict = dest;
-
     x = 0;
   }
 }

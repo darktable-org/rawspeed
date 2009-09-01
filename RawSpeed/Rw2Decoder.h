@@ -3,7 +3,7 @@
 #include "TiffIFD.h"
 #include "BitPumpPlain.h"
 #include "TiffParser.h"
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -36,7 +36,7 @@ public:
   virtual void checkSupport(CameraMetaData *meta);
   TiffIFD *mRootIFD;
 private:
-  unsigned pana_bits (int nbits);
+  guint pana_bits (int nbits);
   void DecodeRw2();
   guint load_flags;
   ByteStream* input;

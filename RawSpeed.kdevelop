@@ -10,16 +10,16 @@
     <projectname>RawSpeed</projectname>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description></description>
-    <defaultencoding></defaultencoding>
+    <description/>
+    <defaultencoding/>
     <versioncontrol>kdevsubversion</versioncontrol>
   </general>
   <kdevcustomproject>
     <run>
       <directoryradio>executable</directoryradio>
       <mainprogram>/usr/local/bin/rawstudio</mainprogram>
-      <programargs></programargs>
-      <globaldebugarguments></globaldebugarguments>
+      <programargs/>
+      <globaldebugarguments/>
       <globalcwd>/home/klaus/dev/rawspeed/RawSpeed</globalcwd>
       <useglobalprogram>false</useglobalprogram>
       <terminal>true</terminal>
@@ -43,6 +43,7 @@
       <filetype>*.cxx</filetype>
       <filetype>Makefile</filetype>
       <filetype>CMakeLists.txt</filetype>
+      <filetype>*.xml</filetype>
     </filetypes>
     <blacklist>
       <path>include</path>
@@ -130,16 +131,346 @@
       <path>include/SoftWire/Synthesizer.hpp</path>
       <path>latex</path>
       <path>latex/Makefile</path>
+      <path>xml</path>
+      <path>xml/ArwDecoder_8cpp.xml</path>
+      <path>xml/ArwDecoder_8h.xml</path>
+      <path>xml/Assembler_8cpp.xml</path>
+      <path>xml/Assembler_8hpp.xml</path>
+      <path>xml/BitPumpJPEG_8cpp.xml</path>
+      <path>xml/BitPumpJPEG_8h.xml</path>
+      <path>xml/BitPumpMSB_8cpp.xml</path>
+      <path>xml/BitPumpMSB_8h.xml</path>
+      <path>xml/BitPumpPlain_8cpp.xml</path>
+      <path>xml/BitPumpPlain_8h.xml</path>
+      <path>xml/BlackArea_8cpp.xml</path>
+      <path>xml/BlackArea_8h.xml</path>
+      <path>xml/ByteStream_8cpp.xml</path>
+      <path>xml/ByteStream_8h.xml</path>
+      <path>xml/c14n_8h.xml</path>
+      <path>xml/Camera_8cpp.xml</path>
+      <path>xml/Camera_8h.xml</path>
+      <path>xml/CameraMetaData_8cpp.xml</path>
+      <path>xml/CameraMetaData_8h.xml</path>
+      <path>xml/CameraMetadataException_8cpp.xml</path>
+      <path>xml/CameraMetadataException_8h.xml</path>
+      <path>xml/catalog_8h.xml</path>
+      <path>xml/chvalid_8h.xml</path>
+      <path>xml/classArwDecoder.xml</path>
+      <path>xml/classBitPumpJPEG.xml</path>
+      <path>xml/classBitPumpMSB.xml</path>
+      <path>xml/classBitPumpPlain.xml</path>
+      <path>xml/classBlackArea.xml</path>
+      <path>xml/classByteStream.xml</path>
+      <path>xml/classCameraMetadataException.xml</path>
+      <path>xml/classCameraMetaData.xml</path>
+      <path>xml/classCamera.xml</path>
+      <path>xml/classColorFilterArray.xml</path>
+      <path>xml/classCr2Decoder.xml</path>
+      <path>xml/classCr2Slice.xml</path>
+      <path>xml/classDngDecoderSlices.xml</path>
+      <path>xml/classDngDecoderThread.xml</path>
+      <path>xml/classDngDecoder.xml</path>
+      <path>xml/classDngSliceElement.xml</path>
+      <path>xml/classDngStrip.xml</path>
+      <path>xml/classFileIOException.xml</path>
+      <path>xml/classFileMap.xml</path>
+      <path>xml/classFileReader.xml</path>
+      <path>xml/classIdentifier.xml</path>
+      <path>xml/classIOException.xml</path>
+      <path>xml/classiPoint2D.xml</path>
+      <path>xml/classLJpegDecompressor.xml</path>
+      <path>xml/classLJpegPlain.xml</path>
+      <path>xml/classNefDecoder.xml</path>
+      <path>xml/classNefSlice.xml</path>
+      <path>xml/classNikonDecompressor.xml</path>
+      <path>xml/classOrfDecoder.xml</path>
+      <path>xml/classPefDecoder.xml</path>
+      <path>xml/classPentaxDecompressor.xml</path>
+      <path>xml/classPlanarPlane.xml</path>
+      <path>xml/classPlanarRawImage.xml</path>
+      <path>xml/classRawDecoderException.xml</path>
+      <path>xml/classRawDecoder.xml</path>
+      <path>xml/classRawImageData.xml</path>
+      <path>xml/classRawImage.xml</path>
+      <path>xml/classRgbImage.xml</path>
+      <path>xml/classRw2Decoder.xml</path>
+      <path>xml/classSOFInfo.xml</path>
+      <path>xml/classSoftWire_1_1Assembler.xml</path>
+      <path>xml/classSoftWire_1_1CodeGenerator_1_1Byte.xml</path>
+      <path>xml/classSoftWire_1_1CodeGenerator_1_1Char.xml</path>
+      <path>xml/classSoftWire_1_1CodeGenerator_1_1Dword2.xml</path>
+      <path>xml/classSoftWire_1_1CodeGenerator_1_1Dword.xml</path>
+      <path>xml/classSoftWire_1_1CodeGenerator_1_1Float4.xml</path>
+      <path>xml/classSoftWire_1_1CodeGenerator_1_1Float.xml</path>
+      <path>xml/classSoftWire_1_1CodeGenerator_1_1Int.xml</path>
+      <path>xml/classSoftWire_1_1CodeGenerator_1_1Qword.xml</path>
+      <path>xml/classSoftWire_1_1CodeGenerator_1_1Short.xml</path>
+      <path>xml/classSoftWire_1_1CodeGenerator_1_1Variable.xml</path>
+      <path>xml/classSoftWire_1_1CodeGenerator_1_1Word4.xml</path>
+      <path>xml/classSoftWire_1_1CodeGenerator_1_1Word.xml</path>
+      <path>xml/classSoftWire_1_1CodeGenerator_1_1Xword.xml</path>
+      <path>xml/classSoftWire_1_1CodeGenerator.xml</path>
+      <path>xml/classSoftWire_1_1Emulator.xml</path>
+      <path>xml/classSoftWire_1_1Encoding.xml</path>
+      <path>xml/classSoftWire_1_1Error.xml</path>
+      <path>xml/classSoftWire_1_1InstructionSet.xml</path>
+      <path>xml/classSoftWire_1_1Instruction.xml</path>
+      <path>xml/classSoftWire_1_1Linker.xml</path>
+      <path>xml/classSoftWire_1_1Link.xml</path>
+      <path>xml/classSoftWire_1_1Loader.xml</path>
+      <path>xml/classSoftWire_1_1Optimizer.xml</path>
+      <path>xml/classSoftWire_1_1RegisterAllocator.xml</path>
+      <path>xml/classSoftWire_1_1Synthesizer.xml</path>
+      <path>xml/classTiffEntryBE.xml</path>
+      <path>xml/classTiffEntry.xml</path>
+      <path>xml/classTiffIFDBE.xml</path>
+      <path>xml/classTiffIFD.xml</path>
+      <path>xml/classTiffParserException.xml</path>
+      <path>xml/classTiffParserHeaderless.xml</path>
+      <path>xml/classTiffParserOlympus.xml</path>
+      <path>xml/classTiffParser.xml</path>
+      <path>xml/CodeGenerator_8cpp.xml</path>
+      <path>xml/CodeGenerator_8hpp.xml</path>
+      <path>xml/ColorFilterArray_8cpp.xml</path>
+      <path>xml/ColorFilterArray_8h.xml</path>
+      <path>xml/Common_8cpp.xml</path>
+      <path>xml/Common_8h.xml</path>
+      <path>xml/Cr2Decoder_8cpp.xml</path>
+      <path>xml/Cr2Decoder_8h.xml</path>
+      <path>xml/debugXML_8h.xml</path>
+      <path>xml/dict_8h.xml</path>
+      <path>xml/dir_08916322408a45aa4812eb53038fcb78.xml</path>
+      <path>xml/dir_1bd0ffffd37c12ed9dfd79a217e42c50.xml</path>
+      <path>xml/dir_31172815b8a4391b44bcb1fd0e0474c0.xml</path>
+      <path>xml/dir_92cd05b66e0d15c94d62d07cc60032ec.xml</path>
+      <path>xml/dir_e37e6fcbfe609470ac76f1f6b9075487.xml</path>
+      <path>xml/dir_f72ad65de714616c0fc0345b732e3728.xml</path>
+      <path>xml/DngDecoder_8cpp.xml</path>
+      <path>xml/DngDecoder_8h.xml</path>
+      <path>xml/DngDecoderSlices_8cpp.xml</path>
+      <path>xml/DngDecoderSlices_8h.xml</path>
+      <path>xml/DOCBparser_8h.xml</path>
+      <path>xml/Emulator_8cpp.xml</path>
+      <path>xml/Emulator_8hpp.xml</path>
+      <path>xml/Encoding_8cpp.xml</path>
+      <path>xml/Encoding_8hpp.xml</path>
+      <path>xml/encoding_8h.xml</path>
+      <path>xml/entities_8h.xml</path>
+      <path>xml/Error_8cpp.xml</path>
+      <path>xml/Error_8hpp.xml</path>
+      <path>xml/FileIOException_8cpp.xml</path>
+      <path>xml/FileIOException_8h.xml</path>
+      <path>xml/FileMap_8cpp.xml</path>
+      <path>xml/FileMap_8h.xml</path>
+      <path>xml/FileReader_8cpp.xml</path>
+      <path>xml/FileReader_8h.xml</path>
+      <path>xml/globals_8h.xml</path>
+      <path>xml/hash_8h.xml</path>
+      <path>xml/HTMLparser_8h.xml</path>
+      <path>xml/HTMLtree_8h.xml</path>
+      <path>xml/iconv_8h.xml</path>
+      <path>xml/index.xml</path>
+      <path>xml/Instruction_8cpp.xml</path>
+      <path>xml/Instruction_8hpp.xml</path>
+      <path>xml/InstructionSet_8cpp.xml</path>
+      <path>xml/InstructionSet_8hpp.xml</path>
+      <path>xml/Intrinsics_8hpp.xml</path>
+      <path>xml/Link_8hpp.xml</path>
+      <path>xml/Linker_8cpp.xml</path>
+      <path>xml/Linker_8hpp.xml</path>
+      <path>xml/list_8h.xml</path>
+      <path>xml/LJpegDecompressor_8cpp.xml</path>
+      <path>xml/LJpegDecompressor_8h.xml</path>
+      <path>xml/LJpegPlain_8cpp.xml</path>
+      <path>xml/LJpegPlain_8h.xml</path>
+      <path>xml/Loader_8cpp.xml</path>
+      <path>xml/Loader_8hpp.xml</path>
+      <path>xml/namespaceSoftWire.xml</path>
+      <path>xml/namespacestd.xml</path>
+      <path>xml/nanoftp_8h.xml</path>
+      <path>xml/nanohttp_8h.xml</path>
+      <path>xml/NefDecoder_8cpp.xml</path>
+      <path>xml/NefDecoder_8h.xml</path>
+      <path>xml/NikonDecompressor_8cpp.xml</path>
+      <path>xml/NikonDecompressor_8h.xml</path>
+      <path>xml/Operand_8cpp.xml</path>
+      <path>xml/Operand_8hpp.xml</path>
+      <path>xml/Optimizer_8cpp.xml</path>
+      <path>xml/Optimizer_8hpp.xml</path>
+      <path>xml/OrfDecoder_8cpp.xml</path>
+      <path>xml/OrfDecoder_8h.xml</path>
+      <path>xml/parser_8h.xml</path>
+      <path>xml/parserInternals_8h.xml</path>
+      <path>xml/pattern_8h.xml</path>
+      <path>xml/PefDecoder_8cpp.xml</path>
+      <path>xml/PefDecoder_8h.xml</path>
+      <path>xml/PentaxDecompressor_8cpp.xml</path>
+      <path>xml/PentaxDecompressor_8h.xml</path>
+      <path>xml/PlanarRawImage_8cpp.xml</path>
+      <path>xml/PlanarRawImage_8h.xml</path>
+      <path>xml/Point_8h.xml</path>
+      <path>xml/pthread_8h.xml</path>
+      <path>xml/RawDecoder_8cpp.xml</path>
+      <path>xml/RawDecoder_8h.xml</path>
+      <path>xml/RawDecoderException_8cpp.xml</path>
+      <path>xml/RawDecoderException_8h.xml</path>
+      <path>xml/RawImage_8cpp.xml</path>
+      <path>xml/RawImage_8h.xml</path>
+      <path>xml/RawSpeed_8cpp.xml</path>
+      <path>xml/rawstudio-plugin_8c.xml</path>
+      <path>xml/rawstudio-plugin-api_8cpp.xml</path>
+      <path>xml/rawstudio-plugin-api_8h.xml</path>
+      <path>xml/RegisterAllocator_8cpp.xml</path>
+      <path>xml/RegisterAllocator_8hpp.xml</path>
+      <path>xml/relaxng_8h.xml</path>
+      <path>xml/RgbImage_8cpp.xml</path>
+      <path>xml/RgbImage_8h.xml</path>
+      <path>xml/Rw2Decoder_8cpp.xml</path>
+      <path>xml/Rw2Decoder_8h.xml</path>
+      <path>xml/SAX2_8h.xml</path>
+      <path>xml/SAX_8h.xml</path>
+      <path>xml/sched_8h.xml</path>
+      <path>xml/schemasInternals_8h.xml</path>
+      <path>xml/schematron_8h.xml</path>
+      <path>xml/StdAfx_8cpp.xml</path>
+      <path>xml/StdAfx_8h.xml</path>
+      <path>xml/String_8hpp.xml</path>
+      <path>xml/structHuffmanTable.xml</path>
+      <path>xml/structJpegComponentInfo.xml</path>
+      <path>xml/structpthread__once__t__.xml</path>
+      <path>xml/structptw32__cleanup__t.xml</path>
+      <path>xml/structptw32__handle__t.xml</path>
+      <path>xml/structsched__param.xml</path>
+      <path>xml/structSoftWire_1_1Instruction_1_1Syntax.xml</path>
+      <path>xml/structSoftWire_1_1InstructionSet_1_1Entry.xml</path>
+      <path>xml/structSoftWire_1_1Linker_1_1Identifier.xml</path>
+      <path>xml/structSoftWire_1_1Operand_1_1Register.xml</path>
+      <path>xml/structSoftWire_1_1OperandAL.xml</path>
+      <path>xml/structSoftWire_1_1OperandAX.xml</path>
+      <path>xml/structSoftWire_1_1OperandCL.xml</path>
+      <path>xml/structSoftWire_1_1OperandCX.xml</path>
+      <path>xml/structSoftWire_1_1OperandDX.xml</path>
+      <path>xml/structSoftWire_1_1OperandEAX.xml</path>
+      <path>xml/structSoftWire_1_1OperandECX.xml</path>
+      <path>xml/structSoftWire_1_1OperandFPUREG.xml</path>
+      <path>xml/structSoftWire_1_1OperandIMM.xml</path>
+      <path>xml/structSoftWire_1_1OperandMEM128.xml</path>
+      <path>xml/structSoftWire_1_1OperandMEM16.xml</path>
+      <path>xml/structSoftWire_1_1OperandMEM32.xml</path>
+      <path>xml/structSoftWire_1_1OperandMEM64.xml</path>
+      <path>xml/structSoftWire_1_1OperandMEM8.xml</path>
+      <path>xml/structSoftWire_1_1OperandMEM.xml</path>
+      <path>xml/structSoftWire_1_1OperandMM64.xml</path>
+      <path>xml/structSoftWire_1_1OperandMMREG.xml</path>
+      <path>xml/structSoftWire_1_1OperandRAX.xml</path>
+      <path>xml/structSoftWire_1_1OperandREF.xml</path>
+      <path>xml/structSoftWire_1_1OperandREG16.xml</path>
+      <path>xml/structSoftWire_1_1OperandREG32.xml</path>
+      <path>xml/structSoftWire_1_1OperandREG64.xml</path>
+      <path>xml/structSoftWire_1_1OperandREG8.xml</path>
+      <path>xml/structSoftWire_1_1OperandREG.xml</path>
+      <path>xml/structSoftWire_1_1OperandREGxX.xml</path>
+      <path>xml/structSoftWire_1_1OperandR__M128.xml</path>
+      <path>xml/structSoftWire_1_1OperandR__M16.xml</path>
+      <path>xml/structSoftWire_1_1OperandR__M32.xml</path>
+      <path>xml/structSoftWire_1_1OperandR__M64.xml</path>
+      <path>xml/structSoftWire_1_1OperandR__M8.xml</path>
+      <path>xml/structSoftWire_1_1OperandST0.xml</path>
+      <path>xml/structSoftWire_1_1OperandVOID.xml</path>
+      <path>xml/structSoftWire_1_1Operand.xml</path>
+      <path>xml/structSoftWire_1_1OperandXMM32.xml</path>
+      <path>xml/structSoftWire_1_1OperandXMM64.xml</path>
+      <path>xml/structSoftWire_1_1OperandXMMREG.xml</path>
+      <path>xml/structSoftWire_1_1RegisterAllocator_1_1AllocationData.xml</path>
+      <path>xml/structSoftWire_1_1RegisterAllocator_1_1Allocation.xml</path>
+      <path>xml/structSoftWire_1_1RegisterAllocator_1_1State.xml</path>
+      <path>xml/structSoftWire_1_1Specifier.xml</path>
+      <path>xml/structtimespec.xml</path>
+      <path>xml/struct__xmlAttribute.xml</path>
+      <path>xml/struct__xmlAttr.xml</path>
+      <path>xml/struct__xmlBuffer.xml</path>
+      <path>xml/struct__xmlCharEncodingHandler.xml</path>
+      <path>xml/struct__xmlChLRange.xml</path>
+      <path>xml/struct__xmlChRangeGroup.xml</path>
+      <path>xml/struct__xmlChSRange.xml</path>
+      <path>xml/struct__xmlDoc.xml</path>
+      <path>xml/struct__xmlDOMWrapCtxt.xml</path>
+      <path>xml/struct__xmlDtd.xml</path>
+      <path>xml/struct__xmlElementContent.xml</path>
+      <path>xml/struct__xmlElement.xml</path>
+      <path>xml/struct__xmlEntity.xml</path>
+      <path>xml/struct__xmlEnumeration.xml</path>
+      <path>xml/struct__xmlError.xml</path>
+      <path>xml/struct__xmlGlobalState.xml</path>
+      <path>xml/struct__xmlID.xml</path>
+      <path>xml/struct__xmlNode.xml</path>
+      <path>xml/struct__xmlNotation.xml</path>
+      <path>xml/struct__xmlNs.xml</path>
+      <path>xml/struct__xmlParserCtxt.xml</path>
+      <path>xml/struct__xmlParserInputBuffer.xml</path>
+      <path>xml/struct__xmlParserInput.xml</path>
+      <path>xml/struct__xmlParserNodeInfoSeq.xml</path>
+      <path>xml/struct__xmlParserNodeInfo.xml</path>
+      <path>xml/struct__xmlRef.xml</path>
+      <path>xml/struct__xmlSAXHandlerV1.xml</path>
+      <path>xml/struct__xmlSAXHandler.xml</path>
+      <path>xml/struct__xmlSAXLocator.xml</path>
+      <path>xml/struct__xmlURI.xml</path>
+      <path>xml/struct__xmlValidCtxt.xml</path>
+      <path>xml/Synthesizer_8cpp.xml</path>
+      <path>xml/Synthesizer_8hpp.xml</path>
+      <path>xml/threads_8h.xml</path>
+      <path>xml/TiffEntry_8cpp.xml</path>
+      <path>xml/TiffEntry_8h.xml</path>
+      <path>xml/TiffEntryBE_8cpp.xml</path>
+      <path>xml/TiffEntryBE_8h.xml</path>
+      <path>xml/TiffIFD_8cpp.xml</path>
+      <path>xml/TiffIFD_8h.xml</path>
+      <path>xml/TiffIFDBE_8cpp.xml</path>
+      <path>xml/TiffIFDBE_8h.xml</path>
+      <path>xml/TiffParser_8cpp.xml</path>
+      <path>xml/TiffParser_8h.xml</path>
+      <path>xml/TiffParserException_8cpp.xml</path>
+      <path>xml/TiffParserException_8h.xml</path>
+      <path>xml/TiffParserHeaderless_8cpp.xml</path>
+      <path>xml/TiffParserHeaderless_8h.xml</path>
+      <path>xml/TiffParserOlympus_8cpp.xml</path>
+      <path>xml/TiffParserOlympus_8h.xml</path>
+      <path>xml/TiffTag_8h.xml</path>
+      <path>xml/tree_8h.xml</path>
+      <path>xml/uri_8h.xml</path>
+      <path>xml/valid_8h.xml</path>
+      <path>xml/xinclude_8h.xml</path>
+      <path>xml/xlink_8h.xml</path>
+      <path>xml/xmlautomata_8h.xml</path>
+      <path>xml/xmlerror_8h.xml</path>
+      <path>xml/xmlexports_8h.xml</path>
+      <path>xml/xmlIO_8h.xml</path>
+      <path>xml/xmlmemory_8h.xml</path>
+      <path>xml/xmlmodule_8h.xml</path>
+      <path>xml/xmlreader_8h.xml</path>
+      <path>xml/xmlregexp_8h.xml</path>
+      <path>xml/xmlsave_8h.xml</path>
+      <path>xml/xmlschemas_8h.xml</path>
+      <path>xml/xmlschemastypes_8h.xml</path>
+      <path>xml/xmlstring_8h.xml</path>
+      <path>xml/xmlunicode_8h.xml</path>
+      <path>xml/xmlversion_8h.xml</path>
+      <path>xml/xmlwin32version_8h.xml</path>
+      <path>xml/xmlwriter_8h.xml</path>
+      <path>xml/xpath_8h.xml</path>
+      <path>xml/xpathInternals_8h.xml</path>
+      <path>xml/xpointer_8h.xml</path>
     </blacklist>
     <build>
       <buildtool>make</buildtool>
-      <builddir></builddir>
+      <builddir>/home/klaus/dev/rawspeed/RawSpeed</builddir>
     </build>
     <other>
       <prio>0</prio>
-      <otherbin></otherbin>
-      <defaulttarget></defaulttarget>
-      <otheroptions></otheroptions>
+      <otherbin/>
+      <defaulttarget/>
+      <otheroptions/>
       <selectedenvironment>default</selectedenvironment>
       <environments>
         <default/>
@@ -150,8 +481,8 @@
       <numberofjobs>4</numberofjobs>
       <prio>0</prio>
       <dontact>false</dontact>
-      <makebin></makebin>
-      <defaulttarget></defaulttarget>
+      <makebin/>
+      <defaulttarget/>
       <makeoptions>-f rawstudio-plugin.makefile</makeoptions>
       <selectedenvironment>default</selectedenvironment>
       <environments>
@@ -161,20 +492,20 @@
   </kdevcustomproject>
   <kdevdebugger>
     <general>
-      <dbgshell></dbgshell>
-      <gdbpath></gdbpath>
-      <configGdbScript></configGdbScript>
-      <runShellScript></runShellScript>
-      <runGdbScript></runGdbScript>
+      <dbgshell/>
+      <gdbpath/>
+      <configGdbScript/>
+      <runShellScript/>
+      <runGdbScript/>
       <breakonloadinglibs>true</breakonloadinglibs>
-      <separatetty>false</separatetty>
+      <separatetty>true</separatetty>
       <floatingtoolbar>false</floatingtoolbar>
       <raiseGDBOnStart>false</raiseGDBOnStart>
     </general>
     <display>
       <staticmembers>false</staticmembers>
       <demanglenames>true</demanglenames>
-      <outputradix>10</outputradix>
+      <outputradix>16</outputradix>
     </display>
   </kdevdebugger>
   <kdevdoctreeview>
@@ -257,8 +588,8 @@
       <namespaceAliases>std=_GLIBCXX_STD;__gnu_cxx=std</namespaceAliases>
       <processPrimaryTypes>true</processPrimaryTypes>
       <processFunctionArguments>true</processFunctionArguments>
-      <preProcessAllHeaders>false</preProcessAllHeaders>
-      <parseMissingHeadersExperimental>false</parseMissingHeadersExperimental>
+      <preProcessAllHeaders>true</preProcessAllHeaders>
+      <parseMissingHeadersExperimental>true</parseMissingHeadersExperimental>
       <resolveIncludePathsUsingMakeExperimental>false</resolveIncludePathsUsingMakeExperimental>
       <alwaysParseInBackground>true</alwaysParseInBackground>
       <usePermanentCaching>true</usePermanentCaching>
@@ -266,7 +597,7 @@
       <includePaths>.;</includePaths>
     </codecompletion>
     <creategettersetter>
-      <prefixGet></prefixGet>
+      <prefixGet/>
       <prefixSet>set</prefixSet>
       <prefixVariable>m_,_</prefixVariable>
       <parameterName>theValue</parameterName>
@@ -307,7 +638,7 @@
       <hidenonlocation>false</hidenonlocation>
     </groups>
     <tree>
-      <hidepatterns>*.o,*.lo,CVS</hidepatterns>
+      <hidepatterns>*.o,*.lo,CVS,*.*~</hidepatterns>
       <hidenonprojectfiles>false</hidenonprojectfiles>
       <showvcsfields>false</showvcsfields>
     </tree>
