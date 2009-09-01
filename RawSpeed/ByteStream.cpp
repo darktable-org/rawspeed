@@ -42,7 +42,7 @@ guint ByteStream::peekByte()
 void ByteStream::skipBytes( guint nbytes )
 {
  off += nbytes;
- if (off>=size)
+ if (off>size)
    throw IOException("Skipped out of buffer");
 }
 

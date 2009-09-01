@@ -35,4 +35,12 @@ public:
   virtual void decodeMetaData(CameraMetaData *meta);
   virtual void checkSupport(CameraMetaData *meta);
   TiffIFD *mRootIFD;
+private:
+  unsigned pana_bits (int nbits);
+  void DecodeRw2();
+  guint load_flags;
+  ByteStream* input;
+  guchar buf[0x4000];
+  int vbits;
+
 };
