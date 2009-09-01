@@ -123,6 +123,16 @@
     <Crop x="0" y="0" width="2808" height="1872"/>
     <Sensor black="0" white="15600"/>
   </Camera>
+  <Camera make="Canon" model="Canon EOS 7D">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">GREEN</Color>
+      <Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color>
+      <Color x="1" y="1">GREEN</Color>
+    </CFA>
+    <Crop x="158" y="52" width="5202" height="3464"/>
+    <Sensor black="2000" white="16300"/>
+  </Camera>
   <Camera make="Canon" model="Canon EOS DIGITAL REBEL XS">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
