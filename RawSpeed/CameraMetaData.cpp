@@ -58,6 +58,12 @@ CameraMetaData::CameraMetaData(char *docname)
     }
     cur = cur->next;
   }
+  if (doc)
+    xmlFreeDoc(doc);
+  doc = 0;
+  if (ctxt)
+    xmlFreeParserCtxt(ctxt);
+  ctxt = 0;
 }
 
 CameraMetaData::~CameraMetaData(void) {

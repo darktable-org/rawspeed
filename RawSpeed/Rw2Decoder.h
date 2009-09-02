@@ -37,7 +37,9 @@ public:
   TiffIFD *mRootIFD;
 private:
   guint pana_bits (int nbits);
+  string getMode(const string model);
   void DecodeRw2();
+  bool almostEqualRelative(float A, float B, float maxRelativeError);
   guint load_flags;
   ByteStream* input;
   guchar buf[0x4000];

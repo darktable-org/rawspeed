@@ -93,7 +93,6 @@ void Rw2Decoder::DecodeRw2()
       } else if ((nonz[i & 1] = pana_bits(8)) || i > 11)
         pred[i & 1] = nonz[i & 1] << 4 | pana_bits(4);
       dest[x] = pred[x&1];
-      _ASSERTE(dest[x] < 4098);
     }
   }
 }
@@ -143,11 +142,41 @@ void Rw2Decoder::decodeMetaData( CameraMetaData *meta )
 
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
-  string mode = "";
+  string mode = getMode(model);
 
-  if (!model.compare("DMC-LX3") && (mRaw->dim.x > 4000))
-    mode ="wide";
+  printf("Mode: %s\n",mode.c_str());
 
   setMetaData(meta, make, model, mode);
+}
 
+bool Rw2Decoder::almostEqualRelative(float A, float B, float maxRelativeError)
+{
+  if (A == B)
+    return true;
+
+  float relativeError = fabs((A - B) / B);
+  if (relativeError <= maxRelativeError)
+    return true;
+  return false;
+}
+
+std::string Rw2Decoder::getMode( const string model )
+{
+  float ratio = 3.0f / 2.0f;  // Default
+  if (mRaw->isAllocated()) {
+    ratio = (float)mRaw->dim.x / (float)mRaw->dim.y;
+  }
+
+  if (!model.compare("DMC-LX3") || !model.compare("DMC-G1") || !model.compare("DMC-GH1") || !model.compare("DMC-GF1")) {
+    if (almostEqualRelative(ratio,16.0f/9.0f,0.02f))
+      return "16:9";
+    if (almostEqualRelative(ratio,3.0f/2.0f,0.02f))
+      return "3:2";
+    if (almostEqualRelative(ratio,4.0f/3.0f,0.02f))
+      return "4:3";
+    if (almostEqualRelative(ratio,1.0f,0.02f))
+      return "1:1";
+  }
+
+  return "";
 }
