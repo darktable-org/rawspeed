@@ -107,13 +107,13 @@ void RawDecoder::Decode12BitRaw(ByteStream &input, guint w, guint h) {
   }
 }
 
-  void RawDecoder::checkCameraSupported(CameraMetaData *meta, string make, string model, string mode) {
+void RawDecoder::checkCameraSupported(CameraMetaData *meta, string make, string model, string mode) {
   TrimSpaces(make);
   TrimSpaces(model);
   Camera* cam = meta->getCamera(make, model, mode);
   if (!cam) {
     if (mode.length() == 0) 
-      printf("Unable to find camera in database: %s %s %s\n", make.c_str(), model.c_str(), mode.c_str());
+      printf("Unable to find camera in database: %s %s %s\nPlease upload file to ftp.rawstudio.org, thanks!\n", make.c_str(), model.c_str(), mode.c_str());
     
     return;    // Assume true.
   }
@@ -131,8 +131,20 @@ void RawDecoder::setMetaData( CameraMetaData *meta, string make, string model, s
     printf("Unable to find camera in database: %s %s %s\n", make.c_str(), model.c_str(), mode.c_str());
     return;
   }
-  mRaw->subFrame(cam->cropPos, cam->cropSize);
+
+  iPoint2D new_size = cam->cropSize;
+
+	// If crop size is negative, use relative cropping
+	if (new_size.x <= 0)
+		new_size.x = mRaw->dim.x - cam->cropPos.x + new_size.x;
+	
+	if (new_size.y <= 0)
+		new_size.y = mRaw->dim.y - cam->cropPos.y + new_size.y;
+	
+  mRaw->subFrame(cam->cropPos, new_size);
   mRaw->cfa = cam->cfa;
+
+  // Shift CFA to match crop
   if (cam->cropPos.x & 1)
     mRaw->cfa.shiftLeft();
   if (cam->cropPos.y & 1)
@@ -141,6 +153,7 @@ void RawDecoder::setMetaData( CameraMetaData *meta, string make, string model, s
   mRaw->blackLevel = cam->black;
   mRaw->whitePoint = cam->white;
 }
+
 void RawDecoder::TrimSpaces( string& str)
 {  
   // Trim Both leading and trailing spaces  
