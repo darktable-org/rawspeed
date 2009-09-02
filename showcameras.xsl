@@ -27,7 +27,7 @@
 	</head>
 
 	<body>
-		<h1>Known RawSpeed Cameras</h1>
+		<h1>The <xsl:value-of select="count(Cameras/Camera)"/> Known RawSpeed Cameras:</h1>
 		<xsl:for-each select="Cameras/Camera">
 		<xsl:sort data-type = "text" select = "concat(@make,@model)"/>
 			<h2>
