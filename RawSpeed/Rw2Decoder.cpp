@@ -80,10 +80,12 @@ void Rw2Decoder::DecodeRw2()
 
   for (y=0; y < h; y++) {
     gushort* dest = (gushort*)mRaw->getData(0,y);
+    i = 0;
     for (x=0; x < w; x++) {
-      if ((i = x % 14) == 0)
+      if (i == 0)
         pred[0] = pred[1] = nonz[0] = nonz[1] = 0;
-      if (i % 3 == 2) sh = 4 >> (3 - pana_bits(2));
+      else if (i % 3 == 2) 
+        sh = 4 >> (3 - pana_bits(2));
       if (nonz[i & 1]) {
         if ((j = pana_bits(8))) {
           if ((pred[i & 1] -= 0x80 << sh) < 0 || sh == 4)
@@ -93,6 +95,9 @@ void Rw2Decoder::DecodeRw2()
       } else if ((nonz[i & 1] = pana_bits(8)) || i > 11)
         pred[i & 1] = nonz[i & 1] << 4 | pana_bits(4);
       dest[x] = pred[x&1];
+      i++;
+      if (i == 14)
+        i = 0;
     }
   }
 }
