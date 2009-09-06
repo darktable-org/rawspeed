@@ -75,45 +75,41 @@ RawImage Rw2Decoder::decodeRaw()
 void Rw2Decoder::DecodeRw2()
 {
   int x, y, i, j, sh=0, pred[2], nonz[2];
-  int w = mRaw->dim.x;
+  int w = mRaw->dim.x/14;
   int h = mRaw->dim.y;
 
   for (y=0; y < h; y++) {
     gushort* dest = (gushort*)mRaw->getData(0,y);
-    i = 0;
     for (x=0; x < w; x++) {
-      // Even pixels
-      if (i == 0)
-        pred[0] = pred[1] = nonz[0] = nonz[1] = 0;
-      else if (i % 3 == 2) 
-        sh = 4 >> (3 - pana_bits(2));
-      if (nonz[0]) {
-        if ((j = pana_bits(8))) {
-          if ((pred[0] -= 0x80 << sh) < 0 || sh == 4)
-            pred[0] &= ~(-1 << sh);
-          pred[0] += j << sh;
-        }
-      } else if ((nonz[0] = pana_bits(8)) || i > 11)
-        pred[0] = nonz[0] << 4 | pana_bits(4);
-      dest[x] = pred[0];
+      pred[0] = pred[1] = nonz[0] = nonz[1] = 0;
+      for (i = 0; i < 14; i++) {
+        // Even pixels
+        if (i % 3 == 2)
+          sh = 4 >> (3 - pana_bits(2));
+        if (nonz[0]) {
+          if ((j = pana_bits(8))) {
+            if ((pred[0] -= 0x80 << sh) < 0 || sh == 4)
+              pred[0] &= ~(-1 << sh);
+            pred[0] += j << sh;
+          }
+        } else if ((nonz[0] = pana_bits(8)) || i > 11)
+          pred[0] = nonz[0] << 4 | pana_bits(4);
+        *dest++ = pred[0];
 
-      // Odd pixels
-      i++;
-      x++;
-      if (i % 3 == 2)
-        sh = 4 >> (3 - pana_bits(2));
-      if (nonz[1]) {
-        if ((j = pana_bits(8))) {
-          if ((pred[1] -= 0x80 << sh) < 0 || sh == 4)
-            pred[1] &= ~(-1 << sh);
-          pred[1] += j << sh;
-        }
-      } else if ((nonz[1] = pana_bits(8)) || i > 11)
-        pred[1] = nonz[1] << 4 | pana_bits(4);
-      dest[x] = pred[1];
-      i++;
-      if (i == 14)
-        i = 0;
+        // Odd pixels
+        i++;
+        if (i % 3 == 2)
+          sh = 4 >> (3 - pana_bits(2));
+        if (nonz[1]) {
+          if ((j = pana_bits(8))) {
+            if ((pred[1] -= 0x80 << sh) < 0 || sh == 4)
+              pred[1] &= ~(-1 << sh);
+            pred[1] += j << sh;
+          }
+        } else if ((nonz[1] = pana_bits(8)) || i > 11)
+          pred[1] = nonz[1] << 4 | pana_bits(4);
+        *dest++ = pred[1];
+      }
     }
   }
 }
