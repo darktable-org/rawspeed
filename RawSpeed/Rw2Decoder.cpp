@@ -119,6 +119,10 @@ guint Rw2Decoder::pana_bits (int nbits)
   int byte;
 
   if (!vbits) {
+    /* On truncated files this routine will just return just for the truncated
+     * part of the file. Since there is no chance of affecting output buffer
+     * size we allow the decoder to decode this
+     */
     if (input->getRemainSize() < 0x4000-load_flags) {
       memcpy (buf+load_flags, input->getData(), input->getRemainSize());
       input->skipBytes(input->getRemainSize());
@@ -146,7 +150,7 @@ void Rw2Decoder::checkSupport(CameraMetaData *meta) {
 
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
-  this->checkCameraSupported(meta, make, model, "");
+  this->checkCameraSupported(meta, make, model, getMode(model));
 }
 
 void Rw2Decoder::decodeMetaData( CameraMetaData *meta )
