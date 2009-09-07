@@ -27,7 +27,7 @@
 	</head>
 
 	<body>
-		<h1>The <xsl:value-of select="count(Cameras/Camera)"/> Known RawSpeed Cameras:</h1>
+		<h1>The <xsl:value-of select="count(Cameras/Camera)"/> Known RawSpeed Cameras and Modes:</h1>
 		<xsl:for-each select="Cameras/Camera">
 		<xsl:sort data-type = "text" select = "concat(@make,@model)"/>
 			<h2>
@@ -40,9 +40,14 @@
 				<xsl:if test ="$supported = 'no'">Supported: <span style="color:red;font-style:italic;">No.</span></xsl:if>
 					<xsl:if test ="not($supported = 'no')">Supported: <span style="color:green;font-style:italic;">Yes.</span>
 					<br/>
-					Cropped Image Size: <span class="param"><xsl:value-of select="Crop/@width"/>x<xsl:value-of select="Crop/@height"/></span> pixels.
+					Crop Top,Left: <span class="param"><xsl:value-of select="Crop/@x"/>,<xsl:value-of select="Crop/@y"/> pixels.</span>
 					<br/>
-					Crop Top-Left: <span class="param"><xsl:value-of select="Crop/@x"/>,<xsl:value-of select="Crop/@y"/> pixels.</span>
+					<xsl:if test ="Crop/@height &gt; 0">
+					Cropped Image Size: <span class="param"><xsl:value-of select="Crop/@width"/>x<xsl:value-of select="Crop/@height"/></span> pixels.
+					</xsl:if>
+					<xsl:if test ="Crop/@height &lt; 1">
+					Crop Right,Bottom: <span class="param"><xsl:value-of select="-(Crop/@width)"/>,<xsl:value-of select="-(Crop/@height)"/></span> pixels.
+					</xsl:if>
 					<br/>
 					Sensor Black: <span class="param"><xsl:value-of select="Sensor/@black"/></span>, White:
 					<span class="param"><xsl:value-of select="Sensor/@white"/>.</span>
