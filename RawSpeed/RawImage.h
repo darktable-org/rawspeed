@@ -49,6 +49,7 @@ public:
   vector<BlackArea> blackAreas;
   iPoint2D subsampling;
   gboolean isAllocated() {return !!data;}
+  void scaleValues(float scale);
 protected:
   RawImageData(void);
   RawImageData(iPoint2D dim, guint bpp, guint cpp=1);

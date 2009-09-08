@@ -135,8 +135,51 @@ void RawImageData::scaleBlackWhite()
       whitePoint = m;
     printf("Estimated black:%d, Estimated white: %d\n", blackLevel, whitePoint);
   }
-  gw = dim.x*cpp;
   float f = 65535.0f / (float)(whitePoint-blackLevel);
+  scaleValues(f);
+}
+
+#if _MSC_VER > 1399
+
+void RawImageData::scaleValues(float f) {
+  int info[4];
+  __cpuid(info,1);
+
+  // Check SSE2
+  if (f >= 0.0f && info[3]&(1<<26)) { 
+  
+    __m128i ssescale;
+    guint gw = pitch / 16;
+    guint i = (int)(65536.0f*f);  // 16 bit fraction
+    i |= i<<16;
+    ssescale = _mm_set_epi32(i,i,i,i);
+
+    for (int y = 0; y < dim.y; y++) {
+      __m128i* pixel = (__m128i*)&data[(mOffset.y+y)*pitch];
+      for (guint x = 0 ; x < gw; x++) {
+        __m128i pix = _mm_load_si128(pixel);
+        pix = _mm_mulhi_epu16(pix, ssescale);
+        _mm_store_si128(pixel, pix);
+        pixel++;
+      }
+    }
+  } else {
+    // Not SSE2
+    gint gw = dim.x*cpp;
+    int scale = (int)(16384.0f*f);  // 14 bit fraction
+    for (int y = 0; y < dim.y; y++) {
+      gushort *pixel = (gushort*)getData(0,y);
+      for (int x = 0 ; x < gw; x++) {
+        pixel[x] = clampbits(((pixel[x]-blackLevel)*scale+8192)>>14,16);
+      }
+    }
+  }
+}
+
+#else
+
+void RawImageData::scaleValues(float f) {
+  gint gw = dim.x*cpp;
   int scale = (int)(16384.0f*f);  // 14 bit fraction
   for (int y = 0; y < dim.y; y++) {
     gushort *pixel = (gushort*)getData(0,y);
@@ -145,6 +188,8 @@ void RawImageData::scaleBlackWhite()
     }
   }
 }
+
+#endif
 
 
 RawImage::RawImage( RawImageData* p ) : p_(p)
