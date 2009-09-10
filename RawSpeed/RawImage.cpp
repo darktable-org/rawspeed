@@ -139,7 +139,7 @@ void RawImageData::scaleBlackWhite()
   scaleValues(f);
 }
 
-#if _MSC_VER > 13990
+#if _MSC_VER > 1399
 
 void RawImageData::scaleValues(float f) {
   int info[4];
@@ -150,21 +150,47 @@ void RawImageData::scaleValues(float f) {
 
     __m128i ssescale;
     __m128i ssesub;
+    __m128i sseround;
+    __m128i ssesub2;
+    __m128i ssesign;
     guint gw = pitch / 16;
-    guint i = (int)(65536.0f*f);  // 16 bit fraction
+    guint i = (int)(1024.0f*f);  // 10 bit fraction
     i |= i<<16;
     guint b = blackLevel | (blackLevel<<16);
 
     ssescale = _mm_set_epi32(i,i,i,i);
     ssesub = _mm_set_epi32(b,b,b,b);
+    sseround = _mm_set_epi32(512,512,512,512);
+    ssesub2 = _mm_set_epi32(32768,32768,32768,32768);
+    ssesign = _mm_set_epi32(0x80008000,0x80008000,0x80008000,0x80008000);
 
     for (int y = 0; y < dim.y; y++) {
       __m128i* pixel = (__m128i*)&data[(mOffset.y+y)*pitch];
       for (guint x = 0 ; x < gw; x++) {
-        __m128i pix = _mm_load_si128(pixel);
-        pix = _mm_subs_epu16(pix, ssesub);
-        pix = _mm_mulhi_epu16(pix, ssescale);
-        _mm_store_si128(pixel, pix);
+        __m128i pix_high;
+        __m128i temp;
+        __m128i pix_low = _mm_load_si128(pixel);
+        // Subtract black
+        pix_low = _mm_subs_epu16(pix_low, ssesub);
+        // Multiply the two unsigned shorts and combine it to 32 bit result 
+        pix_high = _mm_mulhi_epu16(pix_low, ssescale);
+        temp = _mm_mullo_epi16(pix_low, ssescale);
+        pix_low = _mm_unpacklo_epi16(temp, pix_high);
+        pix_high = _mm_unpackhi_epi16(temp, pix_high);
+        // Add rounder
+        pix_low = _mm_add_epi32(pix_low, sseround);
+        pix_high = _mm_add_epi32(pix_high, sseround);
+        // Shift down
+        pix_low = _mm_srai_epi32(pix_low, 10);
+        pix_high = _mm_srai_epi32(pix_high, 10);
+        // Subtract to avoid clipping
+        pix_low = _mm_sub_epi32(pix_low, ssesub2);
+        pix_high = _mm_sub_epi32(pix_high, ssesub2);
+        // Pack
+        pix_low = _mm_packs_epi32(pix_low, pix_high);
+        // Shift sign off
+        pix_low = _mm_xor_si128(pix_low,ssesign);
+        _mm_store_si128(pixel, pix_low);
         pixel++;
       }
     }

@@ -28,6 +28,7 @@ public:
   ~ByteStream(void);
   guint peekByte();
   gushort getShort();
+  guint getOffset() {return off;}
   void skipBytes(guint nbytes);
   guchar getByte();
   void setAbsoluteOffset(guint offset);
