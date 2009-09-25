@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-fPIC -Wall -O4 -g `pkg-config --cflags rawstudio-1.1 libxml-2.0`
 LDFLAGS=`pkg-config --libs rawstudio-1.1 libxml-2.0`
-INSTALLPATH=`pkg-config --variable=plugindir rawstudio-1.1 libxml-2.0`
+INSTALLPATH=`pkg-config --variable=plugindir rawstudio-1.1`
 
 CPP_SOURCES= rawstudio-plugin-api.cpp \
 	ArwDecoder.cpp \
