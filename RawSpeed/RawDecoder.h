@@ -27,6 +27,20 @@
 
     http://www.klauspost.com
 */
+
+class RawDecoder;
+
+class RawDecoderThread
+{
+  public:
+    RawDecoderThread() {error = 0;};
+    guint start_y;
+    guint end_y;
+    const char* error;
+    pthread_t threadid;
+    RawDecoder* parent;
+};
+
 class RawDecoder 
 {
 public:
@@ -35,11 +49,13 @@ public:
   virtual RawImage decodeRaw() = 0;
   virtual void checkSupport(CameraMetaData *meta) = 0;
   virtual void decodeMetaData(CameraMetaData *meta) = 0;
+  virtual void decodeThreaded(RawDecoderThread* t);
   FileMap *mFile; 
   void readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch, int bitPerPixel, gboolean MSBOrder);
   RawImage mRaw; 
   vector<const char*> errors;
 protected:
+  void startThreads();
   void checkCameraSupported(CameraMetaData *meta, string make, string model, string mode);
   virtual void setMetaData(CameraMetaData *meta, string make, string model, string mode);
   void Decode12BitRaw(ByteStream &input, guint w, guint h);

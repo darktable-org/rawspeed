@@ -25,6 +25,18 @@
     http://www.klauspost.com
 */
 
+class PanaBitpump {
+  public:
+  PanaBitpump(ByteStream* input);
+  virtual ~PanaBitpump();
+  ByteStream* input;
+  guchar buf[0x4000];
+  int vbits;
+  guint load_flags;
+  guint getBits(int nbits);
+  void skipBytes(int bytes);
+};
+
 class Rw2Decoder :
   public RawDecoder
 {
@@ -35,14 +47,12 @@ public:
   virtual void decodeMetaData(CameraMetaData *meta);
   virtual void checkSupport(CameraMetaData *meta);
   TiffIFD *mRootIFD;
+protected:
+  virtual void decodeThreaded(RawDecoderThread* t);
 private:
-  guint pana_bits (int nbits);
   string getMode(const string model);
   void DecodeRw2();
   bool almostEqualRelative(float A, float B, float maxRelativeError);
+  ByteStream* input_start;
   guint load_flags;
-  ByteStream* input;
-  guchar buf[0x4000];
-  int vbits;
-
 };

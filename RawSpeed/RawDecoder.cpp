@@ -167,5 +167,53 @@ void RawDecoder::TrimSpaces( string& str)
   }  
   else  
     str = str.substr( startpos, endpos-startpos+1 );  
+}
 
-}  
+
+void *RawDecoderDecodeThread(void *_this) {
+  RawDecoderThread* me = (RawDecoderThread*)_this;
+  try {
+    me->parent->decodeThreaded(me);
+  } catch (RawDecoderException ex) {
+    me->error = _strdup(ex.what());
+  }
+  pthread_exit(NULL);
+  return 0;
+}
+
+void RawDecoder::startThreads()
+{
+  guint threads = rs_get_number_of_processor_cores();
+  int y_offset = 0;
+  int y_per_thread = (mRaw->dim.y + threads - 1) / threads;
+  RawDecoderThread t[threads];
+
+  pthread_attr_t attr;
+
+  /* Initialize and set thread detached attribute */
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+
+  for (guint i = 0; i < threads; i++)
+  {
+    t[i].start_y = y_offset;
+    t[i].end_y = MIN(y_offset + y_per_thread, mRaw->dim.y);
+    t[i].parent = this;
+    pthread_create(&t[i].threadid, &attr, RawDecoderDecodeThread, &t[i]);
+    y_offset = t[i].end_y;
+  }
+
+  void *status;
+  for(guint i = 0; i < threads; i++){
+    pthread_join(t[i].threadid, &status);
+    if (t[i].error) {
+      errors.push_back(t[i].error);
+    }
+  }
+}
+
+void RawDecoder::decodeThreaded(RawDecoderThread * t)
+{
+  ThrowRDE("Internal Error: This class does not support threaded decoding");
+}
+

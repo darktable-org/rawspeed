@@ -122,45 +122,21 @@ void ArwDecoder::DecodeARW(ByteStream &input, guint w, guint h) {
 }
 
 void ArwDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
-  guchar* data = mRaw->getData();
-  guint pitch = mRaw->pitch;
+
   if (bpp == 8) {
-    BitPumpPlain bits(&input);
-    for (guint y = 0; y < h; y++ ) {
-      gushort* dest = (gushort*)&data[y*pitch];
-      bits.setAbsoluteOffset((w*bpp*y)>>3); // Realign
-      // Process 32 pixels (16x2) per loop.
-      for (guint x = 0; x < w-30; ) { 
-        bits.checkPos();
-        gint _max = bits.getBits(11);
-        gint _min = bits.getBits(11);
-        gint _imax = bits.getBits(4);
-        gint _imin = bits.getBits(4);
-        gint sh;
-        for (sh = 0; sh < 4 && 0x80 << sh <= _max-_min; sh++);
-        for (gint i = 0; i < 16; i++) {
-          gint p;
-          if (i == _imax) p = _max;
-          else if (i == _imin) p = _min;
-          else {
-            p = (bits.getBits(7) << sh) + _min;
-            if (p > 0x7ff)
-              p = 0x7ff;
-          }
-          dest[x+i*2] = curve[p << 1];
-        }
-        x += x & 1 ? 31 : 1;  // Skip to next 32 pixels
-      }
-    }
+    in = &input;
+    this->startThreads();
     return;
   } // End bpp = 8
+
   if (bpp==12) {
     guchar* data = mRaw->getData();
     guint pitch = mRaw->pitch;
     const guchar *in = input.getData();
-    if (input.getRemainSize()< (w*h*3/2) ) {
+
+    if (input.getRemainSize()< (w*h*3/2) )
       h = input.getRemainSize() / (w*3/2) - 1;
-    }
+
     for (guint y=0; y < h; y++) {
       gushort* dest = (gushort*)&data[y*pitch];
       for(guint x =0 ; x < w; x+=2) {
@@ -199,4 +175,43 @@ void ArwDecoder::decodeMetaData(CameraMetaData *meta)
   string model = data[0]->getEntry(MODEL)->getString();
 
   setMetaData(meta, make, model, "");
+}
+
+/* Since ARW2 compressed images have predictable offsets, we decode them threaded */
+
+void ArwDecoder::decodeThreaded(RawDecoderThread * t)
+{
+  guchar* data = mRaw->getData();
+  guint pitch = mRaw->pitch;
+  guint w = mRaw->dim.x;
+
+  BitPumpPlain bits(in);
+  for (guint y = t->start_y; y < t->end_y; y++ ) {
+    gushort* dest = (gushort*)&data[y*pitch];
+    // Realign
+    bits.setAbsoluteOffset((w*8*y)>>3); 
+
+    // Process 32 pixels (16x2) per loop.    
+    for (guint x = 0; x < w-30; ) { 
+      bits.checkPos();
+      gint _max = bits.getBits(11);
+      gint _min = bits.getBits(11);
+      gint _imax = bits.getBits(4);
+      gint _imin = bits.getBits(4);
+      gint sh;
+      for (sh = 0; sh < 4 && 0x80 << sh <= _max-_min; sh++);
+      for (gint i = 0; i < 16; i++) {
+        gint p;
+        if (i == _imax) p = _max;
+        else if (i == _imin) p = _min;
+        else {
+          p = (bits.getBits(7) << sh) + _min;
+          if (p > 0x7ff)
+            p = 0x7ff;
+        }
+        dest[x+i*2] = curve[p << 1];
+      }
+      x += x & 1 ? 31 : 1;  // Skip to next 32 pixels
+    }
+  }
 }

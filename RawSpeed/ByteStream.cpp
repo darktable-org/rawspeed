@@ -29,6 +29,12 @@ buffer(_buffer), size(_size), off(0)
 
 }
 
+ByteStream::ByteStream(const ByteStream *b) :
+buffer(b->buffer), size(b->size), off(b->off)
+{
+
+}
+
 ByteStream::~ByteStream(void)
 {
 

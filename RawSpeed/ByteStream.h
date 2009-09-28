@@ -25,6 +25,7 @@ class ByteStream
 {
 public:
   ByteStream(const guchar* _buffer, guint _size);
+  ByteStream(const ByteStream* b);
   ~ByteStream(void);
   guint peekByte();
   gushort getShort();
