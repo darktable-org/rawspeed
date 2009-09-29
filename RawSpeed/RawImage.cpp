@@ -24,31 +24,28 @@
 */
 
 RawImageData::RawImageData(void):
-dim(0,0), bpp(0), isCFA(true),
-blackLevel(-1), whitePoint(65536),
-dataRefCount(0), data(0), cpp(1)
-{
+    dim(0, 0), bpp(0), isCFA(true),
+    blackLevel(-1), whitePoint(65536),
+    dataRefCount(0), data(0), cpp(1) {
   pthread_mutex_init(&mymutex, NULL);
   subsampling.x = subsampling.y = 1;
 }
 
 RawImageData::RawImageData(iPoint2D _dim, guint _bpc, guint _cpp) :
-dim(_dim), bpp(_bpc),
-blackLevel(-1), whitePoint(65536),
-dataRefCount(0),data(0), cpp(cpp)
-{
+    dim(_dim), bpp(_bpc),
+    blackLevel(-1), whitePoint(65536),
+    dataRefCount(0), data(0), cpp(cpp) {
   subsampling.x = subsampling.y = 1;
   createData();
   pthread_mutex_init(&mymutex, NULL);
 }
 
-RawImageData::~RawImageData(void)
-{
+RawImageData::~RawImageData(void) {
   _ASSERTE(dataRefCount == 0);
   if (data)
-	  _aligned_free(data);
+    _aligned_free(data);
   data = 0;
-  mOffset = iPoint2D(0,0);
+  mOffset = iPoint2D(0, 0);
   pthread_mutex_destroy(&mymutex);
 }
 
@@ -58,21 +55,19 @@ void RawImageData::createData() {
     ThrowRDE("RawImageData: Dimensions too large for allocation.");
   if (data)
     ThrowRDE("RawImageData: Duplicate data allocation in createData.");
-  pitch = (((dim.x*bpp) + 15)/16)*16;
-  data = (guchar*)_aligned_malloc(pitch*dim.y,16);
+  pitch = (((dim.x * bpp) + 15) / 16) * 16;
+  data = (guchar*)_aligned_malloc(pitch * dim.y, 16);
   if (!data)
     ThrowRDE("RawImageData::createData: Memory Allocation failed.");
 }
 
-void RawImageData::destroyData()
-{
+void RawImageData::destroyData() {
   if (data)
     _aligned_free(data);
   data = 0;
 }
 
-void RawImageData::setCpp( guint val )
-{
+void RawImageData::setCpp(guint val) {
   if (data)
     ThrowRDE("RawImageData: Attempted to set Components per pixel after data allocation");
   bpp /= cpp;
@@ -80,23 +75,21 @@ void RawImageData::setCpp( guint val )
   bpp *= val;
 }
 
-guchar* RawImageData::getData()
-{
+guchar* RawImageData::getData() {
   if (!data)
     ThrowRDE("RawImageData::getData - Data not yet allocated.");
   return &data[mOffset.y*pitch+mOffset.x*bpp];
 }
 
-guchar* RawImageData::getData( guint x, guint y )
-{
-  if ((int)x>=dim.x)
+guchar* RawImageData::getData(guint x, guint y) {
+  if ((int)x >= dim.x)
     ThrowRDE("RawImageData::getData - X Position outside image requested.");
-  if ((int)y>=dim.y) {
+  if ((int)y >= dim.y) {
     ThrowRDE("RawImageData::getData - Y Position outside image requested.");
   }
 
-  x+= mOffset.x;
-  y+= mOffset.y;
+  x += mOffset.x;
+  y += mOffset.y;
 
   if (!data)
     ThrowRDE("RawImageData::getData - Data not yet allocated.");
@@ -104,9 +97,8 @@ guchar* RawImageData::getData( guint x, guint y )
   return &data[y*pitch+x*bpp];
 }
 
-void RawImageData::subFrame( iPoint2D offset, iPoint2D new_size )
-{
-  if (!new_size.isThisInside(dim-offset)) {
+void RawImageData::subFrame(iPoint2D offset, iPoint2D new_size) {
+  if (!new_size.isThisInside(dim - offset)) {
     printf("WARNING: RawImageData::subFrame - Attempted to create new subframe larger than original size. Crop skipped.\n");
     return;
   }
@@ -115,27 +107,26 @@ void RawImageData::subFrame( iPoint2D offset, iPoint2D new_size )
   dim = new_size;
 }
 
-void RawImageData::scaleBlackWhite()
-{
-  gint gw = (dim.x-20)*cpp;
+void RawImageData::scaleBlackWhite() {
+  gint gw = (dim.x - 20) * cpp;
   if (blackLevel < 0 || whitePoint == 65536) {  // Estimate
     int b = 65536;
     int m = 0;
-    for(int row=10;row<(dim.y-10);row++) {
-      gushort *pixel = (gushort*)getData(10,row);
-      for(int col = 10 ; col < gw ; col++) {
+    for (int row = 10;row < (dim.y - 10);row++) {
+      gushort *pixel = (gushort*)getData(10, row);
+      for (int col = 10 ; col < gw ; col++) {
         b = MIN(*pixel, b);
         m = MAX(*pixel, m);
         pixel++;
       }
     }
-    if (blackLevel<0)
+    if (blackLevel < 0)
       blackLevel = b;
-    if (whitePoint==65536)
+    if (whitePoint == 65536)
       whitePoint = m;
     printf("Estimated black:%d, Estimated white: %d\n", blackLevel, whitePoint);
   }
-  float f = 65535.0f / (float)(whitePoint-blackLevel);
+  float f = 65535.0f / (float)(whitePoint - blackLevel);
   scaleValues(f);
 }
 
@@ -143,10 +134,10 @@ void RawImageData::scaleBlackWhite()
 
 void RawImageData::scaleValues(float f) {
   int info[4];
-  __cpuid(info,1);
+  __cpuid(info, 1);
 
   // Check SSE2
-  if (f >= 0.0f && info[3]&(1<<26)) {
+  if (f >= 0.0f && info[3]&(1 << 26)) {
 
     __m128i ssescale;
     __m128i ssesub;
@@ -154,25 +145,25 @@ void RawImageData::scaleValues(float f) {
     __m128i ssesub2;
     __m128i ssesign;
     guint gw = pitch / 16;
-    guint i = (int)(1024.0f*f);  // 10 bit fraction
-    i |= i<<16;
-    guint b = blackLevel | (blackLevel<<16);
+    guint i = (int)(1024.0f * f);  // 10 bit fraction
+    i |= i << 16;
+    guint b = blackLevel | (blackLevel << 16);
 
-    ssescale = _mm_set_epi32(i,i,i,i);
-    ssesub = _mm_set_epi32(b,b,b,b);
-    sseround = _mm_set_epi32(512,512,512,512);
-    ssesub2 = _mm_set_epi32(32768,32768,32768,32768);
-    ssesign = _mm_set_epi32(0x80008000,0x80008000,0x80008000,0x80008000);
+    ssescale = _mm_set_epi32(i, i, i, i);
+    ssesub = _mm_set_epi32(b, b, b, b);
+    sseround = _mm_set_epi32(512, 512, 512, 512);
+    ssesub2 = _mm_set_epi32(32768, 32768, 32768, 32768);
+    ssesign = _mm_set_epi32(0x80008000, 0x80008000, 0x80008000, 0x80008000);
 
     for (int y = 0; y < dim.y; y++) {
-      __m128i* pixel = (__m128i*)&data[(mOffset.y+y)*pitch];
+      __m128i* pixel = (__m128i*) & data[(mOffset.y+y)*pitch];
       for (guint x = 0 ; x < gw; x++) {
         __m128i pix_high;
         __m128i temp;
         __m128i pix_low = _mm_load_si128(pixel);
         // Subtract black
         pix_low = _mm_subs_epu16(pix_low, ssesub);
-        // Multiply the two unsigned shorts and combine it to 32 bit result 
+        // Multiply the two unsigned shorts and combine it to 32 bit result
         pix_high = _mm_mulhi_epu16(pix_low, ssescale);
         temp = _mm_mullo_epi16(pix_low, ssescale);
         pix_low = _mm_unpacklo_epi16(temp, pix_high);
@@ -189,19 +180,19 @@ void RawImageData::scaleValues(float f) {
         // Pack
         pix_low = _mm_packs_epi32(pix_low, pix_high);
         // Shift sign off
-        pix_low = _mm_xor_si128(pix_low,ssesign);
+        pix_low = _mm_xor_si128(pix_low, ssesign);
         _mm_store_si128(pixel, pix_low);
         pixel++;
       }
     }
   } else {
     // Not SSE2
-    gint gw = dim.x*cpp;
-    int scale = (int)(16384.0f*f);  // 14 bit fraction
+    gint gw = dim.x * cpp;
+    int scale = (int)(16384.0f * f);  // 14 bit fraction
     for (int y = 0; y < dim.y; y++) {
-      gushort *pixel = (gushort*)getData(0,y);
+      gushort *pixel = (gushort*)getData(0, y);
       for (int x = 0 ; x < gw; x++) {
-        pixel[x] = clampbits(((pixel[x]-blackLevel)*scale+8192)>>14,16);
+        pixel[x] = clampbits(((pixel[x] - blackLevel) * scale + 8192) >> 14, 16);
       }
     }
   }
@@ -214,9 +205,9 @@ void RawImageData::scaleValues(float f) {
   //TODO: Check for SSE2 on 32 bit systems and use it there
   guint temp[20];
 
-  guint i = (int)(1024.0f*f);  // 10 bit fraction
-  i |= i<<16;
-  guint b = blackLevel | (blackLevel<<16);
+  guint i = (int)(1024.0f * f);  // 10 bit fraction
+  i |= i << 16;
+  guint b = blackLevel | (blackLevel << 16);
 
   for (int j = 0; j < 4; j++) {
     temp[j] = b;
@@ -227,22 +218,22 @@ void RawImageData::scaleValues(float f) {
   }
 
   asm volatile
-      (
-       "movdqu 0(%0), %%xmm7\n"     // Subtraction
-       "movdqu 16(%0), %%xmm6\n"    // Multiplication factor
-       "movdqu 32(%0), %%xmm5\n"    // Fraction
-       "movdqu 48(%0), %%xmm4\n"    // Sub 32768
-       "movdqu 64(%0), %%xmm3\n"    // Sign shift
-    : // no output registers
-    : "r" (temp)
-    : //  %0
+  (
+    "movdqu 0(%0), %%xmm7\n"     // Subtraction
+    "movdqu 16(%0), %%xmm6\n"    // Multiplication factor
+    "movdqu 32(%0), %%xmm5\n"    // Fraction
+    "movdqu 48(%0), %%xmm4\n"    // Sub 32768
+    "movdqu 64(%0), %%xmm3\n"    // Sign shift
+  : // no output registers
+  : "r"(temp)
+        : //  %0
       );
 
   for (int y = 0; y < dim.y; y++) {
-    guchar* pixel = (guchar*)&data[(mOffset.y+y)*pitch];
+    guchar* pixel = (guchar*) & data[(mOffset.y+y)*pitch];
     guint gw = pitch >> 4;
     for (guint x  = 0; x < gw ; x++) {
-      asm volatile (
+      asm volatile(
         "next_pixel:\n"
         "movaps 0(%0), %%xmm0\n"
         "psubusw %%xmm7, %%xmm0\n"  // Subtract black
@@ -264,22 +255,22 @@ void RawImageData::scaleValues(float f) {
 
         "add $16, %0\n"
       : // no output registers
-      : "r" (pixel)
-      :  // %0    
-      );
+      : "r"(pixel)
+            :  // %0
+          );
     }
   }
 
 #else
 
-  gint gw = dim.x*cpp;
-    int scale = (int)(16384.0f*f);  // 14 bit fraction
-  for (int y = 0; y < dim.y; y++) {
-    gushort *pixel = (gushort*)getData(0,y);
-    for (int x = 0 ; x < gw; x++) {
-        pixel[x] = clampbits(((pixel[x]-blackLevel)*scale+8192)>>14,16);
-    }
+gint gw = dim.x * cpp;
+int scale = (int)(16384.0f * f);  // 14 bit fraction
+for (int y = 0; y < dim.y; y++) {
+  gushort *pixel = (gushort*)getData(0, y);
+  for (int x = 0 ; x < gw; x++) {
+    pixel[x] = clampbits(((pixel[x] - blackLevel) * scale + 8192) >> 14, 16);
   }
+}
 
 #endif
 
@@ -288,22 +279,19 @@ void RawImageData::scaleValues(float f) {
 #endif
 
 
-RawImage::RawImage( RawImageData* p ) : p_(p)
-{
+RawImage::RawImage(RawImageData* p) : p_(p) {
   pthread_mutex_lock(&p_->mymutex);
   ++p_->dataRefCount;
   pthread_mutex_unlock(&p_->mymutex);
 }
 
-RawImage::RawImage( const RawImage& p ) : p_(p.p_)
-{
+RawImage::RawImage(const RawImage& p) : p_(p.p_) {
   pthread_mutex_lock(&p_->mymutex);
   ++p_->dataRefCount;
   pthread_mutex_unlock(&p_->mymutex);
 }
 
-RawImage::~RawImage()
-{
+RawImage::~RawImage() {
   pthread_mutex_lock(&p_->mymutex);
   if (--p_->dataRefCount == 0) {
     pthread_mutex_unlock(&p_->mymutex);
@@ -313,18 +301,15 @@ RawImage::~RawImage()
   pthread_mutex_unlock(&p_->mymutex);
 }
 
-RawImageData* RawImage::operator->()
-{
+RawImageData* RawImage::operator->() {
   return p_;
 }
 
-RawImageData& RawImage::operator*()
-{
+RawImageData& RawImage::operator*() {
   return *p_;
 }
 
-RawImage& RawImage::operator=( const RawImage& p )
-{
+RawImage& RawImage::operator=(const RawImage & p) {
   RawImageData* const old = p_;
   p_ = p.p_;
   ++p_->dataRefCount;

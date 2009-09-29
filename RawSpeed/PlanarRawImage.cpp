@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "PlanarRawImage.h"
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -22,10 +22,8 @@
     http://www.klauspost.com
 */
 
-PlanarRawImage::PlanarRawImage(void)
-{
+PlanarRawImage::PlanarRawImage(void) {
 }
 
-PlanarRawImage::~PlanarRawImage(void)
-{
+PlanarRawImage::~PlanarRawImage(void) {
 }

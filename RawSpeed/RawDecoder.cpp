@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "RawDecoder.h"
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -22,12 +22,10 @@
     http://www.klauspost.com
 */
 
-RawDecoder::RawDecoder(FileMap* file) : mFile(file), mRaw(RawImage::create())
-{
+RawDecoder::RawDecoder(FileMap* file) : mFile(file), mRaw(RawImage::create()) {
 }
 
-RawDecoder::~RawDecoder(void)
-{
+RawDecoder::~RawDecoder(void) {
   for (guint i = 0 ; i < errors.size(); i++) {
     free((void*)errors[i]);
   }
@@ -41,27 +39,27 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
   guint h = size.y;
   guint cpp = mRaw->getCpp();
 
-  if (input.getRemainSize()< (inputPitch*h) ) {
+  if (input.getRemainSize() < (inputPitch*h)) {
     h = input.getRemainSize() / inputPitch - 1;
   }
-  if (bitPerPixel>16)
+  if (bitPerPixel > 16)
     ThrowRDE("readUncompressedRaw: Unsupported bit depth");
 
-  guint skipBits = inputPitch - w*bitPerPixel/8;  // Skip per line
-  if (offset.y>mRaw->dim.y)
+  guint skipBits = inputPitch - w * bitPerPixel / 8;  // Skip per line
+  if (offset.y > mRaw->dim.y)
     ThrowRDE("readUncompressedRaw: Invalid y offset");
-  if (offset.x+size.x>mRaw->dim.x)
+  if (offset.x + size.x > mRaw->dim.x)
     ThrowRDE("readUncompressedRaw: Invalid x offset");
 
   guint y = offset.y;
-  h = MIN(h+(guint)offset.y,(guint)mRaw->dim.y);
+  h = MIN(h + (guint)offset.y, (guint)mRaw->dim.y);
 
   if (MSBOrder) {
     BitPumpMSB bits(&input);
     w *= cpp;
     for (; y < h; y++) {
-      gushort* dest = (gushort*)&data[offset.x*sizeof(gushort)*cpp+y*outPitch];
-      for(guint x =0 ; x < w; x++) {
+      gushort* dest = (gushort*) & data[offset.x*sizeof(gushort)*cpp+y*outPitch];
+      for (guint x = 0 ; x < w; x++) {
         guint b = bits.getBits(bitPerPixel);
         dest[x] = b;
       }
@@ -70,16 +68,16 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
 
   } else {
 
-    if (bitPerPixel==16)  {
-      BitBlt(&data[offset.x*sizeof(gushort)*cpp+y*outPitch],outPitch,
-        input.getData(),inputPitch,w*mRaw->bpp,h-y);
+    if (bitPerPixel == 16)  {
+      BitBlt(&data[offset.x*sizeof(gushort)*cpp+y*outPitch], outPitch,
+             input.getData(), inputPitch, w*mRaw->bpp, h - y);
       return;
     }
     BitPumpPlain bits(&input);
     w *= cpp;
     for (; y < h; y++) {
-      gushort* dest = (gushort*)&data[offset.x*sizeof(gushort)+y*outPitch];
-      for(guint x =0 ; x < w; x++) {
+      gushort* dest = (gushort*) & data[offset.x*sizeof(gushort)+y*outPitch];
+      for (guint x = 0 ; x < w; x++) {
         guint b = bits.getBits(bitPerPixel);
         dest[x] = b;
       }
@@ -92,17 +90,17 @@ void RawDecoder::Decode12BitRaw(ByteStream &input, guint w, guint h) {
   guchar* data = mRaw->getData();
   guint pitch = mRaw->pitch;
   const guchar *in = input.getData();
-  if (input.getRemainSize()< (w*h*3/2) ) {
-    h = input.getRemainSize() / (w*3/2) - 1;
+  if (input.getRemainSize() < (w*h*3 / 2)) {
+    h = input.getRemainSize() / (w * 3 / 2) - 1;
   }
-  for (guint y=0; y < h; y++) {
-    gushort* dest = (gushort*)&data[y*pitch];
-    for(guint x =0 ; x < w; x+=2) {
+  for (guint y = 0; y < h; y++) {
+    gushort* dest = (gushort*) & data[y*pitch];
+    for (guint x = 0 ; x < w; x += 2) {
       guint g1 = *in++;
       guint g2 = *in++;
-      dest[x] = g1 | ((g2&0xf)<<8);
+      dest[x] = g1 | ((g2 & 0xf) << 8);
       guint g3 = *in++;
-      dest[x+1] = (g2>>4) | (g3<<4);
+      dest[x+1] = (g2 >> 4) | (g3 << 4);
     }
   }
 }
@@ -112,9 +110,9 @@ void RawDecoder::checkCameraSupported(CameraMetaData *meta, string make, string 
   TrimSpaces(model);
   Camera* cam = meta->getCamera(make, model, mode);
   if (!cam) {
-    if (mode.length() == 0) 
+    if (mode.length() == 0)
       printf("Unable to find camera in database: %s %s %s\n", make.c_str(), model.c_str(), mode.c_str());
-    
+
     return;    // Assume true.
   }
 
@@ -122,8 +120,7 @@ void RawDecoder::checkCameraSupported(CameraMetaData *meta, string make, string 
     ThrowRDE("Camera not supported (explicit). Sorry.");
 }
 
-void RawDecoder::setMetaData( CameraMetaData *meta, string make, string model, string mode )
-{
+void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model, string mode) {
   TrimSpaces(make);
   TrimSpaces(model);
   Camera *cam = meta->getCamera(make, model, mode);
@@ -134,13 +131,13 @@ void RawDecoder::setMetaData( CameraMetaData *meta, string make, string model, s
 
   iPoint2D new_size = cam->cropSize;
 
-	// If crop size is negative, use relative cropping
-	if (new_size.x <= 0)
-		new_size.x = mRaw->dim.x - cam->cropPos.x + new_size.x;
-	
-	if (new_size.y <= 0)
-		new_size.y = mRaw->dim.y - cam->cropPos.y + new_size.y;
-	
+  // If crop size is negative, use relative cropping
+  if (new_size.x <= 0)
+    new_size.x = mRaw->dim.x - cam->cropPos.x + new_size.x;
+
+  if (new_size.y <= 0)
+    new_size.y = mRaw->dim.y - cam->cropPos.y + new_size.y;
+
   mRaw->subFrame(cam->cropPos, new_size);
   mRaw->cfa = cam->cfa;
 
@@ -154,19 +151,16 @@ void RawDecoder::setMetaData( CameraMetaData *meta, string make, string model, s
   mRaw->whitePoint = cam->white;
 }
 
-void RawDecoder::TrimSpaces( string& str)
-{  
-  // Trim Both leading and trailing spaces  
-  size_t startpos = str.find_first_not_of(" \t"); // Find the first character position after excluding leading blank spaces  
-  size_t endpos = str.find_last_not_of(" \t"); // Find the first character position from reverse af  
+void RawDecoder::TrimSpaces(string& str) {
+  // Trim Both leading and trailing spaces
+  size_t startpos = str.find_first_not_of(" \t"); // Find the first character position after excluding leading blank spaces
+  size_t endpos = str.find_last_not_of(" \t"); // Find the first character position from reverse af
 
-  // if all spaces or empty return an empty string  
-  if(( string::npos == startpos ) || ( string::npos == endpos))  
-  {  
-    str = "";  
-  }  
-  else  
-    str = str.substr( startpos, endpos-startpos+1 );  
+  // if all spaces or empty return an empty string
+  if ((string::npos == startpos) || (string::npos == endpos)) {
+    str = "";
+  } else
+    str = str.substr(startpos, endpos - startpos + 1);
 }
 
 
@@ -181,8 +175,7 @@ void *RawDecoderDecodeThread(void *_this) {
   return 0;
 }
 
-void RawDecoder::startThreads()
-{
+void RawDecoder::startThreads() {
   guint threads = rs_get_number_of_processor_cores();
   int y_offset = 0;
   int y_per_thread = (mRaw->dim.y + threads - 1) / threads;
@@ -194,8 +187,7 @@ void RawDecoder::startThreads()
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-  for (guint i = 0; i < threads; i++)
-  {
+  for (guint i = 0; i < threads; i++) {
     t[i].start_y = y_offset;
     t[i].end_y = MIN(y_offset + y_per_thread, mRaw->dim.y);
     t[i].parent = this;
@@ -204,7 +196,7 @@ void RawDecoder::startThreads()
   }
 
   void *status;
-  for(guint i = 0; i < threads; i++){
+  for (guint i = 0; i < threads; i++) {
     pthread_join(t[i].threadid, &status);
     if (t[i].error) {
       errors.push_back(t[i].error);
@@ -212,8 +204,7 @@ void RawDecoder::startThreads()
   }
 }
 
-void RawDecoder::decodeThreaded(RawDecoderThread * t)
-{
+void RawDecoder::decodeThreaded(RawDecoderThread * t) {
   ThrowRDE("Internal Error: This class does not support threaded decoding");
 }
 

@@ -24,19 +24,16 @@
 */
 
 Rw2Decoder::Rw2Decoder(TiffIFD *rootIFD, FileMap* file) :
-RawDecoder(file), mRootIFD(rootIFD), input_start(0)
-{
+    RawDecoder(file), mRootIFD(rootIFD), input_start(0) {
 
 }
-Rw2Decoder::~Rw2Decoder(void)
-{
+Rw2Decoder::~Rw2Decoder(void) {
   if (input_start)
     delete input_start;
   input_start = 0;
 }
 
-RawImage Rw2Decoder::decodeRaw()
-{
+RawImage Rw2Decoder::decodeRaw() {
 
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(PANASONIC_STRIPOFFSET);
 
@@ -48,7 +45,7 @@ RawImage Rw2Decoder::decodeRaw()
   TiffEntry *offsets = raw->getEntry(PANASONIC_STRIPOFFSET);
 
   if (offsets->count != 1) {
-    ThrowRDE("RW2 Decoder: Multiple Strips found: %u",offsets->count);
+    ThrowRDE("RW2 Decoder: Multiple Strips found: %u", offsets->count);
   }
 
   guint height = raw->getEntry((TiffTag)3)->getShort();
@@ -61,7 +58,7 @@ RawImage Rw2Decoder::decodeRaw()
   load_flags = 0x2008;
   gint off = offsets->getInt();
 
-  input_start = new ByteStream(mFile->getData(off),mFile->getSize()-off);
+  input_start = new ByteStream(mFile->getData(off), mFile->getSize() - off);
   try {
     DecodeRw2();
   } catch (IOException e) {
@@ -72,15 +69,13 @@ RawImage Rw2Decoder::decodeRaw()
   return mRaw;
 }
 
-void Rw2Decoder::DecodeRw2()
-{
+void Rw2Decoder::DecodeRw2() {
   startThreads();
 }
 
-void Rw2Decoder::decodeThreaded(RawDecoderThread * t)
-{
-  int x, i, j, sh=0, pred[2], nonz[2];
-  int w = mRaw->dim.x/14;
+void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
+  int x, i, j, sh = 0, pred[2], nonz[2];
+  int w = mRaw->dim.x / 14;
   guint y;
 
   /* 9 + 1/7 bits per pixel */
@@ -93,8 +88,8 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t)
   bits.skipBytes(skip);
 
   for (y = t->start_y; y < t->end_y; y++) {
-    gushort* dest = (gushort*)mRaw->getData(0,y);
-    for (x=0; x < w; x++) {
+    gushort* dest = (gushort*)mRaw->getData(0, y);
+    for (x = 0; x < w; x++) {
       pred[0] = pred[1] = nonz[0] = nonz[1] = 0;
       for (i = 0; i < 14; i++) {
         // Even pixels
@@ -108,24 +103,24 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t)
           }
         } else if ((nonz[0] = bits.getBits(8)) || i > 11)
           pred[0] = nonz[0] << 4 | bits.getBits(4);
-          *dest++ = pred[0];
+        *dest++ = pred[0];
 
         // Odd pixels
-          i++;
-          if (i % 3 == 2)
-            sh = 4 >> (3 - bits.getBits(2));
-          if (nonz[1]) {
-            if ((j = bits.getBits(8))) {
-              if ((pred[1] -= 0x80 << sh) < 0 || sh == 4)
-                pred[1] &= ~(-1 << sh);
-              pred[1] += j << sh;
-            }
-          } else if ((nonz[1] = bits.getBits(8)) || i > 11)
-            pred[1] = nonz[1] << 4 | bits.getBits(4);
-            *dest++ = pred[1];
+        i++;
+        if (i % 3 == 2)
+          sh = 4 >> (3 - bits.getBits(2));
+        if (nonz[1]) {
+          if ((j = bits.getBits(8))) {
+            if ((pred[1] -= 0x80 << sh) < 0 || sh == 4)
+              pred[1] &= ~(-1 << sh);
+            pred[1] += j << sh;
+          }
+        } else if ((nonz[1] = bits.getBits(8)) || i > 11)
+          pred[1] = nonz[1] << 4 | bits.getBits(4);
+        *dest++ = pred[1];
       }
     }
-  }  
+  }
 }
 
 void Rw2Decoder::checkSupport(CameraMetaData *meta) {
@@ -138,8 +133,7 @@ void Rw2Decoder::checkSupport(CameraMetaData *meta) {
   this->checkCameraSupported(meta, make, model, getMode(model));
 }
 
-void Rw2Decoder::decodeMetaData( CameraMetaData *meta )
-{
+void Rw2Decoder::decodeMetaData(CameraMetaData *meta) {
   mRaw->cfa.setCFA(CFA_BLUE, CFA_GREEN, CFA_GREEN2, CFA_RED);
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
@@ -153,8 +147,7 @@ void Rw2Decoder::decodeMetaData( CameraMetaData *meta )
   setMetaData(meta, make, model, mode);
 }
 
-bool Rw2Decoder::almostEqualRelative(float A, float B, float maxRelativeError)
-{
+bool Rw2Decoder::almostEqualRelative(float A, float B, float maxRelativeError) {
   if (A == B)
     return true;
 
@@ -164,48 +157,43 @@ bool Rw2Decoder::almostEqualRelative(float A, float B, float maxRelativeError)
   return false;
 }
 
-std::string Rw2Decoder::getMode( const string model )
-{
+std::string Rw2Decoder::getMode(const string model) {
   float ratio = 3.0f / 2.0f;  // Default
   if (mRaw->isAllocated()) {
     ratio = (float)mRaw->dim.x / (float)mRaw->dim.y;
   }
 
   if (!model.compare("DMC-LX3") || !model.compare("DMC-G1") || !model.compare("DMC-GH1") || !model.compare("DMC-GF1")) {
-    if (almostEqualRelative(ratio,16.0f/9.0f,0.02f))
+    if (almostEqualRelative(ratio, 16.0f / 9.0f, 0.02f))
       return "16:9";
-    if (almostEqualRelative(ratio,3.0f/2.0f,0.02f))
+    if (almostEqualRelative(ratio, 3.0f / 2.0f, 0.02f))
       return "3:2";
-    if (almostEqualRelative(ratio,4.0f/3.0f,0.02f))
+    if (almostEqualRelative(ratio, 4.0f / 3.0f, 0.02f))
       return "4:3";
-    if (almostEqualRelative(ratio,1.0f,0.02f))
+    if (almostEqualRelative(ratio, 1.0f, 0.02f))
       return "1:1";
   }
 
   return "";
 }
 
-PanaBitpump::PanaBitpump(ByteStream* _input) : input(_input), vbits(0)
-{
+PanaBitpump::PanaBitpump(ByteStream* _input) : input(_input), vbits(0) {
 }
 
-PanaBitpump::~PanaBitpump() 
-{
+PanaBitpump::~PanaBitpump() {
   if (input)
     delete input;
   input = 0;
 }
 
-void PanaBitpump::skipBytes(int bytes) 
-{
-  gint blocks = (bytes/0x4000) * 0x4000;
+void PanaBitpump::skipBytes(int bytes) {
+  gint blocks = (bytes / 0x4000) * 0x4000;
   input->skipBytes(blocks);
   for (int i = blocks; i < bytes; i++)
     getBits(8);
 }
 
-guint PanaBitpump::getBits(int nbits)
-{
+guint PanaBitpump::getBits(int nbits) {
   int byte;
 
   if (!vbits) {
@@ -213,17 +201,17 @@ guint PanaBitpump::getBits(int nbits)
     * part of the file. Since there is no chance of affecting output buffer
     * size we allow the decoder to decode this
     */
-    if (input->getRemainSize() < 0x4000-load_flags) {
-      memcpy (buf+load_flags, input->getData(), input->getRemainSize());
+    if (input->getRemainSize() < 0x4000 - load_flags) {
+      memcpy(buf + load_flags, input->getData(), input->getRemainSize());
       input->skipBytes(input->getRemainSize());
     } else {
-      memcpy (buf+load_flags, input->getData(), 0x4000-load_flags);
-      input->skipBytes(0x4000-load_flags);
-      if (input->getRemainSize()<load_flags) {
-        memcpy (buf, input->getData(), input->getRemainSize());
+      memcpy(buf + load_flags, input->getData(), 0x4000 - load_flags);
+      input->skipBytes(0x4000 - load_flags);
+      if (input->getRemainSize() < load_flags) {
+        memcpy(buf, input->getData(), input->getRemainSize());
         input->skipBytes(input->getRemainSize());
       } else {
-        memcpy (buf, input->getData(), load_flags);
+        memcpy(buf, input->getData(), load_flags);
         input->skipBytes(load_flags);
       }
     }

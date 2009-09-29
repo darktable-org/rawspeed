@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "TiffEntry.h"
 #include <math.h>
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -27,39 +27,37 @@
 TiffEntry::TiffEntry() {
 }
 
-TiffEntry::TiffEntry(FileMap* f, guint offset) 
-{
+TiffEntry::TiffEntry(FileMap* f, guint offset) {
   unsigned short* p = (unsigned short*)f->getData(offset);
   tag = (TiffTag)p[0];
   type = (TiffDataType)p[1];
-  count = *(int*)f->getData(offset+4);
-  if (type>13)
+  count = *(int*)f->getData(offset + 4);
+  if (type > 13)
     throw TiffParserException("Error reading TIFF structure. Unknown Type encountered.");
   guint bytesize = count << datashifts[type];
-  if (bytesize <=4) {
-    data = f->getDataWrt(offset+8);
+  if (bytesize <= 4) {
+    data = f->getDataWrt(offset + 8);
   } else { // offset
-    data_offset = *(guint*)f->getData(offset+8);
-    CHECKSIZE(data_offset+bytesize);
+    data_offset = *(guint*)f->getData(offset + 8);
+    CHECKSIZE(data_offset + bytesize);
     data = f->getDataWrt(data_offset);
   }
 #ifdef _DEBUG
   debug_intVal = 0xC0C4C014;
   debug_floatVal = sqrtf(-1);
 
-  if (type == TIFF_LONG || type == TIFF_SHORT) 
+  if (type == TIFF_LONG || type == TIFF_SHORT)
     debug_intVal = getInt();
-  if (type == TIFF_FLOAT || type == TIFF_DOUBLE) 
+  if (type == TIFF_FLOAT || type == TIFF_DOUBLE)
     debug_floatVal = getFloat();
 #endif
 }
 
-TiffEntry::~TiffEntry(void)
-{
+TiffEntry::~TiffEntry(void) {
 }
 
 unsigned int TiffEntry::getInt() {
-  if(!(type == TIFF_LONG || type == TIFF_SHORT))
+  if (!(type == TIFF_LONG || type == TIFF_SHORT))
     throw TiffParserException("TIFF, getInt: Wrong type encountered. Expected Long");
   if (type == TIFF_SHORT)
     return getShort();
@@ -108,9 +106,9 @@ string TiffEntry::getString() {
 }
 
 int TiffEntry::getElementSize() {
-    return datasizes[type];
+  return datasizes[type];
 }
 
 int TiffEntry::getElementShift() {
-    return datashifts[type];
+  return datashifts[type];
 }

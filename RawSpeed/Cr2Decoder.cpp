@@ -2,7 +2,7 @@
 #include "Cr2Decoder.h"
 #include "TiffParserHeaderless.h"
 
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -25,18 +25,15 @@
 */
 
 Cr2Decoder::Cr2Decoder(TiffIFD *rootIFD, FileMap* file) :
- RawDecoder(file), mRootIFD(rootIFD) 
-{
+    RawDecoder(file), mRootIFD(rootIFD) {
 
 }
 
-Cr2Decoder::~Cr2Decoder(void)
-{
+Cr2Decoder::~Cr2Decoder(void) {
 }
 
-RawImage Cr2Decoder::decodeRaw()
-{
-  
+RawImage Cr2Decoder::decodeRaw() {
+
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag((TiffTag)0xc5d8);
 
   if (data.empty())
@@ -53,27 +50,27 @@ RawImage Cr2Decoder::decodeRaw()
     TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
     TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
     // Iterate through all slices
-    for (guint s = 0; s<offsets->count; s++) {
+    for (guint s = 0; s < offsets->count; s++) {
       Cr2Slice slice;
       slice.offset = offsets[0].getInt();
       slice.count = counts[0].getInt();
       SOFInfo sof;
-      LJpegPlain l(mFile,mRaw);
-      l.getSOF(&sof,slice.offset,slice.count);
-      slice.w = sof.w*sof.cps;
+      LJpegPlain l(mFile, mRaw);
+      l.getSOF(&sof, slice.offset, slice.count);
+      slice.w = sof.w * sof.cps;
       slice.h = sof.h;
       if (!slices.empty())
         if (slices[0].w != slice.w)
           ThrowRDE("CR2 Decoder: Slice width does not match.");
 
-      if (mFile->isValid(slice.offset+slice.count)) // Only decode if size is valid
+      if (mFile->isValid(slice.offset + slice.count)) // Only decode if size is valid
         slices.push_back(slice);
       completeH += slice.h;
     }
   } catch (TiffParserException) {
     ThrowRDE("CR2 Decoder: Unsupported format.");
   }
-  
+
   if (slices.empty()) {
     ThrowRDE("CR2 Decoder: No Slices found.");
   }
@@ -81,16 +78,16 @@ RawImage Cr2Decoder::decodeRaw()
   mRaw->bpp = 2;
   mRaw->dim = iPoint2D(slices[0].w, completeH);
 
-  if(raw->hasEntry((TiffTag)0xc6c5)) {
+  if (raw->hasEntry((TiffTag)0xc6c5)) {
     gushort ss = raw->getEntry((TiffTag)0xc6c5)->getInt();
     // sRaw
-    if (ss == 4) { 
+    if (ss == 4) {
       mRaw->dim.x /= 3;
       mRaw->setCpp(3);
       mRaw->isCFA = false;
     }
   }
- 
+
   mRaw->createData();
 
   vector<int> s_width;
@@ -105,26 +102,25 @@ RawImage Cr2Decoder::decodeRaw()
   }
   guint offY = 0;
 
-  for (guint i = 0; i < slices.size(); i++ ) {
+  for (guint i = 0; i < slices.size(); i++) {
     Cr2Slice slice = slices[i];
     try {
-      LJpegPlain l(mFile,mRaw);
+      LJpegPlain l(mFile, mRaw);
       l.addSlices(s_width);
       l.mUseBigtable = true;
       l.startDecoder(slice.offset, slice.count, 0, offY);
-    } catch (RawDecoderException e) { 
+    } catch (RawDecoderException e) {
       if (i == 0)
         throw;
       // These may just be single slice error - store the error and move on
       errors.push_back(_strdup(e.what()));
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       // Let's try to ignore this - it might be truncated data, so something might be useful.
     }
     offY += slice.w;
   }
 
-  if (mRaw->subsampling.x >1 || mRaw->subsampling.y >1)
+  if (mRaw->subsampling.x > 1 || mRaw->subsampling.y > 1)
     sRawInterpolate();
 
   return mRaw;
@@ -161,8 +157,7 @@ void Cr2Decoder::decodeMetaData(CameraMetaData *meta) {
 }
 
 // Interpolate and convert sRaw data.
-void Cr2Decoder::sRawInterpolate()
-{
+void Cr2Decoder::sRawInterpolate() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MAKERNOTE);
   if (data.empty())
     ThrowRDE("CR2 sRaw: Makernote not found");
@@ -182,7 +177,7 @@ void Cr2Decoder::sRawInterpolate()
   wb_data = &wb_data[4+(126+22)/2];
 
   sraw_coeffs[0] = wb_data[0];
-  sraw_coeffs[1] = (wb_data[1] + wb_data[2] + 1 )>>1;
+  sraw_coeffs[1] = (wb_data[1] + wb_data[2] + 1) >> 1;
   sraw_coeffs[2] = wb_data[3];
 
   // Check if sRaw2 is using old coefficients
@@ -196,11 +191,11 @@ void Cr2Decoder::sRawInterpolate()
 
   if (mRaw->subsampling.y == 1 && mRaw->subsampling.x == 2) {
     if (isOldSraw)
-      interpolate_422_old(mRaw->dim.x / 2, mRaw->dim.y ,0, mRaw->dim.y);
-    else 
-      interpolate_422(mRaw->dim.x / 2, mRaw->dim.y ,0, mRaw->dim.y);
+      interpolate_422_old(mRaw->dim.x / 2, mRaw->dim.y , 0, mRaw->dim.y);
+    else
+      interpolate_422(mRaw->dim.x / 2, mRaw->dim.y , 0, mRaw->dim.y);
   } else {
-    interpolate_420(mRaw->dim.x / 2, mRaw->dim.y / 2 ,0 , mRaw->dim.y / 2);
+    interpolate_420(mRaw->dim.x / 2, mRaw->dim.y / 2 , 0 , mRaw->dim.y / 2);
   }
 }
 
@@ -215,52 +210,50 @@ void Cr2Decoder::sRawInterpolate()
 
 // Note: Thread safe.
 
-void Cr2Decoder::interpolate_422(int w, int h, int start_h , int end_h)
-{
+void Cr2Decoder::interpolate_422(int w, int h, int start_h , int end_h) {
   // Last pixel should not be interpolated
-  w--; 
+  w--;
 
   // Current line
   gushort* c_line;
 
   for (int y = start_h; y < end_h; y++) {
-    c_line = (gushort*)mRaw->getData(0,y);
-    gint r,g,b;
+    c_line = (gushort*)mRaw->getData(0, y);
+    gint r, g, b;
     int off = 0;
     for (int x = 0; x < w; x++) {
       int Y = c_line[off];
-      int Cb = c_line[off+1]- 16384;
-      int Cr = c_line[off+2]- 16384;
+      int Cb = c_line[off+1] - 16384;
+      int Cr = c_line[off+2] - 16384;
       YUV_TO_RGB(Y, Cb, Cr);
-      STORE_RGB(c_line,off,off+1,off+2);
-      off+=3;
+      STORE_RGB(c_line, off, off + 1, off + 2);
+      off += 3;
 
       Y = c_line[off];
-      int Cb2 = (Cb + c_line[off+1+3] - 16384)>>1;
-      int Cr2 = (Cr + c_line[off+2+3] - 16384)>>1;
+      int Cb2 = (Cb + c_line[off+1+3] - 16384) >> 1;
+      int Cr2 = (Cr + c_line[off+2+3] - 16384) >> 1;
       YUV_TO_RGB(Y, Cb2, Cr2);
-      STORE_RGB(c_line,off,off+1,off+2);
-      off+=3;
+      STORE_RGB(c_line, off, off + 1, off + 2);
+      off += 3;
     }
     // Last two pixels
     int Y = c_line[off];
-    int Cb = c_line[off+1]- 16384;
-    int Cr = c_line[off+2]- 16384;
+    int Cb = c_line[off+1] - 16384;
+    int Cr = c_line[off+2] - 16384;
     YUV_TO_RGB(Y, Cb, Cr);
-    STORE_RGB(c_line,off,off+1,off+2);
+    STORE_RGB(c_line, off, off + 1, off + 2);
 
     Y = c_line[off+3];
     YUV_TO_RGB(Y, Cb, Cr);
-    STORE_RGB(c_line,off+3,off+4,off+5);
+    STORE_RGB(c_line, off + 3, off + 4, off + 5);
   }
 }
 
 
 // Note: Not thread safe, since it writes inplace.
-void Cr2Decoder::interpolate_420(int w, int h, int start_h , int end_h)
-{
+void Cr2Decoder::interpolate_420(int w, int h, int start_h , int end_h) {
   // Last pixel should not be interpolated
-  w--; 
+  w--;
 
   gboolean atLastLine = FALSE;
 
@@ -277,88 +270,88 @@ void Cr2Decoder::interpolate_420(int w, int h, int start_h , int end_h)
   gushort* nn_line;
 
   int off;
-  gint r,g,b;
+  gint r, g, b;
 
   for (int y = start_h; y < end_h; y++) {
-    c_line = (gushort*)mRaw->getData(0,y*2);
-    n_line = (gushort*)mRaw->getData(0,y*2+1);
-    nn_line = (gushort*)mRaw->getData(0,y*2+2);
+    c_line = (gushort*)mRaw->getData(0, y * 2);
+    n_line = (gushort*)mRaw->getData(0, y * 2 + 1);
+    nn_line = (gushort*)mRaw->getData(0, y * 2 + 2);
     off = 0;
     for (int x = 0; x < w; x++) {
       int Y = c_line[off];
-      int Cb = c_line[off+1]- 16384;
-      int Cr = c_line[off+2]- 16384;
+      int Cb = c_line[off+1] - 16384;
+      int Cr = c_line[off+2] - 16384;
       YUV_TO_RGB(Y, Cb, Cr);
-      STORE_RGB(c_line,off,off+1,off+2);
+      STORE_RGB(c_line, off, off + 1, off + 2);
 
       Y = c_line[off+3];
-      int Cb2 = (Cb + c_line[off+1+6] - 16383)>>1;
-      int Cr2 = (Cr + c_line[off+2+6] - 16383)>>1;
+      int Cb2 = (Cb + c_line[off+1+6] - 16383) >> 1;
+      int Cr2 = (Cr + c_line[off+2+6] - 16383) >> 1;
       YUV_TO_RGB(Y, Cb2, Cr2);
-      STORE_RGB(c_line,off+3,off+4,off+5);
+      STORE_RGB(c_line, off + 3, off + 4, off + 5);
 
       // Next line
       Y = n_line[off];
-      int Cb3 = (Cb + nn_line[off+1]- 16383)>>1;
-      int Cr3 = (Cr + nn_line[off+2]- 16383)>>1;
+      int Cb3 = (Cb + nn_line[off+1] - 16383) >> 1;
+      int Cr3 = (Cr + nn_line[off+2] - 16383) >> 1;
       YUV_TO_RGB(Y, Cb3, Cr3);
-      STORE_RGB(n_line,off,off+1,off+2);
+      STORE_RGB(n_line, off, off + 1, off + 2);
 
       Y = n_line[off+3];
-      Cb = (Cb + Cb2 + Cb3 + nn_line[off+1+6] - 16382)>>2;  //Left + Above + Right +Below
-      Cr = (Cr + Cr2 + Cr3 + nn_line[off+2+6] - 16382)>>2;
+      Cb = (Cb + Cb2 + Cb3 + nn_line[off+1+6] - 16382) >> 2;  //Left + Above + Right +Below
+      Cr = (Cr + Cr2 + Cr3 + nn_line[off+2+6] - 16382) >> 2;
       YUV_TO_RGB(Y, Cb, Cr);
-      STORE_RGB(n_line,off+3,off+4,off+5);
-      off+=6;
+      STORE_RGB(n_line, off + 3, off + 4, off + 5);
+      off += 6;
     }
     int Y = c_line[off];
-    int Cb = c_line[off+1]- 16384;
-    int Cr = c_line[off+2]- 16384;
+    int Cb = c_line[off+1] - 16384;
+    int Cr = c_line[off+2] - 16384;
     YUV_TO_RGB(Y, Cb, Cr);
-    STORE_RGB(c_line,off,off+1,off+2);
+    STORE_RGB(c_line, off, off + 1, off + 2);
 
     Y = c_line[off+3];
     YUV_TO_RGB(Y, Cb, Cr);
-    STORE_RGB(c_line,off+3,off+4,off+5);
+    STORE_RGB(c_line, off + 3, off + 4, off + 5);
 
     // Next line
     Y = n_line[off];
-    Cb = (Cb + nn_line[off+1]- 16383)>>1;
-    Cr = (Cr + nn_line[off+2]- 16383)>>1;
+    Cb = (Cb + nn_line[off+1] - 16383) >> 1;
+    Cr = (Cr + nn_line[off+2] - 16383) >> 1;
     YUV_TO_RGB(Y, Cb, Cr);
-    STORE_RGB(n_line,off,off+1,off+2);
+    STORE_RGB(n_line, off, off + 1, off + 2);
 
     Y = n_line[off+3];
     YUV_TO_RGB(Y, Cb, Cr);
-    STORE_RGB(n_line,off+3,off+4,off+5);
+    STORE_RGB(n_line, off + 3, off + 4, off + 5);
   }
 
   if (atLastLine) {
-    c_line = (gushort*)mRaw->getData(0,end_h*2);
-    n_line = (gushort*)mRaw->getData(0,end_h*2+1);
+    c_line = (gushort*)mRaw->getData(0, end_h * 2);
+    n_line = (gushort*)mRaw->getData(0, end_h * 2 + 1);
     off = 0;
 
     // Last line
     for (int x = 0; x < w; x++) {
       int Y = c_line[off];
-      int Cb = c_line[off+1]- 16384;
-      int Cr = c_line[off+2]- 16384;
+      int Cb = c_line[off+1] - 16384;
+      int Cr = c_line[off+2] - 16384;
       YUV_TO_RGB(Y, Cb, Cr);
-      STORE_RGB(c_line,off,off+1,off+2);
+      STORE_RGB(c_line, off, off + 1, off + 2);
 
       Y = c_line[off+3];
       YUV_TO_RGB(Y, Cb, Cr);
-      STORE_RGB(c_line,off+3,off+4,off+5);
+      STORE_RGB(c_line, off + 3, off + 4, off + 5);
 
       // Next line
       Y = n_line[off];
       YUV_TO_RGB(Y, Cb, Cr);
-      STORE_RGB(n_line,off,off+1,off+2);
+      STORE_RGB(n_line, off, off + 1, off + 2);
 
       Y = n_line[off+3];
       YUV_TO_RGB(Y, Cb, Cr);
-      STORE_RGB(n_line,off+3,off+4,off+5);
-      off+=6;
+      STORE_RGB(n_line, off + 3, off + 4, off + 5);
+      off += 6;
     }
   }
 }
@@ -373,42 +366,41 @@ void Cr2Decoder::interpolate_420(int w, int h, int start_h , int end_h)
 
 // Note: Thread safe.
 
-void Cr2Decoder::interpolate_422_old(int w, int h, int start_h , int end_h)
-{
+void Cr2Decoder::interpolate_422_old(int w, int h, int start_h , int end_h) {
   // Last pixel should not be interpolated
-  w--; 
+  w--;
 
   // Current line
   gushort* c_line;
 
   for (int y = start_h; y < end_h; y++) {
-    c_line = (gushort*)mRaw->getData(0,y);
-    gint r,g,b;
+    c_line = (gushort*)mRaw->getData(0, y);
+    gint r, g, b;
     int off = 0;
     for (int x = 0; x < w; x++) {
       int Y = c_line[off];
-      int Cb = c_line[off+1]- 16384;
-      int Cr = c_line[off+2]- 16384;
+      int Cb = c_line[off+1] - 16384;
+      int Cr = c_line[off+2] - 16384;
       YUV_TO_RGB(Y, Cb, Cr);
-      STORE_RGB(c_line,off,off+1,off+2);
-      off+=3;
+      STORE_RGB(c_line, off, off + 1, off + 2);
+      off += 3;
 
       Y = c_line[off];
-      int Cb2 = (Cb + c_line[off+1+3] - 16384)>>1;
-      int Cr2 = (Cr + c_line[off+2+3] - 16384)>>1;
+      int Cb2 = (Cb + c_line[off+1+3] - 16384) >> 1;
+      int Cr2 = (Cr + c_line[off+2+3] - 16384) >> 1;
       YUV_TO_RGB(Y, Cb2, Cr2);
-      STORE_RGB(c_line,off,off+1,off+2);
-      off+=3;
+      STORE_RGB(c_line, off, off + 1, off + 2);
+      off += 3;
     }
     // Last two pixels
     int Y = c_line[off];
-    int Cb = c_line[off+1]- 16384;
-    int Cr = c_line[off+2]- 16384;
+    int Cb = c_line[off+1] - 16384;
+    int Cr = c_line[off+2] - 16384;
     YUV_TO_RGB(Y, Cb, Cr);
-    STORE_RGB(c_line,off,off+1,off+2);
+    STORE_RGB(c_line, off, off + 1, off + 2);
 
     Y = c_line[off+3];
     YUV_TO_RGB(Y, Cb, Cr);
-    STORE_RGB(c_line,off+3,off+4,off+5);
+    STORE_RGB(c_line, off + 3, off + 4, off + 5);
   }
 }

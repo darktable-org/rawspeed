@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "DngDecoderSlices.h"
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -37,8 +37,8 @@ void *DecodeThread(void *_this) {
 }
 
 
-DngDecoderSlices::DngDecoderSlices( FileMap* file, RawImage img ) :
-mFile(file), mRaw(img) {
+DngDecoderSlices::DngDecoderSlices(FileMap* file, RawImage img) :
+    mFile(file), mRaw(img) {
   mFixLjpeg = false;
 #ifdef WIN32
   nThreads = pthread_num_processors_np();
@@ -47,17 +47,14 @@ mFile(file), mRaw(img) {
 #endif
 }
 
-DngDecoderSlices::~DngDecoderSlices(void)
-{
+DngDecoderSlices::~DngDecoderSlices(void) {
 }
 
-void DngDecoderSlices::addSlice( DngSliceElement slice )
-{
+void DngDecoderSlices::addSlice(DngSliceElement slice) {
   slices.push(slice);
 }
 
-void DngDecoderSlices::startDecoding()
-{
+void DngDecoderSlices::startDecoding() {
   // Create threads
 
   int slicesPerThread = ((int)slices.size() + nThreads - 1) / nThreads;
@@ -68,22 +65,22 @@ void DngDecoderSlices::startDecoding()
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
   pthread_mutex_init(&errMutex, NULL);
 
-  for (guint i = 0; i< nThreads; i++) {
+  for (guint i = 0; i < nThreads; i++) {
     DngDecoderThread* t = new DngDecoderThread();
-    for (int j = 0; j<slicesPerThread ; j++) {
+    for (int j = 0; j < slicesPerThread ; j++) {
       if (!slices.empty()) {
         t->slices.push(slices.front());
         slices.pop();
       }
     }
     t->parent = this;
-    pthread_create(&t->threadid,&attr,DecodeThread,t);
+    pthread_create(&t->threadid, &attr, DecodeThread, t);
     threads.push_back(t);
   }
   pthread_attr_destroy(&attr);
 
   void *status;
-  for(guint i=0; i<nThreads; i++){
+  for (guint i = 0; i < nThreads; i++) {
     pthread_join(threads[i]->threadid, &status);
     delete(threads[i]);
   }
@@ -91,7 +88,7 @@ void DngDecoderSlices::startDecoding()
 
 }
 
-void DngDecoderSlices::decodeSlice( DngDecoderThread* t ) {
+void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
   while (!t->slices.empty()) {
     LJpegPlain l(mFile, mRaw);
     l.mDNGCompatible = mFixLjpeg;
@@ -100,12 +97,11 @@ void DngDecoderSlices::decodeSlice( DngDecoderThread* t ) {
     t->slices.pop();
     try {
       l.startDecoder(e.byteOffset, e.byteCount, e.offX, e.offY);
-    } catch (RawDecoderException err) { 
+    } catch (RawDecoderException err) {
       pthread_mutex_lock(&errMutex);
       errors.push_back(_strdup(err.what()));
       pthread_mutex_unlock(&errMutex);
-    }
-    catch (IOException err) {
+    } catch (IOException err) {
       pthread_mutex_lock(&errMutex);
       errors.push_back("DngDecoderSlices::decodeSlice: IO error occurred, probably attempted to read past end of file.");
       pthread_mutex_unlock(&errMutex);
@@ -113,7 +109,6 @@ void DngDecoderSlices::decodeSlice( DngDecoderThread* t ) {
   }
 }
 
-int DngDecoderSlices::size()
-{
+int DngDecoderSlices::size() {
   return (int)slices.size();
 }

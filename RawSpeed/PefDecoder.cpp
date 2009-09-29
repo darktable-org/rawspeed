@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "PefDecoder.h"
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -23,16 +23,13 @@
 */
 
 PefDecoder::PefDecoder(TiffIFD *rootIFD, FileMap* file) :
-RawDecoder(file), mRootIFD(rootIFD)
-{
+    RawDecoder(file), mRootIFD(rootIFD) {
 }
 
-PefDecoder::~PefDecoder(void)
-{
+PefDecoder::~PefDecoder(void) {
 }
 
-RawImage PefDecoder::decodeRaw()
-{
+RawImage PefDecoder::decodeRaw() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 
   if (data.empty())
@@ -48,12 +45,12 @@ RawImage PefDecoder::decodeRaw()
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
 
   if (offsets->count != 1) {
-    ThrowRDE("PEF Decoder: Multiple Strips found: %u",offsets->count);
+    ThrowRDE("PEF Decoder: Multiple Strips found: %u", offsets->count);
   }
   if (counts->count != offsets->count) {
-    ThrowRDE("PEF Decoder: Byte count number does not match strip size: count:%u, strips:%u ",counts->count, offsets->count);
+    ThrowRDE("PEF Decoder: Byte count number does not match strip size: count:%u, strips:%u ", counts->count, offsets->count);
   }
-  if (!mFile->isValid(offsets->getInt()+counts->getInt()))
+  if (!mFile->isValid(offsets->getInt() + counts->getInt()))
     ThrowRDE("PEF Decoder: Truncated file.");
 
   guint width = raw->getEntry(IMAGEWIDTH)->getInt();
@@ -63,7 +60,7 @@ RawImage PefDecoder::decodeRaw()
   mRaw->bpp = 2;
   mRaw->createData();
   try {
-    PentaxDecompressor l(mFile,mRaw);
+    PentaxDecompressor l(mFile, mRaw);
     l.decodePentax(offsets->getInt(), counts->getInt());
   } catch (IOException e) {
     // Let's ignore it, it may have delivered somewhat useful data.
@@ -82,8 +79,7 @@ void PefDecoder::checkSupport(CameraMetaData *meta) {
   this->checkCameraSupported(meta, make, model, "");
 }
 
-void PefDecoder::decodeMetaData(CameraMetaData *meta)
-{
+void PefDecoder::decodeMetaData(CameraMetaData *meta) {
   mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
@@ -93,19 +89,19 @@ void PefDecoder::decodeMetaData(CameraMetaData *meta)
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
 
-  setMetaData(meta, make, model,"");
+  setMetaData(meta, make, model, "");
 
-/*  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
+  /*  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
-  if (data.empty())
-    ThrowRDE("PEF Decoder: Model name found");
+    if (data.empty())
+      ThrowRDE("PEF Decoder: Model name found");
 
-  string model(data[0]->getEntry(MODEL)->getString());
-  //printf("Model:\"%s\"\n",model.c_str());
+    string model(data[0]->getEntry(MODEL)->getString());
+    //printf("Model:\"%s\"\n",model.c_str());
 
-  if (!model.compare("PENTAX K20D        "))
-  {
-    mRaw->cfa.setCFA(CFA_BLUE, CFA_GREEN, CFA_GREEN2, CFA_RED);
-  }
-*/
+    if (!model.compare("PENTAX K20D        "))
+    {
+      mRaw->cfa.setCFA(CFA_BLUE, CFA_GREEN, CFA_GREEN2, CFA_RED);
+    }
+  */
 }

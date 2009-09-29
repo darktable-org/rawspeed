@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "TiffParser.h"
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -22,16 +22,14 @@
     http://www.klauspost.com
 */
 
-TiffParser::TiffParser(FileMap* inputData): mInput(inputData), mRootIFD(0)
-{
+TiffParser::TiffParser(FileMap* inputData): mInput(inputData), mRootIFD(0) {
 
 }
 
 
-TiffParser::~TiffParser(void)
-{
+TiffParser::~TiffParser(void) {
   if (mRootIFD)
-    delete mRootIFD;  
+    delete mRootIFD;
   mRootIFD = NULL;
 }
 
@@ -51,10 +49,10 @@ void TiffParser::parseData() {
     throw TiffParserException("Not a TIFF file (size too small)");
   if (data[0] != 0x49 || data[1] != 0x49) {
     endian = big;
-    if (data[0] != 0x4D || data[1] != 0x4D) 
+    if (data[0] != 0x4D || data[1] != 0x4D)
       throw TiffParserException("Not a TIFF file (ID)");
 
-    if (data[3] != 42) 
+    if (data[3] != 42)
       throw TiffParserException("Not a TIFF file (magic 42)");
   } else {
     endian = little;
@@ -106,28 +104,28 @@ RawDecoder* TiffParser::getDecompressor() {
     for (vector<TiffIFD*>::iterator i = potentials.begin(); i != potentials.end(); ++i) {
       string make = (*i)->getEntry(MAKE)->getString();
       if (!make.compare("Canon")) {
-        return new Cr2Decoder(mRootIFD,mInput);
+        return new Cr2Decoder(mRootIFD, mInput);
       }
       if (!make.compare("NIKON CORPORATION")) {
-        return new NefDecoder(mRootIFD,mInput);
+        return new NefDecoder(mRootIFD, mInput);
       }
       if (!make.compare("NIKON")) {
-        return new NefDecoder(mRootIFD,mInput);
+        return new NefDecoder(mRootIFD, mInput);
       }
       if (!make.compare("OLYMPUS IMAGING CORP.  ")) {
-        return new OrfDecoder(mRootIFD,mInput);
+        return new OrfDecoder(mRootIFD, mInput);
       }
       if (!make.compare("SONY ")) {
-        return new ArwDecoder(mRootIFD,mInput);
+        return new ArwDecoder(mRootIFD, mInput);
       }
       if (!make.compare("PENTAX Corporation ")) {
-        return new PefDecoder(mRootIFD,mInput);
+        return new PefDecoder(mRootIFD, mInput);
       }
       if (!make.compare("PENTAX             ")) {
-        return new PefDecoder(mRootIFD,mInput);
+        return new PefDecoder(mRootIFD, mInput);
       }
       if (!make.compare("Panasonic")) {
-        return new Rw2Decoder(mRootIFD,mInput);
+        return new Rw2Decoder(mRootIFD, mInput);
       }
     }
   }

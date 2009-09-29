@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "FileMap.h"
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -22,13 +22,12 @@
     http://www.klauspost.com
 */
 
-FileMap::FileMap(guint _size) : size(_size)
-{
-  data = (unsigned char*)_aligned_malloc(size+4,16);   
+FileMap::FileMap(guint _size) : size(_size) {
+  data = (unsigned char*)_aligned_malloc(size + 4, 16);
   if (!data) {
-		throw new FileIOException("Not enough memory to open file.");
+    throw new FileIOException("Not enough memory to open file.");
   }
-  mOwnAlloc= true;
+  mOwnAlloc = true;
 }
 
 FileMap::FileMap(guchar* _data, guint _size): data(_data), size(_size) {
@@ -36,8 +35,7 @@ FileMap::FileMap(guchar* _data, guint _size): data(_data), size(_size) {
 }
 
 
-FileMap::~FileMap(void)
-{
+FileMap::~FileMap(void) {
   if (data && mOwnAlloc) {
     _aligned_free(data);
   }
@@ -45,17 +43,15 @@ FileMap::~FileMap(void)
   size = 0;
 }
 
-FileMap* FileMap::clone()
-{
+FileMap* FileMap::clone() {
   FileMap *new_map = new FileMap(size);
   memcpy(new_map->data, data, size);
   return new_map;
 }
 
-void FileMap::corrupt( int errors )
-{
+void FileMap::corrupt(int errors) {
   for (int i = 0; i < errors; i++) {
-    guint pos = ( rand() | (rand()<<15) ) % size;
-    data[pos] = rand()&0xff;
+    guint pos = (rand() | (rand() << 15)) % size;
+    data[pos] = rand() & 0xff;
   }
 }

@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #endif // __unix__
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -30,8 +30,7 @@
 */
 
 
-FileReader::FileReader(LPCWSTR _filename) : mFilename(_filename)
-{
+FileReader::FileReader(LPCWSTR _filename) : mFilename(_filename) {
 }
 
 FileMap* FileReader::readFile() {
@@ -48,21 +47,21 @@ FileMap* FileReader::readFile() {
 #if 0
   // Not used, as it is slower than sync read
 
-  guchar* pa = (guchar*)mmap(0, st.st_size, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
+  guchar* pa = (guchar*)mmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
   FileMap *fileData = new FileMap(pa, st.st_size);
 
-#else 
+#else
   FileMap *fileData = new FileMap(st.st_size);
 
-  while((st.st_size > 0) && (bytes_read < st.st_size)) {
+  while ((st.st_size > 0) && (bytes_read < st.st_size)) {
     dest = (char *) fileData->getDataWrt(bytes_read);
-    bytes_read += read(fd, dest, st.st_size-bytes_read);
+    bytes_read += read(fd, dest, st.st_size - bytes_read);
   }
 #endif
 
 #else // __unix__
   HANDLE file_h;  // File handle
-  file_h = CreateFile(mFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+  file_h = CreateFile(mFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
   if (file_h == INVALID_HANDLE_VALUE) {
     throw FileIOException("Could not open file.");
   }
@@ -84,7 +83,6 @@ FileMap* FileReader::readFile() {
   return fileData;
 }
 
-FileReader::~FileReader(void)
-{
+FileReader::~FileReader(void) {
 
 }

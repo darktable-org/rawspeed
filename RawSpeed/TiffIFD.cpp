@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "TiffIFD.h"
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -33,8 +33,7 @@ TiffIFD::TiffIFD() {
   endian = little;
 }
 
-TiffIFD::TiffIFD(FileMap* f, guint offset) 
-{
+TiffIFD::TiffIFD(FileMap* f, guint offset) {
   guint size = f->getSize();
   guint entries;
   endian = big;
@@ -42,13 +41,13 @@ TiffIFD::TiffIFD(FileMap* f, guint offset)
 
   entries = *(unsigned short*)f->getData(offset);    // Directory entries in this IFD
 
-  CHECKSIZE(offset+2+entries*4);
+  CHECKSIZE(offset + 2 + entries*4);
   for (guint i = 0; i < entries; i++) {
-    TiffEntry *t = new TiffEntry(f, offset+2+i*12);
+    TiffEntry *t = new TiffEntry(f, offset + 2 + i*12);
 
     if (t->tag == SUBIFDS || t->tag == EXIFIFDPOINTER) {   // subIFD tag
       const unsigned int* sub_offsets = t->getIntArray();
-      for (guint j = 0; j < t->count; j++ ) {
+      for (guint j = 0; j < t->count; j++) {
         mSubIFD.push_back(new TiffIFD(f, sub_offsets[j]));
       }
       delete(t);
@@ -56,11 +55,10 @@ TiffIFD::TiffIFD(FileMap* f, guint offset)
       mEntry[t->tag] = t;
     }
   }
-  nextIFD = *(int*)f->getData(offset+2+entries*12);
+  nextIFD = *(int*)f->getData(offset + 2 + entries * 12);
 }
 
-TiffIFD::~TiffIFD(void)
-{
+TiffIFD::~TiffIFD(void) {
   for (map<TiffTag, TiffEntry*>::iterator i = mEntry.begin(); i != mEntry.end(); ++i) {
     delete((*i).second);
   }

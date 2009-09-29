@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "CameraMetadataException.h"
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -32,11 +32,10 @@ void ThrowCME(const char* fmt, ...) {
   vsprintf_s(buf, 8192, fmt, val);
 #endif
   va_end(val);
-  _RPT1(0, "EXCEPTION: %s\n",buf);
+  _RPT1(0, "EXCEPTION: %s\n", buf);
   throw CameraMetadataException(buf);
 }
 
-CameraMetadataException::CameraMetadataException(const string _msg): runtime_error(_msg)
-{
+CameraMetadataException::CameraMetadataException(const string _msg): runtime_error(_msg) {
   _RPT1(0, "CameraMetadata Exception: %s\n", _msg.c_str());
 }

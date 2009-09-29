@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "NefDecoder.h"
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -22,18 +22,15 @@
     http://www.klauspost.com
 */
 
-NefDecoder::NefDecoder(TiffIFD *rootIFD, FileMap* file ) : 
-RawDecoder(file), mRootIFD(rootIFD)
-{
+NefDecoder::NefDecoder(TiffIFD *rootIFD, FileMap* file) :
+    RawDecoder(file), mRootIFD(rootIFD) {
 
 }
 
-NefDecoder::~NefDecoder(void)
-{
+NefDecoder::~NefDecoder(void) {
 }
 
-RawImage NefDecoder::decodeRaw()
-{
+RawImage NefDecoder::decodeRaw() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
 
   if (data.empty())
@@ -57,18 +54,18 @@ RawImage NefDecoder::decodeRaw()
     }
   }
 
-  if (compression==1) {
+  if (compression == 1) {
     DecodeUncompressed();
     return mRaw;
   }
 
   if (offsets->count != 1) {
-    ThrowRDE("NEF Decoder: Multiple Strips found: %u",offsets->count);
+    ThrowRDE("NEF Decoder: Multiple Strips found: %u", offsets->count);
   }
   if (counts->count != offsets->count) {
-    ThrowRDE("NEF Decoder: Byte count number does not match strip size: count:%u, strips:%u ",counts->count, offsets->count);
+    ThrowRDE("NEF Decoder: Byte count number does not match strip size: count:%u, strips:%u ", counts->count, offsets->count);
   }
-  if (!mFile->isValid(offsets->getInt()+counts->getInt()))
+  if (!mFile->isValid(offsets->getInt() + counts->getInt()))
     ThrowRDE("NEF Decoder: Invalid strip byte count. File probably truncated.");
 
 
@@ -90,10 +87,10 @@ RawImage NefDecoder::decodeRaw()
   TiffIFD* exif = data[0];
   TiffEntry *makernoteEntry = exif->getEntry(MAKERNOTE);
   const guchar* makernote = makernoteEntry->getData();
-  FileMap makermap((guchar*)&makernote[10], makernoteEntry->count-10);
+  FileMap makermap((guchar*)&makernote[10], makernoteEntry->count - 10);
   TiffParser makertiff(&makermap);
   makertiff.parseData();
-  
+
   data = makertiff.RootIFD()->getIFDsWithTag((TiffTag)0x8c);
 
   if (data.empty())
@@ -105,13 +102,13 @@ RawImage NefDecoder::decodeRaw()
   } catch (TiffParserException) {
     meta = data[0]->getEntry((TiffTag)0x8c);  // Fall back
   }
- 
+
   ByteStream metadata(meta->getData(), meta->count);
   try {
-    NikonDecompressor decompressor(mFile,mRaw);
-    decompressor.DecompressNikon(metadata, width, height, bitPerPixel,offsets->getInt(),counts->getInt());
+    NikonDecompressor decompressor(mFile, mRaw);
+    decompressor.DecompressNikon(metadata, width, height, bitPerPixel, offsets->getInt(), counts->getInt());
   } catch (IOException e) {
-  	// Let's ignore it, it may have delivered somewhat useful data.
+    // Let's ignore it, it may have delivered somewhat useful data.
   }
 
   return mRaw;
@@ -122,15 +119,14 @@ Figure out if a NEF file is compressed.  These fancy heuristics
 are only needed for the D100, thanks to a bug in some cameras
 that tags all images as "compressed".
 */
-gboolean NefDecoder::D100IsCompressed(guint offset)
-{
+gboolean NefDecoder::D100IsCompressed(guint offset) {
   const guchar *test = mFile->getData(offset);
   gint i;
 
-  for (i=15; i < 256; i+=16)
+  for (i = 15; i < 256; i += 16)
     if (test[i]) return true;
   return false;
-} 
+}
 
 void NefDecoder::DecodeUncompressed() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
@@ -146,18 +142,18 @@ void NefDecoder::DecodeUncompressed() {
   vector<NefSlice> slices;
   guint offY = 0;
 
-  for (guint s = 0; s<nslices; s++) {
+  for (guint s = 0; s < nslices; s++) {
     NefSlice slice;
     slice.offset = offsets[s];
     slice.count = counts[s];
-    if (offY+yPerSlice>height)
-      slice.h = height-offY;
+    if (offY + yPerSlice > height)
+      slice.h = height - offY;
     else
       slice.h = yPerSlice;
 
-    offY +=yPerSlice;
+    offY += yPerSlice;
 
-    if (mFile->isValid(slice.offset+slice.count)) // Only decode if size is valid
+    if (mFile->isValid(slice.offset + slice.count)) // Only decode if size is valid
       slices.push_back(slice);
   }
 
@@ -168,12 +164,12 @@ void NefDecoder::DecodeUncompressed() {
     bitPerPixel = 16; // D3
 
   offY = 0;
-  for (guint i = 0; i< slices.size(); i++) {
+  for (guint i = 0; i < slices.size(); i++) {
     NefSlice slice = slices[i];
-    ByteStream in(mFile->getData(slice.offset),slice.count);
-    iPoint2D size(width,slice.h);
-    iPoint2D pos(0,offY);
-    readUncompressedRaw(in,size,pos,width*bitPerPixel/8,bitPerPixel,true);
+    ByteStream in(mFile->getData(slice.offset), slice.count);
+    iPoint2D size(width, slice.h);
+    iPoint2D pos(0, offY);
+    readUncompressedRaw(in, size, pos, width*bitPerPixel / 8, bitPerPixel, true);
     offY += slice.h;
   }
 }
@@ -181,37 +177,37 @@ void NefDecoder::DecodeUncompressed() {
 void NefDecoder::DecodeD100Uncompressed() {
 
   ThrowRDE("NEF DEcoder: D100 uncompressed not supported");
-/*
-  TiffIFD* raw = mRootIFD->getIFDsWithTag(CFAPATTERN)[0];
+  /*
+    TiffIFD* raw = mRootIFD->getIFDsWithTag(CFAPATTERN)[0];
 
-  guint nslices = raw->getEntry(STRIPOFFSETS)->count;
-  guint offset = raw->getEntry(STRIPOFFSETS)->getInt();
-  guint count = raw->getEntry(STRIPBYTECOUNTS)->getInt();
-  if (!mFile->isValid(offset+count))
-    ThrowRDE("DecodeD100Uncompressed: Truncated file");
+    guint nslices = raw->getEntry(STRIPOFFSETS)->count;
+    guint offset = raw->getEntry(STRIPOFFSETS)->getInt();
+    guint count = raw->getEntry(STRIPBYTECOUNTS)->getInt();
+    if (!mFile->isValid(offset+count))
+      ThrowRDE("DecodeD100Uncompressed: Truncated file");
 
-  const guchar *in =  mFile->getData(offset);
+    const guchar *in =  mFile->getData(offset);
 
-  guint w = raw->getEntry(IMAGEWIDTH)->getInt();
-  guint h = raw->getEntry(IMAGELENGTH)->getInt();
+    guint w = raw->getEntry(IMAGEWIDTH)->getInt();
+    guint h = raw->getEntry(IMAGELENGTH)->getInt();
 
-  mRaw->dim = iPoint2D(w, h);
-  mRaw->bpp = 2;
-  mRaw->createData();
+    mRaw->dim = iPoint2D(w, h);
+    mRaw->bpp = 2;
+    mRaw->createData();
 
-  guchar* data = mRaw->getData();
-  guint outPitch = mRaw->pitch;
+    guchar* data = mRaw->getData();
+    guint outPitch = mRaw->pitch;
 
-  BitPumpMSB bits(mFile->getData(offset),count);
-  for (guint y = 0; y < h; y++) {
-    gushort* dest = (gushort*)&data[y*outPitch];
-    for(guint x =0 ; x < w; x++) {
-      guint b = bits.getBits(12);
-      dest[x] = b;
-      if ((x % 10) == 9)
-        bits.skipBits(8);
-    }
-  }*/
+    BitPumpMSB bits(mFile->getData(offset),count);
+    for (guint y = 0; y < h; y++) {
+      gushort* dest = (gushort*)&data[y*outPitch];
+      for(guint x =0 ; x < w; x++) {
+        guint b = bits.getBits(12);
+        dest[x] = b;
+        if ((x % 10) == 9)
+          bits.skipBits(8);
+      }
+    }*/
 }
 
 void NefDecoder::checkSupport(CameraMetaData *meta) {
@@ -223,8 +219,7 @@ void NefDecoder::checkSupport(CameraMetaData *meta) {
   this->checkCameraSupported(meta, make, model, "");
 }
 
-void NefDecoder::decodeMetaData(CameraMetaData *meta)
-{
+void NefDecoder::decodeMetaData(CameraMetaData *meta) {
   mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
 
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
@@ -238,11 +233,11 @@ void NefDecoder::decodeMetaData(CameraMetaData *meta)
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
 
-  setMetaData(meta, make, model,"");
+  setMetaData(meta, make, model, "");
 
-  if (white!=65536)
+  if (white != 65536)
     mRaw->whitePoint = white;
-  if (black>=0)
+  if (black >= 0)
     mRaw->blackLevel = black;
 
 }

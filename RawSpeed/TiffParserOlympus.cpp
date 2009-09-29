@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "TiffParserOlympus.h"
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -25,11 +25,10 @@
 // More relaxed Tiff parser for olympus makernote
 
 TiffParserOlympus::TiffParserOlympus(FileMap* input) :
-TiffParser(input) {
+    TiffParser(input) {
 }
 
-TiffParserOlympus::~TiffParserOlympus(void)
-{
+TiffParserOlympus::~TiffParserOlympus(void) {
 }
 
 #ifdef CHECKSIZE
@@ -49,7 +48,7 @@ void TiffParserOlympus::parseData() {
     throw TiffParserException("Not a TIFF file (size too small)");
   if (data[0] != 0x49 || data[1] != 0x49) {
     endian = big;
-    if (data[0] != 0x4D || data[1] != 0x4D) 
+    if (data[0] != 0x4D || data[1] != 0x4D)
       throw TiffParserException("Not a TIFF file (ID)");
 
   } else {

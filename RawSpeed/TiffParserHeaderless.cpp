@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "TiffParserHeaderless.h"
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -23,13 +23,11 @@
 */
 
 TiffParserHeaderless::TiffParserHeaderless(FileMap* input, Endianness _end) :
-TiffParser(input)
-{
+    TiffParser(input) {
   endian = _end;
 }
 
-TiffParserHeaderless::~TiffParserHeaderless(void)
-{
+TiffParserHeaderless::~TiffParserHeaderless(void) {
 }
 
 #ifdef CHECKSIZE

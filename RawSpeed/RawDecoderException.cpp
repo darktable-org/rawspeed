@@ -4,7 +4,7 @@
 #include <stdarg.h>
 #define vsprintf_s(...) vsnprintf(__VA_ARGS__)
 #endif
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -34,6 +34,6 @@ void ThrowRDE(const char* fmt, ...) {
   char buf[8192];
   vsprintf_s(buf, 8192, fmt, val);
   va_end(val);
-  _RPT1(0, "EXCEPTION: %s\n",buf);
+  _RPT1(0, "EXCEPTION: %s\n", buf);
   throw RawDecoderException(buf);
 }
