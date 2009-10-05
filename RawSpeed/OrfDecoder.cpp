@@ -102,6 +102,16 @@ void OrfDecoder::decodeCompressed(ByteStream& s, guint w, guint h) {
   guchar* data = mRaw->getData();
   gint pitch = mRaw->pitch;
 
+  /* Build a table to quickly look up "high" value */
+  gchar bittable[4096];
+  for (i = 0; i < 4096; i++) {
+    int b = i;
+    for (high = 0; high < 12; high++)
+      if ((b>>(11-high))&1)
+        break;
+      bittable[i] = high;
+  }
+
   s.skipBytes(7);
   BitPumpMSB bits(&s);
 
@@ -114,10 +124,13 @@ void OrfDecoder::decodeCompressed(ByteStream& s, guint w, guint h) {
       carry = acarry[x & 1];
       i = 2 * (carry[2] < 3);
       for (nbits = 2 + i; (gushort) carry[0] >> (nbits + i); nbits++);
-      sign = bits.getBitNoFill() * -1;
-      low  = bits.getBitsNoFill(2);
-      for (high = 0; high < 12; high++)
-        if (bits.getBitNoFill()) break;
+      int b = bits.peekBitsNoFill(15);
+      sign = (b >> 14) * -1;
+      low  = (b >> 12) & 3;
+      high = bittable[b&4095];
+      // Skip bits used above.
+      bits.skipBitsNoFill(min(12+3, high + 1 + 3));
+
       if (high == 12)
         high = bits.getBits(16 - nbits) >> 1;
       carry[0] = (high << nbits) | bits.getBits(nbits);

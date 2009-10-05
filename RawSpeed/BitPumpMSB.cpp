@@ -65,6 +65,9 @@ guint BitPumpMSB::getBit() {
 
 guint BitPumpMSB::getBits(guint nbits) {
   if (mLeft < nbits) {
+    if (nbits>24)
+      throw IOException("Invalid data, attempting to read more than 24 bits.");
+      
     fill();
   }
 
@@ -79,6 +82,9 @@ guint BitPumpMSB::peekBit() {
 
 guint BitPumpMSB::peekBits(guint nbits) {
   if (mLeft < nbits) {
+    if (nbits>24)
+      throw IOException("Invalid data, attempting to read more than 24 bits.");
+
     fill();
   }
 
@@ -129,6 +135,10 @@ void BitPumpMSB::skipBits(unsigned int nbits) {
       throw IOException("Out of buffer read");
   }
 
+  mLeft -= nbits;
+}
+
+void BitPumpMSB::skipBitsNoFill(unsigned int nbits) {
   mLeft -= nbits;
 }
 
