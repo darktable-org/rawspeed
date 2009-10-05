@@ -163,16 +163,14 @@ std::string Rw2Decoder::getMode(const string model) {
     ratio = (float)mRaw->dim.x / (float)mRaw->dim.y;
   }
 
-  if (!model.compare("DMC-LX3") || !model.compare("DMC-G1") || !model.compare("DMC-GH1") || !model.compare("DMC-GF1")) {
-    if (almostEqualRelative(ratio, 16.0f / 9.0f, 0.02f))
-      return "16:9";
-    if (almostEqualRelative(ratio, 3.0f / 2.0f, 0.02f))
-      return "3:2";
-    if (almostEqualRelative(ratio, 4.0f / 3.0f, 0.02f))
-      return "4:3";
-    if (almostEqualRelative(ratio, 1.0f, 0.02f))
-      return "1:1";
-  }
+  if (almostEqualRelative(ratio, 16.0f / 9.0f, 0.02f))
+    return "16:9";
+  if (almostEqualRelative(ratio, 3.0f / 2.0f, 0.02f))
+    return "3:2";
+  if (almostEqualRelative(ratio, 4.0f / 3.0f, 0.02f))
+    return "4:3";
+  if (almostEqualRelative(ratio, 1.0f, 0.02f))
+    return "1:1";
 
   return "";
 }

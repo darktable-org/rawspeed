@@ -176,10 +176,16 @@ void *RawDecoderDecodeThread(void *_this) {
 }
 
 void RawDecoder::startThreads() {
-  guint threads = rs_get_number_of_processor_cores();
+  guint threads;
+#ifdef WIN32
+  threads = pthread_num_processors_np();
+#else
+  // FIXME: Don't depend on Rawstudio.
+  threads = rs_get_number_of_processor_cores(); 
+#endif
   int y_offset = 0;
   int y_per_thread = (mRaw->dim.y + threads - 1) / threads;
-  RawDecoderThread t[threads];
+  RawDecoderThread *t = new RawDecoderThread[threads];
 
   pthread_attr_t attr;
 
@@ -202,6 +208,7 @@ void RawDecoder::startThreads() {
       errors.push_back(t[i].error);
     }
   }
+  delete[] t;
 }
 
 void RawDecoder::decodeThreaded(RawDecoderThread * t) {
