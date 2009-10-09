@@ -94,6 +94,12 @@ RawImage OrfDecoder::decodeRaw() {
 
   return mRaw;
 }
+/* This is probably the slowest decoder of them all.
+ * I cannot see any way to effectively speed up the prediction
+ * phase, which is by far the slowest part of this algorithm.
+ * Also there is no way to multithread this code, since prediction
+ * is based on the output of all previous pixel (bar the first four)
+ */
 
 void OrfDecoder::decodeCompressed(ByteStream& s, guint w, guint h) {
   int nbits, sign, low, high, i, wo, n, nw;
