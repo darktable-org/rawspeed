@@ -22,6 +22,7 @@
 
     http://www.klauspost.com
 */
+namespace RawSpeed {
 
 RawImageData::RawImageData(void):
     dim(0, 0), bpp(0), isCFA(true),
@@ -316,3 +317,5 @@ RawImage& RawImage::operator=(const RawImage & p) {
   if (--old->dataRefCount == 0) delete old;
   return *this;
 }
+
+} // namespace RawSpeed

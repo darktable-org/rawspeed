@@ -23,6 +23,9 @@
 
     http://www.klauspost.com
 */
+
+namespace RawSpeed {
+
 class PefDecoder :
   public RawDecoder
 {
@@ -34,3 +37,5 @@ public:
   virtual void checkSupport(CameraMetaData *meta);
   TiffIFD *mRootIFD;
 };
+
+} // namespace RawSpeed

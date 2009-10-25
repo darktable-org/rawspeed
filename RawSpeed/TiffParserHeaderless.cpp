@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 TiffParserHeaderless::TiffParserHeaderless(FileMap* input, Endianness _end) :
     TiffParser(input) {
   endian = _end;
@@ -65,3 +67,5 @@ void TiffParserHeaderless::parseData(guint firstIfdOffset) {
     nextIFD = mRootIFD->mSubIFD.back()->getNextIFD();
   } while (nextIFD);
 }
+
+} // namespace RawSpeed

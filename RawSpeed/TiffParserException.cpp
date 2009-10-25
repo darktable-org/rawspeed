@@ -27,6 +27,7 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
 
 TiffParserException::TiffParserException(const string _msg) : runtime_error(_msg) {
   _RPT1(0, "TIFF Exception: %s\n", _msg.c_str());
@@ -41,3 +42,5 @@ void ThrowTPE(const char* fmt, ...) {
   _RPT1(0, "EXCEPTION: %s\n", buf);
   throw TiffParserException(buf);
 }
+
+} // namespace RawSpeed

@@ -19,6 +19,8 @@
 
     http://www.klauspost.com
 */
+namespace RawSpeed {
+
 #ifndef SS_Point_H
 #define SS_Point_H
 
@@ -41,5 +43,7 @@ public:
   gboolean isThisInside(const iPoint2D &otherPoint) {return (x<=otherPoint.x && y<=otherPoint.y); };
   int x,y;
 };
+
+} // namespace RawSpeed
 
 #endif // SS_Point_H

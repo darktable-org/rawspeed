@@ -25,6 +25,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 class DngSliceElement
 {
 public:
@@ -69,3 +71,4 @@ public:
   guint nThreads;
 };
 
+} // namespace RawSpeed

@@ -27,6 +27,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 class NefDecoder :
   public RawDecoder
 {
@@ -51,3 +53,5 @@ public:
   guint offset;
   guint count;
 };
+
+} // namespace RawSpeed

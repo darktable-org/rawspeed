@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 void *DecodeThread(void *_this) {
   DngDecoderThread* me = (DngDecoderThread*)_this;
   DngDecoderSlices* parent = me->parent;
@@ -112,3 +114,5 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
 int DngDecoderSlices::size() {
   return (int)slices.size();
 }
+
+} // namespace RawSpeed

@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 class TiffIFDBE :
   public TiffIFD
 {
@@ -30,3 +32,5 @@ public:
   TiffIFDBE(FileMap* f, guint offset);
   virtual ~TiffIFDBE(void);
 };
+
+} // namespace RawSpeed

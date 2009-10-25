@@ -26,6 +26,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 OrfDecoder::OrfDecoder(TiffIFD *rootIFD, FileMap* file):
     RawDecoder(file), mRootIFD(rootIFD) {
 }
@@ -182,5 +184,6 @@ void OrfDecoder::decodeMetaData(CameraMetaData *meta) {
   string model = data[0]->getEntry(MODEL)->getString();
 
   setMetaData(meta, make, model, "");
-
 }
+
+} // namespace RawSpeed

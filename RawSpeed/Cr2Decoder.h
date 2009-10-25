@@ -24,6 +24,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 class Cr2Decoder :
   public RawDecoder
 {
@@ -52,3 +54,5 @@ public:
   guint offset;
   guint count;
 };
+
+} // namespace RawSpeed

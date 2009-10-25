@@ -29,6 +29,8 @@
 
 #define TIME_LOAD 1
 
+using namespace RawSpeed;
+
 extern "C" {
 
 RS_IMAGE16 *

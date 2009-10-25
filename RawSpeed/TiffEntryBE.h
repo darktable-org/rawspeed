@@ -23,6 +23,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 class TiffEntryBE :
   public TiffEntry
 {
@@ -38,3 +40,4 @@ private:
   bool mDataSwapped;
 };
 
+} // namespace RawSpeed

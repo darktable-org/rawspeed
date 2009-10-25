@@ -25,6 +25,7 @@
     Copyright (C) 2007 Hubert Figuiere, released under LGPL
 */
 
+namespace RawSpeed {
 
 /*** Used for entropy encoded sections ***/
 
@@ -201,3 +202,4 @@ void BitPumpJPEG::setAbsoluteOffset(unsigned int offset) {
 BitPumpJPEG::~BitPumpJPEG(void) {
 }
 
+} // namespace RawSpeed

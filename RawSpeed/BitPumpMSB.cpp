@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 /*** Used for entropy encoded sections ***/
 
 #define BITS_PER_LONG (8*sizeof(guint))
@@ -177,3 +179,4 @@ void BitPumpMSB::setAbsoluteOffset(unsigned int offset) {
 BitPumpMSB::~BitPumpMSB(void) {
 }
 
+} // namespace RawSpeed

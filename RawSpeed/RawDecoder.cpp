@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 RawDecoder::RawDecoder(FileMap* file) : mFile(file), mRaw(RawImage::create()) {
 }
 
@@ -215,3 +217,4 @@ void RawDecoder::decodeThreaded(RawDecoderThread * t) {
   ThrowRDE("Internal Error: This class does not support threaded decoding");
 }
 
+} // namespace RawSpeed

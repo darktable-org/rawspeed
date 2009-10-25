@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 class TiffParserHeaderless :
   public TiffParser
 {
@@ -31,3 +33,5 @@ public:
   void parseData(guint firstIfdOffset);
   virtual void parseData();
 };
+
+} // namespace RawSpeed

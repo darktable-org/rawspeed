@@ -27,6 +27,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 FileIOException::FileIOException(const string error) : RawDecoderException(error) {
 }
 
@@ -40,3 +42,5 @@ void ThrowFIE(const char* fmt, ...) {
   _RPT1(0, "EXCEPTION: %s\n", buf);
   throw FileIOException(buf);
 }
+
+} // namespace RawSpeed

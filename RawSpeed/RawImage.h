@@ -25,6 +25,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 class RawImage;
 class RawImageData
 {
@@ -80,3 +82,5 @@ protected:
 inline RawImage RawImage::create()  { return new RawImageData(); }
 inline RawImage RawImage::create(iPoint2D dim, guint bytesPerPixel, guint componentsPerPixel)
 { return new RawImageData(dim, bytesPerPixel, componentsPerPixel); }
+
+} // namespace RawSpeed

@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 class TiffParserOlympus :
   public TiffParser
 {
@@ -30,3 +32,5 @@ public:
   virtual void parseData();
   virtual ~TiffParserOlympus(void);
 };
+
+} // namespace RawSpeed

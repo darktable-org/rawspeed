@@ -22,6 +22,7 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
 
 ByteStream::ByteStream(const guchar* _buffer, guint _size) :
     buffer(_buffer), size(_size), off(0) {
@@ -84,3 +85,5 @@ void ByteStream::skipToMarker() {
   }
 //  _RPT1(0,"Skipped %u bytes.\n", c);
 }
+
+} // namespace RawSpeed

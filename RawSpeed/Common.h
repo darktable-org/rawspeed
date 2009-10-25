@@ -52,6 +52,7 @@
 typedef char* LPCWSTR;
 #endif // __unix__
 
+namespace RawSpeed {
 
 inline void BitBlt(BYTE* dstp, int dst_pitch, const BYTE* srcp, int src_pitch, int row_size, int height) {
   if (height == 1 || (dst_pitch == src_pitch && src_pitch == row_size)) {
@@ -113,3 +114,5 @@ typedef gint64            goffset;
 
 inline guint clampbits(gint x, guint n) { guint32 _y_temp; if( (_y_temp=x>>n) ) x = ~_y_temp >> (32-n); return x;}
 
+
+} // namespace RawSpeed

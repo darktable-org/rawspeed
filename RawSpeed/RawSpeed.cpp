@@ -27,7 +27,9 @@
     http://www.klauspost.com
 */
 
-//#define _USE_GFL_
+using namespace RawSpeed;
+
+#define _USE_GFL_
 #ifdef _USE_GFL_
 #include "libgfl.h"
 #pragma comment(lib, "libgfl.lib") 
@@ -42,7 +44,7 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
   RawDecoder *d = 0;
   FileMap* m = 0;
   try {
-    wprintf(L"Opening:%s\n",f.Filename());
+//    wprintf(L"Opening:%s\n",f.Filename());
     m = f.readFile();
     TiffParser t(m);
     t.parseData();
@@ -54,18 +56,18 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
       d->decodeRaw();
       d->decodeMetaData(meta);
       RawImage r = d->mRaw;
+      r->scaleBlackWhite();
 
       guint time = GetTickCount()-startTime;
       float mpps = (float)r->dim.x * (float)r->dim.y * (float)r->getCpp()  / (1000.0f * (float)time);
       wprintf(L"Decoding %s took: %u ms, %4.2f Mpixel/s\n", f.Filename(), time, mpps);
-      r->scaleBlackWhite();
 
       for (guint i = 0; i < d->errors.size(); i++) {
         printf("Error Encountered:%s", d->errors[i]);
       }
       if (r->isCFA) {
-        printf("DCRAW filter:%x\n",r->cfa.getDcrawFilter());
-        printf(r->cfa.asString().c_str());
+//        printf("DCRAW filter:%x\n",r->cfa.getDcrawFilter());
+//        printf(r->cfa.asString().c_str());
       }
 
 #ifdef _USE_GFL_
@@ -174,7 +176,37 @@ int wmain(int argc, _TCHAR* argv[])
 #endif
   CameraMetaData meta("..\\cameras.xml");  
   //meta.dumpXML();
+/*
+  OpenFile(FileReader(L"..\\testimg\\Panasonic_FZ35FARI0200.RW2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Panasonic_FZ35hSLI0200.RW2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Panasonic_FZ35hVFAWB.RW2"),&meta);
 
+  OpenFile(FileReader(L"..\\testimg\\Panasonic_DMCGF1hSLI0200_NR_LOW.RW2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Panasonic_DMCGF1hMULTII0200.RW2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_lx3_02.rw2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\gh1_sample_iso100.RW2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\gh1_sample_iso400.RW2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\gh1_studio_iso100.RW2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\gh1_studio_iso1600.RW2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Panasonic_DMC-FX150.rw2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Panasonic_FZ28.rw2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_lx3_01.rw2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_lx3_02.rw2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_lx3_03.rw2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_lx3_04.rw2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_lx3_05.rw2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_lx3_06.rw2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Panasonic_LX3.rw2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\panasonic_DMC_gh1_sample_iso100.RW2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\panasonic_DMC_gh1_sample_iso400.RW2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\panasonic_DMC_gh1_studio_iso100.RW2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\panasonic_DMC_gh1_studio_iso1600.RW2"),&meta);
+
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\ricoh_gr_digital_iii_01.dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\ricoh_gr_digital_iii_07.dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\ricoh_gr_digital_iii_09.dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\ricoh_gr_digital_iii_10.dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\ricoh_gr_digital_iii_14.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K7FARI0200.DNG"),&meta);
   OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K7FARI6400.DNG"),&meta);
   OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K7hMULTII0200.DNG"),&meta);
@@ -222,7 +254,7 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Pentax_K20D.pef"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Pentax_optio_33wr.pef"),&meta);
   
-  
+
   OpenFile(FileReader(L"..\\testimg\\SONY-DSLR-A700.arw"),&meta);
   OpenFile(FileReader(L"..\\testimg\\SONY_A200.ARW"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Sony_A300.arw"),&meta);
@@ -231,6 +263,17 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A900-2.arw"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Sony_DSLR-A900.arw"),&meta);
 
+  OpenFile(FileReader(L"..\\testimg\\Sony_a700_ISO1600_compressed.ARW"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Sony_a700_ISO1600_uncompressed.ARW"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Sony_a700_ISO200_compressed.ARW"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Sony_a700_ISO200_uncompressed.ARW"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Sony_a700_ISO6400_compressed.ARW"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Sony_a700_ISO6400_uncompressed.ARW"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Sony_A900_ISO1600_uncompressed.ARW"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Sony_A900_ISO3200_uncompressed.ARW"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Sony_A900_ISO400_uncompressed.ARW"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Sony_A900_ISO6400_uncompressed.ARW"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Sony_A900_ISO800_uncompressed.ARW"),&meta);
   OpenFile(FileReader(L"..\\testimg\\nikon_coolpix_p6000_05.nrw"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon_D1.nef"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon_D100-backhigh.nef"),&meta);
@@ -256,6 +299,24 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Nikon_E5400.nef"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon_E5700.nef"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon_E5700_(sRGB).nef"),&meta);
+*/
+OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_SX1IShMULTII1600.CR2"),&meta);
+OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_SX1ISFARI0200.CR2"),&meta);
+OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_SX1IShMULTII0200.CR2"),&meta);
+OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_SX1IShSLI0080.CR2"),&meta);
+OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_SX1IShSLI0200.CR2"),&meta);
+
+OpenFile(FileReader(L"..\\testimg\\canon_powershot_g11_02.cr2"),&meta);
+OpenFile(FileReader(L"..\\testimg\\canon_powershot_g11_07.cr2"),&meta);
+OpenFile(FileReader(L"..\\testimg\\canon_powershot_g11_08.cr2"),&meta);
+
+  OpenFile(FileReader(L"..\\testimg\\nikon_d3s_Ycircus_vidrig_102400.NEF"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\nikon_d3s_Ycircus_dogjump3_2500.NEF"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\nikon_d3s_Ycircus_granny_10000.NEF"),&meta);
+
+  OpenFile(FileReader(L"..\\testimg\\nikon_d300s_01.nef"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\nikon_d300s_03.nef"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\nikon_d300s_06.nef"),&meta);
 
   OpenFile(FileReader(L"..\\testimg\\Olympus_500UZ.orf"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Olympus_C7070WZ.orf"),&meta);
@@ -408,6 +469,22 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E520-5.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_E520.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\Olympus_SP350.dng"),&meta);
+
+  OpenFile(FileReader(L"..\\testimg\\dng\\Panasonic_DMC-FX150(010909).dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\panasonic_DMC-G1FARI0200(010909).dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\panasonic_DMC-G1hMULTII0200(010909).dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\panasonic_DMC-G1hSLI0400(010909).dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\panasonic_DMC-G1LL0207LENROFF(010909).dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\Panasonic_FZ28(010909).dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\panasonic_lumix_dmc_lx3_01(010909).dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\panasonic_lumix_dmc_lx3_02(010909).dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\panasonic_lumix_dmc_lx3_03(010909).dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\panasonic_lumix_dmc_lx3_04(010909).dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\panasonic_lumix_dmc_lx3_05(010909).dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\panasonic_lumix_dmc_lx3_06(010909).dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\Panasonic_LX3(010909).dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\Panasonic_LX3(300109).dng"),&meta);
+  
   OpenFile(FileReader(L"..\\testimg\\dng\\PENTAX-ISD-linear.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\PENTAX-ISD.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\Pentax_K100D.dng"),&meta);

@@ -21,6 +21,9 @@
 
     http://www.klauspost.com
 */
+
+namespace RawSpeed {
+
 /****
 * Conventions:
 *
@@ -44,3 +47,5 @@ public:
   virtual ~PlanarRawImage(void);
   PlanarPlane p[4];
 };
+
+} // namespace RawSpeed

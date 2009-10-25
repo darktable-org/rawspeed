@@ -23,6 +23,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 class NikonDecompressor :
   public LJpegDecompressor
 {
@@ -51,3 +53,5 @@ static const guchar nikon_tree[][32] = {
   8,0x5c,0x4b,0x3a,0x29,7,6,5,4,3,2,1,0,13,14 },
   { 0,1,4,2,2,3,1,2,0,0,0,0,0,0,0,0,	/* 14-bit lossless */
   7,6,8,5,9,4,10,3,11,12,2,0,1,13,14 } };
+  
+} // namespace RawSpeed

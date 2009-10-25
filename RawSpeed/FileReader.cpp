@@ -29,6 +29,7 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
 
 FileReader::FileReader(LPCWSTR _filename) : mFilename(_filename) {
 }
@@ -86,3 +87,5 @@ FileMap* FileReader::readFile() {
 FileReader::~FileReader(void) {
 
 }
+
+} // namespace RawSpeed

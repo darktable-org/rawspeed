@@ -25,6 +25,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 class PanaBitpump {
   public:
   PanaBitpump(ByteStream* input);
@@ -56,3 +58,5 @@ private:
   ByteStream* input_start;
   guint load_flags;
 };
+
+} // namespace RawSpeed

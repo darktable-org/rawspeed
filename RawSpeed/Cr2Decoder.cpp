@@ -24,6 +24,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 Cr2Decoder::Cr2Decoder(TiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
 
@@ -404,3 +406,5 @@ void Cr2Decoder::interpolate_422_old(int w, int h, int start_h , int end_h) {
     STORE_RGB(c_line, off + 3, off + 4, off + 5);
   }
 }
+
+} // namespace RawSpeed

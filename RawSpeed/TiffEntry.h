@@ -24,6 +24,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 const guint datasizes[] = {0,1,1,2,4,8,1,1,2,4, 8, 4, 8, 4};
                       // 0-1-2-3-4-5-6-7-8-9-10-11-12-13
 const guint datashifts[] = {0,0,0,1,2,3,0,0,1,2, 3, 2, 3, 2};
@@ -86,3 +88,5 @@ protected:
   float debug_floatVal;
 #endif
 };
+
+} // namespace RawSpeed

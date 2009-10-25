@@ -23,6 +23,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 Camera::Camera(xmlDocPtr doc, xmlNodePtr cur) {
   xmlChar *key;
   key = xmlGetProp(cur, (const xmlChar *)"make");
@@ -188,3 +190,4 @@ int Camera::getAttributeAsInt(xmlNodePtr cur , const xmlChar *tag, const char* a
   return i;
 }
 
+} // namespace RawSpeed

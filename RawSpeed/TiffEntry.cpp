@@ -23,6 +23,7 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
 
 TiffEntry::TiffEntry() {
 }
@@ -112,3 +113,5 @@ int TiffEntry::getElementSize() {
 int TiffEntry::getElementShift() {
   return datashifts[type];
 }
+
+} // namespace RawSpeed

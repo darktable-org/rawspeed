@@ -20,6 +20,7 @@
 
     http://www.klauspost.com
 */
+namespace RawSpeed {
 
 class BlackArea
 {
@@ -30,3 +31,5 @@ public:
   guint size;   // Size in bayer pixels.
   gboolean isVertical;  // Otherwise horizontal
 };
+
+} // namespace RawSpeed

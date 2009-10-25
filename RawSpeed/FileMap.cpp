@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 FileMap::FileMap(guint _size) : size(_size) {
   data = (unsigned char*)_aligned_malloc(size + 4, 16);
   if (!data) {
@@ -55,3 +57,5 @@ void FileMap::corrupt(int errors) {
     data[pos] = rand() & 0xff;
   }
 }
+
+} // namespace RawSpeed

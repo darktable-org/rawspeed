@@ -25,6 +25,9 @@
 
     http://www.klauspost.com
 */
+
+namespace RawSpeed {
+
 class OrfDecoder :
   public RawDecoder
 {
@@ -37,5 +40,6 @@ public:
 private:
   void decodeCompressed(ByteStream& s,guint w, guint h);
   TiffIFD *mRootIFD;
-
 };
+
+} // namespace RawSpeed

@@ -28,6 +28,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 class RawDecoder;
 
 class RawDecoderThread
@@ -62,4 +64,4 @@ protected:
   void TrimSpaces( string& str);
 };
 
-
+} // namespace RawSpeed

@@ -23,6 +23,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 /******************
  * Decompresses Lossless non subsampled JPEGs, with 2-4 components
  *****************/
@@ -45,3 +47,5 @@ private:
   guint *offset;
   int* slice_width;
 };
+
+} // namespace RawSpeed

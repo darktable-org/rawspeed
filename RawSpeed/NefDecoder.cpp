@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 NefDecoder::NefDecoder(TiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
 
@@ -239,5 +241,6 @@ void NefDecoder::decodeMetaData(CameraMetaData *meta) {
     mRaw->whitePoint = white;
   if (black >= 0)
     mRaw->blackLevel = black;
-
 }
+
+} // namespace RawSpeed

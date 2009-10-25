@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 #ifdef CHECKSIZE
 #undef CHECKSIZE
 #endif
@@ -95,3 +97,5 @@ TiffEntry* TiffIFD::getEntry(TiffTag tag) {
 bool TiffIFD::hasEntry(TiffTag tag) {
   return mEntry.find(tag) != mEntry.end();
 }
+
+} // namespace RawSpeed

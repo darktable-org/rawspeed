@@ -21,6 +21,8 @@
 */
 #pragma once
 
+namespace RawSpeed {
+
 void ThrowTPE(const char* fmt, ...);
 
 class TiffParserException : public std::runtime_error
@@ -28,3 +30,5 @@ class TiffParserException : public std::runtime_error
 public:
   TiffParserException(const string _msg);
 };
+
+} // namespace RawSpeed

@@ -22,6 +22,7 @@
 
     http://www.klauspost.com
 */
+namespace RawSpeed {
 
 Rw2Decoder::Rw2Decoder(TiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD), input_start(0) {
@@ -218,3 +219,5 @@ guint PanaBitpump::getBits(int nbits) {
   byte = vbits >> 3 ^ 0x3ff0;
   return (buf[byte] | buf[byte+1] << 8) >> (vbits & 7) & ~(-1 << nbits);
 }
+
+} // namespace RawSpeed

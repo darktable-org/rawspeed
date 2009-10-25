@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 http://www.klauspost.com
 */
 
+namespace RawSpeed {
 
 LJpegPlain::LJpegPlain(FileMap* file, RawImage img) :
     LJpegDecompressor(file, img) {
@@ -773,3 +774,4 @@ void LJpegPlain::decodeScanLeft4Comps() {
   }
 }
 
+} // namespace RawSpeed

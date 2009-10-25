@@ -24,7 +24,7 @@
     http://www.klauspost.com
 */
 
-
+namespace RawSpeed {
 
 class DngDecoder : 
   public RawDecoder
@@ -50,3 +50,5 @@ public:
   guint count;
   guint offsetY;
 };
+
+} // namespace RawSpeed

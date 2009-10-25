@@ -58,6 +58,8 @@
 * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 */
 
+namespace RawSpeed {
+
 const guint bitMask[] = {  0xffffffff, 0x7fffffff,
                            0x3fffffff, 0x1fffffff,
                            0x0fffffff, 0x07ffffff,
@@ -592,3 +594,4 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
   return 0;
 }
 
+} // namespace RawSpeed

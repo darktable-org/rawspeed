@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 void ThrowCME(const char* fmt, ...) {
   va_list val;
   va_start(val, fmt);
@@ -39,3 +41,5 @@ void ThrowCME(const char* fmt, ...) {
 CameraMetadataException::CameraMetadataException(const string _msg): runtime_error(_msg) {
   _RPT1(0, "CameraMetadata Exception: %s\n", _msg.c_str());
 }
+
+} // namespace RawSpeed

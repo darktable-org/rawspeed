@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 PentaxDecompressor::PentaxDecompressor(FileMap* file, RawImage img) :
     LJpegDecompressor(file, img) {
   pentaxBits = 0;
@@ -162,3 +164,4 @@ gint PentaxDecompressor::HuffDecodePentax() {
   return 0;
 }
 
+} // namespace RawSpeed

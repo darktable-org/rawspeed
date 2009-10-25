@@ -22,6 +22,9 @@
 
     http://www.klauspost.com
 */
+
+namespace RawSpeed {
+
 class PentaxDecompressor :
   public LJpegDecompressor
 {
@@ -32,3 +35,5 @@ public:
   void decodePentax( guint offset, guint size );
   BitPumpMSB *pentaxBits;
 };
+
+} // namespace RawSpeed

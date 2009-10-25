@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 ColorFilterArray::ColorFilterArray(void) {
   setCFA(CFA_UNKNOWN, CFA_UNKNOWN, CFA_UNKNOWN, CFA_UNKNOWN);
 }
@@ -122,3 +124,5 @@ void ColorFilterArray::shiftDown() {
   cfa[2] = tmp1;
   cfa[3] = tmp2;
 }
+
+} // namespace RawSpeed

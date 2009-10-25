@@ -23,6 +23,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 TiffIFDBE::TiffIFDBE() {
   endian = big;
 }
@@ -55,3 +57,5 @@ TiffIFDBE::TiffIFDBE(FileMap* f, guint offset) {
 
 TiffIFDBE::~TiffIFDBE(void) {
 }
+
+} // namespace RawSpeed

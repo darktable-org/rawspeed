@@ -25,6 +25,8 @@
 #include "TiffIFD.h"
 #include "BitPumpPlain.h"
 
+namespace RawSpeed {
+
 class ArwDecoder :
   public RawDecoder
 {
@@ -42,3 +44,5 @@ protected:
   guint curve[0x4001];
   ByteStream *in;
 };
+
+} // namespace RawSpeed

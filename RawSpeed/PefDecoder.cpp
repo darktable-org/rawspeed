@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 PefDecoder::PefDecoder(TiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
 }
@@ -105,3 +107,5 @@ void PefDecoder::decodeMetaData(CameraMetaData *meta) {
     }
   */
 }
+
+} // namespace RawSpeed

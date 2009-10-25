@@ -21,6 +21,8 @@
 */
 #pragma once
 
+namespace RawSpeed {
+
 class ByteStream
 {
 public:
@@ -51,3 +53,5 @@ public:
     _RPT1(0, "IO Exception: %s\n", _msg.c_str());
   }
 };
+
+} // namespace RawSpeed

@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 NikonDecompressor::NikonDecompressor(FileMap* file, RawImage img) :
     LJpegDecompressor(file, img) {
   for (guint i = 0; i < 0xffff ; i++) {
@@ -198,3 +200,4 @@ gint NikonDecompressor::HuffDecodeNikon() {
   return diff;
 }
 
+} // namespace RawSpeed

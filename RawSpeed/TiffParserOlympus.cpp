@@ -24,6 +24,8 @@
 
 // More relaxed Tiff parser for olympus makernote
 
+namespace RawSpeed {
+
 TiffParserOlympus::TiffParserOlympus(FileMap* input) :
     TiffParser(input) {
 }
@@ -72,3 +74,5 @@ void TiffParserOlympus::parseData() {
     nextIFD = mRootIFD->mSubIFD.back()->getNextIFD();
   } while (nextIFD);
 }
+
+} // namespace RawSpeed

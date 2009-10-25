@@ -23,6 +23,8 @@
 */
 #pragma once
 
+namespace RawSpeed {
+
 void ThrowTPE(const char* fmt, ...);
 
 class FileIOException: public RawDecoderException
@@ -30,3 +32,5 @@ class FileIOException: public RawDecoderException
 public:
   FileIOException(const string);
 };
+
+} // namespace RawSpeed

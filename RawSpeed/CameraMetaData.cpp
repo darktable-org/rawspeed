@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 CameraMetaData::CameraMetaData(char *docname) {
   ctxt = xmlNewParserCtxt();
   doc = xmlCtxtReadFile(ctxt, docname, NULL, XML_PARSE_DTDVALID);
@@ -117,3 +119,5 @@ Camera* CameraMetaData::getCamera(string make, string model, string mode) {
     return NULL;
   return cameras[id];
 }
+
+} // namespace RawSpeed

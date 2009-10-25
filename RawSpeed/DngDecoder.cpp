@@ -24,6 +24,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 //#define PRINT_INFO
 
 DngDecoder::DngDecoder(TiffIFD *rootIFD, FileMap* file) : RawDecoder(file), mRootIFD(rootIFD) {
@@ -474,4 +476,4 @@ void DngDecoder::printMetaData() {
 
 }
 
-
+} // namespace RawSpeed

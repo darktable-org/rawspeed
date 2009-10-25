@@ -25,6 +25,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 class Camera
 {
 public:
@@ -48,3 +50,5 @@ private:
   int StringToInt(const xmlChar *in, const xmlChar *tag, const char* attribute);
   int getAttributeAsInt( xmlNodePtr cur , const xmlChar *tag, const char* attribute);
 };
+
+} // namespace RawSpeed

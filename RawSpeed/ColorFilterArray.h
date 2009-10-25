@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 typedef enum {
   CFA_COLOR_MIN = 0,
   CFA_RED = 0,
@@ -62,3 +64,5 @@ public:
 private:
   CFAColor cfa[4];
 };
+
+} // namespace RawSpeed

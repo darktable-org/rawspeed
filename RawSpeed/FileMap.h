@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 /*************************************************************************
  * This is the basic file map
  *
@@ -47,3 +49,5 @@ private:
  guint size;
  gboolean mOwnAlloc;
 };
+
+} // namespace RawSpeed

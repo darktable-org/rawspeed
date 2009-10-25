@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 TiffParser::TiffParser(FileMap* inputData): mInput(inputData), mRootIFD(0) {
 
 }
@@ -132,3 +134,5 @@ RawDecoder* TiffParser::getDecompressor() {
   throw TiffParserException("No decoder found. Sorry.");
   return NULL;
 }
+
+} // namespace RawSpeed

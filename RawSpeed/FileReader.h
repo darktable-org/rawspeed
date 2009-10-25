@@ -23,6 +23,8 @@
 #include "FileIOException.h"
 #include "FileMap.h"
 
+namespace RawSpeed {
+
 class FileReader
 {
 public:
@@ -35,3 +37,5 @@ public:
 private:
   LPCWSTR mFilename;
 };
+
+} // namespace RawSpeed

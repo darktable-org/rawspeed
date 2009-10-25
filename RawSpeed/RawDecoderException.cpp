@@ -27,6 +27,7 @@
 */
 
 
+namespace RawSpeed {
 
 void ThrowRDE(const char* fmt, ...) {
   va_list val;
@@ -37,3 +38,5 @@ void ThrowRDE(const char* fmt, ...) {
   _RPT1(0, "EXCEPTION: %s\n", buf);
   throw RawDecoderException(buf);
 }
+
+} // namespace RawSpeed

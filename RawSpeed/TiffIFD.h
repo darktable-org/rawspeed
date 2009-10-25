@@ -25,6 +25,7 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
 
 typedef enum Endianness {
   big, little
@@ -48,6 +49,4 @@ protected:
   gint nextIFD;
 };
 
-
-
-
+} // namespace RawSpeed

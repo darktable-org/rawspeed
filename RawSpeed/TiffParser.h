@@ -34,6 +34,8 @@
 #include "OrfDecoder.h"
 #include "Rw2Decoder.h"
 
+namespace RawSpeed {
+
 class TiffParser 
 {
 public:
@@ -49,3 +51,4 @@ protected:
   TiffIFD* mRootIFD;
 };
 
+} // namespace RawSpeed

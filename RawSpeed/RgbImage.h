@@ -21,6 +21,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 class RgbImage
 {
 public:
@@ -36,3 +38,5 @@ public:
   const int bpp;
   unsigned char* data;
 };
+
+} // namespace RawSpeed

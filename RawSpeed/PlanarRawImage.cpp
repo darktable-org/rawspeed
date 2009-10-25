@@ -22,8 +22,12 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 PlanarRawImage::PlanarRawImage(void) {
 }
 
 PlanarRawImage::~PlanarRawImage(void) {
 }
+
+} // namespace RawSpeed

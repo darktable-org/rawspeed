@@ -22,6 +22,7 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
 
 ArwDecoder::ArwDecoder(TiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
@@ -210,3 +211,5 @@ void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
     }
   }
 }
+
+} // namespace RawSpeed

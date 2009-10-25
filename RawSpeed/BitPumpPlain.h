@@ -22,8 +22,9 @@
 #pragma once
 #include "ByteStream.h"
 
-// Note: Allocated buffer MUST be at least size+sizeof(guint) large.
+namespace RawSpeed {
 
+// Note: Allocated buffer MUST be at least size+sizeof(guint) large.
 
 class BitPumpPlain
 {
@@ -53,4 +54,4 @@ protected:
 private:
 };
 
-
+} // namespace RawSpeed

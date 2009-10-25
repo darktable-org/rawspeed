@@ -22,6 +22,7 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
 
 TiffEntryBE::TiffEntryBE(FileMap* f, guint offset) : mDataSwapped(false) {
   type = TIFF_UNDEFINED;  // We set type to undefined to avoid debug assertion errors.
@@ -102,3 +103,5 @@ const unsigned short* TiffEntryBE::getShortArray() {
   mDataSwapped = true;
   return d;
 }
+
+} // namespace RawSpeed

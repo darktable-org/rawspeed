@@ -28,6 +28,8 @@
  * Comments added by tm. See Copyright in LJpegDecompressor.cpp
  */ 
 
+namespace RawSpeed {
+
 typedef enum {		/* JPEG marker codes			*/
   M_STUFF = 0x00,
   M_SOF0  = 0xc0,	/* baseline DCT				*/
@@ -191,4 +193,4 @@ protected:
   HuffmanTable huff[4]; 
 };
 
-
+} // namespace RawSpeed

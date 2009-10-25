@@ -25,6 +25,8 @@
     http://www.klauspost.com
 */
 
+namespace RawSpeed {
+
 class CameraMetaData
 {
 public:
@@ -38,3 +40,5 @@ public:
 protected:
   void dumpCameraXML(Camera* cam);
 };
+
+} // namespace RawSpeed

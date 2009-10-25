@@ -21,6 +21,8 @@
 */
 #pragma once
 
+namespace RawSpeed {
+
 void ThrowCME(const char* fmt, ...);
 
 class CameraMetadataException :
@@ -29,3 +31,5 @@ class CameraMetadataException :
 public:
   CameraMetadataException(const string _msg);
 };
+
+} // namespace RawSpeed
