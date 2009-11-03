@@ -40,7 +40,7 @@ BitPumpMSB::BitPumpMSB(const guchar* _buffer, guint _size) :
   init();
 }
 
-void __inline BitPumpMSB::init() {
+__inline void BitPumpMSB::init() {
   for (int i = 0; i < 31; i++) {
     masks[i] = (1 << i) - 1;
   }
@@ -48,7 +48,7 @@ void __inline BitPumpMSB::init() {
   fill();
 }
 
-void BitPumpMSB::fill() {
+__inline void BitPumpMSB::fill() {
   guchar c;
 
   while (mLeft < MIN_GET_BITS) {
@@ -59,50 +59,6 @@ void BitPumpMSB::fill() {
   }
 }
 
-guint BitPumpMSB::getBit() {
-  if (!mLeft) fill();
-
-  return (mCurr >> (--mLeft)) & 1;
-}
-
-guint BitPumpMSB::getBits(guint nbits) {
-  if (mLeft < nbits) {
-    if (nbits>24)
-      throw IOException("Invalid data, attempting to read more than 24 bits.");
-      
-    fill();
-  }
-
-  return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];
-}
-
-guint BitPumpMSB::peekBit() {
-  if (!mLeft) fill();
-
-  return (mCurr >> (mLeft - 1)) & 1;
-}
-
-guint BitPumpMSB::peekBits(guint nbits) {
-  if (mLeft < nbits) {
-    if (nbits>24)
-      throw IOException("Invalid data, attempting to read more than 24 bits.");
-
-    fill();
-  }
-
-  return ((mCurr >> (mLeft - nbits))) & masks[nbits];
-}
-
-guint BitPumpMSB::peekByte() {
-  if (mLeft < 8) {
-    fill();
-  }
-
-  if (off > size)
-    throw IOException("Out of buffer read");
-
-  return ((mCurr >> (mLeft - 8))) & 0xff;
-}
 
 guint BitPumpMSB::getBitSafe() {
   if (!mLeft) {
@@ -129,28 +85,6 @@ guint BitPumpMSB::getBitsSafe(unsigned int nbits) {
   return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];
 }
 
-void BitPumpMSB::skipBits(unsigned int nbits) {
-  if (mLeft < nbits) {
-    fill();
-
-    if (off > size)
-      throw IOException("Out of buffer read");
-  }
-
-  mLeft -= nbits;
-}
-
-void BitPumpMSB::skipBitsNoFill(unsigned int nbits) {
-  mLeft -= nbits;
-}
-
-unsigned char BitPumpMSB::getByte() {
-  if (mLeft < 8) {
-    fill();
-  }
-
-  return ((mCurr >> (mLeft -= 8))) & 0xff;
-}
 
 unsigned char BitPumpMSB::getByteSafe() {
   if (mLeft < 8) {

@@ -104,8 +104,8 @@ RawImage OrfDecoder::decodeRaw() {
  */
 
 void OrfDecoder::decodeCompressed(ByteStream& s, guint w, guint h) {
-  int nbits, sign, low, high, i, wo, n, nw;
-  int acarry[2][3], *carry, pred, diff;
+  int nbits, sign, low, high, i, wo0, n, nw0, wo1, nw1;
+  int acarry0[3], acarry1[3], pred, diff;
 
   guchar* data = mRaw->getData();
   gint pitch = mRaw->pitch;
@@ -119,19 +119,20 @@ void OrfDecoder::decodeCompressed(ByteStream& s, guint w, guint h) {
         break;
       bittable[i] = high;
   }
-
+  wo0 = nw0 = wo1 = nw1 = 0;
   s.skipBytes(7);
   BitPumpMSB bits(&s);
 
   for (guint y = 0; y < h; y++) {
-    memset(acarry, 0, sizeof acarry);
+    memset(acarry0, 0, sizeof acarry0);
+    memset(acarry1, 0, sizeof acarry1);
     gushort* dest = (gushort*) & data[y*pitch];
     for (guint x = 0; x < w; x++) {
       bits.checkPos();
       bits.fill();
-      carry = acarry[x & 1];
-      i = 2 * (carry[2] < 3);
-      for (nbits = 2 + i; (gushort) carry[0] >> (nbits + i); nbits++);
+      i = 2 * (acarry0[2] < 3);
+      for (nbits = 2 + i; (gushort) acarry0[0] >> (nbits + i); nbits++);
+
       int b = bits.peekBitsNoFill(15);
       sign = (b >> 14) * -1;
       low  = (b >> 12) & 3;
@@ -141,24 +142,90 @@ void OrfDecoder::decodeCompressed(ByteStream& s, guint w, guint h) {
 
       if (high == 12)
         high = bits.getBits(16 - nbits) >> 1;
-      carry[0] = (high << nbits) | bits.getBits(nbits);
-      diff = (carry[0] ^ sign) + carry[1];
-      carry[1] = (diff * 3 + carry[1]) >> 5;
-      carry[2] = carry[0] > 16 ? 0 : carry[2] + 1;
-      if (y < 2 && x < 2) pred = 0;
-      else if (y < 2) pred = dest[x-2];
-      else if (x < 2) pred = dest[-pitch+((gint)x)];  // Pitch is in bytes, and dest is in short, so we skip two lines
-      else {
-        wo  = dest[x-2];
+
+      acarry0[0] = (high << nbits) | bits.getBits(nbits);
+      diff = (acarry0[0] ^ sign) + acarry0[1];
+      acarry0[1] = (diff * 3 + acarry0[1]) >> 5;
+      acarry0[2] = acarry0[0] > 16 ? 0 : acarry0[2] + 1;
+
+      if (y < 2 || x < 2) {
+        if (y < 2 && x < 2)  
+          pred = 0;
+        else if (y < 2) 
+          pred = wo0;
+        else { 
+          pred = dest[-pitch+((gint)x)];
+          nw0 = pred;
+        }
+        dest[x] = pred + ((diff << 2) | low);
+        // Set predictor
+        wo0 = dest[x];
+      } else {
         n  = dest[-pitch+((gint)x)];
-        nw = dest[-pitch+((gint)x)-2];
-        if ((wo < nw && nw < n) || (n < nw && nw < wo)) {
-          if (abs(wo - nw) > 32 || abs(n - nw) > 32)
-            pred = wo + n - nw;
-          else pred = (wo + n) >> 1;
-        } else pred = abs(wo - nw) > abs(n - nw) ? wo : n;
+        if (((wo0 < nw0) & (nw0 < n)) | ((n < nw0) & (nw0 < wo0))) {
+          if (abs(wo0 - nw0) > 32 || abs(n - nw0) > 32)
+            pred = wo0 + n - nw0;
+          else 
+            pred = (wo0 + n) >> 1;
+        } else 
+          pred = abs(wo0 - nw0) > abs(n - nw0) ? wo0 : n;
+
+        dest[x] = pred + ((diff << 2) | low);
+        // Set predictors
+        wo0 = dest[x];
+        nw0 = n;
       }
-      dest[x] = pred + ((diff << 2) | low);
+      _ASSERTE(0 == dest[x] >> 12) ;
+      
+      // ODD PIXELS
+      x += 1;
+      bits.checkPos();
+      bits.fill();
+      i = 2 * (acarry1[2] < 3);
+      for (nbits = 2 + i; (gushort) acarry1[0] >> (nbits + i); nbits++);
+      b = bits.peekBitsNoFill(15);
+      sign = (b >> 14) * -1;
+      low  = (b >> 12) & 3;
+      high = bittable[b&4095];
+      // Skip bits used above.
+      bits.skipBitsNoFill(min(12+3, high + 1 + 3));
+
+      if (high == 12)
+        high = bits.getBits(16 - nbits) >> 1;
+
+      acarry1[0] = (high << nbits) | bits.getBits(nbits);
+      diff = (acarry1[0] ^ sign) + acarry1[1];
+      acarry1[1] = (diff * 3 + acarry1[1]) >> 5;
+      acarry1[2] = acarry1[0] > 16 ? 0 : acarry1[2] + 1;
+
+      if (y < 2 || x < 2) {
+        if (y < 2 && x < 2)  
+          pred = 0;
+        else if (y < 2) 
+          pred = wo1;
+        else { 
+          pred = dest[-pitch+((gint)x)];
+          nw1 = pred;
+        }
+        dest[x] = pred + ((diff << 2) | low);
+        // Set predictor
+        wo1 = dest[x];
+      } else {
+        n  = dest[-pitch+((gint)x)];
+        if (((wo1 < nw1) & (nw1 < n)) | ((n < nw1) & (nw1 < wo1))) {
+          if (abs(wo1 - nw1) > 32 || abs(n - nw1) > 32)
+            pred = wo1 + n - nw1;
+          else 
+            pred = (wo1 + n) >> 1;
+        } else 
+          pred = abs(wo1 - nw1) > abs(n - nw1) ? wo1 : n;
+
+        dest[x] = pred + ((diff << 2) | low);
+
+        // Set predictors
+        wo1 = dest[x];
+        nw1 = n;
+      }
       _ASSERTE(0 == dest[x] >> 12) ;
     }
   }

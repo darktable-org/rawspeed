@@ -31,26 +31,85 @@ class BitPumpMSB
 public:
   BitPumpMSB(ByteStream *s);
   BitPumpMSB(const guchar* _buffer, guint _size );
-	guint getBits(guint nbits);
-	guint getBit();
 	guint getBitsSafe(guint nbits);
 	guint getBitSafe();
-	guint peekBits(guint nbits);
-	guint peekBit();
-  guint peekByte();
-  void skipBits(guint nbits);
-  void skipBitsNoFill(guint nbits);
-  __inline void checkPos()  { if (off>size) throw IOException("Out of buffer read");};        // Check if we have a valid position
-	guchar getByte();
 	guchar getByteSafe();
 	void setAbsoluteOffset(guint offset);     // Set offset in bytes
-  guint getOffset() { return off-(mLeft>>3);}
+  __inline guint getOffset() { return off-(mLeft>>3);}
+  __inline void checkPos()  { if (off>size) throw IOException("Out of buffer read");};        // Check if we have a valid position
   __inline guint getBitNoFill() {return (mCurr >> (--mLeft)) & 1;}
   __inline guint peekByteNoFill() {return ((mCurr >> (mLeft-8))) & 0xff; }
   __inline guint getBitsNoFill(guint nbits) {return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];}
   __inline guint peekBitsNoFill(guint nbits) {return ((mCurr >> (mLeft-nbits))) &masks[nbits]; }
-  void fill();  // Fill the buffer with at least 24 bits
+  __inline void fill();  // Fill the buffer with at least 24 bits
 
+  __inline guint BitPumpMSB::getBit() {
+    if (!mLeft) fill();
+
+    return (mCurr >> (--mLeft)) & 1;
+  }
+
+  __inline guint BitPumpMSB::getBits(guint nbits) {
+    if (mLeft < nbits) {
+      if (nbits>24)
+        throw IOException("Invalid data, attempting to read more than 24 bits.");
+
+      fill();
+    }
+
+    return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];
+  }
+
+  __inline guint BitPumpMSB::peekBit() {
+    if (!mLeft) fill();
+
+    return (mCurr >> (mLeft - 1)) & 1;
+  }
+
+  __inline guint BitPumpMSB::peekBits(guint nbits) {
+    if (mLeft < nbits) {
+      if (nbits>24)
+        throw IOException("Invalid data, attempting to read more than 24 bits.");
+
+      fill();
+    }
+
+    return ((mCurr >> (mLeft - nbits))) & masks[nbits];
+  }
+
+  __inline guint BitPumpMSB::peekByte() {
+    if (mLeft < 8) {
+      fill();
+    }
+
+    if (off > size)
+      throw IOException("Out of buffer read");
+
+    return ((mCurr >> (mLeft - 8))) & 0xff;
+  }
+
+  __inline void BitPumpMSB::skipBits(unsigned int nbits) {
+    if (mLeft < nbits) {
+      fill();
+
+      if (off > size)
+        throw IOException("Out of buffer read");
+    }
+
+    mLeft -= nbits;
+  }
+
+  __inline void BitPumpMSB::skipBitsNoFill(unsigned int nbits) {
+    mLeft -= nbits;
+  }
+
+  __inline unsigned char BitPumpMSB::getByte() {
+    if (mLeft < 8) {
+      fill();
+    }
+
+    return ((mCurr >> (mLeft -= 8))) & 0xff;
+  }
 
   virtual ~BitPumpMSB(void);
 protected:
