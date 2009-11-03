@@ -22,6 +22,9 @@
 #pragma once
 #include "ByteStream.h"
 
+#define BITS_PER_LONG (8*sizeof(guint))
+#define MIN_GET_BITS  (BITS_PER_LONG-7)    /* max value for long getBuffer */
+
 namespace RawSpeed {
 
 // Note: Allocated buffer MUST be at least size+sizeof(guint) large.
@@ -41,15 +44,26 @@ public:
   __inline guint peekByteNoFill() {return ((mCurr >> (mLeft-8))) & 0xff; }
   __inline guint getBitsNoFill(guint nbits) {return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];}
   __inline guint peekBitsNoFill(guint nbits) {return ((mCurr >> (mLeft-nbits))) &masks[nbits]; }
-  __inline void fill();  // Fill the buffer with at least 24 bits
 
-  __inline guint BitPumpMSB::getBit() {
+  // Fill the buffer with at least 24 bits
+  __inline void fill() {
+     guchar c;
+
+     while (mLeft < MIN_GET_BITS) {
+       _ASSERTE(off < size);
+       c = buffer[off++];
+       mCurr = (mCurr << 8) | c;
+       mLeft += 8;
+     }
+  }
+
+  __inline guint getBit() {
     if (!mLeft) fill();
 
     return (mCurr >> (--mLeft)) & 1;
   }
 
-  __inline guint BitPumpMSB::getBits(guint nbits) {
+  __inline guint getBits(guint nbits) {
     if (mLeft < nbits) {
       if (nbits>24)
         throw IOException("Invalid data, attempting to read more than 24 bits.");
@@ -60,13 +74,13 @@ public:
     return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];
   }
 
-  __inline guint BitPumpMSB::peekBit() {
+  __inline guint peekBit() {
     if (!mLeft) fill();
 
     return (mCurr >> (mLeft - 1)) & 1;
   }
 
-  __inline guint BitPumpMSB::peekBits(guint nbits) {
+  __inline guint peekBits(guint nbits) {
     if (mLeft < nbits) {
       if (nbits>24)
         throw IOException("Invalid data, attempting to read more than 24 bits.");
@@ -77,7 +91,7 @@ public:
     return ((mCurr >> (mLeft - nbits))) & masks[nbits];
   }
 
-  __inline guint BitPumpMSB::peekByte() {
+  __inline guint peekByte() {
     if (mLeft < 8) {
       fill();
     }
@@ -88,7 +102,7 @@ public:
     return ((mCurr >> (mLeft - 8))) & 0xff;
   }
 
-  __inline void BitPumpMSB::skipBits(unsigned int nbits) {
+  __inline void skipBits(unsigned int nbits) {
     if (mLeft < nbits) {
       fill();
 
@@ -99,11 +113,11 @@ public:
     mLeft -= nbits;
   }
 
-  __inline void BitPumpMSB::skipBitsNoFill(unsigned int nbits) {
+  __inline void skipBitsNoFill(unsigned int nbits) {
     mLeft -= nbits;
   }
 
-  __inline unsigned char BitPumpMSB::getByte() {
+  __inline unsigned char getByte() {
     if (mLeft < 8) {
       fill();
     }

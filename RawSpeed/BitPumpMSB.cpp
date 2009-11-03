@@ -26,9 +26,6 @@ namespace RawSpeed {
 
 /*** Used for entropy encoded sections ***/
 
-#define BITS_PER_LONG (8*sizeof(guint))
-#define MIN_GET_BITS  (BITS_PER_LONG-7)    /* max value for long getBuffer */
-
 
 BitPumpMSB::BitPumpMSB(ByteStream *s):
     buffer(s->getData()), size(s->getRemainSize() + sizeof(guint)), mLeft(0), mCurr(0), off(0) {
@@ -47,18 +44,6 @@ __inline void BitPumpMSB::init() {
 
   fill();
 }
-
-__inline void BitPumpMSB::fill() {
-  guchar c;
-
-  while (mLeft < MIN_GET_BITS) {
-    _ASSERTE(off < size);
-    c = buffer[off++];
-    mCurr = (mCurr << 8) | c;
-    mLeft += 8;
-  }
-}
-
 
 guint BitPumpMSB::getBitSafe() {
   if (!mLeft) {
