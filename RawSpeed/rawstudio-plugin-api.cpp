@@ -40,7 +40,12 @@ load_rawspeed(const gchar *filename)
 	if (!c)
 	{
 		gchar *path = g_build_filename(rs_confdir_get(), "cameras.xml", NULL);
+    try {
 		c = new CameraMetaData(path);
+    } catch (CameraMetadataException e) {
+		printf("RawSpeed: Could not open camera metadata information.\n%s\nRawSpeed will not be used!\n", e.what());
+		return NULL;
+	}
 		g_free(path);
 	}
 
@@ -65,7 +70,7 @@ load_rawspeed(const gchar *filename)
 		}
 
 #ifdef TIME_LOAD
-		printf("Open %s: %.03fs\n", filename, g_timer_elapsed(gt, NULL));
+		printf("RawSpeed Open %s: %.03fs\n", filename, g_timer_elapsed(gt, NULL));
 		g_timer_destroy(gt);
 #endif
 
@@ -85,16 +90,16 @@ load_rawspeed(const gchar *filename)
 			d->decodeRaw();
 			d->decodeMetaData(c);
 
-#ifdef TIME_LOAD
-			printf("Decode %s: %.03fs\n", filename, g_timer_elapsed(gt, NULL));
-			g_timer_destroy(gt);
-#endif
-
 			for (guint i = 0; i < d->errors.size(); i++)
-				printf("Error Encountered:%s\n", d->errors[i]);
+				printf("RawSpeed: Error Encountered:%s\n", d->errors[i]);
 
 			RawImage r = d->mRaw;
       r->scaleBlackWhite();
+
+#ifdef TIME_LOAD
+	  printf("RawSpeed Decode %s: %.03fs\n", filename, g_timer_elapsed(gt, NULL));
+      g_timer_destroy(gt);
+#endif
 
 			cpp = r->getCpp();
 			if (cpp == 1) 
@@ -102,19 +107,13 @@ load_rawspeed(const gchar *filename)
 			else if (cpp == 3) 
 				image = rs_image16_new(r->dim.x, r->dim.y, 3, 4);
 			else {
-				printf("Unsupported component per pixel count");
+				printf("RawSpeed: Unsupported component per pixel count\n");
 				return NULL;
 			}
 
 			if (r->isCFA)
 				image->filters = r->cfa.getDcrawFilter();
 
-
-			if (r->isCFA) 
-			{
-//				printf("DCRAW filter:%x\n",r->cfa.getDcrawFilter());
-//				printf("%s", r->cfa.asString().c_str());
-			}
 
       if (cpp == 1) 
       {
@@ -138,12 +137,12 @@ load_rawspeed(const gchar *filename)
 		}
 		catch (RawDecoderException e)
 		{
-			printf("RawDecoderException: %s\n", e.what());
+			printf("RawSpeed: RawDecoderException: %s\n", e.what());
 		}
 	}
 	catch (TiffParserException e)
 	{
-		printf("TiffParserException: %s\n", e.what());
+		printf("RawSpeed: TiffParserException: %s\n", e.what());
 	}
 
 	if (d) delete d;
