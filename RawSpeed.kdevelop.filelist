@@ -48,8 +48,6 @@ RawSpeed/PefDecoder.cpp
 RawSpeed/PefDecoder.h
 RawSpeed/PentaxDecompressor.cpp
 RawSpeed/PentaxDecompressor.h
-RawSpeed/PlanarRawImage.cpp
-RawSpeed/PlanarRawImage.h
 RawSpeed/Point.h
 RawSpeed/RawDecoder.cpp
 RawSpeed/RawDecoder.h
@@ -58,8 +56,6 @@ RawSpeed/RawDecoderException.h
 RawSpeed/RawImage.cpp
 RawSpeed/RawImage.h
 RawSpeed/RawSpeed.cpp
-RawSpeed/RgbImage.cpp
-RawSpeed/RgbImage.h
 RawSpeed/Rw2Decoder.cpp
 RawSpeed/Rw2Decoder.h
 RawSpeed/StdAfx.cpp
