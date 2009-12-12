@@ -261,13 +261,13 @@ void Camera::parseHint( xmlDocPtr doc, xmlNodePtr cur )
     if (key)
       hint_name = string((const char*)key);
     else 
-      ThrowCME("CameraMetadata: Could not find name for hint for %s %s camera.", this->make, this->model);
+      ThrowCME("CameraMetadata: Could not find name for hint for %s %s camera.", make.c_str(), model.c_str());
 
     key = xmlGetProp(cur, (const xmlChar *)"value");
     if (key)
       hint_value = string((const char*)key);
     else 
-      ThrowCME("CameraMetadata: Could not find value for hint for %s %s camera.", this->make, this->model);
+      ThrowCME("CameraMetadata: Could not find value for hint %s for %s %s camera.", hint_name.c_str(), make.c_str(), model.c_str());
 
     hints.insert(make_pair(hint_name, hint_value));
   }
