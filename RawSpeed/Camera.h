@@ -31,11 +31,13 @@ class Camera
 {
 public:
   Camera(xmlDocPtr doc, xmlNodePtr cur);
+  Camera(const Camera* camera, guint alias_num);
   void parseCameraChild(xmlDocPtr doc, xmlNodePtr cur);
   virtual ~Camera(void);
   string make;
   string model;
   string mode;
+  vector<string> aliases;
   ColorFilterArray cfa;
   guint black;
   guint white;
@@ -43,12 +45,16 @@ public:
   iPoint2D cropSize;
   iPoint2D cropPos;
   vector<BlackArea> blackAreas;
-  void parseCFA( xmlDocPtr doc, xmlNodePtr cur );
-  void parseBlackAreas( xmlDocPtr doc, xmlNodePtr cur );
-
+  gint decoderVersion;
+  map<string,string> hints;
 private:
   int StringToInt(const xmlChar *in, const xmlChar *tag, const char* attribute);
   int getAttributeAsInt( xmlNodePtr cur , const xmlChar *tag, const char* attribute);
+protected:
+  void parseCFA( xmlDocPtr doc, xmlNodePtr cur );
+  void parseAlias( xmlDocPtr doc, xmlNodePtr cur );
+  void parseHint( xmlDocPtr doc, xmlNodePtr cur );
+  void parseBlackAreas( xmlDocPtr doc, xmlNodePtr cur );
 };
 
 } // namespace RawSpeed

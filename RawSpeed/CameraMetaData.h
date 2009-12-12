@@ -35,10 +35,9 @@ public:
   xmlDocPtr doc;
   xmlParserCtxtPtr ctxt; /* the parser context */
   map<string,Camera*> cameras;
-  void dumpXML();
   Camera* getCamera(string make, string model, string mode);
 protected:
-  void dumpCameraXML(Camera* cam);
+  void addCamera(Camera* cam);
 };
 
 } // namespace RawSpeed

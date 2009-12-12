@@ -120,6 +120,9 @@ RawDecoder* TiffParser::getDecompressor() {
       if (!make.compare("SONY ")) {
         return new ArwDecoder(mRootIFD, mInput);
       }
+      if (!make.compare("SONY")) {
+        return new ArwDecoder(mRootIFD, mInput);
+      }
       if (!make.compare("PENTAX Corporation ")) {
         return new PefDecoder(mRootIFD, mInput);
       }

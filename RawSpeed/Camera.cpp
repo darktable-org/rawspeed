@@ -56,10 +56,42 @@ Camera::Camera(xmlDocPtr doc, xmlNodePtr cur) {
     mode = string("");
   }
 
+  key = xmlGetProp(cur, (const xmlChar *)"decoder_version");
+  if (key) {
+    decoderVersion = getAttributeAsInt(cur, cur->name, "decoder_version");
+  } else {
+    decoderVersion = 0;
+  }
+
   cur = cur->xmlChildrenNode;
   while (cur != NULL) {
     parseCameraChild(doc, cur);
     cur = cur->next;
+  }
+}
+
+Camera::Camera( const Camera* camera, guint alias_num)
+{
+  if (alias_num >= camera->aliases.size())
+    ThrowCME("Camera: Internal error, alias number out of range specified.");
+
+  make = camera->make;
+  model = camera->aliases[alias_num];
+  mode = camera->mode;
+  cfa = camera->cfa;
+  black = camera->black;
+  white = camera->white;
+  supported = camera->supported;
+  cropSize = camera->cropSize;
+  cropPos = camera->cropPos;
+  decoderVersion = camera->decoderVersion;
+  for (guint i = 0; i < camera->blackAreas.size(); i++) {
+    blackAreas.push_back(camera->blackAreas[i]);
+  }
+
+  map<string,string>::const_iterator mi = camera->hints.begin();
+  for (; mi != camera->hints.end(); ++mi) {
+    hints.insert(make_pair((*mi).first, (*mi).second));
   }
 }
 
@@ -101,6 +133,24 @@ void Camera::parseCameraChild(xmlDocPtr doc, xmlNodePtr cur) {
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
       parseBlackAreas(doc, cur);
+      cur = cur->next;
+    }
+    return;
+  }
+
+  if (!xmlStrcmp(cur->name, (const xmlChar *) "Aliases")) {
+    cur = cur->xmlChildrenNode;
+    while (cur != NULL) {
+      parseAlias(doc, cur);
+      cur = cur->next;
+    }
+    return;
+  }
+
+  if (!xmlStrcmp(cur->name, (const xmlChar *) "Hints")) {
+    cur = cur->xmlChildrenNode;
+    while (cur != NULL) {
+      parseHint(doc, cur);
       cur = cur->next;
     }
     return;
@@ -188,6 +238,39 @@ int Camera::getAttributeAsInt(xmlNodePtr cur , const xmlChar *tag, const char* a
   int i = StringToInt(key, tag, attribute);
 
   return i;
+}
+
+void Camera::parseAlias( xmlDocPtr doc, xmlNodePtr cur )
+{
+  if (!xmlStrcmp(cur->name, (const xmlChar *) "Alias")) {
+    cur = cur->xmlChildrenNode;
+    while (NULL != cur) {
+      if (cur && !xmlStrcmp(cur->name, (const xmlChar *) "text"))
+        aliases.push_back(string((const char*)cur->content));
+      cur = cur->next;
+    }
+  }
+}
+
+void Camera::parseHint( xmlDocPtr doc, xmlNodePtr cur )
+{
+  if (!xmlStrcmp(cur->name, (const xmlChar *) "Hint")) {
+    xmlChar *key;
+    string hint_name, hint_value;
+    key = xmlGetProp(cur, (const xmlChar *)"name");
+    if (key)
+      hint_name = string((const char*)key);
+    else 
+      ThrowCME("CameraMetadata: Could not find name for hint for %s %s camera.", this->make, this->model);
+
+    key = xmlGetProp(cur, (const xmlChar *)"value");
+    if (key)
+      hint_value = string((const char*)key);
+    else 
+      ThrowCME("CameraMetadata: Could not find value for hint for %s %s camera.", this->make, this->model);
+
+    hints.insert(make_pair(hint_name, hint_value));
+  }
 }
 
 } // namespace RawSpeed

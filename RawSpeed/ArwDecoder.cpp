@@ -58,6 +58,15 @@ RawImage ArwDecoder::decodeRaw() {
   guint height = raw->getEntry(IMAGELENGTH)->getInt();
   guint bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();
 
+  // Sony E-550 marks compressed 8bpp ARW with 12 bit per pixel
+  // this makes the compression detect it as a ARW v1.
+  // This camera has however another MAKER entry, so we MAY be able
+  // to detect it this way in the future.
+  data = mRootIFD->getIFDsWithTag(MAKE);
+  string make = data[0]->getEntry(MAKE)->getString();
+  if (!make.compare("SONY"))
+    bitPerPixel = 8;
+
   gboolean arw1 = counts->getInt() * 8 != width * height * bitPerPixel;
   if (arw1)
     height += 8;
@@ -109,8 +118,7 @@ void ArwDecoder::DecodeARW(ByteStream &input, guint w, guint h) {
       if (len == 3 && bits.getBitNoFill()) len = 0;
       if (len == 4)
         while (len < 17 && !bits.getBitNoFill()) len++;
-      bits.fill();
-      gint diff = bits.getBitsNoFill(len);
+      gint diff = bits.getBits(len);
       if ((diff & (1 << (len - 1))) == 0)
         diff -= (1 << len) - 1;
       sum += diff;

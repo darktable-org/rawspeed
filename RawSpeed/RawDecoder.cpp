@@ -25,6 +25,7 @@
 namespace RawSpeed {
 
 RawDecoder::RawDecoder(FileMap* file) : mFile(file), mRaw(RawImage::create()) {
+  decoderVersion = 0;
 }
 
 RawDecoder::~RawDecoder(void) {
@@ -120,6 +121,9 @@ void RawDecoder::checkCameraSupported(CameraMetaData *meta, string make, string 
 
   if (!cam->supported)
     ThrowRDE("Camera not supported (explicit). Sorry.");
+
+  if (cam->decoderVersion > decoderVersion)
+    ThrowRDE("Camera not supported in this version. Update RawSpeed for support.");
 }
 
 void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model, string mode) {

@@ -62,6 +62,8 @@ protected:
   virtual void setMetaData(CameraMetaData *meta, string make, string model, string mode);
   void Decode12BitRaw(ByteStream &input, guint w, guint h);
   void TrimSpaces( string& str);
+  gint getDecoderVersion() {return decoderVersion;};
+  gint decoderVersion;
 };
 
 } // namespace RawSpeed

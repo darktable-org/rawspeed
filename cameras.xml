@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <?xml-stylesheet type="text/xsl" href="showcameras.xsl" ?>
-<!DOCTYPE Cameras SYSTEM "http://rawspeed.klauspost.com/dtd/cameras/1.1/cameras.dtd">
+<!DOCTYPE Cameras SYSTEM "http://rawspeed.klauspost.com/dtd/cameras/1.2/cameras.dtd">
 
 <Cameras>
   <Camera make="Canon" model="Canon EOS 20D">
@@ -943,7 +943,7 @@
     <Crop x="0" y="0" width="4599" height="3064"/>
     <Sensor black="0" white="4095"/>
   </Camera>
-  <Camera make="SONY" model="DSLR-A550" supported="no">
+  <Camera make="SONY" model="DSLR-A550">
     <CFA width="2" height="2">
       <Color x="1" y="1">BLUE</Color>
       <Color x="1" y="0">GREEN</Color>
