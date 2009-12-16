@@ -32,6 +32,7 @@
     </CFA>
     <Crop x="42" y="14" width="3474" height="2314"/>
     <Sensor black="255" white="4095"/>
+    <Aliases><Alias>Canon EOS DIGITAL REBEL XT</Alias></Aliases>
   </Camera>
   <Camera make="Canon" model="Canon EOS 40D">
     <CFA width="2" height="2">
@@ -56,6 +57,7 @@
     </CFA>
     <Crop x="22" y="18" width="4290" height="2856"/>
     <Sensor black="1020" white="16000"/>
+    <Aliases><Alias>Canon EOS DIGITAL REBEL XSi</Alias></Aliases>
   </Camera>
   <Camera make="Canon" model="Canon EOS 50D">
     <CFA width="2" height="2">
@@ -84,16 +86,7 @@
     </CFA>
     <Crop x="62" y="30" width="4722" height="3142"/>
     <Sensor black="1020" white="16000"/>
-  </Camera>
-  <Camera make="Canon" model="Canon EOS REBEL T1i">
-    <CFA width="2" height="2">
-      <Color x="0" y="0">RED</Color>
-      <Color x="1" y="0">GREEN</Color>
-      <Color x="0" y="1">GREEN</Color>
-      <Color x="1" y="1">BLUE</Color>
-    </CFA>
-    <Crop x="62" y="30" width="4722" height="3142"/>
-    <Sensor black="1020" white="16000"/>
+    <Aliases><Alias>Canon EOS REBEL T1i</Alias></Aliases>
   </Camera>
   <Camera make="Canon" model="Canon EOS 5D">
     <CFA width="2" height="2">
@@ -133,16 +126,6 @@
     <Crop x="158" y="52" width="5202" height="3464"/>
     <Sensor black="2000" white="16300"/>
   </Camera>
-  <Camera make="Canon" model="Canon EOS DIGITAL REBEL XS">
-    <CFA width="2" height="2">
-      <Color x="0" y="0">RED</Color>
-      <Color x="1" y="0">GREEN</Color>
-      <Color x="0" y="1">GREEN</Color>
-      <Color x="1" y="1">BLUE</Color>
-    </CFA>
-    <Crop x="42" y="18" width="3906" height="2602"/>
-    <Sensor black="255" white="4030"/>
-  </Camera>
   <Camera make="Canon" model="Canon EOS 1000D">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
@@ -152,26 +135,7 @@
     </CFA>
     <Crop x="42" y="18" width="3906" height="2602"/>
     <Sensor black="255" white="4030"/>
-  </Camera>
-  <Camera make="Canon" model="Canon EOS DIGITAL REBEL XSi">
-    <CFA width="2" height="2">
-      <Color x="0" y="0">RED</Color>
-      <Color x="1" y="0">GREEN</Color>
-      <Color x="0" y="1">GREEN</Color>
-      <Color x="1" y="1">BLUE</Color>
-    </CFA>
-    <Crop x="22" y="18" width="4290" height="2856"/>
-    <Sensor black="1021" white="16000"/>
-  </Camera>
-  <Camera make="Canon" model="Canon EOS DIGITAL REBEL XTi">
-    <CFA width="2" height="2">
-      <Color x="0" y="0">RED</Color>
-      <Color x="1" y="0">GREEN</Color>
-      <Color x="0" y="1">GREEN</Color>
-      <Color x="1" y="1">BLUE</Color>
-    </CFA>
-    <Crop x="42" y="18" width="3906" height="2602"/>
-    <Sensor black="255" white="3726"/>
+    <Aliases><Alias>Canon EOS DIGITAL REBEL XS</Alias></Aliases>
   </Camera>
   <Camera make="Canon" model="Canon EOS 400D DIGITAL">
     <CFA width="2" height="2">
@@ -182,6 +146,7 @@
     </CFA>
     <Crop x="42" y="18" width="3906" height="2602"/>
     <Sensor black="255" white="3726"/>
+    <Aliases><Alias>Canon EOS DIGITAL REBEL XTi</Alias></Aliases>
   </Camera>
   <Camera make="Canon" model="Canon EOS-1D Mark II">
     <CFA width="2" height="2">
