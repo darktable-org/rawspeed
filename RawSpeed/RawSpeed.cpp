@@ -45,14 +45,19 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
   FileMap* m = 0;
   try {
 //    wprintf(L"Opening:%s\n",f.Filename());
-    m = f.readFile();
+    try {
+      m = f.readFile();    	
+    } catch (FileIOException e) {
+      printf("Could not open image:%s\n", e.what());
+      return;
+    }
     TiffParser t(m);
     t.parseData();
-    d = t.getDecompressor();
-
-    startTime = GetTickCount();
+    d = t.getDecoder();
     try {
-      
+      d->checkSupport(meta);
+      startTime = GetTickCount();
+
       d->decodeRaw();
       d->decodeMetaData(meta);
       RawImage r = d->mRaw;
@@ -132,7 +137,7 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
       m2->corrupt(1000);
       TiffParser t(m2);
       t.parseData();
-      d = t.getDecompressor();
+      d = t.getDecoder();
 
       startTime = GetTickCount();
 
@@ -176,7 +181,7 @@ int wmain(int argc, _TCHAR* argv[])
 #endif
   CameraMetaData meta("..\\cameras.xml");  
   //meta.dumpXML();
-/*
+
   OpenFile(FileReader(L"..\\testimg\\Panasonic_FZ35FARI0200.RW2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Panasonic_FZ35hSLI0200.RW2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Panasonic_FZ35hVFAWB.RW2"),&meta);
@@ -299,7 +304,13 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Nikon_E5400.nef"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon_E5700.nef"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon_E5700_(sRGB).nef"),&meta);
-*/
+
+OpenFile(FileReader(L"..\\testimg\\pentax_kx_03.pef"),&meta);
+OpenFile(FileReader(L"..\\testimg\\pentax_kx_04.pef"),&meta);
+OpenFile(FileReader(L"..\\testimg\\pentax_kx_10.pef"),&meta);
+OpenFile(FileReader(L"..\\testimg\\pentax_kx_12.pef"),&meta);
+
+
 OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_SX1IShMULTII1600.CR2"),&meta);
 OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_SX1ISFARI0200.CR2"),&meta);
 OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_SX1IShMULTII0200.CR2"),&meta);
@@ -309,6 +320,21 @@ OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_SX1IShSLI0200.CR2"),&meta);
 OpenFile(FileReader(L"..\\testimg\\canon_powershot_g11_02.cr2"),&meta);
 OpenFile(FileReader(L"..\\testimg\\canon_powershot_g11_07.cr2"),&meta);
 OpenFile(FileReader(L"..\\testimg\\canon_powershot_g11_08.cr2"),&meta);
+
+OpenFile(FileReader(L"..\\testimg\\Olympus-EP2hVFAO.ORF"),&meta);
+OpenFile(FileReader(L"..\\testimg\\Olympus-EP2hSLI0200NR0.ORF"),&meta);
+OpenFile(FileReader(L"..\\testimg\\Olympus-EP2hRESM.ORF"),&meta);
+OpenFile(FileReader(L"..\\testimg\\Olympus-EP2FARWTT.ORF"),&meta);
+OpenFile(FileReader(L"..\\testimg\\Olympus-EP2FARI0200.ORF"),&meta);
+
+  OpenFile(FileReader(L"..\\testimg\\Sony_A550hVFAWB.ARW"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Sony_A550hVFATB.ARW"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Sony_A550hSLI00200_NR1D.ARW"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Sony_A550hMULTII00200.ARW"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Sony_A550FARI0200.ARW"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\canon_powershot_s90_02.cr2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\canon_powershot_s90_03.cr2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\canon_powershot_s90_04.cr2"),&meta);
 
   OpenFile(FileReader(L"..\\testimg\\nikon_d3s_Ycircus_vidrig_102400.NEF"),&meta);
   OpenFile(FileReader(L"..\\testimg\\nikon_d3s_Ycircus_dogjump3_2500.NEF"),&meta);
@@ -504,6 +530,34 @@ OpenFile(FileReader(L"..\\testimg\\canon_powershot_g11_08.cr2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed2.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed3.dng"),&meta);
 
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Leica-X1-L1090994.DNG"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Leica-X1-L1090229.DNG"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Leica-X1-ISO100-L1090324.DNG"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Leica_M8.dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\leica_m82_01.dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\leica_m82_07.dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\leica_m82_09.dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\leica_m82_11.dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Leica_M_8.dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K200DFARI0100.DNG"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K200DFARI1600.DNG"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K20DFARI0100_43MM.DNG"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K20DFARI0200_43MM.DNG"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K20DFARI0400_43MM.DNG"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K20DFARI0800_43MM.DNG"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K20DFARI1600_43MM.DNG"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K20DFARI3200_43MM.DNG"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K20DFARI6400_43MM.DNG"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K7FARI0200.DNG"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K7FARI6400.DNG"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K7hMULTII0200.DNG"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Pentax-K7hVFAO.DNG"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Ricoh_GR2.dng"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\camera_dngs\\ricoh_gr_digital_iii_01.dng"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\camera_dngs\\ricoh_gr_digital_iii_07.dng"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\camera_dngs\\ricoh_gr_digital_iii_09.dng"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\camera_dngs\\ricoh_gr_digital_iii_10.dng"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\camera_dngs\\ricoh_gr_digital_iii_14.dng"),&meta);
 
   MessageBox(0,L"Finished", L"Finished",0);
 #ifdef _USE_GFL_

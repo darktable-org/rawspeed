@@ -43,7 +43,7 @@ public:
   virtual ~TiffParser(void);
 
   virtual void parseData();
-  virtual RawDecoder* getDecompressor();
+  virtual RawDecoder* getDecoder();
   Endianness endian;
   TiffIFD* RootIFD() const { return mRootIFD; }
 protected:

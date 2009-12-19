@@ -187,7 +187,12 @@ RawImage DngDecoder::decodeRaw() {
           ByteStream in(mFile->getData(slice.offset), slice.count);
           iPoint2D size(width, slice.h);
           iPoint2D pos(0, slice.offsetY);
-          gboolean big_endian = (mRootIFD->endian == big);
+
+          gboolean big_endian = (raw->endian == big);
+          // DNG spec says that if not 8 or 16 bit/sample, always use big endian
+          if (bps != 8 && bps != 16)
+            big_endian = true;
+
           readUncompressedRaw(in, size, pos, width*bps / 8, bps, big_endian);
         }
 

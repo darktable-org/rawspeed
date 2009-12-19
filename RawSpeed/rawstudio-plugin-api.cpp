@@ -76,7 +76,7 @@ load_rawspeed(const gchar *filename)
 
 		TiffParser t(m);
 		t.parseData();
-		d = t.getDecompressor();
+		d = t.getDecoder();
 
 		try
 		{

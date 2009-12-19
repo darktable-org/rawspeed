@@ -86,7 +86,7 @@ void TiffParser::parseData() {
   }
 }
 
-RawDecoder* TiffParser::getDecompressor() {
+RawDecoder* TiffParser::getDecoder() {
   vector<TiffIFD*> potentials;
   potentials = mRootIFD->getIFDsWithTag(DNGVERSION);
 

@@ -38,7 +38,7 @@ TiffIFD::TiffIFD() {
 TiffIFD::TiffIFD(FileMap* f, guint offset) {
   guint size = f->getSize();
   guint entries;
-  endian = big;
+  endian = little;
   CHECKSIZE(offset);
 
   entries = *(unsigned short*)f->getData(offset);    // Directory entries in this IFD
