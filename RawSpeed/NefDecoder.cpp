@@ -159,6 +159,9 @@ void NefDecoder::DecodeUncompressed() {
       slices.push_back(slice);
   }
 
+  if (0 == slices.size())
+    ThrowRDE("NEF Decoder: No valid slices found. File probably truncated.");
+
   mRaw->dim = iPoint2D(width, offY);
   mRaw->bpp = 2;
   mRaw->createData();

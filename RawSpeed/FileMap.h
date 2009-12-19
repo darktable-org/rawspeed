@@ -22,6 +22,8 @@
     http://www.klauspost.com
 */
 
+#include "IOException.h"
+
 namespace RawSpeed {
 
 /*************************************************************************
@@ -38,12 +40,14 @@ public:
   FileMap(guint _size);                 // Allocates the data array itself
   FileMap(guchar* _data, guint _size);  // Data already allocated.
   ~FileMap(void);
-  const guchar* getData(guint offset) {return &data[offset];}
+  const guchar* getData(guint offset);
   guchar* getDataWrt(guint offset) {return &data[offset];}
   guint getSize() {return size;}
   gboolean isValid(guint offset) {return offset<=size;}
   FileMap* clone();
+  /* For testing purposes */
   void corrupt(int errors);
+  FileMap* cloneRandomSize();
 private:
  guchar* data;
  guint size;

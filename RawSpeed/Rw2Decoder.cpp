@@ -59,14 +59,11 @@ RawImage Rw2Decoder::decodeRaw() {
   load_flags = 0x2008;
   gint off = offsets->getInt();
 
-  input_start = new ByteStream(mFile->getData(off), mFile->getSize() - off);
-  try {
-    DecodeRw2();
-  } catch (IOException e) {
-    // We attempt to ignore, since truncated files may be ok.
-    errors.push_back(e.what());
-  }
+  if (!mFile->isValid(off))
+    ThrowRDE("RW2 Decoder: Invalid image data offset, cannot decode.");
 
+  input_start = new ByteStream(mFile->getData(off), mFile->getSize() - off);
+  DecodeRw2();
   return mRaw;
 }
 

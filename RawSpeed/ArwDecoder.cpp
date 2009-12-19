@@ -90,15 +90,24 @@ RawImage ArwDecoder::decodeRaw() {
 
   guint c2 = counts->getInt();
   guint off = offsets->getInt();
+
+  if (!mFile->isValid(off))
+    ThrowRDE("Sony ARW decoder: Data offset after EOF, file probably truncated");
+
   if (!mFile->isValid(off + c2))
     c2 = mFile->getSize() - off;
 
-  ByteStream input(mFile->getData(off), c2);
 
-  if (arw1)
-    DecodeARW(input, width, height);
-  else
-    DecodeARW2(input, width, height, bitPerPixel);
+  ByteStream input(mFile->getData(off), c2);
+ 
+  try {
+    if (arw1)
+      DecodeARW(input, width, height);
+    else
+      DecodeARW2(input, width, height, bitPerPixel);
+  } catch (IOException e) {
+    // Let's ignore it, it may have delivered somewhat useful data.
+  }
 
   return mRaw;
 }

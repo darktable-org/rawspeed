@@ -51,6 +51,13 @@ FileMap* FileMap::clone() {
   return new_map;
 }
 
+FileMap* FileMap::cloneRandomSize() {
+  guint new_size = (rand() | (rand() << 15)) % size;
+  FileMap *new_map = new FileMap(new_size);
+  memcpy(new_map->data, data, new_size);
+  return new_map;
+}
+
 void FileMap::corrupt(int errors) {
   for (int i = 0; i < errors; i++) {
     guint pos = (rand() | (rand() << 15)) % size;
@@ -58,4 +65,10 @@ void FileMap::corrupt(int errors) {
   }
 }
 
+const guchar* FileMap::getData( guint offset )
+{
+  if (offset >= size)
+    throw IOException("FileMap: Attempting to read out of file.");
+  return &data[offset];
+}
 } // namespace RawSpeed

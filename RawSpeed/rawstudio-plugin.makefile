@@ -21,6 +21,7 @@ CPP_SOURCES= rawstudio-plugin-api.cpp \
 	FileIOException.cpp \
 	FileMap.cpp \
 	FileReader.cpp \
+	IOException.cpp \
 	LJpegDecompressor.cpp \
 	LJpegPlain.cpp \
 	NefDecoder.cpp \

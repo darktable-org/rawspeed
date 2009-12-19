@@ -189,10 +189,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\FileIOException.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\RawImage.cpp"
 				>
 			</File>
@@ -340,11 +336,19 @@
 					>
 				</File>
 				<File
+					RelativePath=".\FileIOException.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\FileMap.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\FileReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\IOException.cpp"
 					>
 				</File>
 			</Filter>
@@ -459,6 +463,10 @@
 				</File>
 				<File
 					RelativePath=".\FileMap.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IOException.h"
 					>
 				</File>
 				<File

@@ -25,7 +25,7 @@
 
 namespace RawSpeed {
 
-void ThrowTPE(const char* fmt, ...);
+void ThrowFIE(const char* fmt, ...);
 
 class FileIOException: public RawDecoderException
 {

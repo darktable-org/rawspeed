@@ -21,6 +21,7 @@
 */
 #pragma once
 #include "ByteStream.h"
+#include "IOException.h"
 
 namespace RawSpeed {
 

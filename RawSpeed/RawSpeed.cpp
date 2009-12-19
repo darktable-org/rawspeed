@@ -38,7 +38,7 @@ using namespace RawSpeed;
 int startTime;
 
 // Open file, or test corrupt file
-#if 1
+#if 0
 // Open file and save as tiff
 void OpenFile(FileReader f, CameraMetaData *meta) {
   RawDecoder *d = 0;
@@ -125,7 +125,12 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
   RawDecoder *d = 0;
   FileMap* m = 0;
   wprintf(L"Opening:%s\n",f.Filename());
-  m = f.readFile();
+  try {
+    m = f.readFile();
+  } catch (FileIOException e) {
+    printf("Could not open image:%s\n", e.what());
+    return;
+  }
   srand(0xC0CAC01A);  // Hardcoded seed for re-producability (on the same platform)
 
   int tests = 50;
@@ -147,7 +152,7 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
 
       guint time = GetTickCount()-startTime;
       float mpps = (float)r->dim.x * (float)r->dim.y * (float)r->getCpp()  / (1000.0f * (float)time);
-      wprintf(L"(%d/%d) Decoding %s took: %u ms, %4.2f Mpixel/s\n", i+1, tests, f.Filename(), time, mpps);
+      wprintf(L"(%d/%d) Decoding %s took: %u ms, %4.2f Mpixel/s\n", i+1, tests*2, f.Filename(), time, mpps);
       for (guint i = 0; i < d->errors.size(); i++) {
         printf("Error Encountered:%s\n", d->errors[i]);
       }
@@ -160,10 +165,46 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
       MultiByteToWideChar(CP_ACP, 0, e.what(), -1, uni, 1024);
       wprintf(L"Tiff Parser Exception:%s\n",uni);
     }
-      delete m2;
-      if (d)
-        delete d;
-      d = 0;
+    delete m2;
+    if (d)
+      delete d;
+    d = 0;
+  }
+  srand(0xC0CAC01A);  // Hardcoded seed for re-producability (on the same platform)
+  wprintf(L"Performing truncation tests\n");
+  for (int i = 0 ; i < tests; i++) {  
+    // Get truncated file
+    FileMap *m2 = m->cloneRandomSize();
+    try {    
+      TiffParser t(m2);
+      t.parseData();
+      d = t.getDecoder();
+
+      startTime = GetTickCount();
+
+      d->decodeRaw();
+      d->decodeMetaData(meta);
+      RawImage r = d->mRaw;
+
+      guint time = GetTickCount()-startTime;
+      float mpps = (float)r->dim.x * (float)r->dim.y * (float)r->getCpp()  / (1000.0f * (float)time);
+      wprintf(L"(%d/%d) Decoding %s took: %u ms, %4.2f Mpixel/s\n", i+1+tests, tests*2, f.Filename(), time, mpps);
+      for (guint i = 0; i < d->errors.size(); i++) {
+        printf("Error Encountered:%s\n", d->errors[i]);
+      }
+    } catch (RawDecoderException e) {
+      wchar_t uni[1024];
+      MultiByteToWideChar(CP_ACP, 0, e.what(), -1, uni, 1024);
+      wprintf(L"Raw Decoder Exception:%s\n",uni);
+    } catch (TiffParserException e) {
+      wchar_t uni[1024];
+      MultiByteToWideChar(CP_ACP, 0, e.what(), -1, uni, 1024);
+      wprintf(L"Tiff Parser Exception:%s\n",uni);
+    }
+    delete m2;
+    if (d)
+      delete d;
+    d = 0;
   }
 }
 #endif
@@ -181,7 +222,7 @@ int wmain(int argc, _TCHAR* argv[])
 #endif
   CameraMetaData meta("..\\cameras.xml");  
   //meta.dumpXML();
-
+/*
   OpenFile(FileReader(L"..\\testimg\\Panasonic_FZ35FARI0200.RW2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Panasonic_FZ35hSLI0200.RW2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Panasonic_FZ35hVFAWB.RW2"),&meta);
@@ -250,7 +291,30 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1Ds_Mk3.cr2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_400D.cr2"),&meta);
   
-    
+  OpenFile(FileReader(L"..\\testimg\\500D_NR-Std_ISO1600.CR2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\canon_eos_1000d_01.cr2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\canon_eos_1000d_06.cr2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_1D_Mk2_N.cr2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_30D-uga1.cr2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_350D-3.cr2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_450D-4.cr2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D.cr2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_7DhMULTII00200.CR2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_Mk2-ISO100_sRAW2.CR2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_G9-1.CR2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Nikon-D3000hMULTII0200.NEF"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Nikon-D3000hSLI0200.NEF"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Nikon-D3x_ISO100.NEF"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Olympus-E620_NF-Std_ISO100.ORF"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Olympus-E-620-1.ORF"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\panasonic_DMC-G1hMULTII0200.RW2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\panasonic_DMC-G1hSLI0400.RW2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_g1_04_portrait.rw2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_gh1_02_portrait.rw2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\sony_a330_02.arw"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\sony_a330_04.arw"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\sony_a330_05.arw"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\sony_a330_06.arw"),&meta);
   
   OpenFile(FileReader(L"..\\testimg\\Pentax_K10D-2.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Pentax_K10D.pef"),&meta);
@@ -279,7 +343,7 @@ int wmain(int argc, _TCHAR* argv[])
     OpenFile(FileReader(L"..\\testimg\\Sony_A900_ISO400_uncompressed.ARW"),&meta);
     OpenFile(FileReader(L"..\\testimg\\Sony_A900_ISO6400_uncompressed.ARW"),&meta);
     OpenFile(FileReader(L"..\\testimg\\Sony_A900_ISO800_uncompressed.ARW"),&meta);
-  OpenFile(FileReader(L"..\\testimg\\nikon_coolpix_p6000_05.nrw"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\nikon_coolpix_p6000_05.nrw"),&meta);*/
   OpenFile(FileReader(L"..\\testimg\\Nikon_D1.nef"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon_D100-backhigh.nef"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon_D200_compressed-1.nef"),&meta);
@@ -309,7 +373,6 @@ OpenFile(FileReader(L"..\\testimg\\pentax_kx_03.pef"),&meta);
 OpenFile(FileReader(L"..\\testimg\\pentax_kx_04.pef"),&meta);
 OpenFile(FileReader(L"..\\testimg\\pentax_kx_10.pef"),&meta);
 OpenFile(FileReader(L"..\\testimg\\pentax_kx_12.pef"),&meta);
-
 
 OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_SX1IShMULTII1600.CR2"),&meta);
 OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_SX1ISFARI0200.CR2"),&meta);

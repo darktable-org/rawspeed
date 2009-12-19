@@ -1,3 +1,5 @@
+#include "RawDecoderException.h"
+
 /* 
     RawSpeed - RAW file decoder.
 
@@ -20,31 +22,14 @@
     http://www.klauspost.com
 */
 #pragma once
-#include "IOException.h"
 
 namespace RawSpeed {
 
-class ByteStream
+class IOException : public std::runtime_error
 {
 public:
-  ByteStream(const guchar* _buffer, guint _size);
-  ByteStream(const ByteStream* b);
-  ~ByteStream(void);
-  guint peekByte();
-  gushort getShort();
-  guint getOffset() {return off;}
-  void skipBytes(guint nbytes);
-  guchar getByte();
-  void setAbsoluteOffset(guint offset);
-  void skipToMarker();
-  guint getRemainSize() { return size-off;}
-  const guchar* getData() {return &buffer[off];}
-  gint getInt();
-private:
-  const guchar* buffer;
-  const guint size;            // This if the end of buffer.
-  guint off;                  // Offset in bytes (this is next byte to deliver)
-
+  IOException(const char* _msg);
+  IOException(const string _msg);
 };
 
 } // namespace RawSpeed

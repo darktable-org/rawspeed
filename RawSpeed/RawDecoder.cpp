@@ -176,7 +176,10 @@ void *RawDecoderDecodeThread(void *_this) {
     me->parent->decodeThreaded(me);
   } catch (RawDecoderException ex) {
     me->error = _strdup(ex.what());
+  } catch (IOException ex) {
+    me->error = _strdup(ex.what());
   }
+
   pthread_exit(NULL);
   return 0;
 }

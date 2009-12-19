@@ -257,6 +257,9 @@ RawImage DngDecoder::decodeRaw() {
           }
         }
         guint nSlices = slices.size();
+        if (!nSlices)
+          ThrowRDE("DNG Decoder: No valid slices found.");
+
         slices.startDecoding();
 
         if (!slices.errors.empty())
