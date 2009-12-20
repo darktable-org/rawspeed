@@ -60,6 +60,7 @@ public:
   void addSlice(DngSliceElement slice);
   void startDecoding();
   void decodeSlice(DngDecoderThread* t);
+  void setError(const char* err);
   int size();
   queue<DngSliceElement> slices;
   vector<DngDecoderThread*> threads;

@@ -30,9 +30,7 @@ void *DecodeThread(void *_this) {
   try {
     parent->decodeSlice(me);
   } catch (...) {
-    pthread_mutex_lock(&parent->errMutex);
-    parent->errors.push_back("DNGDEcodeThread: Caught exception.");
-    pthread_mutex_unlock(&parent->errMutex);
+    parent->setError("DNGDEcodeThread: Caught exception.");
   }
   pthread_exit(NULL);
   return NULL;
@@ -100,19 +98,22 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
     try {
       l.startDecoder(e.byteOffset, e.byteCount, e.offX, e.offY);
     } catch (RawDecoderException err) {
-      pthread_mutex_lock(&errMutex);
-      errors.push_back(_strdup(err.what()));
-      pthread_mutex_unlock(&errMutex);
+      setError(err.what());
     } catch (IOException err) {
-      pthread_mutex_lock(&errMutex);
-      errors.push_back("DngDecoderSlices::decodeSlice: IO error occurred, probably attempted to read past end of file.");
-      pthread_mutex_unlock(&errMutex);
+      setError("DngDecoderSlices::decodeSlice: IO error occurred, probably attempted to read past end of file.");
     }
   }
 }
 
 int DngDecoderSlices::size() {
   return (int)slices.size();
+}
+
+void DngDecoderSlices::setError( const char* err )
+{
+  pthread_mutex_lock(&errMutex);
+  errors.push_back(_strdup(err));
+  pthread_mutex_unlock(&errMutex);
 }
 
 } // namespace RawSpeed
