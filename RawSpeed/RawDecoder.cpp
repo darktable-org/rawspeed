@@ -62,6 +62,7 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
     w *= cpp;
     for (; y < h; y++) {
       gushort* dest = (gushort*) & data[offset.x*sizeof(gushort)*cpp+y*outPitch];
+      bits.checkPos();
       for (guint x = 0 ; x < w; x++) {
         guint b = bits.getBits(bitPerPixel);
         dest[x] = b;
@@ -80,6 +81,7 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
     w *= cpp;
     for (; y < h; y++) {
       gushort* dest = (gushort*) & data[offset.x*sizeof(gushort)+y*outPitch];
+      bits.checkPos();
       for (guint x = 0 ; x < w; x++) {
         guint b = bits.getBits(bitPerPixel);
         dest[x] = b;

@@ -192,8 +192,11 @@ RawImage DngDecoder::decodeRaw() {
           // DNG spec says that if not 8 or 16 bit/sample, always use big endian
           if (bps != 8 && bps != 16)
             big_endian = true;
-
-          readUncompressedRaw(in, size, pos, width*bps / 8, bps, big_endian);
+          try {
+            readUncompressedRaw(in, size, pos, width*bps / 8, bps, big_endian);
+          } catch(IOException ex) {
+            // Let's ignore this, we may have some valid data.
+          }
         }
 
       } catch (TiffParserException) {
@@ -212,6 +215,9 @@ RawImage DngDecoder::decodeRaw() {
         if (raw->hasEntry(TILEOFFSETS)) {
           guint tilew = raw->getEntry(TILEWIDTH)->getInt();
           guint tileh = raw->getEntry(TILELENGTH)->getInt();
+          if (!tilew || !tileh)
+            ThrowRDE("DNG Decoder: Invalid tile size");
+
           guint tilesX = (mRaw->dim.x + tilew - 1) / tilew;
           guint tilesY = (mRaw->dim.y + tileh - 1) / tileh;
           guint nTiles = tilesX * tilesY;
@@ -329,6 +335,7 @@ RawImage DngDecoder::decodeRaw() {
     }
   }
   mRaw->whitePoint = raw->getEntry(WHITELEVEL)->getInt();
+  new_size = mRaw->dim;
 
   int black = -1; // Estimate, if no blacklevel
   if (raw->hasEntry(BLACKLEVELREPEATDIM)) {
