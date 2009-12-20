@@ -29,7 +29,7 @@
 
 using namespace RawSpeed;
 
-#define _USE_GFL_
+//#define _USE_GFL_
 #ifdef _USE_GFL_
 #include "libgfl.h"
 #pragma comment(lib, "libgfl.lib") 
@@ -131,9 +131,9 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
     printf("Could not open image:%s\n", e.what());
     return;
   }
-  srand(0xC0CAC01A);  // Hardcoded seed for re-producability (on the same platform)
+  srand(0xC0CAC01c);  // Hardcoded seed for re-producability (on the same platform)
 
-  int tests = 50;
+  int tests = 100;
   // Try 50 permutations
   for (int i = 0 ; i < tests; i++) {  
     FileMap *m2 = m->clone();
@@ -170,7 +170,7 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
       delete d;
     d = 0;
   }
-  srand(0xC0CAC01A);  // Hardcoded seed for re-producability (on the same platform)
+  srand(0xC0CAC01c);  // Hardcoded seed for re-producability (on the same platform)
   wprintf(L"Performing truncation tests\n");
   for (int i = 0 ; i < tests; i++) {  
     // Get truncated file
@@ -260,7 +260,6 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Leica_M8.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Leica_M_8.dng"),&meta);
 
-  
   OpenFile(FileReader(L"..\\testimg\\Canon_5DMk2-sRaw2.CR2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_450D.cr2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_5DMk2-sRaw1.CR2"),&meta);
@@ -298,7 +297,7 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_30D-uga1.cr2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_350D-3.cr2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_450D-4.cr2"),&meta);
-  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D.cr2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D.cr2"),&meta);*/
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_7DhMULTII00200.CR2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_Mk2-ISO100_sRAW2.CR2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_G9-1.CR2"),&meta);
@@ -343,7 +342,7 @@ int wmain(int argc, _TCHAR* argv[])
     OpenFile(FileReader(L"..\\testimg\\Sony_A900_ISO400_uncompressed.ARW"),&meta);
     OpenFile(FileReader(L"..\\testimg\\Sony_A900_ISO6400_uncompressed.ARW"),&meta);
     OpenFile(FileReader(L"..\\testimg\\Sony_A900_ISO800_uncompressed.ARW"),&meta);
-  OpenFile(FileReader(L"..\\testimg\\nikon_coolpix_p6000_05.nrw"),&meta);*/
+  OpenFile(FileReader(L"..\\testimg\\nikon_coolpix_p6000_05.nrw"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon_D1.nef"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon_D100-backhigh.nef"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon_D200_compressed-1.nef"),&meta);
@@ -434,7 +433,6 @@ OpenFile(FileReader(L"..\\testimg\\Olympus-EP2FARI0200.ORF"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Olympus_SP350.orf"),&meta);
 
   OpenFile(FileReader(L"..\\testimg\\Nikon-D3XFARI0100.NEF"),&meta);
-
   OpenFile(FileReader(L"..\\testimg\\dng\\5d-raw.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\5d.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\CANON-EOS10-linear.dng"),&meta);

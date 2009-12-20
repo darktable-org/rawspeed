@@ -104,6 +104,9 @@ RawImage Cr2Decoder::decodeRaw() {
   }
   guint offY = 0;
 
+  if (s_width.size() > 15)
+    ThrowRDE("CR2 Decoder: No more than 15 slices supported");
+  
   for (guint i = 0; i < slices.size(); i++) {
     Cr2Slice slice = slices[i];
     try {
