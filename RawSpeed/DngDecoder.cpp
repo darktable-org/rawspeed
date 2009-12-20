@@ -302,6 +302,10 @@ RawImage DngDecoder::decodeRaw() {
       new_size = iPoint2D(sz[0], sz[1]);
     }
     mRaw->subFrame(top_left, new_size);
+    if (top_left.x %2 == 1)
+      mRaw->cfa.shiftLeft();
+    if (top_left.y %2 == 1)
+      mRaw->cfa.shiftDown();
   }
 #endif
   // Linearization
