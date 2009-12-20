@@ -157,7 +157,7 @@ gint NikonDecompressor::HuffDecodeNikon() {
   code = bits->peekBitsNoFill(14);
   val = dctbl1->bigTable[code];
   if ((val&0xff) !=  0xff) {
-    bits->skipBits(val&0xff);
+    bits->skipBitsNoFill(val&0xff);
     return val >> 8;
   }
 
@@ -166,7 +166,7 @@ gint NikonDecompressor::HuffDecodeNikon() {
   val = dctbl1->numbits[code];
   l = val & 15;
   if (l) {
-    bits->skipBits(l);
+    bits->skipBitsNoFill(l);
     rv = val >> 4;
   }  else {
     bits->skipBits(8);

@@ -212,10 +212,12 @@ void LJpegPlain::decodeScanLeftGeneric() {
     for (; x < cw ; x += maxSuperH) {
 
       if (0 == pixInSlice) { // Next slice
-        _ASSERTE(slice < slices);
+        if (slice > slices)
+          ThrowRDE("LJpegPlain::decodeScanLeft: Ran out of slices");
         guint o = offset[slice++];
         dest = (gushort*) & draw[o&0x0fffffff];  // Adjust destination for next pixel
-        _ASSERTE((o&0x0fffffff) < mRaw->pitch*mRaw->dim.y);
+        if((o&0x0fffffff) > mRaw->pitch*mRaw->dim.y)
+          ThrowRDE("LJpegPlain::decodeScanLeft: Offset out of bounds");
         pixInSlice = slice_width[o>>28];
 
         // If new are at the start of a new line, also update predictors.
@@ -346,9 +348,13 @@ void LJpegPlain::decodeScanLeft4_2_0() {
     for (; x < cw ; x += 2) {
 
       if (0 == pixInSlice) { // Next slice
+        if (slice > slices)
+          ThrowRDE("LJpegPlain::decodeScanLeft: Ran out of slices");
         guint o = offset[slice++];
         dest = (gushort*) & draw[o&0x0fffffff];  // Adjust destination for next pixel
         _ASSERTE((o&0x0fffffff) < mRaw->pitch*mRaw->dim.y);
+        if((o&0x0fffffff) > mRaw->pitch*mRaw->dim.y)
+          ThrowRDE("LJpegPlain::decodeScanLeft: Offset out of bounds");
         pixInSlice = slice_width[o>>28];
 
         // If new are at the start of a new line, also update predictors.
@@ -466,9 +472,12 @@ void LJpegPlain::decodeScanLeft4_2_2() {
     for (; x < cw ; x += 2) {
 
       if (0 == pixInSlice) { // Next slice
+        if (slice > slices)
+          ThrowRDE("LJpegPlain::decodeScanLeft: Ran out of slices");
         guint o = offset[slice++];
         dest = (gushort*) & draw[o&0x0fffffff];  // Adjust destination for next pixel
-        _ASSERTE((o&0x0fffffff) < mRaw->pitch*mRaw->dim.y);
+        if((o&0x0fffffff) > mRaw->pitch*mRaw->dim.y)
+          ThrowRDE("LJpegPlain::decodeScanLeft: Offset out of bounds");
         pixInSlice = slice_width[o>>28];
 
         // If new are at the start of a new line, also update predictors.
@@ -556,17 +565,20 @@ void LJpegPlain::decodeScanLeft2Comps() {
       gint diff = HuffDecode(dctbl1);
       p1 += diff;
       *dest++ = (gushort)p1;
-      _ASSERTE(p1 >= 0 && p1 < 65536);
+  //    _ASSERTE(p1 >= 0 && p1 < 65536);
 
       diff = HuffDecode(dctbl2);
       p2 += diff;
       *dest++ = (gushort)p2;
-      _ASSERTE(p2 >= 0 && p2 < 65536);
+//      _ASSERTE(p2 >= 0 && p2 < 65536);
 
       if (0 == --pixInSlice) { // Next slice
+        if (slice > slices)
+          ThrowRDE("LJpegPlain::decodeScanLeft: Ran out of slices");
         guint o = offset[slice++];
         dest = (gushort*) & draw[o&0x0fffffff];  // Adjust destination for next pixel
-        _ASSERTE((o&0x0fffffff) < mRaw->pitch*mRaw->dim.y);
+        if((o&0x0fffffff) > mRaw->pitch*mRaw->dim.y)
+          ThrowRDE("LJpegPlain::decodeScanLeft: Offset out of bounds");
         pixInSlice = slice_width[o>>28];
       }
       bits->checkPos();
@@ -653,9 +665,12 @@ void LJpegPlain::decodeScanLeft3Comps() {
       *dest++ = (gushort)p3;
 
       if (0 == --pixInSlice) { // Next slice
+        if (slice > slices)
+          ThrowRDE("LJpegPlain::decodeScanLeft: Ran out of slices");
         guint o = offset[slice++];
         dest = (gushort*) & draw[o&0x0fffffff];  // Adjust destination for next pixel
-        _ASSERTE((o&0x0fffffff) < mRaw->pitch*mRaw->dim.y);
+        if((o&0x0fffffff) > mRaw->pitch*mRaw->dim.y)
+          ThrowRDE("LJpegPlain::decodeScanLeft: Offset out of bounds");
         _ASSERTE((o >> 28) < slicesW.size());
         pixInSlice = slice_width[o>>28];
       }
@@ -750,9 +765,12 @@ void LJpegPlain::decodeScanLeft4Comps() {
       *dest++ = (gushort)p4;
 
       if (0 == --pixInSlice) { // Next slice
+        if (slice > slices)
+          ThrowRDE("LJpegPlain::decodeScanLeft: Ran out of slices");
         guint o = offset[slice++];
         dest = (gushort*) & draw[o&0x0fffffff];  // Adjust destination for next pixel
-        _ASSERTE((o&0x0fffffff) < mRaw->pitch*mRaw->dim.y);
+        if((o&0x0fffffff) > mRaw->pitch*mRaw->dim.y)
+          ThrowRDE("LJpegPlain::decodeScanLeft: Offset out of bounds");
         pixInSlice = slice_width[o>>28];
       }
       bits->checkPos();

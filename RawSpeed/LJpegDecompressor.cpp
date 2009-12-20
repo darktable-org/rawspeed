@@ -529,7 +529,7 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
     code = bits->peekBitsNoFill(14);
     val = htbl->bigTable[code];
     if ((val&0xff) !=  0xff) {
-      bits->skipBits(val&0xff);
+      bits->skipBitsNoFill(val&0xff);
       return val >> 8;
     }
   }
@@ -543,10 +543,10 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
   val = htbl->numbits[code];
   l = val & 15;
   if (l) {
-    bits->skipBits(l);
+    bits->skipBitsNoFill(l);
     rv = val >> 4;
   }  else {
-    bits->skipBits(8);
+    bits->skipBitsNoFill(8);
     l = 8;
     while (code > htbl->maxcode[l]) {
       temp = bits->getBitNoFill();
@@ -568,7 +568,7 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
 
   if (rv == 16) {
     if (mDNGCompatible)
-      bits->skipBits(16);
+      bits->skipBitsNoFill(16);
     return -32768;
   }
 

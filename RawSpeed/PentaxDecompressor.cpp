@@ -115,7 +115,7 @@ gint PentaxDecompressor::HuffDecodePentax() {
   code = pentaxBits->peekBitsNoFill(14);
   val = dctbl1->bigTable[code];
   if ((val&0xff) !=  0xff) {
-    pentaxBits->skipBits(val&0xff);
+    pentaxBits->skipBitsNoFill(val&0xff);
     return val >> 8;
   }
 
@@ -124,7 +124,7 @@ gint PentaxDecompressor::HuffDecodePentax() {
   val = dctbl1->numbits[code];
   l = val & 15;
   if (l) {
-    pentaxBits->skipBits(l);
+    pentaxBits->skipBitsNoFill(l);
     rv = val >> 4;
   }  else {
     pentaxBits->skipBits(8);
@@ -156,7 +156,7 @@ gint PentaxDecompressor::HuffDecodePentax() {
   */
 
   if (rv) {
-    gint x = pentaxBits->getBitsNoFill(rv);
+    gint x = pentaxBits->getBits(rv);
     if ((x & (1 << (rv - 1))) == 0)
       x -= (1 << rv) - 1;
     return x;
