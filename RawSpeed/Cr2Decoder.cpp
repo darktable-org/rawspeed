@@ -121,6 +121,7 @@ RawImage Cr2Decoder::decodeRaw() {
       errors.push_back(_strdup(e.what()));
     } catch (IOException e) {
       // Let's try to ignore this - it might be truncated data, so something might be useful.
+      errors.push_back(_strdup(e.what()));
     }
     offY += slice.w;
   }

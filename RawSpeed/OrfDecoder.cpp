@@ -175,7 +175,7 @@ void OrfDecoder::decodeCompressed(ByteStream& s, guint w, guint h) {
         wo0 = dest[x];
         nw0 = n;
       }
-      _ASSERTE(0 == dest[x] >> 12) ;
+//      _ASSERTE(0 == dest[x] >> 12) ;
       
       // ODD PIXELS
       x += 1;
@@ -226,7 +226,7 @@ void OrfDecoder::decodeCompressed(ByteStream& s, guint w, guint h) {
         wo1 = dest[x];
         nw1 = n;
       }
-      _ASSERTE(0 == dest[x] >> 12) ;
+//      _ASSERTE(0 == dest[x] >> 12) ;
     }
   }
 }

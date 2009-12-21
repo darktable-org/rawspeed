@@ -49,6 +49,9 @@ void LJpegPlain::decodeScan() {
   if (slicesW.empty())
     slicesW.push_back(frame.w*frame.cps);
 
+  if ( 0 == frame.h || 0 == frame.w)
+    ThrowRDE("LJpegPlain::decodeScan: Image width or height set to zero");
+
   for (guint i = 0; i < frame.cps;  i++) {
     if (frame.compInfo[i].superH != 1 || frame.compInfo[i].superV != 1) {
       if (mRaw->isCFA)

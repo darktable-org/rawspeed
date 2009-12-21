@@ -289,6 +289,9 @@ void LJpegDecompressor::parseDHT() {
     guint acc = 0;
     HuffmanTable* t = &huff[Th];
 
+    if (t->initialized)
+      ThrowRDE("LJpegDecompressor::parseDHT: Duplicate table definition");
+
     for (guint i = 0; i < 16 ;i++) {
       t->bits[i+1] = input->getByte();
       acc += t->bits[i+1];
@@ -345,8 +348,11 @@ void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
   */
   p = 0;
   for (l = 1; l <= 16; l++) {
-    for (i = 1; i <= (int)htbl->bits[l]; i++)
+    for (i = 1; i <= (int)htbl->bits[l]; i++) {
       huffsize[p++] = (gchar)l;
+      if (p > 256)
+        ThrowRDE("LJpegDecompressor::createHuffmanTable: Code length too long. Corrupt data.");
+    }
   }
   huffsize[p] = 0;
   lastp = p;
@@ -366,6 +372,8 @@ void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
     }
     code <<= 1;
     si++;
+    if (p > 256)
+      ThrowRDE("createHuffmanTable: Code length too long. Corrupt data.");
   }
 
 
@@ -385,6 +393,8 @@ void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
       htbl->valptr[l] = 0xff;   // This check must be present to avoid crash on junk
       htbl->maxcode[l] = -1;
     }
+    if (p > 256)
+      ThrowRDE("createHuffmanTable: Code length too long. Corrupt data.");
   }
 
   /*
@@ -411,10 +421,8 @@ void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
       } else {
         ul = ll;
       }
-      _ASSERTE(ll >= 0 && ul >= 0);
-      _ASSERTE(ll < 256 && ul < 256);
-      _ASSERTE(ll <= ul);
-      _ASSERTE(size <= 8);
+      if (ul > 256 || ll > ul)
+        ThrowRDE("createHuffmanTable: Code length too long. Corrupt data.");
       for (i = ll; i <= ul; i++) {
         htbl->numbits[i] = size | (value << 4);
       }
