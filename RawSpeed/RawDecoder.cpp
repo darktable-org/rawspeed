@@ -77,6 +77,10 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
              input.getData(), inputPitch, w*mRaw->bpp, h - y);
       return;
     }
+    if (bitPerPixel == 12)  {
+      Decode12BitRaw(input, w, h);
+      return;
+    }
     BitPumpPlain bits(&input);
     w *= cpp;
     for (; y < h; y++) {

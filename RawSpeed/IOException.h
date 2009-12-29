@@ -25,6 +25,9 @@
 
 namespace RawSpeed {
 
+void ThrowIOE(const char* fmt, ...);
+
+
 class IOException : public std::runtime_error
 {
 public:

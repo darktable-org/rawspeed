@@ -567,7 +567,7 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
     */
 
     if (l > frame.prec || htbl->valptr[l] == 0xff) {
-      ThrowRDE("Corrupt JPEG data: bad Huffman code:%u", l);
+      ThrowIOE("Corrupt JPEG data: bad Huffman code:%u", l);
     } else {
       rv = htbl->huffval[htbl->valptr[l] +
                          ((int)(code - htbl->mincode[l]))];
@@ -583,7 +583,7 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
   // Ensure we have enough bits
   if ((rv + l) > 24) {
     if (rv > 16) // There is no values above 16 bits.
-      ThrowRDE("Corrupt JPEG data: Too many bits requested.");
+      ThrowIOE("Corrupt JPEG data: Too many bits requested.");
     else
       bits->fill();
   }

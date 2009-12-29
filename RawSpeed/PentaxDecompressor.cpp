@@ -140,7 +140,7 @@ gint PentaxDecompressor::HuffDecodePentax() {
     */
 
     if (l > 12) {
-      ThrowRDE("Corrupt JPEG data: bad Huffman code:%u\n", l);
+      ThrowIOE("Corrupt JPEG data: bad Huffman code:%u\n", l);
     } else {
       rv = dctbl1->huffval[dctbl1->valptr[l] +
                            ((int)(code - dctbl1->mincode[l]))];

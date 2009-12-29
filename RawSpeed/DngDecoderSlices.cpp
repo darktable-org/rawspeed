@@ -100,7 +100,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
     } catch (RawDecoderException err) {
       setError(err.what());
     } catch (IOException err) {
-      setError("DngDecoderSlices::decodeSlice: IO error occurred, probably attempted to read past end of file.");
+      setError("DngDecoderSlices::decodeSlice: IO error occurred.");
     }
   }
 }

@@ -124,7 +124,7 @@ void NikonDecompressor::DecompressNikon(ByteStream &metadata, guint w, guint h, 
       pLeft1 += HuffDecodeNikon();
       pLeft2 += HuffDecodeNikon();
       if (pLeft1 < 0 || pLeft1 > 65535 || pLeft2 < 0 || pLeft2 > 65535)
-        ThrowRDE("DecompressNikon: Image value out of range. Corrupt image.");
+        ThrowIOE("DecompressNikon: Image value out of range. Corrupt image.");
       dest[x] =  curve[pLeft1] | (curve[pLeft2] << 16);
     }
   }
@@ -178,7 +178,7 @@ gint NikonDecompressor::HuffDecodeNikon() {
     }
 
     if (l > 16) {
-      ThrowRDE("Corrupt JPEG data: bad Huffman code:%u\n", l);
+      ThrowIOE("Corrupt JPEG data: bad Huffman code:%u\n", l);
     } else {
       rv = dctbl1->huffval[dctbl1->valptr[l] +
                            ((int)(code - dctbl1->mincode[l]))];
