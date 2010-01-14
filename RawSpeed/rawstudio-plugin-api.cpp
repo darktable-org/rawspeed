@@ -62,7 +62,9 @@ load_rawspeed(const gchar *filename)
 
 		try
 		{
+			rs_io_lock();
 			m = f.readFile();
+			rs_io_unlock();
 		} catch (FileIOException e) {
 			printf("RawSpeed: IO Error occured:%s\n", e.what());
 			g_timer_destroy(gt);
