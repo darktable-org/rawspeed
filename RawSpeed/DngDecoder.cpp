@@ -334,10 +334,23 @@ RawImage DngDecoder::decodeRaw() {
       }
     }
   }
-  mRaw->whitePoint = raw->getEntry(WHITELEVEL)->getInt();
+
   new_size = mRaw->dim;
 
-  int black = -1; // Estimate, if no blacklevel
+  // Default white level is (2 ** BitsPerSample) - 1
+  mRaw->whitePoint = (1 >> raw->getEntry(BITSPERSAMPLE)->getShort()) - 1;
+  // Black defaults to 0
+  int black = 0; 
+
+  if (raw->hasEntry(WHITELEVEL)) {
+    TiffEntry *whitelevel = raw->getEntry(WHITELEVEL);
+    if (whitelevel->type == TIFF_LONG)
+      mRaw->whitePoint = whitelevel->getInt();
+    else if (whitelevel->type == TIFF_SHORT)
+      mRaw->whitePoint = whitelevel->getShort();
+  }
+
+
   if (raw->hasEntry(BLACKLEVELREPEATDIM)) {
     black = 65536;
     const gushort *blackdim = raw->getEntry(BLACKLEVELREPEATDIM)->getShortArray();
