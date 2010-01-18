@@ -368,6 +368,20 @@ RawImage DngDecoder::decodeRaw() {
     } else {
       black = 0;
     }
+  } else if (raw->hasEntry(BLACKLEVEL)) {
+    // Attempt to read a single value as black
+    TiffEntry *blacklevel = raw->getEntry(BLACKLEVEL);
+    if (blacklevel->count >= 1 && blacklevel->type == TIFF_LONG)
+      black = blacklevel->getInt();
+    if (blacklevel->count >= 1 && blacklevel->type == TIFF_SHORT)
+      black = blacklevel->getShort();
+    if (blacklevel->count >= 1 && blacklevel->type == TIFF_RATIONAL) {
+      const guint* blackarray = (const guint*)blacklevel->getData();
+      if (blackarray[1])
+        black = blackarray[0] / blackarray[1];
+      else
+        black = 0;
+    }
   }
   mRaw->blackLevel = black;
   return mRaw;
