@@ -32,10 +32,10 @@ LJpegPlain::LJpegPlain(FileMap* file, RawImage img) :
 
 LJpegPlain::~LJpegPlain(void) {
   if (offset)
-    delete(offset);
+    delete[](offset);
   offset = 0;
   if (slice_width)
-    delete(slice_width);
+    delete[](slice_width);
   slice_width = 0;
 }
 
