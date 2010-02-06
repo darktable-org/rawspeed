@@ -32,7 +32,10 @@
     </CFA>
     <Crop x="42" y="14" width="3474" height="2314"/>
     <Sensor black="255" white="4095"/>
-    <Aliases><Alias>Canon EOS DIGITAL REBEL XT</Alias></Aliases>
+    <Aliases>
+		<Alias>Canon EOS DIGITAL REBEL XT</Alias>
+		<Alias>Canon EOS Kiss Digital N</Alias>
+	</Aliases>
   </Camera>
   <Camera make="Canon" model="Canon EOS 40D">
     <CFA width="2" height="2">
@@ -57,7 +60,10 @@
     </CFA>
     <Crop x="22" y="18" width="4290" height="2856"/>
     <Sensor black="1020" white="16000"/>
-    <Aliases><Alias>Canon EOS DIGITAL REBEL XSi</Alias></Aliases>
+    <Aliases>
+		<Alias>Canon EOS DIGITAL REBEL XSi</Alias>
+		<Alias>Canon EOS Kiss Digital X2</Alias>
+	</Aliases>
   </Camera>
   <Camera make="Canon" model="Canon EOS 50D">
     <CFA width="2" height="2">
@@ -86,7 +92,10 @@
     </CFA>
     <Crop x="62" y="30" width="4722" height="3142"/>
     <Sensor black="1020" white="16000"/>
-    <Aliases><Alias>Canon EOS REBEL T1i</Alias></Aliases>
+    <Aliases>
+		<Alias>Canon EOS REBEL T1i</Alias>
+		<Alias>Canon EOS Kiss X3</Alias>
+	</Aliases>
   </Camera>
   <Camera make="Canon" model="Canon EOS 5D">
     <CFA width="2" height="2">
@@ -135,7 +144,10 @@
     </CFA>
     <Crop x="42" y="18" width="3906" height="2602"/>
     <Sensor black="255" white="4030"/>
-    <Aliases><Alias>Canon EOS DIGITAL REBEL XS</Alias></Aliases>
+    <Aliases>
+		<Alias>Canon EOS DIGITAL REBEL XS</Alias>
+		<Alias>Canon EOS Kiss Digital F</Alias>
+	</Aliases>
   </Camera>
   <Camera make="Canon" model="Canon EOS 400D DIGITAL">
     <CFA width="2" height="2">
@@ -146,7 +158,10 @@
     </CFA>
     <Crop x="42" y="18" width="3906" height="2602"/>
     <Sensor black="255" white="3726"/>
-    <Aliases><Alias>Canon EOS DIGITAL REBEL XTi</Alias></Aliases>
+    <Aliases>
+		<Alias>Canon EOS DIGITAL REBEL XTi</Alias>
+		<Alias>Canon EOS Kiss Digital X</Alias>
+	</Aliases>
   </Camera>
   <Camera make="Canon" model="Canon EOS-1D Mark II">
     <CFA width="2" height="2">
