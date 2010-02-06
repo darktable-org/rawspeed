@@ -42,8 +42,8 @@ public:
   __inline void checkPos()  { if (off>size) throw IOException("Out of buffer read");};        // Check if we have a valid position
   __inline guint getBitNoFill() {return (mCurr >> (--mLeft)) & 1;}
   __inline guint peekByteNoFill() {return ((mCurr >> (mLeft-8))) & 0xff; }
-  __inline guint getBitsNoFill(guint nbits) {return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];}
-  __inline guint peekBitsNoFill(guint nbits) {return ((mCurr >> (mLeft-nbits))) &masks[nbits]; }
+  __inline guint getBitsNoFill(guint nbits) {return ((mCurr >> (mLeft -= (nbits)))) & ((1 << nbits) - 1);}
+  __inline guint peekBitsNoFill(guint nbits) {return ((mCurr >> (mLeft-nbits))) & ((1 << nbits) - 1); }
 
   // Fill the buffer with at least 24 bits
   __inline void fill() {
@@ -71,7 +71,7 @@ public:
       fill();
     }
 
-    return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];
+    return ((mCurr >> (mLeft -= (nbits)))) & ((1 << nbits) - 1);
   }
 
   __inline guint peekBit() {
@@ -88,7 +88,7 @@ public:
       fill();
     }
 
-    return ((mCurr >> (mLeft - nbits))) & masks[nbits];
+    return ((mCurr >> (mLeft - nbits))) & ((1 << nbits) - 1);
   }
 
   __inline guint peekByte() {

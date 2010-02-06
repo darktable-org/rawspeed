@@ -100,7 +100,7 @@ guint BitPumpJPEG::getBits(guint nbits) {
     fill();
   }
 
-  return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];
+  return ((mCurr >> (mLeft -= (nbits)))) & ((1 << nbits) - 1);
 }
 
 
@@ -114,7 +114,7 @@ guint BitPumpJPEG::peekBits(guint nbits) {
   if (mLeft < nbits) {
     fill();
   }
-  return ((mCurr >> (mLeft - nbits))) & masks[nbits];
+  return ((mCurr >> (mLeft - nbits))) & ((1 << nbits) - 1);
 }
 
 
@@ -149,7 +149,7 @@ guint BitPumpJPEG::getBitsSafe(unsigned int nbits) {
     if (off > size)
       throw IOException("Out of buffer read");
   }
-  return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];
+  return ((mCurr >> (mLeft -= (nbits)))) & ((1 << nbits) - 1);
 }
 
 

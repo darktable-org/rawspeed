@@ -67,7 +67,7 @@ guint BitPumpMSB::getBitsSafe(unsigned int nbits) {
       throw IOException("Out of buffer read");
   }
 
-  return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];
+  return ((mCurr >> (mLeft -= (nbits)))) & ((1 << nbits) - 1);
 }
 
 

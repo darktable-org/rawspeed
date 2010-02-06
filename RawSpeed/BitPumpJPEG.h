@@ -48,8 +48,8 @@ public:
   guint getOffset() { return off-(mLeft>>3)+stuffed;}
   __inline guint getBitNoFill() {return (mCurr >> (--mLeft)) & 1;}
   __inline guint peekByteNoFill() {return ((mCurr >> (mLeft-8))) & 0xff; }
-  __inline guint peekBitsNoFill(guint nbits) {return ((mCurr >> (mLeft-nbits))) &masks[nbits]; }
-  __inline guint getBitsNoFill(guint nbits) {_ASSERTE(nbits<24);return ((mCurr >> (mLeft -= (nbits)))) & masks[nbits];}
+  __inline guint peekBitsNoFill(guint nbits) {return ((mCurr >> (mLeft-nbits))) & ((1 << nbits) - 1); }
+  __inline guint getBitsNoFill(guint nbits) { return ((mCurr >> (mLeft -= (nbits)))) & ((1 << nbits) - 1);}
   void fill();  // Fill the buffer with at least 24 bits
 
 
