@@ -29,7 +29,7 @@
 
 using namespace RawSpeed;
 
-//#define _USE_GFL_
+#define _USE_GFL_
 #ifdef _USE_GFL_
 #include "libgfl.h"
 #pragma comment(lib, "libgfl.lib") 
@@ -38,7 +38,7 @@ using namespace RawSpeed;
 int startTime;
 
 // Open file, or test corrupt file
-#if 0
+#if 1
 // Open file and save as tiff
 void OpenFile(FileReader f, CameraMetaData *meta) {
   RawDecoder *d = 0;
@@ -131,7 +131,7 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
     printf("Could not open image:%s\n", e.what());
     return;
   }
-  srand(0xC0CAC01c);  // Hardcoded seed for re-producability (on the same platform)
+  srand(0xC0CAC018);  // Hardcoded seed for re-producability (on the same platform)
 
   int tests = 100;
   // Try 50 permutations
@@ -170,7 +170,7 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
       delete d;
     d = 0;
   }
-  srand(0xC0CAC01c);  // Hardcoded seed for re-producability (on the same platform)
+  srand(0xC0CAC018);  // Hardcoded seed for re-producability (on the same platform)
   wprintf(L"Performing truncation tests\n");
   for (int i = 0 ; i < tests; i++) {  
     // Get truncated file
@@ -206,6 +206,7 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
       delete d;
     d = 0;
   }
+  delete m;
 }
 #endif
 
@@ -220,9 +221,16 @@ int wmain(int argc, _TCHAR* argv[])
     return 1;
   }
 #endif
-  CameraMetaData meta("..\\cameras.xml");  
+  CameraMetaData meta("..\\data\\cameras.xml");  
   //meta.dumpXML();
-/*
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\CRW_0740.DNG"),&meta);
+
+  OpenFile(FileReader(L"..\\testimg\\Sony-A500-hMULTII00200.ARW"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Sony-A500-hSLI00200_NR_1D.ARW"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon-1D-Mk4-A28C0180.CR2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon-1D-Mk4-DD9C0097.CR2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon-1D-Mk4-DD9C0069.CR2"),&meta);
+
   OpenFile(FileReader(L"..\\testimg\\Panasonic_FZ35FARI0200.RW2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Panasonic_FZ35hSLI0200.RW2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Panasonic_FZ35hVFAWB.RW2"),&meta);
@@ -297,15 +305,13 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_30D-uga1.cr2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_350D-3.cr2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_EOS_450D-4.cr2"),&meta);
-  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D.cr2"),&meta);*/
-  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_7DhMULTII00200.CR2"),&meta);
-  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_Mk2-ISO100_sRAW2.CR2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_50D.cr2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Canon_Powershot_G9-1.CR2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon-D3000hMULTII0200.NEF"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon-D3000hSLI0200.NEF"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Nikon-D3x_ISO100.NEF"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Olympus-E620_NF-Std_ISO100.ORF"),&meta);
-  OpenFile(FileReader(L"..\\testimg\\Olympus-E-620-1.ORF"),&meta);
+  
   OpenFile(FileReader(L"..\\testimg\\panasonic_DMC-G1hMULTII0200.RW2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\panasonic_DMC-G1hSLI0400.RW2"),&meta);
   OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_g1_04_portrait.rw2"),&meta);
@@ -314,8 +320,14 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\sony_a330_04.arw"),&meta);
   OpenFile(FileReader(L"..\\testimg\\sony_a330_05.arw"),&meta);
   OpenFile(FileReader(L"..\\testimg\\sony_a330_06.arw"),&meta);
-  
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_Mk2-ISO100_sRAW2.CR2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Canon_EOS_7DhMULTII00200.CR2"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\Olympus-E-620-1.ORF"),&meta);  
   OpenFile(FileReader(L"..\\testimg\\Pentax_K10D-2.dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Leica-X1-L1090229.DNG"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\CANON-EOS300D.dng"),&meta);
+  OpenFile(FileReader(L"..\\testimg\\dng\\KODAK-DCSPRO-linear.dng"),&meta);
+
   OpenFile(FileReader(L"..\\testimg\\Pentax_K10D.pef"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Pentax_K100D.pef"),&meta);
   OpenFile(FileReader(L"..\\testimg\\Pentax_K10D.pef"),&meta);
@@ -440,7 +452,6 @@ OpenFile(FileReader(L"..\\testimg\\Olympus-EP2FARI0200.ORF"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\CANON-EOS20D-linear.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\CANON-EOS20D.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\CANON-EOS300D-linear.dng"),&meta);
-  OpenFile(FileReader(L"..\\testimg\\dng\\CANON-EOS300D.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\CANON-POWERSHOTPRO1-linear.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\CANON-POWERSHOTPRO1.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\Canon_EOS_1000D.dng"),&meta);
@@ -477,7 +488,6 @@ OpenFile(FileReader(L"..\\testimg\\Olympus-EP2FARI0200.ORF"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\Canon_PowerShot_G9.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\FUJI-FINEPIXS2PRO-linear.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\FUJI-FINEPIXS2PRO.dng"),&meta);
-  OpenFile(FileReader(L"..\\testimg\\dng\\KODAK-DCSPRO-linear.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\KODAK-DCSPRO.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\M8-1-linear.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\M8-1.dng"),&meta);
@@ -592,7 +602,6 @@ OpenFile(FileReader(L"..\\testimg\\Olympus-EP2FARI0200.ORF"),&meta);
   OpenFile(FileReader(L"..\\testimg\\dng\\uncompressed3.dng"),&meta);
 
   OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Leica-X1-L1090994.DNG"),&meta);
-  OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Leica-X1-L1090229.DNG"),&meta);
   OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Leica-X1-ISO100-L1090324.DNG"),&meta);
   OpenFile(FileReader(L"..\\testimg\\camera_dngs\\Leica_M8.dng"),&meta);
   OpenFile(FileReader(L"..\\testimg\\camera_dngs\\leica_m82_01.dng"),&meta);
