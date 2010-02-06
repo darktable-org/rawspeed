@@ -51,7 +51,7 @@ guint BitPumpPlain::getBit() {
 }
 
 guint BitPumpPlain::getBits(guint nbits) {
-  guint v = *(guint*) & buffer[off>>3] >> (off & 7) & masks[nbits];
+  guint v = *(guint*) & buffer[off>>3] >> (off & 7) & ((1 << nbits) - 1);
   off += nbits;
   return v;
 }
@@ -61,7 +61,7 @@ guint BitPumpPlain::peekBit() {
 }
 
 guint BitPumpPlain::peekBits(guint nbits) {
-  return *(guint*)&buffer[off>>3] >> (off&7) & masks[nbits];
+  return *(guint*)&buffer[off>>3] >> (off&7) & ((1 << nbits) - 1);
 }
 
 guint BitPumpPlain::peekByte() {
@@ -79,7 +79,7 @@ guint BitPumpPlain::getBitsSafe(unsigned int nbits) {
   if (off > size)
     throw IOException("Out of buffer read");
 
-  return *(guint*)&buffer[off>>3] >> (off&7) & masks[nbits];
+  return *(guint*)&buffer[off>>3] >> (off&7) & ((1 << nbits) - 1);
 }
 
 void BitPumpPlain::skipBits(unsigned int nbits) {
