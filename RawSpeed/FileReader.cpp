@@ -58,6 +58,7 @@ FileMap* FileReader::readFile() {
     dest = (char *) fileData->getDataWrt(bytes_read);
     bytes_read += read(fd, dest, st.st_size - bytes_read);
   }
+  close(fd);
 #endif
 
 #else // __unix__
