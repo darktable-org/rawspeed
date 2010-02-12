@@ -73,7 +73,7 @@
       <Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="64" y="52" width="4752" height="3158"/>
-    <Sensor black="900" white="16383"/>
+    <Sensor black="1020" white="16383"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS 50D" mode="sRaw1">
     <Crop x="0" y="0" width="3272" height="2178"/>
