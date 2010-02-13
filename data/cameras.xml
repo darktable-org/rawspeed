@@ -135,6 +135,10 @@
     <Crop x="158" y="52" width="5202" height="3464"/>
     <Sensor black="2000" white="16300"/>
   </Camera>
+  <Camera make="Canon" model="Canon EOS 7D" mode="sRaw1">
+    <Crop x="0" y="0" width="0" height="0"/>
+    <Sensor black="0" white="16383"/>
+  </Camera>  
   <Camera make="Canon" model="Canon EOS 1000D">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
