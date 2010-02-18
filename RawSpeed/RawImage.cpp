@@ -202,7 +202,7 @@ void RawImageData::scaleValues(float f) {
 #else
 
 void RawImageData::scaleValues(float f) {
-#if defined (__x86_64__)
+#if 0
   //TODO: Check for SSE2 on 32 bit systems and use it there
   guint temp[20];
 
