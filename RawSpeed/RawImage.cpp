@@ -22,6 +22,10 @@
 
     http://www.klauspost.com
 */
+#if defined(__SSE2__)
+#include <emmintrin.h>
+#endif
+
 namespace RawSpeed {
 
 RawImageData::RawImageData(void):
@@ -131,14 +135,20 @@ void RawImageData::scaleBlackWhite() {
   scaleValues(f);
 }
 
-#if _MSC_VER > 1399
+#if _MSC_VER > 1399 || defined(__SSE2__)
 
 void RawImageData::scaleValues(float f) {
+  gboolean use_sse2;
+#ifdef _MSC_VER 
   int info[4];
   __cpuid(info, 1);
+  use_sse2 = !!info[3]&(1 << 26)
+#else
+  use_sse2 = TRUE;
+#endif
 
   // Check SSE2
-  if (f >= 0.0f && info[3]&(1 << 26)) {
+  if (f >= 0.0f && use_sse2) {
 
     __m128i ssescale;
     __m128i ssesub;
@@ -202,79 +212,14 @@ void RawImageData::scaleValues(float f) {
 #else
 
 void RawImageData::scaleValues(float f) {
-#if 0
-  //TODO: Check for SSE2 on 32 bit systems and use it there
-  guint temp[20];
-
-  guint i = (int)(1024.0f * f);  // 10 bit fraction
-  i |= i << 16;
-  guint b = blackLevel | (blackLevel << 16);
-
-  for (int j = 0; j < 4; j++) {
-    temp[j] = b;
-    temp[j+4] = i;
-    temp[j+8] = 512;
-    temp[j+12] = 32768;
-    temp[j+16] = 0x80008000;
-  }
-
-  asm volatile
-  (
-    "movdqu 0(%0), %%xmm7\n"     // Subtraction
-    "movdqu 16(%0), %%xmm6\n"    // Multiplication factor
-    "movdqu 32(%0), %%xmm5\n"    // Fraction
-    "movdqu 48(%0), %%xmm4\n"    // Sub 32768
-    "movdqu 64(%0), %%xmm3\n"    // Sign shift
-  : // no output registers
-  : "r"(temp)
-        : //  %0
-      );
-
+  gint gw = dim.x * cpp;
+  int scale = (int)(16384.0f * f);  // 14 bit fraction
   for (int y = 0; y < dim.y; y++) {
-    guchar* pixel = (guchar*) & data[(mOffset.y+y)*pitch];
-    guint gw = pitch >> 4;
-    for (guint x  = 0; x < gw ; x++) {
-      asm volatile(
-        "next_pixel:\n"
-        "movaps 0(%0), %%xmm0\n"
-        "psubusw %%xmm7, %%xmm0\n"  // Subtract black
-        "movaps %%xmm0, %%xmm1\n"
-        "pmullw %%xmm6, %%xmm0\n"
-        "pmulhuw %%xmm6, %%xmm1\n"
-        "movaps %%xmm0, %%xmm2\n"
-        "punpcklwd %%xmm1, %%xmm0\n" // First 4 result
-        "punpckhwd %%xmm1, %%xmm2\n" // Last 4 result
-        "paddd %%xmm5, %%xmm0\n"      // Add fraction
-        "paddd %%xmm5, %%xmm2\n"
-        "psrad $10, %%xmm0\n"
-        "psrad $10, %%xmm2\n"
-        "psubd %%xmm4, %%xmm0\n"      // Avoid saturation
-        "psubd %%xmm4, %%xmm2\n"
-        "packssdw %%xmm2, %%xmm0\n"
-        "pxor %%xmm3, %%xmm0\n"       // Shift sign
-        "movaps %%xmm0, 0(%0)\n"
-
-        "add $16, %0\n"
-      : // no output registers
-      : "r"(pixel)
-            :  // %0
-          );
+    gushort *pixel = (gushort*)getData(0, y);
+    for (int x = 0 ; x < gw; x++) {
+      pixel[x] = clampbits(((pixel[x] - blackLevel) * scale + 8192) >> 14, 16);
     }
   }
-
-#else
-
-gint gw = dim.x * cpp;
-int scale = (int)(16384.0f * f);  // 14 bit fraction
-for (int y = 0; y < dim.y; y++) {
-  gushort *pixel = (gushort*)getData(0, y);
-  for (int x = 0 ; x < gw; x++) {
-    pixel[x] = clampbits(((pixel[x] - blackLevel) * scale + 8192) >> 14, 16);
-  }
-}
-
-#endif
-
 }
 
 #endif
