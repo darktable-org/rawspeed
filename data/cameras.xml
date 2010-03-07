@@ -737,6 +737,16 @@
     <Crop x="0" y="0" width="4094" height="3082"/>
     <Sensor black="55" white="4095"/>
   </Camera>
+  <Camera make="OLYMPUS IMAGING CORP." model="E-PL1">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">RED</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="1" y="1">BLUE</Color>
+    </CFA>
+    <Crop x="0" y="0" width="4094" height="3082"/>
+    <Sensor black="55" white="4095"/>
+  </Camera>
   <Camera make="OLYMPUS IMAGING CORP." model="E-P2">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
