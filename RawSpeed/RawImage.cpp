@@ -142,7 +142,7 @@ void RawImageData::scaleValues(float f) {
 #ifdef _MSC_VER 
   int info[4];
   __cpuid(info, 1);
-  use_sse2 = !!info[3]&(1 << 26)
+  use_sse2 = !!(info[3]&(1 << 26));
 #else
   use_sse2 = TRUE;
 #endif
