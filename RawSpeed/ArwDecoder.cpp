@@ -35,8 +35,6 @@ ArwDecoder::~ArwDecoder(void) {
 RawImage ArwDecoder::decodeRaw() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 
-  data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
-
   if (data.empty())
     ThrowRDE("ARW Decoder: No image data found");
 
