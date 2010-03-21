@@ -533,8 +533,8 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
    */
 
   bits->fill();
+  code = bits->peekBitsNoFill(14);
   if (htbl->bigTable) {
-    code = bits->peekBitsNoFill(14);
     val = htbl->bigTable[code];
     if ((val&0xff) !=  0xff) {
       bits->skipBitsNoFill(val&0xff);
@@ -547,7 +547,7 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
   * 3-4% of the time.
   */
   rv = 0;
-  code = bits->peekByteNoFill();
+  code = code>>6;
   val = htbl->numbits[code];
   l = val & 15;
   if (l) {
