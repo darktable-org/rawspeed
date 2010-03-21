@@ -47,6 +47,7 @@ public:
 
   // Fill the buffer with at least 24 bits
 __inline void fill() {
+  unsigned char c, c2, c3;
   int m = mLeft >> 3;
 
   if (mLeft > 23)
@@ -54,7 +55,7 @@ __inline void fill() {
 
   if (m == 2) {
      // 16 to 23 bits left, we can add 1 byte
-     unsigned char c = buffer[off++];
+     c = buffer[off++];
      mCurr = (mCurr << 8) | c;
      mLeft += 8;
      return;
@@ -62,18 +63,19 @@ __inline void fill() {
 
   if (m == 1) {
     // 8 to 15 bits left, we can add 2 bytes
-    unsigned short c = *(unsigned short*)&buffer[off+1];
-    mCurr = (mCurr << 16) | c;
-    mLeft += 16;
-    off += 2;
-    return;
+      c = buffer[off++];
+	  c2 = buffer[off++];
+	  mCurr = (mCurr << 16) | (c<<8) | c2;
+	  mLeft += 16;
+	  return;
   }
 
   // 0 to 7 bits left, we can add 3 bytes
-  unsigned int c = *(unsigned int*)&buffer[off+2];
-  mCurr = (mCurr << 24) | (c&0x00ffffff);
+  c = buffer[off++];
+  c2 = buffer[off++];
+  c3 = buffer[off++];
+  mCurr = (mCurr << 24) | (c<<16) | (c2<<8) | c3;
   mLeft += 24;
-  off+=3;
 
 }
 
