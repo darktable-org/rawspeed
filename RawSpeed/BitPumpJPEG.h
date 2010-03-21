@@ -57,11 +57,11 @@ public:
 protected:
   void __inline init();
   const guchar* buffer;
-  const guint size;            // This if the end of buffer.
   guint mLeft;
-  guint mCurr;
   guint off;                  // Offset in bytes
+  guint mCurr;
   guint stuffed;              // How many bytes has been stuffed?
+  const guint size;            // This if the end of buffer.
 private:
 };
 
