@@ -76,7 +76,7 @@ unsigned short TiffEntry::getShort() {
 }
 
 const unsigned int* TiffEntry::getIntArray() {
-  if (type != TIFF_LONG && type != TIFF_RATIONAL && type != TIFF_SRATIONAL)
+  if (type != TIFF_LONG && type != TIFF_RATIONAL && type != TIFF_SRATIONAL && type != TIFF_UNDEFINED )
     throw TiffParserException("TIFF, getIntArray: Wrong type encountered. Expected Long");
   return (unsigned int*)&data[0];
 }

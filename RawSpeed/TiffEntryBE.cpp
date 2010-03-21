@@ -75,7 +75,7 @@ unsigned short TiffEntryBE::getShort() {
 
 const unsigned int* TiffEntryBE::getIntArray() {
   //TODO: Make critical section to avoid clashes.
-  if (!(type == TIFF_LONG || type == TIFF_UNDEFINED))
+  if (!(type == TIFF_LONG || type == TIFF_UNDEFINED || type == TIFF_RATIONAL ||  type == TIFF_SRATIONAL))
     throw TiffParserException("TIFF, getIntArray: Wrong type encountered. Expected Int");
   if (mDataSwapped)
     return (unsigned int*)&data[0];
