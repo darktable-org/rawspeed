@@ -26,8 +26,6 @@
 
 namespace RawSpeed {
 
-//#define PRINT_INFO
-
 DngDecoder::DngDecoder(TiffIFD *rootIFD, FileMap* file) : RawDecoder(file), mRootIFD(rootIFD) {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(DNGVERSION);
   const unsigned char* v = data[0]->getEntry(DNGVERSION)->getData();
@@ -283,9 +281,8 @@ RawImage DngDecoder::decodeRaw() {
     ThrowRDE("DNG Decoder: Image could not be read:\n%s", e.what());
   }
   iPoint2D new_size(mRaw->dim.x, mRaw->dim.y);
-#ifndef PRINT_INFO
-  // Crop
 
+  // Crop
   if (raw->hasEntry(ACTIVEAREA)) {
     const guint *corners = raw->getEntry(ACTIVEAREA)->getIntArray();
     iPoint2D top_left(corners[1], corners[0]);
@@ -313,7 +310,6 @@ RawImage DngDecoder::decodeRaw() {
     if (top_left.y %2 == 1)
       mRaw->cfa.shiftDown();
   }
-#endif
   // Linearization
 
   if (raw->hasEntry(LINEARIZATIONTABLE)) {
@@ -344,10 +340,8 @@ RawImage DngDecoder::decodeRaw() {
 
   if (raw->hasEntry(WHITELEVEL)) {
     TiffEntry *whitelevel = raw->getEntry(WHITELEVEL);
-    if (whitelevel->type == TIFF_LONG)
+    if (whitelevel->isInt())
       mRaw->whitePoint = whitelevel->getInt();
-    else if (whitelevel->type == TIFF_SHORT)
-      mRaw->whitePoint = whitelevel->getShort();
   }
 
 
@@ -370,12 +364,9 @@ RawImage DngDecoder::decodeRaw() {
             black = blackarray[0] / blackarray[1];
           else
             black = 0;
-        } else if (black_entry->type == TIFF_RATIONAL) {
+        } else if (black_entry->isFloat()) {
           const guint* blackarray = (const guint*)black_entry->getData();
-          if (blackarray[1])
-            black = blackarray[0] / blackarray[1];
-          else
-            black = 0;
+          black = (int)black_entry->getFloat();
         }
       }
     } else {
@@ -384,10 +375,8 @@ RawImage DngDecoder::decodeRaw() {
   } else if (raw->hasEntry(BLACKLEVEL)) {
     // Attempt to read a single value as black
     TiffEntry *blacklevel = raw->getEntry(BLACKLEVEL);
-    if (blacklevel->count >= 1 && blacklevel->type == TIFF_LONG)
+    if (blacklevel->count >= 1 && (blacklevel->isInt()))
       black = blacklevel->getInt();
-    if (blacklevel->count >= 1 && blacklevel->type == TIFF_SHORT)
-      black = blacklevel->getShort();
     if (blacklevel->count >= 1 && blacklevel->type == TIFF_RATIONAL) {
       const guint* blackarray = (const guint*)blacklevel->getData();
       if (blackarray[1])
@@ -401,10 +390,6 @@ RawImage DngDecoder::decodeRaw() {
 }
 
 void DngDecoder::decodeMetaData(CameraMetaData *meta) {
-#ifdef PRINT_INFO
-  if (mRaw->isCFA)
-    printMetaData();
-#endif
 }
 
 void DngDecoder::checkSupport(CameraMetaData *meta) {
@@ -414,112 +399,6 @@ void DngDecoder::checkSupport(CameraMetaData *meta) {
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
   this->checkCameraSupported(meta, make, model, "dng");
-}
-
-void DngDecoder::printMetaData() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  if (data.empty())
-    ThrowRDE("Model name found");
-  TiffIFD* raw = data[0];
-
-  string model = raw->getEntry(MODEL)->getString();
-  string make = raw->getEntry(MAKE)->getString();
-  TrimSpaces(model);
-  TrimSpaces(make);
-
-  data = mRootIFD->getIFDsWithTag(COMPRESSION);
-
-  if (data.empty())
-    ThrowRDE("DNG Decoder: No image data found");
-
-  // Erase the ones not with JPEG compression
-  for (vector<TiffIFD*>::iterator i = data.begin(); i != data.end();) {
-    int compression = (*i)->getEntry(COMPRESSION)->getShort();
-    bool isSubsampled = false;
-    try {
-      isSubsampled = (*i)->getEntry(NEWSUBFILETYPE)->getInt() & 1; // bit 0 is on if image is subsampled
-    } catch (TiffParserException) {}
-    if ((compression != 7 && compression != 1) || isSubsampled) {  // Erase if subsampled, or not JPEG or uncompressed
-      i = data.erase(i);
-    } else {
-      i++;
-    }
-  }
-
-  if (data.empty())
-    ThrowRDE("RAW section not found");
-
-  raw = data[0];
-  ColorFilterArray cfa(mRaw->cfa);
-
-  // Crop
-  iPoint2D top_left(0, 0);
-  iPoint2D new_size(mRaw->dim.x, mRaw->dim.y);
-
-  if (raw->hasEntry(ACTIVEAREA)) {
-    const guint *corners = raw->getEntry(ACTIVEAREA)->getIntArray();
-    top_left = iPoint2D(corners[1], corners[0]);
-    new_size = iPoint2D(corners[3] - corners[1], corners[2] - corners[0]);
-
-  } else if (raw->hasEntry(DEFAULTCROPORIGIN)) {
-
-    if (raw->getEntry(DEFAULTCROPORIGIN)->type == TIFF_LONG) {
-      const guint* tl = raw->getEntry(DEFAULTCROPORIGIN)->getIntArray();
-      const guint* sz = raw->getEntry(DEFAULTCROPSIZE)->getIntArray();
-      top_left = iPoint2D(tl[0], tl[1]);
-      new_size = iPoint2D(sz[0], sz[1]);
-    } else if (raw->getEntry(DEFAULTCROPORIGIN)->type == TIFF_SHORT) {
-      const gushort* tl = raw->getEntry(DEFAULTCROPORIGIN)->getShortArray();
-      const gushort* sz = raw->getEntry(DEFAULTCROPSIZE)->getShortArray();
-      top_left = iPoint2D(tl[0], tl[1]);
-      new_size = iPoint2D(sz[0], sz[1]);
-    }
-  }
-
-  if (top_left.x & 1)
-    cfa.shiftLeft();
-  if (top_left.y & 1)
-    cfa.shiftDown();
-
-  int black = -1;
-  if (raw->hasEntry(BLACKLEVELREPEATDIM)) {
-    const gushort *blackdim = raw->getEntry(BLACKLEVELREPEATDIM)->getShortArray();
-    black = 65536;
-    if (blackdim[0] != 0 && blackdim[1] != 0) {
-      if (raw->hasEntry(BLACKLEVELDELTAV)) {
-        const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
-        int blackbase = blackarray[0] / blackarray[1];
-        const gint *blackarrayv = (const gint*)raw->getEntry(BLACKLEVELDELTAV)->getIntArray();
-        for (int i = 0; i < new_size.y; i++)
-          if (blackarrayv[i*2+1])
-            black = MIN(black, blackbase + blackarrayv[i*2] / blackarrayv[i*2+1]);
-      } else {
-        const guint *blackarray = raw->getEntry(BLACKLEVEL)->getIntArray();
-        if (blackarray[1])
-          black = blackarray[0] / blackarray[1];
-        else
-          black = 0;
-      }
-    } else {
-      black = 0;
-    }
-  }
-
-  cout << "<Camera make=\"" << make << "\" model = \"" << model << "\">" << endl;
-  cout << "<CFA width=\"2\" height=\"2\">" << endl;
-  cout << "<Color x=\"0\" y=\"0\">" << ColorFilterArray::colorToString(cfa.getColorAt(0, 0)) << "</Color>";
-  cout << "<Color x=\"1\" y=\"0\">" << ColorFilterArray::colorToString(cfa.getColorAt(1, 0)) << "</Color>" << endl;
-  cout << "<Color x=\"0\" y=\"1\">" << ColorFilterArray::colorToString(cfa.getColorAt(0, 1)) << "</Color>";
-  cout << "<Color x=\"1\" y=\"1\">" << ColorFilterArray::colorToString(cfa.getColorAt(1, 1)) << "</Color>" << endl;
-  cout << "</CFA>" << endl;
-  cout << "<Crop x=\"" << top_left.x << "\" y=\"" << top_left.y << "\" ";
-  cout << "width=\"" << new_size.x << "\" height=\"" << new_size.y << "\"/>" << endl;
-  int white = raw->getEntry(WHITELEVEL)->getInt();
-
-  cout << "<Sensor black=\"" << black << "\" white=\"" << white << "\"/>" << endl;
-
-  cout << "</Camera>" << endl;
-
 }
 
 } // namespace RawSpeed
