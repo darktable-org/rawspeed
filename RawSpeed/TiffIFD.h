@@ -44,6 +44,8 @@ public:
   vector<TiffIFD*> getIFDsWithTag(TiffTag tag);
   TiffEntry* getEntry(TiffTag tag);
   bool hasEntry(TiffTag tag);
+  bool hasEntryRecursive(TiffTag tag);
+  TiffEntry* getEntryRecursive(TiffTag tag);
   Endianness endian;
 protected:
   gint nextIFD;

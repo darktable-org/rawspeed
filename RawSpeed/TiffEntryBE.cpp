@@ -46,7 +46,7 @@ TiffEntryBE::TiffEntryBE(FileMap* f, guint offset) : mDataSwapped(false) {
     data = f->getDataWrt(data_offset);
   }
 #ifdef _DEBUG
-  debug_intVal = 0xC0C4C014;
+  debug_intVal = 0xC0CAC01A;
   debug_floatVal = sqrtf(-1);
 
   if (type == TIFF_LONG || type == TIFF_SHORT)

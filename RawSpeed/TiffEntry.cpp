@@ -44,7 +44,7 @@ TiffEntry::TiffEntry(FileMap* f, guint offset) {
     data = f->getDataWrt(data_offset);
   }
 #ifdef _DEBUG
-  debug_intVal = 0xC0C4C014;
+  debug_intVal = 0xC0CAC01A;
   debug_floatVal = sqrtf(-1);
 
   if (type == TIFF_LONG || type == TIFF_SHORT)
@@ -55,6 +55,10 @@ TiffEntry::TiffEntry(FileMap* f, guint offset) {
 }
 
 TiffEntry::~TiffEntry(void) {
+}
+
+bool TiffEntry::isInt() {
+  return (type == TIFF_LONG || type == TIFF_SHORT);
 }
 
 unsigned int TiffEntry::getInt() {
@@ -89,14 +93,29 @@ unsigned char TiffEntry::getByte() {
   return data[0];
 }
 
+bool TiffEntry::isFloat() {
+  return (type == TIFF_FLOAT || type == TIFF_DOUBLE || type == TIFF_RATIONAL || type == TIFF_SRATIONAL || type == TIFF_LONG || type == TIFF_SHORT);
+}
+
 float TiffEntry::getFloat() {
-  if (!(type == TIFF_FLOAT || type == TIFF_DOUBLE))
+  if (!(type == TIFF_FLOAT || type == TIFF_DOUBLE || type == TIFF_RATIONAL || type == TIFF_SRATIONAL || type == TIFF_LONG || type == TIFF_SHORT))
     throw TiffParserException("TIFF, getFloat: Wrong type encountered. Expected Float");
   if (type == TIFF_DOUBLE) {
     return (float)*(double*)&data[0];
-  } else {
+  } else if (type == TIFF_FLOAT) {
     return *(float*)&data[0];
+  } else if (type == TIFF_LONG || type == TIFF_SHORT) {
+    return (float)getInt();
+  } else if (type == TIFF_RATIONAL) {
+    const unsigned int* t = getIntArray();
+    if (t[1])
+      return (float)t[0]/t[1];
+  } else if (type == TIFF_SRATIONAL) {
+    const int* t = (const int*)getIntArray();
+    if (t[1])
+      return (float)t[0]/t[1];
   }
+  return 0.0f;
 }
 
 string TiffEntry::getString() {

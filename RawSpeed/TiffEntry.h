@@ -80,6 +80,8 @@ public:
   TiffDataType type;
   guint count;
   guint getDataOffset() const { return data_offset; }
+  bool isFloat();
+  bool isInt();
 protected:
   unsigned char* data;
   guint data_offset;

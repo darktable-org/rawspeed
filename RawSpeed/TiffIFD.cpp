@@ -71,6 +71,16 @@ TiffIFD::~TiffIFD(void) {
   mSubIFD.clear();
 }
 
+bool TiffIFD::hasEntryRecursive(TiffTag tag) {
+  if (mEntry.find(tag) != mEntry.end())
+    return TRUE;
+  for (vector<TiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
+    if ((*i)->hasEntryRecursive(tag))
+      return TRUE;
+  }
+  return false;
+}
+
 vector<TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) {
   vector<TiffIFD*> matchingIFDs;
   if (mEntry.find(tag) != mEntry.end()) {
@@ -84,6 +94,18 @@ vector<TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) {
   }
 
   return matchingIFDs;
+}
+
+TiffEntry* TiffIFD::getEntryRecursive(TiffTag tag) {
+  if (mEntry.find(tag) != mEntry.end()) {
+    return mEntry[tag];
+  }
+  for (vector<TiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
+    TiffEntry* entry = (*i)->getEntryRecursive(tag);
+    if (entry)
+      return entry;
+  }
+  return NULL;
 }
 
 TiffEntry* TiffIFD::getEntry(TiffTag tag) {
