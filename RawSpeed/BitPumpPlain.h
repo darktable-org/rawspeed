@@ -50,7 +50,6 @@ protected:
   const guchar* buffer;
   const guint size;            // This if the end of buffer.
   guint off;                  // Offset in bytes
-	guint masks[31];
 private:
 };
 

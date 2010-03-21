@@ -46,9 +46,6 @@ BitPumpJPEG::BitPumpJPEG(const guchar* _buffer, guint _size) :
 
 
 void __inline BitPumpJPEG::init() {
-  for (int i = 0; i < 31; i++) {
-    masks[i] = (1 << i) - 1;
-  }
   stuffed = 0;
   fill();
 }
@@ -99,7 +96,6 @@ guint BitPumpJPEG::getBits(guint nbits) {
   if (mLeft < nbits) {
     fill();
   }
-
   return ((mCurr >> (mLeft -= (nbits)))) & ((1 << nbits) - 1);
 }
 
@@ -146,8 +142,7 @@ guint BitPumpJPEG::getBitsSafe(unsigned int nbits) {
 
   if (mLeft < nbits) {
     fill();
-    if (off > size)
-      throw IOException("Out of buffer read");
+    checkPos();
   }
   return ((mCurr >> (mLeft -= (nbits)))) & ((1 << nbits) - 1);
 }
@@ -158,9 +153,7 @@ void BitPumpJPEG::skipBits(unsigned int nbits) {
 
   if (mLeft < nbits) {
     fill();
-
-    if (off > size)
-      throw IOException("Out of buffer read");
+    checkPos();
   }
 
   mLeft -= nbits;
@@ -179,9 +172,7 @@ unsigned char BitPumpJPEG::getByte() {
 unsigned char BitPumpJPEG::getByteSafe() {
   if (mLeft < 8) {
     fill();
-
-    if (off > size)
-      throw IOException("Out of buffer read");
+    checkPos();
   }
 
   return ((mCurr >> (mLeft -= 8))) & 0xff;
@@ -193,8 +184,8 @@ void BitPumpJPEG::setAbsoluteOffset(unsigned int offset) {
     throw IOException("Offset set out of buffer");
 
   mLeft = 0;
-
   off = offset;
+  fill();
 }
 
 

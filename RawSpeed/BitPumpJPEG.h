@@ -58,7 +58,6 @@ protected:
   void __inline init();
   const guchar* buffer;
   const guint size;            // This if the end of buffer.
-	guint masks[31];
   guint mLeft;
   guint mCurr;
   guint off;                  // Offset in bytes

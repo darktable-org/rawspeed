@@ -65,9 +65,6 @@ public:
 
   __inline guint getBits(guint nbits) {
     if (mLeft < nbits) {
-      if (nbits>24)
-        throw IOException("Invalid data, attempting to read more than 24 bits.");
-
       fill();
     }
 
@@ -82,9 +79,6 @@ public:
 
   __inline guint peekBits(guint nbits) {
     if (mLeft < nbits) {
-      if (nbits>24)
-        throw IOException("Invalid data, attempting to read more than 24 bits.");
-
       fill();
     }
 
@@ -103,14 +97,13 @@ public:
   }
 
   __inline void skipBits(unsigned int nbits) {
-    if (mLeft < nbits) {
+    while (nbits) {
       fill();
-
-      if (off > size)
-        throw IOException("Out of buffer read");
+      checkPos();
+      int n = MIN(nbits, mLeft);
+      mLeft -= n;
+      nbits -= n;
     }
-
-    mLeft -= nbits;
   }
 
   __inline void skipBitsNoFill(unsigned int nbits) {
