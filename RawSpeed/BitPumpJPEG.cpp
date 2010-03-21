@@ -50,55 +50,6 @@ void __inline BitPumpJPEG::init() {
   fill();
 }
 
-#define TEST_IF_FF(VAL) if (VAL == 0xFF) {\
-  if (buffer[off] == 0)\
-    off++;\
-  else  {\
-    VAL = 0;off--;stuffed++;\
-  }\
-}
-
-void BitPumpJPEG::fill() {
-  guchar c, c2, c3;
-
-  int m = mLeft >> 3;
-
-  if (mLeft > 23)
-    return;
-
-  if (m == 2)
-  {
-    // 16 to 23 bits left, we can add 1 byte
-    c = buffer[off++];
-    TEST_IF_FF(c);
-    mCurr = (mCurr << 8) | c;
-    mLeft += 8;
-    return;
-  }
-
-  if (m == 1)
-  {
-    // 8 to 15 bits left, we can add 2 bytes
-    c = buffer[off++];
-    TEST_IF_FF(c);
-    c2 = buffer[off++];
-    TEST_IF_FF(c2);
-    mCurr = (mCurr << 16) | (c<<8) | c2;
-    mLeft += 16;
-    return;
-  }
-
-   // 0 to 7 bits left, we can add 3 bytes
-   c = buffer[off++];
-   TEST_IF_FF(c);
-   c2 = buffer[off++];
-   TEST_IF_FF(c2);
-   c3 = buffer[off++];
-   TEST_IF_FF(c3);
-   mCurr = (mCurr << 24) | (c<<16) | (c2<<8) | c3;
-   mLeft += 24;
-}
-
 guint BitPumpJPEG::getBit() {
   if (!mLeft) fill();
 

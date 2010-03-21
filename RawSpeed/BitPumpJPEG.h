@@ -50,8 +50,59 @@ public:
   __inline guint peekByteNoFill() {return ((mCurr >> (mLeft-8))) & 0xff; }
   __inline guint peekBitsNoFill(guint nbits) {return ((mCurr >> (mLeft-nbits))) & ((1 << nbits) - 1); }
   __inline guint getBitsNoFill(guint nbits) { return ((mCurr >> (mLeft -= (nbits)))) & ((1 << nbits) - 1);}
-  void fill();  // Fill the buffer with at least 24 bits
 
+#define TEST_IF_FF(VAL) if (VAL == 0xFF) {\
+  if (buffer[off] == 0)\
+  off++;\
+  else  {\
+  VAL = 0;off--;stuffed++;\
+  }\
+  }
+
+
+  // Fill the buffer with at least 24 bits
+  void __inline BitPumpJPEG::fill() {
+    guchar c, c2, c3;
+
+    int m = mLeft >> 3;
+
+    if (mLeft > 23)
+      return;
+
+    if (m == 2)
+    {
+      // 16 to 23 bits left, we can add 1 byte
+      c = buffer[off++];
+      TEST_IF_FF(c);
+      mCurr = (mCurr << 8) | c;
+      mLeft += 8;
+      return;
+    }
+
+    if (m == 1)
+    {
+      // 8 to 15 bits left, we can add 2 bytes
+      c = buffer[off++];
+      TEST_IF_FF(c);
+      c2 = buffer[off++];
+      TEST_IF_FF(c2);
+      mCurr = (mCurr << 16) | (c<<8) | c2;
+      mLeft += 16;
+      return;
+    }
+
+    // 0 to 7 bits left, we can add 3 bytes
+    c = buffer[off++];
+    TEST_IF_FF(c);
+    c2 = buffer[off++];
+    TEST_IF_FF(c2);
+    c3 = buffer[off++];
+    TEST_IF_FF(c3);
+    mCurr = (mCurr << 24) | (c<<16) | (c2<<8) | c3;
+    mLeft += 24;
+  }
+
+#undef TEST_IF_FF
 
   virtual ~BitPumpJPEG(void);
 protected:

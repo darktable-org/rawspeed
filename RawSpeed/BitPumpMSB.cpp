@@ -38,9 +38,6 @@ BitPumpMSB::BitPumpMSB(const guchar* _buffer, guint _size) :
 }
 
 __inline void BitPumpMSB::init() {
-  for (int i = 0; i < 31; i++) {
-    masks[i] = (1 << i) - 1;
-  }
   fill();
 }
 

@@ -46,16 +46,36 @@ public:
   __inline guint peekBitsNoFill(guint nbits) {return ((mCurr >> (mLeft-nbits))) & ((1 << nbits) - 1); }
 
   // Fill the buffer with at least 24 bits
-  __inline void fill() {
-     guchar c;
+__inline void fill() {
+  int m = mLeft >> 3;
 
-     while (mLeft < MIN_GET_BITS) {
-       _ASSERTE(off < size);
-       c = buffer[off++];
-       mCurr = (mCurr << 8) | c;
-       mLeft += 8;
-     }
+  if (mLeft > 23)
+    return;
+
+  if (m == 2) {
+     // 16 to 23 bits left, we can add 1 byte
+     unsigned char c = buffer[off++];
+     mCurr = (mCurr << 8) | c;
+     mLeft += 8;
+     return;
   }
+
+  if (m == 1) {
+    // 8 to 15 bits left, we can add 2 bytes
+    unsigned short c = *(unsigned short*)&buffer[off+1];
+    mCurr = (mCurr << 16) | c;
+    mLeft += 16;
+    off += 2;
+    return;
+  }
+
+  // 0 to 7 bits left, we can add 3 bytes
+  unsigned int c = *(unsigned int*)&buffer[off+2];
+  mCurr = (mCurr << 24) | c&0x00ffffff;
+  mLeft += 24;
+  off+=3;
+
+}
 
   __inline guint getBit() {
     if (!mLeft) fill();
@@ -123,7 +143,6 @@ protected:
   void __inline init();
   const guchar* buffer;
   const guint size;            // This if the end of buffer.
-	guint masks[31];
   guint mLeft;
   guint mCurr;
   guint off;                  // Offset in bytes
