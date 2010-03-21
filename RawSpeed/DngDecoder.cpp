@@ -365,7 +365,6 @@ RawImage DngDecoder::decodeRaw() {
           else
             black = 0;
         } else if (black_entry->isFloat()) {
-          const guint* blackarray = (const guint*)black_entry->getData();
           black = (int)black_entry->getFloat();
         }
       }

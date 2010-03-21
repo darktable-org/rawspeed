@@ -71,7 +71,7 @@ __inline void fill() {
 
   // 0 to 7 bits left, we can add 3 bytes
   unsigned int c = *(unsigned int*)&buffer[off+2];
-  mCurr = (mCurr << 24) | c&0x00ffffff;
+  mCurr = (mCurr << 24) | (c&0x00ffffff);
   mLeft += 24;
   off+=3;
 

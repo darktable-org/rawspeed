@@ -61,7 +61,7 @@ public:
 
 
   // Fill the buffer with at least 24 bits
-  void __inline BitPumpJPEG::fill() {
+  __inline void fill() {
     guchar c, c2, c3;
 
     int m = mLeft >> 3;
@@ -108,11 +108,11 @@ public:
 protected:
   void __inline init();
   const guchar* buffer;
-  guint mLeft;
-  guint off;                  // Offset in bytes
-  guint mCurr;
-  guint stuffed;              // How many bytes has been stuffed?
   const guint size;            // This if the end of buffer.
+  guint mLeft;
+  guint mCurr;
+  guint off;                  // Offset in bytes
+  guint stuffed;              // How many bytes has been stuffed?
 private:
 };
 
