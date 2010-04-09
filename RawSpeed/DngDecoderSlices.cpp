@@ -92,8 +92,8 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
   while (!t->slices.empty()) {
     LJpegPlain l(mFile, mRaw);
     l.mDNGCompatible = mFixLjpeg;
-    l.mUseBigtable = false;
     DngSliceElement e = t->slices.front();
+    l.mUseBigtable = e.mUseBigtable;
     t->slices.pop();
     try {
       l.startDecoder(e.byteOffset, e.byteCount, e.offX, e.offY);
