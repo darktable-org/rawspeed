@@ -193,6 +193,7 @@ RawImage DngDecoder::decodeRaw() {
           try {
             readUncompressedRaw(in, size, pos, width*bps / 8, bps, big_endian);
           } catch(IOException ex) {
+            errors.push_back(ex.what());
             // Let's ignore this, we may have some valid data.
           }
         }
