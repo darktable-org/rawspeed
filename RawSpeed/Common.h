@@ -21,7 +21,7 @@
 */
 #pragma once
 
-#ifndef __unix__
+#if !defined(__unix__) && !defined(__MINGW32__)
 #include <intrin.h>
 #pragma intrinsic(_ReturnAddress)
 #define MIN(a,b) min(a,b)
@@ -49,7 +49,9 @@
 #ifndef MAX
 #define MAX(a, b)  lmin(a,b)
 #endif
+#ifndef __MINGW32__
 typedef char* LPCWSTR;
+#endif
 #endif // __unix__
 
 namespace RawSpeed {
@@ -79,7 +81,7 @@ inline int lmax(int p0, int p1) {
 
 
 /* -------------------------------------------------------------------- */
-#ifndef __unix__
+#if !defined(__unix__) && !defined(__MINGW32__)
 
 typedef   bool          gboolean;
 typedef   void*         gpointer;

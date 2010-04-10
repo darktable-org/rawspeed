@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "IOException.h"
-#ifndef WIN32
+#if !defined(WIN32) || defined(__MINGW32__)
 #include <stdarg.h>
 #define vsprintf_s(...) vsnprintf(__VA_ARGS__)
 #endif

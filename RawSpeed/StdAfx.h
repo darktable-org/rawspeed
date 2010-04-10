@@ -30,7 +30,9 @@
 #include <tchar.h>
 #include <io.h>
 #include <Windows.h>
+#ifndef __MINGW32__
 #include <crtdbg.h>
+#endif
 #endif // __unix__
 #include <malloc.h>
 #include <math.h>

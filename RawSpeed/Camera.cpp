@@ -218,7 +218,7 @@ void Camera::parseBlackAreas(xmlDocPtr doc, xmlNodePtr cur) {
 int Camera::StringToInt(const xmlChar *in, const xmlChar *tag, const char* attribute) {
   int i;
 
-#ifdef __unix__
+#if defined(__unix__) || defined(__MINGW32__)
   if (EOF == sscanf((const char*)in, "%d", &i))
 #else
   if (EOF == sscanf_s((const char*)in, "%d", &i))
