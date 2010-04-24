@@ -145,7 +145,11 @@ RawImage DngDecoder::decodeRaw() {
     if (compression == 1) {  // Uncompressed.
       try {
         if (!mRaw->isCFA)
-          mRaw->setCpp(raw->getEntry(SAMPLESPERPIXEL)->getInt());
+        {
+          guint cpp = raw->getEntry(SAMPLESPERPIXEL)->getInt();
+          ThrowRDE("DNG Decoder: More than 4 samples per pixel is not supported.");
+          mRaw->setCpp(cpp);
+        }
         guint nslices = raw->getEntry(STRIPOFFSETS)->count;
         TiffEntry *TEoffsets = raw->getEntry(STRIPOFFSETS);
         TiffEntry *TEcounts = raw->getEntry(STRIPBYTECOUNTS);
@@ -286,9 +290,13 @@ RawImage DngDecoder::decodeRaw() {
   // Crop
   if (raw->hasEntry(ACTIVEAREA)) {
     const guint *corners = raw->getEntry(ACTIVEAREA)->getIntArray();
-    iPoint2D top_left(corners[1], corners[0]);
-    new_size = iPoint2D(corners[3] - corners[1], corners[2] - corners[0]);
-    mRaw->subFrame(top_left, new_size);
+    if (iPoint2D(corners[1], corners[0]).isThisInside(mRaw->dim)) {
+      if (iPoint2D(corners[3], corners[2]).isThisInside(mRaw->dim)) {
+        iPoint2D top_left(corners[1], corners[0]);
+        new_size = iPoint2D(corners[3] - corners[1], corners[2] - corners[0]);
+        mRaw->subFrame(top_left, new_size);
+      }
+    }
 
   } else if (raw->hasEntry(DEFAULTCROPORIGIN)) {
 
@@ -297,13 +305,17 @@ RawImage DngDecoder::decodeRaw() {
     if (raw->getEntry(DEFAULTCROPORIGIN)->type == TIFF_LONG) {
       const guint* tl = raw->getEntry(DEFAULTCROPORIGIN)->getIntArray();
       const guint* sz = raw->getEntry(DEFAULTCROPSIZE)->getIntArray();
-      top_left = iPoint2D(tl[0], tl[1]);
-      new_size = iPoint2D(sz[0], sz[1]);
+      if (iPoint2D(tl[0], tl[1]).isThisInside(mRaw->dim) && iPoint2D(sz[0], sz[1]).isThisInside(mRaw->dim)) {
+        top_left = iPoint2D(tl[0], tl[1]);
+        new_size = iPoint2D(sz[0], sz[1]);
+      }
     } else if (raw->getEntry(DEFAULTCROPORIGIN)->type == TIFF_SHORT) {
       const gushort* tl = raw->getEntry(DEFAULTCROPORIGIN)->getShortArray();
       const gushort* sz = raw->getEntry(DEFAULTCROPSIZE)->getShortArray();
-      top_left = iPoint2D(tl[0], tl[1]);
-      new_size = iPoint2D(sz[0], sz[1]);
+      if (iPoint2D(tl[0], tl[1]).isThisInside(mRaw->dim) && iPoint2D(sz[0], sz[1]).isThisInside(mRaw->dim)) {
+        top_left = iPoint2D(tl[0], tl[1]);
+        new_size = iPoint2D(sz[0], sz[1]);
+      }
     }
     mRaw->subFrame(top_left, new_size);
     if (top_left.x %2 == 1)

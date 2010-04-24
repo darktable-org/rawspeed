@@ -77,6 +77,8 @@ void RawImageData::destroyData() {
 void RawImageData::setCpp(guint val) {
   if (data)
     ThrowRDE("RawImageData: Attempted to set Components per pixel after data allocation");
+  if (val > 4)
+    ThrowRDE("RawImageData: Only up to 4 components per pixel is support - attempted to set: %d", val);
   bpp /= cpp;
   cpp = val;
   bpp *= val;
