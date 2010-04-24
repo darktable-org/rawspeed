@@ -65,6 +65,7 @@ RawImage PefDecoder::decodeRaw() {
     PentaxDecompressor l(mFile, mRaw);
     l.decodePentax(offsets->getInt(), counts->getInt());
   } catch (IOException e) {
+    errors.push_back(_strdup(e.what()));
     // Let's ignore it, it may have delivered somewhat useful data.
   }
 

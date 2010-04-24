@@ -104,6 +104,7 @@ RawImage ArwDecoder::decodeRaw() {
     else
       DecodeARW2(input, width, height, bitPerPixel);
   } catch (IOException e) {
+    errors.push_back(_strdup(e.what()));
     // Let's ignore it, it may have delivered somewhat useful data.
   }
 
