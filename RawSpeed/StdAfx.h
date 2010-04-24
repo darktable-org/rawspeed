@@ -23,6 +23,10 @@
 
 #pragma once
 
+#if defined(__MINGW32__)
+#define UNICODE
+#define _WIN32_WINNT 0x0501
+#endif
 
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 #include <stdio.h>

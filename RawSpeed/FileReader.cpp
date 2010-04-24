@@ -1,7 +1,3 @@
-#ifdef __MINGW32__
-#define UNICODE
-#define _WIN32_WINNT 0x0501
-#endif
 #include "StdAfx.h"
 #include "FileReader.h"
 #ifdef __unix__
