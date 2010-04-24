@@ -148,6 +148,9 @@ void ArwDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
     guint pitch = mRaw->pitch;
     const guchar *in = input.getData();
 
+    if (input.getRemainSize() < (w * 3 / 2))
+      ThrowRDE("Sony Decoder: Image data section too small, file probably truncated");
+
     if (input.getRemainSize() < (w*h*3 / 2))
       h = input.getRemainSize() / (w * 3 / 2) - 1;
 
