@@ -177,7 +177,14 @@ void NefDecoder::DecodeUncompressed() {
     ByteStream in(mFile->getData(slice.offset), slice.count);
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
-    readUncompressedRaw(in, size, pos, width*bitPerPixel / 8, bitPerPixel, true);
+    try {
+      readUncompressedRaw(in, size, pos, width*bitPerPixel / 8, bitPerPixel, true);
+    } catch (IOException e) {
+      if (i>0)
+        errors.push_back(_strdup(e.what()));
+      else
+        throw;
+    }
     offY += slice.h;
   }
 }
