@@ -80,7 +80,7 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
              input.getData(), inputPitch, w*mRaw->bpp, h - y);
       return;
     }
-    if (bitPerPixel == 12)  {
+    if (bitPerPixel == 12 && w == inputPitch * 8 / 12)  {
       Decode12BitRaw(input, w, h);
       return;
     }
@@ -102,9 +102,9 @@ void RawDecoder::Decode12BitRaw(ByteStream &input, guint w, guint h) {
   guchar* data = mRaw->getData();
   guint pitch = mRaw->pitch;
   const guchar *in = input.getData();
-  if (input.getRemainSize() < (w*h)) {
-    if ((int)input.getRemainSize() > w)
-      h = input.getRemainSize() / w - 1;
+  if (input.getRemainSize() < ((w*12/8)*h)) {
+    if ((int)input.getRemainSize() > (w*12/8))
+      h = input.getRemainSize() / (w*12/8) - 1;
     else
       ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. Image file truncated.");
   }
