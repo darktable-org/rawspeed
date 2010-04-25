@@ -179,11 +179,16 @@ void NefDecoder::DecodeUncompressed() {
     iPoint2D pos(0, offY);
     try {
       readUncompressedRaw(in, size, pos, width*bitPerPixel / 8, bitPerPixel, true);
-    } catch (IOException e) {
+    } catch (RawDecoderException e) {
       if (i>0)
         errors.push_back(_strdup(e.what()));
       else
         throw;
+    } catch (IOException e) {
+      if (i>0)
+        errors.push_back(_strdup(e.what()));
+      else
+        ThrowRDE("NEF decoder: IO error occurred in first slice, unable to decode more. Error is: %s", e.what());
     }
     offY += slice.h;
   }
