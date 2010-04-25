@@ -43,7 +43,10 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
   guint cpp = mRaw->getCpp();
 
   if (input.getRemainSize() < (inputPitch*h)) {
-    h = input.getRemainSize() / inputPitch - 1;
+    if ((int)input.getRemainSize() > inputPitch)
+      h = input.getRemainSize() / inputPitch - 1;
+    else
+      ThrowRDE("readUncompressedRaw: Not enough data to decode a single line. Image file truncated.");
   }
   if (bitPerPixel > 16)
     ThrowRDE("readUncompressedRaw: Unsupported bit depth");
