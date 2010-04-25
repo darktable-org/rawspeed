@@ -197,8 +197,10 @@ RawImage DngDecoder::decodeRaw() {
           try {
             readUncompressedRaw(in, size, pos, width*bps / 8, bps, big_endian);
           } catch(IOException ex) {
-            errors.push_back(ex.what());
-            // Let's ignore this, we may have some valid data.
+            if (i > 0)
+              errors.push_back(_strdup(ex.what()));
+            else
+              ThrowRDE("DNG decoder: IO error occurred in first slice, unable to decode more. Error is: %s", ex.what());
           }
         }
 
