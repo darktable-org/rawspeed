@@ -229,6 +229,9 @@ void RawDecoder::startThreads() {
       errors.push_back(t[i].error);
     }
   }
+  if (errors.size() >= threads)
+    ThrowRDE("RawDecoder::startThreads: All threads reported errors. Cannot load image.");
+
   delete[] t;
 }
 
