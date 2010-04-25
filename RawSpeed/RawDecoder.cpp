@@ -102,8 +102,11 @@ void RawDecoder::Decode12BitRaw(ByteStream &input, guint w, guint h) {
   guchar* data = mRaw->getData();
   guint pitch = mRaw->pitch;
   const guchar *in = input.getData();
-  if (input.getRemainSize() < (w*h*3 / 2)) {
-    h = input.getRemainSize() / (w * 3 / 2) - 1;
+  if (input.getRemainSize() < (w*h)) {
+    if ((int)input.getRemainSize() > w)
+      h = input.getRemainSize() / w - 1;
+    else
+      ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. Image file truncated.");
   }
   for (guint y = 0; y < h; y++) {
     gushort* dest = (gushort*) & data[y*pitch];
