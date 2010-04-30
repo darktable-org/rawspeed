@@ -29,7 +29,7 @@ TiffIFDBE::TiffIFDBE() {
   endian = big;
 }
 
-TiffIFDBE::TiffIFDBE(FileMap* f, guint offset) {
+TiffIFDBE::TiffIFDBE(FileMap* f, uint32 offset) {
   endian = big;
   int entries;
   CHECKSIZE(offset);
@@ -43,7 +43,7 @@ TiffIFDBE::TiffIFDBE(FileMap* f, guint offset) {
 
     if (t->tag == SUBIFDS || t->tag == EXIFIFDPOINTER) {   // subIFD tag
       const unsigned int* sub_offsets = t->getIntArray();
-      for (guint j = 0; j < t->count; j++) {
+      for (uint32 j = 0; j < t->count; j++) {
         mSubIFD.push_back(new TiffIFDBE(f, sub_offsets[j]));
       }
     } else {  // Store as entry

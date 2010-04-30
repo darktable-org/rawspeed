@@ -36,7 +36,7 @@ public:
   virtual void decodeMetaData(CameraMetaData *meta);
   virtual ~Cr2Decoder(void);
 protected:
-  gint sraw_coeffs[3];
+  int sraw_coeffs[3];
 
   void sRawInterpolate();
   void interpolate_420(int w, int h, int start_h , int end_h);
@@ -49,10 +49,10 @@ class Cr2Slice {
 public:
   Cr2Slice() { w = h = offset = count = 0;};
   ~Cr2Slice() {};
-  guint w;
-  guint h;
-  guint offset;
-  guint count;
+  uint32 w;
+  uint32 h;
+  uint32 offset;
+  uint32 count;
 };
 
 } // namespace RawSpeed

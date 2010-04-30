@@ -62,7 +62,7 @@ void TiffParserOlympus::parseData() {
   else
     mRootIFD = new TiffIFDBE();
 
-  guint nextIFD = 4;  // Skip Endian and magic
+  uint32 nextIFD = 4;  // Skip Endian and magic
   do {
     CHECKSIZE(nextIFD);
 

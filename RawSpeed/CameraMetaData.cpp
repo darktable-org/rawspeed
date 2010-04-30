@@ -54,7 +54,7 @@ CameraMetaData::CameraMetaData(char *docname) {
       addCamera(camera);
 
       // Create cameras for aliases.
-      for (guint i = 0; i < camera->aliases.size(); i++) {
+      for (uint32 i = 0; i < camera->aliases.size(); i++) {
         addCamera(new Camera(camera, i));
       }
     }

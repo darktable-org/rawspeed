@@ -76,9 +76,9 @@ RawImage NefDecoder::decodeRaw() {
   if (34713 != compression)
     ThrowRDE("NEF Decoder: Unsupported compression");
 
-  guint width = raw->getEntry(IMAGEWIDTH)->getInt();
-  guint height = raw->getEntry(IMAGELENGTH)->getInt();
-  guint bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
+  uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->bpp = 2;
@@ -90,8 +90,8 @@ RawImage NefDecoder::decodeRaw() {
 
   TiffIFD* exif = data[0];
   TiffEntry *makernoteEntry = exif->getEntry(MAKERNOTE);
-  const guchar* makernote = makernoteEntry->getData();
-  FileMap makermap((guchar*)&makernote[10], makernoteEntry->count - 10);
+  const uchar8* makernote = makernoteEntry->getData();
+  FileMap makermap((uchar8*)&makernote[10], makernoteEntry->count - 10);
   TiffParser makertiff(&makermap);
   makertiff.parseData();
 
@@ -124,9 +124,9 @@ Figure out if a NEF file is compressed.  These fancy heuristics
 are only needed for the D100, thanks to a bug in some cameras
 that tags all images as "compressed".
 */
-gboolean NefDecoder::D100IsCompressed(guint offset) {
-  const guchar *test = mFile->getData(offset);
-  gint i;
+bool NefDecoder::D100IsCompressed(uint32 offset) {
+  const uchar8 *test = mFile->getData(offset);
+  int i;
 
   for (i = 15; i < 256; i += 16)
     if (test[i]) return true;
@@ -136,18 +136,18 @@ gboolean NefDecoder::D100IsCompressed(guint offset) {
 void NefDecoder::DecodeUncompressed() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
   TiffIFD* raw = data[0];
-  guint nslices = raw->getEntry(STRIPOFFSETS)->count;
-  const guint *offsets = raw->getEntry(STRIPOFFSETS)->getIntArray();
-  const guint *counts = raw->getEntry(STRIPBYTECOUNTS)->getIntArray();
-  guint yPerSlice = raw->getEntry(ROWSPERSTRIP)->getInt();
-  guint width = raw->getEntry(IMAGEWIDTH)->getInt();
-  guint height = raw->getEntry(IMAGELENGTH)->getInt();
-  guint bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();
+  uint32 nslices = raw->getEntry(STRIPOFFSETS)->count;
+  const uint32 *offsets = raw->getEntry(STRIPOFFSETS)->getIntArray();
+  const uint32 *counts = raw->getEntry(STRIPBYTECOUNTS)->getIntArray();
+  uint32 yPerSlice = raw->getEntry(ROWSPERSTRIP)->getInt();
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
+  uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();
 
   vector<NefSlice> slices;
-  guint offY = 0;
+  uint32 offY = 0;
 
-  for (guint s = 0; s < nslices; s++) {
+  for (uint32 s = 0; s < nslices; s++) {
     NefSlice slice;
     slice.offset = offsets[s];
     slice.count = counts[s];
@@ -172,7 +172,7 @@ void NefDecoder::DecodeUncompressed() {
     bitPerPixel = 16; // D3
 
   offY = 0;
-  for (guint i = 0; i < slices.size(); i++) {
+  for (uint32 i = 0; i < slices.size(); i++) {
     NefSlice slice = slices[i];
     ByteStream in(mFile->getData(slice.offset), slice.count);
     iPoint2D size(width, slice.h);
@@ -200,29 +200,29 @@ void NefDecoder::DecodeD100Uncompressed() {
   /*
     TiffIFD* raw = mRootIFD->getIFDsWithTag(CFAPATTERN)[0];
 
-    guint nslices = raw->getEntry(STRIPOFFSETS)->count;
-    guint offset = raw->getEntry(STRIPOFFSETS)->getInt();
-    guint count = raw->getEntry(STRIPBYTECOUNTS)->getInt();
+    uint32 nslices = raw->getEntry(STRIPOFFSETS)->count;
+    uint32 offset = raw->getEntry(STRIPOFFSETS)->getInt();
+    uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getInt();
     if (!mFile->isValid(offset+count))
       ThrowRDE("DecodeD100Uncompressed: Truncated file");
 
-    const guchar *in =  mFile->getData(offset);
+    const uchar8 *in =  mFile->getData(offset);
 
-    guint w = raw->getEntry(IMAGEWIDTH)->getInt();
-    guint h = raw->getEntry(IMAGELENGTH)->getInt();
+    uint32 w = raw->getEntry(IMAGEWIDTH)->getInt();
+    uint32 h = raw->getEntry(IMAGELENGTH)->getInt();
 
     mRaw->dim = iPoint2D(w, h);
     mRaw->bpp = 2;
     mRaw->createData();
 
-    guchar* data = mRaw->getData();
-    guint outPitch = mRaw->pitch;
+    uchar8* data = mRaw->getData();
+    uint32 outPitch = mRaw->pitch;
 
     BitPumpMSB bits(mFile->getData(offset),count);
-    for (guint y = 0; y < h; y++) {
-      gushort* dest = (gushort*)&data[y*outPitch];
-      for(guint x =0 ; x < w; x++) {
-        guint b = bits.getBits(12);
+    for (uint32 y = 0; y < h; y++) {
+      ushort16* dest = (ushort16*)&data[y*outPitch];
+      for(uint32 x =0 ; x < w; x++) {
+        uint32 b = bits.getBits(12);
         dest[x] = b;
         if ((x % 10) == 9)
           bits.skipBits(8);

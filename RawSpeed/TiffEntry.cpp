@@ -28,18 +28,18 @@ namespace RawSpeed {
 TiffEntry::TiffEntry() {
 }
 
-TiffEntry::TiffEntry(FileMap* f, guint offset) {
+TiffEntry::TiffEntry(FileMap* f, uint32 offset) {
   unsigned short* p = (unsigned short*)f->getData(offset);
   tag = (TiffTag)p[0];
   type = (TiffDataType)p[1];
   count = *(int*)f->getData(offset + 4);
   if (type > 13)
     throw TiffParserException("Error reading TIFF structure. Unknown Type encountered.");
-  guint bytesize = count << datashifts[type];
+  uint32 bytesize = count << datashifts[type];
   if (bytesize <= 4) {
     data = f->getDataWrt(offset + 8);
   } else { // offset
-    data_offset = *(guint*)f->getData(offset + 8);
+    data_offset = *(uint32*)f->getData(offset + 8);
     CHECKSIZE(data_offset + bytesize);
     data = f->getDataWrt(data_offset);
   }

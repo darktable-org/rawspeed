@@ -65,7 +65,7 @@ void DngDecoderSlices::startDecoding() {
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
   pthread_mutex_init(&errMutex, NULL);
 
-  for (guint i = 0; i < nThreads; i++) {
+  for (uint32 i = 0; i < nThreads; i++) {
     DngDecoderThread* t = new DngDecoderThread();
     for (int j = 0; j < slicesPerThread ; j++) {
       if (!slices.empty()) {
@@ -80,7 +80,7 @@ void DngDecoderSlices::startDecoding() {
   pthread_attr_destroy(&attr);
 
   void *status;
-  for (guint i = 0; i < nThreads; i++) {
+  for (uint32 i = 0; i < nThreads; i++) {
     pthread_join(threads[i]->threadid, &status);
     delete(threads[i]);
   }

@@ -30,12 +30,12 @@ class TiffEntryBE :
 {
 public:
 //  TiffEntryBE(void);
-  TiffEntryBE(FileMap* f, guint offset);
+  TiffEntryBE(FileMap* f, uint32 offset);
   virtual ~TiffEntryBE(void);
-  virtual guint getInt();
-  virtual gushort getShort();
-  virtual const guint* getIntArray();
-  virtual const gushort* getShortArray();
+  virtual uint32 getInt();
+  virtual ushort16 getShort();
+  virtual const uint32* getIntArray();
+  virtual const ushort16* getShortArray();
 private:
   bool mDataSwapped;
 };

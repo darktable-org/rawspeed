@@ -30,14 +30,14 @@ namespace RawSpeed {
 class DngSliceElement
 {
 public:
-  DngSliceElement(guint off, guint count, guint offsetX, guint offsetY) : 
+  DngSliceElement(uint32 off, uint32 count, uint32 offsetX, uint32 offsetY) : 
       byteOffset(off), byteCount(count), offX(offsetX), offY(offsetY), mUseBigtable(false) {};
   ~DngSliceElement(void) {};
-  const guint byteOffset;
-  const guint byteCount;
-  const guint offX;
-  const guint offY;
-  gboolean mUseBigtable;
+  const uint32 byteOffset;
+  const uint32 byteCount;
+  const uint32 offX;
+  const uint32 offY;
+  bool mUseBigtable;
 };
 class DngDecoderSlices;
 
@@ -68,8 +68,8 @@ public:
   RawImage mRaw;
   vector<const char*> errors;
   pthread_mutex_t errMutex;   // Mutex for above
-  gboolean mFixLjpeg;
-  guint nThreads;
+  bool mFixLjpeg;
+  uint32 nThreads;
 };
 
 } // namespace RawSpeed

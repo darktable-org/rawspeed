@@ -38,7 +38,7 @@ public:
   virtual void decodeMetaData(CameraMetaData *meta);
   virtual void checkSupport(CameraMetaData *meta);
 private:
-  void decodeCompressed(ByteStream& s,guint w, guint h);
+  void decodeCompressed(ByteStream& s,uint32 w, uint32 h);
   TiffIFD *mRootIFD;
 };
 

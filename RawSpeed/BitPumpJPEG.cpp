@@ -29,18 +29,18 @@ namespace RawSpeed {
 
 /*** Used for entropy encoded sections ***/
 
-#define BITS_PER_LONG (8*sizeof(guint))
+#define BITS_PER_LONG (8*sizeof(uint32))
 #define MIN_GET_BITS  (BITS_PER_LONG-7)    /* max value for long getBuffer */
 
 
 BitPumpJPEG::BitPumpJPEG(ByteStream *s):
-    buffer(s->getData()), size(s->getRemainSize() + sizeof(guint)), mLeft(0), mCurr(0), off(0) {
+    buffer(s->getData()), size(s->getRemainSize() + sizeof(uint32)), mLeft(0), mCurr(0), off(0) {
   init();
 }
 
 
-BitPumpJPEG::BitPumpJPEG(const guchar* _buffer, guint _size) :
-    buffer(_buffer), size(_size + sizeof(guint)), mLeft(0), mCurr(0), off(0) {
+BitPumpJPEG::BitPumpJPEG(const uchar8* _buffer, uint32 _size) :
+    buffer(_buffer), size(_size + sizeof(uint32)), mLeft(0), mCurr(0), off(0) {
   init();
 }
 
@@ -50,14 +50,14 @@ void __inline BitPumpJPEG::init() {
   fill();
 }
 
-guint BitPumpJPEG::getBit() {
+uint32 BitPumpJPEG::getBit() {
   if (!mLeft) fill();
 
   return (mCurr >> (--mLeft)) & 1;
 }
 
 
-guint BitPumpJPEG::getBits(guint nbits) {
+uint32 BitPumpJPEG::getBits(uint32 nbits) {
   _ASSERTE(nbits < 24);
 
   if (mLeft < nbits) {
@@ -67,13 +67,13 @@ guint BitPumpJPEG::getBits(guint nbits) {
 }
 
 
-guint BitPumpJPEG::peekBit() {
+uint32 BitPumpJPEG::peekBit() {
   if (!mLeft) fill();
   return (mCurr >> (mLeft - 1)) & 1;
 }
 
 
-guint BitPumpJPEG::peekBits(guint nbits) {
+uint32 BitPumpJPEG::peekBits(uint32 nbits) {
   if (mLeft < nbits) {
     fill();
   }
@@ -81,7 +81,7 @@ guint BitPumpJPEG::peekBits(guint nbits) {
 }
 
 
-guint BitPumpJPEG::peekByte() {
+uint32 BitPumpJPEG::peekByte() {
   if (mLeft < 8) {
     fill();
   }
@@ -92,7 +92,7 @@ guint BitPumpJPEG::peekByte() {
 }
 
 
-guint BitPumpJPEG::getBitSafe() {
+uint32 BitPumpJPEG::getBitSafe() {
   if (!mLeft) {
     fill();
     if (off > size)
@@ -103,7 +103,7 @@ guint BitPumpJPEG::getBitSafe() {
 }
 
 
-guint BitPumpJPEG::getBitsSafe(unsigned int nbits) {
+uint32 BitPumpJPEG::getBitsSafe(unsigned int nbits) {
   if (nbits > MIN_GET_BITS)
     throw IOException("Too many bits requested");
 
@@ -127,7 +127,7 @@ void BitPumpJPEG::skipBits(unsigned int nbits) {
 }
 
 
-unsigned char BitPumpJPEG::getByte() {
+uchar8 BitPumpJPEG::getByte() {
   if (mLeft < 8) {
     fill();
   }
@@ -136,7 +136,7 @@ unsigned char BitPumpJPEG::getByte() {
 }
 
 
-unsigned char BitPumpJPEG::getByteSafe() {
+uchar8 BitPumpJPEG::getByteSafe() {
   if (mLeft < 8) {
     fill();
     checkPos();

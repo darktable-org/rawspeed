@@ -25,11 +25,11 @@ namespace RawSpeed {
 class BlackArea
 {
 public:
-  BlackArea(int offset, int size, gboolean isVertical);
+  BlackArea(int offset, int size, bool isVertical);
   virtual ~BlackArea(void);
-  guint offset; // Offset in bayer pixels.
-  guint size;   // Size in bayer pixels.
-  gboolean isVertical;  // Otherwise horizontal
+  uint32 offset; // Offset in bayer pixels.
+  uint32 size;   // Size in bayer pixels.
+  bool isVertical;  // Otherwise horizontal
 };
 
 } // namespace RawSpeed

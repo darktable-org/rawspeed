@@ -36,7 +36,7 @@ RawImageData::RawImageData(void):
   subsampling.x = subsampling.y = 1;
 }
 
-RawImageData::RawImageData(iPoint2D _dim, guint _bpc, guint _cpp) :
+RawImageData::RawImageData(iPoint2D _dim, uint32 _bpc, uint32 _cpp) :
     dim(_dim), bpp(_bpc),
     blackLevel(-1), whitePoint(65536),
     dataRefCount(0), data(0), cpp(cpp) {
@@ -63,7 +63,7 @@ void RawImageData::createData() {
   if (data)
     ThrowRDE("RawImageData: Duplicate data allocation in createData.");
   pitch = (((dim.x * bpp) + 15) / 16) * 16;
-  data = (guchar*)_aligned_malloc(pitch * dim.y, 16);
+  data = (uchar8*)_aligned_malloc(pitch * dim.y, 16);
   if (!data)
     ThrowRDE("RawImageData::createData: Memory Allocation failed.");
 }
@@ -74,7 +74,7 @@ void RawImageData::destroyData() {
   data = 0;
 }
 
-void RawImageData::setCpp(guint val) {
+void RawImageData::setCpp(uint32 val) {
   if (data)
     ThrowRDE("RawImageData: Attempted to set Components per pixel after data allocation");
   if (val > 4)
@@ -84,13 +84,13 @@ void RawImageData::setCpp(guint val) {
   bpp *= val;
 }
 
-guchar* RawImageData::getData() {
+uchar8* RawImageData::getData() {
   if (!data)
     ThrowRDE("RawImageData::getData - Data not yet allocated.");
   return &data[mOffset.y*pitch+mOffset.x*bpp];
 }
 
-guchar* RawImageData::getData(guint x, guint y) {
+uchar8* RawImageData::getData(uint32 x, uint32 y) {
   if ((int)x >= dim.x)
     ThrowRDE("RawImageData::getData - X Position outside image requested.");
   if ((int)y >= dim.y) {
@@ -117,12 +117,12 @@ void RawImageData::subFrame(iPoint2D offset, iPoint2D new_size) {
 }
 
 void RawImageData::scaleBlackWhite() {
-  gint gw = (dim.x - 20) * cpp;
+  int gw = (dim.x - 20) * cpp;
   if (blackLevel < 0 || whitePoint == 65536) {  // Estimate
     int b = 65536;
     int m = 0;
     for (int row = 10;row < (dim.y - 10);row++) {
-      gushort *pixel = (gushort*)getData(10, row);
+      ushort16 *pixel = (ushort16*)getData(10, row);
       for (int col = 10 ; col < gw ; col++) {
         b = MIN(*pixel, b);
         m = MAX(*pixel, m);
@@ -142,7 +142,7 @@ void RawImageData::scaleBlackWhite() {
 #if _MSC_VER > 1399 || defined(__SSE2__)
 
 void RawImageData::scaleValues(float f) {
-  gboolean use_sse2;
+  bool use_sse2;
 #ifdef _MSC_VER 
   int info[4];
   __cpuid(info, 1);
@@ -159,10 +159,10 @@ void RawImageData::scaleValues(float f) {
     __m128i sseround;
     __m128i ssesub2;
     __m128i ssesign;
-    guint gw = pitch / 16;
-    guint i = (int)(1024.0f * f);  // 10 bit fraction
+    uint32 gw = pitch / 16;
+    uint32 i = (int)(1024.0f * f);  // 10 bit fraction
     i |= i << 16;
-    guint b = blackLevel | (blackLevel << 16);
+    uint32 b = blackLevel | (blackLevel << 16);
 
     ssescale = _mm_set_epi32(i, i, i, i);
     ssesub = _mm_set_epi32(b, b, b, b);
@@ -172,7 +172,7 @@ void RawImageData::scaleValues(float f) {
 
     for (int y = 0; y < dim.y; y++) {
       __m128i* pixel = (__m128i*) & data[(mOffset.y+y)*pitch];
-      for (guint x = 0 ; x < gw; x++) {
+      for (uint32 x = 0 ; x < gw; x++) {
         __m128i pix_high;
         __m128i temp;
         __m128i pix_low = _mm_load_si128(pixel);
@@ -202,10 +202,10 @@ void RawImageData::scaleValues(float f) {
     }
   } else {
     // Not SSE2
-    gint gw = dim.x * cpp;
+    int gw = dim.x * cpp;
     int scale = (int)(16384.0f * f);  // 14 bit fraction
     for (int y = 0; y < dim.y; y++) {
-      gushort *pixel = (gushort*)getData(0, y);
+      ushort16 *pixel = (ushort16*)getData(0, y);
       for (int x = 0 ; x < gw; x++) {
         pixel[x] = clampbits(((pixel[x] - blackLevel) * scale + 8192) >> 14, 16);
       }
@@ -216,10 +216,10 @@ void RawImageData::scaleValues(float f) {
 #else
 
 void RawImageData::scaleValues(float f) {
-  gint gw = dim.x * cpp;
+  int gw = dim.x * cpp;
   int scale = (int)(16384.0f * f);  // 14 bit fraction
   for (int y = 0; y < dim.y; y++) {
-    gushort *pixel = (gushort*)getData(0, y);
+    ushort16 *pixel = (ushort16*)getData(0, y);
     for (int x = 0 ; x < gw; x++) {
       pixel[x] = clampbits(((pixel[x] - blackLevel) * scale + 8192) >> 14, 16);
     }

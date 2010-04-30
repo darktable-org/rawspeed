@@ -37,8 +37,8 @@ class RawDecoderThread
 {
   public:
     RawDecoderThread() {error = 0;};
-    guint start_y;
-    guint end_y;
+    uint32 start_y;
+    uint32 end_y;
     const char* error;
     pthread_t threadid;
     RawDecoder* parent;
@@ -110,10 +110,10 @@ protected:
   /* inputPitch: Number of bytes between each line in the input image */
   /* bitPerPixel: Number of bits to read for each input pixel. */
   /* MSBOrder: true -  bits are read from MSB (JPEG style) False: Read from LSB. */
-  void readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch, int bitPerPixel, gboolean MSBOrder);
+  void readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch, int bitPerPixel, bool MSBOrder);
 
   /* Faster version for unpacking 12 bit LSB data */
-  void Decode12BitRaw(ByteStream &input, guint w, guint h);
+  void Decode12BitRaw(ByteStream &input, uint32 w, uint32 h);
 
   /* Remove all spaces at the end of a string */
   void TrimSpaces( string& str);
@@ -126,7 +126,7 @@ protected:
   /* can be decoded, when a specific version of the code is needed */
   /* Higher number in camera xml file: Files for this camera will not be decoded */
   /* Higher number in code than xml: Image will be decoded. */
-  gint decoderVersion;
+  int decoderVersion;
 };
 
 } // namespace RawSpeed

@@ -36,11 +36,11 @@ class TiffIFD
 {
 public:
   TiffIFD();
-  TiffIFD(FileMap* f, guint offset);
+  TiffIFD(FileMap* f, uint32 offset);
   virtual ~TiffIFD(void);
   vector<TiffIFD*> mSubIFD;
   map<TiffTag, TiffEntry*> mEntry;
-  gint getNextIFD() {return nextIFD;}
+  int getNextIFD() {return nextIFD;}
   vector<TiffIFD*> getIFDsWithTag(TiffTag tag);
   TiffEntry* getEntry(TiffTag tag);
   bool hasEntry(TiffTag tag);
@@ -48,7 +48,7 @@ public:
   TiffEntry* getEntryRecursive(TiffTag tag);
   Endianness endian;
 protected:
-  gint nextIFD;
+  int nextIFD;
 };
 
 } // namespace RawSpeed

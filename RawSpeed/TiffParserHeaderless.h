@@ -30,7 +30,7 @@ class TiffParserHeaderless :
 public:
   TiffParserHeaderless(FileMap* input, Endianness _end);
   virtual ~TiffParserHeaderless(void);
-  void parseData(guint firstIfdOffset);
+  void parseData(uint32 firstIfdOffset);
   virtual void parseData();
 };
 

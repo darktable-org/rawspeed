@@ -34,30 +34,30 @@ class RawImageData
 public:
   virtual ~RawImageData(void);
   iPoint2D dim;
-  guint bpp;      // Bytes per pixel.
-  guint getCpp() const { return cpp; }
-  void setCpp(guint val);
-  guint pitch;
+  uint32 bpp;      // Bytes per pixel.
+  uint32 getCpp() const { return cpp; }
+  void setCpp(uint32 val);
+  uint32 pitch;
   virtual void createData();
   virtual void destroyData();
-  guchar* getData();
-  guchar* getData(guint x, guint y);    // Not super fast, but safe. Don't use per pixel.
+  uchar8* getData();
+  uchar8* getData(uint32 x, uint32 y);    // Not super fast, but safe. Don't use per pixel.
   virtual void subFrame( iPoint2D offset, iPoint2D new_size );
   void scaleBlackWhite();
-  gboolean isCFA;
+  bool isCFA;
   ColorFilterArray cfa;
   int blackLevel;
   int whitePoint;
   vector<BlackArea> blackAreas;
   iPoint2D subsampling;
-  gboolean isAllocated() {return !!data;}
+  bool isAllocated() {return !!data;}
   void scaleValues(float scale);
 protected:
   RawImageData(void);
-  RawImageData(iPoint2D dim, guint bpp, guint cpp=1);
-  guint dataRefCount;
-  guchar* data;
-  guint cpp;      // Components per pixel
+  RawImageData(iPoint2D dim, uint32 bpp, uint32 cpp=1);
+  uint32 dataRefCount;
+  uchar8* data;
+  uint32 cpp;      // Components per pixel
   friend class RawImage;
   pthread_mutex_t mymutex;
   iPoint2D mOffset;
@@ -67,7 +67,7 @@ protected:
  class RawImage {
  public:
    static RawImage create();
-   static RawImage create(iPoint2D dim, guint bytesPerComponent, guint componentsPerPixel = 1);
+   static RawImage create(iPoint2D dim, uint32 bytesPerComponent, uint32 componentsPerPixel = 1);
    RawImageData* operator-> ();
    RawImageData& operator* ();
    RawImage(RawImageData* p);  // p must not be NULL
@@ -80,7 +80,7 @@ protected:
  };
 
 inline RawImage RawImage::create()  { return new RawImageData(); }
-inline RawImage RawImage::create(iPoint2D dim, guint bytesPerPixel, guint componentsPerPixel)
+inline RawImage RawImage::create(iPoint2D dim, uint32 bytesPerPixel, uint32 componentsPerPixel)
 { return new RawImageData(dim, bytesPerPixel, componentsPerPixel); }
 
 } // namespace RawSpeed

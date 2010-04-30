@@ -27,23 +27,23 @@ namespace RawSpeed {
 class ByteStream
 {
 public:
-  ByteStream(const guchar* _buffer, guint _size);
+  ByteStream(const uchar8* _buffer, uint32 _size);
   ByteStream(const ByteStream* b);
   ~ByteStream(void);
-  guint peekByte();
-  gushort getShort();
-  guint getOffset() {return off;}
-  void skipBytes(guint nbytes);
-  guchar getByte();
-  void setAbsoluteOffset(guint offset);
+  uint32 peekByte();
+  ushort16 getShort();
+  uint32 getOffset() {return off;}
+  void skipBytes(uint32 nbytes);
+  uchar8 getByte();
+  void setAbsoluteOffset(uint32 offset);
   void skipToMarker();
-  guint getRemainSize() { return size-off;}
-  const guchar* getData() {return &buffer[off];}
-  gint getInt();
+  uint32 getRemainSize() { return size-off;}
+  const uchar8* getData() {return &buffer[off];}
+  int getInt();
 private:
-  const guchar* buffer;
-  const guint size;            // This if the end of buffer.
-  guint off;                  // Offset in bytes (this is next byte to deliver)
+  const uchar8* buffer;
+  const uint32 size;            // This if the end of buffer.
+  uint32 off;                  // Offset in bytes (this is next byte to deliver)
 
 };
 

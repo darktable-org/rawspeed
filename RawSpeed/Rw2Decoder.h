@@ -32,10 +32,10 @@ class PanaBitpump {
   PanaBitpump(ByteStream* input);
   virtual ~PanaBitpump();
   ByteStream* input;
-  guchar buf[0x4000];
+  uchar8 buf[0x4000];
   int vbits;
-  guint load_flags;
-  guint getBits(int nbits);
+  uint32 load_flags;
+  uint32 getBits(int nbits);
   void skipBytes(int bytes);
 };
 
@@ -56,7 +56,7 @@ private:
   void DecodeRw2();
   bool almostEqualRelative(float A, float B, float maxRelativeError);
   ByteStream* input_start;
-  guint load_flags;
+  uint32 load_flags;
 };
 
 } // namespace RawSpeed

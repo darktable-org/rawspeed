@@ -31,7 +31,7 @@ class Camera
 {
 public:
   Camera(xmlDocPtr doc, xmlNodePtr cur);
-  Camera(const Camera* camera, guint alias_num);
+  Camera(const Camera* camera, uint32 alias_num);
   void parseCameraChild(xmlDocPtr doc, xmlNodePtr cur);
   virtual ~Camera(void);
   string make;
@@ -39,13 +39,13 @@ public:
   string mode;
   vector<string> aliases;
   ColorFilterArray cfa;
-  guint black;
-  guint white;
-  gboolean supported;
+  uint32 black;
+  uint32 white;
+  bool supported;
   iPoint2D cropSize;
   iPoint2D cropPos;
   vector<BlackArea> blackAreas;
-  gint decoderVersion;
+  int decoderVersion;
   map<string,string> hints;
 private:
   int StringToInt(const xmlChar *in, const xmlChar *tag, const char* attribute);

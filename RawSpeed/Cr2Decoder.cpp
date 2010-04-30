@@ -52,7 +52,7 @@ RawImage Cr2Decoder::decodeRaw() {
     TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
     TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
     // Iterate through all slices
-    for (guint s = 0; s < offsets->count; s++) {
+    for (uint32 s = 0; s < offsets->count; s++) {
       Cr2Slice slice;
       slice.offset = offsets[0].getInt();
       slice.count = counts[0].getInt();
@@ -81,7 +81,7 @@ RawImage Cr2Decoder::decodeRaw() {
   mRaw->dim = iPoint2D(slices[0].w, completeH);
 
   if (raw->hasEntry((TiffTag)0xc6c5)) {
-    gushort ss = raw->getEntry((TiffTag)0xc6c5)->getInt();
+    ushort16 ss = raw->getEntry((TiffTag)0xc6c5)->getInt();
     // sRaw
     if (ss == 4) {
       mRaw->dim.x /= 3;
@@ -94,7 +94,7 @@ RawImage Cr2Decoder::decodeRaw() {
 
   vector<int> s_width;
   if (raw->hasEntry(CANONCR2SLICE)) {
-    const gushort *ss = raw->getEntry(CANONCR2SLICE)->getShortArray();
+    const ushort16 *ss = raw->getEntry(CANONCR2SLICE)->getShortArray();
     for (int i = 0; i < ss[0]; i++) {
       s_width.push_back(ss[1]);
     }
@@ -102,12 +102,12 @@ RawImage Cr2Decoder::decodeRaw() {
   } else {
     s_width.push_back(slices[0].w);
   }
-  guint offY = 0;
+  uint32 offY = 0;
 
   if (s_width.size() > 15)
     ThrowRDE("CR2 Decoder: No more than 15 slices supported");
   
-  for (guint i = 0; i < slices.size(); i++) {
+  for (uint32 i = 0; i < slices.size(); i++) {
     Cr2Slice slice = slices[i];
     try {
       LJpegPlain l(mFile, mRaw);
@@ -177,7 +177,7 @@ void Cr2Decoder::sRawInterpolate() {
   if (data.empty())
     ThrowRDE("CR2 sRaw: Unable to locate WB info.");
 
-  const gushort *wb_data = data[0]->getEntry((TiffTag)0x4001)->getShortArray();
+  const ushort16 *wb_data = data[0]->getEntry((TiffTag)0x4001)->getShortArray();
 
   // Offset to sRaw coefficients used to reconstruct uncorrected RGB data.
   wb_data = &wb_data[4+(126+22)/2];
@@ -193,7 +193,7 @@ void Cr2Decoder::sRawInterpolate() {
     ThrowRDE("CR2 sRaw Decoder: Model name not found");
 
   string model = data[0]->getEntry(MODEL)->getString();
-  gboolean isOldSraw = (model.compare("Canon EOS 40D") == 0);
+  bool isOldSraw = (model.compare("Canon EOS 40D") == 0);
 
   if (mRaw->subsampling.y == 1 && mRaw->subsampling.x == 2) {
     if (isOldSraw)
@@ -221,11 +221,11 @@ void Cr2Decoder::interpolate_422(int w, int h, int start_h , int end_h) {
   w--;
 
   // Current line
-  gushort* c_line;
+  ushort16* c_line;
 
   for (int y = start_h; y < end_h; y++) {
-    c_line = (gushort*)mRaw->getData(0, y);
-    gint r, g, b;
+    c_line = (ushort16*)mRaw->getData(0, y);
+    int r, g, b;
     int off = 0;
     for (int x = 0; x < w; x++) {
       int Y = c_line[off];
@@ -261,7 +261,7 @@ void Cr2Decoder::interpolate_420(int w, int h, int start_h , int end_h) {
   // Last pixel should not be interpolated
   w--;
 
-  gboolean atLastLine = FALSE;
+  bool atLastLine = FALSE;
 
   if (end_h == h) {
     end_h--;
@@ -269,19 +269,19 @@ void Cr2Decoder::interpolate_420(int w, int h, int start_h , int end_h) {
   }
 
   // Current line
-  gushort* c_line;
+  ushort16* c_line;
   // Next line
-  gushort* n_line;
+  ushort16* n_line;
   // Next line again
-  gushort* nn_line;
+  ushort16* nn_line;
 
   int off;
-  gint r, g, b;
+  int r, g, b;
 
   for (int y = start_h; y < end_h; y++) {
-    c_line = (gushort*)mRaw->getData(0, y * 2);
-    n_line = (gushort*)mRaw->getData(0, y * 2 + 1);
-    nn_line = (gushort*)mRaw->getData(0, y * 2 + 2);
+    c_line = (ushort16*)mRaw->getData(0, y * 2);
+    n_line = (ushort16*)mRaw->getData(0, y * 2 + 1);
+    nn_line = (ushort16*)mRaw->getData(0, y * 2 + 2);
     off = 0;
     for (int x = 0; x < w; x++) {
       int Y = c_line[off];
@@ -333,8 +333,8 @@ void Cr2Decoder::interpolate_420(int w, int h, int start_h , int end_h) {
   }
 
   if (atLastLine) {
-    c_line = (gushort*)mRaw->getData(0, end_h * 2);
-    n_line = (gushort*)mRaw->getData(0, end_h * 2 + 1);
+    c_line = (ushort16*)mRaw->getData(0, end_h * 2);
+    n_line = (ushort16*)mRaw->getData(0, end_h * 2 + 1);
     off = 0;
 
     // Last line
@@ -377,11 +377,11 @@ void Cr2Decoder::interpolate_422_old(int w, int h, int start_h , int end_h) {
   w--;
 
   // Current line
-  gushort* c_line;
+  ushort16* c_line;
 
   for (int y = start_h; y < end_h; y++) {
-    c_line = (gushort*)mRaw->getData(0, y);
-    gint r, g, b;
+    c_line = (ushort16*)mRaw->getData(0, y);
+    int r, g, b;
     int off = 0;
     for (int x = 0; x < w; x++) {
       int Y = c_line[off];

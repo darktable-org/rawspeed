@@ -26,9 +26,9 @@
 
 namespace RawSpeed {
 
-const guint datasizes[] = {0,1,1,2,4,8,1,1,2,4, 8, 4, 8, 4};
+const uint32 datasizes[] = {0,1,1,2,4,8,1,1,2,4, 8, 4, 8, 4};
                       // 0-1-2-3-4-5-6-7-8-9-10-11-12-13
-const guint datashifts[] = {0,0,0,1,2,3,0,0,1,2, 3, 2, 3, 2};
+const uint32 datashifts[] = {0,0,0,1,2,3,0,0,1,2, 3, 2, 3, 2};
 
 #ifdef CHECKSIZE
 #undef CHECKSIZE
@@ -63,28 +63,28 @@ class TiffEntry
 {
 public:
   TiffEntry();
-  TiffEntry(FileMap* f, guint offset);
+  TiffEntry(FileMap* f, uint32 offset);
   virtual ~TiffEntry(void);
-  virtual guint getInt();
-  gfloat getFloat();
-  virtual gushort getShort();
-  virtual const guint* getIntArray();
-  virtual const gushort* getShortArray();
+  virtual uint32 getInt();
+  float getFloat();
+  virtual ushort16 getShort();
+  virtual const uint32* getIntArray();
+  virtual const ushort16* getShortArray();
   string getString();
-  guchar getByte();
-  const guchar* getData() {return data;};
+  uchar8 getByte();
+  const uchar8* getData() {return data;};
   int getElementSize();
   int getElementShift();
 // variables:
   TiffTag tag;
   TiffDataType type;
-  guint count;
-  guint getDataOffset() const { return data_offset; }
+  uint32 count;
+  uint32 getDataOffset() const { return data_offset; }
   bool isFloat();
   bool isInt();
 protected:
-  unsigned char* data;
-  guint data_offset;
+  uchar8* data;
+  uint32 data_offset;
 #ifdef _DEBUG
   int debug_intVal;
   float debug_floatVal;

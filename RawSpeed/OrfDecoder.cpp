@@ -56,8 +56,8 @@ RawImage OrfDecoder::decodeRaw() {
   if (counts->count != offsets->count) {
     ThrowRDE("ORF Decoder: Byte count number does not match strip size: count:%u, strips:%u ", counts->count, offsets->count);
   }
-  guint width = raw->getEntry(IMAGEWIDTH)->getInt();
-  guint height = raw->getEntry(IMAGELENGTH)->getInt();
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
 
   if (!mFile->isValid(offsets->getInt() + counts->getInt()))
     ThrowRDE("ORF Decoder: Truncated file");
@@ -72,8 +72,8 @@ RawImage OrfDecoder::decodeRaw() {
 
   TiffIFD* exif = data[0];
   TiffEntry *makernoteEntry = exif->getEntry(MAKERNOTE);
-  const guchar* makernote = makernoteEntry->getData();
-  FileMap makermap((guchar*)&makernote[8], makernoteEntry->count - 8);
+  const uchar8* makernote = makernoteEntry->getData();
+  FileMap makermap((uchar8*)&makernote[8], makernoteEntry->count - 8);
   TiffParserOlympus makertiff(&makermap);
   makertiff.parseData();
 
@@ -104,15 +104,15 @@ RawImage OrfDecoder::decodeRaw() {
  * is based on the output of all previous pixel (bar the first four)
  */
 
-void OrfDecoder::decodeCompressed(ByteStream& s, guint w, guint h) {
+void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
   int nbits, sign, low, high, i, wo0, n, nw0, wo1, nw1;
   int acarry0[3], acarry1[3], pred, diff;
 
-  guchar* data = mRaw->getData();
-  gint pitch = mRaw->pitch;
+  uchar8* data = mRaw->getData();
+  int pitch = mRaw->pitch;
 
   /* Build a table to quickly look up "high" value */
-  gchar bittable[4096];
+  char bittable[4096];
   for (i = 0; i < 4096; i++) {
     int b = i;
     for (high = 0; high < 12; high++)
@@ -124,15 +124,15 @@ void OrfDecoder::decodeCompressed(ByteStream& s, guint w, guint h) {
   s.skipBytes(7);
   BitPumpMSB bits(&s);
 
-  for (guint y = 0; y < h; y++) {
+  for (uint32 y = 0; y < h; y++) {
     memset(acarry0, 0, sizeof acarry0);
     memset(acarry1, 0, sizeof acarry1);
-    gushort* dest = (gushort*) & data[y*pitch];
-    for (guint x = 0; x < w; x++) {
+    ushort16* dest = (ushort16*) & data[y*pitch];
+    for (uint32 x = 0; x < w; x++) {
       bits.checkPos();
       bits.fill();
       i = 2 * (acarry0[2] < 3);
-      for (nbits = 2 + i; (gushort) acarry0[0] >> (nbits + i); nbits++);
+      for (nbits = 2 + i; (ushort16) acarry0[0] >> (nbits + i); nbits++);
 
       int b = bits.peekBitsNoFill(15);
       sign = (b >> 14) * -1;
@@ -155,14 +155,14 @@ void OrfDecoder::decodeCompressed(ByteStream& s, guint w, guint h) {
         else if (y < 2) 
           pred = wo0;
         else { 
-          pred = dest[-pitch+((gint)x)];
+          pred = dest[-pitch+((int)x)];
           nw0 = pred;
         }
         dest[x] = pred + ((diff << 2) | low);
         // Set predictor
         wo0 = dest[x];
       } else {
-        n  = dest[-pitch+((gint)x)];
+        n  = dest[-pitch+((int)x)];
         if (((wo0 < nw0) & (nw0 < n)) | ((n < nw0) & (nw0 < wo0))) {
           if (abs(wo0 - nw0) > 32 || abs(n - nw0) > 32)
             pred = wo0 + n - nw0;
@@ -183,7 +183,7 @@ void OrfDecoder::decodeCompressed(ByteStream& s, guint w, guint h) {
       bits.checkPos();
       bits.fill();
       i = 2 * (acarry1[2] < 3);
-      for (nbits = 2 + i; (gushort) acarry1[0] >> (nbits + i); nbits++);
+      for (nbits = 2 + i; (ushort16) acarry1[0] >> (nbits + i); nbits++);
       b = bits.peekBitsNoFill(15);
       sign = (b >> 14) * -1;
       low  = (b >> 12) & 3;
@@ -205,14 +205,14 @@ void OrfDecoder::decodeCompressed(ByteStream& s, guint w, guint h) {
         else if (y < 2) 
           pred = wo1;
         else { 
-          pred = dest[-pitch+((gint)x)];
+          pred = dest[-pitch+((int)x)];
           nw1 = pred;
         }
         dest[x] = pred + ((diff << 2) | low);
         // Set predictor
         wo1 = dest[x];
       } else {
-        n  = dest[-pitch+((gint)x)];
+        n  = dest[-pitch+((int)x)];
         if (((wo1 < nw1) & (nw1 < n)) | ((n < nw1) & (nw1 < wo1))) {
           if (abs(wo1 - nw1) > 32 || abs(n - nw1) > 32)
             pred = wo1 + n - nw1;

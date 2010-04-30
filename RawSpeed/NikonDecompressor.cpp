@@ -26,7 +26,7 @@ namespace RawSpeed {
 
 NikonDecompressor::NikonDecompressor(FileMap* file, RawImage img) :
     LJpegDecompressor(file, img) {
-  for (guint i = 0; i < 0xffff ; i++) {
+  for (uint32 i = 0; i < 0xffff ; i++) {
     curve[i]  = i;
   }
   bits = 0;
@@ -38,28 +38,28 @@ NikonDecompressor::~NikonDecompressor(void) {
   bits = 0;
 
 }
-void NikonDecompressor::initTable(guint huffSelect) {
+void NikonDecompressor::initTable(uint32 huffSelect) {
   HuffmanTable *dctbl1 = &huff[0];
-  guint acc = 0;
-  for (guint i = 0; i < 16 ;i++) {
+  uint32 acc = 0;
+  for (uint32 i = 0; i < 16 ;i++) {
     dctbl1->bits[i+1] = nikon_tree[huffSelect][i];
     acc += dctbl1->bits[i+1];
   }
   dctbl1->bits[0] = 0;
 
-  for (guint i = 0 ; i < acc; i++) {
+  for (uint32 i = 0 ; i < acc; i++) {
     dctbl1->huffval[i] = nikon_tree[huffSelect][i+16];
   }
   createHuffmanTable(dctbl1);
 }
 
-void NikonDecompressor::DecompressNikon(ByteStream &metadata, guint w, guint h, guint bitsPS, guint offset, guint size) {
-  guint v0 = metadata.getByte();
-  guint v1 = metadata.getByte();
-  guint huffSelect = 0;
-  guint split = 0;
-  gint pUp1[2];
-  gint pUp2[2];
+void NikonDecompressor::DecompressNikon(ByteStream &metadata, uint32 w, uint32 h, uint32 bitsPS, uint32 offset, uint32 size) {
+  uint32 v0 = metadata.getByte();
+  uint32 v1 = metadata.getByte();
+  uint32 huffSelect = 0;
+  uint32 split = 0;
+  int pUp1[2];
+  int pUp2[2];
   mUseBigtable = true;
 
   _RPT2(0, "Nef version v0:%u, v1:%u\n", v0, v1);
@@ -75,21 +75,21 @@ void NikonDecompressor::DecompressNikon(ByteStream &metadata, guint w, guint h, 
   pUp2[0] = metadata.getShort();
   pUp2[1] = metadata.getShort();
 
-  guint _max = 1 << bitsPS & 0x7fff;
-  guint step = 0;
-  guint csize = metadata.getShort();
+  uint32 _max = 1 << bitsPS & 0x7fff;
+  uint32 step = 0;
+  uint32 csize = metadata.getShort();
   if (csize  > 1)
     step = _max / (csize - 1);
   if (v0 == 68 && v1 == 32 && step > 0) {
-    for (guint i = 0; i < csize; i++)
+    for (uint32 i = 0; i < csize; i++)
       curve[i*step] = metadata.getShort();
-    for (guint i = 0; i < _max; i++)
+    for (uint32 i = 0; i < _max; i++)
       curve[i] = (curve[i-i%step] * (step - i % step) +
                   curve[i-i%step+step] * (i % step)) / step;
     metadata.setAbsoluteOffset(562);
     split = metadata.getShort();
   } else if (v0 != 70 && csize <= 0x4001) {
-    for (guint i = 0; i < csize; i++) {
+    for (uint32 i = 0; i < csize; i++) {
       curve[i] = metadata.getShort();
     }
     _max = csize;
@@ -100,21 +100,21 @@ void NikonDecompressor::DecompressNikon(ByteStream &metadata, guint w, guint h, 
   mRaw->whitePoint = curve[_max-1];
   mRaw->blackLevel = curve[0];
 
-  guint x, y;
+  uint32 x, y;
   bits = new BitPumpMSB(mFile->getData(offset), size);
-  guchar *draw = mRaw->getData();
-  guint *dest;
-  guint pitch = mRaw->pitch;
+  uchar8 *draw = mRaw->getData();
+  uint32 *dest;
+  uint32 pitch = mRaw->pitch;
 
-  gint pLeft1 = 0;
-  gint pLeft2 = 0;
-  guint cw = w / 2;
+  int pLeft1 = 0;
+  int pLeft2 = 0;
+  uint32 cw = w / 2;
 
   for (y = 0; y < h; y++) {
     if (split && y == split) {
       initTable(huffSelect + 1);
     }
-    dest = (guint*) & draw[y*pitch];  // Adjust destination
+    dest = (uint32*) & draw[y*pitch];  // Adjust destination
     pUp1[y&1] += HuffDecodeNikon();
     pUp2[y&1] += HuffDecodeNikon();
     pLeft1 = pUp1[y&1];
@@ -146,10 +146,10 @@ void NikonDecompressor::DecompressNikon(ByteStream &metadata, guint w, guint h, 
 *
 *--------------------------------------------------------------
 */
-gint NikonDecompressor::HuffDecodeNikon() {
-  gint rv;
-  gint l, temp;
-  gint code, val ;
+int NikonDecompressor::HuffDecodeNikon() {
+  int rv;
+  int l, temp;
+  int code, val ;
 
   HuffmanTable *dctbl1 = &huff[0];
 
@@ -192,9 +192,9 @@ gint NikonDecompressor::HuffDecodeNikon() {
   * Section F.2.2.1: decode the difference and
   * Figure F.12: extend sign bit
   */
-  guint len = rv & 15;
-  guint shl = rv >> 4;
-  gint diff = ((bits->getBits(len - shl) << 1) + 1) << shl >> 1;
+  uint32 len = rv & 15;
+  uint32 shl = rv >> 4;
+  int diff = ((bits->getBits(len - shl) << 1) + 1) << shl >> 1;
   if ((diff & (1 << (len - 1))) == 0)
     diff -= (1 << len) - !shl;
   return diff;

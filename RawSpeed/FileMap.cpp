@@ -24,15 +24,15 @@
 
 namespace RawSpeed {
 
-FileMap::FileMap(guint _size) : size(_size) {
-  data = (unsigned char*)_aligned_malloc(size + 4, 16);
+FileMap::FileMap(uint32 _size) : size(_size) {
+  data = (uchar8*)_aligned_malloc(size + 4, 16);
   if (!data) {
     throw new FileIOException("Not enough memory to open file.");
   }
   mOwnAlloc = true;
 }
 
-FileMap::FileMap(guchar* _data, guint _size): data(_data), size(_size) {
+FileMap::FileMap(uchar8* _data, uint32 _size): data(_data), size(_size) {
   mOwnAlloc = false;
 }
 
@@ -52,7 +52,7 @@ FileMap* FileMap::clone() {
 }
 
 FileMap* FileMap::cloneRandomSize() {
-  guint new_size = (rand() | (rand() << 15)) % size;
+  uint32 new_size = (rand() | (rand() << 15)) % size;
   FileMap *new_map = new FileMap(new_size);
   memcpy(new_map->data, data, new_size);
   return new_map;
@@ -60,12 +60,12 @@ FileMap* FileMap::cloneRandomSize() {
 
 void FileMap::corrupt(int errors) {
   for (int i = 0; i < errors; i++) {
-    guint pos = (rand() | (rand() << 15)) % size;
+    uint32 pos = (rand() | (rand() << 15)) % size;
     data[pos] = rand() & 0xff;
   }
 }
 
-const guchar* FileMap::getData( guint offset )
+const uchar8* FileMap::getData( uint32 offset )
 {
   if (offset >= size)
     throw IOException("FileMap: Attempting to read out of file.");

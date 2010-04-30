@@ -38,10 +38,10 @@ public:
   virtual void decodeMetaData(CameraMetaData *meta);
   virtual void decodeThreaded(RawDecoderThread* t);
 protected:
-  void DecodeARW(ByteStream &input, guint w, guint h);
-  void DecodeARW2(ByteStream &input, guint w, guint h, guint bpp);
+  void DecodeARW(ByteStream &input, uint32 w, uint32 h);
+  void DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp);
   TiffIFD *mRootIFD;
-  guint curve[0x4001];
+  uint32 curve[0x4001];
   ByteStream *in;
 };
 

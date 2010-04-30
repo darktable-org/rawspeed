@@ -49,15 +49,15 @@ RawImage Rw2Decoder::decodeRaw() {
     ThrowRDE("RW2 Decoder: Multiple Strips found: %u", offsets->count);
   }
 
-  guint height = raw->getEntry((TiffTag)3)->getShort();
-  guint width = raw->getEntry((TiffTag)2)->getShort();
+  uint32 height = raw->getEntry((TiffTag)3)->getShort();
+  uint32 width = raw->getEntry((TiffTag)2)->getShort();
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->bpp = 2;
   mRaw->createData();
 
   load_flags = 0x2008;
-  gint off = offsets->getInt();
+  int off = offsets->getInt();
 
   if (!mFile->isValid(off))
     ThrowRDE("RW2 Decoder: Invalid image data offset, cannot decode.");
@@ -74,7 +74,7 @@ void Rw2Decoder::DecodeRw2() {
 void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
   int x, i, j, sh = 0, pred[2], nonz[2];
   int w = mRaw->dim.x / 14;
-  guint y;
+  uint32 y;
 
   /* 9 + 1/7 bits per pixel */
   int skip = w * 14 * t->start_y * 9;
@@ -86,7 +86,7 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
   bits.skipBytes(skip);
 
   for (y = t->start_y; y < t->end_y; y++) {
-    gushort* dest = (gushort*)mRaw->getData(0, y);
+    ushort16* dest = (ushort16*)mRaw->getData(0, y);
     for (x = 0; x < w; x++) {
       pred[0] = pred[1] = nonz[0] = nonz[1] = 0;
       for (i = 0; i < 14; i++) {
@@ -183,13 +183,13 @@ PanaBitpump::~PanaBitpump() {
 }
 
 void PanaBitpump::skipBytes(int bytes) {
-  gint blocks = (bytes / 0x4000) * 0x4000;
+  int blocks = (bytes / 0x4000) * 0x4000;
   input->skipBytes(blocks);
   for (int i = blocks; i < bytes; i++)
     getBits(8);
 }
 
-guint PanaBitpump::getBits(int nbits) {
+uint32 PanaBitpump::getBits(int nbits) {
   int byte;
 
   if (!vbits) {

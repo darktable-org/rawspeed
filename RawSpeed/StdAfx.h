@@ -37,6 +37,12 @@
 #ifndef __MINGW32__
 #include <crtdbg.h>
 #endif
+#else // if unix
+#include <stdarg.h>
+#include <stdexcept>
+#include <exception>
+#include <string.h>
+#include <assert.h>
 #endif // __unix__
 #include <malloc.h>
 #include <math.h>

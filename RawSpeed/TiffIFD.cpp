@@ -35,21 +35,21 @@ TiffIFD::TiffIFD() {
   endian = little;
 }
 
-TiffIFD::TiffIFD(FileMap* f, guint offset) {
-  guint size = f->getSize();
-  guint entries;
+TiffIFD::TiffIFD(FileMap* f, uint32 offset) {
+  uint32 size = f->getSize();
+  uint32 entries;
   endian = little;
   CHECKSIZE(offset);
 
   entries = *(unsigned short*)f->getData(offset);    // Directory entries in this IFD
 
   CHECKSIZE(offset + 2 + entries*4);
-  for (guint i = 0; i < entries; i++) {
+  for (uint32 i = 0; i < entries; i++) {
     TiffEntry *t = new TiffEntry(f, offset + 2 + i*12);
 
     if (t->tag == SUBIFDS || t->tag == EXIFIFDPOINTER) {   // subIFD tag
       const unsigned int* sub_offsets = t->getIntArray();
-      for (guint j = 0; j < t->count; j++) {
+      for (uint32 j = 0; j < t->count; j++) {
         mSubIFD.push_back(new TiffIFD(f, sub_offsets[j]));
       }
       delete(t);
@@ -88,7 +88,7 @@ vector<TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) {
   }
   for (vector<TiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
     vector<TiffIFD*> t = (*i)->getIFDsWithTag(tag);
-    for (guint j = 0; j < t.size(); j++) {
+    for (uint32 j = 0; j < t.size(); j++) {
       matchingIFDs.push_back(t[j]);
     }
   }

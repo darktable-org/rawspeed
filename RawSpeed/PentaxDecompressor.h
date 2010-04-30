@@ -31,8 +31,8 @@ class PentaxDecompressor :
 public:
   PentaxDecompressor(FileMap* file, RawImage img);
   virtual ~PentaxDecompressor(void);
-  gint HuffDecodePentax();
-  void decodePentax( guint offset, guint size );
+  int HuffDecodePentax();
+  void decodePentax( uint32 offset, uint32 size );
   BitPumpMSB *pentaxBits;
 };
 

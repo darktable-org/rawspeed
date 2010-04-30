@@ -25,31 +25,31 @@
 
 namespace RawSpeed {
 
-// Note: Allocated buffer MUST be at least size+sizeof(guint) large.
+// Note: Allocated buffer MUST be at least size+sizeof(uint32) large.
 
 class BitPumpJPEG
 {
 public:
   BitPumpJPEG(ByteStream *s);
-  BitPumpJPEG(const guchar* _buffer, guint _size );
-	guint getBits(guint nbits);
-	guint getBit();
-	guint getBitsSafe(guint nbits);
-	guint getBitSafe();
-	guint peekBits(guint nbits);
-	guint peekBit();
-  guint peekByte();
-  void skipBits(guint nbits);
-  __inline void skipBitsNoFill(guint nbits){ mLeft -= nbits; }
+  BitPumpJPEG(const uchar8* _buffer, uint32 _size );
+	uint32 getBits(uint32 nbits);
+	uint32 getBit();
+	uint32 getBitsSafe(uint32 nbits);
+	uint32 getBitSafe();
+	uint32 peekBits(uint32 nbits);
+	uint32 peekBit();
+  uint32 peekByte();
+  void skipBits(uint32 nbits);
+  __inline void skipBitsNoFill(uint32 nbits){ mLeft -= nbits; }
   __inline void checkPos()  { if (off>size) throw IOException("Out of buffer read");};        // Check if we have a valid position
-	guchar getByte();
-	guchar getByteSafe();
-	void setAbsoluteOffset(guint offset);     // Set offset in bytes
-  guint getOffset() { return off-(mLeft>>3)+stuffed;}
-  __inline guint getBitNoFill() {return (mCurr >> (--mLeft)) & 1;}
-  __inline guint peekByteNoFill() {return ((mCurr >> (mLeft-8))) & 0xff; }
-  __inline guint peekBitsNoFill(guint nbits) {return ((mCurr >> (mLeft-nbits))) & ((1 << nbits) - 1); }
-  __inline guint getBitsNoFill(guint nbits) { return ((mCurr >> (mLeft -= (nbits)))) & ((1 << nbits) - 1);}
+	uchar8 getByte();
+	uchar8 getByteSafe();
+	void setAbsoluteOffset(uint32 offset);     // Set offset in bytes
+  uint32 getOffset() { return off-(mLeft>>3)+stuffed;}
+  __inline uint32 getBitNoFill() {return (mCurr >> (--mLeft)) & 1;}
+  __inline uint32 peekByteNoFill() {return ((mCurr >> (mLeft-8))) & 0xff; }
+  __inline uint32 peekBitsNoFill(uint32 nbits) {return ((mCurr >> (mLeft-nbits))) & ((1 << nbits) - 1); }
+  __inline uint32 getBitsNoFill(uint32 nbits) { return ((mCurr >> (mLeft -= (nbits)))) & ((1 << nbits) - 1);}
 
 #define TEST_IF_FF(VAL) if (VAL == 0xFF) {\
   if (buffer[off] == 0)\
@@ -62,7 +62,7 @@ public:
 
   // Fill the buffer with at least 24 bits
   __inline void fill() {
-    guchar c, c2, c3;
+    uchar8 c, c2, c3;
 
     int m = mLeft >> 3;
 
@@ -107,12 +107,12 @@ public:
   virtual ~BitPumpJPEG(void);
 protected:
   void __inline init();
-  const guchar* buffer;
-  const guint size;            // This if the end of buffer.
-  guint mLeft;
-  guint mCurr;
-  guint off;                  // Offset in bytes
-  guint stuffed;              // How many bytes has been stuffed?
+  const uchar8* buffer;
+  const uint32 size;            // This if the end of buffer.
+  uint32 mLeft;
+  uint32 mCurr;
+  uint32 off;                  // Offset in bytes
+  uint32 stuffed;              // How many bytes has been stuffed?
 private:
 };
 

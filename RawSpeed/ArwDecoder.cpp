@@ -52,9 +52,9 @@ RawImage ArwDecoder::decodeRaw() {
   if (counts->count != offsets->count) {
     ThrowRDE("ARW Decoder: Byte count number does not match strip size: count:%u, strips:%u ", counts->count, offsets->count);
   }
-  guint width = raw->getEntry(IMAGEWIDTH)->getInt();
-  guint height = raw->getEntry(IMAGELENGTH)->getInt();
-  guint bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
+  uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();
 
   // Sony E-550 marks compressed 8bpp ARW with 12 bit per pixel
   // this makes the compression detect it as a ARW v1.
@@ -65,7 +65,7 @@ RawImage ArwDecoder::decodeRaw() {
   if (!make.compare("SONY"))
     bitPerPixel = 8;
 
-  gboolean arw1 = counts->getInt() * 8 != width * height * bitPerPixel;
+  bool arw1 = counts->getInt() * 8 != width * height * bitPerPixel;
   if (arw1)
     height += 8;
 
@@ -73,21 +73,21 @@ RawImage ArwDecoder::decodeRaw() {
   mRaw->bpp = 2;
   mRaw->createData();
 
-  const gushort* c = raw->getEntry(SONY_CURVE)->getShortArray();
-  guint sony_curve[] = { 0, 0, 0, 0, 0, 4095 };
+  const ushort16* c = raw->getEntry(SONY_CURVE)->getShortArray();
+  uint32 sony_curve[] = { 0, 0, 0, 0, 0, 4095 };
 
-  for (guint i = 0; i < 4; i++)
+  for (uint32 i = 0; i < 4; i++)
     sony_curve[i+1] = (c[i] >> 2) & 0xfff;
 
-  for (guint i = 0; i < 0x4001; i++)
+  for (uint32 i = 0; i < 0x4001; i++)
     curve[i] = i;
 
-  for (guint i = 0; i < 5; i++)
-    for (guint j = sony_curve[i] + 1; j <= sony_curve[i+1]; j++)
+  for (uint32 i = 0; i < 5; i++)
+    for (uint32 j = sony_curve[i] + 1; j <= sony_curve[i+1]; j++)
       curve[j] = curve[j-1] + (1 << i);
 
-  guint c2 = counts->getInt();
-  guint off = offsets->getInt();
+  uint32 c2 = counts->getInt();
+  uint32 off = offsets->getInt();
 
   if (!mFile->isValid(off))
     ThrowRDE("Sony ARW decoder: Data offset after EOF, file probably truncated");
@@ -111,22 +111,22 @@ RawImage ArwDecoder::decodeRaw() {
   return mRaw;
 }
 
-void ArwDecoder::DecodeARW(ByteStream &input, guint w, guint h) {
+void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
   BitPumpMSB bits(&input);
-  guchar* data = mRaw->getData();
-  gushort* dest = (gushort*) & data[0];
-  guint pitch = mRaw->pitch / sizeof(gushort);
-  gint sum = 0;
-  for (guint x = w; x--;)
-    for (guint y = 0; y < h + 1; y += 2) {
+  uchar8* data = mRaw->getData();
+  ushort16* dest = (ushort16*) & data[0];
+  uint32 pitch = mRaw->pitch / sizeof(ushort16);
+  int sum = 0;
+  for (uint32 x = w; x--;)
+    for (uint32 y = 0; y < h + 1; y += 2) {
       bits.checkPos();
       bits.fill();
       if (y == h) y = 1;
-      guint len = 4 - bits.getBitsNoFill(2);
+      uint32 len = 4 - bits.getBitsNoFill(2);
       if (len == 3 && bits.getBitNoFill()) len = 0;
       if (len == 4)
         while (len < 17 && !bits.getBitNoFill()) len++;
-      gint diff = bits.getBits(len);
+      int diff = bits.getBits(len);
       if ((diff & (1 << (len - 1))) == 0)
         diff -= (1 << len) - 1;
       sum += diff;
@@ -135,7 +135,7 @@ void ArwDecoder::DecodeARW(ByteStream &input, guint w, guint h) {
     }
 }
 
-void ArwDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
+void ArwDecoder::DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp) {
 
   if (bpp == 8) {
     in = &input;
@@ -144,9 +144,9 @@ void ArwDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
   } // End bpp = 8
 
   if (bpp == 12) {
-    guchar* data = mRaw->getData();
-    guint pitch = mRaw->pitch;
-    const guchar *in = input.getData();
+    uchar8* data = mRaw->getData();
+    uint32 pitch = mRaw->pitch;
+    const uchar8 *in = input.getData();
 
     if (input.getRemainSize() < (w * 3 / 2))
       ThrowRDE("Sony Decoder: Image data section too small, file probably truncated");
@@ -154,14 +154,14 @@ void ArwDecoder::DecodeARW2(ByteStream &input, guint w, guint h, guint bpp) {
     if (input.getRemainSize() < (w*h*3 / 2))
       h = input.getRemainSize() / (w * 3 / 2) - 1;
 
-    for (guint y = 0; y < h; y++) {
-      gushort* dest = (gushort*) & data[y*pitch];
-      for (guint x = 0 ; x < w; x += 2) {
-        guint g1 = *in++;
-        guint g2 = *in++;
+    for (uint32 y = 0; y < h; y++) {
+      ushort16* dest = (ushort16*) & data[y*pitch];
+      for (uint32 x = 0 ; x < w; x += 2) {
+        uint32 g1 = *in++;
+        uint32 g2 = *in++;
         // Shift up to match compressed precision
         dest[x] = (g1 | ((g2 & 0xf) << 8)) << 2;
-        guint g3 = *in++;
+        uint32 g3 = *in++;
         dest[x+1] = ((g2 >> 4) | (g3 << 4)) << 2;
       }
     }
@@ -196,27 +196,27 @@ void ArwDecoder::decodeMetaData(CameraMetaData *meta) {
 /* Since ARW2 compressed images have predictable offsets, we decode them threaded */
 
 void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
-  guchar* data = mRaw->getData();
-  guint pitch = mRaw->pitch;
-  guint w = mRaw->dim.x;
+  uchar8* data = mRaw->getData();
+  uint32 pitch = mRaw->pitch;
+  uint32 w = mRaw->dim.x;
 
   BitPumpPlain bits(in);
-  for (guint y = t->start_y; y < t->end_y; y++) {
-    gushort* dest = (gushort*) & data[y*pitch];
+  for (uint32 y = t->start_y; y < t->end_y; y++) {
+    ushort16* dest = (ushort16*) & data[y*pitch];
     // Realign
     bits.setAbsoluteOffset((w*8*y) >> 3);
 
     // Process 32 pixels (16x2) per loop.
-    for (guint x = 0; x < w - 30;) {
+    for (uint32 x = 0; x < w - 30;) {
       bits.checkPos();
-      gint _max = bits.getBits(11);
-      gint _min = bits.getBits(11);
-      gint _imax = bits.getBits(4);
-      gint _imin = bits.getBits(4);
-      gint sh;
+      int _max = bits.getBits(11);
+      int _min = bits.getBits(11);
+      int _imax = bits.getBits(4);
+      int _imin = bits.getBits(4);
+      int sh;
       for (sh = 0; sh < 4 && 0x80 << sh <= _max - _min; sh++);
-      for (gint i = 0; i < 16; i++) {
-        gint p;
+      for (int i = 0; i < 16; i++) {
+        int p;
         if (i == _imax) p = _max;
         else if (i == _imin) p = _min;
         else {

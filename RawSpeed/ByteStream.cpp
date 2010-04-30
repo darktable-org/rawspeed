@@ -24,7 +24,7 @@
 
 namespace RawSpeed {
 
-ByteStream::ByteStream(const guchar* _buffer, guint _size) :
+ByteStream::ByteStream(const uchar8* _buffer, uint32 _size) :
     buffer(_buffer), size(_size), off(0) {
 
 }
@@ -38,45 +38,45 @@ ByteStream::~ByteStream(void) {
 
 }
 
-guint ByteStream::peekByte() {
+uint32 ByteStream::peekByte() {
   return buffer[off];
 }
 
-void ByteStream::skipBytes(guint nbytes) {
+void ByteStream::skipBytes(uint32 nbytes) {
   off += nbytes;
   if (off > size)
     throw IOException("Skipped out of buffer");
 }
 
-guchar ByteStream::getByte() {
+uchar8 ByteStream::getByte() {
   if (off >= size)
     throw IOException("Out of buffer read");
   return buffer[off++];
 }
 
-gushort ByteStream::getShort() {
+ushort16 ByteStream::getShort() {
   if (off + 1 >= size)
     throw IOException("Out of buffer read");
-  guint a = buffer[off++];
-  guint b = buffer[off++];
+  uint32 a = buffer[off++];
+  uint32 b = buffer[off++];
   // !!! ENDIAN SWAP
   return (a << 8) | b;
 }
 
-gint ByteStream::getInt() {
+int ByteStream::getInt() {
   if (off + 4 >= size)
     throw IOException("Out of buffer read");
-  return *(gint*)&buffer[off+=4];
+  return *(int*)&buffer[off+=4];
 }
 
-void ByteStream::setAbsoluteOffset(guint offset) {
+void ByteStream::setAbsoluteOffset(uint32 offset) {
   if (offset >= size)
     throw IOException("Offset set out of buffer");
   off = offset;
 }
 
 void ByteStream::skipToMarker() {
-  gint c = 0;
+  int c = 0;
   while (!(buffer[off] == 0xFF && buffer[off+1] != 0)) {
     off++;
     c++;

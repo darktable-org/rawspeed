@@ -36,44 +36,44 @@ PentaxDecompressor::~PentaxDecompressor(void) {
 }
 
 
-void PentaxDecompressor::decodePentax(guint offset, guint size) {
+void PentaxDecompressor::decodePentax(uint32 offset, uint32 size) {
   // Prepare huffmann table              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 = 16 entries
-  static const guchar pentax_tree[] =  { 0, 2, 3, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0,
+  static const uchar8 pentax_tree[] =  { 0, 2, 3, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0,
                                          3, 4, 2, 5, 1, 6, 0, 7, 8, 9, 10, 11, 12
                                        };
   //                                     0 1 2 3 4 5 6 7 8 9  0  1  2 = 13 entries
   HuffmanTable *dctbl1 = &huff[0];
-  guint acc = 0;
-  for (guint i = 0; i < 16 ;i++) {
+  uint32 acc = 0;
+  for (uint32 i = 0; i < 16 ;i++) {
     dctbl1->bits[i+1] = pentax_tree[i];
     acc += dctbl1->bits[i+1];
   }
   dctbl1->bits[0] = 0;
 
-  for (guint i = 0 ; i < acc; i++) {
+  for (uint32 i = 0 ; i < acc; i++) {
     dctbl1->huffval[i] = pentax_tree[i+16];
   }
   mUseBigtable = true;
   createHuffmanTable(dctbl1);
 
   pentaxBits = new BitPumpMSB(mFile->getData(offset), size);
-  guchar *draw = mRaw->getData();
-  gushort *dest;
-  guint w = mRaw->dim.x;
-  guint h = mRaw->dim.y;
-  gint pUp1[2] = {0, 0};
-  gint pUp2[2] = {0, 0};
-  gint pLeft1 = 0;
-  gint pLeft2 = 0;
+  uchar8 *draw = mRaw->getData();
+  ushort16 *dest;
+  uint32 w = mRaw->dim.x;
+  uint32 h = mRaw->dim.y;
+  int pUp1[2] = {0, 0};
+  int pUp2[2] = {0, 0};
+  int pLeft1 = 0;
+  int pLeft2 = 0;
 
-  for (guint y = 0;y < h;y++) {
+  for (uint32 y = 0;y < h;y++) {
     pentaxBits->checkPos();
-    dest = (gushort*) & draw[y*mRaw->pitch];  // Adjust destination
+    dest = (ushort16*) & draw[y*mRaw->pitch];  // Adjust destination
     pUp1[y&1] += HuffDecodePentax();
     pUp2[y&1] += HuffDecodePentax();
     dest[0] = pLeft1 = pUp1[y&1];
     dest[1] = pLeft2 = pUp2[y&1];
-    for (guint x = 2; x < w ; x += 2) {
+    for (uint32 x = 2; x < w ; x += 2) {
       pLeft1 += HuffDecodePentax();
       pLeft2 += HuffDecodePentax();
       dest[x] =  pLeft1;
@@ -100,10 +100,10 @@ void PentaxDecompressor::decodePentax(guint offset, guint size) {
 *
 *--------------------------------------------------------------
 */
-gint PentaxDecompressor::HuffDecodePentax() {
-  gint rv;
-  gint l, temp;
-  gint code, val;
+int PentaxDecompressor::HuffDecodePentax() {
+  int rv;
+  int l, temp;
+  int code, val;
 
   HuffmanTable *dctbl1 = &huff[0];
   /*
@@ -156,7 +156,7 @@ gint PentaxDecompressor::HuffDecodePentax() {
   */
 
   if (rv) {
-    gint x = pentaxBits->getBits(rv);
+    int x = pentaxBits->getBits(rv);
     if ((x & (1 << (rv - 1))) == 0)
       x -= (1 << rv) - 1;
     return x;

@@ -70,7 +70,7 @@ Camera::Camera(xmlDocPtr doc, xmlNodePtr cur) {
   }
 }
 
-Camera::Camera( const Camera* camera, guint alias_num)
+Camera::Camera( const Camera* camera, uint32 alias_num)
 {
   if (alias_num >= camera->aliases.size())
     ThrowCME("Camera: Internal error, alias number out of range specified.");
@@ -85,7 +85,7 @@ Camera::Camera( const Camera* camera, guint alias_num)
   cropSize = camera->cropSize;
   cropPos = camera->cropPos;
   decoderVersion = camera->decoderVersion;
-  for (guint i = 0; i < camera->blackAreas.size(); i++) {
+  for (uint32 i = 0; i < camera->blackAreas.size(); i++) {
     blackAreas.push_back(camera->blackAreas[i]);
   }
 

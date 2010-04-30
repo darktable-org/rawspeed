@@ -39,8 +39,8 @@ public:
   iPoint2D operator + (const iPoint2D& b) { return iPoint2D(x+b.x,y+b.y); }
   iPoint2D operator = (const iPoint2D& b) { x = b.x; y = b.y; return *this;}
 	~iPoint2D() {};
-  guint area() {return abs(x*y);}
-  gboolean isThisInside(const iPoint2D &otherPoint) {return (x<=otherPoint.x && y<=otherPoint.y); };
+  uint32 area() {return abs(x*y);}
+  bool isThisInside(const iPoint2D &otherPoint) {return (x<=otherPoint.x && y<=otherPoint.y); };
   int x,y;
 };
 

@@ -67,7 +67,7 @@ void TiffParser::parseData() {
   else
     mRootIFD = new TiffIFDBE();
 
-  guint nextIFD;
+  uint32 nextIFD;
   data = mInput->getData(4);
   if (endian == little) {
     nextIFD = *(int*)data;

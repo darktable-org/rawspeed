@@ -29,18 +29,18 @@ namespace RawSpeed {
 }
 
 RawDecoder::~RawDecoder(void) {
-  for (guint i = 0 ; i < errors.size(); i++) {
+  for (uint32 i = 0 ; i < errors.size(); i++) {
     free((void*)errors[i]);
   }
   errors.clear();
 }
 
-void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch, int bitPerPixel, gboolean MSBOrder) {
-  guchar* data = mRaw->getData();
-  guint outPitch = mRaw->pitch;
-  guint w = size.x;
-  guint h = size.y;
-  guint cpp = mRaw->getCpp();
+void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch, int bitPerPixel, bool MSBOrder) {
+  uchar8* data = mRaw->getData();
+  uint32 outPitch = mRaw->pitch;
+  uint32 w = size.x;
+  uint32 h = size.y;
+  uint32 cpp = mRaw->getCpp();
 
   if (input.getRemainSize() < (inputPitch*h)) {
     if ((int)input.getRemainSize() > inputPitch)
@@ -51,23 +51,23 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
   if (bitPerPixel > 16)
     ThrowRDE("readUncompressedRaw: Unsupported bit depth");
 
-  guint skipBits = inputPitch - w * bitPerPixel / 8;  // Skip per line
+  uint32 skipBits = inputPitch - w * bitPerPixel / 8;  // Skip per line
   if (offset.y > mRaw->dim.y)
     ThrowRDE("readUncompressedRaw: Invalid y offset");
   if (offset.x + size.x > mRaw->dim.x)
     ThrowRDE("readUncompressedRaw: Invalid x offset");
 
-  guint y = offset.y;
-  h = MIN(h + (guint)offset.y, (guint)mRaw->dim.y);
+  uint32 y = offset.y;
+  h = MIN(h + (uint32)offset.y, (uint32)mRaw->dim.y);
 
   if (MSBOrder) {
     BitPumpMSB bits(&input);
     w *= cpp;
     for (; y < h; y++) {
-      gushort* dest = (gushort*) & data[offset.x*sizeof(gushort)*cpp+y*outPitch];
+      ushort16* dest = (ushort16*) & data[offset.x*sizeof(ushort16)*cpp+y*outPitch];
       bits.checkPos();
-      for (guint x = 0 ; x < w; x++) {
-        guint b = bits.getBits(bitPerPixel);
+      for (uint32 x = 0 ; x < w; x++) {
+        uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
       }
       bits.skipBits(skipBits);
@@ -76,7 +76,7 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
   } else {
 
     if (bitPerPixel == 16)  {
-      BitBlt(&data[offset.x*sizeof(gushort)*cpp+y*outPitch], outPitch,
+      BitBlt(&data[offset.x*sizeof(ushort16)*cpp+y*outPitch], outPitch,
              input.getData(), inputPitch, w*mRaw->bpp, h - y);
       return;
     }
@@ -87,10 +87,10 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
     BitPumpPlain bits(&input);
     w *= cpp;
     for (; y < h; y++) {
-      gushort* dest = (gushort*) & data[offset.x*sizeof(gushort)+y*outPitch];
+      ushort16* dest = (ushort16*) & data[offset.x*sizeof(ushort16)+y*outPitch];
       bits.checkPos();
-      for (guint x = 0 ; x < w; x++) {
-        guint b = bits.getBits(bitPerPixel);
+      for (uint32 x = 0 ; x < w; x++) {
+        uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
       }
       bits.skipBits(skipBits);
@@ -98,23 +98,23 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
   }
 }
 
-void RawDecoder::Decode12BitRaw(ByteStream &input, guint w, guint h) {
-  guchar* data = mRaw->getData();
-  guint pitch = mRaw->pitch;
-  const guchar *in = input.getData();
+void RawDecoder::Decode12BitRaw(ByteStream &input, uint32 w, uint32 h) {
+  uchar8* data = mRaw->getData();
+  uint32 pitch = mRaw->pitch;
+  const uchar8 *in = input.getData();
   if (input.getRemainSize() < ((w*12/8)*h)) {
-    if ((guint)input.getRemainSize() > (w*12/8))
+    if ((uint32)input.getRemainSize() > (w*12/8))
       h = input.getRemainSize() / (w*12/8) - 1;
     else
       ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. Image file truncated.");
   }
-  for (guint y = 0; y < h; y++) {
-    gushort* dest = (gushort*) & data[y*pitch];
-    for (guint x = 0 ; x < w; x += 2) {
-      guint g1 = *in++;
-      guint g2 = *in++;
+  for (uint32 y = 0; y < h; y++) {
+    ushort16* dest = (ushort16*) & data[y*pitch];
+    for (uint32 x = 0 ; x < w; x += 2) {
+      uint32 g1 = *in++;
+      uint32 g2 = *in++;
       dest[x] = g1 | ((g2 & 0xf) << 8);
-      guint g3 = *in++;
+      uint32 g3 = *in++;
       dest[x+1] = (g2 >> 4) | (g3 << 4);
     }
   }
@@ -197,12 +197,11 @@ void *RawDecoderDecodeThread(void *_this) {
 }
 
 void RawDecoder::startThreads() {
-  guint threads;
+  uint32 threads;
 #ifdef WIN32
   threads = pthread_num_processors_np();
 #else
-  // FIXME: Don't depend on Rawstudio.
-  threads = rs_get_number_of_processor_cores(); 
+  threads = rawspeed_get_number_of_processor_cores(); 
 #endif
   int y_offset = 0;
   int y_per_thread = (mRaw->dim.y + threads - 1) / threads;
@@ -214,7 +213,7 @@ void RawDecoder::startThreads() {
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-  for (guint i = 0; i < threads; i++) {
+  for (uint32 i = 0; i < threads; i++) {
     t[i].start_y = y_offset;
     t[i].end_y = MIN(y_offset + y_per_thread, mRaw->dim.y);
     t[i].parent = this;
@@ -223,7 +222,7 @@ void RawDecoder::startThreads() {
   }
 
   void *status;
-  for (guint i = 0; i < threads; i++) {
+  for (uint32 i = 0; i < threads; i++) {
     pthread_join(t[i].threadid, &status);
     if (t[i].error) {
       errors.push_back(t[i].error);

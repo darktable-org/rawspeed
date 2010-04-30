@@ -22,28 +22,28 @@
 #pragma once
 #include "ByteStream.h"
 
-#define BITS_PER_LONG (8*sizeof(guint))
+#define BITS_PER_LONG (8*sizeof(uint32))
 #define MIN_GET_BITS  (BITS_PER_LONG-7)    /* max value for long getBuffer */
 
 namespace RawSpeed {
 
-// Note: Allocated buffer MUST be at least size+sizeof(guint) large.
+// Note: Allocated buffer MUST be at least size+sizeof(uint32) large.
 
 class BitPumpMSB
 {
 public:
   BitPumpMSB(ByteStream *s);
-  BitPumpMSB(const guchar* _buffer, guint _size );
-	guint getBitsSafe(guint nbits);
-	guint getBitSafe();
-	guchar getByteSafe();
-	void setAbsoluteOffset(guint offset);     // Set offset in bytes
-  __inline guint getOffset() { return off-(mLeft>>3);}
+  BitPumpMSB(const uchar8* _buffer, uint32 _size );
+	uint32 getBitsSafe(uint32 nbits);
+	uint32 getBitSafe();
+	uchar8 getByteSafe();
+	void setAbsoluteOffset(uint32 offset);     // Set offset in bytes
+  __inline uint32 getOffset() { return off-(mLeft>>3);}
   __inline void checkPos()  { if (off>size) throw IOException("Out of buffer read");};        // Check if we have a valid position
-  __inline guint getBitNoFill() {return (mCurr >> (--mLeft)) & 1;}
-  __inline guint peekByteNoFill() {return ((mCurr >> (mLeft-8))) & 0xff; }
-  __inline guint getBitsNoFill(guint nbits) {return ((mCurr >> (mLeft -= (nbits)))) & ((1 << nbits) - 1);}
-  __inline guint peekBitsNoFill(guint nbits) {return ((mCurr >> (mLeft-nbits))) & ((1 << nbits) - 1); }
+  __inline uint32 getBitNoFill() {return (mCurr >> (--mLeft)) & 1;}
+  __inline uint32 peekByteNoFill() {return ((mCurr >> (mLeft-8))) & 0xff; }
+  __inline uint32 getBitsNoFill(uint32 nbits) {return ((mCurr >> (mLeft -= (nbits)))) & ((1 << nbits) - 1);}
+  __inline uint32 peekBitsNoFill(uint32 nbits) {return ((mCurr >> (mLeft-nbits))) & ((1 << nbits) - 1); }
 
   // Fill the buffer with at least 24 bits
 __inline void fill() {
@@ -79,13 +79,13 @@ __inline void fill() {
 
 }
 
-  __inline guint getBit() {
+  __inline uint32 getBit() {
     if (!mLeft) fill();
 
     return (mCurr >> (--mLeft)) & 1;
   }
 
-  __inline guint getBits(guint nbits) {
+  __inline uint32 getBits(uint32 nbits) {
     if (mLeft < nbits) {
       fill();
     }
@@ -93,13 +93,13 @@ __inline void fill() {
     return ((mCurr >> (mLeft -= (nbits)))) & ((1 << nbits) - 1);
   }
 
-  __inline guint peekBit() {
+  __inline uint32 peekBit() {
     if (!mLeft) fill();
 
     return (mCurr >> (mLeft - 1)) & 1;
   }
 
-  __inline guint peekBits(guint nbits) {
+  __inline uint32 peekBits(uint32 nbits) {
     if (mLeft < nbits) {
       fill();
     }
@@ -107,7 +107,7 @@ __inline void fill() {
     return ((mCurr >> (mLeft - nbits))) & ((1 << nbits) - 1);
   }
 
-  __inline guint peekByte() {
+  __inline uint32 peekByte() {
     if (mLeft < 8) {
       fill();
     }
@@ -143,11 +143,11 @@ __inline void fill() {
   virtual ~BitPumpMSB(void);
 protected:
   void __inline init();
-  const guchar* buffer;
-  const guint size;            // This if the end of buffer.
-  guint mLeft;
-  guint mCurr;
-  guint off;                  // Offset in bytes
+  const uchar8* buffer;
+  const uint32 size;            // This if the end of buffer.
+  uint32 mLeft;
+  uint32 mCurr;
+  uint32 off;                  // Offset in bytes
 private:
 };
 

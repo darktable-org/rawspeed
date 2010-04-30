@@ -37,7 +37,7 @@ public:
   virtual void checkSupport(CameraMetaData *meta);
 protected:
   TiffIFD *mRootIFD;
-  gboolean mFixLjpeg;
+  bool mFixLjpeg;
   void printMetaData();
 };
 
@@ -45,10 +45,10 @@ class DngStrip {
 public:
   DngStrip() { h = offset = count = offsetY = 0;};
   ~DngStrip() {};
-  guint h;
-  guint offset; // Offset in bytes
-  guint count;
-  guint offsetY;
+  uint32 h;
+  uint32 offset; // Offset in bytes
+  uint32 count;
+  uint32 offsetY;
 };
 
 } // namespace RawSpeed

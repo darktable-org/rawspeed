@@ -28,12 +28,12 @@ namespace RawSpeed {
 
 
 BitPumpMSB::BitPumpMSB(ByteStream *s):
-    buffer(s->getData()), size(s->getRemainSize() + sizeof(guint)), mLeft(0), mCurr(0), off(0) {
+    buffer(s->getData()), size(s->getRemainSize() + sizeof(uint32)), mLeft(0), mCurr(0), off(0) {
   init();
 }
 
-BitPumpMSB::BitPumpMSB(const guchar* _buffer, guint _size) :
-    buffer(_buffer), size(_size + sizeof(guint)), mLeft(0), mCurr(0), off(0) {
+BitPumpMSB::BitPumpMSB(const uchar8* _buffer, uint32 _size) :
+    buffer(_buffer), size(_size + sizeof(uint32)), mLeft(0), mCurr(0), off(0) {
   init();
 }
 
@@ -41,7 +41,7 @@ __inline void BitPumpMSB::init() {
   fill();
 }
 
-guint BitPumpMSB::getBitSafe() {
+uint32 BitPumpMSB::getBitSafe() {
   if (!mLeft) {
     fill();
     checkPos();
@@ -50,7 +50,7 @@ guint BitPumpMSB::getBitSafe() {
   return (mCurr >> (--mLeft)) & 1;
 }
 
-guint BitPumpMSB::getBitsSafe(unsigned int nbits) {
+uint32 BitPumpMSB::getBitsSafe(unsigned int nbits) {
   if (nbits > MIN_GET_BITS)
     throw IOException("Too many bits requested");
 
@@ -63,7 +63,7 @@ guint BitPumpMSB::getBitsSafe(unsigned int nbits) {
 }
 
 
-unsigned char BitPumpMSB::getByteSafe() {
+uchar8 BitPumpMSB::getByteSafe() {
   if (mLeft < 8) {
     fill();
     checkPos();

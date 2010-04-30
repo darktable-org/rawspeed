@@ -24,32 +24,32 @@
 
 namespace RawSpeed {
 
-// Note: Allocated buffer MUST be at least size+sizeof(guint) large.
+// Note: Allocated buffer MUST be at least size+sizeof(uint32) large.
 
 class BitPumpPlain
 {
 public:
   BitPumpPlain(ByteStream *s);
-  BitPumpPlain(const guchar* _buffer, guint _size );
-	guint getBits(guint nbits);
-	guint getBit();
-	guint getBitsSafe(guint nbits);
-	guint getBitSafe();
-	guint peekBits(guint nbits);
-	guint peekBit();
-  guint peekByte();
-  void skipBits(guint nbits);
-	guchar getByte();
-	guchar getByteSafe();
-	void setAbsoluteOffset(guint offset);
-  guint getOffset() { return off>>3;}
+  BitPumpPlain(const uchar8* _buffer, uint32 _size );
+	uint32 getBits(uint32 nbits);
+	uint32 getBit();
+	uint32 getBitsSafe(uint32 nbits);
+	uint32 getBitSafe();
+	uint32 peekBits(uint32 nbits);
+	uint32 peekBit();
+  uint32 peekByte();
+  void skipBits(uint32 nbits);
+	uchar8 getByte();
+	uchar8 getByteSafe();
+	void setAbsoluteOffset(uint32 offset);
+  uint32 getOffset() { return off>>3;}
   __inline void checkPos()  { if (off>size) throw IOException("Out of buffer read");};        // Check if we have a valid position
 
   virtual ~BitPumpPlain(void);
 protected:
-  const guchar* buffer;
-  const guint size;            // This if the end of buffer.
-  guint off;                  // Offset in bytes
+  const uchar8* buffer;
+  const uint32 size;            // This if the end of buffer.
+  uint32 off;                  // Offset in bytes
 private:
 };
 

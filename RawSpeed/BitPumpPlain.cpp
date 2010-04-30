@@ -26,7 +26,7 @@ namespace RawSpeed {
 
 /*** Used for entropy encoded sections ***/
 
-#define BITS_PER_LONG (8*sizeof(guint))
+#define BITS_PER_LONG (8*sizeof(uint32))
 #define MIN_GET_BITS  (BITS_PER_LONG-7)    /* max value for long getBuffer */
 
 
@@ -34,42 +34,42 @@ BitPumpPlain::BitPumpPlain(ByteStream *s):
     buffer(s->getData()), size(8*s->getRemainSize()), off(0) {
 }
 
-BitPumpPlain::BitPumpPlain(const guchar* _buffer, guint _size) :
+BitPumpPlain::BitPumpPlain(const uchar8* _buffer, uint32 _size) :
     buffer(_buffer), size(_size*8), off(0) {
 }
 
-guint BitPumpPlain::getBit() {
-  guint v = *(guint*) & buffer[off>>3] >> (off & 7) & 1;
+uint32 BitPumpPlain::getBit() {
+  uint32 v = *(uint32*) & buffer[off>>3] >> (off & 7) & 1;
   off++;
   return v;
 }
 
-guint BitPumpPlain::getBits(guint nbits) {
-  guint v = *(guint*) & buffer[off>>3] >> (off & 7) & ((1 << nbits) - 1);
+uint32 BitPumpPlain::getBits(uint32 nbits) {
+  uint32 v = *(uint32*) & buffer[off>>3] >> (off & 7) & ((1 << nbits) - 1);
   off += nbits;
   return v;
 }
 
-guint BitPumpPlain::peekBit() {
-  return *(guint*)&buffer[off>>3] >> (off&7) & 1;
+uint32 BitPumpPlain::peekBit() {
+  return *(uint32*)&buffer[off>>3] >> (off&7) & 1;
 }
 
-guint BitPumpPlain::peekBits(guint nbits) {
-  return *(guint*)&buffer[off>>3] >> (off&7) & ((1 << nbits) - 1);
+uint32 BitPumpPlain::peekBits(uint32 nbits) {
+  return *(uint32*)&buffer[off>>3] >> (off&7) & ((1 << nbits) - 1);
 }
 
-guint BitPumpPlain::peekByte() {
-  return *(guint*)&buffer[off>>3] >> (off&7) & 0xff;
+uint32 BitPumpPlain::peekByte() {
+  return *(uint32*)&buffer[off>>3] >> (off&7) & 0xff;
 }
 
-guint BitPumpPlain::getBitSafe() {
+uint32 BitPumpPlain::getBitSafe() {
   checkPos();
-  return *(guint*)&buffer[off>>3] >> (off&7) & 1;
+  return *(uint32*)&buffer[off>>3] >> (off&7) & 1;
 }
 
-guint BitPumpPlain::getBitsSafe(unsigned int nbits) {
+uint32 BitPumpPlain::getBitsSafe(unsigned int nbits) {
   checkPos();
-  return *(guint*)&buffer[off>>3] >> (off&7) & ((1 << nbits) - 1);
+  return *(uint32*)&buffer[off>>3] >> (off&7) & ((1 << nbits) - 1);
 }
 
 void BitPumpPlain::skipBits(unsigned int nbits) {
@@ -77,14 +77,14 @@ void BitPumpPlain::skipBits(unsigned int nbits) {
   checkPos();
 }
 
-unsigned char BitPumpPlain::getByte() {
-  guint v = *(guint*) & buffer[off>>3] >> (off & 7) & 0xff;
+uchar8 BitPumpPlain::getByte() {
+  uint32 v = *(uint32*) & buffer[off>>3] >> (off & 7) & 0xff;
   off += 8;
   return v;
 }
 
-unsigned char BitPumpPlain::getByteSafe() {
-  guint v = *(guint*) & buffer[off>>3] >> (off & 7) & 0xff;
+uchar8 BitPumpPlain::getByteSafe() {
+  uint32 v = *(uint32*) & buffer[off>>3] >> (off & 7) & 0xff;
   off += 8;
   checkPos();
 

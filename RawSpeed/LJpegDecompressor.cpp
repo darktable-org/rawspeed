@@ -60,7 +60,7 @@
 
 namespace RawSpeed {
 
-const guint bitMask[] = {  0xffffffff, 0x7fffffff,
+const uint32 bitMask[] = {  0xffffffff, 0x7fffffff,
                            0x3fffffff, 0x1fffffff,
                            0x0fffffff, 0x07ffffff,
                            0x03ffffff, 0x01ffffff,
@@ -102,7 +102,7 @@ LJpegDecompressor::~LJpegDecompressor(void) {
 
 }
 
-void LJpegDecompressor::getSOF(SOFInfo* sof, guint offset, guint size) {
+void LJpegDecompressor::getSOF(SOFInfo* sof, uint32 offset, uint32 size) {
   if (!mFile->isValid(offset + size - 1))
     ThrowRDE("LJpegDecompressor::getSOF: Start offset plus size is longer than file. Truncated file.");
   try {
@@ -127,12 +127,12 @@ void LJpegDecompressor::getSOF(SOFInfo* sof, guint offset, guint size) {
   }
 }
 
-void LJpegDecompressor::startDecoder(guint offset, guint size, guint offsetX, guint offsetY) {
+void LJpegDecompressor::startDecoder(uint32 offset, uint32 size, uint32 offsetX, uint32 offsetY) {
   if (!mFile->isValid(offset + size - 1))
     ThrowRDE("LJpegDecompressor::startDecoder: Start offset plus size is longer than file. Truncated file.");
-  if ((gint)offsetX >= mRaw->dim.x)
+  if ((int)offsetX >= mRaw->dim.x)
     ThrowRDE("LJpegDecompressor::startDecoder: X offset outside of image");
-  if ((gint)offsetY >= mRaw->dim.y)
+  if ((int)offsetY >= mRaw->dim.y)
     ThrowRDE("LJpegDecompressor::startDecoder: Y offset outside of image");
   offX = offsetX;
   offY = offsetY;
@@ -144,7 +144,7 @@ void LJpegDecompressor::startDecoder(guint offset, guint size, guint offsetX, gu
       ThrowRDE("LJpegDecompressor::startDecoder: Image did not start with SOI. Probably not an LJPEG");
 //    _RPT0(0,"Found SOI marker\n");
 
-    gboolean moreImage = true;
+    bool moreImage = true;
     while (moreImage) {
       JpegMarker m = getNextMarker(true);
 
@@ -192,7 +192,7 @@ void LJpegDecompressor::startDecoder(guint offset, guint size, guint offsetX, gu
 }
 
 void LJpegDecompressor::parseSOF(SOFInfo* sof) {
-  guint headerLength = input->getShort();
+  uint32 headerLength = input->getShort();
   sof->prec = input->getByte();
   sof->h = input->getShort();
   sof->w = input->getShort();
@@ -208,12 +208,12 @@ void LJpegDecompressor::parseSOF(SOFInfo* sof) {
   if (headerLength != 8 + sof->cps*3)
     ThrowRDE("LJpegDecompressor: Header size mismatch.");
 
-  for (guint i = 0; i < sof->cps; i++) {
+  for (uint32 i = 0; i < sof->cps; i++) {
     sof->compInfo[i].componentId = input->getByte();
-    guint subs = input->getByte();
+    uint32 subs = input->getByte();
     frame.compInfo[i].superV = subs & 0xf;
     frame.compInfo[i].superH = subs >> 4;
-    guint Tq = input->getByte();
+    uint32 Tq = input->getByte();
     if (Tq != 0)
       ThrowRDE("LJpegDecompressor: Quantized components not supported.");
   }
@@ -224,23 +224,23 @@ void LJpegDecompressor::parseSOS() {
   if (!frame.initialized)
     ThrowRDE("LJpegDecompressor::parseSOS: Frame not yet initialized (SOF Marker not parsed)");
 
-  guint headerLength = input->getShort();
-  guint soscps = input->getByte();
+  uint32 headerLength = input->getShort();
+  uint32 soscps = input->getByte();
   if (frame.cps != soscps)
     ThrowRDE("LJpegDecompressor::parseSOS: Component number mismatch.");
 
-  for (guint i = 0;i < frame.cps;i++) {
-    guint cs = input->getByte();
+  for (uint32 i = 0;i < frame.cps;i++) {
+    uint32 cs = input->getByte();
 
-    guint count = 0;  // Find the correct component
+    uint32 count = 0;  // Find the correct component
     while (frame.compInfo[count].componentId != cs) {
       if (count >= frame.cps)
         ThrowRDE("LJpegDecompressor::parseSOS: Invalid Component Selector");
       count++;
     }
 
-    guint b = input->getByte();
-    guint td = b >> 4;
+    uint32 b = input->getByte();
+    uint32 td = b >> 4;
     if (td > 3)
       ThrowRDE("LJpegDecompressor::parseSOS: Invalid Huffman table selection");
     if (!huff[td].initialized)
@@ -255,10 +255,10 @@ void LJpegDecompressor::parseSOS() {
     ThrowRDE("LJpegDecompressor::parseSOS: Invalid predictor mode.");
 
   input->skipBytes(1);                    // Se + Ah Not used in LJPEG
-  guint b = input->getByte();
+  uint32 b = input->getByte();
   Pt = b & 0xf;        // Point Transform
 
-  guint cheadersize = 3 + frame.cps * 2 + 3;
+  uint32 cheadersize = 3 + frame.cps * 2 + 3;
   _ASSERTE(cheadersize == headerLength);
 
   bits = new BitPumpJPEG(input);
@@ -273,26 +273,26 @@ void LJpegDecompressor::parseSOS() {
 }
 
 void LJpegDecompressor::parseDHT() {
-  guint headerLength = input->getShort() - 2; // Subtract myself
+  uint32 headerLength = input->getShort() - 2; // Subtract myself
 
   while (headerLength)  {
-    guint b = input->getByte();
+    uint32 b = input->getByte();
 
-    guint Tc = (b >> 4);
+    uint32 Tc = (b >> 4);
     if (Tc != 0)
       ThrowRDE("LJpegDecompressor::parseDHT: Unsupported Table class.");
 
-    guint Th = b & 0xf;
+    uint32 Th = b & 0xf;
     if (Th > 3)
       ThrowRDE("LJpegDecompressor::parseDHT: Invalid huffman table destination id.");
 
-    guint acc = 0;
+    uint32 acc = 0;
     HuffmanTable* t = &huff[Th];
 
     if (t->initialized)
       ThrowRDE("LJpegDecompressor::parseDHT: Duplicate table definition");
 
-    for (guint i = 0; i < 16 ;i++) {
+    for (uint32 i = 0; i < 16 ;i++) {
       t->bits[i+1] = input->getByte();
       acc += t->bits[i+1];
     }
@@ -304,7 +304,7 @@ void LJpegDecompressor::parseDHT() {
     if (headerLength < 1 + 16 + acc)
       ThrowRDE("LJpegDecompressor::parseDHT: Invalid DHT table length.");
 
-    for (guint i = 0 ; i < acc; i++) {
+    for (uint32 i = 0 ; i < acc; i++) {
       t->huffval[i] = input->getByte();
     }
     createHuffmanTable(t);
@@ -316,7 +316,7 @@ void LJpegDecompressor::parseDHT() {
 JpegMarker LJpegDecompressor::getNextMarker(bool allowskip) {
 
   if (!allowskip) {
-    guchar id = input->getByte();
+    uchar8 id = input->getByte();
     if (id != 0xff)
       ThrowRDE("LJpegDecompressor::getNextMarker: (Noskip) Expected marker not found. Propably corrupt file.");
 
@@ -328,19 +328,19 @@ JpegMarker LJpegDecompressor::getNextMarker(bool allowskip) {
     return mark;
   }
   input->skipToMarker();
-  guchar id = input->getByte();
+  uchar8 id = input->getByte();
   _ASSERTE(0xff == id);
   JpegMarker mark = (JpegMarker)input->getByte();
   return mark;
 }
 
 void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
-  gint p, i, l, lastp, si;
-  gchar huffsize[257];
-  gushort huffcode[257];
-  gushort code;
-  gint size;
-  gint value, ll, ul;
+  int p, i, l, lastp, si;
+  char huffsize[257];
+  ushort16 huffcode[257];
+  ushort16 code;
+  int size;
+  int value, ll, ul;
 
   /*
   * Figure C.1: make table of Huffman code length for each symbol
@@ -349,7 +349,7 @@ void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
   p = 0;
   for (l = 1; l <= 16; l++) {
     for (i = 1; i <= (int)htbl->bits[l]; i++) {
-      huffsize[p++] = (gchar)l;
+      huffsize[p++] = (char)l;
       if (p > 256)
         ThrowRDE("LJpegDecompressor::createHuffmanTable: Code length too long. Corrupt data.");
     }
@@ -446,17 +446,17 @@ void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
  ************************************/
 
 void LJpegDecompressor::createBigTable(HuffmanTable *htbl) {
-  const guint bits = 14;      // HuffDecode functions must be changed, if this is modified.
-  const guint size = 1 << bits;
-  gint rv = 0;
-  gint temp;
-  guint l;
+  const uint32 bits = 14;      // HuffDecode functions must be changed, if this is modified.
+  const uint32 size = 1 << bits;
+  int rv = 0;
+  int temp;
+  uint32 l;
 
-  htbl->bigTable = (gint*)_aligned_malloc(size * sizeof(gint), 16);
-  for (guint i = 0; i < size; i++) {
-    gushort input = i << 2; // Calculate input value
-    gint code = input >> 8;   // Get 8 bits
-    guint val = htbl->numbits[code];
+  htbl->bigTable = (int*)_aligned_malloc(size * sizeof(int), 16);
+  for (uint32 i = 0; i < size; i++) {
+    ushort16 input = i << 2; // Calculate input value
+    int code = input >> 8;   // Get 8 bits
+    uint32 val = htbl->numbits[code];
     l = val & 15;
     if (l) {
       rv = val >> 4;
@@ -496,7 +496,7 @@ void LJpegDecompressor::createBigTable(HuffmanTable *htbl) {
     }
 
     if (rv) {
-      gint x = input >> (16 - l - rv) & ((1 << rv) - 1);
+      int x = input >> (16 - l - rv) & ((1 << rv) - 1);
       if ((x & (1 << (rv - 1))) == 0)
         x -= (1 << rv) - 1;
       htbl->bigTable[i] = (x << 8) | (l + rv);
@@ -523,11 +523,11 @@ void LJpegDecompressor::createBigTable(HuffmanTable *htbl) {
 *
 *--------------------------------------------------------------
 */
-gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
-  gint rv;
-  gint temp;
-  gint code, val;
-  guint l;
+int LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
+  int rv;
+  int temp;
+  int code, val;
+  uint32 l;
   /**
    * First attempt to do complete decode, by using the first 14 bits
    */
@@ -594,7 +594,7 @@ gint LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
   */
 
   if (rv) {
-    gint x = bits->getBitsNoFill(rv);
+    int x = bits->getBitsNoFill(rv);
     if ((x & (1 << (rv - 1))) == 0)
       x -= (1 << rv) - 1;
     return x;

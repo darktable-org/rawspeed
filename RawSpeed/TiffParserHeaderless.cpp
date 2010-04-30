@@ -46,7 +46,7 @@ void TiffParserHeaderless::parseData() {
   parseData(0);
 }
 
-void TiffParserHeaderless::parseData(guint firstIfdOffset) {
+void TiffParserHeaderless::parseData(uint32 firstIfdOffset) {
   if (mInput->getSize() < 12)
     throw TiffParserException("Not a TIFF file (size too small)");
 
@@ -55,7 +55,7 @@ void TiffParserHeaderless::parseData(guint firstIfdOffset) {
   else
     mRootIFD = new TiffIFDBE();
 
-  guint nextIFD = firstIfdOffset;
+  uint32 nextIFD = firstIfdOffset;
   do {
     CHECKSIZE(nextIFD);
 

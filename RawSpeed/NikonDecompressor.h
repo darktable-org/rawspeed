@@ -32,15 +32,15 @@ public:
   NikonDecompressor(FileMap* file, RawImage img );
 public:
   virtual ~NikonDecompressor(void);
-  void DecompressNikon(ByteStream &meta, guint w, guint h, guint bitsPS, guint offset, guint size);
+  void DecompressNikon(ByteStream &meta, uint32 w, uint32 h, uint32 bitsPS, uint32 offset, uint32 size);
 private:
-  void initTable(guint huffSelect);
-  gint HuffDecodeNikon();
-  guint curve[0xffff];
+  void initTable(uint32 huffSelect);
+  int HuffDecodeNikon();
+  uint32 curve[0xffff];
   BitPumpMSB *bits;
 };
 
-static const guchar nikon_tree[][32] = {
+static const uchar8 nikon_tree[][32] = {
   { 0,1,5,1,1,1,1,1,1,2,0,0,0,0,0,0,	/* 12-bit lossy */
   5,4,3,6,2,7,1,0,8,9,11,10,12 },
   { 0,1,5,1,1,1,1,1,1,2,0,0,0,0,0,0,	/* 12-bit lossy after split */

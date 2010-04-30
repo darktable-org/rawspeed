@@ -26,14 +26,8 @@
 #pragma intrinsic(_ReturnAddress)
 #define MIN(a,b) min(a,b)
 #define MAX(a,b) max(a,b)
-#else
-#include <rawstudio.h>
-#include <exception>
-#include <string.h>
-#include <assert.h>
-#define BYTE unsigned char
+#else // On linux
 #define _ASSERTE(a) void(a)
-#include <stdexcept>
 #define _RPT0(a,b) 
 #define _RPT1(a,b,c) 
 #define _RPT2(a,b,c,d) 
@@ -54,9 +48,25 @@ typedef char* LPCWSTR;
 #endif
 #endif // __unix__
 
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+int rawspeed_get_number_of_processor_cores();
+
+
 namespace RawSpeed {
 
-inline void BitBlt(BYTE* dstp, int dst_pitch, const BYTE* srcp, int src_pitch, int row_size, int height) {
+typedef signed char char8;
+typedef unsigned char uchar8;
+typedef unsigned int uint32;
+typedef signed int int32;
+typedef unsigned short ushort16;
+
+inline void BitBlt(uchar8* dstp, int dst_pitch, const uchar8* srcp, int src_pitch, int row_size, int height) {
   if (height == 1 || (dst_pitch == src_pitch && src_pitch == row_size)) {
     memcpy(dstp, srcp, row_size*height);
     return;
@@ -79,42 +89,7 @@ inline int lmax(int p0, int p1) {
 }
 
 
-
-/* -------------------------------------------------------------------- */
-#if !defined(__unix__) && !defined(__MINGW32__)
-
-typedef   bool          gboolean;
-typedef   void*         gpointer;
-typedef   const void*   gconstpointer;
-typedef   char          gchar;
-typedef   unsigned char guchar;
-
-typedef  int           gint;
-typedef  unsigned int  guint;
-typedef  short           gshort;
-typedef  unsigned short           gushort;
-typedef  long           glong;
-typedef  unsigned long           gulong;
-
-typedef  char gint8;
-typedef  unsigned char           guint8;
-typedef  short           gint16;
-typedef  unsigned short           guint16;
-typedef  int           gint32;
-typedef  unsigned int           guint32;
-
-typedef  long long       gint64;
-typedef  unsigned long long          guint64;
-
-typedef float            gfloat;
-typedef double            gdouble;
-
-typedef unsigned int            gsize;
-typedef signed int            gssize;
-typedef gint64            goffset;
-#endif // __unix__
-
-inline guint clampbits(gint x, guint n) { guint32 _y_temp; if( (_y_temp=x>>n) ) x = ~_y_temp >> (32-n); return x;}
+inline uint32 clampbits(int x, uint32 n) { uint32 _y_temp; if( (_y_temp=x>>n) ) x = ~_y_temp >> (32-n); return x;}
 
 
 } // namespace RawSpeed

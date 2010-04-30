@@ -37,21 +37,21 @@ namespace RawSpeed {
 class FileMap
 {
 public:
-  FileMap(guint _size);                 // Allocates the data array itself
-  FileMap(guchar* _data, guint _size);  // Data already allocated.
+  FileMap(uint32 _size);                 // Allocates the data array itself
+  FileMap(uchar8* _data, uint32 _size);  // Data already allocated.
   ~FileMap(void);
-  const guchar* getData(guint offset);
-  guchar* getDataWrt(guint offset) {return &data[offset];}
-  guint getSize() {return size;}
-  gboolean isValid(guint offset) {return offset<=size;}
+  const uchar8* getData(uint32 offset);
+  uchar8* getDataWrt(uint32 offset) {return &data[offset];}
+  uint32 getSize() {return size;}
+  bool isValid(uint32 offset) {return offset<=size;}
   FileMap* clone();
   /* For testing purposes */
   void corrupt(int errors);
   FileMap* cloneRandomSize();
 private:
- guchar* data;
- guint size;
- gboolean mOwnAlloc;
+ uchar8* data;
+ uint32 size;
+ bool mOwnAlloc;
 };
 
 } // namespace RawSpeed

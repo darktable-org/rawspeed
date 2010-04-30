@@ -40,7 +40,7 @@ public:
   virtual void checkSupport(CameraMetaData *meta);
   TiffIFD *mRootIFD;
 private:
-  gboolean D100IsCompressed(guint offset);
+  bool D100IsCompressed(uint32 offset);
   void DecodeUncompressed();
   void DecodeD100Uncompressed();
 };
@@ -49,9 +49,9 @@ class NefSlice {
 public:
   NefSlice() { h = offset = count = 0;};
   ~NefSlice() {};
-  guint h;
-  guint offset;
-  guint count;
+  uint32 h;
+  uint32 offset;
+  uint32 count;
 };
 
 } // namespace RawSpeed

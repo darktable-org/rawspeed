@@ -53,10 +53,10 @@ public:
   virtual ~ColorFilterArray(void);
   void setCFA(CFAColor up_left, CFAColor up_right, CFAColor down_left, CFAColor down_right);
   void setColorAt(iPoint2D pos, CFAColor c);
-  void setCFA(guchar dcrawCode);
-  __inline CFAColor getColorAt(guint x, guint y) {return cfa[(x&1)+((y&1)<<1)];}
-  guint toDcrawColor(CFAColor c);
-  guint getDcrawFilter();
+  void setCFA(uchar8 dcrawCode);
+  __inline CFAColor getColorAt(uint32 x, uint32 y) {return cfa[(x&1)+((y&1)<<1)];}
+  uint32 toDcrawColor(CFAColor c);
+  uint32 getDcrawFilter();
   void shiftLeft();
   void shiftDown();
   std::string asString();
