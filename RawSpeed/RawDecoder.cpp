@@ -24,7 +24,7 @@
 
 namespace RawSpeed {
 
-RawDecoder::RawDecoder(FileMap* file) : mFile(file), mRaw(RawImage::create()) {
+	RawDecoder::RawDecoder(FileMap* file) : mRaw(RawImage::create()), mFile(file) {
   decoderVersion = 0;
 }
 
@@ -80,7 +80,7 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
              input.getData(), inputPitch, w*mRaw->bpp, h - y);
       return;
     }
-    if (bitPerPixel == 12 && w == inputPitch * 8 / 12)  {
+    if (bitPerPixel == 12 && (int)w == inputPitch * 8 / 12)  {
       Decode12BitRaw(input, w, h);
       return;
     }
@@ -103,7 +103,7 @@ void RawDecoder::Decode12BitRaw(ByteStream &input, guint w, guint h) {
   guint pitch = mRaw->pitch;
   const guchar *in = input.getData();
   if (input.getRemainSize() < ((w*12/8)*h)) {
-    if ((int)input.getRemainSize() > (w*12/8))
+    if ((guint)input.getRemainSize() > (w*12/8))
       h = input.getRemainSize() / (w*12/8) - 1;
     else
       ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. Image file truncated.");
