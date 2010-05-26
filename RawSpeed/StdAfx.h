@@ -25,6 +25,7 @@
 
 #if defined(__MINGW32__)
 #define UNICODE
+#undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501
 #endif
 
@@ -36,6 +37,8 @@
 #include <Windows.h>
 #ifndef __MINGW32__
 #include <crtdbg.h>
+#else
+#include <stdexcept>
 #endif
 #else // if unix
 #include <stdarg.h>
