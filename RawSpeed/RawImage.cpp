@@ -117,13 +117,14 @@ void RawImageData::subFrame(iPoint2D offset, iPoint2D new_size) {
 }
 
 void RawImageData::scaleBlackWhite() {
-  int gw = (dim.x - 20) * cpp;
+  const int skipBorder = 100;
+  int gw = (dim.x - skipBorder*2) * cpp;
   if (blackLevel < 0 || whitePoint == 65536) {  // Estimate
     int b = 65536;
     int m = 0;
-    for (int row = 10;row < (dim.y - 10);row++) {
-      ushort16 *pixel = (ushort16*)getData(10, row);
-      for (int col = 10 ; col < gw ; col++) {
+    for (int row = skipBorder;row < (dim.y - skipBorder);row++) {
+      ushort16 *pixel = (ushort16*)getData(skipBorder, row);
+      for (int col = skipBorder ; col < gw ; col++) {
         b = MIN(*pixel, b);
         m = MAX(*pixel, m);
         pixel++;
@@ -135,6 +136,12 @@ void RawImageData::scaleBlackWhite() {
       whitePoint = m;
     printf("Estimated black:%d, Estimated white: %d\n", blackLevel, whitePoint);
   }
+
+  if (whitePoint <= blackLevel) {
+    printf("WARNING: RawImageData::scaleBlackWhite - Unable to estimate Black/White level, skipping scaling.\n");
+    return;
+  }
+
   float f = 65535.0f / (float)(whitePoint - blackLevel);
   scaleValues(f);
 }
