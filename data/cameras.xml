@@ -1073,7 +1073,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="0" height="0"/>
-    <Sensor black="400" white="16600"/>
+    <Sensor black="500" white="16000"/>
   </Camera>
   <Camera make="SONY" model="DSLR-A500">
     <CFA width="2" height="2">
