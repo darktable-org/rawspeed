@@ -21,7 +21,6 @@
 */
 
 
-#pragma once
 
 #if defined(__MINGW32__)
 #define UNICODE
