@@ -1005,7 +1005,8 @@
     <Crop x="0" y="0" width="3900" height="2616"/>
     <Sensor black="0" white="4095"/>
   </Camera>
-  <Camera make="SONY" model="DSLR-A100">
+  <Camera make="SONY" model="DSLR-A100" supported="no">
+	<!-- Files doesn't have a valid TIFF structure -->
     <CFA width="2" height="2">
       <Color x="0" y="0">GREEN</Color>
       <Color x="1" y="0">RED</Color>
