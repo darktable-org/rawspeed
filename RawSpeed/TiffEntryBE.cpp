@@ -35,7 +35,7 @@ TiffEntryBE::TiffEntryBE(FileMap* f, uint32 offset) : mDataSwapped(false) {
   type = _type;         //Now we can set it to the proper type
 
   if (type > 13)
-    throw TiffParserException("Error reading TIFF structure. Unknown Type encountered.");
+    ThrowTPE("Error reading TIFF structure. Unknown Type 0x%x encountered.", type);
   uint32 bytesize = count << datashifts[type];
   if (bytesize <= 4) {
     data = f->getDataWrt(offset + 8);
@@ -61,7 +61,7 @@ TiffEntryBE::~TiffEntryBE(void) {
 
 unsigned int TiffEntryBE::getInt() {
   if (!(type == TIFF_LONG || type == TIFF_SHORT || type == TIFF_UNDEFINED))
-    throw TiffParserException("TIFF, getInt: Wrong type encountered. Expected Int");
+    ThrowTPE("TIFF, getInt: Wrong type 0x%x encountered. Expected Int", type);
   if (type == TIFF_SHORT)
     return getShort();
   return (unsigned int)data[0] << 24 | (unsigned int)data[1] << 16 | (unsigned int)data[2] << 8 | (unsigned int)data[3];
@@ -69,14 +69,14 @@ unsigned int TiffEntryBE::getInt() {
 
 unsigned short TiffEntryBE::getShort() {
   if (!(type == TIFF_SHORT || type == TIFF_UNDEFINED))
-    throw TiffParserException("TIFF, getShort: Wrong type encountered. Expected Short");
+    ThrowTPE("TIFF, getShort: Wrong type 0x%x encountered. Expected Short", type);
   return (unsigned short)data[0] << 8 | (unsigned short)data[1];
 }
 
 const unsigned int* TiffEntryBE::getIntArray() {
   //TODO: Make critical section to avoid clashes.
   if (!(type == TIFF_LONG || type == TIFF_UNDEFINED || type == TIFF_RATIONAL ||  type == TIFF_SRATIONAL))
-    throw TiffParserException("TIFF, getIntArray: Wrong type encountered. Expected Int");
+    ThrowTPE("TIFF, getIntArray: Wrong type 0x%x encountered. Expected Int", type);
   if (mDataSwapped)
     return (unsigned int*)&data[0];
 
@@ -91,7 +91,7 @@ const unsigned int* TiffEntryBE::getIntArray() {
 const unsigned short* TiffEntryBE::getShortArray() {
   //TODO: Make critical section to avoid clashes.
   if (!(type == TIFF_SHORT || type == TIFF_UNDEFINED))
-    throw TiffParserException("TIFF, getShortArray: Wrong type encountered. Expected Short");
+    ThrowTPE("TIFF, getShortArray: Wrong type 0x%x encountered. Expected Short", type);
 
   if (mDataSwapped)
     return (unsigned short*)&data[0];
