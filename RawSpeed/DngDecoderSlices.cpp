@@ -40,11 +40,6 @@ void *DecodeThread(void *_this) {
 DngDecoderSlices::DngDecoderSlices(FileMap* file, RawImage img) :
     mFile(file), mRaw(img) {
   mFixLjpeg = false;
-#ifdef WIN32
-  nThreads = pthread_num_processors_np();
-#else
-  nThreads = 2; // FIXME: Port this to unix
-#endif
 }
 
 DngDecoderSlices::~DngDecoderSlices(void) {

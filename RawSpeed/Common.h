@@ -88,6 +88,14 @@ inline int lmax(int p0, int p1) {
   return p0 - ((p0 - p1) & ((p0 - p1) >> 31));
 }
 
+inline uint32 getThreadCount()
+{
+#ifdef WIN32
+  return pthread_num_processors_np();
+#else
+  return rawspeed_get_number_of_processor_cores();
+#endif
+}
 
 inline uint32 clampbits(int x, uint32 n) { uint32 _y_temp; if( (_y_temp=x>>n) ) x = ~_y_temp >> (32-n); return x;}
 

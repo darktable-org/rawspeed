@@ -198,11 +198,7 @@ void *RawDecoderDecodeThread(void *_this) {
 
 void RawDecoder::startThreads() {
   uint32 threads;
-#ifdef WIN32
-  threads = pthread_num_processors_np();
-#else
-  threads = rawspeed_get_number_of_processor_cores(); 
-#endif
+  threads = getThreadCount(); 
   int y_offset = 0;
   int y_per_thread = (mRaw->dim.y + threads - 1) / threads;
   RawDecoderThread *t = new RawDecoderThread[threads];

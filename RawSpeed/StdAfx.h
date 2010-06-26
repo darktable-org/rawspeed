@@ -48,6 +48,7 @@
 #endif // __unix__
 #include <malloc.h>
 #include <math.h>
+#include "pthread.h"
 // STL
 #include <iostream>
 #include <string>

@@ -1,7 +1,6 @@
 #pragma once
 #include "RawDecoder.h"
 #include <queue>
-#include "pthread.h"
 #include "LJpegPlain.h"
 /* 
     RawSpeed - RAW file decoder.
