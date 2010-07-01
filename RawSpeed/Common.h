@@ -66,6 +66,11 @@ typedef unsigned int uint32;
 typedef signed int int32;
 typedef unsigned short ushort16;
 
+typedef enum Endianness {
+  big, little, unknown
+} Endianness;
+
+
 inline void BitBlt(uchar8* dstp, int dst_pitch, const uchar8* srcp, int src_pitch, int row_size, int height) {
   if (height == 1 || (dst_pitch == src_pitch && src_pitch == row_size)) {
     memcpy(dstp, srcp, row_size*height);
@@ -97,6 +102,19 @@ inline uint32 getThreadCount()
 #endif
 }
 
+inline Endianness getHostEndianness() {
+  ushort16 testvar = 0xfeff; 
+  uint32 firstbyte = ((uchar8 *)&testvar)[0];
+  if (firstbyte == 0xff)
+    return little;
+  else if (firstbyte == 0xfe)
+    return big;
+  else
+    _ASSERTE(FALSE);
+
+  // Return something to make compilers happy
+  return unknown;
+}
 inline uint32 clampbits(int x, uint32 n) { uint32 _y_temp; if( (_y_temp=x>>n) ) x = ~_y_temp >> (32-n); return x;}
 
 

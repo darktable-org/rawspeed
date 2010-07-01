@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "TiffParser.h"
+
 /*
     RawSpeed - RAW file decoder.
 
@@ -24,8 +25,9 @@
 
 namespace RawSpeed {
 
-TiffParser::TiffParser(FileMap* inputData): mInput(inputData), mRootIFD(0) {
 
+TiffParser::TiffParser(FileMap* inputData): mInput(inputData), mRootIFD(0) {
+  host_endian = getHostEndianness();
 }
 
 
@@ -50,26 +52,26 @@ void TiffParser::parseData() {
   if (mInput->getSize() < 16)
     throw TiffParserException("Not a TIFF file (size too small)");
   if (data[0] != 0x49 || data[1] != 0x49) {
-    endian = big;
+    tiff_endian = big;
     if (data[0] != 0x4D || data[1] != 0x4D)
       throw TiffParserException("Not a TIFF file (ID)");
 
     if (data[3] != 42)
       throw TiffParserException("Not a TIFF file (magic 42)");
   } else {
-    endian = little;
+    tiff_endian = little;
     if (data[2] != 42 && data[2] != 0x52 && data[2] != 0x55) // ORF has 0x52, RW2 0x55 - Brillant!
       throw TiffParserException("Not a TIFF file (magic 42)");
   }
 
-  if (endian == little)
+  if (tiff_endian == host_endian)
     mRootIFD = new TiffIFD();
   else
     mRootIFD = new TiffIFDBE();
 
   uint32 nextIFD;
   data = mInput->getData(4);
-  if (endian == little) {
+  if (tiff_endian == host_endian) {
     nextIFD = *(int*)data;
   } else {
     nextIFD = (unsigned int)data[0] << 24 | (unsigned int)data[1] << 16 | (unsigned int)data[2] << 8 | (unsigned int)data[3];
@@ -77,7 +79,7 @@ void TiffParser::parseData() {
   while (nextIFD) {
     CHECKSIZE(nextIFD);
 
-    if (endian == little)
+    if (tiff_endian == host_endian)
       mRootIFD->mSubIFD.push_back(new TiffIFD(mInput, nextIFD));
     else
       mRootIFD->mSubIFD.push_back(new TiffIFDBE(mInput, nextIFD));

@@ -26,7 +26,7 @@ namespace RawSpeed {
 
 TiffParserHeaderless::TiffParserHeaderless(FileMap* input, Endianness _end) :
     TiffParser(input) {
-  endian = _end;
+  tiff_endian = _end;
 }
 
 TiffParserHeaderless::~TiffParserHeaderless(void) {
@@ -50,7 +50,7 @@ void TiffParserHeaderless::parseData(uint32 firstIfdOffset) {
   if (mInput->getSize() < 12)
     throw TiffParserException("Not a TIFF file (size too small)");
 
-  if (endian == little)
+  if (tiff_endian == host_endian)
     mRootIFD = new TiffIFD();
   else
     mRootIFD = new TiffIFDBE();
@@ -59,7 +59,7 @@ void TiffParserHeaderless::parseData(uint32 firstIfdOffset) {
   do {
     CHECKSIZE(nextIFD);
 
-    if (endian == little)
+    if (tiff_endian == host_endian)
       mRootIFD->mSubIFD.push_back(new TiffIFD(mInput, nextIFD));
     else
       mRootIFD->mSubIFD.push_back(new TiffIFDBE(mInput, nextIFD));

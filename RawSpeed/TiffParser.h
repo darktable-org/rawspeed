@@ -44,11 +44,13 @@ public:
 
   virtual void parseData();
   virtual RawDecoder* getDecoder();
-  Endianness endian;
+  Endianness tiff_endian;
   TiffIFD* RootIFD() const { return mRootIFD; }
+  RawSpeed::Endianness getHostEndian() const { return host_endian; }
 protected:
   FileMap *mInput;
   TiffIFD* mRootIFD;
+  Endianness host_endian;
 };
 
 } // namespace RawSpeed

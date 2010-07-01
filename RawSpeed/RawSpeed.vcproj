@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="RawSpeed"
 	ProjectGUID="{482A0ABF-1AE3-4EE4-815A-428880DAE0C6}"
 	RootNamespace="CR2reader"
@@ -297,6 +297,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ByteStreamSwap.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\FileIOException.cpp"
 					>
 				</File>
@@ -412,6 +416,10 @@
 				</File>
 				<File
 					RelativePath=".\ByteStream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ByteStreamSwap.h"
 					>
 				</File>
 				<File

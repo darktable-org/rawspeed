@@ -27,10 +27,6 @@
 
 namespace RawSpeed {
 
-typedef enum Endianness {
-  big, little
-} Endianness;
-
 
 class TiffIFD
 {

@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 #include "LJpegDecompressor.h"
+#include "ByteStreamSwap.h"
+
 /*
     RawSpeed - RAW file decoder.
 
@@ -106,7 +108,12 @@ void LJpegDecompressor::getSOF(SOFInfo* sof, uint32 offset, uint32 size) {
   if (!mFile->isValid(offset + size - 1))
     ThrowRDE("LJpegDecompressor::getSOF: Start offset plus size is longer than file. Truncated file.");
   try {
-    input = new ByteStream(mFile->getData(offset), size);
+    Endianness host_endian = getHostEndianness();
+    // JPEG is big endian
+    if (host_endian == big)
+      input = new ByteStream(mFile->getData(offset), size);
+    else 
+      input = new ByteStreamSwap(mFile->getData(offset), size);
 
     if (getNextMarker(false) != M_SOI)
       ThrowRDE("LJpegDecompressor::getSOF: Image did not start with SOI. Probably not an LJPEG");
@@ -138,7 +145,12 @@ void LJpegDecompressor::startDecoder(uint32 offset, uint32 size, uint32 offsetX,
   offY = offsetY;
 
   try {
-    input = new ByteStream(mFile->getData(offset), size);
+    Endianness host_endian = getHostEndianness();
+    // JPEG is big endian
+    if (host_endian == big)
+      input = new ByteStream(mFile->getData(offset), size);
+    else 
+      input = new ByteStreamSwap(mFile->getData(offset), size);
 
     if (getNextMarker(false) != M_SOI)
       ThrowRDE("LJpegDecompressor::startDecoder: Image did not start with SOI. Probably not an LJPEG");

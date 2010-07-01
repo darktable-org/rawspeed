@@ -49,15 +49,15 @@ void TiffParserOlympus::parseData() {
   if (mInput->getSize() < 16)
     throw TiffParserException("Not a TIFF file (size too small)");
   if (data[0] != 0x49 || data[1] != 0x49) {
-    endian = big;
+    tiff_endian = big;
     if (data[0] != 0x4D || data[1] != 0x4D)
       throw TiffParserException("Not a TIFF file (ID)");
 
   } else {
-    endian = little;
+    tiff_endian = little;
   }
 
-  if (endian == little)
+  if (tiff_endian == host_endian)
     mRootIFD = new TiffIFD();
   else
     mRootIFD = new TiffIFDBE();
@@ -66,7 +66,7 @@ void TiffParserOlympus::parseData() {
   do {
     CHECKSIZE(nextIFD);
 
-    if (endian == little)
+    if (tiff_endian == host_endian)
       mRootIFD->mSubIFD.push_back(new TiffIFD(mInput, nextIFD));
     else
       mRootIFD->mSubIFD.push_back(new TiffIFDBE(mInput, nextIFD));

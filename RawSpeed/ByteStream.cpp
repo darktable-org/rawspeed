@@ -50,13 +50,14 @@ void ByteStream::skipBytes(uint32 nbytes) {
 
 uchar8 ByteStream::getByte() {
   if (off >= size)
-    throw IOException("Out of buffer read");
+    throw IOException("getByte:Out of buffer read");
   return buffer[off++];
 }
 
 ushort16 ByteStream::getShort() {
   if (off + 1 >= size)
-    throw IOException("Out of buffer read");
+    throw IOException("getShort: Out of buffer read");
+  return *(ushort16*)&buffer[off+=4];
   uint32 a = buffer[off++];
   uint32 b = buffer[off++];
   // !!! ENDIAN SWAP
@@ -65,13 +66,13 @@ ushort16 ByteStream::getShort() {
 
 int ByteStream::getInt() {
   if (off + 4 >= size)
-    throw IOException("Out of buffer read");
+    throw IOException("getInt:Out of buffer read");
   return *(int*)&buffer[off+=4];
 }
 
 void ByteStream::setAbsoluteOffset(uint32 offset) {
   if (offset >= size)
-    throw IOException("Offset set out of buffer");
+    throw IOException("setAbsoluteOffset:Offset set out of buffer");
   off = offset;
 }
 

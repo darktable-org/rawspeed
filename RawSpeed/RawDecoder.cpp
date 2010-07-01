@@ -75,12 +75,12 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
 
   } else {
 
-    if (bitPerPixel == 16)  {
+    if (bitPerPixel == 16 && getHostEndianness() == little)  {
       BitBlt(&data[offset.x*sizeof(ushort16)*cpp+y*outPitch], outPitch,
              input.getData(), inputPitch, w*mRaw->bpp, h - y);
       return;
     }
-    if (bitPerPixel == 12 && (int)w == inputPitch * 8 / 12)  {
+    if (bitPerPixel == 12 && (int)w == inputPitch * 8 / 12 && getHostEndianness() == little)  {
       Decode12BitRaw(input, w, h);
       return;
     }

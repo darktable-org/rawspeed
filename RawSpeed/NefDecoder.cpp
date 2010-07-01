@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "NefDecoder.h"
+#include "ByteStreamSwap.h"
 /*
     RawSpeed - RAW file decoder.
 
@@ -107,10 +108,17 @@ RawImage NefDecoder::decodeRaw() {
     meta = data[0]->getEntry((TiffTag)0x8c);  // Fall back
   }
 
-  ByteStream metadata(meta->getData(), meta->count);
   try {
     NikonDecompressor decompressor(mFile, mRaw);
-    decompressor.DecompressNikon(metadata, width, height, bitPerPixel, offsets->getInt(), counts->getInt());
+
+    // Nikon is JPEG (Big Endian) byte order
+    if (getHostEndianness() == big)
+      decompressor.DecompressNikon(ByteStream(meta->getData(), meta->count), 
+                                   width, height, bitPerPixel, offsets->getInt(), counts->getInt());
+    else
+      decompressor.DecompressNikon(ByteStreamSwap(meta->getData(), meta->count), 
+                                   width, height, bitPerPixel, offsets->getInt(), counts->getInt());
+
   } catch (IOException e) {
     errors.push_back(_strdup(e.what()));
     // Let's ignore it, it may have delivered somewhat useful data.

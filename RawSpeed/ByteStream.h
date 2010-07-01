@@ -31,7 +31,6 @@ public:
   ByteStream(const ByteStream* b);
   ~ByteStream(void);
   uint32 peekByte();
-  ushort16 getShort();
   uint32 getOffset() {return off;}
   void skipBytes(uint32 nbytes);
   uchar8 getByte();
@@ -39,8 +38,9 @@ public:
   void skipToMarker();
   uint32 getRemainSize() { return size-off;}
   const uchar8* getData() {return &buffer[off];}
-  int getInt();
-private:
+  virtual ushort16 getShort();
+  virtual int getInt();
+protected:
   const uchar8* buffer;
   const uint32 size;            // This if the end of buffer.
   uint32 off;                  // Offset in bytes (this is next byte to deliver)
