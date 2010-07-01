@@ -257,6 +257,9 @@ RawImage DngDecoder::decodeRaw() {
             ThrowRDE("DNG Decoder: Byte count number does not match strip size: count:%u, stips:%u ", TEcounts->count, TEoffsets->count);
           }
 
+          if (yPerSlice == 0 || yPerSlice > (uint32)mRaw->dim.y)
+            ThrowRDE("DNG Decoder: Invalid y per slice");
+
           uint32 offY = 0;
           for (uint32 s = 0; s < TEcounts->count; s++) {
             DngSliceElement e(offsets[s], counts[s], 0, offY);
