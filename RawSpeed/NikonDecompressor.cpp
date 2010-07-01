@@ -53,7 +53,7 @@ void NikonDecompressor::initTable(uint32 huffSelect) {
   createHuffmanTable(dctbl1);
 }
 
-void NikonDecompressor::DecompressNikon(ByteStream &metadata, uint32 w, uint32 h, uint32 bitsPS, uint32 offset, uint32 size) {
+void NikonDecompressor::DecompressNikon(ByteStream metadata, uint32 w, uint32 h, uint32 bitsPS, uint32 offset, uint32 size) {
   uint32 v0 = metadata.getByte();
   uint32 v1 = metadata.getByte();
   uint32 huffSelect = 0;

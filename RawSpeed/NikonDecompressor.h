@@ -32,7 +32,7 @@ public:
   NikonDecompressor(FileMap* file, RawImage img );
 public:
   virtual ~NikonDecompressor(void);
-  void DecompressNikon(ByteStream &meta, uint32 w, uint32 h, uint32 bitsPS, uint32 offset, uint32 size);
+  void DecompressNikon(ByteStream meta, uint32 w, uint32 h, uint32 bitsPS, uint32 offset, uint32 size);
 private:
   void initTable(uint32 huffSelect);
   int HuffDecodeNikon();
