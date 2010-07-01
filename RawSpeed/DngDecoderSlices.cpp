@@ -52,6 +52,7 @@ void DngDecoderSlices::addSlice(DngSliceElement slice) {
 void DngDecoderSlices::startDecoding() {
   // Create threads
 
+  nThreads = getThreadCount();
   int slicesPerThread = ((int)slices.size() + nThreads - 1) / nThreads;
 //  decodedSlices = 0;
   pthread_attr_t attr;
