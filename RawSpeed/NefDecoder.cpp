@@ -112,13 +112,15 @@ RawImage NefDecoder::decodeRaw() {
     NikonDecompressor decompressor(mFile, mRaw);
 
     // Nikon is JPEG (Big Endian) byte order
+    ByteStream* metastream;
     if (getHostEndianness() == big)
-      decompressor.DecompressNikon(ByteStream(meta->getData(), meta->count), 
-                                   width, height, bitPerPixel, offsets->getInt(), counts->getInt());
+      metastream = new ByteStream(meta->getData(), meta->count);
     else
-      decompressor.DecompressNikon(ByteStreamSwap(meta->getData(), meta->count), 
-                                   width, height, bitPerPixel, offsets->getInt(), counts->getInt());
+      metastream = new ByteStreamSwap(meta->getData(), meta->count);
 
+    decompressor.DecompressNikon(metastream, width, height, bitPerPixel, offsets->getInt(), counts->getInt());
+
+    delete metastream;
   } catch (IOException e) {
     errors.push_back(_strdup(e.what()));
     // Let's ignore it, it may have delivered somewhat useful data.

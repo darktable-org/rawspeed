@@ -53,9 +53,9 @@ void NikonDecompressor::initTable(uint32 huffSelect) {
   createHuffmanTable(dctbl1);
 }
 
-void NikonDecompressor::DecompressNikon(ByteStream metadata, uint32 w, uint32 h, uint32 bitsPS, uint32 offset, uint32 size) {
-  uint32 v0 = metadata.getByte();
-  uint32 v1 = metadata.getByte();
+void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h, uint32 bitsPS, uint32 offset, uint32 size) {
+  uint32 v0 = metadata->getByte();
+  uint32 v1 = metadata->getByte();
   uint32 huffSelect = 0;
   uint32 split = 0;
   int pUp1[2];
@@ -65,32 +65,32 @@ void NikonDecompressor::DecompressNikon(ByteStream metadata, uint32 w, uint32 h,
   _RPT2(0, "Nef version v0:%u, v1:%u\n", v0, v1);
 
   if (v0 == 73 || v1 == 88)
-    metadata.skipBytes(2110);
+    metadata->skipBytes(2110);
 
   if (v0 == 70) huffSelect = 2;
   if (bitsPS == 14) huffSelect += 3;
 
-  pUp1[0] = metadata.getShort();
-  pUp1[1] = metadata.getShort();
-  pUp2[0] = metadata.getShort();
-  pUp2[1] = metadata.getShort();
+  pUp1[0] = metadata->getShort();
+  pUp1[1] = metadata->getShort();
+  pUp2[0] = metadata->getShort();
+  pUp2[1] = metadata->getShort();
 
   uint32 _max = 1 << bitsPS & 0x7fff;
   uint32 step = 0;
-  uint32 csize = metadata.getShort();
+  uint32 csize = metadata->getShort();
   if (csize  > 1)
     step = _max / (csize - 1);
   if (v0 == 68 && v1 == 32 && step > 0) {
     for (uint32 i = 0; i < csize; i++)
-      curve[i*step] = metadata.getShort();
+      curve[i*step] = metadata->getShort();
     for (uint32 i = 0; i < _max; i++)
       curve[i] = (curve[i-i%step] * (step - i % step) +
                   curve[i-i%step+step] * (i % step)) / step;
-    metadata.setAbsoluteOffset(562);
-    split = metadata.getShort();
+    metadata->setAbsoluteOffset(562);
+    split = metadata->getShort();
   } else if (v0 != 70 && csize <= 0x4001) {
     for (uint32 i = 0; i < csize; i++) {
-      curve[i] = metadata.getShort();
+      curve[i] = metadata->getShort();
     }
     _max = csize;
   }
