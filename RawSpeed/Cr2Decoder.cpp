@@ -164,16 +164,7 @@ void Cr2Decoder::decodeMetaData(CameraMetaData *meta) {
 
 // Interpolate and convert sRaw data.
 void Cr2Decoder::sRawInterpolate() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MAKERNOTE);
-  if (data.empty())
-    ThrowRDE("CR2 sRaw: Makernote not found");
-
-  TiffIFD* exif = data[0];
-  TiffEntry *makernoteEntry = exif->getEntry(MAKERNOTE);
-  TiffParserHeaderless makertiff(mFile, mRootIFD->endian);
-  makertiff.parseData(makernoteEntry->getDataOffset());
-
-  data = makertiff.RootIFD()->getIFDsWithTag((TiffTag)0x4001);
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag((TiffTag)0x4001);
   if (data.empty())
     ThrowRDE("CR2 sRaw: Unable to locate WB info.");
 

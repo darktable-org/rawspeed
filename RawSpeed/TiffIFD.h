@@ -42,6 +42,7 @@ public:
   bool hasEntry(TiffTag tag);
   bool hasEntryRecursive(TiffTag tag);
   TiffEntry* getEntryRecursive(TiffTag tag);
+  TiffIFD* parseDngPrivateData(TiffEntry *t);
   Endianness endian;
 protected:
   int nextIFD;

@@ -41,10 +41,30 @@ TiffIFDBE::TiffIFDBE(FileMap* f, uint32 offset) {
   for (int i = 0; i < entries; i++) {
     TiffEntryBE *t = new TiffEntryBE(f, offset + 2 + i*12);
 
-    if (t->tag == SUBIFDS || t->tag == EXIFIFDPOINTER) {   // subIFD tag
-      const unsigned int* sub_offsets = t->getIntArray();
-      for (uint32 j = 0; j < t->count; j++) {
-        mSubIFD.push_back(new TiffIFDBE(f, sub_offsets[j]));
+    if (t->tag == SUBIFDS || t->tag == EXIFIFDPOINTER || t->tag == DNGPRIVATEDATA || t->tag == MAKERNOTE) {   // subIFD tag
+      if (t->tag == DNGPRIVATEDATA) {
+        try {
+          TiffIFD *maker_ifd = parseDngPrivateData(t);
+          mSubIFD.push_back(maker_ifd);
+          delete(t);
+        } catch (TiffParserException e) {
+          // Unparsable private data are added as entries
+          mEntry[t->tag] = t;
+        }
+      } else if (t->tag == MAKERNOTE) {
+        try {
+          mSubIFD.push_back(new TiffIFDBE(f, t->getDataOffset()));
+          delete(t);
+        } catch (TiffParserException e) {
+          // Unparsable makernotes are added as entries
+          mEntry[t->tag] = t;
+        }
+      } else {
+        const unsigned int* sub_offsets = t->getIntArray();
+        for (uint32 j = 0; j < t->count; j++) {
+          mSubIFD.push_back(new TiffIFDBE(f, sub_offsets[j]));
+        }
+        delete(t);
       }
     } else {  // Store as entry
       mEntry[t->tag] = t;

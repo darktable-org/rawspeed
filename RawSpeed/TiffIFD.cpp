@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "TiffIFD.h"
+#include "TiffParser.h"
 /*
     RawSpeed - RAW file decoder.
 
@@ -47,17 +48,102 @@ TiffIFD::TiffIFD(FileMap* f, uint32 offset) {
   for (uint32 i = 0; i < entries; i++) {
     TiffEntry *t = new TiffEntry(f, offset + 2 + i*12);
 
-    if (t->tag == SUBIFDS || t->tag == EXIFIFDPOINTER) {   // subIFD tag
-      const unsigned int* sub_offsets = t->getIntArray();
-      for (uint32 j = 0; j < t->count; j++) {
-        mSubIFD.push_back(new TiffIFD(f, sub_offsets[j]));
+    if (t->tag == SUBIFDS || t->tag == EXIFIFDPOINTER || t->tag == DNGPRIVATEDATA || t->tag == MAKERNOTE) {   // subIFD tag
+      if (t->tag == DNGPRIVATEDATA) {
+        try {
+          TiffIFD *maker_ifd = parseDngPrivateData(t);
+          mSubIFD.push_back(maker_ifd);
+          delete(t);
+        } catch (TiffParserException e) {
+          // Unparsable private data are added as entries
+          mEntry[t->tag] = t;
+        }
+      } else if (t->tag == MAKERNOTE) {
+        try {
+          mSubIFD.push_back(new TiffIFD(f, t->getDataOffset()));
+          delete(t);
+        } catch (TiffParserException e) {
+          // Unparsable makernotes are added as entries
+          mEntry[t->tag] = t;
+        }
+      } else {
+        const unsigned int* sub_offsets = t->getIntArray();
+        for (uint32 j = 0; j < t->count; j++) {
+          mSubIFD.push_back(new TiffIFD(f, sub_offsets[j]));
+        }
+        delete(t);
       }
-      delete(t);
     } else {  // Store as entry
       mEntry[t->tag] = t;
     }
   }
   nextIFD = *(int*)f->getData(offset + 2 + entries * 12);
+}
+
+TiffIFD* TiffIFD::parseDngPrivateData(TiffEntry *t) {
+  /*
+  1. Six bytes containing the zero-terminated string "Adobe". (The DNG specification calls for the DNGPrivateData tag to start with an ASCII string identifying the creator/format).
+  2. 4 bytes: an ASCII string ("MakN" for a Makernote),  indicating what sort of data is being stored here. Note that this is not zero-terminated.
+  3. A four-byte count (number of data bytes following); this is the length of the original MakerNote data. (This is always in "most significant byte first" format).
+  4. 2 bytes: the byte-order indicator from the original file (the usual 'MM'/4D4D or 'II'/4949).
+  5. 4 bytes: the original file offset for the MakerNote tag data (stored according to the byte order given above).
+  6. The contents of the MakerNote tag. This is a simple byte-for-byte copy, with no modification.
+  */
+  uint32 size = t->count;
+  const uchar8 *data = t->getData();
+  string id((const char*)data);
+  if (id.compare("Adobe"))
+    ThrowTPE("Not Adobe Private data");
+
+  data+=6;
+  if (!(data[0] == 'M' && data[1] == 'a' && data[2] == 'k' &&data[3] == 'N' ))
+    ThrowTPE("Not Makernote");
+
+  data+=4;
+  uint32 count;
+  if (big == getHostEndianness())
+    count = *(uint32*)data;
+  else
+    count = (unsigned int)data[0] << 24 | (unsigned int)data[1] << 16 | (unsigned int)data[2] << 8 | (unsigned int)data[3];
+
+  data+=4;
+  CHECKSIZE(count);
+  Endianness makernote_endian;
+  if (data[0] == 0x49 && data[1] == 0x49)
+    makernote_endian = little;
+  else if (data[0] == 0x4D && data[1] == 0x4D)
+    makernote_endian = big;
+  else
+    ThrowTPE("Cannot determine endianess of DNG makernote");
+
+  data+=2;
+  uint32 org_offset;
+
+  if (big == getHostEndianness())
+    org_offset = *(uint32*)data;
+  else
+    org_offset = (unsigned int)data[0] << 24 | (unsigned int)data[1] << 16 | (unsigned int)data[2] << 8 | (unsigned int)data[3];
+
+  data+=4;
+  /* Create fake tiff with original offsets */
+  uchar8* maker_data = new uchar8[org_offset+count];
+  memcpy(&maker_data[org_offset],data, count);
+  FileMap *maker_map = new FileMap(maker_data, org_offset+count);
+
+  TiffIFD *maker_ifd;
+  try {
+    if (makernote_endian == getHostEndianness())
+      maker_ifd = new TiffIFD(maker_map, org_offset);
+    else
+      maker_ifd = new TiffIFDBE(maker_map, org_offset);
+  } catch (TiffParserException e) {
+    delete[] maker_data;
+    delete maker_map;
+    throw e;
+  }
+  delete[] maker_data;
+  delete maker_map;
+  return maker_ifd;
 }
 
 TiffIFD::~TiffIFD(void) {
