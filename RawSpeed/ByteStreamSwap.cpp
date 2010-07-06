@@ -21,15 +21,16 @@ ushort16 ByteStreamSwap::getShort() {
     throw IOException("getShort: Out of buffer read");
   uint32 a = buffer[off++];
   uint32 b = buffer[off++];
-  return (a << 8) | b;
+  return (ushort16)((a << 8) | b);
 }
 
 /* NOTE: Actually unused, so not tested */
 int ByteStreamSwap::getInt() {
   if (off + 4 >= size)
     throw IOException("getInt: Out of buffer read");
-  return (int)buffer[off] << 24 | (int)buffer[off+1] << 16 | (int)buffer[off+2] << 8 | (int)buffer[off+3];
+  int r = (int)buffer[off] << 24 | (int)buffer[off] << 16 | (int)buffer[off] << 8 | (int)buffer[off];
   off+=4;
+  return r;
 }
 
 } // namespace RawSpeed

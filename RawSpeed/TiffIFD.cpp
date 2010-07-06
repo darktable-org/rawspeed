@@ -108,7 +108,7 @@ TiffIFD* TiffIFD::parseDngPrivateData(TiffEntry *t) {
 
   data+=4;
   CHECKSIZE(count);
-  Endianness makernote_endian;
+  Endianness makernote_endian = unknown;
   if (data[0] == 0x49 && data[1] == 0x49)
     makernote_endian = little;
   else if (data[0] == 0x4D && data[1] == 0x4D)
