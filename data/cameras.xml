@@ -155,7 +155,7 @@
       <Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="158" y="52" width="5202" height="3464"/>
-    <Sensor black="2048" white="16300"/>
+    <Sensor black="2050" white="16300"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS 7D" mode="sRaw1">
     <Crop x="0" y="0" width="0" height="0"/>
@@ -1130,7 +1130,16 @@
     <Crop x="0" y="0" width="6080" height="4048"/>
     <Sensor black="520" white="16383"/>
   </Camera>
-  <Camera make="SONY" model="NEX-5" supported="yes">
+  <Camera make="SONY" model="NEX-3" supported="yes">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">RED</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="1" y="1">BLUE</Color>
+    </CFA>
+    <Crop x="0" y="0" width="0" height="0"/>
+    <Sensor black="520" white="16360"/>
+  </Camera>  <Camera make="SONY" model="NEX-5" supported="yes">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
       <Color x="1" y="0">GREEN</Color>
