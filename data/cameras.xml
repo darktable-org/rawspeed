@@ -500,7 +500,7 @@
       <Color x="0" y="1">GREEN</Color>
       <Color x="1" y="1">BLUE</Color>
     </CFA>
-    <Crop x="0" y="0" width="4284" height="2844"/>
+    <Crop x="2" y="0" width="4282" height="2844"/>
     <Sensor black="0" white="3972"/>
   </Camera>
   <Camera make="NIKON CORPORATION" model="NIKON D70s">
