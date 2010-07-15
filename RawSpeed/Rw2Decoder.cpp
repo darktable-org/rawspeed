@@ -67,7 +67,7 @@ RawImage Rw2Decoder::decodeRaw() {
       ThrowRDE("Panasonic RAW Decoder: Invalid image data offset, cannot decode.");
 
     int count = counts->getInt();
-    if (count != width*height*2)
+    if (count != (int)(width*height*2))
       ThrowRDE("Panasonic RAW Decoder: Byte count is wrong.");
 
     ByteStream input_start(mFile->getData(off), mFile->getSize() - off);
