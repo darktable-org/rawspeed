@@ -224,6 +224,14 @@
     <Crop x="78" y="20" width="3906" height="2600"/>
     <Sensor black="1023" white="15100"/>
   </Camera>
+  <Camera make="Canon" model="Canon EOS-1D Mark III" mode="sRaw1">
+    <Crop x="0" y="0" width="0" height="0"/>
+    <Sensor black="0" white="16383"/>
+  </Camera>
+  <Camera make="Canon" model="Canon EOS-1D Mark III" mode="sRaw2">
+    <Crop x="0" y="0" width="0" height="0"/>
+    <Sensor black="0" white="16383"/>
+  </Camera>
   <Camera make="Canon" model="Canon EOS-1D Mark IV">
     <CFA width="2" height="2">
       <Color x="0" y="0">GREEN</Color>
@@ -233,6 +241,14 @@
     </CFA>
     <Crop x="144" y="46" width="-64" height="-2"/>
     <Sensor black="2000" white="15900"/>
+  </Camera>
+  <Camera make="Canon" model="Canon EOS-1D Mark IV" mode="sRaw1">
+    <Crop x="0" y="0" width="0" height="0"/>
+    <Sensor black="0" white="16383"/>
+  </Camera>
+  <Camera make="Canon" model="Canon EOS-1D Mark IV" mode="sRaw2">
+    <Crop x="0" y="0" width="0" height="0"/>
+    <Sensor black="0" white="16383"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS-1Ds Mark II">
     <CFA width="2" height="2">
@@ -253,6 +269,14 @@
     </CFA>
     <Crop x="62" y="20" width="5640" height="3752"/>
     <Sensor black="1021" white="15100"/>
+  </Camera>
+  <Camera make="Canon" model="Canon EOS-1Ds Mark III" mode="sRaw1">
+    <Crop x="0" y="0" width="0" height="0"/>
+    <Sensor black="0" white="16383"/>
+  </Camera>
+  <Camera make="Canon" model="Canon EOS-1Ds Mark III" mode="sRaw2">
+    <Crop x="0" y="0" width="0" height="0"/>
+    <Sensor black="0" white="16383"/>
   </Camera>
   <Camera make="Canon" model="Canon PowerShot G11">
     <CFA width="2" height="2">
@@ -824,6 +848,33 @@
     <Crop x="0" y="0" width="-44" height="0" />
     <Sensor black="0" white="5300"/>
   </Camera>
+  <Camera make="Panasonic" model = "DMC-G2" mode="3:2">
+	<!-- Guess -->
+    <CFA width="2" height="2">
+      <Color x="0" y="0">GREEN</Color><Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
+    </CFA>
+    <Crop x="0" y="0" width="-44" height="0" />
+    <Sensor black="0" white="5300"/>
+  </Camera>
+  <Camera make="Panasonic" model = "DMC-G2" mode="16:9">
+	<!-- Guess -->
+    <CFA width="2" height="2">
+      <Color x="0" y="0">GREEN</Color><Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
+    </CFA>
+    <Crop x="0" y="0" width="-44" height="0" />
+    <Sensor black="0" white="5300"/>
+  </Camera>
+  <Camera make="Panasonic" model = "DMC-G2" mode="1:1">
+	<!-- Guess -->
+    <CFA width="2" height="2">
+      <Color x="0" y="0">GREEN</Color><Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
+    </CFA>
+    <Crop x="0" y="0" width="-44" height="0" />
+    <Sensor black="0" white="5300"/>
+  </Camera>
   <Camera make="Panasonic" model = "DMC-G10" mode="4:3">
     <CFA width="2" height="2">
       <Color x="0" y="0">GREEN</Color><Color x="1" y="0">BLUE</Color>
@@ -833,6 +884,24 @@
     <Sensor black="0" white="4800"/>
   </Camera>
   <Camera make="Panasonic" model = "DMC-GH1" mode="4:3">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">GREEN</Color><Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
+    </CFA>
+    <Crop x="0" y="0" width="-44" height="0"/>
+    <Sensor black="0" white="5111"/>
+  </Camera>
+  <Camera make="Panasonic" model = "DMC-GH1" mode="3:2">
+	<!-- Guess -->
+    <CFA width="2" height="2">
+      <Color x="0" y="0">GREEN</Color><Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
+    </CFA>
+    <Crop x="0" y="0" width="-44" height="0"/>
+    <Sensor black="0" white="5111"/>
+  </Camera>
+  <Camera make="Panasonic" model = "DMC-GH1" mode="1:1">
+	<!-- Guess -->
     <CFA width="2" height="2">
       <Color x="0" y="0">GREEN</Color><Color x="1" y="0">BLUE</Color>
       <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
@@ -881,6 +950,24 @@
     <Sensor black="0" white="5111"/>
   </Camera>
   <Camera make="Panasonic" model = "DMC-FZ35" mode="4:3">
+    <CFA width="2" height="2">
+        <Color x="0" y="0">BLUE</Color><Color x="1" y="0">GREEN</Color>
+        <Color x="0" y="1">GREEN</Color><Color x="1" y="1">RED</Color>
+    </CFA>
+    <Crop x="0" y="0" width="-44" height="0"/>
+    <Sensor black="150" white="4800"/>
+  </Camera>
+  <Camera make="Panasonic" model = "DMC-FZ35" mode="3:2">
+	<!-- Guess -->
+    <CFA width="2" height="2">
+        <Color x="0" y="0">BLUE</Color><Color x="1" y="0">GREEN</Color>
+        <Color x="0" y="1">GREEN</Color><Color x="1" y="1">RED</Color>
+    </CFA>
+    <Crop x="0" y="0" width="-44" height="0"/>
+    <Sensor black="150" white="4800"/>
+  </Camera>
+  <Camera make="Panasonic" model = "DMC-FZ35" mode="16:9">
+	<!-- Guess -->
     <CFA width="2" height="2">
         <Color x="0" y="0">BLUE</Color><Color x="1" y="0">GREEN</Color>
         <Color x="0" y="1">GREEN</Color><Color x="1" y="1">RED</Color>
