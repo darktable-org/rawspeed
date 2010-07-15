@@ -38,17 +38,16 @@ RawImage Rw2Decoder::decodeRaw() {
 
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(PANASONIC_STRIPOFFSET);
 
-  if (data.empty())
-    ThrowRDE("RW2 Decoder: No image data found");
+  bool isOldPanasonic = FALSE;
 
-  TiffIFD* raw = data[0];
-
-  TiffEntry *offsets = raw->getEntry(PANASONIC_STRIPOFFSET);
-
-  if (offsets->count != 1) {
-    ThrowRDE("RW2 Decoder: Multiple Strips found: %u", offsets->count);
+  if (data.empty()) {
+    if (!mRootIFD->hasEntryRecursive(STRIPOFFSETS))
+      ThrowRDE("RW2 Decoder: No image data found");
+    isOldPanasonic = TRUE;
+    data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
   }
 
+  TiffIFD* raw = data[0];
   uint32 height = raw->getEntry((TiffTag)3)->getShort();
   uint32 width = raw->getEntry((TiffTag)2)->getShort();
 
@@ -56,14 +55,42 @@ RawImage Rw2Decoder::decodeRaw() {
   mRaw->bpp = 2;
   mRaw->createData();
 
-  load_flags = 0x2008;
-  int off = offsets->getInt();
+  if (isOldPanasonic) {
+    TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
+    TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
 
-  if (!mFile->isValid(off))
-    ThrowRDE("RW2 Decoder: Invalid image data offset, cannot decode.");
+    if (offsets->count != 1) {
+      ThrowRDE("RW2 Decoder: Multiple Strips found: %u", offsets->count);
+    }
+    int off = offsets->getInt();
+    if (!mFile->isValid(off))
+      ThrowRDE("Panasonic RAW Decoder: Invalid image data offset, cannot decode.");
 
-  input_start = new ByteStream(mFile->getData(off), mFile->getSize() - off);
-  DecodeRw2();
+    int count = counts->getInt();
+    if (count != width*height*2)
+      ThrowRDE("Panasonic RAW Decoder: Byte count is wrong.");
+
+    ByteStream input_start(mFile->getData(off), mFile->getSize() - off);
+    iPoint2D pos(0, 0);
+    readUncompressedRaw(input_start, mRaw->dim,pos, width*2, 16, FALSE);
+
+  } else {
+
+    TiffEntry *offsets = raw->getEntry(PANASONIC_STRIPOFFSET);
+
+    if (offsets->count != 1) {
+      ThrowRDE("RW2 Decoder: Multiple Strips found: %u", offsets->count);
+    }
+
+    load_flags = 0x2008;
+    int off = offsets->getInt();
+
+    if (!mFile->isValid(off))
+      ThrowRDE("RW2 Decoder: Invalid image data offset, cannot decode.");
+
+    input_start = new ByteStream(mFile->getData(off), mFile->getSize() - off);
+    DecodeRw2();
+  }
   return mRaw;
 }
 
