@@ -35,7 +35,7 @@
 #define _RPT4(a,b,c,d,e,f) 
 #define __inline inline
 #define _strdup(a) strdup(a)
-#define _aligned_malloc(a, alignment) malloc(a)
+void* _aligned_malloc(size_t bytes, size_t alignment);
 #define _aligned_free(a) do { free(a); } while (0)
 #ifndef MIN
 #define MIN(a, b)  lmin(a,b)

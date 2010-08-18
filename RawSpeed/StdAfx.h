@@ -40,6 +40,15 @@
 #include <stdexcept>
 #endif
 #else // if unix
+#ifdef _XOPEN_SOURCE
+#if (_XOPEN_SOURCE < 600)
+#undef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 600  // for posix_memalign()
+#endif // _XOPEN_SOURCE < 600
+#else
+#define _XOPEN_SOURCE 600  // for posix_memalign()
+#endif //_XOPEN_SOURCE
+#include <stdlib.h>
 #include <stdarg.h>
 #include <stdexcept>
 #include <exception>

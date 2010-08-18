@@ -22,4 +22,14 @@
     http://www.klauspost.com
 */
 
+#if defined(__unix__) || defined(__MINGW32__)
 
+void* _aligned_malloc(size_t bytes, size_t alignment) {
+  void* ret= NULL;
+  if (0==posix_memalign(&ret, alignment, bytes))
+    return ret;
+  else
+    return NULL;
+}
+
+#endif
