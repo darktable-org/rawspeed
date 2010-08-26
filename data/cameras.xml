@@ -93,6 +93,16 @@
     <Crop x="0" y="0" width="2376" height="1584"/>
     <Sensor black="0" white="16383"/>
   </Camera>
+  <Camera make="Canon" model="Canon EOS 60D">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">GREEN</Color>
+      <Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color>
+      <Color x="1" y="1">GREEN</Color>
+    </CFA>
+    <Crop x="146" y="54" width="0" height="0"/>
+    <Sensor black="2026" white="15304"/>
+  </Camera>
   <Camera make="Canon" model="Canon EOS 500D">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
