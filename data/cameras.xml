@@ -1018,7 +1018,7 @@
       <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="-200" height="0"/>
-    <Sensor black="0" white="5400"/>
+    <Sensor black="120" white="5400"/>
   </Camera>
   <Camera make="Panasonic" model = "DMC-LX3" mode="16:9">
     <CFA width="2" height="2">
