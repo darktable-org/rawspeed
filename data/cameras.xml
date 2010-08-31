@@ -1000,6 +1000,9 @@
     </CFA>
     <Crop x="0" y="0" width="-58" height="-10"/>
     <Sensor black="150" white="4097"/>
+    <Aliases>
+		<Alias>DMC-FZ40</Alias>
+	</Aliases>
   </Camera>
   <Camera make="Panasonic" model = "DMC-FZ50" mode = "4:3" decoder_version = "1">
     <CFA width="2" height="2">
@@ -1008,6 +1011,14 @@
     </CFA>
     <Crop x="20" y="18" width="-86" height="-28"/>
     <Sensor black="0" white="65535"/>
+  </Camera>
+  <Camera make="Panasonic" model = "DMC-FZ100">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">GREEN</Color><Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
+    </CFA>
+    <Crop x="0" y="0" width="-200" height="0"/>
+    <Sensor black="0" white="5400"/>
   </Camera>
   <Camera make="Panasonic" model = "DMC-LX3" mode="16:9">
     <CFA width="2" height="2">
