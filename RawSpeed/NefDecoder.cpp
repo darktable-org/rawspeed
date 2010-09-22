@@ -213,7 +213,6 @@ void NefDecoder::readCoolpixMangledRaw(ByteStream &input, iPoint2D& size, iPoint
   uint32 w = size.x;
   uint32 h = size.y;
   uint32 cpp = mRaw->getCpp();
-  uint32 bitPerPixel = 12;
   if (input.getRemainSize() < (inputPitch*h)) {
     if ((int)input.getRemainSize() > inputPitch)
       h = input.getRemainSize() / inputPitch - 1;
@@ -221,7 +220,6 @@ void NefDecoder::readCoolpixMangledRaw(ByteStream &input, iPoint2D& size, iPoint
       ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. Image file truncated.");
   }
 
-  uint32 skipBits = inputPitch - w * bitPerPixel / 8;  // Skip per line
   if (offset.y > mRaw->dim.y)
     ThrowRDE("readUncompressedRaw: Invalid y offset");
   if (offset.x + size.x > mRaw->dim.x)
