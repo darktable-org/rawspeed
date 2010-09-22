@@ -27,7 +27,7 @@ namespace RawSpeed {
 
 NefDecoder::NefDecoder(TiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
-
+  decoderVersion = 1;
 }
 
 NefDecoder::~NefDecoder(void) {
@@ -188,7 +188,10 @@ void NefDecoder::DecodeUncompressed() {
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
     try {
-      readUncompressedRaw(in, size, pos, width*bitPerPixel / 8, bitPerPixel, true);
+      if (hints.find(string("coolpixmangled")) == hints.end())
+        readUncompressedRaw(in, size, pos, width*bitPerPixel / 8, bitPerPixel, true);
+      else 
+        readCoolpixMangledRaw(in, size, pos, width*bitPerPixel / 8);
     } catch (RawDecoderException e) {
       if (i>0)
         errors.push_back(_strdup(e.what()));
@@ -201,6 +204,77 @@ void NefDecoder::DecodeUncompressed() {
         ThrowRDE("NEF decoder: IO error occurred in first slice, unable to decode more. Error is: %s", e.what());
     }
     offY += slice.h;
+  }
+}
+
+void NefDecoder::readCoolpixMangledRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch) {
+  uchar8* data = mRaw->getData();
+  uint32 outPitch = mRaw->pitch;
+  uint32 w = size.x;
+  uint32 h = size.y;
+  uint32 cpp = mRaw->getCpp();
+  uint32 bitPerPixel = 12;
+  if (input.getRemainSize() < (inputPitch*h)) {
+    if ((int)input.getRemainSize() > inputPitch)
+      h = input.getRemainSize() / inputPitch - 1;
+    else
+      ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. Image file truncated.");
+  }
+
+  uint32 skipBits = inputPitch - w * bitPerPixel / 8;  // Skip per line
+  if (offset.y > mRaw->dim.y)
+    ThrowRDE("readUncompressedRaw: Invalid y offset");
+  if (offset.x + size.x > mRaw->dim.x)
+    ThrowRDE("readUncompressedRaw: Invalid x offset");
+
+  uint32 y = offset.y;
+  h = MIN(h + (uint32)offset.y, (uint32)mRaw->dim.y);
+  w *= cpp;
+  BitPumpMSB *in = new BitPumpMSB(&input);
+  for (; y < h; y++) {
+    ushort16* dest = (ushort16*) & data[offset.x*sizeof(ushort16)*cpp+y*outPitch];
+    int val;
+    int val2;
+    for (uint32 x = 0 ; x < w; x++) {
+      switch (x&7) {
+        case 0:
+          val = in->getBits(12);
+          break;
+        case 2:
+        case 5:
+          val2 = in->getBits(12);
+          val = dest[x-2];  // Swap this and pixel two to the left
+          dest[x-2] = val2;
+          break;
+        case 1:
+          val = in->getBits(12);
+          val = ((val&0xf)<<8) | (((val>>4)&0xf)<<4) | (((val>>8)&0xf));
+          break;
+        case 3:
+          val = in->getBits(4) << 8;
+          val2 = in->getBits(8) << 4;
+          val |= in->getBits(8);
+          val2 |= in->getBits(4);
+          dest[x] = val;
+          x++;
+          val= val2;
+          break;
+        case 6:
+          val = in->getBits(4);
+          val2 = in->getBits(4) << 8;
+          val |= in->getBits(8) << 4;
+          val2 |= in->getBits(4) <<4;
+          val2 |= in->getBits(4);
+          dest[x] = val;
+          x++;
+          val = val2;
+          break;
+        default:
+          val = 4096;
+          in->skipBits(12);
+      }
+      dest[x] = val;
+    }
   }
 }
 

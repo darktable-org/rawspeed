@@ -127,6 +127,9 @@ protected:
   /* Higher number in camera xml file: Files for this camera will not be decoded */
   /* Higher number in code than xml: Image will be decoded. */
   int decoderVersion;
+
+  /* Hints set for the camera after checkCameraSupported has been called from the implementation*/
+   map<string,string> hints;
 };
 
 } // namespace RawSpeed

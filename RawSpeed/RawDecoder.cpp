@@ -136,6 +136,8 @@ void RawDecoder::checkCameraSupported(CameraMetaData *meta, string make, string 
 
   if (cam->decoderVersion > decoderVersion)
     ThrowRDE("Camera not supported in this version. Update RawSpeed for support.");
+
+  hints = cam->hints;
 }
 
 void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model, string mode) {
@@ -167,6 +169,7 @@ void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model, st
 
   mRaw->blackLevel = cam->black;
   mRaw->whitePoint = cam->white;
+
 }
 
 void RawDecoder::TrimSpaces(string& str) {

@@ -43,6 +43,7 @@ private:
   bool D100IsCompressed(uint32 offset);
   void DecodeUncompressed();
   void DecodeD100Uncompressed();
+  void NefDecoder::readCoolpixMangledRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch);
 };
 
 class NefSlice {
