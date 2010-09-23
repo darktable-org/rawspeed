@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "NefDecoder.h"
 #include "ByteStreamSwap.h"
+#include "BitpumpMSB32.h"
 /*
     RawSpeed - RAW file decoder.
 
@@ -228,50 +229,11 @@ void NefDecoder::readCoolpixMangledRaw(ByteStream &input, iPoint2D& size, iPoint
   uint32 y = offset.y;
   h = MIN(h + (uint32)offset.y, (uint32)mRaw->dim.y);
   w *= cpp;
-  BitPumpMSB *in = new BitPumpMSB(&input);
+  BitPumpMSB32 *in = new BitPumpMSB32(&input);
   for (; y < h; y++) {
     ushort16* dest = (ushort16*) & data[offset.x*sizeof(ushort16)*cpp+y*outPitch];
-    int val;
-    int val2;
     for (uint32 x = 0 ; x < w; x++) {
-      switch (x&7) {
-        case 0:
-          val = in->getBits(12);
-          break;
-        case 2:
-        case 5:
-          val2 = in->getBits(12);
-          val = dest[x-2];  // Swap this and pixel two to the left
-          dest[x-2] = val2;
-          break;
-        case 1:
-          val = in->getBits(12);
-          val = ((val&0xf)<<8) | (((val>>4)&0xf)<<4) | (((val>>8)&0xf));
-          break;
-        case 3:
-          val = in->getBits(4) << 8;
-          val2 = in->getBits(8) << 4;
-          val |= in->getBits(8);
-          val2 |= in->getBits(4);
-          dest[x] = val;
-          x++;
-          val= val2;
-          break;
-        case 6:
-          val = in->getBits(4);
-          val2 = in->getBits(4) << 8;
-          val |= in->getBits(8) << 4;
-          val2 |= in->getBits(4) <<4;
-          val2 |= in->getBits(4);
-          dest[x] = val;
-          x++;
-          val = val2;
-          break;
-        default:
-          val = 4096;
-          in->skipBits(12);
-      }
-      dest[x] = val;
+      dest[x] =  in->getBits(12);
     }
   }
 }

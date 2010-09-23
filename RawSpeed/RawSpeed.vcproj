@@ -289,6 +289,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BitPumpMSB32.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\BitPumpPlain.cpp"
 					>
 				</File>
@@ -408,6 +412,10 @@
 				</File>
 				<File
 					RelativePath=".\BitPumpMSB.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BitPumpMSB32.h"
 					>
 				</File>
 				<File

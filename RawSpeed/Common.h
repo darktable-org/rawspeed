@@ -26,6 +26,7 @@
 #pragma intrinsic(_ReturnAddress)
 #define MIN(a,b) min(a,b)
 #define MAX(a,b) max(a,b)
+typedef unsigned __int64 uint64;
 #else // On linux
 #define _ASSERTE(a) void(a)
 #define _RPT0(a,b) 
@@ -39,7 +40,8 @@ void* _aligned_malloc(size_t bytes, size_t alignment);
 #define _aligned_free(a) do { free(a); } while (0)
 #ifndef MIN
 #define MIN(a, b)  lmin(a,b)
-#endif
+typedef unsigned long long uint64;
+#endif // end On linux
 #ifndef MAX
 #define MAX(a, b)  lmin(a,b)
 #endif
