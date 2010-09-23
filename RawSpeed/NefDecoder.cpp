@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "NefDecoder.h"
 #include "ByteStreamSwap.h"
-#include "BitpumpMSB32.h"
+#include "BitPumpMSB32.h"
 /*
     RawSpeed - RAW file decoder.
 
