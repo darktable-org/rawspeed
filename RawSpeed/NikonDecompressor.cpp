@@ -75,7 +75,7 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
   pUp2[0] = metadata->getShort();
   pUp2[1] = metadata->getShort();
 
-  uint32 _max = 1 << bitsPS & 0x7fff;
+  int _max = 1 << bitsPS & 0x7fff;
   uint32 step = 0;
   uint32 csize = metadata->getShort();
   if (csize  > 1)
@@ -83,7 +83,7 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
   if (v0 == 68 && v1 == 32 && step > 0) {
     for (uint32 i = 0; i < csize; i++)
       curve[i*step] = metadata->getShort();
-    for (uint32 i = 0; i < _max; i++)
+    for (int i = 0; i < _max; i++)
       curve[i] = (curve[i-i%step] * (step - i % step) +
                   curve[i-i%step+step] * (i % step)) / step;
     metadata->setAbsoluteOffset(562);
@@ -123,9 +123,7 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
     for (x = 1; x < cw; x++) {
       pLeft1 += HuffDecodeNikon();
       pLeft2 += HuffDecodeNikon();
-      if (pLeft1 < 0 || pLeft1 > 65535 || pLeft2 < 0 || pLeft2 > 65535)
-        ThrowIOE("DecompressNikon: Image value out of range. Corrupt image.");
-      dest[x] =  curve[pLeft1] | (curve[pLeft2] << 16);
+      dest[x] =  curve[MIN(_max-1, MAX(0,pLeft1))] | (curve[MIN(_max-1, MAX(0,pLeft2))] << 16);
     }
   }
 }
