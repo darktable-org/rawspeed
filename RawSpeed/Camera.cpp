@@ -118,6 +118,11 @@ void Camera::parseCameraChild(xmlDocPtr doc, xmlNodePtr cur) {
     cropPos.x = getAttributeAsInt(cur, cur->name, "x");
     cropPos.y = getAttributeAsInt(cur, cur->name, "y");
 
+    if (cropPos.x < 0)
+      ThrowCME("Negative X axis crop specified in camera %s %s", make.c_str(), model.c_str());
+    if (cropPos.y < 0)
+      ThrowCME("Negative Y axis crop specified in camera %s %s", make.c_str(), model.c_str());
+
     cropSize.x = getAttributeAsInt(cur, cur->name, "width");
     cropSize.y = getAttributeAsInt(cur, cur->name, "height");
     return;

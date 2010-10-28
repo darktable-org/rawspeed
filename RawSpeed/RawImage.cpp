@@ -111,6 +111,10 @@ void RawImageData::subFrame(iPoint2D offset, iPoint2D new_size) {
     printf("WARNING: RawImageData::subFrame - Attempted to create new subframe larger than original size. Crop skipped.\n");
     return;
   }
+  if (offset.x < 0 || offset.y < 0) {
+    printf("WARNING: RawImageData::subFrame - Negative crop offset. Crop skipped.\n");
+    return;
+  }
 
   mOffset += offset;
   dim = new_size;
