@@ -1204,6 +1204,16 @@
     <Crop x="0" y="0" width="-44" height="-2"/>
     <Sensor black="41" white="4095"/>
   </Camera>
+  <Camera make="PENTAX" model="PENTAX K-r">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">BLUE</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="1" y="1">RED</Color>
+    </CFA>
+    <Crop x="2" y="2" width="-44" height="0"/>
+    <Sensor black="40" white="4095"/>
+  </Camera>
   <Camera make="PENTAX" model="PENTAX K200D">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
