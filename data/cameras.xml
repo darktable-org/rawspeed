@@ -1355,6 +1355,16 @@
     <Crop x="0" y="0" width="0" height="0"/>
     <Sensor black="476" white="16596"/>
   </Camera>
+  <Camera make="SONY" model="DSLR-A580">
+    <CFA width="2" height="2">
+      <Color x="1" y="1">BLUE</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="0" y="0">RED</Color>
+    </CFA>
+    <Crop x="0" y="0" width="-2" height="-2"/>
+    <Sensor black="520" white="16596"/>
+  </Camera>
   <Camera make="SONY" model="DSLR-A700" supported="yes">
     <CFA width="2" height="2">
       <Color x="1" y="1">BLUE</Color>
