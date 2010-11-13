@@ -1,6 +1,8 @@
 #pragma once
 #include "LJpegDecompressor.h"
 #include "BitPumpMSB.h"
+#include "TiffIFD.h"
+
 /* 
     RawSpeed - RAW file decoder.
 
@@ -32,7 +34,7 @@ public:
   PentaxDecompressor(FileMap* file, RawImage img);
   virtual ~PentaxDecompressor(void);
   int HuffDecodePentax();
-  void decodePentax( uint32 offset, uint32 size );
+  void decodePentax(TiffIFD *root, uint32 offset, uint32 size);
   BitPumpMSB *pentaxBits;
 };
 

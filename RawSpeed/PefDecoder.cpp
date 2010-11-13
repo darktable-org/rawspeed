@@ -26,6 +26,7 @@ namespace RawSpeed {
 
 PefDecoder::PefDecoder(TiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
+      decoderVersion = 0;
 }
 
 PefDecoder::~PefDecoder(void) {
@@ -63,7 +64,7 @@ RawImage PefDecoder::decodeRaw() {
   mRaw->createData();
   try {
     PentaxDecompressor l(mFile, mRaw);
-    l.decodePentax(offsets->getInt(), counts->getInt());
+    l.decodePentax(mRootIFD, offsets->getInt(), counts->getInt());
   } catch (IOException e) {
     errors.push_back(_strdup(e.what()));
     // Let's ignore it, it may have delivered somewhat useful data.
