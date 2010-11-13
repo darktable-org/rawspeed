@@ -48,7 +48,7 @@ TiffIFD::TiffIFD(FileMap* f, uint32 offset) {
   for (uint32 i = 0; i < entries; i++) {
     TiffEntry *t = new TiffEntry(f, offset + 2 + i*12);
 
-    if (t->tag == SUBIFDS || t->tag == EXIFIFDPOINTER || t->tag == DNGPRIVATEDATA || t->tag == MAKERNOTE) {   // subIFD tag
+    if (t->tag == SUBIFDS || t->tag == EXIFIFDPOINTER || t->tag == DNGPRIVATEDATA || t->tag == MAKERNOTE || t->tag == 0x2e) {   // subIFD tag
       if (t->tag == DNGPRIVATEDATA) {
         try {
           TiffIFD *maker_ifd = parseDngPrivateData(t);
@@ -60,7 +60,18 @@ TiffIFD::TiffIFD(FileMap* f, uint32 offset) {
         }
       } else if (t->tag == MAKERNOTE) {
         try {
-          mSubIFD.push_back(new TiffIFD(f, t->getDataOffset()));
+          mSubIFD.push_back(parseMakerNote(f, t->getDataOffset(), endian));
+          delete(t);
+        } catch (TiffParserException e) {
+          // Unparsable makernotes are added as entries
+          mEntry[t->tag] = t;
+        }
+      } else if (t->tag == 0x2e) {
+        try {
+          FileMap file_map((uchar8*)t->getData()+12, t->count-12);
+          TiffParser tiff(&file_map);
+          tiff.parseData();
+          mSubIFD.push_back(tiff.RootIFD());
           delete(t);
         } catch (TiffParserException e) {
           // Unparsable makernotes are added as entries
@@ -132,10 +143,7 @@ TiffIFD* TiffIFD::parseDngPrivateData(TiffEntry *t) {
 
   TiffIFD *maker_ifd;
   try {
-    if (makernote_endian == getHostEndianness())
-      maker_ifd = new TiffIFD(maker_map, org_offset);
-    else
-      maker_ifd = new TiffIFDBE(maker_map, org_offset);
+    maker_ifd = parseMakerNote(maker_map, org_offset, makernote_endian);
   } catch (TiffParserException e) {
     delete[] maker_data;
     delete maker_map;
@@ -143,6 +151,40 @@ TiffIFD* TiffIFD::parseDngPrivateData(TiffEntry *t) {
   }
   delete[] maker_data;
   delete maker_map;
+  return maker_ifd;
+}
+
+/* This will attempt to parse makernotes and return it as an IFD */
+TiffIFD* TiffIFD::parseMakerNote(FileMap *f, uint32 offset, Endianness parent_end)
+{
+  uint32 size = f->getSize();
+  CHECKSIZE(offset + 6);
+  TiffIFD *maker_ifd = NULL;
+  const uchar8* data = f->getData(offset);
+
+  // Pentax makernote starts with AOC\0 - If it's there, skip it
+  if (data[0] == 0x41 && data[1] == 0x4f && data[2] == 0x43 && data[3] == 0)
+  {
+    data +=4;
+    offset +=4;
+  }
+
+  // Some have MM or II to indicate endianness - read that
+  if (data[0] == 0x49 && data[1] == 0x49) {
+    offset +=2;
+    parent_end = little;
+  } else if (data[0] == 0x4D && data[1] == 0x4D) {
+    parent_end = big;
+    offset +=2;
+  }
+
+  // Attempt to parse the rest as an IFD
+  if (parent_end == getHostEndianness())
+    maker_ifd = new TiffIFD(f, offset);
+  else
+    maker_ifd = new TiffIFDBE(f, offset);
+
+  // If the structure cannot be read, a TiffParserException will be thrown.
   return maker_ifd;
 }
 
@@ -201,6 +243,7 @@ TiffEntry* TiffIFD::getEntry(TiffTag tag) {
   ThrowTPE("TiffIFD: TIFF Parser entry 0x%x not found.", tag);
   return 0;
 }
+
 
 bool TiffIFD::hasEntry(TiffTag tag) {
   return mEntry.find(tag) != mEntry.end();

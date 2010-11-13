@@ -53,7 +53,15 @@ TiffIFDBE::TiffIFDBE(FileMap* f, uint32 offset) {
         }
       } else if (t->tag == MAKERNOTE) {
         try {
-          mSubIFD.push_back(new TiffIFDBE(f, t->getDataOffset()));
+          mSubIFD.push_back(parseMakerNote(f, t->getDataOffset(), endian));
+          delete(t);
+        } catch (TiffParserException e) {
+          // Unparsable makernotes are added as entries
+          mEntry[t->tag] = t;
+        }
+      } else if (t->tag == 0x2e) {
+        try {
+          mSubIFD.push_back(new TiffIFD(f, t->getDataOffset()+12));
           delete(t);
         } catch (TiffParserException e) {
           // Unparsable makernotes are added as entries
