@@ -26,7 +26,7 @@ namespace RawSpeed {
 
 PefDecoder::PefDecoder(TiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
-      decoderVersion = 0;
+      decoderVersion = 1;
 }
 
 PefDecoder::~PefDecoder(void) {
@@ -41,6 +41,12 @@ RawImage PefDecoder::decodeRaw() {
   TiffIFD* raw = data[0];
 
   int compression = raw->getEntry(COMPRESSION)->getInt();
+
+  if (1 == compression) {
+    decodeUncompressed(raw);
+    return mRaw;
+  }
+
   if (65535 != compression)
     ThrowRDE("PEF Decoder: Unsupported compression");
 

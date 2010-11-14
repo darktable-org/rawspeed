@@ -6,6 +6,8 @@
 #include "BitPumpMSB.h"
 #include "BitPumpPlain.h"
 #include "CameraMetaData.h"
+#include "TiffIFD.h"
+
 /* 
     RawSpeed - RAW file decoder.
 
@@ -118,6 +120,9 @@ protected:
   /* Remove all spaces at the end of a string */
   void TrimSpaces( string& str);
 
+  /* Generic decompressor for uncompressed images */
+  void decodeUncompressed(TiffIFD *rawIFD);
+
   /* The Raw input file to be decoded */
   FileMap *mFile; 
 
@@ -130,6 +135,15 @@ protected:
 
   /* Hints set for the camera after checkCameraSupported has been called from the implementation*/
    map<string,string> hints;
+};
+
+class RawSlice {
+public:
+  RawSlice() { h = offset = count = 0;};
+  ~RawSlice() {};
+  uint32 h;
+  uint32 offset;
+  uint32 count;
 };
 
 } // namespace RawSpeed

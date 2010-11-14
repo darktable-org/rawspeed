@@ -35,6 +35,65 @@ RawDecoder::~RawDecoder(void) {
   errors.clear();
 }
 
+void RawDecoder::decodeUncompressed(TiffIFD *rawIFD) {
+  uint32 nslices = rawIFD->getEntry(STRIPOFFSETS)->count;
+  const uint32 *offsets = rawIFD->getEntry(STRIPOFFSETS)->getIntArray();
+  const uint32 *counts = rawIFD->getEntry(STRIPBYTECOUNTS)->getIntArray();
+  uint32 yPerSlice = rawIFD->getEntry(ROWSPERSTRIP)->getInt();
+  uint32 width = rawIFD->getEntry(IMAGEWIDTH)->getInt();
+  uint32 height = rawIFD->getEntry(IMAGELENGTH)->getInt();
+  uint32 bitPerPixel = rawIFD->getEntry(BITSPERSAMPLE)->getInt();
+
+  vector<RawSlice> slices;
+  uint32 offY = 0;
+
+  for (uint32 s = 0; s < nslices; s++) {
+    RawSlice slice;
+    slice.offset = offsets[s];
+    slice.count = counts[s];
+    if (offY + yPerSlice > height)
+      slice.h = height - offY;
+    else
+      slice.h = yPerSlice;
+
+    offY += yPerSlice;
+
+    if (mFile->isValid(slice.offset + slice.count)) // Only decode if size is valid
+      slices.push_back(slice);
+  }
+
+  if (0 == slices.size())
+    ThrowRDE("RAW Decoder: No valid slices found. File probably truncated.");
+
+  mRaw->dim = iPoint2D(width, offY);
+  mRaw->bpp = 2;
+  mRaw->createData();
+  mRaw->whitePoint = (1<<bitPerPixel)-1;
+
+  offY = 0;
+  for (uint32 i = 0; i < slices.size(); i++) {
+    RawSlice slice = slices[i];
+    ByteStream in(mFile->getData(slice.offset), slice.count);
+    iPoint2D size(width, slice.h);
+    iPoint2D pos(0, offY);
+    bitPerPixel = (int)((__int64)(slice.count * 8) / (slice.h * width));
+    try {
+        readUncompressedRaw(in, size, pos, width*bitPerPixel / 8, bitPerPixel, true);
+    } catch (RawDecoderException e) {
+      if (i>0)
+        errors.push_back(_strdup(e.what()));
+      else
+        throw;
+    } catch (IOException e) {
+      if (i>0)
+        errors.push_back(_strdup(e.what()));
+      else
+        ThrowRDE("RAW decoder: IO error occurred in first slice, unable to decode more. Error is: %s", e.what());
+    }
+    offY += slice.h;
+  }
+}
+
 void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch, int bitPerPixel, bool MSBOrder) {
   uchar8* data = mRaw->getData();
   uint32 outPitch = mRaw->pitch;
