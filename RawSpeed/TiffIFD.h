@@ -43,7 +43,7 @@ public:
   bool hasEntryRecursive(TiffTag tag);
   TiffEntry* getEntryRecursive(TiffTag tag);
   TiffIFD* parseDngPrivateData(TiffEntry *t);
-  TiffIFD* TiffIFD::parseMakerNote(FileMap *f, uint32 offset, Endianness parent_end);
+  TiffIFD* parseMakerNote(FileMap *f, uint32 offset, Endianness parent_end);
   Endianness endian;
 protected:
   int nextIFD;
