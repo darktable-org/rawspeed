@@ -51,7 +51,7 @@ TiffIFDBE::TiffIFDBE(FileMap* f, uint32 offset) {
           // Unparsable private data are added as entries
           mEntry[t->tag] = t;
         }
-      } else if (t->tag == MAKERNOTE) {
+      } else if (t->tag == MAKERNOTE || t->tag == 0x2e) {
         try {
           mSubIFD.push_back(parseMakerNote(f, t->getDataOffset(), endian));
           delete(t);
@@ -59,20 +59,17 @@ TiffIFDBE::TiffIFDBE(FileMap* f, uint32 offset) {
           // Unparsable makernotes are added as entries
           mEntry[t->tag] = t;
         }
-      } else if (t->tag == 0x2e) {
-        try {
-          mSubIFD.push_back(new TiffIFD(f, t->getDataOffset()+12));
-          delete(t);
-        } catch (TiffParserException e) {
-          // Unparsable makernotes are added as entries
-          mEntry[t->tag] = t;
-        }
       } else {
         const unsigned int* sub_offsets = t->getIntArray();
-        for (uint32 j = 0; j < t->count; j++) {
-          mSubIFD.push_back(new TiffIFDBE(f, sub_offsets[j]));
+        try {
+          for (uint32 j = 0; j < t->count; j++) {
+            mSubIFD.push_back(new TiffIFDBE(f, sub_offsets[j]));
+          }
+          delete(t);
+        } catch (TiffParserException e) {
+          // Unparsable subifds are added as entries
+          mEntry[t->tag] = t;
         }
-        delete(t);
       }
     } else {  // Store as entry
       mEntry[t->tag] = t;

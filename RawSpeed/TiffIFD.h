@@ -49,4 +49,23 @@ protected:
   int nextIFD;
 };
 
+inline bool isTiffSameAsHost(const ushort16* tifftag) {
+  Endianness host = getHostEndianness();
+  if (tifftag[0] == 0x4949)
+    return little == host;
+  if (tifftag[0] == 0x4d4d)
+    return big == host;
+  ThrowTPE("Unknown Tiff Byteorder :%x", tifftag[0]);
+  return false;
+}
+
+inline Endianness getTiffEndianness(const ushort16* tifftag) {
+  Endianness host = getHostEndianness();
+  if (tifftag[0] == 0x4949)
+    return little;
+  if (tifftag[0] == 0x4d4d)
+    return big;
+  return unknown;
+}
+
 } // namespace RawSpeed

@@ -58,7 +58,7 @@ TiffIFD::TiffIFD(FileMap* f, uint32 offset) {
           // Unparsable private data are added as entries
           mEntry[t->tag] = t;
         }
-      } else if (t->tag == MAKERNOTE) {
+      } else if (t->tag == MAKERNOTE || t->tag == 0x2e) {
         try {
           mSubIFD.push_back(parseMakerNote(f, t->getDataOffset(), endian));
           delete(t);
@@ -66,23 +66,17 @@ TiffIFD::TiffIFD(FileMap* f, uint32 offset) {
           // Unparsable makernotes are added as entries
           mEntry[t->tag] = t;
         }
-      } else if (t->tag == 0x2e) {
-        try {
-          FileMap file_map((uchar8*)t->getData()+12, t->count-12);
-          TiffParser tiff(&file_map);
-          tiff.parseData();
-          mSubIFD.push_back(tiff.RootIFD());
-          delete(t);
-        } catch (TiffParserException e) {
-          // Unparsable makernotes are added as entries
-          mEntry[t->tag] = t;
-        }
       } else {
         const unsigned int* sub_offsets = t->getIntArray();
-        for (uint32 j = 0; j < t->count; j++) {
-          mSubIFD.push_back(new TiffIFD(f, sub_offsets[j]));
+        try {
+          for (uint32 j = 0; j < t->count; j++) {
+            mSubIFD.push_back(new TiffIFD(f, sub_offsets[j]));
+          }
+          delete(t);
+        } catch (TiffParserException e) {
+          // Unparsable subifds are added as entries
+          mEntry[t->tag] = t;
         }
-        delete(t);
       }
     } else {  // Store as entry
       mEntry[t->tag] = t;
@@ -158,7 +152,7 @@ TiffIFD* TiffIFD::parseDngPrivateData(TiffEntry *t) {
 TiffIFD* TiffIFD::parseMakerNote(FileMap *f, uint32 offset, Endianness parent_end)
 {
   uint32 size = f->getSize();
-  CHECKSIZE(offset + 6);
+  CHECKSIZE(offset + 20);
   TiffIFD *maker_ifd = NULL;
   const uchar8* data = f->getData(offset);
 
@@ -167,6 +161,17 @@ TiffIFD* TiffIFD::parseMakerNote(FileMap *f, uint32 offset, Endianness parent_en
   {
     data +=4;
     offset +=4;
+  }
+
+  // Panasonic has the word Exif at byte 6, a complete Tiff header starts at byte 12
+  // This TIFF is 0 offset based
+  if (data[6] == 0x45 && data[7] == 0x78 && data[8] == 0x69 && data[9] == 0x66)
+  {
+    parent_end = getTiffEndianness((const ushort16*)&data[12]);
+    if (parent_end == unknown)
+      ThrowTPE("Cannot determine Panasonic makernote endianness");
+    data +=20;
+    offset +=20;
   }
 
   // Some have MM or II to indicate endianness - read that
