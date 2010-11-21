@@ -51,11 +51,10 @@ RawImage Rw2Decoder::decodeRaw() {
   uint32 height = raw->getEntry((TiffTag)3)->getShort();
   uint32 width = raw->getEntry((TiffTag)2)->getShort();
 
-  mRaw->dim = iPoint2D(width, height);
   mRaw->bpp = 2;
-  mRaw->createData();
 
   if (isOldPanasonic) {
+    ThrowRDE("Cannot decoder old-style Panasonic RAW files");
     TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
     TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
 
@@ -70,12 +69,19 @@ RawImage Rw2Decoder::decodeRaw() {
     if (count != (int)(width*height*2))
       ThrowRDE("Panasonic RAW Decoder: Byte count is wrong.");
 
+    if (!mFile->isValid(off+count))
+      ThrowRDE("Panasonic RAW Decoder: Invalid image data offset, cannot decode.");
+      
+    mRaw->dim = iPoint2D(width, height);
+    mRaw->createData();
     ByteStream input_start(mFile->getData(off), mFile->getSize() - off);
     iPoint2D pos(0, 0);
     readUncompressedRaw(input_start, mRaw->dim,pos, width*2, 16, FALSE);
 
   } else {
 
+    mRaw->dim = iPoint2D(width, height);
+    mRaw->createData();
     TiffEntry *offsets = raw->getEntry(PANASONIC_STRIPOFFSET);
 
     if (offsets->count != 1) {
@@ -116,10 +122,14 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
     ushort16* dest = (ushort16*)mRaw->getData(0, y);
     for (x = 0; x < w; x++) {
       pred[0] = pred[1] = nonz[0] = nonz[1] = 0;
+      int u = 0;
       for (i = 0; i < 14; i++) {
         // Even pixels
-        if (i % 3 == 2)
+        if (u == 2)
+        {
           sh = 4 >> (3 - bits.getBits(2));
+          u = -1;
+        }
         if (nonz[0]) {
           if ((j = bits.getBits(8))) {
             if ((pred[0] -= 0x80 << sh) < 0 || sh == 4)
@@ -132,8 +142,12 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
 
         // Odd pixels
         i++;
-        if (i % 3 == 2)
+        u++;
+        if (u == 2)
+        {
           sh = 4 >> (3 - bits.getBits(2));
+          u = -1;
+        }
         if (nonz[1]) {
           if ((j = bits.getBits(8))) {
             if ((pred[1] -= 0x80 << sh) < 0 || sh == 4)
@@ -143,6 +157,7 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
         } else if ((nonz[1] = bits.getBits(8)) || i > 11)
           pred[1] = nonz[1] << 4 | bits.getBits(4);
         *dest++ = pred[1];
+        u++;
       }
     }
   }
