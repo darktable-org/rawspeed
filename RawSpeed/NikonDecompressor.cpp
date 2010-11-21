@@ -121,6 +121,7 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
     pLeft2 = pUp2[y&1];
     dest[0] = curve[pLeft1] | (curve[pLeft2] << 16);
     for (x = 1; x < cw; x++) {
+      bits->checkPos();
       pLeft1 += HuffDecodeNikon();
       pLeft2 += HuffDecodeNikon();
       dest[x] =  curve[MIN(_max-1, MAX(0,pLeft1))] | (curve[MIN(_max-1, MAX(0,pLeft2))] << 16);
