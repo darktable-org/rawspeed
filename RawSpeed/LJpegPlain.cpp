@@ -253,7 +253,8 @@ void LJpegPlain::decodeScanLeftGeneric() {
     for (uint32 i = 0; i < comps; i++) {
       p[i] = predict[i];
       // Ensure, that there is a slice shift at new line
-      _ASSERTE(pixInSlice == 0 || maxSuperV == 1);
+      if (!(pixInSlice == 0 || maxSuperV == 1))
+        ThrowRDE("LJpegPlain::decodeScanLeftGeneric: Slice not placed at new line");
     }
     predict = dest;
     x = 0;
