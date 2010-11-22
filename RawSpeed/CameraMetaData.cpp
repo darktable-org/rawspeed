@@ -26,10 +26,15 @@ namespace RawSpeed {
 
 CameraMetaData::CameraMetaData(char *docname) {
   ctxt = xmlNewParserCtxt();
+  if (ctxt == NULL) {
+    ThrowCME("CameraMetaData:Could not initialize context.");
+  }
+
+  xmlResetLastError();
   doc = xmlCtxtReadFile(ctxt, docname, NULL, XML_PARSE_DTDVALID);
 
   if (doc == NULL) {
-    ThrowCME("CameraMetaData: XML Document could not be parsed successfully. Error was: %s", ctxt->lastError.message);
+      ThrowCME("CameraMetaData: XML Document could not be parsed successfully. Error was: %s", ctxt->lastError.message);
   }
 
   if (ctxt->valid == 0) {
