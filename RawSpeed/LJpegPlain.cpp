@@ -174,7 +174,7 @@ void LJpegPlain::decodeScanLeftGeneric() {
   offset[slices] = offset[slices-1];        // Extra offset to avoid branch in loop.
 
   if (skipX)
-    slice_width[slicesW.size()-1] -= skipX;
+    ThrowRDE("LJpegPlain::decodeScanLeftGeneric: Cannot skip right border in subsampled mode");
 
   // Predictors for components
   int p[4];
@@ -242,12 +242,6 @@ void LJpegPlain::decodeScanLeftGeneric() {
       pixInSlice -= maxSuperH;
       // Check if we are still within the file.
       bits->checkPos();
-    }
-    if (skipX) {
-      for (uint32 i = 0; i < skipX; i += maxSuperH) {
-        for (uint32 j = 0; j < pixGroup; i++)
-          HuffDecode(dctbl[i]);
-      }
     }
     // Update predictors
     for (uint32 i = 0; i < comps; i++) {
