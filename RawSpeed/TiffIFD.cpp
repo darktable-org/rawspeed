@@ -130,6 +130,10 @@ TiffIFD* TiffIFD::parseDngPrivateData(TiffEntry *t) {
     org_offset = (unsigned int)data[0] << 24 | (unsigned int)data[1] << 16 | (unsigned int)data[2] << 8 | (unsigned int)data[3];
 
   data+=4;
+  /* We don't parse original makernotes that are placed after 300MB mark in the original file */
+  if (org_offset+count > 300*1024*1024)
+    ThrowTPE("Adobe Private data: original offset of makernote is past 300MB offset");
+
   /* Create fake tiff with original offsets */
   uchar8* maker_data = new uchar8[org_offset+count];
   memcpy(&maker_data[org_offset],data, count);
