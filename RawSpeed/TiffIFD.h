@@ -60,7 +60,6 @@ inline bool isTiffSameAsHost(const ushort16* tifftag) {
 }
 
 inline Endianness getTiffEndianness(const ushort16* tifftag) {
-  Endianness host = getHostEndianness();
   if (tifftag[0] == 0x4949)
     return little;
   if (tifftag[0] == 0x4d4d)
