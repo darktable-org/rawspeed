@@ -27,7 +27,7 @@ namespace RawSpeed {
 FileMap::FileMap(uint32 _size) : size(_size) {
   data = (uchar8*)_aligned_malloc(size + 4, 16);
   if (!data) {
-    throw new FileIOException("Not enough memory to open file.");
+    throw FileIOException("Not enough memory to open file.");
   }
   mOwnAlloc = true;
 }
