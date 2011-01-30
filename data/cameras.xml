@@ -11,7 +11,7 @@
 -->
 
 <!DOCTYPE Cameras [
-<!ELEMENT BlackAreas ( Vertical?, Horizontal? ) >
+<!ELEMENT BlackAreas ( Vertical*, Horizontal* ) >
 
 <!ELEMENT Camera ( CFA?, Crop, Sensor+, BlackAreas?, Aliases?, Hints? ) >
 <!ATTLIST Camera make CDATA #REQUIRED >
