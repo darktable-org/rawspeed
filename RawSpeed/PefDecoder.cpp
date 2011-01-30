@@ -94,7 +94,7 @@ void PefDecoder::decodeMetaData(CameraMetaData *meta) {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
   if (data.empty())
-    ThrowRDE("ARW Meta Decoder: Model name found");
+    ThrowRDE("PEF Meta Decoder: Model name found");
 
   TiffIFD* raw = data[0];
 

@@ -230,6 +230,7 @@ void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model, st
 
   mRaw->blackLevel = cam->black;
   mRaw->whitePoint = cam->white;
+  mRaw->blackAreas = cam->blackAreas;
 
 }
 
