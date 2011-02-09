@@ -29,9 +29,10 @@
 namespace RawSpeed {
 
 RawImageData::RawImageData(void):
-    dim(0, 0), uncropped_dim(0, 0),bpp(0), isCFA(true),
+    dim(0, 0), bpp(0), isCFA(true),
     blackLevel(-1), whitePoint(65536),
-    dataRefCount(0), data(0), cpp(1) {
+    dataRefCount(0), data(0), cpp(1),
+    uncropped_dim(0, 0) {
   pthread_mutex_init(&mymutex, NULL);
   subsampling.x = subsampling.y = 1;
 }
@@ -39,7 +40,8 @@ RawImageData::RawImageData(void):
 RawImageData::RawImageData(iPoint2D _dim, uint32 _bpc, uint32 _cpp) :
     dim(_dim), bpp(_bpc),
     blackLevel(-1), whitePoint(65536),
-    dataRefCount(0), data(0), cpp(cpp) {
+    dataRefCount(0), data(0), cpp(cpp),
+    uncropped_dim(0, 0) {
   subsampling.x = subsampling.y = 1;
   createData();
   pthread_mutex_init(&mymutex, NULL);
