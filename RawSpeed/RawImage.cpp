@@ -29,7 +29,7 @@
 namespace RawSpeed {
 
 RawImageData::RawImageData(void):
-    dim(0, 0), bpp(0), isCFA(true),
+    dim(0, 0), uncropped_dim(0, 0),bpp(0), isCFA(true),
     blackLevel(-1), whitePoint(65536),
     dataRefCount(0), data(0), cpp(1) {
   pthread_mutex_init(&mymutex, NULL);
@@ -66,6 +66,7 @@ void RawImageData::createData() {
   data = (uchar8*)_aligned_malloc(pitch * dim.y, 16);
   if (!data)
     ThrowRDE("RawImageData::createData: Memory Allocation failed.");
+  uncropped_dim = dim;
 }
 
 void RawImageData::destroyData() {
@@ -107,9 +108,9 @@ uchar8* RawImageData::getData(uint32 x, uint32 y) {
 }
 
 uchar8* RawImageData::getDataUncropped(uint32 x, uint32 y) {
-  if ((int)x >= dim.x+mOffset.x)
+  if ((int)x >= uncropped_dim.x)
     ThrowRDE("RawImageData::getDataUncropped - X Position outside image requested.");
-  if ((int)y >= dim.y+mOffset.y) {
+  if ((int)y >= uncropped_dim.y) {
     ThrowRDE("RawImageData::getDataUncropped - Y Position outside image requested.");
   }
 
@@ -142,10 +143,12 @@ void RawImageData::calculateBlackAreas() {
     BlackArea area = blackAreas[i];
     /* Process horizontal area */
     if (!area.isVertical) {
+      if ((int)area.offset+(int)area.size > uncropped_dim.y)
+        ThrowRDE("RawImageData::calculateBlackAreas: Offset + size is larger than height of image");
       for (uint32 y = area.offset; y < area.offset+area.size; y++) {
         ushort16 *pixel = (ushort16*)getDataUncropped(mOffset.x, y);
         int* localhist = &histogram[(y&1)*(65536*2)];
-        for (int x = mOffset.x; x < dim.x; x++) {
+        for (int x = mOffset.x; x < dim.x+mOffset.x; x++) {
           localhist[((x&1)<<16) + *pixel]++;
         }
       }
@@ -154,10 +157,12 @@ void RawImageData::calculateBlackAreas() {
 
     /* Process vertical area */
     if (area.isVertical) {
-      for (int y = mOffset.y; y < dim.y; y++) {
+      if ((int)area.offset+(int)area.size > uncropped_dim.x)
+        ThrowRDE("RawImageData::calculateBlackAreas: Offset + size is larger than width of image");
+      for (int y = mOffset.y; y < dim.y+mOffset.y; y++) {
         ushort16 *pixel = (ushort16*)getDataUncropped(area.offset, y);
         int* localhist = &histogram[(y&1)*(65536*2)];
-        for (uint32 x = area.offset; x < area.size; x++) {
+        for (uint32 x = area.offset; x < area.size+area.offset; x++) {
           localhist[((x&1)<<16) + *pixel]++;
         }
       }

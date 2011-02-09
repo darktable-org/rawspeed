@@ -63,6 +63,7 @@ protected:
   friend class RawImage;
   pthread_mutex_t mymutex;
   iPoint2D mOffset;
+  iPoint2D uncropped_dim;
 };
 
 
