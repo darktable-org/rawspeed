@@ -143,6 +143,11 @@ void RawImageData::calculateBlackAreas() {
 
   for (uint32 i = 0; i < blackAreas.size(); i++) {
     BlackArea area = blackAreas[i];
+
+    /* Make sure area sizes are multiple of two, 
+       so we have the same amount of pixels for each CFA group */
+    area.size = area.size - (area.size&1);
+
     /* Process horizontal area */
     if (!area.isVertical) {
       if ((int)area.offset+(int)area.size > uncropped_dim.y)
