@@ -27,9 +27,11 @@
 namespace RawSpeed {
 
 class RawImage;
+class RawImageWorker;
+
 class RawImageData
 {
-
+  friend class RawImageWorker;
 public:
   virtual ~RawImageData(void);
   iPoint2D dim;
@@ -52,7 +54,7 @@ public:
   vector<BlackArea> blackAreas;
   iPoint2D subsampling;
   bool isAllocated() {return !!data;}
-  void scaleValues();
+  void scaleValues(int start_y, int end_y);
 protected:
   RawImageData(void);
   RawImageData(iPoint2D dim, uint32 bpp, uint32 cpp=1);
@@ -66,6 +68,20 @@ protected:
   iPoint2D uncropped_dim;
 };
 
+class RawImageWorker {
+public:
+  typedef enum {TASK_SCALE_VALUES} RawImageWorkerTask;
+  RawImageWorker(RawImageData *img, RawImageWorkerTask task, int start_y, int end_y);
+  void waitForThread();
+  void _performTask();
+protected:
+  void startThread();
+  pthread_t threadid;
+  RawImageData* data;
+  RawImageWorkerTask task;
+  int start_y;
+  int end_y;
+};
 
  class RawImage {
  public:

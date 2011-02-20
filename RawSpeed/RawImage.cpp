@@ -222,12 +222,30 @@ void RawImageData::scaleBlackWhite() {
   }
 
   calculateBlackAreas();
-  scaleValues();
+  int threads = getThreadCount(); 
+  if (threads <= 1)
+    scaleValues(0, dim.y);
+  else {
+    RawImageWorker **workers = new RawImageWorker*[threads];
+    int y_offset = 0;
+    int y_per_thread = (dim.y + threads - 1) / threads;
+
+    for (int i = 0; i < threads; i++) {
+      int y_end = MIN(y_offset + y_per_thread, dim.y);
+      workers[i] = new RawImageWorker(this, RawImageWorker::TASK_SCALE_VALUES, y_offset, y_end);
+      y_offset = y_end;
+    }
+    for (int i = 0; i < threads; i++) {
+      workers[i]->waitForThread();
+      delete workers[i];
+    }
+    delete[] workers;
+  }
 }
 
 #if _MSC_VER > 1399 || defined(__SSE2__)
 
-void RawImageData::scaleValues() {
+void RawImageData::scaleValues(int start_y, int end_y) {
   bool use_sse2;
 #ifdef _MSC_VER 
   int info[4];
@@ -268,7 +286,7 @@ void RawImageData::scaleValues() {
     ssesub2 = _mm_set_epi32(32768, 32768, 32768, 32768);
     ssesign = _mm_set_epi32(0x80008000, 0x80008000, 0x80008000, 0x80008000);
 
-    for (int y = 0; y < dim.y; y++) {
+    for (int y = start_y; y < end_y; y++) {
       __m128i* pixel = (__m128i*) & data[(mOffset.y+y)*pitch];
       __m128i ssescale, ssesub;
       if (((y+mOffset.y)&1) == 0) { 
@@ -282,6 +300,7 @@ void RawImageData::scaleValues() {
       for (uint32 x = 0 ; x < gw; x++) {
         __m128i pix_high;
         __m128i temp;
+        _mm_prefetch((char*)(pixel+1), _MM_HINT_T0);
         __m128i pix_low = _mm_load_si128(pixel);
         // Subtract black
         pix_low = _mm_subs_epu16(pix_low, ssesub);
@@ -322,7 +341,7 @@ void RawImageData::scaleValues() {
       mul[i] = (int)(16384.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[v]));
       sub[i] = blackLevelSeparate[v];
     }
-    for (int y = 0; y < dim.y; y++) {
+    for (int y = start_y; y < end_y; y++) {
       ushort16 *pixel = (ushort16*)getData(0, y);
       int *mul_local = &mul[2*(y&1)];
       int *sub_local = &sub[2*(y&1)];
@@ -335,7 +354,7 @@ void RawImageData::scaleValues() {
 
 #else
 
-void RawImageData::scaleValues() {
+void RawImageData::scaleValues(int start_y, int end_y) {
   int gw = dim.x * cpp;
   int mul[4];
   int sub[4];
@@ -348,7 +367,7 @@ void RawImageData::scaleValues() {
     mul[i] = (int)(16384.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[v]));
     sub[i] = blackLevelSeparate[v];
   }
-  for (int y = 0; y < dim.y; y++) {
+  for (int y = start_y; y < end_y; y++) {
     ushort16 *pixel = (ushort16*)getData(0, y);
     int *mul_local = &mul[2*(y&1)];
     int *sub_local = &sub[2*(y&1)];
@@ -398,5 +417,49 @@ RawImage& RawImage::operator=(const RawImage & p) {
   if (--old->dataRefCount == 0) delete old;
   return *this;
 }
+
+void *RawImageWorkerThread(void *_this) {
+  RawImageWorker* me = (RawImageWorker*)_this;
+  me->_performTask();
+  pthread_exit(NULL);
+  return 0;
+}
+
+RawImageWorker::RawImageWorker( RawImageData *_img, RawImageWorkerTask _task, int _start_y, int _end_y )
+{
+  data = _img;
+  start_y = _start_y;
+  end_y = _end_y;
+  task = _task;
+  startThread();
+}
+
+void RawImageWorker::startThread()
+{
+  /* Initialize and set thread detached attribute */
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+  pthread_create(&threadid, &attr, RawImageWorkerThread, this);
+}
+
+void RawImageWorker::waitForThread()
+{ 
+  void *status;
+  pthread_join(threadid, &status);
+}
+
+void RawImageWorker::_performTask()
+{
+  switch(task)
+  {
+    case TASK_SCALE_VALUES:
+      data->scaleValues(start_y, end_y);
+      break;
+    default:
+      _ASSERTE(false);
+  }
+}
+
 
 } // namespace RawSpeed
