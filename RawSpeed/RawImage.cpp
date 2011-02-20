@@ -173,8 +173,8 @@ void RawImageData::calculateBlackAreas() {
           localhist[((x&1)<<16) + *pixel]++;
         }
       }
+      totalpixels += area.size * dim.y;
     }
-    totalpixels += area.size * dim.y;
   }
 
   if (!totalpixels) {
