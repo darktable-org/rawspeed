@@ -45,6 +45,8 @@ public:
   uchar8* getData(uint32 x, uint32 y);    // Not super fast, but safe. Don't use per pixel.
   uchar8* getDataUncropped(uint32 x, uint32 y);
   virtual void subFrame( iPoint2D offset, iPoint2D new_size );
+  iPoint2D getUncroppedDim();
+  iPoint2D getCropOffset();
   void scaleBlackWhite();
   bool isCFA;
   ColorFilterArray cfa;

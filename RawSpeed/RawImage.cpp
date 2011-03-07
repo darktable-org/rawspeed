@@ -33,6 +33,7 @@ RawImageData::RawImageData(void):
     blackLevel(-1), whitePoint(65536),
     dataRefCount(0), data(0), cpp(1),
     uncropped_dim(0, 0) {
+  blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
   pthread_mutex_init(&mymutex, NULL);
   subsampling.x = subsampling.y = 1;
 }
@@ -42,6 +43,7 @@ RawImageData::RawImageData(iPoint2D _dim, uint32 _bpc, uint32 _cpp) :
     blackLevel(-1), whitePoint(65536),
     dataRefCount(0), data(0), cpp(cpp),
     uncropped_dim(0, 0) {
+  blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
   subsampling.x = subsampling.y = 1;
   createData();
   pthread_mutex_init(&mymutex, NULL);
@@ -120,6 +122,16 @@ uchar8* RawImageData::getDataUncropped(uint32 x, uint32 y) {
     ThrowRDE("RawImageData::getDataUncropped - Data not yet allocated.");
 
   return &data[y*pitch+x*bpp];
+}
+
+iPoint2D RawImageData::getUncroppedDim()
+{
+  return uncropped_dim;
+}
+
+iPoint2D RawImageData::getCropOffset()
+{
+  return mOffset;
 }
 
 void RawImageData::subFrame(iPoint2D offset, iPoint2D new_size) {
@@ -203,7 +215,7 @@ void RawImageData::calculateBlackAreas() {
 void RawImageData::scaleBlackWhite() {
   const int skipBorder = 150;
   int gw = (dim.x - skipBorder) * cpp;
-  if (blackLevel < 0 || whitePoint == 65536) {  // Estimate
+  if ((blackLevelSeparate[0] < 0 && blackLevel < 0) || whitePoint == 65536) {  // Estimate
     int b = 65536;
     int m = 0;
     for (int row = skipBorder*cpp;row < (dim.y - skipBorder);row++) {
@@ -221,7 +233,10 @@ void RawImageData::scaleBlackWhite() {
     printf("Estimated black:%d, Estimated white: %d\n", blackLevel, whitePoint);
   }
 
-  calculateBlackAreas();
+  /* If filter has not set separate blacklevel, compute or fetch it */
+  if (blackLevelSeparate[0] < 0)
+    calculateBlackAreas();
+
   int threads = getThreadCount(); 
   if (threads <= 1)
     scaleValues(0, dim.y);
