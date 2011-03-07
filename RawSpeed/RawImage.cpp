@@ -215,7 +215,7 @@ void RawImageData::calculateBlackAreas() {
 void RawImageData::scaleBlackWhite() {
   const int skipBorder = 150;
   int gw = (dim.x - skipBorder) * cpp;
-  if ((blackLevelSeparate[0] < 0 && blackLevel < 0) || whitePoint == 65536) {  // Estimate
+  if ((blackAreas.empty() && blackLevelSeparate[0] < 0 && blackLevel < 0) || whitePoint == 65536) {  // Estimate
     int b = 65536;
     int m = 0;
     for (int row = skipBorder*cpp;row < (dim.y - skipBorder);row++) {
