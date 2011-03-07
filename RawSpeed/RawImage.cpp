@@ -270,8 +270,9 @@ void RawImageData::scaleValues(int start_y, int end_y) {
   use_sse2 = TRUE;
 #endif
 
+  float app_scale = 65535.0f / (whitePoint - blackLevelSeparate[0]);
   // Check SSE2
-  if (use_sse2) {
+  if (use_sse2 && app_scale < 63) {
 
     __m128i sseround;
     __m128i ssesub2;
