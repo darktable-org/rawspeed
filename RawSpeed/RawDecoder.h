@@ -84,6 +84,13 @@ public:
   /* Remember this is automatically refcounted, so a reference is retained until this class is destroyed */
   RawImage mRaw; 
 
+  /* You can set this if you do not want Rawspeed to attempt to decode images, */
+  /* where it does not have reliable information about CFA, cropping, black and white point */
+  /* It is pretty safe to leave this disabled (default behaviour), but if you do not want to */
+  /* support unknown cameras, you can enable this */
+  /* DNGs are always attempted to be decoded, so this variable has no effect on DNGs */
+  bool failOnUnknown;
+
   /* Vector containing silent errors that occurred doing decoding, that may have lead to */
   /* an incomplete image. */
   vector<const char*> errors;

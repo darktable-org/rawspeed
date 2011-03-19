@@ -158,7 +158,13 @@ RawImage DngDecoder::decodeRaw() {
         uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
         uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
         uint32 bps = raw->getEntry(BITSPERSAMPLE)->getShort();
-
+ 
+        if (raw->hasEntry(SAMPLEFORMAT)) {
+          uint32 sample_format = raw->getEntry(SAMPLEFORMAT)->getInt();
+          if (sample_format != 1)
+            ThrowRDE("DNG Decoder: Only 16 bit unsigned data supported.");
+        }
+          
         if (TEcounts->count != TEoffsets->count) {
           ThrowRDE("DNG Decoder: Byte count number does not match strip size: count:%u, strips:%u ", TEcounts->count, TEoffsets->count);
         }
@@ -369,6 +375,9 @@ void DngDecoder::checkSupport(CameraMetaData *meta) {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
   if (data.empty())
     ThrowRDE("DNG Support check: Model name found");
+
+  // We set this, since DNG's are not explicitly added. 
+  failOnUnknown = FALSE;
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
   this->checkCameraSupported(meta, make, model, "dng");

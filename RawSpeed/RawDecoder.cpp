@@ -26,6 +26,7 @@ namespace RawSpeed {
 
 	RawDecoder::RawDecoder(FileMap* file) : mRaw(RawImage::create()), mFile(file) {
   decoderVersion = 0;
+  failOnUnknown = FALSE;
 }
 
 RawDecoder::~RawDecoder(void) {
@@ -185,6 +186,9 @@ bool RawDecoder::checkCameraSupported(CameraMetaData *meta, string make, string 
   if (!cam) {
     if (mode.length() == 0)
       printf("Unable to find camera in database: %s %s %s\n", make.c_str(), model.c_str(), mode.c_str());
+
+     if (failOnUnknown)
+       ThrowRDE("Camera not supported, and not allowed to guess. Sorry.");
 
     // Assume the camera can be decoded, but return false, so decoders can see that we are unsure.
     return false;    
