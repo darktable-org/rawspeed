@@ -33,6 +33,7 @@
 #include "NefDecoder.h"
 #include "OrfDecoder.h"
 #include "Rw2Decoder.h"
+#include "SrwDecoder.h"
 
 namespace RawSpeed {
 

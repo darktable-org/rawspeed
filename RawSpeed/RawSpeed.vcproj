@@ -360,6 +360,10 @@
 					RelativePath=".\Rw2Decoder.cpp"
 					>
 				</File>
+				<File
+					RelativePath=".\SrwDecoder.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="CameraMetadata"
@@ -516,6 +520,10 @@
 				</File>
 				<File
 					RelativePath=".\Rw2Decoder.h"
+					>
+				</File>
+				<File
+					RelativePath=".\SrwDecoder.h"
 					>
 				</File>
 			</Filter>
