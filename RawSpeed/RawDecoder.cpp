@@ -35,7 +35,7 @@ RawDecoder::~RawDecoder(void) {
   errors.clear();
 }
 
-void RawDecoder::decodeUncompressed(TiffIFD *rawIFD) {
+void RawDecoder::decodeUncompressed(TiffIFD *rawIFD, bool MSBOrder) {
   uint32 nslices = rawIFD->getEntry(STRIPOFFSETS)->count;
   const uint32 *offsets = rawIFD->getEntry(STRIPOFFSETS)->getIntArray();
   const uint32 *counts = rawIFD->getEntry(STRIPBYTECOUNTS)->getIntArray();
@@ -78,7 +78,7 @@ void RawDecoder::decodeUncompressed(TiffIFD *rawIFD) {
     iPoint2D pos(0, offY);
     bitPerPixel = (int)((uint64)(slice.count * 8) / (slice.h * width));
     try {
-        readUncompressedRaw(in, size, pos, width*bitPerPixel / 8, bitPerPixel, true);
+      readUncompressedRaw(in, size, pos, width*bitPerPixel / 8, bitPerPixel, MSBOrder);
     } catch (RawDecoderException e) {
       if (i>0)
         errors.push_back(_strdup(e.what()));
@@ -232,18 +232,6 @@ void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model, st
   mRaw->whitePoint = cam->white;
   mRaw->blackAreas = cam->blackAreas;
 
-}
-
-void RawDecoder::TrimSpaces(string& str) {
-  // Trim Both leading and trailing spaces
-  size_t startpos = str.find_first_not_of(" \t"); // Find the first character position after excluding leading blank spaces
-  size_t endpos = str.find_last_not_of(" \t"); // Find the first character position from reverse af
-
-  // if all spaces or empty return an empty string
-  if ((string::npos == startpos) || (string::npos == endpos)) {
-    str = "";
-  } else
-    str = str.substr(startpos, endpos - startpos + 1);
 }
 
 

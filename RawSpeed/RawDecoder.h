@@ -117,11 +117,9 @@ protected:
   /* Faster version for unpacking 12 bit LSB data */
   void Decode12BitRaw(ByteStream &input, uint32 w, uint32 h);
 
-  /* Remove all spaces at the end of a string */
-  void TrimSpaces( string& str);
-
   /* Generic decompressor for uncompressed images */
-  void decodeUncompressed(TiffIFD *rawIFD);
+  /* MSBOrder: true -  bits are read from MSB (JPEG style) False: Read from LSB. */
+  void decodeUncompressed(TiffIFD *rawIFD, bool MSBOrder);
 
   /* The Raw input file to be decoded */
   FileMap *mFile; 
