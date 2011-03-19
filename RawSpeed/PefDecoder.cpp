@@ -43,7 +43,7 @@ RawImage PefDecoder::decodeRaw() {
   int compression = raw->getEntry(COMPRESSION)->getInt();
 
   if (1 == compression) {
-    decodeUncompressed(raw);
+    decodeUncompressed(raw, true);
     return mRaw;
   }
 
