@@ -66,7 +66,6 @@ RawImage PefDecoder::decodeRaw() {
   uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
 
   mRaw->dim = iPoint2D(width, height);
-  mRaw->bpp = 2;
   mRaw->createData();
   try {
     PentaxDecompressor l(mFile, mRaw);

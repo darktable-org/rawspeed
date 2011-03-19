@@ -190,10 +190,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\RawImage.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\RawSpeed.cpp"
 				>
 			</File>
@@ -386,6 +382,22 @@
 				</File>
 				<File
 					RelativePath=".\ColorFilterArray.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="RawImage"
+				>
+				<File
+					RelativePath=".\RawImage.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RawImageDataFloat.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RawImageDataU16.cpp"
 					>
 				</File>
 			</Filter>

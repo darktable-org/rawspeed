@@ -66,7 +66,6 @@ void RawDecoder::decodeUncompressed(TiffIFD *rawIFD, bool MSBOrder) {
     ThrowRDE("RAW Decoder: No valid slices found. File probably truncated.");
 
   mRaw->dim = iPoint2D(width, offY);
-  mRaw->bpp = 2;
   mRaw->createData();
   mRaw->whitePoint = (1<<bitPerPixel)-1;
 
@@ -136,7 +135,7 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
 
     if (bitPerPixel == 16 && getHostEndianness() == little)  {
       BitBlt(&data[offset.x*sizeof(ushort16)*cpp+y*outPitch], outPitch,
-             input.getData(), inputPitch, w*mRaw->bpp, h - y);
+             input.getData(), inputPitch, w*mRaw->getBpp(), h - y);
       return;
     }
     if (bitPerPixel == 12 && (int)w == inputPitch * 8 / 12 && getHostEndianness() == little)  {
