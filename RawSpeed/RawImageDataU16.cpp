@@ -30,12 +30,14 @@ namespace RawSpeed {
 
 RawImageDataU16::RawImageDataU16(void)
 {
+  dataType = TYPE_USHORT16;
   bpp = 2;
 }
 
 RawImageDataU16::RawImageDataU16(iPoint2D _dim, uint32 _cpp) :
 RawImageData(_dim, 2, _cpp)
 {
+  dataType = TYPE_USHORT16;
 }
 
 
