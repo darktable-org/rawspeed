@@ -1565,11 +1565,7 @@
       <Color x="0" y="1">GREEN</Color><Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="2" width="-10" height="-2"/>
-    <Sensor black="0" white="16383"/>
-	<BlackAreas>
-		<Vertical x="0" width="8"/>
-		<Horizontal y="0" height="2"/>
-	</BlackAreas>  
+    <Sensor black="0" white="4095"/>
   </Camera>  
   <Camera make="SONY" model="DSLR-A100" supported="no">
 	<!-- Files doesn't have a valid TIFF structure -->
