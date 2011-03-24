@@ -1,4 +1,6 @@
-#pragma once
+#ifndef RAW_IMAGE_H
+#define RAW_IMAGE_H
+
 #include "ColorFilterArray.h"
 #include "BlackArea.h"
 
@@ -155,3 +157,5 @@ inline RawImage RawImage::create(iPoint2D dim, RawImageType type, uint32 compone
 }
 
 } // namespace RawSpeed
+
+#endif

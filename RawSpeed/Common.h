@@ -19,7 +19,9 @@
 
     http://www.klauspost.com
 */
-#pragma once
+#ifndef COMMON_H
+#define COMMON_H
+
 
 #if !defined(__unix__) && !defined(__MINGW32__)
 #include <intrin.h>
@@ -135,3 +137,5 @@ inline void TrimSpaces(string& str) {
 
 
 } // namespace RawSpeed
+
+#endif

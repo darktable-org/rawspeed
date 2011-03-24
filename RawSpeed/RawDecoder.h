@@ -1,4 +1,6 @@
-#pragma once
+#ifndef RAW_DECODER_H
+#define RAW_DECODER_H
+
 #include "RawDecoderException.h"
 #include "FileMap.h"
 #include "BitPumpJPEG.h" // Includes bytestream
@@ -152,3 +154,5 @@ public:
 };
 
 } // namespace RawSpeed
+
+#endif

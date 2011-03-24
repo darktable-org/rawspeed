@@ -20,7 +20,9 @@
     http://www.klauspost.com
 */
 
-#pragma once
+#ifndef TIFF_PARSER_H
+#define TIFF_PARSER_H
+
 #include "FileMap.h"
 #include "TiffIFD.h"
 #include "TiffIFDBE.h"
@@ -55,3 +57,5 @@ protected:
 };
 
 } // namespace RawSpeed
+
+#endif

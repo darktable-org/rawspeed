@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SRW_DECODER_H
+#define SRW_DECODER_H
+
 #include "RawDecoder.h"
 #include "LJpegPlain.h"
 #include "TiffIFD.h"
@@ -42,3 +44,5 @@ private:
 };
 
 } // namespace RawSpeed
+
+#endif
