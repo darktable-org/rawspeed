@@ -107,7 +107,7 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
     else
       ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. Image file truncated.");
   }
-  if (bitPerPixel > 16)
+  if (bitPerPixel > 16 && mRaw->getDataType() == TYPE_USHORT16)
     ThrowRDE("readUncompressedRaw: Unsupported bit depth");
 
   uint32 skipBits = inputPitch - w * bitPerPixel / 8;  // Skip per line
@@ -118,6 +118,15 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
 
   uint32 y = offset.y;
   h = MIN(h + (uint32)offset.y, (uint32)mRaw->dim.y);
+
+  if (mRaw->getDataType() == TYPE_FLOAT32)
+  {
+    if (bitPerPixel != 32)
+      ThrowRDE("readUncompressedRaw: Only 32 bit float point supported");
+    BitBlt(&data[offset.x*sizeof(float)*cpp+y*outPitch], outPitch,
+        input.getData(), inputPitch, w*mRaw->getBpp(), h - y);
+    return;
+  }
 
   if (MSBOrder) {
     BitPumpMSB bits(&input);

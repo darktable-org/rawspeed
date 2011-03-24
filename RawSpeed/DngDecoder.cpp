@@ -72,13 +72,31 @@ RawImage DngDecoder::decodeRaw() {
   }
 
   TiffIFD* raw = data[0];
-  mRaw = RawImage::create();
+  uint32 sample_format = 1;
+  uint32 bps = raw->getEntry(BITSPERSAMPLE)->getInt();
+
+  if (raw->hasEntry(SAMPLEFORMAT))
+    sample_format = raw->getEntry(SAMPLEFORMAT)->getInt();
+
+  if (sample_format == 1)
+    mRaw = RawImage::create(TYPE_USHORT16);
+  else if (sample_format == 3)
+    mRaw = RawImage::create(TYPE_FLOAT32);
+  else
+    ThrowRDE("DNG Decoder: Only 16 bit unsigned or float point data supported.");
+
   mRaw->isCFA = (raw->getEntry(PHOTOMETRICINTERPRETATION)->getShort() == 32803);
 
   if (mRaw->isCFA)
     _RPT0(0, "This is a CFA image\n");
   else
     _RPT0(0, "This is NOT a CFA image\n");
+
+  if (sample_format == 1 && bps > 16)
+    ThrowRDE("DNG Decoder: Integer precision larger than 16 bits currently not supported.");
+
+  if (sample_format == 3 && bps != 32)
+    ThrowRDE("DNG Decoder: Float point must be 32 bits per sample.");
 
   try {
     mRaw->dim.x = raw->getEntry(IMAGEWIDTH)->getInt();
@@ -157,13 +175,6 @@ RawImage DngDecoder::decodeRaw() {
         uint32 yPerSlice = raw->getEntry(ROWSPERSTRIP)->getInt();
         uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
         uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
-        uint32 bps = raw->getEntry(BITSPERSAMPLE)->getShort();
- 
-        if (raw->hasEntry(SAMPLEFORMAT)) {
-          uint32 sample_format = raw->getEntry(SAMPLEFORMAT)->getInt();
-          if (sample_format != 1)
-            ThrowRDE("DNG Decoder: Only 16 bit unsigned data supported.");
-        }
           
         if (TEcounts->count != TEoffsets->count) {
           ThrowRDE("DNG Decoder: Byte count number does not match strip size: count:%u, strips:%u ", TEcounts->count, TEoffsets->count);
@@ -220,6 +231,9 @@ RawImage DngDecoder::decodeRaw() {
           mRaw->setCpp(raw->getEntry(SAMPLESPERPIXEL)->getInt());
         }
         mRaw->createData();
+
+        if (sample_format != 1)
+           ThrowRDE("DNG Decoder: Only 16 bit unsigned data supported for compressed data.");
 
         DngDecoderSlices slices(mFile, mRaw);
         if (raw->hasEntry(TILEOFFSETS)) {
