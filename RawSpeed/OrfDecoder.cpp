@@ -168,7 +168,7 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
         // Check if sign is different, and one is not zero
         if (((leftMinusNw) ^ (upMinusNw)) < 0 && (upMinusNw * leftMinusNw)) {
           if (abs(leftMinusNw) > 32 || abs(upMinusNw) > 32)
-            pred = left0 + up - nw0;
+            pred = left0 + upMinusNw;
           else 
             pred = (left0 + up) >> 1;
         } else 
