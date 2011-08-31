@@ -1586,6 +1586,9 @@
     </CFA>
     <Crop x="0" y="0" width="-44" height="-2"/>
     <Sensor black="41" white="4095"/>
+	<BlackAreas>
+	    <Vertical x="4310" width="40"/>
+	</BlackAreas>
   </Camera>
   <Camera make="PENTAX" model="PENTAX K-r">
     <CFA width="2" height="2">
