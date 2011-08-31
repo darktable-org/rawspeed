@@ -121,6 +121,9 @@ inline Endianness getHostEndianness() {
 }
 inline uint32 clampbits(int x, uint32 n) { uint32 _y_temp; if( (_y_temp=x>>n) ) x = ~_y_temp >> (32-n); return x;}
 
+/* This is faster - at least when compiled on visual studio 32 bits */
+inline int other_abs(int x) { int const mask = x >> 31; return (x + mask) ^ mask;}
+
 /* Remove all spaces at the end of a string */
 
 inline void TrimSpaces(string& str) {
