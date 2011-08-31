@@ -23,7 +23,7 @@
 #define COMMON_H
 
 
-#if !defined(__unix__) && !defined(__MINGW32__)
+#if !defined(__unix__) && !defined(__APPLE__) && !defined(__MINGW32__) 
 #include <intrin.h>
 #pragma intrinsic(_ReturnAddress)
 #define MIN(a,b) min(a,b)
