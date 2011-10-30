@@ -1920,7 +1920,7 @@
       <Color x="0" y="0">RED</Color>
     </CFA>
     <Crop x="0" y="0" width="0" height="0"/>
-    <Sensor black="500" white="15000"/>
+    <Sensor black="512" white="16372"/>
   </Camera>
   <Camera make="SONY" model="DSLR-A560">
     <CFA width="2" height="2">
