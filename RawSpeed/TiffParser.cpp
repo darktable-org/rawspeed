@@ -97,8 +97,6 @@ RawDecoder* TiffParser::getDecoder() {
     const unsigned char* c = t->getEntry(DNGVERSION)->getData();
     if (c[0] > 1)
       throw TiffParserException("DNG version too new.");
-    if (c[1] > 2)
-      throw TiffParserException("DNG version not supported.");
     return new DngDecoder(mRootIFD, mInput);
   }
 
