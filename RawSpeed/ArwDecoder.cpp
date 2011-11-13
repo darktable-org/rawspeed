@@ -180,6 +180,8 @@ void ArwDecoder::checkSupport(CameraMetaData *meta) {
 
 void ArwDecoder::decodeMetaData(CameraMetaData *meta) {
   //Default
+  int iso = 0;
+
   mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
@@ -189,7 +191,10 @@ void ArwDecoder::decodeMetaData(CameraMetaData *meta) {
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
 
-  setMetaData(meta, make, model, "");
+  if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
+    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getInt();
+
+  setMetaData(meta, make, model, "", iso);
 }
 
 /* Since ARW2 compressed images have predictable offsets, we decode them threaded */

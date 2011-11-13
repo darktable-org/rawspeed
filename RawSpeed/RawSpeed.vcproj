@@ -381,6 +381,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\CameraSensorInfo.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\ColorFilterArray.cpp"
 					>
 				</File>
@@ -556,6 +560,10 @@
 				</File>
 				<File
 					RelativePath=".\CameraMetadataException.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CameraSensorInfo.h"
 					>
 				</File>
 				<File

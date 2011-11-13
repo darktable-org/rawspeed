@@ -182,12 +182,16 @@ void Rw2Decoder::decodeMetaData(CameraMetaData *meta) {
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
   string mode = guessMode();
+  int iso = 0;
+  if (mRootIFD->hasEntryRecursive(PANASONIC_ISO_SPEED))
+    iso = mRootIFD->getEntryRecursive(PANASONIC_ISO_SPEED)->getInt();
+
   if (this->checkCameraSupported(meta, make, model, mode)) {
-    setMetaData(meta, make, model, mode);
+    setMetaData(meta, make, model, mode, iso);
   } else {
     mRaw->mode = mode;
     _RPT1(0, "Mode not found in DB: %s", mode.c_str());
-    setMetaData(meta, make, model, "");
+    setMetaData(meta, make, model, "", iso);
   }
 }
 
