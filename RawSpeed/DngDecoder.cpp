@@ -60,7 +60,7 @@ RawImage DngDecoder::decodeRaw() {
     if ((compression != 7 && compression != 1) || isSubsampled) {  // Erase if subsampled, or not JPEG or uncompressed
       i = data.erase(i);
     } else {
-      i++;
+      ++i;
     }
   }
 
