@@ -558,8 +558,8 @@
   </Camera>
   <Camera make="Canon" model="Canon PowerShot S100">
     <CFA width="2" height="2">
-      <Color x="0" y="0">RED</Color><Color x="1" y="0">GREEN</Color>
-      <Color x="0" y="1">GREEN</Color><Color x="1" y="1">BLUE</Color>
+      <Color x="0" y="0">GREEN</Color><Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="104" y="12" width="-10" height="-66"/>
     <Sensor black="125" white="4095"/>
@@ -1271,16 +1271,16 @@
   </Camera>
   <Camera make="Panasonic" model = "DMC-FZ150">
     <CFA width="2" height="2">
-        <Color x="0" y="0">BLUE</Color><Color x="1" y="0">GREEN</Color>
-        <Color x="0" y="1">GREEN</Color><Color x="1" y="1">RED</Color>
+      <Color x="0" y="0">GREEN</Color><Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="-128" height="0"/>
     <Sensor black="0" white="4095"/>
   </Camera>
   <Camera make="Panasonic" model = "DMC-FZ150" mode="4:3">
     <CFA width="2" height="2">
-        <Color x="0" y="0">BLUE</Color><Color x="1" y="0">GREEN</Color>
-        <Color x="0" y="1">GREEN</Color><Color x="1" y="1">RED</Color>
+      <Color x="0" y="0">GREEN</Color><Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="-128" height="0"/>
     <Sensor black="0" white="4095"/>
