@@ -32,6 +32,9 @@ Rw2Decoder::~Rw2Decoder(void) {
   if (input_start)
     delete input_start;
   input_start = 0;
+  if (mRootIFD)
+    delete mRootIFD;
+  mRootIFD = NULL;
 }
 
 RawImage Rw2Decoder::decodeRaw() {

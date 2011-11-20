@@ -42,6 +42,9 @@ DngDecoder::DngDecoder(TiffIFD *rootIFD, FileMap* file) : RawDecoder(file), mRoo
 }
 
 DngDecoder::~DngDecoder(void) {
+  if (mRootIFD)
+    delete mRootIFD;
+  mRootIFD = NULL;
 }
 
 RawImage DngDecoder::decodeRaw() {

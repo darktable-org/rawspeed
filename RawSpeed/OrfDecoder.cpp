@@ -33,6 +33,9 @@ OrfDecoder::OrfDecoder(TiffIFD *rootIFD, FileMap* file):
 }
 
 OrfDecoder::~OrfDecoder(void) {
+  if (mRootIFD)
+    delete mRootIFD;
+  mRootIFD = NULL;
 }
 
 RawImage OrfDecoder::decodeRaw() {
@@ -73,16 +76,18 @@ RawImage OrfDecoder::decodeRaw() {
   TiffEntry *makernoteEntry = exif->getEntry(MAKERNOTE);
   const uchar8* makernote = makernoteEntry->getData();
   FileMap makermap((uchar8*)&makernote[8], makernoteEntry->count - 8);
-  TiffParserOlympus makertiff(&makermap);
-  makertiff.parseData();
-
-  data = makertiff.RootIFD()->getIFDsWithTag((TiffTag)0x2010);
-
-  if (data.empty())
-    ThrowRDE("ORF Decoder: Unsupported compression");
-  TiffEntry *oly = data[0]->getEntry((TiffTag)0x2010);
-  if (oly->type == TIFF_UNDEFINED)
-    ThrowRDE("ORF Decoder: Unsupported compression");
+  try {
+    TiffParserOlympus makertiff(&makermap);
+    makertiff.parseData();
+    data = makertiff.RootIFD()->getIFDsWithTag((TiffTag)0x2010);
+    if (data.empty())
+      ThrowRDE("ORF Decoder: Unsupported compression");
+    TiffEntry *oly = data[0]->getEntry((TiffTag)0x2010);
+    if (oly->type == TIFF_UNDEFINED)
+      ThrowRDE("ORF Decoder: Unsupported compression");
+  } catch (TiffParserException) {
+    ThrowRDE("ORF Decoder: Unable to parse makernote");
+  }
 
   // We add 3 bytes slack, since the bitpump might be a few bytes ahead.
   ByteStream s(mFile->getData(offsets->getInt()), counts->getInt() + 3);

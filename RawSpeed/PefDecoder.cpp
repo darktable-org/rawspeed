@@ -30,6 +30,9 @@ PefDecoder::PefDecoder(TiffIFD *rootIFD, FileMap* file) :
 }
 
 PefDecoder::~PefDecoder(void) {
+  if (mRootIFD)
+    delete mRootIFD;
+  mRootIFD = NULL;
 }
 
 RawImage PefDecoder::decodeRaw() {

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "FileReader.h"
-#include "TiffParser.h"
+#include "RawParser.h"
 #include "RawDecoder.h"
 #include "CameraMetaData.h"
 #include "ColorFilterArray.h"
@@ -29,7 +29,7 @@
 
 using namespace RawSpeed;
 
-#define _USE_GFL_
+//#define _USE_GFL_
 #ifdef _USE_GFL_
 #include "libgfl.h"
 #pragma comment(lib, "libgfl.lib") 
@@ -51,77 +51,69 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
       printf("Could not open image:%s\n", e.what());
       return;
     }
-    TiffParser t(m);
-    t.parseData();
+    RawParser t(m);
     d = t.getDecoder();
-    try {
-      d->checkSupport(meta);
-      startTime = GetTickCount();
+    d->checkSupport(meta);
+    startTime = GetTickCount();
 
-      d->decodeRaw();
-      d->decodeMetaData(meta);
-      RawImage r = d->mRaw;
-      r->scaleBlackWhite();
+    d->decodeRaw();
+    d->decodeMetaData(meta);
+    RawImage r = d->mRaw;
+    r->scaleBlackWhite();
 
-      uint32 time = GetTickCount()-startTime;
-      float mpps = (float)r->dim.x * (float)r->dim.y * (float)r->getCpp()  / (1000.0f * (float)time);
-      wprintf(L"Decoding %s took: %u ms, %4.2f Mpixel/s\n", f.Filename(), time, mpps);
+    uint32 time = GetTickCount()-startTime;
+    float mpps = (float)r->dim.x * (float)r->dim.y * (float)r->getCpp()  / (1000.0f * (float)time);
+    wprintf(L"Decoding %s took: %u ms, %4.2f Mpixel/s\n", f.Filename(), time, mpps);
 
-      for (uint32 i = 0; i < d->errors.size(); i++) {
-        printf("Error Encountered:%s", d->errors[i]);
-      }
-      if (r->isCFA) {
+    for (uint32 i = 0; i < d->errors.size(); i++) {
+      printf("Error Encountered:%s", d->errors[i]);
+    }
+    if (r->isCFA) {
 //        printf("DCRAW filter:%x\n",r->cfa.getDcrawFilter());
 //        printf(r->cfa.asString().c_str());
-      }
+    }
 /*
-      for (uint32 y=200;y<r->dim.y-400; y+=2) {
-        printf("black,");
-        for (uint32 x=20;x<=100; x+=2) {
-          (x==100) ? printf("%d\n",(int)*(UINT16*)r->getData(x,y)) : printf("%d,",(int)*(UINT16*)r->getData(x,y));
-        }
-        printf("color,");
-        for (uint32 x=1020;x<=1100; x+=2) {
-          (x==1100) ? printf("%d\n",(int)*(UINT16*)r->getData(x,y)) : printf("%d,",(int)*(UINT16*)r->getData(x,y));
-        }
+    for (uint32 y=200;y<r->dim.y-400; y+=2) {
+      printf("black,");
+      for (uint32 x=20;x<=100; x+=2) {
+        (x==100) ? printf("%d\n",(int)*(UINT16*)r->getData(x,y)) : printf("%d,",(int)*(UINT16*)r->getData(x,y));
       }
+      printf("color,");
+      for (uint32 x=1020;x<=1100; x+=2) {
+        (x==1100) ? printf("%d\n",(int)*(UINT16*)r->getData(x,y)) : printf("%d,",(int)*(UINT16*)r->getData(x,y));
+      }
+    }
 */
 #ifdef _USE_GFL_
-      GFL_BITMAP* b;
-      if (r->getCpp() == 1)
-        b = gflAllockBitmapEx(GFL_GREY,d->mRaw->dim.x, d->mRaw->dim.y,16,16,NULL);
-      else if (r->getCpp() == 3)
-        b = gflAllockBitmapEx(GFL_RGB,d->mRaw->dim.x, d->mRaw->dim.y,16,8,NULL);
-      else
-        ThrowRDE("Unable to save image.");
+    GFL_BITMAP* b;
+    if (r->getCpp() == 1)
+      b = gflAllockBitmapEx(GFL_GREY,d->mRaw->dim.x, d->mRaw->dim.y,16,16,NULL);
+    else if (r->getCpp() == 3)
+      b = gflAllockBitmapEx(GFL_RGB,d->mRaw->dim.x, d->mRaw->dim.y,16,8,NULL);
+    else
+      ThrowRDE("Unable to save image.");
 
-      BitBlt(b->Data,b->BytesPerLine, r->getData(),r->pitch, r->dim.x*r->getBpp(), r->dim.y );
+    BitBlt(b->Data,b->BytesPerLine, r->getData(),r->pitch, r->dim.x*r->getBpp(), r->dim.y );
 
-      GFL_SAVE_PARAMS s;
-      gflGetDefaultSaveParams(&s);
-      s.FormatIndex = gflGetFormatIndexByName("tiff");
+    GFL_SAVE_PARAMS s;
+    gflGetDefaultSaveParams(&s);
+    s.FormatIndex = gflGetFormatIndexByName("tiff");
 
-      char ascii[1024];
-      WideCharToMultiByte(CP_ACP, 0, f.Filename(), -1, ascii, 1024, NULL, NULL);
-      string savename(ascii);
-      size_t index = savename.rfind('.');
-      replace(r->mode.begin(), r->mode.end(), ':', '-');
-      savename = savename.substr(0,index).append("[").append(r->mode).append("].tiff");
+    char ascii[1024];
+    WideCharToMultiByte(CP_ACP, 0, f.Filename(), -1, ascii, 1024, NULL, NULL);
+    string savename(ascii);
+    size_t index = savename.rfind('.');
+    replace(r->mode.begin(), r->mode.end(), ':', '-');
+    savename = savename.substr(0,index).append("[").append(r->mode).append("].tiff");
 
-      gflSaveBitmap((char*)savename.c_str(),b,&s);
-      gflFreeBitmap(b);
+    gflSaveBitmap((char*)savename.c_str(),b,&s);
+    gflFreeBitmap(b);
 #endif
-    } catch (RawDecoderException e) {
-      wchar_t uni[1024];
-      MultiByteToWideChar(CP_ACP, 0, e.what(), -1, uni, 1024);
-      //    MessageBox(0,uni, L"RawDecoder Exception",0);
-      wprintf(L"Raw Decoder Exception:%s\n",uni);
-    }
-  } catch (TiffParserException e) {
+  } catch (RawDecoderException e) {
     wchar_t uni[1024];
     MultiByteToWideChar(CP_ACP, 0, e.what(), -1, uni, 1024);
-    //    MessageBox(0,uni, L"Tiff Parser error",0);
-    wprintf(L"Tiff Exception:%s\n",uni);
+    //    MessageBox(0,uni, L"RawDecoder Exception",0);
+    wprintf(L"Raw Decoder Exception:%s\n",uni);
   }
   if (d) delete d;
   if (m) delete m;
@@ -152,8 +144,7 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
     try {    
       // Insert 1000 random errors in file
       m2->corrupt(1000);
-      TiffParser t(m2);
-      t.parseData();
+      RawParser t(m2);
       d = t.getDecoder();
 
       startTime = GetTickCount();
@@ -174,10 +165,6 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
       wchar_t uni[1024];
       MultiByteToWideChar(CP_ACP, 0, e.what(), -1, uni, 1024);
       wprintf(L"Raw Decoder Exception:%s\n",uni);
-    } catch (TiffParserException e) {
-      wchar_t uni[1024];
-      MultiByteToWideChar(CP_ACP, 0, e.what(), -1, uni, 1024);
-      wprintf(L"Tiff Parser Exception:%s\n",uni);
     }
     delete m2;
     if (d)
@@ -190,8 +177,7 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
     // Get truncated file
     FileMap *m2 = m->cloneRandomSize();
     try {    
-      TiffParser t(m2);
-      t.parseData();
+      RawParser t(m2);
       d = t.getDecoder();
 
       startTime = GetTickCount();
@@ -211,10 +197,6 @@ void OpenFile(FileReader f, CameraMetaData *meta) {
       wchar_t uni[1024];
       MultiByteToWideChar(CP_ACP, 0, e.what(), -1, uni, 1024);
       wprintf(L"Raw Decoder Exception:%s\n",uni);
-    } catch (TiffParserException e) {
-      wchar_t uni[1024];
-      MultiByteToWideChar(CP_ACP, 0, e.what(), -1, uni, 1024);
-      wprintf(L"Tiff Parser Exception:%s\n",uni);
     }
     delete m2;
     if (d)
@@ -238,7 +220,23 @@ int wmain(int argc, _TCHAR* argv[])
 #endif
   try {
     CameraMetaData meta("..\\data\\cameras.xml");
-
+    OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_fz150_18.rw2"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_fz150_17.rw2"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_fz150_16.rw2"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_fz150_15.rw2"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_fz150_14.rw2"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_fz150_13.rw2"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_fz150_10.rw2"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_fz150_07.rw2"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\panasonic_lumix_dmc_fz150_01.rw2"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Canon_PowerShot_S100-PS100hSLI0200.CR2"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Canon_PowerShot_S100-PS100LL64003.CR2"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Canon_PowerShot_S100-PS100LL32003.CR2"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Canon_PowerShot_S100-PS100LL16003.CR2"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Canon_PowerShot_S100-PS100LL08003.CR2"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Canon_PowerShot_S100-PS100LL04003.CR2"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Canon_PowerShot_S100-PS100LL00806.CR2"),&meta);
+    OpenFile(FileReader(L"..\\testimg\\Canon_PowerShot_S100-PS100hVFATB.CR2"),&meta);
     OpenFile(FileReader(L"..\\testimg\\samsung_ex1_07.srw"),&meta);
     OpenFile(FileReader(L"..\\testimg\\Olympus_E-PM1-EPM1hVFAI00200.ORF"),&meta);
     OpenFile(FileReader(L"..\\testimg\\Pentax_Kx_IGP2252.PEF"),&meta);
@@ -444,7 +442,6 @@ int wmain(int argc, _TCHAR* argv[])
       OpenFile(FileReader(L"..\\testimg\\Sony Alpha SLT-A77-AA77hSLI16000NR1.ARW"),&meta);
       OpenFile(FileReader(L"..\\testimg\\Sony Alpha SLT-A77-AA77hVFAI00200.ARW"),&meta);
       OpenFile(FileReader(L"..\\testimg\\Sony Alpha SLT-A77-AA77hVFAWS_DISTORT_OFF.ARW"),&meta);
-/*
     OpenFile(FileReader(L"..\\testimg\\Phase One H25 Capture One PRO 3.7.10 IIQ Raw Large-001.tif"),&meta);
       OpenFile(FileReader(L"..\\testimg\\Phase One H25 Capture One PRO 3.7.10 IIQ Raw Small-001.tif"),&meta);
       OpenFile(FileReader(L"..\\testimg\\Phase One H25 Capture One PRO 3.7.10 Raw Compatible with 3.0-001.Cap"),&meta);
@@ -467,7 +464,6 @@ int wmain(int argc, _TCHAR* argv[])
       OpenFile(FileReader(L"..\\testimg\\Olympus_PEN_E-P3-EP3hSLI01600NR0.ORF"),&meta);
       OpenFile(FileReader(L"..\\testimg\\Olympus_PEN_E-P3-EP3hVFAI00200.ORF"),&meta);
       OpenFile(FileReader(L"..\\testimg\\Olympus_PEN_E-P3-EP3hVFAWB.ORF"),&meta);
-      return 0;
     OpenFile(FileReader(L"..\\testimg\\dng\\_DSC5230.dng"),&meta);
     OpenFile(FileReader(L"..\\testimg\\Nikon_D5100-dsc_0081.NEF"),&meta);
       OpenFile(FileReader(L"..\\testimg\\Nikon_D5100-dsc_0064.NEF"),&meta);
@@ -487,7 +483,7 @@ int wmain(int argc, _TCHAR* argv[])
   OpenFile(FileReader(L"..\\testimg\\Nikon_E5400.nef"),&meta);
     OpenFile(FileReader(L"..\\testimg\\350d-color_problem.cr2"),&meta);
     OpenFile(FileReader(L"..\\testimg\\samsung_nx100_02.srw"),&meta);
-    OpenFile(FileReader(L"..\\testimg\\samsung_ex1_10.srw"),&meta);*/
+    OpenFile(FileReader(L"..\\testimg\\samsung_ex1_10.srw"),&meta);
     OpenFile(FileReader(L"..\\testimg\\olympus_xz1_26.orf"),&meta);
     OpenFile(FileReader(L"..\\testimg\\olympus_xz1_06.orf"),&meta);
     OpenFile(FileReader(L"..\\testimg\\olympus_xz1_05.orf"),&meta);

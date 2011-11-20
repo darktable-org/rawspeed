@@ -30,6 +30,9 @@ ArwDecoder::ArwDecoder(TiffIFD *rootIFD, FileMap* file) :
 }
 
 ArwDecoder::~ArwDecoder(void) {
+  if (mRootIFD)
+    delete mRootIFD;
+  mRootIFD = NULL;
 }
 
 RawImage ArwDecoder::decodeRaw() {

@@ -32,6 +32,9 @@ NefDecoder::NefDecoder(TiffIFD *rootIFD, FileMap* file) :
 }
 
 NefDecoder::~NefDecoder(void) {
+  if (mRootIFD)
+    delete mRootIFD;
+  mRootIFD = NULL;
 }
 
 RawImage NefDecoder::decodeRaw() {

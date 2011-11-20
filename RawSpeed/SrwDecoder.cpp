@@ -33,6 +33,9 @@ SrwDecoder::SrwDecoder(TiffIFD *rootIFD, FileMap* file):
 }
 
 SrwDecoder::~SrwDecoder(void) {
+  if (mRootIFD)
+    delete mRootIFD;
+  mRootIFD = NULL;
 }
 
 RawImage SrwDecoder::decodeRaw() {

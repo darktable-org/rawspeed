@@ -32,6 +32,9 @@ Cr2Decoder::Cr2Decoder(TiffIFD *rootIFD, FileMap* file) :
 }
 
 Cr2Decoder::~Cr2Decoder(void) {
+  if (mRootIFD)
+    delete mRootIFD;
+  mRootIFD = NULL;
 }
 
 RawImage Cr2Decoder::decodeRaw() {

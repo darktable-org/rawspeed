@@ -353,6 +353,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\RawParser.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\Rw2Decoder.cpp"
 					>
 				</File>
@@ -532,6 +536,10 @@
 				</File>
 				<File
 					RelativePath=".\RawDecoderException.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RawParser.h"
 					>
 				</File>
 				<File
