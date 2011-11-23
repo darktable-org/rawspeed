@@ -38,7 +38,7 @@ OrfDecoder::~OrfDecoder(void) {
   mRootIFD = NULL;
 }
 
-RawImage OrfDecoder::decodeRaw() {
+RawImage OrfDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 
   if (data.empty())
