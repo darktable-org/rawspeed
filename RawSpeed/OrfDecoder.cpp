@@ -290,7 +290,7 @@ void OrfDecoder::decodeMetaData(CameraMetaData *meta) {
 
           int32 offset;
           const uchar8* data = imagep->getData();
-          if (makertiff.tiff_endian = makertiff.getHostEndian())
+          if (makertiff.tiff_endian == makertiff.getHostEndian())
             offset = *(int32*)data;
           else
             offset = (unsigned int)data[0] << 24 | (unsigned int)data[1] << 16 | (unsigned int)data[2] << 8 | (unsigned int)data[3];
