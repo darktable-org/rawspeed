@@ -305,7 +305,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="42" y="18" width="3906" height="2602"/>
-    <Sensor black="255" white="4030"/>
+    <Sensor black="255" white="3600"/>
 	<BlackAreas>
 		<Vertical x="0" width="41"/>
 		<Horizontal y="2" height="14"/>
