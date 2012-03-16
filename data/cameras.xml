@@ -434,7 +434,7 @@
       <Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="144" y="46" width="-64" height="-2"/>
-    <Sensor black="2000" white="15900"/>
+    <Sensor black="2000" white="13000"/>
 	<BlackAreas>
 		<Vertical x="0" width="140"/>
 		<Horizontal y="26" height="16"/>
