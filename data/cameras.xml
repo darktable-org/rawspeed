@@ -749,6 +749,16 @@
     <Crop x="0" y="0" width="3898" height="2610"/>
     <Sensor black="0" white="16383"/>
   </Camera>
+  <Camera make="NIKON CORPORATION" model="NIKON D3200">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">RED</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="1" y="1">BLUE</Color>
+    </CFA>
+    <Crop x="0" y="0" width="-48" height="0"/>
+    <Sensor black="0" white="16383"/>
+  </Camera>
   <Camera make="NIKON CORPORATION" model="NIKON D4">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
@@ -1203,6 +1213,16 @@
     </CFA>
     <Crop x="0" y="0" width="2576" height="1924"/>
     <Sensor black="32" white="1023"/>
+  </Camera>
+  <Camera make="OLYMPUS IMAGING CORP." model="E-M5">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">RED</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="1" y="1">BLUE</Color>
+    </CFA>
+    <Crop x="0" y="0" width="0" height="0"/>
+    <Sensor black="250" white="4095"/>
   </Camera>
   <Camera make="OLYMPUS IMAGING CORP." model="E-P1">
     <CFA width="2" height="2">
