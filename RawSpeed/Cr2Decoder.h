@@ -44,6 +44,8 @@ protected:
   void interpolate_420(int w, int h, int start_h , int end_h);
   void interpolate_422(int w, int h, int start_h , int end_h);
   void interpolate_422_old(int w, int h, int start_h , int end_h);
+  void interpolate_420_new(int w, int h, int start_h , int end_h);
+  void interpolate_422_new(int w, int h, int start_h , int end_h);
   TiffIFD *mRootIFD;
 };
 

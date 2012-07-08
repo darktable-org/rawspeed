@@ -191,14 +191,20 @@ void Cr2Decoder::sRawInterpolate() {
 
   string model = data[0]->getEntry(MODEL)->getString();
   bool isOldSraw = (model.compare("Canon EOS 40D") == 0);
+  bool isNewSraw = hints.find("sraw_new") != hints.end();
 
   if (mRaw->subsampling.y == 1 && mRaw->subsampling.x == 2) {
     if (isOldSraw)
       interpolate_422_old(mRaw->dim.x / 2, mRaw->dim.y , 0, mRaw->dim.y);
+    else if (isNewSraw)
+      interpolate_422_new(mRaw->dim.x / 2, mRaw->dim.y , 0, mRaw->dim.y);
     else
       interpolate_422(mRaw->dim.x / 2, mRaw->dim.y , 0, mRaw->dim.y);
   } else {
-    interpolate_420(mRaw->dim.x / 2, mRaw->dim.y / 2 , 0 , mRaw->dim.y / 2);
+    if (isNewSraw)
+      interpolate_420_new(mRaw->dim.x / 2, mRaw->dim.y / 2 , 0 , mRaw->dim.y / 2);
+    else
+      interpolate_420(mRaw->dim.x / 2, mRaw->dim.y / 2 , 0 , mRaw->dim.y / 2);
   }
 }
 
@@ -288,21 +294,21 @@ void Cr2Decoder::interpolate_420(int w, int h, int start_h , int end_h) {
       STORE_RGB(c_line, off, off + 1, off + 2);
 
       Y = c_line[off+3];
-      int Cb2 = (Cb + c_line[off+1+6] - 16383) >> 1;
-      int Cr2 = (Cr + c_line[off+2+6] - 16383) >> 1;
+      int Cb2 = (Cb + c_line[off+1+6] - 16384) >> 1;
+      int Cr2 = (Cr + c_line[off+2+6] - 16384) >> 1;
       YUV_TO_RGB(Y, Cb2, Cr2);
       STORE_RGB(c_line, off + 3, off + 4, off + 5);
 
       // Next line
       Y = n_line[off];
-      int Cb3 = (Cb + nn_line[off+1] - 16383) >> 1;
-      int Cr3 = (Cr + nn_line[off+2] - 16383) >> 1;
+      int Cb3 = (Cb + nn_line[off+1] - 16384) >> 1;
+      int Cr3 = (Cr + nn_line[off+2] - 16384) >> 1;
       YUV_TO_RGB(Y, Cb3, Cr3);
       STORE_RGB(n_line, off, off + 1, off + 2);
 
       Y = n_line[off+3];
-      Cb = (Cb + Cb2 + Cb3 + nn_line[off+1+6] - 16382) >> 2;  //Left + Above + Right +Below
-      Cr = (Cr + Cr2 + Cr3 + nn_line[off+2+6] - 16382) >> 2;
+      Cb = (Cb + Cb2 + Cb3 + nn_line[off+1+6] - 16384) >> 2;  //Left + Above + Right +Below
+      Cr = (Cr + Cr2 + Cr3 + nn_line[off+2+6] - 16384) >> 2;
       YUV_TO_RGB(Y, Cb, Cr);
       STORE_RGB(n_line, off + 3, off + 4, off + 5);
       off += 6;
@@ -319,8 +325,8 @@ void Cr2Decoder::interpolate_420(int w, int h, int start_h , int end_h) {
 
     // Next line
     Y = n_line[off];
-    Cb = (Cb + nn_line[off+1] - 16383) >> 1;
-    Cr = (Cr + nn_line[off+2] - 16383) >> 1;
+    Cb = (Cb + nn_line[off+1] - 16384) >> 1;
+    Cr = (Cr + nn_line[off+2] - 16384) >> 1;
     YUV_TO_RGB(Y, Cb, Cr);
     STORE_RGB(n_line, off, off + 1, off + 2);
 
@@ -405,6 +411,161 @@ void Cr2Decoder::interpolate_422_old(int w, int h, int start_h , int end_h) {
     Y = c_line[off+3];
     YUV_TO_RGB(Y, Cb, Cr);
     STORE_RGB(c_line, off + 3, off + 4, off + 5);
+  }
+}
+
+/* Algorithm found in EOS 5d Mk III */
+
+#undef YUV_TO_RGB
+
+#define YUV_TO_RGB(Y, Cb, Cr) r = sraw_coeffs[0] * (Y + Cr);\
+  g = sraw_coeffs[1] * (Y + ((-778*Cb - (Cr << 11)) >> 12) );\
+  b = sraw_coeffs[2] * (Y + Cb);\
+  r >>= 10; g >>=10; b >>=10;
+
+void Cr2Decoder::interpolate_422_new(int w, int h, int start_h , int end_h) {
+  // Last pixel should not be interpolated
+  w--;
+
+  // Current line
+  ushort16* c_line;
+
+  for (int y = start_h; y < end_h; y++) {
+    c_line = (ushort16*)mRaw->getData(0, y);
+    int r, g, b;
+    int off = 0;
+    for (int x = 0; x < w; x++) {
+      int Y = c_line[off];
+      int Cb = c_line[off+1] - 16384;
+      int Cr = c_line[off+2] - 16384;
+      YUV_TO_RGB(Y, Cb, Cr);
+      STORE_RGB(c_line, off, off + 1, off + 2);
+      off += 3;
+
+      Y = c_line[off];
+      int Cb2 = (Cb + c_line[off+1+3] - 16384) >> 1;
+      int Cr2 = (Cr + c_line[off+2+3] - 16384) >> 1;
+      YUV_TO_RGB(Y, Cb2, Cr2);
+      STORE_RGB(c_line, off, off + 1, off + 2);
+      off += 3;
+    }
+    // Last two pixels
+    int Y = c_line[off];
+    int Cb = c_line[off+1] - 16384;
+    int Cr = c_line[off+2] - 16384;
+    YUV_TO_RGB(Y, Cb, Cr);
+    STORE_RGB(c_line, off, off + 1, off + 2);
+
+    Y = c_line[off+3];
+    YUV_TO_RGB(Y, Cb, Cr);
+    STORE_RGB(c_line, off + 3, off + 4, off + 5);
+  }
+}
+
+
+// Note: Not thread safe, since it writes inplace.
+void Cr2Decoder::interpolate_420_new(int w, int h, int start_h , int end_h) {
+  // Last pixel should not be interpolated
+  w--;
+
+  bool atLastLine = FALSE;
+
+  if (end_h == h) {
+    end_h--;
+    atLastLine = TRUE;
+  }
+
+  // Current line
+  ushort16* c_line;
+  // Next line
+  ushort16* n_line;
+  // Next line again
+  ushort16* nn_line;
+
+  int off;
+  int r, g, b;
+
+  for (int y = start_h; y < end_h; y++) {
+    c_line = (ushort16*)mRaw->getData(0, y * 2);
+    n_line = (ushort16*)mRaw->getData(0, y * 2 + 1);
+    nn_line = (ushort16*)mRaw->getData(0, y * 2 + 2);
+    off = 0;
+    for (int x = 0; x < w; x++) {
+      int Y = c_line[off];
+      int Cb = c_line[off+1] - 16384;
+      int Cr = c_line[off+2] - 16384;
+      YUV_TO_RGB(Y, Cb, Cr);
+      STORE_RGB(c_line, off, off + 1, off + 2);
+
+      Y = c_line[off+3];
+      int Cb2 = (Cb + c_line[off+1+6] - 16384) >> 1;
+      int Cr2 = (Cr + c_line[off+2+6] - 16384) >> 1;
+      YUV_TO_RGB(Y, Cb2, Cr2);
+      STORE_RGB(c_line, off + 3, off + 4, off + 5);
+
+      // Next line
+      Y = n_line[off];
+      int Cb3 = (Cb + nn_line[off+1] - 16384) >> 1;
+      int Cr3 = (Cr + nn_line[off+2] - 16384) >> 1;
+      YUV_TO_RGB(Y, Cb3, Cr3);
+      STORE_RGB(n_line, off, off + 1, off + 2);
+
+      Y = n_line[off+3];
+      Cb = (Cb + Cb2 + Cb3 + nn_line[off+1+6] - 16384) >> 2;  //Left + Above + Right +Below
+      Cr = (Cr + Cr2 + Cr3 + nn_line[off+2+6] - 16384) >> 2;
+      YUV_TO_RGB(Y, Cb, Cr);
+      STORE_RGB(n_line, off + 3, off + 4, off + 5);
+      off += 6;
+    }
+    int Y = c_line[off];
+    int Cb = c_line[off+1] - 16384;
+    int Cr = c_line[off+2] - 16384;
+    YUV_TO_RGB(Y, Cb, Cr);
+    STORE_RGB(c_line, off, off + 1, off + 2);
+
+    Y = c_line[off+3];
+    YUV_TO_RGB(Y, Cb, Cr);
+    STORE_RGB(c_line, off + 3, off + 4, off + 5);
+
+    // Next line
+    Y = n_line[off];
+    Cb = (Cb + nn_line[off+1] - 16384) >> 1;
+    Cr = (Cr + nn_line[off+2] - 16384) >> 1;
+    YUV_TO_RGB(Y, Cb, Cr);
+    STORE_RGB(n_line, off, off + 1, off + 2);
+
+    Y = n_line[off+3];
+    YUV_TO_RGB(Y, Cb, Cr);
+    STORE_RGB(n_line, off + 3, off + 4, off + 5);
+  }
+
+  if (atLastLine) {
+    c_line = (ushort16*)mRaw->getData(0, end_h * 2);
+    n_line = (ushort16*)mRaw->getData(0, end_h * 2 + 1);
+    off = 0;
+
+    // Last line
+    for (int x = 0; x < w; x++) {
+      int Y = c_line[off];
+      int Cb = c_line[off+1] - 16384;
+      int Cr = c_line[off+2] - 16384;
+      YUV_TO_RGB(Y, Cb, Cr);
+      STORE_RGB(c_line, off, off + 1, off + 2);
+
+      Y = c_line[off+3];
+      YUV_TO_RGB(Y, Cb, Cr);
+      STORE_RGB(c_line, off + 3, off + 4, off + 5);
+
+      // Next line
+      Y = n_line[off];
+      YUV_TO_RGB(Y, Cb, Cr);
+      STORE_RGB(n_line, off, off + 1, off + 2);
+
+      Y = n_line[off+3];
+      YUV_TO_RGB(Y, Cb, Cr);
+      STORE_RGB(n_line, off + 3, off + 4, off + 5);
+      off += 6;
+    }
   }
 }
 
