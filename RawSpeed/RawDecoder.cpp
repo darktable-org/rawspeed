@@ -214,6 +214,7 @@ bool RawDecoder::checkCameraSupported(CameraMetaData *meta, string make, string 
 }
 
 void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model, string mode, int iso_speed) {
+  mRaw->isoSpeed = iso_speed;
   TrimSpaces(make);
   TrimSpaces(model);
   Camera *cam = meta->getCamera(make, model, mode);

@@ -125,6 +125,7 @@
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="..\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				MinimalRebuild="true"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="true"
 				EnableEnhancedInstructionSet="1"
