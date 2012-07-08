@@ -239,6 +239,25 @@
 		<Alias>Canon EOS Kiss X5</Alias>
 	</Aliases>
   </Camera>
+  <Camera make="Canon" model="Canon EOS 650D">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">GREEN</Color>
+      <Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color>
+      <Color x="1" y="1">GREEN</Color>
+    </CFA>
+    <Crop x="76" y="56" width="0" height="0"/>
+    <Sensor black="2026" white="13584" iso_min="0" iso_max = "199"/>
+    <Sensor black="2026" white="15304"/>
+	<BlackAreas>
+		<Vertical x="0" width="70"/>
+		<Horizontal y="4" height="44"/>
+	</BlackAreas>
+    <Aliases>
+		<Alias>Canon EOS REBEL T4i</Alias>
+		<Alias>Canon EOS Kiss X6i</Alias>
+	</Aliases>
+  </Camera>
   <Camera make="Canon" model="Canon EOS 5D">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
@@ -481,6 +500,28 @@
     <Sensor black="0" white="16383"/>
   </Camera>
   <Camera make="Canon" model="Canon EOS-1Ds Mark III" mode="sRaw2">
+    <Crop x="0" y="0" width="0" height="0"/>
+    <Sensor black="0" white="16383"/>
+  </Camera>
+  <Camera make="Canon" model="Canon EOS-1D X">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">GREEN</Color>
+      <Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color>
+      <Color x="1" y="1">GREEN</Color>
+    </CFA>
+    <Crop x="128" y="102" width="0" height="-2"/>
+    <Sensor black="2050" white="15100"/>
+	<BlackAreas>
+		<Vertical x="0" width="120"/>
+		<Horizontal y="0" height="98"/>
+	</BlackAreas>
+  </Camera>
+  <Camera make="Canon" model="Canon EOS-1D X" mode="sRaw1">
+    <Crop x="0" y="0" width="0" height="0"/>
+    <Sensor black="0" white="16383"/>
+  </Camera>
+  <Camera make="Canon" model="Canon EOS-1D X" mode="sRaw2">
     <Crop x="0" y="0" width="0" height="0"/>
     <Sensor black="0" white="16383"/>
   </Camera>
@@ -2166,6 +2207,16 @@
     <Crop x="0" y="0" width="0" height="0"/>
     <Sensor black="545" white="16596"/>
   </Camera>   
+  <Camera make="SONY" model="NEX-F3" supported="yes">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">RED</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="1" y="1">BLUE</Color>
+    </CFA>
+    <Crop x="0" y="0" width="0" height="0"/>
+    <Sensor black="520" white="16360"/>
+  </Camera>  
   <Camera make="SONY" model="SLT-A33">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
@@ -2185,6 +2236,16 @@
     </CFA>
     <Crop x="0" y="0" width="0" height="0"/>
     <Sensor black="545" white="16596"/>
+  </Camera>
+  <Camera make="SONY" model="SLT-A37">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">RED</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="1" y="1">BLUE</Color>
+    </CFA>
+    <Crop x="0" y="0" width="0" height="0"/>
+    <Sensor black="520" white="16500"/>
   </Camera>
   <Camera make="SONY" model="SLT-A55V">
     <CFA width="2" height="2">
