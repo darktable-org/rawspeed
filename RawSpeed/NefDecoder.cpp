@@ -346,6 +346,8 @@ void NefDecoder::decodeMetaData(CameraMetaData *meta) {
 
   if (data.empty())
     ThrowRDE("NEF Meta Decoder: Model name found");
+  if (!data[0]->hasEntry(MAKE))
+    ThrowRDE("NEF Support: Make name not found");
 
   int white = mRaw->whitePoint;
   int black = mRaw->blackLevel;

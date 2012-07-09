@@ -108,7 +108,7 @@ RawImage Cr2Decoder::decodeRawInternal() {
 
   if (s_width.size() > 15)
     ThrowRDE("CR2 Decoder: No more than 15 slices supported");
-  
+  _RPT1(0,"Org slices:%d\n", s_width.size());
   for (uint32 i = 0; i < slices.size(); i++) {
     Cr2Slice slice = slices[i];
     try {
@@ -138,6 +138,8 @@ void Cr2Decoder::checkSupport(CameraMetaData *meta) {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
   if (data.empty())
     ThrowRDE("CR2 Support check: Model name found");
+  if (!data[0]->hasEntry(MAKE))
+    ThrowRDE("CR2 Support: Make name not found");
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
   this->checkCameraSupported(meta, make, model, "");

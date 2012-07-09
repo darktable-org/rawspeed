@@ -190,6 +190,8 @@ void ArwDecoder::decodeMetaData(CameraMetaData *meta) {
 
   if (data.empty())
     ThrowRDE("ARW Meta Decoder: Model name found");
+  if (!data[0]->hasEntry(MAKE))
+    ThrowRDE("ARW Decoder: Make name not found");
 
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();

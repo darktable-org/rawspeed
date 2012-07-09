@@ -80,6 +80,8 @@ void SrwDecoder::checkSupport(CameraMetaData *meta) {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
   if (data.empty())
     ThrowRDE("Srw Support check: Model name found");
+  if (!data[0]->hasEntry(MAKE))
+    ThrowRDE("SRW Support: Make name not found");
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
   this->checkCameraSupported(meta, make, model, "");

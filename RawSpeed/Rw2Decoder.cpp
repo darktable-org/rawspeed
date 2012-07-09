@@ -180,7 +180,9 @@ void Rw2Decoder::decodeMetaData(CameraMetaData *meta) {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
   if (data.empty())
-    ThrowRDE("CR2 Meta Decoder: Model name not found");
+    ThrowRDE("RW2 Meta Decoder: Model name not found");
+  if (!data[0]->hasEntry(MAKE))
+    ThrowRDE("RW2 Support: Make name not found");
 
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
