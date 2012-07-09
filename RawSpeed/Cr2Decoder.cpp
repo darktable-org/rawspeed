@@ -134,7 +134,7 @@ RawImage Cr2Decoder::decodeRawInternal() {
   return mRaw;
 }
 
-void Cr2Decoder::checkSupport(CameraMetaData *meta) {
+void Cr2Decoder::checkSupportInternal(CameraMetaData *meta) {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
   if (data.empty())
     ThrowRDE("CR2 Support check: Model name found");
@@ -145,7 +145,7 @@ void Cr2Decoder::checkSupport(CameraMetaData *meta) {
   this->checkCameraSupported(meta, make, model, "");
 }
 
-void Cr2Decoder::decodeMetaData(CameraMetaData *meta) {
+void Cr2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
   int iso = 0;
   mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);

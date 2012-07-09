@@ -329,7 +329,7 @@ void NefDecoder::DecodeD100Uncompressed() {
     }*/
 }
 
-void NefDecoder::checkSupport(CameraMetaData *meta) {
+void NefDecoder::checkSupportInternal(CameraMetaData *meta) {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
   if (data.empty())
     ThrowRDE("NEF Support check: Model name found");
@@ -338,7 +338,7 @@ void NefDecoder::checkSupport(CameraMetaData *meta) {
   this->checkCameraSupported(meta, make, model, "");
 }
 
-void NefDecoder::decodeMetaData(CameraMetaData *meta) {
+void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   int iso = 0;
   mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
 

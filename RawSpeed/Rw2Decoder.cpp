@@ -164,7 +164,7 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
   }
 }
 
-void Rw2Decoder::checkSupport(CameraMetaData *meta) {
+void Rw2Decoder::checkSupportInternal(CameraMetaData *meta) {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
   if (data.empty())
     ThrowRDE("RW2 Support check: Model name found");
@@ -175,7 +175,7 @@ void Rw2Decoder::checkSupport(CameraMetaData *meta) {
     this->checkCameraSupported(meta, make, model, "");
 }
 
-void Rw2Decoder::decodeMetaData(CameraMetaData *meta) {
+void Rw2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
   mRaw->cfa.setCFA(CFA_BLUE, CFA_GREEN, CFA_GREEN2, CFA_RED);
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 

@@ -34,8 +34,8 @@ class Cr2Decoder :
 public:
   Cr2Decoder(TiffIFD *rootIFD, FileMap* file);
   virtual RawImage decodeRawInternal();
-  virtual void checkSupport(CameraMetaData *meta);
-  virtual void decodeMetaData(CameraMetaData *meta);
+  virtual void checkSupportInternal(CameraMetaData *meta);
+  virtual void decodeMetaDataInternal(CameraMetaData *meta);
   virtual ~Cr2Decoder(void);
 protected:
   int sraw_coeffs[3];

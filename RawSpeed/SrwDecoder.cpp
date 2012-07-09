@@ -76,7 +76,7 @@ RawImage SrwDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void SrwDecoder::checkSupport(CameraMetaData *meta) {
+void SrwDecoder::checkSupportInternal(CameraMetaData *meta) {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
   if (data.empty())
     ThrowRDE("Srw Support check: Model name found");
@@ -87,7 +87,7 @@ void SrwDecoder::checkSupport(CameraMetaData *meta) {
   this->checkCameraSupported(meta, make, model, "");
 }
 
-void SrwDecoder::decodeMetaData(CameraMetaData *meta) {
+void SrwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   mRaw->cfa.setCFA(CFA_RED, CFA_GREEN, CFA_GREEN2, CFA_BLUE);
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
