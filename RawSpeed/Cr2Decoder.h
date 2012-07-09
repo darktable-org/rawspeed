@@ -41,6 +41,7 @@ protected:
   int sraw_coeffs[3];
 
   void sRawInterpolate();
+  int Cr2Decoder::getHue();
   void interpolate_420(int w, int h, int start_h , int end_h);
   void interpolate_422(int w, int h, int start_h , int end_h);
   void interpolate_422_old(int w, int h, int start_h , int end_h);
