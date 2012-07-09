@@ -258,6 +258,9 @@ void LJpegDecompressor::parseSOS() {
     if (!huff[td].initialized)
       ThrowRDE("LJpegDecompressor::parseSOS: Invalid Huffman table selection, not defined.");
 
+    if (count > 3)
+      ThrowRDE("LJpegDecompressor::parseSOS: Component count out of range");
+
     frame.compInfo[count].dcTblNo = td;
   }
 
