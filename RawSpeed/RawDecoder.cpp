@@ -328,4 +328,17 @@ void RawDecoder::decodeMetaData(CameraMetaData *meta)
   }
 }
 
+void RawDecoder::checkSupport(CameraMetaData *meta)
+{
+  try {
+    return checkSupportInternal(meta);
+  } catch (TiffParserException &e) {
+    ThrowRDE("%s", e.what());
+  } catch (FileIOException &e) {
+    ThrowRDE("%s", e.what());
+  } catch (IOException &e) {
+    ThrowRDE("%s", e.what());
+  }
+}
+
 } // namespace RawSpeed
