@@ -26,7 +26,7 @@ namespace RawSpeed {
 
 PefDecoder::PefDecoder(TiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
-      decoderVersion = 2;
+      decoderVersion = 3;
 }
 
 PefDecoder::~PefDecoder(void) {
