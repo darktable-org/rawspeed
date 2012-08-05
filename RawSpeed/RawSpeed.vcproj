@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include"
+				AdditionalIncludeDirectories="..\include;..\include\libjpeg"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib $(NoInherit) User32.lib pthreadVC2.lib iconv.lib libxml2.lib"
+				AdditionalDependencies="kernel32.lib $(NoInherit) User32.lib pthreadVC2.lib iconv.lib libxml2.lib turbojpeg-static.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\lib"
 				IgnoreAllDefaultLibraries="false"
@@ -119,13 +119,15 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
+				Optimization="3"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="..\include"
+				OmitFramePointers="false"
+				EnableFiberSafeOptimizations="true"
+				WholeProgramOptimization="false"
+				AdditionalIncludeDirectories="..\include;..\include\libjpeg"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
-				MinimalRebuild="true"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="true"
 				EnableEnhancedInstructionSet="1"
@@ -147,7 +149,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib $(NoInherit) User32.lib pthreadVC2.lib iconv.lib libxml2.lib"
+				AdditionalDependencies="kernel32.lib $(NoInherit) User32.lib pthreadVC2.lib iconv.lib libxml2.lib turbojpeg-static.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\lib"
 				GenerateDebugInformation="true"
@@ -299,6 +301,10 @@
 				</File>
 				<File
 					RelativePath=".\ByteStreamSwap.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DngOpcodes.cpp"
 					>
 				</File>
 				<File
@@ -457,6 +463,10 @@
 				</File>
 				<File
 					RelativePath=".\Common.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DngOpcodes.h"
 					>
 				</File>
 				<File
