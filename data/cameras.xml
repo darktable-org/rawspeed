@@ -122,6 +122,10 @@
 			<Vertical x="0" width="28"/>
 			<Horizontal y="4" height="12"/>
 		</BlackAreas>
+  </Camera>
+  <Camera make="Canon" model="Canon EOS 40D" mode="sRaw1">
+    <Crop x="0" y="0" width="0" height="0"/>
+    <Sensor black="0" white="65535"/>
 		<Hints>
 			<Hint name="sraw_40d" value=""/>
 		</Hints>
