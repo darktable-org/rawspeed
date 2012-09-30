@@ -114,9 +114,8 @@ RawImage NefDecoder::decodeRawInternal() {
   try {
     NikonDecompressor decompressor(mFile, mRaw);
 
-    // Nikon is JPEG (Big Endian) byte order
     ByteStream* metastream;
-    if (getHostEndianness() == big)
+    if (getHostEndianness() == data[0]->endian)
       metastream = new ByteStream(meta->getData(), meta->count);
     else
       metastream = new ByteStreamSwap(meta->getData(), meta->count);
