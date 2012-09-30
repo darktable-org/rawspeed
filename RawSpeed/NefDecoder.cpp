@@ -95,7 +95,7 @@ RawImage NefDecoder::decodeRawInternal() {
   TiffIFD* exif = data[0];
   TiffEntry *makernoteEntry = exif->getEntry(MAKERNOTE);
   const uchar8* makernote = makernoteEntry->getData();
-  FileMap makermap((uchar8*)&makernote[10], makernoteEntry->count - 10);
+  FileMap makermap((uchar8*)&makernote[10], mFile->getSize() - makernoteEntry->getDataOffset() - 10);
   TiffParser makertiff(&makermap);
   makertiff.parseData();
 
