@@ -944,7 +944,7 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="2" y="0" width="4282" height="2844"/>
-    <Sensor black="0" white="15888"/>
+    <Sensor black="0" white="16383"/>
   </Camera>
   <Camera make="NIKON CORPORATION" model="NIKON D7000">
     <CFA width="2" height="2">
