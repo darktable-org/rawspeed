@@ -618,6 +618,19 @@
 		<Horizontal y="0" height="8"/>
 	</BlackAreas>
   </Camera>
+  <Camera make="Canon" model="Canon PowerShot G15">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">GREEN</Color><Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
+    </CFA>
+    <Crop x="106" y="12" width="-10" height="-66"/>
+    <Sensor black="500" white="2800" iso_min="12800" iso_max="12800"/>
+    <Sensor black="128" white="4095"/>
+	<BlackAreas>
+		<Vertical x="0" width="100"/>
+		<Horizontal y="3062" height="60"/>
+	</BlackAreas>
+  </Camera>	
   <Camera make="Canon" model="Canon PowerShot SX1 IS">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
@@ -670,6 +683,19 @@
 	<BlackAreas>
 		<Vertical x="0" width="100"/>
 		<Horizontal y="0" height="10"/>
+		<Horizontal y="3062" height="60"/>
+	</BlackAreas>
+  </Camera>	
+  <Camera make="Canon" model="Canon PowerShot S110">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">GREEN</Color><Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
+    </CFA>
+    <Crop x="106" y="12" width="-10" height="-66"/>
+    <Sensor black="500" white="3072" iso_min="12800" iso_max="12800"/>
+    <Sensor black="128" white="4095"/>
+	<BlackAreas>
+		<Vertical x="0" width="100"/>
 		<Horizontal y="3062" height="60"/>
 	</BlackAreas>
   </Camera>	
