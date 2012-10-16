@@ -1485,7 +1485,7 @@
       <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="-128" height="-4"/>
-    <Sensor black="0" white="4095"/>
+    <Sensor black="150" white="4095"/>
   </Camera>
   <Camera make="Panasonic" model = "DMC-FZ200" mode="4:3">
     <CFA width="2" height="2">
@@ -1493,7 +1493,7 @@
       <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="-128" height="-4"/>
-    <Sensor black="0" white="4095"/>
+    <Sensor black="150" white="4095"/>
   </Camera>
   <Camera make="Panasonic" model = "DMC-G1">
     <CFA width="2" height="2">
@@ -1951,7 +1951,7 @@
       <Color x="0" y="1">BLUE</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="-34" height="0"/>
-    <Sensor black="0" white="4095"/>
+    <Sensor black="150" white="4095"/>
   </Camera>  
   <Camera make="Panasonic" model = "DMC-LX7" mode="4:3">
     <CFA width="2" height="2">
@@ -1959,7 +1959,7 @@
       <Color x="0" y="1">BLUE</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="-34" height="0"/>
-    <Sensor black="0" white="4095"/>
+    <Sensor black="150" white="4095"/>
   </Camera>  
 	
 	<Camera make="PENTAX Corporation" model="PENTAX K100D">
