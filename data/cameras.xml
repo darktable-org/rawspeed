@@ -418,6 +418,21 @@
 		<Alias>Canon EOS Kiss Digital X</Alias>
 	</Aliases>
   </Camera>
+  <Camera make="Canon" model="Canon EOS M">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">RED</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="1" y="1">BLUE</Color>
+    </CFA>
+    <Crop x="76" y="56" width="0" height="0"/>
+    <Sensor black="2026" white="13584" iso_min="0" iso_max = "199"/>
+    <Sensor black="2026" white="15304"/>
+    <BlackAreas>
+      <Vertical x="0" width="70"/>
+        <Horizontal y="4" height="44"/>
+    </BlackAreas>
+  </Camera>	
   <Camera make="Canon" model="Canon EOS-1D Mark II">
     <CFA width="2" height="2">
       <Color x="0" y="0">RED</Color>
@@ -698,6 +713,18 @@
 		<Vertical x="0" width="100"/>
 		<Horizontal y="3062" height="60"/>
 	</BlackAreas>
+  </Camera>	
+  <Camera make="Canon" model="Canon PowerShot SX50 HS">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">GREEN</Color><Color x="1" y="0">BLUE</Color>
+      <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
+    </CFA>
+    <Crop x="100" y="20" width="-10" height="0"/>
+    <Sensor black="127" white="4095"/>
+		<BlackAreas>
+			<Vertical x="6" width="70"/>
+			<Horizontal y="0" height="16"/>
+		</BlackAreas>
   </Camera>	
   <Camera make="NIKON CORPORATION" model="NIKON D100">
     <CFA width="2" height="2">
@@ -2441,6 +2468,16 @@
       <Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="0" y="0" width="-12" height="0"/>
+    <Sensor black="520" white="16596"/>
+  </Camera>
+  <Camera make="SONY" model="NEX-6" supported="yes">
+    <CFA width="2" height="2">
+      <Color x="0" y="0">RED</Color>
+      <Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color>
+      <Color x="1" y="1">BLUE</Color>
+    </CFA>
+    <Crop x="0" y="0" width="-16" height="0"/>
     <Sensor black="520" white="16596"/>
   </Camera>
   <Camera make="SONY" model="NEX-7" supported="yes">
