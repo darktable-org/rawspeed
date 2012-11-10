@@ -30,6 +30,7 @@ namespace RawSpeed {
 
 OrfDecoder::OrfDecoder(TiffIFD *rootIFD, FileMap* file):
     RawDecoder(file), mRootIFD(rootIFD) {
+      decoderVersion = 2;
 }
 
 OrfDecoder::~OrfDecoder(void) {
@@ -61,6 +62,7 @@ RawImage OrfDecoder::decodeRawInternal() {
   }
   uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
   uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
+  uint32 bps = raw->getEntry(BITSPERSAMPLE)->getInt();
 
   if (!mFile->isValid(offsets->getInt() + counts->getInt()))
     ThrowRDE("ORF Decoder: Truncated file");
@@ -91,6 +93,11 @@ RawImage OrfDecoder::decodeRawInternal() {
 
   // We add 3 bytes slack, since the bitpump might be a few bytes ahead.
   ByteStream s(mFile->getData(offsets->getInt()), counts->getInt() + 3);
+
+  if ((hints.find(string("force_uncompressed")) != hints.end())) {
+    readUncompressedRaw(ByteStream(mFile->getData(offsets->getInt()), counts->getInt() + 3), iPoint2D(width, height),iPoint2D(0,0),width*bps/8,bps, BitOrder_Jpeg32);
+    return mRaw;
+  }
 
   try {
     decodeCompressed(s, width, height);
