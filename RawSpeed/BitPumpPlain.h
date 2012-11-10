@@ -41,7 +41,7 @@ public:
 	uint32 peekBit() throw ();
   uint32 peekByte() throw ();
   void skipBits(uint32 nbits);
-	uchar8 getByte();
+	uchar8 getByte() throw();
 	uchar8 getByteSafe();
 	void setAbsoluteOffset(uint32 offset);
   uint32 getOffset() { return off>>3;}

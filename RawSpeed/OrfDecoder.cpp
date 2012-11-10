@@ -95,7 +95,9 @@ RawImage OrfDecoder::decodeRawInternal() {
   ByteStream s(mFile->getData(offsets->getInt()), counts->getInt() + 3);
 
   if ((hints.find(string("force_uncompressed")) != hints.end())) {
-    readUncompressedRaw(ByteStream(mFile->getData(offsets->getInt()), counts->getInt() + 3), iPoint2D(width, height),iPoint2D(0,0),width*bps/8,bps, BitOrder_Jpeg32);
+    ByteStream in(mFile->getData(offsets->getInt()), counts->getInt() + 3);
+    iPoint2D size(width, height),pos(0,0);
+    readUncompressedRaw(in, size, pos, width*bps/8,bps, BitOrder_Jpeg32);
     return mRaw;
   }
 
