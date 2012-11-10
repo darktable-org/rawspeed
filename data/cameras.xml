@@ -716,8 +716,8 @@
   </Camera>	
   <Camera make="Canon" model="Canon PowerShot SX50 HS">
     <CFA width="2" height="2">
-      <Color x="0" y="0">GREEN</Color><Color x="1" y="0">BLUE</Color>
-      <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
+      <Color x="0" y="0">RED</Color><Color x="1" y="0">GREEN</Color>
+      <Color x="0" y="1">GREEN</Color><Color x="1" y="1">BLUE</Color>
     </CFA>
     <Crop x="100" y="20" width="-10" height="0"/>
     <Sensor black="127" white="4095"/>
@@ -1656,7 +1656,10 @@
       <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="-194" height="0"/>
-    <Sensor black="0" white="4097"/>
+    <Sensor black="155" white="4095"/>
+    <Sensor black="165" white="4095" iso_list="6400"/>
+    <Sensor black="165" white="2900" iso_list="12800"/>
+    <Sensor black="170" white="1800" iso_list="25600"/>
   </Camera>
 	<!-- Default Guess -->
   <Camera make="Panasonic" model = "DMC-GH3">
@@ -1665,7 +1668,10 @@
       <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="-194" height="0"/>
-    <Sensor black="0" white="4097"/>
+    <Sensor black="155" white="4095"/>
+    <Sensor black="165" white="4095" iso_list="6400"/>
+    <Sensor black="165" white="2900" iso_list="12800"/>
+    <Sensor black="170" white="1800" iso_list="25600"/>
   </Camera>
 	
   <Camera make="Panasonic" model = "DMC-GF1">
