@@ -50,6 +50,7 @@ public:
   iPoint2D getUncroppedDim();
   iPoint2D getCropOffset();
   virtual void scaleBlackWhite() = 0;
+  virtual void calculateBlackAreas() = 0;
   bool isAllocated() {return !!data;}
   iPoint2D dim;
   uint32 pitch;
@@ -72,7 +73,6 @@ protected:
   RawImageType dataType;
   RawImageData(void);
   RawImageData(iPoint2D dim, uint32 bpp, uint32 cpp=1);
-  virtual void calculateBlackAreas() = 0;
   virtual void scaleValues(int start_y, int end_y) = 0;
   uint32 dataRefCount;
   uchar8* data;
@@ -88,9 +88,9 @@ class RawImageDataU16 : public RawImageData
 {
 public:
   virtual void scaleBlackWhite();
+  virtual void calculateBlackAreas();
 
 protected:
-  virtual void calculateBlackAreas();
   virtual void scaleValues(int start_y, int end_y);
   RawImageDataU16(void);
   RawImageDataU16(iPoint2D dim, uint32 cpp=1);
@@ -101,9 +101,9 @@ class RawImageDataFloat : public RawImageData
 {
 public:
   virtual void scaleBlackWhite();
+  virtual void calculateBlackAreas();
 
 protected:
-  virtual void calculateBlackAreas();
   virtual void scaleValues(int start_y, int end_y);
   RawImageDataFloat(void);
   RawImageDataFloat(iPoint2D dim, uint32 cpp=1);
