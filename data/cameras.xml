@@ -1662,6 +1662,7 @@
     </CFA>
     <Crop x="0" y="0" width="-128" height="-4"/>
     <Sensor black="150" white="4095"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="Panasonic" model = "DMC-FZ200" mode="4:3">
     <CFA width="2" height="2">
@@ -1790,7 +1791,8 @@
       <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="-44" height="0"/>
-    <Sensor black="0" white="4096"/>
+    <Sensor black="15" white="4096"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="Panasonic" model = "DMC-GF1" mode="4:3">
     <CFA width="2" height="2">
@@ -1798,7 +1800,8 @@
       <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="-44" height="0"/>
-    <Sensor black="0" white="4096"/>
+    <Sensor black="15" white="4096"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="Panasonic" model = "DMC-GF1" mode="16:9">
     <CFA width="2" height="2">
@@ -1806,7 +1809,8 @@
       <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="-44" height="0"/>
-    <Sensor black="0" white="4096"/>
+    <Sensor black="15" white="4096"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="Panasonic" model = "DMC-GF1" mode="3:2">
     <CFA width="2" height="2">
@@ -1814,7 +1818,8 @@
       <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="-44" height="0"/>
-    <Sensor black="0" white="4096"/>
+    <Sensor black="15" white="4096"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="Panasonic" model = "DMC-GF1" mode="1:1">
     <CFA width="2" height="2">
@@ -1822,7 +1827,8 @@
       <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="-44" height="0"/>
-    <Sensor black="0" white="4096"/>
+    <Sensor black="15" white="4096"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="Panasonic" model = "DMC-GF2">
     <CFA width="2" height="2">
@@ -2107,7 +2113,8 @@
       <Color x="0" y="1">GREEN</Color><Color x="1" y="1">RED</Color>
     </CFA>
     <Crop x="0" y="0" width="-84" height="0"/>
-    <Sensor black="0" white="4095"/>
+    <Sensor black="15" white="4095"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="Panasonic" model = "DMC-LX3" mode="16:9">
     <CFA width="2" height="2">
@@ -2115,7 +2122,8 @@
       <Color x="0" y="1">GREEN</Color><Color x="1" y="1">RED</Color>
     </CFA>
     <Crop x="0" y="0" width="3990" height="2250"/>
-    <Sensor black="0" white="4095"/>
+    <Sensor black="15" white="4095"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="Panasonic" model = "DMC-LX3" mode="4:3">
     <CFA width="2" height="2">
@@ -2123,7 +2131,8 @@
       <Color x="0" y="1">GREEN</Color><Color x="1" y="1">RED</Color>
     </CFA>
     <Crop x="0" y="0" width="3666" height="2754"/>
-    <Sensor black="0" white="4095"/>
+    <Sensor black="15" white="4095"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="Panasonic" model = "DMC-LX3" mode="3:2">
     <CFA width="2" height="2">
@@ -2131,7 +2140,8 @@
       <Color x="0" y="1">GREEN</Color><Color x="1" y="1">RED</Color>
     </CFA>
     <Crop x="0" y="0" width="-44" height="0"/>
-    <Sensor black="0" white="4095"/>
+    <Sensor black="15" white="4095"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <!-- Leica D-Lux 4 is the same camera as LX-3 -->
   <Camera make="LEICA" model = "D-LUX 4">
@@ -2140,7 +2150,8 @@
       <Color x="0" y="1">GREEN</Color><Color x="1" y="1">RED</Color>
     </CFA>
     <Crop x="0" y="0" width="-84" height="0"/>
-    <Sensor black="0" white="4095"/>
+    <Sensor black="15" white="4095"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="LEICA" model = "D-LUX 4" mode="16:9">
     <CFA width="2" height="2">
@@ -2148,7 +2159,8 @@
       <Color x="0" y="1">GREEN</Color><Color x="1" y="1">RED</Color>
     </CFA>
     <Crop x="0" y="0" width="3990" height="2250"/>
-    <Sensor black="0" white="4095"/>
+    <Sensor black="15" white="4095"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="LEICA" model = "D-LUX 4" mode="4:3">
     <CFA width="2" height="2">
@@ -2156,7 +2168,8 @@
       <Color x="0" y="1">GREEN</Color><Color x="1" y="1">RED</Color>
     </CFA>
     <Crop x="0" y="0" width="3666" height="2754"/>
-    <Sensor black="0" white="4095"/>
+    <Sensor black="15" white="4095"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="LEICA" model = "D-LUX 4" mode="3:2">
     <CFA width="2" height="2">
@@ -2164,7 +2177,8 @@
       <Color x="0" y="1">GREEN</Color><Color x="1" y="1">RED</Color>
     </CFA>
     <Crop x="0" y="0" width="-44" height="0"/>
-    <Sensor black="0" white="4095"/>
+    <Sensor black="15" white="4095"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
 
   <Camera make="Panasonic" model = "DMC-LX5">
