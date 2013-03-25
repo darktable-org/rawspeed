@@ -102,38 +102,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
 }
 
 void Rw2Decoder::DecodeRw2() {
-  pthread_mutex_init(&zeroMutex, NULL);
   startThreads();
-  pthread_mutex_destroy(&zeroMutex);
-  // Interpolate over zeroes.
-  int pitch = (int)mRaw->pitch;
-
-  for (vector<uint32>::iterator i=zero_pos.begin(); i != zero_pos.end(); i++) {
-    uint32 pos = *i;
-    uint32 pos_x = pos&0xffff;
-    uint32 pos_y = pos>>16;
-    ushort16* pix = (ushort16*)mRaw->getData(pos_x, pos_y);
-    uint32 total = 0;
-    uint32 div = 0;
-    if (pos_x > 1 && 0 != pix[-2]) {
-      total += pix[-2];
-      div++;
-    }
-    if (pos_x < (uint32)mRaw->dim.x-2 && 0 != pix[2]) {
-      total += pix[2];
-      div++;
-    }
-    if (pos_y > 1 && 0 != pix[-pitch]) {
-      total += pix[-pitch];  // Note: 2 lines above, since pitch is in bytes and pix in shorts this cancels out.
-      div++;
-    }
-    if (pos_y < (uint32)mRaw->dim.y-2 && 0 != pix[mRaw->pitch]) {
-      total += pix[mRaw->pitch];  // Note: 2 lines below, since pitch is in bytes and pix in shorts this cancels out.
-      div++;
-    }
-    if (div)
-      pix[0] = total / div;
-  }
 }
 
 void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
@@ -204,10 +173,9 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
     }
   }
   if (zero_is_bad && !zero_pos.empty()) {
-    Rw2Decoder* rw2_dec = (Rw2Decoder*)t->parent;
-    pthread_mutex_lock(&zeroMutex);
-    rw2_dec->zero_pos.insert(rw2_dec->zero_pos.end(), zero_pos.begin(), zero_pos.end());
-    pthread_mutex_unlock(&zeroMutex);
+    pthread_mutex_lock(&mRaw->mBadPixelMutex);
+    mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(), zero_pos.begin(), zero_pos.end());
+    pthread_mutex_unlock(&mRaw->mBadPixelMutex);
   }
 }
 

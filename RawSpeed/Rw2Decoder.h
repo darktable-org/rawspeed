@@ -58,8 +58,6 @@ private:
   std::string guessMode();
   ByteStream* input_start;
   uint32 load_flags;
-  vector<uint32> zero_pos;    // Positions of zeroes that must be interpolated
-  pthread_mutex_t zeroMutex;   // Mutex for above
 };
 
 } // namespace RawSpeed

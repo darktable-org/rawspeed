@@ -27,6 +27,7 @@ namespace RawSpeed {
 	RawDecoder::RawDecoder(FileMap* file) : mRaw(RawImage::create()), mFile(file) {
   decoderVersion = 0;
   failOnUnknown = FALSE;
+  interpolateBadPixels = TRUE;
 }
 
 RawDecoder::~RawDecoder(void) {
@@ -261,7 +262,7 @@ void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model, st
 void *RawDecoderDecodeThread(void *_this) {
   RawDecoderThread* me = (RawDecoderThread*)_this;
   try {
-    me->parent->decodeThreaded(me);
+      me->parent->decodeThreaded(me);
   } catch (RawDecoderException &ex) {
     me->parent->mRaw->setError(ex.what());
   } catch (IOException &ex) {
@@ -310,7 +311,10 @@ void RawDecoder::decodeThreaded(RawDecoderThread * t) {
 RawSpeed::RawImage RawDecoder::decodeRaw()
 {
   try {
-    return decodeRawInternal();
+    RawImage raw = decodeRawInternal();
+    if (interpolateBadPixels)
+      raw->fixBadPixels();
+    return raw;
   } catch (TiffParserException &e) {
     ThrowRDE("%s", e.what());
   } catch (FileIOException &e) {
