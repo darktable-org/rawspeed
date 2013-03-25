@@ -1645,7 +1645,8 @@
       <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="-128" height="0"/>
-    <Sensor black="0" white="4095"/>
+    <Sensor black="15" white="4095"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="Panasonic" model = "DMC-FZ150" mode="4:3">
     <CFA width="2" height="2">
@@ -1653,7 +1654,8 @@
       <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
     </CFA>
     <Crop x="0" y="0" width="-128" height="0"/>
-    <Sensor black="0" white="4095"/>
+    <Sensor black="15" white="4095"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="Panasonic" model = "DMC-FZ200">
     <CFA width="2" height="2">
@@ -1962,6 +1964,7 @@
     </CFA>
     <Crop x="0" y="0" width="-216" height="0"/>
     <Sensor black="0" white="4096"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="Panasonic" model = "DMC-GH2" mode="16:9">
     <CFA width="2" height="2">
@@ -1970,6 +1973,7 @@
     </CFA>
     <Crop x="0" y="0" width="-216" height="0"/>
     <Sensor black="0" white="4096"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="Panasonic" model = "DMC-GH2" mode="4:3">
     <CFA width="2" height="2">
@@ -1978,6 +1982,7 @@
     </CFA>
     <Crop x="0" y="0" width="-140" height="0"/>
     <Sensor black="0" white="4096"/>
+    <Hints><Hint name="zero_is_bad" value=""/></Hints>
   </Camera>
   <Camera make="Panasonic" model = "DMC-GH1" mode="16:9">
     <CFA width="2" height="2">
