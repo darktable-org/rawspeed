@@ -97,6 +97,10 @@ public:
   /* If you disable this parameter, no bad pixel interpolation will be done */
   bool interpolateBadPixels;
 
+  /* Apply stage 1 DNG opcodes. */
+  /* This usually maps out bad pixels, etc */
+  bool applyStage1DngOpcodes;
+
 protected:
   /* Attempt to decode the image */
   /* A RawDecoderException will be thrown if the image cannot be decoded, */

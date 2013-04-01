@@ -28,6 +28,7 @@ namespace RawSpeed {
   decoderVersion = 0;
   failOnUnknown = FALSE;
   interpolateBadPixels = TRUE;
+  applyStage1DngOpcodes = TRUE;
 }
 
 RawDecoder::~RawDecoder(void) {
