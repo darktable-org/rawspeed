@@ -135,12 +135,14 @@ RawImage& OpcodeFixBadPixelsConstant::createOutput( RawImage &in )
 
 void OpcodeFixBadPixelsConstant::apply( RawImage &in, RawImage &out, int startY, int endY )
 {
+  iPoint2D crop = in->getCropOffset();
+  uint32 offset = crop.x | (crop.y << 16);
   vector<uint32> bad_pos;
   for (int y = startY; y < endY; y ++) {
     ushort16* src = (ushort16*)out->getData(0, y);
     for (int x = 0; x < in->dim.x; x++) {
       if (src[x]== mValue) {
-        bad_pos.push_back(((uint32)x | (uint32)y<<16));
+        bad_pos.push_back(offset + ((uint32)x | (uint32)y<<16));
       }
     }
   }
@@ -192,7 +194,12 @@ OpcodeFixBadPixelsList::OpcodeFixBadPixelsList( const uchar8* parameters, int pa
 
 void OpcodeFixBadPixelsList::apply( RawImage &in, RawImage &out, int startY, int endY )
 {
-  out->mBadPixelPositions.insert(out->mBadPixelPositions.end(), bad_pos.begin(), bad_pos.end());
+  iPoint2D crop = in->getCropOffset();
+  uint32 offset = crop.x | (crop.y << 16);
+  for (vector<uint32>::iterator i=bad_pos.begin(); i != bad_pos.end(); i++) {
+    uint32 pos = offset + (*i);
+    out->mBadPixelPositions.push_back(pos);
+  }
 }
 
  /***************** OpcodeTrimBounds   ****************/
