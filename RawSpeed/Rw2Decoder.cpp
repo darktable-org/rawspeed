@@ -55,7 +55,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
   uint32 width = raw->getEntry((TiffTag)2)->getShort();
 
   if (isOldPanasonic) {
-    ThrowRDE("Cannot decoder old-style Panasonic RAW files");
+    ThrowRDE("Cannot decode old-style Panasonic RAW files");
     TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
     TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
 
