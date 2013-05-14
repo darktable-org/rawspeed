@@ -62,6 +62,24 @@
 ]>
 
 <Cameras>
+	<Camera make="Canon" model="Canon EOS 100D">
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="72" y="52" width="0" height="0"/>
+		<Sensor black="0" white="16383"/>
+		<BlackAreas>
+			<Vertical x="0" width="72"/>
+			<Horizontal y="8" height="44"/>
+		</BlackAreas>
+		<Aliases>
+			<Alias>Canon EOS REBEL SL1</Alias>
+			<Alias>Canon EOS Kiss X7</Alias>
+		</Aliases>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS 20D">
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -2922,6 +2940,16 @@
 			<Hint name="msb_override" value="false"/>
 		</Hints>    
 	</Camera>  
+	<Camera make="SAMSUNG" model="NX300" supported="no">
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="4095"/>
+	</Camera>  
 	<Camera make="SAMSUNG" model="NX5">
 		<CFA width="2" height="2">
 			<Color x="0" y="0">BLUE</Color>
@@ -3254,6 +3282,16 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="520" white="16596"/>
+	</Camera>
+	<Camera make="SONY" model="SLT-A58">
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-36" height="0"/>
 		<Sensor black="520" white="16596"/>
 	</Camera>
 	<Camera make="SONY" model="SLT-A65V">
