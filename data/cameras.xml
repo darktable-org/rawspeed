@@ -373,7 +373,7 @@
 		</BlackAreas>
 	</Camera>
 	<!---Guess -->
-	<Camera make="Canon" model="Canon EOS 6D" mode="sRaw1">
+	<Camera make="Canon" model="Canon EOS 6D" mode="sRaw1" decoder_version="3">
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="48664"/>
 		<Hints>
