@@ -3002,7 +3002,7 @@
 			<Hint name="msb_override" value="false"/>
 		</Hints>    
 	</Camera>  
-	<Camera make="SAMSUNG" model="NX300" supported="yes">
+	<Camera make="SAMSUNG" model="NX300" supported="no">
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
 			<Color x="1" y="0">GREEN</Color>
