@@ -40,7 +40,7 @@ public:
   virtual void decodeMetaDataInternal(CameraMetaData *meta);
   virtual void checkSupportInternal(CameraMetaData *meta);
 private:
-  void SrwDecoder::decodeCompressed( TiffIFD* raw);
+  void decodeCompressed( TiffIFD* raw);
   TiffIFD *mRootIFD;
 };
 
