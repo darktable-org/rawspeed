@@ -3338,7 +3338,8 @@
 		</CFA>
 		<Crop x="0" y="0" width="-10" height="0"/>
 		<Sensor black="520" white="16596"/>
-	</Camera>  	<Camera make="SONY" model="NEX-5" supported="yes">
+	</Camera>
+	<Camera make="SONY" model="NEX-5" supported="yes">
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
 			<Color x="1" y="0">GREEN</Color>
