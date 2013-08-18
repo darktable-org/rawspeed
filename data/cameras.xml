@@ -653,7 +653,9 @@
 		<Sensor black="120" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="10"/>
+			<Vertical x="3696" width="48"/>
 			<Horizontal y="0" height="14"/>
+			<Horizontal y="2778" height="6"/>
 		</BlackAreas>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G10">
