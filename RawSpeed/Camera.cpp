@@ -100,21 +100,19 @@ Camera::~Camera(void) {
 }
 
 void Camera::parseCameraChild(xmlDocPtr doc, xmlNodePtr cur) {
-  if (!xmlStrcmp(cur->name, (const xmlChar *) "CFA")) {
-    if (2 != getAttributeAsInt(cur, cur->name, "width"))
-      ThrowCME("Unsupported CFA size in camera %s %s", make.c_str(), model.c_str());
-    if (2 != getAttributeAsInt(cur, cur->name, "height"))
-      ThrowCME("Unsupported CFA size in camera %s %s", make.c_str(), model.c_str());
 
-    cur = cur->xmlChildrenNode;
-    while (cur != NULL) {
-      parseCFA(doc, cur);
-      cur = cur->next;
+  if (!xmlStrcmp(cur->name, (const xmlChar *) "CFA")) {    
+    if (2 != getAttributeAsInt(cur, cur->name, "width") || 2 != getAttributeAsInt(cur, cur->name, "height")) {
+      supported = FALSE;
+    } else {
+      cur = cur->xmlChildrenNode;
+      while (cur != NULL) {
+        parseCFA(doc, cur);
+        cur = cur->next;
+      }
     }
-
     return;
   }
-
   if (!xmlStrcmp(cur->name, (const xmlChar *) "Crop")) {
     cropPos.x = getAttributeAsInt(cur, cur->name, "x");
     cropPos.y = getAttributeAsInt(cur, cur->name, "y");
