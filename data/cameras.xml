@@ -3616,9 +3616,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="-28" height="0"/>
 		<Sensor black="520" white="16596"/>
-		<BlackAreas>
-			<Vertical x="6032" width="14"/>
-		</BlackAreas>
 	</Camera>
 	<Camera make="Sinar Photography AG" model="Sinar Hy6/ Sinarback eXact" mode="dng">
 		<CFA width="2" height="2">
