@@ -1809,7 +1809,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-128" height="0"/>
-		<Sensor black="15" white="4095"/>
+		<Sensor black="15" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -1822,7 +1822,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-128" height="0"/>
-		<Sensor black="15" white="4095"/>
+		<Sensor black="15" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -1835,7 +1835,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-128" height="-4"/>
-		<Sensor black="150" white="4095"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -1848,7 +1848,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-128" height="-4"/>
-		<Sensor black="150" white="4095"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -1913,7 +1913,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-44" height="0" />
-		<Sensor black="0" white="5300"/>
+		<Sensor black="0" white="3900"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -1927,7 +1927,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-44" height="0" />
-		<Sensor black="0" white="5300"/>
+		<Sensor black="0" white="3900"/>
 	</Camera>
 	<Camera make="Panasonic" model = "DMC-G10">
 		<CFA width="2" height="2">
@@ -1937,7 +1937,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-44" height="0" />
-		<Sensor black="0" white="4800"/>
+		<Sensor black="0" white="3900"/>
 	</Camera>
 	<Camera make="Panasonic" model = "DMC-G10" mode="4:3">
 		<CFA width="2" height="2">
@@ -1947,7 +1947,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-44" height="0" />
-		<Sensor black="0" white="4800"/>
+		<Sensor black="0" white="3900"/>
 	</Camera>
 	<Camera make="Panasonic" model = "DMC-GH1" mode="4:3">
 		<CFA width="2" height="2">
@@ -1957,7 +1957,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-44" height="0"/>
-		<Sensor black="0" white="5111"/>
+		<Sensor black="0" white="3986"/>
 	</Camera>
 	<Camera make="Panasonic" model = "DMC-GH1">
 		<!-- Default Guess -->
@@ -1968,7 +1968,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-44" height="0"/>
-		<Sensor black="0" white="5111"/>
+		<Sensor black="0" white="3986"/>
 	</Camera>
 	<Camera make="Panasonic" model = "DMC-GH3" mode="4:3">
 		<CFA width="2" height="2">
@@ -1978,10 +1978,8 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-192" height="0"/>
-		<Sensor black="155" white="4095"/>
-		<Sensor black="165" white="4095" iso_list="6400"/>
-		<Sensor black="165" white="2900" iso_list="12800"/>
-		<Sensor black="170" white="1800" iso_list="25600"/>
+		<Sensor black="155" white="3956"/>
+		<Sensor black="165" white="3941" iso_min="6400"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -1994,10 +1992,8 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-192" height="0"/>
-		<Sensor black="155" white="4095"/>
-		<Sensor black="165" white="4095" iso_list="6400"/>
-		<Sensor black="165" white="2900" iso_list="12800"/>
-		<Sensor black="170" white="1800" iso_list="25600"/>
+		<Sensor black="155" white="3956"/>
+		<Sensor black="165" white="3941" iso_min="6400"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2010,10 +2006,8 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-192" height="0"/>
-		<Sensor black="155" white="4095"/>
-		<Sensor black="165" white="4095" iso_list="6400"/>
-		<Sensor black="165" white="2900" iso_list="12800"/>
-		<Sensor black="170" white="1800" iso_list="25600"/>
+		<Sensor black="155" white="3956"/>
+		<Sensor black="165" white="3941" iso_min="6400"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2026,10 +2020,8 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="155" white="4095"/>
-		<Sensor black="165" white="4095" iso_list="6400"/>
-		<Sensor black="165" white="2900" iso_list="12800"/>
-		<Sensor black="170" white="1800" iso_list="25600"/>
+		<Sensor black="155" white="3956"/>
+		<Sensor black="165" white="3941" iso_min="6400"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2043,10 +2035,8 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-192" height="0"/>
-		<Sensor black="155" white="4095"/>
-		<Sensor black="165" white="4095" iso_list="6400"/>
-		<Sensor black="165" white="2900" iso_list="12800"/>
-		<Sensor black="170" white="1800" iso_list="25600"/>
+		<Sensor black="155" white="3956"/>
+		<Sensor black="165" white="3941" iso_min="6400"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2060,7 +2050,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-44" height="0"/>
-		<Sensor black="15" white="4096"/>
+		<Sensor black="15" white="3986"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2073,7 +2063,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-44" height="0"/>
-		<Sensor black="15" white="4096"/>
+		<Sensor black="15" white="3986"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2086,7 +2076,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-44" height="0"/>
-		<Sensor black="15" white="4096"/>
+		<Sensor black="15" white="3986"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2099,7 +2089,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-44" height="0"/>
-		<Sensor black="15" white="4096"/>
+		<Sensor black="15" white="3986"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2112,7 +2102,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-44" height="0"/>
-		<Sensor black="15" white="4096"/>
+		<Sensor black="15" white="3986"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2125,7 +2115,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-74" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2138,7 +2128,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-74" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2151,7 +2141,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-74" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2164,7 +2154,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-74" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2177,7 +2167,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-74" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 	</Camera>
 	<Camera make="Panasonic" model = "DMC-G3">
 		<CFA width="2" height="2">
@@ -2187,7 +2177,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-154" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2200,7 +2190,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-172" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2213,7 +2203,7 @@
 			<Color x="1" y="1">RED</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-194" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2226,7 +2216,7 @@
 			<Color x="1" y="1">RED</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-194" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2239,7 +2229,7 @@
 			<Color x="1" y="1">RED</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-194" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2252,7 +2242,7 @@
 			<Color x="1" y="1">RED</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-194" height="0"/>
-		<Sensor black="142" white="4095"/>
+		<Sensor black="142" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2265,7 +2255,7 @@
 			<Color x="1" y="1">RED</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-194" height="0"/>
-		<Sensor black="142" white="4095"/>
+		<Sensor black="142" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2278,7 +2268,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-72" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2291,7 +2281,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-72" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2304,7 +2294,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-128" height="0"/>
-		<Sensor black="150" white="4097"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2317,7 +2307,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-128" height="0"/>
-		<Sensor black="150" white="4097"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2330,7 +2320,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-208" height="0"/>
-		<Sensor black="150" white="4097"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2343,7 +2333,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-208" height="0"/>
-		<Sensor black="150" white="4097"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2356,7 +2346,7 @@
 			<Color x="0" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-216" height="0"/>
-		<Sensor black="15" white="4096"/>
+		<Sensor black="15" white="3800"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2369,7 +2359,7 @@
 			<Color x="0" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-136" height="0"/>
-		<Sensor black="15" white="4096"/>
+		<Sensor black="15" white="3800"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2382,7 +2372,7 @@
 			<Color x="0" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-216" height="0"/>
-		<Sensor black="15" white="4096"/>
+		<Sensor black="15" white="3800"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2395,7 +2385,7 @@
 			<Color x="0" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-216" height="0"/>
-		<Sensor black="15" white="4096"/>
+		<Sensor black="15" white="3800"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2408,7 +2398,7 @@
 			<Color x="0" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-168" height="0"/>
-		<Sensor black="15" white="4096"/>
+		<Sensor black="15" white="3800"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2421,7 +2411,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-28" height="0"/>
-		<Sensor black="0" white="5111"/>
+		<Sensor black="0" white="3986"/>
 	</Camera>
 	<Camera make="Panasonic" model = "DMC-FZ35" mode="4:3">
 		<CFA width="2" height="2">
@@ -2431,7 +2421,7 @@
 			<Color x="1" y="1">RED</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-44" height="0"/>
-		<Sensor black="150" white="4800"/>
+		<Sensor black="150" white="3986"/>
 		<Aliases>
 			<Alias>DMC-FZ38</Alias>
 		</Aliases>
@@ -2448,7 +2438,7 @@
 			<Color x="1" y="1">RED</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-44" height="0"/>
-		<Sensor black="150" white="4800"/>
+		<Sensor black="150" white="3986"/>
 		<Aliases>
 			<Alias>DMC-FZ38</Alias>
 		</Aliases>
@@ -2464,7 +2454,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-58" height="-10"/>
-		<Sensor black="150" white="4097"/>
+		<Sensor black="150" white="3986"/>
 		<Aliases>
 			<Alias>DMC-FZ40</Alias>
 		</Aliases>
@@ -2480,7 +2470,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-58" height="-10"/>
-		<Sensor black="150" white="4097"/>
+		<Sensor black="150" white="3986"/>
 		<Aliases>
 			<Alias>DMC-FZ40</Alias>
 		</Aliases>
@@ -2506,7 +2496,7 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-182" height="0"/>
-		<Sensor black="120" white="4097"/>
+		<Sensor black="120" white="3971"/>
 		<Aliases>
 			<Alias>DMC-FZ72</Alias>
 		</Aliases>
@@ -2522,7 +2512,7 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-182" height="0"/>
-		<Sensor black="120" white="4097"/>
+		<Sensor black="120" white="3971"/>
 		<Aliases>
 			<Alias>DMC-FZ72</Alias>
 		</Aliases>
@@ -2538,7 +2528,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-200" height="0"/>
-		<Sensor black="120" white="5400"/>
+		<Sensor black="120" white="3986"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2551,7 +2541,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-200" height="0"/>
-		<Sensor black="120" white="5400"/>
+		<Sensor black="120" white="3986"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2564,7 +2554,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-154" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2577,7 +2567,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-154" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2590,7 +2580,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-170" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2603,7 +2593,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-170" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2616,7 +2606,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-198" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2629,7 +2619,7 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-130" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2643,7 +2633,7 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-130" height="0"/>
-		<Sensor black="150" white="4096"/>
+		<Sensor black="150" white="3956"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2656,7 +2646,7 @@
 			<Color x="1" y="1">RED</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-84" height="0"/>
-		<Sensor black="15" white="4095"/>
+		<Sensor black="15" white="3971"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2669,7 +2659,7 @@
 			<Color x="1" y="1">RED</Color>
 		</CFA>
 		<Crop x="0" y="0" width="3990" height="2250"/>
-		<Sensor black="15" white="4095"/>
+		<Sensor black="15" white="3971"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2682,7 +2672,7 @@
 			<Color x="1" y="1">RED</Color>
 		</CFA>
 		<Crop x="0" y="0" width="3666" height="2754"/>
-		<Sensor black="15" white="4095"/>
+		<Sensor black="15" white="3971"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2695,7 +2685,7 @@
 			<Color x="1" y="1">RED</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-44" height="0"/>
-		<Sensor black="15" white="4095"/>
+		<Sensor black="15" white="3971"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2709,7 +2699,7 @@
 			<Color x="1" y="1">RED</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-84" height="0"/>
-		<Sensor black="15" white="4095"/>
+		<Sensor black="15" white="3971"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2722,7 +2712,7 @@
 			<Color x="1" y="1">RED</Color>
 		</CFA>
 		<Crop x="0" y="0" width="3990" height="2250"/>
-		<Sensor black="15" white="4095"/>
+		<Sensor black="15" white="3971"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2735,7 +2725,7 @@
 			<Color x="1" y="1">RED</Color>
 		</CFA>
 		<Crop x="0" y="0" width="3666" height="2754"/>
-		<Sensor black="15" white="4095"/>
+		<Sensor black="15" white="3971"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2748,7 +2738,7 @@
 			<Color x="1" y="1">RED</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-44" height="0"/>
-		<Sensor black="15" white="4095"/>
+		<Sensor black="15" white="3971"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2762,7 +2752,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-200" height="-4"/>
-		<Sensor black="150" white="4095"/>
+		<Sensor black="150" white="3986"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2775,7 +2765,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-200" height="-4"/>
-		<Sensor black="150" white="4095"/>
+		<Sensor black="150" white="3986"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2788,7 +2778,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-74" height="-4"/>
-		<Sensor black="150" white="4095"/>
+		<Sensor black="150" white="3986"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2801,7 +2791,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-220" height="-4"/>
-		<Sensor black="150" white="4095"/>
+		<Sensor black="150" white="3986"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2816,7 +2806,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-200" height="-4"/>
-		<Sensor black="150" white="4095"/>
+		<Sensor black="150" white="3986"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2829,7 +2819,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-200" height="-4"/>
-		<Sensor black="150" white="4095"/>
+		<Sensor black="150" white="3986"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2842,7 +2832,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-74" height="-4"/>
-		<Sensor black="150" white="4095"/>
+		<Sensor black="150" white="3986"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2855,7 +2845,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-220" height="-4"/>
-		<Sensor black="150" white="4095"/>
+		<Sensor black="150" white="3986"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2868,7 +2858,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-34" height="0"/>
-		<Sensor black="150" white="4095"/>
+		<Sensor black="150" white="3971"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2881,7 +2871,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-34" height="0"/>
-		<Sensor black="150" white="4095"/>
+		<Sensor black="150" white="3971"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2894,7 +2884,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-128" height="0"/>
-		<Sensor black="150" white="4095"/>
+		<Sensor black="150" white="3971"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2907,7 +2897,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-160" height="0"/>
-		<Sensor black="150" white="4095"/>
+		<Sensor black="150" white="3971"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -2920,7 +2910,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-48" height="0"/>
-		<Sensor black="150" white="4095"/>
+		<Sensor black="150" white="3971"/>
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
@@ -3586,7 +3576,7 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="520" white="16596"/>
+		<Sensor black="512" white="16596"/>
 	</Camera>
 	<Camera make="SONY" model="SLT-A58">
 		<CFA width="2" height="2">
