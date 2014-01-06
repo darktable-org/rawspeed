@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009 Klaus Post
@@ -31,7 +31,9 @@
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 
 // there's no <malloc.h> on OS X
-#if !defined(__APPLE__)
+#if !defined(__APPLE__) && !defined(__DragonFly__) &&			\
+    !defined(__FreeBSD__) && !defined(__NetBSD__) &&			\
+    !defined(__OpenBSD__)
 #include <malloc.h>
 #endif
 
@@ -39,9 +41,9 @@
 
 #ifdef __MINGW32__
 #include <stdlib.h>
-#endif    
+#endif
 
-#if !defined(__unix__) && !defined(__APPLE__) 
+#if !defined(__unix__) && !defined(__APPLE__)
 #include <tchar.h>
 #include <io.h>
 #include <windows.h>
@@ -52,7 +54,7 @@
 #include <stdexcept>
 #endif
 
-#else // !defined(__unix__) && !defined(__APPLE__) 
+#else // !defined(__unix__) && !defined(__APPLE__)
 
 #ifdef _XOPEN_SOURCE
 #if (_XOPEN_SOURCE < 600)
