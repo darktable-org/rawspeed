@@ -1,6 +1,3 @@
-rawspeed
-========
-
 #RawSpeed Developer Information
 
 ##What is RawSpeed?
