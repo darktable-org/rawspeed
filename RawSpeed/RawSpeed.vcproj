@@ -61,10 +61,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib $(NoInherit) User32.lib pthreadVC2.lib iconv.lib libxml2.lib turbojpeg-static.lib"
+				AdditionalDependencies="kernel32.lib $(NoInherit) User32.lib pthreadVC2.lib turbojpeg-static.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\lib"
 				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames="libcmt.lib;msvcrtd.lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -149,7 +150,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib $(NoInherit) User32.lib pthreadVC2.lib iconv.lib libxml2.lib turbojpeg-static.lib"
+				AdditionalDependencies="kernel32.lib $(NoInherit) User32.lib pthreadVC2.lib turbojpeg-static.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\lib"
 				GenerateDebugInformation="true"
@@ -218,7 +219,7 @@
 				</FileConfiguration>
 			</File>
 			<Filter
-				Name="Tiff"
+				Name="Parsers"
 				>
 				<File
 					RelativePath=".\TiffEntry.cpp"
@@ -250,6 +251,10 @@
 				</File>
 				<File
 					RelativePath=".\TiffParserOlympus.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\X3fParser.cpp"
 					>
 				</File>
 			</Filter>
@@ -305,6 +310,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Common.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\DngOpcodes.cpp"
 					>
 				</File>
@@ -321,7 +330,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\FileWriter.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\IOException.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\pugixml.cpp"
 					>
 				</File>
 			</Filter>
@@ -353,6 +370,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\RafDecoder.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\RawDecoder.cpp"
 					>
 				</File>
@@ -370,6 +391,10 @@
 				</File>
 				<File
 					RelativePath=".\SrwDecoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\X3fDecoder.cpp"
 					>
 				</File>
 			</Filter>
@@ -424,14 +449,6 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\FileReader.h"
-				>
-			</File>
-			<File
-				RelativePath=".\RawImage.h"
-				>
-			</File>
-			<File
 				RelativePath=".\stdafx.h"
 				>
 			</File>
@@ -476,6 +493,14 @@
 				</File>
 				<File
 					RelativePath=".\FileMap.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileReader.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileWriter.h"
 					>
 				</File>
 				<File
@@ -543,6 +568,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\RafDecoder.h"
+					>
+				</File>
+				<File
 					RelativePath=".\RawDecoder.h"
 					>
 				</File>
@@ -560,6 +589,10 @@
 				</File>
 				<File
 					RelativePath=".\SrwDecoder.h"
+					>
+				</File>
+				<File
+					RelativePath=".\X3fDecoder.h"
 					>
 				</File>
 			</Filter>
@@ -592,7 +625,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Tiff"
+				Name="Parsers"
 				>
 				<File
 					RelativePath=".\TiffEntry.h"
@@ -628,6 +661,18 @@
 				</File>
 				<File
 					RelativePath=".\TiffTag.h"
+					>
+				</File>
+				<File
+					RelativePath=".\X3fParser.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="RawImage"
+				>
+				<File
+					RelativePath=".\RawImage.h"
 					>
 				</File>
 			</Filter>
