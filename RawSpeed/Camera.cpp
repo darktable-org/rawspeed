@@ -205,7 +205,6 @@ void Camera::parseCFA(xml_node &cur) {
       else 
         supported = FALSE;
     }
-    printf("Colors: %s\n", cfa.asString().c_str());
   }
   if (isTag(cur.name(), "Color")) {
     int x = cur.attribute("x").as_int(-1);
