@@ -38,10 +38,9 @@ void FileWriter::writeFile(FileMap* filemap, uint32 size) {
   if (size > filemap->getSize())
     size = filemap->getSize();
 #if defined(__unix__) || defined(__APPLE__) 
-  int bytes_written = 0;
+  size_t bytes_written = 0;
   FILE *file;
   char *src;
-  long size;
 
   file = fopen(mFilename, "wb");
   if (file == NULL)
@@ -51,7 +50,6 @@ void FileWriter::writeFile(FileMap* filemap, uint32 size) {
   bytes_written = fwrite(src, 1, size ? size : filemap->getSize(), file);
   fclose(file);
   if (size != bytes_written) {
-    delete fileData;
     throw FileIOException("Could not write file.");
   }
 
