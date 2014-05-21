@@ -130,9 +130,15 @@ void ColorFilterArray::shiftDown(int n) {
   delete[] tmp;
 }
 
-// FIXME:
 std::string ColorFilterArray::asString() {
-  return string("");
+  string dst = string("");
+  for (int y = 0; y < size.y; y++) {
+    for (int x = 0; x < size.x; x++) {
+      dst += colorToString(getColorAt(x,y));
+      dst += (x == size.x - 1) ? "\n" : ",";
+    }
+  }
+  return dst;
 }
 
 
