@@ -29,14 +29,13 @@ RawSpeed does NOT…
 So RawSpeed is not intended to be a complete RAW file display library,  but only act as the first stage decoding, delivering the RAW data to your application.
 
 
-
 ##Getting Source Code
 
-You can get access to the lastest version using subversion here. You will need to include the “RawSpeed” and “data” folder in your own project.
+You can get access to the lastest version using [from here](https://github.com/klauspost/rawspeed). You will need to include the “RawSpeed” and “data” folder in your own project.
 
-This includes a Microsoft Visual Studio project to build a test application. The test application uses libgfl to output 16 bit images. This library is not required for your own implementation though.
+This includes a Microsoft Visual Studio project to build a test application. The test application uses [libgfl](http://www.xnview.com/en/gfl.html) to output 16 bit images. This library is not required for your own implementation though.
 
-To see a GCC-based implementation, you can check out this directory, which is the implementation Rawstudio uses to load the images. This also includes an automake file to set up. You can also have a look at the darktable implementation, for which there is a Cmake based build file.
+To see a GCC-based implementation, you can check out [this directory](http://rawstudio.org/svn/rawstudio/trunk/plugins/load-rawspeed/), which is the implementation Rawstudio uses to load the images. This also includes an automake file to set up. You can also have a look at the [darktable implementation](https://github.com/darktable-org/darktable/blob/master/src/common/imageio_rawspeed.cc), for which there is a [Cmake based build file](https://github.com/darktable-org/darktable/tree/master/src/external/rawspeed).
 
 
 ##Background of RawSpeed
@@ -50,7 +49,7 @@ RawSpeed is not at the moment a separate library, so you have to include it in y
 
 All needed headers are available by including “RawSpeed-API.h”. You must have the pthread library and headers installed and available.
 
-RawSpeed uses pthreads and libxml2, which is the only external requirements beside standard C/C++ libraries.
+RawSpeed uses pthreads ~~and libxml2~~, which is the only external requirements beside standard C/C++ libraries. As of v2, libxml is no longer required.
 
 You must implement a single function: “int rawspeed_get_number_of_processor_cores();”, which should return the maximum number of threads that should be used for decoding, if multithreaded decoding is possible.
 
@@ -58,11 +57,11 @@ Everything is encapsulated on a “RawSpeed” namespace. To avoid clutter the e
 
 ##The Camera Definition file
 
-This file describes basic information about different cameras, so new cameras can be supported without code changes. See the separate documentation on the Camera Definition File.
+This file describes basic information about different cameras, so new cameras can be supported without code changes. See the separate documentation on the [Camera Definition File](README.md).
 
 The camera definitions are read into the CameraMetaData object, which you can retain for re-use later. You initialize this data by doing
 
-```
+```cpp
 static CameraMetaData *metadata = NULL;
 if (NULL == metadata)
 {
@@ -76,13 +75,21 @@ if (NULL == metadata)
 
 The memory impact of this object is quite small, so you don’t have to free it every time. You can however delete and re-create it, if you know the metadata file has been updated.
 
+You can disable specific cameras in the xml file, or if you would want to do it in code, you can use:
 
+```cpp
+    // Disable specific camera
+    metadata.disableCamera("Canon", "Canon EOS 100D")
+
+    // Disable all cameras from maker:
+    metadata.disableCamera("Fuji")
+```
 
 ##Using RawSpeed
 
 You need to have the file data in a FileMap object. This can either be created by supplying the file content in memory using FileMap(buffer_pointer, size_of_buffer), or use a “FileReader” object to read the content of a file, like this:
 
-```
+```cpp
 FileReader reader(filename);
 FileMap* map = NULL;
 try {
@@ -94,14 +101,14 @@ try {
 
 The next step is to start decoding. The first step is to get a decoder:
 
-```
+```cpp
 RawParser parser(map);
 RawDecoder *decoder = parser.getDecoder();
 ```
 
 This will do basic parsing of the file, and return a decoder that is capable of decoding the image. If no decoder can be found or another error occurs a “RawDecoderException” object will be thrown. The next step is to determine whether the specific camera is supported:
 
-```
+```cpp
 decoder->failOnUnknown = FALSE;
 decoder->checkSupport(metadata);
 ```
@@ -110,7 +117,7 @@ The “failOnUnknown” property will indicate whether the decoder should refuse
 
 Reaching this point should not take very long in terms of CPU time, so the support check is very quick, if file data is quickly available. Next we decode the image:
 
-```
+```cpp
 decoder->decodeRaw();
 decoder->decodeMetaData(metadata);
 RawImage raw = decoder->mRaw;
@@ -121,13 +128,13 @@ This will decode the image, and apply metadata information. The RawImage is at t
 Non-fatal errors are pushed into a "vector" array in the decoder object called "errors". With these types of errors, there WILL be a raw image available, but it will likely contain junk sections in undecodable parts. However, as much as it was possible to decode will be available. So treat these messages as warnings.
 Another thing to note here is that the RawImage object is automatically refcounted, so you can pass the object around  without worrying about the image being freed before all instances are out of scope.
 
-```
+```cpp
 raw->scaleBlackWhite();
 ```
 
 This will apply the black/white scaling to the image, so the data is normalized into the 0->65535 range no matter what the sensor adjustment is (for 16 bit images). This function does no throw any errors. Now you can retrieve information about the image:
 
-```
+```cpp
 int components_per_pixel = raw->getCpp();
 RawImageType type = raw->getDataType();
 bool is_cfa = r->isCFA;
@@ -143,7 +150,7 @@ The isCFA indicates whether the image has all components per pixel, or if it was
 
 The ColorfilterArray contains information about the placement of colors in the CFA:
 
-```
+```cpp
 int dcraw_filter = raw->cfa.getDcrawFilter();
 CFAColor c = raw->cfa.getColorAt(0,0);
 ```
@@ -154,7 +161,7 @@ You can also use getColorAt(x, y) to get a single color information. Note that u
 
 Finally information about the image itself:
 
-```
+```cpp
 unsigned char* data = raw->getData(0,0);
 int width = raw->dim.x;
 int height = raw->dim.y;
@@ -167,7 +174,7 @@ Pitch is the number of bytes between lines, since this is usually NOT width * co
 
 Finally to clean up, use:
 
-```
+```cpp
 delete map;
 delete decoder;
 ```
@@ -190,19 +197,19 @@ A few cameras will mark bad pixels within their RAW files in various ways. For t
 
 If you want to do bad pixel interpolation yourself you can set:
 
-```
+```cpp
 RawDecoder.interpolateBadPixels = FALSE;
 ```
 
 Before calling the decoder. This will disable the automatic interpolation of bad pixels. You can retrieve the bad pixels by using:
 
-```
+```cpp
 std::vector<uint32> RawImage->mBadPixelPositions;
 ```
 
 This is a vector that contains the positions of the detected bad pixels in the image. The positions are stored as x | (y << 16), so maximum pixel position is 65535, which also corresponds with the limit of the image sizes within RawSpeed. you can loop through all bad pixels with a loop like this:
 
-```
+```cpp
 for (vector<uint32>::iterator i=mBadPixelPositions.begin(); i != mBadPixelPositions.end(); i++)  {
     uint32 pos_x = (*i)&0xffff;
     uint32 pos_y = (*i)>>16;
@@ -212,7 +219,7 @@ for (vector<uint32>::iterator i=mBadPixelPositions.begin(); i != mBadPixelPositi
 
 This however may not be most optimal format for you. You can also call RawImage->transferBadPixelsToMap(). This will create a bit-mask for you with all bad pixels. Each byte correspond to 8 pixels with the least significant bit for the leftmost pixel. To set position x,y this operation is used:
 
-```
+```cpp
 RawImage->mBadPixelMap[(x >> 8) + y * mBadPixelMapPitch] |=  1 << (x & 7);
 ```
 
@@ -246,4 +253,4 @@ RawSpeed will need:
 
 ##Submitting Requests and Patches
 
-Please go to the Rawstudio Bugzilla and submit your requests there.
+Please go to the [github page](https://github.com/klauspost/rawspeed) and submit your (pull) requests and issues there.
