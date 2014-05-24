@@ -57,7 +57,7 @@ Everything is encapsulated on a “RawSpeed” namespace. To avoid clutter the e
 
 ##The Camera Definition file
 
-This file describes basic information about different cameras, so new cameras can be supported without code changes. See the separate documentation on the [Camera Definition File](README.md).
+This file describes basic information about different cameras, so new cameras can be supported without code changes. See the separate documentation on the [Camera Definition File](cameras-xml.md).
 
 The camera definitions are read into the CameraMetaData object, which you can retain for re-use later. You initialize this data by doing
 
@@ -253,4 +253,4 @@ RawSpeed will need:
 
 ##Submitting Requests and Patches
 
-Please go to the [github page](https://github.com/klauspost/rawspeed) and submit your (pull) requests and issues there.
+Please go to the [github page](https://github.com/klauspost/rawspeed) and submit your (pull)requests and issues there.

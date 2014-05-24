@@ -48,7 +48,7 @@ The decoder_version is a possibility to disable decoding, if the decoder version
 
 This refers to the color layout of the sensor. This is the position at of the colors on the uncropped image, so it will be the same no matter what crop you specify. Currently only 2×2 CFA patterns are possible.
 
-From version 2, there is an alternative syntax; *CFA2*. This definition allows for sizes other than 2x2 and has a simpler syntax:
+From version 2, there is an alternative syntax; *CFA2*. This definition allows for sizes *bigger than 2x2* and has a simpler syntax:
 
 ```xml
 	<CFA2 width="2" height="2">
