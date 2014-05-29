@@ -3669,7 +3669,7 @@
 			<Vertical x="6032" width="14"/>
 		</BlackAreas>
 	</Camera>
-	<Camera make="SONY" model="DSLR-A100">
+	<Camera make="SONY" model="DSLR-A100" decoder_version="1">
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
 			<Color x="1" y="0">RED</Color>
