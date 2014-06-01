@@ -358,6 +358,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\MrwDecoder.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\NefDecoder.cpp"
 					>
 				</File>
@@ -553,6 +557,10 @@
 				</File>
 				<File
 					RelativePath=".\DngDecoder.h"
+					>
+				</File>
+				<File
+					RelativePath=".\MrwDecoder.h"
 					>
 				</File>
 				<File
