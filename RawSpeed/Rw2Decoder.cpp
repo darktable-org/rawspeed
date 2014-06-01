@@ -113,10 +113,16 @@ void Rw2Decoder::DecodePanasonicPackedRaw(ByteStream &input, uint32 w, uint32 h)
   uchar8* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
   const uchar8 *in = input.getData();
-  if (input.getRemainSize() < ((w*12/8)*h)) {
-    if ((uint32)input.getRemainSize() > (w*12/8))
-      h = input.getRemainSize() / (w*12/8) - 1;
-    else
+  // Calulate expected bytes per line.
+  uint32 perline = (w*12/8);
+  // Add skips every 10 pixels
+  perline += ((w + 2) / 10);
+  // If file is too short, only decode as many lines as we have
+  if (input.getRemainSize() < (perline*h)) {
+    if ((uint32)input.getRemainSize() > perline) {
+//      _RPT2(0, "Truncated : %u to %u", h, input.getRemainSize() / perline - 1);
+      h = input.getRemainSize() / perline - 1;
+    } else
       ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. Image file truncated.");
   }
   uint32 x;
