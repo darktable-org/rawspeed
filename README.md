@@ -14,7 +14,7 @@ RawSpeed…
 - can add support for new cameras by adding definitions to an xml file.
 - is extensively crash-tested on broken files.
 - decodes images from memory, not a file stream. You can use a memory mapped file, but it is rarely faster.
-- is currently tested on more than 150 unique cameras.
+- is currently tested on more than 250 unique cameras.
 - can add support for new cameras by updating an xml file.
 - open source under the LGPL v2 license.
 
