@@ -100,6 +100,9 @@ void ColorFilterArray::setCFA( iPoint2D in_size, ... )
 }
 
 void ColorFilterArray::shiftLeft(int n) {
+  if (!size.x) {
+    ThrowRDE("ColorFilterArray:shiftLeft: No CFA size set (or set to zero)");
+  }
   writeLog(DEBUG_PRIO_EXTRA, "Shift left:%d\n", n);
   int shift = n % size.x;
   if (0 == shift)
@@ -115,6 +118,9 @@ void ColorFilterArray::shiftLeft(int n) {
 }
 
 void ColorFilterArray::shiftDown(int n) {
+  if (!size.y) {
+    ThrowRDE("ColorFilterArray:shiftDown: No CFA size set (or set to zero)");
+  }
   writeLog(DEBUG_PRIO_EXTRA, "Shift down:%d\n", n);
   int shift = n % size.y;
   if (0 == shift)
