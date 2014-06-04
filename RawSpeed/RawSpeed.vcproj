@@ -222,6 +222,10 @@
 				Name="Parsers"
 				>
 				<File
+					RelativePath=".\RawParser.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\TiffEntry.cpp"
 					>
 				</File>
@@ -383,10 +387,6 @@
 				</File>
 				<File
 					RelativePath=".\RawDecoderException.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\RawParser.cpp"
 					>
 				</File>
 				<File
@@ -588,10 +588,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\RawParser.h"
-					>
-				</File>
-				<File
 					RelativePath=".\Rw2Decoder.h"
 					>
 				</File>
@@ -635,6 +631,10 @@
 			<Filter
 				Name="Parsers"
 				>
+				<File
+					RelativePath=".\RawParser.h"
+					>
+				</File>
 				<File
 					RelativePath=".\TiffEntry.h"
 					>
