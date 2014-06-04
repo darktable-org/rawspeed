@@ -2773,16 +2773,6 @@
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
 	</Camera>
-	<Camera make="Panasonic" model = "DMC-FZ50" mode = "4:3" decoder_version = "1">
-		<CFA width="2" height="2">
-			<Color x="0" y="0">BLUE</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">RED</Color>
-		</CFA>
-		<Crop x="20" y="18" width="-86" height="-28"/>
-		<Sensor black="0" white="65535"/>
-	</Camera>
 	<Camera make="Panasonic" model = "DMC-FZ70">
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
