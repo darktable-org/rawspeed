@@ -47,7 +47,6 @@ ColorFilterArray::ColorFilterArray( const ColorFilterArray& other )
 
 ColorFilterArray& ColorFilterArray::operator=(const ColorFilterArray& other ) 
 {
-  cfa = NULL;
   setSize(other.size);
   if (cfa)
     memcpy(cfa, other.cfa, size.area()*sizeof(CFAColor));
