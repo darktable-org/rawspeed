@@ -539,10 +539,6 @@
 					RelativePath=".\PentaxDecompressor.h"
 					>
 				</File>
-				<File
-					RelativePath=".\rawstudio-plugin-api.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="Decoders"
