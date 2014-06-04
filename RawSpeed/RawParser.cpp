@@ -136,7 +136,7 @@ RawDecoder* RawParser::getDecoder() {
 
   // TIFF image could not be decoded, so no further options for now.
 
-  throw RawDecoderException("No decoder found. Sorry.");
+  ThrowRDE("No decoder found. Sorry.");
   return NULL;
 }
 
