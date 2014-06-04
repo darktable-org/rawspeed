@@ -178,7 +178,6 @@ void TiffParser::MergeIFD( TiffParser* other_tiff)
   }
   other_root->mSubIFD.clear();
   other_root->mEntry.clear();
-  other_tiff->mRootIFD = NULL;
 }
 
 } // namespace RawSpeed
