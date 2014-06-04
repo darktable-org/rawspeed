@@ -94,6 +94,7 @@ void PentaxDecompressor::decodePentax(TiffIFD *root, uint32 offset, uint32 size)
         dctbl1->huffval[i] = sm_num;
         v2[sm_num]=0xffffffff;
       }
+      delete(stream);
     } else {
       ThrowRDE("PentaxDecompressor: Unknown Huffman table type.");
     }
