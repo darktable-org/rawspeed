@@ -28,6 +28,13 @@ RawSpeed does NOT…
 
 So RawSpeed is not intended to be a complete RAW file display library,  but only act as the first stage decoding, delivering the RAW data to your application.
 
+##Version 2, new cameras and features
+- Support for Sigma foveon cameras.
+- Support for Fuji cameras.
+- Support old Minolta, Panasonic, Sony cameras (contributed by Pedro Côrte-Real)
+- Arbitrary CFA definition sizes.
+- Use [pugixml](http://pugixml.org/) for xml parsing to avoid depending on libxml.
+
 
 ##Getting Source Code
 
@@ -238,8 +245,38 @@ That means you should safely be able to update cameras.xml to a newer version, a
 
 ##Format Specific Notes
 
+###Canon sRaw/mRaw
 Canon reduced resolution Raws (mRaw/sRaw) are returned as RGB with 3 component per pixel without whitebalance compensation, so color balance should match ordinary CR2 images. The subsampled color components are linearly interpolated.
 
+This is even more complicated by the fact that Canon has changed the way they store the sraw whitebalance values. This means that on newer cameras, you might have to specify "invert_sraw_wb" as a hint to properly decode the whitebalance on these casmeras. To see examples of this, search cameras.xml for "invert_sraw_wb".
+
+###Sigma Foveon Support
+
+Sigma Foveon (x3f-based) images are delivered as raw image values. dcraw offers a "cleanup" function, that will reduce noise in Foveon images. RawSpeed does not have an equivalent function, so if you want to use RawSpeed as a drop-in replacement, you will either have to convert the dcraw "foveon_interpolate", or implement similar noise reduction, if you want it.
+
+###Fuji Rotated Support
+
+By default RawSpeed delivers Fuji SuperCCD images as 45 degree rotated images.
+
+RawSpeed does however use two camera hints to do this. The first hint is "fuji_rotate": When this is specified in cameras.xml, the images are rotated.
+
+To check if an image has been rotated, check RawImage->fujiWidth after calling RawDecoder->decodeMetaData(...) If it is > 0, then the image has been rotated, and you can use this value to calculate the un-rotated image size. See [here](https://rawstudio.org/svn/rawstudio/trunk/plugins/fuji-rotate/fuji-rotate.c) for an example on how to rotate the image back after de-mosaic.
+
+If you do NOT want your images to be delivered rotated, you can disable it when decoding.
+```cpp
+RawDecoder->fujiRotate = FALSE";
+```
+Do however note the CFA colors are still referring to the rotated color positions.
+
+
+##Other options
+
+###RawDecoder -> uncorrectedRawValues
+If you enable this on the decoder before calling RawDecoder->decodeRaw(), you will get complely unscaled values. Some cameras have a "compressed" mode, where a non-linear compression curve is applied to the image data. If you enable this parameter the compression curve will not be applied to the image. Currently there is no way to retrieve the compression curve, so this option is only useful for diagnostics.
+
+
+###RawImage.mDitherScale
+This option will determine whether dither is applied when values are scaled to 16 bits. Dither is applied as a random value between "+-scalefactor/2". This will make it so that images with less number of bits/pixel doesn't have a big tendency for posterization, since values close to eachother will be spaced out a bit. Another way of putting it, is that if your camera saves 12 bit per pixel, when RawSpeed upscales this to 16 bits, the "new" bits will be random instead of always the same value.
 
 ##Memory Usage
 
