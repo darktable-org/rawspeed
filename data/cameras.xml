@@ -4302,6 +4302,173 @@
 		<Crop x="73" y="1" width="-73" height="-1"/>
 		<Sensor black="255" white="4000"/>
 	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S6000fd">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">GB</ColorRow>
+			<ColorRow y="1">RG</ColorRow>
+		</CFA2>
+		<Sensor black="0" white="15872"/>
+		<Hints>
+			<Hint name="fuji_rotate" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="FUJIFILM" model="IS-1">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">GB</ColorRow>
+			<ColorRow y="1">RG</ColorRow>
+		</CFA2>
+		<Crop x="32" y="0" width="-32" height="0"/>
+		<Sensor black="0" white="15872"/>
+		<Hints>
+			<Hint name="fuji_rotate" value=""/>
+			<Hint name="set_alt_layout" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S3Pro">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">GB</ColorRow>
+			<ColorRow y="1">RG</ColorRow>
+		</CFA2>
+		<Crop x="32" y="2" width="-32" height="2"/>
+		<Sensor black="0" white="15872"/>
+		<Hints>
+			<Hint name="fuji_rotate" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S5Pro">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">GB</ColorRow>
+			<ColorRow y="1">RG</ColorRow>
+		</CFA2>
+		<Crop x="32" y="2" width="-32" height="-2"/>
+		<Sensor black="0" white="15872"/>
+		<Hints>
+			<Hint name="fuji_rotate" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S5600">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">GB</ColorRow>
+			<ColorRow y="1">RG</ColorRow>
+		</CFA2>
+		<Crop x="30" y="0" width="-30" height="0"/>
+		<Sensor black="0" white="15872"/>
+		<Hints>
+			<Hint name="fuji_rotate" value=""/>
+			<Hint name="set_alt_layout" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix E900">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">GB</ColorRow>
+			<ColorRow y="1">RG</ColorRow>
+		</CFA2>
+		<Crop x="32" y="0" width="-32" height="0"/>
+		<Sensor black="0" white="15872"/>
+		<Hints>
+			<Hint name="fuji_rotate" value=""/>
+			<Hint name="set_alt_layout" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S2Pro">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">GB</ColorRow>
+			<ColorRow y="1">RG</ColorRow>
+		</CFA2>
+		<Sensor black="128" white="4095"/>
+		<Hints>
+			<Hint name="fuji_rotate" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S5000">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">GB</ColorRow>
+			<ColorRow y="1">RG</ColorRow>
+		</CFA2>
+		<Crop x="24" y="4" width="-24" height="-4"/>
+		<Sensor black="0" white="15872"/>
+		<Hints>
+			<Hint name="fuji_rotate" value=""/>
+			<Hint name="set_alt_layout" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S5200">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">GB</ColorRow>
+			<ColorRow y="1">RG</ColorRow>
+		</CFA2>
+		<Crop x="30" y="4" width="-30" height="-4"/>
+		<Sensor black="0" white="15872"/>
+		<Hints>
+			<Hint name="fuji_rotate" value=""/>
+			<Hint name="set_alt_layout" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S5500">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">RG</ColorRow>
+			<ColorRow y="1">GB</ColorRow>
+		</CFA2>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="15872"/>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S5Pro">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">GB</ColorRow>
+			<ColorRow y="1">RG</ColorRow>
+		</CFA2>
+		<Sensor black="0" white="15872"/>
+		<Hints>
+			<Hint name="fuji_rotate" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S6500fd">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">GB</ColorRow>
+			<ColorRow y="1">RG</ColorRow>
+		</CFA2>
+		<Crop x="64" y="0" width="-64" height="0"/>
+		<Sensor black="0" white="15872"/>
+		<Hints>
+			<Hint name="fuji_rotate" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S9500">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">GB</ColorRow>
+			<ColorRow y="1">RG</ColorRow>
+		</CFA2>
+		<Sensor black="0" white="15872"/>
+		<Crop x="32" y="0" width="-32" height="0"/>
+		<Hints>
+			<Hint name="fuji_rotate" value=""/>
+			<Hint name="set_alt_layout" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S9600">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">GB</ColorRow>
+			<ColorRow y="1">RG</ColorRow>
+		</CFA2>
+		<Sensor black="0" white="15872"/>
+		<Crop x="32" y="0" width="-32" height="0"/>
+		<Hints>
+			<Hint name="fuji_rotate" value=""/>
+			<Hint name="set_alt_layout" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S9600fd">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">GB</ColorRow>
+			<ColorRow y="1">RG</ColorRow>
+		</CFA2>
+		<Sensor black="0" white="15872"/>
+		<Crop x="64" y="0" width="-64" height="0"/>
+		<Hints>
+			<Hint name="fuji_rotate" value=""/>
+			<Hint name="set_alt_layout" value=""/>
+		</Hints>
+	</Camera>
 	<Camera make="MINOLTA" model="DYNAX 5D">
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
