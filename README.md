@@ -159,12 +159,14 @@ The ColorfilterArray contains information about the placement of colors in the C
 
 ```cpp
 int dcraw_filter = raw->cfa.getDcrawFilter();
+int cfa_width = raw->cfa.size.x;
+int cfa_height = raw->cfa.size.y;
 CFAColor c = raw->cfa.getColorAt(0,0);
 ```
 
 To get this information as a dcraw compatible filter information, you can use getDcrawFilter() function.
 
-You can also use getColorAt(x, y) to get a single color information. Note that unlike dcraw, RawSpeed only supports 2×2 patterns, so you can reuse this information. CFAColor can be CFA_RED, CFA_GREEN, CFA_BLUE for instance.
+You can also use getColorAt(x, y) to get a single color information. ~~Note that unlike dcraw, RawSpeed only supports 2×2 patterns, so you can reuse this information.~~ CFAColor can be CFA_RED, CFA_GREEN, CFA_BLUE for instance.
 
 Finally information about the image itself:
 
