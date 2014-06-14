@@ -4,6 +4,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2014 Pedro Côrte-Real
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -70,6 +71,16 @@ RawImage ArwDecoder::decodeRawInternal() {
 
   TiffIFD* raw = data[0];
   int compression = raw->getEntry(COMPRESSION)->getInt();
+  if (1 == compression) {
+    // This is probably the SR2 format, let's pass it on
+    try {
+      DecodeSR2(raw);
+    } catch (IOException &e) {
+      mRaw->setError(e.what());
+    }
+
+    return mRaw;
+  }
   if (32767 != compression)
     ThrowRDE("ARW Decoder: Unsupported compression");
 
@@ -143,6 +154,19 @@ RawImage ArwDecoder::decodeRawInternal() {
   }
 
   return mRaw;
+}
+
+void ArwDecoder::DecodeSR2(TiffIFD* raw) {
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
+  uint32 off = raw->getEntry(STRIPOFFSETS)->getInt();
+  uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getInt();
+
+  mRaw->dim = iPoint2D(width, height);
+  mRaw->createData();
+  ByteStream input(mFile->getData(off), c2);
+
+  Decode14BitRawBEunpacked(input, width, height);
 }
 
 void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
