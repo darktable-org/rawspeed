@@ -126,7 +126,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="false"
 				EnableFiberSafeOptimizations="true"
-				WholeProgramOptimization="false"
+				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="..\include;..\include\libjpeg"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
@@ -157,7 +157,7 @@
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				LinkTimeCodeGeneration="0"
+				LinkTimeCodeGeneration="1"
 				TargetMachine="1"
 			/>
 			<Tool
