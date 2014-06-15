@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <?xml-stylesheet type="text/xsl" href="showcameras.xsl" ?>
 <!--
-    License: CC-BY-SA 3.0
+	License: CC-BY-SA 3.0
 
-    This work is licensed under a
-    Creative Commons Attribution-ShareAlike 3.0 Unported License.
+	This work is licensed under a
+	Creative Commons Attribution-ShareAlike 3.0 Unported License.
 
-    See more at:
-    http://creativecommons.org/licenses/by-sa/3.0/
+	See more at:
+	http://creativecommons.org/licenses/by-sa/3.0/
 -->
 
 <!DOCTYPE Cameras [
@@ -4412,16 +4412,6 @@
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="15872"/>
 	</Camera>
-	<Camera make="FUJIFILM" model="FinePix S5Pro">
-		<CFA2 width="2" height="2">
-			<ColorRow y="0">GB</ColorRow>
-			<ColorRow y="1">RG</ColorRow>
-		</CFA2>
-		<Sensor black="0" white="15872"/>
-		<Hints>
-			<Hint name="fuji_rotate" value=""/>
-		</Hints>
-	</Camera>
 	<Camera make="FUJIFILM" model="FinePix S6500fd">
 		<CFA2 width="2" height="2">
 			<ColorRow y="0">GB</ColorRow>
@@ -4468,6 +4458,28 @@
 			<Hint name="fuji_rotate" value=""/>
 			<Hint name="set_alt_layout" value=""/>
 		</Hints>
+	</Camera>
+	<Camera make="Fujifilm" model="X-Pro1">
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Sensor black="0" white="4095"/>
+	</Camera>
+	<Camera make="Fujifilm" model="X100S">
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">RGRBGB</ColorRow>
+			<ColorRow y="1">GBGGRG</ColorRow>
+			<ColorRow y="2">GRGGBG</ColorRow>
+			<ColorRow y="3">BGBRGR</ColorRow>
+			<ColorRow y="4">GRGGBG</ColorRow>
+			<ColorRow y="5">GBGGRG</ColorRow>
+		</CFA2>
+		<Sensor black="0" white="15872"/>
 	</Camera>
 	<Camera make="MINOLTA" model="DYNAX 5D">
 		<CFA width="2" height="2">
