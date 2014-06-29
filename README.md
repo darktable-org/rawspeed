@@ -14,7 +14,7 @@ RawSpeed…
 - can add support for new cameras by adding definitions to an xml file.
 - is extensively crash-tested on broken files.
 - decodes images from memory, not a file stream. You can use a memory mapped file, but it is rarely faster.
-- is currently tested on more than 250 unique cameras.
+- is currently tested on more than 300 unique cameras.
 - can add support for new cameras by updating an xml file.
 - open source under the LGPL v2 license.
 
@@ -122,7 +122,7 @@ decoder->checkSupport(metadata);
 
 The “failOnUnknown” property will indicate whether the decoder should refuse to decode unknown cameras. Otherwise RawSpeed will only refuse to decode the image, if it is confirmed that the camera type cannot be decoded correctly. If the image isn’t supported a “RawDecoderException” will be thrown.
 
-Reaching this point should not take very long in terms of CPU time, so the support check is very quick, if file data is quickly available. Next we decode the image:
+Reaching this point should be very fast in terms of CPU time, so the support check is very quick, if file data is quickly available. Next we decode the image:
 
 ```cpp
 decoder->decodeRaw();
@@ -133,7 +133,8 @@ RawImage raw = decoder->mRaw;
 This will decode the image, and apply metadata information. The RawImage is at this point completely untouched Raw data, however the image has been cropped to the active image area in decodeMetaData. Error reporting is: If a fatal error occurs a RawDecoderException is thrown.
 
 Non-fatal errors are pushed into a "vector" array in the decoder object called "errors". With these types of errors, there WILL be a raw image available, but it will likely contain junk sections in undecodable parts. However, as much as it was possible to decode will be available. So treat these messages as warnings.
-Another thing to note here is that the RawImage object is automatically refcounted, so you can pass the object around  without worrying about the image being freed before all instances are out of scope.
+
+Another thing to note here is that the RawImage object is automatically refcounted, so you can pass the object around  without worrying about the image being freed before all instances are out of scope. Do however keep this in mind if you pass the pointer to image data to another part of your application.
 
 ```cpp
 raw->scaleBlackWhite();
@@ -145,11 +146,9 @@ This will apply the black/white scaling to the image, so the data is normalized 
 int components_per_pixel = raw->getCpp();
 RawImageType type = raw->getDataType();
 bool is_cfa = r->isCFA;
-if (TRUE == is_cfa)
-  ColorFilterArray cfa = raw->cfa;
 ```
 
-Components per pixel indicates how many components are present per pixel. Common values are 1 on CFA images, and 3, found in some DNG images for instance.
+Components per pixel indicates how many components are present per pixel. Common values are 1 on CFA images, and 3, found in some DNG images for instance. Do note, you cannot assume that an images is CFA just because it is 1 cpp - greyscale dng images from things like scanners can be saved like that.
 
 The RawImageType can be TYPE_USHORT16 (most common) which indicates unsigned 16 bit data or TYPE_FLOAT32 (found in some DNGs)
 
@@ -158,10 +157,13 @@ The isCFA indicates whether the image has all components per pixel, or if it was
 The ColorfilterArray contains information about the placement of colors in the CFA:
 
 ```cpp
-int dcraw_filter = raw->cfa.getDcrawFilter();
-int cfa_width = raw->cfa.size.x;
-int cfa_height = raw->cfa.size.y;
-CFAColor c = raw->cfa.getColorAt(0,0);
+if (TRUE == is_cfa) {
+  ColorFilterArray cfa = raw->cfa;
+  int dcraw_filter = cfa.getDcrawFilter();
+  int cfa_width = cfa.size.x;
+  int cfa_height = cfa.size.y;
+  CFAColor c = cfa.getColorAt(0,0);
+}
 ```
 
 To get this information as a dcraw compatible filter information, you can use getDcrawFilter() function.
@@ -266,7 +268,7 @@ To check if an image has been rotated, check RawImage->fujiWidth after calling R
 
 If you do NOT want your images to be delivered rotated, you can disable it when decoding.
 ```cpp
-RawDecoder->fujiRotate = FALSE";
+RawDecoder->fujiRotate = FALSE;
 ```
 Do however note the CFA colors are still referring to the rotated color positions.
 
@@ -278,7 +280,9 @@ If you enable this on the decoder before calling RawDecoder->decodeRaw(), you wi
 
 
 ###RawImage.mDitherScale
-This option will determine whether dither is applied when values are scaled to 16 bits. Dither is applied as a random value between "+-scalefactor/2". This will make it so that images with less number of bits/pixel doesn't have a big tendency for posterization, since values close to eachother will be spaced out a bit. Another way of putting it, is that if your camera saves 12 bit per pixel, when RawSpeed upscales this to 16 bits, the "new" bits will be random instead of always the same value.
+This option will determine whether dither is applied when values are scaled to 16 bits. Dither is applied as a random value between "+-scalefactor/2". This will make it so that images with less number of bits/pixel doesn't have a big tendency for posterization, since values close to eachother will be spaced out a bit.
+
+Another way of putting it, is that if your camera saves 12 bit per pixel, when RawSpeed upscales this to 16 bits, the 4 "new" bits will be random instead of always the same value.
 
 ##Memory Usage
 
