@@ -230,7 +230,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\TiffEntryBE.cpp"
+					RelativePath=".\TiffEntrySwap.cpp"
 					>
 				</File>
 				<File
@@ -238,7 +238,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\TiffIFDBE.cpp"
+					RelativePath=".\TiffIFDSwap.cpp"
 					>
 				</File>
 				<File
@@ -692,7 +692,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\TiffEntryBE.h"
+					RelativePath=".\TiffEntrySwap.h"
 					>
 				</File>
 				<File
@@ -700,7 +700,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\TiffIFDBE.h"
+					RelativePath=".\TiffIFDSwap.h"
 					>
 				</File>
 				<File

@@ -235,7 +235,7 @@ TiffIFD* TiffIFD::parseMakerNote(FileMap *f, uint32 offset, Endianness parent_en
     if (parent_end == getHostEndianness())
       maker_ifd = new TiffIFD(mFile, offset);
     else
-      maker_ifd = new TiffIFDBE(mFile, offset);
+      maker_ifd = new TiffIFDSwap(mFile, offset);
   } catch (...) {
     if (mFile != f)
       delete mFile;

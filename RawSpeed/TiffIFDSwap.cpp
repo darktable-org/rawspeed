@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "TiffIFDBE.h"
-#include "TiffEntryBE.h"
+#include "TiffIFDSwap.h"
+#include "TiffEntrySwap.h"
 /*
     RawSpeed - RAW file decoder.
 
@@ -25,11 +25,11 @@
 
 namespace RawSpeed {
 
-TiffIFDBE::TiffIFDBE() {
+TiffIFDSwap::TiffIFDSwap() {
   endian = big;
 }
 
-TiffIFDBE::TiffIFDBE(FileMap* f, uint32 offset) {
+TiffIFDSwap::TiffIFDSwap(FileMap* f, uint32 offset) {
   mFile = f;
   endian = big;
   int entries;
@@ -40,7 +40,7 @@ TiffIFDBE::TiffIFDBE(FileMap* f, uint32 offset) {
 
   CHECKSIZE(offset + 2 + entries*4);
   for (int i = 0; i < entries; i++) {
-    TiffEntryBE *t = new TiffEntryBE(f, offset + 2 + i*12);
+    TiffEntrySwap *t = new TiffEntrySwap(f, offset + 2 + i*12);
 
     if (t->tag == SUBIFDS || t->tag == EXIFIFDPOINTER || t->tag == DNGPRIVATEDATA || t->tag == MAKERNOTE) {   // subIFD tag
       if (t->tag == DNGPRIVATEDATA) {
@@ -64,7 +64,7 @@ TiffIFDBE::TiffIFDBE(FileMap* f, uint32 offset) {
         const unsigned int* sub_offsets = t->getIntArray();
         try {
           for (uint32 j = 0; j < t->count; j++) {
-            mSubIFD.push_back(new TiffIFDBE(f, sub_offsets[j]));
+            mSubIFD.push_back(new TiffIFDSwap(f, sub_offsets[j]));
           }
           delete(t);
         } catch (TiffParserException) {
@@ -81,7 +81,7 @@ TiffIFDBE::TiffIFDBE(FileMap* f, uint32 offset) {
 }
 
 
-TiffIFDBE::~TiffIFDBE(void) {
+TiffIFDSwap::~TiffIFDSwap(void) {
 }
 
 } // namespace RawSpeed

@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "ErfDecoder.h"
+#include "TiffIFDSwap.h"
 
 /*
     RawSpeed - RAW file decoder.

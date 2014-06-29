@@ -352,7 +352,7 @@ void OrfDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
           if (makertiff.getHostEndian() == makertiff.tiff_endian)
             ImageProcessing = new TiffIFD(&makermap2, offset);
           else
-            ImageProcessing = new TiffIFDBE(&makermap2, offset);
+            ImageProcessing = new TiffIFDSwap(&makermap2, offset);
           blackEntry = ImageProcessing->getEntry((TiffTag)0x600);
         } catch (TiffParserException) {
         }

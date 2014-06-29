@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "TiffEntryBE.h"
+#include "TiffEntrySwap.h"
 /*
     RawSpeed - RAW file decoder.
 
@@ -24,7 +24,7 @@
 
 namespace RawSpeed {
 
-TiffEntryBE::TiffEntryBE(FileMap* f, uint32 offset) {
+TiffEntrySwap::TiffEntrySwap(FileMap* f, uint32 offset) {
   own_data = NULL;
   type = TIFF_UNDEFINED;  // We set type to undefined to avoid debug assertion errors.
   data = f->getDataWrt(offset);
@@ -57,7 +57,7 @@ TiffEntryBE::TiffEntryBE(FileMap* f, uint32 offset) {
 #endif
 }
 
-TiffEntryBE::TiffEntryBE( TiffTag tag, TiffDataType type, uint32 count, const uchar8* data /*= NULL*/ )
+TiffEntrySwap::TiffEntrySwap( TiffTag tag, TiffDataType type, uint32 count, const uchar8* data /*= NULL*/ )
 : TiffEntry(tag, type,count, data)
 {
 #ifdef _DEBUG
@@ -71,10 +71,10 @@ TiffEntryBE::TiffEntryBE( TiffTag tag, TiffDataType type, uint32 count, const uc
 #endif
 }
 
-TiffEntryBE::~TiffEntryBE(void) {
+TiffEntrySwap::~TiffEntrySwap(void) {
 }
 
-unsigned int TiffEntryBE::getInt() {
+unsigned int TiffEntrySwap::getInt() {
   if (!(type == TIFF_LONG || type == TIFF_SHORT || type == TIFF_UNDEFINED))
     ThrowTPE("TIFF, getInt: Wrong type 0x%x encountered. Expected Int", type);
   if (type == TIFF_SHORT)
@@ -82,13 +82,13 @@ unsigned int TiffEntryBE::getInt() {
   return (unsigned int)data[0] << 24 | (unsigned int)data[1] << 16 | (unsigned int)data[2] << 8 | (unsigned int)data[3];
 }
 
-unsigned short TiffEntryBE::getShort() {
+unsigned short TiffEntrySwap::getShort() {
   if (!(type == TIFF_SHORT || type == TIFF_UNDEFINED))
     ThrowTPE("TIFF, getShort: Wrong type 0x%x encountered. Expected Short", type);
   return (unsigned short)data[0] << 8 | (unsigned short)data[1];
 }
 
-const uint32* TiffEntryBE::getIntArray() {
+const uint32* TiffEntrySwap::getIntArray() {
   if (!(type == TIFF_LONG || type == TIFF_UNDEFINED || type == TIFF_RATIONAL ||  type == TIFF_SRATIONAL))
     ThrowTPE("TIFF, getIntArray: Wrong type 0x%x encountered. Expected Int", type);
   if (own_data)
@@ -107,7 +107,7 @@ const uint32* TiffEntryBE::getIntArray() {
   return (uint32*)own_data;
 }
 
-const ushort16* TiffEntryBE::getShortArray() {
+const ushort16* TiffEntrySwap::getShortArray() {
   if (!(type == TIFF_SHORT || type == TIFF_UNDEFINED))
     ThrowTPE("TIFF, getShortArray: Wrong type 0x%x encountered. Expected Short", type);
 
@@ -122,7 +122,7 @@ const ushort16* TiffEntryBE::getShortArray() {
   return d;
 }
 
-void TiffEntryBE::setData( const void *in_data, uint32 byte_count )
+void TiffEntrySwap::setData( const void *in_data, uint32 byte_count )
 {
   if (datashifts[type] != 0)
     ThrowTPE("TIFF, Unable to set data on byteswapped platforms (unsupported)");

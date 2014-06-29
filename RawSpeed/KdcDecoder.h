@@ -24,7 +24,7 @@
 #define KDC_DECODER_H
 
 #include "RawDecoder.h"
-#include "TiffIFDBE.h"
+#include "TiffIFDSwap.h"
 
 namespace RawSpeed {
 

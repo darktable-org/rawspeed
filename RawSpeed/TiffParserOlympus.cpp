@@ -60,7 +60,7 @@ void TiffParserOlympus::parseData() {
   if (tiff_endian == host_endian)
     mRootIFD = new TiffIFD();
   else
-    mRootIFD = new TiffIFDBE();
+    mRootIFD = new TiffIFDSwap();
 
   uint32 nextIFD = 4;  // Skip Endian and magic
   do {
@@ -69,7 +69,7 @@ void TiffParserOlympus::parseData() {
     if (tiff_endian == host_endian)
       mRootIFD->mSubIFD.push_back(new TiffIFD(mInput, nextIFD));
     else
-      mRootIFD->mSubIFD.push_back(new TiffIFDBE(mInput, nextIFD));
+      mRootIFD->mSubIFD.push_back(new TiffIFDSwap(mInput, nextIFD));
 
     nextIFD = mRootIFD->mSubIFD.back()->getNextIFD();
   } while (nextIFD);

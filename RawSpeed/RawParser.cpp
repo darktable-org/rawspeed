@@ -4,7 +4,7 @@
 #include "TiffParser.h"
 #include "X3fParser.h"
 #include "ByteStreamSwap.h"
-#include "TiffEntryBE.h"
+#include "TiffEntrySwap.h"
 #include "MrwDecoder.h"
 
 /*
@@ -161,7 +161,7 @@ void RawParser::ParseFuji(uint32 offset, TiffIFD *target_ifd)
         case 0x100:
         case 0x121:
         case 0x2ff0:
-          t = new TiffEntryBE((TiffTag)tag, TIFF_SHORT, length/2, bytes.getData());
+          t = new TiffEntrySwap((TiffTag)tag, TIFF_SHORT, length/2, bytes.getData());
           break;
 
         case 0xc000:

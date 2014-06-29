@@ -1,7 +1,8 @@
-#ifndef TIFF_IFDBE_H
-#define TIFF_IFDBE_H
+#ifndef TIFF_ENTRY_BE_H
+#define TIFF_ENTRY_BE_H
 
-#include "TiffIFD.h"
+#include "TiffEntry.h"
+
 /* 
     RawSpeed - RAW file decoder.
 
@@ -26,13 +27,19 @@
 
 namespace RawSpeed {
 
-class TiffIFDBE :
-  public TiffIFD
+class TiffEntrySwap :
+  public TiffEntry
 {
 public:
-  TiffIFDBE();
-  TiffIFDBE(FileMap* f, uint32 offset);
-  virtual ~TiffIFDBE(void);
+//  TiffEntrySwap(void);
+  TiffEntrySwap(FileMap* f, uint32 offset);
+  TiffEntrySwap(TiffTag tag, TiffDataType type, uint32 count, const uchar8* data = NULL);
+  virtual ~TiffEntrySwap(void);
+  virtual uint32 getInt();
+  virtual ushort16 getShort();
+  virtual const uint32* getIntArray();
+  virtual const ushort16* getShortArray();
+  virtual void setData(const void *in_data, uint32 byte_count );
 };
 
 } // namespace RawSpeed

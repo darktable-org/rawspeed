@@ -25,7 +25,7 @@
 
 #include "FileMap.h"
 #include "TiffIFD.h"
-#include "TiffIFDBE.h"
+#include "TiffIFDSwap.h"
 #include "TiffParserException.h"
 #include "RawDecoder.h"
 
