@@ -270,6 +270,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\HasselbladDecompressor.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\LJpegDecompressor.cpp"
 					>
 				</File>
@@ -418,6 +422,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ThreefrDecoder.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\X3fDecoder.cpp"
 					>
 				</File>
@@ -544,6 +552,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\HasselbladDecompressor.h"
+					>
+				</File>
+				<File
 					RelativePath=".\LJpegDecompressor.h"
 					>
 				</File>
@@ -629,6 +641,10 @@
 				</File>
 				<File
 					RelativePath=".\SrwDecoder.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ThreefrDecoder.h"
 					>
 				</File>
 				<File

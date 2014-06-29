@@ -28,20 +28,7 @@
 #include "TiffIFDBE.h"
 #include "TiffParserException.h"
 #include "RawDecoder.h"
-#include "DngDecoder.h"
-#include "Cr2Decoder.h"
-#include "ArwDecoder.h"
-#include "PefDecoder.h"
-#include "NefDecoder.h"
-#include "OrfDecoder.h"
-#include "RafDecoder.h"
-#include "Rw2Decoder.h"
-#include "SrwDecoder.h"
-#include "MefDecoder.h"
-#include "MosDecoder.h"
-#include "DcrDecoder.h"
-#include "KdcDecoder.h"
-#include "ErfDecoder.h"
+
 
 namespace RawSpeed {
 
