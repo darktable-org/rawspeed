@@ -89,10 +89,12 @@
 		</Aliases>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS 20D">
-		<CFA2 width="2" height="2">
-			<ColorRow y="0">RG</ColorRow>
-			<ColorRow y="1">GB</ColorRow>
-		</CFA2>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
 		<Crop x="74" y="12" width="3522" height="2348"/>
 		<Sensor black="126" white="4095"/>
 		<BlackAreas>
@@ -1298,7 +1300,7 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="2" y="0" width="-48" height="0"/>
-		<Sensor black="0" white="3972"/>
+		<Sensor black="0" white="3880"/>
 		<Aliases>
 			<Alias>NIKON D800E</Alias>
 		</Aliases>
