@@ -358,7 +358,27 @@
 					>
 				</File>
 				<File
+					RelativePath=".\DcrDecoder.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\DngDecoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ErfDecoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\KdcDecoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\MefDecoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\MosDecoder.cpp"
 					>
 				</File>
 				<File
@@ -552,7 +572,27 @@
 					>
 				</File>
 				<File
+					RelativePath=".\DcrDecoder.h"
+					>
+				</File>
+				<File
 					RelativePath=".\DngDecoder.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ErfDecoder.h"
+					>
+				</File>
+				<File
+					RelativePath=".\KdcDecoder.h"
+					>
+				</File>
+				<File
+					RelativePath=".\MefDecoder.h"
+					>
+				</File>
+				<File
+					RelativePath=".\MosDecoder.h"
 					>
 				</File>
 				<File
