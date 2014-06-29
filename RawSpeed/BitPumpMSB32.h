@@ -48,10 +48,11 @@ public:
   __inline void checkPos()  { if (off>size) throw IOException("Out of buffer read");};        // Check if we have a valid position
 
   // Fill the buffer with at least 24 bits
-void fill();
+  __inline void fill() {  if (mLeft < MIN_GET_BITS) _fill();};
+  void _fill();
 
   __inline uint32 getBit() {
-    if (!mLeft) fill();
+    if (!mLeft) _fill();
 
     return (uint32)((mCurr >> (--mLeft)) & 1);
   }
@@ -62,7 +63,7 @@ void fill();
 
   __inline uint32 getBits(uint32 nbits) {
     if (mLeft < nbits) {
-      fill();
+      _fill();
     }
 
     return (uint32)((mCurr >> (mLeft -= (nbits))) & ((1 << nbits) - 1));
@@ -80,6 +81,13 @@ void fill();
       mLeft -= n;
       nbits -= n;
     }
+  }
+  __inline uint32 peekByteNoFill() {
+    return (uint32)((mCurr >> (mLeft-8)) & 0xff);
+  }
+
+  __inline void skipBitsNoFill(uint32 nbits) {
+    mLeft -= nbits;
   }
 
   virtual ~BitPumpMSB32(void);
