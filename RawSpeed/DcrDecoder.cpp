@@ -64,7 +64,17 @@ RawImage DcrDecoder::decodeRawInternal() {
     if (linearization->type != TIFF_SHORT)
       ThrowRDE("DCR Decoder: Linearization table is wrong type");
 
-    decodeKodak65000(input, width, height, linearization->getShortArray());
+    // Get create passthrough curve if user has requested that.
+    if (uncorrectedRawValues) {
+      for (int i = 0; i < 1024; i++)
+        linear[i] = i;
+    }
+
+    if (uncorrectedRawValues)
+      decodeKodak65000(input, width, height, linear);
+    else
+      decodeKodak65000(input, width, height, linearization->getShortArray());
+
   } else
     ThrowRDE("DCR Decoder: Unsupported compression %d", compression);
 
@@ -116,7 +126,7 @@ void DcrDecoder::decodeKodak65000Segment(ByteStream &input, ushort16 *out, uint3
       }
       bits += 32;
     }
-    uint32 diff = bitbuf & (0xffff >> (16-len));
+    uint32 diff = (uint32)bitbuf & (0xffff >> (16-len));
     bitbuf >>= len;
     bits -= len;
     if ((diff & (1 << (len-1))) == 0)
