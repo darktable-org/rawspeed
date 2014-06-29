@@ -45,7 +45,7 @@ public:
 	uchar8 getByteSafe();
 	void setAbsoluteOffset(uint32 offset);     // Set offset in bytes
   __inline uint32 getOffset() { return off-(mLeft>>3);}
-  __inline void checkPos()  { if (off>size) throw IOException("Out of buffer read");};        // Check if we have a valid position
+  __inline void checkPos()  { if (mStuffed > 3) throw IOException("Out of buffer read");};        // Check if we have a valid position
 
   // Fill the buffer with at least 24 bits
   __inline void fill() {  if (mLeft < MIN_GET_BITS) _fill();};
@@ -98,6 +98,7 @@ protected:
   uint32 mLeft;
   uint64 mCurr;
   uint32 off;                  // Offset in bytes
+  uint32 mStuffed;
 private:
 };
 

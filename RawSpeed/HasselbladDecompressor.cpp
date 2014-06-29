@@ -126,6 +126,7 @@ void HasselbladDecompressor::decodeScanHasselblad() {
     ushort16 *dest = (ushort16*) mRaw->getData(0, y);
     int p1 = 0x8000 + pixelBaseOffset;
     int p2 = 0x8000 + pixelBaseOffset;
+    ph1_bits->checkPos();
     for (uint32 x = 0; x < frame.w ; x+=2 ) {
       int len1 = HuffGetLength();
       int len2 = HuffGetLength();

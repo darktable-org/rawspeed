@@ -38,13 +38,27 @@ BitPumpMSB32::BitPumpMSB32(const uchar8* _buffer, uint32 _size) :
 }
 
 __inline void BitPumpMSB32::init() {
+  mStuffed = 0;
   _fill();
 }
 
 void BitPumpMSB32::_fill()
 {
   uint32 c, c2, c3, c4;
-
+  if ((off + 4) > size) {
+    while (off < size) {
+      mCurr <<= 8;
+      c = buffer[off++];
+      mCurr |= c;
+      mLeft += 8;
+    }
+    while (mLeft < MIN_GET_BITS) {
+      mCurr <<= 8;
+      mLeft += 8;
+      mStuffed++;
+    }
+    return;
+  }
   c = buffer[off++];
   c2 = buffer[off++];
   c3 = buffer[off++];
@@ -74,6 +88,7 @@ void BitPumpMSB32::setAbsoluteOffset(unsigned int offset) {
   mLeft = 0;
   mCurr = 0;
   off = offset;
+  mStuffed = 0;
   _fill();
 }
 
