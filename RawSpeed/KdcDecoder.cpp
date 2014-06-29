@@ -35,8 +35,6 @@ KdcDecoder::~KdcDecoder(void) {
 }
 
 RawImage KdcDecoder::decodeRawInternal() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
-
   int compression = mRootIFD->getEntryRecursive(COMPRESSION)->getInt();
   if (7 != compression)
     ThrowRDE("KDC Decoder: Unsupported compression %d", compression);
