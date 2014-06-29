@@ -48,7 +48,7 @@ RawImage DcrDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
-  ByteStream input(mFile->getData(off), c2);
+  ByteStream input(mFile->getData(off), mFile->getSize() - off);
 
   int compression = raw->getEntry(COMPRESSION)->getInt();
   if (65000 == compression) {
@@ -70,11 +70,14 @@ RawImage DcrDecoder::decodeRawInternal() {
         linear[i] = i;
     }
 
+    try {
     if (uncorrectedRawValues)
       decodeKodak65000(input, width, height, linear);
     else
       decodeKodak65000(input, width, height, linearization->getShortArray());
-
+    } catch (IOException) {
+      mRaw->setError("IO error occurred while reading image. Returning partial result.");
+    }
   } else
     ThrowRDE("DCR Decoder: Unsupported compression %d", compression);
 
