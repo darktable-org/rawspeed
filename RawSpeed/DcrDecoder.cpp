@@ -35,12 +35,12 @@ DcrDecoder::~DcrDecoder(void) {
 }
 
 RawImage DcrDecoder::decodeRawInternal() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
 
-  if (data.size() < 2)
+  if (data.size() < 1)
     ThrowRDE("DCR Decoder: No image data found");
     
-  TiffIFD* raw = data[2];
+  TiffIFD* raw = data[0];
   uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
   uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
   uint32 off = raw->getEntry(STRIPOFFSETS)->getInt();
