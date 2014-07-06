@@ -85,19 +85,19 @@ void X3fDecoder::decodeMetaDataInternal( CameraMetaData *meta )
 
 void X3fDecoder::checkSupportInternal( CameraMetaData *meta )
 {
-  if (hasProp("CAMMANUF") && hasProp("CAMMODEL")) {
+/*  if (hasProp("CAMMANUF") && hasProp("CAMMODEL")) {
     if (!checkCameraSupported(meta, getProp("CAMMANUF"), getProp("CAMMODEL"), "" ))
       ThrowRDE("X3FDecoder: Unknown camera. Will not guess.");
     return;
   }
-
+*/
   // If we somehow got to here without a camera, see if we have an image
   // with proper format identifiers.
   vector<X3fImage>::iterator img = mImages.begin();
   for (; img !=  mImages.end(); img++) {
     X3fImage cimg = *img;
     if (cimg.type == 1 || cimg.type == 3) {
-      if (cimg.format == 30)
+      if (cimg.format == 30 || cimg.format == 35)
         return;
     }
   }
@@ -123,17 +123,17 @@ void X3fDecoder::decompressSigma( X3fImage &image )
   mRaw->createData();
   curr_image = &image;
 
-  if (image.format == 30) {
+  if (image.format == 30 || image.format == 35) {
     for (int i = 0; i < 3; i++)
       pred[i] = input.getShort();
 
     // Skip padding
-    input.skipBytes(2);
+    input.skipBytes(14);
 
-    createSigmaTable(&input, 13);
+    createSigmaTable(&input, 15);
 
     // Skip padding  (2 x 0x00)
-    input.skipBytes(2);
+    input.skipBytes(2+4);
     plane_offset[0] = image.dataOffset + 48;
 
     for (int i = 0; i < 3; i++) {
@@ -243,7 +243,7 @@ void X3fDecoder::createSigmaTable(ByteStream *bytes, int codes) {
 
 void X3fDecoder::decodeThreaded( RawDecoderThread* t )
 {
-  if (curr_image->format == 30) {
+  if (curr_image->format == 30 || curr_image->format == 35) {
     uint32 i = t->taskNo;
     if (i>3)
       ThrowRDE("X3fDecoder:Invalid plane:%u (internal error)", i);
