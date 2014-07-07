@@ -134,7 +134,7 @@ void X3fDecoder::decompressSigma( X3fImage &image )
 
     // Skip padding  (2 x 0x00)
     input.skipBytes(2+4);
-    plane_offset[0] = image.dataOffset + 48;
+    plane_offset[0] = image.dataOffset + 68;
 
     for (int i = 0; i < 3; i++) {
       plane_sizes[i] = input.getUInt();
@@ -144,7 +144,11 @@ void X3fDecoder::decompressSigma( X3fImage &image )
         if (plane_offset[i]>mFile->getSize())
           ThrowRDE("SigmaDecompressor:Plane offset outside image");
       }
+      const uchar8* start = mFile->getData(plane_offset[i]);
+      Sleep(10);
     }
+    mRaw->clearArea(iRectangle2D(0,0,image.width,image.height));
+
     startTasks(3);
     return;
   } // End if format 30
@@ -250,24 +254,36 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
     /* We have a weird prediction which is actually more appropriate for a CFA image */
     BitPumpMSB *bits = new BitPumpMSB(mFile->getData(plane_offset[i]), mFile->getSize()-plane_offset[i]);
     /* Initialize predictors */
-    int pred_up[4];
-    int pred_left[2];
-    for (int j = 0; j < 4; j++)
-      pred_up[j] = pred[i];
+    int pred_up;
+    int pred_left;
 
-    for (int y = 0; y < mRaw->dim.y; y++) {
+    pred_up = pred[i];
+
+    int w = mRaw->dim.x;
+    int h = mRaw->dim.y;
+    if (i < 2) {
+      w >>= 1;
+      h >>= 1;
+    } else {
+      // Skip blue (for now)
+      //return;
+    }
+    for (int y = 0; y < h; y++) {
       ushort16* dst = (ushort16*)mRaw->getData(0,y) + i;
       int diff1= SigmaDecode(bits);
-      int diff2 = SigmaDecode(bits);
-      dst[0] = pred_left[0] = pred_up[y & 1] = pred_up[y & 1] + diff1;
-      dst[3] = pred_left[1] = pred_up[(y & 1) + 2] = pred_up[(y & 1) + 2] + diff2;
-      dst+=6;
-      for (int x = 2; x < mRaw->dim.x; x+=2) {
+      dst[0] = pred_left = pred_up = pred_up + diff1;
+      dst+=3;
+      for (int x = 1; x < w; x++) {
         int diff1= SigmaDecode(bits);
-        int diff2 = SigmaDecode(bits);
-        dst[0] = pred_left[0] = pred_left[0] + diff1;
-        dst[3] = pred_left[1] = pred_left[1] + diff2;
-        dst+=6;
+        dst[0] = pred_left = pred_left + diff1;
+        if ((y&3) == 0 && ((x&15) == 0 || (x&15) == 1)) {
+          if (i == 2) {
+//            dst+=3;
+//            x++;
+          } else 
+            dst[0] = (((dst[0] - 2000) * 320) >> 8) + 2000;
+        }
+        dst+=3;
       }
     }
     return;
