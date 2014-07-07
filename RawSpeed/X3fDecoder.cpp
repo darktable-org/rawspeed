@@ -265,8 +265,8 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
       w >>= 1;
       h >>= 1;
     } else {
-      // Skip blue (for now)
-      //return;
+      // For some weird reason blue is 384 pixels wider than actual image??!
+      w+=384;
     }
     for (int y = 0; y < h; y++) {
       ushort16* dst = (ushort16*)mRaw->getData(0,y) + i;
@@ -275,13 +275,12 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
       dst+=3;
       for (int x = 1; x < w; x++) {
         int diff1= SigmaDecode(bits);
-        dst[0] = pred_left = pred_left + diff1;
-        if ((y&3) == 0 && ((x&15) == 0 || (x&15) == 1)) {
-          if (i == 2) {
-//            dst+=3;
-//            x++;
-          } else 
+        pred_left = pred_left + diff1;
+        if (x < mRaw->dim.x) {
+          dst[0] = pred_left;
+          if ((y&3) == 0 && ((x&15) == 0 || (x&15) == 1)) {
             dst[0] = (((dst[0] - 2000) * 320) >> 8) + 2000;
+          }
         }
         dst+=3;
       }
