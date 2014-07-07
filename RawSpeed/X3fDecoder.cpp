@@ -269,7 +269,7 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
       w+=384;
     }
     for (int y = 0; y < h; y++) {
-      ushort16* dst = (ushort16*)mRaw->getData(0,y) + i;
+      ushort16* dst = (ushort16*)mRaw->getData(0,y * (1+ (i<2))) + i;
       int diff1= SigmaDecode(bits);
       dst[0] = pred_left = pred_up = pred_up + diff1;
       dst+=3;
@@ -282,7 +282,7 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
             dst[0] = (((dst[0] - 2000) * 320) >> 8) + 2000;
           }
         }
-        dst+=3;
+        dst += (i == 2) ? 3 : 6;
       }
     }
     return;
