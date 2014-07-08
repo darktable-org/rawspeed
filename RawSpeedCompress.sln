@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RawSpeedCompress", "RawSpeed\RawSpeedCompressTest.vcproj", "{7AF1796A-5A5F-4B62-9E73-27904CC983CF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7AF1796A-5A5F-4B62-9E73-27904CC983CF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7AF1796A-5A5F-4B62-9E73-27904CC983CF}.Debug|Win32.Build.0 = Debug|Win32
+		{7AF1796A-5A5F-4B62-9E73-27904CC983CF}.Release|Win32.ActiveCfg = Release|Win32
+		{7AF1796A-5A5F-4B62-9E73-27904CC983CF}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		AMDCaProjectFile = D:\dev\_rawspeed\CodeAnalyst\RawSpeed.caw
+	EndGlobalSection
+EndGlobal
