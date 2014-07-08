@@ -3871,6 +3871,14 @@
 		<Crop x="0" y="2" width="-10" height="-2"/>
 		<Sensor black="0" white="4095"/>
 	</Camera>
+	<Camera make="SIGMA" model="SIGMA DP2">
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="4095"/>
+	</Camera>
+	<Camera make="SIGMA" model="SIGMA SD1 Merrill">
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="4095"/>
+	</Camera>
 	<Camera make="SONY" model="DSC-RX10">
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
