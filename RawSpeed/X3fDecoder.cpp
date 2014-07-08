@@ -150,6 +150,40 @@ void X3fDecoder::decompressSigma( X3fImage &image )
     mRaw->clearArea(iRectangle2D(0,0,image.width,image.height));
 
     startTasks(3);
+    int w = mRaw->dim.x/2;
+    int h = mRaw->dim.y/2;
+    for (int i = 0; i < 2;  i++) {
+      for (int y = 2; y < (h-2); y++) {
+        ushort16* dst = (ushort16*)mRaw->getData(2, y * 2) + i;
+        ushort16* blue = (ushort16*)mRaw->getData(2, y * 2) + 2;
+        int pitch = mRaw->pitch / 2;
+        for (int x = 2; x < (w-2); x++) {
+          // Interpolate 1 missing pixel
+          int blue_mid = ((int)blue[-3] + (int)blue[3] + 1)>>1;
+          int blue_off = (int)blue[0] - blue_mid;
+          int c_mid = ((int)dst[-3] + (int)dst[3] + 1)>>1;
+          dst[0] = clampbits(c_mid + blue_off, 16);
+          dst += 6;
+          blue += 6;
+        }
+      }
+      int pitch = mRaw->pitch / 2;
+      for (int y = 0; y < (h-2); y++) {
+        ushort16* dst = (ushort16*)mRaw->getData(0, y * 2 + 1) + i;
+        ushort16* blue = (ushort16*)mRaw->getData(0, y * 2 + 1) + 2;
+        int pitch = mRaw->pitch / 2;
+        for (int x = 0; x < (w*2); x++) {
+          // Interpolate 1 missing pixel
+          int blue_mid = ((int)blue[-pitch] + (int)blue[pitch] + 1)>>1;
+          int blue_off = (int)blue[0] - blue_mid;
+          int c_mid = ((int)dst[-pitch] + (int)dst[pitch] + 1)>>1;
+          dst[0] = clampbits(c_mid + blue_off, 16);
+          dst += 3;
+          blue += 3;
+        }
+      }
+    }
+
     return;
   } // End if format 30
 
@@ -269,7 +303,7 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
       w+=384;
     }
     for (int y = 0; y < h; y++) {
-      ushort16* dst = (ushort16*)mRaw->getData(0,y * (1+ (i<2))) + i;
+      ushort16* dst = (ushort16*)mRaw->getData(0,y * (1+(i<2))) + i;
       int diff1= SigmaDecode(bits);
       dst[0] = pred_left = pred_up = pred_up + diff1;
       dst+=3;
@@ -278,9 +312,9 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
         pred_left = pred_left + diff1;
         if (x < mRaw->dim.x) {
           dst[0] = pred_left;
-          if ((y&3) == 0 && ((x&15) == 0 || (x&15) == 1)) {
+/*          if ((y&3) == 0 && ((x&15) == 0 || (x&15) == 1)) {
             dst[0] = (((dst[0] - 2000) * 320) >> 8) + 2000;
-          }
+          }*/
         }
         dst += (i == 2) ? 3 : 6;
       }
