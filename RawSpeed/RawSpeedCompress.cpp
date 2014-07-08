@@ -389,7 +389,7 @@ int wmain(int argc, _TCHAR* argv[])
   if (1) {  // for memory detection
     try {
 
-#if 0
+#if 1
       CameraMetaData meta("cameras.xml");
       if (argc > 1)
         OpenFile(FileReader(argv[1]),&meta);
