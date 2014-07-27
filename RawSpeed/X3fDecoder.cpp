@@ -122,19 +122,33 @@ void X3fDecoder::decompressSigma( X3fImage &image )
   mRaw->isCFA = false;
   mRaw->createData();
   curr_image = &image;
+  int bits = 13;
 
+  if (image.format == 35) {
+    for (int i = 0; i < 3; i++) {
+      planeDim[i].x = input.getShort();
+      planeDim[i].y = input.getShort();
+    }
+    bits = 15;
+  }
   if (image.format == 30 || image.format == 35) {
     for (int i = 0; i < 3; i++)
       pred[i] = input.getShort();
 
     // Skip padding
-    input.skipBytes(14);
+    input.skipBytes(2);
 
-    createSigmaTable(&input, 15);
+    createSigmaTable(&input, bits);
 
     // Skip padding  (2 x 0x00)
-    input.skipBytes(2+4);
-    plane_offset[0] = image.dataOffset + 68;
+    if (image.format == 35) {
+      input.skipBytes(2+4);
+      plane_offset[0] = image.dataOffset + 68;
+    } else {
+      // Skip padding  (2 x 0x00)
+      input.skipBytes(2);
+      plane_offset[0] = image.dataOffset + 48;
+    }
 
     for (int i = 0; i < 3; i++) {
       plane_sizes[i] = input.getUInt();
@@ -150,40 +164,32 @@ void X3fDecoder::decompressSigma( X3fImage &image )
     mRaw->clearArea(iRectangle2D(0,0,image.width,image.height));
 
     startTasks(3);
-    int w = mRaw->dim.x/2;
-    int h = mRaw->dim.y/2;
+    //Interpolate based on blue value
+    if (image.format == 35) {
+    int w = planeDim[0].x;
+    int h = planeDim[0].y;
     for (int i = 0; i < 2;  i++) {
-      for (int y = 2; y < (h-2); y++) {
-        ushort16* dst = (ushort16*)mRaw->getData(2, y * 2) + i;
-        ushort16* blue = (ushort16*)mRaw->getData(2, y * 2) + 2;
-        int pitch = mRaw->pitch / 2;
-        for (int x = 2; x < (w-2); x++) {
+      for (int y = 0; y < h; y++) {
+        ushort16* dst = (ushort16*)mRaw->getData(0, y * 2 )+ i;
+        ushort16* dst_down = (ushort16*)mRaw->getData(0, y * 2 + 1) + i;
+        ushort16* blue = (ushort16*)mRaw->getData(0, y * 2) + 2;
+        ushort16* blue_down = (ushort16*)mRaw->getData(0, y * 2 + 1) + 2;
+        for (int x = 0; x < w; x++) {
           // Interpolate 1 missing pixel
-          int blue_mid = ((int)blue[-3] + (int)blue[3] + 1)>>1;
-          int blue_off = (int)blue[0] - blue_mid;
-          int c_mid = ((int)dst[-3] + (int)dst[3] + 1)>>1;
-          dst[0] = clampbits(c_mid + blue_off, 16);
+          int blue_mid = ((int)blue[0] + (int)blue[3] + (int)blue_down[0] + (int)blue_down[3] + 2)>>2;          
+          int avg = dst[0];
+          dst[0] = clampbits(((int)blue[0] - blue_mid) + avg, 16);
+          dst[3] = clampbits(((int)blue[3] - blue_mid) + avg, 16);
+          dst_down[0] = clampbits(((int)blue_down[0] - blue_mid) + avg, 16);
+          dst_down[3] = clampbits(((int)blue_down[3] - blue_mid) + avg, 16);
           dst += 6;
           blue += 6;
-        }
-      }
-      int pitch = mRaw->pitch / 2;
-      for (int y = 0; y < (h-2); y++) {
-        ushort16* dst = (ushort16*)mRaw->getData(0, y * 2 + 1) + i;
-        ushort16* blue = (ushort16*)mRaw->getData(0, y * 2 + 1) + 2;
-        int pitch = mRaw->pitch / 2;
-        for (int x = 0; x < (w*2); x++) {
-          // Interpolate 1 missing pixel
-          int blue_mid = ((int)blue[-pitch] + (int)blue[pitch] + 1)>>1;
-          int blue_off = (int)blue[0] - blue_mid;
-          int c_mid = ((int)dst[-pitch] + (int)dst[pitch] + 1)>>1;
-          dst[0] = clampbits(c_mid + blue_off, 16);
-          dst += 3;
-          blue += 3;
+          blue_down += 6;
+          dst_down += 6;
         }
       }
     }
-
+    }
     return;
   } // End if format 30
 
@@ -285,39 +291,48 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
     uint32 i = t->taskNo;
     if (i>3)
       ThrowRDE("X3fDecoder:Invalid plane:%u (internal error)", i);
+
+    // Subsampling (in shifts)
+    int subs = 0;
+    iPoint2D dim = mRaw->dim;
+    // Pixels to skip in right side of the image.
+    int skipX = 0;
+    if (curr_image->format == 35) {
+      dim = planeDim[i];
+      if (i < 2)
+        subs = 1;
+      if (dim.x > mRaw->dim.x) {
+        skipX = dim.x - mRaw->dim.x;
+        dim.x = mRaw->dim.x;
+      }
+    }
+    
     /* We have a weird prediction which is actually more appropriate for a CFA image */
     BitPumpMSB *bits = new BitPumpMSB(mFile->getData(plane_offset[i]), mFile->getSize()-plane_offset[i]);
     /* Initialize predictors */
-    int pred_up;
-    int pred_left;
+    int pred_up[4];
+    int pred_left[2];
+    for (int j = 0; j < 4; j++)
+      pred_up[j] = pred[i];
 
-    pred_up = pred[i];
-
-    int w = mRaw->dim.x;
-    int h = mRaw->dim.y;
-    if (i < 2) {
-      w >>= 1;
-      h >>= 1;
-    } else {
-      // For some weird reason blue is 384 pixels wider than actual image??!
-      w+=384;
-    }
-    for (int y = 0; y < h; y++) {
-      ushort16* dst = (ushort16*)mRaw->getData(0,y * (1+(i<2))) + i;
+    for (int y = 0; y < dim.y; y++) {
+      ushort16* dst = (ushort16*)mRaw->getData(0, y << subs) + i;
       int diff1= SigmaDecode(bits);
-      dst[0] = pred_left = pred_up = pred_up + diff1;
-      dst+=3;
-      for (int x = 1; x < w; x++) {
-        int diff1= SigmaDecode(bits);
-        pred_left = pred_left + diff1;
-        if (x < mRaw->dim.x) {
-          dst[0] = pred_left;
-/*          if ((y&3) == 0 && ((x&15) == 0 || (x&15) == 1)) {
-            dst[0] = (((dst[0] - 2000) * 320) >> 8) + 2000;
-          }*/
-        }
-        dst += (i == 2) ? 3 : 6;
+      int diff2 = SigmaDecode(bits);
+      dst[0] = pred_left[0] = pred_up[y & 1] = pred_up[y & 1] + diff1;
+      dst[3<<subs] = pred_left[1] = pred_up[(y & 1) + 2] = pred_up[(y & 1) + 2] + diff2;
+      dst += 6<<subs;
+      // We decode two pixels every loop
+      for (int x = 2; x < dim.x; x += 2) {
+        int diff1 = SigmaDecode(bits);
+        int diff2 = SigmaDecode(bits);
+        dst[0] = pred_left[0] = pred_left[0] + diff1;
+        dst[3<<subs] = pred_left[1] = pred_left[1] + diff2;
+        dst += 6<<subs;
       }
+      // If plane is larger than image, skip that number of pixels.
+      for (int i = 0; i < skipX; i++)
+        SigmaSkipOne(bits);
     }
     return;
   }
@@ -345,6 +360,25 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
     return;
   }
 }
+
+/* Skip a single value */
+void X3fDecoder::SigmaSkipOne(BitPumpMSB *bits) {
+  bits->fill();
+  uint32 code = bits->peekBitsNoFill(14);
+  int32 bigv = big_table[code];
+  if (bigv != 0xf) {
+    bits->skipBitsNoFill(bigv&0xff);
+    return;
+  }
+  uchar8 val = code_table[code>>6];
+  if (val == 0xff)
+    ThrowRDE("X3fDecoder: Invalid Huffman code");
+
+  uint32 code_bits = val&0xf;
+  uint32 val_bits = val>>4;
+  bits->skipBitsNoFill(code_bits+val_bits);
+}
+
 
 /* Returns a single value by reading the bitstream*/
 int X3fDecoder::SigmaDecode(BitPumpMSB *bits) {
