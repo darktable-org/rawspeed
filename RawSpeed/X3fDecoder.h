@@ -54,10 +54,12 @@ protected:
   void createSigmaTable(ByteStream *bytes, int codes);
   int SigmaDecode(BitPumpMSB *bits);
   string getIdAsString(ByteStream *bytes);
+  void SigmaSkipOne(BitPumpMSB *bits);
   X3fImage *curr_image;
   int pred[3];
   uint32 plane_sizes[3];
   uint32 plane_offset[3];
+  iPoint2D planeDim[3];
   uchar8 code_table[256];
   int32 big_table[1<<14];
   uint32 *line_offsets;
