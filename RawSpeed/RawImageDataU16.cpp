@@ -441,23 +441,24 @@ void RawImageDataU16::fixBadPixel( uint32 x, uint32 y, int component )
       fixBadPixel(x,y,i);
 }
 
+// TODO: Could be done with SSE2
 void RawImageDataU16::doLookup( int start_y, int end_y )
 {
   if (table->ntables == 1) {
     ushort16* t = table->getTable(0);
     if (table->dither) {
-      int gw = dim.x * cpp;
+      int gw = uncropped_dim.x * cpp;
       uint32* t = (uint32*)table->getTable(0);
       for (int y = start_y; y < end_y; y++) {
-        uint32 v = dim.x + y * 36959;
-        ushort16 *pixel = (ushort16*)getData(0, y);
+        uint32 v = (uncropped_dim.x + y * 13) ^ 0x45694584;
+        ushort16 *pixel = (ushort16*)getDataUncropped(0, y);
         for (int x = 0 ; x < gw; x++) {
           ushort16 p = *pixel;
           uint32 lookup = t[p];
           uint32 base = lookup & 0xffff;
           uint32 delta = lookup >> 16;
           v = 15700 *(v & 65535) + (v >> 16);
-          uint32 pix = base + ((delta * v&2047) >> 11);
+          uint32 pix = base + ((delta * (v&2047)) >> 12);
           *pixel = pix;
           pixel++;
         }
@@ -465,9 +466,9 @@ void RawImageDataU16::doLookup( int start_y, int end_y )
       return;
     }
 
-    int gw = dim.x * cpp;
+    int gw = uncropped_dim.x * cpp;
     for (int y = start_y; y < end_y; y++) {
-      ushort16 *pixel = (ushort16*)getData(0, y);
+      ushort16 *pixel = (ushort16*)getDataUncropped(0, y);
       for (int x = 0 ; x < gw; x++) {
         *pixel = t[*pixel];
         pixel ++;
@@ -493,7 +494,7 @@ void RawImageDataU16::setWithLookUp(ushort16 value, uchar8* dst) {
     uint32 delta = lookup >> 16;
     
     table->random = 15700 *(table->random & 65535) + (table->random >> 16);
-    uint32 pix = base + ((delta * table->random&2047) >> 11);
+    uint32 pix = base + ((delta * table->random&2047) >> 12);
     *dest = pix;
     return;
   }

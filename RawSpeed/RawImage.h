@@ -34,7 +34,9 @@ typedef enum {TYPE_USHORT16, TYPE_FLOAT32} RawImageType;
 
 class RawImageWorker {
 public:
-  typedef enum {SCALE_VALUES, FIX_BAD_PIXELS, APPLY_LOOKUP} RawImageWorkerTask;
+  typedef enum {
+    SCALE_VALUES = 1, FIX_BAD_PIXELS = 2, APPLY_LOOKUP = 3 | 0x1000, FULL_IMAGE = 0x1000
+  } RawImageWorkerTask;
   RawImageWorker(RawImageData *img, RawImageWorkerTask task, int start_y, int end_y);
   void startThread();
   void waitForThread();
@@ -51,7 +53,7 @@ class TableLookUp {
 public:
   TableLookUp(int ntables, bool dither);
   ~TableLookUp();
-  void setTable( int ntable, ushort16 table[65536], int nfilled);
+  void setTable(int ntable, const ushort16* table, int nfilled);
   ushort16* getTable(int n);
   const int ntables;
   uint32 random;
@@ -85,7 +87,7 @@ public:
   virtual void transferBadPixelsToMap();
   virtual void fixBadPixels();
   void expandBorder(iRectangle2D validData);
-  void setTable(ushort16 table[65536], int nfilled, bool dither);
+  void setTable(const ushort16* table, int nfilled, bool dither);
   void setTable(TableLookUp *t);
 
   bool isAllocated() {return !!data;}

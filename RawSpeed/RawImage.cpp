@@ -282,7 +282,10 @@ void RawImageData::fixBadPixels()
 
 void RawImageData::startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped )
 {
-  int height = cropped ? dim.y : uncropped_dim.y;
+  int height = (cropped) ? dim.y : uncropped_dim.y;
+  if (task & RawImageWorker::FULL_IMAGE) {
+    height = uncropped_dim.y;
+  }
 
   int threads = getThreadCount();
   if (threads <= 1) {
@@ -501,7 +504,7 @@ void RawImageData::setTable( TableLookUp *t )
   table = t;
 }
 
-void RawImageData::setTable(ushort16 table[65536], int nfilled, bool dither) {
+void RawImageData::setTable(const ushort16* table, int nfilled, bool dither) {
   TableLookUp* t = new TableLookUp(1, dither);
   t->setTable(0, table, nfilled);
   this->setTable(t);
@@ -517,7 +520,7 @@ TableLookUp::TableLookUp( int _ntables, bool _dither ) : ntables(_ntables), dith
   }
   tables = new ushort16[ntables * TABLE_SIZE];
   random = 0x49f6428a;
-  memset(tables, sizeof(ushort16) * ntables * TABLE_SIZE, 0);
+  memset(tables, 0, sizeof(ushort16) * ntables * TABLE_SIZE);
 }
 
 TableLookUp::~TableLookUp()
@@ -529,7 +532,7 @@ TableLookUp::~TableLookUp()
 }
 
 
-void TableLookUp::setTable( int ntable, ushort16 table[65536] , int nfilled) {
+void TableLookUp::setTable(int ntable, const ushort16 *table , int nfilled) {
   if (ntable > ntables) {
     ThrowRDE("Table lookup with number greater than number of tables.");
   }
@@ -541,10 +544,11 @@ void TableLookUp::setTable( int ntable, ushort16 table[65536] , int nfilled) {
     return;
   }
   for (int i = 0; i < nfilled; i++) {
-    int lower = i > 0 ? table[i-1] : table[0];
-    int upper = i < (nfilled-1) ? table[i+1] : table[nfilled-1];
+    int center = table[i];
+    int lower = i > 0 ? table[i-1] : center;
+    int upper = i < (nfilled-1) ? table[i+1] : center;
     int delta = upper - lower;
-    t[i*2] = lower;
+    t[i*2] = center - ((upper - lower) / 4);
     t[i*2+1] = delta;
   }
 
