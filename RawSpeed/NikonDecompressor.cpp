@@ -75,7 +75,7 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
   uint32 csize = metadata->getShort();
   if (csize  > 1)
     step = _max / (csize - 1);
-  if (v0 == 68 && v1 == 32 && step > 0 && !uncorrectedRawValues) {
+  if (v0 == 68 && v1 == 32 && step > 0) {
     for (uint32 i = 0; i < csize; i++)
       curve[i*step] = metadata->getShort();
     for (int i = 0; i < _max; i++)
@@ -83,7 +83,7 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
                   curve[i-i%step+step] * (i % step)) / step;
     metadata->setAbsoluteOffset(562);
     split = metadata->getShort();
-  } else if (v0 != 70 && csize <= 0x4001 && !uncorrectedRawValues) {
+  } else if (v0 != 70 && csize <= 0x4001) {
     for (uint32 i = 0; i < csize; i++) {
       curve[i] = metadata->getShort();
     }
@@ -126,7 +126,13 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
       mRaw->setWithLookUp(clampbits(pLeft2,15), (uchar8*)dest++);
     }
   }
-  mRaw->setTable(NULL);
+
+  if (uncorrectedRawValues) {
+    mRaw->setTable(curve, _max, false);
+  } else {
+    mRaw->setTable(NULL);
+  }
+
 }
 
 /*

@@ -404,9 +404,10 @@ RawImage DngDecoder::decodeRawInternal() {
   if (raw->hasEntry(LINEARIZATIONTABLE)) {
     const ushort16* intable = raw->getEntry(LINEARIZATIONTABLE)->getShortArray();
     uint32 len =  raw->getEntry(LINEARIZATIONTABLE)->count;
-    mRaw->setTable(intable, len, true);
+    mRaw->setTable(intable, len, !uncorrectedRawValues);
     if (!uncorrectedRawValues) {
       mRaw->sixteenBitLookup();
+      mRaw->setTable(NULL);
     }
 
     if (0) {
