@@ -93,15 +93,14 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
 
   mRaw->whitePoint = curve[_max-1];
   mRaw->blackLevel = curve[0];
-
-  ushort16 top = mRaw->whitePoint;
-  for (int i = _max; i < 0x8000; i++)
-    curve[i] = top;
+  if (!uncorrectedRawValues) {
+    mRaw->setTable(curve, _max, true);
+  }
 
   uint32 x, y;
   BitPumpMSB bits(mFile->getData(offset), size);
   uchar8 *draw = mRaw->getData();
-  uint32 *dest;
+  ushort16 *dest;
   uint32 pitch = mRaw->pitch;
 
   int pLeft1 = 0;
@@ -112,19 +111,22 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
     if (split && y == split) {
       initTable(huffSelect + 1);
     }
-    dest = (uint32*) & draw[y*pitch];  // Adjust destination
+    dest = (ushort16*) & draw[y*pitch];  // Adjust destination
     pUp1[y&1] += HuffDecodeNikon(bits);
     pUp2[y&1] += HuffDecodeNikon(bits);
     pLeft1 = pUp1[y&1];
     pLeft2 = pUp2[y&1];
-    dest[0] = curve[clampbits(pLeft1,15)] | ((uint32)curve[clampbits(pLeft2,15)] << 16);
+    mRaw->setWithLookUp(clampbits(pLeft1,15), (uchar8*)dest++);
+    mRaw->setWithLookUp(clampbits(pLeft2,15), (uchar8*)dest++);
     for (x = 1; x < cw; x++) {
       bits.checkPos();
       pLeft1 += HuffDecodeNikon(bits);
       pLeft2 += HuffDecodeNikon(bits);
-      dest[x] = curve[clampbits(pLeft1,15)] | ((uint32)curve[clampbits(pLeft2,15)] << 16);
+      mRaw->setWithLookUp(clampbits(pLeft1,15), (uchar8*)dest++);
+      mRaw->setWithLookUp(clampbits(pLeft2,15), (uchar8*)dest++);
     }
   }
+  mRaw->setTable(NULL);
 }
 
 /*

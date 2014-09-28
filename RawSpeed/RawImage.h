@@ -34,7 +34,7 @@ typedef enum {TYPE_USHORT16, TYPE_FLOAT32} RawImageType;
 
 class RawImageWorker {
 public:
-  typedef enum {SCALE_VALUES, FIX_BAD_PIXELS} RawImageWorkerTask;
+  typedef enum {SCALE_VALUES, FIX_BAD_PIXELS, APPLY_LOOKUP} RawImageWorkerTask;
   RawImageWorker(RawImageData *img, RawImageWorkerTask task, int start_y, int end_y);
   void startThread();
   void waitForThread();
@@ -45,6 +45,18 @@ protected:
   RawImageWorkerTask task;
   int start_y;
   int end_y;
+};
+
+class TableLookUp {
+public:
+  TableLookUp(int ntables, bool dither);
+  ~TableLookUp();
+  void setTable( int ntable, ushort16 table[65536], int nfilled);
+  ushort16* getTable(int n);
+  const int ntables;
+  uint32 random;
+  ushort16* tables;
+  const bool dither;
 };
 
 class RawImageData
@@ -68,9 +80,13 @@ public:
   iPoint2D getCropOffset();
   virtual void scaleBlackWhite() = 0;
   virtual void calculateBlackAreas() = 0;
+  virtual void setWithLookUp(ushort16 value, uchar8* dst) = 0;
+  virtual void sixteenBitLookup();
   virtual void transferBadPixelsToMap();
   virtual void fixBadPixels();
   void expandBorder(iRectangle2D validData);
+  void setTable(ushort16 table[65536], int nfilled, bool dither);
+  void setTable(TableLookUp *t);
 
   bool isAllocated() {return !!data;}
   void createBadPixelMap();
@@ -112,6 +128,7 @@ protected:
   RawImageData(void);
   RawImageData(iPoint2D dim, uint32 bpp, uint32 cpp=1);
   virtual void scaleValues(int start_y, int end_y) = 0;
+  virtual void doLookup(int start_y, int end_y) = 0;
   virtual void fixBadPixel( uint32 x, uint32 y, int component = 0) = 0;
   void fixBadPixelsThread(int start_y, int end_y);
   void startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped );
@@ -123,17 +140,21 @@ protected:
   pthread_mutex_t mymutex;
   iPoint2D mOffset;
   iPoint2D uncropped_dim;
+  TableLookUp *table;
 };
+
 
 class RawImageDataU16 : public RawImageData
 {
 public:
   virtual void scaleBlackWhite();
   virtual void calculateBlackAreas();
+  virtual void setWithLookUp(ushort16 value, uchar8* dst);
 
 protected:
   virtual void scaleValues(int start_y, int end_y);
   virtual void fixBadPixel( uint32 x, uint32 y, int component = 0);
+  virtual void doLookup(int start_y, int end_y);
 
   RawImageDataU16(void);
   RawImageDataU16(iPoint2D dim, uint32 cpp=1);
@@ -145,10 +166,12 @@ class RawImageDataFloat : public RawImageData
 public:
   virtual void scaleBlackWhite();
   virtual void calculateBlackAreas();
+  virtual void setWithLookUp(ushort16 value, uchar8* dst);
 
 protected:
   virtual void scaleValues(int start_y, int end_y);
   virtual void fixBadPixel( uint32 x, uint32 y, int component = 0);
+  virtual void doLookup(int start_y, int end_y);
   RawImageDataFloat(void);
   RawImageDataFloat(iPoint2D dim, uint32 cpp=1);
   friend class RawImage;
