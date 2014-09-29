@@ -458,7 +458,7 @@ void RawImageDataU16::doLookup( int start_y, int end_y )
           uint32 base = lookup & 0xffff;
           uint32 delta = lookup >> 16;
           v = 15700 *(v & 65535) + (v >> 16);
-          uint32 pix = base + ((delta * (v&2047)) >> 12);
+          uint32 pix = base + (((delta * (v&2047) + 1024)) >> 12);
           *pixel = pix;
           pixel++;
         }
@@ -494,7 +494,7 @@ void RawImageDataU16::setWithLookUp(ushort16 value, uchar8* dst) {
     uint32 delta = lookup >> 16;
     
     table->random = 15700 *(table->random & 65535) + (table->random >> 16);
-    uint32 pix = base + ((delta * table->random&2047) >> 12);
+    uint32 pix = base + ((delta * (table->random&2047) + 1024) >> 12);
     *dest = pix;
     return;
   }

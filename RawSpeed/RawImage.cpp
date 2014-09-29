@@ -548,7 +548,7 @@ void TableLookUp::setTable(int ntable, const ushort16 *table , int nfilled) {
     int lower = i > 0 ? table[i-1] : center;
     int upper = i < (nfilled-1) ? table[i+1] : center;
     int delta = upper - lower;
-    t[i*2] = center - ((upper - lower) / 4);
+    t[i*2] = center - ((upper - lower + 2) / 4);
     t[i*2+1] = delta;
   }
 
