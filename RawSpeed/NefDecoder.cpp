@@ -212,7 +212,7 @@ void NefDecoder::DecodeUncompressed() {
     else
       slice.h = yPerSlice;
 
-    offY += yPerSlice;
+    offY = MIN(height, offY + yPerSlice);
 
     if (mFile->isValid(slice.offset + slice.count)) // Only decode if size is valid
       slices.push_back(slice);
