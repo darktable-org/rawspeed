@@ -121,7 +121,7 @@ void RawImageDataU16::scaleBlackWhite() {
   if ((blackAreas.empty() && blackLevelSeparate[0] < 0 && blackLevel < 0) || whitePoint >= 65536) {  // Estimate
     int b = 65536;
     int m = 0;
-    for (int row = skipBorder*cpp;row < (dim.y - skipBorder);row++) {
+    for (int row = skipBorder; row < (dim.y - skipBorder);row++) {
       ushort16 *pixel = (ushort16*)getData(skipBorder, row);
       for (int col = skipBorder ; col < gw ; col++) {
         b = MIN(*pixel, b);
