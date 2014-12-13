@@ -457,7 +457,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
   const uchar8 *in = input.getData();
   if (input.getRemainSize() < (w*h*3)) {
     if ((uint32)input.getRemainSize() > w*3) {
-      h = input.getRemainSize() / w*3 - 1;
+      h = input.getRemainSize() / (w*3) - 1;
       mRaw->setError("Image truncated (file is too short)");
     } else
       ThrowIOE("DecodeNikonSNef: Not enough data to decode a single line. Image file truncated.");
