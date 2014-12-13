@@ -569,13 +569,14 @@ void RawDecoder::startThreads() {
     t[i].start_y = y_offset;
     t[i].end_y = MIN(y_offset + y_per_thread, mRaw->dim.y);
     t[i].parent = this;
-    pthread_create(&t[i].threadid, &attr, RawDecoderDecodeThread, &t[i]);
+    if (pthread_create(&t[i].threadid, &attr, RawDecoderDecodeThread, &t[i]) != 0) {
+      ThrowRDE("RawDecoder::startThreads: Unable to start thread");
+    }
     y_offset = t[i].end_y;
   }
 
-  void *status;
   for (uint32 i = 0; i < threads; i++) {
-    pthread_join(t[i].threadid, &status);
+    pthread_join(t[i].threadid, NULL);
   }
   if (mRaw->errors.size() >= threads)
     ThrowRDE("RawDecoder::startThreads: All threads reported errors. Cannot load image.");
