@@ -367,7 +367,7 @@ void RawImageDataFloat::doLookup( int start_y, int end_y ) {
   ThrowRDE("Float point lookup tables not implemented");
 }
 
-void RawImageDataFloat::setWithLookUp(ushort16 value, uchar8* dst ) {
+void RawImageDataFloat::setWithLookUp(ushort16 value, uchar8* dst, uint32* random) {
   float* dest = (float*)dst;
   if (table == NULL) {
     *dest = (float)value * (1.0f/65535);

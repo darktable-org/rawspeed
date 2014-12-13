@@ -56,7 +56,6 @@ public:
   void setTable(int ntable, const ushort16* table, int nfilled);
   ushort16* getTable(int n);
   const int ntables;
-  uint32 random;
   ushort16* tables;
   const bool dither;
 };
@@ -82,7 +81,7 @@ public:
   iPoint2D getCropOffset();
   virtual void scaleBlackWhite() = 0;
   virtual void calculateBlackAreas() = 0;
-  virtual void setWithLookUp(ushort16 value, uchar8* dst) = 0;
+  virtual void setWithLookUp(ushort16 value, uchar8* dst, uint32* random) = 0;
   virtual void sixteenBitLookup();
   virtual void transferBadPixelsToMap();
   virtual void fixBadPixels();
@@ -151,7 +150,7 @@ class RawImageDataU16 : public RawImageData
 public:
   virtual void scaleBlackWhite();
   virtual void calculateBlackAreas();
-  virtual void setWithLookUp(ushort16 value, uchar8* dst);
+  virtual void setWithLookUp(ushort16 value, uchar8* dst, uint32* random);
 
 protected:
   virtual void scaleValues(int start_y, int end_y);
@@ -168,7 +167,7 @@ class RawImageDataFloat : public RawImageData
 public:
   virtual void scaleBlackWhite();
   virtual void calculateBlackAreas();
-  virtual void setWithLookUp(ushort16 value, uchar8* dst);
+  virtual void setWithLookUp(ushort16 value, uchar8* dst, uint32* random);
 
 protected:
   virtual void scaleValues(int start_y, int end_y);

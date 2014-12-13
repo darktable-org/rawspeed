@@ -284,6 +284,7 @@ void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
     ushort16* dest = (ushort16*) & data[y*pitch];
     // Realign
     bits.setAbsoluteOffset((w*8*y) >> 3);
+    uint32 random = bits.peekBits(24);
 
     // Process 32 pixels (16x2) per loop.
     for (uint32 x = 0; x < w - 30;) {
@@ -303,7 +304,7 @@ void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
           if (p > 0x7ff)
             p = 0x7ff;
         }
-        mRaw->setWithLookUp(p << 1, (uchar8*)&dest[x+i*2]);
+        mRaw->setWithLookUp(p << 1, (uchar8*)&dest[x+i*2], &random);
       }
       x += x & 1 ? 31 : 1;  // Skip to next 32 pixels
     }

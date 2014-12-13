@@ -519,7 +519,6 @@ TableLookUp::TableLookUp( int _ntables, bool _dither ) : ntables(_ntables), dith
     ThrowRDE("Cannot construct 0 tables");
   }
   tables = new ushort16[ntables * TABLE_SIZE];
-  random = 0x49f6428a;
   memset(tables, 0, sizeof(ushort16) * ntables * TABLE_SIZE);
 }
 
