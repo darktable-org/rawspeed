@@ -41,7 +41,14 @@ public:
   virtual void checkSupportInternal(CameraMetaData *meta);
   virtual TiffIFD* getRootIFD() {return mRootIFD;}
 private:
-  void decodeCompressed( TiffIFD* raw);
+  typedef struct {
+    uchar8 encLen;
+    uchar8 diffLen;
+  } encTableItem;
+
+  void decodeCompressed(TiffIFD* raw);
+  void decodeCompressed2(TiffIFD* raw, int bits);
+  int32 samsungDiff (BitPumpMSB &pump, encTableItem *tbl);
   TiffIFD *mRootIFD;
   ByteStream *b;
 };

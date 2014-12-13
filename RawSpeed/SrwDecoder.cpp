@@ -56,7 +56,7 @@ RawImage SrwDecoder::decodeRawInternal() {
   int compression = raw->getEntry(COMPRESSION)->getInt();
   int bits = raw->getEntry(BITSPERSAMPLE)->getInt();
 
-  if (32769 != compression && 32770 != compression )
+  if (32769 != compression && 32770 != compression && 32772 != compression)
     ThrowRDE("Srw Decoder: Unsupported compression");
 
   if (32769 == compression)
@@ -89,6 +89,18 @@ RawImage SrwDecoder::decodeRawInternal() {
       }
       return mRaw;
     }
+  }
+  if (32772 == compression)
+  {
+    uint32 nslices = raw->getEntry(STRIPOFFSETS)->count;
+    if (nslices != 1)
+      ThrowRDE("Srw Decoder: Only one slice supported, found %u", nslices);
+    try {
+      decodeCompressed2(raw, bits);
+    } catch (RawDecoderException& e) {
+      mRaw->setError(e.what());
+    }
+    return mRaw;
   }
   ThrowRDE("Srw Decoder: Unsupported compression");
   return mRaw;
@@ -181,8 +193,88 @@ void SrwDecoder::decodeCompressed( TiffIFD* raw )
       img_up2 += 16;
     }
   }
+
+  // Swap red and blue pixels to get the final CFA pattern
+  for (uint32 y = 0; y < height-1; y+=2) {
+    ushort16* topline = (ushort16*)mRaw->getData(0, y);
+    ushort16* bottomline = (ushort16*)mRaw->getData(0, y+1);
+    for (uint32 x = 0; x < width-1; x += 2) {
+      ushort16 temp = topline[1];
+      topline[1] = bottomline[0];
+      bottomline[0] = temp;
+      topline += 2;
+      bottomline += 2;
+    }
+  }
 }
 
+// Decoder for compressed srw files (NX3000 and later)
+void SrwDecoder::decodeCompressed2( TiffIFD* raw, int bits)
+{
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
+  uint32 offset = raw->getEntry(STRIPOFFSETS)->getInt();
+
+  mRaw->dim = iPoint2D(width, height);
+  mRaw->createData();
+
+  // This format has a variable length encoding of how many bits are needed
+  // to encode the difference between pixels, we use a table to process it
+  // that has two values, the first the number of bits that were used to 
+  // encode, the second the number of bits that come after with the difference
+  // The table has 14 entries because the difference can have between 0 (no 
+  // difference) and 13 bits (differences between 12 bits numbers can need 13)
+  const ushort16 tab[14][2] = {{3,4}, {3,7}, {2,6}, {2,5}, {4,3}, {6,0}, {7,9},
+                               {8,10}, {9,11}, {10,12}, {10,13}, {5,1}, {4,8}, {4,2}};
+  encTableItem tbl[1024];
+  ushort16 vpred[2][2] = {{0,0},{0,0}}, hpred[2];
+
+  // We generate a 1024 entry table (to be addressed by reading 10 bits) by 
+  // consecutively filling in 2^(10-N) positions where N is the variable number of
+  // bits of the encoding. So for example 4 is encoded with 3 bits so the first
+  // 2^(10-3)=128 positions are set with 3,4 so that any time we read 000 we 
+  // know the next 4 bits are the difference. We read 10 bits because that is
+  // the maximum number of bits used in the variable encoding (for the 12 and 
+  // 13 cases)
+  uint32 n = 0;
+  for (uint32 i=0; i < 14; i++) {
+    for(int32 c = 0; c < (1024 >> tab[i][0]); c++) {
+      tbl[n  ].encLen = tab[i][0];
+      tbl[n++].diffLen = tab[i][1];
+    }
+  }
+
+  BitPumpMSB pump(mFile->getData(offset),mFile->getSize() - offset);
+  for (uint32 y = 0; y < height; y++) {
+    ushort16* img = (ushort16*)mRaw->getData(0, y);
+    for (uint32 x = 0; x < width; x++) {
+      int32 diff = samsungDiff(pump, tbl);
+      if (x < 2)
+        hpred[x] = vpred[y & 1][x] += diff;
+      else
+        hpred[x & 1] += diff;
+      img[x] = hpred[x & 1];
+      if (img[x] >> bits)
+        ThrowRDE("SRW: Error: decoded value out of bounds at %d:%d", x, y);
+    }
+  }
+}
+
+int32 SrwDecoder::samsungDiff (BitPumpMSB &pump, encTableItem *tbl)
+{
+  // We read 10 bits to index into our table
+  uint32 c = pump.peekBits(10);
+  // Skip the bits that were used to encode this case
+  pump.getBitsSafe(tbl[c].encLen);
+  // Read the number of bits the table tells me
+  int32 len = tbl[c].diffLen;
+  int32 diff = pump.getBitsSafe(len);
+
+  // If the first bit is 0 we need to turn this into a negative number
+  if (len && (diff & (1 << (len-1))) == 0)
+    diff -= (1 << len) - 1;
+  return diff;
+}
 
 void SrwDecoder::checkSupportInternal(CameraMetaData *meta) {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
