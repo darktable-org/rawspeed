@@ -480,8 +480,8 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
 
   float wb_r = (float)wba[0] / (float)wba[1];
   float wb_b = (float)wba[2] / (float)wba[3];
-  float wb_g1 = (float)wba[4] / (float)wba[5];
-  float wb_g2 = (float)wba[6] / (float)wba[7];
+  //float wb_g1 = (float)wba[4] / (float)wba[5];
+  //float wb_g2 = (float)wba[6] / (float)wba[7];
 
   // Since we are dealing with calulated data (YCbCr -> unwhitebalanced RGB), we upscale the result to keep
   // better precision.
