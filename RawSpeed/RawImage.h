@@ -124,6 +124,9 @@ public:
   // >1 means the image needs to be stretched horizontally (2 mean 2x)
   double pixelAspectRatio;
 
+  // White balance coefficients of the image
+  float wbCoeffs[3];
+
 protected:
   RawImageType dataType;
   RawImageData(void);
