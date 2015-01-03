@@ -59,6 +59,7 @@ ImageMetaData::ImageMetaData(void) {
   subsampling.x = subsampling.y = 1;
   isoSpeed = 0;
   pixelAspectRatio = 1;
+  fujiRotationPos = 0;
   wbCoeffs[0] = NAN;
   wbCoeffs[1] = NAN;
   wbCoeffs[2] = NAN;
