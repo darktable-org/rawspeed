@@ -530,7 +530,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
 
       float cb2 = cb;
       float cr2 = cr;
-      // Interpolate right pixel . We assume the sample is aligned with left pixel.
+      // Interpolate right pixel. We assume the sample is aligned with left pixel.
       if ((x+6) < w*3) {
         g5 = in[4];
         g6 = in[5];
