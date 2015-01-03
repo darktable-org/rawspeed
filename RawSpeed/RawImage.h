@@ -63,7 +63,7 @@ public:
 
 class ImageMetaData {
 public:
-  ImageMetaData::ImageMetaData(void);
+  ImageMetaData(void);
 
   // Aspect ratio of the pixels, usually 1 but some cameras need scaling
   // <1 means the image needs to be stretched vertically, (0.5 means 2x)
