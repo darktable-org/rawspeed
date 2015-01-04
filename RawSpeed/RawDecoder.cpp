@@ -540,7 +540,7 @@ void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model, st
   // (the same order as the in the CFA tag)
   // A hint could be:
   // <Hint name="override_cfa_black" value="10,20,30,20"/>
-  if (cam->hints.find(string("override_cfa_black")) != hints.end()) {
+  if (cam->hints.find(string("override_cfa_black")) != cam->hints.end()) {
     string rgb = cam->hints.find(string("override_cfa_black"))->second;
     vector<string> v = split_string(rgb, ',');
     if (v.size() != 4) {
