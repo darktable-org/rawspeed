@@ -141,7 +141,7 @@ RawDecoder* RawParser::getDecoder() {
     CiffParser p(mInput);
     p.parseData();
     return p.getDecoder();
-  } catch (CiffParserException &e) {
+  } catch (CiffParserException) {
   }
 
   // File could not be decoded, so no further options for now.
