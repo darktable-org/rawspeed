@@ -41,7 +41,7 @@ RawParser::RawParser(FileMap* inputData): mInput(inputData) {
 RawParser::~RawParser(void) {
 }
 
-RawDecoder* RawParser::getDecoder() {
+RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
   const unsigned char* data = mInput->getData(0);
   // We need some data.
   // For now it is 104 bytes for RAF images.
@@ -144,8 +144,14 @@ RawDecoder* RawParser::getDecoder() {
   } catch (CiffParserException) {
   }
 
-  // File could not be decoded, so no further options for now.
+  // Detect camera on filesize (CHDK).
+  if (meta != NULL && meta->hasChdkCamera(mInput->getSize())) {
+    Camera* c = meta->getChdkCamera(mInput->getSize());
 
+    // TODO: Create decoder and return
+  }
+
+  // File could not be decoded, so no further options for now.
   ThrowRDE("No decoder found. Sorry.");
   return NULL;
 }
