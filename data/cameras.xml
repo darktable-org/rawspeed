@@ -5295,4 +5295,20 @@
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="31456"/>
 	</Camera>
+	<!-- CHDK Cameras -->
+	<Camera make="AVT" model="F-201C" mode="chdk">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">RG</ColorRow>
+			<ColorRow y="1">GB</ColorRow>
+		</CFA2>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="255"/>
+		<Hints>
+			<Hint name="filesize" value="1920000"/>
+			<Hint name="bits" value="8"/>
+			<Hint name="full_width" value="1600"/>
+			<Hint name="full_height" value="1200"/>
+		</Hints>
+	</Camera>
+
 </Cameras>
