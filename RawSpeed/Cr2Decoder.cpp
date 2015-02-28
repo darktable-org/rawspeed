@@ -211,7 +211,7 @@ void Cr2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
      * Canon PowerShot cameras (color_data->count == 5120) identify this tag
      * as TIFF_UNDEFINED, while they still write normal TIFF_SHORT data there
      */
-    if (color_data->type == TIFF_SHORT || color_data->count == 5120) {
+    if ((color_data->type == TIFF_SHORT || color_data->count == 5120) && color_data->count >= (uint32)(offset/2) + 3) {
       const ushort16* data = color_data->getShortArray();
 
       // RGGB !
@@ -220,11 +220,14 @@ void Cr2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
       {
         cam_mul[c] = (float) data[offset/2 + c];
       }
-
-      const float green = (cam_mul[1] + cam_mul[2]) / 2.0f;
-      mRaw->metadata.wbCoeffs[0] = cam_mul[0] / green;
-      mRaw->metadata.wbCoeffs[1] = 1.0f;
-      mRaw->metadata.wbCoeffs[2] = cam_mul[3] / green;
+      if (cam_mul[1] + cam_mul[2] > 0) {
+        const float green = (cam_mul[1] + cam_mul[2]) / 2.0f;
+        mRaw->metadata.wbCoeffs[0] = cam_mul[0] / green;
+        mRaw->metadata.wbCoeffs[1] = 1.0f;
+        mRaw->metadata.wbCoeffs[2] = cam_mul[3] / green;
+      } else {
+        writeLog(DEBUG_PRIO_INFO, "CR2 Decoder: Invalid WB; Green was 0.");
+      }
     } else {
       writeLog(DEBUG_PRIO_INFO, "CR2 Decoder: CanonColorData has to be SHORT, %d found.\n", color_data->type);
     }
@@ -237,27 +240,34 @@ void Cr2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
     {
 
       TiffEntry *shot_info = mRootIFD->getEntryRecursive(CANONSHOTINFO);
-      ushort16 wb_index = shot_info->getShortArray()[14/2];
+      if (shot_info->type == TIFF_SHORT && shot_info->count >= 7) {
+        ushort16 wb_index = shot_info->getShortArray()[14/2];
 
-      /* Canon PowerShot G9 */
-      TiffEntry *g9_wb = mRootIFD->getEntryRecursive(CANONPOWERSHOTG9WB);
-      if (g9_wb->type == TIFF_BYTE) {
-        int wb_offset = (wb_index < 18) ? "012347800000005896"[wb_index]-'0' : 0;
-        wb_offset = wb_offset*32 + 8;
+        /* Canon PowerShot G9 */
+        TiffEntry *g9_wb = mRootIFD->getEntryRecursive(CANONPOWERSHOTG9WB);
+        if (g9_wb->type == TIFF_BYTE) {
+          int wb_offset = (wb_index < 18) ? "012347800000005896"[wb_index]-'0' : 0;
+          wb_offset = wb_offset*32 + 8;
 
-        // GRBG !
-        float cam_mul[4];
-        for(int c = 0; c < 4; c++)
-        {
-          cam_mul[c] = (float) get4LE(g9_wb->getData(), wb_offset + 4*c);
+          if (g9_wb->count >= (uint32)wb_offset + 4*3) {
+            // GRBG !
+            float cam_mul[4];
+            for(int c = 0; c < 4; c++) {
+              cam_mul[c] = (float) get4LE(g9_wb->getData(), wb_offset + 4*c);
+            }
+
+            const float green = (cam_mul[0] + cam_mul[3]) / 2.0f;
+            mRaw->metadata.wbCoeffs[0] = cam_mul[1] / green;
+            mRaw->metadata.wbCoeffs[1] = 1.0f;
+            mRaw->metadata.wbCoeffs[2] = cam_mul[2] / green;
+          } else {
+            writeLog(DEBUG_PRIO_INFO, "CR2 Decoder: CANONPOWERSHOTG9WB is too small. Count is %d, but should be at least %d", g9_wb->count, wb_offset + 4*3);
+          }
+        } else {
+          writeLog(DEBUG_PRIO_INFO, "CR2 Decoder: CANONPOWERSHOTG9WB has to be BYTE, %d found.", g9_wb->type);
         }
-
-        const float green = (cam_mul[0] + cam_mul[3]) / 2.0f;
-        mRaw->metadata.wbCoeffs[0] = cam_mul[1] / green;
-        mRaw->metadata.wbCoeffs[1] = 1.0f;
-        mRaw->metadata.wbCoeffs[2] = cam_mul[2] / green;
       } else {
-        writeLog(DEBUG_PRIO_INFO, "CR2 Decoder: CANONPOWERSHOTG9WB has to be BYTE, %d found.", g9_wb->type);
+        writeLog(DEBUG_PRIO_INFO, "CR2 Decoder: CANONSHOTINFO has to be SHORT, %d found.", shot_info->type);
       }
     }
   }
