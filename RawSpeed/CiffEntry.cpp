@@ -28,6 +28,7 @@ namespace RawSpeed {
 
 CiffEntry::CiffEntry(FileMap* f, uint32 value_data, uint32 offset) {
   own_data = NULL;
+  CHECKSIZE(offset);
   unsigned short p = *(unsigned short*)f->getData(offset);
   tag = (CiffTag) (p & 0x3fff);
   ushort16 datalocation = (p & 0xc000);
