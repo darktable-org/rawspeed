@@ -222,6 +222,22 @@
 				Name="Parsers"
 				>
 				<File
+					RelativePath=".\CiffEntry.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CiffIFD.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CiffParser.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CiffParserException.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\RawParser.cpp"
 					>
 				</File>
@@ -359,6 +375,10 @@
 				</File>
 				<File
 					RelativePath=".\Cr2Decoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CrwDecoder.cpp"
 					>
 				</File>
 				<File
@@ -584,6 +604,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\CrwDecoder.h"
+					>
+				</File>
+				<File
 					RelativePath=".\DcrDecoder.h"
 					>
 				</File>
@@ -683,6 +707,26 @@
 			<Filter
 				Name="Parsers"
 				>
+				<File
+					RelativePath=".\CiffEntry.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CiffIFD.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CiffParser.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CiffParserException.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CiffTag.h"
+					>
+				</File>
 				<File
 					RelativePath=".\RawParser.h"
 					>
