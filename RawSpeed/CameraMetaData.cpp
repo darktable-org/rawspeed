@@ -89,7 +89,7 @@ void CameraMetaData::addCamera( Camera* cam )
   } else {
     cameras[id] = cam;
   }
-  if (0 == cam->mode.compare("chdk")) {
+  if (string::npos != cam->mode.find("chdk")) {
     if (cam->hints.find("filesize") == cam->hints.end()) {
       writeLog(DEBUG_PRIO_WARNING, "CameraMetaData: CHDK camera: %s %s, no \"filesize\" hint set!\n", cam->make.c_str(), cam->model.c_str());
     } else {
