@@ -6,6 +6,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2015 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -147,7 +148,7 @@ RawImage Cr2Decoder::decodeRawInternal() {
 void Cr2Decoder::checkSupportInternal(CameraMetaData *meta) {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
   if (data.empty())
-    ThrowRDE("CR2 Support check: Model name found");
+    ThrowRDE("CR2 Support check: Model name not found");
   if (!data[0]->hasEntry(MAKE))
     ThrowRDE("CR2 Support: Make name not found");
   string make = data[0]->getEntry(MAKE)->getString();
@@ -190,6 +191,77 @@ void Cr2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
     iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getInt();
 
+  // Fetch the white balance
+  if (mRootIFD->hasEntryRecursive(CANONCOLORDATA)) {
+    TiffEntry *color_data = mRootIFD->getEntryRecursive(CANONCOLORDATA);
+
+    // this entry is a big table, and different cameras store used WB in
+    // different parts, so find the offset
+
+    // correct offset for most cameras
+    int offset = 126;
+
+    // check for the hint that we need to use other offset
+    if (hints.find("wb_offset") != hints.end()) {
+      stringstream wb_offset(hints.find("wb_offset")->second);
+      wb_offset >> offset;
+    }
+
+    /*
+     * Canon PowerShot cameras (color_data->count == 5120) identify this tag
+     * as TIFF_UNDEFINED, while they still write normal TIFF_SHORT data there
+     */
+    if (color_data->type == TIFF_SHORT || color_data->count == 5120) {
+      const ushort16* data = color_data->getShortArray();
+
+      // RGGB !
+      float cam_mul[4];
+      for(int c = 0; c < 4; c++)
+      {
+        cam_mul[c] = (float) data[offset/2 + c];
+      }
+
+      const float green = (cam_mul[1] + cam_mul[2]) / 2.0f;
+      mRaw->metadata.wbCoeffs[0] = cam_mul[0] / green;
+      mRaw->metadata.wbCoeffs[1] = 1.0f;
+      mRaw->metadata.wbCoeffs[2] = cam_mul[3] / green;
+    } else {
+      writeLog(DEBUG_PRIO_INFO, "CR2 Decoder: CanonColorData has to be SHORT, %d found.\n", color_data->type);
+    }
+  } else {
+    vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
+
+    if(make.compare("Canon") == 0 && model.compare("Canon PowerShot G9") == 0 &&
+        mRootIFD->hasEntryRecursive(CANONSHOTINFO) &&
+        mRootIFD->hasEntryRecursive(CANONPOWERSHOTG9WB))
+    {
+
+      TiffEntry *shot_info = mRootIFD->getEntryRecursive(CANONSHOTINFO);
+      ushort16 wb_index = shot_info->getShortArray()[14/2];
+
+      /* Canon PowerShot G9 */
+      TiffEntry *g9_wb = mRootIFD->getEntryRecursive(CANONPOWERSHOTG9WB);
+      if (g9_wb->type == TIFF_BYTE) {
+        int wb_offset = (wb_index < 18) ? "012347800000005896"[wb_index]-'0' : 0;
+        wb_offset = wb_offset*32 + 8;
+
+        // GRBG !
+        float cam_mul[4];
+        for(int c = 0; c < 4; c++)
+        {
+          cam_mul[c] = (float) get4LE(g9_wb->getData(), wb_offset + 4*c);
+        }
+
+        const float green = (cam_mul[0] + cam_mul[3]) / 2.0f;
+        mRaw->metadata.wbCoeffs[0] = cam_mul[1] / green;
+        mRaw->metadata.wbCoeffs[1] = 1.0f;
+        mRaw->metadata.wbCoeffs[2] = cam_mul[2] / green;
+      } else {
+        writeLog(DEBUG_PRIO_INFO, "CR2 Decoder: CANONPOWERSHOTG9WB has to be BYTE, %d found.", g9_wb->type);
+      }
+    }
+  }
+
   setMetaData(meta, make, model, mode, iso);
 
 }
@@ -208,11 +280,11 @@ int Cr2Decoder::getHue() {
 
 // Interpolate and convert sRaw data.
 void Cr2Decoder::sRawInterpolate() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag((TiffTag)0x4001);
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CANONCOLORDATA);
   if (data.empty())
     ThrowRDE("CR2 sRaw: Unable to locate WB info.");
 
-  const ushort16 *wb_data = data[0]->getEntry((TiffTag)0x4001)->getShortArray();
+  const ushort16 *wb_data = data[0]->getEntry(CANONCOLORDATA)->getShortArray();
 
   // Offset to sRaw coefficients used to reconstruct uncorrected RGB data.
   wb_data = &wb_data[4+(126+22)/2];
