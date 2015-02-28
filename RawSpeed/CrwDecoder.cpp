@@ -30,12 +30,20 @@ namespace RawSpeed {
 CrwDecoder::CrwDecoder(CiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
   decoderVersion = 0;
+  mHuff[0] = NULL;
+  mHuff[1] = NULL;
 }
 
 CrwDecoder::~CrwDecoder(void) {
   if (mRootIFD)
     delete mRootIFD;
   mRootIFD = NULL;
+  if (mHuff[0] != NULL)
+    _aligned_free(mHuff[0]);
+  if (mHuff[1] != NULL)
+    _aligned_free(mHuff[1]);  
+  mHuff[0] = NULL;
+  mHuff[1] = NULL;
 }
 
 RawImage CrwDecoder::decodeRawInternal() {
@@ -190,27 +198,39 @@ void CrwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
         1111111           0xff
  */
 
-ushort16 * CrwDecoder::makeDecoder (const uchar8 *source)
+void CrwDecoder::makeDecoder (int n, const uchar8 *source)
 {
   int max, len, h, i, j;
   const uchar8 *count;
-  ushort16 *huff;
+
+  if (n > 1) {
+    ThrowRDE("CRW: Invalid table number specified");
+  }
 
   count = (source += 16) - 17;
   for (max=16; max && !count[max]; max--);
-  huff = (ushort16 *) calloc (1 + (1 << max), sizeof *huff);
+
+  if (mHuff[n] != NULL) {
+    _aligned_free(mHuff[n]);
+    mHuff[n] = NULL;
+  }
+
+  ushort16* huff = (ushort16 *) _aligned_malloc((1 + (1 << max)* sizeof(ushort16)), 16);
+  
   if (!huff)
     ThrowRDE("CRW: Couldn't allocate table");
+
   huff[0] = max;
   for (h=len=1; len <= max; len++)
     for (i=0; i < count[len]; i++, ++source)
       for (j=0; j < 1 << (max-len); j++)
         if (h <= 1 << max)
           huff[h++] = len << 8 | *source;
-  return huff;
+
+  mHuff[n] = huff;
 }
 
-void CrwDecoder::initHuffTables (uint32 table, ushort16 *huff[2])
+void CrwDecoder::initHuffTables (uint32 table)
 {
   static const uchar8 first_tree[3][29] = {
     { 0,1,4,2,3,1,2,0,0,0,0,0,0,0,0,0,
@@ -267,8 +287,8 @@ void CrwDecoder::initHuffTables (uint32 table, ushort16 *huff[2])
       0xd3,0xaa,0xc4,0xca,0xf2,0xb1,0xe4,0xd1,0x83,0x63,0xea,0xc3,
       0xe2,0x82,0xf1,0xa3,0xc2,0xa1,0xc1,0xe3,0xa2,0xe1,0xff,0xff  }
   };
-  huff[0] = makeDecoder(first_tree[table]);
-  huff[1] = makeDecoder(second_tree[table]);
+  makeDecoder(0, first_tree[table]);
+  makeDecoder(1, second_tree[table]);
 }
 
 uint32 CrwDecoder::getbithuff (BitPumpJPEG &pump, int nbits, ushort16 *huff)
@@ -282,11 +302,11 @@ uint32 CrwDecoder::getbithuff (BitPumpJPEG &pump, int nbits, ushort16 *huff)
 
 void CrwDecoder::decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 height)
 {
-  ushort16 *huff[2];
   int nblocks;
   int block, diffbuf[64], leaf, len, diff, carry=0, pnum=0, base[2];
 
-  initHuffTables (dec_table, huff);
+  initHuffTables (dec_table);
+
   uint32 offset = 540 + lowbits*height*width/4;
   ByteStream input(mFile->getData(offset), mFile->getSize() - offset);
   BitPumpJPEG pump(mFile->getData(offset),mFile->getSize() - offset);
@@ -297,7 +317,7 @@ void CrwDecoder::decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 
     for (block=0; block < nblocks; block++) {
       memset (diffbuf, 0, sizeof diffbuf);
       for (uint32 i=0; i < 64; i++ ) {
-        leaf = getbithuff(pump, *huff[i > 0], huff[i > 0]+1);
+        leaf = getbithuff(pump, *mHuff[i > 0], mHuff[i > 0]+1);
         if (leaf == 0 && i) break;
         if (leaf == 0xff) continue;
         i  += leaf >> 4;
@@ -333,8 +353,6 @@ void CrwDecoder::decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 
       }
     }
   }
-  free(huff[0]);
-  free(huff[1]);
 }
 
 } // namespace RawSpeed
