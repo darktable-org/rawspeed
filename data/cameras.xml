@@ -107,6 +107,9 @@
 		</CFA>
 		<Crop x="48" y="6" width="0" height="-2"/>
 		<Sensor black="126" white="4095"/>
+		<Hints>
+			<Hint name="override_whitebalance" value="2093285,1000000,1055975"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS D60">
 		<CFA width="2" height="2">
@@ -760,6 +763,9 @@
 		</CFA>
 		<Crop x="4" y="6" width="-52" height="-6"/>
 		<Sensor black="129" white="4095"/>
+		<Hints>
+			<Hint name="override_whitebalance" value="2185173,1000000,1342573"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G1">
 		<CFA width="2" height="2">
@@ -796,6 +802,9 @@
 		</CFA>
 		<Crop x="12" y="6" width="-52" height="-2"/>
 		<Sensor black="0" white="4095"/>
+		<Hints>
+			<Hint name="override_whitebalance" value="1757692,1000000,2071795"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G5">
 		<CFA width="2" height="2">
@@ -806,6 +815,9 @@
 		</CFA>
 		<Crop x="12" y="6" width="-44" height="-2"/>
 		<Sensor black="0" white="4095"/>
+		<Hints>
+			<Hint name="override_whitebalance" value="1984870,1000000,1237501"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G6">
 		<CFA width="2" height="2">
@@ -816,6 +828,9 @@
 		</CFA>
 		<Crop x="44" y="12" width="-4" height="-4"/>
 		<Sensor black="128" white="4095"/>
+		<Hints>
+			<Hint name="override_whitebalance" value="2340268,1000000,1351293"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G1 X">
 		<CFA width="2" height="2">
@@ -981,6 +996,9 @@
 		</CFA>
 		<Crop x="12" y="6" width="-52" height="-2"/>
 		<Sensor black="129" white="4095"/>
+		<Hints>
+			<Hint name="override_whitebalance" value="2466639,1000000,1153626"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot S50">
 		<CFA width="2" height="2">
@@ -991,6 +1009,9 @@
 		</CFA>
 		<Crop x="12" y="6" width="-44" height="-2"/>
 		<Sensor black="129" white="4095"/>
+		<Hints>
+			<Hint name="override_whitebalance" value="2168080,1000000,1356259"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot S60">
 		<CFA width="2" height="2">
@@ -1001,6 +1022,9 @@
 		</CFA>
 		<Crop x="12" y="6" width="-44" height="-2"/>
 		<Sensor black="129" white="4095"/>
+		<Hints>
+			<Hint name="override_whitebalance" value="2143041,1000000,1136598"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot S70">
 		<CFA width="2" height="2">
@@ -1011,6 +1035,9 @@
 		</CFA>
 		<Crop x="44" y="12" width="-4" height="-4"/>
 		<Sensor black="129" white="4095"/>
+		<Hints>
+			<Hint name="override_whitebalance" value="2279613,1000000,1245660"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot S90">
 		<CFA width="2" height="2">
