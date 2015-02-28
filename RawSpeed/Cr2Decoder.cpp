@@ -280,6 +280,9 @@ int Cr2Decoder::getHue() {
   if (hints.find("old_sraw_hue") != hints.end())
     return (mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x);
 
+  if (!mRootIFD->hasEntryRecursive((TiffTag)0x10)) {
+    return 0;
+  }
   uint32 model_id = mRootIFD->getEntryRecursive((TiffTag)0x10)->getInt();
   if (model_id >= 0x80000281 || model_id == 0x80000218 || (hints.find("force_new_sraw_hue") != hints.end()))
     return ((mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x) - 1) >> 1;
