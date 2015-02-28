@@ -40,16 +40,6 @@ int MrwDecoder::isMRW(FileMap* input) {
   const uchar8* data = input->getData(0);
   return data[0] == 0x00 && data[1] == 0x4D && data[2] == 0x52 && data[3] == 0x4D;
 }
-
-#define get2BE(data,pos) ((((ushort16)(data)[pos]) << 8) | ((ushort16)(data)[pos+1]))
-
-#define get4BE(data,pos) ((((uint32)(data)[pos]) << 24) | (((uint32)(data)[pos+1]) << 16) | \
-                          (((uint32)(data)[pos+2]) << 8) | ((uint32)(data)[pos+3]))
-
-#define get8LE(data,pos) ((((uint64)(data)[pos+7]) << 56) | (((uint64)(data)[pos+6]) << 48) | \
-                          (((uint64)(data)[pos+5]) << 40) | (((uint64)(data)[pos+4]) << 32) | \
-                          (((uint64)(data)[pos+3]) << 24) | (((uint64)(data)[pos+2]) << 16) | \
-                          (((uint64)(data)[pos+1]) << 8) | ((uint64)(data)[pos]))
                         
 /* This table includes all cameras that have ever had official MRW raw support.
    There were also a few compacts (G400, G500, G530 and G600) that had a raw
@@ -107,28 +97,6 @@ RawImage MrwDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(raw_width, raw_height);
   mRaw->createData();
 
-  uint32 currpos = 8;
-  const unsigned char* data = mFile->getData(0);
-  while (currpos < data_offset) {
-    uint32 tag = get4BE(data,currpos);
-    uint32 len = get4BE(data,currpos+4);
-    if (tag == 0x574247) { /* WBG */
-      ushort16 tmp[4];
-      for(uint32 i=0; i<4; i++)
-        tmp[i] = get2BE(data, currpos+12+i*2);
-      if (!strcmp(cameraName,"DIMAGE A200")) {
-        mRaw->metadata.wbCoeffs[0] = tmp[2];
-        mRaw->metadata.wbCoeffs[1] = tmp[0];
-        mRaw->metadata.wbCoeffs[2] = tmp[1];
-      } else {
-        mRaw->metadata.wbCoeffs[0] = tmp[0];
-        mRaw->metadata.wbCoeffs[1] = tmp[1];
-        mRaw->metadata.wbCoeffs[2] = tmp[3];
-      }
-    }
-    currpos += len+8;
-  }
-
   if (packed)
     imgsize = raw_width * raw_height * 3 / 2;
   else
@@ -163,6 +131,28 @@ void MrwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   int iso = 0;
 
   setMetaData(meta, "MINOLTA", cameraName, "", iso);
+
+  uint32 currpos = 8;
+  const unsigned char* data = mFile->getData(0);
+  while (currpos < data_offset) {
+    uint32 tag = get4BE(data,currpos);
+    uint32 len = get4BE(data,currpos+4);
+    if (tag == 0x574247) { /* WBG */
+      ushort16 tmp[4];
+      for(uint32 i=0; i<4; i++)
+        tmp[i] = get2BE(data, currpos+12+i*2);
+      if (!strcmp(cameraName,"DIMAGE A200")) {
+        mRaw->metadata.wbCoeffs[0] = (float) tmp[2];
+        mRaw->metadata.wbCoeffs[1] = (float) tmp[0];
+        mRaw->metadata.wbCoeffs[2] = (float) tmp[1];
+      } else {
+        mRaw->metadata.wbCoeffs[0] = (float) tmp[0];
+        mRaw->metadata.wbCoeffs[1] = (float) tmp[1];
+        mRaw->metadata.wbCoeffs[2] = (float) tmp[3];
+      }
+    }
+    currpos += MAX(len+8,1); // MAX(,1) to make sure we make progress
+  }
 }
 
 } // namespace RawSpeed

@@ -947,6 +947,9 @@
 		</CFA>
 		<Crop x="0" y="0" width="2000" height="1312"/>
 		<Sensor black="0" white="4095"/>
+		<Hints>
+			<Hint name="override_whitebalance" value="960152,1000000,1041009"/>
+		</Hints>
 	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON D1H">
 		<CFA width="2" height="2">
@@ -4951,6 +4954,9 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="4000"/>
+		<Hints>
+			<Hint name="override_whitebalance" value="12740092,10000000,11964914"/>
+		</Hints>
 	</Camera>
 	<Camera make="Creo/Leaf" model="Leaf Aptus 22(LF3779     )/Hasselblad H1">
 		<CFA width="2" height="2">
