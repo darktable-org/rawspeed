@@ -51,7 +51,7 @@ CiffIFD::CiffIFD(FileMap* f, uint32 start, uint32 end) {
       try {
         mSubIFD.push_back(new CiffIFD(f, t->data_offset, t->data_offset+t->count));
         delete(t);
-      } catch (CiffParserException &e) {
+      } catch (CiffParserException) {
         // Unparsable subifds are added as entries
         mEntry[t->tag] = t;
       }
