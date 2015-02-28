@@ -48,14 +48,17 @@ CrwDecoder::~CrwDecoder(void) {
 
 RawImage CrwDecoder::decodeRawInternal() {
   CiffEntry *sensorInfo = mRootIFD->getEntryRecursive(CIFF_SENSORINFO);
-  if (!sensorInfo || sensorInfo->count < 6)
-    ThrowRDE("CRW: Couldn't find image width & height");
+
+  if (!sensorInfo || sensorInfo->count < 6 || sensorInfo->type != CIFF_SHORT)
+    ThrowRDE("CRW: Couldn't find image sensor info");
+
   uint32 width = sensorInfo->getShortArray()[1];
   uint32 height = sensorInfo->getShortArray()[2];
 
   CiffEntry *decTable = mRootIFD->getEntryRecursive(CIFF_DECODERTABLE);
-  if (!decTable)
+  if (!decTable || decTable->type != CIFF_LONG)
     ThrowRDE("CRW: Couldn't find decoder table");
+
   uint32 dec_table = decTable->getInt();
   if (dec_table > 2)
     ThrowRDE("CRW: Unknown decoder table %d", dec_table);
