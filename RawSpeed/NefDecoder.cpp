@@ -577,16 +577,6 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
     mRaw->blackLevel = black;
 }
 
-// Curve measured by libraw: https://github.com/LibRaw/LibRaw/blob/master/src/libraw_cxx.cpp#L1092-L1118
-__inline float curveValue(float v) {
-  float beta_1 = 5.79342238397656E-02f;
-  float beta_2 = 3.28163551282665f;
-  float beta_3 = -8.43136004842678f;
-  float beta_4 = 1.03533181861023E+01f;
-  float x = v* (1.0f/4096.f);
-  float y = (1.f-expf(beta_1*x-beta_2*x*x-beta_3*x*x*x-beta_4*x*x*x*x));
-  return y*16383.f;
-}
 
 // DecodeNikonYUY2 decodes 12 bit data in an YUY2-like pattern (2 Luma, 1 Chroma per 2 pixels).
 // We un-apply the whitebalance, so output matches lossless.
