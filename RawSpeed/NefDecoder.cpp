@@ -657,10 +657,11 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
       float cr2 = cr;
       // Interpolate right pixel. We assume the sample is aligned with left pixel.
       if ((x+6) < w*3) {
+        g4 = in[3];
         g5 = in[4];
         g6 = in[5];
-        cb2 = ((float)(g4 | ((g5 & 0x0f) << 8)) + cb)*0.5f;
-        cr2 = ((float)((g5 >> 4) | (g6 << 4)) + cr)* 0.5f;
+        cb2 = ((float)((g4 | ((g5 & 0x0f) << 8))) + cb) * 0.5f;
+        cr2 = ((float)(((g5 >> 4) | (g6 << 4))) + cr)* 0.5f;
       }
 
       cb -= 2048;
