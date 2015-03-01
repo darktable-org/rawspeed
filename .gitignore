@@ -19,4 +19,6 @@
 *.exe
 *.out
 *.app
-/testimg
+testimg
+Release
+Debug
