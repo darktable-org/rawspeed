@@ -314,6 +314,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BitPumpMSB16.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\BitPumpMSB32.cpp"
 					>
 				</File>
@@ -403,6 +407,10 @@
 				</File>
 				<File
 					RelativePath=".\MrwDecoder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\NakedDecoder.cpp"
 					>
 				</File>
 				<File
@@ -509,6 +517,10 @@
 				</File>
 				<File
 					RelativePath=".\BitPumpMSB.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BitPumpMSB16.h"
 					>
 				</File>
 				<File
@@ -629,6 +641,10 @@
 				</File>
 				<File
 					RelativePath=".\MrwDecoder.h"
+					>
+				</File>
+				<File
+					RelativePath=".\NakedDecoder.h"
 					>
 				</File>
 				<File
