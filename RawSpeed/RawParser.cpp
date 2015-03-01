@@ -150,7 +150,7 @@ RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
     Camera* c = meta->getChdkCamera(mInput->getSize());
 
     try {
-      return new NakedDecoder(mInput);
+      return new NakedDecoder(mInput, c);
     } catch (RawDecoderException) {
     }
   }
