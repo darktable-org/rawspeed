@@ -622,8 +622,8 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
   float wb_r = (float)wba[0] / (float)wba[1];
   float wb_b = (float)wba[2] / (float)wba[3];
 
-  int inv_wb_r = (int)(65536.0 / wb_r);
-  int inv_wb_b = (int)(65536.0 / wb_b);
+  int inv_wb_r = (int)(1024.0 / wb_r);
+  int inv_wb_b = (int)(1024.0 / wb_b);
 
   ushort16* curve = gammaCurve(1/2.4, 12.92, 1, 4095);
   // Scale output values to 16 bits.
@@ -668,20 +668,20 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
       cr2 -= 2048;
 
       mRaw->setWithLookUp(clampbits((int)(y1 + 1.370705 * cr), 12), tmpch, &random);
-      dest[x] = (inv_wb_r * tmp +(1<<15)) >> 16;
+      dest[x] = (inv_wb_r * tmp + (1<<9)) >> 10;
 
       mRaw->setWithLookUp(clampbits((int)(y1 - 0.337633 * cb - 0.698001 * cr), 12), (uchar8*)&dest[x+1], &random);
 
       mRaw->setWithLookUp(clampbits((int)(y1 + 1.732446 * cb), 12), tmpch, &random);
-      dest[x+2]   = (inv_wb_b * tmp +(1<<15)) >> 16;
+      dest[x+2]   = (inv_wb_b * tmp + (1<<9)) >> 10;
 
       mRaw->setWithLookUp(clampbits((int)(y2 + 1.370705 * cr2), 12), tmpch, &random);
-      dest[x+3] = (inv_wb_r * tmp +(1<<15)) >> 16;
+      dest[x+3] = (inv_wb_r * tmp+ (1<<9)) >> 10;
 
       mRaw->setWithLookUp(clampbits((int)(y2 - 0.337633 * cb2 - 0.698001 * cr2), 12), (uchar8*)&dest[x+4], &random);
 
       mRaw->setWithLookUp(clampbits((int)(y2 + 1.732446 * cb2), 12), tmpch, &random);
-      dest[x+5] = (inv_wb_b * tmp +(1<<15)) >> 16;
+      dest[x+5] = (inv_wb_b * tmp + (1<<9)) >> 10;
     }
   }
   mRaw->setTable(NULL);
