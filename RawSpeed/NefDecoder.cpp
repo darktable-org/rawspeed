@@ -628,9 +628,10 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
   ushort16* curve = gammaCurve(1/2.4, 12.92, 1, 4095);
   // Scale output values to 16 bits.
   for (int i = 0 ; i < 4096; i++) {
-    curve[i] <<= 4;
+    int c = curve[i];
+    curve[i] = clampbits(c<<4, 16);
   }
-  mRaw->setTable(curve,4095,true);
+  mRaw->setTable(curve, 4095, true);
   _aligned_free(curve);
 
   ushort16 tmp;
@@ -668,20 +669,20 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
       cr2 -= 2048;
 
       mRaw->setWithLookUp(clampbits((int)(y1 + 1.370705 * cr), 12), tmpch, &random);
-      dest[x] = (inv_wb_r * tmp + (1<<9)) >> 10;
+      dest[x] = clampbits((inv_wb_r * tmp + (1<<9)) >> 10, 15);
 
       mRaw->setWithLookUp(clampbits((int)(y1 - 0.337633 * cb - 0.698001 * cr), 12), (uchar8*)&dest[x+1], &random);
 
       mRaw->setWithLookUp(clampbits((int)(y1 + 1.732446 * cb), 12), tmpch, &random);
-      dest[x+2]   = (inv_wb_b * tmp + (1<<9)) >> 10;
+      dest[x+2]   = clampbits((inv_wb_b * tmp + (1<<9)) >> 10, 15);
 
       mRaw->setWithLookUp(clampbits((int)(y2 + 1.370705 * cr2), 12), tmpch, &random);
-      dest[x+3] = (inv_wb_r * tmp+ (1<<9)) >> 10;
+      dest[x+3] = clampbits((inv_wb_r * tmp + (1<<9)) >> 10, 15);
 
       mRaw->setWithLookUp(clampbits((int)(y2 - 0.337633 * cb2 - 0.698001 * cr2), 12), (uchar8*)&dest[x+4], &random);
 
       mRaw->setWithLookUp(clampbits((int)(y2 + 1.732446 * cb2), 12), tmpch, &random);
-      dest[x+5] = (inv_wb_b * tmp + (1<<9)) >> 10;
+      dest[x+5] = clampbits((inv_wb_b * tmp + (1<<9)) >> 10, 15);
     }
   }
   mRaw->setTable(NULL);
