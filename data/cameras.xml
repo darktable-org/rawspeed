@@ -5511,7 +5511,7 @@
 			<Hint name="override_whitebalance" value="1564987,1000000,1710746"/>
 		</Hints>
 		<BlackAreas>
-			<Vertical x="-40" width="40"/>
+			<Vertical x="2632" width="40"/>
 		</BlackAreas>
 	</Camera>
 	<Camera make="Canon" model="PowerShot A530" mode="chdk">
@@ -5576,8 +5576,8 @@
 	</Camera>
 	<Camera make="Canon" model="PowerShot A720 IS" mode="chdk">
 		<CFA2 width="2" height="2">
-			<ColorRow y="0">RG</ColorRow>
-			<ColorRow y="1">GB</ColorRow>
+			<ColorRow y="0">GB</ColorRow>
+			<ColorRow y="1">RG</ColorRow>
 		</CFA2>
 		<Crop x="6" y="5" width="-32" height="-3"/>
 		<Sensor black="0" white="1023"/>
@@ -5588,7 +5588,7 @@
 			<Hint name="override_whitebalance" value="1524730,1000000,2009988"/>
 		</Hints>
 		<BlackAreas>
-			<Vertical x="-30" width="30"/>
+			<Vertical x="3306" width="30"/>
 		</BlackAreas>
 	</Camera>
 	<Camera make="Canon" model="PowerShot A630" mode="chdk">
@@ -5622,7 +5622,7 @@
 			<Hint name="override_whitebalance" value="1838080,1000000,1556674"/>
 		</Hints>
 		<BlackAreas>
-			<Vertical x="-50" width="50"/>
+			<Vertical x="3686" width="50"/>
 		</BlackAreas>
 	</Camera>
 	<Camera make="Canon" model="PowerShot A650" mode="chdk">
@@ -5656,7 +5656,7 @@
 			<Hint name="override_whitebalance" value="1614148,979180,2115417"/>
 		</Hints>
 		<BlackAreas>
-			<Vertical x="-30" width="30"/>
+			<Vertical x="3690" width="30"/>
 		</BlackAreas>
 	</Camera>
 	<Camera make="Canon" model="PowerShot SX120 IS" mode="chdk">
