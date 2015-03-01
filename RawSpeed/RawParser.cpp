@@ -8,6 +8,7 @@
 #include "ByteStreamSwap.h"
 #include "TiffEntryBE.h"
 #include "MrwDecoder.h"
+#include "NakedDecoder.h"
 
 /*
     RawSpeed - RAW file decoder.
@@ -148,7 +149,10 @@ RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
   if (meta != NULL && meta->hasChdkCamera(mInput->getSize())) {
     Camera* c = meta->getChdkCamera(mInput->getSize());
 
-    // TODO: Create decoder and return
+    try {
+      return new NakedDecoder(mInput, c);
+    } catch (RawDecoderException) {
+    }
   }
 
   // File could not be decoded, so no further options for now.
