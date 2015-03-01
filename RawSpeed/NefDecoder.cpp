@@ -621,18 +621,25 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
 
   float wb_r = (float)wba[0] / (float)wba[1];
   float wb_b = (float)wba[2] / (float)wba[3];
-  //float wb_g1 = (float)wba[4] / (float)wba[5];
-  //float wb_g2 = (float)wba[6] / (float)wba[7];
 
-  float inv_wb_r = 1.0f / wb_r;
-  float inv_wb_b = 1.0f / wb_b;
+  int inv_wb_r = (int)(65536.0 / wb_r);
+  int inv_wb_b = (int)(65536.0 / wb_b);
+
+  ushort16* curve = gammaCurve(1/2.4, 12.92, 1, 4095);
+  // Scale output values to 16 bits.
+  for (int i = 0 ; i < 4096; i++) {
+    curve[i] <<= 4;
+  }
+  mRaw->setTable(curve,4095,true);
+  _aligned_free(curve);
+
+  ushort16 tmp;
+  uchar8 *tmpch = (uchar8*)&tmp;
 
   for (uint32 y = 0; y < h; y++) {
     ushort16* dest = (ushort16*) & data[y*pitch];
+    uint32 random = in[0] + (in[1] << 8) +  (in[2] << 16);
     for (uint32 x = 0 ; x < w*3; x += 6) {
-      /* Decoding method and coefficients taken from
-      http://www.rawdigger.com/howtouse/nikon-small-raw-internals */
-
       uint32 g1 = *in++;
       uint32 g2 = *in++;
       uint32 g3 = *in++;
@@ -655,24 +662,72 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
         cr2 = ((float)((g5 >> 4) | (g6 << 4)) + cr)* 0.5f;
       }
 
-      // Scale Y to 2549 (maximum value determined by rawdigger)
-      y1 = y1 * (4096.0f/2549.0f);
-      y2 = y2 * (4096.0f/2549.0f);
+      cb -= 2048;
+      cr -= 2048;
+      cb2 -= 2048;
+      cr2 -= 2048;
 
-      // Center cb/cr on 0. cb/cr has maximum of +- 1280 (recommended  by rawdigger)
-      cb = (cb - 2048.0f)*(2048.0f/1280.0f);
-      cr = (cr - 2048.0f)*(2048.0f/1280.0f);
-      cb2 = (cb2 - 2048.0f)*(2048.0f/1280.0f);
-      cr2 = (cr2 - 2048.0f)*(2048.0f/1280.0f);
+      mRaw->setWithLookUp(clampbits((int)(y1 + 1.370705 * cr), 12), tmpch, &random);
+      dest[x] = (inv_wb_r * tmp +(1<<15)) >> 16;
 
-      dest[x]   = clampbits((int)(inv_wb_r * curveValue(y1 + 1.40200f * cr)), 16);
-      dest[x+1] = clampbits((int)(curveValue(y1 - 0.34414f * cb - 0.71414f * cr)), 16);
-      dest[x+2] = clampbits((int)(inv_wb_b * curveValue(y1 + 1.77200f * cb)), 16);
-      dest[x+3] = clampbits((int)(inv_wb_r * curveValue(y2 + 1.40200f * cr2)), 16);
-      dest[x+4] = clampbits((int)(curveValue(y2 - 0.34414f * cb2 - 0.71414f * cr2)), 16);
-      dest[x+5] = clampbits((int)(inv_wb_b * curveValue(y2 + 1.77200f * cb2)), 16);
+      mRaw->setWithLookUp(clampbits((int)(y1 - 0.337633 * cb - 0.698001 * cr), 12), (uchar8*)&dest[x+1], &random);
+
+      mRaw->setWithLookUp(clampbits((int)(y1 + 1.732446 * cb), 12), tmpch, &random);
+      dest[x+2]   = (inv_wb_b * tmp +(1<<15)) >> 16;
+
+      mRaw->setWithLookUp(clampbits((int)(y2 + 1.370705 * cr2), 12), tmpch, &random);
+      dest[x+3] = (inv_wb_r * tmp +(1<<15)) >> 16;
+
+      mRaw->setWithLookUp(clampbits((int)(y2 - 0.337633 * cb2 - 0.698001 * cr2), 12), (uchar8*)&dest[x+4], &random);
+
+      mRaw->setWithLookUp(clampbits((int)(y2 + 1.732446 * cb2), 12), tmpch, &random);
+      dest[x+5] = (inv_wb_b * tmp +(1<<15)) >> 16;
     }
   }
+  mRaw->setTable(NULL);
 }
+
+// From:  dcraw.c -- Dave Coffin's raw photo decoder
+#define SQR(x) ((x)*(x))
+ushort16* NefDecoder::gammaCurve(double pwr, double ts, int mode, int imax) {
+  ushort16 *curve = (ushort16*)_aligned_malloc(65536 * sizeof(ushort16), 16);
+  if (curve == NULL) {
+    ThrowRDE("NEF Decoder: Unable to allocate gamma curve");
+  }
+  int i;
+  double g[6], bnd[2]={0,0}, r;
+  g[0] = pwr;
+  g[1] = ts;
+  g[2] = g[3] = g[4] = 0;
+  bnd[g[1] >= 1] = 1;
+  if (g[1] && (g[1]-1)*(g[0]-1) <= 0) {
+    for (i=0; i < 48; i++) {
+      g[2] = (bnd[0] + bnd[1])/2;
+      if (g[0]) bnd[(pow(g[2]/g[1],-g[0]) - 1)/g[0] - 1/g[2] > -1] = g[2];
+      else	bnd[g[2]/exp(1-1/g[2]) < g[1]] = g[2];
+    }
+    g[3] = g[2] / g[1];
+    if (g[0]) g[4] = g[2] * (1/g[0] - 1);
+  }
+  if (g[0]) g[5] = 1 / (g[1]*SQR(g[3])/2 - g[4]*(1 - g[3]) +
+    (1 - pow(g[3],1+g[0]))*(1 + g[4])/(1 + g[0])) - 1;
+  else g[5] = 1 / (g[1]*SQR(g[3])/2 + 1
+    - g[2] - g[3] - g[2]*g[3]*(log(g[3]) - 1)) - 1;
+
+  if (!mode--) {
+    ThrowRDE("NEF curve: Unimplemented mode");
+  }
+  for (i=0; i < 0x10000; i++) {
+    curve[i] = 0xffff;
+    if ((r = (double) i / imax) < 1) {
+      curve[i] = (ushort16)(0x10000 * ( mode
+        ? (r < g[3] ? r*g[1] : (g[0] ? pow( r,g[0])*(1+g[4])-g[4] : log(r)*g[2]+1))
+        : (r < g[2] ? r/g[1] : (g[0] ? pow((r+g[4])/(1+g[4]),1/g[0]) : exp((r-1)/g[2]))))
+      );
+    }
+  }
+  return curve;
+}
+#undef SQR
 
 } // namespace RawSpeed
