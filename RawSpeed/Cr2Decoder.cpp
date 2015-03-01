@@ -49,8 +49,8 @@ RawImage Cr2Decoder::decodeRawInternal() {
       if (data.empty())
         ThrowRDE("CR2 Decoder: Couldn't find offset");
       else {
-        if (mRootIFD->getEntryRecursive(STRIPOFFSETS))
-          off = data[0]->getEntryRecursive(STRIPOFFSETS)->getInt();
+        if (data[0]->hasEntry(STRIPOFFSETS))
+          off = data[0]->getEntry(STRIPOFFSETS)->getInt();
         else
           ThrowRDE("CR2 Decoder: Couldn't find offset");
       }
