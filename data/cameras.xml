@@ -1300,19 +1300,6 @@
 			<Horizontal y="0" height="16"/>
 		</BlackAreas>
 	</Camera>
-	<Camera make="Canon" model="PowerShot S3 IS">
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
-		<Crop x="44" y="8" width="-4" height="0"/>
-		<Sensor black="0" white="1023"/>
-		<BlackAreas>
-			<Vertical x="0" width="40"/>
-		</BlackAreas>
-	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON D100">
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
