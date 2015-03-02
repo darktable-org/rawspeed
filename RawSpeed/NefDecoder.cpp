@@ -619,7 +619,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
   // Scale output values to 16 bits.
   for (int i = 0 ; i < 4096; i++) {
     int c = curve[i];
-    curve[i] = clampbits(c<<4, 16);
+    curve[i] = clampbits(c << 2, 16);
   }
   mRaw->setTable(curve, 4095, true);
   _aligned_free(curve);
