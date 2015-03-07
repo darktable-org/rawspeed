@@ -598,6 +598,7 @@ void *RawDecoderDecodeThread(void *_this) {
 
 void RawDecoder::startThreads() {
   uint32 threads;
+  bool fail = false;
   threads = getThreadCount(); 
   int y_offset = 0;
   int y_per_thread = (mRaw->dim.y + threads - 1) / threads;
@@ -613,7 +614,9 @@ void RawDecoder::startThreads() {
     t[i].end_y = MIN(y_offset + y_per_thread, mRaw->dim.y);
     t[i].parent = this;
     if (pthread_create(&t[i].threadid, &attr, RawDecoderDecodeThread, &t[i]) != 0) {
-      ThrowRDE("RawDecoder::startThreads: Unable to start thread");
+      // If a failure occurs, we need to wait for the already created threads to finish
+      threads = i-1;
+      fail = true;
     }
     y_offset = t[i].end_y;
   }
@@ -621,10 +624,14 @@ void RawDecoder::startThreads() {
   for (uint32 i = 0; i < threads; i++) {
     pthread_join(t[i].threadid, NULL);
   }
+  pthread_attr_destroy(&attr);
+  delete[] t;
+
+  if (fail) {
+    ThrowRDE("RawDecoder::startThreads: Unable to start threads");
+  }
   if (mRaw->errors.size() >= threads)
     ThrowRDE("RawDecoder::startThreads: All threads reported errors. Cannot load image.");
-
-  delete[] t;
 }
 
 void RawDecoder::decodeThreaded(RawDecoderThread * t) {
