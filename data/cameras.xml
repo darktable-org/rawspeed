@@ -5101,7 +5101,7 @@
 		<Crop x="0" y="0" width="-8" height="0"/>
 		<Sensor black="800" white="16300"/>
 	</Camera>
-	<!-- Still needs to interpolate/upscale some pixels --->
+	<!-- Still needs to interpolate/upscale some pixels -->
 	<Camera make="SIGMA" model="SIGMA dp2 Quattro" supported="no">
 		<Crop x="204" y="24" width="-236" height="-24"/>
 		<Sensor black="1245" white="16384"/>
