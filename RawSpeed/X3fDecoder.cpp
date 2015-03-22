@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "X3fDecoder.h"
 #include "ByteStreamSwap.h"
+#include "TiffParser.h"
+
 /*
 RawSpeed - RAW file decoder.
 
@@ -72,25 +74,77 @@ RawImage X3fDecoder::decodeRawInternal()
 
 void X3fDecoder::decodeMetaDataInternal( CameraMetaData *meta )
 {
-  if (hasProp("CAMMANUF") && hasProp("CAMMODEL")) {
-    if (checkCameraSupported(meta, getProp("CAMMANUF"), getProp("CAMMODEL"), "" )) {
+  if (readName()) {
+    if (checkCameraSupported(meta, camera_make, camera_model, "" )) {
       int iso = 0;
       if (hasProp("ISO"))
         iso = atoi(getProp("ISO").c_str());
-      setMetaData(meta, getProp("CAMMANUF"), getProp("CAMMODEL"), "", iso);
+      setMetaData(meta, camera_make, camera_model, "", iso);
       return;
     }
   }
 }
 
+// readName will read the make and model of the image.
+//
+// If the name is read, it will return true, and the make/model
+// will be available in camera_make/camera_model members.
+boolean X3fDecoder::readName() {
+  if (camera_make.length() != 0 && camera_model.length() != 0) {
+    return true;
+  }
+
+  // Read from properties
+  if (hasProp("CAMMANUF") && hasProp("CAMMODEL")) {
+    camera_make = getProp("CAMMANUF");
+    camera_model = getProp("CAMMODEL");
+    return true;
+  }
+
+  // See if we can find EXIF info and grab the name from there.
+  // This is needed for Sigma DP2 Quattro and possibly later cameras.
+  vector<X3fImage>::iterator img = mImages.begin();
+  for (; img !=  mImages.end(); img++) {
+    X3fImage cimg = *img;
+    if (cimg.type == 2 && cimg.format == 0x12 && cimg.dataSize > 100) {
+      if (!mFile->isValid(cimg.dataOffset + cimg.dataSize - 1)) {
+        return false;
+      }
+      ByteStream i(mFile->getDataWrt(cimg.dataOffset), cimg.dataSize);
+      // Skip jpeg header
+      i.skipBytes(6);
+      if (i.getInt() == 0x66697845) { // Match text 'Exif'
+        TiffParser t(new FileMap(mFile->getDataWrt(cimg.dataOffset+12), i.getRemainSize()));
+        try {
+          t.parseData();
+        } catch (...) {
+          return false;
+        }
+        TiffIFD *root = t.RootIFD();
+        try {
+          if (root->hasEntryRecursive(MAKE) && root->hasEntryRecursive(MODEL)) {
+            camera_model = root->getEntryRecursive(MODEL)->getString();
+            camera_make = root->getEntryRecursive(MAKE)->getString();
+            mProperties.props["CAMMANUF"] = root->getEntryRecursive(MAKE)->getString();
+            mProperties.props["CAMMODEL"] = root->getEntryRecursive(MODEL)->getString();
+            return true;
+          }
+        } catch (...) {}
+        return false;
+      }
+    }
+  }
+  return false;
+}
+
 void X3fDecoder::checkSupportInternal( CameraMetaData *meta )
 {
-/*  if (hasProp("CAMMANUF") && hasProp("CAMMODEL")) {
-    if (!checkCameraSupported(meta, getProp("CAMMANUF"), getProp("CAMMODEL"), "" ))
+  if (readName()) {
+    if (!checkCameraSupported(meta, camera_make, camera_model, "" ))
       ThrowRDE("X3FDecoder: Unknown camera. Will not guess.");
     return;
   }
-*/
+
   // If we somehow got to here without a camera, see if we have an image
   // with proper format identifiers.
   vector<X3fImage>::iterator img = mImages.begin();
@@ -159,36 +213,35 @@ void X3fDecoder::decompressSigma( X3fImage &image )
           ThrowRDE("SigmaDecompressor:Plane offset outside image");
       }
       const uchar8* start = mFile->getData(plane_offset[i]);
-      Sleep(10);
     }
     mRaw->clearArea(iRectangle2D(0,0,image.width,image.height));
 
     startTasks(3);
     //Interpolate based on blue value
     if (image.format == 35) {
-    int w = planeDim[0].x;
-    int h = planeDim[0].y;
-    for (int i = 0; i < 2;  i++) {
-      for (int y = 0; y < h; y++) {
-        ushort16* dst = (ushort16*)mRaw->getData(0, y * 2 )+ i;
-        ushort16* dst_down = (ushort16*)mRaw->getData(0, y * 2 + 1) + i;
-        ushort16* blue = (ushort16*)mRaw->getData(0, y * 2) + 2;
-        ushort16* blue_down = (ushort16*)mRaw->getData(0, y * 2 + 1) + 2;
-        for (int x = 0; x < w; x++) {
-          // Interpolate 1 missing pixel
-          int blue_mid = ((int)blue[0] + (int)blue[3] + (int)blue_down[0] + (int)blue_down[3] + 2)>>2;          
-          int avg = dst[0];
-          dst[0] = clampbits(((int)blue[0] - blue_mid) + avg, 16);
-          dst[3] = clampbits(((int)blue[3] - blue_mid) + avg, 16);
-          dst_down[0] = clampbits(((int)blue_down[0] - blue_mid) + avg, 16);
-          dst_down[3] = clampbits(((int)blue_down[3] - blue_mid) + avg, 16);
-          dst += 6;
-          blue += 6;
-          blue_down += 6;
-          dst_down += 6;
+      int w = planeDim[0].x;
+      int h = planeDim[0].y;
+      for (int i = 0; i < 2;  i++) {
+        for (int y = 0; y < h; y++) {
+          ushort16* dst = (ushort16*)mRaw->getData(0, y * 2 )+ i;
+          ushort16* dst_down = (ushort16*)mRaw->getData(0, y * 2 + 1) + i;
+          ushort16* blue = (ushort16*)mRaw->getData(0, y * 2) + 2;
+          ushort16* blue_down = (ushort16*)mRaw->getData(0, y * 2 + 1) + 2;
+          for (int x = 0; x < w; x++) {
+            // Interpolate 1 missing pixel
+            int blue_mid = ((int)blue[0] + (int)blue[3] + (int)blue_down[0] + (int)blue_down[3] + 2)>>2;          
+            int avg = dst[0];
+            dst[0] = clampbits(((int)blue[0] - blue_mid) + avg, 16);
+            dst[3] = clampbits(((int)blue[3] - blue_mid) + avg, 16);
+            dst_down[0] = clampbits(((int)blue_down[0] - blue_mid) + avg, 16);
+            dst_down[3] = clampbits(((int)blue_down[3] - blue_mid) + avg, 16);
+            dst += 6;
+            blue += 6;
+            blue_down += 6;
+            dst_down += 6;
+          }
         }
       }
-    }
     }
     return;
   } // End if format 30
