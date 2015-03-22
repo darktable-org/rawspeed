@@ -582,16 +582,12 @@ void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model, st
 void *RawDecoderDecodeThread(void *_this) {
   RawDecoderThread* me = (RawDecoderThread*)_this;
   try {
-    if (me->taskNo >= 0)
-      me->parent->decodeThreaded(me);
-    else
-      me->parent->decodeThreaded(me);
+     me->parent->decodeThreaded(me);
   } catch (RawDecoderException &ex) {
     me->parent->mRaw->setError(ex.what());
   } catch (IOException &ex) {
     me->parent->mRaw->setError(ex.what());
   }
-
   pthread_exit(NULL);
   return 0;
 }
@@ -692,11 +688,18 @@ void RawDecoder::startTasks( uint32 tasks )
   int ctask = 0;
   RawDecoderThread *t = new RawDecoderThread[threads];
 
+  // We don't need a thread
   if (threads == 1) {
     t[0].parent = this;
     while ((uint32)ctask < tasks) {
       t[0].taskNo = ctask++;
-      RawDecoderDecodeThread(t);
+      try {
+        decodeThreaded(&t[0]);
+      } catch (RawDecoderException &ex) {
+        mRaw->setError(ex.what());
+      } catch (IOException &ex) {
+        mRaw->setError(ex.what());
+      }
     }
     delete[] t;
     return;
