@@ -55,6 +55,7 @@ protected:
   int SigmaDecode(BitPumpMSB *bits);
   string getIdAsString(ByteStream *bytes);
   void SigmaSkipOne(BitPumpMSB *bits);
+  boolean readName();
   X3fImage *curr_image;
   int pred[3];
   uint32 plane_sizes[3];
@@ -66,6 +67,8 @@ protected:
   ushort16 *huge_table;
   short curve[1024];
   uint32 max_len;
+  string camera_make;
+  string camera_model;
 };
 
 } // namespace RawSpeed
