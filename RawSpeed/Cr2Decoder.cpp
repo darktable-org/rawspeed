@@ -146,7 +146,7 @@ RawImage Cr2Decoder::decodeRawInternal() {
       l.getSOF(&sof, slice.offset, slice.count);
       slice.w = sof.w * sof.cps;
       slice.h = sof.h;
-      if (sof.cps == 4) {
+      if (sof.cps == 4 && slice.w > slice.h * 4) {
         doubleHeight = true;
       }
       if (!slices.empty())
@@ -161,6 +161,10 @@ RawImage Cr2Decoder::decodeRawInternal() {
     ThrowRDE("CR2 Decoder: Unsupported format.");
   }
 
+  // Override with canon_double_height if set.
+  map<string,string>::iterator msb_hint = hints.find("canon_double_height");
+  if (msb_hint != hints.end())
+    doubleHeight = (0 == (msb_hint->second).compare("true"));
 
   if (slices.empty()) {
     ThrowRDE("CR2 Decoder: No Slices found.");
