@@ -370,6 +370,10 @@
 				Name="Decoders"
 				>
 				<File
+					RelativePath=".\AriDecoder.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\ARWDecoder.cpp"
 					>
 				</File>
@@ -603,6 +607,10 @@
 			<Filter
 				Name="Decoders"
 				>
+				<File
+					RelativePath=".\AriDecoder.h"
+					>
+				</File>
 				<File
 					RelativePath=".\ARWDecoder.h"
 					>
