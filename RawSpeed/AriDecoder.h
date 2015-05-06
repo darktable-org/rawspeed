@@ -36,10 +36,11 @@ public:
   virtual void checkSupportInternal(CameraMetaData *meta);
   virtual void decodeMetaDataInternal(CameraMetaData *meta);
 protected:
-  uint32 mWidth, mHeight;
+  uint32 mWidth, mHeight, mIso;
   string mModel;
   string mEncoder;
   uint32 mDataOffset, mDataSize;
+  float mWB[3];
 };
 
 } // namespace RawSpeed

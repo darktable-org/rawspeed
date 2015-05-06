@@ -42,11 +42,20 @@ RawDecoder(file) {
   s->setAbsoluteOffset(0x40);
   mDataSize = s->getInt();
 
-  // TODO: Check strings - this is a bit risky.
+  // Smells like whitebalance
+  s->setAbsoluteOffset(0x5c);
+  mWB[0] = s->getFloat();  // 1.3667001 in sample
+  mWB[1] = s->getFloat();  // 1.0000000 in sample
+  mWB[2] = s->getFloat();  // 1.6450000 in sample
+
+  // Smells like iso
+  s->setAbsoluteOffset(0xb8);
+  mIso = s->getInt();  // 100 in sample
+
   s->setAbsoluteOffset(0x29c-8);
-  mModel = (const char*)s->getData();
+  mModel = s->getString();
   s->setAbsoluteOffset(0x2a4-8);
-  mEncoder = (const char*)s->getData();
+  mEncoder = s->getString();
 }
 
 AriDecoder::~AriDecoder(void) {
@@ -73,7 +82,7 @@ RawImage AriDecoder::decodeRawInternal() {
       dest[x*2+1] = a;
     }
   }
-
+  mRaw->whitePoint = 4095;
   return mRaw;
 }
 
@@ -87,11 +96,15 @@ void AriDecoder::checkSupportInternal(CameraMetaData *meta) {
 
 void AriDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_GREEN, CFA_RED, CFA_BLUE, CFA_GREEN2);
+  mRaw->metadata.wbCoeffs[0] = mWB[0];
+  mRaw->metadata.wbCoeffs[1] = mWB[1];
+  mRaw->metadata.wbCoeffs[2] = mWB[2];
   if (meta->hasCamera("ARRI", mModel, mEncoder)) {
-    setMetaData(meta, "ARRI", mModel, mEncoder, 0);
+    setMetaData(meta, "ARRI", mModel, mEncoder, mIso);
   } else {
-    setMetaData(meta, "ARRI", mModel, "", 0);
+    setMetaData(meta, "ARRI", mModel, "", mIso);
   }
+  Sleep(20);
 }
 
 } // namespace RawSpeed
