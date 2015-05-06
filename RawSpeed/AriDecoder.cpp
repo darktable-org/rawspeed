@@ -65,14 +65,22 @@ RawImage AriDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(mWidth, mHeight);
   mRaw->createData();
 
-  // TODO: Check if mDataOffset is within file
-  // TODO: Check if mDataSize+mDataOffset is within file
-  // TODO: Check if mDataSize == mWidth * mHeight * 12 / 8
+  startThreads();
 
-  ByteStream input(mFile->getData(mDataOffset), mFile->getSize()-mDataOffset);
-  BitPumpMSB32 bits(&input);
+  mRaw->whitePoint = 4095;
+  return mRaw;
+}
+
+void AriDecoder::decodeThreaded(RawDecoderThread * t) {
+  uchar8* data = mRaw->getData();
+  uint32 pitch = mRaw->pitch;
+  uint32 w = mRaw->dim.x;
+
+  uint32 startOff = mDataOffset + t->start_y * ((mWidth * 12) / 8);
+  BitPumpMSB32 bits(mFile->getData(startOff), mFile->getSize()-startOff);
+  
   uint32 hw = mWidth >> 1;
-  for (uint32 y = 0; y < mHeight; y++) {
+  for (uint32 y = t->start_y; y < t->end_y; y++) {
     ushort16* dest = (ushort16*)mRaw->getData(0, y);
     bits.checkPos();
     for (uint32 x = 0 ; x < hw; x++) {
@@ -82,10 +90,7 @@ RawImage AriDecoder::decodeRawInternal() {
       dest[x*2+1] = a;
     }
   }
-  mRaw->whitePoint = 4095;
-  return mRaw;
 }
-
 void AriDecoder::checkSupportInternal(CameraMetaData *meta) {
   if (meta->hasCamera("ARRI", mModel, mEncoder)) {
     this->checkCameraSupported(meta, "ARRI", mModel, mEncoder);
@@ -104,7 +109,6 @@ void AriDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   } else {
     setMetaData(meta, "ARRI", mModel, "", mIso);
   }
-  Sleep(20);
 }
 
 } // namespace RawSpeed

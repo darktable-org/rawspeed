@@ -35,6 +35,7 @@ public:
   virtual RawImage decodeRawInternal();
   virtual void checkSupportInternal(CameraMetaData *meta);
   virtual void decodeMetaDataInternal(CameraMetaData *meta);
+  virtual void decodeThreaded(RawDecoderThread * t);
 protected:
   uint32 mWidth, mHeight, mIso;
   string mModel;
