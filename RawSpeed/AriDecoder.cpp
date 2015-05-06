@@ -25,37 +25,42 @@ http://www.klauspost.com
 
 namespace RawSpeed {
 
-  AriDecoder::AriDecoder(FileMap* file) :
-RawDecoder(file) {
-  // TODO: Check if size is big enough.
-  ByteStream *s;
-  if (getHostEndianness() == little) {
-    s = new ByteStream(mFile->getData(8), mFile->getSize()- 8);
-  } else {
-    s = new ByteStreamSwap(mFile->getData(8), mFile->getSize()- 8);
+AriDecoder::AriDecoder(FileMap* file) : RawDecoder(file) {
+  if (mFile->getSize() < 4096) {
+    ThrowRDE("ARRI: File too small (no header)");
   }
-  mDataOffset = s->getInt();
-  uint32 someNumber = s->getInt(); // Value: 3?
-  uint32 segmentLength = s->getInt(); // Value: 0x3c = length
-  mWidth = s->getInt();
-  mHeight = s->getInt();
-  s->setAbsoluteOffset(0x40);
-  mDataSize = s->getInt();
+  try {
+    ByteStream *s;
+    if (getHostEndianness() == little) {
+      s = new ByteStream(mFile->getData(8), mFile->getSize()- 8);
+    } else {
+      s = new ByteStreamSwap(mFile->getData(8), mFile->getSize()- 8);
+    }
+    mDataOffset = s->getInt();
+    uint32 someNumber = s->getInt(); // Value: 3?
+    uint32 segmentLength = s->getInt(); // Value: 0x3c = length
+    mWidth = s->getInt();
+    mHeight = s->getInt();
+    s->setAbsoluteOffset(0x40);
+    mDataSize = s->getInt();
 
-  // Smells like whitebalance
-  s->setAbsoluteOffset(0x5c);
-  mWB[0] = s->getFloat();  // 1.3667001 in sample
-  mWB[1] = s->getFloat();  // 1.0000000 in sample
-  mWB[2] = s->getFloat();  // 1.6450000 in sample
+    // Smells like whitebalance
+    s->setAbsoluteOffset(0x5c);
+    mWB[0] = s->getFloat();  // 1.3667001 in sample
+    mWB[1] = s->getFloat();  // 1.0000000 in sample
+    mWB[2] = s->getFloat();  // 1.6450000 in sample
 
-  // Smells like iso
-  s->setAbsoluteOffset(0xb8);
-  mIso = s->getInt();  // 100 in sample
+    // Smells like iso
+    s->setAbsoluteOffset(0xb8);
+    mIso = s->getInt();  // 100 in sample
 
-  s->setAbsoluteOffset(0x29c-8);
-  mModel = s->getString();
-  s->setAbsoluteOffset(0x2a4-8);
-  mEncoder = s->getString();
+    s->setAbsoluteOffset(0x29c-8);
+    mModel = s->getString();
+    s->setAbsoluteOffset(0x2a4-8);
+    mEncoder = s->getString();
+  } catch (IOException &e) {
+    ThrowRDE("ARRI: IO Exception:%s", e.what());
+  }
 }
 
 AriDecoder::~AriDecoder(void) {
@@ -82,12 +87,12 @@ void AriDecoder::decodeThreaded(RawDecoderThread * t) {
   uint32 hw = mWidth >> 1;
   for (uint32 y = t->start_y; y < t->end_y; y++) {
     ushort16* dest = (ushort16*)mRaw->getData(0, y);
-    bits.checkPos();
     for (uint32 x = 0 ; x < hw; x++) {
       uint32 a = bits.getBits(12);
       uint32 b = bits.getBits(12);
       dest[x*2] = b;
       dest[x*2+1] = a;
+      bits.checkPos();
     }
   }
 }
