@@ -4955,6 +4955,7 @@
 		<Sensor black="0" white="16191"/>
 	</Camera>
 	<Camera make="Leaf" model="Leaf Aptus 75(LI400146   )/Large Format" supported="no">
+		<ID make="Leaf" model="Aptus 75">Leaf Aptus 75</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
 			<Color x="1" y="0">GREEN</Color>
@@ -4965,6 +4966,7 @@
 		<Sensor black="0" white="16191"/>
 	</Camera>
 	<Camera make="Leaf" model="Credo 40" supported="no">
+		<ID make="Leaf" model="Credo 40">Leaf Credo 40</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
 			<Color x="1" y="0">GREEN</Color>
@@ -4975,6 +4977,7 @@
 		<Sensor black="" white="65535"/>
 	</Camera>
 	<Camera make="Leaf" model="Credo 60" supported="no">
+		<ID make="Leaf" model="Credo 60">Leaf Credo 60</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
 			<Color x="1" y="0">GREEN</Color>
@@ -4985,6 +4988,7 @@
 		<Sensor black="" white="65535"/>
 	</Camera>
 	<Camera make="Leaf" model="Credo 80" supported="no">
+		<ID make="Leaf" model="Credo 80">Leaf Credo 80</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
 			<Color x="1" y="0">GREEN</Color>
@@ -4995,6 +4999,7 @@
 		<Sensor black="" white="65535"/>
 	</Camera>
 	<Camera make="Leaf" model="Leaf Aptus-II 5(LI300059   )/Mamiya 645 AFD">
+		<ID make="Leaf" model="Aptus-II 5">Leaf Aptus-II 5</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
 			<Color x="1" y="0">RED</Color>
