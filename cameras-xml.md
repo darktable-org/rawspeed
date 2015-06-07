@@ -4,6 +4,7 @@ The camera definition file is used for decoding images which doesn’t require a
 
 ```xml
 <Camera make="Panasonic" model="DMC-FZ45" mode="4:3" supported="yes" decoder_version="0">
+  <ID make="Panasonic" model="DMC-FZ45">Panasonic DMC-FZ45</ID>
   <CFA width="2" height="2">
     <Color x="0" y="0">GREEN</Color><Color x="1" y="0">BLUE</Color>
     <Color x="0" y="1">RED</Color><Color x="1" y="1">GREEN</Color>
@@ -18,7 +19,7 @@ The camera definition file is used for decoding images which doesn’t require a
     <Hint name="coolpixsplit" value=""/>
   </Hints>
   <Aliases>
-    <Alias>DMC-FZ40</Alias>
+    <Alias id="DMC-FZ40">DMC-FZ40</Alias>
   </Aliases>
 </Camera>
 ```
@@ -27,7 +28,9 @@ Let’s go through it line for line:
 
 ##Camera Name
 
+```xml
 <Camera make="Panasonic" model="DMC-FZ45" mode="4:3" supported="yes" decoder_version="0">
+```
 
 This the basic camera identification. In this the make and model are required. This must be exactly as specified in the EXIF data of the file.
 
@@ -36,6 +39,14 @@ Mode refers to specific decoder modes which are special for each manufacturer. F
 The supported tag specifies whether a camera is supported. If this tag isn’t added it is assumed to be supported.
 
 The decoder_version is a possibility to disable decoding, if the decoder version is too old to properly decode the images from this camera. If the code version of RawSpeed is too old to decode this camera type, it will refuse to do so. If this isn’t specified it is assumed that all older versions of RawSpeed can decode the image.
+
+##Camera ID
+
+```xml
+<ID make="Panasonic" model="DMC-FZ45">Panasonic DMC-FZ45</ID>
+```
+
+This sets the canonical name for the camera. The content of the tag should be the same as the UniqueCameraModel DNG field in the Adobe DNG converted raw file and can be used to match the camera against DCP files or other external references. The make and model attributes are clean names (no repetitions, spurious words, etc) that can be used in UI. If the Alias tag is omitted the make and model from the Camera tag are used instead (joined with a space for UniqueCameraModel), so in this particular case the tag is actually not needed.
 
 ##CFA Colors
 
@@ -113,8 +124,8 @@ This may contain manufacturer-specific hints for decoding. This can result in th
 
 ```xml
   <Aliases>
-    <Alias>DMC-FZ40</Alias>
+    <Alias id="DMC-FZ40">DMC-FZ40</Alias>
   </Aliases>
 ```
 
-This is a possibility to add one or more model aliases for a camera, which may have different model names in different regions.
+This is a possibility to add one or more model aliases for a camera, which may have different model names in different regions. The id attribute specifies the clean model name for this alias, if ommited defaults to alias value (so in this case is not really needed).
