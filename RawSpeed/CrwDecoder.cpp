@@ -218,7 +218,7 @@ void CrwDecoder::makeDecoder (int n, const uchar8 *source)
     mHuff[n] = NULL;
   }
 
-  ushort16* huff = (ushort16 *) _aligned_malloc((1 + (1 << max)* sizeof(ushort16)), 16);
+  ushort16* huff = (ushort16 *) _aligned_malloc((1 + (1 << max)) * sizeof(ushort16), 16);
   
   if (!huff)
     ThrowRDE("CRW: Couldn't allocate table");
