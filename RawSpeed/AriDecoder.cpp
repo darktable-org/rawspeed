@@ -39,6 +39,9 @@ AriDecoder::AriDecoder(FileMap* file) : RawDecoder(file) {
     mDataOffset = s->getInt();
     uint32 someNumber = s->getInt(); // Value: 3?
     uint32 segmentLength = s->getInt(); // Value: 0x3c = length
+	if (someNumber != 3 || segmentLength != 0x3c) {
+		ThrowRDE("Unknown values in ARRIRAW header, %d, %d", someNumber, segmentLength);
+	}
     mWidth = s->getInt();
     mHeight = s->getInt();
     s->setAbsoluteOffset(0x40);
