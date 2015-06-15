@@ -254,6 +254,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AriDecoder.cpp" />
     <ClCompile Include="RawSpeed.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -329,6 +330,7 @@
     <ClCompile Include="RawImageDataU16.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AriDecoder.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="BitPumpJPEG.h" />
     <ClInclude Include="BitPumpMSB.h" />
