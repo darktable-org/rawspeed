@@ -20,5 +20,5 @@
 *.out
 *.app
 testimg
-Release
-Debug
+Release-*
+Debug-*
