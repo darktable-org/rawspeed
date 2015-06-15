@@ -1,0 +1,402 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug-X64|Win32">
+      <Configuration>Debug-X64</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug-X64|x64">
+      <Configuration>Debug-X64</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{482A0ABF-1AE3-4EE4-815A-428880DAE0C6}</ProjectGuid>
+    <RootNamespace>CR2reader</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-X64|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-X64|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-X64|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-X64|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)-$(Platform)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)$(Configuration)-$(Platform)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug-X64|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug-X64|x64'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)-$(Platform)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Configuration)-$(Platform)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug-X64|Win32'">$(Configuration)-$(Platform)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug-X64|x64'">$(Configuration)-$(Platform)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug-X64|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug-X64|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)-$(Platform)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)$(Configuration)-$(Platform)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)-$(Platform)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Configuration)-$(Platform)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\include;..\include\libjpeg;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;User32.lib;pthreadVC2.lib;turbojpeg-static.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib;msvcrtd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\include;..\include\libjpeg;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;User32.lib;pthreadVC2.lib;turbojpeg-static.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib;msvcrtd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-X64|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\include;..\include\libjpeg;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;User32.lib;pthreadVC2.lib;turbojpeg-static.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib;msvcrtd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-X64|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\include;..\include\libjpeg;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;User32.lib;pthreadVC2.lib;turbojpeg-static.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib;msvcrtd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>false</OmitFramePointers>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>..\include;..\include\libjpeg;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <AssemblerOutput>All</AssemblerOutput>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;User32.lib;pthreadVC2.lib;turbojpeg-static.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>false</OmitFramePointers>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>..\include;..\include\libjpeg;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <AssemblerOutput>All</AssemblerOutput>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;User32.lib;pthreadVC2.lib;turbojpeg-static.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration>
+      </LinkTimeCodeGeneration>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="RawSpeed.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-X64|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-X64|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="CiffEntry.cpp" />
+    <ClCompile Include="CiffIFD.cpp" />
+    <ClCompile Include="CiffParser.cpp" />
+    <ClCompile Include="CiffParserException.cpp" />
+    <ClCompile Include="RawParser.cpp" />
+    <ClCompile Include="TiffEntry.cpp" />
+    <ClCompile Include="TiffEntryBE.cpp" />
+    <ClCompile Include="TiffIFD.cpp" />
+    <ClCompile Include="TiffIFDBE.cpp" />
+    <ClCompile Include="TiffParser.cpp" />
+    <ClCompile Include="TiffParserException.cpp" />
+    <ClCompile Include="TiffParserHeaderless.cpp" />
+    <ClCompile Include="X3fParser.cpp" />
+    <ClCompile Include="DngDecoderSlices.cpp" />
+    <ClCompile Include="HasselbladDecompressor.cpp" />
+    <ClCompile Include="LJpegDecompressor.cpp" />
+    <ClCompile Include="LJpegPlain.cpp" />
+    <ClCompile Include="NikonDecompressor.cpp" />
+    <ClCompile Include="PentaxDecompressor.cpp" />
+    <ClCompile Include="BitPumpJPEG.cpp" />
+    <ClCompile Include="BitPumpMSB.cpp" />
+    <ClCompile Include="BitPumpMSB16.cpp" />
+    <ClCompile Include="BitPumpMSB32.cpp" />
+    <ClCompile Include="BitPumpPlain.cpp" />
+    <ClCompile Include="ByteStream.cpp" />
+    <ClCompile Include="ByteStreamSwap.cpp" />
+    <ClCompile Include="Common.cpp" />
+    <ClCompile Include="DngOpcodes.cpp" />
+    <ClCompile Include="FileIOException.cpp" />
+    <ClCompile Include="FileMap.cpp" />
+    <ClCompile Include="FileReader.cpp" />
+    <ClCompile Include="FileWriter.cpp" />
+    <ClCompile Include="IOException.cpp" />
+    <ClCompile Include="pugixml.cpp" />
+    <ClCompile Include="ARWDecoder.cpp" />
+    <ClCompile Include="Cr2Decoder.cpp" />
+    <ClCompile Include="CrwDecoder.cpp" />
+    <ClCompile Include="DcrDecoder.cpp" />
+    <ClCompile Include="DngDecoder.cpp" />
+    <ClCompile Include="ErfDecoder.cpp" />
+    <ClCompile Include="KdcDecoder.cpp" />
+    <ClCompile Include="MefDecoder.cpp" />
+    <ClCompile Include="MosDecoder.cpp" />
+    <ClCompile Include="MrwDecoder.cpp" />
+    <ClCompile Include="NakedDecoder.cpp" />
+    <ClCompile Include="NefDecoder.cpp" />
+    <ClCompile Include="OrfDecoder.cpp" />
+    <ClCompile Include="PefDecoder.cpp" />
+    <ClCompile Include="RafDecoder.cpp" />
+    <ClCompile Include="RawDecoder.cpp" />
+    <ClCompile Include="RawDecoderException.cpp" />
+    <ClCompile Include="Rw2Decoder.cpp" />
+    <ClCompile Include="SrwDecoder.cpp" />
+    <ClCompile Include="ThreefrDecoder.cpp" />
+    <ClCompile Include="X3fDecoder.cpp" />
+    <ClCompile Include="BlackArea.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CameraMetaData.cpp" />
+    <ClCompile Include="CameraMetadataException.cpp" />
+    <ClCompile Include="CameraSensorInfo.cpp" />
+    <ClCompile Include="ColorFilterArray.cpp" />
+    <ClCompile Include="RawImage.cpp" />
+    <ClCompile Include="RawImageDataFloat.cpp" />
+    <ClCompile Include="RawImageDataU16.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="BitPumpJPEG.h" />
+    <ClInclude Include="BitPumpMSB.h" />
+    <ClInclude Include="BitPumpMSB16.h" />
+    <ClInclude Include="BitPumpMSB32.h" />
+    <ClInclude Include="BitPumpPlain.h" />
+    <ClInclude Include="ByteStream.h" />
+    <ClInclude Include="ByteStreamSwap.h" />
+    <ClInclude Include="Common.h" />
+    <ClInclude Include="DngOpcodes.h" />
+    <ClInclude Include="FileIOException.h" />
+    <ClInclude Include="FileMap.h" />
+    <ClInclude Include="FileReader.h" />
+    <ClInclude Include="FileWriter.h" />
+    <ClInclude Include="IOException.h" />
+    <ClInclude Include="Point.h" />
+    <ClInclude Include="DngDecoderSlices.h" />
+    <ClInclude Include="HasselbladDecompressor.h" />
+    <ClInclude Include="LJpegDecompressor.h" />
+    <ClInclude Include="LJpegPlain.h" />
+    <ClInclude Include="NikonDecompressor.h" />
+    <ClInclude Include="PentaxDecompressor.h" />
+    <ClInclude Include="ARWDecoder.h" />
+    <ClInclude Include="Cr2Decoder.h" />
+    <ClInclude Include="CrwDecoder.h" />
+    <ClInclude Include="DcrDecoder.h" />
+    <ClInclude Include="DngDecoder.h" />
+    <ClInclude Include="ErfDecoder.h" />
+    <ClInclude Include="KdcDecoder.h" />
+    <ClInclude Include="MefDecoder.h" />
+    <ClInclude Include="MosDecoder.h" />
+    <ClInclude Include="MrwDecoder.h" />
+    <ClInclude Include="NakedDecoder.h" />
+    <ClInclude Include="NefDecoder.h" />
+    <ClInclude Include="OrfDecoder.h" />
+    <ClInclude Include="PefDecoder.h" />
+    <ClInclude Include="RafDecoder.h" />
+    <ClInclude Include="RawDecoder.h" />
+    <ClInclude Include="RawDecoderException.h" />
+    <ClInclude Include="Rw2Decoder.h" />
+    <ClInclude Include="SrwDecoder.h" />
+    <ClInclude Include="ThreefrDecoder.h" />
+    <ClInclude Include="X3fDecoder.h" />
+    <ClInclude Include="BlackArea.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="CameraMetaData.h" />
+    <ClInclude Include="CameraMetadataException.h" />
+    <ClInclude Include="CameraSensorInfo.h" />
+    <ClInclude Include="ColorFilterArray.h" />
+    <ClInclude Include="CiffEntry.h" />
+    <ClInclude Include="CiffIFD.h" />
+    <ClInclude Include="CiffParser.h" />
+    <ClInclude Include="CiffParserException.h" />
+    <ClInclude Include="CiffTag.h" />
+    <ClInclude Include="RawParser.h" />
+    <ClInclude Include="TiffEntry.h" />
+    <ClInclude Include="TiffEntryBE.h" />
+    <ClInclude Include="TiffIFD.h" />
+    <ClInclude Include="TiffIFDBE.h" />
+    <ClInclude Include="TiffParser.h" />
+    <ClInclude Include="TiffParserException.h" />
+    <ClInclude Include="TiffParserHeaderless.h" />
+    <ClInclude Include="TiffParserOlympus.h" />
+    <ClInclude Include="TiffTag.h" />
+    <ClInclude Include="X3fParser.h" />
+    <ClInclude Include="RawImage.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
