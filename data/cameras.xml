@@ -4965,7 +4965,7 @@
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="16191"/>
 	</Camera>
-	<Camera make="Leaf" model="Credo 40" supported="no">
+	<Camera make="Leaf" model="Credo 40">
 		<ID make="Leaf" model="Credo 40">Leaf Credo 40</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -4973,10 +4973,10 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="" white="65535"/>
+		<Crop x="36" y="6" width="-16" height="-46"/>
+		<Sensor black="0" white="16383"/>
 	</Camera>
-	<Camera make="Leaf" model="Credo 60" supported="no">
+	<Camera make="Leaf" model="Credo 60">
 		<ID make="Leaf" model="Credo 60">Leaf Credo 60</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -4984,8 +4984,8 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="" white="65535"/>
+		<Crop x="36" y="6" width="-16" height="-46"/>
+		<Sensor black="0" white="16383"/>
 	</Camera>
 	<Camera make="Leaf" model="Credo 80" supported="no">
 		<ID make="Leaf" model="Credo 80">Leaf Credo 80</ID>
