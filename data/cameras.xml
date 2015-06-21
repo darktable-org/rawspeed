@@ -4996,7 +4996,7 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="" white="65535"/>
+		<Sensor black="0" white="65535"/>
 	</Camera>
 	<Camera make="Leaf" model="Leaf Aptus-II 5(LI300059   )/Mamiya 645 AFD">
 		<ID make="Leaf" model="Aptus-II 5">Leaf Aptus-II 5</ID>
