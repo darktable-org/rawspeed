@@ -25,6 +25,7 @@
 
 #include "RawDecoder.h"
 #include "string.h"
+#include "LJpegPlain.h"
 
 namespace RawSpeed {
 
@@ -38,10 +39,11 @@ public:
   virtual void checkSupportInternal(CameraMetaData *meta);
   virtual void decodeMetaDataInternal(CameraMetaData *meta);
 protected:
+  uint32 black_level;
   TiffIFD *mRootIFD;
-  char *make, *model;
-  uchar8 *xmpText;
-  void parseXMP(TiffEntry *xmp);
+  string make, model;
+  string getXMPTag(string xmp, string tag);
+  void DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32 width, uint32 height);
 };
 
 } // namespace RawSpeed
