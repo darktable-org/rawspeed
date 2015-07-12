@@ -4031,6 +4031,9 @@
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
+		<Aliases>
+			<Alias>DMC-G70</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-G7" mode="4:3">
 		<ID make="Panasonic" model="DMC-G7">Panasonic DMC-G7</ID>
@@ -4045,6 +4048,60 @@
 		<Hints>
 			<Hint name="zero_is_bad" value=""/>
 		</Hints>
+		<Aliases>
+			<Alias>DMC-G70</Alias>
+		</Aliases>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-G7" mode="3:2">
+		<ID make="Panasonic" model="DMC-G7">Panasonic DMC-G7</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">BLUE</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">RED</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-208" height="0"/>
+		<Sensor black="143" white="4095"/>
+		<Hints>
+			<Hint name="zero_is_bad" value=""/>
+		</Hints>
+		<Aliases>
+			<Alias>DMC-G70</Alias>
+		</Aliases>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-G7" mode="1:1">
+		<ID make="Panasonic" model="DMC-G7">Panasonic DMC-G7</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">BLUE</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">RED</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-32" height="0"/>
+		<Sensor black="143" white="4095"/>
+		<Hints>
+			<Hint name="zero_is_bad" value=""/>
+		</Hints>
+		<Aliases>
+			<Alias>DMC-G70</Alias>
+		</Aliases>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-G7" mode="16:9">
+		<ID make="Panasonic" model="DMC-G7">Panasonic DMC-G7</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">BLUE</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">RED</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-208" height="0"/>
+		<Sensor black="143" white="4095"/>
+		<Hints>
+			<Hint name="zero_is_bad" value=""/>
+		</Hints>
+		<Aliases>
+			<Alias>DMC-G70</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="Panasonic" model = "DMC-GF3">
 		<ID make="Panasonic" model="DMC-GF3">Panasonic DMC-GF3</ID>
@@ -5650,6 +5707,17 @@
 		<Crop x="4" y="0" width="-36" height="0"/>
 		<Sensor black="1" white="15868"/>
 	</Camera>
+        <Camera make="RICOH IMAGING COMPANY, LTD." model="PENTAX K-3 II">
+                <ID make="Pentax" model="K-3 II">PENTAX K-3 II</ID>
+                <CFA width="2" height="2">
+                        <Color x="0" y="0">RED</Color>
+                        <Color x="1" y="0">GREEN</Color>
+                        <Color x="0" y="1">GREEN</Color>
+                        <Color x="1" y="1">BLUE</Color>
+                </CFA>
+                <Crop x="4" y="0" width="-36" height="0"/>
+                <Sensor black="1" white="15865"/>
+        </Camera>
 	<Camera make="PENTAX" model="PENTAX K-5" decoder_version="2">
 		<ID make="Pentax" model="K-5">PENTAX K-5</ID>
 		<CFA width="2" height="2">
@@ -7323,6 +7391,17 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="15000"/>
+	</Camera>
+	<Camera make="Phase One A/S" model="IQ250">
+		<ID make="Phase One" model="IQ250">Phase One IQ250</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="92" y="108" width="0" height="0"/>
+		<Sensor black="1024" white="65535"/>
 	</Camera>
 	<Camera make="Kodak" model="DCS Pro SLR/n">
 		<CFA width="2" height="2">
