@@ -15,6 +15,7 @@
 #include "KdcDecoder.h"
 #include "ErfDecoder.h"
 #include "ThreefrDecoder.h"
+#include "DcsDecoder.h"
 
 /*
     RawSpeed - RAW file decoder.
@@ -191,6 +192,9 @@ RawDecoder* TiffParser::getDecoder() {
         else
           return new DcrDecoder(root, mInput);
       }
+      if (!make.compare("KODAK")) {
+        mRootIFD = NULL;
+        return new DcsDecoder(root, mInput);
       }
       if (!make.compare("EASTMAN KODAK COMPANY")) {
         mRootIFD = NULL;
