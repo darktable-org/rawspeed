@@ -1497,6 +1497,24 @@
 			<Horizontal y="0" height="16"/>
 		</BlackAreas>
 	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX60 HS">
+		<ID make="Canon" model="PowerShot SX60 HS">Canon PowerShot SX60 HS</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="112" y="26" width="-24" height="-10"/>
+		<Sensor black="128" white="4000"/>
+		<Hints>
+			<Hint name="wb_offset" value="142"/>
+		</Hints>
+		<BlackAreas>
+			<Vertical x="0" width="70"/>
+			<Horizontal y="0" height="16"/>
+		</BlackAreas>
+	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON D100">
 		<ID make="Nikon" model="D100">Nikon D100</ID>
 		<CFA width="2" height="2">
@@ -2547,6 +2565,17 @@
 		<Crop x="0" y="0" width="2624" height="1966"/>
 		<Sensor black="65" white="4095"/>
 	</Camera>
+        <Camera make="OLYMPUS CORPORATION" model="TG-4">
+	        <ID make="Olympus" model="TG-4">Olympus TG-4</ID>
+                <CFA width="2" height="2">
+                        <Color x="0" y="0">GREEN</Color>
+                        <Color x="1" y="0">RED</Color>
+                        <Color x="0" y="1">BLUE</Color>
+                        <Color x="1" y="1">GREEN</Color>
+			</CFA>
+		<Crop x="16" y="8" width="-16" height="-8"/>
+                <Sensor black="0" white="4000"/>
+		</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="C7070WZ">
 		<ID make="Olympus" model="C7070WZ">Olympus C7070WZ</ID>
 		<CFA width="2" height="2">
@@ -5496,7 +5525,11 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="143" white="3956"/>
+		<Sensor black="143" white="3971"/>
+		<Aliases>
+			<Alias>DMC-ZS50</Alias>
+			<Alias>DMC-TZ70</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-TZ71" mode="4:3">
 		<ID make="Panasonic" model="DMC-TZ71">Panasonic DMC-ZS50</ID>
@@ -5507,7 +5540,11 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-128" height="0"/>
-		<Sensor black="143" white="3956"/>
+		<Sensor black="143" white="3971"/>
+		<Aliases>
+			<Alias>DMC-ZS50</Alias>
+			<Alias>DMC-TZ70</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-TZ71" mode="3:2">
 		<ID make="Panasonic" model="DMC-TZ71">Panasonic DMC-ZS50</ID>
@@ -5519,6 +5556,10 @@
 		</CFA>
 		<Crop x="0" y="0" width="-128" height="0"/>
 		<Sensor black="142" white="3971"/>
+		<Aliases>
+			<Alias>DMC-ZS50</Alias>
+			<Alias>DMC-TZ70</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-TZ71" mode="16:9">
 		<ID make="Panasonic" model="DMC-TZ71">Panasonic DMC-ZS50</ID>
@@ -5529,7 +5570,11 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-128" height="0"/>
-		<Sensor black="143" white="3956"/>
+		<Sensor black="143" white="3971"/>
+		<Aliases>
+			<Alias>DMC-ZS50</Alias>
+			<Alias>DMC-TZ70</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-TZ71" mode="1:1">
 		<ID make="Panasonic" model="DMC-TZ71">Panasonic DMC-ZS50</ID>
@@ -5540,7 +5585,11 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-16" height="0"/>
-		<Sensor black="143" white="3956"/>
+		<Sensor black="143" white="3971"/>
+		<Aliases>
+			<Alias>DMC-ZS50</Alias>
+			<Alias>DMC-TZ70</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="PENTAX Corporation" model="PENTAX K100D">
 		<ID make="Pentax" model="K100D">Pentax K100D</ID>
@@ -6513,6 +6562,17 @@
 		<Crop x="0" y="0" width="-26" height="0"/>
 		<Sensor black="512" white="16300"/>
 	</Camera>
+	<Camera make="SONY" model="ILCE-7RM2">
+		<ID make="Sony" model="ILCE-7RM2">Sony ILCE-7RM2</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-32" height="0"/>
+		<Sensor black="512" white="16300"/>
+	</Camera>
 	<Camera make="SONY" model="ILCE-7S">
 		<ID make="Sony" model="ILCE-7S">Sony ILCE-7S</ID>
 		<CFA width="2" height="2">
@@ -7089,6 +7149,17 @@
 		<Crop x="0" y="0" width="-168" height="0"/>
 		<Sensor black="256" white="4094"/>
 	</Camera>
+	<Camera make="FUJIFILM" model="X-A2">
+		<ID make="Fujifilm" model="X-A2">Fujifilm X-A2</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-168" height="0"/>
+		<Sensor black="256" white="4094"/>
+	</Camera>
 	<Camera make="FUJIFILM" model="XQ1">
 		<ID make="Fujifilm" model="XQ1">Fujifilm XQ1</ID>
 		<CFA2 width="6" height="6">
@@ -7514,6 +7585,15 @@
 	</Camera>
 	<Camera make="Leica Camera AG" model="M8 Digital Camera" mode="dng">
 		<ID make="Leica" model="M8">M8 Digital Camera</ID>
+	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA M (Typ 240)" mode="dng">
+		<ID make="Leica" model="M (Typ 240)">LEICA M (Typ 240)</ID>
+	</Camera>
+	<Camera make="RICOH IMAGING COMPANY, LTD." model="GR" mode="dng">
+		<ID make="Ricoh" model="GR">GR</ID>
+	</Camera>
+	<Camera make="RICOH" model="GR DIGITAL 2" mode="dng">
+		<ID make="Ricoh" model="GR II">Ricoh GR DIGITAL 2</ID>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot SX100 IS" mode="dng">
 		<ID make="Canon" model="PowerShot SX100 IS">Canon PowerShot SX100 IS</ID>
