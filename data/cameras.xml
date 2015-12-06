@@ -220,6 +220,7 @@
 			<Alias id="Digital Rebel XT">Canon EOS DIGITAL REBEL XT</Alias>
 			<Alias id="Kiss Digital N">Canon EOS Kiss Digital N</Alias>
 			<Alias id="EOS 350D">Canon EOS 350D</Alias>
+			<Alias id="EOS 350D">Canon EOS 350D Digital</Alias>
 		</Aliases>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS 40D" decoder_version="2">
@@ -3192,7 +3193,7 @@
 		<Crop x="0" y="0" width="-128" height="0"/>
 		<Sensor black="15" white="3956"/>
 	</Camera>
-	<Camera make="Panasonic" model = "DMC-FZ150" mode="4:3">
+	<Camera make="Panasonic" model="DMC-FZ150" mode="4:3">
 		<ID make="Panasonic" model="DMC-FZ150">Panasonic DMC-FZ150</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
@@ -3201,7 +3202,18 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-128" height="0"/>
-		<Sensor black="15" white="3956"/>
+		<Sensor black="145" white="3956"/>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-FZ150" mode="3:2">
+		<ID make="Panasonic" model="DMC-FZ150">Panasonic DMC-FZ150</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-128" height="0"/>
+		<Sensor black="143" white="3971"/>
 	</Camera>
 	<Camera make="Panasonic" model = "DMC-FZ200">
 		<ID make="Panasonic" model="DMC-FZ200">Panasonic DMC-FZ200</ID>
