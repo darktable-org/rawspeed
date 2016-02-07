@@ -809,6 +809,9 @@
 			<Vertical x="2" width="68"/>
 			<Horizontal y="2" height="30"/>
 		</BlackAreas>
+		<Hints>
+			<Hint name="wb_offset" value="142"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS-1D" decoder_version="5">
 		<ID make="Canon" model="EOS-1D">Canon EOS-1D</ID>
@@ -1097,6 +1100,9 @@
 			<Vertical x="0" width="90"/>
 			<Horizontal y="0" height="16"/>
 		</BlackAreas>
+		<Hints>
+			<Hint name="wb_offset" value="142"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G5">
 		<ID make="Canon" model="PowerShot G5">Canon PowerShot G5</ID>
@@ -1112,9 +1118,6 @@
 			<Vertical x="2632" width="40"/>
 			<Horizontal y="0" height="10"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G5 X">
 		<ID make="Canon" model="PowerShot G5 X">Canon PowerShot G5 X</ID>
@@ -1195,6 +1198,9 @@
 			<Vertical x="0" width="68"/>
 			<Horizontal y="0" height="46"/>
 		</BlackAreas>
+		<Hints>
+			<Hint name="wb_offset" value="142"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G12">
 		<ID make="Canon" model="PowerShot G12">Canon PowerShot G12</ID>
@@ -1282,6 +1288,9 @@
 			<Vertical x="0" width="100"/>
 			<Horizontal y="3062" height="60"/>
 		</BlackAreas>
+		<Hints>
+			<Hint name="wb_offset" value="142"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G16" decoder_version="4">
 		<ID make="Canon" model="PowerShot G16">Canon PowerShot G16</ID>
@@ -1471,6 +1480,9 @@
 			<Horizontal y="0" height="10"/>
 			<Horizontal y="3062" height="60"/>
 		</BlackAreas>
+		<Hints>
+			<Hint name="wb_offset" value="142"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot S110">
 		<ID make="Canon" model="PowerShot S110">Canon PowerShot S110</ID>
@@ -1487,6 +1499,9 @@
 			<Vertical x="0" width="100"/>
 			<Horizontal y="3062" height="60"/>
 		</BlackAreas>
+		<Hints>
+			<Hint name="wb_offset" value="142"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot S120">
 		<ID make="Canon" model="PowerShot S120">Canon PowerShot S120</ID>
@@ -2362,6 +2377,20 @@
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="4095"/>
 	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON 1 V3" decoder_version="4">
+		<ID make="Nikon" model="1 V3">Nikon 1 V3</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="200" white="4000"/>
+		<Hints>
+			<Hint name="nikon_override_auto_black" value=""/>
+		</Hints>
+	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON 1 AW1" decoder_version="4">
 		<ID make="Nikon" model="1 AW1">Nikon 1 AW1</ID>
 		<CFA width="2" height="2">
@@ -3185,7 +3214,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="-128" height="0"/>
-		<Sensor black="15" white="3956"/>
+		<Sensor black="145" white="3956"/>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-FZ150" mode="4:3">
 		<ID make="Panasonic" model="DMC-FZ150">Panasonic DMC-FZ150</ID>
@@ -3208,6 +3237,28 @@
 		</CFA>
 		<Crop x="0" y="0" width="-128" height="0"/>
 		<Sensor black="143" white="3971"/>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-FZ150" mode="1:1">
+		<ID make="Panasonic" model="DMC-FZ150">Panasonic DMC-FZ150</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-16" height="0"/>
+		<Sensor black="142" white="3971"/>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-FZ150" mode="16:9">
+		<ID make="Panasonic" model="DMC-FZ150">Panasonic DMC-FZ150</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-128" height="0"/>
+		<Sensor black="142" white="3971"/>
 	</Camera>
 	<Camera make="Panasonic" model = "DMC-FZ200">
 		<ID make="Panasonic" model="DMC-FZ200">Panasonic DMC-FZ200</ID>
@@ -4145,6 +4196,39 @@
 		<Crop x="0" y="0" width="-208" height="0"/>
 		<Sensor black="143" white="4095"/>
 	</Camera>
+	<Camera make="Panasonic" model="DMC-GF7" mode="1:1">
+		<ID make="Panasonic" model="DMC-GF7">Panasonic DMC-GF7</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">BLUE</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">RED</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-32" height="0"/>
+		<Sensor black="143" white="4095"/>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-GF7" mode="3:2">
+		<ID make="Panasonic" model="DMC-GF7">Panasonic DMC-GF7</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">BLUE</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">RED</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-208" height="0"/>
+		<Sensor black="143" white="4095"/>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-GF7" mode="16:9">
+		<ID make="Panasonic" model="DMC-GF7">Panasonic DMC-GF7</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">BLUE</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">RED</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-208" height="0"/>
+		<Sensor black="143" white="4095"/>
+	</Camera>
 	<Camera make="Panasonic" model = "DMC-GH2">
 		<ID make="Panasonic" model="DMC-GH2">Panasonic DMC-GH2</ID>
 		<CFA width="2" height="2">
@@ -4290,6 +4374,48 @@
 		</CFA>
 		<Crop x="0" y="0" width="-182" height="0"/>
 		<Sensor black="120" white="3971"/>
+		<Aliases>
+			<Alias>DMC-FZ72</Alias>
+		</Aliases>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-FZ70" mode="1:1">
+		<ID make="Panasonic" model="DMC-FZ70">Panasonic DMC-FZ70</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="144" white="3956"/>
+		<Aliases>
+			<Alias>DMC-FZ72</Alias>
+		</Aliases>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-FZ70" mode="3:2">
+		<ID make="Panasonic" model="DMC-FZ70">Panasonic DMC-FZ70</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-182" height="0"/>
+		<Sensor black="144" white="3956"/>
+		<Aliases>
+			<Alias>DMC-FZ72</Alias>
+		</Aliases>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-FZ70" mode="16:9">
+		<ID make="Panasonic" model="DMC-FZ70">Panasonic DMC-FZ70</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-182" height="0"/>
+		<Sensor black="144" white="3956"/>
 		<Aliases>
 			<Alias>DMC-FZ72</Alias>
 		</Aliases>
@@ -6954,6 +7080,19 @@
 		<Crop x="0" y="0" width="-64" height="0"/>
 		<Sensor black="257" white="4094"/>
 	</Camera>
+	<Camera make="FUJIFILM" model="XQ2">
+		<ID make="Fujifilm" model="XQ2">Fujifilm XQ2</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GBGGRG</ColorRow>
+			<ColorRow y="1">RGRBGB</ColorRow>
+			<ColorRow y="2">GBGGRG</ColorRow>
+			<ColorRow y="3">GRGGBG</ColorRow>
+			<ColorRow y="4">BGBRGR</ColorRow>
+			<ColorRow y="5">GRGGBG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="0" width="-64" height="0"/>
+		<Sensor black="257" white="4094"/>
+	</Camera>
 	<Camera make="FUJIFILM" model="X-E2">
 		<ID make="Fujifilm" model="X-E2">Fujifilm X-E2</ID>
 		<CFA2 width="6" height="6">
@@ -7415,8 +7554,23 @@
 	<Camera make="Canon" model="Canon PowerShot SX100 IS" mode="dng">
 		<ID make="Canon" model="PowerShot SX100 IS">Canon PowerShot SX100 IS</ID>
 	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX130 IS" mode="dng">
+		<ID make="Canon" model="PowerShot SX130 IS">Canon PowerShot SX130 IS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX260 HS" mode="dng">
+		<ID make="Canon" model="PowerShot SX260 HS">Canon PowerShot SX260 HS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX510 HS" mode="dng">
+		<ID make="Canon" model="PowerShot SX510 HS">Canon PowerShot SX510 HS</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon PowerShot A3200 IS" mode="dng">
 		<ID make="Canon" model="PowerShot A3200 IS">Canon PowerShot A3200 IS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SD450" mode="dng">
+		<ID make="Canon" model="PowerShot SD450">Canon PowerShot SD450</ID>
+	</Camera>
+	<Camera make="OnePlus" model="One A0001" mode="dng">
+		<ID make="OnePlus" model="One">OnePlus One</ID>
 	</Camera>
 	<!-- CHDK Cameras -->
 	<Camera make="AVT" model="F-080C" mode="chdk">
