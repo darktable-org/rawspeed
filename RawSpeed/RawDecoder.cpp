@@ -604,11 +604,18 @@ void *RawDecoderDecodeThread(void *_this) {
   } catch (IOException &ex) {
     me->parent->mRaw->setError(ex.what());
   }
-  pthread_exit(NULL);
-  return 0;
+  return NULL;
 }
 
 void RawDecoder::startThreads() {
+#ifdef NO_PTHREAD
+  uint32 threads = 1;
+  RawDecoderThread t;
+  t.start_y = 0;
+  t.end_y = mRaw->dim.y;
+  t.parent = this;
+  RawDecoderDecodeThread(&t);
+#else
   uint32 threads;
   bool fail = false;
   threads = getThreadCount(); 
@@ -642,6 +649,8 @@ void RawDecoder::startThreads() {
   if (fail) {
     ThrowRDE("RawDecoder::startThreads: Unable to start threads");
   }
+#endif
+
   if (mRaw->errors.size() >= threads)
     ThrowRDE("RawDecoder::startThreads: All threads reported errors. Cannot load image.");
 }
@@ -720,6 +729,8 @@ void RawDecoder::startTasks( uint32 tasks )
     delete[] t;
     return;
   }
+
+#ifndef NO_PTHREAD
   pthread_attr_t attr;
 
   /* Initialize and set thread detached attribute */
@@ -743,6 +754,9 @@ void RawDecoder::startTasks( uint32 tasks )
     ThrowRDE("RawDecoder::startThreads: All threads reported errors. Cannot load image.");
 
   delete[] t;
+#else
+  ThrowRDE("Unreachable");
+#endif
 }
 
 } // namespace RawSpeed

@@ -302,6 +302,7 @@ void RawImageData::startWorker(RawImageWorker::RawImageWorkerTask task, bool cro
     return;
   }
 
+#ifndef NO_PTHREAD
   RawImageWorker **workers = new RawImageWorker*[threads];
   int y_offset = 0;
   int y_per_thread = (height + threads - 1) / threads;
@@ -317,6 +318,9 @@ void RawImageData::startWorker(RawImageWorker::RawImageWorkerTask task, bool cro
     delete workers[i];
   }
   delete[] workers;
+#else
+  ThrowRDE("Unreachable");
+#endif
 }
 
 void RawImageData::fixBadPixelsThread( int start_y, int end_y )
@@ -440,8 +444,7 @@ RawImage& RawImage::operator=(const RawImage & p) {
 void *RawImageWorkerThread(void *_this) {
   RawImageWorker* me = (RawImageWorker*)_this;
   me->performTask();
-  pthread_exit(NULL);
-  return 0;
+  return NULL;
 }
 
 RawImageWorker::RawImageWorker( RawImageData *_img, RawImageWorkerTask _task, int _start_y, int _end_y )
@@ -450,14 +453,19 @@ RawImageWorker::RawImageWorker( RawImageData *_img, RawImageWorkerTask _task, in
   start_y = _start_y;
   end_y = _end_y;
   task = _task;
+#ifndef NO_PTHREAD
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+#endif
 }
 
 RawImageWorker::~RawImageWorker() {
+#ifndef NO_PTHREAD
   pthread_attr_destroy(&attr);  
+#endif
 }
 
+#ifndef NO_PTHREAD
 void RawImageWorker::startThread()
 {
   /* Initialize and set thread detached attribute */
@@ -469,6 +477,7 @@ void RawImageWorker::waitForThread()
   void *status;
   pthread_join(threadid, &status);
 }
+#endif
 
 void RawImageWorker::performTask()
 {
