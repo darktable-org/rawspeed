@@ -196,7 +196,7 @@ void OpcodeFixBadPixelsList::apply( RawImage &in, RawImage &out, int startY, int
 {
   iPoint2D crop = in->getCropOffset();
   uint32 offset = crop.x | (crop.y << 16);
-  for (vector<uint32>::iterator i=bad_pos.begin(); i != bad_pos.end(); i++) {
+  for (vector<uint32>::iterator i=bad_pos.begin(); i != bad_pos.end(); ++i) {
     uint32 pos = offset + (*i);
     out->mBadPixelPositions.push_back(pos);
   }

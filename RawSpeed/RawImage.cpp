@@ -229,7 +229,7 @@ void RawImageData::transferBadPixelsToMap()
   if (!mBadPixelMap)
     createBadPixelMap();
 
-  for (vector<uint32>::iterator i=mBadPixelPositions.begin(); i != mBadPixelPositions.end(); i++) {
+  for (vector<uint32>::iterator i=mBadPixelPositions.begin(); i != mBadPixelPositions.end(); ++i) {
     uint32 pos = *i;
     uint32 pos_x = pos&0xffff;
     uint32 pos_y = pos>>16;
@@ -263,7 +263,7 @@ void RawImageData::fixBadPixels()
 
 #else  // EMULATE_DCRAW_BAD_PIXELS - not recommended, testing purposes only
 
-  for (vector<uint32>::iterator i=mBadPixelPositions.begin(); i != mBadPixelPositions.end(); i++) {
+  for (vector<uint32>::iterator i=mBadPixelPositions.begin(); i != mBadPixelPositions.end(); ++i) {
     uint32 pos = *i;
     uint32 pos_x = pos&0xffff;
     uint32 pos_y = pos>>16;
