@@ -153,6 +153,9 @@ typedef void* pthread_mutex_t;
 #define pthread_mutex_unlock(A)
 #endif
 
+typedef int __attribute__((aligned(1))) align1_int;
+typedef unsigned int __attribute__((aligned(1))) align1_uint;
+
 inline Endianness getHostEndianness() {
 #if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
   return little;
