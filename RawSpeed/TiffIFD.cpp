@@ -97,7 +97,7 @@ TiffIFD::TiffIFD(FileMap* f, uint32 offset, uint32 _depth) {
       case SUBIFDS:
       case EXIFIFDPOINTER:
         try {
-          const unsigned int* sub_offsets = t->getIntArray();
+          const align1_uint* sub_offsets = t->getIntArray();
 
           for (uint32 j = 0; j < t->count; j++) {
             mSubIFD.push_back(new TiffIFD(f, sub_offsets[j], depth));
@@ -114,7 +114,7 @@ TiffIFD::TiffIFD(FileMap* f, uint32 offset, uint32 _depth) {
         mEntry[t->tag] = t;
     }
   }
-  nextIFD = *(int*)f->getData(offset + 2 + entries * 12, 4);
+  nextIFD = *(align1_int*)f->getData(offset + 2 + entries * 12, 4);
 }
 
 TiffIFD* TiffIFD::parseDngPrivateData(TiffEntry *t) {
