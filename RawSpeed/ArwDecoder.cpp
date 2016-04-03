@@ -38,6 +38,7 @@ ArwDecoder::~ArwDecoder(void) {
 }
 
 RawImage ArwDecoder::decodeRawInternal() {
+  TiffIFD* raw = NULL;
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 
   if (data.empty()) {
@@ -47,7 +48,11 @@ RawImage ArwDecoder::decodeRawInternal() {
       // We've caught the elusive A100 in the wild, a transitional format
       // between the simple sanity of the MRW custom format and the wordly
       // wonderfullness of the Tiff-based ARW format, let's shoot from the hip
-      uint32 off = mRootIFD->getEntryRecursive(SUBIFDS)->getInt();
+      data = mRootIFD->getIFDsWithTag(SUBIFDS);
+      if (data.empty())
+        ThrowRDE("ARW: A100 format, couldn't find offset");
+      raw = data[0];
+      uint32 off = raw->getEntry(SUBIFDS)->getInt();
       uint32 width = 3881;
       uint32 height = 2608;
 
@@ -64,17 +69,19 @@ RawImage ArwDecoder::decodeRawInternal() {
 
       return mRaw;
     } else if (hints.find("srf_format") != hints.end()) {
-      uint32 width = mRootIFD->getEntryRecursive(IMAGEWIDTH)->getInt();
-      uint32 height = mRootIFD->getEntryRecursive(IMAGELENGTH)->getInt();
+      data = mRootIFD->getIFDsWithTag(IMAGEWIDTH);
+      if (data.empty())
+        ThrowRDE("ARW: SRF format, couldn't find width/height");
+      raw = data[0];
+
+      uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
+      uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
       uint32 len = width*height*2;
 
       // Constants taken from dcraw
       uint32 off = 862144;
       uint32 key_off = 200896;
       uint32 head_off = 164600;
-
-      if (mFile->getSize() < off+len)
-        ThrowRDE("ARW: SRF format, file too short, trying to read out of bounds");
 
       // Replicate the dcraw contortions to get the "decryption" key
       const uchar8 *data = mFile->getData(key_off, 1);
@@ -102,7 +109,7 @@ RawImage ArwDecoder::decodeRawInternal() {
     }
   }
 
-  TiffIFD* raw = data[0];
+  raw = data[0];
   int compression = raw->getEntry(COMPRESSION)->getInt();
   if (1 == compression) {
     try {
@@ -152,11 +159,11 @@ RawImage ArwDecoder::decodeRawInternal() {
   mRaw->createData();
 
   ushort16 curve[0x4001];
-  const ushort16* c = raw->getEntry(SONY_CURVE)->getShortArray();
+  TiffEntry *c = raw->getEntry(SONY_CURVE);
   uint32 sony_curve[] = { 0, 0, 0, 0, 0, 4095 };
 
   for (uint32 i = 0; i < 4; i++)
-    sony_curve[i+1] = (c[i] >> 2) & 0xfff;
+    sony_curve[i+1] = (c->getShort(i) >> 2) & 0xfff;
 
   for (uint32 i = 0; i < 0x4001; i++)
     curve[i] = i;
@@ -334,7 +341,8 @@ void ArwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   } else { // Everything else but the A100
     try {
       GetWB();
-    } catch (...) {
+    } catch (const std::exception& e) {
+      mRaw->setError(e.what());
       // We caught an exception reading WB, just ignore it
     }
   }
@@ -399,26 +407,16 @@ void ArwDecoder::GetWB() {
       TiffEntry *wb = sony_private->getEntry(SONYGRBGLEVELS);
       if (wb->count != 4)
         ThrowRDE("ARW: WB has %d entries instead of 4", wb->count);
-      if (wb->type == TIFF_SHORT) { // We're probably in the SR2 format
-        const ushort16 *tmp = wb->getShortArray();
-        mRaw->metadata.wbCoeffs[0] = (float)tmp[1];
-        mRaw->metadata.wbCoeffs[1] = (float)tmp[0];
-        mRaw->metadata.wbCoeffs[2] = (float)tmp[2];
-      }
-      else {
-        const short16 *tmp = wb->getSignedShortArray();
-        mRaw->metadata.wbCoeffs[0] = (float)tmp[1];
-        mRaw->metadata.wbCoeffs[1] = (float)tmp[0];
-        mRaw->metadata.wbCoeffs[2] = (float)tmp[2];
-      }
+      mRaw->metadata.wbCoeffs[0] = wb->getFloat(1);
+      mRaw->metadata.wbCoeffs[1] = wb->getFloat(0);
+      mRaw->metadata.wbCoeffs[2] = wb->getFloat(2);
     } else if (sony_private->hasEntry(SONYRGGBLEVELS)){
       TiffEntry *wb = sony_private->getEntry(SONYRGGBLEVELS);
       if (wb->count != 4)
         ThrowRDE("ARW: WB has %d entries instead of 4", wb->count);
-      const short16 *tmp = wb->getSignedShortArray();
-      mRaw->metadata.wbCoeffs[0] = (float)tmp[0];
-      mRaw->metadata.wbCoeffs[1] = (float)tmp[1];
-      mRaw->metadata.wbCoeffs[2] = (float)tmp[3];
+      mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
+      mRaw->metadata.wbCoeffs[1] = wb->getFloat(1);
+      mRaw->metadata.wbCoeffs[2] = wb->getFloat(3);
     }
     if (sony_private)
       delete(sony_private);
@@ -430,7 +428,7 @@ void ArwDecoder::GetWB() {
 void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
   uchar8* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
-  uint32 w = mRaw->dim.x;
+  int32 w = mRaw->dim.x;
 
   BitPumpPlain bits(in);
   for (uint32 y = t->start_y; y < t->end_y; y++) {
@@ -440,7 +438,7 @@ void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
     uint32 random = bits.peekBits(24);
 
     // Process 32 pixels (16x2) per loop.
-    for (uint32 x = 0; x < w - 30;) {
+    for (int32 x = 0; x < w - 30;) {
       bits.checkPos();
       int _max = bits.getBits(11);
       int _min = bits.getBits(11);
