@@ -64,6 +64,10 @@ typedef char* LPCWSTR;
 #define FALSE 0
 #endif
 
+#ifndef UINT32_MAX
+#define UINT32_MAX 0xffffffff
+#endif
+
 #define get2BE(data,pos) ((((ushort16)(data)[pos]) << 8) | \
                            ((ushort16)(data)[pos+1]))
 
@@ -196,6 +200,10 @@ inline Endianness getHostEndianness() {
 #include <intrin.h>
 #define LE_PLATFORM_HAS_BSWAP
 #define PLATFORM_BSWAP32(A) _byteswap_ulong(A)
+// See http://tinyurl.com/hqfuznc
+#if _MSC_VER >= 1900 
+extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
+#endif
 #endif
 
 inline uint32 clampbits(int x, uint32 n) { 
