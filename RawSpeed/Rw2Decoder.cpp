@@ -101,23 +101,6 @@ RawImage Rw2Decoder::decodeRawInternal() {
     input_start = new ByteStream(mFile, off);
     DecodeRw2();
   }
-  // Read blacklevels
-  if (raw->hasEntry((TiffTag)0x1c) && raw->hasEntry((TiffTag)0x1d) && raw->hasEntry((TiffTag)0x1e)) {
-    mRaw->blackLevelSeparate[0] = raw->getEntry((TiffTag)0x1c)->getInt() + 15;
-    mRaw->blackLevelSeparate[1] = mRaw->blackLevelSeparate[2] = raw->getEntry((TiffTag)0x1d)->getInt() + 15;
-    mRaw->blackLevelSeparate[3] = raw->getEntry((TiffTag)0x1e)->getInt() + 15;
-  }
-
-  // Read WB levels
-  if (raw->hasEntry((TiffTag)0x0024) && raw->hasEntry((TiffTag)0x0025) && raw->hasEntry((TiffTag)0x0026)) {
-    mRaw->metadata.wbCoeffs[0] = (float) raw->getEntry((TiffTag)0x0024)->getShort();
-    mRaw->metadata.wbCoeffs[1] = (float) raw->getEntry((TiffTag)0x0025)->getShort();
-    mRaw->metadata.wbCoeffs[2] = (float) raw->getEntry((TiffTag)0x0026)->getShort();
-  } else if (raw->hasEntry((TiffTag)0x0011) && raw->hasEntry((TiffTag)0x0012)) {
-    mRaw->metadata.wbCoeffs[0] = (float) raw->getEntry((TiffTag)0x0011)->getShort();
-    mRaw->metadata.wbCoeffs[1] = 256.0f;
-    mRaw->metadata.wbCoeffs[2] = (float) raw->getEntry((TiffTag)0x0012)->getShort();
-  }
 
   return mRaw;
 }
@@ -140,9 +123,9 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
   skip += w * 2 * t->start_y;
   skip /= 8;
 
-  PanaBitpump bits(new ByteStream(input_start));
-  bits.load_flags = load_flags;
-  bits.skipBytes(skip);
+  PanaBitpump *bits = new PanaBitpump(new ByteStream(input_start));
+  bits->load_flags = load_flags;
+  bits->skipBytes(skip);
 
   vector<uint32> zero_pos;
   for (y = t->start_y; y < t->end_y; y++) {
@@ -154,17 +137,17 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
         // Even pixels
         if (u == 2)
         {
-          sh = 4 >> (3 - bits.getBits(2));
+          sh = 4 >> (3 - bits->getBits(2));
           u = -1;
         }
         if (nonz[0]) {
-          if ((j = bits.getBits(8))) {
+          if ((j = bits->getBits(8))) {
             if ((pred[0] -= 0x80 << sh) < 0 || sh == 4)
               pred[0] &= ~(-1 << sh);
             pred[0] += j << sh;
           }
-        } else if ((nonz[0] = bits.getBits(8)) || i > 11)
-          pred[0] = nonz[0] << 4 | bits.getBits(4);
+        } else if ((nonz[0] = bits->getBits(8)) || i > 11)
+          pred[0] = nonz[0] << 4 | bits->getBits(4);
         *dest++ = pred[0];
         if (zero_is_bad && 0 == pred[0])
           zero_pos.push_back((y<<16) | (x*14+i));
@@ -174,17 +157,17 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
         u++;
         if (u == 2)
         {
-          sh = 4 >> (3 - bits.getBits(2));
+          sh = 4 >> (3 - bits->getBits(2));
           u = -1;
         }
         if (nonz[1]) {
-          if ((j = bits.getBits(8))) {
+          if ((j = bits->getBits(8))) {
             if ((pred[1] -= 0x80 << sh) < 0 || sh == 4)
               pred[1] &= ~(-1 << sh);
             pred[1] += j << sh;
           }
-        } else if ((nonz[1] = bits.getBits(8)) || i > 11)
-          pred[1] = nonz[1] << 4 | bits.getBits(4);
+        } else if ((nonz[1] = bits->getBits(8)) || i > 11)
+          pred[1] = nonz[1] << 4 | bits->getBits(4);
         *dest++ = pred[1];
         if (zero_is_bad && 0 == pred[1])
           zero_pos.push_back((y<<16) | (x*14+i));
@@ -197,6 +180,8 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
     mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(), zero_pos.begin(), zero_pos.end());
     pthread_mutex_unlock(&mRaw->mBadPixelMutex);
   }
+
+  delete bits;
 }
 
 void Rw2Decoder::checkSupportInternal(CameraMetaData *meta) {
@@ -232,6 +217,48 @@ void Rw2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
     mRaw->metadata.mode = mode;
     _RPT1(0, "Mode not found in DB: %s", mode.c_str());
     setMetaData(meta, make, model, "", iso);
+  }
+
+  data = mRootIFD->getIFDsWithTag(PANASONIC_STRIPOFFSET);
+  TiffIFD* raw = data[0];
+
+  // Read blacklevels
+  if (raw->hasEntry((TiffTag)0x1c) && raw->hasEntry((TiffTag)0x1d) && raw->hasEntry((TiffTag)0x1e)) {
+    const int blackRed = raw->getEntry((TiffTag)0x1c)->getInt() + 15;
+    const int blackGreen = raw->getEntry((TiffTag)0x1d)->getInt() + 15;
+    const int blackBlue = raw->getEntry((TiffTag)0x1e)->getInt() + 15;
+
+    for(int i = 0; i < 2; i++) {
+      for(int j = 0; j < 2; j++) {
+        const int k = i + 2 * j;
+        const CFAColor c = mRaw->cfa.getColorAt(i, j);
+        switch (c) {
+          case CFA_RED:
+            mRaw->blackLevelSeparate[k] = blackRed;
+            break;
+          case CFA_GREEN:
+            mRaw->blackLevelSeparate[k] = blackGreen;
+            break;
+          case CFA_BLUE:
+            mRaw->blackLevelSeparate[k] = blackBlue;
+            break;
+          default:
+            ThrowRDE("RW2 Decoder: Unexpected CFA color %s.", ColorFilterArray::colorToString(c).c_str());
+            break;
+        }
+      }
+    }
+  }
+
+  // Read WB levels
+  if (raw->hasEntry((TiffTag)0x0024) && raw->hasEntry((TiffTag)0x0025) && raw->hasEntry((TiffTag)0x0026)) {
+    mRaw->metadata.wbCoeffs[0] = (float) raw->getEntry((TiffTag)0x0024)->getShort();
+    mRaw->metadata.wbCoeffs[1] = (float) raw->getEntry((TiffTag)0x0025)->getShort();
+    mRaw->metadata.wbCoeffs[2] = (float) raw->getEntry((TiffTag)0x0026)->getShort();
+  } else if (raw->hasEntry((TiffTag)0x0011) && raw->hasEntry((TiffTag)0x0012)) {
+    mRaw->metadata.wbCoeffs[0] = (float) raw->getEntry((TiffTag)0x0011)->getShort();
+    mRaw->metadata.wbCoeffs[1] = 256.0f;
+    mRaw->metadata.wbCoeffs[2] = (float) raw->getEntry((TiffTag)0x0012)->getShort();
   }
 }
 
