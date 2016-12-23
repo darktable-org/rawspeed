@@ -1,0 +1,6 @@
+brew 'cmake'
+brew 'gcc'
+brew 'git'
+brew 'jpeg'
+brew 'ninja'
+brew 'pugixml'
