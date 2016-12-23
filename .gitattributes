@@ -1,16 +1,2 @@
-# Set the default behavior, in case people don't have core.autocrlf set.
-* text=auto
-
-# Explicitly declare text files you want to always be normalized and converted
-# to native line endings on checkout.
-*.cpp text
-*.h text
-*.xml text
-*.xsl text
-*.xsd text
-*.md text
-*.txt text
-*.cmake text
-
-# Denote all files that are truly binary and should not be modified.
-*.lib binary
+# No binary files in here.
+* text
