@@ -1,3 +1,18 @@
+# cmake out-of-source build tree
+build*/
+
+# tmp files
+*~
+.DS_Store
+cscope.out
+.*.swp
+
+# project files
+*.kdev4
+*.sln
+*.vcproj
+*.vcxproj
+
 # Compiled Object files
 *.slo
 *.lo
