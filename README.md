@@ -40,7 +40,7 @@ So RawSpeed is not intended to be a complete RAW file display library,  but only
 
 ##Getting Source Code
 
-You can get access to the lastest version using [from here](https://github.com/klauspost/rawspeed). You will need to include the “RawSpeed” and “data” folder in your own project.
+You can get access to the lastest version using [from here](https://github.com/darktable-org/rawspeed). You will need to include the “RawSpeed” and “data” folder in your own project.
 
 This includes a Microsoft Visual Studio project to build a test application. The test application uses [libgfl](http://www.xnview.com/en/gfl.html) to output 16 bit images. This library is not required for your own implementation though.
 
@@ -298,4 +298,4 @@ RawSpeed will need:
 
 ##Submitting Requests and Patches
 
-Please go to the [github page](https://github.com/klauspost/rawspeed) and submit your (pull)requests and issues there.
+Please go to the [github page](https://github.com/darktable-org/rawspeed) and submit your (pull)requests and issues there.
