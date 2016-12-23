@@ -2,6 +2,7 @@ language: generic
 
 os:
   - linux
+  - osx
 
 sudo: required
 
@@ -10,6 +11,7 @@ services:
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker pull darktable/rawspeed; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update && brew tap Homebrew/bundle && cd .ci && brew bundle --verbose; fi
 
 env:
   global:
@@ -28,6 +30,16 @@ matrix:
     services:
       - docker
     env: CC=clang-3.9 CXX=clang++-3.9 TARGET=build
+  - os: osx
+    env: CC=gcc-6 CXX=g++-6 TARGET=build
 
 script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run --read-only --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --tmpfs $BUILD_DIR --workdir $BUILD_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS --env CC --env CXX --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET darktable/rawspeed sh -c "$SRC_DIR/.ci/ci-script.sh"; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      export SRC_DIR="$TRAVIS_BUILD_DIR";
+      export BUILD_DIR="$SRC_DIR/build";
+      export INSTALL_PREFIX="$SRC_DIR/install";
+      mkdir "$BUILD_DIR";
+      mkdir "$INSTALL_PREFIX";
+      "$SRC_DIR/.ci/ci-script.sh";
+    fi
