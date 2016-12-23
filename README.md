@@ -1,3 +1,5 @@
+rawspeed [![build status](https://travis-ci.org/darktable-org/rawspeed.svg?branch=develop)](https://travis-ci.org/darktable-org/rawspeed)
+
 #RawSpeed Developer Information
 
 ##What is RawSpeed?

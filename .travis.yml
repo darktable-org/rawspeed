@@ -1,0 +1,33 @@
+language: generic
+
+os:
+  - linux
+
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker pull darktable/rawspeed; fi
+
+env:
+  global:
+    - SRC_DIR=/build/rawspeed
+    - BUILD_DIR=/build/rawspeed-build
+    - INSTALL_PREFIX=/build/rawspeed-install
+    - CFLAGS="-pipe -Werror" CXXFLAGS="-pipe -Werror"
+  matrix:
+    - CC=cc CXX=c++ TARGET=build # default system compiler, all platforms
+
+matrix:
+  fast_finish: true
+  include:
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    env: CC=clang-3.9 CXX=clang++-3.9 TARGET=build
+
+script:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run --read-only --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --tmpfs $BUILD_DIR --workdir $BUILD_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS --env CC --env CXX --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET darktable/rawspeed sh -c "$SRC_DIR/.ci/ci-script.sh"; fi
