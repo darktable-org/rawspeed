@@ -144,7 +144,7 @@ inline uint32 getThreadCount()
 {
 #ifdef NO_PTHREAD
   return 1;
-#elif WIN32
+#elif defined(WIN32)
   return pthread_num_processors_np();
 #else
   return rawspeed_get_number_of_processor_cores();

@@ -1,3 +1,6 @@
+set(CMAKE_THREAD_PREFER_PTHREAD 1)
+find_package(Threads REQUIRED)
+
 find_package(Pugixml 1.2 REQUIRED)
 include_directories(SYSTEM ${Pugixml_INCLUDE_DIRS})
 
@@ -86,7 +89,7 @@ set_target_properties(rawspeed
     POSITION_INDEPENDENT_CODE True
 )
 
-target_link_libraries(rawspeed ${RAWSPEED_LIBS} ${Pugixml_LIBRARIES} ${JPEG_LIBRARIES})
+target_link_libraries(rawspeed ${RAWSPEED_LIBS} ${CMAKE_THREAD_LIBS_INIT} ${Pugixml_LIBRARIES} ${JPEG_LIBRARIES})
 
 #
 # the rawspeed part is a bit of a hack:

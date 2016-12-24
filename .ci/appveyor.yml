@@ -1,0 +1,26 @@
+install:
+  - C:\msys64\usr\bin\pacman --noconfirm --sync --refresh --refresh --sysupgrade --sysupgrade
+  - C:\msys64\usr\bin\pacman -S --noconfirm mingw-w64-x86_64-{toolchain,gcc,clang,cmake,ninja,libxml2,pugixml,libjpeg-turbo}
+
+environment:
+  CFLAGS: "-pipe"
+  CXXFLAGS: "-pipe"
+  TARGET: build
+  matrix:
+    - CC:  cc
+      CXX: c++
+    - CC:  clang
+      CXX: clang++
+
+matrix:
+  fast_finish: true
+
+build_script:
+  - C:\msys64\usr\bin\bash --login -c "
+      export PATH=/c/msys64/mingw64/bin:$PATH;
+      export SRC_DIR="${APPVEYOR_BUILD_FOLDER}";
+      export BUILD_DIR="$SRC_DIR/build";
+      export INSTALL_PREFIX="$SRC_DIR/install";
+      mkdir ${BUILD_DIR};
+      mkdir ${INSTALL_PREFIX};
+      $(cygpath ${APPVEYOR_BUILD_FOLDER})/.ci/ci-script.sh"
