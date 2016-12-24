@@ -77,7 +77,8 @@
 // Workaround timespec redefinition: http://tinyurl.com/zcs2ocd
 #define HAVE_STRUCT_TIMESPEC 1
 #endif
-#include "pthread.h"
+#else
+#include <pthread.h>
 #endif
 
 #ifdef FAR  // libjpeg also defines FAR

@@ -1,5 +1,13 @@
-set(CMAKE_THREAD_PREFER_PTHREAD 1)
-find_package(Threads REQUIRED)
+if(WITH_PTHREADS)
+  set(CMAKE_THREAD_PREFER_PTHREAD 1)
+  find_package(Threads REQUIRED)
+  if(NOT CMAKE_USE_PTHREADS_INIT)
+    message(SEND_ERROR "Did not found POSIX Threads! Either make it find pthreads, or pass -DWITH_PTHREADS=OFF to disable threading.")
+  endif()
+else()
+  message(STATUS "PThread-based threading is disabled. Not searching for PThreads")
+  add_definitions(-DNO_PTHREAD)
+endif()
 
 find_package(Pugixml 1.2 REQUIRED)
 include_directories(SYSTEM ${Pugixml_INCLUDE_DIRS})
@@ -89,7 +97,11 @@ set_target_properties(rawspeed
     POSITION_INDEPENDENT_CODE True
 )
 
-target_link_libraries(rawspeed ${RAWSPEED_LIBS} ${CMAKE_THREAD_LIBS_INIT} ${Pugixml_LIBRARIES} ${JPEG_LIBRARIES})
+target_link_libraries(rawspeed ${RAWSPEED_LIBS} ${Pugixml_LIBRARIES} ${JPEG_LIBRARIES})
+
+if(WITH_PTHREADS AND Threads_FOUND)
+  target_link_libraries(rawspeed ${CMAKE_THREAD_LIBS_INIT})
+endif()
 
 #
 # the rawspeed part is a bit of a hack:
