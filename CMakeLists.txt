@@ -22,6 +22,16 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(WITH_PTHREADS "Enable threading support through pthread. Highly recommended" ON)
 option(USE_XMLLINT "Run xmllint to test if data/cameras.xml is valid" ON)
 
+if(UNIX AND NOT APPLE)
+  option(BUILD_TESTING "Build the testing tree." ON)
+else()
+  option(BUILD_TESTING "Build the testing tree." OFF)
+endif()
+
+if(BUILD_TESTING)
+  enable_testing()
+endif()
+
 include(CpuMarch)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
