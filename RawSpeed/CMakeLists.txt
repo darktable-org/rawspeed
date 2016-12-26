@@ -124,6 +124,7 @@ endif()
 
 if(BUILD_TESTING)
   FILE(GLOB RAWSPEED_TEST_SOURCES
+    "BlackAreaTest.cpp"
     "RawSpeedTest.cpp"
   )
 

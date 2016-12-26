@@ -22,6 +22,9 @@
 
     http://www.klauspost.com
 */
+
+#include "StdAfx.h"
+
 namespace RawSpeed {
 
 class BlackArea
