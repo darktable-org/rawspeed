@@ -101,7 +101,11 @@ if(WIN32)
   set(RAWSPEED_LIBS "msvcrt")
 endif(WIN32)
 
-add_library(rawspeed STATIC ${RAWSPEED_SOURCES})
+if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
+  add_library(rawspeed SHARED ${RAWSPEED_SOURCES})
+else()
+  add_library(rawspeed STATIC ${RAWSPEED_SOURCES})
+endif()
 
 set_target_properties(rawspeed
   PROPERTIES

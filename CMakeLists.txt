@@ -43,3 +43,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 
 add_subdirectory(RawSpeed)
 add_subdirectory(data)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
+  include(CodeCoverage)
+  setup_target_for_coverage(coverage ctest coverage)
+endif()
