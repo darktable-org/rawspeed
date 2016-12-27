@@ -28,6 +28,21 @@ else()
   option(BUILD_TESTING "Build the testing tree." OFF)
 endif()
 
+# Add a sensible build type default and warning because empty means no optimization and no debug info.
+if(NOT CMAKE_BUILD_TYPE)
+  message("WARNING: CMAKE_BUILD_TYPE is not defined!")
+
+  set(default_build_type "RelWithDebInfo")
+
+  if(BUILD_TESTING AND CMAKE_COMPILER_IS_GNUCXX)
+    set(default_build_type "Coverage")
+  endif()
+
+  message("WARNING: Defaulting to CMAKE_BUILD_TYPE=${default_build_type}. Use ccmake to set a proper value.")
+
+  SET(CMAKE_BUILD_TYPE ${default_build_type} CACHE STRING "Choose the type of build, options are: None Coverage Debug RelWithDebInfo Release RelWithDebInfo MinSizeRel." FORCE)
+endif(NOT CMAKE_BUILD_TYPE)
+
 if(BUILD_TESTING)
   enable_testing()
 endif()
