@@ -22,7 +22,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(WITH_PTHREADS "Enable threading support through pthread. Highly recommended" ON)
 option(USE_XMLLINT "Run xmllint to test if data/cameras.xml is valid" ON)
 
-if(UNIX AND NOT APPLE)
+if(UNIX OR APPLE)
   option(BUILD_TESTING "Build the testing tree." ON)
 else()
   option(BUILD_TESTING "Build the testing tree." OFF)
