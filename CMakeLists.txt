@@ -25,7 +25,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 option(WITH_PTHREADS "Enable threading support through pthread. Highly recommended" ON)
 option(USE_XMLLINT "Run xmllint to test if data/cameras.xml is valid" ON)
 
-if(UNIX OR APPLE)
+if(NOT APPLE)
   option(BUILD_TESTING "Build the testing tree." ON)
 else()
   option(BUILD_TESTING "Build the testing tree." OFF)
