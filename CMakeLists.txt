@@ -12,12 +12,15 @@ If(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 endif(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 include(GNUInstallDirs)
 
 project(rawspeed CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(WITH_PTHREADS "Enable threading support through pthread. Highly recommended" ON)
 option(USE_XMLLINT "Run xmllint to test if data/cameras.xml is valid" ON)
@@ -34,32 +37,25 @@ if(NOT CMAKE_BUILD_TYPE)
 
   set(default_build_type "RelWithDebInfo")
 
-  if(BUILD_TESTING AND CMAKE_COMPILER_IS_GNUCXX)
+  if(BUILD_TESTING)
     set(default_build_type "Coverage")
   endif()
 
   message("WARNING: Defaulting to CMAKE_BUILD_TYPE=${default_build_type}. Use ccmake to set a proper value.")
 
-  SET(CMAKE_BUILD_TYPE ${default_build_type} CACHE STRING "Choose the type of build, options are: None Coverage Debug RelWithDebInfo Release RelWithDebInfo MinSizeRel." FORCE)
+  SET(CMAKE_BUILD_TYPE ${default_build_type} CACHE STRING "Choose the type of build, options are: None Coverage Debug RelWithDebInfo Release." FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 if(BUILD_TESTING)
   enable_testing()
 endif()
 
-include(CpuMarch)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-
-# should be fixed IMHO
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
+include(compiler-flags)
 
 add_subdirectory(RawSpeed)
 add_subdirectory(data)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
+if(CMAKE_BUILD_TYPE MATCHES "^[Cc][Oo][Vv][Ee][Rr][Aa][Gg][Ee]$")
   include(CodeCoverage)
   setup_target_for_coverage(coverage ctest coverage)
 endif()

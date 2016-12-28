@@ -77,16 +77,20 @@ IF(NOT GCOV_PATH)
 	MESSAGE(FATAL_ERROR "gcov not found! Aborting...")
 ENDIF() # NOT GCOV_PATH
 
-IF(NOT CMAKE_COMPILER_IS_GNUCXX)
+IF("${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
+	IF("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 3)
+		MESSAGE(FATAL_ERROR "Clang version must be 3.0.0 or greater! Aborting...")
+	ENDIF()
+ELSEIF(NOT CMAKE_COMPILER_IS_GNUCXX)
 	MESSAGE(FATAL_ERROR "Compiler is not GNU gcc! Aborting...")
 ENDIF() # CHECK VALID COMPILER
 
 SET(CMAKE_CXX_FLAGS_COVERAGE
-    "-g -O0 --coverage -fprofile-arcs -ftest-coverage"
+    "-g -O0 -fprofile-arcs -ftest-coverage"
     CACHE STRING "Flags used by the C++ compiler during coverage builds."
     FORCE )
 SET(CMAKE_C_FLAGS_COVERAGE
-    "-g -O0 --coverage -fprofile-arcs -ftest-coverage"
+    "-g -O0 -fprofile-arcs -ftest-coverage"
     CACHE STRING "Flags used by the C compiler during coverage builds."
     FORCE )
 SET(CMAKE_EXE_LINKER_FLAGS_COVERAGE
