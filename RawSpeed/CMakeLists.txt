@@ -119,10 +119,6 @@ if(WITH_PTHREADS AND Threads_FOUND)
 endif()
 
 if(BUILD_TESTING)
-  target_link_libraries(rawspeed libgoogletest)
-endif()
-
-if(BUILD_TESTING)
   FILE(GLOB RAWSPEED_TEST_SOURCES
     "BlackAreaTest.cpp"
     "ExceptionsTest.cpp"
@@ -133,7 +129,7 @@ if(BUILD_TESTING)
     get_filename_component(TESTNAME ${IN} NAME_WE)
 
     add_executable(${TESTNAME} ${IN})
-    target_link_libraries(${TESTNAME} rawspeed)
+    target_link_libraries(${TESTNAME} rawspeed gtest gmock)
     GTEST_ADD_TESTS(${TESTNAME} "" AUTO)
   endforeach()
 endif()
