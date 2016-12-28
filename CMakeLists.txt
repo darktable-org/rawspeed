@@ -55,7 +55,7 @@ include(compiler-flags)
 add_subdirectory(RawSpeed)
 add_subdirectory(data)
 
-if(CMAKE_BUILD_TYPE MATCHES "^[Cc][Oo][Vv][Ee][Rr][Aa][Gg][Ee]$")
+if(BUILD_TESTING AND CMAKE_BUILD_TYPE MATCHES "^[Cc][Oo][Vv][Ee][Rr][Aa][Gg][Ee]$")
   include(CodeCoverage)
   setup_target_for_coverage(coverage ctest coverage)
 endif()

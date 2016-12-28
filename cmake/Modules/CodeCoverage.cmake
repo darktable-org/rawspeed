@@ -75,32 +75,15 @@ ELSEIF(NOT CMAKE_COMPILER_IS_GNUCXX)
 	MESSAGE(FATAL_ERROR "Compiler is not GNU gcc! Aborting...")
 ENDIF() # CHECK VALID COMPILER
 
-SET(CMAKE_CXX_FLAGS_COVERAGE
-    "-g -O0 -fprofile-arcs -ftest-coverage"
-    CACHE STRING "Flags used by the C++ compiler during coverage builds."
-    FORCE )
-SET(CMAKE_C_FLAGS_COVERAGE
-    "-g -O0 -fprofile-arcs -ftest-coverage"
-    CACHE STRING "Flags used by the C compiler during coverage builds."
-    FORCE )
-SET(CMAKE_EXE_LINKER_FLAGS_COVERAGE
-    ""
-    CACHE STRING "Flags used for linking binaries during coverage builds."
-    FORCE )
-SET(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
-    ""
-    CACHE STRING "Flags used by the shared libraries linker during coverage builds."
-    FORCE )
-MARK_AS_ADVANCED(
-    CMAKE_CXX_FLAGS_COVERAGE
-    CMAKE_C_FLAGS_COVERAGE
-    CMAKE_EXE_LINKER_FLAGS_COVERAGE
-    CMAKE_SHARED_LINKER_FLAGS_COVERAGE )
-
 IF ( NOT (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "Coverage"))
   MESSAGE( WARNING "Code coverage results with an optimized (non-Debug) build may be misleading" )
 ENDIF() # NOT CMAKE_BUILD_TYPE STREQUAL "Debug"
 
+# Check prereqs
+FIND_PROGRAM( GCOV_PATH gcov )
+FIND_PROGRAM( LCOV_PATH lcov )
+FIND_PROGRAM( GENHTML_PATH genhtml )
+FIND_PROGRAM( GCOVR_PATH gcovr PATHS ${CMAKE_SOURCE_DIR}/tests)
 
 # Param _targetname     The name of new the custom make target
 # Param _testrunner     The name of the target which runs the tests.
@@ -111,22 +94,19 @@ ENDIF() # NOT CMAKE_BUILD_TYPE STREQUAL "Debug"
 # Optional fourth parameter is passed as arguments to _testrunner
 #   Pass them in list form, e.g.: "-j;2" for -j 2
 FUNCTION(SETUP_TARGET_FOR_COVERAGE _targetname _testrunner _outputname)
-  # Check prereqs
-  FIND_PROGRAM( GCOV_PATH gcov )
-  FIND_PROGRAM( LCOV_PATH lcov )
-  FIND_PROGRAM( GENHTML_PATH genhtml )
-  FIND_PROGRAM( GCOVR_PATH gcovr PATHS ${CMAKE_SOURCE_DIR}/tests)
-
   IF(NOT GCOV_PATH)
-    MESSAGE(FATAL_ERROR "gcov not found! Aborting...")
+    MESSAGE(WARNING "gcov not found! Aborting...")
+    return()
   ENDIF() # NOT GCOV_PATH
 
 	IF(NOT LCOV_PATH)
-		MESSAGE(FATAL_ERROR "lcov not found! Aborting...")
+		MESSAGE(WARNING "lcov not found! Aborting...")
+		return()
 	ENDIF() # NOT LCOV_PATH
 
 	IF(NOT GENHTML_PATH)
-		MESSAGE(FATAL_ERROR "genhtml not found! Aborting...")
+		MESSAGE(WARNING "genhtml not found! Aborting...")
+		return()
 	ENDIF() # NOT GENHTML_PATH
 
 	SET(coverage_info "${CMAKE_BINARY_DIR}/${_outputname}.info")
