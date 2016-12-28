@@ -38,8 +38,8 @@ RUN echo 'APT::Get::Fix-Missing "true";' > /etc/apt/apt.conf.d/80fixmissin
 
 # pls keep sorted :)
 RUN rm -rf /var/lib/apt/lists/* && apt-get update && \
-    apt-get install clang++-3.9 cmake g++ git libjpeg-dev libpugixml-dev \
-    libxml2-utils make ninja-build && \
+    apt-get install clang++-3.9 cmake g++ git googletest libjpeg-dev \
+    libpugixml-dev libxml2-utils make ninja-build && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # i'd like to explicitly use ld.gold
