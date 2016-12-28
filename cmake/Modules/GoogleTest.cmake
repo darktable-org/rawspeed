@@ -1,3 +1,7 @@
+cmake_minimum_required(VERSION 3.0)
+
+project(googletest NONE)
+
 # Download and unpack googletest at configure time
 configure_file(${CMAKE_SOURCE_DIR}/cmake/Modules/GoogleTest.cmake.in ${CMAKE_BINARY_DIR}/googletest/CMakeLists.txt @ONLY)
 
@@ -6,8 +10,6 @@ execute_process(
   RESULT_VARIABLE result
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest
 )
-
-#message(WARNING "0 CMAKE_BINARY_DIR ${CMAKE_BINARY_DIR}")
 
 if(result)
   message(FATAL_ERROR "CMake step for googletest failed: ${result}")
@@ -26,6 +28,10 @@ endif()
 # Prevent overriding the parent project's compiler/linker
 # settings on Windows
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+if(NOT (UNIX OR APPLE))
+  set(gtest_disable_pthreads ON CACHE BOOL "" FORCE)
+endif()
 
 set(CMAKE_C_FLAGS_SAVE "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS_SAVE "${CMAKE_CXX_FLAGS}")

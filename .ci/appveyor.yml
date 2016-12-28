@@ -1,6 +1,6 @@
 install:
   - C:\msys64\usr\bin\pacman --noconfirm --sync --refresh --refresh --sysupgrade --sysupgrade
-  - C:\msys64\usr\bin\pacman -S --noconfirm mingw-w64-x86_64-{toolchain,gcc,clang,cmake,ninja,libxml2,pugixml,libjpeg-turbo}
+  - C:\msys64\usr\bin\pacman -S --noconfirm mingw-w64-x86_64-{toolchain,gcc,clang,cmake,ninja,libxml2,pugixml,libjpeg-turbo,curl,lcov}
 
 environment:
   CFLAGS: "-pipe"
@@ -11,6 +11,9 @@ environment:
       CXX: c++
     - CC:  clang
       CXX: clang++
+    - CC:  cc
+      CXX: c++
+      FLAVOR: Coverage
 
 matrix:
   fast_finish: true
@@ -23,4 +26,9 @@ build_script:
       export INSTALL_PREFIX="$SRC_DIR/install";
       mkdir ${BUILD_DIR};
       mkdir ${INSTALL_PREFIX};
-      $(cygpath ${APPVEYOR_BUILD_FOLDER})/.ci/ci-script.sh"
+      $(cygpath ${APPVEYOR_BUILD_FOLDER})/.ci/ci-script.sh;"
+
+on_success:
+  - C:\msys64\usr\bin\bash --login -c "
+      cd "${APPVEYOR_BUILD_FOLDER}";
+      bash <(curl -s https://codecov.io/bash);"

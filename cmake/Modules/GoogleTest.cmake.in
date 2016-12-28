@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(googletest NONE)
+project(googletest-download NONE)
 
 # Enable ExternalProject CMake module
 include(ExternalProject)
