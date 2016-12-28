@@ -19,8 +19,9 @@ env:
     - BUILD_DIR=/build/rawspeed-build
     - INSTALL_PREFIX=/build/rawspeed-install
     - CFLAGS="-pipe -Werror" CXXFLAGS="-pipe -Werror"
+    - TARGET=build
   matrix:
-    - CC=cc CXX=c++ TARGET=build # default system compiler, all platforms
+    - CC=cc CXX=c++ # default system compiler, all platforms
 
 matrix:
   fast_finish: true
@@ -29,12 +30,21 @@ matrix:
     sudo: required
     services:
       - docker
-    env: CC=clang-3.9 CXX=clang++-3.9 TARGET=build
+    env: CC=clang-3.9 CXX=clang++-3.9
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    env: CC=cc CXX=c++ FLAVOR=Coverage
   - os: osx
-    env: CC=gcc-6 CXX=g++-6 TARGET=build
+    env: CC=gcc-6 CXX=g++-6
 
 script:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run --read-only --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --tmpfs $BUILD_DIR:exec --workdir $BUILD_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS --env CC --env CXX --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET darktable/rawspeed sh -c "$SRC_DIR/.ci/ci-script.sh"; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      mkdir "$TRAVIS_BUILD_DIR/build";
+      docker run --read-only --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $BUILD_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS --env CC --env CXX --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR darktable/rawspeed sh -c "$SRC_DIR/.ci/ci-script.sh";
+      bash <(curl -s https://codecov.io/bash);
+    fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       export SRC_DIR="$TRAVIS_BUILD_DIR";
       export BUILD_DIR="$SRC_DIR/build";
