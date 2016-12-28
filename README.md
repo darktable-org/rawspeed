@@ -1,4 +1,4 @@
-rawspeed [![travis-ci](https://travis-ci.org/darktable-org/rawspeed.svg?branch=develop)](https://travis-ci.org/darktable-org/rawspeed) [![appveyor-ci](https://ci.appveyor.com/api/projects/status/7pqy0gdr9mp16xu2/branch/develop?svg=true)](https://ci.appveyor.com/project/LebedevRI/rawspeed/branch/develop) [![coverity status](https://scan.coverity.com/projects/11256/badge.svg)](https://scan.coverity.com/projects/darktable-org-rawspeed)
+rawspeed [![travis-ci](https://travis-ci.org/darktable-org/rawspeed.svg?branch=develop)](https://travis-ci.org/darktable-org/rawspeed) [![appveyor-ci](https://ci.appveyor.com/api/projects/status/7pqy0gdr9mp16xu2/branch/develop?svg=true)](https://ci.appveyor.com/project/LebedevRI/rawspeed/branch/develop) [![codecov](https://codecov.io/gh/darktable-org/rawspeed/branch/develop/graph/badge.svg)](https://codecov.io/gh/darktable-org/rawspeed) [![coverity status](https://scan.coverity.com/projects/11256/badge.svg)](https://scan.coverity.com/projects/darktable-org-rawspeed)
 =========
 
 #RawSpeed Developer Information
