@@ -1,0 +1,45 @@
+cmake_minimum_required(VERSION 3.0)
+
+project(googletest NONE)
+
+# Enable ExternalProject CMake module
+include(ExternalProject)
+
+# Download and install GoogleTest
+
+set(GOOGLETEST_PATH "/usr/src/googletest")
+
+#message(FATAL_ERROR "1 CMAKE_BINARY_DIR ${CMAKE_BINARY_DIR}")
+
+if(EXISTS "${GOOGLETEST_PATH}"            AND IS_DIRECTORY "${GOOGLETEST_PATH}"            AND EXISTS "${GOOGLETEST_PATH}/CMakeLists.txt" AND
+   EXISTS "${GOOGLETEST_PATH}/googletest" AND IS_DIRECTORY "${GOOGLETEST_PATH}/googletest" AND EXISTS "${GOOGLETEST_PATH}/googletest/CMakeLists.txt" AND
+   EXISTS "${GOOGLETEST_PATH}/googlemock" AND IS_DIRECTORY "${GOOGLETEST_PATH}/googlemock" AND EXISTS "${GOOGLETEST_PATH}/googlemock/CMakeLists.txt")
+  message(STATUS "Found Google Test in ${GOOGLETEST_PATH}")
+
+  ExternalProject_Add(
+    googletest
+    URL               "${GOOGLETEST_PATH}"
+    PREFIX            "${CMAKE_BINARY_DIR}/googletest"
+    SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src"
+    BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND     ""
+    INSTALL_COMMAND   ""
+    TEST_COMMAND      ""
+  )
+else()
+  message(WARNING "Did not find Google Test! Will have to fetch from web...")
+
+  ExternalProject_Add(
+    googletest
+    URL               https://github.com/google/googletest/archive/release-1.8.0.tar.gz
+    URL_HASH          SHA512=1dbece324473e53a83a60601b02c92c089f5d314761351974e097b2cf4d24af4296f9eb8653b6b03b1e363d9c5f793897acae1f0c7ac40149216035c4d395d9d
+    PREFIX            "${CMAKE_BINARY_DIR}/googletest"
+    SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src"
+    BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND     ""
+    INSTALL_COMMAND   ""
+    TEST_COMMAND      ""
+  )
+endif()
