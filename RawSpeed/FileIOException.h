@@ -24,6 +24,8 @@
 #ifndef FILE_IOEXCEPTION_H
 #define FILE_IOEXCEPTION_H
 
+#include "RawDecoderException.h"
+#include <string>
 
 namespace RawSpeed {
 
@@ -32,7 +34,7 @@ void ThrowFIE(const char* fmt, ...) __attribute__ ((format (printf, 1, 2)));
 class FileIOException: public RawDecoderException
 {
 public:
-  FileIOException(const string);
+  FileIOException(const std::string);
 };
 
 } // namespace RawSpeed

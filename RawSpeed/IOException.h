@@ -24,6 +24,8 @@
 #ifndef IOEXCEPTION_H
 #define IOEXCEPTION_H
 
+#include <stdexcept>
+#include <string>
 
 namespace RawSpeed {
 
@@ -34,7 +36,7 @@ class IOException : public std::runtime_error
 {
 public:
   IOException(const char* _msg);
-  IOException(const string _msg);
+  IOException(const std::string _msg);
 };
 
 } // namespace RawSpeed

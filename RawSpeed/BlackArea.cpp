@@ -1,4 +1,3 @@
-#include "StdAfx.h"
 #include "BlackArea.h"
 /* 
     RawSpeed - RAW file decoder.

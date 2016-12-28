@@ -22,6 +22,8 @@
 #ifndef TIFF_PARSER_EXCEPTION_H
 #define TIFF_PARSER_EXCEPTION_H
 
+#include <stdexcept>
+#include <string>
 
 namespace RawSpeed {
 
@@ -30,7 +32,7 @@ void ThrowTPE(const char* fmt, ...) __attribute__ ((format (printf, 1, 2)));
 class TiffParserException : public std::runtime_error
 {
 public:
-  TiffParserException(const string _msg);
+  TiffParserException(const std::string _msg);
 };
 
 } // namespace RawSpeed

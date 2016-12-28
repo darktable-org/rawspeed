@@ -22,6 +22,8 @@
 #ifndef CAMERA_METADATA_EXCEPTION_H
 #define CAMERA_METADATA_EXCEPTION_H
 
+#include <stdexcept>
+#include <string>
 
 namespace RawSpeed {
 
@@ -31,7 +33,7 @@ class CameraMetadataException :
   public std::runtime_error
 {
 public:
-  CameraMetadataException(const string _msg);
+  CameraMetadataException(const std::string _msg);
 };
 
 } // namespace RawSpeed

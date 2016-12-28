@@ -23,6 +23,8 @@
 #ifndef CIFF_PARSER_EXCEPTION_H
 #define CIFF_PARSER_EXCEPTION_H
 
+#include <stdexcept>
+#include <string>
 
 namespace RawSpeed {
 
@@ -31,7 +33,7 @@ void ThrowCPE(const char* fmt, ...) __attribute__ ((format (printf, 1, 2)));
 class CiffParserException : public std::runtime_error
 {
 public:
-  CiffParserException(const string _msg);
+  CiffParserException(const std::string _msg);
 };
 
 } // namespace RawSpeed

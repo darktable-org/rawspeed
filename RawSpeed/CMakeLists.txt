@@ -15,6 +15,17 @@ include_directories(SYSTEM ${Pugixml_INCLUDE_DIRS})
 find_package(JPEG REQUIRED)
 include_directories(SYSTEM ${JPEG_INCLUDE_DIRS})
 
+if(BUILD_TESTING)
+  # want GTEST_ADD_TESTS() macro. NOT THE ACTUAL MODULE!
+  include(GTEST_ADD_TESTS)
+
+  # for the actual gtest:
+
+  # at least in debian, they are the package only installs their source code,
+  # so if one wants to use them, he needs to compile them in-tree
+  include(GoogleTest)
+endif()
+
 FILE(GLOB RAWSPEED_SOURCES
   "AriDecoder.cpp"
   "ArwDecoder.cpp"
@@ -90,7 +101,11 @@ if(WIN32)
   set(RAWSPEED_LIBS "msvcrt")
 endif(WIN32)
 
-add_library(rawspeed STATIC ${RAWSPEED_SOURCES})
+if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
+  add_library(rawspeed SHARED ${RAWSPEED_SOURCES})
+else()
+  add_library(rawspeed STATIC ${RAWSPEED_SOURCES})
+endif()
 
 set_target_properties(rawspeed
   PROPERTIES
@@ -102,6 +117,27 @@ target_link_libraries(rawspeed ${RAWSPEED_LIBS} ${Pugixml_LIBRARIES} ${JPEG_LIBR
 if(WITH_PTHREADS AND Threads_FOUND)
   target_link_libraries(rawspeed ${CMAKE_THREAD_LIBS_INIT})
 endif()
+
+if(BUILD_TESTING)
+  target_link_libraries(rawspeed libgoogletest)
+endif()
+
+if(BUILD_TESTING)
+  FILE(GLOB RAWSPEED_TEST_SOURCES
+    "BlackAreaTest.cpp"
+    "ExceptionsTest.cpp"
+    "RawSpeedTest.cpp"
+  )
+
+  foreach(IN ${RAWSPEED_TEST_SOURCES})
+    get_filename_component(TESTNAME ${IN} NAME_WE)
+
+    add_executable(${TESTNAME} ${IN})
+    target_link_libraries(${TESTNAME} rawspeed)
+    GTEST_ADD_TESTS(${TESTNAME} "" AUTO)
+  endforeach()
+endif()
+
 
 #
 # the rawspeed part is a bit of a hack:
