@@ -14,9 +14,6 @@ environment:
     - CC:  cc
       CXX: c++
       FLAVOR: Coverage
-    - CC:  clang
-      CXX: clang++
-      FLAVOR: Coverage
 
 matrix:
   fast_finish: true
@@ -29,5 +26,9 @@ build_script:
       export INSTALL_PREFIX="$SRC_DIR/install";
       mkdir ${BUILD_DIR};
       mkdir ${INSTALL_PREFIX};
-      $(cygpath ${APPVEYOR_BUILD_FOLDER})/.ci/ci-script.sh;
+      $(cygpath ${APPVEYOR_BUILD_FOLDER})/.ci/ci-script.sh;"
+
+on_success:
+  - C:\msys64\usr\bin\bash --login -c "
+      cd "${APPVEYOR_BUILD_FOLDER}";
       bash <(curl -s https://codecov.io/bash);"

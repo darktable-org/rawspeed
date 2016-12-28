@@ -43,7 +43,6 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       mkdir "$TRAVIS_BUILD_DIR/build";
       docker run --read-only --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $BUILD_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS --env CC --env CXX --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR darktable/rawspeed sh -c "$SRC_DIR/.ci/ci-script.sh";
-      bash <(curl -s https://codecov.io/bash);
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       export SRC_DIR="$TRAVIS_BUILD_DIR";
@@ -53,3 +52,7 @@ script:
       mkdir "$INSTALL_PREFIX";
       "$SRC_DIR/.ci/ci-script.sh";
     fi
+
+after_success:
+  - cd "$TRAVIS_BUILD_DIR"
+  - bash <(curl -s https://codecov.io/bash)
