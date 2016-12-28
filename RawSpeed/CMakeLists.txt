@@ -107,11 +107,6 @@ else()
   add_library(rawspeed STATIC ${RAWSPEED_SOURCES})
 endif()
 
-set_target_properties(rawspeed
-  PROPERTIES
-    POSITION_INDEPENDENT_CODE True
-)
-
 target_link_libraries(rawspeed ${RAWSPEED_LIBS} ${Pugixml_LIBRARIES} ${JPEG_LIBRARIES})
 
 if(WITH_PTHREADS AND Threads_FOUND)
@@ -146,7 +141,6 @@ set_target_properties(rawspeed_static
   PROPERTIES
     IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/librawspeed.a
     INTERFACE_LINK_LIBRARIES $<TARGET_PROPERTY:rawspeed,INTERFACE_LINK_LIBRARIES>
-    POSITION_INDEPENDENT_CODE True
 )
 
 add_dependencies(rawspeed_static rawspeed)

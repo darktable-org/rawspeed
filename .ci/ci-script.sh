@@ -27,8 +27,18 @@ du -hcs "$SRC_DIR"
 du -hcs "$BUILD_DIR"
 du -hcs "$INSTALL_PREFIX"
 
+CMAKE_BUILD_TYPE="RelWithDebInfo"
+
+case "$FLAVOR" in
+  "Coverage")
+    CMAKE_BUILD_TYPE="Coverage"
+    ;;
+  *)
+    ;;
+esac
+
 cd "$BUILD_DIR"
-cmake -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo "$SRC_DIR" || (cat "$BUILD_DIR"/CMakeFiles/CMakeOutput.log; cat "$BUILD_DIR"/CMakeFiles/CMakeError.log)
+cmake -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" -GNinja -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" "$SRC_DIR" || (cat "$BUILD_DIR"/CMakeFiles/CMakeOutput.log; cat "$BUILD_DIR"/CMakeFiles/CMakeError.log)
 
 case "$TARGET" in
   "build")
