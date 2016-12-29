@@ -29,21 +29,6 @@
 
 using namespace RawSpeed;
 
-// define this function, it is only declared in rawspeed:
-int rawspeed_get_number_of_processor_cores() {
-#ifdef _OPENMP
-  return omp_get_num_procs();
-#else
-  return 1;
-#endif
-}
-
-int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  int ret = RUN_ALL_TESTS();
-  return ret;
-}
-
 static const std::string msg("my very Smart error Message #1 !");
 
 template <class T> class ExceptionsTest : public testing::Test {};

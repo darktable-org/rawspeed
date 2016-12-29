@@ -19,6 +19,17 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "StdAfx.h"
 #include <gmock/gmock.h> // for InitGoogleTest, RUN_ALL_TESTS
+#include <iostream>      // for operator<<, basic_ostream, basic...
 
-TEST(RawSpeed, Dummy) {}
+using namespace RawSpeed;
+
+// define this function, it is only declared in rawspeed:
+int rawspeed_get_number_of_processor_cores() {
+#ifdef _OPENMP
+  return omp_get_num_procs();
+#else
+  return 1;
+#endif
+}

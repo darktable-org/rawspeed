@@ -115,16 +115,33 @@ add_dependencies(rawspeed_static rawspeed)
 
 if(BUILD_TESTING)
   FILE(GLOB RAWSPEED_TEST_SOURCES
+    "RawSpeed.cpp"
+  )
+
+  if(APPLE AND NOT (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
+    # standard library mismatch issues, will probably end up dropping GCC on OSX completely
+    add_library(rawspeed_test STATIC $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_TEST_SOURCES})
+  else()
+    add_library(rawspeed_test SHARED $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_TEST_SOURCES})
+  endif()
+  target_link_libraries(rawspeed_test ${RAWSPEED_LIBS})
+  add_dependencies(rawspeed_test rawspeed)
+
+  target_link_libraries(rawspeed_test gtest gmock_main)
+
+  FILE(GLOB RAWSPEED_TESTS_SOURCES
     "BlackAreaTest.cpp"
     "ExceptionsTest.cpp"
     "RawSpeedTest.cpp"
   )
 
-  foreach(IN ${RAWSPEED_TEST_SOURCES})
+  foreach(IN ${RAWSPEED_TESTS_SOURCES})
     get_filename_component(TESTNAME ${IN} NAME_WE)
 
     add_executable(${TESTNAME} ${IN})
-    target_link_libraries(${TESTNAME} rawspeed_static gtest gmock)
+
+    target_link_libraries(${TESTNAME} rawspeed_test)
+
     GTEST_ADD_TESTS(${TESTNAME} "" AUTO)
 
   endforeach()
