@@ -21,7 +21,8 @@ env:
     - CFLAGS="-pipe -Werror" CXXFLAGS="-pipe -Werror"
     - TARGET=build
   matrix:
-    - CC=cc CXX=c++ # default system compiler, all platforms
+    - CC=cc CXX=c++
+    - CC=cc CXX=c++ FLAVOR=Coverage
 
 matrix:
   fast_finish: true
@@ -31,13 +32,11 @@ matrix:
     services:
       - docker
     env: CC=clang-3.9 CXX=clang++-3.9
-  - os: linux
-    sudo: required
-    services:
-      - docker
-    env: CC=cc CXX=c++ FLAVOR=Coverage
   - os: osx
     env: CC=gcc-6 CXX=g++-6
+
+# linux clang Coverage build OOM's in gcov during final codecov report collection
+# OSX gcc Coverage build produces invalid .gcno files
 
 script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
@@ -54,5 +53,14 @@ script:
     fi
 
 after_success:
-  - cd "$TRAVIS_BUILD_DIR"
-  - bash <(curl -s https://codecov.io/bash)
+  - export PLATFORM="$TRAVIS_OS_NAME";
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      export CXX=GCC;
+    fi;
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      export CXX=AppleClang;
+    fi;
+    cd "$TRAVIS_BUILD_DIR";
+    curl -s https://codecov.io/bash > codecov;
+    chmod +x codecov;
+    ./codecov -e PLATFORM,CXX -F unittests;

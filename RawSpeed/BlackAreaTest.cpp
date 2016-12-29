@@ -20,25 +20,10 @@
 */
 
 #include "BlackArea.h"
-#include <gtest/gtest.h> // for InitGoogleTest, RUN_ALL_TESTS
+#include <gmock/gmock.h> // for InitGoogleTest, RUN_ALL_TESTS
 #include <iostream>      // for operator<<, basic_ostream, basic...
 
 using namespace RawSpeed;
-
-// define this function, it is only declared in rawspeed:
-int rawspeed_get_number_of_processor_cores() {
-#ifdef _OPENMP
-  return omp_get_num_procs();
-#else
-  return 1;
-#endif
-}
-
-int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  int ret = RUN_ALL_TESTS();
-  return ret;
-}
 
 class BlackAreaTest
     : public ::testing::TestWithParam<std::tr1::tuple<int, int, bool>> {

@@ -101,46 +101,51 @@ if(WIN32)
   set(RAWSPEED_LIBS "msvcrt")
 endif(WIN32)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
-  add_library(rawspeed SHARED ${RAWSPEED_SOURCES})
-else()
-  add_library(rawspeed STATIC ${RAWSPEED_SOURCES})
-endif()
+add_library(rawspeed OBJECT ${RAWSPEED_SOURCES})
 
-target_link_libraries(rawspeed ${RAWSPEED_LIBS} ${Pugixml_LIBRARIES} ${JPEG_LIBRARIES})
+list(APPEND RAWSPEED_LIBS ${Pugixml_LIBRARIES} ${JPEG_LIBRARIES})
 
 if(WITH_PTHREADS AND Threads_FOUND)
-  target_link_libraries(rawspeed ${CMAKE_THREAD_LIBS_INIT})
+  list(APPEND RAWSPEED_LIBS ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
+add_library(rawspeed_static STATIC $<TARGET_OBJECTS:rawspeed>)
+target_link_libraries(rawspeed_static ${RAWSPEED_LIBS})
+add_dependencies(rawspeed_static rawspeed)
+
 if(BUILD_TESTING)
+  add_custom_target(tests ALL)
+
   FILE(GLOB RAWSPEED_TEST_SOURCES
+    "RawSpeed.cpp"
+  )
+
+  if((APPLE AND NOT (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")) OR (NOT CMAKE_BUILD_TYPE MATCHES "^[Cc][Oo][Vv][Ee][Rr][Aa][Gg][Ee]$"))
+    # standard library mismatch issues, will probably end up dropping GCC on OSX completely
+    add_library(rawspeed_test STATIC $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_TEST_SOURCES})
+  else()
+    add_library(rawspeed_test SHARED $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_TEST_SOURCES})
+  endif()
+  target_link_libraries(rawspeed_test ${RAWSPEED_LIBS})
+  add_dependencies(rawspeed_test rawspeed)
+
+  target_link_libraries(rawspeed_test gtest gmock_main)
+
+  FILE(GLOB RAWSPEED_TESTS_SOURCES
     "BlackAreaTest.cpp"
     "ExceptionsTest.cpp"
     "RawSpeedTest.cpp"
   )
 
-  foreach(IN ${RAWSPEED_TEST_SOURCES})
+  foreach(IN ${RAWSPEED_TESTS_SOURCES})
     get_filename_component(TESTNAME ${IN} NAME_WE)
 
     add_executable(${TESTNAME} ${IN})
-    target_link_libraries(${TESTNAME} rawspeed gtest gmock)
+
+    target_link_libraries(${TESTNAME} rawspeed_test)
+
     GTEST_ADD_TESTS(${TESTNAME} "" AUTO)
+
+    add_dependencies(tests ${TESTNAME})
   endforeach()
 endif()
-
-
-#
-# the rawspeed part is a bit of a hack:
-# the static linking didn't work since it was pulling -lstdc++ and -lm into linker flags.
-# so we do a custom dependency and pretend an imported librawsped.a so no other -l are
-# appended.
-#
-add_library(rawspeed_static STATIC IMPORTED GLOBAL)
-set_target_properties(rawspeed_static
-  PROPERTIES
-    IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/librawspeed.a
-    INTERFACE_LINK_LIBRARIES $<TARGET_PROPERTY:rawspeed,INTERFACE_LINK_LIBRARIES>
-)
-
-add_dependencies(rawspeed_static rawspeed)
