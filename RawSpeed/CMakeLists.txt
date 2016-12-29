@@ -101,17 +101,17 @@ if(WIN32)
   set(RAWSPEED_LIBS "msvcrt")
 endif(WIN32)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
-  add_library(rawspeed SHARED ${RAWSPEED_SOURCES})
-else()
-  add_library(rawspeed STATIC ${RAWSPEED_SOURCES})
-endif()
+add_library(rawspeed OBJECT ${RAWSPEED_SOURCES})
 
-target_link_libraries(rawspeed ${RAWSPEED_LIBS} ${Pugixml_LIBRARIES} ${JPEG_LIBRARIES})
+list(APPEND RAWSPEED_LIBS ${Pugixml_LIBRARIES} ${JPEG_LIBRARIES})
 
 if(WITH_PTHREADS AND Threads_FOUND)
-  target_link_libraries(rawspeed ${CMAKE_THREAD_LIBS_INIT})
+  list(APPEND RAWSPEED_LIBS ${CMAKE_THREAD_LIBS_INIT})
 endif()
+
+add_library(rawspeed_static STATIC $<TARGET_OBJECTS:rawspeed>)
+target_link_libraries(rawspeed_static ${RAWSPEED_LIBS})
+add_dependencies(rawspeed_static rawspeed)
 
 if(BUILD_TESTING)
   FILE(GLOB RAWSPEED_TEST_SOURCES
@@ -124,23 +124,8 @@ if(BUILD_TESTING)
     get_filename_component(TESTNAME ${IN} NAME_WE)
 
     add_executable(${TESTNAME} ${IN})
-    target_link_libraries(${TESTNAME} rawspeed gtest gmock)
+    target_link_libraries(${TESTNAME} rawspeed_static gtest gmock)
     GTEST_ADD_TESTS(${TESTNAME} "" AUTO)
+
   endforeach()
 endif()
-
-
-#
-# the rawspeed part is a bit of a hack:
-# the static linking didn't work since it was pulling -lstdc++ and -lm into linker flags.
-# so we do a custom dependency and pretend an imported librawsped.a so no other -l are
-# appended.
-#
-add_library(rawspeed_static STATIC IMPORTED GLOBAL)
-set_target_properties(rawspeed_static
-  PROPERTIES
-    IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/librawspeed.a
-    INTERFACE_LINK_LIBRARIES $<TARGET_PROPERTY:rawspeed,INTERFACE_LINK_LIBRARIES>
-)
-
-add_dependencies(rawspeed_static rawspeed)
