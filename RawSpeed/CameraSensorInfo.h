@@ -23,13 +23,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 http://www.klauspost.com
 */
 
+#include <vector>
 
 namespace RawSpeed {
 
 class CameraSensorInfo
 {
 public:
-  CameraSensorInfo(int black_level, int white_level, int min_iso, int max_iso, vector<int> black_separate);
+  CameraSensorInfo(int black_level, int white_level, int min_iso, int max_iso,
+                   std::vector<int> black_separate);
   virtual ~CameraSensorInfo(void);
   bool isIsoWithin(int iso);
   bool isDefault();
@@ -37,7 +39,7 @@ public:
   int mWhiteLevel;
   int mMinIso; 
   int mMaxIso;
-  vector<int> mBlackLevelSeparate;
+  std::vector<int> mBlackLevelSeparate;
 };
 
 } // namespace RawSpeed
