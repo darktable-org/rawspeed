@@ -15,20 +15,26 @@ environment:
       CXX: c++
       FLAVOR: Coverage
 
+# clang Coverage build fails with some llvm linking issues
+
 matrix:
   fast_finish: true
 
 build_script:
   - C:\msys64\usr\bin\bash --login -c "
       export PATH=/c/msys64/mingw64/bin:$PATH;
-      export SRC_DIR="${APPVEYOR_BUILD_FOLDER}";
-      export BUILD_DIR="$SRC_DIR/build";
-      export INSTALL_PREFIX="$SRC_DIR/install";
-      mkdir ${BUILD_DIR};
-      mkdir ${INSTALL_PREFIX};
+      export SRC_DIR=\"${APPVEYOR_BUILD_FOLDER}\";
+      export BUILD_DIR=\"$SRC_DIR/build\";
+      export INSTALL_PREFIX=\"$SRC_DIR/install\";
+      mkdir \"${BUILD_DIR}\";
+      mkdir \"${INSTALL_PREFIX}\";
       $(cygpath ${APPVEYOR_BUILD_FOLDER})/.ci/ci-script.sh;"
 
 on_success:
   - C:\msys64\usr\bin\bash --login -c "
-      cd "${APPVEYOR_BUILD_FOLDER}";
-      bash <(curl -s https://codecov.io/bash);"
+      export PLATFORM=windows;
+      export CXX=GCC;
+      cd \"${APPVEYOR_BUILD_FOLDER}\";
+      curl -s https://codecov.io/bash > codecov;
+      chmod +x codecov;
+      ./codecov -e PLATFORM,CXX -F unittests;"
