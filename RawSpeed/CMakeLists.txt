@@ -114,6 +114,8 @@ target_link_libraries(rawspeed_static ${RAWSPEED_LIBS})
 add_dependencies(rawspeed_static rawspeed)
 
 if(BUILD_TESTING)
+  add_custom_target(tests ALL)
+
   FILE(GLOB RAWSPEED_TEST_SOURCES
     "RawSpeed.cpp"
   )
@@ -144,5 +146,6 @@ if(BUILD_TESTING)
 
     GTEST_ADD_TESTS(${TESTNAME} "" AUTO)
 
+    add_dependencies(tests ${TESTNAME})
   endforeach()
 endif()
