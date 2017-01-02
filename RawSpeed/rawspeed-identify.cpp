@@ -133,7 +133,11 @@ int main(int argc, const char *argv[]) {
 
     fprintf(stderr, "Loading file: \"%s\"\n", argv[1]);
 
+#if defined(WIN32)
+    FileReader f((LPCWSTR)argv[1]);
+#else
     FileReader f((char *)argv[1]);
+#endif
 
     std::unique_ptr<FileMap> m(f.readFile());
 
@@ -262,8 +266,6 @@ int main(int argc, const char *argv[]) {
   return 0;
 }
 
-// modelines: These editor modelines have been set for all relevant files by
-// tools/update_modelines.sh
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: indent-mode cstyle; replace-tabs on; tab-indents: off;
-// remove-trailing-space on;
+// kate: remove-trailing-space on;
