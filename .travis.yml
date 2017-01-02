@@ -18,7 +18,7 @@ env:
     - SRC_DIR=/build/rawspeed
     - BUILD_DIR=/build/rawspeed-build
     - INSTALL_PREFIX=/build/rawspeed-install
-    - CFLAGS="-pipe -Werror" CXXFLAGS="-pipe -Werror"
+    - CFLAGS="-pipe" CXXFLAGS="-pipe"
     - TARGET=build
   matrix:
     - CC=cc CXX=c++
