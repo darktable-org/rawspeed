@@ -46,6 +46,7 @@ if(BUILD_TESTING)
 endif()
 
 include(compiler-flags)
+include(compiler-warnings)
 
 add_subdirectory(RawSpeed)
 add_subdirectory(data)

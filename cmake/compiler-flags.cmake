@@ -1,5 +1,6 @@
 include(CheckCXXCompilerFlag)
 include(CpuMarch)
+include(CheckCXXCompilerFlagAndEnableIt)
 
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 if(NOT COMPILER_SUPPORTS_CXX11)
@@ -11,17 +12,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 add_definitions(-g3)
 add_definitions(-ggdb3)
 
-# warnings
-add_definitions(-Wall)
-
-if(UNIX OR APPLE)
-  # want -Werror to be enabled automatically for me.
-  # but on windows platform, there are warnings still
-  add_definitions(-Werror)
-endif()
-
 # should be fixed IMHO
-add_definitions(-fno-strict-aliasing)
+CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-fno-strict-aliasing)
 
 # assertions
 if(CMAKE_BUILD_TYPE MATCHES "^[Re][Ee][Ll][Ee][Aa][Ss][Ee]$")
