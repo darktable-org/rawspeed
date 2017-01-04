@@ -133,6 +133,7 @@ if(BUILD_TESTING)
 
   FILE(GLOB RAWSPEED_TESTS_SOURCES
     "BlackAreaTest.cpp"
+    "CameraMetaDataTest.cpp"
     "CameraSensorInfoTest.cpp"
     "ExceptionsTest.cpp"
     "RawSpeedTest.cpp"
