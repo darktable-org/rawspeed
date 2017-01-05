@@ -1,3 +1,19 @@
+notifications:
+  irc:
+    channels:
+#     - "chat.freenode.net#darktable"
+      - secure: "Sl/eC6JEqTMm82H4TANoyngf2oq+TfZ7oiqh3iDqmq0+yNxhnmWGlg+NwhfwpBOoh6eDICoq0CpxOLhXEbNGnILYeHlTbycf41qOS5zP0fquVIgfQJOs6ZNNQWxRO8G1ydkpIl4nMuzix+Uxb09LKN4Ymf2ifLh892yYqwJpwnzyhDZamDa0dNKJuu5r1pzsfAKrLrrd8NnUO6EqUzFz5NjexCZ+wRMKdvkHSGSpQwQ52KonvjnqvFPy11D0f/fZdtNpP9qcalLFXduH0IEafDP82526ri6qcIekJQjgz3eWcrTTuFWI1NOUozIs/maOsLf8NYi8Ql17sw1WorlHZ4Ma48rTUPBEot+lzRk03K+vQaBmFccB9ys0wTVZa4wmmM1051tqsGH7S2ezx8rnULClrMvOLadHiG8JYKwfO5ZjrLRRMndbXH7mSJDKUPrUIMAEvGRDoMP1uqaFf6MFe3mtXv5ZUcaj2GrxF3OIxZtvFFhGZ8HlYInXTGCV2Yaf0NtODWPUKqOYRGzeqPmO6mPVPNcSAyt7YrAT2N4vXUg/+hIAmBfjq+78PpbCZZsZTh12YDbzHmj2TS8ZflciCAhfABxwV1LlVMXXEB3fEpfRsB7Ee1jSd6lrVGy3BAx4GST8NDdI5GVVNKUMtguA8nzDd9iZoq966NlWxYlROlI="
+    skip_join: true
+    template:
+      - "%{repository}#%{build_number} (\x037%{branch}\x03 - \x02%{commit}\x02 : \x033%{author}\x03): \x1f\x02%{message}\x02\x1f"
+      - "Build details : <%{build_url}>"
+  email:
+    recipients:
+#     - darktable-ci@lists.darktable.org
+      - secure: "21/+N6QLMqeNojQjOQSooUi6bnHfy4doVO5xefDbpaaX/leFxP6PLv2yNL7d2lk0iwGRCitfbUqF0czmToTvZcE60EGttst5MnHUOyM8d9NR+dOZlVc8fsloIkiCC0nN575xSg5gwGFZmtG94wI0DQBiPQ4UDDPEDcim3c1OjQWn6o8Q4RmLSd65WJxioQRnNqOY0L+TN0T/Re7uIdri2swzNKC+bfdvpOV5Gef0yUPtzTF/0idq8pwwTJ0y8TGhIRDsNlyNdX3SI/TJiUFQDrwxPM1VidwK2FrST+HIYKC4O53KK2XbTN7+3jB0Wv7hdqZ6rzEanmPNRUmzOpbxqcDi8Kb/KJnBm9DkwaXJ1I1jEWdPOEYmoc4FUaA/7QZWtiQvIa1oDRHAQfEDjHJK1mm8z1esYDBrVHvx291DbKHv2AMzfqxrVG0DKG4piXNJMwDummU6SpekbbB5gXJ81dsQPJwOIpNUGax3aFq12sYHG6JSOdMAnzTvOL+WuHCsVnu2sR7LC8Y6kW03A+U/NP4kbbu4QQr4MLJRiE/t1Y14UiMuvz1K7X52V560oauWoGppB8/64EMm4P9SDxm0fosMaqCRmJduKU8pQlsNOnacQ10JlQkVYksXgnEWwrRYEtLSk3PVUf6awkRLES3UZDLSoepmVGRsttJnCAXZR3g="
+    on_success: always
+    on_failure: always
+
 language: generic
 
 os:
