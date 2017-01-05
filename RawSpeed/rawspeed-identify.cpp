@@ -257,7 +257,7 @@ int main(int argc, const char *argv[]) {
 
     /* if an exception is raised lets not retry or handle the
      specific ones, consider the file as corrupted */
-    return 2;
+    return 0;
   } catch (...) {
     printf("Unhandled exception in rawspeed-identify\n");
     return 3;
