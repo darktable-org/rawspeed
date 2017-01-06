@@ -120,11 +120,11 @@ if(BUILD_TESTING)
     "RawSpeed.cpp"
   )
 
-  if((APPLE AND NOT (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")) OR (NOT CMAKE_BUILD_TYPE MATCHES "^[Cc][Oo][Vv][Ee][Rr][Aa][Gg][Ee]$"))
-    # standard library mismatch issues, will probably end up dropping GCC on OSX completely
-    add_library(rawspeed_test STATIC $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_TEST_SOURCES})
-  else()
+  if(CMAKE_BUILD_TYPE MATCHES "^[Cc][Oo][Vv][Ee][Rr][Aa][Gg][Ee]$")
+    # want all the symbols.
     add_library(rawspeed_test SHARED $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_TEST_SOURCES})
+  else()
+    add_library(rawspeed_test STATIC $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_TEST_SOURCES})
   endif()
   target_link_libraries(rawspeed_test ${RAWSPEED_LIBS})
   add_dependencies(rawspeed_test rawspeed)
@@ -152,7 +152,7 @@ if(BUILD_TESTING)
   endforeach()
 endif()
 
-if(NOT APPLE OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
+if(1)
   add_executable(darktable-rs-identify rawspeed-identify.cpp)
   target_compile_definitions(darktable-rs-identify
     PRIVATE -DRS_CAMERAS_XML_PATH="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATAROOTDIR}/darktable/rawspeed/cameras.xml"
