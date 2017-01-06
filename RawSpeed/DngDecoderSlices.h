@@ -31,13 +31,15 @@ namespace RawSpeed {
 class DngSliceElement
 {
 public:
-  DngSliceElement(uint32 off, uint32 count, uint32 offsetX, uint32 offsetY) : 
-      byteOffset(off), byteCount(count), offX(offsetX), offY(offsetY), mUseBigtable(false) {};
+  DngSliceElement(uint32 off, uint32 count, uint32 offsetX, uint32 offsetY, uint32 w, uint32 h) :
+      byteOffset(off), byteCount(count), offX(offsetX), offY(offsetY), width(w), height(h), mUseBigtable(false) {};
   ~DngSliceElement(void) {};
   const uint32 byteOffset;
   const uint32 byteCount;
   const uint32 offX;
   const uint32 offY;
+  const uint32 width;
+  const uint32 height;
   bool mUseBigtable;
 };
 class DngDecoderSlices;
@@ -69,8 +71,15 @@ public:
   FileMap *mFile; 
   RawImage mRaw;
   bool mFixLjpeg;
+  uint32 mPredictor;
+  uint32 mBps;
   uint32 nThreads;
   int compression;
+#ifdef HAVE_ZLIB
+private:
+  void decodeDeflate(const DngSliceElement &e, unsigned char *dBuffer);
+#endif
+
 };
 
 } // namespace RawSpeed
