@@ -38,11 +38,11 @@ MARK_AS_ADVANCED(
     CMAKE_C_FLAGS_COVERAGE )
 
 SET(CMAKE_CXX_FLAGS_ASAN
-    "-fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common -U_FORTIFY_SOURCE -fsanitize=address -fstack-protector-strong"
+    "-O1 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common -U_FORTIFY_SOURCE -fsanitize=address -fstack-protector-strong"
     CACHE STRING "Flags used by the C++ compiler during ASAN builds."
     FORCE )
 SET(CMAKE_C_FLAGS_ASAN
-    "-fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common -U_FORTIFY_SOURCE -fsanitize=address -fstack-protector-strong"
+    "-O1 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common -U_FORTIFY_SOURCE -fsanitize=address -fstack-protector-strong"
     CACHE STRING "Flags used by the C compiler during ASAN builds."
     FORCE )
 MARK_AS_ADVANCED(
