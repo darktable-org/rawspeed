@@ -26,6 +26,8 @@ include_directories(SYSTEM ${Pugixml_INCLUDE_DIRS})
 find_package(JPEG REQUIRED)
 include_directories(SYSTEM ${JPEG_INCLUDE_DIRS})
 
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+
 FILE(GLOB RAWSPEED_SOURCES
   "AriDecoder.cpp"
   "ArwDecoder.cpp"
@@ -120,19 +122,22 @@ if(BUILD_TESTING)
     "RawSpeed.cpp"
   )
 
-  if((APPLE AND NOT (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")) OR (NOT CMAKE_BUILD_TYPE MATCHES "^[Cc][Oo][Vv][Ee][Rr][Aa][Gg][Ee]$"))
-    # standard library mismatch issues, will probably end up dropping GCC on OSX completely
-    add_library(rawspeed_test STATIC $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_TEST_SOURCES})
-  else()
+  if(CMAKE_BUILD_TYPE MATCHES "^[Cc][Oo][Vv][Ee][Rr][Aa][Gg][Ee]$")
+    # want all the symbols.
     add_library(rawspeed_test SHARED $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_TEST_SOURCES})
+  else()
+    add_library(rawspeed_test STATIC $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_TEST_SOURCES})
   endif()
   target_link_libraries(rawspeed_test ${RAWSPEED_LIBS})
   add_dependencies(rawspeed_test rawspeed)
 
   target_link_libraries(rawspeed_test gtest gmock_main)
+  target_include_directories(rawspeed_test INTERFACE ${CMAKE_CURRENT_BINARY_DIR})
 
   FILE(GLOB RAWSPEED_TESTS_SOURCES
     "BlackAreaTest.cpp"
+    "CameraMetaDataTest.cpp"
+    "CameraSensorInfoTest.cpp"
     "ExceptionsTest.cpp"
     "RawSpeedTest.cpp"
   )
@@ -150,7 +155,7 @@ if(BUILD_TESTING)
   endforeach()
 endif()
 
-if(NOT APPLE OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
+if(1)
   add_executable(darktable-rs-identify rawspeed-identify.cpp)
   target_compile_definitions(darktable-rs-identify
     PRIVATE -DRS_CAMERAS_XML_PATH="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATAROOTDIR}/darktable/rawspeed/cameras.xml"

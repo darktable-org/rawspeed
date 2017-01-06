@@ -26,6 +26,7 @@
 #include "RawDecoderException.h"
 #include "TiffParserException.h"
 #include <gmock/gmock.h>
+#include <memory>
 
 using namespace RawSpeed;
 
@@ -97,22 +98,19 @@ TYPED_TEST(ExceptionsTest, Throw) {
       TypeParam);
 
   ASSERT_ANY_THROW({
-    TypeParam *Exception = new TypeParam(msg);
-    throw * Exception;
-    delete Exception;
+    std::unique_ptr<TypeParam> Exception(new TypeParam(msg));
+    throw * Exception.get();
   });
   EXPECT_THROW(
       {
-        TypeParam *Exception = new TypeParam(msg);
-        throw * Exception;
-        delete Exception;
+        std::unique_ptr<TypeParam> Exception(new TypeParam(msg));
+        throw * Exception.get();
       },
       std::runtime_error);
   EXPECT_THROW(
       {
-        TypeParam *Exception = new TypeParam(msg);
-        throw * Exception;
-        delete Exception;
+        std::unique_ptr<TypeParam> Exception(new TypeParam(msg));
+        throw * Exception.get();
       },
       TypeParam);
 }
@@ -134,9 +132,8 @@ TYPED_TEST(ExceptionsTest, ThrowMessage) {
   }
 
   try {
-    TypeParam *Exception = new TypeParam(msg);
-    throw * Exception;
-    delete Exception;
+    std::unique_ptr<TypeParam> Exception(new TypeParam(msg));
+    throw * Exception.get();
   } catch (std::exception &ex) {
     ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
     EXPECT_THAT(ex.what(), testing::StrEq(msg));
@@ -152,11 +149,9 @@ TYPED_TEST(ExceptionsTest, ThrowMessage) {
   }
 
   try {
-    const TypeParam *const ExceptionOne = new TypeParam(msg);
-    TypeParam *ExceptionTwo = new TypeParam(*ExceptionOne);
-    throw * ExceptionTwo;
-    delete ExceptionTwo;
-    delete ExceptionOne;
+    std::unique_ptr<TypeParam> ExceptionOne(new TypeParam(msg));
+    const std::unique_ptr<const TypeParam> ExceptionTwo(new TypeParam(msg));
+    throw * ExceptionTwo.get();
   } catch (std::exception &ex) {
     ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
     EXPECT_THAT(ex.what(), testing::StrEq(msg));
@@ -164,19 +159,17 @@ TYPED_TEST(ExceptionsTest, ThrowMessage) {
 
   try {
     const TypeParam ExceptionOne(msg);
-    TypeParam *ExceptionTwo = new TypeParam(ExceptionOne);
-    throw * ExceptionTwo;
-    delete ExceptionTwo;
+    std::unique_ptr<TypeParam> ExceptionTwo(new TypeParam(msg));
+    throw * ExceptionTwo.get();
   } catch (std::exception &ex) {
     ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
     EXPECT_THAT(ex.what(), testing::StrEq(msg));
   }
 
   try {
-    const TypeParam *const ExceptionOne = new TypeParam(msg);
-    TypeParam ExceptionTwo(*ExceptionOne);
+    const std::unique_ptr<const TypeParam> ExceptionOne(new TypeParam(msg));
+    TypeParam ExceptionTwo(*ExceptionOne.get());
     throw ExceptionTwo;
-    delete ExceptionOne;
   } catch (std::exception &ex) {
     ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
     EXPECT_THAT(ex.what(), testing::StrEq(msg));

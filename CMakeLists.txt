@@ -48,6 +48,8 @@ endif()
 include(compiler-flags)
 include(compiler-warnings)
 
+add_custom_target(check ALL)
+
 add_subdirectory(RawSpeed)
 add_subdirectory(data)
 

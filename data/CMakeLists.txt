@@ -10,17 +10,8 @@ if(USE_XMLLINT)
 endif(USE_XMLLINT)
 
 if(USE_XMLLINT)
-  add_custom_target(
-    validate_cameras_xml ALL
-    COMMAND ${Xmllint_BIN} --nonet --valid --noout --schema ${CMAKE_CURRENT_SOURCE_DIR}/cameras.xsd ${CMAKE_CURRENT_SOURCE_DIR}/cameras.xml
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cameras.xml
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Checking validity of data/cameras.xml"
-  )
+  include(run-xmllint)
+  check_xml(${CMAKE_CURRENT_SOURCE_DIR}/cameras.xml ${CMAKE_CURRENT_SOURCE_DIR}/cameras.xsd)
 endif(USE_XMLLINT)
 
 install(FILES cameras.xml showcameras.xsl DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/darktable/rawspeed)
-
-if(USE_XMLLINT)
-  add_dependencies(rawspeed validate_cameras_xml)
-endif(USE_XMLLINT)
