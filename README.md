@@ -17,7 +17,7 @@ RawSpeed…
 - can add support for new cameras by adding definitions to an xml file.
 - ~~is extensively crash-tested on broken files~~.
 - decodes images from memory, not a file stream. You can use a memory mapped file, but it is rarely faster.
-- is currently tested on more than 500 unique cameras.
+- is currently tested on [![raw.pixls.us - the free raw sample archive](https://raw.pixls.us/button-cameras.php)](https://raw.pixls.us/) unique cameras, on [![raw.pixls.us - the free raw sample archive](https://raw.pixls.us/button-samples.php)](https://raw.pixls.us/) unique samples. **Please contribute samples**!
 - open source under the LGPL v2 license.
 
 RawSpeed does NOT…
