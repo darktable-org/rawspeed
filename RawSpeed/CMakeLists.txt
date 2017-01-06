@@ -26,6 +26,8 @@ include_directories(SYSTEM ${Pugixml_INCLUDE_DIRS})
 find_package(JPEG REQUIRED)
 include_directories(SYSTEM ${JPEG_INCLUDE_DIRS})
 
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+
 FILE(GLOB RAWSPEED_SOURCES
   "AriDecoder.cpp"
   "ArwDecoder.cpp"
@@ -130,6 +132,7 @@ if(BUILD_TESTING)
   add_dependencies(rawspeed_test rawspeed)
 
   target_link_libraries(rawspeed_test gtest gmock_main)
+  target_include_directories(rawspeed_test INTERFACE ${CMAKE_CURRENT_BINARY_DIR})
 
   FILE(GLOB RAWSPEED_TESTS_SOURCES
     "BlackAreaTest.cpp"
