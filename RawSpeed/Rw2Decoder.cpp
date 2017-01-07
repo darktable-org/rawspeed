@@ -123,9 +123,9 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
   skip += w * 2 * t->start_y;
   skip /= 8;
 
-  PanaBitpump *bits = new PanaBitpump(new ByteStream(input_start));
-  bits->load_flags = load_flags;
-  bits->skipBytes(skip);
+  PanaBitpump bits(new ByteStream(input_start));
+  bits.load_flags = load_flags;
+  bits.skipBytes(skip);
 
   vector<uint32> zero_pos;
   for (y = t->start_y; y < t->end_y; y++) {
@@ -137,17 +137,17 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
         // Even pixels
         if (u == 2)
         {
-          sh = 4 >> (3 - bits->getBits(2));
+          sh = 4 >> (3 - bits.getBits(2));
           u = -1;
         }
         if (nonz[0]) {
-          if ((j = bits->getBits(8))) {
+          if ((j = bits.getBits(8))) {
             if ((pred[0] -= 0x80 << sh) < 0 || sh == 4)
               pred[0] &= ~(-1 << sh);
             pred[0] += j << sh;
           }
-        } else if ((nonz[0] = bits->getBits(8)) || i > 11)
-          pred[0] = nonz[0] << 4 | bits->getBits(4);
+        } else if ((nonz[0] = bits.getBits(8)) || i > 11)
+          pred[0] = nonz[0] << 4 | bits.getBits(4);
         *dest++ = pred[0];
         if (zero_is_bad && 0 == pred[0])
           zero_pos.push_back((y<<16) | (x*14+i));
@@ -157,17 +157,17 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
         u++;
         if (u == 2)
         {
-          sh = 4 >> (3 - bits->getBits(2));
+          sh = 4 >> (3 - bits.getBits(2));
           u = -1;
         }
         if (nonz[1]) {
-          if ((j = bits->getBits(8))) {
+          if ((j = bits.getBits(8))) {
             if ((pred[1] -= 0x80 << sh) < 0 || sh == 4)
               pred[1] &= ~(-1 << sh);
             pred[1] += j << sh;
           }
-        } else if ((nonz[1] = bits->getBits(8)) || i > 11)
-          pred[1] = nonz[1] << 4 | bits->getBits(4);
+        } else if ((nonz[1] = bits.getBits(8)) || i > 11)
+          pred[1] = nonz[1] << 4 | bits.getBits(4);
         *dest++ = pred[1];
         if (zero_is_bad && 0 == pred[1])
           zero_pos.push_back((y<<16) | (x*14+i));
@@ -180,8 +180,6 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
     mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(), zero_pos.begin(), zero_pos.end());
     pthread_mutex_unlock(&mRaw->mBadPixelMutex);
   }
-
-  delete bits;
 }
 
 void Rw2Decoder::checkSupportInternal(CameraMetaData *meta) {
@@ -304,17 +302,23 @@ std::string Rw2Decoder::guessMode() {
   return closest_match;
 }
 
+static const uint32 BufSize = 0x4000;
+
 PanaBitpump::PanaBitpump(ByteStream* _input) : input(_input), vbits(0) {
+  // get one more byte, so the return statement of getBits does not have
+  // to special case for accessing the last byte
+  buf = new uchar8[BufSize + 1];
 }
 
 PanaBitpump::~PanaBitpump() {
   if (input)
     delete input;
   input = 0;
+  delete [] buf;
 }
 
 void PanaBitpump::skipBytes(int bytes) {
-  int blocks = (bytes / 0x4000) * 0x4000;
+  int blocks = (bytes / BufSize) * BufSize;
   input->skipBytes(blocks);
   for (int i = blocks; i < bytes; i++)
     getBits(8);
@@ -328,12 +332,12 @@ uint32 PanaBitpump::getBits(int nbits) {
     * part of the file. Since there is no chance of affecting output buffer
     * size we allow the decoder to decode this
     */
-    if (input->getRemainSize() < 0x4000 - load_flags) {
+    if (input->getRemainSize() < BufSize - load_flags) {
       memcpy(buf + load_flags, input->getData(), input->getRemainSize());
       input->skipBytes(input->getRemainSize());
     } else {
-      memcpy(buf + load_flags, input->getData(), 0x4000 - load_flags);
-      input->skipBytes(0x4000 - load_flags);
+      memcpy(buf + load_flags, input->getData(), BufSize - load_flags);
+      input->skipBytes(BufSize - load_flags);
       if (input->getRemainSize() < load_flags) {
         memcpy(buf, input->getData(), input->getRemainSize());
         input->skipBytes(input->getRemainSize());
