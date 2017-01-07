@@ -155,7 +155,7 @@ if(BUILD_TESTING)
   endforeach()
 endif()
 
-if(1)
+if(BUILD_TOOLS)
   add_executable(darktable-rs-identify rawspeed-identify.cpp)
   target_compile_definitions(darktable-rs-identify
     PRIVATE -DRS_CAMERAS_XML_PATH="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATAROOTDIR}/darktable/rawspeed/cameras.xml"
