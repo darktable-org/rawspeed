@@ -156,7 +156,8 @@ size_t process(string filename, CameraMetaData *metadata, bool create,
   Timer t;
 
   RawParser parser(map.get());
-  unique_ptr<RawDecoder> decoder = unique_ptr<RawDecoder>(parser.getDecoder());
+  unique_ptr<RawDecoder> decoder =
+      unique_ptr<RawDecoder>(parser.getDecoder(metadata));
   // RawDecoder* decoder = parseRaw( map );
 
   decoder->failOnUnknown = false;
