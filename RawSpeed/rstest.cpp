@@ -149,6 +149,15 @@ void writePPM(RawImage raw, string fn) {
 size_t process(string filename, CameraMetaData *metadata, bool create,
                bool dump) {
 
+  const string hashfile(filename + ".hash");
+
+  if (create) {
+    // if creating hash, and hash exists - skip current file
+    ifstream f(hashfile);
+    if (f.good())
+      return 0;
+  }
+
   FileReader reader((LPCWSTR)filename.c_str());
   unique_ptr<FileMap> map = unique_ptr<FileMap>(reader.readFile());
   // FileMap* map = readFile( argv[1] );
@@ -177,12 +186,12 @@ size_t process(string filename, CameraMetaData *metadata, bool create,
        << endl;
 
   if (create) {
-    ofstream f(filename + ".hash");
+    ofstream f(hashfile);
     f << img_hash(raw);
     if (dump)
       writePPM(raw, filename + ".ppm");
   } else {
-    ifstream in(filename + ".hash");
+    ifstream in(hashfile);
     if (in) {
       string truth((istreambuf_iterator<char>(in)),
                    istreambuf_iterator<char>());
