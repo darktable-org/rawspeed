@@ -167,3 +167,9 @@ if(BUILD_TOOLS)
 
   install(TARGETS darktable-rs-identify DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
+
+if(BUILD_TESTING AND BUILD_TOOLS)
+  add_executable(rstest rstest.cpp md5.cpp)
+  set_target_properties(rstest PROPERTIES LINKER_LANGUAGE CXX)
+  target_link_libraries(rstest rawspeed_test)
+endif()
