@@ -23,6 +23,10 @@
 #include <gmock/gmock.h> // for InitGoogleTest, RUN_ALL_TESTS
 #include <iostream>      // for operator<<, basic_ostream, basic...
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 using namespace RawSpeed;
 
 // define this function, it is only declared in rawspeed:

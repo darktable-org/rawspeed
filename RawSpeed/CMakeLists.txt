@@ -20,6 +20,10 @@ else()
   add_definitions(-DNO_PTHREAD)
 endif()
 
+if(WITH_OPENMP)
+  find_package(OpenMP)
+endif()
+
 find_package(Pugixml 1.2 REQUIRED)
 include_directories(SYSTEM ${Pugixml_INCLUDE_DIRS})
 
@@ -112,8 +116,12 @@ if(WITH_PTHREADS AND Threads_FOUND)
 endif()
 
 add_library(rawspeed_static STATIC $<TARGET_OBJECTS:rawspeed>)
-target_link_libraries(rawspeed_static ${RAWSPEED_LIBS})
+target_link_libraries(rawspeed_static PUBLIC ${RAWSPEED_LIBS})
 add_dependencies(rawspeed_static rawspeed)
+
+if(WITH_OPENMP AND OPENMP_FOUND)
+  target_link_libraries(rawspeed_static INTERFACE ${OpenMP_CXX_FLAGS})
+endif()
 
 if(BUILD_TESTING)
   add_custom_target(tests ALL)
@@ -128,7 +136,7 @@ if(BUILD_TESTING)
   else()
     add_library(rawspeed_test STATIC $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_TEST_SOURCES})
   endif()
-  target_link_libraries(rawspeed_test ${RAWSPEED_LIBS})
+  target_link_libraries(rawspeed_test rawspeed_static)
   add_dependencies(rawspeed_test rawspeed)
 
   target_link_libraries(rawspeed_test gtest gmock_main)
