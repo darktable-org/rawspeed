@@ -136,11 +136,15 @@ if(BUILD_TESTING)
   else()
     add_library(rawspeed_test STATIC $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_TEST_SOURCES})
   endif()
-  target_link_libraries(rawspeed_test rawspeed_static)
+  target_link_libraries(rawspeed_test PUBLIC ${RAWSPEED_LIBS})
   add_dependencies(rawspeed_test rawspeed)
 
-  target_link_libraries(rawspeed_test gtest gmock_main)
+  target_link_libraries(rawspeed_test PUBLIC gtest gmock_main)
   target_include_directories(rawspeed_test INTERFACE ${CMAKE_CURRENT_BINARY_DIR})
+
+  if(WITH_OPENMP AND OPENMP_FOUND)
+    target_link_libraries(rawspeed_test INTERFACE ${OpenMP_CXX_FLAGS})
+  endif()
 
   FILE(GLOB RAWSPEED_TESTS_SOURCES
     "BlackAreaTest.cpp"
