@@ -1,6 +1,6 @@
 install:
   - C:\msys64\usr\bin\pacman --noconfirm --sync --refresh --refresh --sysupgrade --sysupgrade
-  - C:\msys64\usr\bin\pacman -S --noconfirm mingw-w64-x86_64-{toolchain,gcc,clang,cmake,ninja,libxml2,pugixml,libjpeg-turbo,curl,lcov}
+  - C:\msys64\usr\bin\pacman -S --noconfirm mingw-w64-x86_64-{toolchain,gcc,clang,cmake,ninja,libxml2,pugixml,libjpeg-turbo,zlib}
 
 environment:
   CFLAGS: "-pipe"

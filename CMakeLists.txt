@@ -23,8 +23,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(WITH_PTHREADS "Enable threading support through pthread. Highly recommended" ON)
+option(WITH_OPENMP "Enable OpenMP support. Only used for tools, not the library itself." ON)
 option(USE_XMLLINT "Run xmllint to test if data/cameras.xml is valid" ON)
 option(BUILD_TESTING "Build the testing tree." ON)
+option(BUILD_TOOLS "Build some tools (identify, rstest)." ON)
 
 # Add a sensible build type default and warning because empty means no optimization and no debug info.
 if(NOT CMAKE_BUILD_TYPE)

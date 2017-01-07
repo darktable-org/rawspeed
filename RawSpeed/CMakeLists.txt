@@ -20,6 +20,10 @@ else()
   add_definitions(-DNO_PTHREAD)
 endif()
 
+if(WITH_OPENMP)
+  find_package(OpenMP)
+endif()
+
 find_package(Pugixml 1.2 REQUIRED)
 include_directories(SYSTEM ${Pugixml_INCLUDE_DIRS})
 
@@ -112,8 +116,12 @@ if(WITH_PTHREADS AND Threads_FOUND)
 endif()
 
 add_library(rawspeed_static STATIC $<TARGET_OBJECTS:rawspeed>)
-target_link_libraries(rawspeed_static ${RAWSPEED_LIBS})
+target_link_libraries(rawspeed_static PUBLIC ${RAWSPEED_LIBS})
 add_dependencies(rawspeed_static rawspeed)
+
+if(WITH_OPENMP AND OPENMP_FOUND)
+  target_link_libraries(rawspeed_static INTERFACE ${OpenMP_CXX_FLAGS})
+endif()
 
 if(BUILD_TESTING)
   add_custom_target(tests ALL)
@@ -128,11 +136,15 @@ if(BUILD_TESTING)
   else()
     add_library(rawspeed_test STATIC $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_TEST_SOURCES})
   endif()
-  target_link_libraries(rawspeed_test ${RAWSPEED_LIBS})
+  target_link_libraries(rawspeed_test PUBLIC ${RAWSPEED_LIBS})
   add_dependencies(rawspeed_test rawspeed)
 
-  target_link_libraries(rawspeed_test gtest gmock_main)
+  target_link_libraries(rawspeed_test PUBLIC gtest gmock_main)
   target_include_directories(rawspeed_test INTERFACE ${CMAKE_CURRENT_BINARY_DIR})
+
+  if(WITH_OPENMP AND OPENMP_FOUND)
+    target_link_libraries(rawspeed_test INTERFACE ${OpenMP_CXX_FLAGS})
+  endif()
 
   FILE(GLOB RAWSPEED_TESTS_SOURCES
     "BlackAreaTest.cpp"
@@ -155,7 +167,7 @@ if(BUILD_TESTING)
   endforeach()
 endif()
 
-if(1)
+if(BUILD_TOOLS)
   add_executable(darktable-rs-identify rawspeed-identify.cpp)
   target_compile_definitions(darktable-rs-identify
     PRIVATE -DRS_CAMERAS_XML_PATH="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATAROOTDIR}/darktable/rawspeed/cameras.xml"
@@ -166,4 +178,10 @@ if(1)
   target_link_libraries(darktable-rs-identify rawspeed_static)
 
   install(TARGETS darktable-rs-identify DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
+
+if(BUILD_TESTING AND BUILD_TOOLS)
+  add_executable(rstest rstest.cpp md5.cpp)
+  set_target_properties(rstest PROPERTIES LINKER_LANGUAGE CXX)
+  target_link_libraries(rstest rawspeed_test)
 endif()
