@@ -27,6 +27,7 @@
 #include <limits>
 #include <vector>
 
+using namespace std;
 using namespace RawSpeed;
 
 std::vector<int> ISOList(6);
@@ -47,9 +48,14 @@ class CameraSensorInfoTestDumb
     : public ::testing::TestWithParam<std::tr1::tuple<int, int>> {
 protected:
   CameraSensorInfoTestDumb()
-      : mBlackLevel(std::rand()), mWhiteLevel(std::rand()),
-        mBlackLevelSeparate(
-            {std::rand(), std::rand(), std::rand(), std::rand()}) {}
+      : mBlackLevel(std::rand()), // NOLINT do not need crypto-level randomness
+        mWhiteLevel(std::rand()), // NOLINT do not need crypto-level randomness
+        mBlackLevelSeparate({
+            std::rand(), // NOLINT do not need crypto-level randomness
+            std::rand(), // NOLINT do not need crypto-level randomness
+            std::rand(), // NOLINT do not need crypto-level randomness
+            std::rand()  // NOLINT do not need crypto-level randomness
+        }) {}
   virtual void SetUp() {
     mMinIso = std::tr1::get<0>(GetParam());
     mMaxIso = std::tr1::get<1>(GetParam());
@@ -74,9 +80,8 @@ TEST_P(CameraSensorInfoTestDumb, Constructor) {
   });
 
   ASSERT_NO_THROW({
-    CameraSensorInfo *Info = new CameraSensorInfo(
-        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate);
-    delete Info;
+    unique_ptr<CameraSensorInfo> Info(new CameraSensorInfo(
+        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate));
   });
 }
 
@@ -93,15 +98,14 @@ TEST_P(CameraSensorInfoTestDumb, Getters) {
   }
 
   {
-    const CameraSensorInfo *const Info = new CameraSensorInfo(
-        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate);
+    const unique_ptr<const CameraSensorInfo> Info(new CameraSensorInfo(
+        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate));
 
     ASSERT_EQ(Info->mBlackLevel, mBlackLevel);
     ASSERT_EQ(Info->mWhiteLevel, mWhiteLevel);
     ASSERT_EQ(Info->mMinIso, mMinIso);
     ASSERT_EQ(Info->mMaxIso, mMaxIso);
     ASSERT_EQ(Info->mBlackLevelSeparate, mBlackLevelSeparate);
-    delete Info;
   }
 }
 
@@ -109,32 +113,25 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentConstructor) {
   ASSERT_NO_THROW({
     const CameraSensorInfo InfoOrig(mBlackLevel, mWhiteLevel, mMinIso, mMaxIso,
                                     mBlackLevelSeparate);
-    CameraSensorInfo Info(InfoOrig);
+    CameraSensorInfo Info(InfoOrig); // NOLINT trying to test the copy
   });
 
   ASSERT_NO_THROW({
-    const CameraSensorInfo *const InfoOrig = new CameraSensorInfo(
-        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate);
-    CameraSensorInfo *Info = new CameraSensorInfo(*InfoOrig);
-
-    delete Info;
-    delete InfoOrig;
+    const unique_ptr<const CameraSensorInfo> InfoOrig(new CameraSensorInfo(
+        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate));
+    unique_ptr<CameraSensorInfo> Info(new CameraSensorInfo(*InfoOrig));
   });
 
   ASSERT_NO_THROW({
     const CameraSensorInfo InfoOrig(mBlackLevel, mWhiteLevel, mMinIso, mMaxIso,
                                     mBlackLevelSeparate);
-    CameraSensorInfo *Info = new CameraSensorInfo(InfoOrig);
-
-    delete Info;
+    unique_ptr<CameraSensorInfo> Info(new CameraSensorInfo(InfoOrig));
   });
 
   ASSERT_NO_THROW({
-    const CameraSensorInfo *const InfoOrig = new CameraSensorInfo(
-        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate);
+    const unique_ptr<const CameraSensorInfo> InfoOrig(new CameraSensorInfo(
+        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate));
     CameraSensorInfo Info(*InfoOrig);
-
-    delete InfoOrig;
   });
 }
 
@@ -158,9 +155,9 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentConstructorGetters) {
   }
 
   {
-    const CameraSensorInfo *const InfoOrig = new CameraSensorInfo(
-        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate);
-    CameraSensorInfo *Info = new CameraSensorInfo(*InfoOrig);
+    const unique_ptr<const CameraSensorInfo> InfoOrig(new CameraSensorInfo(
+        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate));
+    unique_ptr<CameraSensorInfo> Info(new CameraSensorInfo(*InfoOrig));
 
     ASSERT_EQ(Info->mBlackLevel, mBlackLevel);
     ASSERT_EQ(Info->mWhiteLevel, mWhiteLevel);
@@ -173,15 +170,12 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentConstructorGetters) {
     ASSERT_EQ(Info->mMinIso, InfoOrig->mMinIso);
     ASSERT_EQ(Info->mMaxIso, InfoOrig->mMaxIso);
     ASSERT_EQ(Info->mBlackLevelSeparate, InfoOrig->mBlackLevelSeparate);
-
-    delete Info;
-    delete InfoOrig;
   }
 
   {
     const CameraSensorInfo InfoOrig(mBlackLevel, mWhiteLevel, mMinIso, mMaxIso,
                                     mBlackLevelSeparate);
-    CameraSensorInfo *Info = new CameraSensorInfo(InfoOrig);
+    unique_ptr<CameraSensorInfo> Info(new CameraSensorInfo(InfoOrig));
 
     ASSERT_EQ(Info->mBlackLevel, mBlackLevel);
     ASSERT_EQ(Info->mWhiteLevel, mWhiteLevel);
@@ -194,13 +188,11 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentConstructorGetters) {
     ASSERT_EQ(Info->mMinIso, InfoOrig.mMinIso);
     ASSERT_EQ(Info->mMaxIso, InfoOrig.mMaxIso);
     ASSERT_EQ(Info->mBlackLevelSeparate, InfoOrig.mBlackLevelSeparate);
-
-    delete Info;
   }
 
   {
-    const CameraSensorInfo *const InfoOrig = new CameraSensorInfo(
-        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate);
+    const unique_ptr<const CameraSensorInfo> InfoOrig(new CameraSensorInfo(
+        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate));
     CameraSensorInfo Info(*InfoOrig);
 
     ASSERT_EQ(Info.mBlackLevel, mBlackLevel);
@@ -214,8 +206,6 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentConstructorGetters) {
     ASSERT_EQ(Info.mMinIso, InfoOrig->mMinIso);
     ASSERT_EQ(Info.mMaxIso, InfoOrig->mMaxIso);
     ASSERT_EQ(Info.mBlackLevelSeparate, InfoOrig->mBlackLevelSeparate);
-
-    delete InfoOrig;
   }
 }
 
@@ -229,34 +219,27 @@ TEST_P(CameraSensorInfoTestDumb, Assignment) {
   });
 
   ASSERT_NO_THROW({
-    const CameraSensorInfo *const InfoOrig = new CameraSensorInfo(
-        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate);
-    CameraSensorInfo *Info = new CameraSensorInfo(0, 0, 0, 0, {0});
+    const unique_ptr<const CameraSensorInfo> InfoOrig(new CameraSensorInfo(
+        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate));
+    unique_ptr<CameraSensorInfo> Info(new CameraSensorInfo(0, 0, 0, 0, {0}));
 
     *Info = *InfoOrig;
-
-    delete Info;
-    delete InfoOrig;
   });
 
   ASSERT_NO_THROW({
     const CameraSensorInfo InfoOrig(mBlackLevel, mWhiteLevel, mMinIso, mMaxIso,
                                     mBlackLevelSeparate);
-    CameraSensorInfo *Info = new CameraSensorInfo(0, 0, 0, 0, {0});
+    unique_ptr<CameraSensorInfo> Info(new CameraSensorInfo(0, 0, 0, 0, {0}));
 
     *Info = InfoOrig;
-
-    delete Info;
   });
 
   ASSERT_NO_THROW({
-    const CameraSensorInfo *const InfoOrig = new CameraSensorInfo(
-        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate);
+    const unique_ptr<const CameraSensorInfo> InfoOrig(new CameraSensorInfo(
+        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate));
     CameraSensorInfo Info(0, 0, 0, 0, {0});
 
     Info = *InfoOrig;
-
-    delete InfoOrig;
   });
 }
 
@@ -282,9 +265,9 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentGetters) {
   });
 
   ASSERT_NO_THROW({
-    const CameraSensorInfo *const InfoOrig = new CameraSensorInfo(
-        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate);
-    CameraSensorInfo *Info = new CameraSensorInfo(0, 0, 0, 0, {0});
+    const unique_ptr<const CameraSensorInfo> InfoOrig(new CameraSensorInfo(
+        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate));
+    unique_ptr<CameraSensorInfo> Info(new CameraSensorInfo(0, 0, 0, 0, {0}));
 
     *Info = *InfoOrig;
 
@@ -299,15 +282,12 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentGetters) {
     ASSERT_EQ(Info->mMinIso, InfoOrig->mMinIso);
     ASSERT_EQ(Info->mMaxIso, InfoOrig->mMaxIso);
     ASSERT_EQ(Info->mBlackLevelSeparate, InfoOrig->mBlackLevelSeparate);
-
-    delete Info;
-    delete InfoOrig;
   });
 
   ASSERT_NO_THROW({
     const CameraSensorInfo InfoOrig(mBlackLevel, mWhiteLevel, mMinIso, mMaxIso,
                                     mBlackLevelSeparate);
-    CameraSensorInfo *Info = new CameraSensorInfo(0, 0, 0, 0, {0});
+    unique_ptr<CameraSensorInfo> Info(new CameraSensorInfo(0, 0, 0, 0, {0}));
 
     *Info = InfoOrig;
 
@@ -322,13 +302,11 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentGetters) {
     ASSERT_EQ(Info->mMinIso, InfoOrig.mMinIso);
     ASSERT_EQ(Info->mMaxIso, InfoOrig.mMaxIso);
     ASSERT_EQ(Info->mBlackLevelSeparate, InfoOrig.mBlackLevelSeparate);
-
-    delete Info;
   });
 
   ASSERT_NO_THROW({
-    const CameraSensorInfo *const InfoOrig = new CameraSensorInfo(
-        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate);
+    const unique_ptr<const CameraSensorInfo> InfoOrig(new CameraSensorInfo(
+        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate));
     CameraSensorInfo Info(0, 0, 0, 0, {0});
 
     Info = *InfoOrig;
@@ -344,8 +322,6 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentGetters) {
     ASSERT_EQ(Info.mMinIso, InfoOrig->mMinIso);
     ASSERT_EQ(Info.mMaxIso, InfoOrig->mMaxIso);
     ASSERT_EQ(Info.mBlackLevelSeparate, InfoOrig->mBlackLevelSeparate);
-
-    delete InfoOrig;
   });
 }
 
@@ -388,9 +364,14 @@ static const struct IsoExpectationsT CameraSensorIsoInfos[] = {
 class CameraSensorInfoTest : public ::testing::TestWithParam<IsoExpectationsT> {
 protected:
   CameraSensorInfoTest()
-      : mBlackLevel(std::rand()), mWhiteLevel(std::rand()),
-        mBlackLevelSeparate(
-            {std::rand(), std::rand(), std::rand(), std::rand()}) {}
+      : mBlackLevel(std::rand()), // NOLINT do not need crypto-level randomness
+        mWhiteLevel(std::rand()), // NOLINT do not need crypto-level randomness
+        mBlackLevelSeparate({
+            std::rand(), // NOLINT do not need crypto-level randomness
+            std::rand(), // NOLINT do not need crypto-level randomness
+            std::rand(), // NOLINT do not need crypto-level randomness
+            std::rand()  // NOLINT do not need crypto-level randomness
+        }) {}
   virtual void SetUp() { data = GetParam(); }
 
   IsoExpectationsT data;
