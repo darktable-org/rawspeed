@@ -25,6 +25,7 @@
 #include <gmock/gmock.h> // for InitGoogleTest, RUN_ALL_TESTS
 #include <iostream>      // for operator<<, basic_ostream, basic...
 
+using namespace std;
 using namespace RawSpeed;
 
 static const std::string camfile(CMAKE_SOURCE_DIR "/data/cameras.xml");
@@ -33,7 +34,6 @@ TEST(CameraMetaDataTest, CamerasXml) {
   ASSERT_NO_THROW({ CameraMetaData Data(camfile.c_str()); });
 
   ASSERT_NO_THROW({
-    CameraMetaData *Data = new CameraMetaData(camfile.c_str());
-    delete Data;
+    unique_ptr<CameraMetaData> Data(new CameraMetaData(camfile.c_str()));
   });
 }
