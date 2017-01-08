@@ -25,6 +25,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 option(WITH_PTHREADS "Enable threading support through pthread. Highly recommended" ON)
 option(WITH_OPENMP "Enable OpenMP support. Only used for tools, not the library itself." ON)
 option(USE_XMLLINT "Run xmllint to test if data/cameras.xml is valid" ON)
+option(USE_IWYU "Run iwyu tool when compiling sources" OFF)
 option(BUILD_TESTING "Build the testing tree." ON)
 option(BUILD_TOOLS "Build some tools (identify, rstest)." ON)
 
@@ -42,6 +43,10 @@ if(NOT CMAKE_BUILD_TYPE)
 
   SET(CMAKE_BUILD_TYPE ${default_build_type} CACHE STRING "Choose the type of build, options are: None Coverage Debug RelWithDebInfo Release." FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
+
+if(USE_IWYU)
+  include(iwyu)
+endif()
 
 if(BUILD_TESTING)
   enable_testing()
