@@ -120,7 +120,8 @@ string img_hash(RawImage &r) {
       memset(d, 0, padding);
   }
   string hash =
-      md5_hash(r->getDataUncropped(0, 0), r->pitch * r->getUncroppedDim().y);
+      md5_hash(r->getDataUncropped(0, 0),
+               static_cast<size_t>(r->pitch) * r->getUncroppedDim().y);
   APPEND("data md5sum: %s\n", hash.c_str());
 
   for (const char *e : r->errors)
@@ -131,7 +132,7 @@ string img_hash(RawImage &r) {
   return oss.str();
 }
 
-void writePPM(RawImage raw, string fn) {
+void writePPM(RawImage raw, const string &fn) {
   FILE *f = fopen(fn.c_str(), "wb");
 
   int width = raw->dim.x;
@@ -142,7 +143,8 @@ void writePPM(RawImage raw, string fn) {
 
   // Write pixels
   for (int y = 0; y < height; ++y) {
-    unsigned short *row = (unsigned short *)raw->getData(0, y);
+    unsigned short *row =
+        reinterpret_cast<unsigned short *>(raw->getData(0, y));
     // Swap for PPM format byte ordering
     if (getHostEndianness() == little)
       for (int x = 0; x < width; ++x)
@@ -153,7 +155,7 @@ void writePPM(RawImage raw, string fn) {
   fclose(f);
 }
 
-size_t process(string filename, CameraMetaData *metadata, bool create,
+size_t process(const string &filename, CameraMetaData *metadata, bool create,
                bool dump) {
 
   const string hashfile(filename + ".hash");
@@ -167,7 +169,7 @@ size_t process(string filename, CameraMetaData *metadata, bool create,
     }
   }
 
-  FileReader reader((LPCWSTR)filename.c_str());
+  FileReader reader(const_cast<LPCWSTR>(filename.c_str()));
   unique_ptr<FileMap> map = unique_ptr<FileMap>(reader.readFile());
   // FileMap* map = readFile( argv[1] );
 
@@ -263,7 +265,7 @@ int main(int argc, char **argv) {
   for (int i = 1; argv[i] && i < argc; ++i) {
     try {
       time += process(argv[i], &metadata, create, dump);
-    } catch (std::runtime_error e) {
+    } catch (std::runtime_error &e) {
 #ifdef _OPENMP
 #pragma omp critical(io)
 #endif
@@ -278,7 +280,7 @@ int main(int argc, char **argv) {
 
   if (!failedTests.empty()) {
     cerr << "WARNING: the following tests have failed:\n";
-    for (auto i : failedTests)
+    for (const auto &i : failedTests)
       cerr << i << "\n";
   }
 
