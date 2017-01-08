@@ -157,42 +157,46 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
 *--------------------------------------------------------------
 */
 int NikonDecompressor::HuffDecodeNikon(BitPumpMSB& bits) {
-  int rv;
-  int l, temp;
-  int code, val ;
-
-  HuffmanTable *dctbl1 = &huff[0];
+  HuffmanTable *htbl = &huff[0];
 
   bits.fill();
-  code = bits.peekBitsNoFill(14);
-  val = dctbl1->bigTable[code];
+  ushort16 code = bits.peekBitsNoFill(HuffmanTable::TableBitDepth);
+
+  int val = htbl->bigTable[code];
   if ((val&0xff) !=  0xff) {
     bits.skipBitsNoFill(val&0xff);
     return val >> 8;
   }
 
-  rv = 0;
-  code = bits.peekByteNoFill();
-  val = dctbl1->numbits[code];
-  l = val & 15;
+  /*
+  * If the huffman code is less than 8 bits, we can use the fast
+  * table lookup to get its value.  It's more than 8 bits about
+  * 3-4% of the time.
+  */
+  ushort16 rv = 0;
+  code >>= HuffmanTable::TableBitDepth-8;
+  val = htbl->numbits[code];
+  uint32 l = val & 0xf;
   if (l) {
     bits.skipBitsNoFill(l);
     rv = val >> 4;
   }  else {
-    bits.skipBits(8);
+    bits.skipBitsNoFill(8);
     l = 8;
-    while (code > dctbl1->maxcode[l]) {
-      temp = bits.getBitNoFill();
+    while (code > htbl->maxcode[l]) {
+      uint32 temp = bits.getBitsNoFill(1);
       code = (code << 1) | temp;
       l++;
     }
 
-    if (l > 16) {
+    /*
+    * With garbage input we may reach the sentinel value l = 17.
+    */
+
+    if (l > 16)
       ThrowRDE("Corrupt JPEG data: bad Huffman code:%u\n", l);
-    } else {
-      rv = dctbl1->huffval[dctbl1->valptr[l] +
-                           ((int)(code - dctbl1->mincode[l]))];
-    }
+
+    rv = htbl->huffval[htbl->valptr[l] + (code - htbl->mincode[l])];
   }
 
   if (rv == 16)
@@ -202,7 +206,7 @@ int NikonDecompressor::HuffDecodeNikon(BitPumpMSB& bits) {
   * Section F.2.2.1: decode the difference and
   * Figure F.12: extend sign bit
   */
-  uint32 len = rv & 15;
+  uint32 len = rv & 0xf;
   uint32 shl = rv >> 4;
   int diff = ((bits.getBits(len - shl) << 1) + 1) << shl >> 1;
   if ((diff & (1 << (len - 1))) == 0)
