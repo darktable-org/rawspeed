@@ -364,7 +364,8 @@ static const struct IsoExpectationsT CameraSensorIsoInfos[] = {
 class CameraSensorInfoTest : public ::testing::TestWithParam<IsoExpectationsT> {
 protected:
   CameraSensorInfoTest()
-      : mBlackLevel(std::rand()), // NOLINT do not need crypto-level randomness
+      : data(IsoExpectationsT{-1, -1, -1, false, false}),
+        mBlackLevel(std::rand()), // NOLINT do not need crypto-level randomness
         mWhiteLevel(std::rand()), // NOLINT do not need crypto-level randomness
         mBlackLevelSeparate({
             std::rand(), // NOLINT do not need crypto-level randomness
