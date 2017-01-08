@@ -18,17 +18,24 @@
 
 #include "config.h"
 
+#include "RawSpeed-API.h"
+
 #include <chrono>
-#include <fstream>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <fstream> // IWYU pragma: keep
 #include <iomanip>
 #include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <type_traits>
+#include <vector>
 
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-
-#include "RawSpeed-API.h"
-#include <stdio.h>
 
 using namespace std;
 using namespace RawSpeed;
