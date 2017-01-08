@@ -69,7 +69,6 @@ RawImage RafDecoder::decodeRawInternal() {
     ThrowRDE("RAF Decoder: Multiple Strips found: %u %u", offsets->count, counts->count);
 
   int off = offsets->getInt();
-  int count = counts->getInt();
 
   int bps = 16;
   if (raw->hasEntry(FUJI_BITSPERSAMPLE))
