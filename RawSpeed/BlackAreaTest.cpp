@@ -29,7 +29,7 @@ using namespace RawSpeed;
 class BlackAreaTest
     : public ::testing::TestWithParam<std::tr1::tuple<int, int, bool>> {
 protected:
-  BlackAreaTest() {}
+  BlackAreaTest() : offset(0), size(0), isVertical(false) {}
   virtual void SetUp() {
     offset = std::tr1::get<0>(GetParam());
     size = std::tr1::get<1>(GetParam());
