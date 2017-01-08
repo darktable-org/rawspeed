@@ -234,7 +234,8 @@ inline vector<string> split_string(string input, char c = ' ') {
     while(*str != c && *str)
       str++;
 
-    result.push_back(string(begin, str));
+    if(begin != str)
+      result.push_back(string(begin, str));
 
     if(0 == *str++)
       break;

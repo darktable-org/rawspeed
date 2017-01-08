@@ -35,9 +35,7 @@ class Camera
 public:
   Camera(pugi::xml_node &camera);
   Camera(const Camera* camera, uint32 alias_num);
-  void parseCameraChild( pugi::xml_node &node );
   const CameraSensorInfo* getSensorInfo(int iso);
-  virtual ~Camera(void);
   string make;
   string model;
   string mode;
@@ -56,13 +54,7 @@ public:
   int decoderVersion;
   map<string,string> hints;
 protected:
-  void parseCFA( pugi::xml_node &node );
-  void parseAlias( pugi::xml_node &node );
-  void parseHint( pugi::xml_node &node );
-  void parseID( pugi::xml_node &node );
-  void parseBlackAreas( pugi::xml_node &node );
-  void parseSensorInfo( pugi::xml_node &node );
-  vector<int> MultipleStringToInt(const char *in, const char *tag, const char* attribute);
+  void parseCameraChild(const pugi::xml_node &node);
 };
 
 } // namespace RawSpeed
