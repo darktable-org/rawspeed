@@ -28,6 +28,7 @@
 #include <gmock/gmock.h>
 #include <memory>
 
+using namespace std;
 using namespace RawSpeed;
 
 static const std::string msg("my very Smart error Message #1 !");
@@ -43,35 +44,28 @@ TYPED_TEST_CASE(ExceptionsTest, Classes);
 
 TYPED_TEST(ExceptionsTest, Constructor) {
   ASSERT_NO_THROW({ TypeParam Exception(msg); });
-  ASSERT_NO_THROW({
-    TypeParam *Exception = new TypeParam(msg);
-    delete Exception;
-  });
+  ASSERT_NO_THROW({ unique_ptr<TypeParam> Exception(new TypeParam(msg)); });
 }
 
 TYPED_TEST(ExceptionsTest, AssignmentConstructor) {
   ASSERT_NO_THROW({
     const TypeParam ExceptionOne(msg);
-    TypeParam ExceptionTwo(ExceptionOne);
+    TypeParam ExceptionTwo(ExceptionOne); // NOLINT trying to test the copy
   });
 
   ASSERT_NO_THROW({
-    const TypeParam *const ExceptionOne = new TypeParam(msg);
-    TypeParam *ExceptionTwo = new TypeParam(*ExceptionOne);
-    delete ExceptionTwo;
-    delete ExceptionOne;
+    const unique_ptr<const TypeParam> ExceptionOne(new TypeParam(msg));
+    unique_ptr<TypeParam> ExceptionTwo(new TypeParam(*ExceptionOne));
   });
 
   ASSERT_NO_THROW({
     const TypeParam ExceptionOne(msg);
-    TypeParam *ExceptionTwo = new TypeParam(ExceptionOne);
-    delete ExceptionTwo;
+    unique_ptr<TypeParam> ExceptionTwo(new TypeParam(ExceptionOne));
   });
 
   ASSERT_NO_THROW({
-    const TypeParam *const ExceptionOne = new TypeParam(msg);
+    const unique_ptr<const TypeParam> ExceptionOne(new TypeParam(msg));
     TypeParam ExceptionTwo(*ExceptionOne);
-    delete ExceptionOne;
   });
 }
 
@@ -79,23 +73,6 @@ TYPED_TEST(ExceptionsTest, Throw) {
   ASSERT_ANY_THROW(throw TypeParam(msg));
   EXPECT_THROW(throw TypeParam(msg), TypeParam);
   EXPECT_THROW(throw TypeParam(msg), std::runtime_error);
-
-  ASSERT_ANY_THROW({
-    TypeParam Exception(msg);
-    throw Exception;
-  });
-  EXPECT_THROW(
-      {
-        TypeParam Exception(msg);
-        throw Exception;
-      },
-      std::runtime_error);
-  EXPECT_THROW(
-      {
-        TypeParam Exception(msg);
-        throw Exception;
-      },
-      TypeParam);
 
   ASSERT_ANY_THROW({
     std::unique_ptr<TypeParam> Exception(new TypeParam(msg));
@@ -124,25 +101,8 @@ TYPED_TEST(ExceptionsTest, ThrowMessage) {
   }
 
   try {
-    TypeParam Exception(msg);
-    throw Exception;
-  } catch (std::exception &ex) {
-    ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
-    EXPECT_THAT(ex.what(), testing::StrEq(msg));
-  }
-
-  try {
     std::unique_ptr<TypeParam> Exception(new TypeParam(msg));
     throw * Exception.get();
-  } catch (std::exception &ex) {
-    ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
-    EXPECT_THAT(ex.what(), testing::StrEq(msg));
-  }
-
-  try {
-    const TypeParam ExceptionOne(msg);
-    TypeParam ExceptionTwo(ExceptionOne);
-    throw ExceptionTwo;
   } catch (std::exception &ex) {
     ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
     EXPECT_THAT(ex.what(), testing::StrEq(msg));
@@ -161,15 +121,6 @@ TYPED_TEST(ExceptionsTest, ThrowMessage) {
     const TypeParam ExceptionOne(msg);
     std::unique_ptr<TypeParam> ExceptionTwo(new TypeParam(msg));
     throw * ExceptionTwo.get();
-  } catch (std::exception &ex) {
-    ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
-    EXPECT_THAT(ex.what(), testing::StrEq(msg));
-  }
-
-  try {
-    const std::unique_ptr<const TypeParam> ExceptionOne(new TypeParam(msg));
-    TypeParam ExceptionTwo(*ExceptionOne.get());
-    throw ExceptionTwo;
   } catch (std::exception &ex) {
     ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
     EXPECT_THAT(ex.what(), testing::StrEq(msg));
