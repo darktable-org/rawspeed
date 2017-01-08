@@ -54,7 +54,6 @@ public:
   virtual void setSize(iPoint2D size);
   void setColorAt(iPoint2D pos, CFAColor c);
   virtual void setCFA(iPoint2D size, ...);
-  CFAColor* getCfaWrt() {return cfa;};
   virtual CFAColor getColorAt(uint32 x, uint32 y);
   virtual uint32 getDcrawFilter();
   virtual void shiftLeft(int n = 1);
