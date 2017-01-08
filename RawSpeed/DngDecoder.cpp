@@ -122,8 +122,7 @@ RawImage DngDecoder::decodeRawInternal() {
       TiffEntry *cfadim = raw->getEntry(CFAREPEATPATTERNDIM);
       if (cfadim->count != 2)
         ThrowRDE("DNG Decoder: Couldn't read CFA pattern dimension");
-      TiffEntry *pDim = raw->getEntry(CFAREPEATPATTERNDIM); // Get the size
-      const uchar8* cPat = raw->getEntry(CFAPATTERN)->getData();                 // Does NOT contain dimensions as some documents state
+      TiffEntry* cPat = raw->getEntry(CFAPATTERN);                 // Does NOT contain dimensions as some documents state
       /*
             if (raw->hasEntry(CFAPLANECOLOR)) {
               TiffEntry* e = raw->getEntry(CFAPLANECOLOR);
@@ -135,14 +134,14 @@ RawImage DngDecoder::decodeRawInternal() {
               printf("\n");
             }
       */
-      iPoint2D cfaSize(pDim->getInt(1), pDim->getInt(0));
+      iPoint2D cfaSize(cfadim->getInt(1), cfadim->getInt(0));
+      if (cfaSize.area() != cPat->count)
+        ThrowRDE("DNG Decoder: CFA pattern dimension and pattern count does not match: %d.", cPat->count);
       mRaw->cfa.setSize(cfaSize);
-      if (cfaSize.area() != raw->getEntry(CFAPATTERN)->count)
-        ThrowRDE("DNG Decoder: CFA pattern dimension and pattern count does not match: %d.", raw->getEntry(CFAPATTERN)->count);
 
       for (int y = 0; y < cfaSize.y; y++) {
         for (int x = 0; x < cfaSize.x; x++) {
-          uint32 c1 = cPat[x+y*cfaSize.x];
+          uint32 c1 = cPat->getByte(x+y*cfaSize.x);
           CFAColor c2;
           switch (c1) {
             case 0:

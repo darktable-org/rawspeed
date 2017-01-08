@@ -479,10 +479,9 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   } else if (mRootIFD->hasEntryRecursive((TiffTag)0x0097)) {
     TiffEntry *wb = mRootIFD->getEntryRecursive((TiffTag)0x0097);
     if (wb->count > 4) {
-      const uchar8 *data = wb->getData();
       uint32 version = 0;
       for (uint32 i=0; i<4; i++)
-        version = (version << 4) + data[i]-'0';
+        version = (version << 4) + wb->getByte(i)-'0';
       if (version == 0x100 && wb->count >= 80 && wb->type == TIFF_UNDEFINED) {
         mRaw->metadata.wbCoeffs[0] = (float) wb->getShort(36);
         mRaw->metadata.wbCoeffs[2] = (float) wb->getShort(37);
@@ -496,15 +495,13 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
                  mRootIFD->hasEntryRecursive((TiffTag)0x001d) &&
                  mRootIFD->hasEntryRecursive((TiffTag)0x00a7)) {
         // Get the serial number
-        TiffEntry *serial = mRootIFD->getEntryRecursive((TiffTag)0x001d);
-        const char *data = (const char*) serial->getData();
+        string serial = mRootIFD->getEntryRecursive((TiffTag)0x001d)->getString();
         uint32 serialno = 0;
-        for (uint32 i=0; i<serial->count; i++) {
-          if (!data[i]) break;
-          if (data[i] >= '0' && data[i] <= '9')
-            serialno = serialno*10 + data[i]-'0';
+        for (char c : serial) {
+          if (c >= '0' && c <= '9')
+            serialno = serialno*10 + c-'0';
           else
-            serialno = serialno*10 + data[i]%10;
+            serialno = serialno*10 + c%10;
         }
 
         // Get the decryption key
@@ -534,11 +531,9 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
     TiffEntry *wb = mRootIFD->getEntryRecursive((TiffTag)0x0014);
     uchar8 *tmp = (uchar8 *) wb->getData();
     if (wb->count == 2560 && wb->type == TIFF_UNDEFINED) {
-      uint32 red = ((uint32) tmp[1249]) | (((uint32) tmp[1248]) <<8);
-      uint32 blue = ((uint32) tmp[1251]) | (((uint32) tmp[1250]) <<8);
-      mRaw->metadata.wbCoeffs[0] = (float) red / 256.0f;
+      mRaw->metadata.wbCoeffs[0] = (float) get2BE(tmp, 1248) / 256.0f;
       mRaw->metadata.wbCoeffs[1] = 1.0f;
-      mRaw->metadata.wbCoeffs[2] = (float) blue / 256.0f;
+      mRaw->metadata.wbCoeffs[2] = (float) get2BE(tmp, 1250) / 256.0f;
     } else if (!strncmp((char *)tmp,"NRW ",4)) {
       uint32 offset = 0;
       if (strncmp((char *)tmp+4,"0100",4) && wb->count > 72)
