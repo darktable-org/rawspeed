@@ -161,8 +161,10 @@ size_t process(string filename, CameraMetaData *metadata, bool create,
   if (create) {
     // if creating hash, and hash exists - skip current file
     ifstream f(hashfile);
-    if (f.good())
+    if (f.good()) {
+      cout << left << setw(55) << filename << ": hash exists, skipping" << endl;
       return 0;
+    }
   }
 
   FileReader reader((LPCWSTR)filename.c_str());
@@ -217,25 +219,48 @@ size_t process(string filename, CameraMetaData *metadata, bool create,
   return time;
 }
 
+static int usage(const char *progname) {
+  cout << "usage: " << progname << endl
+       << "  [-h] print this help" << endl
+       << "  [-c] for each file, decode, compute hash, and store it." << endl
+       << "       If hash exists - it does not recompute it!" << endl
+       << "  [-d] store decoded image as PPM" << endl
+       << "  <FILE[S]> the file[s] to work on." << endl
+       << endl
+       << "  if no options are passed, for each file, decode, compute hash, "
+          "and the hash file exists, compare hashes."
+       << endl;
+  return EXIT_SUCCESS;
+}
+
 int main(int argc, char **argv) {
 
-  CameraMetaData metadata(CMAKE_SOURCE_DIR "/data/cameras.xml");
-
-  int j = 1;
   auto hasFlag = [&](string flag) {
-    bool ret = argv[j] == flag;
-    j += ret ? 1 : 0;
-    return ret;
+    bool found = false;
+    for (int i = 1; argv[i] && i < argc; ++i) {
+      if (argv[i] != flag)
+        continue;
+      found = true;
+      argv[i] = nullptr;
+    }
+    return found;
   };
+
+  bool help = hasFlag("-h");
   bool create = hasFlag("-c");
   bool dump = hasFlag("-d");
+
+  if (1 == argc || help)
+    return usage(argv[0]);
+
+  CameraMetaData metadata(CMAKE_SOURCE_DIR "/data/cameras.xml");
 
   size_t time = 0;
   vector<string> failedTests;
 #ifdef _OPENMP
 #pragma omp parallel for default(shared) schedule(static, 1) reduction(+ : time)
 #endif
-  for (int i = j; i < argc; ++i) {
+  for (int i = 1; argv[i] && i < argc; ++i) {
     try {
       time += process(argv[i], &metadata, create, dump);
     } catch (std::runtime_error e) {
