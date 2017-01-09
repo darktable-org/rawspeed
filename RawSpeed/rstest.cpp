@@ -284,10 +284,11 @@ int main(int argc, char **argv) {
     }
   }
 
-  cout << "Total decoding time: " << time / 1000.0 << "s" << endl;
+  cout << "Total decoding time: " << time / 1000.0 << "s" << endl << endl;
 
   if (!failedTests.empty()) {
-    cerr << "WARNING: the following tests have failed:\n";
+    cerr << "WARNING: the following " << failedTests.size()
+         << " tests have failed:\n";
     for (const auto &i : failedTests)
       cerr << i << "\n";
   }
