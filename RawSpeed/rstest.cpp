@@ -244,8 +244,8 @@ int main(int argc, char **argv) {
 
   auto hasFlag = [&](string flag) {
     bool found = false;
-    for (int i = 1; argv[i] && i < argc; ++i) {
-      if (argv[i] != flag)
+    for (int i = 1; i < argc; ++i) {
+      if (!argv[i] || argv[i] != flag)
         continue;
       found = true;
       argv[i] = nullptr;
@@ -267,7 +267,10 @@ int main(int argc, char **argv) {
 #ifdef _OPENMP
 #pragma omp parallel for default(shared) schedule(static, 1) reduction(+ : time)
 #endif
-  for (int i = 1; argv[i] && i < argc; ++i) {
+  for (int i = 1; i < argc; ++i) {
+    if (!argv[i])
+      continue;
+
     try {
       time += process(argv[i], &metadata, create, dump);
     } catch (std::runtime_error &e) {
