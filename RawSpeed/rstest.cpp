@@ -169,7 +169,12 @@ size_t process(const string &filename, CameraMetaData *metadata, bool create,
     }
   }
 
-  FileReader reader(const_cast<LPCWSTR>(filename.c_str()));
+#if defined(WIN32)
+  FileReader reader(static_cast<LPCWSTR>(argv[1]));
+#else
+  FileReader reader(filename.c_str());
+#endif
+
   unique_ptr<FileMap> map = unique_ptr<FileMap>(reader.readFile());
   // FileMap* map = readFile( argv[1] );
 

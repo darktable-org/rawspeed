@@ -105,7 +105,7 @@ std::string find_cameras_xml(const char *argv0) {
   return found_camfile;
 }
 
-int main(int argc, const char *argv[]) {
+int main(int argc, char *argv[]) {
 
   if (argc != 2) {
     fprintf(stderr, "Usage: darktable-rs-identify <file>\n");
@@ -136,7 +136,7 @@ int main(int argc, const char *argv[]) {
 #if defined(WIN32)
     FileReader f((LPCWSTR)argv[1]);
 #else
-    FileReader f((char *)argv[1]);
+    FileReader f(argv[1]);
 #endif
 
     std::unique_ptr<FileMap> m(f.readFile());

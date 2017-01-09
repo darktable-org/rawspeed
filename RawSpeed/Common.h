@@ -53,7 +53,7 @@ typedef unsigned long long uint64;
 #ifndef __MINGW32__
 void* _aligned_malloc(size_t bytes, size_t alignment);
 #define _aligned_free(a) do { free(a); } while (0)
-typedef char* LPCWSTR;
+typedef const char *LPCWSTR;
 #endif
 #endif // __unix__
 
