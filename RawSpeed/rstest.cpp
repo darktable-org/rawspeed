@@ -163,9 +163,9 @@ size_t process(const string &filename, CameraMetaData *metadata, bool create,
   // if creating hash and hash exists -> skip current file
   // if not creating and hash is missing -> skip as well
   ifstream hf(hashfile);
-  if ((hf.good() && create) || (!hf.good() && !create)) {
-    cout << left << setw(55) << filename
-         << ": hash " << (create ? "exists" : "missing") << ", skipping" << endl;
+  if (!(hf.good() ^ create)) {
+    cout << left << setw(55) << filename << ": hash "
+         << (create ? "exists" : "missing") << ", skipping" << endl;
     return 0;
   }
 
@@ -207,20 +207,15 @@ size_t process(const string &filename, CameraMetaData *metadata, bool create,
     if (dump)
       writePPM(raw, filename + ".ppm");
   } else {
-    ifstream in(hashfile);
-    if (in) {
-      string truth((istreambuf_iterator<char>(in)),
-                   istreambuf_iterator<char>());
-      string h = img_hash(raw);
-      if (h != truth) {
-        ofstream f(filename + ".hash.failed");
-        f << h;
-        if (dump)
-          writePPM(raw, filename + ".failed.ppm");
-        throw std::runtime_error("hash/metadata mismatch");
-      }
-    } else
-      cerr << filename << ".hash missing." << endl;
+    string truth((istreambuf_iterator<char>(hf)), istreambuf_iterator<char>());
+    string h = img_hash(raw);
+    if (h != truth) {
+      ofstream f(filename + ".hash.failed");
+      f << h;
+      if (dump)
+        writePPM(raw, filename + ".failed.ppm");
+      throw std::runtime_error("hash/metadata mismatch");
+    }
   }
 
   return time;
