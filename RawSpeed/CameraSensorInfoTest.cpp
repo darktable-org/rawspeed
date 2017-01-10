@@ -19,13 +19,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "CameraSensorInfo.h"
-#include <algorithm>
-#include <cstdlib>
-#include <gmock/gmock.h>
-#include <iostream>
-#include <limits>
-#include <vector>
+#include "CameraSensorInfo.h" // for CameraSensorInfo
+#include <algorithm>          // for generate
+#include <cstdlib>            // for rand, srand
+#include <gmock/gmock.h>      // for get, InitGoogleMock, tuple
+#include <gtest/gtest.h>      // for IsNullLiteralHelper, AssertionResult
+#include <iostream>           // for operator<<, basic_ostream::operator<<
+#include <limits>             // for numeric_limits
+#include <memory>             // for unique_ptr
+#include <string>             // for string
+#include <vector>             // for vector, allocator
 
 using namespace std;
 using namespace RawSpeed;

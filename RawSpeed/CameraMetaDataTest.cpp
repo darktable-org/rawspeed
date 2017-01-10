@@ -19,11 +19,12 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "config.h"
+#include "config.h" // for CMAKE_SOURCE_DIR
 
-#include "CameraMetaData.h"
-#include <gmock/gmock.h> // for InitGoogleTest, RUN_ALL_TESTS
-#include <iostream>      // for operator<<, basic_ostream, basic...
+#include "CameraMetaData.h" // for CameraMetaData
+#include <gtest/gtest.h>    // for Test, ASSERT_NO_THROW, GetTestTypeId
+#include <memory>           // for unique_ptr
+#include <string>           // for string
 
 using namespace std;
 using namespace RawSpeed;

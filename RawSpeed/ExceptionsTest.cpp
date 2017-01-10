@@ -19,14 +19,18 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "CameraMetadataException.h"
-#include "CiffParserException.h"
-#include "FileIOException.h"
-#include "IOException.h"
-#include "RawDecoderException.h"
-#include "TiffParserException.h"
-#include <gmock/gmock.h>
-#include <memory>
+#include "CameraMetadataException.h" // for ThrowCME
+#include "CiffParserException.h"     // for ThrowCPE
+#include "FileIOException.h"         // for ThrowFIE
+#include "IOException.h"             // for ThrowIOE
+#include "RawDecoderException.h"     // for ThrowRDE
+#include "TiffParserException.h"     // for ThrowTPE
+#include <exception>                 // for exception
+#include <gmock/gmock.h>             // for MakePredicateFormatterFromMatcher
+#include <gtest/gtest.h>             // for Message, TestPartResult, Test
+#include <memory>                    // for unique_ptr
+#include <stdexcept>                 // for runtime_error
+#include <string>                    // for string
 
 using namespace std;
 using namespace RawSpeed;

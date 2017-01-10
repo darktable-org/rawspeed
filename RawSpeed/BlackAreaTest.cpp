@@ -19,9 +19,9 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "BlackArea.h"
-#include <gmock/gmock.h> // for InitGoogleTest, RUN_ALL_TESTS
-#include <iostream>      // for operator<<, basic_ostream, basic...
+#include "BlackArea.h"   // for BlackArea
+#include <gtest/gtest.h> // for IsNullLiteralHelper, AssertionResult, gtest_ar
+#include <memory>        // for unique_ptr
 
 using namespace std;
 using namespace RawSpeed;

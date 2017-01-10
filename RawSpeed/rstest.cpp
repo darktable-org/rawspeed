@@ -240,7 +240,7 @@ static int usage(const char *progname) {
     4. run with no option   -> checks files with existing .hash
   If the second run shows no errors, you have no regressions.
 )";
-  return EXIT_SUCCESS;
+  return 0;
 }
 
 int main(int argc, char **argv) {
