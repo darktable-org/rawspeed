@@ -52,21 +52,15 @@ RawImage RafDecoder::decodeRawInternal() {
     width = raw->getEntry(FUJI_RAWIMAGEFULLWIDTH)->getInt();
   } else if (raw->hasEntry(IMAGEWIDTH)) {
     TiffEntry *e = raw->getEntry(IMAGEWIDTH);
-    if (e->count < 2)
-      ThrowRDE("Fuji decoder: Size array too small");
     height = e->getShort(0);
     width = e->getShort(1);
-  } 
+  } else
+    ThrowRDE("RAF decoder: Unable to locate image size");
+
   if (raw->hasEntry(FUJI_LAYOUT)) {
     TiffEntry *e = raw->getEntry(FUJI_LAYOUT);
-    if (e->count < 2)
-      ThrowRDE("Fuji decoder: Layout array too small");
-    const uchar8 *layout = e->getData();
-    alt_layout = !(layout[0] >> 7);
+    alt_layout = !(e->getByte(0) >> 7);
   }
-
-  if (width <= 0 ||  height <= 0)
-    ThrowRDE("RAF decoder: Unable to locate image size");
 
   TiffEntry *offsets = raw->getEntry(FUJI_STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(FUJI_STRIPBYTECOUNTS);
@@ -75,7 +69,6 @@ RawImage RafDecoder::decodeRawInternal() {
     ThrowRDE("RAF Decoder: Multiple Strips found: %u %u", offsets->count, counts->count);
 
   int off = offsets->getInt();
-  int count = counts->getInt();
 
   int bps = 16;
   if (raw->hasEntry(FUJI_BITSPERSAMPLE))
@@ -94,7 +87,7 @@ RawImage RafDecoder::decodeRawInternal() {
   ByteStream input(mFile, off);
   iPoint2D pos(0, 0);
 
-  if (count*8/(width*height) < 10) {
+  if (counts->getInt()*8/(width*height) < 10) {
     ThrowRDE("Don't know how to decode compressed images");
   } else if (double_width) {
     Decode16BitRawUnpacked(input, width*2, height);

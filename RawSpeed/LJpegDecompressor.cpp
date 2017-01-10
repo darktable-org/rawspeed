@@ -62,24 +62,6 @@
 
 namespace RawSpeed {
 
-const uint32 bitMask[] = {  0xffffffff, 0x7fffffff,
-                           0x3fffffff, 0x1fffffff,
-                           0x0fffffff, 0x07ffffff,
-                           0x03ffffff, 0x01ffffff,
-                           0x00ffffff, 0x007fffff,
-                           0x003fffff, 0x001fffff,
-                           0x000fffff, 0x0007ffff,
-                           0x0003ffff, 0x0001ffff,
-                           0x0000ffff, 0x00007fff,
-                           0x00003fff, 0x00001fff,
-                           0x00000fff, 0x000007ff,
-                           0x000003ff, 0x000001ff,
-                           0x000000ff, 0x0000007f,
-                           0x0000003f, 0x0000001f,
-                           0x0000000f, 0x00000007,
-                           0x00000003, 0x00000001
-                        };
-
 LJpegDecompressor::LJpegDecompressor(FileMap* file, RawImage img):
     mFile(file), mRaw(img) {
   input = 0;
@@ -303,17 +285,17 @@ void LJpegDecompressor::parseDHT() {
     if (Th > 3)
       ThrowRDE("LJpegDecompressor::parseDHT: Invalid huffman table destination id.");
 
-    uint32 acc = 0;
     HuffmanTable* t = &huff[Th];
 
     if (t->initialized)
       ThrowRDE("LJpegDecompressor::parseDHT: Duplicate table definition");
 
-    for (uint32 i = 0; i < 16 ;i++) {
-      t->bits[i+1] = input->getByte();
-      acc += t->bits[i+1];
-    }
+    uint32 acc = 0;
     t->bits[0] = 0;
+    for (uint32 i = 1; i <= 16; i++) {
+      t->bits[i] = input->getByte();
+      acc += t->bits[i];
+    }
     memset(t->huffval, 0, sizeof(t->huffval));
     if (acc > 256)
       ThrowRDE("LJpegDecompressor::parseDHT: Invalid DHT table.");
@@ -343,56 +325,42 @@ JpegMarker LJpegDecompressor::getNextMarker(bool allowskip) {
       ThrowRDE("LJpegDecompressor::getNextMarker: (Noskip) Expected marker, but found stuffed 00 or ff.");
 
     return mark;
+  } else {
+    // skipToMarker
+    uchar8 c0, c1 = input->getByte();
+    do {
+      c0 = c1;
+      c1 = input->getByte();
+    } while (!(c0 == 0xFF && c1 != 0 && c1 != 0xFF));
+
+    return (JpegMarker)c1;
   }
-  input->skipToMarker();
-  uchar8 id = input->getByte();
-  _ASSERTE(0xff == id);
-  JpegMarker mark = (JpegMarker)input->getByte();
-  return mark;
 }
 
 void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
-  int p, i, l, lastp, si;
   char huffsize[257];
   ushort16 huffcode[257];
-  ushort16 code;
-  int size;
-  int value, ll, ul;
 
   /*
   * Figure C.1: make table of Huffman code length for each symbol
-  * Note that this is in code-length order.
-  */
-  p = 0;
-  for (l = 1; l <= 16; l++) {
-    for (i = 1; i <= (int)htbl->bits[l]; i++) {
-      huffsize[p++] = (char)l;
-      if (p > 256)
-        ThrowRDE("LJpegDecompressor::createHuffmanTable: Code length too long. Corrupt data.");
-    }
-  }
-  huffsize[p] = 0;
-  lastp = p;
-
-
-  /*
   * Figure C.2: generate the codes themselves
   * Note that this is in code-length order.
   */
-  code = 0;
-  si = huffsize[0];
-  p = 0;
-  while (huffsize[p]) {
-    while (((int)huffsize[p]) == si) {
-      huffcode[p++] = code;
-      code++;
+  int p = 0;
+  ushort16 code = 0;
+  for (int l = 1; l <= 16; l++) {
+    for (uint32 i = 0; i < htbl->bits[l]; i++) {
+      huffsize[p] = l;
+      huffcode[p] = code;
+      ++code;
+      ++p;
+      if (p > 256)
+        ThrowRDE("LJpegDecompressor::createHuffmanTable: Code length too long. Corrupt data.");
     }
     code <<= 1;
-    si++;
-    if (p > 256)
-      ThrowRDE("createHuffmanTable: Code length too long. Corrupt data.");
   }
-
+  huffsize[p] = 0;
+  int lastp = p;
 
   /*
   * Figure F.15: generate decoding tables
@@ -400,7 +368,7 @@ void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
   htbl->mincode[0] = 0;
   htbl->maxcode[0] = 0;
   p = 0;
-  for (l = 1; l <= 16; l++) {
+  for (int l = 1; l <= 16; l++) {
     if (htbl->bits[l]) {
       htbl->valptr[l] = p;
       htbl->mincode[l] = huffcode[p];
@@ -408,17 +376,20 @@ void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
       htbl->maxcode[l] = huffcode[p - 1];
     } else {
       htbl->valptr[l] = 0xff;   // This check must be present to avoid crash on junk
-      htbl->maxcode[l] = -1;
+      htbl->maxcode[l] = 0;
     }
-    if (p > 256)
-      ThrowRDE("createHuffmanTable: Code length too long. Corrupt data.");
   }
 
   /*
   * We put in this value to ensure HuffDecode terminates.
   */
-  htbl->maxcode[17] = 0xFFFFFL;
+  htbl->maxcode[17] = 0xffff;
 
+  const ushort16 bitMask[] = {
+    0x00ff, 0x007f, 0x003f, 0x001f,
+    0x000f, 0x0007, 0x0003, 0x0001,
+    0x0
+  };
   /*
   * Build the numbits, value lookup tables.
   * These table allow us to gather 8 bits from the bits stream,
@@ -428,19 +399,14 @@ void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
   */
   memset(htbl->numbits, 0, sizeof(htbl->numbits));
   for (p = 0; p < lastp; p++) {
-    size = huffsize[p];
+    int size = huffsize[p];
     if (size <= 8) {
-      value = htbl->huffval[p];
-      code = huffcode[p];
-      ll = code << (8 - size);
-      if (size < 8) {
-        ul = ll | bitMask[24+size];
-      } else {
-        ul = ll;
-      }
-      if (ul > 256 || ll > ul)
+      ushort16 ll = huffcode[p] << (8 - size);
+      ushort16 ul = ll | bitMask[size];
+      if (ul > 256)
         ThrowRDE("createHuffmanTable: Code length too long. Corrupt data.");
-      for (i = ll; i <= ul; i++) {
+      uint32 value = htbl->huffval[p];
+      for (ushort16 i = ll; i <= ul; i++) {
         htbl->numbits[i] = size | (value << 4);
       }
     }
@@ -463,27 +429,25 @@ void LJpegDecompressor::createHuffmanTable(HuffmanTable *htbl) {
  ************************************/
 
 void LJpegDecompressor::createBigTable(HuffmanTable *htbl) {
-  const uint32 bits = 14;      // HuffDecode functions must be changed, if this is modified.
+  const uint32 bits = HuffmanTable::TableBitDepth;      // HuffDecode functions must be changed, if this is modified.
   const uint32 size = 1 << bits;
-  int rv = 0;
-  int temp;
-  uint32 l;
 
   if (!htbl->bigTable)
     htbl->bigTable = (int*)_aligned_malloc(size * sizeof(int), 16);
   if (!htbl->bigTable)
-	ThrowRDE("Out of memory, failed to allocate %zu bytes", size*sizeof(int));
+    ThrowRDE("Out of memory, failed to allocate %zu bytes", size*sizeof(int));
   for (uint32 i = 0; i < size; i++) {
-    ushort16 input = i << 2; // Calculate input value
-    int code = input >> 8;   // Get 8 bits
+    ushort16 input = i << (16-bits); // Calculate input value
+    ushort16 code = input >> 8;   // Get 8 bits
+    ushort16 rv = 0;
     uint32 val = htbl->numbits[code];
-    l = val & 15;
+    uint32 l = val & 0xf;
     if (l) {
       rv = val >> 4;
     }  else {
       l = 8;
       while (code > htbl->maxcode[l]) {
-        temp = input >> (15 - l) & 1;
+        ushort16 temp = input >> (15 - l) & 1;
         code = (code << 1) | temp;
         l++;
       }
@@ -495,18 +459,16 @@ void LJpegDecompressor::createBigTable(HuffmanTable *htbl) {
       if (l > frame.prec || htbl->valptr[l] == 0xff) {
         htbl->bigTable[i] = 0xff;
         continue;
-      } else {
-        rv = htbl->huffval[htbl->valptr[l] +
-                           ((int)(code - htbl->mincode[l]))];
       }
+
+      rv = htbl->huffval[htbl->valptr[l] + (code - htbl->mincode[l])];
     }
 
 
     if (rv == 16) {
       if (mDNGCompatible)
-        htbl->bigTable[i] = (-(32768 << 8)) | (16 + l);
-      else
-        htbl->bigTable[i] = (-(32768 << 8)) | l;
+        l += 16;
+      htbl->bigTable[i] = (-(32768 << 8)) | l;
       continue;
     }
 
@@ -515,14 +477,10 @@ void LJpegDecompressor::createBigTable(HuffmanTable *htbl) {
       continue;
     }
 
-    if (rv) {
-      int x = input >> (16 - l - rv) & ((1 << rv) - 1);
-      if ((x & (1 << (rv - 1))) == 0)
-        x -= (1 << rv) - 1;
-      htbl->bigTable[i] = (x << 8) | (l + rv);
-    } else {
-      htbl->bigTable[i] = l;
-    }
+    htbl->bigTable[i] = l + rv;
+
+    if (rv)
+      htbl->bigTable[i] |= HuffExtend(rv, input >> (16 - l - rv) & ((1 << rv) - 1)) << 8;
   }
 }
 
@@ -544,32 +502,30 @@ void LJpegDecompressor::createBigTable(HuffmanTable *htbl) {
 *--------------------------------------------------------------
 */
 int LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
-  int rv;
-  int temp;
-  int code, val;
-  uint32 l;
   /**
-   * First attempt to do complete decode, by using the first 14 bits
+   * First attempt to do complete decode, by using the first TableBitDepth bits
    */
 
   bits->fill();
-  code = bits->peekBitsNoFill(14);
+  uint32 code = bits->peekBitsNoFill(HuffmanTable::TableBitDepth);
+
   if (htbl->bigTable) {
-    val = htbl->bigTable[code];
+    int val = htbl->bigTable[code];
     if ((val&0xff) !=  0xff) {
       bits->skipBitsNoFill(val&0xff);
       return val >> 8;
     }
   }
+
   /*
   * If the huffman code is less than 8 bits, we can use the fast
   * table lookup to get its value.  It's more than 8 bits about
   * 3-4% of the time.
   */
-  rv = 0;
-  code = code>>6;
-  val = htbl->numbits[code];
-  l = val & 15;
+  ushort16 rv = 0;
+  code >>= HuffmanTable::TableBitDepth-8;
+  uint32 val = htbl->numbits[code];
+  uint32 l = val & 0xf;
   if (l) {
     bits->skipBitsNoFill(l);
     rv = val >> 4;
@@ -577,7 +533,7 @@ int LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
     bits->skipBitsNoFill(8);
     l = 8;
     while (code > htbl->maxcode[l]) {
-      temp = bits->getBitNoFill();
+      uint32 temp = bits->getBitsNoFill(1);
       code = (code << 1) | temp;
       l++;
     }
@@ -586,12 +542,10 @@ int LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
     * With garbage input we may reach the sentinel value l = 17.
     */
 
-    if (l > frame.prec || htbl->valptr[l] == 0xff) {
+    if (l > frame.prec || htbl->valptr[l] == 0xff)
       ThrowRDE("Corrupt JPEG data: bad Huffman code:%u", l);
-    } else {
-      rv = htbl->huffval[htbl->valptr[l] +
-                         ((int)(code - htbl->mincode[l]))];
-    }
+
+    rv = htbl->huffval[htbl->valptr[l] + (code - htbl->mincode[l])];
   }
 
   if (rv == 16) {
@@ -600,12 +554,9 @@ int LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
     return -32768;
   }
 
-  // Ensure we have enough bits
+  // check for the rare case that our cache in the bitpump is not large enough
   if ((rv + l) > 24) {
-    if (rv > 16) // There is no values above 16 bits.
-      ThrowRDE("Corrupt JPEG data: Too many bits requested.");
-    else
-      bits->fill();
+    bits->fill();
   }
 
   /*
@@ -613,12 +564,9 @@ int LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
   * Figure F.12: extend sign bit
   */
 
-  if (rv) {
-    int x = bits->getBitsNoFill(rv);
-    if ((x & (1 << (rv - 1))) == 0)
-      x -= (1 << rv) - 1;
-    return x;
-  }
+  if (rv)
+    return HuffExtend(rv, bits->getBitsNoFill(rv));
+
   return 0;
 }
 

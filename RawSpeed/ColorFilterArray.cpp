@@ -155,7 +155,7 @@ void ColorFilterArray::shiftDown(int n) {
 }
 
 std::string ColorFilterArray::asString() {
-  string dst = string("");
+  string dst;
   for (int y = 0; y < size.y; y++) {
     for (int x = 0; x < size.x; x++) {
       dst += colorToString(getColorAt(x,y));
@@ -237,8 +237,8 @@ CFAColor ColorFilterArray::toRawspeedColor( uint32 dcrawColor )
     case 1: return CFA_GREEN;
     case 2: return CFA_BLUE;
     case 3: return CFA_GREEN2;
+    default: return CFA_UNKNOWN;
   }
-  return CFA_UNKNOWN;
 }
 
 RawSpeed::uint32 ColorFilterArray::toDcrawColor( CFAColor c )
@@ -252,10 +252,8 @@ RawSpeed::uint32 ColorFilterArray::toDcrawColor( CFAColor c )
     case CFA_BLUE: return 2;
     case CFA_YELLOW:
     case CFA_GREEN2: return 3;
-    default:
-      break;
+    default: return 0;
   }
-  return 0;
 }
 
 

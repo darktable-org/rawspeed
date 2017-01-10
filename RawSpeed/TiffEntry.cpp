@@ -117,7 +117,7 @@ bool TiffEntry::isInt() {
 }
 
 uchar8 TiffEntry::getByte(uint32 num) {
-  if (type != TIFF_BYTE)
+  if (type != TIFF_BYTE && type != TIFF_UNDEFINED)
     ThrowTPE("TIFF, getByte: Wrong type %u encountered. Expected Byte on 0x%x", type, tag);
 
   if (num >= bytesize)

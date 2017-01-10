@@ -143,11 +143,13 @@ struct HuffmanTable {
   */
 
   ushort16 mincode[17];
-  int maxcode[18];
-  short valptr[17];
+  ushort16 maxcode[18];
+  ushort16 valptr[17];
   uint32 numbits[256];
   int* bigTable;
   bool initialized;
+
+  static const uint32 TableBitDepth = 13;
 };
 
 class SOFInfo {
@@ -184,6 +186,10 @@ protected:
   JpegMarker getNextMarker(bool allowskip);
   void parseDHT();
   int HuffDecode(HuffmanTable *htbl);
+  inline int HuffExtend(uint32 len, uint32 diff) {
+    int x = diff;
+    return ((x & (1 << (len - 1))) == 0) ? x - (1 << len) + 1 : x;
+  }
   ByteStream* input;
   BitPumpJPEG* bits;
   FileMap *mFile;
