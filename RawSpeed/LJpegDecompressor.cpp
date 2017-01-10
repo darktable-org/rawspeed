@@ -554,6 +554,11 @@ int LJpegDecompressor::HuffDecode(HuffmanTable *htbl) {
     return -32768;
   }
 
+  // check for the rare case that our cache in the bitpump is not large enough
+  if ((rv + l) > 24) {
+    bits->fill();
+  }
+
   /*
   * Section F.2.2.1: decode the difference and
   * Figure F.12: extend sign bit
