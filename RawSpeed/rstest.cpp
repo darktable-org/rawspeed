@@ -160,13 +160,13 @@ size_t process(const string &filename, CameraMetaData *metadata, bool create,
 
   const string hashfile(filename + ".hash");
 
-  if (create) {
-    // if creating hash, and hash exists - skip current file
-    ifstream f(hashfile);
-    if (f.good()) {
-      cout << left << setw(55) << filename << ": hash exists, skipping" << endl;
-      return 0;
-    }
+  // if creating hash and hash exists -> skip current file
+  // if not creating and hash is missing -> skip as well
+  ifstream hf(hashfile);
+  if ((hf.good() && create) || (!hf.good() && !create)) {
+    cout << left << setw(55) << filename
+         << ": hash " << (create ? "exists" : "missing") << ", skipping" << endl;
+    return 0;
   }
 
 #if defined(WIN32)
@@ -227,16 +227,24 @@ size_t process(const string &filename, CameraMetaData *metadata, bool create,
 }
 
 static int usage(const char *progname) {
-  cout << "usage: " << progname << endl
-       << "  [-h] print this help" << endl
-       << "  [-c] for each file, decode, compute hash, and store it." << endl
-       << "       If hash exists - it does not recompute it!" << endl
-       << "  [-d] store decoded image as PPM" << endl
-       << "  <FILE[S]> the file[s] to work on." << endl
-       << endl
-       << "  if no options are passed, for each file, decode, compute hash, "
-          "and the hash file exists, compare hashes."
-       << endl;
+  cout << "usage: " << progname << R"(
+  [-h] print this help
+  [-c] for each file: decode, compute hash and store it.
+       If hash exists, it does not recompute it!
+  [-d] store decoded image as PPM
+  <FILE[S]> the file[s] to work on.
+
+  With no options given, each raw with an accompanying hash will be decoded
+  and compared to the existing hash. A summary of all errors/failed hash
+  comparisons will be reported at the end.
+
+  Suggested workflow for easy regression testing:
+    1. remove all .hash files and build 'trusted' version of this program
+    2. run with option '-c' -> creates .hash for all supported files
+    3. build new version to test for regressions
+    4. run with no option   -> checks files with existing .hash
+  If the second run shows no errors, you have no regressions.
+)";
   return EXIT_SUCCESS;
 }
 
