@@ -170,7 +170,7 @@ size_t process(const string &filename, CameraMetaData *metadata, bool create,
   }
 
 #if defined(WIN32)
-  FileReader reader(static_cast<LPCWSTR>(argv[1]));
+  FileReader reader(static_cast<LPCWSTR>(filename.c_str()));
 #else
   FileReader reader(filename.c_str());
 #endif
