@@ -133,6 +133,19 @@ inline bool isPowerOfTwo (int val) {
   return (val & (~val+1)) == val;
 }
 
+template<typename T> bool isIn(const T value, const std::initializer_list<T>& list) {
+  for (auto t : list)
+    if (t == value)
+      return true;
+  return false;
+}
+
+// until we allow c++14 code
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args) {
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
 inline int lmin(int p0, int p1) {
   return p1 + ((p0 - p1) & ((p0 - p1) >> 31));
 }
@@ -159,9 +172,6 @@ typedef void* pthread_mutex_t;
 #define pthread_mutex_unlock(A)
 #endif
 
-typedef int __attribute__((aligned(1))) align1_int;
-typedef unsigned int __attribute__((aligned(1))) align1_uint;
-
 inline Endianness getHostEndianness() {
 #if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
   return little;
@@ -182,17 +192,34 @@ inline Endianness getHostEndianness() {
 #endif
 }
 
-#if defined(__GNUC__) && (PIPE_CC_GCC_VERSION >= 403) && defined(__BYTE_ORDER__) 
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__ && __alignof__ (int) == 1
-#define LE_PLATFORM_HAS_BSWAP
-#define PLATFORM_BSWAP32(A) __builtin_bswap32(A)
-#endif
+#ifdef _MSC_VER
+# include <intrin.h>
+# define BSWAP16(A) _byteswap_ushort(A)
+# define BSWAP32(A) _byteswap_ulong(A)
+# define BSWAP64(A) _byteswap_uint64(A)
+#else
+# define BSWAP16(A) __builtin_bswap16(A)
+# define BSWAP32(A) __builtin_bswap32(A)
+# define BSWAP64(A) __builtin_bswap64(A)
 #endif
 
+template<typename T> inline T loadMem(const void* data, bool bswap) {
+  T ret;
+  // all interesting compilers optimize this memcpy into a single move
+  // this is the most effective way to load some bytes without running into alignmen issues
+  memcpy(&ret, data, sizeof(T));
+  if (bswap) {
+    switch(sizeof(T)) {
+    case 1: break;
+    case 2: ret = BSWAP16(ret); break;
+    case 4: ret = BSWAP32(ret); break;
+    case 8: ret = BSWAP64(ret); break;
+    }
+  }
+  return ret;
+}
+
 #ifdef _MSC_VER
-#include <intrin.h>
-#define LE_PLATFORM_HAS_BSWAP
-#define PLATFORM_BSWAP32(A) _byteswap_ulong(A)
 // See http://tinyurl.com/hqfuznc
 #if _MSC_VER >= 1900 
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }

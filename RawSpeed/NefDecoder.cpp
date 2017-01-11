@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "NefDecoder.h"
-#include "ByteStreamSwap.h"
 #include "BitPumpMSB32.h"
 /*
     RawSpeed - RAW file decoder.
@@ -110,15 +109,9 @@ RawImage NefDecoder::decodeRawInternal() {
   try {
     NikonDecompressor decompressor(mFile, mRaw);
     decompressor.uncorrectedRawValues = uncorrectedRawValues;
-    ByteStream* metastream;
-    if (getHostEndianness() == data[0]->endian)
-      metastream = new ByteStream(meta->getData(), meta->count);
-    else
-      metastream = new ByteStreamSwap(meta->getData(), meta->count);
+    ByteStream bs(meta->getData());
 
-    decompressor.DecompressNikon(metastream, width, height, bitPerPixel, offsets->getInt(), counts->getInt());
-
-    delete metastream;
+    decompressor.DecompressNikon(&bs, width, height, bitPerPixel, offsets->getInt(), counts->getInt());
   } catch (IOException &e) {
     mRaw->setError(e.what());
     // Let's ignore it, it may have delivered somewhat useful data.
@@ -276,7 +269,7 @@ void NefDecoder::readCoolpixMangledRaw(ByteStream &input, iPoint2D& size, iPoint
   uint32 y = offset.y;
   h = MIN(h + (uint32)offset.y, (uint32)mRaw->dim.y);
   w *= cpp;
-  BitPumpMSB32 in(&input);
+  BitPumpMSB32 in(input);
   for (; y < h; y++) {
     ushort16* dest = (ushort16*) & data[offset.x*sizeof(ushort16)*cpp+y*outPitch];
     for (uint32 x = 0 ; x < w; x++) {
@@ -308,7 +301,7 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream &input, iPoint2D& size, iPoint2D
   h = MIN(h + (uint32)offset.y, (uint32)mRaw->dim.y);
   w *= cpp;
   h /= 2;
-  BitPumpMSB in(&input);
+  BitPumpMSB in(input);
   for (; y < h; y++) {
     ushort16* dest = (ushort16*) & data[offset.x*sizeof(ushort16)*cpp+y*2*outPitch];
     for (uint32 x = 0 ; x < w; x++) {
@@ -506,19 +499,20 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
 
         // Get the decryption key
         TiffEntry *key = mRootIFD->getEntryRecursive((TiffTag)0x00a7);
-        const uchar8 *keydata = key->getData();
+        const uchar8 *keydata = key->getData(4);
         uint32 keyno = keydata[0]^keydata[1]^keydata[2]^keydata[3];
 
         // "Decrypt" the block using the serial and key
-        uchar8 *buf = (uchar8 *)wb->getData()+4;
-        if (version == 0x204)
-          buf += 280;
         uchar8 ci = serialmap[serialno & 0xff];
         uchar8 cj = keymap[keyno & 0xff];
         uchar8 ck = 0x60;
 
-        for (uint32 i=0; i < 280; i++)
-          buf[i] ^= (cj += ci * ck++);
+        ByteStream bs = wb->getData();
+        bs.skipBytes(version == 0x204 ? 284 : 4);
+
+        uchar8 buf[14+8];
+        for (uint32 i=0; i < sizeof(buf); i++)
+          buf[i] = bs.getByte() ^ (cj += ci * ck++);
 
         // Finally set the WB coeffs
         uint32 off = (version == 0x204) ? 6 : 14;
@@ -529,7 +523,7 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
     }
   } else if (mRootIFD->hasEntryRecursive((TiffTag)0x0014)) {
     TiffEntry *wb = mRootIFD->getEntryRecursive((TiffTag)0x0014);
-    uchar8 *tmp = (uchar8 *) wb->getData();
+    uchar8 *tmp = (uchar8 *) wb->getData(wb->count);
     if (wb->count == 2560 && wb->type == TIFF_UNDEFINED) {
       mRaw->metadata.wbCoeffs[0] = (float) get2BE(tmp, 1248) / 256.0f;
       mRaw->metadata.wbCoeffs[1] = 1.0f;
@@ -579,9 +573,6 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
 void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
   if(w<6) ThrowIOE("NEF: got a %u wide sNEF, aborting", w);
 
-  uchar8* data = mRaw->getData();
-  uint32 pitch = mRaw->pitch;
-  const uchar8 *in = input.getData();
   if (input.getRemainSize() < (w*h*3)) {
     if ((uint32)input.getRemainSize() > w*3) {
       h = input.getRemainSize() / (w*3) - 1;
@@ -625,6 +616,10 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
 
   ushort16 tmp;
   uchar8 *tmpch = (uchar8*)&tmp;
+
+  uchar8* data = mRaw->getData();
+  uint32 pitch = mRaw->pitch;
+  const uchar8 *in = input.getData(w*h*3);
 
   for (uint32 y = 0; y < h; y++) {
     ushort16* dest = (ushort16*) & data[y*pitch];

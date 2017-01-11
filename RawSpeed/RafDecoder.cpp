@@ -43,7 +43,6 @@ RawImage RafDecoder::decodeRawInternal() {
     ThrowRDE("Fuji decoder: Unable to locate raw IFD");
 
   TiffIFD* raw = data[0];
-  mFile = raw->getFileMap();
   uint32 height = 0;
   uint32 width = 0;
 
@@ -68,8 +67,6 @@ RawImage RafDecoder::decodeRawInternal() {
   if (offsets->count != 1 || counts->count != 1)
     ThrowRDE("RAF Decoder: Multiple Strips found: %u %u", offsets->count, counts->count);
 
-  int off = offsets->getInt();
-
   int bps = 16;
   if (raw->hasEntry(FUJI_BITSPERSAMPLE))
     bps = raw->getEntry(FUJI_BITSPERSAMPLE)->getInt();
@@ -84,14 +81,15 @@ RawImage RafDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width*(double_width ? 2 : 1), height);
   mRaw->createData();
-  ByteStream input(mFile, off);
+  ByteStream input = offsets->getRootIfdData();
+  input.setPosition(offsets->getInt());
   iPoint2D pos(0, 0);
 
   if (counts->getInt()*8/(width*height) < 10) {
     ThrowRDE("Don't know how to decode compressed images");
   } else if (double_width) {
     Decode16BitRawUnpacked(input, width*2, height);
-  } else if (mRootIFD->endian == big) {
+  } else if (input.isInNativeByteOrder() == (getHostEndianness() == big)) {
     Decode16BitRawBEunpacked(input, width, height);
   } else {
     if (hints.find("jpeg32_bitorder") != hints.end())

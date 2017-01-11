@@ -28,7 +28,7 @@ namespace RawSpeed {
 
 DngDecoder::DngDecoder(TiffIFD *rootIFD, FileMap* file) : RawDecoder(file), mRootIFD(rootIFD) {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(DNGVERSION);
-  const uchar8* v = data[0]->getEntry(DNGVERSION)->getData();
+  const uchar8* v = data[0]->getEntry(DNGVERSION)->getData(4);
 
   if (v[0] != 1)
     ThrowRDE("Not a supported DNG image format: v%u.%u.%u.%u", (int)v[0], (int)v[1], (int)v[2], (int)v[3]);
@@ -212,7 +212,7 @@ RawImage DngDecoder::decodeRawInternal() {
           iPoint2D size(width, slice.h);
           iPoint2D pos(0, slice.offsetY);
 
-          bool big_endian = (raw->endian == big);
+          bool big_endian = (getTiffEndianness(mFile) == big);
           // DNG spec says that if not 8 or 16 bit/sample, always use big endian
           if (bps != 8 && bps != 16)
             big_endian = true;

@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "HasselbladDecompressor.h"
-#include "ByteStreamSwap.h"
 
 /*
     RawSpeed - RAW file decoder.
@@ -95,14 +94,14 @@ void HasselbladDecompressor::parseSOS() {
   if (ph1_bits)
     delete(ph1_bits);
 
-  ph1_bits = new BitPumpMSB32(input);
+  ph1_bits = new BitPumpMSB32(*input);
 
   try {
     decodeScanHasselblad();
   } catch (...) {
     throw;
   }
-  input->skipBytes(ph1_bits->getOffset());
+  input->skipBytes(ph1_bits->getBufferPosition());
 }
 
 // Returns len bits as a signed value.
@@ -148,7 +147,7 @@ int HasselbladDecompressor::HuffGetLength() {
   */
   ph1_bits->fill();
 
-  code = ph1_bits->peekByteNoFill();
+  code = ph1_bits->peekBitsNoFill(8);
   val = dctbl1->numbits[code];
   l = val & 15;
   if (l) {
@@ -159,7 +158,7 @@ int HasselbladDecompressor::HuffGetLength() {
   l = 8;
 
   while (code > dctbl1->maxcode[l]) {
-    temp = ph1_bits->getBitNoFill();
+    temp = ph1_bits->getBitsNoFill(1);
     code = (code << 1) | temp;
     l++;
   }

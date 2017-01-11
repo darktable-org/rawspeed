@@ -4,7 +4,6 @@
 #include "RawDecoder.h"
 #include "LJpegPlain.h"
 #include "TiffIFD.h"
-#include "TiffIFDBE.h"
 #include "BitPumpPlain.h"
 
 /* 
@@ -44,7 +43,7 @@ public:
   virtual TiffIFD* getRootIFD() {return mRootIFD;}
 private:
   void decodeCompressed(ByteStream& s,uint32 w, uint32 h);
-  void decodeUncompressed(ByteStream& s,uint32 w, uint32 h, uint32 size, Endianness endian);
+  void decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 size);
   TiffIFD *mRootIFD;
 };
 

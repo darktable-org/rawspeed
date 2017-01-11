@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "X3fDecoder.h"
-#include "ByteStreamSwap.h"
 #include "TiffParser.h"
 
 /*
@@ -32,10 +31,7 @@ RawDecoder(file), bytes(NULL) {
   decoderVersion = 1;
   huge_table = NULL;
   line_offsets = NULL;
-  if (getHostEndianness() == little)
-    bytes = new ByteStream(file, 0);
-  else
-    bytes = new ByteStreamSwap(file, 0);
+  bytes = new ByteStream(file, 0, getHostEndianness() == little);
 }
 
 X3fDecoder::~X3fDecoder(void)
@@ -113,16 +109,10 @@ bool X3fDecoder::readName() {
       ByteStream i(mFile, cimg.dataOffset, cimg.dataSize);
       // Skip jpeg header
       i.skipBytes(6);
-      if (i.getInt() == 0x66697845) { // Match text 'Exif'
-        FileMap subMap(mFile, cimg.dataOffset+12, i.getRemainSize());
-        TiffParser t(&subMap);
+      if (i.getUInt() == 0x66697845) { // Match text 'Exif'
         try {
-          t.parseData();
-        } catch (...) {
-          return false;
-        }
-        TiffIFD *root = t.RootIFD();
-        try {
+          TiffRootIFDOwner root = parseTiff(mFile->getSubView(cimg.dataOffset+12, i.getRemainSize()));
+
           if (root->hasEntryRecursive(MAKE) && root->hasEntryRecursive(MODEL)) {
             camera_model = root->getEntryRecursive(MODEL)->getString();
             camera_make = root->getEntryRecursive(MAKE)->getString();
@@ -282,12 +272,12 @@ void X3fDecoder::decompressSigma( X3fImage &image )
       }
     }
     // Load offsets
-    ByteStream i2(mFile, image.dataOffset+image.dataSize-mRaw->dim.y*4, mRaw->dim.y*4);
+    ByteStream i2(mFile, image.dataOffset+image.dataSize-mRaw->dim.y*4, (ByteStream::size_type)mRaw->dim.y*4);
     line_offsets = (uint32*)_aligned_malloc(4*mRaw->dim.y, 16);
     if (!line_offsets)
       ThrowRDE("SigmaDecompressor: Memory Allocation failed.");
     for (int y = 0; y < mRaw->dim.y; y++) {
-      line_offsets[y] = i2.getUInt() + input.getOffset() + image.dataOffset;
+      line_offsets[y] = i2.getUInt() + input.getPosition() + image.dataOffset;
     }
     startThreads();
     return;
@@ -465,7 +455,7 @@ FileMap* X3fDecoder::getCompressedData()
   for (; img !=  mImages.end(); ++img) {
     X3fImage cimg = *img;
     if (cimg.type == 1 || cimg.type == 3) {
-      return new FileMap(mFile, cimg.dataOffset, cimg.dataSize);
+      return new FileMap(mFile->getSubView(cimg.dataOffset, cimg.dataSize));
     }
   }
   return NULL;

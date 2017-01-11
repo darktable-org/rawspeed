@@ -57,6 +57,7 @@ RawImage OrfDecoder::decodeRawInternal() {
   if (counts->count != offsets->count)
     ThrowRDE("ORF Decoder: Byte count number does not match strip size: count:%u, strips:%u ", counts->count, offsets->count);
 
+  //TODO: this code assumes that all strips are layed out directly after another without padding and in order
   uint32 off = raw->getEntry(STRIPOFFSETS)->getInt();
   uint32 size = 0;
   for (uint32 i=0; i < counts->count; i++)
@@ -71,12 +72,12 @@ RawImage OrfDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  // We add 3 bytes slack, since the bitpump might be a few bytes ahead.
-  ByteStream input(mFile, off, size+3);
+  ByteStream input(offsets->getRootIfdData());
+  input.setPosition(off);
 
   try {
     if (offsets->count != 1 || (hints.find(string("force_uncompressed")) != hints.end()))
-      decodeUncompressed(input, width, height, size, raw->endian);
+      decodeUncompressed(input, width, height, size);
     else
       decodeCompressed(input, width, height);
   } catch (IOException &e) {
@@ -86,14 +87,14 @@ RawImage OrfDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void OrfDecoder::decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 size, Endianness endian) {
+void OrfDecoder::decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 size) {
   if ((hints.find(string("packed_with_control")) != hints.end()))
     Decode12BitRawWithControl(s, w, h);
   else if ((hints.find(string("jpeg32_bitorder")) != hints.end())) {
     iPoint2D size(w, h),pos(0,0);
     readUncompressedRaw(s, size, pos, w*12/8, 12, BitOrder_Jpeg32);
   } else if (size >= w*h*2) { // We're in an unpacked raw
-    if (endian == little)
+    if (s.isInNativeByteOrder())
       Decode12BitRawUnpacked(s, w, h);
     else
       Decode12BitRawBEunpackedLeftAligned(s, w, h);
@@ -130,7 +131,7 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
   left0 = nw0 = left1 = nw1 = 0;
 
   s.skipBytes(7);
-  BitPumpMSB bits(&s);
+  BitPumpMSB bits(s);
 
   for (uint32 y = 0; y < h; y++) {
     memset(acarry0, 0, sizeof acarry0);
@@ -286,21 +287,13 @@ void OrfDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
     // Newer cameras process the Image Processing SubIFD in the makernote
     if(mRootIFD->hasEntryRecursive(OLYMPUSIMAGEPROCESSING)) {
       TiffEntry *img_entry = mRootIFD->getEntryRecursive(OLYMPUSIMAGEPROCESSING);
-      uint32 offset = img_entry->getInt() + img_entry->parent_offset - 12;
-      TiffIFD *image_processing = NULL;
       try {
-        if (mRootIFD->endian == getHostEndianness())
-          image_processing = new TiffIFD(mFile, offset);
-        else
-          image_processing = new TiffIFDBE(mFile, offset);
+        // get makernote ifd with containing FileMap
+        TiffRootIFD image_processing(img_entry->getRootIfdData(), img_entry->getInt());
 
         // Get the WB
-        if(image_processing->hasEntry((TiffTag) 0x0100)) {
-          TiffEntry *wb = image_processing->getEntry((TiffTag) 0x0100);
-          if (wb->count == 4) {
-            wb->parent_offset = img_entry->parent_offset - 12;
-            wb->offsetFromParent();
-          }
+        if(image_processing.hasEntry((TiffTag) 0x0100)) {
+          TiffEntry *wb = image_processing.getEntry((TiffTag) 0x0100);
           if (wb->count == 2 || wb->count == 4) {
             mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
             mRaw->metadata.wbCoeffs[1] = 256.0f;
@@ -309,12 +302,10 @@ void OrfDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
         }
 
         // Get the black levels
-        if(image_processing->hasEntry((TiffTag) 0x0600)) {
-          TiffEntry *blackEntry = image_processing->getEntry((TiffTag) 0x0600);
+        if(image_processing.hasEntry((TiffTag) 0x0600)) {
+          TiffEntry *blackEntry = image_processing.getEntry((TiffTag) 0x0600);
           // Order is assumed to be RGGB
           if (blackEntry->count == 4) {
-            blackEntry->parent_offset = img_entry->parent_offset - 12;
-            blackEntry->offsetFromParent();
             for (int i = 0; i < 4; i++) {
               if (mRaw->cfa.getColorAt(i&1, i>>1) == CFA_RED)
                 mRaw->blackLevelSeparate[i] = blackEntry->getShort(0);
@@ -332,9 +323,6 @@ void OrfDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
       } catch(TiffParserException e) {
         mRaw->setError(e.what());
       }
-
-      if (image_processing)
-        delete image_processing;
     }
   }
 }

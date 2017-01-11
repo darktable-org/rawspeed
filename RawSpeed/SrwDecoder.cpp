@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "SrwDecoder.h"
-#include "ByteStreamSwap.h"
 
 #if defined(__unix__) || defined(__APPLE__) 
 #include <stdlib.h>
@@ -33,16 +32,12 @@ namespace RawSpeed {
 SrwDecoder::SrwDecoder(TiffIFD *rootIFD, FileMap* file):
 RawDecoder(file), mRootIFD(rootIFD) {
   decoderVersion = 3;
-  b = NULL;
 }
 
 SrwDecoder::~SrwDecoder(void) {
   if (mRootIFD)
     delete mRootIFD;
   mRootIFD = NULL;
-  if (NULL != b)
-    delete b;
-  b = NULL;
 }
 
 RawImage SrwDecoder::decodeRawInternal() {
@@ -120,16 +115,10 @@ void SrwDecoder::decodeCompressed( TiffIFD* raw )
   const uint32 offset = raw->getEntry(STRIPOFFSETS)->getInt();
   uint32 compressed_offset = raw->getEntry((TiffTag)40976)->getInt();
 
-  if (NULL != b)
-    delete b;
-  if (getHostEndianness() == little)
-    b = new ByteStream(mFile, 0);
-  else
-    b = new ByteStreamSwap(mFile, 0);
-  b->setAbsoluteOffset(compressed_offset);
+  ByteStream bs(mFile, compressed_offset, getHostEndianness() == little);
 
   for (uint32 y = 0; y < height; y++) {
-    uint32 line_offset = offset + b->getInt();
+    uint32 line_offset = offset + bs.getInt();
     if (line_offset >= mFile->getSize())
       ThrowRDE("Srw decoder: Offset outside image file, file probably truncated.");
     int len[4];
@@ -143,7 +132,7 @@ void SrwDecoder::decodeCompressed( TiffIFD* raw )
     // Image is arranged in groups of 16 pixels horizontally
     for (uint32 x = 0; x < width; x += 16) {
       bits.fill();
-      bool dir = !!bits.getBitNoFill();
+      bool dir = !!bits.getBitsNoFill(1);
       for (int i = 0; i < 4; i++)
         op[i] = bits.getBitsNoFill(2);
       for (int i = 0; i < 4; i++) {
@@ -328,7 +317,7 @@ void SrwDecoder::decodeCompressed3( TiffIFD* raw, int bits)
   // the actual difference bits
   uint32 motion;
   uint32 diffBitsMode[3][2] = {{0}};
-  uint32 line_offset = startpump.getOffset();
+  uint32 line_offset = startpump.getBufferPosition();
   for (uint32 row=0; row < height; row++) {
     // Align pump to 16byte boundary
     if ((line_offset & 0xf) != 0)
@@ -436,7 +425,7 @@ void SrwDecoder::decodeCompressed3( TiffIFD* raw, int bits)
       img_up += 16;
       img_up2 += 16;
     }
-    line_offset += pump.getOffset();
+    line_offset += pump.getBufferPosition();
   }
 }
 
@@ -489,8 +478,6 @@ void SrwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
     TiffEntry *wb_levels = mRootIFD->getEntryRecursive(SAMSUNG_WB_RGGBLEVELSUNCORRECTED);
     TiffEntry *wb_black = mRootIFD->getEntryRecursive(SAMSUNG_WB_RGGBLEVELSBLACK);
     if (wb_levels->count == 4 && wb_black->count == 4) {
-      wb_levels->offsetFromParent();
-      wb_black->offsetFromParent();
       mRaw->metadata.wbCoeffs[0] = wb_levels->getFloat(0) - wb_black->getFloat(0);
       mRaw->metadata.wbCoeffs[1] = wb_levels->getFloat(1) - wb_black->getFloat(1);
       mRaw->metadata.wbCoeffs[2] = wb_levels->getFloat(3) - wb_black->getFloat(3);

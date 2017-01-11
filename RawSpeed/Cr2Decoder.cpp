@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "Cr2Decoder.h"
-#include "ByteStreamSwap.h"
 
 /*
     RawSpeed - RAW file decoder.
@@ -38,131 +37,130 @@ Cr2Decoder::~Cr2Decoder(void) {
   mRootIFD = NULL;
 }
 
-RawImage Cr2Decoder::decodeRawInternal() {
-  if(hints.find("old_format") != hints.end()) {
-    uint32 off = 0;
-    if (mRootIFD->getEntryRecursive((TiffTag)0x81))
-      off = mRootIFD->getEntryRecursive((TiffTag)0x81)->getInt();
+RawImage Cr2Decoder::decodeOldFormat() {
+  uint32 off = 0;
+  if (mRootIFD->getEntryRecursive((TiffTag)0x81))
+    off = mRootIFD->getEntryRecursive((TiffTag)0x81)->getInt();
+  else {
+    vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
+    if (data.empty())
+      ThrowRDE("CR2 Decoder: Couldn't find offset");
     else {
-      vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
-      if (data.empty())
+      if (data[0]->hasEntry(STRIPOFFSETS))
+        off = data[0]->getEntry(STRIPOFFSETS)->getInt();
+      else
         ThrowRDE("CR2 Decoder: Couldn't find offset");
-      else {
-        if (data[0]->hasEntry(STRIPOFFSETS))
-          off = data[0]->getEntry(STRIPOFFSETS)->getInt();
-        else
-          ThrowRDE("CR2 Decoder: Couldn't find offset");
-      }
     }
-
-    ByteStream *b;
-    if (getHostEndianness() == big)
-      b = new ByteStream(mFile, off+41);
-    else
-      b = new ByteStreamSwap(mFile, off+41);
-    uint32 height = b->getShort();
-    uint32 width = b->getShort();
-    delete b;
-
-    // Every two lines can be encoded as a single line, probably to try and get
-    // better compression by getting the same RGBG sequence in every line
-    if(hints.find("double_line_ljpeg") != hints.end()) {
-      height *= 2;
-      mRaw->dim = iPoint2D(width*2, height/2);
-    }
-    else {
-      width *= 2;
-      mRaw->dim = iPoint2D(width, height);
-    }
-
-    mRaw->createData();
-    LJpegPlain l(mFile, mRaw);
-    try {
-      l.startDecoder(off, mFile->getSize()-off, 0, 0);
-    } catch (IOException& e) {
-      mRaw->setError(e.what());
-    }
-
-    if(hints.find("double_line_ljpeg") != hints.end()) {
-      // We now have a double width half height image we need to convert to the
-      // normal format
-      iPoint2D final_size(width, height);
-      RawImage procRaw = RawImage::create(final_size, TYPE_USHORT16, 1);
-      procRaw->metadata = mRaw->metadata;
-      procRaw->copyErrorsFrom(mRaw);
-
-      for (uint32 y = 0; y < height; y++) {
-        ushort16 *dst = (ushort16*)procRaw->getData(0,y);
-        ushort16 *src = (ushort16*)mRaw->getData(y%2 == 0 ? 0 : width, y/2);
-        for (uint32 x = 0; x < width; x++)
-          dst[x] = src[x];
-      }
-      mRaw = procRaw;
-    }
-
-    if (mRootIFD->getEntryRecursive((TiffTag)0x123)) {
-      TiffEntry *curve = mRootIFD->getEntryRecursive((TiffTag)0x123);
-      if (curve->type == TIFF_SHORT && curve->count == 4096) {
-        TiffEntry *linearization = mRootIFD->getEntryRecursive((TiffTag)0x123);
-        uint32 len = linearization->count;
-        ushort16 *table = new ushort16[len];
-        linearization->getShortArray(table, len);
-        if (!uncorrectedRawValues) {
-          mRaw->setTable(table, 4096, true);
-          // Apply table
-          mRaw->sixteenBitLookup();
-          // Delete table
-          mRaw->setTable(NULL);
-        } else {
-          // We want uncorrected, but we store the table.
-          mRaw->setTable(table, 4096, false);
-        }
-        delete [] table;
-      }
-    }
-
-    return mRaw;
   }
 
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag((TiffTag)0xc5d8);
+  ByteStream b(mFile, off+41, getHostEndianness() == big);
+  uint32 height = b.getShort();
+  uint32 width = b.getShort();
 
-  if (data.empty())
+  // Every two lines can be encoded as a single line, probably to try and get
+  // better compression by getting the same RGBG sequence in every line
+  if(hints.find("double_line_ljpeg") != hints.end()) {
+    height *= 2;
+    mRaw->dim = iPoint2D(width*2, height/2);
+  }
+  else {
+    width *= 2;
+    mRaw->dim = iPoint2D(width, height);
+  }
+
+  mRaw->createData();
+  LJpegPlain l(mFile, mRaw);
+  try {
+    l.startDecoder(off, mFile->getSize()-off, 0, 0);
+  } catch (IOException& e) {
+    mRaw->setError(e.what());
+  }
+
+  if(hints.find("double_line_ljpeg") != hints.end()) {
+    // We now have a double width half height image we need to convert to the
+    // normal format
+    iPoint2D final_size(width, height);
+    RawImage procRaw = RawImage::create(final_size, TYPE_USHORT16, 1);
+    procRaw->metadata = mRaw->metadata;
+    procRaw->copyErrorsFrom(mRaw);
+
+    for (uint32 y = 0; y < height; y++) {
+      ushort16 *dst = (ushort16*)procRaw->getData(0,y);
+      ushort16 *src = (ushort16*)mRaw->getData(y%2 == 0 ? 0 : width, y/2);
+      for (uint32 x = 0; x < width; x++)
+        dst[x] = src[x];
+    }
+    mRaw = procRaw;
+  }
+
+  if (mRootIFD->getEntryRecursive((TiffTag)0x123)) {
+    TiffEntry *curve = mRootIFD->getEntryRecursive((TiffTag)0x123);
+    if (curve->type == TIFF_SHORT && curve->count == 4096) {
+      TiffEntry *linearization = mRootIFD->getEntryRecursive((TiffTag)0x123);
+      uint32 len = linearization->count;
+      ushort16 *table = new ushort16[len];
+      linearization->getShortArray(table, len);
+      if (!uncorrectedRawValues) {
+        mRaw->setTable(table, 4096, true);
+        // Apply table
+        mRaw->sixteenBitLookup();
+        // Delete table
+        mRaw->setTable(NULL);
+      } else {
+        // We want uncorrected, but we store the table.
+        mRaw->setTable(table, 4096, false);
+      }
+      delete [] table;
+    }
+  }
+
+  return mRaw;
+}
+
+struct Cr2Slice {
+  uint32 w;
+  uint32 h;
+  uint32 offset;
+  uint32 size;
+};
+
+// for technical details about Cr2 mRAW/sRAW, see http://lclevy.free.fr/cr2/
+
+static const TiffTag magicTagInRawIFD = (TiffTag)0xc5d8;
+
+RawImage Cr2Decoder::decodeNewFormat() {
+  if (mRootIFD->getSubIFDs().size() < 4)
     ThrowRDE("CR2 Decoder: No image data found");
 
-
-  TiffIFD* raw = data[0];
+  TiffIFD* raw = mRootIFD->getSubIFDs()[3].get();
   mRaw = RawImage::create();
   mRaw->isCFA = true;
   vector<Cr2Slice> slices;
   int completeH = 0;
   bool doubleHeight = false;
 
-  try {
-    TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
-    TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
-    // Iterate through all slices
-    for (uint32 s = 0; s < offsets->count; s++) {
-      Cr2Slice slice;
-      slice.offset = offsets[0].getInt();
-      slice.count = counts[0].getInt();
-      SOFInfo sof;
-      LJpegPlain l(mFile, mRaw);
-      l.getSOF(&sof, slice.offset, slice.count);
-      slice.w = sof.w * sof.cps;
-      slice.h = sof.h;
-      if (sof.cps == 4 && slice.w > slice.h * 4) {
-        doubleHeight = true;
-      }
-      if (!slices.empty())
-        if (slices[0].w != slice.w)
-          ThrowRDE("CR2 Decoder: Slice width does not match.");
-
-      if (mFile->isValid(slice.offset, slice.count)) // Only decode if size is valid
-        slices.push_back(slice);
-      completeH += slice.h;
+  TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
+  TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
+  // Iterate through all slices
+  for (uint32 s = 0; s < offsets->count; s++) {
+    Cr2Slice slice;
+    slice.offset = offsets[0].getInt();
+    slice.size = counts[0].getInt();
+    SOFInfo sof;
+    LJpegPlain l(mFile, mRaw);
+    l.getSOF(&sof, slice.offset, slice.size);
+    slice.w = sof.w * sof.cps;
+    slice.h = sof.h;
+    if (sof.cps == 4 && sof.w > sof.h) {
+      doubleHeight = true;
     }
-  } catch (TiffParserException) {
-    ThrowRDE("CR2 Decoder: Unsupported format.");
+    if (!slices.empty())
+      if (slices[0].w != slice.w)
+        ThrowRDE("CR2 Decoder: Slice width does not match.");
+
+    if (mFile->isValid(slice.offset, slice.size)) // Only decode if size is valid
+      slices.push_back(slice);
+    completeH += slice.h;
   }
 
   // Override with canon_double_height if set.
@@ -235,7 +233,7 @@ RawImage Cr2Decoder::decodeRawInternal() {
       l.mCanonFlipDim = flipDims;
       l.mCanonDoubleHeight = doubleHeight;
       l.mWrappedCr2Slices = wrappedCr2Slices;
-      l.startDecoder(slice.offset, slice.count, 0, offY);
+      l.startDecoder(slice.offset, slice.size, 0, offY);
     } catch (RawDecoderException &e) {
       if (i == 0)
         throw;
@@ -254,6 +252,19 @@ RawImage Cr2Decoder::decodeRawInternal() {
   return mRaw;
 }
 
+RawImage Cr2Decoder::decodeRawInternal() {
+  try {
+    if (hints.find("old_format") != hints.end()) {
+      return decodeOldFormat();
+    } else {
+      return decodeNewFormat();
+    }
+  } catch (TiffParserException) {
+    ThrowRDE("CR2 Decoder: Unsupported format.");
+    return nullptr; // silence the -Wreturn-type warning
+  }
+}
+
 void Cr2Decoder::checkSupportInternal(CameraMetaData *meta) {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
   if (data.empty())
@@ -264,7 +275,7 @@ void Cr2Decoder::checkSupportInternal(CameraMetaData *meta) {
   string model = data[0]->getEntry(MODEL)->getString();
 
   // Check for sRaw mode
-  data = mRootIFD->getIFDsWithTag((TiffTag)0xc5d8);
+  data = mRootIFD->getIFDsWithTag(magicTagInRawIFD);
   if (!data.empty()) {
     TiffIFD* raw = data[0];
     if (raw->hasEntry((TiffTag)0xc6c5)) {
@@ -361,7 +372,6 @@ int Cr2Decoder::getHue() {
     return ((mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x) - 1) >> 1;
 
   return (mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x);
-    
 }
 
 // Interpolate and convert sRaw data.

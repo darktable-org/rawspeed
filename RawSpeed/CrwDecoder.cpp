@@ -330,7 +330,7 @@ void CrwDecoder::decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 
 
   uint32 offset = 540 + lowbits*height*width/4;
   ByteStream input(mFile, offset);
-  BitPumpJPEG pump(mFile, offset);
+  BitPumpJPEG pump(input);
 
   for (uint32 row=0; row < height; row+=8) {
     ushort16 *dest = (ushort16*) & mRaw->getData()[row*width*2];

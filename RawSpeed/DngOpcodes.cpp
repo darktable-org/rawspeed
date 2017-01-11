@@ -27,7 +27,7 @@ namespace RawSpeed {
 DngOpcodes::DngOpcodes(TiffEntry *entry)
 {
   host = getHostEndianness();
-  const uchar8* data = entry->getData();
+  const uchar8* data = entry->getData(entry->count);
   uint32 entry_size = entry->count;
 
   if (entry_size < 20)

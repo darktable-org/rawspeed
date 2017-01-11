@@ -1,7 +1,7 @@
 #ifndef TIFF_IFD_H
 #define TIFF_IFD_H
 
-#include "FileMap.h"
+#include "Buffer.h"
 #include "TiffEntry.h"
 #include "TiffParserException.h"
 
@@ -9,6 +9,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -29,53 +30,75 @@
 
 namespace RawSpeed {
 
-#define TIFF_DEPTH(_depth) if((depth=_depth+1) > 10) ThrowTPE("TIFF: sub-micron matryoshka dolls are ignored");
+class TiffIFD;
+class TiffRootIFD;
+using TiffIFDOwner = std::unique_ptr<TiffIFD>;
+using TiffRootIFDOwner = std::unique_ptr<TiffRootIFD>;
+using TiffEntryOwner = std::unique_ptr<TiffEntry>;
 
 class TiffIFD
 {
+  uint32 nextIFD = 0;
+  TiffIFD* parent = nullptr;
+  vector<TiffIFDOwner> subIFDs;
+  map<TiffTag, TiffEntryOwner> entries;
+
+  friend class TiffEntry;
+  friend class RawParser;
+  friend TiffRootIFDOwner parseTiff(const Buffer& data);
+
+  // make sure we never copy-constuct/assign a TiffIFD to keep the owning subcontainers contents save
+  TiffIFD(const TiffIFD&) = delete;
+  TiffIFD& operator=(const TiffIFD&) = delete;
+
+  void add(TiffIFDOwner subIFD);
+  void add(TiffEntryOwner entry);
+  TiffRootIFDOwner parseDngPrivateData(TiffEntry *t);
+  TiffRootIFDOwner parseMakerNote(TiffEntry *t);
+
 public:
-  TiffIFD();
-  TiffIFD(FileMap* f);
-  TiffIFD(FileMap* f, uint32 offset, uint32 depth=0);
-  virtual ~TiffIFD(void);
-  vector<TiffIFD*> mSubIFD;
-  map<TiffTag, TiffEntry*> mEntry;
-  int getNextIFD() {return nextIFD;}
+  TiffIFD() {}
+  TiffIFD(const DataBuffer& data, uint32 offset, TiffIFD* parent);
+  virtual ~TiffIFD() {}
+  uint32 getNextIFD() const {return nextIFD;}
+  //TODO: make public api totally const
   vector<TiffIFD*> getIFDsWithTag(TiffTag tag);
-  TiffEntry* getEntry(TiffTag tag);
-  bool hasEntry(TiffTag tag);
-  bool hasEntryRecursive(TiffTag tag);
-  TiffEntry* getEntryRecursive(TiffTag tag);
-  TiffIFD* parseDngPrivateData(TiffEntry *t);
-  TiffIFD* parseMakerNote(FileMap *f, uint32 offset, Endianness parent_end);
-  TiffEntry* getEntryRecursiveWhere(TiffTag tag, uint32 isValue);
-  TiffEntry* getEntryRecursiveWhere(TiffTag tag, string isValue);
-  vector<TiffIFD*> getIFDsWithTagWhere(TiffTag tag, string isValue);
-  vector<TiffIFD*> getIFDsWithTagWhere(TiffTag tag, uint32 isValue);
-  Endianness endian;
-  FileMap* getFileMap() {return mFile;};
-protected:
-  int nextIFD;
-  FileMap *mFile;
-  uint32 depth;
+  TiffEntry* getEntry(TiffTag tag) const;
+  TiffEntry* getEntryRecursive(TiffTag tag) const;
+  bool hasEntry(TiffTag tag) const { return entries.find(tag) != entries.end(); }
+  bool hasEntryRecursive(TiffTag tag) const { return getEntryRecursive(tag) != nullptr; }
+
+  const vector<TiffIFDOwner>& getSubIFDs() const { return subIFDs; }
+//  const map<TiffTag, TiffEntry*>& getEntries() const { return entries; }
 };
 
-inline bool isTiffSameAsHost(const ushort16* tifftag) {
-  Endianness host = getHostEndianness();
-  if (tifftag[0] == 0x4949)
-    return little == host;
-  if (tifftag[0] == 0x4d4d)
-    return big == host;
-  ThrowTPE("Unknown Tiff Byteorder :%x", tifftag[0]);
-  return false;
+class TiffRootIFD : public TiffIFD
+{
+public:
+  const DataBuffer rootBuffer;
+
+  TiffRootIFD(DataBuffer data, uint32 offset) : TiffIFD(data, offset, nullptr), rootBuffer(data) {}
+};
+
+inline bool isTiffInNativeByteOrder(const ByteStream& bs, uint32 pos, const char* context = "") {
+  if (bs.hasPatternAt("II", 2, pos))
+    return getHostEndianness() == little;
+  else if (bs.hasPatternAt("MM", 2, pos))
+    return getHostEndianness() == big;
+  else
+    ThrowTPE("Failed to parse TIFF endianess information in %s.", context);
+  return true; // prevent compiler warning
 }
 
-inline Endianness getTiffEndianness(const ushort16* tifftag) {
-  if (tifftag[0] == 0x4949)
+inline Endianness getTiffEndianness(const FileMap* file) {
+  ushort16 magic = *(ushort16*)file->getData(0, 2);
+  if (magic == 0x4949)
     return little;
-  if (tifftag[0] == 0x4d4d)
+  else if (magic == 0x4d4d)
     return big;
-  return unknown;
+  else
+    ThrowTPE("Failed to parse TIFF endianess information.");
+  return unknown; // prevent compiler warning
 }
 
 } // namespace RawSpeed

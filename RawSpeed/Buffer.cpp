@@ -1,9 +1,10 @@
 #include "StdAfx.h"
-#include "FileMap.h"
+#include "Buffer.h"
 /*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -24,69 +25,56 @@
 
 namespace RawSpeed {
 
-FileMap::FileMap(uint32 _size) : size(_size) {
+Buffer::Buffer(size_type size) : size(size) {
   if (!size)
-    throw FileIOException("Filemap of 0 bytes not possible");
+    ThrowIOE("Trying to allocate 0 bytes sized buffer.");
   data = (uchar8*)_aligned_malloc(size + FILEMAP_MARGIN, 16);
-  if (!data) {
-    throw FileIOException("Not enough memory to open file.");
+  if (!data)
+    ThrowIOE("Failed to allocate %uz bytes memory buffer.", size);
+  isOwner = true;
+}
+
+Buffer::~Buffer() {
+  if (isOwner) {
+    _aligned_free(const_cast<uchar8*>(data));
   }
-  mOwnAlloc = true;
 }
 
-FileMap::FileMap(uchar8* _data, uint32 _size): data(_data), size(_size) {
-  mOwnAlloc = false;
+Buffer& Buffer::operator=(const Buffer &rhs)
+{
+  this->~Buffer();
+  data = rhs.data;
+  size = rhs.size;
+  isOwner = false;
+  return *this;
 }
 
-FileMap::FileMap(FileMap *f, uint32 offset) {
-  size = f->getSize()-offset;
-  data = f->getDataWrt(offset, size+FILEMAP_MARGIN);
-  mOwnAlloc = false;
-}
-
-FileMap::FileMap(FileMap *f, uint32 offset, uint32 size) {
-  data = f->getDataWrt(offset, size+FILEMAP_MARGIN);
-  mOwnAlloc = false;
-}
-
-FileMap::~FileMap(void) {
-  if (data && mOwnAlloc) {
-    _aligned_free(data);
-  }
-  data = 0;
-  size = 0;
-}
-
-FileMap* FileMap::clone() {
-  FileMap *new_map = new FileMap(size);
+#if 0
+Buffer* Buffer::clone() {
+  Buffer *new_map = new Buffer(size);
   memcpy(new_map->data, data, size);
   return new_map;
 }
 
-FileMap* FileMap::cloneRandomSize() {
+Buffer* Buffer::cloneRandomSize() {
   uint32 new_size = (rand() | (rand() << 15)) % size;
-  FileMap *new_map = new FileMap(new_size);
+  Buffer *new_map = new Buffer(new_size);
   memcpy(new_map->data, data, new_size);
   return new_map;
 }
 
-void FileMap::corrupt(int errors) {
+void Buffer::corrupt(int errors) {
   for (int i = 0; i < errors; i++) {
     uint32 pos = (rand() | (rand() << 15)) % size;
     data[pos] = rand() & 0xff;
   }
 }
+#endif
 
-bool FileMap::isValid(uint32 offset, uint32 count)
-{
-  uint64 totaloffset = (uint64)offset + (uint64)count - 1;
-  return (isValid(offset) && totaloffset < size);
-}
-
-const uchar8* FileMap::getData( uint32 offset, uint32 count )
+const uchar8* Buffer::getData(size_type offset, size_type count) const
 {
   if (count == 0)
-    throw IOException("FileMap: Trying to get a zero sized buffer?!");
+    throw IOException("Buffer: Trying to get a pointer to zero sized buffer?!");
 
   uint64 totaloffset = (uint64)offset + (uint64)count - 1;
   uint64 totalsize = (uint64)size + FILEMAP_MARGIN;

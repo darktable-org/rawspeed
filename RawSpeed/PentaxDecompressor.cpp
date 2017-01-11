@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "PentaxDecompressor.h"
-#include "ByteStreamSwap.h"
 
 /*
     RawSpeed - RAW file decoder.
@@ -51,22 +50,18 @@ void PentaxDecompressor::decodePentax(TiffIFD *root, uint32 offset, uint32 size)
     TiffEntry *t = root->getEntryRecursive((TiffTag)0x220);
     if (t->type == TIFF_UNDEFINED) {
 
-      ByteStream *stream;
-      if (root->endian == getHostEndianness())
-        stream = new ByteStream(t->getData(), t->count);
-      else
-        stream = new ByteStreamSwap(t->getData(), t->count);
+      ByteStream stream = t->getData();
 
-      uint32 depth = (stream->getShort()+12)&0xf;
-      stream->skipBytes(12);
+      uint32 depth = (stream.getShort()+12)&0xf;
+      stream.skipBytes(12);
       uint32 v0[16];
       uint32 v1[16];
       uint32 v2[16];
       for (uint32 i = 0; i < depth; i++)
-         v0[i] = stream->getShort();
+         v0[i] = stream.getShort();
 
       for (uint32 i = 0; i < depth; i++)
-        v1[i] = stream->getByte();
+        v1[i] = stream.getByte();
 
       /* Reset bits */
       for (uint32 i = 0; i < 17; i++)
@@ -94,7 +89,6 @@ void PentaxDecompressor::decodePentax(TiffIFD *root, uint32 offset, uint32 size)
         dctbl1->huffval[i] = sm_num;
         v2[sm_num]=0xffffffff;
       }
-      delete(stream);
     } else {
       ThrowRDE("PentaxDecompressor: Unknown Huffman table type.");
     }

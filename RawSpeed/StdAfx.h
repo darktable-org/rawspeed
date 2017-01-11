@@ -105,6 +105,7 @@ extern "C" {
 #include <vector>
 #include <map>
 #include <list>
+#include <memory>
 using namespace std;
 
 #include "pugixml.hpp"

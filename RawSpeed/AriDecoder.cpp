@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "AriDecoder.h"
-#include "ByteStreamSwap.h"
 /*
 RawSpeed - RAW file decoder.
 
@@ -30,37 +29,32 @@ AriDecoder::AriDecoder(FileMap* file) : RawDecoder(file) {
     ThrowRDE("ARRI: File too small (no header)");
   }
   try {
-    ByteStream *s;
-    if (getHostEndianness() == little) {
-      s = new ByteStream(mFile, 8);
-    } else {
-      s = new ByteStreamSwap(mFile, 8);
-    }
-    mDataOffset = s->getInt();
-    uint32 someNumber = s->getInt(); // Value: 3?
-    uint32 segmentLength = s->getInt(); // Value: 0x3c = length
+    ByteStream s(mFile, 8, getHostEndianness() == little);
+    mDataOffset = s.getUInt();
+    uint32 someNumber = s.getUInt(); // Value: 3?
+    uint32 segmentLength = s.getUInt(); // Value: 0x3c = length
 	if (someNumber != 3 || segmentLength != 0x3c) {
 		ThrowRDE("Unknown values in ARRIRAW header, %d, %d", someNumber, segmentLength);
 	}
-    mWidth = s->getInt();
-    mHeight = s->getInt();
-    s->setAbsoluteOffset(0x40);
-    mDataSize = s->getInt();
+    mWidth = s.getUInt();
+    mHeight = s.getUInt();
+    s.setPosition(0x40);
+    mDataSize = s.getUInt();
 
     // Smells like whitebalance
-    s->setAbsoluteOffset(0x5c);
-    mWB[0] = s->getFloat();  // 1.3667001 in sample
-    mWB[1] = s->getFloat();  // 1.0000000 in sample
-    mWB[2] = s->getFloat();  // 1.6450000 in sample
+    s.setPosition(0x5c);
+    mWB[0] = s.getFloat();  // 1.3667001 in sample
+    mWB[1] = s.getFloat();  // 1.0000000 in sample
+    mWB[2] = s.getFloat();  // 1.6450000 in sample
 
     // Smells like iso
-    s->setAbsoluteOffset(0xb8);
-    mIso = s->getInt();  // 100 in sample
+    s.setPosition(0xb8);
+    mIso = s.getUInt();  // 100 in sample
 
-    s->setAbsoluteOffset(0x29c-8);
-    mModel = s->getString();
-    s->setAbsoluteOffset(0x2a4-8);
-    mEncoder = s->getString();
+    s.setPosition(0x29c-8);
+    mModel = s.getString();
+    s.setPosition(0x2a4-8);
+    mEncoder = s.getString();
   } catch (IOException &e) {
     ThrowRDE("ARRI: IO Exception:%s", e.what());
   }

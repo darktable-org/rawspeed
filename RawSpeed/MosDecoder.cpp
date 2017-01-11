@@ -135,7 +135,7 @@ RawImage MosDecoder::decodeRawInternal() {
   ByteStream input(mFile, off);
   int compression = raw->getEntry(COMPRESSION)->getInt();
   if (1 == compression) {
-    if (mRootIFD->endian == big)
+    if (getTiffEndianness(mFile) == big)
       Decode16BitRawBEunpacked(input, width, height);
     else
       Decode16BitRawUnpacked(input, width, height);
@@ -188,35 +188,29 @@ void MosDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
 
   // Fetch the white balance (see dcraw.c parse_mos for more metadata that can be gotten)
   if (mRootIFD->hasEntryRecursive(LEAFMETADATA)) {
-    TiffEntry *meta = mRootIFD->getEntryRecursive(LEAFMETADATA);
+    ByteStream bs = mRootIFD->getEntryRecursive(LEAFMETADATA)->getData();
 
-    uchar8 *buffer = meta->getDataWrt();
-    uint32 size = meta->count;
-
-    // We need at least 17+44 bytes for the NeutObj_neutrals section itself
-    if(size < 1)
-      ThrowRDE("Can't parse a zero sized meta entry");
-
-    //Make sure the data is NUL terminated so that scanf never reads beyond limits
-    //This is not a string though, it will have other NUL's in the middle
-    buffer[size-1] = 0;
+    // We need at least a couple of bytes:
+    // "NeutObj_neutrals" + 28 bytes binay + 4x uint as strings + 3x space + \0
+    const uint32 minSize = 16+28+4+3+1;
 
     // dcraw does actual parsing, since we just want one field we bruteforce it
-    uchar8 *neutobj = NULL;
-    // We need at least 17+44 bytes for the NeutObj_neutrals section itself
-    for(uint32 i=0; (int32)i < (int32)size-17-44; i++) {
-      if (!strncmp("NeutObj_neutrals", (const char *) buffer+i, 16)) {
-        neutobj = buffer+i;
+    while (bs.getRemainSize() > minSize) {
+      if (bs.skipPrefix("NeutObj_neutrals", 16)) {
+        bs.skipBytes(28);
+        // check for nulltermination of string inside bounds
+        if (!memchr(bs.peekData(bs.getRemainSize()), 0, bs.getRemainSize()))
+          break;
+        uint32 tmp[4] = {0};
+        sscanf(bs.peekString(), "%u %u %u %u", &tmp[0], &tmp[1], &tmp[2], &tmp[3]);
+        if (tmp[0] > 0 && tmp[1] > 0 && tmp[2] > 0 && tmp[3] > 0) {
+          mRaw->metadata.wbCoeffs[0] = (float) tmp[0]/tmp[1];
+          mRaw->metadata.wbCoeffs[1] = (float) tmp[0]/tmp[2];
+          mRaw->metadata.wbCoeffs[2] = (float) tmp[0]/tmp[3];
+        }
         break;
-      }
-    }
-    if (neutobj) {
-      uint32 tmp[4] = {0};
-      sscanf((const char *)neutobj+44, "%u %u %u %u", &tmp[0], &tmp[1], &tmp[2], &tmp[3]);
-      if (tmp[0] > 0 && tmp[1] > 0 && tmp[2] > 0 && tmp[3] > 0) {
-        mRaw->metadata.wbCoeffs[0] = (float) tmp[0]/tmp[1];
-        mRaw->metadata.wbCoeffs[1] = (float) tmp[0]/tmp[2];
-        mRaw->metadata.wbCoeffs[2] = (float) tmp[0]/tmp[3];
+      } else {
+        bs.skipBytes(1);
       }
     }
   }
