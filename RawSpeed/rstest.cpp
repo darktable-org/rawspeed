@@ -23,15 +23,17 @@
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <fstream> // IWYU pragma: keep
 #include <iomanip>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
-#include <map>
+#include <utility>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -241,7 +243,8 @@ static int usage(const char *progname) {
     2. run with option '-c' -> creates .hash for all supported files
     3. build new version to test for regressions
     4. run with no option   -> checks files with existing .hash
-  If the second run shows no errors, you have no regressions.
+  If the second run shows no errors, you have no regressions,
+  otherwise, the diff between hashes is appended to rstest.log
 )";
   return 0;
 }
@@ -303,6 +306,7 @@ int main(int argc, char **argv) {
         ; // this is only to supress the warn-unused-result warning
 #endif
     }
+    cerr << "See rstest.log for details.\n";
   }
 
   return failedTests.empty() ? 0 : 1;
