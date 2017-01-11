@@ -164,6 +164,9 @@ size_t process(const string &filename, CameraMetaData *metadata, bool create,
   // if not creating and hash is missing -> skip as well
   ifstream hf(hashfile);
   if (!(hf.good() ^ create)) {
+#ifdef _OPENMP
+#pragma omp critical(io)
+#endif
     cout << left << setw(55) << filename << ": hash "
          << (create ? "exists" : "missing") << ", skipping" << endl;
     return 0;
