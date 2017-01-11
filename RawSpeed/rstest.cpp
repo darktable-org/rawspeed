@@ -31,7 +31,7 @@
 #include <stdexcept>
 #include <string>
 #include <type_traits>
-#include <vector>
+#include <map>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -269,7 +269,7 @@ int main(int argc, char **argv) {
   CameraMetaData metadata(CMAKE_SOURCE_DIR "/data/cameras.xml");
 
   size_t time = 0;
-  vector<string> failedTests;
+  map<string, string> failedTests;
 #ifdef _OPENMP
 #pragma omp parallel for default(shared) schedule(static, 1) reduction(+ : time)
 #endif
@@ -284,8 +284,9 @@ int main(int argc, char **argv) {
 #pragma omp critical(io)
 #endif
       {
-        failedTests.push_back(string(argv[i]) + " failed: " + e.what());
-        cerr << failedTests.back() << endl;
+        string msg = string(argv[i]) + " failed: " + e.what();
+        cerr << msg << endl;
+        failedTests.emplace(argv[i], msg);
       }
     }
   }
@@ -295,8 +296,13 @@ int main(int argc, char **argv) {
   if (!failedTests.empty()) {
     cerr << "WARNING: the following " << failedTests.size()
          << " tests have failed:\n";
-    for (const auto &i : failedTests)
-      cerr << i << "\n";
+    for (const auto &i : failedTests) {
+      cerr << i.second << "\n";
+#ifndef WIN32
+      if (system(("diff -u0 " + i.first + ".hash* >> rstest.log").c_str()))
+        ; // this is only to supress the warn-unused-result warning
+#endif
+    }
   }
 
   return failedTests.empty() ? 0 : 1;
