@@ -161,7 +161,7 @@ public:
     bs.data = new_data;
     bs.size = size;
     bs.isOwner = true;
-    return std::move(bs);
+    return bs; // hint: copy elision or move will happen
   }
 };
 

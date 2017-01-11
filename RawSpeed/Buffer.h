@@ -55,7 +55,7 @@ public:
   Buffer(const Buffer& rhs)
     : data(rhs.data), size(rhs.size) {}
   // Move data and ownership from rhs to this
-  Buffer(Buffer&& rhs)
+  Buffer(Buffer&& rhs) noexcept
     : data(rhs.data), size(rhs.size), isOwner(rhs.isOwner) { rhs.isOwner = false; }
   // Frees memory if owned
   ~Buffer();
