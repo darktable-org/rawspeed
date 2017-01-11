@@ -66,10 +66,7 @@
 #endif //_XOPEN_SOURCE
 #include <stdlib.h>
 #include <stdarg.h>
-#include <stdexcept>
-#include <exception>
 #include <string.h>
-#include <assert.h>
 #endif // __unix__
 #include <math.h>
 #ifndef NO_PTHREAD
@@ -99,6 +96,7 @@ extern "C" {
 }
 #endif
 // STL
+#include <cassert>
 #include <iostream>
 #include <string>
 #include <sstream>
