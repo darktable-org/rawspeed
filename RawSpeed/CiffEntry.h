@@ -54,8 +54,8 @@ public:
   string getString();
   vector<string> getStrings();
   uchar8 getByte(uint32 num=0);
-  const uchar8* getData() {return data;};
-  uchar8* getDataWrt();;
+  const uchar8* getData() {return data;}
+  uchar8* getDataWrt();
   void setData(const void *data, uint32 byte_count );
   uint32 getElementSize();
   uint32 getElementShift();
