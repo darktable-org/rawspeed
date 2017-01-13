@@ -24,43 +24,69 @@
 
 namespace RawSpeed {
 
+// simple 64-bit wide cache implementation that acts like a FiFo.
+// There are two variants:
+//  * L->R: new bits are pushed in on the left and pulled out on the right
+//  * L<-R: new bits are pushed in on the right and pulled out on the left
+// Each BitStream specialization uses one of the two.
+
+struct BitStreamCacheBase
+{
+  uint64 cache = 0; // the acutal bits stored in the cache
+  unsigned int fillLevel = 0; // bits left in cache
+  static constexpr unsigned Size = sizeof(cache)*8;
+  static constexpr unsigned MaxGetBits = Size/2;
+};
+
+struct BitStreamCacheLeftInRightOut : BitStreamCacheBase
+{
+  inline void push(uint64 bits, uint32 count) noexcept {
+    assert(count + fillLevel <= Size);
+    cache |= bits << fillLevel;
+    fillLevel += count;
+  }
+
+  inline uint32 peek(uint32 count) const noexcept {
+    return cache & ((1 << count) - 1);
+  }
+
+  inline void skip(uint32 count) noexcept {
+    cache >>= count;
+    fillLevel -= count;
+  }
+};
+
+struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
+{
+  inline void push(uint64 bits, uint32 count) noexcept {
+    assert(count + fillLevel <= Size);
+    cache = cache << count | bits;
+    fillLevel += count;
+  }
+
+  inline uint32 peek(uint32 count) const noexcept {
+    return (cache >> (fillLevel - count)) & ((1 << count) - 1);
+  }
+
+  inline void skip(uint32 count) noexcept {
+    fillLevel -= count;
+  }
+};
+
 // Note: Allocated buffer MUST be at least FILEMAP_MARGIN bytes larger than
 // the compressed bit stream requires, see implementation of cache and fill()
 
-template<typename Tag>
+template<typename Tag, typename Cache>
 class BitStream
 {
   typedef ByteStream::size_type size_type;
   const uchar8* data = nullptr;
   const size_type size = 0;
   size_type pos = 0; // Offset/position inside data buffer in bytes
-  unsigned int bitsInCache = 0; // bits left in cache
-  uint64 cache = 0;
-  static constexpr unsigned MaxGetBits = 32;
+  Cache cache;
 
-  // this function will have to be specialized for each bit pump tag
-  // it has to put at least MaxGetBits into the cache
-  inline void fillCache();
-
-  // these two functions have to be specialized to call either of the following two versions
-  // this would ideally be implemented with partial template member function specialization if there was such a thing
-  inline uint32 peekCacheBits(uint32 nbits) const;
-  inline void skipCacheBits(uint32 nbits);
-
-  inline uint32 peekCacheBitsR2L(uint32 nbits) const {
-    return (cache >> (bitsInCache - nbits)) & ((1 << nbits) - 1);
-  }
-  inline uint32 peekCacheBitsL2R(uint32 nbits) const {
-    return cache & ((1 << nbits) - 1);
-  }
-
-  inline void skipCacheBitsR2L(uint32 nbits) {
-    bitsInCache -= nbits;
-  }
-  inline void skipCacheBitsL2R(uint32 nbits) {
-    cache >>= nbits;
-    bitsInCache -= nbits;
-  }
+  // this method has to be implemented in the concrete BitStream template specializations
+  void fillCache();
 
 public:
   BitStream(ByteStream& s)
@@ -73,12 +99,12 @@ public:
     : BitStream(f, offset, f->getSize()-offset) {}
 
 
-  inline void fill(uint32 nbits = MaxGetBits) {
-    assert(nbits <= MaxGetBits);
-    if (bitsInCache < nbits) {
+  inline void fill(uint32 nbits = Cache::MaxGetBits) {
+    assert(nbits <= Cache::MaxGetBits);
+    if (cache.fillLevel < nbits) {
 #if 1
       // disabling this run-time bounds check saves about 1% on intel x86-64
-      if (pos + MaxGetBits/8 >= size)
+      if (pos + Cache::MaxGetBits/8 >= size)
         ThrowIOE("Buffer overflow read in BitStream");
 #endif
       fillCache();
@@ -87,24 +113,24 @@ public:
 
   // these methods might be specialized by implementations that support it
   inline size_type getBufferPosition() const {
-    return pos - (bitsInCache >> 3);
+    return pos - (cache.fillLevel >> 3);
   }
   inline void setBufferPosition(size_type newPos);
 
   inline uint32 peekBitsNoFill(uint32 nbits) {
-    assert(nbits <= MaxGetBits && nbits <= bitsInCache);
-    return peekCacheBits(nbits);
+    assert(nbits <= Cache::MaxGetBits && nbits <= cache.fillLevel);
+    return cache.peek(nbits);
   }
 
   inline uint32 getBitsNoFill(uint32 nbits) {
     uint32 ret = peekBitsNoFill(nbits);
-    skipCacheBits(nbits);
+    cache.skip(nbits);
     return ret;
   }
 
   inline void skipBitsNoFill(uint32 nbits) {
-    assert(nbits <= MaxGetBits && nbits <= bitsInCache);
-    skipCacheBits(nbits);
+    assert(nbits <= Cache::MaxGetBits && nbits <= cache.fillLevel);
+    cache.skip(nbits);
   }
 
   inline uint32 peekBits(uint32 nbits) {
@@ -118,9 +144,9 @@ public:
   }
 
   inline void skipBits(uint32 nbits) {
-    if (nbits > bitsInCache)
+    if (nbits > cache.fillLevel)
       ThrowIOE("skipBits overflow");
-    skipCacheBits(nbits);
+    cache.skip(nbits);
   }
 
   // deprecated (the above interface is already 'always save'):

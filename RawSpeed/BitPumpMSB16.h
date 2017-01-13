@@ -28,24 +28,15 @@ struct MSB16BitPumpTag;
 // The MSB data is ordered in MSB bit order,
 // i.e. we push into the cache from the right and read it from the left
 
-template<> inline void BitStream<MSB16BitPumpTag>::fillCache() {
-  static_assert(sizeof(cache) == 8 && MaxGetBits <= 32, "if the structure of the bit cache changed, this code has to be updated");
+using BitPumpMSB16 = BitStream<MSB16BitPumpTag, BitStreamCacheRightInLeftOut>;
+
+template<> inline void BitPumpMSB16::fillCache() {
+  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "if the structure of the bit cache changed, this code has to be updated");
 
   for (int i = 0; i < 2; ++i) {
-    cache = cache << 16 | loadMem<ushort16>(data+pos, getHostEndianness() == big);
+    cache.push(loadMem<ushort16>(data+pos, getHostEndianness() == big), 16);
     pos += 2;
-    bitsInCache += 16;
   }
 }
-
-template<> inline uint32 BitStream<MSB16BitPumpTag>::peekCacheBits(uint32 nbits) const {
-  return peekCacheBitsR2L(nbits);
-}
-
-template<> inline void BitStream<MSB16BitPumpTag>::skipCacheBits(uint32 nbits) {
-  skipCacheBitsR2L(nbits);
-}
-
-using BitPumpMSB16 = BitStream<MSB16BitPumpTag>;
 
 } // namespace RawSpeed

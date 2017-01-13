@@ -28,30 +28,20 @@ struct PlainBitPumpTag;
 // The PlainPump is ordered in LSB bit order,
 // i.e. we push into the cache from the left and read it from the right
 
-template<> inline void BitStream<PlainBitPumpTag>::fillCache() {
-  static_assert(sizeof(cache) == 8 && MaxGetBits <= 32, "if the structure of the bit cache changed, this code has to be updated");
+using BitPumpPlain = BitStream<PlainBitPumpTag, BitStreamCacheLeftInRightOut>;
 
-  uint64 tmp = loadMem<uint32>(data+pos, getHostEndianness() == big);
-  cache |= tmp << bitsInCache;
+template<> inline void BitPumpPlain::fillCache() {
+  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "if the structure of the bit cache changed, this code has to be updated");
+
+  cache.push(loadMem<uint32>(data+pos, getHostEndianness() == big), 32);
   pos += 4;
-  bitsInCache += 32;
 }
 
-template<> inline uint32 BitStream<PlainBitPumpTag>::peekCacheBits(uint32 nbits) const {
-  return peekCacheBitsL2R(nbits);
-}
-
-template<> inline void BitStream<PlainBitPumpTag>::skipCacheBits(uint32 nbits) {
-  skipCacheBitsL2R(nbits);
-}
-
-template<> inline void BitStream<PlainBitPumpTag>::setBufferPosition(uint32 newPos) {
+template<> inline void BitPumpPlain::setBufferPosition(uint32 newPos) {
   pos = newPos;
-  bitsInCache = 0;
-  cache = 0;
+  cache.fillLevel = 0;
+  cache.cache = 0;
 }
-
-using BitPumpPlain = BitStream<PlainBitPumpTag>;
 
 } // namespace RawSpeed
 

@@ -27,9 +27,10 @@ struct JPEGBitPumpTag;
 
 // The JPEG data is ordered in MSB bit order,
 // i.e. we push into the cache from the right and read it from the left
+using BitPumpJPEG = BitStream<JPEGBitPumpTag, BitStreamCacheRightInLeftOut>;
 
-template<> inline void BitStream<JPEGBitPumpTag>::fillCache() {
-  static_assert(sizeof(cache) == 8 && MaxGetBits == 32, "if the structure of the bit cache changed, this code has to be updated");
+template<> inline void BitPumpJPEG::fillCache() {
+  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "if the structure of the bit cache changed, this code has to be updated");
 
   const uint32 nBytes = 4;
   // short-cut path for the most common case (no FF marker in the next 4 bytes)
@@ -39,15 +40,13 @@ template<> inline void BitStream<JPEGBitPumpTag>::fillCache() {
       data[pos+1] != 0xFF &&
       data[pos+2] != 0xFF &&
       data[pos+3] != 0xFF ) {
-    cache = cache << nBytes*8 | loadMem<uint32>(data+pos, getHostEndianness() == little);
-    pos += nBytes;
-    bitsInCache += nBytes*8;
+    cache.push(loadMem<uint32>(data+pos, getHostEndianness() == little), 32);
+    pos += 4;
   } else {
     for (uint32 i = 0; i < nBytes; ++i) {
       // Pre-execute most common case, where next byte is 'normal'/non-FF
       const int c0 = data[pos++];
-      cache = (cache << 8) | c0;
-      bitsInCache += 8;
+      cache.push(c0, 8);
       if (c0 == 0xFF) {
         // Found FF -> pre-execute case of FF/00, which represents an FF data byte -> ignore the 00
         const int c1 = data[pos++];
@@ -56,9 +55,9 @@ template<> inline void BitStream<JPEGBitPumpTag>::fillCache() {
           // Rewind pos to the FF byte, in case we get called again.
           // Fill the cache with zeros and keep on doing that from now on.
           pos -= 2;
-          cache &= ~0xFF;
-          cache <<= 64 - bitsInCache;
-          bitsInCache = 64;
+          cache.cache &= ~0xFF;
+          cache.cache <<= 64 - cache.fillLevel;
+          cache.fillLevel = 64;
           break;
         }
       }
@@ -66,18 +65,8 @@ template<> inline void BitStream<JPEGBitPumpTag>::fillCache() {
   }
 }
 
-template<> inline uint32 BitStream<JPEGBitPumpTag>::peekCacheBits(uint32 nbits) const {
-  return peekCacheBitsR2L(nbits);
+template<> inline BitPumpJPEG::size_type BitPumpJPEG::getBufferPosition() const {
+  return pos; // the current number byte we consumed -> at the end of the stream pos, it points to the JPEG marker FF
 }
-
-template<> inline void BitStream<JPEGBitPumpTag>::skipCacheBits(uint32 nbits) {
-  skipCacheBitsR2L(nbits);
-}
-
-template<> inline BitStream<JPEGBitPumpTag>::size_type BitStream<JPEGBitPumpTag>::getBufferPosition() const {
-  return pos; // the current number byte we consumed -> at the end of the stream pos points to the JPEG marker FF
-}
-
-using BitPumpJPEG = BitStream<JPEGBitPumpTag>;
 
 } // namespace RawSpeed
