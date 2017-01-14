@@ -303,7 +303,7 @@ int main(int argc, char **argv) {
       cerr << i.second << "\n";
 #ifndef WIN32
       const string oldhash(i.first + ".hash");
-      const string newhash(i.first + ".failed");
+      const string newhash(oldhash + ".failed");
 
       ifstream oldfile(oldhash), newfile(newhash);
 
