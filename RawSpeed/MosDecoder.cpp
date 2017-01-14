@@ -106,9 +106,7 @@ RawImage MosDecoder::decodeRawInternal() {
 
     const uchar8 *data = mFile->getData(wb_offset, 12);
     for(int i=0; i<3; i++) {
-      // Use get4LE instead of going straight to float so this is endian clean
-      uint32 value = get4LE(data, i*4);
-      mRaw->metadata.wbCoeffs[i] = *((float *) &value);
+      mRaw->metadata.wbCoeffs[i] = loadMem<float>(data+i*4, getHostEndianness()==big);
     }
 
     return mRaw;
