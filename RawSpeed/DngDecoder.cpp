@@ -60,7 +60,13 @@ RawImage DngDecoder::decodeRawInternal() {
     try {
       isSubsampled = (*i)->getEntry(NEWSUBFILETYPE)->getInt() & 1; // bit 0 is on if image is subsampled
     } catch (TiffParserException) {}
-    if ((compression != 7 && compression != 1 && compression != 0x884c) || isSubsampled) {  // Erase if subsampled, or not JPEG or uncompressed
+    if (!(compression == 7 ||
+#ifdef HAVE_ZLIB
+          compression == 8 ||
+#endif
+          compression == 1 ||
+          compression == 0x884c) ||
+        isSubsampled) {  // Erase if subsampled, or not deflated, JPEG or uncompressed
       i = data.erase(i);
     } else {
       ++i;
@@ -81,6 +87,8 @@ RawImage DngDecoder::decodeRawInternal() {
   if (raw->hasEntry(SAMPLEFORMAT))
     sample_format = raw->getEntry(SAMPLEFORMAT)->getInt();
 
+  const int compression = raw->getEntry(COMPRESSION)->getShort();
+
   if (sample_format == 1)
     mRaw = RawImage::create(TYPE_USHORT16);
   else if (sample_format == 3)
@@ -98,8 +106,8 @@ RawImage DngDecoder::decodeRawInternal() {
   if (sample_format == 1 && bps > 16)
     ThrowRDE("DNG Decoder: Integer precision larger than 16 bits currently not supported.");
 
-  if (sample_format == 3 && bps != 32)
-    ThrowRDE("DNG Decoder: Float point must be 32 bits per sample.");
+  if (sample_format == 3 && bps != 32 && compression != 8)
+    ThrowRDE("DNG Decoder: Uncompressed float point must be 32 bits per sample.");
 
   try {
     mRaw->dim.x = raw->getEntry(IMAGEWIDTH)->getInt();
@@ -108,10 +116,8 @@ RawImage DngDecoder::decodeRawInternal() {
     ThrowRDE("DNG Decoder: Could not read basic image information.");
   }
 
-  int compression = -1;
-
   try {
-    compression = raw->getEntry(COMPRESSION)->getShort();
+
     if (mRaw->isCFA) {
 
       // Check if layout is OK, if present
@@ -229,17 +235,23 @@ RawImage DngDecoder::decodeRawInternal() {
       } catch (TiffParserException) {
         ThrowRDE("DNG Decoder: Unsupported format, uncompressed with no strips.");
       }
-    } else if (compression == 7 || compression == 0x884c) {
+    } else if (compression == 7 || compression == 8 || compression == 0x884c) {
       try {
         // Let's try loading it as tiles instead
 
-        mRaw->setCpp(raw->getEntry(SAMPLESPERPIXEL)->getInt());
         mRaw->createData();
 
-        if (sample_format != 1)
-           ThrowRDE("DNG Decoder: Only 16 bit unsigned data supported for compressed data.");
+        if (compression == 8 && sample_format != 3)
+           ThrowRDE("DNG Decoder: Only float format is supported for deflate-compressed data.");
+        else if (compression != 8 && sample_format != 1)
+           ThrowRDE("DNG Decoder: Only 16 bit unsigned data supported for JPEG-compressed data.");
 
         DngDecoderSlices slices(mFile, mRaw, compression);
+        if (raw->hasEntry(PREDICTOR)) {
+            uint32 predictor = raw->getEntry(PREDICTOR)->getInt();
+            slices.mPredictor = predictor;
+        }
+        slices.mBps = raw->getEntry(BITSPERSAMPLE)->getInt();
         if (raw->hasEntry(TILEOFFSETS)) {
           uint32 tilew = raw->getEntry(TILEWIDTH)->getInt();
           uint32 tileh = raw->getEntry(TILELENGTH)->getInt();
@@ -259,7 +271,7 @@ RawImage DngDecoder::decodeRawInternal() {
 
           for (uint32 y = 0; y < tilesY; y++) {
             for (uint32 x = 0; x < tilesX; x++) {
-              DngSliceElement e(offsets->getInt(x+y*tilesX), counts->getInt(x+y*tilesX), tilew*x, tileh*y);
+              DngSliceElement e(offsets->getInt(x+y*tilesX), counts->getInt(x+y*tilesX), tilew*x, tileh*y, tilew, tileh);
               e.mUseBigtable = tilew * tileh > 1024 * 1024;
               slices.addSlice(e);
             }
@@ -279,7 +291,7 @@ RawImage DngDecoder::decodeRawInternal() {
 
           uint32 offY = 0;
           for (uint32 s = 0; s < counts->count; s++) {
-            DngSliceElement e(offsets->getInt(s), counts->getInt(s), 0, offY);
+            DngSliceElement e(offsets->getInt(s), counts->getInt(s), 0, offY, mRaw->dim.x, yPerSlice);
             e.mUseBigtable = yPerSlice * mRaw->dim.y > 1024 * 1024;
             offY += yPerSlice;
 

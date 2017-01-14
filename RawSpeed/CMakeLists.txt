@@ -30,6 +30,17 @@ include_directories(SYSTEM ${Pugixml_INCLUDE_DIRS})
 find_package(JPEG REQUIRED)
 include_directories(SYSTEM ${JPEG_INCLUDE_DIRS})
 
+if (WITH_ZLIB)
+  find_package(ZLIB REQUIRED)
+  if(NOT ZLIB_FOUND)
+    message(SEND_ERROR "Did not find ZLIB! Either make it find ZLIB, or pass -DWITH_ZLIB=OFF to disable ZLIB.")
+  endif()
+  add_definitions(-DHAVE_ZLIB)
+  include_directories(SYSTEM ${ZLIB_INCLUDE_DIRS})
+else()
+  message(STATUS "ZLIB is disabled, DNG deflate support won't be available.")
+endif()
+
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 FILE(GLOB RAWSPEED_SOURCES
@@ -110,6 +121,10 @@ endif(WIN32)
 add_library(rawspeed OBJECT ${RAWSPEED_SOURCES})
 
 list(APPEND RAWSPEED_LIBS ${Pugixml_LIBRARIES} ${JPEG_LIBRARIES})
+
+if(WITH_ZLIB AND ZLIB_FOUND)
+  list(APPEND RAWSPEED_LIBS ${ZLIB_LIBRARIES})
+endif()
 
 if(WITH_PTHREADS AND Threads_FOUND)
   list(APPEND RAWSPEED_LIBS ${CMAKE_THREAD_LIBS_INIT})

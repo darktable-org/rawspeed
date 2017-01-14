@@ -69,6 +69,7 @@ typedef enum {
   SOFTWARE    = 0x0131,
   DATETIME   = 0x0132,
   ARTIST    = 0x013B,
+  PREDICTOR                       = 0x013D,
   WHITEPOINT   = 0x013E,
   PRIMARYCHROMATICITIES  = 0x013F,
 

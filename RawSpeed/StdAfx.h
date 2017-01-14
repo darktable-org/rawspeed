@@ -107,6 +107,11 @@ extern "C" {
 #include <list>
 using namespace std;
 
+#ifdef HAVE_ZLIB
+// ZLIB
+#include <zlib.h>
+#endif
+
 #include "pugixml.hpp"
 #include <float.h>
 
