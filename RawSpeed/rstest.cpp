@@ -302,8 +302,19 @@ int main(int argc, char **argv) {
     for (const auto &i : failedTests) {
       cerr << i.second << "\n";
 #ifndef WIN32
-      if (system(("diff -u0 " + i.first + ".hash* >> rstest.log").c_str()))
-        ; // this is only to supress the warn-unused-result warning
+      const string oldhash(i.first + ".hash");
+      const string newhash(i.first + ".failed");
+
+      ifstream oldfile(oldhash), newfile(newhash);
+
+      // if neither hashes exist, nothing to append...
+      if (oldfile.good() || newfile.good()) {
+        // DIFF(1): -N, --new-file  treat absent files as empty
+        if (system(("diff -N -u0 \"" + oldhash + "\" \"" + newhash +
+                    "\" >> rstest.log")
+                       .c_str()))
+          ; // this is only to supress the warn-unused-result warning
+      }
 #endif
     }
     cerr << "See rstest.log for details.\n";
