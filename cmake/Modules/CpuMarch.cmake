@@ -1,6 +1,6 @@
 include(CheckCXXCompilerFlag)
 
-if(1)
+if(NOT BINARY_PACKAGE_BUILD)
   MESSAGE("-- Checking for -march=native support")
   CHECK_CXX_COMPILER_FLAG("-march=native" MARCHNATIVE)
   if(MARCHNATIVE)

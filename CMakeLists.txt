@@ -22,6 +22,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+option(BINARY_PACKAGE_BUILD "Sets march optimization to generic" OFF)
 option(WITH_PTHREADS "Enable threading support through pthread. Highly recommended" ON)
 option(WITH_OPENMP "Enable OpenMP support. Only used for tools, not the library itself." ON)
 option(USE_XMLLINT "Run xmllint to test if data/cameras.xml is valid" ON)
