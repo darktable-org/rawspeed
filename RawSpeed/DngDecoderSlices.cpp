@@ -29,8 +29,13 @@ void *DecodeThread(void *_this) {
   DngDecoderSlices* parent = me->parent;
   try {
     parent->decodeSlice(me);
+  } catch (const std::exception &exc) {
+    parent->mRaw->setError(
+        string(string("DNGDEcodeThread: Caught exception: ") +
+               string(exc.what()))
+            .c_str());
   } catch (...) {
-    parent->mRaw->setError("DNGDEcodeThread: Caught exception.");
+    parent->mRaw->setError("DNGDEcodeThread: Caught unhandled exception.");
   }
   return NULL;
 }
