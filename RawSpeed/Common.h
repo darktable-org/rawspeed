@@ -61,40 +61,6 @@ typedef const char *LPCWSTR;
 #define UINT32_MAX 0xffffffff
 #endif
 
-#define get2BE(data,pos) ((((ushort16)(data)[pos]) << 8) | \
-                           ((ushort16)(data)[pos+1]))
-
-#define get2LE(data,pos) ((((ushort16)(data)[pos+1]) << 8) | \
-                           ((ushort16)(data)[pos]))
-
-#define get4BE(data,pos) ((((uint32)(data)[pos+0]) << 24) | \
-                          (((uint32)(data)[pos+1]) << 16) | \
-                          (((uint32)(data)[pos+2]) << 8) | \
-                           ((uint32)(data)[pos+3]))
-
-#define get4LE(data,pos) ((((uint32)(data)[pos+3]) << 24) | \
-                          (((uint32)(data)[pos+2]) << 16) | \
-                          (((uint32)(data)[pos+1]) << 8) | \
-                           ((uint32)(data)[pos]))
-
-#define get8LE(data,pos) ((((uint64)(data)[pos+7]) << 56) | \
-                          (((uint64)(data)[pos+6]) << 48) | \
-                          (((uint64)(data)[pos+5]) << 40) | \
-                          (((uint64)(data)[pos+4]) << 32) | \
-                          (((uint64)(data)[pos+3]) << 24) | \
-                          (((uint64)(data)[pos+2]) << 16) | \
-                          (((uint64)(data)[pos+1]) << 8)  | \
-                           ((uint64)(data)[pos]))
-
-#define get8BE(data,pos) ((((uint64)(data)[pos+0]) << 56) | \
-                          (((uint64)(data)[pos+1]) << 48) | \
-                          (((uint64)(data)[pos+2]) << 40) | \
-                          (((uint64)(data)[pos+3]) << 32) | \
-                          (((uint64)(data)[pos+4]) << 24) | \
-                          (((uint64)(data)[pos+5]) << 16) | \
-                          (((uint64)(data)[pos+6]) << 8)  | \
-                           ((uint64)(data)[pos+7]))
-
 int rawspeed_get_number_of_processor_cores();
 
 
@@ -218,6 +184,12 @@ template<typename T> inline T loadMem(const void* data, bool bswap) {
   }
   return ret;
 }
+
+#define get2BE(data,pos) (loadMem<ushort16>(data+pos, getHostEndianness() == little))
+#define get2LE(data,pos) (loadMem<ushort16>(data+pos, getHostEndianness() == big))
+
+#define get4BE(data,pos) (loadMem<uint32>(data+pos, getHostEndianness() == little))
+#define get4LE(data,pos) (loadMem<uint32>(data+pos, getHostEndianness() == big))
 
 #ifdef _MSC_VER
 // See http://tinyurl.com/hqfuznc
