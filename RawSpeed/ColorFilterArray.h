@@ -51,6 +51,7 @@ public:
   ColorFilterArray(iPoint2D size);
   ColorFilterArray(const uint32 dcrawFilters);
   virtual ~ColorFilterArray(void);
+
   virtual void setSize(iPoint2D size);
   void setColorAt(iPoint2D pos, CFAColor c);
   virtual void setCFA(iPoint2D size, ...);

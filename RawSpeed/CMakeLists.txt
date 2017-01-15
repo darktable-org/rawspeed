@@ -165,6 +165,7 @@ if(BUILD_TESTING)
     "BlackAreaTest.cpp"
     "CameraMetaDataTest.cpp"
     "CameraSensorInfoTest.cpp"
+    "ColorFilterArrayTest.cpp"
     "ExceptionsTest.cpp"
     "RawSpeedTest.cpp"
   )
