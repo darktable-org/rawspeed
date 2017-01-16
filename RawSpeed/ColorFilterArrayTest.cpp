@@ -30,12 +30,12 @@ using namespace RawSpeed;
 
 typedef std::tr1::tuple<int, int, int, int> Bayer2x2;
 
-static const iPoint2D size(2, 2);
+static const iPoint2D square(2, 2);
 
 TEST(ColorFilterArrayTestBasic, Constructor) {
   ASSERT_NO_THROW({
-    ColorFilterArray cfa(size);
-    ASSERT_EQ(cfa.size.area(), size.area());
+    ColorFilterArray cfa(square);
+    ASSERT_EQ(cfa.size.area(), square.area());
   });
 
   ASSERT_NO_THROW({
@@ -44,8 +44,8 @@ TEST(ColorFilterArrayTestBasic, Constructor) {
   });
 
   ASSERT_NO_THROW({
-    unique_ptr<ColorFilterArray> cfa(new ColorFilterArray(size));
-    ASSERT_EQ(cfa->size.area(), size.area());
+    unique_ptr<ColorFilterArray> cfa(new ColorFilterArray(square));
+    ASSERT_EQ(cfa->size.area(), square.area());
   });
 
   ASSERT_NO_THROW({
@@ -57,26 +57,26 @@ TEST(ColorFilterArrayTestBasic, Constructor) {
 TEST(ColorFilterArrayTestBasic, SetSize) {
   ASSERT_NO_THROW({
     ColorFilterArray cfa;
-    cfa.setSize(size);
-    ASSERT_EQ(cfa.size.area(), size.area());
+    cfa.setSize(square);
+    ASSERT_EQ(cfa.size.area(), square.area());
   });
 
   ASSERT_NO_THROW({
     unique_ptr<ColorFilterArray> cfa(new ColorFilterArray);
-    cfa->setSize(size);
-    ASSERT_EQ(cfa->size.area(), size.area());
+    cfa->setSize(square);
+    ASSERT_EQ(cfa->size.area(), square.area());
   });
 
   ASSERT_NO_THROW({
     ColorFilterArray cfa(iPoint2D(1, 1));
-    cfa.setSize(size);
-    ASSERT_EQ(cfa.size.area(), size.area());
+    cfa.setSize(square);
+    ASSERT_EQ(cfa.size.area(), square.area());
   });
 
   ASSERT_NO_THROW({
     unique_ptr<ColorFilterArray> cfa(new ColorFilterArray(iPoint2D(1, 1)));
-    cfa->setSize(size);
-    ASSERT_EQ(cfa->size.area(), size.area());
+    cfa->setSize(square);
+    ASSERT_EQ(cfa->size.area(), square.area());
   });
 }
 
@@ -102,7 +102,7 @@ INSTANTIATE_TEST_CASE_P(RGBG2, ColorFilterArrayTest,
                                          testing::Range(0, 4)));
 
 static void setHelper(ColorFilterArray *cfa, Bayer2x2 param) {
-  cfa->setCFA(size, std::tr1::get<0>(param), std::tr1::get<1>(param),
+  cfa->setCFA(square, std::tr1::get<0>(param), std::tr1::get<1>(param),
               std::tr1::get<2>(param), std::tr1::get<3>(param));
 }
 
