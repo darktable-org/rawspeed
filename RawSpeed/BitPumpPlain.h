@@ -1,7 +1,7 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -16,45 +16,32 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-    http://www.klauspost.com
 */
-#ifndef BIT_PUMP_PLAIN_H
-#define BIT_PUMP_PLAIN_H
+#pragma once
 
-#include "ByteStream.h"
+#include "BitStream.h"
 
 namespace RawSpeed {
 
-// Note: Allocated buffer MUST be at least size+sizeof(uint32) large.
+struct PlainBitPumpTag;
 
-class BitPumpPlain
-{
-public:
-  BitPumpPlain(ByteStream *s);
-  BitPumpPlain(const uchar8* _buffer, uint32 _size );
-	uint32 getBits(uint32 nbits) throw ();
-	uint32 getBit() throw ();
-	uint32 getBitsSafe(uint32 nbits);
-	uint32 getBitSafe();
-	uint32 peekBits(uint32 nbits) throw ();
-	uint32 peekBit() throw ();
-  uint32 peekByte() throw ();
-  void skipBits(uint32 nbits);
-	uchar8 getByte() throw();
-	uchar8 getByteSafe();
-	void setAbsoluteOffset(uint32 offset);
-  uint32 getOffset() { return off>>3;}
-  __inline void checkPos()  { if (off>=size) throw IOException("Out of buffer read");};        // Check if we have a valid position
+// The PlainPump is ordered in LSB bit order,
+// i.e. we push into the cache from the left and read it from the right
 
-  virtual ~BitPumpPlain(void);
-protected:
-  const uchar8* buffer;
-  const uint32 size;            // This if the end of buffer.
-  uint32 off;                  // Offset in bytes
-private:
-};
+using BitPumpPlain = BitStream<PlainBitPumpTag, BitStreamCacheLeftInRightOut>;
+
+template<> inline void BitPumpPlain::fillCache() {
+  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "if the structure of the bit cache changed, this code has to be updated");
+
+  cache.push(loadMem<uint32>(data+pos, getHostEndianness() == big), 32);
+  pos += 4;
+}
+
+template<> inline void BitPumpPlain::setBufferPosition(uint32 newPos) {
+  pos = newPos;
+  cache.fillLevel = 0;
+  cache.cache = 0;
+}
 
 } // namespace RawSpeed
 
-#endif

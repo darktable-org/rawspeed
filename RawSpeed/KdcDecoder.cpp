@@ -98,15 +98,11 @@ void KdcDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   // Try the kodak hidden IFD for WB
   if (mRootIFD->hasEntryRecursive(KODAK_IFD2)) {
     TiffEntry *ifdoffset = mRootIFD->getEntryRecursive(KODAK_IFD2);
-    TiffIFD *kodakifd = NULL;
     try {
-      if (mRootIFD->endian == getHostEndianness())
-        kodakifd = new TiffIFD(mFile, ifdoffset->getInt());
-      else
-        kodakifd = new TiffIFDBE(mFile, ifdoffset->getInt());
+      TiffRootIFD kodakifd(ifdoffset->getRootIfdData(), ifdoffset->getInt());
 
-     if (kodakifd && kodakifd->hasEntryRecursive(KODAK_KDC_WB)) {
-        TiffEntry *wb = kodakifd->getEntryRecursive(KODAK_KDC_WB);
+     if (kodakifd.hasEntryRecursive(KODAK_KDC_WB)) {
+        TiffEntry *wb = kodakifd.getEntryRecursive(KODAK_KDC_WB);
         if (wb->count == 3) {
           mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
           mRaw->metadata.wbCoeffs[1] = wb->getFloat(1);
@@ -116,8 +112,6 @@ void KdcDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
     } catch(TiffParserException e) {
       mRaw->setError(e.what());
     }
-    if (kodakifd)
-      delete kodakifd;
   }
 
   // Use the normal WB if available

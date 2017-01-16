@@ -61,40 +61,6 @@ typedef const char *LPCWSTR;
 #define UINT32_MAX 0xffffffff
 #endif
 
-#define get2BE(data,pos) ((((ushort16)(data)[pos]) << 8) | \
-                           ((ushort16)(data)[pos+1]))
-
-#define get2LE(data,pos) ((((ushort16)(data)[pos+1]) << 8) | \
-                           ((ushort16)(data)[pos]))
-
-#define get4BE(data,pos) ((((uint32)(data)[pos+0]) << 24) | \
-                          (((uint32)(data)[pos+1]) << 16) | \
-                          (((uint32)(data)[pos+2]) << 8) | \
-                           ((uint32)(data)[pos+3]))
-
-#define get4LE(data,pos) ((((uint32)(data)[pos+3]) << 24) | \
-                          (((uint32)(data)[pos+2]) << 16) | \
-                          (((uint32)(data)[pos+1]) << 8) | \
-                           ((uint32)(data)[pos]))
-
-#define get8LE(data,pos) ((((uint64)(data)[pos+7]) << 56) | \
-                          (((uint64)(data)[pos+6]) << 48) | \
-                          (((uint64)(data)[pos+5]) << 40) | \
-                          (((uint64)(data)[pos+4]) << 32) | \
-                          (((uint64)(data)[pos+3]) << 24) | \
-                          (((uint64)(data)[pos+2]) << 16) | \
-                          (((uint64)(data)[pos+1]) << 8)  | \
-                           ((uint64)(data)[pos]))
-
-#define get8BE(data,pos) ((((uint64)(data)[pos+0]) << 56) | \
-                          (((uint64)(data)[pos+1]) << 48) | \
-                          (((uint64)(data)[pos+2]) << 40) | \
-                          (((uint64)(data)[pos+3]) << 32) | \
-                          (((uint64)(data)[pos+4]) << 24) | \
-                          (((uint64)(data)[pos+5]) << 16) | \
-                          (((uint64)(data)[pos+6]) << 8)  | \
-                           ((uint64)(data)[pos+7]))
-
 int rawspeed_get_number_of_processor_cores();
 
 
@@ -133,6 +99,21 @@ inline bool isPowerOfTwo (int val) {
   return (val & (~val+1)) == val;
 }
 
+template<typename T> bool isIn(const T value, const std::initializer_list<T>& list) {
+  for (auto t : list)
+    if (t == value)
+      return true;
+  return false;
+}
+
+// until we allow c++14 code
+#if __cplusplus < 201402L
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args) {
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+#endif
+
 inline int lmin(int p0, int p1) {
   return p1 + ((p0 - p1) & ((p0 - p1) >> 31));
 }
@@ -159,9 +140,6 @@ typedef void* pthread_mutex_t;
 #define pthread_mutex_unlock(A)
 #endif
 
-typedef int __attribute__((aligned(1))) align1_int;
-typedef unsigned int __attribute__((aligned(1))) align1_uint;
-
 inline Endianness getHostEndianness() {
 #if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
   return little;
@@ -182,17 +160,40 @@ inline Endianness getHostEndianness() {
 #endif
 }
 
-#if defined(__GNUC__) && (PIPE_CC_GCC_VERSION >= 403) && defined(__BYTE_ORDER__) 
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__ && __alignof__ (int) == 1
-#define LE_PLATFORM_HAS_BSWAP
-#define PLATFORM_BSWAP32(A) __builtin_bswap32(A)
-#endif
+#ifdef _MSC_VER
+# include <intrin.h>
+# define BSWAP16(A) _byteswap_ushort(A)
+# define BSWAP32(A) _byteswap_ulong(A)
+# define BSWAP64(A) _byteswap_uint64(A)
+#else
+# define BSWAP16(A) __builtin_bswap16(A)
+# define BSWAP32(A) __builtin_bswap32(A)
+# define BSWAP64(A) __builtin_bswap64(A)
 #endif
 
+template<typename T> inline T loadMem(const void* data, bool bswap) {
+  T ret;
+  // all interesting compilers optimize this memcpy into a single move
+  // this is the most effective way to load some bytes without running into alignmen issues
+  memcpy(&ret, data, sizeof(T));
+  if (bswap) {
+    switch(sizeof(T)) {
+    case 1: break;
+    case 2: ret = BSWAP16(ret); break;
+    case 4: ret = BSWAP32(ret); break;
+    case 8: ret = BSWAP64(ret); break;
+    }
+  }
+  return ret;
+}
+
+#define get2BE(data,pos) (loadMem<ushort16>(data+pos, getHostEndianness() == little))
+#define get2LE(data,pos) (loadMem<ushort16>(data+pos, getHostEndianness() == big))
+
+#define get4BE(data,pos) (loadMem<uint32>(data+pos, getHostEndianness() == little))
+#define get4LE(data,pos) (loadMem<uint32>(data+pos, getHostEndianness() == big))
+
 #ifdef _MSC_VER
-#include <intrin.h>
-#define LE_PLATFORM_HAS_BSWAP
-#define PLATFORM_BSWAP32(A) _byteswap_ulong(A)
 // See http://tinyurl.com/hqfuznc
 #if _MSC_VER >= 1900 
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }

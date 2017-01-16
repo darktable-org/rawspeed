@@ -86,7 +86,7 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
     for (size_t i = 0; i < curve.size()-1; i++)
       curve[i] = (curve[i-i%step] * (step - i % step) +
                   curve[i-i%step+step] * (i % step)) / step;
-    metadata->setAbsoluteOffset(562);
+    metadata->setPosition(562);
     split = metadata->getShort();
   } else if (v0 != 70 && csize <= 0x4001) {
     curve.resize(csize+1);
@@ -101,7 +101,8 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
   }
 
   uint32 x, y;
-  BitPumpMSB bits(mFile, offset, size);
+  ByteStream input(mFile, offset, size);
+  BitPumpMSB bits(input);
   uchar8 *draw = mRaw->getData();
   ushort16 *dest;
   uint32 pitch = mRaw->pitch;

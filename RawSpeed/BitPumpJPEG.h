@@ -1,7 +1,7 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -16,132 +16,57 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-    http://www.klauspost.com
 */
-#ifndef BIT_PUMP_JPEG_H
-#define BIT_PUMP_JPEG_H
+#pragma once
 
-#include "ByteStream.h"
-
-#define BITS_PER_LONG (8*sizeof(uint32))
-#define MIN_GET_BITS  (BITS_PER_LONG-7)    /* max value for long getBuffer */
+#include "BitStream.h"
 
 namespace RawSpeed {
 
-// Note: Allocated buffer MUST be at least size+sizeof(uint32) large.
+struct JPEGBitPumpTag;
 
-class BitPumpJPEG
-{
-public:
-  BitPumpJPEG(ByteStream *s);
-  BitPumpJPEG(const uchar8* _buffer, uint32 _size );
-  BitPumpJPEG(FileMap *f, uint32 offset, uint32 _size );
-  BitPumpJPEG(FileMap *f, uint32 offset );
-	uint32 getBitsSafe(uint32 nbits);
-	uint32 getBitSafe();
-	uchar8 getByteSafe();
-	void setAbsoluteOffset(uint32 offset);     // Set offset in bytes
-  __inline uint32 getOffset() { return off-(mLeft>>3)+stuffed;}
-  __inline void checkPos()  { if (off>=size || stuffed > (mLeft>>3)) ThrowIOE("Out of buffer read");};        // Check if we have a valid position
+// The JPEG data is ordered in MSB bit order,
+// i.e. we push into the cache from the right and read it from the left
+using BitPumpJPEG = BitStream<JPEGBitPumpTag, BitStreamCacheRightInLeftOut>;
 
-  // Fill the buffer with at least 24 bits
-  void fill() {if (mLeft<25) _fill();}
- __inline uint32 peekBitsNoFill( uint32 nbits )
- {
-   int shift = mLeft-nbits;
-   uint32 ret;
-   memcpy(&ret, (uint32*)&current_buffer[shift>>3], sizeof(uint32));
-   ret >>= shift & 7;
-   return ret & ((1 << nbits) - 1);
- }
+template<> inline void BitPumpJPEG::fillCache() {
+  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "if the structure of the bit cache changed, this code has to be updated");
 
-
-__inline uint32 getBit() {
-  if (!mLeft) _fill();
-  mLeft--;
-  uint32 _byte = mLeft >> 3;
-  return (current_buffer[_byte] >> (mLeft & 0x7)) & 1;
-}
-
-__inline uint32 getBitsNoFill(uint32 nbits) {
-	uint32 ret = peekBitsNoFill(nbits);
-	mLeft -= nbits;
-	return ret;
-}
-__inline uint32 getBits(uint32 nbits) {
-	fill();
-	return getBitsNoFill(nbits);
-}
-
-__inline uint32 peekBit() {
-  if (!mLeft) _fill();
-  return (current_buffer[(mLeft-1) >> 3] >> ((mLeft-1) & 0x7)) & 1;
-}
-__inline uint32 getBitNoFill() {
-  mLeft--;
-  uint32 ret = (current_buffer[mLeft >> 3] >> (mLeft & 0x7)) & 1;
-  return ret;
-}
-
-__inline uint32 peekByteNoFill() {
-  int shift = mLeft-8;
-  uint32 ret = *(uint32*)&current_buffer[shift>>3];
-  ret >>= shift & 7;
-  return ret & 0xff;
-}
-
-__inline uint32 peekBits(uint32 nbits) {
-  fill();
-  return peekBitsNoFill(nbits);
-}
-
-__inline uint32 peekByte() {
-   fill();
- 
-  if (off > size)
-    throw IOException("Out of buffer read");
-
-  return peekByteNoFill();
-} 
-
-  __inline void skipBits(unsigned int nbits) {
-    int skipn = nbits;
-    while (skipn) {
-      fill();
-      checkPos();
-      int n = MIN(skipn, mLeft);
-      mLeft -= n;
-      skipn -= n;
+  const uint32 nBytes = 4;
+  // short-cut path for the most common case (no FF marker in the next 4 bytes)
+  // this is slightly faster than the else-case alone.
+  // TODO: investigate applicability of vector intrinsics to speed up if-cascade
+  if (data[pos+0] != 0xFF &&
+      data[pos+1] != 0xFF &&
+      data[pos+2] != 0xFF &&
+      data[pos+3] != 0xFF ) {
+    cache.push(loadMem<uint32>(data+pos, getHostEndianness() == little), 32);
+    pos += 4;
+  } else {
+    for (uint32 i = 0; i < nBytes; ++i) {
+      // Pre-execute most common case, where next byte is 'normal'/non-FF
+      const int c0 = data[pos++];
+      cache.push(c0, 8);
+      if (c0 == 0xFF) {
+        // Found FF -> pre-execute case of FF/00, which represents an FF data byte -> ignore the 00
+        const int c1 = data[pos++];
+        if (c1 != 0) {
+          // Found FF/xx with xx != 00. This is the end of stream marker.
+          // Rewind pos to the FF byte, in case we get called again.
+          // Fill the cache with zeros and keep on doing that from now on.
+          pos -= 2;
+          cache.cache &= ~0xFF;
+          cache.cache <<= 64 - cache.fillLevel;
+          cache.fillLevel = 64;
+          break;
+        }
+      }
     }
   }
+}
 
-  __inline void skipBitsNoFill(unsigned int nbits) {
-    mLeft -= nbits;
-  }
-
-  __inline unsigned char getByte() {
-    fill();
-    mLeft-=8;
-    int shift = mLeft;
-    uint32 ret = *(uint32*)&current_buffer[shift>>3];
-    ret >>= shift & 7;
-    return ret & 0xff;
-  }
-
-  virtual ~BitPumpJPEG(void);
-protected:
-  void __inline init();
-  void _fill();
-  const uchar8* buffer;
-  uchar8 current_buffer[16];
-  uint32 size;            // This if the end of buffer.
-  int mLeft;
-  uint32 off;                  // Offset in bytes
-  int stuffed;              // How many bytes has been stuffed?
-private:
-};
+template<> inline BitPumpJPEG::size_type BitPumpJPEG::getBufferPosition() const {
+  return pos; // the current number byte we consumed -> at the end of the stream pos, it points to the JPEG marker FF
+}
 
 } // namespace RawSpeed
-
-#endif//BIT_PUMP_JPEG_H

@@ -23,34 +23,18 @@
 #ifndef TIFF_PARSER_H
 #define TIFF_PARSER_H
 
-#include "FileMap.h"
+#include "Buffer.h"
 #include "TiffIFD.h"
-#include "TiffIFDBE.h"
-#include "TiffParserException.h"
 #include "RawDecoder.h"
 
 
 namespace RawSpeed {
 
-class TiffParser 
-{
-public:
-  TiffParser(FileMap* input);
-  virtual ~TiffParser(void);
+// TiffRootIFDOwner contains pointers into 'data' but if is is non-owning, it may be deleted immediately
+TiffRootIFDOwner parseTiff(const Buffer& data);
 
-  virtual void parseData();
-  virtual RawDecoder* getDecoder();
-  Endianness tiff_endian;
-  /* Returns the Root IFD - this object still retains ownership */
-  TiffIFD* RootIFD() const { return mRootIFD; }
-  /* Merges root of other TIFF into this - clears the root of the other */
-  void MergeIFD(TiffParser* other_tiff);
-  RawSpeed::Endianness getHostEndian() const { return host_endian; }
-protected:
-  FileMap *mInput;
-  TiffIFD* mRootIFD;
-  Endianness host_endian;
-};
+// transfers ownership of TiffIFD into RawDecoder
+RawDecoder* makeDecoder(TiffRootIFDOwner root, Buffer &data);
 
 } // namespace RawSpeed
 

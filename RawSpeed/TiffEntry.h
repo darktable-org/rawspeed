@@ -2,13 +2,14 @@
 #define TIFF_ENTRY_H
 
 #include "TiffParserException.h"
-#include "FileMap.h"
+#include "ByteStream.h"
 
 /* 
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2015 Pedro Côrte-Real
+    Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -29,11 +30,6 @@
 
 namespace RawSpeed {
 
-const uint32 datasizes[] =  {0,1,1,2,4,8,1,1,2,4, 8, 4, 8, 4};
-                          // 0-1-2-3-4-5-6-7-8-9-10-11-12-13
-const uint32 datashifts[] = {0,0,0,1,2,3,0,0,1,2, 3, 2, 3, 2};
-
-// 0-1-2-3-4-5-6-7-8-9-10-11-12-13
 /*
  * Tag data type information.
  *
@@ -53,55 +49,42 @@ typedef	enum {
   TIFF_SRATIONAL = 10, /* !64-bit signed fraction */
   TIFF_FLOAT     = 11, /* !32-bit IEEE floating point */
   TIFF_DOUBLE    = 12, /* !64-bit IEEE floating point */
-  TIFF_OFFSET    = 13, /* 32-bit unsigned offset used in ORF at least */
+  TIFF_OFFSET    = 13, /* 32-bit unsigned offset used for IFD and other offsets */
 } TiffDataType;
 
+class TiffIFD;
 
 class TiffEntry
 {
+  ByteStream data;
+  TiffIFD* parent = nullptr;
+  friend class TiffIFD;
+
 public:
-  TiffEntry();
-  TiffEntry(TiffTag tag, TiffDataType type, uint32 count, const uchar8* data = NULL);
-  TiffEntry(FileMap* f, uint32 offset, uint32 up_offset);
-  virtual ~TiffEntry(void);
-  uchar8 getByte(uint32 num=0);
-  virtual uint32 getInt(uint32 num=0);
-  virtual int32 getSInt(uint32 num=0);
-  virtual ushort16 getShort(uint32 num=0);
-  virtual short16 getSShort(uint32 num=0);
-  virtual float getFloat(uint32 num=0);
-  string getString();
-  void getShortArray(ushort16 *array, uint32 num);
-  void getIntArray(uint32 *array, uint32 num);
-  void getFloatArray(float *array, uint32 num);
-  const uchar8* getData() {return data;};
-  uchar8* getDataWrt();;
-  virtual void setData(const void *data, uint32 byte_count );
-  int getElementSize();
-  int getElementShift();
-// variables:
   TiffTag tag;
   TiffDataType type;
   uint32 count;
-  uint32 getDataOffset() const { return data_offset; }
-  bool isFloat();
-  bool isInt();
-  bool isString();
-  void offsetFromParent() {data_offset += parent_offset; parent_offset = 0; fetchData(); }
-  uint32 parent_offset;
-  uint64 empty_data;
-protected:
-  void fetchData();
-  string getValueAsString();
-  uchar8* own_data;
-  const uchar8* data;
-  uint32 data_offset;
-  uint64 bytesize;
-  FileMap *file;
-#ifdef _DEBUG
-  int debug_intVal;
-  float debug_floatVal;
-#endif
+
+  TiffEntry(TiffTag tag, TiffDataType type, uint32 count, ByteStream&& data);
+  TiffEntry(ByteStream& bs);
+
+  bool isFloat() const;
+  bool isInt() const;
+  bool isString() const;
+  uchar8 getByte(uint32 num=0) const;
+  uint32 getInt(uint32 num=0) const;
+  int32 getSInt(uint32 num=0) const;
+  ushort16 getShort(uint32 num=0) const;
+  short16 getSShort(uint32 num=0) const;
+  float getFloat(uint32 num=0) const;
+  string getString() const;
+  void getShortArray(ushort16 *array, uint32 num) const;
+  void getIntArray(uint32 *array, uint32 num) const;
+  void getFloatArray(float *array, uint32 num) const;
+  ByteStream& getData() { return data; }
+  const uchar8* getData(uint32 size) { return data.getData(size); }
+
+  const DataBuffer& getRootIfdData() const;
 };
 
 } // namespace RawSpeed

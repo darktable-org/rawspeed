@@ -52,7 +52,6 @@ private:
   void decodeCompressed3(TiffIFD* raw, int bits);
   string getMode();
   TiffIFD *mRootIFD;
-  ByteStream *b;
 };
 
 } // namespace RawSpeed

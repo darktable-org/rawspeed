@@ -100,7 +100,7 @@ RawImage ArwDecoder::decodeRawInternal() {
       // And now decode as a normal 16bit raw
       mRaw->dim = iPoint2D(width, height);
       mRaw->createData();
-      ByteStream input(image_data,len);
+      ByteStream input(mFile, off, len);
       Decode16BitRawBEunpacked(input, width, height);
 
       return mRaw;
@@ -225,7 +225,7 @@ void ArwDecoder::DecodeUncompressed(TiffIFD* raw) {
 }
 
 void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
-  BitPumpMSB bits(&input);
+  BitPumpMSB bits(input);
   uchar8* data = mRaw->getData();
   ushort16* dest = (ushort16*) & data[0];
   uint32 pitch = mRaw->pitch / sizeof(ushort16);
@@ -236,9 +236,9 @@ void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
       bits.fill();
       if (y == h) y = 1;
       uint32 len = 4 - bits.getBitsNoFill(2);
-      if (len == 3 && bits.getBitNoFill()) len = 0;
+      if (len == 3 && bits.getBitsNoFill(1)) len = 0;
       if (len == 4)
-        while (len < 17 && !bits.getBitNoFill()) len++;
+        while (len < 17 && !bits.getBitsNoFill(1)) len++;
       int diff = bits.getBits(len);
       if (len && (diff & (1 << (len - 1))) == 0)
         diff -= (1 << len) - 1;
@@ -257,15 +257,15 @@ void ArwDecoder::DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp) {
   } // End bpp = 8
 
   if (bpp == 12) {
-    uchar8* data = mRaw->getData();
-    uint32 pitch = mRaw->pitch;
-    const uchar8 *in = input.getData();
-
     if (input.getRemainSize() < (w * 3 / 2))
       ThrowRDE("Sony Decoder: Image data section too small, file probably truncated");
 
     if (input.getRemainSize() < (w*h*3 / 2))
       h = input.getRemainSize() / (w * 3 / 2) - 1;
+
+    uchar8* data = mRaw->getData();
+    uint32 pitch = mRaw->pitch;
+    const uchar8 *in = input.getData(input.getRemainSize());
 
     for (uint32 y = 0; y < h; y++) {
       ushort16* dest = (ushort16*) & data[y*pitch];
@@ -319,7 +319,7 @@ void ArwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   if (model == "DSLR-A100") { // Handle the MRW style WB of the A100
     if (mRootIFD->hasEntryRecursive(DNGPRIVATEDATA)) {
       TiffEntry *priv = mRootIFD->getEntryRecursive(DNGPRIVATEDATA);
-      const uchar8 *offdata = priv->getData();
+      const uchar8 *offdata = priv->getData(4);
       uint32 off = get4LE(offdata,0);
       uint32 length = mFile->getSize()-off;
       const unsigned char* data = mFile->getData(off, length);
@@ -375,53 +375,40 @@ void ArwDecoder::GetWB() {
   // Set the whitebalance for all the modern ARW formats (everything after A100)
   if (mRootIFD->hasEntryRecursive(DNGPRIVATEDATA)) {
     TiffEntry *priv = mRootIFD->getEntryRecursive(DNGPRIVATEDATA);
-    const uchar8 *data = priv->getData();
-    uint32 off = get4LE(data, 0);
-    TiffIFD *sony_private;
-    if (mRootIFD->endian == getHostEndianness())
-      sony_private = new TiffIFD(mFile, off);
-    else
-      sony_private = new TiffIFDBE(mFile, off);
+    TiffRootIFD makerNoteIFD(priv->getRootIfdData(), priv->getInt());
 
-    TiffEntry *sony_offset = sony_private->getEntryRecursive(SONY_OFFSET);
-    TiffEntry *sony_length = sony_private->getEntryRecursive(SONY_LENGTH);
-    TiffEntry *sony_key = sony_private->getEntryRecursive(SONY_KEY);
+    TiffEntry *sony_offset = makerNoteIFD.getEntryRecursive(SONY_OFFSET);
+    TiffEntry *sony_length = makerNoteIFD.getEntryRecursive(SONY_LENGTH);
+    TiffEntry *sony_key = makerNoteIFD.getEntryRecursive(SONY_KEY);
     if(!sony_offset || !sony_length || !sony_key || sony_key->count != 4)
       ThrowRDE("ARW: couldn't find the correct metadata for WB decoding");
 
-    off = sony_offset->getInt();
+    uint32 off = sony_offset->getInt();
     uint32 len = sony_length->getInt();
-    data = sony_key->getData();
+    const uchar8* data = sony_key->getData(4);
     uint32 key = get4LE(data,0);
 
-    if (sony_private)
-      delete(sony_private);
-
+    //TODO: replace ugly inplace decryption of (const) raw data
     uint32 *ifp_data = (uint32 *) mFile->getDataWrt(off, len);
     SonyDecrypt(ifp_data, len/4, key);
 
-    if (mRootIFD->endian == getHostEndianness())
-      sony_private = new TiffIFD(mFile, off);
-    else
-      sony_private = new TiffIFDBE(mFile, off);
+    TiffRootIFD encryptedIFD(priv->getRootIfdData(), off);
 
-    if (sony_private->hasEntry(SONYGRBGLEVELS)){
-      TiffEntry *wb = sony_private->getEntry(SONYGRBGLEVELS);
+    if (encryptedIFD.hasEntry(SONYGRBGLEVELS)){
+      TiffEntry *wb = encryptedIFD.getEntry(SONYGRBGLEVELS);
       if (wb->count != 4)
         ThrowRDE("ARW: WB has %d entries instead of 4", wb->count);
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(1);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(0);
       mRaw->metadata.wbCoeffs[2] = wb->getFloat(2);
-    } else if (sony_private->hasEntry(SONYRGGBLEVELS)){
-      TiffEntry *wb = sony_private->getEntry(SONYRGGBLEVELS);
+    } else if (encryptedIFD.hasEntry(SONYRGGBLEVELS)){
+      TiffEntry *wb = encryptedIFD.getEntry(SONYRGGBLEVELS);
       if (wb->count != 4)
         ThrowRDE("ARW: WB has %d entries instead of 4", wb->count);
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(1);
       mRaw->metadata.wbCoeffs[2] = wb->getFloat(3);
     }
-    if (sony_private)
-      delete(sony_private);
   }
 }
 
@@ -432,11 +419,11 @@ void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
   uint32 pitch = mRaw->pitch;
   int32 w = mRaw->dim.x;
 
-  BitPumpPlain bits(in);
+  BitPumpPlain bits(*in);
   for (uint32 y = t->start_y; y < t->end_y; y++) {
     ushort16* dest = (ushort16*) & data[y*pitch];
     // Realign
-    bits.setAbsoluteOffset((w*8*y) >> 3);
+    bits.setBufferPosition(w*y);
     uint32 random = bits.peekBits(24);
 
     // Process 32 pixels (16x2) per loop.

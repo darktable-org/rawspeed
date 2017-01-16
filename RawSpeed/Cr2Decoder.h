@@ -28,7 +28,7 @@
 
 namespace RawSpeed {
 
-class Cr2Decoder :
+class Cr2Decoder final :
   public RawDecoder
 {
 public:
@@ -41,6 +41,8 @@ public:
 protected:
   int sraw_coeffs[3];
 
+  RawImage decodeOldFormat();
+  RawImage decodeNewFormat();
   void sRawInterpolate();
   int getHue();
   void interpolate_420(int w, int h, int start_h , int end_h);
@@ -49,16 +51,6 @@ protected:
   void interpolate_420_new(int w, int h, int start_h , int end_h);
   void interpolate_422_new(int w, int h, int start_h , int end_h);
   TiffIFD *mRootIFD;
-};
-
-class Cr2Slice {
-public:
-  Cr2Slice() { w = h = offset = count = 0;};
-  ~Cr2Slice() {};
-  uint32 w;
-  uint32 h;
-  uint32 offset;
-  uint32 count;
 };
 
 } // namespace RawSpeed

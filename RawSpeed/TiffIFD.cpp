@@ -6,6 +6,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2015 Pedro Côrte-Real
+    Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -26,105 +27,59 @@
 
 namespace RawSpeed {
 
-TiffIFD::TiffIFD() {
-  TIFF_DEPTH(0);
-  nextIFD = 0;
-  endian = little;
-  mFile = 0;
-}
+TiffIFD::TiffIFD(const DataBuffer& data, uint32 offset, TiffIFD *parent) : parent(parent) {
 
-TiffIFD::TiffIFD(FileMap* f) {
-  TIFF_DEPTH(0);
-  nextIFD = 0;
-  endian = little;
-  mFile = f;
-}
+  // see parseTiff: UINT32_MAX is used to mark the "virtual" top level TiffRootIFD in a tiff file
+  if (offset == UINT32_MAX)
+    return;
 
-TiffIFD::TiffIFD(FileMap* f, uint32 offset, uint32 _depth) {
-  TIFF_DEPTH(_depth);
-  mFile = f;
-  uint32 entries;
-  endian = little;
+  ByteStream bs = data;
+  bs.setPosition(offset);
 
-  entries = *(unsigned short*)f->getData(offset, 2);    // Directory entries in this IFD
+  auto entries = bs.getShort(); // Directory entries in this IFD
 
   for (uint32 i = 0; i < entries; i++) {
-    int entry_offset = offset + 2 + i*12;
-
-    // If the space for the entry is no longer valid stop reading any more as
-    // the file is broken or truncated
-    if (!mFile->isValid(entry_offset, 12))
-      break;
-
-    TiffEntry *t = NULL;
+    TiffEntryOwner t;
     try {
-      t = new TiffEntry(f, entry_offset, offset);
+      t = make_unique<TiffEntry>(bs);
     } catch (IOException) { // Ignore unparsable entry
+      // fix probably broken position due to interruption by exception
+      bs.setPosition(offset + 2 + (i+1)*12);
       continue;
-    } catch (...) {
-      // make sure all already allocated mEntries are freed again
-      // will be gone after cleanup using unique_ptr containers
-      this->~TiffIFD();
-      throw;
     }
 
-    switch (t->tag) {
-      case DNGPRIVATEDATA: 
-        {
-          try {
-            TiffIFD *maker_ifd = parseDngPrivateData(t);
-            mSubIFD.push_back(maker_ifd);
-            delete(t);
-          } catch (TiffParserException) { // Unparsable private data are added as entries
-            mEntry[t->tag] = t;
-          } catch (IOException) { // Unparsable private data are added as entries
-            mEntry[t->tag] = t;
-          }
-        }
+    try {
+      switch (t->tag) {
+      case DNGPRIVATEDATA:
+        add(parseDngPrivateData(t.get()));
         break;
+
       case MAKERNOTE:
       case MAKERNOTE_ALT:
-        {
-          try {
-            mSubIFD.push_back(parseMakerNote(f, t->getDataOffset(), endian));
-            delete(t);
-          } catch (TiffParserException) { // Unparsable makernotes are added as entries
-            mEntry[t->tag] = t;
-          } catch (IOException) { // Unparsable makernotes are added as entries
-            mEntry[t->tag] = t;
-          }
-        }
+        add(parseMakerNote(t.get()));
         break;
 
       case FUJI_RAW_IFD:
-        if (t->type == 0xd) // FUJI - correct type
-          t->type = TIFF_LONG;
       case SUBIFDS:
       case EXIFIFDPOINTER:
-        try {
-          for (uint32 j = 0; j < t->count; j++) {
-            mSubIFD.push_back(new TiffIFD(f, t->getInt(j), depth));
-          }
-          delete(t);
-        } catch (TiffParserException) { // Unparsable subifds are added as entries
-          mEntry[t->tag] = t;
-        } catch (IOException) { // Unparsable subifds are added as entries
-          mEntry[t->tag] = t;
+        for (uint32 j = 0; j < t->count; j++) {
+          add(make_unique<TiffIFD>(bs, t->getInt(j), this));
+//          if (getSubIFDs().back()->getNextIFD() != 0)
+//            cerr << "detected chained subIFds" << endl;
         }
-
         break;
+
       default:
-        // make sure we don't override an entry without deleting the old one first
-        // will be gone after cleanup using unique_ptr containers
-        if (mEntry.find(t->tag) != mEntry.end())
-          delete mEntry[t->tag];
-        mEntry[t->tag] = t;
+        add(move(t));
+      }
+    } catch (...) { // Unparsable private data are added as entries
+      add(move(t));
     }
   }
-  nextIFD = *(align1_int*)f->getData(offset + 2 + entries * 12, 4);
+  nextIFD = bs.getUInt();
 }
 
-TiffIFD* TiffIFD::parseDngPrivateData(TiffEntry *t) {
+TiffRootIFDOwner TiffIFD::parseDngPrivateData(TiffEntry* t) {
   /*
   1. Six bytes containing the zero-terminated string "Adobe". (The DNG specification calls for the DNGPrivateData tag to start with an ASCII string identifying the creator/format).
   2. 4 bytes: an ASCII string ("MakN" for a Makernote),  indicating what sort of data is being stored here. Note that this is not zero-terminated.
@@ -133,285 +88,149 @@ TiffIFD* TiffIFD::parseDngPrivateData(TiffEntry *t) {
   5. 4 bytes: the original file offset for the MakerNote tag data (stored according to the byte order given above).
   6. The contents of the MakerNote tag. This is a simple byte-for-byte copy, with no modification.
   */
-  uint32 size = t->count;
-  const uchar8 *data = t->getData();
-  if (0 != memcmp(data, "Adobe", 6))
+  ByteStream& bs = t->getData();
+  if (!bs.skipPrefix("Adobe", 6))
     ThrowTPE("Not Adobe Private data");
 
-  data+=6;
-  if (!(data[0] == 'M' && data[1] == 'a' && data[2] == 'k' &&data[3] == 'N' ))
+  if (!bs.skipPrefix("MakN", 4))
     ThrowTPE("Not Makernote");
 
-  data+=4;
-  uint32 count;
-  if (big == getHostEndianness())
-    count = *(uint32*)data;
-  else
-    count = (unsigned int)data[0] << 24 | (unsigned int)data[1] << 16 | (unsigned int)data[2] << 8 | (unsigned int)data[3];
-
-  data+=4;
-  if (count > size)
+  bs.setInNativeByteOrder(big == getHostEndianness());
+  uint32 makerNoteSize = bs.getUInt();
+  if (makerNoteSize != bs.getRemainSize())
     ThrowTPE("Error reading TIFF structure (invalid size). File Corrupt");
 
-  Endianness makernote_endian = unknown;
-  if (data[0] == 0x49 && data[1] == 0x49)
-    makernote_endian = little;
-  else if (data[0] == 0x4D && data[1] == 0x4D)
-    makernote_endian = big;
-  else
-    ThrowTPE("Cannot determine endianess of DNG makernote");
+  bs.setInNativeByteOrder(isTiffInNativeByteOrder(bs, 0, "DNG makernote"));
+  bs.skipBytes(2);
 
-  data+=2;
-  uint32 org_offset;
+  uint32 makerNoteOffset = bs.getUInt();
+  makerNoteSize -= 6; // update size of orinial maker note, we skipped 2+4 bytes
 
-  if (big == getHostEndianness())
-    org_offset = *(uint32*)data;
-  else
-    org_offset = (unsigned int)data[0] << 24 | (unsigned int)data[1] << 16 | (unsigned int)data[2] << 8 | (unsigned int)data[3];
+  // Update the underlying buffer of t, such that the maker note data starts at its original offset
+  bs.rebase(makerNoteOffset, makerNoteSize);
 
-  data+=4;
-  /* We don't parse original makernotes that are placed after 300MB mark in the original file */
-  if (org_offset+count > 300*1024*1024)
-    ThrowTPE("Adobe Private data: original offset of makernote is past 300MB offset");
-
-  /* Create fake tiff with original offsets */
-  uchar8* maker_data = new uchar8[org_offset+count];
-  memcpy(&maker_data[org_offset],data, count);
-  FileMap *maker_map = new FileMap(maker_data, org_offset+count);
-
-  TiffIFD *maker_ifd;
-  try {
-    maker_ifd = parseMakerNote(maker_map, org_offset, makernote_endian);
-  } catch (TiffParserException &e) {
-    delete[] maker_data;
-    delete maker_map;
-    throw e;
-  }
-  delete[] maker_data;
-  delete maker_map;
-  return maker_ifd;
+  return parseMakerNote(t);
 }
 
-const uchar8 fuji_signature[] = {
-  'F', 'U', 'J', 'I', 'F', 'I', 'L', 'M', 0x0c, 0x00, 0x00, 0x00
-};
-
-const uchar8 nikon_v3_signature[] = {
-  'N', 'i', 'k', 'o', 'n', 0x0, 0x2
-};
-
 /* This will attempt to parse makernotes and return it as an IFD */
-TiffIFD* TiffIFD::parseMakerNote(FileMap *f, uint32 offset, Endianness parent_end)
+TiffRootIFDOwner TiffIFD::parseMakerNote(TiffEntry* t)
 {
-  FileMap *mFile = f;
-  TiffIFD *maker_ifd = NULL;
-  // Get at least 100 bytes which is more than enough for all the checks below
-  const uchar8* data = f->getData(offset, 100);
+  // go up the IFD tree and try to find the MAKE entry on each level.
+  // we can not go all the way to the top first because this partial tree
+  // is not yet added to the TiffRootIFD.
+  TiffIFD* p = this;
+  TiffEntry* makeEntry;
+  do {
+    makeEntry = p->getEntryRecursive(MAKE);
+    p = p->parent;
+  } while (!makeEntry && p);
+  string make = makeEntry ? makeEntry->getString() : "";
+  TrimSpaces(make);
 
-  // Pentax makernote starts with AOC\0 - If it's there, skip it
-  if (data[0] == 0x41 && data[1] == 0x4f && data[2] == 0x43 && data[3] == 0)
-  {
-    data +=4;
-    offset +=4;
-  }
+  ByteStream bs = t->getData();
 
-  // Pentax also has "PENTAX" at the start, makernote starts at 8
-  if (data[0] == 0x50 && data[1] == 0x45 && data[2] == 0x4e && data[3] == 0x54 && data[4] == 0x41 && data[5] == 0x58)
-  {
-    mFile = new FileMap(f, offset);
-    parent_end = getTiffEndianness((const ushort16*)&data[8]);
-    if (parent_end == unknown)
-      ThrowTPE("Cannot determine Pentax makernote endianness");
-    data +=10;
-    offset = 10;
-  // Check for fuji signature in else block so we don't accidentally leak FileMap
-  } else if (0 == memcmp(fuji_signature,&data[0], sizeof(fuji_signature))) {
-    mFile = new FileMap(f, offset);
-    offset = 12;
-  } else if (0 == memcmp(nikon_v3_signature,&data[0], sizeof(nikon_v3_signature))) {
-    offset += 10;
-    mFile = new FileMap(f, offset);
-    data +=10;
-    offset = 8;
-    // Read endianness
-    if (data[0] == 0x49 && data[1] == 0x49) {
-      parent_end = little;
-    } else if (data[0] == 0x4D && data[1] == 0x4D) {
-      parent_end = big;
+  // helper function for easy setup of ByteStream buffer for the different maker note types
+  // 'rebase' means position 0 of new stream equals current position
+  // 'newPosition' is the position where the IFD starts
+  // 'byteOrderOffset' is the position wher the 2 magic bytes (II/MM) may be found
+  // 'context' is a string providing error information in case the byte order parsing should fail
+  auto setup = [&bs](bool rebase, uint32 newPosition, uint32 byteOrderOffset = 0, const char* context = 0) {
+    if (rebase)
+      bs = bs.getSubStream(bs.getPosition(), bs.getRemainSize());
+    if (context)
+      bs.setInNativeByteOrder(isTiffInNativeByteOrder(bs, byteOrderOffset, context));
+    bs.skipBytes(newPosition);
+  };
+
+  if (bs.hasPrefix("AOC\0", 4)) {
+    setup(false, 6, 4, "Pentax makernote");
+  } else if (bs.hasPrefix("PENTAX", 6)) {
+    setup(true, 10, 8, "Pentax makernote");
+  } else if (bs.hasPrefix("FUJIFILM\x0c\x00\x00\x00", 12)) {
+    bs.setInNativeByteOrder(getHostEndianness() == little);
+    setup(true, 12);
+  } else if (bs.hasPrefix("Nikon\x00\x02", 7)) {
+    // this is Nikon type 3 maker note format
+    // TODO: implement Nikon type 1 maker note format
+    // see http://www.ozhiker.com/electronics/pjmt/jpeg_info/nikon_mn.html
+    bs.skipBytes(10);
+    setup(true, 8, 0, "Nikon makernote");
+  } else if (bs.hasPrefix("OLYMPUS", 7)) { // new Olympus
+    setup(true, 12);
+  } else if (bs.hasPrefix("OLYMP", 5)) {   // old Olympus
+    setup(true, 8);
+  } else if (bs.hasPrefix("EPSON", 5)) {
+    setup(false, 8);
+  } else if (bs.hasPatternAt("Exif", 4, 6)) {
+    // TODO: for none of the rawsamples.ch files from Panasonic is this true, instead their MakerNote start with "Panasonic"
+    // Panasonic has the word Exif at byte 6, a complete Tiff header starts at byte 12
+    // This TIFF is 0 offset based
+    setup(false, 20, 12, "Panosonic makernote");
+  } else if (make == "SAMSUNG") {
+    // Samsung has no identification in its MakerNote but starts with the IFD right away
+    setup(true, 0);
+  } else {
+    // cerr << "default MakerNote from " << make << endl; // Canon, Nikon (type 2), Sony, Minolta, Ricoh, Leica, Hasselblad, etc.
+
+    // At least one MAKE has not been handled explicitly and starts its MakerNote with an endian prefix: Kodak
+    if (bs.skipPrefix("II", 2)) {
+      bs.setInNativeByteOrder( getHostEndianness() == little );
+    } else if (bs.skipPrefix("MM", 2)) {
+      bs.setInNativeByteOrder( getHostEndianness() == big );
     }
-    data += 2;
-  }
-
-  // Panasonic has the word Exif at byte 6, a complete Tiff header starts at byte 12
-  // This TIFF is 0 offset based
-  if (data[6] == 0x45 && data[7] == 0x78 && data[8] == 0x69 && data[9] == 0x66)
-  {
-    parent_end = getTiffEndianness((const ushort16*)&data[12]);
-    if (parent_end == unknown)
-      ThrowTPE("Cannot determine Panasonic makernote endianness");
-    data +=20;
-    offset +=20;
-  }
-
-  // Some have MM or II to indicate endianness - read that
-  if (data[0] == 0x49 && data[1] == 0x49) {
-    offset +=2;
-    parent_end = little;
-  } else if (data[0] == 0x4D && data[1] == 0x4D) {
-    parent_end = big;
-    offset +=2;
-  }
-
-  // Olympus starts the makernote with their own name, sometimes truncated
-  if (!strncmp((const char *)data, "OLYMP", 5)) {
-    offset += 8;
-    if (!strncmp((const char *)data, "OLYMPUS", 7)) {
-      offset += 4;
-    }
-  }
-
-  // Epson starts the makernote with its own name
-  if (!strncmp((const char *)data, "EPSON", 5)) {
-    offset += 8;
   }
 
   // Attempt to parse the rest as an IFD
-  try {
-    if (parent_end == getHostEndianness())
-      maker_ifd = new TiffIFD(mFile, offset, depth);
-    else
-      maker_ifd = new TiffIFDBE(mFile, offset, depth);
-  } catch (...) {
-    if (mFile != f)
-      delete mFile;
- 	  throw;
-  }
-
-  if (mFile != f)
-    delete mFile;
-  // If the structure cannot be read, a TiffParserException will be thrown.
-  mFile = f;
-  return maker_ifd;
-}
-
-TiffIFD::~TiffIFD(void) {
-  for (map<TiffTag, TiffEntry*>::iterator i = mEntry.begin(); i != mEntry.end(); ++i) {
-    delete((*i).second);
-  }
-  mEntry.clear();
-  for (vector<TiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
-    delete(*i);
-  }
-  mSubIFD.clear();
-}
-
-bool TiffIFD::hasEntryRecursive(TiffTag tag) {
-  if (mEntry.find(tag) != mEntry.end())
-    return TRUE;
-  for (vector<TiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
-    if ((*i)->hasEntryRecursive(tag))
-      return TRUE;
-  }
-  return false;
+  return make_unique<TiffRootIFD>(bs, bs.getPosition());
 }
 
 vector<TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) {
   vector<TiffIFD*> matchingIFDs;
-  if (mEntry.find(tag) != mEntry.end()) {
+  if (entries.find(tag) != entries.end()) {
     matchingIFDs.push_back(this);
   }
-  for (vector<TiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
-    vector<TiffIFD*> t = (*i)->getIFDsWithTag(tag);
-    for (uint32 j = 0; j < t.size(); j++) {
-      matchingIFDs.push_back(t[j]);
-    }
+  for (auto& i : subIFDs) {
+    vector<TiffIFD*> t = i->getIFDsWithTag(tag);
+    matchingIFDs.insert(matchingIFDs.end(), t.begin(), t.end());
   }
   return matchingIFDs;
 }
 
-vector<TiffIFD*> TiffIFD::getIFDsWithTagWhere(TiffTag tag, uint32 isValue) {
-  vector<TiffIFD*> matchingIFDs;
-  if (mEntry.find(tag) != mEntry.end()) {
-    TiffEntry* entry = mEntry[tag];
-    if (entry->isInt() && entry->getInt() == isValue)
-      matchingIFDs.push_back(this);
+TiffEntry* TiffIFD::getEntryRecursive(TiffTag tag) const {
+  auto i = entries.find(tag);
+  if (i != entries.end()) {
+    return i->second.get();
   }
-  for (vector<TiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
-    vector<TiffIFD*> t = (*i)->getIFDsWithTag(tag);
-    for (uint32 j = 0; j < t.size(); j++) {
-      matchingIFDs.push_back(t[j]);
-    }
-  }
-  return matchingIFDs;
-}
-
-vector<TiffIFD*> TiffIFD::getIFDsWithTagWhere(TiffTag tag, string isValue) {
-  vector<TiffIFD*> matchingIFDs;
-  if (mEntry.find(tag) != mEntry.end()) {
-    TiffEntry* entry = mEntry[tag];
-    if (entry->isString() && 0 == entry->getString().compare(isValue))
-      matchingIFDs.push_back(this);
-  }
-  for (vector<TiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
-    vector<TiffIFD*> t = (*i)->getIFDsWithTag(tag);
-    for (uint32 j = 0; j < t.size(); j++) {
-      matchingIFDs.push_back(t[j]);
-    }
-  }
-  return matchingIFDs;
-}
-
-TiffEntry* TiffIFD::getEntryRecursive(TiffTag tag) {
-  if (mEntry.find(tag) != mEntry.end()) {
-    return mEntry[tag];
-  }
-  for (vector<TiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
-    TiffEntry* entry = (*i)->getEntryRecursive(tag);
+  for (auto& i : subIFDs) {
+    TiffEntry* entry = i->getEntryRecursive(tag);
     if (entry)
       return entry;
   }
-  return NULL;
+  return nullptr;
 }
 
-TiffEntry* TiffIFD::getEntryRecursiveWhere(TiffTag tag, uint32 isValue) {
-  if (mEntry.find(tag) != mEntry.end()) {
-    TiffEntry* entry = mEntry[tag];
-    if (entry->isInt() && entry->getInt() == isValue)
-      return entry;
-  }
-  for (vector<TiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
-    TiffEntry* entry = (*i)->getEntryRecursive(tag);
-    if (entry)
-      return entry;
-  }
-  return NULL;
+void TiffIFD::add(TiffIFDOwner subIFD) {
+  TiffIFD* p = this;
+  for (int i = 1; p; ++i, p = p->parent )
+    if (i > 10)
+      ThrowTPE("TiffIFD cascading overflow.");
+  if (subIFDs.size() > 100)
+    ThrowTPE("TIFF file has too many SubIFDs, probably broken");
+  subIFD->parent = this;
+  subIFDs.push_back(move(subIFD));
 }
 
-TiffEntry* TiffIFD::getEntryRecursiveWhere(TiffTag tag, string isValue) {
-  if (mEntry.find(tag) != mEntry.end()) {
-    TiffEntry* entry = mEntry[tag];
-    if (entry->isString() && 0 == entry->getString().compare(isValue))
-      return entry;
-  }
-  for (vector<TiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
-    TiffEntry* entry = (*i)->getEntryRecursive(tag);
-    if (entry)
-      return entry;
-  }
-  return NULL;
+void TiffIFD::add(TiffEntryOwner entry) {
+  entry->parent = this;
+  entries[entry->tag] = move(entry);
 }
 
-TiffEntry* TiffIFD::getEntry(TiffTag tag) {
-  if (mEntry.find(tag) != mEntry.end()) {
-    return mEntry[tag];
-  }
-  ThrowTPE("TiffIFD: TIFF Parser entry 0x%x not found.", tag);
-  return 0;
+TiffEntry* TiffIFD::getEntry(TiffTag tag) const {
+  auto i = entries.find(tag);
+  if (i == entries.end())
+    ThrowTPE("TiffIFD: TIFF Parser entry 0x%x not found.", tag);
+  return i->second.get();
 }
 
-
-bool TiffIFD::hasEntry(TiffTag tag) {
-  return mEntry.find(tag) != mEntry.end();
-}
 
 } // namespace RawSpeed

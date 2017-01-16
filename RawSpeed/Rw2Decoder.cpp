@@ -123,7 +123,8 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
   skip += w * 2 * t->start_y;
   skip /= 8;
 
-  PanaBitpump bits(new ByteStream(input_start));
+  ByteStream bs = *input_start;
+  PanaBitpump bits(&bs);
   bits.load_flags = load_flags;
   bits.skipBytes(skip);
 
@@ -311,9 +312,6 @@ PanaBitpump::PanaBitpump(ByteStream* _input) : input(_input), vbits(0) {
 }
 
 PanaBitpump::~PanaBitpump() {
-  if (input)
-    delete input;
-  input = 0;
   delete [] buf;
 }
 
@@ -332,20 +330,12 @@ uint32 PanaBitpump::getBits(int nbits) {
     * part of the file. Since there is no chance of affecting output buffer
     * size we allow the decoder to decode this
     */
-    if (input->getRemainSize() < BufSize - load_flags) {
-      memcpy(buf + load_flags, input->getData(), input->getRemainSize());
-      input->skipBytes(input->getRemainSize());
-    } else {
-      memcpy(buf + load_flags, input->getData(), BufSize - load_flags);
-      input->skipBytes(BufSize - load_flags);
-      if (input->getRemainSize() < load_flags) {
-        memcpy(buf, input->getData(), input->getRemainSize());
-        input->skipBytes(input->getRemainSize());
-      } else {
-        memcpy(buf, input->getData(), load_flags);
-        input->skipBytes(load_flags);
-      }
-    }
+    ByteStream::size_type size = min(input->getRemainSize(), BufSize - load_flags);
+    memcpy(buf + load_flags, input->getData(size), size);
+
+    size = min(input->getRemainSize(), load_flags);
+    if (size != 0)
+      memcpy(buf, input->getData(size), size);
   }
   vbits = (vbits - nbits) & 0x1ffff;
   byte = vbits >> 3 ^ 0x3ff0;

@@ -61,7 +61,7 @@ public:
   /* The FileMap is not owned by this class, will not be deleted, and must remain */
   /* valid while this object exists */
   RawDecoder(FileMap* file);
-  virtual ~RawDecoder(void);
+  virtual ~RawDecoder() {}
 
   /* Check if the decoder can decode the image from this camera */
   /* A RawDecoderException will be thrown if the camera isn't supported */
@@ -121,9 +121,6 @@ public:
 
   /* Should Fuji images be rotated? */
   bool fujiRotate;
-
-  /* Vector of objects that will be destroyed alongside the decoder */
-  vector<FileMap*> ownedObjects;
 
   /* Retrieve the main RAW chunk */
   /* Returns NULL if unknown */

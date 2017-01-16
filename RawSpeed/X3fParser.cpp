@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "X3fParser.h"
 #include "X3fDecoder.h"
-#include "ByteStreamSwap.h"
+
 /*
 RawSpeed - RAW file decoder.
 
@@ -34,10 +34,8 @@ X3fParser::X3fParser(FileMap* file) {
   if (size<104+128)
     ThrowRDE("X3F file too small");
 
-  if (getHostEndianness() == little)
-    bytes = new ByteStream(file, 0, size);
-  else
-    bytes = new ByteStreamSwap(file, 0, size);
+  bytes = new ByteStream(file, 0, size, getHostEndianness() == little);
+
   try {
     try {
       // Read signature
@@ -51,7 +49,7 @@ X3fParser::X3fParser(FileMap* file) {
       // Skip identifier + mark bits
       bytes->skipBytes(16+4);
 
-      bytes->setAbsoluteOffset(0);
+      bytes->setPosition(0);
       decoder = new X3fDecoder(file);
       readDirectory();
     } catch (IOException e) {
@@ -89,9 +87,9 @@ static string getIdAsString(ByteStream *bytes) {
 
 void X3fParser::readDirectory()
 {
-  bytes->setAbsoluteOffset(mFile->getSize()-4);
+  bytes->setPosition(mFile->getSize()-4);
   uint32 dir_off = bytes->getUInt();
-  bytes->setAbsoluteOffset(dir_off);
+  bytes->setPosition(dir_off);
 
   // Check signature
   if (0 != getIdAsString(bytes).compare("SECd"))
@@ -105,14 +103,14 @@ void X3fParser::readDirectory()
   for (uint32 i = 0; i < n_entries; i++) {
     X3fDirectory dir(bytes);
     decoder->mDirectory.push_back(dir);
-    bytes->pushOffset();
+    uint32 old_pos = bytes->getPosition();
     if (0 == dir.id.compare("IMA2") || 0 == dir.id.compare("IMAG")){
       decoder->mImages.push_back(X3fImage(bytes, dir.offset, dir.length));
     }
     if (0 == dir.id.compare("PROP")){
       decoder->mProperties.addProperties(bytes, dir.offset, dir.length);
     }
-    bytes->popOffset();
+    bytes->setPosition(old_pos);
   }
 }
 
@@ -130,16 +128,16 @@ X3fDirectory::X3fDirectory( ByteStream *bytes )
     offset = bytes->getUInt();
     length = bytes->getUInt();
     id = getIdAsString(bytes);
-    bytes->pushOffset();
-    bytes->setAbsoluteOffset(offset);
+    uint32 old_pos = bytes->getPosition();
+    bytes->setPosition(offset);
     sectionID = getIdAsString(bytes);
-    bytes->popOffset();
+    bytes->setPosition(old_pos);
 }
 
 
 X3fImage::X3fImage( ByteStream *bytes, uint32 offset, uint32 length )
 {
-  bytes->setAbsoluteOffset(offset);
+  bytes->setPosition(offset);
   string id = getIdAsString(bytes);
   if (id.compare("SECi"))
     ThrowRDE("X3fImage:Unknown Image signature");
@@ -153,7 +151,7 @@ X3fImage::X3fImage( ByteStream *bytes, uint32 offset, uint32 length )
   width = bytes->getUInt();
   height = bytes->getUInt();
   pitchB = bytes->getUInt();
-  dataOffset = bytes->getOffset();
+  dataOffset = bytes->getPosition();
   dataSize = length - (dataOffset-offset);
   if (pitchB == dataSize)
     pitchB = 0;
@@ -276,7 +274,7 @@ static bool ConvertUTF16toUTF8 (const UTF16** sourceStart, const UTF16* sourceEn
 
 string X3fPropertyCollection::getString( ByteStream *bytes ) {
   uint32 max_len = bytes->getRemainSize() / 2;
-  const UTF16* start = (const UTF16*)bytes->getData();
+  const UTF16* start = (const UTF16*)bytes->getData(max_len*2);
   const UTF16* src_end = start;
   uint32 i = 0;
   for (; i < max_len && start == src_end; i++) {
@@ -299,7 +297,7 @@ string X3fPropertyCollection::getString( ByteStream *bytes ) {
 
 void X3fPropertyCollection::addProperties( ByteStream *bytes, uint32 offset, uint32 length )
 {
-  bytes->setAbsoluteOffset(offset);
+  bytes->setPosition(offset);
   string id = getIdAsString(bytes);
   if (id.compare("SECp"))
     ThrowRDE("X3fImage:Unknown Property signature");
@@ -324,19 +322,19 @@ void X3fPropertyCollection::addProperties( ByteStream *bytes, uint32 offset, uin
   if (entries > 1000)
     ThrowRDE("X3F Decoder: Unreasonable number of properties: %u", entries);
 
-  uint32 data_start = bytes->getOffset() + entries*8;
+  uint32 data_start = bytes->getPosition() + entries*8;
   for (uint32 i = 0; i < entries; i++) {
     uint32 key_pos = bytes->getUInt();
     uint32 value_pos = bytes->getUInt();
-    bytes->pushOffset();
+    uint32 old_pos = bytes->getPosition();
     try {
-      bytes->setAbsoluteOffset(key_pos * 2 + data_start);
+      bytes->setPosition(key_pos * 2 + data_start);
       string key = getString(bytes);
-      bytes->setAbsoluteOffset(value_pos * 2 + data_start);
+      bytes->setPosition(value_pos * 2 + data_start);
       string val = getString(bytes);
       props[key] = val;
     } catch (IOException) {}
-    bytes->popOffset();
+    bytes->setPosition(old_pos);
   }
 }
 

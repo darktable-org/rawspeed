@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "MrwDecoder.h"
+#include "TiffParser.h"
 /*
     RawSpeed - RAW file decoder.
 
@@ -75,12 +76,7 @@ void MrwDecoder::parseHeader() {
       break;
     case 0x545457: // TTW
       // Base value for offsets needs to be at the beginning of the TIFF block, not the file
-      FileMap *f = new FileMap(mFile, currpos+8);
-      if (little == getHostEndianness())
-        tiff_meta = new TiffIFDBE(f, 8);
-      else
-        tiff_meta = new TiffIFD(f, 8);
-      delete f;
+      tiff_meta = parseTiff(mFile->getSubView(currpos+8)).release();
       break;
     }
     currpos += MAX(len+8,1); // MAX(,1) to make sure we make progress
@@ -107,11 +103,11 @@ RawImage MrwDecoder::decodeRawInternal() {
 }
 
 void MrwDecoder::checkSupportInternal(CameraMetaData *meta) {
-  if (!tiff_meta || !tiff_meta->hasEntry(MAKE) || !tiff_meta->hasEntry(MODEL))
+  if (!tiff_meta || !tiff_meta->hasEntryRecursive(MAKE) || !tiff_meta->hasEntryRecursive(MODEL))
     ThrowRDE("MRW: Couldn't find make and model");
 
-  string make = tiff_meta->getEntry(MAKE)->getString();
-  string model = tiff_meta->getEntry(MODEL)->getString();
+  string make = tiff_meta->getEntryRecursive(MAKE)->getString();
+  string model = tiff_meta->getEntryRecursive(MODEL)->getString();
   this->checkCameraSupported(meta, make, model, "");
 }
 
@@ -119,11 +115,11 @@ void MrwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   //Default
   int iso = 0;
 
-  if (!tiff_meta || !tiff_meta->hasEntry(MAKE) || !tiff_meta->hasEntry(MODEL))
+  if (!tiff_meta || !tiff_meta->getEntryRecursive(MAKE) || !tiff_meta->getEntryRecursive(MODEL))
     ThrowRDE("MRW: Couldn't find make and model");
 
-  string make = tiff_meta->getEntry(MAKE)->getString();
-  string model = tiff_meta->getEntry(MODEL)->getString();
+  string make = tiff_meta->getEntryRecursive(MAKE)->getString();
+  string model = tiff_meta->getEntryRecursive(MODEL)->getString();
 
   setMetaData(meta, make, model, "", iso);
 

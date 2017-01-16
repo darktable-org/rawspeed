@@ -63,14 +63,9 @@ RawImage DcrDecoder::decodeRawInternal() {
     TiffEntry *ifdoffset = mRootIFD->getEntryRecursive(KODAK_IFD);
     if (!ifdoffset)
       ThrowRDE("DCR Decoder: Couldn't find the Kodak IFD offset");
-    TiffIFD *kodakifd;
-    if (mRootIFD->endian == getHostEndianness())
-      kodakifd = new TiffIFD(mFile, ifdoffset->getInt());
-    else
-      kodakifd = new TiffIFDBE(mFile, ifdoffset->getInt());
-    TiffEntry *linearization = kodakifd->getEntryRecursive(KODAK_LINEARIZATION);
+    TiffRootIFD kodakifd(ifdoffset->getRootIfdData(), ifdoffset->getInt());
+    TiffEntry *linearization = kodakifd.getEntryRecursive(KODAK_LINEARIZATION);
     if (!linearization || linearization->count != 1024 || linearization->type != TIFF_SHORT) {
-      delete kodakifd;
       ThrowRDE("DCR Decoder: Couldn't find the linearization table");
     }
 
@@ -84,7 +79,7 @@ RawImage DcrDecoder::decodeRawInternal() {
     //        WB from what appear to be presets and calculate it in weird ways
     //        The only file I have only uses this method, if anybody careas look
     //        in dcraw.c parse_kodak_ifd() for all that weirdness
-    TiffEntry *blob = kodakifd->getEntryRecursive((TiffTag) 0x03fd);
+    TiffEntry *blob = kodakifd.getEntryRecursive((TiffTag) 0x03fd);
     if (blob && blob->count == 72) {
       mRaw->metadata.wbCoeffs[0] = (float) 2048.0f / blob->getShort(20);
       mRaw->metadata.wbCoeffs[1] = (float) 2048.0f / blob->getShort(21);
@@ -104,8 +99,6 @@ RawImage DcrDecoder::decodeRawInternal() {
       mRaw->setTable(NULL);
     }
     delete [] linearization_table;
-
-    delete kodakifd;
   } else
     ThrowRDE("DCR Decoder: Unsupported compression %d", compression);
 

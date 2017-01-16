@@ -2,6 +2,7 @@
 #define NIKON_DECOMPRESSOR_H
 
 #include "LJpegDecompressor.h"
+#include "BitPumpMSB.h"
 /* 
     RawSpeed - RAW file decoder.
 
@@ -25,8 +26,6 @@
 */
 
 namespace RawSpeed {
-
-class BitPumpMSB;
 
 class NikonDecompressor :
   public LJpegDecompressor

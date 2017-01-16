@@ -24,7 +24,6 @@
 #define MRW_DECODER_H
 
 #include "RawDecoder.h"
-#include "TiffIFDBE.h"
 
 namespace RawSpeed {
 
