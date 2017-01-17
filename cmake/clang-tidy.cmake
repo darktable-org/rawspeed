@@ -1,0 +1,11 @@
+message(STATUS "Looking for clang-tidy")
+find_program(CLANG_TIDY NAMES clang-tidy clang-tidy-4.0 clang-tidy-3.9 clang-tidy-3.8)
+if(CLANG_TIDY)
+  message(STATUS "Looking for clang-tidy - found")
+
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY}" -extra-arg=-Wno-unknown-warning-option)
+  else()
+    set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY}")
+  endif()
+endif()

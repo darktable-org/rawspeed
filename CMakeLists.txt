@@ -28,6 +28,7 @@ option(WITH_OPENMP "Enable OpenMP support. Only used for tools, not the library 
 option(WITH_ZLIB "Enable ZLIB support for DNG deflate support" ON)
 option(USE_XMLLINT "Run xmllint to test if data/cameras.xml is valid" ON)
 option(USE_IWYU "Run iwyu tool when compiling sources" OFF)
+option(USE_CLANG_TIDY "Run clang-tidy tool when compiling sources" OFF)
 option(BUILD_TESTING "Build the testing tree." ON)
 option(BUILD_TOOLS "Build some tools (identify, rstest)." ON)
 
@@ -48,6 +49,10 @@ endif(NOT CMAKE_BUILD_TYPE)
 
 if(USE_IWYU)
   include(iwyu)
+endif()
+
+if(USE_CLANG_TIDY)
+  include(clang-tidy)
 endif()
 
 if(BUILD_TESTING)
