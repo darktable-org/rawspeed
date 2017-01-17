@@ -106,6 +106,7 @@ extern "C" {
 #include <memory>
 #include <array>
 #include <algorithm>
+#include <numeric>
 using namespace std;
 
 #ifdef HAVE_ZLIB
