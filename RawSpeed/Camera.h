@@ -54,6 +54,14 @@ public:
   int decoderVersion;
   map<string,string> hints;
 protected:
+  void parseCFA(const pugi::xml_node &node);
+  void parseCrop(const pugi::xml_node &node);
+  void parseBlackAreas(const pugi::xml_node &node);
+  void parseAliases(const pugi::xml_node &node);
+  void parseHints(const pugi::xml_node &node);
+  void parseID(const pugi::xml_node &node);
+  void parseSensor(const pugi::xml_node &node);
+
   void parseCameraChild(const pugi::xml_node &node);
 };
 
