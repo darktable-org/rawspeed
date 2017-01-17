@@ -65,6 +65,22 @@ protected:
     mMaxIso = std::tr1::get<1>(GetParam());
   }
 
+  void checkHelper(const CameraSensorInfo &csi) {
+    ASSERT_EQ(csi.mBlackLevel, mBlackLevel);
+    ASSERT_EQ(csi.mWhiteLevel, mWhiteLevel);
+    ASSERT_EQ(csi.mMinIso, mMinIso);
+    ASSERT_EQ(csi.mMaxIso, mMaxIso);
+    ASSERT_EQ(csi.mBlackLevelSeparate, mBlackLevelSeparate);
+  }
+
+  void checkHelper(const CameraSensorInfo &a, const CameraSensorInfo &b) {
+    ASSERT_EQ(a.mBlackLevel, b.mBlackLevel);
+    ASSERT_EQ(a.mWhiteLevel, b.mWhiteLevel);
+    ASSERT_EQ(a.mMinIso, b.mMinIso);
+    ASSERT_EQ(a.mMaxIso, b.mMaxIso);
+    ASSERT_EQ(a.mBlackLevelSeparate, b.mBlackLevelSeparate);
+  }
+
   int mBlackLevel;
   int mWhiteLevel;
   int mMinIso;
@@ -94,22 +110,14 @@ TEST_P(CameraSensorInfoTestDumb, Getters) {
     const CameraSensorInfo Info(mBlackLevel, mWhiteLevel, mMinIso, mMaxIso,
                                 mBlackLevelSeparate);
 
-    ASSERT_EQ(Info.mBlackLevel, mBlackLevel);
-    ASSERT_EQ(Info.mWhiteLevel, mWhiteLevel);
-    ASSERT_EQ(Info.mMinIso, mMinIso);
-    ASSERT_EQ(Info.mMaxIso, mMaxIso);
-    ASSERT_EQ(Info.mBlackLevelSeparate, mBlackLevelSeparate);
+    checkHelper(Info);
   }
 
   {
     const unique_ptr<const CameraSensorInfo> Info(new CameraSensorInfo(
         mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate));
 
-    ASSERT_EQ(Info->mBlackLevel, mBlackLevel);
-    ASSERT_EQ(Info->mWhiteLevel, mWhiteLevel);
-    ASSERT_EQ(Info->mMinIso, mMinIso);
-    ASSERT_EQ(Info->mMaxIso, mMaxIso);
-    ASSERT_EQ(Info->mBlackLevelSeparate, mBlackLevelSeparate);
+    checkHelper(*Info);
   }
 }
 
@@ -145,17 +153,8 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentConstructorGetters) {
                                     mBlackLevelSeparate);
     CameraSensorInfo Info(InfoOrig);
 
-    ASSERT_EQ(Info.mBlackLevel, mBlackLevel);
-    ASSERT_EQ(Info.mWhiteLevel, mWhiteLevel);
-    ASSERT_EQ(Info.mMinIso, mMinIso);
-    ASSERT_EQ(Info.mMaxIso, mMaxIso);
-    ASSERT_EQ(Info.mBlackLevelSeparate, mBlackLevelSeparate);
-
-    ASSERT_EQ(Info.mBlackLevel, InfoOrig.mBlackLevel);
-    ASSERT_EQ(Info.mWhiteLevel, InfoOrig.mWhiteLevel);
-    ASSERT_EQ(Info.mMinIso, InfoOrig.mMinIso);
-    ASSERT_EQ(Info.mMaxIso, InfoOrig.mMaxIso);
-    ASSERT_EQ(Info.mBlackLevelSeparate, InfoOrig.mBlackLevelSeparate);
+    checkHelper(Info);
+    checkHelper(Info, InfoOrig);
   }
 
   {
@@ -163,17 +162,8 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentConstructorGetters) {
         mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate));
     unique_ptr<CameraSensorInfo> Info(new CameraSensorInfo(*InfoOrig));
 
-    ASSERT_EQ(Info->mBlackLevel, mBlackLevel);
-    ASSERT_EQ(Info->mWhiteLevel, mWhiteLevel);
-    ASSERT_EQ(Info->mMinIso, mMinIso);
-    ASSERT_EQ(Info->mMaxIso, mMaxIso);
-    ASSERT_EQ(Info->mBlackLevelSeparate, mBlackLevelSeparate);
-
-    ASSERT_EQ(Info->mBlackLevel, InfoOrig->mBlackLevel);
-    ASSERT_EQ(Info->mWhiteLevel, InfoOrig->mWhiteLevel);
-    ASSERT_EQ(Info->mMinIso, InfoOrig->mMinIso);
-    ASSERT_EQ(Info->mMaxIso, InfoOrig->mMaxIso);
-    ASSERT_EQ(Info->mBlackLevelSeparate, InfoOrig->mBlackLevelSeparate);
+    checkHelper(*Info);
+    checkHelper(*Info, *InfoOrig);
   }
 
   {
@@ -181,17 +171,8 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentConstructorGetters) {
                                     mBlackLevelSeparate);
     unique_ptr<CameraSensorInfo> Info(new CameraSensorInfo(InfoOrig));
 
-    ASSERT_EQ(Info->mBlackLevel, mBlackLevel);
-    ASSERT_EQ(Info->mWhiteLevel, mWhiteLevel);
-    ASSERT_EQ(Info->mMinIso, mMinIso);
-    ASSERT_EQ(Info->mMaxIso, mMaxIso);
-    ASSERT_EQ(Info->mBlackLevelSeparate, mBlackLevelSeparate);
-
-    ASSERT_EQ(Info->mBlackLevel, InfoOrig.mBlackLevel);
-    ASSERT_EQ(Info->mWhiteLevel, InfoOrig.mWhiteLevel);
-    ASSERT_EQ(Info->mMinIso, InfoOrig.mMinIso);
-    ASSERT_EQ(Info->mMaxIso, InfoOrig.mMaxIso);
-    ASSERT_EQ(Info->mBlackLevelSeparate, InfoOrig.mBlackLevelSeparate);
+    checkHelper(*Info);
+    checkHelper(*Info, InfoOrig);
   }
 
   {
@@ -199,17 +180,8 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentConstructorGetters) {
         mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate));
     CameraSensorInfo Info(*InfoOrig);
 
-    ASSERT_EQ(Info.mBlackLevel, mBlackLevel);
-    ASSERT_EQ(Info.mWhiteLevel, mWhiteLevel);
-    ASSERT_EQ(Info.mMinIso, mMinIso);
-    ASSERT_EQ(Info.mMaxIso, mMaxIso);
-    ASSERT_EQ(Info.mBlackLevelSeparate, mBlackLevelSeparate);
-
-    ASSERT_EQ(Info.mBlackLevel, InfoOrig->mBlackLevel);
-    ASSERT_EQ(Info.mWhiteLevel, InfoOrig->mWhiteLevel);
-    ASSERT_EQ(Info.mMinIso, InfoOrig->mMinIso);
-    ASSERT_EQ(Info.mMaxIso, InfoOrig->mMaxIso);
-    ASSERT_EQ(Info.mBlackLevelSeparate, InfoOrig->mBlackLevelSeparate);
+    checkHelper(Info);
+    checkHelper(Info, *InfoOrig);
   }
 }
 
@@ -255,17 +227,8 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentGetters) {
 
     Info = InfoOrig;
 
-    ASSERT_EQ(Info.mBlackLevel, mBlackLevel);
-    ASSERT_EQ(Info.mWhiteLevel, mWhiteLevel);
-    ASSERT_EQ(Info.mMinIso, mMinIso);
-    ASSERT_EQ(Info.mMaxIso, mMaxIso);
-    ASSERT_EQ(Info.mBlackLevelSeparate, mBlackLevelSeparate);
-
-    ASSERT_EQ(Info.mBlackLevel, InfoOrig.mBlackLevel);
-    ASSERT_EQ(Info.mWhiteLevel, InfoOrig.mWhiteLevel);
-    ASSERT_EQ(Info.mMinIso, InfoOrig.mMinIso);
-    ASSERT_EQ(Info.mMaxIso, InfoOrig.mMaxIso);
-    ASSERT_EQ(Info.mBlackLevelSeparate, InfoOrig.mBlackLevelSeparate);
+    checkHelper(Info);
+    checkHelper(Info, InfoOrig);
   });
 
   ASSERT_NO_THROW({
@@ -275,17 +238,8 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentGetters) {
 
     *Info = *InfoOrig;
 
-    ASSERT_EQ(Info->mBlackLevel, mBlackLevel);
-    ASSERT_EQ(Info->mWhiteLevel, mWhiteLevel);
-    ASSERT_EQ(Info->mMinIso, mMinIso);
-    ASSERT_EQ(Info->mMaxIso, mMaxIso);
-    ASSERT_EQ(Info->mBlackLevelSeparate, mBlackLevelSeparate);
-
-    ASSERT_EQ(Info->mBlackLevel, InfoOrig->mBlackLevel);
-    ASSERT_EQ(Info->mWhiteLevel, InfoOrig->mWhiteLevel);
-    ASSERT_EQ(Info->mMinIso, InfoOrig->mMinIso);
-    ASSERT_EQ(Info->mMaxIso, InfoOrig->mMaxIso);
-    ASSERT_EQ(Info->mBlackLevelSeparate, InfoOrig->mBlackLevelSeparate);
+    checkHelper(*Info);
+    checkHelper(*Info, *InfoOrig);
   });
 
   ASSERT_NO_THROW({
@@ -295,17 +249,8 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentGetters) {
 
     *Info = InfoOrig;
 
-    ASSERT_EQ(Info->mBlackLevel, mBlackLevel);
-    ASSERT_EQ(Info->mWhiteLevel, mWhiteLevel);
-    ASSERT_EQ(Info->mMinIso, mMinIso);
-    ASSERT_EQ(Info->mMaxIso, mMaxIso);
-    ASSERT_EQ(Info->mBlackLevelSeparate, mBlackLevelSeparate);
-
-    ASSERT_EQ(Info->mBlackLevel, InfoOrig.mBlackLevel);
-    ASSERT_EQ(Info->mWhiteLevel, InfoOrig.mWhiteLevel);
-    ASSERT_EQ(Info->mMinIso, InfoOrig.mMinIso);
-    ASSERT_EQ(Info->mMaxIso, InfoOrig.mMaxIso);
-    ASSERT_EQ(Info->mBlackLevelSeparate, InfoOrig.mBlackLevelSeparate);
+    checkHelper(*Info);
+    checkHelper(*Info, InfoOrig);
   });
 
   ASSERT_NO_THROW({
@@ -315,17 +260,8 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentGetters) {
 
     Info = *InfoOrig;
 
-    ASSERT_EQ(Info.mBlackLevel, mBlackLevel);
-    ASSERT_EQ(Info.mWhiteLevel, mWhiteLevel);
-    ASSERT_EQ(Info.mMinIso, mMinIso);
-    ASSERT_EQ(Info.mMaxIso, mMaxIso);
-    ASSERT_EQ(Info.mBlackLevelSeparate, mBlackLevelSeparate);
-
-    ASSERT_EQ(Info.mBlackLevel, InfoOrig->mBlackLevel);
-    ASSERT_EQ(Info.mWhiteLevel, InfoOrig->mWhiteLevel);
-    ASSERT_EQ(Info.mMinIso, InfoOrig->mMinIso);
-    ASSERT_EQ(Info.mMaxIso, InfoOrig->mMaxIso);
-    ASSERT_EQ(Info.mBlackLevelSeparate, InfoOrig->mBlackLevelSeparate);
+    checkHelper(Info);
+    checkHelper(Info, *InfoOrig);
   });
 }
 
