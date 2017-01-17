@@ -120,7 +120,8 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
   int pitch = mRaw->pitch;
 
   /* Build a table to quickly look up "high" value */
-  char bittable[4096];
+  unique_ptr<char[]> bittable(new char[4096]);
+
   for (i = 0; i < 4096; i++) {
     int b = i;
     for (high = 0; high < 12; high++)
