@@ -104,6 +104,8 @@ extern "C" {
 #include <map>
 #include <list>
 #include <memory>
+#include <array>
+#include <algorithm>
 using namespace std;
 
 #ifdef HAVE_ZLIB

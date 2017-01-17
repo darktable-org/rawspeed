@@ -68,7 +68,7 @@ void HasselbladDecompressor::parseSOS() {
     uint32 td = b >> 4;
     if (td > 3)
       ThrowRDE("LJpegDecompressor::parseSOS: Invalid Huffman table selection");
-    if (!huff[td].initialized)
+    if (!huff[td])
       ThrowRDE("LJpegDecompressor::parseSOS: Invalid Huffman table selection, not defined.");
 
     if (count > 3)
@@ -107,9 +107,7 @@ void HasselbladDecompressor::parseSOS() {
 // Returns len bits as a signed value.
 // Highest bit is a sign bit
 inline int HasselbladDecompressor::getBits(int len) {
-  int diff = ph1_bits->getBits(len);
-  if ((diff & (1 << (len - 1))) == 0)
-    diff -= (1 << len) - 1;
+  int diff = HuffmanTable::signExtended(ph1_bits->getBits(len), len);
   if (diff == 65535)
     return -32768;
   return diff;
@@ -135,46 +133,7 @@ void HasselbladDecompressor::decodeScanHasselblad() {
 }
 
 int HasselbladDecompressor::HuffGetLength() {
-  int rv = 0;
-  int l, temp;
-  int code, val;
-
-  HuffmanTable *dctbl1 = &huff[0];
-  /*
-  * If the huffman code is less than 8 bits, we can use the fast
-  * table lookup to get its value.  It's more than 8 bits about
-  * 3-4% of the time.
-  */
-  ph1_bits->fill();
-
-  code = ph1_bits->peekBitsNoFill(8);
-  val = dctbl1->numbits[code];
-  l = val & 15;
-  if (l) {
-    ph1_bits->skipBitsNoFill(l);
-    return val >> 4;
-  }
-  ph1_bits->skipBits(8);
-  l = 8;
-
-  while (code > dctbl1->maxcode[l]) {
-    temp = ph1_bits->getBitsNoFill(1);
-    code = (code << 1) | temp;
-    l++;
-  }
-
-  /*
-  * With garbage input we may reach the sentinel value l = 17.
-  */
-
-  if (l > 16) {
-    ThrowRDE("Hasselblad, Corrupt JPEG data: bad Huffman code:%u\n", l);
-  } else {
-    rv = dctbl1->huffval[dctbl1->valptr[l] +
-                         ((int)(code - dctbl1->mincode[l]))];
-  }
-  return rv;
+  return huff[0]->decodeLength(*ph1_bits);
 }
-
 
 } // namespace RawSpeed

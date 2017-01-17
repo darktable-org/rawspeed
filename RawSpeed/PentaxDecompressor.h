@@ -2,7 +2,6 @@
 #define PENTAX_DECOMPRESSOR_H
 
 #include "LJpegDecompressor.h"
-#include "BitPumpMSB.h"
 #include "TiffIFD.h"
 
 /* 
@@ -29,15 +28,11 @@
 
 namespace RawSpeed {
 
-class PentaxDecompressor :
-  public LJpegDecompressor
+class PentaxDecompressor final : public LJpegDecompressor
 {
 public:
-  PentaxDecompressor(FileMap* file, RawImage img);
-  virtual ~PentaxDecompressor(void);
-  int HuffDecodePentax();
+  using LJpegDecompressor::LJpegDecompressor;
   void decodePentax(TiffIFD *root, uint32 offset, uint32 size);
-  BitPumpMSB *pentaxBits;
 };
 
 } // namespace RawSpeed

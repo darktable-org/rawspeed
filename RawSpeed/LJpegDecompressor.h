@@ -1,12 +1,14 @@
 #ifndef LJPEG_DECOMPRESSOR_H
 #define LJPEG_DECOMPRESSOR_H
 
+#include "HuffmanTable.h"
 #include "RawDecoder.h"
-#include "BitPumpMSB.h"
+
 /* 
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -27,7 +29,7 @@
 
 /*
  * The following enum and two structs are stolen from the IJG JPEG library
- * Comments added by tm. See Copyright in LJpegDecompressor.cpp
+ * Comments added by tm. See also Copyright in HuffmanTable.h.
  */ 
 
 namespace RawSpeed {
@@ -121,37 +123,6 @@ typedef struct JpegComponentInfo {
   uint32 superV; // Vertical Supersampling
 } JpegComponentInfo;
 
-/*
-* One of the following structures is created for each huffman coding
-* table.  We use the same structure for encoding and decoding, so there
-* may be some extra fields for encoding that aren't used in the decoding
-* and vice-versa.
-*/
-
-struct HuffmanTable {
-  /*
-  * These two fields directly represent the contents of a JPEG DHT
-  * marker
-  */
-  uint32 bits[17];
-  uint32 huffval[256];
-
-  /*
-  * The remaining fields are computed from the above to allow more
-  * efficient coding and decoding.  These fields should be considered
-  * private to the Huffman compression & decompression modules.
-  */
-
-  ushort16 mincode[17];
-  ushort16 maxcode[18];
-  ushort16 valptr[17];
-  uint32 numbits[256];
-  int* bigTable;
-  bool initialized;
-
-  static const uint32 TableBitDepth = 13;
-};
-
 class SOFInfo {
 public:
   SOFInfo() { w = h = cps = prec = 0; initialized = false;};
@@ -180,15 +151,12 @@ public:
 protected:
   virtual void parseSOF(SOFInfo* i);
   virtual void parseSOS();
-  virtual void createHuffmanTable(HuffmanTable *htbl);
-  virtual void createBigTable(HuffmanTable *htbl);
   virtual void decodeScan() {ThrowRDE("LJpegDecompressor: No Scan decoder found");};
   JpegMarker getNextMarker(bool allowskip);
   void parseDHT();
-  int HuffDecode(HuffmanTable *htbl);
-  inline int HuffExtend(uint32 len, uint32 diff) {
-    int x = diff;
-    return ((x & (1 << (len - 1))) == 0) ? x - (1 << len) + 1 : x;
+  // TODO: remove
+  inline int HuffDecode(HuffmanTable *htbl) {
+    return htbl->decodeNext(*bits);
   }
   ByteStream* input;
   BitPumpJPEG* bits;
@@ -201,8 +169,8 @@ protected:
   uint32 Pt;
   uint32 offX, offY;  // Offset into image where decoding should start
   uint32 skipX, skipY;   // Tile is larger than output, skip these border pixels
-  // allocate large HuffmanTable struct on heap to make libmusl happy
-  vector<HuffmanTable> huff = vector<HuffmanTable>(4);
+  array<HuffmanTable*, 4> huff {}; // 4 pointers into the store
+  vector<HuffmanTable> huffmanTableStore;
 };
 
 } // namespace RawSpeed

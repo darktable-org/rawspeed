@@ -31,18 +31,15 @@ NikonDecompressor::NikonDecompressor(FileMap* file, RawImage img) :
 }
 
 void NikonDecompressor::initTable(uint32 huffSelect) {
-  HuffmanTable *dctbl1 = &huff[0];
-  uint32 acc = 0;
-  for (uint32 i = 0; i < 16 ;i++) {
-    dctbl1->bits[i+1] = nikon_tree[huffSelect][i];
-    acc += dctbl1->bits[i+1];
-  }
-  dctbl1->bits[0] = 0;
+  if (huffmanTableStore.empty())
+    huffmanTableStore.emplace_back();
 
-  for (uint32 i = 0 ; i < acc; i++) {
-    dctbl1->huffval[i] = nikon_tree[huffSelect][i+16];
-  }
-  createHuffmanTable(dctbl1);
+  huff[0] = &huffmanTableStore.back();
+
+  uint32 count = huff[0]->setNCodesPerLength(Buffer(nikon_tree[huffSelect], 16));
+  huff[0]->setCodeValues(Buffer(nikon_tree[huffSelect]+16, count));
+
+  huff[0]->setup(mUseBigtable, false);
 }
 
 void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h, uint32 bitsPS, uint32 offset, uint32 size) {
@@ -107,6 +104,7 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
   ushort16 *dest;
   uint32 pitch = mRaw->pitch;
 
+  HuffmanTable *htbl = huff[0];
   int pLeft1 = 0;
   int pLeft2 = 0;
   uint32 cw = w / 2;
@@ -118,16 +116,16 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
       initTable(huffSelect + 1);
     }
     dest = (ushort16*) & draw[y*pitch];  // Adjust destination
-    pUp1[y&1] += HuffDecodeNikon(bits);
-    pUp2[y&1] += HuffDecodeNikon(bits);
+    pUp1[y&1] += htbl->decodeNext(bits);
+    pUp2[y&1] += htbl->decodeNext(bits);
     pLeft1 = pUp1[y&1];
     pLeft2 = pUp2[y&1];
     rawdata->setWithLookUp(clampbits(pLeft1,15), (uchar8*)dest++, &random);
     rawdata->setWithLookUp(clampbits(pLeft2,15), (uchar8*)dest++, &random);
     for (x = 1; x < cw; x++) {
       bits.checkPos();
-      pLeft1 += HuffDecodeNikon(bits);
-      pLeft2 += HuffDecodeNikon(bits);
+      pLeft1 += htbl->decodeNext(bits);
+      pLeft2 += htbl->decodeNext(bits);
       rawdata->setWithLookUp(clampbits(pLeft1,15), (uchar8*)dest++, &random);
       rawdata->setWithLookUp(clampbits(pLeft2,15), (uchar8*)dest++, &random);
     }
@@ -138,81 +136,6 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
   } else {
     mRaw->setTable(NULL);
   }
-
-}
-
-/*
-*--------------------------------------------------------------
-*
-* HuffDecode --
-*
-* Taken from Figure F.16: extract next coded symbol from
-* input stream.  This should becode a macro.
-*
-* Results:
-* Next coded symbol
-*
-* Side effects:
-* Bitstream is parsed.
-*
-*--------------------------------------------------------------
-*/
-int NikonDecompressor::HuffDecodeNikon(BitPumpMSB& bits) {
-  HuffmanTable *htbl = &huff[0];
-
-  bits.fill();
-  ushort16 code = bits.peekBitsNoFill(HuffmanTable::TableBitDepth);
-
-  int val = htbl->bigTable[code];
-  if ((val&0xff) !=  0xff) {
-    bits.skipBitsNoFill(val&0xff);
-    return val >> 8;
-  }
-
-  /*
-  * If the huffman code is less than 8 bits, we can use the fast
-  * table lookup to get its value.  It's more than 8 bits about
-  * 3-4% of the time.
-  */
-  ushort16 rv = 0;
-  code >>= HuffmanTable::TableBitDepth-8;
-  val = htbl->numbits[code];
-  uint32 l = val & 0xf;
-  if (l) {
-    bits.skipBitsNoFill(l);
-    rv = val >> 4;
-  }  else {
-    bits.skipBitsNoFill(8);
-    l = 8;
-    while (code > htbl->maxcode[l]) {
-      uint32 temp = bits.getBitsNoFill(1);
-      code = (code << 1) | temp;
-      l++;
-    }
-
-    /*
-    * With garbage input we may reach the sentinel value l = 17.
-    */
-
-    if (l > 16)
-      ThrowRDE("Corrupt JPEG data: bad Huffman code:%u\n", l);
-
-    rv = htbl->huffval[htbl->valptr[l] + (code - htbl->mincode[l])];
-  }
-
-  if (rv == 16)
-    return -32768;
-
-  /*
-  * Section F.2.2.1: decode the difference and
-  * Figure F.12: extend sign bit
-  */
-  uint32 len = rv & 0xf;
-  uint32 shl = rv >> 4;
-  int diff = ((bits.getBits(len - shl) << 1) + 1) << shl >> 1;
-  if ((diff & (1 << (len - 1))) == 0)
-    diff -= (1 << len) - !shl;
-  return diff;
 }
 
 } // namespace RawSpeed
