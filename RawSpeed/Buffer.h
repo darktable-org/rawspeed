@@ -51,6 +51,8 @@ public:
   Buffer() = default;
   // Allocates the memory
   Buffer(size_type size);
+  // Data already allocated
+  explicit Buffer(const uchar8* data, size_type size) : data(data), size(size) {}
   // creates a (non-owning) copy / view of rhs
   Buffer(const Buffer& rhs)
     : data(rhs.data), size(rhs.size) {}
@@ -71,6 +73,19 @@ public:
 
   // get pointer to memory at 'offset', make sure at least 'count' bytes are accessable
   const uchar8* getData(size_type offset, size_type count) const;
+
+  // convenience getter for single bytes
+  uchar8 operator[](size_type offset) const {
+    return *getData(offset, 1);
+  }
+
+  // std begin/end iterators to allow for range loop
+  const uchar8* begin() const {
+    return data;
+  }
+  const uchar8* end() const {
+    return data + size;
+  }
 
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap byte order if required
   template<typename T> inline T get(bool inNativeByteOrder, size_type offset, size_type index = 0) const {
@@ -100,9 +115,6 @@ public:
   }
 
 protected:
-  // Data already allocated
-  Buffer(const uchar8* data, size_type size) : data(data), size(size) {}
-
   const uchar8* data = nullptr;
   size_type size = 0;
   bool isOwner = false;

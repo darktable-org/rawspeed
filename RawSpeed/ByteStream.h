@@ -72,6 +72,11 @@ public:
     pos += count;
     return ret;
   }
+  inline Buffer getBuffer(size_type size) {
+    Buffer ret = getSubView(pos, size);
+    pos += size;
+    return ret;
+  }
 
   inline uchar8 peekByte(size_type i = 0) const {
     check(i+1);
