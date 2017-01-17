@@ -223,7 +223,8 @@ void LJpegDecompressor::parseDHT() {
   // in the huffmanTableStore to be later transalted to pointers.
   // neccessary because the addition of objects to the store invalidates pointers
   // so we can not directly store the pointers during processing the header
-  array<int, 4> index = {-1, -1, -1, -1};
+  array<int, 4> index;
+  index.fill(-1);
 
   while (headerLength)  {
     uint32 b = input->getByte();
