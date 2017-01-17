@@ -150,6 +150,8 @@ RawDecoder* makeDecoder(TiffRootIFDOwner _root, Buffer &data) {
     }
   }
 
+  delete root;
+
   throw TiffParserException("No decoder found. Sorry.");
   return nullptr;
 }
