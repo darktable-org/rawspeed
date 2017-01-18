@@ -530,7 +530,7 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
       mRaw->metadata.wbCoeffs[2] = (float) get2BE(tmp, 1250) / 256.0f;
     } else if (!strncmp((char *)tmp,"NRW ",4)) {
       uint32 offset = 0;
-      if (strncmp((char *)tmp+4,"0100",4) && wb->count > 72)
+      if (strncmp((char *)tmp + 4, "0100", 4) != 0 && wb->count > 72)
         offset = 56;
       else if (wb->count > 1572)
         offset = 1556;
