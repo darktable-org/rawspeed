@@ -77,7 +77,7 @@ class HuffmanTable
   static constexpr unsigned PayloadShift = 16;
   static constexpr unsigned FlagMask = 0x100;
   static constexpr unsigned LenMask = 0xff;
-  static constexpr unsigned LookupDepth = 13;
+  static constexpr unsigned LookupDepth = 11;
   vector<int32> decodeLookup;
 #else
   // lookup table containing 2 fields: payload:4|len:4
