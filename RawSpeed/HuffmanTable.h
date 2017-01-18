@@ -116,6 +116,9 @@ public:
     assert(data.getSize() == 16);
     nCodesPerLength.resize(17);
     copy(data.begin(), data.end(), &nCodesPerLength[1]);
+    // trim empty entries from the codes per length table on the right
+    while (nCodesPerLength.back() == 0)
+      nCodesPerLength.pop_back();
     return accumulate(data.begin(), data.end(), 0);
   }
 
@@ -133,9 +136,6 @@ public:
     // store the codes themselfs (bit patterns found inside the stream)
     vector<ushort16> codes;  // index is just sequential number
 
-    // trim empty entries from the codes per length table on the right
-    while (!nCodesPerLength.back())
-      nCodesPerLength.pop_back();
     int maxCodeLength = nCodesPerLength.size()-1;
 
     // Figure C.1: make table of Huffman code length for each symbol
