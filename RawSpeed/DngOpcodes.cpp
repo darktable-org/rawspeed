@@ -490,7 +490,7 @@ RawImage& OpcodeDeltaPerCol::createOutput( RawImage &in )
     int w = mAoi.getWidth();
     mDeltaX = new int[w];
     for (int i = 0; i < w; i++)
-      mDeltaX[i] = (int)(65535.0f * mDelta[i] + 0.5f);
+      mDeltaX[i] = lround(65535.0f * mDelta[i]);
   }
   return in;
 }
