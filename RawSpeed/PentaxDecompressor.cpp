@@ -25,25 +25,15 @@
 
 namespace RawSpeed {
 
-PentaxDecompressor::PentaxDecompressor(FileMap* file, RawImage img) :
-    LJpegDecompressor(file, img) {
-  pentaxBits = 0;
-}
-
-PentaxDecompressor::~PentaxDecompressor(void) {
-  if (pentaxBits)
-    delete(pentaxBits);
-  pentaxBits = 0;
-}
-
-
 void PentaxDecompressor::decodePentax(TiffIFD *root, uint32 offset, uint32 size) {
-  // Prepare huffmann table              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 = 16 entries
-  static const uchar8 pentax_tree[] =  { 0, 2, 3, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0,
-                                         3, 4, 2, 5, 1, 6, 0, 7, 8, 9, 10, 11, 12
-                                       };
-  //                                     0 1 2 3 4 5 6 7 8 9  0  1  2 = 13 entries
-  HuffmanTable *dctbl1 = &huff[0];
+  static const uchar8 pentax_tree[] =  {
+    0, 2, 3, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0,
+//  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5 = 16 entries of codes per bit length
+    3, 4, 2, 5, 1, 6, 0, 7, 8, 9, 10, 11, 12
+//  0  1  2  3  4  5  6  7  8  9  10  11  12       = 13 entries of code values
+  };
+
+  HuffmanTable ht;
 
   /* Attempt to read huffman table, if found in makernote */
   if (root->hasEntryRecursive((TiffTag)0x220)) {
@@ -63,30 +53,24 @@ void PentaxDecompressor::decodePentax(TiffIFD *root, uint32 offset, uint32 size)
       for (uint32 i = 0; i < depth; i++)
         v1[i] = stream.getByte();
 
-      /* Reset bits */
-      for (uint32 i = 0; i < 17; i++)
-        dctbl1->bits[i] = 0;
+      ht.nCodesPerLength.resize(17);
 
       /* Calculate codes and store bitcounts */
-      for (uint32 c = 0; c < depth; c++)
-      {
+      for (uint32 c = 0; c < depth; c++) {
         v2[c] = v0[c]>>(12-v1[c]);
-        dctbl1->bits[v1[c]]++;
+        ht.nCodesPerLength.at(v1[c])++;
       }
       /* Find smallest */
-      for (uint32 i = 0; i < depth; i++)
-      {
+      for (uint32 i = 0; i < depth; i++) {
         uint32 sm_val = 0xfffffff;
         uint32 sm_num = 0xff;
-        for (uint32 j = 0; j < depth; j++)
-        {
-          if(v2[j]<=sm_val)
-          {
+        for (uint32 j = 0; j < depth; j++) {
+          if(v2[j]<=sm_val) {
             sm_num = j;
             sm_val = v2[j];
           }
         }
-        dctbl1->huffval[i] = sm_num;
+        ht.codeValues.push_back(sm_num);
         v2[sm_num]=0xffffffff;
       }
     } else {
@@ -94,21 +78,14 @@ void PentaxDecompressor::decodePentax(TiffIFD *root, uint32 offset, uint32 size)
     }
   } else {
     /* Initialize with legacy data */
-    uint32 acc = 0;
-    for (uint32 i = 0; i < 16 ;i++) {
-      dctbl1->bits[i+1] = pentax_tree[i];
-      acc += dctbl1->bits[i+1];
-    }
-    dctbl1->bits[0] = 0;
-    for (uint32 i = 0 ; i < acc; i++) {
-      dctbl1->huffval[i] = pentax_tree[i+16];
-    }
+    auto nCodes = ht.setNCodesPerLength(Buffer(pentax_tree, 16));
+    assert(nCodes == 13); // see pentax_tree definition
+    ht.setCodeValues(Buffer(pentax_tree+16, nCodes));
   }
   frame.prec = 16; // set "dummy" precision for error checking in HuffDecode()
-  mUseBigtable = true;
-  createHuffmanTable(dctbl1);
+  ht.setup(true, false);
 
-  pentaxBits = new BitPumpMSB(mFile, offset, size);
+  BitPumpMSB bs(mFile, offset, size);
   uchar8 *draw = mRaw->getData();
   ushort16 *dest;
   uint32 w = mRaw->dim.x;
@@ -119,96 +96,21 @@ void PentaxDecompressor::decodePentax(TiffIFD *root, uint32 offset, uint32 size)
   int pLeft2 = 0;
 
   for (uint32 y = 0;y < h;y++) {
-    pentaxBits->checkPos();
+    bs.checkPos();
     dest = (ushort16*) & draw[y*mRaw->pitch];  // Adjust destination
-    pUp1[y&1] += HuffDecodePentax();
-    pUp2[y&1] += HuffDecodePentax();
+    pUp1[y&1] += ht.decodeNext(bs);
+    pUp2[y&1] += ht.decodeNext(bs);
     dest[0] = pLeft1 = pUp1[y&1];
     dest[1] = pLeft2 = pUp2[y&1];
     for (uint32 x = 2; x < w ; x += 2) {
-      pLeft1 += HuffDecodePentax();
-      pLeft2 += HuffDecodePentax();
+      pLeft1 += ht.decodeNext(bs);
+      pLeft2 += ht.decodeNext(bs);
       dest[x] =  pLeft1;
       dest[x+1] =  pLeft2;
       _ASSERTE(pLeft1 >= 0 && pLeft1 <= (65536));
       _ASSERTE(pLeft2 >= 0 && pLeft2 <= (65536));
     }
   }
-}
-
-/*
-*--------------------------------------------------------------
-*
-* HuffDecode --
-*
-* Taken from Figure F.16: extract next coded symbol from
-* input stream.  This should becode a macro.
-*
-* Results:
-* Next coded symbol
-*
-* Side effects:
-* Bitstream is parsed.
-*
-*--------------------------------------------------------------
-*/
-int PentaxDecompressor::HuffDecodePentax() {
-  HuffmanTable *htbl = &huff[0];
-
-  pentaxBits->fill();
-  uint32 code = pentaxBits->peekBitsNoFill(HuffmanTable::TableBitDepth);
-
-  if (htbl->bigTable) {
-    int val = htbl->bigTable[code];
-    if ((val&0xff) !=  0xff) {
-      pentaxBits->skipBitsNoFill(val&0xff);
-      return val >> 8;
-    }
-  }
-
-  /*
-  * If the huffman code is less than 8 bits, we can use the fast
-  * table lookup to get its value.  It's more than 8 bits about
-  * 3-4% of the time.
-  */
-  ushort16 rv = 0;
-  code >>= HuffmanTable::TableBitDepth-8;
-  uint32 val = htbl->numbits[code];
-  uint32 l = val & 15;
-  if (l) {
-    pentaxBits->skipBitsNoFill(l);
-    rv = val >> 4;
-  }  else {
-    pentaxBits->skipBits(8);
-    l = 8;
-    while (code > htbl->maxcode[l]) {
-      uint32 temp = pentaxBits->getBitsNoFill(1);
-      code = (code << 1) | temp;
-      l++;
-    }
-
-    /*
-    * With garbage input we may reach the sentinel value l = 17.
-    */
-
-    if (l > frame.prec || htbl->valptr[l] == 0xff)
-      ThrowRDE("Corrupt JPEG data: bad Huffman code:%u\n", l);
-
-    rv = htbl->huffval[htbl->valptr[l] + (code - htbl->mincode[l])];
-  }
-
-  if (rv == 16)
-    return -32768;
-
-  /*
-  * Section F.2.2.1: decode the difference and
-  * Figure F.12: extend sign bit
-  */
-
-  if (rv)
-   return HuffExtend(rv, pentaxBits->getBits(rv));
-
-  return 0;
 }
 
 } // namespace RawSpeed

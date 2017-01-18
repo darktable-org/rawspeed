@@ -37,7 +37,6 @@ public:
   bool uncorrectedRawValues;
 private:
   void initTable(uint32 huffSelect);
-  int HuffDecodeNikon(BitPumpMSB& bits);
 };
 
 static const uchar8 nikon_tree[][32] = {

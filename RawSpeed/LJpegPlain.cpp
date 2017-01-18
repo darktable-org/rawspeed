@@ -160,7 +160,7 @@ void LJpegPlain::decodeScanLeftGeneric() {
   uint32 pixGroup = 0;   // How many pixels per group.
 
   for (uint32 i = 0; i < comps; i++) {
-    dctbl[i] = &huff[frame.compInfo[i].dcTblNo];
+    dctbl[i] = huff[frame.compInfo[i].dcTblNo];
     samplesH[i] = frame.compInfo[i].superH;
     if (!isPowerOfTwo(samplesH[i]))
       ThrowRDE("LJpegPlain::decodeScanLeftGeneric: Horizontal sampling is not power of two.");
@@ -334,9 +334,9 @@ void LJpegPlain::decodeScanLeft4_2_0() {
   _ASSERTE(frame.cps == COMPS);
   _ASSERTE(skipX == 0);
 
-  HuffmanTable *dctbl1 = &huff[frame.compInfo[0].dcTblNo];
-  HuffmanTable *dctbl2 = &huff[frame.compInfo[1].dcTblNo];
-  HuffmanTable *dctbl3 = &huff[frame.compInfo[2].dcTblNo];
+  HuffmanTable *dctbl1 = huff[frame.compInfo[0].dcTblNo];
+  HuffmanTable *dctbl2 = huff[frame.compInfo[1].dcTblNo];
+  HuffmanTable *dctbl3 = huff[frame.compInfo[2].dcTblNo];
 
   ushort16 *predict;      // Prediction pointer
 
@@ -478,9 +478,9 @@ void LJpegPlain::decodeScanLeft4_2_2() {
   _ASSERTE(frame.cps == COMPS);
   _ASSERTE(skipX == 0);
 
-  HuffmanTable *dctbl1 = &huff[frame.compInfo[0].dcTblNo];
-  HuffmanTable *dctbl2 = &huff[frame.compInfo[1].dcTblNo];
-  HuffmanTable *dctbl3 = &huff[frame.compInfo[2].dcTblNo];
+  HuffmanTable *dctbl1 = huff[frame.compInfo[0].dcTblNo];
+  HuffmanTable *dctbl2 = huff[frame.compInfo[1].dcTblNo];
+  HuffmanTable *dctbl3 = huff[frame.compInfo[2].dcTblNo];
 
   mRaw->metadata.subsampling.x = 2;
   mRaw->metadata.subsampling.y = 1;
@@ -605,8 +605,8 @@ void LJpegPlain::decodeScanLeft2Comps() {
 
   uchar8 *draw = mRaw->getData();
   // First line
-  HuffmanTable *dctbl1 = &huff[frame.compInfo[0].dcTblNo];
-  HuffmanTable *dctbl2 = &huff[frame.compInfo[1].dcTblNo];
+  HuffmanTable *dctbl1 = huff[frame.compInfo[0].dcTblNo];
+  HuffmanTable *dctbl2 = huff[frame.compInfo[1].dcTblNo];
 
   //Prepare slices (for CR2)
   uint32 slices = (uint32)slicesW.size() * (frame.h - skipY);
@@ -706,9 +706,9 @@ void LJpegPlain::decodeScanLeft2Comps() {
 void LJpegPlain::decodeScanLeft3Comps() {
   uchar8 *draw = mRaw->getData();
   // First line
-  HuffmanTable *dctbl1 = &huff[frame.compInfo[0].dcTblNo];
-  HuffmanTable *dctbl2 = &huff[frame.compInfo[1].dcTblNo];
-  HuffmanTable *dctbl3 = &huff[frame.compInfo[2].dcTblNo];
+  HuffmanTable *dctbl1 = huff[frame.compInfo[0].dcTblNo];
+  HuffmanTable *dctbl2 = huff[frame.compInfo[1].dcTblNo];
+  HuffmanTable *dctbl3 = huff[frame.compInfo[2].dcTblNo];
 
   //Prepare slices (for CR2)
   uint32 slices = (uint32)slicesW.size() * (frame.h - skipY);
@@ -812,10 +812,10 @@ void LJpegPlain::decodeScanLeft3Comps() {
 
 void LJpegPlain::decodeScanLeft4Comps() {
   // First line
-  HuffmanTable *dctbl1 = &huff[frame.compInfo[0].dcTblNo];
-  HuffmanTable *dctbl2 = &huff[frame.compInfo[1].dcTblNo];
-  HuffmanTable *dctbl3 = &huff[frame.compInfo[2].dcTblNo];
-  HuffmanTable *dctbl4 = &huff[frame.compInfo[3].dcTblNo];
+  HuffmanTable *dctbl1 = huff[frame.compInfo[0].dcTblNo];
+  HuffmanTable *dctbl2 = huff[frame.compInfo[1].dcTblNo];
+  HuffmanTable *dctbl3 = huff[frame.compInfo[2].dcTblNo];
+  HuffmanTable *dctbl4 = huff[frame.compInfo[3].dcTblNo];
 
   if (mCanonDoubleHeight) {
     frame.h *= 2;
