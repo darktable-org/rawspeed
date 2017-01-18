@@ -283,8 +283,8 @@ string X3fPropertyCollection::getString( ByteStream *bytes ) {
     }
   }
   if (start != src_end) {
-    UTF8* dest = new UTF8[i * 4 + 1];
-    memset(dest, 0, i * 4 + 1);
+    UTF8 *dest = new UTF8[i * 4UL + 1];
+    memset(dest, 0, i * 4UL + 1);
     if (ConvertUTF16toUTF8(&start, src_end, &dest, &dest[i * 4 - 1])) {
       string ret((const char*)dest);
       delete[] dest;

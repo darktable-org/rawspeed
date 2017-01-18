@@ -299,7 +299,7 @@ void DngDecoderSlices::decodeDeflate(const DngSliceElement &e,
     ThrowRDE("DngDecoderSlices::decodeDeflate: tile offset plus size is longer "
              "than file. Truncated file.");
 
-  unsigned long dstLen = e.width * e.height * 4;
+  uLongf dstLen = e.width * e.height * 4UL;
   const unsigned char *cBuffer = mFile->getData(e.byteOffset, e.byteCount);
   int predFactor = 0;
 

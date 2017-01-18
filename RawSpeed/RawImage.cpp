@@ -90,7 +90,7 @@ void RawImageData::createData() {
   if (data)
     ThrowRDE("RawImageData: Duplicate data allocation in createData.");
   pitch = (((dim.x * bpp) + 15) / 16) * 16;
-  data = (uchar8*)_aligned_malloc(pitch * dim.y, 16);
+  data = (uchar8 *)_aligned_malloc((size_t)pitch * dim.y, 16);
   if (!data)
     ThrowRDE("RawImageData::createData: Memory Allocation failed.");
   uncropped_dim = dim;
@@ -186,8 +186,9 @@ void RawImageData::createBadPixelMap()
   if (!isAllocated())
     ThrowRDE("RawImageData::createBadPixelMap: (internal) Bad pixel map cannot be allocated before image.");
   mBadPixelMapPitch = (((uncropped_dim.x / 8) + 15) / 16) * 16;
-  mBadPixelMap = (uchar8*)_aligned_malloc(mBadPixelMapPitch * uncropped_dim.y, 16);
-  memset(mBadPixelMap, 0, mBadPixelMapPitch * uncropped_dim.y);
+  mBadPixelMap = (uchar8 *)_aligned_malloc(
+      (size_t)mBadPixelMapPitch * uncropped_dim.y, 16);
+  memset(mBadPixelMap, 0, (size_t)mBadPixelMapPitch * uncropped_dim.y);
   if (!mBadPixelMap)
     ThrowRDE("RawImageData::createData: Memory Allocation failed.");
 }
@@ -401,14 +402,14 @@ void RawImageData::expandBorder(iRectangle2D validData)
     uchar8* src_pos = getData(0, validData.pos.y);
     for (int y = 0; y < validData.pos.y; y++ ) {
       uchar8* dst_pos = getData(0, y);
-      memcpy(dst_pos, src_pos, dim.x*bpp);
+      memcpy(dst_pos, src_pos, (size_t)dim.x * bpp);
     }
   }
   if (validData.getBottom() < dim.y) {
     uchar8* src_pos = getData(0, validData.getBottom()-1);
     for (int y = validData.getBottom(); y < dim.y; y++ ) {
       uchar8* dst_pos = getData(0, y);
-      memcpy(dst_pos, src_pos, dim.x*bpp);
+      memcpy(dst_pos, src_pos, (size_t)dim.x * bpp);
     }
   }
 }
@@ -421,7 +422,7 @@ void RawImageData::clearArea( iRectangle2D area, uchar8 val /*= 0*/ )
     return;
 
   for (int y = area.getTop(); y < area.getBottom(); y++)
-    memset(getData(area.getLeft(),y), val, area.getWidth() * bpp);
+    memset(getData(area.getLeft(), y), val, (size_t)area.getWidth() * bpp);
 }
 
 

@@ -77,7 +77,7 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
   if (csize  > 1)
     step = curve.size() / (csize - 1);
   if (v0 == 68 && v1 == 32 && step > 0) {
-    for (uint32 i = 0; i < csize; i++)
+    for (size_t i = 0; i < csize; i++)
       curve[i*step] = metadata->getShort();
     for (size_t i = 0; i < curve.size()-1; i++)
       curve[i] = (curve[i-i%step] * (step - i % step) +
@@ -85,7 +85,7 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
     metadata->setPosition(562);
     split = metadata->getShort();
   } else if (v0 != 70 && csize <= 0x4001) {
-    curve.resize(csize+1);
+    curve.resize(csize + 1UL);
     for (uint32 i = 0; i < csize; i++) {
       curve[i] = metadata->getShort();
     }
