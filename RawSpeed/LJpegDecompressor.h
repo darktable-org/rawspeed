@@ -138,7 +138,7 @@ public:
 class LJpegDecompressor
 {
 public:
-  LJpegDecompressor(FileMap* file, RawImage img);
+  LJpegDecompressor(FileMap *file, const RawImage &img);
   virtual ~LJpegDecompressor(void);
   virtual void startDecoder(uint32 offset, uint32 size, uint32 offsetX, uint32 offsetY);
   virtual void getSOF(SOFInfo* i, uint32 offset, uint32 size);

@@ -34,7 +34,7 @@ void ThrowFIE(const char* fmt, ...) __attribute__ ((format (printf, 1, 2)));
 class FileIOException: public RawDecoderException
 {
 public:
-  FileIOException(const std::string);
+  FileIOException(const std::string &);
 };
 
 } // namespace RawSpeed

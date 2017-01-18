@@ -511,7 +511,8 @@ void RawDecoder::Decode12BitRawUnpacked(ByteStream &input, uint32 w, uint32 h) {
   }
 }
 
-bool RawDecoder::checkCameraSupported(CameraMetaData *meta, string make, string model, string mode) {
+bool RawDecoder::checkCameraSupported(CameraMetaData *meta, string make,
+                                      string model, const string &mode) {
   TrimSpaces(make);
   TrimSpaces(model);
   mRaw->metadata.make = make;
@@ -540,7 +541,8 @@ bool RawDecoder::checkCameraSupported(CameraMetaData *meta, string make, string 
   return true;
 }
 
-void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model, string mode, int iso_speed) {
+void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model,
+                             const string &mode, int iso_speed) {
   mRaw->metadata.isoSpeed = iso_speed;
   TrimSpaces(make);
   TrimSpaces(model);

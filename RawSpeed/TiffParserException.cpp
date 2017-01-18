@@ -29,7 +29,8 @@
 
 namespace RawSpeed {
 
-TiffParserException::TiffParserException(const string _msg) : runtime_error(_msg) {
+TiffParserException::TiffParserException(const string &_msg)
+    : runtime_error(_msg) {
   _RPT1(0, "TIFF Exception: %s\n", _msg.c_str());
 }
 

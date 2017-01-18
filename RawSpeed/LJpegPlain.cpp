@@ -24,8 +24,8 @@ http://www.klauspost.com
 
 namespace RawSpeed {
 
-LJpegPlain::LJpegPlain(FileMap* file, RawImage img) :
-    LJpegDecompressor(file, img) {
+LJpegPlain::LJpegPlain(FileMap *file, const RawImage &img)
+    : LJpegDecompressor(file, img) {
   offset = 0;
   slice_width = 0;
 }

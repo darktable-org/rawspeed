@@ -42,7 +42,7 @@ protected:
   uint32 black_level;
   TiffIFD *mRootIFD;
   string make, model;
-  string getXMPTag(string xmp, string tag);
+  string getXMPTag(const string &xmp, const string &tag);
   void DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32 width, uint32 height);
 };
 

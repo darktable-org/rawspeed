@@ -24,8 +24,7 @@
 
 namespace RawSpeed {
 
-ColorFilterArray::ColorFilterArray( iPoint2D _size)
-{
+ColorFilterArray::ColorFilterArray(const iPoint2D &_size) {
   cfa = NULL;
   setSize(_size);
 }
@@ -70,8 +69,7 @@ ColorFilterArray& ColorFilterArray::operator=(const ColorFilterArray& other )
   return *this;
 }
 
-void ColorFilterArray::setSize( iPoint2D _size )
-{
+void ColorFilterArray::setSize(const iPoint2D &_size) {
   size = _size;
   if (cfa)
     delete[] cfa;

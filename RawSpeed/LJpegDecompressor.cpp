@@ -26,8 +26,8 @@
 
 namespace RawSpeed {
 
-LJpegDecompressor::LJpegDecompressor(FileMap* file, RawImage img):
-    mFile(file), mRaw(img) {
+LJpegDecompressor::LJpegDecompressor(FileMap *file, const RawImage &img)
+    : mFile(file), mRaw(img) {
   input = 0;
   skipX = skipY = 0;
   mDNGCompatible = false;

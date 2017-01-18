@@ -41,11 +41,10 @@ RawImageData::RawImageData(void):
   mDitherScale = TRUE;
 }
 
-RawImageData::RawImageData(iPoint2D _dim, uint32 _bpc, uint32 _cpp) :
-    dim(_dim), isCFA(_cpp==1), cfa(iPoint2D(0,0)),
-    blackLevel(-1), whitePoint(65536),
-    dataRefCount(0), data(0), cpp(_cpp), bpp(_bpc * _cpp),
-    uncropped_dim(0, 0), table(NULL) {
+RawImageData::RawImageData(const iPoint2D &_dim, uint32 _bpc, uint32 _cpp)
+    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), blackLevel(-1),
+      whitePoint(65536), dataRefCount(0), data(0), cpp(_cpp), bpp(_bpc * _cpp),
+      uncropped_dim(0, 0), table(NULL) {
   blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
   mBadPixelMap = NULL;
   mDitherScale = TRUE;
@@ -352,8 +351,8 @@ void RawImageData::fixBadPixelsThread( int start_y, int end_y )
   }
 }
 
-void RawImageData::blitFrom(RawImage src, iPoint2D srcPos, iPoint2D size, iPoint2D destPos )
-{
+void RawImageData::blitFrom(RawImage src, const iPoint2D &srcPos,
+                            const iPoint2D &size, const iPoint2D &destPos) {
   iRectangle2D src_rect(srcPos, size);
   iRectangle2D dest_rect(destPos, size);
   src_rect = src_rect.getOverlap(iRectangle2D(iPoint2D(0,0), src->dim));

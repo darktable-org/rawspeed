@@ -310,9 +310,12 @@ int main(int argc, char **argv) {
       // if neither hashes exist, nothing to append...
       if (oldfile.good() || newfile.good()) {
         // DIFF(1): -N, --new-file  treat absent files as empty
-        if (system(("diff -N -u0 \"" + oldhash + "\" \"" + newhash +
-                    "\" >> rstest.log")
-                       .c_str()))
+        string cmd("diff -N -u0 \"");
+        cmd += oldhash;
+        cmd += "\" \"";
+        cmd += newhash;
+        cmd += "\" >> rstest.log";
+        if (system(cmd.c_str()))
           ; // this is only to supress the warn-unused-result warning
       }
 #endif

@@ -34,9 +34,8 @@ RawImageDataU16::RawImageDataU16(void)
   bpp = 2;
 }
 
-RawImageDataU16::RawImageDataU16(iPoint2D _dim, uint32 _cpp) :
-RawImageData(_dim, 2, _cpp)
-{
+RawImageDataU16::RawImageDataU16(const iPoint2D &_dim, uint32 _cpp)
+    : RawImageData(_dim, 2, _cpp) {
   dataType = TYPE_USHORT16;
 }
 

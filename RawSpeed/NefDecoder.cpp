@@ -386,7 +386,7 @@ string NefDecoder::getMode() {
   return mode.str();
 }
 
-string NefDecoder::getExtendedMode(string mode) {
+string NefDecoder::getExtendedMode(const string &mode) {
   ostringstream extended_mode;
 
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);

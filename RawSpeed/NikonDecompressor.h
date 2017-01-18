@@ -31,7 +31,8 @@ class NikonDecompressor :
   public LJpegDecompressor
 {
 public:
-  NikonDecompressor(FileMap* file, RawImage img );
+  NikonDecompressor(FileMap *file, const RawImage &img);
+
 public:
   void DecompressNikon(ByteStream *meta, uint32 w, uint32 h, uint32 bitsPS, uint32 offset, uint32 size);
   bool uncorrectedRawValues;

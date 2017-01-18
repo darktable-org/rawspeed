@@ -29,9 +29,8 @@
 
 namespace RawSpeed {
 
-FileIOException::FileIOException(const string error) : RawDecoderException(error) {
-}
-
+FileIOException::FileIOException(const string &error)
+    : RawDecoderException(error) {}
 
 void ThrowFIE(const char* fmt, ...) {
   va_list val;

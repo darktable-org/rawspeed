@@ -45,8 +45,8 @@ public:
   bool hasEntryRecursive(CiffTag tag);
   CiffEntry* getEntryRecursive(CiffTag tag);
   CiffEntry* getEntryRecursiveWhere(CiffTag tag, uint32 isValue);
-  CiffEntry* getEntryRecursiveWhere(CiffTag tag, string isValue);
-  vector<CiffIFD*> getIFDsWithTagWhere(CiffTag tag, string isValue);
+  CiffEntry *getEntryRecursiveWhere(CiffTag tag, const string &isValue);
+  vector<CiffIFD *> getIFDsWithTagWhere(CiffTag tag, const string &isValue);
   vector<CiffIFD*> getIFDsWithTagWhere(CiffTag tag, uint32 isValue);
   FileMap* getFileMap() {return mFile;};
 protected:

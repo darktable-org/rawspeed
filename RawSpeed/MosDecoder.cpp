@@ -48,7 +48,7 @@ MosDecoder::~MosDecoder(void) {
   delete mRootIFD;
 }
 
-string MosDecoder::getXMPTag(string xmp, string tag) {
+string MosDecoder::getXMPTag(const string &xmp, const string &tag) {
   string::size_type start = xmp.find("<tiff:"+tag+">");
   string::size_type end = xmp.find("</tiff:"+tag+">");
   if (start == string::npos || end == string::npos || end <= start)

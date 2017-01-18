@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "StdAfx.h"
 #include "CameraMetaData.h"
 /*
@@ -66,12 +68,13 @@ static inline string getId(string make, string model, string mode)
 }
 
 Camera* CameraMetaData::getCamera(string make, string model, string mode) {
- auto camera = cameras.find(getId(make, model, mode));
- return camera == cameras.end() ? nullptr : camera->second;
+  auto camera =
+      cameras.find(getId(std::move(make), std::move(model), std::move(mode)));
+  return camera == cameras.end() ? nullptr : camera->second;
 }
 
 Camera* CameraMetaData::getCamera(string make, string model) {
-  string id = getId(make, model, "");
+  string id = getId(std::move(make), std::move(model), "");
 
   // do a prefix match, i.e. the make and model match, but not mode.
   auto iter = cameras.lower_bound(id);
@@ -83,7 +86,7 @@ Camera* CameraMetaData::getCamera(string make, string model) {
 }
 
 bool CameraMetaData::hasCamera(string make, string model, string mode) {
-  return getCamera(make, model, mode);
+  return getCamera(std::move(make), std::move(model), std::move(mode));
 }
 
 Camera* CameraMetaData::getChdkCamera(uint32 filesize) {
@@ -117,16 +120,14 @@ bool CameraMetaData::addCamera( Camera* cam )
   return true;
 }
 
-void CameraMetaData::disableMake( string make )
-{
+void CameraMetaData::disableMake(const string &make) {
   for (auto cam : cameras) {
     if (cam.second->make == make)
       cam.second->supported = false;
   }
 }
 
-void CameraMetaData::disableCamera( string make, string model )
-{
+void CameraMetaData::disableCamera(const string &make, const string &model) {
   for (auto cam : cameras) {
     if (cam.second->make == make && cam.second->model == model)
       cam.second->supported = false;

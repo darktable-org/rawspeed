@@ -109,7 +109,8 @@ public:
   void setCpp(uint32 val);
   virtual void createData();
   virtual void destroyData();
-  void blitFrom(const RawImage src, iPoint2D srcPos, iPoint2D size, iPoint2D destPos);
+  void blitFrom(const RawImage src, const iPoint2D &srcPos,
+                const iPoint2D &size, const iPoint2D &destPos);
   RawSpeed::RawImageType getDataType() const { return dataType; }
   uchar8* getData();
   uchar8* getData(uint32 x, uint32 y);    // Not super fast, but safe. Don't use per pixel.
@@ -156,7 +157,7 @@ public:
 protected:
   RawImageType dataType;
   RawImageData(void);
-  RawImageData(iPoint2D dim, uint32 bpp, uint32 cpp=1);
+  RawImageData(const iPoint2D &dim, uint32 bpp, uint32 cpp = 1);
   virtual void scaleValues(int start_y, int end_y) = 0;
   virtual void doLookup(int start_y, int end_y) = 0;
   virtual void fixBadPixel( uint32 x, uint32 y, int component = 0) = 0;
@@ -187,7 +188,7 @@ protected:
   virtual void doLookup(int start_y, int end_y);
 
   RawImageDataU16(void);
-  RawImageDataU16(iPoint2D dim, uint32 cpp=1);
+  RawImageDataU16(const iPoint2D &dim, uint32 cpp = 1);
   friend class RawImage;
 };
 
@@ -203,7 +204,7 @@ protected:
   virtual void fixBadPixel( uint32 x, uint32 y, int component = 0);
   virtual void doLookup(int start_y, int end_y);
   RawImageDataFloat(void);
-  RawImageDataFloat(iPoint2D dim, uint32 cpp=1);
+  RawImageDataFloat(const iPoint2D &dim, uint32 cpp = 1);
   friend class RawImage;
 };
 

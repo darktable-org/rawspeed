@@ -26,9 +26,8 @@
 
 namespace RawSpeed {
 
-NikonDecompressor::NikonDecompressor(FileMap* file, RawImage img) :
-    LJpegDecompressor(file, img) {
-}
+NikonDecompressor::NikonDecompressor(FileMap *file, const RawImage &img)
+    : LJpegDecompressor(file, img) {}
 
 void NikonDecompressor::initTable(uint32 huffSelect) {
   if (huffmanTableStore.empty())
