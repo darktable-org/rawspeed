@@ -259,7 +259,7 @@ RawImage Cr2Decoder::decodeRawInternal() {
     } else {
       return decodeNewFormat();
     }
-  } catch (TiffParserException) {
+  } catch (TiffParserException &) {
     ThrowRDE("CR2 Decoder: Unsupported format.");
     return nullptr; // silence the -Wreturn-type warning
   }

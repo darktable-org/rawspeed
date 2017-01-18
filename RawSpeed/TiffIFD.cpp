@@ -42,7 +42,7 @@ TiffIFD::TiffIFD(const DataBuffer& data, uint32 offset, TiffIFD *parent) : paren
     TiffEntryOwner t;
     try {
       t = make_unique<TiffEntry>(bs);
-    } catch (IOException) { // Ignore unparsable entry
+    } catch (IOException &) { // Ignore unparsable entry
       // fix probably broken position due to interruption by exception
       bs.setPosition(offset + 2 + (i+1)*12);
       continue;

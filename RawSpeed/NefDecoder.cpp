@@ -233,12 +233,12 @@ void NefDecoder::DecodeUncompressed() {
         readCoolpixSplitRaw(in, size, pos, width*bitPerPixel / 8);
       else
         readUncompressedRaw(in, size, pos, width*bitPerPixel / 8, bitPerPixel, bitorder ? BitOrder_Jpeg : BitOrder_Plain);
-    } catch (RawDecoderException e) {
+    } catch (RawDecoderException &e) {
       if (i>0)
         mRaw->setError(e.what());
       else
         throw;
-    } catch (IOException e) {
+    } catch (IOException &e) {
       if (i>0)
         mRaw->setError(e.what());
       else

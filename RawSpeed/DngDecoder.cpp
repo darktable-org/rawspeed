@@ -59,7 +59,8 @@ RawImage DngDecoder::decodeRawInternal() {
     bool isSubsampled = false;
     try {
       isSubsampled = (*i)->getEntry(NEWSUBFILETYPE)->getInt() & 1; // bit 0 is on if image is subsampled
-    } catch (TiffParserException) {}
+    } catch (TiffParserException &) {
+    }
     if (!(compression == 7 ||
 #ifdef HAVE_ZLIB
           compression == 8 ||
@@ -112,7 +113,7 @@ RawImage DngDecoder::decodeRawInternal() {
   try {
     mRaw->dim.x = raw->getEntry(IMAGEWIDTH)->getInt();
     mRaw->dim.y = raw->getEntry(IMAGELENGTH)->getInt();
-  } catch (TiffParserException) {
+  } catch (TiffParserException &) {
     ThrowRDE("DNG Decoder: Could not read basic image information.");
   }
 
@@ -232,7 +233,7 @@ RawImage DngDecoder::decodeRawInternal() {
           }
         }
 
-      } catch (TiffParserException) {
+      } catch (TiffParserException &) {
         ThrowRDE("DNG Decoder: Unsupported format, uncompressed with no strips.");
       }
     } else if (compression == 7 || compression == 8 || compression == 0x884c) {
@@ -307,13 +308,13 @@ RawImage DngDecoder::decodeRawInternal() {
 
         if (mRaw->errors.size() >= nSlices)
           ThrowRDE("DNG Decoding: Too many errors encountered. Giving up.\nFirst Error:%s", mRaw->errors[0]);
-      } catch (TiffParserException e) {
+      } catch (TiffParserException &e) {
         ThrowRDE("DNG Decoder: Unsupported format, tried strips and tiles:\n%s", e.what());
       }
     } else {
       ThrowRDE("DNG Decoder: Unknown compression: %u", compression);
     }
-  } catch (TiffParserException e) {
+  } catch (TiffParserException &e) {
     ThrowRDE("DNG Decoder: Image could not be read:\n%s", e.what());
   }
 

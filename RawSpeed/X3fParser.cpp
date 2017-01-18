@@ -52,10 +52,10 @@ X3fParser::X3fParser(FileMap* file) {
       bytes->setPosition(0);
       decoder = new X3fDecoder(file);
       readDirectory();
-    } catch (IOException e) {
+    } catch (IOException &e) {
       ThrowRDE("X3F Decoder: IO Error while reading header: %s", e.what());
     }
-  } catch (RawDecoderException e) {
+  } catch (RawDecoderException &e) {
     freeObjects();
     throw e;
   }
@@ -333,7 +333,8 @@ void X3fPropertyCollection::addProperties( ByteStream *bytes, uint32 offset, uin
       bytes->setPosition(value_pos * 2 + data_start);
       string val = getString(bytes);
       props[key] = val;
-    } catch (IOException) {}
+    } catch (IOException &) {
+    }
     bytes->setPosition(old_pos);
   }
 }

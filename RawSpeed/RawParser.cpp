@@ -54,14 +54,14 @@ RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
   if (MrwDecoder::isMRW(mInput)) {
     try {
       return new MrwDecoder(mInput);
-    } catch (RawDecoderException) {
+    } catch (RawDecoderException &) {
     }
   }
 
   if (0 == memcmp(&data[0], "ARRI\x12\x34\x56\x78", 8)) {
     try {
       return new AriDecoder(mInput);
-    } catch (RawDecoderException) {
+    } catch (RawDecoderException &) {
     }
   }
 
@@ -84,7 +84,7 @@ RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
         // -> so we try parsing as Tiff first and add it as data if parsing fails
         try {
           rootIFD->add(parseTiff(mInput->getSubView(second_ifd)));
-        } catch (TiffParserException) {
+        } catch (TiffParserException &) {
           // the offset will be interpreted relative to the rootIFD where this subIFD gets inserted
           uint32 rawOffset = second_ifd - first_ifd;
           subIFD->add(make_unique<TiffEntry>(FUJI_STRIPOFFSETS, TIFF_OFFSET, 1, ByteStream::createCopy(&rawOffset, 4)));
@@ -123,19 +123,21 @@ RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
       rootIFD->add(move(subIFD));
 
       return makeDecoder(move(rootIFD), *mInput);
-    } catch (TiffParserException) {}
+    } catch (TiffParserException &) {
+    }
     ThrowRDE("No decoder found. Sorry.");
   }
 
   // Ordinary TIFF images
   try {
     return makeDecoder(parseTiff(*mInput), *mInput);
-  } catch (TiffParserException) {}
+  } catch (TiffParserException &) {
+  }
 
   try {
     X3fParser parser(mInput);
     return parser.getDecoder();
-  } catch (RawDecoderException) {
+  } catch (RawDecoderException &) {
   }
 
   // CIFF images
@@ -143,7 +145,7 @@ RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
     CiffParser p(mInput);
     p.parseData();
     return p.getDecoder();
-  } catch (CiffParserException) {
+  } catch (CiffParserException &) {
   }
 
   // Detect camera on filesize (CHDK).
@@ -152,7 +154,7 @@ RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
 
     try {
       return new NakedDecoder(mInput, c);
-    } catch (RawDecoderException) {
+    } catch (RawDecoderException &) {
     }
   }
 

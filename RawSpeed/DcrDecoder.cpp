@@ -88,7 +88,7 @@ RawImage DcrDecoder::decodeRawInternal() {
 
     try {
       decodeKodak65000(input, width, height);
-    } catch (IOException) {
+    } catch (IOException &) {
       mRaw->setError("IO error occurred while reading image. Returning partial result.");
     }
 

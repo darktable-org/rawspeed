@@ -47,7 +47,7 @@ CiffIFD::CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 _depth) {
     CiffEntry *t = NULL;
     try {
       t = new CiffEntry(f, start, entry_offset);
-    } catch (IOException) { // Ignore unparsable entry
+    } catch (IOException &) { // Ignore unparsable entry
       continue;
     }
 
@@ -55,9 +55,10 @@ CiffIFD::CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 _depth) {
       try {
         mSubIFD.push_back(new CiffIFD(f, t->data_offset, t->data_offset+t->bytesize, depth));
         delete(t);
-      } catch (CiffParserException) { // Unparsable subifds are added as entries
+      } catch (
+          CiffParserException &) { // Unparsable subifds are added as entries
         mEntry[t->tag] = t;
-      } catch (IOException) { // Unparsable private data are added as entries
+      } catch (IOException &) { // Unparsable private data are added as entries
         mEntry[t->tag] = t;
       }
     } else {

@@ -62,7 +62,7 @@ void LJpegDecompressor::getSOF(SOFInfo* sof, uint32 offset, uint32 size) {
         return;
       }
     }
-  } catch (IOException) {
+  } catch (IOException &) {
     ThrowRDE("LJpegDecompressor: IO exception, read outside file. Corrupt File.");
   }
 }
@@ -127,7 +127,7 @@ void LJpegDecompressor::startDecoder(uint32 offset, uint32 size, uint32 offsetX,
       }
     }
 
-  } catch (IOException) {
+  } catch (IOException &) {
     throw;
   }
 }
