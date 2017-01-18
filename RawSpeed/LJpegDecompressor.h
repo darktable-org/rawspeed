@@ -170,7 +170,7 @@ protected:
   uint32 offX, offY;  // Offset into image where decoding should start
   uint32 skipX, skipY;   // Tile is larger than output, skip these border pixels
   array<HuffmanTable*, 4> huff {}; // 4 pointers into the store
-  vector<HuffmanTable> huffmanTableStore;
+  vector<unique_ptr<HuffmanTable>> huffmanTableStore; // vector of unique HTs
 };
 
 } // namespace RawSpeed

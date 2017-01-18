@@ -219,13 +219,6 @@ void LJpegDecompressor::parseSOS() {
 void LJpegDecompressor::parseDHT() {
   uint32 headerLength = input->getShort() - 2; // Subtract myself
 
-  // small helper array, storing the indices of the HuffmanTable objects
-  // in the huffmanTableStore to be later transalted to pointers.
-  // neccessary because the addition of objects to the store invalidates pointers
-  // so we can not directly store the pointers during processing the header
-  array<int, 4> index;
-  index.fill(-1);
-
   while (headerLength)  {
     uint32 b = input->getByte();
 
@@ -237,37 +230,33 @@ void LJpegDecompressor::parseDHT() {
     if (htIndex >= huff.size())
       ThrowRDE("LJpegDecompressor::parseDHT: Invalid huffman table destination id.");
 
-    if (index[htIndex] != -1)
+    if (huff[htIndex] != nullptr)
       ThrowRDE("LJpegDecompressor::parseDHT: Duplicate table definition");
 
-    HuffmanTable ht;
+    auto ht = make_unique<HuffmanTable>();
 
     // copy 16 bytes from input stream to number of codes per length table
-    uint32 nCodes = ht.setNCodesPerLength(input->getBuffer(16));
+    uint32 nCodes = ht->setNCodesPerLength(input->getBuffer(16));
     // spec says 16 different codes is max but Hasselblad violates that -> 17
     if (nCodes > 17 || headerLength < 1 + 16 + nCodes)
       ThrowRDE("LJpegDecompressor::parseDHT: Invalid DHT table.");
 
     // copy nCodes bytes from input stream to code values table
-    ht.setCodeValues(input->getBuffer(nCodes));
+    ht->setCodeValues(input->getBuffer(nCodes));
 
     // see if we already have a HuffmanTable with the same codes
-    auto i = find(huffmanTableStore.begin(), huffmanTableStore.end(), ht);
-    if (i == huffmanTableStore.end()) {
+    for (const auto& i : huffmanTableStore)
+      if (*i == *ht)
+        huff[htIndex] = i.get();
+
+    if (!huff[htIndex]) {
       // setup new ht and put it into the store
-      ht.setup(mUseBigtable, mDNGCompatible);
+      ht->setup(mUseBigtable, mDNGCompatible);
+      huff[htIndex] = ht.get();
       huffmanTableStore.emplace_back(std::move(ht));
-      index[htIndex] = huffmanTableStore.size()-1;
-    } else {
-      // use the existing ht with the same codes
-      index[htIndex] = distance(huffmanTableStore.begin(), i);
     }
     headerLength -= 1 + 16 + nCodes;
   }
-
-  // setup the list of pointers into the huffmanTableStore
-  for (int i=0; i<4; ++i)
-    huff[i] = &huffmanTableStore[index[i]];
 }
 
 

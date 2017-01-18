@@ -32,9 +32,9 @@ NikonDecompressor::NikonDecompressor(FileMap* file, RawImage img) :
 
 void NikonDecompressor::initTable(uint32 huffSelect) {
   if (huffmanTableStore.empty())
-    huffmanTableStore.emplace_back();
+    huffmanTableStore.emplace_back(make_unique<HuffmanTable>());
 
-  huff[0] = &huffmanTableStore.back();
+  huff[0] = huffmanTableStore.back().get();
 
   uint32 count = huff[0]->setNCodesPerLength(Buffer(nikon_tree[huffSelect], 16));
   huff[0]->setCodeValues(Buffer(nikon_tree[huffSelect]+16, count));
