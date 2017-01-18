@@ -83,59 +83,54 @@ RawDecoder* makeDecoder(TiffRootIFDOwner _root, Buffer &data) {
       model = ifd->getEntry(MODEL)->getString();
       TrimSpaces(model);
     }
-    if (!make.compare("Canon")) {
+    if (make == "Canon") {
       return new Cr2Decoder(root, mInput);
     }
-    if (!make.compare("FUJIFILM")) {
+    if (make == "FUJIFILM") {
       return new RafDecoder(root, mInput);
     }
-    if (!make.compare("NIKON CORPORATION") ||
-        !make.compare("NIKON")) {
+    if (make == "NIKON CORPORATION" || make == "NIKON") {
       return new NefDecoder(root, mInput);
     }
-    if (!make.compare("OLYMPUS IMAGING CORP.") ||
-        !make.compare("OLYMPUS CORPORATION") ||
-        !make.compare("OLYMPUS OPTICAL CO.,LTD") ) {
+    if (make == "OLYMPUS IMAGING CORP." || make == "OLYMPUS CORPORATION" ||
+        make == "OLYMPUS OPTICAL CO.,LTD") {
       return new OrfDecoder(root, mInput);
     }
-    if (!make.compare("SONY")) {
+    if (make == "SONY") {
       return new ArwDecoder(root, mInput);
     }
-    if (!make.compare("PENTAX Corporation") ||
-        !make.compare("RICOH IMAGING COMPANY, LTD.") ||
-        !make.compare("PENTAX")) {
+    if (make == "PENTAX Corporation" || make == "RICOH IMAGING COMPANY, LTD." ||
+        make == "PENTAX") {
       return new PefDecoder(root, mInput);
     }
-    if (!make.compare("Panasonic") ||
-        !make.compare("LEICA")) {
+    if (make == "Panasonic" || make == "LEICA") {
       return new Rw2Decoder(root, mInput);
     }
-    if (!make.compare("SAMSUNG")) {
+    if (make == "SAMSUNG") {
       return new SrwDecoder(root, mInput);
     }
-    if (!make.compare("Mamiya-OP Co.,Ltd.")) {
+    if (make == "Mamiya-OP Co.,Ltd.") {
       return new MefDecoder(root, mInput);
     }
-    if (!make.compare("Kodak")) {
-      if (!model.compare("DCS560C"))
+    if (make == "Kodak") {
+      if (model == "DCS560C")
         return new Cr2Decoder(root, mInput);
       else
         return new DcrDecoder(root, mInput);
     }
-    if (!make.compare("KODAK")) {
+    if (make == "KODAK") {
       return new DcsDecoder(root, mInput);
     }
-    if (!make.compare("EASTMAN KODAK COMPANY")) {
+    if (make == "EASTMAN KODAK COMPANY") {
       return new KdcDecoder(root, mInput);
     }
-    if (!make.compare("SEIKO EPSON CORP.")) {
+    if (make == "SEIKO EPSON CORP.") {
       return new ErfDecoder(root, mInput);
     }
-    if (!make.compare("Hasselblad")) {
+    if (make == "Hasselblad") {
       return new ThreefrDecoder(root, mInput);
     }
-    if (!make.compare("Leaf") ||
-        !make.compare("Phase One A/S")) {
+    if (make == "Leaf" || make == "Phase One A/S") {
       return new MosDecoder(root, mInput);
     }
   }
@@ -145,7 +140,7 @@ RawDecoder* makeDecoder(TiffRootIFDOwner _root, Buffer &data) {
   if (softwareIFD) {
     string software = softwareIFD->getString();
     TrimSpaces(software);
-    if (!software.compare("Camera Library")) {
+    if (software == "Camera Library") {
       return new MosDecoder(root, mInput);
     }
   }

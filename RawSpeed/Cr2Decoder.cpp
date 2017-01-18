@@ -166,7 +166,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
   // Override with canon_double_height if set.
   map<string,string>::iterator msb_hint = hints.find("canon_double_height");
   if (msb_hint != hints.end())
-    doubleHeight = (0 == (msb_hint->second).compare("true"));
+    doubleHeight = ("true" == (msb_hint->second));
 
   if (slices.empty()) {
     ThrowRDE("CR2 Decoder: No Slices found.");

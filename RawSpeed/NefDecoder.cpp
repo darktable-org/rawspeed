@@ -54,7 +54,7 @@ RawImage NefDecoder::decodeRawInternal() {
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
 
-  if (!data[0]->getEntry(MODEL)->getString().compare("NIKON D100 ")) {  /**Sigh**/
+  if (data[0]->getEntry(MODEL)->getString() == "NIKON D100 ") { /**Sigh**/
     if (!mFile->isValid(offsets->getInt()))
       ThrowRDE("NEF Decoder: Image data outside of file.");
     if (!D100IsCompressed(offsets->getInt())) {
@@ -218,7 +218,7 @@ void NefDecoder::DecodeUncompressed() {
   bool bitorder = true;
   map<string,string>::iterator msb_hint = hints.find("msb_override");
   if (msb_hint != hints.end())
-    bitorder = (0 == (msb_hint->second).compare("true"));
+    bitorder = ("true" == (msb_hint->second));
 
   offY = 0;
   for (uint32 i = 0; i < slices.size(); i++) {

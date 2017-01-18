@@ -66,7 +66,7 @@ RawDecoder* CiffParser::getDecoder() {
     for (vector<CiffIFD*>::iterator i = potentials.begin(); i != potentials.end(); ++i) {
       string make = (*i)->getEntry(CIFF_MAKEMODEL)->getString();
       TrimSpaces(make);
-      if (!make.compare("Canon")) {
+      if (make == "Canon") {
         mRootIFD = NULL;
         return new CrwDecoder(root, mInput);
       }

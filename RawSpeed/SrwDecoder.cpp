@@ -59,7 +59,7 @@ RawImage SrwDecoder::decodeRawInternal() {
     bool bit_order = false;  // Default guess
     map<string,string>::iterator msb_hint = hints.find("msb_override");
     if (msb_hint != hints.end())
-      bit_order = (0 == (msb_hint->second).compare("true"));
+      bit_order = ("true" == (msb_hint->second));
     this->decodeUncompressed(raw, bit_order ? BitOrder_Jpeg : BitOrder_Plain);
     return mRaw;
   }
@@ -70,7 +70,7 @@ RawImage SrwDecoder::decodeRawInternal() {
       bool bit_order = (bits == 12);  // Default guess
       map<string,string>::iterator msb_hint = hints.find("msb_override");
       if (msb_hint != hints.end())
-        bit_order = (0 == (msb_hint->second).compare("true"));
+        bit_order = ("true" == (msb_hint->second));
       this->decodeUncompressed(raw, bit_order ? BitOrder_Jpeg : BitOrder_Plain);
       return mRaw;
     } else {
