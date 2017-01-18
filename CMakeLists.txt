@@ -51,7 +51,7 @@ if(USE_IWYU)
   include(iwyu)
 endif()
 
-if(USE_CLANG_TIDY)
+if((UNIX OR APPLE) AND USE_CLANG_TIDY)
   include(clang-tidy)
 endif()
 
