@@ -316,7 +316,7 @@ int main(int argc, char **argv) {
         cmd += newhash;
         cmd += "\" >> rstest.log";
         if (system(cmd.c_str()))
-          ; // this is only to supress the warn-unused-result warning
+          ; // NOLINT
       }
 #endif
     }
