@@ -48,11 +48,11 @@ public:
   ColorFilterArray();
   ColorFilterArray(const ColorFilterArray& other );
   ColorFilterArray& operator= (const ColorFilterArray& other);
-  ColorFilterArray(iPoint2D size);
+  ColorFilterArray(const iPoint2D &size);
   ColorFilterArray(const uint32 dcrawFilters);
   virtual ~ColorFilterArray(void);
 
-  virtual void setSize(iPoint2D size);
+  virtual void setSize(const iPoint2D &size);
   void setColorAt(iPoint2D pos, CFAColor c);
   virtual void setCFA(iPoint2D size, ...);
   virtual CFAColor getColorAt(uint32 x, uint32 y);

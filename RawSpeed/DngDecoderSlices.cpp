@@ -40,9 +40,9 @@ void *DecodeThread(void *_this) {
   return NULL;
 }
 
-
-DngDecoderSlices::DngDecoderSlices(FileMap* file, RawImage img, int _compression) :
-    mFile(file), mRaw(img) {
+DngDecoderSlices::DngDecoderSlices(FileMap *file, const RawImage &img,
+                                   int _compression)
+    : mFile(file), mRaw(img) {
   mFixLjpeg = false;
   compression = _compression;
 }
@@ -50,7 +50,7 @@ DngDecoderSlices::DngDecoderSlices(FileMap* file, RawImage img, int _compression
 DngDecoderSlices::~DngDecoderSlices(void) {
 }
 
-void DngDecoderSlices::addSlice(DngSliceElement slice) {
+void DngDecoderSlices::addSlice(const DngSliceElement &slice) {
   slices.push(slice);
 }
 
@@ -299,7 +299,7 @@ void DngDecoderSlices::decodeDeflate(const DngSliceElement &e,
     ThrowRDE("DngDecoderSlices::decodeDeflate: tile offset plus size is longer "
              "than file. Truncated file.");
 
-  unsigned long dstLen = e.width * e.height * 4;
+  uLongf dstLen = e.width * e.height * 4UL;
   const unsigned char *cBuffer = mFile->getData(e.byteOffset, e.byteCount);
   int predFactor = 0;
 

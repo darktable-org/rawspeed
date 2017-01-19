@@ -60,9 +60,9 @@ public:
 class DngDecoderSlices
 {
 public:
-  DngDecoderSlices(FileMap* file, RawImage img, int compression );
+  DngDecoderSlices(FileMap *file, const RawImage &img, int compression);
   ~DngDecoderSlices(void);
-  void addSlice(DngSliceElement slice);
+  void addSlice(const DngSliceElement &slice);
   void startDecoding();
   void decodeSlice(DngDecoderThread* t);
   int size();

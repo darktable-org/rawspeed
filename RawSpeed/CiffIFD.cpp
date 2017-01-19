@@ -47,7 +47,7 @@ CiffIFD::CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 _depth) {
     CiffEntry *t = NULL;
     try {
       t = new CiffEntry(f, start, entry_offset);
-    } catch (IOException) { // Ignore unparsable entry
+    } catch (IOException &) { // Ignore unparsable entry
       continue;
     }
 
@@ -55,9 +55,10 @@ CiffIFD::CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 _depth) {
       try {
         mSubIFD.push_back(new CiffIFD(f, t->data_offset, t->data_offset+t->bytesize, depth));
         delete(t);
-      } catch (CiffParserException) { // Unparsable subifds are added as entries
+      } catch (
+          CiffParserException &) { // Unparsable subifds are added as entries
         mEntry[t->tag] = t;
-      } catch (IOException) { // Unparsable private data are added as entries
+      } catch (IOException &) { // Unparsable private data are added as entries
         mEntry[t->tag] = t;
       }
     } else {
@@ -118,11 +119,12 @@ vector<CiffIFD*> CiffIFD::getIFDsWithTagWhere(CiffTag tag, uint32 isValue) {
   return matchingIFDs;
 }
 
-vector<CiffIFD*> CiffIFD::getIFDsWithTagWhere(CiffTag tag, string isValue) {
+vector<CiffIFD *> CiffIFD::getIFDsWithTagWhere(CiffTag tag,
+                                               const string &isValue) {
   vector<CiffIFD*> matchingIFDs;
   if (mEntry.find(tag) != mEntry.end()) {
     CiffEntry* entry = mEntry[tag];
-    if (entry->isString() && 0 == entry->getString().compare(isValue))
+    if (entry->isString() && isValue == entry->getString())
       matchingIFDs.push_back(this);
   }
   for (vector<CiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
@@ -160,10 +162,10 @@ CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag, uint32 isValue) {
   return NULL;
 }
 
-CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag, string isValue) {
+CiffEntry *CiffIFD::getEntryRecursiveWhere(CiffTag tag, const string &isValue) {
   if (mEntry.find(tag) != mEntry.end()) {
     CiffEntry* entry = mEntry[tag];
-    if (entry->isString() && 0 == entry->getString().compare(isValue))
+    if (entry->isString() && isValue == entry->getString())
       return entry;
   }
   for (vector<CiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {

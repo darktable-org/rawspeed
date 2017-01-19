@@ -146,7 +146,7 @@ RawImage ArwDecoder::decodeRawInternal() {
     for (uint32 i = 0; i < data.size(); i++) {
       string make = data[i]->getEntry(MAKE)->getString();
       /* Check for maker "SONY" without spaces */
-      if (!make.compare("SONY"))
+      if (make == "SONY")
         bitPerPixel = 8;
     }
   }

@@ -54,7 +54,7 @@ RawImage NefDecoder::decodeRawInternal() {
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
 
-  if (!data[0]->getEntry(MODEL)->getString().compare("NIKON D100 ")) {  /**Sigh**/
+  if (data[0]->getEntry(MODEL)->getString() == "NIKON D100 ") { /**Sigh**/
     if (!mFile->isValid(offsets->getInt()))
       ThrowRDE("NEF Decoder: Image data outside of file.");
     if (!D100IsCompressed(offsets->getInt())) {
@@ -218,7 +218,7 @@ void NefDecoder::DecodeUncompressed() {
   bool bitorder = true;
   map<string,string>::iterator msb_hint = hints.find("msb_override");
   if (msb_hint != hints.end())
-    bitorder = (0 == (msb_hint->second).compare("true"));
+    bitorder = ("true" == (msb_hint->second));
 
   offY = 0;
   for (uint32 i = 0; i < slices.size(); i++) {
@@ -233,12 +233,12 @@ void NefDecoder::DecodeUncompressed() {
         readCoolpixSplitRaw(in, size, pos, width*bitPerPixel / 8);
       else
         readUncompressedRaw(in, size, pos, width*bitPerPixel / 8, bitPerPixel, bitorder ? BitOrder_Jpeg : BitOrder_Plain);
-    } catch (RawDecoderException e) {
+    } catch (RawDecoderException &e) {
       if (i>0)
         mRaw->setError(e.what());
       else
         throw;
-    } catch (IOException e) {
+    } catch (IOException &e) {
       if (i>0)
         mRaw->setError(e.what());
       else
@@ -386,7 +386,7 @@ string NefDecoder::getMode() {
   return mode.str();
 }
 
-string NefDecoder::getExtendedMode(string mode) {
+string NefDecoder::getExtendedMode(const string &mode) {
   ostringstream extended_mode;
 
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
@@ -530,7 +530,7 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
       mRaw->metadata.wbCoeffs[2] = (float) get2BE(tmp, 1250) / 256.0f;
     } else if (!strncmp((char *)tmp,"NRW ",4)) {
       uint32 offset = 0;
-      if (strncmp((char *)tmp+4,"0100",4) && wb->count > 72)
+      if (strncmp((char *)tmp + 4, "0100", 4) != 0 && wb->count > 72)
         offset = 56;
       else if (wb->count > 1572)
         offset = 1556;

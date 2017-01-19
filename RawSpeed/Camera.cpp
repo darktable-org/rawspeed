@@ -203,7 +203,8 @@ void Camera::parseCameraChild(const xml_node& cur) {
     auto stringToListOfInts = [this, &cur](const char* attribute) {
       vector<int> ret;
       try {
-        for (string s : split_string(cur.attribute(attribute).as_string(), ' ')) {
+        for (const string &s :
+             split_string(cur.attribute(attribute).as_string(), ' ')) {
           ret.push_back(stoi(s));
         }
       } catch (...) {

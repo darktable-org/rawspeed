@@ -35,7 +35,7 @@ class LJpegPlain :
   public LJpegDecompressor
 {
 public:
-  LJpegPlain(FileMap* file, RawImage img);
+  LJpegPlain(FileMap *file, const RawImage &img);
   virtual ~LJpegPlain(void);
 protected:
   virtual void decodeScan();

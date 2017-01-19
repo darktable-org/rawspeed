@@ -38,7 +38,7 @@ case "$FLAVOR" in
 esac
 
 cd "$BUILD_DIR"
-cmake -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" -GNinja -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" "$SRC_DIR" || (cat "$BUILD_DIR"/CMakeFiles/CMakeOutput.log; cat "$BUILD_DIR"/CMakeFiles/CMakeError.log)
+cmake -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" -GNinja -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" -DUSE_CLANG_TIDY=ON "$SRC_DIR" || (cat "$BUILD_DIR"/CMakeFiles/CMakeOutput.log; cat "$BUILD_DIR"/CMakeFiles/CMakeError.log)
 
 case "$TARGET" in
   "build")

@@ -33,7 +33,7 @@ class CameraMetadataException :
   public std::runtime_error
 {
 public:
-  CameraMetadataException(const std::string _msg);
+  CameraMetadataException(const std::string &_msg);
 };
 
 } // namespace RawSpeed

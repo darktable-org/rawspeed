@@ -67,13 +67,13 @@ RawImage NakedDecoder::decodeRawInternal() {
   BitOrder bo = BitOrder_Jpeg16;  // Default
   if(cam->hints.find("order") != cam->hints.end()) {
     string tmp = cam->hints.find(string("order"))->second;
-    if (tmp.compare("plain") == 0) {
+    if (tmp == "plain") {
       bo = BitOrder_Plain;
-    } else if (tmp.compare("jpeg") == 0) {
+    } else if (tmp == "jpeg") {
       bo = BitOrder_Jpeg;
-    } else if (tmp.compare("jpeg16") == 0) {
-      bo = BitOrder_Jpeg16;    
-    } else if (tmp.compare("jpeg32") == 0) {
+    } else if (tmp == "jpeg16") {
+      bo = BitOrder_Jpeg16;
+    } else if (tmp == "jpeg32") {
       bo = BitOrder_Jpeg32;    
     }
   }

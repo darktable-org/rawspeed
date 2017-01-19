@@ -33,7 +33,7 @@ class HasselbladDecompressor :
   public LJpegDecompressor
 {
 public:
-  HasselbladDecompressor(FileMap* file, RawImage img);
+  HasselbladDecompressor(FileMap *file, const RawImage &img);
   virtual ~HasselbladDecompressor(void);
   int HuffDecodeHasselblad();
   void decodeHasselblad(TiffIFD *root, uint32 offset, uint32 size);

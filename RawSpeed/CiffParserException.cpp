@@ -30,7 +30,8 @@
 
 namespace RawSpeed {
 
-CiffParserException::CiffParserException(const string _msg) : runtime_error(_msg) {
+CiffParserException::CiffParserException(const string &_msg)
+    : runtime_error(_msg) {
   _RPT1(0, "CIFF Exception: %s\n", _msg.c_str());
 }
 

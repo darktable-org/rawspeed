@@ -31,7 +31,7 @@ namespace RawSpeed {
 // All file maps have this much space extra at the end. This is useful for
 // BitPump* that needs to have a bit of extra space at the end to be able to
 // do more efficient reads without crashing
-#define FILEMAP_MARGIN 16
+#define FILEMAP_MARGIN 16UL
 
 /*************************************************************************
  * This is the buffer abstaction.

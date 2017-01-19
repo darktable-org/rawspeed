@@ -88,7 +88,7 @@ RawImage DcrDecoder::decodeRawInternal() {
 
     try {
       decodeKodak65000(input, width, height);
-    } catch (IOException) {
+    } catch (IOException &) {
       mRaw->setError("IO error occurred while reading image. Returning partial result.");
     }
 
@@ -142,7 +142,7 @@ void DcrDecoder::decodeKodak65000Segment(ByteStream &input, ushort16 *out, uint3
     blen[i+1] = input.getByte() >> 4;
   }
   if ((bsize & 7) == 4) {
-    bitbuf  = ((int) input.getByte()) << 8;
+    bitbuf = ((uint64)input.getByte()) << 8UL;
     bitbuf += ((int) input.getByte());
     bits = 16;
   }

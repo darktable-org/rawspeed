@@ -52,10 +52,10 @@ X3fParser::X3fParser(FileMap* file) {
       bytes->setPosition(0);
       decoder = new X3fDecoder(file);
       readDirectory();
-    } catch (IOException e) {
+    } catch (IOException &e) {
       ThrowRDE("X3F Decoder: IO Error while reading header: %s", e.what());
     }
-  } catch (RawDecoderException e) {
+  } catch (RawDecoderException &e) {
     freeObjects();
     throw e;
   }
@@ -92,7 +92,7 @@ void X3fParser::readDirectory()
   bytes->setPosition(dir_off);
 
   // Check signature
-  if (0 != getIdAsString(bytes).compare("SECd"))
+  if ("SECd" != getIdAsString(bytes))
     ThrowRDE("X3F Decoder: Unable to locate directory");
 
   uint32 version = bytes->getUInt();
@@ -104,10 +104,10 @@ void X3fParser::readDirectory()
     X3fDirectory dir(bytes);
     decoder->mDirectory.push_back(dir);
     uint32 old_pos = bytes->getPosition();
-    if (0 == dir.id.compare("IMA2") || 0 == dir.id.compare("IMAG")){
+    if ("IMA2" == dir.id || "IMAG" == dir.id) {
       decoder->mImages.push_back(X3fImage(bytes, dir.offset, dir.length));
     }
-    if (0 == dir.id.compare("PROP")){
+    if ("PROP" == dir.id) {
       decoder->mProperties.addProperties(bytes, dir.offset, dir.length);
     }
     bytes->setPosition(old_pos);
@@ -139,7 +139,7 @@ X3fImage::X3fImage( ByteStream *bytes, uint32 offset, uint32 length )
 {
   bytes->setPosition(offset);
   string id = getIdAsString(bytes);
-  if (id.compare("SECi"))
+  if (id != "SECi")
     ThrowRDE("X3fImage:Unknown Image signature");
 
   uint32 version = bytes->getUInt();
@@ -283,8 +283,8 @@ string X3fPropertyCollection::getString( ByteStream *bytes ) {
     }
   }
   if (start != src_end) {
-    UTF8* dest = new UTF8[i * 4 + 1];
-    memset(dest, 0, i * 4 + 1);
+    UTF8 *dest = new UTF8[i * 4UL + 1];
+    memset(dest, 0, i * 4UL + 1);
     if (ConvertUTF16toUTF8(&start, src_end, &dest, &dest[i * 4 - 1])) {
       string ret((const char*)dest);
       delete[] dest;
@@ -299,7 +299,7 @@ void X3fPropertyCollection::addProperties( ByteStream *bytes, uint32 offset, uin
 {
   bytes->setPosition(offset);
   string id = getIdAsString(bytes);
-  if (id.compare("SECp"))
+  if (id != "SECp")
     ThrowRDE("X3fImage:Unknown Property signature");
 
   uint32 version = bytes->getUInt();
@@ -333,7 +333,8 @@ void X3fPropertyCollection::addProperties( ByteStream *bytes, uint32 offset, uin
       bytes->setPosition(value_pos * 2 + data_start);
       string val = getString(bytes);
       props[key] = val;
-    } catch (IOException) {}
+    } catch (IOException &) {
+    }
     bytes->setPosition(old_pos);
   }
 }

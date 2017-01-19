@@ -33,9 +33,8 @@ namespace RawSpeed {
     dataType = TYPE_FLOAT32;
   }
 
-  RawImageDataFloat::RawImageDataFloat(iPoint2D _dim, uint32 _cpp) :
-  RawImageData(_dim, 4, _cpp)
-  {
+  RawImageDataFloat::RawImageDataFloat(const iPoint2D &_dim, uint32 _cpp)
+      : RawImageData(_dim, 4, _cpp) {
     dataType = TYPE_FLOAT32;
   }
 

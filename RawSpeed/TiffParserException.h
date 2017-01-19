@@ -32,7 +32,7 @@ void ThrowTPE(const char* fmt, ...) __attribute__ ((format (printf, 1, 2)));
 class TiffParserException : public std::runtime_error
 {
 public:
-  TiffParserException(const std::string _msg);
+  TiffParserException(const std::string &_msg);
 };
 
 } // namespace RawSpeed

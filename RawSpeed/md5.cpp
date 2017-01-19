@@ -40,8 +40,8 @@
 void md5_compress(uint32_t state[4], const uint8_t block[64]) {
 #define LOADSCHEDULE(i)                                                        \
   schedule[i] =                                                                \
-      (uint32_t)block[i * 4 + 0] << 0 | (uint32_t)block[i * 4 + 1] << 8 |      \
-      (uint32_t)block[i * 4 + 2] << 16 | (uint32_t)block[i * 4 + 3] << 24;
+      (uint32_t)block[(i)*4 + 0] << 0 | (uint32_t)block[(i)*4 + 1] << 8 |      \
+      (uint32_t)block[(i)*4 + 2] << 16 | (uint32_t)block[(i)*4 + 3] << 24;
 
   uint32_t schedule[16];
   LOADSCHEDULE(0)
@@ -64,13 +64,16 @@ void md5_compress(uint32_t state[4], const uint8_t block[64]) {
 #define ROTL32(x, n)                                                           \
   (((0U + (x)) << (n)) |                                                       \
    ((x) >> (32 - (n)))) // Assumes that x is uint32_t and 0 < n < 32
-#define ROUND0(a, b, c, d, k, s, t) ROUND_TAIL(a, b, d ^ (b & (c ^ d)), k, s, t)
-#define ROUND1(a, b, c, d, k, s, t) ROUND_TAIL(a, b, c ^ (d & (b ^ c)), k, s, t)
-#define ROUND2(a, b, c, d, k, s, t) ROUND_TAIL(a, b, b ^ c ^ d, k, s, t)
-#define ROUND3(a, b, c, d, k, s, t) ROUND_TAIL(a, b, c ^ (b | ~d), k, s, t)
+#define ROUND0(a, b, c, d, k, s, t)                                            \
+  ROUND_TAIL(a, b, (d) ^ ((b) & ((c) ^ (d))), k, s, t)
+#define ROUND1(a, b, c, d, k, s, t)                                            \
+  ROUND_TAIL(a, b, (c) ^ ((d) & ((b) ^ (c))), k, s, t)
+#define ROUND2(a, b, c, d, k, s, t) ROUND_TAIL(a, b, (b) ^ (c) ^ (d), k, s, t)
+#define ROUND3(a, b, c, d, k, s, t)                                            \
+  ROUND_TAIL(a, b, (c) ^ ((b) | ~(d)), k, s, t)
 #define ROUND_TAIL(a, b, expr, k, s, t)                                        \
-  a = 0U + a + (expr) + UINT32_C(t) + schedule[k];                             \
-  a = 0U + b + ROTL32(a, s);
+  a = 0U + (a) + (expr) + UINT32_C(t) + schedule[k];                           \
+  (a) = 0U + (b) + ROTL32(a, s);
 
   uint32_t a = state[0];
   uint32_t b = state[1];

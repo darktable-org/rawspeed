@@ -54,7 +54,7 @@ private:
   void DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h);
   TiffIFD* FindBestImage(vector<TiffIFD*>* data);
   string getMode();
-  string getExtendedMode(string mode);
+  string getExtendedMode(const string &mode);
   ushort16* gammaCurve(double pwr, double ts, int mode, int imax);
 };
 

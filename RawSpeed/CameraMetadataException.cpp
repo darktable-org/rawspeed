@@ -38,7 +38,8 @@ void ThrowCME(const char* fmt, ...) {
   throw CameraMetadataException(buf);
 }
 
-CameraMetadataException::CameraMetadataException(const string _msg): runtime_error(_msg) {
+CameraMetadataException::CameraMetadataException(const string &_msg)
+    : runtime_error(_msg) {
   _RPT1(0, "CameraMetadata Exception: %s\n", _msg.c_str());
 }
 

@@ -166,7 +166,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
   // Override with canon_double_height if set.
   map<string,string>::iterator msb_hint = hints.find("canon_double_height");
   if (msb_hint != hints.end())
-    doubleHeight = (0 == (msb_hint->second).compare("true"));
+    doubleHeight = ("true" == (msb_hint->second));
 
   if (slices.empty()) {
     ThrowRDE("CR2 Decoder: No Slices found.");
@@ -259,7 +259,7 @@ RawImage Cr2Decoder::decodeRawInternal() {
     } else {
       return decodeNewFormat();
     }
-  } catch (TiffParserException) {
+  } catch (TiffParserException &) {
     ThrowRDE("CR2 Decoder: Unsupported format.");
     return nullptr; // silence the -Wreturn-type warning
   }
@@ -413,12 +413,21 @@ void Cr2Decoder::sRawInterpolate() {
     ThrowRDE("CR2 Decoder: Unknown subsampling");
 }
 
-#define YUV_TO_RGB(Y, Cb, Cr) r = sraw_coeffs[0] * ((int)Y + (( 50*(int)Cb + 22929*(int)Cr) >> 12));\
-  g = sraw_coeffs[1] * ((int)Y + ((-5640*(int)Cb - 11751*(int)Cr) >> 12));\
-  b = sraw_coeffs[2] * ((int)Y + ((29040*(int)Cb - 101*(int)Cr) >> 12));\
-  r >>= 8; g >>=8; b >>=8;
+#define YUV_TO_RGB(Y, Cb, Cr)                                                  \
+  r = sraw_coeffs[0] *                                                         \
+      ((int)(Y) + ((50 * (int)(Cb) + 22929 * (int)(Cr)) >> 12));               \
+  g = sraw_coeffs[1] *                                                         \
+      ((int)(Y) + ((-5640 * (int)(Cb)-11751 * (int)(Cr)) >> 12));              \
+  b = sraw_coeffs[2] *                                                         \
+      ((int)(Y) + ((29040 * (int)(Cb)-101 * (int)(Cr)) >> 12));                \
+  r >>= 8;                                                                     \
+  g >>= 8;                                                                     \
+  b >>= 8;
 
-#define STORE_RGB(X,A,B,C) X[A] = clampbits(r,16); X[B] = clampbits(g,16); X[C] = clampbits(b,16);
+#define STORE_RGB(X, A, B, C)                                                  \
+  X[A] = clampbits(r, 16);                                                     \
+  (X)[B] = clampbits(g, 16);                                                   \
+  (X)[C] = clampbits(b, 16);
 
 /* sRaw interpolators - ugly as sin, but does the job in reasonably speed */
 
@@ -573,11 +582,13 @@ void Cr2Decoder::interpolate_420(int w, int h, int start_h , int end_h) {
 
 #undef YUV_TO_RGB
 
-#define YUV_TO_RGB(Y, Cb, Cr) r = sraw_coeffs[0] * (Y + Cr -512 );\
-  g = sraw_coeffs[1] * (Y + ((-778*Cb - (Cr << 11)) >> 12) - 512);\
-  b = sraw_coeffs[2] * (Y + (Cb - 512));\
-  r >>= 8; g >>=8; b >>=8;
-
+#define YUV_TO_RGB(Y, Cb, Cr)                                                  \
+  r = sraw_coeffs[0] * ((Y) + (Cr)-512);                                       \
+  g = sraw_coeffs[1] * ((Y) + ((-778 * (Cb) - ((Cr) << 11)) >> 12) - 512);     \
+  b = sraw_coeffs[2] * ((Y) + ((Cb)-512));                                     \
+  r >>= 8;                                                                     \
+  g >>= 8;                                                                     \
+  b >>= 8;
 
 // Note: Thread safe.
 
@@ -625,10 +636,13 @@ void Cr2Decoder::interpolate_422_old(int w, int h, int start_h , int end_h) {
 
 #undef YUV_TO_RGB
 
-#define YUV_TO_RGB(Y, Cb, Cr) r = sraw_coeffs[0] * (Y + Cr);\
-  g = sraw_coeffs[1] * (Y + ((-778*Cb - (Cr << 11)) >> 12) );\
-  b = sraw_coeffs[2] * (Y + Cb);\
-  r >>= 8; g >>=8; b >>=8;
+#define YUV_TO_RGB(Y, Cb, Cr)                                                  \
+  r = sraw_coeffs[0] * ((Y) + (Cr));                                           \
+  g = sraw_coeffs[1] * ((Y) + ((-778 * (Cb) - ((Cr) << 11)) >> 12));           \
+  b = sraw_coeffs[2] * ((Y) + (Cb));                                           \
+  r >>= 8;                                                                     \
+  g >>= 8;                                                                     \
+  b >>= 8;
 
 void Cr2Decoder::interpolate_422_new(int w, int h, int start_h , int end_h) {
   // Last pixel should not be interpolated

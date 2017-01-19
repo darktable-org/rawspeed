@@ -46,8 +46,9 @@ public:
   bool hasCamera(string make, string model, string mode);
   Camera* getChdkCamera(uint32 filesize);
   bool hasChdkCamera(uint32 filesize);
-  void disableMake(string make);
-  void disableCamera(string make, string model);
+  void disableMake(const string &make);
+  void disableCamera(const string &make, const string &model);
+
 protected:
   bool addCamera(Camera* cam);
 };

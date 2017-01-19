@@ -25,8 +25,9 @@
 
 namespace RawSpeed {
 
-HasselbladDecompressor::HasselbladDecompressor(FileMap* file, RawImage img) :
-    LJpegDecompressor(file, img) {
+HasselbladDecompressor::HasselbladDecompressor(FileMap *file,
+                                               const RawImage &img)
+    : LJpegDecompressor(file, img) {
   ph1_bits = 0;
   pixelBaseOffset = 0;
 }

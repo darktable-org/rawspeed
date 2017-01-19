@@ -45,8 +45,7 @@ IOException::IOException( const char* _msg ) : std::runtime_error(string(_msg))
   _RPT1(0, "IO Exception: %s\n", _msg);
 }
 
-IOException::IOException( const string _msg ) : std::runtime_error(_msg)
-{
+IOException::IOException(const string &_msg) : std::runtime_error(_msg) {
   _RPT1(0, "IO Exception: %s\n", _msg.c_str());
 }
 } // namespace RawSpeed
