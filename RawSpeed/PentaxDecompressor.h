@@ -1,13 +1,16 @@
 #ifndef PENTAX_DECOMPRESSOR_H
 #define PENTAX_DECOMPRESSOR_H
 
-#include "LJpegDecompressor.h"
 #include "TiffIFD.h"
+#include "RawImage.h"
+#include "Buffer.h"
+#include "ByteStream.h"
 
 /* 
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -28,12 +31,7 @@
 
 namespace RawSpeed {
 
-class PentaxDecompressor final : public LJpegDecompressor
-{
-public:
-  using LJpegDecompressor::LJpegDecompressor;
-  void decodePentax(TiffIFD *root, uint32 offset, uint32 size);
-};
+void decodePentax(RawImage& mRaw, ByteStream&& data, TiffIFD* root);
 
 } // namespace RawSpeed
 
