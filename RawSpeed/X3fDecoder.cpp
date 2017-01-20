@@ -241,12 +241,19 @@ void X3fDecoder::decompressSigma( X3fImage &image )
       curve[i] = (short)input.getShort();
     }
     max_len = 0;
-    uchar8 huff_len[1024];
-    uint32 huff_code[1024];
+
+    struct huff_item {
+      uchar8 len;
+      uint32 code;
+    };
+
+    // FIXME: this probably results in awful padding!
+    unique_ptr<struct huff_item[]> huff(new struct huff_item[1024]);
+
     for (int i = 0; i < 1024; i++) {
       uint32 val = input.getUInt();
-      huff_len[i] = val>>27;
-      huff_code[i] = val&0x7ffffff;
+      huff[i].len = val >> 27;
+      huff[i].code = val & 0x7ffffff;
       max_len = max(max_len, val>>27);
     }
     if (max_len>26)
@@ -261,9 +268,9 @@ void X3fDecoder::decompressSigma( X3fImage &image )
 
     memset(huge_table, 0xff, (1UL << max_len) * 2);
     for (int i = 0; i < 1024; i++) {
-      if (huff_len[i]) {
-        uint32 len = huff_len[i];
-        uint32 code = huff_code[i]&((1<<len)-1);
+      if (huff[i].len) {
+        uint32 len = huff[i].len;
+        uint32 code = huff[i].code & ((1 << len) - 1);
         uint32 rem_bits = max_len-len;
         uint32 top_code = (code<<rem_bits);
         ushort16 store_val = (i << 5) | len;
