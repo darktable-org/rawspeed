@@ -50,7 +50,7 @@ The main objectives were to make a very fast loader that worked for 75% of the c
 
 RawSpeed is not at the moment a separate library, so you have to include it in your project directly.
 
-##Please see [RawSpeed/README.md](RawSpeed/README.md) for usage instructions.
+##Please see [/src/librawspeed/README.md](src/librawspeed/README.md) for usage instructions.
 
 ##Submitting Requests and Patches
 

@@ -127,7 +127,7 @@ FUNCTION(SETUP_TARGET_FOR_COVERAGE _targetname _testrunner _outputname)
 		# Capturing lcov counters and generating report
 		COMMAND ${LCOV_PATH} --directory . --capture --output-file ${coverage_info}
 		# COMMAND ${LCOV_PATH} --remove ${coverage_info} 'test/*' '/usr/*' --output-file ${coverage_cleaned}
-		COMMAND ${LCOV_PATH} --extract ${coverage_info} '*/RawSpeed/*' --output-file ${coverage_cleaned}
+		COMMAND ${LCOV_PATH} --extract ${coverage_info} '*/librawspeed/*' --output-file ${coverage_cleaned}
 		COMMAND ${LCOV_PATH} --remove ${coverage_cleaned} '*/*Test.cpp' '*/*Decoder*.*' --output-file ${coverage_final}
 		COMMAND ${GENHTML_PATH} --demangle-cpp --precision 2 -o ${_outputname} ${coverage_final}
 		COMMAND ${CMAKE_COMMAND} -E remove ${coverage_info} ${coverage_cleaned} ${coverage_final}
