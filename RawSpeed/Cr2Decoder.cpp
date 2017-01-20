@@ -71,7 +71,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
   mRaw->createData();
   LJpegPlain l(mFile, mRaw);
   try {
-    l.startDecoder(off, mFile->getSize()-off, 0, 0);
+    l.decode(off, mFile->getSize()-off, 0, 0);
   } catch (IOException& e) {
     mRaw->setError(e.what());
   }
@@ -229,11 +229,10 @@ RawImage Cr2Decoder::decodeNewFormat() {
     try {
       LJpegPlain l(mFile, mRaw);
       l.addSlices(s_width);
-      l.mUseBigtable = true;
       l.mCanonFlipDim = flipDims;
       l.mCanonDoubleHeight = doubleHeight;
       l.mWrappedCr2Slices = wrappedCr2Slices;
-      l.startDecoder(slice.offset, slice.size, 0, offY);
+      l.decode(slice.offset, slice.size, 0, offY);
     } catch (RawDecoderException &e) {
       if (i == 0)
         throw;

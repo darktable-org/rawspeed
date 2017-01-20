@@ -2,13 +2,12 @@
 #define HASSELBLAD_DECOMPRESSOR_H
 
 #include "LJpegDecompressor.h"
-#include "BitPumpMSB.h"
-#include "TiffIFD.h"
 
 /*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -29,21 +28,14 @@
 
 namespace RawSpeed {
 
-class HasselbladDecompressor :
-  public LJpegDecompressor
+class HasselbladDecompressor final : public LJpegDecompressor
 {
+  virtual void decodeScan();
+
 public:
-  HasselbladDecompressor(FileMap *file, const RawImage &img);
-  virtual ~HasselbladDecompressor(void);
-  int HuffDecodeHasselblad();
-  void decodeHasselblad(TiffIFD *root, uint32 offset, uint32 size);
-  int pixelBaseOffset;
-protected:
-  int HuffGetLength();
-  virtual void parseSOS();
-  void decodeScanHasselblad();
-  inline int getBits(int len);
-  BitPumpMSB32* ph1_bits;  // Phase One has unescaped bits.
+  using LJpegDecompressor::LJpegDecompressor;
+
+  int pixelBaseOffset = 0;
 };
 
 } // namespace RawSpeed

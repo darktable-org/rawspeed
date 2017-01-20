@@ -23,8 +23,6 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-    http://www.klauspost.com
 */
 
 /*
@@ -111,64 +109,60 @@ typedef struct JpegComponentInfo {
   * These values are fixed over the whole image.
   * They are read from the SOF marker.
   */
-  uint32 componentId;		/* identifier for this component (0..255) */
-  uint32 componentIndex;	/* its index in SOF or cPtr->compInfo[]   */
+  uint32 componentId = -1;		/* identifier for this component (0..255) */
 
   /*
   * Huffman table selector (0..3). The value may vary
   * between scans. It is read from the SOS marker.
   */
-  uint32 dcTblNo;
-  uint32 superH; // Horizontal Supersampling
-  uint32 superV; // Vertical Supersampling
+  uint32 dcTblNo = -1;
+  uint32 superH = -1; // Horizontal Supersampling
+  uint32 superV = -1; // Vertical Supersampling
 } JpegComponentInfo;
 
 class SOFInfo {
 public:
-  SOFInfo() { w = h = cps = prec = 0; initialized = false;};
-  ~SOFInfo() {initialized = false;};
-  uint32 w;    // Width
-  uint32 h;    // Height
-  uint32 cps;  // Components
-  uint32 prec; // Precision
   JpegComponentInfo compInfo[4];
-  bool initialized;  
+  uint32 w = 0;    // Width
+  uint32 h = 0;    // Height
+  uint32 cps = 0;  // Components
+  uint32 prec = 0; // Precision
+  bool initialized = false;
 };
 
 class LJpegDecompressor
 {
 public:
-  LJpegDecompressor(FileMap *file, const RawImage &img);
-  virtual ~LJpegDecompressor(void);
-  virtual void startDecoder(uint32 offset, uint32 size, uint32 offsetX, uint32 offsetY);
-  virtual void getSOF(SOFInfo* i, uint32 offset, uint32 size);
-  bool mDNGCompatible;  // DNG v1.0.x compatibility
-  bool mUseBigtable;    // Use only for large images
-  bool mCanonFlipDim;   // Fix Canon 6D mRaw where width/height is flipped
-  bool mCanonDoubleHeight; // Fix Canon double height on 4 components (EOS 5DS R)
-  bool mWrappedCr2Slices; // Fix Canon 80D mRaw where the slices are wrapped
-  virtual void addSlices(vector<int> slices) {slicesW=slices;};  // CR2 slices.
+  LJpegDecompressor(FileMap* file, RawImage img) : mFile(file), mRaw(img) {}
+  virtual ~LJpegDecompressor();
+  void decode(uint32 offset, uint32 size, uint32 offsetX, uint32 offsetY);
+  void getSOF(SOFInfo* i, uint32 offset, uint32 size);
+  void addSlices(vector<int> slices) {slicesW = slices;}  // CR2 slices.
+
+  bool mDNGCompatible = false;  // DNG v1.0.x compatibility
+  bool mFullDecodeHT = true;    // FullDecode Huffman
+  bool mCanonFlipDim = false;   // Fix Canon 6D mRaw where width/height is flipped
+  bool mCanonDoubleHeight = false; // Fix Canon double height on 4 components (EOS 5DS R)
+  bool mWrappedCr2Slices = false;  // Fix Canon 80D mRaw where the slices are wrapped
+
 protected:
-  virtual void parseSOF(SOFInfo* i);
-  virtual void parseSOS();
-  virtual void decodeScan() {ThrowRDE("LJpegDecompressor: No Scan decoder found");};
-  JpegMarker getNextMarker(bool allowskip);
+  void parseSOF(SOFInfo* i);
+  void parseSOS();
   void parseDHT();
-  // TODO: remove
-  inline int HuffDecode(HuffmanTable *htbl) {
-    return htbl->decodeNext(*bits);
-  }
-  ByteStream* input;
-  BitPumpJPEG* bits;
-  FileMap *mFile;
+  JpegMarker getNextMarker(bool allowskip);
+
+  virtual void decodeScan() = 0;
+
+  ByteStream* input = 0;
+  FileMap *mFile = 0;
   RawImage mRaw; 
 
   SOFInfo frame;
   vector<int> slicesW;
-  uint32 pred;
-  uint32 Pt;
-  uint32 offX, offY;  // Offset into image where decoding should start
-  uint32 skipX, skipY;   // Tile is larger than output, skip these border pixels
+  uint32 pred = 0;
+  uint32 Pt = 0;
+  uint32 offX = 0, offY = 0;  // Offset into image where decoding should start
+  uint32 skipX = 0, skipY = 0;   // Tile is larger than output, skip these border pixels
   array<HuffmanTable*, 4> huff {}; // 4 pointers into the store
   vector<unique_ptr<HuffmanTable>> huffmanTableStore; // vector of unique HTs
 };

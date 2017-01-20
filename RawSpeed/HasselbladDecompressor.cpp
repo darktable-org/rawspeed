@@ -5,6 +5,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -19,122 +20,38 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-    http://www.klauspost.com
 */
 
 namespace RawSpeed {
 
-HasselbladDecompressor::HasselbladDecompressor(FileMap *file,
-                                               const RawImage &img)
-    : LJpegDecompressor(file, img) {
-  ph1_bits = 0;
-  pixelBaseOffset = 0;
-}
-
-HasselbladDecompressor::~HasselbladDecompressor(void) {
-  if (ph1_bits)
-    delete(ph1_bits);
-  ph1_bits = 0;
-}
-
-
-void HasselbladDecompressor::decodeHasselblad(TiffIFD *root, uint32 offset, uint32 size) {
-  // We cannot use bigtable, because values are packed two pixels at the time.
-  mUseBigtable = false;
-  startDecoder(offset,size, 0,0);
-}
-
-/* Since Phase One has it's own definition of a SOS header, we override it from LJPEG-Decompressor */
-void HasselbladDecompressor::parseSOS() {
-  if (!frame.initialized)
-    ThrowRDE("LJpegDecompressor::parseSOS: Frame not yet initialized (SOF Marker not parsed)");
-
-  uint32 headerLength = input->getShort();
-  uint32 soscps = input->getByte();
-  if (frame.cps != soscps)
-    ThrowRDE("LJpegDecompressor::parseSOS: Component number mismatch.");
-
-  for (uint32 i = 0;i < frame.cps;i++) {
-    uint32 cs = input->getByte();
-
-    uint32 count = 0;  // Find the correct component
-    while (frame.compInfo[count].componentId != cs) {
-      if (count >= frame.cps)
-        ThrowRDE("LJpegDecompressor::parseSOS: Invalid Component Selector");
-      count++;
-    }
-
-    uint32 b = input->getByte();
-    uint32 td = b >> 4;
-    if (td > 3)
-      ThrowRDE("LJpegDecompressor::parseSOS: Invalid Huffman table selection");
-    if (!huff[td])
-      ThrowRDE("LJpegDecompressor::parseSOS: Invalid Huffman table selection, not defined.");
-
-    if (count > 3)
-      ThrowRDE("LJpegDecompressor::parseSOS: Component count out of range");
-
-    frame.compInfo[count].dcTblNo = td;
-  }
-
-  // Get predictor
-  pred = input->getByte();
-
-  // Hasselblad files are tagged with predictor #8
-  if (pred != 8)
-    ThrowRDE("HasselbladDecompressor::parseSOS: Invalid predictor mode.");
-
-  input->skipBytes(1);                    // Se + Ah Not used in LJPEG
-  uint32 b = input->getByte();
-  Pt = b & 0xf;        // Point Transform
-
-  uint32 cheadersize = 3 + frame.cps * 2 + 3;
-  _ASSERTE(cheadersize == headerLength);
-
-  if (ph1_bits)
-    delete(ph1_bits);
-
-  ph1_bits = new BitPumpMSB32(*input);
-
-  try {
-    decodeScanHasselblad();
-  } catch (...) {
-    throw;
-  }
-  input->skipBytes(ph1_bits->getBufferPosition());
-}
-
 // Returns len bits as a signed value.
 // Highest bit is a sign bit
-inline int HasselbladDecompressor::getBits(int len) {
-  int diff = HuffmanTable::signExtended(ph1_bits->getBits(len), len);
+inline static int getBits(BitPumpMSB32& bs, int len) {
+  int diff = HuffmanTable::signExtended(bs.getBits(len), len);
   if (diff == 65535)
     return -32768;
   return diff;
 }
 
-void HasselbladDecompressor::decodeScanHasselblad() {
+void HasselbladDecompressor::decodeScan()
+{
+  BitPumpMSB32 bitStream(*input);
   // Pixels are packed two at a time, not like LJPEG:
   // [p1_length_as_huffman][p2_length_as_huffman][p0_diff_with_length][p1_diff_with_length]|NEXT PIXELS
   for (uint32 y = 0; y < frame.h; y++) {
     ushort16 *dest = (ushort16*) mRaw->getData(0, y);
     int p1 = 0x8000 + pixelBaseOffset;
     int p2 = 0x8000 + pixelBaseOffset;
-    ph1_bits->checkPos();
-    for (uint32 x = 0; x < frame.w ; x+=2 ) {
-      int len1 = HuffGetLength();
-      int len2 = HuffGetLength();
-      p1 += getBits(len1);
-      p2 += getBits(len2);
+    for (uint32 x = 0; x < frame.w; x += 2) {
+      int len1 = huff[0]->decodeLength(bitStream);
+      int len2 = huff[0]->decodeLength(bitStream);
+      p1 += getBits(bitStream, len1);
+      p2 += getBits(bitStream, len2);
       dest[x] = p1;
       dest[x+1] = p2;
     }
   }
-}
-
-int HasselbladDecompressor::HuffGetLength() {
-  return huff[0]->decodeLength(*ph1_bits);
+  input->skipBytes(bitStream.getBufferPosition());
 }
 
 } // namespace RawSpeed
