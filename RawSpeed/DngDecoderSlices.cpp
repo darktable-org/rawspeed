@@ -356,10 +356,9 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
       LJpegPlain l(mFile, mRaw);
       l.mDNGCompatible = mFixLjpeg;
       DngSliceElement e = t->slices.front();
-      l.mUseBigtable = e.mUseBigtable;
       t->slices.pop();
       try {
-        l.startDecoder(e.byteOffset, e.byteCount, e.offX, e.offY);
+        l.decode(e.byteOffset, e.byteCount, e.offX, e.offY);
       } catch (RawDecoderException &err) {
         mRaw->setError(err.what());
       } catch (IOException &err) {

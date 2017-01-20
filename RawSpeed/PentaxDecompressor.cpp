@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 #include "PentaxDecompressor.h"
+#include "BitPumpMSB.h"
+#include "HuffmanTable.h"
 
 /*
     RawSpeed - RAW file decoder.
@@ -25,13 +27,14 @@
 
 namespace RawSpeed {
 
-void PentaxDecompressor::decodePentax(TiffIFD *root, uint32 offset, uint32 size) {
-  static const uchar8 pentax_tree[] =  {
-    0, 2, 3, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0,
-//  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5 = 16 entries of codes per bit length
-    3, 4, 2, 5, 1, 6, 0, 7, 8, 9, 10, 11, 12
-//  0  1  2  3  4  5  6  7  8  9  10  11  12       = 13 entries of code values
-  };
+static const uchar8 pentax_tree[] =  {
+  0, 2, 3, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0,
+//0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5 = 16 entries of codes per bit length
+  3, 4, 2, 5, 1, 6, 0, 7, 8, 9, 10, 11, 12
+//0  1  2  3  4  5  6  7  8  9  10  11  12       = 13 entries of code values
+};
+
+void decodePentax(RawImage& mRaw, ByteStream&& data, TiffIFD* root) {
 
   HuffmanTable ht;
 
@@ -82,10 +85,10 @@ void PentaxDecompressor::decodePentax(TiffIFD *root, uint32 offset, uint32 size)
     assert(nCodes == 13); // see pentax_tree definition
     ht.setCodeValues(Buffer(pentax_tree+16, nCodes));
   }
-  frame.prec = 16; // set "dummy" precision for error checking in HuffDecode()
+
   ht.setup(true, false);
 
-  BitPumpMSB bs(mFile, offset, size);
+  BitPumpMSB bs(data);
   uchar8 *draw = mRaw->getData();
   ushort16 *dest;
   uint32 w = mRaw->dim.x;

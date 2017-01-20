@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "NikonDecompressor.h"
 #include "BitPumpMSB.h"
+#include "HuffmanTable.h"
 
 /*
     RawSpeed - RAW file decoder.
@@ -26,42 +27,49 @@
 
 namespace RawSpeed {
 
-NikonDecompressor::NikonDecompressor(FileMap *file, const RawImage &img)
-    : LJpegDecompressor(file, img) {}
+static const uchar8 nikon_tree[][32] = {
+  { 0,1,5,1,1,1,1,1,1,2,0,0,0,0,0,0,	/* 12-bit lossy */
+  5,4,3,6,2,7,1,0,8,9,11,10,12 },
+  { 0,1,5,1,1,1,1,1,1,2,0,0,0,0,0,0,	/* 12-bit lossy after split */
+  0x39,0x5a,0x38,0x27,0x16,5,4,3,2,1,0,11,12,12 },
+  { 0,1,4,2,3,1,2,0,0,0,0,0,0,0,0,0,  /* 12-bit lossless */
+  5,4,6,3,7,2,8,1,9,0,10,11,12 },
+  { 0,1,4,3,1,1,1,1,1,2,0,0,0,0,0,0,	/* 14-bit lossy */
+  5,6,4,7,8,3,9,2,1,0,10,11,12,13,14 },
+  { 0,1,5,1,1,1,1,1,1,1,2,0,0,0,0,0,	/* 14-bit lossy after split */
+  8,0x5c,0x4b,0x3a,0x29,7,6,5,4,3,2,1,0,13,14 },
+  { 0,1,4,2,2,3,1,2,0,0,0,0,0,0,0,0,	/* 14-bit lossless */
+  7,6,8,5,9,4,10,3,11,12,2,0,1,13,14 } };
 
-void NikonDecompressor::initTable(uint32 huffSelect) {
-  if (huffmanTableStore.empty())
-    huffmanTableStore.emplace_back(make_unique<HuffmanTable>());
 
-  huff[0] = huffmanTableStore.back().get();
-
-  uint32 count = huff[0]->setNCodesPerLength(Buffer(nikon_tree[huffSelect], 16));
-  huff[0]->setCodeValues(Buffer(nikon_tree[huffSelect]+16, count));
-
-  huff[0]->setup(mUseBigtable, false);
+static HuffmanTable createHuffmanTable(uint32 huffSelect) {
+  HuffmanTable ht;
+  uint32 count = ht.setNCodesPerLength(Buffer(nikon_tree[huffSelect], 16));
+  ht.setCodeValues(Buffer(nikon_tree[huffSelect]+16, count));
+  ht.setup(true, false);
+  return ht;
 }
 
-void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h, uint32 bitsPS, uint32 offset, uint32 size) {
-  uint32 v0 = metadata->getByte();
-  uint32 v1 = metadata->getByte();
+void decompressNikon(RawImage& mRaw, ByteStream&& data, ByteStream metadata, uint32 w, uint32 h, uint32 bitsPS, bool uncorrectedRawValues) {
+  uint32 v0 = metadata.getByte();
+  uint32 v1 = metadata.getByte();
   uint32 huffSelect = 0;
   uint32 split = 0;
   int pUp1[2];
   int pUp2[2];
-  mUseBigtable = true;
 
   _RPT2(0, "Nef version v0:%u, v1:%u\n", v0, v1);
 
   if (v0 == 73 || v1 == 88)
-    metadata->skipBytes(2110);
+    metadata.skipBytes(2110);
 
   if (v0 == 70) huffSelect = 2;
   if (bitsPS == 14) huffSelect += 3;
 
-  pUp1[0] = metadata->getShort();
-  pUp1[1] = metadata->getShort();
-  pUp2[0] = metadata->getShort();
-  pUp2[1] = metadata->getShort();
+  pUp1[0] = metadata.getShort();
+  pUp1[1] = metadata.getShort();
+  pUp2[0] = metadata.getShort();
+  pUp2[1] = metadata.getShort();
 
   // 'curve' will hold a peace wise linearly interpolated function.
   // there are 'csize' segements, each is 'step' values long.
@@ -73,58 +81,55 @@ void NikonDecompressor::DecompressNikon(ByteStream *metadata, uint32 w, uint32 h
     curve[i] = i;
 
   uint32 step = 0;
-  uint32 csize = metadata->getShort();
+  uint32 csize = metadata.getShort();
   if (csize  > 1)
     step = curve.size() / (csize - 1);
   if (v0 == 68 && v1 == 32 && step > 0) {
     for (size_t i = 0; i < csize; i++)
-      curve[i*step] = metadata->getShort();
+      curve[i*step] = metadata.getShort();
     for (size_t i = 0; i < curve.size()-1; i++)
       curve[i] = (curve[i-i%step] * (step - i % step) +
                   curve[i-i%step+step] * (i % step)) / step;
-    metadata->setPosition(562);
-    split = metadata->getShort();
+    metadata.setPosition(562);
+    split = metadata.getShort();
   } else if (v0 != 70 && csize <= 0x4001) {
     curve.resize(csize + 1UL);
     for (uint32 i = 0; i < csize; i++) {
-      curve[i] = metadata->getShort();
+      curve[i] = metadata.getShort();
     }
   }
-  initTable(huffSelect);
+
+  HuffmanTable ht = createHuffmanTable(huffSelect);
 
   if (!uncorrectedRawValues) {
     mRaw->setTable(&curve[0], curve.size()-1, true);
   }
 
-  uint32 x, y;
-  ByteStream input(mFile, offset, size);
-  BitPumpMSB bits(input);
+  BitPumpMSB bits(data);
   uchar8 *draw = mRaw->getData();
-  ushort16 *dest;
   uint32 pitch = mRaw->pitch;
 
-  HuffmanTable *htbl = huff[0];
   int pLeft1 = 0;
   int pLeft2 = 0;
   uint32 cw = w / 2;
   uint32 random = bits.peekBits(24);
   //allow gcc to devirtualize the calls below
   RawImageDataU16* rawdata = (RawImageDataU16*)mRaw.get();
-  for (y = 0; y < h; y++) {
+  for (uint32 y = 0; y < h; y++) {
     if (split && y == split) {
-      initTable(huffSelect + 1);
+      ht = createHuffmanTable(huffSelect + 1);
     }
-    dest = (ushort16*) & draw[y*pitch];  // Adjust destination
-    pUp1[y&1] += htbl->decodeNext(bits);
-    pUp2[y&1] += htbl->decodeNext(bits);
+    ushort16* dest = (ushort16*) & draw[y*pitch];  // Adjust destination
+    pUp1[y&1] += ht.decodeNext(bits);
+    pUp2[y&1] += ht.decodeNext(bits);
     pLeft1 = pUp1[y&1];
     pLeft2 = pUp2[y&1];
     rawdata->setWithLookUp(clampbits(pLeft1,15), (uchar8*)dest++, &random);
     rawdata->setWithLookUp(clampbits(pLeft2,15), (uchar8*)dest++, &random);
-    for (x = 1; x < cw; x++) {
+    for (uint32 x = 1; x < cw; x++) {
       bits.checkPos();
-      pLeft1 += htbl->decodeNext(bits);
-      pLeft2 += htbl->decodeNext(bits);
+      pLeft1 += ht.decodeNext(bits);
+      pLeft2 += ht.decodeNext(bits);
       rawdata->setWithLookUp(clampbits(pLeft1,15), (uchar8*)dest++, &random);
       rawdata->setWithLookUp(clampbits(pLeft2,15), (uchar8*)dest++, &random);
     }

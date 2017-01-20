@@ -49,9 +49,11 @@ RawImage ThreefrDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
-  ByteStream input(mFile, off);
 
   HasselbladDecompressor l(mFile, mRaw);
+  // We cannot use fully decoding huffman table,
+  // because values are packed two pixels at the time.
+  l.mFullDecodeHT = false;
   map<string,string>::iterator pixelOffset = hints.find("pixelBaseOffset");
   if (pixelOffset != hints.end()) {
     stringstream convert((*pixelOffset).second);
@@ -59,7 +61,7 @@ RawImage ThreefrDecoder::decodeRawInternal() {
   }
 
   try {
-    l.decodeHasselblad(mRootIFD, off, mFile->getSize() - off);
+    l.decode(off, mFile->getSize() - off, 0, 0);
   } catch (IOException &e) {
     mRaw->setError(e.what());
     // Let's ignore it, it may have delivered somewhat useful data.

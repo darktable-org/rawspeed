@@ -2,11 +2,11 @@
 #define LJPEG_PLAIN_H
 
 #include "LJpegDecompressor.h"
-#include "BitPumpMSB.h"
 /* 
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -27,27 +27,15 @@
 
 namespace RawSpeed {
 
-/******************
- * Decompresses Lossless non subsampled JPEGs, with 2-4 components
- *****************/
+// Decompresses Lossless JPEGs, with 2-4 components and optional X/Y subsampling
 
-class LJpegPlain :
-  public LJpegDecompressor
+class LJpegPlain final : public LJpegDecompressor
 {
-public:
-  LJpegPlain(FileMap *file, const RawImage &img);
-  virtual ~LJpegPlain(void);
-protected:
   virtual void decodeScan();
-private:
-  void decodeScanLeft4Comps();
-  void decodeScanLeft2Comps();
-  void decodeScanLeft3Comps();
-  void decodeScanLeftGeneric();
-  void decodeScanLeft4_2_0();
-  void decodeScanLeft4_2_2();
-  uint32 *offset;
-  int* slice_width;
+  template<int N_COMP, int X_S_F, int Y_S_F> void decodeN_X_Y();
+
+public:
+  using LJpegDecompressor::LJpegDecompressor;
 };
 
 } // namespace RawSpeed

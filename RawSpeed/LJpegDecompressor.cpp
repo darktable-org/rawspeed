@@ -26,18 +26,7 @@
 
 namespace RawSpeed {
 
-LJpegDecompressor::LJpegDecompressor(FileMap *file, const RawImage &img)
-    : mFile(file), mRaw(img) {
-  input = 0;
-  skipX = skipY = 0;
-  mDNGCompatible = false;
-  slicesW.clear();
-  mUseBigtable = true;
-  mCanonFlipDim = false;
-  mCanonDoubleHeight = false;
-}
-
-LJpegDecompressor::~LJpegDecompressor(void) {
+LJpegDecompressor::~LJpegDecompressor() {
   delete input;
 }
 
@@ -67,69 +56,35 @@ void LJpegDecompressor::getSOF(SOFInfo* sof, uint32 offset, uint32 size) {
   }
 }
 
-void LJpegDecompressor::startDecoder(uint32 offset, uint32 size, uint32 offsetX, uint32 offsetY) {
+void LJpegDecompressor::decode(uint32 offset, uint32 size, uint32 offsetX, uint32 offsetY) {
   if (!mFile->isValid(offset, size))
-    ThrowRDE("LJpegDecompressor::startDecoder: Start offset plus size is longer than file. Truncated file.");
+    ThrowRDE("LJpegDecompressor: Start offset plus size is longer than file. Truncated file.");
   if ((int)offsetX >= mRaw->dim.x)
-    ThrowRDE("LJpegDecompressor::startDecoder: X offset outside of image");
+    ThrowRDE("LJpegDecompressor: X offset outside of image");
   if ((int)offsetY >= mRaw->dim.y)
-    ThrowRDE("LJpegDecompressor::startDecoder: Y offset outside of image");
+    ThrowRDE("LJpegDecompressor: Y offset outside of image");
   offX = offsetX;
   offY = offsetY;
 
-  try {
-    // JPEG is big endian
-    input = new ByteStream(mFile, offset, size, getHostEndianness() == big);
+  // JPEG is big endian
+  input = new ByteStream(mFile, offset, size, getHostEndianness() == big);
 
-    if (getNextMarker(false) != M_SOI)
-      ThrowRDE("LJpegDecompressor::startDecoder: Image did not start with SOI. Probably not an LJPEG");
-//    _RPT0(0,"Found SOI marker\n");
+  if (getNextMarker(false) != M_SOI)
+    ThrowRDE("LJpegDecompressor: Image did not start with SOI. Probably not an LJPEG");
 
-    bool moreImage = true;
-    while (moreImage) {
-      JpegMarker m = getNextMarker(true);
+  JpegMarker m;
+  do {
+    m = getNextMarker(true);
 
-      switch (m) {
-        case M_SOS:
-//          _RPT0(0,"Found SOS marker\n");
-          parseSOS();
-          break;
-        case M_EOI:
-//          _RPT0(0,"Found EOI marker\n");
-          moreImage = false;
-          break;
-
-        case M_DHT:
-//          _RPT0(0,"Found DHT marker\n");
-          parseDHT();
-          break;
-
-        case M_DQT:
-          ThrowRDE("LJpegDecompressor: Not a valid RAW file.");
-          break;
-
-        case M_DRI:
-//          _RPT0(0,"Found DRI marker\n");
-          break;
-
-        case M_APP0:
-//          _RPT0(0,"Found APP0 marker\n");
-          break;
-
-        case M_SOF3:
-//          _RPT0(0,"Found SOF 3 marker:\n");
-          parseSOF(&frame);
-          break;
-
-        default:  // Just let it skip to next marker
-          _RPT1(0, "Found marker:0x%x. Skipping\n", (int)m);
-          break;
-      }
+    switch (m) {
+    case M_DHT:  parseDHT(); break;
+    case M_SOF3: parseSOF(&frame); break;
+    case M_SOS:  parseSOS(); break;
+    case M_DQT:  ThrowRDE("LJpegDecompressor: Not a valid RAW file.");
+    default:  // Just let it skip to next marker
+      break;
     }
-
-  } catch (IOException &) {
-    throw;
-  }
+  } while (m != M_EOI);
 }
 
 void LJpegDecompressor::parseSOF(SOFInfo* sof) {
@@ -137,7 +92,6 @@ void LJpegDecompressor::parseSOF(SOFInfo* sof) {
   sof->prec = input->getByte();
   sof->h = input->getShort();
   sof->w = input->getShort();
-
   sof->cps = input->getByte();
 
   if (sof->prec > 16)
@@ -166,54 +120,41 @@ void LJpegDecompressor::parseSOS() {
     ThrowRDE("LJpegDecompressor::parseSOS: Frame not yet initialized (SOF Marker not parsed)");
 
   uint32 headerLength = input->getShort();
+  if (headerLength != 3 + frame.cps * 2 + 3)
+    ThrowRDE("LJpegDecompressor::parseSOS: Invalid SOS header length.");
+
   uint32 soscps = input->getByte();
   if (frame.cps != soscps)
     ThrowRDE("LJpegDecompressor::parseSOS: Component number mismatch.");
 
-  for (uint32 i = 0;i < frame.cps;i++) {
+  for (uint32 i = 0; i < frame.cps; i++) {
     uint32 cs = input->getByte();
+    uint32 td = input->getByte() >> 4;
 
-    uint32 count = 0;  // Find the correct component
-    while (frame.compInfo[count].componentId != cs) {
-      if (count >= frame.cps)
-        ThrowRDE("LJpegDecompressor::parseSOS: Invalid Component Selector");
-      count++;
+    if (td > 3 || !huff[td])
+      ThrowRDE("LJpegDecompressor::parseSOS: Invalid Huffman table selection.");
+
+    int ciIndex = -1;
+    for (uint32 j = 0; j < frame.cps; ++j) {
+      if (frame.compInfo[j].componentId == cs)
+        ciIndex = j;
     }
 
-    uint32 b = input->getByte();
-    uint32 td = b >> 4;
-    if (td > 3)
-      ThrowRDE("LJpegDecompressor::parseSOS: Invalid Huffman table selection");
-    if (!huff[td])
-      ThrowRDE("LJpegDecompressor::parseSOS: Invalid Huffman table selection, not defined.");
+    if (ciIndex == -1)
+        ThrowRDE("LJpegDecompressor::parseSOS: Invalid Component Selector");
 
-    if (count > 3)
-      ThrowRDE("LJpegDecompressor::parseSOS: Component count out of range");
-
-    frame.compInfo[count].dcTblNo = td;
+    frame.compInfo[ciIndex].dcTblNo = td;
   }
 
   // Get predictor
   pred = input->getByte();
-  if (pred > 7)
+  if (pred > 8)
     ThrowRDE("LJpegDecompressor::parseSOS: Invalid predictor mode.");
 
-  input->skipBytes(1);                    // Se + Ah Not used in LJPEG
-  uint32 b = input->getByte();
-  Pt = b & 0xf;        // Point Transform
+  input->skipBytes(1);         // Se + Ah Not used in LJPEG
+  Pt = input->getByte() & 0xf; // Point Transform
 
-  uint32 cheadersize = 3 + frame.cps * 2 + 3;
-  _ASSERTE(cheadersize == headerLength);
-
-  bits = new BitPumpJPEG(*input);
-  try {
-    decodeScan();
-  } catch (...) {
-    delete bits;
-    throw;
-  }
-  input->skipBytes(bits->getBufferPosition());
-  delete bits;
+  decodeScan();
 }
 
 void LJpegDecompressor::parseDHT() {
@@ -251,7 +192,7 @@ void LJpegDecompressor::parseDHT() {
 
     if (!huff[htIndex]) {
       // setup new ht and put it into the store
-      ht->setup(mUseBigtable, mDNGCompatible);
+      ht->setup(mFullDecodeHT, mDNGCompatible);
       huff[htIndex] = ht.get();
       huffmanTableStore.emplace_back(std::move(ht));
     }
@@ -259,30 +200,17 @@ void LJpegDecompressor::parseDHT() {
   }
 }
 
-
 JpegMarker LJpegDecompressor::getNextMarker(bool allowskip) {
+  uchar8 c0, c1 = input->getByte();
+  do {
+    c0 = c1;
+    c1 = input->getByte();
+  } while (allowskip && !(c0 == 0xFF && c1 != 0 && c1 != 0xFF));
 
-  if (!allowskip) {
-    uchar8 id = input->getByte();
-    if (id != 0xff)
-      ThrowRDE("LJpegDecompressor::getNextMarker: (Noskip) Expected marker not found. Propably corrupt file.");
+  if (!(c0 == 0xFF && c1 != 0 && c1 != 0xFF))
+    ThrowRDE("LJpegDecompressor::getNextMarker: (Noskip) Expected marker not found. Propably corrupt file.");
 
-    JpegMarker mark = (JpegMarker)input->getByte();
-
-    if (M_FILL == mark || M_STUFF == mark)
-      ThrowRDE("LJpegDecompressor::getNextMarker: (Noskip) Expected marker, but found stuffed 00 or ff.");
-
-    return mark;
-  } else {
-    // skipToMarker
-    uchar8 c0, c1 = input->getByte();
-    do {
-      c0 = c1;
-      c1 = input->getByte();
-    } while (!(c0 == 0xFF && c1 != 0 && c1 != 0xFF));
-
-    return (JpegMarker)c1;
-  }
+  return (JpegMarker)c1;
 }
 
 } // namespace RawSpeed
