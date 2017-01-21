@@ -140,7 +140,7 @@ namespace RawSpeed {
     __cpuid(info, 1);
     use_sse2 = !!(info[3]&(1 << 26));
 #else
-    use_sse2 = TRUE;
+    use_sse2 = true;
 #endif
 
     float app_scale = 65535.0f / (whitePoint - blackLevelSeparate[0]);

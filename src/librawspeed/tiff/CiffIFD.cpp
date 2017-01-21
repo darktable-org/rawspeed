@@ -80,10 +80,10 @@ CiffIFD::~CiffIFD(void) {
 
 bool CiffIFD::hasEntryRecursive(CiffTag tag) {
   if (mEntry.find(tag) != mEntry.end())
-    return TRUE;
+    return true;
   for (vector<CiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
     if ((*i)->hasEntryRecursive(tag))
-      return TRUE;
+      return true;
   }
   return false;
 }

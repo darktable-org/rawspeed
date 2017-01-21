@@ -26,12 +26,12 @@ namespace RawSpeed {
 
 RawDecoder::RawDecoder(FileMap* file) : mRaw(RawImage::create()), mFile(file) {
   decoderVersion = 0;
-  failOnUnknown = FALSE;
-  interpolateBadPixels = TRUE;
-  applyStage1DngOpcodes = TRUE;
-  applyCrop = TRUE;
-  uncorrectedRawValues = FALSE;
-  fujiRotate = TRUE;
+  failOnUnknown = false;
+  interpolateBadPixels = true;
+  applyStage1DngOpcodes = true;
+  applyCrop = true;
+  uncorrectedRawValues = false;
+  fujiRotate = true;
 }
 
 void RawDecoder::decodeUncompressed(TiffIFD *rawIFD, BitOrder order) {

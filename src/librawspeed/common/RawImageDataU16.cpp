@@ -155,7 +155,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
   __cpuid(info, 1);
   use_sse2 = !!(info[3]&(1 << 26));
 #else
-  use_sse2 = TRUE;
+  use_sse2 = true;
 #endif
 
   int depth_values = whitePoint - blackLevelSeparate[0];

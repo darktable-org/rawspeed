@@ -209,7 +209,7 @@ static const UTF8 firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC 
 
 static bool ConvertUTF16toUTF8 (const UTF16** sourceStart, const UTF16* sourceEnd,  UTF8** targetStart, UTF8* targetEnd) 
 {
-  bool success = TRUE;
+  bool success = true;
   const UTF16* source = *sourceStart;
   UTF8* target = *targetStart;
   while (source < sourceEnd) {
@@ -232,13 +232,13 @@ static bool ConvertUTF16toUTF8 (const UTF16** sourceStart, const UTF16* sourceEn
 #if 0
         } else if (flags == strictConversion) { /* it's an unpaired high surrogate */
           --source; /* return to the illegal value itself */
-          success = FALSE;
+          success = false;
           break;
 #endif
         }
       } else { /* We don't have the 16 bits following the high surrogate. */
         --source; /* return to the high surrogate */
-        success = FALSE;
+        success = false;
         break;
       }
     }
@@ -254,7 +254,9 @@ static bool ConvertUTF16toUTF8 (const UTF16** sourceStart, const UTF16* sourceEn
     target += bytesToWrite;
     if (target > targetEnd) {
       source = oldSource; /* Back up source pointer! */
-      target -= bytesToWrite; success = FALSE; break;
+      target -= bytesToWrite;
+      success = false;
+      break;
     }
     switch (bytesToWrite) { /* note: everything falls through. */
             case 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;

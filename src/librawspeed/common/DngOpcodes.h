@@ -35,7 +35,7 @@ public:
   /* Can be used for preparing pre-calculated values, etc */
   virtual RawImage& createOutput(RawImage &in) {return in;}
   /* Will be called for actual processing */
-  /* If multiThreaded is TRUE, it will be called several times, */
+  /* If multiThreaded is true, it will be called several times, */
   /* otherwise only once */
   /* Properties of out will not have changed from createOutput */
   virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY) = 0;

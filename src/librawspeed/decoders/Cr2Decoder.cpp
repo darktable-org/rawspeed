@@ -475,11 +475,11 @@ void Cr2Decoder::interpolate_420(int w, int h, int start_h , int end_h) {
   // Last pixel should not be interpolated
   w--;
 
-  bool atLastLine = FALSE;
+  bool atLastLine = false;
 
   if (end_h == h) {
     end_h--;
-    atLastLine = TRUE;
+    atLastLine = true;
   }
 
   // Current line
@@ -687,11 +687,11 @@ void Cr2Decoder::interpolate_420_new(int w, int h, int start_h , int end_h) {
   // Last pixel should not be interpolated
   w--;
 
-  bool atLastLine = FALSE;
+  bool atLastLine = false;
 
   if (end_h == h) {
     end_h--;
-    atLastLine = TRUE;
+    atLastLine = true;
   }
 
   // Current line

@@ -138,7 +138,7 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
     memset(acarry1, 0, sizeof acarry1);
     ushort16* dest = (ushort16*) & data[y*pitch];
     bool y_border = y < 2;
-    bool border = TRUE;
+    bool border = true;
     for (uint32 x = 0; x < w; x++) {
       bits.checkPos();
       bits.fill();

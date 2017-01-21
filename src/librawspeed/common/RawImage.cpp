@@ -40,7 +40,7 @@ RawImageData::RawImageData(void):
   mBadPixelMap = NULL;
   pthread_mutex_init(&errMutex, NULL);
   pthread_mutex_init(&mBadPixelMutex, NULL);
-  mDitherScale = TRUE;
+  mDitherScale = true;
 }
 
 RawImageData::RawImageData(const iPoint2D &_dim, uint32 _bpc, uint32 _cpp)
@@ -49,7 +49,7 @@ RawImageData::RawImageData(const iPoint2D &_dim, uint32 _bpc, uint32 _cpp)
       uncropped_dim(0, 0), table(NULL) {
   blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
   mBadPixelMap = NULL;
-  mDitherScale = TRUE;
+  mDitherScale = true;
   createData();
   pthread_mutex_init(&mymutex, NULL);
   pthread_mutex_init(&errMutex, NULL);

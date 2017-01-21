@@ -41,12 +41,12 @@ RawImage Rw2Decoder::decodeRawInternal() {
 
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(PANASONIC_STRIPOFFSET);
 
-  bool isOldPanasonic = FALSE;
+  bool isOldPanasonic = false;
 
   if (data.empty()) {
     if (!mRootIFD->hasEntryRecursive(STRIPOFFSETS))
       ThrowRDE("RW2 Decoder: No image data found");
-    isOldPanasonic = TRUE;
+    isOldPanasonic = true;
     data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
   }
 
@@ -219,12 +219,12 @@ void Rw2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
 
   data = mRootIFD->getIFDsWithTag(PANASONIC_STRIPOFFSET);
 
-  // bool isOldPanasonic = FALSE;
+  // bool isOldPanasonic = false;
 
   if (data.empty()) {
     if (!mRootIFD->hasEntryRecursive(STRIPOFFSETS))
       ThrowRDE("RW2 Decoder: No image data found");
-    // isOldPanasonic = TRUE;
+    // isOldPanasonic = true;
     data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
   }
 

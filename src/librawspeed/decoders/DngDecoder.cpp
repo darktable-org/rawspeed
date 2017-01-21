@@ -498,7 +498,7 @@ void DngDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
 /* DNG Images are assumed to be decodable unless explicitly set so */
 void DngDecoder::checkSupportInternal(CameraMetaData *meta) {
   // We set this, since DNG's are not explicitly added.
-  failOnUnknown = FALSE;
+  failOnUnknown = false;
 
   if (!(mRootIFD->hasEntryRecursive(MAKE) && mRootIFD->hasEntryRecursive(MODEL))) {
     // Check "Unique Camera Model" instead, uses this for both make + model.
@@ -523,11 +523,11 @@ bool DngDecoder::decodeMaskedAreas(TiffIFD* raw) {
   TiffEntry *masked = raw->getEntry(MASKEDAREAS);
 
   if (masked->type != TIFF_SHORT && masked->type != TIFF_LONG)
-    return FALSE;
+    return false;
 
   uint32 nrects = masked->count/4;
   if (0 == nrects)
-    return FALSE;
+    return false;
 
   /* Since we may both have short or int, copy it to int array. */
   uint32 *rects = new uint32[nrects*4];
@@ -540,10 +540,12 @@ bool DngDecoder::decodeMaskedAreas(TiffIFD* raw) {
     iPoint2D bottomright = iPoint2D(rects[i*4+3], rects[i*4+2]);
     // Is this a horizontal box, only add it if it covers the active width of the image
     if (topleft.x <= top.x && bottomright.x >= (mRaw->dim.x+top.x))
-      mRaw->blackAreas.push_back(BlackArea(topleft.y, bottomright.y-topleft.y, FALSE));
+      mRaw->blackAreas.push_back(
+          BlackArea(topleft.y, bottomright.y - topleft.y, false));
     // Is it a vertical box, only add it if it covers the active height of the image
     else if (topleft.y <= top.y && bottomright.y >= (mRaw->dim.y+top.y)) {
-        mRaw->blackAreas.push_back(BlackArea(topleft.x, bottomright.x-topleft.x, TRUE));
+      mRaw->blackAreas.push_back(
+          BlackArea(topleft.x, bottomright.x - topleft.x, true));
     }
   }
   delete[] rects;
@@ -555,18 +557,18 @@ bool DngDecoder::decodeBlackLevels(TiffIFD* raw) {
   if (raw->hasEntry(BLACKLEVELREPEATDIM)) {
     TiffEntry *bleveldim = raw->getEntry(BLACKLEVELREPEATDIM);
     if (bleveldim->count != 2)
-      return FALSE;
+      return false;
     blackdim = iPoint2D(bleveldim->getInt(0), bleveldim->getInt(1));
   }
 
   if (blackdim.x == 0 || blackdim.y == 0)
-    return FALSE;
+    return false;
 
   if (!raw->hasEntry(BLACKLEVEL))
-    return TRUE;
+    return true;
 
   if (mRaw->getCpp() != 1)
-    return FALSE;
+    return false;
 
   TiffEntry* black_entry = raw->getEntry(BLACKLEVEL);
   if ((int)black_entry->count < blackdim.x*blackdim.y)
@@ -610,7 +612,7 @@ bool DngDecoder::decodeBlackLevels(TiffIFD* raw) {
     for (int i = 0; i < 4; i++)
       mRaw->blackLevelSeparate[i] += (int)(black_sum[i&1] / (float)mRaw->dim.x * 2.0f);
   }
-  return TRUE;
+  return true;
 }
 
 void DngDecoder::setBlack(TiffIFD* raw) {
