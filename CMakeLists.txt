@@ -64,7 +64,7 @@ include(compiler-warnings)
 
 add_custom_target(check ALL)
 
-add_subdirectory(RawSpeed)
+add_subdirectory(src)
 add_subdirectory(data)
 
 if(BUILD_TESTING AND CMAKE_BUILD_TYPE MATCHES "^[Cc][Oo][Vv][Ee][Rr][Aa][Gg][Ee]$")
