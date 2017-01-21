@@ -1,12 +1,3 @@
-# want GTEST_ADD_TESTS() macro. NOT THE ACTUAL MODULE!
-include(GTEST_ADD_TESTS)
-
-# for the actual gtest:
-
-# at least in debian, they are the package only installs their source code,
-# so if one wants to use them, he needs to compile them in-tree
-include(GoogleTest)
-
 add_custom_target(tests ALL)
 
 FILE(GLOB RAWSPEED_TEST_SOURCES
