@@ -19,8 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef HASSELBLAD_DECOMPRESSOR_H
-#define HASSELBLAD_DECOMPRESSOR_H
+#pragma once
 
 #include "decompressors/LJpegDecompressor.h"
 
@@ -37,5 +36,3 @@ public:
 };
 
 } // namespace RawSpeed
-
-#endif

@@ -1,4 +1,4 @@
-/* 
+/*
 RawSpeed - RAW file decoder.
 
 Copyright (C) 2012 Klaus Post
@@ -18,8 +18,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef DNG_OPCODES_H
-#define DNG_OPCODES_H
+#pragma once
 #include <vector>
 #include "tiff/TiffIFD.h"
 #include "common/RawImage.h"
@@ -48,7 +47,7 @@ public:
     PureLookup = 2
   };
 
-  
+
 protected:
   Endianness host;
   int32 getLong(const uchar8 *ptr) {
@@ -213,6 +212,4 @@ private:
   int* mDeltaX;
 };
 
-} // namespace RawSpeed 
-
-#endif // DNG_OPCODES_H
+} // namespace RawSpeed

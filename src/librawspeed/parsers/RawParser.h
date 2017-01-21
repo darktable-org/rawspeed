@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -18,15 +18,14 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef RAW_PARSER_H
-#define RAW_PARSER_H
+#pragma once
 
 #include "io/FileMap.h"
 #include "decoders/RawDecoder.h"
 
 namespace RawSpeed {
 
-class RawParser 
+class RawParser
 {
 public:
   RawParser(FileMap* input);
@@ -38,5 +37,3 @@ protected:
 };
 
 } // namespace RawSpeed
-
-#endif

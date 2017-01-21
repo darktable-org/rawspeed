@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -19,8 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef LJPEG_PLAIN_H
-#define LJPEG_PLAIN_H
+#pragma once
 
 #include "decompressors/LJpegDecompressor.h"
 
@@ -38,5 +37,3 @@ public:
 };
 
 } // namespace RawSpeed
-
-#endif

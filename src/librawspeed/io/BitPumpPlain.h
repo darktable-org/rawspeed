@@ -45,4 +45,3 @@ template<> inline void BitPumpPlain::setBufferPosition(uint32 newPos) {
 }
 
 } // namespace RawSpeed
-

@@ -18,6 +18,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#pragma once
+
 #if defined(__MINGW32__)
 #define UNICODE
 #undef _WIN32_WINNT
@@ -117,5 +119,3 @@ using namespace std;
 #include "tiff/TiffTag.h"
 #include "common/Common.h"
 #include "common/Point.h"
-
-

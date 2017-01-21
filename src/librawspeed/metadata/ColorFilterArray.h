@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -18,8 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef COLOR_FILTER_ARRAY_H
-#define COLOR_FILTER_ARRAY_H
+#pragma once
 
 #include "decoders/RawDecoderException.h"
 
@@ -68,5 +67,3 @@ protected:
 };
 
 } // namespace RawSpeed
-
-#endif

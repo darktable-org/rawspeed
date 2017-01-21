@@ -1,4 +1,4 @@
-/* 
+/*
 RawSpeed - RAW file decoder.
 
 Copyright (C) 2013 Klaus Post
@@ -18,8 +18,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef X3F_PARSER_H
-#define X3F_PARSER_H
+#pragma once
 
 #include "io/ByteStream.h"
 #include "io/FileMap.h"
@@ -47,12 +46,12 @@ public:
   /*  1 = RAW X3 (SD1)
   2 = thumbnail or maybe just RGB
   3 = RAW X3 */
-  uint32 type;              
+  uint32 type;
   /*  3 = 3x8 bit pixmap
   6 = 3x10 bit huffman with map table
   11 = 3x8 bit huffman
-  18 = JPEG */  
-  uint32 format;              
+  18 = JPEG */
+  uint32 format;
   uint32 width;
   uint32 height;
   // Pitch in bytes, 0 if Huffman encoded
@@ -66,7 +65,7 @@ class X3fPropertyCollection
 public:
   X3fPropertyCollection(){};
   void addProperties(ByteStream *bytes, uint32 offset, uint32 length);
-  X3fPropertyCollection(const X3fPropertyCollection &other) 
+  X3fPropertyCollection(const X3fPropertyCollection &other)
     : props(other.props) {};
   string getString( ByteStream *bytes );
   map<string, string> props;
@@ -90,4 +89,3 @@ protected:
 };
 
 } // namespace RawSpeed
-#endif

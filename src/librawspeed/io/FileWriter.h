@@ -18,8 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef FILE_WRITER_H
-#define FILE_WRITER_H
+#pragma once
 
 #include "io/FileIOException.h"
 #include "io/FileMap.h"
@@ -40,6 +39,3 @@ private:
 };
 
 } // namespace RawSpeed
-
-#endif
-

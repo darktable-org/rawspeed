@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -19,8 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef TIFF_IFD_H
-#define TIFF_IFD_H
+#pragma once
 
 #include "io/Buffer.h"
 #include "tiff/TiffEntry.h"
@@ -100,5 +99,3 @@ inline Endianness getTiffEndianness(const FileMap* file) {
 }
 
 } // namespace RawSpeed
-
-#endif

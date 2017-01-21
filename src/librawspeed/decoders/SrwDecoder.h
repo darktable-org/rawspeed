@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2010 Klaus Post
@@ -18,8 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef SRW_DECODER_H
-#define SRW_DECODER_H
+#pragma once
 
 #include "decoders/RawDecoder.h"
 #include "decompressors/LJpegPlain.h"
@@ -53,5 +52,3 @@ private:
 };
 
 } // namespace RawSpeed
-
-#endif

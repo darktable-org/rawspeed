@@ -19,8 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef RAW_DECODER_H
-#define RAW_DECODER_H
+#pragma once
 
 #include "decoders/RawDecoderException.h"
 #include "io/FileMap.h"
@@ -52,7 +51,7 @@ class RawDecoderThread
     uint32 taskNo;
 };
 
-class RawDecoder 
+class RawDecoder
 {
 public:
   /* Construct decoder instance - FileMap is a filemap of the file to be decoded */
@@ -91,7 +90,7 @@ public:
 
   /* The decoded image - undefined if image has not or could not be decoded. */
   /* Remember this is automatically refcounted, so a reference is retained until this class is destroyed */
-  RawImage mRaw; 
+  RawImage mRaw;
 
   /* You can set this if you do not want Rawspeed to attempt to decode images, */
   /* where it does not have reliable information about CFA, cropping, black and white point */
@@ -188,7 +187,7 @@ protected:
 
   /* Faster version for reading unpacked 12 bit MSB data that is left aligned (needs >> 4 shift) */
   void Decode12BitRawBEunpackedLeftAligned(ByteStream &input, uint32 w, uint32 h);
-  
+
   /* Faster version for reading unpacked 14 bit MSB data */
   void Decode14BitRawBEunpacked(ByteStream &input, uint32 w, uint32 h);
 
@@ -206,7 +205,7 @@ protected:
   void decodeUncompressed(TiffIFD *rawIFD, BitOrder order);
 
   /* The Raw input file to be decoded */
-  FileMap *mFile; 
+  FileMap *mFile;
 
   /* Decoder version - defaults to 0, but can be overridden by decoders */
   /* This can be used to avoid newer version of an xml file to indicate that a file */
@@ -229,5 +228,3 @@ public:
 };
 
 } // namespace RawSpeed
-
-#endif

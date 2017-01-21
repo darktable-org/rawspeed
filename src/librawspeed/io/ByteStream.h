@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -19,8 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef BYTE_STREAM_H
-#define BYTE_STREAM_H
+#pragma once
 
 #include "io/IOException.h"
 #include "io/Buffer.h"
@@ -170,5 +169,3 @@ public:
 };
 
 } // namespace RawSpeed
-
-#endif

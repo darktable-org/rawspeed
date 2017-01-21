@@ -18,8 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef SS_Point_H
-#define SS_Point_H
+#pragma once
 
 namespace RawSpeed {
 
@@ -120,5 +119,3 @@ public:
 };
 
 } // namespace RawSpeed
-
-#endif // SS_Point_H

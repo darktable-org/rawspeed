@@ -19,8 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef CIFF_TAG_H
-#define CIFF_TAG_H
+#pragma once
 
 namespace RawSpeed {
 
@@ -38,5 +37,3 @@ typedef enum {
 } CiffTag;
 
 } // namespace RawSpeed
-
-#endif // CIFF_TAG_H

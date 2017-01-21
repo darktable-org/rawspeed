@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -18,8 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef NIKON_DECOMPRESSOR_H
-#define NIKON_DECOMPRESSOR_H
+#pragma once
 
 #include "common/RawImage.h"
 #include "io/Buffer.h"
@@ -28,7 +27,5 @@
 namespace RawSpeed {
 
 void decompressNikon(RawImage& mRaw, ByteStream&& data, ByteStream meta, uint32 w, uint32 h, uint32 bitsPS, bool uncorrectedRawValues);
-  
-} // namespace RawSpeed
 
-#endif
+} // namespace RawSpeed

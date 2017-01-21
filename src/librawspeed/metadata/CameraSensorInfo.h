@@ -18,8 +18,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef CAMERA_SENSOR_INFO_H
-#define CAMERA_SENSOR_INFO_H
+#pragma once
 
 #include <vector>
 
@@ -35,11 +34,9 @@ public:
   bool isDefault();
   int mBlackLevel;
   int mWhiteLevel;
-  int mMinIso; 
+  int mMinIso;
   int mMaxIso;
   std::vector<int> mBlackLevelSeparate;
 };
 
 } // namespace RawSpeed
-
-#endif

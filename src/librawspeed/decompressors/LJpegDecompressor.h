@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -19,8 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef LJPEG_DECOMPRESSOR_H
-#define LJPEG_DECOMPRESSOR_H
+#pragma once
 
 #include "decompressors/HuffmanTable.h"
 #include "decoders/RawDecoder.h"
@@ -28,7 +27,7 @@
 /*
  * The following enum and two structs are stolen from the IJG JPEG library
  * Comments added by tm. See also Copyright in HuffmanTable.h.
- */ 
+ */
 
 namespace RawSpeed {
 
@@ -38,24 +37,24 @@ typedef enum {		/* JPEG marker codes			*/
   M_SOF1  = 0xc1,	/* extended sequential DCT		*/
   M_SOF2  = 0xc2,	/* progressive DCT			*/
   M_SOF3  = 0xc3,	/* lossless (sequential)		*/
-  
+
   M_SOF5  = 0xc5,	/* differential sequential DCT		*/
   M_SOF6  = 0xc6,	/* differential progressive DCT		*/
   M_SOF7  = 0xc7,	/* differential lossless		*/
-  
+
   M_JPG   = 0xc8,	/* JPEG extensions			*/
   M_SOF9  = 0xc9,	/* extended sequential DCT		*/
   M_SOF10 = 0xca,	/* progressive DCT			*/
   M_SOF11 = 0xcb,	/* lossless (sequential)		*/
-  
+
   M_SOF13 = 0xcd,	/* differential sequential DCT		*/
   M_SOF14 = 0xce,	/* differential progressive DCT		*/
   M_SOF15 = 0xcf,	/* differential lossless		*/
-  
+
   M_DHT   = 0xc4,	/* define Huffman tables		*/
-  
+
   M_DAC   = 0xcc,	/* define arithmetic conditioning table	*/
-  
+
   M_RST0  = 0xd0,	/* restart				*/
   M_RST1  = 0xd1,	/* restart				*/
   M_RST2  = 0xd2,	/* restart				*/
@@ -64,7 +63,7 @@ typedef enum {		/* JPEG marker codes			*/
   M_RST5  = 0xd5,	/* restart				*/
   M_RST6  = 0xd6,	/* restart				*/
   M_RST7  = 0xd7,	/* restart				*/
-  
+
   M_SOI   = 0xd8,	/* start of image			*/
   M_EOI   = 0xd9,	/* end of image				*/
   M_SOS   = 0xda,	/* start of scan			*/
@@ -73,7 +72,7 @@ typedef enum {		/* JPEG marker codes			*/
   M_DRI   = 0xdd,	/* define restart interval		*/
   M_DHP   = 0xde,	/* define hierarchical progression	*/
   M_EXP   = 0xdf,	/* expand reference image(s)		*/
-  
+
   M_APP0  = 0xe0,	/* application marker, used for JFIF	*/
   M_APP1  = 0xe1,	/* application marker			*/
   M_APP2  = 0xe2,	/* application marker			*/
@@ -90,11 +89,11 @@ typedef enum {		/* JPEG marker codes			*/
   M_APP13 = 0xed,	/* application marker			*/
   M_APP14 = 0xee,	/* application marker, used by Adobe	*/
   M_APP15 = 0xef,	/* application marker			*/
-  
+
   M_JPG0  = 0xf0,	/* reserved for JPEG extensions		*/
   M_JPG13 = 0xfd,	/* reserved for JPEG extensions		*/
   M_COM   = 0xfe,	/* comment				*/
-  
+
   M_TEM   = 0x01,	/* temporary use			*/
   M_FILL  = 0xFF
 
@@ -155,7 +154,7 @@ protected:
 
   ByteStream* input = 0;
   FileMap *mFile = 0;
-  RawImage mRaw; 
+  RawImage mRaw;
 
   SOFInfo frame;
   vector<int> slicesW;
@@ -168,5 +167,3 @@ protected:
 };
 
 } // namespace RawSpeed
-
-#endif

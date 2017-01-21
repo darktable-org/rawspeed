@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -19,8 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef CIFF_PARSER_H
-#define CIFF_PARSER_H
+#pragma once
 
 #include "io/FileMap.h"
 #include "tiff/CiffIFD.h"
@@ -29,7 +28,7 @@
 
 namespace RawSpeed {
 
-class CiffParser 
+class CiffParser
 {
 public:
   CiffParser(FileMap* input);
@@ -47,5 +46,3 @@ protected:
 };
 
 } // namespace RawSpeed
-
-#endif

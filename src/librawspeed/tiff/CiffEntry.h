@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -19,8 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef CIFF_ENTRY_H
-#define CIFF_ENTRY_H
+#pragma once
 
 #include "parsers/CiffParserException.h"
 #include "tiff/CiffTag.h"
@@ -77,5 +76,3 @@ protected:
 };
 
 } // namespace RawSpeed
-
-#endif

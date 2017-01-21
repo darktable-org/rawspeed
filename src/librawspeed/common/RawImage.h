@@ -18,8 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef RAW_IMAGE_H
-#define RAW_IMAGE_H
+#pragma once
 
 #include "metadata/ColorFilterArray.h"
 #include "metadata/BlackArea.h"
@@ -77,7 +76,7 @@ public:
   // White balance coefficients of the image
   float wbCoeffs[4];
 
-  // How many pixels far down the left edge and far up the right edge the image 
+  // How many pixels far down the left edge and far up the right edge the image
   // corners are when the image is rotated 45 degrees in Fuji rotated sensors.
   uint32 fujiRotationPos;
 
@@ -222,7 +221,7 @@ protected:
    RawImageData* p_;    // p_ is never NULL
  };
 
-inline RawImage RawImage::create(RawImageType type)  { 
+inline RawImage RawImage::create(RawImageType type)  {
   switch (type)
   {
     case TYPE_USHORT16:
@@ -232,18 +231,18 @@ inline RawImage RawImage::create(RawImageType type)  {
     default:
       writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!\n");
   }
-  return NULL; 
+  return NULL;
 }
 
 inline RawImage RawImage::create(iPoint2D dim, RawImageType type, uint32 componentsPerPixel)
-{   
+{
   switch (type) {
     case TYPE_USHORT16:
       return new RawImageDataU16(dim, componentsPerPixel);
     default:
       writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!\n");
   }
-  return NULL; 
+  return NULL;
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,
@@ -273,5 +272,3 @@ inline void RawImageDataU16::setWithLookUp(ushort16 value, uchar8* dst, uint32* 
 }
 
 } // namespace RawSpeed
-
-#endif

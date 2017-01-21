@@ -18,8 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef FILE_IOEXCEPTION_H
-#define FILE_IOEXCEPTION_H
+#pragma once
 
 #include "decoders/RawDecoderException.h"
 #include <string>
@@ -35,5 +34,3 @@ public:
 };
 
 } // namespace RawSpeed
-
-#endif

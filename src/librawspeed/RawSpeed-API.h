@@ -18,6 +18,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#pragma once
+
 #include "common/StdAfx.h"
 #include "io/FileReader.h"
 #include "parsers/RawParser.h"

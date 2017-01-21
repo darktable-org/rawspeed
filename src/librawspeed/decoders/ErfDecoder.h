@@ -19,8 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef ERF_DECODER_H
-#define ERF_DECODER_H
+#pragma once
 
 #include "decoders/RawDecoder.h"
 
@@ -40,5 +39,3 @@ protected:
 };
 
 } // namespace RawSpeed
-
-#endif

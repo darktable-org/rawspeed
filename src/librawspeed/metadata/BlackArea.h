@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -18,8 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef BLACK_AREA_H
-#define BLACK_AREA_H
+#pragma once
 
 #include "common/StdAfx.h"
 
@@ -36,5 +35,3 @@ public:
 };
 
 } // namespace RawSpeed
-
-#endif

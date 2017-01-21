@@ -19,8 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef FILEMAP_H
-#define FILEMAP_H
+#pragma once
 
 #include "io/Buffer.h"
 
@@ -30,5 +29,3 @@ namespace RawSpeed {
 typedef Buffer FileMap;
 
 } // namespace RawSpeed
-
-#endif // FILEMAP_H

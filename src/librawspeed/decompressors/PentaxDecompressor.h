@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -19,8 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef PENTAX_DECOMPRESSOR_H
-#define PENTAX_DECOMPRESSOR_H
+#pragma once
 
 #include "tiff/TiffIFD.h"
 #include "common/RawImage.h"
@@ -32,5 +31,3 @@ namespace RawSpeed {
 void decodePentax(RawImage& mRaw, ByteStream&& data, TiffIFD* root);
 
 } // namespace RawSpeed
-
-#endif

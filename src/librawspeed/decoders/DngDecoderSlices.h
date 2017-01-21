@@ -18,8 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef DNG_DECODER_SLICES_H
-#define DNG_DECODER_SLICES_H
+#pragma once
 
 #include "decoders/RawDecoder.h"
 #include <queue>
@@ -67,7 +66,7 @@ public:
   int size();
   queue<DngSliceElement> slices;
   vector<DngDecoderThread*> threads;
-  FileMap *mFile; 
+  FileMap *mFile;
   RawImage mRaw;
   bool mFixLjpeg;
   uint32 mPredictor;
@@ -82,5 +81,3 @@ private:
 };
 
 } // namespace RawSpeed
-
-#endif

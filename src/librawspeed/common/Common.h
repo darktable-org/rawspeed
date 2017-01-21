@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -18,11 +18,9 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef COMMON_H
-#define COMMON_H
+#pragma once
 
-
-#if !defined(__unix__) && !defined(__APPLE__) && !defined(__MINGW32__) 
+#if !defined(__unix__) && !defined(__APPLE__) && !defined(__MINGW32__)
 #include <intrin.h>
 #pragma intrinsic(_ReturnAddress)
 #define MIN(a,b) min(a,b)
@@ -35,11 +33,11 @@ typedef unsigned __int64 uint64;
 #endif
 #else // On linux
 #define _ASSERTE(a) void(a)
-#define _RPT0(a,b) 
-#define _RPT1(a,b,c) 
-#define _RPT2(a,b,c,d) 
-#define _RPT3(a,b,c,d,e) 
-#define _RPT4(a,b,c,d,e,f) 
+#define _RPT0(a,b)
+#define _RPT1(a,b,c)
+#define _RPT2(a,b,c,d)
+#define _RPT3(a,b,c,d,e)
+#define _RPT4(a,b,c,d,e,f)
 #define __inline inline
 #define _strdup(a) strdup(a)
 #ifndef MIN
@@ -145,7 +143,7 @@ inline Endianness getHostEndianness() {
 #elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
   return big;
 #else
-  ushort16 testvar = 0xfeff; 
+  ushort16 testvar = 0xfeff;
   uint32 firstbyte = ((uchar8 *)&testvar)[0];
   if (firstbyte == 0xff)
     return little;
@@ -194,15 +192,15 @@ template<typename T> inline T loadMem(const void* data, bool bswap) {
 
 #ifdef _MSC_VER
 // See http://tinyurl.com/hqfuznc
-#if _MSC_VER >= 1900 
+#if _MSC_VER >= 1900
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 #endif
 #endif
 
-inline uint32 clampbits(int x, uint32 n) { 
-  uint32 _y_temp; 
-  if( (_y_temp=x>>n) ) 
-    x = ~_y_temp >> (32-n); 
+inline uint32 clampbits(int x, uint32 n) {
+  uint32 _y_temp;
+  if( (_y_temp=x>>n) )
+    x = ~_y_temp >> (32-n);
   return x;
 }
 
@@ -252,5 +250,3 @@ typedef enum {
 } BitOrder;
 
 } // namespace RawSpeed
-
-#endif

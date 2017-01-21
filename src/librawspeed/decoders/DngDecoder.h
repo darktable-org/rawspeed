@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -18,8 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef DNG_DECODER_H
-#define DNG_DECODER_H
+#pragma once
 
 #include "decompressors/LJpegPlain.h"
 #include "tiff/TiffIFD.h"
@@ -28,7 +27,7 @@
 
 namespace RawSpeed {
 
-class DngDecoder : 
+class DngDecoder :
   public RawDecoder
 {
 public:
@@ -58,5 +57,3 @@ public:
 };
 
 } // namespace RawSpeed
-
-#endif
