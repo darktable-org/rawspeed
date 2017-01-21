@@ -25,6 +25,10 @@ extern "C" {
 #include <jpeglib.h>
 }
 
+#ifdef HAVE_ZLIB
+#include <zlib.h>
+#endif
+
 namespace RawSpeed {
 
 void *DecodeThread(void *_this) {

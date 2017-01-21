@@ -100,11 +100,6 @@
 #include <numeric>
 using namespace std;
 
-#ifdef HAVE_ZLIB
-// ZLIB
-#include <zlib.h>
-#endif
-
 #include <float.h>
 
 //My own
