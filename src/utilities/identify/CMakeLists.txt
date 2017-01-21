@@ -5,5 +5,6 @@ target_compile_definitions(darktable-rs-identify
 
 set_target_properties(darktable-rs-identify PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(darktable-rs-identify rawspeed_static)
+target_include_directories(darktable-rs-identify PUBLIC "${CONFIG_INCLUDE_PATH}")
 
 install(TARGETS darktable-rs-identify DESTINATION ${CMAKE_INSTALL_BINDIR})

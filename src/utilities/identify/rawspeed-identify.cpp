@@ -17,6 +17,8 @@
     along with darktable.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "config.h"
+
 #include "RawSpeed-API.h" // IWYU pragma: keep
 #include <cstddef>        // for size_t
 #include <cstdio>         // for fprintf, stdout, stderr
@@ -82,7 +84,7 @@ std::string find_cameras_xml(const char *argv0) {
   }
 
   // running from build dir?
-  found_camfile = std::string(bindir + "/../../data/cameras.xml");
+  found_camfile = std::string(CMAKE_SOURCE_DIR "/data/cameras.xml");
 
   if (stat(found_camfile.c_str(), &statbuf)) {
 #ifndef __APPLE__
