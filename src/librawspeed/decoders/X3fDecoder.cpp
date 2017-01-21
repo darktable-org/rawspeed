@@ -22,6 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include "decoders/X3fDecoder.h"
 #include "parsers/TiffParser.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 X3fDecoder::X3fDecoder(FileMap* file) :

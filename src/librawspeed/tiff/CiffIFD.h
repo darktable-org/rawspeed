@@ -34,17 +34,17 @@ class CiffIFD
 public:
   CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 depth=0);
   virtual ~CiffIFD(void);
-  vector<CiffIFD*> mSubIFD;
-  map<CiffTag, CiffEntry*> mEntry;
-  vector<CiffIFD*> getIFDsWithTag(CiffTag tag);
+  std::vector<CiffIFD*> mSubIFD;
+  std::map<CiffTag, CiffEntry*> mEntry;
+  std::vector<CiffIFD*> getIFDsWithTag(CiffTag tag);
   CiffEntry* getEntry(CiffTag tag);
   bool hasEntry(CiffTag tag);
   bool hasEntryRecursive(CiffTag tag);
   CiffEntry* getEntryRecursive(CiffTag tag);
   CiffEntry* getEntryRecursiveWhere(CiffTag tag, uint32 isValue);
-  CiffEntry *getEntryRecursiveWhere(CiffTag tag, const string &isValue);
-  vector<CiffIFD *> getIFDsWithTagWhere(CiffTag tag, const string &isValue);
-  vector<CiffIFD*> getIFDsWithTagWhere(CiffTag tag, uint32 isValue);
+  CiffEntry *getEntryRecursiveWhere(CiffTag tag, const std::string &isValue);
+  std::vector<CiffIFD *> getIFDsWithTagWhere(CiffTag tag, const std::string &isValue);
+  std::vector<CiffIFD*> getIFDsWithTagWhere(CiffTag tag, uint32 isValue);
   FileMap* getFileMap() {return mFile;};
 protected:
   FileMap *mFile;

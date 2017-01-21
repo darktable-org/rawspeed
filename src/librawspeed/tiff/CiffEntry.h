@@ -48,8 +48,8 @@ public:
   ~CiffEntry(void);
   uint32 getInt(uint32 num=0);
   ushort16 getShort(uint32 num=0);
-  string getString();
-  vector<string> getStrings();
+  std::string getString();
+  std::vector<std::string> getStrings();
   uchar8 getByte(uint32 num=0);
   const uchar8* getData() {return data;}
   uchar8* getDataWrt();
@@ -66,7 +66,7 @@ public:
   bool isInt();
   bool isString();
 protected:
-  string getValueAsString();
+  std::string getValueAsString();
   uchar8* own_data;
   const uchar8* data;
 #ifdef _DEBUG

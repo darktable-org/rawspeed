@@ -29,6 +29,8 @@ extern "C" {
 #include <zlib.h>
 #endif
 
+using namespace std;
+
 namespace RawSpeed {
 
 void *DecodeThread(void *_this) {

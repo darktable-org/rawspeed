@@ -22,6 +22,8 @@
 #include "common/StdAfx.h"
 #include "decoders/RafDecoder.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 RafDecoder::RafDecoder(TiffIFD *rootIFD, FileMap* file) :

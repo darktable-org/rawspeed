@@ -22,6 +22,8 @@
 #include "decoders/DngDecoder.h"
 #include <iostream>
 
+using namespace std;
+
 namespace RawSpeed {
 
 DngDecoder::DngDecoder(TiffIFD *rootIFD, FileMap* file) : RawDecoder(file), mRootIFD(rootIFD) {

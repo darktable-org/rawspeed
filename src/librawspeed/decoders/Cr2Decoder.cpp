@@ -22,6 +22,8 @@
 #include "common/StdAfx.h"
 #include "decoders/Cr2Decoder.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 Cr2Decoder::Cr2Decoder(TiffIFD *rootIFD, FileMap* file) :

@@ -25,6 +25,8 @@
 #define vsprintf_s(...) vsnprintf(__VA_ARGS__)
 #endif
 
+using namespace std;
+
 namespace RawSpeed {
 
 TiffParserException::TiffParserException(const string &_msg)

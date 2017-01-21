@@ -1,10 +1,3 @@
-#include "common/StdAfx.h"
-#include "io/IOException.h"
-#if !defined(WIN32) || defined(__MINGW32__)
-#include <stdarg.h>
-#define vsprintf_s(...) vsnprintf(__VA_ARGS__)
-#endif
-
 /*
     RawSpeed - RAW file decoder.
 
@@ -23,9 +16,16 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-
 */
+
+#include "common/StdAfx.h"
+#include "io/IOException.h"
+#if !defined(WIN32) || defined(__MINGW32__)
+#include <stdarg.h>
+#define vsprintf_s(...) vsnprintf(__VA_ARGS__)
+#endif
+
+using namespace std;
 
 namespace RawSpeed {
 

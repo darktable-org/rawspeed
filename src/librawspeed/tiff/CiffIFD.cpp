@@ -23,6 +23,8 @@
 #include "tiff/CiffIFD.h"
 #include "parsers/CiffParser.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 CiffIFD::CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 _depth) {
@@ -32,7 +34,7 @@ CiffIFD::CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 _depth) {
   uint32 valuedata_size = get4LE(f->getData(end-4, 4), 0);
   ushort16 dircount = get2LE(f->getData(start+valuedata_size, 2), 0);
 
-//  fprintf(stderr, "Found %d entries between %d and %d after %d data bytes\n", 
+//  fprintf(stderr, "Found %d entries between %d and %d after %d data bytes\n",
 //                  dircount, start, end, valuedata_size);
 
   for (uint32 i = 0; i < dircount; i++) {

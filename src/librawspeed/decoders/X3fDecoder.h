@@ -34,21 +34,21 @@ public:
   virtual void decodeMetaDataInternal(CameraMetaData *meta);
   virtual void checkSupportInternal(CameraMetaData *meta);
   virtual FileMap* getCompressedData();
-  vector<X3fDirectory> mDirectory;
-  vector<X3fImage> mImages;
+  std::vector<X3fDirectory> mDirectory;
+  std::vector<X3fImage> mImages;
   X3fPropertyCollection mProperties;
 
 protected:
   virtual void decodeThreaded(RawDecoderThread* t);
   void readDirectory();
-  string getId();
+  std::string getId();
   ByteStream *bytes;
   bool hasProp(const char* key) { return mProperties.props.find(key) != mProperties.props.end();};
-  string getProp(const char* key);
+  std::string getProp(const char* key);
   void decompressSigma( X3fImage &image );
   void createSigmaTable(ByteStream *bytes, int codes);
   int SigmaDecode(BitPumpMSB *bits);
-  string getIdAsString(ByteStream *bytes);
+  std::string getIdAsString(ByteStream *bytes);
   void SigmaSkipOne(BitPumpMSB *bits);
   bool readName();
   X3fImage *curr_image;
@@ -62,8 +62,8 @@ protected:
   ushort16 *huge_table;
   short curve[1024];
   uint32 max_len;
-  string camera_make;
-  string camera_model;
+  std::string camera_make;
+  std::string camera_model;
 };
 
 } // namespace RawSpeed

@@ -22,6 +22,8 @@
 #include "common/StdAfx.h"
 #include "decoders/MosDecoder.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 MosDecoder::MosDecoder(TiffIFD *rootIFD, FileMap* file)  :

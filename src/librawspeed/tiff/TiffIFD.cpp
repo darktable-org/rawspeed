@@ -24,6 +24,8 @@
 #include "tiff/TiffIFD.h"
 #include "parsers/TiffParser.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 TiffIFD::TiffIFD(const DataBuffer& data, uint32 offset, TiffIFD *parent) : parent(parent) {

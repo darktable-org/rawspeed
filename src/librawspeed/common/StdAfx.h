@@ -98,7 +98,6 @@
 #include <array>
 #include <algorithm>
 #include <numeric>
-using namespace std;
 
 #include <float.h>
 

@@ -21,6 +21,8 @@
 #include "common/StdAfx.h"
 #include "metadata/ColorFilterArray.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 ColorFilterArray::ColorFilterArray(const iPoint2D &_size) {
@@ -29,9 +31,9 @@ ColorFilterArray::ColorFilterArray(const iPoint2D &_size) {
 }
 
 ColorFilterArray::ColorFilterArray() :
-size(0,0) 
+size(0,0)
 {
-  cfa = NULL; 
+  cfa = NULL;
 }
 
 
@@ -60,7 +62,7 @@ size(8,2)
   }
 }
 
-ColorFilterArray& ColorFilterArray::operator=(const ColorFilterArray& other ) 
+ColorFilterArray& ColorFilterArray::operator=(const ColorFilterArray& other )
 {
   setSize(other.size);
   if (cfa)
@@ -111,7 +113,7 @@ void ColorFilterArray::setCFA( iPoint2D in_size, ... )
   for (uint32 i = 0; i <  size.area(); i++ ) {
     cfa[i] = (CFAColor)va_arg(arguments, int);
   }
-  va_end (arguments);   
+  va_end (arguments);
 }
 
 void ColorFilterArray::shiftLeft(int n) {
@@ -200,7 +202,7 @@ void ColorFilterArray::setColorAt(iPoint2D pos, CFAColor c) {
 RawSpeed::uint32 ColorFilterArray::getDcrawFilter()
 {
   //dcraw magic
-  if (size.x == 6 && size.y == 6) 
+  if (size.x == 6 && size.y == 6)
     return 9;
 
   if (size.x > 8 || size.y > 2 || 0 == cfa)

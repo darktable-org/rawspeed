@@ -26,6 +26,8 @@
 #include <stdlib.h>
 #endif
 
+using namespace std;
+
 namespace RawSpeed {
 
 SrwDecoder::SrwDecoder(TiffIFD *rootIFD, FileMap* file):

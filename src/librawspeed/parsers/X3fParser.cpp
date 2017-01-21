@@ -22,6 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include "parsers/X3fParser.h"
 #include "decoders/X3fDecoder.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 X3fParser::X3fParser(FileMap* file) {
@@ -160,9 +162,9 @@ X3fImage::X3fImage( ByteStream *bytes, uint32 offset, uint32 length )
 * ConvertUTF16toUTF8 function only Copyright:
 *
 * Copyright 2001-2004 Unicode, Inc.
-* 
+*
 * Disclaimer
-* 
+*
 * This source code is provided as is by Unicode, Inc. No claims are
 * made as to fitness for any particular purpose. No warranties of any
 * kind are expressed or implied. The recipient agrees to determine
@@ -170,9 +172,9 @@ X3fImage::X3fImage( ByteStream *bytes, uint32 offset, uint32 length )
 * purchased on magnetic or optical media from Unicode, Inc., the
 * sole remedy for any claim will be exchange of defective media
 * within 90 days of receipt.
-* 
+*
 * Limitations on Rights to Redistribute This Code
-* 
+*
 * Unicode, Inc. hereby grants the right to freely use the information
 * supplied in this file in the creation of products supporting the
 * Unicode Standard, and to make copies of this file in any form
@@ -207,7 +209,7 @@ static const int halfShift  = 10; /* used for shifting by 10 bits */
 static const UTF32 halfBase = 0x0010000UL;
 static const UTF8 firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
 
-static bool ConvertUTF16toUTF8 (const UTF16** sourceStart, const UTF16* sourceEnd,  UTF8** targetStart, UTF8* targetEnd) 
+static bool ConvertUTF16toUTF8 (const UTF16** sourceStart, const UTF16* sourceEnd,  UTF8** targetStart, UTF8* targetEnd)
 {
   bool success = true;
   const UTF16* source = *sourceStart;
@@ -216,7 +218,7 @@ static bool ConvertUTF16toUTF8 (const UTF16** sourceStart, const UTF16* sourceEn
     UTF32 ch;
     unsigned short bytesToWrite = 0;
     const UTF32 byteMask = 0xBF;
-    const UTF32 byteMark = 0x80; 
+    const UTF32 byteMark = 0x80;
     const UTF16* oldSource = source; /* In case we have to back up because of target overflow. */
     ch = *source++;
     /* If we have a surrogate pair, convert to UTF32 first. */

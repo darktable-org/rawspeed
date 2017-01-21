@@ -22,6 +22,8 @@
 #include "common/StdAfx.h"
 #include "decoders/NakedDecoder.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 NakedDecoder::NakedDecoder(FileMap* file, Camera* c) :

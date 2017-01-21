@@ -53,7 +53,7 @@ void* _aligned_malloc(size_t bytes, size_t alignment) {
       return ret;
     else
       return NULL;
-  } 
+  }
   return malloc(bytes); // Mac OS X malloc is usually aligned to 16 bytes
 }
 
@@ -73,7 +73,7 @@ namespace RawSpeed {
 
 void writeLog(int priority, const char *format, ...)
 {
-  string msg("RawSpeed:");
+  std::string msg("RawSpeed:");
   msg.append(format);
   va_list args;
   va_start(args, format);

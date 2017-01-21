@@ -21,9 +21,12 @@
 
 #include "common/StdAfx.h"
 #include "decoders/OrfDecoder.h"
+
 #if defined(__unix__) || defined(__APPLE__)
 #include <stdlib.h>
 #endif
+
+using namespace std;
 
 namespace RawSpeed {
 

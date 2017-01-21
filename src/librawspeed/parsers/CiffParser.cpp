@@ -23,6 +23,9 @@
 #include "parsers/CiffParser.h"
 #include "decoders/CrwDecoder.h"
 
+
+using namespace std;
+
 namespace RawSpeed {
 
 
@@ -85,7 +88,7 @@ void CiffParser::MergeIFD( CiffParser* other_ciff)
     mRootIFD->mSubIFD.push_back(*i);
   }
 
-  for (map<CiffTag, CiffEntry*>::iterator i = other_root->mEntry.begin(); i != other_root->mEntry.end(); ++i) {    
+  for (map<CiffTag, CiffEntry*>::iterator i = other_root->mEntry.begin(); i != other_root->mEntry.end(); ++i) {
     mRootIFD->mEntry[(*i).first] = (*i).second;
   }
   other_root->mSubIFD.clear();

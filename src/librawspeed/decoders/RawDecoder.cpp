@@ -22,6 +22,8 @@
 #include "common/StdAfx.h"
 #include "decoders/RawDecoder.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 RawDecoder::RawDecoder(FileMap* file) : mRaw(RawImage::create()), mFile(file) {

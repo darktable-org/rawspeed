@@ -94,7 +94,7 @@ public:
   virtual ~DngOpcodes(void);
   RawImage& applyOpCodes(RawImage &img);
 private:
-  vector<DngOpcode*> mOpcodes;
+  std::vector<DngOpcode*> mOpcodes;
   Endianness host;
   uint32 getULong(const uchar8 *ptr) {
     if (host == big)
@@ -122,7 +122,7 @@ public:
   virtual ~OpcodeFixBadPixelsList(void) {};
   virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
 private:
-  vector<uint32> bad_pos;
+  std::vector<uint32> bad_pos;
 };
 
 

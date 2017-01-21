@@ -24,6 +24,8 @@
 #include "decoders/CrwDecoder.h"
 #include <cmath>
 
+using namespace std;
+
 namespace RawSpeed {
 
 CrwDecoder::CrwDecoder(CiffIFD *rootIFD, FileMap* file) :

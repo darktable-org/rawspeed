@@ -22,6 +22,8 @@
 #include "common/StdAfx.h"
 #include "decoders/ArwDecoder.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 ArwDecoder::ArwDecoder(TiffIFD *rootIFD, FileMap* file) :

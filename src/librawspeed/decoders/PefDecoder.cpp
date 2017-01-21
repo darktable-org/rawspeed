@@ -22,6 +22,8 @@
 #include "common/StdAfx.h"
 #include "decoders/PefDecoder.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 PefDecoder::PefDecoder(TiffIFD *rootIFD, FileMap* file) :

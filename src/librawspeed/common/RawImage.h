@@ -81,14 +81,14 @@ public:
   uint32 fujiRotationPos;
 
   iPoint2D subsampling;
-  string make;
-  string model;
-  string mode;
+  std::string make;
+  std::string model;
+  std::string mode;
 
-  string canonical_make;
-  string canonical_model;
-  string canonical_alias;
-  string canonical_id;
+  std::string canonical_make;
+  std::string canonical_model;
+  std::string canonical_alias;
+  std::string canonical_id;
 
   // ISO speed. If known the value is set, otherwise it will be '0'.
   int isoSpeed;
@@ -136,15 +136,15 @@ public:
   int blackLevel;
   int blackLevelSeparate[4];
   int whitePoint;
-  vector<BlackArea> blackAreas;
+  std::vector<BlackArea> blackAreas;
   /* Vector containing silent errors that occurred doing decoding, that may have lead to */
   /* an incomplete image. */
-  vector<const char*> errors;
+  std::vector<const char*> errors;
   pthread_mutex_t errMutex;   // Mutex for above
   void setError(const char* err);
   /* Vector containing the positions of bad pixels */
   /* Format is x | (y << 16), so maximum pixel position is 65535 */
-  vector<uint32> mBadPixelPositions;    // Positions of zeroes that must be interpolated
+  std::vector<uint32> mBadPixelPositions;    // Positions of zeroes that must be interpolated
   pthread_mutex_t mBadPixelMutex;   // Mutex for above, must be used if more than 1 thread is accessing vector
   uchar8 *mBadPixelMap;
   uint32 mBadPixelMapPitch;

@@ -22,6 +22,8 @@
 #include "common/StdAfx.h"
 #include "decoders/DcsDecoder.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 DcsDecoder::DcsDecoder(TiffIFD *rootIFD, FileMap* file)  :

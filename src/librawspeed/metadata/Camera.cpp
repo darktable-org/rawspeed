@@ -23,6 +23,8 @@
 #include "common/StdAfx.h"
 #include <pugixml.hpp>
 
+using namespace std;
+
 namespace RawSpeed {
 
 using namespace pugi;

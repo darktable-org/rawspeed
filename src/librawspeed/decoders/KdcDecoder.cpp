@@ -22,6 +22,8 @@
 #include "common/StdAfx.h"
 #include "decoders/KdcDecoder.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 KdcDecoder::KdcDecoder(TiffIFD *rootIFD, FileMap* file)  :

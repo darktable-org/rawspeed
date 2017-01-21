@@ -36,8 +36,8 @@ public:
   virtual void decodeThreaded(RawDecoderThread * t);
 protected:
   uint32 mWidth, mHeight, mIso;
-  string mModel;
-  string mEncoder;
+  std::string mModel;
+  std::string mEncoder;
   uint32 mDataOffset, mDataSize;
   float mWB[3];
 };

@@ -23,6 +23,8 @@
 #include "decoders/MrwDecoder.h"
 #include "parsers/TiffParser.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 MrwDecoder::MrwDecoder(FileMap* file) :

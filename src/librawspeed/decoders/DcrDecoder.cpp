@@ -22,6 +22,8 @@
 #include "common/StdAfx.h"
 #include "decoders/DcrDecoder.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 DcrDecoder::DcrDecoder(TiffIFD *rootIFD, FileMap* file)  :

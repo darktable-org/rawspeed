@@ -39,8 +39,8 @@ public:
 protected:
   uint32 black_level;
   TiffIFD *mRootIFD;
-  string make, model;
-  string getXMPTag(const string &xmp, const string &tag);
+  std::string make, model;
+  std::string getXMPTag(const std::string &xmp, const std::string &tag);
   void DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32 width, uint32 height);
 };
 

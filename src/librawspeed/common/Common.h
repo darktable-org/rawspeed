@@ -209,21 +209,21 @@ inline int other_abs(int x) { int const mask = x >> 31; return (x + mask) ^ mask
 
 /* Remove all spaces at the end of a string */
 
-inline void TrimSpaces(string& str) {
+inline void TrimSpaces(std::string& str) {
   // Trim Both leading and trailing spaces
   size_t startpos = str.find_first_not_of(" \t"); // Find the first character position after excluding leading blank spaces
   size_t endpos = str.find_last_not_of(" \t"); // Find the first character position from reverse af
 
   // if all spaces or empty return an empty string
-  if ((string::npos == startpos) || (string::npos == endpos)) {
+  if ((std::string::npos == startpos) || (std::string::npos == endpos)) {
     str = "";
   } else
     str = str.substr(startpos, endpos - startpos + 1);
 }
 
 
-inline vector<string> split_string(string input, char c = ' ') {
-  vector<string> result;
+inline std::vector<std::string> split_string(std::string input, char c = ' ') {
+  std::vector<std::string> result;
   const char *str = input.c_str();
 
   while(1) {
@@ -233,7 +233,7 @@ inline vector<string> split_string(string input, char c = ' ') {
       str++;
 
     if(begin != str)
-      result.push_back(string(begin, str));
+      result.push_back(std::string(begin, str));
 
     if(0 == *str++)
       break;

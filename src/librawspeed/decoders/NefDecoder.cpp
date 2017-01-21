@@ -23,6 +23,8 @@
 #include "decoders/NefDecoder.h"
 #include "io/BitPumpMSB32.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 NefDecoder::NefDecoder(TiffIFD *rootIFD, FileMap* file) :

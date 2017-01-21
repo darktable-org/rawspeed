@@ -22,6 +22,8 @@
 #include "common/StdAfx.h"
 #include "decoders/ErfDecoder.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 ErfDecoder::ErfDecoder(TiffIFD *rootIFD, FileMap* file)  :

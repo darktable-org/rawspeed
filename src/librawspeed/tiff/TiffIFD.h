@@ -37,8 +37,8 @@ class TiffIFD
 {
   uint32 nextIFD = 0;
   TiffIFD* parent = nullptr;
-  vector<TiffIFDOwner> subIFDs;
-  map<TiffTag, TiffEntryOwner> entries;
+  std::vector<TiffIFDOwner> subIFDs;
+  std::map<TiffTag, TiffEntryOwner> entries;
 
   friend class TiffEntry;
   friend class RawParser;
@@ -59,14 +59,14 @@ public:
   virtual ~TiffIFD() {}
   uint32 getNextIFD() const {return nextIFD;}
   //TODO: make public api totally const
-  vector<TiffIFD*> getIFDsWithTag(TiffTag tag);
+  std::vector<TiffIFD*> getIFDsWithTag(TiffTag tag);
   TiffEntry* getEntry(TiffTag tag) const;
   TiffEntry* getEntryRecursive(TiffTag tag) const;
   bool hasEntry(TiffTag tag) const { return entries.find(tag) != entries.end(); }
   bool hasEntryRecursive(TiffTag tag) const { return getEntryRecursive(tag) != nullptr; }
 
-  const vector<TiffIFDOwner>& getSubIFDs() const { return subIFDs; }
-//  const map<TiffTag, TiffEntry*>& getEntries() const { return entries; }
+  const std::vector<TiffIFDOwner>& getSubIFDs() const { return subIFDs; }
+//  const std::map<TiffTag, TiffEntry*>& getEntries() const { return entries; }
 };
 
 class TiffRootIFD : public TiffIFD

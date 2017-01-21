@@ -28,6 +28,8 @@
 #include <emmintrin.h>
 #endif
 
+using namespace std;
+
 namespace RawSpeed {
 
 RawImageData::RawImageData(void):
@@ -467,7 +469,7 @@ RawImageWorker::RawImageWorker( RawImageData *_img, RawImageWorkerTask _task, in
 
 RawImageWorker::~RawImageWorker() {
 #ifndef NO_PTHREAD
-  pthread_attr_destroy(&attr);  
+  pthread_attr_destroy(&attr);
 #endif
 }
 

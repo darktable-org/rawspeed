@@ -24,6 +24,8 @@
 #include "decompressors/HasselbladDecompressor.h"
 #include "decompressors/LJpegPlain.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 ThreefrDecoder::ThreefrDecoder(TiffIFD *rootIFD, FileMap* file)  :

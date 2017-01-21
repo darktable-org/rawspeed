@@ -74,7 +74,7 @@ public:
   ushort16 getShort(uint32 num=0) const;
   short16 getSShort(uint32 num=0) const;
   float getFloat(uint32 num=0) const;
-  string getString() const;
+  std::string getString() const;
   void getShortArray(ushort16 *array, uint32 num) const;
   void getIntArray(uint32 *array, uint32 num) const;
   void getFloatArray(float *array, uint32 num) const;

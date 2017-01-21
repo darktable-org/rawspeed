@@ -39,6 +39,8 @@
 #include "decoders/ThreefrDecoder.h"
 #include "decoders/DcsDecoder.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 TiffRootIFDOwner parseTiff(const Buffer &data) {

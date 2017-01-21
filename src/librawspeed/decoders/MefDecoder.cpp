@@ -22,6 +22,8 @@
 #include "common/StdAfx.h"
 #include "decoders/MefDecoder.h"
 
+using namespace std;
+
 namespace RawSpeed {
 
 MefDecoder::MefDecoder(TiffIFD *rootIFD, FileMap* file)  :

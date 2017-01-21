@@ -25,6 +25,8 @@
 #include "tiff/TiffIFD.h"
 #include <math.h>
 
+using namespace std;
+
 namespace RawSpeed {
 
 // order see TiffDataType

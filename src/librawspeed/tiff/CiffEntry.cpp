@@ -23,6 +23,8 @@
 #include "tiff/CiffEntry.h"
 #include <math.h>
 
+using namespace std;
+
 namespace RawSpeed {
 
 CiffEntry::CiffEntry(FileMap* f, uint32 value_data, uint32 offset) {
@@ -181,7 +183,7 @@ uchar8* CiffEntry::getDataWrt()
 #endif
 
 std::string CiffEntry::getValueAsString()
-{  
+{
   if (type == CIFF_ASCII)
     return string((const char*)&data[0]);
   char *temp_string = new char[4096];

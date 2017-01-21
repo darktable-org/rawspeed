@@ -136,7 +136,7 @@ public:
   virtual ~LJpegDecompressor();
   void decode(uint32 offset, uint32 size, uint32 offsetX, uint32 offsetY);
   void getSOF(SOFInfo* i, uint32 offset, uint32 size);
-  void addSlices(vector<int> slices) {slicesW = slices;}  // CR2 slices.
+  void addSlices(std::vector<int> slices) {slicesW = slices;}  // CR2 slices.
 
   bool mDNGCompatible = false;  // DNG v1.0.x compatibility
   bool mFullDecodeHT = true;    // FullDecode Huffman
@@ -157,13 +157,13 @@ protected:
   RawImage mRaw;
 
   SOFInfo frame;
-  vector<int> slicesW;
+  std::vector<int> slicesW;
   uint32 pred = 0;
   uint32 Pt = 0;
   uint32 offX = 0, offY = 0;  // Offset into image where decoding should start
   uint32 skipX = 0, skipY = 0;   // Tile is larger than output, skip these border pixels
-  array<HuffmanTable*, 4> huff {}; // 4 pointers into the store
-  vector<unique_ptr<HuffmanTable>> huffmanTableStore; // vector of unique HTs
+  std::array<HuffmanTable*, 4> huff {}; // 4 pointers into the store
+  std::vector<std::unique_ptr<HuffmanTable>> huffmanTableStore; // std::vector of unique HTs
 };
 
 } // namespace RawSpeed
