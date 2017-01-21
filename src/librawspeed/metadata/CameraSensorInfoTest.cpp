@@ -151,7 +151,7 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentConstructorGetters) {
   {
     const CameraSensorInfo InfoOrig(mBlackLevel, mWhiteLevel, mMinIso, mMaxIso,
                                     mBlackLevelSeparate);
-    CameraSensorInfo Info(InfoOrig);
+    CameraSensorInfo Info(InfoOrig); // NOLINT
 
     checkHelper(Info);
     checkHelper(Info, InfoOrig);
