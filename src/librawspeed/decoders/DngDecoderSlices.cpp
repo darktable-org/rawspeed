@@ -21,6 +21,10 @@
 #include "common/StdAfx.h"
 #include "decoders/DngDecoderSlices.h"
 
+extern "C" {
+#include <jpeglib.h>
+}
+
 namespace RawSpeed {
 
 void *DecodeThread(void *_this) {

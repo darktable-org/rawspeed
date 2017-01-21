@@ -86,13 +86,6 @@
 #define __attribute__(p)
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include <jpeglib.h>
-#ifdef __cplusplus
-}
-#endif
 // STL
 #include <cassert>
 #include <iostream>
