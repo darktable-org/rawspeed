@@ -24,8 +24,6 @@
 
 namespace RawSpeed {
 
-using namespace pugi;
-
 class CameraMetaData
 {
 public:

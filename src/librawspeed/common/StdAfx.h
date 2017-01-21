@@ -105,7 +105,6 @@ using namespace std;
 #include <zlib.h>
 #endif
 
-#include <pugixml.hpp>
 #include <float.h>
 
 //My own

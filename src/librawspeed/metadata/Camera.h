@@ -20,10 +20,11 @@
 
 #pragma once
 
-#include "metadata/ColorFilterArray.h"
-#include "metadata/CameraSensorInfo.h"
 #include "metadata/BlackArea.h"
 #include "metadata/CameraMetadataException.h"
+#include "metadata/CameraSensorInfo.h"
+#include "metadata/ColorFilterArray.h"
+#include <pugixml.hpp>
 
 namespace RawSpeed {
 
