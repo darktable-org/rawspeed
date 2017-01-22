@@ -23,7 +23,7 @@
 namespace RawSpeed {
 
 #ifdef __unix
-#include <stdlib.h>
+#include <cstdlib>
 #endif
 
 class iPoint2D {

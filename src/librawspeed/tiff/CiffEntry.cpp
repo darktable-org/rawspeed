@@ -19,9 +19,9 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "tiff/CiffEntry.h"
-#include <math.h>
+#include "common/StdAfx.h"
+#include <cmath>
 
 using namespace std;
 

@@ -24,10 +24,10 @@
 #include "common/Common.h"
 
 #if defined(__APPLE__)
-#include <sys/types.h>
+#include <cstdlib>
+#include <cstring>
 #include <sys/sysctl.h>
-#include <stdlib.h>
-#include <string.h>
+#include <sys/types.h>
 
 int macosx_version()
 {

@@ -23,7 +23,7 @@
 
 #include "decoders/RawDecoder.h"
 #include "decompressors/LJpegPlain.h"
-#include <string.h>
+#include <cstring>
 
 namespace RawSpeed {
 

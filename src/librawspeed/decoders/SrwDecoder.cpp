@@ -23,7 +23,7 @@
 #include "decoders/SrwDecoder.h"
 
 #if defined(__unix__) || defined(__APPLE__)
-#include <stdlib.h>
+#include <cstdlib>
 #endif
 
 using namespace std;

@@ -35,10 +35,10 @@
 #include <malloc.h>
 #endif
 
-#include <stdio.h>
+#include <cstdio>
 
 #ifdef __MINGW32__
-#include <stdlib.h>
+#include <cstdlib>
 #endif
 
 #if !defined(__unix__) && !defined(__APPLE__)
@@ -62,11 +62,11 @@
 #else
 #define _XOPEN_SOURCE 600  // for posix_memalign()
 #endif //_XOPEN_SOURCE
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
+#include <cstdarg>
+#include <cstdlib>
+#include <cstring>
 #endif // __unix__
-#include <math.h>
+#include <cmath>
 #ifndef NO_PTHREAD
 #if _MSC_VER >= 1900
 // Workaround timespec redefinition: http://tinyurl.com/zcs2ocd
@@ -99,7 +99,7 @@
 #include <algorithm>
 #include <numeric>
 
-#include <float.h>
+#include <cfloat>
 
 //My own
 #include "tiff/TiffTag.h"

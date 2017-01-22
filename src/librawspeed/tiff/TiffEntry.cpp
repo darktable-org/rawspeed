@@ -20,10 +20,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "tiff/TiffEntry.h"
+#include "common/StdAfx.h"
 #include "tiff/TiffIFD.h"
-#include <math.h>
+#include <cmath>
 
 using namespace std;
 

@@ -22,12 +22,13 @@
 #include "decoders/DngDecoderSlices.h"
 
 extern "C" {
+
 #include <jpeglib.h>
-}
 
 #ifdef HAVE_ZLIB
 #include <zlib.h>
 #endif
+}
 
 using namespace std;
 

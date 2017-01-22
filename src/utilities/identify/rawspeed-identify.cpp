@@ -21,10 +21,10 @@
 
 #include "RawSpeed-API.h" // IWYU pragma: keep
 #include <cstddef>        // for size_t
+#include <cstdint>        // for uint16_t
 #include <cstdio>         // for fprintf, stdout, stderr
 #include <exception>      // for exception
 #include <memory>         // for unique_ptr, allocator
-#include <stdint.h>       // for uint16_t
 #include <string>         // for string, operator+, basic...
 #include <sys/stat.h>     // for stat
 #include <vector>         // for vector

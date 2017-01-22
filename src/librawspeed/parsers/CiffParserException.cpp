@@ -23,7 +23,7 @@
 #include "parsers/CiffParserException.h"
 
 #if !defined(WIN32) || defined(__MINGW32__)
-#include <stdarg.h>
+#include <cstdarg>
 #define vsprintf_s(...) vsnprintf(__VA_ARGS__)
 #endif
 
