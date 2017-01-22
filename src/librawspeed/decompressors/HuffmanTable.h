@@ -152,8 +152,8 @@ public:
     }
 
     // Figure F.15: generate decoding tables
-    codeOffsetOL.resize(maxCodeLength+1, 0xffff);
-    maxCodeOL.resize(maxCodeLength+1);
+    codeOffsetOL.resize(maxCodeLength + 1UL, 0xffff);
+    maxCodeOL.resize(maxCodeLength + 1UL);
     int code_index = 0;
     for (int l = 1; l <= maxCodeLength; l++) {
       if (nCodesPerLength[l]) {

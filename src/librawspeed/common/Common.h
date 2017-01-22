@@ -83,7 +83,7 @@ void writeLog(int priority, const char *format, ...) __attribute__((format(print
 
 inline void BitBlt(uchar8* dstp, int dst_pitch, const uchar8* srcp, int src_pitch, int row_size, int height) {
   if (height == 1 || (dst_pitch == src_pitch && src_pitch == row_size)) {
-    memcpy(dstp, srcp, row_size*height);
+    memcpy(dstp, srcp, (size_t)row_size * height);
     return;
   }
   for (int y=height; y>0; --y) {
