@@ -184,11 +184,15 @@ template<typename T> inline T loadMem(const void* data, bool bswap) {
   return ret;
 }
 
-#define get2BE(data,pos) (loadMem<ushort16>(data+pos, getHostEndianness() == little))
-#define get2LE(data,pos) (loadMem<ushort16>(data+pos, getHostEndianness() == big))
+#define get2BE(data, pos)                                                      \
+  (loadMem<ushort16>((data) + (pos), getHostEndianness() == little))
+#define get2LE(data, pos)                                                      \
+  (loadMem<ushort16>((data) + (pos), getHostEndianness() == big))
 
-#define get4BE(data,pos) (loadMem<uint32>(data+pos, getHostEndianness() == little))
-#define get4LE(data,pos) (loadMem<uint32>(data+pos, getHostEndianness() == big))
+#define get4BE(data, pos)                                                      \
+  (loadMem<uint32>((data) + (pos), getHostEndianness() == little))
+#define get4LE(data, pos)                                                      \
+  (loadMem<uint32>((data) + (pos), getHostEndianness() == big))
 
 #ifdef _MSC_VER
 // See http://tinyurl.com/hqfuznc

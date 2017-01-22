@@ -27,7 +27,9 @@
 
 namespace RawSpeed {
 
-#define CIFF_DEPTH(_depth) if((depth=_depth+1) > 10) ThrowCPE("CIFF: sub-micron matryoshka dolls are ignored");
+#define CIFF_DEPTH(_depth)                                                     \
+  if ((depth = (_depth) + 1) > 10)                                             \
+    ThrowCPE("CIFF: sub-micron matryoshka dolls are ignored");
 
 class CiffIFD
 {
