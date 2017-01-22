@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include "io/FileIOException.h"
-#include "io/IOException.h"
+#include "common/Common.h" // for uchar8, loadMem, uint32, uint64
+#include <algorithm>       // for swap
 
 namespace RawSpeed {
 

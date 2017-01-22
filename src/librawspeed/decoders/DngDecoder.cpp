@@ -18,9 +18,26 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "decoders/DngDecoder.h"
-#include <iostream>
+#include "common/Common.h"                // for uint32, uchar8, ushort16
+#include "common/DngOpcodes.h"            // for DngOpcodes
+#include "common/Point.h"                 // for iPoint2D, iRectangle2D
+#include "decoders/DngDecoderSlices.h"    // for DngDecoderSlices, DngSlice...
+#include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
+#include "io/ByteStream.h"                // for ByteStream
+#include "io/IOException.h"               // for IOException
+#include "metadata/BlackArea.h"           // for BlackArea
+#include "metadata/Camera.h"              // for Camera
+#include "metadata/CameraMetaData.h"      // for CameraMetaData
+#include "metadata/ColorFilterArray.h"    // for ColorFilterArray, ::CFA_BLUE
+#include "parsers/TiffParserException.h"  // for TiffParserException
+#include "tiff/TiffEntry.h"               // for TiffEntry, ::TIFF_LONG
+#include "tiff/TiffIFD.h"                 // for TiffIFD, getTiffEndianness
+#include "tiff/TiffTag.h"                 // for ::MODEL, ::MAKE, ::UNIQUEC...
+#include <cstdio>                         // for NULL, printf
+#include <cstring>                        // for memset
+#include <string>                         // for allocator, string, operator+
+#include <vector>                         // for vector, vector<>::iterator
 
 using namespace std;
 

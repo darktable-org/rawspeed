@@ -20,11 +20,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #pragma once
 
-#include "io/ByteStream.h"
-#include "io/FileMap.h"
+#include "common/Common.h" // for uint32
+#include "io/FileMap.h"    // for FileMap
+#include <map>             // for map
+#include <string>          // for string
 
 namespace RawSpeed {
 
+class ByteStream;
+
+class RawDecoder;
+
+class X3fDecoder;
 
 class X3fDirectory
 {
@@ -70,9 +77,6 @@ public:
   std::string getString( ByteStream *bytes );
   std::map<std::string, std::string> props;
 };
-
-class X3fDecoder;
-class RawDecoder;
 
 class X3fParser {
 public:

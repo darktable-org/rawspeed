@@ -20,8 +20,18 @@
 
 #pragma once
 
-#include "common/StdAfx.h"
-#include "io/FileReader.h"
-#include "parsers/RawParser.h"
+// IWYU pragma: begin_exports
+
+#include "common/Common.h"
+#include "common/Point.h"
+#include "common/RawImage.h"
 #include "decoders/RawDecoder.h"
+#include "io/Buffer.h"
+#include "io/FileMap.h"
+#include "io/FileReader.h"
+#include "metadata/BlackArea.h"
 #include "metadata/CameraMetaData.h"
+#include "metadata/ColorFilterArray.h"
+#include "parsers/RawParser.h"
+
+// IWYU pragma: end_exports

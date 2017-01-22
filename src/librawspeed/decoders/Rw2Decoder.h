@@ -21,12 +21,19 @@
 
 #pragma once
 
-#include "decoders/RawDecoder.h"
-#include "tiff/TiffIFD.h"
-#include "io/BitPumpPlain.h"
-#include "parsers/TiffParser.h"
+#include "common/Common.h"       // for uint32, uchar8
+#include "common/RawImage.h"     // for RawImage
+#include "decoders/RawDecoder.h" // for RawDecoder, RawDecoderThread (ptr o...
+#include "io/FileMap.h"          // for FileMap
+#include <string>                // for string
 
 namespace RawSpeed {
+
+class ByteStream;
+
+class CameraMetaData;
+
+class TiffIFD;
 
 class PanaBitpump {
   public:

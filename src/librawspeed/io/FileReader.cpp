@@ -1,12 +1,3 @@
-#include "common/StdAfx.h"
-#include "io/FileReader.h"
-#if defined(__unix__) || defined(__APPLE__) 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <fcntl.h>
-//#include <sys/mman.h>
-#endif // __unix__
 /*
     RawSpeed - RAW file decoder.
 
@@ -25,17 +16,25 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-
 */
+
+#include "io/FileReader.h"
+#include "io/FileIOException.h" // for FileIOException
+#include <cstdio>               // for fclose, fseek, fopen, fread, ftell
+#include <fcntl.h>              // for SEEK_END, SEEK_SET
+
+#if !defined(__unix__) && !defined(__APPLE__)
+#include <io.h>
+#include <tchar.h>
+#include <windows.h>
+#endif // !defined(__unix__) && !defined(__APPLE__)
 
 namespace RawSpeed {
 
-FileReader::FileReader(LPCWSTR _filename) : mFilename(_filename) {
-}
+FileReader::FileReader(const char *_filename) : mFilename(_filename) {}
 
 FileMap* FileReader::readFile() {
-#if defined(__unix__) || defined(__APPLE__) 
+#if defined(__unix__) || defined(__APPLE__)
   int bytes_read = 0;
   FILE *file;
   char *dest;

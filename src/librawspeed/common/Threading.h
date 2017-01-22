@@ -1,13 +1,7 @@
-// stdafx.cpp : source file that includes just the standard includes
-// CR2-reader.pch will be the pre-compiled header
-// stdafx.obj will contain the pre-compiled type information
-
-#include "common/StdAfx.h"
-
-/* 
+/*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -22,8 +16,20 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-
 */
 
+#pragma once
 
+#ifdef NO_PTHREAD
+
+typedef void *pthread_mutex_t;
+#define pthread_mutex_init(A, B)
+#define pthread_mutex_destroy(A)
+#define pthread_mutex_lock(A)
+#define pthread_mutex_unlock(A)
+
+#else
+
+#include <pthread.h> // IWYU pragma: export
+
+#endif

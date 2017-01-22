@@ -19,11 +19,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
 #pragma once
-#include <vector>
-#include "tiff/TiffIFD.h"
-#include "common/RawImage.h"
+
+#include "common/Common.h" // for uint32, uchar8, uint64, Endianness::big
+#include "common/Point.h"  // for iRectangle2D
+#include <vector>          // for vector
 
 namespace RawSpeed {
+
+class RawImage;
+
+class TiffEntry;
 
 class DngOpcode
 {

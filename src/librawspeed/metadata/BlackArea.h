@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/StdAfx.h"
+#include "common/Common.h" // for uint32
 
 namespace RawSpeed {
 

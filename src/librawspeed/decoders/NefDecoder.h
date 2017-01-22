@@ -20,14 +20,22 @@
 
 #pragma once
 
-#include "decoders/RawDecoder.h"
-#include "decompressors/LJpegPlain.h"
-#include "tiff/TiffIFD.h"
-#include "io/BitPumpPlain.h"
-#include "parsers/TiffParser.h"
-#include "decompressors/NikonDecompressor.h"
+#include "common/Common.h"       // for uint32, ushort16
+#include "common/RawImage.h"     // for RawImage
+#include "decoders/RawDecoder.h" // for RawDecoder
+#include "io/FileMap.h"          // for FileMap
+#include <string>                // for string
+#include <vector>                // for vector
 
 namespace RawSpeed {
+
+class ByteStream;
+
+class CameraMetaData;
+
+class TiffIFD;
+
+class iPoint2D;
 
 class NefDecoder :
   public RawDecoder

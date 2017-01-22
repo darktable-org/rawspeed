@@ -20,20 +20,21 @@
 
 #include "RawSpeed-API.h"
 
-#include <chrono>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <fstream> // IWYU pragma: keep
-#include <iomanip>
-#include <iostream>
-#include <map>
-#include <memory>
-#include <stdexcept>
-#include <string>
-#include <type_traits>
-#include <utility>
+#include <chrono>      // for milliseconds, steady_clock, duration
+#include <cstdint>     // for uint8_t
+#include <cstdio>      // for snprintf, size_t, fclose, fopen, fpr...
+#include <cstdlib>     // for system
+#include <cstring>     // for memset
+#include <fstream>     // IWYU pragma: keep
+#include <iomanip>     // for setw
+#include <iostream>    // for cout
+#include <map>         // for map
+#include <memory>      // for unique_ptr, allocator
+#include <sstream>     // IWYU pragma: keep
+#include <stdexcept>   // for runtime_error
+#include <string>      // for string, operator+, operator<<, char_...
+#include <type_traits> // for enable_if<>::type
+#include <utility>     // for pair
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -174,11 +175,7 @@ size_t process(const string &filename, CameraMetaData *metadata, bool create,
     return 0;
   }
 
-#if defined(WIN32)
-  FileReader reader((LPCWSTR)filename.c_str());
-#else
   FileReader reader(filename.c_str());
-#endif
 
   unique_ptr<FileMap> map = unique_ptr<FileMap>(reader.readFile());
   // FileMap* map = readFile( argv[1] );

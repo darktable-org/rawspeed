@@ -19,11 +19,11 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "metadata/CameraMetadataException.h" // for ThrowCME
-#include "parsers/CiffParserException.h"     // for ThrowCPE
+#include "decoders/RawDecoderException.h"     // for ThrowRDE
 #include "io/FileIOException.h"         // for ThrowFIE
 #include "io/IOException.h"             // for ThrowIOE
-#include "decoders/RawDecoderException.h"     // for ThrowRDE
+#include "metadata/CameraMetadataException.h" // for ThrowCME
+#include "parsers/CiffParserException.h"     // for ThrowCPE
 #include "parsers/TiffParserException.h"     // for ThrowTPE
 #include <exception>                 // for exception
 #include <gmock/gmock.h>             // for MakePredicateFormatterFromMatcher

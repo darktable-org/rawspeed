@@ -20,14 +20,20 @@
 
 #pragma once
 
-#include "metadata/BlackArea.h"
-#include "metadata/CameraMetadataException.h"
-#include "metadata/CameraSensorInfo.h"
-#include "metadata/ColorFilterArray.h"
-#include <pugixml.hpp>
+#include "common/Common.h"             // for uint32
+#include "common/Point.h"              // for iPoint2D
+#include "metadata/BlackArea.h"        // for BlackArea
+#include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
+#include "metadata/ColorFilterArray.h" // for ColorFilterArray
+#include <map>                         // for map
+#include <string>                      // for string, basic_string, allocator
+#include <vector>                      // for vector
+
+namespace pugi {
+class xml_node;
+} // namespace pugi
 
 namespace RawSpeed {
-
 
 class Camera
 {

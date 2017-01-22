@@ -18,8 +18,11 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "metadata/CameraMetadataException.h"
+#include "common/Common.h" // for _RPT1
+#include <cstdarg>         // for va_end, va_list, va_start
+#include <cstdio>          // for vsnprintf
+#include <string>          // for string
 
 using namespace std;
 
@@ -32,7 +35,7 @@ void ThrowCME(const char* fmt, ...) {
 #if defined(__unix__) || defined(__APPLE__) || defined(__MINGW32__)
   vsnprintf(buf, 8192, fmt, val);
 #else
-  vsprintf_s(buf, 8192, fmt, val);
+  vsnprintf(buf, 8192, fmt, val);
 #endif
   va_end(val);
   _RPT1(0, "EXCEPTION: %s\n", buf);

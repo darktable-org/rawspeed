@@ -20,6 +20,14 @@
 
 #pragma once
 
+#include <algorithm>        // for forward
+#include <cstdint>          // for UINT32_MAX
+#include <cstring>          // for memcpy, size_t
+#include <initializer_list> // for initializer_list
+#include <memory>           // for unique_ptr, allocator
+#include <string>           // for string
+#include <vector>           // for vector
+
 #if !defined(__unix__) && !defined(__APPLE__) && !defined(__MINGW32__)
 #include <intrin.h>
 #pragma intrinsic(_ReturnAddress)
@@ -49,8 +57,7 @@ typedef unsigned __int64 uint64;
 typedef unsigned long long uint64;
 #ifndef __MINGW32__
 void* _aligned_malloc(size_t bytes, size_t alignment);
-#define _aligned_free(a) do { free(a); } while (0)
-typedef const char *LPCWSTR;
+void _aligned_free(void *ptr);
 #endif
 #endif // __unix__
 
@@ -128,14 +135,6 @@ inline uint32 getThreadCount()
   return rawspeed_get_number_of_processor_cores();
 #endif
 }
-
-#ifdef NO_PTHREAD
-typedef void* pthread_mutex_t;
-#define pthread_mutex_init(A, B)
-#define pthread_mutex_destroy(A)
-#define pthread_mutex_lock(A)
-#define pthread_mutex_unlock(A)
-#endif
 
 inline Endianness getHostEndianness() {
 #if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__

@@ -20,22 +20,22 @@
 
 #pragma once
 
-#include "io/FileIOException.h"
-#include "io/FileMap.h"
+#include "io/FileMap.h" // for FileMap
 
 namespace RawSpeed {
 
 class FileReader
 {
 public:
-	FileReader(LPCWSTR filename);
+  FileReader(const char *filename);
+
 public:
 	FileMap* readFile();
 	virtual ~FileReader();
-  LPCWSTR Filename() const { return mFilename; }
-//  void Filename(LPCWSTR val) { mFilename = val; }
-private:
-  LPCWSTR mFilename;
+        const char *Filename() const { return mFilename; }
+        //  void Filename(const char * val) { mFilename = val; }
+      private:
+        const char *mFilename;
 };
 
 } // namespace RawSpeed

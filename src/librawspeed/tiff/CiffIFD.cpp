@@ -19,13 +19,24 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "tiff/CiffIFD.h"
-#include "parsers/CiffParser.h"
+#include "common/Common.h"               // for uint32, get2LE, get4LE, ush...
+#include "io/IOException.h"              // for IOException
+#include "parsers/CiffParserException.h" // for ThrowCPE, CiffParserException
+#include "tiff/CiffEntry.h"              // for CiffEntry, ::CIFF_SUB1, ::C...
+#include <cstdio>                        // for NULL
+#include <map>                           // for map, _Rb_tree_iterator, map...
+#include <string>                        // for allocator, operator==, string
+#include <utility>                       // for pair
+#include <vector>                        // for vector, vector<>::iterator
 
 using namespace std;
 
 namespace RawSpeed {
+
+#define CIFF_DEPTH(_depth)                                                     \
+  if ((depth = (_depth) + 1) > 10)                                             \
+    ThrowCPE("CIFF: sub-micron matryoshka dolls are ignored");
 
 CiffIFD::CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 _depth) {
   CIFF_DEPTH(_depth);

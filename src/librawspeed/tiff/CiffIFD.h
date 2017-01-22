@@ -21,15 +21,16 @@
 
 #pragma once
 
-#include "io/FileMap.h"
-#include "tiff/CiffEntry.h"
-#include "parsers/CiffParserException.h"
+#include "common/Common.h" // for uint32
+#include "io/FileMap.h"    // for FileMap
+#include "tiff/CiffTag.h"  // for CiffTag
+#include <map>             // for map
+#include <string>          // for string
+#include <vector>          // for vector
 
 namespace RawSpeed {
 
-#define CIFF_DEPTH(_depth)                                                     \
-  if ((depth = (_depth) + 1) > 10)                                             \
-    ThrowCPE("CIFF: sub-micron matryoshka dolls are ignored");
+class CiffEntry;
 
 class CiffIFD
 {

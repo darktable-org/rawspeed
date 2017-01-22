@@ -3,7 +3,7 @@ FILE(GLOB DECODER_SOURCES
   "AriDecoder.h"
   "ArwDecoder.cpp"
   "ArwDecoder.h"
-  "Cr2Decoder.cpp"
+  "Cr2Decoder.cpp" # IWYU breaks
   "Cr2Decoder.h"
   "CrwDecoder.cpp"
   "CrwDecoder.h"
@@ -13,7 +13,7 @@ FILE(GLOB DECODER_SOURCES
   "DcsDecoder.h"
   "DngDecoder.cpp"
   "DngDecoder.h"
-  "DngDecoderSlices.cpp"
+  "DngDecoderSlices.cpp" # IWYU breaks
   "DngDecoderSlices.h"
   "ErfDecoder.cpp"
   "ErfDecoder.h"
@@ -43,7 +43,7 @@ FILE(GLOB DECODER_SOURCES
   "Rw2Decoder.h"
   "SrwDecoder.cpp"
   "SrwDecoder.h"
-  "ThreefrDecoder.cpp"
+  "ThreefrDecoder.cpp" # IWYU breaks
   "ThreefrDecoder.h"
   "X3fDecoder.cpp"
   "X3fDecoder.h"

@@ -20,9 +20,13 @@
 
 #pragma once
 
-#include "metadata/Camera.h"
+#include "common/Common.h" // for uint32
+#include <map>             // for map
+#include <string>          // for string
 
 namespace RawSpeed {
+
+class Camera;
 
 class CameraMetaData
 {

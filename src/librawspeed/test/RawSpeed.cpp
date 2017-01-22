@@ -1,8 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2009-2014 Klaus Post
-    Copyright (C) 2016 Roman Lebedev
+    Copyright (C) 2016-2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -19,15 +18,9 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
-#include <gmock/gmock.h> // for InitGoogleTest, RUN_ALL_TESTS
-#include <iostream>      // for operator<<, basic_ostream, basic...
-
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-
-using namespace RawSpeed;
 
 // define this function, it is only declared in rawspeed:
 int rawspeed_get_number_of_processor_cores() {

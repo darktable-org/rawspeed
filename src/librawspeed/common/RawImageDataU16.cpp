@@ -1,6 +1,3 @@
-#include "common/StdAfx.h"
-#include "common/RawImage.h"
-#include "decoders/RawDecoder.h"  // For exceptions
 /*
     RawSpeed - RAW file decoder.
 
@@ -19,11 +16,20 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-
 */
+
+#include "common/Common.h"                // for uint32, ushort16, uchar8
+#include "common/Point.h"                 // for iPoint2D
+#include "common/RawImage.h"              // for RawImageDataU16, TableLookUp
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "metadata/BlackArea.h"           // for BlackArea
+#include <cstdlib>                        // for free, malloc
+#include <cstring>                        // for memset
+#include <vector>                         // for vector
+
 #if defined(__SSE2__)
-#include <emmintrin.h>
+#include <emmintrin.h> // for __m128i, _mm_load_si128
+#include <xmmintrin.h> // for _MM_HINT_T0, _mm_prefetch
 #endif
 
 namespace RawSpeed {
@@ -48,7 +54,7 @@ void RawImageDataU16::calculateBlackAreas() {
   for (uint32 i = 0; i < blackAreas.size(); i++) {
     BlackArea area = blackAreas[i];
 
-    /* Make sure area sizes are multiple of two, 
+    /* Make sure area sizes are multiple of two,
        so we have the same amount of pixels for each CFA group */
     area.size = area.size - (area.size&1);
 
@@ -150,7 +156,7 @@ void RawImageDataU16::scaleBlackWhite() {
 
 void RawImageDataU16::scaleValues(int start_y, int end_y) {
   bool use_sse2;
-#ifdef _MSC_VER 
+#ifdef _MSC_VER
   int info[4];
   __cpuid(info, 1);
   use_sse2 = !!(info[3]&(1 << 26));
@@ -182,7 +188,8 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 	  ThrowRDE("Out of memory, failed to allocate 128 bytes");
     uint32 gw = pitch / 16;
     // 10 bit fraction
-    uint32 mul = (int)(1024.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[mOffset.x&1]));  
+    uint32 mul = (int)(1024.0f * 65535.0f /
+                       (float)(whitePoint - blackLevelSeparate[mOffset.x & 1]));
     mul |= ((int)(1024.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[(mOffset.x+1)&1])))<<16;
     uint32 b = blackLevelSeparate[mOffset.x&1] | (blackLevelSeparate[(mOffset.x+1)&1]<<16);
 
@@ -222,7 +229,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
       }
       __m128i* pixel = (__m128i*) & data[(mOffset.y+y)*pitch];
       __m128i ssescale, ssesub;
-      if (((y+mOffset.y)&1) == 0) { 
+      if (((y + mOffset.y) & 1) == 0) {
         ssesub = _mm_load_si128((__m128i*)&sub_mul[0]);
         ssescale = _mm_load_si128((__m128i*)&sub_mul[4]);
       } else {
@@ -249,7 +256,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
         sserandom = _mm_xor_si128(_mm_mulhi_epi16(sserandom, rand_mul), _mm_mullo_epi16(sserandom, rand_mul));
         __m128i rand_masked = _mm_and_si128(sserandom, rand_mask);  // Get 8 random bits
         rand_masked = _mm_mullo_epi16(rand_masked, sse_full_scale_fp);
-        
+
         __m128i zero = _mm_setzero_si128();
         __m128i rand_lo = _mm_sub_epi32(sse_half_scale_fp, _mm_unpacklo_epi16(rand_masked,zero));
         __m128i rand_hi = _mm_sub_epi32(sse_half_scale_fp, _mm_unpackhi_epi16(rand_masked,zero));
@@ -474,7 +481,7 @@ void RawImageDataU16::doLookup( int start_y, int end_y )
       }
     }
     return;
-  } 
+  }
   ThrowRDE("Table lookup with multiple components not implemented");
 }
 

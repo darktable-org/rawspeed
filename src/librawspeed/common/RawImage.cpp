@@ -16,17 +16,15 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-
 */
 
-#include "common/StdAfx.h"
 #include "common/RawImage.h"
-#include "decoders/RawDecoder.h"
-
-#if defined(__SSE2__)
-#include <emmintrin.h>
-#endif
+#include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
+#include "io/IOException.h"               // for IOException
+#include "parsers/TiffParserException.h"  // for TiffParserException
+#include <cmath>                          // for NAN
+#include <cstdlib>                        // for free
+#include <cstring>                        // for memset, memcpy
 
 using namespace std;
 

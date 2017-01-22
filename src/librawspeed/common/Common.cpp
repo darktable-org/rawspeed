@@ -16,15 +16,32 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-
 */
 
-#include "common/StdAfx.h"
-#include "common/Common.h"
+#if defined(__unix__) || defined(__APPLE__)
+#ifdef _XOPEN_SOURCE
+#if (_XOPEN_SOURCE < 600)
+#undef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 600 // for posix_memalign()
+#endif                    // _XOPEN_SOURCE < 600
+#else
+#define _XOPEN_SOURCE 600 // for posix_memalign()
+#endif                    //_XOPEN_SOURCE
+#endif // defined(__unix__) || defined(__APPLE__)
 
 #if defined(__APPLE__)
-#include <cstdlib>
+#ifndef _DARWIN_C_SOURCE
+#define _DARWIN_C_SOURCE
+#endif // _DARWIN_C_SOURCE
+#endif // defined(__APPLE__)
+
+#include "common/Common.h"
+#include <cstdarg> // for va_end, va_list, va_start
+#include <cstdio>  // for vprintf
+#include <cstdlib> // for posix_memalign, free
+
+#if defined(__APPLE__)
+
 #include <cstring>
 #include <sys/sysctl.h>
 #include <sys/types.h>
@@ -67,6 +84,10 @@ void* _aligned_malloc(size_t bytes, size_t alignment) {
     return NULL;
 }
 
+#endif
+
+#if defined(__APPLE__) || defined(__unix__)
+void _aligned_free(void *ptr) { free(ptr); }
 #endif
 
 namespace RawSpeed {

@@ -21,9 +21,15 @@
 
 #pragma once
 
-#include "decoders/RawDecoder.h"
+#include "common/RawImage.h"     // for RawImage
+#include "decoders/RawDecoder.h" // for RawDecoder
+#include "io/FileMap.h"          // for FileMap
 
 namespace RawSpeed {
+
+class TiffIFD;
+
+class CameraMetaData;
 
 class ErfDecoder :
   public RawDecoder

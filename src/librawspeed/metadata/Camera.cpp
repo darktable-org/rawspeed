@@ -20,8 +20,16 @@
 */
 
 #include "metadata/Camera.h"
-#include "common/StdAfx.h"
-#include <pugixml.hpp>
+#include "common/Common.h"                    // for split_string, uint32
+#include "common/Point.h"                     // for iPoint2D
+#include "metadata/CameraMetadataException.h" // for ThrowCME
+#include <cctype>                             // for tolower
+#include <cstdio>                             // for size_t
+#include <map>                                // for map
+#include <pugixml.hpp>                        // for xml_node, xml_attribute
+#include <stdexcept>                          // for out_of_range
+#include <string>                             // for string, allocator, ope...
+#include <vector>                             // for vector
 
 using namespace std;
 

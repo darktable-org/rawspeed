@@ -19,16 +19,31 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "decoders/OrfDecoder.h"
-
-#if defined(__unix__) || defined(__APPLE__)
-#include <cstdlib>
-#endif
+#include "common/Common.h"                // for other_abs, ushort16, uint32
+#include "common/Point.h"                 // for iPoint2D
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/BitPumpMSB.h"                // for BitPumpMSB
+#include "io/ByteStream.h"                // for ByteStream
+#include "io/IOException.h"               // for IOException
+#include "metadata/ColorFilterArray.h"    // for ColorFilterArray, ::CFA_GREEN
+#include "parsers/TiffParserException.h"  // for TiffParserException
+#include "tiff/TiffEntry.h"               // for TiffEntry
+#include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD
+#include "tiff/TiffTag.h"                 // for ::MODEL, TiffTag, ::MAKE
+#include <algorithm>                      // for min
+#include <cstdio>                         // for NULL
+#include <cstring>                        // for memset
+#include <map>                            // for map, _Rb_tree_iterator
+#include <memory>                         // for unique_ptr
+#include <string>                         // for string
+#include <vector>                         // for vector
 
 using namespace std;
 
 namespace RawSpeed {
+
+class CameraMetaData;
 
 OrfDecoder::OrfDecoder(TiffIFD *rootIFD, FileMap* file):
     RawDecoder(file), mRootIFD(rootIFD) {

@@ -1,8 +1,6 @@
 FILE(GLOB COMMON_SOURCES
   "Common.cpp"
   "Common.h"
-  "StdAfx.cpp"
-  "StdAfx.h"
   "Point.h"
   "RawImage.cpp"
   "RawImage.h"
@@ -10,6 +8,7 @@ FILE(GLOB COMMON_SOURCES
   "RawImageDataU16.cpp"
   "DngOpcodes.cpp"
   "DngOpcodes.h"
+  "Threading.h"
 )
 
 set(RAWSPEED_SOURCES "${RAWSPEED_SOURCES};${COMMON_SOURCES}" PARENT_SCOPE)

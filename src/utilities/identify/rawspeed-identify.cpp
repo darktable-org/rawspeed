@@ -135,11 +135,7 @@ int main(int argc, char *argv[]) {
 
     fprintf(stderr, "Loading file: \"%s\"\n", argv[1]);
 
-#if defined(WIN32)
-    FileReader f((LPCWSTR)argv[1]);
-#else
     FileReader f(argv[1]);
-#endif
 
     std::unique_ptr<FileMap> m(f.readFile());
 

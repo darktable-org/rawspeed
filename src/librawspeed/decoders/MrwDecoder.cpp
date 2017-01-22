@@ -19,13 +19,26 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "decoders/MrwDecoder.h"
-#include "parsers/TiffParser.h"
+#include "common/Common.h"                // for uchar8, uint32, get2BE
+#include "common/Point.h"                 // for iPoint2D
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/ByteStream.h"                // for ByteStream
+#include "io/IOException.h"               // for IOException
+#include "parsers/TiffParser.h"           // for parseTiff
+#include "tiff/TiffEntry.h"               // for TiffEntry
+#include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD, Tiff...
+#include "tiff/TiffTag.h"                 // for ::MAKE, ::MODEL
+#include <cmath>                          // for NAN
+#include <cstdio>                         // for NULL
+#include <map>                            // for map, _Rb_tree_iterator
+#include <string>                         // for string
 
 using namespace std;
 
 namespace RawSpeed {
+
+class CameraMetaData;
 
 MrwDecoder::MrwDecoder(FileMap* file) :
     RawDecoder(file) {

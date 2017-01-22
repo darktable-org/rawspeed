@@ -19,9 +19,14 @@
 */
 
 #include "metadata/CameraMetaData.h"
-#include "common/StdAfx.h"
-#include <pugixml.hpp>
-#include <utility>
+#include "common/Common.h"                    // for uint32, TrimSpaces
+#include "metadata/Camera.h"                  // for Camera
+#include "metadata/CameraMetadataException.h" // for ThrowCME
+#include <map>                                // for map, _Rb_tree_iterator
+#include <pugixml.hpp>                        // for xml_document, xml_pars...
+#include <string>                             // for string, allocator, bas...
+#include <utility>                            // for move, pair
+#include <vector>                             // for vector
 
 using namespace std;
 

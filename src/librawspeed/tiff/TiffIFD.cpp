@@ -20,9 +20,18 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "tiff/TiffIFD.h"
-#include "parsers/TiffParser.h"
+#include "common/Common.h"  // for getHostEndianness, uint32, make_unique
+#include "io/IOException.h" // for IOException
+#include "tiff/TiffEntry.h" // for TiffEntry
+#include "tiff/TiffTag.h"   // for TiffTag, ::DNGPRIVATEDATA, ::EXIFIFDPOINTER
+#include <algorithm>        // for move
+#include <cstdint>          // for UINT32_MAX
+#include <map>              // for map, _Rb_tree_const_iterator, allocator
+#include <memory>           // for default_delete, unique_ptr
+#include <string>           // for operator==, string, basic_string
+#include <utility>          // for pair
+#include <vector>           // for vector
 
 using namespace std;
 

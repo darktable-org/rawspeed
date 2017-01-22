@@ -20,13 +20,31 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "decoders/CrwDecoder.h"
-#include <cmath>
+#include "common/Common.h"                // for ushort16, uint32, uchar8
+#include "common/Point.h"                 // for iPoint2D
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/ByteStream.h"                // for ByteStream
+#include "metadata/ColorFilterArray.h"    // for ::CFA_BLUE, ::CFA_GREEN
+#include "tiff/CiffEntry.h"               // for CiffEntry, ::CIFF_SHORT
+#include "tiff/CiffIFD.h"                 // for CiffIFD
+#include "tiff/CiffTag.h"                 // for ::CIFF_MAKEMODEL, ::CIFF_S...
+#include <cmath>                          // for copysignf, expf, logf
+#include <cstdio>                         // for NULL, fprintf, stderr
+#include <cstdlib>                        // for NULL, abs
+#include <cstring>                        // for memset
+#include <exception>                      // for exception
+#include <map>                            // for map, _Rb_tree_iterator
+#include <sstream>                        // for stringstream
+#include <string>                         // for string
+#include <utility>                        // for pair
+#include <vector>                         // for vector
 
 using namespace std;
 
 namespace RawSpeed {
+
+class CameraMetaData;
 
 CrwDecoder::CrwDecoder(CiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {

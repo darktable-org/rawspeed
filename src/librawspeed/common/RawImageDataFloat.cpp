@@ -16,17 +16,15 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-
 */
 
-#include "common/StdAfx.h"
-#include "common/RawImage.h"
-#include "decoders/RawDecoder.h"  // For exceptions
-
-#if defined(__SSE2__)
-#include <emmintrin.h>
-#endif
+#include "common/Common.h"                // for uchar8, uint32, writeLog
+#include "common/Point.h"                 // for iPoint2D
+#include "common/RawImage.h"              // for RawImageDataFloat, ::TYPE_...
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "metadata/BlackArea.h"           // for BlackArea
+#include <cstddef>                        // for NULL
+#include <vector>                         // for vector
 
 namespace RawSpeed {
 
@@ -48,7 +46,7 @@ namespace RawSpeed {
     for (uint32 i = 0; i < blackAreas.size(); i++) {
       BlackArea area = blackAreas[i];
 
-      /* Make sure area sizes are multiple of two, 
+      /* Make sure area sizes are multiple of two,
       so we have the same amount of pixels for each CFA group */
       area.size = area.size - (area.size&1);
 
@@ -135,7 +133,7 @@ namespace RawSpeed {
 
   void RawImageDataFloat::scaleValues(int start_y, int end_y) {
     bool use_sse2;
-#ifdef _MSC_VER 
+#ifdef _MSC_VER
     int info[4];
     __cpuid(info, 1);
     use_sse2 = !!(info[3]&(1 << 26));
@@ -156,7 +154,7 @@ namespace RawSpeed {
 
       uint32 gw = pitch / 16;
       // 10 bit fraction
-      uint32 mul = (int)(1024.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[mOffset.x&1]));  
+      uint32 mul = (int)(1024.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[mOffset.x&1]));
       mul |= ((int)(1024.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[(mOffset.x+1)&1])))<<16;
       uint32 b = blackLevelSeparate[mOffset.x&1] | (blackLevelSeparate[(mOffset.x+1)&1]<<16);
 
@@ -181,7 +179,7 @@ namespace RawSpeed {
       for (int y = start_y; y < end_y; y++) {
         __m128i* pixel = (__m128i*) & data[(mOffset.y+y)*pitch];
         __m128i ssescale, ssesub;
-        if (((y+mOffset.y)&1) == 0) { 
+        if (((y+mOffset.y)&1) == 0) {
           ssesub = _mm_load_si128((__m128i*)&sub_mul[0]);
           ssescale = _mm_load_si128((__m128i*)&sub_mul[4]);
         } else {

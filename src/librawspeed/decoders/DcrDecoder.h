@@ -21,9 +21,18 @@
 
 #pragma once
 
-#include "decoders/RawDecoder.h"
+#include "common/Common.h"       // for uint32, ushort16
+#include "common/RawImage.h"     // for RawImage
+#include "decoders/RawDecoder.h" // for RawDecoder
+#include "io/FileMap.h"          // for FileMap
 
 namespace RawSpeed {
+
+class ByteStream;
+
+class CameraMetaData;
+
+class TiffIFD;
 
 class DcrDecoder :
   public RawDecoder

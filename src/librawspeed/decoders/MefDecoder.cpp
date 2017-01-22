@@ -19,8 +19,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "decoders/MefDecoder.h"
+#include "common/Common.h"                // for uint32
+#include "common/Point.h"                 // for iPoint2D
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/ByteStream.h"                // for ByteStream
+#include "tiff/TiffEntry.h"               // for TiffEntry
+#include "tiff/TiffIFD.h"                 // for TiffIFD
+#include "tiff/TiffTag.h"                 // for ::MODEL, ::MAKE, ::STRIPOF...
+#include <string>                         // for string
+#include <vector>                         // for vector
 
 using namespace std;
 

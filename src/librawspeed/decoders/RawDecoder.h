@@ -21,18 +21,23 @@
 
 #pragma once
 
-#include "decoders/RawDecoderException.h"
-#include "io/FileMap.h"
-#include "io/BitPumpJPEG.h" // Includes bytestream
-#include "common/RawImage.h"
-#include "io/BitPumpMSB.h"
-#include "io/BitPumpMSB16.h"
-#include "io/BitPumpMSB32.h"
-#include "io/BitPumpPlain.h"
-#include "metadata/CameraMetaData.h"
-#include "tiff/TiffIFD.h"
+#include "common/Common.h"    // for uint32, BitOrder
+#include "common/RawImage.h"  // for RawImage
+#include "common/Threading.h" // for pthread_t
+#include "io/FileMap.h"       // for FileMap
+#include <cstddef>            // for NULL
+#include <map>                // for map
+#include <string>             // for string
 
 namespace RawSpeed {
+
+class ByteStream;
+
+class CameraMetaData;
+
+class TiffIFD;
+
+class iPoint2D;
 
 class RawDecoder;
 

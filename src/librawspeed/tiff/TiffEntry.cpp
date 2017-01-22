@@ -21,13 +21,20 @@
 */
 
 #include "tiff/TiffEntry.h"
-#include "common/StdAfx.h"
-#include "tiff/TiffIFD.h"
-#include <cmath>
+#include "common/Common.h"               // for uint32, ushort16, int32
+#include "parsers/TiffParserException.h" // for ThrowTPE
+#include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
+#include "tiff/TiffTag.h"                // for ::DNGPRIVATEDATA, ::EXIFIFD...
+#include <algorithm>                     // for move
+#include <cstdint>                       // for UINT32_MAX
+#include <cstring>                       // for strnlen
+#include <string>                        // for string
 
 using namespace std;
 
 namespace RawSpeed {
+
+class DataBuffer;
 
 // order see TiffDataType
 static const uint32 datashifts[] = {0,0,0,1,2,3,0,0,1,2, 3, 2, 3, 2};

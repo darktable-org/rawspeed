@@ -18,9 +18,17 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "parsers/X3fParser.h"
-#include "decoders/X3fDecoder.h"
+#include "common/Common.h"                // for uint32, uchar8, getHostEnd...
+#include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
+#include "decoders/X3fDecoder.h"          // for X3fDecoder
+#include "io/ByteStream.h"                // for ByteStream
+#include "io/IOException.h"               // for IOException
+#include <cstdio>                         // for NULL
+#include <cstring>                        // for memset
+#include <map>                            // for allocator, map, map<>::map...
+#include <string>                         // for string, basic_string, oper...
+#include <vector>                         // for vector
 
 using namespace std;
 

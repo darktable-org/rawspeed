@@ -20,8 +20,12 @@
 */
 
 #include "tiff/CiffEntry.h"
-#include "common/StdAfx.h"
-#include <cmath>
+#include "common/Common.h"               // for uchar8, uint32, get4LE, ush...
+#include "parsers/CiffParserException.h" // for ThrowCPE
+#include <cstdio>                        // for sprintf, NULL
+#include <cstring>                       // for memcpy, strlen
+#include <string>                        // for string, allocator
+#include <vector>                        // for vector
 
 using namespace std;
 

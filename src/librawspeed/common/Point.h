@@ -20,11 +20,9 @@
 
 #pragma once
 
-namespace RawSpeed {
+#include <cstdlib> // for abs
 
-#ifdef __unix
-#include <cstdlib>
-#endif
+namespace RawSpeed {
 
 class iPoint2D {
 public:
@@ -43,10 +41,14 @@ public:
   bool operator==(const iPoint2D& rhs){ return this->x==rhs.x && this->y==rhs.y; }
   bool operator!=(const iPoint2D& rhs){ return this->x!=rhs.x || this->y!=rhs.y; }
 	~iPoint2D() {};
-  uint32 area() const {return abs(x*y);}
-  bool isThisInside(const iPoint2D &otherPoint) const {return (x<=otherPoint.x && y<=otherPoint.y); };
-  iPoint2D getSmallest(const iPoint2D &otherPoint) const { return iPoint2D(std::min(x, otherPoint.x), std::min(y, otherPoint.y)); };
-  int x,y;
+        uint32 area() const { return std::abs(x * y); }
+        bool isThisInside(const iPoint2D &otherPoint) const {
+          return (x <= otherPoint.x && y <= otherPoint.y);
+        };
+        iPoint2D getSmallest(const iPoint2D &otherPoint) const {
+          return iPoint2D(std::min(x, otherPoint.x), std::min(y, otherPoint.y));
+        };
+        int x, y;
 };
 
 /* Helper class for managing a rectangle in 2D space. */

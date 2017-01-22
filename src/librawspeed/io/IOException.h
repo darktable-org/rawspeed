@@ -20,14 +20,12 @@
 
 #pragma once
 
-#include "decoders/RawDecoderException.h"
-#include <stdexcept>
-#include <string>
+#include <stdexcept> // for runtime_error
+#include <string>    // for string
 
 namespace RawSpeed {
 
 void ThrowIOE(const char* fmt, ...) __attribute__ ((format (printf, 1, 2)));
-
 
 class IOException : public std::runtime_error
 {

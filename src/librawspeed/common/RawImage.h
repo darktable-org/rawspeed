@@ -20,13 +20,21 @@
 
 #pragma once
 
-#include "metadata/ColorFilterArray.h"
-#include "metadata/BlackArea.h"
+#include "common/Common.h"             // for uint32, ushort16, uchar8, wri...
+#include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
+#include "common/Threading.h"          // for pthread_mutex_lock, pthrea...
+#include "metadata/BlackArea.h"        // for BlackArea
+#include "metadata/ColorFilterArray.h" // for ColorFilterArray
+#include <cstddef>                     // for NULL
+#include <string>                      // for string
+#include <vector>                      // for vector
 
 namespace RawSpeed {
 
 class RawImage;
+
 class RawImageData;
+
 typedef enum {TYPE_USHORT16, TYPE_FLOAT32} RawImageType;
 
 class RawImageWorker {

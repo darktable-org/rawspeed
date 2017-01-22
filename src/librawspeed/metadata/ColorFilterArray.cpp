@@ -18,8 +18,14 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "metadata/ColorFilterArray.h"
+#include "common/Common.h"                // for uint32, writeLog, DEBUG_PR...
+#include "common/Point.h"                 // for iPoint2D
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include <cstdarg>                        // for va_arg, va_end, va_list
+#include <cstdio>                         // for NULL
+#include <cstring>                        // for memcpy, memset
+#include <string>                         // for string
 
 using namespace std;
 

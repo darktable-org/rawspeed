@@ -20,7 +20,10 @@
 
 #pragma once
 
+#include "decoders/RawDecoderException.h"
 #include "io/Buffer.h"
+#include <cassert>
+#include <numeric>
 
 /*
 * The following code is inspired by the IJG JPEG library.

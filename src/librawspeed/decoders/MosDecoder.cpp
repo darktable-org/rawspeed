@@ -19,12 +19,25 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "decoders/MosDecoder.h"
+#include "common/Common.h"                // for uint32, get4LE, ushort16
+#include "common/Point.h"                 // for iPoint2D
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/BitPumpMSB32.h"              // for BitPumpMSB32
+#include "io/ByteStream.h"                // for ByteStream
+#include "tiff/TiffEntry.h"               // for TiffEntry
+#include "tiff/TiffIFD.h"                 // for TiffIFD, getTiffEndianness
+#include "tiff/TiffTag.h"                 // for ::LEAFMETADATA, ::MAKE
+#include <cstdio>                         // for sscanf
+#include <cstring>                        // for memchr, NULL
+#include <string>                         // for string, allocator, operator+
+#include <vector>                         // for vector
 
 using namespace std;
 
 namespace RawSpeed {
+
+class CameraMetaData;
 
 MosDecoder::MosDecoder(TiffIFD *rootIFD, FileMap* file)  :
     RawDecoder(file), mRootIFD(rootIFD) {

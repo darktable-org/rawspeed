@@ -21,14 +21,24 @@
 
 #pragma once
 
-#include "io/Buffer.h"
-#include "tiff/TiffEntry.h"
-#include "parsers/TiffParserException.h"
+#include "common/Common.h"               // for uint32, getHostEndianness
+#include "io/Buffer.h"                   // for Buffer (ptr only), DataBuffer
+#include "io/ByteStream.h"               // for ByteStream
+#include "io/FileMap.h"                  // for FileMap
+#include "parsers/TiffParserException.h" // for ThrowTPE
+#include "tiff/TiffTag.h"                // for TiffTag
+#include <map>                           // for map, _Rb_tree_const_iterator
+#include <memory>                        // for unique_ptr
+#include <vector>                        // for vector
 
 namespace RawSpeed {
 
+class TiffEntry;
+
 class TiffIFD;
+
 class TiffRootIFD;
+
 using TiffIFDOwner = std::unique_ptr<TiffIFD>;
 using TiffRootIFDOwner = std::unique_ptr<TiffRootIFD>;
 using TiffEntryOwner = std::unique_ptr<TiffEntry>;

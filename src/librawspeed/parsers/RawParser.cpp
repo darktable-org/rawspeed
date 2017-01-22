@@ -1,14 +1,3 @@
-#include "common/StdAfx.h"
-#include "parsers/RawParser.h"
-#include "parsers/TiffParserException.h"
-#include "parsers/TiffParser.h"
-#include "parsers/CiffParserException.h"
-#include "parsers/CiffParser.h"
-#include "parsers/X3fParser.h"
-#include "decoders/AriDecoder.h"
-#include "decoders/MrwDecoder.h"
-#include "decoders/NakedDecoder.h"
-
 /*
     RawSpeed - RAW file decoder.
 
@@ -28,12 +17,33 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-
 */
+
+#include "parsers/RawParser.h"
+#include "common/Common.h"                // for make_unique, uint32, get4BE
+#include "decoders/AriDecoder.h"          // for AriDecoder
+#include "decoders/MrwDecoder.h"          // for MrwDecoder
+#include "decoders/NakedDecoder.h"        // for NakedDecoder
+#include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
+#include "io/ByteStream.h"                // for ByteStream
+#include "metadata/CameraMetaData.h"      // for CameraMetaData
+#include "parsers/CiffParser.h"           // for CiffParser
+#include "parsers/CiffParserException.h"  // for CiffParserException
+#include "parsers/TiffParser.h"           // for parseTiff, makeDecoder
+#include "parsers/TiffParserException.h"  // for TiffParserException, ThrowTPE
+#include "parsers/X3fParser.h"            // for X3fParser
+#include "tiff/TiffEntry.h"               // for TiffEntry, ::TIFF_SHORT
+#include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD, Tiff...
+#include "tiff/TiffTag.h"                 // for ::FUJIOLDWB, ::FUJI_STRIPB...
+#include <algorithm>                      // for move
+#include <cstring>                        // for memcmp
+#include <memory>                         // for default_delete, unique_ptr
 
 namespace RawSpeed {
 
+class Camera;
+
+class RawDecoder;
 
 RawParser::RawParser(FileMap* inputData): mInput(inputData) {
 }

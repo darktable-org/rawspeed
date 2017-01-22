@@ -20,10 +20,17 @@
 
 #pragma once
 
-#include "io/FileMap.h"
-#include "decoders/RawDecoder.h"
+#include "common/Common.h" // for uint32
+#include "io/FileMap.h"    // for FileMap
+#include <cstddef>         // for NULL
 
 namespace RawSpeed {
+
+class CameraMetaData;
+
+class RawDecoder;
+
+class TiffIFD;
 
 class RawParser
 {

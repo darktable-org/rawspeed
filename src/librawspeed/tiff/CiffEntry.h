@@ -21,9 +21,11 @@
 
 #pragma once
 
-#include "parsers/CiffParserException.h"
-#include "tiff/CiffTag.h"
-#include "io/FileMap.h"
+#include "common/Common.h" // for uint32, uchar8, ushort16
+#include "io/FileMap.h"    // for FileMap
+#include "tiff/CiffTag.h"  // for CiffTag
+#include <string>          // for string
+#include <vector>          // for vector
 
 namespace RawSpeed {
 

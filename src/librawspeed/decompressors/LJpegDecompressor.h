@@ -21,10 +21,14 @@
 
 #pragma once
 
-#include <utility>
-
-#include "decompressors/HuffmanTable.h"
-#include "decoders/RawDecoder.h"
+#include "common/Common.h"              // for uint32
+#include "common/RawImage.h"            // for RawImage
+#include "decompressors/HuffmanTable.h" // IWYU pragma: keep
+#include "io/FileMap.h"                 // for FileMap
+#include <array>                        // for array
+#include <memory>                       // for unique_ptr
+#include <utility>                      // for move
+#include <vector>                       // for vector
 
 /*
  * The following enum and two structs are stolen from the IJG JPEG library
@@ -32,6 +36,8 @@
  */
 
 namespace RawSpeed {
+
+class ByteStream;
 
 typedef enum {		/* JPEG marker codes			*/
   M_STUFF = 0x00,
