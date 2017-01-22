@@ -35,7 +35,11 @@ public:
   iPoint2D operator -= (const iPoint2D& other) { x -= other.x; y -= other.y; return *this;}
   iPoint2D operator - (const iPoint2D& b) const { return iPoint2D(x-b.x,y-b.y); }
   iPoint2D operator + (const iPoint2D& b) const { return iPoint2D(x+b.x,y+b.y); }
-  iPoint2D operator = (const iPoint2D& b) { x = b.x; y = b.y; return *this;}
+  iPoint2D &operator=(const iPoint2D &b) {
+    x = b.x;
+    y = b.y;
+    return *this;
+  }
   bool operator==(const iPoint2D& rhs){ return this->x==rhs.x && this->y==rhs.y; }
   bool operator!=(const iPoint2D& rhs){ return this->x!=rhs.x || this->y!=rhs.y; }
 	~iPoint2D() {};
@@ -53,7 +57,11 @@ public:
   iRectangle2D( int x_pos, int y_pos, int w, int h) {dim = iPoint2D(w,h); pos=iPoint2D(x_pos, y_pos);}
   iRectangle2D( const iRectangle2D& r) {dim = iPoint2D(r.dim); pos = iPoint2D(r.pos);}
   iRectangle2D( const iPoint2D& _pos, const iPoint2D& size) {dim = size; pos=_pos;}
-  iRectangle2D operator = (const iRectangle2D& b) {dim = iPoint2D(b.dim); pos = iPoint2D(b.pos); return *this;}
+  iRectangle2D &operator=(const iRectangle2D &b) {
+    dim = iPoint2D(b.dim);
+    pos = iPoint2D(b.pos);
+    return *this;
+  }
   ~iRectangle2D() {};
   uint32 area() const {return dim.area();}
   void offset(const iPoint2D& offset) {pos+=offset;}
