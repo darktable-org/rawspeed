@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "decompressors/HuffmanTable.h"
 #include "decoders/RawDecoder.h"
 
@@ -132,11 +134,14 @@ public:
 class LJpegDecompressor
 {
 public:
-  LJpegDecompressor(FileMap* file, RawImage img) : mFile(file), mRaw(img) {}
+  LJpegDecompressor(FileMap *file, const RawImage &img)
+      : mFile(file), mRaw(img) {}
   virtual ~LJpegDecompressor();
   void decode(uint32 offset, uint32 size, uint32 offsetX, uint32 offsetY);
   void getSOF(SOFInfo* i, uint32 offset, uint32 size);
-  void addSlices(std::vector<int> slices) {slicesW = slices;}  // CR2 slices.
+  void addSlices(std::vector<int> slices) {
+    slicesW = std::move(slices);
+  } // CR2 slices.
 
   bool mDNGCompatible = false;  // DNG v1.0.x compatibility
   bool mFullDecodeHT = true;    // FullDecode Huffman

@@ -208,7 +208,9 @@ protected:
  class RawImage {
  public:
    static RawImage create(RawImageType type = TYPE_USHORT16);
-   static RawImage create(iPoint2D dim, RawImageType type = TYPE_USHORT16, uint32 componentsPerPixel = 1);
+   static RawImage create(const iPoint2D &dim,
+                          RawImageType type = TYPE_USHORT16,
+                          uint32 componentsPerPixel = 1);
    RawImageData* operator-> (){ return p_; };
    RawImageData& operator* (){ return *p_; };
    RawImage(RawImageData* p);  // p must not be NULL
@@ -234,8 +236,8 @@ inline RawImage RawImage::create(RawImageType type)  {
   return NULL;
 }
 
-inline RawImage RawImage::create(iPoint2D dim, RawImageType type, uint32 componentsPerPixel)
-{
+inline RawImage RawImage::create(const iPoint2D &dim, RawImageType type,
+                                 uint32 componentsPerPixel) {
   switch (type) {
     case TYPE_USHORT16:
       return new RawImageDataU16(dim, componentsPerPixel);

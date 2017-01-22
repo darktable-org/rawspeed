@@ -221,8 +221,8 @@ inline void TrimSpaces(std::string& str) {
     str = str.substr(startpos, endpos - startpos + 1);
 }
 
-
-inline std::vector<std::string> split_string(std::string input, char c = ' ') {
+inline std::vector<std::string> split_string(const std::string &input,
+                                             char c = ' ') {
   std::vector<std::string> result;
   const char *str = input.c_str();
 

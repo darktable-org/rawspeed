@@ -74,7 +74,8 @@ class TiffRootIFD : public TiffIFD
 public:
   const DataBuffer rootBuffer;
 
-  TiffRootIFD(DataBuffer data, uint32 offset) : TiffIFD(data, offset, nullptr), rootBuffer(data) {}
+  TiffRootIFD(const DataBuffer &data, uint32 offset)
+      : TiffIFD(data, offset, nullptr), rootBuffer(data) {}
 };
 
 inline bool isTiffInNativeByteOrder(const ByteStream& bs, uint32 pos, const char* context = "") {
