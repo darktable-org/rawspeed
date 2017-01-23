@@ -59,7 +59,7 @@ CameraMetaData::CameraMetaData(const char *docname) {
   }
 }
 
-CameraMetaData::~CameraMetaData(void) {
+CameraMetaData::~CameraMetaData() {
   map<string, Camera*>::iterator i = cameras.begin();
   for (; i != cameras.end(); ++i) {
     delete((*i).second);

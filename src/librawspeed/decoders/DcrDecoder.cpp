@@ -43,9 +43,7 @@ DcrDecoder::DcrDecoder(TiffIFD *rootIFD, FileMap* file)  :
   decoderVersion = 0;
 }
 
-DcrDecoder::~DcrDecoder(void) {
-  delete mRootIFD;
-}
+DcrDecoder::~DcrDecoder() { delete mRootIFD; }
 
 RawImage DcrDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);

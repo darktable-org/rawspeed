@@ -35,7 +35,7 @@ class PefDecoder :
 {
 public:
   PefDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~PefDecoder(void);
+  virtual ~PefDecoder();
   virtual RawImage decodeRawInternal();
   virtual void decodeMetaDataInternal(CameraMetaData *meta);
   virtual void checkSupportInternal(CameraMetaData *meta);

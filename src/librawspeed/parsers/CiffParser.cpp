@@ -41,8 +41,7 @@ class RawDecoder;
 CiffParser::CiffParser(FileMap* inputData): mInput(inputData), mRootIFD(0) {
 }
 
-
-CiffParser::~CiffParser(void) {
+CiffParser::~CiffParser() {
   if (mRootIFD)
     delete mRootIFD;
   mRootIFD = NULL;

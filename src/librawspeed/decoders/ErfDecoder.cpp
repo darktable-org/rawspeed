@@ -41,9 +41,7 @@ ErfDecoder::ErfDecoder(TiffIFD *rootIFD, FileMap* file)  :
   decoderVersion = 0;
 }
 
-ErfDecoder::~ErfDecoder(void) {
-  delete mRootIFD;
-}
+ErfDecoder::~ErfDecoder() { delete mRootIFD; }
 
 RawImage ErfDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);

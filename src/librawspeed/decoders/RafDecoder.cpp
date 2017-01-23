@@ -46,7 +46,7 @@ RafDecoder::RafDecoder(TiffIFD *rootIFD, FileMap* file) :
   decoderVersion = 1;
   alt_layout = false;
 }
-RafDecoder::~RafDecoder(void) {
+RafDecoder::~RafDecoder() {
   if (mRootIFD)
     delete mRootIFD;
   mRootIFD = NULL;

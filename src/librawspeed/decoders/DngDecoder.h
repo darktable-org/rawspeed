@@ -35,7 +35,7 @@ class DngDecoder :
 {
 public:
   DngDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~DngDecoder(void);
+  virtual ~DngDecoder();
   virtual RawImage decodeRawInternal();
   virtual void decodeMetaDataInternal(CameraMetaData *meta);
   virtual void checkSupportInternal(CameraMetaData *meta);

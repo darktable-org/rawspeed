@@ -35,7 +35,7 @@ class KdcDecoder :
 {
 public:
   KdcDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~KdcDecoder(void);
+  virtual ~KdcDecoder();
   virtual RawImage decodeRawInternal();
   virtual void checkSupportInternal(CameraMetaData *meta);
   virtual void decodeMetaDataInternal(CameraMetaData *meta);

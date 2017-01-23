@@ -47,7 +47,7 @@ ArwDecoder::ArwDecoder(TiffIFD *rootIFD, FileMap* file) :
   decoderVersion = 1;
 }
 
-ArwDecoder::~ArwDecoder(void) {
+ArwDecoder::~ArwDecoder() {
   if (mRootIFD)
     delete mRootIFD;
   mRootIFD = NULL;

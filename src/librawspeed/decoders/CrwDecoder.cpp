@@ -53,7 +53,7 @@ CrwDecoder::CrwDecoder(CiffIFD *rootIFD, FileMap* file) :
   mHuff[1] = NULL;
 }
 
-CrwDecoder::~CrwDecoder(void) {
+CrwDecoder::~CrwDecoder() {
   if (mRootIFD)
     delete mRootIFD;
   mRootIFD = NULL;

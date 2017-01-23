@@ -60,9 +60,7 @@ ThreefrDecoder::ThreefrDecoder(TiffIFD *rootIFD, FileMap* file)  :
   decoderVersion = 0;
 }
 
-ThreefrDecoder::~ThreefrDecoder(void) {
-  delete mRootIFD;
-}
+ThreefrDecoder::~ThreefrDecoder() { delete mRootIFD; }
 
 RawImage ThreefrDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);

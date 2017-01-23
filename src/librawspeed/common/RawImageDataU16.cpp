@@ -34,8 +34,7 @@
 
 namespace RawSpeed {
 
-RawImageDataU16::RawImageDataU16(void)
-{
+RawImageDataU16::RawImageDataU16() {
   dataType = TYPE_USHORT16;
   bpp = 2;
 }

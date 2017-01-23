@@ -52,7 +52,7 @@ NefDecoder::NefDecoder(TiffIFD *rootIFD, FileMap* file) :
   decoderVersion = 5;
 }
 
-NefDecoder::~NefDecoder(void) {
+NefDecoder::~NefDecoder() {
   if (mRootIFD)
     delete mRootIFD;
   mRootIFD = NULL;

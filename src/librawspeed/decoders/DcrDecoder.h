@@ -39,7 +39,7 @@ class DcrDecoder :
 {
 public:
   DcrDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~DcrDecoder(void);
+  virtual ~DcrDecoder();
   virtual RawImage decodeRawInternal();
   virtual void checkSupportInternal(CameraMetaData *meta);
   virtual void decodeMetaDataInternal(CameraMetaData *meta);

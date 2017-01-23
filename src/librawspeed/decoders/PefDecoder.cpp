@@ -43,7 +43,7 @@ PefDecoder::PefDecoder(TiffIFD *rootIFD, FileMap* file) :
       decoderVersion = 3;
 }
 
-PefDecoder::~PefDecoder(void) {
+PefDecoder::~PefDecoder() {
   if (mRootIFD)
     delete mRootIFD;
   mRootIFD = NULL;

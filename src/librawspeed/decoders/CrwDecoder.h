@@ -41,7 +41,8 @@ public:
   virtual RawImage decodeRawInternal();
   virtual void checkSupportInternal(CameraMetaData *meta);
   virtual void decodeMetaDataInternal(CameraMetaData *meta);
-  virtual ~CrwDecoder(void);
+  virtual ~CrwDecoder();
+
 protected:
   CiffIFD *mRootIFD;
   void makeDecoder(int n, const uchar8 *source);

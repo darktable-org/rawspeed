@@ -42,7 +42,7 @@ class NefDecoder :
 {
 public:
   NefDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~NefDecoder(void);
+  virtual ~NefDecoder();
   virtual RawImage decodeRawInternal();
   virtual void decodeMetaDataInternal(CameraMetaData *meta);
   virtual void checkSupportInternal(CameraMetaData *meta);

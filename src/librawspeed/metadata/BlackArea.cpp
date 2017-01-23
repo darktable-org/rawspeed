@@ -28,8 +28,6 @@ offset(_offset), size(_size), isVertical(_isVertical)
 
 }
 
-BlackArea::~BlackArea(void)
-{
-}
+BlackArea::~BlackArea() {}
 
 } // namespace RawSpeed

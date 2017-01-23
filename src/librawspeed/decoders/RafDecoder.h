@@ -37,7 +37,7 @@ class RafDecoder :
   TiffIFD *mRootIFD;
 public:
   RafDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~RafDecoder(void);
+  virtual ~RafDecoder();
   RawImage decodeRawInternal();
   virtual void decodeMetaDataInternal(CameraMetaData *meta);
   virtual void checkSupportInternal(CameraMetaData *meta);

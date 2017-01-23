@@ -36,7 +36,7 @@ class NakedDecoder :
 {
 public:
   NakedDecoder(FileMap* file, Camera *c);
-  virtual ~NakedDecoder(void);
+  virtual ~NakedDecoder();
   virtual RawImage decodeRawInternal();
   virtual void checkSupportInternal(CameraMetaData *meta);
   virtual void decodeMetaDataInternal(CameraMetaData *meta);

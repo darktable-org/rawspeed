@@ -96,8 +96,6 @@ FileMap* FileReader::readFile() {
   return fileData;
 }
 
-FileReader::~FileReader(void) {
-
-}
+FileReader::~FileReader() {}
 
 } // namespace RawSpeed

@@ -28,9 +28,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 namespace RawSpeed {
 
-  RawImageDataFloat::RawImageDataFloat(void) {
-    bpp = 4;
-    dataType = TYPE_FLOAT32;
+RawImageDataFloat::RawImageDataFloat() {
+  bpp = 4;
+  dataType = TYPE_FLOAT32;
   }
 
   RawImageDataFloat::RawImageDataFloat(const iPoint2D &_dim, uint32 _cpp)

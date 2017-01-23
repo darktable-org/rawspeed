@@ -52,7 +52,7 @@ CiffEntry::CiffEntry(FileMap* f, uint32 value_data, uint32 offset) {
   count = bytesize >> getElementShift();
 }
 
-CiffEntry::~CiffEntry(void) {
+CiffEntry::~CiffEntry() {
   if (own_data)
     delete[] own_data;
 }

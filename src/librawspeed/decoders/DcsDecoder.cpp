@@ -42,9 +42,7 @@ DcsDecoder::DcsDecoder(TiffIFD *rootIFD, FileMap* file)  :
   decoderVersion = 0;
 }
 
-DcsDecoder::~DcsDecoder(void) {
-  delete mRootIFD;
-}
+DcsDecoder::~DcsDecoder() { delete mRootIFD; }
 
 RawImage DcsDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(IMAGEWIDTH);

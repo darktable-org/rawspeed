@@ -50,7 +50,7 @@ OrfDecoder::OrfDecoder(TiffIFD *rootIFD, FileMap* file):
       decoderVersion = 3;
 }
 
-OrfDecoder::~OrfDecoder(void) {
+OrfDecoder::~OrfDecoder() {
   if (mRootIFD)
     delete mRootIFD;
   mRootIFD = NULL;

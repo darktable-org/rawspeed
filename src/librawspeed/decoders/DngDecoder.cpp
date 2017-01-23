@@ -58,7 +58,7 @@ DngDecoder::DngDecoder(TiffIFD *rootIFD, FileMap* file) : RawDecoder(file), mRoo
     mFixLjpeg = false;
 }
 
-DngDecoder::~DngDecoder(void) {
+DngDecoder::~DngDecoder() {
   if (mRootIFD)
     delete mRootIFD;
   mRootIFD = NULL;

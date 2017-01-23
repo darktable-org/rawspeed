@@ -46,7 +46,7 @@ MrwDecoder::MrwDecoder(FileMap* file) :
   parseHeader();
 }
 
-MrwDecoder::~MrwDecoder(void) {
+MrwDecoder::~MrwDecoder() {
   if (tiff_meta)
     delete tiff_meta;
 }

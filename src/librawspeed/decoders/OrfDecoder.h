@@ -39,7 +39,7 @@ class OrfDecoder :
 {
 public:
   OrfDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~OrfDecoder(void);
+  virtual ~OrfDecoder();
   virtual RawImage decodeRawInternal();
   virtual void decodeMetaDataInternal(CameraMetaData *meta);
   virtual void checkSupportInternal(CameraMetaData *meta);

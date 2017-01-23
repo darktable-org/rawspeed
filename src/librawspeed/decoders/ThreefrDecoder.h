@@ -35,7 +35,7 @@ class ThreefrDecoder :
 {
 public:
   ThreefrDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~ThreefrDecoder(void);
+  virtual ~ThreefrDecoder();
   virtual RawImage decodeRawInternal();
   virtual void checkSupportInternal(CameraMetaData *meta);
   virtual void decodeMetaDataInternal(CameraMetaData *meta);

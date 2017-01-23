@@ -93,8 +93,7 @@ DngOpcodes::DngOpcodes(TiffEntry *entry)
   }
 }
 
-DngOpcodes::~DngOpcodes(void)
-{
+DngOpcodes::~DngOpcodes() {
   size_t codes = mOpcodes.size();
   for (uint32 i = 0; i < codes; i++)
     delete mOpcodes[i];
@@ -476,8 +475,7 @@ OpcodeDeltaPerCol::OpcodeDeltaPerCol(const uchar8* parameters, uint32 param_max_
   mDeltaX = NULL;
 }
 
-OpcodeDeltaPerCol::~OpcodeDeltaPerCol( void )
-{
+OpcodeDeltaPerCol::~OpcodeDeltaPerCol() {
   if (mDeltaX)
     delete[] mDeltaX;
   mDeltaX = NULL;
@@ -638,8 +636,7 @@ OpcodeScalePerCol::OpcodeScalePerCol(const uchar8* parameters, uint32 param_max_
   mDeltaX = NULL;
 }
 
-OpcodeScalePerCol::~OpcodeScalePerCol( void )
-{
+OpcodeScalePerCol::~OpcodeScalePerCol() {
   if (mDeltaX)
     delete[] mDeltaX;
   mDeltaX = NULL;

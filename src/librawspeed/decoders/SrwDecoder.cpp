@@ -46,7 +46,7 @@ RawDecoder(file), mRootIFD(rootIFD) {
   decoderVersion = 3;
 }
 
-SrwDecoder::~SrwDecoder(void) {
+SrwDecoder::~SrwDecoder() {
   if (mRootIFD)
     delete mRootIFD;
   mRootIFD = NULL;

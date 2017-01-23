@@ -78,11 +78,7 @@ void X3fParser::freeObjects() {
   bytes = NULL;
 }
 
-X3fParser::~X3fParser(void)
-{
-  freeObjects();
-}
-
+X3fParser::~X3fParser() { freeObjects(); }
 
 static string getIdAsString(ByteStream *bytes) {
   uchar8 id[5];

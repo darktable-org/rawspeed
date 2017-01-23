@@ -35,7 +35,7 @@ class DcsDecoder :
 {
 public:
   DcsDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~DcsDecoder(void);
+  virtual ~DcsDecoder();
   virtual RawImage decodeRawInternal();
   virtual void checkSupportInternal(CameraMetaData *meta);
   virtual void decodeMetaDataInternal(CameraMetaData *meta);

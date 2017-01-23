@@ -74,7 +74,7 @@ public:
 
 class ImageMetaData {
 public:
-  ImageMetaData(void);
+  ImageMetaData();
 
   // Aspect ratio of the pixels, usually 1 but some cameras need scaling
   // <1 means the image needs to be stretched vertically, (0.5 means 2x)
@@ -108,7 +108,7 @@ class RawImageData
 {
   friend class RawImageWorker;
 public:
-  virtual ~RawImageData(void);
+  virtual ~RawImageData();
   uint32 getCpp() const { return cpp; }
   uint32 getBpp() const { return bpp; }
   void setCpp(uint32 val);
@@ -164,7 +164,7 @@ public:
 
 protected:
   RawImageType dataType;
-  RawImageData(void);
+  RawImageData();
   RawImageData(const iPoint2D &dim, uint32 bpp, uint32 cpp = 1);
   virtual void scaleValues(int start_y, int end_y) = 0;
   virtual void doLookup(int start_y, int end_y) = 0;
@@ -197,7 +197,7 @@ protected:
   virtual void fixBadPixel( uint32 x, uint32 y, int component = 0);
   virtual void doLookup(int start_y, int end_y);
 
-  RawImageDataU16(void);
+  RawImageDataU16();
   RawImageDataU16(const iPoint2D &dim, uint32 cpp = 1);
   friend class RawImage;
 };
@@ -213,7 +213,7 @@ protected:
   virtual void scaleValues(int start_y, int end_y);
   virtual void fixBadPixel( uint32 x, uint32 y, int component = 0);
   virtual void doLookup(int start_y, int end_y);
-  RawImageDataFloat(void);
+  RawImageDataFloat();
   RawImageDataFloat(const iPoint2D &dim, uint32 cpp = 1);
   friend class RawImage;
 };

@@ -52,7 +52,7 @@ class Rw2Decoder :
 {
 public:
   Rw2Decoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~Rw2Decoder(void);
+  virtual ~Rw2Decoder();
   RawImage decodeRawInternal();
   virtual void decodeMetaDataInternal(CameraMetaData *meta);
   virtual void checkSupportInternal(CameraMetaData *meta);

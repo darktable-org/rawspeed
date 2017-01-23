@@ -33,7 +33,7 @@ class CiffParser
 {
 public:
   CiffParser(FileMap* input);
-  virtual ~CiffParser(void);
+  virtual ~CiffParser();
 
   virtual void parseData();
   virtual RawDecoder* getDecoder();

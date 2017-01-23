@@ -51,7 +51,7 @@ Cr2Decoder::Cr2Decoder(TiffIFD *rootIFD, FileMap* file) :
   decoderVersion = 7;
 }
 
-Cr2Decoder::~Cr2Decoder(void) {
+Cr2Decoder::~Cr2Decoder() {
   if (mRootIFD)
     delete mRootIFD;
   mRootIFD = NULL;

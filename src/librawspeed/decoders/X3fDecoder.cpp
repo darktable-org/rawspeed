@@ -50,8 +50,7 @@ RawDecoder(file), bytes(NULL) {
   bytes = new ByteStream(file, 0, getHostEndianness() == little);
 }
 
-X3fDecoder::~X3fDecoder(void)
-{
+X3fDecoder::~X3fDecoder() {
   if (bytes)
     delete bytes;
   if (huge_table)

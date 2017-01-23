@@ -38,7 +38,7 @@ class MosDecoder :
 {
 public:
   MosDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~MosDecoder(void);
+  virtual ~MosDecoder();
   virtual RawImage decodeRawInternal();
   virtual void checkSupportInternal(CameraMetaData *meta);
   virtual void decodeMetaDataInternal(CameraMetaData *meta);

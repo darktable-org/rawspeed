@@ -67,8 +67,7 @@ AriDecoder::AriDecoder(FileMap* file) : RawDecoder(file) {
   }
 }
 
-AriDecoder::~AriDecoder(void) {
-}
+AriDecoder::~AriDecoder() {}
 
 RawImage AriDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(mWidth, mHeight);

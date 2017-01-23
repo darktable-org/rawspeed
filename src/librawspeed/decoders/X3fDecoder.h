@@ -42,7 +42,7 @@ class X3fDecoder :
 {
 public:
   X3fDecoder(FileMap* file);
-  virtual ~X3fDecoder(void);
+  virtual ~X3fDecoder();
   virtual RawImage decodeRawInternal();
   virtual void decodeMetaDataInternal(CameraMetaData *meta);
   virtual void checkSupportInternal(CameraMetaData *meta);

@@ -30,11 +30,10 @@ using namespace std;
 
 namespace RawSpeed {
 
-RawImageData::RawImageData(void):
-    dim(0, 0), isCFA(true), cfa(iPoint2D(0,0)),
-    blackLevel(-1), whitePoint(65536),
-    dataRefCount(0), data(0), cpp(1), bpp(0),
-    uncropped_dim(0, 0), table(NULL) {
+RawImageData::RawImageData()
+    : dim(0, 0), isCFA(true), cfa(iPoint2D(0, 0)), blackLevel(-1),
+      whitePoint(65536), dataRefCount(0), data(0), cpp(1), bpp(0),
+      uncropped_dim(0, 0), table(NULL) {
   blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
   pthread_mutex_init(&mymutex, NULL);
   mBadPixelMap = NULL;
@@ -56,7 +55,7 @@ RawImageData::RawImageData(const iPoint2D &_dim, uint32 _bpc, uint32 _cpp)
   pthread_mutex_init(&mBadPixelMutex, NULL);
 }
 
-ImageMetaData::ImageMetaData(void) {
+ImageMetaData::ImageMetaData() {
   subsampling.x = subsampling.y = 1;
   isoSpeed = 0;
   pixelAspectRatio = 1;
@@ -67,7 +66,7 @@ ImageMetaData::ImageMetaData(void) {
   wbCoeffs[3] = NAN;
 }
 
-RawImageData::~RawImageData(void) {
+RawImageData::~RawImageData() {
   _ASSERTE(dataRefCount == 0);
   mOffset = iPoint2D(0, 0);
   pthread_mutex_destroy(&mymutex);

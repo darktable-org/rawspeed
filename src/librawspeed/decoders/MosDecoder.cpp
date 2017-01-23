@@ -58,9 +58,7 @@ MosDecoder::MosDecoder(TiffIFD *rootIFD, FileMap* file)  :
   }
 }
 
-MosDecoder::~MosDecoder(void) {
-  delete mRootIFD;
-}
+MosDecoder::~MosDecoder() { delete mRootIFD; }
 
 string MosDecoder::getXMPTag(const string &xmp, const string &tag) {
   string::size_type start = xmp.find("<tiff:"+tag+">");

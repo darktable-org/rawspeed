@@ -41,9 +41,7 @@ KdcDecoder::KdcDecoder(TiffIFD *rootIFD, FileMap* file)  :
   decoderVersion = 0;
 }
 
-KdcDecoder::~KdcDecoder(void) {
-  delete mRootIFD;
-}
+KdcDecoder::~KdcDecoder() { delete mRootIFD; }
 
 RawImage KdcDecoder::decodeRawInternal() {
   if (!mRootIFD->hasEntryRecursive(COMPRESSION))

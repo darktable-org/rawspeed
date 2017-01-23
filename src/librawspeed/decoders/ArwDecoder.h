@@ -37,7 +37,7 @@ class ArwDecoder :
 {
 public:
   ArwDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~ArwDecoder(void);
+  virtual ~ArwDecoder();
   virtual RawImage decodeRawInternal();
   virtual void checkSupportInternal(CameraMetaData *meta);
   virtual void decodeMetaDataInternal(CameraMetaData *meta);

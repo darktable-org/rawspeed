@@ -79,8 +79,7 @@ CiffIFD::CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 _depth) {
   }
 }
 
-
-CiffIFD::~CiffIFD(void) {
+CiffIFD::~CiffIFD() {
   for (map<CiffTag, CiffEntry*>::iterator i = mEntry.begin(); i != mEntry.end(); ++i) {
     delete((*i).second);
   }

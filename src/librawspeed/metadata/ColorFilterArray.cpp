@@ -91,8 +91,7 @@ void ColorFilterArray::setSize(const iPoint2D &_size) {
   memset(cfa, CFA_UNKNOWN, size.area()*sizeof(CFAColor));
 }
 
-ColorFilterArray::~ColorFilterArray( void )
-{
+ColorFilterArray::~ColorFilterArray() {
   if (cfa)
     delete[] cfa;
   cfa = NULL;
