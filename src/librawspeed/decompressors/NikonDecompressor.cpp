@@ -142,7 +142,7 @@ void decompressNikon(RawImage& mRaw, ByteStream&& data, ByteStream metadata, uin
   if (uncorrectedRawValues) {
     mRaw->setTable(&curve[0], curve.size(), false);
   } else {
-    mRaw->setTable(NULL);
+    mRaw->setTable(nullptr);
   }
 }
 

@@ -42,11 +42,10 @@ using namespace std;
 
 namespace RawSpeed {
 
-X3fDecoder::X3fDecoder(FileMap* file) :
-RawDecoder(file), bytes(NULL) {
+X3fDecoder::X3fDecoder(FileMap *file) : RawDecoder(file), bytes(nullptr) {
   decoderVersion = 1;
-  huge_table = NULL;
-  line_offsets = NULL;
+  huge_table = nullptr;
+  line_offsets = nullptr;
   bytes = new ByteStream(file, 0, getHostEndianness() == little);
 }
 
@@ -57,8 +56,8 @@ X3fDecoder::~X3fDecoder() {
     _aligned_free(huge_table);
   if (line_offsets)
     _aligned_free(line_offsets);
-  huge_table = NULL;
-  line_offsets = NULL;
+  huge_table = nullptr;
+  line_offsets = nullptr;
 }
 
 string X3fDecoder::getIdAsString(ByteStream *bytes) {
@@ -169,7 +168,7 @@ string X3fDecoder::getProp(const char* key )
   map<string,string>::iterator prop_it = mProperties.props.find(key);
   if (prop_it != mProperties.props.end())
     return (*prop_it).second;
-  return NULL;
+  return nullptr;
 }
 
 
@@ -480,7 +479,7 @@ FileMap* X3fDecoder::getCompressedData()
       return new FileMap(mFile->getSubView(cimg.dataOffset, cimg.dataSize));
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 } // namespace RawSpeed

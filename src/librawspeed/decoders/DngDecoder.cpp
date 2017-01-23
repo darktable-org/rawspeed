@@ -61,7 +61,7 @@ DngDecoder::DngDecoder(TiffIFD *rootIFD, FileMap* file) : RawDecoder(file), mRoo
 DngDecoder::~DngDecoder() {
   if (mRootIFD)
     delete mRootIFD;
-  mRootIFD = NULL;
+  mRootIFD = nullptr;
 }
 
 RawImage DngDecoder::decodeRawInternal() {
@@ -428,7 +428,7 @@ RawImage DngDecoder::decodeRawInternal() {
     mRaw->setTable(table, len, !uncorrectedRawValues);
     if (!uncorrectedRawValues) {
       mRaw->sixteenBitLookup();
-      mRaw->setTable(NULL);
+      mRaw->setTable(nullptr);
     }
     delete [] table;
 

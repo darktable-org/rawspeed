@@ -67,7 +67,7 @@ void *DecodeThread(void *_this) {
   } catch (...) {
     parent->mRaw->setError("DNGDEcodeThread: Caught unhandled exception.");
   }
-  return NULL;
+  return nullptr;
 }
 
 DngDecoderSlices::DngDecoderSlices(FileMap *file, const RawImage &img,
@@ -152,7 +152,7 @@ static void jpeg_mem_src_int (j_decompress_ptr cinfo, unsigned char* buffer, lon
 {
   struct jpeg_source_mgr* src;
 
-  if (cinfo->src == NULL) {   /* first time for this JPEG object? */
+  if (cinfo->src == nullptr) { /* first time for this JPEG object? */
     cinfo->src = (struct jpeg_source_mgr *)
       (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT,
       sizeof(struct jpeg_source_mgr));
@@ -397,7 +397,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
     /* Deflate compression */
   } else if (compression == 8) {
 #ifdef HAVE_ZLIB
-    unsigned char *uBuffer = NULL;
+    unsigned char *uBuffer = nullptr;
     while (!t->slices.empty()) {
       DngSliceElement e = t->slices.front();
       if (!uBuffer)
@@ -423,7 +423,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
     while (!t->slices.empty()) {
       DngSliceElement e = t->slices.front();
       t->slices.pop();
-      uchar8 *complete_buffer = NULL;
+      uchar8 *complete_buffer = nullptr;
       JSAMPARRAY buffer = (JSAMPARRAY)malloc(sizeof(JSAMPROW));
 
       try {

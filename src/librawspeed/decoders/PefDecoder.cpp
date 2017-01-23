@@ -46,7 +46,7 @@ PefDecoder::PefDecoder(TiffIFD *rootIFD, FileMap* file) :
 PefDecoder::~PefDecoder() {
   if (mRootIFD)
     delete mRootIFD;
-  mRootIFD = NULL;
+  mRootIFD = nullptr;
 }
 
 RawImage PefDecoder::decodeRawInternal() {

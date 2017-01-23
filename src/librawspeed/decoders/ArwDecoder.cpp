@@ -50,11 +50,11 @@ ArwDecoder::ArwDecoder(TiffIFD *rootIFD, FileMap* file) :
 ArwDecoder::~ArwDecoder() {
   if (mRootIFD)
     delete mRootIFD;
-  mRootIFD = NULL;
+  mRootIFD = nullptr;
 }
 
 RawImage ArwDecoder::decodeRawInternal() {
-  TiffIFD* raw = NULL;
+  TiffIFD *raw = nullptr;
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 
   if (data.empty()) {
@@ -216,7 +216,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   if (uncorrectedRawValues) {
     mRaw->setTable(curve, 0x4000, false);
   } else {
-    mRaw->setTable(NULL);
+    mRaw->setTable(nullptr);
   }
 
   delete[] curve;

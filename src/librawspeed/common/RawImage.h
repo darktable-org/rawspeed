@@ -172,13 +172,13 @@ protected:
   void fixBadPixelsThread(int start_y, int end_y);
   void startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped );
   uint32 dataRefCount{0};
-  uchar8 *data{0};
+  uchar8 *data{nullptr};
   uint32 cpp{1}; // Components per pixel
   uint32 bpp{0}; // Bytes per pixel.
   friend class RawImage;
   iPoint2D mOffset;
   iPoint2D uncropped_dim;
-  TableLookUp *table;
+  TableLookUp *table{nullptr};
 #ifndef NO_PTHREAD
   pthread_mutex_t mymutex;
 #endif
@@ -246,7 +246,7 @@ inline RawImage RawImage::create(RawImageType type)  {
     default:
       writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!\n");
   }
-  return NULL;
+  return nullptr;
 }
 
 inline RawImage RawImage::create(const iPoint2D &dim, RawImageType type,
@@ -257,7 +257,7 @@ inline RawImage RawImage::create(const iPoint2D &dim, RawImageType type,
     default:
       writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!\n");
   }
-  return NULL;
+  return nullptr;
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,
@@ -266,7 +266,7 @@ inline RawImage RawImage::create(const iPoint2D &dim, RawImageType type,
 // this needs to be inline to speed up tight decompressor loops
 inline void RawImageDataU16::setWithLookUp(ushort16 value, uchar8* dst, uint32* random) {
   ushort16* dest = (ushort16*)dst;
-  if (table == NULL) {
+  if (table == nullptr) {
     *dest = value;
     return;
   }

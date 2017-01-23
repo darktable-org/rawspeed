@@ -38,13 +38,13 @@ namespace RawSpeed {
 
 class RawDecoder;
 
-CiffParser::CiffParser(FileMap* inputData): mInput(inputData), mRootIFD(0) {
-}
+CiffParser::CiffParser(FileMap *inputData)
+    : mInput(inputData), mRootIFD(nullptr) {}
 
 CiffParser::~CiffParser() {
   if (mRootIFD)
     delete mRootIFD;
-  mRootIFD = NULL;
+  mRootIFD = nullptr;
 }
 
 void CiffParser::parseData() {
@@ -76,14 +76,14 @@ RawDecoder* CiffParser::getDecoder() {
       string make = potential->getEntry(CIFF_MAKEMODEL)->getString();
       TrimSpaces(make);
       if (make == "Canon") {
-        mRootIFD = NULL;
+        mRootIFD = nullptr;
         return new CrwDecoder(root, mInput);
       }
     }
   }
 
   throw CiffParserException("No decoder found. Sorry.");
-  return NULL;
+  return nullptr;
 }
 
 void CiffParser::MergeIFD( CiffParser* other_ciff)

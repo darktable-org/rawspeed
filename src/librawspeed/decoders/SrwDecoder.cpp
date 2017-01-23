@@ -49,7 +49,7 @@ RawDecoder(file), mRootIFD(rootIFD) {
 SrwDecoder::~SrwDecoder() {
   if (mRootIFD)
     delete mRootIFD;
-  mRootIFD = NULL;
+  mRootIFD = nullptr;
 }
 
 RawImage SrwDecoder::decodeRawInternal() {
@@ -422,7 +422,7 @@ void SrwDecoder::decodeCompressed3( TiffIFD* raw, int bits)
         if (diff >> (len-1))
           diff -= (1 << len);
 
-        ushort16 *value = NULL;
+        ushort16 *value = nullptr;
         // Apply the diff to pixels 0 2 4 6 8 10 12 14 1 3 5 7 9 11 13 15
         if (row % 2)
           value = &img[((i&0x7)<<1)+1-(i>>3)];

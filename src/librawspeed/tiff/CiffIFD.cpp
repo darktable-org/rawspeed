@@ -56,7 +56,7 @@ CiffIFD::CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 _depth) {
     if (!mFile->isValid(entry_offset, 10))
       break;
 
-    CiffEntry *t = NULL;
+    CiffEntry *t = nullptr;
     try {
       t = new CiffEntry(f, start, entry_offset);
     } catch (IOException &) { // Ignore unparsable entry
@@ -156,7 +156,7 @@ CiffEntry* CiffIFD::getEntryRecursive(CiffTag tag) {
     if (entry)
       return entry;
   }
-  return NULL;
+  return nullptr;
 }
 
 CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag, uint32 isValue) {
@@ -170,7 +170,7 @@ CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag, uint32 isValue) {
     if (entry)
       return entry;
   }
-  return NULL;
+  return nullptr;
 }
 
 CiffEntry *CiffIFD::getEntryRecursiveWhere(CiffTag tag, const string &isValue) {
@@ -184,7 +184,7 @@ CiffEntry *CiffIFD::getEntryRecursiveWhere(CiffTag tag, const string &isValue) {
     if (entry)
       return entry;
   }
-  return NULL;
+  return nullptr;
 }
 
 CiffEntry* CiffIFD::getEntry(CiffTag tag) {
@@ -192,7 +192,7 @@ CiffEntry* CiffIFD::getEntry(CiffTag tag) {
     return mEntry[tag];
   }
   ThrowCPE("CiffIFD: CIFF Parser entry 0x%x not found.", tag);
-  return 0;
+  return nullptr;
 }
 
 

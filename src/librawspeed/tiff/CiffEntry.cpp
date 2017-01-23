@@ -32,7 +32,7 @@ using namespace std;
 namespace RawSpeed {
 
 CiffEntry::CiffEntry(FileMap* f, uint32 value_data, uint32 offset) {
-  own_data = NULL;
+  own_data = nullptr;
   ushort16 p = get2LE(f->getData(offset, 2), 0);
   tag = (CiffTag) (p & 0x3fff);
   ushort16 datalocation = (p & 0xc000);

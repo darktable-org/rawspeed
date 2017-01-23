@@ -71,7 +71,7 @@ string MosDecoder::getXMPTag(const string &xmp, const string &tag) {
 
 RawImage MosDecoder::decodeRawInternal() {
   vector<TiffIFD*> data;
-  TiffIFD* raw = NULL;
+  TiffIFD *raw = nullptr;
   uint32 off = 0;
 
   uint32 base = 8;

@@ -472,13 +472,13 @@ OpcodeDeltaPerCol::OpcodeDeltaPerCol(const uchar8* parameters, uint32 param_max_
     mDelta[i] = getFloat(&parameters[36+4*i]);
   *bytes_used += 4*mCount;
   mFlags = MultiThreaded;
-  mDeltaX = NULL;
+  mDeltaX = nullptr;
 }
 
 OpcodeDeltaPerCol::~OpcodeDeltaPerCol() {
   if (mDeltaX)
     delete[] mDeltaX;
-  mDeltaX = NULL;
+  mDeltaX = nullptr;
 }
 
 
@@ -633,13 +633,13 @@ OpcodeScalePerCol::OpcodeScalePerCol(const uchar8* parameters, uint32 param_max_
     mDelta[i] = getFloat(&parameters[36+4*i]);
   *bytes_used += 4*mCount;
   mFlags = MultiThreaded;
-  mDeltaX = NULL;
+  mDeltaX = nullptr;
 }
 
 OpcodeScalePerCol::~OpcodeScalePerCol() {
   if (mDeltaX)
     delete[] mDeltaX;
-  mDeltaX = NULL;
+  mDeltaX = nullptr;
 }
 
 

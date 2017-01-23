@@ -89,7 +89,7 @@ RawImage DcsDecoder::decodeRawInternal() {
   if (uncorrectedRawValues) {
     mRaw->setTable(table, 256, false);
   } else {
-    mRaw->setTable(NULL);
+    mRaw->setTable(nullptr);
   }
 
   return mRaw;

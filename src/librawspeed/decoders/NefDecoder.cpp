@@ -55,7 +55,7 @@ NefDecoder::NefDecoder(TiffIFD *rootIFD, FileMap* file) :
 NefDecoder::~NefDecoder() {
   if (mRootIFD)
     delete mRootIFD;
-  mRootIFD = NULL;
+  mRootIFD = nullptr;
 }
 
 RawImage NefDecoder::decodeRawInternal() {
@@ -178,13 +178,13 @@ bool NefDecoder::NEFIsUncompressedRGB(TiffIFD *raw) {
 
 TiffIFD* NefDecoder::FindBestImage(vector<TiffIFD*>* data) {
   int largest_width = 0;
-  TiffIFD* best_ifd = NULL;
+  TiffIFD *best_ifd = nullptr;
   for (auto raw : *data) {
     int width = raw->getEntry(IMAGEWIDTH)->getInt();
     if (width > largest_width)
       best_ifd = raw;
   }
-  if (NULL == best_ifd)
+  if (nullptr == best_ifd)
     ThrowRDE("NEF Decoder: Unable to locate image");
   return best_ifd;
 }
@@ -688,14 +688,14 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
       dest[x+5] = clampbits((inv_wb_b * tmp + (1<<9)) >> 10, 15);
     }
   }
-  mRaw->setTable(NULL);
+  mRaw->setTable(nullptr);
 }
 
 // From:  dcraw.c -- Dave Coffin's raw photo decoder
 #define SQR(x) ((x)*(x))
 ushort16* NefDecoder::gammaCurve(double pwr, double ts, int mode, int imax) {
   ushort16 *curve = (ushort16*)_aligned_malloc(65536 * sizeof(ushort16), 16);
-  if (curve == NULL) {
+  if (curve == nullptr) {
     ThrowRDE("NEF Decoder: Unable to allocate gamma curve");
   }
   int i;

@@ -45,7 +45,10 @@ class RawDecoder;
 class RawDecoderThread
 {
   public:
-    RawDecoderThread() {error = 0; taskNo = -1;};
+    RawDecoderThread() {
+      error = nullptr;
+      taskNo = -1;
+    };
     uint32 start_y;
     uint32 end_y;
     const char* error;
@@ -91,7 +94,7 @@ public:
 
   /* Allows access to the root IFD structure */
   /* If image isn't TIFF based NULL will be returned */
-  virtual TiffIFD* getRootIFD() {return NULL;}
+  virtual TiffIFD *getRootIFD() { return nullptr; }
 
   /* The decoded image - undefined if image has not or could not be decoded. */
   /* Remember this is automatically refcounted, so a reference is retained until this class is destroyed */
@@ -126,7 +129,7 @@ public:
 
   /* Retrieve the main RAW chunk */
   /* Returns NULL if unknown */
-  virtual FileMap* getCompressedData() {return NULL;}
+  virtual FileMap *getCompressedData() { return nullptr; }
 
 protected:
   /* Attempt to decode the image */

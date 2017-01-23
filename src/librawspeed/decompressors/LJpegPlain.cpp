@@ -172,7 +172,7 @@ void LJpegPlain::decodeN_X_Y() {
     mRaw->createData();
   }
 
-  HuffmanTable* ht[N_COMP] = {0};
+  HuffmanTable *ht[N_COMP] = {nullptr};
   for (int i = 0; i < N_COMP; ++i)
     ht[i] = huff[frame.compInfo[i].dcTblNo];
 

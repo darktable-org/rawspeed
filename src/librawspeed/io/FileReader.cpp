@@ -41,7 +41,7 @@ FileMap* FileReader::readFile() {
   long size;
 
   file = fopen(mFilename, "rb");
-  if (file == NULL)
+  if (file == nullptr)
     throw FileIOException("Could not open file.");
   fseek(file, 0, SEEK_END);
   size = ftell(file);
@@ -71,7 +71,8 @@ FileMap* FileReader::readFile() {
 
 #else // __unix__
   HANDLE file_h;  // File handle
-  file_h = CreateFile(mFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+  file_h = CreateFile(mFilename, GENERIC_READ, FILE_SHARE_READ, nullptr,
+                      OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
   if (file_h == INVALID_HANDLE_VALUE) {
     throw FileIOException("Could not open file.");
   }
@@ -85,7 +86,8 @@ FileMap* FileReader::readFile() {
   FileMap *fileData = new FileMap(f_size.LowPart);
 
   DWORD bytes_read;
-  if (! ReadFile(file_h, fileData->getDataWrt(0, fileData->getSize()), fileData->getSize(), &bytes_read, NULL)) {
+  if (!ReadFile(file_h, fileData->getDataWrt(0, fileData->getSize()),
+                fileData->getSize(), &bytes_read, nullptr)) {
     CloseHandle(file_h);
     delete fileData;
     throw FileIOException("Could not read file.");

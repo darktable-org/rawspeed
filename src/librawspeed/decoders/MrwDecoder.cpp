@@ -42,7 +42,7 @@ class CameraMetaData;
 
 MrwDecoder::MrwDecoder(FileMap* file) :
     RawDecoder(file) {
-  tiff_meta = NULL;
+  tiff_meta = nullptr;
   parseHeader();
 }
 

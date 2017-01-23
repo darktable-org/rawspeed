@@ -54,7 +54,7 @@ Cr2Decoder::Cr2Decoder(TiffIFD *rootIFD, FileMap* file) :
 Cr2Decoder::~Cr2Decoder() {
   if (mRootIFD)
     delete mRootIFD;
-  mRootIFD = NULL;
+  mRootIFD = nullptr;
 }
 
 RawImage Cr2Decoder::decodeOldFormat() {
@@ -125,7 +125,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
         // Apply table
         mRaw->sixteenBitLookup();
         // Delete table
-        mRaw->setTable(NULL);
+        mRaw->setTable(nullptr);
       } else {
         // We want uncorrected, but we store the table.
         mRaw->setTable(table, 4096, false);

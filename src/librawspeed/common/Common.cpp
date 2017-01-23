@@ -51,9 +51,10 @@ int macosx_version()
   static int ver = 0; // cached
   char str[256];
   size_t strsize = sizeof(str);
-  if (0 == ver && sysctlbyname("kern.osrelease", str, &strsize, NULL, 0) == 0) {
+  if (0 == ver &&
+      sysctlbyname("kern.osrelease", str, &strsize, nullptr, 0) == 0) {
     // kern.osrelease is a string formated as "Major.Minor.Patch"
-    if (memchr(str, '\0', strsize) != NULL) {
+    if (memchr(str, '\0', strsize) != nullptr) {
       int major, minor, patch;
       if (sscanf(str, "%d.%d.%d", &major, &minor, &patch) == 3) {
         ver = 0x1000 + major*10;
@@ -65,11 +66,11 @@ int macosx_version()
 void* _aligned_malloc(size_t bytes, size_t alignment) {
 
   if (macosx_version() >=0x1060) { // 10.6+
-    void* ret= NULL;
+    void *ret = nullptr;
     if (0 == posix_memalign(&ret, alignment, bytes))
       return ret;
     else
-      return NULL;
+      return nullptr;
   }
   return malloc(bytes); // Mac OS X malloc is usually aligned to 16 bytes
 }
@@ -77,11 +78,11 @@ void* _aligned_malloc(size_t bytes, size_t alignment) {
 #elif defined(__unix__)
 
 void* _aligned_malloc(size_t bytes, size_t alignment) {
-  void* ret= NULL;
+  void *ret = nullptr;
   if (0 == posix_memalign(&ret, alignment, bytes))
     return ret;
   else
-    return NULL;
+    return nullptr;
 }
 
 #endif

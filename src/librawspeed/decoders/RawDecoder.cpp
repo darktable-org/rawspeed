@@ -658,7 +658,7 @@ void *RawDecoderDecodeThread(void *_this) {
   } catch (IOException &ex) {
     me->parent->mRaw->setError(ex.what());
   }
-  return NULL;
+  return nullptr;
 }
 
 void RawDecoder::startThreads() {
@@ -695,7 +695,7 @@ void RawDecoder::startThreads() {
   }
 
   for (uint32 i = 0; i < threads; i++) {
-    pthread_join(t[i].threadid, NULL);
+    pthread_join(t[i].threadid, nullptr);
   }
   pthread_attr_destroy(&attr);
   delete[] t;
@@ -731,7 +731,7 @@ RawSpeed::RawImage RawDecoder::decodeRaw()
   } catch (IOException &e) {
     ThrowRDE("%s", e.what());
   }
-  return NULL;
+  return nullptr;
 }
 
 void RawDecoder::decodeMetaData(CameraMetaData *meta)

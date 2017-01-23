@@ -49,7 +49,7 @@ RafDecoder::RafDecoder(TiffIFD *rootIFD, FileMap* file) :
 RafDecoder::~RafDecoder() {
   if (mRootIFD)
     delete mRootIFD;
-  mRootIFD = NULL;
+  mRootIFD = nullptr;
 }
 
 RawImage RafDecoder::decodeRawInternal() {

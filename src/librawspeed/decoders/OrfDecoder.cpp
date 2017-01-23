@@ -53,7 +53,7 @@ OrfDecoder::OrfDecoder(TiffIFD *rootIFD, FileMap* file):
 OrfDecoder::~OrfDecoder() {
   if (mRootIFD)
     delete mRootIFD;
-  mRootIFD = NULL;
+  mRootIFD = nullptr;
 }
 
 RawImage OrfDecoder::decodeRawInternal() {

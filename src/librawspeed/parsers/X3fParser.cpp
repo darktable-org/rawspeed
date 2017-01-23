@@ -35,8 +35,8 @@ using namespace std;
 namespace RawSpeed {
 
 X3fParser::X3fParser(FileMap* file) {
-  decoder = NULL;
-  bytes = NULL;
+  decoder = nullptr;
+  bytes = nullptr;
   mFile = file;
   uint32 size = file->getSize();
   if (size<104+128)
@@ -74,8 +74,8 @@ void X3fParser::freeObjects() {
     delete bytes;
   if (decoder)
     delete decoder;
-  decoder = NULL;
-  bytes = NULL;
+  decoder = nullptr;
+  bytes = nullptr;
 }
 
 X3fParser::~X3fParser() { freeObjects(); }
@@ -120,10 +120,10 @@ void X3fParser::readDirectory()
 
 RawDecoder* X3fParser::getDecoder()
 {
-  if (NULL == decoder)
+  if (nullptr == decoder)
     ThrowRDE("X3fParser: No decoder found!");
   RawDecoder *ret = decoder;
-  decoder = NULL;
+  decoder = nullptr;
   return ret;
 }
 

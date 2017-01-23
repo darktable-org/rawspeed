@@ -163,8 +163,8 @@ protected:
 
   virtual void decodeScan() = 0;
 
-  ByteStream* input = 0;
-  FileMap *mFile = 0;
+  ByteStream *input = nullptr;
+  FileMap *mFile = nullptr;
   RawImage mRaw;
 
   SOFInfo frame;

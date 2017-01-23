@@ -31,25 +31,25 @@ using namespace std;
 namespace RawSpeed {
 
 RawImageData::RawImageData()
-    : dim(0, 0), cfa(iPoint2D(0, 0)), uncropped_dim(0, 0), table(NULL) {
+    : dim(0, 0), cfa(iPoint2D(0, 0)), uncropped_dim(0, 0) {
   blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
-  pthread_mutex_init(&mymutex, NULL);
-  mBadPixelMap = NULL;
-  pthread_mutex_init(&errMutex, NULL);
-  pthread_mutex_init(&mBadPixelMutex, NULL);
+  pthread_mutex_init(&mymutex, nullptr);
+  mBadPixelMap = nullptr;
+  pthread_mutex_init(&errMutex, nullptr);
+  pthread_mutex_init(&mBadPixelMutex, nullptr);
   mDitherScale = true;
 }
 
 RawImageData::RawImageData(const iPoint2D &_dim, uint32 _bpc, uint32 _cpp)
     : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), dataRefCount(0),
-      data(0), cpp(_cpp), bpp(_bpc * _cpp), uncropped_dim(0, 0), table(NULL) {
+      data(nullptr), cpp(_cpp), bpp(_bpc * _cpp), uncropped_dim(0, 0) {
   blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
-  mBadPixelMap = NULL;
+  mBadPixelMap = nullptr;
   mDitherScale = true;
   createData();
-  pthread_mutex_init(&mymutex, NULL);
-  pthread_mutex_init(&errMutex, NULL);
-  pthread_mutex_init(&mBadPixelMutex, NULL);
+  pthread_mutex_init(&mymutex, nullptr);
+  pthread_mutex_init(&errMutex, nullptr);
+  pthread_mutex_init(&mBadPixelMutex, nullptr);
 }
 
 ImageMetaData::ImageMetaData() {
@@ -72,7 +72,7 @@ RawImageData::~RawImageData() {
   for (auto &error : errors) {
     free((void *)error);
   }
-  if (table != NULL) {
+  if (table != nullptr) {
     delete table;
   }
   errors.clear();
@@ -99,8 +99,8 @@ void RawImageData::destroyData() {
     _aligned_free(data);
   if (mBadPixelMap)
     _aligned_free(mBadPixelMap);
-  data = 0;
-  mBadPixelMap = 0;
+  data = nullptr;
+  mBadPixelMap = nullptr;
 }
 
 void RawImageData::setCpp(uint32 val) {
@@ -445,7 +445,7 @@ RawImage& RawImage::operator=(const RawImage & p) {
 void *RawImageWorkerThread(void *_this) {
   RawImageWorker* me = (RawImageWorker*)_this;
   me->performTask();
-  return NULL;
+  return nullptr;
 }
 
 RawImageWorker::RawImageWorker( RawImageData *_img, RawImageWorkerTask _task, int _start_y, int _end_y )
@@ -507,7 +507,7 @@ void RawImageWorker::performTask()
 }
 
 void RawImageData::sixteenBitLookup() {
-  if (table == NULL) {
+  if (table == nullptr) {
     return;
   }
   startWorker(RawImageWorker::APPLY_LOOKUP, true);
@@ -515,7 +515,7 @@ void RawImageData::sixteenBitLookup() {
 
 void RawImageData::setTable( TableLookUp *t )
 {
-  if (table != NULL) {
+  if (table != nullptr) {
     delete table;
   }
   table = t;
@@ -531,7 +531,7 @@ const int TABLE_SIZE = 65536 * 2;
 
 // Creates n numre of tables.
 TableLookUp::TableLookUp( int _ntables, bool _dither ) : ntables(_ntables), dither(_dither) {
-  tables = NULL;
+  tables = nullptr;
   if (ntables < 1) {
     ThrowRDE("Cannot construct 0 tables");
   }
@@ -541,9 +541,9 @@ TableLookUp::TableLookUp( int _ntables, bool _dither ) : ntables(_ntables), dith
 
 TableLookUp::~TableLookUp()
 {
-  if (tables != NULL) {
+  if (tables != nullptr) {
     delete[] tables;
-    tables = NULL;
+    tables = nullptr;
   }
 }
 

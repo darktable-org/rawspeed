@@ -49,20 +49,20 @@ class CameraMetaData;
 CrwDecoder::CrwDecoder(CiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
   decoderVersion = 0;
-  mHuff[0] = NULL;
-  mHuff[1] = NULL;
+  mHuff[0] = nullptr;
+  mHuff[1] = nullptr;
 }
 
 CrwDecoder::~CrwDecoder() {
   if (mRootIFD)
     delete mRootIFD;
-  mRootIFD = NULL;
-  if (mHuff[0] != NULL)
+  mRootIFD = nullptr;
+  if (mHuff[0] != nullptr)
     _aligned_free(mHuff[0]);
-  if (mHuff[1] != NULL)
+  if (mHuff[1] != nullptr)
     _aligned_free(mHuff[1]);
-  mHuff[0] = NULL;
-  mHuff[1] = NULL;
+  mHuff[0] = nullptr;
+  mHuff[1] = nullptr;
 }
 
 RawImage CrwDecoder::decodeRawInternal() {
@@ -249,9 +249,9 @@ void CrwDecoder::makeDecoder (int n, const uchar8 *source)
   count = (source += 16) - 17;
   for (max=16; max && !count[max]; max--);
 
-  if (mHuff[n] != NULL) {
+  if (mHuff[n] != nullptr) {
     _aligned_free(mHuff[n]);
-    mHuff[n] = NULL;
+    mHuff[n] = nullptr;
   }
 
   ushort16* huff = (ushort16 *) _aligned_malloc((1 + (1 << max)) * sizeof(ushort16), 16);

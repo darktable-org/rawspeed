@@ -106,7 +106,7 @@ RawImage DcrDecoder::decodeRawInternal() {
     if (uncorrectedRawValues) {
       mRaw->setTable(linearization_table, 1024, false);
     } else {
-      mRaw->setTable(NULL);
+      mRaw->setTable(nullptr);
     }
     delete [] linearization_table;
   } else
