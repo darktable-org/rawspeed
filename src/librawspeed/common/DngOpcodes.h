@@ -45,13 +45,8 @@ public:
   /* Properties of out will not have changed from createOutput */
   virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY) = 0;
   iRectangle2D mAoi;
-  int mFlags;
-  enum Flags
-  {
-    MultiThreaded = 1,
-    PureLookup = 2
-  };
-
+  enum Flags { MultiThreaded = 1 << 0, PureLookup = 1 << 1 };
+  Flags mFlags;
 
 protected:
   Endianness host;
@@ -91,6 +86,10 @@ protected:
 
 };
 
+inline DngOpcode::Flags operator|(DngOpcode::Flags a, DngOpcode::Flags b) {
+  return static_cast<DngOpcode::Flags>(static_cast<int>(a) |
+                                       static_cast<int>(b));
+}
 
 class DngOpcodes
 {
