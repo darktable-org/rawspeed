@@ -186,11 +186,10 @@ X3fImage::X3fImage( ByteStream *bytes, uint32 offset, uint32 length )
 * remains attached.
 */
 
-typedef unsigned int    UTF32;  /* at least 32 bits */
-typedef unsigned short  UTF16;  /* at least 16 bits */
-typedef unsigned char   UTF8;   /* typically 8 bits */
-typedef unsigned char   Boolean; /* 0 or 1 */
-
+using UTF32 = unsigned int;    /* at least 32 bits */
+using UTF16 = unsigned short;  /* at least 16 bits */
+using UTF8 = unsigned char;    /* typically 8 bits */
+using Boolean = unsigned char; /* 0 or 1 */
 
 /* Some fundamental constants */
 #define UNI_REPLACEMENT_CHAR (UTF32)0x0000FFFD

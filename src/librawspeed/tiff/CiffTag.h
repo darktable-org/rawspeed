@@ -23,7 +23,7 @@
 
 namespace RawSpeed {
 
-typedef enum {
+using CiffTag = enum CiffTag {
   CIFF_NULL         = 0x0000,
   CIFF_MAKEMODEL    = 0x080a,
   CIFF_SHOTINFO     = 0x102a,
@@ -34,6 +34,6 @@ typedef enum {
   CIFF_RAWDATA      = 0x2005,
   CIFF_SUBIFD       = 0x300a,
   CIFF_EXIF         = 0x300b,
-} CiffTag;
+};
 
 } // namespace RawSpeed

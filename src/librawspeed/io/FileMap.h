@@ -26,6 +26,6 @@
 namespace RawSpeed {
 
 // deprecated Name:
-typedef Buffer FileMap;
+using FileMap = Buffer;
 
 } // namespace RawSpeed

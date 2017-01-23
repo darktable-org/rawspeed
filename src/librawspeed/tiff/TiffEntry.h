@@ -38,7 +38,7 @@ class TiffIFD;
  *
  * Note: RATIONALs are the ratio of two 32-bit integer values.
  */
-typedef	enum {
+using TiffDataType = enum TiffDataType {
   TIFF_NOTYPE    = 0, /* placeholder */
   TIFF_BYTE      = 1, /* 8-bit unsigned integer */
   TIFF_ASCII     = 2, /* 8-bit bytes w/ last byte null */
@@ -53,7 +53,7 @@ typedef	enum {
   TIFF_FLOAT     = 11, /* !32-bit IEEE floating point */
   TIFF_DOUBLE    = 12, /* !64-bit IEEE floating point */
   TIFF_OFFSET    = 13, /* 32-bit unsigned offset used for IFD and other offsets */
-} TiffDataType;
+};
 
 class TiffEntry
 {

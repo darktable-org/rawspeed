@@ -32,7 +32,7 @@ namespace RawSpeed {
 /*
  * Tag data type information.
  */
-typedef	enum {
+using CiffDataType = enum CiffDataType {
 	CIFF_BYTE  = 0x0000,	/* 8-bit unsigned integer */
 	CIFF_ASCII = 0x0800,	/* 8-bit bytes w/ last byte null */
 	CIFF_SHORT = 0x1000,	/* 16-bit unsigned integer */
@@ -40,8 +40,8 @@ typedef	enum {
 	CIFF_MIX   = 0x2000,	/* 32-bit unsigned integer */
 	CIFF_SUB1  = 0x2800,	/* 32-bit unsigned integer */
 	CIFF_SUB2  = 0x3000,	/* 32-bit unsigned integer */
-} CiffDataType;
 
+};
 
 class CiffEntry
 {

@@ -33,7 +33,7 @@
 #pragma intrinsic(_ReturnAddress)
 #define MIN(a,b) min(a,b)
 #define MAX(a,b) max(a,b)
-typedef unsigned __int64 uint64;
+using uint64 = unsigned __int64;
 // MSVC may not have NAN
 #ifndef NAN
   static const unsigned long __nan[2] = {0xffffffff, 0x7fffffff};
@@ -54,7 +54,7 @@ typedef unsigned __int64 uint64;
 #ifndef MAX
 #define MAX(a, b)  lmax(a,b)
 #endif
-typedef unsigned long long uint64;
+using uint64 = unsigned long long;
 #ifndef __MINGW32__
 void* _aligned_malloc(size_t bytes, size_t alignment);
 void _aligned_free(void *ptr);
@@ -70,16 +70,14 @@ int rawspeed_get_number_of_processor_cores();
 
 namespace RawSpeed {
 
-typedef signed char char8;
-typedef unsigned char uchar8;
-typedef unsigned int uint32;
-typedef signed int int32;
-typedef unsigned short ushort16;
-typedef signed short short16;
+using char8 = signed char;
+using uchar8 = unsigned char;
+using uint32 = unsigned int;
+using int32 = signed int;
+using ushort16 = unsigned short;
+using short16 = signed short;
 
-typedef enum Endianness {
-  big, little, unknown
-} Endianness;
+using Endianness = enum Endianness { big, little, unknown };
 
 const int DEBUG_PRIO_ERROR = 0x10;
 const int DEBUG_PRIO_WARNING = 0x100;
@@ -245,11 +243,11 @@ inline std::vector<std::string> split_string(const std::string &input,
   return result;
 }
 
-typedef enum {
+using BitOrder = enum BitOrder {
   BitOrder_Plain,  /* Memory order */
   BitOrder_Jpeg,   /* Input is added to stack byte by byte, and output is lifted from top */
   BitOrder_Jpeg16, /* Same as above, but 16 bits at the time */
   BitOrder_Jpeg32, /* Same as above, but 32 bits at the time */
-} BitOrder;
+};
 
 } // namespace RawSpeed

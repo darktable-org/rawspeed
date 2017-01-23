@@ -45,10 +45,10 @@ public:
   TiffIFD *getRootIFD() override { return mRootIFD; }
 
 private:
-  typedef struct {
+  using encTableItem = struct encTableItem {
     uchar8 encLen;
     uchar8 diffLen;
-  } encTableItem;
+  };
 
   void decodeCompressed(TiffIFD* raw);
   void decodeCompressed2(TiffIFD* raw, int bits);

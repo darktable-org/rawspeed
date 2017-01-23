@@ -39,10 +39,9 @@ static const std::string msg("my very Smart error Message #1 !");
 
 template <class T> class ExceptionsTest : public testing::Test {};
 
-typedef testing::Types<CameraMetadataException, CiffParserException,
-                       FileIOException, IOException, RawDecoderException,
-                       TiffParserException>
-    Classes;
+using Classes = testing::Types<CameraMetadataException, CiffParserException,
+                               FileIOException, IOException,
+                               RawDecoderException, TiffParserException>;
 
 TYPED_TEST_CASE(ExceptionsTest, Classes);
 

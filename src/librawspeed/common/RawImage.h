@@ -35,13 +35,14 @@ class RawImage;
 
 class RawImageData;
 
-typedef enum {TYPE_USHORT16, TYPE_FLOAT32} RawImageType;
+using RawImageType = enum RawImageType { TYPE_USHORT16, TYPE_FLOAT32 };
 
 class RawImageWorker {
 public:
-  typedef enum {
+  using RawImageWorkerTask = enum RawImageWorkerTask {
     SCALE_VALUES = 1, FIX_BAD_PIXELS = 2, APPLY_LOOKUP = 3 | 0x1000, FULL_IMAGE = 0x1000
-  } RawImageWorkerTask;
+  };
+
   RawImageWorker(RawImageData *img, RawImageWorkerTask task, int start_y, int end_y);
   ~RawImageWorker();
 #ifndef NO_PTHREAD

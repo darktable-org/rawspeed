@@ -27,7 +27,7 @@
 
 namespace RawSpeed {
 
-typedef enum {
+using TiffTag = enum TiffTag {
   INTEROPERABILITYINDEX  = 0x0001,
   INTEROPERABILITYVERSION         = 0x0002,
   CANONSHOTINFO = 0x0004,
@@ -347,6 +347,6 @@ typedef enum {
   KODAK_KDC_WIDTH = 0xFD00,
   KODAK_KDC_HEIGHT = 0xFD01,
   KODAK_IFD2 = 0xFE00,
-} TiffTag;
+};
 
 } // namespace RawSpeed

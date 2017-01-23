@@ -26,7 +26,7 @@
 
 namespace RawSpeed {
 
-typedef enum {
+using CFAColor = enum CFAColor {
   CFA_COLOR_MIN = 0,
   CFA_RED = 0,
   CFA_GREEN = 1,
@@ -39,8 +39,7 @@ typedef enum {
   CFA_COLOR_MAX = 8,
   CFA_FUJI_GREEN = 9,
   CFA_UNKNOWN = 255
-} CFAColor;
-
+};
 
 class ColorFilterArray
 {
