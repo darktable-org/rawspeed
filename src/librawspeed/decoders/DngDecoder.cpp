@@ -432,7 +432,7 @@ RawImage DngDecoder::decodeRawInternal() {
     }
     delete [] table;
 
-    if (0) {
+    if (false) {
       // Test average for bias
       uint32 cw = mRaw->dim.x * mRaw->getCpp();
       ushort16* pixels = (ushort16*)mRaw->getData(0, 500);

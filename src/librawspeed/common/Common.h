@@ -229,7 +229,7 @@ inline std::vector<std::string> split_string(const std::string &input,
   std::vector<std::string> result;
   const char *str = input.c_str();
 
-  while(1) {
+  while (true) {
     const char *begin = str;
 
     while(*str != c && *str)

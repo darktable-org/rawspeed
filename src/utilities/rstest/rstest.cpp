@@ -73,7 +73,7 @@ string img_hash(RawImage &r) {
   do {                                                                         \
     snprintf(line, sizeof(line), __VA_ARGS__);                                 \
     oss << line;                                                               \
-  } while (0)
+  } while (false)
 
   APPEND("make: %s\n", r->metadata.make.c_str());
   APPEND("model: %s\n", r->metadata.model.c_str());
