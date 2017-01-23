@@ -55,8 +55,8 @@ class TiffIFD
   friend TiffRootIFDOwner parseTiff(const Buffer& data);
 
   // make sure we never copy-constuct/assign a TiffIFD to keep the owning subcontainers contents save
-  TiffIFD(const TiffIFD&) = delete;
-  TiffIFD& operator=(const TiffIFD&) = delete;
+  TiffIFD(const TiffIFD &) = delete;            // NOLINT
+  TiffIFD &operator=(const TiffIFD &) = delete; // NOLINT
 
   void add(TiffIFDOwner subIFD);
   void add(TiffEntryOwner entry);
