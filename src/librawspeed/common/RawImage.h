@@ -148,16 +148,19 @@ public:
   /* Vector containing silent errors that occurred doing decoding, that may have lead to */
   /* an incomplete image. */
   std::vector<const char*> errors;
-  pthread_mutex_t errMutex;   // Mutex for above
   void setError(const char* err);
   /* Vector containing the positions of bad pixels */
   /* Format is x | (y << 16), so maximum pixel position is 65535 */
   std::vector<uint32> mBadPixelPositions;    // Positions of zeroes that must be interpolated
-  pthread_mutex_t mBadPixelMutex;   // Mutex for above, must be used if more than 1 thread is accessing vector
   uchar8 *mBadPixelMap;
   uint32 mBadPixelMapPitch;
   bool mDitherScale;           // Should upscaling be done with dither to minimize banding?
   ImageMetaData metadata;
+
+#ifndef NO_PTHREAD
+  pthread_mutex_t errMutex;   // Mutex for 'errors'
+  pthread_mutex_t mBadPixelMutex;   // Mutex for 'mBadPixelPositions, must be used if more than 1 thread is accessing vector
+#endif
 
 protected:
   RawImageType dataType;
@@ -173,10 +176,12 @@ protected:
   uint32 cpp;      // Components per pixel
   uint32 bpp;      // Bytes per pixel.
   friend class RawImage;
-  pthread_mutex_t mymutex;
   iPoint2D mOffset;
   iPoint2D uncropped_dim;
   TableLookUp *table;
+#ifndef NO_PTHREAD
+  pthread_mutex_t mymutex;
+#endif
 };
 
 
