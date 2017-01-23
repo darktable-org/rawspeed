@@ -20,12 +20,18 @@
 
 #pragma once
 
-#include "decoders/RawDecoder.h"
-#include "decompressors/LJpegPlain.h"
-#include "tiff/TiffIFD.h"
-#include "io/BitPumpPlain.h"
+#include "common/Common.h"       // for uchar8, int32
+#include "common/RawImage.h"     // for RawImage
+#include "decoders/RawDecoder.h" // for RawDecoder
+#include "io/BitPumpMSB.h"       // for BitPumpMSB
+#include "io/FileMap.h"          // for FileMap
+#include <string>                // for string
 
 namespace RawSpeed {
+
+class CameraMetaData;
+
+class TiffIFD;
 
 class SrwDecoder :
   public RawDecoder
@@ -47,7 +53,7 @@ private:
   void decodeCompressed2(TiffIFD* raw, int bits);
   int32 samsungDiff (BitPumpMSB &pump, encTableItem *tbl);
   void decodeCompressed3(TiffIFD* raw, int bits);
-  string getMode();
+  std::string getMode();
   TiffIFD *mRootIFD;
 };
 

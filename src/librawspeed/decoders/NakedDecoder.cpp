@@ -19,10 +19,22 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "decoders/NakedDecoder.h"
+#include "common/Common.h"                // for uint32, ::BitOrder_Jpeg16
+#include "common/Point.h"                 // for iPoint2D
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/ByteStream.h"                // for ByteStream
+#include "metadata/Camera.h"              // for Camera
+#include <cstdlib>                        // for atoi
+#include <map>                            // for map, _Rb_tree_iterator
+#include <string>                         // for string, operator==, basic_...
+#include <utility>                        // for pair
+
+using namespace std;
 
 namespace RawSpeed {
+
+class CameraMetaData;
 
 NakedDecoder::NakedDecoder(FileMap* file, Camera* c) :
     RawDecoder(file) {

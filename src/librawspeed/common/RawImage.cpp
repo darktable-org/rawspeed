@@ -16,17 +16,17 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-
 */
 
-#include "common/StdAfx.h"
 #include "common/RawImage.h"
-#include "decoders/RawDecoder.h"
+#include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
+#include "io/IOException.h"               // for IOException
+#include "parsers/TiffParserException.h"  // for TiffParserException
+#include <cmath>                          // for NAN
+#include <cstdlib>                        // for free
+#include <cstring>                        // for memset, memcpy
 
-#if defined(__SSE2__)
-#include <emmintrin.h>
-#endif
+using namespace std;
 
 namespace RawSpeed {
 
@@ -40,7 +40,7 @@ RawImageData::RawImageData(void):
   mBadPixelMap = NULL;
   pthread_mutex_init(&errMutex, NULL);
   pthread_mutex_init(&mBadPixelMutex, NULL);
-  mDitherScale = TRUE;
+  mDitherScale = true;
 }
 
 RawImageData::RawImageData(const iPoint2D &_dim, uint32 _bpc, uint32 _cpp)
@@ -49,7 +49,7 @@ RawImageData::RawImageData(const iPoint2D &_dim, uint32 _bpc, uint32 _cpp)
       uncropped_dim(0, 0), table(NULL) {
   blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
   mBadPixelMap = NULL;
-  mDitherScale = TRUE;
+  mDitherScale = true;
   createData();
   pthread_mutex_init(&mymutex, NULL);
   pthread_mutex_init(&errMutex, NULL);
@@ -467,7 +467,7 @@ RawImageWorker::RawImageWorker( RawImageData *_img, RawImageWorkerTask _task, in
 
 RawImageWorker::~RawImageWorker() {
 #ifndef NO_PTHREAD
-  pthread_attr_destroy(&attr);  
+  pthread_attr_destroy(&attr);
 #endif
 }
 

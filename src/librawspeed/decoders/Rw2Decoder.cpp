@@ -19,10 +19,30 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "decoders/Rw2Decoder.h"
+#include "common/Common.h"                // for uint32, uchar8, _RPT1, ush...
+#include "common/Point.h"                 // for iPoint2D
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/Buffer.h"                    // for Buffer::size_type
+#include "io/ByteStream.h"                // for ByteStream
+#include "metadata/ColorFilterArray.h"    // for ::CFA_GREEN, ColorFilterArray
+#include "tiff/TiffEntry.h"               // for TiffEntry
+#include "tiff/TiffIFD.h"                 // for TiffIFD
+#include "tiff/TiffTag.h"                 // for TiffTag, ::STRIPOFFSETS
+#include <algorithm>                      // for min
+#include <cmath>                          // for fabs
+#include <cstdio>                         // for NULL
+#include <cstring>                        // for memcpy
+#include <map>                            // for map, _Rb_tree_iterator
+#include <pthread.h>                      // for pthread_mutex_lock, pthrea...
+#include <string>                         // for string, allocator
+#include <vector>                         // for vector
+
+using namespace std;
 
 namespace RawSpeed {
+
+class CameraMetaData;
 
 Rw2Decoder::Rw2Decoder(TiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD), input_start(0) {
@@ -41,12 +61,12 @@ RawImage Rw2Decoder::decodeRawInternal() {
 
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(PANASONIC_STRIPOFFSET);
 
-  bool isOldPanasonic = FALSE;
+  bool isOldPanasonic = false;
 
   if (data.empty()) {
     if (!mRootIFD->hasEntryRecursive(STRIPOFFSETS))
       ThrowRDE("RW2 Decoder: No image data found");
-    isOldPanasonic = TRUE;
+    isOldPanasonic = true;
     data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
   }
 
@@ -219,12 +239,12 @@ void Rw2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
 
   data = mRootIFD->getIFDsWithTag(PANASONIC_STRIPOFFSET);
 
-  // bool isOldPanasonic = FALSE;
+  // bool isOldPanasonic = false;
 
   if (data.empty()) {
     if (!mRootIFD->hasEntryRecursive(STRIPOFFSETS))
       ThrowRDE("RW2 Decoder: No image data found");
-    // isOldPanasonic = TRUE;
+    // isOldPanasonic = true;
     data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
   }
 

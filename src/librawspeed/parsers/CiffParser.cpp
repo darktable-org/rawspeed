@@ -19,12 +19,24 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "parsers/CiffParser.h"
-#include "decoders/CrwDecoder.h"
+#include "common/Common.h"               // for TrimSpaces
+#include "decoders/CrwDecoder.h"         // for CrwDecoder
+#include "parsers/CiffParserException.h" // for ThrowCPE, CiffParserException
+#include "tiff/CiffEntry.h"              // for CiffEntry
+#include "tiff/CiffIFD.h"                // for CiffIFD
+#include "tiff/CiffTag.h"                // for CiffTag, ::CIFF_MAKEMODEL
+#include <cstdio>                        // for NULL
+#include <map>                           // for map, _Rb_tree_iterator, map...
+#include <string>                        // for operator==, allocator, basi...
+#include <utility>                       // for pair
+#include <vector>                        // for vector, vector<>::iterator
+
+using namespace std;
 
 namespace RawSpeed {
 
+class RawDecoder;
 
 CiffParser::CiffParser(FileMap* inputData): mInput(inputData), mRootIFD(0) {
 }
@@ -85,7 +97,7 @@ void CiffParser::MergeIFD( CiffParser* other_ciff)
     mRootIFD->mSubIFD.push_back(*i);
   }
 
-  for (map<CiffTag, CiffEntry*>::iterator i = other_root->mEntry.begin(); i != other_root->mEntry.end(); ++i) {    
+  for (map<CiffTag, CiffEntry*>::iterator i = other_root->mEntry.begin(); i != other_root->mEntry.end(); ++i) {
     mRootIFD->mEntry[(*i).first] = (*i).second;
   }
   other_root->mSubIFD.clear();

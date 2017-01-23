@@ -20,13 +20,20 @@
 
 #pragma once
 
-#include "metadata/ColorFilterArray.h"
-#include "metadata/CameraSensorInfo.h"
-#include "metadata/BlackArea.h"
-#include "metadata/CameraMetadataException.h"
+#include "common/Common.h"             // for uint32
+#include "common/Point.h"              // for iPoint2D
+#include "metadata/BlackArea.h"        // for BlackArea
+#include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
+#include "metadata/ColorFilterArray.h" // for ColorFilterArray
+#include <map>                         // for map
+#include <string>                      // for string, basic_string, allocator
+#include <vector>                      // for vector
+
+namespace pugi {
+class xml_node;
+} // namespace pugi
 
 namespace RawSpeed {
-
 
 class Camera
 {
@@ -34,23 +41,23 @@ public:
   Camera(pugi::xml_node &camera);
   Camera(const Camera* camera, uint32 alias_num);
   const CameraSensorInfo* getSensorInfo(int iso);
-  string make;
-  string model;
-  string mode;
-  string canonical_make;
-  string canonical_model;
-  string canonical_alias;
-  string canonical_id;
-  vector<string> aliases;
-  vector<string> canonical_aliases;
+  std::string make;
+  std::string model;
+  std::string mode;
+  std::string canonical_make;
+  std::string canonical_model;
+  std::string canonical_alias;
+  std::string canonical_id;
+  std::vector<std::string> aliases;
+  std::vector<std::string> canonical_aliases;
   ColorFilterArray cfa;
   bool supported;
   iPoint2D cropSize;
   iPoint2D cropPos;
-  vector<BlackArea> blackAreas;
-  vector<CameraSensorInfo> sensorInfo;
+  std::vector<BlackArea> blackAreas;
+  std::vector<CameraSensorInfo> sensorInfo;
   int decoderVersion;
-  map<string,string> hints;
+  std::map<std::string,std::string> hints;
 protected:
   void parseCFA(const pugi::xml_node &node);
   void parseCrop(const pugi::xml_node &node);

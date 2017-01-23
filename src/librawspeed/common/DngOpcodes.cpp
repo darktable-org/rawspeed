@@ -1,6 +1,5 @@
-#include "common/StdAfx.h"
-#include "common/DngOpcodes.h"
-/* 
+
+/*
 RawSpeed - RAW file decoder.
 
 Copyright (C) 2012 Klaus Post
@@ -18,9 +17,18 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-
 */
+
+#include "common/DngOpcodes.h"
+#include "common/RawImage.h"              // for RawImage, RawImageData
+#include "common/Threading.h"             // for pthread_mutex_lock, pthrea...
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "tiff/TiffEntry.h"               // for TiffEntry
+#include <algorithm>                      // for min
+#include <cmath>                          // for lround, pow
+#include <cstddef>                        // for NULL, size_t
+
+using namespace std;
 
 namespace RawSpeed {
 
@@ -689,4 +697,4 @@ void OpcodeScalePerCol::apply( RawImage &in, RawImage &out, uint32 startY, uint3
 }
 
 
-} // namespace RawSpeed 
+} // namespace RawSpeed

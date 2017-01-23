@@ -19,11 +19,24 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "tiff/CiffIFD.h"
-#include "parsers/CiffParser.h"
+#include "common/Common.h"               // for uint32, get2LE, get4LE, ush...
+#include "io/IOException.h"              // for IOException
+#include "parsers/CiffParserException.h" // for ThrowCPE, CiffParserException
+#include "tiff/CiffEntry.h"              // for CiffEntry, ::CIFF_SUB1, ::C...
+#include <cstdio>                        // for NULL
+#include <map>                           // for map, _Rb_tree_iterator, map...
+#include <string>                        // for allocator, operator==, string
+#include <utility>                       // for pair
+#include <vector>                        // for vector, vector<>::iterator
+
+using namespace std;
 
 namespace RawSpeed {
+
+#define CIFF_DEPTH(_depth)                                                     \
+  if ((depth = (_depth) + 1) > 10)                                             \
+    ThrowCPE("CIFF: sub-micron matryoshka dolls are ignored");
 
 CiffIFD::CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 _depth) {
   CIFF_DEPTH(_depth);
@@ -32,7 +45,7 @@ CiffIFD::CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 _depth) {
   uint32 valuedata_size = get4LE(f->getData(end-4, 4), 0);
   ushort16 dircount = get2LE(f->getData(start+valuedata_size, 2), 0);
 
-//  fprintf(stderr, "Found %d entries between %d and %d after %d data bytes\n", 
+//  fprintf(stderr, "Found %d entries between %d and %d after %d data bytes\n",
 //                  dircount, start, end, valuedata_size);
 
   for (uint32 i = 0; i < dircount; i++) {
@@ -80,10 +93,10 @@ CiffIFD::~CiffIFD(void) {
 
 bool CiffIFD::hasEntryRecursive(CiffTag tag) {
   if (mEntry.find(tag) != mEntry.end())
-    return TRUE;
+    return true;
   for (vector<CiffIFD*>::iterator i = mSubIFD.begin(); i != mSubIFD.end(); ++i) {
     if ((*i)->hasEntryRecursive(tag))
-      return TRUE;
+      return true;
   }
   return false;
 }

@@ -21,30 +21,33 @@
 
 #pragma once
 
-#include "io/FileMap.h"
-#include "tiff/CiffEntry.h"
-#include "parsers/CiffParserException.h"
+#include "common/Common.h" // for uint32
+#include "io/FileMap.h"    // for FileMap
+#include "tiff/CiffTag.h"  // for CiffTag
+#include <map>             // for map
+#include <string>          // for string
+#include <vector>          // for vector
 
 namespace RawSpeed {
 
-#define CIFF_DEPTH(_depth) if((depth=_depth+1) > 10) ThrowCPE("CIFF: sub-micron matryoshka dolls are ignored");
+class CiffEntry;
 
 class CiffIFD
 {
 public:
   CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 depth=0);
   virtual ~CiffIFD(void);
-  vector<CiffIFD*> mSubIFD;
-  map<CiffTag, CiffEntry*> mEntry;
-  vector<CiffIFD*> getIFDsWithTag(CiffTag tag);
+  std::vector<CiffIFD*> mSubIFD;
+  std::map<CiffTag, CiffEntry*> mEntry;
+  std::vector<CiffIFD*> getIFDsWithTag(CiffTag tag);
   CiffEntry* getEntry(CiffTag tag);
   bool hasEntry(CiffTag tag);
   bool hasEntryRecursive(CiffTag tag);
   CiffEntry* getEntryRecursive(CiffTag tag);
   CiffEntry* getEntryRecursiveWhere(CiffTag tag, uint32 isValue);
-  CiffEntry *getEntryRecursiveWhere(CiffTag tag, const string &isValue);
-  vector<CiffIFD *> getIFDsWithTagWhere(CiffTag tag, const string &isValue);
-  vector<CiffIFD*> getIFDsWithTagWhere(CiffTag tag, uint32 isValue);
+  CiffEntry *getEntryRecursiveWhere(CiffTag tag, const std::string &isValue);
+  std::vector<CiffIFD *> getIFDsWithTagWhere(CiffTag tag, const std::string &isValue);
+  std::vector<CiffIFD*> getIFDsWithTagWhere(CiffTag tag, uint32 isValue);
   FileMap* getFileMap() {return mFile;};
 protected:
   FileMap *mFile;

@@ -19,10 +19,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
 #pragma once
-#include "decoders/RawDecoder.h"
-#include "parsers/X3fParser.h"
+
+#include "common/Common.h"       // for uint32, int32, uchar8, ushort16
+#include "common/Point.h"        // for iPoint2D
+#include "common/RawImage.h"     // for RawImage
+#include "decoders/RawDecoder.h" // for RawDecoder, RawDecoderThread (ptr o...
+#include "io/BitPumpMSB.h"       // for BitPumpMSB
+#include "io/FileMap.h"          // for FileMap
+#include "parsers/X3fParser.h"   // for X3fPropertyCollection, X3fDirectory
+#include <map>                   // for map, _Rb_tree_iterator
+#include <string>                // for string
+#include <vector>                // for vector
 
 namespace RawSpeed {
+
+class ByteStream;
+
+class CameraMetaData;
 
 class X3fDecoder :
   public RawDecoder
@@ -34,21 +47,21 @@ public:
   virtual void decodeMetaDataInternal(CameraMetaData *meta);
   virtual void checkSupportInternal(CameraMetaData *meta);
   virtual FileMap* getCompressedData();
-  vector<X3fDirectory> mDirectory;
-  vector<X3fImage> mImages;
+  std::vector<X3fDirectory> mDirectory;
+  std::vector<X3fImage> mImages;
   X3fPropertyCollection mProperties;
 
 protected:
   virtual void decodeThreaded(RawDecoderThread* t);
   void readDirectory();
-  string getId();
+  std::string getId();
   ByteStream *bytes;
   bool hasProp(const char* key) { return mProperties.props.find(key) != mProperties.props.end();};
-  string getProp(const char* key);
+  std::string getProp(const char* key);
   void decompressSigma( X3fImage &image );
   void createSigmaTable(ByteStream *bytes, int codes);
   int SigmaDecode(BitPumpMSB *bits);
-  string getIdAsString(ByteStream *bytes);
+  std::string getIdAsString(ByteStream *bytes);
   void SigmaSkipOne(BitPumpMSB *bits);
   bool readName();
   X3fImage *curr_image;
@@ -62,8 +75,8 @@ protected:
   ushort16 *huge_table;
   short curve[1024];
   uint32 max_len;
-  string camera_make;
-  string camera_model;
+  std::string camera_make;
+  std::string camera_model;
 };
 
 } // namespace RawSpeed

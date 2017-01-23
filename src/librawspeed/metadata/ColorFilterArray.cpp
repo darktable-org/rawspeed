@@ -18,8 +18,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "metadata/ColorFilterArray.h"
+#include "common/Common.h"                // for uint32, writeLog, DEBUG_PR...
+#include "common/Point.h"                 // for iPoint2D
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include <cstdarg>                        // for va_arg, va_end, va_list
+#include <cstdio>                         // for NULL
+#include <cstring>                        // for memcpy, memset
+#include <string>                         // for string
+
+using namespace std;
 
 namespace RawSpeed {
 
@@ -29,9 +37,9 @@ ColorFilterArray::ColorFilterArray(const iPoint2D &_size) {
 }
 
 ColorFilterArray::ColorFilterArray() :
-size(0,0) 
+size(0,0)
 {
-  cfa = NULL; 
+  cfa = NULL;
 }
 
 
@@ -60,7 +68,7 @@ size(8,2)
   }
 }
 
-ColorFilterArray& ColorFilterArray::operator=(const ColorFilterArray& other ) 
+ColorFilterArray& ColorFilterArray::operator=(const ColorFilterArray& other )
 {
   setSize(other.size);
   if (cfa)
@@ -111,7 +119,7 @@ void ColorFilterArray::setCFA( iPoint2D in_size, ... )
   for (uint32 i = 0; i <  size.area(); i++ ) {
     cfa[i] = (CFAColor)va_arg(arguments, int);
   }
-  va_end (arguments);   
+  va_end (arguments);
 }
 
 void ColorFilterArray::shiftLeft(int n) {
@@ -200,7 +208,7 @@ void ColorFilterArray::setColorAt(iPoint2D pos, CFAColor c) {
 RawSpeed::uint32 ColorFilterArray::getDcrawFilter()
 {
   //dcraw magic
-  if (size.x == 6 && size.y == 6) 
+  if (size.x == 6 && size.y == 6)
     return 9;
 
   if (size.x > 8 || size.y > 2 || 0 == cfa)

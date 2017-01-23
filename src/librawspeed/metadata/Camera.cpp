@@ -1,6 +1,3 @@
-#include "common/StdAfx.h"
-#include "metadata/Camera.h"
-
 /*
     RawSpeed - RAW file decoder.
 
@@ -20,9 +17,21 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-
 */
+
+#include "metadata/Camera.h"
+#include "common/Common.h"                    // for split_string, uint32
+#include "common/Point.h"                     // for iPoint2D
+#include "metadata/CameraMetadataException.h" // for ThrowCME
+#include <cctype>                             // for tolower
+#include <cstdio>                             // for size_t
+#include <map>                                // for map
+#include <pugixml.hpp>                        // for xml_node, xml_attribute
+#include <stdexcept>                          // for out_of_range
+#include <string>                             // for string, allocator, ope...
+#include <vector>                             // for vector
+
+using namespace std;
 
 namespace RawSpeed {
 

@@ -64,7 +64,7 @@ RawDecoder *decoder = parser.getDecoder();
 This will do basic parsing of the file, and return a decoder that is capable of decoding the image. If no decoder can be found or another error occurs a “RawDecoderException” object will be thrown. The next step is to determine whether the specific camera is supported:
 
 ```cpp
-decoder->failOnUnknown = FALSE;
+decoder->failOnUnknown = false;
 decoder->checkSupport(metadata);
 ```
 
@@ -105,7 +105,7 @@ The isCFA indicates whether the image has all components per pixel, or if it was
 The ColorfilterArray contains information about the placement of colors in the CFA:
 
 ```cpp
-if (TRUE == is_cfa) {
+if (true == is_cfa) {
   ColorFilterArray cfa = raw->cfa;
   int dcraw_filter = cfa.getDcrawFilter();
   int cfa_width = cfa.size.x;
@@ -157,7 +157,7 @@ A few cameras will mark bad pixels within their RAW files in various ways. For t
 If you want to do bad pixel interpolation yourself you can set:
 
 ```cpp
-RawDecoder.interpolateBadPixels = FALSE;
+RawDecoder.interpolateBadPixels = false;
 ```
 
 Before calling the decoder. This will disable the automatic interpolation of bad pixels. You can retrieve the bad pixels by using:
@@ -216,7 +216,7 @@ To check if an image has been rotated, check RawImage->fujiWidth after calling R
 
 If you do NOT want your images to be delivered rotated, you can disable it when decoding.
 ```cpp
-RawDecoder->fujiRotate = FALSE;
+RawDecoder->fujiRotate = false;
 ```
 Do however note the CFA colors are still referring to the rotated color positions.
 

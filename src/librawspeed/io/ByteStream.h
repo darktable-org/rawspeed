@@ -21,10 +21,11 @@
 
 #pragma once
 
-#include "io/IOException.h"
+#include "common/Common.h"
 #include "io/Buffer.h"
 #include "io/FileMap.h" // deprecated, see below
-#include "common/Common.h"
+#include "io/IOException.h"
+#include <cassert>
 
 namespace RawSpeed {
 
@@ -149,7 +150,7 @@ public:
   // TODO: could add a lower bound check later if required.
   void rebase(size_type newPosition, size_type newSize) {
     const uchar8* dataAtNewPosition = getData(newSize);
-    if ((ptrdiff_t)newPosition > (ptrdiff_t)dataAtNewPosition)
+    if ((std::ptrdiff_t)newPosition > (std::ptrdiff_t)dataAtNewPosition)
       ThrowIOE("Out of bounds access in ByteStream");
     data = dataAtNewPosition - newPosition;
     size = newPosition + newSize;

@@ -21,12 +21,13 @@
 
 #pragma once
 
-#include "tiff/TiffIFD.h"
-#include "common/RawImage.h"
-#include "io/Buffer.h"
-#include "io/ByteStream.h"
-
 namespace RawSpeed {
+
+class ByteStream;
+
+class RawImage;
+
+class TiffIFD;
 
 void decodePentax(RawImage& mRaw, ByteStream&& data, TiffIFD* root);
 

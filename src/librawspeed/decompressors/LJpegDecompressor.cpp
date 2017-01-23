@@ -1,6 +1,3 @@
-#include "common/StdAfx.h"
-#include "decompressors/LJpegDecompressor.h"
-
 /*
     RawSpeed - RAW file decoder.
 
@@ -20,9 +17,18 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-
 */
+
+#include "decompressors/LJpegDecompressor.h"
+#include "common/Common.h"                // for uint32, getHostEndianness
+#include "common/Point.h"                 // for iPoint2D
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable
+#include "io/ByteStream.h"                // for ByteStream
+#include "io/IOException.h"               // for IOException
+#include <array>                          // for array
+#include <memory>                         // for unique_ptr, allocator
+#include <vector>                         // for vector
 
 namespace RawSpeed {
 

@@ -19,10 +19,23 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "decoders/DcsDecoder.h"
+#include "common/Common.h"                // for uint32, ushort16
+#include "common/Point.h"                 // for iPoint2D
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/ByteStream.h"                // for ByteStream
+#include "tiff/TiffEntry.h"               // for TiffEntry, ::TIFF_SHORT
+#include "tiff/TiffIFD.h"                 // for TiffIFD
+#include "tiff/TiffTag.h"                 // for ::IMAGEWIDTH, ::MODEL, ::MAKE
+#include <cstddef>                        // for NULL
+#include <string>                         // for string
+#include <vector>                         // for vector
+
+using namespace std;
 
 namespace RawSpeed {
+
+class CameraMetaData;
 
 DcsDecoder::DcsDecoder(TiffIFD *rootIFD, FileMap* file)  :
     RawDecoder(file), mRootIFD(rootIFD) {

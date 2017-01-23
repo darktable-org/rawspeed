@@ -20,11 +20,13 @@
 
 #pragma once
 
-#include "metadata/Camera.h"
+#include "common/Common.h" // for uint32
+#include <map>             // for map
+#include <string>          // for string
 
 namespace RawSpeed {
 
-using namespace pugi;
+class Camera;
 
 class CameraMetaData
 {
@@ -32,20 +34,20 @@ public:
   CameraMetaData();
   CameraMetaData(const char *docname);
   virtual ~CameraMetaData(void);
-  map<string,Camera*> cameras;
-  map<uint32,Camera*> chdkCameras;
+  std::map<std::string,Camera*> cameras;
+  std::map<uint32,Camera*> chdkCameras;
 
   // searches for camera with given make + model + mode
-  Camera* getCamera(string make, string model, string mode);
+  Camera* getCamera(std::string make, std::string model, std::string mode);
 
   // searches for camera with given make + model, with ANY mode
-  Camera* getCamera(string make, string model);
+  Camera* getCamera(std::string make, std::string model);
 
-  bool hasCamera(string make, string model, string mode);
+  bool hasCamera(std::string make, std::string model, std::string mode);
   Camera* getChdkCamera(uint32 filesize);
   bool hasChdkCamera(uint32 filesize);
-  void disableMake(const string &make);
-  void disableCamera(const string &make, const string &model);
+  void disableMake(const std::string &make);
+  void disableCamera(const std::string &make, const std::string &model);
 
 protected:
   bool addCamera(Camera* cam);

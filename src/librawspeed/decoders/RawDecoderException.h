@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "common/StdAfx.h"
-#include <stdexcept>
-#include <string>
+#include "common/Common.h" // for _RPT1
+#include <stdexcept>       // for runtime_error
+#include <string>          // for string
 
 namespace RawSpeed {
 
@@ -31,7 +31,7 @@ void ThrowRDE(const char* fmt, ...) __attribute__ ((format (printf, 1, 2)));
 class RawDecoderException : public std::runtime_error
 {
 public:
-  RawDecoderException(const std::string _msg) : runtime_error(_msg) {
+  RawDecoderException(const std::string &_msg) : runtime_error(_msg) {
     _RPT1(0, "RawDecompressor Exception: %s\n", _msg.c_str());
   }
 };

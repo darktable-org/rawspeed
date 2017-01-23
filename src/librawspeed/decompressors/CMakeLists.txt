@@ -1,5 +1,5 @@
 FILE(GLOB DECOMPRESSOR_SOURCES
-  "HasselbladDecompressor.cpp"
+  "HasselbladDecompressor.cpp" # IWYU breaks
   "HasselbladDecompressor.h"
   "LJpegDecompressor.cpp"
   "LJpegDecompressor.h"
@@ -7,7 +7,7 @@ FILE(GLOB DECOMPRESSOR_SOURCES
   "NikonDecompressor.h"
   "PentaxDecompressor.cpp"
   "PentaxDecompressor.h"
-  "LJpegPlain.cpp"
+  "LJpegPlain.cpp" # IWYU breaks
   "LJpegPlain.h"
   "HuffmanTable.h"
 )

@@ -21,8 +21,14 @@
 
 #pragma once
 
-#include "decompressors/HuffmanTable.h"
-#include "decoders/RawDecoder.h"
+#include "common/Common.h"              // for uint32
+#include "common/RawImage.h"            // for RawImage
+#include "decompressors/HuffmanTable.h" // IWYU pragma: keep
+#include "io/FileMap.h"                 // for FileMap
+#include <array>                        // for array
+#include <memory>                       // for unique_ptr
+#include <utility>                      // for move
+#include <vector>                       // for vector
 
 /*
  * The following enum and two structs are stolen from the IJG JPEG library
@@ -30,6 +36,8 @@
  */
 
 namespace RawSpeed {
+
+class ByteStream;
 
 typedef enum {		/* JPEG marker codes			*/
   M_STUFF = 0x00,
@@ -132,11 +140,14 @@ public:
 class LJpegDecompressor
 {
 public:
-  LJpegDecompressor(FileMap* file, RawImage img) : mFile(file), mRaw(img) {}
+  LJpegDecompressor(FileMap *file, const RawImage &img)
+      : mFile(file), mRaw(img) {}
   virtual ~LJpegDecompressor();
   void decode(uint32 offset, uint32 size, uint32 offsetX, uint32 offsetY);
   void getSOF(SOFInfo* i, uint32 offset, uint32 size);
-  void addSlices(vector<int> slices) {slicesW = slices;}  // CR2 slices.
+  void addSlices(std::vector<int> slices) {
+    slicesW = std::move(slices);
+  } // CR2 slices.
 
   bool mDNGCompatible = false;  // DNG v1.0.x compatibility
   bool mFullDecodeHT = true;    // FullDecode Huffman
@@ -157,13 +168,13 @@ protected:
   RawImage mRaw;
 
   SOFInfo frame;
-  vector<int> slicesW;
+  std::vector<int> slicesW;
   uint32 pred = 0;
   uint32 Pt = 0;
   uint32 offX = 0, offY = 0;  // Offset into image where decoding should start
   uint32 skipX = 0, skipY = 0;   // Tile is larger than output, skip these border pixels
-  array<HuffmanTable*, 4> huff {}; // 4 pointers into the store
-  vector<unique_ptr<HuffmanTable>> huffmanTableStore; // vector of unique HTs
+  std::array<HuffmanTable*, 4> huff {}; // 4 pointers into the store
+  std::vector<std::unique_ptr<HuffmanTable>> huffmanTableStore; // std::vector of unique HTs
 };
 
 } // namespace RawSpeed

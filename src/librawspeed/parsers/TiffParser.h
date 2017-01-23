@@ -20,11 +20,12 @@
 
 #pragma once
 
-#include "io/Buffer.h"
-#include "tiff/TiffIFD.h"
-#include "decoders/RawDecoder.h"
+#include "io/Buffer.h"    // for Buffer
+#include "tiff/TiffIFD.h" // for TiffRootIFDOwner
 
 namespace RawSpeed {
+
+class RawDecoder;
 
 // TiffRootIFDOwner contains pointers into 'data' but if is is non-owning, it may be deleted immediately
 TiffRootIFDOwner parseTiff(const Buffer& data);

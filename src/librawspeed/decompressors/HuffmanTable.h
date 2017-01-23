@@ -20,7 +20,10 @@
 
 #pragma once
 
+#include "decoders/RawDecoderException.h"
 #include "io/Buffer.h"
+#include <cassert>
+#include <numeric>
 
 /*
 * The following code is inspired by the IJG JPEG library.
@@ -61,8 +64,8 @@ class HuffmanTable
   // private fields calculated from codesPerBits and codeValues
   // they are index '1' based, so we can directly lookup the value
   // for code length l without decrementing
-  vector<ushort16> maxCodeOL;    // index is length of code
-  vector<ushort16> codeOffsetOL; // index is length of code
+  std::vector<ushort16> maxCodeOL;    // index is length of code
+  std::vector<ushort16> codeOffsetOL; // index is length of code
 
   // The code can be compiled with two different decode lookup table layouts.
   // The idea is that different CPU architectures may perform better with
@@ -78,7 +81,7 @@ class HuffmanTable
   static constexpr unsigned FlagMask = 0x100;
   static constexpr unsigned LenMask = 0xff;
   static constexpr unsigned LookupDepth = 11;
-  vector<int32> decodeLookup;
+  std::vector<int32> decodeLookup;
 #else
   // lookup table containing 2 fields: payload:4|len:4
   // the payload is the length of the diff, len is the length of the code
@@ -86,7 +89,7 @@ class HuffmanTable
   static constexpr unsigned PayloadShift = 4;
   static constexpr unsigned FlagMask = 0;
   static constexpr unsigned LenMask = 0x0f;
-  vector<uchar8> decodeLookup;
+  std::vector<uchar8> decodeLookup;
 #endif
 
   bool fixDNGBug16 = false;
@@ -100,12 +103,12 @@ public:
   // These two fields directly represent the contents of a JPEG DHT field
   // 1. The number of codes there are per bit length, this is index 1 based.
   // (there are always 0 codes of length 0)
-  vector<int> nCodesPerLength; // index is length of code
+  std::vector<int> nCodesPerLength; // index is length of code
   // 2. This is the actual huffman encoded data, i.e. the 'alphabet'. Each value
   // is the number of bits following the code that encode the difference to the
   // last pixel. Valid values are in the range 0..16.
   // signExtended() is used to decode the difference bits to a signed int.
-  vector<uchar8> codeValues;   // index is just sequential number
+  std::vector<uchar8> codeValues;   // index is just sequential number
 
   bool operator==(const HuffmanTable& other) const {
     return nCodesPerLength == other.nCodesPerLength
@@ -115,11 +118,11 @@ public:
   uint32 setNCodesPerLength(const Buffer& data) {
     assert(data.getSize() == 16);
     nCodesPerLength.resize(17);
-    copy(data.begin(), data.end(), &nCodesPerLength[1]);
+    std::copy(data.begin(), data.end(), &nCodesPerLength[1]);
     // trim empty entries from the codes per length table on the right
     while (nCodesPerLength.back() == 0)
       nCodesPerLength.pop_back();
-    return accumulate(data.begin(), data.end(), 0);
+    return std::accumulate(data.begin(), data.end(), 0);
   }
 
   void setCodeValues(const Buffer& data) {
@@ -132,9 +135,9 @@ public:
     this->fixDNGBug16 = fixDNGBug16;
 
     // store the code lengths in bits, valid values are 0..16
-    vector<uchar8> code_len; // index is just sequential number
+    std::vector<uchar8> code_len; // index is just sequential number
     // store the codes themselfs (bit patterns found inside the stream)
-    vector<ushort16> codes;  // index is just sequential number
+    std::vector<ushort16> codes;  // index is just sequential number
 
     int maxCodeLength = nCodesPerLength.size()-1;
 
@@ -152,8 +155,8 @@ public:
     }
 
     // Figure F.15: generate decoding tables
-    codeOffsetOL.resize(maxCodeLength+1, 0xffff);
-    maxCodeOL.resize(maxCodeLength+1);
+    codeOffsetOL.resize(maxCodeLength + 1UL, 0xffff);
+    maxCodeOL.resize(maxCodeLength + 1UL);
     int code_index = 0;
     for (int l = 1; l <= maxCodeLength; l++) {
       if (nCodesPerLength[l]) {

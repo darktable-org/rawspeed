@@ -1,6 +1,3 @@
-#include "common/StdAfx.h"
-#include "decompressors/HasselbladDecompressor.h"
-
 /*
     RawSpeed - RAW file decoder.
 
@@ -21,6 +18,29 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
+
+#include "decompressors/HasselbladDecompressor.h"
+#include "common/Common.h"
+#include "common/Point.h"
+#include "io/BitPumpMSB32.h"
+#include "tiff/TiffTag.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cfloat>
+#include <cmath>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <list>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace RawSpeed {
 

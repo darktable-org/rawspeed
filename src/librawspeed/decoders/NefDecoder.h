@@ -20,14 +20,22 @@
 
 #pragma once
 
-#include "decoders/RawDecoder.h"
-#include "decompressors/LJpegPlain.h"
-#include "tiff/TiffIFD.h"
-#include "io/BitPumpPlain.h"
-#include "parsers/TiffParser.h"
-#include "decompressors/NikonDecompressor.h"
+#include "common/Common.h"       // for uint32, ushort16
+#include "common/RawImage.h"     // for RawImage
+#include "decoders/RawDecoder.h" // for RawDecoder
+#include "io/FileMap.h"          // for FileMap
+#include <string>                // for string
+#include <vector>                // for vector
 
 namespace RawSpeed {
+
+class ByteStream;
+
+class CameraMetaData;
+
+class TiffIFD;
+
+class iPoint2D;
 
 class NefDecoder :
   public RawDecoder
@@ -50,9 +58,9 @@ private:
   void readCoolpixMangledRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch);
   void readCoolpixSplitRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch);
   void DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h);
-  TiffIFD* FindBestImage(vector<TiffIFD*>* data);
-  string getMode();
-  string getExtendedMode(const string &mode);
+  TiffIFD* FindBestImage(std::vector<TiffIFD*>* data);
+  std::string getMode();
+  std::string getExtendedMode(const std::string &mode);
   ushort16* gammaCurve(double pwr, double ts, int mode, int imax);
 };
 

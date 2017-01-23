@@ -20,13 +20,21 @@
 
 #pragma once
 
-#include "metadata/ColorFilterArray.h"
-#include "metadata/BlackArea.h"
+#include "common/Common.h"             // for uint32, ushort16, uchar8, wri...
+#include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
+#include "common/Threading.h"          // for pthread_mutex_lock, pthrea...
+#include "metadata/BlackArea.h"        // for BlackArea
+#include "metadata/ColorFilterArray.h" // for ColorFilterArray
+#include <cstddef>                     // for NULL
+#include <string>                      // for string
+#include <vector>                      // for vector
 
 namespace RawSpeed {
 
 class RawImage;
+
 class RawImageData;
+
 typedef enum {TYPE_USHORT16, TYPE_FLOAT32} RawImageType;
 
 class RawImageWorker {
@@ -81,14 +89,14 @@ public:
   uint32 fujiRotationPos;
 
   iPoint2D subsampling;
-  string make;
-  string model;
-  string mode;
+  std::string make;
+  std::string model;
+  std::string mode;
 
-  string canonical_make;
-  string canonical_model;
-  string canonical_alias;
-  string canonical_id;
+  std::string canonical_make;
+  std::string canonical_model;
+  std::string canonical_alias;
+  std::string canonical_id;
 
   // ISO speed. If known the value is set, otherwise it will be '0'.
   int isoSpeed;
@@ -136,15 +144,15 @@ public:
   int blackLevel;
   int blackLevelSeparate[4];
   int whitePoint;
-  vector<BlackArea> blackAreas;
+  std::vector<BlackArea> blackAreas;
   /* Vector containing silent errors that occurred doing decoding, that may have lead to */
   /* an incomplete image. */
-  vector<const char*> errors;
+  std::vector<const char*> errors;
   pthread_mutex_t errMutex;   // Mutex for above
   void setError(const char* err);
   /* Vector containing the positions of bad pixels */
   /* Format is x | (y << 16), so maximum pixel position is 65535 */
-  vector<uint32> mBadPixelPositions;    // Positions of zeroes that must be interpolated
+  std::vector<uint32> mBadPixelPositions;    // Positions of zeroes that must be interpolated
   pthread_mutex_t mBadPixelMutex;   // Mutex for above, must be used if more than 1 thread is accessing vector
   uchar8 *mBadPixelMap;
   uint32 mBadPixelMapPitch;
@@ -208,7 +216,9 @@ protected:
  class RawImage {
  public:
    static RawImage create(RawImageType type = TYPE_USHORT16);
-   static RawImage create(iPoint2D dim, RawImageType type = TYPE_USHORT16, uint32 componentsPerPixel = 1);
+   static RawImage create(const iPoint2D &dim,
+                          RawImageType type = TYPE_USHORT16,
+                          uint32 componentsPerPixel = 1);
    RawImageData* operator-> (){ return p_; };
    RawImageData& operator* (){ return *p_; };
    RawImage(RawImageData* p);  // p must not be NULL
@@ -234,8 +244,8 @@ inline RawImage RawImage::create(RawImageType type)  {
   return NULL;
 }
 
-inline RawImage RawImage::create(iPoint2D dim, RawImageType type, uint32 componentsPerPixel)
-{
+inline RawImage RawImage::create(const iPoint2D &dim, RawImageType type,
+                                 uint32 componentsPerPixel) {
   switch (type) {
     case TYPE_USHORT16:
       return new RawImageDataU16(dim, componentsPerPixel);

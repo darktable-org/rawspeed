@@ -20,11 +20,12 @@
 
 #pragma once
 
-#include "common/RawImage.h"
-#include "io/Buffer.h"
-#include "io/ByteStream.h"
+#include "common/Common.h" // for uint32
+#include "io/ByteStream.h" // for ByteStream
 
 namespace RawSpeed {
+
+class RawImage;
 
 void decompressNikon(RawImage& mRaw, ByteStream&& data, ByteStream meta, uint32 w, uint32 h, uint32 bitsPS, bool uncorrectedRawValues);
 

@@ -19,10 +19,24 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "decoders/DcrDecoder.h"
+#include "common/Common.h"                // for uint32, ushort16, uchar8
+#include "common/Point.h"                 // for iPoint2D
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/ByteStream.h"                // for ByteStream
+#include "io/IOException.h"               // for IOException
+#include "tiff/TiffEntry.h"               // for TiffEntry, ::TIFF_SHORT
+#include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD
+#include "tiff/TiffTag.h"                 // for ::MODEL, ::MAKE, ::CFAPATTERN
+#include <cstdio>                         // for NULL
+#include <string>                         // for string
+#include <vector>                         // for vector
+
+using namespace std;
 
 namespace RawSpeed {
+
+class CameraMetaData;
 
 DcrDecoder::DcrDecoder(TiffIFD *rootIFD, FileMap* file)  :
     RawDecoder(file), mRootIFD(rootIFD) {

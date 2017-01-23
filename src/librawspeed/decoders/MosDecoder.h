@@ -21,11 +21,17 @@
 
 #pragma once
 
-#include "decoders/RawDecoder.h"
-#include "decompressors/LJpegPlain.h"
-#include <string.h>
+#include "common/Common.h"       // for uint32
+#include "common/RawImage.h"     // for RawImage
+#include "decoders/RawDecoder.h" // for RawDecoder
+#include "io/FileMap.h"          // for FileMap
+#include <string>                // for string
 
 namespace RawSpeed {
+
+class CameraMetaData;
+
+class TiffIFD;
 
 class MosDecoder :
   public RawDecoder
@@ -39,8 +45,8 @@ public:
 protected:
   uint32 black_level;
   TiffIFD *mRootIFD;
-  string make, model;
-  string getXMPTag(const string &xmp, const string &tag);
+  std::string make, model;
+  std::string getXMPTag(const std::string &xmp, const std::string &tag);
   void DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32 width, uint32 height);
 };
 

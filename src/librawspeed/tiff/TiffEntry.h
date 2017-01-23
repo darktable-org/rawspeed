@@ -22,10 +22,16 @@
 
 #pragma once
 
-#include "parsers/TiffParserException.h"
-#include "io/ByteStream.h"
+#include "common/Common.h" // for uint32, uchar8, ushort16, int32, short16
+#include "io/ByteStream.h" // for ByteStream
+#include "tiff/TiffTag.h"  // for TiffTag
+#include <string>          // for string
 
 namespace RawSpeed {
+
+class DataBuffer;
+
+class TiffIFD;
 
 /*
  * Tag data type information.
@@ -48,8 +54,6 @@ typedef	enum {
   TIFF_DOUBLE    = 12, /* !64-bit IEEE floating point */
   TIFF_OFFSET    = 13, /* 32-bit unsigned offset used for IFD and other offsets */
 } TiffDataType;
-
-class TiffIFD;
 
 class TiffEntry
 {
@@ -74,7 +78,7 @@ public:
   ushort16 getShort(uint32 num=0) const;
   short16 getSShort(uint32 num=0) const;
   float getFloat(uint32 num=0) const;
-  string getString() const;
+  std::string getString() const;
   void getShortArray(ushort16 *array, uint32 num) const;
   void getIntArray(uint32 *array, uint32 num) const;
   void getFloatArray(float *array, uint32 num) const;

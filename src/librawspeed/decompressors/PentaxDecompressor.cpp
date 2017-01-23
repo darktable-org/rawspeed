@@ -1,8 +1,3 @@
-#include "common/StdAfx.h"
-#include "decompressors/PentaxDecompressor.h"
-#include "io/BitPumpMSB.h"
-#include "decompressors/HuffmanTable.h"
-
 /*
     RawSpeed - RAW file decoder.
 
@@ -21,9 +16,22 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-
 */
+
+#include "decompressors/PentaxDecompressor.h"
+#include "common/Common.h"                // for uint32, uchar8, ushort16
+#include "common/Point.h"                 // for iPoint2D
+#include "common/RawImage.h"              // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable
+#include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::f...
+#include "io/Buffer.h"                    // for Buffer
+#include "io/ByteStream.h"                // for ByteStream
+#include "tiff/TiffEntry.h"               // for TiffEntry, ::TIFF_UNDEFINED
+#include "tiff/TiffIFD.h"                 // for TiffIFD
+#include "tiff/TiffTag.h"                 // for TiffTag
+#include <cassert>                        // for assert
+#include <vector>                         // for vector, allocator
 
 namespace RawSpeed {
 

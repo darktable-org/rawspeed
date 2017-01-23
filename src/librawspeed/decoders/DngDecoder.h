@@ -20,12 +20,15 @@
 
 #pragma once
 
-#include "decompressors/LJpegPlain.h"
-#include "tiff/TiffIFD.h"
-#include "decoders/DngDecoderSlices.h"
-#include "common/DngOpcodes.h"
+#include "common/Common.h"       // for uint32
+#include "common/RawImage.h"     // for RawImage
+#include "decoders/RawDecoder.h" // for RawDecoder
+#include "io/FileMap.h"          // for FileMap
 
 namespace RawSpeed {
+
+class CameraMetaData;
+class TiffIFD;
 
 class DngDecoder :
   public RawDecoder

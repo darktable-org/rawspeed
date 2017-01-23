@@ -1,5 +1,3 @@
-#include "common/StdAfx.h"
-#include "decompressors/LJpegPlain.h"
 /*
 RawSpeed - RAW file decoder.
 
@@ -20,6 +18,30 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
+
+#include "decompressors/LJpegPlain.h"
+#include "common/Common.h"
+#include "common/Point.h"
+#include "io/BitPumpJPEG.h"
+#include "io/ByteStream.h"
+#include "tiff/TiffTag.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cfloat>
+#include <cmath>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <list>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace RawSpeed {
 

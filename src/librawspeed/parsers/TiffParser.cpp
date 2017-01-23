@@ -20,26 +20,41 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "parsers/TiffParser.h"
-#include "decoders/DngDecoder.h"
-#include "decoders/Cr2Decoder.h"
-#include "decoders/ArwDecoder.h"
-#include "decoders/PefDecoder.h"
-#include "decoders/NefDecoder.h"
-#include "decoders/OrfDecoder.h"
-#include "decoders/RafDecoder.h"
-#include "decoders/Rw2Decoder.h"
-#include "decoders/SrwDecoder.h"
-#include "decoders/MefDecoder.h"
-#include "decoders/MosDecoder.h"
-#include "decoders/DcrDecoder.h"
-#include "decoders/KdcDecoder.h"
-#include "decoders/ErfDecoder.h"
-#include "decoders/ThreefrDecoder.h"
-#include "decoders/DcsDecoder.h"
+#include "common/Common.h"               // for TrimSpaces, make_unique
+#include "decoders/ArwDecoder.h"         // for ArwDecoder
+#include "decoders/Cr2Decoder.h"         // for Cr2Decoder
+#include "decoders/DcrDecoder.h"         // for DcrDecoder
+#include "decoders/DcsDecoder.h"         // for DcsDecoder
+#include "decoders/DngDecoder.h"         // for DngDecoder
+#include "decoders/ErfDecoder.h"         // for ErfDecoder
+#include "decoders/KdcDecoder.h"         // for KdcDecoder
+#include "decoders/MefDecoder.h"         // for MefDecoder
+#include "decoders/MosDecoder.h"         // for MosDecoder
+#include "decoders/NefDecoder.h"         // for NefDecoder
+#include "decoders/OrfDecoder.h"         // for OrfDecoder
+#include "decoders/PefDecoder.h"         // for PefDecoder
+#include "decoders/RafDecoder.h"         // for RafDecoder
+#include "decoders/Rw2Decoder.h"         // for Rw2Decoder
+#include "decoders/SrwDecoder.h"         // for SrwDecoder
+#include "decoders/ThreefrDecoder.h"     // for ThreefrDecoder
+#include "io/ByteStream.h"               // for ByteStream
+#include "io/FileMap.h"                  // for FileMap
+#include "parsers/TiffParserException.h" // for TiffParserException
+#include "tiff/TiffEntry.h"              // for TiffEntry
+#include "tiff/TiffTag.h"                // for ::MAKE, ::MODEL, ::DNGVERSION
+#include <cstdint>                       // for UINT32_MAX
+#include <memory>                        // for unique_ptr
+#include <stdexcept>                     // for runtime_error
+#include <string>                        // for operator==, basic_string
+#include <vector>                        // for vector
+// IWYU pragma: no_include <ext/alloc_traits.h>
+
+using namespace std;
 
 namespace RawSpeed {
+
+class RawDecoder;
 
 TiffRootIFDOwner parseTiff(const Buffer &data) {
   ByteStream bs(data, 0);

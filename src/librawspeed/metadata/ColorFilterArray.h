@@ -20,7 +20,9 @@
 
 #pragma once
 
-#include "decoders/RawDecoderException.h"
+#include "common/Common.h" // for uint32
+#include "common/Point.h"  // for iPoint2D
+#include <string>          // for string
 
 namespace RawSpeed {
 

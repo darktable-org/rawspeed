@@ -20,9 +20,15 @@
 
 #pragma once
 
-#include "decoders/RawDecoder.h"
+#include "common/Common.h"       // for uint32
+#include "common/RawImage.h"     // for RawImage
+#include "decoders/RawDecoder.h" // for RawDecoder, RawDecoderThread (ptr o...
+#include "io/FileMap.h"          // for FileMap
+#include <string>                // for string
 
 namespace RawSpeed {
+
+class CameraMetaData;
 
 class AriDecoder :
   public RawDecoder
@@ -36,8 +42,8 @@ public:
   virtual void decodeThreaded(RawDecoderThread * t);
 protected:
   uint32 mWidth, mHeight, mIso;
-  string mModel;
-  string mEncoder;
+  std::string mModel;
+  std::string mEncoder;
   uint32 mDataOffset, mDataSize;
   float mWB[3];
 };

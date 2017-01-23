@@ -19,8 +19,25 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "decoders/ArwDecoder.h"
+#include "common/Common.h"                // for uint32, ushort16, uchar8
+#include "common/Point.h"                 // for iPoint2D
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/BitPumpMSB.h"                // for BitPumpMSB
+#include "io/BitPumpPlain.h"              // for BitPumpPlain, BitStream<>:...
+#include "io/ByteStream.h"                // for ByteStream
+#include "io/IOException.h"               // for IOException
+#include "metadata/ColorFilterArray.h"    // for ::CFA_BLUE, ::CFA_GREEN
+#include "tiff/TiffEntry.h"               // for TiffEntry
+#include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD
+#include "tiff/TiffTag.h"                 // for ::MAKE, ::MODEL, ::DNGPRIV...
+#include <cstdio>                         // for NULL
+#include <exception>                      // for exception
+#include <map>                            // for map, _Rb_tree_iterator
+#include <string>                         // for string, operator==, basic_...
+#include <vector>                         // for vector
+
+using namespace std;
 
 namespace RawSpeed {
 

@@ -18,13 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "decoders/RawDecoderException.h"
-
-#if !defined(WIN32) || defined(__MINGW32__)
-#include <stdarg.h>
-#define vsprintf_s(...) vsnprintf(__VA_ARGS__)
-#endif
+#include "common/Common.h" // for _RPT1
+#include <cstdarg>         // for va_end, va_list, va_start
+#include <cstdio>          // for vsnprintf
 
 namespace RawSpeed {
 
@@ -32,7 +29,7 @@ void ThrowRDE(const char* fmt, ...) {
   va_list val;
   va_start(val, fmt);
   static char buf[8192];
-  vsprintf_s(buf, 8192, fmt, val);
+  vsnprintf(buf, 8192, fmt, val);
   va_end(val);
   _RPT1(0, "EXCEPTION: %s\n", buf);
   throw RawDecoderException(buf);

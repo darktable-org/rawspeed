@@ -19,8 +19,30 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/StdAfx.h"
 #include "decoders/Cr2Decoder.h"
+#include "common/Common.h"
+#include "common/Point.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffTag.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cfloat>
+#include <cmath>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <list>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <sstream>
+#include <string>
+#include <vector>
+
+using namespace std;
 
 namespace RawSpeed {
 
@@ -475,11 +497,11 @@ void Cr2Decoder::interpolate_420(int w, int h, int start_h , int end_h) {
   // Last pixel should not be interpolated
   w--;
 
-  bool atLastLine = FALSE;
+  bool atLastLine = false;
 
   if (end_h == h) {
     end_h--;
-    atLastLine = TRUE;
+    atLastLine = true;
   }
 
   // Current line
@@ -687,11 +709,11 @@ void Cr2Decoder::interpolate_420_new(int w, int h, int start_h , int end_h) {
   // Last pixel should not be interpolated
   w--;
 
-  bool atLastLine = FALSE;
+  bool atLastLine = false;
 
   if (end_h == h) {
     end_h--;
-    atLastLine = TRUE;
+    atLastLine = true;
   }
 
   // Current line

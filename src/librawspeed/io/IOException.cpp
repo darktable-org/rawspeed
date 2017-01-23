@@ -1,10 +1,3 @@
-#include "common/StdAfx.h"
-#include "io/IOException.h"
-#if !defined(WIN32) || defined(__MINGW32__)
-#include <stdarg.h>
-#define vsprintf_s(...) vsnprintf(__VA_ARGS__)
-#endif
-
 /*
     RawSpeed - RAW file decoder.
 
@@ -23,9 +16,15 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-
 */
+
+#include "io/IOException.h"
+#include "common/Common.h" // for _RPT1
+#include <cstdarg>         // for va_end, va_list, va_start
+#include <cstdio>          // for vsnprintf
+#include <string>          // for string
+
+using namespace std;
 
 namespace RawSpeed {
 
@@ -33,7 +32,7 @@ void ThrowIOE(const char* fmt, ...) {
   va_list val;
   va_start(val, fmt);
   static char buf[8192];
-  vsprintf_s(buf, 8192, fmt, val);
+  vsnprintf(buf, 8192, fmt, val);
   va_end(val);
   _RPT1(0, "IO EXCEPTION: %s\n", buf);
   throw IOException(buf);

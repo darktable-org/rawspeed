@@ -20,22 +20,29 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #pragma once
 
-#include "io/ByteStream.h"
-#include "io/FileMap.h"
+#include "common/Common.h" // for uint32
+#include "io/FileMap.h"    // for FileMap
+#include <map>             // for map
+#include <string>          // for string
 
 namespace RawSpeed {
 
+class ByteStream;
+
+class RawDecoder;
+
+class X3fDecoder;
 
 class X3fDirectory
 {
 public:
-  X3fDirectory() : offset(0), length(0), id(string()){};
+  X3fDirectory() : offset(0), length(0), id(std::string()){};
   X3fDirectory(ByteStream *bytes);
   X3fDirectory(const X3fDirectory &other) : offset(other.offset), length(other.length), id(other.id), sectionID(other.sectionID) {};
   uint32 offset;
   uint32 length;
-  string id;
-  string sectionID;
+  std::string id;
+  std::string sectionID;
 };
 
 class X3fImage
@@ -67,12 +74,9 @@ public:
   void addProperties(ByteStream *bytes, uint32 offset, uint32 length);
   X3fPropertyCollection(const X3fPropertyCollection &other)
     : props(other.props) {};
-  string getString( ByteStream *bytes );
-  map<string, string> props;
+  std::string getString( ByteStream *bytes );
+  std::map<std::string, std::string> props;
 };
-
-class X3fDecoder;
-class RawDecoder;
 
 class X3fParser {
 public:
@@ -81,7 +85,7 @@ public:
   virtual RawDecoder* getDecoder();
 protected:
   void readDirectory();
-  string getId();
+  std::string getId();
   void freeObjects();
   ByteStream *bytes;
   X3fDecoder *decoder;

@@ -21,8 +21,8 @@
 #pragma once
 
 #include "decoders/RawDecoder.h"
-#include <queue>
 #include "decompressors/LJpegPlain.h"
+#include <queue>
 
 namespace RawSpeed {
 
@@ -50,7 +50,7 @@ public:
 #ifndef NO_PTHREAD
   pthread_t threadid;
 #endif
-  queue<DngSliceElement> slices;
+  std::queue<DngSliceElement> slices;
   DngDecoderSlices* parent;
 };
 
@@ -64,8 +64,8 @@ public:
   void startDecoding();
   void decodeSlice(DngDecoderThread* t);
   int size();
-  queue<DngSliceElement> slices;
-  vector<DngDecoderThread*> threads;
+  std::queue<DngSliceElement> slices;
+  std::vector<DngDecoderThread*> threads;
   FileMap *mFile;
   RawImage mRaw;
   bool mFixLjpeg;

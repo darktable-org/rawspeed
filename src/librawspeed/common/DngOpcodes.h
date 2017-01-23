@@ -19,11 +19,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
 #pragma once
-#include <vector>
-#include "tiff/TiffIFD.h"
-#include "common/RawImage.h"
+
+#include "common/Common.h" // for uint32, uchar8, uint64, Endianness::big
+#include "common/Point.h"  // for iRectangle2D
+#include <vector>          // for vector
 
 namespace RawSpeed {
+
+class RawImage;
+
+class TiffEntry;
 
 class DngOpcode
 {
@@ -35,7 +40,7 @@ public:
   /* Can be used for preparing pre-calculated values, etc */
   virtual RawImage& createOutput(RawImage &in) {return in;}
   /* Will be called for actual processing */
-  /* If multiThreaded is TRUE, it will be called several times, */
+  /* If multiThreaded is true, it will be called several times, */
   /* otherwise only once */
   /* Properties of out will not have changed from createOutput */
   virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY) = 0;
@@ -94,7 +99,7 @@ public:
   virtual ~DngOpcodes(void);
   RawImage& applyOpCodes(RawImage &img);
 private:
-  vector<DngOpcode*> mOpcodes;
+  std::vector<DngOpcode*> mOpcodes;
   Endianness host;
   uint32 getULong(const uchar8 *ptr) {
     if (host == big)
@@ -122,7 +127,7 @@ public:
   virtual ~OpcodeFixBadPixelsList(void) {};
   virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
 private:
-  vector<uint32> bad_pos;
+  std::vector<uint32> bad_pos;
 };
 
 

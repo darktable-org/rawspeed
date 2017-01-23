@@ -1,8 +1,3 @@
-#include "common/StdAfx.h"
-#include "decompressors/NikonDecompressor.h"
-#include "io/BitPumpMSB.h"
-#include "decompressors/HuffmanTable.h"
-
 /*
     RawSpeed - RAW file decoder.
 
@@ -21,9 +16,18 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-
 */
+
+#include "decompressors/NikonDecompressor.h"
+#include "common/Common.h"              // for uint32, ushort16, clampbits
+#include "common/RawImage.h"            // for RawImage, RawImageData, RawI...
+#include "decompressors/HuffmanTable.h" // for HuffmanTable
+#include "io/BitPumpMSB.h"              // for BitPumpMSB, BitStream<>::fil...
+#include "io/Buffer.h"                  // for Buffer
+#include <cstdio>                       // for size_t, NULL
+#include <vector>                       // for vector, allocator
+
+using namespace std;
 
 namespace RawSpeed {
 
