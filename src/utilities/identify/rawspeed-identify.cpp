@@ -61,7 +61,7 @@ std::string find_cameras_xml(const char *argv0) {
 
   // If we haven't been provided with a valid cameras.xml path on compile try
   // relative to argv[0]
-  const std::size_t lastslash = self.find_last_of("/\\");
+  const std::size_t lastslash = self.find_last_of(R"(/\)");
   const std::string bindir(self.substr(0, lastslash));
 
   std::string found_camfile(bindir +

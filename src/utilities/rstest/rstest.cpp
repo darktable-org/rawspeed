@@ -316,11 +316,11 @@ int main(int argc, char **argv) {
       // if neither hashes exist, nothing to append...
       if (oldfile.good() || newfile.good()) {
         // DIFF(1): -N, --new-file  treat absent files as empty
-        string cmd("diff -N -u0 \"");
+        string cmd(R"(diff -N -u0 ")");
         cmd += oldhash;
-        cmd += "\" \"";
+        cmd += R"(" ")";
         cmd += newhash;
-        cmd += "\" >> rstest.log";
+        cmd += R"(" >> rstest.log)";
         if (system(cmd.c_str()))
           ; // NOLINT
       }

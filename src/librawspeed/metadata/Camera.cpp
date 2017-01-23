@@ -40,12 +40,12 @@ using namespace pugi;
 Camera::Camera(pugi::xml_node &camera) : cfa(iPoint2D(0,0)) {
   make = canonical_make = camera.attribute("make").as_string();
   if (make.empty())
-    ThrowCME("Camera XML Parser: \"make\" attribute not found.");
+    ThrowCME(R"(Camera XML Parser: "make" attribute not found.)");
 
   model = canonical_model = canonical_alias = camera.attribute("model").as_string();
   // chdk cameras seem to have an empty model?
   if (!camera.attribute("model")) // (model.empty())
-    ThrowCME("Camera XML Parser: \"model\" attribute not found.");
+    ThrowCME(R"(Camera XML Parser: "model" attribute not found.)");
 
   canonical_id = make + " " + model;
 
