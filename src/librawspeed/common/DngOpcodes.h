@@ -69,7 +69,7 @@ protected:
     if (host == big)
       return *(double*)ptr;
     double ret;
-    uchar8 *tmp = (uchar8*)&ret;
+    auto *tmp = (uchar8 *)&ret;
     for (int i = 0; i < 8; i++)
      tmp[i] = ptr[7-i];
     return ret;
@@ -78,7 +78,7 @@ protected:
     if (host == big)
       return *(float*)ptr;
     float ret;
-    uchar8 *tmp = (uchar8*)&ret;
+    auto *tmp = (uchar8 *)&ret;
     for (int i = 0; i < 4; i++)
       tmp[i] = ptr[3-i];
     return ret;

@@ -80,7 +80,7 @@ RawImage ThreefrDecoder::decodeRawInternal() {
   // We cannot use fully decoding huffman table,
   // because values are packed two pixels at the time.
   l.mFullDecodeHT = false;
-  map<string,string>::iterator pixelOffset = hints.find("pixelBaseOffset");
+  auto pixelOffset = hints.find("pixelBaseOffset");
   if (pixelOffset != hints.end()) {
     stringstream convert((*pixelOffset).second);
     convert >> l.pixelBaseOffset;

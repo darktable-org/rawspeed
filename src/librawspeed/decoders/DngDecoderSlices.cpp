@@ -55,7 +55,7 @@ using namespace std;
 namespace RawSpeed {
 
 void *DecodeThread(void *_this) {
-  DngDecoderThread* me = (DngDecoderThread*)_this;
+  auto *me = (DngDecoderThread *)_this;
   DngDecoderSlices* parent = me->parent;
   try {
     parent->decodeSlice(me);
@@ -104,7 +104,7 @@ void DngDecoderSlices::startDecoding() {
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
   for (uint32 i = 0; i < nThreads; i++) {
-    DngDecoderThread* t = new DngDecoderThread();
+    auto *t = new DngDecoderThread();
     for (int j = 0; j < slicesPerThread ; j++) {
       if (!slices.empty()) {
         t->slices.push(slices.front());
@@ -133,12 +133,12 @@ void DngDecoderSlices::startDecoding() {
 static void init_source (j_decompress_ptr cinfo) {}
 static boolean fill_input_buffer (j_decompress_ptr cinfo)
 {
-  struct jpeg_source_mgr* src = (struct jpeg_source_mgr*) cinfo->src;
+  auto *src = (struct jpeg_source_mgr *)cinfo->src;
   return (boolean)!!src->bytes_in_buffer;
 }
 static void skip_input_data (j_decompress_ptr cinfo, long num_bytes)
 {
-  struct jpeg_source_mgr* src = (struct jpeg_source_mgr*) cinfo->src;
+  auto *src = (struct jpeg_source_mgr *)cinfo->src;
 
   if (num_bytes > (int)src->bytes_in_buffer)
     ThrowIOE("JPEG Decoder - read out of buffer");
@@ -306,15 +306,15 @@ static inline uint32 fp24ToFloat(uint32 fp24) {
 }
 
 static inline void expandFP16(unsigned char *dst, int width) {
-  ushort16 *dst16 = (ushort16 *)dst;
-  uint32 *dst32 = (uint32 *)dst;
+  auto *dst16 = (ushort16 *)dst;
+  auto *dst32 = (uint32 *)dst;
 
   for (off_t x = width - 1; x >= 0; x--)
     dst32[x] = fp16ToFloat(dst16[x]);
 }
 
 static inline void expandFP24(unsigned char *dst, int width) {
-  uint32 *dst32 = (uint32 *)dst;
+  auto *dst32 = (uint32 *)dst;
   dst += (width - 1) * 3;
   for (off_t x = width - 1; x >= 0; x--) {
     dst32[x] = fp24ToFloat((dst[0] << 16) | (dst[1] << 8) | dst[2]);
@@ -424,7 +424,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
       DngSliceElement e = t->slices.front();
       t->slices.pop();
       uchar8 *complete_buffer = nullptr;
-      JSAMPARRAY buffer = (JSAMPARRAY)malloc(sizeof(JSAMPROW));
+      auto buffer = (JSAMPARRAY)malloc(sizeof(JSAMPROW));
 
       try {
         jpeg_create_decompress(&dinfo);
@@ -453,7 +453,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
         int copy_h = min(mRaw->dim.y-e.offY, dinfo.output_height);
         for (int y = 0; y < copy_h; y++) {
           uchar8* src = &complete_buffer[row_stride*y];
-          ushort16* dst = (ushort16*)mRaw->getData(e.offX, y+e.offY);
+          auto *dst = (ushort16 *)mRaw->getData(e.offX, y + e.offY);
           for (int x = 0; x < copy_w; x++) {
             for (int c=0; c < dinfo.output_components; c++)
               *dst++ = (*src++);

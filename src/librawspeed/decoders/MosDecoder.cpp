@@ -170,7 +170,7 @@ void MosDecoder::DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32
     BitPumpMSB32 pump(mFile, off);
     uint32 pred[2], len[2];
     pred[0] = pred[1] = 0;
-    ushort16* img = (ushort16*)mRaw->getData(0, row);
+    auto *img = (ushort16 *)mRaw->getData(0, row);
     for (uint32 col=0; col < width; col++) {
       if (col >= (width & -8))
         len[0] = len[1] = 14;

@@ -190,7 +190,7 @@ std::string CiffEntry::getValueAsString()
 {
   if (type == CIFF_ASCII)
     return string((const char*)&data[0]);
-  char *temp_string = new char[4096];
+  auto *temp_string = new char[4096];
   if (count == 1) {
     switch (type) {
       case CIFF_LONG:

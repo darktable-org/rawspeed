@@ -155,8 +155,7 @@ void writePPM(RawImage raw, const string &fn) {
 
   // Write pixels
   for (int y = 0; y < height; ++y) {
-    unsigned short *row =
-        reinterpret_cast<unsigned short *>(raw->getData(0, y));
+    auto *row = reinterpret_cast<unsigned short *>(raw->getData(0, y));
     // Swap for PPM format byte ordering
     if (getHostEndianness() == little)
       for (int x = 0; x < width; ++x)

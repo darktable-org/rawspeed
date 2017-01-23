@@ -265,13 +265,13 @@ inline RawImage RawImage::create(const iPoint2D &dim, RawImageType type,
 // a value that will be used to store a random counter that can be reused between calls.
 // this needs to be inline to speed up tight decompressor loops
 inline void RawImageDataU16::setWithLookUp(ushort16 value, uchar8* dst, uint32* random) {
-  ushort16* dest = (ushort16*)dst;
+  auto *dest = (ushort16 *)dst;
   if (table == nullptr) {
     *dest = value;
     return;
   }
   if (table->dither) {
-    uint32* t = (uint32*)table->tables;
+    auto *t = (uint32 *)table->tables;
     uint32 lookup = t[value];
     uint32 base = lookup & 0xffff;
     uint32 delta = lookup >> 16;
@@ -282,7 +282,7 @@ inline void RawImageDataU16::setWithLookUp(ushort16 value, uchar8* dst, uint32* 
     *dest = pix;
     return;
   }
-  ushort16* t = (ushort16*)table->tables;
+  auto *t = (ushort16 *)table->tables;
   *dest = t[value];
 }
 

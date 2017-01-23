@@ -180,8 +180,8 @@ float TiffEntry::getFloat(uint32 num) const {
     return b ? (float) a/b : 0.f;
   }
   case TIFF_SRATIONAL: {
-    int a = (int) getInt(num*2);
-    int b = (int) getInt(num*2+1);
+    auto a = (int)getInt(num * 2);
+    auto b = (int)getInt(num * 2 + 1);
     return b ? (float) a/b : 0.f;
   }
   default:

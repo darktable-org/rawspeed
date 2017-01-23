@@ -71,7 +71,7 @@ RawImage DngDecoder::decodeRawInternal() {
     ThrowRDE("DNG Decoder: No image data found");
 
   // Erase the ones not with JPEG compression
-  for (vector<TiffIFD*>::iterator i = data.begin(); i != data.end();) {
+  for (auto i = data.begin(); i != data.end();) {
     int compression = (*i)->getEntry(COMPRESSION)->getShort();
     bool isSubsampled = false;
     try {
@@ -423,7 +423,7 @@ RawImage DngDecoder::decodeRawInternal() {
   if (raw->hasEntry(LINEARIZATIONTABLE)) {
     TiffEntry *lintable = raw->getEntry(LINEARIZATIONTABLE);
     uint32 len = lintable->count;
-    ushort16 *table = new ushort16[len];
+    auto *table = new ushort16[len];
     lintable->getShortArray(table, len);
     mRaw->setTable(table, len, !uncorrectedRawValues);
     if (!uncorrectedRawValues) {
@@ -435,7 +435,7 @@ RawImage DngDecoder::decodeRawInternal() {
     if (false) {
       // Test average for bias
       uint32 cw = mRaw->dim.x * mRaw->getCpp();
-      ushort16* pixels = (ushort16*)mRaw->getData(0, 500);
+      auto *pixels = (ushort16 *)mRaw->getData(0, 500);
       float avg = 0.0f;
       for (uint32 x = 0; x < cw; x++) {
         avg += (float)pixels[x];
@@ -549,7 +549,7 @@ bool DngDecoder::decodeMaskedAreas(TiffIFD* raw) {
     return false;
 
   /* Since we may both have short or int, copy it to int array. */
-  uint32 *rects = new uint32[nrects*4];
+  auto *rects = new uint32[nrects * 4];
   masked->getIntArray(rects, nrects*4);
 
   iPoint2D top = mRaw->getCropOffset();

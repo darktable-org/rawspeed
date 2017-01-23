@@ -174,7 +174,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  ushort16 *curve = new ushort16[0x4001];
+  auto *curve = new ushort16[0x4001];
   TiffEntry *c = raw->getEntry(SONY_CURVE);
   uint32 sony_curve[] = { 0, 0, 0, 0, 0, 4095 };
 
@@ -243,7 +243,7 @@ void ArwDecoder::DecodeUncompressed(TiffIFD* raw) {
 void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
   BitPumpMSB bits(input);
   uchar8* data = mRaw->getData();
-  ushort16* dest = (ushort16*) & data[0];
+  auto *dest = (ushort16 *)&data[0];
   uint32 pitch = mRaw->pitch / sizeof(ushort16);
   int sum = 0;
   for (uint32 x = w; x--;)
@@ -284,7 +284,7 @@ void ArwDecoder::DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp) {
     const uchar8 *in = input.getData(input.getRemainSize());
 
     for (uint32 y = 0; y < h; y++) {
-      ushort16* dest = (ushort16*) & data[y*pitch];
+      auto *dest = (ushort16 *)&data[y * pitch];
       for (uint32 x = 0 ; x < w; x += 2) {
         uint32 g1 = *in++;
         uint32 g2 = *in++;
@@ -405,7 +405,7 @@ void ArwDecoder::GetWB() {
     uint32 key = get4LE(data,0);
 
     //TODO: replace ugly inplace decryption of (const) raw data
-    uint32 *ifp_data = (uint32 *) mFile->getDataWrt(off, len);
+    auto *ifp_data = (uint32 *)mFile->getDataWrt(off, len);
     SonyDecrypt(ifp_data, len/4, key);
 
     TiffRootIFD encryptedIFD(priv->getRootIfdData(), off);
@@ -437,7 +437,7 @@ void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
 
   BitPumpPlain bits(*in);
   for (uint32 y = t->start_y; y < t->end_y; y++) {
-    ushort16* dest = (ushort16*) & data[y*pitch];
+    auto *dest = (ushort16 *)&data[y * pitch];
     // Realign
     bits.setBufferPosition(w*y);
     uint32 random = bits.peekBits(24);

@@ -105,8 +105,8 @@ RawImage Cr2Decoder::decodeOldFormat() {
     procRaw->copyErrorsFrom(mRaw);
 
     for (uint32 y = 0; y < height; y++) {
-      ushort16 *dst = (ushort16*)procRaw->getData(0,y);
-      ushort16 *src = (ushort16*)mRaw->getData(y%2 == 0 ? 0 : width, y/2);
+      auto *dst = (ushort16 *)procRaw->getData(0, y);
+      auto *src = (ushort16 *)mRaw->getData(y % 2 == 0 ? 0 : width, y / 2);
       for (uint32 x = 0; x < width; x++)
         dst[x] = src[x];
     }
@@ -118,7 +118,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
     if (curve->type == TIFF_SHORT && curve->count == 4096) {
       TiffEntry *linearization = mRootIFD->getEntryRecursive((TiffTag)0x123);
       uint32 len = linearization->count;
-      ushort16 *table = new ushort16[len];
+      auto *table = new ushort16[len];
       linearization->getShortArray(table, len);
       if (!uncorrectedRawValues) {
         mRaw->setTable(table, 4096, true);
@@ -184,7 +184,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
   }
 
   // Override with canon_double_height if set.
-  map<string,string>::iterator msb_hint = hints.find("canon_double_height");
+  auto msb_hint = hints.find("canon_double_height");
   if (msb_hint != hints.end())
     doubleHeight = ("true" == (msb_hint->second));
 

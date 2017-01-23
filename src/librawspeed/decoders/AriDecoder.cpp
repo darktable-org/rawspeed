@@ -85,7 +85,7 @@ void AriDecoder::decodeThreaded(RawDecoderThread * t) {
 
   uint32 hw = mWidth >> 1;
   for (uint32 y = t->start_y; y < t->end_y; y++) {
-    ushort16* dest = (ushort16*)mRaw->getData(0, y);
+    auto *dest = (ushort16 *)mRaw->getData(0, y);
     for (uint32 x = 0 ; x < hw; x++) {
       uint32 a = bits.getBits(12);
       uint32 b = bits.getBits(12);

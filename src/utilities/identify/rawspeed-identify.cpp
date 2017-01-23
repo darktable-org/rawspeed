@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
 
     if (r->getDataType() == TYPE_FLOAT32) {
       sum = 0.0f;
-      float *const data = (float *)r->getDataUncropped(0, 0);
+      auto *const data = (float *)r->getDataUncropped(0, 0);
 
 #ifdef _OPENMP
 #pragma omp parallel for default(none) schedule(static) reduction(+ : sum)
@@ -237,7 +237,7 @@ int main(int argc, char *argv[]) {
               sum / (double)(dimUncropped.y * dimUncropped.x));
     } else if (r->getDataType() == TYPE_USHORT16) {
       sum = 0.0f;
-      uint16_t *const data = (uint16_t *)r->getDataUncropped(0, 0);
+      auto *const data = (uint16_t *)r->getDataUncropped(0, 0);
 
 #ifdef _OPENMP
 #pragma omp parallel for default(none) schedule(static) reduction(+ : sum)

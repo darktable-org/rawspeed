@@ -71,7 +71,7 @@ string X3fDecoder::getIdAsString(ByteStream *bytes) {
 
 RawImage X3fDecoder::decodeRawInternal()
 {
-  vector<X3fImage>::iterator img = mImages.begin();
+  auto img = mImages.begin();
   for (; img !=  mImages.end(); ++img) {
     X3fImage cimg = *img;
     if (cimg.type == 1 || cimg.type == 3) {
@@ -113,7 +113,7 @@ bool X3fDecoder::readName() {
 
   // See if we can find EXIF info and grab the name from there.
   // This is needed for Sigma DP2 Quattro and possibly later cameras.
-  vector<X3fImage>::iterator img = mImages.begin();
+  auto img = mImages.begin();
   for (; img !=  mImages.end(); ++img) {
     X3fImage cimg = *img;
     if (cimg.type == 2 && cimg.format == 0x12 && cimg.dataSize > 100) {
@@ -152,7 +152,7 @@ void X3fDecoder::checkSupportInternal( CameraMetaData *meta )
 
   // If we somehow got to here without a camera, see if we have an image
   // with proper format identifiers.
-  vector<X3fImage>::iterator img = mImages.begin();
+  auto img = mImages.begin();
   for (; img !=  mImages.end(); ++img) {
     X3fImage cimg = *img;
     if (cimg.type == 1 || cimg.type == 3) {
@@ -165,7 +165,7 @@ void X3fDecoder::checkSupportInternal( CameraMetaData *meta )
 
 string X3fDecoder::getProp(const char* key )
 {
-  map<string,string>::iterator prop_it = mProperties.props.find(key);
+  auto prop_it = mProperties.props.find(key);
   if (prop_it != mProperties.props.end())
     return (*prop_it).second;
   return nullptr;
@@ -405,7 +405,7 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
     int pred[3];
     for (uint32 y = t->start_y; y < t->end_y; y++) {
       BitPumpMSB bits(mFile, line_offsets[y]);
-      ushort16* dst = (ushort16*)mRaw->getData(0,y);
+      auto *dst = (ushort16 *)mRaw->getData(0, y);
       pred[0] = pred[1] = pred[2] = 0;
       for (int x = 0; x < mRaw->dim.x; x++) {
         for (int &i : pred) {
@@ -472,7 +472,7 @@ int X3fDecoder::SigmaDecode(BitPumpMSB *bits) {
 
 FileMap* X3fDecoder::getCompressedData()
 {
-  vector<X3fImage>::iterator img = mImages.begin();
+  auto img = mImages.begin();
   for (; img !=  mImages.end(); ++img) {
     X3fImage cimg = *img;
     if (cimg.type == 1 || cimg.type == 3) {

@@ -58,7 +58,7 @@ FileMap* FileReader::readFile() {
   FileMap *fileData = new FileMap(pa, size);
 
 #else
-  FileMap *fileData = new FileMap(size);
+  auto *fileData = new FileMap(size);
 
   dest = (char *)fileData->getDataWrt(0, size);
   bytes_read = fread(dest, 1, size, file);

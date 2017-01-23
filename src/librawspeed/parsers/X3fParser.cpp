@@ -280,7 +280,7 @@ static bool ConvertUTF16toUTF8 (const UTF16** sourceStart, const UTF16* sourceEn
 
 string X3fPropertyCollection::getString( ByteStream *bytes ) {
   uint32 max_len = bytes->getRemainSize() / 2;
-  const UTF16* start = (const UTF16*)bytes->getData(max_len*2);
+  const auto *start = (const UTF16 *)bytes->getData(max_len * 2);
   const UTF16* src_end = start;
   uint32 i = 0;
   for (; i < max_len && start == src_end; i++) {
@@ -289,7 +289,7 @@ string X3fPropertyCollection::getString( ByteStream *bytes ) {
     }
   }
   if (start != src_end) {
-    UTF8 *dest = new UTF8[i * 4UL + 1];
+    auto *dest = new UTF8[i * 4UL + 1];
     memset(dest, 0, i * 4UL + 1);
     if (ConvertUTF16toUTF8(&start, src_end, &dest, &dest[i * 4 - 1])) {
       string ret((const char*)dest);

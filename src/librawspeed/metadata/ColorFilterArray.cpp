@@ -124,7 +124,7 @@ void ColorFilterArray::shiftLeft(int n) {
   int shift = n % size.x;
   if (0 == shift)
     return;
-  CFAColor* tmp = new CFAColor[size.x];
+  auto *tmp = new CFAColor[size.x];
   for (int y = 0; y < size.y; y++) {
     CFAColor *old = &cfa[y*size.x];
     memcpy(tmp, &old[shift], (size.x-shift)*sizeof(CFAColor));
@@ -142,7 +142,7 @@ void ColorFilterArray::shiftDown(int n) {
   int shift = n % size.y;
   if (0 == shift)
     return;
-  CFAColor* tmp = new CFAColor[size.y];
+  auto *tmp = new CFAColor[size.y];
   for (int x = 0; x < size.x; x++) {
     CFAColor *old = &cfa[x];
     for (int y = 0; y < size.y; y++)

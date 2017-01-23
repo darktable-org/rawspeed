@@ -300,7 +300,7 @@ void RawImageData::startWorker(RawImageWorker::RawImageWorkerTask task, bool cro
   }
 
 #ifndef NO_PTHREAD
-  RawImageWorker **workers = new RawImageWorker*[threads];
+  auto **workers = new RawImageWorker *[threads];
   int y_offset = 0;
   int y_per_thread = (height + threads - 1) / threads;
 
@@ -327,11 +327,11 @@ void RawImageData::fixBadPixelsThread( int start_y, int end_y )
   int bad_count = 0;
 #endif
   for (int y = start_y; y < end_y; y++) {
-    uint32* bad_map = (uint32*)&mBadPixelMap[y*mBadPixelMapPitch];
+    auto *bad_map = (uint32 *)&mBadPixelMap[y * mBadPixelMapPitch];
     for (int x = 0 ; x < gw; x++) {
       // Test if there is a bad pixel within these 32 pixels
       if (bad_map[x] != 0) {
-        uchar8 *bad = (uchar8*)&bad_map[x];
+        auto *bad = (uchar8 *)&bad_map[x];
         // Go through each pixel
         for (int i = 0; i < 4; i++) {
           for (int j = 0; j < 8; j++) {
@@ -443,7 +443,7 @@ RawImage& RawImage::operator=(const RawImage & p) {
 }
 
 void *RawImageWorkerThread(void *_this) {
-  RawImageWorker* me = (RawImageWorker*)_this;
+  auto *me = (RawImageWorker *)_this;
   me->performTask();
   return nullptr;
 }
@@ -522,7 +522,7 @@ void RawImageData::setTable( TableLookUp *t )
 }
 
 void RawImageData::setTable(const ushort16* table, int nfilled, bool dither) {
-  TableLookUp* t = new TableLookUp(1, dither);
+  auto *t = new TableLookUp(1, dither);
   t->setTable(0, table, nfilled);
   this->setTable(t);
 }

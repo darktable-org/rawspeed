@@ -53,7 +53,7 @@ RawImageDataFloat::RawImageDataFloat() {
         if ((int)area.offset+(int)area.size > uncropped_dim.y)
           ThrowRDE("RawImageData::calculateBlackAreas: Offset + size is larger than height of image");
         for (uint32 y = area.offset; y < area.offset+area.size; y++) {
-          float *pixel = (float*)getDataUncropped(mOffset.x, y);
+          auto *pixel = (float *)getDataUncropped(mOffset.x, y);
           for (int x = mOffset.x; x < dim.x+mOffset.x; x++) {
             accPixels[((y&1)<<1)|(x&1)] += *pixel++;
           }
@@ -66,7 +66,7 @@ RawImageDataFloat::RawImageDataFloat() {
         if ((int)area.offset+(int)area.size > uncropped_dim.x)
           ThrowRDE("RawImageData::calculateBlackAreas: Offset + size is larger than width of image");
         for (int y = mOffset.y; y < dim.y+mOffset.y; y++) {
-          float *pixel = (float*)getDataUncropped(area.offset, y);
+          auto *pixel = (float *)getDataUncropped(area.offset, y);
           for (uint32 x = area.offset; x < area.size+area.offset; x++) {
             accPixels[((y&1)<<1)|(x&1)] += *pixel++;
           }
@@ -106,7 +106,7 @@ RawImageDataFloat::RawImageDataFloat() {
       float b = 100000000;
       float m = -10000000;
       for (int row = skipBorder*cpp;row < (dim.y - skipBorder);row++) {
-        float *pixel = (float*)getData(skipBorder, row);
+        auto *pixel = (float *)getData(skipBorder, row);
         for (int col = skipBorder ; col < gw ; col++) {
           b = MIN(*pixel, b);
           m = MAX(*pixel, m);
@@ -256,7 +256,7 @@ RawImageDataFloat::RawImageDataFloat() {
       sub[i] = (float)blackLevelSeparate[v];
     }
     for (int y = start_y; y < end_y; y++) {
-      float *pixel = (float*)getData(0, y);
+      auto *pixel = (float *)getData(0, y);
       float *mul_local = &mul[2*(y&1)];
       float *sub_local = &sub[2*(y&1)];
       for (int x = 0 ; x < gw; x++) {
@@ -349,7 +349,7 @@ void RawImageDataFloat::fixBadPixel( uint32 x, uint32 y, int component )
       total_pixel += values[i] * dist[i];
 
   total_pixel /= total_div;
-  float* pix = (float*)getDataUncropped(x, y);
+  auto *pix = (float *)getDataUncropped(x, y);
   pix[component] = total_pixel;
 
   /* Process other pixels - could be done inline, since we have the weights */
@@ -365,7 +365,7 @@ void RawImageDataFloat::doLookup( int start_y, int end_y ) {
 }
 
 void RawImageDataFloat::setWithLookUp(ushort16 value, uchar8* dst, uint32* random) {
-  float* dest = (float*)dst;
+  auto *dest = (float *)dst;
   if (table == nullptr) {
     *dest = (float)value * (1.0f/65535);
     return;

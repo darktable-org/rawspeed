@@ -59,7 +59,7 @@ void HasselbladDecompressor::decodeScan()
   // Pixels are packed two at a time, not like LJPEG:
   // [p1_length_as_huffman][p2_length_as_huffman][p0_diff_with_length][p1_diff_with_length]|NEXT PIXELS
   for (uint32 y = 0; y < frame.h; y++) {
-    ushort16 *dest = (ushort16*) mRaw->getData(0, y);
+    auto *dest = (ushort16 *)mRaw->getData(0, y);
     int p1 = 0x8000 + pixelBaseOffset;
     int p2 = 0x8000 + pixelBaseOffset;
     for (uint32 x = 0; x < frame.w; x += 2) {

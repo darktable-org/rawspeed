@@ -69,7 +69,7 @@ RawImage SrwDecoder::decodeRawInternal() {
   if (32769 == compression)
   {
     bool bit_order = false;  // Default guess
-    map<string,string>::iterator msb_hint = hints.find("msb_override");
+    auto msb_hint = hints.find("msb_override");
     if (msb_hint != hints.end())
       bit_order = ("true" == (msb_hint->second));
     this->decodeUncompressed(raw, bit_order ? BitOrder_Jpeg : BitOrder_Plain);
@@ -80,7 +80,7 @@ RawImage SrwDecoder::decodeRawInternal() {
   {
     if (!raw->hasEntry ((TiffTag)40976)) {
       bool bit_order = (bits == 12);  // Default guess
-      map<string,string>::iterator msb_hint = hints.find("msb_override");
+      auto msb_hint = hints.find("msb_override");
       if (msb_hint != hints.end())
         bit_order = ("true" == (msb_hint->second));
       this->decodeUncompressed(raw, bit_order ? BitOrder_Jpeg : BitOrder_Plain);
@@ -138,7 +138,7 @@ void SrwDecoder::decodeCompressed( TiffIFD* raw )
       i = y < 2 ? 7 : 4;
     BitPumpMSB32 bits(mFile, line_offset);
     int op[4];
-    ushort16* img = (ushort16*)mRaw->getData(0, y);
+    auto *img = (ushort16 *)mRaw->getData(0, y);
     ushort16* img_up = (ushort16*)mRaw->getData(0, max(0, (int)y - 1));
     ushort16* img_up2 = (ushort16*)mRaw->getData(0, max(0, (int)y - 2));
     // Image is arranged in groups of 16 pixels horizontally
@@ -202,8 +202,8 @@ void SrwDecoder::decodeCompressed( TiffIFD* raw )
 
   // Swap red and blue pixels to get the final CFA pattern
   for (uint32 y = 0; y < height-1; y+=2) {
-    ushort16* topline = (ushort16*)mRaw->getData(0, y);
-    ushort16* bottomline = (ushort16*)mRaw->getData(0, y+1);
+    auto *topline = (ushort16 *)mRaw->getData(0, y);
+    auto *bottomline = (ushort16 *)mRaw->getData(0, y + 1);
     for (uint32 x = 0; x < width-1; x += 2) {
       ushort16 temp = topline[1];
       topline[1] = bottomline[0];
@@ -252,7 +252,7 @@ void SrwDecoder::decodeCompressed2( TiffIFD* raw, int bits)
 
   BitPumpMSB pump(mFile, offset);
   for (uint32 y = 0; y < height; y++) {
-    ushort16* img = (ushort16*)mRaw->getData(0, y);
+    auto *img = (ushort16 *)mRaw->getData(0, y);
     for (uint32 x = 0; x < width; x++) {
       int32 diff = samsungDiff(pump, tbl);
       if (x < 2)
@@ -336,7 +336,7 @@ void SrwDecoder::decodeCompressed3( TiffIFD* raw, int bits)
       line_offset += 16 - (line_offset & 0xf);
     BitPumpMSB32 pump(mFile, offset+line_offset);
 
-    ushort16* img = (ushort16*)mRaw->getData(0, row);
+    auto *img = (ushort16 *)mRaw->getData(0, row);
     ushort16* img_up = (ushort16*)mRaw->getData(0, max(0, (int)row - 1));
     ushort16* img_up2 = (ushort16*)mRaw->getData(0, max(0, (int)row - 2));
     // Initialize the motion and diff modes at the start of the line
