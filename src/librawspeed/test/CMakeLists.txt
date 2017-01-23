@@ -31,6 +31,10 @@ FILE(GLOB RAWSPEED_TESTS_SOURCES
   "RawSpeedTest.cpp"
 )
 
+set(CMAKE_CXX_CLANG_TIDY_SAVE "${CMAKE_CXX_CLANG_TIDY}")
+
+unset(CMAKE_CXX_CLANG_TIDY)
+
 foreach(IN ${RAWSPEED_TESTS_SOURCES})
   get_filename_component(TESTNAME ${IN} NAME_WE)
   add_executable(${TESTNAME} ${IN})
@@ -38,3 +42,5 @@ foreach(IN ${RAWSPEED_TESTS_SOURCES})
   GTEST_ADD_TESTS(${TESTNAME} "" AUTO)
   add_dependencies(tests ${TESTNAME})
 endforeach()
+
+set(CMAKE_CXX_CLANG_TIDY "${CMAKE_CXX_CLANG_TIDY_SAVE}")
