@@ -236,7 +236,7 @@ inline std::vector<std::string> split_string(const std::string &input,
       str++;
 
     if(begin != str)
-      result.push_back(std::string(begin, str));
+      result.emplace_back(begin, str);
 
     if(0 == *str++)
       break;

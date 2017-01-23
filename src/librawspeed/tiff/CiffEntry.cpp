@@ -150,7 +150,7 @@ vector<string> CiffEntry::getStrings() {
   uint32 start = 0;
   for (uint32 i=0; i< count; i++) {
     if (own_data[i] == 0) {
-      strs.push_back(string((const char*)&own_data[start]));
+      strs.emplace_back((const char *)&own_data[start]);
       start = i+1;
     }
   }

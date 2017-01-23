@@ -109,7 +109,7 @@ void X3fParser::readDirectory()
     decoder->mDirectory.push_back(dir);
     uint32 old_pos = bytes->getPosition();
     if ("IMA2" == dir.id || "IMAG" == dir.id) {
-      decoder->mImages.push_back(X3fImage(bytes, dir.offset, dir.length));
+      decoder->mImages.emplace_back(bytes, dir.offset, dir.length);
     }
     if ("PROP" == dir.id) {
       decoder->mProperties.addProperties(bytes, dir.offset, dir.length);
