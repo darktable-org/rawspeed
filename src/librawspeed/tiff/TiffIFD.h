@@ -64,9 +64,9 @@ class TiffIFD
   TiffRootIFDOwner parseMakerNote(TiffEntry *t);
 
 public:
-  TiffIFD() {}
+  TiffIFD() = default;
   TiffIFD(const DataBuffer& data, uint32 offset, TiffIFD* parent);
-  virtual ~TiffIFD() {}
+  virtual ~TiffIFD() = default;
   uint32 getNextIFD() const {return nextIFD;}
   //TODO: make public api totally const
   std::vector<TiffIFD*> getIFDsWithTag(TiffTag tag);

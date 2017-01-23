@@ -33,17 +33,13 @@ public:
   iPoint2D operator -= (const iPoint2D& other) { x -= other.x; y -= other.y; return *this;}
   iPoint2D operator - (const iPoint2D& b) const { return iPoint2D(x-b.x,y-b.y); }
   iPoint2D operator + (const iPoint2D& b) const { return iPoint2D(x+b.x,y+b.y); }
-  iPoint2D &operator=(const iPoint2D &b) {
-    x = b.x;
-    y = b.y;
-    return *this;
-  }
+  iPoint2D &operator=(const iPoint2D &b) = default;
   bool operator==(const iPoint2D& rhs){ return this->x==rhs.x && this->y==rhs.y; }
   bool operator!=(const iPoint2D& rhs){ return this->x!=rhs.x || this->y!=rhs.y; }
-	~iPoint2D() {};
-        uint32 area() const { return std::abs(x * y); }
-        bool isThisInside(const iPoint2D &otherPoint) const {
-          return (x <= otherPoint.x && y <= otherPoint.y);
+  ~iPoint2D() = default;
+  uint32 area() const { return std::abs(x * y); }
+  bool isThisInside(const iPoint2D &otherPoint) const {
+    return (x <= otherPoint.x && y <= otherPoint.y);
         };
         iPoint2D getSmallest(const iPoint2D &otherPoint) const {
           return iPoint2D(std::min(x, otherPoint.x), std::min(y, otherPoint.y));
@@ -54,7 +50,7 @@ public:
 /* Helper class for managing a rectangle in 2D space. */
 class iRectangle2D {
 public:
-  iRectangle2D() {}
+  iRectangle2D() = default;
   iRectangle2D( int w, int h) {dim = iPoint2D(w,h);}
   iRectangle2D( int x_pos, int y_pos, int w, int h) {dim = iPoint2D(w,h); pos=iPoint2D(x_pos, y_pos);}
   iRectangle2D( const iRectangle2D& r) {dim = iPoint2D(r.dim); pos = iPoint2D(r.pos);}
@@ -64,7 +60,7 @@ public:
     pos = iPoint2D(b.pos);
     return *this;
   }
-  ~iRectangle2D() {};
+  ~iRectangle2D() = default;
   uint32 area() const {return dim.area();}
   void offset(const iPoint2D& offset) {pos+=offset;}
   bool isThisInside(const iRectangle2D &otherPoint) const {

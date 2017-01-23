@@ -34,8 +34,7 @@ namespace RawSpeed {
 
 using namespace pugi;
 
-CameraMetaData::CameraMetaData() {
-}
+CameraMetaData::CameraMetaData() = default;
 
 CameraMetaData::CameraMetaData(const char *docname) {
   xml_document doc;

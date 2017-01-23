@@ -77,7 +77,7 @@ DngDecoderSlices::DngDecoderSlices(FileMap *file, const RawImage &img,
   compression = _compression;
 }
 
-DngDecoderSlices::~DngDecoderSlices() {}
+DngDecoderSlices::~DngDecoderSlices() = default;
 
 void DngDecoderSlices::addSlice(const DngSliceElement &slice) {
   slices.push(slice);

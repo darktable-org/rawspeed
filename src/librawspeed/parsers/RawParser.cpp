@@ -48,7 +48,7 @@ class RawDecoder;
 RawParser::RawParser(FileMap* inputData): mInput(inputData) {
 }
 
-RawParser::~RawParser() {}
+RawParser::~RawParser() = default;
 
 RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
   // We need some data.

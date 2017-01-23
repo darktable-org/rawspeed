@@ -90,7 +90,7 @@ TEST(ColorFilterArrayTestBasic, ToDcraw) {
 
 class ColorFilterArrayTest : public ::testing::TestWithParam<Bayer2x2> {
 protected:
-  ColorFilterArrayTest() {}
+  ColorFilterArrayTest() = default;
   virtual void SetUp() { param = GetParam(); }
 
   Bayer2x2 param;

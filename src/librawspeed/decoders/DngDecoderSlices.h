@@ -31,7 +31,7 @@ class DngSliceElement
 public:
   DngSliceElement(uint32 off, uint32 count, uint32 offsetX, uint32 offsetY, uint32 w, uint32 h) :
       byteOffset(off), byteCount(count), offX(offsetX), offY(offsetY), width(w), height(h), mUseBigtable(false) {};
-  ~DngSliceElement(){};
+  ~DngSliceElement() = default;
   const uint32 byteOffset;
   const uint32 byteCount;
   const uint32 offX;
@@ -45,8 +45,8 @@ class DngDecoderSlices;
 class DngDecoderThread
 {
 public:
-  DngDecoderThread() {}
-  ~DngDecoderThread() {}
+  DngDecoderThread() = default;
+  ~DngDecoderThread() = default;
 #ifndef NO_PTHREAD
   pthread_t threadid;
 #endif

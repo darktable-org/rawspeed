@@ -63,7 +63,7 @@ public:
   /* The FileMap is not owned by this class, will not be deleted, and must remain */
   /* valid while this object exists */
   RawDecoder(FileMap* file);
-  virtual ~RawDecoder() {}
+  virtual ~RawDecoder() = default;
 
   /* Check if the decoder can decode the image from this camera */
   /* A RawDecoderException will be thrown if the camera isn't supported */
@@ -226,7 +226,7 @@ protected:
 class RawSlice {
 public:
   RawSlice() { h = offset = count = 0;};
-  ~RawSlice() {};
+  ~RawSlice() = default;
   uint32 h;
   uint32 offset;
   uint32 count;

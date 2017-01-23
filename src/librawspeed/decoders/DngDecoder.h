@@ -52,7 +52,7 @@ protected:
 class DngStrip {
 public:
   DngStrip() { h = offset = count = offsetY = 0;};
-  ~DngStrip() {};
+  ~DngStrip() = default;
   uint32 h;
   uint32 offset; // Offset in bytes
   uint32 count;

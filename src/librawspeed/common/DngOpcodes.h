@@ -34,7 +34,7 @@ class DngOpcode
 {
 public:
   DngOpcode() { host = getHostEndianness(); };
-  virtual ~DngOpcode(){};
+  virtual ~DngOpcode() = default;
 
   /* Will be called exactly once, when input changes */
   /* Can be used for preparing pre-calculated values, etc */
@@ -112,7 +112,7 @@ class OpcodeFixBadPixelsConstant: public DngOpcode
 {
 public:
   OpcodeFixBadPixelsConstant(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used);
-  virtual ~OpcodeFixBadPixelsConstant(){};
+  virtual ~OpcodeFixBadPixelsConstant() = default;
   virtual RawImage& createOutput( RawImage &in );
   virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
 private:
@@ -124,7 +124,7 @@ class OpcodeFixBadPixelsList: public DngOpcode
 {
 public:
   OpcodeFixBadPixelsList(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used);
-  virtual ~OpcodeFixBadPixelsList(){};
+  virtual ~OpcodeFixBadPixelsList() = default;
   virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
 private:
   std::vector<uint32> bad_pos;
@@ -135,7 +135,7 @@ class OpcodeTrimBounds: public DngOpcode
 {
 public:
   OpcodeTrimBounds(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used);
-  virtual ~OpcodeTrimBounds(){};
+  virtual ~OpcodeTrimBounds() = default;
   virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
 private:
   uint64 mTop, mLeft, mBottom, mRight;
@@ -146,7 +146,7 @@ class OpcodeMapTable: public DngOpcode
 {
 public:
   OpcodeMapTable(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used);
-  virtual ~OpcodeMapTable(){};
+  virtual ~OpcodeMapTable() = default;
   virtual RawImage& createOutput(RawImage &in);
   virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
 private:
@@ -158,7 +158,7 @@ class OpcodeMapPolynomial: public DngOpcode
 {
 public:
   OpcodeMapPolynomial(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used);
-  virtual ~OpcodeMapPolynomial(){};
+  virtual ~OpcodeMapPolynomial() = default;
   virtual RawImage& createOutput(RawImage &in);
   virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
 private:
@@ -171,7 +171,7 @@ class OpcodeDeltaPerRow: public DngOpcode
 {
 public:
   OpcodeDeltaPerRow(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used);
-  virtual ~OpcodeDeltaPerRow(){};
+  virtual ~OpcodeDeltaPerRow() = default;
   virtual RawImage& createOutput(RawImage &in);
   virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
 private:
@@ -196,7 +196,7 @@ class OpcodeScalePerRow: public DngOpcode
 {
 public:
   OpcodeScalePerRow(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used);
-  virtual ~OpcodeScalePerRow(){};
+  virtual ~OpcodeScalePerRow() = default;
   virtual RawImage& createOutput(RawImage &in);
   virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
 private:
