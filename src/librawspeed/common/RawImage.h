@@ -139,11 +139,11 @@ public:
   void createBadPixelMap();
   iPoint2D dim;
   uint32 pitch;
-  bool isCFA;
+  bool isCFA{true};
   ColorFilterArray cfa;
-  int blackLevel;
+  int blackLevel{-1};
   int blackLevelSeparate[4];
-  int whitePoint;
+  int whitePoint{65536};
   std::vector<BlackArea> blackAreas;
   /* Vector containing silent errors that occurred doing decoding, that may have lead to */
   /* an incomplete image. */
@@ -171,10 +171,10 @@ protected:
   virtual void fixBadPixel( uint32 x, uint32 y, int component = 0) = 0;
   void fixBadPixelsThread(int start_y, int end_y);
   void startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped );
-  uint32 dataRefCount;
-  uchar8* data;
-  uint32 cpp;      // Components per pixel
-  uint32 bpp;      // Bytes per pixel.
+  uint32 dataRefCount{0};
+  uchar8 *data{0};
+  uint32 cpp{1}; // Components per pixel
+  uint32 bpp{0}; // Bytes per pixel.
   friend class RawImage;
   iPoint2D mOffset;
   iPoint2D uncropped_dim;

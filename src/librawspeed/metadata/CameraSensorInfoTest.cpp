@@ -53,7 +53,6 @@ protected:
   CameraSensorInfoTestDumb()
       : mBlackLevel(std::rand()), // NOLINT do not need crypto-level randomness
         mWhiteLevel(std::rand()), // NOLINT do not need crypto-level randomness
-        mMinIso(-1), mMaxIso(-1),
         mBlackLevelSeparate({
             std::rand(), // NOLINT do not need crypto-level randomness
             std::rand(), // NOLINT do not need crypto-level randomness
@@ -83,8 +82,8 @@ protected:
 
   int mBlackLevel;
   int mWhiteLevel;
-  int mMinIso;
-  int mMaxIso;
+  int mMinIso{-1};
+  int mMaxIso{-1};
   std::vector<int> mBlackLevelSeparate;
 };
 

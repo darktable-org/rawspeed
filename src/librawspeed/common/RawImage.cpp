@@ -31,9 +31,7 @@ using namespace std;
 namespace RawSpeed {
 
 RawImageData::RawImageData()
-    : dim(0, 0), isCFA(true), cfa(iPoint2D(0, 0)), blackLevel(-1),
-      whitePoint(65536), dataRefCount(0), data(0), cpp(1), bpp(0),
-      uncropped_dim(0, 0), table(NULL) {
+    : dim(0, 0), cfa(iPoint2D(0, 0)), uncropped_dim(0, 0), table(NULL) {
   blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
   pthread_mutex_init(&mymutex, NULL);
   mBadPixelMap = NULL;
@@ -43,9 +41,8 @@ RawImageData::RawImageData()
 }
 
 RawImageData::RawImageData(const iPoint2D &_dim, uint32 _bpc, uint32 _cpp)
-    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), blackLevel(-1),
-      whitePoint(65536), dataRefCount(0), data(0), cpp(_cpp), bpp(_bpc * _cpp),
-      uncropped_dim(0, 0), table(NULL) {
+    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), dataRefCount(0),
+      data(0), cpp(_cpp), bpp(_bpc * _cpp), uncropped_dim(0, 0), table(NULL) {
   blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
   mBadPixelMap = NULL;
   mDitherScale = true;
