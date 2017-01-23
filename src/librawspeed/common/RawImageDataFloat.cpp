@@ -43,9 +43,7 @@ RawImageDataFloat::RawImageDataFloat() {
     float accPixels[4] = {0,0,0,0};
     int totalpixels = 0;
 
-    for (uint32 i = 0; i < blackAreas.size(); i++) {
-      BlackArea area = blackAreas[i];
-
+    for (auto area : blackAreas) {
       /* Make sure area sizes are multiple of two,
       so we have the same amount of pixels for each CFA group */
       area.size = area.size - (area.size&1);
@@ -78,8 +76,8 @@ RawImageDataFloat::RawImageDataFloat() {
     }
 
     if (!totalpixels) {
-      for (int i = 0 ; i < 4; i++)
-        blackLevelSeparate[i] = blackLevel;
+      for (int &i : blackLevelSeparate)
+        i = blackLevel;
       return;
     }
 
@@ -94,10 +92,10 @@ RawImageDataFloat::RawImageDataFloat() {
     /* If this is not a CFA image, we do not use separate blacklevels, use average */
     if (!isCFA) {
       int total = 0;
-      for (int i = 0 ; i < 4; i++)
-        total+=blackLevelSeparate[i];
-      for (int i = 0 ; i < 4; i++)
-        blackLevelSeparate[i] = (total+2)>>2;
+      for (int i : blackLevelSeparate)
+        total += i;
+      for (int &i : blackLevelSeparate)
+        i = (total + 2) >> 2;
     }
   }
 

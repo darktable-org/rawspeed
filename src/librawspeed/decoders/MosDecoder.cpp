@@ -175,10 +175,11 @@ void MosDecoder::DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32
       if (col >= (width & -8))
         len[0] = len[1] = 14;
       else if ((col & 7) == 0)
-        for (uint32 i=0; i < 2; i++) {
+        for (unsigned int &i : len) {
           uint32 j = 0;
           for (; j < 5 && !pump.getBitsSafe(1); j++);
-          if (j--) len[i] = length[j*2 + pump.getBitsSafe(1)];
+          if (j--)
+            i = length[j * 2 + pump.getBitsSafe(1)];
         }
       int i = len[col & 1];
       if (i == 14)

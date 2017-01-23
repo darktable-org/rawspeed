@@ -185,15 +185,15 @@ void X3fDecoder::decompressSigma( X3fImage &image )
   int bits = 13;
 
   if (image.format == 35) {
-    for (int i = 0; i < 3; i++) {
-      planeDim[i].x = input.getShort();
-      planeDim[i].y = input.getShort();
+    for (auto &i : planeDim) {
+      i.x = input.getShort();
+      i.y = input.getShort();
     }
     bits = 15;
   }
   if (image.format == 30 || image.format == 35) {
-    for (int i = 0; i < 3; i++)
-      pred[i] = input.getShort();
+    for (int &i : pred)
+      i = input.getShort();
 
     // Skip padding
     input.skipBytes(2);
@@ -252,8 +252,8 @@ void X3fDecoder::decompressSigma( X3fImage &image )
   } // End if format 30
 
   if (image.format == 6) {
-    for (int i = 0; i < 1024; i++) {
-      curve[i] = (short)input.getShort();
+    for (short &i : curve) {
+      i = (short)input.getShort();
     }
     max_len = 0;
 
@@ -377,8 +377,8 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
     /* Initialize predictors */
     int pred_up[4];
     int pred_left[2];
-    for (int j = 0; j < 4; j++)
-      pred_up[j] = pred[i];
+    for (int &j : pred_up)
+      j = pred[i];
 
     for (int y = 0; y < dim.y; y++) {
       ushort16* dst = (ushort16*)mRaw->getData(0, y << subs) + i;
@@ -409,15 +409,15 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
       ushort16* dst = (ushort16*)mRaw->getData(0,y);
       pred[0] = pred[1] = pred[2] = 0;
       for (int x = 0; x < mRaw->dim.x; x++) {
-        for (int i = 0; i < 3; i++) {
+        for (int &i : pred) {
           ushort16 val = huge_table[bits.peekBits(max_len)];
           uchar8 nbits = val&31;
           if (val == 0xffff) {
             ThrowRDE("SigmaDecompressor: Invalid Huffman value. Image Corrupt");
           }
           bits.skipBitsNoFill(nbits);
-          pred[i] += curve[(val>>5)];
-          dst[0] = clampbits(pred[i], 16);
+          i += curve[(val >> 5)];
+          dst[0] = clampbits(i, 16);
           dst++;
         }
       }

@@ -179,8 +179,7 @@ bool NefDecoder::NEFIsUncompressedRGB(TiffIFD *raw) {
 TiffIFD* NefDecoder::FindBestImage(vector<TiffIFD*>* data) {
   int largest_width = 0;
   TiffIFD* best_ifd = NULL;
-  for (int i = 0; i < (int)data->size(); i++) {
-    TiffIFD* raw = (*data)[i];
+  for (auto raw : *data) {
     int width = raw->getEntry(IMAGEWIDTH)->getInt();
     if (width > largest_width)
       best_ifd = raw;
@@ -529,8 +528,8 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
         bs.skipBytes(version == 0x204 ? 284 : 4);
 
         uchar8 buf[14+8];
-        for (uint32 i=0; i < sizeof(buf); i++)
-          buf[i] = bs.getByte() ^ (cj += ci * ck++);
+        for (unsigned char &i : buf)
+          i = bs.getByte() ^ (cj += ci * ck++);
 
         // Finally set the WB coeffs
         uint32 off = (version == 0x204) ? 6 : 14;

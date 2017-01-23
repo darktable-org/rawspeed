@@ -159,8 +159,8 @@ RawImage ArwDecoder::decodeRawInternal() {
   // to detect it this way in the future.
   data = mRootIFD->getIFDsWithTag(MAKE);
   if (data.size() > 1) {
-    for (uint32 i = 0; i < data.size(); i++) {
-      string make = data[i]->getEntry(MAKE)->getString();
+    for (auto &i : data) {
+      string make = i->getEntry(MAKE)->getString();
       /* Check for maker "SONY" without spaces */
       if (make == "SONY")
         bitPerPixel = 8;

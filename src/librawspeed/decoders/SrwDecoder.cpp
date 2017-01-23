@@ -134,8 +134,8 @@ void SrwDecoder::decodeCompressed( TiffIFD* raw )
     if (line_offset >= mFile->getSize())
       ThrowRDE("Srw decoder: Offset outside image file, file probably truncated.");
     int len[4];
-    for (int i = 0; i < 4; i++)
-      len[i] = y < 2 ? 7 : 4;
+    for (int &i : len)
+      i = y < 2 ? 7 : 4;
     BitPumpMSB32 bits(mFile, line_offset);
     int op[4];
     ushort16* img = (ushort16*)mRaw->getData(0, y);
@@ -145,8 +145,8 @@ void SrwDecoder::decodeCompressed( TiffIFD* raw )
     for (uint32 x = 0; x < width; x += 16) {
       bits.fill();
       bool dir = !!bits.getBitsNoFill(1);
-      for (int i = 0; i < 4; i++)
-        op[i] = bits.getBitsNoFill(2);
+      for (int &i : op)
+        i = bits.getBitsNoFill(2);
       for (int i = 0; i < 4; i++) {
         switch (op[i]) {
           case 3: len[i] = bits.getBits(4);
@@ -243,10 +243,10 @@ void SrwDecoder::decodeCompressed2( TiffIFD* raw, int bits)
   // the maximum number of bits used in the variable encoding (for the 12 and
   // 13 cases)
   uint32 n = 0;
-  for (uint32 i=0; i < 14; i++) {
-    for(int32 c = 0; c < (1024 >> tab[i][0]); c++) {
-      tbl[n  ].encLen = tab[i][0];
-      tbl[n++].diffLen = tab[i][1];
+  for (auto i : tab) {
+    for (int32 c = 0; c < (1024 >> i[0]); c++) {
+      tbl[n].encLen = i[0];
+      tbl[n++].diffLen = i[1];
     }
   }
 
@@ -343,8 +343,8 @@ void SrwDecoder::decodeCompressed3( TiffIFD* raw, int bits)
     motion = 7;
     // By default we are not scaling values at all
     int32 scale = 0;
-    for (uint32 i=0; i<3; i++)
-      diffBitsMode[i][0] = diffBitsMode[i][1] = (row==0 || row==1) ? 7 : 4;
+    for (auto &i : diffBitsMode)
+      i[0] = i[1] = (row == 0 || row == 1) ? 7 : 4;
 
     for (uint32 col=0; col < width; col += 16) {
       if (!(optflags & OPT_QP) && !(col & 63)) {
@@ -395,8 +395,8 @@ void SrwDecoder::decodeCompressed3( TiffIFD* raw, int bits)
       uint32 diffBits[4] = {0};
       if (optflags & OPT_SKIP || !pump.getBitsSafe(1)) {
         uint32 flags[4];
-        for (uint32 i=0; i<4; i++)
-          flags[i] = pump.getBitsSafe(2);
+        for (unsigned int &flag : flags)
+          flag = pump.getBitsSafe(2);
         for (uint32 i=0; i<4; i++) {
           // The color is 0-Green 1-Blue 2-Red
           uint32 colornum = (row % 2 != 0) ? i>>1 : ((i>>1)+2) % 3;

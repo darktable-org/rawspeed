@@ -167,8 +167,8 @@ int main(int argc, char *argv[]) {
     d->decodeRaw();
     d->decodeMetaData(meta.get());
     r = d->mRaw;
-    for (uint32 i = 0; i < r->errors.size(); i++)
-      fprintf(stderr, "WARNING: [rawspeed] %s\n", r->errors[i]);
+    for (auto &error : r->errors)
+      fprintf(stderr, "WARNING: [rawspeed] %s\n", error);
 
     fprintf(stdout, "blackLevel: %d\n", r->blackLevel);
     fprintf(stdout, "whitePoint: %d\n", r->whitePoint);

@@ -72,8 +72,8 @@ RawImageData::~RawImageData() {
   pthread_mutex_destroy(&mymutex);
   pthread_mutex_destroy(&errMutex);
   pthread_mutex_destroy(&mBadPixelMutex);
-  for (uint32 i = 0 ; i < errors.size(); i++) {
-    free((void*)errors[i]);
+  for (auto &error : errors) {
+    free((void *)error);
   }
   if (table != NULL) {
     delete table;
@@ -217,8 +217,8 @@ RawImage::~RawImage() {
 }
 
 void RawImageData::copyErrorsFrom(RawImage other) {
-  for (uint32 i = 0 ; i < other->errors.size(); i++) {
-    setError(other->errors[i]);
+  for (auto &error : other->errors) {
+    setError(error);
   }
 }
 
@@ -230,8 +230,7 @@ void RawImageData::transferBadPixelsToMap()
   if (!mBadPixelMap)
     createBadPixelMap();
 
-  for (vector<uint32>::iterator i=mBadPixelPositions.begin(); i != mBadPixelPositions.end(); ++i) {
-    uint32 pos = *i;
+  for (unsigned int pos : mBadPixelPositions) {
     uint32 pos_x = pos&0xffff;
     uint32 pos_y = pos>>16;
     mBadPixelMap[mBadPixelMapPitch * pos_y + (pos_x >> 3)] |= 1 << (pos_x&7);

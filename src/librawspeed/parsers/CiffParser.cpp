@@ -72,8 +72,8 @@ RawDecoder* CiffParser::getDecoder() {
   potentials = mRootIFD->getIFDsWithTag(CIFF_MAKEMODEL);
 
   if (!potentials.empty()) {  // We have make entry
-    for (vector<CiffIFD*>::iterator i = potentials.begin(); i != potentials.end(); ++i) {
-      string make = (*i)->getEntry(CIFF_MAKEMODEL)->getString();
+    for (auto &potential : potentials) {
+      string make = potential->getEntry(CIFF_MAKEMODEL)->getString();
       TrimSpaces(make);
       if (make == "Canon") {
         mRootIFD = NULL;
@@ -92,12 +92,12 @@ void CiffParser::MergeIFD( CiffParser* other_ciff)
     return;
 
   CiffIFD *other_root = other_ciff->mRootIFD;
-  for (vector<CiffIFD*>::iterator i = other_root->mSubIFD.begin(); i != other_root->mSubIFD.end(); ++i) {
-    mRootIFD->mSubIFD.push_back(*i);
+  for (auto &i : other_root->mSubIFD) {
+    mRootIFD->mSubIFD.push_back(i);
   }
 
-  for (map<CiffTag, CiffEntry*>::iterator i = other_root->mEntry.begin(); i != other_root->mEntry.end(); ++i) {
-    mRootIFD->mEntry[(*i).first] = (*i).second;
+  for (auto &i : other_root->mEntry) {
+    mRootIFD->mEntry[i.first] = i.second;
   }
   other_root->mSubIFD.clear();
   other_root->mEntry.clear();
