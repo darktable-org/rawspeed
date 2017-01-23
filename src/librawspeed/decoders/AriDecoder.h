@@ -35,11 +35,12 @@ class AriDecoder :
 {
 public:
   AriDecoder(FileMap* file);
-  virtual ~AriDecoder();
-  virtual RawImage decodeRawInternal();
-  virtual void checkSupportInternal(CameraMetaData *meta);
-  virtual void decodeMetaDataInternal(CameraMetaData *meta);
-  virtual void decodeThreaded(RawDecoderThread * t);
+  ~AriDecoder() override;
+  RawImage decodeRawInternal() override;
+  void checkSupportInternal(CameraMetaData *meta) override;
+  void decodeMetaDataInternal(CameraMetaData *meta) override;
+  void decodeThreaded(RawDecoderThread *t) override;
+
 protected:
   uint32 mWidth, mHeight, mIso;
   std::string mModel;

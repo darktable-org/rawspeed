@@ -35,11 +35,12 @@ class DngDecoder :
 {
 public:
   DngDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~DngDecoder();
-  virtual RawImage decodeRawInternal();
-  virtual void decodeMetaDataInternal(CameraMetaData *meta);
-  virtual void checkSupportInternal(CameraMetaData *meta);
-  virtual TiffIFD* getRootIFD() {return mRootIFD;}
+  ~DngDecoder() override;
+  RawImage decodeRawInternal() override;
+  void decodeMetaDataInternal(CameraMetaData *meta) override;
+  void checkSupportInternal(CameraMetaData *meta) override;
+  TiffIFD *getRootIFD() override { return mRootIFD; }
+
 protected:
   TiffIFD *mRootIFD;
   bool mFixLjpeg;

@@ -27,7 +27,7 @@ namespace RawSpeed {
 
 class HasselbladDecompressor final : public LJpegDecompressor
 {
-  virtual void decodeScan();
+  void decodeScan() override;
 
 public:
   using LJpegDecompressor::LJpegDecompressor;

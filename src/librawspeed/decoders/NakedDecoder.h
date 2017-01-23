@@ -36,10 +36,11 @@ class NakedDecoder :
 {
 public:
   NakedDecoder(FileMap* file, Camera *c);
-  virtual ~NakedDecoder();
-  virtual RawImage decodeRawInternal();
-  virtual void checkSupportInternal(CameraMetaData *meta);
-  virtual void decodeMetaDataInternal(CameraMetaData *meta);
+  ~NakedDecoder() override;
+  RawImage decodeRawInternal() override;
+  void checkSupportInternal(CameraMetaData *meta) override;
+  void decodeMetaDataInternal(CameraMetaData *meta) override;
+
 protected:
   Camera *cam;
 };

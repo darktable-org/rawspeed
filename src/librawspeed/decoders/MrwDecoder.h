@@ -41,10 +41,10 @@ class MrwDecoder :
 {
 public:
   MrwDecoder(FileMap* file);
-  virtual ~MrwDecoder();
-  virtual RawImage decodeRawInternal();
-  virtual void checkSupportInternal(CameraMetaData *meta);
-  virtual void decodeMetaDataInternal(CameraMetaData *meta);
+  ~MrwDecoder() override;
+  RawImage decodeRawInternal() override;
+  void checkSupportInternal(CameraMetaData *meta) override;
+  void decodeMetaDataInternal(CameraMetaData *meta) override;
   static int isMRW(FileMap* input);
 protected:
   virtual void parseHeader();

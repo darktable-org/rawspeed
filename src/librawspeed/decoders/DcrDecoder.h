@@ -39,10 +39,11 @@ class DcrDecoder :
 {
 public:
   DcrDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~DcrDecoder();
-  virtual RawImage decodeRawInternal();
-  virtual void checkSupportInternal(CameraMetaData *meta);
-  virtual void decodeMetaDataInternal(CameraMetaData *meta);
+  ~DcrDecoder() override;
+  RawImage decodeRawInternal() override;
+  void checkSupportInternal(CameraMetaData *meta) override;
+  void decodeMetaDataInternal(CameraMetaData *meta) override;
+
 protected:
   TiffIFD *mRootIFD;
   void decodeKodak65000(ByteStream &input, uint32 w, uint32 h);

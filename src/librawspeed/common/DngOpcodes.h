@@ -112,9 +112,10 @@ class OpcodeFixBadPixelsConstant: public DngOpcode
 {
 public:
   OpcodeFixBadPixelsConstant(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used);
-  virtual ~OpcodeFixBadPixelsConstant() = default;
-  virtual RawImage& createOutput( RawImage &in );
-  virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
+  ~OpcodeFixBadPixelsConstant() override = default;
+  RawImage &createOutput(RawImage &in) override;
+  void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY) override;
+
 private:
   int mValue;
 };
@@ -124,8 +125,9 @@ class OpcodeFixBadPixelsList: public DngOpcode
 {
 public:
   OpcodeFixBadPixelsList(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used);
-  virtual ~OpcodeFixBadPixelsList() = default;
-  virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
+  ~OpcodeFixBadPixelsList() override = default;
+  void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY) override;
+
 private:
   std::vector<uint32> bad_pos;
 };
@@ -135,8 +137,9 @@ class OpcodeTrimBounds: public DngOpcode
 {
 public:
   OpcodeTrimBounds(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used);
-  virtual ~OpcodeTrimBounds() = default;
-  virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
+  ~OpcodeTrimBounds() override = default;
+  void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY) override;
+
 private:
   uint64 mTop, mLeft, mBottom, mRight;
 };
@@ -146,9 +149,10 @@ class OpcodeMapTable: public DngOpcode
 {
 public:
   OpcodeMapTable(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used);
-  virtual ~OpcodeMapTable() = default;
-  virtual RawImage& createOutput(RawImage &in);
-  virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
+  ~OpcodeMapTable() override = default;
+  RawImage &createOutput(RawImage &in) override;
+  void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY) override;
+
 private:
   uint64 mFirstPlane, mPlanes, mRowPitch, mColPitch;
   ushort16 mLookup[65536];
@@ -158,9 +162,10 @@ class OpcodeMapPolynomial: public DngOpcode
 {
 public:
   OpcodeMapPolynomial(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used);
-  virtual ~OpcodeMapPolynomial() = default;
-  virtual RawImage& createOutput(RawImage &in);
-  virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
+  ~OpcodeMapPolynomial() override = default;
+  RawImage &createOutput(RawImage &in) override;
+  void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY) override;
+
 private:
   uint64 mFirstPlane, mPlanes, mRowPitch, mColPitch, mDegree;
   double mCoefficient[9];
@@ -171,9 +176,10 @@ class OpcodeDeltaPerRow: public DngOpcode
 {
 public:
   OpcodeDeltaPerRow(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used);
-  virtual ~OpcodeDeltaPerRow() = default;
-  virtual RawImage& createOutput(RawImage &in);
-  virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
+  ~OpcodeDeltaPerRow() override = default;
+  RawImage &createOutput(RawImage &in) override;
+  void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY) override;
+
 private:
   uint64 mFirstPlane, mPlanes, mRowPitch, mColPitch, mCount;
   float* mDelta;
@@ -183,9 +189,10 @@ class OpcodeDeltaPerCol: public DngOpcode
 {
 public:
   OpcodeDeltaPerCol(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used);
-  virtual ~OpcodeDeltaPerCol();
-  virtual RawImage& createOutput(RawImage &in);
-  virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
+  ~OpcodeDeltaPerCol() override;
+  RawImage &createOutput(RawImage &in) override;
+  void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY) override;
+
 private:
   uint64 mFirstPlane, mPlanes, mRowPitch, mColPitch, mCount;
   float* mDelta;
@@ -196,9 +203,10 @@ class OpcodeScalePerRow: public DngOpcode
 {
 public:
   OpcodeScalePerRow(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used);
-  virtual ~OpcodeScalePerRow() = default;
-  virtual RawImage& createOutput(RawImage &in);
-  virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
+  ~OpcodeScalePerRow() override = default;
+  RawImage &createOutput(RawImage &in) override;
+  void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY) override;
+
 private:
   uint64 mFirstPlane, mPlanes, mRowPitch, mColPitch, mCount;
   float* mDelta;
@@ -208,9 +216,10 @@ class OpcodeScalePerCol: public DngOpcode
 {
 public:
   OpcodeScalePerCol(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used);
-  virtual ~OpcodeScalePerCol();
-  virtual RawImage& createOutput(RawImage &in);
-  virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY);
+  ~OpcodeScalePerCol() override;
+  RawImage &createOutput(RawImage &in) override;
+  void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY) override;
+
 private:
   uint64 mFirstPlane, mPlanes, mRowPitch, mColPitch, mCount;
   float* mDelta;

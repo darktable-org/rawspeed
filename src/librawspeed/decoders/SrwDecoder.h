@@ -38,11 +38,12 @@ class SrwDecoder :
 {
 public:
   SrwDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~SrwDecoder();
-  virtual RawImage decodeRawInternal();
-  virtual void decodeMetaDataInternal(CameraMetaData *meta);
-  virtual void checkSupportInternal(CameraMetaData *meta);
-  virtual TiffIFD* getRootIFD() {return mRootIFD;}
+  ~SrwDecoder() override;
+  RawImage decodeRawInternal() override;
+  void decodeMetaDataInternal(CameraMetaData *meta) override;
+  void checkSupportInternal(CameraMetaData *meta) override;
+  TiffIFD *getRootIFD() override { return mRootIFD; }
+
 private:
   typedef struct {
     uchar8 encLen;

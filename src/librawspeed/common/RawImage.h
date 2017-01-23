@@ -188,14 +188,14 @@ protected:
 class RawImageDataU16 : public RawImageData
 {
 public:
-  virtual void scaleBlackWhite();
-  virtual void calculateBlackAreas();
-  virtual void setWithLookUp(ushort16 value, uchar8* dst, uint32* random) final;
+  void scaleBlackWhite() override;
+  void calculateBlackAreas() override;
+  void setWithLookUp(ushort16 value, uchar8 *dst, uint32 *random) final;
 
 protected:
-  virtual void scaleValues(int start_y, int end_y);
-  virtual void fixBadPixel( uint32 x, uint32 y, int component = 0);
-  virtual void doLookup(int start_y, int end_y);
+  void scaleValues(int start_y, int end_y) override;
+  void fixBadPixel(uint32 x, uint32 y, int component = 0) override;
+  void doLookup(int start_y, int end_y) override;
 
   RawImageDataU16();
   RawImageDataU16(const iPoint2D &dim, uint32 cpp = 1);
@@ -205,14 +205,14 @@ protected:
 class RawImageDataFloat : public RawImageData
 {
 public:
-  virtual void scaleBlackWhite();
-  virtual void calculateBlackAreas();
-  virtual void setWithLookUp(ushort16 value, uchar8* dst, uint32* random);
+  void scaleBlackWhite() override;
+  void calculateBlackAreas() override;
+  void setWithLookUp(ushort16 value, uchar8 *dst, uint32 *random) override;
 
 protected:
-  virtual void scaleValues(int start_y, int end_y);
-  virtual void fixBadPixel( uint32 x, uint32 y, int component = 0);
-  virtual void doLookup(int start_y, int end_y);
+  void scaleValues(int start_y, int end_y) override;
+  void fixBadPixel(uint32 x, uint32 y, int component = 0) override;
+  void doLookup(int start_y, int end_y) override;
   RawImageDataFloat();
   RawImageDataFloat(const iPoint2D &dim, uint32 cpp = 1);
   friend class RawImage;

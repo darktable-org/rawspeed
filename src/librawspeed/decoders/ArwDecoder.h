@@ -37,12 +37,13 @@ class ArwDecoder :
 {
 public:
   ArwDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~ArwDecoder();
-  virtual RawImage decodeRawInternal();
-  virtual void checkSupportInternal(CameraMetaData *meta);
-  virtual void decodeMetaDataInternal(CameraMetaData *meta);
-  virtual void decodeThreaded(RawDecoderThread* t);
-  virtual TiffIFD* getRootIFD() {return mRootIFD;}
+  ~ArwDecoder() override;
+  RawImage decodeRawInternal() override;
+  void checkSupportInternal(CameraMetaData *meta) override;
+  void decodeMetaDataInternal(CameraMetaData *meta) override;
+  void decodeThreaded(RawDecoderThread *t) override;
+  TiffIFD *getRootIFD() override { return mRootIFD; }
+
 protected:
   void DecodeARW(ByteStream &input, uint32 w, uint32 h);
   void DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp);

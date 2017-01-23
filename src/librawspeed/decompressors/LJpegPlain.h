@@ -29,7 +29,7 @@ namespace RawSpeed {
 
 class LJpegPlain final : public LJpegDecompressor
 {
-  virtual void decodeScan();
+  void decodeScan() override;
   template<int N_COMP, int X_S_F, int Y_S_F> void decodeN_X_Y();
 
 public:

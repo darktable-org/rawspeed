@@ -38,10 +38,10 @@ class CrwDecoder :
 {
 public:
   CrwDecoder(CiffIFD *rootIFD, FileMap* file);
-  virtual RawImage decodeRawInternal();
-  virtual void checkSupportInternal(CameraMetaData *meta);
-  virtual void decodeMetaDataInternal(CameraMetaData *meta);
-  virtual ~CrwDecoder();
+  RawImage decodeRawInternal() override;
+  void checkSupportInternal(CameraMetaData *meta) override;
+  void decodeMetaDataInternal(CameraMetaData *meta) override;
+  ~CrwDecoder() override;
 
 protected:
   CiffIFD *mRootIFD;
