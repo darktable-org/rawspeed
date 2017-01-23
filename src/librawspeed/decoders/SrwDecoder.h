@@ -45,7 +45,7 @@ public:
   TiffIFD *getRootIFD() override { return mRootIFD; }
 
 private:
-  using encTableItem = struct encTableItem {
+  struct encTableItem {
     uchar8 encLen;
     uchar8 diffLen;
   };

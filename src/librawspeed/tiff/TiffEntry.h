@@ -38,7 +38,7 @@ class TiffIFD;
  *
  * Note: RATIONALs are the ratio of two 32-bit integer values.
  */
-using TiffDataType = enum TiffDataType {
+enum TiffDataType {
   TIFF_NOTYPE    = 0, /* placeholder */
   TIFF_BYTE      = 1, /* 8-bit unsigned integer */
   TIFF_ASCII     = 2, /* 8-bit bytes w/ last byte null */

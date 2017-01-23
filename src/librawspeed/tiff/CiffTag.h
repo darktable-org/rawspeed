@@ -23,7 +23,7 @@
 
 namespace RawSpeed {
 
-using CiffTag = enum CiffTag {
+enum CiffTag {
   CIFF_NULL         = 0x0000,
   CIFF_MAKEMODEL    = 0x080a,
   CIFF_SHOTINFO     = 0x102a,

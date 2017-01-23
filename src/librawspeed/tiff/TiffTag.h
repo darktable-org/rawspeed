@@ -27,7 +27,7 @@
 
 namespace RawSpeed {
 
-using TiffTag = enum TiffTag {
+enum TiffTag {
   INTEROPERABILITYINDEX  = 0x0001,
   INTEROPERABILITYVERSION         = 0x0002,
   CANONSHOTINFO = 0x0004,

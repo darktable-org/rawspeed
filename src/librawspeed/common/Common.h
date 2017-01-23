@@ -77,7 +77,7 @@ using int32 = signed int;
 using ushort16 = unsigned short;
 using short16 = signed short;
 
-using Endianness = enum Endianness { big, little, unknown };
+enum Endianness { big, little, unknown };
 
 const int DEBUG_PRIO_ERROR = 0x10;
 const int DEBUG_PRIO_WARNING = 0x100;
@@ -243,7 +243,7 @@ inline std::vector<std::string> split_string(const std::string &input,
   return result;
 }
 
-using BitOrder = enum BitOrder {
+enum BitOrder {
   BitOrder_Plain,  /* Memory order */
   BitOrder_Jpeg,   /* Input is added to stack byte by byte, and output is lifted from top */
   BitOrder_Jpeg16, /* Same as above, but 16 bits at the time */

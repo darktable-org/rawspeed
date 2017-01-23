@@ -26,7 +26,7 @@
 
 namespace RawSpeed {
 
-using CFAColor = enum CFAColor {
+enum CFAColor {
   CFA_COLOR_MIN = 0,
   CFA_RED = 0,
   CFA_GREEN = 1,

@@ -35,11 +35,11 @@ class RawImage;
 
 class RawImageData;
 
-using RawImageType = enum RawImageType { TYPE_USHORT16, TYPE_FLOAT32 };
+enum RawImageType { TYPE_USHORT16, TYPE_FLOAT32 };
 
 class RawImageWorker {
 public:
-  using RawImageWorkerTask = enum RawImageWorkerTask {
+  enum RawImageWorkerTask {
     SCALE_VALUES = 1, FIX_BAD_PIXELS = 2, APPLY_LOOKUP = 3 | 0x1000, FULL_IMAGE = 0x1000
   };
 

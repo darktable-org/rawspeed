@@ -31,11 +31,6 @@ namespace RawSpeed {
 class CameraMetaData;
 class TiffIFD;
 
-using mrw_camera_t = struct mrw_camera_t {
-  const char* code;
-  const char* name;
-};
-
 class MrwDecoder :
   public RawDecoder
 {

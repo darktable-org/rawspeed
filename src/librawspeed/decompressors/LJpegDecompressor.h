@@ -39,8 +39,7 @@ namespace RawSpeed {
 
 class ByteStream;
 
-using JpegMarker =
-    enum JpegMarker { /* JPEG marker codes			*/
+enum JpegMarker { /* JPEG marker codes			*/
   M_STUFF = 0x00,
   M_SOF0  = 0xc0,	/* baseline DCT				*/
   M_SOF1  = 0xc1,	/* extended sequential DCT		*/
@@ -107,12 +106,12 @@ using JpegMarker =
   M_FILL  = 0xFF
 
 
-    };
+};
 
 /*
 * The following structure stores basic information about one component.
 */
-using JpegComponentInfo = struct JpegComponentInfo {
+struct JpegComponentInfo {
   /*
   * These values are fixed over the whole image.
   * They are read from the SOF marker.
