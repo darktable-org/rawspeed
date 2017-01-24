@@ -1,6 +1,7 @@
 add_executable(rstest rstest.cpp md5.cpp)
 set_target_properties(rstest PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(rstest rawspeed_test)
+target_link_libraries(rstest rawspeed_static)
+target_include_directories(rstest PUBLIC "${CONFIG_INCLUDE_PATH}")
 
 if(BUILD_TESTING)
   add_executable(md5 md5.cpp)
