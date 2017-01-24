@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 
   if (argc != 2) {
     fprintf(stderr, "Usage: darktable-rs-identify <file>\n");
-    return 2;
+    return 0;
   }
 
   const std::string camfile = find_cameras_xml(argv[0]);
