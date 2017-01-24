@@ -7,4 +7,8 @@ set_target_properties(darktable-rs-identify PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(darktable-rs-identify rawspeed_static)
 target_include_directories(darktable-rs-identify PUBLIC "${CONFIG_INCLUDE_PATH}")
 
+if(BUILD_TESTING)
+  add_test(NAME utilities/darktable-rs-identify COMMAND darktable-rs-identify)
+endif()
+
 install(TARGETS darktable-rs-identify DESTINATION ${CMAKE_INSTALL_BINDIR})

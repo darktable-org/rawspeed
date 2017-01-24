@@ -18,7 +18,7 @@ target_build()
   # to get as much of the issues into the log as possible
   cmake --build "$BUILD_DIR" -- $PARALLEL -v || cmake --build "$BUILD_DIR" -- -j1 -v -k0
 
-  ctest --output-on-failure || ctest -V
+  ctest --output-on-failure || ctest --rerun-failed -V -VV
 
   # and now check that it installs where told and only there.
   cmake --build "$BUILD_DIR" --target install -- $PARALLEL -v || cmake --build "$BUILD_DIR" --target install -- -j1 -v -k0

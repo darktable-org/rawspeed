@@ -194,7 +194,7 @@ std::string md5_hash(const uint8_t *message, size_t len) {
   return res;
 }
 
-#if 0
+#ifdef ENABLE_SELFTEST
 /* Self-check */
 
 struct testcase {
@@ -238,6 +238,7 @@ int main(int argc, char **argv) {
 	}
 	printf("Self-check passed\n");
 
+#if 0
 	// Benchmark speed
 	uint32_t state[4] = {0};
 	uint8_t block[64] = {0};
@@ -247,6 +248,7 @@ int main(int argc, char **argv) {
 	for (i = 0; i < N; i++)
 		md5_compress(state, block);
 	printf("Speed: %.1f MB/s\n", (double)N * sizeof(block) / (clock() - start_time) * CLOCKS_PER_SEC / 1000000);
+#endif
 
 	return EXIT_SUCCESS;
 }
