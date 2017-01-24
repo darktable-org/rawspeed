@@ -2,11 +2,13 @@ include(CheckCXXCompilerFlag)
 include(CpuMarch)
 include(CheckCXXCompilerFlagAndEnableIt)
 
+message(STATUS "Checking for -std=c++11 support")
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 if(NOT COMPILER_SUPPORTS_CXX11)
         message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+message(STATUS "Checking for -std=c++11 support - works")
 
 # always debug info
 add_definitions(-g3)
