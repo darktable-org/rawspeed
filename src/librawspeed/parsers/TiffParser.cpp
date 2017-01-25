@@ -91,7 +91,7 @@ RawDecoder* makeDecoder(TiffRootIFDOwner _root, Buffer &data) {
   for (TiffIFD* ifd : root->getIFDsWithTag(MAKE)) {
     string make = ifd->getEntry(MAKE)->getString();
     TrimSpaces(make);
-    string model = "";
+    string model;
     if (ifd->hasEntry(MODEL)) {
       model = ifd->getEntry(MODEL)->getString();
       TrimSpaces(model);

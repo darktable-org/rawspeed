@@ -256,8 +256,6 @@ void RawImageData::fixBadPixels()
   if (mBadPixelMap)
     startWorker(RawImageWorker::FIX_BAD_PIXELS, false);
 
-  return;
-
 #else  // EMULATE_DCRAW_BAD_PIXELS - not recommended, testing purposes only
 
   for (vector<uint32>::iterator i=mBadPixelPositions.begin(); i != mBadPixelPositions.end(); ++i) {

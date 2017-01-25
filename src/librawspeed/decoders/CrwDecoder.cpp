@@ -132,7 +132,7 @@ void CrwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
     ThrowRDE("CRW Support check: wrong number of strings for make/model");
   string make = makemodel[0];
   string model = makemodel[1];
-  string mode = "";
+  string mode;
 
   if (mRootIFD->hasEntryRecursive(CIFF_SHOTINFO)) {
     CiffEntry *shot_info = mRootIFD->getEntryRecursive(CIFF_SHOTINFO);
