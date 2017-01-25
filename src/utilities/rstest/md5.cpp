@@ -203,7 +203,7 @@ struct testcase {
 };
 
 #define TESTCASE(a, b, c, d, msg)                                              \
-  { {UINT32_C(a), UINT32_C(b), UINT32_C(c), UINT32_C(d)}, (const uint8_t *)msg }
+  { {UINT32_C(a), UINT32_C(b), UINT32_C(c), UINT32_C(d)}, (const uint8_t *)(msg) }
 
 // Note: The MD5 standard specifies that uint32 are serialized to/from bytes in little endian
 static struct testcase testCases[] = {
@@ -216,7 +216,7 @@ static struct testcase testCases[] = {
 	TESTCASE(0xA2F4ED57,0x55C9E32B,0x2EDA49AC,0x7AB60721, "12345678901234567890123456789012345678901234567890123456789012345678901234567890"),
 };
 
-static bool self_check(void) {
+static bool self_check() {
 	unsigned int i;
 	for (i = 0; i < sizeof(testCases) / sizeof(testCases[i]); i++) {
 		struct testcase *tc = &testCases[i];
