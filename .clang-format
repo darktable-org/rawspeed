@@ -2,4 +2,7 @@
 Language:     Cpp
 BasedOnStyle: LLVM
 Standard:     Cpp11
+# Force pointers to the type for C++.
+DerivePointerAlignment: false
+PointerAlignment: Left
 ...
