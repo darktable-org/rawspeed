@@ -128,8 +128,8 @@ RawDecoder* makeDecoder(TiffRootIFDOwner _root, Buffer &data) {
     if (make == "Kodak") {
       if (model == "DCS560C")
         return new Cr2Decoder(root, mInput);
-      else
-        return new DcrDecoder(root, mInput);
+
+      return new DcrDecoder(root, mInput);
     }
     if (make == "KODAK") {
       return new DcsDecoder(root, mInput);

@@ -81,8 +81,8 @@ void* _aligned_malloc(size_t bytes, size_t alignment) {
   void *ret = nullptr;
   if (0 == posix_memalign(&ret, alignment, bytes))
     return ret;
-  else
-    return nullptr;
+
+  return nullptr;
 }
 
 #endif

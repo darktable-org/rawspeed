@@ -525,10 +525,9 @@ void DngDecoder::checkSupportInternal(CameraMetaData *meta) {
       string unique = mRootIFD->getEntryRecursive(UNIQUECAMERAMODEL)->getString();
       this->checkCameraSupported(meta, unique, unique, "dng");
       return;
-    } else {
-      // If we don't have make/model we cannot tell, but still assume yes.
-      return;
     }
+    // If we don't have make/model we cannot tell, but still assume yes.
+    return;
   }
 
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);

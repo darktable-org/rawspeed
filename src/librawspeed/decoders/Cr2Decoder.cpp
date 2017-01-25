@@ -273,11 +273,10 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
 RawImage Cr2Decoder::decodeRawInternal() {
   try {
-    if (hints.find("old_format") != hints.end()) {
+    if (hints.find("old_format") != hints.end())
       return decodeOldFormat();
-    } else {
-      return decodeNewFormat();
-    }
+
+    return decodeNewFormat();
   } catch (TiffParserException &) {
     ThrowRDE("CR2 Decoder: Unsupported format.");
     return nullptr; // silence the -Wreturn-type warning

@@ -84,7 +84,9 @@ RawImage ArwDecoder::decodeRawInternal() {
       }
 
       return mRaw;
-    } else if (hints.find("srf_format") != hints.end()) {
+    }
+
+    if (hints.find("srf_format") != hints.end()) {
       data = mRootIFD->getIFDsWithTag(IMAGEWIDTH);
       if (data.empty())
         ThrowRDE("ARW: SRF format, couldn't find width/height");
@@ -120,9 +122,9 @@ RawImage ArwDecoder::decodeRawInternal() {
       Decode16BitRawBEunpacked(input, width, height);
 
       return mRaw;
-    } else {
-      ThrowRDE("ARW Decoder: No image data found");
     }
+
+    ThrowRDE("ARW Decoder: No image data found");
   }
 
   raw = data[0];

@@ -85,17 +85,16 @@ RawImage SrwDecoder::decodeRawInternal() {
         bit_order = ("true" == (msb_hint->second));
       this->decodeUncompressed(raw, bit_order ? BitOrder_Jpeg : BitOrder_Plain);
       return mRaw;
-    } else {
-      uint32 nslices = raw->getEntry(STRIPOFFSETS)->count;
-      if (nslices != 1)
-        ThrowRDE("Srw Decoder: Only one slice supported, found %u", nslices);
-      try {
-        decodeCompressed(raw);
-      } catch (RawDecoderException& e) {
-        mRaw->setError(e.what());
-      }
-      return mRaw;
     }
+    uint32 nslices = raw->getEntry(STRIPOFFSETS)->count;
+    if (nslices != 1)
+      ThrowRDE("Srw Decoder: Only one slice supported, found %u", nslices);
+    try {
+      decodeCompressed(raw);
+    } catch (RawDecoderException& e) {
+      mRaw->setError(e.what());
+    }
+    return mRaw;
   }
   if (32772 == compression)
   {

@@ -121,19 +121,18 @@ RawImage MosDecoder::decodeRawInternal() {
     }
 
     return mRaw;
+  }
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(TILEOFFSETS);
+  if (!data.empty()) {
+    raw = data[0];
+    off = raw->getEntry(TILEOFFSETS)->getInt();
   } else {
-    vector<TiffIFD *> data = mRootIFD->getIFDsWithTag(TILEOFFSETS);
+    data = mRootIFD->getIFDsWithTag(CFAPATTERN);
     if (!data.empty()) {
       raw = data[0];
-      off = raw->getEntry(TILEOFFSETS)->getInt();
-    } else {
-      data = mRootIFD->getIFDsWithTag(CFAPATTERN);
-      if (!data.empty()) {
-        raw = data[0];
-        off = raw->getEntry(STRIPOFFSETS)->getInt();
-      } else
-        ThrowRDE("MOS Decoder: No image data found");
-    }
+      off = raw->getEntry(STRIPOFFSETS)->getInt();
+    } else
+      ThrowRDE("MOS Decoder: No image data found");
   }
 
   uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
@@ -221,9 +220,8 @@ void MosDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
           mRaw->metadata.wbCoeffs[2] = (float) tmp[0]/tmp[3];
         }
         break;
-      } else {
-        bs.skipBytes(1);
       }
+      bs.skipBytes(1);
     }
   }
 
