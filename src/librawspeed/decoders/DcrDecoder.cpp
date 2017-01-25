@@ -43,9 +43,7 @@ DcrDecoder::DcrDecoder(TiffIFD *rootIFD, FileMap* file)  :
   decoderVersion = 0;
 }
 
-DcrDecoder::~DcrDecoder(void) {
-  delete mRootIFD;
-}
+DcrDecoder::~DcrDecoder() { delete mRootIFD; }
 
 RawImage DcrDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
@@ -81,7 +79,7 @@ RawImage DcrDecoder::decodeRawInternal() {
       ThrowRDE("DCR Decoder: Couldn't find the linearization table");
     }
 
-    ushort16 *linearization_table = new ushort16[1024];
+    auto *linearization_table = new ushort16[1024];
     linearization->getShortArray(linearization_table, 1024);
 
     if (!uncorrectedRawValues)
@@ -108,7 +106,7 @@ RawImage DcrDecoder::decodeRawInternal() {
     if (uncorrectedRawValues) {
       mRaw->setTable(linearization_table, 1024, false);
     } else {
-      mRaw->setTable(NULL);
+      mRaw->setTable(nullptr);
     }
     delete [] linearization_table;
   } else
@@ -125,7 +123,7 @@ void DcrDecoder::decodeKodak65000(ByteStream &input, uint32 w, uint32 h) {
 
   uint32 random = 0;
   for (uint32 y = 0; y < h; y++) {
-    ushort16* dest = (ushort16*) & data[y*pitch];
+    auto *dest = (ushort16 *)&data[y * pitch];
     for (uint32 x = 0 ; x < w; x += 256) {
       pred[0] = pred[1] = 0;
       uint32 len = MIN(256, w-x);

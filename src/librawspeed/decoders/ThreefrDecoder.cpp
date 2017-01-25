@@ -60,9 +60,7 @@ ThreefrDecoder::ThreefrDecoder(TiffIFD *rootIFD, FileMap* file)  :
   decoderVersion = 0;
 }
 
-ThreefrDecoder::~ThreefrDecoder(void) {
-  delete mRootIFD;
-}
+ThreefrDecoder::~ThreefrDecoder() { delete mRootIFD; }
 
 RawImage ThreefrDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
@@ -82,7 +80,7 @@ RawImage ThreefrDecoder::decodeRawInternal() {
   // We cannot use fully decoding huffman table,
   // because values are packed two pixels at the time.
   l.mFullDecodeHT = false;
-  map<string,string>::iterator pixelOffset = hints.find("pixelBaseOffset");
+  auto pixelOffset = hints.find("pixelBaseOffset");
   if (pixelOffset != hints.end()) {
     stringstream convert((*pixelOffset).second);
     convert >> l.pixelBaseOffset;

@@ -46,10 +46,10 @@ RawDecoder(file), mRootIFD(rootIFD) {
   decoderVersion = 3;
 }
 
-SrwDecoder::~SrwDecoder(void) {
+SrwDecoder::~SrwDecoder() {
   if (mRootIFD)
     delete mRootIFD;
-  mRootIFD = NULL;
+  mRootIFD = nullptr;
 }
 
 RawImage SrwDecoder::decodeRawInternal() {
@@ -69,7 +69,7 @@ RawImage SrwDecoder::decodeRawInternal() {
   if (32769 == compression)
   {
     bool bit_order = false;  // Default guess
-    map<string,string>::iterator msb_hint = hints.find("msb_override");
+    auto msb_hint = hints.find("msb_override");
     if (msb_hint != hints.end())
       bit_order = ("true" == (msb_hint->second));
     this->decodeUncompressed(raw, bit_order ? BitOrder_Jpeg : BitOrder_Plain);
@@ -80,7 +80,7 @@ RawImage SrwDecoder::decodeRawInternal() {
   {
     if (!raw->hasEntry ((TiffTag)40976)) {
       bool bit_order = (bits == 12);  // Default guess
-      map<string,string>::iterator msb_hint = hints.find("msb_override");
+      auto msb_hint = hints.find("msb_override");
       if (msb_hint != hints.end())
         bit_order = ("true" == (msb_hint->second));
       this->decodeUncompressed(raw, bit_order ? BitOrder_Jpeg : BitOrder_Plain);
@@ -134,19 +134,19 @@ void SrwDecoder::decodeCompressed( TiffIFD* raw )
     if (line_offset >= mFile->getSize())
       ThrowRDE("Srw decoder: Offset outside image file, file probably truncated.");
     int len[4];
-    for (int i = 0; i < 4; i++)
-      len[i] = y < 2 ? 7 : 4;
+    for (int &i : len)
+      i = y < 2 ? 7 : 4;
     BitPumpMSB32 bits(mFile, line_offset);
     int op[4];
-    ushort16* img = (ushort16*)mRaw->getData(0, y);
+    auto *img = (ushort16 *)mRaw->getData(0, y);
     ushort16* img_up = (ushort16*)mRaw->getData(0, max(0, (int)y - 1));
     ushort16* img_up2 = (ushort16*)mRaw->getData(0, max(0, (int)y - 2));
     // Image is arranged in groups of 16 pixels horizontally
     for (uint32 x = 0; x < width; x += 16) {
       bits.fill();
       bool dir = !!bits.getBitsNoFill(1);
-      for (int i = 0; i < 4; i++)
-        op[i] = bits.getBitsNoFill(2);
+      for (int &i : op)
+        i = bits.getBitsNoFill(2);
       for (int i = 0; i < 4; i++) {
         switch (op[i]) {
           case 3: len[i] = bits.getBits(4);
@@ -202,8 +202,8 @@ void SrwDecoder::decodeCompressed( TiffIFD* raw )
 
   // Swap red and blue pixels to get the final CFA pattern
   for (uint32 y = 0; y < height-1; y+=2) {
-    ushort16* topline = (ushort16*)mRaw->getData(0, y);
-    ushort16* bottomline = (ushort16*)mRaw->getData(0, y+1);
+    auto *topline = (ushort16 *)mRaw->getData(0, y);
+    auto *bottomline = (ushort16 *)mRaw->getData(0, y + 1);
     for (uint32 x = 0; x < width-1; x += 2) {
       ushort16 temp = topline[1];
       topline[1] = bottomline[0];
@@ -243,16 +243,16 @@ void SrwDecoder::decodeCompressed2( TiffIFD* raw, int bits)
   // the maximum number of bits used in the variable encoding (for the 12 and
   // 13 cases)
   uint32 n = 0;
-  for (uint32 i=0; i < 14; i++) {
-    for(int32 c = 0; c < (1024 >> tab[i][0]); c++) {
-      tbl[n  ].encLen = tab[i][0];
-      tbl[n++].diffLen = tab[i][1];
+  for (auto i : tab) {
+    for (int32 c = 0; c < (1024 >> i[0]); c++) {
+      tbl[n].encLen = i[0];
+      tbl[n++].diffLen = i[1];
     }
   }
 
   BitPumpMSB pump(mFile, offset);
   for (uint32 y = 0; y < height; y++) {
-    ushort16* img = (ushort16*)mRaw->getData(0, y);
+    auto *img = (ushort16 *)mRaw->getData(0, y);
     for (uint32 x = 0; x < width; x++) {
       int32 diff = samsungDiff(pump, tbl);
       if (x < 2)
@@ -336,15 +336,15 @@ void SrwDecoder::decodeCompressed3( TiffIFD* raw, int bits)
       line_offset += 16 - (line_offset & 0xf);
     BitPumpMSB32 pump(mFile, offset+line_offset);
 
-    ushort16* img = (ushort16*)mRaw->getData(0, row);
+    auto *img = (ushort16 *)mRaw->getData(0, row);
     ushort16* img_up = (ushort16*)mRaw->getData(0, max(0, (int)row - 1));
     ushort16* img_up2 = (ushort16*)mRaw->getData(0, max(0, (int)row - 2));
     // Initialize the motion and diff modes at the start of the line
     motion = 7;
     // By default we are not scaling values at all
     int32 scale = 0;
-    for (uint32 i=0; i<3; i++)
-      diffBitsMode[i][0] = diffBitsMode[i][1] = (row==0 || row==1) ? 7 : 4;
+    for (auto &i : diffBitsMode)
+      i[0] = i[1] = (row == 0 || row == 1) ? 7 : 4;
 
     for (uint32 col=0; col < width; col += 16) {
       if (!(optflags & OPT_QP) && !(col & 63)) {
@@ -395,8 +395,8 @@ void SrwDecoder::decodeCompressed3( TiffIFD* raw, int bits)
       uint32 diffBits[4] = {0};
       if (optflags & OPT_SKIP || !pump.getBitsSafe(1)) {
         uint32 flags[4];
-        for (uint32 i=0; i<4; i++)
-          flags[i] = pump.getBitsSafe(2);
+        for (unsigned int &flag : flags)
+          flag = pump.getBitsSafe(2);
         for (uint32 i=0; i<4; i++) {
           // The color is 0-Green 1-Blue 2-Red
           uint32 colornum = (row % 2 != 0) ? i>>1 : ((i>>1)+2) % 3;
@@ -422,7 +422,7 @@ void SrwDecoder::decodeCompressed3( TiffIFD* raw, int bits)
         if (diff >> (len-1))
           diff -= (1 << len);
 
-        ushort16 *value = NULL;
+        ushort16 *value = nullptr;
         // Apply the diff to pixels 0 2 4 6 8 10 12 14 1 3 5 7 9 11 13 15
         if (row % 2)
           value = &img[((i&0x7)<<1)+1-(i>>3)];

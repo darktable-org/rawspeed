@@ -36,11 +36,11 @@ class X3fDecoder;
 class X3fDirectory
 {
 public:
-  X3fDirectory() : offset(0), length(0), id(std::string()){};
+  X3fDirectory() : id(std::string()){};
   X3fDirectory(ByteStream *bytes);
-  X3fDirectory(const X3fDirectory &other) : offset(other.offset), length(other.length), id(other.id), sectionID(other.sectionID) {};
-  uint32 offset;
-  uint32 length;
+  X3fDirectory(const X3fDirectory &other) = default;
+  uint32 offset{0};
+  uint32 length{0};
   std::string id;
   std::string sectionID;
 };
@@ -70,10 +70,9 @@ public:
 class X3fPropertyCollection
 {
 public:
-  X3fPropertyCollection(){};
+  X3fPropertyCollection() = default;
   void addProperties(ByteStream *bytes, uint32 offset, uint32 length);
-  X3fPropertyCollection(const X3fPropertyCollection &other)
-    : props(other.props) {};
+  X3fPropertyCollection(const X3fPropertyCollection &other) = default;
   std::string getString( ByteStream *bytes );
   std::map<std::string, std::string> props;
 };
@@ -81,7 +80,7 @@ public:
 class X3fParser {
 public:
   X3fParser(FileMap* file);
-  virtual ~X3fParser(void);
+  virtual ~X3fParser();
   virtual RawDecoder* getDecoder();
 protected:
   void readDirectory();

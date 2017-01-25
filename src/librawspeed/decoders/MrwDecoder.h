@@ -31,20 +31,15 @@ namespace RawSpeed {
 class CameraMetaData;
 class TiffIFD;
 
-typedef struct {
-  const char* code;
-  const char* name;
-} mrw_camera_t;
-
 class MrwDecoder :
   public RawDecoder
 {
 public:
   MrwDecoder(FileMap* file);
-  virtual ~MrwDecoder(void);
-  virtual RawImage decodeRawInternal();
-  virtual void checkSupportInternal(CameraMetaData *meta);
-  virtual void decodeMetaDataInternal(CameraMetaData *meta);
+  ~MrwDecoder() override;
+  RawImage decodeRawInternal() override;
+  void checkSupportInternal(CameraMetaData *meta) override;
+  void decodeMetaDataInternal(CameraMetaData *meta) override;
   static int isMRW(FileMap* input);
 protected:
   virtual void parseHeader();

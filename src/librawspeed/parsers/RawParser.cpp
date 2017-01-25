@@ -48,9 +48,7 @@ class RawDecoder;
 RawParser::RawParser(FileMap* inputData): mInput(inputData) {
 }
 
-
-RawParser::~RawParser(void) {
-}
+RawParser::~RawParser() = default;
 
 RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
   // We need some data.
@@ -159,7 +157,7 @@ RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
   }
 
   // Detect camera on filesize (CHDK).
-  if (meta != NULL && meta->hasChdkCamera(mInput->getSize())) {
+  if (meta != nullptr && meta->hasChdkCamera(mInput->getSize())) {
     Camera* c = meta->getChdkCamera(mInput->getSize());
 
     try {
@@ -170,7 +168,7 @@ RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
 
   // File could not be decoded, so no further options for now.
   ThrowRDE("No decoder found. Sorry.");
-  return NULL;
+  return nullptr;
 }
 
 } // namespace RawSpeed

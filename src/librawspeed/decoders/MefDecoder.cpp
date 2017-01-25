@@ -39,9 +39,7 @@ MefDecoder::MefDecoder(TiffIFD *rootIFD, FileMap* file)  :
   decoderVersion = 0;
 }
 
-MefDecoder::~MefDecoder(void) {
-  delete mRootIFD;
-}
+MefDecoder::~MefDecoder() { delete mRootIFD; }
 
 RawImage MefDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);

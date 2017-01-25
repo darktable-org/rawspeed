@@ -30,33 +30,29 @@ using namespace std;
 
 namespace RawSpeed {
 
-RawImageData::RawImageData(void):
-    dim(0, 0), isCFA(true), cfa(iPoint2D(0,0)),
-    blackLevel(-1), whitePoint(65536),
-    dataRefCount(0), data(0), cpp(1), bpp(0),
-    uncropped_dim(0, 0), table(NULL) {
+RawImageData::RawImageData()
+    : dim(0, 0), cfa(iPoint2D(0, 0)), uncropped_dim(0, 0) {
   blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
-  pthread_mutex_init(&mymutex, NULL);
-  mBadPixelMap = NULL;
-  pthread_mutex_init(&errMutex, NULL);
-  pthread_mutex_init(&mBadPixelMutex, NULL);
+  pthread_mutex_init(&mymutex, nullptr);
+  mBadPixelMap = nullptr;
+  pthread_mutex_init(&errMutex, nullptr);
+  pthread_mutex_init(&mBadPixelMutex, nullptr);
   mDitherScale = true;
 }
 
 RawImageData::RawImageData(const iPoint2D &_dim, uint32 _bpc, uint32 _cpp)
-    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), blackLevel(-1),
-      whitePoint(65536), dataRefCount(0), data(0), cpp(_cpp), bpp(_bpc * _cpp),
-      uncropped_dim(0, 0), table(NULL) {
+    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), dataRefCount(0),
+      data(nullptr), cpp(_cpp), bpp(_bpc * _cpp), uncropped_dim(0, 0) {
   blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
-  mBadPixelMap = NULL;
+  mBadPixelMap = nullptr;
   mDitherScale = true;
   createData();
-  pthread_mutex_init(&mymutex, NULL);
-  pthread_mutex_init(&errMutex, NULL);
-  pthread_mutex_init(&mBadPixelMutex, NULL);
+  pthread_mutex_init(&mymutex, nullptr);
+  pthread_mutex_init(&errMutex, nullptr);
+  pthread_mutex_init(&mBadPixelMutex, nullptr);
 }
 
-ImageMetaData::ImageMetaData(void) {
+ImageMetaData::ImageMetaData() {
   subsampling.x = subsampling.y = 1;
   isoSpeed = 0;
   pixelAspectRatio = 1;
@@ -67,16 +63,16 @@ ImageMetaData::ImageMetaData(void) {
   wbCoeffs[3] = NAN;
 }
 
-RawImageData::~RawImageData(void) {
+RawImageData::~RawImageData() {
   _ASSERTE(dataRefCount == 0);
   mOffset = iPoint2D(0, 0);
   pthread_mutex_destroy(&mymutex);
   pthread_mutex_destroy(&errMutex);
   pthread_mutex_destroy(&mBadPixelMutex);
-  for (uint32 i = 0 ; i < errors.size(); i++) {
-    free((void*)errors[i]);
+  for (auto &error : errors) {
+    free((void *)error);
   }
-  if (table != NULL) {
+  if (table != nullptr) {
     delete table;
   }
   errors.clear();
@@ -103,8 +99,8 @@ void RawImageData::destroyData() {
     _aligned_free(data);
   if (mBadPixelMap)
     _aligned_free(mBadPixelMap);
-  data = 0;
-  mBadPixelMap = 0;
+  data = nullptr;
+  mBadPixelMap = nullptr;
 }
 
 void RawImageData::setCpp(uint32 val) {
@@ -218,8 +214,8 @@ RawImage::~RawImage() {
 }
 
 void RawImageData::copyErrorsFrom(RawImage other) {
-  for (uint32 i = 0 ; i < other->errors.size(); i++) {
-    setError(other->errors[i]);
+  for (auto &error : other->errors) {
+    setError(error);
   }
 }
 
@@ -231,8 +227,7 @@ void RawImageData::transferBadPixelsToMap()
   if (!mBadPixelMap)
     createBadPixelMap();
 
-  for (vector<uint32>::iterator i=mBadPixelPositions.begin(); i != mBadPixelPositions.end(); ++i) {
-    uint32 pos = *i;
+  for (unsigned int pos : mBadPixelPositions) {
     uint32 pos_x = pos&0xffff;
     uint32 pos_y = pos>>16;
     mBadPixelMap[mBadPixelMapPitch * pos_y + (pos_x >> 3)] |= 1 << (pos_x&7);
@@ -305,7 +300,7 @@ void RawImageData::startWorker(RawImageWorker::RawImageWorkerTask task, bool cro
   }
 
 #ifndef NO_PTHREAD
-  RawImageWorker **workers = new RawImageWorker*[threads];
+  auto **workers = new RawImageWorker *[threads];
   int y_offset = 0;
   int y_per_thread = (height + threads - 1) / threads;
 
@@ -332,11 +327,11 @@ void RawImageData::fixBadPixelsThread( int start_y, int end_y )
   int bad_count = 0;
 #endif
   for (int y = start_y; y < end_y; y++) {
-    uint32* bad_map = (uint32*)&mBadPixelMap[y*mBadPixelMapPitch];
+    auto *bad_map = (uint32 *)&mBadPixelMap[y * mBadPixelMapPitch];
     for (int x = 0 ; x < gw; x++) {
       // Test if there is a bad pixel within these 32 pixels
       if (bad_map[x] != 0) {
-        uchar8 *bad = (uchar8*)&bad_map[x];
+        auto *bad = (uchar8 *)&bad_map[x];
         // Go through each pixel
         for (int i = 0; i < 4; i++) {
           for (int j = 0; j < 8; j++) {
@@ -448,9 +443,9 @@ RawImage& RawImage::operator=(const RawImage & p) {
 }
 
 void *RawImageWorkerThread(void *_this) {
-  RawImageWorker* me = (RawImageWorker*)_this;
+  auto *me = (RawImageWorker *)_this;
   me->performTask();
-  return NULL;
+  return nullptr;
 }
 
 RawImageWorker::RawImageWorker( RawImageData *_img, RawImageWorkerTask _task, int _start_y, int _end_y )
@@ -512,7 +507,7 @@ void RawImageWorker::performTask()
 }
 
 void RawImageData::sixteenBitLookup() {
-  if (table == NULL) {
+  if (table == nullptr) {
     return;
   }
   startWorker(RawImageWorker::APPLY_LOOKUP, true);
@@ -520,14 +515,14 @@ void RawImageData::sixteenBitLookup() {
 
 void RawImageData::setTable( TableLookUp *t )
 {
-  if (table != NULL) {
+  if (table != nullptr) {
     delete table;
   }
   table = t;
 }
 
 void RawImageData::setTable(const ushort16* table, int nfilled, bool dither) {
-  TableLookUp* t = new TableLookUp(1, dither);
+  auto *t = new TableLookUp(1, dither);
   t->setTable(0, table, nfilled);
   this->setTable(t);
 }
@@ -536,7 +531,7 @@ const int TABLE_SIZE = 65536 * 2;
 
 // Creates n numre of tables.
 TableLookUp::TableLookUp( int _ntables, bool _dither ) : ntables(_ntables), dither(_dither) {
-  tables = NULL;
+  tables = nullptr;
   if (ntables < 1) {
     ThrowRDE("Cannot construct 0 tables");
   }
@@ -546,9 +541,9 @@ TableLookUp::TableLookUp( int _ntables, bool _dither ) : ntables(_ntables), dith
 
 TableLookUp::~TableLookUp()
 {
-  if (tables != NULL) {
+  if (tables != nullptr) {
     delete[] tables;
-    tables = NULL;
+    tables = nullptr;
   }
 }
 

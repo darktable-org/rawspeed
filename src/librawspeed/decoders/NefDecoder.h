@@ -42,12 +42,13 @@ class NefDecoder :
 {
 public:
   NefDecoder(TiffIFD *rootIFD, FileMap* file);
-  virtual ~NefDecoder(void);
-  virtual RawImage decodeRawInternal();
-  virtual void decodeMetaDataInternal(CameraMetaData *meta);
-  virtual void checkSupportInternal(CameraMetaData *meta);
+  ~NefDecoder() override;
+  RawImage decodeRawInternal() override;
+  void decodeMetaDataInternal(CameraMetaData *meta) override;
+  void checkSupportInternal(CameraMetaData *meta) override;
   TiffIFD *mRootIFD;
-  virtual TiffIFD* getRootIFD() {return mRootIFD;}
+  TiffIFD *getRootIFD() override { return mRootIFD; }
+
 private:
   bool D100IsCompressed(uint32 offset);
   bool NEFIsUncompressed(TiffIFD *raw);
@@ -67,7 +68,7 @@ private:
 class NefSlice {
 public:
   NefSlice() { h = offset = count = 0;};
-  ~NefSlice() {};
+  ~NefSlice() = default;
   uint32 h;
   uint32 offset;
   uint32 count;

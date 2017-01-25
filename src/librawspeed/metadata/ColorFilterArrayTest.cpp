@@ -29,7 +29,7 @@
 using namespace std;
 using namespace RawSpeed;
 
-typedef std::tr1::tuple<int, int, int, int> Bayer2x2;
+using Bayer2x2 = std::tr1::tuple<int, int, int, int>;
 
 static const iPoint2D square(2, 2);
 
@@ -90,7 +90,7 @@ TEST(ColorFilterArrayTestBasic, ToDcraw) {
 
 class ColorFilterArrayTest : public ::testing::TestWithParam<Bayer2x2> {
 protected:
-  ColorFilterArrayTest() {}
+  ColorFilterArrayTest() = default;
   virtual void SetUp() { param = GetParam(); }
 
   Bayer2x2 param;

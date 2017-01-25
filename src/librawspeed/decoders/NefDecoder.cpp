@@ -52,10 +52,10 @@ NefDecoder::NefDecoder(TiffIFD *rootIFD, FileMap* file) :
   decoderVersion = 5;
 }
 
-NefDecoder::~NefDecoder(void) {
+NefDecoder::~NefDecoder() {
   if (mRootIFD)
     delete mRootIFD;
-  mRootIFD = NULL;
+  mRootIFD = nullptr;
 }
 
 RawImage NefDecoder::decodeRawInternal() {
@@ -178,14 +178,13 @@ bool NefDecoder::NEFIsUncompressedRGB(TiffIFD *raw) {
 
 TiffIFD* NefDecoder::FindBestImage(vector<TiffIFD*>* data) {
   int largest_width = 0;
-  TiffIFD* best_ifd = NULL;
-  for (int i = 0; i < (int)data->size(); i++) {
-    TiffIFD* raw = (*data)[i];
+  TiffIFD *best_ifd = nullptr;
+  for (auto raw : *data) {
     int width = raw->getEntry(IMAGEWIDTH)->getInt();
     if (width > largest_width)
       best_ifd = raw;
   }
-  if (NULL == best_ifd)
+  if (nullptr == best_ifd)
     ThrowRDE("NEF Decoder: Unable to locate image");
   return best_ifd;
 }
@@ -234,7 +233,7 @@ void NefDecoder::DecodeUncompressed() {
   }
 
   bool bitorder = true;
-  map<string,string>::iterator msb_hint = hints.find("msb_override");
+  auto msb_hint = hints.find("msb_override");
   if (msb_hint != hints.end())
     bitorder = ("true" == (msb_hint->second));
 
@@ -289,7 +288,8 @@ void NefDecoder::readCoolpixMangledRaw(ByteStream &input, iPoint2D& size, iPoint
   w *= cpp;
   BitPumpMSB32 in(input);
   for (; y < h; y++) {
-    ushort16* dest = (ushort16*) & data[offset.x*sizeof(ushort16)*cpp+y*outPitch];
+    auto *dest =
+        (ushort16 *)&data[offset.x * sizeof(ushort16) * cpp + y * outPitch];
     for (uint32 x = 0 ; x < w; x++) {
       dest[x] = in.getBits(12);
     }
@@ -321,13 +321,15 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream &input, iPoint2D& size, iPoint2D
   h /= 2;
   BitPumpMSB in(input);
   for (; y < h; y++) {
-    ushort16* dest = (ushort16*) & data[offset.x*sizeof(ushort16)*cpp+y*2*outPitch];
+    auto *dest =
+        (ushort16 *)&data[offset.x * sizeof(ushort16) * cpp + y * 2 * outPitch];
     for (uint32 x = 0 ; x < w; x++) {
       dest[x] =  in.getBits(12);
     }
   }
   for (y = offset.y; y < h; y++) {
-    ushort16* dest = (ushort16*) & data[offset.x*sizeof(ushort16)*cpp+(y*2+1)*outPitch];
+    auto *dest = (ushort16 *)&data[offset.x * sizeof(ushort16) * cpp +
+                                   (y * 2 + 1) * outPitch];
     for (uint32 x = 0 ; x < w; x++) {
       dest[x] =  in.getBits(12);
     }
@@ -529,8 +531,8 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
         bs.skipBytes(version == 0x204 ? 284 : 4);
 
         uchar8 buf[14+8];
-        for (uint32 i=0; i < sizeof(buf); i++)
-          buf[i] = bs.getByte() ^ (cj += ci * ck++);
+        for (unsigned char &i : buf)
+          i = bs.getByte() ^ (cj += ci * ck++);
 
         // Finally set the WB coeffs
         uint32 off = (version == 0x204) ? 6 : 14;
@@ -541,7 +543,7 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
     }
   } else if (mRootIFD->hasEntryRecursive((TiffTag)0x0014)) {
     TiffEntry *wb = mRootIFD->getEntryRecursive((TiffTag)0x0014);
-    uchar8 *tmp = (uchar8 *) wb->getData(wb->count);
+    auto *tmp = (uchar8 *)wb->getData(wb->count);
     if (wb->count == 2560 && wb->type == TIFF_UNDEFINED) {
       mRaw->metadata.wbCoeffs[0] = (float) get2BE(tmp, 1248) / 256.0f;
       mRaw->metadata.wbCoeffs[1] = 1.0f;
@@ -620,8 +622,8 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
   mRaw->metadata.wbCoeffs[1] = 1.0f;
   mRaw->metadata.wbCoeffs[2] = wb_b;
 
-  int inv_wb_r = (int)(1024.0 / wb_r);
-  int inv_wb_b = (int)(1024.0 / wb_b);
+  auto inv_wb_r = (int)(1024.0 / wb_r);
+  auto inv_wb_b = (int)(1024.0 / wb_b);
 
   ushort16* curve = gammaCurve(1/2.4, 12.92, 1, 4095);
   // Scale output values to 16 bits.
@@ -633,14 +635,14 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
   _aligned_free(curve);
 
   ushort16 tmp;
-  uchar8 *tmpch = (uchar8*)&tmp;
+  auto *tmpch = (uchar8 *)&tmp;
 
   uchar8* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
   const uchar8 *in = input.getData(w*h*3);
 
   for (uint32 y = 0; y < h; y++) {
-    ushort16* dest = (ushort16*) & data[y*pitch];
+    auto *dest = (ushort16 *)&data[y * pitch];
     uint32 random = in[0] + (in[1] << 8) +  (in[2] << 16);
     for (uint32 x = 0 ; x < w*3; x += 6) {
       uint32 g1 = in[0];
@@ -651,10 +653,10 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
       uint32 g6 = in[5];
 
       in+=6;
-      float y1 = (float)(g1 | ((g2 & 0x0f) << 8));
-      float y2 = (float)((g2 >> 4) | (g3 << 4));
-      float cb = (float)(g4 | ((g5 & 0x0f) << 8));
-      float cr = (float)((g5 >> 4) | (g6 << 4));
+      auto y1 = (float)(g1 | ((g2 & 0x0f) << 8));
+      auto y2 = (float)((g2 >> 4) | (g3 << 4));
+      auto cb = (float)(g4 | ((g5 & 0x0f) << 8));
+      auto cr = (float)((g5 >> 4) | (g6 << 4));
 
       float cb2 = cb;
       float cr2 = cr;
@@ -689,14 +691,14 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
       dest[x+5] = clampbits((inv_wb_b * tmp + (1<<9)) >> 10, 15);
     }
   }
-  mRaw->setTable(NULL);
+  mRaw->setTable(nullptr);
 }
 
 // From:  dcraw.c -- Dave Coffin's raw photo decoder
 #define SQR(x) ((x)*(x))
 ushort16* NefDecoder::gammaCurve(double pwr, double ts, int mode, int imax) {
-  ushort16 *curve = (ushort16*)_aligned_malloc(65536 * sizeof(ushort16), 16);
-  if (curve == NULL) {
+  auto *curve = (ushort16 *)_aligned_malloc(65536 * sizeof(ushort16), 16);
+  if (curve == nullptr) {
     ThrowRDE("NEF Decoder: Unable to allocate gamma curve");
   }
   int i;

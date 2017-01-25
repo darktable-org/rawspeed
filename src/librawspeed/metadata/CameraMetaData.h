@@ -33,7 +33,7 @@ class CameraMetaData
 public:
   CameraMetaData();
   CameraMetaData(const char *docname);
-  virtual ~CameraMetaData(void);
+  virtual ~CameraMetaData();
   std::map<std::string,Camera*> cameras;
   std::map<uint32,Camera*> chdkCameras;
 

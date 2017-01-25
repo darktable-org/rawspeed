@@ -172,7 +172,7 @@ void LJpegPlain::decodeN_X_Y() {
     mRaw->createData();
   }
 
-  HuffmanTable* ht[N_COMP] = {0};
+  HuffmanTable *ht[N_COMP] = {nullptr};
   for (int i = 0; i < N_COMP; ++i)
     ht[i] = huff[frame.compInfo[i].dcTblNo];
 
@@ -211,7 +211,7 @@ void LJpegPlain::decodeN_X_Y() {
   // in full raw (<N,1,1>) the width of a slice is the number of raw pixels,
   // i.e. frame.w * frame.cps
   uint32 pixInSlicedLine = 0;
-  ushort16* dest = (ushort16*)mRaw->getDataUncropped(offX, offY);
+  auto *dest = (ushort16 *)mRaw->getDataUncropped(offX, offY);
 
   for (uint32 y = 0; y < ch; y += Y_S_F) {
     const ushort16* predict = dest;

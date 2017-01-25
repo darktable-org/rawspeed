@@ -46,10 +46,10 @@ RafDecoder::RafDecoder(TiffIFD *rootIFD, FileMap* file) :
   decoderVersion = 1;
   alt_layout = false;
 }
-RafDecoder::~RafDecoder(void) {
+RafDecoder::~RafDecoder() {
   if (mRootIFD)
     delete mRootIFD;
-  mRootIFD = NULL;
+  mRootIFD = nullptr;
 }
 
 RawImage RafDecoder::decodeRawInternal() {
@@ -196,10 +196,10 @@ void RafDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
     rotated->metadata.fujiRotationPos = rotationPos;
 
     int dest_pitch = (int)rotated->pitch / 2;
-    ushort16 *dst = (ushort16*)rotated->getData(0,0);
+    auto *dst = (ushort16 *)rotated->getData(0, 0);
 
     for (int y = 0; y < new_size.y; y++) {
-      ushort16 *src = (ushort16*)mRaw->getData(crop_offset.x, crop_offset.y + y);
+      auto *src = (ushort16 *)mRaw->getData(crop_offset.x, crop_offset.y + y);
       for (int x = 0; x < new_size.x; x++) {
         int h, w;
         if (alt_layout) { // Swapped x and y

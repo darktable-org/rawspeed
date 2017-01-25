@@ -49,20 +49,20 @@ class CameraMetaData;
 CrwDecoder::CrwDecoder(CiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
   decoderVersion = 0;
-  mHuff[0] = NULL;
-  mHuff[1] = NULL;
+  mHuff[0] = nullptr;
+  mHuff[1] = nullptr;
 }
 
-CrwDecoder::~CrwDecoder(void) {
+CrwDecoder::~CrwDecoder() {
   if (mRootIFD)
     delete mRootIFD;
-  mRootIFD = NULL;
-  if (mHuff[0] != NULL)
+  mRootIFD = nullptr;
+  if (mHuff[0] != nullptr)
     _aligned_free(mHuff[0]);
-  if (mHuff[1] != NULL)
+  if (mHuff[1] != nullptr)
     _aligned_free(mHuff[1]);
-  mHuff[0] = NULL;
-  mHuff[1] = NULL;
+  mHuff[0] = nullptr;
+  mHuff[1] = nullptr;
 }
 
 RawImage CrwDecoder::decodeRawInternal() {
@@ -109,7 +109,7 @@ static float canonEv(const long in) {
   // remove sign
   long val = abs(in);
   // remove fraction
-  float frac = static_cast<float>(val & 0x1f);
+  auto frac = static_cast<float>(val & 0x1f);
   val -= long(frac);
   // convert 1/3 (0x0c) and 2/3 (0x14) codes
   if (frac == 0x0c) {
@@ -249,12 +249,13 @@ void CrwDecoder::makeDecoder (int n, const uchar8 *source)
   count = (source += 16) - 17;
   for (max=16; max && !count[max]; max--);
 
-  if (mHuff[n] != NULL) {
+  if (mHuff[n] != nullptr) {
     _aligned_free(mHuff[n]);
-    mHuff[n] = NULL;
+    mHuff[n] = nullptr;
   }
 
-  ushort16* huff = (ushort16 *) _aligned_malloc((1 + (1 << max)) * sizeof(ushort16), 16);
+  auto *huff =
+      (ushort16 *)_aligned_malloc((1 + (1 << max)) * sizeof(ushort16), 16);
 
   if (!huff)
     ThrowRDE("CRW: Couldn't allocate table");
@@ -351,7 +352,7 @@ void CrwDecoder::decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 
   BitPumpJPEG pump(input);
 
   for (uint32 row=0; row < height; row+=8) {
-    ushort16 *dest = (ushort16*) & mRaw->getData()[row*width*2];
+    auto *dest = (ushort16 *)&mRaw->getData()[row * width * 2];
     nblocks = MIN (8, height-row) * width >> 6;
     for (block=0; block < nblocks; block++) {
       memset (diffbuf, 0, sizeof diffbuf);

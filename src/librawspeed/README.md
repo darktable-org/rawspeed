@@ -17,8 +17,8 @@ This file describes basic information about different cameras, so new cameras ca
 The camera definitions are read into the CameraMetaData object, which you can retain for re-use later. You initialize this data by doing
 
 ```cpp
-static CameraMetaData *metadata = NULL;
-if (NULL == metadata)
+static CameraMetaData *metadata = nullptr;
+if (nullptr == metadata)
 {
   try {
     metadata = new CameraMetaData("path_to_cameras.xml");
@@ -46,7 +46,7 @@ You need to have the file data in a FileMap object. This can either be created b
 
 ```cpp
 FileReader reader(filename);
-FileMap* map = NULL;
+FileMap* map = nullptr;
 try {
   map = reader.readFile();
 } catch (FileIOException &e) {

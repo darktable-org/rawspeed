@@ -144,7 +144,9 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(TiffEntry* t)
   // 'newPosition' is the position where the IFD starts
   // 'byteOrderOffset' is the position wher the 2 magic bytes (II/MM) may be found
   // 'context' is a string providing error information in case the byte order parsing should fail
-  auto setup = [&bs](bool rebase, uint32 newPosition, uint32 byteOrderOffset = 0, const char* context = 0) {
+  auto setup = [&bs](bool rebase, uint32 newPosition,
+                     uint32 byteOrderOffset = 0,
+                     const char *context = nullptr) {
     if (rebase)
       bs = bs.getSubStream(bs.getPosition(), bs.getRemainSize());
     if (context)

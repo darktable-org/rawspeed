@@ -42,7 +42,7 @@ void FileWriter::writeFile(FileMap* filemap, uint32 size) {
   char *src;
 
   file = fopen(mFilename, "wb");
-  if (file == NULL)
+  if (file == nullptr)
     throw FileIOException("Could not open file.");
 
   src = (char *)filemap->getData(0, filemap->getSize());
@@ -54,13 +54,15 @@ void FileWriter::writeFile(FileMap* filemap, uint32 size) {
 
 #else // __unix__
   HANDLE file_h;  // File handle
-  file_h = CreateFile(mFilename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+  file_h = CreateFile(mFilename, GENERIC_WRITE, FILE_SHARE_WRITE, nullptr,
+                      CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
   if (file_h == INVALID_HANDLE_VALUE) {
     throw FileIOException("Could not open file.");
   }
 
   DWORD bytes_written;
-  if (! WriteFile(file_h, filemap->getData(0, filemap->getSize()), size ? size : filemap->getSize(), &bytes_written, NULL)) {
+  if (!WriteFile(file_h, filemap->getData(0, filemap->getSize()),
+                 size ? size : filemap->getSize(), &bytes_written, nullptr)) {
     CloseHandle(file_h);
     throw FileIOException("Could not read file.");
   }
@@ -69,8 +71,6 @@ void FileWriter::writeFile(FileMap* filemap, uint32 size) {
 #endif // __unix__
 }
 
-FileWriter::~FileWriter(void) {
-
-}
+FileWriter::~FileWriter() = default;
 
 } // namespace RawSpeed

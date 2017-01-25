@@ -73,7 +73,7 @@ string img_hash(RawImage &r) {
   do {                                                                         \
     snprintf(line, sizeof(line), __VA_ARGS__);                                 \
     oss << line;                                                               \
-  } while (0)
+  } while (false)
 
   APPEND("make: %s\n", r->metadata.make.c_str());
   APPEND("model: %s\n", r->metadata.model.c_str());
@@ -155,8 +155,7 @@ void writePPM(RawImage raw, const string &fn) {
 
   // Write pixels
   for (int y = 0; y < height; ++y) {
-    unsigned short *row =
-        reinterpret_cast<unsigned short *>(raw->getData(0, y));
+    auto *row = reinterpret_cast<unsigned short *>(raw->getData(0, y));
     // Swap for PPM format byte ordering
     if (getHostEndianness() == little)
       for (int x = 0; x < width; ++x)
@@ -316,11 +315,11 @@ int main(int argc, char **argv) {
       // if neither hashes exist, nothing to append...
       if (oldfile.good() || newfile.good()) {
         // DIFF(1): -N, --new-file  treat absent files as empty
-        string cmd("diff -N -u0 \"");
+        string cmd(R"(diff -N -u0 ")");
         cmd += oldhash;
-        cmd += "\" \"";
+        cmd += R"(" ")";
         cmd += newhash;
-        cmd += "\" >> rstest.log";
+        cmd += R"(" >> rstest.log)";
         if (system(cmd.c_str()))
           ; // NOLINT
       }

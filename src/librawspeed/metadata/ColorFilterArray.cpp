@@ -32,20 +32,15 @@ using namespace std;
 namespace RawSpeed {
 
 ColorFilterArray::ColorFilterArray(const iPoint2D &_size) {
-  cfa = NULL;
+  cfa = nullptr;
   setSize(_size);
 }
 
-ColorFilterArray::ColorFilterArray() :
-size(0,0)
-{
-  cfa = NULL;
-}
-
+ColorFilterArray::ColorFilterArray() : size(0, 0) { cfa = nullptr; }
 
 ColorFilterArray::ColorFilterArray( const ColorFilterArray& other )
 {
-  cfa = NULL;
+  cfa = nullptr;
   setSize(other.size);
   if (cfa)
     memcpy(cfa, other.cfa, size.area()*sizeof(CFAColor));
@@ -57,7 +52,7 @@ ColorFilterArray::ColorFilterArray( const ColorFilterArray& other )
 ColorFilterArray::ColorFilterArray( const uint32 filters) :
 size(8,2)
 {
-  cfa = NULL;
+  cfa = nullptr;
   setSize(size);
 
   for (int x = 0; x < 8; x++) {
@@ -80,7 +75,7 @@ void ColorFilterArray::setSize(const iPoint2D &_size) {
   size = _size;
   if (cfa)
     delete[] cfa;
-  cfa = NULL;
+  cfa = nullptr;
   if (size.area() > 100)
     ThrowRDE("ColorFilterArray:setSize if your CFA pattern is really %d pixels in area we may as well give up now", size.area());
   if (size.area() <= 0)
@@ -91,11 +86,10 @@ void ColorFilterArray::setSize(const iPoint2D &_size) {
   memset(cfa, CFA_UNKNOWN, size.area()*sizeof(CFAColor));
 }
 
-ColorFilterArray::~ColorFilterArray( void )
-{
+ColorFilterArray::~ColorFilterArray() {
   if (cfa)
     delete[] cfa;
-  cfa = NULL;
+  cfa = nullptr;
 }
 
 CFAColor ColorFilterArray::getColorAt( uint32 x, uint32 y )
@@ -130,7 +124,7 @@ void ColorFilterArray::shiftLeft(int n) {
   int shift = n % size.x;
   if (0 == shift)
     return;
-  CFAColor* tmp = new CFAColor[size.x];
+  auto *tmp = new CFAColor[size.x];
   for (int y = 0; y < size.y; y++) {
     CFAColor *old = &cfa[y*size.x];
     memcpy(tmp, &old[shift], (size.x-shift)*sizeof(CFAColor));
@@ -148,7 +142,7 @@ void ColorFilterArray::shiftDown(int n) {
   int shift = n % size.y;
   if (0 == shift)
     return;
-  CFAColor* tmp = new CFAColor[size.y];
+  auto *tmp = new CFAColor[size.y];
   for (int x = 0; x < size.x; x++) {
     CFAColor *old = &cfa[x];
     for (int y = 0; y < size.y; y++)
@@ -211,7 +205,7 @@ RawSpeed::uint32 ColorFilterArray::getDcrawFilter()
   if (size.x == 6 && size.y == 6)
     return 9;
 
-  if (size.x > 8 || size.y > 2 || 0 == cfa)
+  if (size.x > 8 || size.y > 2 || nullptr == cfa)
     return 1;
 
   if (!isPowerOfTwo(size.x))

@@ -58,10 +58,10 @@ DngDecoder::DngDecoder(TiffIFD *rootIFD, FileMap* file) : RawDecoder(file), mRoo
     mFixLjpeg = false;
 }
 
-DngDecoder::~DngDecoder(void) {
+DngDecoder::~DngDecoder() {
   if (mRootIFD)
     delete mRootIFD;
-  mRootIFD = NULL;
+  mRootIFD = nullptr;
 }
 
 RawImage DngDecoder::decodeRawInternal() {
@@ -71,7 +71,7 @@ RawImage DngDecoder::decodeRawInternal() {
     ThrowRDE("DNG Decoder: No image data found");
 
   // Erase the ones not with JPEG compression
-  for (vector<TiffIFD*>::iterator i = data.begin(); i != data.end();) {
+  for (auto i = data.begin(); i != data.end();) {
     int compression = (*i)->getEntry(COMPRESSION)->getShort();
     bool isSubsampled = false;
     try {
@@ -423,19 +423,19 @@ RawImage DngDecoder::decodeRawInternal() {
   if (raw->hasEntry(LINEARIZATIONTABLE)) {
     TiffEntry *lintable = raw->getEntry(LINEARIZATIONTABLE);
     uint32 len = lintable->count;
-    ushort16 *table = new ushort16[len];
+    auto *table = new ushort16[len];
     lintable->getShortArray(table, len);
     mRaw->setTable(table, len, !uncorrectedRawValues);
     if (!uncorrectedRawValues) {
       mRaw->sixteenBitLookup();
-      mRaw->setTable(NULL);
+      mRaw->setTable(nullptr);
     }
     delete [] table;
 
-    if (0) {
+    if (false) {
       // Test average for bias
       uint32 cw = mRaw->dim.x * mRaw->getCpp();
-      ushort16* pixels = (ushort16*)mRaw->getData(0, 500);
+      auto *pixels = (ushort16 *)mRaw->getData(0, 500);
       float avg = 0.0f;
       for (uint32 x = 0; x < cw; x++) {
         avg += (float)pixels[x];
@@ -549,7 +549,7 @@ bool DngDecoder::decodeMaskedAreas(TiffIFD* raw) {
     return false;
 
   /* Since we may both have short or int, copy it to int array. */
-  uint32 *rects = new uint32[nrects*4];
+  auto *rects = new uint32[nrects * 4];
   masked->getIntArray(rects, nrects*4);
 
   iPoint2D top = mRaw->getCropOffset();
@@ -559,12 +559,11 @@ bool DngDecoder::decodeMaskedAreas(TiffIFD* raw) {
     iPoint2D bottomright = iPoint2D(rects[i*4+3], rects[i*4+2]);
     // Is this a horizontal box, only add it if it covers the active width of the image
     if (topleft.x <= top.x && bottomright.x >= (mRaw->dim.x+top.x))
-      mRaw->blackAreas.push_back(
-          BlackArea(topleft.y, bottomright.y - topleft.y, false));
+      mRaw->blackAreas.emplace_back(topleft.y, bottomright.y - topleft.y,
+                                    false);
     // Is it a vertical box, only add it if it covers the active height of the image
     else if (topleft.y <= top.y && bottomright.y >= (mRaw->dim.y+top.y)) {
-      mRaw->blackAreas.push_back(
-          BlackArea(topleft.x, bottomright.x - topleft.x, true));
+      mRaw->blackAreas.emplace_back(topleft.x, bottomright.x - topleft.x, true);
     }
   }
   delete[] rects;

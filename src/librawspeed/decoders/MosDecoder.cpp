@@ -58,9 +58,7 @@ MosDecoder::MosDecoder(TiffIFD *rootIFD, FileMap* file)  :
   }
 }
 
-MosDecoder::~MosDecoder(void) {
-  delete mRootIFD;
-}
+MosDecoder::~MosDecoder() { delete mRootIFD; }
 
 string MosDecoder::getXMPTag(const string &xmp, const string &tag) {
   string::size_type start = xmp.find("<tiff:"+tag+">");
@@ -73,7 +71,7 @@ string MosDecoder::getXMPTag(const string &xmp, const string &tag) {
 
 RawImage MosDecoder::decodeRawInternal() {
   vector<TiffIFD*> data;
-  TiffIFD* raw = NULL;
+  TiffIFD *raw = nullptr;
   uint32 off = 0;
 
   uint32 base = 8;
@@ -172,15 +170,16 @@ void MosDecoder::DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32
     BitPumpMSB32 pump(mFile, off);
     uint32 pred[2], len[2];
     pred[0] = pred[1] = 0;
-    ushort16* img = (ushort16*)mRaw->getData(0, row);
+    auto *img = (ushort16 *)mRaw->getData(0, row);
     for (uint32 col=0; col < width; col++) {
       if (col >= (width & -8))
         len[0] = len[1] = 14;
       else if ((col & 7) == 0)
-        for (uint32 i=0; i < 2; i++) {
+        for (unsigned int &i : len) {
           uint32 j = 0;
           for (; j < 5 && !pump.getBitsSafe(1); j++);
-          if (j--) len[i] = length[j*2 + pump.getBitsSafe(1)];
+          if (j--)
+            i = length[j * 2 + pump.getBitsSafe(1)];
         }
       int i = len[col & 1];
       if (i == 14)

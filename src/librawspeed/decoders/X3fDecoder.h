@@ -42,17 +42,17 @@ class X3fDecoder :
 {
 public:
   X3fDecoder(FileMap* file);
-  virtual ~X3fDecoder(void);
-  virtual RawImage decodeRawInternal();
-  virtual void decodeMetaDataInternal(CameraMetaData *meta);
-  virtual void checkSupportInternal(CameraMetaData *meta);
-  virtual FileMap* getCompressedData();
+  ~X3fDecoder() override;
+  RawImage decodeRawInternal() override;
+  void decodeMetaDataInternal(CameraMetaData *meta) override;
+  void checkSupportInternal(CameraMetaData *meta) override;
+  FileMap *getCompressedData() override;
   std::vector<X3fDirectory> mDirectory;
   std::vector<X3fImage> mImages;
   X3fPropertyCollection mProperties;
 
 protected:
-  virtual void decodeThreaded(RawDecoderThread* t);
+  void decodeThreaded(RawDecoderThread *t) override;
   void readDirectory();
   std::string getId();
   ByteStream *bytes;

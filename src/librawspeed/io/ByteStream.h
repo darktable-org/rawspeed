@@ -114,7 +114,7 @@ public:
   }
 
   template<typename T> inline T get() {
-    T ret = peek<T>();
+    auto ret = peek<T>();
     pos += sizeof(T);
     return ret;
   }
@@ -160,7 +160,7 @@ public:
   // only necessary to create 'fake' TiffEntries (see e.g. RAF)
   static ByteStream createCopy(void* data, size_type size) {
     ByteStream bs;
-    uchar8* new_data = (uchar8*)_aligned_malloc(size, 8);
+    auto *new_data = (uchar8 *)_aligned_malloc(size, 8);
     memcpy(new_data, data, size);
     bs.data = new_data;
     bs.size = size;

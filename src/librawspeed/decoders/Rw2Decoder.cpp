@@ -44,17 +44,17 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-Rw2Decoder::Rw2Decoder(TiffIFD *rootIFD, FileMap* file) :
-    RawDecoder(file), mRootIFD(rootIFD), input_start(0) {
-      decoderVersion = 2;
+Rw2Decoder::Rw2Decoder(TiffIFD *rootIFD, FileMap *file)
+    : RawDecoder(file), mRootIFD(rootIFD), input_start(nullptr) {
+  decoderVersion = 2;
 }
-Rw2Decoder::~Rw2Decoder(void) {
+Rw2Decoder::~Rw2Decoder() {
   if (input_start)
     delete input_start;
-  input_start = 0;
+  input_start = nullptr;
   if (mRootIFD)
     delete mRootIFD;
-  mRootIFD = NULL;
+  mRootIFD = nullptr;
 }
 
 RawImage Rw2Decoder::decodeRawInternal() {
@@ -149,7 +149,7 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
 
   vector<uint32> zero_pos;
   for (y = t->start_y; y < t->end_y; y++) {
-    ushort16* dest = (ushort16*)mRaw->getData(0, y);
+    auto *dest = (ushort16 *)mRaw->getData(0, y);
     for (x = 0; x < w; x++) {
       pred[0] = pred[1] = nonz[0] = nonz[1] = 0;
       int u = 0;

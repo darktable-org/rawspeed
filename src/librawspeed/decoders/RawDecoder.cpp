@@ -161,7 +161,8 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
     BitPumpMSB bits(input);
     w *= cpp;
     for (; y < h; y++) {
-      ushort16* dest = (ushort16*) & data[offset.x*sizeof(ushort16)*cpp+y*outPitch];
+      auto *dest =
+          (ushort16 *)&data[offset.x * sizeof(ushort16) * cpp + y * outPitch];
       bits.checkPos();
       for (uint32 x = 0 ; x < w; x++) {
         uint32 b = bits.getBits(bitPerPixel);
@@ -173,7 +174,8 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
     BitPumpMSB16 bits(input);
     w *= cpp;
     for (; y < h; y++) {
-      ushort16* dest = (ushort16*) & data[offset.x*sizeof(ushort16)*cpp+y*outPitch];
+      auto *dest =
+          (ushort16 *)&data[offset.x * sizeof(ushort16) * cpp + y * outPitch];
       bits.checkPos();
       for (uint32 x = 0 ; x < w; x++) {
         uint32 b = bits.getBits(bitPerPixel);
@@ -185,7 +187,8 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
     BitPumpMSB32 bits(input);
     w *= cpp;
     for (; y < h; y++) {
-      ushort16* dest = (ushort16*) & data[offset.x*sizeof(ushort16)*cpp+y*outPitch];
+      auto *dest =
+          (ushort16 *)&data[offset.x * sizeof(ushort16) * cpp + y * outPitch];
       bits.checkPos();
       for (uint32 x = 0 ; x < w; x++) {
         uint32 b = bits.getBits(bitPerPixel);
@@ -206,7 +209,8 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
     BitPumpPlain bits(input);
     w *= cpp;
     for (; y < h; y++) {
-      ushort16* dest = (ushort16*) & data[offset.x*sizeof(ushort16)+y*outPitch];
+      auto *dest =
+          (ushort16 *)&data[offset.x * sizeof(ushort16) + y * outPitch];
       bits.checkPos();
       for (uint32 x = 0 ; x < w; x++) {
         uint32 b = bits.getBits(bitPerPixel);
@@ -231,7 +235,7 @@ void RawDecoder::Decode8BitRaw(ByteStream &input, uint32 w, uint32 h) {
   const uchar8 *in = input.getData(w*h);
   uint32 random = 0;
   for (uint32 y = 0; y < h; y++) {
-    ushort16* dest = (ushort16*) & data[y*pitch];
+    auto *dest = (ushort16 *)&data[y * pitch];
     for (uint32 x = 0 ; x < w; x += 1) {
       if (uncorrectedRawValues)
         dest[x] = *in++;
@@ -257,7 +261,7 @@ void RawDecoder::Decode12BitRaw(ByteStream &input, uint32 w, uint32 h) {
   const uchar8 *in = input.getData(w*12/8*h);
 
   for (uint32 y = 0; y < h; y++) {
-    ushort16* dest = (ushort16*) & data[y*pitch];
+    auto *dest = (ushort16 *)&data[y * pitch];
     for (uint32 x = 0 ; x < w; x += 2) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;
@@ -290,7 +294,7 @@ void RawDecoder::Decode12BitRawWithControl(ByteStream &input, uint32 w, uint32 h
 
   uint32 x;
   for (uint32 y = 0; y < h; y++) {
-    ushort16* dest = (ushort16*) & data[y*pitch];
+    auto *dest = (ushort16 *)&data[y * pitch];
     for (x = 0 ; x < w; x += 2) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;
@@ -324,7 +328,7 @@ void RawDecoder::Decode12BitRawBEWithControl(ByteStream &input, uint32 w, uint32
   const uchar8 *in = input.getData(perline*h);
 
   for (uint32 y = 0; y < h; y++) {
-    ushort16* dest = (ushort16*) & data[y*pitch];
+    auto *dest = (ushort16 *)&data[y * pitch];
     for (uint32 x = 0; x < w; x += 2) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;
@@ -353,7 +357,7 @@ void RawDecoder::Decode12BitRawBE(ByteStream &input, uint32 w, uint32 h) {
   const uchar8 *in = input.getData(w*12/8*h);
 
   for (uint32 y = 0; y < h; y++) {
-    ushort16* dest = (ushort16*) & data[y*pitch];
+    auto *dest = (ushort16 *)&data[y * pitch];
     for (uint32 x = 0 ; x < w; x += 2) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;
@@ -381,7 +385,7 @@ void RawDecoder::Decode12BitRawBEInterlaced(ByteStream &input, uint32 w, uint32 
   uint32 half = (h+1) >> 1;
   for (uint32 row = 0; row < h; row++) {
     uint32 y = row % half * 2 + row / half;
-    ushort16* dest = (ushort16*) & data[y*pitch];
+    auto *dest = (ushort16 *)&data[y * pitch];
     if (y == 1) {
       // The second field starts at a 2048 byte aligment
       uint32 offset = ((half*w*3/2 >> 11) + 1) << 11;
@@ -414,7 +418,7 @@ void RawDecoder::Decode12BitRawBEunpacked(ByteStream &input, uint32 w, uint32 h)
   const uchar8 *in = input.getData(w*h*2);
 
   for (uint32 y = 0; y < h; y++) {
-    ushort16* dest = (ushort16*) & data[y*pitch];
+    auto *dest = (ushort16 *)&data[y * pitch];
     for (uint32 x = 0 ; x < w; x += 1) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;
@@ -437,7 +441,7 @@ void RawDecoder::Decode12BitRawBEunpackedLeftAligned(ByteStream &input, uint32 w
   const uchar8 *in = input.getData(w*h*2);
 
   for (uint32 y = 0; y < h; y++) {
-    ushort16* dest = (ushort16*) & data[y*pitch];
+    auto *dest = (ushort16 *)&data[y * pitch];
     for (uint32 x = 0 ; x < w; x += 1) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;
@@ -460,7 +464,7 @@ void RawDecoder::Decode14BitRawBEunpacked(ByteStream &input, uint32 w, uint32 h)
   const uchar8 *in = input.getData(w*h*2);
 
   for (uint32 y = 0; y < h; y++) {
-    ushort16* dest = (ushort16*) & data[y*pitch];
+    auto *dest = (ushort16 *)&data[y * pitch];
     for (uint32 x = 0 ; x < w; x += 1) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;
@@ -483,7 +487,7 @@ void RawDecoder::Decode16BitRawUnpacked(ByteStream &input, uint32 w, uint32 h) {
   const uchar8 *in = input.getData(w*h*2);
 
   for (uint32 y = 0; y < h; y++) {
-    ushort16* dest = (ushort16*) & data[y*pitch];
+    auto *dest = (ushort16 *)&data[y * pitch];
     for (uint32 x = 0 ; x < w; x += 1) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;
@@ -506,7 +510,7 @@ void RawDecoder::Decode16BitRawBEunpacked(ByteStream &input, uint32 w, uint32 h)
   const uchar8 *in = input.getData(w*h*2);
 
   for (uint32 y = 0; y < h; y++) {
-    ushort16* dest = (ushort16*) & data[y*pitch];
+    auto *dest = (ushort16 *)&data[y * pitch];
     for (uint32 x = 0 ; x < w; x += 1) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;
@@ -529,7 +533,7 @@ void RawDecoder::Decode12BitRawUnpacked(ByteStream &input, uint32 w, uint32 h) {
   const uchar8 *in = input.getData(w*h*2);
 
   for (uint32 y = 0; y < h; y++) {
-    ushort16* dest = (ushort16*) & data[y*pitch];
+    auto *dest = (ushort16 *)&data[y * pitch];
     for (uint32 x = 0 ; x < w; x += 1) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;
@@ -650,7 +654,7 @@ void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model,
 
 
 void *RawDecoderDecodeThread(void *_this) {
-  RawDecoderThread* me = (RawDecoderThread*)_this;
+  auto *me = (RawDecoderThread *)_this;
   try {
      me->parent->decodeThreaded(me);
   } catch (RawDecoderException &ex) {
@@ -658,7 +662,7 @@ void *RawDecoderDecodeThread(void *_this) {
   } catch (IOException &ex) {
     me->parent->mRaw->setError(ex.what());
   }
-  return NULL;
+  return nullptr;
 }
 
 void RawDecoder::startThreads() {
@@ -675,7 +679,7 @@ void RawDecoder::startThreads() {
   threads = MIN(mRaw->dim.y, getThreadCount());
   int y_offset = 0;
   int y_per_thread = (mRaw->dim.y + threads - 1) / threads;
-  RawDecoderThread *t = new RawDecoderThread[threads];
+  auto *t = new RawDecoderThread[threads];
 
   /* Initialize and set thread detached attribute */
   pthread_attr_t attr;
@@ -695,7 +699,7 @@ void RawDecoder::startThreads() {
   }
 
   for (uint32 i = 0; i < threads; i++) {
-    pthread_join(t[i].threadid, NULL);
+    pthread_join(t[i].threadid, nullptr);
   }
   pthread_attr_destroy(&attr);
   delete[] t;
@@ -731,7 +735,7 @@ RawSpeed::RawImage RawDecoder::decodeRaw()
   } catch (IOException &e) {
     ThrowRDE("%s", e.what());
   }
-  return NULL;
+  return nullptr;
 }
 
 void RawDecoder::decodeMetaData(CameraMetaData *meta)
@@ -765,7 +769,7 @@ void RawDecoder::startTasks( uint32 tasks )
   uint32 threads;
   threads = min(tasks, getThreadCount());
   int ctask = 0;
-  RawDecoderThread *t = new RawDecoderThread[threads];
+  auto *t = new RawDecoderThread[threads];
 
   // We don't need a thread
   if (threads == 1) {

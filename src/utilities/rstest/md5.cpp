@@ -187,7 +187,7 @@ std::string md5_hash(const uint8_t *message, size_t len) {
   uint32_t hash[4];
   md5_hash(message, len, hash);
   char res[2 * sizeof(hash) + 1];
-  uint8_t *h = (uint8_t *)hash;
+  auto *h = (uint8_t *)hash;
   for (int i = 0; i < (int)sizeof(hash); ++i)
     snprintf(res + 2 * i, 3, "%02x", h[i]);
   res[32] = 0;

@@ -42,24 +42,22 @@ using namespace std;
 
 namespace RawSpeed {
 
-X3fDecoder::X3fDecoder(FileMap* file) :
-RawDecoder(file), bytes(NULL) {
+X3fDecoder::X3fDecoder(FileMap *file) : RawDecoder(file), bytes(nullptr) {
   decoderVersion = 1;
-  huge_table = NULL;
-  line_offsets = NULL;
+  huge_table = nullptr;
+  line_offsets = nullptr;
   bytes = new ByteStream(file, 0, getHostEndianness() == little);
 }
 
-X3fDecoder::~X3fDecoder(void)
-{
+X3fDecoder::~X3fDecoder() {
   if (bytes)
     delete bytes;
   if (huge_table)
     _aligned_free(huge_table);
   if (line_offsets)
     _aligned_free(line_offsets);
-  huge_table = NULL;
-  line_offsets = NULL;
+  huge_table = nullptr;
+  line_offsets = nullptr;
 }
 
 string X3fDecoder::getIdAsString(ByteStream *bytes) {
@@ -73,7 +71,7 @@ string X3fDecoder::getIdAsString(ByteStream *bytes) {
 
 RawImage X3fDecoder::decodeRawInternal()
 {
-  vector<X3fImage>::iterator img = mImages.begin();
+  auto img = mImages.begin();
   for (; img !=  mImages.end(); ++img) {
     X3fImage cimg = *img;
     if (cimg.type == 1 || cimg.type == 3) {
@@ -115,7 +113,7 @@ bool X3fDecoder::readName() {
 
   // See if we can find EXIF info and grab the name from there.
   // This is needed for Sigma DP2 Quattro and possibly later cameras.
-  vector<X3fImage>::iterator img = mImages.begin();
+  auto img = mImages.begin();
   for (; img !=  mImages.end(); ++img) {
     X3fImage cimg = *img;
     if (cimg.type == 2 && cimg.format == 0x12 && cimg.dataSize > 100) {
@@ -154,7 +152,7 @@ void X3fDecoder::checkSupportInternal( CameraMetaData *meta )
 
   // If we somehow got to here without a camera, see if we have an image
   // with proper format identifiers.
-  vector<X3fImage>::iterator img = mImages.begin();
+  auto img = mImages.begin();
   for (; img !=  mImages.end(); ++img) {
     X3fImage cimg = *img;
     if (cimg.type == 1 || cimg.type == 3) {
@@ -167,10 +165,10 @@ void X3fDecoder::checkSupportInternal( CameraMetaData *meta )
 
 string X3fDecoder::getProp(const char* key )
 {
-  map<string,string>::iterator prop_it = mProperties.props.find(key);
+  auto prop_it = mProperties.props.find(key);
   if (prop_it != mProperties.props.end())
     return (*prop_it).second;
-  return NULL;
+  return nullptr;
 }
 
 
@@ -186,15 +184,15 @@ void X3fDecoder::decompressSigma( X3fImage &image )
   int bits = 13;
 
   if (image.format == 35) {
-    for (int i = 0; i < 3; i++) {
-      planeDim[i].x = input.getShort();
-      planeDim[i].y = input.getShort();
+    for (auto &i : planeDim) {
+      i.x = input.getShort();
+      i.y = input.getShort();
     }
     bits = 15;
   }
   if (image.format == 30 || image.format == 35) {
-    for (int i = 0; i < 3; i++)
-      pred[i] = input.getShort();
+    for (int &i : pred)
+      i = input.getShort();
 
     // Skip padding
     input.skipBytes(2);
@@ -253,8 +251,8 @@ void X3fDecoder::decompressSigma( X3fImage &image )
   } // End if format 30
 
   if (image.format == 6) {
-    for (int i = 0; i < 1024; i++) {
-      curve[i] = (short)input.getShort();
+    for (short &i : curve) {
+      i = (short)input.getShort();
     }
     max_len = 0;
 
@@ -378,8 +376,8 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
     /* Initialize predictors */
     int pred_up[4];
     int pred_left[2];
-    for (int j = 0; j < 4; j++)
-      pred_up[j] = pred[i];
+    for (int &j : pred_up)
+      j = pred[i];
 
     for (int y = 0; y < dim.y; y++) {
       ushort16* dst = (ushort16*)mRaw->getData(0, y << subs) + i;
@@ -407,18 +405,18 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
     int pred[3];
     for (uint32 y = t->start_y; y < t->end_y; y++) {
       BitPumpMSB bits(mFile, line_offsets[y]);
-      ushort16* dst = (ushort16*)mRaw->getData(0,y);
+      auto *dst = (ushort16 *)mRaw->getData(0, y);
       pred[0] = pred[1] = pred[2] = 0;
       for (int x = 0; x < mRaw->dim.x; x++) {
-        for (int i = 0; i < 3; i++) {
+        for (int &i : pred) {
           ushort16 val = huge_table[bits.peekBits(max_len)];
           uchar8 nbits = val&31;
           if (val == 0xffff) {
             ThrowRDE("SigmaDecompressor: Invalid Huffman value. Image Corrupt");
           }
           bits.skipBitsNoFill(nbits);
-          pred[i] += curve[(val>>5)];
-          dst[0] = clampbits(pred[i], 16);
+          i += curve[(val >> 5)];
+          dst[0] = clampbits(i, 16);
           dst++;
         }
       }
@@ -474,14 +472,14 @@ int X3fDecoder::SigmaDecode(BitPumpMSB *bits) {
 
 FileMap* X3fDecoder::getCompressedData()
 {
-  vector<X3fImage>::iterator img = mImages.begin();
+  auto img = mImages.begin();
   for (; img !=  mImages.end(); ++img) {
     X3fImage cimg = *img;
     if (cimg.type == 1 || cimg.type == 3) {
       return new FileMap(mFile->getSubView(cimg.dataOffset, cimg.dataSize));
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 } // namespace RawSpeed

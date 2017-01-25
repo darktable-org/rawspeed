@@ -41,8 +41,7 @@ NakedDecoder::NakedDecoder(FileMap* file, Camera* c) :
   cam = c;
 }
 
-NakedDecoder::~NakedDecoder(void) {
-}
+NakedDecoder::~NakedDecoder() = default;
 
 RawImage NakedDecoder::decodeRawInternal() {
   uint32 width=0, height=0, filesize=0, bits=0, offset=0;

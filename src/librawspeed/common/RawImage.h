@@ -35,13 +35,14 @@ class RawImage;
 
 class RawImageData;
 
-typedef enum {TYPE_USHORT16, TYPE_FLOAT32} RawImageType;
+enum RawImageType { TYPE_USHORT16, TYPE_FLOAT32 };
 
 class RawImageWorker {
 public:
-  typedef enum {
+  enum RawImageWorkerTask {
     SCALE_VALUES = 1, FIX_BAD_PIXELS = 2, APPLY_LOOKUP = 3 | 0x1000, FULL_IMAGE = 0x1000
-  } RawImageWorkerTask;
+  };
+
   RawImageWorker(RawImageData *img, RawImageWorkerTask task, int start_y, int end_y);
   ~RawImageWorker();
 #ifndef NO_PTHREAD
@@ -74,7 +75,7 @@ public:
 
 class ImageMetaData {
 public:
-  ImageMetaData(void);
+  ImageMetaData();
 
   // Aspect ratio of the pixels, usually 1 but some cameras need scaling
   // <1 means the image needs to be stretched vertically, (0.5 means 2x)
@@ -108,7 +109,7 @@ class RawImageData
 {
   friend class RawImageWorker;
 public:
-  virtual ~RawImageData(void);
+  virtual ~RawImageData();
   uint32 getCpp() const { return cpp; }
   uint32 getBpp() const { return bpp; }
   void setCpp(uint32 val);
@@ -139,11 +140,11 @@ public:
   void createBadPixelMap();
   iPoint2D dim;
   uint32 pitch;
-  bool isCFA;
+  bool isCFA{true};
   ColorFilterArray cfa;
-  int blackLevel;
+  int blackLevel{-1};
   int blackLevelSeparate[4];
-  int whitePoint;
+  int whitePoint{65536};
   std::vector<BlackArea> blackAreas;
   /* Vector containing silent errors that occurred doing decoding, that may have lead to */
   /* an incomplete image. */
@@ -164,21 +165,21 @@ public:
 
 protected:
   RawImageType dataType;
-  RawImageData(void);
+  RawImageData();
   RawImageData(const iPoint2D &dim, uint32 bpp, uint32 cpp = 1);
   virtual void scaleValues(int start_y, int end_y) = 0;
   virtual void doLookup(int start_y, int end_y) = 0;
   virtual void fixBadPixel( uint32 x, uint32 y, int component = 0) = 0;
   void fixBadPixelsThread(int start_y, int end_y);
   void startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped );
-  uint32 dataRefCount;
-  uchar8* data;
-  uint32 cpp;      // Components per pixel
-  uint32 bpp;      // Bytes per pixel.
+  uint32 dataRefCount{0};
+  uchar8 *data{nullptr};
+  uint32 cpp{1}; // Components per pixel
+  uint32 bpp{0}; // Bytes per pixel.
   friend class RawImage;
   iPoint2D mOffset;
   iPoint2D uncropped_dim;
-  TableLookUp *table;
+  TableLookUp *table{nullptr};
 #ifndef NO_PTHREAD
   pthread_mutex_t mymutex;
 #endif
@@ -188,16 +189,16 @@ protected:
 class RawImageDataU16 : public RawImageData
 {
 public:
-  virtual void scaleBlackWhite();
-  virtual void calculateBlackAreas();
-  virtual void setWithLookUp(ushort16 value, uchar8* dst, uint32* random) final;
+  void scaleBlackWhite() override;
+  void calculateBlackAreas() override;
+  void setWithLookUp(ushort16 value, uchar8 *dst, uint32 *random) final;
 
 protected:
-  virtual void scaleValues(int start_y, int end_y);
-  virtual void fixBadPixel( uint32 x, uint32 y, int component = 0);
-  virtual void doLookup(int start_y, int end_y);
+  void scaleValues(int start_y, int end_y) override;
+  void fixBadPixel(uint32 x, uint32 y, int component = 0) override;
+  void doLookup(int start_y, int end_y) override;
 
-  RawImageDataU16(void);
+  RawImageDataU16();
   RawImageDataU16(const iPoint2D &dim, uint32 cpp = 1);
   friend class RawImage;
 };
@@ -205,15 +206,15 @@ protected:
 class RawImageDataFloat : public RawImageData
 {
 public:
-  virtual void scaleBlackWhite();
-  virtual void calculateBlackAreas();
-  virtual void setWithLookUp(ushort16 value, uchar8* dst, uint32* random);
+  void scaleBlackWhite() override;
+  void calculateBlackAreas() override;
+  void setWithLookUp(ushort16 value, uchar8 *dst, uint32 *random) override;
 
 protected:
-  virtual void scaleValues(int start_y, int end_y);
-  virtual void fixBadPixel( uint32 x, uint32 y, int component = 0);
-  virtual void doLookup(int start_y, int end_y);
-  RawImageDataFloat(void);
+  void scaleValues(int start_y, int end_y) override;
+  void fixBadPixel(uint32 x, uint32 y, int component = 0) override;
+  void doLookup(int start_y, int end_y) override;
+  RawImageDataFloat();
   RawImageDataFloat(const iPoint2D &dim, uint32 cpp = 1);
   friend class RawImage;
 };
@@ -246,7 +247,7 @@ inline RawImage RawImage::create(RawImageType type)  {
     default:
       writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!\n");
   }
-  return NULL;
+  return nullptr;
 }
 
 inline RawImage RawImage::create(const iPoint2D &dim, RawImageType type,
@@ -257,7 +258,7 @@ inline RawImage RawImage::create(const iPoint2D &dim, RawImageType type,
     default:
       writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!\n");
   }
-  return NULL;
+  return nullptr;
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,
@@ -265,13 +266,13 @@ inline RawImage RawImage::create(const iPoint2D &dim, RawImageType type,
 // a value that will be used to store a random counter that can be reused between calls.
 // this needs to be inline to speed up tight decompressor loops
 inline void RawImageDataU16::setWithLookUp(ushort16 value, uchar8* dst, uint32* random) {
-  ushort16* dest = (ushort16*)dst;
-  if (table == NULL) {
+  auto *dest = (ushort16 *)dst;
+  if (table == nullptr) {
     *dest = value;
     return;
   }
   if (table->dither) {
-    uint32* t = (uint32*)table->tables;
+    auto *t = (uint32 *)table->tables;
     uint32 lookup = t[value];
     uint32 base = lookup & 0xffff;
     uint32 delta = lookup >> 16;
@@ -282,7 +283,7 @@ inline void RawImageDataU16::setWithLookUp(ushort16 value, uchar8* dst, uint32* 
     *dest = pix;
     return;
   }
-  ushort16* t = (ushort16*)table->tables;
+  auto *t = (ushort16 *)table->tables;
   *dest = t[value];
 }
 

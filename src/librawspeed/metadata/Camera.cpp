@@ -40,12 +40,12 @@ using namespace pugi;
 Camera::Camera(pugi::xml_node &camera) : cfa(iPoint2D(0,0)) {
   make = canonical_make = camera.attribute("make").as_string();
   if (make.empty())
-    ThrowCME("Camera XML Parser: \"make\" attribute not found.");
+    ThrowCME(R"(Camera XML Parser: "make" attribute not found.)");
 
   model = canonical_model = canonical_alias = camera.attribute("model").as_string();
   // chdk cameras seem to have an empty model?
   if (!camera.attribute("model")) // (model.empty())
-    ThrowCME("Camera XML Parser: \"model\" attribute not found.");
+    ThrowCME(R"(Camera XML Parser: "model" attribute not found.)");
 
   canonical_id = make + " " + model;
 
@@ -168,7 +168,7 @@ void Camera::parseBlackAreas(const xml_node &cur) {
                  make.c_str(), model.c_str());
       }
 
-      blackAreas.push_back(BlackArea(x, w, true));
+      blackAreas.emplace_back(x, w, true);
 
     } else if (name(c) == "Horizontal") {
 
@@ -184,7 +184,7 @@ void Camera::parseBlackAreas(const xml_node &cur) {
                  make.c_str(), model.c_str());
       }
 
-      blackAreas.push_back(BlackArea(y, h, false));
+      blackAreas.emplace_back(y, h, false);
     }
   }
 }
@@ -194,8 +194,9 @@ void Camera::parseAliases(const xml_node &cur) {
     ThrowCME("parseAliases(): Not an Aliases node!");
 
   for (xml_node c : cur.children("Alias")) {
-    aliases.push_back(c.child_value());
-    canonical_aliases.push_back(c.attribute("id").as_string(c.child_value()));
+    aliases.emplace_back(c.child_value());
+    canonical_aliases.emplace_back(
+        c.attribute("id").as_string(c.child_value()));
   }
 }
 
@@ -262,12 +263,10 @@ void Camera::parseSensor(const xml_node &cur) {
   vector<int> iso_list = stringToListOfInts("iso_list");
   if (!iso_list.empty()) {
     for (int iso : iso_list) {
-      sensorInfo.push_back(
-          CameraSensorInfo(black, white, iso, iso, black_colors));
+      sensorInfo.emplace_back(black, white, iso, iso, black_colors);
     }
   } else {
-    sensorInfo.push_back(
-        CameraSensorInfo(black, white, min_iso, max_iso, black_colors));
+    sensorInfo.emplace_back(black, white, min_iso, max_iso, black_colors);
   }
 }
 

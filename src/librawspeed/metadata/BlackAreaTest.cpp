@@ -29,16 +29,16 @@ using namespace RawSpeed;
 class BlackAreaTest
     : public ::testing::TestWithParam<std::tr1::tuple<int, int, bool>> {
 protected:
-  BlackAreaTest() : offset(0), size(0), isVertical(false) {}
+  BlackAreaTest() = default;
   virtual void SetUp() {
     offset = std::tr1::get<0>(GetParam());
     size = std::tr1::get<1>(GetParam());
     isVertical = std::tr1::get<2>(GetParam());
   }
 
-  int offset;      // Offset in bayer pixels.
-  int size;        // Size in bayer pixels.
-  bool isVertical; // Otherwise horizontal
+  int offset{0};          // Offset in bayer pixels.
+  int size{0};            // Size in bayer pixels.
+  bool isVertical{false}; // Otherwise horizontal
 };
 
 INSTANTIATE_TEST_CASE_P(BlackAreas, BlackAreaTest,

@@ -31,11 +31,12 @@ class Cr2Decoder final :
 {
 public:
   Cr2Decoder(TiffIFD *rootIFD, FileMap* file);
-  virtual RawImage decodeRawInternal();
-  virtual void checkSupportInternal(CameraMetaData *meta);
-  virtual void decodeMetaDataInternal(CameraMetaData *meta);
-  virtual TiffIFD* getRootIFD() {return mRootIFD;}
-  virtual ~Cr2Decoder(void);
+  RawImage decodeRawInternal() override;
+  void checkSupportInternal(CameraMetaData *meta) override;
+  void decodeMetaDataInternal(CameraMetaData *meta) override;
+  TiffIFD *getRootIFD() override { return mRootIFD; }
+  ~Cr2Decoder() override;
+
 protected:
   int sraw_coeffs[3];
 

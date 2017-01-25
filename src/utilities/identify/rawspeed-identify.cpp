@@ -61,7 +61,7 @@ std::string find_cameras_xml(const char *argv0) {
 
   // If we haven't been provided with a valid cameras.xml path on compile try
   // relative to argv[0]
-  const std::size_t lastslash = self.find_last_of("/\\");
+  const std::size_t lastslash = self.find_last_of(R"(/\)");
   const std::string bindir(self.substr(0, lastslash));
 
   std::string found_camfile(bindir +
@@ -90,7 +90,7 @@ std::string find_cameras_xml(const char *argv0) {
 #ifndef __APPLE__
     fprintf(stderr, "ERROR: Couldn't find cameras.xml in '%s'\n",
             found_camfile.c_str());
-    return NULL;
+    return nullptr;
 #else
     fprintf(stderr, "WARNING: Couldn't find cameras.xml in '%s'\n",
             found_camfile.c_str());
@@ -99,7 +99,7 @@ std::string find_cameras_xml(const char *argv0) {
     if (stat(found_camfile.c_str(), &statbuf)) {
       fprintf(stderr, "ERROR: Couldn't find cameras.xml in '%s'\n",
               found_camfile.c_str());
-      return NULL;
+      return nullptr;
     }
 #endif
   }
@@ -167,8 +167,8 @@ int main(int argc, char *argv[]) {
     d->decodeRaw();
     d->decodeMetaData(meta.get());
     r = d->mRaw;
-    for (uint32 i = 0; i < r->errors.size(); i++)
-      fprintf(stderr, "WARNING: [rawspeed] %s\n", r->errors[i]);
+    for (auto &error : r->errors)
+      fprintf(stderr, "WARNING: [rawspeed] %s\n", error);
 
     fprintf(stdout, "blackLevel: %d\n", r->blackLevel);
     fprintf(stdout, "whitePoint: %d\n", r->whitePoint);
@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
 
     if (r->getDataType() == TYPE_FLOAT32) {
       sum = 0.0f;
-      float *const data = (float *)r->getDataUncropped(0, 0);
+      auto *const data = (float *)r->getDataUncropped(0, 0);
 
 #ifdef _OPENMP
 #pragma omp parallel for default(none) schedule(static) reduction(+ : sum)
@@ -237,7 +237,7 @@ int main(int argc, char *argv[]) {
               sum / (double)(dimUncropped.y * dimUncropped.x));
     } else if (r->getDataType() == TYPE_USHORT16) {
       sum = 0.0f;
-      uint16_t *const data = (uint16_t *)r->getDataUncropped(0, 0);
+      auto *const data = (uint16_t *)r->getDataUncropped(0, 0);
 
 #ifdef _OPENMP
 #pragma omp parallel for default(none) schedule(static) reduction(+ : sum)

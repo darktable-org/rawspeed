@@ -34,8 +34,7 @@ namespace RawSpeed {
 
 using namespace pugi;
 
-CameraMetaData::CameraMetaData() {
-}
+CameraMetaData::CameraMetaData() = default;
 
 CameraMetaData::CameraMetaData(const char *docname) {
   xml_document doc;
@@ -47,7 +46,7 @@ CameraMetaData::CameraMetaData(const char *docname) {
   }
 
   for (xml_node camera : doc.child("Cameras").children("Camera")) {
-    Camera *cam = new Camera(camera);
+    auto *cam = new Camera(camera);
 
     if (!addCamera(cam))
       continue;
@@ -59,8 +58,8 @@ CameraMetaData::CameraMetaData(const char *docname) {
   }
 }
 
-CameraMetaData::~CameraMetaData(void) {
-  map<string, Camera*>::iterator i = cameras.begin();
+CameraMetaData::~CameraMetaData() {
+  auto i = cameras.begin();
   for (; i != cameras.end(); ++i) {
     delete((*i).second);
   }

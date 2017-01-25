@@ -36,7 +36,7 @@ class CiffIFD
 {
 public:
   CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 depth=0);
-  virtual ~CiffIFD(void);
+  virtual ~CiffIFD();
   std::vector<CiffIFD*> mSubIFD;
   std::map<CiffTag, CiffEntry*> mEntry;
   std::vector<CiffIFD*> getIFDsWithTag(CiffTag tag);
