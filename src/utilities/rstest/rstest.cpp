@@ -144,7 +144,7 @@ string img_hash(RawImage &r) {
   return oss.str();
 }
 
-void writePPM(RawImage raw, const string &fn) {
+void writePPM(const RawImage& raw, const string& fn) {
   FILE *f = fopen(fn.c_str(), "wb");
 
   int width = raw->dim.x;

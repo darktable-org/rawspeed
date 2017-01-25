@@ -115,8 +115,8 @@ public:
   void setCpp(uint32 val);
   virtual void createData();
   virtual void destroyData();
-  void blitFrom(const RawImage src, const iPoint2D &srcPos,
-                const iPoint2D &size, const iPoint2D &destPos);
+  void blitFrom(const RawImage& src, const iPoint2D& srcPos,
+                const iPoint2D& size, const iPoint2D& destPos);
   RawSpeed::RawImageType getDataType() const { return dataType; }
   uchar8* getData();
   uchar8* getData(uint32 x, uint32 y);    // Not super fast, but safe. Don't use per pixel.
@@ -131,7 +131,7 @@ public:
   virtual void sixteenBitLookup();
   virtual void transferBadPixelsToMap();
   virtual void fixBadPixels();
-  void copyErrorsFrom(const RawImage other);
+  void copyErrorsFrom(const RawImage& other);
   void expandBorder(iRectangle2D validData);
   void setTable(const ushort16* table, int nfilled, bool dither);
   void setTable(TableLookUp *t);
@@ -225,8 +225,8 @@ protected:
    static RawImage create(const iPoint2D &dim,
                           RawImageType type = TYPE_USHORT16,
                           uint32 componentsPerPixel = 1);
-   RawImageData* operator-> (){ return p_; };
-   RawImageData& operator* (){ return *p_; };
+   RawImageData* operator->() const { return p_; };
+   RawImageData& operator*() const { return *p_; };
    RawImage(RawImageData* p);  // p must not be NULL
   ~RawImage();
    RawImage(const RawImage& p);

@@ -213,7 +213,7 @@ RawImage::~RawImage() {
   pthread_mutex_unlock(&p_->mymutex);
 }
 
-void RawImageData::copyErrorsFrom(RawImage other) {
+void RawImageData::copyErrorsFrom(const RawImage& other) {
   for (auto &error : other->errors) {
     setError(error);
   }
@@ -347,8 +347,8 @@ void RawImageData::fixBadPixelsThread( int start_y, int end_y )
   }
 }
 
-void RawImageData::blitFrom(RawImage src, const iPoint2D &srcPos,
-                            const iPoint2D &size, const iPoint2D &destPos) {
+void RawImageData::blitFrom(const RawImage& src, const iPoint2D& srcPos,
+                            const iPoint2D& size, const iPoint2D& destPos) {
   iRectangle2D src_rect(srcPos, size);
   iRectangle2D dest_rect(destPos, size);
   src_rect = src_rect.getOverlap(iRectangle2D(iPoint2D(0,0), src->dim));
