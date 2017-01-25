@@ -48,7 +48,7 @@ DcrDecoder::~DcrDecoder() { delete mRootIFD; }
 RawImage DcrDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
 
-  if (data.size() < 1)
+  if (data.empty())
     ThrowRDE("DCR Decoder: No image data found");
 
   TiffIFD* raw = data[0];

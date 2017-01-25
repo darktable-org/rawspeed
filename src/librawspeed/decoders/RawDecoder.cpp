@@ -89,7 +89,7 @@ void RawDecoder::decodeUncompressed(TiffIFD *rawIFD, BitOrder order) {
       slices.push_back(slice);
   }
 
-  if (0 == slices.size())
+  if (slices.empty())
     ThrowRDE("RAW Decoder: No valid slices found. File probably truncated.");
 
   mRaw->dim = iPoint2D(width, offY);

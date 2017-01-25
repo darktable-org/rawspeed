@@ -569,7 +569,7 @@ bool DngDecoder::decodeMaskedAreas(TiffIFD* raw) {
     }
   }
   delete[] rects;
-  return !!mRaw->blackAreas.size();
+  return !mRaw->blackAreas.empty();
 }
 
 bool DngDecoder::decodeBlackLevels(TiffIFD* raw) {
