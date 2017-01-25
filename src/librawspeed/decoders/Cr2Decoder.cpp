@@ -348,8 +348,6 @@ void Cr2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
       mRaw->metadata.wbCoeffs[1] = (float) wb->getShort(offset + 1);
       mRaw->metadata.wbCoeffs[2] = (float) wb->getShort(offset + 3);
     } else {
-      vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-
       if (mRootIFD->hasEntryRecursive(CANONSHOTINFO) &&
           mRootIFD->hasEntryRecursive(CANONPOWERSHOTG9WB)) {
         TiffEntry *shot_info = mRootIFD->getEntryRecursive(CANONSHOTINFO);

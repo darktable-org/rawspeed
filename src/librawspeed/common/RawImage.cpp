@@ -521,9 +521,9 @@ void RawImageData::setTable( TableLookUp *t )
   table = t;
 }
 
-void RawImageData::setTable(const ushort16* table, int nfilled, bool dither) {
+void RawImageData::setTable(const ushort16 *table_, int nfilled, bool dither) {
   auto *t = new TableLookUp(1, dither);
-  t->setTable(0, table, nfilled);
+  t->setTable(0, table_, nfilled);
   this->setTable(t);
 }
 

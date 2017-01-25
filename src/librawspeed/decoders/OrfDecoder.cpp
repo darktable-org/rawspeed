@@ -108,8 +108,8 @@ void OrfDecoder::decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 si
   if ((hints.find(string("packed_with_control")) != hints.end()))
     Decode12BitRawWithControl(s, w, h);
   else if ((hints.find(string("jpeg32_bitorder")) != hints.end())) {
-    iPoint2D size(w, h),pos(0,0);
-    readUncompressedRaw(s, size, pos, w*12/8, 12, BitOrder_Jpeg32);
+    iPoint2D dimensions(w, h), pos(0, 0);
+    readUncompressedRaw(s, dimensions, pos, w * 12 / 8, 12, BitOrder_Jpeg32);
   } else if (size >= w*h*2) { // We're in an unpacked raw
     if (s.isInNativeByteOrder())
       Decode12BitRawUnpacked(s, w, h);

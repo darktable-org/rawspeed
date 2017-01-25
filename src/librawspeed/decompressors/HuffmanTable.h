@@ -131,8 +131,8 @@ public:
     codeValues.assign(data.begin(), data.end());
   }
 
-  void setup(bool fullDecode, bool fixDNGBug16) {
-    this->fixDNGBug16 = fixDNGBug16;
+  void setup(bool fullDecode, bool fixDNGBug16_) {
+    this->fixDNGBug16 = fixDNGBug16_;
 
     // store the code lengths in bits, valid values are 0..16
     std::vector<uchar8> code_len; // index is just sequential number

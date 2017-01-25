@@ -25,7 +25,7 @@
 
 namespace RawSpeed {
 
-Buffer::Buffer(size_type size) : size(size) {
+Buffer::Buffer(size_type size_) : size(size_) {
   if (!size)
     ThrowIOE("Trying to allocate 0 bytes sized buffer.");
   data = (uchar8*)_aligned_malloc(size + FILEMAP_MARGIN, 16);

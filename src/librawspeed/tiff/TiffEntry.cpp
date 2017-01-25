@@ -80,10 +80,9 @@ TiffEntry::TiffEntry(ByteStream &bs) {
   }
 }
 
-
-TiffEntry::TiffEntry(TiffTag tag, TiffDataType type, uint32 count, ByteStream&& _data)
-  : data(std::move(_data)), tag(tag), type(type), count(count)
-{
+TiffEntry::TiffEntry(TiffTag tag_, TiffDataType type_, uint32 count_,
+                     ByteStream &&data_)
+    : data(std::move(data_)), tag(tag_), type(type_), count(count_) {
   // check for count << datashift overflow
   if (count > UINT32_MAX >> datashifts[type])
     ThrowTPE("Parse error in TiffEntry: integer overflow in size calculation.");

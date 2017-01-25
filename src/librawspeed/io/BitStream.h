@@ -94,8 +94,8 @@ public:
     : data(s.peekData(s.getRemainSize())), size(s.getRemainSize() + FILEMAP_MARGIN) {}
 
   // deprecated:
-  BitStream(FileMap* f, size_type offset, size_type size)
-    : data(f->getData(offset, size)), size(size + FILEMAP_MARGIN) {}
+  BitStream(FileMap *f, size_type offset, size_type size_)
+      : data(f->getData(offset, size_)), size(size_ + FILEMAP_MARGIN) {}
   BitStream(FileMap* f, size_type offset)
     : BitStream(f, offset, f->getSize()-offset) {}
 

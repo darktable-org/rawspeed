@@ -100,10 +100,10 @@ RawImage ArwDecoder::decodeRawInternal() {
       uint32 head_off = 164600;
 
       // Replicate the dcraw contortions to get the "decryption" key
-      const uchar8 *data = mFile->getData(key_off, 1);
-      uint32 offset = (*data)*4;
-      data = mFile->getData(key_off+offset, 4);
-      uint32 key = get4BE(data,0);
+      const uchar8 *keyData = mFile->getData(key_off, 1);
+      uint32 offset = (*keyData) * 4;
+      keyData = mFile->getData(key_off + offset, 4);
+      uint32 key = get4BE(keyData, 0);
       uchar8 *head = mFile->getDataWrt(head_off, 40);
       SonyDecrypt((uint32 *) head, 10, key);
       for (int i=26; i-- > 22; )
@@ -279,17 +279,17 @@ void ArwDecoder::DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp) {
     if (input.getRemainSize() < (w*h*3 / 2))
       h = input.getRemainSize() / (w * 3 / 2) - 1;
 
-    uchar8* data = mRaw->getData();
+    uchar8 *outData = mRaw->getData();
     uint32 pitch = mRaw->pitch;
-    const uchar8 *in = input.getData(input.getRemainSize());
+    const uchar8 *inData = input.getData(input.getRemainSize());
 
     for (uint32 y = 0; y < h; y++) {
-      auto *dest = (ushort16 *)&data[y * pitch];
+      auto *dest = (ushort16 *)&outData[y * pitch];
       for (uint32 x = 0 ; x < w; x += 2) {
-        uint32 g1 = *in++;
-        uint32 g2 = *in++;
+        uint32 g1 = *inData++;
+        uint32 g2 = *inData++;
         dest[x] = (g1 | ((g2 & 0xf) << 8));
-        uint32 g3 = *in++;
+        uint32 g3 = *inData++;
         dest[x+1] = ((g2 >> 4) | (g3 << 4));
       }
     }
@@ -338,15 +338,15 @@ void ArwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
       const uchar8 *offdata = priv->getData(4);
       uint32 off = get4LE(offdata,0);
       uint32 length = mFile->getSize()-off;
-      const unsigned char* data = mFile->getData(off, length);
+      const unsigned char *dpd = mFile->getData(off, length);
       uint32 currpos = 8;
       while (currpos+20 < length) {
-        uint32 tag = get4BE(data,currpos);
-        uint32 len = get4LE(data,currpos+4);
+        uint32 tag = get4BE(dpd, currpos);
+        uint32 len = get4LE(dpd, currpos + 4);
         if (tag == 0x574247) { /* WBG */
           ushort16 tmp[4];
           for(uint32 i=0; i<4; i++)
-            tmp[i] = get2LE(data, currpos+12+i*2);
+            tmp[i] = get2LE(dpd, currpos + 12 + i * 2);
 
           mRaw->metadata.wbCoeffs[0] = (float) tmp[0];
           mRaw->metadata.wbCoeffs[1] = (float) tmp[1];
