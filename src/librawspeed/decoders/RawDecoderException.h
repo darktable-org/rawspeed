@@ -26,7 +26,8 @@
 
 namespace RawSpeed {
 
-void ThrowRDE(const char* fmt, ...) __attribute__ ((format (printf, 1, 2)));
+[[noreturn]] void ThrowRDE(const char* fmt, ...)
+    __attribute__((format(printf, 1, 2)));
 
 class RawDecoderException : public std::runtime_error
 {
