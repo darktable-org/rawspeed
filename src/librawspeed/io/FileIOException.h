@@ -31,7 +31,7 @@ namespace RawSpeed {
 class FileIOException: public RawDecoderException
 {
 public:
-  FileIOException(const std::string &);
+  FileIOException(const std::string& error);
 };
 
 } // namespace RawSpeed
