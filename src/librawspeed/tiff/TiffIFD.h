@@ -95,7 +95,6 @@ inline bool isTiffInNativeByteOrder(const ByteStream& bs, uint32 pos, const char
     return getHostEndianness() == big;
 
   ThrowTPE("Failed to parse TIFF endianess information in %s.", context);
-  return true; // prevent compiler warning
 }
 
 inline Endianness getTiffEndianness(const FileMap* file) {
@@ -106,7 +105,6 @@ inline Endianness getTiffEndianness(const FileMap* file) {
     return big;
 
   ThrowTPE("Failed to parse TIFF endianess information.");
-  return unknown; // prevent compiler warning
 }
 
 } // namespace RawSpeed
