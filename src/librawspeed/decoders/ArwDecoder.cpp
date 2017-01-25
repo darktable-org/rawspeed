@@ -246,7 +246,7 @@ void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
   auto *dest = (ushort16 *)&data[0];
   uint32 pitch = mRaw->pitch / sizeof(ushort16);
   int sum = 0;
-  for (uint32 x = w; x--;)
+  for (uint32 x = w; x--;) {
     for (uint32 y = 0; y < h + 1; y += 2) {
       bits.checkPos();
       bits.fill();
@@ -262,6 +262,7 @@ void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
       _ASSERTE(!(sum >> 12));
       if (y < h) dest[x+y*pitch] = sum;
     }
+  }
 }
 
 void ArwDecoder::DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp) {
