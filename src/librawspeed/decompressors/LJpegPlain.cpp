@@ -151,7 +151,6 @@ inline void unroll_loop(const Lambda& f) {
 
 template<int N_COMP, int X_S_F, int Y_S_F>
 void LJpegPlain::decodeN_X_Y() {
-  _ASSERTE(slicesW.size() < 16);  // We only have 4 bits for slice number.
   _ASSERTE(!(slicesW.size() > 1 && skipX));
   _ASSERTE(frame.compInfo[0].superH == X_S_F);
   _ASSERTE(frame.compInfo[0].superV == Y_S_F);
