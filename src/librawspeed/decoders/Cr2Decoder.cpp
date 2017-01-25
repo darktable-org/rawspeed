@@ -48,7 +48,7 @@ namespace RawSpeed {
 
 Cr2Decoder::Cr2Decoder(TiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
-  decoderVersion = 7;
+  decoderVersion = 8;
 }
 
 Cr2Decoder::~Cr2Decoder() {
@@ -157,7 +157,6 @@ RawImage Cr2Decoder::decodeNewFormat() {
   mRaw->isCFA = true;
   vector<Cr2Slice> slices;
   int completeH = 0;
-  bool doubleHeight = false;
 
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
@@ -169,11 +168,15 @@ RawImage Cr2Decoder::decodeNewFormat() {
     SOFInfo sof;
     LJpegPlain l(mFile, mRaw);
     l.getSOF(&sof, slice.offset, slice.size);
+    if (sof.cps == 4 && sof.w > sof.h) {
+      // Fix Canon double height issue where Canon doubled the width and halfed
+      // the height (e.g. with 5Ds), ask Canon.
+      // see: FIX_CANON_HALF_HEIGHT_DOUBLE_WIDTH
+      sof.w /= 2;
+      sof.h *= 2;
+    }
     slice.w = sof.w * sof.cps;
     slice.h = sof.h;
-    if (sof.cps == 4 && sof.w > sof.h) {
-      doubleHeight = true;
-    }
     if (!slices.empty())
       if (slices[0].w != slice.w)
         ThrowRDE("CR2 Decoder: Slice width does not match.");
@@ -183,20 +186,11 @@ RawImage Cr2Decoder::decodeNewFormat() {
     completeH += slice.h;
   }
 
-  // Override with canon_double_height if set.
-  auto msb_hint = hints.find("canon_double_height");
-  if (msb_hint != hints.end())
-    doubleHeight = ("true" == (msb_hint->second));
-
   if (slices.empty()) {
     ThrowRDE("CR2 Decoder: No Slices found.");
   }
   mRaw->dim = iPoint2D(slices[0].w, completeH);
 
-  // Fix for Canon 6D mRaw, which has flipped width & height for some part of the image
-  // In that case, we swap width and height, since this is the correct dimension
-  bool flipDims = false;
-  bool wrappedCr2Slices = false;
   if (raw->hasEntry((TiffTag)0xc6c5)) {
     ushort16 ss = raw->getEntry((TiffTag)0xc6c5)->getInt();
     // sRaw
@@ -205,12 +199,11 @@ RawImage Cr2Decoder::decodeNewFormat() {
       mRaw->setCpp(3);
       mRaw->isCFA = false;
 
-      // Fix for Canon 80D mraw format.
-      // In that format, the frame (as read by getSOF()) is 4032x3402, while the
-      // real image should be 4536x3024 (where the full vertical slices in
-      // the frame "wrap around" the image.
-      if (hints.find("wrapped_cr2_slices") != hints.end() && raw->hasEntry(IMAGEWIDTH) && raw->hasEntry(IMAGELENGTH)) {
-        wrappedCr2Slices = true;
+      // Note: e.g. the Canon 80D mRaw files don't agree between between width/height
+      // of the LJpeg encoded frame and width/height of the raw file, but the total
+      // amount of pixels must be the same.
+      // see FIX_CANON_FRAME_VS_IMAGE_SIZE_MISMATCH
+      if (raw->hasEntry(IMAGEWIDTH) && raw->hasEntry(IMAGELENGTH)) {
         int w = raw->getEntry(IMAGEWIDTH)->getInt();
         int h = raw->getEntry(IMAGELENGTH)->getInt();
         if (w * h != mRaw->dim.x * mRaw->dim.y) {
@@ -219,12 +212,11 @@ RawImage Cr2Decoder::decodeNewFormat() {
         mRaw->dim = iPoint2D(w, h);
       }
     }
-    flipDims = mRaw->dim.x < mRaw->dim.y;
-    if (flipDims) {
-      int w = mRaw->dim.x;
-      mRaw->dim.x = mRaw->dim.y;
-      mRaw->dim.y = w;
-    }
+    // Fix for Canon 6D mRaw, which has flipped width & height for some part of the image
+    // In that case, we swap width and height, since this is the correct dimension.
+    // see FIX_CANON_FLIPPED_WIDTH_AND_HEIGHT
+    if (mRaw->dim.x < mRaw->dim.y)
+      swap(mRaw->dim.x, mRaw->dim.y);
   }
 
   mRaw->createData();
@@ -247,9 +239,6 @@ RawImage Cr2Decoder::decodeNewFormat() {
     try {
       LJpegPlain l(mFile, mRaw);
       l.addSlices(s_width);
-      l.mCanonFlipDim = flipDims;
-      l.mCanonDoubleHeight = doubleHeight;
-      l.mWrappedCr2Slices = wrappedCr2Slices;
       l.decode(slice.offset, slice.size, 0, offY);
     } catch (RawDecoderException &e) {
       if (i == 0)
