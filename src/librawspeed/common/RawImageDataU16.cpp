@@ -448,7 +448,6 @@ void RawImageDataU16::fixBadPixel( uint32 x, uint32 y, int component )
 void RawImageDataU16::doLookup( int start_y, int end_y )
 {
   if (table->ntables == 1) {
-    ushort16* t = table->getTable(0);
     if (table->dither) {
       int gw = uncropped_dim.x * cpp;
       auto *t = (uint32 *)table->getTable(0);
@@ -470,6 +469,7 @@ void RawImageDataU16::doLookup( int start_y, int end_y )
     }
 
     int gw = uncropped_dim.x * cpp;
+    ushort16 *t = table->getTable(0);
     for (int y = start_y; y < end_y; y++) {
       auto *pixel = (ushort16 *)getDataUncropped(0, y);
       for (int x = 0 ; x < gw; x++) {

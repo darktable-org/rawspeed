@@ -60,10 +60,10 @@ X3fDecoder::~X3fDecoder() {
   line_offsets = nullptr;
 }
 
-string X3fDecoder::getIdAsString(ByteStream *bytes) {
+string X3fDecoder::getIdAsString(ByteStream *bytes_) {
   uchar8 id[5];
   for (int i = 0; i < 4; i++)
-    id[i] = bytes->getByte();
+    id[i] = bytes_->getByte();
   id[4] = 0;
   return string((const char*)id);
 }
@@ -306,15 +306,13 @@ void X3fDecoder::decompressSigma( X3fImage &image )
   ThrowRDE("X3fDecoder: Unable to find decoder for format: %d", image.format);
 }
 
-
-
-void X3fDecoder::createSigmaTable(ByteStream *bytes, int codes) {
+void X3fDecoder::createSigmaTable(ByteStream *bytes_, int codes) {
   memset(code_table, 0xff, sizeof(code_table));
 
   // Read codes and create 8 bit table with all valid values.
   for (int i = 0; i < codes; i++) {
-    uint32 len = bytes->getByte();
-    uint32 code = bytes->getByte();
+    uint32 len = bytes_->getByte();
+    uint32 code = bytes_->getByte();
     if (len > 8)
       ThrowRDE("X3fDecoder: bit length longer than 8");
     uint32 rem_bits = 8-len;
@@ -388,27 +386,28 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
       dst += 6<<subs;
       // We decode two pixels every loop
       for (int x = 2; x < dim.x; x += 2) {
-        int diff1 = SigmaDecode(&bits);
-        int diff2 = SigmaDecode(&bits);
+        diff1 = SigmaDecode(&bits);
+        diff2 = SigmaDecode(&bits);
         dst[0] = pred_left[0] = pred_left[0] + diff1;
         dst[3<<subs] = pred_left[1] = pred_left[1] + diff2;
         dst += 6<<subs;
       }
       // If plane is larger than image, skip that number of pixels.
-      for (int i = 0; i < skipX; i++)
+      for (int j = 0; j < skipX; j++)
         SigmaSkipOne(&bits);
     }
     return;
   }
 
   if (curr_image->format == 6) {
-    int pred[3];
+    // FIXME: or does it want X3fDecoder::pred[3] here?
+    int predictor[3];
     for (uint32 y = t->start_y; y < t->end_y; y++) {
       BitPumpMSB bits(mFile, line_offsets[y]);
       auto *dst = (ushort16 *)mRaw->getData(0, y);
-      pred[0] = pred[1] = pred[2] = 0;
+      predictor[0] = predictor[1] = predictor[2] = 0;
       for (int x = 0; x < mRaw->dim.x; x++) {
-        for (int &i : pred) {
+        for (int &i : predictor) {
           ushort16 val = huge_table[bits.peekBits(max_len)];
           uchar8 nbits = val&31;
           if (val == 0xffff) {

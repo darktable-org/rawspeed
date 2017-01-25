@@ -70,7 +70,6 @@ string MosDecoder::getXMPTag(const string &xmp, const string &tag) {
 }
 
 RawImage MosDecoder::decodeRawInternal() {
-  vector<TiffIFD*> data;
   TiffIFD *raw = nullptr;
   uint32 off = 0;
 
@@ -123,7 +122,7 @@ RawImage MosDecoder::decodeRawInternal() {
 
     return mRaw;
   } else {
-    data = mRootIFD->getIFDsWithTag(TILEOFFSETS);
+    vector<TiffIFD *> data = mRootIFD->getIFDsWithTag(TILEOFFSETS);
     if (!data.empty()) {
       raw = data[0];
       off = raw->getEntry(TILEOFFSETS)->getInt();

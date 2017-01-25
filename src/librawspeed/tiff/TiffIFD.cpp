@@ -37,7 +37,8 @@ using namespace std;
 
 namespace RawSpeed {
 
-TiffIFD::TiffIFD(const DataBuffer& data, uint32 offset, TiffIFD *parent) : parent(parent) {
+TiffIFD::TiffIFD(const DataBuffer &data, uint32 offset, TiffIFD *parent_)
+    : parent(parent_) {
 
   // see parseTiff: UINT32_MAX is used to mark the "virtual" top level TiffRootIFD in a tiff file
   if (offset == UINT32_MAX)
@@ -46,9 +47,9 @@ TiffIFD::TiffIFD(const DataBuffer& data, uint32 offset, TiffIFD *parent) : paren
   ByteStream bs = data;
   bs.setPosition(offset);
 
-  auto entries = bs.getShort(); // Directory entries in this IFD
+  auto numEntries = bs.getShort(); // Directory entries in this IFD
 
-  for (uint32 i = 0; i < entries; i++) {
+  for (uint32 i = 0; i < numEntries; i++) {
     TiffEntryOwner t;
     try {
       t = make_unique<TiffEntry>(bs);
@@ -213,8 +214,8 @@ TiffEntry* TiffIFD::getEntryRecursive(TiffTag tag) const {
   if (i != entries.end()) {
     return i->second.get();
   }
-  for (auto& i : subIFDs) {
-    TiffEntry* entry = i->getEntryRecursive(tag);
+  for (auto &j : subIFDs) {
+    TiffEntry *entry = j->getEntryRecursive(tag);
     if (entry)
       return entry;
   }

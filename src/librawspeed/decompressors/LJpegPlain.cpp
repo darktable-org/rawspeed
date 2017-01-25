@@ -259,9 +259,7 @@ void LJpegPlain::decodeN_X_Y() {
 
     if (X_S_F == 1) // will be optimized out
       for (uint32 i = 0; i < skipX; i++)
-        unroll_loop<N_COMP>([&](int i) {
-          ht[i]->decodeNext(bitStream);
-        });
+        unroll_loop<N_COMP>([&](int j) { ht[j]->decodeNext(bitStream); });
 
     // Update predictors
     unroll_loop<N_COMP>([&](int i) {

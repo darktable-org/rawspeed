@@ -50,7 +50,8 @@ public:
   // Allocates the memory
   Buffer(size_type size);
   // Data already allocated
-  explicit Buffer(const uchar8* data, size_type size) : data(data), size(size) {}
+  explicit Buffer(const uchar8 *data_, size_type size_)
+      : data(data_), size(size_) {}
   // creates a (non-owning) copy / view of rhs
   Buffer(const Buffer& rhs)
     : data(rhs.data), size(rhs.size) {}
@@ -61,8 +62,8 @@ public:
   ~Buffer();
   Buffer& operator=(const Buffer& rhs);
 
-  Buffer getSubView(size_type offset, size_type size) const {
-    return Buffer(getData(offset, size), size);
+  Buffer getSubView(size_type offset, size_type size_) const {
+    return Buffer(getData(offset, size_), size_);
   }
   Buffer getSubView(size_type offset) const {
     size_type newSize = size - offset;
@@ -128,8 +129,8 @@ class DataBuffer : public Buffer
   bool inNativeByteOrder = true;
 public:
   DataBuffer() = default;
-  DataBuffer(const Buffer& data, bool inNativeByteOrder = true)
-    : Buffer(data), inNativeByteOrder(inNativeByteOrder) {}
+  DataBuffer(const Buffer &data_, bool inNativeByteOrder_ = true)
+      : Buffer(data_), inNativeByteOrder(inNativeByteOrder_) {}
 
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap byte order if required
   template<typename T> inline T get(size_type offset, size_type index = 0) const {
