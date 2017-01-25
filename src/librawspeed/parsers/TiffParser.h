@@ -28,7 +28,7 @@ namespace RawSpeed {
 class RawDecoder;
 
 // TiffRootIFDOwner contains pointers into 'data' but if is is non-owning, it may be deleted immediately
-TiffRootIFDOwner parseTiff(const Buffer& data);
+TiffRootIFDOwner parseTiff(const Buffer& data); // NOLINT no, it's not unneeded
 
 // transfers ownership of TiffIFD into RawDecoder
 RawDecoder* makeDecoder(TiffRootIFDOwner root, Buffer &data);
