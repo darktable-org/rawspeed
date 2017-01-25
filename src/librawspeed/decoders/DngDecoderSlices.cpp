@@ -148,8 +148,8 @@ static void skip_input_data (j_decompress_ptr cinfo, long num_bytes)
   }
 }
 static void term_source (j_decompress_ptr cinfo) {}
-static void jpeg_mem_src_int (j_decompress_ptr cinfo, unsigned char* buffer, long nbytes)
-{
+static void jpeg_mem_src_int(j_decompress_ptr cinfo,
+                             const unsigned char* buffer, long nbytes) {
   struct jpeg_source_mgr* src;
 
   if (cinfo->src == nullptr) { /* first time for this JPEG object? */

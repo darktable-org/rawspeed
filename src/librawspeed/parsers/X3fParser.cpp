@@ -212,8 +212,9 @@ static const int halfShift  = 10; /* used for shifting by 10 bits */
 static const UTF32 halfBase = 0x0010000UL;
 static const UTF8 firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
 
-static bool ConvertUTF16toUTF8 (const UTF16** sourceStart, const UTF16* sourceEnd,  UTF8** targetStart, UTF8* targetEnd)
-{
+static bool ConvertUTF16toUTF8(const UTF16** sourceStart,
+                               const UTF16* sourceEnd, UTF8** targetStart,
+                               const UTF8* targetEnd) {
   bool success = true;
   const UTF16* source = *sourceStart;
   UTF8* target = *targetStart;
