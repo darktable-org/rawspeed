@@ -183,6 +183,12 @@ size_t process(const string &filename, CameraMetaData *metadata, bool create,
     return 0;
   }
 
+// to narrow down the list of files that could have causes the crash
+#ifdef _OPENMP
+#pragma omp critical(io)
+#endif
+  cout << left << setw(55) << filename << ": starting decoding ... " << endl;
+
   FileReader reader(filename.c_str());
 
   unique_ptr<FileMap> map = unique_ptr<FileMap>(reader.readFile());
@@ -327,6 +333,8 @@ int main(int argc, char **argv) {
     }
     cerr << "See rstest.log for details.\n";
   }
+
+  cout << "All good, no tests failed!" << endl;
 
   return failedTests.empty() ? 0 : 1;
 }
