@@ -242,7 +242,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
 RawImage Cr2Decoder::decodeRawInternal() {
   try {
-    if (hints.find("old_format") != hints.end())
+    if (mRootIFD->getSubIFDs().size() < 4)
       return decodeOldFormat();
 
     return decodeNewFormat();
