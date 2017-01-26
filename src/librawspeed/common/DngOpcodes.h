@@ -33,7 +33,7 @@ class TiffEntry;
 class DngOpcode
 {
 public:
-  DngOpcode() { host = getHostEndianness(); };
+  DngOpcode() { host = getHostEndianness(); }
   virtual ~DngOpcode() = default;
 
   /* Will be called exactly once, when input changes */

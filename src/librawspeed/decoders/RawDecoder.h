@@ -48,7 +48,7 @@ class RawDecoderThread
     RawDecoderThread() {
       error = nullptr;
       taskNo = -1;
-    };
+    }
     uint32 start_y;
     uint32 end_y;
     const char* error;
@@ -228,7 +228,7 @@ protected:
 
 class RawSlice {
 public:
-  RawSlice() { h = offset = count = 0;};
+  RawSlice() { h = offset = count = 0; }
   ~RawSlice() = default;
   uint32 h;
   uint32 offset;

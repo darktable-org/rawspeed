@@ -56,7 +56,9 @@ protected:
   void readDirectory();
   std::string getId();
   ByteStream *bytes;
-  bool hasProp(const char* key) { return mProperties.props.find(key) != mProperties.props.end();};
+  bool hasProp(const char* key) {
+    return mProperties.props.find(key) != mProperties.props.end();
+  }
   std::string getProp(const char* key);
   void decompressSigma( X3fImage &image );
   void createSigmaTable(ByteStream *bytes, int codes);
