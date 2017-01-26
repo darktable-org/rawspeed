@@ -91,7 +91,7 @@ RawDecoder* makeDecoder(TiffRootIFDOwner _root, Buffer &data) {
   for (TiffIFD* ifd : root->getIFDsWithTag(MAKE)) {
     string make = ifd->getEntry(MAKE)->getString();
     TrimSpaces(make);
-    string model = "";
+    string model;
     if (ifd->hasEntry(MODEL)) {
       model = ifd->getEntry(MODEL)->getString();
       TrimSpaces(model);
@@ -128,8 +128,8 @@ RawDecoder* makeDecoder(TiffRootIFDOwner _root, Buffer &data) {
     if (make == "Kodak") {
       if (model == "DCS560C")
         return new Cr2Decoder(root, mInput);
-      else
-        return new DcrDecoder(root, mInput);
+
+      return new DcrDecoder(root, mInput);
     }
     if (make == "KODAK") {
       return new DcsDecoder(root, mInput);

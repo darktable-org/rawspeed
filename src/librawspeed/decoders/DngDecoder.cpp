@@ -432,7 +432,7 @@ RawImage DngDecoder::decodeRawInternal() {
     }
     delete [] table;
 
-    if (false) {
+    if (false) { // NOLINT else would need preprocessor
       // Test average for bias
       uint32 cw = mRaw->dim.x * mRaw->getCpp();
       auto *pixels = (ushort16 *)mRaw->getData(0, 500);
@@ -525,10 +525,9 @@ void DngDecoder::checkSupportInternal(CameraMetaData *meta) {
       string unique = mRootIFD->getEntryRecursive(UNIQUECAMERAMODEL)->getString();
       this->checkCameraSupported(meta, unique, unique, "dng");
       return;
-    } else {
-      // If we don't have make/model we cannot tell, but still assume yes.
-      return;
     }
+    // If we don't have make/model we cannot tell, but still assume yes.
+    return;
   }
 
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
@@ -558,16 +557,18 @@ bool DngDecoder::decodeMaskedAreas(TiffIFD* raw) {
     iPoint2D topleft = iPoint2D(rects[i*4+1], rects[i*4]);
     iPoint2D bottomright = iPoint2D(rects[i*4+3], rects[i*4+2]);
     // Is this a horizontal box, only add it if it covers the active width of the image
-    if (topleft.x <= top.x && bottomright.x >= (mRaw->dim.x+top.x))
+    if (topleft.x <= top.x && bottomright.x >= (mRaw->dim.x + top.x)) {
       mRaw->blackAreas.emplace_back(topleft.y, bottomright.y - topleft.y,
                                     false);
-    // Is it a vertical box, only add it if it covers the active height of the image
-    else if (topleft.y <= top.y && bottomright.y >= (mRaw->dim.y+top.y)) {
+    }
+    // Is it a vertical box, only add it if it covers the active height of the
+    // image
+    else if (topleft.y <= top.y && bottomright.y >= (mRaw->dim.y + top.y)) {
       mRaw->blackAreas.emplace_back(topleft.x, bottomright.x - topleft.x, true);
     }
   }
   delete[] rects;
-  return !!mRaw->blackAreas.size();
+  return !mRaw->blackAreas.empty();
 }
 
 bool DngDecoder::decodeBlackLevels(TiffIFD* raw) {

@@ -144,7 +144,7 @@ string img_hash(RawImage &r) {
   return oss.str();
 }
 
-void writePPM(RawImage raw, const string &fn) {
+void writePPM(const RawImage& raw, const string& fn) {
   FILE *f = fopen(fn.c_str(), "wb");
 
   int width = raw->dim.x;
@@ -182,6 +182,12 @@ size_t process(const string &filename, CameraMetaData *metadata, bool create,
          << (create ? "exists" : "missing") << ", skipping" << endl;
     return 0;
   }
+
+// to narrow down the list of files that could have causes the crash
+#ifdef _OPENMP
+#pragma omp critical(io)
+#endif
+  cout << left << setw(55) << filename << ": starting decoding ... " << endl;
 
   FileReader reader(filename.c_str());
 
@@ -327,6 +333,8 @@ int main(int argc, char **argv) {
     }
     cerr << "See rstest.log for details.\n";
   }
+
+  cout << "All good, no tests failed!" << endl;
 
   return failedTests.empty() ? 0 : 1;
 }

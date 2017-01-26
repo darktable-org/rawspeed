@@ -36,6 +36,7 @@ target_link_libraries(rawspeed_static PUBLIC ${RAWSPEED_LIBS})
 add_dependencies(rawspeed_static rawspeed)
 
 if(WITH_OPENMP AND OPENMP_FOUND)
+  target_compile_options(rawspeed_static INTERFACE ${OpenMP_CXX_FLAGS})
   target_link_libraries(rawspeed_static INTERFACE ${OpenMP_CXX_FLAGS})
 endif()
 

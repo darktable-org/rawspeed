@@ -39,7 +39,11 @@ if(NOT CMAKE_BUILD_TYPE)
   set(default_build_type "RelWithDebInfo")
 
   if(BUILD_TESTING)
-    set(default_build_type "Coverage")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+      set(default_build_type "Coverage")
+    else()
+      set(default_build_type "ASAN")
+    endif()
   endif()
 
   message("WARNING: Defaulting to CMAKE_BUILD_TYPE=${default_build_type}. Use ccmake to set a proper value.")

@@ -273,11 +273,10 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
 RawImage Cr2Decoder::decodeRawInternal() {
   try {
-    if (hints.find("old_format") != hints.end()) {
+    if (hints.find("old_format") != hints.end())
       return decodeOldFormat();
-    } else {
-      return decodeNewFormat();
-    }
+
+    return decodeNewFormat();
   } catch (TiffParserException &) {
     ThrowRDE("CR2 Decoder: Unsupported format.");
     return nullptr; // silence the -Wreturn-type warning
@@ -318,7 +317,7 @@ void Cr2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
 
   string make = data[0]->getEntry(MAKE)->getString();
   string model = data[0]->getEntry(MODEL)->getString();
-  string mode = "";
+  string mode;
 
   if (mRaw->metadata.subsampling.y == 2 && mRaw->metadata.subsampling.x == 2)
     mode = "sRaw1";

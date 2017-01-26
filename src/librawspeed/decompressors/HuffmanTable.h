@@ -239,35 +239,38 @@ public:
     if (FULL_DECODE && val & FlagMask) {
       // if the flag bit is set, the payload is the already sign extended difference
       return val >> PayloadShift;
-    } else if (len) {
+    }
+
+    if (len) {
       // if the flag bit is not set but len != 0, the payload is the number of bits to sign extend and return
       int l_diff = val >> PayloadShift;
       return FULL_DECODE ? signExtended(bs.getBitsNoFill(l_diff), l_diff) : l_diff;
-    } else {
-      uint32 code_l = LookupDepth;
-      bs.skipBitsNoFill(code_l);
-      while (code_l < maxCodeOL.size() && code > maxCodeOL[code_l]) {
-        uint32 temp = bs.getBitsNoFill(1);
-        code = (code << 1) | temp;
-        code_l++;
-      }
-
-      if (code > maxCodeOL[code_l])
-        ThrowRDE("Corrupt JPEG data: bad Huffman code: %u (len: %u)", code, code_l);
-
-      int diff_l = codeValues[code - codeOffsetOL[code_l]];
-
-      if (!FULL_DECODE)
-        return diff_l;
-
-      if (diff_l == 16) {
-        if (fixDNGBug16)
-          bs.skipBits(16);
-        return -32768;
-      }
-
-      return diff_l ? signExtended(bs.getBitsNoFill(diff_l), diff_l) : 0;
     }
+
+    uint32 code_l = LookupDepth;
+    bs.skipBitsNoFill(code_l);
+    while (code_l < maxCodeOL.size() && code > maxCodeOL[code_l]) {
+      uint32 temp = bs.getBitsNoFill(1);
+      code = (code << 1) | temp;
+      code_l++;
+    }
+
+    if (code > maxCodeOL[code_l])
+      ThrowRDE("Corrupt JPEG data: bad Huffman code: %u (len: %u)", code,
+               code_l);
+
+    int diff_l = codeValues[code - codeOffsetOL[code_l]];
+
+    if (!FULL_DECODE)
+      return diff_l;
+
+    if (diff_l == 16) {
+      if (fixDNGBug16)
+        bs.skipBits(16);
+      return -32768;
+    }
+
+    return diff_l ? signExtended(bs.getBitsNoFill(diff_l), diff_l) : 0;
   }
 };
 

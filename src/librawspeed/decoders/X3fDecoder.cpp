@@ -344,7 +344,6 @@ void X3fDecoder::createSigmaTable(ByteStream *bytes_, int codes) {
       big_table[i] = 0xf;
     }
   }
-  return;
 }
 
 void X3fDecoder::decodeThreaded( RawDecoderThread* t )

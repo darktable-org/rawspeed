@@ -47,7 +47,7 @@ DcsDecoder::~DcsDecoder() { delete mRootIFD; }
 RawImage DcsDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(IMAGEWIDTH);
 
-  if (data.size() < 1)
+  if (data.empty())
     ThrowRDE("DCS Decoder: No image data found");
 
   TiffIFD* raw = data[0];

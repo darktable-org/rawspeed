@@ -112,9 +112,9 @@ bool CameraMetaData::addCamera( Camera* cam )
     writeLog(DEBUG_PRIO_WARNING, "CameraMetaData: Duplicate entry found for camera: %s %s, Skipping!\n", cam->make.c_str(), cam->model.c_str());
     delete cam;
     return false;
-  } else {
-    cameras[id] = cam;
   }
+  cameras[id] = cam;
+
   if (string::npos != cam->mode.find("chdk")) {
     auto filesize_hint = cam->hints.find("filesize");
     if (filesize_hint == cam->hints.end() || filesize_hint->second.empty()) {

@@ -91,22 +91,20 @@ public:
 inline bool isTiffInNativeByteOrder(const ByteStream& bs, uint32 pos, const char* context = "") {
   if (bs.hasPatternAt("II", 2, pos))
     return getHostEndianness() == little;
-  else if (bs.hasPatternAt("MM", 2, pos))
+  if (bs.hasPatternAt("MM", 2, pos))
     return getHostEndianness() == big;
-  else
-    ThrowTPE("Failed to parse TIFF endianess information in %s.", context);
-  return true; // prevent compiler warning
+
+  ThrowTPE("Failed to parse TIFF endianess information in %s.", context);
 }
 
 inline Endianness getTiffEndianness(const FileMap* file) {
   ushort16 magic = *(ushort16*)file->getData(0, 2);
   if (magic == 0x4949)
     return little;
-  else if (magic == 0x4d4d)
+  if (magic == 0x4d4d)
     return big;
-  else
-    ThrowTPE("Failed to parse TIFF endianess information.");
-  return unknown; // prevent compiler warning
+
+  ThrowTPE("Failed to parse TIFF endianess information.");
 }
 
 } // namespace RawSpeed

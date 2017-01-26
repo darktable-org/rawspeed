@@ -132,7 +132,7 @@ void CrwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
     ThrowRDE("CRW Support check: wrong number of strings for make/model");
   string make = makemodel[0];
   string model = makemodel[1];
-  string mode = "";
+  string mode;
 
   if (mRootIFD->hasEntryRecursive(CIFF_SHOTINFO)) {
     CiffEntry *shot_info = mRootIFD->getEntryRecursive(CIFF_SHOTINFO);
@@ -261,11 +261,13 @@ void CrwDecoder::makeDecoder (int n, const uchar8 *source)
     ThrowRDE("CRW: Couldn't allocate table");
 
   huff[0] = max;
-  for (h=len=1; len <= max; len++)
-    for (i=0; i < count[len]; i++, ++source)
+  for (h = len = 1; len <= max; len++) {
+    for (i = 0; i < count[len]; i++, ++source) {
       for (j=0; j < 1 << (max-len); j++)
         if (h <= 1 << max)
           huff[h++] = len << 8 | *source;
+    }
+  }
 
   mHuff[n] = huff;
 }
