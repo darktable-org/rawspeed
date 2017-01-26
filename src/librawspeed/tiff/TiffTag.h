@@ -322,7 +322,8 @@ enum TiffTag {
   OPCODELIST3 = 0xC742,
   NOISEPROFILE = 0xC761,
   CANONCR2SLICE                   = 0xC640,   // CANON CR2
-  CANON_SRAWTYPE                  = 0xC6C5,
+  CANON_SRAWTYPE                  = 0xC6C5, // IFD3
+  CANON_SENSOR_INFO               = 0x00E0, // MakerNote
 
   CALIBRATIONILLUMINANT1          = 0xC65A, // IFD0
   CALIBRATIONILLUMINANT2          = 0xC65B, // IFD0

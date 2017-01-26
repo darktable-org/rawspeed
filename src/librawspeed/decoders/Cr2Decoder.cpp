@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2015 Roman Lebedev
+    Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -121,85 +122,25 @@ RawImage Cr2Decoder::decodeOldFormat() {
   return mRaw;
 }
 
-struct Cr2Slice {
-  uint32 w;
-  uint32 h;
-  uint32 offset;
-  uint32 size;
-};
-
 // for technical details about Cr2 mRAW/sRAW, see http://lclevy.free.fr/cr2/
 
 RawImage Cr2Decoder::decodeNewFormat() {
   if (mRootIFD->getSubIFDs().size() < 4)
     ThrowRDE("CR2 Decoder: No image data found");
 
+  TiffEntry* sensorInfoE = mRootIFD->getEntryRecursive(CANON_SENSOR_INFO);
+  if (!sensorInfoE)
+    ThrowTPE("Cr2Decoder: failed to get SensorInfo from MakerNote");
+  iPoint2D dim(sensorInfoE->getShort(1), sensorInfoE->getShort(2));
+
+  int componentsPerPixel = 1;
   TiffIFD* raw = mRootIFD->getSubIFDs()[3].get();
-  mRaw = RawImage::create();
-  mRaw->isCFA = true;
-  vector<Cr2Slice> slices;
-  int completeH = 0;
-
-  TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
-  TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
-  // Iterate through all slices
-  for (uint32 s = 0; s < offsets->count; s++) {
-    Cr2Slice slice;
-    slice.offset = offsets[0].getInt();
-    slice.size = counts[0].getInt();
-    SOFInfo sof;
-    LJpegPlain l(mFile, mRaw);
-    l.getSOF(&sof, slice.offset, slice.size);
-    if (sof.cps == 4 && sof.w > sof.h) {
-      // Fix Canon double height issue where Canon doubled the width and halfed
-      // the height (e.g. with 5Ds), ask Canon.
-      // see: FIX_CANON_HALF_HEIGHT_DOUBLE_WIDTH
-      sof.w /= 2;
-      sof.h *= 2;
-    }
-    slice.w = sof.w * sof.cps;
-    slice.h = sof.h;
-    if (!slices.empty())
-      if (slices[0].w != slice.w)
-        ThrowRDE("CR2 Decoder: Slice width does not match.");
-
-    if (mFile->isValid(slice.offset, slice.size)) // Only decode if size is valid
-      slices.push_back(slice);
-    completeH += slice.h;
+  if (raw->hasEntry(CANON_SRAWTYPE) &&
+      raw->getEntry(CANON_SRAWTYPE)->getInt() == 4) {
+    componentsPerPixel = 3;
   }
 
-  if (slices.empty()) {
-    ThrowRDE("CR2 Decoder: No Slices found.");
-  }
-  mRaw->dim = iPoint2D(slices[0].w, completeH);
-
-  if (raw->hasEntry(CANON_SRAWTYPE)) {
-    if (raw->getEntry(CANON_SRAWTYPE)->getInt() == 4) {
-      mRaw->dim.x /= 3;
-      mRaw->setCpp(3);
-      mRaw->isCFA = false;
-
-      // Note: e.g. the Canon 80D mRaw files don't agree between between width/height
-      // of the LJpeg encoded frame and width/height of the raw file, but the total
-      // amount of pixels must be the same.
-      // see FIX_CANON_FRAME_VS_IMAGE_SIZE_MISMATCH
-      if (raw->hasEntry(IMAGEWIDTH) && raw->hasEntry(IMAGELENGTH)) {
-        int w = raw->getEntry(IMAGEWIDTH)->getInt();
-        int h = raw->getEntry(IMAGELENGTH)->getInt();
-        if (w * h != mRaw->dim.x * mRaw->dim.y) {
-          ThrowRDE("CR2 Decoder: Wrapped slices don't match image size");
-        }
-        mRaw->dim = iPoint2D(w, h);
-      }
-    }
-    // Fix for Canon 6D mRaw, which has flipped width & height for some part of the image
-    // In that case, we swap width and height, since this is the correct dimension.
-    // see FIX_CANON_FLIPPED_WIDTH_AND_HEIGHT
-    if (mRaw->dim.x < mRaw->dim.y)
-      swap(mRaw->dim.x, mRaw->dim.y);
-  }
-
-  mRaw->createData();
+  mRaw = RawImage::create(dim, TYPE_USHORT16, componentsPerPixel);
 
   vector<int> s_width;
   TiffEntry* cr2SliceEntry = raw->getEntryRecursive(CANONCR2SLICE);
@@ -209,25 +150,19 @@ RawImage Cr2Decoder::decodeNewFormat() {
     s_width.push_back(cr2SliceEntry->getShort(2));
   }
 
-  uint32 offY = 0;
+  TiffEntry* offsets = raw->getEntry(STRIPOFFSETS);
+  TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
 
-  _RPT1(0,"Org slices:%d\n", s_width.size());
-  for (uint32 i = 0; i < slices.size(); i++) {
-    Cr2Slice slice = slices[i];
-    try {
-      LJpegPlain l(mFile, mRaw);
-      l.addSlices(s_width);
-      l.decode(slice.offset, slice.size, 0, offY);
-    } catch (RawDecoderException &e) {
-      if (i == 0)
-        throw;
-      // These may just be single slice error - store the error and move on
-      mRaw->setError(e.what());
-    } catch (IOException &e) {
-      // Let's try to ignore this - it might be truncated data, so something might be useful.
-      mRaw->setError(e.what());
-    }
-    offY += slice.w;
+  LJpegPlain l(mFile, mRaw);
+  l.addSlices(s_width);
+
+  try {
+    l.decode(offsets->getInt(), counts->getInt(), 0, 0);
+  } catch (RawDecoderException &e) {
+    mRaw->setError(e.what());
+  } catch (IOException &e) {
+    // Let's try to ignore this - it might be truncated data, so something might be useful.
+    mRaw->setError(e.what());
   }
 
   if (mRaw->metadata.subsampling.x > 1 || mRaw->metadata.subsampling.y > 1)

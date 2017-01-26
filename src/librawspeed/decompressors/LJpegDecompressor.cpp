@@ -36,32 +36,6 @@ LJpegDecompressor::~LJpegDecompressor() {
   delete input;
 }
 
-void LJpegDecompressor::getSOF(SOFInfo* sof, uint32 offset, uint32 size) {
-  if (!mFile->isValid(offset, size))
-    ThrowRDE("LJpegDecompressor::getSOF: Start offset plus size is longer than file. Truncated file.");
-  try {
-    // JPEG is big endian
-    input = new ByteStream(mFile, offset, size, getHostEndianness() == big);
-
-    if (getNextMarker(false) != M_SOI)
-      ThrowRDE("LJpegDecompressor::getSOF: Image did not start with SOI. Probably not an LJPEG");
-
-    while (true) {
-      JpegMarker m = getNextMarker(true);
-      if (M_SOF3 == m) {
-        parseSOF(sof);
-        return;
-      }
-      if (M_EOI == m) {
-        ThrowRDE("LJpegDecompressor: Could not locate Start of Frame.");
-        return;
-      }
-    }
-  } catch (IOException &) {
-    ThrowRDE("LJpegDecompressor: IO exception, read outside file. Corrupt File.");
-  }
-}
-
 void LJpegDecompressor::decode(uint32 offset, uint32 size, uint32 offsetX, uint32 offsetY) {
   if (!mFile->isValid(offset, size))
     ThrowRDE("LJpegDecompressor: Start offset plus size is longer than file. Truncated file.");

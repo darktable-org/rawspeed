@@ -144,7 +144,6 @@ public:
       : mFile(file), mRaw(img) {}
   virtual ~LJpegDecompressor();
   void decode(uint32 offset, uint32 size, uint32 offsetX, uint32 offsetY);
-  void getSOF(SOFInfo* i, uint32 offset, uint32 size);
   void addSlices(std::vector<int> slices) {
     slicesW = std::move(slices);
   } // CR2 slices.
