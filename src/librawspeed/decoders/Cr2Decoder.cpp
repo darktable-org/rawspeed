@@ -130,8 +130,6 @@ struct Cr2Slice {
 
 // for technical details about Cr2 mRAW/sRAW, see http://lclevy.free.fr/cr2/
 
-static const TiffTag magicTagInRawIFD = (TiffTag)0xc5d8;
-
 RawImage Cr2Decoder::decodeNewFormat() {
   if (mRootIFD->getSubIFDs().size() < 4)
     ThrowRDE("CR2 Decoder: No image data found");
@@ -175,10 +173,8 @@ RawImage Cr2Decoder::decodeNewFormat() {
   }
   mRaw->dim = iPoint2D(slices[0].w, completeH);
 
-  if (raw->hasEntry((TiffTag)0xc6c5)) {
-    ushort16 ss = raw->getEntry((TiffTag)0xc6c5)->getInt();
-    // sRaw
-    if (ss == 4) {
+  if (raw->hasEntry(CANON_SRAWTYPE)) {
+    if (raw->getEntry(CANON_SRAWTYPE)->getInt() == 4) {
       mRaw->dim.x /= 3;
       mRaw->setCpp(3);
       mRaw->isCFA = false;
@@ -262,17 +258,14 @@ void Cr2Decoder::checkSupportInternal(CameraMetaData *meta) {
   string model = data[0]->getEntry(MODEL)->getString();
 
   // Check for sRaw mode
-  data = mRootIFD->getIFDsWithTag(magicTagInRawIFD);
-  if (!data.empty()) {
-    TiffIFD* raw = data[0];
-    if (raw->hasEntry((TiffTag)0xc6c5)) {
-      ushort16 ss = raw->getEntry((TiffTag)0xc6c5)->getInt();
-      if (ss == 4) {
-        this->checkCameraSupported(meta, make, model, "sRaw1");
-        return;
-      }
+  if (mRootIFD->getSubIFDs().size() == 4) {
+    TiffEntry* typeE = mRootIFD->getSubIFDs()[3]->getEntryRecursive(CANON_SRAWTYPE);
+    if (typeE && typeE->getInt() == 4) {
+      this->checkCameraSupported(meta, make, model, "sRaw1");
+      return;
     }
   }
+
   this->checkCameraSupported(meta, make, model, "");
 }
 
