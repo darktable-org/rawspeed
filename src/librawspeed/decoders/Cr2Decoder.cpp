@@ -118,9 +118,6 @@ RawImage Cr2Decoder::decodeOldFormat() {
 // for technical details about Cr2 mRAW/sRAW, see http://lclevy.free.fr/cr2/
 
 RawImage Cr2Decoder::decodeNewFormat() {
-  if (mRootIFD->getSubIFDs().size() < 4)
-    ThrowRDE("CR2 Decoder: No image data found");
-
   TiffEntry* sensorInfoE = mRootIFD->getEntryRecursive(CANON_SENSOR_INFO);
   if (!sensorInfoE)
     ThrowTPE("Cr2Decoder: failed to get SensorInfo from MakerNote");
@@ -129,9 +126,8 @@ RawImage Cr2Decoder::decodeNewFormat() {
   int componentsPerPixel = 1;
   TiffIFD* raw = mRootIFD->getSubIFDs()[3].get();
   if (raw->hasEntry(CANON_SRAWTYPE) &&
-      raw->getEntry(CANON_SRAWTYPE)->getInt() == 4) {
+      raw->getEntry(CANON_SRAWTYPE)->getInt() == 4)
     componentsPerPixel = 3;
-  }
 
   mRaw = RawImage::create(dim, TYPE_USHORT16, componentsPerPixel);
 
@@ -165,15 +161,10 @@ RawImage Cr2Decoder::decodeNewFormat() {
 }
 
 RawImage Cr2Decoder::decodeRawInternal() {
-  try {
-    if (mRootIFD->getSubIFDs().size() < 4)
-      return decodeOldFormat();
-
+  if (mRootIFD->getSubIFDs().size() < 4)
+    return decodeOldFormat();
+  else
     return decodeNewFormat();
-  } catch (TiffParserException &) {
-    ThrowRDE("CR2 Decoder: Unsupported format.");
-    return nullptr; // silence the -Wreturn-type warning
-  }
 }
 
 void Cr2Decoder::checkSupportInternal(CameraMetaData *meta) {
