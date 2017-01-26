@@ -85,11 +85,11 @@ RawImage Cr2Decoder::decodeOldFormat() {
 
   mRaw = RawImage::create({width, height});
 
-  LJpegPlain l(mFile, mRaw);
+  LJpegPlain l(*mFile, offset, mRaw);
   l.addSlices({width});
 
   try {
-    l.decode(offset, mFile->getSize()-offset, 0, 0);
+    l.decode(0, 0);
   } catch (IOException& e) {
     mRaw->setError(e.what());
   }
@@ -142,11 +142,11 @@ RawImage Cr2Decoder::decodeNewFormat() {
   TiffEntry* offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
 
-  LJpegPlain l(mFile, mRaw);
+  LJpegPlain l(*mFile, offsets->getInt(), counts->getInt(), mRaw);
   l.addSlices(s_width);
 
   try {
-    l.decode(offsets->getInt(), counts->getInt(), 0, 0);
+    l.decode(0, 0);
   } catch (RawDecoderException &e) {
     mRaw->setError(e.what());
   } catch (IOException &e) {

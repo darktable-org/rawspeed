@@ -32,22 +32,13 @@
 
 namespace RawSpeed {
 
-LJpegDecompressor::~LJpegDecompressor() {
-  delete input;
-}
-
-void LJpegDecompressor::decode(uint32 offset, uint32 size, uint32 offsetX, uint32 offsetY) {
-  if (!mFile->isValid(offset, size))
-    ThrowRDE("LJpegDecompressor: Start offset plus size is longer than file. Truncated file.");
+void LJpegDecompressor::decode(uint32 offsetX, uint32 offsetY) {
   if ((int)offsetX >= mRaw->dim.x)
     ThrowRDE("LJpegDecompressor: X offset outside of image");
   if ((int)offsetY >= mRaw->dim.y)
     ThrowRDE("LJpegDecompressor: Y offset outside of image");
   offX = offsetX;
   offY = offsetY;
-
-  // JPEG is big endian
-  input = new ByteStream(mFile, offset, size, getHostEndianness() == big);
 
   if (getNextMarker(false) != M_SOI)
     ThrowRDE("LJpegDecompressor: Image did not start with SOI. Probably not an LJPEG");
@@ -68,11 +59,11 @@ void LJpegDecompressor::decode(uint32 offset, uint32 size, uint32 offsetX, uint3
 }
 
 void LJpegDecompressor::parseSOF(SOFInfo* sof) {
-  uint32 headerLength = input->getShort();
-  sof->prec = input->getByte();
-  sof->h = input->getShort();
-  sof->w = input->getShort();
-  sof->cps = input->getByte();
+  uint32 headerLength = input.getShort();
+  sof->prec = input.getByte();
+  sof->h = input.getShort();
+  sof->w = input.getShort();
+  sof->cps = input.getByte();
 
   if (sof->prec > 16)
     ThrowRDE("LJpegDecompressor: More than 16 bits per channel is not supported.");
@@ -84,11 +75,11 @@ void LJpegDecompressor::parseSOF(SOFInfo* sof) {
     ThrowRDE("LJpegDecompressor: Header size mismatch.");
 
   for (uint32 i = 0; i < sof->cps; i++) {
-    sof->compInfo[i].componentId = input->getByte();
-    uint32 subs = input->getByte();
+    sof->compInfo[i].componentId = input.getByte();
+    uint32 subs = input.getByte();
     frame.compInfo[i].superV = subs & 0xf;
     frame.compInfo[i].superH = subs >> 4;
-    uint32 Tq = input->getByte();
+    uint32 Tq = input.getByte();
     if (Tq != 0)
       ThrowRDE("LJpegDecompressor: Quantized components not supported.");
   }
@@ -102,17 +93,17 @@ void LJpegDecompressor::parseSOS() {
   if (!frame.initialized)
     ThrowRDE("LJpegDecompressor::parseSOS: Frame not yet initialized (SOF Marker not parsed)");
 
-  uint32 headerLength = input->getShort();
+  uint32 headerLength = input.getShort();
   if (headerLength != 3 + frame.cps * 2 + 3)
     ThrowRDE("LJpegDecompressor::parseSOS: Invalid SOS header length.");
 
-  uint32 soscps = input->getByte();
+  uint32 soscps = input.getByte();
   if (frame.cps != soscps)
     ThrowRDE("LJpegDecompressor::parseSOS: Component number mismatch.");
 
   for (uint32 i = 0; i < frame.cps; i++) {
-    uint32 cs = input->getByte();
-    uint32 td = input->getByte() >> 4;
+    uint32 cs = input.getByte();
+    uint32 td = input.getByte() >> 4;
 
     if (td > 3 || !huff[td])
       ThrowRDE("LJpegDecompressor::parseSOS: Invalid Huffman table selection.");
@@ -130,21 +121,21 @@ void LJpegDecompressor::parseSOS() {
   }
 
   // Get predictor
-  pred = input->getByte();
+  pred = input.getByte();
   if (pred > 8)
     ThrowRDE("LJpegDecompressor::parseSOS: Invalid predictor mode.");
 
-  input->skipBytes(1);         // Se + Ah Not used in LJPEG
-  Pt = input->getByte() & 0xf; // Point Transform
+  input.skipBytes(1);         // Se + Ah Not used in LJPEG
+  Pt = input.getByte() & 0xf; // Point Transform
 
   decodeScan();
 }
 
 void LJpegDecompressor::parseDHT() {
-  uint32 headerLength = input->getShort() - 2; // Subtract myself
+  uint32 headerLength = input.getShort() - 2; // Subtract myself
 
   while (headerLength)  {
-    uint32 b = input->getByte();
+    uint32 b = input.getByte();
 
     uint32 htClass = b >> 4;
     if (htClass != 0)
@@ -160,13 +151,13 @@ void LJpegDecompressor::parseDHT() {
     auto ht = make_unique<HuffmanTable>();
 
     // copy 16 bytes from input stream to number of codes per length table
-    uint32 nCodes = ht->setNCodesPerLength(input->getBuffer(16));
+    uint32 nCodes = ht->setNCodesPerLength(input.getBuffer(16));
     // spec says 16 different codes is max but Hasselblad violates that -> 17
     if (nCodes > 17 || headerLength < 1 + 16 + nCodes)
       ThrowRDE("LJpegDecompressor::parseDHT: Invalid DHT table.");
 
     // copy nCodes bytes from input stream to code values table
-    ht->setCodeValues(input->getBuffer(nCodes));
+    ht->setCodeValues(input.getBuffer(nCodes));
 
     // see if we already have a HuffmanTable with the same codes
     for (const auto& i : huffmanTableStore)
@@ -184,10 +175,10 @@ void LJpegDecompressor::parseDHT() {
 }
 
 JpegMarker LJpegDecompressor::getNextMarker(bool allowskip) {
-  uchar8 c0, c1 = input->getByte();
+  uchar8 c0, c1 = input.getByte();
   do {
     c0 = c1;
-    c1 = input->getByte();
+    c1 = input.getByte();
   } while (allowskip && !(c0 == 0xFF && c1 != 0 && c1 != 0xFF));
 
   if (!(c0 == 0xFF && c1 != 0 && c1 != 0xFF))

@@ -137,7 +137,7 @@ void LJpegPlain::decodeN_X_Y() {
   for (int i = 0; i < N_COMP; ++i)
     p[i] = (1 << (frame.prec - Pt - 1));
 
-  BitPumpJPEG bitStream(*input);
+  BitPumpJPEG bitStream(input);
   uint32 pixelPitch = mRaw->pitch / 2; // Pitch in pixel
   if (frame.cps != 3 && frame.w * frame.cps > 2 * frame.h) {
     // Fix Canon double height issue where Canon doubled the width and halfed
@@ -218,7 +218,7 @@ void LJpegPlain::decodeN_X_Y() {
       processedLineSlices += yStepSize;
     }
   }
-  input->skipBytes(bitStream.getBufferPosition());
+  input.skipBytes(bitStream.getBufferPosition());
 }
 
 } // namespace RawSpeed

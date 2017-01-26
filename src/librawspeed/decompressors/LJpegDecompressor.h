@@ -24,7 +24,7 @@
 #include "common/Common.h"              // for uint32
 #include "common/RawImage.h"            // for RawImage
 #include "decompressors/HuffmanTable.h" // IWYU pragma: keep
-#include "io/FileMap.h"                 // for FileMap
+#include "io/ByteStream.h"              // for ByteStream
 #include <array>                        // for array
 #include <memory>                       // for unique_ptr
 #include <utility>                      // for move
@@ -140,10 +140,14 @@ public:
 class LJpegDecompressor
 {
 public:
-  LJpegDecompressor(FileMap *file, const RawImage &img)
-      : mFile(file), mRaw(img) {}
-  virtual ~LJpegDecompressor();
-  void decode(uint32 offset, uint32 size, uint32 offsetX, uint32 offsetY);
+  LJpegDecompressor(const Buffer& data, Buffer::size_type offset,
+                    Buffer::size_type size, const RawImage& img)
+      : input(data, offset, size, getHostEndianness() == big), mRaw(img) {}
+  LJpegDecompressor(const Buffer& data, Buffer::size_type offset,
+                    const RawImage& img)
+      : LJpegDecompressor(data, offset, data.getSize()-offset, img) {}
+  virtual ~LJpegDecompressor() {}
+  void decode(uint32 offsetX, uint32 offsetY);
   void addSlices(std::vector<int> slices) {
     slicesW = std::move(slices);
   } // CR2 slices.
@@ -159,8 +163,7 @@ protected:
 
   virtual void decodeScan() = 0;
 
-  ByteStream *input = nullptr;
-  FileMap *mFile = nullptr;
+  ByteStream input;
   RawImage mRaw;
 
   SOFInfo frame;
