@@ -74,43 +74,27 @@ RawImage Cr2Decoder::decodeOldFormat() {
   }
 
   ByteStream b(mFile, off+41, getHostEndianness() == big);
-  uint32 height = b.getShort();
-  uint32 width = b.getShort();
+  int height = b.getShort();
+  int width = b.getShort();
 
-  // Every two lines can be encoded as a single line, probably to try and get
-  // better compression by getting the same RGBG sequence in every line
-  if(hints.find("double_line_ljpeg") != hints.end()) {
+  // some old models (1D/1DS/D2000C) encode two lines as one
+  // see: FIX_CANON_HALF_HEIGHT_DOUBLE_WIDTH
+  if (width > 2*height) {
     height *= 2;
-    mRaw->dim = iPoint2D(width*2, height/2);
+    width /= 2;
   }
-  else {
-    width *= 2;
-    mRaw->dim = iPoint2D(width, height);
-  }
+  width *= 2; // components
+
+  mRaw->dim = iPoint2D(width, height);
 
   mRaw->createData();
-  LJpegPlain l(mFile, mRaw);
+
   try {
+    LJpegPlain l(mFile, mRaw);
+    l.addSlices({width});
     l.decode(off, mFile->getSize()-off, 0, 0);
   } catch (IOException& e) {
     mRaw->setError(e.what());
-  }
-
-  if(hints.find("double_line_ljpeg") != hints.end()) {
-    // We now have a double width half height image we need to convert to the
-    // normal format
-    iPoint2D final_size(width, height);
-    RawImage procRaw = RawImage::create(final_size, TYPE_USHORT16, 1);
-    procRaw->metadata = mRaw->metadata;
-    procRaw->copyErrorsFrom(mRaw);
-
-    for (uint32 y = 0; y < height; y++) {
-      auto *dst = (ushort16 *)procRaw->getData(0, y);
-      auto *src = (ushort16 *)mRaw->getData(y % 2 == 0 ? 0 : width, y / 2);
-      for (uint32 x = 0; x < width; x++)
-        dst[x] = src[x];
-    }
-    mRaw = procRaw;
   }
 
   if (mRootIFD->getEntryRecursive((TiffTag)0x123)) {

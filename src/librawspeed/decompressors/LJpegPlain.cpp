@@ -142,7 +142,7 @@ void LJpegPlain::decodeN_X_Y() {
 
   BitPumpJPEG bitStream(*input);
   uint32 pixelPitch = mRaw->pitch / 2; // Pitch in pixel
-  if (frame.cps == 4 && frame.w > frame.h) {
+  if (frame.cps != 3 && frame.w * frame.cps > 2 * frame.h) {
     // Fix Canon double height issue where Canon doubled the width and halfed
     // the height (e.g. with 5Ds), ask Canon. frame.w needs to stay as is here
     // because the number of pixels after which the predictor gets updated is
