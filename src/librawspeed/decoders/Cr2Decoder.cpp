@@ -222,15 +222,13 @@ RawImage Cr2Decoder::decodeNewFormat() {
   mRaw->createData();
 
   vector<int> s_width;
-  if (raw->hasEntry(CANONCR2SLICE)) {
-    TiffEntry *ss = raw->getEntry(CANONCR2SLICE);
-    for (int i = 0; i < ss->getShort(0); i++) {
-      s_width.push_back(ss->getShort(1));
-    }
-    s_width.push_back(ss->getShort(2));
-  } else {
-    s_width.push_back(slices[0].w);
+  TiffEntry* cr2SliceEntry = raw->getEntryRecursive(CANONCR2SLICE);
+  if (cr2SliceEntry && cr2SliceEntry->getShort(0) > 0) {
+    for (int i = 0; i < cr2SliceEntry->getShort(0); i++)
+      s_width.push_back(cr2SliceEntry->getShort(1));
+    s_width.push_back(cr2SliceEntry->getShort(2));
   }
+
   uint32 offY = 0;
 
   _RPT1(0,"Org slices:%d\n", s_width.size());
