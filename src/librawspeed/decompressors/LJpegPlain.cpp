@@ -132,9 +132,6 @@ void LJpegPlain::decodeN_X_Y() {
   for (int i = 0; i < N_COMP; ++i)
     ht[i] = huff[frame.compInfo[i].dcTblNo];
 
-  mRaw->metadata.subsampling.x = X_S_F;
-  mRaw->metadata.subsampling.y = Y_S_F;
-
   // Initialize predictors
   int p[N_COMP];
   for (int i = 0; i < N_COMP; ++i)

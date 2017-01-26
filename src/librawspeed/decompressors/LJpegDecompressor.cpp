@@ -93,6 +93,9 @@ void LJpegDecompressor::parseSOF(SOFInfo* sof) {
       ThrowRDE("LJpegDecompressor: Quantized components not supported.");
   }
   sof->initialized = true;
+
+  mRaw->metadata.subsampling.x = sof->compInfo[0].superH;
+  mRaw->metadata.subsampling.y = sof->compInfo[0].superV;
 }
 
 void LJpegDecompressor::parseSOS() {
