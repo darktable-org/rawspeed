@@ -59,22 +59,19 @@ Cr2Decoder::~Cr2Decoder() {
 }
 
 RawImage Cr2Decoder::decodeOldFormat() {
-  uint32 off = 0;
-  if (mRootIFD->getEntryRecursive((TiffTag)0x81))
-    off = mRootIFD->getEntryRecursive((TiffTag)0x81)->getInt();
+  uint32 offset = 0;
+  if (mRootIFD->getEntryRecursive(CANON_RAW_DATA_OFFSET))
+    offset = mRootIFD->getEntryRecursive(CANON_RAW_DATA_OFFSET)->getInt();
   else {
+    // D2000 is oh so special...
     vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
-    if (data.empty())
+    if (data.empty() || ! data[0]->hasEntry(STRIPOFFSETS))
       ThrowRDE("CR2 Decoder: Couldn't find offset");
-    else {
-      if (data[0]->hasEntry(STRIPOFFSETS))
-        off = data[0]->getEntry(STRIPOFFSETS)->getInt();
-      else
-        ThrowRDE("CR2 Decoder: Couldn't find offset");
-    }
+
+    offset = data[0]->getEntry(STRIPOFFSETS)->getInt();
   }
 
-  ByteStream b(mFile, off+41, getHostEndianness() == big);
+  ByteStream b(mFile, offset+41, getHostEndianness() == big);
   int height = b.getShort();
   int width = b.getShort();
 
@@ -86,37 +83,33 @@ RawImage Cr2Decoder::decodeOldFormat() {
   }
   width *= 2; // components
 
-  mRaw->dim = iPoint2D(width, height);
+  mRaw = RawImage::create({width, height});
 
-  mRaw->createData();
+  LJpegPlain l(mFile, mRaw);
+  l.addSlices({width});
 
   try {
-    LJpegPlain l(mFile, mRaw);
-    l.addSlices({width});
-    l.decode(off, mFile->getSize()-off, 0, 0);
+    l.decode(offset, mFile->getSize()-offset, 0, 0);
   } catch (IOException& e) {
     mRaw->setError(e.what());
   }
 
-  if (mRootIFD->getEntryRecursive((TiffTag)0x123)) {
-    TiffEntry *curve = mRootIFD->getEntryRecursive((TiffTag)0x123);
-    if (curve->type == TIFF_SHORT && curve->count == 4096) {
-      TiffEntry *linearization = mRootIFD->getEntryRecursive((TiffTag)0x123);
-      uint32 len = linearization->count;
-      auto *table = new ushort16[len];
-      linearization->getShortArray(table, len);
-      if (!uncorrectedRawValues) {
-        mRaw->setTable(table, 4096, true);
-        // Apply table
-        mRaw->sixteenBitLookup();
-        // Delete table
-        mRaw->setTable(nullptr);
-      } else {
-        // We want uncorrected, but we store the table.
-        mRaw->setTable(table, 4096, false);
-      }
-      delete [] table;
+  // deal with D2000 GrayResponseCurve
+  TiffEntry* curve = mRootIFD->getEntryRecursive((TiffTag)0x123);
+  if (curve && curve->type == TIFF_SHORT && curve->count == 4096) {
+    auto* table = new ushort16[curve->count];
+    curve->getShortArray(table, curve->count);
+    if (!uncorrectedRawValues) {
+      mRaw->setTable(table, curve->count, true);
+      // Apply table
+      mRaw->sixteenBitLookup();
+      // Delete table
+      mRaw->setTable(nullptr);
+    } else {
+      // We want uncorrected, but we store the table.
+      mRaw->setTable(table, curve->count, false);
     }
+    delete [] table;
   }
 
   return mRaw;

@@ -324,6 +324,7 @@ enum TiffTag {
   CANONCR2SLICE                   = 0xC640,   // CANON CR2
   CANON_SRAWTYPE                  = 0xC6C5, // IFD3
   CANON_SENSOR_INFO               = 0x00E0, // MakerNote
+  CANON_RAW_DATA_OFFSET           = 0x0081, // MakerNote TIF
 
   CALIBRATIONILLUMINANT1          = 0xC65A, // IFD0
   CALIBRATIONILLUMINANT2          = 0xC65B, // IFD0
