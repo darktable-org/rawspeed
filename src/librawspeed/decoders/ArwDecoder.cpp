@@ -356,7 +356,7 @@ void ArwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
           mRaw->metadata.wbCoeffs[2] = (float) tmp[3];
           break;
         }
-        currpos += MAX(len+8,1); // MAX(,1) to make sure we make progress
+        currpos += max(len + 8, 1u); // max(,1) to make sure we make progress
       }
     }
   } else { // Everything else but the A100

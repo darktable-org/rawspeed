@@ -146,7 +146,7 @@ void RawDecoder::readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D
     ThrowRDE("readUncompressedRaw: Invalid x offset");
 
   uint64 y = oy;
-  h = MIN(h + oy, (uint32)mRaw->dim.y);
+  h = min(h + oy, (uint64)mRaw->dim.y);
 
   if (mRaw->getDataType() == TYPE_FLOAT32)
   {
@@ -676,7 +676,7 @@ void RawDecoder::startThreads() {
 #else
   uint32 threads;
   bool fail = false;
-  threads = MIN(mRaw->dim.y, getThreadCount());
+  threads = min((unsigned)mRaw->dim.y, getThreadCount());
   int y_offset = 0;
   int y_per_thread = (mRaw->dim.y + threads - 1) / threads;
   auto *t = new RawDecoderThread[threads];
@@ -688,7 +688,7 @@ void RawDecoder::startThreads() {
 
   for (uint32 i = 0; i < threads; i++) {
     t[i].start_y = y_offset;
-    t[i].end_y = MIN(y_offset + y_per_thread, mRaw->dim.y);
+    t[i].end_y = min(y_offset + y_per_thread, mRaw->dim.y);
     t[i].parent = this;
     if (pthread_create(&t[i].threadid, &attr, RawDecoderDecodeThread, &t[i]) != 0) {
       // If a failure occurs, we need to wait for the already created threads to finish

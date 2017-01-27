@@ -212,7 +212,7 @@ void NefDecoder::DecodeUncompressed() {
     else
       slice.h = yPerSlice;
 
-    offY = MIN(height, offY + yPerSlice);
+    offY = min(height, offY + yPerSlice);
 
     if (mFile->isValid(slice.offset, slice.count)) // Only decode if size is valid
       slices.push_back(slice);
@@ -284,7 +284,7 @@ void NefDecoder::readCoolpixMangledRaw(ByteStream &input, iPoint2D& size, iPoint
     ThrowRDE("readUncompressedRaw: Invalid x offset");
 
   uint32 y = offset.y;
-  h = MIN(h + (uint32)offset.y, (uint32)mRaw->dim.y);
+  h = min(h + (uint32)offset.y, (uint32)mRaw->dim.y);
   w *= cpp;
   BitPumpMSB32 in(input);
   for (; y < h; y++) {
@@ -316,7 +316,7 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream &input, iPoint2D& size, iPoint2D
     ThrowRDE("readCoolpixSplitRaw: Invalid x offset");
 
   uint32 y = offset.y;
-  h = MIN(h + (uint32)offset.y, (uint32)mRaw->dim.y);
+  h = min(h + (uint32)offset.y, (uint32)mRaw->dim.y);
   w *= cpp;
   h /= 2;
   BitPumpMSB in(input);

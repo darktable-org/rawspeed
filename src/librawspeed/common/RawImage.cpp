@@ -303,7 +303,7 @@ void RawImageData::startWorker(RawImageWorker::RawImageWorkerTask task, bool cro
   int y_per_thread = (height + threads - 1) / threads;
 
   for (int i = 0; i < threads; i++) {
-    int y_end = MIN(y_offset + y_per_thread, height);
+    int y_end = min(y_offset + y_per_thread, height);
     workers[i] = new RawImageWorker(this, task, y_offset, y_end);
     workers[i]->startThread();
     y_offset = y_end;

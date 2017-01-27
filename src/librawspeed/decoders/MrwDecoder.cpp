@@ -93,7 +93,7 @@ void MrwDecoder::parseHeader() {
       tiff_meta = parseTiff(mFile->getSubView(currpos+8)).release();
       break;
     }
-    currpos += MAX(len+8,1); // MAX(,1) to make sure we make progress
+    currpos += max(len + 8, 1u); // max(,1) to make sure we make progress
   }
 }
 
