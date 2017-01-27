@@ -38,13 +38,13 @@ void ThrowCME(const char* fmt, ...) {
   vsnprintf(buf, 8192, fmt, val);
 #endif
   va_end(val);
-  _RPT1(0, "EXCEPTION: %s\n", buf);
+  writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s\n", buf);
   throw CameraMetadataException(buf);
 }
 
 CameraMetadataException::CameraMetadataException(const string &_msg)
     : runtime_error(_msg) {
-  _RPT1(0, "CameraMetadata Exception: %s\n", _msg.c_str());
+  writeLog(DEBUG_PRIO_EXTRA, "CameraMetadata Exception: %s\n", _msg.c_str());
 }
 
 } // namespace RawSpeed

@@ -95,7 +95,7 @@ RawImage DngDecoder::decodeRawInternal() {
     ThrowRDE("DNG Decoder: No RAW chunks found");
 
   if (data.size() > 1) {
-    _RPT0(0, "Multiple RAW chunks found - using first only!");
+    writeLog(DEBUG_PRIO_EXTRA, "Multiple RAW chunks found - using first only!");
   }
 
   TiffIFD* raw = data[0];
@@ -117,9 +117,9 @@ RawImage DngDecoder::decodeRawInternal() {
   mRaw->isCFA = (raw->getEntry(PHOTOMETRICINTERPRETATION)->getShort() == 32803);
 
   if (mRaw->isCFA)
-    _RPT0(0, "This is a CFA image\n");
+    writeLog(DEBUG_PRIO_EXTRA, "This is a CFA image\n");
   else {
-    _RPT0(0, "This is NOT a CFA image\n");
+    writeLog(DEBUG_PRIO_EXTRA, "This is NOT a CFA image\n");
   }
 
   if (sample_format == 1 && bps > 16)

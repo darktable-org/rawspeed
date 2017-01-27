@@ -233,7 +233,7 @@ void Rw2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
     setMetaData(meta, make, model, mode, iso);
   } else {
     mRaw->metadata.mode = mode;
-    _RPT1(0, "Mode not found in DB: %s", mode.c_str());
+    writeLog(DEBUG_PRIO_EXTRA, "Mode not found in DB: %s", mode.c_str());
     setMetaData(meta, make, model, "", iso);
   }
 
@@ -318,7 +318,7 @@ std::string Rw2Decoder::guessMode() {
     closest_match = "1:1";
     min_diff  = t;
   }
-  _RPT1(0, "Mode guess: '%s'\n", closest_match.c_str());
+  writeLog(DEBUG_PRIO_EXTRA, "Mode guess: '%s'\n", closest_match.c_str());
   return closest_match;
 }
 

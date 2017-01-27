@@ -37,7 +37,7 @@ void ThrowFIE(const char* fmt, ...) {
   static char buf[8192];
   vsnprintf(buf, 8192, fmt, val);
   va_end(val);
-  _RPT1(0, "EXCEPTION: %s\n", buf);
+  writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s\n", buf);
   throw FileIOException(buf);
 }
 

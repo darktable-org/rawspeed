@@ -31,7 +31,7 @@ namespace RawSpeed {
 
 CiffParserException::CiffParserException(const string &_msg)
     : runtime_error(_msg) {
-  _RPT1(0, "CIFF Exception: %s\n", _msg.c_str());
+  writeLog(DEBUG_PRIO_EXTRA, "CIFF Exception: %s\n", _msg.c_str());
 }
 
 void ThrowCPE(const char* fmt, ...) {
@@ -40,7 +40,7 @@ void ThrowCPE(const char* fmt, ...) {
   static char buf[8192];
   vsnprintf(buf, 8192, fmt, val);
   va_end(val);
-  _RPT1(0, "EXCEPTION: %s\n", buf);
+  writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s\n", buf);
   throw CiffParserException(buf);
 }
 
