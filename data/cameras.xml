@@ -8844,9 +8844,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="4095"/>
-		<Hints>
-			<Hint name="old_format" value=""/>
-		</Hints>
 	</Camera>
 	<Camera make="KODAK" model="EOSDCS1B        FILE VERSION 3">
 		<ID make="Kodak" model="EOS DCS 1">Kodak EOSDCS1</ID>
