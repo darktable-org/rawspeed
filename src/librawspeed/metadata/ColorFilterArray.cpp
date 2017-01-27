@@ -173,8 +173,6 @@ std::string ColorFilterArray::colorToString(CFAColor c) {
       return string("GREEN");
     case CFA_BLUE:
       return string("BLUE");
-    case CFA_GREEN2:
-      return string("GREEN2");
     case CFA_CYAN:
       return string("CYAN");
     case CFA_MAGENTA:
@@ -235,7 +233,7 @@ CFAColor ColorFilterArray::toRawspeedColor( uint32 dcrawColor )
     case 0: return CFA_RED;
     case 1: return CFA_GREEN;
     case 2: return CFA_BLUE;
-    case 3: return CFA_GREEN2;
+    case 3: return CFA_INVALID;
     default: return CFA_UNKNOWN;
   }
 }
@@ -250,7 +248,7 @@ RawSpeed::uint32 ColorFilterArray::toDcrawColor( CFAColor c )
     case CFA_CYAN:
     case CFA_BLUE: return 2;
     case CFA_YELLOW:
-    case CFA_GREEN2: return 3;
+    case CFA_INVALID: return 3;
     default: return 0;
   }
 }

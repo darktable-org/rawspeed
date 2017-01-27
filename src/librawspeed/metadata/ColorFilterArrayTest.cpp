@@ -170,6 +170,6 @@ TEST_P(ColorFilterArrayTest, AsString) {
     string dsc = cfa.asString();
 
     ASSERT_GT(dsc.size(), 15);
-    ASSERT_LE(dsc.size(), 28);
+    ASSERT_LE(dsc.size(), 32);
   });
 }

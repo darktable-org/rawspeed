@@ -104,7 +104,7 @@ void AriDecoder::checkSupportInternal(CameraMetaData *meta) {
 }
 
 void AriDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
-  mRaw->cfa.setCFA(iPoint2D(2,2), CFA_GREEN, CFA_RED, CFA_BLUE, CFA_GREEN2);
+  mRaw->cfa.setCFA(iPoint2D(2,2), CFA_GREEN, CFA_RED, CFA_BLUE, CFA_GREEN);
   mRaw->metadata.wbCoeffs[0] = mWB[0];
   mRaw->metadata.wbCoeffs[1] = mWB[1];
   mRaw->metadata.wbCoeffs[2] = mWB[2];

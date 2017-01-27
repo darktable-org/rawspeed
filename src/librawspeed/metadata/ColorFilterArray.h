@@ -27,16 +27,15 @@
 namespace RawSpeed {
 
 enum CFAColor {
-  CFA_COLOR_MIN = 0,
+  // see also DngDecoder
   CFA_RED = 0,
   CFA_GREEN = 1,
   CFA_BLUE = 2,
-  CFA_GREEN2 = 3,
+  CFA_INVALID = 3, // keep the unit tests happy
   CFA_CYAN = 4,
   CFA_MAGENTA = 5,
   CFA_YELLOW = 6,
   CFA_WHITE = 7,
-  CFA_COLOR_MAX = 8,
   CFA_FUJI_GREEN = 9,
   CFA_UNKNOWN = 255
 };
