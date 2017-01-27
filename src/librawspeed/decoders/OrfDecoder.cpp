@@ -192,12 +192,12 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
         int upMinusNw = up - nw0;
         // Check if sign is different, and one is not zero
         if (leftMinusNw * upMinusNw < 0) {
-          if (other_abs(leftMinusNw) > 32 || other_abs(upMinusNw) > 32)
+          if (abs(leftMinusNw) > 32 || abs(upMinusNw) > 32)
             pred = left0 + upMinusNw;
           else
             pred = (left0 + up) >> 1;
         } else
-          pred = other_abs(leftMinusNw) > other_abs(upMinusNw) ? left0 : up;
+          pred = abs(leftMinusNw) > abs(upMinusNw) ? left0 : up;
 
         dest[x] = pred + ((diff << 2) | low);
         // Set predictors
@@ -245,12 +245,12 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
 
         // Check if sign is different, and one is not zero
         if (leftMinusNw * upMinusNw < 0) {
-          if (other_abs(leftMinusNw) > 32 || other_abs(upMinusNw) > 32)
+          if (abs(leftMinusNw) > 32 || abs(upMinusNw) > 32)
             pred = left1 + upMinusNw;
           else
             pred = (left1 + up) >> 1;
         } else
-          pred = other_abs(leftMinusNw) > other_abs(upMinusNw) ? left1 : up;
+          pred = abs(leftMinusNw) > abs(upMinusNw) ? left1 : up;
 
         dest[x] = left1 = pred + ((diff << 2) | low);
         nw1 = up;
