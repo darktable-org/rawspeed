@@ -76,11 +76,15 @@ void LJpegPlain::decodeScan() {
       ThrowRDE("LJpegDecompressor::decodeScan: Unsupported subsampling");
 
     if (frame.compInfo[0].superV == 2)
+    {
       // Something like Cr2 sRaw1, use fast decoder
       decodeN_X_Y<3, 2, 2>();
+    }
     else // frame.compInfo[0].superV == 1
+    {
       // Something like Cr2 sRaw2, use fast decoder
       decodeN_X_Y<3, 2, 1>();
+    }
   } else {
     if (frame.cps == 2)
       decodeN_X_Y<2, 1, 1>();
@@ -152,9 +156,11 @@ void LJpegPlain::decodeN_X_Y() {
   uint32 sliceH = frame.cps == 3 ? min(frame.w, frame.h) : frame.h;
 
   if (X_S_F == 2 && Y_S_F == 1)
+  {
     // fix the inconsistent slice width in sRaw mode, ask Canon.
     for (auto& sliceW : slicesW)
       sliceW = sliceW * 3 / 2;
+  }
 
   // To understand the CR2 slice handling and sampling factor behavior, see
   // https://github.com/lclevy/libcraw2/blob/master/docs/cr2_lossless.pdf?raw=true

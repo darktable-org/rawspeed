@@ -163,7 +163,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
 RawImage Cr2Decoder::decodeRawInternal() {
   if (mRootIFD->getSubIFDs().size() < 4)
     return decodeOldFormat();
-  else
+  else // NOLINT ok, here it make sense
     return decodeNewFormat();
 }
 

@@ -146,7 +146,7 @@ public:
   LJpegDecompressor(const Buffer& data, Buffer::size_type offset,
                     const RawImage& img)
       : LJpegDecompressor(data, offset, data.getSize()-offset, img) {}
-  virtual ~LJpegDecompressor() {}
+  virtual ~LJpegDecompressor() = default;
   void decode(uint32 offsetX, uint32 offsetY);
   void addSlices(std::vector<int> slices) {
     slicesW = std::move(slices);
