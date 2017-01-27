@@ -43,6 +43,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include <string>
 #include <vector>
 
+using namespace std;
+
 namespace RawSpeed {
 
 void LJpegPlain::decodeScan() {
@@ -50,36 +52,11 @@ void LJpegPlain::decodeScan() {
   if (pred != 1)
     ThrowRDE("LJpegDecompressor::decodeScan: Unsupported prediction direction.");
 
-  // Fix for Canon 6D mRaw, which has flipped width & height for some part of the image
-  // We temporarily swap width and height for cropping.
-  if (mCanonFlipDim) {
-    uint32 w = frame.w;
-    frame.w = frame.h;
-    frame.h = w;
-  }
-
-  // If image attempts to decode beyond the image bounds, strip it.
-  if ((frame.w * frame.cps + offX * mRaw->getCpp()) > mRaw->dim.x * mRaw->getCpp())
-    skipX = ((frame.w * frame.cps + offX * mRaw->getCpp()) - mRaw->dim.x * mRaw->getCpp()) / frame.cps;
-  if (frame.h + offY > (uint32)mRaw->dim.y)
-    skipY = frame.h + offY - mRaw->dim.y;
-
-  // Swap back (see above)
-  if (mCanonFlipDim) {
-    uint32 w = frame.w;
-    frame.w = frame.h;
-    frame.h = w;
-  }
-
   if (frame.h == 0 || frame.w == 0)
     ThrowRDE("LJpegPlain::decodeScan: Image width or height set to zero");
 
-  /* Correct wrong slice count (Canon G16) */
-  if (slicesW.size() == 1)
-    slicesW[0] = frame.w * frame.cps;
-
   if (slicesW.empty())
-    slicesW.push_back(frame.w*frame.cps);
+    slicesW.push_back(frame.w * frame.cps);
 
   bool isSubSampled = false;
   for (uint32 i = 0; i < frame.cps;  i++)
@@ -98,19 +75,13 @@ void LJpegPlain::decodeScan() {
         frame.compInfo[2].superH != 1 || frame.compInfo[2].superV != 1)
       ThrowRDE("LJpegDecompressor::decodeScan: Unsupported subsampling");
 
-    if (frame.compInfo[0].superV == 2) {
+    if (frame.compInfo[0].superV == 2)
       // Something like Cr2 sRaw1, use fast decoder
       decodeN_X_Y<3, 2, 2>();
-    } else { // frame.compInfo[0].superV == 1
-      if (mCanonFlipDim)
-        ThrowRDE("LJpegDecompressor::decodeScan: Cannot flip non 4:2:2 subsampled images.");
+    else // frame.compInfo[0].superV == 1
       // Something like Cr2 sRaw2, use fast decoder
       decodeN_X_Y<3, 2, 1>();
-    }
   } else {
-    if (mCanonFlipDim)
-      ThrowRDE("LJpegDecompressor::decodeScan: Cannot flip non subsampled images.");
-
     if (frame.cps == 2)
       decodeN_X_Y<2, 1, 1>();
     else if (frame.cps == 4)
@@ -151,123 +122,103 @@ inline void unroll_loop(const Lambda& f) {
 
 template<int N_COMP, int X_S_F, int Y_S_F>
 void LJpegPlain::decodeN_X_Y() {
-  _ASSERTE(slicesW.size() < 16);  // We only have 4 bits for slice number.
-  _ASSERTE(!(slicesW.size() > 1 && skipX));
   _ASSERTE(frame.compInfo[0].superH == X_S_F);
   _ASSERTE(frame.compInfo[0].superV == Y_S_F);
   _ASSERTE(frame.compInfo[1].superH == 1);
   _ASSERTE(frame.compInfo[1].superV == 1);
   _ASSERTE(frame.cps == N_COMP);
-  _ASSERTE(skipX == 0 || X_S_F == 1);
-
-  // old code said this is only relevant for full-res raws
-  mCanonDoubleHeight &= Y_S_F == 1 && X_S_F == 1;
-  // old code said this is only relevant for s/mRaws
-  mCanonFlipDim &= X_S_F == 2;
-
-  if (mCanonDoubleHeight) {
-    mRaw->destroyData();
-    frame.h *= 2;
-    mRaw->dim = iPoint2D(frame.w * 2, frame.h);
-    mRaw->createData();
-  }
 
   HuffmanTable *ht[N_COMP] = {nullptr};
   for (int i = 0; i < N_COMP; ++i)
     ht[i] = huff[frame.compInfo[i].dcTblNo];
-
-  mRaw->metadata.subsampling.x = X_S_F;
-  mRaw->metadata.subsampling.y = Y_S_F;
-
-  // Fix for Canon 6D mRaw, which has flipped width & height
-  uint32 real_h = mCanonFlipDim ? frame.w : frame.h;
 
   // Initialize predictors
   int p[N_COMP];
   for (int i = 0; i < N_COMP; ++i)
     p[i] = (1 << (frame.prec - Pt - 1));
 
-  uint32 cw = (frame.w - skipX);
-  uint32 ch = (frame.h - skipY);
+  BitPumpJPEG bitStream(input);
+  uint32 pixelPitch = mRaw->pitch / 2; // Pitch in pixel
+  if (frame.cps != 3 && frame.w * frame.cps > 2 * frame.h) {
+    // Fix Canon double height issue where Canon doubled the width and halfed
+    // the height (e.g. with 5Ds), ask Canon. frame.w needs to stay as is here
+    // because the number of pixels after which the predictor gets updated is
+    // still the doubled width.
+    // see: FIX_CANON_HALF_HEIGHT_DOUBLE_WIDTH
+    frame.h *= 2;
+  }
+  // Fix for Canon 6D mRaw, which has flipped width & height
+  // see FIX_CANON_FLIPPED_WIDTH_AND_HEIGHT
+  uint32 sliceH = frame.cps == 3 ? min(frame.w, frame.h) : frame.h;
 
-  if (mCanonDoubleHeight)
-    ch = frame.h / 2;
-
-  // Fix for Canon 80D mraw format.
-  // In that format, `frame` is 4032x3402, while `mRaw` is 4536x3024.
-  // Consequently, the slices in `frame` wrap around (this is taken care of by
-  // `offset`) and must be decoded fully (without skipY) to fill the image
-  if (mWrappedCr2Slices)
-    ch = frame.h;
-
-  BitPumpJPEG bitStream(*input);
-  uint32 pixel_pitch = mRaw->pitch / 2; // Pitch in pixel
+  if (X_S_F == 2 && Y_S_F == 1)
+    // fix the inconsistent slice width in sRaw mode, ask Canon.
+    for (auto& sliceW : slicesW)
+      sliceW = sliceW * 3 / 2;
 
   // To understand the CR2 slice handling and sampling factor behavior, see
   // https://github.com/lclevy/libcraw2/blob/master/docs/cr2_lossless.pdf?raw=true
 
-  uint32 t_s = 0, t_x = 0, t_y = 0;
-  constexpr int div = X_S_F == 2 ? Y_S_F+1 : N_COMP;
-  // in full raw (<N,1,1>) the width of a slice is the number of raw pixels,
-  // i.e. frame.w * frame.cps
-  uint32 pixInSlicedLine = 0;
-  auto *dest = (ushort16 *)mRaw->getDataUncropped(offX, offY);
+  // inner loop decodes one group of pixels at a time
+  //  * for <N,1,1>: N  = N*1*1 (full raw)
+  //  * for <3,2,1>: 6  = 3*2*1
+  //  * for <3,2,2>: 12 = 3*2*2
+  // and advances x by N_COMP*X_S_F and y by Y_S_F
+  constexpr int xStepSize = N_COMP * X_S_F;
+  constexpr int yStepSize = Y_S_F;
 
-  for (uint32 y = 0; y < ch; y += Y_S_F) {
-    const ushort16* predict = dest;
-    for (uint32 x = 0; x < cw; x += X_S_F) {
-      // inner loop decodes one group of pixels at a time
-      //  * for <N,1,1>: N  = N*1*1 (full raw)
-      //  * for <3,2,1>: 6  = 3*2*1
-      //  * for <3,2,2>: 12 = 3*2*2
+  unsigned processedPixels = 0;
+  unsigned processedLineSlices = 0;
+  auto nextPredictor = (ushort16*)mRaw->getDataUncropped(offX/mRaw->getCpp(), offY);
+  for (unsigned sliceW : slicesW) {
+    for (unsigned y = 0; y < sliceH; y += yStepSize) {
+      // Fix for Canon 80D mraw format.
+      // In that format, `frame` is 4032x3402, while `mRaw` is 4536x3024.
+      // Consequently, the slices in `frame` wrap around plus there are few
+      // 'extra' sliced lines because sum(slicesW) * sliceH > mRaw->dim.area()
+      // Those would overflow, hence the break.
+      // see FIX_CANON_FRAME_VS_IMAGE_SIZE_MISMATCH
+      unsigned destX = processedLineSlices / mRaw->dim.y * slicesW[0];
+      unsigned destY = processedLineSlices % mRaw->dim.y;
+      if (destX + offX >= mRaw->dim.x * mRaw->getCpp())
+        break;
+      auto dest = (ushort16*)mRaw->getDataUncropped((destX + offX)/mRaw->getCpp(), destY + offY);
+      for (unsigned x = 0; x < sliceW; x += xStepSize) {
 
-      if (pixInSlicedLine == 0) { // Next slice
-        pixInSlicedLine = slicesW[t_s] / div;
-        dest = (ushort16*)mRaw->getDataUncropped(t_x + offX, t_y + offY);
-        if (x == 0 && y != 0)
-          predict = dest;
-
-        t_y += Y_S_F;
-        if (t_y >= (real_h - skipY)) {
-          t_y = 0;
-          if (X_S_F == 2)
-            t_x += slicesW[t_s] / div;
-          else
-            t_x += slicesW[t_s];
-          ++t_s;
+        // check if we processed one full raw row worth of pixels
+        if (processedPixels == frame.w) {
+          // if yes -> update predictor by going back exactly one row,
+          // no matter where we are right now.
+          // makes no sense from an image compression point of view, ask Canon.
+          unroll_loop<N_COMP>([&](int i) {
+            p[i] = nextPredictor[i];
+          });
+          nextPredictor = dest;
+          processedPixels = 0;
         }
+
+        if (X_S_F == 1) { // will be optimized out
+          unroll_loop<N_COMP>([&](int i) {
+            *dest++ = p[i] += ht[i]->decodeNext(bitStream);
+          });
+        } else {
+          unroll_loop<Y_S_F>([&](int i) {
+            dest[0 + i*pixelPitch] = p[0] += ht[0]->decodeNext(bitStream);
+            dest[3 + i*pixelPitch] = p[0] += ht[0]->decodeNext(bitStream);
+          });
+
+          dest[1] = p[1] += ht[1]->decodeNext(bitStream);
+          dest[2] = p[2] += ht[2]->decodeNext(bitStream);
+
+          dest += xStepSize;
+        }
+
+        processedPixels += X_S_F;
       }
-
-      if (X_S_F == 1) { // will be optimized out
-        unroll_loop<N_COMP>([&](int i) {
-          *dest++ = p[i] += ht[i]->decodeNext(bitStream);
-        });
-      } else {
-        unroll_loop<Y_S_F>([&](int i) {
-          dest[0 + i*pixel_pitch] = p[0] += ht[0]->decodeNext(bitStream);
-          dest[3 + i*pixel_pitch] = p[0] += ht[0]->decodeNext(bitStream);
-        });
-
-        dest[1] = p[1] += ht[1]->decodeNext(bitStream);
-        dest[2] = p[2] += ht[2]->decodeNext(bitStream);
-
-        dest += 3 * sizeof(ushort16);
-      }
-
-      pixInSlicedLine -= X_S_F;
+      processedLineSlices += yStepSize;
     }
-
-    if (X_S_F == 1) // will be optimized out
-      for (uint32 i = 0; i < skipX; i++)
-        unroll_loop<N_COMP>([&](int j) { ht[j]->decodeNext(bitStream); });
-
-    // Update predictors
-    unroll_loop<N_COMP>([&](int i) {
-      p[i] = predict[i];
-    });
   }
-
-  input->skipBytes(bitStream.getBufferPosition());
+  input.skipBytes(bitStream.getBufferPosition());
 }
 
 } // namespace RawSpeed

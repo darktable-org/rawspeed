@@ -382,12 +382,12 @@ void DngDecoderSlices::decodeDeflate(const DngSliceElement &e,
 void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
   if (compression == 7) {
     while (!t->slices.empty()) {
-      LJpegPlain l(mFile, mRaw);
-      l.mDNGCompatible = mFixLjpeg;
       DngSliceElement e = t->slices.front();
       t->slices.pop();
+      LJpegPlain l(*mFile, e.byteOffset, e.byteCount, mRaw);
+      l.mDNGCompatible = mFixLjpeg;
       try {
-        l.decode(e.byteOffset, e.byteCount, e.offX, e.offY);
+        l.decode(e.offX, e.offY);
       } catch (RawDecoderException &err) {
         mRaw->setError(err.what());
       } catch (IOException &err) {

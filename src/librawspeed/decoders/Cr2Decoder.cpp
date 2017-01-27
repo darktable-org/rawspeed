@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2015 Roman Lebedev
+    Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -48,7 +49,7 @@ namespace RawSpeed {
 
 Cr2Decoder::Cr2Decoder(TiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
-  decoderVersion = 7;
+  decoderVersion = 8;
 }
 
 Cr2Decoder::~Cr2Decoder() {
@@ -58,211 +59,99 @@ Cr2Decoder::~Cr2Decoder() {
 }
 
 RawImage Cr2Decoder::decodeOldFormat() {
-  uint32 off = 0;
-  if (mRootIFD->getEntryRecursive((TiffTag)0x81))
-    off = mRootIFD->getEntryRecursive((TiffTag)0x81)->getInt();
+  uint32 offset = 0;
+  if (mRootIFD->getEntryRecursive(CANON_RAW_DATA_OFFSET))
+    offset = mRootIFD->getEntryRecursive(CANON_RAW_DATA_OFFSET)->getInt();
   else {
+    // D2000 is oh so special...
     vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
-    if (data.empty())
+    if (data.empty() || ! data[0]->hasEntry(STRIPOFFSETS))
       ThrowRDE("CR2 Decoder: Couldn't find offset");
-    else {
-      if (data[0]->hasEntry(STRIPOFFSETS))
-        off = data[0]->getEntry(STRIPOFFSETS)->getInt();
-      else
-        ThrowRDE("CR2 Decoder: Couldn't find offset");
-    }
+
+    offset = data[0]->getEntry(STRIPOFFSETS)->getInt();
   }
 
-  ByteStream b(mFile, off+41, getHostEndianness() == big);
-  uint32 height = b.getShort();
-  uint32 width = b.getShort();
+  ByteStream b(mFile, offset+41, getHostEndianness() == big);
+  int height = b.getShort();
+  int width = b.getShort();
 
-  // Every two lines can be encoded as a single line, probably to try and get
-  // better compression by getting the same RGBG sequence in every line
-  if(hints.find("double_line_ljpeg") != hints.end()) {
+  // some old models (1D/1DS/D2000C) encode two lines as one
+  // see: FIX_CANON_HALF_HEIGHT_DOUBLE_WIDTH
+  if (width > 2*height) {
     height *= 2;
-    mRaw->dim = iPoint2D(width*2, height/2);
+    width /= 2;
   }
-  else {
-    width *= 2;
-    mRaw->dim = iPoint2D(width, height);
-  }
+  width *= 2; // components
 
-  mRaw->createData();
-  LJpegPlain l(mFile, mRaw);
+  mRaw = RawImage::create({width, height});
+
+  LJpegPlain l(*mFile, offset, mRaw);
+  l.addSlices({width});
+
   try {
-    l.decode(off, mFile->getSize()-off, 0, 0);
+    l.decode(0, 0);
   } catch (IOException& e) {
     mRaw->setError(e.what());
   }
 
-  if(hints.find("double_line_ljpeg") != hints.end()) {
-    // We now have a double width half height image we need to convert to the
-    // normal format
-    iPoint2D final_size(width, height);
-    RawImage procRaw = RawImage::create(final_size, TYPE_USHORT16, 1);
-    procRaw->metadata = mRaw->metadata;
-    procRaw->copyErrorsFrom(mRaw);
-
-    for (uint32 y = 0; y < height; y++) {
-      auto *dst = (ushort16 *)procRaw->getData(0, y);
-      auto *src = (ushort16 *)mRaw->getData(y % 2 == 0 ? 0 : width, y / 2);
-      for (uint32 x = 0; x < width; x++)
-        dst[x] = src[x];
+  // deal with D2000 GrayResponseCurve
+  TiffEntry* curve = mRootIFD->getEntryRecursive((TiffTag)0x123);
+  if (curve && curve->type == TIFF_SHORT && curve->count == 4096) {
+    auto* table = new ushort16[curve->count];
+    curve->getShortArray(table, curve->count);
+    if (!uncorrectedRawValues) {
+      mRaw->setTable(table, curve->count, true);
+      // Apply table
+      mRaw->sixteenBitLookup();
+      // Delete table
+      mRaw->setTable(nullptr);
+    } else {
+      // We want uncorrected, but we store the table.
+      mRaw->setTable(table, curve->count, false);
     }
-    mRaw = procRaw;
-  }
-
-  if (mRootIFD->getEntryRecursive((TiffTag)0x123)) {
-    TiffEntry *curve = mRootIFD->getEntryRecursive((TiffTag)0x123);
-    if (curve->type == TIFF_SHORT && curve->count == 4096) {
-      TiffEntry *linearization = mRootIFD->getEntryRecursive((TiffTag)0x123);
-      uint32 len = linearization->count;
-      auto *table = new ushort16[len];
-      linearization->getShortArray(table, len);
-      if (!uncorrectedRawValues) {
-        mRaw->setTable(table, 4096, true);
-        // Apply table
-        mRaw->sixteenBitLookup();
-        // Delete table
-        mRaw->setTable(nullptr);
-      } else {
-        // We want uncorrected, but we store the table.
-        mRaw->setTable(table, 4096, false);
-      }
-      delete [] table;
-    }
+    delete [] table;
   }
 
   return mRaw;
 }
 
-struct Cr2Slice {
-  uint32 w;
-  uint32 h;
-  uint32 offset;
-  uint32 size;
-};
-
 // for technical details about Cr2 mRAW/sRAW, see http://lclevy.free.fr/cr2/
 
-static const TiffTag magicTagInRawIFD = (TiffTag)0xc5d8;
-
 RawImage Cr2Decoder::decodeNewFormat() {
-  if (mRootIFD->getSubIFDs().size() < 4)
-    ThrowRDE("CR2 Decoder: No image data found");
+  TiffEntry* sensorInfoE = mRootIFD->getEntryRecursive(CANON_SENSOR_INFO);
+  if (!sensorInfoE)
+    ThrowTPE("Cr2Decoder: failed to get SensorInfo from MakerNote");
+  iPoint2D dim(sensorInfoE->getShort(1), sensorInfoE->getShort(2));
 
+  int componentsPerPixel = 1;
   TiffIFD* raw = mRootIFD->getSubIFDs()[3].get();
-  mRaw = RawImage::create();
-  mRaw->isCFA = true;
-  vector<Cr2Slice> slices;
-  int completeH = 0;
-  bool doubleHeight = false;
+  if (raw->hasEntry(CANON_SRAWTYPE) &&
+      raw->getEntry(CANON_SRAWTYPE)->getInt() == 4)
+    componentsPerPixel = 3;
 
-  TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
-  TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
-  // Iterate through all slices
-  for (uint32 s = 0; s < offsets->count; s++) {
-    Cr2Slice slice;
-    slice.offset = offsets[0].getInt();
-    slice.size = counts[0].getInt();
-    SOFInfo sof;
-    LJpegPlain l(mFile, mRaw);
-    l.getSOF(&sof, slice.offset, slice.size);
-    slice.w = sof.w * sof.cps;
-    slice.h = sof.h;
-    if (sof.cps == 4 && sof.w > sof.h) {
-      doubleHeight = true;
-    }
-    if (!slices.empty())
-      if (slices[0].w != slice.w)
-        ThrowRDE("CR2 Decoder: Slice width does not match.");
-
-    if (mFile->isValid(slice.offset, slice.size)) // Only decode if size is valid
-      slices.push_back(slice);
-    completeH += slice.h;
-  }
-
-  // Override with canon_double_height if set.
-  auto msb_hint = hints.find("canon_double_height");
-  if (msb_hint != hints.end())
-    doubleHeight = ("true" == (msb_hint->second));
-
-  if (slices.empty()) {
-    ThrowRDE("CR2 Decoder: No Slices found.");
-  }
-  mRaw->dim = iPoint2D(slices[0].w, completeH);
-
-  // Fix for Canon 6D mRaw, which has flipped width & height for some part of the image
-  // In that case, we swap width and height, since this is the correct dimension
-  bool flipDims = false;
-  bool wrappedCr2Slices = false;
-  if (raw->hasEntry((TiffTag)0xc6c5)) {
-    ushort16 ss = raw->getEntry((TiffTag)0xc6c5)->getInt();
-    // sRaw
-    if (ss == 4) {
-      mRaw->dim.x /= 3;
-      mRaw->setCpp(3);
-      mRaw->isCFA = false;
-
-      // Fix for Canon 80D mraw format.
-      // In that format, the frame (as read by getSOF()) is 4032x3402, while the
-      // real image should be 4536x3024 (where the full vertical slices in
-      // the frame "wrap around" the image.
-      if (hints.find("wrapped_cr2_slices") != hints.end() && raw->hasEntry(IMAGEWIDTH) && raw->hasEntry(IMAGELENGTH)) {
-        wrappedCr2Slices = true;
-        int w = raw->getEntry(IMAGEWIDTH)->getInt();
-        int h = raw->getEntry(IMAGELENGTH)->getInt();
-        if (w * h != mRaw->dim.x * mRaw->dim.y) {
-          ThrowRDE("CR2 Decoder: Wrapped slices don't match image size");
-        }
-        mRaw->dim = iPoint2D(w, h);
-      }
-    }
-    flipDims = mRaw->dim.x < mRaw->dim.y;
-    if (flipDims) {
-      int w = mRaw->dim.x;
-      mRaw->dim.x = mRaw->dim.y;
-      mRaw->dim.y = w;
-    }
-  }
-
-  mRaw->createData();
+  mRaw = RawImage::create(dim, TYPE_USHORT16, componentsPerPixel);
 
   vector<int> s_width;
-  if (raw->hasEntry(CANONCR2SLICE)) {
-    TiffEntry *ss = raw->getEntry(CANONCR2SLICE);
-    for (int i = 0; i < ss->getShort(0); i++) {
-      s_width.push_back(ss->getShort(1));
-    }
-    s_width.push_back(ss->getShort(2));
-  } else {
-    s_width.push_back(slices[0].w);
+  TiffEntry* cr2SliceEntry = raw->getEntryRecursive(CANONCR2SLICE);
+  if (cr2SliceEntry && cr2SliceEntry->getShort(0) > 0) {
+    for (int i = 0; i < cr2SliceEntry->getShort(0); i++)
+      s_width.push_back(cr2SliceEntry->getShort(1));
+    s_width.push_back(cr2SliceEntry->getShort(2));
   }
-  uint32 offY = 0;
 
-  if (s_width.size() > 15)
-    ThrowRDE("CR2 Decoder: No more than 15 slices supported");
-  _RPT1(0,"Org slices:%d\n", s_width.size());
-  for (uint32 i = 0; i < slices.size(); i++) {
-    Cr2Slice slice = slices[i];
-    try {
-      LJpegPlain l(mFile, mRaw);
-      l.addSlices(s_width);
-      l.mCanonFlipDim = flipDims;
-      l.mCanonDoubleHeight = doubleHeight;
-      l.mWrappedCr2Slices = wrappedCr2Slices;
-      l.decode(slice.offset, slice.size, 0, offY);
-    } catch (RawDecoderException &e) {
-      if (i == 0)
-        throw;
-      // These may just be single slice error - store the error and move on
-      mRaw->setError(e.what());
-    } catch (IOException &e) {
-      // Let's try to ignore this - it might be truncated data, so something might be useful.
-      mRaw->setError(e.what());
-    }
-    offY += slice.w;
+  TiffEntry* offsets = raw->getEntry(STRIPOFFSETS);
+  TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
+
+  LJpegPlain l(*mFile, offsets->getInt(), counts->getInt(), mRaw);
+  l.addSlices(s_width);
+
+  try {
+    l.decode(0, 0);
+  } catch (RawDecoderException &e) {
+    mRaw->setError(e.what());
+  } catch (IOException &e) {
+    // Let's try to ignore this - it might be truncated data, so something might be useful.
+    mRaw->setError(e.what());
   }
 
   if (mRaw->metadata.subsampling.x > 1 || mRaw->metadata.subsampling.y > 1)
@@ -272,15 +161,10 @@ RawImage Cr2Decoder::decodeNewFormat() {
 }
 
 RawImage Cr2Decoder::decodeRawInternal() {
-  try {
-    if (hints.find("old_format") != hints.end())
-      return decodeOldFormat();
-
+  if (mRootIFD->getSubIFDs().size() < 4)
+    return decodeOldFormat();
+  else
     return decodeNewFormat();
-  } catch (TiffParserException &) {
-    ThrowRDE("CR2 Decoder: Unsupported format.");
-    return nullptr; // silence the -Wreturn-type warning
-  }
 }
 
 void Cr2Decoder::checkSupportInternal(CameraMetaData *meta) {
@@ -293,17 +177,14 @@ void Cr2Decoder::checkSupportInternal(CameraMetaData *meta) {
   string model = data[0]->getEntry(MODEL)->getString();
 
   // Check for sRaw mode
-  data = mRootIFD->getIFDsWithTag(magicTagInRawIFD);
-  if (!data.empty()) {
-    TiffIFD* raw = data[0];
-    if (raw->hasEntry((TiffTag)0xc6c5)) {
-      ushort16 ss = raw->getEntry((TiffTag)0xc6c5)->getInt();
-      if (ss == 4) {
-        this->checkCameraSupported(meta, make, model, "sRaw1");
-        return;
-      }
+  if (mRootIFD->getSubIFDs().size() == 4) {
+    TiffEntry* typeE = mRootIFD->getSubIFDs()[3]->getEntryRecursive(CANON_SRAWTYPE);
+    if (typeE && typeE->getInt() == 4) {
+      this->checkCameraSupported(meta, make, model, "sRaw1");
+      return;
     }
   }
+
   this->checkCameraSupported(meta, make, model, "");
 }
 

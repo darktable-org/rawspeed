@@ -384,7 +384,7 @@
 				<Horizontal y="0" height="33"/>
 			</BlackAreas>
 		</Camera>
-		<Camera make="Canon" model="Canon EOS 80D" mode="sRaw1" decoder_version="7">
+		<Camera make="Canon" model="Canon EOS 80D" mode="sRaw1" decoder_version="8">
 			<ID make="Canon" model="EOS 80D">Canon EOS 80D</ID>
 			<Crop x="28" y="10" width="0" height="0"/>
 			<Sensor black="0" white="48816" iso_list="320 640 1250 2500 5000"/>
@@ -395,7 +395,6 @@
 			<Hints>
 				<Hint name="sraw_new" value=""/>
 				<Hint name="invert_sraw_wb" value=""/>
-				<Hint name="wrapped_cr2_slices" value=""/>
 			</Hints>
 		</Camera>
 		<Camera make="Canon" model="Canon EOS 80D" mode="sRaw2" decoder_version="7">
@@ -975,7 +974,7 @@
 			<Hint name="wb_offset" value="142"/>
 		</Hints>
 	</Camera>
-	<Camera make="Canon" model="Canon EOS-1D" decoder_version="5">
+	<Camera make="Canon" model="Canon EOS-1D" decoder_version="8">
 		<ID make="Canon" model="EOS-1D">Canon EOS-1D</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
@@ -985,12 +984,8 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="3588"/>
-		<Hints>
-			<Hint name="old_format" value=""/>
-			<Hint name="double_line_ljpeg" value=""/>
-		</Hints>
 	</Camera>
-	<Camera make="Canon" model="Canon EOS-1DS" decoder_version="5">
+	<Camera make="Canon" model="Canon EOS-1DS" decoder_version="8">
 		<ID make="Canon" model="EOS-1Ds">Canon EOS-1Ds</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
@@ -1000,12 +995,8 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="3500"/>
-		<Hints>
-			<Hint name="old_format" value=""/>
-			<Hint name="double_line_ljpeg" value=""/>
-		</Hints>
 	</Camera>
-	<Camera make="Canon" model="EOS D2000C" decoder_version="5">
+	<Camera make="Canon" model="EOS D2000C" decoder_version="8">
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
 			<Color x="1" y="0">RED</Color>
@@ -1014,9 +1005,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="96" white="4095"/>
-		<Hints>
-			<Hint name="old_format" value=""/>
-		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS-1D Mark II">
 		<ID make="Canon" model="EOS-1D Mark II">Canon EOS-1D Mark II</ID>

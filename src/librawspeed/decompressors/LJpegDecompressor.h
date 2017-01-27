@@ -24,7 +24,7 @@
 #include "common/Common.h"              // for uint32
 #include "common/RawImage.h"            // for RawImage
 #include "decompressors/HuffmanTable.h" // IWYU pragma: keep
-#include "io/FileMap.h"                 // for FileMap
+#include "io/ByteStream.h"              // for ByteStream
 #include <array>                        // for array
 #include <memory>                       // for unique_ptr
 #include <utility>                      // for move
@@ -140,20 +140,20 @@ public:
 class LJpegDecompressor
 {
 public:
-  LJpegDecompressor(FileMap *file, const RawImage &img)
-      : mFile(file), mRaw(img) {}
-  virtual ~LJpegDecompressor();
-  void decode(uint32 offset, uint32 size, uint32 offsetX, uint32 offsetY);
-  void getSOF(SOFInfo* i, uint32 offset, uint32 size);
+  LJpegDecompressor(const Buffer& data, Buffer::size_type offset,
+                    Buffer::size_type size, const RawImage& img)
+      : input(data, offset, size, getHostEndianness() == big), mRaw(img) {}
+  LJpegDecompressor(const Buffer& data, Buffer::size_type offset,
+                    const RawImage& img)
+      : LJpegDecompressor(data, offset, data.getSize()-offset, img) {}
+  virtual ~LJpegDecompressor() {}
+  void decode(uint32 offsetX, uint32 offsetY);
   void addSlices(std::vector<int> slices) {
     slicesW = std::move(slices);
   } // CR2 slices.
 
   bool mDNGCompatible = false;  // DNG v1.0.x compatibility
   bool mFullDecodeHT = true;    // FullDecode Huffman
-  bool mCanonFlipDim = false;   // Fix Canon 6D mRaw where width/height is flipped
-  bool mCanonDoubleHeight = false; // Fix Canon double height on 4 components (EOS 5DS R)
-  bool mWrappedCr2Slices = false;  // Fix Canon 80D mRaw where the slices are wrapped
 
 protected:
   void parseSOF(SOFInfo* i);
@@ -163,8 +163,7 @@ protected:
 
   virtual void decodeScan() = 0;
 
-  ByteStream *input = nullptr;
-  FileMap *mFile = nullptr;
+  ByteStream input;
   RawImage mRaw;
 
   SOFInfo frame;
@@ -172,7 +171,6 @@ protected:
   uint32 pred = 0;
   uint32 Pt = 0;
   uint32 offX = 0, offY = 0;  // Offset into image where decoding should start
-  uint32 skipX = 0, skipY = 0;   // Tile is larger than output, skip these border pixels
   std::array<HuffmanTable*, 4> huff {}; // 4 pointers into the store
   std::vector<std::unique_ptr<HuffmanTable>> huffmanTableStore; // std::vector of unique HTs
 };
