@@ -332,9 +332,8 @@ int main(int argc, char **argv) {
 #endif
     }
     cerr << "See rstest.log for details.\n";
-  }
-
-  cout << "All good, no tests failed!" << endl;
+  } else
+    cout << "All good, no tests failed!" << endl;
 
   return failedTests.empty() ? 0 : 1;
 }
