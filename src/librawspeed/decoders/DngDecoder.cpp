@@ -118,8 +118,9 @@ RawImage DngDecoder::decodeRawInternal() {
 
   if (mRaw->isCFA)
     _RPT0(0, "This is a CFA image\n");
-  else
+  else {
     _RPT0(0, "This is NOT a CFA image\n");
+  }
 
   if (sample_format == 1 && bps > 16)
     ThrowRDE("DNG Decoder: Integer precision larger than 16 bits currently not supported.");
