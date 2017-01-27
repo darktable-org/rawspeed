@@ -291,7 +291,6 @@
       <xs:maxLength value="26"/>
       <xs:enumeration value="coolpixmangled"/>
       <xs:enumeration value="coolpixsplit"/>
-      <xs:enumeration value="double_line_ljpeg"/>
       <xs:enumeration value="double_width_unpacked"/>
       <xs:enumeration value="easyshare_offset_hack"/>
       <xs:enumeration value="filesize"/>
@@ -305,7 +304,6 @@
       <xs:enumeration value="nikon_wb_adjustment"/>
       <xs:enumeration value="no_decompressed_lowbits"/>
       <xs:enumeration value="offset"/>
-      <xs:enumeration value="old_format"/>
       <xs:enumeration value="packed_with_control"/>
       <xs:enumeration value="pixel_aspect_ratio"/>
       <xs:enumeration value="real_bpp"/>
@@ -316,7 +314,6 @@
       <xs:enumeration value="swapped_wb"/>
       <xs:enumeration value="wb_mangle"/>
       <xs:enumeration value="wb_offset"/>
-      <xs:enumeration value="wrapped_cr2_slices"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:complexType name="HintType">
