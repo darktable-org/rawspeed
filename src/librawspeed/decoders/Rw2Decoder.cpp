@@ -163,7 +163,7 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
         if (nonz[0]) {
           if ((j = bits.getBits(8))) {
             if ((pred[0] -= 0x80 << sh) < 0 || sh == 4)
-              pred[0] &= ~(-1 << sh);
+              pred[0] &= ~(-(1 << sh));
             pred[0] += j << sh;
           }
         } else if ((nonz[0] = bits.getBits(8)) || i > 11)
@@ -183,7 +183,7 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
         if (nonz[1]) {
           if ((j = bits.getBits(8))) {
             if ((pred[1] -= 0x80 << sh) < 0 || sh == 4)
-              pred[1] &= ~(-1 << sh);
+              pred[1] &= ~(-(1 << sh));
             pred[1] += j << sh;
           }
         } else if ((nonz[1] = bits.getBits(8)) || i > 11)
@@ -358,7 +358,7 @@ uint32 PanaBitpump::getBits(int nbits) {
   }
   vbits = (vbits - nbits) & 0x1ffff;
   byte = vbits >> 3 ^ 0x3ff0;
-  return (buf[byte] | buf[byte+1] << 8) >> (vbits & 7) & ~(-1 << nbits);
+  return (buf[byte] | buf[byte + 1] << 8) >> (vbits & 7) & ~(-(1 << nbits));
 }
 
 } // namespace RawSpeed
