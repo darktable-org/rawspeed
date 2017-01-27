@@ -2,6 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2011 Klaus Post
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -30,6 +31,7 @@
 #include "io/FileMap.h"
 #include "io/FileReader.h"
 #include "metadata/BlackArea.h"
+#include "metadata/Camera.h"
 #include "metadata/CameraMetaData.h"
 #include "metadata/ColorFilterArray.h"
 #include "parsers/RawParser.h"
