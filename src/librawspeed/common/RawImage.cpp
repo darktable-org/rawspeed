@@ -175,7 +175,7 @@ void RawImageData::subFrame(iRectangle2D crop) {
 void RawImageData::setError( const char* err )
 {
   pthread_mutex_lock(&errMutex);
-  errors.push_back(_strdup(err));
+  errors.push_back(strdup(err));
   pthread_mutex_unlock(&errMutex);
 }
 
