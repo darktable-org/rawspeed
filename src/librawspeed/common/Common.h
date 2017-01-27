@@ -147,7 +147,7 @@ inline Endianness getHostEndianness() {
   else if (firstbyte == 0xfe)
     return big;
   else
-    _ASSERTE(false);
+    assert(false);
 
   // Return something to make compilers happy
   return unknown;

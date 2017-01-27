@@ -261,7 +261,7 @@ void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
       if (len && (diff & (1 << (len - 1))) == 0)
         diff -= (1 << len) - 1;
       sum += diff;
-      _ASSERTE(!(sum >> 12));
+      assert(!(sum >> 12));
       if (y < h) dest[x+y*pitch] = sum;
     }
   }

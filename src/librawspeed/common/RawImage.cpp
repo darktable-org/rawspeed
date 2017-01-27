@@ -22,6 +22,7 @@
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "io/IOException.h"               // for IOException
 #include "parsers/TiffParserException.h"  // for TiffParserException
+#include <cassert>                        // for assert
 #include <cmath>                          // for NAN
 #include <cstdlib>                        // for free
 #include <cstring>                        // for memset, memcpy
@@ -64,7 +65,7 @@ ImageMetaData::ImageMetaData() {
 }
 
 RawImageData::~RawImageData() {
-  _ASSERTE(dataRefCount == 0);
+  assert(dataRefCount == 0);
   mOffset = iPoint2D(0, 0);
   pthread_mutex_destroy(&mymutex);
   pthread_mutex_destroy(&errMutex);
@@ -493,7 +494,7 @@ void RawImageWorker::performTask()
       data->doLookup(start_y, end_y);
       break;
     default:
-      _ASSERTE(false);
+      assert(false);
     }
   } catch (RawDecoderException &e) {
     data->setError(e.what());
