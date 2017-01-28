@@ -41,9 +41,15 @@ public:
   void checkSupportInternal(CameraMetaData *meta) override;
   TiffIFD *getRootIFD() override { return mRootIFD; }
 
+private:
+  uint32 sample_format{1};
+  uint32 bps;
+  int compression;
+
 protected:
   TiffIFD *mRootIFD;
   bool mFixLjpeg;
+  void decodeData(TiffIFD* raw);
   void printMetaData();
   bool decodeMaskedAreas(TiffIFD* raw);
   bool decodeBlackLevels(TiffIFD* raw);

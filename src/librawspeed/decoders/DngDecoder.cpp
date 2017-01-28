@@ -62,6 +62,93 @@ DngDecoder::~DngDecoder() {
   mRootIFD = nullptr;
 }
 
+void DngDecoder::decodeData(TiffIFD* raw) {
+  mRaw->createData();
+
+  if (compression == 8 && sample_format != 3) {
+    ThrowRDE("DNG Decoder: Only float format is supported for "
+             "deflate-compressed data.");
+  } else if ((compression == 7 || compression == 0x884c) &&
+             sample_format != 1) {
+    ThrowRDE("DNG Decoder: Only 16 bit unsigned data supported for "
+             "JPEG-compressed data.");
+  }
+
+  DngDecoderSlices slices(mFile, mRaw, compression);
+  if (raw->hasEntry(PREDICTOR)) {
+    uint32 predictor = raw->getEntry(PREDICTOR)->getInt();
+    slices.mPredictor = predictor;
+  }
+  slices.mBps = raw->getEntry(BITSPERSAMPLE)->getInt();
+  if (raw->hasEntry(TILEOFFSETS)) {
+    uint32 tilew = raw->getEntry(TILEWIDTH)->getInt();
+    uint32 tileh = raw->getEntry(TILELENGTH)->getInt();
+    if (!tilew || !tileh)
+      ThrowRDE("DNG Decoder: Invalid tile size");
+
+    uint32 tilesX = (mRaw->dim.x + tilew - 1) / tilew;
+    uint32 tilesY = (mRaw->dim.y + tileh - 1) / tileh;
+    uint32 nTiles = tilesX * tilesY;
+
+    TiffEntry* offsets = raw->getEntry(TILEOFFSETS);
+    TiffEntry* counts = raw->getEntry(TILEBYTECOUNTS);
+    if (offsets->count != counts->count || offsets->count != nTiles) {
+      ThrowRDE("DNG Decoder: Tile count mismatch: offsets:%u count:%u, "
+               "calculated:%u",
+               offsets->count, counts->count, nTiles);
+    }
+
+    slices.mFixLjpeg = mFixLjpeg;
+
+    for (uint32 y = 0; y < tilesY; y++) {
+      for (uint32 x = 0; x < tilesX; x++) {
+        DngSliceElement e(offsets->getInt(x + y * tilesX),
+                          counts->getInt(x + y * tilesX), tilew * x, tileh * y,
+                          tilew, tileh);
+        e.mUseBigtable = tilew * tileh > 1024 * 1024;
+        slices.addSlice(e);
+      }
+    }
+  } else { // Strips
+    TiffEntry* offsets = raw->getEntry(STRIPOFFSETS);
+    TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
+
+    uint32 yPerSlice = raw->getEntry(ROWSPERSTRIP)->getInt();
+
+    if (counts->count != offsets->count) {
+      ThrowRDE("DNG Decoder: Byte count number does not match strip size: "
+               "count:%u, stips:%u ",
+               counts->count, offsets->count);
+    }
+
+    if (yPerSlice == 0 || yPerSlice > (uint32)mRaw->dim.y)
+      ThrowRDE("DNG Decoder: Invalid y per slice");
+
+    uint32 offY = 0;
+    for (uint32 s = 0; s < counts->count; s++) {
+      DngSliceElement e(offsets->getInt(s), counts->getInt(s), 0, offY,
+                        mRaw->dim.x, yPerSlice);
+      e.mUseBigtable = yPerSlice * mRaw->dim.y > 1024 * 1024;
+      offY += yPerSlice;
+
+      if (mFile->isValid(e.byteOffset,
+                         e.byteCount)) // Only decode if size is valid
+        slices.addSlice(e);
+    }
+  }
+  uint32 nSlices = slices.size();
+  if (!nSlices)
+    ThrowRDE("DNG Decoder: No valid slices found.");
+
+  slices.startDecoding();
+
+  if (mRaw->errors.size() >= nSlices) {
+    ThrowRDE(
+        "DNG Decoding: Too many errors encountered. Giving up.\nFirst Error:%s",
+        mRaw->errors[0]);
+  }
+}
+
 RawImage DngDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(COMPRESSION);
 
@@ -70,19 +157,19 @@ RawImage DngDecoder::decodeRawInternal() {
 
   // Erase the ones not with JPEG compression
   for (auto i = data.begin(); i != data.end();) {
-    int compression = (*i)->getEntry(COMPRESSION)->getShort();
+    int comp = (*i)->getEntry(COMPRESSION)->getShort();
     bool isSubsampled = false;
     try {
       isSubsampled = (*i)->getEntry(NEWSUBFILETYPE)->getInt() & 1; // bit 0 is on if image is subsampled
     } catch (TiffParserException &) {
     }
-    if (!(compression == 7 ||
+    if (!(comp == 7 ||
 #ifdef HAVE_ZLIB
-          compression == 8 ||
+          comp == 8 ||
 #endif
-          compression == 1 ||
-          compression == 0x884c) ||
-        isSubsampled) {  // Erase if subsampled, or not deflated, JPEG or uncompressed
+          comp == 1 || comp == 0x884c) ||
+        isSubsampled) { // Erase if subsampled, or not deflated, JPEG or
+                        // uncompressed
       i = data.erase(i);
     } else {
       ++i;
@@ -97,13 +184,12 @@ RawImage DngDecoder::decodeRawInternal() {
   }
 
   TiffIFD* raw = data[0];
-  uint32 sample_format = 1;
-  uint32 bps = raw->getEntry(BITSPERSAMPLE)->getInt();
+  bps = raw->getEntry(BITSPERSAMPLE)->getInt();
 
   if (raw->hasEntry(SAMPLEFORMAT))
     sample_format = raw->getEntry(SAMPLEFORMAT)->getInt();
 
-  const int compression = raw->getEntry(COMPRESSION)->getShort();
+  compression = raw->getEntry(COMPRESSION)->getShort();
 
   if (sample_format == 1)
     mRaw = RawImage::create(TYPE_USHORT16);
@@ -202,82 +288,12 @@ RawImage DngDecoder::decodeRawInternal() {
       ThrowRDE("DNG Decoder: Unknown compression: %u", compression);
 
     // Now load the image
-      try {
-        // Let's try loading it as tiles instead
-
-        mRaw->createData();
-
-        if (compression == 8 && sample_format != 3)
-           ThrowRDE("DNG Decoder: Only float format is supported for deflate-compressed data.");
-        else if ((compression == 7 || compression == 0x884c) &&
-                 sample_format != 1)
-          ThrowRDE("DNG Decoder: Only 16 bit unsigned data supported for "
-                   "JPEG-compressed data.");
-
-        DngDecoderSlices slices(mFile, mRaw, compression);
-        if (raw->hasEntry(PREDICTOR)) {
-            uint32 predictor = raw->getEntry(PREDICTOR)->getInt();
-            slices.mPredictor = predictor;
-        }
-        slices.mBps = raw->getEntry(BITSPERSAMPLE)->getInt();
-        if (raw->hasEntry(TILEOFFSETS)) {
-          uint32 tilew = raw->getEntry(TILEWIDTH)->getInt();
-          uint32 tileh = raw->getEntry(TILELENGTH)->getInt();
-          if (!tilew || !tileh)
-            ThrowRDE("DNG Decoder: Invalid tile size");
-
-          uint32 tilesX = (mRaw->dim.x + tilew - 1) / tilew;
-          uint32 tilesY = (mRaw->dim.y + tileh - 1) / tileh;
-          uint32 nTiles = tilesX * tilesY;
-
-          TiffEntry *offsets = raw->getEntry(TILEOFFSETS);
-          TiffEntry *counts = raw->getEntry(TILEBYTECOUNTS);
-          if (offsets->count != counts->count || offsets->count != nTiles)
-            ThrowRDE("DNG Decoder: Tile count mismatch: offsets:%u count:%u, calculated:%u", offsets->count, counts->count, nTiles);
-
-          slices.mFixLjpeg = mFixLjpeg;
-
-          for (uint32 y = 0; y < tilesY; y++) {
-            for (uint32 x = 0; x < tilesX; x++) {
-              DngSliceElement e(offsets->getInt(x+y*tilesX), counts->getInt(x+y*tilesX), tilew*x, tileh*y, tilew, tileh);
-              e.mUseBigtable = tilew * tileh > 1024 * 1024;
-              slices.addSlice(e);
-            }
-          }
-        } else {  // Strips
-          TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
-          TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
-
-          uint32 yPerSlice = raw->getEntry(ROWSPERSTRIP)->getInt();
-
-          if (counts->count != offsets->count) {
-            ThrowRDE("DNG Decoder: Byte count number does not match strip size: count:%u, stips:%u ", counts->count, offsets->count);
-          }
-
-          if (yPerSlice == 0 || yPerSlice > (uint32)mRaw->dim.y)
-            ThrowRDE("DNG Decoder: Invalid y per slice");
-
-          uint32 offY = 0;
-          for (uint32 s = 0; s < counts->count; s++) {
-            DngSliceElement e(offsets->getInt(s), counts->getInt(s), 0, offY, mRaw->dim.x, yPerSlice);
-            e.mUseBigtable = yPerSlice * mRaw->dim.y > 1024 * 1024;
-            offY += yPerSlice;
-
-            if (mFile->isValid(e.byteOffset, e.byteCount)) // Only decode if size is valid
-              slices.addSlice(e);
-          }
-        }
-        uint32 nSlices = slices.size();
-        if (!nSlices)
-          ThrowRDE("DNG Decoder: No valid slices found.");
-
-        slices.startDecoding();
-
-        if (mRaw->errors.size() >= nSlices)
-          ThrowRDE("DNG Decoding: Too many errors encountered. Giving up.\nFirst Error:%s", mRaw->errors[0]);
-      } catch (TiffParserException &e) {
-        ThrowRDE("DNG Decoder: Unsupported format, tried strips and tiles:\n%s", e.what());
-      }
+    try {
+      decodeData(raw);
+    } catch (TiffParserException& e) {
+      ThrowRDE("DNG Decoder: Unsupported format, tried strips and tiles:\n%s",
+               e.what());
+    }
   } catch (TiffParserException &e) {
     ThrowRDE("DNG Decoder: Image could not be read:\n%s", e.what());
   }
