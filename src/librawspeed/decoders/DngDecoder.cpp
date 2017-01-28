@@ -193,15 +193,16 @@ RawImage DngDecoder::decodeRawInternal() {
       }
     }
 
+    uint32 cpp = raw->getEntry(SAMPLESPERPIXEL)->getInt();
+
+    if (cpp > 4)
+      ThrowRDE("DNG Decoder: More than 4 samples per pixel is not supported.");
+
+    mRaw->setCpp(cpp);
 
     // Now load the image
-    if (compression == 1) {  // Uncompressed.
+    if (0) { // Uncompressed.
       try {
-        uint32 cpp = raw->getEntry(SAMPLESPERPIXEL)->getInt();
-        if (cpp > 4)
-          ThrowRDE("DNG Decoder: More than 4 samples per pixel is not supported.");
-        mRaw->setCpp(cpp);
-
         TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
         TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
         uint32 yPerSlice = raw->getEntry(ROWSPERSTRIP)->getInt();
@@ -260,7 +261,8 @@ RawImage DngDecoder::decodeRawInternal() {
       } catch (TiffParserException &) {
         ThrowRDE("DNG Decoder: Unsupported format, uncompressed with no strips.");
       }
-    } else if (compression == 7 || compression == 8 || compression == 0x884c) {
+    } else if (compression == 1 || compression == 7 || compression == 8 ||
+               compression == 0x884c) {
       try {
         // Let's try loading it as tiles instead
 
@@ -268,8 +270,10 @@ RawImage DngDecoder::decodeRawInternal() {
 
         if (compression == 8 && sample_format != 3)
            ThrowRDE("DNG Decoder: Only float format is supported for deflate-compressed data.");
-        else if (compression != 8 && sample_format != 1)
-           ThrowRDE("DNG Decoder: Only 16 bit unsigned data supported for JPEG-compressed data.");
+        else if ((compression == 7 || compression == 0x884c) &&
+                 sample_format != 1)
+          ThrowRDE("DNG Decoder: Only 16 bit unsigned data supported for "
+                   "JPEG-compressed data.");
 
         DngDecoderSlices slices(mFile, mRaw, compression);
         if (raw->hasEntry(PREDICTOR)) {
