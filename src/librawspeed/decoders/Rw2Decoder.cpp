@@ -23,20 +23,21 @@
 #include "common/Common.h"                // for uint32, uchar8, _RPT1, ush...
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/Buffer.h"                    // for Buffer::size_type
-#include "io/ByteStream.h"                // for ByteStream
-#include "metadata/ColorFilterArray.h"    // for ::CFA_GREEN, ColorFilterArray
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include "tiff/TiffIFD.h"                 // for TiffIFD
-#include "tiff/TiffTag.h"                 // for TiffTag, ::STRIPOFFSETS
-#include <algorithm>                      // for min
-#include <cmath>                          // for fabs
-#include <cstdio>                         // for NULL
-#include <cstring>                        // for memcpy
-#include <map>                            // for map, _Rb_tree_iterator
-#include <pthread.h>                      // for pthread_mutex_lock, pthrea...
-#include <string>                         // for string, allocator
-#include <vector>                         // for vector
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"                 // for Buffer::size_type
+#include "io/ByteStream.h"             // for ByteStream
+#include "metadata/ColorFilterArray.h" // for ::CFA_GREEN, ColorFilterArray
+#include "tiff/TiffEntry.h"            // for TiffEntry
+#include "tiff/TiffIFD.h"              // for TiffIFD
+#include "tiff/TiffTag.h"              // for TiffTag, ::STRIPOFFSETS
+#include <algorithm>                   // for min
+#include <cmath>                       // for fabs
+#include <cstdio>                      // for NULL
+#include <cstring>                     // for memcpy
+#include <map>                         // for map, _Rb_tree_iterator
+#include <pthread.h>                   // for pthread_mutex_lock, pthrea...
+#include <string>                      // for string, allocator
+#include <vector>                      // for vector
 
 using namespace std;
 
@@ -90,12 +91,14 @@ RawImage Rw2Decoder::decodeRawInternal() {
     uint32 size = mFile->getSize() - off;
     input_start = new ByteStream(mFile, off);
 
+    UncompressedDecompressor u(*input_start, mRaw, uncorrectedRawValues);
+
     if (size >= width*height*2) {
       // It's completely unpacked little-endian
-      Decode12BitRawUnpacked(*input_start, width, height);
+      u.Decode12BitRawUnpacked(width, height);
     } else if (size >= width*height*3/2) {
       // It's a packed format
-      Decode12BitRawWithControl(*input_start, width, height);
+      u.Decode12BitRawWithControl(width, height);
     } else {
       // It's using the new .RW2 decoding method
       load_flags = 0;

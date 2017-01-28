@@ -23,13 +23,14 @@
 #include "common/Common.h"                // for uint32, ushort16
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/ByteStream.h"                // for ByteStream
-#include "tiff/TiffEntry.h"               // for TiffEntry, ::TIFF_SHORT
-#include "tiff/TiffIFD.h"                 // for TiffIFD
-#include "tiff/TiffTag.h"                 // for ::IMAGEWIDTH, ::MODEL, ::MAKE
-#include <cstddef>                        // for NULL
-#include <string>                         // for string
-#include <vector>                         // for vector
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/ByteStream.h"  // for ByteStream
+#include "tiff/TiffEntry.h" // for TiffEntry, ::TIFF_SHORT
+#include "tiff/TiffIFD.h"   // for TiffIFD
+#include "tiff/TiffTag.h"   // for ::IMAGEWIDTH, ::MODEL, ::MAKE
+#include <cstddef>          // for NULL
+#include <string>           // for string
+#include <vector>           // for vector
 
 using namespace std;
 
@@ -71,7 +72,6 @@ RawImage DcsDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
-  ByteStream input(mFile, off);
 
   TiffEntry *linearization = mRootIFD->getEntryRecursive(GRAYRESPONSECURVE);
   if (!linearization || linearization->count != 256 || linearization->type != TIFF_SHORT)
@@ -83,7 +83,9 @@ RawImage DcsDecoder::decodeRawInternal() {
   if (!uncorrectedRawValues)
     mRaw->setTable(table, 256, true);
 
-  Decode8BitRaw(input, width, height);
+  UncompressedDecompressor u(*mFile, off, c2, mRaw, uncorrectedRawValues);
+
+  u.Decode8BitRaw(width, height);
 
   // Set the table, if it should be needed later.
   if (uncorrectedRawValues) {

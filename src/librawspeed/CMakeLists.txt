@@ -1,12 +1,12 @@
 add_subdirectory(common)
-add_subdirectory(decoders)
-add_subdirectory(decompressors)
-add_subdirectory(io)
 add_subdirectory(metadata)
-add_subdirectory(parsers)
+add_subdirectory(io)
 add_subdirectory(tiff)
+add_subdirectory(parsers)
+add_subdirectory(decompressors)
+add_subdirectory(decoders)
 
-list(SORT RAWSPEED_SOURCES)
+# list(SORT RAWSPEED_SOURCES)
 list(REMOVE_DUPLICATES RAWSPEED_SOURCES)
 
 #

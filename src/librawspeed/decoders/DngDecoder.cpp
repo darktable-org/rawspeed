@@ -24,20 +24,21 @@
 #include "common/Point.h"                 // for iPoint2D, iRectangle2D
 #include "decoders/DngDecoderSlices.h"    // for DngDecoderSlices, DngSlice...
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
-#include "io/ByteStream.h"                // for ByteStream
-#include "io/IOException.h"               // for IOException
-#include "metadata/BlackArea.h"           // for BlackArea
-#include "metadata/Camera.h"              // for Camera
-#include "metadata/CameraMetaData.h"      // for CameraMetaData
-#include "metadata/ColorFilterArray.h"    // for ColorFilterArray, ::CFA_BLUE
-#include "parsers/TiffParserException.h"  // for TiffParserException
-#include "tiff/TiffEntry.h"               // for TiffEntry, ::TIFF_LONG
-#include "tiff/TiffIFD.h"                 // for TiffIFD, getTiffEndianness
-#include "tiff/TiffTag.h"                 // for ::MODEL, ::MAKE, ::UNIQUEC...
-#include <cstdio>                         // for NULL, printf
-#include <cstring>                        // for memset
-#include <string>                         // for allocator, string, operator+
-#include <vector>                         // for vector, vector<>::iterator
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/ByteStream.h"               // for ByteStream
+#include "io/IOException.h"              // for IOException
+#include "metadata/BlackArea.h"          // for BlackArea
+#include "metadata/Camera.h"             // for Camera
+#include "metadata/CameraMetaData.h"     // for CameraMetaData
+#include "metadata/ColorFilterArray.h"   // for ColorFilterArray, ::CFA_BLUE
+#include "parsers/TiffParserException.h" // for TiffParserException
+#include "tiff/TiffEntry.h"              // for TiffEntry, ::TIFF_LONG
+#include "tiff/TiffIFD.h"                // for TiffIFD, getTiffEndianness
+#include "tiff/TiffTag.h"                // for ::MODEL, ::MAKE, ::UNIQUEC...
+#include <cstdio>                        // for NULL, printf
+#include <cstring>                       // for memset
+#include <string>                        // for allocator, string, operator+
+#include <vector>                        // for vector, vector<>::iterator
 
 using namespace std;
 
@@ -233,7 +234,10 @@ RawImage DngDecoder::decodeRawInternal() {
 
         for (uint32 i = 0; i < slices.size(); i++) {
           DngStrip slice = slices[i];
-          ByteStream in(mFile, slice.offset);
+
+          UncompressedDecompressor u(*mFile, slice.offset, slice.count, mRaw,
+                                     uncorrectedRawValues);
+
           iPoint2D size(width, slice.h);
           iPoint2D pos(0, slice.offsetY);
 
@@ -242,7 +246,9 @@ RawImage DngDecoder::decodeRawInternal() {
           if (bps != 8 && bps != 16)
             big_endian = true;
           try {
-            readUncompressedRaw(in, size, pos, mRaw->getCpp()* width * bps / 8, bps, big_endian ? BitOrder_Jpeg : BitOrder_Plain);
+            u.readUncompressedRaw(size, pos, mRaw->getCpp() * width * bps / 8,
+                                  bps,
+                                  big_endian ? BitOrder_Jpeg : BitOrder_Plain);
           } catch(IOException &ex) {
             if (i > 0)
               mRaw->setError(ex.what());
