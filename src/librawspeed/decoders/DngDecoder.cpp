@@ -19,26 +19,23 @@
 */
 
 #include "decoders/DngDecoder.h"
-#include "common/Common.h"                // for uint32, uchar8, ushort16
+#include "common/Common.h"                // for uint32, uchar8, writeLog
 #include "common/DngOpcodes.h"            // for DngOpcodes
 #include "common/Point.h"                 // for iPoint2D, iRectangle2D
 #include "decoders/DngDecoderSlices.h"    // for DngDecoderSlices, DngSlice...
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
-#include "decompressors/UncompressedDecompressor.h"
-#include "io/ByteStream.h"               // for ByteStream
-#include "io/IOException.h"              // for IOException
-#include "metadata/BlackArea.h"          // for BlackArea
-#include "metadata/Camera.h"             // for Camera
-#include "metadata/CameraMetaData.h"     // for CameraMetaData
-#include "metadata/ColorFilterArray.h"   // for ColorFilterArray, ::CFA_BLUE
-#include "parsers/TiffParserException.h" // for TiffParserException
-#include "tiff/TiffEntry.h"              // for TiffEntry, ::TIFF_LONG
-#include "tiff/TiffIFD.h"                // for TiffIFD, getTiffEndianness
-#include "tiff/TiffTag.h"                // for ::MODEL, ::MAKE, ::UNIQUEC...
-#include <cstdio>                        // for NULL, printf
-#include <cstring>                       // for memset
-#include <string>                        // for allocator, string, operator+
-#include <vector>                        // for vector, vector<>::iterator
+#include "metadata/BlackArea.h"           // for BlackArea
+#include "metadata/Camera.h"              // for Camera
+#include "metadata/CameraMetaData.h"      // for CameraMetaData
+#include "metadata/ColorFilterArray.h"    // for ColorFilterArray, CFAColor
+#include "parsers/TiffParserException.h"  // for TiffParserException
+#include "tiff/TiffEntry.h"               // for TiffEntry, TiffDataType::T...
+#include "tiff/TiffIFD.h"                 // for TiffIFD
+#include "tiff/TiffTag.h"                 // for TiffTag::MODEL, TiffTag::MAKE
+#include <cstdio>                         // for printf
+#include <cstring>                        // for memset
+#include <string>                         // for allocator, string, operator+
+#include <vector>                         // for vector
 
 using namespace std;
 
@@ -200,69 +197,11 @@ RawImage DngDecoder::decodeRawInternal() {
 
     mRaw->setCpp(cpp);
 
+    if (!(compression == 1 || compression == 7 || compression == 8 ||
+               compression == 0x884c))
+      ThrowRDE("DNG Decoder: Unknown compression: %u", compression);
+
     // Now load the image
-    if (0) { // Uncompressed.
-      try {
-        TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
-        TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
-        uint32 yPerSlice = raw->getEntry(ROWSPERSTRIP)->getInt();
-        uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
-        uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
-
-        if (counts->count != offsets->count) {
-          ThrowRDE("DNG Decoder: Byte count number does not match strip size: count:%u, strips:%u ", counts->count, offsets->count);
-        }
-
-        uint32 offY = 0;
-        vector<DngStrip> slices;
-        for (uint32 s = 0; s < offsets->count; s++) {
-          DngStrip slice;
-          slice.offset = offsets->getInt(s);
-          slice.count = counts->getInt(s);
-          slice.offsetY = offY;
-          if (offY + yPerSlice > height)
-            slice.h = height - offY;
-          else
-            slice.h = yPerSlice;
-
-          offY += yPerSlice;
-
-          if (mFile->isValid(slice.offset, slice.count)) // Only decode if size is valid
-            slices.push_back(slice);
-        }
-
-        mRaw->createData();
-
-        for (uint32 i = 0; i < slices.size(); i++) {
-          DngStrip slice = slices[i];
-
-          UncompressedDecompressor u(*mFile, slice.offset, slice.count, mRaw,
-                                     uncorrectedRawValues);
-
-          iPoint2D size(width, slice.h);
-          iPoint2D pos(0, slice.offsetY);
-
-          bool big_endian = (getTiffEndianness(mFile) == big);
-          // DNG spec says that if not 8 or 16 bit/sample, always use big endian
-          if (bps != 8 && bps != 16)
-            big_endian = true;
-          try {
-            u.readUncompressedRaw(size, pos, mRaw->getCpp() * width * bps / 8,
-                                  bps,
-                                  big_endian ? BitOrder_Jpeg : BitOrder_Plain);
-          } catch(IOException &ex) {
-            if (i > 0)
-              mRaw->setError(ex.what());
-            else
-              ThrowRDE("DNG decoder: IO error occurred in first slice, unable to decode more. Error is: %s", ex.what());
-          }
-        }
-
-      } catch (TiffParserException &) {
-        ThrowRDE("DNG Decoder: Unsupported format, uncompressed with no strips.");
-      }
-    } else if (compression == 1 || compression == 7 || compression == 8 ||
-               compression == 0x884c) {
       try {
         // Let's try loading it as tiles instead
 
@@ -339,9 +278,6 @@ RawImage DngDecoder::decodeRawInternal() {
       } catch (TiffParserException &e) {
         ThrowRDE("DNG Decoder: Unsupported format, tried strips and tiles:\n%s", e.what());
       }
-    } else {
-      ThrowRDE("DNG Decoder: Unknown compression: %u", compression);
-    }
   } catch (TiffParserException &e) {
     ThrowRDE("DNG Decoder: Image could not be read:\n%s", e.what());
   }
