@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -44,6 +44,13 @@ protected:
   RawImage decodeNewFormat();
   void sRawInterpolate();
   int getHue();
+
+  using yuv2rgb = void(int Y, int Cb, int Cr, int& r, int& g, int& b,
+                       const int* sraw_coeffs);
+  static yuv2rgb YUV_TO_RGB_v0;
+  static yuv2rgb YUV_TO_RGB_v1;
+  static yuv2rgb YUV_TO_RGB_v2;
+
   void interpolate_420(int w, int h, int start_h , int end_h);
   void interpolate_422(int w, int h, int start_h , int end_h);
   void interpolate_422_old(int w, int h, int start_h , int end_h);
