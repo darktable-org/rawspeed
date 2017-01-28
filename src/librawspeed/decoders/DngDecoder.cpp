@@ -63,6 +63,30 @@ DngDecoder::~DngDecoder() {
   mRootIFD = nullptr;
 }
 
+void DngDecoder::dropUnsuportedChunks(vector<TiffIFD*>& data) {
+  // Erase the ones not with JPEG compression
+  for (auto i = data.begin(); i != data.end();) {
+    int comp = (*i)->getEntry(COMPRESSION)->getShort();
+    bool isSubsampled = false;
+    try {
+      isSubsampled = (*i)->getEntry(NEWSUBFILETYPE)->getInt() &
+                     1; // bit 0 is on if image is subsampled
+    } catch (TiffParserException&) {
+    }
+    if (!(comp == 7 ||
+#ifdef HAVE_ZLIB
+          comp == 8 ||
+#endif
+          comp == 1 || comp == 0x884c) ||
+        isSubsampled) { // Erase if subsampled, or not deflated, JPEG or
+                        // uncompressed
+      i = data.erase(i);
+    } else {
+      ++i;
+    }
+  }
+}
+
 void DngDecoder::parseCFA(TiffIFD* raw) {
 
   // Check if layout is OK, if present
@@ -214,26 +238,7 @@ RawImage DngDecoder::decodeRawInternal() {
   if (data.empty())
     ThrowRDE("DNG Decoder: No image data found");
 
-  // Erase the ones not with JPEG compression
-  for (auto i = data.begin(); i != data.end();) {
-    int comp = (*i)->getEntry(COMPRESSION)->getShort();
-    bool isSubsampled = false;
-    try {
-      isSubsampled = (*i)->getEntry(NEWSUBFILETYPE)->getInt() & 1; // bit 0 is on if image is subsampled
-    } catch (TiffParserException &) {
-    }
-    if (!(comp == 7 ||
-#ifdef HAVE_ZLIB
-          comp == 8 ||
-#endif
-          comp == 1 || comp == 0x884c) ||
-        isSubsampled) { // Erase if subsampled, or not deflated, JPEG or
-                        // uncompressed
-      i = data.erase(i);
-    } else {
-      ++i;
-    }
-  }
+  dropUnsuportedChunks(data);
 
   if (data.empty())
     ThrowRDE("DNG Decoder: No RAW chunks found");
@@ -289,10 +294,6 @@ RawImage DngDecoder::decodeRawInternal() {
       ThrowRDE("DNG Decoder: More than 4 samples per pixel is not supported.");
 
     mRaw->setCpp(cpp);
-
-    if (!(compression == 1 || compression == 7 || compression == 8 ||
-               compression == 0x884c))
-      ThrowRDE("DNG Decoder: Unknown compression: %u", compression);
 
     // Now load the image
     try {

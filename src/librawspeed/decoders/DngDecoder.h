@@ -24,6 +24,7 @@
 #include "common/RawImage.h"     // for RawImage
 #include "decoders/RawDecoder.h" // for RawDecoder
 #include "io/FileMap.h"          // for FileMap
+#include <vector>                // for vector
 
 namespace RawSpeed {
 
@@ -49,6 +50,7 @@ private:
 protected:
   TiffIFD *mRootIFD;
   bool mFixLjpeg;
+  void dropUnsuportedChunks(std::vector<TiffIFD*>& data);
   void parseCFA(TiffIFD* raw);
   void decodeData(TiffIFD* raw);
   void printMetaData();
