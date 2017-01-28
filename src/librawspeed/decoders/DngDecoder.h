@@ -49,6 +49,7 @@ private:
 protected:
   TiffIFD *mRootIFD;
   bool mFixLjpeg;
+  void parseCFA(TiffIFD* raw);
   void decodeData(TiffIFD* raw);
   void printMetaData();
   bool decodeMaskedAreas(TiffIFD* raw);

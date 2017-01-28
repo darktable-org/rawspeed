@@ -34,6 +34,7 @@
 #include "tiff/TiffTag.h"                 // for TiffTag::MODEL, TiffTag::MAKE
 #include <cstdio>                         // for printf
 #include <cstring>                        // for memset
+#include <map>                            // for map
 #include <string>                         // for allocator, string, operator+
 #include <vector>                         // for vector
 
@@ -60,6 +61,64 @@ DngDecoder::~DngDecoder() {
   if (mRootIFD)
     delete mRootIFD;
   mRootIFD = nullptr;
+}
+
+void DngDecoder::parseCFA(TiffIFD* raw) {
+
+  // Check if layout is OK, if present
+  if (raw->hasEntry(CFALAYOUT))
+    if (raw->getEntry(CFALAYOUT)->getShort() != 1)
+      ThrowRDE("DNG Decoder: Unsupported CFA Layout.");
+
+  TiffEntry* cfadim = raw->getEntry(CFAREPEATPATTERNDIM);
+  if (cfadim->count != 2)
+    ThrowRDE("DNG Decoder: Couldn't read CFA pattern dimension");
+
+  // Does NOT contain dimensions as some documents state
+  TiffEntry* cPat = raw->getEntry(CFAPATTERN);
+
+  /*
+  if (raw->hasEntry(CFAPLANECOLOR)) {
+    // Map from the order in the image, to the position in the CFA
+    TiffEntry* e = raw->getEntry(CFAPLANECOLOR);
+
+    const unsigned char* cPlaneOrder = e->getData();
+    printf("Planecolor: ");
+    for (uint32 i = 0; i < e->count; i++) {
+      printf("%u,",cPlaneOrder[i]);
+    }
+    printf("\n");
+  }
+  */
+
+  iPoint2D cfaSize(cfadim->getInt(1), cfadim->getInt(0));
+  if (cfaSize.area() != cPat->count) {
+    ThrowRDE("DNG Decoder: CFA pattern dimension and pattern count does not "
+             "match: %d.",
+             cPat->count);
+  }
+
+  mRaw->cfa.setSize(cfaSize);
+
+  const map<uint32, CFAColor> int2enum = {
+      {0, CFA_RED},     {1, CFA_GREEN},  {2, CFA_BLUE},  {3, CFA_CYAN},
+      {4, CFA_MAGENTA}, {5, CFA_YELLOW}, {6, CFA_WHITE},
+  };
+
+  for (int y = 0; y < cfaSize.y; y++) {
+    for (int x = 0; x < cfaSize.x; x++) {
+      uint32 c1 = cPat->getByte(x + y * cfaSize.x);
+      CFAColor c2 = CFA_UNKNOWN;
+
+      try {
+        c2 = int2enum.at(c1);
+      } catch (std::out_of_range&) {
+        ThrowRDE("DNG Decoder: Unsupported CFA Color: %u", c1);
+      }
+
+      mRaw->cfa.setColorAt(iPoint2D(x, y), c2);
+    }
+  }
 }
 
 void DngDecoder::decodeData(TiffIFD* raw) {
@@ -221,60 +280,8 @@ RawImage DngDecoder::decodeRawInternal() {
 
   try {
 
-    if (mRaw->isCFA) {
-
-      // Check if layout is OK, if present
-      if (raw->hasEntry(CFALAYOUT))
-        if (raw->getEntry(CFALAYOUT)->getShort() != 1)
-          ThrowRDE("DNG Decoder: Unsupported CFA Layout.");
-
-      TiffEntry *cfadim = raw->getEntry(CFAREPEATPATTERNDIM);
-      if (cfadim->count != 2)
-        ThrowRDE("DNG Decoder: Couldn't read CFA pattern dimension");
-      TiffEntry* cPat = raw->getEntry(CFAPATTERN);                 // Does NOT contain dimensions as some documents state
-      /*
-            if (raw->hasEntry(CFAPLANECOLOR)) {
-              TiffEntry* e = raw->getEntry(CFAPLANECOLOR);
-              const unsigned char* cPlaneOrder = e->getData();       // Map from the order in the image, to the position in the CFA
-              printf("Planecolor: ");
-              for (uint32 i = 0; i < e->count; i++) {
-                printf("%u,",cPlaneOrder[i]);
-              }
-              printf("\n");
-            }
-      */
-      iPoint2D cfaSize(cfadim->getInt(1), cfadim->getInt(0));
-      if (cfaSize.area() != cPat->count)
-        ThrowRDE("DNG Decoder: CFA pattern dimension and pattern count does not match: %d.", cPat->count);
-      mRaw->cfa.setSize(cfaSize);
-
-      for (int y = 0; y < cfaSize.y; y++) {
-        for (int x = 0; x < cfaSize.x; x++) {
-          uint32 c1 = cPat->getByte(x+y*cfaSize.x);
-          CFAColor c2;
-          switch (c1) {
-            case 0:
-              c2 = CFA_RED; break;
-            case 1:
-              c2 = CFA_GREEN; break;
-            case 2:
-              c2 = CFA_BLUE; break;
-            case 3:
-              c2 = CFA_CYAN; break;
-            case 4:
-              c2 = CFA_MAGENTA; break;
-            case 5:
-              c2 = CFA_YELLOW; break;
-            case 6:
-              c2 = CFA_WHITE; break;
-            default:
-              c2 = CFA_UNKNOWN;
-              ThrowRDE("DNG Decoder: Unsupported CFA Color.");
-          }
-          mRaw->cfa.setColorAt(iPoint2D(x, y), c2);
-        }
-      }
-    }
+    if (mRaw->isCFA)
+      parseCFA(raw);
 
     uint32 cpp = raw->getEntry(SAMPLESPERPIXEL)->getInt();
 
