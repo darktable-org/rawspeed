@@ -23,12 +23,13 @@
 #include "common/Common.h"                // for uint32, ::BitOrder_Jpeg16
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/ByteStream.h"                // for ByteStream
-#include "metadata/Camera.h"              // for Camera
-#include <cstdlib>                        // for atoi
-#include <map>                            // for map, _Rb_tree_iterator
-#include <string>                         // for string, operator==, basic_...
-#include <utility>                        // for pair
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/ByteStream.h"   // for ByteStream
+#include "metadata/Camera.h" // for Camera
+#include <cstdlib>           // for atoi
+#include <map>               // for map, _Rb_tree_iterator
+#include <string>            // for string, operator==, basic_...
+#include <utility>           // for pair
 
 using namespace std;
 
@@ -91,9 +92,10 @@ RawImage NakedDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  ByteStream input(mFile, offset);
+  UncompressedDecompressor u(*mFile, offset, mRaw, uncorrectedRawValues);
+
   iPoint2D pos(0, 0);
-  readUncompressedRaw(input, mRaw->dim, pos, width*bits/8, bits, bo);
+  u.readUncompressedRaw(mRaw->dim, pos, width * bits / 8, bits, bo);
 
   return mRaw;
 }

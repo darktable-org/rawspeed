@@ -40,11 +40,11 @@ public:
   uint32 area() const { return std::abs(x * y); }
   bool isThisInside(const iPoint2D &otherPoint) const {
     return (x <= otherPoint.x && y <= otherPoint.y);
-        };
-        iPoint2D getSmallest(const iPoint2D &otherPoint) const {
-          return iPoint2D(std::min(x, otherPoint.x), std::min(y, otherPoint.y));
-        };
-        int x, y;
+  }
+  iPoint2D getSmallest(const iPoint2D& otherPoint) const {
+    return iPoint2D(std::min(x, otherPoint.x), std::min(y, otherPoint.y));
+  }
+  int x, y;
 };
 
 /* Helper class for managing a rectangle in 2D space. */
@@ -83,14 +83,26 @@ public:
   /* Retains size */
   void setTopLeft(const iPoint2D& top_left) {pos = top_left;}
   /* Set BR  */
-  void setBottomRightAbsolute(const iPoint2D& bottom_right) {dim = iPoint2D(bottom_right) - pos;};
-  void setAbsolute(int x1, int y1, int x2, int y2) {pos = iPoint2D(x1,y1); dim = iPoint2D(x2-x1,y2-y1);};
-  void setAbsolute(const iPoint2D& top_left, const iPoint2D& bottom_right) {pos = top_left; setBottomRightAbsolute(bottom_right);};
-  void setSize(const iPoint2D& size) {dim = size;};
-  bool hasPositiveArea() const {return (dim.x > 0) && (dim.y > 0);};
+  void setBottomRightAbsolute(const iPoint2D& bottom_right) {
+    dim = iPoint2D(bottom_right) - pos;
+  }
+  void setAbsolute(int x1, int y1, int x2, int y2) {
+    pos = iPoint2D(x1, y1);
+    dim = iPoint2D(x2 - x1, y2 - y1);
+  }
+  void setAbsolute(const iPoint2D& top_left, const iPoint2D& bottom_right) {
+    pos = top_left;
+    setBottomRightAbsolute(bottom_right);
+  }
+  void setSize(const iPoint2D& size) { dim = size; }
+  bool hasPositiveArea() const { return (dim.x > 0) && (dim.y > 0); }
   /* Crop, so area is postitive, and return true, if there is any area left */
   /* This will ensure that bottomright is never on the left/top of the offset */
-  bool cropArea(){ dim.x = std::max(0,dim.x); dim.y = std::max(0, dim.y); return hasPositiveArea();};
+  bool cropArea() {
+    dim.x = std::max(0, dim.x);
+    dim.y = std::max(0, dim.y);
+    return hasPositiveArea();
+  }
   /* This will make sure that offset is positive, and make the area smaller if needed */
   /* This will return true if there is any area left */
   bool cropOffsetToZero(){
@@ -105,21 +117,21 @@ public:
     }
     dim -= crop_pixels;
     return cropArea();
-  };
+  }
   iRectangle2D getOverlap(const iRectangle2D& other) const {
     iRectangle2D overlap;
     iPoint2D br1 = getBottomRight();
     iPoint2D br2 = other.getBottomRight();
     overlap.setAbsolute(std::max(pos.x, other.pos.x), std::max(pos.y, other.pos.y), std::min(br1.x, br2.x), std::min(br1.y, br2.y));
     return overlap;
-  };
+  }
   iRectangle2D combine(const iRectangle2D& other) const {
     iRectangle2D combined;
 		iPoint2D br1 = getBottomRight();
 		iPoint2D br2 = other.getBottomRight();
 		combined.setAbsolute(std::min(pos.x, other.pos.x), std::min(pos.y, other.pos.y), std::max(br1.x, br2.x), std::max(br2.y, br2.y));
 		return combined;
-  };
+  }
   iPoint2D pos;
   iPoint2D dim;
 };

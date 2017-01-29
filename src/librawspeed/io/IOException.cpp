@@ -34,17 +34,17 @@ void ThrowIOE(const char* fmt, ...) {
   static char buf[8192];
   vsnprintf(buf, 8192, fmt, val);
   va_end(val);
-  _RPT1(0, "IO EXCEPTION: %s\n", buf);
+  writeLog(DEBUG_PRIO_EXTRA, "IO EXCEPTION: %s\n", buf);
   throw IOException(buf);
 }
 
 
 IOException::IOException( const char* _msg ) : std::runtime_error(string(_msg))
 {
-  _RPT1(0, "IO Exception: %s\n", _msg);
+  writeLog(DEBUG_PRIO_EXTRA, "IO Exception: %s\n", _msg);
 }
 
 IOException::IOException(const string &_msg) : std::runtime_error(_msg) {
-  _RPT1(0, "IO Exception: %s\n", _msg.c_str());
+  writeLog(DEBUG_PRIO_EXTRA, "IO Exception: %s\n", _msg.c_str());
 }
 } // namespace RawSpeed

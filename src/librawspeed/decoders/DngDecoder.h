@@ -24,6 +24,7 @@
 #include "common/RawImage.h"     // for RawImage
 #include "decoders/RawDecoder.h" // for RawDecoder
 #include "io/FileMap.h"          // for FileMap
+#include <vector>                // for vector
 
 namespace RawSpeed {
 
@@ -41,23 +42,21 @@ public:
   void checkSupportInternal(CameraMetaData *meta) override;
   TiffIFD *getRootIFD() override { return mRootIFD; }
 
+private:
+  uint32 sample_format{1};
+  uint32 bps;
+  int compression;
+
 protected:
   TiffIFD *mRootIFD;
   bool mFixLjpeg;
+  void dropUnsuportedChunks(std::vector<TiffIFD*>& data);
+  void parseCFA(TiffIFD* raw);
+  void decodeData(TiffIFD* raw);
   void printMetaData();
   bool decodeMaskedAreas(TiffIFD* raw);
   bool decodeBlackLevels(TiffIFD* raw);
   void setBlack(TiffIFD* raw);
-};
-
-class DngStrip {
-public:
-  DngStrip() { h = offset = count = offsetY = 0;};
-  ~DngStrip() = default;
-  uint32 h;
-  uint32 offset; // Offset in bytes
-  uint32 count;
-  uint32 offsetY;
 };
 
 } // namespace RawSpeed

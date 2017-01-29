@@ -29,8 +29,10 @@ namespace RawSpeed {
 class DngSliceElement
 {
 public:
-  DngSliceElement(uint32 off, uint32 count, uint32 offsetX, uint32 offsetY, uint32 w, uint32 h) :
-      byteOffset(off), byteCount(count), offX(offsetX), offY(offsetY), width(w), height(h), mUseBigtable(false) {};
+  DngSliceElement(uint32 off, uint32 count, uint32 offsetX, uint32 offsetY,
+                  uint32 w, uint32 h)
+      : byteOffset(off), byteCount(count), offX(offsetX), offY(offsetY),
+        width(w), height(h), mUseBigtable(false) {}
   ~DngSliceElement() = default;
   const uint32 byteOffset;
   const uint32 byteCount;

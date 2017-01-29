@@ -23,14 +23,15 @@
 #include "common/Common.h"                // for uint32, ushort16
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/ByteStream.h"                // for ByteStream
-#include "parsers/TiffParserException.h"  // for TiffParserException
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD
-#include "tiff/TiffTag.h"                 // for ::MODEL, ::MAKE, ::COMPRES...
-#include <map>                            // for map, _Rb_tree_iterator
-#include <string>                         // for string
-#include <vector>                         // for vector
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/ByteStream.h"               // for ByteStream
+#include "parsers/TiffParserException.h" // for TiffParserException
+#include "tiff/TiffEntry.h"              // for TiffEntry
+#include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
+#include "tiff/TiffTag.h"                // for ::MODEL, ::MAKE, ::COMPRES...
+#include <map>                           // for map, _Rb_tree_iterator
+#include <string>                        // for string
+#include <vector>                        // for vector
 
 using namespace std;
 
@@ -75,9 +76,10 @@ RawImage KdcDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
-  ByteStream input(mFile, off);
 
-  Decode12BitRawBE(input, width, height);
+  UncompressedDecompressor u(*mFile, off, mRaw, uncorrectedRawValues);
+
+  u.decode12BitRawBE(width, height);
 
   return mRaw;
 }

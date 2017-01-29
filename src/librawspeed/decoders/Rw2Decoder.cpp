@@ -23,20 +23,21 @@
 #include "common/Common.h"                // for uint32, uchar8, _RPT1, ush...
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/Buffer.h"                    // for Buffer::size_type
-#include "io/ByteStream.h"                // for ByteStream
-#include "metadata/ColorFilterArray.h"    // for ::CFA_GREEN, ColorFilterArray
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include "tiff/TiffIFD.h"                 // for TiffIFD
-#include "tiff/TiffTag.h"                 // for TiffTag, ::STRIPOFFSETS
-#include <algorithm>                      // for min
-#include <cmath>                          // for fabs
-#include <cstdio>                         // for NULL
-#include <cstring>                        // for memcpy
-#include <map>                            // for map, _Rb_tree_iterator
-#include <pthread.h>                      // for pthread_mutex_lock, pthrea...
-#include <string>                         // for string, allocator
-#include <vector>                         // for vector
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"                 // for Buffer::size_type
+#include "io/ByteStream.h"             // for ByteStream
+#include "metadata/ColorFilterArray.h" // for ::CFA_GREEN, ColorFilterArray
+#include "tiff/TiffEntry.h"            // for TiffEntry
+#include "tiff/TiffIFD.h"              // for TiffIFD
+#include "tiff/TiffTag.h"              // for TiffTag, ::STRIPOFFSETS
+#include <algorithm>                   // for min
+#include <cmath>                       // for fabs
+#include <cstdio>                      // for NULL
+#include <cstring>                     // for memcpy
+#include <map>                         // for map, _Rb_tree_iterator
+#include <pthread.h>                   // for pthread_mutex_lock, pthrea...
+#include <string>                      // for string, allocator
+#include <vector>                      // for vector
 
 using namespace std;
 
@@ -90,12 +91,14 @@ RawImage Rw2Decoder::decodeRawInternal() {
     uint32 size = mFile->getSize() - off;
     input_start = new ByteStream(mFile, off);
 
+    UncompressedDecompressor u(*input_start, mRaw, uncorrectedRawValues);
+
     if (size >= width*height*2) {
       // It's completely unpacked little-endian
-      Decode12BitRawUnpacked(*input_start, width, height);
+      u.decode12BitRawUnpacked(width, height);
     } else if (size >= width*height*3/2) {
       // It's a packed format
-      Decode12BitRawWithControl(*input_start, width, height);
+      u.decode12BitRawWithControl(width, height);
     } else {
       // It's using the new .RW2 decoding method
       load_flags = 0;
@@ -163,7 +166,7 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
         if (nonz[0]) {
           if ((j = bits.getBits(8))) {
             if ((pred[0] -= 0x80 << sh) < 0 || sh == 4)
-              pred[0] &= ~(-1 << sh);
+              pred[0] &= ~(-(1 << sh));
             pred[0] += j << sh;
           }
         } else if ((nonz[0] = bits.getBits(8)) || i > 11)
@@ -183,7 +186,7 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
         if (nonz[1]) {
           if ((j = bits.getBits(8))) {
             if ((pred[1] -= 0x80 << sh) < 0 || sh == 4)
-              pred[1] &= ~(-1 << sh);
+              pred[1] &= ~(-(1 << sh));
             pred[1] += j << sh;
           }
         } else if ((nonz[1] = bits.getBits(8)) || i > 11)
@@ -233,7 +236,7 @@ void Rw2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
     setMetaData(meta, make, model, mode, iso);
   } else {
     mRaw->metadata.mode = mode;
-    _RPT1(0, "Mode not found in DB: %s", mode.c_str());
+    writeLog(DEBUG_PRIO_EXTRA, "Mode not found in DB: %s", mode.c_str());
     setMetaData(meta, make, model, "", iso);
   }
 
@@ -318,7 +321,7 @@ std::string Rw2Decoder::guessMode() {
     closest_match = "1:1";
     min_diff  = t;
   }
-  _RPT1(0, "Mode guess: '%s'\n", closest_match.c_str());
+  writeLog(DEBUG_PRIO_EXTRA, "Mode guess: '%s'\n", closest_match.c_str());
   return closest_match;
 }
 
@@ -358,7 +361,7 @@ uint32 PanaBitpump::getBits(int nbits) {
   }
   vbits = (vbits - nbits) & 0x1ffff;
   byte = vbits >> 3 ^ 0x3ff0;
-  return (buf[byte] | buf[byte+1] << 8) >> (vbits & 7) & ~(-1 << nbits);
+  return (buf[byte] | buf[byte + 1] << 8) >> (vbits & 7) & ~(-(1 << nbits));
 }
 
 } // namespace RawSpeed

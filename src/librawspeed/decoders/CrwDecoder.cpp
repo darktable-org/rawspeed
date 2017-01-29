@@ -355,7 +355,7 @@ void CrwDecoder::decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 
 
   for (uint32 row=0; row < height; row+=8) {
     auto *dest = (ushort16 *)&mRaw->getData()[row * width * 2];
-    nblocks = MIN (8, height-row) * width >> 6;
+    nblocks = min(8u, height - row) * width >> 6;
     for (block=0; block < nblocks; block++) {
       memset (diffbuf, 0, sizeof diffbuf);
       for (uint32 i=0; i < 64; i++ ) {
@@ -384,7 +384,8 @@ void CrwDecoder::decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 
     if (lowbits) {
       offset = 26 + row*width/4;
       ByteStream lowbit_input(mFile, offset, height*width/4);
-      uint32 lines = MIN(height-row, 8); // Process 8 rows or however are left
+      uint32 lines =
+          min(height - row, 8u); // Process 8 rows or however are left
       for (uint32 i=0; i < width/4*lines; i++) {
         uint32 c = ((uint32) lowbit_input.getByte());
         for (uint32 r=0; r < 8; r+=2, dest++) { // Process 8 bits in pairs

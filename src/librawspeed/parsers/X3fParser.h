@@ -36,7 +36,7 @@ class X3fDecoder;
 class X3fDirectory
 {
 public:
-  X3fDirectory() : id(std::string()){};
+  X3fDirectory() : id(std::string()) {}
   X3fDirectory(ByteStream *bytes);
   X3fDirectory(const X3fDirectory &other) = default;
   uint32 offset{0};

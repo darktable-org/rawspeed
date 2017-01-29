@@ -118,8 +118,8 @@ void decodePentax(RawImage& mRaw, ByteStream&& data, TiffIFD* root) {
       pLeft2 += ht.decodeNext(bs);
       dest[x] =  pLeft1;
       dest[x+1] =  pLeft2;
-      _ASSERTE(pLeft1 >= 0 && pLeft1 <= (65536));
-      _ASSERTE(pLeft2 >= 0 && pLeft2 <= (65536));
+      assert(pLeft1 >= 0 && pLeft1 <= (65536));
+      assert(pLeft2 >= 0 && pLeft2 <= (65536));
     }
   }
 }

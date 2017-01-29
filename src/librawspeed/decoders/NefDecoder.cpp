@@ -24,24 +24,25 @@
 #include "common/Point.h"                    // for iPoint2D
 #include "decoders/RawDecoderException.h"    // for ThrowRDE, RawDecoderExc...
 #include "decompressors/NikonDecompressor.h" // for decompressNikon
-#include "io/BitPumpMSB.h"                   // for BitPumpMSB
-#include "io/BitPumpMSB32.h"                 // for BitPumpMSB32
-#include "io/ByteStream.h"                   // for ByteStream
-#include "io/IOException.h"                  // for IOException, ThrowIOE
-#include "metadata/CameraMetaData.h"         // for CameraMetaData
-#include "metadata/ColorFilterArray.h"       // for ::CFA_BLUE, ::CFA_GREEN
-#include "tiff/TiffEntry.h"                  // for TiffEntry, ::TIFF_UNDEF...
-#include "tiff/TiffIFD.h"                    // for TiffIFD
-#include "tiff/TiffTag.h"                    // for TiffTag, ::IMAGEWIDTH
-#include <cmath>                             // for pow, exp, log
-#include <cstdio>                            // for NULL
-#include <cstring>                           // for strncmp
-#include <map>                               // for map, _Rb_tree_iterator
-#include <memory>                            // for allocator_traits<>::val...
-#include <sstream>                           // for stringstream
-#include <string>                            // for string, operator==, bas...
-#include <utility>                           // for pair
-#include <vector>                            // for vector
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/BitPumpMSB.h"             // for BitPumpMSB
+#include "io/BitPumpMSB32.h"           // for BitPumpMSB32
+#include "io/ByteStream.h"             // for ByteStream
+#include "io/IOException.h"            // for IOException, ThrowIOE
+#include "metadata/CameraMetaData.h"   // for CameraMetaData
+#include "metadata/ColorFilterArray.h" // for ::CFA_BLUE, ::CFA_GREEN
+#include "tiff/TiffEntry.h"            // for TiffEntry, ::TIFF_UNDEF...
+#include "tiff/TiffIFD.h"              // for TiffIFD
+#include "tiff/TiffTag.h"              // for TiffTag, ::IMAGEWIDTH
+#include <cmath>                       // for pow, exp, log
+#include <cstdio>                      // for NULL
+#include <cstring>                     // for strncmp
+#include <map>                         // for map, _Rb_tree_iterator
+#include <memory>                      // for allocator_traits<>::val...
+#include <sstream>                     // for stringstream
+#include <string>                      // for string, operator==, bas...
+#include <utility>                     // for pair
+#include <vector>                      // for vector
 
 using namespace std;
 
@@ -212,7 +213,7 @@ void NefDecoder::DecodeUncompressed() {
     else
       slice.h = yPerSlice;
 
-    offY = MIN(height, offY + yPerSlice);
+    offY = min(height, offY + yPerSlice);
 
     if (mFile->isValid(slice.offset, slice.count)) // Only decode if size is valid
       slices.push_back(slice);
@@ -248,8 +249,11 @@ void NefDecoder::DecodeUncompressed() {
         readCoolpixMangledRaw(in, size, pos, width*bitPerPixel / 8);
       else if (hints.find(string("coolpixsplit")) != hints.end())
         readCoolpixSplitRaw(in, size, pos, width*bitPerPixel / 8);
-      else
-        readUncompressedRaw(in, size, pos, width*bitPerPixel / 8, bitPerPixel, bitorder ? BitOrder_Jpeg : BitOrder_Plain);
+      else {
+        UncompressedDecompressor u(in, mRaw, uncorrectedRawValues);
+        u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, bitPerPixel,
+                              bitorder ? BitOrder_Jpeg : BitOrder_Plain);
+      }
     } catch (RawDecoderException &e) {
       if (i>0)
         mRaw->setError(e.what());
@@ -284,7 +288,7 @@ void NefDecoder::readCoolpixMangledRaw(ByteStream &input, iPoint2D& size, iPoint
     ThrowRDE("readUncompressedRaw: Invalid x offset");
 
   uint32 y = offset.y;
-  h = MIN(h + (uint32)offset.y, (uint32)mRaw->dim.y);
+  h = min(h + (uint32)offset.y, (uint32)mRaw->dim.y);
   w *= cpp;
   BitPumpMSB32 in(input);
   for (; y < h; y++) {
@@ -316,7 +320,7 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream &input, iPoint2D& size, iPoint2D
     ThrowRDE("readCoolpixSplitRaw: Invalid x offset");
 
   uint32 y = offset.y;
-  h = MIN(h + (uint32)offset.y, (uint32)mRaw->dim.y);
+  h = min(h + (uint32)offset.y, (uint32)mRaw->dim.y);
   w *= cpp;
   h /= 2;
   BitPumpMSB in(input);
@@ -351,9 +355,10 @@ void NefDecoder::DecodeD100Uncompressed() {
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
-  ByteStream input(mFile, offset);
 
-  Decode12BitRawBEWithControl(input, width, height);
+  UncompressedDecompressor u(*mFile, offset, mRaw, uncorrectedRawValues);
+
+  u.decode12BitRawBEWithControl(width, height);
 }
 
 void NefDecoder::DecodeSNefUncompressed() {

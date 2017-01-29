@@ -23,19 +23,20 @@
 #include "common/Common.h"                // for ushort16, TrimSpaces, uint32
 #include "common/Point.h"                 // for iPoint2D, iRectangle2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/ByteStream.h"                // for ByteStream
-#include "metadata/BlackArea.h"           // for BlackArea
-#include "metadata/Camera.h"              // for Camera
-#include "metadata/CameraMetaData.h"      // for CameraMetaData
-#include "metadata/CameraSensorInfo.h"    // for CameraSensorInfo
-#include "metadata/ColorFilterArray.h"    // for ColorFilterArray
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include "tiff/TiffIFD.h"                 // for TiffIFD
-#include "tiff/TiffTag.h"                 // for ::MODEL, ::MAKE, ::FUJIOLDWB
-#include <cstdio>                         // for NULL
-#include <map>                            // for map, _Rb_tree_iterator
-#include <string>                         // for string, allocator
-#include <vector>                         // for vector
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/ByteStream.h"             // for ByteStream
+#include "metadata/BlackArea.h"        // for BlackArea
+#include "metadata/Camera.h"           // for Camera
+#include "metadata/CameraMetaData.h"   // for CameraMetaData
+#include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
+#include "metadata/ColorFilterArray.h" // for ColorFilterArray
+#include "tiff/TiffEntry.h"            // for TiffEntry
+#include "tiff/TiffIFD.h"              // for TiffIFD
+#include "tiff/TiffTag.h"              // for ::MODEL, ::MAKE, ::FUJIOLDWB
+#include <cstdio>                      // for NULL
+#include <map>                         // for map, _Rb_tree_iterator
+#include <string>                      // for string, allocator
+#include <vector>                      // for vector
 
 using namespace std;
 
@@ -99,19 +100,25 @@ RawImage RafDecoder::decodeRawInternal() {
   mRaw->createData();
   ByteStream input = offsets->getRootIfdData();
   input.setPosition(offsets->getInt());
+
+  UncompressedDecompressor u(input, mRaw, uncorrectedRawValues);
+
   iPoint2D pos(0, 0);
 
   if (counts->getInt()*8/(width*height) < 10) {
     ThrowRDE("Don't know how to decode compressed images");
   } else if (double_width) {
-    Decode16BitRawUnpacked(input, width*2, height);
+    u.decode16BitRawUnpacked(width * 2, height);
   } else if (input.isInNativeByteOrder() == (getHostEndianness() == big)) {
-    Decode16BitRawBEunpacked(input, width, height);
+    u.decode16BitRawBEunpacked(width, height);
   } else {
-    if (hints.find("jpeg32_bitorder") != hints.end())
-      readUncompressedRaw(input, mRaw->dim, pos, width*bps/8, bps, BitOrder_Jpeg32);
-    else
-      readUncompressedRaw(input, mRaw->dim, pos, width*bps/8, bps, BitOrder_Plain);
+    if (hints.find("jpeg32_bitorder") != hints.end()) {
+      u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
+                            BitOrder_Jpeg32);
+    } else {
+      u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
+                            BitOrder_Plain);
+    }
   }
 
   return mRaw;

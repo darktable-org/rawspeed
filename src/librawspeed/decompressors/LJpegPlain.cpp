@@ -126,11 +126,11 @@ inline void unroll_loop(const Lambda& f) {
 
 template<int N_COMP, int X_S_F, int Y_S_F>
 void LJpegPlain::decodeN_X_Y() {
-  _ASSERTE(frame.compInfo[0].superH == X_S_F);
-  _ASSERTE(frame.compInfo[0].superV == Y_S_F);
-  _ASSERTE(frame.compInfo[1].superH == 1);
-  _ASSERTE(frame.compInfo[1].superV == 1);
-  _ASSERTE(frame.cps == N_COMP);
+  assert(frame.compInfo[0].superH == X_S_F);
+  assert(frame.compInfo[0].superV == Y_S_F);
+  assert(frame.compInfo[1].superH == 1);
+  assert(frame.compInfo[1].superV == 1);
+  assert(frame.cps == N_COMP);
 
   HuffmanTable *ht[N_COMP] = {nullptr};
   for (int i = 0; i < N_COMP; ++i)

@@ -30,7 +30,7 @@ namespace RawSpeed {
 
 TiffParserException::TiffParserException(const string &_msg)
     : runtime_error(_msg) {
-  _RPT1(0, "TIFF Exception: %s\n", _msg.c_str());
+  writeLog(DEBUG_PRIO_EXTRA, "TIFF Exception: %s\n", _msg.c_str());
 }
 
 void ThrowTPE(const char* fmt, ...) {
@@ -39,7 +39,7 @@ void ThrowTPE(const char* fmt, ...) {
   static char buf[8192];
   vsnprintf(buf, 8192, fmt, val);
   va_end(val);
-  _RPT1(0, "EXCEPTION: %s\n", buf);
+  writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s\n", buf);
   throw TiffParserException(buf);
 }
 

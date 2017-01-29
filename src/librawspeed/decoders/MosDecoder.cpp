@@ -23,15 +23,16 @@
 #include "common/Common.h"                // for uint32, get4LE, ushort16
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/BitPumpMSB32.h"              // for BitPumpMSB32
-#include "io/ByteStream.h"                // for ByteStream
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include "tiff/TiffIFD.h"                 // for TiffIFD, getTiffEndianness
-#include "tiff/TiffTag.h"                 // for ::LEAFMETADATA, ::MAKE
-#include <cstdio>                         // for sscanf
-#include <cstring>                        // for memchr, NULL
-#include <string>                         // for string, allocator, operator+
-#include <vector>                         // for vector
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/BitPumpMSB32.h" // for BitPumpMSB32
+#include "io/ByteStream.h"   // for ByteStream
+#include "tiff/TiffEntry.h"  // for TiffEntry
+#include "tiff/TiffIFD.h"    // for TiffIFD, getTiffEndianness
+#include "tiff/TiffTag.h"    // for ::LEAFMETADATA, ::MAKE
+#include <cstdio>            // for sscanf
+#include <cstring>           // for memchr, NULL
+#include <string>            // for string, allocator, operator+
+#include <vector>            // for vector
 
 using namespace std;
 
@@ -140,13 +141,14 @@ RawImage MosDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  ByteStream input(mFile, off);
+  UncompressedDecompressor u(*mFile, off, mRaw, uncorrectedRawValues);
+
   int compression = raw->getEntry(COMPRESSION)->getInt();
   if (1 == compression) {
     if (getTiffEndianness(mFile) == big)
-      Decode16BitRawBEunpacked(input, width, height);
+      u.decode16BitRawBEunpacked(width, height);
     else
-      Decode16BitRawUnpacked(input, width, height);
+      u.decode16BitRawUnpacked(width, height);
   }
   else if (99 == compression || 7 == compression) {
     ThrowRDE("MOS Decoder: Leaf LJpeg not yet supported");

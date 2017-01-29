@@ -225,8 +225,8 @@ protected:
    static RawImage create(const iPoint2D &dim,
                           RawImageType type = TYPE_USHORT16,
                           uint32 componentsPerPixel = 1);
-   RawImageData* operator->() const { return p_; };
-   RawImageData& operator*() const { return *p_; };
+   RawImageData* operator->() const { return p_; }
+   RawImageData& operator*() const { return *p_; }
    RawImage(RawImageData* p);  // p must not be NULL
   ~RawImage();
    RawImage(const RawImage& p);

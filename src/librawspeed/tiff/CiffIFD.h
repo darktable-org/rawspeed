@@ -48,7 +48,8 @@ public:
   CiffEntry *getEntryRecursiveWhere(CiffTag tag, const std::string &isValue);
   std::vector<CiffIFD *> getIFDsWithTagWhere(CiffTag tag, const std::string &isValue);
   std::vector<CiffIFD*> getIFDsWithTagWhere(CiffTag tag, uint32 isValue);
-  FileMap* getFileMap() {return mFile;};
+  FileMap* getFileMap() { return mFile; }
+
 protected:
   FileMap *mFile;
   uint32 depth;

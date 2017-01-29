@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -44,11 +44,12 @@ protected:
   RawImage decodeNewFormat();
   void sRawInterpolate();
   int getHue();
-  void interpolate_420(int w, int h, int start_h , int end_h);
-  void interpolate_422(int w, int h, int start_h , int end_h);
-  void interpolate_422_old(int w, int h, int start_h , int end_h);
-  void interpolate_420_new(int w, int h, int start_h , int end_h);
-  void interpolate_422_new(int w, int h, int start_h , int end_h);
+
+  void interpolate_422_v0(int w, int h, int start_h, int end_h);
+  void interpolate_422_v1(int w, int h, int start_h, int end_h);
+  void interpolate_420_v1(int w, int h, int start_h, int end_h);
+  void interpolate_422_v2(int w, int h, int start_h, int end_h);
+  void interpolate_420_v2(int w, int h, int start_h, int end_h);
   TiffIFD *mRootIFD;
 };
 

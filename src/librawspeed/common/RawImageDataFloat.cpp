@@ -23,8 +23,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include "common/RawImage.h"              // for RawImageDataFloat, ::TYPE_...
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea
+#include <algorithm>                      // for min
 #include <cstddef>                        // for NULL
 #include <vector>                         // for vector
+
+using namespace std;
 
 namespace RawSpeed {
 
@@ -108,8 +111,8 @@ RawImageDataFloat::RawImageDataFloat() {
       for (int row = skipBorder*cpp;row < (dim.y - skipBorder);row++) {
         auto *pixel = (float *)getData(skipBorder, row);
         for (int col = skipBorder ; col < gw ; col++) {
-          b = MIN(*pixel, b);
-          m = MAX(*pixel, m);
+          b = min(*pixel, b);
+          m = max(*pixel, m);
           pixel++;
         }
       }

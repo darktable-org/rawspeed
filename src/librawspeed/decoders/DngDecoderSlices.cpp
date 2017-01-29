@@ -21,7 +21,10 @@
 #include "decoders/DngDecoderSlices.h"
 #include "common/Common.h"
 #include "common/Point.h"
+#include "decompressors/UncompressedDecompressor.h"
 #include "io/IOException.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
 #include "tiff/TiffTag.h"
 #include <algorithm>
 #include <array>
@@ -380,7 +383,38 @@ void DngDecoderSlices::decodeDeflate(const DngSliceElement &e,
 #endif
 
 void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
-  if (compression == 7) {
+  if (compression == 1) {
+    while (!t->slices.empty()) {
+      DngSliceElement e = t->slices.front();
+      t->slices.pop();
+
+      UncompressedDecompressor decompressor(*mFile, e.byteOffset, e.byteCount,
+                                            mRaw,
+                                            true /* does not matter here */);
+
+      size_t thisTileLength = e.offY + e.height > (uint32)mRaw->dim.y
+                                  ? mRaw->dim.y - e.offY
+                                  : e.height;
+
+      iPoint2D size(mRaw->dim.x, thisTileLength);
+      iPoint2D pos(0, e.offY);
+
+      bool big_endian = (getTiffEndianness(mFile) == big);
+      // DNG spec says that if not 8 or 16 bit/sample, always use big endian
+      if (mBps != 8 && mBps != 16)
+        big_endian = true;
+
+      try {
+        decompressor.readUncompressedRaw(
+            size, pos, mRaw->getCpp() * mRaw->dim.x * mBps / 8, mBps,
+            big_endian ? BitOrder_Jpeg : BitOrder_Plain);
+      } catch (RawDecoderException& err) {
+        mRaw->setError(err.what());
+      } catch (IOException& err) {
+        mRaw->setError(err.what());
+      }
+    }
+  } else if (compression == 7) {
     while (!t->slices.empty()) {
       DngSliceElement e = t->slices.front();
       t->slices.pop();
@@ -432,7 +466,8 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
         jerr.error_exit = my_error_throw;
         JPEG_MEMSRC(&dinfo, (unsigned char*)mFile->getData(e.byteOffset, e.byteCount), e.byteCount);
 
-        if (JPEG_HEADER_OK != jpeg_read_header(&dinfo, true))
+        if (JPEG_HEADER_OK !=
+            jpeg_read_header(&dinfo, static_cast<boolean>(true)))
           ThrowRDE("DngDecoderSlices: Unable to read JPEG header");
 
         jpeg_start_decompress(&dinfo);

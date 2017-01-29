@@ -23,16 +23,17 @@
 #include "common/Common.h"                // for uchar8, uint32, get2BE
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/ByteStream.h"                // for ByteStream
-#include "io/IOException.h"               // for IOException
-#include "parsers/TiffParser.h"           // for parseTiff
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD, Tiff...
-#include "tiff/TiffTag.h"                 // for ::MAKE, ::MODEL
-#include <cmath>                          // for NAN
-#include <cstdio>                         // for NULL
-#include <map>                            // for map, _Rb_tree_iterator
-#include <string>                         // for string
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/ByteStream.h"      // for ByteStream
+#include "io/IOException.h"     // for IOException
+#include "parsers/TiffParser.h" // for parseTiff
+#include "tiff/TiffEntry.h"     // for TiffEntry
+#include "tiff/TiffIFD.h"       // for TiffIFD, TiffRootIFD, Tiff...
+#include "tiff/TiffTag.h"       // for ::MAKE, ::MODEL
+#include <cmath>                // for NAN
+#include <cstdio>               // for NULL
+#include <map>                  // for map, _Rb_tree_iterator
+#include <string>               // for string
 
 using namespace std;
 
@@ -93,7 +94,7 @@ void MrwDecoder::parseHeader() {
       tiff_meta = parseTiff(mFile->getSubView(currpos+8)).release();
       break;
     }
-    currpos += MAX(len+8,1); // MAX(,1) to make sure we make progress
+    currpos += max(len + 8, 1u); // max(,1) to make sure we make progress
   }
 }
 
@@ -101,13 +102,13 @@ RawImage MrwDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(raw_width, raw_height);
   mRaw->createData();
 
-  ByteStream input(mFile, data_offset);
+  UncompressedDecompressor u(*mFile, data_offset, mRaw, uncorrectedRawValues);
 
   try {
     if (packed)
-      Decode12BitRawBE(input, raw_width, raw_height);
+      u.decode12BitRawBE(raw_width, raw_height);
     else
-      Decode12BitRawBEunpacked(input, raw_width, raw_height);
+      u.decode12BitRawBEunpacked(raw_width, raw_height);
   } catch (IOException &e) {
     mRaw->setError(e.what());
     // Let's ignore it, it may have delivered somewhat useful data.

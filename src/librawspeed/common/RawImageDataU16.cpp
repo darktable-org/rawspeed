@@ -23,6 +23,7 @@
 #include "common/RawImage.h"              // for RawImageDataU16, TableLookUp
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea
+#include <algorithm>                      // for min
 #include <cstdlib>                        // for free, malloc
 #include <cstring>                        // for memset
 #include <vector>                         // for vector
@@ -31,6 +32,8 @@
 #include <emmintrin.h> // for __m128i, _mm_load_si128
 #include <xmmintrin.h> // for _MM_HINT_T0, _mm_prefetch
 #endif
+
+using namespace std;
 
 namespace RawSpeed {
 
@@ -126,8 +129,8 @@ void RawImageDataU16::scaleBlackWhite() {
     for (int row = skipBorder; row < (dim.y - skipBorder);row++) {
       auto *pixel = (ushort16 *)getData(skipBorder, row);
       for (int col = skipBorder ; col < gw ; col++) {
-        b = MIN(*pixel, b);
-        m = MAX(*pixel, m);
+        b = min((int)*pixel, b);
+        m = max((int)*pixel, m);
         pixel++;
       }
     }

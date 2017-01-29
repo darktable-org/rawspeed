@@ -23,19 +23,20 @@
 #include "common/Common.h"                // for uint32, ushort16, uchar8
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/BitPumpMSB.h"                // for BitPumpMSB
-#include "io/BitPumpPlain.h"              // for BitPumpPlain, BitStream<>:...
-#include "io/ByteStream.h"                // for ByteStream
-#include "io/IOException.h"               // for IOException
-#include "metadata/ColorFilterArray.h"    // for ::CFA_BLUE, ::CFA_GREEN
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD
-#include "tiff/TiffTag.h"                 // for ::MAKE, ::MODEL, ::DNGPRIV...
-#include <cstdio>                         // for NULL
-#include <exception>                      // for exception
-#include <map>                            // for map, _Rb_tree_iterator
-#include <string>                         // for string, operator==, basic_...
-#include <vector>                         // for vector
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/BitPumpMSB.h"             // for BitPumpMSB
+#include "io/BitPumpPlain.h"           // for BitPumpPlain, BitStream<>:...
+#include "io/ByteStream.h"             // for ByteStream
+#include "io/IOException.h"            // for IOException
+#include "metadata/ColorFilterArray.h" // for ::CFA_BLUE, ::CFA_GREEN
+#include "tiff/TiffEntry.h"            // for TiffEntry
+#include "tiff/TiffIFD.h"              // for TiffIFD, TiffRootIFD
+#include "tiff/TiffTag.h"              // for ::MAKE, ::MODEL, ::DNGPRIV...
+#include <cstdio>                      // for NULL
+#include <exception>                   // for exception
+#include <map>                         // for map, _Rb_tree_iterator
+#include <string>                      // for string, operator==, basic_...
+#include <vector>                      // for vector
 
 using namespace std;
 
@@ -118,8 +119,9 @@ RawImage ArwDecoder::decodeRawInternal() {
       // And now decode as a normal 16bit raw
       mRaw->dim = iPoint2D(width, height);
       mRaw->createData();
-      ByteStream input(mFile, off, len);
-      Decode16BitRawBEunpacked(input, width, height);
+
+      UncompressedDecompressor u(*mFile, off, len, mRaw, uncorrectedRawValues);
+      u.decode16BitRawBEunpacked(width, height);
 
       return mRaw;
     }
@@ -234,12 +236,13 @@ void ArwDecoder::DecodeUncompressed(TiffIFD* raw) {
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
-  ByteStream input(mFile, off, c2);
+
+  UncompressedDecompressor u(*mFile, off, c2, mRaw, uncorrectedRawValues);
 
   if (hints.find("sr2_format") != hints.end())
-    Decode14BitRawBEunpacked(input, width, height);
+    u.decode14BitRawBEunpacked(width, height);
   else
-    Decode16BitRawUnpacked(input, width, height);
+    u.decode16BitRawUnpacked(width, height);
 }
 
 void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
@@ -261,7 +264,7 @@ void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
       if (len && (diff & (1 << (len - 1))) == 0)
         diff -= (1 << len) - 1;
       sum += diff;
-      _ASSERTE(!(sum >> 12));
+      assert(!(sum >> 12));
       if (y < h) dest[x+y*pitch] = sum;
     }
   }
@@ -356,7 +359,7 @@ void ArwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
           mRaw->metadata.wbCoeffs[2] = (float) tmp[3];
           break;
         }
-        currpos += MAX(len+8,1); // MAX(,1) to make sure we make progress
+        currpos += max(len + 8, 1u); // max(,1) to make sure we make progress
       }
     }
   } else { // Everything else but the A100

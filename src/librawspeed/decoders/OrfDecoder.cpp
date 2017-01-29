@@ -23,21 +23,22 @@
 #include "common/Common.h"                // for other_abs, ushort16, uint32
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/BitPumpMSB.h"                // for BitPumpMSB
-#include "io/ByteStream.h"                // for ByteStream
-#include "io/IOException.h"               // for IOException
-#include "metadata/ColorFilterArray.h"    // for ColorFilterArray, ::CFA_GREEN
-#include "parsers/TiffParserException.h"  // for TiffParserException
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD
-#include "tiff/TiffTag.h"                 // for ::MODEL, TiffTag, ::MAKE
-#include <algorithm>                      // for min
-#include <cstdio>                         // for NULL
-#include <cstring>                        // for memset
-#include <map>                            // for map, _Rb_tree_iterator
-#include <memory>                         // for unique_ptr
-#include <string>                         // for string
-#include <vector>                         // for vector
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/BitPumpMSB.h"               // for BitPumpMSB
+#include "io/ByteStream.h"               // for ByteStream
+#include "io/IOException.h"              // for IOException
+#include "metadata/ColorFilterArray.h"   // for ColorFilterArray, ::CFA_GREEN
+#include "parsers/TiffParserException.h" // for TiffParserException
+#include "tiff/TiffEntry.h"              // for TiffEntry
+#include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
+#include "tiff/TiffTag.h"                // for ::MODEL, TiffTag, ::MAKE
+#include <algorithm>                     // for min
+#include <cstdio>                        // for NULL
+#include <cstring>                       // for memset
+#include <map>                           // for map, _Rb_tree_iterator
+#include <memory>                        // for unique_ptr
+#include <string>                        // for string
+#include <vector>                        // for vector
 
 using namespace std;
 
@@ -105,18 +106,19 @@ RawImage OrfDecoder::decodeRawInternal() {
 }
 
 void OrfDecoder::decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 size) {
+  UncompressedDecompressor u(s, mRaw, uncorrectedRawValues);
   if ((hints.find(string("packed_with_control")) != hints.end()))
-    Decode12BitRawWithControl(s, w, h);
+    u.decode12BitRawWithControl(w, h);
   else if ((hints.find(string("jpeg32_bitorder")) != hints.end())) {
     iPoint2D dimensions(w, h), pos(0, 0);
-    readUncompressedRaw(s, dimensions, pos, w * 12 / 8, 12, BitOrder_Jpeg32);
+    u.readUncompressedRaw(dimensions, pos, w * 12 / 8, 12, BitOrder_Jpeg32);
   } else if (size >= w*h*2) { // We're in an unpacked raw
     if (s.isInNativeByteOrder())
-      Decode12BitRawUnpacked(s, w, h);
+      u.decode12BitRawUnpacked(w, h);
     else
-      Decode12BitRawBEunpackedLeftAligned(s, w, h);
+      u.decode12BitRawBEunpackedLeftAligned(w, h);
   } else if (size >= w*h*3/2) { // We're in one of those weird interlaced packed raws
-      Decode12BitRawBEInterlaced(s, w, h);
+    u.decode12BitRawBEInterlaced(w, h);
   } else {
     ThrowRDE("ORF Decoder: Don't know how to handle the encoding in this file\n");
   }

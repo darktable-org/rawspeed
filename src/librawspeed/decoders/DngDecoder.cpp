@@ -19,25 +19,24 @@
 */
 
 #include "decoders/DngDecoder.h"
-#include "common/Common.h"                // for uint32, uchar8, ushort16
+#include "common/Common.h"                // for uint32, uchar8, writeLog
 #include "common/DngOpcodes.h"            // for DngOpcodes
 #include "common/Point.h"                 // for iPoint2D, iRectangle2D
 #include "decoders/DngDecoderSlices.h"    // for DngDecoderSlices, DngSlice...
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
-#include "io/ByteStream.h"                // for ByteStream
-#include "io/IOException.h"               // for IOException
 #include "metadata/BlackArea.h"           // for BlackArea
 #include "metadata/Camera.h"              // for Camera
 #include "metadata/CameraMetaData.h"      // for CameraMetaData
-#include "metadata/ColorFilterArray.h"    // for ColorFilterArray, ::CFA_BLUE
+#include "metadata/ColorFilterArray.h"    // for ColorFilterArray, CFAColor
 #include "parsers/TiffParserException.h"  // for TiffParserException
-#include "tiff/TiffEntry.h"               // for TiffEntry, ::TIFF_LONG
-#include "tiff/TiffIFD.h"                 // for TiffIFD, getTiffEndianness
-#include "tiff/TiffTag.h"                 // for ::MODEL, ::MAKE, ::UNIQUEC...
-#include <cstdio>                         // for NULL, printf
+#include "tiff/TiffEntry.h"               // for TiffEntry, TiffDataType::T...
+#include "tiff/TiffIFD.h"                 // for TiffIFD
+#include "tiff/TiffTag.h"                 // for TiffTag::MODEL, TiffTag::MAKE
+#include <cstdio>                         // for printf
 #include <cstring>                        // for memset
+#include <map>                            // for map
 #include <string>                         // for allocator, string, operator+
-#include <vector>                         // for vector, vector<>::iterator
+#include <vector>                         // for vector
 
 using namespace std;
 
@@ -64,48 +63,197 @@ DngDecoder::~DngDecoder() {
   mRootIFD = nullptr;
 }
 
+void DngDecoder::dropUnsuportedChunks(vector<TiffIFD*>& data) {
+  // Erase the ones not with JPEG compression
+  for (auto i = data.begin(); i != data.end();) {
+    int comp = (*i)->getEntry(COMPRESSION)->getShort();
+    bool isSubsampled = false;
+    try {
+      isSubsampled = (*i)->getEntry(NEWSUBFILETYPE)->getInt() &
+                     1; // bit 0 is on if image is subsampled
+    } catch (TiffParserException&) {
+    }
+    if (!(comp == 7 ||
+#ifdef HAVE_ZLIB
+          comp == 8 ||
+#endif
+          comp == 1 || comp == 0x884c) ||
+        isSubsampled) { // Erase if subsampled, or not deflated, JPEG or
+                        // uncompressed
+      i = data.erase(i);
+    } else {
+      ++i;
+    }
+  }
+}
+
+void DngDecoder::parseCFA(TiffIFD* raw) {
+
+  // Check if layout is OK, if present
+  if (raw->hasEntry(CFALAYOUT))
+    if (raw->getEntry(CFALAYOUT)->getShort() != 1)
+      ThrowRDE("DNG Decoder: Unsupported CFA Layout.");
+
+  TiffEntry* cfadim = raw->getEntry(CFAREPEATPATTERNDIM);
+  if (cfadim->count != 2)
+    ThrowRDE("DNG Decoder: Couldn't read CFA pattern dimension");
+
+  // Does NOT contain dimensions as some documents state
+  TiffEntry* cPat = raw->getEntry(CFAPATTERN);
+
+  /*
+  if (raw->hasEntry(CFAPLANECOLOR)) {
+    // Map from the order in the image, to the position in the CFA
+    TiffEntry* e = raw->getEntry(CFAPLANECOLOR);
+
+    const unsigned char* cPlaneOrder = e->getData();
+    printf("Planecolor: ");
+    for (uint32 i = 0; i < e->count; i++) {
+      printf("%u,",cPlaneOrder[i]);
+    }
+    printf("\n");
+  }
+  */
+
+  iPoint2D cfaSize(cfadim->getInt(1), cfadim->getInt(0));
+  if (cfaSize.area() != cPat->count) {
+    ThrowRDE("DNG Decoder: CFA pattern dimension and pattern count does not "
+             "match: %d.",
+             cPat->count);
+  }
+
+  mRaw->cfa.setSize(cfaSize);
+
+  const map<uint32, CFAColor> int2enum = {
+      {0, CFA_RED},     {1, CFA_GREEN},  {2, CFA_BLUE},  {3, CFA_CYAN},
+      {4, CFA_MAGENTA}, {5, CFA_YELLOW}, {6, CFA_WHITE},
+  };
+
+  for (int y = 0; y < cfaSize.y; y++) {
+    for (int x = 0; x < cfaSize.x; x++) {
+      uint32 c1 = cPat->getByte(x + y * cfaSize.x);
+      CFAColor c2 = CFA_UNKNOWN;
+
+      try {
+        c2 = int2enum.at(c1);
+      } catch (std::out_of_range&) {
+        ThrowRDE("DNG Decoder: Unsupported CFA Color: %u", c1);
+      }
+
+      mRaw->cfa.setColorAt(iPoint2D(x, y), c2);
+    }
+  }
+}
+
+void DngDecoder::decodeData(TiffIFD* raw) {
+  mRaw->createData();
+
+  if (compression == 8 && sample_format != 3) {
+    ThrowRDE("DNG Decoder: Only float format is supported for "
+             "deflate-compressed data.");
+  } else if ((compression == 7 || compression == 0x884c) &&
+             sample_format != 1) {
+    ThrowRDE("DNG Decoder: Only 16 bit unsigned data supported for "
+             "JPEG-compressed data.");
+  }
+
+  DngDecoderSlices slices(mFile, mRaw, compression);
+  if (raw->hasEntry(PREDICTOR)) {
+    uint32 predictor = raw->getEntry(PREDICTOR)->getInt();
+    slices.mPredictor = predictor;
+  }
+  slices.mBps = raw->getEntry(BITSPERSAMPLE)->getInt();
+  if (raw->hasEntry(TILEOFFSETS)) {
+    uint32 tilew = raw->getEntry(TILEWIDTH)->getInt();
+    uint32 tileh = raw->getEntry(TILELENGTH)->getInt();
+    if (!tilew || !tileh)
+      ThrowRDE("DNG Decoder: Invalid tile size");
+
+    uint32 tilesX = (mRaw->dim.x + tilew - 1) / tilew;
+    uint32 tilesY = (mRaw->dim.y + tileh - 1) / tileh;
+    uint32 nTiles = tilesX * tilesY;
+
+    TiffEntry* offsets = raw->getEntry(TILEOFFSETS);
+    TiffEntry* counts = raw->getEntry(TILEBYTECOUNTS);
+    if (offsets->count != counts->count || offsets->count != nTiles) {
+      ThrowRDE("DNG Decoder: Tile count mismatch: offsets:%u count:%u, "
+               "calculated:%u",
+               offsets->count, counts->count, nTiles);
+    }
+
+    slices.mFixLjpeg = mFixLjpeg;
+
+    for (uint32 y = 0; y < tilesY; y++) {
+      for (uint32 x = 0; x < tilesX; x++) {
+        DngSliceElement e(offsets->getInt(x + y * tilesX),
+                          counts->getInt(x + y * tilesX), tilew * x, tileh * y,
+                          tilew, tileh);
+        e.mUseBigtable = tilew * tileh > 1024 * 1024;
+        slices.addSlice(e);
+      }
+    }
+  } else { // Strips
+    TiffEntry* offsets = raw->getEntry(STRIPOFFSETS);
+    TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
+
+    uint32 yPerSlice = raw->getEntry(ROWSPERSTRIP)->getInt();
+
+    if (counts->count != offsets->count) {
+      ThrowRDE("DNG Decoder: Byte count number does not match strip size: "
+               "count:%u, stips:%u ",
+               counts->count, offsets->count);
+    }
+
+    if (yPerSlice == 0 || yPerSlice > (uint32)mRaw->dim.y)
+      ThrowRDE("DNG Decoder: Invalid y per slice");
+
+    uint32 offY = 0;
+    for (uint32 s = 0; s < counts->count; s++) {
+      DngSliceElement e(offsets->getInt(s), counts->getInt(s), 0, offY,
+                        mRaw->dim.x, yPerSlice);
+      e.mUseBigtable = yPerSlice * mRaw->dim.y > 1024 * 1024;
+      offY += yPerSlice;
+
+      if (mFile->isValid(e.byteOffset,
+                         e.byteCount)) // Only decode if size is valid
+        slices.addSlice(e);
+    }
+  }
+  uint32 nSlices = slices.size();
+  if (!nSlices)
+    ThrowRDE("DNG Decoder: No valid slices found.");
+
+  slices.startDecoding();
+
+  if (mRaw->errors.size() >= nSlices) {
+    ThrowRDE(
+        "DNG Decoding: Too many errors encountered. Giving up.\nFirst Error:%s",
+        mRaw->errors[0]);
+  }
+}
+
 RawImage DngDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(COMPRESSION);
 
   if (data.empty())
     ThrowRDE("DNG Decoder: No image data found");
 
-  // Erase the ones not with JPEG compression
-  for (auto i = data.begin(); i != data.end();) {
-    int compression = (*i)->getEntry(COMPRESSION)->getShort();
-    bool isSubsampled = false;
-    try {
-      isSubsampled = (*i)->getEntry(NEWSUBFILETYPE)->getInt() & 1; // bit 0 is on if image is subsampled
-    } catch (TiffParserException &) {
-    }
-    if (!(compression == 7 ||
-#ifdef HAVE_ZLIB
-          compression == 8 ||
-#endif
-          compression == 1 ||
-          compression == 0x884c) ||
-        isSubsampled) {  // Erase if subsampled, or not deflated, JPEG or uncompressed
-      i = data.erase(i);
-    } else {
-      ++i;
-    }
-  }
+  dropUnsuportedChunks(data);
 
   if (data.empty())
     ThrowRDE("DNG Decoder: No RAW chunks found");
 
   if (data.size() > 1) {
-    _RPT0(0, "Multiple RAW chunks found - using first only!");
+    writeLog(DEBUG_PRIO_EXTRA, "Multiple RAW chunks found - using first only!");
   }
 
   TiffIFD* raw = data[0];
-  uint32 sample_format = 1;
-  uint32 bps = raw->getEntry(BITSPERSAMPLE)->getInt();
+  bps = raw->getEntry(BITSPERSAMPLE)->getInt();
 
   if (raw->hasEntry(SAMPLEFORMAT))
     sample_format = raw->getEntry(SAMPLEFORMAT)->getInt();
 
-  const int compression = raw->getEntry(COMPRESSION)->getShort();
+  compression = raw->getEntry(COMPRESSION)->getShort();
 
   if (sample_format == 1)
     mRaw = RawImage::create(TYPE_USHORT16);
@@ -117,9 +265,10 @@ RawImage DngDecoder::decodeRawInternal() {
   mRaw->isCFA = (raw->getEntry(PHOTOMETRICINTERPRETATION)->getShort() == 32803);
 
   if (mRaw->isCFA)
-    _RPT0(0, "This is a CFA image\n");
-  else
-    _RPT0(0, "This is NOT a CFA image\n");
+    writeLog(DEBUG_PRIO_EXTRA, "This is a CFA image\n");
+  else {
+    writeLog(DEBUG_PRIO_EXTRA, "This is NOT a CFA image\n");
+  }
 
   if (sample_format == 1 && bps > 16)
     ThrowRDE("DNG Decoder: Integer precision larger than 16 bits currently not supported.");
@@ -136,200 +285,22 @@ RawImage DngDecoder::decodeRawInternal() {
 
   try {
 
-    if (mRaw->isCFA) {
+    if (mRaw->isCFA)
+      parseCFA(raw);
 
-      // Check if layout is OK, if present
-      if (raw->hasEntry(CFALAYOUT))
-        if (raw->getEntry(CFALAYOUT)->getShort() != 1)
-          ThrowRDE("DNG Decoder: Unsupported CFA Layout.");
+    uint32 cpp = raw->getEntry(SAMPLESPERPIXEL)->getInt();
 
-      TiffEntry *cfadim = raw->getEntry(CFAREPEATPATTERNDIM);
-      if (cfadim->count != 2)
-        ThrowRDE("DNG Decoder: Couldn't read CFA pattern dimension");
-      TiffEntry* cPat = raw->getEntry(CFAPATTERN);                 // Does NOT contain dimensions as some documents state
-      /*
-            if (raw->hasEntry(CFAPLANECOLOR)) {
-              TiffEntry* e = raw->getEntry(CFAPLANECOLOR);
-              const unsigned char* cPlaneOrder = e->getData();       // Map from the order in the image, to the position in the CFA
-              printf("Planecolor: ");
-              for (uint32 i = 0; i < e->count; i++) {
-                printf("%u,",cPlaneOrder[i]);
-              }
-              printf("\n");
-            }
-      */
-      iPoint2D cfaSize(cfadim->getInt(1), cfadim->getInt(0));
-      if (cfaSize.area() != cPat->count)
-        ThrowRDE("DNG Decoder: CFA pattern dimension and pattern count does not match: %d.", cPat->count);
-      mRaw->cfa.setSize(cfaSize);
+    if (cpp > 4)
+      ThrowRDE("DNG Decoder: More than 4 samples per pixel is not supported.");
 
-      for (int y = 0; y < cfaSize.y; y++) {
-        for (int x = 0; x < cfaSize.x; x++) {
-          uint32 c1 = cPat->getByte(x+y*cfaSize.x);
-          CFAColor c2;
-          switch (c1) {
-            case 0:
-              c2 = CFA_RED; break;
-            case 1:
-              c2 = CFA_GREEN; break;
-            case 2:
-              c2 = CFA_BLUE; break;
-            case 3:
-              c2 = CFA_CYAN; break;
-            case 4:
-              c2 = CFA_MAGENTA; break;
-            case 5:
-              c2 = CFA_YELLOW; break;
-            case 6:
-              c2 = CFA_WHITE; break;
-            default:
-              c2 = CFA_UNKNOWN;
-              ThrowRDE("DNG Decoder: Unsupported CFA Color.");
-          }
-          mRaw->cfa.setColorAt(iPoint2D(x, y), c2);
-        }
-      }
-    }
-
+    mRaw->setCpp(cpp);
 
     // Now load the image
-    if (compression == 1) {  // Uncompressed.
-      try {
-        uint32 cpp = raw->getEntry(SAMPLESPERPIXEL)->getInt();
-        if (cpp > 4)
-          ThrowRDE("DNG Decoder: More than 4 samples per pixel is not supported.");
-        mRaw->setCpp(cpp);
-
-        TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
-        TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
-        uint32 yPerSlice = raw->getEntry(ROWSPERSTRIP)->getInt();
-        uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
-        uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
-
-        if (counts->count != offsets->count) {
-          ThrowRDE("DNG Decoder: Byte count number does not match strip size: count:%u, strips:%u ", counts->count, offsets->count);
-        }
-
-        uint32 offY = 0;
-        vector<DngStrip> slices;
-        for (uint32 s = 0; s < offsets->count; s++) {
-          DngStrip slice;
-          slice.offset = offsets->getInt(s);
-          slice.count = counts->getInt(s);
-          slice.offsetY = offY;
-          if (offY + yPerSlice > height)
-            slice.h = height - offY;
-          else
-            slice.h = yPerSlice;
-
-          offY += yPerSlice;
-
-          if (mFile->isValid(slice.offset, slice.count)) // Only decode if size is valid
-            slices.push_back(slice);
-        }
-
-        mRaw->createData();
-
-        for (uint32 i = 0; i < slices.size(); i++) {
-          DngStrip slice = slices[i];
-          ByteStream in(mFile, slice.offset);
-          iPoint2D size(width, slice.h);
-          iPoint2D pos(0, slice.offsetY);
-
-          bool big_endian = (getTiffEndianness(mFile) == big);
-          // DNG spec says that if not 8 or 16 bit/sample, always use big endian
-          if (bps != 8 && bps != 16)
-            big_endian = true;
-          try {
-            readUncompressedRaw(in, size, pos, mRaw->getCpp()* width * bps / 8, bps, big_endian ? BitOrder_Jpeg : BitOrder_Plain);
-          } catch(IOException &ex) {
-            if (i > 0)
-              mRaw->setError(ex.what());
-            else
-              ThrowRDE("DNG decoder: IO error occurred in first slice, unable to decode more. Error is: %s", ex.what());
-          }
-        }
-
-      } catch (TiffParserException &) {
-        ThrowRDE("DNG Decoder: Unsupported format, uncompressed with no strips.");
-      }
-    } else if (compression == 7 || compression == 8 || compression == 0x884c) {
-      try {
-        // Let's try loading it as tiles instead
-
-        mRaw->createData();
-
-        if (compression == 8 && sample_format != 3)
-           ThrowRDE("DNG Decoder: Only float format is supported for deflate-compressed data.");
-        else if (compression != 8 && sample_format != 1)
-           ThrowRDE("DNG Decoder: Only 16 bit unsigned data supported for JPEG-compressed data.");
-
-        DngDecoderSlices slices(mFile, mRaw, compression);
-        if (raw->hasEntry(PREDICTOR)) {
-            uint32 predictor = raw->getEntry(PREDICTOR)->getInt();
-            slices.mPredictor = predictor;
-        }
-        slices.mBps = raw->getEntry(BITSPERSAMPLE)->getInt();
-        if (raw->hasEntry(TILEOFFSETS)) {
-          uint32 tilew = raw->getEntry(TILEWIDTH)->getInt();
-          uint32 tileh = raw->getEntry(TILELENGTH)->getInt();
-          if (!tilew || !tileh)
-            ThrowRDE("DNG Decoder: Invalid tile size");
-
-          uint32 tilesX = (mRaw->dim.x + tilew - 1) / tilew;
-          uint32 tilesY = (mRaw->dim.y + tileh - 1) / tileh;
-          uint32 nTiles = tilesX * tilesY;
-
-          TiffEntry *offsets = raw->getEntry(TILEOFFSETS);
-          TiffEntry *counts = raw->getEntry(TILEBYTECOUNTS);
-          if (offsets->count != counts->count || offsets->count != nTiles)
-            ThrowRDE("DNG Decoder: Tile count mismatch: offsets:%u count:%u, calculated:%u", offsets->count, counts->count, nTiles);
-
-          slices.mFixLjpeg = mFixLjpeg;
-
-          for (uint32 y = 0; y < tilesY; y++) {
-            for (uint32 x = 0; x < tilesX; x++) {
-              DngSliceElement e(offsets->getInt(x+y*tilesX), counts->getInt(x+y*tilesX), tilew*x, tileh*y, tilew, tileh);
-              e.mUseBigtable = tilew * tileh > 1024 * 1024;
-              slices.addSlice(e);
-            }
-          }
-        } else {  // Strips
-          TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
-          TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
-
-          uint32 yPerSlice = raw->getEntry(ROWSPERSTRIP)->getInt();
-
-          if (counts->count != offsets->count) {
-            ThrowRDE("DNG Decoder: Byte count number does not match strip size: count:%u, stips:%u ", counts->count, offsets->count);
-          }
-
-          if (yPerSlice == 0 || yPerSlice > (uint32)mRaw->dim.y)
-            ThrowRDE("DNG Decoder: Invalid y per slice");
-
-          uint32 offY = 0;
-          for (uint32 s = 0; s < counts->count; s++) {
-            DngSliceElement e(offsets->getInt(s), counts->getInt(s), 0, offY, mRaw->dim.x, yPerSlice);
-            e.mUseBigtable = yPerSlice * mRaw->dim.y > 1024 * 1024;
-            offY += yPerSlice;
-
-            if (mFile->isValid(e.byteOffset, e.byteCount)) // Only decode if size is valid
-              slices.addSlice(e);
-          }
-        }
-        uint32 nSlices = slices.size();
-        if (!nSlices)
-          ThrowRDE("DNG Decoder: No valid slices found.");
-
-        slices.startDecoding();
-
-        if (mRaw->errors.size() >= nSlices)
-          ThrowRDE("DNG Decoding: Too many errors encountered. Giving up.\nFirst Error:%s", mRaw->errors[0]);
-      } catch (TiffParserException &e) {
-        ThrowRDE("DNG Decoder: Unsupported format, tried strips and tiles:\n%s", e.what());
-      }
-    } else {
-      ThrowRDE("DNG Decoder: Unknown compression: %u", compression);
+    try {
+      decodeData(raw);
+    } catch (TiffParserException& e) {
+      ThrowRDE("DNG Decoder: Unsupported format, tried strips and tiles:\n%s",
+               e.what());
     }
   } catch (TiffParserException &e) {
     ThrowRDE("DNG Decoder: Image could not be read:\n%s", e.what());

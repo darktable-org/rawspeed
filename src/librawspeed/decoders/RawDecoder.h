@@ -48,7 +48,7 @@ class RawDecoderThread
     RawDecoderThread() {
       error = nullptr;
       taskNo = -1;
-    };
+    }
     uint32 start_y;
     uint32 end_y;
     const char* error;
@@ -163,51 +163,6 @@ protected:
   virtual void setMetaData(CameraMetaData *meta, std::string make, std::string model,
                            const std::string &mode, int iso_speed = 0);
 
-  /* Helper function for decoders, that will unpack uncompressed image data */
-  /* input: Input image, positioned at first pixel */
-  /* size: Size of the image to decode in pixels */
-  /* offset: offset to write the data into the final image */
-  /* inputPitch: Number of bytes between each line in the input image */
-  /* bitPerPixel: Number of bits to read for each input pixel. */
-  /* order: Order of the bits - see Common.h for possibilities. */
-  void readUncompressedRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch, int bitPerPixel, BitOrder order);
-
-  /* Faster versions for unpacking 8 bit data */
-  void Decode8BitRaw(ByteStream &input, uint32 w, uint32 h);
-
-  /* Faster version for unpacking 12 bit LSB data */
-  void Decode12BitRaw(ByteStream &input, uint32 w, uint32 h);
-
-  /* Faster version for unpacking 12 bit LSB data with a control byte every 10 pixels */
-  void Decode12BitRawWithControl(ByteStream &input, uint32 w, uint32 h);
-
-  /* Faster version for unpacking 12 bit MSB data with a control byte every 10 pixels */
-  void Decode12BitRawBEWithControl(ByteStream &input, uint32 w, uint32 h);
-
-  /* Faster version for unpacking 12 bit MSB data */
-  void Decode12BitRawBE(ByteStream &input, uint32 w, uint32 h);
-
-  /* Faster version for unpacking 12 bit MSB data with interlaced lines */
-  void Decode12BitRawBEInterlaced(ByteStream &input, uint32 w, uint32 h);
-
-  /* Faster version for reading unpacked 12 bit MSB data */
-  void Decode12BitRawBEunpacked(ByteStream &input, uint32 w, uint32 h);
-
-  /* Faster version for reading unpacked 12 bit MSB data that is left aligned (needs >> 4 shift) */
-  void Decode12BitRawBEunpackedLeftAligned(ByteStream &input, uint32 w, uint32 h);
-
-  /* Faster version for reading unpacked 14 bit MSB data */
-  void Decode14BitRawBEunpacked(ByteStream &input, uint32 w, uint32 h);
-
-  /* Faster version for reading unpacked 16 bit LSB data */
-  void Decode16BitRawUnpacked(ByteStream &input, uint32 w, uint32 h);
-
-  /* Faster version for reading unpacked 16 bit MSB data */
-  void Decode16BitRawBEunpacked(ByteStream &input, uint32 w, uint32 h);
-
-  /* Faster version for reading unpacked 12 bit LSB data */
-  void Decode12BitRawUnpacked(ByteStream &input, uint32 w, uint32 h);
-
   /* Generic decompressor for uncompressed images */
   /* order: Order of the bits - see Common.h for possibilities. */
   void decodeUncompressed(TiffIFD *rawIFD, BitOrder order);
@@ -228,7 +183,7 @@ protected:
 
 class RawSlice {
 public:
-  RawSlice() { h = offset = count = 0;};
+  RawSlice() { h = offset = count = 0; }
   ~RawSlice() = default;
   uint32 h;
   uint32 offset;

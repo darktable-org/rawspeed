@@ -326,8 +326,8 @@ int main(int argc, char **argv) {
         cmd += R"(" ")";
         cmd += newhash;
         cmd += R"(" >> rstest.log)";
-        if (system(cmd.c_str()))
-          ; // NOLINT
+        if (system(cmd.c_str())) {
+        }
       }
 #endif
     }

@@ -62,7 +62,7 @@ void decompressNikon(RawImage& mRaw, ByteStream&& data, ByteStream metadata, uin
   int pUp1[2];
   int pUp2[2];
 
-  _RPT2(0, "Nef version v0:%u, v1:%u\n", v0, v1);
+  writeLog(DEBUG_PRIO_EXTRA, "Nef version v0:%u, v1:%u\n", v0, v1);
 
   if (v0 == 73 || v1 == 88)
     metadata.skipBytes(2110);

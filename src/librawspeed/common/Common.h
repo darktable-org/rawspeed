@@ -28,42 +28,8 @@
 #include <string>           // for string
 #include <vector>           // for vector
 
-#if !defined(__unix__) && !defined(__APPLE__) && !defined(__MINGW32__)
-#include <intrin.h>
-#pragma intrinsic(_ReturnAddress)
-#define MIN(a,b) min(a,b)
-#define MAX(a,b) max(a,b)
-using uint64 = unsigned __int64;
-// MSVC may not have NAN
-#ifndef NAN
-  static const unsigned long __nan[2] = {0xffffffff, 0x7fffffff};
-  #define NAN (*(const float *) __nan)
-#endif
-#else // On linux
-#define _ASSERTE(a) void(a)
-#define _RPT0(a,b)
-#define _RPT1(a,b,c)
-#define _RPT2(a,b,c,d)
-#define _RPT3(a,b,c,d,e)
-#define _RPT4(a,b,c,d,e,f)
-#define __inline inline
-#define _strdup(a) strdup(a)
-#ifndef MIN
-#define MIN(a, b)  lmin(a,b)
-#endif
-#ifndef MAX
-#define MAX(a, b)  lmax(a,b)
-#endif
-using uint64 = unsigned long long;
-#ifndef __MINGW32__
 void* _aligned_malloc(size_t bytes, size_t alignment);
 void _aligned_free(void *ptr);
-#endif
-#endif // __unix__
-
-#ifndef UINT32_MAX
-#define UINT32_MAX 0xffffffff
-#endif
 
 int rawspeed_get_number_of_processor_cores();
 
@@ -73,6 +39,7 @@ namespace RawSpeed {
 using char8 = signed char;
 using uchar8 = unsigned char;
 using uint32 = unsigned int;
+using uint64 = unsigned long long;
 using int32 = signed int;
 using ushort16 = unsigned short;
 using short16 = signed short;
@@ -116,13 +83,6 @@ std::unique_ptr<T> make_unique(Args&&... args) {
 }
 #endif
 
-inline int lmin(int p0, int p1) {
-  return p1 + ((p0 - p1) & ((p0 - p1) >> 31));
-}
-inline int lmax(int p0, int p1) {
-  return p0 - ((p0 - p1) & ((p0 - p1) >> 31));
-}
-
 inline uint32 getThreadCount()
 {
 #ifdef NO_PTHREAD
@@ -147,7 +107,7 @@ inline Endianness getHostEndianness() {
   else if (firstbyte == 0xfe)
     return big;
   else
-    _ASSERTE(false);
+    assert(false);
 
   // Return something to make compilers happy
   return unknown;
