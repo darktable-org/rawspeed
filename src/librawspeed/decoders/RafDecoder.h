@@ -41,6 +41,7 @@ public:
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
   void checkSupportInternal(CameraMetaData *meta) override;
+  static bool isRAF(FileMap* input);
 
 protected:
   void decodeThreaded(RawDecoderThread *t) override;

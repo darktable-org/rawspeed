@@ -24,6 +24,7 @@
 #include "decoders/AriDecoder.h"          // for AriDecoder
 #include "decoders/MrwDecoder.h"          // for MrwDecoder
 #include "decoders/NakedDecoder.h"        // for NakedDecoder
+#include "decoders/RafDecoder.h"          // for RafDecoder
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "io/ByteStream.h"                // for ByteStream
 #include "metadata/CameraMetaData.h"      // for CameraMetaData
@@ -75,7 +76,7 @@ RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
 
   // FUJI has pointers to IFD's at fixed byte offsets
   // So if camera is FUJI, we cannot use ordinary TIFF parser
-  if (0 == memcmp(data, "FUJIFILMCCD-RAW ", 16)) {
+  if (RafDecoder::isRAF(mInput)) {
     //TODO: fix byte order and move to separate decoder/parser
     // First IFD typically JPEG and EXIF with a TIFF starting at offset 12
     uint32 first_ifd = get4BE(data, 0x54) + 12;
