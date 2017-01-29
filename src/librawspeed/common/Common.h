@@ -199,21 +199,22 @@ inline std::string trimSpaces(const std::string& str)
   return str.substr(startpos, endpos - startpos + 1);
 }
 
-inline std::vector<std::string> split_string(const std::string &input,
-                                             char c = ' ') {
+inline std::vector<std::string> splitString(const std::string& input,
+                                            char c = ' ')
+{
   std::vector<std::string> result;
-  const char *str = input.c_str();
+  const char* str = input.c_str();
 
   while (true) {
-    const char *begin = str;
+    const char* begin = str;
 
-    while(*str != c && *str)
+    while (*str != c && *str)
       str++;
 
-    if(begin != str)
+    if (begin != str)
       result.emplace_back(begin, str);
 
-    if(0 == *str++)
+    if (0 == *str++)
       break;
   }
 

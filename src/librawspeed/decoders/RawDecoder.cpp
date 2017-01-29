@@ -218,7 +218,7 @@ void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model,
   // <Hint name="override_cfa_black" value="10,20,30,20"/>
   if (cam->hints.find(string("override_cfa_black")) != cam->hints.end()) {
     string rgb = cam->hints.find(string("override_cfa_black"))->second;
-    vector<string> v = split_string(rgb, ',');
+    vector<string> v = splitString(rgb, ',');
     if (v.size() != 4) {
       mRaw->setError("Expected 4 values '10,20,30,20' as values for override_cfa_black hint.");
     } else {
