@@ -74,6 +74,19 @@ static string name(const xml_node &a) {
   return string(a.name());
 }
 
+static const map<char, CFAColor> char2enum = {
+    {'g', CFA_GREEN},      {'r', CFA_RED},  {'b', CFA_BLUE},
+    {'f', CFA_FUJI_GREEN}, {'c', CFA_CYAN}, {'m', CFA_MAGENTA},
+    {'y', CFA_YELLOW},
+};
+
+static const map<string, CFAColor> str2enum = {
+    {"GREEN", CFA_GREEN},   {"RED", CFA_RED},
+    {"BLUE", CFA_BLUE},     {"FUJI_GREEN", CFA_FUJI_GREEN},
+    {"CYAN", CFA_CYAN},     {"MAGENTA", CFA_MAGENTA},
+    {"YELLOW", CFA_YELLOW},
+};
+
 void Camera::parseCFA(const xml_node &cur) {
   if (name(cur) != "CFA" && name(cur) != "CFA2")
     ThrowCME("parseCFA(): Not an CFA/CFA2 node!");
@@ -81,7 +94,6 @@ void Camera::parseCFA(const xml_node &cur) {
   cfa.setSize(iPoint2D(cur.attribute("width").as_int(0),
                        cur.attribute("height").as_int(0)));
   for (xml_node c : cur.children()) {
-    try {
       if (name(c) == "ColorRow") {
         int y = c.attribute("y").as_int(-1);
         if (y < 0 || y >= cfa.getSize().y) {
@@ -94,14 +106,18 @@ void Camera::parseCFA(const xml_node &cur) {
                    "camera %s %s. Expected %d, found %zu.",
                    y, make.c_str(), model.c_str(), cfa.getSize().x, key.size());
         }
-        const map<char, CFAColor> char2enum = {
-            {'g', CFA_GREEN},      {'r', CFA_RED},  {'b', CFA_BLUE},
-            {'f', CFA_FUJI_GREEN}, {'c', CFA_CYAN}, {'m', CFA_MAGENTA},
-            {'y', CFA_YELLOW},
-        };
         for (size_t x = 0; x < key.size(); ++x) {
-          cfa.setColorAt(iPoint2D((int)x, y),
-                         char2enum.at((char)tolower(key[x])));
+          auto c1 = key[x];
+          CFAColor c2;
+
+          try {
+            c2 = char2enum.at((char)tolower(c1));
+          } catch (std::out_of_range&) {
+            ThrowCME("Invalid color in CFA array of camera %s %s: %c",
+                     make.c_str(), model.c_str(), c1);
+          }
+
+          cfa.setColorAt(iPoint2D((int)x, y), c2);
         }
       } else if (name(c) == "Color") {
         int x = c.attribute("x").as_int(-1);
@@ -116,18 +132,18 @@ void Camera::parseCFA(const xml_node &cur) {
                    make.c_str(), model.c_str());
         }
 
-        const map<string, CFAColor> str2enum = {
-            {"GREEN", CFA_GREEN},   {"RED", CFA_RED},
-            {"BLUE", CFA_BLUE},     {"FUJI_GREEN", CFA_FUJI_GREEN},
-            {"CYAN", CFA_CYAN},     {"MAGENTA", CFA_MAGENTA},
-            {"YELLOW", CFA_YELLOW},
-        };
-        cfa.setColorAt(iPoint2D(x, y), str2enum.at(c.child_value()));
+        auto c1 = c.child_value();
+        CFAColor c2;
+
+        try {
+          c2 = str2enum.at(c1);
+        } catch (std::out_of_range&) {
+          ThrowCME("Invalid color in CFA array of camera %s %s: %s",
+                   make.c_str(), model.c_str(), c1);
+        }
+
+        cfa.setColorAt(iPoint2D(x, y), c2);
       }
-    } catch (std::out_of_range &) {
-      ThrowCME("Invalid color in CFA array of camera %s %s", make.c_str(),
-               model.c_str());
-    }
   }
 }
 
