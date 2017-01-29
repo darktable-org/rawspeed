@@ -9,6 +9,10 @@ FILE(GLOB PARSER_SOURCES
   "TiffParser.h"
   "TiffParserException.cpp"
   "TiffParserException.h"
+  "FiffParser.cpp"
+  "FiffParser.h"
+  "FiffParserException.cpp"
+  "FiffParserException.h"
   "X3fParser.cpp"
   "X3fParser.h"
 )

@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,26 +20,21 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32
-#include "io/FileMap.h"    // for FileMap
+#include "io/FileMap.h" // for FileMap
 
 namespace RawSpeed {
 
-class CameraMetaData;
-
 class RawDecoder;
 
-class TiffIFD;
-
-class RawParser
-{
+class FiffParser {
 public:
-  RawParser(FileMap* input);
-  virtual ~RawParser();
-  virtual RawDecoder *getDecoder(CameraMetaData *meta = nullptr);
-  void ParseFuji(uint32 offset, TiffIFD *target_ifd);
+  FiffParser(FileMap* input);
+  virtual ~FiffParser() = default;
+
+  virtual RawDecoder* getDecoder();
+
 protected:
-  FileMap *mInput;
+  FileMap* mInput;
 };
 
 } // namespace RawSpeed

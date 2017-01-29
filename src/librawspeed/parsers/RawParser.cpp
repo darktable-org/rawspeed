@@ -20,25 +20,20 @@
 */
 
 #include "parsers/RawParser.h"
-#include "common/Common.h"                // for make_unique, uint32, get4BE
 #include "decoders/AriDecoder.h"          // for AriDecoder
 #include "decoders/MrwDecoder.h"          // for MrwDecoder
 #include "decoders/NakedDecoder.h"        // for NakedDecoder
 #include "decoders/RafDecoder.h"          // for RafDecoder
-#include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
-#include "io/ByteStream.h"                // for ByteStream
+#include "decoders/RawDecoderException.h" // for RawDecoderException, ThrowRDE
 #include "metadata/CameraMetaData.h"      // for CameraMetaData
 #include "parsers/CiffParser.h"           // for CiffParser
 #include "parsers/CiffParserException.h"  // for CiffParserException
-#include "parsers/TiffParser.h"           // for parseTiff, makeDecoder
-#include "parsers/TiffParserException.h"  // for TiffParserException, ThrowTPE
+#include "parsers/FiffParser.h"           // for FiffParser
+#include "parsers/FiffParserException.h"  // for FiffParserException
+#include "parsers/TiffParser.h"           // for makeDecoder, parseTiff
+#include "parsers/TiffParserException.h"  // for TiffParserException
 #include "parsers/X3fParser.h"            // for X3fParser
-#include "tiff/TiffEntry.h"               // for TiffEntry, ::TIFF_SHORT
-#include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD, Tiff...
-#include "tiff/TiffTag.h"                 // for ::FUJIOLDWB, ::FUJI_STRIPB...
-#include <algorithm>                      // for move
-#include <cstring>                        // for memcmp
-#include <memory>                         // for default_delete, unique_ptr
+#include "tiff/TiffEntry.h"               // IWYU pragma: keep
 
 namespace RawSpeed {
 
@@ -54,10 +49,9 @@ RawParser::~RawParser() = default;
 RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
   // We need some data.
   // For now it is 104 bytes for RAF/FUJIFIM images.
+  // FIXME: each decoder/parser should check it on their own.
   if (mInput->getSize() <=  104)
     ThrowRDE("File too small");
-
-  const unsigned char* data = mInput->getData(0, 104);
 
   // MRW images are easy to check for, let's try that first
   if (MrwDecoder::isMRW(mInput)) {
@@ -77,64 +71,11 @@ RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
   // FUJI has pointers to IFD's at fixed byte offsets
   // So if camera is FUJI, we cannot use ordinary TIFF parser
   if (RafDecoder::isRAF(mInput)) {
-    //TODO: fix byte order and move to separate decoder/parser
-    // First IFD typically JPEG and EXIF with a TIFF starting at offset 12
-    uint32 first_ifd = get4BE(data, 0x54) + 12;
-    uint32 second_ifd = get4BE(data, 0x64);
-    uint32 third_ifd = get4BE(data, 0x5C);
-
-    // Open the IFDs and merge them
     try {
-      TiffRootIFDOwner rootIFD = parseTiff(mInput->getSubView(first_ifd));
-      TiffIFDOwner subIFD = make_unique<TiffIFD>();
-
-      if (mInput->isValid(second_ifd)) {
-        // RAW Tiff on newer models, pointer to raw data on older models
-        // -> so we try parsing as Tiff first and add it as data if parsing fails
-        try {
-          rootIFD->add(parseTiff(mInput->getSubView(second_ifd)));
-        } catch (TiffParserException &) {
-          // the offset will be interpreted relative to the rootIFD where this subIFD gets inserted
-          uint32 rawOffset = second_ifd - first_ifd;
-          subIFD->add(make_unique<TiffEntry>(FUJI_STRIPOFFSETS, TIFF_OFFSET, 1, ByteStream::createCopy(&rawOffset, 4)));
-          uint32 max_size = mInput->getSize() - second_ifd;
-          subIFD->add(make_unique<TiffEntry>(FUJI_STRIPBYTECOUNTS, TIFF_LONG, 1, ByteStream::createCopy(&max_size, 4)));
-        }
-      }
-
-      if (mInput->isValid(third_ifd)) {
-        // RAW information IFD on older
-
-        // This Fuji directory structure is similar to a Tiff IFD but with two differences:
-        //   a) no type info and b) data is always stored in place.
-        // 4b: # of entries, for each entry: 2b tag, 2b len, xb data
-        ByteStream bytes(mInput, third_ifd, getHostEndianness() == big);
-        uint32 entries = bytes.getUInt();
-
-        if (entries > 255)
-          ThrowTPE("ParseFuji: Too many entries");
-
-        for (uint32 i = 0; i < entries; i++) {
-          ushort16 tag = bytes.getShort();
-          ushort16 length = bytes.getShort();
-          TiffDataType type = TIFF_UNDEFINED;
-
-          if (tag == IMAGEWIDTH || tag == FUJIOLDWB) // also 0x121?
-            type = TIFF_SHORT;
-
-          uint32 count = type == TIFF_SHORT ? length/2 : length;
-          subIFD->add(make_unique<TiffEntry>((TiffTag)tag, type, count, bytes.getSubStream(bytes.getPosition(), length)));
-
-          bytes.skipBytes(length);
-        }
-      }
-
-      rootIFD->add(move(subIFD));
-
-      return makeDecoder(move(rootIFD), *mInput);
-    } catch (TiffParserException &) {
+      FiffParser p(mInput);
+      return p.getDecoder();
+    } catch (FiffParserException&) {
     }
-    ThrowRDE("No decoder found. Sorry.");
   }
 
   // Ordinary TIFF images

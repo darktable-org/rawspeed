@@ -2,6 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2014 Pedro Côrte-Real
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,28 +19,29 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#pragma once
+#include "parsers/FiffParserException.h"
+#include "common/Common.h" // for _RPT1
+#include <cstdarg>         // for va_end, va_list, va_start
+#include <cstdio>          // for vsnprintf
+#include <string>          // for string
 
-#include "common/Common.h" // for uint32
-#include "io/FileMap.h"    // for FileMap
+using namespace std;
 
 namespace RawSpeed {
 
-class CameraMetaData;
+FiffParserException::FiffParserException(const string& _msg)
+    : runtime_error(_msg) {
+  writeLog(DEBUG_PRIO_EXTRA, "FIFF Exception: %s\n", _msg.c_str());
+}
 
-class RawDecoder;
-
-class TiffIFD;
-
-class RawParser
-{
-public:
-  RawParser(FileMap* input);
-  virtual ~RawParser();
-  virtual RawDecoder *getDecoder(CameraMetaData *meta = nullptr);
-  void ParseFuji(uint32 offset, TiffIFD *target_ifd);
-protected:
-  FileMap *mInput;
-};
+void ThrowFPE(const char* fmt, ...) {
+  va_list val;
+  va_start(val, fmt);
+  static char buf[8192];
+  vsnprintf(buf, 8192, fmt, val);
+  va_end(val);
+  writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s\n", buf);
+  throw FiffParserException(buf);
+}
 
 } // namespace RawSpeed
