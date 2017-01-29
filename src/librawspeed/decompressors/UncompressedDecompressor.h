@@ -61,43 +61,43 @@ public:
                            int bitPerPixel, BitOrder order);
 
   /* Faster versions for unpacking 8 bit data */
-  void Decode8BitRaw(uint32 w, uint32 h);
+  void decode8BitRaw(uint32 w, uint32 h);
 
   /* Faster version for unpacking 12 bit LSB data */
-  void Decode12BitRaw(uint32 w, uint32 h);
+  void decode12BitRaw(uint32 w, uint32 h);
 
   /* Faster version for unpacking 12 bit LSB data with a control byte every 10
    * pixels */
-  void Decode12BitRawWithControl(uint32 w, uint32 h);
+  void decode12BitRawWithControl(uint32 w, uint32 h);
 
   /* Faster version for unpacking 12 bit MSB data with a control byte every 10
    * pixels */
-  void Decode12BitRawBEWithControl(uint32 w, uint32 h);
+  void decode12BitRawBEWithControl(uint32 w, uint32 h);
 
   /* Faster version for unpacking 12 bit MSB data */
-  void Decode12BitRawBE(uint32 w, uint32 h);
+  void decode12BitRawBE(uint32 w, uint32 h);
 
   /* Faster version for unpacking 12 bit MSB data with interlaced lines */
-  void Decode12BitRawBEInterlaced(uint32 w, uint32 h);
+  void decode12BitRawBEInterlaced(uint32 w, uint32 h);
 
   /* Faster version for reading unpacked 12 bit MSB data */
-  void Decode12BitRawBEunpacked(uint32 w, uint32 h);
+  void decode12BitRawBEunpacked(uint32 w, uint32 h);
 
   /* Faster version for reading unpacked 12 bit MSB data that is left aligned
    * (needs >> 4 shift) */
-  void Decode12BitRawBEunpackedLeftAligned(uint32 w, uint32 h);
+  void decode12BitRawBEunpackedLeftAligned(uint32 w, uint32 h);
 
   /* Faster version for reading unpacked 14 bit MSB data */
-  void Decode14BitRawBEunpacked(uint32 w, uint32 h);
+  void decode14BitRawBEunpacked(uint32 w, uint32 h);
 
   /* Faster version for reading unpacked 16 bit LSB data */
-  void Decode16BitRawUnpacked(uint32 w, uint32 h);
+  void decode16BitRawUnpacked(uint32 w, uint32 h);
 
   /* Faster version for reading unpacked 16 bit MSB data */
-  void Decode16BitRawBEunpacked(uint32 w, uint32 h);
+  void decode16BitRawBEunpacked(uint32 w, uint32 h);
 
   /* Faster version for reading unpacked 12 bit LSB data */
-  void Decode12BitRawUnpacked(uint32 w, uint32 h);
+  void decode12BitRawUnpacked(uint32 w, uint32 h);
 
 protected:
   ByteStream input;

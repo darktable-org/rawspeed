@@ -125,7 +125,7 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
     }
     if (bitPerPixel == 12 && (int)w == inputPitch * 8 / 12 &&
         getHostEndianness() == little) {
-      Decode12BitRaw(w, h);
+      decode12BitRaw(w, h);
       return;
     }
     BitPumpPlain bits(input);
@@ -142,13 +142,13 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
   }
 }
 
-void UncompressedDecompressor::Decode8BitRaw(uint32 w, uint32 h) {
+void UncompressedDecompressor::decode8BitRaw(uint32 w, uint32 h) {
   if (input.getRemainSize() < w * h) {
     if ((uint32)input.getRemainSize() > w) {
       h = input.getRemainSize() / w - 1;
       mRaw->setError("Image truncated (file is too short)");
     } else
-      ThrowIOE("Decode8BitRaw: Not enough data to decode a single line. Image "
+      ThrowIOE("decode8BitRaw: Not enough data to decode a single line. Image "
                "file truncated.");
   }
 
@@ -167,7 +167,7 @@ void UncompressedDecompressor::Decode8BitRaw(uint32 w, uint32 h) {
   }
 }
 
-void UncompressedDecompressor::Decode12BitRaw(uint32 w, uint32 h) {
+void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
   if (w < 2)
     ThrowIOE("Are you mad? 1 pixel wide raw images are no fun");
 
@@ -196,7 +196,7 @@ void UncompressedDecompressor::Decode12BitRaw(uint32 w, uint32 h) {
   }
 }
 
-void UncompressedDecompressor::Decode12BitRawWithControl(uint32 w, uint32 h) {
+void UncompressedDecompressor::decode12BitRawWithControl(uint32 w, uint32 h) {
   if (w < 2)
     ThrowIOE("Are you mad? 1 pixel wide raw images are no fun");
 
@@ -207,7 +207,7 @@ void UncompressedDecompressor::Decode12BitRawWithControl(uint32 w, uint32 h) {
 
   // If file is too short, only decode as many lines as we have
   if (input.getRemainSize() <= perline) {
-    ThrowIOE("Decode12BitRawBEWithControl: Not enough data to decode a single "
+    ThrowIOE("decode12BitRawBEWithControl: Not enough data to decode a single "
              "line. Image file truncated.");
   } else if (input.getRemainSize() < (perline * h)) {
     h = input.getRemainSize() / perline - 1;
@@ -233,7 +233,7 @@ void UncompressedDecompressor::Decode12BitRawWithControl(uint32 w, uint32 h) {
   }
 }
 
-void UncompressedDecompressor::Decode12BitRawBEWithControl(uint32 w, uint32 h) {
+void UncompressedDecompressor::decode12BitRawBEWithControl(uint32 w, uint32 h) {
   if (w < 2)
     ThrowIOE("Are you mad? 1 pixel wide raw images are no fun");
 
@@ -244,7 +244,7 @@ void UncompressedDecompressor::Decode12BitRawBEWithControl(uint32 w, uint32 h) {
 
   // If file is too short, only decode as many lines as we have
   if (input.getRemainSize() <= perline) {
-    ThrowIOE("Decode12BitRawBEWithControl: Not enough data to decode a single "
+    ThrowIOE("decode12BitRawBEWithControl: Not enough data to decode a single "
              "line. Image file truncated.");
   } else if (input.getRemainSize() < (perline * h)) {
     h = input.getRemainSize() / perline - 1;
@@ -269,7 +269,7 @@ void UncompressedDecompressor::Decode12BitRawBEWithControl(uint32 w, uint32 h) {
   }
 }
 
-void UncompressedDecompressor::Decode12BitRawBE(uint32 w, uint32 h) {
+void UncompressedDecompressor::decode12BitRawBE(uint32 w, uint32 h) {
   if (w < 2)
     ThrowIOE("Are you mad? 1 pixel wide raw images are no fun");
 
@@ -298,7 +298,7 @@ void UncompressedDecompressor::Decode12BitRawBE(uint32 w, uint32 h) {
   }
 }
 
-void UncompressedDecompressor::Decode12BitRawBEInterlaced(uint32 w, uint32 h) {
+void UncompressedDecompressor::decode12BitRawBEInterlaced(uint32 w, uint32 h) {
   if (w < 2)
     ThrowIOE("Are you mad? 1 pixel wide raw images are no fun");
 
@@ -337,7 +337,7 @@ void UncompressedDecompressor::Decode12BitRawBEInterlaced(uint32 w, uint32 h) {
   input.skipBytes(input.getRemainSize());
 }
 
-void UncompressedDecompressor::Decode12BitRawBEunpacked(uint32 w, uint32 h) {
+void UncompressedDecompressor::decode12BitRawBEunpacked(uint32 w, uint32 h) {
   if (input.getRemainSize() < w * h * 2) {
     if ((uint32)input.getRemainSize() > w * 2) {
       h = input.getRemainSize() / (w * 2) - 1;
@@ -361,7 +361,7 @@ void UncompressedDecompressor::Decode12BitRawBEunpacked(uint32 w, uint32 h) {
   }
 }
 
-void UncompressedDecompressor::Decode12BitRawBEunpackedLeftAligned(uint32 w,
+void UncompressedDecompressor::decode12BitRawBEunpackedLeftAligned(uint32 w,
                                                                    uint32 h) {
   if (input.getRemainSize() < w * h * 2) {
     if ((uint32)input.getRemainSize() > w * 2) {
@@ -386,7 +386,7 @@ void UncompressedDecompressor::Decode12BitRawBEunpackedLeftAligned(uint32 w,
   }
 }
 
-void UncompressedDecompressor::Decode14BitRawBEunpacked(uint32 w, uint32 h) {
+void UncompressedDecompressor::decode14BitRawBEunpacked(uint32 w, uint32 h) {
   if (input.getRemainSize() < w * h * 2) {
     if ((uint32)input.getRemainSize() > w * 2) {
       h = input.getRemainSize() / (w * 2) - 1;
@@ -410,7 +410,7 @@ void UncompressedDecompressor::Decode14BitRawBEunpacked(uint32 w, uint32 h) {
   }
 }
 
-void UncompressedDecompressor::Decode16BitRawUnpacked(uint32 w, uint32 h) {
+void UncompressedDecompressor::decode16BitRawUnpacked(uint32 w, uint32 h) {
   if (input.getRemainSize() < w * h * 2) {
     if ((uint32)input.getRemainSize() > w * 2) {
       h = input.getRemainSize() / (w * 2) - 1;
@@ -434,7 +434,7 @@ void UncompressedDecompressor::Decode16BitRawUnpacked(uint32 w, uint32 h) {
   }
 }
 
-void UncompressedDecompressor::Decode16BitRawBEunpacked(uint32 w, uint32 h) {
+void UncompressedDecompressor::decode16BitRawBEunpacked(uint32 w, uint32 h) {
   if (input.getRemainSize() < w * h * 2) {
     if ((uint32)input.getRemainSize() > w * 2) {
       h = input.getRemainSize() / (w * 2) - 1;
@@ -458,7 +458,7 @@ void UncompressedDecompressor::Decode16BitRawBEunpacked(uint32 w, uint32 h) {
   }
 }
 
-void UncompressedDecompressor::Decode12BitRawUnpacked(uint32 w, uint32 h) {
+void UncompressedDecompressor::decode12BitRawUnpacked(uint32 w, uint32 h) {
   if (input.getRemainSize() < w * h * 2) {
     if ((uint32)input.getRemainSize() > w * 2) {
       h = input.getRemainSize() / (w * 2) - 1;

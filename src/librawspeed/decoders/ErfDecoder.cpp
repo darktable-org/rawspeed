@@ -65,7 +65,7 @@ RawImage ErfDecoder::decodeRawInternal() {
 
   UncompressedDecompressor u(*mFile, off, c2, mRaw, uncorrectedRawValues);
 
-  u.Decode12BitRawBEWithControl(width, height);
+  u.decode12BitRawBEWithControl(width, height);
 
   return mRaw;
 }

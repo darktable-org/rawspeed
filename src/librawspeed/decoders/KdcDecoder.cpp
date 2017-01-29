@@ -79,7 +79,7 @@ RawImage KdcDecoder::decodeRawInternal() {
 
   UncompressedDecompressor u(*mFile, off, mRaw, uncorrectedRawValues);
 
-  u.Decode12BitRawBE(width, height);
+  u.decode12BitRawBE(width, height);
 
   return mRaw;
 }
