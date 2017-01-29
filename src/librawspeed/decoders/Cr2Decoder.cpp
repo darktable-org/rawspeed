@@ -331,23 +331,23 @@ static inline void interpolate_422(T yuv2rgb, const int* sraw_coeffs,
       int Y = c_line[off];
       int Cb = c_line[off+1] - hue;
       int Cr = c_line[off+2] - hue;
-      yuv2rgb(Y, Cb, Cr, sraw_coeffs, c_line, off, off + 1, off + 2);
+      yuv2rgb(Y, Cb, Cr, sraw_coeffs, c_line, off);
       off += 3;
 
       Y = c_line[off];
       int Cb2 = (Cb + c_line[off+1+3] - hue) >> 1;
       int Cr2 = (Cr + c_line[off+2+3] - hue) >> 1;
-      yuv2rgb(Y, Cb2, Cr2, sraw_coeffs, c_line, off, off + 1, off + 2);
+      yuv2rgb(Y, Cb2, Cr2, sraw_coeffs, c_line, off);
       off += 3;
     }
     // Last two pixels
     int Y = c_line[off];
     int Cb = c_line[off + 1] - hue_last;
     int Cr = c_line[off + 2] - hue_last;
-    yuv2rgb(Y, Cb, Cr, sraw_coeffs, c_line, off, off + 1, off + 2);
+    yuv2rgb(Y, Cb, Cr, sraw_coeffs, c_line, off);
 
     Y = c_line[off+3];
-    yuv2rgb(Y, Cb, Cr, sraw_coeffs, c_line, off + 3, off + 4, off + 5);
+    yuv2rgb(Y, Cb, Cr, sraw_coeffs, c_line, off + 3);
   }
 }
 
@@ -384,41 +384,41 @@ static inline void interpolate_420(T yuv2rgb, const int* sraw_coeffs,
       int Y = c_line[off];
       int Cb = c_line[off+1] - hue;
       int Cr = c_line[off+2] - hue;
-      yuv2rgb(Y, Cb, Cr, sraw_coeffs, c_line, off, off + 1, off + 2);
+      yuv2rgb(Y, Cb, Cr, sraw_coeffs, c_line, off);
 
       Y = c_line[off+3];
       int Cb2 = (Cb + c_line[off+1+6] - hue) >> 1;
       int Cr2 = (Cr + c_line[off+2+6] - hue) >> 1;
-      yuv2rgb(Y, Cb2, Cr2, sraw_coeffs, c_line, off + 3, off + 4, off + 5);
+      yuv2rgb(Y, Cb2, Cr2, sraw_coeffs, c_line, off + 3);
 
       // Next line
       Y = n_line[off];
       int Cb3 = (Cb + nn_line[off+1] - hue) >> 1;
       int Cr3 = (Cr + nn_line[off+2] - hue) >> 1;
-      yuv2rgb(Y, Cb3, Cr3, sraw_coeffs, n_line, off, off + 1, off + 2);
+      yuv2rgb(Y, Cb3, Cr3, sraw_coeffs, n_line, off);
 
       Y = n_line[off+3];
       Cb = (Cb + Cb2 + Cb3 + nn_line[off+1+6] - hue) >> 2;  //Left + Above + Right +Below
       Cr = (Cr + Cr2 + Cr3 + nn_line[off+2+6] - hue) >> 2;
-      yuv2rgb(Y, Cb, Cr, sraw_coeffs, n_line, off + 3, off + 4, off + 5);
+      yuv2rgb(Y, Cb, Cr, sraw_coeffs, n_line, off + 3);
       off += 6;
     }
     int Y = c_line[off];
     int Cb = c_line[off+1] - hue;
     int Cr = c_line[off+2] - hue;
-    yuv2rgb(Y, Cb, Cr, sraw_coeffs, c_line, off, off + 1, off + 2);
+    yuv2rgb(Y, Cb, Cr, sraw_coeffs, c_line, off);
 
     Y = c_line[off+3];
-    yuv2rgb(Y, Cb, Cr, sraw_coeffs, c_line, off + 3, off + 4, off + 5);
+    yuv2rgb(Y, Cb, Cr, sraw_coeffs, c_line, off + 3);
 
     // Next line
     Y = n_line[off];
     Cb = (Cb + nn_line[off+1] - hue) >> 1;
     Cr = (Cr + nn_line[off+2] - hue) >> 1;
-    yuv2rgb(Y, Cb, Cr, sraw_coeffs, n_line, off, off + 1, off + 2);
+    yuv2rgb(Y, Cb, Cr, sraw_coeffs, n_line, off);
 
     Y = n_line[off+3];
-    yuv2rgb(Y, Cb, Cr, sraw_coeffs, n_line, off + 3, off + 4, off + 5);
+    yuv2rgb(Y, Cb, Cr, sraw_coeffs, n_line, off + 3);
   }
 
   if (atLastLine) {
@@ -431,39 +431,38 @@ static inline void interpolate_420(T yuv2rgb, const int* sraw_coeffs,
       int Y = c_line[off];
       int Cb = c_line[off+1] - hue;
       int Cr = c_line[off+2] - hue;
-      yuv2rgb(Y, Cb, Cr, sraw_coeffs, c_line, off, off + 1, off + 2);
+      yuv2rgb(Y, Cb, Cr, sraw_coeffs, c_line, off);
 
       Y = c_line[off+3];
-      yuv2rgb(Y, Cb, Cr, sraw_coeffs, c_line, off + 3, off + 4, off + 5);
+      yuv2rgb(Y, Cb, Cr, sraw_coeffs, c_line, off + 3);
 
       // Next line
       Y = n_line[off];
-      yuv2rgb(Y, Cb, Cr, sraw_coeffs, n_line, off, off + 1, off + 2);
+      yuv2rgb(Y, Cb, Cr, sraw_coeffs, n_line, off);
 
       Y = n_line[off+3];
-      yuv2rgb(Y, Cb, Cr, sraw_coeffs, n_line, off + 3, off + 4, off + 5);
+      yuv2rgb(Y, Cb, Cr, sraw_coeffs, n_line, off + 3);
       off += 6;
     }
   }
 }
 
-static inline void STORE_RGB(ushort16* X, int r, int g, int b, int A, int B,
-                             int C) {
+static inline void STORE_RGB(ushort16* X, int r, int g, int b, int offset) {
   r >>= 8;
   g >>= 8;
   b >>= 8;
-  X[A] = clampbits(r, 16);
-  X[B] = clampbits(g, 16);
-  X[C] = clampbits(b, 16);
+  X[offset + 0] = clampbits(r, 16);
+  X[offset + 1] = clampbits(g, 16);
+  X[offset + 2] = clampbits(b, 16);
 }
 
 static inline void YUV_TO_RGB_v1(int Y, int Cb, int Cr, const int* sraw_coeffs,
-                                 ushort16* X, int A, int B, int C) {
+                                 ushort16* X, int offset) {
   int r, g, b;
   r = sraw_coeffs[0] * (Y + ((50 * Cb + 22929 * Cr) >> 12));
   g = sraw_coeffs[1] * (Y + ((-5640 * Cb - 11751 * Cr) >> 12));
   b = sraw_coeffs[2] * (Y + ((29040 * Cb - 101 * Cr) >> 12));
-  STORE_RGB(X, r, g, b, A, B, C);
+  STORE_RGB(X, r, g, b, offset);
 }
 
 void Cr2Decoder::interpolate_422_v1(int w, int h, int start_h, int end_h) {
@@ -479,12 +478,12 @@ void Cr2Decoder::interpolate_420_v1(int w, int h, int start_h, int end_h) {
 
 /* Algorithm found in EOS 40D */
 static inline void YUV_TO_RGB_v0(int Y, int Cb, int Cr, const int* sraw_coeffs,
-                                 ushort16* X, int A, int B, int C) {
+                                 ushort16* X, int offset) {
   int r, g, b;
   r = sraw_coeffs[0] * (Y + Cr - 512);
   g = sraw_coeffs[1] * (Y + ((-778 * Cb - (Cr << 11)) >> 12) - 512);
   b = sraw_coeffs[2] * (Y + (Cb - 512));
-  STORE_RGB(X, r, g, b, A, B, C);
+  STORE_RGB(X, r, g, b, offset);
 }
 
 void Cr2Decoder::interpolate_422_v0(int w, int h, int start_h, int end_h) {
@@ -496,12 +495,12 @@ void Cr2Decoder::interpolate_422_v0(int w, int h, int start_h, int end_h) {
 
 /* Algorithm found in EOS 5d Mk III */
 static inline void YUV_TO_RGB_v2(int Y, int Cb, int Cr, const int* sraw_coeffs,
-                                 ushort16* X, int A, int B, int C) {
+                                 ushort16* X, int offset) {
   int r, g, b;
   r = sraw_coeffs[0] * (Y + Cr);
   g = sraw_coeffs[1] * (Y + ((-778 * Cb - (Cr << 11)) >> 12));
   b = sraw_coeffs[2] * (Y + Cb);
-  STORE_RGB(X, r, g, b, A, B, C);
+  STORE_RGB(X, r, g, b, offset);
 }
 
 void Cr2Decoder::interpolate_422_v2(int w, int h, int start_h, int end_h) {
