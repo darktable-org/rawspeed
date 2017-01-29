@@ -360,7 +360,9 @@ void RawImageData::blitFrom(const RawImage& src, const iPoint2D& srcPos,
     return;
 
   // TODO: Move offsets after crop.
-  BitBlt(getData(dest_rect.pos.x, dest_rect.pos.y), pitch, src->getData(src_rect.pos.x, src_rect.pos.y), src->pitch, blitsize.x*bpp, blitsize.y);
+  copyPixels(getData(dest_rect.pos.x, dest_rect.pos.y), pitch,
+             src->getData(src_rect.pos.x, src_rect.pos.y), src->pitch,
+             blitsize.x * bpp, blitsize.y);
 }
 
 /* Does not take cfa into consideration */

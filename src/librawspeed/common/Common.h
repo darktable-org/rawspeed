@@ -49,15 +49,17 @@ const int DEBUG_PRIO_EXTRA = 0x10000;
 
 void writeLog(int priority, const char *format, ...) __attribute__((format(printf, 2, 3)));
 
-inline void BitBlt(uchar8* dstp, int dst_pitch, const uchar8* srcp, int src_pitch, int row_size, int height) {
-  if (height == 1 || (dst_pitch == src_pitch && src_pitch == row_size)) {
-    memcpy(dstp, srcp, (size_t)row_size * height);
-    return;
-  }
-  for (int y=height; y>0; --y) {
-    memcpy(dstp, srcp, row_size);
-    dstp += dst_pitch;
-    srcp += src_pitch;
+inline void copyPixels(uchar8* dest, int dstPitch, const uchar8* src,
+                       int srcPitch, int rowSize, int height)
+{
+  if (height == 1 || (dstPitch == srcPitch && srcPitch == rowSize))
+    memcpy(dest, src, (size_t)rowSize * height);
+  else {
+    for (int y = height; y > 0; --y) {
+      memcpy(dest, src, rowSize);
+      dest += dstPitch;
+      src += srcPitch;
+    }
   }
 }
 
