@@ -62,6 +62,7 @@ class TiffIFD
   void add(TiffEntryOwner entry);
   TiffRootIFDOwner parseDngPrivateData(TiffEntry *t);
   TiffRootIFDOwner parseMakerNote(TiffEntry *t);
+  void parseIFDEntry(ByteStream& bs);
 
 public:
   TiffIFD() = default;
