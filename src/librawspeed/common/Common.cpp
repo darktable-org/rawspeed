@@ -95,17 +95,19 @@ namespace RawSpeed {
 
 void writeLog(int priority, const char *format, ...)
 {
-  std::string msg("RawSpeed:");
-  msg.append(format);
+#ifndef _DEBUG
+  if (priority < DEBUG_PRIO_INFO)
+#endif // _DEBUG
+    printf("%s", "RawSpeed:");
+
   va_list args;
   va_start(args, format);
 
-#ifdef _DEBUG
-  vprintf(msg.c_str(), args);
-#else
+#ifndef _DEBUG
   if(priority < DEBUG_PRIO_INFO)
-    vprintf(msg.c_str(), args);
 #endif // _DEBUG
+    vprintf(format, args);
+
   va_end(args);
 }
 

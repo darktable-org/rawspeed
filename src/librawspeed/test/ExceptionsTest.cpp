@@ -37,6 +37,9 @@ using namespace RawSpeed;
 
 static const std::string msg("my very Smart error Message #1 !");
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+
 template <typename T>
 static void* MetaThrowHelper(const char* fmt, const char* str) {
   ADD_FAILURE() << "non-specialzer was called";
@@ -73,6 +76,8 @@ template <>
 void* MetaThrowHelper<TiffParserException>(const char* fmt, const char* str) {
   ThrowTPE(fmt, str);
 }
+
+#pragma GCC diagnostic pop
 
 template <class T> class ExceptionsTest : public testing::Test {};
 

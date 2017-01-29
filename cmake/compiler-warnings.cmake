@@ -8,8 +8,7 @@ endif()
 
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wall)
 
-CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wformat)
-CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wformat-security)
+CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wformat=2)
 
 # cleanup this once we no longer need to support gcc-4.9
 # disabled for now, see https://github.com/darktable-org/rawspeed/issues/32
