@@ -143,8 +143,7 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(TiffEntry* t)
     makeEntry = p->getEntryRecursive(MAKE);
     p = p->parent;
   } while (!makeEntry && p);
-  string make = makeEntry ? makeEntry->getString() : "";
-  TrimSpaces(make);
+  string make = makeEntry ? trimSpaces(makeEntry->getString()) : "";
 
   ByteStream bs = t->getData();
 
@@ -264,10 +263,8 @@ TiffID TiffRootIFD::getID() const
   if (!modelE)
     ThrowTPE("TiffIFD: Failed to find MODEL entry.");
 
-  id.make = makeE->getString();
-  id.model = modelE->getString();
-  TrimSpaces(id.make);
-  TrimSpaces(id.model);
+  id.make = trimSpaces(makeE->getString());
+  id.model = trimSpaces(modelE->getString());
 
   return id;
 }

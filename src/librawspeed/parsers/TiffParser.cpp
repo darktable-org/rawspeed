@@ -146,8 +146,7 @@ RawDecoder* makeDecoder(TiffRootIFDOwner root, Buffer &data) {
     // Last ditch effort to identify Leaf cameras that don't have a Tiff Make set
     TiffEntry* softwareIFD = root->getEntryRecursive(SOFTWARE);
     if (softwareIFD) {
-      string software = softwareIFD->getString();
-      TrimSpaces(software);
+      string software = trimSpaces(softwareIFD->getString());
       if (software == "Camera Library") {
         return new MosDecoder(move(root), mInput);
       }

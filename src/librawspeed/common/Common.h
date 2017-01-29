@@ -183,18 +183,20 @@ inline uint32 clampBits(int x, uint32 n)
   return x;
 }
 
-/* Remove all spaces at the end of a string */
+// Trim both leading and trailing spaces from the string
+inline std::string trimSpaces(const std::string& str)
+{
+  // Find the first character position after excluding leading blank spaces
+  size_t startpos = str.find_first_not_of(" \t");
 
-inline void TrimSpaces(std::string& str) {
-  // Trim Both leading and trailing spaces
-  size_t startpos = str.find_first_not_of(" \t"); // Find the first character position after excluding leading blank spaces
-  size_t endpos = str.find_last_not_of(" \t"); // Find the first character position from reverse af
+  // Find the first character position from reverse af
+  size_t endpos = str.find_last_not_of(" \t");
 
   // if all spaces or empty return an empty string
-  if ((std::string::npos == startpos) || (std::string::npos == endpos)) {
-    str = "";
-  } else
-    str = str.substr(startpos, endpos - startpos + 1);
+  if ((startpos == std::string::npos) || (endpos == std::string::npos))
+    return "";
+
+  return str.substr(startpos, endpos - startpos + 1);
 }
 
 inline std::vector<std::string> split_string(const std::string &input,
