@@ -45,17 +45,11 @@ protected:
   void sRawInterpolate();
   int getHue();
 
-  using yuv2rgb = void(int Y, int Cb, int Cr, int& r, int& g, int& b,
-                       const int* sraw_coeffs);
-  static yuv2rgb YUV_TO_RGB_v0;
-  static yuv2rgb YUV_TO_RGB_v1;
-  static yuv2rgb YUV_TO_RGB_v2;
-
-  void interpolate_420(int w, int h, int start_h , int end_h);
-  void interpolate_422(int w, int h, int start_h , int end_h);
-  void interpolate_422_old(int w, int h, int start_h , int end_h);
-  void interpolate_420_new(int w, int h, int start_h , int end_h);
-  void interpolate_422_new(int w, int h, int start_h , int end_h);
+  void interpolate_422_v0(int w, int h, int start_h, int end_h);
+  void interpolate_422_v1(int w, int h, int start_h, int end_h);
+  void interpolate_420_v1(int w, int h, int start_h, int end_h);
+  void interpolate_422_v2(int w, int h, int start_h, int end_h);
+  void interpolate_420_v2(int w, int h, int start_h, int end_h);
   TiffIFD *mRootIFD;
 };
 
