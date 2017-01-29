@@ -174,10 +174,12 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 #endif
 #endif
 
-inline uint32 clampbits(int x, uint32 n) {
-  uint32 _y_temp;
-  if( (_y_temp=x>>n) )
-    x = ~_y_temp >> (32-n);
+// clampBits clamps the given int to the range 0 .. 2^n-1
+inline uint32 clampBits(int x, uint32 n)
+{
+  const int tmp = (1 << n) - 1;
+  x = x < 0 ? 0 : x;
+  x = x > tmp ? tmp : x;
   return x;
 }
 

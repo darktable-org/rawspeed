@@ -350,7 +350,7 @@ RawImage& OpcodeMapPolynomial::createOutput( RawImage &in )
     double val = mCoefficient[0];
     for (uint64 j = 1; j <= mDegree; j++)
       val += mCoefficient[j] * pow(in_val, (double)(j));
-    mLookup[i] = clampbits((int)(val*65535.5), 16);
+    mLookup[i] = clampBits((int)(val*65535.5), 16);
   }
   return in;
 }
@@ -424,7 +424,8 @@ void OpcodeDeltaPerRow::apply( RawImage &in, RawImage &out, uint32 startY, uint3
       for (uint64 x = 0; x < (uint64)mAoi.getWidth(); x += mColPitch) {
         for (uint64 p = 0; p < mPlanes; p++)
         {
-          src[x*cpp+p] = clampbits(16,delta + src[x*cpp+p]);
+          //TODO: the way clampBits is used here, is _very_ likely wrong
+          src[x*cpp+p] = clampBits(16,delta + src[x*cpp+p]);
         }
       }
     }
@@ -512,7 +513,7 @@ void OpcodeDeltaPerCol::apply( RawImage &in, RawImage &out, uint32 startY, uint3
       for (uint64 x = 0; x < (uint64)mAoi.getWidth(); x += mColPitch) {
         for (uint64 p = 0; p < mPlanes; p++)
         {
-          src[x*cpp+p] = clampbits(16, mDeltaX[x] + src[x*cpp+p]);
+          src[x*cpp+p] = clampBits(16, mDeltaX[x] + src[x*cpp+p]);
         }
       }
     }
@@ -585,7 +586,7 @@ void OpcodeScalePerRow::apply( RawImage &in, RawImage &out, uint32 startY, uint3
       for (uint64 x = 0; x < (uint64)mAoi.getWidth(); x += mColPitch) {
         for (uint64 p = 0; p < mPlanes; p++)
         {
-          src[x*cpp+p] = clampbits(16,(delta * src[x*cpp+p] + 512) >> 10);
+          src[x*cpp+p] = clampBits(16,(delta * src[x*cpp+p] + 512) >> 10);
         }
       }
     }
@@ -673,7 +674,7 @@ void OpcodeScalePerCol::apply( RawImage &in, RawImage &out, uint32 startY, uint3
       for (uint64 x = 0; x < (uint64)mAoi.getWidth(); x += mColPitch) {
         for (uint64 p = 0; p < mPlanes; p++)
         {
-          src[x*cpp+p] = clampbits(16, (mDeltaX[x] * src[x*cpp+p] + 512) >> 10);
+          src[x*cpp+p] = clampBits(16, (mDeltaX[x] * src[x*cpp+p] + 512) >> 10);
         }
       }
     }
