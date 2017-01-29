@@ -229,39 +229,6 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentGetters) {
     checkHelper(Info);
     checkHelper(Info, InfoOrig);
   });
-
-  ASSERT_NO_THROW({
-    const unique_ptr<const CameraSensorInfo> InfoOrig(new CameraSensorInfo(
-        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate));
-    unique_ptr<CameraSensorInfo> Info(new CameraSensorInfo(0, 0, 0, 0, {0}));
-
-    *Info = *InfoOrig;
-
-    checkHelper(*Info);
-    checkHelper(*Info, *InfoOrig);
-  });
-
-  ASSERT_NO_THROW({
-    const CameraSensorInfo InfoOrig(mBlackLevel, mWhiteLevel, mMinIso, mMaxIso,
-                                    mBlackLevelSeparate);
-    unique_ptr<CameraSensorInfo> Info(new CameraSensorInfo(0, 0, 0, 0, {0}));
-
-    *Info = InfoOrig;
-
-    checkHelper(*Info);
-    checkHelper(*Info, InfoOrig);
-  });
-
-  ASSERT_NO_THROW({
-    const unique_ptr<const CameraSensorInfo> InfoOrig(new CameraSensorInfo(
-        mBlackLevel, mWhiteLevel, mMinIso, mMaxIso, mBlackLevelSeparate));
-    CameraSensorInfo Info(0, 0, 0, 0, {0});
-
-    Info = *InfoOrig;
-
-    checkHelper(Info);
-    checkHelper(Info, *InfoOrig);
-  });
 }
 
 // --------------------------------------------------------
