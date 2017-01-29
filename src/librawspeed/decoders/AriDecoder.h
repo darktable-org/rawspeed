@@ -40,6 +40,7 @@ public:
   void checkSupportInternal(CameraMetaData *meta) override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
   void decodeThreaded(RawDecoderThread *t) override;
+  static bool isARI(FileMap* input);
 
 protected:
   uint32 mWidth, mHeight, mIso;

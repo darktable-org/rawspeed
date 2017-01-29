@@ -66,7 +66,7 @@ RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
     }
   }
 
-  if (0 == memcmp(&data[0], "ARRI\x12\x34\x56\x78", 8)) {
+  if (AriDecoder::isARI(mInput)) {
     try {
       return new AriDecoder(mInput);
     } catch (RawDecoderException &) {
