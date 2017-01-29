@@ -27,7 +27,7 @@
 #include "io/ByteStream.h"   // for ByteStream
 #include "metadata/Camera.h" // for Camera
 #include <cstdlib>           // for atoi
-#include <map>               // for map, _Rb_tree_iterator
+#include <map>               // for map
 #include <string>            // for string, operator==, basic_...
 #include <utility>           // for pair
 
@@ -44,50 +44,55 @@ NakedDecoder::NakedDecoder(FileMap* file, Camera* c) :
 
 NakedDecoder::~NakedDecoder() = default;
 
-RawImage NakedDecoder::decodeRawInternal() {
-  uint32 width=0, height=0, filesize=0, bits=0, offset=0;
-  if(cam->hints.find("full_width") != cam->hints.end()) {
-    string tmp = cam->hints.find(string("full_width"))->second;
-    width = (uint32) atoi(tmp.c_str());
-  } else
-    ThrowRDE("Naked: couldn't find width");
+static const map<string, BitOrder> order2enum = {
+    {"plain", BitOrder_Plain},
+    {"jpeg", BitOrder_Jpeg},
+    {"jpeg16", BitOrder_Jpeg16},
+    {"jpeg32", BitOrder_Jpeg32},
+};
 
-  if(cam->hints.find("full_height") != cam->hints.end()) {
-    string tmp = cam->hints.find(string("full_height"))->second;
-    height = (uint32) atoi(tmp.c_str());
-  } else
-    ThrowRDE("Naked: couldn't find height");
+void NakedDecoder::parseHints() {
+  const auto& cHints = cam->hints;
+  const auto& make = cam->make.c_str();
+  const auto& model = cam->model.c_str();
 
-  if(cam->hints.find("filesize") != cam->hints.end()) {
-    string tmp = cam->hints.find(string("filesize"))->second;
-    filesize = (uint32) atoi(tmp.c_str());
-  } else
-    ThrowRDE("Naked: couldn't find filesize");
+  auto parseHint = [&cHints, &make, &model](const string& name, uint32& field,
+                                            bool fatal = true) {
+    const auto& hint = cHints.find(name);
+    if (hint == cHints.end()) {
+      if (fatal)
+        ThrowRDE("Naked: %s %s: couldn't find %s", make, model, name.c_str());
+      else
+        return false;
+    }
 
-  if(cam->hints.find("offset") != cam->hints.end()) {
-    string tmp = cam->hints.find(string("offset"))->second;
-    offset = (uint32) atoi(tmp.c_str());
-  }
+    const auto& tmp = hint->second;
+    field = (uint32)atoi(tmp.c_str());
 
-  if(cam->hints.find("bits") != cam->hints.end()) {
-    string tmp = cam->hints.find(string("bits"))->second;
-    bits = (uint32) atoi(tmp.c_str());
-  } else
+    return true;
+  };
+
+  parseHint("full_width", width);
+  parseHint("full_height", height);
+  parseHint("filesize", filesize);
+  parseHint("offset", offset, false);
+
+  if (!parseHint("bits", bits, false))
     bits = (filesize-offset)*8/width/height;
 
-  BitOrder bo = BitOrder_Jpeg16;  // Default
-  if(cam->hints.find("order") != cam->hints.end()) {
-    string tmp = cam->hints.find(string("order"))->second;
-    if (tmp == "plain") {
-      bo = BitOrder_Plain;
-    } else if (tmp == "jpeg") {
-      bo = BitOrder_Jpeg;
-    } else if (tmp == "jpeg16") {
-      bo = BitOrder_Jpeg16;
-    } else if (tmp == "jpeg32") {
-      bo = BitOrder_Jpeg32;
+  if (cHints.find("order") != cHints.end()) {
+    const auto& tmp = cHints.find("order")->second;
+
+    try {
+      bo = order2enum.at(tmp);
+    } catch (std::out_of_range&) {
+      ThrowRDE("Naked: %s %s: unknown order: %s", make, model, tmp.c_str());
     }
   }
+}
+
+RawImage NakedDecoder::decodeRawInternal() {
+  parseHints();
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();

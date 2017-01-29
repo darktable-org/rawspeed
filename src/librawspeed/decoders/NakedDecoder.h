@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "common/Common.h"       // for uint32, ::BitOrder_Jpeg16
 #include "common/RawImage.h"     // for RawImage
 #include "decoders/RawDecoder.h" // for RawDecoder
 #include "io/FileMap.h"          // for FileMap
@@ -41,8 +42,18 @@ public:
   void checkSupportInternal(CameraMetaData *meta) override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
 
+private:
+  void parseHints();
+
 protected:
   Camera *cam;
+
+  uint32 width{0};
+  uint32 height{0};
+  uint32 filesize{0};
+  uint32 bits{0};
+  uint32 offset{0};
+  BitOrder bo{BitOrder_Jpeg16};
 };
 
 } // namespace RawSpeed
