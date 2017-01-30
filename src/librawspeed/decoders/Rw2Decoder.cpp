@@ -45,16 +45,10 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-Rw2Decoder::Rw2Decoder(TiffIFD *rootIFD, FileMap *file)
-    : RawDecoder(file), mRootIFD(rootIFD), input_start(nullptr) {
-}
 Rw2Decoder::~Rw2Decoder() {
   if (input_start)
     delete input_start;
   input_start = nullptr;
-  if (mRootIFD)
-    delete mRootIFD;
-  mRootIFD = nullptr;
 }
 
 RawImage Rw2Decoder::decodeRawInternal() {

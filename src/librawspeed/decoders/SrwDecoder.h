@@ -22,7 +22,7 @@
 
 #include "common/Common.h"       // for uchar8, int32
 #include "common/RawImage.h"     // for RawImage
-#include "decoders/RawDecoder.h" // for RawDecoder
+#include "decoders/AbstractTiffDecoder.h"
 #include "io/BitPumpMSB.h"       // for BitPumpMSB
 #include "io/FileMap.h"          // for FileMap
 #include <string>                // for string
@@ -31,18 +31,14 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-class TiffIFD;
-
-class SrwDecoder :
-  public RawDecoder
+class SrwDecoder final : public AbstractTiffDecoder
 {
 public:
-  SrwDecoder(TiffIFD *rootIFD, FileMap* file);
-  ~SrwDecoder() override;
+  using AbstractTiffDecoder::AbstractTiffDecoder;
+
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
   void checkSupportInternal(CameraMetaData *meta) override;
-  TiffIFD *getRootIFD() override { return mRootIFD; }
 
 private:
   struct encTableItem {
@@ -56,7 +52,6 @@ private:
   int32 samsungDiff (BitPumpMSB &pump, encTableItem *tbl);
   void decodeCompressed3(TiffIFD* raw, int bits);
   std::string getMode();
-  TiffIFD *mRootIFD;
 };
 
 } // namespace RawSpeed

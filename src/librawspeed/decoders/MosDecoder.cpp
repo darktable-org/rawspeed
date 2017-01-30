@@ -40,8 +40,9 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-MosDecoder::MosDecoder(TiffIFD *rootIFD, FileMap* file)  :
-    RawDecoder(file), mRootIFD(rootIFD) {
+MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, FileMap* file)
+  : AbstractTiffDecoder(move(rootIFD), file)
+{
   black_level = 0;
 
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MAKE);
@@ -57,8 +58,6 @@ MosDecoder::MosDecoder(TiffIFD *rootIFD, FileMap* file)  :
     model = getXMPTag(xmpText, "Model");
   }
 }
-
-MosDecoder::~MosDecoder() { delete mRootIFD; }
 
 string MosDecoder::getXMPTag(const string &xmp, const string &tag) {
   string::size_type start = xmp.find("<tiff:"+tag+">");

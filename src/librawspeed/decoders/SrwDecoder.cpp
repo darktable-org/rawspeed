@@ -41,16 +41,6 @@ using namespace std;
 
 namespace RawSpeed {
 
-SrwDecoder::SrwDecoder(TiffIFD *rootIFD, FileMap* file):
-RawDecoder(file), mRootIFD(rootIFD) {
-}
-
-SrwDecoder::~SrwDecoder() {
-  if (mRootIFD)
-    delete mRootIFD;
-  mRootIFD = nullptr;
-}
-
 RawImage SrwDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 

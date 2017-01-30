@@ -22,25 +22,22 @@
 
 #include "common/Common.h"       // for uint32
 #include "common/RawImage.h"     // for RawImage
-#include "decoders/RawDecoder.h" // for RawDecoder
+#include "decoders/AbstractTiffDecoder.h"
 #include "io/FileMap.h"          // for FileMap
 #include <vector>                // for vector
 
 namespace RawSpeed {
 
 class CameraMetaData;
-class TiffIFD;
 
-class DngDecoder :
-  public RawDecoder
+class DngDecoder final : public AbstractTiffDecoder
 {
 public:
-  DngDecoder(TiffIFD *rootIFD, FileMap* file);
-  ~DngDecoder() override;
+  DngDecoder(TiffRootIFDOwner&& rootIFD, FileMap* file);
+
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
   void checkSupportInternal(CameraMetaData *meta) override;
-  TiffIFD *getRootIFD() override { return mRootIFD; }
 
 private:
   uint32 sample_format{1};
@@ -48,7 +45,6 @@ private:
   int compression;
 
 protected:
-  TiffIFD *mRootIFD;
   int getDecoderVersion() const override { return 0; }
   bool mFixLjpeg;
   void dropUnsuportedChunks(std::vector<TiffIFD*>& data);

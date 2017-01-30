@@ -42,7 +42,9 @@ using namespace std;
 
 namespace RawSpeed {
 
-DngDecoder::DngDecoder(TiffIFD *rootIFD, FileMap* file) : RawDecoder(file), mRootIFD(rootIFD) {
+DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, FileMap* file)
+  : AbstractTiffDecoder(move(rootIFD), file)
+{
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(DNGVERSION);
   const uchar8* v = data[0]->getEntry(DNGVERSION)->getData(4);
 
@@ -55,12 +57,6 @@ DngDecoder::DngDecoder(TiffIFD *rootIFD, FileMap* file) : RawDecoder(file), mRoo
     mFixLjpeg = true;
   else
     mFixLjpeg = false;
-}
-
-DngDecoder::~DngDecoder() {
-  if (mRootIFD)
-    delete mRootIFD;
-  mRootIFD = nullptr;
 }
 
 void DngDecoder::dropUnsuportedChunks(vector<TiffIFD*>& data) {

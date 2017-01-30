@@ -46,16 +46,6 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-OrfDecoder::OrfDecoder(TiffIFD *rootIFD, FileMap* file):
-    RawDecoder(file), mRootIFD(rootIFD) {
-}
-
-OrfDecoder::~OrfDecoder() {
-  if (mRootIFD)
-    delete mRootIFD;
-  mRootIFD = nullptr;
-}
-
 RawImage OrfDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 

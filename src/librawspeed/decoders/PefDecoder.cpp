@@ -38,16 +38,6 @@ using namespace std;
 
 namespace RawSpeed {
 
-PefDecoder::PefDecoder(TiffIFD *rootIFD, FileMap* file) :
-    RawDecoder(file), mRootIFD(rootIFD) {
-}
-
-PefDecoder::~PefDecoder() {
-  if (mRootIFD)
-    delete mRootIFD;
-  mRootIFD = nullptr;
-}
-
 RawImage PefDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
   if (data.empty())
@@ -83,7 +73,7 @@ RawImage PefDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
   try {
-    decodePentax(mRaw, ByteStream(mFile, offsets->getInt(), counts->getInt()), mRootIFD);
+    decodePentax(mRaw, ByteStream(mFile, offsets->getInt(), counts->getInt()), getRootIFD());
   } catch (IOException &e) {
     mRaw->setError(e.what());
     // Let's ignore it, it may have delivered somewhat useful data.

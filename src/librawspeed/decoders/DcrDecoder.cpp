@@ -38,12 +38,6 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-DcrDecoder::DcrDecoder(TiffIFD *rootIFD, FileMap* file)  :
-    RawDecoder(file), mRootIFD(rootIFD) {
-}
-
-DcrDecoder::~DcrDecoder() { delete mRootIFD; }
-
 RawImage DcrDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
 

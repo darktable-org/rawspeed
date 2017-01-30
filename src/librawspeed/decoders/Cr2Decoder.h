@@ -20,22 +20,19 @@
 
 #pragma once
 
-#include "decoders/RawDecoder.h"
+#include "decoders/AbstractTiffDecoder.h"
 #include "decompressors/LJpegPlain.h"
-#include "tiff/TiffIFD.h"
 
 namespace RawSpeed {
 
-class Cr2Decoder final :
-  public RawDecoder
+class Cr2Decoder final : public AbstractTiffDecoder
 {
 public:
-  Cr2Decoder(TiffIFD *rootIFD, FileMap* file);
+  using AbstractTiffDecoder::AbstractTiffDecoder;
+
   RawImage decodeRawInternal() override;
   void checkSupportInternal(CameraMetaData *meta) override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
-  TiffIFD *getRootIFD() override { return mRootIFD; }
-  ~Cr2Decoder() override;
 
 protected:
   int sraw_coeffs[3];
@@ -51,7 +48,6 @@ protected:
   void interpolate_420_v1(int w, int h, int start_h, int end_h);
   void interpolate_422_v2(int w, int h, int start_h, int end_h);
   void interpolate_420_v2(int w, int h, int start_h, int end_h);
-  TiffIFD *mRootIFD;
 };
 
 } // namespace RawSpeed

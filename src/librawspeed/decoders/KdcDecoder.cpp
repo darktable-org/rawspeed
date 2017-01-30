@@ -37,12 +37,6 @@ using namespace std;
 
 namespace RawSpeed {
 
-KdcDecoder::KdcDecoder(TiffIFD *rootIFD, FileMap* file)  :
-    RawDecoder(file), mRootIFD(rootIFD) {
-}
-
-KdcDecoder::~KdcDecoder() { delete mRootIFD; }
-
 RawImage KdcDecoder::decodeRawInternal() {
   if (!mRootIFD->hasEntryRecursive(COMPRESSION))
     ThrowRDE("KDC Decoder: Couldn't find compression setting");

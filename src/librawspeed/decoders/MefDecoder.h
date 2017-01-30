@@ -22,27 +22,24 @@
 #pragma once
 
 #include "common/RawImage.h"     // for RawImage
-#include "decoders/RawDecoder.h" // for RawDecoder
+#include "decoders/AbstractTiffDecoder.h"
 #include "io/FileMap.h"          // for FileMap
 
 namespace RawSpeed {
 
 class CameraMetaData;
-class TiffIFD;
 
-class MefDecoder :
-  public RawDecoder
+class MefDecoder final : public AbstractTiffDecoder
 {
 public:
-  MefDecoder(TiffIFD *rootIFD, FileMap* file);
-  ~MefDecoder() override;
+  using AbstractTiffDecoder::AbstractTiffDecoder;
+
   RawImage decodeRawInternal() override;
   void checkSupportInternal(CameraMetaData *meta) override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
 
 protected:
   int getDecoderVersion() const override { return 0; }
-  TiffIFD *mRootIFD;
 };
 
 } // namespace RawSpeed

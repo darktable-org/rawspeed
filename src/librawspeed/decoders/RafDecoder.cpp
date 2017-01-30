@@ -42,16 +42,6 @@ using namespace std;
 
 namespace RawSpeed {
 
-RafDecoder::RafDecoder(TiffIFD *rootIFD, FileMap* file) :
-    RawDecoder(file), mRootIFD(rootIFD) {
-  alt_layout = false;
-}
-RafDecoder::~RafDecoder() {
-  if (mRootIFD)
-    delete mRootIFD;
-  mRootIFD = nullptr;
-}
-
 bool RafDecoder::isRAF(FileMap* input) {
   static const char magic[] = "FUJIFILMCCD-RAW ";
   static const size_t magic_size = sizeof(magic) - 1; // excluding \0

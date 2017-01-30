@@ -38,12 +38,6 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-DcsDecoder::DcsDecoder(TiffIFD *rootIFD, FileMap* file)  :
-    RawDecoder(file), mRootIFD(rootIFD) {
-}
-
-DcsDecoder::~DcsDecoder() { delete mRootIFD; }
-
 RawImage DcsDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(IMAGEWIDTH);
 

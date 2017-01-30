@@ -35,12 +35,6 @@ using namespace std;
 
 namespace RawSpeed {
 
-MefDecoder::MefDecoder(TiffIFD *rootIFD, FileMap* file)  :
-    RawDecoder(file), mRootIFD(rootIFD) {
-}
-
-MefDecoder::~MefDecoder() { delete mRootIFD; }
-
 RawImage MefDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 

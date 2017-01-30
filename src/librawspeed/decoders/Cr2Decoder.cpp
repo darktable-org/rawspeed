@@ -47,16 +47,6 @@ using namespace std;
 
 namespace RawSpeed {
 
-Cr2Decoder::Cr2Decoder(TiffIFD *rootIFD, FileMap* file) :
-    RawDecoder(file), mRootIFD(rootIFD) {
-}
-
-Cr2Decoder::~Cr2Decoder() {
-  if (mRootIFD)
-    delete mRootIFD;
-  mRootIFD = nullptr;
-}
-
 RawImage Cr2Decoder::decodeOldFormat() {
   uint32 offset = 0;
   if (mRootIFD->getEntryRecursive(CANON_RAW_DATA_OFFSET))

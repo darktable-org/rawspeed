@@ -49,16 +49,6 @@ using namespace std;
 
 namespace RawSpeed {
 
-NefDecoder::NefDecoder(TiffIFD *rootIFD, FileMap* file) :
-    RawDecoder(file), mRootIFD(rootIFD) {
-}
-
-NefDecoder::~NefDecoder() {
-  if (mRootIFD)
-    delete mRootIFD;
-  mRootIFD = nullptr;
-}
-
 RawImage NefDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
 
