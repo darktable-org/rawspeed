@@ -1,14 +1,16 @@
 include(CheckCXXCompilerFlagAndEnableIt)
 
-if(UNIX OR APPLE)
-  # want -Werror to be enabled automatically for me.
-  # but on windows platform, there are warnings still
-  add_definitions(-Werror)
-endif()
+# want -Werror to be enabled automatically for me.
+add_definitions(-Werror)
 
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wall)
 
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wformat=2)
+
+if(NOT (UNIX OR APPLE))
+  # on windows, resuts in bogus false-positive varnings
+  add_definitions(-Wno-format)
+endif()
 
 # cleanup this once we no longer need to support gcc-4.9
 # disabled for now, see https://github.com/darktable-org/rawspeed/issues/32
