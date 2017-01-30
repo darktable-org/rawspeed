@@ -43,16 +43,6 @@ TEST(ColorFilterArrayTestBasic, Constructor) {
     ColorFilterArray cfa((uint32)0);
     ASSERT_EQ(cfa.size.area(), 8 * 2);
   });
-
-  ASSERT_NO_THROW({
-    unique_ptr<ColorFilterArray> cfa(new ColorFilterArray(square));
-    ASSERT_EQ(cfa->size.area(), square.area());
-  });
-
-  ASSERT_NO_THROW({
-    unique_ptr<ColorFilterArray> cfa(new ColorFilterArray((uint32)0));
-    ASSERT_EQ(cfa->size.area(), 8 * 2);
-  });
 }
 
 TEST(ColorFilterArrayTestBasic, SetSize) {
@@ -63,21 +53,9 @@ TEST(ColorFilterArrayTestBasic, SetSize) {
   });
 
   ASSERT_NO_THROW({
-    unique_ptr<ColorFilterArray> cfa(new ColorFilterArray);
-    cfa->setSize(square);
-    ASSERT_EQ(cfa->size.area(), square.area());
-  });
-
-  ASSERT_NO_THROW({
     ColorFilterArray cfa(iPoint2D(1, 1));
     cfa.setSize(square);
     ASSERT_EQ(cfa.size.area(), square.area());
-  });
-
-  ASSERT_NO_THROW({
-    unique_ptr<ColorFilterArray> cfa(new ColorFilterArray(iPoint2D(1, 1)));
-    cfa->setSize(square);
-    ASSERT_EQ(cfa->size.area(), square.area());
   });
 }
 
