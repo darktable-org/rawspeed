@@ -46,6 +46,7 @@ public:
   TiffIFD *getRootIFD() override { return mRootIFD; }
 
 private:
+  int getDecoderVersion() const override { return 3; }
   void decodeCompressed(ByteStream& s,uint32 w, uint32 h);
   void decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 size);
   TiffIFD *mRootIFD;

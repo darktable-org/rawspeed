@@ -39,7 +39,6 @@ class CameraMetaData;
 
 ErfDecoder::ErfDecoder(TiffIFD *rootIFD, FileMap* file)  :
     RawDecoder(file), mRootIFD(rootIFD) {
-  decoderVersion = 0;
 }
 
 ErfDecoder::~ErfDecoder() { delete mRootIFD; }

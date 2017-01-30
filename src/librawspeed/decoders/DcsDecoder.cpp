@@ -40,7 +40,6 @@ class CameraMetaData;
 
 DcsDecoder::DcsDecoder(TiffIFD *rootIFD, FileMap* file)  :
     RawDecoder(file), mRootIFD(rootIFD) {
-  decoderVersion = 0;
 }
 
 DcsDecoder::~DcsDecoder() { delete mRootIFD; }

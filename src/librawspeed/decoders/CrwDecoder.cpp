@@ -49,7 +49,6 @@ class CameraMetaData;
 
 CrwDecoder::CrwDecoder(CiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
-  decoderVersion = 0;
   mHuff[0] = nullptr;
   mHuff[1] = nullptr;
 }

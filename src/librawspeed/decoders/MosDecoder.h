@@ -44,6 +44,7 @@ public:
   void decodeMetaDataInternal(CameraMetaData *meta) override;
 
 protected:
+  int getDecoderVersion() const override { return 0; }
   uint32 black_level;
   TiffIFD *mRootIFD;
   std::string make, model;

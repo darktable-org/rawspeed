@@ -50,6 +50,7 @@ private:
     uchar8 diffLen;
   };
 
+  int getDecoderVersion() const override { return 3; }
   void decodeCompressed(TiffIFD* raw);
   void decodeCompressed2(TiffIFD* raw, int bits);
   int32 samsungDiff (BitPumpMSB &pump, encTableItem *tbl);

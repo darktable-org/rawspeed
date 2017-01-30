@@ -57,7 +57,6 @@ namespace RawSpeed {
 
 ThreefrDecoder::ThreefrDecoder(TiffIFD *rootIFD, FileMap* file)  :
     RawDecoder(file), mRootIFD(rootIFD) {
-  decoderVersion = 0;
 }
 
 ThreefrDecoder::~ThreefrDecoder() { delete mRootIFD; }

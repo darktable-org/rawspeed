@@ -42,7 +42,6 @@ class CameraMetaData;
 
 MosDecoder::MosDecoder(TiffIFD *rootIFD, FileMap* file)  :
     RawDecoder(file), mRootIFD(rootIFD) {
-  decoderVersion = 0;
   black_level = 0;
 
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MAKE);

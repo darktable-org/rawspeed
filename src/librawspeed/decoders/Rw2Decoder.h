@@ -60,6 +60,7 @@ public:
   TiffIFD *getRootIFD() override { return mRootIFD; }
 
 protected:
+  int getDecoderVersion() const override { return 2; }
   void decodeThreaded(RawDecoderThread *t) override;
 
 private:

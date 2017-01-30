@@ -43,6 +43,7 @@ public:
   static bool isARI(FileMap* input);
 
 protected:
+  int getDecoderVersion() const override { return 0; }
   uint32 mWidth, mHeight, mIso;
   std::string mModel;
   std::string mEncoder;

@@ -42,6 +42,7 @@ public:
   void decodeMetaDataInternal(CameraMetaData *meta) override;
 
 protected:
+  int getDecoderVersion() const override { return 0; }
   TiffIFD *mRootIFD;
 };
 

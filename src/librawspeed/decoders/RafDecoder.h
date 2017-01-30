@@ -44,6 +44,7 @@ public:
   static bool isRAF(FileMap* input);
 
 protected:
+  int getDecoderVersion() const override { return 1; }
   void decodeThreaded(RawDecoderThread *t) override;
   void DecodeRaf();
   bool alt_layout;

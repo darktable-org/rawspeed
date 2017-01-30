@@ -54,7 +54,6 @@ using namespace std;
 namespace RawSpeed {
 
 RawDecoder::RawDecoder(FileMap* file) : mRaw(RawImage::create()), mFile(file) {
-  decoderVersion = 0;
   failOnUnknown = false;
   interpolateBadPixels = true;
   applyStage1DngOpcodes = true;
@@ -146,7 +145,7 @@ bool RawDecoder::checkCameraSupported(CameraMetaData *meta, string make,
   if (!cam->supported)
     ThrowRDE("Camera not supported (explicit). Sorry.");
 
-  if (cam->decoderVersion > decoderVersion)
+  if (cam->decoderVersion > getDecoderVersion())
     ThrowRDE("Camera not supported in this version. Update RawSpeed for support.");
 
   hints = cam->hints;

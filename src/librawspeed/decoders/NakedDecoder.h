@@ -46,6 +46,7 @@ private:
   void parseHints();
 
 protected:
+  int getDecoderVersion() const override { return 0; }
   Camera *cam;
 
   uint32 width{0};

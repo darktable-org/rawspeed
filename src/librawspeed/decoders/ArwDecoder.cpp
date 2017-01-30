@@ -45,7 +45,6 @@ namespace RawSpeed {
 ArwDecoder::ArwDecoder(TiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
   mShiftDownScale = 0;
-  decoderVersion = 1;
 }
 
 ArwDecoder::~ArwDecoder() {

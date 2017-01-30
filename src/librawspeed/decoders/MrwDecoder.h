@@ -42,6 +42,7 @@ public:
   void decodeMetaDataInternal(CameraMetaData *meta) override;
   static int isMRW(FileMap* input);
 protected:
+  int getDecoderVersion() const override { return 0; }
   virtual void parseHeader();
   uint32 raw_width, raw_height, data_offset, packed;
   TiffIFD *tiff_meta;

@@ -44,7 +44,6 @@ using namespace std;
 namespace RawSpeed {
 
 X3fDecoder::X3fDecoder(FileMap *file) : RawDecoder(file), bytes(nullptr) {
-  decoderVersion = 1;
   huge_table = nullptr;
   line_offsets = nullptr;
   bytes = new ByteStream(file, 0, getHostEndianness() == little);

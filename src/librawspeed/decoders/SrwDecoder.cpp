@@ -43,7 +43,6 @@ namespace RawSpeed {
 
 SrwDecoder::SrwDecoder(TiffIFD *rootIFD, FileMap* file):
 RawDecoder(file), mRootIFD(rootIFD) {
-  decoderVersion = 3;
 }
 
 SrwDecoder::~SrwDecoder() {

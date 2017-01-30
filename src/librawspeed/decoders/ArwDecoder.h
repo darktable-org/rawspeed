@@ -45,6 +45,7 @@ public:
   TiffIFD *getRootIFD() override { return mRootIFD; }
 
 protected:
+  int getDecoderVersion() const override { return 1; }
   void DecodeARW(ByteStream &input, uint32 w, uint32 h);
   void DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp);
   void DecodeUncompressed(TiffIFD* raw);

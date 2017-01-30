@@ -39,7 +39,6 @@ namespace RawSpeed {
 
 KdcDecoder::KdcDecoder(TiffIFD *rootIFD, FileMap* file)  :
     RawDecoder(file), mRootIFD(rootIFD) {
-  decoderVersion = 0;
 }
 
 KdcDecoder::~KdcDecoder() { delete mRootIFD; }

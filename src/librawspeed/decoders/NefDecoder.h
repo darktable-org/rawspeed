@@ -50,6 +50,7 @@ public:
   TiffIFD *getRootIFD() override { return mRootIFD; }
 
 private:
+  int getDecoderVersion() const override { return 5; }
   bool D100IsCompressed(uint32 offset);
   bool NEFIsUncompressed(TiffIFD *raw);
   bool NEFIsUncompressedRGB(TiffIFD *raw);

@@ -37,7 +37,6 @@ namespace RawSpeed {
 
 MefDecoder::MefDecoder(TiffIFD *rootIFD, FileMap* file)  :
     RawDecoder(file), mRootIFD(rootIFD) {
-  decoderVersion = 0;
 }
 
 MefDecoder::~MefDecoder() { delete mRootIFD; }

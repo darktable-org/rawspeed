@@ -49,6 +49,7 @@ private:
 
 protected:
   TiffIFD *mRootIFD;
+  int getDecoderVersion() const override { return 0; }
   bool mFixLjpeg;
   void dropUnsuportedChunks(std::vector<TiffIFD*>& data);
   void parseCFA(TiffIFD* raw);

@@ -51,7 +51,6 @@ namespace RawSpeed {
 
 NefDecoder::NefDecoder(TiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
-  decoderVersion = 5;
 }
 
 NefDecoder::~NefDecoder() {

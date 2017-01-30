@@ -44,7 +44,6 @@ namespace RawSpeed {
 
 RafDecoder::RafDecoder(TiffIFD *rootIFD, FileMap* file) :
     RawDecoder(file), mRootIFD(rootIFD) {
-  decoderVersion = 1;
   alt_layout = false;
 }
 RafDecoder::~RafDecoder() {

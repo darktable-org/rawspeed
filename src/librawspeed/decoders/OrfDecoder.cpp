@@ -48,7 +48,6 @@ class CameraMetaData;
 
 OrfDecoder::OrfDecoder(TiffIFD *rootIFD, FileMap* file):
     RawDecoder(file), mRootIFD(rootIFD) {
-      decoderVersion = 3;
 }
 
 OrfDecoder::~OrfDecoder() {

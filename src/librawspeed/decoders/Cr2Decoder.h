@@ -40,6 +40,7 @@ public:
 protected:
   int sraw_coeffs[3];
 
+  int getDecoderVersion() const override { return 8; }
   RawImage decodeOldFormat();
   RawImage decodeNewFormat();
   void sRawInterpolate();

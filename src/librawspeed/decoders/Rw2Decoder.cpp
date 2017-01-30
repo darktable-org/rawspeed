@@ -47,7 +47,6 @@ class CameraMetaData;
 
 Rw2Decoder::Rw2Decoder(TiffIFD *rootIFD, FileMap *file)
     : RawDecoder(file), mRootIFD(rootIFD), input_start(nullptr) {
-  decoderVersion = 2;
 }
 Rw2Decoder::~Rw2Decoder() {
   if (input_start)
