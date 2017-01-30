@@ -20,6 +20,7 @@
 
 #include "decoders/DngDecoderSlices.h"
 #include "common/Common.h"
+#include "common/Memory.h" // for alignedMalloc, alignedFree
 #include "common/Point.h"
 #include "decompressors/UncompressedDecompressor.h"
 #include "io/IOException.h"
@@ -475,7 +476,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
           ThrowRDE("DngDecoderSlices: Component count doesn't match");
         int row_stride = dinfo.output_width * dinfo.output_components;
         int pic_size = dinfo.output_height * row_stride;
-        complete_buffer = (uchar8*)_aligned_malloc(pic_size, 16);
+        complete_buffer = (uchar8*)alignedMalloc(pic_size, 16);
         while (dinfo.output_scanline < dinfo.output_height) {
           buffer[0] = (JSAMPROW)(&complete_buffer[dinfo.output_scanline*row_stride]);
           if (0 == jpeg_read_scanlines(&dinfo, buffer, 1))
@@ -501,7 +502,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
       }
       free(buffer);
       if (complete_buffer)
-        _aligned_free(complete_buffer);
+        alignedFree(complete_buffer);
       jpeg_destroy_decompress(&dinfo);
     }
   }

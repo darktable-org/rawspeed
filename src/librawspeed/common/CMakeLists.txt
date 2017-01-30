@@ -1,6 +1,8 @@
 FILE(GLOB COMMON_SOURCES
   "Common.cpp"
   "Common.h"
+  "Memory.cpp"
+  "Memory.h"
   "Point.h"
   "RawImage.cpp"
   "RawImage.h"

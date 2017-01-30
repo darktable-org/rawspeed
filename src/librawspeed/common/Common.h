@@ -21,15 +21,11 @@
 #pragma once
 
 #include <algorithm>        // for forward
-#include <cstdint>          // for UINT32_MAX
 #include <cstring>          // for memcpy, size_t
 #include <initializer_list> // for initializer_list
 #include <memory>           // for unique_ptr, allocator
 #include <string>           // for string
 #include <vector>           // for vector
-
-void* _aligned_malloc(size_t bytes, size_t alignment);
-void _aligned_free(void *ptr);
 
 int rawspeed_get_number_of_processor_cores();
 
@@ -64,8 +60,15 @@ inline void BitBlt(uchar8* dstp, int dst_pitch, const uchar8* srcp, int src_pitc
     srcp += src_pitch;
   }
 }
-inline bool isPowerOfTwo (int val) {
+
+template <typename T> inline constexpr bool isPowerOfTwo(T val) {
   return (val & (~val+1)) == val;
+}
+
+constexpr inline size_t roundUp(size_t value, size_t multiple) {
+  return ((multiple == 0) || (value % multiple == 0))
+             ? value
+             : value + multiple - (value % multiple);
 }
 
 template<typename T> bool isIn(const T value, const std::initializer_list<T>& list) {

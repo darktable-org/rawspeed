@@ -63,6 +63,8 @@ else()
   message(STATUS "ZLIB is disabled, DNG deflate support won't be available.")
 endif()
 
+include(memory-align-alloc)
+
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 set(CONFIG_INCLUDE_PATH "${CMAKE_CURRENT_BINARY_DIR}")
 

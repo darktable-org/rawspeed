@@ -22,6 +22,7 @@
 
 #include "decoders/CrwDecoder.h"
 #include "common/Common.h"                // for ushort16, uint32, uchar8
+#include "common/Memory.h"                // for alignedMalloc, alignedFree
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/ByteStream.h"                // for ByteStream
@@ -58,9 +59,9 @@ CrwDecoder::~CrwDecoder() {
     delete mRootIFD;
   mRootIFD = nullptr;
   if (mHuff[0] != nullptr)
-    _aligned_free(mHuff[0]);
+    alignedFree(mHuff[0]);
   if (mHuff[1] != nullptr)
-    _aligned_free(mHuff[1]);
+    alignedFree(mHuff[1]);
   mHuff[0] = nullptr;
   mHuff[1] = nullptr;
 }
@@ -250,12 +251,12 @@ void CrwDecoder::makeDecoder (int n, const uchar8 *source)
   for (max=16; max && !count[max]; max--);
 
   if (mHuff[n] != nullptr) {
-    _aligned_free(mHuff[n]);
+    alignedFree(mHuff[n]);
     mHuff[n] = nullptr;
   }
 
-  auto *huff =
-      (ushort16 *)_aligned_malloc((1 + (1 << max)) * sizeof(ushort16), 16);
+  auto* huff =
+      (ushort16*)alignedMalloc((1 + (1 << max)) * sizeof(ushort16), 16);
 
   if (!huff)
     ThrowRDE("CRW: Couldn't allocate table");

@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,28 +18,26 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h"
-#include <cstdarg> // for va_end, va_list, va_start
-#include <cstdio>  // for printf, vprintf
+#pragma once
+
+#include "common/Common.h" // for isPowerOfTwo
+#include <cstddef>         // for size_t
+#include <cstdint>         // for SIZE_MAX, uintptr_t
 
 namespace RawSpeed {
 
-void writeLog(int priority, const char *format, ...)
-{
-#ifndef _DEBUG
-  if (priority < DEBUG_PRIO_INFO)
-#endif // _DEBUG
-    printf("%s", "RawSpeed:");
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-attributes"
+#pragma GCC diagnostic ignored "-Wattributes"
 
-  va_list args;
-  va_start(args, format);
+// coverity[+alloc]
+void* alignedMalloc(size_t size, size_t alignment)
+    __attribute__((malloc, warn_unused_result, alloc_size(1), alloc_align(2)));
 
-#ifndef _DEBUG
-  if(priority < DEBUG_PRIO_INFO)
-#endif // _DEBUG
-    vprintf(format, args);
+#pragma GCC diagnostic pop
 
-  va_end(args);
-}
+// coverity[+free : arg-0]
+void alignedFree(void* ptr);
 
-} // Namespace RawSpeed
+} // namespace RawSpeed
