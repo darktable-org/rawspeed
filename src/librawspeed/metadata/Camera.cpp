@@ -84,15 +84,15 @@ void Camera::parseCFA(const xml_node &cur) {
     try {
       if (name(c) == "ColorRow") {
         int y = c.attribute("y").as_int(-1);
-        if (y < 0 || y >= cfa.size.y) {
+        if (y < 0 || y >= cfa.getSize().y) {
           ThrowCME("Invalid y coordinate in CFA array of camera %s %s",
                    make.c_str(), model.c_str());
         }
         string key = c.child_value();
-        if ((int)key.size() != cfa.size.x) {
+        if ((int)key.size() != cfa.getSize().x) {
           ThrowCME("Invalid number of colors in definition for row %d in "
                    "camera %s %s. Expected %d, found %zu.",
-                   y, make.c_str(), model.c_str(), cfa.size.x, key.size());
+                   y, make.c_str(), model.c_str(), cfa.getSize().x, key.size());
         }
         const map<char, CFAColor> char2enum = {
             {'g', CFA_GREEN},      {'r', CFA_RED},  {'b', CFA_BLUE},
@@ -105,13 +105,13 @@ void Camera::parseCFA(const xml_node &cur) {
         }
       } else if (name(c) == "Color") {
         int x = c.attribute("x").as_int(-1);
-        if (x < 0 || x >= cfa.size.x) {
+        if (x < 0 || x >= cfa.getSize().x) {
           ThrowCME("Invalid x coordinate in CFA array of camera %s %s",
                    make.c_str(), model.c_str());
         }
 
         int y = c.attribute("y").as_int(-1);
-        if (y < 0 || y >= cfa.size.y) {
+        if (y < 0 || y >= cfa.getSize().y) {
           ThrowCME("Invalid y coordinate in CFA array of camera %s %s",
                    make.c_str(), model.c_str());
         }

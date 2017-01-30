@@ -205,8 +205,9 @@ void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model,
   mRaw->whitePoint = sensor->mWhiteLevel;
   mRaw->blackAreas = cam->blackAreas;
   if (mRaw->blackAreas.empty() && !sensor->mBlackLevelSeparate.empty()) {
-    if (mRaw->isCFA && mRaw->cfa.size.area() <= sensor->mBlackLevelSeparate.size()) {
-      for (uint32 i = 0; i < mRaw->cfa.size.area(); i++) {
+    auto cfaArea = mRaw->cfa.getSize().area();
+    if (mRaw->isCFA && cfaArea <= sensor->mBlackLevelSeparate.size()) {
+      for (uint32 i = 0; i < cfaArea; i++) {
         mRaw->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
       }
     } else if (!mRaw->isCFA && mRaw->getCpp() <= sensor->mBlackLevelSeparate.size()) {

@@ -42,6 +42,8 @@ enum CFAColor {
 
 class ColorFilterArray
 {
+  iPoint2D size;
+
 public:
   ColorFilterArray();
   ColorFilterArray(const ColorFilterArray& other );
@@ -58,10 +60,11 @@ public:
   virtual void shiftLeft(int n = 1);
   virtual void shiftDown(int n = 1);
   virtual std::string asString();
+  iPoint2D getSize() const { return size; }
+
   static std::string colorToString(CFAColor c);
   uint32 toDcrawColor(CFAColor c);
   CFAColor toRawspeedColor(uint32 dcrawColor);
-  iPoint2D size;
 protected:
   CFAColor *cfa;
 };

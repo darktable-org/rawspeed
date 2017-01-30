@@ -49,13 +49,13 @@ TEST(ColorFilterArrayTestBasic, SetSize) {
   ASSERT_NO_THROW({
     ColorFilterArray cfa;
     cfa.setSize(square);
-    ASSERT_EQ(cfa.size.area(), square.area());
+    ASSERT_EQ(cfa.getSize().area(), square.area());
   });
 
   ASSERT_NO_THROW({
     ColorFilterArray cfa(iPoint2D(1, 1));
     cfa.setSize(square);
-    ASSERT_EQ(cfa.size.area(), square.area());
+    ASSERT_EQ(cfa.getSize().area(), square.area());
   });
 }
 
