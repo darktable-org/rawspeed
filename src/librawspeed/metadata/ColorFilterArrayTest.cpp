@@ -36,12 +36,7 @@ static const iPoint2D square(2, 2);
 TEST(ColorFilterArrayTestBasic, Constructor) {
   ASSERT_NO_THROW({
     ColorFilterArray cfa(square);
-    ASSERT_EQ(cfa.size.area(), square.area());
-  });
-
-  ASSERT_NO_THROW({
-    ColorFilterArray cfa((uint32)0);
-    ASSERT_EQ(cfa.size.area(), 8 * 2);
+    ASSERT_EQ(cfa.getSize().area(), square.area());
   });
 }
 
@@ -129,15 +124,35 @@ TEST_P(ColorFilterArrayTest, ToDcraw) {
   });
 }
 
-TEST_P(ColorFilterArrayTest, ToDcrawAndBack) {
+TEST_P(ColorFilterArrayTest, DcrawFilterShift1) {
+  uint32 bggr = 0x16161616;
+  uint32 grbg = 0x61616161;
+  uint32 gbrg = 0x49494949;
+  uint32 rggb = 0x94949494;
+  ASSERT_NO_THROW({
+    ASSERT_EQ(ColorFilterArray::shiftDcrawFilter(rggb, 0, 0), rggb);
+    ASSERT_EQ(ColorFilterArray::shiftDcrawFilter(rggb, 1, 0), grbg);
+    ASSERT_EQ(ColorFilterArray::shiftDcrawFilter(rggb, 0, 1), gbrg);
+    ASSERT_EQ(ColorFilterArray::shiftDcrawFilter(rggb, 1, 1), bggr);
+    ASSERT_EQ(ColorFilterArray::shiftDcrawFilter(rggb, 0, 2), rggb);
+  });
+}
+
+static iPoint2D shifts[] = {{0, 0}, {1, 0}, {0, 1}, {1, 1}, {0, 2}};
+
+TEST_P(ColorFilterArrayTest, DcrawFilterShift2) {
   ASSERT_NO_THROW({
     ColorFilterArray cfaOrig;
     setHelper(&cfaOrig, param);
+    uint32 fo = cfaOrig.getDcrawFilter();
 
-    uint32 filters = cfaOrig.getDcrawFilter();
-
-    ColorFilterArray cfa(filters);
-    check(&cfa, param); // so it should be a NOP
+    for (auto s : shifts) {
+      ColorFilterArray cfa = cfaOrig;
+      cfa.shiftLeft(s.x);
+      cfa.shiftDown(s.y);
+      uint32 f = cfa.getDcrawFilter();
+      ASSERT_EQ(f, ColorFilterArray::shiftDcrawFilter(fo, s.x, s.y));
+    }
   });
 }
 
