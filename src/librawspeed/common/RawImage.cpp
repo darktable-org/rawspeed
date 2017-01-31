@@ -90,7 +90,7 @@ void RawImageData::createData() {
   if (data)
     ThrowRDE("RawImageData: Duplicate data allocation in createData.");
   pitch = (((dim.x * bpp) + 15) / 16) * 16;
-  data = (uchar8*)alignedMalloc((size_t)pitch * dim.y, 16);
+  data = (uchar8*)alignedMalloc<16>((size_t)pitch * dim.y);
   if (!data)
     ThrowRDE("RawImageData::createData: Memory Allocation failed.");
   uncropped_dim = dim;
@@ -187,7 +187,7 @@ void RawImageData::createBadPixelMap()
     ThrowRDE("RawImageData::createBadPixelMap: (internal) Bad pixel map cannot be allocated before image.");
   mBadPixelMapPitch = (((uncropped_dim.x / 8) + 15) / 16) * 16;
   mBadPixelMap =
-      (uchar8*)alignedMalloc((size_t)mBadPixelMapPitch * uncropped_dim.y, 16);
+      (uchar8*)alignedMalloc<16>((size_t)mBadPixelMapPitch * uncropped_dim.y);
   memset(mBadPixelMap, 0, (size_t)mBadPixelMapPitch * uncropped_dim.y);
   if (!mBadPixelMap)
     ThrowRDE("RawImageData::createData: Memory Allocation failed.");

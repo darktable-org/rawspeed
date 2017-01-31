@@ -29,7 +29,7 @@ namespace RawSpeed {
 Buffer::Buffer(size_type size_) : size(size_) {
   if (!size)
     ThrowIOE("Trying to allocate 0 bytes sized buffer.");
-  data = (uchar8*)alignedMalloc(size + FILEMAP_MARGIN, 16);
+  data = (uchar8*)alignedMalloc<16>(size + FILEMAP_MARGIN);
   if (!data)
     ThrowIOE("Failed to allocate %uz bytes memory buffer.", size);
   isOwner = true;

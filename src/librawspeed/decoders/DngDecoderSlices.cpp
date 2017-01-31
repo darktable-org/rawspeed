@@ -476,7 +476,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
           ThrowRDE("DngDecoderSlices: Component count doesn't match");
         int row_stride = dinfo.output_width * dinfo.output_components;
         int pic_size = dinfo.output_height * row_stride;
-        complete_buffer = (uchar8*)alignedMalloc(pic_size, 16);
+        complete_buffer = (uchar8*)alignedMalloc<16>(pic_size);
         while (dinfo.output_scanline < dinfo.output_height) {
           buffer[0] = (JSAMPROW)(&complete_buffer[dinfo.output_scanline*row_stride]);
           if (0 == jpeg_read_scanlines(&dinfo, buffer, 1))

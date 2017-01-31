@@ -186,7 +186,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
     __m128i sse_full_scale_fp;
     __m128i sse_half_scale_fp;
 
-    auto* sub_mul = (uint32*)alignedMalloc(16 * 4 * 2, 16);
+    auto* sub_mul = (uint32*)alignedMalloc<16>(16 * 4 * 2);
     if (!sub_mul)
 	  ThrowRDE("Out of memory, failed to allocate 128 bytes");
     uint32 gw = pitch / 16;

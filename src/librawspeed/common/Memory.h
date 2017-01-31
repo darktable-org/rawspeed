@@ -33,7 +33,27 @@ namespace RawSpeed {
 
 // coverity[+alloc]
 void* alignedMalloc(size_t size, size_t alignment)
-    __attribute__((malloc, warn_unused_result, alloc_size(1), alloc_align(2)));
+    __attribute__((malloc, warn_unused_result, alloc_size(1), alloc_align(2),
+                   deprecated("use alignedMalloc<alignment>(size)")));
+
+template <size_t alignment>
+// coverity[+alloc]
+inline void* __attribute__((malloc, warn_unused_result, alloc_size(1)))
+alignedMalloc(size_t size) {
+  static_assert(isPowerOfTwo(alignment), "not power-of-two");
+  static_assert(((uintptr_t)alignment % sizeof(void*)) == 0,
+                "not multiple of sizeof(void*)");
+
+#if defined(__APPLE__) &&                                                      \
+    !(defined(HAVE_POSIX_MEMALIGN) || defined(HAVE_ALIGNED_ALLOC) ||           \
+      defined(HAVE_MM_MALLOC) || defined(HAVE_ALIGNED_MALLOC))
+  // apple malloc() aligns to 16 by default. can not expect any more
+  static_assert(alignment <= 16, "on OSX, plain malloc() aligns to 16");
+#endif
+
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  return alignedMalloc(size, alignment);
+}
 
 #pragma GCC diagnostic pop
 
