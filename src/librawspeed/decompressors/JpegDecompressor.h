@@ -20,6 +20,8 @@
 
 #pragma once
 
+#ifdef HAVE_JPEG
+
 #include "common/Common.h"   // for getHostEndianness, uint32, Endianness::big
 #include "common/RawImage.h" // for RawImage
 #include "io/Buffer.h"       // for Buffer, Buffer::size_type
@@ -45,3 +47,10 @@ protected:
 };
 
 } // namespace RawSpeed
+
+#else
+
+#pragma message                                                                \
+    "JPEG is not present! Lossy JPEG compression will not be supported!"
+
+#endif

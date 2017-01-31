@@ -19,6 +19,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#ifdef HAVE_JPEG
+
 #include "decompressors/JpegDecompressor.h"
 #include "common/Common.h"                // for uchar8, uint32, ushort16
 #include "common/Memory.h"                // for alignedMallocArray, alignedFree
@@ -135,3 +137,10 @@ void JpegDecompressor::decode(uint32 offX,
 }
 
 } // namespace RawSpeed
+
+#else
+
+#pragma message                                                                \
+    "JPEG is not present! Lossy JPEG compression will not be supported!"
+
+#endif
