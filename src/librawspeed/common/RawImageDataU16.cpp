@@ -19,7 +19,7 @@
 */
 
 #include "common/Common.h"                // for uint32, ushort16, uchar8
-#include "common/Memory.h"                // for alignedMalloc, alignedFree
+#include "common/Memory.h"                // for alignedMallocArray, alignedFree
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImageDataU16, TableLookUp
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -186,7 +186,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
     __m128i sse_full_scale_fp;
     __m128i sse_half_scale_fp;
 
-    auto* sub_mul = (uint32*)alignedMalloc<16>(16 * 4 * 2);
+    auto* sub_mul = (uint32*)alignedMallocArray<16>(4, sizeof(__m128i));
     if (!sub_mul)
 	  ThrowRDE("Out of memory, failed to allocate 128 bytes");
     uint32 gw = pitch / 16;

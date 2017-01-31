@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
 #include "common/Common.h"                // for uchar8, uint32, writeLog
-#include "common/Memory.h"                // for alignedMalloc, alignedFree
+#include "common/Memory.h"                // for alignedMallocArray, alignedFree
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImageDataFloat, ::TYPE_...
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -150,7 +150,7 @@ RawImageDataFloat::RawImageDataFloat() {
       __m128i sseround;
       __m128i ssesub2;
       __m128i ssesign;
-      uint32* sub_mul = (uint32*)alignedMalloc(16*4*2, 16);
+      uint32* sub_mul = (uint32*)alignedMallocArray(4, sizeof(__m128i));
 	  if (!sub_mul)
 		ThrowRDE("Out of memory, failed to allocate 128 bytes");
 

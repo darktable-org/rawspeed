@@ -57,6 +57,19 @@ alignedMalloc(size_t size) {
 
 #pragma GCC diagnostic pop
 
+template <size_t alignment>
+// coverity[+alloc]
+inline void* __attribute__((malloc, warn_unused_result, alloc_size(1, 2)))
+alignedMallocArray(size_t nmemb, size_t size) {
+  // Check for size_t overflow
+  if (size && nmemb > SIZE_MAX / size)
+    return nullptr;
+
+  size *= nmemb;
+
+  return alignedMalloc<alignment>(size);
+}
+
 // coverity[+free : arg-0]
 void alignedFree(void* ptr);
 

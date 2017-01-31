@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include "decoders/X3fDecoder.h"
 #include "common/Common.h"                // for ushort16, uint32, uchar8
-#include "common/Memory.h"                // for alignedMalloc, alignedFree
+#include "common/Memory.h"                // for alignedMallocArray, alignedFree
 #include "common/Point.h"                 // for iPoint2D, iRectangle2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/Buffer.h"                    // for Buffer::size_type
@@ -277,7 +277,7 @@ void X3fDecoder::decompressSigma( X3fImage &image )
     //We create a HUGE table that contains all values up to the
     //maximum code length. Luckily values can only be up to 10
     //bits, so we can get away with using 2 bytes/value
-    huge_table = (ushort16*)alignedMalloc<16>((1UL << max_len) * 2);
+    huge_table = (ushort16*)alignedMallocArray<16>(1UL << max_len, sizeof(ushort16));
     if (!huge_table)
       ThrowRDE("SigmaDecompressor: Memory Allocation failed.");
 
@@ -295,7 +295,7 @@ void X3fDecoder::decompressSigma( X3fImage &image )
     }
     // Load offsets
     ByteStream i2(mFile, image.dataOffset+image.dataSize-mRaw->dim.y*4, (ByteStream::size_type)mRaw->dim.y*4);
-    line_offsets = (uint32*)alignedMalloc<16>(4UL * mRaw->dim.y);
+    line_offsets = (uint32*)alignedMallocArray<16>(mRaw->dim.y, sizeof(uint32));
     if (!line_offsets)
       ThrowRDE("SigmaDecompressor: Memory Allocation failed.");
     for (int y = 0; y < mRaw->dim.y; y++) {
