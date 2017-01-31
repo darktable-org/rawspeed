@@ -2,6 +2,8 @@ FILE(GLOB DECOMPRESSOR_SOURCES
   "HasselbladDecompressor.cpp" # IWYU breaks
   "HasselbladDecompressor.h"
   "HuffmanTable.h"
+  "JpegDecompressor.cpp"
+  "JpegDecompressor.h"
   "LJpegDecompressor.cpp"
   "LJpegDecompressor.h"
   "LJpegPlain.cpp" # IWYU breaks
