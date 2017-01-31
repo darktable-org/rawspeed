@@ -1,0 +1,43 @@
+cmake_minimum_required(VERSION 3.0)
+
+project(pugixml-download NONE)
+
+# Enable ExternalProject CMake module
+include(ExternalProject)
+
+# Download and install GoogleTest
+
+set(GOOGLETEST_PATH "/usr/src/pugixml")
+
+#message(FATAL_ERROR "1 CMAKE_BINARY_DIR ${CMAKE_BINARY_DIR}")
+
+if(EXISTS "${GOOGLETEST_PATH}"            AND IS_DIRECTORY "${GOOGLETEST_PATH}"            AND EXISTS "${GOOGLETEST_PATH}/CMakeLists.txt")
+  message(STATUS "Found Pugixml in ${GOOGLETEST_PATH}")
+
+  ExternalProject_Add(
+    pugixml
+    URL               "${GOOGLETEST_PATH}"
+    PREFIX            "${CMAKE_BINARY_DIR}/pugixml"
+    SOURCE_DIR        "${CMAKE_BINARY_DIR}/pugixml-src"
+    BINARY_DIR        "${CMAKE_BINARY_DIR}/pugixml-build"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND     ""
+    INSTALL_COMMAND   ""
+    TEST_COMMAND      ""
+  )
+else()
+  message(WARNING "Did not find Pugixml! Will have to fetch from web...")
+
+  ExternalProject_Add(
+    pugixml
+    URL               https://github.com/zeux/pugixml/releases/download/v1.8.1/pugixml-1.8.1.tar.gz
+    URL_HASH          SHA512=1aec6f8cd0c385b66e848020d94d331db788c78523f72d145726738433a784b518084ec45a6eeffb0a6585bcf2759d09ad1e3d304d15d99068d43dbfd6db9d31
+    PREFIX            "${CMAKE_BINARY_DIR}/pugixml"
+    SOURCE_DIR        "${CMAKE_BINARY_DIR}/pugixml-src"
+    BINARY_DIR        "${CMAKE_BINARY_DIR}/pugixml-build"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND     ""
+    INSTALL_COMMAND   ""
+    TEST_COMMAND      ""
+  )
+endif()
