@@ -1,4 +1,6 @@
 FILE(GLOB DECOMPRESSOR_SOURCES
+  "DeflateDecompressor.cpp"
+  "DeflateDecompressor.h"
   "HasselbladDecompressor.cpp" # IWYU breaks
   "HasselbladDecompressor.h"
   "HuffmanTable.h"
