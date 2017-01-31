@@ -70,6 +70,17 @@ alignedMallocArray(size_t nmemb, size_t size) {
   return alignedMalloc<alignment>(size);
 }
 
+template <size_t alignment, typename T>
+// coverity[+alloc]
+inline void* __attribute__((malloc, warn_unused_result))
+alignedMallocArray(size_t nmemb) {
+  static_assert(sizeof(T), "???");
+  static_assert(alignment >= alignof(T), "unsufficient alignment");
+  static_assert(isPowerOfTwo(sizeof(T)), "not power-of-two");
+
+  return alignedMallocArray<alignment>(nmemb, sizeof(T));
+}
+
 // coverity[+free : arg-0]
 void alignedFree(void* ptr);
 

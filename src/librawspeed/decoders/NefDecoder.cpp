@@ -703,7 +703,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
 // From:  dcraw.c -- Dave Coffin's raw photo decoder
 #define SQR(x) ((x)*(x))
 ushort16* NefDecoder::gammaCurve(double pwr, double ts, int mode, int imax) {
-  auto* curve = (ushort16*)alignedMallocArray<16>(65536, sizeof(ushort16));
+  auto* curve = (ushort16*)alignedMallocArray<16, ushort16>(65536);
   if (curve == nullptr) {
     ThrowRDE("NEF Decoder: Unable to allocate gamma curve");
   }
