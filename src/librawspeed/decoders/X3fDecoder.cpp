@@ -214,7 +214,7 @@ void X3fDecoder::decompressSigma( X3fImage &image )
       plane_sizes[i] = input.getUInt();
       // Planes are 16 byte aligned
       if (i != 2) {
-        plane_offset[i+1] = plane_offset[i] + (((plane_sizes[i] + 15) / 16) * 16);
+        plane_offset[i + 1] = plane_offset[i] + roundUp(plane_sizes[i], 16);
         if (plane_offset[i]>mFile->getSize())
           ThrowRDE("SigmaDecompressor:Plane offset outside image");
       }

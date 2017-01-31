@@ -44,7 +44,7 @@ namespace RawSpeed {
 void* alignedMalloc(size_t size, size_t alignment) {
   assert(isPowerOfTwo(alignment)); // for posix_memalign, _aligned_malloc
   assert(((uintptr_t)alignment % sizeof(void*)) == 0); // for posix_memalign
-  // assert(((uintptr_t)size % alignment) == 0);          // for aligned_alloc
+  assert(((uintptr_t)size % alignment) == 0);          // for aligned_alloc
 
   void* ptr = nullptr;
 

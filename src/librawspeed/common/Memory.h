@@ -44,11 +44,13 @@ alignedMalloc(size_t size) {
   static_assert(((uintptr_t)alignment % sizeof(void*)) == 0,
                 "not multiple of sizeof(void*)");
 
-#if defined(__APPLE__) &&                                                      \
-    !(defined(HAVE_POSIX_MEMALIGN) || defined(HAVE_ALIGNED_ALLOC) ||           \
+#if !(defined(HAVE_POSIX_MEMALIGN) || defined(HAVE_ALIGNED_ALLOC) ||           \
       defined(HAVE_MM_MALLOC) || defined(HAVE_ALIGNED_MALLOC))
+  static_assert(alignment <= alignof(std::max_align_t), "too high alignment");
+#if defined(__APPLE__)
   // apple malloc() aligns to 16 by default. can not expect any more
   static_assert(alignment <= 16, "on OSX, plain malloc() aligns to 16");
+#endif
 #endif
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -57,9 +59,9 @@ alignedMalloc(size_t size) {
 
 #pragma GCC diagnostic pop
 
-template <size_t alignment>
+template <size_t alignment, bool doRoundUp = false>
 // coverity[+alloc]
-inline void* __attribute__((malloc, warn_unused_result, alloc_size(1, 2)))
+inline void* __attribute__((malloc, warn_unused_result))
 alignedMallocArray(size_t nmemb, size_t size) {
   // Check for size_t overflow
   if (size && nmemb > SIZE_MAX / size)
@@ -67,10 +69,13 @@ alignedMallocArray(size_t nmemb, size_t size) {
 
   size *= nmemb;
 
+  if (doRoundUp)
+    size = roundUp(size, alignment);
+
   return alignedMalloc<alignment>(size);
 }
 
-template <size_t alignment, typename T>
+template <size_t alignment, typename T, bool doRoundUp = false>
 // coverity[+alloc]
 inline void* __attribute__((malloc, warn_unused_result))
 alignedMallocArray(size_t nmemb) {
@@ -78,7 +83,7 @@ alignedMallocArray(size_t nmemb) {
   static_assert(alignment >= alignof(T), "unsufficient alignment");
   static_assert(isPowerOfTwo(sizeof(T)), "not power-of-two");
 
-  return alignedMallocArray<alignment>(nmemb, sizeof(T));
+  return alignedMallocArray<alignment, doRoundUp>(nmemb, sizeof(T));
 }
 
 // coverity[+free : arg-0]

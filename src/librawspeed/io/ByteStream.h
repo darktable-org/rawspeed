@@ -166,7 +166,7 @@ public:
   // only necessary to create 'fake' TiffEntries (see e.g. RAF)
   static ByteStream createCopy(void* data, size_type size) {
     ByteStream bs;
-    auto* new_data = (uchar8*)alignedMalloc<8>(size);
+    auto* new_data = (uchar8*)alignedMalloc<8>(roundUp(size, 8));
     memcpy(new_data, data, size);
     bs.data = new_data;
     bs.size = size;
