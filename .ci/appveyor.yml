@@ -1,8 +1,6 @@
 install:
   - SET "PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%"
   - C:\msys64\usr\bin\pacman --noconfirm -Syyuu
-  - C:\msys64\usr\bin\pacman --noconfirm -Syyuu
-  - C:\msys64\usr\bin\pacman --noconfirm -Syyuu
   - C:\msys64\usr\bin\pacman -S --noconfirm mingw-w64-x86_64-{toolchain,gcc,clang,cmake,ninja,libxml2,pugixml,libjpeg-turbo,zlib}
 
 environment:
