@@ -168,7 +168,7 @@ protected:
 
   SOFInfo frame;
   std::vector<int> slicesW;
-  uint32 pred = 0;
+  uint32 predictorMode = 0;
   uint32 Pt = 0;
   uint32 offX = 0, offY = 0;  // Offset into image where decoding should start
   std::array<HuffmanTable*, 4> huff {}; // 4 pointers into the store
