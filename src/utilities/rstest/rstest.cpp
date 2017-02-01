@@ -149,9 +149,12 @@ void writePPM(const RawImage& raw, const string& fn) {
 
   int width = raw->dim.x;
   int height = raw->dim.y;
+  string format = raw->getCpp() == 1 ? "P5" : "P6";
 
   // Write PPM header
-  fprintf(f, "P5\n%d %d\n65535\n", width, height);
+  fprintf(f, "%s\n%d %d\n65535\n", format.c_str(), width, height);
+
+  width *= raw->getCpp();
 
   // Write pixels
   for (int y = 0; y < height; ++y) {
@@ -159,7 +162,7 @@ void writePPM(const RawImage& raw, const string& fn) {
     // Swap for PPM format byte ordering
     if (getHostEndianness() == little)
       for (int x = 0; x < width; ++x)
-        row[x] = __builtin_bswap16(row[x]);
+        row[x] = BSWAP16(row[x]);
 
     fwrite(row, 2, width, f);
   }
