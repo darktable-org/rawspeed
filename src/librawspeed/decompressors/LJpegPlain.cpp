@@ -49,7 +49,7 @@ namespace RawSpeed {
 
 void LJpegPlain::decodeScan() {
 
-  if (pred != 1)
+  if (predictorMode != 1)
     ThrowRDE("LJpegDecompressor::decodeScan: Unsupported prediction direction.");
 
   if (frame.h == 0 || frame.w == 0)
@@ -91,7 +91,7 @@ void LJpegPlain::decodeScan() {
     else if (frame.cps == 4)
       decodeN_X_Y<4, 1, 1>();
     else
-      ThrowRDE("LJpegDecompressor::decodeScan: Unsupported component direction count.");
+      ThrowRDE("LJpegDecompressor::decodeScan: Unsupported number of components");
   }
 }
 
@@ -132,14 +132,13 @@ void LJpegPlain::decodeN_X_Y() {
   assert(frame.compInfo[1].superV == 1);
   assert(frame.cps == N_COMP);
 
-  HuffmanTable *ht[N_COMP] = {nullptr};
+  array<HuffmanTable*, N_COMP> ht;
   for (int i = 0; i < N_COMP; ++i)
     ht[i] = huff[frame.compInfo[i].dcTblNo];
 
   // Initialize predictors
-  int p[N_COMP];
-  for (int i = 0; i < N_COMP; ++i)
-    p[i] = (1 << (frame.prec - Pt - 1));
+  array<ushort16, N_COMP> pred;
+  pred.fill(1 << (frame.prec - Pt - 1));
 
   BitPumpJPEG bitStream(input);
   uint32 pixelPitch = mRaw->pitch / 2; // Pitch in pixel
@@ -190,35 +189,31 @@ void LJpegPlain::decodeN_X_Y() {
         break;
       auto dest = (ushort16*)mRaw->getDataUncropped((destX + offX)/mRaw->getCpp(), destY + offY);
       for (unsigned x = 0; x < sliceW; x += xStepSize) {
-
         // check if we processed one full raw row worth of pixels
         if (processedPixels == frame.w) {
           // if yes -> update predictor by going back exactly one row,
           // no matter where we are right now.
           // makes no sense from an image compression point of view, ask Canon.
-          unroll_loop<N_COMP>([&](int i) {
-            p[i] = nextPredictor[i];
-          });
-          nextPredictor = dest;
+          copy_n(predNext, N_COMP, pred.data());
+          predNext = dest;
           processedPixels = 0;
         }
 
         if (X_S_F == 1) { // will be optimized out
           unroll_loop<N_COMP>([&](int i) {
-            *dest++ = p[i] += ht[i]->decodeNext(bitStream);
+            *dest++ = pred[i] += ht[i]->decodeNext(bitStream);
           });
         } else {
           unroll_loop<Y_S_F>([&](int i) {
-            dest[0 + i*pixelPitch] = p[0] += ht[0]->decodeNext(bitStream);
-            dest[3 + i*pixelPitch] = p[0] += ht[0]->decodeNext(bitStream);
+            dest[0 + i*pixelPitch] = pred[0] += ht[0]->decodeNext(bitStream);
+            dest[3 + i*pixelPitch] = pred[0] += ht[0]->decodeNext(bitStream);
           });
 
-          dest[1] = p[1] += ht[1]->decodeNext(bitStream);
-          dest[2] = p[2] += ht[2]->decodeNext(bitStream);
+          dest[1] = pred[1] += ht[1]->decodeNext(bitStream);
+          dest[2] = pred[2] += ht[2]->decodeNext(bitStream);
 
           dest += xStepSize;
         }
-
         processedPixels += X_S_F;
       }
       processedLineSlices += yStepSize;

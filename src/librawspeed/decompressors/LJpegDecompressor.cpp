@@ -121,8 +121,8 @@ void LJpegDecompressor::parseSOS() {
   }
 
   // Get predictor
-  pred = input.getByte();
-  if (pred > 8)
+  predictorMode = input.getByte();
+  if (predictorMode > 8)
     ThrowRDE("LJpegDecompressor::parseSOS: Invalid predictor mode.");
 
   input.skipBytes(1);         // Se + Ah Not used in LJPEG
