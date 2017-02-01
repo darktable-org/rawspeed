@@ -88,6 +88,8 @@ void LJpegPlain::decodeScan() {
   } else {
     if (frame.cps == 2)
       decodeN_X_Y<2, 1, 1>();
+    else if (frame.cps == 3)
+      decodeN_X_Y<3, 1, 1>();
     else if (frame.cps == 4)
       decodeN_X_Y<4, 1, 1>();
     else
@@ -141,6 +143,48 @@ void LJpegPlain::decodeN_X_Y() {
   pred.fill(1 << (frame.prec - Pt - 1));
 
   BitPumpJPEG bitStream(input);
+
+  if (slicesW.size() == 1 && (unsigned)slicesW[0] == frame.w * frame.cps) {
+    // This is the 'sane' non Canon case. Here we don't have to worry
+    // about any canon quirks / cr2_slices or even super sampled X/Y data.
+    // But DNGs may encode more data than fits into the raw image frame.
+    assert(X_S_F == 1 && Y_S_F == 1);
+    auto predNext = pred.data();
+    for (unsigned y = 0; y < frame.h; y += Y_S_F) {
+      auto destY = offY + y;
+      // A recoded DNG might be split up into tiles of self contained LJpeg
+      // blobs. The tiles at the bottom and the right may extend beyond the
+      // dimension of the raw image buffer. The excessive content has to be
+      // ignored. For y, we can simply stop decoding when we reached the border.
+      if (destY >= (unsigned)mRaw->dim.y)
+        break;
+
+      auto dest = (ushort16*)mRaw->getDataUncropped(offX, destY);
+
+      copy_n(predNext, N_COMP, pred.data());
+      // the predictor for the next line is the start of this line
+      predNext = dest;
+
+      unsigned width = min(frame.w,
+                           (mRaw->dim.x - offX) / (N_COMP / mRaw->getCpp()));
+
+      // For x, we first process all pixels within the image buffer ...
+      for (unsigned x = 0; x < width; x += X_S_F) {
+        unroll_loop<N_COMP>([&](int i) {
+          *dest++ = pred[i] += ht[i]->decodeNext(bitStream);
+        });
+      }
+      // ... and discard the rest.
+      for (unsigned x = width; x < frame.w; x += X_S_F) {
+        unroll_loop<N_COMP>([&](int i) {
+          ht[i]->decodeNext(bitStream);
+        });
+      }
+    }
+    input.skipBytes(bitStream.getBufferPosition());
+    return;
+  }
+
   uint32 pixelPitch = mRaw->pitch / 2; // Pitch in pixel
   if (frame.cps != 3 && frame.w * frame.cps > 2 * frame.h) {
     // Fix Canon double height issue where Canon doubled the width and halfed
@@ -174,7 +218,7 @@ void LJpegPlain::decodeN_X_Y() {
 
   unsigned processedPixels = 0;
   unsigned processedLineSlices = 0;
-  auto nextPredictor = (ushort16*)mRaw->getDataUncropped(offX/mRaw->getCpp(), offY);
+  auto predNext = (ushort16*)mRaw->getDataUncropped(0, 0);
   for (unsigned sliceW : slicesW) {
     for (unsigned y = 0; y < sliceH; y += yStepSize) {
       // Fix for Canon 80D mraw format.
@@ -183,11 +227,13 @@ void LJpegPlain::decodeN_X_Y() {
       // 'extra' sliced lines because sum(slicesW) * sliceH > mRaw->dim.area()
       // Those would overflow, hence the break.
       // see FIX_CANON_FRAME_VS_IMAGE_SIZE_MISMATCH
-      unsigned destX = processedLineSlices / mRaw->dim.y * slicesW[0];
       unsigned destY = processedLineSlices % mRaw->dim.y;
-      if (destX + offX >= mRaw->dim.x * mRaw->getCpp())
+      unsigned destX =
+          processedLineSlices / mRaw->dim.y * slicesW[0] / mRaw->getCpp();
+      if (destX >= (unsigned)mRaw->dim.x)
         break;
-      auto dest = (ushort16*)mRaw->getDataUncropped((destX + offX)/mRaw->getCpp(), destY + offY);
+      auto dest = (ushort16*)mRaw->getDataUncropped(destX, destY);
+
       for (unsigned x = 0; x < sliceW; x += xStepSize) {
         // check if we processed one full raw row worth of pixels
         if (processedPixels == frame.w) {
