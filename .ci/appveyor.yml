@@ -1,5 +1,8 @@
 install:
-  - C:\msys64\usr\bin\pacman --noconfirm --sync --refresh --refresh --sysupgrade --sysupgrade
+  - SET "PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%"
+  - C:\msys64\usr\bin\pacman --noconfirm -Syyuu
+  - C:\msys64\usr\bin\pacman --noconfirm -Syyuu
+  - C:\msys64\usr\bin\pacman --noconfirm -Syyuu
   - C:\msys64\usr\bin\pacman -S --noconfirm mingw-w64-x86_64-{toolchain,gcc,clang,cmake,ninja,libxml2,pugixml,libjpeg-turbo,zlib}
 
 environment:
@@ -21,8 +24,9 @@ matrix:
   fast_finish: true
 
 build_script:
+  - SET "PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%"
   - C:\msys64\usr\bin\bash --login -c "
-      export PATH=/c/msys64/mingw64/bin:$PATH;
+      export PATH=/c/msys64/mingw64/bin:/c/msys64/usr/bin:$PATH;
       export SRC_DIR=\"${APPVEYOR_BUILD_FOLDER}\";
       export BUILD_DIR=\"$SRC_DIR/build\";
       export INSTALL_PREFIX=\"$SRC_DIR/install\";
@@ -31,7 +35,9 @@ build_script:
       $(cygpath ${APPVEYOR_BUILD_FOLDER})/.ci/ci-script.sh;"
 
 on_success:
+  - SET "PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%"
   - C:\msys64\usr\bin\bash --login -c "
+      export PATH=/c/msys64/mingw64/bin:/c/msys64/usr/bin:$PATH;
       export PLATFORM=windows;
       export CXX=GCC;
       cd \"${APPVEYOR_BUILD_FOLDER}\";
