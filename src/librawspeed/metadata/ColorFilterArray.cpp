@@ -25,6 +25,7 @@
 #include <cstdarg>                        // for va_arg, va_end, va_list
 #include <cstdio>                         // for NULL
 #include <cstring>                        // for memcpy, memset
+#include <map>                            // for map
 #include <string>                         // for string
 
 using namespace std;
@@ -32,75 +33,32 @@ using namespace std;
 namespace RawSpeed {
 
 ColorFilterArray::ColorFilterArray(const iPoint2D &_size) {
-  cfa = nullptr;
   setSize(_size);
 }
 
-ColorFilterArray::ColorFilterArray() : size(0, 0) { cfa = nullptr; }
-
-ColorFilterArray::ColorFilterArray( const ColorFilterArray& other )
+void ColorFilterArray::setSize(const iPoint2D& _size)
 {
-  cfa = nullptr;
-  setSize(other.size);
-  if (cfa)
-    memcpy(cfa, other.cfa, size.area()*sizeof(CFAColor));
-}
-
-// FC macro from dcraw outputs, given the filters definition, the dcraw color
-// number for that given position in the CFA pattern
-#define FC(filters,row,col) ((filters) >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
-ColorFilterArray::ColorFilterArray( const uint32 filters) :
-size(8,2)
-{
-  cfa = nullptr;
-  setSize(size);
-
-  for (int x = 0; x < 8; x++) {
-    for (int y = 0; y < 2; y++) {
-      CFAColor c = toRawspeedColor(FC(filters,y,x));
-      setColorAt(iPoint2D(x,y), c);
-    }
-  }
-}
-
-ColorFilterArray& ColorFilterArray::operator=(const ColorFilterArray& other )
-{
-  setSize(other.size);
-  if (cfa)
-    memcpy(cfa, other.cfa, size.area()*sizeof(CFAColor));
-  return *this;
-}
-
-void ColorFilterArray::setSize(const iPoint2D &_size) {
   size = _size;
-  if (cfa)
-    delete[] cfa;
-  cfa = nullptr;
   if (size.area() > 100)
-    ThrowRDE("ColorFilterArray:setSize if your CFA pattern is really %d pixels in area we may as well give up now", size.area());
+    ThrowRDE("ColorFilterArray:setSize if your CFA pattern is really %d pixels "
+             "in area we may as well give up now",
+             size.area());
   if (size.area() <= 0)
     return;
-  cfa = new CFAColor[size.area()];
-  if (!cfa)
-    ThrowRDE("ColorFilterArray:setSize Unable to allocate memory");
-  memset(cfa, CFA_UNKNOWN, size.area()*sizeof(CFAColor));
+  cfa.resize(size.area());
+  fill(cfa.begin(), cfa.end(), CFA_UNKNOWN);
 }
 
-ColorFilterArray::~ColorFilterArray() {
-  if (cfa)
-    delete[] cfa;
-  cfa = nullptr;
-}
-
-CFAColor ColorFilterArray::getColorAt( uint32 x, uint32 y )
+CFAColor ColorFilterArray::getColorAt( int x, int y ) const
 {
-  if (!cfa)
+  if (cfa.empty())
     ThrowRDE("ColorFilterArray:getColorAt: No CFA size set");
-  if (x >= (uint32)size.x || y >= (uint32)size.y) {
-    x = x%size.x;
-    y = y%size.y;
-  }
-  return cfa[x+y*size.x];
+
+  // calculate the positive modulo [0 .. size-1]
+  x = (x % size.x + size.x) % size.x;
+  y = (y % size.y + size.y) % size.y;
+
+  return cfa[x + y * size.x];
 }
 
 void ColorFilterArray::setCFA( iPoint2D in_size, ... )
@@ -117,43 +75,41 @@ void ColorFilterArray::setCFA( iPoint2D in_size, ... )
 }
 
 void ColorFilterArray::shiftLeft(int n) {
-  if (!size.x) {
+  if (cfa.empty())
     ThrowRDE("ColorFilterArray:shiftLeft: No CFA size set (or set to zero)");
-  }
+
   writeLog(DEBUG_PRIO_EXTRA, "Shift left:%d\n", n);
-  int shift = n % size.x;
-  if (0 == shift)
+  n %= size.x;
+  if (n == 0)
     return;
-  auto *tmp = new CFAColor[size.x];
-  for (int y = 0; y < size.y; y++) {
-    CFAColor *old = &cfa[y*size.x];
-    memcpy(tmp, &old[shift], (size.x-shift)*sizeof(CFAColor));
-    memcpy(&tmp[size.x-shift], old, shift*sizeof(CFAColor));
-    memcpy(old, tmp, size.x * sizeof(CFAColor));
+
+  vector<CFAColor> tmp(size.area());
+  for (int y = 0; y < size.y; ++y) {
+    for (int x = 0; x < size.x; ++x) {
+      tmp[x + y * size.x] = getColorAt(x+n, y);
+    }
   }
-  delete[] tmp;
+  cfa = tmp;
 }
 
 void ColorFilterArray::shiftDown(int n) {
-  if (!size.y) {
+  if (cfa.empty())
     ThrowRDE("ColorFilterArray:shiftDown: No CFA size set (or set to zero)");
-  }
+
   writeLog(DEBUG_PRIO_EXTRA, "Shift down:%d\n", n);
-  int shift = n % size.y;
-  if (0 == shift)
+  n %= size.y;
+  if (n == 0)
     return;
-  auto *tmp = new CFAColor[size.y];
-  for (int x = 0; x < size.x; x++) {
-    CFAColor *old = &cfa[x];
-    for (int y = 0; y < size.y; y++)
-      tmp[y] = old[((y+shift)%size.y)*size.x];
-    for (int y = 0; y < size.y; y++)
-      old[y*size.x] = tmp[y];
+  vector<CFAColor> tmp(size.area());
+  for (int y = 0; y < size.y; ++y) {
+    for (int x = 0; x < size.x; ++x) {
+      tmp[x + y * size.x] = getColorAt(x, y+n);
+    }
   }
-  delete[] tmp;
+  cfa = tmp;
 }
 
-std::string ColorFilterArray::asString() {
+string ColorFilterArray::asString() const {
   string dst;
   for (int y = 0; y < size.y; y++) {
     for (int x = 0; x < size.x; x++) {
@@ -164,32 +120,48 @@ std::string ColorFilterArray::asString() {
   return dst;
 }
 
+uint32 ColorFilterArray::shiftDcrawFilter(uint32 filter, int x, int y)
+{
+  // filter is a series of 4 bytes that describe a 2x8 matrix. 2 is the width,
+  // 8 is the height. each byte describes a 2x2 pixel block. so each pixel has
+  // 2 bits of information. This allows to distinguish 4 different colors.
 
-std::string ColorFilterArray::colorToString(CFAColor c) {
-  switch (c) {
-    case CFA_RED:
-      return string("RED");
-    case CFA_GREEN:
-      return string("GREEN");
-    case CFA_BLUE:
-      return string("BLUE");
-    case CFA_GREEN2:
-      return string("GREEN2");
-    case CFA_CYAN:
-      return string("CYAN");
-    case CFA_MAGENTA:
-      return string("MAGENTA");
-    case CFA_YELLOW:
-      return string("YELLOW");
-    case CFA_WHITE:
-      return string("WHITE");
-    case CFA_FUJI_GREEN:
-      return string("FUJIGREEN");
-    default:
-      return string("UNKNOWN");
+  if (std::abs(x) & 1) {
+    // A shift in x direction means swapping the first and second half of each
+    // nibble.
+    // see http://graphics.stanford.edu/~seander/bithacks.html#SwappingBitsXOR
+    for (int n = 0; n < 8; ++n) {
+      int i = n * 4;
+      int j = i + 2;
+      uint32 t = ((filter >> i) ^ (filter >> j)) & ((1U << 2) - 1);
+      filter = filter ^ ((t << i) | (t << j));
+    }
   }
+
+  // A shift in y direction means rotating the whole int by 4 bits.
+  y *= 4;
+  y = y >= 0 ? y % 32 : -((-y) % 32);
+  filter = (filter >> y) | (filter << (32 - y));
+
+  return filter;
 }
 
+const static map<CFAColor, string> color2String = {
+    {CFA_RED, "RED"},         {CFA_GREEN, "GREEN"},
+    {CFA_BLUE, "BLUE"},       {CFA_CYAN, "CYAN"},
+    {CFA_MAGENTA, "MAGENTA"}, {CFA_YELLOW, "YELLOW"},
+    {CFA_WHITE, "WHITE"},     {CFA_FUJI_GREEN, "FUJIGREEN"},
+    {CFA_UNKNOWN, "UNKNOWN"}
+};
+
+string ColorFilterArray::colorToString(CFAColor c)
+{
+  try {
+    return color2String.at(c);
+  } catch (std::out_of_range&) {
+    ThrowRDE("ColorFilterArray: Unsupported CFA Color: %u", c);
+  }
+}
 
 void ColorFilterArray::setColorAt(iPoint2D pos, CFAColor c) {
   if (pos.x >= size.x || pos.x < 0)
@@ -199,21 +171,32 @@ void ColorFilterArray::setColorAt(iPoint2D pos, CFAColor c) {
   cfa[pos.x+pos.y*size.x] = c;
 }
 
-RawSpeed::uint32 ColorFilterArray::getDcrawFilter()
+static uint32 toDcrawColor( CFAColor c )
+{
+  switch (c) {
+  case CFA_FUJI_GREEN:
+  case CFA_RED: return 0;
+  case CFA_MAGENTA:
+  case CFA_GREEN: return 1;
+  case CFA_CYAN:
+  case CFA_BLUE: return 2;
+  case CFA_YELLOW: return 3;
+  default: return 0;
+  }
+}
+
+uint32 ColorFilterArray::getDcrawFilter() const
 {
   //dcraw magic
   if (size.x == 6 && size.y == 6)
     return 9;
 
-  if (size.x > 8 || size.y > 2 || nullptr == cfa)
-    return 1;
-
-  if (!isPowerOfTwo(size.x))
+  if (cfa.empty() || size.x > 2 || size.y > 8 || !isPowerOfTwo(size.y))
     return 1;
 
   uint32 ret = 0;
-  for (int x = 0; x < 8; x++) {
-    for (int y = 0; y < 2; y++) {
+  for (int x = 0; x < 2; x++) {
+    for (int y = 0; y < 8; y++) {
       uint32 c = toDcrawColor(getColorAt(x,y));
       int g = (x >> 1) * 8;
       ret |= c << ((x&1)*2 + y*4 + g);
@@ -228,32 +211,5 @@ RawSpeed::uint32 ColorFilterArray::getDcrawFilter()
   writeLog(DEBUG_PRIO_EXTRA, "DCRAW filter:%x\n",ret);
   return ret;
 }
-
-CFAColor ColorFilterArray::toRawspeedColor( uint32 dcrawColor )
-{
-  switch (dcrawColor) {
-    case 0: return CFA_RED;
-    case 1: return CFA_GREEN;
-    case 2: return CFA_BLUE;
-    case 3: return CFA_GREEN2;
-    default: return CFA_UNKNOWN;
-  }
-}
-
-RawSpeed::uint32 ColorFilterArray::toDcrawColor( CFAColor c )
-{
-  switch (c) {
-    case CFA_FUJI_GREEN:
-    case CFA_RED: return 0;
-    case CFA_MAGENTA:
-    case CFA_GREEN: return 1;
-    case CFA_CYAN:
-    case CFA_BLUE: return 2;
-    case CFA_YELLOW:
-    case CFA_GREEN2: return 3;
-    default: return 0;
-  }
-}
-
 
 } // namespace RawSpeed

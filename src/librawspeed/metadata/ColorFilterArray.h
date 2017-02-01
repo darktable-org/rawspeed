@@ -27,44 +27,44 @@
 namespace RawSpeed {
 
 enum CFAColor {
-  CFA_COLOR_MIN = 0,
+  // see also DngDecoder
   CFA_RED = 0,
   CFA_GREEN = 1,
   CFA_BLUE = 2,
-  CFA_GREEN2 = 3,
-  CFA_CYAN = 4,
-  CFA_MAGENTA = 5,
-  CFA_YELLOW = 6,
-  CFA_WHITE = 7,
-  CFA_COLOR_MAX = 8,
-  CFA_FUJI_GREEN = 9,
+  CFA_CYAN = 3,
+  CFA_MAGENTA = 4,
+  CFA_YELLOW = 5,
+  CFA_WHITE = 6,
+  CFA_FUJI_GREEN = 7,
   CFA_UNKNOWN = 255
 };
 
 class ColorFilterArray
 {
-public:
-  ColorFilterArray();
-  ColorFilterArray(const ColorFilterArray& other );
-  ColorFilterArray& operator= (const ColorFilterArray& other);
-  ColorFilterArray(const iPoint2D &size);
-  ColorFilterArray(uint32 dcrawFilters);
-  virtual ~ColorFilterArray();
-
-  virtual void setSize(const iPoint2D &size);
-  void setColorAt(iPoint2D pos, CFAColor c);
-  virtual void setCFA(iPoint2D size, ...);
-  virtual CFAColor getColorAt(uint32 x, uint32 y);
-  virtual uint32 getDcrawFilter();
-  virtual void shiftLeft(int n = 1);
-  virtual void shiftDown(int n = 1);
-  virtual std::string asString();
-  static std::string colorToString(CFAColor c);
-  uint32 toDcrawColor(CFAColor c);
-  CFAColor toRawspeedColor(uint32 dcrawColor);
+  std::vector<CFAColor> cfa;
   iPoint2D size;
-protected:
-  CFAColor *cfa;
+
+public:
+  ColorFilterArray() = default;
+  ColorFilterArray(const iPoint2D& size);
+
+  void setSize(const iPoint2D& size);
+  void setColorAt(iPoint2D pos, CFAColor c);
+  void setCFA(iPoint2D size, ...);
+  void shiftLeft(int n = 1);
+  void shiftDown(int n = 1);
+
+  CFAColor getColorAt(int x, int y) const;
+  uint32 getDcrawFilter() const;
+  std::string asString() const;
+  iPoint2D getSize() const { return size; }
+
+  static std::string colorToString(CFAColor c);
+  static uint32 shiftDcrawFilter(uint32 filter, int x, int y);
 };
+
+// FC macro from dcraw outputs, given the filters definition, the dcraw color
+// number for that given position in the CFA pattern
+// #define FC(filters,row,col) ((filters) >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
 
 } // namespace RawSpeed
