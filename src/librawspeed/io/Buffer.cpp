@@ -20,7 +20,8 @@
 */
 
 #include "io/Buffer.h"
-#include "common/Common.h"  // for uint64, uchar8, _aligned_malloc, _aligne...
+#include "common/Common.h"  // for uint64, uchar8, alignedMalloc, _aligne...
+#include "common/Memory.h"  // for alignedMalloc, alignedFree
 #include "io/IOException.h" // for IOException, ThrowIOE
 
 namespace RawSpeed {
@@ -28,7 +29,7 @@ namespace RawSpeed {
 Buffer::Buffer(size_type size_) : size(size_) {
   if (!size)
     ThrowIOE("Trying to allocate 0 bytes sized buffer.");
-  data = (uchar8*)_aligned_malloc(size + FILEMAP_MARGIN, 16);
+  data = (uchar8*)alignedMalloc<16>(roundUp(size + FILEMAP_MARGIN, 16));
   if (!data)
     ThrowIOE("Failed to allocate %uz bytes memory buffer.", size);
   isOwner = true;
@@ -36,7 +37,7 @@ Buffer::Buffer(size_type size_) : size(size_) {
 
 Buffer::~Buffer() {
   if (isOwner) {
-    _aligned_free(const_cast<uchar8*>(data));
+    alignedFree(const_cast<uchar8*>(data));
   }
 }
 

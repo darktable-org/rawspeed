@@ -51,7 +51,7 @@ class TiffIFD
   std::map<TiffTag, TiffEntryOwner> entries;
 
   friend class TiffEntry;
-  friend class RawParser;
+  friend class FiffParser;
   friend TiffRootIFDOwner parseTiff(const Buffer& data);
 
   // make sure we never copy-constuct/assign a TiffIFD to keep the owning subcontainers contents save
@@ -62,6 +62,7 @@ class TiffIFD
   void add(TiffEntryOwner entry);
   TiffRootIFDOwner parseDngPrivateData(TiffEntry *t);
   TiffRootIFDOwner parseMakerNote(TiffEntry *t);
+  void parseIFDEntry(ByteStream& bs);
 
 public:
   TiffIFD() = default;

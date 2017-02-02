@@ -22,6 +22,7 @@
 #pragma once
 
 #include "common/Common.h"
+#include "common/Memory.h" // for alignedMalloc, alignedFree
 #include "io/Buffer.h"
 #include "io/FileMap.h" // deprecated, see below
 #include "io/IOException.h"
@@ -165,7 +166,7 @@ public:
   // only necessary to create 'fake' TiffEntries (see e.g. RAF)
   static ByteStream createCopy(void* data, size_type size) {
     ByteStream bs;
-    auto *new_data = (uchar8 *)_aligned_malloc(size, 8);
+    auto* new_data = (uchar8*)alignedMalloc<8>(roundUp(size, 8));
     memcpy(new_data, data, size);
     bs.data = new_data;
     bs.size = size;

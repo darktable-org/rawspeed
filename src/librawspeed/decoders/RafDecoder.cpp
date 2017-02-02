@@ -53,6 +53,13 @@ RafDecoder::~RafDecoder() {
   mRootIFD = nullptr;
 }
 
+bool RafDecoder::isRAF(FileMap* input) {
+  static const char magic[] = "FUJIFILMCCD-RAW ";
+  static const size_t magic_size = sizeof(magic) - 1; // excluding \0
+  const unsigned char* data = input->getData(0, magic_size);
+  return 0 == memcmp(&data[0], magic, magic_size);
+}
+
 RawImage RafDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(FUJI_STRIPOFFSETS);
 

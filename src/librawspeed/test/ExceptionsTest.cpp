@@ -23,6 +23,7 @@
 #include "io/IOException.h"                   // for IOException (ptr only)
 #include "metadata/CameraMetadataException.h" // for CameraMetadataExceptio...
 #include "parsers/CiffParserException.h"      // for CiffParserException (p...
+#include "parsers/FiffParserException.h"      // for ThrowFPE, FiffParserEx...
 #include "parsers/TiffParserException.h"      // for ThrowTPE, TiffParserEx...
 #include "gtest/gtest.h"                      // for gtest_ar
 #include <exception>                          // for exception
@@ -36,6 +37,9 @@ using namespace std;
 using namespace RawSpeed;
 
 static const std::string msg("my very Smart error Message #1 !");
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 
 template <typename T>
 static void* MetaThrowHelper(const char* fmt, const char* str) {
@@ -74,11 +78,19 @@ void* MetaThrowHelper<TiffParserException>(const char* fmt, const char* str) {
   ThrowTPE(fmt, str);
 }
 
+template <>
+void* MetaThrowHelper<FiffParserException>(const char* fmt, const char* str) {
+  ThrowFPE(fmt, str);
+}
+
+#pragma GCC diagnostic pop
+
 template <class T> class ExceptionsTest : public testing::Test {};
 
-using Classes = testing::Types<CameraMetadataException, CiffParserException,
-                               FileIOException, IOException,
-                               RawDecoderException, TiffParserException>;
+using Classes =
+    testing::Types<CameraMetadataException, CiffParserException,
+                   FileIOException, IOException, RawDecoderException,
+                   TiffParserException, FiffParserException>;
 
 TYPED_TEST_CASE(ExceptionsTest, Classes);
 

@@ -19,6 +19,7 @@
 */
 
 #include "common/RawImage.h"
+#include "common/Memory.h"                // for alignedMallocArray, alignedFree
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "io/IOException.h"               // for IOException
 #include "parsers/TiffParserException.h"  // for TiffParserException
@@ -88,8 +89,8 @@ void RawImageData::createData() {
     ThrowRDE("RawImageData: Dimension of one sides is less than 1 - cannot allocate image.");
   if (data)
     ThrowRDE("RawImageData: Duplicate data allocation in createData.");
-  pitch = (((dim.x * bpp) + 15) / 16) * 16;
-  data = (uchar8 *)_aligned_malloc((size_t)pitch * dim.y, 16);
+  pitch = roundUp((size_t)dim.x * bpp, 16);
+  data = (uchar8*)alignedMallocArray<16>(dim.y, pitch);
   if (!data)
     ThrowRDE("RawImageData::createData: Memory Allocation failed.");
   uncropped_dim = dim;
@@ -97,9 +98,9 @@ void RawImageData::createData() {
 
 void RawImageData::destroyData() {
   if (data)
-    _aligned_free(data);
+    alignedFree(data);
   if (mBadPixelMap)
-    _aligned_free(mBadPixelMap);
+    alignedFree(mBadPixelMap);
   data = nullptr;
   mBadPixelMap = nullptr;
 }
@@ -184,9 +185,8 @@ void RawImageData::createBadPixelMap()
 {
   if (!isAllocated())
     ThrowRDE("RawImageData::createBadPixelMap: (internal) Bad pixel map cannot be allocated before image.");
-  mBadPixelMapPitch = (((uncropped_dim.x / 8) + 15) / 16) * 16;
-  mBadPixelMap = (uchar8 *)_aligned_malloc(
-      (size_t)mBadPixelMapPitch * uncropped_dim.y, 16);
+  mBadPixelMapPitch = roundUp(uncropped_dim.x / 8, 16);
+  mBadPixelMap = (uchar8*)alignedMallocArray<16>(uncropped_dim.y, mBadPixelMapPitch);
   memset(mBadPixelMap, 0, (size_t)mBadPixelMapPitch * uncropped_dim.y);
   if (!mBadPixelMap)
     ThrowRDE("RawImageData::createData: Memory Allocation failed.");

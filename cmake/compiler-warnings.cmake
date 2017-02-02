@@ -1,23 +1,22 @@
 include(CheckCXXCompilerFlagAndEnableIt)
 
-if(UNIX OR APPLE)
-  # want -Werror to be enabled automatically for me.
-  # but on windows platform, there are warnings still
-  add_definitions(-Werror)
-endif()
+# want -Werror to be enabled automatically for me.
+add_definitions(-Werror)
 
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wall)
 
-CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wformat)
-CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wformat-security)
+CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wformat=2)
+
+if(NOT (UNIX OR APPLE))
+  # on windows, resuts in bogus false-positive varnings
+  add_definitions(-Wno-format)
+endif()
 
 # cleanup this once we no longer need to support gcc-4.9
 # disabled for now, see https://github.com/darktable-org/rawspeed/issues/32
 if(CMAKE_CXX_COMPILER_ID AND NOT (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0))
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wshadow)
 endif()
-
-CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wtype-limits)
 
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wvla)
 
@@ -28,8 +27,7 @@ CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wextra)
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-unused-parameter)
 
 # should be < 64Kb
-# FIXME: 4K
-math(EXPR MAX_MEANINGFUL_SIZE 8*1024)
+math(EXPR MAX_MEANINGFUL_SIZE 4*1024)
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wframe-larger-than=${MAX_MEANINGFUL_SIZE})
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wstack-usage=${MAX_MEANINGFUL_SIZE})
 

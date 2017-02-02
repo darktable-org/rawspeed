@@ -65,6 +65,11 @@ struct Timer {
   }
 };
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#pragma GCC diagnostic ignored "-Wframe-larger-than="
+#pragma GCC diagnostic ignored "-Wstack-usage="
+
 string img_hash(RawImage &r) {
   ostringstream oss;
   char line[256];
@@ -240,7 +245,46 @@ size_t process(const string &filename, CameraMetaData *metadata, bool create,
   return time;
 }
 
-static int usage(const char *progname) {
+#pragma GCC diagnostic pop
+
+static int results(const map<string, string>& failedTests) {
+  if (failedTests.empty()) {
+    cout << "All good, no tests failed!" << endl;
+    return 0;
+  }
+
+  cerr << "WARNING: the following " << failedTests.size()
+       << " tests have failed:\n";
+
+  for (const auto& i : failedTests) {
+    cerr << i.second << "\n";
+#ifndef WIN32
+    const string oldhash(i.first + ".hash");
+    const string newhash(oldhash + ".failed");
+
+    ifstream oldfile(oldhash), newfile(newhash);
+
+    // if neither hashes exist, nothing to append...
+    if (!(oldfile.good() || newfile.good()))
+      continue;
+
+    // DIFF(1): -N, --new-file  treat absent files as empty
+    string cmd(R"(diff -N -u0 ")");
+    cmd += oldhash;
+    cmd += R"(" ")";
+    cmd += newhash;
+    cmd += R"(" >> rstest.log)";
+    if (system(cmd.c_str())) {
+    }
+  }
+#endif
+
+  cerr << "See rstest.log for details.\n";
+
+  return 1;
+}
+
+static int usage(const char* progname) {
   cout << "usage: " << progname << R"(
   [-h] print this help
   [-c] for each file: decode, compute hash and store it.
@@ -310,33 +354,5 @@ int main(int argc, char **argv) {
 
   cout << "Total decoding time: " << time / 1000.0 << "s" << endl << endl;
 
-  if (!failedTests.empty()) {
-    cerr << "WARNING: the following " << failedTests.size()
-         << " tests have failed:\n";
-    for (const auto &i : failedTests) {
-      cerr << i.second << "\n";
-#ifndef WIN32
-      const string oldhash(i.first + ".hash");
-      const string newhash(oldhash + ".failed");
-
-      ifstream oldfile(oldhash), newfile(newhash);
-
-      // if neither hashes exist, nothing to append...
-      if (oldfile.good() || newfile.good()) {
-        // DIFF(1): -N, --new-file  treat absent files as empty
-        string cmd(R"(diff -N -u0 ")");
-        cmd += oldhash;
-        cmd += R"(" ")";
-        cmd += newhash;
-        cmd += R"(" >> rstest.log)";
-        if (system(cmd.c_str())) {
-        }
-      }
-#endif
-    }
-    cerr << "See rstest.log for details.\n";
-  } else
-    cout << "All good, no tests failed!" << endl;
-
-  return failedTests.empty() ? 0 : 1;
+  return results(failedTests);
 }

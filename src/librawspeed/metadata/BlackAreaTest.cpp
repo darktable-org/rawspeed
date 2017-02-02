@@ -36,6 +36,18 @@ protected:
     isVertical = std::tr1::get<2>(GetParam());
   }
 
+  void checkHelper(const BlackArea& a) {
+    ASSERT_EQ(a.offset, offset);
+    ASSERT_EQ(a.size, size);
+    ASSERT_EQ(a.isVertical, isVertical);
+  }
+
+  void checkHelper(const BlackArea& a, const BlackArea& b) {
+    ASSERT_EQ(a.offset, b.offset);
+    ASSERT_EQ(a.size, b.size);
+    ASSERT_EQ(a.isVertical, b.isVertical);
+  }
+
   int offset{0};          // Offset in bayer pixels.
   int size{0};            // Size in bayer pixels.
   bool isVertical{false}; // Otherwise horizontal
@@ -58,18 +70,14 @@ TEST_P(BlackAreaTest, Getters) {
   {
     const BlackArea Area(offset, size, isVertical);
 
-    ASSERT_EQ(Area.offset, offset);
-    ASSERT_EQ(Area.size, size);
-    ASSERT_EQ(Area.isVertical, isVertical);
+    checkHelper(Area);
   }
 
   {
     const unique_ptr<const BlackArea> Area(
         new BlackArea(offset, size, isVertical));
 
-    ASSERT_EQ(Area->offset, offset);
-    ASSERT_EQ(Area->size, size);
-    ASSERT_EQ(Area->isVertical, isVertical);
+    checkHelper(*Area);
   }
 }
 
@@ -102,54 +110,8 @@ TEST_P(BlackAreaTest, AssignmentConstructorGetters) {
     const BlackArea AreaOrig(offset, size, isVertical);
     BlackArea Area(AreaOrig);
 
-    ASSERT_EQ(Area.offset, offset);
-    ASSERT_EQ(Area.size, size);
-    ASSERT_EQ(Area.isVertical, isVertical);
-
-    ASSERT_EQ(Area.offset, AreaOrig.offset);
-    ASSERT_EQ(Area.size, AreaOrig.size);
-    ASSERT_EQ(Area.isVertical, AreaOrig.isVertical);
-  }
-
-  {
-    const unique_ptr<const BlackArea> AreaOrig(
-        new BlackArea(offset, size, isVertical));
-    unique_ptr<BlackArea> Area(new BlackArea(*AreaOrig));
-
-    ASSERT_EQ(Area->offset, offset);
-    ASSERT_EQ(Area->size, size);
-    ASSERT_EQ(Area->isVertical, isVertical);
-
-    ASSERT_EQ(Area->offset, AreaOrig->offset);
-    ASSERT_EQ(Area->size, AreaOrig->size);
-    ASSERT_EQ(Area->isVertical, AreaOrig->isVertical);
-  }
-
-  {
-    const BlackArea AreaOrig(offset, size, isVertical);
-    unique_ptr<BlackArea> Area(new BlackArea(AreaOrig));
-
-    ASSERT_EQ(Area->offset, offset);
-    ASSERT_EQ(Area->size, size);
-    ASSERT_EQ(Area->isVertical, isVertical);
-
-    ASSERT_EQ(Area->offset, AreaOrig.offset);
-    ASSERT_EQ(Area->size, AreaOrig.size);
-    ASSERT_EQ(Area->isVertical, AreaOrig.isVertical);
-  }
-
-  {
-    const unique_ptr<const BlackArea> AreaOrig(
-        new BlackArea(offset, size, isVertical));
-    BlackArea Area(*AreaOrig);
-
-    ASSERT_EQ(Area.offset, offset);
-    ASSERT_EQ(Area.size, size);
-    ASSERT_EQ(Area.isVertical, isVertical);
-
-    ASSERT_EQ(Area.offset, AreaOrig->offset);
-    ASSERT_EQ(Area.size, AreaOrig->size);
-    ASSERT_EQ(Area.isVertical, AreaOrig->isVertical);
+    checkHelper(Area);
+    checkHelper(Area, AreaOrig);
   }
 }
 
@@ -192,13 +154,8 @@ TEST_P(BlackAreaTest, AssignmentGetters) {
 
     Area = AreaOrig;
 
-    ASSERT_EQ(Area.offset, offset);
-    ASSERT_EQ(Area.size, size);
-    ASSERT_EQ(Area.isVertical, isVertical);
-
-    ASSERT_EQ(Area.offset, AreaOrig.offset);
-    ASSERT_EQ(Area.size, AreaOrig.size);
-    ASSERT_EQ(Area.isVertical, AreaOrig.isVertical);
+    checkHelper(Area);
+    checkHelper(Area, AreaOrig);
   });
 
   ASSERT_NO_THROW({
@@ -208,13 +165,8 @@ TEST_P(BlackAreaTest, AssignmentGetters) {
 
     *Area = *AreaOrig;
 
-    ASSERT_EQ(Area->offset, offset);
-    ASSERT_EQ(Area->size, size);
-    ASSERT_EQ(Area->isVertical, isVertical);
-
-    ASSERT_EQ(Area->offset, AreaOrig->offset);
-    ASSERT_EQ(Area->size, AreaOrig->size);
-    ASSERT_EQ(Area->isVertical, AreaOrig->isVertical);
+    checkHelper(*Area);
+    checkHelper(*Area, *AreaOrig);
   });
 
   ASSERT_NO_THROW({
@@ -223,13 +175,8 @@ TEST_P(BlackAreaTest, AssignmentGetters) {
 
     *Area = AreaOrig;
 
-    ASSERT_EQ(Area->offset, offset);
-    ASSERT_EQ(Area->size, size);
-    ASSERT_EQ(Area->isVertical, isVertical);
-
-    ASSERT_EQ(Area->offset, AreaOrig.offset);
-    ASSERT_EQ(Area->size, AreaOrig.size);
-    ASSERT_EQ(Area->isVertical, AreaOrig.isVertical);
+    checkHelper(*Area);
+    checkHelper(*Area, AreaOrig);
   });
 
   ASSERT_NO_THROW({
@@ -239,12 +186,7 @@ TEST_P(BlackAreaTest, AssignmentGetters) {
 
     Area = *AreaOrig;
 
-    ASSERT_EQ(Area.offset, offset);
-    ASSERT_EQ(Area.size, size);
-    ASSERT_EQ(Area.isVertical, isVertical);
-
-    ASSERT_EQ(Area.offset, AreaOrig->offset);
-    ASSERT_EQ(Area.size, AreaOrig->size);
-    ASSERT_EQ(Area.isVertical, AreaOrig->isVertical);
+    checkHelper(Area);
+    checkHelper(Area, *AreaOrig);
   });
 }

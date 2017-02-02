@@ -27,17 +27,34 @@ endif()
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
 
+set(coverage_compilation "-fprofile-arcs -ftest-coverage")
+set(coverage_link "--coverage")
 SET(CMAKE_CXX_FLAGS_COVERAGE
-    "-fprofile-arcs -ftest-coverage"
+    "${coverage_compilation}"
     CACHE STRING "Flags used by the C++ compiler during coverage builds."
     FORCE )
 SET(CMAKE_C_FLAGS_COVERAGE
-    "-fprofile-arcs -ftest-coverage"
+    "${coverage_compilation}"
     CACHE STRING "Flags used by the C compiler during coverage builds."
+     FORCE )
+SET(CMAKE_EXE_LINKER_FLAGS_COVERAGE
+    "${coverage_compilation}"
+    CACHE STRING "Flags used for linking binaries during coverage builds."
+    FORCE )
+SET(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
+    "${coverage_compilation} ${coverage_link}"
+    CACHE STRING "Flags used by the shared libraries linker during coverage builds."
+    FORCE )
+SET(CMAKE_SHARED_MODULE_FLAGS_COVERAGE
+    "${coverage_compilation} ${coverage_link}"
+    CACHE STRING "Flags used by the module linker during coverage builds."
     FORCE )
 MARK_AS_ADVANCED(
     CMAKE_CXX_FLAGS_COVERAGE
-    CMAKE_C_FLAGS_COVERAGE )
+    CMAKE_C_FLAGS_COVERAGE
+    CMAKE_EXE_LINKER_FLAGS_COVERAGE
+    CMAKE_SHARED_LINKER_FLAGS_COVERAGE
+    CMAKE_SHARED_MODULE_FLAGS_COVERAGE )
 
 SET(CMAKE_CXX_FLAGS_ASAN
     "-O1 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common -U_FORTIFY_SOURCE -fsanitize=address -fstack-protector-strong"

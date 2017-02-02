@@ -21,6 +21,7 @@
 
 #include "decoders/NefDecoder.h"
 #include "common/Common.h"                   // for uint32, uchar8, ushort16
+#include "common/Memory.h"                   // for alignedMallocArray, alignedFree
 #include "common/Point.h"                    // for iPoint2D
 #include "decoders/RawDecoderException.h"    // for ThrowRDE, RawDecoderExc...
 #include "decompressors/NikonDecompressor.h" // for decompressNikon
@@ -637,7 +638,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
     curve[i] = clampbits(c << 2, 16);
   }
   mRaw->setTable(curve, 4095, true);
-  _aligned_free(curve);
+  alignedFree(curve);
 
   ushort16 tmp;
   auto *tmpch = (uchar8 *)&tmp;
@@ -702,7 +703,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
 // From:  dcraw.c -- Dave Coffin's raw photo decoder
 #define SQR(x) ((x)*(x))
 ushort16* NefDecoder::gammaCurve(double pwr, double ts, int mode, int imax) {
-  auto *curve = (ushort16 *)_aligned_malloc(65536 * sizeof(ushort16), 16);
+  auto* curve = (ushort16*)alignedMallocArray<16, ushort16>(65536);
   if (curve == nullptr) {
     ThrowRDE("NEF Decoder: Unable to allocate gamma curve");
   }

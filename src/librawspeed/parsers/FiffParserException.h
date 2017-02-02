@@ -1,8 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2013 Klaus Post
-    Copyright (C) 2014 Pedro Côrte-Real
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -21,32 +20,17 @@
 
 #pragma once
 
-#include "common/RawImage.h"     // for RawImage
-#include "decoders/RawDecoder.h" // for RawDecoder, RawDecoderThread (ptr o...
-#include "io/FileMap.h"          // for FileMap
+#include <stdexcept>
+#include <string>
 
 namespace RawSpeed {
 
-class CameraMetaData;
+[[noreturn]] void ThrowFPE(const char* fmt, ...)
+    __attribute__((format(printf, 1, 2)));
 
-class TiffIFD;
-
-class RafDecoder :
-  public RawDecoder
-{
-  TiffIFD *mRootIFD;
+class FiffParserException : public std::runtime_error {
 public:
-  RafDecoder(TiffIFD *rootIFD, FileMap* file);
-  ~RafDecoder() override;
-  RawImage decodeRawInternal() override;
-  void decodeMetaDataInternal(CameraMetaData *meta) override;
-  void checkSupportInternal(CameraMetaData *meta) override;
-  static bool isRAF(FileMap* input);
-
-protected:
-  void decodeThreaded(RawDecoderThread *t) override;
-  void DecodeRaf();
-  bool alt_layout;
+  FiffParserException(const std::string& _msg);
 };
 
 } // namespace RawSpeed

@@ -37,7 +37,50 @@ using namespace std;
 
 namespace RawSpeed {
 
-TiffIFD::TiffIFD(const DataBuffer &data, uint32 offset, TiffIFD *parent_)
+void TiffIFD::parseIFDEntry(ByteStream& bs) {
+  TiffEntryOwner t;
+
+  auto origPos = bs.getPosition();
+
+  try {
+    t = make_unique<TiffEntry>(bs);
+  } catch (IOException&) { // Ignore unparsable entry
+    // fix probably broken position due to interruption by exception
+    // i.e. setting it to the next entry.
+    bs.setPosition(origPos + 12);
+    return;
+  }
+
+  try {
+    switch (t->tag) {
+    case DNGPRIVATEDATA:
+      add(parseDngPrivateData(t.get()));
+      break;
+
+    case MAKERNOTE:
+    case MAKERNOTE_ALT:
+      add(parseMakerNote(t.get()));
+      break;
+
+    case FUJI_RAW_IFD:
+    case SUBIFDS:
+    case EXIFIFDPOINTER:
+      for (uint32 j = 0; j < t->count; j++) {
+        add(make_unique<TiffIFD>(bs, t->getInt(j), this));
+        // if (getSubIFDs().back()->getNextIFD() != 0)
+        //   cerr << "detected chained subIFds" << endl;
+      }
+      break;
+
+    default:
+      add(move(t));
+    }
+  } catch (...) { // Unparsable private data are added as entries
+    add(move(t));
+  }
+}
+
+TiffIFD::TiffIFD(const DataBuffer& data, uint32 offset, TiffIFD* parent_)
     : parent(parent_) {
 
   // see parseTiff: UINT32_MAX is used to mark the "virtual" top level TiffRootIFD in a tiff file
@@ -49,44 +92,9 @@ TiffIFD::TiffIFD(const DataBuffer &data, uint32 offset, TiffIFD *parent_)
 
   auto numEntries = bs.getShort(); // Directory entries in this IFD
 
-  for (uint32 i = 0; i < numEntries; i++) {
-    TiffEntryOwner t;
-    try {
-      t = make_unique<TiffEntry>(bs);
-    } catch (IOException &) { // Ignore unparsable entry
-      // fix probably broken position due to interruption by exception
-      bs.setPosition(offset + 2 + (i+1)*12);
-      continue;
-    }
+  for (uint32 i = 0; i < numEntries; i++)
+    parseIFDEntry(bs);
 
-    try {
-      switch (t->tag) {
-      case DNGPRIVATEDATA:
-        add(parseDngPrivateData(t.get()));
-        break;
-
-      case MAKERNOTE:
-      case MAKERNOTE_ALT:
-        add(parseMakerNote(t.get()));
-        break;
-
-      case FUJI_RAW_IFD:
-      case SUBIFDS:
-      case EXIFIFDPOINTER:
-        for (uint32 j = 0; j < t->count; j++) {
-          add(make_unique<TiffIFD>(bs, t->getInt(j), this));
-//          if (getSubIFDs().back()->getNextIFD() != 0)
-//            cerr << "detected chained subIFds" << endl;
-        }
-        break;
-
-      default:
-        add(move(t));
-      }
-    } catch (...) { // Unparsable private data are added as entries
-      add(move(t));
-    }
-  }
   nextIFD = bs.getUInt();
 }
 

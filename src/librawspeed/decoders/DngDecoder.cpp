@@ -77,7 +77,11 @@ void DngDecoder::dropUnsuportedChunks(vector<TiffIFD*>& data) {
 #ifdef HAVE_ZLIB
           comp == 8 ||
 #endif
-          comp == 1 || comp == 0x884c) ||
+          comp == 1
+#ifdef HAVE_ZLIB
+          || comp == 0x884c
+#endif
+          ) ||
         isSubsampled) { // Erase if subsampled, or not deflated, JPEG or
                         // uncompressed
       i = data.erase(i);
