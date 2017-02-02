@@ -34,7 +34,10 @@ class CameraMetaData;
 class ArwDecoder final : public AbstractTiffDecoder
 {
 public:
-  using AbstractTiffDecoder::AbstractTiffDecoder;
+  // please revert _this_ commit, once IWYU can handle inheriting constructors
+  // using AbstractTiffDecoder::AbstractTiffDecoder;
+  ArwDecoder(TiffRootIFDOwner&& root, FileMap* file)
+    : AbstractTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;
   void checkSupportInternal(CameraMetaData *meta) override;

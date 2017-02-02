@@ -35,7 +35,10 @@ class CameraMetaData;
 class OrfDecoder final : public AbstractTiffDecoder
 {
 public:
-  using AbstractTiffDecoder::AbstractTiffDecoder;
+  // please revert _this_ commit, once IWYU can handle inheriting constructors
+  // using AbstractTiffDecoder::AbstractTiffDecoder;
+  OrfDecoder(TiffRootIFDOwner&& root, FileMap* file)
+    : AbstractTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;

@@ -48,7 +48,10 @@ class PanaBitpump {
 class Rw2Decoder final : public AbstractTiffDecoder
 {
 public:
-  using AbstractTiffDecoder::AbstractTiffDecoder;
+  // please revert _this_ commit, once IWYU can handle inheriting constructors
+  // using AbstractTiffDecoder::AbstractTiffDecoder;
+  Rw2Decoder(TiffRootIFDOwner&& root, FileMap* file)
+    : AbstractTiffDecoder(move(root), file) {}
   ~Rw2Decoder() override;
 
   RawImage decodeRawInternal() override;
