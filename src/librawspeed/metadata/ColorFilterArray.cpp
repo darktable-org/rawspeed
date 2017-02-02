@@ -140,7 +140,7 @@ uint32 ColorFilterArray::shiftDcrawFilter(uint32 filter, int x, int y)
 
   // A shift in y direction means rotating the whole int by 4 bits.
   y *= 4;
-  y = y >= 0 ? y % 32 : -((-y) % 32);
+  y = y >= 0 ? y % 32 : 32 - ((-y) % 32);
   filter = (filter >> y) | (filter << (32 - y));
 
   return filter;

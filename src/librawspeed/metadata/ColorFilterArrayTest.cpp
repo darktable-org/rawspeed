@@ -135,6 +135,7 @@ TEST_P(ColorFilterArrayTest, DcrawFilterShift1) {
     ASSERT_EQ(ColorFilterArray::shiftDcrawFilter(rggb, 0, 1), gbrg);
     ASSERT_EQ(ColorFilterArray::shiftDcrawFilter(rggb, 1, 1), bggr);
     ASSERT_EQ(ColorFilterArray::shiftDcrawFilter(rggb, 0, 2), rggb);
+    ASSERT_EQ(ColorFilterArray::shiftDcrawFilter(rggb, 0, -1), gbrg);
   });
 }
 
