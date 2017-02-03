@@ -196,13 +196,14 @@ void DngDecoder::decodeData(TiffIFD* raw) {
     TiffEntry* offsets = raw->getEntry(STRIPOFFSETS);
     TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
 
-    uint32 yPerSlice = raw->getEntry(ROWSPERSTRIP)->getInt();
-
     if (counts->count != offsets->count) {
       ThrowRDE("DNG Decoder: Byte count number does not match strip size: "
                "count:%u, stips:%u ",
                counts->count, offsets->count);
     }
+
+    uint32 yPerSlice = raw->hasEntry(ROWSPERSTRIP) ?
+          raw->getEntry(ROWSPERSTRIP)->getInt() : mRaw->dim.y;
 
     if (yPerSlice == 0 || yPerSlice > (uint32)mRaw->dim.y)
       ThrowRDE("DNG Decoder: Invalid y per slice");
