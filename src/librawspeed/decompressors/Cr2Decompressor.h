@@ -1,7 +1,6 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
@@ -27,13 +26,18 @@ namespace RawSpeed {
 
 // Decompresses Lossless JPEGs, with 2-4 components and optional X/Y subsampling
 
-class LJpegPlain final : public LJpegDecompressor
+class Cr2Decompressor final : public AbstractLJpegDecompressor
 {
+  // CR2 slices
+  std::vector<int> slicesWidths;
+
   void decodeScan() override;
   template<int N_COMP, int X_S_F, int Y_S_F> void decodeN_X_Y();
 
 public:
-  using LJpegDecompressor::LJpegDecompressor;
+  using AbstractLJpegDecompressor::AbstractLJpegDecompressor;
+
+  void decode(std::vector<int> slicesWidths);
 };
 
 } // namespace RawSpeed

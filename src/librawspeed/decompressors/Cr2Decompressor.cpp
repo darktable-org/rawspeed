@@ -19,44 +19,21 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/LJpegPlain.h"
-#include "common/Common.h"
-#include "common/Point.h"
+#include "decompressors/Cr2Decompressor.h"
 #include "io/BitPumpJPEG.h"
 #include "io/ByteStream.h"
-#include "tiff/TiffTag.h"
-#include <algorithm>
-#include <array>
-#include <cassert>
-#include <cfloat>
-#include <cmath>
-#include <cstdarg>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <list>
-#include <map>
-#include <memory>
-#include <numeric>
-#include <sstream>
-#include <string>
-#include <vector>
 
 using namespace std;
 
 namespace RawSpeed {
 
-void LJpegPlain::decodeScan() {
-
+void Cr2Decompressor::decodeScan()
+{
   if (predictorMode != 1)
-    ThrowRDE("LJpegDecompressor::decodeScan: Unsupported prediction direction.");
+    ThrowRDE("Cr2Decompressor: Unsupported predictor mode.");
 
-  if (frame.h == 0 || frame.w == 0)
-    ThrowRDE("LJpegPlain::decodeScan: Image width or height set to zero");
-
-  if (slicesW.empty())
-    slicesW.push_back(frame.w * frame.cps);
+  if (slicesWidths.empty())
+    slicesWidths.push_back(frame.w * frame.cps);
 
   bool isSubSampled = false;
   for (uint32 i = 0; i < frame.cps;  i++)
@@ -64,126 +41,49 @@ void LJpegPlain::decodeScan() {
 
   if (isSubSampled) {
     if (mRaw->isCFA)
-      ThrowRDE("LJpegDecompressor::decodeScan: Cannot decode subsampled image to CFA data");
+      ThrowRDE("Cr2Decompressor: Cannot decode subsampled image to CFA data");
 
     if (mRaw->getCpp() != frame.cps)
-      ThrowRDE("LJpegDecompressor::decodeScan: Subsampled component count does not match image.");
+      ThrowRDE("Cr2Decompressor: Subsampled component count does not match image.");
 
     if (frame.cps != 3 || frame.compInfo[0].superH != 2 ||
         (frame.compInfo[0].superV != 2 && frame.compInfo[0].superV != 1) ||
         frame.compInfo[1].superH != 1 || frame.compInfo[1].superV != 1 ||
         frame.compInfo[2].superH != 1 || frame.compInfo[2].superV != 1)
-      ThrowRDE("LJpegDecompressor::decodeScan: Unsupported subsampling");
+      ThrowRDE("Cr2Decompressor: Unsupported subsampling");
 
     if (frame.compInfo[0].superV == 2)
-    {
-      // Something like Cr2 sRaw1, use fast decoder
-      decodeN_X_Y<3, 2, 2>();
-    }
+      decodeN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
     else // frame.compInfo[0].superV == 1
-    {
-      // Something like Cr2 sRaw2, use fast decoder
-      decodeN_X_Y<3, 2, 1>();
-    }
+      decodeN_X_Y<3, 2, 1>(); // Cr2 sRaw2/sRaw
   } else {
     if (frame.cps == 2)
       decodeN_X_Y<2, 1, 1>();
-    else if (frame.cps == 3)
-      decodeN_X_Y<3, 1, 1>();
     else if (frame.cps == 4)
       decodeN_X_Y<4, 1, 1>();
     else
-      ThrowRDE("LJpegDecompressor::decodeScan: Unsupported number of components");
+      ThrowRDE("Cr2Decompressor: Unsupported number of components");
   }
 }
 
-// little 'forced' loop unrolling helper tool, example:
-//   unroll_loop<N>([&](int i) {
-//     func(i);
-//   });
-// will translate to:
-//   func(0); func(1); func(2); ... func(N-1);
-
-template <typename Lambda, size_t N>
-struct unroll_loop_t {
-  inline static void repeat(const Lambda& f) {
-    unroll_loop_t<Lambda, N-1>::repeat(f);
-    f(N-1);
-  }
-};
-
-template <typename Lambda>
-struct unroll_loop_t<Lambda, 0> {
-  inline static void repeat(const Lambda& f) {}
-};
-
-template <size_t N, typename Lambda>
-inline void unroll_loop(const Lambda& f) {
-  unroll_loop_t<Lambda, N>::repeat(f);
+void Cr2Decompressor::decode(std::vector<int> slicesWidths_)
+{
+  slicesWidths = move(slicesWidths_);
+  AbstractLJpegDecompressor::decode();
 }
 
 // N_COMP == number of components (2, 3 or 4)
 // X_S_F  == x/horizontal sampling factor (1 or 2)
 // Y_S_F  == y/vertical   sampling factor (1 or 2)
 
-template<int N_COMP, int X_S_F, int Y_S_F>
-void LJpegPlain::decodeN_X_Y() {
-  assert(frame.compInfo[0].superH == X_S_F);
-  assert(frame.compInfo[0].superV == Y_S_F);
-  assert(frame.compInfo[1].superH == 1);
-  assert(frame.compInfo[1].superV == 1);
-  assert(frame.cps == N_COMP);
-
-  array<HuffmanTable*, N_COMP> ht;
-  for (int i = 0; i < N_COMP; ++i)
-    ht[i] = huff[frame.compInfo[i].dcTblNo];
-
-  // Initialize predictors
-  array<ushort16, N_COMP> pred;
-  pred.fill(1 << (frame.prec - Pt - 1));
+template <int N_COMP, int X_S_F, int Y_S_F>
+void Cr2Decompressor::decodeN_X_Y()
+{
+  auto ht = getHuffmanTables<N_COMP>();
+  auto pred = getInitialPredictors<N_COMP>();
+  auto predNext = (ushort16*)mRaw->getDataUncropped(0, 0);
 
   BitPumpJPEG bitStream(input);
-
-  if (slicesW.size() == 1 && (unsigned)slicesW[0] == frame.w * frame.cps) {
-    // This is the 'sane' non Canon case. Here we don't have to worry
-    // about any canon quirks / cr2_slices or even super sampled X/Y data.
-    // But DNGs may encode more data than fits into the raw image frame.
-    assert(X_S_F == 1 && Y_S_F == 1);
-    auto predNext = pred.data();
-    for (unsigned y = 0; y < frame.h; y += Y_S_F) {
-      auto destY = offY + y;
-      // A recoded DNG might be split up into tiles of self contained LJpeg
-      // blobs. The tiles at the bottom and the right may extend beyond the
-      // dimension of the raw image buffer. The excessive content has to be
-      // ignored. For y, we can simply stop decoding when we reached the border.
-      if (destY >= (unsigned)mRaw->dim.y)
-        break;
-
-      auto dest = (ushort16*)mRaw->getDataUncropped(offX, destY);
-
-      copy_n(predNext, N_COMP, pred.data());
-      // the predictor for the next line is the start of this line
-      predNext = dest;
-
-      unsigned width = min(frame.w,
-                           (mRaw->dim.x - offX) / (N_COMP / mRaw->getCpp()));
-
-      // For x, we first process all pixels within the image buffer ...
-      for (unsigned x = 0; x < width; x += X_S_F) {
-        unroll_loop<N_COMP>([&](int i) {
-          *dest++ = pred[i] += ht[i]->decodeNext(bitStream);
-        });
-      }
-      // ... and discard the rest.
-      for (unsigned x = width; x < frame.w; x += X_S_F) {
-        unroll_loop<N_COMP>([&](int i) {
-          ht[i]->decodeNext(bitStream);
-        });
-      }
-    }
-    input.skipBytes(bitStream.getBufferPosition());
-    return;
-  }
 
   uint32 pixelPitch = mRaw->pitch / 2; // Pitch in pixel
   if (frame.cps != 3 && frame.w * frame.cps > 2 * frame.h) {
@@ -196,13 +96,13 @@ void LJpegPlain::decodeN_X_Y() {
   }
   // Fix for Canon 6D mRaw, which has flipped width & height
   // see FIX_CANON_FLIPPED_WIDTH_AND_HEIGHT
-  uint32 sliceH = frame.cps == 3 ? min(frame.w, frame.h) : frame.h;
+  uint32 sliceHeight = frame.cps == 3 ? min(frame.w, frame.h) : frame.h;
 
   if (X_S_F == 2 && Y_S_F == 1)
   {
     // fix the inconsistent slice width in sRaw mode, ask Canon.
-    for (auto& sliceW : slicesW)
-      sliceW = sliceW * 3 / 2;
+    for (auto& sliceWidth : slicesWidths)
+      sliceWidth = sliceWidth * 3 / 2;
   }
 
   // To understand the CR2 slice handling and sampling factor behavior, see
@@ -218,9 +118,8 @@ void LJpegPlain::decodeN_X_Y() {
 
   unsigned processedPixels = 0;
   unsigned processedLineSlices = 0;
-  auto predNext = (ushort16*)mRaw->getDataUncropped(0, 0);
-  for (unsigned sliceW : slicesW) {
-    for (unsigned y = 0; y < sliceH; y += yStepSize) {
+  for (unsigned sliceWidth : slicesWidths) {
+    for (unsigned y = 0; y < sliceHeight; y += yStepSize) {
       // Fix for Canon 80D mraw format.
       // In that format, `frame` is 4032x3402, while `mRaw` is 4536x3024.
       // Consequently, the slices in `frame` wrap around plus there are few
@@ -229,12 +128,12 @@ void LJpegPlain::decodeN_X_Y() {
       // see FIX_CANON_FRAME_VS_IMAGE_SIZE_MISMATCH
       unsigned destY = processedLineSlices % mRaw->dim.y;
       unsigned destX =
-          processedLineSlices / mRaw->dim.y * slicesW[0] / mRaw->getCpp();
+          processedLineSlices / mRaw->dim.y * slicesWidths[0] / mRaw->getCpp();
       if (destX >= (unsigned)mRaw->dim.x)
         break;
       auto dest = (ushort16*)mRaw->getDataUncropped(destX, destY);
 
-      for (unsigned x = 0; x < sliceW; x += xStepSize) {
+      for (unsigned x = 0; x < sliceWidth; x += xStepSize) {
         // check if we processed one full raw row worth of pixels
         if (processedPixels == frame.w) {
           // if yes -> update predictor by going back exactly one row,

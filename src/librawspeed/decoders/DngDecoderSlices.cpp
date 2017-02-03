@@ -23,6 +23,7 @@
 #include "common/Memory.h" // for alignedMallocArray, alignedFree
 #include "common/Point.h"
 #include "decompressors/DeflateDecompressor.h"
+#include "decompressors/LJpegDecompressor.h"
 #include "decompressors/JpegDecompressor.h"
 #include "decompressors/UncompressedDecompressor.h"
 #include "io/IOException.h"
@@ -158,10 +159,9 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
     while (!t->slices.empty()) {
       DngSliceElement e = t->slices.front();
       t->slices.pop();
-      LJpegPlain l(*mFile, e.byteOffset, e.byteCount, mRaw);
-      l.mDNGCompatible = mFixLjpeg;
+      LJpegDecompressor d(*mFile, e.byteOffset, e.byteCount, mRaw);
       try {
-        l.decode(e.offX, e.offY);
+        d.decode(e.offX, e.offY, mFixLjpeg);
       } catch (RawDecoderException &err) {
         mRaw->setError(err.what());
       } catch (IOException &err) {

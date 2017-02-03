@@ -24,7 +24,6 @@
 #include "common/Point.h"  // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "decompressors/HasselbladDecompressor.h"
-#include "decompressors/LJpegPlain.h"
 #include "io/BitPumpMSB32.h"         // for BitPumpMSB32
 #include "io/ByteStream.h"           // for ByteStream
 #include "metadata/CameraMetaData.h" // for CameraMetaData
@@ -70,17 +69,13 @@ RawImage ThreefrDecoder::decodeRawInternal() {
   mRaw->createData();
 
   HasselbladDecompressor l(*mFile, off, mRaw);
-  // We cannot use fully decoding huffman table,
-  // because values are packed two pixels at the time.
-  l.mFullDecodeHT = false;
-  auto pixelOffset = hints.find("pixelBaseOffset");
-  if (pixelOffset != hints.end()) {
-    stringstream convert((*pixelOffset).second);
-    convert >> l.pixelBaseOffset;
-  }
+  int pixelBaseOffset = 0;
+  auto pixelOffsetHint = hints.find("pixelBaseOffset");
+  if (pixelOffsetHint != hints.end())
+    pixelBaseOffset = stoi(pixelOffsetHint->second);
 
   try {
-    l.decode(0, 0);
+    l.decode(pixelBaseOffset);
   } catch (IOException &e) {
     mRaw->setError(e.what());
     // Let's ignore it, it may have delivered somewhat useful data.

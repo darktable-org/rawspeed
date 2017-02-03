@@ -74,4 +74,14 @@ void HasselbladDecompressor::decodeScan()
   input.skipBytes(bitStream.getBufferPosition());
 }
 
+void HasselbladDecompressor::decode(int pixelBaseOffset_)
+{
+  pixelBaseOffset = pixelBaseOffset_;
+  // We cannot use fully decoding huffman table,
+  // because values are packed two pixels at the time.
+  fullDecodeHT = false;
+
+  AbstractLJpegDecompressor::decode();
+}
+
 } // namespace RawSpeed

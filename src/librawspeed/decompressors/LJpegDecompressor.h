@@ -1,7 +1,6 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
@@ -21,158 +20,23 @@
 
 #pragma once
 
-#include "common/Common.h"              // for uint32
-#include "common/RawImage.h"            // for RawImage
-#include "decompressors/HuffmanTable.h" // IWYU pragma: keep
-#include "io/ByteStream.h"              // for ByteStream
-#include <array>                        // for array
-#include <memory>                       // for unique_ptr
-#include <utility>                      // for move
-#include <vector>                       // for vector
-
-/*
- * The following enum and two structs are stolen from the IJG JPEG library
- * Comments added by tm. See also Copyright in HuffmanTable.h.
- */
+#include "decompressors/AbstractLJpegDecompressor.h"
 
 namespace RawSpeed {
 
-class ByteStream;
+// Decompresses Lossless JPEGs, with 2-4 components
 
-enum JpegMarker { /* JPEG marker codes			*/
-  M_STUFF = 0x00,
-  M_SOF0  = 0xc0,	/* baseline DCT				*/
-  M_SOF1  = 0xc1,	/* extended sequential DCT		*/
-  M_SOF2  = 0xc2,	/* progressive DCT			*/
-  M_SOF3  = 0xc3,	/* lossless (sequential)		*/
-
-  M_SOF5  = 0xc5,	/* differential sequential DCT		*/
-  M_SOF6  = 0xc6,	/* differential progressive DCT		*/
-  M_SOF7  = 0xc7,	/* differential lossless		*/
-
-  M_JPG   = 0xc8,	/* JPEG extensions			*/
-  M_SOF9  = 0xc9,	/* extended sequential DCT		*/
-  M_SOF10 = 0xca,	/* progressive DCT			*/
-  M_SOF11 = 0xcb,	/* lossless (sequential)		*/
-
-  M_SOF13 = 0xcd,	/* differential sequential DCT		*/
-  M_SOF14 = 0xce,	/* differential progressive DCT		*/
-  M_SOF15 = 0xcf,	/* differential lossless		*/
-
-  M_DHT   = 0xc4,	/* define Huffman tables		*/
-
-  M_DAC   = 0xcc,	/* define arithmetic conditioning table	*/
-
-  M_RST0  = 0xd0,	/* restart				*/
-  M_RST1  = 0xd1,	/* restart				*/
-  M_RST2  = 0xd2,	/* restart				*/
-  M_RST3  = 0xd3,	/* restart				*/
-  M_RST4  = 0xd4,	/* restart				*/
-  M_RST5  = 0xd5,	/* restart				*/
-  M_RST6  = 0xd6,	/* restart				*/
-  M_RST7  = 0xd7,	/* restart				*/
-
-  M_SOI   = 0xd8,	/* start of image			*/
-  M_EOI   = 0xd9,	/* end of image				*/
-  M_SOS   = 0xda,	/* start of scan			*/
-  M_DQT   = 0xdb,	/* define quantization tables		*/
-  M_DNL   = 0xdc,	/* define number of lines		*/
-  M_DRI   = 0xdd,	/* define restart interval		*/
-  M_DHP   = 0xde,	/* define hierarchical progression	*/
-  M_EXP   = 0xdf,	/* expand reference image(s)		*/
-
-  M_APP0  = 0xe0,	/* application marker, used for JFIF	*/
-  M_APP1  = 0xe1,	/* application marker			*/
-  M_APP2  = 0xe2,	/* application marker			*/
-  M_APP3  = 0xe3,	/* application marker			*/
-  M_APP4  = 0xe4,	/* application marker			*/
-  M_APP5  = 0xe5,	/* application marker			*/
-  M_APP6  = 0xe6,	/* application marker			*/
-  M_APP7  = 0xe7,	/* application marker			*/
-  M_APP8  = 0xe8,	/* application marker			*/
-  M_APP9  = 0xe9,	/* application marker			*/
-  M_APP10 = 0xea,	/* application marker			*/
-  M_APP11 = 0xeb,	/* application marker			*/
-  M_APP12 = 0xec,	/* application marker			*/
-  M_APP13 = 0xed,	/* application marker			*/
-  M_APP14 = 0xee,	/* application marker, used by Adobe	*/
-  M_APP15 = 0xef,	/* application marker			*/
-
-  M_JPG0  = 0xf0,	/* reserved for JPEG extensions		*/
-  M_JPG13 = 0xfd,	/* reserved for JPEG extensions		*/
-  M_COM   = 0xfe,	/* comment				*/
-
-  M_TEM   = 0x01,	/* temporary use			*/
-  M_FILL  = 0xFF
-
-
-};
-
-/*
-* The following structure stores basic information about one component.
-*/
-struct JpegComponentInfo {
-  /*
-  * These values are fixed over the whole image.
-  * They are read from the SOF marker.
-  */
-  uint32 componentId = -1;		/* identifier for this component (0..255) */
-
-  /*
-  * Huffman table selector (0..3). The value may vary
-  * between scans. It is read from the SOS marker.
-  */
-  uint32 dcTblNo = -1;
-  uint32 superH = -1; // Horizontal Supersampling
-  uint32 superV = -1; // Vertical Supersampling
-};
-
-class SOFInfo {
-public:
-  JpegComponentInfo compInfo[4];
-  uint32 w = 0;    // Width
-  uint32 h = 0;    // Height
-  uint32 cps = 0;  // Components
-  uint32 prec = 0; // Precision
-  bool initialized = false;
-};
-
-class LJpegDecompressor
+class LJpegDecompressor final : public AbstractLJpegDecompressor
 {
+  void decodeScan() override;
+  template<int N_COMP> void decodeN();
+
+  uint32 offX = 0, offY = 0;
+
 public:
-  LJpegDecompressor(const Buffer& data, Buffer::size_type offset,
-                    Buffer::size_type size, const RawImage& img)
-      : input(data, offset, size, getHostEndianness() == big), mRaw(img) {}
-  LJpegDecompressor(const Buffer& data, Buffer::size_type offset,
-                    const RawImage& img)
-      : LJpegDecompressor(data, offset, data.getSize()-offset, img) {}
-  virtual ~LJpegDecompressor() = default;
-  void decode(uint32 offsetX, uint32 offsetY);
-  void addSlices(std::vector<int> slices) {
-    slicesW = std::move(slices);
-  } // CR2 slices.
+  using AbstractLJpegDecompressor::AbstractLJpegDecompressor;
 
-  bool mDNGCompatible = false;  // DNG v1.0.x compatibility
-  bool mFullDecodeHT = true;    // FullDecode Huffman
-
-protected:
-  void parseSOF(SOFInfo* i);
-  void parseSOS();
-  void parseDHT();
-  JpegMarker getNextMarker(bool allowskip);
-
-  virtual void decodeScan() = 0;
-
-  ByteStream input;
-  RawImage mRaw;
-
-  SOFInfo frame;
-  std::vector<int> slicesW;
-  uint32 predictorMode = 0;
-  uint32 Pt = 0;
-  uint32 offX = 0, offY = 0;  // Offset into image where decoding should start
-  std::array<HuffmanTable*, 4> huff{{}}; // 4 pointers into the store
-  std::vector<std::unique_ptr<HuffmanTable>> huffmanTableStore; // std::vector of unique HTs
+  void decode(uint32 offsetX, uint32 offsetY, bool fixDng16Bug);
 };
 
 } // namespace RawSpeed

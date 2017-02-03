@@ -21,6 +21,7 @@
 */
 
 #include "decoders/Cr2Decoder.h"
+#include "decompressors/Cr2Decompressor.h"
 #include "common/Common.h"
 #include "common/Point.h"
 #include "tiff/TiffEntry.h"
@@ -74,11 +75,9 @@ RawImage Cr2Decoder::decodeOldFormat() {
 
   mRaw = RawImage::create({width, height});
 
-  LJpegPlain l(*mFile, offset, mRaw);
-  l.addSlices({width});
-
+  Cr2Decompressor l(*mFile, offset, mRaw);
   try {
-    l.decode(0, 0);
+    l.decode({width});
   } catch (IOException& e) {
     mRaw->setError(e.what());
   }
@@ -131,11 +130,10 @@ RawImage Cr2Decoder::decodeNewFormat() {
   TiffEntry* offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
 
-  LJpegPlain l(*mFile, offsets->getInt(), counts->getInt(), mRaw);
-  l.addSlices(s_width);
+  Cr2Decompressor d(*mFile, offsets->getInt(), counts->getInt(), mRaw);
 
   try {
-    l.decode(0, 0);
+    d.decode(s_width);
   } catch (RawDecoderException &e) {
     mRaw->setError(e.what());
   } catch (IOException &e) {
