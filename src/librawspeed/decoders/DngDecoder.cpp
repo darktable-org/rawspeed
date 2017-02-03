@@ -454,7 +454,14 @@ void DngDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
     mRaw->metadata.isoSpeed = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getInt();
 
-  auto id = mRootIFD->getID();
+  TiffID id;
+
+  try {
+    id = mRootIFD->getID();
+  } catch (...) {
+    // not all dngs have MAKE/MODEL entries,
+    // will be dealt with by using UNIQUECAMERAMODEL below
+  }
 
   // Set the make and model
   mRaw->metadata.make = id.make;
