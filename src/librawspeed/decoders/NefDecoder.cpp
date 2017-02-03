@@ -517,18 +517,18 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
 
         // Finally set the WB coeffs
         uint32 off = (version == 0x204) ? 6 : 14;
-        mRaw->metadata.wbCoeffs[0] = (float)get2BE(buf, off);
-        mRaw->metadata.wbCoeffs[1] = (float)get2BE(buf, off+2);
-        mRaw->metadata.wbCoeffs[2] = (float)get2BE(buf, off+6);
+        mRaw->metadata.wbCoeffs[0] = (float)getU16BE(buf + off + 0);
+        mRaw->metadata.wbCoeffs[1] = (float)getU16BE(buf + off + 2);
+        mRaw->metadata.wbCoeffs[2] = (float)getU16BE(buf + off + 6);
       }
     }
   } else if (mRootIFD->hasEntryRecursive((TiffTag)0x0014)) {
     TiffEntry *wb = mRootIFD->getEntryRecursive((TiffTag)0x0014);
     auto *tmp = (uchar8 *)wb->getData(wb->count);
     if (wb->count == 2560 && wb->type == TIFF_UNDEFINED) {
-      mRaw->metadata.wbCoeffs[0] = (float) get2BE(tmp, 1248) / 256.0f;
+      mRaw->metadata.wbCoeffs[0] = (float) getU16BE(tmp + 1248) / 256.0f;
       mRaw->metadata.wbCoeffs[1] = 1.0f;
-      mRaw->metadata.wbCoeffs[2] = (float) get2BE(tmp, 1250) / 256.0f;
+      mRaw->metadata.wbCoeffs[2] = (float) getU16BE(tmp + 1250) / 256.0f;
     } else if (!strncmp((char *)tmp,"NRW ",4)) {
       uint32 offset = 0;
       if (strncmp((char *)tmp + 4, "0100", 4) != 0 && wb->count > 72)
@@ -538,9 +538,9 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
 
       if (offset) {
         tmp += offset;
-        mRaw->metadata.wbCoeffs[0] = (float) (get4LE(tmp,0) << 2);
-        mRaw->metadata.wbCoeffs[1] = (float) (get4LE(tmp,4) + get4LE(tmp,8));
-        mRaw->metadata.wbCoeffs[2] = (float) (get4LE(tmp,12) << 2);
+        mRaw->metadata.wbCoeffs[0] = (float)(getU32LE(tmp + 0) << 2);
+        mRaw->metadata.wbCoeffs[1] = (float)(getU32LE(tmp + 4) + getU32LE(tmp + 8));
+        mRaw->metadata.wbCoeffs[2] = (float)(getU32LE(tmp + 12) << 2);
       }
     }
   }

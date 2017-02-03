@@ -35,7 +35,7 @@ template<> inline void BitPumpMSB16::fillCache() {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "if the structure of the bit cache changed, this code has to be updated");
 
   for (int i = 0; i < 2; ++i) {
-    cache.push(loadMem<ushort16>(data+pos, getHostEndianness() == big), 16);
+    cache.push(getLE<ushort16>(data + pos), 16);
     pos += 2;
   }
 }

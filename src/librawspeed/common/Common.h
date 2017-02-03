@@ -128,7 +128,8 @@ inline Endianness getHostEndianness() {
 # define BSWAP64(A) __builtin_bswap64(A)
 #endif
 
-template<typename T> inline T loadMem(const void* data, bool bswap) {
+template<typename T> inline T getByteSwapped(const void* data, bool bswap)
+{
   T ret;
   // all interesting compilers optimize this memcpy into a single move
   // this is the most effective way to load some bytes without running into alignmen issues
@@ -144,15 +145,27 @@ template<typename T> inline T loadMem(const void* data, bool bswap) {
   return ret;
 }
 
-#define get2BE(data, pos)                                                      \
-  (loadMem<ushort16>((data) + (pos), getHostEndianness() == little))
-#define get2LE(data, pos)                                                      \
-  (loadMem<ushort16>((data) + (pos), getHostEndianness() == big))
+// The following functions may be used to get a multi-byte sized tyoe from some
+// memory location converted to the native byte order of the host.
+// 'BE' suffix: source byte order is known to be big endian
+// 'LE' suffix: source byte order is known to be little endian
+// Note: these functions should be avoided if higher level acess from
+// Buffer/DataBuffer classes is available.
 
-#define get4BE(data, pos)                                                      \
-  (loadMem<uint32>((data) + (pos), getHostEndianness() == little))
-#define get4LE(data, pos)                                                      \
-  (loadMem<uint32>((data) + (pos), getHostEndianness() == big))
+template <typename T> inline T getBE(const void* data)
+{
+  return getByteSwapped<T>(data, getHostEndianness() == little);
+}
+
+template <typename T> inline T getLE(const void* data)
+{
+  return getByteSwapped<T>(data, getHostEndianness() == big);
+}
+
+inline ushort16 getU16BE(const void* data) { return getBE<ushort16>(data); }
+inline ushort16 getU16LE(const void* data) { return getLE<ushort16>(data); }
+inline uint32 getU32BE(const void* data)   { return getBE<uint32>(data); }
+inline uint32 getU32LE(const void* data)   { return getLE<uint32>(data); }
 
 #ifdef _MSC_VER
 // See http://tinyurl.com/hqfuznc

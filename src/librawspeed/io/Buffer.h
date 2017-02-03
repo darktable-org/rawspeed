@@ -88,7 +88,7 @@ public:
 
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap byte order if required
   template<typename T> inline T get(bool inNativeByteOrder, size_type offset, size_type index = 0) const {
-    return loadMem<T>(getData(offset + index*(size_type)sizeof(T), (size_type)sizeof(T)), !inNativeByteOrder);
+    return getByteSwapped<T>(getData(offset + index*(size_type)sizeof(T), (size_type)sizeof(T)), !inNativeByteOrder);
   }
 
   inline size_type getSize() const {

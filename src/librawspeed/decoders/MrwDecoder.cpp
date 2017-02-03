@@ -59,7 +59,7 @@ void MrwDecoder::parseHeader() {
     ThrowRDE("This isn't actually a MRW file, why are you calling me?");
 
   const unsigned char* data = mFile->getData(0,8);
-  data_offset = get4BE(data,4)+8;
+  data_offset = getU32BE(data + 4) + 8;
   data = mFile->getData(0,data_offset);
 
   if (!mFile->isValid(data_offset))
@@ -71,17 +71,17 @@ void MrwDecoder::parseHeader() {
 
   uint32 currpos = 8;
   // At most we read 20 bytes from currpos so check we don't step outside that
-  while (currpos+20 < data_offset) {
-    uint32 tag = get4BE(data,currpos);
-    uint32 len = get4BE(data,currpos+4);
+  while (currpos + 20 < data_offset) {
+    uint32 tag = getU32BE(data + currpos);
+    uint32 len = getU32BE(data + currpos + 4);
     switch(tag) {
     case 0x505244: // PRD
-      raw_height = get2BE(data,currpos+16);
-      raw_width = get2BE(data,currpos+18);
+      raw_height = getU16BE(data + currpos + 16);
+      raw_width = getU16BE(data + currpos + 18);
       packed = (data[currpos+24] == 12);
     case 0x574247: // WBG
-      for(uint32 i=0; i<4; i++)
-        wb_coeffs[i] = (float)get2BE(data, currpos+12+i*2);
+      for (uint32 i = 0; i < 4; i++)
+        wb_coeffs[i] = (float)getU16BE(data + currpos + 12 + i * 2);
       break;
     case 0x545457: // TTW
       // Base value for offsets needs to be at the beginning of the TIFF block, not the file

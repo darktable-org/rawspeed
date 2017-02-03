@@ -75,12 +75,12 @@ RawImage MosDecoder::decodeRawInternal() {
   uint32 base = 8;
   // We get a pointer up to the end of the file as we check offset bounds later
   const uchar8 *insideTiff = mFile->getData(base, mFile->getSize()-base);
-  if (get4LE(insideTiff, 0) == 0x49494949) {
-    uint32 offset = get4LE(insideTiff, 8);
+  if (getU32LE(insideTiff) == 0x49494949) {
+    uint32 offset = getU32LE(insideTiff + 8);
     if (offset+base+4 > mFile->getSize())
       ThrowRDE("MOS: PhaseOneC offset out of bounds");
 
-    uint32 entries = get4LE(insideTiff, offset);
+    uint32 entries = getU32LE(insideTiff + offset);
     uint32 pos = 8; // Skip another 4 bytes
 
     uint32 width=0, height=0, strip_offset=0, data_offset=0, wb_offset=0;
@@ -88,10 +88,10 @@ RawImage MosDecoder::decodeRawInternal() {
       if (offset+base+pos+16 > mFile->getSize())
         ThrowRDE("MOS: PhaseOneC offset out of bounds");
 
-      uint32 tag  = get4LE(insideTiff, offset+pos);
-      //uint32 type = get4LE(insideTiff, offset+pos+4);
-      //uint32 len  = get4LE(insideTiff, offset+pos+8);
-      uint32 data = get4LE(insideTiff, offset+pos+12);
+      uint32 tag = getU32LE(insideTiff + offset + pos + 0);
+      // uint32 type = getU32LE(insideTiff + offset + pos + 4);
+      // uint32 len  = getU32LE(insideTiff + offset + pos + 8);
+      uint32 data = getU32LE(insideTiff + offset + pos + 12);
       pos += 16;
       switch(tag) {
       case 0x107: wb_offset    = data+base;      break;
@@ -116,7 +116,7 @@ RawImage MosDecoder::decodeRawInternal() {
 
     const uchar8 *data = mFile->getData(wb_offset, 12);
     for(int i=0; i<3; i++) {
-      mRaw->metadata.wbCoeffs[i] = loadMem<float>(data+i*4, getHostEndianness()==big);
+      mRaw->metadata.wbCoeffs[i] = getLE<float>(data + i * 4);
     }
 
     return mRaw;
@@ -162,8 +162,9 @@ void MosDecoder::DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32
 {
   const int length[] = { 8,7,6,9,11,10,5,12,14,13 };
 
-  for (uint32 row=0; row < height; row++) {
-    uint32 off = data_offset + get4LE(mFile->getData(strip_offset, 4), row*4);
+  for (uint32 row = 0; row < height; row++) {
+    uint32 off =
+        data_offset + getU32LE(mFile->getData(strip_offset + row * 4, 4));
 
     BitPumpMSB32 pump(mFile, off);
     uint32 pred[2], len[2];
