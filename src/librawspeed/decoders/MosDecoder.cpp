@@ -45,10 +45,10 @@ MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, FileMap* file)
 {
   black_level = 0;
 
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MAKE);
-  if (!data.empty()) {
-    make = data[0]->getEntry(MAKE)->getString();
-    model = data[0]->getEntry(MODEL)->getString();
+  if (mRootIFD->getEntryRecursive(MAKE)) {
+    auto id = mRootIFD->getID();
+    make = id.make;
+    model = id.model;
   } else {
     TiffEntry *xmp = mRootIFD->getEntryRecursive(XMP);
     if (!xmp)
@@ -191,11 +191,11 @@ void MosDecoder::DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32
 }
 
 void MosDecoder::checkSupportInternal(CameraMetaData *meta) {
-  this->checkCameraSupported(meta, make, model, "");
+  RawDecoder::checkCameraSupported(meta, make, model, "");
 }
 
 void MosDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
-  setMetaData(meta, make, model, "", 0);
+  RawDecoder::setMetaData(meta, make, model, "", 0);
 
   // Fetch the white balance (see dcraw.c parse_mos for more metadata that can be gotten)
   if (mRootIFD->hasEntryRecursive(LEAFMETADATA)) {

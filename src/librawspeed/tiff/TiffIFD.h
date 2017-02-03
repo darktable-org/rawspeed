@@ -80,6 +80,12 @@ public:
 //  const std::map<TiffTag, TiffEntry*>& getEntries() const { return entries; }
 };
 
+struct TiffID
+{
+  std::string make;
+  std::string model;
+};
+
 class TiffRootIFD : public TiffIFD
 {
 public:
@@ -87,6 +93,10 @@ public:
 
   TiffRootIFD(const DataBuffer &data, uint32 offset)
       : TiffIFD(data, offset, nullptr), rootBuffer(data) {}
+
+  // find the MAKE and MODEL tags identifying the camera
+  // note: the returned strings are trimmed automatically
+  TiffID getID() const;
 };
 
 inline bool isTiffInNativeByteOrder(const ByteStream& bs, uint32 pos, const char* context = "") {

@@ -77,26 +77,8 @@ RawImage KdcDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void KdcDecoder::checkSupportInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  if (data.empty())
-    ThrowRDE("KDC Support check: Model name not found");
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  this->checkCameraSupported(meta, make, model, "");
-}
-
 void KdcDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-
-  if (data.empty())
-    ThrowRDE("KDC Decoder: Model name found");
-  if (!data[0]->hasEntry(MAKE))
-    ThrowRDE("KDC Decoder: Make name not found");
-
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  setMetaData(meta, make, model, "", 0);
+  setMetaData(meta, "", 0);
 
   // Try the kodak hidden IFD for WB
   if (mRootIFD->hasEntryRecursive(KODAK_IFD2)) {

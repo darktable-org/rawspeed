@@ -166,26 +166,8 @@ void DcrDecoder::decodeKodak65000Segment(ByteStream &input, ushort16 *out, uint3
   }
 }
 
-void DcrDecoder::checkSupportInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  if (data.empty())
-    ThrowRDE("DCR Support check: Model name not found");
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  this->checkCameraSupported(meta, make, model, "");
-}
-
 void DcrDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-
-  if (data.empty())
-    ThrowRDE("DCR Decoder: Model name found");
-  if (!data[0]->hasEntry(MAKE))
-    ThrowRDE("DCR Decoder: Make name not found");
-
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  setMetaData(meta, make, model, "", 0);
+  setMetaData(meta, "", 0);
 }
 
 } // namespace RawSpeed

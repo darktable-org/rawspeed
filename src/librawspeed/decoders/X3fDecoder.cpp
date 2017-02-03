@@ -126,16 +126,15 @@ bool X3fDecoder::readName() {
       if (i.getUInt() == 0x66697845) { // Match text 'Exif'
         try {
           TiffRootIFDOwner root = parseTiff(mFile->getSubView(cimg.dataOffset+12, i.getRemainSize()));
-
-          if (root->hasEntryRecursive(MAKE) && root->hasEntryRecursive(MODEL)) {
-            camera_model = root->getEntryRecursive(MODEL)->getString();
-            camera_make = root->getEntryRecursive(MAKE)->getString();
-            mProperties.props["CAMMANUF"] = root->getEntryRecursive(MAKE)->getString();
-            mProperties.props["CAMMODEL"] = root->getEntryRecursive(MODEL)->getString();
-            return true;
-          }
-        } catch (...) {}
-        return false;
+          auto id = root->getID();
+          camera_model = id.model;
+          camera_make = id.make;
+          mProperties.props["CAMMANUF"] = id.make;
+          mProperties.props["CAMMODEL"] = id.model;
+          return true;
+        } catch (...) {
+          return false;
+        }
       }
     }
   }

@@ -260,32 +260,14 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
   }
 }
 
-void OrfDecoder::checkSupportInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  if (data.empty())
-    ThrowRDE("ORF Support check: Model name found");
-  if (!data[0]->hasEntry(MAKE))
-    ThrowRDE("ORF Support: Make name not found");
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  this->checkCameraSupported(meta, make, model, "");
-}
-
 void OrfDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   int iso = 0;
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-
-  if (data.empty())
-    ThrowRDE("ORF Meta Decoder: Model name found");
-
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
 
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
     iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getInt();
 
-  setMetaData(meta, make, model, "", iso);
+  setMetaData(meta, "", iso);
 
   if (mRootIFD->hasEntryRecursive(OLYMPUSREDMULTIPLIER) &&
       mRootIFD->hasEntryRecursive(OLYMPUSBLUEMULTIPLIER)) {

@@ -87,14 +87,11 @@ RawDecoder* makeDecoder(TiffRootIFDOwner root, Buffer &data) {
     }
   }
 
-  for (TiffIFD* ifd : root->getIFDsWithTag(MAKE)) {
-    string make = ifd->getEntry(MAKE)->getString();
-    TrimSpaces(make);
-    string model;
-    if (ifd->hasEntry(MODEL)) {
-      model = ifd->getEntry(MODEL)->getString();
-      TrimSpaces(model);
-    }
+  try {
+    auto id = root->getID();
+    string make = id.make;
+    string model = id.model;
+
     if (make == "Canon") {
       return new Cr2Decoder(move(root), mInput);
     }
@@ -145,15 +142,15 @@ RawDecoder* makeDecoder(TiffRootIFDOwner root, Buffer &data) {
     if (make == "Leaf" || make == "Phase One A/S") {
       return new MosDecoder(move(root), mInput);
     }
-  }
-
-  // Last ditch effort to identify Leaf cameras that don't have a Tiff Make set
-  TiffEntry* softwareIFD = root->getEntryRecursive(SOFTWARE);
-  if (softwareIFD) {
-    string software = softwareIFD->getString();
-    TrimSpaces(software);
-    if (software == "Camera Library") {
-      return new MosDecoder(move(root), mInput);
+  } catch (const TiffParserException&) {
+    // Last ditch effort to identify Leaf cameras that don't have a Tiff Make set
+    TiffEntry* softwareIFD = root->getEntryRecursive(SOFTWARE);
+    if (softwareIFD) {
+      string software = softwareIFD->getString();
+      TrimSpaces(software);
+      if (software == "Camera Library") {
+        return new MosDecoder(move(root), mInput);
+      }
     }
   }
 

@@ -35,6 +35,31 @@ public:
     : RawDecoder(file), mRootIFD(std::move(root)) {}
 
   TiffIFD *getRootIFD() final { return mRootIFD.get(); }
+
+  inline bool checkCameraSupported(CameraMetaData* meta, const TiffID& id,
+                                   const std::string& mode)
+  {
+      return RawDecoder::checkCameraSupported(meta, id.make, id.model, mode);
+  }
+
+  using RawDecoder::setMetaData;
+
+  inline void setMetaData(CameraMetaData* meta, const TiffID& id,
+                          const std::string& mode, int iso_speed)
+  {
+      setMetaData(meta, id.make, id.model, mode, iso_speed);
+  }
+
+  inline void setMetaData(CameraMetaData* meta, const std::string& mode,
+                          int iso_speed)
+  {
+      setMetaData(meta, mRootIFD->getID(), mode, iso_speed);
+  }
+
+  inline void checkSupportInternal(CameraMetaData *meta) override
+  {
+      checkCameraSupported(meta, mRootIFD->getID(), "");
+  }
 };
 
 } // namespace RawSpeed

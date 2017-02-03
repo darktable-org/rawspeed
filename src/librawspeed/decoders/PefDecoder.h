@@ -38,7 +38,7 @@ public:
 
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
-  void checkSupportInternal(CameraMetaData *meta) override;
+
 protected:
   int getDecoderVersion() const override { return 3; }
 };

@@ -369,18 +369,14 @@ void NefDecoder::DecodeSNefUncompressed() {
 }
 
 void NefDecoder::checkSupportInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  if (data.empty())
-    ThrowRDE("NEF Support check: Model name not found");
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-
+  auto id = mRootIFD->getID();
   string mode = getMode();
   string extended_mode = getExtendedMode(mode);
 
-  if (meta->hasCamera(make, model, extended_mode))
-    this->checkCameraSupported(meta, make, model, extended_mode);
-  else this->checkCameraSupported(meta, make, model, mode);
+  if (meta->hasCamera(id.make, id.model, extended_mode))
+    checkCameraSupported(meta, id, extended_mode);
+  else
+    checkCameraSupported(meta, id, mode);
 }
 
 string NefDecoder::getMode() {
@@ -420,18 +416,8 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   int iso = 0;
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
 
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-
-  if (data.empty())
-    ThrowRDE("NEF Meta Decoder: Model name not found");
-  if (!data[0]->hasEntry(MAKE))
-    ThrowRDE("NEF Support: Make name not found");
-
   int white = mRaw->whitePoint;
   int black = mRaw->blackLevel;
-
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
 
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
     iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getInt();
@@ -564,14 +550,15 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
     mRaw->metadata.wbCoeffs[2] *= 256/317.0;
   }
 
+  auto id = mRootIFD->getID();
   string mode = getMode();
   string extended_mode = getExtendedMode(mode);
-  if (meta->hasCamera(make, model, extended_mode)) {
-    setMetaData(meta, make, model, extended_mode, iso);
-  } else if (meta->hasCamera(make, model, mode)) {
-    setMetaData(meta, make, model, mode, iso);
+  if (meta->hasCamera(id.make, id.model, extended_mode)) {
+    setMetaData(meta, id, extended_mode, iso);
+  } else if (meta->hasCamera(id.make, id.model, mode)) {
+    setMetaData(meta, id, mode, iso);
   } else {
-    setMetaData(meta, make, model, "", iso);
+    setMetaData(meta, id, "", iso);
   }
 
   if (white != 65536)

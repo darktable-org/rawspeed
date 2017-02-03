@@ -294,39 +294,23 @@ void ArwDecoder::DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp) {
   ThrowRDE("Unsupported bit depth");
 }
 
-void ArwDecoder::checkSupportInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  if (data.empty())
-    ThrowRDE("ARW Support check: Model name found");
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  this->checkCameraSupported(meta, make, model, "");
-}
-
 void ArwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   //Default
   int iso = 0;
 
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-
-  if (data.empty())
-    ThrowRDE("ARW Meta Decoder: Model name found");
-  if (!data[0]->hasEntry(MAKE))
-    ThrowRDE("ARW Decoder: Make name not found");
-
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
 
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
     iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getInt();
 
-  setMetaData(meta, make, model, "", iso);
+  auto id = mRootIFD->getID();
+
+  setMetaData(meta, id, "", iso);
   mRaw->whitePoint >>= mShiftDownScale;
   mRaw->blackLevel >>= mShiftDownScale;
 
   // Set the whitebalance
-  if (model == "DSLR-A100") { // Handle the MRW style WB of the A100
+  if (id.model == "DSLR-A100") { // Handle the MRW style WB of the A100
     if (mRootIFD->hasEntryRecursive(DNGPRIVATEDATA)) {
       TiffEntry *priv = mRootIFD->getEntryRecursive(DNGPRIVATEDATA);
       const uchar8 *offdata = priv->getData(4);

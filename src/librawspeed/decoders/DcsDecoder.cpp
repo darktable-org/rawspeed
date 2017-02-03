@@ -90,26 +90,8 @@ RawImage DcsDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void DcsDecoder::checkSupportInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  if (data.empty())
-    ThrowRDE("DCS Support check: Model name not found");
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  this->checkCameraSupported(meta, make, model, "");
-}
-
 void DcsDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-
-  if (data.empty())
-    ThrowRDE("DCS Decoder: Model name found");
-  if (!data[0]->hasEntry(MAKE))
-    ThrowRDE("DCS Decoder: Make name not found");
-
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  setMetaData(meta, make, model, "", 0);
+  setMetaData(meta, "", 0);
 }
 
 } // namespace RawSpeed

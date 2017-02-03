@@ -89,27 +89,10 @@ RawImage ThreefrDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void ThreefrDecoder::checkSupportInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  if (data.empty())
-    ThrowRDE("3FR Support check: Model name not found");
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  this->checkCameraSupported(meta, make, model, "");
-}
-
 void ThreefrDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
-  if (data.empty())
-    ThrowRDE("3FR Decoder: Model name found");
-  if (!data[0]->hasEntry(MAKE))
-    ThrowRDE("3FR Decoder: Make name not found");
-
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  setMetaData(meta, make, model, "", 0);
+  setMetaData(meta, "", 0);
 
   // Fetch the white balance
   if (mRootIFD->hasEntryRecursive(ASSHOTNEUTRAL)) {

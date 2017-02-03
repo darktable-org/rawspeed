@@ -124,8 +124,6 @@ void RawDecoder::decodeUncompressed(TiffIFD *rawIFD, BitOrder order) {
 
 bool RawDecoder::checkCameraSupported(CameraMetaData *meta, string make,
                                       string model, const string &mode) {
-  TrimSpaces(make);
-  TrimSpaces(model);
   mRaw->metadata.make = make;
   mRaw->metadata.model = model;
   Camera* cam = meta->getCamera(make, model, mode);
@@ -155,8 +153,6 @@ bool RawDecoder::checkCameraSupported(CameraMetaData *meta, string make,
 void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model,
                              const string &mode, int iso_speed) {
   mRaw->metadata.isoSpeed = iso_speed;
-  TrimSpaces(make);
-  TrimSpaces(model);
   Camera *cam = meta->getCamera(make, model, mode);
   if (!cam) {
     writeLog(DEBUG_PRIO_INFO, "ISO:%d\n", iso_speed);

@@ -82,35 +82,14 @@ RawImage PefDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void PefDecoder::checkSupportInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  if (data.empty())
-    ThrowRDE("PEF Support check: Model name found");
-  if (!data[0]->hasEntry(MAKE))
-    ThrowRDE("PEF Support: Make name not found");
-
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  this->checkCameraSupported(meta, make, model, "");
-}
-
 void PefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   int iso = 0;
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-
-  if (data.empty())
-    ThrowRDE("PEF Meta Decoder: Model name found");
-
-  TiffIFD* raw = data[0];
-
-  string make = raw->getEntry(MAKE)->getString();
-  string model = raw->getEntry(MODEL)->getString();
 
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
     iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getInt();
 
-  setMetaData(meta, make, model, "", iso);
+  setMetaData(meta, "", iso);
 
   // Read black level
   if (mRootIFD->hasEntryRecursive((TiffTag)0x200)) {

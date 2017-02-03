@@ -440,37 +440,25 @@ string SrwDecoder::getMode() {
 }
 
 void SrwDecoder::checkSupportInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  if (data.empty())
-    ThrowRDE("Srw Support check: Model name found");
-  if (!data[0]->hasEntry(MAKE))
-    ThrowRDE("SRW Support: Make name not found");
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
+  auto id = mRootIFD->getID();
   string mode = getMode();
-  if (meta->hasCamera(make, model, mode))
-    this->checkCameraSupported(meta, make, model, getMode());
+  if (meta->hasCamera(id.make, id.model, mode))
+    this->checkCameraSupported(meta, id, getMode());
   else
-    this->checkCameraSupported(meta, make, model, "");
+    this->checkCameraSupported(meta, id, "");
 }
 
 void SrwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  if (data.empty())
-    ThrowRDE("SRW Meta Decoder: Model name found");
-
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-
   int iso = 0;
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
     iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getInt();
 
+  auto id = mRootIFD->getID();
   string mode = getMode();
-  if (meta->hasCamera(make, model, mode))
-    setMetaData(meta, make, model, mode, iso);
+  if (meta->hasCamera(id.make, id.model, mode))
+    setMetaData(meta, id, mode, iso);
   else
-    setMetaData(meta, make, model, "", iso);
+    setMetaData(meta, id, "", iso);
 
   // Set the whitebalance
   if (mRootIFD->hasEntryRecursive(SAMSUNG_WB_RGGBLEVELSUNCORRECTED) &&

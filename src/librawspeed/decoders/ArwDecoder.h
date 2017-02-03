@@ -40,7 +40,6 @@ public:
     : AbstractTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;
-  void checkSupportInternal(CameraMetaData *meta) override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
   void decodeThreaded(RawDecoderThread *t) override;
 
