@@ -39,10 +39,15 @@ ColorFilterArray::ColorFilterArray(const iPoint2D &_size) {
 void ColorFilterArray::setSize(const iPoint2D& _size)
 {
   size = _size;
-  if (size.area() > 100)
+
+  if (size.area() > 36) {
+    // Bayer, FC() supports 2x8 pattern
+    // X-Trans is 6x6 pattern
+    // is there anything bigger?
     ThrowRDE("ColorFilterArray:setSize if your CFA pattern is really %d pixels "
              "in area we may as well give up now",
              size.area());
+  }
   if (size.area() <= 0)
     return;
   cfa.resize(size.area());
@@ -181,7 +186,8 @@ static uint32 toDcrawColor( CFAColor c )
   case CFA_CYAN:
   case CFA_BLUE: return 2;
   case CFA_YELLOW: return 3;
-  default: return 0;
+  default:
+    throw out_of_range(ColorFilterArray::colorToString(c));
   }
 }
 
