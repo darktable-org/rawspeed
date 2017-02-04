@@ -21,7 +21,9 @@
 
 #pragma once
 
-#include "decompressors/AbstractLJpegDecompressor.h"
+#include "common/RawImage.h"                         // for RawImage
+#include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
+#include "io/Buffer.h"                               // for Buffer, Buffer:...
 
 namespace RawSpeed {
 
@@ -32,7 +34,12 @@ class HasselbladDecompressor final : public AbstractLJpegDecompressor
   void decodeScan() override;
 
 public:
-  using AbstractLJpegDecompressor::AbstractLJpegDecompressor;
+  HasselbladDecompressor(const Buffer& data, Buffer::size_type offset,
+                         Buffer::size_type size, const RawImage& img)
+      : AbstractLJpegDecompressor(data, offset, size, img) {}
+  HasselbladDecompressor(const Buffer& data, Buffer::size_type offset,
+                         const RawImage& img)
+      : AbstractLJpegDecompressor(data, offset, img) {}
 
   void decode(int pixelBaseOffset_);
 };

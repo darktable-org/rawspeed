@@ -20,19 +20,22 @@
 */
 
 #include "decoders/MosDecoder.h"
-#include "common/Common.h"                // for uint32, get4LE, ushort16
-#include "common/Point.h"                 // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "decompressors/UncompressedDecompressor.h"
-#include "io/BitPumpMSB32.h" // for BitPumpMSB32
-#include "io/ByteStream.h"   // for ByteStream
-#include "tiff/TiffEntry.h"  // for TiffEntry
-#include "tiff/TiffIFD.h"    // for TiffIFD, getTiffEndianness
-#include "tiff/TiffTag.h"    // for ::LEAFMETADATA, ::MAKE
-#include <cstdio>            // for sscanf
-#include <cstring>           // for memchr, NULL
-#include <string>            // for string, allocator, operator+
-#include <vector>            // for vector
+#include "common/Common.h"                          // for uint32, getU32LE
+#include "common/Point.h"                           // for iPoint2D
+#include "decoders/RawDecoder.h"                    // for RawDecoder
+#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/BitPumpMSB32.h"                        // for BitPumpMSB32
+#include "io/ByteStream.h"                          // for ByteStream
+#include "tiff/TiffEntry.h"                         // for TiffEntry
+#include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
+#include "tiff/TiffTag.h"                           // for TiffTag::LEAFMET...
+#include <algorithm>                                // for move
+#include <cstdio>                                   // for sscanf
+#include <cstring>                                  // for memchr
+#include <memory>                                   // for unique_ptr
+#include <string>                                   // for string, allocator
+#include <vector>                                   // for vector
 
 using namespace std;
 

@@ -20,17 +20,16 @@
 */
 
 #include "parsers/CiffParser.h"
-#include "common/Common.h"               // for TrimSpaces
+#include "common/Common.h"               // for trimSpaces
 #include "decoders/CrwDecoder.h"         // for CrwDecoder
 #include "parsers/CiffParserException.h" // for ThrowCPE, CiffParserException
 #include "tiff/CiffEntry.h"              // for CiffEntry
 #include "tiff/CiffIFD.h"                // for CiffIFD
-#include "tiff/CiffTag.h"                // for CiffTag, ::CIFF_MAKEMODEL
-#include <cstdio>                        // for NULL
-#include <map>                           // for map, _Rb_tree_iterator, map...
+#include "tiff/CiffTag.h"                // for CiffTag::CIFF_MAKEMODEL
+#include <map>                           // for map
 #include <string>                        // for operator==, allocator, basi...
 #include <utility>                       // for pair
-#include <vector>                        // for vector, vector<>::iterator
+#include <vector>                        // for vector
 
 using namespace std;
 

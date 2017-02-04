@@ -19,6 +19,7 @@
 */
 
 #include "io/FileReader.h"
+#include "io/Buffer.h"          // for Buffer
 #include "io/FileIOException.h" // for FileIOException
 #include <cstdio>               // for fclose, fseek, fopen, fread, ftell
 #include <fcntl.h>              // for SEEK_END, SEEK_SET

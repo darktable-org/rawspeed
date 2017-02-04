@@ -20,17 +20,15 @@
 */
 
 #include "decoders/DcsDecoder.h"
-#include "common/Common.h"                // for uint32, ushort16
-#include "common/Point.h"                 // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "decompressors/UncompressedDecompressor.h"
-#include "io/ByteStream.h"  // for ByteStream
-#include "tiff/TiffEntry.h" // for TiffEntry, ::TIFF_SHORT
-#include "tiff/TiffIFD.h"   // for TiffIFD
-#include "tiff/TiffTag.h"   // for ::IMAGEWIDTH, ::MODEL, ::MAKE
-#include <cstddef>          // for NULL
-#include <string>           // for string
-#include <vector>           // for vector
+#include "common/Common.h"                          // for uint32, ushort16
+#include "common/Point.h"                           // for iPoint2D
+#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "tiff/TiffEntry.h"                         // for TiffEntry, TiffD...
+#include "tiff/TiffIFD.h"                           // for TiffIFD, TiffRoo...
+#include "tiff/TiffTag.h"                           // for TiffTag::IMAGEWIDTH
+#include <memory>                                   // for unique_ptr
+#include <vector>                                   // for vector
 
 using namespace std;
 

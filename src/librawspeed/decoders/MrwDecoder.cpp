@@ -20,20 +20,19 @@
 */
 
 #include "decoders/MrwDecoder.h"
-#include "common/Common.h"                // for uchar8, uint32, get2BE
-#include "common/Point.h"                 // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "decompressors/UncompressedDecompressor.h"
-#include "io/ByteStream.h"      // for ByteStream
-#include "io/IOException.h"     // for IOException
-#include "parsers/TiffParser.h" // for parseTiff
-#include "tiff/TiffEntry.h"     // for TiffEntry
-#include "tiff/TiffIFD.h"       // for TiffIFD, TiffRootIFD, Tiff...
-#include "tiff/TiffTag.h"       // for ::MAKE, ::MODEL
-#include <cmath>                // for NAN
-#include <cstdio>               // for NULL
-#include <map>                  // for map, _Rb_tree_iterator
-#include <string>               // for string
+#include "common/Common.h"                          // for getU16BE, getU32BE
+#include "common/Point.h"                           // for iPoint2D
+#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/IOException.h"                         // for IOException
+#include "parsers/TiffParser.h"                     // for parseTiff
+#include "tiff/TiffEntry.h"                         // IWYU pragma: keep
+#include "tiff/TiffIFD.h"                           // for TiffID, TiffRoot...
+#include <algorithm>                                // for max
+#include <cmath>                                    // for NAN
+#include <map>                                      // for map, _Rb_tree_it...
+#include <memory>                                   // for unique_ptr
+#include <string>                                   // for string
 
 using namespace std;
 

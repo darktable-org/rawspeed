@@ -23,15 +23,14 @@
 #include "io/IOException.h"                   // for IOException (ptr only)
 #include "metadata/CameraMetadataException.h" // for CameraMetadataExceptio...
 #include "parsers/CiffParserException.h"      // for CiffParserException (p...
-#include "parsers/FiffParserException.h"      // for ThrowFPE, FiffParserEx...
+#include "parsers/FiffParserException.h"      // for FiffParserException (p...
 #include "parsers/TiffParserException.h"      // for ThrowTPE, TiffParserEx...
-#include "gtest/gtest.h"                      // for gtest_ar
 #include <exception>                          // for exception
-#include <gmock/gmock.h> // for MakePredicateFormatterFromMatcher
-#include <gtest/gtest.h> // for Message, TestPartResult, Test
-#include <memory>        // for unique_ptr
-#include <stdexcept>     // for runtime_error
-#include <string>        // for string
+#include <gmock/gmock.h>                      // for MakePredicateFormatter...
+#include <gtest/gtest.h>                      // for Message, TestPartResult
+#include <memory>                             // for unique_ptr
+#include <stdexcept>                          // for runtime_error
+#include <string>                             // for string
 
 using namespace std;
 using namespace RawSpeed;

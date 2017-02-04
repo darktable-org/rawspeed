@@ -20,7 +20,10 @@
 
 #pragma once
 
-#include "decompressors/LJpegDecompressor.h"
+#include "common/RawImage.h"                         // for RawImage
+#include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
+#include "io/Buffer.h"                               // for Buffer, Buffer:...
+#include <vector>                                    // for vector
 
 namespace RawSpeed {
 
@@ -35,7 +38,12 @@ class Cr2Decompressor final : public AbstractLJpegDecompressor
   template<int N_COMP, int X_S_F, int Y_S_F> void decodeN_X_Y();
 
 public:
-  using AbstractLJpegDecompressor::AbstractLJpegDecompressor;
+  Cr2Decompressor(const Buffer& data, Buffer::size_type offset,
+                  Buffer::size_type size, const RawImage& img)
+      : AbstractLJpegDecompressor(data, offset, size, img) {}
+  Cr2Decompressor(const Buffer& data, Buffer::size_type offset,
+                  const RawImage& img)
+      : AbstractLJpegDecompressor(data, offset, img) {}
 
   void decode(std::vector<int> slicesWidths);
 };

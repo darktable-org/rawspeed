@@ -21,13 +21,13 @@
 
 #pragma once
 
-#include "common/Common.h"              // for uint32
+#include "common/Common.h"              // for uint32, getHostEndianness
 #include "common/RawImage.h"            // for RawImage
-#include "decompressors/HuffmanTable.h" // IWYU pragma: keep
+#include "decompressors/HuffmanTable.h" // for HuffmanTable
+#include "io/Buffer.h"                  // for Buffer, Buffer::size_type
 #include "io/ByteStream.h"              // for ByteStream
 #include <array>                        // for array
 #include <memory>                       // for unique_ptr
-#include <utility>                      // for move
 #include <vector>                       // for vector
 
 /*
@@ -36,8 +36,6 @@
  */
 
 namespace RawSpeed {
-
-class ByteStream;
 
 enum JpegMarker { /* JPEG marker codes			*/
   M_STUFF = 0x00,

@@ -19,34 +19,20 @@
 */
 
 #include "decoders/DngDecoderSlices.h"
-#include "common/Common.h"
-#include "common/Memory.h" // for alignedMallocArray, alignedFree
-#include "common/Point.h"
-#include "decompressors/DeflateDecompressor.h"
-#include "decompressors/LJpegDecompressor.h"
-#include "decompressors/JpegDecompressor.h"
-#include "decompressors/UncompressedDecompressor.h"
-#include "io/IOException.h"
-#include "tiff/TiffEntry.h"
-#include "tiff/TiffIFD.h"
-#include "tiff/TiffTag.h"
-#include <algorithm>
-#include <array>
-#include <cassert>
-#include <cfloat>
-#include <cmath>
-#include <cstdarg>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <list>
-#include <map>
-#include <memory>
-#include <numeric>
-#include <sstream>
-#include <string>
-#include <vector>
+#include "common/Common.h"                          // for uint32, getThrea...
+#include "common/Point.h"                           // for iPoint2D
+#include "decoders/RawDecoderException.h"           // for RawDecoderException
+#include "decompressors/DeflateDecompressor.h"      // for DeflateDecompressor
+#include "decompressors/JpegDecompressor.h"         // for JpegDecompressor
+#include "decompressors/LJpegDecompressor.h"        // for LJpegDecompressor
+#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/IOException.h"                         // for IOException
+#include "tiff/TiffEntry.h"                         // IWYU pragma: keep
+#include "tiff/TiffIFD.h"                           // for getTiffEndianness
+#include <cstdio>                                   // for size_t
+#include <exception>                                // for exception
+#include <string>                                   // for allocator, string
+#include <vector>                                   // for vector
 
 using namespace std;
 

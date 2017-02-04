@@ -20,12 +20,11 @@
 
 #pragma once
 
-#include "common/Common.h"             // for uint32, ushort16, uchar8, wri...
+#include "common/Common.h"             // for uint32, uchar8, ushort16, wri...
 #include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
-#include "common/Threading.h"          // for pthread_mutex_lock, pthrea...
+#include "common/Threading.h"          // for pthread_mutex_t, pthread_attr_t
 #include "metadata/BlackArea.h"        // for BlackArea
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray
-#include <cstddef>                     // for NULL
 #include <string>                      // for string
 #include <vector>                      // for vector
 

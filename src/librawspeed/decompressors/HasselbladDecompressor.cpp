@@ -20,27 +20,11 @@
 */
 
 #include "decompressors/HasselbladDecompressor.h"
-#include "common/Common.h"
-#include "common/Point.h"
-#include "io/BitPumpMSB32.h"
-#include "tiff/TiffTag.h"
-#include <algorithm>
-#include <array>
-#include <cassert>
-#include <cfloat>
-#include <cmath>
-#include <cstdarg>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <list>
-#include <map>
-#include <memory>
-#include <numeric>
-#include <sstream>
-#include <string>
-#include <vector>
+#include "common/Common.h"              // for uint32, ushort16
+#include "decompressors/HuffmanTable.h" // for HuffmanTable
+#include "io/BitPumpMSB32.h"            // for BitPumpMSB32, BitStream<>::f...
+#include "io/ByteStream.h"              // for ByteStream
+#include <array>                        // for array
 
 namespace RawSpeed {
 

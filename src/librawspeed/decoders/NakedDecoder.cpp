@@ -20,16 +20,16 @@
 */
 
 #include "decoders/NakedDecoder.h"
-#include "common/Common.h"                // for uint32, ::BitOrder_Jpeg16
-#include "common/Point.h"                 // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "decompressors/UncompressedDecompressor.h"
-#include "io/ByteStream.h"   // for ByteStream
-#include "metadata/Camera.h" // for Camera
-#include <cstdlib>           // for atoi
-#include <map>               // for map
-#include <string>            // for string, operator==, basic_...
-#include <utility>           // for pair
+#include "common/Common.h"                          // for BitOrder, BitOrd...
+#include "common/Point.h"                           // for iPoint2D
+#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "metadata/Camera.h"                        // for Camera
+#include <cstdlib>                                  // for atoi
+#include <map>                                      // for map, _Rb_tree_co...
+#include <stdexcept>                                // for out_of_range
+#include <string>                                   // for string, basic_st...
+#include <utility>                                  // for pair
 
 using namespace std;
 

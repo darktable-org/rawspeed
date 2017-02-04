@@ -20,24 +20,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include "decoders/X3fDecoder.h"
 #include "common/Common.h"                // for ushort16, uint32, uchar8
-#include "common/Memory.h"                // for alignedMallocArray, alignedFree
+#include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D, iRectangle2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/Buffer.h"                    // for Buffer::size_type
 #include "io/ByteStream.h"                // for ByteStream
 #include "parsers/TiffParser.h"           // for parseTiff
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include "tiff/TiffIFD.h"                 // for TiffRootIFD, TiffRootIFDOwner
-#include "tiff/TiffTag.h"                 // for ::MAKE, ::MODEL
+#include "tiff/TiffEntry.h"               // IWYU pragma: keep
+#include "tiff/TiffIFD.h"                 // for TiffID, TiffRootIFD, TiffR...
 #include <algorithm>                      // for max
-#include <cstdio>                         // for NULL
 #include <cstdlib>                        // for atoi
 #include <cstring>                        // for memset
 #include <map>                            // for map, _Rb_tree_iterator
 #include <memory>                         // for unique_ptr
 #include <string>                         // for string
 #include <utility>                        // for pair
-#include <vector>                         // for vector, vector<>::iterator
+#include <vector>                         // for vector
 
 using namespace std;
 

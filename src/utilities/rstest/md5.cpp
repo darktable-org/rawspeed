@@ -27,14 +27,14 @@
  *   Software.
  */
 
-#include <cstddef>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
+#include <cstdint> // for uint32_t, uint8_t, UINT32_C
+#include <cstdio>  // for printf, snprintf
+#include <cstring> // for memset, strlen, memcmp, memcpy
+#include <string>  // for string
 
-#include <string>
+#ifdef ENABLE_SELFTEST
+#include <cstdlib> // for EXIT_FAILURE, EXIT_SUCCESS
+#endif
 
 void md5_compress(uint32_t state[4], const uint8_t block[64]) {
 #define LOADSCHEDULE(i)                                                        \

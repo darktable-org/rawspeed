@@ -19,14 +19,15 @@
 */
 
 #include "common/RawImage.h"
-#include "common/Memory.h"                // for alignedMallocArray, alignedFree
+#include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "io/IOException.h"               // for IOException
 #include "parsers/TiffParserException.h"  // for TiffParserException
+#include <algorithm>                      // for min
 #include <cassert>                        // for assert
 #include <cmath>                          // for NAN
 #include <cstdlib>                        // for free
-#include <cstring>                        // for memset, memcpy
+#include <cstring>                        // for memset, memcpy, strdup
 
 using namespace std;
 

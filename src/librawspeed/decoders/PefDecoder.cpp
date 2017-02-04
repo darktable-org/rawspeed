@@ -20,18 +20,17 @@
 */
 
 #include "decoders/PefDecoder.h"
-#include "common/Common.h"                    // for uint32, ::BitOrder_Jpeg
+#include "common/Common.h"                    // for uint32, BitOrder::BitO...
 #include "common/Point.h"                     // for iPoint2D
 #include "decoders/RawDecoderException.h"     // for ThrowRDE
 #include "decompressors/PentaxDecompressor.h" // for decodePentax
 #include "io/ByteStream.h"                    // for ByteStream
 #include "io/IOException.h"                   // for IOException
-#include "metadata/ColorFilterArray.h"        // for ::CFA_BLUE, ::CFA_GREEN
+#include "metadata/ColorFilterArray.h"        // for CFAColor::CFA_GREEN
 #include "tiff/TiffEntry.h"                   // for TiffEntry
-#include "tiff/TiffIFD.h"                     // for TiffIFD
-#include "tiff/TiffTag.h"                     // for ::MODEL, TiffTag, ::MAKE
-#include <cstdio>                             // for NULL
-#include <string>                             // for string
+#include "tiff/TiffIFD.h"                     // for TiffRootIFD, TiffIFD
+#include "tiff/TiffTag.h"                     // for TiffTag, TiffTag::ISOS...
+#include <memory>                             // for unique_ptr
 #include <vector>                             // for vector
 
 using namespace std;

@@ -27,16 +27,19 @@
 #include "metadata/BlackArea.h"           // for BlackArea
 #include "metadata/Camera.h"              // for Camera
 #include "metadata/CameraMetaData.h"      // for CameraMetaData
-#include "metadata/ColorFilterArray.h"    // for ColorFilterArray, CFAColor
+#include "metadata/ColorFilterArray.h"    // for CFAColor, ColorFilterArray
 #include "parsers/TiffParserException.h"  // for TiffParserException
 #include "tiff/TiffEntry.h"               // for TiffEntry, TiffDataType::T...
-#include "tiff/TiffIFD.h"                 // for TiffIFD
-#include "tiff/TiffTag.h"                 // for TiffTag::MODEL, TiffTag::MAKE
+#include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD, TiffID
+#include "tiff/TiffTag.h"                 // for TiffTag::UNIQUECAMERAMODEL
+#include <algorithm>                      // for move
 #include <cstdio>                         // for printf
 #include <cstring>                        // for memset
 #include <map>                            // for map
-#include <string>                         // for allocator, string, operator+
-#include <vector>                         // for vector
+#include <memory>                         // for unique_ptr
+#include <stdexcept>                      // for out_of_range
+#include <string>                         // for string, operator+, basic_s...
+#include <vector>                         // for vector, allocator
 
 using namespace std;
 

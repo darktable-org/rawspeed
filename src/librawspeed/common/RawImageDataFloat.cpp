@@ -19,13 +19,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
 #include "common/Common.h"                // for uchar8, uint32, writeLog
-#include "common/Memory.h"                // for alignedMallocArray, alignedFree
 #include "common/Point.h"                 // for iPoint2D
-#include "common/RawImage.h"              // for RawImageDataFloat, ::TYPE_...
+#include "common/RawImage.h"              // for RawImageDataFloat, RawImag...
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea
-#include <algorithm>                      // for min
-#include <cstddef>                        // for NULL
+#include <algorithm>                      // for max, min
 #include <vector>                         // for vector
 
 using namespace std;

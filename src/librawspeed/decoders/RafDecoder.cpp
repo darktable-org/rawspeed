@@ -20,23 +20,25 @@
 */
 
 #include "decoders/RafDecoder.h"
-#include "common/Common.h"                // for ushort16, TrimSpaces, uint32
-#include "common/Point.h"                 // for iPoint2D, iRectangle2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "decompressors/UncompressedDecompressor.h"
-#include "io/ByteStream.h"             // for ByteStream
-#include "metadata/BlackArea.h"        // for BlackArea
-#include "metadata/Camera.h"           // for Camera
-#include "metadata/CameraMetaData.h"   // for CameraMetaData
-#include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
-#include "metadata/ColorFilterArray.h" // for ColorFilterArray
-#include "tiff/TiffEntry.h"            // for TiffEntry
-#include "tiff/TiffIFD.h"              // for TiffIFD
-#include "tiff/TiffTag.h"              // for ::MODEL, ::MAKE, ::FUJIOLDWB
-#include <cstdio>                      // for NULL
-#include <map>                         // for map, _Rb_tree_iterator
-#include <string>                      // for string, allocator
-#include <vector>                      // for vector
+#include "common/Common.h"                          // for uint32, getHostE...
+#include "common/Point.h"                           // for iPoint2D, iRecta...
+#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/ByteStream.h"                          // for ByteStream
+#include "metadata/BlackArea.h"                     // for BlackArea
+#include "metadata/Camera.h"                        // for Camera
+#include "metadata/CameraMetaData.h"                // for CameraMetaData
+#include "metadata/CameraSensorInfo.h"              // for CameraSensorInfo
+#include "metadata/ColorFilterArray.h"              // for ColorFilterArray
+#include "tiff/TiffEntry.h"                         // for TiffEntry
+#include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
+#include "tiff/TiffTag.h"                           // for TiffTag::FUJIOLDWB
+#include <cstdio>                                   // for size_t
+#include <cstring>                                  // for memcmp
+#include <map>                                      // for map, _Rb_tree_it...
+#include <memory>                                   // for unique_ptr
+#include <string>                                   // for string, allocator
+#include <vector>                                   // for vector
 
 using namespace std;
 

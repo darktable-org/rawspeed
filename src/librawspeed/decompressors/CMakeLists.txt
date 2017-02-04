@@ -1,16 +1,16 @@
 FILE(GLOB DECOMPRESSOR_SOURCES
   "AbstractLJpegDecompressor.cpp"
   "AbstractLJpegDecompressor.h"
-  "Cr2Decompressor.cpp" # IWYU breaks
+  "Cr2Decompressor.cpp"
   "Cr2Decompressor.h"
   "DeflateDecompressor.cpp"
   "DeflateDecompressor.h"
-  "HasselbladDecompressor.cpp" # IWYU breaks
+  "HasselbladDecompressor.cpp"
   "HasselbladDecompressor.h"
   "HuffmanTable.h"
   "JpegDecompressor.cpp"
   "JpegDecompressor.h"
-  "LJpegDecompressor.cpp" # IWYU breaks
+  "LJpegDecompressor.cpp"
   "LJpegDecompressor.h"
   "NikonDecompressor.cpp"
   "NikonDecompressor.h"

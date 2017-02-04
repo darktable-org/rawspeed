@@ -21,13 +21,17 @@
 
 #pragma once
 
-#include "common/RawImage.h"     // for RawImage
-#include "decoders/AbstractTiffDecoder.h"
-#include "io/FileMap.h"          // for FileMap
+#include "common/RawImage.h"              // for RawImage
+#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
+#include "io/FileMap.h"                   // for FileMap
+#include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
+#include <algorithm>                      // for move
 
 namespace RawSpeed {
 
 class CameraMetaData;
+
+class RawDecoderThread;
 
 class RafDecoder final : public AbstractTiffDecoder
 {

@@ -20,9 +20,15 @@
 
 #pragma once
 
-#include "decoders/AbstractTiffDecoder.h"
+#include "common/RawImage.h"              // for RawImage
+#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
+#include "io/FileMap.h"                   // for FileMap
+#include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
+#include <algorithm>                      // for move
 
 namespace RawSpeed {
+
+class CameraMetaData;
 
 class Cr2Decoder final : public AbstractTiffDecoder
 {

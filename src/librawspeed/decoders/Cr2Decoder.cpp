@@ -21,28 +21,23 @@
 */
 
 #include "decoders/Cr2Decoder.h"
-#include "decompressors/Cr2Decompressor.h"
-#include "common/Common.h"
-#include "common/Point.h"
-#include "tiff/TiffEntry.h"
-#include "tiff/TiffTag.h"
-#include <algorithm>
-#include <array>
-#include <cassert>
-#include <cfloat>
-#include <cmath>
-#include <cstdarg>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <list>
-#include <map>
-#include <memory>
-#include <numeric>
-#include <sstream>
-#include <string>
-#include <vector>
+#include "common/Common.h"                 // for ushort16, clampBits, uint32
+#include "common/Point.h"                  // for iPoint2D
+#include "decoders/RawDecoderException.h"  // for ThrowRDE, RawDecoderExcep...
+#include "decompressors/Cr2Decompressor.h" // for Cr2Decompressor
+#include "io/ByteStream.h"                 // for ByteStream
+#include "io/IOException.h"                // for IOException
+#include "metadata/ColorFilterArray.h"     // for CFAColor::CFA_GREEN, CFAC...
+#include "parsers/TiffParserException.h"   // for ThrowTPE
+#include "tiff/TiffEntry.h"                // for TiffEntry, TiffDataType::...
+#include "tiff/TiffTag.h"                  // for TiffTag, TiffTag::CANONCO...
+#include <exception>                       // for exception
+#include <map>                             // for map, _Rb_tree_iterator
+#include <memory>                          // for unique_ptr, allocator
+#include <string>                          // for string, stoi
+#include <utility>                         // for pair
+#include <vector>                          // for vector
+// IWYU pragma: no_include <ext/alloc_traits.h>
 
 using namespace std;
 
@@ -193,8 +188,7 @@ void Cr2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
 
       // replace it with a hint if it exists
       if (hints.find("wb_offset") != hints.end()) {
-        stringstream wb_offset(hints.find("wb_offset")->second);
-        wb_offset >> offset;
+        offset = stoi(hints.find("wb_offset")->second);
       }
 
       offset /= 2;

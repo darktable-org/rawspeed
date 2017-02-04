@@ -20,18 +20,17 @@
 */
 
 #include "decoders/KdcDecoder.h"
-#include "common/Common.h"                // for uint32, ushort16
-#include "common/Point.h"                 // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "decompressors/UncompressedDecompressor.h"
-#include "io/ByteStream.h"               // for ByteStream
-#include "parsers/TiffParserException.h" // for TiffParserException
-#include "tiff/TiffEntry.h"              // for TiffEntry
-#include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
-#include "tiff/TiffTag.h"                // for ::MODEL, ::MAKE, ::COMPRES...
-#include <map>                           // for map, _Rb_tree_iterator
-#include <string>                        // for string
-#include <vector>                        // for vector
+#include "common/Common.h"                          // for uint32, ushort16
+#include "common/Point.h"                           // for iPoint2D
+#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "parsers/TiffParserException.h"            // for TiffParserException
+#include "tiff/TiffEntry.h"                         // for TiffEntry
+#include "tiff/TiffIFD.h"                           // for TiffRootIFD
+#include "tiff/TiffTag.h"                           // for TiffTag::COMPRES...
+#include <map>                                      // for map, _Rb_tree_it...
+#include <memory>                                   // for unique_ptr
+#include <string>                                   // for string
 
 using namespace std;
 
