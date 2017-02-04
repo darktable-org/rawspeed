@@ -42,14 +42,13 @@ public:
 private:
   uint32 sample_format{1};
   uint32 bps;
-  int compression;
 
 protected:
   int getDecoderVersion() const override { return 0; }
   bool mFixLjpeg;
   void dropUnsuportedChunks(std::vector<TiffIFD*>& data);
   void parseCFA(TiffIFD* raw);
-  void decodeData(TiffIFD* raw);
+  void decodeData(TiffIFD* raw, int compression);
   void printMetaData();
   bool decodeMaskedAreas(TiffIFD* raw);
   bool decodeBlackLevels(TiffIFD* raw);

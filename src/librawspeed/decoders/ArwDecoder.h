@@ -50,7 +50,7 @@ protected:
   void DecodeUncompressed(TiffIFD* raw);
   void SonyDecrypt(uint32 *buffer, uint32 len, uint32 key);
   void GetWB();
-  ByteStream *in;
+  ByteStream in;
   int mShiftDownScale = 0;
 };
 
