@@ -261,7 +261,7 @@ void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
 void ArwDecoder::DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp) {
 
   if (bpp == 8) {
-    in = &input;
+    in = input;
     this->startThreads();
     return;
   } // End bpp = 8
@@ -412,7 +412,7 @@ void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
   uint32 pitch = mRaw->pitch;
   int32 w = mRaw->dim.x;
 
-  BitPumpPlain bits(*in);
+  BitPumpPlain bits(in);
   for (uint32 y = t->start_y; y < t->end_y; y++) {
     auto *dest = (ushort16 *)&data[y * pitch];
     // Realign
