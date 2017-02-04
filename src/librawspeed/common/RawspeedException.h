@@ -2,7 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
-    Copyright (C) 2014 Pedro Côrte-Real
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -19,29 +19,39 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "parsers/FiffParserException.h"
-#include "common/Common.h" // for _RPT1
-#include <cstdarg>         // for va_end, va_list, va_start
-#include <cstdio>          // for vsnprintf
-#include <string>          // for string
+#pragma once
 
-using namespace std;
+#include "common/Common.h"
+#include <cstdarg>
+#include <cstdio>
+#include <stdexcept>
+#include <string>
 
 namespace RawSpeed {
 
-FiffParserException::FiffParserException(const string& _msg)
-    : runtime_error(_msg) {
-  writeLog(DEBUG_PRIO_EXTRA, "FIFF Exception: %s\n", _msg.c_str());
-}
-
-void ThrowFPE(const char* fmt, ...) {
+template <typename T>
+[[noreturn]] void __attribute__((format(printf, 1, 2)))
+ThrowException(const char* fmt, ...) {
+  static char buf[8192];
   va_list val;
   va_start(val, fmt);
-  static char buf[8192];
-  vsnprintf(buf, 8192, fmt, val);
+  vsnprintf(buf, sizeof(buf), fmt, val);
   va_end(val);
   writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s\n", buf);
-  throw FiffParserException(buf);
+  throw T(buf);
 }
+
+class RawspeedException : public std::runtime_error {
+private:
+  void log(const char* msg) {
+    writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s\n", msg);
+  }
+
+public:
+  RawspeedException(const std::string& msg) : std::runtime_error(msg) {
+    log(msg.c_str());
+  }
+  RawspeedException(const char* msg) : std::runtime_error(msg) { log(msg); }
+};
 
 } // namespace RawSpeed

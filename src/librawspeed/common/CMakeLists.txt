@@ -10,6 +10,7 @@ FILE(GLOB COMMON_SOURCES
   "RawImageDataU16.cpp"
   "DngOpcodes.cpp"
   "DngOpcodes.h"
+  "RawspeedException.h"
   "Threading.h"
 )
 

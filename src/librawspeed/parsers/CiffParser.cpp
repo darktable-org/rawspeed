@@ -80,7 +80,7 @@ RawDecoder* CiffParser::getDecoder() {
     }
   }
 
-  throw CiffParserException("No decoder found. Sorry.");
+  ThrowCPE("No decoder found. Sorry.");
   return nullptr;
 }
 

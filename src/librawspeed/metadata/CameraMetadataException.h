@@ -2,6 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,17 +21,17 @@
 
 #pragma once
 
-#include <stdexcept>
-#include <string>
+#include "common/RawspeedException.h"
+#include <string> // for string
 
 namespace RawSpeed {
 
-[[noreturn]] void ThrowCME(const char* fmt, ...)
-    __attribute__((format(printf, 1, 2)));
-
-class CameraMetadataException final : public std::runtime_error {
+class CameraMetadataException final : public RawspeedException {
 public:
-  CameraMetadataException(const std::string &_msg);
+  CameraMetadataException(const std::string& msg) : RawspeedException(msg) {}
+  CameraMetadataException(const char* msg) : RawspeedException(msg) {}
 };
+
+#define ThrowCME(...) ThrowException<CameraMetadataException>(__VA_ARGS__)
 
 } // namespace RawSpeed

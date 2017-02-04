@@ -20,17 +20,17 @@
 
 #pragma once
 
-#include <stdexcept>
+#include "common/RawspeedException.h"
 #include <string>
 
 namespace RawSpeed {
 
-[[noreturn]] void ThrowFPE(const char* fmt, ...)
-    __attribute__((format(printf, 1, 2)));
-
-class FiffParserException final : public std::runtime_error {
+class FiffParserException final : public RawspeedException {
 public:
-  FiffParserException(const std::string& _msg);
+  FiffParserException(const std::string& msg) : RawspeedException(msg) {}
+  FiffParserException(const char* msg) : RawspeedException(msg) {}
 };
+
+#define ThrowFPE(...) ThrowException<FiffParserException>(__VA_ARGS__)
 
 } // namespace RawSpeed
