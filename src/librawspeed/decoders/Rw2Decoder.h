@@ -33,18 +33,6 @@ class ByteStream;
 
 class CameraMetaData;
 
-class PanaBitpump {
-  public:
-  PanaBitpump(ByteStream* input);
-  virtual ~PanaBitpump();
-  ByteStream* input;
-  uchar8* buf;
-  int vbits;
-  uint32 load_flags;
-  uint32 getBits(int nbits);
-  void skipBytes(int bytes);
-};
-
 class Rw2Decoder final : public AbstractTiffDecoder
 {
 public:
@@ -52,7 +40,6 @@ public:
   // using AbstractTiffDecoder::AbstractTiffDecoder;
   Rw2Decoder(TiffRootIFDOwner&& root, FileMap* file)
     : AbstractTiffDecoder(move(root), file) {}
-  ~Rw2Decoder() override;
 
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
@@ -65,8 +52,8 @@ protected:
 private:
   void DecodeRw2();
   std::string guessMode();
-  ByteStream* input_start = nullptr;
-  uint32 load_flags;
+  uint32 offset = 0;
+  uint32 load_flags = 0;
 };
 
 } // namespace RawSpeed
