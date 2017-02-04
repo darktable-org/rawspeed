@@ -21,7 +21,6 @@
 #pragma once
 
 #include "decoders/RawDecoder.h"
-#include "decompressors/LJpegPlain.h"
 #include <queue>
 
 namespace RawSpeed {

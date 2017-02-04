@@ -42,17 +42,6 @@ using namespace std;
 
 namespace RawSpeed {
 
-RafDecoder::RafDecoder(TiffIFD *rootIFD, FileMap* file) :
-    RawDecoder(file), mRootIFD(rootIFD) {
-  decoderVersion = 1;
-  alt_layout = false;
-}
-RafDecoder::~RafDecoder() {
-  if (mRootIFD)
-    delete mRootIFD;
-  mRootIFD = nullptr;
-}
-
 bool RafDecoder::isRAF(FileMap* input) {
   static const char magic[] = "FUJIFILMCCD-RAW ";
   static const size_t magic_size = sizeof(magic) - 1; // excluding \0
@@ -136,27 +125,11 @@ void RafDecoder::decodeThreaded(RawDecoderThread * t) {
 }
 
 void RafDecoder::checkSupportInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  if (data.empty())
-    ThrowRDE("RAF Support check: Model name found");
-
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  if (!this->checkCameraSupported(meta, make, model, ""))
+  if (!this->checkCameraSupported(meta, mRootIFD->getID(), ""))
      ThrowRDE("RAFDecoder: Unknown camera. Will not guess.");
 }
 
 void RafDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-
-  if (data.empty())
-    ThrowRDE("RAF Meta Decoder: Model name not found");
-  if (!data[0]->hasEntry(MAKE))
-    ThrowRDE("RAF Support: Make name not found");
-
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-
   int iso = 0;
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
     iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getInt();
@@ -164,9 +137,8 @@ void RafDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
 
   // This is where we'd normally call setMetaData but since we may still need
   // to rotate the image for SuperCCD cameras we do everything ourselves
-  TrimSpaces(make);
-  TrimSpaces(model);
-  Camera *cam = meta->getCamera(make, model, "");
+  auto id = mRootIFD->getID();
+  Camera *cam = meta->getCamera(id.make, id.model, "");
   if (!cam)
     ThrowRDE("RAF Meta Decoder: Couldn't find camera");
 
@@ -254,8 +226,8 @@ void RafDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   mRaw->metadata.canonical_model = cam->canonical_model;
   mRaw->metadata.canonical_alias = cam->canonical_alias;
   mRaw->metadata.canonical_id = cam->canonical_id;
-  mRaw->metadata.make = make;
-  mRaw->metadata.model = model;
+  mRaw->metadata.make = id.make;
+  mRaw->metadata.model = id.model;
 
   if (mRootIFD->hasEntryRecursive(FUJI_WB_GRBLEVELS)) {
     TiffEntry *wb = mRootIFD->getEntryRecursive(FUJI_WB_GRBLEVELS);

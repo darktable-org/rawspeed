@@ -73,92 +73,86 @@ TiffRootIFDOwner parseTiff(const Buffer &data) {
   return root;
 }
 
-RawDecoder* makeDecoder(TiffRootIFDOwner _root, Buffer &data) {
-  TiffRootIFD* root = _root.release();
+RawDecoder* makeDecoder(TiffRootIFDOwner root, Buffer &data) {
   FileMap* mInput = &data;
   if (!root)
     throw TiffParserException("TiffIFD is null.");
 
   if (root->hasEntryRecursive(DNGVERSION)) {  // We have a dng image entry
     try {
-      return new DngDecoder(root, mInput);
+      return new DngDecoder(move(root), mInput);
     } catch (std::runtime_error& e) {
       //TODO: remove this exception type conversion
       throw TiffParserException(e.what());
     }
   }
 
-  for (TiffIFD* ifd : root->getIFDsWithTag(MAKE)) {
-    string make = ifd->getEntry(MAKE)->getString();
-    TrimSpaces(make);
-    string model;
-    if (ifd->hasEntry(MODEL)) {
-      model = ifd->getEntry(MODEL)->getString();
-      TrimSpaces(model);
-    }
+  try {
+    auto id = root->getID();
+    string make = id.make;
+    string model = id.model;
+
     if (make == "Canon") {
-      return new Cr2Decoder(root, mInput);
+      return new Cr2Decoder(move(root), mInput);
     }
     if (make == "FUJIFILM") {
-      return new RafDecoder(root, mInput);
+      return new RafDecoder(move(root), mInput);
     }
     if (make == "NIKON CORPORATION" || make == "NIKON") {
-      return new NefDecoder(root, mInput);
+      return new NefDecoder(move(root), mInput);
     }
     if (make == "OLYMPUS IMAGING CORP." || make == "OLYMPUS CORPORATION" ||
         make == "OLYMPUS OPTICAL CO.,LTD") {
-      return new OrfDecoder(root, mInput);
+      return new OrfDecoder(move(root), mInput);
     }
     if (make == "SONY") {
-      return new ArwDecoder(root, mInput);
+      return new ArwDecoder(move(root), mInput);
     }
     if (make == "PENTAX Corporation" || make == "RICOH IMAGING COMPANY, LTD." ||
         make == "PENTAX") {
-      return new PefDecoder(root, mInput);
+      return new PefDecoder(move(root), mInput);
     }
     if (make == "Panasonic" || make == "LEICA") {
-      return new Rw2Decoder(root, mInput);
+      return new Rw2Decoder(move(root), mInput);
     }
     if (make == "SAMSUNG") {
-      return new SrwDecoder(root, mInput);
+      return new SrwDecoder(move(root), mInput);
     }
     if (make == "Mamiya-OP Co.,Ltd.") {
-      return new MefDecoder(root, mInput);
+      return new MefDecoder(move(root), mInput);
     }
     if (make == "Kodak") {
       if (model == "DCS560C")
-        return new Cr2Decoder(root, mInput);
+        return new Cr2Decoder(move(root), mInput);
 
-      return new DcrDecoder(root, mInput);
+      return new DcrDecoder(move(root), mInput);
     }
     if (make == "KODAK") {
-      return new DcsDecoder(root, mInput);
+      return new DcsDecoder(move(root), mInput);
     }
     if (make == "EASTMAN KODAK COMPANY") {
-      return new KdcDecoder(root, mInput);
+      return new KdcDecoder(move(root), mInput);
     }
     if (make == "SEIKO EPSON CORP.") {
-      return new ErfDecoder(root, mInput);
+      return new ErfDecoder(move(root), mInput);
     }
     if (make == "Hasselblad") {
-      return new ThreefrDecoder(root, mInput);
+      return new ThreefrDecoder(move(root), mInput);
     }
     if (make == "Leaf" || make == "Phase One A/S") {
-      return new MosDecoder(root, mInput);
+      return new MosDecoder(move(root), mInput);
+    }
+  } catch (const TiffParserException&) {
+    // Last ditch effort to identify Leaf cameras that don't have a Tiff Make set
+    TiffEntry* softwareIFD = root->getEntryRecursive(SOFTWARE);
+    if (softwareIFD) {
+      string software = softwareIFD->getString();
+      TrimSpaces(software);
+      if (software == "Camera Library") {
+        return new MosDecoder(move(root), mInput);
+      }
     }
   }
-
-  // Last ditch effort to identify Leaf cameras that don't have a Tiff Make set
-  TiffEntry* softwareIFD = root->getEntryRecursive(SOFTWARE);
-  if (softwareIFD) {
-    string software = softwareIFD->getString();
-    TrimSpaces(software);
-    if (software == "Camera Library") {
-      return new MosDecoder(root, mInput);
-    }
-  }
-
-  delete root;
 
   throw TiffParserException("No decoder found. Sorry.");
   return nullptr;

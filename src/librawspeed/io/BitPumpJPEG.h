@@ -41,7 +41,7 @@ template<> inline void BitPumpJPEG::fillCache() {
       data[pos+1] != 0xFF &&
       data[pos+2] != 0xFF &&
       data[pos+3] != 0xFF ) {
-    cache.push(loadMem<uint32>(data+pos, getHostEndianness() == little), 32);
+    cache.push(getBE<uint32>(data + pos), 32);
     pos += 4;
   } else {
     for (uint32 i = 0; i < nBytes; ++i) {

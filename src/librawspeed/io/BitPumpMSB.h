@@ -34,7 +34,7 @@ using BitPumpMSB = BitStream<MSBBitPumpTag, BitStreamCacheRightInLeftOut>;
 template<> inline void BitPumpMSB::fillCache() {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "if the structure of the bit cache changed, this code has to be updated");
 
-  cache.push(loadMem<uint32>(data+pos, getHostEndianness() == little), 32);
+  cache.push(getBE<uint32>(data + pos), 32);
   pos += 4;
 }
 

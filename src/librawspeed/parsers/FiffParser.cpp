@@ -41,11 +41,11 @@ class RawDecoder;
 FiffParser::FiffParser(FileMap* inputData) : mInput(inputData) {}
 
 RawDecoder* FiffParser::getDecoder() {
-  const unsigned char* data = mInput->getData(0, 104);
+  const uchar8* data = mInput->getData(0, 104);
 
-  uint32 first_ifd = get4BE(data, 0x54) + 12;
-  uint32 second_ifd = get4BE(data, 0x64);
-  uint32 third_ifd = get4BE(data, 0x5C);
+  uint32 first_ifd = getU32BE(data + 0x54) + 12;
+  uint32 second_ifd = getU32BE(data + 0x64);
+  uint32 third_ifd = getU32BE(data + 0x5C);
 
   try {
     TiffRootIFDOwner rootIFD = parseTiff(mInput->getSubView(first_ifd));

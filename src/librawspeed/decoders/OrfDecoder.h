@@ -23,7 +23,7 @@
 
 #include "common/Common.h"       // for uint32
 #include "common/RawImage.h"     // for RawImage
-#include "decoders/RawDecoder.h" // for RawDecoder
+#include "decoders/AbstractTiffDecoder.h"
 #include "io/FileMap.h"          // for FileMap
 
 namespace RawSpeed {
@@ -32,23 +32,21 @@ class ByteStream;
 
 class CameraMetaData;
 
-class TiffIFD;
-
-class OrfDecoder :
-  public RawDecoder
+class OrfDecoder final : public AbstractTiffDecoder
 {
 public:
-  OrfDecoder(TiffIFD *rootIFD, FileMap* file);
-  ~OrfDecoder() override;
+  // please revert _this_ commit, once IWYU can handle inheriting constructors
+  // using AbstractTiffDecoder::AbstractTiffDecoder;
+  OrfDecoder(TiffRootIFDOwner&& root, FileMap* file)
+    : AbstractTiffDecoder(move(root), file) {}
+
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
-  void checkSupportInternal(CameraMetaData *meta) override;
-  TiffIFD *getRootIFD() override { return mRootIFD; }
 
 private:
+  int getDecoderVersion() const override { return 3; }
   void decodeCompressed(ByteStream& s,uint32 w, uint32 h);
   void decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 size);
-  TiffIFD *mRootIFD;
 };
 
 } // namespace RawSpeed

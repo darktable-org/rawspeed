@@ -23,7 +23,7 @@
 
 #include "common/Common.h"       // for uint32
 #include "common/RawImage.h"     // for RawImage
-#include "decoders/RawDecoder.h" // for RawDecoder
+#include "decoders/AbstractTiffDecoder.h"
 #include "io/FileMap.h"          // for FileMap
 #include <string>                // for string
 
@@ -31,21 +31,18 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-class TiffIFD;
-
-class MosDecoder :
-  public RawDecoder
+class MosDecoder final : public AbstractTiffDecoder
 {
 public:
-  MosDecoder(TiffIFD *rootIFD, FileMap* file);
-  ~MosDecoder() override;
+  MosDecoder(TiffRootIFDOwner&& rootIFD, FileMap* file);
+
   RawImage decodeRawInternal() override;
   void checkSupportInternal(CameraMetaData *meta) override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
 
 protected:
+  int getDecoderVersion() const override { return 0; }
   uint32 black_level;
-  TiffIFD *mRootIFD;
   std::string make, model;
   std::string getXMPTag(const std::string &xmp, const std::string &tag);
   void DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32 width, uint32 height);

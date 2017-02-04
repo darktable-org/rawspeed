@@ -20,26 +20,26 @@
 
 #pragma once
 
-#include "decoders/RawDecoder.h"
-#include "decompressors/LJpegPlain.h"
-#include "tiff/TiffIFD.h"
+#include "decoders/AbstractTiffDecoder.h"
 
 namespace RawSpeed {
 
-class Cr2Decoder final :
-  public RawDecoder
+class Cr2Decoder final : public AbstractTiffDecoder
 {
 public:
-  Cr2Decoder(TiffIFD *rootIFD, FileMap* file);
+  // please revert _this_ commit, once IWYU can handle inheriting constructors
+  // using AbstractTiffDecoder::AbstractTiffDecoder;
+  Cr2Decoder(TiffRootIFDOwner&& root, FileMap* file)
+    : AbstractTiffDecoder(move(root), file) {}
+
   RawImage decodeRawInternal() override;
   void checkSupportInternal(CameraMetaData *meta) override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
-  TiffIFD *getRootIFD() override { return mRootIFD; }
-  ~Cr2Decoder() override;
 
 protected:
   int sraw_coeffs[3];
 
+  int getDecoderVersion() const override { return 8; }
   RawImage decodeOldFormat();
   RawImage decodeNewFormat();
   void sRawInterpolate();
@@ -50,7 +50,6 @@ protected:
   void interpolate_420_v1(int w, int h, int start_h, int end_h);
   void interpolate_422_v2(int w, int h, int start_h, int end_h);
   void interpolate_420_v2(int w, int h, int start_h, int end_h);
-  TiffIFD *mRootIFD;
 };
 
 } // namespace RawSpeed

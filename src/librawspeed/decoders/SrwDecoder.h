@@ -22,7 +22,7 @@
 
 #include "common/Common.h"       // for uchar8, int32
 #include "common/RawImage.h"     // for RawImage
-#include "decoders/RawDecoder.h" // for RawDecoder
+#include "decoders/AbstractTiffDecoder.h"
 #include "io/BitPumpMSB.h"       // for BitPumpMSB
 #include "io/FileMap.h"          // for FileMap
 #include <string>                // for string
@@ -31,18 +31,17 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-class TiffIFD;
-
-class SrwDecoder :
-  public RawDecoder
+class SrwDecoder final : public AbstractTiffDecoder
 {
 public:
-  SrwDecoder(TiffIFD *rootIFD, FileMap* file);
-  ~SrwDecoder() override;
+  // please revert _this_ commit, once IWYU can handle inheriting constructors
+  // using AbstractTiffDecoder::AbstractTiffDecoder;
+  SrwDecoder(TiffRootIFDOwner&& root, FileMap* file)
+    : AbstractTiffDecoder(move(root), file) {}
+
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
   void checkSupportInternal(CameraMetaData *meta) override;
-  TiffIFD *getRootIFD() override { return mRootIFD; }
 
 private:
   struct encTableItem {
@@ -50,12 +49,12 @@ private:
     uchar8 diffLen;
   };
 
+  int getDecoderVersion() const override { return 3; }
   void decodeCompressed(TiffIFD* raw);
   void decodeCompressed2(TiffIFD* raw, int bits);
   int32 samsungDiff (BitPumpMSB &pump, encTableItem *tbl);
   void decodeCompressed3(TiffIFD* raw, int bits);
   std::string getMode();
-  TiffIFD *mRootIFD;
 };
 
 } // namespace RawSpeed

@@ -21,6 +21,7 @@
 */
 
 #include "decoders/Cr2Decoder.h"
+#include "decompressors/Cr2Decompressor.h"
 #include "common/Common.h"
 #include "common/Point.h"
 #include "tiff/TiffEntry.h"
@@ -46,17 +47,6 @@
 using namespace std;
 
 namespace RawSpeed {
-
-Cr2Decoder::Cr2Decoder(TiffIFD *rootIFD, FileMap* file) :
-    RawDecoder(file), mRootIFD(rootIFD) {
-  decoderVersion = 8;
-}
-
-Cr2Decoder::~Cr2Decoder() {
-  if (mRootIFD)
-    delete mRootIFD;
-  mRootIFD = nullptr;
-}
 
 RawImage Cr2Decoder::decodeOldFormat() {
   uint32 offset = 0;
@@ -85,11 +75,9 @@ RawImage Cr2Decoder::decodeOldFormat() {
 
   mRaw = RawImage::create({width, height});
 
-  LJpegPlain l(*mFile, offset, mRaw);
-  l.addSlices({width});
-
+  Cr2Decompressor l(*mFile, offset, mRaw);
   try {
-    l.decode(0, 0);
+    l.decode({width});
   } catch (IOException& e) {
     mRaw->setError(e.what());
   }
@@ -142,11 +130,10 @@ RawImage Cr2Decoder::decodeNewFormat() {
   TiffEntry* offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
 
-  LJpegPlain l(*mFile, offsets->getInt(), counts->getInt(), mRaw);
-  l.addSlices(s_width);
+  Cr2Decompressor d(*mFile, offsets->getInt(), counts->getInt(), mRaw);
 
   try {
-    l.decode(0, 0);
+    d.decode(s_width);
   } catch (RawDecoderException &e) {
     mRaw->setError(e.what());
   } catch (IOException &e) {
@@ -168,36 +155,23 @@ RawImage Cr2Decoder::decodeRawInternal() {
 }
 
 void Cr2Decoder::checkSupportInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  if (data.empty())
-    ThrowRDE("CR2 Support check: Model name not found");
-  if (!data[0]->hasEntry(MAKE))
-    ThrowRDE("CR2 Support: Make name not found");
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-
+  auto id = mRootIFD->getID();
   // Check for sRaw mode
   if (mRootIFD->getSubIFDs().size() == 4) {
     TiffEntry* typeE = mRootIFD->getSubIFDs()[3]->getEntryRecursive(CANON_SRAWTYPE);
     if (typeE && typeE->getInt() == 4) {
-      this->checkCameraSupported(meta, make, model, "sRaw1");
+      checkCameraSupported(meta, id, "sRaw1");
       return;
     }
   }
 
-  this->checkCameraSupported(meta, make, model, "");
+  checkCameraSupported(meta, id, "");
 }
 
 void Cr2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
   int iso = 0;
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
-  if (data.empty())
-    ThrowRDE("CR2 Meta Decoder: Model name not found");
-
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
   string mode;
 
   if (mRaw->metadata.subsampling.y == 2 && mRaw->metadata.subsampling.x == 2)
@@ -254,7 +228,7 @@ void Cr2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
     mRaw->setError(e.what());
     // We caught an exception reading WB, just ignore it
   }
-  setMetaData(meta, make, model, mode, iso);
+  setMetaData(meta, mode, iso);
 }
 
 int Cr2Decoder::getHue() {

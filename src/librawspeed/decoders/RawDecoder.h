@@ -170,12 +170,12 @@ protected:
   /* The Raw input file to be decoded */
   FileMap *mFile;
 
-  /* Decoder version - defaults to 0, but can be overridden by decoders */
+  /* Decoder version */
   /* This can be used to avoid newer version of an xml file to indicate that a file */
   /* can be decoded, when a specific version of the code is needed */
   /* Higher number in camera xml file: Files for this camera will not be decoded */
   /* Higher number in code than xml: Image will be decoded. */
-  int decoderVersion;
+  virtual int getDecoderVersion() const = 0;
 
   /* Hints set for the camera after checkCameraSupported has been called from the implementation*/
    std::map<std::string,std::string> hints;

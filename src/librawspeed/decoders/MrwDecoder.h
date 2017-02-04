@@ -25,26 +25,26 @@
 #include "common/RawImage.h"     // for RawImage
 #include "decoders/RawDecoder.h" // for RawDecoder
 #include "io/FileMap.h"          // for FileMap
+#include "tiff/TiffIFD.h"
 
 namespace RawSpeed {
 
 class CameraMetaData;
-class TiffIFD;
 
 class MrwDecoder :
   public RawDecoder
 {
 public:
   MrwDecoder(FileMap* file);
-  ~MrwDecoder() override;
   RawImage decodeRawInternal() override;
   void checkSupportInternal(CameraMetaData *meta) override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
   static int isMRW(FileMap* input);
 protected:
+  int getDecoderVersion() const override { return 0; }
   virtual void parseHeader();
   uint32 raw_width, raw_height, data_offset, packed;
-  TiffIFD *tiff_meta;
+  TiffRootIFDOwner rootIFD;
   float wb_coeffs[4];
 };
 

@@ -44,6 +44,7 @@ public:
   ~CrwDecoder() override;
 
 protected:
+  int getDecoderVersion() const override { return 0; }
   CiffIFD *mRootIFD;
   void makeDecoder(int n, const uchar8 *source);
   void initHuffTables (uint32 table);

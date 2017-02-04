@@ -42,7 +42,9 @@ using namespace std;
 
 namespace RawSpeed {
 
-DngDecoder::DngDecoder(TiffIFD *rootIFD, FileMap* file) : RawDecoder(file), mRootIFD(rootIFD) {
+DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, FileMap* file)
+  : AbstractTiffDecoder(move(rootIFD), file)
+{
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(DNGVERSION);
   const uchar8* v = data[0]->getEntry(DNGVERSION)->getData(4);
 
@@ -55,12 +57,6 @@ DngDecoder::DngDecoder(TiffIFD *rootIFD, FileMap* file) : RawDecoder(file), mRoo
     mFixLjpeg = true;
   else
     mFixLjpeg = false;
-}
-
-DngDecoder::~DngDecoder() {
-  if (mRootIFD)
-    delete mRootIFD;
-  mRootIFD = nullptr;
 }
 
 void DngDecoder::dropUnsuportedChunks(vector<TiffIFD*>& data) {
@@ -200,13 +196,14 @@ void DngDecoder::decodeData(TiffIFD* raw) {
     TiffEntry* offsets = raw->getEntry(STRIPOFFSETS);
     TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
 
-    uint32 yPerSlice = raw->getEntry(ROWSPERSTRIP)->getInt();
-
     if (counts->count != offsets->count) {
       ThrowRDE("DNG Decoder: Byte count number does not match strip size: "
                "count:%u, stips:%u ",
                counts->count, offsets->count);
     }
+
+    uint32 yPerSlice = raw->hasEntry(ROWSPERSTRIP) ?
+          raw->getEntry(ROWSPERSTRIP)->getInt() : mRaw->dim.y;
 
     if (yPerSlice == 0 || yPerSlice > (uint32)mRaw->dim.y)
       ThrowRDE("DNG Decoder: Invalid y per slice");
@@ -458,33 +455,36 @@ void DngDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
     mRaw->metadata.isoSpeed = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getInt();
 
-  // Set the make and model
-  if (mRootIFD->hasEntryRecursive(MAKE) && mRootIFD->hasEntryRecursive(MODEL)) {
-    string make = mRootIFD->getEntryRecursive(MAKE)->getString();
-    string model = mRootIFD->getEntryRecursive(MODEL)->getString();
-    TrimSpaces(make);
-    TrimSpaces(model);
-    mRaw->metadata.make = make;
-    mRaw->metadata.model = model;
+  TiffID id;
 
-    Camera *cam = meta->getCamera(make, model, "dng");
-    if (!cam) //Also look for non-DNG cameras in case it's a converted file
-      cam = meta->getCamera(make, model, "");
-    if (!cam) // Worst case scenario, look for any such camera.
-      cam = meta->getCamera(make, model);
-    if (cam) {
-      mRaw->metadata.canonical_make = cam->canonical_make;
-      mRaw->metadata.canonical_model = cam->canonical_model;
-      mRaw->metadata.canonical_alias = cam->canonical_alias;
-      mRaw->metadata.canonical_id = cam->canonical_id;
+  try {
+    id = mRootIFD->getID();
+  } catch (...) {
+    // not all dngs have MAKE/MODEL entries,
+    // will be dealt with by using UNIQUECAMERAMODEL below
+  }
+
+  // Set the make and model
+  mRaw->metadata.make = id.make;
+  mRaw->metadata.model = id.model;
+
+  Camera *cam = meta->getCamera(id.make, id.model, "dng");
+  if (!cam) //Also look for non-DNG cameras in case it's a converted file
+    cam = meta->getCamera(id.make, id.model, "");
+  if (!cam) // Worst case scenario, look for any such camera.
+    cam = meta->getCamera(id.make, id.model);
+  if (cam) {
+    mRaw->metadata.canonical_make = cam->canonical_make;
+    mRaw->metadata.canonical_model = cam->canonical_model;
+    mRaw->metadata.canonical_alias = cam->canonical_alias;
+    mRaw->metadata.canonical_id = cam->canonical_id;
+  } else {
+    mRaw->metadata.canonical_make = id.make;
+    mRaw->metadata.canonical_model = mRaw->metadata.canonical_alias = id.model;
+    if (mRootIFD->hasEntryRecursive(UNIQUECAMERAMODEL)) {
+      mRaw->metadata.canonical_id = mRootIFD->getEntryRecursive(UNIQUECAMERAMODEL)->getString();
     } else {
-      mRaw->metadata.canonical_make = make;
-      mRaw->metadata.canonical_model = mRaw->metadata.canonical_alias = model;
-      if (mRootIFD->hasEntryRecursive(UNIQUECAMERAMODEL)) {
-        mRaw->metadata.canonical_id = mRootIFD->getEntryRecursive(UNIQUECAMERAMODEL)->getString();
-      } else {
-        mRaw->metadata.canonical_id = make + " " + model;
-      }
+      mRaw->metadata.canonical_id = id.make + " " + id.model;
     }
   }
 }
@@ -498,17 +498,14 @@ void DngDecoder::checkSupportInternal(CameraMetaData *meta) {
     // Check "Unique Camera Model" instead, uses this for both make + model.
     if (mRootIFD->hasEntryRecursive(UNIQUECAMERAMODEL)) {
       string unique = mRootIFD->getEntryRecursive(UNIQUECAMERAMODEL)->getString();
-      this->checkCameraSupported(meta, unique, unique, "dng");
+      checkCameraSupported(meta, {unique, unique}, "dng");
       return;
     }
     // If we don't have make/model we cannot tell, but still assume yes.
     return;
   }
 
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  this->checkCameraSupported(meta, make, model, "dng");
+  checkCameraSupported(meta, mRootIFD->getID(), "dng");
 }
 
 /* Decodes DNG masked areas into blackareas in the image */

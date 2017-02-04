@@ -42,18 +42,6 @@ using namespace std;
 
 namespace RawSpeed {
 
-ArwDecoder::ArwDecoder(TiffIFD *rootIFD, FileMap* file) :
-    RawDecoder(file), mRootIFD(rootIFD) {
-  mShiftDownScale = 0;
-  decoderVersion = 1;
-}
-
-ArwDecoder::~ArwDecoder() {
-  if (mRootIFD)
-    delete mRootIFD;
-  mRootIFD = nullptr;
-}
-
 RawImage ArwDecoder::decodeRawInternal() {
   TiffIFD *raw = nullptr;
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
@@ -106,7 +94,7 @@ RawImage ArwDecoder::decodeRawInternal() {
       const uchar8 *keyData = mFile->getData(key_off, 1);
       uint32 offset = (*keyData) * 4;
       keyData = mFile->getData(key_off + offset, 4);
-      uint32 key = get4BE(keyData, 0);
+      uint32 key = getU32BE(keyData);
       uchar8 *head = mFile->getDataWrt(head_off, 40);
       SonyDecrypt((uint32 *) head, 10, key);
       for (int i=26; i-- > 22; )
@@ -306,53 +294,37 @@ void ArwDecoder::DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp) {
   ThrowRDE("Unsupported bit depth");
 }
 
-void ArwDecoder::checkSupportInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  if (data.empty())
-    ThrowRDE("ARW Support check: Model name found");
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  this->checkCameraSupported(meta, make, model, "");
-}
-
 void ArwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   //Default
   int iso = 0;
 
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-
-  if (data.empty())
-    ThrowRDE("ARW Meta Decoder: Model name found");
-  if (!data[0]->hasEntry(MAKE))
-    ThrowRDE("ARW Decoder: Make name not found");
-
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
 
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
     iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getInt();
 
-  setMetaData(meta, make, model, "", iso);
+  auto id = mRootIFD->getID();
+
+  setMetaData(meta, id, "", iso);
   mRaw->whitePoint >>= mShiftDownScale;
   mRaw->blackLevel >>= mShiftDownScale;
 
   // Set the whitebalance
-  if (model == "DSLR-A100") { // Handle the MRW style WB of the A100
+  if (id.model == "DSLR-A100") { // Handle the MRW style WB of the A100
     if (mRootIFD->hasEntryRecursive(DNGPRIVATEDATA)) {
       TiffEntry *priv = mRootIFD->getEntryRecursive(DNGPRIVATEDATA);
       const uchar8 *offdata = priv->getData(4);
-      uint32 off = get4LE(offdata,0);
+      uint32 off = getU32LE(offdata);
       uint32 length = mFile->getSize()-off;
       const unsigned char *dpd = mFile->getData(off, length);
       uint32 currpos = 8;
       while (currpos+20 < length) {
-        uint32 tag = get4BE(dpd, currpos);
-        uint32 len = get4LE(dpd, currpos + 4);
+        uint32 tag = getU32BE(dpd + currpos + 0);
+        uint32 len = getU32LE(dpd + currpos + 4);
         if (tag == 0x574247) { /* WBG */
           ushort16 tmp[4];
           for(uint32 i=0; i<4; i++)
-            tmp[i] = get2LE(dpd, currpos + 12 + i * 2);
+            tmp[i] = getU16LE(dpd + currpos + 12 + i * 2);
 
           mRaw->metadata.wbCoeffs[0] = (float) tmp[0];
           mRaw->metadata.wbCoeffs[1] = (float) tmp[1];
@@ -382,7 +354,7 @@ void ArwDecoder::SonyDecrypt(uint32 *buffer, uint32 len, uint32 key) {
   for (int p=4; p < 127; p++)
     pad[p] = (pad[p-4]^pad[p-2]) << 1 | (pad[p-3]^pad[p-1]) >> 31;
   for (int p=0; p < 127; p++)
-    pad[p] = get4BE((uchar8 *) &pad[p],0);
+    pad[p] = getU32BE(&pad[p]);
 
   int p = 127;
   // Decrypt the buffer in place using the pad
@@ -407,8 +379,7 @@ void ArwDecoder::GetWB() {
 
     uint32 off = sony_offset->getInt();
     uint32 len = sony_length->getInt();
-    const uchar8* data = sony_key->getData(4);
-    uint32 key = get4LE(data,0);
+    uint32 key = getU32LE(sony_key->getData(4));
 
     //TODO: replace ugly inplace decryption of (const) raw data
     auto *ifp_data = (uint32 *)mFile->getDataWrt(off, len);

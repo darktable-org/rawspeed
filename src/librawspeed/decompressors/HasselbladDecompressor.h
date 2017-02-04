@@ -21,18 +21,20 @@
 
 #pragma once
 
-#include "decompressors/LJpegDecompressor.h"
+#include "decompressors/AbstractLJpegDecompressor.h"
 
 namespace RawSpeed {
 
-class HasselbladDecompressor final : public LJpegDecompressor
+class HasselbladDecompressor final : public AbstractLJpegDecompressor
 {
+  int pixelBaseOffset = 0;
+
   void decodeScan() override;
 
 public:
-  using LJpegDecompressor::LJpegDecompressor;
+  using AbstractLJpegDecompressor::AbstractLJpegDecompressor;
 
-  int pixelBaseOffset = 0;
+  void decode(int pixelBaseOffset_);
 };
 
 } // namespace RawSpeed

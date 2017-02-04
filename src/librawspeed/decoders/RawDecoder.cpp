@@ -54,7 +54,6 @@ using namespace std;
 namespace RawSpeed {
 
 RawDecoder::RawDecoder(FileMap* file) : mRaw(RawImage::create()), mFile(file) {
-  decoderVersion = 0;
   failOnUnknown = false;
   interpolateBadPixels = true;
   applyStage1DngOpcodes = true;
@@ -125,8 +124,6 @@ void RawDecoder::decodeUncompressed(TiffIFD *rawIFD, BitOrder order) {
 
 bool RawDecoder::checkCameraSupported(CameraMetaData *meta, string make,
                                       string model, const string &mode) {
-  TrimSpaces(make);
-  TrimSpaces(model);
   mRaw->metadata.make = make;
   mRaw->metadata.model = model;
   Camera* cam = meta->getCamera(make, model, mode);
@@ -146,7 +143,7 @@ bool RawDecoder::checkCameraSupported(CameraMetaData *meta, string make,
   if (!cam->supported)
     ThrowRDE("Camera not supported (explicit). Sorry.");
 
-  if (cam->decoderVersion > decoderVersion)
+  if (cam->decoderVersion > getDecoderVersion())
     ThrowRDE("Camera not supported in this version. Update RawSpeed for support.");
 
   hints = cam->hints;
@@ -156,8 +153,6 @@ bool RawDecoder::checkCameraSupported(CameraMetaData *meta, string make,
 void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model,
                              const string &mode, int iso_speed) {
   mRaw->metadata.isoSpeed = iso_speed;
-  TrimSpaces(make);
-  TrimSpaces(model);
   Camera *cam = meta->getCamera(make, model, mode);
   if (!cam) {
     writeLog(DEBUG_PRIO_INFO, "ISO:%d\n", iso_speed);

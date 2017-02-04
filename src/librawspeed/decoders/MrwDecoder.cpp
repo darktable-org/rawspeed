@@ -43,13 +43,7 @@ class CameraMetaData;
 
 MrwDecoder::MrwDecoder(FileMap* file) :
     RawDecoder(file) {
-  tiff_meta = nullptr;
   parseHeader();
-}
-
-MrwDecoder::~MrwDecoder() {
-  if (tiff_meta)
-    delete tiff_meta;
 }
 
 int MrwDecoder::isMRW(FileMap* input) {
@@ -65,7 +59,7 @@ void MrwDecoder::parseHeader() {
     ThrowRDE("This isn't actually a MRW file, why are you calling me?");
 
   const unsigned char* data = mFile->getData(0,8);
-  data_offset = get4BE(data,4)+8;
+  data_offset = getU32BE(data + 4) + 8;
   data = mFile->getData(0,data_offset);
 
   if (!mFile->isValid(data_offset))
@@ -77,21 +71,21 @@ void MrwDecoder::parseHeader() {
 
   uint32 currpos = 8;
   // At most we read 20 bytes from currpos so check we don't step outside that
-  while (currpos+20 < data_offset) {
-    uint32 tag = get4BE(data,currpos);
-    uint32 len = get4BE(data,currpos+4);
+  while (currpos + 20 < data_offset) {
+    uint32 tag = getU32BE(data + currpos);
+    uint32 len = getU32BE(data + currpos + 4);
     switch(tag) {
     case 0x505244: // PRD
-      raw_height = get2BE(data,currpos+16);
-      raw_width = get2BE(data,currpos+18);
+      raw_height = getU16BE(data + currpos + 16);
+      raw_width = getU16BE(data + currpos + 18);
       packed = (data[currpos+24] == 12);
     case 0x574247: // WBG
-      for(uint32 i=0; i<4; i++)
-        wb_coeffs[i] = (float)get2BE(data, currpos+12+i*2);
+      for (uint32 i = 0; i < 4; i++)
+        wb_coeffs[i] = (float)getU16BE(data + currpos + 12 + i * 2);
       break;
     case 0x545457: // TTW
       // Base value for offsets needs to be at the beginning of the TIFF block, not the file
-      tiff_meta = parseTiff(mFile->getSubView(currpos+8)).release();
+      rootIFD = parseTiff(mFile->getSubView(currpos+8));
       break;
     }
     currpos += max(len + 8, 1u); // max(,1) to make sure we make progress
@@ -118,25 +112,19 @@ RawImage MrwDecoder::decodeRawInternal() {
 }
 
 void MrwDecoder::checkSupportInternal(CameraMetaData *meta) {
-  if (!tiff_meta || !tiff_meta->hasEntryRecursive(MAKE) || !tiff_meta->hasEntryRecursive(MODEL))
-    ThrowRDE("MRW: Couldn't find make and model");
-
-  string make = tiff_meta->getEntryRecursive(MAKE)->getString();
-  string model = tiff_meta->getEntryRecursive(MODEL)->getString();
-  this->checkCameraSupported(meta, make, model, "");
+  auto id = rootIFD->getID();
+  this->checkCameraSupported(meta, id.make, id.model, "");
 }
 
 void MrwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   //Default
   int iso = 0;
 
-  if (!tiff_meta || !tiff_meta->getEntryRecursive(MAKE) || !tiff_meta->getEntryRecursive(MODEL))
+  if (!rootIFD)
     ThrowRDE("MRW: Couldn't find make and model");
 
-  string make = tiff_meta->getEntryRecursive(MAKE)->getString();
-  string model = tiff_meta->getEntryRecursive(MODEL)->getString();
-
-  setMetaData(meta, make, model, "", iso);
+  auto id = rootIFD->getID();
+  setMetaData(meta, id.make, id.model, "", iso);
 
   if (hints.find("swapped_wb") != hints.end()) {
     mRaw->metadata.wbCoeffs[0] = (float) wb_coeffs[2];

@@ -45,17 +45,10 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-Rw2Decoder::Rw2Decoder(TiffIFD *rootIFD, FileMap *file)
-    : RawDecoder(file), mRootIFD(rootIFD), input_start(nullptr) {
-  decoderVersion = 2;
-}
 Rw2Decoder::~Rw2Decoder() {
   if (input_start)
     delete input_start;
   input_start = nullptr;
-  if (mRootIFD)
-    delete mRootIFD;
-  mRootIFD = nullptr;
 }
 
 RawImage Rw2Decoder::decodeRawInternal() {
@@ -206,41 +199,29 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
 }
 
 void Rw2Decoder::checkSupportInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  if (data.empty())
-    ThrowRDE("RW2 Support check: Model name found");
-
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  if (!this->checkCameraSupported(meta, make, model, guessMode()))
-    this->checkCameraSupported(meta, make, model, "");
+  auto id = mRootIFD->getID();
+  if (!checkCameraSupported(meta, id, guessMode()))
+    checkCameraSupported(meta, id, "");
 }
 
 void Rw2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_BLUE, CFA_GREEN, CFA_GREEN, CFA_RED);
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
-  if (data.empty())
-    ThrowRDE("RW2 Meta Decoder: Model name not found");
-  if (!data[0]->hasEntry(MAKE))
-    ThrowRDE("RW2 Support: Make name not found");
-
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
+  auto id = mRootIFD->getID();
   string mode = guessMode();
   int iso = 0;
   if (mRootIFD->hasEntryRecursive(PANASONIC_ISO_SPEED))
     iso = mRootIFD->getEntryRecursive(PANASONIC_ISO_SPEED)->getInt();
 
-  if (this->checkCameraSupported(meta, make, model, mode)) {
-    setMetaData(meta, make, model, mode, iso);
+  if (this->checkCameraSupported(meta, id, mode)) {
+    setMetaData(meta, id, mode, iso);
   } else {
     mRaw->metadata.mode = mode;
     writeLog(DEBUG_PRIO_EXTRA, "Mode not found in DB: %s", mode.c_str());
-    setMetaData(meta, make, model, "", iso);
+    setMetaData(meta, id, "", iso);
   }
 
-  data = mRootIFD->getIFDsWithTag(PANASONIC_STRIPOFFSET);
+  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(PANASONIC_STRIPOFFSET);
 
   // bool isOldPanasonic = false;
 

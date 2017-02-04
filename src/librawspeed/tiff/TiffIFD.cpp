@@ -253,5 +253,23 @@ TiffEntry* TiffIFD::getEntry(TiffTag tag) const {
   return i->second.get();
 }
 
+TiffID TiffRootIFD::getID() const
+{
+  TiffID id;
+  auto makeE = getEntryRecursive(MAKE);
+  auto modelE = getEntryRecursive(MODEL);
+
+  if (!makeE)
+    ThrowTPE("TiffIFD: Failed to find MAKE entry.");
+  if (!modelE)
+    ThrowTPE("TiffIFD: Failed to find MODEL entry.");
+
+  id.make = makeE->getString();
+  id.model = modelE->getString();
+  TrimSpaces(id.make);
+  TrimSpaces(id.model);
+
+  return id;
+}
 
 } // namespace RawSpeed

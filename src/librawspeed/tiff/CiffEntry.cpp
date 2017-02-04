@@ -33,13 +33,13 @@ namespace RawSpeed {
 
 CiffEntry::CiffEntry(FileMap* f, uint32 value_data, uint32 offset) {
   own_data = nullptr;
-  ushort16 p = get2LE(f->getData(offset, 2), 0);
+  ushort16 p = getU16LE(f->getData(offset, 2));
   tag = (CiffTag) (p & 0x3fff);
   ushort16 datalocation = (p & 0xc000);
   type = (CiffDataType) (p & 0x3800);
   if (datalocation == 0x0000) { // Data is offset in value_data
-    bytesize = get4LE(f->getData(offset + 2, 4), 0);
-    data_offset = get4LE(f->getData(offset + 6, 4),0) + value_data;
+    bytesize = getU32LE(f->getData(offset + 2, 4));
+    data_offset = getU32LE(f->getData(offset + 6, 4)) + value_data;
     data = f->getDataWrt(data_offset, bytesize);
   } else if (datalocation == 0x4000) { // Data is stored directly in entry
     data_offset = offset + 2;
@@ -104,7 +104,7 @@ uint32 CiffEntry::getInt(uint32 num) {
   if (num*4+3 >= bytesize)
     ThrowCPE("CIFF, getInt: Trying to read out of bounds");
 
-  return get4LE(data, num*4);
+  return getU32LE(data + num * 4);
 }
 
 ushort16 CiffEntry::getShort(uint32 num) {
@@ -114,7 +114,7 @@ ushort16 CiffEntry::getShort(uint32 num) {
   if (num*2+1 >= bytesize)
     ThrowCPE("CIFF, getShort: Trying to read out of bounds");
 
-  return get2LE(data, num*2);
+  return getU16LE(data + num * 2);
 }
 
 uchar8 CiffEntry::getByte(uint32 num) {

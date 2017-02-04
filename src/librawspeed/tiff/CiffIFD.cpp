@@ -42,8 +42,8 @@ CiffIFD::CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 _depth) {
   CIFF_DEPTH(_depth);
   mFile = f;
 
-  uint32 valuedata_size = get4LE(f->getData(end-4, 4), 0);
-  ushort16 dircount = get2LE(f->getData(start+valuedata_size, 2), 0);
+  uint32 valuedata_size = getU32LE(f->getData(end-4, 4));
+  ushort16 dircount = getU16LE(f->getData(start+valuedata_size, 2));
 
 //  fprintf(stderr, "Found %d entries between %d and %d after %d data bytes\n",
 //                  dircount, start, end, valuedata_size);

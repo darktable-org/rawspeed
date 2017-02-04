@@ -21,26 +21,26 @@
 #pragma once
 
 #include "common/RawImage.h"     // for RawImage
-#include "decoders/RawDecoder.h" // for RawDecoder
+#include "decoders/AbstractTiffDecoder.h"
 #include "io/FileMap.h"          // for FileMap
 
 namespace RawSpeed {
 
 class CameraMetaData;
 
-class TiffIFD;
-
-class PefDecoder :
-  public RawDecoder
+class PefDecoder final : public AbstractTiffDecoder
 {
 public:
-  PefDecoder(TiffIFD *rootIFD, FileMap* file);
-  ~PefDecoder() override;
+  // please revert _this_ commit, once IWYU can handle inheriting constructors
+  // using AbstractTiffDecoder::AbstractTiffDecoder;
+  PefDecoder(TiffRootIFDOwner&& root, FileMap* file)
+    : AbstractTiffDecoder(move(root), file) {}
+
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
-  void checkSupportInternal(CameraMetaData *meta) override;
-  TiffIFD *getRootIFD() override { return mRootIFD; }
-  TiffIFD *mRootIFD;
+
+protected:
+  int getDecoderVersion() const override { return 3; }
 };
 
 } // namespace RawSpeed

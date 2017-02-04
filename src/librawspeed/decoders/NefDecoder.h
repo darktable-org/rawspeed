@@ -22,7 +22,7 @@
 
 #include "common/Common.h"       // for uint32, ushort16
 #include "common/RawImage.h"     // for RawImage
-#include "decoders/RawDecoder.h" // for RawDecoder
+#include "decoders/AbstractTiffDecoder.h"
 #include "io/FileMap.h"          // for FileMap
 #include <string>                // for string
 #include <vector>                // for vector
@@ -33,23 +33,22 @@ class ByteStream;
 
 class CameraMetaData;
 
-class TiffIFD;
-
 class iPoint2D;
 
-class NefDecoder :
-  public RawDecoder
+class NefDecoder final : public AbstractTiffDecoder
 {
 public:
-  NefDecoder(TiffIFD *rootIFD, FileMap* file);
-  ~NefDecoder() override;
+  // please revert _this_ commit, once IWYU can handle inheriting constructors
+  // using AbstractTiffDecoder::AbstractTiffDecoder;
+  NefDecoder(TiffRootIFDOwner&& root, FileMap* file)
+    : AbstractTiffDecoder(move(root), file) {}
+
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
   void checkSupportInternal(CameraMetaData *meta) override;
-  TiffIFD *mRootIFD;
-  TiffIFD *getRootIFD() override { return mRootIFD; }
 
 private:
+  int getDecoderVersion() const override { return 5; }
   bool D100IsCompressed(uint32 offset);
   bool NEFIsUncompressed(TiffIFD *raw);
   bool NEFIsUncompressedRGB(TiffIFD *raw);

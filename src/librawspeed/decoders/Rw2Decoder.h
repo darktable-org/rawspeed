@@ -23,7 +23,7 @@
 
 #include "common/Common.h"       // for uint32, uchar8
 #include "common/RawImage.h"     // for RawImage
-#include "decoders/RawDecoder.h" // for RawDecoder, RawDecoderThread (ptr o...
+#include "decoders/AbstractTiffDecoder.h"
 #include "io/FileMap.h"          // for FileMap
 #include <string>                // for string
 
@@ -32,8 +32,6 @@ namespace RawSpeed {
 class ByteStream;
 
 class CameraMetaData;
-
-class TiffIFD;
 
 class PanaBitpump {
   public:
@@ -47,25 +45,27 @@ class PanaBitpump {
   void skipBytes(int bytes);
 };
 
-class Rw2Decoder :
-  public RawDecoder
+class Rw2Decoder final : public AbstractTiffDecoder
 {
 public:
-  Rw2Decoder(TiffIFD *rootIFD, FileMap* file);
+  // please revert _this_ commit, once IWYU can handle inheriting constructors
+  // using AbstractTiffDecoder::AbstractTiffDecoder;
+  Rw2Decoder(TiffRootIFDOwner&& root, FileMap* file)
+    : AbstractTiffDecoder(move(root), file) {}
   ~Rw2Decoder() override;
+
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
   void checkSupportInternal(CameraMetaData *meta) override;
-  TiffIFD *mRootIFD;
-  TiffIFD *getRootIFD() override { return mRootIFD; }
 
 protected:
+  int getDecoderVersion() const override { return 2; }
   void decodeThreaded(RawDecoderThread *t) override;
 
 private:
   void DecodeRw2();
   std::string guessMode();
-  ByteStream* input_start;
+  ByteStream* input_start = nullptr;
   uint32 load_flags;
 };
 

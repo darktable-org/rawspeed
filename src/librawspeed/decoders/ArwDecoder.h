@@ -23,36 +23,35 @@
 
 #include "common/Common.h"       // for uint32
 #include "common/RawImage.h"     // for RawImage
-#include "decoders/RawDecoder.h" // for RawDecoder, RawDecoderThread (ptr o...
+#include "decoders/AbstractTiffDecoder.h"
 #include "io/FileMap.h"          // for FileMap
 
 namespace RawSpeed {
 
 class ByteStream;
 class CameraMetaData;
-class TiffIFD;
 
-class ArwDecoder :
-  public RawDecoder
+class ArwDecoder final : public AbstractTiffDecoder
 {
 public:
-  ArwDecoder(TiffIFD *rootIFD, FileMap* file);
-  ~ArwDecoder() override;
+  // please revert _this_ commit, once IWYU can handle inheriting constructors
+  // using AbstractTiffDecoder::AbstractTiffDecoder;
+  ArwDecoder(TiffRootIFDOwner&& root, FileMap* file)
+    : AbstractTiffDecoder(move(root), file) {}
+
   RawImage decodeRawInternal() override;
-  void checkSupportInternal(CameraMetaData *meta) override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
   void decodeThreaded(RawDecoderThread *t) override;
-  TiffIFD *getRootIFD() override { return mRootIFD; }
 
 protected:
+  int getDecoderVersion() const override { return 1; }
   void DecodeARW(ByteStream &input, uint32 w, uint32 h);
   void DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp);
   void DecodeUncompressed(TiffIFD* raw);
   void SonyDecrypt(uint32 *buffer, uint32 len, uint32 key);
   void GetWB();
-  TiffIFD *mRootIFD;
   ByteStream *in;
-  int mShiftDownScale;
+  int mShiftDownScale = 0;
 };
 
 } // namespace RawSpeed

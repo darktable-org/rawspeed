@@ -24,7 +24,6 @@
 #include "common/Point.h"  // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "decompressors/HasselbladDecompressor.h"
-#include "decompressors/LJpegPlain.h"
 #include "io/BitPumpMSB32.h"         // for BitPumpMSB32
 #include "io/ByteStream.h"           // for ByteStream
 #include "metadata/CameraMetaData.h" // for CameraMetaData
@@ -55,13 +54,6 @@ using namespace std;
 
 namespace RawSpeed {
 
-ThreefrDecoder::ThreefrDecoder(TiffIFD *rootIFD, FileMap* file)  :
-    RawDecoder(file), mRootIFD(rootIFD) {
-  decoderVersion = 0;
-}
-
-ThreefrDecoder::~ThreefrDecoder() { delete mRootIFD; }
-
 RawImage ThreefrDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 
@@ -77,17 +69,13 @@ RawImage ThreefrDecoder::decodeRawInternal() {
   mRaw->createData();
 
   HasselbladDecompressor l(*mFile, off, mRaw);
-  // We cannot use fully decoding huffman table,
-  // because values are packed two pixels at the time.
-  l.mFullDecodeHT = false;
-  auto pixelOffset = hints.find("pixelBaseOffset");
-  if (pixelOffset != hints.end()) {
-    stringstream convert((*pixelOffset).second);
-    convert >> l.pixelBaseOffset;
-  }
+  int pixelBaseOffset = 0;
+  auto pixelOffsetHint = hints.find("pixelBaseOffset");
+  if (pixelOffsetHint != hints.end())
+    pixelBaseOffset = stoi(pixelOffsetHint->second);
 
   try {
-    l.decode(0, 0);
+    l.decode(pixelBaseOffset);
   } catch (IOException &e) {
     mRaw->setError(e.what());
     // Let's ignore it, it may have delivered somewhat useful data.
@@ -96,27 +84,10 @@ RawImage ThreefrDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void ThreefrDecoder::checkSupportInternal(CameraMetaData *meta) {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
-  if (data.empty())
-    ThrowRDE("3FR Support check: Model name not found");
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  this->checkCameraSupported(meta, make, model, "");
-}
-
 void ThreefrDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(MODEL);
 
-  if (data.empty())
-    ThrowRDE("3FR Decoder: Model name found");
-  if (!data[0]->hasEntry(MAKE))
-    ThrowRDE("3FR Decoder: Make name not found");
-
-  string make = data[0]->getEntry(MAKE)->getString();
-  string model = data[0]->getEntry(MODEL)->getString();
-  setMetaData(meta, make, model, "", 0);
+  setMetaData(meta, "", 0);
 
   // Fetch the white balance
   if (mRootIFD->hasEntryRecursive(ASSHOTNEUTRAL)) {

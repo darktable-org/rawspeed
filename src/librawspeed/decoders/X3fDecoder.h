@@ -52,6 +52,7 @@ public:
   X3fPropertyCollection mProperties;
 
 protected:
+  int getDecoderVersion() const override { return 1; }
   void decodeThreaded(RawDecoderThread *t) override;
   void readDirectory();
   std::string getId();
