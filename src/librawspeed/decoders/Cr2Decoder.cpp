@@ -422,12 +422,9 @@ static inline void interpolate_420(T yuv2rgb, const int* sraw_coeffs,
 }
 
 static inline void STORE_RGB(ushort16* X, int r, int g, int b, int offset) {
-  r >>= 8;
-  g >>= 8;
-  b >>= 8;
-  X[offset + 0] = clampbits(r, 16);
-  X[offset + 1] = clampbits(g, 16);
-  X[offset + 2] = clampbits(b, 16);
+  X[offset + 0] = clampBits(r >> 8, 16);
+  X[offset + 1] = clampBits(g >> 8, 16);
+  X[offset + 2] = clampBits(b >> 8, 16);
 }
 
 static inline void YUV_TO_RGB_v1(int Y, int Cb, int Cr, const int* sraw_coeffs,

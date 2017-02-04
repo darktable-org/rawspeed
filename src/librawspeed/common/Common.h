@@ -49,15 +49,17 @@ const int DEBUG_PRIO_EXTRA = 0x10000;
 
 void writeLog(int priority, const char *format, ...) __attribute__((format(printf, 2, 3)));
 
-inline void BitBlt(uchar8* dstp, int dst_pitch, const uchar8* srcp, int src_pitch, int row_size, int height) {
-  if (height == 1 || (dst_pitch == src_pitch && src_pitch == row_size)) {
-    memcpy(dstp, srcp, (size_t)row_size * height);
-    return;
-  }
-  for (int y=height; y>0; --y) {
-    memcpy(dstp, srcp, row_size);
-    dstp += dst_pitch;
-    srcp += src_pitch;
+inline void copyPixels(uchar8* dest, int dstPitch, const uchar8* src,
+                       int srcPitch, int rowSize, int height)
+{
+  if (height == 1 || (dstPitch == srcPitch && srcPitch == rowSize))
+    memcpy(dest, src, (size_t)rowSize * height);
+  else {
+    for (int y = height; y > 0; --y) {
+      memcpy(dest, src, rowSize);
+      dest += dstPitch;
+      src += srcPitch;
+    }
   }
 }
 
@@ -174,45 +176,47 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 #endif
 #endif
 
-inline uint32 clampbits(int x, uint32 n) {
-  uint32 _y_temp;
-  if( (_y_temp=x>>n) )
-    x = ~_y_temp >> (32-n);
+// clampBits clamps the given int to the range 0 .. 2^n-1
+inline uint32 clampBits(int x, uint32 n)
+{
+  const int tmp = (1 << n) - 1;
+  x = x < 0 ? 0 : x;
+  x = x > tmp ? tmp : x;
   return x;
 }
 
-/* This is faster - at least when compiled on visual studio 32 bits */
-inline int other_abs(int x) { int const mask = x >> 31; return (x + mask) ^ mask;}
+// Trim both leading and trailing spaces from the string
+inline std::string trimSpaces(const std::string& str)
+{
+  // Find the first character position after excluding leading blank spaces
+  size_t startpos = str.find_first_not_of(" \t");
 
-/* Remove all spaces at the end of a string */
-
-inline void TrimSpaces(std::string& str) {
-  // Trim Both leading and trailing spaces
-  size_t startpos = str.find_first_not_of(" \t"); // Find the first character position after excluding leading blank spaces
-  size_t endpos = str.find_last_not_of(" \t"); // Find the first character position from reverse af
+  // Find the first character position from reverse af
+  size_t endpos = str.find_last_not_of(" \t");
 
   // if all spaces or empty return an empty string
-  if ((std::string::npos == startpos) || (std::string::npos == endpos)) {
-    str = "";
-  } else
-    str = str.substr(startpos, endpos - startpos + 1);
+  if ((startpos == std::string::npos) || (endpos == std::string::npos))
+    return "";
+
+  return str.substr(startpos, endpos - startpos + 1);
 }
 
-inline std::vector<std::string> split_string(const std::string &input,
-                                             char c = ' ') {
+inline std::vector<std::string> splitString(const std::string& input,
+                                            char c = ' ')
+{
   std::vector<std::string> result;
-  const char *str = input.c_str();
+  const char* str = input.c_str();
 
   while (true) {
-    const char *begin = str;
+    const char* begin = str;
 
-    while(*str != c && *str)
+    while (*str != c && *str)
       str++;
 
-    if(begin != str)
+    if (begin != str)
       result.emplace_back(begin, str);
 
-    if(0 == *str++)
+    if (0 == *str++)
       break;
   }
 

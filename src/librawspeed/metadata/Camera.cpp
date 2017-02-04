@@ -259,10 +259,8 @@ void Camera::parseSensor(const xml_node &cur) {
   auto stringToListOfInts = [this, &cur](const char *attribute) {
     vector<int> ret;
     try {
-      for (const string &s :
-           split_string(cur.attribute(attribute).as_string(), ' ')) {
+      for (const string& s : splitString(cur.attribute(attribute).as_string()))
         ret.push_back(stoi(s));
-      }
     } catch (...) {
       ThrowCME("Error parsing attribute %s in tag %s, in camera %s %s.",
                attribute, cur.name(), make.c_str(), model.c_str());

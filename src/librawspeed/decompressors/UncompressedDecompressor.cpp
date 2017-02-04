@@ -71,9 +71,9 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
   if (mRaw->getDataType() == TYPE_FLOAT32) {
     if (bitPerPixel != 32)
       ThrowRDE("readUncompressedRaw: Only 32 bit float point supported");
-    BitBlt(&data[offset.x * sizeof(float) * cpp + y * outPitch], outPitch,
-           input.getData(inputPitch * (h - y)), inputPitch, w * mRaw->getBpp(),
-           h - y);
+    copyPixels(&data[offset.x * sizeof(float) * cpp + y * outPitch], outPitch,
+               input.getData(inputPitch * (h - y)), inputPitch,
+               w * mRaw->getBpp(), h - y);
     return;
   }
 
@@ -118,9 +118,9 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
     }
   } else {
     if (bitPerPixel == 16 && getHostEndianness() == little) {
-      BitBlt(&data[offset.x * sizeof(ushort16) * cpp + y * outPitch], outPitch,
-             input.getData(inputPitch * (h - y)), inputPitch,
-             w * mRaw->getBpp(), h - y);
+      copyPixels(&data[offset.x * sizeof(ushort16) * cpp + y * outPitch],
+                 outPitch, input.getData(inputPitch * (h - y)), inputPitch,
+                 w * mRaw->getBpp(), h - y);
       return;
     }
     if (bitPerPixel == 12 && (int)w == inputPitch * 8 / 12 &&

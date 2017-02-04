@@ -73,8 +73,7 @@ RawDecoder* CiffParser::getDecoder() {
 
   if (!potentials.empty()) {  // We have make entry
     for (auto &potential : potentials) {
-      string make = potential->getEntry(CIFF_MAKEMODEL)->getString();
-      TrimSpaces(make);
+      string make = trimSpaces(potential->getEntry(CIFF_MAKEMODEL)->getString());
       if (make == "Canon") {
         mRootIFD = nullptr;
         return new CrwDecoder(root, mInput);

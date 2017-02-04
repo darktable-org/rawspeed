@@ -309,7 +309,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
         } else {
           rand = 0;
         }
-        pixel[x] = clampbits(((pixel[x] - sub_local[x&1]) * mul_local[x&1] + 8192 + rand) >> 14, 16);
+        pixel[x] = clampBits(((pixel[x] - sub_local[x&1]) * mul_local[x&1] + 8192 + rand) >> 14, 16);
       }
     }
   }
@@ -442,7 +442,7 @@ void RawImageDataU16::fixBadPixel( uint32 x, uint32 y, int component )
 
   total_pixel >>= total_shifts;
   auto *pix = (ushort16 *)getDataUncropped(x, y);
-  pix[component] = clampbits(total_pixel, 16);
+  pix[component] = clampBits(total_pixel, 16);
 
   /* Process other pixels - could be done inline, since we have the weights */
   if (cpp > 1 && component == 0)

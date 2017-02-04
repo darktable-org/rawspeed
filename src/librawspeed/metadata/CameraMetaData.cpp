@@ -66,14 +66,10 @@ CameraMetaData::~CameraMetaData() {
 }
 
 static inline CameraId getId(string make, string model, string mode) {
-  TrimSpaces(make);
-  TrimSpaces(model);
-  TrimSpaces(mode);
-
   CameraId id;
-  id.make = make;
-  id.model = model;
-  id.mode = mode;
+  id.make = trimSpaces(make);
+  id.model = trimSpaces(model);
+  id.mode = trimSpaces(mode);
 
   return id;
 }
