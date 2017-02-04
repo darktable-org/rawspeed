@@ -20,8 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32
-#include "io/FileMap.h"    // for FileMap
+#include "io/FileMap.h" // for FileMap
 
 namespace RawSpeed {
 

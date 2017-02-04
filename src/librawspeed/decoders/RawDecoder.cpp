@@ -20,34 +20,29 @@
 */
 
 #include "decoders/RawDecoder.h"
-#include "common/Common.h"                // for uint32, ushort16, uchar8
-#include "common/Point.h"                 // for iPoint2D, iRectangle2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
-#include "decompressors/UncompressedDecompressor.h"
-#include "io/BitPumpMSB.h"               // for BitPumpMSB
-#include "io/BitPumpMSB16.h"             // for BitPumpMSB16
-#include "io/BitPumpMSB32.h"             // for BitPumpMSB32
-#include "io/BitPumpPlain.h"             // for BitPumpPlain
-#include "io/ByteStream.h"               // for ByteStream
-#include "io/FileIOException.h"          // for FileIOException
-#include "io/IOException.h"              // for ThrowIOE, IOException
-#include "metadata/BlackArea.h"          // for BlackArea
-#include "metadata/Camera.h"             // for Camera
-#include "metadata/CameraMetaData.h"     // for CameraMetaData
-#include "metadata/CameraSensorInfo.h"   // for CameraSensorInfo
-#include "metadata/ColorFilterArray.h"   // for ColorFilterArray
-#include "parsers/TiffParserException.h" // for TiffParserException
-#include "tiff/TiffEntry.h"              // for TiffEntry
-#include "tiff/TiffIFD.h"                // for TiffIFD
-#include "tiff/TiffTag.h"                // for ::STRIPOFFSETS, ::BITSPERS...
-#include <algorithm>                     // for min
-#include <cstdlib>                       // for atoi
-#include <map>                           // for map, _Rb_tree_iterator
-#include <memory>                        // for allocator, allocator_trait...
-#include <sstream>                       // for stringstream
-#include <string>                        // for string
-#include <utility>                       // for pair
-#include <vector>                        // for vector
+#include "common/Common.h"                          // for uint32, writeLog
+#include "common/Point.h"                           // for iPoint2D, iRecta...
+#include "decoders/RawDecoderException.h"           // for ThrowRDE, RawDec...
+#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/FileIOException.h"                     // for FileIOException
+#include "io/IOException.h"                         // for IOException
+#include "metadata/BlackArea.h"                     // for BlackArea
+#include "metadata/Camera.h"                        // for Camera
+#include "metadata/CameraMetaData.h"                // for CameraMetaData
+#include "metadata/CameraSensorInfo.h"              // for CameraSensorInfo
+#include "metadata/ColorFilterArray.h"              // for ColorFilterArray
+#include "parsers/TiffParserException.h"            // for TiffParserException
+#include "tiff/TiffEntry.h"                         // for TiffEntry
+#include "tiff/TiffIFD.h"                           // for TiffIFD
+#include "tiff/TiffTag.h"                           // for TiffTag::STRIPOF...
+#include <algorithm>                                // for min
+#include <cstdlib>                                  // for atoi
+#include <map>                                      // for map, _Rb_tree_it...
+#include <memory>                                   // for allocator_traits...
+#include <sstream>                                  // for stringstream
+#include <string>                                   // for string, allocator
+#include <utility>                                  // for pair
+#include <vector>                                   // for vector
 
 using namespace std;
 

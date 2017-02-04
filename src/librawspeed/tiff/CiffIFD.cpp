@@ -20,15 +20,14 @@
 */
 
 #include "tiff/CiffIFD.h"
-#include "common/Common.h"               // for uint32, get2LE, get4LE, ush...
+#include "common/Common.h"               // for uint32, getU16LE, getU32LE
 #include "io/IOException.h"              // for IOException
 #include "parsers/CiffParserException.h" // for ThrowCPE, CiffParserException
-#include "tiff/CiffEntry.h"              // for CiffEntry, ::CIFF_SUB1, ::C...
-#include <cstdio>                        // for NULL
-#include <map>                           // for map, _Rb_tree_iterator, map...
+#include "tiff/CiffEntry.h"              // for CiffEntry, CiffDataType::CI...
+#include <map>                           // for map, _Rb_tree_iterator
 #include <string>                        // for allocator, operator==, string
 #include <utility>                       // for pair
-#include <vector>                        // for vector, vector<>::iterator
+#include <vector>                        // for vector
 
 using namespace std;
 

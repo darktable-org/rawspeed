@@ -20,24 +20,24 @@
 */
 
 #include "decoders/Rw2Decoder.h"
-#include "common/Common.h"                // for uint32, uchar8, _RPT1, ush...
-#include "common/Point.h"                 // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "decompressors/UncompressedDecompressor.h"
-#include "io/Buffer.h"                 // for Buffer::size_type
-#include "io/ByteStream.h"             // for ByteStream
-#include "metadata/ColorFilterArray.h" // for ::CFA_GREEN, ColorFilterArray
-#include "tiff/TiffEntry.h"            // for TiffEntry
-#include "tiff/TiffIFD.h"              // for TiffIFD
-#include "tiff/TiffTag.h"              // for TiffTag, ::STRIPOFFSETS
-#include <algorithm>                   // for min
-#include <cmath>                       // for fabs
-#include <cstdio>                      // for NULL
-#include <cstring>                     // for memcpy
-#include <map>                         // for map, _Rb_tree_iterator
-#include <pthread.h>                   // for pthread_mutex_lock, pthrea...
-#include <string>                      // for string, allocator
-#include <vector>                      // for vector
+#include "common/Common.h"                          // for uint32, uchar8
+#include "common/Point.h"                           // for iPoint2D
+#include "decoders/RawDecoder.h"                    // for RawDecoderThread
+#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/ByteStream.h"                          // for ByteStream
+#include "metadata/ColorFilterArray.h"              // for CFAColor::CFA_GREEN
+#include "tiff/TiffEntry.h"                         // for TiffEntry
+#include "tiff/TiffIFD.h"                           // for TiffIFD, TiffRoo...
+#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
+#include <algorithm>                                // for min, move
+#include <cmath>                                    // for fabs
+#include <cstring>                                  // for memcpy
+#include <map>                                      // for map, _Rb_tree_it...
+#include <memory>                                   // for unique_ptr
+#include <pthread.h>                                // for pthread_mutex_lock
+#include <string>                                   // for string, allocator
+#include <vector>                                   // for vector
 
 using namespace std;
 

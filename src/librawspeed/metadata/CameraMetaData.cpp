@@ -19,13 +19,14 @@
 */
 
 #include "metadata/CameraMetaData.h"
-#include "common/Common.h"                    // for uint32, TrimSpaces
+#include "common/Common.h"                    // for uint32, trimSpaces
 #include "metadata/Camera.h"                  // for Camera
 #include "metadata/CameraMetadataException.h" // for ThrowCME
-#include <map>                                // for map, _Rb_tree_iterator
+#include <algorithm>                          // for find_if
+#include <map>                                // for _Rb_tree_iterator, map
 #include <pugixml.hpp>                        // for xml_document, xml_pars...
-#include <string>                             // for string, allocator, bas...
-#include <utility>                            // for move, pair
+#include <string>                             // for string, operator==
+#include <utility>                            // for pair
 #include <vector>                             // for vector
 
 using namespace std;

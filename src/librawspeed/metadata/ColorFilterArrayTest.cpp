@@ -21,10 +21,10 @@
 
 #include "common/Common.h"             // for uint32
 #include "common/Point.h"              // for iPoint2D
-#include "metadata/ColorFilterArray.h" // for ColorFilterArray, (anonymous)
+#include "metadata/ColorFilterArray.h" // for ColorFilterArray, CFAColor
 #include <gtest/gtest.h>               // for AssertionResult, IsNullLitera...
-#include <memory>                      // for unique_ptr
-#include <string>                      // for string
+#include <iosfwd>                      // for ostream
+#include <string>                      // for string, operator<<
 
 using namespace std;
 using namespace RawSpeed;

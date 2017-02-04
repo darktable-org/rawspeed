@@ -22,21 +22,22 @@
 
 #include "decoders/CrwDecoder.h"
 #include "common/Common.h"                // for ushort16, uint32, uchar8
-#include "common/Memory.h"                // for alignedMallocArray, alignedFree
+#include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/ByteStream.h"                // for ByteStream
-#include "metadata/ColorFilterArray.h"    // for ::CFA_BLUE, ::CFA_GREEN
-#include "tiff/CiffEntry.h"               // for CiffEntry, ::CIFF_SHORT
+#include "metadata/ColorFilterArray.h"    // for CFAColor::CFA_GREEN, CFACo...
+#include "tiff/CiffEntry.h"               // for CiffEntry, CiffDataType::C...
 #include "tiff/CiffIFD.h"                 // for CiffIFD
-#include "tiff/CiffTag.h"                 // for ::CIFF_MAKEMODEL, ::CIFF_S...
+#include "tiff/CiffTag.h"                 // for CiffTag, CiffTag::CIFF_MAK...
+#include <algorithm>                      // for min
 #include <cmath>                          // for copysignf, expf, logf
-#include <cstdio>                         // for NULL, fprintf, stderr
-#include <cstdlib>                        // for NULL, abs
+#include <cstdio>                         // for fprintf, stderr
+#include <cstdlib>                        // for abs
 #include <cstring>                        // for memset
 #include <exception>                      // for exception
 #include <map>                            // for map, _Rb_tree_iterator
-#include <sstream>                        // for stringstream
+#include <sstream>                        // for basic_istream::operator>>
 #include <string>                         // for string
 #include <utility>                        // for pair
 #include <vector>                         // for vector

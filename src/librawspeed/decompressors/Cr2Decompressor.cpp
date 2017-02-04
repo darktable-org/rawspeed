@@ -20,8 +20,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
 #include "decompressors/Cr2Decompressor.h"
-#include "io/BitPumpJPEG.h"
-#include "io/ByteStream.h"
+#include "common/Common.h"                // for unroll_loop, uint32, ushort16
+#include "common/Point.h"                 // for iPoint2D
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/BitPumpJPEG.h"               // for BitStream<>::getBufferPosi...
+#include "io/ByteStream.h"                // for ByteStream
+#include <algorithm>                      // for min, copy_n, move
 
 using namespace std;
 

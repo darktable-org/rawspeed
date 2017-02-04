@@ -25,19 +25,14 @@
 #include "common/RawImage.h"  // for RawImage
 #include "common/Threading.h" // for pthread_t
 #include "io/FileMap.h"       // for FileMap
-#include <cstddef>            // for NULL
 #include <map>                // for map
 #include <string>             // for string
 
 namespace RawSpeed {
 
-class ByteStream;
-
 class CameraMetaData;
 
 class TiffIFD;
-
-class iPoint2D;
 
 class RawDecoder;
 

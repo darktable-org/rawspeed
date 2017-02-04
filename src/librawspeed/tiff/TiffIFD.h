@@ -29,6 +29,7 @@
 #include "tiff/TiffTag.h"                // for TiffTag
 #include <map>                           // for map, _Rb_tree_const_iterator
 #include <memory>                        // for unique_ptr
+#include <string>                        // for string
 #include <vector>                        // for vector
 
 namespace RawSpeed {

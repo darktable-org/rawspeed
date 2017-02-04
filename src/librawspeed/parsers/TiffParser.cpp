@@ -21,7 +21,7 @@
 */
 
 #include "parsers/TiffParser.h"
-#include "common/Common.h"               // for TrimSpaces, make_unique
+#include "common/Common.h"               // for make_unique, trimSpaces
 #include "decoders/ArwDecoder.h"         // for ArwDecoder
 #include "decoders/Cr2Decoder.h"         // for Cr2Decoder
 #include "decoders/DcrDecoder.h"         // for DcrDecoder
@@ -42,7 +42,8 @@
 #include "io/FileMap.h"                  // for FileMap
 #include "parsers/TiffParserException.h" // for TiffParserException
 #include "tiff/TiffEntry.h"              // for TiffEntry
-#include "tiff/TiffTag.h"                // for ::MAKE, ::MODEL, ::DNGVERSION
+#include "tiff/TiffTag.h"                // for TiffTag::DNGVERSION, TiffTa...
+#include <algorithm>                     // for move
 #include <cstdint>                       // for UINT32_MAX
 #include <memory>                        // for unique_ptr
 #include <stdexcept>                     // for runtime_error

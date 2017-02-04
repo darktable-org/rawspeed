@@ -19,14 +19,15 @@
 */
 
 #include "metadata/ColorFilterArray.h"
-#include "common/Common.h"                // for uint32, writeLog, DEBUG_PR...
+#include "common/Common.h"                // for writeLog, uint32, DEBUG_PR...
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
+#include <algorithm>                      // for fill
 #include <cstdarg>                        // for va_arg, va_end, va_list
-#include <cstdio>                         // for NULL
-#include <cstring>                        // for memcpy, memset
+#include <cstdlib>                        // for size_t, abs
 #include <map>                            // for map
-#include <string>                         // for string
+#include <stdexcept>                      // for out_of_range
+#include <string>                         // for string, allocator
 
 using namespace std;
 

@@ -20,10 +20,16 @@
 
 #pragma once
 
-#include "decoders/RawDecoder.h"
-#include <queue>
+#include "common/Common.h"    // for uint32
+#include "common/RawImage.h"  // for RawImage
+#include "common/Threading.h" // for pthread_t
+#include "io/FileMap.h"       // for FileMap
+#include <queue>              // for queue
+#include <vector>             // for vector
 
 namespace RawSpeed {
+
+class DngDecoderSlices;
 
 class DngSliceElement
 {
@@ -41,7 +47,6 @@ public:
   const uint32 height;
   bool mUseBigtable;
 };
-class DngDecoderSlices;
 
 class DngDecoderThread
 {

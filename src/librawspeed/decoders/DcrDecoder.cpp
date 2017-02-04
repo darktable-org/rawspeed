@@ -20,16 +20,15 @@
 */
 
 #include "decoders/DcrDecoder.h"
-#include "common/Common.h"                // for uint32, ushort16, uchar8
+#include "common/Common.h"                // for uint32, uchar8, ushort16
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/IOException.h"               // for IOException
-#include "tiff/TiffEntry.h"               // for TiffEntry, ::TIFF_SHORT
-#include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD
-#include "tiff/TiffTag.h"                 // for ::MODEL, ::MAKE, ::CFAPATTERN
-#include <cstdio>                         // for NULL
-#include <string>                         // for string
+#include "tiff/TiffEntry.h"               // for TiffEntry, TiffDataType::T...
+#include "tiff/TiffIFD.h"                 // for TiffRootIFD, TiffIFD
+#include "tiff/TiffTag.h"                 // for TiffTag, TiffTag::CFAPATTERN
+#include <memory>                         // for unique_ptr
 #include <vector>                         // for vector
 
 using namespace std;

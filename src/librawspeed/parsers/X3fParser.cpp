@@ -24,9 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include "decoders/X3fDecoder.h"          // for X3fDecoder
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/IOException.h"               // for IOException
-#include <cstdio>                         // for NULL
 #include <cstring>                        // for memset
-#include <map>                            // for allocator, map, map<>::map...
+#include <map>                            // for map, map<>::mapped_type
 #include <string>                         // for string, basic_string, oper...
 #include <vector>                         // for vector
 

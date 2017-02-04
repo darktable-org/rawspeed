@@ -20,19 +20,19 @@
 */
 
 #include "decoders/SrwDecoder.h"
-#include "common/Common.h"                // for ushort16, uint32, int32
+#include "common/Common.h"                // for uint32, ushort16, int32
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
 #include "io/ByteStream.h"                // for ByteStream
 #include "metadata/CameraMetaData.h"      // for CameraMetaData
 #include "tiff/TiffEntry.h"               // for TiffEntry
-#include "tiff/TiffIFD.h"                 // for TiffIFD
-#include "tiff/TiffTag.h"                 // for ::STRIPOFFSETS, ::MODEL
+#include "tiff/TiffIFD.h"                 // for TiffRootIFD, TiffIFD, TiffID
+#include "tiff/TiffTag.h"                 // for TiffTag::STRIPOFFSETS, Tif...
 #include <algorithm>                      // for max
-#include <cstdio>                         // for NULL
-#include <map>                            // for map, _Rb_tree_iterator
-#include <sstream>                        // for stringstream
+#include <map>                            // for _Rb_tree_iterator, map
+#include <memory>                         // for unique_ptr
+#include <sstream>                        // for ostringstream, operator<<
 #include <string>                         // for string, operator==, basic_...
 #include <utility>                        // for pair
 #include <vector>                         // for vector
