@@ -65,7 +65,8 @@ CameraMetaData::~CameraMetaData() {
   }
 }
 
-static inline CameraId getId(string make, string model, string mode) {
+static inline CameraId getId(const string& make, const string& model,
+                             const string& mode) {
   CameraId id;
   id.make = trimSpaces(make);
   id.model = trimSpaces(model);
@@ -74,14 +75,14 @@ static inline CameraId getId(string make, string model, string mode) {
   return id;
 }
 
-Camera* CameraMetaData::getCamera(string make, string model, string mode) {
-  auto camera =
-      cameras.find(getId(std::move(make), std::move(model), std::move(mode)));
+Camera* CameraMetaData::getCamera(const string& make, const string& model,
+                                  const string& mode) {
+  auto camera = cameras.find(getId(make, model, mode));
   return camera == cameras.end() ? nullptr : camera->second;
 }
 
-Camera* CameraMetaData::getCamera(string make, string model) {
-  auto id = getId(std::move(make), std::move(model), "");
+Camera* CameraMetaData::getCamera(const string& make, const string& model) {
+  auto id = getId(make, model, "");
 
   auto iter = find_if(cameras.begin(), cameras.end(),
                       [id](decltype(*cameras.begin())& i) -> bool {
@@ -96,8 +97,9 @@ Camera* CameraMetaData::getCamera(string make, string model) {
   return iter->second;
 }
 
-bool CameraMetaData::hasCamera(string make, string model, string mode) {
-  return getCamera(std::move(make), std::move(model), std::move(mode));
+bool CameraMetaData::hasCamera(const string& make, const string& model,
+                               const string& mode) {
+  return getCamera(make, model, mode);
 }
 
 Camera* CameraMetaData::getChdkCamera(uint32 filesize) {

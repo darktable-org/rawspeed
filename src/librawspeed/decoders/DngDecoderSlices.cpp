@@ -23,8 +23,8 @@
 #include "common/Memory.h" // for alignedMallocArray, alignedFree
 #include "common/Point.h"
 #include "decompressors/DeflateDecompressor.h"
-#include "decompressors/LJpegDecompressor.h"
 #include "decompressors/JpegDecompressor.h"
+#include "decompressors/LJpegDecompressor.h"
 #include "decompressors/UncompressedDecompressor.h"
 #include "io/IOException.h"
 #include "tiff/TiffEntry.h"

@@ -21,9 +21,9 @@
 */
 
 #include "decoders/Cr2Decoder.h"
-#include "decompressors/Cr2Decompressor.h"
 #include "common/Common.h"
 #include "common/Point.h"
+#include "decompressors/Cr2Decompressor.h"
 #include "tiff/TiffEntry.h"
 #include "tiff/TiffTag.h"
 #include <algorithm>

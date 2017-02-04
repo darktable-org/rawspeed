@@ -155,13 +155,14 @@ protected:
   /* Check the camera and mode against the camera database. */
   /* A RawDecoderException will be thrown if the camera isn't supported */
   /* Unknown cameras does NOT generate any errors, but returns false */
-  bool checkCameraSupported(CameraMetaData *meta, std::string make, std::string model,
-                            const std::string &mode);
+  bool checkCameraSupported(CameraMetaData* meta, const std::string& make,
+                            const std::string& model, const std::string& mode);
 
   /* Helper function for decodeMetaData(), that find the camera in the CameraMetaData DB */
   /* and sets common settings such as crop, black- white level, and sets CFA information */
-  virtual void setMetaData(CameraMetaData *meta, std::string make, std::string model,
-                           const std::string &mode, int iso_speed = 0);
+  virtual void setMetaData(CameraMetaData* meta, const std::string& make,
+                           const std::string& model, const std::string& mode,
+                           int iso_speed = 0);
 
   /* Generic decompressor for uncompressed images */
   /* order: Order of the bits - see Common.h for possibilities. */

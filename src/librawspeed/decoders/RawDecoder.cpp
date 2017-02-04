@@ -122,8 +122,8 @@ void RawDecoder::decodeUncompressed(TiffIFD *rawIFD, BitOrder order) {
   }
 }
 
-bool RawDecoder::checkCameraSupported(CameraMetaData *meta, string make,
-                                      string model, const string &mode) {
+bool RawDecoder::checkCameraSupported(CameraMetaData* meta, const string& make,
+                                      const string& model, const string& mode) {
   mRaw->metadata.make = make;
   mRaw->metadata.model = model;
   Camera* cam = meta->getCamera(make, model, mode);
@@ -150,8 +150,9 @@ bool RawDecoder::checkCameraSupported(CameraMetaData *meta, string make,
   return true;
 }
 
-void RawDecoder::setMetaData(CameraMetaData *meta, string make, string model,
-                             const string &mode, int iso_speed) {
+void RawDecoder::setMetaData(CameraMetaData* meta, const string& make,
+                             const string& model, const string& mode,
+                             int iso_speed) {
   mRaw->metadata.isoSpeed = iso_speed;
   Camera *cam = meta->getCamera(make, model, mode);
   if (!cam) {

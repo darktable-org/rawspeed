@@ -58,7 +58,7 @@ struct PanaBitpump
   {
     // get one more byte, so the return statement of getBits does not have
     // to special case for accessing the last byte
-    buf.resize(BufSize + 1);
+    buf.resize(BufSize + 1UL);
   }
 
   void skipBytes(int bytes)
@@ -85,7 +85,7 @@ struct PanaBitpump
     }
     vbits = (vbits - nbits) & 0x1ffff;
     int byte = vbits >> 3 ^ 0x3ff0;
-    return (buf[byte] | buf[byte + 1] << 8) >> (vbits & 7) & ~(-(1 << nbits));
+    return (buf[byte] | buf[byte + 1UL] << 8) >> (vbits & 7) & ~(-(1 << nbits));
   }
 };
 
