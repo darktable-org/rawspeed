@@ -23,10 +23,22 @@
 #include "common/Common.h" // for uint32
 #include <map>             // for map
 #include <string>          // for string
+#include <tuple>           // for tuple
 
 namespace RawSpeed {
 
 class Camera;
+
+struct CameraId {
+  std::string make;
+  std::string model;
+  std::string mode;
+
+  bool operator<(const CameraId& rhs) const {
+    return std::tie(make, model, mode) <
+           std::tie(rhs.make, rhs.model, rhs.mode);
+  }
+};
 
 class CameraMetaData
 {
@@ -34,7 +46,7 @@ public:
   CameraMetaData();
   CameraMetaData(const char *docname);
   virtual ~CameraMetaData();
-  std::map<std::string,Camera*> cameras;
+  std::map<CameraId, Camera*> cameras;
   std::map<uint32,Camera*> chdkCameras;
 
   // searches for camera with given make + model + mode

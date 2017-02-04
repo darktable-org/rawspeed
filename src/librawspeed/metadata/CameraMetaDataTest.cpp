@@ -21,10 +21,11 @@
 
 #include "config.h" // for CMAKE_SOURCE_DIR
 
+#include "metadata/Camera.h"         // for Camera
 #include "metadata/CameraMetaData.h" // for CameraMetaData
-#include <gtest/gtest.h>    // for Test, ASSERT_NO_THROW, GetTestTypeId
-#include <memory>           // for unique_ptr
-#include <string>           // for string
+#include <gtest/gtest.h>             // for Test, ASSERT_NO_THROW, GetTestTypeId
+#include <memory>                    // for unique_ptr
+#include <string>                    // for string
 
 using namespace std;
 using namespace RawSpeed;
@@ -36,5 +37,43 @@ TEST(CameraMetaDataTest, CamerasXml) {
 
   ASSERT_NO_THROW({
     unique_ptr<CameraMetaData> Data(new CameraMetaData(camfile.c_str()));
+  });
+}
+
+TEST(CameraMetaDataTest, PrefixSearch) {
+  ASSERT_NO_THROW({
+    CameraMetaData Data(camfile.c_str());
+
+    ASSERT_NE(
+        nullptr,
+        Data.getCamera("NIKON CORPORATION", "NIKON D3", "14bit-compressed"));
+    ASSERT_EQ(
+        "D3",
+        Data.getCamera("NIKON CORPORATION", "NIKON D3", "14bit-compressed")
+            ->canonical_model);
+
+    ASSERT_EQ(nullptr,
+              Data.getCamera("NIKON CORPORATION", "NIKON D3",
+                             "14bit-compressed-with-some-bogus-prefix"));
+    ASSERT_EQ(nullptr,
+              Data.getCamera("NIKON CORPORATION",
+                             "NIKON D3-with-some-bogus-prefix",
+                             "14bit-compressed"));
+    ASSERT_EQ(nullptr,
+              Data.getCamera("NIKON CORPORATION-with-some-bogus-prefix",
+                             "NIKON D3", "14bit-compressed"));
+
+    ASSERT_NE(nullptr, Data.getCamera("NIKON CORPORATION", "NIKON D3"));
+    ASSERT_EQ("D3",
+              Data.getCamera("NIKON CORPORATION", "NIKON D3")->canonical_model);
+    ASSERT_EQ(
+        nullptr,
+        Data.getCamera("NIKON CORPORATION", "NIKON D3-with-some-bogus-prefix"));
+    ASSERT_EQ(
+        nullptr,
+        Data.getCamera("NIKON CORPORATION-with-some-bogus-prefix", "NIKON D3"));
+    ASSERT_EQ(nullptr,
+              Data.getCamera("NIKON CORPORATION-with-some-bogus-prefix",
+                             "NIKON D3-with-some-bogus-prefix"));
   });
 }

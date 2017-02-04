@@ -62,11 +62,74 @@ TEST(ColorFilterArrayTestBasic, SetSize) {
   });
 }
 
+// FIXME: breaks, but only in msys2, with clang compiler
+TEST(ColorFilterArrayTestBasic, DISABLED_SetTooBigSize) {
+  ASSERT_ANY_THROW({
+    ColorFilterArray cfa(iPoint2D(1, 1));
+    cfa.setSize({6, 8});
+  });
+};
+
 TEST(ColorFilterArrayTestBasic, ToDcraw) {
+  ASSERT_NO_THROW({
+    ColorFilterArray cfa;
+    ASSERT_EQ(cfa.getDcrawFilter(), 1);
+  });
+
+  ASSERT_NO_THROW({
+    ColorFilterArray cfa(iPoint2D(4, 8));
+    ASSERT_EQ(cfa.getDcrawFilter(), 1);
+  });
+
+  ASSERT_NO_THROW({
+    ColorFilterArray cfa(iPoint2D(2, 10));
+    ASSERT_EQ(cfa.getDcrawFilter(), 1);
+  });
+
+  ASSERT_NO_THROW({
+    ColorFilterArray cfa(iPoint2D(2, 10));
+    ASSERT_EQ(cfa.getDcrawFilter(), 1);
+  });
+
+  ASSERT_NO_THROW({
+    ColorFilterArray cfa(iPoint2D(2, 7));
+    ASSERT_EQ(cfa.getDcrawFilter(), 1);
+  });
+
   ASSERT_NO_THROW({
     ColorFilterArray cfa(iPoint2D(6, 6));
     ASSERT_EQ(cfa.getDcrawFilter(), 9); // xtrans magic
   });
+}
+
+TEST(ColorFilterArrayTestBasic, HandlesEmptyCFA) {
+  ColorFilterArray cfa;
+
+  ASSERT_ANY_THROW({ cfa.getColorAt(0, 0); });
+
+  ASSERT_ANY_THROW({ cfa.shiftLeft(0); });
+
+  ASSERT_ANY_THROW({ cfa.shiftDown(0); });
+}
+
+TEST(ColorFilterArrayTestBasic, HandlesOutOfBounds) {
+  ColorFilterArray cfa(square);
+
+  ASSERT_ANY_THROW({ cfa.setColorAt({0, -1}, CFA_RED); });
+
+  ASSERT_ANY_THROW({ cfa.setColorAt({-1, 0}, CFA_RED); });
+
+  ASSERT_ANY_THROW({ cfa.setColorAt({-1, -1}, CFA_RED); });
+
+  ASSERT_ANY_THROW({ cfa.setColorAt({0, 2}, CFA_RED); });
+
+  ASSERT_ANY_THROW({ cfa.setColorAt({2, 0}, CFA_RED); });
+
+  ASSERT_ANY_THROW({ cfa.setColorAt({2, 2}, CFA_RED); });
+
+  ASSERT_ANY_THROW({ ColorFilterArray::colorToString((CFAColor)-1); });
+
+  ASSERT_ANY_THROW({ cfa.getDcrawFilter(); });
 }
 
 class ColorFilterArrayTest : public ::testing::TestWithParam<Bayer2x2> {

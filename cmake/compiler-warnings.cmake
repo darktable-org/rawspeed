@@ -28,6 +28,11 @@ CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-unused-parameter)
 
 # should be < 64Kb
 math(EXPR MAX_MEANINGFUL_SIZE 4*1024)
+if(APPLE)
+  # Apple XCode seems to generate HUGE stack/frames, much bigger than anything else.
+  math(EXPR MAX_MEANINGFUL_SIZE 5*1024)
+endif()
+
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wframe-larger-than=${MAX_MEANINGFUL_SIZE})
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wstack-usage=${MAX_MEANINGFUL_SIZE})
 

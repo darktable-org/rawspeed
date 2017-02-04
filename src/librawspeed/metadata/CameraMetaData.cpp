@@ -65,13 +65,17 @@ CameraMetaData::~CameraMetaData() {
   }
 }
 
-static inline string getId(string make, string model, string mode)
-{
+static inline CameraId getId(string make, string model, string mode) {
   TrimSpaces(make);
   TrimSpaces(model);
   TrimSpaces(mode);
 
-  return make + model + mode;
+  CameraId id;
+  id.make = make;
+  id.model = model;
+  id.mode = mode;
+
+  return id;
 }
 
 Camera* CameraMetaData::getCamera(string make, string model, string mode) {
@@ -81,12 +85,16 @@ Camera* CameraMetaData::getCamera(string make, string model, string mode) {
 }
 
 Camera* CameraMetaData::getCamera(string make, string model) {
-  string id = getId(std::move(make), std::move(model), "");
+  auto id = getId(std::move(make), std::move(model), "");
 
-  // do a prefix match, i.e. the make and model match, but not mode.
-  auto iter = cameras.lower_bound(id);
+  auto iter = find_if(cameras.begin(), cameras.end(),
+                      [id](decltype(*cameras.begin())& i) -> bool {
+                        const auto cid = i.first;
+                        return tie(id.make, id.model) ==
+                               tie(cid.make, cid.model);
+                      });
 
-  if (iter == cameras.find(id))
+  if (iter == cameras.end())
     return nullptr;
 
   return iter->second;
@@ -107,7 +115,7 @@ bool CameraMetaData::hasChdkCamera(uint32 filesize) {
 
 bool CameraMetaData::addCamera( Camera* cam )
 {
-  string id = getId(cam->make, cam->model, cam->mode);
+  auto id = getId(cam->make, cam->model, cam->mode);
   if (cameras.end() != cameras.find(id)) {
     writeLog(DEBUG_PRIO_WARNING, "CameraMetaData: Duplicate entry found for camera: %s %s, Skipping!\n", cam->make.c_str(), cam->model.c_str());
     delete cam;
