@@ -229,7 +229,8 @@ protected:
    RawImage(RawImageData* p);  // p must not be NULL
   ~RawImage();
    RawImage(const RawImage& p);
-   RawImage& operator= (const RawImage& p);
+   RawImage& operator=(const RawImage& p) noexcept;
+   RawImage& operator=(RawImage&& p) noexcept;
 
    RawImageData* get() { return p_; }
  private:

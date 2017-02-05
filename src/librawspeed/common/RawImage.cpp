@@ -424,8 +424,7 @@ void RawImageData::clearArea( iRectangle2D area, uchar8 val /*= 0*/ )
     memset(getData(area.getLeft(), y), val, (size_t)area.getWidth() * bpp);
 }
 
-
-RawImage& RawImage::operator=(const RawImage & p) {
+RawImage& RawImage::operator=(const RawImage& p) noexcept {
   if (this == &p)      // Same object?
     return *this;      // Yes, so skip assignment, and just return *this.
   pthread_mutex_lock(&p_->mymutex);
@@ -441,6 +440,11 @@ RawImage& RawImage::operator=(const RawImage & p) {
   } else {
   	pthread_mutex_unlock(&(old->mymutex));
   }
+  return *this;
+}
+
+RawImage& RawImage::operator=(RawImage&& p) noexcept {
+  operator=(p);
   return *this;
 }
 
