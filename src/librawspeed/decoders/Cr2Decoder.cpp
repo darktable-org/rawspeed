@@ -80,19 +80,17 @@ RawImage Cr2Decoder::decodeOldFormat() {
   // deal with D2000 GrayResponseCurve
   TiffEntry* curve = mRootIFD->getEntryRecursive((TiffTag)0x123);
   if (curve && curve->type == TIFF_SHORT && curve->count == 4096) {
-    auto* table = new ushort16[curve->count];
-    curve->getShortArray(table, curve->count);
+    auto table = curve->getU16Array(curve->count);
     if (!uncorrectedRawValues) {
-      mRaw->setTable(table, curve->count, true);
+      mRaw->setTable(table.data(), table.size(), true);
       // Apply table
       mRaw->sixteenBitLookup();
       // Delete table
       mRaw->setTable(nullptr);
     } else {
       // We want uncorrected, but we store the table.
-      mRaw->setTable(table, curve->count, false);
+      mRaw->setTable(table.data(), table.size(), false);
     }
-    delete [] table;
   }
 
   return mRaw;

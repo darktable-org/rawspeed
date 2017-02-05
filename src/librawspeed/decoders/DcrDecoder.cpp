@@ -71,11 +71,10 @@ RawImage DcrDecoder::decodeRawInternal() {
       ThrowRDE("DCR Decoder: Couldn't find the linearization table");
     }
 
-    auto *linearization_table = new ushort16[1024];
-    linearization->getShortArray(linearization_table, 1024);
+    auto linTable = linearization->getU16Array(1024);
 
     if (!uncorrectedRawValues)
-      mRaw->setTable(linearization_table, 1024, true);
+      mRaw->setTable(linTable.data(), linTable.size(), true);
 
     // FIXME: dcraw does all sorts of crazy things besides this to fetch
     //        WB from what appear to be presets and calculate it in weird ways
@@ -96,11 +95,10 @@ RawImage DcrDecoder::decodeRawInternal() {
 
     // Set the table, if it should be needed later.
     if (uncorrectedRawValues) {
-      mRaw->setTable(linearization_table, 1024, false);
+      mRaw->setTable(linTable.data(), linTable.size(), false);
     } else {
       mRaw->setTable(nullptr);
     }
-    delete [] linearization_table;
   } else
     ThrowRDE("DCR Decoder: Unsupported compression %d", compression);
 

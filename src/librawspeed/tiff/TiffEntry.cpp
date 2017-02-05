@@ -147,21 +147,6 @@ int32 TiffEntry::getI32(uint32 index) const {
   return data.peek<int32>(index);
 }
 
-void TiffEntry::getShortArray(ushort16 *array, uint32 num) const {
-  for (uint32 i = 0; i < num; i++)
-    array[i] = getU16(i);
-}
-
-void TiffEntry::getIntArray(uint32 *array, uint32 num) const {
-  for (uint32 i = 0; i < num; i++)
-    array[i] = getU32(i);
-}
-
-void TiffEntry::getFloatArray(float *array, uint32 num) const {
-  for (uint32 i = 0; i < num; i++)
-    array[i] = getFloat(i);
-}
-
 float TiffEntry::getFloat(uint32 index) const {
   if (!isFloat())
     ThrowTPE("TIFF, getFloat: Wrong type 0x%x encountered. Expected Float or something convertible on 0x%x", type, tag);

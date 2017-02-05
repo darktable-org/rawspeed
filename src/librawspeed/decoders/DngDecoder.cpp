@@ -338,8 +338,7 @@ RawImage DngDecoder::decodeRawInternal() {
     if (active_area->count != 4)
       ThrowRDE("DNG: active area has %d values instead of 4", active_area->count);
 
-    uint32 corners[4] = {0};
-    active_area->getIntArray(corners, 4);
+    auto corners = active_area->getU32Array(4);
     if (iPoint2D(corners[1], corners[0]).isThisInside(mRaw->dim)) {
       if (iPoint2D(corners[3], corners[2]).isThisInside(mRaw->dim)) {
         iRectangle2D crop(corners[1], corners[0], corners[3] - corners[1], corners[2] - corners[0]);
@@ -354,15 +353,13 @@ RawImage DngDecoder::decodeRawInternal() {
     TiffEntry *size_entry = raw->getEntry(DEFAULTCROPSIZE);
 
     /* Read crop position (sometimes is rational so use float) */
-    float tl[2] = {0.0f};
-    origin_entry->getFloatArray(tl, 2);
+    auto tl = origin_entry->getFloatArray(2);
     if (iPoint2D(tl[0], tl[1]).isThisInside(mRaw->dim))
       cropped = iRectangle2D(tl[0], tl[1], 0, 0);
 
     cropped.dim = mRaw->dim - cropped.pos;
     /* Read size (sometimes is rational so use float) */
-    float sz[2] = {0.0f};
-    size_entry->getFloatArray(sz,2);
+    auto sz = size_entry->getFloatArray(2);
     iPoint2D size(sz[0], sz[1]);
     if ((size + cropped.pos).isThisInside(mRaw->dim))
       cropped.dim = size;
@@ -397,15 +394,12 @@ RawImage DngDecoder::decodeRawInternal() {
   // Linearization
   if (raw->hasEntry(LINEARIZATIONTABLE)) {
     TiffEntry *lintable = raw->getEntry(LINEARIZATIONTABLE);
-    uint32 len = lintable->count;
-    auto *table = new ushort16[len];
-    lintable->getShortArray(table, len);
-    mRaw->setTable(table, len, !uncorrectedRawValues);
+    auto table = lintable->getU16Array(lintable->count);
+    mRaw->setTable(table.data(), table.size(), !uncorrectedRawValues);
     if (!uncorrectedRawValues) {
       mRaw->sixteenBitLookup();
       mRaw->setTable(nullptr);
     }
-    delete [] table;
 
     if (false) { // NOLINT else would need preprocessor
       // Test average for bias
@@ -523,8 +517,7 @@ bool DngDecoder::decodeMaskedAreas(TiffIFD* raw) {
     return false;
 
   /* Since we may both have short or int, copy it to int array. */
-  auto *rects = new uint32[nrects * 4];
-  masked->getIntArray(rects, nrects*4);
+  auto rects = masked->getU32Array(nrects*4);
 
   iPoint2D top = mRaw->getCropOffset();
 
@@ -542,7 +535,6 @@ bool DngDecoder::decodeMaskedAreas(TiffIFD* raw) {
       mRaw->blackAreas.emplace_back(topleft.x, bottomright.x - topleft.x, true);
     }
   }
-  delete[] rects;
   return !mRaw->blackAreas.empty();
 }
 

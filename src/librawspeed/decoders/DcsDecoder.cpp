@@ -68,11 +68,10 @@ RawImage DcsDecoder::decodeRawInternal() {
   if (!linearization || linearization->count != 256 || linearization->type != TIFF_SHORT)
     ThrowRDE("DCS Decoder: Couldn't find the linearization table");
 
-  ushort16 table[256];
-  linearization->getShortArray(table, 256);
+  auto table = linearization->getU16Array(256);
 
   if (!uncorrectedRawValues)
-    mRaw->setTable(table, 256, true);
+    mRaw->setTable(table.data(), table.size(), true);
 
   UncompressedDecompressor u(*mFile, off, c2, mRaw, uncorrectedRawValues);
 
@@ -80,7 +79,7 @@ RawImage DcsDecoder::decodeRawInternal() {
 
   // Set the table, if it should be needed later.
   if (uncorrectedRawValues) {
-    mRaw->setTable(table, 256, false);
+    mRaw->setTable(table.data(), table.size(), false);
   } else {
     mRaw->setTable(nullptr);
   }
