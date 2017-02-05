@@ -46,7 +46,7 @@ namespace RawSpeed {
 
 RawImage ArwDecoder::decodeRawInternal() {
   const TiffIFD* raw = nullptr;
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
+  vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 
   if (data.empty()) {
     TiffEntry *model = mRootIFD->getEntryRecursive(MODEL);

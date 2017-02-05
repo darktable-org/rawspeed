@@ -425,7 +425,7 @@ void SrwDecoder::decodeCompressed3(const TiffIFD* raw, int bits)
 }
 
 string SrwDecoder::getMode() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
+  vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
   ostringstream mode;
   if (!data.empty() && data[0]->hasEntryRecursive(BITSPERSAMPLE)) {
     mode << data[0]->getEntryRecursive(BITSPERSAMPLE)->getU32() << "bit";

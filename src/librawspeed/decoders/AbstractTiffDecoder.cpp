@@ -27,7 +27,7 @@ namespace RawSpeed {
 
 const TiffIFD* AbstractTiffDecoder::getIFDWithLargestImage(TiffTag filter) const
 {
-  std::vector<TiffIFD*> ifds = mRootIFD->getIFDsWithTag(filter);
+  std::vector<const TiffIFD*> ifds = mRootIFD->getIFDsWithTag(filter);
 
   if (ifds.empty())
     ThrowRDE("AbstractTiffDecoder: No suitable IFD with tag 0x%04x found.",

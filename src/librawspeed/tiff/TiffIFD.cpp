@@ -204,13 +204,13 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(TiffEntry* t)
   return make_unique<TiffRootIFD>(bs, bs.getPosition());
 }
 
-vector<TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) {
-  vector<TiffIFD*> matchingIFDs;
+std::vector<const TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) const {
+  vector<const TiffIFD*> matchingIFDs;
   if (entries.find(tag) != entries.end()) {
     matchingIFDs.push_back(this);
   }
   for (auto& i : subIFDs) {
-    vector<TiffIFD*> t = i->getIFDsWithTag(tag);
+    vector<const TiffIFD*> t = i->getIFDsWithTag(tag);
     matchingIFDs.insert(matchingIFDs.end(), t.begin(), t.end());
   }
   return matchingIFDs;
@@ -218,7 +218,7 @@ vector<TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) {
 
 const TiffIFD* TiffIFD::getIFDWithTag(TiffTag tag, uint32 index) const
 {
-  auto ifds = const_cast<TiffIFD*>(this)->getIFDsWithTag(tag);
+  auto ifds = getIFDsWithTag(tag);
   if (index >= ifds.size())
     ThrowTPE("TiffIFD: failed to find %u ifs with tag 0x%04x", index+1, tag);
   return ifds[index];

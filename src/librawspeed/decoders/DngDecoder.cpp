@@ -61,7 +61,7 @@ DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, FileMap* file)
     mFixLjpeg = false;
 }
 
-void DngDecoder::dropUnsuportedChunks(vector<TiffIFD*>& data) {
+void DngDecoder::dropUnsuportedChunks(vector<const TiffIFD*>& data) {
   // Erase the ones not with JPEG compression
   for (auto i = data.begin(); i != data.end();) {
     int comp = (*i)->getEntry(COMPRESSION)->getU16();
@@ -89,7 +89,7 @@ void DngDecoder::dropUnsuportedChunks(vector<TiffIFD*>& data) {
   }
 }
 
-void DngDecoder::parseCFA(TiffIFD* raw) {
+void DngDecoder::parseCFA(const TiffIFD* raw) {
 
   // Check if layout is OK, if present
   if (raw->hasEntry(CFALAYOUT))
@@ -147,7 +147,7 @@ void DngDecoder::parseCFA(TiffIFD* raw) {
   }
 }
 
-void DngDecoder::decodeData(TiffIFD* raw, int compression) {
+void DngDecoder::decodeData(const TiffIFD* raw, int compression) {
   mRaw->createData();
 
   if (compression == 8 && sample_format != 3) {
@@ -236,7 +236,7 @@ void DngDecoder::decodeData(TiffIFD* raw, int compression) {
 }
 
 RawImage DngDecoder::decodeRawInternal() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(COMPRESSION);
+  vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(COMPRESSION);
 
   if (data.empty())
     ThrowRDE("DNG Decoder: No image data found");
@@ -250,7 +250,7 @@ RawImage DngDecoder::decodeRawInternal() {
     writeLog(DEBUG_PRIO_EXTRA, "Multiple RAW chunks found - using first only!");
   }
 
-  TiffIFD* raw = data[0];
+  const TiffIFD* raw = data[0];
   bps = raw->getEntry(BITSPERSAMPLE)->getU32();
 
   if (raw->hasEntry(SAMPLEFORMAT))
@@ -505,7 +505,7 @@ void DngDecoder::checkSupportInternal(CameraMetaData *meta) {
 }
 
 /* Decodes DNG masked areas into blackareas in the image */
-bool DngDecoder::decodeMaskedAreas(TiffIFD* raw) {
+bool DngDecoder::decodeMaskedAreas(const TiffIFD* raw) {
   TiffEntry *masked = raw->getEntry(MASKEDAREAS);
 
   if (masked->type != TIFF_SHORT && masked->type != TIFF_LONG)
@@ -537,7 +537,7 @@ bool DngDecoder::decodeMaskedAreas(TiffIFD* raw) {
   return !mRaw->blackAreas.empty();
 }
 
-bool DngDecoder::decodeBlackLevels(TiffIFD* raw) {
+bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) {
   iPoint2D blackdim(1,1);
   if (raw->hasEntry(BLACKLEVELREPEATDIM)) {
     TiffEntry *bleveldim = raw->getEntry(BLACKLEVELREPEATDIM);
@@ -600,7 +600,7 @@ bool DngDecoder::decodeBlackLevels(TiffIFD* raw) {
   return true;
 }
 
-void DngDecoder::setBlack(TiffIFD* raw) {
+void DngDecoder::setBlack(const TiffIFD* raw) {
 
   if (raw->hasEntry(MASKEDAREAS))
     if (decodeMaskedAreas(raw))
