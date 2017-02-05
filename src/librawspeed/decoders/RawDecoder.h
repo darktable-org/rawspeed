@@ -40,18 +40,15 @@ class RawDecoder;
 class RawDecoderThread
 {
   public:
-    RawDecoderThread() {
-      error = nullptr;
-      taskNo = -1;
-    }
+    RawDecoderThread(RawDecoder* parent_) : parent(parent_) {}
     uint32 start_y;
     uint32 end_y;
-    const char* error;
+    const char* error = nullptr;
 #ifndef NO_PTHREAD
     pthread_t threadid;
 #endif
     RawDecoder* parent;
-    uint32 taskNo;
+    uint32 taskNo = -1;
 };
 
 class RawDecoder

@@ -245,10 +245,9 @@ void *RawDecoderDecodeThread(void *_this) {
 void RawDecoder::startThreads() {
 #ifdef NO_PTHREAD
   uint32 threads = 1;
-  RawDecoderThread t;
+  RawDecoderThread t(this);
   t.start_y = 0;
   t.end_y = mRaw->dim.y;
-  t.parent = this;
   RawDecoderDecodeThread(&t);
 #else
   uint32 threads;
@@ -256,7 +255,8 @@ void RawDecoder::startThreads() {
   threads = min((unsigned)mRaw->dim.y, getThreadCount());
   int y_offset = 0;
   int y_per_thread = (mRaw->dim.y + threads - 1) / threads;
-  auto *t = new RawDecoderThread[threads];
+
+  vector<RawDecoderThread> t(threads, RawDecoderThread(this));
 
   /* Initialize and set thread detached attribute */
   pthread_attr_t attr;
@@ -266,7 +266,6 @@ void RawDecoder::startThreads() {
   for (uint32 i = 0; i < threads; i++) {
     t[i].start_y = y_offset;
     t[i].end_y = min(y_offset + y_per_thread, mRaw->dim.y);
-    t[i].parent = this;
     if (pthread_create(&t[i].threadid, &attr, RawDecoderDecodeThread, &t[i]) != 0) {
       // If a failure occurs, we need to wait for the already created threads to finish
       threads = i-1;
@@ -279,7 +278,6 @@ void RawDecoder::startThreads() {
     pthread_join(t[i].threadid, nullptr);
   }
   pthread_attr_destroy(&attr);
-  delete[] t;
 
   if (fail) {
     ThrowRDE("RawDecoder::startThreads: Unable to start threads");
@@ -346,11 +344,10 @@ void RawDecoder::startTasks( uint32 tasks )
   uint32 threads;
   threads = min(tasks, getThreadCount());
   int ctask = 0;
-  auto *t = new RawDecoderThread[threads];
+  vector<RawDecoderThread> t(threads, RawDecoderThread(this));
 
   // We don't need a thread
   if (threads == 1) {
-    t[0].parent = this;
     while ((uint32)ctask < tasks) {
       t[0].taskNo = ctask++;
       try {
@@ -361,7 +358,6 @@ void RawDecoder::startTasks( uint32 tasks )
         mRaw->setError(ex.what());
       }
     }
-    delete[] t;
     return;
   }
 
@@ -377,7 +373,6 @@ void RawDecoder::startTasks( uint32 tasks )
   while ((uint32)ctask < tasks) {
     for (uint32 i = 0; i < threads && (uint32)ctask < tasks; i++) {
       t[i].taskNo = ctask++;
-      t[i].parent = this;
       pthread_create(&t[i].threadid, &attr, RawDecoderDecodeThread, &t[i]);
     }
     for (uint32 i = 0; i < threads; i++) {
@@ -388,7 +383,6 @@ void RawDecoder::startTasks( uint32 tasks )
   if (mRaw->errors.size() >= tasks)
     ThrowRDE("RawDecoder::startThreads: All threads reported errors. Cannot load image.");
 
-  delete[] t;
 #else
   ThrowRDE("Unreachable");
 #endif
