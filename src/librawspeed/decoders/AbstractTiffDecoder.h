@@ -40,7 +40,7 @@ public:
   AbstractTiffDecoder(TiffRootIFDOwner&& root, FileMap* file)
     : RawDecoder(file), mRootIFD(std::move(root)) {}
 
-  TiffIFD *getRootIFD() final { return mRootIFD.get(); }
+  TiffIFD* getRootIFD() override final { return mRootIFD.get(); }
 
   inline bool checkCameraSupported(CameraMetaData* meta, const TiffID& id,
                                    const std::string& mode)
