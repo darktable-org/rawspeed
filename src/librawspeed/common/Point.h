@@ -2,6 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -22,35 +23,73 @@
 
 #include "common/Common.h"  // for uint32
 #include <algorithm>        // for max, min
-#include <cstdlib>          // for abs
 
 namespace RawSpeed {
 
 class iPoint2D {
 public:
-	iPoint2D() {x = y = 0;  }
-	iPoint2D( int a, int b) {x=a; y=b;}
-  iPoint2D( const iPoint2D& pt) {x=pt.x; y=pt.y;}
-  iPoint2D operator += (const iPoint2D& other) { x += other.x; y += other.y; return *this;}
-  iPoint2D operator -= (const iPoint2D& other) { x -= other.x; y -= other.y; return *this;}
-  iPoint2D operator - (const iPoint2D& b) const { return iPoint2D(x-b.x,y-b.y); }
-  iPoint2D operator + (const iPoint2D& b) const { return iPoint2D(x+b.x,y+b.y); }
-  iPoint2D &operator=(const iPoint2D &b) = default;
-  bool operator==(const iPoint2D& rhs) const {
-    return this->x == rhs.x && this->y == rhs.y;
-  }
-  bool operator!=(const iPoint2D& rhs) const {
-    return this->x != rhs.x || this->y != rhs.y;
-  }
+  constexpr iPoint2D() = default;
   ~iPoint2D() = default;
-  uint32 area() const { return std::abs(x * y); }
-  bool isThisInside(const iPoint2D &otherPoint) const {
-    return (x <= otherPoint.x && y <= otherPoint.y);
+
+  constexpr iPoint2D(const iPoint2D& pt) = default;
+  constexpr iPoint2D(iPoint2D&& pt) = default;
+
+  constexpr iPoint2D(int a, int b) : x(a), y(b) {}
+
+  iPoint2D& operator=(const iPoint2D& pt) = default;
+  iPoint2D&
+  operator=(iPoint2D&& pt) noexcept = default; // NOLINT llvm Bug 24712
+
+  constexpr iPoint2D operator+(const iPoint2D& rhs) const {
+    return iPoint2D(x + rhs.x, y + rhs.y);
   }
-  iPoint2D getSmallest(const iPoint2D& otherPoint) const {
-    return iPoint2D(std::min(x, otherPoint.x), std::min(y, otherPoint.y));
+  constexpr iPoint2D operator-(const iPoint2D& rhs) const {
+    return iPoint2D(x - rhs.x, y - rhs.y);
   }
-  int x, y;
+
+  iPoint2D& operator+=(const iPoint2D& rhs) {
+    *this = operator+(rhs);
+    return *this;
+  }
+  iPoint2D& operator-=(const iPoint2D& rhs) {
+    *this = operator-(rhs);
+    return *this;
+  }
+
+  constexpr bool operator==(const iPoint2D& rhs) const {
+    return x == rhs.x && y == rhs.y;
+  }
+  constexpr bool operator!=(const iPoint2D& rhs) const {
+    return !operator==(rhs);
+  }
+
+  constexpr bool operator>(const iPoint2D& rhs) const {
+    return x > rhs.x && y > rhs.y;
+  }
+  constexpr bool operator<(const iPoint2D& rhs) const {
+    return x < rhs.x && y < rhs.y;
+  }
+
+  constexpr bool operator>=(const iPoint2D& rhs) const {
+    return x >= rhs.x && y >= rhs.y;
+  }
+  constexpr bool operator<=(const iPoint2D& rhs) const {
+    return x <= rhs.x && y <= rhs.y;
+  }
+
+  constexpr uint32 area() const { return (x * y) > 0 ? (x * y) : -(x * y); }
+
+  constexpr bool isThisInside(const iPoint2D& rhs) const {
+    return operator<=(rhs);
+  }
+
+  // FIXME: C++14
+  constexpr iPoint2D getSmallest(const iPoint2D& rhs) const {
+    return iPoint2D(x < rhs.x ? x : rhs.x, y < rhs.y ? y : rhs.y);
+  }
+
+  int x = 0;
+  int y = 0;
 };
 
 /* Helper class for managing a rectangle in 2D space. */

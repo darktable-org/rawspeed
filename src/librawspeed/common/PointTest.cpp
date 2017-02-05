@@ -31,31 +31,72 @@ using namespace RawSpeed;
 }
 
 TEST(PointTest, Constructor) {
+  int x = -10, y = 15;
   ASSERT_NO_THROW({
     iPoint2D a;
     ASSERT_EQ(a.x, 0);
     ASSERT_EQ(a.y, 0);
   });
   ASSERT_NO_THROW({
-    iPoint2D a(-10, 15);
-    ASSERT_EQ(a.x, -10);
-    ASSERT_EQ(a.y, 15);
+    iPoint2D a(x, y);
+    ASSERT_EQ(a.x, x);
+    ASSERT_EQ(a.y, y);
   });
   ASSERT_NO_THROW({
-    const iPoint2D a(-10, 15);
+    const iPoint2D a(x, y);
     iPoint2D b(a);
-    ASSERT_EQ(b.x, -10);
-    ASSERT_EQ(b.y, 15);
+    ASSERT_EQ(b.x, x);
+    ASSERT_EQ(b.y, y);
+  });
+  ASSERT_NO_THROW({
+    iPoint2D a(x, y);
+    iPoint2D b(a);
+    ASSERT_EQ(b.x, x);
+    ASSERT_EQ(b.y, y);
+  });
+  ASSERT_NO_THROW({
+    const iPoint2D a(x, y);
+    iPoint2D b(move(a));
+    ASSERT_EQ(b.x, x);
+    ASSERT_EQ(b.y, y);
+  });
+  ASSERT_NO_THROW({
+    iPoint2D a(x, y);
+    iPoint2D b(move(a));
+    ASSERT_EQ(b.x, x);
+    ASSERT_EQ(b.y, y);
   });
 }
 
 TEST(PointTest, AssignmentConstructor) {
+  int x = -10, y = 15;
   ASSERT_NO_THROW({
-    const iPoint2D a(-10, 15);
+    iPoint2D a(x, y);
     iPoint2D b(666, 777);
     b = a;
-    ASSERT_EQ(b.x, -10);
-    ASSERT_EQ(b.y, 15);
+    ASSERT_EQ(b.x, x);
+    ASSERT_EQ(b.y, y);
+  });
+  ASSERT_NO_THROW({
+    const iPoint2D a(x, y);
+    iPoint2D b(666, 777);
+    b = a;
+    ASSERT_EQ(b.x, x);
+    ASSERT_EQ(b.y, y);
+  });
+  ASSERT_NO_THROW({
+    iPoint2D a(x, y);
+    iPoint2D b(666, 777);
+    b = move(a);
+    ASSERT_EQ(b.x, x);
+    ASSERT_EQ(b.y, y);
+  });
+  ASSERT_NO_THROW({
+    const iPoint2D a(x, y);
+    iPoint2D b(666, 777);
+    b = move(a);
+    ASSERT_EQ(b.x, x);
+    ASSERT_EQ(b.y, y);
   });
 }
 
@@ -302,10 +343,11 @@ TEST_P(AreaTest, AreaTest) {
   ASSERT_NO_THROW({ ASSERT_EQ(p.area(), a); });
 }
 
-using isThisInsideType = std::tr1::tuple<IntPair, IntPair, bool>;
-class IsThisInsideTest : public ::testing::TestWithParam<isThisInsideType> {
+using operatorsType =
+    std::tr1::tuple<IntPair, IntPair, bool, bool, bool, bool, bool>;
+class OperatorsTest : public ::testing::TestWithParam<operatorsType> {
 protected:
-  IsThisInsideTest() = default;
+  OperatorsTest() = default;
   virtual void SetUp() {
     auto p = GetParam();
 
@@ -315,12 +357,20 @@ protected:
     pair = std::tr1::get<1>(p);
     b = iPoint2D(pair.first, pair.second);
 
-    res = std::tr1::get<2>(p);
+    eq = std::tr1::get<2>(p);
+    lt = std::tr1::get<3>(p);
+    gt = std::tr1::get<4>(p);
+    le = std::tr1::get<5>(p);
+    ge = std::tr1::get<6>(p);
   }
 
   iPoint2D a;
   iPoint2D b;
-  bool res;
+  bool eq;
+  bool lt;
+  bool gt;
+  bool le;
+  bool ge;
 };
 
 /*
@@ -333,105 +383,245 @@ do
     do
       for q in -1 0 1;
       do
+        echo "make_tuple(make_pair($i, $j), make_pair($k, $q), "
+
+        if [ $i -eq $k ] && [ $j -eq $q ]
+        then
+          echo "true, "
+        else
+          echo "false, "
+        fi;
+
+        if [ $i -lt $k ] && [ $j -lt $q ]
+        then
+          echo "true, "
+        else
+          echo "false, "
+        fi;
+
+        if [ $i -gt $k ] && [ $j -gt $q ]
+        then
+          echo "true, "
+        else
+          echo "false, "
+        fi;
+
         if [ $i -le $k ] && [ $j -le $q ]
         then
-          echo "make_tuple(make_pair($i, $j), make_pair($k, $q), true),";
+          echo "true, "
         else
-          echo "make_tuple(make_pair($i, $j), make_pair($k, $q), false),";
+          echo "false, "
         fi;
+
+        if [ $i -ge $k ] && [ $j -ge $q ]
+        then
+          echo "true"
+        else
+          echo "false"
+        fi;
+
+        echo "),";
       done;
     done;
   done;
 done;
 */
-static const isThisInsideType isThisInsideValues[]{
-    make_tuple(make_pair(-1, -1), make_pair(-1, -1), true),
-    make_tuple(make_pair(-1, -1), make_pair(-1, 0), true),
-    make_tuple(make_pair(-1, -1), make_pair(-1, 1), true),
-    make_tuple(make_pair(-1, -1), make_pair(0, -1), true),
-    make_tuple(make_pair(-1, -1), make_pair(0, 0), true),
-    make_tuple(make_pair(-1, -1), make_pair(0, 1), true),
-    make_tuple(make_pair(-1, -1), make_pair(1, -1), true),
-    make_tuple(make_pair(-1, -1), make_pair(1, 0), true),
-    make_tuple(make_pair(-1, -1), make_pair(1, 1), true),
-    make_tuple(make_pair(-1, 0), make_pair(-1, -1), false),
-    make_tuple(make_pair(-1, 0), make_pair(-1, 0), true),
-    make_tuple(make_pair(-1, 0), make_pair(-1, 1), true),
-    make_tuple(make_pair(-1, 0), make_pair(0, -1), false),
-    make_tuple(make_pair(-1, 0), make_pair(0, 0), true),
-    make_tuple(make_pair(-1, 0), make_pair(0, 1), true),
-    make_tuple(make_pair(-1, 0), make_pair(1, -1), false),
-    make_tuple(make_pair(-1, 0), make_pair(1, 0), true),
-    make_tuple(make_pair(-1, 0), make_pair(1, 1), true),
-    make_tuple(make_pair(-1, 1), make_pair(-1, -1), false),
-    make_tuple(make_pair(-1, 1), make_pair(-1, 0), false),
-    make_tuple(make_pair(-1, 1), make_pair(-1, 1), true),
-    make_tuple(make_pair(-1, 1), make_pair(0, -1), false),
-    make_tuple(make_pair(-1, 1), make_pair(0, 0), false),
-    make_tuple(make_pair(-1, 1), make_pair(0, 1), true),
-    make_tuple(make_pair(-1, 1), make_pair(1, -1), false),
-    make_tuple(make_pair(-1, 1), make_pair(1, 0), false),
-    make_tuple(make_pair(-1, 1), make_pair(1, 1), true),
-    make_tuple(make_pair(0, -1), make_pair(-1, -1), false),
-    make_tuple(make_pair(0, -1), make_pair(-1, 0), false),
-    make_tuple(make_pair(0, -1), make_pair(-1, 1), false),
-    make_tuple(make_pair(0, -1), make_pair(0, -1), true),
-    make_tuple(make_pair(0, -1), make_pair(0, 0), true),
-    make_tuple(make_pair(0, -1), make_pair(0, 1), true),
-    make_tuple(make_pair(0, -1), make_pair(1, -1), true),
-    make_tuple(make_pair(0, -1), make_pair(1, 0), true),
-    make_tuple(make_pair(0, -1), make_pair(1, 1), true),
-    make_tuple(make_pair(0, 0), make_pair(-1, -1), false),
-    make_tuple(make_pair(0, 0), make_pair(-1, 0), false),
-    make_tuple(make_pair(0, 0), make_pair(-1, 1), false),
-    make_tuple(make_pair(0, 0), make_pair(0, -1), false),
-    make_tuple(make_pair(0, 0), make_pair(0, 0), true),
-    make_tuple(make_pair(0, 0), make_pair(0, 1), true),
-    make_tuple(make_pair(0, 0), make_pair(1, -1), false),
-    make_tuple(make_pair(0, 0), make_pair(1, 0), true),
-    make_tuple(make_pair(0, 0), make_pair(1, 1), true),
-    make_tuple(make_pair(0, 1), make_pair(-1, -1), false),
-    make_tuple(make_pair(0, 1), make_pair(-1, 0), false),
-    make_tuple(make_pair(0, 1), make_pair(-1, 1), false),
-    make_tuple(make_pair(0, 1), make_pair(0, -1), false),
-    make_tuple(make_pair(0, 1), make_pair(0, 0), false),
-    make_tuple(make_pair(0, 1), make_pair(0, 1), true),
-    make_tuple(make_pair(0, 1), make_pair(1, -1), false),
-    make_tuple(make_pair(0, 1), make_pair(1, 0), false),
-    make_tuple(make_pair(0, 1), make_pair(1, 1), true),
-    make_tuple(make_pair(1, -1), make_pair(-1, -1), false),
-    make_tuple(make_pair(1, -1), make_pair(-1, 0), false),
-    make_tuple(make_pair(1, -1), make_pair(-1, 1), false),
-    make_tuple(make_pair(1, -1), make_pair(0, -1), false),
-    make_tuple(make_pair(1, -1), make_pair(0, 0), false),
-    make_tuple(make_pair(1, -1), make_pair(0, 1), false),
-    make_tuple(make_pair(1, -1), make_pair(1, -1), true),
-    make_tuple(make_pair(1, -1), make_pair(1, 0), true),
-    make_tuple(make_pair(1, -1), make_pair(1, 1), true),
-    make_tuple(make_pair(1, 0), make_pair(-1, -1), false),
-    make_tuple(make_pair(1, 0), make_pair(-1, 0), false),
-    make_tuple(make_pair(1, 0), make_pair(-1, 1), false),
-    make_tuple(make_pair(1, 0), make_pair(0, -1), false),
-    make_tuple(make_pair(1, 0), make_pair(0, 0), false),
-    make_tuple(make_pair(1, 0), make_pair(0, 1), false),
-    make_tuple(make_pair(1, 0), make_pair(1, -1), false),
-    make_tuple(make_pair(1, 0), make_pair(1, 0), true),
-    make_tuple(make_pair(1, 0), make_pair(1, 1), true),
-    make_tuple(make_pair(1, 1), make_pair(-1, -1), false),
-    make_tuple(make_pair(1, 1), make_pair(-1, 0), false),
-    make_tuple(make_pair(1, 1), make_pair(-1, 1), false),
-    make_tuple(make_pair(1, 1), make_pair(0, -1), false),
-    make_tuple(make_pair(1, 1), make_pair(0, 0), false),
-    make_tuple(make_pair(1, 1), make_pair(0, 1), false),
-    make_tuple(make_pair(1, 1), make_pair(1, -1), false),
-    make_tuple(make_pair(1, 1), make_pair(1, 0), false),
-    make_tuple(make_pair(1, 1), make_pair(1, 1), true),
-};
+static const operatorsType operatorsValues[]{
+    make_tuple(make_pair(-1, -1), make_pair(-1, -1), true, false, false, true,
+               true),
+    make_tuple(make_pair(-1, -1), make_pair(-1, 0), false, false, false, true,
+               false),
+    make_tuple(make_pair(-1, -1), make_pair(-1, 1), false, false, false, true,
+               false),
+    make_tuple(make_pair(-1, -1), make_pair(0, -1), false, false, false, true,
+               false),
+    make_tuple(make_pair(-1, -1), make_pair(0, 0), false, true, false, true,
+               false),
+    make_tuple(make_pair(-1, -1), make_pair(0, 1), false, true, false, true,
+               false),
+    make_tuple(make_pair(-1, -1), make_pair(1, -1), false, false, false, true,
+               false),
+    make_tuple(make_pair(-1, -1), make_pair(1, 0), false, true, false, true,
+               false),
+    make_tuple(make_pair(-1, -1), make_pair(1, 1), false, true, false, true,
+               false),
+    make_tuple(make_pair(-1, 0), make_pair(-1, -1), false, false, false, false,
+               true),
+    make_tuple(make_pair(-1, 0), make_pair(-1, 0), true, false, false, true,
+               true),
+    make_tuple(make_pair(-1, 0), make_pair(-1, 1), false, false, false, true,
+               false),
+    make_tuple(make_pair(-1, 0), make_pair(0, -1), false, false, false, false,
+               false),
+    make_tuple(make_pair(-1, 0), make_pair(0, 0), false, false, false, true,
+               false),
+    make_tuple(make_pair(-1, 0), make_pair(0, 1), false, true, false, true,
+               false),
+    make_tuple(make_pair(-1, 0), make_pair(1, -1), false, false, false, false,
+               false),
+    make_tuple(make_pair(-1, 0), make_pair(1, 0), false, false, false, true,
+               false),
+    make_tuple(make_pair(-1, 0), make_pair(1, 1), false, true, false, true,
+               false),
+    make_tuple(make_pair(-1, 1), make_pair(-1, -1), false, false, false, false,
+               true),
+    make_tuple(make_pair(-1, 1), make_pair(-1, 0), false, false, false, false,
+               true),
+    make_tuple(make_pair(-1, 1), make_pair(-1, 1), true, false, false, true,
+               true),
+    make_tuple(make_pair(-1, 1), make_pair(0, -1), false, false, false, false,
+               false),
+    make_tuple(make_pair(-1, 1), make_pair(0, 0), false, false, false, false,
+               false),
+    make_tuple(make_pair(-1, 1), make_pair(0, 1), false, false, false, true,
+               false),
+    make_tuple(make_pair(-1, 1), make_pair(1, -1), false, false, false, false,
+               false),
+    make_tuple(make_pair(-1, 1), make_pair(1, 0), false, false, false, false,
+               false),
+    make_tuple(make_pair(-1, 1), make_pair(1, 1), false, false, false, true,
+               false),
+    make_tuple(make_pair(0, -1), make_pair(-1, -1), false, false, false, false,
+               true),
+    make_tuple(make_pair(0, -1), make_pair(-1, 0), false, false, false, false,
+               false),
+    make_tuple(make_pair(0, -1), make_pair(-1, 1), false, false, false, false,
+               false),
+    make_tuple(make_pair(0, -1), make_pair(0, -1), true, false, false, true,
+               true),
+    make_tuple(make_pair(0, -1), make_pair(0, 0), false, false, false, true,
+               false),
+    make_tuple(make_pair(0, -1), make_pair(0, 1), false, false, false, true,
+               false),
+    make_tuple(make_pair(0, -1), make_pair(1, -1), false, false, false, true,
+               false),
+    make_tuple(make_pair(0, -1), make_pair(1, 0), false, true, false, true,
+               false),
+    make_tuple(make_pair(0, -1), make_pair(1, 1), false, true, false, true,
+               false),
+    make_tuple(make_pair(0, 0), make_pair(-1, -1), false, false, true, false,
+               true),
+    make_tuple(make_pair(0, 0), make_pair(-1, 0), false, false, false, false,
+               true),
+    make_tuple(make_pair(0, 0), make_pair(-1, 1), false, false, false, false,
+               false),
+    make_tuple(make_pair(0, 0), make_pair(0, -1), false, false, false, false,
+               true),
+    make_tuple(make_pair(0, 0), make_pair(0, 0), true, false, false, true,
+               true),
+    make_tuple(make_pair(0, 0), make_pair(0, 1), false, false, false, true,
+               false),
+    make_tuple(make_pair(0, 0), make_pair(1, -1), false, false, false, false,
+               false),
+    make_tuple(make_pair(0, 0), make_pair(1, 0), false, false, false, true,
+               false),
+    make_tuple(make_pair(0, 0), make_pair(1, 1), false, true, false, true,
+               false),
+    make_tuple(make_pair(0, 1), make_pair(-1, -1), false, false, true, false,
+               true),
+    make_tuple(make_pair(0, 1), make_pair(-1, 0), false, false, true, false,
+               true),
+    make_tuple(make_pair(0, 1), make_pair(-1, 1), false, false, false, false,
+               true),
+    make_tuple(make_pair(0, 1), make_pair(0, -1), false, false, false, false,
+               true),
+    make_tuple(make_pair(0, 1), make_pair(0, 0), false, false, false, false,
+               true),
+    make_tuple(make_pair(0, 1), make_pair(0, 1), true, false, false, true,
+               true),
+    make_tuple(make_pair(0, 1), make_pair(1, -1), false, false, false, false,
+               false),
+    make_tuple(make_pair(0, 1), make_pair(1, 0), false, false, false, false,
+               false),
+    make_tuple(make_pair(0, 1), make_pair(1, 1), false, false, false, true,
+               false),
+    make_tuple(make_pair(1, -1), make_pair(-1, -1), false, false, false, false,
+               true),
+    make_tuple(make_pair(1, -1), make_pair(-1, 0), false, false, false, false,
+               false),
+    make_tuple(make_pair(1, -1), make_pair(-1, 1), false, false, false, false,
+               false),
+    make_tuple(make_pair(1, -1), make_pair(0, -1), false, false, false, false,
+               true),
+    make_tuple(make_pair(1, -1), make_pair(0, 0), false, false, false, false,
+               false),
+    make_tuple(make_pair(1, -1), make_pair(0, 1), false, false, false, false,
+               false),
+    make_tuple(make_pair(1, -1), make_pair(1, -1), true, false, false, true,
+               true),
+    make_tuple(make_pair(1, -1), make_pair(1, 0), false, false, false, true,
+               false),
+    make_tuple(make_pair(1, -1), make_pair(1, 1), false, false, false, true,
+               false),
+    make_tuple(make_pair(1, 0), make_pair(-1, -1), false, false, true, false,
+               true),
+    make_tuple(make_pair(1, 0), make_pair(-1, 0), false, false, false, false,
+               true),
+    make_tuple(make_pair(1, 0), make_pair(-1, 1), false, false, false, false,
+               false),
+    make_tuple(make_pair(1, 0), make_pair(0, -1), false, false, true, false,
+               true),
+    make_tuple(make_pair(1, 0), make_pair(0, 0), false, false, false, false,
+               true),
+    make_tuple(make_pair(1, 0), make_pair(0, 1), false, false, false, false,
+               false),
+    make_tuple(make_pair(1, 0), make_pair(1, -1), false, false, false, false,
+               true),
+    make_tuple(make_pair(1, 0), make_pair(1, 0), true, false, false, true,
+               true),
+    make_tuple(make_pair(1, 0), make_pair(1, 1), false, false, false, true,
+               false),
+    make_tuple(make_pair(1, 1), make_pair(-1, -1), false, false, true, false,
+               true),
+    make_tuple(make_pair(1, 1), make_pair(-1, 0), false, false, true, false,
+               true),
+    make_tuple(make_pair(1, 1), make_pair(-1, 1), false, false, false, false,
+               true),
+    make_tuple(make_pair(1, 1), make_pair(0, -1), false, false, true, false,
+               true),
+    make_tuple(make_pair(1, 1), make_pair(0, 0), false, false, true, false,
+               true),
+    make_tuple(make_pair(1, 1), make_pair(0, 1), false, false, false, false,
+               true),
+    make_tuple(make_pair(1, 1), make_pair(1, -1), false, false, false, false,
+               true),
+    make_tuple(make_pair(1, 1), make_pair(1, 0), false, false, false, false,
+               true),
+    make_tuple(make_pair(1, 1), make_pair(1, 1), true, false, false, true,
+               true)};
 
-INSTANTIATE_TEST_CASE_P(IsThisInsideTest, IsThisInsideTest,
-                        ::testing::ValuesIn(isThisInsideValues));
-TEST_P(IsThisInsideTest, IsThisInsideTest) {
-  ASSERT_NO_THROW({ ASSERT_EQ(a.isThisInside(b), res); });
+INSTANTIATE_TEST_CASE_P(OperatorsTests, OperatorsTest,
+                        ::testing::ValuesIn(operatorsValues));
+
+TEST_P(OperatorsTest, OperatorEQTest) {
+  ASSERT_NO_THROW({ ASSERT_EQ(a == b, eq); });
+  ASSERT_NO_THROW({ ASSERT_EQ(b == a, eq); });
+}
+TEST_P(OperatorsTest, OperatorNETest) {
+  ASSERT_NO_THROW({ ASSERT_EQ(a != b, !eq); });
+  ASSERT_NO_THROW({ ASSERT_EQ(b != a, !eq); });
+}
+
+TEST_P(OperatorsTest, OperatorLTTest) {
+  ASSERT_NO_THROW({ ASSERT_EQ(a < b, lt); });
+  ASSERT_NO_THROW({ ASSERT_EQ(b > a, lt); });
+}
+TEST_P(OperatorsTest, OperatorGTest) {
+  ASSERT_NO_THROW({ ASSERT_EQ(a > b, gt); });
+  ASSERT_NO_THROW({ ASSERT_EQ(b < a, gt); });
+}
+
+TEST_P(OperatorsTest, OperatorLETest) {
+  ASSERT_NO_THROW({ ASSERT_EQ(a <= b, le); });
+  ASSERT_NO_THROW({ ASSERT_EQ(b >= a, le); });
+}
+TEST_P(OperatorsTest, OperatorGEest) {
+  ASSERT_NO_THROW({ ASSERT_EQ(a >= b, ge); });
+  ASSERT_NO_THROW({ ASSERT_EQ(b <= a, ge); });
+}
+
+TEST_P(OperatorsTest, OperatorsTest) {
+  ASSERT_NO_THROW({ ASSERT_EQ(a.isThisInside(b), le); });
 }
 
 /*
