@@ -45,8 +45,8 @@ public:
   /* Properties of out will not have changed from createOutput */
   virtual void apply(RawImage &in, RawImage &out, uint32 startY, uint32 endY) = 0;
   iRectangle2D mAoi;
-  enum Flags { MultiThreaded = 1 << 0, PureLookup = 1 << 1 };
-  Flags mFlags;
+  enum Flags { None = 0, MultiThreaded = 1 << 0, PureLookup = 1 << 1 };
+  Flags mFlags = None;
 
 protected:
   Endianness host;
