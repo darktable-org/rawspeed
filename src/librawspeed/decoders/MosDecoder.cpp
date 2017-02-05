@@ -127,24 +127,24 @@ RawImage MosDecoder::decodeRawInternal() {
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(TILEOFFSETS);
   if (!data.empty()) {
     raw = data[0];
-    off = raw->getEntry(TILEOFFSETS)->getInt();
+    off = raw->getEntry(TILEOFFSETS)->getU32();
   } else {
     data = mRootIFD->getIFDsWithTag(CFAPATTERN);
     if (!data.empty()) {
       raw = data[0];
-      off = raw->getEntry(STRIPOFFSETS)->getInt();
+      off = raw->getEntry(STRIPOFFSETS)->getU32();
     } else
       ThrowRDE("MOS Decoder: No image data found");
   }
 
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
   UncompressedDecompressor u(*mFile, off, mRaw, uncorrectedRawValues);
 
-  int compression = raw->getEntry(COMPRESSION)->getInt();
+  int compression = raw->getEntry(COMPRESSION)->getU32();
   if (1 == compression) {
     if (getTiffEndianness(mFile) == big)
       u.decode16BitRawBEunpacked(width, height);

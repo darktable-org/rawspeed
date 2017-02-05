@@ -61,18 +61,18 @@ void RawDecoder::decodeUncompressed(TiffIFD *rawIFD, BitOrder order) {
   uint32 nslices = rawIFD->getEntry(STRIPOFFSETS)->count;
   TiffEntry *offsets = rawIFD->getEntry(STRIPOFFSETS);
   TiffEntry *counts = rawIFD->getEntry(STRIPBYTECOUNTS);
-  uint32 yPerSlice = rawIFD->getEntry(ROWSPERSTRIP)->getInt();
-  uint32 width = rawIFD->getEntry(IMAGEWIDTH)->getInt();
-  uint32 height = rawIFD->getEntry(IMAGELENGTH)->getInt();
-  uint32 bitPerPixel = rawIFD->getEntry(BITSPERSAMPLE)->getInt();
+  uint32 yPerSlice = rawIFD->getEntry(ROWSPERSTRIP)->getU32();
+  uint32 width = rawIFD->getEntry(IMAGEWIDTH)->getU32();
+  uint32 height = rawIFD->getEntry(IMAGELENGTH)->getU32();
+  uint32 bitPerPixel = rawIFD->getEntry(BITSPERSAMPLE)->getU32();
 
   vector<RawSlice> slices;
   uint32 offY = 0;
 
   for (uint32 s = 0; s < nslices; s++) {
     RawSlice slice;
-    slice.offset = offsets->getInt(s);
-    slice.count = counts->getInt(s);
+    slice.offset = offsets->getU32(s);
+    slice.count = counts->getU32(s);
     if (offY + yPerSlice > height)
       slice.h = height - offY;
     else

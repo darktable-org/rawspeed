@@ -103,8 +103,8 @@ RawImage Rw2Decoder::decodeRawInternal() {
   }
 
   TiffIFD* raw = data[0];
-  uint32 height = raw->getEntry((TiffTag)3)->getShort();
-  uint32 width = raw->getEntry((TiffTag)2)->getShort();
+  uint32 height = raw->getEntry((TiffTag)3)->getU16();
+  uint32 width = raw->getEntry((TiffTag)2)->getU16();
 
   if (isOldPanasonic) {
     TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
@@ -112,7 +112,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
     if (offsets->count != 1) {
       ThrowRDE("RW2 Decoder: Multiple Strips found: %u", offsets->count);
     }
-    offset = offsets->getInt();
+    offset = offsets->getU32();
     if (!mFile->isValid(offset))
       ThrowRDE("Panasonic RAW Decoder: Invalid image data offset, cannot decode.");
 
@@ -144,7 +144,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       ThrowRDE("RW2 Decoder: Multiple Strips found: %u", offsets->count);
     }
 
-    offset = offsets->getInt();
+    offset = offsets->getU32();
 
     if (!mFile->isValid(offset))
       ThrowRDE("RW2 Decoder: Invalid image data offset, cannot decode.");
@@ -245,7 +245,7 @@ void Rw2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
   string mode = guessMode();
   int iso = 0;
   if (mRootIFD->hasEntryRecursive(PANASONIC_ISO_SPEED))
-    iso = mRootIFD->getEntryRecursive(PANASONIC_ISO_SPEED)->getInt();
+    iso = mRootIFD->getEntryRecursive(PANASONIC_ISO_SPEED)->getU32();
 
   if (this->checkCameraSupported(meta, id, mode)) {
     setMetaData(meta, id, mode, iso);
@@ -270,9 +270,9 @@ void Rw2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
 
   // Read blacklevels
   if (raw->hasEntry((TiffTag)0x1c) && raw->hasEntry((TiffTag)0x1d) && raw->hasEntry((TiffTag)0x1e)) {
-    const int blackRed = raw->getEntry((TiffTag)0x1c)->getInt() + 15;
-    const int blackGreen = raw->getEntry((TiffTag)0x1d)->getInt() + 15;
-    const int blackBlue = raw->getEntry((TiffTag)0x1e)->getInt() + 15;
+    const int blackRed = raw->getEntry((TiffTag)0x1c)->getU32() + 15;
+    const int blackGreen = raw->getEntry((TiffTag)0x1d)->getU32() + 15;
+    const int blackBlue = raw->getEntry((TiffTag)0x1e)->getU32() + 15;
 
     for(int i = 0; i < 2; i++) {
       for(int j = 0; j < 2; j++) {
@@ -298,13 +298,13 @@ void Rw2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
 
   // Read WB levels
   if (raw->hasEntry((TiffTag)0x0024) && raw->hasEntry((TiffTag)0x0025) && raw->hasEntry((TiffTag)0x0026)) {
-    mRaw->metadata.wbCoeffs[0] = (float) raw->getEntry((TiffTag)0x0024)->getShort();
-    mRaw->metadata.wbCoeffs[1] = (float) raw->getEntry((TiffTag)0x0025)->getShort();
-    mRaw->metadata.wbCoeffs[2] = (float) raw->getEntry((TiffTag)0x0026)->getShort();
+    mRaw->metadata.wbCoeffs[0] = (float) raw->getEntry((TiffTag)0x0024)->getU16();
+    mRaw->metadata.wbCoeffs[1] = (float) raw->getEntry((TiffTag)0x0025)->getU16();
+    mRaw->metadata.wbCoeffs[2] = (float) raw->getEntry((TiffTag)0x0026)->getU16();
   } else if (raw->hasEntry((TiffTag)0x0011) && raw->hasEntry((TiffTag)0x0012)) {
-    mRaw->metadata.wbCoeffs[0] = (float) raw->getEntry((TiffTag)0x0011)->getShort();
+    mRaw->metadata.wbCoeffs[0] = (float) raw->getEntry((TiffTag)0x0011)->getU16();
     mRaw->metadata.wbCoeffs[1] = 256.0f;
-    mRaw->metadata.wbCoeffs[2] = (float) raw->getEntry((TiffTag)0x0012)->getShort();
+    mRaw->metadata.wbCoeffs[2] = (float) raw->getEntry((TiffTag)0x0012)->getU16();
   }
 }
 

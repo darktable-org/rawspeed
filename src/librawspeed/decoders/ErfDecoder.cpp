@@ -43,10 +43,10 @@ RawImage ErfDecoder::decodeRawInternal() {
     ThrowRDE("ERF Decoder: No image data found");
 
   TiffIFD* raw = data[1];
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
-  uint32 off = raw->getEntry(STRIPOFFSETS)->getInt();
-  uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getInt();
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
+  uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getU32();
 
   if (c2 > mFile->getSize() - off) {
     mRaw->setError("Warning: byte count larger than file size, file probably truncated.");
@@ -69,9 +69,9 @@ void ErfDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
     TiffEntry *wb = mRootIFD->getEntryRecursive(EPSONWB);
     if (wb->count == 256) {
       // Magic values taken directly from dcraw
-      mRaw->metadata.wbCoeffs[0] = (float) wb->getShort(24) * 508.0f * 1.078f / (float)0x10000;
+      mRaw->metadata.wbCoeffs[0] = (float) wb->getU16(24) * 508.0f * 1.078f / (float)0x10000;
       mRaw->metadata.wbCoeffs[1] = 1.0f;
-      mRaw->metadata.wbCoeffs[2] = (float) wb->getShort(25) * 382.0f * 1.173f / (float)0x10000;
+      mRaw->metadata.wbCoeffs[2] = (float) wb->getU16(25) * 382.0f * 1.173f / (float)0x10000;
     }
   }
 }

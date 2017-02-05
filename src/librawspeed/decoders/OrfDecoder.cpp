@@ -54,7 +54,7 @@ RawImage OrfDecoder::decodeRawInternal() {
 
   TiffIFD* raw = data[0];
 
-  int compression = raw->getEntry(COMPRESSION)->getInt();
+  int compression = raw->getEntry(COMPRESSION)->getU32();
   if (1 != compression)
     ThrowRDE("ORF Decoder: Unsupported compression");
 
@@ -65,16 +65,16 @@ RawImage OrfDecoder::decodeRawInternal() {
     ThrowRDE("ORF Decoder: Byte count number does not match strip size: count:%u, strips:%u ", counts->count, offsets->count);
 
   //TODO: this code assumes that all strips are layed out directly after another without padding and in order
-  uint32 off = raw->getEntry(STRIPOFFSETS)->getInt();
+  uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
   uint32 size = 0;
   for (uint32 i=0; i < counts->count; i++)
-    size += counts->getInt(i);
+    size += counts->getU32(i);
 
   if (!mFile->isValid(off, size))
     ThrowRDE("ORF Decoder: Truncated file");
 
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
@@ -265,22 +265,22 @@ void OrfDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
 
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
-    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getInt();
+    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();
 
   setMetaData(meta, "", iso);
 
   if (mRootIFD->hasEntryRecursive(OLYMPUSREDMULTIPLIER) &&
       mRootIFD->hasEntryRecursive(OLYMPUSBLUEMULTIPLIER)) {
-    mRaw->metadata.wbCoeffs[0] = (float) mRootIFD->getEntryRecursive(OLYMPUSREDMULTIPLIER)->getShort();
+    mRaw->metadata.wbCoeffs[0] = (float) mRootIFD->getEntryRecursive(OLYMPUSREDMULTIPLIER)->getU16();
     mRaw->metadata.wbCoeffs[1] = 256.0f;
-    mRaw->metadata.wbCoeffs[2] = (float) mRootIFD->getEntryRecursive(OLYMPUSBLUEMULTIPLIER)->getShort();
+    mRaw->metadata.wbCoeffs[2] = (float) mRootIFD->getEntryRecursive(OLYMPUSBLUEMULTIPLIER)->getU16();
   } else {
     // Newer cameras process the Image Processing SubIFD in the makernote
     if(mRootIFD->hasEntryRecursive(OLYMPUSIMAGEPROCESSING)) {
       TiffEntry *img_entry = mRootIFD->getEntryRecursive(OLYMPUSIMAGEPROCESSING);
       try {
         // get makernote ifd with containing FileMap
-        TiffRootIFD image_processing(img_entry->getRootIfdData(), img_entry->getInt());
+        TiffRootIFD image_processing(img_entry->getRootIfdData(), img_entry->getU32());
 
         // Get the WB
         if(image_processing.hasEntry((TiffTag) 0x0100)) {
@@ -299,13 +299,13 @@ void OrfDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
           if (blackEntry->count == 4) {
             for (int i = 0; i < 4; i++) {
               if (mRaw->cfa.getColorAt(i&1, i>>1) == CFA_RED)
-                mRaw->blackLevelSeparate[i] = blackEntry->getShort(0);
+                mRaw->blackLevelSeparate[i] = blackEntry->getU16(0);
               else if (mRaw->cfa.getColorAt(i&1, i>>1) == CFA_BLUE)
-                mRaw->blackLevelSeparate[i] = blackEntry->getShort(3);
+                mRaw->blackLevelSeparate[i] = blackEntry->getU16(3);
               else if (mRaw->cfa.getColorAt(i&1, i>>1) == CFA_GREEN && i<2)
-                mRaw->blackLevelSeparate[i] = blackEntry->getShort(1);
+                mRaw->blackLevelSeparate[i] = blackEntry->getU16(1);
               else if (mRaw->cfa.getColorAt(i&1, i>>1) == CFA_GREEN)
-                mRaw->blackLevelSeparate[i] = blackEntry->getShort(2);
+                mRaw->blackLevelSeparate[i] = blackEntry->getU16(2);
             }
             // Adjust whitelevel based on the read black (we assume the dynamic range is the same)
             mRaw->whitePoint -= (mRaw->blackLevel - mRaw->blackLevelSeparate[0]);

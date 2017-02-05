@@ -73,10 +73,10 @@ public:
   bool isInt() const;
   bool isString() const;
   uchar8 getByte(uint32 num=0) const;
-  uint32 getInt(uint32 num=0) const;
-  int32 getSInt(uint32 num=0) const;
-  ushort16 getShort(uint32 num=0) const;
-  short16 getSShort(uint32 num=0) const;
+  uint32 getU32(uint32 num=0) const;
+  int32 getI32(uint32 num=0) const;
+  ushort16 getU16(uint32 num=0) const;
+  short16 getI16(uint32 num=0) const;
   float getFloat(uint32 num=0) const;
   std::string getString() const;
   void getShortArray(ushort16 *array, uint32 num) const;

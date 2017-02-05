@@ -40,7 +40,7 @@ RawImage KdcDecoder::decodeRawInternal() {
   if (!mRootIFD->hasEntryRecursive(COMPRESSION))
     ThrowRDE("KDC Decoder: Couldn't find compression setting");
 
-  int compression = mRootIFD->getEntryRecursive(COMPRESSION)->getInt();
+  int compression = mRootIFD->getEntryRecursive(COMPRESSION)->getU32();
   if (7 != compression)
     ThrowRDE("KDC Decoder: Unsupported compression %d", compression);
 
@@ -49,15 +49,15 @@ RawImage KdcDecoder::decodeRawInternal() {
   TiffEntry *ew = mRootIFD->getEntryRecursive(KODAK_KDC_WIDTH);
   TiffEntry *eh = mRootIFD->getEntryRecursive(KODAK_KDC_HEIGHT);
   if (ew && eh) {
-    width = ew->getInt()+80;
-    height = eh->getInt()+70;
+    width = ew->getU32()+80;
+    height = eh->getU32()+70;
   } else
     ThrowRDE("KDC Decoder: Unable to retrieve image size");
 
   TiffEntry *offset = mRootIFD->getEntryRecursive(KODAK_KDC_OFFSET);
   if (!offset || offset->count < 13)
     ThrowRDE("KDC Decoder: Couldn't find the KDC offset");
-  uint32 off = offset->getInt(4) + offset->getInt(12);
+  uint32 off = offset->getU32(4) + offset->getU32(12);
 
   // Offset hardcoding gotten from dcraw
   if (hints.find("easyshare_offset_hack") != hints.end())
@@ -83,7 +83,7 @@ void KdcDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   if (mRootIFD->hasEntryRecursive(KODAK_IFD2)) {
     TiffEntry *ifdoffset = mRootIFD->getEntryRecursive(KODAK_IFD2);
     try {
-      TiffRootIFD kodakifd(ifdoffset->getRootIfdData(), ifdoffset->getInt());
+      TiffRootIFD kodakifd(ifdoffset->getRootIfdData(), ifdoffset->getU32());
 
      if (kodakifd.hasEntryRecursive(KODAK_KDC_WB)) {
         TiffEntry *wb = kodakifd.getEntryRecursive(KODAK_KDC_WB);

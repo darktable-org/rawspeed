@@ -44,10 +44,10 @@ RawImage DcrDecoder::decodeRawInternal() {
     ThrowRDE("DCR Decoder: No image data found");
 
   TiffIFD* raw = data[0];
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
-  uint32 off = raw->getEntry(STRIPOFFSETS)->getInt();
-  uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getInt();
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
+  uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getU32();
 
   if (off > mFile->getSize())
     ThrowRDE("DCR Decoder: Offset is out of bounds");
@@ -60,12 +60,12 @@ RawImage DcrDecoder::decodeRawInternal() {
   mRaw->createData();
   ByteStream input(mFile, off);
 
-  int compression = raw->getEntry(COMPRESSION)->getInt();
+  int compression = raw->getEntry(COMPRESSION)->getU32();
   if (65000 == compression) {
     TiffEntry *ifdoffset = mRootIFD->getEntryRecursive(KODAK_IFD);
     if (!ifdoffset)
       ThrowRDE("DCR Decoder: Couldn't find the Kodak IFD offset");
-    TiffRootIFD kodakifd(ifdoffset->getRootIfdData(), ifdoffset->getInt());
+    TiffRootIFD kodakifd(ifdoffset->getRootIfdData(), ifdoffset->getU32());
     TiffEntry *linearization = kodakifd.getEntryRecursive(KODAK_LINEARIZATION);
     if (!linearization || linearization->count != 1024 || linearization->type != TIFF_SHORT) {
       ThrowRDE("DCR Decoder: Couldn't find the linearization table");
@@ -83,9 +83,9 @@ RawImage DcrDecoder::decodeRawInternal() {
     //        in dcraw.c parse_kodak_ifd() for all that weirdness
     TiffEntry *blob = kodakifd.getEntryRecursive((TiffTag) 0x03fd);
     if (blob && blob->count == 72) {
-      mRaw->metadata.wbCoeffs[0] = (float) 2048.0f / blob->getShort(20);
-      mRaw->metadata.wbCoeffs[1] = (float) 2048.0f / blob->getShort(21);
-      mRaw->metadata.wbCoeffs[2] = (float) 2048.0f / blob->getShort(22);
+      mRaw->metadata.wbCoeffs[0] = (float) 2048.0f / blob->getU16(20);
+      mRaw->metadata.wbCoeffs[1] = (float) 2048.0f / blob->getU16(21);
+      mRaw->metadata.wbCoeffs[2] = (float) 2048.0f / blob->getU16(22);
     }
 
     try {

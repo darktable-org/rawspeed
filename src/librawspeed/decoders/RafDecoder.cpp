@@ -62,12 +62,12 @@ RawImage RafDecoder::decodeRawInternal() {
   uint32 width = 0;
 
   if (raw->hasEntry(FUJI_RAWIMAGEFULLHEIGHT)) {
-    height = raw->getEntry(FUJI_RAWIMAGEFULLHEIGHT)->getInt();
-    width = raw->getEntry(FUJI_RAWIMAGEFULLWIDTH)->getInt();
+    height = raw->getEntry(FUJI_RAWIMAGEFULLHEIGHT)->getU32();
+    width = raw->getEntry(FUJI_RAWIMAGEFULLWIDTH)->getU32();
   } else if (raw->hasEntry(IMAGEWIDTH)) {
     TiffEntry *e = raw->getEntry(IMAGEWIDTH);
-    height = e->getShort(0);
-    width = e->getShort(1);
+    height = e->getU16(0);
+    width = e->getU16(1);
   } else
     ThrowRDE("RAF decoder: Unable to locate image size");
 
@@ -84,7 +84,7 @@ RawImage RafDecoder::decodeRawInternal() {
 
   int bps = 16;
   if (raw->hasEntry(FUJI_BITSPERSAMPLE))
-    bps = raw->getEntry(FUJI_BITSPERSAMPLE)->getInt();
+    bps = raw->getEntry(FUJI_BITSPERSAMPLE)->getU32();
 
   // x-trans sensors report 14bpp, but data isn't packed so read as 16bpp
   if (bps == 14) bps = 16;
@@ -97,13 +97,13 @@ RawImage RafDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width*(double_width ? 2 : 1), height);
   mRaw->createData();
   ByteStream input = offsets->getRootIfdData();
-  input.setPosition(offsets->getInt());
+  input.setPosition(offsets->getU32());
 
   UncompressedDecompressor u(input, mRaw, uncorrectedRawValues);
 
   iPoint2D pos(0, 0);
 
-  if (counts->getInt()*8/(width*height) < 10) {
+  if (counts->getU32()*8/(width*height) < 10) {
     ThrowRDE("Don't know how to decode compressed images");
   } else if (double_width) {
     u.decode16BitRawUnpacked(width * 2, height);
@@ -134,7 +134,7 @@ void RafDecoder::checkSupportInternal(CameraMetaData *meta) {
 void RafDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   int iso = 0;
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
-    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getInt();
+    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();
   mRaw->metadata.isoSpeed = iso;
 
   // This is where we'd normally call setMetaData but since we may still need
@@ -218,7 +218,7 @@ void RafDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
     if (sep_black->count == 4)
     {
       for(int k=0;k<4;k++)
-        mRaw->blackLevelSeparate[k] = sep_black->getInt(k);
+        mRaw->blackLevelSeparate[k] = sep_black->getU32(k);
     }
   }
   mRaw->whitePoint = sensor->mWhiteLevel;

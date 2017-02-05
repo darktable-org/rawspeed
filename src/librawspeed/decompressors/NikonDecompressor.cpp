@@ -70,10 +70,10 @@ void decompressNikon(RawImage& mRaw, ByteStream&& data, ByteStream metadata, uin
   if (v0 == 70) huffSelect = 2;
   if (bitsPS == 14) huffSelect += 3;
 
-  pUp1[0] = metadata.getShort();
-  pUp1[1] = metadata.getShort();
-  pUp2[0] = metadata.getShort();
-  pUp2[1] = metadata.getShort();
+  pUp1[0] = metadata.getU16();
+  pUp1[1] = metadata.getU16();
+  pUp2[0] = metadata.getU16();
+  pUp2[1] = metadata.getU16();
 
   // 'curve' will hold a peace wise linearly interpolated function.
   // there are 'csize' segements, each is 'step' values long.
@@ -85,21 +85,21 @@ void decompressNikon(RawImage& mRaw, ByteStream&& data, ByteStream metadata, uin
     curve[i] = i;
 
   uint32 step = 0;
-  uint32 csize = metadata.getShort();
+  uint32 csize = metadata.getU16();
   if (csize  > 1)
     step = curve.size() / (csize - 1);
   if (v0 == 68 && v1 == 32 && step > 0) {
     for (size_t i = 0; i < csize; i++)
-      curve[i*step] = metadata.getShort();
+      curve[i*step] = metadata.getU16();
     for (size_t i = 0; i < curve.size()-1; i++)
       curve[i] = (curve[i-i%step] * (step - i % step) +
                   curve[i-i%step+step] * (i % step)) / step;
     metadata.setPosition(562);
-    split = metadata.getShort();
+    split = metadata.getU16();
   } else if (v0 != 70 && csize <= 0x4001) {
     curve.resize(csize + 1UL);
     for (uint32 i = 0; i < csize; i++) {
-      curve[i] = metadata.getShort();
+      curve[i] = metadata.getU16();
     }
   }
 

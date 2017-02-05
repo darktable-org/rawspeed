@@ -53,13 +53,13 @@ void decodePentax(RawImage& mRaw, ByteStream&& data, TiffIFD* root) {
 
       ByteStream stream = t->getData();
 
-      uint32 depth = (stream.getShort()+12)&0xf;
+      uint32 depth = (stream.getU16()+12)&0xf;
       stream.skipBytes(12);
       uint32 v0[16];
       uint32 v1[16];
       uint32 v2[16];
       for (uint32 i = 0; i < depth; i++)
-         v0[i] = stream.getShort();
+         v0[i] = stream.getU16();
 
       for (uint32 i = 0; i < depth; i++)
         v1[i] = stream.getByte();

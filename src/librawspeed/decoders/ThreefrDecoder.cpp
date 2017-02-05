@@ -48,9 +48,9 @@ RawImage ThreefrDecoder::decodeRawInternal() {
     ThrowRDE("3FR Decoder: No image data found");
 
   TiffIFD* raw = data[1];
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
-  uint32 off = raw->getEntry(STRIPOFFSETS)->getInt();
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();

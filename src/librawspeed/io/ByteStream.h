@@ -125,10 +125,9 @@ public:
     return ret;
   }
 
-  // TODO: rename, see also TiffEntry
-  inline ushort16 getShort() { return get<ushort16>(); }
-  inline int32 getInt() { return get<int32>(); }
-  inline uint32 getUInt() { return get<uint32>(); }
+  inline ushort16 getU16() { return get<ushort16>(); }
+  inline int32 getI32() { return get<int32>(); }
+  inline uint32 getU32() { return get<uint32>(); }
   inline float getFloat() { return get<float>(); }
 
   const char* peekString() const {

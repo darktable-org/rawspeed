@@ -44,7 +44,7 @@ RawImage PefDecoder::decodeRawInternal() {
 
   TiffIFD* raw = data[0];
 
-  int compression = raw->getEntry(COMPRESSION)->getInt();
+  int compression = raw->getEntry(COMPRESSION)->getU32();
 
   if (1 == compression || compression == 32773) {
     decodeUncompressed(raw, BitOrder_Jpeg);
@@ -63,16 +63,16 @@ RawImage PefDecoder::decodeRawInternal() {
   if (counts->count != offsets->count) {
     ThrowRDE("PEF Decoder: Byte count number does not match strip size: count:%u, strips:%u ", counts->count, offsets->count);
   }
-  if (!mFile->isValid(offsets->getInt(), counts->getInt()))
+  if (!mFile->isValid(offsets->getU32(), counts->getU32()))
     ThrowRDE("PEF Decoder: Truncated file.");
 
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
   try {
-    decodePentax(mRaw, ByteStream(mFile, offsets->getInt(), counts->getInt()), getRootIFD());
+    decodePentax(mRaw, ByteStream(mFile, offsets->getU32(), counts->getU32()), getRootIFD());
   } catch (IOException &e) {
     mRaw->setError(e.what());
     // Let's ignore it, it may have delivered somewhat useful data.
@@ -86,7 +86,7 @@ void PefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
 
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
-    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getInt();
+    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();
 
   setMetaData(meta, "", iso);
 
@@ -95,7 +95,7 @@ void PefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
     TiffEntry *black = mRootIFD->getEntryRecursive((TiffTag)0x200);
     if (black->count == 4) {
       for (int i = 0; i < 4; i++)
-        mRaw->blackLevelSeparate[i] = black->getInt(i);
+        mRaw->blackLevelSeparate[i] = black->getU32(i);
     }
   }
 
@@ -103,9 +103,9 @@ void PefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   if (mRootIFD->hasEntryRecursive((TiffTag) 0x0201)) {
     TiffEntry *wb = mRootIFD->getEntryRecursive((TiffTag) 0x0201);
     if (wb->count == 4) {
-      mRaw->metadata.wbCoeffs[0] = wb->getInt(0);
-      mRaw->metadata.wbCoeffs[1] = wb->getInt(1);
-      mRaw->metadata.wbCoeffs[2] = wb->getInt(3);
+      mRaw->metadata.wbCoeffs[0] = wb->getU32(0);
+      mRaw->metadata.wbCoeffs[1] = wb->getU32(1);
+      mRaw->metadata.wbCoeffs[2] = wb->getU32(3);
     }
   }
 }

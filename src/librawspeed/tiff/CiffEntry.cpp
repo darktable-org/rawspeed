@@ -93,26 +93,26 @@ bool CiffEntry::isInt() {
   return (type == CIFF_LONG || type == CIFF_SHORT || type ==  CIFF_BYTE);
 }
 
-uint32 CiffEntry::getInt(uint32 num) {
+uint32 CiffEntry::getU32(uint32 num) {
   if (!isInt())
-    ThrowCPE("CIFF, getInt: Wrong type 0x%x encountered. Expected Long, Short or Byte at 0x%x", type, tag);
+    ThrowCPE("CIFF, getU32: Wrong type 0x%x encountered. Expected Long, Short or Byte at 0x%x", type, tag);
   if (type == CIFF_BYTE)
     return getByte(num);
   if (type == CIFF_SHORT)
-    return getShort(num);
+    return getU16(num);
 
   if (num*4+3 >= bytesize)
-    ThrowCPE("CIFF, getInt: Trying to read out of bounds");
+    ThrowCPE("CIFF, getU32: Trying to read out of bounds");
 
   return getU32LE(data + num * 4);
 }
 
-ushort16 CiffEntry::getShort(uint32 num) {
+ushort16 CiffEntry::getU16(uint32 num) {
   if (type != CIFF_SHORT && type != CIFF_BYTE)
-    ThrowCPE("CIFF, getShort: Wrong type 0x%x encountered. Expected Short at 0x%x", type, tag);
+    ThrowCPE("CIFF, getU16: Wrong type 0x%x encountered. Expected Short at 0x%x", type, tag);
 
   if (num*2+1 >= bytesize)
-    ThrowCPE("CIFF, getShort: Trying to read out of bounds");
+    ThrowCPE("CIFF, getU16: Trying to read out of bounds");
 
   return getU16LE(data + num * 2);
 }
@@ -194,13 +194,13 @@ std::string CiffEntry::getValueAsString()
   if (count == 1) {
     switch (type) {
       case CIFF_LONG:
-        sprintf(temp_string, "Long: %u (0x%x)", getInt(), getInt());
+        sprintf(temp_string, "Long: %u (0x%x)", getU32(), getU32());
         break;
       case CIFF_SHORT:
-        sprintf(temp_string, "Short: %u (0x%x)", getInt(), getInt());
+        sprintf(temp_string, "Short: %u (0x%x)", getU32(), getU32());
         break;
       case CIFF_BYTE:
-        sprintf(temp_string, "Byte: %u (0x%x)", getInt(), getInt());
+        sprintf(temp_string, "Byte: %u (0x%x)", getU32(), getU32());
         break;
       default:
         sprintf(temp_string, "Type: %x: ", type);
