@@ -37,19 +37,8 @@ namespace RawSpeed {
 class CameraMetaData;
 
 RawImage DcsDecoder::decodeRawInternal() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(IMAGEWIDTH);
-
-  if (data.empty())
-    ThrowRDE("DCS Decoder: No image data found");
-
-  TiffIFD* raw = data[0];
+  auto raw = getIFDWithLargestImage();
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-  // Find the largest image in the file
-  for(uint32 i=1; i<data.size(); i++)
-    if(data[i]->getEntry(IMAGEWIDTH)->getU32() > width)
-      raw = data[i];
-
-  width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
   uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
   uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getU32();

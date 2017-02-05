@@ -152,23 +152,8 @@ bool NefDecoder::NEFIsUncompressedRGB(const TiffIFD* raw) {
   return counts->getU32(0) == width*height*3;
 }
 
-
-TiffIFD* NefDecoder::FindBestImage(vector<TiffIFD*>* data) {
-  int largest_width = 0;
-  TiffIFD *best_ifd = nullptr;
-  for (auto raw : *data) {
-    int width = raw->getEntry(IMAGEWIDTH)->getU32();
-    if (width > largest_width)
-      best_ifd = raw;
-  }
-  if (nullptr == best_ifd)
-    ThrowRDE("NEF Decoder: Unable to locate image");
-  return best_ifd;
-}
-
 void NefDecoder::DecodeUncompressed() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
-  TiffIFD* raw = FindBestImage(&data);
+  auto raw = getIFDWithLargestImage(CFAPATTERN);
   uint32 nslices = raw->getEntry(STRIPOFFSETS)->count;
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
@@ -333,8 +318,7 @@ void NefDecoder::DecodeD100Uncompressed() {
 }
 
 void NefDecoder::DecodeSNefUncompressed() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
-  TiffIFD* raw = FindBestImage(&data);
+  auto raw = getIFDWithLargestImage(CFAPATTERN);
   uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
@@ -362,8 +346,7 @@ void NefDecoder::checkSupportInternal(CameraMetaData *meta) {
 
 string NefDecoder::getMode() {
   ostringstream mode;
-  vector<TiffIFD*>  data = mRootIFD->getIFDsWithTag(CFAPATTERN);
-  TiffIFD* raw = FindBestImage(&data);
+  auto raw = getIFDWithLargestImage(CFAPATTERN);
   int compression = raw->getEntry(COMPRESSION)->getU32();
   uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
 
