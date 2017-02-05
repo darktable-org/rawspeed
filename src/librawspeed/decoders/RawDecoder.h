@@ -82,7 +82,7 @@ public:
 
   /* Called function for filters that are capable of doing simple multi-threaded decode */
   /* The delivered class gives information on what part of the image should be decoded. */
-  virtual void decodeThreaded(RawDecoderThread* t);
+  [[noreturn]] virtual void decodeThreaded(RawDecoderThread* t);
 
   /* Allows access to the root IFD structure */
   /* If image isn't TIFF based NULL will be returned */

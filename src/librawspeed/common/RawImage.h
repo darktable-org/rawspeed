@@ -212,7 +212,7 @@ public:
 protected:
   void scaleValues(int start_y, int end_y) override;
   void fixBadPixel(uint32 x, uint32 y, int component = 0) override;
-  void doLookup(int start_y, int end_y) override;
+  [[noreturn]] void doLookup(int start_y, int end_y) override;
   RawImageDataFloat();
   RawImageDataFloat(const iPoint2D &dim, uint32 cpp = 1);
   friend class RawImage;
