@@ -47,12 +47,7 @@ namespace RawSpeed {
 class CameraMetaData;
 
 RawImage OrfDecoder::decodeRawInternal() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
-
-  if (data.empty())
-    ThrowRDE("ORF Decoder: No image data found");
-
-  TiffIFD* raw = data[0];
+  auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
 
   int compression = raw->getEntry(COMPRESSION)->getU32();
   if (1 != compression)

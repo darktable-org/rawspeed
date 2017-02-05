@@ -216,6 +216,14 @@ vector<TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) {
   return matchingIFDs;
 }
 
+const TiffIFD* TiffIFD::getIFDWithTag(TiffTag tag, uint32 index) const
+{
+  auto ifds = const_cast<TiffIFD*>(this)->getIFDsWithTag(tag);
+  if (index >= ifds.size())
+    ThrowTPE("TiffIFD: failed to find %u ifs with tag 0x%04x", index+1, tag);
+  return ifds[index];
+}
+
 TiffEntry* TiffIFD::getEntryRecursive(TiffTag tag) const {
   auto i = entries.find(tag);
   if (i != entries.end()) {

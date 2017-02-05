@@ -72,6 +72,7 @@ public:
   uint32 getNextIFD() const {return nextIFD;}
   //TODO: make public api totally const
   std::vector<TiffIFD*> getIFDsWithTag(TiffTag tag);
+  const TiffIFD* getIFDWithTag(TiffTag tag, uint32 index = 0) const;
   TiffEntry* getEntry(TiffTag tag) const;
   TiffEntry* getEntryRecursive(TiffTag tag) const;
   bool hasEntry(TiffTag tag) const { return entries.find(tag) != entries.end(); }

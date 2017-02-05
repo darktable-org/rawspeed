@@ -72,7 +72,6 @@ string MosDecoder::getXMPTag(const string &xmp, const string &tag) {
 }
 
 RawImage MosDecoder::decodeRawInternal() {
-  TiffIFD *raw = nullptr;
   uint32 off = 0;
 
   uint32 base = 8;
@@ -124,17 +123,15 @@ RawImage MosDecoder::decodeRawInternal() {
 
     return mRaw;
   }
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(TILEOFFSETS);
-  if (!data.empty()) {
-    raw = data[0];
+
+  const TiffIFD *raw = nullptr;
+
+  try {
+    raw = mRootIFD->getIFDWithTag(TILEOFFSETS);
     off = raw->getEntry(TILEOFFSETS)->getU32();
-  } else {
-    data = mRootIFD->getIFDsWithTag(CFAPATTERN);
-    if (!data.empty()) {
-      raw = data[0];
-      off = raw->getEntry(STRIPOFFSETS)->getU32();
-    } else
-      ThrowRDE("MOS Decoder: No image data found");
+  } catch(...) {
+    raw = mRootIFD->getIFDWithTag(CFAPATTERN);
+    off = raw->getEntry(STRIPOFFSETS)->getU32();
   }
 
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();

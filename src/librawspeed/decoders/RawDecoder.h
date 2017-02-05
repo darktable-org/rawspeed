@@ -161,7 +161,7 @@ protected:
 
   /* Generic decompressor for uncompressed images */
   /* order: Order of the bits - see Common.h for possibilities. */
-  void decodeUncompressed(TiffIFD *rawIFD, BitOrder order);
+  void decodeUncompressed(const TiffIFD* rawIFD, BitOrder order);
 
   /* The Raw input file to be decoded */
   FileMap *mFile;

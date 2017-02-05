@@ -38,12 +38,7 @@ namespace RawSpeed {
 class CameraMetaData;
 
 RawImage DcrDecoder::decodeRawInternal() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
-
-  if (data.empty())
-    ThrowRDE("DCR Decoder: No image data found");
-
-  TiffIFD* raw = data[0];
+  auto raw = mRootIFD->getIFDWithTag(CFAPATTERN);
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
   uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();

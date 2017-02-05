@@ -48,8 +48,7 @@ namespace RawSpeed {
 DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, FileMap* file)
   : AbstractTiffDecoder(move(rootIFD), file)
 {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(DNGVERSION);
-  const uchar8* v = data[0]->getEntry(DNGVERSION)->getData(4);
+  const uchar8* v = mRootIFD->getEntryRecursive(DNGVERSION)->getData(4);
 
   if (v[0] != 1)
     ThrowRDE("Not a supported DNG image format: v%u.%u.%u.%u", (int)v[0], (int)v[1], (int)v[2], (int)v[3]);

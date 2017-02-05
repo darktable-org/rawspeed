@@ -38,11 +38,7 @@ using namespace std;
 namespace RawSpeed {
 
 RawImage PefDecoder::decodeRawInternal() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
-  if (data.empty())
-    ThrowRDE("PEF Decoder: No image data found");
-
-  TiffIFD* raw = data[0];
+  auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
 
   int compression = raw->getEntry(COMPRESSION)->getU32();
 

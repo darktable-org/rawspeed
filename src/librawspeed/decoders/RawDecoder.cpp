@@ -57,7 +57,7 @@ RawDecoder::RawDecoder(FileMap* file) : mRaw(RawImage::create()), mFile(file) {
   fujiRotate = true;
 }
 
-void RawDecoder::decodeUncompressed(TiffIFD *rawIFD, BitOrder order) {
+void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
   uint32 nslices = rawIFD->getEntry(STRIPOFFSETS)->count;
   TiffEntry *offsets = rawIFD->getEntry(STRIPOFFSETS);
   TiffEntry *counts = rawIFD->getEntry(STRIPBYTECOUNTS);

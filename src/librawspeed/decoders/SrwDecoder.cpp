@@ -42,12 +42,7 @@ using namespace std;
 namespace RawSpeed {
 
 RawImage SrwDecoder::decodeRawInternal() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
-
-  if (data.empty())
-    ThrowRDE("Srw Decoder: No image data found");
-
-  TiffIFD* raw = data[0];
+  auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
 
   int compression = raw->getEntry(COMPRESSION)->getU32();
   int bits = raw->getEntry(BITSPERSAMPLE)->getU32();
@@ -106,7 +101,7 @@ RawImage SrwDecoder::decodeRawInternal() {
   return mRaw;
 }
 // Decoder for compressed srw files (NX300 and later)
-void SrwDecoder::decodeCompressed( TiffIFD* raw )
+void SrwDecoder::decodeCompressed( const TiffIFD* raw )
 {
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
@@ -203,7 +198,7 @@ void SrwDecoder::decodeCompressed( TiffIFD* raw )
 }
 
 // Decoder for compressed srw files (NX3000 and later)
-void SrwDecoder::decodeCompressed2( TiffIFD* raw, int bits)
+void SrwDecoder::decodeCompressed2( const TiffIFD* raw, int bits)
 {
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
@@ -276,7 +271,7 @@ int32 SrwDecoder::samsungDiff (BitPumpMSB &pump, encTableItem *tbl)
 // Thanks to Michael Reichmann (Luminous Landscape) for putting me in contact
 // and Loring von Palleske (Samsung) for pointing to the open-source code of
 // Samsung's DNG converter at http://opensource.samsung.com/
-void SrwDecoder::decodeCompressed3( TiffIFD* raw, int bits)
+void SrwDecoder::decodeCompressed3(const TiffIFD* raw, int bits)
 {
   uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
   BitPumpMSB32 startpump(mFile, offset);

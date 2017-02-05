@@ -52,12 +52,7 @@ bool RafDecoder::isRAF(FileMap* input) {
 }
 
 RawImage RafDecoder::decodeRawInternal() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(FUJI_STRIPOFFSETS);
-
-  if (data.empty())
-    ThrowRDE("Fuji decoder: Unable to locate raw IFD");
-
-  TiffIFD* raw = data[0];
+  auto raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
   uint32 height = 0;
   uint32 width = 0;
 

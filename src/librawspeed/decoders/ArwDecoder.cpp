@@ -45,7 +45,7 @@ using namespace std;
 namespace RawSpeed {
 
 RawImage ArwDecoder::decodeRawInternal() {
-  TiffIFD *raw = nullptr;
+  const TiffIFD* raw = nullptr;
   vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 
   if (data.empty()) {
@@ -55,10 +55,7 @@ RawImage ArwDecoder::decodeRawInternal() {
       // We've caught the elusive A100 in the wild, a transitional format
       // between the simple sanity of the MRW custom format and the wordly
       // wonderfullness of the Tiff-based ARW format, let's shoot from the hip
-      data = mRootIFD->getIFDsWithTag(SUBIFDS);
-      if (data.empty())
-        ThrowRDE("ARW: A100 format, couldn't find offset");
-      raw = data[0];
+      raw = mRootIFD->getIFDWithTag(SUBIFDS);
       uint32 off = raw->getEntry(SUBIFDS)->getU32();
       uint32 width = 3881;
       uint32 height = 2608;
@@ -78,10 +75,7 @@ RawImage ArwDecoder::decodeRawInternal() {
     }
 
     if (hints.find("srf_format") != hints.end()) {
-      data = mRootIFD->getIFDsWithTag(IMAGEWIDTH);
-      if (data.empty())
-        ThrowRDE("ARW: SRF format, couldn't find width/height");
-      raw = data[0];
+      raw = mRootIFD->getIFDWithTag(IMAGEWIDTH);
 
       uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
       uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
@@ -218,7 +212,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void ArwDecoder::DecodeUncompressed(TiffIFD* raw) {
+void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) {
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
   uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();

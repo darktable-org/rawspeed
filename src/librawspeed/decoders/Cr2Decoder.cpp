@@ -49,11 +49,11 @@ RawImage Cr2Decoder::decodeOldFormat() {
     offset = mRootIFD->getEntryRecursive(CANON_RAW_DATA_OFFSET)->getU32();
   else {
     // D2000 is oh so special...
-    vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
-    if (data.empty() || ! data[0]->hasEntry(STRIPOFFSETS))
+    auto ifd = mRootIFD->getIFDWithTag(CFAPATTERN);
+    if (! ifd->hasEntry(STRIPOFFSETS))
       ThrowRDE("CR2 Decoder: Couldn't find offset");
 
-    offset = data[0]->getEntry(STRIPOFFSETS)->getU32();
+    offset = ifd->getEntry(STRIPOFFSETS)->getU32();
   }
 
   ByteStream b(mFile, offset+41, getHostEndianness() == big);
@@ -239,11 +239,10 @@ int Cr2Decoder::getHue() {
 
 // Interpolate and convert sRaw data.
 void Cr2Decoder::sRawInterpolate() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CANONCOLORDATA);
-  if (data.empty())
+  TiffEntry* wb = mRootIFD->getEntryRecursive(CANONCOLORDATA);
+  if (!wb)
     ThrowRDE("CR2 sRaw: Unable to locate WB info.");
 
-  TiffEntry *wb = data[0]->getEntry(CANONCOLORDATA);
   // Offset to sRaw coefficients used to reconstruct uncorrected RGB data.
   uint32 offset = 78;
 

@@ -91,18 +91,16 @@ struct PanaBitpump
 
 RawImage Rw2Decoder::decodeRawInternal() {
 
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(PANASONIC_STRIPOFFSET);
-
   bool isOldPanasonic = false;
+  const TiffIFD* raw;
 
-  if (data.empty()) {
-    if (!mRootIFD->hasEntryRecursive(STRIPOFFSETS))
-      ThrowRDE("RW2 Decoder: No image data found");
+  try {
+    raw = mRootIFD->getIFDWithTag(PANASONIC_STRIPOFFSET);
+  } catch(...) {
     isOldPanasonic = true;
-    data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
+    raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
   }
 
-  TiffIFD* raw = data[0];
   uint32 height = raw->getEntry((TiffTag)3)->getU16();
   uint32 width = raw->getEntry((TiffTag)2)->getU16();
 
@@ -255,18 +253,13 @@ void Rw2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
     setMetaData(meta, id, "", iso);
   }
 
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(PANASONIC_STRIPOFFSET);
+  const TiffIFD* raw;
 
-  // bool isOldPanasonic = false;
-
-  if (data.empty()) {
-    if (!mRootIFD->hasEntryRecursive(STRIPOFFSETS))
-      ThrowRDE("RW2 Decoder: No image data found");
-    // isOldPanasonic = true;
-    data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
+  try {
+    raw = mRootIFD->getIFDWithTag(PANASONIC_STRIPOFFSET);
+  } catch(...) {
+    raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
   }
-
-  TiffIFD* raw = data[0];
 
   // Read blacklevels
   if (raw->hasEntry((TiffTag)0x1c) && raw->hasEntry((TiffTag)0x1d) && raw->hasEntry((TiffTag)0x1e)) {

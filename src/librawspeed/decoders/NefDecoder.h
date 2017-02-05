@@ -52,8 +52,8 @@ public:
 private:
   int getDecoderVersion() const override { return 5; }
   bool D100IsCompressed(uint32 offset);
-  bool NEFIsUncompressed(TiffIFD *raw);
-  bool NEFIsUncompressedRGB(TiffIFD *raw);
+  bool NEFIsUncompressed(const TiffIFD* raw);
+  bool NEFIsUncompressedRGB(const TiffIFD* raw);
   void DecodeUncompressed();
   void DecodeD100Uncompressed();
   void DecodeSNefUncompressed();
