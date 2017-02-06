@@ -20,7 +20,8 @@
 
 #pragma once
 
-#include "io/BitStream.h"
+#include "common/Common.h" // for getLE, ushort16, uchar8
+#include "io/BitStream.h"  // for BitStream, BitStreamCacheRightInLeftOut
 
 namespace RawSpeed {
 

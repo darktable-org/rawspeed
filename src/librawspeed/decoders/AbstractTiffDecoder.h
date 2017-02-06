@@ -22,9 +22,14 @@
 
 #include "decoders/RawDecoder.h" // for RawDecoder
 #include "io/FileMap.h"          // for FileMap
-#include "tiff/TiffIFD.h"        // for TiffRootIFDOwner
+#include "tiff/TiffIFD.h"        // for TiffID, TiffRootIFD, TiffRootIFDOwner
+#include <algorithm>             // for move
+#include <memory>                // for unique_ptr
+#include <string>                // for string
 
 namespace RawSpeed {
+
+class CameraMetaData;
 
 class AbstractTiffDecoder : public RawDecoder
 {

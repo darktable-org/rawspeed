@@ -21,12 +21,13 @@
 
 #pragma once
 
-#include "common/Common.h"
-#include "common/Memory.h" // for alignedMalloc, alignedFree
-#include "io/Buffer.h"
-#include "io/FileMap.h" // deprecated, see below
-#include "io/IOException.h"
-#include <cassert>
+#include "common/Common.h"  // for uchar8, int32, uint32, ushort16, roundUp
+#include "common/Memory.h"  // for alignedMalloc
+#include "io/Buffer.h"      // for Buffer::size_type, Buffer, DataBuffer
+#include "io/FileMap.h"     // for FileMap
+#include "io/IOException.h" // for ThrowIOE
+#include <cstddef>          // for ptrdiff_t
+#include <cstring>          // for memcmp, memcpy
 
 namespace RawSpeed {
 
