@@ -18,10 +18,12 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "tiff/TiffIFD.h"                 // for TiffRootIFD
-#include "tiff/TiffEntry.h"               // for TiffEntry
+#include "decoders/AbstractTiffDecoder.h"
+#include "common/Common.h"                // for uint32
 #include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "tiff/TiffEntry.h"               // for TiffEntry
+#include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD, Tiff...
+#include <vector>                         // for vector
 
 namespace RawSpeed {
 

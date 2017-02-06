@@ -22,13 +22,11 @@
 #include "decoders/MefDecoder.h"
 #include "common/Common.h"                          // for uint32
 #include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffIFD, TiffRoo...
 #include "tiff/TiffTag.h"                           // for TiffTag::STRIPOF...
 #include <memory>                                   // for unique_ptr
-#include <vector>                                   // for vector
 
 using namespace std;
 

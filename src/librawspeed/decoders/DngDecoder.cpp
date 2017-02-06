@@ -521,8 +521,8 @@ bool DngDecoder::decodeMaskedAreas(const TiffIFD* raw) {
   iPoint2D top = mRaw->getCropOffset();
 
   for (uint32 i = 0; i < nrects; i++) {
-    iPoint2D topleft = iPoint2D(rects[i*4+1], rects[i*4]);
-    iPoint2D bottomright = iPoint2D(rects[i*4+3], rects[i*4+2]);
+    iPoint2D topleft = iPoint2D(rects[i * 4UL + 1UL], rects[i * 4UL]);
+    iPoint2D bottomright = iPoint2D(rects[i * 4UL + 3UL], rects[i * 4UL + 2UL]);
     // Is this a horizontal box, only add it if it covers the active width of the image
     if (topleft.x <= top.x && bottomright.x >= (mRaw->dim.x + top.x)) {
       mRaw->blackAreas.emplace_back(topleft.y, bottomright.y - topleft.y,

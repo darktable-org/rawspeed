@@ -1,4 +1,4 @@
-/* 
+/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2017 Axel Waggershauser
@@ -20,7 +20,8 @@
 
 #pragma once
 
-#include "io/BitStream.h"
+#include "common/Common.h" // for getLE, uint32, uchar8
+#include "io/BitStream.h"  // for BitStream, BitStreamCacheRightInLeftOut
 
 namespace RawSpeed {
 

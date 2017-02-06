@@ -27,7 +27,6 @@
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
 #include <algorithm>                      // for move
 #include <string>                         // for string
-#include <vector>                         // for vector
 
 namespace RawSpeed {
 
