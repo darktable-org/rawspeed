@@ -20,10 +20,14 @@
 
 #pragma once
 
-#include "decoders/RawDecoderException.h"
-#include "io/Buffer.h"
-#include <cassert>
-#include <numeric>
+#include "common/Common.h"                // for ushort16, uchar8, int32
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/Buffer.h"                    // for Buffer
+#include <algorithm>                      // for copy
+#include <cassert>                        // for assert
+#include <cstddef>                        // for size_t
+#include <numeric>                        // for accumulate
+#include <vector>                         // for vector, allocator, operator==
 
 /*
 * The following code is inspired by the IJG JPEG library.

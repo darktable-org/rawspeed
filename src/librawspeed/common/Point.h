@@ -20,7 +20,9 @@
 
 #pragma once
 
-#include <cstdlib> // for abs
+#include "common/Common.h" // for uint32
+#include <algorithm>       // for max, min
+#include <cstdlib>         // for abs
 
 namespace RawSpeed {
 
