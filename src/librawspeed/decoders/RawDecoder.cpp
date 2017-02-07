@@ -117,16 +117,24 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
   }
 }
 
+void RawDecoder::askForSamples(CameraMetaData* meta, const string& make,
+                               const string& model, const string& mode) {
+  if ("dng" == mode)
+    return;
+
+  writeLog(DEBUG_PRIO_WARNING, "Unable to find camera in database: '%s' '%s' "
+                               "'%s'\nPlease consider providing samples on "
+                               "<https://raw.pixls.us/>, thanks!\n",
+           make.c_str(), model.c_str(), mode.c_str());
+}
+
 bool RawDecoder::checkCameraSupported(CameraMetaData* meta, const string& make,
                                       const string& model, const string& mode) {
   mRaw->metadata.make = make;
   mRaw->metadata.model = model;
   Camera* cam = meta->getCamera(make, model, mode);
   if (!cam) {
-    writeLog(DEBUG_PRIO_WARNING, "Unable to find camera in database: '%s' '%s' "
-                                 "'%s'\nPlease consider providing samples on "
-                                 "<https://raw.pixls.us/>, thanks!\n",
-             make.c_str(), model.c_str(), mode.c_str());
+    askForSamples(meta, make, model, mode);
 
     if (failOnUnknown)
       ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to guess. Sorry.", make.c_str(), model.c_str(), mode.c_str());
@@ -151,11 +159,7 @@ void RawDecoder::setMetaData(CameraMetaData* meta, const string& make,
   mRaw->metadata.isoSpeed = iso_speed;
   Camera *cam = meta->getCamera(make, model, mode);
   if (!cam) {
-    writeLog(DEBUG_PRIO_INFO, "ISO:%d\n", iso_speed);
-    writeLog(DEBUG_PRIO_WARNING, "Unable to find camera in database: '%s' '%s' "
-                                 "'%s'\nPlease consider providing samples on "
-                                 "<https://raw.pixls.us/>, thanks!\n",
-             make.c_str(), model.c_str(), mode.c_str());
+    askForSamples(meta, make, model, mode);
 
     if (failOnUnknown)
       ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to guess. Sorry.", make.c_str(), model.c_str(), mode.c_str());

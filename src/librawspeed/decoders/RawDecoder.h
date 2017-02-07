@@ -147,6 +147,10 @@ protected:
   /* If all threads report an error an exception will be thrown*/
   void startTasks(uint32 tasks);
 
+  /* Ask for sample submisson, if makes sense */
+  void askForSamples(CameraMetaData* meta, const std::string& make,
+                     const std::string& model, const std::string& mode);
+
   /* Check the camera and mode against the camera database. */
   /* A RawDecoderException will be thrown if the camera isn't supported */
   /* Unknown cameras does NOT generate any errors, but returns false */
