@@ -85,6 +85,32 @@ FIND_PROGRAM( LCOV_PATH lcov )
 FIND_PROGRAM( GENHTML_PATH genhtml )
 FIND_PROGRAM( GCOVR_PATH gcovr PATHS ${CMAKE_SOURCE_DIR}/tests)
 
+ADD_CUSTOM_TARGET(coverage-zerocounters
+  # Cleanup lcov
+  COMMAND ${LCOV_PATH} --directory ${CMAKE_BINARY_DIR} --zerocounters
+  COMMENT "Resetting code coverage counters to zero."
+)
+SET(coverage_info "${CMAKE_BINARY_DIR}/coverage.info")
+SET(coverage_cleaned "${coverage_info}.cleaned")
+SET(coverage_final "${coverage_info}.final")
+ADD_CUSTOM_TARGET(coverage-html
+  # Capturing lcov counters and generating report
+  COMMAND ${LCOV_PATH} --directory ${CMAKE_BINARY_DIR} --capture --output-file ${coverage_info}
+  # COMMAND ${LCOV_PATH} --remove ${coverage_info} 'test/*' '/usr/*' --output-file ${coverage_cleaned}
+  COMMAND ${LCOV_PATH} --extract ${coverage_info} '*/librawspeed/*' --output-file ${coverage_cleaned}
+  COMMAND ${LCOV_PATH} --remove ${coverage_cleaned} '*/*Test.cpp' '*/*Decoder*.*' --output-file ${coverage_final}
+  COMMAND ${GENHTML_PATH} --demangle-cpp --precision 2 -o coverage ${coverage_final}
+  COMMAND ${CMAKE_COMMAND} -E remove ${coverage_info} ${coverage_cleaned} ${coverage_final}
+
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  COMMENT "Processing code coverage counters and generating report."
+)
+# Show info where to find the report
+ADD_CUSTOM_COMMAND(TARGET coverage-html POST_BUILD
+  COMMAND ;
+  COMMENT "Use $ sensible-browser ./coverage/index.html  to view the coverage report."
+)
+
 # Param _targetname     The name of new the custom make target
 # Param _testrunner     The name of the target which runs the tests.
 #						MUST return ZERO always, even on errors.
@@ -118,8 +144,7 @@ FUNCTION(SETUP_TARGET_FOR_COVERAGE _targetname _testrunner _outputname)
 	# Setup target
 	ADD_CUSTOM_TARGET(${_targetname}
 
-		# Cleanup lcov
-		${LCOV_PATH} --directory . --zerocounters
+		DEPENDS coverage-zerocounters
 
 		# Run tests
 		COMMAND ${test_command} ${ARGV3}
