@@ -413,7 +413,7 @@ void SrwDecoder::decodeCompressed3(const TiffIFD* raw, int bits)
           value = &img[((i&0x7)<<1)+(i>>3)];
 
         diff = diff * (scale*2+1) + scale;
-        *value = clampBits(*value + diff, bits);
+        *value = clampBits((int64)(*value) + diff, bits);
       }
 
       img += 16;

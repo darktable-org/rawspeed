@@ -23,6 +23,7 @@ if(WITH_OPENMP AND OPENMP_FOUND)
 endif()
 
 FILE(GLOB RAWSPEED_TESTS_SOURCES
+  "../common/CommonTest.cpp"
   "../metadata/BlackAreaTest.cpp"
   "../metadata/CameraMetaDataTest.cpp"
   "../metadata/CameraSensorInfoTest.cpp"

@@ -35,6 +35,7 @@ namespace RawSpeed {
 using char8 = signed char;
 using uchar8 = unsigned char;
 using uint32 = unsigned int;
+using int64 = long long;
 using uint64 = unsigned long long;
 using int32 = signed int;
 using ushort16 = unsigned short;
@@ -63,6 +64,7 @@ inline void copyPixels(uchar8* dest, int dstPitch, const uchar8* src,
   }
 }
 
+// only works for positive values and zero
 template <typename T> inline constexpr bool isPowerOfTwo(T val) {
   return (val & (~val+1)) == val;
 }
@@ -73,7 +75,8 @@ constexpr inline size_t roundUp(size_t value, size_t multiple) {
              : value + multiple - (value % multiple);
 }
 
-template<typename T> bool isIn(const T value, const std::initializer_list<T>& list) {
+template <typename T, typename T2>
+bool isIn(const T value, const std::initializer_list<T2>& list) {
   for (auto t : list)
     if (t == value)
       return true;
@@ -177,10 +180,9 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 #endif
 
 // clampBits clamps the given int to the range 0 .. 2^n-1
-inline uint32 clampBits(int x, uint32 n)
-{
-  const int tmp = (1 << n) - 1;
-  x = x < 0 ? 0 : x;
+inline uint32 clampBits(int64 x, uint32 n) {
+  const int64 tmp = (1ULL << n) - 1ULL;
+  x = x < 0LL ? 0LL : x;
   x = x > tmp ? tmp : x;
   return x;
 }
