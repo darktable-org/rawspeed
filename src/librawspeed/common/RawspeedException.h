@@ -32,7 +32,17 @@ namespace RawSpeed {
 template <typename T>
 [[noreturn]] void __attribute__((format(printf, 1, 2)))
 ThrowException(const char* fmt, ...) {
-  static char buf[8192];
+  static constexpr size_t bufSize = 8192;
+#if defined(HAVE_THREAD_LOCAL)
+  static thread_local char buf[bufSize];
+#elif defined(HAVE___THREAD)
+  static __thread char buf[bufSize];
+#else
+#pragma message                                                                \
+    "Don't have thread-local-storage! Exception text may be garbled if used multithreaded"
+  static char buf[bufSize];
+#endif
+
   va_list val;
   va_start(val, fmt);
   vsnprintf(buf, sizeof(buf), fmt, val);

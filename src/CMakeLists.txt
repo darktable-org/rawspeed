@@ -104,6 +104,7 @@ else()
 endif()
 
 include(memory-align-alloc)
+include(thread-local)
 
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 set(CONFIG_INCLUDE_PATH "${CMAKE_CURRENT_BINARY_DIR}")
