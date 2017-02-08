@@ -7,6 +7,8 @@ if(BUILD_TESTING)
   # at least in debian, they are the package only installs their source code,
   # so if one wants to use them, he needs to compile them in-tree
   include(GoogleTest)
+
+  add_dependencies(dependencies gtest gmock_main)
 endif()
 
 if(WITH_PTHREADS)
@@ -50,6 +52,7 @@ if(WITH_PUGIXML)
       message(SEND_ERROR "Managed to fail to use 'bundled' Pugixml!")
     else()
       message(STATUS "Looking for pugixml - found ('in-tree')")
+      add_dependencies(dependencies ${Pugixml_LIBRARIES})
     endif()
   endif()
 
@@ -89,6 +92,7 @@ if (WITH_ZLIB)
       message(SEND_ERROR "Managed to fail to use 'bundled' ZLIB!")
     else()
       message(STATUS "Looking for ZLIB - found ('in-tree')")
+      add_dependencies(dependencies ${ZLIB_LIBRARIES})
     endif()
   endif()
 

@@ -92,6 +92,7 @@ include(compiler-flags)
 include(compiler-warnings)
 
 add_custom_target(check ALL)
+add_custom_target(dependencies ALL)
 
 add_subdirectory(src)
 add_subdirectory(data)
