@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32
-#include <algorithm>       // for max, min
-#include <cstdlib>         // for abs
+#include "common/Common.h"  // for uint32
+#include <algorithm>        // for max, min
+#include <cstdlib>          // for abs
 
 namespace RawSpeed {
 
@@ -36,8 +36,12 @@ public:
   iPoint2D operator - (const iPoint2D& b) const { return iPoint2D(x-b.x,y-b.y); }
   iPoint2D operator + (const iPoint2D& b) const { return iPoint2D(x+b.x,y+b.y); }
   iPoint2D &operator=(const iPoint2D &b) = default;
-  bool operator==(const iPoint2D& rhs){ return this->x==rhs.x && this->y==rhs.y; }
-  bool operator!=(const iPoint2D& rhs){ return this->x!=rhs.x || this->y!=rhs.y; }
+  bool operator==(const iPoint2D& rhs) const {
+    return this->x == rhs.x && this->y == rhs.y;
+  }
+  bool operator!=(const iPoint2D& rhs) const {
+    return this->x != rhs.x || this->y != rhs.y;
+  }
   ~iPoint2D() = default;
   uint32 area() const { return std::abs(x * y); }
   bool isThisInside(const iPoint2D &otherPoint) const {
