@@ -6,6 +6,7 @@ install:
 environment:
   CFLAGS: "-pipe"
   CXXFLAGS: "-pipe"
+  ECO: "-DALLOW_DOWNLOADING_GOOGLETEST=ON"
   TARGET: build
   matrix:
     - CC:  cc

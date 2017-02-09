@@ -31,6 +31,11 @@ option(USE_XMLLINT "Run xmllint to test if data/cameras.xml is valid" ON)
 option(USE_IWYU "Run iwyu tool when compiling sources" OFF)
 option(USE_CLANG_TIDY "Run clang-tidy tool when compiling sources" OFF)
 option(BUILD_TESTING "Build the testing tree." ON)
+if(BUILD_TESTING)
+  option(ALLOW_DOWNLOADING_GOOGLETEST "If googletest src tree is not found in location specified by GOOGLETEST_PATH, do fetch the archive from internet" OFF)
+else()
+  set(ALLOW_DOWNLOADING_GOOGLETEST OFF CACHE BOOL "If googletest src tree is not found in location specified by GOOGLETEST_PATH, do fetch the archive from internet" FORCE)
+endif()
 option(BUILD_TOOLS "Build some tools (identify, rstest)." ON)
 
 # Add a sensible build type default and warning because empty means no optimization and no debug info.
