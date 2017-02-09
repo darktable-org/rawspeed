@@ -126,10 +126,10 @@ RawImage MosDecoder::decodeRawInternal() {
 
   const TiffIFD *raw = nullptr;
 
-  try {
+  if (mRootIFD->hasEntryRecursive(TILEOFFSETS)) {
     raw = mRootIFD->getIFDWithTag(TILEOFFSETS);
     off = raw->getEntry(TILEOFFSETS)->getU32();
-  } catch(...) {
+  } else {
     raw = mRootIFD->getIFDWithTag(CFAPATTERN);
     off = raw->getEntry(STRIPOFFSETS)->getU32();
   }

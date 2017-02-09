@@ -91,15 +91,13 @@ struct PanaBitpump
 
 RawImage Rw2Decoder::decodeRawInternal() {
 
-  bool isOldPanasonic = false;
-  const TiffIFD* raw;
+  const TiffIFD* raw = nullptr;
+  bool isOldPanasonic = ! mRootIFD->hasEntryRecursive(PANASONIC_STRIPOFFSET);
 
-  try {
+  if (! isOldPanasonic)
     raw = mRootIFD->getIFDWithTag(PANASONIC_STRIPOFFSET);
-  } catch(...) {
-    isOldPanasonic = true;
+  else
     raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
-  }
 
   uint32 height = raw->getEntry((TiffTag)3)->getU16();
   uint32 width = raw->getEntry((TiffTag)2)->getU16();
@@ -253,13 +251,9 @@ void Rw2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
     setMetaData(meta, id, "", iso);
   }
 
-  const TiffIFD* raw;
-
-  try {
-    raw = mRootIFD->getIFDWithTag(PANASONIC_STRIPOFFSET);
-  } catch(...) {
-    raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
-  }
+  const TiffIFD* raw = mRootIFD->hasEntryRecursive(PANASONIC_STRIPOFFSET)
+                           ? mRootIFD->getIFDWithTag(PANASONIC_STRIPOFFSET)
+                           : mRootIFD->getIFDWithTag(STRIPOFFSETS);
 
   // Read blacklevels
   if (raw->hasEntry((TiffTag)0x1c) && raw->hasEntry((TiffTag)0x1d) && raw->hasEntry((TiffTag)0x1e)) {
