@@ -19,7 +19,7 @@
 */
 
 #include "decompressors/NikonDecompressor.h"
-#include "common/Common.h"              // for uint32, ushort16, clampbits
+#include "common/Common.h"              // for uint32, ushort16, clampBits
 #include "common/RawImage.h"            // for RawImage, RawImageData, RawI...
 #include "decompressors/HuffmanTable.h" // for HuffmanTable
 #include "io/BitPumpMSB.h"              // for BitPumpMSB, BitStream<>::fil...

@@ -236,7 +236,7 @@ RawImageDataFloat::RawImageDataFloat() {
         int *mul_local = &mul[2*(y&1)];
         int *sub_local = &sub[2*(y&1)];
         for (int x = 0 ; x < gw; x++) {
-          pixel[x] = clampbits(((pixel[x] - sub_local[x&1]) * mul_local[x&1] + 8192) >> 14, 16);
+          pixel[x] = clampBits(((pixel[x] - sub_local[x&1]) * mul_local[x&1] + 8192) >> 14, 16);
         }
       }
     }

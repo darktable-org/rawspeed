@@ -351,7 +351,10 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
       } else {
         rand = 0;
       }
-      pixel[x] = clampbits(((pixel[x] - sub_local[x&1]) * mul_local[x&1] + 8192 + rand) >> 14, 16);
+      pixel[x] = clampBits(
+          ((pixel[x] - sub_local[x & 1]) * mul_local[x & 1] + 8192 + rand) >>
+              14,
+          16);
     }
   }
 }
