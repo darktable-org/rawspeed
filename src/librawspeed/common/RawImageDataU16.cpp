@@ -382,7 +382,7 @@ void RawImageDataU16::fixBadPixel( uint32 x, uint32 y, int component )
   int curr = 0;
   while (x_find >= 0 && values[curr] < 0) {
     if (0 == ((bad_line[x_find>>3] >> (x_find&7)) & 1)) {
-      values[curr] = ((ushort16*)getData(x_find, y))[component];
+      values[curr] = ((ushort16*)getDataUncropped(x_find, y))[component];
       dist[curr] = (int)x-x_find;
     }
     x_find -= step;
@@ -392,7 +392,7 @@ void RawImageDataU16::fixBadPixel( uint32 x, uint32 y, int component )
   curr = 1;
   while (x_find < uncropped_dim.x && values[curr] < 0) {
     if (0 == ((bad_line[x_find>>3] >> (x_find&7)) & 1)) {
-      values[curr] = ((ushort16*)getData(x_find, y))[component];
+      values[curr] = ((ushort16*)getDataUncropped(x_find, y))[component];
       dist[curr] = x_find-(int)x;
     }
     x_find += step;
@@ -404,7 +404,7 @@ void RawImageDataU16::fixBadPixel( uint32 x, uint32 y, int component )
   curr = 2;
   while (y_find >= 0 && values[curr] < 0) {
     if (0 == ((bad_line[y_find*mBadPixelMapPitch] >> (x&7)) & 1)) {
-      values[curr] = ((ushort16*)getData(x, y_find))[component];
+      values[curr] = ((ushort16*)getDataUncropped(x, y_find))[component];
       dist[curr] = (int)y-y_find;
     }
     y_find -= step;
@@ -414,7 +414,7 @@ void RawImageDataU16::fixBadPixel( uint32 x, uint32 y, int component )
   curr = 3;
   while (y_find < uncropped_dim.y && values[curr] < 0) {
     if (0 == ((bad_line[y_find*mBadPixelMapPitch] >> (x&7)) & 1)) {
-      values[curr] = ((ushort16*)getData(x, y_find))[component];
+      values[curr] = ((ushort16*)getDataUncropped(x, y_find))[component];
       dist[curr] = y_find-(int)y;
     }
     y_find += step;
