@@ -60,7 +60,7 @@ RawImage KdcDecoder::decodeRawInternal() {
   uint32 off = offset->getU32(4) + offset->getU32(12);
 
   // Offset hardcoding gotten from dcraw
-  if (hints.find("easyshare_offset_hack") != hints.end())
+  if (hints.has("easyshare_offset_hack"))
     off = off < 0x15000 ? 0x15000 : 0x17000;
 
   if (off > mFile->getSize())

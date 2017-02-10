@@ -39,7 +39,6 @@
 #include <cstdlib>                                  // for atoi
 #include <map>                                      // for map, _Rb_tree_it...
 #include <memory>                                   // for allocator_traits...
-#include <sstream>                                  // for stringstream
 #include <string>                                   // for string, allocator
 #include <utility>                                  // for pair
 #include <vector>                                   // for vector
@@ -216,14 +215,14 @@ void RawDecoder::setMetaData(CameraMetaData* meta, const string& make,
   // (the same order as the in the CFA tag)
   // A hint could be:
   // <Hint name="override_cfa_black" value="10,20,30,20"/>
-  if (cam->hints.find(string("override_cfa_black")) != cam->hints.end()) {
-    string rgb = cam->hints.find(string("override_cfa_black"))->second;
-    vector<string> v = splitString(rgb, ',');
+  string cfa_black = hints.get("override_cfa_black", string());
+  if (!cfa_black.empty()) {
+    vector<string> v = splitString(cfa_black, ',');
     if (v.size() != 4) {
       mRaw->setError("Expected 4 values '10,20,30,20' as values for override_cfa_black hint.");
     } else {
       for (int i = 0; i < 4; i++) {
-        mRaw->blackLevelSeparate[i] = atoi(v[i].c_str());
+        mRaw->blackLevelSeparate[i] = stoi(v[i]);
       }
     }
   }
@@ -296,10 +295,8 @@ RawSpeed::RawImage RawDecoder::decodeRaw()
 {
   try {
     RawImage raw = decodeRawInternal();
-    if(hints.find("pixel_aspect_ratio") != hints.end()) {
-      stringstream convert(hints.find("pixel_aspect_ratio")->second);
-      convert >> raw->metadata.pixelAspectRatio;
-    }
+    raw->metadata.pixelAspectRatio =
+        hints.get("pixel_aspect_ratio", raw->metadata.pixelAspectRatio);
     if (interpolateBadPixels)
       raw->fixBadPixels();
     return raw;

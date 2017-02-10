@@ -26,6 +26,7 @@
 #include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray
 #include <map>                         // for map
+#include <sstream>                     // for istringstream
 #include <string>                      // for string, basic_string, allocator
 #include <vector>                      // for vector
 
@@ -34,6 +35,32 @@ class xml_node;
 } // namespace pugi
 
 namespace RawSpeed {
+
+class Hints
+{
+  std::map<std::string, std::string> data;
+public:
+  void add(const std::string& key, const std::string& value)
+  {
+    data.insert({key, value});
+  }
+
+  bool has(const std::string& key) const
+  {
+    return data.find(key) != data.end();
+  }
+
+  template <typename T>
+  T get(const std::string& key, T defaultValue) const
+  {
+    auto hint = data.find(key);
+    if (hint != data.end() && !hint->second.empty()) {
+      std::istringstream iss(hint->second);
+      iss >> std::boolalpha >> defaultValue;
+    }
+    return defaultValue;
+  }
+};
 
 class Camera
 {
@@ -57,7 +84,7 @@ public:
   std::vector<BlackArea> blackAreas;
   std::vector<CameraSensorInfo> sensorInfo;
   int decoderVersion;
-  std::map<std::string,std::string> hints;
+  Hints hints;
 protected:
   void parseCFA(const pugi::xml_node &node);
   void parseCrop(const pugi::xml_node &node);

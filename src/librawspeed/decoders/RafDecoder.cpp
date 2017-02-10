@@ -87,7 +87,7 @@ RawImage RafDecoder::decodeRawInternal() {
   // Some fuji SuperCCD cameras include a second raw image next to the first one
   // that is identical but darker to the first. The two combined can produce
   // a higher dynamic range image. Right now we're ignoring it.
-  bool double_width = hints.find("double_width_unpacked") != hints.end();
+  bool double_width = hints.has("double_width_unpacked");
 
   mRaw->dim = iPoint2D(width*(double_width ? 2 : 1), height);
   mRaw->createData();
@@ -105,7 +105,7 @@ RawImage RafDecoder::decodeRawInternal() {
   } else if (input.isInNativeByteOrder() == (getHostEndianness() == big)) {
     u.decode16BitRawBEunpacked(width, height);
   } else {
-    if (hints.find("jpeg32_bitorder") != hints.end()) {
+    if (hints.has("jpeg32_bitorder")) {
       u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
                             BitOrder_Jpeg32);
     } else {
@@ -144,7 +144,7 @@ void RafDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   if (applyCrop) {
     new_size = cam->cropSize;
     crop_offset = cam->cropPos;
-    bool double_width = hints.find("double_width_unpacked") != hints.end();
+    bool double_width = hints.has("double_width_unpacked");
     // If crop size is negative, use relative cropping
     if (new_size.x <= 0)
       new_size.x = mRaw->dim.x / (double_width ? 2 : 1) - cam->cropPos.x + new_size.x;
@@ -155,7 +155,7 @@ void RafDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
       new_size.y = mRaw->dim.y - cam->cropPos.y + new_size.y;
   }
 
-  bool rotate = hints.find("fuji_rotate") != hints.end();
+  bool rotate = hints.has("fuji_rotate");
   rotate = rotate & fujiRotate;
 
   // Rotate 45 degrees - could be multithreaded.

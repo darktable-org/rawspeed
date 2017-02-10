@@ -74,7 +74,7 @@ RawImage ArwDecoder::decodeRawInternal() {
       return mRaw;
     }
 
-    if (hints.find("srf_format") != hints.end()) {
+    if (hints.has("srf_format")) {
       raw = mRootIFD->getIFDWithTag(IMAGEWIDTH);
 
       uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
@@ -223,7 +223,7 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) {
 
   UncompressedDecompressor u(*mFile, off, c2, mRaw, uncorrectedRawValues);
 
-  if (hints.find("sr2_format") != hints.end())
+  if (hints.has("sr2_format"))
     u.decode14BitRawBEunpacked(width, height);
   else
     u.decode16BitRawUnpacked(width, height);

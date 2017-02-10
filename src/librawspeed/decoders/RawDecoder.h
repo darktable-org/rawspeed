@@ -25,6 +25,7 @@
 #include "common/RawImage.h"              // for RawImage
 #include "common/Threading.h"             // for pthread_t
 #include "io/FileMap.h"                   // for FileMap
+#include "metadata/Camera.h"              // for Hints
 #include <map>                            // for map
 #include <string>                         // for string
 
@@ -175,7 +176,7 @@ protected:
   virtual int getDecoderVersion() const = 0;
 
   /* Hints set for the camera after checkCameraSupported has been called from the implementation*/
-   std::map<std::string,std::string> hints;
+  Hints hints;
 };
 
 class RawSlice {
