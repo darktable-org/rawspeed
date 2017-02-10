@@ -25,6 +25,10 @@ if(result)
   message(FATAL_ERROR "Build step for googletest failed: ${result}")
 endif()
 
+# shared googletest exibits varous spririous failures.
+# let's insist on static library.
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
 # Prevent overriding the parent project's compiler/linker
 # settings on Windows
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
