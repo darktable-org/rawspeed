@@ -5,8 +5,8 @@ project(googletest NONE)
 # Download and unpack googletest at configure time
 configure_file(${CMAKE_SOURCE_DIR}/cmake/Modules/GoogleTest.cmake.in ${CMAKE_BINARY_DIR}/googletest/CMakeLists.txt @ONLY)
 
-execute_process(
-  COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}"
+  -DALLOW_DOWNLOADING_GOOGLETEST=${ALLOW_DOWNLOADING_GOOGLETEST} -DGOOGLETEST_PATH:PATH=${GOOGLETEST_PATH} .
   RESULT_VARIABLE result
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest
 )

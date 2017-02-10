@@ -5,14 +5,14 @@ project(googletest-download NONE)
 # Enable ExternalProject CMake module
 include(ExternalProject)
 
-# Download and install GoogleTest
-
+option(ALLOW_DOWNLOADING_GOOGLETEST "If googletest src tree is not found in location specified by GOOGLETEST_PATH, do fetch the archive from internet" OFF)
 set(GOOGLETEST_PATH "/usr/src/googletest" CACHE PATH
                     "Path to the googletest root tree. Should contain googletest and googlemock subdirs. And CMakeLists.txt in root, and in both of these subdirs")
 
-#message(FATAL_ERROR "1 CMAKE_BINARY_DIR ${CMAKE_BINARY_DIR}")
+# Download and install GoogleTest
 
 message(STATUS "Looking for Google Test sources")
+message(STATUS "Looking for Google Test sources in ${GOOGLETEST_PATH}")
 if(EXISTS "${GOOGLETEST_PATH}"            AND IS_DIRECTORY "${GOOGLETEST_PATH}"            AND EXISTS "${GOOGLETEST_PATH}/CMakeLists.txt" AND
    EXISTS "${GOOGLETEST_PATH}/googletest" AND IS_DIRECTORY "${GOOGLETEST_PATH}/googletest" AND EXISTS "${GOOGLETEST_PATH}/googletest/CMakeLists.txt" AND
    EXISTS "${GOOGLETEST_PATH}/googlemock" AND IS_DIRECTORY "${GOOGLETEST_PATH}/googlemock" AND EXISTS "${GOOGLETEST_PATH}/googlemock/CMakeLists.txt")

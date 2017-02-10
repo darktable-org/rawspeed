@@ -38,6 +38,9 @@ else()
 endif()
 option(BUILD_TOOLS "Build some tools (identify, rstest)." ON)
 
+set(GOOGLETEST_PATH "/usr/src/googletest" CACHE PATH
+                    "Path to the googletest root tree. Should contain googletest and googlemock subdirs. And CMakeLists.txt in root, and in both of these subdirs")
+
 # Add a sensible build type default and warning because empty means no optimization and no debug info.
 if(NOT CMAKE_BUILD_TYPE)
   message("WARNING: CMAKE_BUILD_TYPE is not defined!")

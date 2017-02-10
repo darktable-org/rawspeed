@@ -69,7 +69,7 @@ script:
       export SRC_DIR="$TRAVIS_BUILD_DIR";
       export BUILD_DIR="$SRC_DIR/build";
       export INSTALL_PREFIX="$SRC_DIR/install";
-      export ECO="$ECO -DALLOW_DOWNLOADING_GOOGLETEST=ON"
+      export ECO="$ECO -DALLOW_DOWNLOADING_GOOGLETEST=ON";
       mkdir "$BUILD_DIR";
       mkdir "$INSTALL_PREFIX";
       "$SRC_DIR/.ci/ci-script.sh";
@@ -80,7 +80,7 @@ script:
       export SRC_DIR="$TRAVIS_BUILD_DIR";
       export BUILD_DIR="$SRC_DIR/build";
       export INSTALL_PREFIX="$SRC_DIR/install";
-      export ECO="$ECO -DALLOW_DOWNLOADING_GOOGLETEST=ON"
+      export ECO="$ECO -DALLOW_DOWNLOADING_GOOGLETEST=ON";
       mkdir "$BUILD_DIR";
       mkdir "$INSTALL_PREFIX";
       "$SRC_DIR/.ci/ci-script.sh";
