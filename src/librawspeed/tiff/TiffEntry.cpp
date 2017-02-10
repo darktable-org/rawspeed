@@ -41,12 +41,12 @@ static const uint32 datashifts[] = {0,0,0,1,2,3,0,0,1,2, 3, 2, 3, 2};
 //                                  0-1-2-3-4-5-6-7-8-9-10-11-12-13
 
 TiffEntry::TiffEntry(ByteStream &bs) {
-  tag = (TiffTag)bs.getShort();
-  const ushort16 numType = bs.getShort();
+  tag = (TiffTag)bs.getU16();
+  const ushort16 numType = bs.getU16();
   if (numType > TIFF_OFFSET)
     ThrowTPE("Error reading TIFF structure. Unknown Type 0x%x encountered.", numType);
   type = (TiffDataType) numType;
-  count = bs.getUInt();
+  count = bs.getU32();
 
   // check for count << datashift overflow
   if (count > UINT32_MAX >> datashifts[type])
@@ -60,7 +60,7 @@ TiffEntry::TiffEntry(ByteStream &bs) {
     data = bs.getSubStream(bs.getPosition(), byte_size);
     bs.skipBytes(4);
   } else {
-    data_offset = bs.getUInt();
+    data_offset = bs.getU32();
     if (type == TIFF_OFFSET || isIn(tag, {DNGPRIVATEDATA, MAKERNOTE, MAKERNOTE_ALT, FUJI_RAW_IFD, SUBIFDS, EXIFIFDPOINTER})) {
       // preserve offset for SUB_IFD/EXIF/MAKER_NOTE data
 #if 0
@@ -108,79 +108,64 @@ bool TiffEntry::isFloat() const {
            type == TIFF_SHORT || type == TIFF_SSHORT);
 }
 
-uchar8 TiffEntry::getByte(uint32 num) const {
+uchar8 TiffEntry::getByte(uint32 index) const {
   if (type != TIFF_BYTE && type != TIFF_UNDEFINED)
     ThrowTPE("TIFF, getByte: Wrong type %u encountered. Expected Byte on 0x%x", type, tag);
 
-  return data.peekByte(num);
+  return data.peekByte(index);
 }
 
-ushort16 TiffEntry::getShort(uint32 num) const {
+ushort16 TiffEntry::getU16(uint32 index) const {
   if (type != TIFF_SHORT && type != TIFF_UNDEFINED)
-    ThrowTPE("TIFF, getShort: Wrong type %u encountered. Expected Short or Undefined on 0x%x", type, tag);
+    ThrowTPE("TIFF, getU16: Wrong type %u encountered. Expected Short or Undefined on 0x%x", type, tag);
 
-  return data.peek<ushort16>(num);
+  return data.peek<ushort16>(index);
 }
 
-short16 TiffEntry::getSShort(uint32 num) const {
+short16 TiffEntry::getI16(uint32 index) const {
   if (type != TIFF_SSHORT && type != TIFF_UNDEFINED)
-    ThrowTPE("TIFF, getSShort: Wrong type %u encountered. Expected Short or Undefined on 0x%x", type, tag);
+    ThrowTPE("TIFF, getI16: Wrong type %u encountered. Expected Short or Undefined on 0x%x", type, tag);
 
-  return data.peek<short16>(num);
+  return data.peek<short16>(index);
 }
 
-uint32 TiffEntry::getInt(uint32 num) const {
+uint32 TiffEntry::getU32(uint32 index) const {
   if (type == TIFF_SHORT)
-    return getShort(num);
+    return getU16(index);
   if (!(type == TIFF_LONG || type == TIFF_OFFSET || type == TIFF_BYTE || type == TIFF_UNDEFINED || type == TIFF_RATIONAL || type == TIFF_SRATIONAL))
-    ThrowTPE("TIFF, getInt: Wrong type %u encountered. Expected Long, Offset, Rational or Undefined on 0x%x", type, tag);
+    ThrowTPE("TIFF, getU32: Wrong type %u encountered. Expected Long, Offset, Rational or Undefined on 0x%x", type, tag);
 
-  return data.peek<uint32>(num);
+  return data.peek<uint32>(index);
 }
 
-int32 TiffEntry::getSInt(uint32 num) const {
+int32 TiffEntry::getI32(uint32 index) const {
   if (type == TIFF_SSHORT)
-    return getSShort(num);
+    return getI16(index);
   if (!(type == TIFF_SLONG || type == TIFF_UNDEFINED))
-    ThrowTPE("TIFF, getSInt: Wrong type %u encountered. Expected SLong or Undefined on 0x%x", type, tag);
+    ThrowTPE("TIFF, getI32: Wrong type %u encountered. Expected SLong or Undefined on 0x%x", type, tag);
 
-  return data.peek<int32>(num);
+  return data.peek<int32>(index);
 }
 
-void TiffEntry::getShortArray(ushort16 *array, uint32 num) const {
-  for (uint32 i = 0; i < num; i++)
-    array[i] = getShort(i);
-}
-
-void TiffEntry::getIntArray(uint32 *array, uint32 num) const {
-  for (uint32 i = 0; i < num; i++)
-    array[i] = getInt(i);
-}
-
-void TiffEntry::getFloatArray(float *array, uint32 num) const {
-  for (uint32 i = 0; i < num; i++)
-    array[i] = getFloat(i);
-}
-
-float TiffEntry::getFloat(uint32 num) const {
+float TiffEntry::getFloat(uint32 index) const {
   if (!isFloat())
     ThrowTPE("TIFF, getFloat: Wrong type 0x%x encountered. Expected Float or something convertible on 0x%x", type, tag);
 
   switch (type) {
-  case TIFF_DOUBLE: return data.peek<double>(num);
-  case TIFF_FLOAT:  return data.peek<float>(num);
+  case TIFF_DOUBLE: return data.peek<double>(index);
+  case TIFF_FLOAT:  return data.peek<float>(index);
   case TIFF_LONG:
-  case TIFF_SHORT:  return (float)getInt(num);
+  case TIFF_SHORT:  return (float)getU32(index);
   case TIFF_SLONG:
-  case TIFF_SSHORT: return (float)getSInt(num);
+  case TIFF_SSHORT: return (float)getI32(index);
   case TIFF_RATIONAL: {
-    uint32 a = getInt(num*2);
-    uint32 b = getInt(num*2+1);
+    uint32 a = getU32(index*2);
+    uint32 b = getU32(index*2+1);
     return b ? (float) a/b : 0.f;
   }
   case TIFF_SRATIONAL: {
-    auto a = (int)getInt(num * 2);
-    auto b = (int)getInt(num * 2 + 1);
+    auto a = (int)getU32(index * 2);
+    auto b = (int)getU32(index * 2 + 1);
     return b ? (float) a/b : 0.f;
   }
   default:

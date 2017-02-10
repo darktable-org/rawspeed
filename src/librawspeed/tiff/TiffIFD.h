@@ -70,8 +70,8 @@ public:
   TiffIFD(const DataBuffer& data, uint32 offset, TiffIFD* parent);
   virtual ~TiffIFD() = default;
   uint32 getNextIFD() const {return nextIFD;}
-  //TODO: make public api totally const
-  std::vector<TiffIFD*> getIFDsWithTag(TiffTag tag);
+  std::vector<const TiffIFD*> getIFDsWithTag(TiffTag tag) const;
+  const TiffIFD* getIFDWithTag(TiffTag tag, uint32 index = 0) const;
   TiffEntry* getEntry(TiffTag tag) const;
   TiffEntry* getEntryRecursive(TiffTag tag) const;
   bool hasEntry(TiffTag tag) const { return entries.find(tag) != entries.end(); }

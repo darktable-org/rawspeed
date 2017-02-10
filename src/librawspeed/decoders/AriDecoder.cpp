@@ -38,16 +38,16 @@ AriDecoder::AriDecoder(FileMap* file) : RawDecoder(file) {
   }
   try {
     ByteStream s(mFile, 8, getHostEndianness() == little);
-    mDataOffset = s.getUInt();
-    uint32 someNumber = s.getUInt(); // Value: 3?
-    uint32 segmentLength = s.getUInt(); // Value: 0x3c = length
+    mDataOffset = s.getU32();
+    uint32 someNumber = s.getU32(); // Value: 3?
+    uint32 segmentLength = s.getU32(); // Value: 0x3c = length
 	if (someNumber != 3 || segmentLength != 0x3c) {
 		ThrowRDE("Unknown values in ARRIRAW header, %d, %d", someNumber, segmentLength);
 	}
-    mWidth = s.getUInt();
-    mHeight = s.getUInt();
+    mWidth = s.getU32();
+    mHeight = s.getU32();
     s.setPosition(0x40);
-    mDataSize = s.getUInt();
+    mDataSize = s.getU32();
 
     // Smells like whitebalance
     s.setPosition(0x5c);
@@ -57,7 +57,7 @@ AriDecoder::AriDecoder(FileMap* file) : RawDecoder(file) {
 
     // Smells like iso
     s.setPosition(0xb8);
-    mIso = s.getUInt();  // 100 in sample
+    mIso = s.getU32();  // 100 in sample
 
     s.setPosition(0x29c-8);
     mModel = s.getString();

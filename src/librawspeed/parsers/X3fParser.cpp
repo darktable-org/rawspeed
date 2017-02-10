@@ -46,10 +46,10 @@ X3fParser::X3fParser(FileMap* file) {
   try {
     try {
       // Read signature
-      if (bytes->getUInt() != 0x62564f46)
+      if (bytes->getU32() != 0x62564f46)
         ThrowRDE("X3F Decoder: Not an X3f file (Signature)");
 
-      uint32 version = bytes->getUInt();
+      uint32 version = bytes->getU32();
       if (version < 0x00020000)
         ThrowRDE("X3F Decoder: File version too old");
 
@@ -91,18 +91,18 @@ static string getIdAsString(ByteStream *bytes) {
 void X3fParser::readDirectory()
 {
   bytes->setPosition(mFile->getSize()-4);
-  uint32 dir_off = bytes->getUInt();
+  uint32 dir_off = bytes->getU32();
   bytes->setPosition(dir_off);
 
   // Check signature
   if ("SECd" != getIdAsString(bytes))
     ThrowRDE("X3F Decoder: Unable to locate directory");
 
-  uint32 version = bytes->getUInt();
+  uint32 version = bytes->getU32();
   if (version < 0x00020000)
     ThrowRDE("X3F Decoder: File version too old (directory)");
 
-  uint32 n_entries = bytes->getUInt();
+  uint32 n_entries = bytes->getU32();
   for (uint32 i = 0; i < n_entries; i++) {
     X3fDirectory dir(bytes);
     decoder->mDirectory.push_back(dir);
@@ -128,8 +128,8 @@ RawDecoder* X3fParser::getDecoder()
 
 X3fDirectory::X3fDirectory( ByteStream *bytes )
 {
-    offset = bytes->getUInt();
-    length = bytes->getUInt();
+    offset = bytes->getU32();
+    length = bytes->getU32();
     id = getIdAsString(bytes);
     uint32 old_pos = bytes->getPosition();
     bytes->setPosition(offset);
@@ -145,15 +145,15 @@ X3fImage::X3fImage( ByteStream *bytes, uint32 offset, uint32 length )
   if (id != "SECi")
     ThrowRDE("X3fImage:Unknown Image signature");
 
-  uint32 version = bytes->getUInt();
+  uint32 version = bytes->getU32();
   if (version < 0x00020000)
     ThrowRDE("X3F Decoder: File version too old (image)");
 
-  type = bytes->getUInt();
-  format = bytes->getUInt();
-  width = bytes->getUInt();
-  height = bytes->getUInt();
-  pitchB = bytes->getUInt();
+  type = bytes->getU32();
+  format = bytes->getU32();
+  width = bytes->getU32();
+  height = bytes->getU32();
+  pitchB = bytes->getU32();
   dataOffset = bytes->getPosition();
   dataSize = length - (dataOffset-offset);
   if (pitchB == dataSize)
@@ -307,15 +307,15 @@ void X3fPropertyCollection::addProperties( ByteStream *bytes, uint32 offset, uin
   if (id != "SECp")
     ThrowRDE("X3fImage:Unknown Property signature");
 
-  uint32 version = bytes->getUInt();
+  uint32 version = bytes->getU32();
   if (version < 0x00020000)
     ThrowRDE("X3F Decoder: File version too old (properties)");
 
-  uint32 entries = bytes->getUInt();
+  uint32 entries = bytes->getU32();
   if (!entries)
     return;
 
-  if (0 != bytes->getUInt())
+  if (0 != bytes->getU32())
     ThrowRDE("X3F Decoder: Unknown property character encoding");
 
   // Skip 4 reserved bytes
@@ -329,8 +329,8 @@ void X3fPropertyCollection::addProperties( ByteStream *bytes, uint32 offset, uin
 
   uint32 data_start = bytes->getPosition() + entries*8;
   for (uint32 i = 0; i < entries; i++) {
-    uint32 key_pos = bytes->getUInt();
-    uint32 value_pos = bytes->getUInt();
+    uint32 key_pos = bytes->getU32();
+    uint32 value_pos = bytes->getU32();
     uint32 old_pos = bytes->getPosition();
     try {
       bytes->setPosition(key_pos * 2 + data_start);

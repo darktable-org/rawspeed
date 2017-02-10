@@ -121,7 +121,7 @@ bool X3fDecoder::readName() {
       ByteStream i(mFile, cimg.dataOffset, cimg.dataSize);
       // Skip jpeg header
       i.skipBytes(6);
-      if (i.getUInt() == 0x66697845) { // Match text 'Exif'
+      if (i.getU32() == 0x66697845) { // Match text 'Exif'
         try {
           TiffRootIFDOwner root = parseTiff(mFile->getSubView(cimg.dataOffset+12, i.getRemainSize()));
           auto id = root->getID();
@@ -182,14 +182,14 @@ void X3fDecoder::decompressSigma( X3fImage &image )
 
   if (image.format == 35) {
     for (auto &i : planeDim) {
-      i.x = input.getShort();
-      i.y = input.getShort();
+      i.x = input.getU16();
+      i.y = input.getU16();
     }
     bits = 15;
   }
   if (image.format == 30 || image.format == 35) {
     for (int &i : pred)
-      i = input.getShort();
+      i = input.getU16();
 
     // Skip padding
     input.skipBytes(2);
@@ -207,7 +207,7 @@ void X3fDecoder::decompressSigma( X3fImage &image )
     }
 
     for (int i = 0; i < 3; i++) {
-      plane_sizes[i] = input.getUInt();
+      plane_sizes[i] = input.getU32();
       // Planes are 16 byte aligned
       if (i != 2) {
         plane_offset[i + 1] = plane_offset[i] + roundUp(plane_sizes[i], 16);
@@ -249,7 +249,7 @@ void X3fDecoder::decompressSigma( X3fImage &image )
 
   if (image.format == 6) {
     for (short &i : curve) {
-      i = (short)input.getShort();
+      i = (short)input.getU16();
     }
     max_len = 0;
 
@@ -262,7 +262,7 @@ void X3fDecoder::decompressSigma( X3fImage &image )
     unique_ptr<struct huff_item[]> huff(new struct huff_item[1024]);
 
     for (int i = 0; i < 1024; i++) {
-      uint32 val = input.getUInt();
+      uint32 val = input.getU32();
       huff[i].len = val >> 27;
       huff[i].code = val & 0x7ffffff;
       max_len = max(max_len, val>>27);
@@ -295,7 +295,7 @@ void X3fDecoder::decompressSigma( X3fImage &image )
     if (!line_offsets)
       ThrowRDE("SigmaDecompressor: Memory Allocation failed.");
     for (int y = 0; y < mRaw->dim.y; y++) {
-      line_offsets[y] = i2.getUInt() + input.getPosition() + image.dataOffset;
+      line_offsets[y] = i2.getU32() + input.getPosition() + image.dataOffset;
     }
     startThreads();
     return;

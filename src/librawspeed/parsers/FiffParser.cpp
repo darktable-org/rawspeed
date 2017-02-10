@@ -78,14 +78,14 @@ RawDecoder* FiffParser::getDecoder() {
       //   a) no type info and b) data is always stored in place.
       // 4b: # of entries, for each entry: 2b tag, 2b len, xb data
       ByteStream bytes(mInput, third_ifd, getHostEndianness() == big);
-      uint32 entries = bytes.getUInt();
+      uint32 entries = bytes.getU32();
 
       if (entries > 255)
         ThrowFPE("ParseFuji: Too many entries");
 
       for (uint32 i = 0; i < entries; i++) {
-        ushort16 tag = bytes.getShort();
-        ushort16 length = bytes.getShort();
+        ushort16 tag = bytes.getU16();
+        ushort16 length = bytes.getU16();
         TiffDataType type = TIFF_UNDEFINED;
 
         if (tag == IMAGEWIDTH || tag == FUJIOLDWB) // also 0x121?

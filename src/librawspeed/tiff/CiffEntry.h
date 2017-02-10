@@ -48,8 +48,8 @@ class CiffEntry
 public:
   CiffEntry(FileMap* f, uint32 value_data, uint32 offset);
   ~CiffEntry();
-  uint32 getInt(uint32 num=0);
-  ushort16 getShort(uint32 num=0);
+  uint32 getU32(uint32 num=0);
+  ushort16 getU16(uint32 num=0);
   std::string getString();
   std::vector<std::string> getStrings();
   uchar8 getByte(uint32 num=0);

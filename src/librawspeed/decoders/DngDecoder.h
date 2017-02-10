@@ -47,13 +47,13 @@ private:
 protected:
   int getDecoderVersion() const override { return 0; }
   bool mFixLjpeg;
-  void dropUnsuportedChunks(std::vector<TiffIFD*>& data);
-  void parseCFA(TiffIFD* raw);
-  void decodeData(TiffIFD* raw, int compression);
+  void dropUnsuportedChunks(std::vector<const TiffIFD*>& data);
+  void parseCFA(const TiffIFD* raw);
+  void decodeData(const TiffIFD* raw, int compression);
   void printMetaData();
-  bool decodeMaskedAreas(TiffIFD* raw);
-  bool decodeBlackLevels(TiffIFD* raw);
-  void setBlack(TiffIFD* raw);
+  bool decodeMaskedAreas(const TiffIFD* raw);
+  bool decodeBlackLevels(const TiffIFD* raw);
+  void setBlack(const TiffIFD* raw);
 };
 
 } // namespace RawSpeed

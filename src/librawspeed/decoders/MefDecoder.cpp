@@ -35,16 +35,11 @@ using namespace std;
 namespace RawSpeed {
 
 RawImage MefDecoder::decodeRawInternal() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
-
-  if (data.size() < 2)
-    ThrowRDE("MEF Decoder: No image data found");
-
-  TiffIFD* raw = data[1];
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
-  uint32 off = raw->getEntry(STRIPOFFSETS)->getInt();
-  uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getInt();
+  auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS, 1);
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
+  uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getU32();
 
   if (c2 > mFile->getSize() - off) {
     mRaw->setError("Warning: byte count larger than file size, file probably truncated.");

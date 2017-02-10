@@ -72,14 +72,14 @@ RawImage CrwDecoder::decodeRawInternal() {
   if (!sensorInfo || sensorInfo->count < 6 || sensorInfo->type != CIFF_SHORT)
     ThrowRDE("CRW: Couldn't find image sensor info");
 
-  uint32 width = sensorInfo->getShort(1);
-  uint32 height = sensorInfo->getShort(2);
+  uint32 width = sensorInfo->getU16(1);
+  uint32 height = sensorInfo->getU16(2);
 
   CiffEntry *decTable = mRootIFD->getEntryRecursive(CIFF_DECODERTABLE);
   if (!decTable || decTable->type != CIFF_LONG)
     ThrowRDE("CRW: Couldn't find decoder table");
 
-  uint32 dec_table = decTable->getInt();
+  uint32 dec_table = decTable->getU32();
   if (dec_table > 2)
     ThrowRDE("CRW: Unknown decoder table %d", dec_table);
 
@@ -139,7 +139,7 @@ void CrwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
     CiffEntry *shot_info = mRootIFD->getEntryRecursive(CIFF_SHOTINFO);
     if (shot_info->type == CIFF_SHORT && shot_info->count >= 2) {
       // os << exp(canonEv(value.toLong()) * log(2.0)) * 100.0 / 32.0;
-      ushort16 iso_index = shot_info->getShort(2);
+      ushort16 iso_index = shot_info->getU16(2);
       iso = expf(canonEv((long)iso_index) * logf(2.0)) * 100.0f / 32.0f;
     }
   }
@@ -168,36 +168,36 @@ void CrwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
           key[0] = key[1] = 0;
 
         offset /= 2;
-        mRaw->metadata.wbCoeffs[0] = (float) (wb->getShort(offset+1) ^ key[1]);
-        mRaw->metadata.wbCoeffs[1] = (float) (wb->getShort(offset+0) ^ key[0]);
-        mRaw->metadata.wbCoeffs[2] = (float) (wb->getShort(offset+2) ^ key[0]);
+        mRaw->metadata.wbCoeffs[0] = (float) (wb->getU16(offset+1) ^ key[1]);
+        mRaw->metadata.wbCoeffs[1] = (float) (wb->getU16(offset+0) ^ key[0]);
+        mRaw->metadata.wbCoeffs[2] = (float) (wb->getU16(offset+2) ^ key[0]);
       }
     }
     if(mRootIFD->hasEntryRecursive((CiffTag)0x102c)) {
       CiffEntry *entry = mRootIFD->getEntryRecursive((CiffTag)0x102c);
-      if (entry->type == CIFF_SHORT && entry->getShort() > 512) {
+      if (entry->type == CIFF_SHORT && entry->getU16() > 512) {
         // G1/Pro90 CYGM pattern
-        mRaw->metadata.wbCoeffs[0] = (float) entry->getShort(62);
-        mRaw->metadata.wbCoeffs[1] = (float) entry->getShort(63);
-        mRaw->metadata.wbCoeffs[2] = (float) entry->getShort(60);
-        mRaw->metadata.wbCoeffs[3] = (float) entry->getShort(61);
+        mRaw->metadata.wbCoeffs[0] = (float) entry->getU16(62);
+        mRaw->metadata.wbCoeffs[1] = (float) entry->getU16(63);
+        mRaw->metadata.wbCoeffs[2] = (float) entry->getU16(60);
+        mRaw->metadata.wbCoeffs[3] = (float) entry->getU16(61);
       } else if (entry->type == CIFF_SHORT) {
         /* G2, S30, S40 */
-        mRaw->metadata.wbCoeffs[0] = (float) entry->getShort(51);
-        mRaw->metadata.wbCoeffs[1] = ((float) entry->getShort(50) + (float) entry->getShort(53))/ 2.0f;
-        mRaw->metadata.wbCoeffs[2] = (float) entry->getShort(52);
+        mRaw->metadata.wbCoeffs[0] = (float) entry->getU16(51);
+        mRaw->metadata.wbCoeffs[1] = ((float) entry->getU16(50) + (float) entry->getU16(53))/ 2.0f;
+        mRaw->metadata.wbCoeffs[2] = (float) entry->getU16(52);
       }
     }
     if (mRootIFD->hasEntryRecursive(CIFF_SHOTINFO) && mRootIFD->hasEntryRecursive(CIFF_WHITEBALANCE)) {
       CiffEntry *shot_info = mRootIFD->getEntryRecursive(CIFF_SHOTINFO);
-      ushort16 wb_index = shot_info->getShort(7);
+      ushort16 wb_index = shot_info->getU16(7);
       CiffEntry *wb_data = mRootIFD->getEntryRecursive(CIFF_WHITEBALANCE);
       /* CANON EOS D60, CANON EOS 10D, CANON EOS 300D */
       int wb_offset = (wb_index < 18) ? "0134567028"[wb_index]-'0' : 0;
       wb_offset = 1+wb_offset*4;
-      mRaw->metadata.wbCoeffs[0] = wb_data->getShort(wb_offset + 0);
-      mRaw->metadata.wbCoeffs[1] = wb_data->getShort(wb_offset + 1);
-      mRaw->metadata.wbCoeffs[2] = wb_data->getShort(wb_offset + 3);
+      mRaw->metadata.wbCoeffs[0] = wb_data->getU16(wb_offset + 0);
+      mRaw->metadata.wbCoeffs[1] = wb_data->getU16(wb_offset + 1);
+      mRaw->metadata.wbCoeffs[2] = wb_data->getU16(wb_offset + 3);
     }
   } catch (const std::exception& e) {
     fprintf(stderr, "Got exception: %s\n", e.what());

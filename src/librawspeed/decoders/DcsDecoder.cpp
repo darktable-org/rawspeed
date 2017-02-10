@@ -37,22 +37,11 @@ namespace RawSpeed {
 class CameraMetaData;
 
 RawImage DcsDecoder::decodeRawInternal() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(IMAGEWIDTH);
-
-  if (data.empty())
-    ThrowRDE("DCS Decoder: No image data found");
-
-  TiffIFD* raw = data[0];
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
-  // Find the largest image in the file
-  for(uint32 i=1; i<data.size(); i++)
-    if(data[i]->getEntry(IMAGEWIDTH)->getInt() > width)
-      raw = data[i];
-
-  width = raw->getEntry(IMAGEWIDTH)->getInt();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
-  uint32 off = raw->getEntry(STRIPOFFSETS)->getInt();
-  uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getInt();
+  auto raw = getIFDWithLargestImage();
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
+  uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getU32();
 
   if (off > mFile->getSize())
     ThrowRDE("DCR Decoder: Offset is out of bounds");
@@ -68,11 +57,10 @@ RawImage DcsDecoder::decodeRawInternal() {
   if (!linearization || linearization->count != 256 || linearization->type != TIFF_SHORT)
     ThrowRDE("DCS Decoder: Couldn't find the linearization table");
 
-  ushort16 table[256];
-  linearization->getShortArray(table, 256);
+  auto table = linearization->getU16Array(256);
 
   if (!uncorrectedRawValues)
-    mRaw->setTable(table, 256, true);
+    mRaw->setTable(table.data(), table.size(), true);
 
   UncompressedDecompressor u(*mFile, off, c2, mRaw, uncorrectedRawValues);
 
@@ -80,7 +68,7 @@ RawImage DcsDecoder::decodeRawInternal() {
 
   // Set the table, if it should be needed later.
   if (uncorrectedRawValues) {
-    mRaw->setTable(table, 256, false);
+    mRaw->setTable(table.data(), table.size(), false);
   } else {
     mRaw->setTable(nullptr);
   }

@@ -52,10 +52,10 @@ void AbstractLJpegDecompressor::decode() {
 }
 
 void AbstractLJpegDecompressor::parseSOF(SOFInfo* sof) {
-  uint32 headerLength = input.getShort();
+  uint32 headerLength = input.getU16();
   sof->prec = input.getByte();
-  sof->h = input.getShort();
-  sof->w = input.getShort();
+  sof->h = input.getU16();
+  sof->w = input.getU16();
   sof->cps = input.getByte();
 
   if (sof->h == 0 || sof->w == 0)
@@ -89,7 +89,7 @@ void AbstractLJpegDecompressor::parseSOS() {
   if (!frame.initialized)
     ThrowRDE("LJpegDecompressor::parseSOS: Frame not yet initialized (SOF Marker not parsed)");
 
-  uint32 headerLength = input.getShort();
+  uint32 headerLength = input.getU16();
   if (headerLength != 3 + frame.cps * 2 + 3)
     ThrowRDE("LJpegDecompressor::parseSOS: Invalid SOS header length.");
 
@@ -129,7 +129,7 @@ void AbstractLJpegDecompressor::parseSOS() {
 }
 
 void AbstractLJpegDecompressor::parseDHT() {
-  uint32 headerLength = input.getShort() - 2; // Subtract myself
+  uint32 headerLength = input.getU16() - 2; // Subtract myself
 
   while (headerLength)  {
     uint32 b = input.getByte();

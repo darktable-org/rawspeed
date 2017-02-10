@@ -42,15 +42,10 @@ using namespace std;
 namespace RawSpeed {
 
 RawImage SrwDecoder::decodeRawInternal() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
+  auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
 
-  if (data.empty())
-    ThrowRDE("Srw Decoder: No image data found");
-
-  TiffIFD* raw = data[0];
-
-  int compression = raw->getEntry(COMPRESSION)->getInt();
-  int bits = raw->getEntry(BITSPERSAMPLE)->getInt();
+  int compression = raw->getEntry(COMPRESSION)->getU32();
+  int bits = raw->getEntry(BITSPERSAMPLE)->getU32();
 
   if (32769 != compression && 32770 != compression && 32772 != compression && 32773 != compression)
     ThrowRDE("Srw Decoder: Unsupported compression");
@@ -106,19 +101,19 @@ RawImage SrwDecoder::decodeRawInternal() {
   return mRaw;
 }
 // Decoder for compressed srw files (NX300 and later)
-void SrwDecoder::decodeCompressed( TiffIFD* raw )
+void SrwDecoder::decodeCompressed( const TiffIFD* raw )
 {
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
-  const uint32 offset = raw->getEntry(STRIPOFFSETS)->getInt();
-  uint32 compressed_offset = raw->getEntry((TiffTag)40976)->getInt();
+  const uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
+  uint32 compressed_offset = raw->getEntry((TiffTag)40976)->getU32();
 
   ByteStream bs(mFile, compressed_offset, getHostEndianness() == little);
 
   for (uint32 y = 0; y < height; y++) {
-    uint32 line_offset = offset + bs.getInt();
+    uint32 line_offset = offset + bs.getI32();
     if (line_offset >= mFile->getSize())
       ThrowRDE("Srw decoder: Offset outside image file, file probably truncated.");
     int len[4];
@@ -203,11 +198,11 @@ void SrwDecoder::decodeCompressed( TiffIFD* raw )
 }
 
 // Decoder for compressed srw files (NX3000 and later)
-void SrwDecoder::decodeCompressed2( TiffIFD* raw, int bits)
+void SrwDecoder::decodeCompressed2( const TiffIFD* raw, int bits)
 {
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
-  uint32 offset = raw->getEntry(STRIPOFFSETS)->getInt();
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
@@ -276,9 +271,9 @@ int32 SrwDecoder::samsungDiff (BitPumpMSB &pump, encTableItem *tbl)
 // Thanks to Michael Reichmann (Luminous Landscape) for putting me in contact
 // and Loring von Palleske (Samsung) for pointing to the open-source code of
 // Samsung's DNG converter at http://opensource.samsung.com/
-void SrwDecoder::decodeCompressed3( TiffIFD* raw, int bits)
+void SrwDecoder::decodeCompressed3(const TiffIFD* raw, int bits)
 {
-  uint32 offset = raw->getEntry(STRIPOFFSETS)->getInt();
+  uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
   BitPumpMSB32 startpump(mFile, offset);
 
   // Process the initial metadata bits, we only really use initVal, width and
@@ -430,10 +425,10 @@ void SrwDecoder::decodeCompressed3( TiffIFD* raw, int bits)
 }
 
 string SrwDecoder::getMode() {
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
+  vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
   ostringstream mode;
   if (!data.empty() && data[0]->hasEntryRecursive(BITSPERSAMPLE)) {
-    mode << data[0]->getEntryRecursive(BITSPERSAMPLE)->getInt() << "bit";
+    mode << data[0]->getEntryRecursive(BITSPERSAMPLE)->getU32() << "bit";
     return mode.str();
   }
   return "";
@@ -451,7 +446,7 @@ void SrwDecoder::checkSupportInternal(CameraMetaData *meta) {
 void SrwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   int iso = 0;
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
-    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getInt();
+    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();
 
   auto id = mRootIFD->getID();
   string mode = getMode();

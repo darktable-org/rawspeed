@@ -66,7 +66,7 @@ void TiffIFD::parseIFDEntry(ByteStream& bs) {
     case SUBIFDS:
     case EXIFIFDPOINTER:
       for (uint32 j = 0; j < t->count; j++) {
-        add(make_unique<TiffIFD>(bs, t->getInt(j), this));
+        add(make_unique<TiffIFD>(bs, t->getU32(j), this));
         // if (getSubIFDs().back()->getNextIFD() != 0)
         //   cerr << "detected chained subIFds" << endl;
       }
@@ -90,12 +90,12 @@ TiffIFD::TiffIFD(const DataBuffer& data, uint32 offset, TiffIFD* parent_)
   ByteStream bs = data;
   bs.setPosition(offset);
 
-  auto numEntries = bs.getShort(); // Directory entries in this IFD
+  auto numEntries = bs.getU16(); // Directory entries in this IFD
 
   for (uint32 i = 0; i < numEntries; i++)
     parseIFDEntry(bs);
 
-  nextIFD = bs.getUInt();
+  nextIFD = bs.getU32();
 }
 
 TiffRootIFDOwner TiffIFD::parseDngPrivateData(TiffEntry* t) {
@@ -115,14 +115,14 @@ TiffRootIFDOwner TiffIFD::parseDngPrivateData(TiffEntry* t) {
     ThrowTPE("Not Makernote");
 
   bs.setInNativeByteOrder(big == getHostEndianness());
-  uint32 makerNoteSize = bs.getUInt();
+  uint32 makerNoteSize = bs.getU32();
   if (makerNoteSize != bs.getRemainSize())
     ThrowTPE("Error reading TIFF structure (invalid size). File Corrupt");
 
   bs.setInNativeByteOrder(isTiffInNativeByteOrder(bs, 0, "DNG makernote"));
   bs.skipBytes(2);
 
-  uint32 makerNoteOffset = bs.getUInt();
+  uint32 makerNoteOffset = bs.getU32();
   makerNoteSize -= 6; // update size of orinial maker note, we skipped 2+4 bytes
 
   // Update the underlying buffer of t, such that the maker note data starts at its original offset
@@ -204,16 +204,24 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(TiffEntry* t)
   return make_unique<TiffRootIFD>(bs, bs.getPosition());
 }
 
-vector<TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) {
-  vector<TiffIFD*> matchingIFDs;
+std::vector<const TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) const {
+  vector<const TiffIFD*> matchingIFDs;
   if (entries.find(tag) != entries.end()) {
     matchingIFDs.push_back(this);
   }
   for (auto& i : subIFDs) {
-    vector<TiffIFD*> t = i->getIFDsWithTag(tag);
+    vector<const TiffIFD*> t = i->getIFDsWithTag(tag);
     matchingIFDs.insert(matchingIFDs.end(), t.begin(), t.end());
   }
   return matchingIFDs;
+}
+
+const TiffIFD* TiffIFD::getIFDWithTag(TiffTag tag, uint32 index) const
+{
+  auto ifds = getIFDsWithTag(tag);
+  if (index >= ifds.size())
+    ThrowTPE("TiffIFD: failed to find %u ifs with tag 0x%04x", index+1, tag);
+  return ifds[index];
 }
 
 TiffEntry* TiffIFD::getEntryRecursive(TiffTag tag) const {

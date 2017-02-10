@@ -52,15 +52,14 @@ public:
 private:
   int getDecoderVersion() const override { return 5; }
   bool D100IsCompressed(uint32 offset);
-  bool NEFIsUncompressed(TiffIFD *raw);
-  bool NEFIsUncompressedRGB(TiffIFD *raw);
+  bool NEFIsUncompressed(const TiffIFD* raw);
+  bool NEFIsUncompressedRGB(const TiffIFD* raw);
   void DecodeUncompressed();
   void DecodeD100Uncompressed();
   void DecodeSNefUncompressed();
   void readCoolpixMangledRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch);
   void readCoolpixSplitRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch);
   void DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h);
-  TiffIFD* FindBestImage(std::vector<TiffIFD*>* data);
   std::string getMode();
   std::string getExtendedMode(const std::string &mode);
   ushort16* gammaCurve(double pwr, double ts, int mode, int imax);

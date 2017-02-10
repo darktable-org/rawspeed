@@ -45,8 +45,8 @@ using namespace std;
 namespace RawSpeed {
 
 RawImage ArwDecoder::decodeRawInternal() {
-  TiffIFD *raw = nullptr;
-  vector<TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
+  const TiffIFD* raw = nullptr;
+  vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
 
   if (data.empty()) {
     TiffEntry *model = mRootIFD->getEntryRecursive(MODEL);
@@ -55,11 +55,8 @@ RawImage ArwDecoder::decodeRawInternal() {
       // We've caught the elusive A100 in the wild, a transitional format
       // between the simple sanity of the MRW custom format and the wordly
       // wonderfullness of the Tiff-based ARW format, let's shoot from the hip
-      data = mRootIFD->getIFDsWithTag(SUBIFDS);
-      if (data.empty())
-        ThrowRDE("ARW: A100 format, couldn't find offset");
-      raw = data[0];
-      uint32 off = raw->getEntry(SUBIFDS)->getInt();
+      raw = mRootIFD->getIFDWithTag(SUBIFDS);
+      uint32 off = raw->getEntry(SUBIFDS)->getU32();
       uint32 width = 3881;
       uint32 height = 2608;
 
@@ -78,13 +75,10 @@ RawImage ArwDecoder::decodeRawInternal() {
     }
 
     if (hints.find("srf_format") != hints.end()) {
-      data = mRootIFD->getIFDsWithTag(IMAGEWIDTH);
-      if (data.empty())
-        ThrowRDE("ARW: SRF format, couldn't find width/height");
-      raw = data[0];
+      raw = mRootIFD->getIFDWithTag(IMAGEWIDTH);
 
-      uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
-      uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
+      uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
+      uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
       uint32 len = width*height*2;
 
       // Constants taken from dcraw
@@ -120,7 +114,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   }
 
   raw = data[0];
-  int compression = raw->getEntry(COMPRESSION)->getInt();
+  int compression = raw->getEntry(COMPRESSION)->getU32();
   if (1 == compression) {
     try {
       DecodeUncompressed(raw);
@@ -143,9 +137,9 @@ RawImage ArwDecoder::decodeRawInternal() {
   if (counts->count != offsets->count) {
     ThrowRDE("ARW Decoder: Byte count number does not match strip size: count:%u, strips:%u ", counts->count, offsets->count);
   }
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
-  uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getInt();
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
 
   // Sony E-550 marks compressed 8bpp ARW with 12 bit per pixel
   // this makes the compression detect it as a ARW v1.
@@ -161,7 +155,7 @@ RawImage ArwDecoder::decodeRawInternal() {
     }
   }
 
-  bool arw1 = counts->getInt() * 8 != width * height * bitPerPixel;
+  bool arw1 = counts->getU32() * 8 != width * height * bitPerPixel;
   if (arw1)
     height += 8;
 
@@ -173,7 +167,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   uint32 sony_curve[] = { 0, 0, 0, 0, 0, 4095 };
 
   for (uint32 i = 0; i < 4; i++)
-    sony_curve[i+1] = (c->getShort(i) >> 2) & 0xfff;
+    sony_curve[i+1] = (c->getU16(i) >> 2) & 0xfff;
 
   for (uint32 i = 0; i < 0x4001; i++)
     curve[i] = i;
@@ -185,8 +179,8 @@ RawImage ArwDecoder::decodeRawInternal() {
   if (!uncorrectedRawValues)
     mRaw->setTable(curve, 0x4000, true);
 
-  uint32 c2 = counts->getInt();
-  uint32 off = offsets->getInt();
+  uint32 c2 = counts->getU32();
+  uint32 off = offsets->getU32();
 
   if (!mFile->isValid(off))
     ThrowRDE("Sony ARW decoder: Data offset after EOF, file probably truncated");
@@ -218,11 +212,11 @@ RawImage ArwDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void ArwDecoder::DecodeUncompressed(TiffIFD* raw) {
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getInt();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getInt();
-  uint32 off = raw->getEntry(STRIPOFFSETS)->getInt();
-  uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getInt();
+void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) {
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
+  uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getU32();
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
@@ -303,7 +297,7 @@ void ArwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
 
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
-    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getInt();
+    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();
 
   auto id = mRootIFD->getID();
 
@@ -371,7 +365,7 @@ void ArwDecoder::GetWB() {
   // Set the whitebalance for all the modern ARW formats (everything after A100)
   if (mRootIFD->hasEntryRecursive(DNGPRIVATEDATA)) {
     TiffEntry *priv = mRootIFD->getEntryRecursive(DNGPRIVATEDATA);
-    TiffRootIFD makerNoteIFD(priv->getRootIfdData(), priv->getInt());
+    TiffRootIFD makerNoteIFD(priv->getRootIfdData(), priv->getU32());
 
     TiffEntry *sony_offset = makerNoteIFD.getEntryRecursive(SONY_OFFSET);
     TiffEntry *sony_length = makerNoteIFD.getEntryRecursive(SONY_LENGTH);
@@ -379,8 +373,8 @@ void ArwDecoder::GetWB() {
     if(!sony_offset || !sony_length || !sony_key || sony_key->count != 4)
       ThrowRDE("ARW: couldn't find the correct metadata for WB decoding");
 
-    uint32 off = sony_offset->getInt();
-    uint32 len = sony_length->getInt();
+    uint32 off = sony_offset->getU32();
+    uint32 len = sony_length->getU32();
     uint32 key = getU32LE(sony_key->getData(4));
 
     //TODO: replace ugly inplace decryption of (const) raw data

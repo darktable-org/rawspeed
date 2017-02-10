@@ -1,4 +1,6 @@
 FILE(GLOB DECODER_SOURCES
+  "AbstractTiffDecoder.cpp"
+  "AbstractTiffDecoder.h"
   "AriDecoder.cpp"
   "AriDecoder.h"
   "ArwDecoder.cpp"

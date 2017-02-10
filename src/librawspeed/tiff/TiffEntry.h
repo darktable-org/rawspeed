@@ -26,6 +26,7 @@
 #include "io/ByteStream.h" // for ByteStream
 #include "tiff/TiffTag.h"  // for TiffTag
 #include <string>          // for string
+#include <vector>          // for vector
 
 namespace RawSpeed {
 
@@ -61,6 +62,15 @@ class TiffEntry
   TiffIFD* parent = nullptr;
   friend class TiffIFD;
 
+  template <typename T, T (TiffEntry::* getter)(uint32) const>
+  std::vector<T> getArray(uint32 count_) const
+  {
+    std::vector<T> res(count_);
+    for (uint32 i = 0; i < count_; ++i)
+      res[i] = (this->*getter)(i);
+    return res;
+  }
+
 public:
   TiffTag tag;
   TiffDataType type;
@@ -72,16 +82,29 @@ public:
   bool isFloat() const;
   bool isInt() const;
   bool isString() const;
-  uchar8 getByte(uint32 num=0) const;
-  uint32 getInt(uint32 num=0) const;
-  int32 getSInt(uint32 num=0) const;
-  ushort16 getShort(uint32 num=0) const;
-  short16 getSShort(uint32 num=0) const;
-  float getFloat(uint32 num=0) const;
+  uchar8 getByte(uint32 index = 0) const;
+  uint32 getU32(uint32 index = 0) const;
+  int32 getI32(uint32 index = 0) const;
+  ushort16 getU16(uint32 index = 0) const;
+  short16 getI16(uint32 index = 0) const;
+  float getFloat(uint32 index = 0) const;
   std::string getString() const;
-  void getShortArray(ushort16 *array, uint32 num) const;
-  void getIntArray(uint32 *array, uint32 num) const;
-  void getFloatArray(float *array, uint32 num) const;
+
+  inline std::vector<ushort16> getU16Array(uint32 count_) const
+  {
+    return getArray<ushort16, &TiffEntry::getU16>(count_);
+  }
+
+  inline std::vector<uint32> getU32Array(uint32 count_) const
+  {
+    return getArray<uint32, &TiffEntry::getU32>(count_);
+  }
+
+  inline std::vector<float> getFloatArray(uint32 count_) const
+  {
+    return getArray<float, &TiffEntry::getFloat>(count_);
+  }
+
   ByteStream& getData() { return data; }
   const uchar8* getData(uint32 size) { return data.getData(size); }
 

@@ -23,6 +23,7 @@
 #include "decoders/RawDecoder.h" // for RawDecoder
 #include "io/FileMap.h"          // for FileMap
 #include "tiff/TiffIFD.h"        // for TiffRootIFDOwner
+#include "tiff/TiffTag.h"        // for TiffTag
 
 namespace RawSpeed {
 
@@ -60,6 +61,8 @@ public:
   {
       checkCameraSupported(meta, mRootIFD->getID(), "");
   }
+
+  const TiffIFD* getIFDWithLargestImage(TiffTag filter = IMAGEWIDTH) const;
 };
 
 } // namespace RawSpeed

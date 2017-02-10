@@ -117,7 +117,7 @@ vector<CiffIFD*> CiffIFD::getIFDsWithTagWhere(CiffTag tag, uint32 isValue) {
   vector<CiffIFD*> matchingIFDs;
   if (mEntry.find(tag) != mEntry.end()) {
     CiffEntry* entry = mEntry[tag];
-    if (entry->isInt() && entry->getInt() == isValue)
+    if (entry->isInt() && entry->getU32() == isValue)
       matchingIFDs.push_back(this);
   }
   for (auto &i : mSubIFD) {
@@ -161,7 +161,7 @@ CiffEntry* CiffIFD::getEntryRecursive(CiffTag tag) {
 CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag, uint32 isValue) {
   if (mEntry.find(tag) != mEntry.end()) {
     CiffEntry* entry = mEntry[tag];
-    if (entry->isInt() && entry->getInt() == isValue)
+    if (entry->isInt() && entry->getU32() == isValue)
       return entry;
   }
   for (auto &i : mSubIFD) {
