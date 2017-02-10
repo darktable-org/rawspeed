@@ -13,7 +13,12 @@ endif(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 
 include(GNUInstallDirs)
 
-project(rawspeed CXX)
+if(NOT (CMAKE_VERSION VERSION_LESS 3.4.0-rc1))
+  project(rawspeed CXX)
+else()
+  # FindThreads.cmake issue
+  project(rawspeed CXX C)
+endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/")
