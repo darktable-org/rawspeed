@@ -37,9 +37,7 @@ class ByteStream;
 
 class CameraMetaData;
 
-class X3fDecoder :
-  public RawDecoder
-{
+class X3fDecoder final : public RawDecoder {
 public:
   X3fDecoder(FileMap* file);
   ~X3fDecoder() override;

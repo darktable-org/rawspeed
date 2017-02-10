@@ -350,13 +350,7 @@ void RawDecoder::startTasks( uint32 tasks )
   if (threads == 1) {
     while ((uint32)ctask < tasks) {
       t[0].taskNo = ctask++;
-      try {
-        decodeThreaded(&t[0]);
-      } catch (RawDecoderException &ex) {
-        mRaw->setError(ex.what());
-      } catch (IOException &ex) {
-        mRaw->setError(ex.what());
-      }
+      RawDecoderDecodeThread(&t[0]);
     }
     return;
   }

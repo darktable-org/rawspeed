@@ -24,8 +24,7 @@
 
 namespace RawSpeed {
 
-class BlackArea
-{
+class BlackArea final {
 public:
   BlackArea(int offset, int size, bool isVertical);
   virtual ~BlackArea();

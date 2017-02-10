@@ -31,9 +31,7 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-class MrwDecoder :
-  public RawDecoder
-{
+class MrwDecoder final : public RawDecoder {
 public:
   MrwDecoder(FileMap* file);
   RawImage decodeRawInternal() override;

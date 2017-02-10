@@ -30,6 +30,12 @@ CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wsuggest-attribute=noreturn)
 # CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wsuggest-attribute=format)
 # CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wmissing-format-attribute)
 
+CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wsuggest-final-types)
+CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wsuggest-final-methods)
+
+CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-error=suggest-final-types)
+CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-error=suggest-final-methods)
+
 # should be < 64Kb
 math(EXPR MAX_MEANINGFUL_SIZE 4*1024)
 if(APPLE)

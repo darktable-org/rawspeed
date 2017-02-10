@@ -28,7 +28,7 @@ namespace RawSpeed {
 [[noreturn]] void ThrowFPE(const char* fmt, ...)
     __attribute__((format(printf, 1, 2)));
 
-class FiffParserException : public std::runtime_error {
+class FiffParserException final : public std::runtime_error {
 public:
   FiffParserException(const std::string& _msg);
 };

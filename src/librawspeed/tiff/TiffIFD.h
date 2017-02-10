@@ -87,8 +87,7 @@ struct TiffID
   std::string model;
 };
 
-class TiffRootIFD : public TiffIFD
-{
+class TiffRootIFD final : public TiffIFD {
 public:
   const DataBuffer rootBuffer;
 

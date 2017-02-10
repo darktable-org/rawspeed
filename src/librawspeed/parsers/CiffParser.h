@@ -29,8 +29,7 @@ class CiffIFD;
 
 class RawDecoder;
 
-class CiffParser
-{
+class CiffParser final {
 public:
   CiffParser(FileMap* input);
   virtual ~CiffParser();

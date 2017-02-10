@@ -32,8 +32,7 @@ namespace RawSpeed {
 
 class CiffEntry;
 
-class CiffIFD
-{
+class CiffIFD final {
 public:
   CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 depth=0);
   virtual ~CiffIFD();

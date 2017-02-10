@@ -28,8 +28,7 @@ namespace RawSpeed {
 [[noreturn]] void ThrowIOE(const char* fmt, ...)
     __attribute__((format(printf, 1, 2)));
 
-class IOException : public std::runtime_error
-{
+class IOException final : public std::runtime_error {
 public:
   IOException(const char* _msg);
   IOException(const std::string &_msg);

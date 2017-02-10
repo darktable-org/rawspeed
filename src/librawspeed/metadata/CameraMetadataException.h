@@ -28,9 +28,7 @@ namespace RawSpeed {
 [[noreturn]] void ThrowCME(const char* fmt, ...)
     __attribute__((format(printf, 1, 2)));
 
-class CameraMetadataException :
-  public std::runtime_error
-{
+class CameraMetadataException final : public std::runtime_error {
 public:
   CameraMetadataException(const std::string &_msg);
 };

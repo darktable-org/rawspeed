@@ -112,7 +112,7 @@ public:
   uint32 getCpp() const { return cpp; }
   uint32 getBpp() const { return bpp; }
   void setCpp(uint32 val);
-  virtual void createData();
+  void createData();
   virtual void destroyData();
   void blitFrom(const RawImage& src, const iPoint2D& srcPos,
                 const iPoint2D& size, const iPoint2D& destPos);
@@ -120,16 +120,16 @@ public:
   uchar8* getData();
   uchar8* getData(uint32 x, uint32 y);    // Not super fast, but safe. Don't use per pixel.
   uchar8* getDataUncropped(uint32 x, uint32 y);
-  virtual void subFrame(iRectangle2D cropped );
-  virtual void clearArea(iRectangle2D area, uchar8 value = 0);
+  void subFrame(iRectangle2D cropped);
+  void clearArea(iRectangle2D area, uchar8 value = 0);
   iPoint2D getUncroppedDim();
   iPoint2D getCropOffset();
   virtual void scaleBlackWhite() = 0;
   virtual void calculateBlackAreas() = 0;
   virtual void setWithLookUp(ushort16 value, uchar8* dst, uint32* random) = 0;
-  virtual void sixteenBitLookup();
-  virtual void transferBadPixelsToMap();
-  virtual void fixBadPixels();
+  void sixteenBitLookup();
+  void transferBadPixelsToMap();
+  void fixBadPixels();
   void copyErrorsFrom(const RawImage& other);
   void expandBorder(iRectangle2D validData);
   void setTable(const ushort16* table, int nfilled, bool dither);
@@ -184,14 +184,11 @@ protected:
 #endif
 };
 
-
-class RawImageDataU16 : public RawImageData
-{
+class RawImageDataU16 final : public RawImageData {
 public:
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
-  void setWithLookUp(ushort16 value, uchar8* dst,
-                     uint32* random) override final;
+  void setWithLookUp(ushort16 value, uchar8* dst, uint32* random) final;
 
 protected:
   void scaleValues(int start_y, int end_y) override;
@@ -203,8 +200,7 @@ protected:
   friend class RawImage;
 };
 
-class RawImageDataFloat : public RawImageData
-{
+class RawImageDataFloat final : public RawImageData {
 public:
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;

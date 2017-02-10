@@ -29,8 +29,7 @@ namespace RawSpeed {
 [[noreturn]] void ThrowCPE(const char* fmt, ...)
     __attribute__((format(printf, 1, 2)));
 
-class CiffParserException : public std::runtime_error
-{
+class CiffParserException final : public std::runtime_error {
 public:
   CiffParserException(const std::string &_msg);
 };

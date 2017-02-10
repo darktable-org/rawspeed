@@ -24,8 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 namespace RawSpeed {
 
-class CameraSensorInfo
-{
+class CameraSensorInfo final {
 public:
   CameraSensorInfo(int black_level, int white_level, int min_iso, int max_iso,
                    std::vector<int> black_separate);

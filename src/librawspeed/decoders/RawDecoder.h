@@ -21,12 +21,12 @@
 
 #pragma once
 
-#include "common/Common.h"    // for uint32, BitOrder
-#include "common/RawImage.h"  // for RawImage
-#include "common/Threading.h" // for pthread_t
-#include "io/FileMap.h"       // for FileMap
-#include <map>                // for map
-#include <string>             // for string
+#include "common/Common.h"                // for uint32, BitOrder
+#include "common/RawImage.h"              // for RawImage
+#include "common/Threading.h"             // for pthread_t
+#include "io/FileMap.h"                   // for FileMap
+#include <map>                            // for map
+#include <string>                         // for string
 
 namespace RawSpeed {
 
