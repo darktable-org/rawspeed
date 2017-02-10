@@ -137,21 +137,39 @@ inline Endianness getHostEndianness() {
 # define BSWAP64(A) __builtin_bswap64(A)
 #endif
 
-template<typename T> inline T getByteSwapped(const void* data, bool bswap)
+inline short16 getByteSwapped(short16 v) { return BSWAP16(v); }
+inline ushort16 getByteSwapped(ushort16 v) { return BSWAP16(v); }
+inline int32 getByteSwapped(int32 v) { return BSWAP32(v); }
+inline uint32 getByteSwapped(uint32 v) { return BSWAP32(v); }
+inline uint64 getByteSwapped(uint64 v) { return BSWAP64(v); }
+
+// the float/double versions use two memcpy which guarantee strict aliasing
+// and are compiled into the same assembly as the popular union trick.
+inline float getByteSwapped(float f)
+{
+  uint32 i;
+  memcpy(&i, &f, sizeof(i));
+  i = BSWAP32(i);
+  memcpy(&f, &i, sizeof(i));
+  return f;
+}
+inline double getByteSwapped(double d)
+{
+  uint64 i;
+  memcpy(&i, &d, sizeof(i));
+  i = BSWAP64(i);
+  memcpy(&d, &i, sizeof(i));
+  return d;
+}
+
+template <typename T> inline T getByteSwapped(const void* data, bool bswap)
 {
   T ret;
   // all interesting compilers optimize this memcpy into a single move
-  // this is the most effective way to load some bytes without running into alignmen issues
+  // this is the most effective way to load some bytes without running into
+  // alignment or aliasing issues
   memcpy(&ret, data, sizeof(T));
-  if (bswap) {
-    switch(sizeof(T)) {
-    case 1: break;
-    case 2: ret = BSWAP16(ret); break;
-    case 4: ret = BSWAP32(ret); break;
-    case 8: ret = BSWAP64(ret); break;
-    }
-  }
-  return ret;
+  return bswap ? getByteSwapped(ret) : ret;
 }
 
 // The following functions may be used to get a multi-byte sized tyoe from some
