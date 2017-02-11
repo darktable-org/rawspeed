@@ -27,6 +27,10 @@
 #include <string>           // for string
 #include <vector>           // for vector
 
+#ifndef __BYTE_ORDER__
+#include <cassert> // for assert
+#endif
+
 int rawspeed_get_number_of_processor_cores();
 
 
