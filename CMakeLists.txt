@@ -90,6 +90,7 @@ if(BUILD_TESTING)
   enable_testing()
 endif()
 
+include(compiler-versions)
 include(compiler-flags)
 include(compiler-warnings)
 
