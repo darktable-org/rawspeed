@@ -25,6 +25,7 @@ endif()
 FILE(GLOB RAWSPEED_TESTS_SOURCES
   "../common/CommonTest.cpp"
   "../common/PointTest.cpp"
+  "../io/EndiannessTest.cpp"
   "../metadata/BlackAreaTest.cpp"
   "../metadata/CameraMetaDataTest.cpp"
   "../metadata/CameraSensorInfoTest.cpp"
