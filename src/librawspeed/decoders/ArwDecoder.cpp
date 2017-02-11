@@ -28,6 +28,7 @@
 #include "io/BitPumpMSB.h"                          // for BitPumpMSB
 #include "io/BitPumpPlain.h"                        // for BitPumpPlain
 #include "io/ByteStream.h"                          // for ByteStream
+#include "io/Endianness.h"                          // for getU32BE, getU32LE
 #include "io/IOException.h"                         // for IOException
 #include "metadata/ColorFilterArray.h"              // for CFAColor::CFA_GREEN
 #include "tiff/TiffEntry.h"                         // for TiffEntry

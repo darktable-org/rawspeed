@@ -22,10 +22,11 @@
 
 #ifdef HAVE_JPEG
 
-#include "common/Common.h"   // for getHostEndianness, uint32, Endianness::big
+#include "common/Common.h"   // for uint32
 #include "common/RawImage.h" // for RawImage
 #include "io/Buffer.h"       // for Buffer, Buffer::size_type
 #include "io/ByteStream.h"   // for ByteStream
+#include "io/Endianness.h"   // for getHostEndianness, Endianness::big
 
 namespace RawSpeed {
 

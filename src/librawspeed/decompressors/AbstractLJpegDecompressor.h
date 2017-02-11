@@ -21,11 +21,12 @@
 
 #pragma once
 
-#include "common/Common.h"              // for uint32, getHostEndianness
+#include "common/Common.h"              // for uint32, ushort16
 #include "common/RawImage.h"            // for RawImage
 #include "decompressors/HuffmanTable.h" // for HuffmanTable
 #include "io/Buffer.h"                  // for Buffer, Buffer::size_type
 #include "io/ByteStream.h"              // for ByteStream
+#include "io/Endianness.h"              // for getHostEndianness, Endiannes...
 #include <array>                        // for array
 #include <memory>                       // for unique_ptr
 #include <vector>                       // for vector

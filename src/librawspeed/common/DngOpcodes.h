@@ -20,8 +20,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #pragma once
 
-#include "common/Common.h" // for uint32, uchar8, uint64, Endianness::big
+#include "common/Common.h" // for uint32, uchar8, uint64
 #include "common/Point.h"  // for iRectangle2D
+#include "io/Endianness.h" // for Endianness::big
 #include <vector>          // for vector
 
 namespace RawSpeed {

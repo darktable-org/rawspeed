@@ -26,13 +26,14 @@
 #include "decompressors/JpegDecompressor.h"         // for JpegDecompressor
 #include "decompressors/LJpegDecompressor.h"        // for LJpegDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/Endianness.h"                          // for Endianness::big
 #include "io/IOException.h"                         // for IOException
 #include "tiff/TiffEntry.h"                         // IWYU pragma: keep
 #include "tiff/TiffIFD.h"                           // for getTiffEndianness
 #include <cstdio>                                   // for size_t
 #include <exception>                                // for exception
-#include <string>                                   // for allocator, string
-#include <vector>                                   // for vector
+#include <string>                                   // for string, operator+
+#include <vector>                                   // for allocator, vector
 
 using namespace std;
 
