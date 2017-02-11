@@ -22,10 +22,15 @@
 
 #include "decoders/RawDecoder.h" // for RawDecoder
 #include "io/FileMap.h"          // for FileMap
-#include "tiff/TiffIFD.h"        // for TiffRootIFDOwner
-#include "tiff/TiffTag.h"        // for TiffTag
+#include "tiff/TiffIFD.h"        // for TiffID, TiffRootIFD, TiffRootIFDOwner
+#include "tiff/TiffTag.h"        // for TiffTag, TiffTag::IMAGEWIDTH
+#include <algorithm>             // for move
+#include <memory>                // for unique_ptr
+#include <string>                // for string
 
 namespace RawSpeed {
+
+class CameraMetaData;
 
 class AbstractTiffDecoder : public RawDecoder
 {
@@ -35,7 +40,7 @@ public:
   AbstractTiffDecoder(TiffRootIFDOwner&& root, FileMap* file)
     : RawDecoder(file), mRootIFD(std::move(root)) {}
 
-  TiffIFD *getRootIFD() final { return mRootIFD.get(); }
+  TiffIFD* getRootIFD() final { return mRootIFD.get(); }
 
   inline bool checkCameraSupported(CameraMetaData* meta, const TiffID& id,
                                    const std::string& mode)

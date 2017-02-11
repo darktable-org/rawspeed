@@ -39,7 +39,6 @@ FILE(GLOB DECODER_SOURCES
   "RafDecoder.h"
   "RawDecoder.cpp"
   "RawDecoder.h"
-  "RawDecoderException.cpp"
   "RawDecoderException.h"
   "Rw2Decoder.cpp"
   "Rw2Decoder.h"

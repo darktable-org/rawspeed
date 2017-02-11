@@ -43,12 +43,12 @@ FileMap* FileReader::readFile() {
 
   file = fopen(mFilename, "rb");
   if (file == nullptr)
-    throw FileIOException("Could not open file.");
+    ThrowFIE("Could not open file.");
   fseek(file, 0, SEEK_END);
   size = ftell(file);
   if (size <= 0) {
     fclose(file);
-    throw FileIOException("File is 0 bytes.");
+    ThrowFIE("File is 0 bytes.");
   }
   fseek(file, 0, SEEK_SET);
 
@@ -66,7 +66,7 @@ FileMap* FileReader::readFile() {
   fclose(file);
   if (size != bytes_read) {
     delete fileData;
-    throw FileIOException("Could not read file.");
+    ThrowFIE("Could not read file.");
   }
 #endif
 
@@ -75,14 +75,14 @@ FileMap* FileReader::readFile() {
   file_h = CreateFile(mFilename, GENERIC_READ, FILE_SHARE_READ, nullptr,
                       OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
   if (file_h == INVALID_HANDLE_VALUE) {
-    throw FileIOException("Could not open file.");
+    ThrowFIE("Could not open file.");
   }
 
   LARGE_INTEGER f_size;
   GetFileSizeEx(file_h , &f_size);
 
   if (!f_size.LowPart)
-    throw FileIOException("File is 0 bytes.");
+    ThrowFIE("File is 0 bytes.");
 
   FileMap *fileData = new FileMap(f_size.LowPart);
 
@@ -91,7 +91,7 @@ FileMap* FileReader::readFile() {
                 fileData->getSize(), &bytes_read, nullptr)) {
     CloseHandle(file_h);
     delete fileData;
-    throw FileIOException("Could not read file.");
+    ThrowFIE("Could not read file.");
   }
   CloseHandle(file_h);
 

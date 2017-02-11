@@ -21,12 +21,12 @@
 
 #pragma once
 
-#include "common/Common.h"    // for uint32, BitOrder
-#include "common/RawImage.h"  // for RawImage
-#include "common/Threading.h" // for pthread_t
-#include "io/FileMap.h"       // for FileMap
-#include <map>                // for map
-#include <string>             // for string
+#include "common/Common.h"                // for uint32, BitOrder
+#include "common/RawImage.h"              // for RawImage
+#include "common/Threading.h"             // for pthread_t
+#include "io/FileMap.h"                   // for FileMap
+#include <map>                            // for map
+#include <string>                         // for string
 
 namespace RawSpeed {
 
@@ -40,18 +40,15 @@ class RawDecoder;
 class RawDecoderThread
 {
   public:
-    RawDecoderThread() {
-      error = nullptr;
-      taskNo = -1;
-    }
+    RawDecoderThread(RawDecoder* parent_) : parent(parent_) {}
     uint32 start_y;
     uint32 end_y;
-    const char* error;
+    const char* error = nullptr;
 #ifndef NO_PTHREAD
     pthread_t threadid;
 #endif
     RawDecoder* parent;
-    uint32 taskNo;
+    uint32 taskNo = -1;
 };
 
 class RawDecoder
@@ -85,7 +82,7 @@ public:
 
   /* Called function for filters that are capable of doing simple multi-threaded decode */
   /* The delivered class gives information on what part of the image should be decoded. */
-  virtual void decodeThreaded(RawDecoderThread* t);
+  [[noreturn]] virtual void decodeThreaded(RawDecoderThread* t);
 
   /* Allows access to the root IFD structure */
   /* If image isn't TIFF based NULL will be returned */
@@ -146,6 +143,10 @@ protected:
   /* All errors are silently pushed into the "errors" array.*/
   /* If all threads report an error an exception will be thrown*/
   void startTasks(uint32 tasks);
+
+  /* Ask for sample submisson, if makes sense */
+  void askForSamples(CameraMetaData* meta, const std::string& make,
+                     const std::string& model, const std::string& mode);
 
   /* Check the camera and mode against the camera database. */
   /* A RawDecoderException will be thrown if the camera isn't supported */

@@ -1,5 +1,11 @@
 add_custom_target(tests ALL)
 
+if(APPLE)
+  # Apple XCode seems to generate HUGE stack/frames, much bigger than anything else.
+  math(EXPR HUGESIZE 128*1024)
+  CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wframe-larger-than=${HUGESIZE})
+endif()
+
 FILE(GLOB RAWSPEED_TEST_SOURCES
   "RawSpeed.cpp"
 )
@@ -23,6 +29,8 @@ if(WITH_OPENMP AND OPENMP_FOUND)
 endif()
 
 FILE(GLOB RAWSPEED_TESTS_SOURCES
+  "../common/CommonTest.cpp"
+  "../common/PointTest.cpp"
   "../metadata/BlackAreaTest.cpp"
   "../metadata/CameraMetaDataTest.cpp"
   "../metadata/CameraSensorInfoTest.cpp"

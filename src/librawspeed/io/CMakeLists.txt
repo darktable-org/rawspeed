@@ -9,14 +9,12 @@ FILE(GLOB IO_SOURCES
   "Buffer.h"
   "ByteStream.cpp"
   "ByteStream.h"
-  "FileIOException.cpp"
   "FileIOException.h"
   "FileMap.h"
   "FileReader.cpp"
   "FileReader.h"
   "FileWriter.cpp"
   "FileWriter.h"
-  "IOException.cpp"
   "IOException.h"
 )
 

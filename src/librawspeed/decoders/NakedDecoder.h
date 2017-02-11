@@ -32,9 +32,7 @@ class Camera;
 
 class CameraMetaData;
 
-class NakedDecoder :
-  public RawDecoder
-{
+class NakedDecoder final : public RawDecoder {
 public:
   NakedDecoder(FileMap* file, Camera *c);
   ~NakedDecoder() override;

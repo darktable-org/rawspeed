@@ -33,9 +33,7 @@ class CameraMetaData;
 
 class CiffIFD;
 
-class CrwDecoder :
-  public RawDecoder
-{
+class CrwDecoder final : public RawDecoder {
 public:
   CrwDecoder(CiffIFD *rootIFD, FileMap* file);
   RawImage decodeRawInternal() override;

@@ -117,16 +117,24 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
   }
 }
 
+void RawDecoder::askForSamples(CameraMetaData* meta, const string& make,
+                               const string& model, const string& mode) {
+  if ("dng" == mode)
+    return;
+
+  writeLog(DEBUG_PRIO_WARNING, "Unable to find camera in database: '%s' '%s' "
+                               "'%s'\nPlease consider providing samples on "
+                               "<https://raw.pixls.us/>, thanks!\n",
+           make.c_str(), model.c_str(), mode.c_str());
+}
+
 bool RawDecoder::checkCameraSupported(CameraMetaData* meta, const string& make,
                                       const string& model, const string& mode) {
   mRaw->metadata.make = make;
   mRaw->metadata.model = model;
   Camera* cam = meta->getCamera(make, model, mode);
   if (!cam) {
-    writeLog(DEBUG_PRIO_WARNING, "Unable to find camera in database: '%s' '%s' "
-                                 "'%s'\nPlease consider providing samples on "
-                                 "<https://raw.pixls.us/>, thanks!\n",
-             make.c_str(), model.c_str(), mode.c_str());
+    askForSamples(meta, make, model, mode);
 
     if (failOnUnknown)
       ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to guess. Sorry.", make.c_str(), model.c_str(), mode.c_str());
@@ -151,11 +159,7 @@ void RawDecoder::setMetaData(CameraMetaData* meta, const string& make,
   mRaw->metadata.isoSpeed = iso_speed;
   Camera *cam = meta->getCamera(make, model, mode);
   if (!cam) {
-    writeLog(DEBUG_PRIO_INFO, "ISO:%d\n", iso_speed);
-    writeLog(DEBUG_PRIO_WARNING, "Unable to find camera in database: '%s' '%s' "
-                                 "'%s'\nPlease consider providing samples on "
-                                 "<https://raw.pixls.us/>, thanks!\n",
-             make.c_str(), model.c_str(), mode.c_str());
+    askForSamples(meta, make, model, mode);
 
     if (failOnUnknown)
       ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to guess. Sorry.", make.c_str(), model.c_str(), mode.c_str());
@@ -241,10 +245,9 @@ void *RawDecoderDecodeThread(void *_this) {
 void RawDecoder::startThreads() {
 #ifdef NO_PTHREAD
   uint32 threads = 1;
-  RawDecoderThread t;
+  RawDecoderThread t(this);
   t.start_y = 0;
   t.end_y = mRaw->dim.y;
-  t.parent = this;
   RawDecoderDecodeThread(&t);
 #else
   uint32 threads;
@@ -252,7 +255,8 @@ void RawDecoder::startThreads() {
   threads = min((unsigned)mRaw->dim.y, getThreadCount());
   int y_offset = 0;
   int y_per_thread = (mRaw->dim.y + threads - 1) / threads;
-  auto *t = new RawDecoderThread[threads];
+
+  vector<RawDecoderThread> t(threads, RawDecoderThread(this));
 
   /* Initialize and set thread detached attribute */
   pthread_attr_t attr;
@@ -262,7 +266,6 @@ void RawDecoder::startThreads() {
   for (uint32 i = 0; i < threads; i++) {
     t[i].start_y = y_offset;
     t[i].end_y = min(y_offset + y_per_thread, mRaw->dim.y);
-    t[i].parent = this;
     if (pthread_create(&t[i].threadid, &attr, RawDecoderDecodeThread, &t[i]) != 0) {
       // If a failure occurs, we need to wait for the already created threads to finish
       threads = i-1;
@@ -275,7 +278,6 @@ void RawDecoder::startThreads() {
     pthread_join(t[i].threadid, nullptr);
   }
   pthread_attr_destroy(&attr);
-  delete[] t;
 
   if (fail) {
     ThrowRDE("RawDecoder::startThreads: Unable to start threads");
@@ -342,22 +344,14 @@ void RawDecoder::startTasks( uint32 tasks )
   uint32 threads;
   threads = min(tasks, getThreadCount());
   int ctask = 0;
-  auto *t = new RawDecoderThread[threads];
+  vector<RawDecoderThread> t(threads, RawDecoderThread(this));
 
   // We don't need a thread
   if (threads == 1) {
-    t[0].parent = this;
     while ((uint32)ctask < tasks) {
       t[0].taskNo = ctask++;
-      try {
-        decodeThreaded(&t[0]);
-      } catch (RawDecoderException &ex) {
-        mRaw->setError(ex.what());
-      } catch (IOException &ex) {
-        mRaw->setError(ex.what());
-      }
+      RawDecoderDecodeThread(&t[0]);
     }
-    delete[] t;
     return;
   }
 
@@ -373,7 +367,6 @@ void RawDecoder::startTasks( uint32 tasks )
   while ((uint32)ctask < tasks) {
     for (uint32 i = 0; i < threads && (uint32)ctask < tasks; i++) {
       t[i].taskNo = ctask++;
-      t[i].parent = this;
       pthread_create(&t[i].threadid, &attr, RawDecoderDecodeThread, &t[i]);
     }
     for (uint32 i = 0; i < threads; i++) {
@@ -384,7 +377,6 @@ void RawDecoder::startTasks( uint32 tasks )
   if (mRaw->errors.size() >= tasks)
     ThrowRDE("RawDecoder::startThreads: All threads reported errors. Cannot load image.");
 
-  delete[] t;
 #else
   ThrowRDE("Unreachable");
 #endif

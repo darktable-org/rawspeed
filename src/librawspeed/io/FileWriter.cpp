@@ -43,13 +43,13 @@ void FileWriter::writeFile(FileMap* filemap, uint32 size) {
 
   file = fopen(mFilename, "wb");
   if (file == nullptr)
-    throw FileIOException("Could not open file.");
+    ThrowFIE("Could not open file.");
 
   src = (char *)filemap->getData(0, filemap->getSize());
   bytes_written = fwrite(src, 1, size ? size : filemap->getSize(), file);
   fclose(file);
   if (size != bytes_written) {
-    throw FileIOException("Could not write file.");
+    ThrowFIE("Could not write file.");
   }
 
 #else // __unix__
@@ -57,14 +57,14 @@ void FileWriter::writeFile(FileMap* filemap, uint32 size) {
   file_h = CreateFile(mFilename, GENERIC_WRITE, FILE_SHARE_WRITE, nullptr,
                       CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
   if (file_h == INVALID_HANDLE_VALUE) {
-    throw FileIOException("Could not open file.");
+    ThrowFIE("Could not open file.");
   }
 
   DWORD bytes_written;
   if (!WriteFile(file_h, filemap->getData(0, filemap->getSize()),
                  size ? size : filemap->getSize(), &bytes_written, nullptr)) {
     CloseHandle(file_h);
-    throw FileIOException("Could not read file.");
+    ThrowFIE("Could not read file.");
   }
   CloseHandle(file_h);
 

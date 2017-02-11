@@ -232,10 +232,10 @@ void X3fDecoder::decompressSigma( X3fImage &image )
             // Interpolate 1 missing pixel
             int blue_mid = ((int)blue[0] + (int)blue[3] + (int)blue_down[0] + (int)blue_down[3] + 2)>>2;
             int avg = dst[0];
-            dst[0] = clampBits(((int)blue[0] - blue_mid) + avg, 16);
-            dst[3] = clampBits(((int)blue[3] - blue_mid) + avg, 16);
-            dst_down[0] = clampBits(((int)blue_down[0] - blue_mid) + avg, 16);
-            dst_down[3] = clampBits(((int)blue_down[3] - blue_mid) + avg, 16);
+            dst[0] = clampBits(((int64)blue[0] - blue_mid) + avg, 16);
+            dst[3] = clampBits(((int64)blue[3] - blue_mid) + avg, 16);
+            dst_down[0] = clampBits(((int64)blue_down[0] - blue_mid) + avg, 16);
+            dst_down[3] = clampBits(((int64)blue_down[3] - blue_mid) + avg, 16);
             dst += 6;
             blue += 6;
             blue_down += 6;

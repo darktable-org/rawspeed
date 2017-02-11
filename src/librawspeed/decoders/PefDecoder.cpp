@@ -31,7 +31,6 @@
 #include "tiff/TiffIFD.h"                     // for TiffRootIFD, TiffIFD
 #include "tiff/TiffTag.h"                     // for TiffTag, TiffTag::ISOS...
 #include <memory>                             // for unique_ptr
-#include <vector>                             // for vector
 
 using namespace std;
 

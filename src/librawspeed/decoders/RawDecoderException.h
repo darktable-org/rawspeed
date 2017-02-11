@@ -2,6 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,21 +21,17 @@
 
 #pragma once
 
-#include "common/Common.h" // for _RPT1
-#include <stdexcept>       // for runtime_error
-#include <string>          // for string
+#include "common/RawspeedException.h" // for ThrowException, RawspeedException
+#include <string>                     // for string
 
 namespace RawSpeed {
 
-[[noreturn]] void ThrowRDE(const char* fmt, ...)
-    __attribute__((format(printf, 1, 2)));
-
-class RawDecoderException : public std::runtime_error
-{
+class RawDecoderException : public RawspeedException {
 public:
-  RawDecoderException(const std::string &_msg) : runtime_error(_msg) {
-    writeLog(DEBUG_PRIO_EXTRA, "RawDecompressor Exception: %s\n", _msg.c_str());
-  }
+  RawDecoderException(const std::string& msg) : RawspeedException(msg) {}
+  RawDecoderException(const char* msg) : RawspeedException(msg) {}
 };
+
+#define ThrowRDE(...) ThrowException<RawDecoderException>(__VA_ARGS__)
 
 } // namespace RawSpeed

@@ -43,19 +43,11 @@ public:
   void decodeMetaDataInternal(CameraMetaData *meta) override;
 
 protected:
-  int sraw_coeffs[3];
-
   int getDecoderVersion() const override { return 8; }
   RawImage decodeOldFormat();
   RawImage decodeNewFormat();
   void sRawInterpolate();
   int getHue();
-
-  void interpolate_422_v0(int w, int h, int start_h, int end_h);
-  void interpolate_422_v1(int w, int h, int start_h, int end_h);
-  void interpolate_420_v1(int w, int h, int start_h, int end_h);
-  void interpolate_422_v2(int w, int h, int start_h, int end_h);
-  void interpolate_420_v2(int w, int h, int start_h, int end_h);
 };
 
 } // namespace RawSpeed

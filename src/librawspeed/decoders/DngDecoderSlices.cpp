@@ -175,7 +175,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
     delete [] uBuffer;
 #else
 #pragma message                                                                \
-    "ZLIB is not present! Deflate-compressed DNG will not be supported!"
+    "ZLIB is not present! Deflate compression will not be supported!"
     ThrowRDE("DngDecoderSlices: deflate support is disabled.");
 #endif
     /* Lossy DNG */

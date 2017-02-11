@@ -62,7 +62,6 @@ DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, FileMap* file)
 }
 
 void DngDecoder::dropUnsuportedChunks(vector<const TiffIFD*>& data) {
-  // Erase the ones not with JPEG compression
   for (auto i = data.begin(); i != data.end();) {
     int comp = (*i)->getEntry(COMPRESSION)->getU16();
     bool isSubsampled = false;
@@ -71,20 +70,47 @@ void DngDecoder::dropUnsuportedChunks(vector<const TiffIFD*>& data) {
                      1; // bit 0 is on if image is subsampled
     } catch (TiffParserException&) {
     }
-    if (!(comp == 7 ||
-#ifdef HAVE_ZLIB
-          comp == 8 ||
-#endif
-          comp == 1
-#ifdef HAVE_ZLIB
-          || comp == 0x884c
-#endif
-          ) ||
-        isSubsampled) { // Erase if subsampled, or not deflated, JPEG or
-                        // uncompressed
+
+    // subsampled ?
+    if (isSubsampled) {
       i = data.erase(i);
-    } else {
+      continue;
+    }
+
+    switch (comp) {
+    case 1: // uncompressed
       ++i;
+      break;
+    case 7: // lossless JPEG
+      ++i;
+      break;
+    case 8: // deflate
+#ifdef HAVE_ZLIB
+      ++i;
+#else
+#pragma message                                                                \
+    "ZLIB is not present! Deflate compression will not be supported!"
+      i = data.erase(i);
+      writeLog(DEBUG_PRIO_WARNING, "DNG Decoder: found Deflate-encoded chunk, "
+                                   "but the deflate support was disabled at "
+                                   "build!");
+#endif
+      break;
+    case 0x884c: // lossy JPEG
+#ifdef HAVE_JPEG
+      ++i;
+#else
+#pragma message                                                                \
+    "JPEG is not present! Lossy JPEG compression will not be supported!"
+      i = data.erase(i);
+      writeLog(DEBUG_PRIO_WARNING, "DNG Decoder: found lossy JPEG-encoded "
+                                   "chunk, but the jpeg support was "
+                                   "disabled at build!");
+#endif
+      break;
+    default:
+      i = data.erase(i);
+      break;
     }
   }
 }
@@ -521,8 +547,8 @@ bool DngDecoder::decodeMaskedAreas(const TiffIFD* raw) {
   iPoint2D top = mRaw->getCropOffset();
 
   for (uint32 i = 0; i < nrects; i++) {
-    iPoint2D topleft = iPoint2D(rects[i*4+1], rects[i*4]);
-    iPoint2D bottomright = iPoint2D(rects[i*4+3], rects[i*4+2]);
+    iPoint2D topleft = iPoint2D(rects[i * 4UL + 1UL], rects[i * 4UL]);
+    iPoint2D bottomright = iPoint2D(rects[i * 4UL + 3UL], rects[i * 4UL + 2UL]);
     // Is this a horizontal box, only add it if it covers the active width of the image
     if (topleft.x <= top.x && bottomright.x >= (mRaw->dim.x + top.x)) {
       mRaw->blackAreas.emplace_back(topleft.y, bottomright.y - topleft.y,

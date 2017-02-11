@@ -7,16 +7,16 @@ include(ExternalProject)
 
 # Download and install GoogleTest
 
-set(GOOGLETEST_PATH "/usr/src/pugixml")
+set(PUGIXML_PATH "/usr/src/pugixml")
 
 #message(FATAL_ERROR "1 CMAKE_BINARY_DIR ${CMAKE_BINARY_DIR}")
 
-if(EXISTS "${GOOGLETEST_PATH}"            AND IS_DIRECTORY "${GOOGLETEST_PATH}"            AND EXISTS "${GOOGLETEST_PATH}/CMakeLists.txt")
-  message(STATUS "Found Pugixml in ${GOOGLETEST_PATH}")
+if(EXISTS "${PUGIXML_PATH}" AND IS_DIRECTORY "${PUGIXML_PATH}" AND EXISTS "${PUGIXML_PATH}/CMakeLists.txt")
+  message(STATUS "Found Pugixml in ${PUGIXML_PATH}")
 
   ExternalProject_Add(
     pugixml
-    URL               "${GOOGLETEST_PATH}"
+    URL               "${PUGIXML_PATH}"
     PREFIX            "${CMAKE_BINARY_DIR}/pugixml"
     SOURCE_DIR        "${CMAKE_BINARY_DIR}/pugixml-src"
     BINARY_DIR        "${CMAKE_BINARY_DIR}/pugixml-build"

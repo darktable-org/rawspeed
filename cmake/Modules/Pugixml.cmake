@@ -27,6 +27,9 @@ endif()
 
 set(Pugixml_FOUND 1)
 
+# want static pugixml?
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
 set(CMAKE_C_FLAGS_SAVE "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS_SAVE "${CMAKE_CXX_FLAGS}")
 
@@ -48,8 +51,6 @@ set_target_properties(pugixml PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<
 
 set(Pugixml_LIBRARIES pugixml)
 set(Pugixml_INCLUDE_DIRS "$<TARGET_PROPERTY:pugixml,SOURCE_DIR>/src/")
-
-message(STATUS ${Pugixml_INCLUDE_DIRS})
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_SAVE}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_SAVE}")

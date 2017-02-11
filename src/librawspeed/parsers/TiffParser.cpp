@@ -64,7 +64,7 @@ TiffRootIFDOwner parseTiff(const Buffer &data) {
 
   ushort16 magic = bs.getU16();
   if (magic != 42 && magic != 0x4f52 && magic != 0x5352 && magic != 0x55) // ORF has 0x4f52/0x5352, RW2 0x55 - Brillant!
-    throw TiffParserException("Not a TIFF file (magic 42)");
+    ThrowTPE("Not a TIFF file (magic 42)");
 
   TiffRootIFDOwner root = make_unique<TiffRootIFD>(bs, UINT32_MAX); // tell TiffIFD constructur not to parse bs as IFD
   for( uint32 nextIFD = bs.getU32(); nextIFD; nextIFD = root->getSubIFDs().back()->getNextIFD() ) {
@@ -77,14 +77,14 @@ TiffRootIFDOwner parseTiff(const Buffer &data) {
 RawDecoder* makeDecoder(TiffRootIFDOwner root, Buffer &data) {
   FileMap* mInput = &data;
   if (!root)
-    throw TiffParserException("TiffIFD is null.");
+    ThrowTPE("TiffIFD is null.");
 
   if (root->hasEntryRecursive(DNGVERSION)) {  // We have a dng image entry
     try {
       return new DngDecoder(move(root), mInput);
     } catch (std::runtime_error& e) {
       //TODO: remove this exception type conversion
-      throw TiffParserException(e.what());
+      ThrowTPE("%s", e.what());
     }
   }
 
@@ -154,7 +154,7 @@ RawDecoder* makeDecoder(TiffRootIFDOwner root, Buffer &data) {
     }
   }
 
-  throw TiffParserException("No decoder found. Sorry.");
+  ThrowTPE("No decoder found. Sorry.");
   return nullptr;
 }
 

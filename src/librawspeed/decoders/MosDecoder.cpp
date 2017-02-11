@@ -29,13 +29,12 @@
 #include "io/ByteStream.h"                          // for ByteStream
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag::LEAFMET...
+#include "tiff/TiffTag.h"                           // for TiffTag::TILEOFF...
 #include <algorithm>                                // for move
 #include <cstdio>                                   // for sscanf
 #include <cstring>                                  // for memchr
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for string, allocator
-#include <vector>                                   // for vector
 
 using namespace std;
 

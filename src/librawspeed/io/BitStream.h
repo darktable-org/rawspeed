@@ -21,7 +21,12 @@
 
 #pragma once
 
-#include "io/ByteStream.h"
+#include "common/Common.h"  // for uint32, uint64, uchar8
+#include "io/Buffer.h"      // for FILEMAP_MARGIN, Buffer::size_type
+#include "io/ByteStream.h"  // for ByteStream
+#include "io/FileMap.h"     // for FileMap
+#include "io/IOException.h" // for ThrowIOE
+#include <cassert>          // for assert
 
 namespace RawSpeed {
 

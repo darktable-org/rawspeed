@@ -30,9 +30,7 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-class AriDecoder :
-  public RawDecoder
-{
+class AriDecoder final : public RawDecoder {
 public:
   AriDecoder(FileMap* file);
   ~AriDecoder() override;

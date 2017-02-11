@@ -18,6 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "common/RawspeedException.h"         // for RawspeedException
 #include "decoders/RawDecoderException.h"     // for RawDecoderException (p...
 #include "io/FileIOException.h"               // for FileIOException (ptr o...
 #include "io/IOException.h"                   // for IOException (ptr only)
@@ -44,6 +45,11 @@ template <typename T>
 static void* MetaThrowHelper(const char* fmt, const char* str) {
   ADD_FAILURE() << "non-specialzer was called";
   return nullptr;
+}
+
+template <>
+void* MetaThrowHelper<RawspeedException>(const char* fmt, const char* str) {
+  ThrowException<RawspeedException>(fmt, str);
 }
 
 template <>
@@ -86,10 +92,10 @@ void* MetaThrowHelper<FiffParserException>(const char* fmt, const char* str) {
 
 template <class T> class ExceptionsTest : public testing::Test {};
 
-using Classes =
-    testing::Types<CameraMetadataException, CiffParserException,
-                   FileIOException, IOException, RawDecoderException,
-                   TiffParserException, FiffParserException>;
+using Classes = testing::Types<RawspeedException, CameraMetadataException,
+                               CiffParserException, FileIOException,
+                               IOException, RawDecoderException,
+                               TiffParserException, FiffParserException>;
 
 TYPED_TEST_CASE(ExceptionsTest, Classes);
 
@@ -123,6 +129,7 @@ TYPED_TEST(ExceptionsTest, AssignmentConstructor) {
 TYPED_TEST(ExceptionsTest, Throw) {
   ASSERT_ANY_THROW(throw TypeParam(msg));
   EXPECT_THROW(throw TypeParam(msg), TypeParam);
+  EXPECT_THROW(throw TypeParam(msg), RawspeedException);
   EXPECT_THROW(throw TypeParam(msg), std::runtime_error);
 
   ASSERT_ANY_THROW({
@@ -135,6 +142,12 @@ TYPED_TEST(ExceptionsTest, Throw) {
         throw * Exception.get();
       },
       std::runtime_error);
+  EXPECT_THROW(
+      {
+        std::unique_ptr<TypeParam> Exception(new TypeParam(msg));
+        throw * Exception.get();
+      },
+      RawspeedException);
   EXPECT_THROW(
       {
         std::unique_ptr<TypeParam> Exception(new TypeParam(msg));
@@ -182,6 +195,8 @@ TYPED_TEST(ExceptionsTest, ThrowHelperTest) {
   ASSERT_ANY_THROW(MetaThrowHelper<TypeParam>("%s", msg.c_str()));
   EXPECT_THROW(MetaThrowHelper<TypeParam>("%s", msg.c_str()),
                std::runtime_error);
+  EXPECT_THROW(MetaThrowHelper<TypeParam>("%s", msg.c_str()),
+               RawspeedException);
   EXPECT_THROW(MetaThrowHelper<TypeParam>("%s", msg.c_str()), TypeParam);
 }
 

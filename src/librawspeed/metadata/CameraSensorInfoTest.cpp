@@ -59,7 +59,7 @@ protected:
             std::rand(), // NOLINT do not need crypto-level randomness
             std::rand()  // NOLINT do not need crypto-level randomness
         }) {}
-  virtual void SetUp() {
+  virtual void SetUp() override {
     mMinIso = std::tr1::get<0>(GetParam());
     mMaxIso = std::tr1::get<1>(GetParam());
   }
@@ -279,7 +279,7 @@ protected:
             std::rand(), // NOLINT do not need crypto-level randomness
             std::rand()  // NOLINT do not need crypto-level randomness
         }) {}
-  virtual void SetUp() { data = GetParam(); }
+  virtual void SetUp() override { data = GetParam(); }
 
   IsoExpectationsT data;
 

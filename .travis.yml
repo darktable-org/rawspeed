@@ -28,19 +28,21 @@ services:
   - docker
 
 before_install:
-  - if [[ "$LEGACY" == "UGH" ]]; then
-      sudo apt-get update -qq && sudo apt-get upgrade -qq cmake g++ git libjpeg-dev libpugixml-dev libxml2-utils make ninja-build zlib1g-dev;
-    elif [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker pull darktable/rawspeed;
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      docker pull darktable/rawspeed;
+      sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y;
+      sudo apt-get update -q;
+      sudo apt-get upgrade -q g++-6;
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update && brew tap Homebrew/bundle && cd .ci && brew bundle --verbose; fi
 
 env:
   global:
+    - secure: "rKETh/WScyiRebr6/7ex3FbMqgSL4gucYPj5Z0+F2UkOC+399MFuxHrZ744NwEPGjVvkL39btDVrViwmjp1BJraslQnuPJ8LS7DaVIQQJKnh/pLF8/BclcbGecXrIbSSAtgy3hwKp8N08DXpmyiyaLXsDrPE3/0Oz8JqT9n8b2nzkLDscJSjX73Gp+4DZiUsVzGYYsHq+1k7YbG0xEFrC0OVU3EyHN/bkOepLYUkEKuPj5yi/nRnHLt/1lVdHWBmvELezXnGfuDeGZGb8TbKDTCsv0sscKFDEzK2kzwpAIZbksBHVIcQS8cqcpx48LkvybXOc0vlrS+jMvSUDKAY62+JDZHZd3hCjSIMFVL9bf9b+7gMeevTMKJfLEe9Ro8bHITrKmy0S1Z+mozxdAkESjmFklKgkHBW72T8ttfz33R30Fr87dP9cRwlX2tiU06o8N13228Mh4vr4Cy1S342OOpnf+aw5pq0EydT1eVhjB+B6kmpGinTWbDNtInir2H0w0GlW1VHDZGWqEIB66Nq9aV7ugOBE6b2nsDmBgLS8Xk9OELnRLq2y51Z9nsVq0EnH4td+ciSDPulY9TuUbvBSioMTs8igArM10NFX3+NE13Nla0QiEp1sCKNgxouh5pfkTgmdRL4sQ0MWDPa/c85BaPBF+3xazbI8jZkB19QHKc="
     - SRC_DIR=/build/rawspeed
     - BUILD_DIR=/build/rawspeed-build
     - INSTALL_PREFIX=/build/rawspeed-install
     - CFLAGS="-pipe" CXXFLAGS="-pipe"
     - TARGET=build
-    -
   matrix:
     - CC=cc CXX=c++
     - CC=cc CXX=c++ FLAVOR=Coverage
@@ -58,22 +60,12 @@ matrix:
     services:
       - docker
     env: ECO="-DWITH_PTHREADS=OFF"
-  - os: linux
-    env: LEGACY=UGH
 
 # linux clang Coverage build OOM's in gcov during final codecov report collection
 # OSX gcc Coverage build produces invalid .gcno files
 
 script:
-  - if [[ "$LEGACY" == "UGH" ]]; then
-      export SRC_DIR="$TRAVIS_BUILD_DIR";
-      export BUILD_DIR="$SRC_DIR/build";
-      export INSTALL_PREFIX="$SRC_DIR/install";
-      export ECO="$ECO -DALLOW_DOWNLOADING_GOOGLETEST=ON";
-      mkdir "$BUILD_DIR";
-      mkdir "$INSTALL_PREFIX";
-      "$SRC_DIR/.ci/ci-script.sh";
-    elif [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       mkdir "$TRAVIS_BUILD_DIR/build";
       docker run --read-only --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $BUILD_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS --env CC --env CXX --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR --env ECO darktable/rawspeed sh -c "$SRC_DIR/.ci/ci-script.sh";
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
@@ -87,14 +79,18 @@ script:
     fi
 
 after_success:
-  - export PLATFORM="$TRAVIS_OS_NAME";
-    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      export CXX=GCC;
-    fi;
-    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      export CXX=AppleClang;
-    fi;
     cd "$TRAVIS_BUILD_DIR";
     curl -s https://codecov.io/bash > codecov;
     chmod +x codecov;
-    ./codecov -e PLATFORM,CXX -F unittests;
+    export GCOVEXE="";
+    export GCOVARGS="";
+    export PLATFORM="$TRAVIS_OS_NAME";
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      if [[ "$CC" == "cc" ]]; then
+        export CXX=GCC;
+        export GCOVEXE="-x gcov-6";
+      fi;
+    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      export CXX=AppleClang;
+    fi;
+    ./codecov -e PLATFORM,CXX -F unittests $GCOVEXE $GCOVARGS;

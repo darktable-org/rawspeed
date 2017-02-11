@@ -22,7 +22,6 @@
 #include "decoders/ThreefrDecoder.h"
 #include "common/Common.h"                        // for uint32
 #include "common/Point.h"                         // for iPoint2D
-#include "decoders/RawDecoderException.h"         // for ThrowRDE
 #include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompre...
 #include "io/IOException.h"                       // for IOException
 #include "metadata/ColorFilterArray.h"            // for CFAColor::CFA_GREEN
@@ -33,7 +32,6 @@
 #include <memory>                                 // for unique_ptr
 #include <string>                                 // for string, stoi
 #include <utility>                                // for pair
-#include <vector>                                 // for vector
 
 using namespace std;
 

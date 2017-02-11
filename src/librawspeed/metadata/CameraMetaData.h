@@ -40,8 +40,7 @@ struct CameraId {
   }
 };
 
-class CameraMetaData
-{
+class CameraMetaData final {
 public:
   CameraMetaData();
   CameraMetaData(const char *docname);
