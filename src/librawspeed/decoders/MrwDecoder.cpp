@@ -78,6 +78,7 @@ void MrwDecoder::parseHeader() {
       raw_height = getU16BE(data + currpos + 16);
       raw_width = getU16BE(data + currpos + 18);
       packed = (data[currpos+24] == 12);
+      break;
     case 0x574247: // WBG
       for (uint32 i = 0; i < 4; i++)
         wb_coeffs[i] = (float)getU16BE(data + currpos + 12 + i * 2);
