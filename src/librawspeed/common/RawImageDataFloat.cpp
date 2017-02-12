@@ -339,7 +339,7 @@ void RawImageDataFloat::fixBadPixel( uint32 x, uint32 y, int component )
   // Find y weights
   float total_dist_y = dist[2] + dist[3];
   if (total_dist_y) {
-    weight[2] = dist[2] > 0.0f ? (total_dist_x - dist[2]) / total_dist_y : 0;
+    weight[2] = dist[2] > 0.0f ? (total_dist_y - dist[2]) / total_dist_y : 0;
     weight[3] = 1.0f - weight[2];
     total_div += 1;
   }

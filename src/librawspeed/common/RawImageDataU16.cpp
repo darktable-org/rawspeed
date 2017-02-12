@@ -433,7 +433,7 @@ void RawImageDataU16::fixBadPixel( uint32 x, uint32 y, int component )
   // Find y weights
   int total_dist_y = dist[2] + dist[3];
   if (total_dist_y) {
-    weight[2] = dist[2] ? (total_dist_x - dist[2]) * 256 / total_dist_y : 0;
+    weight[2] = dist[2] ? (total_dist_y - dist[2]) * 256 / total_dist_y : 0;
     weight[3] = 256-weight[2];
     total_shifts++;
   }
