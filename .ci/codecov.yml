@@ -9,6 +9,9 @@ coverage:
     changes: false
     patch: false
     project: false
+  ignore:
+    - "src/librawspeed/**/test/.*"
+    - "src/librawspeed/**/*Test*"
 parsers:
   gcov:
     branch_detection:
