@@ -25,6 +25,7 @@
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea
 #include <algorithm>                      // for min
+#include <array>                          // for array
 #include <cstdlib>                        // for free, malloc
 #include <cstring>                        // for memset
 #include <vector>                         // for vector
@@ -368,12 +369,14 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 
 void RawImageDataU16::fixBadPixel( uint32 x, uint32 y, int component )
 {
-  int values[4];
-  int dist[4];
-  int weight[4];
+  array<int, 4> values;
+  array<int, 4> dist;
+  array<int, 4> weight;
 
-  values[0] = values[1] = values[2] = values[3] = -1;
-  dist[0] = dist[1] = dist[2] = dist[3] = 0;
+  values.fill(-1);
+  dist.fill(0);
+  weight.fill(0);
+
   uchar8* bad_line = &mBadPixelMap[y*mBadPixelMapPitch];
   int step = isCFA ? 2 : 1;
 
