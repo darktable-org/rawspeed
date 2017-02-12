@@ -18,13 +18,14 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "common/RawImage.h"              // for RawImageDataU16, TableLookUp
 #include "common/Common.h"                // for ushort16, uint32, uchar8
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D
-#include "common/RawImage.h"              // for RawImageDataU16, TableLookUp
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea
 #include <algorithm>                      // for fill, max, min
+#include <array>                          // for array
 #include <vector>                         // for vector
 
 #if defined(__SSE2__)
@@ -365,12 +366,14 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 
 void RawImageDataU16::fixBadPixel( uint32 x, uint32 y, int component )
 {
-  int values[4];
-  int dist[4];
-  int weight[4];
+  array<int, 4> values;
+  array<int, 4> dist;
+  array<int, 4> weight;
 
-  values[0] = values[1] = values[2] = values[3] = -1;
-  dist[0] = dist[1] = dist[2] = dist[3] = 0;
+  values.fill(-1);
+  dist.fill(0);
+  weight.fill(0);
+
   uchar8* bad_line = &mBadPixelMap[y*mBadPixelMapPitch];
   int step = isCFA ? 2 : 1;
 
