@@ -175,7 +175,7 @@ void DngDecoder::parseCFA(const TiffIFD* raw) {
   }
 }
 
-void DngDecoder::decodeData(const TiffIFD* raw, int compression) {
+void DngDecoder::decodeData(const TiffIFD* raw, int compression, uint32 sample_format) {
   mRaw->createData();
 
   if (compression == 8 && sample_format != 3) {
@@ -278,8 +278,9 @@ RawImage DngDecoder::decodeRawInternal() {
   }
 
   const TiffIFD* raw = data[0];
-  bps = raw->getEntry(BITSPERSAMPLE)->getU32();
+  uint32 bps = raw->getEntry(BITSPERSAMPLE)->getU32();
 
+  uint32 sample_format = 1;
   if (raw->hasEntry(SAMPLEFORMAT))
     sample_format = raw->getEntry(SAMPLEFORMAT)->getU32();
 
@@ -327,7 +328,7 @@ RawImage DngDecoder::decodeRawInternal() {
 
     // Now load the image
     try {
-      decodeData(raw, compression);
+      decodeData(raw, compression, sample_format);
     } catch (TiffParserException& e) {
       ThrowRDE("Unsupported format, tried strips and tiles:\n%s", e.what());
     }
