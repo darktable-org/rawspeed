@@ -346,8 +346,7 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
 {
   if (curr_image->format == 30 || curr_image->format == 35) {
     uint32 i = t->taskNo;
-    if (i>3)
-      ThrowRDE("Invalid plane:%u (internal error)", i);
+    assert(i < 3); // see startTasks above
 
     // Subsampling (in shifts)
     int subs = 0;
