@@ -19,10 +19,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
 #include "parsers/X3fParser.h"
-#include "common/Common.h"                // for uint32, uchar8, getHostEnd...
+#include "common/Common.h"                // for uint32, uchar8
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "decoders/X3fDecoder.h"          // for X3fDecoder
 #include "io/ByteStream.h"                // for ByteStream
+#include "io/Endianness.h"                // for getHostEndianness, Endiann...
 #include "io/IOException.h"               // for IOException
 #include <cstring>                        // for memset
 #include <map>                            // for map, map<>::mapped_type

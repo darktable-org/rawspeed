@@ -29,6 +29,7 @@
 #include "io/BitPumpMSB.h"                          // for BitPumpMSB
 #include "io/BitPumpMSB32.h"                        // for BitPumpMSB32
 #include "io/ByteStream.h"                          // for ByteStream
+#include "io/Endianness.h"                          // for getU16BE, getU32LE
 #include "io/IOException.h"                         // for IOException, Thr...
 #include "metadata/CameraMetaData.h"                // for CameraMetaData
 #include "metadata/ColorFilterArray.h"              // for CFAColor::CFA_GREEN

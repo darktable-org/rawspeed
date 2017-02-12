@@ -20,9 +20,10 @@
 */
 
 #include "tiff/CiffEntry.h"
-#include "common/Common.h"               // for uchar8, uint32, get4LE, ush...
+#include "common/Common.h"               // for uchar8, uint32, ushort16
+#include "io/Endianness.h"               // for getU32LE, getU16LE
 #include "parsers/CiffParserException.h" // for ThrowCPE
-#include <cstdio>                        // for sprintf, NULL
+#include <cstdio>                        // for sprintf
 #include <cstring>                       // for memcpy, strlen
 #include <string>                        // for string, allocator
 #include <vector>                        // for vector

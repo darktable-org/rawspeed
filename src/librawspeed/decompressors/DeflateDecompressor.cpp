@@ -21,9 +21,10 @@
 #ifdef HAVE_ZLIB
 
 #include "decompressors/DeflateDecompressor.h"
-#include "common/Common.h"                // for uint32, getHostEndianness
+#include "common/Common.h"                // for uint32, ushort16
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/Endianness.h"                // for getHostEndianness, Endiann...
 #include <cstdio>                         // for size_t
 
 extern "C" {

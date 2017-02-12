@@ -21,8 +21,9 @@
 */
 
 #include "parsers/FiffParser.h"
-#include "common/Common.h"               // for make_unique, uint32, get4BE
+#include "common/Common.h"               // for make_unique, uint32, uchar8
 #include "io/ByteStream.h"               // for ByteStream
+#include "io/Endianness.h"               // for getU32BE, getHostEndianness
 #include "parsers/FiffParserException.h" // for ThrowFPE
 #include "parsers/TiffParser.h"          // for parseTiff, makeDecoder
 #include "parsers/TiffParserException.h" // for TiffParserException

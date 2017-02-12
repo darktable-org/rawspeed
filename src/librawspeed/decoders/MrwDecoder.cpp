@@ -20,10 +20,11 @@
 */
 
 #include "decoders/MrwDecoder.h"
-#include "common/Common.h"                          // for getU16BE, getU32BE
+#include "common/Common.h"                          // for uchar8, uint32
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/Endianness.h"                          // for getU16BE, getU32BE
 #include "io/IOException.h"                         // for IOException
 #include "parsers/TiffParser.h"                     // for parseTiff
 #include "tiff/TiffEntry.h"                         // IWYU pragma: keep

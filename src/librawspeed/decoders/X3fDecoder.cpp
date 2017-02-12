@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/Buffer.h"                    // for Buffer::size_type
 #include "io/ByteStream.h"                // for ByteStream
+#include "io/Endianness.h"                // for getHostEndianness, Endiann...
 #include "parsers/TiffParser.h"           // for parseTiff
 #include "tiff/TiffEntry.h"               // IWYU pragma: keep
 #include "tiff/TiffIFD.h"                 // for TiffID, TiffRootIFD, TiffR...

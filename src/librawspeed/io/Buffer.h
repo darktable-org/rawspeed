@@ -21,7 +21,8 @@
 
 #pragma once
 
-#include "common/Common.h" // for uchar8, loadMem, uint32, uint64
+#include "common/Common.h" // for uchar8, uint32, uint64
+#include "io/Endianness.h" // for getByteSwapped
 #include <algorithm>       // for swap
 
 namespace RawSpeed {

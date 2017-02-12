@@ -23,10 +23,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "common/Threading.h"             // for pthread_mutex_lock, pthrea...
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include <algorithm>                      // for min
-#include <cmath>                          // for lround, pow
-#include <cstddef>                        // for NULL, size_t
+#include "io/Endianness.h"
+#include "tiff/TiffEntry.h" // for TiffEntry
+#include <algorithm>        // for min
+#include <cmath>            // for lround, pow
+#include <cstddef>          // for NULL, size_t
 
 using namespace std;
 

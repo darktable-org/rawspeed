@@ -20,13 +20,14 @@
 */
 
 #include "decoders/MosDecoder.h"
-#include "common/Common.h"                          // for uint32, getU32LE
+#include "common/Common.h"                          // for uint32, uchar8
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoder.h"                    // for RawDecoder
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/BitPumpMSB32.h"                        // for BitPumpMSB32
 #include "io/ByteStream.h"                          // for ByteStream
+#include "io/Endianness.h"                          // for getU32LE, getLE
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag::TILEOFF...

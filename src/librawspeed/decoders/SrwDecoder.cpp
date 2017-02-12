@@ -25,6 +25,7 @@
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
 #include "io/ByteStream.h"                // for ByteStream
+#include "io/Endianness.h"                // for getHostEndianness, Endiann...
 #include "metadata/CameraMetaData.h"      // for CameraMetaData
 #include "tiff/TiffEntry.h"               // for TiffEntry
 #include "tiff/TiffIFD.h"                 // for TiffRootIFD, TiffIFD, TiffID

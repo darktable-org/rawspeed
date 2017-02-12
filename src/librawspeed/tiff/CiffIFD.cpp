@@ -20,7 +20,8 @@
 */
 
 #include "tiff/CiffIFD.h"
-#include "common/Common.h"               // for uint32, getU16LE, getU32LE
+#include "common/Common.h"               // for uint32, ushort16
+#include "io/Endianness.h"               // for getU16LE, getU32LE
 #include "io/IOException.h"              // for IOException
 #include "parsers/CiffParserException.h" // for ThrowCPE, CiffParserException
 #include "tiff/CiffEntry.h"              // for CiffEntry, CiffDataType::CI...

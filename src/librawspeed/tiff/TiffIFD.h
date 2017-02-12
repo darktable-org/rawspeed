@@ -21,9 +21,10 @@
 
 #pragma once
 
-#include "common/Common.h"               // for uint32, getHostEndianness
+#include "common/Common.h"               // for uint32, ushort16
 #include "io/Buffer.h"                   // for Buffer (ptr only), DataBuffer
 #include "io/ByteStream.h"               // for ByteStream
+#include "io/Endianness.h"               // for getHostEndianness, Endianne...
 #include "io/FileMap.h"                  // for FileMap
 #include "parsers/TiffParserException.h" // for ThrowTPE
 #include "tiff/TiffTag.h"                // for TiffTag

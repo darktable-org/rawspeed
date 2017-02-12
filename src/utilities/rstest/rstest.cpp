@@ -20,21 +20,22 @@
 
 #include "RawSpeed-API.h"
 
-#include <chrono>      // for milliseconds, steady_clock, duration
-#include <cstdint>     // for uint8_t
-#include <cstdio>      // for snprintf, size_t, fclose, fopen, fpr...
-#include <cstdlib>     // for system
-#include <cstring>     // for memset
-#include <fstream>     // IWYU pragma: keep
-#include <iomanip>     // for setw
-#include <iostream>    // for cout
-#include <map>         // for map
-#include <memory>      // for unique_ptr, allocator
-#include <sstream>     // IWYU pragma: keep
-#include <stdexcept>   // for runtime_error
-#include <string>      // for string, operator+, operator<<, char_...
-#include <type_traits> // for enable_if<>::type
-#include <utility>     // for pair
+#include "io/Endianness.h" // for getHostEndianness, BSWAP16, Endianness::l...
+#include <chrono>          // for milliseconds, steady_clock, duration, dur...
+#include <cstdint>         // for uint8_t
+#include <cstdio>          // for snprintf, size_t, fclose, fopen, fprintf
+#include <cstdlib>         // for system
+#include <cstring>         // for memset
+#include <fstream>         // IWYU pragma: keep
+#include <iomanip>         // for operator<<, setw
+#include <iostream>        // for cout, cerr, left, internal
+#include <map>             // for map
+#include <memory>          // for unique_ptr, allocator
+#include <sstream>         // IWYU pragma: keep
+#include <stdexcept>       // for runtime_error
+#include <string>          // for string, char_traits, operator+, operator<<
+#include <type_traits>     // for enable_if<>::type
+#include <utility>         // for pair
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -164,10 +165,9 @@ void writePPM(const RawImage& raw, const string& fn) {
   // Write pixels
   for (int y = 0; y < height; ++y) {
     auto *row = reinterpret_cast<unsigned short *>(raw->getData(0, y));
-    // Swap for PPM format byte ordering
-    if (getHostEndianness() == little)
-      for (int x = 0; x < width; ++x)
-        row[x] = BSWAP16(row[x]);
+    // PPM is big-endian
+    for (int x = 0; x < width; ++x)
+      row[x] = getU16BE(row + x);
 
     fwrite(row, 2, width, f);
   }

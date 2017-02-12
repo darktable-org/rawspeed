@@ -28,6 +28,7 @@
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
 #include "io/BitPumpPlain.h"              // for BitPumpPlain
 #include "io/ByteStream.h"                // for ByteStream
+#include "io/Endianness.h"                // for getHostEndianness, Endiann...
 #include "io/IOException.h"               // for ThrowIOE
 #include <algorithm>                      // for min
 

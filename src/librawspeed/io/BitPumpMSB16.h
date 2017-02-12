@@ -20,8 +20,9 @@
 
 #pragma once
 
-#include "common/Common.h" // for getLE, ushort16, uchar8
+#include "common/Common.h" // for ushort16, uchar8
 #include "io/BitStream.h"  // for BitStream, BitStreamCacheRightInLeftOut
+#include "io/Endianness.h" // for getLE
 
 namespace RawSpeed {
 
