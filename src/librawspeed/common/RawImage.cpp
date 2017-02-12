@@ -34,21 +34,17 @@ using namespace std;
 namespace RawSpeed {
 
 RawImageData::RawImageData()
-    : dim(0, 0), cfa(iPoint2D(0, 0)), uncropped_dim(0, 0) {
-  blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
+    : cfa(iPoint2D(0, 0)) {
+  fill_n(blackLevelSeparate, 4, -1);
   pthread_mutex_init(&mymutex, nullptr);
-  mBadPixelMap = nullptr;
   pthread_mutex_init(&errMutex, nullptr);
   pthread_mutex_init(&mBadPixelMutex, nullptr);
-  mDitherScale = true;
 }
 
-RawImageData::RawImageData(const iPoint2D &_dim, uint32 _bpc, uint32 _cpp)
-    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), dataRefCount(0),
-      data(nullptr), cpp(_cpp), bpp(_bpc * _cpp), uncropped_dim(0, 0) {
-  blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
-  mBadPixelMap = nullptr;
-  mDitherScale = true;
+RawImageData::RawImageData(const iPoint2D& _dim, uint32 _bpc, uint32 _cpp)
+    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), cpp(_cpp),
+      bpp(_bpc * _cpp) {
+  fill_n(blackLevelSeparate, 4, -1);
   createData();
   pthread_mutex_init(&mymutex, nullptr);
   pthread_mutex_init(&errMutex, nullptr);
@@ -60,10 +56,7 @@ ImageMetaData::ImageMetaData() {
   isoSpeed = 0;
   pixelAspectRatio = 1;
   fujiRotationPos = 0;
-  wbCoeffs[0] = NAN;
-  wbCoeffs[1] = NAN;
-  wbCoeffs[2] = NAN;
-  wbCoeffs[3] = NAN;
+  fill_n(wbCoeffs, 4, NAN);
 }
 
 RawImageData::~RawImageData() {
