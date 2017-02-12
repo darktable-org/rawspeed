@@ -41,8 +41,8 @@ class RawDecoderThread
 {
   public:
     RawDecoderThread(RawDecoder* parent_) : parent(parent_) {}
-    uint32 start_y;
-    uint32 end_y;
+    uint32 start_y = 0;
+    uint32 end_y = 0;
     const char* error = nullptr;
 #ifndef NO_PTHREAD
     pthread_t threadid;
