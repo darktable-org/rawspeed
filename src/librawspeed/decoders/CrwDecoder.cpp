@@ -86,7 +86,7 @@ RawImage CrwDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  bool lowbits = hints.find("no_decompressed_lowbits") == hints.end();
+  bool lowbits = ! hints.has("no_decompressed_lowbits");
   decodeRaw(lowbits, dec_table, width, height);
 
   return mRaw;
@@ -156,15 +156,10 @@ void CrwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
         mRaw->metadata.wbCoeffs[2] = (float) (1024.0 /wb->getByte(75));
       } else if (wb->type == CIFF_BYTE && wb->count > 768) { // Other G series and S series cameras
         // correct offset for most cameras
-        int offset = 120;
-        // check for the hint that we need to use other offset
-        if (hints.find("wb_offset") != hints.end()) {
-          stringstream wb_offset(hints.find("wb_offset")->second);
-          wb_offset >> offset;
-        }
+        int offset = hints.get("wb_offset", 120);
 
         ushort16 key[] = { 0x410, 0x45f3 };
-        if (hints.find("wb_mangle") == hints.end())
+        if (! hints.has("wb_mangle"))
           key[0] = key[1] = 0;
 
         offset /= 2;

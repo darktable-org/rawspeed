@@ -53,10 +53,7 @@ RawImage SrwDecoder::decodeRawInternal() {
 
   if (32769 == compression)
   {
-    bool bit_order = false;  // Default guess
-    auto msb_hint = hints.find("msb_override");
-    if (msb_hint != hints.end())
-      bit_order = ("true" == (msb_hint->second));
+    bool bit_order = hints.get("msb_override", false);
     this->decodeUncompressed(raw, bit_order ? BitOrder_Jpeg : BitOrder_Plain);
     return mRaw;
   }
@@ -64,10 +61,7 @@ RawImage SrwDecoder::decodeRawInternal() {
   if (32770 == compression)
   {
     if (!raw->hasEntry ((TiffTag)40976)) {
-      bool bit_order = (bits == 12);  // Default guess
-      auto msb_hint = hints.find("msb_override");
-      if (msb_hint != hints.end())
-        bit_order = ("true" == (msb_hint->second));
+      bool bit_order = hints.get("msb_override", bits == 12);
       this->decodeUncompressed(raw, bit_order ? BitOrder_Jpeg : BitOrder_Plain);
       return mRaw;
     }

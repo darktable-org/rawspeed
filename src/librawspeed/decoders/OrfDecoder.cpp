@@ -77,7 +77,7 @@ RawImage OrfDecoder::decodeRawInternal() {
   input.setPosition(off);
 
   try {
-    if (offsets->count != 1 || (hints.find(string("force_uncompressed")) != hints.end()))
+    if (offsets->count != 1 || hints.has("force_uncompressed"))
       decodeUncompressed(input, width, height, size);
     else
       decodeCompressed(input, width, height);
@@ -90,9 +90,9 @@ RawImage OrfDecoder::decodeRawInternal() {
 
 void OrfDecoder::decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 size) {
   UncompressedDecompressor u(s, mRaw, uncorrectedRawValues);
-  if ((hints.find(string("packed_with_control")) != hints.end()))
+  if (hints.has("packed_with_control"))
     u.decode12BitRawWithControl(w, h);
-  else if ((hints.find(string("jpeg32_bitorder")) != hints.end())) {
+  else if (hints.has("jpeg32_bitorder")) {
     iPoint2D dimensions(w, h), pos(0, 0);
     u.readUncompressedRaw(dimensions, pos, w * 12 / 8, 12, BitOrder_Jpeg32);
   } else if (size >= w*h*2) { // We're in an unpacked raw

@@ -228,7 +228,7 @@ void Camera::parseHints(const xml_node &cur) {
 
     string value = c.attribute("value").as_string();
 
-    hints.insert({name, value});
+    hints.add(name, value);
   }
 }
 

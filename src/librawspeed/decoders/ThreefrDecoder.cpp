@@ -49,10 +49,7 @@ RawImage ThreefrDecoder::decodeRawInternal() {
   mRaw->createData();
 
   HasselbladDecompressor l(*mFile, off, mRaw);
-  int pixelBaseOffset = 0;
-  auto pixelOffsetHint = hints.find("pixelBaseOffset");
-  if (pixelOffsetHint != hints.end())
-    pixelBaseOffset = stoi(pixelOffsetHint->second);
+  int pixelBaseOffset = hints.get("pixelBaseOffset", 0);
 
   try {
     l.decode(pixelBaseOffset);

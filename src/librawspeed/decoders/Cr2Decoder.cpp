@@ -182,13 +182,8 @@ void Cr2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
     if (mRootIFD->hasEntryRecursive(CANONCOLORDATA)) {
       TiffEntry *wb = mRootIFD->getEntryRecursive(CANONCOLORDATA);
       // this entry is a big table, and different cameras store used WB in
-      // different parts, so find the offset, starting with the most common one
-      int offset = 126;
-
-      // replace it with a hint if it exists
-      if (hints.find("wb_offset") != hints.end()) {
-        offset = stoi(hints.find("wb_offset")->second);
-      }
+      // different parts, so find the offset, default is the most common one
+      int offset = hints.get("wb_offset", 126);
 
       offset /= 2;
       mRaw->metadata.wbCoeffs[0] = (float) wb->getU16(offset + 0);
@@ -225,14 +220,14 @@ void Cr2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
 }
 
 int Cr2Decoder::getHue() {
-  if (hints.find("old_sraw_hue") != hints.end())
+  if (hints.has("old_sraw_hue"))
     return (mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x);
 
   if (!mRootIFD->hasEntryRecursive((TiffTag)0x10)) {
     return 0;
   }
   uint32 model_id = mRootIFD->getEntryRecursive((TiffTag)0x10)->getU32();
-  if (model_id >= 0x80000281 || model_id == 0x80000218 || (hints.find("force_new_sraw_hue") != hints.end()))
+  if (model_id >= 0x80000281 || model_id == 0x80000218 || (hints.has("force_new_sraw_hue")))
     return ((mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x) - 1) >> 1;
 
   return (mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x);
@@ -441,11 +436,10 @@ inline void YUV_TO_RGB<2>(int Y, int Cb, int Cr, const int* sraw_coeffs,
 
 // Interpolate and convert sRaw data.
 void Cr2Decoder::sRawInterpolate() {
-  vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(CANONCOLORDATA);
-  if (data.empty())
+  TiffEntry* wb = mRootIFD->getEntryRecursive(CANONCOLORDATA);
+  if (!wb)
     ThrowRDE("CR2 sRaw: Unable to locate WB info.");
 
-  TiffEntry* wb = data[0]->getEntry(CANONCOLORDATA);
   // Offset to sRaw coefficients used to reconstruct uncorrected RGB data.
   uint32 offset = 78;
 
@@ -455,14 +449,14 @@ void Cr2Decoder::sRawInterpolate() {
       (wb->getU16(offset + 1) + wb->getU16(offset + 2) + 1) >> 1;
   sraw_coeffs[2] = wb->getU16(offset + 3);
 
-  if (hints.find("invert_sraw_wb") != hints.end()) {
+  if (hints.has("invert_sraw_wb")) {
     sraw_coeffs[0] = (int)(1024.0f / ((float)sraw_coeffs[0] / 1024.0f));
     sraw_coeffs[2] = (int)(1024.0f / ((float)sraw_coeffs[2] / 1024.0f));
   }
 
   /* Determine sRaw coefficients */
-  bool isOldSraw = hints.find("sraw_40d") != hints.end();
-  bool isNewSraw = hints.find("sraw_new") != hints.end();
+  bool isOldSraw = hints.has("sraw_40d");
+  bool isNewSraw = hints.has("sraw_new");
 
   const auto& subSampling = mRaw->metadata.subsampling;
   int width = mRaw->dim.x / subSampling.x;

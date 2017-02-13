@@ -123,11 +123,11 @@ bool CameraMetaData::addCamera( Camera* cam )
   cameras[id] = cam;
 
   if (string::npos != cam->mode.find("chdk")) {
-    auto filesize_hint = cam->hints.find("filesize");
-    if (filesize_hint == cam->hints.end() || filesize_hint->second.empty()) {
+    auto filesize_hint = cam->hints.get("filesize", string());
+    if (filesize_hint.empty()) {
       writeLog(DEBUG_PRIO_WARNING, "CameraMetaData: CHDK camera: %s %s, no \"filesize\" hint set!\n", cam->make.c_str(), cam->model.c_str());
     } else {
-      chdkCameras[stoi(filesize_hint->second)] = cam;
+      chdkCameras[stoi(filesize_hint)] = cam;
       // writeLog(DEBUG_PRIO_WARNING, "CHDK camera: %s %s size:%u\n", cam->make.c_str(), cam->model.c_str(), size);
     }
   }

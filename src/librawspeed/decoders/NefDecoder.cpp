@@ -65,7 +65,7 @@ RawImage NefDecoder::decodeRawInternal() {
     }
   }
 
-  if (compression == 1 || (hints.find(string("force_uncompressed")) != hints.end()) ||
+  if (compression == 1 || (hints.has("force_uncompressed")) ||
       NEFIsUncompressed(raw)) {
     DecodeUncompressed();
     return mRaw;
@@ -190,15 +190,9 @@ void NefDecoder::DecodeUncompressed() {
   if (bitPerPixel == 14 && width*slices[0].h*2 == slices[0].count)
     bitPerPixel = 16; // D3 & D810
 
-  if(hints.find("real_bpp") != hints.end()) {
-    stringstream convert(hints.find("real_bpp")->second);
-    convert >> bitPerPixel;
-  }
+  bitPerPixel = hints.get("real_bpp", bitPerPixel);
 
-  bool bitorder = true;
-  auto msb_hint = hints.find("msb_override");
-  if (msb_hint != hints.end())
-    bitorder = ("true" == (msb_hint->second));
+  bool bitorder = ! hints.has("msb_override");
 
   offY = 0;
   for (uint32 i = 0; i < slices.size(); i++) {
@@ -207,9 +201,9 @@ void NefDecoder::DecodeUncompressed() {
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
     try {
-      if (hints.find(string("coolpixmangled")) != hints.end())
+      if (hints.has("coolpixmangled"))
         readCoolpixMangledRaw(in, size, pos, width*bitPerPixel / 8);
-      else if (hints.find(string("coolpixsplit")) != hints.end())
+      else if (hints.has("coolpixsplit"))
         readCoolpixSplitRaw(in, size, pos, width*bitPerPixel / 8);
       else {
         UncompressedDecompressor u(in, mRaw, uncorrectedRawValues);
@@ -505,7 +499,7 @@ void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
     }
   }
 
-  if (hints.find(string("nikon_wb_adjustment")) != hints.end()) {
+  if (hints.has("nikon_wb_adjustment")) {
     mRaw->metadata.wbCoeffs[0] *= 256/527.0;
     mRaw->metadata.wbCoeffs[2] *= 256/317.0;
   }
