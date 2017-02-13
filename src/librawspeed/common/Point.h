@@ -29,16 +29,7 @@ namespace RawSpeed {
 class iPoint2D {
 public:
   constexpr iPoint2D() = default;
-  ~iPoint2D() = default;
-
-  constexpr iPoint2D(const iPoint2D& pt) = default;
-  constexpr iPoint2D(iPoint2D&& pt) = default;
-
   constexpr iPoint2D(int a, int b) : x(a), y(b) {}
-
-  iPoint2D& operator=(const iPoint2D& pt) = default;
-  iPoint2D&
-  operator=(iPoint2D&& pt) noexcept = default; // NOLINT llvm Bug 24712
 
   constexpr iPoint2D operator+(const iPoint2D& rhs) const {
     return iPoint2D(x + rhs.x, y + rhs.y);
@@ -96,11 +87,6 @@ public:
 class iRectangle2D {
 public:
   constexpr iRectangle2D() = default;
-  ~iRectangle2D() = default;
-
-  constexpr iRectangle2D(const iRectangle2D& r) = default;
-  constexpr iRectangle2D(iRectangle2D&& r) = default;
-
   constexpr iRectangle2D(const iPoint2D& pos_, const iPoint2D& dim_)
       : pos(pos_), dim(dim_) {}
   constexpr iRectangle2D(iPoint2D&& pos_, iPoint2D&& dim_)
@@ -109,10 +95,6 @@ public:
   constexpr iRectangle2D(int w, int h) : dim({w, h}) {}
   constexpr iRectangle2D(int x_pos, int y_pos, int w, int h)
       : pos({x_pos, y_pos}), dim({w, h}) {}
-
-  iRectangle2D& operator=(const iRectangle2D& b) = default;
-  iRectangle2D&
-  operator=(iRectangle2D&& b) noexcept = default; // NOLINT llvm Bug 24712
 
   constexpr int getTop() const { return pos.y; }
   constexpr int getBottom() const { return pos.y + dim.y; }

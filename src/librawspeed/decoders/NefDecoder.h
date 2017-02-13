@@ -67,7 +67,6 @@ private:
 class NefSlice {
 public:
   NefSlice() { h = offset = count = 0; }
-  ~NefSlice() = default;
   uint32 h;
   uint32 offset;
   uint32 count;

@@ -32,7 +32,6 @@ public:
 
 public:
 	void writeFile(FileMap* fileMap, uint32 size = 0);
-	virtual ~FileWriter();
         const char *Filename() const { return mFilename; }
         //  void Filename(const char * val) { mFilename = val; }
       private:

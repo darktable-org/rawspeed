@@ -69,8 +69,6 @@ AriDecoder::AriDecoder(FileMap* file) : RawDecoder(file) {
   }
 }
 
-AriDecoder::~AriDecoder() = default;
-
 bool AriDecoder::isARI(FileMap* input) {
   static const char magic[] = "ARRI\x12\x34\x56\x78";
   static const size_t magic_size = sizeof(magic) - 1; // excluding \0

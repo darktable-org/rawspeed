@@ -33,7 +33,6 @@ class CameraMetaData;
 class AriDecoder final : public RawDecoder {
 public:
   AriDecoder(FileMap* file);
-  ~AriDecoder() override;
   RawImage decodeRawInternal() override;
   void checkSupportInternal(CameraMetaData *meta) override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;

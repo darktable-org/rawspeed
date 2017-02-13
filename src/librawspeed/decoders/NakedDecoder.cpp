@@ -40,8 +40,6 @@ NakedDecoder::NakedDecoder(FileMap* file, Camera* c) :
   cam = c;
 }
 
-NakedDecoder::~NakedDecoder() = default;
-
 static const map<string, BitOrder> order2enum = {
     {"plain", BitOrder_Plain},
     {"jpeg", BitOrder_Jpeg},

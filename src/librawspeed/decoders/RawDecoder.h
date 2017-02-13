@@ -181,7 +181,6 @@ protected:
 class RawSlice {
 public:
   RawSlice() { h = offset = count = 0; }
-  ~RawSlice() = default;
   uint32 h;
   uint32 offset;
   uint32 count;

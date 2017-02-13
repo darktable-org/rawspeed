@@ -28,7 +28,6 @@ class CameraSensorInfo final {
 public:
   CameraSensorInfo(int black_level, int white_level, int min_iso, int max_iso,
                    std::vector<int> black_separate);
-  virtual ~CameraSensorInfo();
   bool isIsoWithin(int iso);
   bool isDefault();
   int mBlackLevel;

@@ -31,7 +31,6 @@ public:
 
 public:
 	FileMap* readFile();
-	virtual ~FileReader();
         const char *Filename() const { return mFilename; }
         //  void Filename(const char * val) { mFilename = val; }
       private:

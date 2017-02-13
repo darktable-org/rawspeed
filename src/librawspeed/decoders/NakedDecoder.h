@@ -35,7 +35,6 @@ class CameraMetaData;
 class NakedDecoder final : public RawDecoder {
 public:
   NakedDecoder(FileMap* file, Camera *c);
-  ~NakedDecoder() override;
   RawImage decodeRawInternal() override;
   void checkSupportInternal(CameraMetaData *meta) override;
   void decodeMetaDataInternal(CameraMetaData *meta) override;
