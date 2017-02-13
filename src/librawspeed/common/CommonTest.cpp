@@ -105,7 +105,7 @@ TEST_P(IsInTest, IsInTest) {
 }
 
 using ClampBitsType =
-    std::tr1::tuple<long long int, int, unsigned long long int>;
+    std::tr1::tuple<int, int, ushort16>;
 class ClampBitsTest : public ::testing::TestWithParam<ClampBitsType> {
 protected:
   ClampBitsTest() = default;
@@ -115,35 +115,35 @@ protected:
     expected = std::tr1::get<2>(GetParam());
   }
 
-  long long int in; // input
+  int in; // input
   int n;
-  unsigned long long int expected; // expected output
+  ushort16 expected; // expected output
 };
 
 #define ROWS(v, p, pv) make_tuple((v), (p), ((v) <= (pv)) ? (v) : (pv)),
 
 #define THREEROWS(v, p)                                                        \
-  ROWS(((1ULL << (v##ULL)) - 1ULL), (p), ((1ULL << (p##ULL)) - 1ULL))          \
-  ROWS(((1ULL << (v##ULL)) - 0ULL), (p), ((1ULL << (p##ULL)) - 1ULL))          \
-  ROWS(((1ULL << (v##ULL)) + 1ULL), (p), ((1ULL << (p##ULL)) - 1ULL))
+  ROWS(((1 << (v)) - 1), (p), ((1 << (p)) - 1))                                \
+  ROWS(((1 << (v)) - 0), (p), ((1 << (p)) - 1))                                \
+  ROWS(((1 << (v)) + 1), (p), ((1 << (p)) - 1))
 
 #define MOREROWS(v)                                                            \
   THREEROWS(v, 0)                                                              \
   THREEROWS(v, 1)                                                              \
   THREEROWS(v, 2)                                                              \
   THREEROWS(v, 4)                                                              \
-  THREEROWS(v, 8) THREEROWS(v, 16) THREEROWS(v, 24) THREEROWS(v, 32)
+  THREEROWS(v, 8) THREEROWS(v, 16)
 
 #define GENERATE()                                                             \
   MOREROWS(0)                                                                  \
   MOREROWS(1)                                                                  \
-  MOREROWS(2) MOREROWS(4) MOREROWS(8) MOREROWS(16) MOREROWS(24) MOREROWS(32)
+  MOREROWS(2) MOREROWS(4) MOREROWS(8) MOREROWS(16) MOREROWS(24) MOREROWS(30)
 
 static const ClampBitsType ClampBitsValues[] = {
-    make_tuple(0, 0, 0),    make_tuple(0, 32, 0),
-    make_tuple(32, 0, 0),   make_tuple(32, 32, 32),
+    make_tuple(0, 0, 0),    make_tuple(0, 16, 0),
+    make_tuple(32, 0, 0),   make_tuple(32, 16, 32),
     make_tuple(32, 2, 3),   make_tuple(-32, 0, 0),
-    make_tuple(-32, 32, 0), GENERATE()};
+    make_tuple(-32, 16, 0), GENERATE()};
 INSTANTIATE_TEST_CASE_P(ClampBitsTest, ClampBitsTest,
                         ::testing::ValuesIn(ClampBitsValues));
 TEST_P(ClampBitsTest, ClampBitsTest) { ASSERT_EQ(clampBits(in, n), expected); }

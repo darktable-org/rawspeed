@@ -66,7 +66,7 @@ struct PanaBitpump
     int blocks = (bytes / BufSize) * BufSize;
     input.skipBytes(blocks);
     for (int i = blocks; i < bytes; i++)
-      getBits(8);
+      (void)getBits(8);
   }
 
   uint32 getBits(int nbits)

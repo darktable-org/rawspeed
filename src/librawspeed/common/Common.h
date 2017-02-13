@@ -26,6 +26,7 @@
 #include <memory>           // for unique_ptr, allocator
 #include <string>           // for string
 #include <vector>           // for vector
+#include <cassert>          // for assert
 
 int rawspeed_get_number_of_processor_cores();
 
@@ -107,10 +108,11 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 #endif
 #endif
 
-// clampBits clamps the given int to the range 0 .. 2^n-1
-inline uint32 clampBits(int64 x, uint32 n) {
-  const int64 tmp = (1ULL << n) - 1ULL;
-  x = x < 0LL ? 0LL : x;
+// clampBits clamps the given int to the range 0 .. 2^n-1, with n <= 16
+inline ushort16 clampBits(int x, uint32 n) {
+  assert(n <= 16);
+  const int tmp = (1 << n) - 1;
+  x = x < 0 ? 0 : x;
   x = x > tmp ? tmp : x;
   return x;
 }

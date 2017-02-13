@@ -138,12 +138,12 @@ public:
   bool isAllocated() {return !!data;}
   void createBadPixelMap();
   iPoint2D dim;
-  uint32 pitch;
+  uint32 pitch = 0;
   bool isCFA{true};
   ColorFilterArray cfa;
-  int blackLevel{-1};
+  int blackLevel = -1;
   int blackLevelSeparate[4];
-  int whitePoint{65536};
+  int whitePoint = 65536;
   std::vector<BlackArea> blackAreas;
   /* Vector containing silent errors that occurred doing decoding, that may have lead to */
   /* an incomplete image. */
@@ -152,9 +152,9 @@ public:
   /* Vector containing the positions of bad pixels */
   /* Format is x | (y << 16), so maximum pixel position is 65535 */
   std::vector<uint32> mBadPixelPositions;    // Positions of zeroes that must be interpolated
-  uchar8 *mBadPixelMap;
-  uint32 mBadPixelMapPitch;
-  bool mDitherScale;           // Should upscaling be done with dither to minimize banding?
+  uchar8* mBadPixelMap = nullptr;
+  uint32 mBadPixelMapPitch = 0;
+  bool mDitherScale = true;           // Should upscaling be done with dither to minimize banding?
   ImageMetaData metadata;
 
 #ifndef NO_PTHREAD
@@ -171,14 +171,14 @@ protected:
   virtual void fixBadPixel( uint32 x, uint32 y, int component = 0) = 0;
   void fixBadPixelsThread(int start_y, int end_y);
   void startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped );
-  uint32 dataRefCount{0};
-  uchar8 *data{nullptr};
-  uint32 cpp{1}; // Components per pixel
-  uint32 bpp{0}; // Bytes per pixel.
+  uint32 dataRefCount = 0;
+  uchar8* data = nullptr;
+  uint32 cpp = 1; // Components per pixel
+  uint32 bpp = 0; // Bytes per pixel.
   friend class RawImage;
   iPoint2D mOffset;
   iPoint2D uncropped_dim;
-  TableLookUp *table{nullptr};
+  TableLookUp* table = nullptr;
 #ifndef NO_PTHREAD
   pthread_mutex_t mymutex;
 #endif

@@ -42,9 +42,7 @@ using namespace std;
 
 namespace RawSpeed {
 
-X3fDecoder::X3fDecoder(FileMap *file) : RawDecoder(file), bytes(nullptr) {
-  huge_table = nullptr;
-  line_offsets = nullptr;
+X3fDecoder::X3fDecoder(FileMap *file) : RawDecoder(file) {
   bytes = new ByteStream(file, 0, getHostEndianness() == little);
 }
 
@@ -233,10 +231,10 @@ void X3fDecoder::decompressSigma( X3fImage &image )
             // Interpolate 1 missing pixel
             int blue_mid = ((int)blue[0] + (int)blue[3] + (int)blue_down[0] + (int)blue_down[3] + 2)>>2;
             int avg = dst[0];
-            dst[0] = clampBits(((int64)blue[0] - blue_mid) + avg, 16);
-            dst[3] = clampBits(((int64)blue[3] - blue_mid) + avg, 16);
-            dst_down[0] = clampBits(((int64)blue_down[0] - blue_mid) + avg, 16);
-            dst_down[3] = clampBits(((int64)blue_down[3] - blue_mid) + avg, 16);
+            dst[0] = clampBits(((int)blue[0] - blue_mid) + avg, 16);
+            dst[3] = clampBits(((int)blue[3] - blue_mid) + avg, 16);
+            dst_down[0] = clampBits(((int)blue_down[0] - blue_mid) + avg, 16);
+            dst_down[3] = clampBits(((int)blue_down[3] - blue_mid) + avg, 16);
             dst += 6;
             blue += 6;
             blue_down += 6;
@@ -348,8 +346,7 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
 {
   if (curr_image->format == 30 || curr_image->format == 35) {
     uint32 i = t->taskNo;
-    if (i>3)
-      ThrowRDE("X3fDecoder:Invalid plane:%u (internal error)", i);
+    assert(i < 3); // see startTasks above
 
     // Subsampling (in shifts)
     int subs = 0;
