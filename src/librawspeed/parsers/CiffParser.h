@@ -32,10 +32,10 @@ class RawDecoder;
 class CiffParser final {
 public:
   CiffParser(FileMap* input);
-  virtual ~CiffParser();
+  ~CiffParser();
 
-  virtual void parseData();
-  virtual RawDecoder* getDecoder();
+  void parseData();
+  RawDecoder* getDecoder();
   /* Returns the Root IFD - this object still retains ownership */
   CiffIFD* RootIFD() const { return mRootIFD; }
   /* Merges root of other CIFF into this - clears the root of the other */

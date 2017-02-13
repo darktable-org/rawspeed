@@ -77,8 +77,8 @@ public:
 class X3fParser {
 public:
   X3fParser(FileMap* file);
-  virtual ~X3fParser();
-  virtual RawDecoder* getDecoder();
+  ~X3fParser();
+  RawDecoder* getDecoder();
 protected:
   void readDirectory();
   std::string getId();

@@ -113,7 +113,7 @@ public:
   uint32 getBpp() const { return bpp; }
   void setCpp(uint32 val);
   void createData();
-  virtual void destroyData();
+  void destroyData();
   void blitFrom(const RawImage& src, const iPoint2D& srcPos,
                 const iPoint2D& size, const iPoint2D& destPos);
   RawSpeed::RawImageType getDataType() const { return dataType; }
