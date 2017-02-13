@@ -138,7 +138,6 @@ void decompressNikon(RawImage& mRaw, ByteStream&& data, ByteStream metadata, uin
     rawdata->setWithLookUp(clampBits(pLeft1,15), (uchar8*)dest++, &random);
     rawdata->setWithLookUp(clampBits(pLeft2,15), (uchar8*)dest++, &random);
     for (uint32 x = 1; x < cw; x++) {
-      bits.checkPos();
       pLeft1 += ht.decodeNext(bits);
       pLeft2 += ht.decodeNext(bits);
       rawdata->setWithLookUp(clampBits(pLeft1,15), (uchar8*)dest++, &random);

@@ -179,7 +179,6 @@ void SrwDecoder::decodeCompressed( const TiffIFD* raw )
           img[c] = adj + pred_left;
         }
       }
-      bits.checkPos();
       img += 16;
       img_up += 16;
       img_up2 += 16;

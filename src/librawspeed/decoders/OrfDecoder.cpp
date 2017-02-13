@@ -145,7 +145,6 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
     bool y_border = y < 2;
     bool border = true;
     for (uint32 x = 0; x < w; x++) {
-      bits.checkPos();
       bits.fill();
       i = 2 * (acarry0[2] < 3);
       for (nbits = 2 + i; (ushort16) acarry0[0] >> (nbits + i); nbits++);

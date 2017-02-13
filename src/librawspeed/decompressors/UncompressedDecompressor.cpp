@@ -84,7 +84,6 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
     for (; y < h; y++) {
       auto* dest =
           (ushort16*)&data[offset.x * sizeof(ushort16) * cpp + y * outPitch];
-      bits.checkPos();
       for (uint32 x = 0; x < w; x++) {
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
@@ -97,7 +96,6 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
     for (; y < h; y++) {
       auto* dest =
           (ushort16*)&data[offset.x * sizeof(ushort16) * cpp + y * outPitch];
-      bits.checkPos();
       for (uint32 x = 0; x < w; x++) {
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
@@ -110,7 +108,6 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
     for (; y < h; y++) {
       auto* dest =
           (ushort16*)&data[offset.x * sizeof(ushort16) * cpp + y * outPitch];
-      bits.checkPos();
       for (uint32 x = 0; x < w; x++) {
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
@@ -133,7 +130,6 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
     w *= cpp;
     for (; y < h; y++) {
       auto* dest = (ushort16*)&data[offset.x * sizeof(ushort16) + y * outPitch];
-      bits.checkPos();
       for (uint32 x = 0; x < w; x++) {
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;

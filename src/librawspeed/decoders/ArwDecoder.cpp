@@ -245,7 +245,6 @@ void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
   int sum = 0;
   for (int64 x = w - 1; x >= 0; x--) {
     for (uint32 y = 0; y < h + 1; y += 2) {
-      bits.checkPos();
       bits.fill();
       if (y == h) y = 1;
       uint32 len = 4 - bits.getBitsNoFill(2);
@@ -438,7 +437,6 @@ void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
 
     // Process 32 pixels (16x2) per loop.
     for (int32 x = 0; x < w - 30;) {
-      bits.checkPos();
       int _max = bits.getBits(11);
       int _min = bits.getBits(11);
       int _imax = bits.getBits(4);

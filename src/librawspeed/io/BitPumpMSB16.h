@@ -33,13 +33,14 @@ struct MSB16BitPumpTag;
 
 using BitPumpMSB16 = BitStream<MSB16BitPumpTag, BitStreamCacheRightInLeftOut>;
 
-template<> inline void BitPumpMSB16::fillCache() {
-  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "if the structure of the bit cache changed, this code has to be updated");
+template <>
+inline BitPumpMSB16::size_type BitPumpMSB16::fillCache(const uchar8* input)
+{
+  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
 
-  for (int i = 0; i < 2; ++i) {
-    cache.push(getLE<ushort16>(data + pos), 16);
-    pos += 2;
-  }
+  for (size_type i = 0; i < 4; i += sizeof(ushort16))
+    cache.push(getLE<ushort16>(input + i), 16);
+  return 4;
 }
 
 } // namespace RawSpeed

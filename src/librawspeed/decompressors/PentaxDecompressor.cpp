@@ -107,7 +107,6 @@ void decodePentax(RawImage& mRaw, ByteStream&& data, TiffIFD* root) {
   int pLeft2 = 0;
 
   for (uint32 y = 0;y < h;y++) {
-    bs.checkPos();
     dest = (ushort16*) & draw[y*mRaw->pitch];  // Adjust destination
     pUp1[y&1] += ht.decodeNext(bs);
     pUp2[y&1] += ht.decodeNext(bs);
