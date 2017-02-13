@@ -29,6 +29,7 @@ FILE(GLOB RAWSPEED_TESTS_SOURCES
   "../metadata/BlackAreaTest.cpp"
   "../metadata/CameraMetaDataTest.cpp"
   "../metadata/CameraSensorInfoTest.cpp"
+  "../metadata/CameraTest.cpp"
   "../metadata/ColorFilterArrayTest.cpp"
   "ExceptionsTest.cpp"
   "RawSpeedTest.cpp"

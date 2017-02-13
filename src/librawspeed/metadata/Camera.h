@@ -57,9 +57,16 @@ public:
     auto hint = data.find(key);
     if (hint != data.end() && !hint->second.empty()) {
       std::istringstream iss(hint->second);
-      iss >> std::boolalpha >> defaultValue;
+      iss >> defaultValue;
     }
     return defaultValue;
+  }
+
+  bool get(const std::string& key, bool defaultValue) const {
+    auto hint = data.find(key);
+    if (hint == data.end())
+      return defaultValue;
+    return "true" == hint->second;
   }
 };
 
