@@ -71,6 +71,8 @@ if(WITH_JPEG)
     message(STATUS "Looking for JPEG - found")
     include_directories(SYSTEM ${JPEG_INCLUDE_DIRS})
     add_definitions(-DHAVE_JPEG)
+
+    include(CheckJPEGSymbols)
   endif()
 else()
   message(STATUS "JPEG is disabled, DNG Lossy JPEG support won't be available.")

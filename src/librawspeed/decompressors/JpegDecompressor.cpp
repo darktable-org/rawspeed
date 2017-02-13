@@ -43,7 +43,11 @@ using namespace std;
 
 namespace RawSpeed {
 
-#if JPEG_LIB_VERSION < 80
+#ifdef HAVE_JPEG_MEM_SRC
+
+#define JPEG_MEMSRC(A, B, C) jpeg_mem_src(A, B, C)
+
+#else
 
 #define JPEG_MEMSRC(A, B, C) jpeg_mem_src_int(A, B, C)
 /* Read JPEG image from a memory segment */
@@ -82,8 +86,7 @@ static void jpeg_mem_src_int(j_decompress_ptr cinfo,
   src->bytes_in_buffer = nbytes;
   src->next_input_byte = (JOCTET*)buffer;
 }
-#else
-#define JPEG_MEMSRC(A, B, C) jpeg_mem_src(A, B, C)
+
 #endif
 
 METHODDEF(void)
