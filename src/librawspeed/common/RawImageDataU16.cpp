@@ -18,15 +18,13 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h"                // for uint32, ushort16, uchar8
-#include "common/Memory.h"                // for alignedMallocArray, alignedFree
+#include "common/Common.h"                // for ushort16, uint32, uchar8
+#include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImageDataU16, TableLookUp
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea
-#include <algorithm>                      // for min
-#include <cstdlib>                        // for free, malloc
-#include <cstring>                        // for memset
+#include <algorithm>                      // for fill, max, min
 #include <vector>                         // for vector
 
 #if defined(__SSE2__)
@@ -50,8 +48,9 @@ RawImageDataU16::RawImageDataU16(const iPoint2D &_dim, uint32 _cpp)
 
 
 void RawImageDataU16::calculateBlackAreas() {
-  auto *histogram = (int *)malloc(4 * 65536 * sizeof(int));
-  memset(histogram, 0, 4*65536*sizeof(int));
+  vector<unsigned int> histogram(4 * 65536);
+  fill(histogram.begin(), histogram.end(), 0);
+
   int totalpixels = 0;
 
   for (auto area : blackAreas) {
@@ -65,7 +64,7 @@ void RawImageDataU16::calculateBlackAreas() {
         ThrowRDE("RawImageData::calculateBlackAreas: Offset + size is larger than height of image");
       for (uint32 y = area.offset; y < area.offset+area.size; y++) {
         auto *pixel = (ushort16 *)getDataUncropped(mOffset.x, y);
-        int* localhist = &histogram[(y&1)*(65536*2)];
+        auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
         for (int x = mOffset.x; x < dim.x+mOffset.x; x++) {
           localhist[((x&1)<<16) + *pixel]++;
         }
@@ -79,7 +78,7 @@ void RawImageDataU16::calculateBlackAreas() {
         ThrowRDE("RawImageData::calculateBlackAreas: Offset + size is larger than width of image");
       for (int y = mOffset.y; y < dim.y+mOffset.y; y++) {
         auto *pixel = (ushort16 *)getDataUncropped(area.offset, y);
-        int* localhist = &histogram[(y&1)*(65536*2)];
+        auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
         for (uint32 x = area.offset; x < area.size+area.offset; x++) {
           localhist[((x&1)<<16) + *pixel]++;
         }
@@ -91,7 +90,6 @@ void RawImageDataU16::calculateBlackAreas() {
   if (!totalpixels) {
     for (int &i : blackLevelSeparate)
       i = blackLevel;
-    free(histogram);
     return;
   }
 
@@ -100,7 +98,7 @@ void RawImageDataU16::calculateBlackAreas() {
   totalpixels /= 4*2;
 
   for (int i = 0 ; i < 4; i++) {
-    int* localhist = &histogram[i*65536];
+    auto* localhist = &histogram[i * 65536UL];
     int acc_pixels = localhist[0];
     int pixel_value = 0;
     while (acc_pixels <= totalpixels && pixel_value < 65535) {
@@ -118,7 +116,6 @@ void RawImageDataU16::calculateBlackAreas() {
     for (int &i : blackLevelSeparate)
       i = (total + 2) >> 2;
   }
-  free(histogram);
 }
 
 void RawImageDataU16::scaleBlackWhite() {
