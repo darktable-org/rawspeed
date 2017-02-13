@@ -20,14 +20,14 @@
 */
 
 #include "decoders/RawDecoder.h"
-#include "common/Common.h"                          // for uint32, writeLog
+#include "common/Common.h"                          // for uint32, getThrea...
 #include "common/Point.h"                           // for iPoint2D, iRecta...
 #include "decoders/RawDecoderException.h"           // for ThrowRDE, RawDec...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/FileIOException.h"                     // for FileIOException
 #include "io/IOException.h"                         // for IOException
 #include "metadata/BlackArea.h"                     // for BlackArea
-#include "metadata/Camera.h"                        // for Camera
+#include "metadata/Camera.h"                        // for Camera, Hints
 #include "metadata/CameraMetaData.h"                // for CameraMetaData
 #include "metadata/CameraSensorInfo.h"              // for CameraSensorInfo
 #include "metadata/ColorFilterArray.h"              // for ColorFilterArray
@@ -36,11 +36,8 @@
 #include "tiff/TiffIFD.h"                           // for TiffIFD
 #include "tiff/TiffTag.h"                           // for TiffTag::STRIPOF...
 #include <algorithm>                                // for min
-#include <cstdlib>                                  // for atoi
-#include <map>                                      // for map, _Rb_tree_it...
 #include <memory>                                   // for allocator_traits...
-#include <string>                                   // for string, allocator
-#include <utility>                                  // for pair
+#include <string>                                   // for string, basic_st...
 #include <vector>                                   // for vector
 
 using namespace std;

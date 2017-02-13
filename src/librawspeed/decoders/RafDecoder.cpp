@@ -27,7 +27,7 @@
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for getHostEndianness
 #include "metadata/BlackArea.h"                     // for BlackArea
-#include "metadata/Camera.h"                        // for Camera
+#include "metadata/Camera.h"                        // for Camera, Hints
 #include "metadata/CameraMetaData.h"                // for CameraMetaData
 #include "metadata/CameraSensorInfo.h"              // for CameraSensorInfo
 #include "metadata/ColorFilterArray.h"              // for ColorFilterArray
@@ -36,7 +36,6 @@
 #include "tiff/TiffTag.h"                           // for TiffTag::FUJIOLDWB
 #include <cstdio>                                   // for size_t
 #include <cstring>                                  // for memcmp
-#include <map>                                      // for map, _Rb_tree_it...
 #include <memory>                                   // for unique_ptr, allo...
 #include <string>                                   // for string
 #include <vector>                                   // for vector

@@ -28,15 +28,14 @@
 #include "io/ByteStream.h"                 // for ByteStream
 #include "io/Endianness.h"                 // for getHostEndianness, Endian...
 #include "io/IOException.h"                // for IOException
+#include "metadata/Camera.h"               // for Hints
 #include "metadata/ColorFilterArray.h"     // for CFAColor::CFA_GREEN, CFAC...
 #include "parsers/TiffParserException.h"   // for ThrowTPE
 #include "tiff/TiffEntry.h"                // for TiffEntry, TiffDataType::...
 #include "tiff/TiffTag.h"                  // for TiffTag, TiffTag::CANONCO...
 #include <exception>                       // for exception
-#include <map>                             // for map, _Rb_tree_iterator
 #include <memory>                          // for unique_ptr, allocator
-#include <string>                          // for string, stoi
-#include <utility>                         // for pair
+#include <string>                          // for string
 #include <vector>                          // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 

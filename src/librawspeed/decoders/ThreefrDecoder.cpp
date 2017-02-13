@@ -24,14 +24,12 @@
 #include "common/Point.h"                         // for iPoint2D
 #include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompre...
 #include "io/IOException.h"                       // for IOException
+#include "metadata/Camera.h"                      // for Hints
 #include "metadata/ColorFilterArray.h"            // for CFAColor::CFA_GREEN
 #include "tiff/TiffEntry.h"                       // for TiffEntry
 #include "tiff/TiffIFD.h"                         // for TiffRootIFD, TiffIFD
 #include "tiff/TiffTag.h"                         // for TiffTag::ASSHOTNEU...
-#include <map>                                    // for _Rb_tree_iterator
 #include <memory>                                 // for unique_ptr
-#include <string>                                 // for string, stoi
-#include <utility>                                // for pair
 
 using namespace std;
 

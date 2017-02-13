@@ -26,6 +26,7 @@
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/ByteStream.h"                          // for ByteStream
+#include "metadata/Camera.h"                        // for Hints
 #include "metadata/ColorFilterArray.h"              // for CFAColor::CFA_GREEN
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffIFD, TiffRoo...
@@ -33,7 +34,6 @@
 #include <algorithm>                                // for min, move
 #include <cmath>                                    // for fabs
 #include <cstring>                                  // for memcpy
-#include <map>                                      // for map, _Rb_tree_it...
 #include <memory>                                   // for unique_ptr
 #include <pthread.h>                                // for pthread_mutex_lock
 #include <string>                                   // for string, allocator

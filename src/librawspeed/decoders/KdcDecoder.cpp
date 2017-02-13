@@ -24,13 +24,12 @@
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "metadata/Camera.h"                        // for Hints
 #include "parsers/TiffParserException.h"            // for TiffParserException
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD
 #include "tiff/TiffTag.h"                           // for TiffTag::COMPRES...
-#include <map>                                      // for map, _Rb_tree_it...
 #include <memory>                                   // for unique_ptr
-#include <string>                                   // for string
 
 using namespace std;
 

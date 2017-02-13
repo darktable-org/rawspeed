@@ -26,16 +26,15 @@
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/Endianness.h"                // for getHostEndianness, Endiann...
+#include "metadata/Camera.h"              // for Hints
 #include "metadata/CameraMetaData.h"      // for CameraMetaData
 #include "tiff/TiffEntry.h"               // for TiffEntry
 #include "tiff/TiffIFD.h"                 // for TiffRootIFD, TiffIFD, TiffID
 #include "tiff/TiffTag.h"                 // for TiffTag::STRIPOFFSETS, Tif...
 #include <algorithm>                      // for max
-#include <map>                            // for _Rb_tree_iterator, map
 #include <memory>                         // for unique_ptr
 #include <sstream>                        // for ostringstream, operator<<
-#include <string>                         // for string, operator==, basic_...
-#include <utility>                        // for pair
+#include <string>                         // for string
 #include <vector>                         // for vector
 
 using namespace std;

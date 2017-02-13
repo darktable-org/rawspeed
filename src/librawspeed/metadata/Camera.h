@@ -25,9 +25,10 @@
 #include "metadata/BlackArea.h"        // for BlackArea
 #include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray
-#include <map>                         // for map
-#include <sstream>                     // for istringstream
-#include <string>                      // for string, basic_string, allocator
+#include <map>                         // for map, _Rb_tree_const_iterator
+#include <sstream>                     // for istringstream, basic_istream
+#include <string>                      // for string, basic_string, operator>>
+#include <utility>                     // for pair
 #include <vector>                      // for vector
 
 namespace pugi {

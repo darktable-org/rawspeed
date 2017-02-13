@@ -26,6 +26,7 @@
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/ByteStream.h"                // for ByteStream
+#include "metadata/Camera.h"              // for Hints
 #include "metadata/ColorFilterArray.h"    // for CFAColor::CFA_GREEN, CFACo...
 #include "tiff/CiffEntry.h"               // for CiffEntry, CiffDataType::C...
 #include "tiff/CiffIFD.h"                 // for CiffIFD
@@ -36,10 +37,7 @@
 #include <cstdlib>                        // for abs
 #include <cstring>                        // for memset
 #include <exception>                      // for exception
-#include <map>                            // for map, _Rb_tree_iterator
-#include <sstream>                        // for basic_istream::operator>>
 #include <string>                         // for string
-#include <utility>                        // for pair
 #include <vector>                         // for vector
 
 using namespace std;

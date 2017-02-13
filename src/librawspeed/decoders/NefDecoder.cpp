@@ -31,6 +31,7 @@
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for getU16BE, getU32LE
 #include "io/IOException.h"                         // for IOException, Thr...
+#include "metadata/Camera.h"                        // for Hints
 #include "metadata/CameraMetaData.h"                // for CameraMetaData
 #include "metadata/ColorFilterArray.h"              // for CFAColor::CFA_GREEN
 #include "tiff/TiffEntry.h"                         // for TiffEntry, TiffD...
@@ -38,11 +39,9 @@
 #include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
 #include <cmath>                                    // for pow, exp, log
 #include <cstring>                                  // for strncmp
-#include <map>                                      // for map, _Rb_tree_it...
 #include <memory>                                   // for unique_ptr, allo...
 #include <sstream>                                  // for operator<<, ostr...
-#include <string>                                   // for string, operator==
-#include <utility>                                  // for pair
+#include <string>                                   // for string, operator<<
 #include <vector>                                   // for vector
 
 using namespace std;

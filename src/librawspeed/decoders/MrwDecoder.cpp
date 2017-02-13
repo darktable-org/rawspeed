@@ -26,14 +26,13 @@
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Endianness.h"                          // for getU16BE, getU32BE
 #include "io/IOException.h"                         // for IOException
+#include "metadata/Camera.h"                        // for Hints
 #include "parsers/TiffParser.h"                     // for parseTiff
 #include "tiff/TiffEntry.h"                         // IWYU pragma: keep
 #include "tiff/TiffIFD.h"                           // for TiffID, TiffRoot...
 #include <algorithm>                                // for max
 #include <cmath>                                    // for NAN
-#include <map>                                      // for map, _Rb_tree_it...
 #include <memory>                                   // for unique_ptr
-#include <string>                                   // for string
 
 using namespace std;
 

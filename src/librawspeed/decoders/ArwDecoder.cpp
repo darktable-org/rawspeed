@@ -30,15 +30,15 @@
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for getU32BE, getU32LE
 #include "io/IOException.h"                         // for IOException
+#include "metadata/Camera.h"                        // for Hints
 #include "metadata/ColorFilterArray.h"              // for CFAColor::CFA_GREEN
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag::DNGPRIV...
 #include <cassert>                                  // for assert
 #include <exception>                                // for exception
-#include <map>                                      // for map, _Rb_tree_it...
 #include <memory>                                   // for unique_ptr
-#include <string>                                   // for string, operator==
+#include <string>                                   // for operator==, basi...
 #include <vector>                                   // for vector
 
 using namespace std;

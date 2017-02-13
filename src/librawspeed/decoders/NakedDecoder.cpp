@@ -24,12 +24,10 @@
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "metadata/Camera.h"                        // for Camera
-#include <cstdlib>                                  // for atoi
-#include <map>                                      // for map, _Rb_tree_co...
+#include "metadata/Camera.h"                        // for Camera, Hints
+#include <map>                                      // for map
 #include <stdexcept>                                // for out_of_range
 #include <string>                                   // for string, basic_st...
-#include <utility>                                  // for pair
 
 using namespace std;
 

@@ -27,6 +27,7 @@
 #include "io/BitPumpMSB.h"                          // for BitPumpMSB
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/IOException.h"                         // for IOException
+#include "metadata/Camera.h"                        // for Hints
 #include "metadata/ColorFilterArray.h"              // for ColorFilterArray
 #include "parsers/TiffParserException.h"            // for TiffParserException
 #include "tiff/TiffEntry.h"                         // for TiffEntry
@@ -35,9 +36,7 @@
 #include <algorithm>                                // for min
 #include <cstdlib>                                  // for abs
 #include <cstring>                                  // for memset
-#include <map>                                      // for map, _Rb_tree_it...
 #include <memory>                                   // for unique_ptr
-#include <string>                                   // for string
 
 using namespace std;
 
