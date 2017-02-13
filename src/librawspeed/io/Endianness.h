@@ -22,22 +22,14 @@
 #pragma once
 
 #include "common/Common.h" // for uint32, ushort16, uint64, int32, short16
+#include <cassert>         // for assert
 #include <cstring>         // for memcpy
-
-#ifndef __BYTE_ORDER__
-#include <cassert> // for assert
-#endif
 
 namespace RawSpeed {
 
 enum Endianness { big, little, unknown };
 
-inline Endianness getHostEndianness() {
-#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-  return little;
-#elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-  return big;
-#else
+inline Endianness getHostEndiannessRuntime() {
   ushort16 testvar = 0xfeff;
   uint32 firstbyte = ((uchar8*)&testvar)[0];
   if (firstbyte == 0xff)
@@ -49,6 +41,17 @@ inline Endianness getHostEndianness() {
 
   // Return something to make compilers happy
   return unknown;
+}
+
+inline Endianness getHostEndianness() {
+#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+  return little;
+#elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+  return big;
+#elif defined(__BYTE_ORDER__)
+#error "uhm, __BYTE_ORDER__ has some strange value"
+#else
+  return getHostEndiannessRuntime();
 #endif
 }
 

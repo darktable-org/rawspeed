@@ -30,6 +30,12 @@
 using namespace std;
 using namespace RawSpeed;
 
+TEST(EndiannessTest, getHostEndiannessTests) {
+#if defined(__BYTE_ORDER__)
+  ASSERT_EQ(getHostEndiannessRuntime(), getHostEndianness());
+#endif
+}
+
 /*
 #!/bin/bash
 d=16 # squared, how many samples
