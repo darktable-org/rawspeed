@@ -34,10 +34,10 @@ inline Endianness getHostEndiannessRuntime() {
   uint32 firstbyte = ((uchar8*)&testvar)[0];
   if (firstbyte == 0xff)
     return little;
-  else if (firstbyte == 0xfe)
+  if (firstbyte == 0xfe)
     return big;
-  else
-    assert(false);
+
+  assert(false);
 
   // Return something to make compilers happy
   return unknown;

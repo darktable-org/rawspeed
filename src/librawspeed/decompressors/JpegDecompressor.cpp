@@ -23,17 +23,18 @@
 
 #include "decompressors/JpegDecompressor.h"
 #include "common/Common.h"                // for uchar8, uint32, ushort16
-#include "common/Memory.h"                // for alignedMallocArray, alignedFree
+#include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
+#include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/ByteStream.h"                // for ByteStream
-#include "io/IOException.h"               // for IOException, ThrowIOE
+#include "io/IOException.h"               // for ThrowIOE
 #include <algorithm>                      // for min
 #include <cstdio>                         // for size_t
-#include <cstdlib>                        // for free, malloc
+#include <memory>                         // for unique_ptr
+#include <vector>                         // for vector
 
 extern "C" {
-#include <jpeglib.h> // for jpeg_decompress_struct
+#include <jpeglib.h> // for jpeg_source_mgr, jpeg_decompress_struct
 // IWYU pragma: no_include <jconfig.h>
 // IWYU pragma: no_include <jmorecfg.h>
 }
@@ -88,17 +89,23 @@ static void jpeg_mem_src_int(j_decompress_ptr cinfo,
 METHODDEF(void)
 my_error_throw(j_common_ptr cinfo) { ThrowRDE("JPEG decoder error!"); }
 
+struct JpegDecompressStruct : jpeg_decompress_struct {
+  struct jpeg_error_mgr jerr;
+  JpegDecompressStruct() {
+    jpeg_create_decompress(this);
+
+    err = jpeg_std_error(&jerr);
+    jerr.error_exit = my_error_throw;
+  }
+  ~JpegDecompressStruct() { jpeg_destroy_decompress(this); }
+};
+
 void JpegDecompressor::decode(uint32 offX,
                               uint32 offY) { /* Each slice is a JPEG image */
-  struct jpeg_decompress_struct dinfo;
-  struct jpeg_error_mgr jerr;
+  struct JpegDecompressStruct dinfo;
 
-  uchar8* complete_buffer = nullptr;
-  auto buffer = (JSAMPARRAY)malloc(sizeof(JSAMPROW));
+  vector<JSAMPROW> buffer(1);
 
-  jpeg_create_decompress(&dinfo);
-  dinfo.err = jpeg_std_error(&jerr);
-  jerr.error_exit = my_error_throw;
   JPEG_MEMSRC(&dinfo, (unsigned char*)input.getData(input.getRemainSize()),
               input.getRemainSize());
 
@@ -109,11 +116,14 @@ void JpegDecompressor::decode(uint32 offX,
   if (dinfo.output_components != (int)mRaw->getCpp())
     ThrowRDE("JpegDecompressor: Component count doesn't match");
   int row_stride = dinfo.output_width * dinfo.output_components;
-  complete_buffer = (uchar8*)alignedMallocArray<16>(dinfo.output_height, row_stride);
+
+  unique_ptr<uchar8[], decltype(&alignedFree)> complete_buffer(
+      (uchar8*)alignedMallocArray<16>(dinfo.output_height, row_stride),
+      alignedFree);
   while (dinfo.output_scanline < dinfo.output_height) {
-    buffer[0] =
-        (JSAMPROW)(&complete_buffer[dinfo.output_scanline * row_stride]);
-    if (0 == jpeg_read_scanlines(&dinfo, buffer, 1))
+    buffer[0] = (JSAMPROW)(
+        &complete_buffer[(size_t)dinfo.output_scanline * row_stride]);
+    if (0 == jpeg_read_scanlines(&dinfo, &buffer[0], 1))
       ThrowRDE("JpegDecompressor: JPEG Error while decompressing image.");
   }
   jpeg_finish_decompress(&dinfo);
@@ -122,18 +132,13 @@ void JpegDecompressor::decode(uint32 offX,
   int copy_w = min(mRaw->dim.x - offX, dinfo.output_width);
   int copy_h = min(mRaw->dim.y - offY, dinfo.output_height);
   for (int y = 0; y < copy_h; y++) {
-    uchar8* src = &complete_buffer[row_stride * y];
+    uchar8* src = &complete_buffer[(size_t)row_stride * y];
     auto* dst = (ushort16*)mRaw->getData(offX, y + offY);
     for (int x = 0; x < copy_w; x++) {
       for (int c = 0; c < dinfo.output_components; c++)
         *dst++ = (*src++);
     }
   }
-
-  free(buffer);
-  if (complete_buffer)
-    alignedFree(complete_buffer);
-  jpeg_destroy_decompress(&dinfo);
 }
 
 } // namespace RawSpeed
