@@ -155,11 +155,6 @@ public:
       ThrowIOE("skipBits overflow");
     cache.skip(nbits);
   }
-
-  // deprecated (the above interface is already 'always save'):
-  inline uint32 getBitsSafe(uint32 nbits) {
-    return getBits(nbits);
-  }
 };
 
 } // namespace RawSpeed
