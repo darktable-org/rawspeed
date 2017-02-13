@@ -142,8 +142,8 @@ string img_hash(RawImage &r) {
                static_cast<size_t>(r->pitch) * r->getUncroppedDim().y);
   APPEND("data md5sum: %s\n", hash.c_str());
 
-  for (const char *e : r->errors)
-    APPEND("WARNING: [rawspeed] %s\n", e);
+  for (const string& e : r->errors)
+    APPEND("WARNING: [rawspeed] %s\n", e.c_str());
 
 #undef APPEND
 

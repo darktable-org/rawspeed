@@ -147,8 +147,8 @@ public:
   std::vector<BlackArea> blackAreas;
   /* Vector containing silent errors that occurred doing decoding, that may have lead to */
   /* an incomplete image. */
-  std::vector<const char*> errors;
-  void setError(const char* err);
+  std::vector<std::string> errors;
+  void setError(const std::string& err);
   /* Vector containing the positions of bad pixels */
   /* Format is x | (y << 16), so maximum pixel position is 65535 */
   std::vector<uint32> mBadPixelPositions;    // Positions of zeroes that must be interpolated

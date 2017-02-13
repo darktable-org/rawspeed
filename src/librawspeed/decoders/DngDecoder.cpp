@@ -257,7 +257,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, int compression) {
   if (mRaw->errors.size() >= nSlices) {
     ThrowRDE(
         "DNG Decoding: Too many errors encountered. Giving up.\nFirst Error:%s",
-        mRaw->errors[0]);
+        mRaw->errors[0].c_str());
   }
 }
 

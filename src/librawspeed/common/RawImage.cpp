@@ -72,9 +72,6 @@ RawImageData::~RawImageData() {
   pthread_mutex_destroy(&mymutex);
   pthread_mutex_destroy(&errMutex);
   pthread_mutex_destroy(&mBadPixelMutex);
-  for (auto &error : errors) {
-    free((void *)error);
-  }
   if (table != nullptr) {
     delete table;
   }
@@ -175,10 +172,9 @@ void RawImageData::subFrame(iRectangle2D crop) {
   dim = crop.dim;
 }
 
-void RawImageData::setError( const char* err )
-{
+void RawImageData::setError(const string& err) {
   pthread_mutex_lock(&errMutex);
-  errors.push_back(strdup(err));
+  errors.push_back(err);
   pthread_mutex_unlock(&errMutex);
 }
 
