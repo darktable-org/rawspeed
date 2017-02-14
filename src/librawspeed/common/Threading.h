@@ -2,6 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -32,3 +33,65 @@
 #include <pthread.h> // IWYU pragma: export
 
 #endif
+
+#include "common/Common.h"
+#include <vector>
+#include <memory>
+
+namespace RawSpeed {
+
+template <typename T>
+class ThreadSafeVector : protected std::vector<T>
+{
+#ifdef NO_PTHREAD
+  struct pthread_mutext_t;
+#endif
+
+  // use a pimpl idiom here to make sure the stack size of this class is the
+  // same with or without NO_THREAD, so we get a stable ABI.
+  //TODO: replace with std::mutex
+  std::unique_ptr<pthread_mutex_t> mutex;
+
+  using base_t = std::vector<T>;
+
+public:
+  ThreadSafeVector()
+  {
+    mutex = make_unique<pthread_mutex_t>();
+    pthread_mutex_init(mutex.get(), nullptr);
+  }
+
+  ~ThreadSafeVector()
+  {
+    pthread_mutex_destroy(mutex.get());
+  }
+
+  void push_back(T v)
+  {
+    pthread_mutex_lock(mutex.get());
+    base_t::push_back(v);
+    pthread_mutex_unlock(mutex.get());
+  }
+
+  template <typename Container> void append(const Container& c)
+  {
+    pthread_mutex_lock(mutex.get());
+    base_t::insert(end(), c.begin(), c.end());
+    pthread_mutex_unlock(mutex.get());
+  }
+
+  void clear()
+  {
+    pthread_mutex_lock(mutex.get());
+    base_t::clear();
+    pthread_mutex_unlock(mutex.get());
+  }
+
+  using base_t::end;
+  using base_t::begin;
+  using base_t::empty;
+  using base_t::size;
+  using base_t::operator[];
+};
+
+}

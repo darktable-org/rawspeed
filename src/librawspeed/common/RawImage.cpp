@@ -37,8 +37,6 @@ RawImageData::RawImageData()
     : dim(0, 0), cfa(iPoint2D(0, 0)), uncropped_dim(0, 0) {
   blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
   mBadPixelMap = nullptr;
-  pthread_mutex_init(&errMutex, nullptr);
-  pthread_mutex_init(&mBadPixelMutex, nullptr);
   mDitherScale = true;
 }
 
@@ -49,8 +47,6 @@ RawImageData::RawImageData(const iPoint2D &_dim, uint32 _bpc, uint32 _cpp)
   mBadPixelMap = nullptr;
   mDitherScale = true;
   createData();
-  pthread_mutex_init(&errMutex, nullptr);
-  pthread_mutex_init(&mBadPixelMutex, nullptr);
 }
 
 ImageMetaData::ImageMetaData() {
@@ -66,12 +62,9 @@ ImageMetaData::ImageMetaData() {
 
 RawImageData::~RawImageData() {
   mOffset = iPoint2D(0, 0);
-  pthread_mutex_destroy(&errMutex);
-  pthread_mutex_destroy(&mBadPixelMutex);
   if (table != nullptr) {
     delete table;
   }
-  errors.clear();
   destroyData();
 }
 
@@ -166,12 +159,6 @@ void RawImageData::subFrame(iRectangle2D crop) {
 
   mOffset += crop.pos;
   dim = crop.dim;
-}
-
-void RawImageData::setError(const string& err) {
-  pthread_mutex_lock(&errMutex);
-  errors.push_back(err);
-  pthread_mutex_unlock(&errMutex);
 }
 
 void RawImageData::createBadPixelMap()

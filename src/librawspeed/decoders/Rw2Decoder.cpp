@@ -35,7 +35,6 @@
 #include <cmath>                                    // for fabs
 #include <cstring>                                  // for memcpy
 #include <memory>                                   // for unique_ptr
-#include <pthread.h>                                // for pthread_mutex_lock
 #include <string>                                   // for string, allocator
 #include <vector>                                   // for vector
 
@@ -219,11 +218,8 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
       }
     }
   }
-  if (zero_is_bad && !zero_pos.empty()) {
-    pthread_mutex_lock(&mRaw->mBadPixelMutex);
-    mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(), zero_pos.begin(), zero_pos.end());
-    pthread_mutex_unlock(&mRaw->mBadPixelMutex);
-  }
+  if (zero_is_bad && !zero_pos.empty())
+    mRaw->mBadPixelPositions.append(zero_pos);
 }
 
 void Rw2Decoder::checkSupportInternal(CameraMetaData *meta) {

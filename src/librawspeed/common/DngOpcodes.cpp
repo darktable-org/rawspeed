@@ -21,7 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include "common/DngOpcodes.h"
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "common/Threading.h"             // for pthread_mutex_lock, pthrea...
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/Endianness.h"
 #include "tiff/TiffEntry.h" // for TiffEntry
@@ -158,12 +157,8 @@ void OpcodeFixBadPixelsConstant::apply( RawImage &in, RawImage &out, uint32 star
       }
     }
   }
-  if (!bad_pos.empty()) {
-    pthread_mutex_lock(&out->mBadPixelMutex);
-    out->mBadPixelPositions.insert(out->mBadPixelPositions.end(), bad_pos.begin(), bad_pos.end());
-    pthread_mutex_unlock(&out->mBadPixelMutex);
-  }
-
+  if (!bad_pos.empty())
+    out->mBadPixelPositions.append(bad_pos);
 }
 
 /***************** OpcodeFixBadPixelsList   ****************/

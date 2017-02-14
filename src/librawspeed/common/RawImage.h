@@ -22,7 +22,7 @@
 
 #include "common/Common.h"             // for uint32, uchar8, ushort16, wri...
 #include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
-#include "common/Threading.h"          // for pthread_mutex_t, pthread_attr_t
+#include "common/Threading.h"          // for ThreadSafeVector, pthread_attr_t
 #include "metadata/BlackArea.h"        // for BlackArea
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray
 #include <string>                      // for string
@@ -148,20 +148,15 @@ public:
   std::vector<BlackArea> blackAreas;
   /* Vector containing silent errors that occurred doing decoding, that may have lead to */
   /* an incomplete image. */
-  std::vector<std::string> errors;
-  void setError(const std::string& err);
+  ThreadSafeVector<std::string> errors;
+  inline void setError(const std::string& err) { errors.push_back(err); }
   /* Vector containing the positions of bad pixels */
   /* Format is x | (y << 16), so maximum pixel position is 65535 */
-  std::vector<uint32> mBadPixelPositions;    // Positions of zeroes that must be interpolated
+  ThreadSafeVector<uint32> mBadPixelPositions;    // Positions of zeroes that must be interpolated
   uchar8 *mBadPixelMap;
   uint32 mBadPixelMapPitch;
   bool mDitherScale;           // Should upscaling be done with dither to minimize banding?
   ImageMetaData metadata;
-
-#ifndef NO_PTHREAD
-  pthread_mutex_t errMutex;   // Mutex for 'errors'
-  pthread_mutex_t mBadPixelMutex;   // Mutex for 'mBadPixelPositions, must be used if more than 1 thread is accessing vector
-#endif
 
 protected:
   RawImageType dataType;
