@@ -396,7 +396,7 @@ void SrwDecoder::decodeCompressed3(const TiffIFD* raw, int bits)
         int32 diff = pump.getBitsSafe(len);
 
         // If the first bit is 1 we need to turn this into a negative number
-        if (diff >> (len-1))
+        if (len != 0 && diff >> (len - 1))
           diff -= (1 << len);
 
         ushort16 *value = nullptr;
