@@ -56,12 +56,16 @@ MARK_AS_ADVANCED(
     CMAKE_SHARED_LINKER_FLAGS_COVERAGE
     CMAKE_SHARED_MODULE_FLAGS_COVERAGE )
 
+set(asan "-O1 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common -U_FORTIFY_SOURCE -fsanitize=address -fstack-protector-strong")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  set(asan "${asan} -fsanitize-address-use-after-scope")
+endif()
 SET(CMAKE_CXX_FLAGS_ASAN
-    "-O1 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common -U_FORTIFY_SOURCE -fsanitize=address -fstack-protector-strong"
+    "${asan}"
     CACHE STRING "Flags used by the C++ compiler during ASAN builds."
     FORCE )
 SET(CMAKE_C_FLAGS_ASAN
-    "-O1 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common -U_FORTIFY_SOURCE -fsanitize=address -fstack-protector-strong"
+    "${asan}"
     CACHE STRING "Flags used by the C compiler during ASAN builds."
     FORCE )
 MARK_AS_ADVANCED(
