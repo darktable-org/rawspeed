@@ -409,7 +409,7 @@ inline void YUV_TO_RGB<0>(int Y, int Cb, int Cr, const int* sraw_coeffs,
                           ushort16* X, int offset) {
   int r, g, b;
   r = sraw_coeffs[0] * (Y + Cr - 512);
-  g = sraw_coeffs[1] * (Y + ((-778 * Cb - (Cr << 11)) >> 12) - 512);
+  g = sraw_coeffs[1] * (Y + ((-778 * Cb - (Cr * 2048)) >> 12) - 512);
   b = sraw_coeffs[2] * (Y + (Cb - 512));
   STORE_RGB(X, r, g, b, offset);
 }
