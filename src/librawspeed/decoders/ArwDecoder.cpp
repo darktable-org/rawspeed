@@ -346,7 +346,7 @@ void ArwDecoder::SonyDecrypt(uint32 *buffer, uint32 len, uint32 key) {
 
   // Initialize the decryption pad from the key
   for (int p=0; p < 4; p++)
-    pad[p] = key = key * 48828125 + 1;
+    pad[p] = key = key * 48828125UL + 1UL;
   pad[3] = pad[3] << 1 | (pad[0]^pad[2]) >> 31;
   for (int p=4; p < 127; p++)
     pad[p] = (pad[p-4]^pad[p-2]) << 1 | (pad[p-3]^pad[p-1]) >> 31;
