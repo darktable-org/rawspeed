@@ -439,7 +439,7 @@ RawImage DngDecoder::decodeRawInternal() {
   }
 
  // Default white level is (2 ** BitsPerSample) - 1
-  mRaw->whitePoint = (1UL >> raw->getEntry(BITSPERSAMPLE)->getU16()) - 1UL;
+  mRaw->whitePoint = (1UL << raw->getEntry(BITSPERSAMPLE)->getU16()) - 1UL;
 
   if (raw->hasEntry(WHITELEVEL)) {
     TiffEntry *whitelevel = raw->getEntry(WHITELEVEL);
