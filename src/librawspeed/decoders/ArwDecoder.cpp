@@ -357,7 +357,18 @@ void ArwDecoder::SonyDecrypt(uint32 *buffer, uint32 len, uint32 key) {
   // Decrypt the buffer in place using the pad
   while (len--) {
     pad[p & 127] = pad[(p+1) & 127] ^ pad[(p+1+64) & 127];
-    *buffer++ ^= pad[p & 127];
+
+    uint32 pv;
+    memcpy(&pv, pad + (p & 127), sizeof(uint32));
+
+    uint32 bv;
+    memcpy(&bv, buffer, sizeof(uint32));
+
+    bv ^= pv;
+
+    memcpy(buffer, &bv, sizeof(uint32));
+
+    buffer++;
     p++;
   }
 }
