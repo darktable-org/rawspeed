@@ -34,6 +34,7 @@
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
 #include <algorithm>                                // for min
+#include <cmath>                                    // for signbit
 #include <cstdlib>                                  // for abs
 #include <cstring>                                  // for memset
 #include <memory>                                   // for unique_ptr
@@ -183,8 +184,9 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
         int up  = dest[-pitch+((int)x)];
         int leftMinusNw = left0 - nw0;
         int upMinusNw = up - nw0;
-        // Check if sign is different, and one is not zero
-        if (leftMinusNw * upMinusNw < 0) {
+        // Check if sign is different, and they are both not zero
+        if ((signbit(leftMinusNw) ^ signbit(upMinusNw)) &&
+            (leftMinusNw != 0 && upMinusNw != 0)) {
           if (abs(leftMinusNw) > 32 || abs(upMinusNw) > 32)
             pred = left0 + upMinusNw;
           else
@@ -236,8 +238,9 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
         int leftMinusNw = left1 - nw1;
         int upMinusNw = up - nw1;
 
-        // Check if sign is different, and one is not zero
-        if (leftMinusNw * upMinusNw < 0) {
+        // Check if sign is different, and they are both not zero
+        if ((signbit(leftMinusNw) ^ signbit(upMinusNw)) &&
+            (leftMinusNw != 0 && upMinusNw != 0)) {
           if (abs(leftMinusNw) > 32 || abs(upMinusNw) > 32)
             pred = left1 + upMinusNw;
           else
