@@ -86,7 +86,7 @@ RawImage MosDecoder::decodeRawInternal() {
     uint32 pos = 8; // Skip another 4 bytes
 
     uint32 width=0, height=0, strip_offset=0, data_offset=0, wb_offset=0;
-    while (entries--) {
+    for (; entries > 0; entries--) {
       if (offset+base+pos+16 > mFile->getSize())
         ThrowRDE("MOS: PhaseOneC offset out of bounds");
 
