@@ -142,7 +142,9 @@ void SrwDecoder::decodeCompressed( const TiffIFD* raw )
         // First we decode even pixels
         for (int c = 0; c < 16; c += 2) {
           int b = len[(c >> 3)];
-          int32 adj = ((int32) bits.getBits(b) << (32-b) >> (32-b));
+          int32 adj = 0;
+          if (b)
+            adj = ((int32)bits.getBits(b) << (32 - b) >> (32 - b));
           img[c] = adj + img_up[c];
         }
         // Now we decode odd pixels
@@ -150,7 +152,9 @@ void SrwDecoder::decodeCompressed( const TiffIFD* raw )
         // is beyond me, it will hurt compression a deal.
         for (int c = 1; c < 16; c += 2) {
           int b = len[2 | (c >> 3)];
-          int32 adj = ((int32) bits.getBits(b) << (32-b) >> (32-b));
+          int32 adj = 0;
+          if (b)
+            adj = ((int32)bits.getBits(b) << (32 - b) >> (32 - b));
           img[c] = adj + img_up2[c];
         }
       } else {
@@ -159,14 +163,18 @@ void SrwDecoder::decodeCompressed( const TiffIFD* raw )
         int pred_left = x ? img[-2] : 128;
         for (int c = 0; c < 16; c += 2) {
           int b = len[(c >> 3)];
-          int32 adj = ((int32) bits.getBits(b) << (32-b) >> (32-b));
+          int32 adj = 0;
+          if (b)
+            adj = ((int32)bits.getBits(b) << (32 - b) >> (32 - b));
           img[c] = adj + pred_left;
         }
         // Now we decode odd pixels
         pred_left = x ? img[-1] : 128;
         for (int c = 1; c < 16; c += 2) {
           int b = len[2 | (c >> 3)];
-          int32 adj = ((int32) bits.getBits(b) << (32-b) >> (32-b));
+          int32 adj = 0;
+          if (b)
+            adj = ((int32)bits.getBits(b) << (32 - b) >> (32 - b));
           img[c] = adj + pred_left;
         }
       }
