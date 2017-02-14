@@ -56,17 +56,37 @@ MARK_AS_ADVANCED(
     CMAKE_SHARED_LINKER_FLAGS_COVERAGE
     CMAKE_SHARED_MODULE_FLAGS_COVERAGE )
 
+set(SANITIZATION_BASE "-fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common -U_FORTIFY_SOURCE")
+set(SANITIZATION_DEFAULTS "${SANITIZATION_BASE} -O1 -fstack-protector-strong")
+
+set(asan "${SANITIZATION_DEFAULTS} -fsanitize=address")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  set(asan "${asan} -fsanitize-address-use-after-scope")
+endif()
 SET(CMAKE_CXX_FLAGS_ASAN
-    "-O1 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common -U_FORTIFY_SOURCE -fsanitize=address -fstack-protector-strong"
+    "${asan}"
     CACHE STRING "Flags used by the C++ compiler during ASAN builds."
     FORCE )
 SET(CMAKE_C_FLAGS_ASAN
-    "-O1 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common -U_FORTIFY_SOURCE -fsanitize=address -fstack-protector-strong"
+    "${asan}"
     CACHE STRING "Flags used by the C compiler during ASAN builds."
     FORCE )
 MARK_AS_ADVANCED(
     CMAKE_CXX_FLAGS_ASAN
     CMAKE_C_FLAGS_ASAN )
+
+set(ubsan "${SANITIZATION_DEFAULTS} -fsanitize=undefined -fno-sanitize-recover=undefined")
+SET(CMAKE_CXX_FLAGS_UBSAN
+    "${ubsan}"
+    CACHE STRING "Flags used by the C++ compiler during UBSAN builds."
+    FORCE )
+SET(CMAKE_C_FLAGS_UBSAN
+    "${ubsan}"
+    CACHE STRING "Flags used by the C compiler during UBSAN builds."
+    FORCE )
+MARK_AS_ADVANCED(
+    CMAKE_CXX_FLAGS_UBSAN
+    CMAKE_C_FLAGS_UBSAN )
 
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -O2")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O2")
