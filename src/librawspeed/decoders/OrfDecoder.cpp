@@ -174,7 +174,7 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
           pred = dest[-pitch+((int)x)];
           nw0 = pred;
         }
-        dest[x] = pred + ((diff << 2) | low);
+        dest[x] = pred + ((diff * 4) | low);
         // Set predictor
         left0 = dest[x];
       } else {
@@ -192,7 +192,7 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
         } else
           pred = abs(leftMinusNw) > abs(upMinusNw) ? left0 : up;
 
-        dest[x] = pred + ((diff << 2) | low);
+        dest[x] = pred + ((diff * 4) | low);
         // Set predictors
         left0 = dest[x];
         nw0 = up;
@@ -230,7 +230,7 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
           pred = dest[-pitch+((int)x)];
           nw1 = pred;
         }
-        dest[x] = left1 = pred + ((diff << 2) | low);
+        dest[x] = left1 = pred + ((diff * 4) | low);
       } else {
         int up  = dest[-pitch+((int)x)];
         int leftMinusNw = left1 - nw1;
@@ -245,7 +245,7 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
         } else
           pred = abs(leftMinusNw) > abs(upMinusNw) ? left1 : up;
 
-        dest[x] = left1 = pred + ((diff << 2) | low);
+        dest[x] = left1 = pred + ((diff * 4) | low);
         nw1 = up;
       }
       border = y_border;
