@@ -130,6 +130,34 @@ MARK_AS_ADVANCED(
     CMAKE_SHARED_LINKER_FLAGS_FUZZ
     CMAKE_SHARED_MODULE_FLAGS_FUZZ )
 
+set(ubsan "${SANITIZATION_DEFAULTS} -fsanitize=thread")
+SET(CMAKE_CXX_FLAGS_TSAN
+    "${ubsan}"
+    CACHE STRING "Flags used by the C++ compiler during TSAN builds."
+    FORCE )
+SET(CMAKE_C_FLAGS_TSAN
+    "${ubsan}"
+    CACHE STRING "Flags used by the C compiler during TSAN builds."
+    FORCE )
+# SET(CMAKE_EXE_LINKER_FLAGS_TSAN
+#     "-no-pie"
+#     CACHE STRING "Flags used for linking binaries during TSAN builds."
+#     FORCE )
+# SET(CMAKE_SHARED_LINKER_FLAGS_TSAN
+#     "-no-pie"
+#     CACHE STRING "Flags used by the shared libraries linker during TSAN builds."
+#     FORCE )
+# SET(CMAKE_SHARED_MODULE_FLAGS_TSAN
+#     "-no-pie"
+#     CACHE STRING "Flags used by the module linker during TSAN builds."
+#     FORCE )
+MARK_AS_ADVANCED(
+    CMAKE_CXX_FLAGS_TSAN
+    CMAKE_C_FLAGS_TSAN
+    CMAKE_EXE_LINKER_FLAGS_TSAN
+    CMAKE_SHARED_LINKER_FLAGS_TSAN
+    CMAKE_SHARED_MODULE_FLAGS_TSAN )
+
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -O2")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O2")
 

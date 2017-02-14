@@ -27,7 +27,6 @@
 #include <cstdio>          // for snprintf, size_t, fclose, fopen, fprintf
 #include <cstdlib>         // for system
 #include <fstream>         // IWYU pragma: keep
-#include <iomanip>         // for operator<<, setw
 #include <iostream>        // for cout, cerr, left, internal
 #include <map>             // for map
 #include <memory>          // for unique_ptr, allocator
@@ -37,6 +36,10 @@
 #include <utility>         // for pair
 #include <vector>          // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
+
+#if !defined(__has_feature) || !__has_feature(thread_sanitizer)
+#include <iomanip> // for operator<<, setw
+#endif
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -61,10 +64,7 @@ using std::ifstream;
 using std::istreambuf_iterator;
 using std::ofstream;
 using std::cout;
-using std::setw;
-using std::left;
 using std::endl;
-using std::internal;
 using std::map;
 using std::cerr;
 using rawspeed::CameraMetaData;
@@ -81,6 +81,12 @@ using rawspeed::getU32LE;
 using rawspeed::isAligned;
 using rawspeed::roundUp;
 using rawspeed::RawspeedException;
+
+#if !defined(__has_feature) || !__has_feature(thread_sanitizer)
+using std::setw;
+using std::left;
+using std::internal;
+#endif
 
 namespace rawspeed {
 
@@ -319,19 +325,23 @@ size_t process(const string& filename, const CameraMetaData* metadata,
   // if not creating and hash is missing -> skip as well
   ifstream hf(hashfile);
   if (hf.good() == create) {
+#if !defined(__has_feature) || !__has_feature(thread_sanitizer)
 #ifdef _OPENMP
 #pragma omp critical(io)
 #endif
     cout << left << setw(55) << filename << ": hash "
          << (create ? "exists" : "missing") << ", skipping" << endl;
+#endif
     return 0;
   }
 
 // to narrow down the list of files that could have causes the crash
+#if !defined(__has_feature) || !__has_feature(thread_sanitizer)
 #ifdef _OPENMP
 #pragma omp critical(io)
 #endif
   cout << left << setw(55) << filename << ": starting decoding ... " << endl;
+#endif
 
   FileReader reader(filename.c_str());
 
@@ -353,12 +363,14 @@ size_t process(const string& filename, const CameraMetaData* metadata,
   // RawImage raw = decoder->decode();
 
   auto time = t();
+#if !defined(__has_feature) || !__has_feature(thread_sanitizer)
 #ifdef _OPENMP
 #pragma omp critical(io)
 #endif
   cout << left << setw(55) << filename << ": " << internal << setw(3)
        << map->getSize() / 1000000 << " MB / " << setw(4) << time << " ms"
        << endl;
+#endif
 
   if (create) {
     ofstream f(hashfile);
@@ -490,7 +502,9 @@ int main(int argc, char **argv) {
 #endif
       {
         string msg = string(argv[i]) + " failed: " + e.what();
+#if !defined(__has_feature) || !__has_feature(thread_sanitizer)
         cerr << msg << endl;
+#endif
         failedTests.emplace(argv[i], msg);
       }
     }
