@@ -342,6 +342,9 @@ void ArwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
 }
 
 void ArwDecoder::SonyDecrypt(uint32 *buffer, uint32 len, uint32 key) {
+  if (0 == len)
+    return;
+
   uint32 pad[128];
 
   // Initialize the decryption pad from the key
@@ -355,7 +358,7 @@ void ArwDecoder::SonyDecrypt(uint32 *buffer, uint32 len, uint32 key) {
 
   int p = 127;
   // Decrypt the buffer in place using the pad
-  while (len--) {
+  for (; len > 0; len--) {
     pad[p & 127] = pad[(p+1) & 127] ^ pad[(p+1+64) & 127];
 
     uint32 pv;
