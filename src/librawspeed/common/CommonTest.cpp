@@ -208,3 +208,12 @@ TEST_P(SplitStringTest, SplitStringTest) {
   ASSERT_EQ(split.size(), out.size());
   ASSERT_TRUE(std::equal(split.begin(), split.end(), out.begin()));
 }
+
+TEST(ThreadCountTest, ThreadCountTest) {
+  ASSERT_GT(getThreadCount(), 0);
+  setThreadCount(1); ASSERT_EQ(getThreadCount(), 1);
+#ifndef NO_PTHREAD
+  setThreadCount(2); ASSERT_EQ(getThreadCount(), 2);
+#endif
+  setThreadCount(0); ASSERT_GT(getThreadCount(), 0);
+}

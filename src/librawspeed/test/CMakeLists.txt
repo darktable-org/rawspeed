@@ -1,7 +1,7 @@
 add_custom_target(tests ALL)
 
 FILE(GLOB RAWSPEED_TEST_SOURCES
-  "RawSpeed.cpp"
+#  "RawSpeed.cpp"
 )
 
 if(CMAKE_BUILD_TYPE MATCHES "^[Cc][Oo][Vv][Ee][Rr][Aa][Gg][Ee]$")

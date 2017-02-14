@@ -27,9 +27,6 @@
 #include <string>           // for string
 #include <vector>           // for vector
 
-int rawspeed_get_number_of_processor_cores();
-
-
 namespace RawSpeed {
 
 using char8 = signed char;
@@ -89,16 +86,10 @@ std::unique_ptr<T> make_unique(Args&&... args) {
 }
 #endif
 
-inline uint32 getThreadCount()
-{
-#ifdef NO_PTHREAD
-  return 1;
-#elif defined(WIN32)
-  return pthread_num_processors_np();
-#else
-  return rawspeed_get_number_of_processor_cores();
-#endif
-}
+uint32 getThreadCount();
+// overwrite the default thread count, which is the number cores on the system.
+// use 0 to restore the default thread count.
+void setThreadCount(uint32 n);
 
 #ifdef _MSC_VER
 // See http://tinyurl.com/hqfuznc
