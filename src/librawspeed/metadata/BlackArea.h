@@ -26,7 +26,8 @@ namespace RawSpeed {
 
 class BlackArea final {
 public:
-  BlackArea(int offset, int size, bool isVertical);
+  BlackArea( uint32 _offset, uint32 _size, bool _isVertical )
+    : offset(_offset), size(_size), isVertical(_isVertical) {}
   uint32 offset; // Offset in bayer pixels.
   uint32 size;   // Size in bayer pixels.
   bool isVertical;  // Otherwise horizontal

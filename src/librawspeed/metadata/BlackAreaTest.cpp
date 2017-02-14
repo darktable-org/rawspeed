@@ -21,7 +21,6 @@
 
 #include "metadata/BlackArea.h"   // for BlackArea
 #include <gtest/gtest.h> // for IsNullLiteralHelper, AssertionResult, gtest_ar
-#include <memory>        // for unique_ptr
 
 using namespace std;
 using namespace RawSpeed;
@@ -42,12 +41,6 @@ protected:
     ASSERT_EQ(a.isVertical, isVertical);
   }
 
-  void checkHelper(const BlackArea& a, const BlackArea& b) {
-    ASSERT_EQ(a.offset, b.offset);
-    ASSERT_EQ(a.size, b.size);
-    ASSERT_EQ(a.isVertical, b.isVertical);
-  }
-
   int offset{0};          // Offset in bayer pixels.
   int size{0};            // Size in bayer pixels.
   bool isVertical{false}; // Otherwise horizontal
@@ -61,9 +54,6 @@ INSTANTIATE_TEST_CASE_P(BlackAreas, BlackAreaTest,
 
 TEST_P(BlackAreaTest, Constructor) {
   ASSERT_NO_THROW({ BlackArea Area(offset, size, isVertical); });
-
-  ASSERT_NO_THROW(
-      { unique_ptr<BlackArea> Area(new BlackArea(offset, size, isVertical)); });
 }
 
 TEST_P(BlackAreaTest, Getters) {
@@ -72,121 +62,4 @@ TEST_P(BlackAreaTest, Getters) {
 
     checkHelper(Area);
   }
-
-  {
-    const unique_ptr<const BlackArea> Area(
-        new BlackArea(offset, size, isVertical));
-
-    checkHelper(*Area);
-  }
-}
-
-TEST_P(BlackAreaTest, AssignmentConstructor) {
-  ASSERT_NO_THROW({
-    const BlackArea AreaOrig(offset, size, isVertical);
-    BlackArea Area(AreaOrig); // NOLINT trying to test the copy
-  });
-
-  ASSERT_NO_THROW({
-    const unique_ptr<const BlackArea> AreaOrig(
-        new BlackArea(offset, size, isVertical));
-    unique_ptr<BlackArea> Area(new BlackArea(*AreaOrig));
-  });
-
-  ASSERT_NO_THROW({
-    const BlackArea AreaOrig(offset, size, isVertical);
-    unique_ptr<BlackArea> Area(new BlackArea(AreaOrig));
-  });
-
-  ASSERT_NO_THROW({
-    const unique_ptr<const BlackArea> AreaOrig(
-        new BlackArea(offset, size, isVertical));
-    BlackArea Area(*AreaOrig);
-  });
-}
-
-TEST_P(BlackAreaTest, AssignmentConstructorGetters) {
-  {
-    const BlackArea AreaOrig(offset, size, isVertical);
-    BlackArea Area(AreaOrig);
-
-    checkHelper(Area);
-    checkHelper(Area, AreaOrig);
-  }
-}
-
-TEST_P(BlackAreaTest, Assignment) {
-  ASSERT_NO_THROW({
-    const BlackArea AreaOrig(offset, size, isVertical);
-    BlackArea Area(0, 0, false);
-
-    Area = AreaOrig;
-  });
-
-  ASSERT_NO_THROW({
-    const unique_ptr<const BlackArea> AreaOrig(
-        new BlackArea(offset, size, isVertical));
-    unique_ptr<BlackArea> Area(new BlackArea(0, 0, false));
-
-    *Area = *AreaOrig;
-  });
-
-  ASSERT_NO_THROW({
-    const BlackArea AreaOrig(offset, size, isVertical);
-    unique_ptr<BlackArea> Area(new BlackArea(0, 0, false));
-
-    *Area = AreaOrig;
-  });
-
-  ASSERT_NO_THROW({
-    const unique_ptr<const BlackArea> AreaOrig(
-        new BlackArea(offset, size, isVertical));
-    BlackArea Area(0, 0, false);
-
-    Area = *AreaOrig;
-  });
-}
-
-TEST_P(BlackAreaTest, AssignmentGetters) {
-  ASSERT_NO_THROW({
-    const BlackArea AreaOrig(offset, size, isVertical);
-    BlackArea Area(0, 0, false);
-
-    Area = AreaOrig;
-
-    checkHelper(Area);
-    checkHelper(Area, AreaOrig);
-  });
-
-  ASSERT_NO_THROW({
-    const unique_ptr<const BlackArea> AreaOrig(
-        new BlackArea(offset, size, isVertical));
-    unique_ptr<BlackArea> Area(new BlackArea(0, 0, false));
-
-    *Area = *AreaOrig;
-
-    checkHelper(*Area);
-    checkHelper(*Area, *AreaOrig);
-  });
-
-  ASSERT_NO_THROW({
-    const BlackArea AreaOrig(offset, size, isVertical);
-    unique_ptr<BlackArea> Area(new BlackArea(0, 0, false));
-
-    *Area = AreaOrig;
-
-    checkHelper(*Area);
-    checkHelper(*Area, AreaOrig);
-  });
-
-  ASSERT_NO_THROW({
-    const unique_ptr<const BlackArea> AreaOrig(
-        new BlackArea(offset, size, isVertical));
-    BlackArea Area(0, 0, false);
-
-    Area = *AreaOrig;
-
-    checkHelper(Area);
-    checkHelper(Area, *AreaOrig);
-  });
 }
