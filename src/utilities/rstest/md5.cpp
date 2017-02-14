@@ -61,7 +61,7 @@ void md5_compress(uint32_t state[4], const uint8_t block[64]) {
   LOADSCHEDULE(15)
 
 #define ROTL32(x, n)                                                           \
-  (((0U + (x)) << (n)) |                                                       \
+  (((0UL + (x)) << (n)) |                                                      \
    ((x) >> (32 - (n)))) // Assumes that x is uint32_t and 0 < n < 32
 #define ROUND0(a, b, c, d, k, s, t)                                            \
   ROUND_TAIL(a, b, (d) ^ ((b) & ((c) ^ (d))), k, s, t)
@@ -71,8 +71,8 @@ void md5_compress(uint32_t state[4], const uint8_t block[64]) {
 #define ROUND3(a, b, c, d, k, s, t)                                            \
   ROUND_TAIL(a, b, (c) ^ ((b) | ~(d)), k, s, t)
 #define ROUND_TAIL(a, b, expr, k, s, t)                                        \
-  a = 0U + (a) + (expr) + UINT32_C(t) + schedule[k];                           \
-  (a) = 0U + (b) + ROTL32(a, s);
+  a = 0UL + (a) + (expr) + UINT32_C(t) + schedule[k];                          \
+  (a) = 0UL + (b) + ROTL32(a, s);
 
   uint32_t a = state[0];
   uint32_t b = state[1];
@@ -144,10 +144,10 @@ void md5_compress(uint32_t state[4], const uint8_t block[64]) {
   ROUND3(c, d, a, b, 2, 15, 0x2AD7D2BB)
   ROUND3(b, c, d, a, 9, 21, 0xEB86D391)
 
-  state[0] = 0U + state[0] + a;
-  state[1] = 0U + state[1] + b;
-  state[2] = 0U + state[2] + c;
-  state[3] = 0U + state[3] + d;
+  state[0] = 0UL + state[0] + a;
+  state[1] = 0UL + state[1] + b;
+  state[2] = 0UL + state[2] + c;
+  state[3] = 0UL + state[3] + d;
 }
 
 /* Full message hasher */
