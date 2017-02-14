@@ -231,12 +231,15 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) {
 }
 
 void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
+  if (0 == w)
+    return;
+
   BitPumpMSB bits(input);
   uchar8* data = mRaw->getData();
   auto *dest = (ushort16 *)&data[0];
   uint32 pitch = mRaw->pitch / sizeof(ushort16);
   int sum = 0;
-  for (uint32 x = w; x--;) {
+  for (int64 x = w - 1; x >= 0; x--) {
     for (uint32 y = 0; y < h + 1; y += 2) {
       bits.checkPos();
       bits.fill();
