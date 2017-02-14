@@ -76,6 +76,9 @@ MARK_AS_ADVANCED(
     CMAKE_C_FLAGS_ASAN )
 
 set(ubsan "${SANITIZATION_DEFAULTS} -fsanitize=undefined -fno-sanitize-recover=undefined")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  set(ubsan "${ubsan} -fsanitize=integer -fno-sanitize-recover=integer")
+endif()
 SET(CMAKE_CXX_FLAGS_UBSAN
     "${ubsan}"
     CACHE STRING "Flags used by the C++ compiler during UBSAN builds."
