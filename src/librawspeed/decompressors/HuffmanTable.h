@@ -211,7 +211,7 @@ public:
     if ((diff & (1 << (len - 1))) == 0)
       diff -= offset[len];
 #else
-    if ((diff & (1 << (len - 1))) == 0)
+    if (len > 0 && (diff & (1 << (len - 1))) == 0)
       diff -= (1 << len) - 1;
 #endif
     return diff;
