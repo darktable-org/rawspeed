@@ -18,11 +18,14 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h" // for clampBits, isIn, isPowerOfTwo, roundUp
-#include <algorithm>       // for equal
-#include <gtest/gtest.h>   // for get, IsNullLiteralHelper, ParamIteratorIn...
-#include <stddef.h>        // for size_t
-#include <string>          // for basic_string, string, allocator, operator==
+#include "common/Common.h" // for uchar8, clampBits, isIn, isPower...
+#include <algorithm>       // for fill, min, equal
+#include <cassert>         // for assert
+#include <cstddef>         // for size_t
+#include <gtest/gtest.h>   // for make_tuple, get, IsNullLiteralHe...
+#include <limits>          // for numeric_limits
+#include <memory>          // for unique_ptr
+#include <string>          // for basic_string, string, allocator
 #include <vector>          // for vector
 
 using namespace std;
@@ -174,6 +177,10 @@ static const TrimSpacesType TrimSpacesValues[] = {
     make_tuple("  " STR "  ", STR),
     make_tuple("\t" STR "\t", STR),
     make_tuple("  \t  " STR "  \t  ", STR),
+    make_tuple("    ", ""),
+    make_tuple("  \t", ""),
+    make_tuple("  \t  ", ""),
+    make_tuple("\t  ", ""),
 #undef STR
 };
 INSTANTIATE_TEST_CASE_P(TrimSpacesTest, TrimSpacesTest,
@@ -207,4 +214,90 @@ TEST_P(SplitStringTest, SplitStringTest) {
   auto split = splitString(in, sep);
   ASSERT_EQ(split.size(), out.size());
   ASSERT_TRUE(std::equal(split.begin(), split.end(), out.begin()));
+}
+
+TEST(UnrollLoopTest, Test) {
+  ASSERT_NO_THROW({
+    int cnt = 0;
+    unroll_loop<0>([&](int i) { cnt++; });
+    ASSERT_EQ(cnt, 0);
+  });
+
+  ASSERT_NO_THROW({
+    int cnt = 0;
+    unroll_loop<3>([&](int i) { cnt++; });
+    ASSERT_EQ(cnt, 3);
+  });
+}
+
+TEST(GetThreadCountTest, Test) {
+  ASSERT_NO_THROW({ ASSERT_GE(getThreadCount(), 1); });
+}
+
+TEST(MakeUniqueTest, Test) {
+  ASSERT_NO_THROW({
+    auto s = make_unique<int>(0);
+    ASSERT_EQ(*s, 0);
+  });
+  ASSERT_NO_THROW({
+    auto s = make_unique<int>(314);
+    ASSERT_EQ(*s, 314);
+  });
+}
+
+using copyPixelsType = std::tr1::tuple<int, int, int, int>;
+class CopyPixelsTest : public ::testing::TestWithParam<copyPixelsType> {
+protected:
+  CopyPixelsTest() = default;
+  virtual void SetUp() {
+    dstPitch = std::tr1::get<0>(GetParam());
+    srcPitch = std::tr1::get<1>(GetParam());
+    rowSize = min(min(std::tr1::get<2>(GetParam()), srcPitch), dstPitch);
+    height = std::tr1::get<3>(GetParam());
+
+    assert(srcPitch * height < numeric_limits<uchar8>::max());
+    assert(dstPitch * height < numeric_limits<uchar8>::max());
+
+    src.resize((size_t)srcPitch * height);
+    dst.resize((size_t)dstPitch * height);
+
+    fill(src.begin(), src.end(), 0);
+    fill(dst.begin(), dst.end(), -1);
+  }
+  void generate() {
+    uchar8 v = 0;
+
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < rowSize; x++, v++) {
+        src[y * srcPitch + x] = v;
+      }
+    }
+  }
+  void copy() {
+    copyPixels(&(dst[0]), dstPitch, &(src[0]), srcPitch, rowSize, height);
+  }
+  void compare() {
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < rowSize; x++) {
+        ASSERT_EQ(dst[y * dstPitch + x], src[y * srcPitch + x]);
+      }
+    }
+  }
+
+  vector<uchar8> src;
+  vector<uchar8> dst;
+  int dstPitch;
+  int srcPitch;
+  int rowSize;
+  int height;
+};
+INSTANTIATE_TEST_CASE_P(CopyPixelsTest, CopyPixelsTest,
+                        testing::Combine(testing::Range(0, 4, 1),
+                                         testing::Range(0, 4, 1),
+                                         testing::Range(0, 4, 1),
+                                         testing::Range(0, 4, 1)));
+TEST_P(CopyPixelsTest, CopyPixelsTest) {
+  generate();
+  copy();
+  compare();
 }
