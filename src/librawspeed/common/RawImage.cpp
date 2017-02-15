@@ -36,23 +36,17 @@ namespace RawSpeed {
 RawImageData::RawImageData()
     : dim(0, 0), cfa(iPoint2D(0, 0)), uncropped_dim(0, 0) {
   blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
-  pthread_mutex_init(&mymutex, nullptr);
   mBadPixelMap = nullptr;
-  pthread_mutex_init(&errMutex, nullptr);
-  pthread_mutex_init(&mBadPixelMutex, nullptr);
   mDitherScale = true;
 }
 
 RawImageData::RawImageData(const iPoint2D &_dim, uint32 _bpc, uint32 _cpp)
-    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), dataRefCount(0),
+    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)),
       data(nullptr), cpp(_cpp), bpp(_bpc * _cpp), uncropped_dim(0, 0) {
   blackLevelSeparate[0] = blackLevelSeparate[1] = blackLevelSeparate[2] = blackLevelSeparate[3] = -1;
   mBadPixelMap = nullptr;
   mDitherScale = true;
   createData();
-  pthread_mutex_init(&mymutex, nullptr);
-  pthread_mutex_init(&errMutex, nullptr);
-  pthread_mutex_init(&mBadPixelMutex, nullptr);
 }
 
 ImageMetaData::ImageMetaData() {
@@ -67,15 +61,10 @@ ImageMetaData::ImageMetaData() {
 }
 
 RawImageData::~RawImageData() {
-  assert(dataRefCount == 0);
   mOffset = iPoint2D(0, 0);
-  pthread_mutex_destroy(&mymutex);
-  pthread_mutex_destroy(&errMutex);
-  pthread_mutex_destroy(&mBadPixelMutex);
   if (table != nullptr) {
     delete table;
   }
-  errors.clear();
   destroyData();
 }
 
@@ -172,12 +161,6 @@ void RawImageData::subFrame(iRectangle2D crop) {
   dim = crop.dim;
 }
 
-void RawImageData::setError(const string& err) {
-  pthread_mutex_lock(&errMutex);
-  errors.push_back(err);
-  pthread_mutex_unlock(&errMutex);
-}
-
 void RawImageData::createBadPixelMap()
 {
   if (!isAllocated())
@@ -187,28 +170,6 @@ void RawImageData::createBadPixelMap()
   memset(mBadPixelMap, 0, (size_t)mBadPixelMapPitch * uncropped_dim.y);
   if (!mBadPixelMap)
     ThrowRDE("RawImageData::createData: Memory Allocation failed.");
-}
-
-RawImage::RawImage(RawImageData* p) : p_(p) {
-  pthread_mutex_lock(&p_->mymutex);
-  ++p_->dataRefCount;
-  pthread_mutex_unlock(&p_->mymutex);
-}
-
-RawImage::RawImage(const RawImage& p) : p_(p.p_) {
-  pthread_mutex_lock(&p_->mymutex);
-  ++p_->dataRefCount;
-  pthread_mutex_unlock(&p_->mymutex);
-}
-
-RawImage::~RawImage() {
-  pthread_mutex_lock(&p_->mymutex);
-  if (--p_->dataRefCount == 0) {
-    pthread_mutex_unlock(&p_->mymutex);
-    delete p_;
-    return;
-  }
-  pthread_mutex_unlock(&p_->mymutex);
 }
 
 void RawImageData::copyErrorsFrom(const RawImage& other) {
@@ -418,30 +379,6 @@ void RawImageData::clearArea( iRectangle2D area, uchar8 val /*= 0*/ )
 
   for (int y = area.getTop(); y < area.getBottom(); y++)
     memset(getData(area.getLeft(), y), val, (size_t)area.getWidth() * bpp);
-}
-
-RawImage& RawImage::operator=(const RawImage& p) noexcept {
-  if (this == &p)      // Same object?
-    return *this;      // Yes, so skip assignment, and just return *this.
-  pthread_mutex_lock(&p_->mymutex);
-  // Retain the old RawImageData before overwriting it
-  RawImageData* const old = p_;
-  p_ = p.p_;
-  // Increment use on new data
-  ++p_->dataRefCount;
-  // If the RawImageData previously used by "this" is unused, delete it.
-  if (--old->dataRefCount == 0) {
-  	pthread_mutex_unlock(&(old->mymutex));
-  	delete old;
-  } else {
-  	pthread_mutex_unlock(&(old->mymutex));
-  }
-  return *this;
-}
-
-RawImage& RawImage::operator=(RawImage&& p) noexcept {
-  operator=(p);
-  return *this;
 }
 
 void *RawImageWorkerThread(void *_this) {

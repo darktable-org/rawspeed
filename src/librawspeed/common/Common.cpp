@@ -22,6 +22,10 @@
 #include <cstdarg> // for va_end, va_list, va_start
 #include <cstdio>  // for printf, vprintf
 
+#ifndef NO_PTHREAD
+#include <thread>  // for thread::hardware_concurrency
+#endif
+
 namespace RawSpeed {
 
 void writeLog(int priority, const char *format, ...)
@@ -40,6 +44,32 @@ void writeLog(int priority, const char *format, ...)
     vprintf(format, args);
 
   va_end(args);
+}
+
+// use a singleton type of method to allow the sucessfull read/write access
+// of the static variable no matter when this is executed during static
+// initialization of the translation unit / dll
+static uint32 accessThreadCount(uint32 n = 0)
+{
+  static uint32 threadCount = 0;
+  if (n)
+    threadCount = n;
+  return threadCount;
+}
+
+uint32 getThreadCount()
+{
+#ifdef NO_PTHREAD
+  return 1;
+#else
+  auto n = accessThreadCount();
+  return n ? n : std::max(1u, std::thread::hardware_concurrency());
+#endif
+}
+
+void setThreadCount(uint32 n)
+{
+  accessThreadCount(n);
 }
 
 } // Namespace RawSpeed
