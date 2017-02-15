@@ -22,7 +22,7 @@ if(WITH_PTHREADS)
   endif()
 else()
   message(STATUS "PThread-based threading is disabled. Not searching for PThreads")
-  add_definitions(-DNO_PTHREAD)
+  # add_definitions(-DNO_PTHREAD)
 endif()
 
 if(WITH_OPENMP)

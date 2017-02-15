@@ -13,6 +13,7 @@ endif()
 
 target_link_libraries(rawspeed_test PUBLIC ${RAWSPEED_LIBS})
 target_include_directories(rawspeed_test PUBLIC "${CONFIG_INCLUDE_PATH}")
+target_compile_definitions(rawspeed_test PUBLIC "$<TARGET_PROPERTY:rawspeed,COMPILE_DEFINITIONS>")
 target_include_directories(rawspeed_test PUBLIC "$<TARGET_PROPERTY:rawspeed,INCLUDE_DIRECTORIES>")
 add_dependencies(rawspeed_test rawspeed)
 
