@@ -18,17 +18,13 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Memory.h"
-#include <algorithm>     // for fill, min, equal
-#include <cassert>       // for assert
-#include <cstddef>       // for size_t, uintptr_t
-#include <cstddef>       // for size_t
-#include <gmock/gmock.h> // for MakePredicateFormatter...
-#include <gtest/gtest.h> // for Message, TestPartResult
-#include <limits>        // for numeric_limits
-#include <memory>        // for unique_ptr
-#include <string>        // for basic_string, string, allocator
-#include <vector>        // for vector
+#include "common/Common.h" // for uchar8, int64, int32, short16, uint32
+#include "common/Memory.h" // for alignedMallocArray, alignedFree, alignedM...
+#include <cstddef>         // for size_t
+#include <cstdint>         // for SIZE_MAX, uintptr_t
+#include <gtest/gtest.h>   // for Message, TestPartResult, TestPartResult::...
+#include <memory>          // for unique_ptr
+#include <string>          // for string
 
 using namespace std;
 using namespace RawSpeed;
