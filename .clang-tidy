@@ -1,5 +1,5 @@
 ---
-Checks:          '-*,performance-*,cert-*,-cert-env33-c,-cert-err34-c,-cert-dcl50-cpp,-cert-err58-cpp,misc-*,-misc-unused-parameters,modernize-*,llvm-include-order,llvm-namespace-comment,google-build-namespaces,google-global-names-in-headers,google-runtime-*,-google-runtime-int,-google-runtime-references,google-readability-*,-google-readability-todo,-google-readability-casting,readability-*,-readability-identifier-naming,-readability-inconsistent-declaration-parameter-name,-readability-implicit-bool-cast'
+Checks:          '-*,performance-*,cert-*,-cert-env33-c,-cert-err34-c,-cert-dcl50-cpp,-cert-err58-cpp,misc-*,-misc-unused-parameters,modernize-*,llvm-namespace-comment,google-build-namespaces,google-global-names-in-headers,google-runtime-*,-google-runtime-int,-google-runtime-references,google-readability-*,-google-readability-todo,-google-readability-casting,readability-*,-readability-identifier-naming,-readability-inconsistent-declaration-parameter-name,-readability-implicit-bool-cast'
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
 AnalyzeTemporaryDtors: false

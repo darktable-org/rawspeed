@@ -19,7 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "config.h" // for CMAKE_SOURCE_DIR
+#include "rawspeedconfig.h" // for CMAKE_SOURCE_DIR
 
 #include "metadata/Camera.h"         // for Camera
 #include "metadata/CameraMetaData.h" // for CameraMetaData

@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
+
 #include <algorithm>        // for forward
 #include <cstring>          // for memcpy, size_t
 #include <initializer_list> // for initializer_list
@@ -91,7 +93,7 @@ std::unique_ptr<T> make_unique(Args&&... args) {
 
 inline uint32 getThreadCount()
 {
-#ifdef NO_PTHREAD
+#ifndef HAVE_PTHREAD
   return 1;
 #elif defined(WIN32)
   return pthread_num_processors_np();

@@ -18,10 +18,7 @@ endif(WIN32)
 
 add_library(rawspeed OBJECT ${RAWSPEED_SOURCES})
 
-if(NOT WITH_PTHREADS)
-  target_compile_definitions(rawspeed PUBLIC -DNO_PTHREAD)
-endif()
-
+target_include_directories(rawspeed PUBLIC ${CONFIG_INCLUDE_PATH})
 target_include_directories(rawspeed PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 list(APPEND RAWSPEED_LIBS ${Pugixml_LIBRARIES})

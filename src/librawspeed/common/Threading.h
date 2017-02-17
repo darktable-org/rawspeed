@@ -20,7 +20,9 @@
 
 #pragma once
 
-#ifdef NO_PTHREAD
+#include "rawspeedconfig.h"
+
+#ifndef HAVE_PTHREAD
 
 #define pthread_mutex_init(A, B)
 #define pthread_mutex_destroy(A)

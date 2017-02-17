@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
+
 #include "common/Common.h"    // for uint32, BitOrder
 #include "common/RawImage.h"  // for RawImage
 #include "common/Threading.h" // for pthread_t
@@ -44,7 +46,7 @@ class RawDecoderThread
     uint32 start_y;
     uint32 end_y;
     const char* error = nullptr;
-#ifndef NO_PTHREAD
+#ifdef HAVE_PTHREAD
     pthread_t threadid;
 #endif
     RawDecoder* parent;

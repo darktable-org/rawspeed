@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
+
 #ifdef HAVE_ZLIB
 
 #include "common/Common.h"   // for getHostEndianness, uint32, Endianness::big

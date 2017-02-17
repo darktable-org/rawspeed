@@ -18,6 +18,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
+
 #include "common/RawImage.h"
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
@@ -295,7 +297,7 @@ void RawImageData::startWorker(RawImageWorker::RawImageWorkerTask task, bool cro
     return;
   }
 
-#ifndef NO_PTHREAD
+#ifdef HAVE_PTHREAD
   auto **workers = new RawImageWorker *[threads];
   int y_offset = 0;
   int y_per_thread = (height + threads - 1) / threads;
@@ -456,19 +458,19 @@ RawImageWorker::RawImageWorker( RawImageData *_img, RawImageWorkerTask _task, in
   start_y = _start_y;
   end_y = _end_y;
   task = _task;
-#ifndef NO_PTHREAD
+#ifdef HAVE_PTHREAD
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 #endif
 }
 
 RawImageWorker::~RawImageWorker() {
-#ifndef NO_PTHREAD
+#ifdef HAVE_PTHREAD
   pthread_attr_destroy(&attr);
 #endif
 }
 
-#ifndef NO_PTHREAD
+#ifdef HAVE_PTHREAD
 void RawImageWorker::startThread()
 {
   /* Initialize and set thread detached attribute */

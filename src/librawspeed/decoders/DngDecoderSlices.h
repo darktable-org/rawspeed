@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
+
 #include "common/Common.h"    // for uint32
 #include "common/RawImage.h"  // for RawImage
 #include "common/Threading.h" // for pthread_t
@@ -53,7 +55,7 @@ class DngDecoderThread
 public:
   DngDecoderThread() = default;
   ~DngDecoderThread() = default;
-#ifndef NO_PTHREAD
+#ifdef HAVE_PTHREAD
   pthread_t threadid;
 #endif
   std::queue<DngSliceElement> slices;

@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2016 Roman Lebedev
+    Copyright (C) 2016-2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -19,5 +19,24 @@
 */
 
 #pragma once
+
+#cmakedefine HAVE_PTHREAD
+
+#cmakedefine HAVE_PUGIXML
+
+#cmakedefine HAVE_ZLIB
+
+#cmakedefine HAVE_JPEG
+#cmakedefine HAVE_JPEG_MEM_SRC
+
+#cmakedefine HAVE_THREAD_LOCAL
+#cmakedefine HAVE___THREAD
+
+// which aligned memory allocation function is avaliable, if any?
+// only the first one found will be enabled
+#cmakedefine HAVE_POSIX_MEMALIGN
+#cmakedefine HAVE_ALIGNED_ALLOC
+#cmakedefine HAVE_MM_MALLOC
+#cmakedefine HAVE_ALIGNED_MALLOC
 
 #define CMAKE_SOURCE_DIR "@CMAKE_SOURCE_DIR@"

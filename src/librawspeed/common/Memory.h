@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
+
 #include "common/Common.h" // for isPowerOfTwo
 #include <cstddef>         // for size_t
 #include <cstdint>         // for SIZE_MAX, uintptr_t

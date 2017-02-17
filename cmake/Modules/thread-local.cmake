@@ -7,7 +7,6 @@ int main(void)
   return 0;
 }" HAVE_THREAD_LOCAL)
 if(HAVE_THREAD_LOCAL)
-  add_definitions(-DHAVE_THREAD_LOCAL)
   return()
 endif()
 
@@ -18,7 +17,6 @@ int main(void)
   return 0;
 }" HAVE___THREAD)
 if(HAVE___THREAD)
-  add_definitions(-DHAVE___THREAD)
   return()
 endif()
 

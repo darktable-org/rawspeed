@@ -23,6 +23,8 @@
 
 // IWYU pragma: begin_exports
 
+#include "rawspeedconfig.h"
+
 #include "common/Common.h"
 #include "common/Point.h"
 #include "common/RawImage.h"

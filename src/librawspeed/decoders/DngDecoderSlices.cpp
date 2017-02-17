@@ -18,6 +18,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
+
 #include "decoders/DngDecoderSlices.h"
 #include "common/Common.h"                          // for uint32, getThrea...
 #include "common/Point.h"                           // for iPoint2D
@@ -67,7 +69,7 @@ void DngDecoderSlices::addSlice(const DngSliceElement &slice) {
 }
 
 void DngDecoderSlices::startDecoding() {
-#ifdef NO_PTHREAD
+#ifndef HAVE_PTHREAD
   DngDecoderThread t;
   while (!slices.empty()) {
     t.slices.push(slices.front());

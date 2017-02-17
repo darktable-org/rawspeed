@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
+
 #ifdef HAVE_JPEG
 
 #include "common/Common.h"   // for uint32

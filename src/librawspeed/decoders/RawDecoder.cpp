@@ -19,6 +19,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
+
 #include "decoders/RawDecoder.h"
 #include "common/Common.h"                          // for uint32, getThrea...
 #include "common/Point.h"                           // for iPoint2D, iRecta...
@@ -239,7 +241,7 @@ void *RawDecoderDecodeThread(void *_this) {
 }
 
 void RawDecoder::startThreads() {
-#ifdef NO_PTHREAD
+#ifndef HAVE_PTHREAD
   uint32 threads = 1;
   RawDecoderThread t(this);
   t.start_y = 0;
@@ -349,7 +351,7 @@ void RawDecoder::startTasks( uint32 tasks )
     return;
   }
 
-#ifndef NO_PTHREAD
+#ifdef HAVE_PTHREAD
   pthread_attr_t attr;
 
   /* Initialize and set thread detached attribute */

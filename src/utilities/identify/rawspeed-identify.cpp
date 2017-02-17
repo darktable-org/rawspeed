@@ -17,8 +17,6 @@
     along with darktable.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "config.h"
-
 #include "RawSpeed-API.h" // for RawImage, RawImageData, iPoint2D, ImageMet...
 
 #include <cstddef>    // for size_t

@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
+
 #include "common/Common.h"
 #include <cstdarg>
 #include <cstdio>

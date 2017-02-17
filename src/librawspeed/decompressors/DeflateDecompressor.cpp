@@ -18,6 +18,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
+
 #ifdef HAVE_ZLIB
 
 #include "decompressors/DeflateDecompressor.h"

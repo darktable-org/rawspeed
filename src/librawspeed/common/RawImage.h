@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
+
 #include "common/Common.h"             // for uint32, uchar8, ushort16, wri...
 #include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
 #include "common/Threading.h"          // for pthread_mutex_t, pthread_attr_t
@@ -44,13 +46,13 @@ public:
 
   RawImageWorker(RawImageData *img, RawImageWorkerTask task, int start_y, int end_y);
   ~RawImageWorker();
-#ifndef NO_PTHREAD
+#ifdef HAVE_PTHREAD
   void startThread();
   void waitForThread();
 #endif
   void performTask();
 protected:
-#ifndef NO_PTHREAD
+#ifdef HAVE_PTHREAD
   pthread_t threadid;
   pthread_attr_t attr;
 #endif
@@ -157,7 +159,7 @@ public:
   bool mDitherScale;           // Should upscaling be done with dither to minimize banding?
   ImageMetaData metadata;
 
-#ifndef NO_PTHREAD
+#ifdef HAVE_PTHREAD
   pthread_mutex_t errMutex;   // Mutex for 'errors'
   pthread_mutex_t mBadPixelMutex;   // Mutex for 'mBadPixelPositions, must be used if more than 1 thread is accessing vector
 #endif
@@ -179,7 +181,7 @@ protected:
   iPoint2D mOffset;
   iPoint2D uncropped_dim;
   TableLookUp *table{nullptr};
-#ifndef NO_PTHREAD
+#ifdef HAVE_PTHREAD
   pthread_mutex_t mymutex;
 #endif
 };

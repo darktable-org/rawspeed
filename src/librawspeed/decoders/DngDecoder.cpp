@@ -18,6 +18,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
+
 #include "decoders/DngDecoder.h"
 #include "common/Common.h"                // for uint32, uchar8, writeLog
 #include "common/DngOpcodes.h"            // for DngOpcodes
