@@ -302,8 +302,7 @@ void Camera::parseCameraChild(const xml_node &cur) {
   }
 }
 
-const CameraSensorInfo* Camera::getSensorInfo( int iso )
-{
+const CameraSensorInfo* Camera::getSensorInfo(int iso) const {
   if (sensorInfo.empty()) {
     ThrowCME(
         "getSensorInfo(): Camera '%s' '%s', mode '%s' has no <Sensor> entries.",
@@ -314,7 +313,7 @@ const CameraSensorInfo* Camera::getSensorInfo( int iso )
   if (sensorInfo.size() == 1)
     return &sensorInfo.front();
 
-  vector<CameraSensorInfo*> candidates;
+  vector<const CameraSensorInfo*> candidates;
   for (auto& i : sensorInfo) {
     if (i.isIsoWithin(iso))
       candidates.push_back(&i);

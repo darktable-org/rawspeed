@@ -131,7 +131,7 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
                                       const string& mode) {
   mRaw->metadata.make = make;
   mRaw->metadata.model = model;
-  Camera* cam = meta->getCamera(make, model, mode);
+  const Camera* cam = meta->getCamera(make, model, mode);
   if (!cam) {
     askForSamples(meta, make, model, mode);
 
@@ -156,7 +156,7 @@ void RawDecoder::setMetaData(const CameraMetaData* meta, const string& make,
                              const string& model, const string& mode,
                              int iso_speed) {
   mRaw->metadata.isoSpeed = iso_speed;
-  Camera *cam = meta->getCamera(make, model, mode);
+  const Camera* cam = meta->getCamera(make, model, mode);
   if (!cam) {
     askForSamples(meta, make, model, mode);
 

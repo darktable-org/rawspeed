@@ -131,7 +131,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   // This is where we'd normally call setMetaData but since we may still need
   // to rotate the image for SuperCCD cameras we do everything ourselves
   auto id = mRootIFD->getID();
-  Camera *cam = meta->getCamera(id.make, id.model, "");
+  const Camera* cam = meta->getCamera(id.make, id.model, "");
   if (!cam)
     ThrowRDE("RAF Meta Decoder: Couldn't find camera");
 

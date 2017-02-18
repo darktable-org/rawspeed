@@ -34,7 +34,7 @@ class CameraMetaData;
 
 class NakedDecoder final : public RawDecoder {
 public:
-  NakedDecoder(FileMap* file, Camera *c);
+  NakedDecoder(FileMap* file, const Camera* c);
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
@@ -44,7 +44,7 @@ private:
 
 protected:
   int getDecoderVersion() const override { return 0; }
-  Camera *cam;
+  const Camera* cam;
 
   uint32 width{0};
   uint32 height{0};

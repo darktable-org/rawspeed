@@ -492,7 +492,7 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   mRaw->metadata.make = id.make;
   mRaw->metadata.model = id.model;
 
-  Camera *cam = meta->getCamera(id.make, id.model, "dng");
+  const Camera* cam = meta->getCamera(id.make, id.model, "dng");
   if (!cam) //Also look for non-DNG cameras in case it's a converted file
     cam = meta->getCamera(id.make, id.model, "");
   if (!cam) // Worst case scenario, look for any such camera.

@@ -74,14 +74,14 @@ static inline CameraId getId(const string& make, const string& model,
   return id;
 }
 
-Camera* CameraMetaData::getCamera(const string& make, const string& model,
-                                  const string& mode) const {
+const Camera* CameraMetaData::getCamera(const string& make, const string& model,
+                                        const string& mode) const {
   auto camera = cameras.find(getId(make, model, mode));
   return camera == cameras.end() ? nullptr : camera->second;
 }
 
-Camera* CameraMetaData::getCamera(const string& make,
-                                  const string& model) const {
+const Camera* CameraMetaData::getCamera(const string& make,
+                                        const string& model) const {
   auto id = getId(make, model, "");
 
   auto iter = find_if(cameras.begin(), cameras.end(),
@@ -102,7 +102,7 @@ bool CameraMetaData::hasCamera(const string& make, const string& model,
   return getCamera(make, model, mode);
 }
 
-Camera* CameraMetaData::getChdkCamera(uint32 filesize) const {
+const Camera* CameraMetaData::getChdkCamera(uint32 filesize) const {
   auto camera = chdkCameras.find(filesize);
   return camera == chdkCameras.end() ? nullptr : camera->second;
 }

@@ -95,7 +95,7 @@ RawDecoder* RawParser::getDecoder(const CameraMetaData* meta) {
 
   // Detect camera on filesize (CHDK).
   if (meta != nullptr && meta->hasChdkCamera(mInput->getSize())) {
-    Camera* c = meta->getChdkCamera(mInput->getSize());
+    const Camera* c = meta->getChdkCamera(mInput->getSize());
 
     try {
       return new NakedDecoder(mInput, c);

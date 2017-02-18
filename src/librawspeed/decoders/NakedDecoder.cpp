@@ -35,10 +35,8 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-NakedDecoder::NakedDecoder(FileMap* file, Camera* c) :
-    RawDecoder(file) {
-  cam = c;
-}
+NakedDecoder::NakedDecoder(FileMap* file, const Camera* c)
+    : RawDecoder(file), cam(c) {}
 
 static const map<string, BitOrder> order2enum = {
     {"plain", BitOrder_Plain},
