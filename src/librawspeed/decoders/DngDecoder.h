@@ -37,8 +37,8 @@ public:
   DngDecoder(TiffRootIFDOwner&& rootIFD, FileMap* file);
 
   RawImage decodeRawInternal() override;
-  void decodeMetaDataInternal(CameraMetaData *meta) override;
-  void checkSupportInternal(CameraMetaData *meta) override;
+  void decodeMetaDataInternal(const CameraMetaData* meta) override;
+  void checkSupportInternal(const CameraMetaData* meta) override;
 
 private:
   uint32 sample_format{1};

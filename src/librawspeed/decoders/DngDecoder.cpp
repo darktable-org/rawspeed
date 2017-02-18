@@ -475,7 +475,7 @@ RawImage DngDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void DngDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
     mRaw->metadata.isoSpeed = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();
 
@@ -514,7 +514,7 @@ void DngDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
 }
 
 /* DNG Images are assumed to be decodable unless explicitly set so */
-void DngDecoder::checkSupportInternal(CameraMetaData *meta) {
+void DngDecoder::checkSupportInternal(const CameraMetaData* meta) {
   // We set this, since DNG's are not explicitly added.
   failOnUnknown = false;
 

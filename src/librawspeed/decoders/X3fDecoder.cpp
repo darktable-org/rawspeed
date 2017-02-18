@@ -81,8 +81,7 @@ RawImage X3fDecoder::decodeRawInternal()
   return mRaw;
 }
 
-void X3fDecoder::decodeMetaDataInternal( CameraMetaData *meta )
-{
+void X3fDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (readName()) {
     if (checkCameraSupported(meta, camera_make, camera_model, "" )) {
       int iso = 0;
@@ -140,8 +139,7 @@ bool X3fDecoder::readName() {
   return false;
 }
 
-void X3fDecoder::checkSupportInternal( CameraMetaData *meta )
-{
+void X3fDecoder::checkSupportInternal(const CameraMetaData* meta) {
   if (readName()) {
     if (!checkCameraSupported(meta, camera_make, camera_model, "" ))
       ThrowRDE("X3FDecoder: Unknown camera. Will not guess.");

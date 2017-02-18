@@ -90,7 +90,7 @@ RawImage CrwDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void CrwDecoder::checkSupportInternal(CameraMetaData *meta) {
+void CrwDecoder::checkSupportInternal(const CameraMetaData* meta) {
   vector<CiffIFD*> data = mRootIFD->getIFDsWithTag(CIFF_MAKEMODEL);
   if (data.empty())
     ThrowRDE("CRW Support check: Model name not found");
@@ -120,7 +120,7 @@ static float canonEv(const long in) {
   return copysignf((val + frac) / 32.0f, in);
 }
 
-void CrwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
   vector<CiffIFD*> data = mRootIFD->getIFDsWithTag(CIFF_MAKEMODEL);

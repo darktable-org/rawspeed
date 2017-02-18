@@ -327,7 +327,7 @@ void NefDecoder::DecodeSNefUncompressed() {
   DecodeNikonSNef(in, width, height);
 }
 
-void NefDecoder::checkSupportInternal(CameraMetaData *meta) {
+void NefDecoder::checkSupportInternal(const CameraMetaData* meta) {
   auto id = mRootIFD->getID();
   string mode = getMode();
   string extended_mode = getExtendedMode(mode);
@@ -366,7 +366,7 @@ string NefDecoder::getExtendedMode(const string &mode) {
   return extended_mode.str();
 }
 
-void NefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
 

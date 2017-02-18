@@ -33,7 +33,8 @@ class RawParser
 public:
   RawParser(FileMap* input);
   virtual ~RawParser();
-  virtual RawDecoder *getDecoder(CameraMetaData *meta = nullptr);
+  virtual RawDecoder* getDecoder(const CameraMetaData* meta = nullptr);
+
 protected:
   FileMap *mInput;
 };

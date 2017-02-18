@@ -35,8 +35,8 @@ public:
   AriDecoder(FileMap* file);
   ~AriDecoder() override;
   RawImage decodeRawInternal() override;
-  void checkSupportInternal(CameraMetaData *meta) override;
-  void decodeMetaDataInternal(CameraMetaData *meta) override;
+  void checkSupportInternal(const CameraMetaData* meta) override;
+  void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void decodeThreaded(RawDecoderThread *t) override;
   static bool isARI(FileMap* input);
 

@@ -295,7 +295,7 @@ void ArwDecoder::DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp) {
   ThrowRDE("Unsupported bit depth");
 }
 
-void ArwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   //Default
   int iso = 0;
 

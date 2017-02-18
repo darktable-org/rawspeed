@@ -91,11 +91,11 @@ RawImage NakedDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void NakedDecoder::checkSupportInternal(CameraMetaData *meta) {
+void NakedDecoder::checkSupportInternal(const CameraMetaData* meta) {
   this->checkCameraSupported(meta, cam->make, cam->model, cam->mode);
 }
 
-void NakedDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void NakedDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, cam->make, cam->model, cam->mode, 0);
 }
 

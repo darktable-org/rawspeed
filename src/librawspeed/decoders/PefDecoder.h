@@ -39,7 +39,7 @@ public:
     : AbstractTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;
-  void decodeMetaDataInternal(CameraMetaData *meta) override;
+  void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 protected:
   int getDecoderVersion() const override { return 3; }

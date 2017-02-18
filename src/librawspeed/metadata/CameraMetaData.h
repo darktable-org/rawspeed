@@ -50,15 +50,15 @@ public:
 
   // searches for camera with given make + model + mode
   Camera* getCamera(const std::string& make, const std::string& model,
-                    const std::string& mode);
+                    const std::string& mode) const;
 
   // searches for camera with given make + model, with ANY mode
-  Camera* getCamera(const std::string& make, const std::string& model);
+  Camera* getCamera(const std::string& make, const std::string& model) const;
 
   bool hasCamera(const std::string& make, const std::string& model,
-                 const std::string& mode);
-  Camera* getChdkCamera(uint32 filesize);
-  bool hasChdkCamera(uint32 filesize);
+                 const std::string& mode) const;
+  Camera* getChdkCamera(uint32 filesize) const;
+  bool hasChdkCamera(uint32 filesize) const;
   void disableMake(const std::string &make);
   void disableCamera(const std::string &make, const std::string &model);
 

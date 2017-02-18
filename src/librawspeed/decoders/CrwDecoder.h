@@ -37,8 +37,8 @@ class CrwDecoder final : public RawDecoder {
 public:
   CrwDecoder(CiffIFD *rootIFD, FileMap* file);
   RawImage decodeRawInternal() override;
-  void checkSupportInternal(CameraMetaData *meta) override;
-  void decodeMetaDataInternal(CameraMetaData *meta) override;
+  void checkSupportInternal(const CameraMetaData* meta) override;
+  void decodeMetaDataInternal(const CameraMetaData* meta) override;
   ~CrwDecoder() override;
 
 protected:

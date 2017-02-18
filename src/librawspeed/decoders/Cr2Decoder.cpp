@@ -147,7 +147,7 @@ RawImage Cr2Decoder::decodeRawInternal() {
     return decodeNewFormat();
 }
 
-void Cr2Decoder::checkSupportInternal(CameraMetaData *meta) {
+void Cr2Decoder::checkSupportInternal(const CameraMetaData* meta) {
   auto id = mRootIFD->getID();
   // Check for sRaw mode
   if (mRootIFD->getSubIFDs().size() == 4) {
@@ -161,7 +161,7 @@ void Cr2Decoder::checkSupportInternal(CameraMetaData *meta) {
   checkCameraSupported(meta, id, "");
 }
 
-void Cr2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
 

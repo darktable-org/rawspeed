@@ -172,8 +172,8 @@ void writePPM(const RawImage& raw, const string& fn) {
   fclose(f);
 }
 
-size_t process(const string &filename, CameraMetaData *metadata, bool create,
-               bool dump) {
+size_t process(const string& filename, const CameraMetaData* metadata,
+               bool create, bool dump) {
 
   const string hashfile(filename + ".hash");
 
@@ -325,7 +325,7 @@ int main(int argc, char **argv) {
   if (1 == argc || help)
     return usage(argv[0]);
 
-  CameraMetaData metadata(CMAKE_SOURCE_DIR "/data/cameras.xml");
+  const CameraMetaData metadata(CMAKE_SOURCE_DIR "/data/cameras.xml");
 
   size_t time = 0;
   map<string, string> failedTests;

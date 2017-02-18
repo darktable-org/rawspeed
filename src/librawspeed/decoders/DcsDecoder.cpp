@@ -76,7 +76,7 @@ RawImage DcsDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void DcsDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void DcsDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, "", 0);
 }
 

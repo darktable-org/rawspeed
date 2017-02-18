@@ -115,8 +115,8 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
   }
 }
 
-void RawDecoder::askForSamples(CameraMetaData* meta, const string& make,
-                               const string& model, const string& mode) {
+void RawDecoder::askForSamples(const CameraMetaData* meta, const string& make,
+                               const string& model, const string& mode) const {
   if ("dng" == mode)
     return;
 
@@ -126,8 +126,9 @@ void RawDecoder::askForSamples(CameraMetaData* meta, const string& make,
            make.c_str(), model.c_str(), mode.c_str());
 }
 
-bool RawDecoder::checkCameraSupported(CameraMetaData* meta, const string& make,
-                                      const string& model, const string& mode) {
+bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
+                                      const string& make, const string& model,
+                                      const string& mode) {
   mRaw->metadata.make = make;
   mRaw->metadata.model = model;
   Camera* cam = meta->getCamera(make, model, mode);
@@ -151,7 +152,7 @@ bool RawDecoder::checkCameraSupported(CameraMetaData* meta, const string& make,
   return true;
 }
 
-void RawDecoder::setMetaData(CameraMetaData* meta, const string& make,
+void RawDecoder::setMetaData(const CameraMetaData* meta, const string& make,
                              const string& model, const string& mode,
                              int iso_speed) {
   mRaw->metadata.isoSpeed = iso_speed;
@@ -309,8 +310,7 @@ RawSpeed::RawImage RawDecoder::decodeRaw()
   return nullptr;
 }
 
-void RawDecoder::decodeMetaData(CameraMetaData *meta)
-{
+void RawDecoder::decodeMetaData(const CameraMetaData* meta) {
   try {
     return decodeMetaDataInternal(meta);
   } catch (TiffParserException &e) {
@@ -322,8 +322,7 @@ void RawDecoder::decodeMetaData(CameraMetaData *meta)
   }
 }
 
-void RawDecoder::checkSupport(CameraMetaData *meta)
-{
+void RawDecoder::checkSupport(const CameraMetaData* meta) {
   try {
     return checkSupportInternal(meta);
   } catch (TiffParserException &e) {

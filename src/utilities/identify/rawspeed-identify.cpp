@@ -120,7 +120,8 @@ int main(int argc, char *argv[]) {
   // fprintf(stderr, "Using cameras.xml from '%s'\n", camfile);
 
   try {
-    std::unique_ptr<CameraMetaData> meta(new CameraMetaData(camfile.c_str()));
+    std::unique_ptr<const CameraMetaData> meta(
+        new CameraMetaData(camfile.c_str()));
 
     if (!meta.get()) {
       fprintf(stderr, "ERROR: Couldn't get a CameraMetaData instance\n");

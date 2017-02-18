@@ -191,11 +191,11 @@ void MosDecoder::DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32
   }
 }
 
-void MosDecoder::checkSupportInternal(CameraMetaData *meta) {
+void MosDecoder::checkSupportInternal(const CameraMetaData* meta) {
   RawDecoder::checkCameraSupported(meta, make, model, "");
 }
 
-void MosDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   RawDecoder::setMetaData(meta, make, model, "", 0);
 
   // Fetch the white balance (see dcraw.c parse_mos for more metadata that can be gotten)

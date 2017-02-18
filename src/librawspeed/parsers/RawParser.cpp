@@ -46,7 +46,7 @@ RawParser::RawParser(FileMap* inputData): mInput(inputData) {
 
 RawParser::~RawParser() = default;
 
-RawDecoder* RawParser::getDecoder(CameraMetaData* meta) {
+RawDecoder* RawParser::getDecoder(const CameraMetaData* meta) {
   // We need some data.
   // For now it is 104 bytes for RAF/FUJIFIM images.
   // FIXME: each decoder/parser should check it on their own.

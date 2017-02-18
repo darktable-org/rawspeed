@@ -66,7 +66,7 @@ public:
   /* A RawDecoderException will be thrown if the camera isn't supported */
   /* Unknown cameras does NOT generate any specific feedback */
   /* This function must be overridden by actual decoders */
-  void checkSupport(CameraMetaData *meta);
+  void checkSupport(const CameraMetaData* meta);
 
   /* Attempt to decode the image */
   /* A RawDecoderException will be thrown if the image cannot be decoded, */
@@ -80,7 +80,7 @@ public:
   /* If meta-data is set during load, this function can be empty. */
   /* The image is expected to be cropped after this, but black/whitelevel */
   /* compensation is not expected to be applied to the image */
-  void decodeMetaData(CameraMetaData *meta);
+  void decodeMetaData(const CameraMetaData* meta);
 
   /* Called function for filters that are capable of doing simple multi-threaded decode */
   /* The delivered class gives information on what part of the image should be decoded. */
@@ -131,8 +131,8 @@ protected:
   /* and there will not be any data in the mRaw image. */
   /* This function must be overridden by actual decoders. */
   virtual RawImage decodeRawInternal() = 0;
-  virtual void decodeMetaDataInternal(CameraMetaData *meta) = 0;
-  virtual void checkSupportInternal(CameraMetaData *meta) = 0;
+  virtual void decodeMetaDataInternal(const CameraMetaData* meta) = 0;
+  virtual void checkSupportInternal(const CameraMetaData* meta) = 0;
 
   /* Helper function for decoders - splits the image vertically and starts of decoder threads */
   /* The function returns when all threads are done */
@@ -147,18 +147,18 @@ protected:
   void startTasks(uint32 tasks);
 
   /* Ask for sample submisson, if makes sense */
-  void askForSamples(CameraMetaData* meta, const std::string& make,
-                     const std::string& model, const std::string& mode);
+  void askForSamples(const CameraMetaData* meta, const std::string& make,
+                     const std::string& model, const std::string& mode) const;
 
   /* Check the camera and mode against the camera database. */
   /* A RawDecoderException will be thrown if the camera isn't supported */
   /* Unknown cameras does NOT generate any errors, but returns false */
-  bool checkCameraSupported(CameraMetaData* meta, const std::string& make,
+  bool checkCameraSupported(const CameraMetaData* meta, const std::string& make,
                             const std::string& model, const std::string& mode);
 
   /* Helper function for decodeMetaData(), that find the camera in the CameraMetaData DB */
   /* and sets common settings such as crop, black- white level, and sets CFA information */
-  virtual void setMetaData(CameraMetaData* meta, const std::string& make,
+  virtual void setMetaData(const CameraMetaData* meta, const std::string& make,
                            const std::string& model, const std::string& mode,
                            int iso_speed = 0);
 

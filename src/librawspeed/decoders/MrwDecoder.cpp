@@ -110,12 +110,12 @@ RawImage MrwDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void MrwDecoder::checkSupportInternal(CameraMetaData *meta) {
+void MrwDecoder::checkSupportInternal(const CameraMetaData* meta) {
   auto id = rootIFD->getID();
   this->checkCameraSupported(meta, id.make, id.model, "");
 }
 
-void MrwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void MrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   //Default
   int iso = 0;
 

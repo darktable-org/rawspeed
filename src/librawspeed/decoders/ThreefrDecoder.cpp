@@ -59,7 +59,7 @@ RawImage ThreefrDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void ThreefrDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void ThreefrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
 
   setMetaData(meta, "", 0);

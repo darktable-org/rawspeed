@@ -53,7 +53,7 @@ RawImage MefDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void MefDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void MefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, "", 0);
 }
 

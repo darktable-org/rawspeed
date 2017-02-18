@@ -42,8 +42,8 @@ public:
   X3fDecoder(FileMap* file);
   ~X3fDecoder() override;
   RawImage decodeRawInternal() override;
-  void decodeMetaDataInternal(CameraMetaData *meta) override;
-  void checkSupportInternal(CameraMetaData *meta) override;
+  void decodeMetaDataInternal(const CameraMetaData* meta) override;
+  void checkSupportInternal(const CameraMetaData* meta) override;
   FileMap *getCompressedData() override;
   std::vector<X3fDirectory> mDirectory;
   std::vector<X3fImage> mImages;

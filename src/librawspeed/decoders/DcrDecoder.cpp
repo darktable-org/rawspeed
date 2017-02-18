@@ -158,7 +158,7 @@ void DcrDecoder::decodeKodak65000Segment(ByteStream &input, ushort16 *out, uint3
   }
 }
 
-void DcrDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void DcrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, "", 0);
 }
 

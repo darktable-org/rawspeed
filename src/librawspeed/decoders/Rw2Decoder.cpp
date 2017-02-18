@@ -226,13 +226,13 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
   }
 }
 
-void Rw2Decoder::checkSupportInternal(CameraMetaData *meta) {
+void Rw2Decoder::checkSupportInternal(const CameraMetaData* meta) {
   auto id = mRootIFD->getID();
   if (!checkCameraSupported(meta, id, guessMode()))
     checkCameraSupported(meta, id, "");
 }
 
-void Rw2Decoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_BLUE, CFA_GREEN, CFA_GREEN, CFA_RED);
 
   auto id = mRootIFD->getID();

@@ -121,12 +121,12 @@ RawImage RafDecoder::decodeRawInternal() {
 void RafDecoder::decodeThreaded(RawDecoderThread * t) {
 }
 
-void RafDecoder::checkSupportInternal(CameraMetaData *meta) {
+void RafDecoder::checkSupportInternal(const CameraMetaData* meta) {
   if (!this->checkCameraSupported(meta, mRootIFD->getID(), ""))
      ThrowRDE("RAFDecoder: Unknown camera. Will not guess.");
 }
 
-void RafDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
     iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();

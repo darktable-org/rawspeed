@@ -55,7 +55,7 @@ RawImage ErfDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void ErfDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void ErfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, "", 0);
 
   if (mRootIFD->hasEntryRecursive(EPSONWB)) {

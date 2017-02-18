@@ -75,7 +75,7 @@ RawImage KdcDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void KdcDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void KdcDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, "", 0);
 
   // Try the kodak hidden IFD for WB

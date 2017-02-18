@@ -436,7 +436,7 @@ string SrwDecoder::getMode() {
   return "";
 }
 
-void SrwDecoder::checkSupportInternal(CameraMetaData *meta) {
+void SrwDecoder::checkSupportInternal(const CameraMetaData* meta) {
   auto id = mRootIFD->getID();
   string mode = getMode();
   if (meta->hasCamera(id.make, id.model, mode))
@@ -445,7 +445,7 @@ void SrwDecoder::checkSupportInternal(CameraMetaData *meta) {
     this->checkCameraSupported(meta, id, "");
 }
 
-void SrwDecoder::decodeMetaDataInternal(CameraMetaData *meta) {
+void SrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
     iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();
