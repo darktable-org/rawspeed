@@ -69,12 +69,11 @@ void DngDecoderSlices::addSlice(const DngSliceElement &slice) {
 
 void DngDecoderSlices::startDecoding() {
 #ifndef HAVE_PTHREAD
-  DngDecoderThread t;
+  DngDecoderThread t(this);
   while (!slices.empty()) {
     t.slices.push(slices.front());
     slices.pop();
   }
-  t.parent = this;
   DecodeThread(&t);
 #else
   // Create threads
