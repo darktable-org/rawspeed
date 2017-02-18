@@ -28,8 +28,9 @@ CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-unused-parameter)
 
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wsuggest-attribute=noreturn)
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wsuggest-attribute=const)
-# CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wsuggest-attribute=format)
-# CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wmissing-format-attribute)
+CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wsuggest-attribute=pure)
+CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wsuggest-attribute=format)
+CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wmissing-format-attribute)
 
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wsuggest-final-types)
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wsuggest-final-methods)

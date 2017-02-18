@@ -69,7 +69,7 @@ public:
   void addSlice(const DngSliceElement &slice);
   void startDecoding();
   void decodeSlice(DngDecoderThread* t);
-  int size();
+  int __attribute__((pure)) size();
   std::queue<DngSliceElement> slices;
   std::vector<std::unique_ptr<DngDecoderThread>> threads;
   FileMap *mFile;

@@ -93,16 +93,15 @@ TiffEntry::TiffEntry(TiffTag tag_, TiffDataType type_, uint32 count_,
     ThrowTPE("TIFF, data set larger than entry size given");
 }
 
-
-bool TiffEntry::isInt() const {
+bool __attribute__((pure)) TiffEntry::isInt() const {
   return type == TIFF_LONG || type == TIFF_SHORT || type == TIFF_BYTE;
 }
 
-bool TiffEntry::isString() const {
+bool __attribute__((pure)) TiffEntry::isString() const {
   return type == TIFF_ASCII;
 }
 
-bool TiffEntry::isFloat() const {
+bool __attribute__((pure)) TiffEntry::isFloat() const {
   return  (type == TIFF_FLOAT || type == TIFF_DOUBLE || type == TIFF_RATIONAL ||
            type == TIFF_SRATIONAL || type == TIFF_LONG || type == TIFF_SLONG ||
            type == TIFF_SHORT || type == TIFF_SSHORT);

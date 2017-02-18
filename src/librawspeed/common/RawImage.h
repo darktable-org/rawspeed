@@ -124,8 +124,8 @@ public:
   uchar8* getDataUncropped(uint32 x, uint32 y);
   void subFrame(iRectangle2D cropped);
   void clearArea(iRectangle2D area, uchar8 value = 0);
-  iPoint2D getUncroppedDim();
-  iPoint2D getCropOffset();
+  iPoint2D __attribute__((pure)) getUncroppedDim() const;
+  iPoint2D __attribute__((pure)) getCropOffset() const;
   virtual void scaleBlackWhite() = 0;
   virtual void calculateBlackAreas() = 0;
   virtual void setWithLookUp(ushort16 value, uchar8* dst, uint32* random) = 0;

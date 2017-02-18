@@ -58,7 +58,7 @@ CiffEntry::~CiffEntry() {
     delete[] own_data;
 }
 
-uint32 CiffEntry::getElementShift() {
+uint32 __attribute__((pure)) CiffEntry::getElementShift() {
   switch (type) {
     case CIFF_BYTE:
     case CIFF_ASCII:
@@ -74,7 +74,7 @@ uint32 CiffEntry::getElementShift() {
   return 0;
 }
 
-uint32 CiffEntry::getElementSize() {
+uint32 __attribute__((pure)) CiffEntry::getElementSize() {
   switch (type) {
     case CIFF_BYTE:
     case CIFF_ASCII:
@@ -90,7 +90,7 @@ uint32 CiffEntry::getElementSize() {
   return 0;
 }
 
-bool CiffEntry::isInt() {
+bool __attribute__((pure)) CiffEntry::isInt() {
   return (type == CIFF_LONG || type == CIFF_SHORT || type ==  CIFF_BYTE);
 }
 
@@ -158,7 +158,7 @@ vector<string> CiffEntry::getStrings() {
   return strs;
 }
 
-bool CiffEntry::isString() {
+bool __attribute__((pure)) CiffEntry::isString() {
   return (type == CIFF_ASCII);
 }
 

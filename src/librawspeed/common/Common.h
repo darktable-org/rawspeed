@@ -76,7 +76,8 @@ constexpr inline size_t roundUp(size_t value, size_t multiple) {
 }
 
 template <typename T, typename T2>
-bool isIn(const T value, const std::initializer_list<T2>& list) {
+bool __attribute__((pure))
+isIn(const T value, const std::initializer_list<T2>& list) {
   for (auto t : list)
     if (t == value)
       return true;

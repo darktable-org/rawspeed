@@ -74,8 +74,10 @@ public:
   std::vector<const TiffIFD*> getIFDsWithTag(TiffTag tag) const;
   const TiffIFD* getIFDWithTag(TiffTag tag, uint32 index = 0) const;
   TiffEntry* getEntry(TiffTag tag) const;
-  TiffEntry* getEntryRecursive(TiffTag tag) const;
-  bool hasEntry(TiffTag tag) const { return entries.find(tag) != entries.end(); }
+  TiffEntry* __attribute__((pure)) getEntryRecursive(TiffTag tag) const;
+  bool __attribute__((pure)) hasEntry(TiffTag tag) const {
+    return entries.find(tag) != entries.end();
+  }
   bool hasEntryRecursive(TiffTag tag) const { return getEntryRecursive(tag) != nullptr; }
 
   const std::vector<TiffIFDOwner>& getSubIFDs() const { return subIFDs; }

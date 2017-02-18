@@ -79,9 +79,9 @@ public:
   TiffEntry(TiffTag tag, TiffDataType type, uint32 count, ByteStream&& data);
   TiffEntry(ByteStream& bs);
 
-  bool isFloat() const;
-  bool isInt() const;
-  bool isString() const;
+  bool __attribute__((pure)) isFloat() const;
+  bool __attribute__((pure)) isInt() const;
+  bool __attribute__((pure)) isString() const;
   uchar8 getByte(uint32 index = 0) const;
   uint32 getU32(uint32 index = 0) const;
   int32 getI32(uint32 index = 0) const;

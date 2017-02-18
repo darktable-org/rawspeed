@@ -202,7 +202,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
     mRaw->setError("DngDecoderSlices: Unknown compression");
 }
 
-int DngDecoderSlices::size() {
+int __attribute__((pure)) DngDecoderSlices::size() {
   return (int)slices.size();
 }
 

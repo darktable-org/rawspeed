@@ -56,17 +56,18 @@ public:
   const uchar8* getData() {return data;}
   uchar8* getDataWrt();
   void setData(const void *data, uint32 byte_count );
-  uint32 getElementSize();
-  uint32 getElementShift();
-// variables:
+  uint32 __attribute__((pure)) getElementSize();
+  uint32 __attribute__((pure)) getElementShift();
+  // variables:
   CiffTag tag;
   CiffDataType type;
   uint32 count;
   uint32 bytesize;
   uint32 data_offset;
   uint32 getDataOffset() const { return data_offset; }
-  bool isInt();
-  bool isString();
+  bool __attribute__((pure)) isInt();
+  bool __attribute__((pure)) isString();
+
 protected:
   std::string getValueAsString();
   uchar8* own_data;

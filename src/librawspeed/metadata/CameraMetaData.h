@@ -58,8 +58,8 @@ public:
 
   bool hasCamera(const std::string& make, const std::string& model,
                  const std::string& mode) const;
-  const Camera* getChdkCamera(uint32 filesize) const;
-  bool hasChdkCamera(uint32 filesize) const;
+  const Camera* __attribute__((pure)) getChdkCamera(uint32 filesize) const;
+  bool __attribute__((pure)) hasChdkCamera(uint32 filesize) const;
   void disableMake(const std::string &make);
   void disableCamera(const std::string &make, const std::string &model);
 

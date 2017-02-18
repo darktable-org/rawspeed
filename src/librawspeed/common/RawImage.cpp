@@ -150,13 +150,11 @@ uchar8* RawImageData::getDataUncropped(uint32 x, uint32 y) {
   return &data[y*pitch+x*bpp];
 }
 
-iPoint2D RawImageData::getUncroppedDim()
-{
+iPoint2D __attribute__((pure)) RawSpeed::RawImageData::getUncroppedDim() const {
   return uncropped_dim;
 }
 
-iPoint2D RawImageData::getCropOffset()
-{
+iPoint2D __attribute__((pure)) RawImageData::getCropOffset() const {
   return mOffset;
 }
 

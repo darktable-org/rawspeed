@@ -90,7 +90,7 @@ CiffIFD::~CiffIFD() {
   mSubIFD.clear();
 }
 
-bool CiffIFD::hasEntryRecursive(CiffTag tag) {
+bool __attribute__((pure)) CiffIFD::hasEntryRecursive(CiffTag tag) {
   if (mEntry.find(tag) != mEntry.end())
     return true;
   for (auto &i : mSubIFD) {
@@ -195,8 +195,7 @@ CiffEntry* CiffIFD::getEntry(CiffTag tag) {
   return nullptr;
 }
 
-
-bool CiffIFD::hasEntry(CiffTag tag) {
+bool __attribute__((pure)) CiffIFD::hasEntry(CiffTag tag) {
   return mEntry.find(tag) != mEntry.end();
 }
 
