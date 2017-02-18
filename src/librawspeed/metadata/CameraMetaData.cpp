@@ -134,14 +134,14 @@ bool CameraMetaData::addCamera( Camera* cam )
 }
 
 void CameraMetaData::disableMake(const string &make) {
-  for (auto cam : cameras) {
+  for (const auto& cam : cameras) {
     if (cam.second->make == make)
       cam.second->supported = false;
   }
 }
 
 void CameraMetaData::disableCamera(const string &make, const string &model) {
-  for (auto cam : cameras) {
+  for (const auto& cam : cameras) {
     if (cam.second->make == make && cam.second->model == model)
       cam.second->supported = false;
   }

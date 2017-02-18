@@ -25,4 +25,6 @@ CheckOptions:
     value:           '1'
   - key:             readability-simplify-boolean-expr.ChainedConditionalReturn
     value:           '1'
+  - key:             performance-for-range-copy.WarnOnAllAutoCopies
+    value:           '1'
 ...
