@@ -26,6 +26,7 @@
 #include "common/RawImage.h"  // for RawImage
 #include "common/Threading.h" // for pthread_t
 #include "io/FileMap.h"       // for FileMap
+#include <memory>             // for unique_ptr
 #include <queue>              // for queue
 #include <vector>             // for vector
 
@@ -55,6 +56,7 @@ public:
 #ifdef HAVE_PTHREAD
   pthread_t threadid;
 #endif
+  DngDecoderThread(DngDecoderSlices* parent_) : parent(parent_) {}
   std::queue<DngSliceElement> slices;
   DngDecoderSlices* parent;
 };
@@ -69,7 +71,7 @@ public:
   void decodeSlice(DngDecoderThread* t);
   int size();
   std::queue<DngSliceElement> slices;
-  std::vector<DngDecoderThread*> threads;
+  std::vector<std::unique_ptr<DngDecoderThread>> threads;
   FileMap *mFile;
   RawImage mRaw;
   bool mFixLjpeg;
@@ -77,11 +79,6 @@ public:
   uint32 mBps;
   uint32 nThreads;
   int compression;
-#ifdef HAVE_ZLIB
-private:
-  void decodeDeflate(const DngSliceElement &e, unsigned char *dBuffer);
-#endif
-
 };
 
 } // namespace RawSpeed

@@ -19,7 +19,6 @@
 */
 
 #include "rawspeedconfig.h"
-
 #include "decoders/DngDecoderSlices.h"
 #include "common/Common.h"                          // for uint32, getThrea...
 #include "common/Point.h"                           // for iPoint2D
@@ -32,8 +31,10 @@
 #include "io/IOException.h"                         // for IOException
 #include "tiff/TiffEntry.h"                         // IWYU pragma: keep
 #include "tiff/TiffIFD.h"                           // for getTiffEndianness
+#include <algorithm>                                // for move
 #include <cstdio>                                   // for size_t
 #include <exception>                                // for exception
+#include <memory>                                   // for allocator_traits...
 #include <string>                                   // for string, operator+
 #include <vector>                                   // for allocator, vector
 
@@ -87,24 +88,23 @@ void DngDecoderSlices::startDecoding() {
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
   for (uint32 i = 0; i < nThreads; i++) {
-    auto *t = new DngDecoderThread();
+    auto t = make_unique<DngDecoderThread>(this);
     for (int j = 0; j < slicesPerThread ; j++) {
       if (!slices.empty()) {
         t->slices.push(slices.front());
         slices.pop();
       }
     }
-    t->parent = this;
-    pthread_create(&t->threadid, &attr, DecodeThread, t);
-    threads.push_back(t);
+    pthread_create(&t->threadid, &attr, DecodeThread, t.get());
+    threads.push_back(move(t));
   }
   pthread_attr_destroy(&attr);
 
   void *status;
-  for (uint32 i = 0; i < nThreads; i++) {
-    pthread_join(threads[i]->threadid, &status);
-    delete(threads[i]);
+  for (auto& thread : threads) {
+    pthread_join(thread->threadid, &status);
   }
+  threads.clear();
 #endif
 }
 
