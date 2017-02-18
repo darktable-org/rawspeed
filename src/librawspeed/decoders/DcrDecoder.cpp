@@ -23,6 +23,7 @@
 #include "common/Common.h"                // for uint32, uchar8, ushort16
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable::signExtend
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/IOException.h"               // for IOException
 #include "tiff/TiffEntry.h"               // for TiffEntry, TiffDataType::T...
@@ -152,8 +153,7 @@ void DcrDecoder::decodeKodak65000Segment(ByteStream &input, ushort16 *out, uint3
     uint32 diff = (uint32)bitbuf & (0xffff >> (16-len));
     bitbuf >>= len;
     bits -= len;
-    if (len && (diff & (1 << (len-1))) == 0)
-      diff -= (1 << len) - 1;
+    diff = HuffmanTable::signExtended(diff, len);
     out[i] = diff;
   }
 }

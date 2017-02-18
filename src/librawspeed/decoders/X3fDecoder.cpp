@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D, iRectangle2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable::signExtend
 #include "io/Buffer.h"                    // for Buffer::size_type
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/Endianness.h"                // for getHostEndianness, Endiann...
@@ -330,8 +331,7 @@ void X3fDecoder::createSigmaTable(ByteStream *bytes_, int codes) {
       if (code_bits + val_bits < 14) {
         uint32 low_pos = 14-code_bits-val_bits;
         int v = (int)(i>>low_pos)&((1<<val_bits) - 1);
-        if ((v & (1 << (val_bits - 1))) == 0)
-          v -= (1 << val_bits) - 1;
+        v = HuffmanTable::signExtended(v, val_bits);
         big_table[i] = (v<<8) | (code_bits+val_bits);
       } else {
         big_table[i] = 0xf;
@@ -458,8 +458,7 @@ int X3fDecoder::SigmaDecode(BitPumpMSB *bits) {
   if (!val_bits)
     return 0;
   int v = bits->getBitsNoFill(val_bits);
-  if ((v & (1 << (val_bits - 1))) == 0)
-    v -= (1 << val_bits) - 1;
+  v = HuffmanTable::signExtended(v, val_bits);
 
   return v;
 }

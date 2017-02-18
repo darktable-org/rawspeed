@@ -24,6 +24,7 @@
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoder.h"                    // for RawDecoderThread
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decompressors/HuffmanTable.h"             // for HuffmanTable::signExtend
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/BitPumpMSB.h"                          // for BitPumpMSB
 #include "io/BitPumpPlain.h"                        // for BitPumpPlain
@@ -250,8 +251,7 @@ void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
       if (len == 4)
         while (len < 17 && !bits.getBitsNoFill(1)) len++;
       int diff = bits.getBits(len);
-      if (len && (diff & (1 << (len - 1))) == 0)
-        diff -= (1 << len) - 1;
+      diff = HuffmanTable::signExtended(diff, len);
       sum += diff;
       assert(!(sum >> 12));
       if (y < h) dest[x+y*pitch] = sum;

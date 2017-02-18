@@ -25,6 +25,7 @@
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable::signExtend
 #include "io/ByteStream.h"                // for ByteStream
 #include "metadata/Camera.h"              // for Hints
 #include "metadata/ColorFilterArray.h"    // for CFAColor::CFA_GREEN, CFACo...
@@ -359,8 +360,7 @@ void CrwDecoder::decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 
         len = leaf & 15;
         if (len == 0) continue;
         diff = pump.getBitsSafe(len);
-        if ((diff & (1 << (len-1))) == 0)
-          diff -= (1 << len) - 1;
+        diff = HuffmanTable::signExtended(diff, len);
         if (i < 64) diffbuf[i] = diff;
       }
       diffbuf[0] += carry;

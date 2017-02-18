@@ -23,6 +23,7 @@
 #include "common/Common.h"                // for uint32, ushort16, int32
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable::signExtend
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/Endianness.h"                // for getHostEndianness, Endiann...
@@ -262,8 +263,8 @@ int32 SrwDecoder::samsungDiff (BitPumpMSB &pump, encTableItem *tbl)
   int32 diff = pump.getBitsSafe(len);
 
   // If the first bit is 0 we need to turn this into a negative number
-  if (len && (diff & (1 << (len-1))) == 0)
-    diff -= (1 << len) - 1;
+  diff = HuffmanTable::signExtended(diff, len);
+
   return diff;
 }
 
