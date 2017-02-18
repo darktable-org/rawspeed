@@ -31,8 +31,6 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-class RawDecoderThread;
-
 class RafDecoder final : public AbstractTiffDecoder
 {
 public:

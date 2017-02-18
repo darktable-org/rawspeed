@@ -28,12 +28,10 @@ class CameraMetaData;
 
 class RawDecoder;
 
-class RawParser
-{
+class RawParser final {
 public:
   RawParser(FileMap* inputData) : mInput(inputData) {}
-  virtual ~RawParser() = default;
-  virtual RawDecoder* getDecoder(const CameraMetaData* meta = nullptr);
+  RawDecoder* getDecoder(const CameraMetaData* meta = nullptr);
 
 protected:
   FileMap *mInput;

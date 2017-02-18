@@ -42,9 +42,9 @@ struct CameraId {
 
 class CameraMetaData final {
 public:
-  CameraMetaData();
+  CameraMetaData() = default;
   CameraMetaData(const char *docname);
-  virtual ~CameraMetaData();
+  ~CameraMetaData();
   std::map<CameraId, Camera*> cameras;
   std::map<uint32,Camera*> chdkCameras;
 

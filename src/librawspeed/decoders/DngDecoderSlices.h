@@ -40,7 +40,6 @@ public:
                   uint32 w, uint32 h)
       : byteOffset(off), byteCount(count), offX(offsetX), offY(offsetY),
         width(w), height(h), mUseBigtable(false) {}
-  ~DngSliceElement() = default;
   const uint32 byteOffset;
   const uint32 byteCount;
   const uint32 offX;
@@ -53,8 +52,6 @@ public:
 class DngDecoderThread
 {
 public:
-  DngDecoderThread() = default;
-  ~DngDecoderThread() = default;
 #ifdef HAVE_PTHREAD
   pthread_t threadid;
 #endif
@@ -67,7 +64,6 @@ class DngDecoderSlices
 {
 public:
   DngDecoderSlices(FileMap *file, const RawImage &img, int compression);
-  ~DngDecoderSlices();
   void addSlice(const DngSliceElement &slice);
   void startDecoding();
   void decodeSlice(DngDecoderThread* t);

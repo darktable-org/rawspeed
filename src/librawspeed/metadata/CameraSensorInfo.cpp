@@ -32,8 +32,6 @@ CameraSensorInfo::CameraSensorInfo(int black_level, int white_level,
     : mBlackLevel(black_level), mWhiteLevel(white_level), mMinIso(min_iso),
       mMaxIso(max_iso), mBlackLevelSeparate(std::move(black_separate)) {}
 
-CameraSensorInfo::~CameraSensorInfo() = default;
-
 bool CameraSensorInfo::isIsoWithin( int iso )
 {
   return (iso >= mMinIso && iso <= mMaxIso) || (iso >= mMinIso && 0 == mMaxIso);
