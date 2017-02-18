@@ -464,11 +464,9 @@ RawImageWorker::RawImageWorker( RawImageData *_img, RawImageWorkerTask _task, in
 #endif
 }
 
-RawImageWorker::~RawImageWorker() {
 #ifdef HAVE_PTHREAD
-  pthread_attr_destroy(&attr);
+RawImageWorker::~RawImageWorker() { pthread_attr_destroy(&attr); }
 #endif
-}
 
 #ifdef HAVE_PTHREAD
 void RawImageWorker::startThread()

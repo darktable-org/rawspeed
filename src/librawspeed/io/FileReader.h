@@ -29,13 +29,12 @@ class FileReader
 public:
   FileReader(const char *filename);
 
-public:
-	FileMap* readFile();
-	virtual ~FileReader();
-        const char *Filename() const { return mFilename; }
-        //  void Filename(const char * val) { mFilename = val; }
-      private:
-        const char *mFilename;
+  FileMap* readFile();
+  const char* Filename() const { return mFilename; }
+  //  void Filename(const char * val) { mFilename = val; }
+
+private:
+  const char* mFilename;
 };
 
 } // namespace RawSpeed

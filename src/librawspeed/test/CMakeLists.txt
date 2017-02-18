@@ -33,8 +33,9 @@ FILE(GLOB RAWSPEED_TESTS_SOURCES
   "../metadata/CameraTest.cpp"
   "../metadata/ColorFilterArrayTest.cpp"
   "ExceptionsTest.cpp"
-  "RawSpeedTest.cpp"
 )
+
+CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-suggest-attribute=const)
 
 set(CMAKE_CXX_CLANG_TIDY_SAVE "${CMAKE_CXX_CLANG_TIDY}")
 

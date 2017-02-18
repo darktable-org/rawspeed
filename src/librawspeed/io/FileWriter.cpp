@@ -71,6 +71,4 @@ void FileWriter::writeFile(FileMap* filemap, uint32 size) {
 #endif // __unix__
 }
 
-FileWriter::~FileWriter() = default;
-
 } // namespace RawSpeed

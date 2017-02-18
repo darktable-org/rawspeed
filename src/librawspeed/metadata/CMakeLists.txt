@@ -1,5 +1,4 @@
 FILE(GLOB METADATA_SOURCES
-  "BlackArea.cpp"
   "BlackArea.h"
   "Camera.cpp"
   "Camera.h"

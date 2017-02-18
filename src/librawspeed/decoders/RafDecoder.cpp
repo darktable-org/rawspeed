@@ -117,10 +117,6 @@ RawImage RafDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-
-void RafDecoder::decodeThreaded(RawDecoderThread * t) {
-}
-
 void RafDecoder::checkSupportInternal(const CameraMetaData* meta) {
   if (!this->checkCameraSupported(meta, mRootIFD->getID(), ""))
      ThrowRDE("RAFDecoder: Unknown camera. Will not guess.");

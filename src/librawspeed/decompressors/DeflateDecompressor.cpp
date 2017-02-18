@@ -71,7 +71,7 @@ static inline void decodeFPDeltaRow(unsigned char* src, unsigned char* dst,
   }
 }
 
-static inline uint32 fp16ToFloat(ushort16 fp16) {
+static inline uint32 __attribute__((const)) fp16ToFloat(ushort16 fp16) {
   // IEEE-754-2008: binary16:
   // bit 15 - sign
   // bits 14-10 - exponent (5 bit)
@@ -119,7 +119,7 @@ static inline uint32 fp16ToFloat(ushort16 fp16) {
   return (sign << 31) | (fp32_exponent << 23) | fp32_fraction;
 }
 
-static inline uint32 fp24ToFloat(uint32 fp24) {
+static inline uint32 __attribute__((const)) fp24ToFloat(uint32 fp24) {
   // binary24: Not a part of IEEE754-2008, but format is obvious,
   // see https://en.wikipedia.org/wiki/Minifloat
   // bit 23 - sign

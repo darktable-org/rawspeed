@@ -85,23 +85,31 @@ TEST_P(BlackAreaTest, AssignmentConstructor) {
   ASSERT_NO_THROW({
     const BlackArea AreaOrig(offset, size, isVertical);
     BlackArea Area(AreaOrig); // NOLINT trying to test the copy
+    checkHelper(AreaOrig);
+    checkHelper(Area);
   });
 
   ASSERT_NO_THROW({
     const unique_ptr<const BlackArea> AreaOrig(
         new BlackArea(offset, size, isVertical));
     unique_ptr<BlackArea> Area(new BlackArea(*AreaOrig));
+    checkHelper(*AreaOrig);
+    checkHelper(*Area);
   });
 
   ASSERT_NO_THROW({
     const BlackArea AreaOrig(offset, size, isVertical);
     unique_ptr<BlackArea> Area(new BlackArea(AreaOrig));
+    checkHelper(AreaOrig);
+    checkHelper(*Area);
   });
 
   ASSERT_NO_THROW({
     const unique_ptr<const BlackArea> AreaOrig(
         new BlackArea(offset, size, isVertical));
     BlackArea Area(*AreaOrig);
+    checkHelper(*AreaOrig);
+    checkHelper(Area);
   });
 }
 

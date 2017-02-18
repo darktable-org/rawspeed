@@ -45,8 +45,8 @@ public:
   };
 
   RawImageWorker(RawImageData *img, RawImageWorkerTask task, int start_y, int end_y);
-  ~RawImageWorker();
 #ifdef HAVE_PTHREAD
+  ~RawImageWorker();
   void startThread();
   void waitForThread();
 #endif

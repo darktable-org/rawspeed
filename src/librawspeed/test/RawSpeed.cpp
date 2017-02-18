@@ -23,7 +23,7 @@
 #endif
 
 // define this function, it is only declared in rawspeed:
-int rawspeed_get_number_of_processor_cores() {
+int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
 #ifdef _OPENMP
   return omp_get_num_procs();
 #else

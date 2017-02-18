@@ -61,7 +61,8 @@ public:
   iPoint2D getSize() const { return size; }
 
   static std::string colorToString(CFAColor c);
-  static uint32 shiftDcrawFilter(uint32 filter, int x, int y);
+  static uint32 __attribute__((const))
+  shiftDcrawFilter(uint32 filter, int x, int y);
 };
 
 // FC macro from dcraw outputs, given the filters definition, the dcraw color
