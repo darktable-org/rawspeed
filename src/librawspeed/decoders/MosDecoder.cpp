@@ -176,7 +176,7 @@ void MosDecoder::DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32
         len[0] = len[1] = 14;
       else if ((col & 7) == 0) {
         for (unsigned int &i : len) {
-          uint32 j = 0;
+          int32 j = 0;
           for (; j < 5 && !pump.getBitsSafe(1); j++);
           if (j--)
             i = length[j * 2 + pump.getBitsSafe(1)];
