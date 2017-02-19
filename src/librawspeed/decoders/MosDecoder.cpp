@@ -167,7 +167,8 @@ void MosDecoder::DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32
         data_offset + getU32LE(mFile->getData(strip_offset + row * 4, 4));
 
     BitPumpMSB32 pump(mFile, off);
-    uint32 pred[2], len[2];
+    int32 pred[2];
+    uint32 len[2];
     pred[0] = pred[1] = 0;
     auto *img = (ushort16 *)mRaw->getData(0, row);
     for (uint32 col=0; col < width; col++) {
@@ -186,7 +187,8 @@ void MosDecoder::DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32
       if (i == 14)
         img[col] = pred[col & 1] = pump.getBitsSafe(16);
       else
-        img[col] = pred[col & 1] += pump.getBitsSafe(i) + 1 - (1 << (i - 1));
+        img[col] = pred[col & 1] +=
+            (signed)pump.getBitsSafe(i) + 1 - (1 << (i - 1));
     }
   }
 }
