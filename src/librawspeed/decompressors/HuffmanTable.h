@@ -201,7 +201,8 @@ public:
     }
   }
 
-  inline static int signExtended(uint32 diff, uint32 len) {
+  inline static int __attribute__((const))
+  signExtended(uint32 diff, uint32 len) {
 #if 0
 #define _X(x) (1<<x)-1
     constexpr static int offset[16] = {
