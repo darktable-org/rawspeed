@@ -274,6 +274,9 @@ protected:
     }
   }
   void copy() {
+    if (src.empty() || dst.empty())
+      return;
+
     copyPixels(&(dst[0]), dstPitch, &(src[0]), srcPitch, rowSize, height);
   }
   void compare() {
