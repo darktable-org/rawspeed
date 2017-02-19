@@ -201,6 +201,7 @@ public:
     }
   }
 
+  // WARNING: the caller should check that len != 0 before calling the function
   inline static int __attribute__((const))
   signExtended(uint32 diff, uint32 len) {
     int32 ret = diff;
@@ -213,7 +214,7 @@ public:
     if ((diff & (1 << (len - 1))) == 0)
       ret -= offset[len];
 #else
-    if (len > 0 && (diff & (1 << (len - 1))) == 0)
+    if ((diff & (1 << (len - 1))) == 0)
       ret -= (1 << len) - 1;
 #endif
     return ret;

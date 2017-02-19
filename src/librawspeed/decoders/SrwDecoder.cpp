@@ -263,7 +263,7 @@ int32 SrwDecoder::samsungDiff (BitPumpMSB &pump, encTableItem *tbl)
   int32 diff = pump.getBitsSafe(len);
 
   // If the first bit is 0 we need to turn this into a negative number
-  diff = HuffmanTable::signExtended(diff, len);
+  diff = len ? HuffmanTable::signExtended(diff, len) : diff;
 
   return diff;
 }

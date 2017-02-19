@@ -251,7 +251,7 @@ void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
       if (len == 4)
         while (len < 17 && !bits.getBitsNoFill(1)) len++;
       int diff = bits.getBits(len);
-      diff = HuffmanTable::signExtended(diff, len);
+      diff = len ? HuffmanTable::signExtended(diff, len) : diff;
       sum += diff;
       assert(!(sum >> 12));
       if (y < h) dest[x+y*pitch] = sum;
