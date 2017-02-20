@@ -38,57 +38,44 @@ using namespace RawSpeed;
 
 static const std::string msg("my very Smart error Message #1 !");
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#define FMT "%s"
 
-template <typename T>
-static void* MetaThrowHelper(const char* fmt, const char* str) {
+template <typename T> static void* MetaHelper(const char* str) {
   ADD_FAILURE() << "non-specialzer was called";
   return nullptr;
 }
 
-template <>
-void* MetaThrowHelper<RawspeedException>(const char* fmt, const char* str) {
-  ThrowException<RawspeedException>(fmt, str);
+template <> void* MetaHelper<RawspeedException>(const char* str) {
+  ThrowRSE(FMT, str);
 }
 
-template <>
-void* MetaThrowHelper<CameraMetadataException>(const char* fmt,
-                                               const char* str) {
-  ThrowCME(fmt, str);
+template <> void* MetaHelper<CameraMetadataException>(const char* str) {
+  ThrowCME(FMT, str);
 }
 
-template <>
-void* MetaThrowHelper<CiffParserException>(const char* fmt, const char* str) {
-  ThrowCPE(fmt, str);
+template <> void* MetaHelper<CiffParserException>(const char* str) {
+  ThrowCPE(FMT, str);
 }
 
-template <>
-void* MetaThrowHelper<FileIOException>(const char* fmt, const char* str) {
-  ThrowFIE(fmt, str);
+template <> void* MetaHelper<FileIOException>(const char* str) {
+  ThrowFIE(FMT, str);
 }
 
-template <>
-void* MetaThrowHelper<IOException>(const char* fmt, const char* str) {
-  ThrowIOE(fmt, str);
+template <> void* MetaHelper<IOException>(const char* str) {
+  ThrowIOE(FMT, str);
 }
 
-template <>
-void* MetaThrowHelper<RawDecoderException>(const char* fmt, const char* str) {
-  ThrowRDE(fmt, str);
+template <> void* MetaHelper<RawDecoderException>(const char* str) {
+  ThrowRDE(FMT, str);
 }
 
-template <>
-void* MetaThrowHelper<TiffParserException>(const char* fmt, const char* str) {
-  ThrowTPE(fmt, str);
+template <> void* MetaHelper<TiffParserException>(const char* str) {
+  ThrowTPE(FMT, str);
 }
 
-template <>
-void* MetaThrowHelper<FiffParserException>(const char* fmt, const char* str) {
-  ThrowFPE(fmt, str);
+template <> void* MetaHelper<FiffParserException>(const char* str) {
+  ThrowFPE(FMT, str);
 }
-
-#pragma GCC diagnostic pop
 
 template <class T> class ExceptionsTest : public testing::Test {};
 
@@ -161,7 +148,6 @@ TYPED_TEST(ExceptionsTest, ThrowMessage) {
     throw TypeParam(msg);
   } catch (std::exception& ex) {
     ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
-    EXPECT_THAT(ex.what(), testing::StrEq(msg));
   }
 
   try {
@@ -169,7 +155,6 @@ TYPED_TEST(ExceptionsTest, ThrowMessage) {
     throw * Exception.get();
   } catch (std::exception& ex) {
     ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
-    EXPECT_THAT(ex.what(), testing::StrEq(msg));
   }
 
   try {
@@ -178,7 +163,6 @@ TYPED_TEST(ExceptionsTest, ThrowMessage) {
     throw * ExceptionTwo.get();
   } catch (std::exception& ex) {
     ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
-    EXPECT_THAT(ex.what(), testing::StrEq(msg));
   }
 
   try {
@@ -187,24 +171,20 @@ TYPED_TEST(ExceptionsTest, ThrowMessage) {
     throw * ExceptionTwo.get();
   } catch (std::exception& ex) {
     ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
-    EXPECT_THAT(ex.what(), testing::StrEq(msg));
   }
 }
 
 TYPED_TEST(ExceptionsTest, ThrowHelperTest) {
-  ASSERT_ANY_THROW(MetaThrowHelper<TypeParam>("%s", msg.c_str()));
-  EXPECT_THROW(MetaThrowHelper<TypeParam>("%s", msg.c_str()),
-               std::runtime_error);
-  EXPECT_THROW(MetaThrowHelper<TypeParam>("%s", msg.c_str()),
-               RawspeedException);
-  EXPECT_THROW(MetaThrowHelper<TypeParam>("%s", msg.c_str()), TypeParam);
+  ASSERT_ANY_THROW(MetaHelper<TypeParam>(msg.c_str()));
+  EXPECT_THROW(MetaHelper<TypeParam>(msg.c_str()), std::runtime_error);
+  EXPECT_THROW(MetaHelper<TypeParam>(msg.c_str()), RawspeedException);
+  EXPECT_THROW(MetaHelper<TypeParam>(msg.c_str()), TypeParam);
 }
 
 TYPED_TEST(ExceptionsTest, ThrowHelperTestMessage) {
   try {
-    MetaThrowHelper<TypeParam>("%s", msg.c_str());
+    MetaHelper<TypeParam>(msg.c_str());
   } catch (std::exception& ex) {
     ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
-    EXPECT_THAT(ex.what(), testing::StrEq(msg));
   }
 }

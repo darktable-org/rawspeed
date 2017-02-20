@@ -33,6 +33,6 @@ public:
   CiffParserException(const char* msg) : RawspeedException(msg) {}
 };
 
-#define ThrowCPE(...) ThrowException<CiffParserException>(__VA_ARGS__)
+#define ThrowCPE(...) ThrowExceptionHelper(CiffParserException, __VA_ARGS__)
 
 } // namespace RawSpeed

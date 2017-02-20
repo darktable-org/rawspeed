@@ -33,6 +33,6 @@ public:
   FileIOException(const char* msg) : RawDecoderException(msg) {}
 };
 
-#define ThrowFIE(...) ThrowException<FileIOException>(__VA_ARGS__)
+#define ThrowFIE(...) ThrowExceptionHelper(FileIOException, __VA_ARGS__)
 
 } // namespace RawSpeed

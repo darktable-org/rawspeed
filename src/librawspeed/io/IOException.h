@@ -32,6 +32,6 @@ public:
   IOException(const char* msg) : RawspeedException(msg) {}
 };
 
-#define ThrowIOE(...) ThrowException<IOException>(__VA_ARGS__)
+#define ThrowIOE(...) ThrowExceptionHelper(IOException, __VA_ARGS__)
 
 } // namespace RawSpeed
