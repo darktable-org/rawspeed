@@ -53,10 +53,15 @@ public:
   }
 };
 
+template <typename T>
+class AlignedMallocDeathTest : public AlignedMallocTest<T> {};
+
 using Classes = testing::Types<int, unsigned int, short16, ushort16, int32,
                                uint32, int64, uint64, float, double>;
 
 TYPED_TEST_CASE(AlignedMallocTest, Classes);
+
+TYPED_TEST_CASE(AlignedMallocDeathTest, Classes);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -76,7 +81,7 @@ TYPED_TEST(AlignedMallocTest, UniquePtrTest) {
   this->TheTest(&(ptr[0]));
 }
 
-TYPED_TEST(AlignedMallocTest, AlignedMallocAssertions) {
+TYPED_TEST(AlignedMallocDeathTest, AlignedMallocAssertions) {
 #ifndef NDEBUG
   ASSERT_DEATH(
       {
@@ -148,7 +153,7 @@ TYPED_TEST(AlignedMallocTest, TemplateUniquePtrArrayTest) {
   this->TheTest(&(ptr[0]));
 }
 
-TYPED_TEST(AlignedMallocTest, TemplateArrayAssertions) {
+TYPED_TEST(AlignedMallocDeathTest, TemplateArrayAssertions) {
 #ifndef NDEBUG
   // unlike TemplateArrayRoundUp, should fail
   ASSERT_DEATH(
@@ -188,7 +193,7 @@ TYPED_TEST(AlignedMallocTest, TemplateUniquePtrArraySizeTest) {
   this->TheTest(&(ptr[0]));
 }
 
-TEST(AlignedMallocTest, TemplateArraySizeAssertions) {
+TEST(AlignedMallocDeathTest, TemplateArraySizeAssertions) {
 #ifndef NDEBUG
   // unlike TemplateArraySizeRoundUp, should fail
   ASSERT_DEATH(
