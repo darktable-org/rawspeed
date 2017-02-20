@@ -35,11 +35,11 @@
 
 namespace RawSpeed {
 
-static const uchar8 pentax_tree[] =  {
-  0, 2, 3, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0,
-//0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5 = 16 entries of codes per bit length
-  3, 4, 2, 5, 1, 6, 0, 7, 8, 9, 10, 11, 12
-//0  1  2  3  4  5  6  7  8  9  10  11  12       = 13 entries of code values
+// 16 entries of codes per bit length
+// 13 entries of code values
+static const uchar8 pentax_tree[][2][16] = {
+    {{0, 2, 3, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0},
+     {3, 4, 2, 5, 1, 6, 0, 7, 8, 9, 10, 11, 12}},
 };
 
 void decodePentax(RawImage& mRaw, ByteStream&& data, TiffIFD* root) {
@@ -89,9 +89,9 @@ void decodePentax(RawImage& mRaw, ByteStream&& data, TiffIFD* root) {
     }
   } else {
     /* Initialize with legacy data */
-    auto nCodes = ht.setNCodesPerLength(Buffer(pentax_tree, 16));
+    auto nCodes = ht.setNCodesPerLength(Buffer(pentax_tree[0][0], 16));
     assert(nCodes == 13); // see pentax_tree definition
-    ht.setCodeValues(Buffer(pentax_tree+16, nCodes));
+    ht.setCodeValues(Buffer(pentax_tree[0][1], nCodes));
   }
 
   ht.setup(true, false);
