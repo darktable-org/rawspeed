@@ -51,7 +51,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
     // D2000 is oh so special...
     auto ifd = mRootIFD->getIFDWithTag(CFAPATTERN);
     if (! ifd->hasEntry(STRIPOFFSETS))
-      ThrowRDE("CR2 Decoder: Couldn't find offset");
+      ThrowRDE("Couldn't find offset");
 
     offset = ifd->getEntry(STRIPOFFSETS)->getU32();
   }
@@ -101,7 +101,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
 RawImage Cr2Decoder::decodeNewFormat() {
   TiffEntry* sensorInfoE = mRootIFD->getEntryRecursive(CANON_SENSOR_INFO);
   if (!sensorInfoE)
-    ThrowTPE("Cr2Decoder: failed to get SensorInfo from MakerNote");
+    ThrowTPE("failed to get SensorInfo from MakerNote");
   iPoint2D dim(sensorInfoE->getU16(1), sensorInfoE->getU16(2));
 
   int componentsPerPixel = 1;
@@ -437,7 +437,7 @@ inline void YUV_TO_RGB<2>(int Y, int Cb, int Cr, const int* sraw_coeffs,
 void Cr2Decoder::sRawInterpolate() {
   TiffEntry* wb = mRootIFD->getEntryRecursive(CANONCOLORDATA);
   if (!wb)
-    ThrowRDE("CR2 sRaw: Unable to locate WB info.");
+    ThrowRDE("Unable to locate WB info.");
 
   // Offset to sRaw coefficients used to reconstruct uncorrected RGB data.
   uint32 offset = 78;
@@ -474,8 +474,7 @@ void Cr2Decoder::sRawInterpolate() {
     else
       interpolate_420<1>(getHue(), mRaw, sraw_coeffs, width, height, 0, height);
   } else
-    ThrowRDE("CR2 Decoder: Unknown subsampling: (%i; %i)", subSampling.x,
-             subSampling.y);
+    ThrowRDE("Unknown subsampling: (%i; %i)", subSampling.x, subSampling.y);
 }
 
 } // namespace RawSpeed

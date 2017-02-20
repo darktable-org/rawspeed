@@ -54,24 +54,24 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
       h = input.getRemainSize() / inputPitch - 1;
       mRaw->setError("Image truncated (file is too short)");
     } else
-      ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. "
+      ThrowIOE("Not enough data to decode a single line. "
                "Image file truncated.");
   }
   if (bitPerPixel > 16 && mRaw->getDataType() == TYPE_USHORT16)
-    ThrowRDE("readUncompressedRaw: Unsupported bit depth");
+    ThrowRDE("Unsupported bit depth");
 
   uint32 skipBits = inputPitch - w * cpp * bitPerPixel / 8; // Skip per line
   if (oy > (uint64)mRaw->dim.y)
-    ThrowRDE("readUncompressedRaw: Invalid y offset");
+    ThrowRDE("Invalid y offset");
   if (ox + size.x > (uint64)mRaw->dim.x)
-    ThrowRDE("readUncompressedRaw: Invalid x offset");
+    ThrowRDE("Invalid x offset");
 
   uint64 y = oy;
   h = min(h + oy, (uint64)mRaw->dim.y);
 
   if (mRaw->getDataType() == TYPE_FLOAT32) {
     if (bitPerPixel != 32)
-      ThrowRDE("readUncompressedRaw: Only 32 bit float point supported");
+      ThrowRDE("Only 32 bit float point supported");
     copyPixels(&data[offset.x * sizeof(float) * cpp + y * outPitch], outPitch,
                input.getData(inputPitch * (h - y)), inputPitch,
                w * mRaw->getBpp(), h - y);
@@ -149,7 +149,7 @@ void UncompressedDecompressor::decode8BitRaw(uint32 w, uint32 h) {
       h = input.getRemainSize() / w - 1;
       mRaw->setError("Image truncated (file is too short)");
     } else
-      ThrowIOE("decode8BitRaw: Not enough data to decode a single line. Image "
+      ThrowIOE("Not enough data to decode a single line. Image "
                "file truncated.");
   }
 
@@ -177,7 +177,7 @@ void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
       h = input.getRemainSize() / (w * 12 / 8) - 1;
       mRaw->setError("Image truncated (file is too short)");
     } else
-      ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. "
+      ThrowIOE("Not enough data to decode a single line. "
                "Image file truncated.");
   }
 
@@ -208,7 +208,7 @@ void UncompressedDecompressor::decode12BitRawWithControl(uint32 w, uint32 h) {
 
   // If file is too short, only decode as many lines as we have
   if (input.getRemainSize() <= perline) {
-    ThrowIOE("decode12BitRawBEWithControl: Not enough data to decode a single "
+    ThrowIOE("Not enough data to decode a single "
              "line. Image file truncated.");
   } else if (input.getRemainSize() < (perline * h)) {
     h = input.getRemainSize() / perline - 1;
@@ -245,7 +245,7 @@ void UncompressedDecompressor::decode12BitRawBEWithControl(uint32 w, uint32 h) {
 
   // If file is too short, only decode as many lines as we have
   if (input.getRemainSize() <= perline) {
-    ThrowIOE("decode12BitRawBEWithControl: Not enough data to decode a single "
+    ThrowIOE("Not enough data to decode a single "
              "line. Image file truncated.");
   } else if (input.getRemainSize() < (perline * h)) {
     h = input.getRemainSize() / perline - 1;
@@ -279,7 +279,7 @@ void UncompressedDecompressor::decode12BitRawBE(uint32 w, uint32 h) {
       h = input.getRemainSize() / (w * 12 / 8) - 1;
       mRaw->setError("Image truncated (file is too short)");
     } else
-      ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. "
+      ThrowIOE("Not enough data to decode a single line. "
                "Image file truncated.");
   }
 
@@ -308,7 +308,7 @@ void UncompressedDecompressor::decode12BitRawBEInterlaced(uint32 w, uint32 h) {
       h = input.getRemainSize() / (w * 12 / 8) - 1;
       mRaw->setError("Image truncated (file is too short)");
     } else
-      ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. "
+      ThrowIOE("Not enough data to decode a single line. "
                "Image file truncated.");
   }
 
@@ -323,8 +323,7 @@ void UncompressedDecompressor::decode12BitRawBEInterlaced(uint32 w, uint32 h) {
       // The second field starts at a 2048 byte aligment
       uint32 offset = ((half * w * 3 / 2 >> 11) + 1) << 11;
       if (offset > input.getRemainSize())
-        ThrowIOE("Decode12BitSplitRaw: Trying to jump to invalid offset %d",
-                 offset);
+        ThrowIOE("Trying to jump to invalid offset %d", offset);
       in = input.peekData(input.getRemainSize()) + offset;
     }
     for (uint32 x = 0; x < w; x += 2) {
@@ -344,7 +343,7 @@ void UncompressedDecompressor::decode12BitRawBEunpacked(uint32 w, uint32 h) {
       h = input.getRemainSize() / (w * 2) - 1;
       mRaw->setError("Image truncated (file is too short)");
     } else
-      ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. "
+      ThrowIOE("Not enough data to decode a single line. "
                "Image file truncated.");
   }
 
@@ -369,7 +368,7 @@ void UncompressedDecompressor::decode12BitRawBEunpackedLeftAligned(uint32 w,
       h = input.getRemainSize() / (w * 2) - 1;
       mRaw->setError("Image truncated (file is too short)");
     } else
-      ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. "
+      ThrowIOE("Not enough data to decode a single line. "
                "Image file truncated.");
   }
 
@@ -393,7 +392,7 @@ void UncompressedDecompressor::decode14BitRawBEunpacked(uint32 w, uint32 h) {
       h = input.getRemainSize() / (w * 2) - 1;
       mRaw->setError("Image truncated (file is too short)");
     } else
-      ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. "
+      ThrowIOE("Not enough data to decode a single line. "
                "Image file truncated.");
   }
 
@@ -417,7 +416,7 @@ void UncompressedDecompressor::decode16BitRawUnpacked(uint32 w, uint32 h) {
       h = input.getRemainSize() / (w * 2) - 1;
       mRaw->setError("Image truncated (file is too short)");
     } else
-      ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. "
+      ThrowIOE("Not enough data to decode a single line. "
                "Image file truncated.");
   }
 
@@ -441,7 +440,7 @@ void UncompressedDecompressor::decode16BitRawBEunpacked(uint32 w, uint32 h) {
       h = input.getRemainSize() / (w * 2) - 1;
       mRaw->setError("Image truncated (file is too short)");
     } else
-      ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. "
+      ThrowIOE("Not enough data to decode a single line. "
                "Image file truncated.");
   }
 
@@ -465,7 +464,7 @@ void UncompressedDecompressor::decode12BitRawUnpacked(uint32 w, uint32 h) {
       h = input.getRemainSize() / (w * 2) - 1;
       mRaw->setError("Image truncated (file is too short)");
     } else
-      ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. "
+      ThrowIOE("Not enough data to decode a single line. "
                "Image file truncated.");
   }
 

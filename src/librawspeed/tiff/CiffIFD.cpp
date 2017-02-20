@@ -36,7 +36,7 @@ namespace RawSpeed {
 
 #define CIFF_DEPTH(_depth)                                                     \
   if ((depth = (_depth) + 1) > 10)                                             \
-    ThrowCPE("CIFF: sub-micron matryoshka dolls are ignored");
+    ThrowCPE("sub-micron matryoshka dolls are ignored");
 
 CiffIFD::CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 _depth) {
   CIFF_DEPTH(_depth);
@@ -191,7 +191,7 @@ CiffEntry* CiffIFD::getEntry(CiffTag tag) {
   if (mEntry.find(tag) != mEntry.end()) {
     return mEntry[tag];
   }
-  ThrowCPE("CiffIFD: CIFF Parser entry 0x%x not found.", tag);
+  ThrowCPE("Entry 0x%x not found.", tag);
   return nullptr;
 }
 

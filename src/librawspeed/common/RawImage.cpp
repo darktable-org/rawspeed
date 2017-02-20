@@ -84,15 +84,15 @@ RawImageData::~RawImageData() {
 
 void RawImageData::createData() {
   if (dim.x > 65535 || dim.y > 65535)
-    ThrowRDE("RawImageData: Dimensions too large for allocation.");
+    ThrowRDE("Dimensions too large for allocation.");
   if (dim.x <= 0 || dim.y <= 0)
-    ThrowRDE("RawImageData: Dimension of one sides is less than 1 - cannot allocate image.");
+    ThrowRDE("Dimension of one sides is less than 1 - cannot allocate image.");
   if (data)
-    ThrowRDE("RawImageData: Duplicate data allocation in createData.");
+    ThrowRDE("Duplicate data allocation in createData.");
   pitch = roundUp((size_t)dim.x * bpp, 16);
   data = (uchar8*)alignedMallocArray<16>(dim.y, pitch);
   if (!data)
-    ThrowRDE("RawImageData::createData: Memory Allocation failed.");
+    ThrowRDE("Memory Allocation failed.");
   uncropped_dim = dim;
 }
 
@@ -107,9 +107,11 @@ void RawImageData::destroyData() {
 
 void RawImageData::setCpp(uint32 val) {
   if (data)
-    ThrowRDE("RawImageData: Attempted to set Components per pixel after data allocation");
+    ThrowRDE("Attempted to set Components per pixel after data allocation");
   if (val > 4)
-    ThrowRDE("RawImageData: Only up to 4 components per pixel is support - attempted to set: %d", val);
+    ThrowRDE(
+        "Only up to 4 components per pixel is support - attempted to set: %d",
+        val);
   bpp /= cpp;
   cpp = val;
   bpp *= val;
@@ -117,35 +119,35 @@ void RawImageData::setCpp(uint32 val) {
 
 uchar8* RawImageData::getData() {
   if (!data)
-    ThrowRDE("RawImageData::getData - Data not yet allocated.");
+    ThrowRDE("Data not yet allocated.");
   return &data[mOffset.y*pitch+mOffset.x*bpp];
 }
 
 uchar8* RawImageData::getData(uint32 x, uint32 y) {
   if ((int)x >= dim.x)
-    ThrowRDE("RawImageData::getData - X Position outside image requested.");
+    ThrowRDE("X Position outside image requested.");
   if ((int)y >= dim.y) {
-    ThrowRDE("RawImageData::getData - Y Position outside image requested.");
+    ThrowRDE("Y Position outside image requested.");
   }
 
   x += mOffset.x;
   y += mOffset.y;
 
   if (!data)
-    ThrowRDE("RawImageData::getData - Data not yet allocated.");
+    ThrowRDE("Data not yet allocated.");
 
   return &data[y*pitch+x*bpp];
 }
 
 uchar8* RawImageData::getDataUncropped(uint32 x, uint32 y) {
   if ((int)x >= uncropped_dim.x)
-    ThrowRDE("RawImageData::getDataUncropped - X Position outside image requested.");
+    ThrowRDE("X Position outside image requested.");
   if ((int)y >= uncropped_dim.y) {
-    ThrowRDE("RawImageData::getDataUncropped - Y Position outside image requested.");
+    ThrowRDE("Y Position outside image requested.");
   }
 
   if (!data)
-    ThrowRDE("RawImageData::getDataUncropped - Data not yet allocated.");
+    ThrowRDE("Data not yet allocated.");
 
   return &data[y*pitch+x*bpp];
 }
@@ -181,12 +183,12 @@ void RawImageData::setError(const string& err) {
 void RawImageData::createBadPixelMap()
 {
   if (!isAllocated())
-    ThrowRDE("RawImageData::createBadPixelMap: (internal) Bad pixel map cannot be allocated before image.");
+    ThrowRDE("(internal) Bad pixel map cannot be allocated before image.");
   mBadPixelMapPitch = roundUp(uncropped_dim.x / 8, 16);
   mBadPixelMap = (uchar8*)alignedMallocArray<16>(uncropped_dim.y, mBadPixelMapPitch);
   memset(mBadPixelMap, 0, (size_t)mBadPixelMapPitch * uncropped_dim.y);
   if (!mBadPixelMap)
-    ThrowRDE("RawImageData::createData: Memory Allocation failed.");
+    ThrowRDE("Memory Allocation failed.");
 }
 
 RawImage::RawImage(RawImageData* p) : p_(p) {

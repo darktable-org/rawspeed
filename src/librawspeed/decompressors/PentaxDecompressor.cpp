@@ -85,7 +85,7 @@ void decodePentax(RawImage& mRaw, ByteStream&& data, TiffIFD* root) {
         v2[sm_num]=0xffffffff;
       }
     } else {
-      ThrowRDE("PentaxDecompressor: Unknown Huffman table type.");
+      ThrowRDE("Unknown Huffman table type.");
     }
   } else {
     /* Initialize with legacy data */

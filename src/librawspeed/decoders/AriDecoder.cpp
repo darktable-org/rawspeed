@@ -35,7 +35,7 @@ namespace RawSpeed {
 
 AriDecoder::AriDecoder(FileMap* file) : RawDecoder(file) {
   if (mFile->getSize() < 4096) {
-    ThrowRDE("ARRI: File too small (no header)");
+    ThrowRDE("File too small (no header)");
   }
   try {
     ByteStream s(mFile, 8, getHostEndianness() == little);
@@ -65,7 +65,7 @@ AriDecoder::AriDecoder(FileMap* file) : RawDecoder(file) {
     s.setPosition(0x2a4-8);
     mEncoder = s.getString();
   } catch (IOException &e) {
-    ThrowRDE("ARRI: IO Exception:%s", e.what());
+    ThrowRDE("IO Exception:%s", e.what());
   }
 }
 

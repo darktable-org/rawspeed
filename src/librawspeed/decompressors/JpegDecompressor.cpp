@@ -66,7 +66,7 @@ static void skip_input_data(j_decompress_ptr cinfo, long num_bytes) {
   auto* src = (struct jpeg_source_mgr*)cinfo->src;
 
   if (num_bytes > (int)src->bytes_in_buffer)
-    ThrowIOE("JPEG Decoder - read out of buffer");
+    ThrowIOE("read out of buffer");
   if (num_bytes > 0) {
     src->next_input_byte += (size_t)num_bytes;
     src->bytes_in_buffer -= (size_t)num_bytes;
@@ -118,11 +118,11 @@ void JpegDecompressor::decode(uint32 offX,
               input.getRemainSize());
 
   if (JPEG_HEADER_OK != jpeg_read_header(&dinfo, static_cast<boolean>(true)))
-    ThrowRDE("JpegDecompressor: Unable to read JPEG header");
+    ThrowRDE("Unable to read JPEG header");
 
   jpeg_start_decompress(&dinfo);
   if (dinfo.output_components != (int)mRaw->getCpp())
-    ThrowRDE("JpegDecompressor: Component count doesn't match");
+    ThrowRDE("Component count doesn't match");
   int row_stride = dinfo.output_width * dinfo.output_components;
 
   unique_ptr<uchar8[], decltype(&alignedFree)> complete_buffer(
@@ -132,7 +132,7 @@ void JpegDecompressor::decode(uint32 offX,
     buffer[0] = (JSAMPROW)(
         &complete_buffer[(size_t)dinfo.output_scanline * row_stride]);
     if (0 == jpeg_read_scanlines(&dinfo, &buffer[0], 1))
-      ThrowRDE("JpegDecompressor: JPEG Error while decompressing image.");
+      ThrowRDE("JPEG Error while decompressing image.");
   }
   jpeg_finish_decompress(&dinfo);
 

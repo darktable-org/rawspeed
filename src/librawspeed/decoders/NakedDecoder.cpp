@@ -52,7 +52,7 @@ void NakedDecoder::parseHints() {
 
   auto parseHint = [&cHints, &make, &model](const string& name) -> uint32 {
     if (!cHints.has(name))
-      ThrowRDE("Naked: %s %s: couldn't find %s", make, model, name.c_str());
+      ThrowRDE("%s %s: couldn't find %s", make, model, name.c_str());
 
     return cHints.get(name, 0u);
   };
@@ -68,7 +68,7 @@ void NakedDecoder::parseHints() {
     try {
       bo = order2enum.at(order);
     } catch (std::out_of_range&) {
-      ThrowRDE("Naked: %s %s: unknown order: %s", make, model, order.c_str());
+      ThrowRDE("%s %s: unknown order: %s", make, model, order.c_str());
     }
   }
 }

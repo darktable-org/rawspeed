@@ -40,8 +40,9 @@ CameraMetaData::CameraMetaData(const char *docname) {
   xml_parse_result result = doc.load_file(docname);
 
   if (!result) {
-    ThrowCME("CameraMetaData: XML Document could not be parsed successfully. Error was: %s in %s",
-      result.description(), doc.child("node").attribute("attr").value());
+    ThrowCME(
+        "XML Document could not be parsed successfully. Error was: %s in %s",
+        result.description(), doc.child("node").attribute("attr").value());
   }
 
   for (xml_node camera : doc.child("Cameras").children("Camera")) {

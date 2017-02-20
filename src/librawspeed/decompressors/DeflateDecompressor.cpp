@@ -197,9 +197,7 @@ void DeflateDecompressor::decode(unsigned char** uBuffer, int width, int height,
 
   int err = uncompress(*uBuffer, &dstLen, cBuffer, cSize);
   if (err != Z_OK) {
-    ThrowRDE(
-        "DeflateDecompressor::decodeDeflate: failed to uncompress tile: %d",
-        err);
+    ThrowRDE("failed to uncompress tile: %d", err);
   }
 
   int predFactor = 0;

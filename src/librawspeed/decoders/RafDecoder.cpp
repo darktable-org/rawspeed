@@ -64,7 +64,7 @@ RawImage RafDecoder::decodeRawInternal() {
     height = e->getU16(0);
     width = e->getU16(1);
   } else
-    ThrowRDE("RAF decoder: Unable to locate image size");
+    ThrowRDE("Unable to locate image size");
 
   if (raw->hasEntry(FUJI_LAYOUT)) {
     TiffEntry *e = raw->getEntry(FUJI_LAYOUT);
@@ -75,7 +75,7 @@ RawImage RafDecoder::decodeRawInternal() {
   TiffEntry *counts = raw->getEntry(FUJI_STRIPBYTECOUNTS);
 
   if (offsets->count != 1 || counts->count != 1)
-    ThrowRDE("RAF Decoder: Multiple Strips found: %u %u", offsets->count, counts->count);
+    ThrowRDE("Multiple Strips found: %u %u", offsets->count, counts->count);
 
   int bps = 16;
   if (raw->hasEntry(FUJI_BITSPERSAMPLE))
@@ -119,7 +119,7 @@ RawImage RafDecoder::decodeRawInternal() {
 
 void RafDecoder::checkSupportInternal(const CameraMetaData* meta) {
   if (!this->checkCameraSupported(meta, mRootIFD->getID(), ""))
-     ThrowRDE("RAFDecoder: Unknown camera. Will not guess.");
+    ThrowRDE("Unknown camera. Will not guess.");
 }
 
 void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
@@ -133,7 +133,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   auto id = mRootIFD->getID();
   const Camera* cam = meta->getCamera(id.make, id.model, "");
   if (!cam)
-    ThrowRDE("RAF Meta Decoder: Couldn't find camera");
+    ThrowRDE("Couldn't find camera");
 
   iPoint2D new_size(mRaw->dim);
   iPoint2D crop_offset = iPoint2D(0,0);
@@ -191,7 +191,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         if (h < rotated->dim.y && w < rotated->dim.x)
           dst[w + h * dest_pitch] = src[x];
         else
-          ThrowRDE("RAF Decoder: Trying to write out of bounds");
+          ThrowRDE("Trying to write out of bounds");
       }
     }
     mRaw = rotated;

@@ -40,13 +40,13 @@ DngOpcodes::DngOpcodes(TiffEntry *entry)
   uint32 entry_size = entry->count;
 
   if (entry_size < 20)
-    ThrowRDE("DngOpcodes: Not enough bytes to read a single opcode");
+    ThrowRDE("Not enough bytes to read a single opcode");
 
   uint32 opcode_count = getULong(&data[0]);
   int bytes_used = 4;
   for (uint32 i = 0; i < opcode_count; i++) {
     if ((int)entry_size - bytes_used < 16)
-      ThrowRDE("DngOpcodes: Not enough bytes to read a new opcode");
+      ThrowRDE("Not enough bytes to read a new opcode");
 
     uint32 code = getULong(&data[bytes_used]);
     //uint32 version = getULong(&data[bytes_used+4]);
@@ -86,10 +86,10 @@ DngOpcodes::DngOpcodes(TiffEntry *entry)
       default:
         // Throw Error if not marked as optional
         if (!(flags & 1))
-          ThrowRDE("DngOpcodes: Unsupported Opcode: %d", code);
+          ThrowRDE("Unsupported Opcode: %d", code);
     }
     if (opcode_used != expected_size)
-      ThrowRDE("DngOpcodes: Inconsistent length of opcode");
+      ThrowRDE("Inconsistent length of opcode");
     bytes_used += opcode_used;
   }
 }
@@ -112,7 +112,7 @@ RawImage& DngOpcodes::applyOpCodes( RawImage &img )
     iRectangle2D fullImage(0,0,img->dim.x, img->dim.y);
 
     if (!code->mAoi.isThisInside(fullImage))
-      ThrowRDE("DngOpcodes: Area of interest not inside image!");
+      ThrowRDE("Area of interest not inside image!");
     if (code->mAoi.hasPositiveArea()) {
       code->apply(img, img_out, code->mAoi.getTop(), code->mAoi.getBottom());
       img = img_out;
@@ -126,7 +126,8 @@ RawImage& DngOpcodes::applyOpCodes( RawImage &img )
 OpcodeFixBadPixelsConstant::OpcodeFixBadPixelsConstant(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used )
 {
   if (param_max_bytes < 8)
-    ThrowRDE("OpcodeFixBadPixelsConstant: Not enough data to read parameters, only %u bytes left.", param_max_bytes);
+    ThrowRDE("Not enough data to read parameters, only %u bytes left.",
+             param_max_bytes);
   mValue = getLong(&parameters[0]);
   // Bayer Phase not used
   *bytes_used = 8;
@@ -137,10 +138,10 @@ RawImage& OpcodeFixBadPixelsConstant::createOutput( RawImage &in )
 {
   // These limitations are present within the DNG SDK as well.
   if (in->getDataType() != TYPE_USHORT16)
-    ThrowRDE("OpcodeFixBadPixelsConstant: Only 16 bit images supported");
+    ThrowRDE("Only 16 bit images supported");
 
   if (in->getCpp() > 1)
-    ThrowRDE("OpcodeFixBadPixelsConstant: This operation is only supported with 1 component");
+    ThrowRDE("This operation is only supported with 1 component");
 
   return in;
 }
@@ -171,14 +172,15 @@ void OpcodeFixBadPixelsConstant::apply( RawImage &in, RawImage &out, uint32 star
 OpcodeFixBadPixelsList::OpcodeFixBadPixelsList( const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used )
 {
   if (param_max_bytes < 12)
-    ThrowRDE("OpcodeFixBadPixelsList: Not enough data to read parameters, only %u bytes left.", param_max_bytes);
+    ThrowRDE("Not enough data to read parameters, only %u bytes left.",
+             param_max_bytes);
   // Skip phase - we don't care
   uint64 BadPointCount = getULong(&parameters[4]);
   uint64 BadRectCount = getULong(&parameters[8]);
   bytes_used[0] = 12;
 
   if (12 + BadPointCount * 8 + BadRectCount * 16 > (uint64) param_max_bytes)
-    ThrowRDE("OpcodeFixBadPixelsList: Ran out parameter space, only %u bytes left.", param_max_bytes);
+    ThrowRDE("Ran out parameter space, only %u bytes left.", param_max_bytes);
 
   // Read points
   for (uint64 i = 0; i < BadPointCount; i++) {
@@ -220,7 +222,8 @@ void OpcodeFixBadPixelsList::apply( RawImage &in, RawImage &out, uint32 startY, 
 OpcodeTrimBounds::OpcodeTrimBounds(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used )
 {
   if (param_max_bytes < 16)
-    ThrowRDE("OpcodeTrimBounds: Not enough data to read parameters, only %u bytes left.", param_max_bytes);
+    ThrowRDE("Not enough data to read parameters, only %u bytes left.",
+             param_max_bytes);
   mTop = getLong(&parameters[0]);
   mLeft = getLong(&parameters[4]);
   mBottom = getLong(&parameters[8]);
@@ -239,27 +242,29 @@ void OpcodeTrimBounds::apply( RawImage &in, RawImage &out, uint32 startY, uint32
 OpcodeMapTable::OpcodeMapTable(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used )
 {
   if (param_max_bytes < 36)
-    ThrowRDE("OpcodeMapTable: Not enough data to read parameters, only %u bytes left.", param_max_bytes);
+    ThrowRDE("Not enough data to read parameters, only %u bytes left.",
+             param_max_bytes);
   mAoi.setAbsolute(getLong(&parameters[4]), getLong(&parameters[0]), getLong(&parameters[12]), getLong(&parameters[8]));
   mFirstPlane = getLong(&parameters[16]);
   mPlanes = getLong(&parameters[20]);
   mRowPitch = getLong(&parameters[24]);
   mColPitch = getLong(&parameters[28]);
   if (mPlanes == 0)
-    ThrowRDE("OpcodeMapPolynomial: Zero planes");
+    ThrowRDE("Zero planes");
   if (mRowPitch == 0 || mColPitch == 0)
-    ThrowRDE("OpcodeMapPolynomial: Invalid Pitch");
+    ThrowRDE("Invalid Pitch");
 
   int tablesize = getLong(&parameters[32]);
   *bytes_used = 36;
 
   if (tablesize <= 0)
-    ThrowRDE("OpcodeMapTable: Table size must be positive");
+    ThrowRDE("Table size must be positive");
   if (tablesize > 65536)
-    ThrowRDE("OpcodeMapTable: A map with more than 65536 entries not allowed");
+    ThrowRDE("A map with more than 65536 entries not allowed");
 
   if (param_max_bytes < 36 + ((uint64)tablesize*2))
-    ThrowRDE("OpcodeMapPolynomial: Not enough data to read parameters, only %u bytes left.", param_max_bytes);
+    ThrowRDE("Not enough data to read parameters, only %u bytes left.",
+             param_max_bytes);
 
   for (int i = 0; i <= 65535; i++)
   {
@@ -275,13 +280,13 @@ OpcodeMapTable::OpcodeMapTable(const uchar8* parameters, uint32 param_max_bytes,
 RawImage& OpcodeMapTable::createOutput( RawImage &in )
 {
   if (in->getDataType() != TYPE_USHORT16)
-    ThrowRDE("OpcodeMapTable: Only 16 bit images supported");
+    ThrowRDE("Only 16 bit images supported");
 
   if (mFirstPlane > in->getCpp())
-    ThrowRDE("OpcodeMapTable: Not that many planes in actual image");
+    ThrowRDE("Not that many planes in actual image");
 
   if (mFirstPlane+mPlanes > in->getCpp())
-    ThrowRDE("OpcodeMapTable: Not that many planes in actual image");
+    ThrowRDE("Not that many planes in actual image");
 
   return in;
 }
@@ -309,23 +314,25 @@ void OpcodeMapTable::apply( RawImage &in, RawImage &out, uint32 startY, uint32 e
 OpcodeMapPolynomial::OpcodeMapPolynomial(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used )
 {
   if (param_max_bytes < 36)
-    ThrowRDE("OpcodeMapPolynomial: Not enough data to read parameters, only %u bytes left.", param_max_bytes);
+    ThrowRDE("Not enough data to read parameters, only %u bytes left.",
+             param_max_bytes);
   mAoi.setAbsolute(getLong(&parameters[4]), getLong(&parameters[0]), getLong(&parameters[12]), getLong(&parameters[8]));
   mFirstPlane = getLong(&parameters[16]);
   mPlanes = getLong(&parameters[20]);
   mRowPitch = getLong(&parameters[24]);
   mColPitch = getLong(&parameters[28]);
   if (mPlanes == 0)
-    ThrowRDE("OpcodeMapPolynomial: Zero planes");
+    ThrowRDE("Zero planes");
   if (mRowPitch == 0 || mColPitch == 0)
-    ThrowRDE("OpcodeMapPolynomial: Invalid Pitch");
+    ThrowRDE("Invalid Pitch");
 
   mDegree = getLong(&parameters[32]);
   *bytes_used = 36;
   if (mDegree > 8)
-    ThrowRDE("OpcodeMapPolynomial: A polynomial with more than 8 degrees not allowed");
+    ThrowRDE("A polynomial with more than 8 degrees not allowed");
   if (param_max_bytes < 36 + (mDegree*8))
-    ThrowRDE("OpcodeMapPolynomial: Not enough data to read parameters, only %u bytes left.", param_max_bytes);
+    ThrowRDE("Not enough data to read parameters, only %u bytes left.",
+             param_max_bytes);
   for (uint64 i = 0; i <= mDegree; i++)
     mCoefficient[i] = getDouble(&parameters[36+8*i]);
   *bytes_used += 8*mDegree+8;
@@ -336,13 +343,13 @@ OpcodeMapPolynomial::OpcodeMapPolynomial(const uchar8* parameters, uint32 param_
 RawImage& OpcodeMapPolynomial::createOutput( RawImage &in )
 {
   if (in->getDataType() != TYPE_USHORT16)
-    ThrowRDE("OpcodeMapPolynomial: Only 16 bit images supported");
+    ThrowRDE("Only 16 bit images supported");
 
   if (mFirstPlane > in->getCpp())
-    ThrowRDE("OpcodeMapPolynomial: Not that many planes in actual image");
+    ThrowRDE("Not that many planes in actual image");
 
   if (mFirstPlane+mPlanes > in->getCpp())
-    ThrowRDE("OpcodeMapPolynomial: Not that many planes in actual image");
+    ThrowRDE("Not that many planes in actual image");
 
   // Create lookup
   for (int i = 0; i < 65536; i++)
@@ -377,23 +384,26 @@ void OpcodeMapPolynomial::apply( RawImage &in, RawImage &out, uint32 startY, uin
 OpcodeDeltaPerRow::OpcodeDeltaPerRow(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used )
 {
   if (param_max_bytes < 36)
-    ThrowRDE("OpcodeDeltaPerRow: Not enough data to read parameters, only %u bytes left.", param_max_bytes);
+    ThrowRDE("Not enough data to read parameters, only %u bytes left.",
+             param_max_bytes);
   mAoi.setAbsolute(getLong(&parameters[4]), getLong(&parameters[0]), getLong(&parameters[12]), getLong(&parameters[8]));
   mFirstPlane = getLong(&parameters[16]);
   mPlanes = getLong(&parameters[20]);
   mRowPitch = getLong(&parameters[24]);
   mColPitch = getLong(&parameters[28]);
   if (mPlanes == 0)
-    ThrowRDE("OpcodeDeltaPerRow: Zero planes");
+    ThrowRDE("Zero planes");
   if (mRowPitch == 0 || mColPitch == 0)
-    ThrowRDE("OpcodeDeltaPerRow: Invalid Pitch");
+    ThrowRDE("Invalid Pitch");
 
   mCount = getLong(&parameters[32]);
   *bytes_used = 36;
   if (param_max_bytes < 36 + (mCount*4))
-    ThrowRDE("OpcodeDeltaPerRow: Not enough data to read parameters, only %u bytes left.", param_max_bytes);
+    ThrowRDE("Not enough data to read parameters, only %u bytes left.",
+             param_max_bytes);
   if ((uint64)mAoi.getHeight() != mCount)
-    ThrowRDE("OpcodeDeltaPerRow: Element count (%llu) does not match height of area (%d.", mCount, mAoi.getHeight());
+    ThrowRDE("Element count (%llu) does not match height of area (%d.", mCount,
+             mAoi.getHeight());
 
   for (uint64 i = 0; i < mCount; i++)
     mDelta[i] = getFloat(&parameters[36+4*i]);
@@ -405,10 +415,10 @@ OpcodeDeltaPerRow::OpcodeDeltaPerRow(const uchar8* parameters, uint32 param_max_
 RawImage& OpcodeDeltaPerRow::createOutput( RawImage &in )
 {
   if (mFirstPlane > in->getCpp())
-    ThrowRDE("OpcodeDeltaPerRow: Not that many planes in actual image");
+    ThrowRDE("Not that many planes in actual image");
 
   if (mFirstPlane+mPlanes > in->getCpp())
-    ThrowRDE("OpcodeDeltaPerRow: Not that many planes in actual image");
+    ThrowRDE("Not that many planes in actual image");
 
   return in;
 }
@@ -452,23 +462,26 @@ void OpcodeDeltaPerRow::apply( RawImage &in, RawImage &out, uint32 startY, uint3
 OpcodeDeltaPerCol::OpcodeDeltaPerCol(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used )
 {
   if (param_max_bytes < 36)
-    ThrowRDE("OpcodeDeltaPerCol: Not enough data to read parameters, only %u bytes left.", param_max_bytes);
+    ThrowRDE("Not enough data to read parameters, only %u bytes left.",
+             param_max_bytes);
   mAoi.setAbsolute(getLong(&parameters[4]), getLong(&parameters[0]), getLong(&parameters[12]), getLong(&parameters[8]));
   mFirstPlane = getLong(&parameters[16]);
   mPlanes = getLong(&parameters[20]);
   mRowPitch = getLong(&parameters[24]);
   mColPitch = getLong(&parameters[28]);
   if (mPlanes == 0)
-    ThrowRDE("OpcodeDeltaPerCol: Zero planes");
+    ThrowRDE("Zero planes");
   if (mRowPitch == 0 || mColPitch == 0)
-    ThrowRDE("OpcodeDeltaPerCol: Invalid Pitch");
+    ThrowRDE("Invalid Pitch");
 
   mCount = getLong(&parameters[32]);
   *bytes_used = 36;
   if (param_max_bytes < 36 + (mCount*4))
-    ThrowRDE("OpcodeDeltaPerCol: Not enough data to read parameters, only %u bytes left.", param_max_bytes);
+    ThrowRDE("Not enough data to read parameters, only %u bytes left.",
+             param_max_bytes);
   if ((uint64)mAoi.getWidth() != mCount)
-    ThrowRDE("OpcodeDeltaPerRow: Element count (%llu) does not match width of area (%d).", mCount, mAoi.getWidth());
+    ThrowRDE("Element count (%llu) does not match width of area (%d).", mCount,
+             mAoi.getWidth());
 
   for (uint64 i = 0; i < mCount; i++)
     mDelta[i] = getFloat(&parameters[36+4*i]);
@@ -487,10 +500,10 @@ OpcodeDeltaPerCol::~OpcodeDeltaPerCol() {
 RawImage& OpcodeDeltaPerCol::createOutput( RawImage &in )
 {
   if (mFirstPlane > in->getCpp())
-    ThrowRDE("OpcodeDeltaPerCol: Not that many planes in actual image");
+    ThrowRDE("Not that many planes in actual image");
 
   if (mFirstPlane+mPlanes > in->getCpp())
-    ThrowRDE("OpcodeDeltaPerCol: Not that many planes in actual image");
+    ThrowRDE("Not that many planes in actual image");
 
   if (in->getDataType() == TYPE_USHORT16) {
     if (mDeltaX)
@@ -539,23 +552,26 @@ void OpcodeDeltaPerCol::apply( RawImage &in, RawImage &out, uint32 startY, uint3
 OpcodeScalePerRow::OpcodeScalePerRow(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used )
 {
   if (param_max_bytes < 36)
-    ThrowRDE("OpcodeScalePerRow: Not enough data to read parameters, only %u bytes left.", param_max_bytes);
+    ThrowRDE("Not enough data to read parameters, only %u bytes left.",
+             param_max_bytes);
   mAoi.setAbsolute(getLong(&parameters[4]), getLong(&parameters[0]), getLong(&parameters[12]), getLong(&parameters[8]));
   mFirstPlane = getLong(&parameters[16]);
   mPlanes = getLong(&parameters[20]);
   mRowPitch = getLong(&parameters[24]);
   mColPitch = getLong(&parameters[28]);
   if (mPlanes == 0)
-    ThrowRDE("OpcodeScalePerRow: Zero planes");
+    ThrowRDE("Zero planes");
   if (mRowPitch == 0 || mColPitch == 0)
-    ThrowRDE("OpcodeScalePerRow: Invalid Pitch");
+    ThrowRDE("Invalid Pitch");
 
   mCount = getLong(&parameters[32]);
   *bytes_used = 36;
   if (param_max_bytes < 36 + (mCount*4))
-    ThrowRDE("OpcodeScalePerRow: Not enough data to read parameters, only %u bytes left.", param_max_bytes);
+    ThrowRDE("Not enough data to read parameters, only %u bytes left.",
+             param_max_bytes);
   if ((uint64)mAoi.getHeight() != mCount)
-    ThrowRDE("OpcodeScalePerRow: Element count (%llu) does not match height of area (%d).", mCount, mAoi.getHeight());
+    ThrowRDE("Element count (%llu) does not match height of area (%d).", mCount,
+             mAoi.getHeight());
 
   for (uint64 i = 0; i < mCount; i++)
     mDelta[i] = getFloat(&parameters[36+4*i]);
@@ -567,10 +583,10 @@ OpcodeScalePerRow::OpcodeScalePerRow(const uchar8* parameters, uint32 param_max_
 RawImage& OpcodeScalePerRow::createOutput( RawImage &in )
 {
   if (mFirstPlane > in->getCpp())
-    ThrowRDE("OpcodeScalePerRow: Not that many planes in actual image");
+    ThrowRDE("Not that many planes in actual image");
 
   if (mFirstPlane+mPlanes > in->getCpp())
-    ThrowRDE("OpcodeScalePerRow: Not that many planes in actual image");
+    ThrowRDE("Not that many planes in actual image");
 
   return in;
 }
@@ -613,23 +629,26 @@ void OpcodeScalePerRow::apply( RawImage &in, RawImage &out, uint32 startY, uint3
 OpcodeScalePerCol::OpcodeScalePerCol(const uchar8* parameters, uint32 param_max_bytes, uint32 *bytes_used )
 {
   if (param_max_bytes < 36)
-    ThrowRDE("OpcodeScalePerCol: Not enough data to read parameters, only %u bytes left.", param_max_bytes);
+    ThrowRDE("Not enough data to read parameters, only %u bytes left.",
+             param_max_bytes);
   mAoi.setAbsolute(getLong(&parameters[4]), getLong(&parameters[0]), getLong(&parameters[12]), getLong(&parameters[8]));
   mFirstPlane = getLong(&parameters[16]);
   mPlanes = getLong(&parameters[20]);
   mRowPitch = getLong(&parameters[24]);
   mColPitch = getLong(&parameters[28]);
   if (mPlanes == 0)
-    ThrowRDE("OpcodeScalePerCol: Zero planes");
+    ThrowRDE("Zero planes");
   if (mRowPitch == 0 || mColPitch == 0)
-    ThrowRDE("OpcodeScalePerCol: Invalid Pitch");
+    ThrowRDE("Invalid Pitch");
 
   mCount = getLong(&parameters[32]);
   *bytes_used = 36;
   if (param_max_bytes < 36 + (mCount*4))
-    ThrowRDE("OpcodeScalePerCol: Not enough data to read parameters, only %u bytes left.", param_max_bytes);
+    ThrowRDE("Not enough data to read parameters, only %u bytes left.",
+             param_max_bytes);
   if ((uint64)mAoi.getWidth() != mCount)
-    ThrowRDE("OpcodeScalePerCol: Element count (%llu) does not match width of area (%d).", mCount, mAoi.getWidth());
+    ThrowRDE("Element count (%llu) does not match width of area (%d).", mCount,
+             mAoi.getWidth());
 
   for (uint64 i = 0; i < mCount; i++)
     mDelta[i] = getFloat(&parameters[36+4*i]);
@@ -648,10 +667,10 @@ OpcodeScalePerCol::~OpcodeScalePerCol() {
 RawImage& OpcodeScalePerCol::createOutput( RawImage &in )
 {
   if (mFirstPlane > in->getCpp())
-    ThrowRDE("OpcodeScalePerCol: Not that many planes in actual image");
+    ThrowRDE("Not that many planes in actual image");
 
   if (mFirstPlane+mPlanes > in->getCpp())
-    ThrowRDE("OpcodeScalePerCol: Not that many planes in actual image");
+    ThrowRDE("Not that many planes in actual image");
 
   if (in->getDataType() == TYPE_USHORT16) {
     if (mDeltaX)

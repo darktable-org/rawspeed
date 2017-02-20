@@ -96,41 +96,43 @@ bool __attribute__((pure)) CiffEntry::isInt() {
 
 uint32 CiffEntry::getU32(uint32 num) {
   if (!isInt())
-    ThrowCPE("CIFF, getU32: Wrong type 0x%x encountered. Expected Long, Short or Byte at 0x%x", type, tag);
+    ThrowCPE(
+        "Wrong type 0x%x encountered. Expected Long, Short or Byte at 0x%x",
+        type, tag);
   if (type == CIFF_BYTE)
     return getByte(num);
   if (type == CIFF_SHORT)
     return getU16(num);
 
   if (num*4+3 >= bytesize)
-    ThrowCPE("CIFF, getU32: Trying to read out of bounds");
+    ThrowCPE("Trying to read out of bounds");
 
   return getU32LE(data + num * 4);
 }
 
 ushort16 CiffEntry::getU16(uint32 num) {
   if (type != CIFF_SHORT && type != CIFF_BYTE)
-    ThrowCPE("CIFF, getU16: Wrong type 0x%x encountered. Expected Short at 0x%x", type, tag);
+    ThrowCPE("Wrong type 0x%x encountered. Expected Short at 0x%x", type, tag);
 
   if (num*2+1 >= bytesize)
-    ThrowCPE("CIFF, getU16: Trying to read out of bounds");
+    ThrowCPE("Trying to read out of bounds");
 
   return getU16LE(data + num * 2);
 }
 
 uchar8 CiffEntry::getByte(uint32 num) {
   if (type != CIFF_BYTE)
-    ThrowCPE("CIFF, getByte: Wrong type 0x%x encountered. Expected Byte at 0x%x", type, tag);
+    ThrowCPE("Wrong type 0x%x encountered. Expected Byte at 0x%x", type, tag);
 
   if (num >= bytesize)
-    ThrowCPE("CIFF, getByte: Trying to read out of bounds");
+    ThrowCPE("Trying to read out of bounds");
 
   return data[num];
 }
 
 string CiffEntry::getString() {
   if (type != CIFF_ASCII)
-    ThrowCPE("CIFF, getString: Wrong type 0x%x encountered. Expected Ascii", type);
+    ThrowCPE("Wrong type 0x%x encountered. Expected Ascii", type);
   if (!own_data) {
     own_data = new uchar8[count];
     memcpy(own_data, data, count);
@@ -142,7 +144,7 @@ string CiffEntry::getString() {
 vector<string> CiffEntry::getStrings() {
   vector<string> strs;
   if (type != CIFF_ASCII)
-    ThrowCPE("CIFF, getString: Wrong type 0x%x encountered. Expected Ascii", type);
+    ThrowCPE("Wrong type 0x%x encountered. Expected Ascii", type);
   if (!own_data) {
     own_data = new uchar8[count];
     memcpy(own_data, data, count);
@@ -165,7 +167,7 @@ bool __attribute__((pure)) CiffEntry::isString() {
 void CiffEntry::setData( const void *in_data, uint32 byte_count )
 {
   if (byte_count > bytesize)
-    ThrowCPE("CIFF, data set larger than entry size given");
+    ThrowCPE("data set larger than entry size given");
 
   if (!own_data) {
     own_data = new uchar8[bytesize];

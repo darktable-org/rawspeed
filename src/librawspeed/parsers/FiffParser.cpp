@@ -82,7 +82,7 @@ RawDecoder* FiffParser::getDecoder() {
       uint32 entries = bytes.getU32();
 
       if (entries > 255)
-        ThrowFPE("ParseFuji: Too many entries");
+        ThrowFPE("Too many entries");
 
       for (uint32 i = 0; i < entries; i++) {
         ushort16 tag = bytes.getU16();
@@ -105,7 +105,7 @@ RawDecoder* FiffParser::getDecoder() {
 
     return makeDecoder(move(rootIFD), *mInput);
   } catch (TiffParserException&) {
-    ThrowFPE("FiffParser: No decoder found. Sorry.");
+    ThrowFPE("No decoder found. Sorry.");
   }
 }
 

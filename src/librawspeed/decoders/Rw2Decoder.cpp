@@ -106,11 +106,11 @@ RawImage Rw2Decoder::decodeRawInternal() {
     TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
 
     if (offsets->count != 1) {
-      ThrowRDE("RW2 Decoder: Multiple Strips found: %u", offsets->count);
+      ThrowRDE("Multiple Strips found: %u", offsets->count);
     }
     offset = offsets->getU32();
     if (!mFile->isValid(offset))
-      ThrowRDE("Panasonic RAW Decoder: Invalid image data offset, cannot decode.");
+      ThrowRDE("Invalid image data offset, cannot decode.");
 
     mRaw->dim = iPoint2D(width, height);
     mRaw->createData();
@@ -137,13 +137,13 @@ RawImage Rw2Decoder::decodeRawInternal() {
     TiffEntry *offsets = raw->getEntry(PANASONIC_STRIPOFFSET);
 
     if (offsets->count != 1) {
-      ThrowRDE("RW2 Decoder: Multiple Strips found: %u", offsets->count);
+      ThrowRDE("Multiple Strips found: %u", offsets->count);
     }
 
     offset = offsets->getU32();
 
     if (!mFile->isValid(offset))
-      ThrowRDE("RW2 Decoder: Invalid image data offset, cannot decode.");
+      ThrowRDE("Invalid image data offset, cannot decode.");
 
     load_flags = 0x2008;
     DecodeRw2();
@@ -274,7 +274,8 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
             mRaw->blackLevelSeparate[k] = blackBlue;
             break;
           default:
-            ThrowRDE("RW2 Decoder: Unexpected CFA color %s.", ColorFilterArray::colorToString(c).c_str());
+            ThrowRDE("Unexpected CFA color %s.",
+                     ColorFilterArray::colorToString(c).c_str());
             break;
         }
       }

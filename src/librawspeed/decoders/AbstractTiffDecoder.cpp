@@ -32,8 +32,7 @@ const TiffIFD* AbstractTiffDecoder::getIFDWithLargestImage(TiffTag filter) const
   std::vector<const TiffIFD*> ifds = mRootIFD->getIFDsWithTag(filter);
 
   if (ifds.empty())
-    ThrowRDE("AbstractTiffDecoder: No suitable IFD with tag 0x%04x found.",
-             filter);
+    ThrowRDE("No suitable IFD with tag 0x%04x found.", filter);
 
   auto res = ifds[0];
   uint32 width = res->getEntry(IMAGEWIDTH)->getU32();

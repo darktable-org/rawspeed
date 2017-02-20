@@ -75,7 +75,7 @@ void Buffer::corrupt(int errors) {
 const uchar8* Buffer::getData(size_type offset, size_type count) const
 {
   if (count == 0)
-    ThrowIOE("Buffer: Trying to get a pointer to zero sized buffer?!");
+    ThrowIOE("Trying to get a pointer to zero sized buffer?!");
 
   uint64 totaloffset = (uint64)offset + (uint64)count - 1;
   uint64 totalsize = (uint64)size + FILEMAP_MARGIN;
@@ -83,7 +83,7 @@ const uchar8* Buffer::getData(size_type offset, size_type count) const
   // Give out data up to FILEMAP_MARGIN more bytes than are really in the
   // file as that is useful for some of the BitPump code
   if (!isValid(offset) || totaloffset >= totalsize)
-    ThrowIOE("FileMap: Attempting to read file out of bounds.");
+    ThrowIOE("Attempting to read file out of bounds.");
   return &data[offset];
 }
 

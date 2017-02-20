@@ -55,7 +55,7 @@ MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, FileMap* file)
   } else {
     TiffEntry *xmp = mRootIFD->getEntryRecursive(XMP);
     if (!xmp)
-      ThrowRDE("MOS Decoder: Couldn't find the XMP");
+      ThrowRDE("Couldn't find the XMP");
     string xmpText = xmp->getString();
     make = getXMPTag(xmpText, "Make");
     model = getXMPTag(xmpText, "Model");
@@ -66,7 +66,7 @@ string MosDecoder::getXMPTag(const string &xmp, const string &tag) {
   string::size_type start = xmp.find("<tiff:"+tag+">");
   string::size_type end = xmp.find("</tiff:"+tag+">");
   if (start == string::npos || end == string::npos || end <= start)
-    ThrowRDE("MOS Decoder: Couldn't find tag '%s' in the XMP", tag.c_str());
+    ThrowRDE("Couldn't find tag '%s' in the XMP", tag.c_str());
   int startlen = tag.size()+7;
   return xmp.substr(start+startlen, end-start-startlen);
 }
@@ -80,7 +80,7 @@ RawImage MosDecoder::decodeRawInternal() {
   if (getU32LE(insideTiff) == 0x49494949) {
     uint32 offset = getU32LE(insideTiff + 8);
     if (offset+base+4 > mFile->getSize())
-      ThrowRDE("MOS: PhaseOneC offset out of bounds");
+      ThrowRDE("offset out of bounds");
 
     uint32 entries = getU32LE(insideTiff + offset);
     uint32 pos = 8; // Skip another 4 bytes
@@ -88,7 +88,7 @@ RawImage MosDecoder::decodeRawInternal() {
     uint32 width=0, height=0, strip_offset=0, data_offset=0, wb_offset=0;
     for (; entries > 0; entries--) {
       if (offset+base+pos+16 > mFile->getSize())
-        ThrowRDE("MOS: PhaseOneC offset out of bounds");
+        ThrowRDE("offset out of bounds");
 
       uint32 tag = getU32LE(insideTiff + offset + pos + 0);
       // uint32 type = getU32LE(insideTiff + offset + pos + 4);
@@ -105,11 +105,11 @@ RawImage MosDecoder::decodeRawInternal() {
       }
     }
     if (width <= 0 || height <= 0)
-      ThrowRDE("MOS: PhaseOneC couldn't find width and height");
+      ThrowRDE("couldn't find width and height");
     if (strip_offset+height*4 > mFile->getSize())
-      ThrowRDE("MOS: PhaseOneC strip offsets out of bounds");
+      ThrowRDE("strip offsets out of bounds");
     if (data_offset > mFile->getSize())
-      ThrowRDE("MOS: PhaseOneC data offset out of bounds");
+      ThrowRDE("data offset out of bounds");
 
     mRaw->dim = iPoint2D(width, height);
     mRaw->createData();
@@ -149,11 +149,11 @@ RawImage MosDecoder::decodeRawInternal() {
       u.decode16BitRawUnpacked(width, height);
   }
   else if (99 == compression || 7 == compression) {
-    ThrowRDE("MOS Decoder: Leaf LJpeg not yet supported");
+    ThrowRDE("Leaf LJpeg not yet supported");
     //LJpegPlain l(mFile, mRaw);
     //l.startDecoder(off, mFile->getSize()-off, 0, 0);
   } else
-    ThrowRDE("MOS Decoder: Unsupported compression: %d", compression);
+    ThrowRDE("Unsupported compression: %d", compression);
 
   return mRaw;
 }

@@ -50,7 +50,7 @@ TiffEntry::TiffEntry(ByteStream &bs) {
 
   // check for count << datashift overflow
   if (count > UINT32_MAX >> datashifts[type])
-    ThrowTPE("Parse error in TiffEntry: integer overflow in size calculation.");
+    ThrowTPE("integer overflow in size calculation.");
 
   uint32 byte_size = count << datashifts[type];
   uint32 data_offset = UINT32_MAX;
@@ -85,12 +85,12 @@ TiffEntry::TiffEntry(TiffTag tag_, TiffDataType type_, uint32 count_,
     : data(std::move(data_)), tag(tag_), type(type_), count(count_) {
   // check for count << datashift overflow
   if (count > UINT32_MAX >> datashifts[type])
-    ThrowTPE("Parse error in TiffEntry: integer overflow in size calculation.");
+    ThrowTPE("integer overflow in size calculation.");
 
   uint32 bytesize = count << datashifts[type];
 
   if (data.getSize() != bytesize)
-    ThrowTPE("TIFF, data set larger than entry size given");
+    ThrowTPE("data set larger than entry size given");
 }
 
 bool __attribute__((pure)) TiffEntry::isInt() const {
@@ -109,21 +109,23 @@ bool __attribute__((pure)) TiffEntry::isFloat() const {
 
 uchar8 TiffEntry::getByte(uint32 index) const {
   if (type != TIFF_BYTE && type != TIFF_UNDEFINED)
-    ThrowTPE("TIFF, getByte: Wrong type %u encountered. Expected Byte on 0x%x", type, tag);
+    ThrowTPE("Wrong type %u encountered. Expected Byte on 0x%x", type, tag);
 
   return data.peekByte(index);
 }
 
 ushort16 TiffEntry::getU16(uint32 index) const {
   if (type != TIFF_SHORT && type != TIFF_UNDEFINED)
-    ThrowTPE("TIFF, getU16: Wrong type %u encountered. Expected Short or Undefined on 0x%x", type, tag);
+    ThrowTPE("Wrong type %u encountered. Expected Short or Undefined on 0x%x",
+             type, tag);
 
   return data.peek<ushort16>(index);
 }
 
 short16 TiffEntry::getI16(uint32 index) const {
   if (type != TIFF_SSHORT && type != TIFF_UNDEFINED)
-    ThrowTPE("TIFF, getI16: Wrong type %u encountered. Expected Short or Undefined on 0x%x", type, tag);
+    ThrowTPE("Wrong type %u encountered. Expected Short or Undefined on 0x%x",
+             type, tag);
 
   return data.peek<short16>(index);
 }
@@ -132,7 +134,9 @@ uint32 TiffEntry::getU32(uint32 index) const {
   if (type == TIFF_SHORT)
     return getU16(index);
   if (!(type == TIFF_LONG || type == TIFF_OFFSET || type == TIFF_BYTE || type == TIFF_UNDEFINED || type == TIFF_RATIONAL || type == TIFF_SRATIONAL))
-    ThrowTPE("TIFF, getU32: Wrong type %u encountered. Expected Long, Offset, Rational or Undefined on 0x%x", type, tag);
+    ThrowTPE("Wrong type %u encountered. Expected Long, Offset, Rational or "
+             "Undefined on 0x%x",
+             type, tag);
 
   return data.peek<uint32>(index);
 }
@@ -141,14 +145,17 @@ int32 TiffEntry::getI32(uint32 index) const {
   if (type == TIFF_SSHORT)
     return getI16(index);
   if (!(type == TIFF_SLONG || type == TIFF_UNDEFINED))
-    ThrowTPE("TIFF, getI32: Wrong type %u encountered. Expected SLong or Undefined on 0x%x", type, tag);
+    ThrowTPE("Wrong type %u encountered. Expected SLong or Undefined on 0x%x",
+             type, tag);
 
   return data.peek<int32>(index);
 }
 
 float TiffEntry::getFloat(uint32 index) const {
   if (!isFloat())
-    ThrowTPE("TIFF, getFloat: Wrong type 0x%x encountered. Expected Float or something convertible on 0x%x", type, tag);
+    ThrowTPE("Wrong type 0x%x encountered. Expected Float or something "
+             "convertible on 0x%x",
+             type, tag);
 
   switch (type) {
   case TIFF_DOUBLE: return data.peek<double>(index);
@@ -175,7 +182,7 @@ float TiffEntry::getFloat(uint32 index) const {
 
 string TiffEntry::getString() const {
   if (type != TIFF_ASCII && type != TIFF_BYTE)
-    ThrowTPE("TIFF, getString: Wrong type 0x%x encountered. Expected Ascii or Byte", type);
+    ThrowTPE("Wrong type 0x%x encountered. Expected Ascii or Byte", type);
 
   const char* s = data.peekString();
   return string(s, strnlen(s, count));

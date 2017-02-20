@@ -69,18 +69,18 @@ RawImage CrwDecoder::decodeRawInternal() {
   CiffEntry *sensorInfo = mRootIFD->getEntryRecursive(CIFF_SENSORINFO);
 
   if (!sensorInfo || sensorInfo->count < 6 || sensorInfo->type != CIFF_SHORT)
-    ThrowRDE("CRW: Couldn't find image sensor info");
+    ThrowRDE("Couldn't find image sensor info");
 
   uint32 width = sensorInfo->getU16(1);
   uint32 height = sensorInfo->getU16(2);
 
   CiffEntry *decTable = mRootIFD->getEntryRecursive(CIFF_DECODERTABLE);
   if (!decTable || decTable->type != CIFF_LONG)
-    ThrowRDE("CRW: Couldn't find decoder table");
+    ThrowRDE("Couldn't find decoder table");
 
   uint32 dec_table = decTable->getU32();
   if (dec_table > 2)
-    ThrowRDE("CRW: Unknown decoder table %d", dec_table);
+    ThrowRDE("Unknown decoder table %d", dec_table);
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
@@ -94,10 +94,10 @@ RawImage CrwDecoder::decodeRawInternal() {
 void CrwDecoder::checkSupportInternal(const CameraMetaData* meta) {
   vector<CiffIFD*> data = mRootIFD->getIFDsWithTag(CIFF_MAKEMODEL);
   if (data.empty())
-    ThrowRDE("CRW Support check: Model name not found");
+    ThrowRDE("Model name not found");
   vector<string> makemodel = data[0]->getEntry(CIFF_MAKEMODEL)->getStrings();
   if (makemodel.size() < 2)
-    ThrowRDE("CRW Support check: wrong number of strings for make/model");
+    ThrowRDE("wrong number of strings for make/model");
   string make = makemodel[0];
   string model = makemodel[1];
 
@@ -126,10 +126,10 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
   vector<CiffIFD*> data = mRootIFD->getIFDsWithTag(CIFF_MAKEMODEL);
   if (data.empty())
-    ThrowRDE("CRW Support check: Model name not found");
+    ThrowRDE("Model name not found");
   vector<string> makemodel = data[0]->getEntry(CIFF_MAKEMODEL)->getStrings();
   if (makemodel.size() < 2)
-    ThrowRDE("CRW Support check: wrong number of strings for make/model");
+    ThrowRDE("wrong number of strings for make/model");
   string make = makemodel[0];
   string model = makemodel[1];
   string mode;
@@ -238,7 +238,7 @@ void CrwDecoder::makeDecoder (int n, const uchar8 *source)
   const uchar8 *count;
 
   if (n > 1) {
-    ThrowRDE("CRW: Invalid table number specified");
+    ThrowRDE("Invalid table number specified");
   }
 
   count = (source += 16) - 17;
@@ -252,7 +252,7 @@ void CrwDecoder::makeDecoder (int n, const uchar8 *source)
   auto* huff = (ushort16*)alignedMallocArray<16, ushort16, true>(1UL + (1UL << max));
 
   if (!huff)
-    ThrowRDE("CRW: Couldn't allocate table");
+    ThrowRDE("Couldn't allocate table");
 
   huff[0] = max;
   for (h = len = 1; len <= max; len++) {
@@ -369,7 +369,7 @@ void CrwDecoder::decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 
         if (pnum++ % width == 0)
           base[0] = base[1] = 512;
         if ((dest[(block << 6) + i] = base[i & 1] += diffbuf[i]) >> 10)
-          ThrowRDE("CRW: Error decompressing");
+          ThrowRDE("Error decompressing");
       }
     }
 

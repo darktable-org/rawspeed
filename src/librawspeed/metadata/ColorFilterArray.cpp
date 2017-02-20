@@ -45,7 +45,7 @@ void ColorFilterArray::setSize(const iPoint2D& _size)
     // Bayer, FC() supports 2x8 pattern
     // X-Trans is 6x6 pattern
     // is there anything bigger?
-    ThrowRDE("ColorFilterArray:setSize if your CFA pattern is really %d pixels "
+    ThrowRDE("if your CFA pattern is really %d pixels "
              "in area we may as well give up now",
              size.area());
   }
@@ -58,7 +58,7 @@ void ColorFilterArray::setSize(const iPoint2D& _size)
 CFAColor ColorFilterArray::getColorAt( int x, int y ) const
 {
   if (cfa.empty())
-    ThrowRDE("ColorFilterArray:getColorAt: No CFA size set");
+    ThrowRDE("No CFA size set");
 
   // calculate the positive modulo [0 .. size-1]
   x = (x % size.x + size.x) % size.x;
@@ -82,7 +82,7 @@ void ColorFilterArray::setCFA( iPoint2D in_size, ... )
 
 void ColorFilterArray::shiftLeft(int n) {
   if (cfa.empty())
-    ThrowRDE("ColorFilterArray:shiftLeft: No CFA size set (or set to zero)");
+    ThrowRDE("No CFA size set (or set to zero)");
 
   writeLog(DEBUG_PRIO_EXTRA, "Shift left:%d\n", n);
   n %= size.x;
@@ -100,7 +100,7 @@ void ColorFilterArray::shiftLeft(int n) {
 
 void ColorFilterArray::shiftDown(int n) {
   if (cfa.empty())
-    ThrowRDE("ColorFilterArray:shiftDown: No CFA size set (or set to zero)");
+    ThrowRDE("No CFA size set (or set to zero)");
 
   writeLog(DEBUG_PRIO_EXTRA, "Shift down:%d\n", n);
   n %= size.y;
@@ -168,15 +168,15 @@ string ColorFilterArray::colorToString(CFAColor c)
   try {
     return color2String.at(c);
   } catch (std::out_of_range&) {
-    ThrowRDE("ColorFilterArray: Unsupported CFA Color: %u", c);
+    ThrowRDE("Unsupported CFA Color: %u", c);
   }
 }
 
 void ColorFilterArray::setColorAt(iPoint2D pos, CFAColor c) {
   if (pos.x >= size.x || pos.x < 0)
-    ThrowRDE("ColorFilterArray::SetColor: position out of CFA pattern");
+    ThrowRDE("position out of CFA pattern");
   if (pos.y >= size.y || pos.y < 0)
-    ThrowRDE("ColorFilterArray::SetColor: position out of CFA pattern");
+    ThrowRDE("position out of CFA pattern");
   cfa[pos.x + (size_t)pos.y * size.x] = c;
 }
 

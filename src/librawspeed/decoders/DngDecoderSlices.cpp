@@ -174,7 +174,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
 #else
 #pragma message                                                                \
     "ZLIB is not present! Deflate compression will not be supported!"
-    ThrowRDE("DngDecoderSlices: deflate support is disabled.");
+    ThrowRDE("deflate support is disabled.");
 #endif
     /* Lossy DNG */
   } else if (compression == 0x884c) {
@@ -194,7 +194,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
     }
 #else
 #pragma message "JPEG is not present! Lossy JPEG DNG will not be supported!"
-    ThrowRDE("DngDecoderSlices: jpeg support is disabled.");
+    ThrowRDE("jpeg support is disabled.");
 #endif
   }
   else

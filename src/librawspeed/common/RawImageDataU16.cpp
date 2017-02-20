@@ -61,7 +61,7 @@ void RawImageDataU16::calculateBlackAreas() {
     /* Process horizontal area */
     if (!area.isVertical) {
       if ((int)area.offset+(int)area.size > uncropped_dim.y)
-        ThrowRDE("RawImageData::calculateBlackAreas: Offset + size is larger than height of image");
+        ThrowRDE("Offset + size is larger than height of image");
       for (uint32 y = area.offset; y < area.offset+area.size; y++) {
         auto *pixel = (ushort16 *)getDataUncropped(mOffset.x, y);
         auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
@@ -75,7 +75,7 @@ void RawImageDataU16::calculateBlackAreas() {
     /* Process vertical area */
     if (area.isVertical) {
       if ((int)area.offset+(int)area.size > uncropped_dim.x)
-        ThrowRDE("RawImageData::calculateBlackAreas: Offset + size is larger than width of image");
+        ThrowRDE("Offset + size is larger than width of image");
       for (int y = mOffset.y; y < dim.y+mOffset.y; y++) {
         auto *pixel = (ushort16 *)getDataUncropped(area.offset, y);
         auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];

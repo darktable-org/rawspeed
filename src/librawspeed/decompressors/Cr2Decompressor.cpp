@@ -34,7 +34,7 @@ namespace RawSpeed {
 void Cr2Decompressor::decodeScan()
 {
   if (predictorMode != 1)
-    ThrowRDE("Cr2Decompressor: Unsupported predictor mode.");
+    ThrowRDE("Unsupported predictor mode.");
 
   if (slicesWidths.empty())
     slicesWidths.push_back(frame.w * frame.cps);
@@ -45,16 +45,16 @@ void Cr2Decompressor::decodeScan()
 
   if (isSubSampled) {
     if (mRaw->isCFA)
-      ThrowRDE("Cr2Decompressor: Cannot decode subsampled image to CFA data");
+      ThrowRDE("Cannot decode subsampled image to CFA data");
 
     if (mRaw->getCpp() != frame.cps)
-      ThrowRDE("Cr2Decompressor: Subsampled component count does not match image.");
+      ThrowRDE("Subsampled component count does not match image.");
 
     if (frame.cps != 3 || frame.compInfo[0].superH != 2 ||
         (frame.compInfo[0].superV != 2 && frame.compInfo[0].superV != 1) ||
         frame.compInfo[1].superH != 1 || frame.compInfo[1].superV != 1 ||
         frame.compInfo[2].superH != 1 || frame.compInfo[2].superV != 1)
-      ThrowRDE("Cr2Decompressor: Unsupported subsampling");
+      ThrowRDE("Unsupported subsampling");
 
     if (frame.compInfo[0].superV == 2)
       decodeN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
@@ -66,7 +66,7 @@ void Cr2Decompressor::decodeScan()
     else if (frame.cps == 4)
       decodeN_X_Y<4, 1, 1>();
     else
-      ThrowRDE("Cr2Decompressor: Unsupported number of components");
+      ThrowRDE("Unsupported number of components");
   }
 }
 

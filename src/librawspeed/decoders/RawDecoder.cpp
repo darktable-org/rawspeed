@@ -83,7 +83,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
   }
 
   if (slices.empty())
-    ThrowRDE("RAW Decoder: No valid slices found. File probably truncated.");
+    ThrowRDE("No valid slices found. File probably truncated.");
 
   mRaw->dim = iPoint2D(width, offY);
   mRaw->createData();
@@ -109,7 +109,9 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
       if (i>0)
         mRaw->setError(e.what());
       else
-        ThrowRDE("RAW decoder: IO error occurred in first slice, unable to decode more. Error is: %s", e.what());
+        ThrowRDE("IO error occurred in first slice, unable to decode more. "
+                 "Error is: %s",
+                 e.what());
     }
     offY += slice.h;
   }
@@ -279,16 +281,16 @@ void RawDecoder::startThreads() {
   pthread_attr_destroy(&attr);
 
   if (fail) {
-    ThrowRDE("RawDecoder::startThreads: Unable to start threads");
+    ThrowRDE("Unable to start threads");
   }
 #endif
 
   if (mRaw->errors.size() >= threads)
-    ThrowRDE("RawDecoder::startThreads: All threads reported errors. Cannot load image.");
+    ThrowRDE("All threads reported errors. Cannot load image.");
 }
 
 void RawDecoder::decodeThreaded(RawDecoderThread * t) {
-  ThrowRDE("Internal Error: This class does not support threaded decoding");
+  ThrowRDE("This class does not support threaded decoding");
 }
 
 RawSpeed::RawImage RawDecoder::decodeRaw()
@@ -370,7 +372,7 @@ void RawDecoder::startTasks( uint32 tasks )
   }
 
   if (mRaw->errors.size() >= tasks)
-    ThrowRDE("RawDecoder::startThreads: All threads reported errors. Cannot load image.");
+    ThrowRDE("All threads reported errors. Cannot load image.");
 
 #else
   ThrowRDE("Unreachable");

@@ -113,7 +113,7 @@ RawImage ArwDecoder::decodeRawInternal() {
       return mRaw;
     }
 
-    ThrowRDE("ARW Decoder: No image data found");
+    ThrowRDE("No image data found");
   }
 
   raw = data[0];
@@ -129,16 +129,18 @@ RawImage ArwDecoder::decodeRawInternal() {
   }
 
   if (32767 != compression)
-    ThrowRDE("ARW Decoder: Unsupported compression");
+    ThrowRDE("Unsupported compression");
 
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
 
   if (offsets->count != 1) {
-    ThrowRDE("ARW Decoder: Multiple Strips found: %u", offsets->count);
+    ThrowRDE("Multiple Strips found: %u", offsets->count);
   }
   if (counts->count != offsets->count) {
-    ThrowRDE("ARW Decoder: Byte count number does not match strip size: count:%u, strips:%u ", counts->count, offsets->count);
+    ThrowRDE(
+        "Byte count number does not match strip size: count:%u, strips:%u ",
+        counts->count, offsets->count);
   }
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
@@ -186,7 +188,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   uint32 off = offsets->getU32();
 
   if (!mFile->isValid(off))
-    ThrowRDE("Sony ARW decoder: Data offset after EOF, file probably truncated");
+    ThrowRDE("Data offset after EOF, file probably truncated");
 
   if (!mFile->isValid(off, c2))
     c2 = mFile->getSize() - off;
@@ -269,7 +271,7 @@ void ArwDecoder::DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp) {
 
   if (bpp == 12) {
     if (input.getRemainSize() < (w * 3 / 2))
-      ThrowRDE("Sony Decoder: Image data section too small, file probably truncated");
+      ThrowRDE("Image data section too small, file probably truncated");
 
     if (input.getRemainSize() < (w*h*3 / 2))
       h = input.getRemainSize() / (w * 3 / 2) - 1;
@@ -390,7 +392,7 @@ void ArwDecoder::GetWB() {
     TiffEntry *sony_length = makerNoteIFD.getEntryRecursive(SONY_LENGTH);
     TiffEntry *sony_key = makerNoteIFD.getEntryRecursive(SONY_KEY);
     if(!sony_offset || !sony_length || !sony_key || sony_key->count != 4)
-      ThrowRDE("ARW: couldn't find the correct metadata for WB decoding");
+      ThrowRDE("couldn't find the correct metadata for WB decoding");
 
     uint32 off = sony_offset->getU32();
     uint32 len = sony_length->getU32();
@@ -405,14 +407,14 @@ void ArwDecoder::GetWB() {
     if (encryptedIFD.hasEntry(SONYGRBGLEVELS)){
       TiffEntry *wb = encryptedIFD.getEntry(SONYGRBGLEVELS);
       if (wb->count != 4)
-        ThrowRDE("ARW: WB has %d entries instead of 4", wb->count);
+        ThrowRDE("WB has %d entries instead of 4", wb->count);
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(1);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(0);
       mRaw->metadata.wbCoeffs[2] = wb->getFloat(2);
     } else if (encryptedIFD.hasEntry(SONYRGGBLEVELS)){
       TiffEntry *wb = encryptedIFD.getEntry(SONYRGGBLEVELS);
       if (wb->count != 4)
-        ThrowRDE("ARW: WB has %d entries instead of 4", wb->count);
+        ThrowRDE("WB has %d entries instead of 4", wb->count);
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(1);
       mRaw->metadata.wbCoeffs[2] = wb->getFloat(3);

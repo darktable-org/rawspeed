@@ -37,11 +37,11 @@ namespace RawSpeed {
 
 RawImage KdcDecoder::decodeRawInternal() {
   if (!mRootIFD->hasEntryRecursive(COMPRESSION))
-    ThrowRDE("KDC Decoder: Couldn't find compression setting");
+    ThrowRDE("Couldn't find compression setting");
 
   int compression = mRootIFD->getEntryRecursive(COMPRESSION)->getU32();
   if (7 != compression)
-    ThrowRDE("KDC Decoder: Unsupported compression %d", compression);
+    ThrowRDE("Unsupported compression %d", compression);
 
   uint32 width = 0;
   uint32 height = 0;
@@ -51,11 +51,11 @@ RawImage KdcDecoder::decodeRawInternal() {
     width = ew->getU32()+80;
     height = eh->getU32()+70;
   } else
-    ThrowRDE("KDC Decoder: Unable to retrieve image size");
+    ThrowRDE("Unable to retrieve image size");
 
   TiffEntry *offset = mRootIFD->getEntryRecursive(KODAK_KDC_OFFSET);
   if (!offset || offset->count < 13)
-    ThrowRDE("KDC Decoder: Couldn't find the KDC offset");
+    ThrowRDE("Couldn't find the KDC offset");
   uint32 off = offset->getU32(4) + offset->getU32(12);
 
   // Offset hardcoding gotten from dcraw
@@ -63,7 +63,7 @@ RawImage KdcDecoder::decodeRawInternal() {
     off = off < 0x15000 ? 0x15000 : 0x17000;
 
   if (off > mFile->getSize())
-    ThrowRDE("KDC Decoder: offset is out of bounds");
+    ThrowRDE("offset is out of bounds");
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();

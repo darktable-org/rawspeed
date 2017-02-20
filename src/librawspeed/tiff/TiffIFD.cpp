@@ -220,7 +220,7 @@ const TiffIFD* TiffIFD::getIFDWithTag(TiffTag tag, uint32 index) const
 {
   auto ifds = getIFDsWithTag(tag);
   if (index >= ifds.size())
-    ThrowTPE("TiffIFD: failed to find %u ifs with tag 0x%04x", index+1, tag);
+    ThrowTPE("failed to find %u ifs with tag 0x%04x", index + 1, tag);
   return ifds[index];
 }
 
@@ -256,7 +256,7 @@ void TiffIFD::add(TiffEntryOwner entry) {
 TiffEntry* TiffIFD::getEntry(TiffTag tag) const {
   auto i = entries.find(tag);
   if (i == entries.end())
-    ThrowTPE("TiffIFD: TIFF Parser entry 0x%x not found.", tag);
+    ThrowTPE("Entry 0x%x not found.", tag);
   return i->second.get();
 }
 
@@ -267,9 +267,9 @@ TiffID TiffRootIFD::getID() const
   auto modelE = getEntryRecursive(MODEL);
 
   if (!makeE)
-    ThrowTPE("TiffIFD: Failed to find MAKE entry.");
+    ThrowTPE("Failed to find MAKE entry.");
   if (!modelE)
-    ThrowTPE("TiffIFD: Failed to find MODEL entry.");
+    ThrowTPE("Failed to find MODEL entry.");
 
   id.make = trimSpaces(makeE->getString());
   id.model = trimSpaces(modelE->getString());

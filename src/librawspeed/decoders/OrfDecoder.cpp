@@ -50,13 +50,15 @@ RawImage OrfDecoder::decodeRawInternal() {
 
   int compression = raw->getEntry(COMPRESSION)->getU32();
   if (1 != compression)
-    ThrowRDE("ORF Decoder: Unsupported compression");
+    ThrowRDE("Unsupported compression");
 
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
 
   if (counts->count != offsets->count)
-    ThrowRDE("ORF Decoder: Byte count number does not match strip size: count:%u, strips:%u ", counts->count, offsets->count);
+    ThrowRDE(
+        "Byte count number does not match strip size: count:%u, strips:%u ",
+        counts->count, offsets->count);
 
   //TODO: this code assumes that all strips are layed out directly after another without padding and in order
   uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
@@ -65,7 +67,7 @@ RawImage OrfDecoder::decodeRawInternal() {
     size += counts->getU32(i);
 
   if (!mFile->isValid(off, size))
-    ThrowRDE("ORF Decoder: Truncated file");
+    ThrowRDE("Truncated file");
 
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
@@ -103,7 +105,7 @@ void OrfDecoder::decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 si
   } else if (size >= w*h*3/2) { // We're in one of those weird interlaced packed raws
     u.decode12BitRawBEInterlaced(w, h);
   } else {
-    ThrowRDE("ORF Decoder: Don't know how to handle the encoding in this file\n");
+    ThrowRDE("Don't know how to handle the encoding in this file\n");
   }
 }
 

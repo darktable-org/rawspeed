@@ -40,12 +40,12 @@ using namespace pugi;
 Camera::Camera(pugi::xml_node &camera) : cfa(iPoint2D(0,0)) {
   make = canonical_make = camera.attribute("make").as_string();
   if (make.empty())
-    ThrowCME(R"(Camera XML Parser: "make" attribute not found.)");
+    ThrowCME(R"("make" attribute not found.)");
 
   model = canonical_model = canonical_alias = camera.attribute("model").as_string();
   // chdk cameras seem to have an empty model?
   if (!camera.attribute("model")) // (model.empty())
-    ThrowCME(R"(Camera XML Parser: "model" attribute not found.)");
+    ThrowCME(R"("model" attribute not found.)");
 
   canonical_id = make + " " + model;
 
@@ -61,7 +61,7 @@ Camera::Camera(pugi::xml_node &camera) : cfa(iPoint2D(0,0)) {
 Camera::Camera(const Camera* camera, uint32 alias_num) : cfa(iPoint2D(0,0))
 {
   if (alias_num >= camera->aliases.size())
-    ThrowCME("Camera: Internal error, alias number out of range specified.");
+    ThrowCME("Internal error, alias number out of range specified.");
 
   *this = *camera;
   model = camera->aliases[alias_num];
@@ -89,7 +89,7 @@ static const map<string, CFAColor> str2enum = {
 
 void Camera::parseCFA(const xml_node &cur) {
   if (name(cur) != "CFA" && name(cur) != "CFA2")
-    ThrowCME("parseCFA(): Not an CFA/CFA2 node!");
+    ThrowCME("Not an CFA/CFA2 node!");
 
   cfa.setSize(iPoint2D(cur.attribute("width").as_int(0),
                        cur.attribute("height").as_int(0)));
@@ -149,7 +149,7 @@ void Camera::parseCFA(const xml_node &cur) {
 
 void Camera::parseCrop(const xml_node &cur) {
   if (name(cur) != "Crop")
-    ThrowCME("parseCrop(): Not an Crop node!");
+    ThrowCME("Not an Crop node!");
 
   cropSize.x = cur.attribute("width").as_int(0);
   cropSize.y = cur.attribute("height").as_int(0);
@@ -167,7 +167,7 @@ void Camera::parseCrop(const xml_node &cur) {
 void Camera::parseBlackAreas(const xml_node &cur) {
 
   if (name(cur) != "BlackAreas")
-    ThrowCME("parseBlackAreas(): Not an BlackAreas node!");
+    ThrowCME("Not an BlackAreas node!");
 
   for (xml_node c : cur.children()) {
     if (name(c) == "Vertical") {
@@ -207,7 +207,7 @@ void Camera::parseBlackAreas(const xml_node &cur) {
 
 void Camera::parseAliases(const xml_node &cur) {
   if (name(cur) != "Aliases")
-    ThrowCME("parseAliases(): Not an Aliases node!");
+    ThrowCME("Not an Aliases node!");
 
   for (xml_node c : cur.children("Alias")) {
     aliases.emplace_back(c.child_value());
@@ -218,13 +218,13 @@ void Camera::parseAliases(const xml_node &cur) {
 
 void Camera::parseHints(const xml_node &cur) {
   if (name(cur) != "Hints")
-    ThrowCME("parseHints(): Not an Hints node!");
+    ThrowCME("Not an Hints node!");
 
   for (xml_node c : cur.children("Hint")) {
     string name = c.attribute("name").as_string();
     if (name.empty())
-      ThrowCME("CameraMetadata: Could not find name for hint for %s %s camera.",
-               make.c_str(), model.c_str());
+      ThrowCME("Could not find name for hint for %s %s camera.", make.c_str(),
+               model.c_str());
 
     string value = c.attribute("value").as_string();
 
@@ -234,17 +234,17 @@ void Camera::parseHints(const xml_node &cur) {
 
 void Camera::parseID(const xml_node &cur) {
   if (name(cur) != "ID")
-    ThrowCME("parseID(): Not an ID node!");
+    ThrowCME("Not an ID node!");
 
   string id_make = cur.attribute("make").as_string();
   if (id_make.empty())
-    ThrowCME("CameraMetadata: Could not find make for ID for %s %s camera.",
-             make.c_str(), model.c_str());
+    ThrowCME("Could not find make for ID for %s %s camera.", make.c_str(),
+             model.c_str());
 
   string id_model = cur.attribute("model").as_string();
   if (id_model.empty())
-    ThrowCME("CameraMetadata: Could not find model for ID for %s %s camera.",
-             make.c_str(), model.c_str());
+    ThrowCME("Could not find model for ID for %s %s camera.", make.c_str(),
+             model.c_str());
 
   canonical_make = id_make;
   canonical_model = id_model;
@@ -254,7 +254,7 @@ void Camera::parseID(const xml_node &cur) {
 
 void Camera::parseSensor(const xml_node &cur) {
   if (name(cur) != "Sensor")
-    ThrowCME("parseSensor(): Not an Sensor node!");
+    ThrowCME("Not an Sensor node!");
 
   auto stringToListOfInts = [this, &cur](const char *attribute) {
     vector<int> ret;
@@ -304,9 +304,8 @@ void Camera::parseCameraChild(const xml_node &cur) {
 
 const CameraSensorInfo* Camera::getSensorInfo(int iso) const {
   if (sensorInfo.empty()) {
-    ThrowCME(
-        "getSensorInfo(): Camera '%s' '%s', mode '%s' has no <Sensor> entries.",
-        make.c_str(), model.c_str(), mode.c_str());
+    ThrowCME("Camera '%s' '%s', mode '%s' has no <Sensor> entries.",
+             make.c_str(), model.c_str(), mode.c_str());
   }
 
   // If only one, just return that

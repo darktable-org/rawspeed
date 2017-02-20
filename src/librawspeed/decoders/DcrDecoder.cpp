@@ -46,7 +46,7 @@ RawImage DcrDecoder::decodeRawInternal() {
   uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getU32();
 
   if (off > mFile->getSize())
-    ThrowRDE("DCR Decoder: Offset is out of bounds");
+    ThrowRDE("Offset is out of bounds");
 
   if (c2 > mFile->getSize() - off) {
     mRaw->setError("Warning: byte count larger than file size, file probably truncated.");
@@ -60,11 +60,11 @@ RawImage DcrDecoder::decodeRawInternal() {
   if (65000 == compression) {
     TiffEntry *ifdoffset = mRootIFD->getEntryRecursive(KODAK_IFD);
     if (!ifdoffset)
-      ThrowRDE("DCR Decoder: Couldn't find the Kodak IFD offset");
+      ThrowRDE("Couldn't find the Kodak IFD offset");
     TiffRootIFD kodakifd(ifdoffset->getRootIfdData(), ifdoffset->getU32());
     TiffEntry *linearization = kodakifd.getEntryRecursive(KODAK_LINEARIZATION);
     if (!linearization || linearization->count != 1024 || linearization->type != TIFF_SHORT) {
-      ThrowRDE("DCR Decoder: Couldn't find the linearization table");
+      ThrowRDE("Couldn't find the linearization table");
     }
 
     auto linTable = linearization->getU16Array(1024);
@@ -96,7 +96,7 @@ RawImage DcrDecoder::decodeRawInternal() {
       mRaw->setTable(nullptr);
     }
   } else
-    ThrowRDE("DCR Decoder: Unsupported compression %d", compression);
+    ThrowRDE("Unsupported compression %d", compression);
 
   return mRaw;
 }
@@ -117,7 +117,7 @@ void DcrDecoder::decodeKodak65000(ByteStream &input, uint32 w, uint32 h) {
       for (uint32 i = 0; i < len; i++) {
         ushort16 value = pred[i & 1] += buf[i];
         if (value > 1023)
-          ThrowRDE("DCR Decoder: Value out of bounds %d", value);
+          ThrowRDE("Value out of bounds %d", value);
         if(uncorrectedRawValues)
           dest[x+i] = value;
         else

@@ -44,7 +44,7 @@ RawImage DcsDecoder::decodeRawInternal() {
   uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getU32();
 
   if (off > mFile->getSize())
-    ThrowRDE("DCR Decoder: Offset is out of bounds");
+    ThrowRDE("Offset is out of bounds");
 
   if (c2 > mFile->getSize() - off) {
     mRaw->setError("Warning: byte count larger than file size, file probably truncated.");
@@ -55,7 +55,7 @@ RawImage DcsDecoder::decodeRawInternal() {
 
   TiffEntry *linearization = mRootIFD->getEntryRecursive(GRAYRESPONSECURVE);
   if (!linearization || linearization->count != 256 || linearization->type != TIFF_SHORT)
-    ThrowRDE("DCS Decoder: Couldn't find the linearization table");
+    ThrowRDE("Couldn't find the linearization table");
 
   auto table = linearization->getU16Array(256);
 

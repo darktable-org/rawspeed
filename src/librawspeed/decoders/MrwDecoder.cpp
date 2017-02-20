@@ -62,7 +62,7 @@ void MrwDecoder::parseHeader() {
   data = mFile->getData(0,data_offset);
 
   if (!mFile->isValid(data_offset))
-    ThrowRDE("MRW: Data offset is invalid");
+    ThrowRDE("Data offset is invalid");
 
   // Make sure all values have at least been initialized
   raw_width = raw_height = packed = 0;
@@ -120,7 +120,7 @@ void MrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
 
   if (!rootIFD)
-    ThrowRDE("MRW: Couldn't find make and model");
+    ThrowRDE("Couldn't find make and model");
 
   auto id = rootIFD->getID();
   setMetaData(meta, id.make, id.model, "", iso);

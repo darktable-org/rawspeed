@@ -57,7 +57,7 @@ RawImage NefDecoder::decodeRawInternal() {
 
   if (mRootIFD->getEntryRecursive(MODEL)->getString() == "NIKON D100 ") { /**Sigh**/
     if (!mFile->isValid(offsets->getU32()))
-      ThrowRDE("NEF Decoder: Image data outside of file.");
+      ThrowRDE("Image data outside of file.");
     if (!D100IsCompressed(offsets->getU32())) {
       DecodeD100Uncompressed();
       return mRaw;
@@ -76,17 +76,18 @@ RawImage NefDecoder::decodeRawInternal() {
   }
 
   if (offsets->count != 1) {
-    ThrowRDE("NEF Decoder: Multiple Strips found: %u", offsets->count);
+    ThrowRDE("Multiple Strips found: %u", offsets->count);
   }
   if (counts->count != offsets->count) {
-    ThrowRDE("NEF Decoder: Byte count number does not match strip size: count:%u, strips:%u ", counts->count, offsets->count);
+    ThrowRDE(
+        "Byte count number does not match strip size: count:%u, strips:%u ",
+        counts->count, offsets->count);
   }
   if (!mFile->isValid(offsets->getU32(), counts->getU32()))
-    ThrowRDE("NEF Decoder: Invalid strip byte count. File probably truncated.");
-
+    ThrowRDE("Invalid strip byte count. File probably truncated.");
 
   if (34713 != compression)
-    ThrowRDE("NEF Decoder: Unsupported compression");
+    ThrowRDE("Unsupported compression");
 
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
@@ -181,7 +182,7 @@ void NefDecoder::DecodeUncompressed() {
   }
 
   if (slices.empty())
-    ThrowRDE("NEF Decoder: No valid slices found. File probably truncated.");
+    ThrowRDE("No valid slices found. File probably truncated.");
 
   mRaw->dim = iPoint2D(width, offY);
 
@@ -218,7 +219,9 @@ void NefDecoder::DecodeUncompressed() {
       if (i>0)
         mRaw->setError(e.what());
       else
-        ThrowRDE("NEF decoder: IO error occurred in first slice, unable to decode more. Error is: %s", e.what());
+        ThrowRDE("IO error occurred in first slice, unable to decode more. "
+                 "Error is: %s",
+                 e.what());
     }
     offY += slice.h;
   }
@@ -234,13 +237,14 @@ void NefDecoder::readCoolpixMangledRaw(ByteStream &input, iPoint2D& size, iPoint
     if ((int)input.getRemainSize() > inputPitch)
       h = input.getRemainSize() / inputPitch - 1;
     else
-      ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. Image file truncated.");
+      ThrowIOE(
+          "Not enough data to decode a single line. Image file truncated.");
   }
 
   if (offset.y > mRaw->dim.y)
-    ThrowRDE("readUncompressedRaw: Invalid y offset");
+    ThrowRDE("Invalid y offset");
   if (offset.x + size.x > mRaw->dim.x)
-    ThrowRDE("readUncompressedRaw: Invalid x offset");
+    ThrowRDE("Invalid x offset");
 
   uint32 y = offset.y;
   h = min(h + (uint32)offset.y, (uint32)mRaw->dim.y);
@@ -266,13 +270,14 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream &input, iPoint2D& size, iPoint2D
     if ((int)input.getRemainSize() > inputPitch)
       h = input.getRemainSize() / inputPitch - 1;
     else
-      ThrowIOE("readUncompressedRaw: Not enough data to decode a single line. Image file truncated.");
+      ThrowIOE(
+          "Not enough data to decode a single line. Image file truncated.");
   }
 
   if (offset.y > mRaw->dim.y)
-    ThrowRDE("readCoolpixSplitRaw: Invalid y offset");
+    ThrowRDE("Invalid y offset");
   if (offset.x + size.x > mRaw->dim.x)
-    ThrowRDE("readCoolpixSplitRaw: Invalid x offset");
+    ThrowRDE("Invalid x offset");
 
   uint32 y = offset.y;
   h = min(h + (uint32)offset.y, (uint32)mRaw->dim.y);
@@ -526,30 +531,32 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 // Note that values are scaled. See comment below on details.
 // OPTME: It would be trivial to run this multithreaded.
 void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
-  if(w<6) ThrowIOE("NEF: got a %u wide sNEF, aborting", w);
+  if (w < 6)
+    ThrowIOE("got a %u wide sNEF, aborting", w);
 
   if (input.getRemainSize() < (w*h*3)) {
     if ((uint32)input.getRemainSize() > w*3) {
       h = input.getRemainSize() / (w*3) - 1;
       mRaw->setError("Image truncated (file is too short)");
     } else
-      ThrowIOE("DecodeNikonSNef: Not enough data to decode a single line. Image file truncated.");
+      ThrowIOE(
+          "Not enough data to decode a single line. Image file truncated.");
   }
 
   // We need to read the applied whitebalance, since we should return
   // data before whitebalance, so we "unapply" it.
   TiffEntry* wb = mRootIFD->getEntryRecursive((TiffTag)12);
   if (!wb)
-    ThrowRDE("NEF Decoder: Unable to locate whitebalance needed for decompression");
+    ThrowRDE("Unable to locate whitebalance needed for decompression");
 
   if (wb->count != 4 || wb->type != TIFF_RATIONAL)
-    ThrowRDE("NEF Decoder: Whitebalance has unknown count or type");
+    ThrowRDE("Whitebalance has unknown count or type");
 
   float wb_r = wb->getFloat(0);
   float wb_b = wb->getFloat(1);
 
   if (wb_r == 0.0f || wb_b == 0.0f)
-    ThrowRDE("NEF Decoder: Whitebalance has zero value");
+    ThrowRDE("Whitebalance has zero value");
 
   mRaw->metadata.wbCoeffs[0] = wb_r;
   mRaw->metadata.wbCoeffs[1] = 1.0f;
@@ -631,7 +638,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
 ushort16* NefDecoder::gammaCurve(double pwr, double ts, int mode, int imax) {
   auto* curve = (ushort16*)alignedMallocArray<16, ushort16>(65536);
   if (curve == nullptr) {
-    ThrowRDE("NEF Decoder: Unable to allocate gamma curve");
+    ThrowRDE("Unable to allocate gamma curve");
   }
   int i;
   double g[6], bnd[2]={0,0}, r;
@@ -654,7 +661,7 @@ ushort16* NefDecoder::gammaCurve(double pwr, double ts, int mode, int imax) {
     - g[2] - g[3] - g[2]*g[3]*(log(g[3]) - 1)) - 1;
 
   if (!mode--) {
-    ThrowRDE("NEF curve: Unimplemented mode");
+    ThrowRDE("Unimplemented mode");
   }
   for (i=0; i < 0x10000; i++) {
     curve[i] = 0xffff;
