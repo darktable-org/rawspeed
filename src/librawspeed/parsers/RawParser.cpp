@@ -25,6 +25,7 @@
 #include "decoders/NakedDecoder.h"        // for NakedDecoder
 #include "decoders/RafDecoder.h"          // for RafDecoder
 #include "decoders/RawDecoderException.h" // for RawDecoderException, ThrowRDE
+#include "io/Buffer.h"                    // for Buffer
 #include "metadata/CameraMetaData.h"      // for CameraMetaData
 #include "parsers/CiffParser.h"           // for CiffParser
 #include "parsers/CiffParserException.h"  // for CiffParserException

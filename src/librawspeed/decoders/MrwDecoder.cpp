@@ -22,8 +22,9 @@
 #include "decoders/MrwDecoder.h"
 #include "common/Common.h"                          // for uchar8, uint32
 #include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/Buffer.h"                              // for Buffer
 #include "io/Endianness.h"                          // for getU16BE, getU32BE
 #include "io/IOException.h"                         // for IOException
 #include "metadata/Camera.h"                        // for Hints
@@ -40,12 +41,9 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-MrwDecoder::MrwDecoder(FileMap* file) :
-    RawDecoder(file) {
-  parseHeader();
-}
+MrwDecoder::MrwDecoder(Buffer* file) : RawDecoder(file) { parseHeader(); }
 
-int MrwDecoder::isMRW(FileMap* input) {
+int MrwDecoder::isMRW(Buffer* input) {
   const uchar8* data = input->getData(0, 4);
   return data[0] == 0x00 && data[1] == 0x4D && data[2] == 0x52 && data[3] == 0x4D;
 }

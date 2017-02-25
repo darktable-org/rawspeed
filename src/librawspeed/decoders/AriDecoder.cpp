@@ -21,8 +21,9 @@
 #include "decoders/AriDecoder.h"
 #include "common/Common.h"                // for uint32, ushort16
 #include "common/Point.h"                 // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
+#include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/Endianness.h"                // for getHostEndianness, Endiann...
 #include "io/IOException.h"               // for IOException
@@ -33,7 +34,7 @@
 
 namespace RawSpeed {
 
-AriDecoder::AriDecoder(FileMap* file) : RawDecoder(file) {
+AriDecoder::AriDecoder(Buffer* file) : RawDecoder(file) {
   if (mFile->getSize() < 4096) {
     ThrowRDE("File too small (no header)");
   }
@@ -69,7 +70,7 @@ AriDecoder::AriDecoder(FileMap* file) : RawDecoder(file) {
   }
 }
 
-bool AriDecoder::isARI(FileMap* input) {
+bool AriDecoder::isARI(Buffer* input) {
   static const char magic[] = "ARRI\x12\x34\x56\x78";
   static const size_t magic_size = sizeof(magic) - 1; // excluding \0
   const unsigned char* data = input->getData(0, magic_size);

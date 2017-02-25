@@ -21,6 +21,7 @@
 
 #include "tiff/CiffIFD.h"
 #include "common/Common.h"               // for uint32, ushort16
+#include "io/Buffer.h"                   // for Buffer
 #include "io/Endianness.h"               // for getU16LE, getU32LE
 #include "io/IOException.h"              // for IOException
 #include "parsers/CiffParserException.h" // for ThrowCPE, CiffParserException
@@ -38,7 +39,7 @@ namespace RawSpeed {
   if ((depth = (_depth) + 1) > 10)                                             \
     ThrowCPE("sub-micron matryoshka dolls are ignored");
 
-CiffIFD::CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 _depth) {
+CiffIFD::CiffIFD(Buffer* f, uint32 start, uint32 end, uint32 _depth) {
   CIFF_DEPTH(_depth);
   mFile = f;
 

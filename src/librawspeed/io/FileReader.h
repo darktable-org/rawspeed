@@ -20,16 +20,16 @@
 
 #pragma once
 
-#include "io/FileMap.h" // for FileMap
-
 namespace RawSpeed {
+
+class Buffer;
 
 class FileReader
 {
 public:
   FileReader(const char *filename);
 
-  FileMap* readFile();
+  Buffer* readFile();
   const char* Filename() const { return mFilename; }
   //  void Filename(const char * val) { mFilename = val; }
 

@@ -23,6 +23,7 @@
 #include "common/Common.h"                          // for uint32
 #include "common/Point.h"                           // for iPoint2D
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/Buffer.h"                              // for Buffer
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag::EPSONWB

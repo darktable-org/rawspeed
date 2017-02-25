@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
 
     FileReader f(argv[1]);
 
-    std::unique_ptr<FileMap> m(f.readFile());
+    std::unique_ptr<Buffer> m(f.readFile());
 
     RawParser t(m.get());
 

@@ -199,8 +199,8 @@ size_t process(const string& filename, const CameraMetaData* metadata,
 
   FileReader reader(filename.c_str());
 
-  unique_ptr<FileMap> map = unique_ptr<FileMap>(reader.readFile());
-  // FileMap* map = readFile( argv[1] );
+  unique_ptr<Buffer> map = unique_ptr<Buffer>(reader.readFile());
+  // Buffer* map = readFile( argv[1] );
 
   Timer t;
 

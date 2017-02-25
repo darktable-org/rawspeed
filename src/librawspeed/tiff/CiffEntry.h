@@ -22,12 +22,13 @@
 #pragma once
 
 #include "common/Common.h" // for uint32, uchar8, ushort16
-#include "io/FileMap.h"    // for FileMap
 #include "tiff/CiffTag.h"  // for CiffTag
 #include <string>          // for string
 #include <vector>          // for vector
 
 namespace RawSpeed {
+
+class Buffer;
 
 /*
  * Tag data type information.
@@ -46,7 +47,7 @@ enum CiffDataType {
 class CiffEntry
 {
 public:
-  CiffEntry(FileMap* f, uint32 value_data, uint32 offset);
+  CiffEntry(Buffer* f, uint32 value_data, uint32 offset);
   ~CiffEntry();
   uint32 getU32(uint32 num=0);
   ushort16 getU16(uint32 num=0);

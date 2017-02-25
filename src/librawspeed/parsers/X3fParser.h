@@ -21,11 +21,12 @@
 #pragma once
 
 #include "common/Common.h" // for uint32
-#include "io/FileMap.h"    // for FileMap
 #include <map>             // for map
 #include <string>          // for string
 
 namespace RawSpeed {
+
+class Buffer;
 
 class ByteStream;
 
@@ -76,7 +77,7 @@ public:
 
 class X3fParser {
 public:
-  X3fParser(FileMap* file);
+  X3fParser(Buffer* file);
   ~X3fParser();
   RawDecoder* getDecoder();
 
@@ -86,7 +87,7 @@ protected:
   void freeObjects();
   ByteStream *bytes;
   X3fDecoder *decoder;
-  FileMap* mFile;
+  Buffer* mFile;
 };
 
 } // namespace RawSpeed

@@ -23,7 +23,6 @@
 #include "common/Common.h"                // for uint32
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "io/FileMap.h"                   // for FileMap
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
 #include <vector>                         // for vector
 
@@ -31,10 +30,12 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
+class Buffer;
+
 class DngDecoder final : public AbstractTiffDecoder
 {
 public:
-  DngDecoder(TiffRootIFDOwner&& rootIFD, FileMap* file);
+  DngDecoder(TiffRootIFDOwner&& rootIFD, Buffer* file);
 
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;

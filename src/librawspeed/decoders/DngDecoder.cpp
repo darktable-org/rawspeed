@@ -18,14 +18,14 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
-
+#include "rawspeedconfig.h" // for HAVE_JPEG, HAVE_ZLIB
 #include "decoders/DngDecoder.h"
 #include "common/Common.h"                // for uint32, uchar8, writeLog
 #include "common/DngOpcodes.h"            // for DngOpcodes
 #include "common/Point.h"                 // for iPoint2D, iRectangle2D
 #include "decoders/DngDecoderSlices.h"    // for DngDecoderSlices, DngSlice...
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
+#include "io/Buffer.h"                    // for Buffer
 #include "metadata/BlackArea.h"           // for BlackArea
 #include "metadata/Camera.h"              // for Camera
 #include "metadata/CameraMetaData.h"      // for CameraMetaData
@@ -38,7 +38,7 @@
 #include <cstdio>                         // for printf
 #include <cstring>                        // for memset
 #include <map>                            // for map
-#include <memory>                         // for unique_ptr
+#include <memory>                         // for unique_ptr, allocator_trai...
 #include <stdexcept>                      // for out_of_range
 #include <string>                         // for string, operator+, basic_s...
 #include <vector>                         // for vector, allocator
@@ -47,9 +47,8 @@ using namespace std;
 
 namespace RawSpeed {
 
-DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, FileMap* file)
-  : AbstractTiffDecoder(move(rootIFD), file)
-{
+DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, Buffer* file)
+    : AbstractTiffDecoder(move(rootIFD), file) {
   const uchar8* v = mRootIFD->getEntryRecursive(DNGVERSION)->getData(4);
 
   if (v[0] != 1)

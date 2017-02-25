@@ -21,16 +21,17 @@
 #pragma once
 
 #include "common/Common.h" // for uint32
-#include "io/FileMap.h"    // for FileMap
 
 namespace RawSpeed {
+
+class Buffer;
 
 class FileWriter
 {
 public:
   FileWriter(const char *filename);
 
-  void writeFile(FileMap* fileMap, uint32 size = 0);
+  void writeFile(Buffer* fileMap, uint32 size = 0);
   const char* Filename() const { return mFilename; }
   //  void Filename(const char * val) { mFilename = val; }
 

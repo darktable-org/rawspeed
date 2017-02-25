@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "io/FileMap.h" // for FileMap
-
 namespace RawSpeed {
+
+class Buffer;
 
 class CameraMetaData;
 
@@ -30,11 +30,11 @@ class RawDecoder;
 
 class RawParser final {
 public:
-  RawParser(FileMap* inputData) : mInput(inputData) {}
+  RawParser(Buffer* inputData) : mInput(inputData) {}
   RawDecoder* getDecoder(const CameraMetaData* meta = nullptr);
 
 protected:
-  FileMap *mInput;
+  Buffer* mInput;
 };
 
 } // namespace RawSpeed

@@ -22,8 +22,9 @@
 #include "decoders/KdcDecoder.h"
 #include "common/Common.h"                          // for uint32, ushort16
 #include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/Buffer.h"                              // for Buffer
 #include "metadata/Camera.h"                        // for Hints
 #include "parsers/TiffParserException.h"            // for TiffParserException
 #include "tiff/TiffEntry.h"                         // for TiffEntry

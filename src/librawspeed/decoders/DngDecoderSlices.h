@@ -25,12 +25,13 @@
 #include "common/Common.h"    // for uint32
 #include "common/RawImage.h"  // for RawImage
 #include "common/Threading.h" // for pthread_t
-#include "io/FileMap.h"       // for FileMap
 #include <memory>             // for unique_ptr
 #include <queue>              // for queue
 #include <vector>             // for vector
 
 namespace RawSpeed {
+
+class Buffer;
 
 class DngDecoderSlices;
 
@@ -65,14 +66,14 @@ public:
 class DngDecoderSlices
 {
 public:
-  DngDecoderSlices(FileMap *file, const RawImage &img, int compression);
+  DngDecoderSlices(Buffer* file, const RawImage& img, int compression);
   void addSlice(const DngSliceElement &slice);
   void startDecoding();
   void decodeSlice(DngDecoderThread* t);
   int __attribute__((pure)) size();
   std::queue<DngSliceElement> slices;
   std::vector<std::unique_ptr<DngDecoderThread>> threads;
-  FileMap *mFile;
+  Buffer* mFile;
   RawImage mRaw;
   bool mFixLjpeg;
   uint32 mPredictor;

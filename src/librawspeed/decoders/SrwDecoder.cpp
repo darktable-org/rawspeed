@@ -23,8 +23,9 @@
 #include "common/Common.h"                // for uint32, ushort16, int32
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable::signExtend
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
+#include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/Endianness.h"                // for getHostEndianness, Endiann...
 #include "metadata/Camera.h"              // for Hints

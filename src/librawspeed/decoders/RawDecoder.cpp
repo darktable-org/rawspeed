@@ -19,13 +19,13 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
-
+#include "rawspeedconfig.h" // for HAVE_PTHREAD
 #include "decoders/RawDecoder.h"
 #include "common/Common.h"                          // for uint32, getThrea...
 #include "common/Point.h"                           // for iPoint2D, iRecta...
 #include "decoders/RawDecoderException.h"           // for ThrowRDE, RawDec...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/Buffer.h"                              // for Buffer
 #include "io/FileIOException.h"                     // for FileIOException
 #include "io/IOException.h"                         // for IOException
 #include "metadata/BlackArea.h"                     // for BlackArea
@@ -46,7 +46,7 @@ using namespace std;
 
 namespace RawSpeed {
 
-RawDecoder::RawDecoder(FileMap* file) : mRaw(RawImage::create()), mFile(file) {
+RawDecoder::RawDecoder(Buffer* file) : mRaw(RawImage::create()), mFile(file) {
   failOnUnknown = false;
   interpolateBadPixels = true;
   applyStage1DngOpcodes = true;

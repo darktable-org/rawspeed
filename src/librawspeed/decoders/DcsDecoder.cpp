@@ -20,13 +20,14 @@
 */
 
 #include "decoders/DcsDecoder.h"
-#include "common/Common.h"                          // for uint32, ushort16
+#include "common/Common.h"                          // for uint32
 #include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/Buffer.h"                              // for Buffer
 #include "tiff/TiffEntry.h"                         // for TiffEntry, TiffD...
 #include "tiff/TiffIFD.h"                           // for TiffIFD, TiffRoo...
-#include "tiff/TiffTag.h"                           // for TiffTag::IMAGEWIDTH
+#include "tiff/TiffTag.h"                           // for TiffTag::GRAYRES...
 #include <memory>                                   // for unique_ptr
 #include <vector>                                   // for vector
 

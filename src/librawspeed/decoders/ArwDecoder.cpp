@@ -23,11 +23,12 @@
 #include "common/Common.h"                          // for uint32, uchar8
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoder.h"                    // for RawDecoderThread
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
-#include "decompressors/HuffmanTable.h"             // for HuffmanTable::signExtend
+#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
+#include "decompressors/HuffmanTable.h"             // for HuffmanTable
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/BitPumpMSB.h"                          // for BitPumpMSB
 #include "io/BitPumpPlain.h"                        // for BitPumpPlain
+#include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for getU32BE, getU32LE
 #include "io/IOException.h"                         // for IOException
@@ -37,7 +38,7 @@
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag::DNGPRIV...
 #include <cassert>                                  // for assert
-#include <cstring>                                  // for memcpy
+#include <cstring>                                  // for memcpy, size_t
 #include <exception>                                // for exception
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for operator==, basi...

@@ -25,9 +25,10 @@
 #include "common/RawImage.h"     // for RawImage
 #include "decoders/RawDecoder.h" // for RawDecoder
 #include "io/BitPumpJPEG.h"      // for BitPumpJPEG
-#include "io/FileMap.h"          // for FileMap
 
 namespace RawSpeed {
+
+class Buffer;
 
 class CameraMetaData;
 
@@ -35,7 +36,7 @@ class CiffIFD;
 
 class CrwDecoder final : public RawDecoder {
 public:
-  CrwDecoder(CiffIFD *rootIFD, FileMap* file);
+  CrwDecoder(CiffIFD* rootIFD, Buffer* file);
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;

@@ -22,6 +22,7 @@
 #include "common/Common.h"                // for uint32, uchar8
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "decoders/X3fDecoder.h"          // for X3fDecoder
+#include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/Endianness.h"                // for getHostEndianness, Endiann...
 #include "io/IOException.h"               // for IOException
@@ -34,7 +35,7 @@ using namespace std;
 
 namespace RawSpeed {
 
-X3fParser::X3fParser(FileMap* file) {
+X3fParser::X3fParser(Buffer* file) {
   decoder = nullptr;
   bytes = nullptr;
   mFile = file;

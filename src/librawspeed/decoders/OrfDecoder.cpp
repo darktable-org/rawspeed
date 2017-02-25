@@ -22,9 +22,10 @@
 #include "decoders/OrfDecoder.h"
 #include "common/Common.h"                          // for uint32, ushort16
 #include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/BitPumpMSB.h"                          // for BitPumpMSB
+#include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/IOException.h"                         // for IOException
 #include "metadata/Camera.h"                        // for Hints
@@ -277,7 +278,7 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     if(mRootIFD->hasEntryRecursive(OLYMPUSIMAGEPROCESSING)) {
       TiffEntry *img_entry = mRootIFD->getEntryRecursive(OLYMPUSIMAGEPROCESSING);
       try {
-        // get makernote ifd with containing FileMap
+        // get makernote ifd with containing Buffer
         TiffRootIFD image_processing(img_entry->getRootIfdData(), img_entry->getU32());
 
         // Get the WB

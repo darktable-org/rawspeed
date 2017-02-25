@@ -24,7 +24,6 @@
 #include "common/Common.h"  // for uchar8, int32, uint32, ushort16, roundUp
 #include "common/Memory.h"  // for alignedMalloc
 #include "io/Buffer.h"      // for Buffer::size_type, Buffer, DataBuffer
-#include "io/FileMap.h"     // for FileMap
 #include "io/IOException.h" // for ThrowIOE
 #include <cstddef>          // for ptrdiff_t
 #include <cstring>          // for memcmp, memcpy
@@ -49,10 +48,10 @@ public:
       : DataBuffer(buffer, inNativeByteOrder_), pos(offset) {}
 
   // deprecated:
-  ByteStream(const FileMap *f, size_type offset, size_type size_,
+  ByteStream(const Buffer* f, size_type offset, size_type size_,
              bool inNativeByteOrder_ = true)
       : ByteStream(*f, offset, size_, inNativeByteOrder_) {}
-  ByteStream(const FileMap *f, size_type offset, bool inNativeByteOrder_ = true)
+  ByteStream(const Buffer* f, size_type offset, bool inNativeByteOrder_ = true)
       : ByteStream(*f, offset, inNativeByteOrder_) {}
 
   // return ByteStream that starts at given offset
@@ -72,9 +71,11 @@ public:
     check(0);
   }
   inline size_type getRemainSize() const { return size-pos; }
-  inline const uchar8* peekData(size_type count) { return FileMap::getData(pos, count); }
+  inline const uchar8* peekData(size_type count) {
+    return Buffer::getData(pos, count);
+  }
   inline const uchar8* getData(size_type count) {
-    const uchar8* ret = FileMap::getData(pos, count);
+    const uchar8* ret = Buffer::getData(pos, count);
     pos += count;
     return ret;
   }

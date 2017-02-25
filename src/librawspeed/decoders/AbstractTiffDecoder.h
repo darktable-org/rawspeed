@@ -21,9 +21,8 @@
 #pragma once
 
 #include "decoders/RawDecoder.h" // for RawDecoder
-#include "io/FileMap.h"          // for FileMap
 #include "tiff/TiffIFD.h"        // for TiffID, TiffRootIFD, TiffRootIFDOwner
-#include "tiff/TiffTag.h"        // for TiffTag, TiffTag::IMAGEWIDTH
+#include "tiff/TiffTag.h"        // for TiffTag::IMAGEWIDTH, TiffTag
 #include <algorithm>             // for move
 #include <memory>                // for unique_ptr
 #include <string>                // for string
@@ -32,13 +31,15 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
+class Buffer;
+
 class AbstractTiffDecoder : public RawDecoder
 {
 protected:
   TiffRootIFDOwner mRootIFD;
 public:
-  AbstractTiffDecoder(TiffRootIFDOwner&& root, FileMap* file)
-    : RawDecoder(file), mRootIFD(std::move(root)) {}
+  AbstractTiffDecoder(TiffRootIFDOwner&& root, Buffer* file)
+      : RawDecoder(file), mRootIFD(std::move(root)) {}
 
   TiffIFD* getRootIFD() final { return mRootIFD.get(); }
 

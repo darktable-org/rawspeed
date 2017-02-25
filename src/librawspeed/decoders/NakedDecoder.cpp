@@ -22,12 +22,16 @@
 #include "decoders/NakedDecoder.h"
 #include "common/Common.h"                          // for BitOrder, BitOrd...
 #include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "metadata/Camera.h"                        // for Camera, Hints
 #include <map>                                      // for map
 #include <stdexcept>                                // for out_of_range
 #include <string>                                   // for string, basic_st...
+
+namespace RawSpeed {
+class Buffer;
+} // namespace RawSpeed
 
 using namespace std;
 
@@ -35,7 +39,7 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-NakedDecoder::NakedDecoder(FileMap* file, const Camera* c)
+NakedDecoder::NakedDecoder(Buffer* file, const Camera* c)
     : RawDecoder(file), cam(c) {}
 
 static const map<string, BitOrder> order2enum = {

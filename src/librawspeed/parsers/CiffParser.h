@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include "io/FileMap.h" // for FileMap
-
 namespace RawSpeed {
+
+class Buffer;
 
 class CiffIFD;
 
@@ -31,7 +31,7 @@ class RawDecoder;
 
 class CiffParser final {
 public:
-  CiffParser(FileMap* input);
+  CiffParser(Buffer* input);
   ~CiffParser();
 
   void parseData();
@@ -41,7 +41,7 @@ public:
   /* Merges root of other CIFF into this - clears the root of the other */
   void MergeIFD(CiffParser* other_ciff);
 protected:
-  FileMap *mInput;
+  Buffer* mInput;
   CiffIFD* mRootIFD;
 };
 

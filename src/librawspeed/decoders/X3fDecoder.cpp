@@ -44,7 +44,7 @@ using namespace std;
 
 namespace RawSpeed {
 
-X3fDecoder::X3fDecoder(FileMap *file) : RawDecoder(file) {
+X3fDecoder::X3fDecoder(Buffer* file) : RawDecoder(file) {
   bytes = new ByteStream(file, 0, getHostEndianness() == little);
 }
 
@@ -461,13 +461,12 @@ int X3fDecoder::SigmaDecode(BitPumpMSB *bits) {
   return v;
 }
 
-FileMap* X3fDecoder::getCompressedData()
-{
+Buffer* X3fDecoder::getCompressedData() {
   auto img = mImages.begin();
   for (; img !=  mImages.end(); ++img) {
     X3fImage cimg = *img;
     if (cimg.type == 1 || cimg.type == 3) {
-      return new FileMap(mFile->getSubView(cimg.dataOffset, cimg.dataSize));
+      return new Buffer(mFile->getSubView(cimg.dataOffset, cimg.dataSize));
     }
   }
   return nullptr;

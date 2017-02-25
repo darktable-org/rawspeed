@@ -23,8 +23,9 @@
 #include "common/Common.h"                          // for uint32, uchar8
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoder.h"                    // for RawDecoderThread
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "metadata/Camera.h"                        // for Hints
 #include "metadata/ColorFilterArray.h"              // for CFAColor::CFA_GREEN

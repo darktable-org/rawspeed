@@ -36,7 +36,7 @@ namespace RawSpeed {
 
 FileReader::FileReader(const char *_filename) : mFilename(_filename) {}
 
-FileMap* FileReader::readFile() {
+Buffer* FileReader::readFile() {
 #if defined(__unix__) || defined(__APPLE__)
   int bytes_read = 0;
   FILE *file;

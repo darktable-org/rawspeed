@@ -24,18 +24,18 @@
 #include "common/Common.h"                // for uint32
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "io/FileMap.h"                   // for FileMap
 #include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
 #include <string>                         // for string
 
 namespace RawSpeed {
 
 class CameraMetaData;
+class Buffer;
 
 class MosDecoder final : public AbstractTiffDecoder
 {
 public:
-  MosDecoder(TiffRootIFDOwner&& rootIFD, FileMap* file);
+  MosDecoder(TiffRootIFDOwner&& rootIFD, Buffer* file);
 
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;

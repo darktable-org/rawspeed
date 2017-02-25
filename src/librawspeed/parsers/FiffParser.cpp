@@ -22,6 +22,7 @@
 
 #include "parsers/FiffParser.h"
 #include "common/Common.h"               // for make_unique, uint32, uchar8
+#include "io/Buffer.h"                   // for Buffer
 #include "io/ByteStream.h"               // for ByteStream
 #include "io/Endianness.h"               // for getU32BE, getHostEndianness
 #include "parsers/FiffParserException.h" // for ThrowFPE
@@ -39,7 +40,7 @@ namespace RawSpeed {
 
 class RawDecoder;
 
-FiffParser::FiffParser(FileMap* inputData) : mInput(inputData) {}
+FiffParser::FiffParser(Buffer* inputData) : mInput(inputData) {}
 
 RawDecoder* FiffParser::getDecoder() {
   const uchar8* data = mInput->getData(0, 104);

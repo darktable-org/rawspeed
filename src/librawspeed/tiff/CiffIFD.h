@@ -22,7 +22,6 @@
 #pragma once
 
 #include "common/Common.h" // for uint32
-#include "io/FileMap.h"    // for FileMap
 #include "tiff/CiffTag.h"  // for CiffTag
 #include <map>             // for map
 #include <string>          // for string
@@ -30,11 +29,13 @@
 
 namespace RawSpeed {
 
+class Buffer;
+
 class CiffEntry;
 
 class CiffIFD final {
 public:
-  CiffIFD(FileMap* f, uint32 start, uint32 end, uint32 depth=0);
+  CiffIFD(Buffer* f, uint32 start, uint32 end, uint32 depth = 0);
   ~CiffIFD();
   std::vector<CiffIFD*> mSubIFD;
   std::map<CiffTag, CiffEntry*> mEntry;
@@ -47,10 +48,10 @@ public:
   CiffEntry *getEntryRecursiveWhere(CiffTag tag, const std::string &isValue);
   std::vector<CiffIFD *> getIFDsWithTagWhere(CiffTag tag, const std::string &isValue);
   std::vector<CiffIFD*> getIFDsWithTagWhere(CiffTag tag, uint32 isValue);
-  FileMap* getFileMap() { return mFile; }
+  Buffer* getBuffer() { return mFile; }
 
 protected:
-  FileMap *mFile;
+  Buffer* mFile;
   uint32 depth;
 };
 

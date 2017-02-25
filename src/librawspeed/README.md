@@ -42,11 +42,11 @@ You can disable specific cameras in the xml file, or if you would want to do it 
 
 ##Using RawSpeed
 
-You need to have the file data in a FileMap object. This can either be created by supplying the file content in memory using FileMap(buffer_pointer, size_of_buffer), or use a “FileReader” object to read the content of a file, like this:
+You need to have the file data in a Buffer object. This can either be created by supplying the file content in memory using Buffer(buffer_pointer, size_of_buffer), or use a “FileReader” object to read the content of a file, like this:
 
 ```cpp
 FileReader reader(filename);
-FileMap* map = nullptr;
+Buffer* map = nullptr;
 try {
   map = reader.readFile();
 } catch (FileIOException &e) {

@@ -23,9 +23,10 @@
 #include "common/Common.h"                          // for uint32, uchar8
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoder.h"                    // for RawDecoder
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/BitPumpMSB32.h"                        // for BitPumpMSB32
+#include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for getU32LE, getLE
 #include "tiff/TiffEntry.h"                         // for TiffEntry
@@ -43,9 +44,8 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, FileMap* file)
-  : AbstractTiffDecoder(move(rootIFD), file)
-{
+MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, Buffer* file)
+    : AbstractTiffDecoder(move(rootIFD), file) {
   black_level = 0;
 
   if (mRootIFD->getEntryRecursive(MAKE)) {

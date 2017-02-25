@@ -20,6 +20,7 @@
 
 #include "io/FileWriter.h"
 #include "common/Common.h"      // for uint32
+#include "io/Buffer.h"          // for Buffer
 #include "io/FileIOException.h" // for FileIOException
 #include <cstdio>               // for fclose, fopen, fwrite, FILE, NULL
 
@@ -33,7 +34,7 @@ namespace RawSpeed {
 
 FileWriter::FileWriter(const char *_filename) : mFilename(_filename) {}
 
-void FileWriter::writeFile(FileMap* filemap, uint32 size) {
+void FileWriter::writeFile(Buffer* filemap, uint32 size) {
   if (size > filemap->getSize())
     size = filemap->getSize();
 #if defined(__unix__) || defined(__APPLE__)

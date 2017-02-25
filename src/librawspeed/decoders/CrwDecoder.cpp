@@ -47,8 +47,8 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-CrwDecoder::CrwDecoder(CiffIFD *rootIFD, FileMap* file) :
-    RawDecoder(file), mRootIFD(rootIFD) {
+CrwDecoder::CrwDecoder(CiffIFD* rootIFD, Buffer* file)
+    : RawDecoder(file), mRootIFD(rootIFD) {
   mHuff[0] = nullptr;
   mHuff[1] = nullptr;
 }

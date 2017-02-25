@@ -21,6 +21,7 @@
 
 #include "tiff/CiffEntry.h"
 #include "common/Common.h"               // for uchar8, uint32, ushort16
+#include "io/Buffer.h"                   // for Buffer
 #include "io/Endianness.h"               // for getU32LE, getU16LE
 #include "parsers/CiffParserException.h" // for ThrowCPE
 #include <cstdio>                        // for sprintf
@@ -32,7 +33,7 @@ using namespace std;
 
 namespace RawSpeed {
 
-CiffEntry::CiffEntry(FileMap* f, uint32 value_data, uint32 offset) {
+CiffEntry::CiffEntry(Buffer* f, uint32 value_data, uint32 offset) {
   own_data = nullptr;
   ushort16 p = getU16LE(f->getData(offset, 2));
   tag = (CiffTag) (p & 0x3fff);

@@ -30,7 +30,6 @@
 #include "common/RawImage.h"
 #include "decoders/RawDecoder.h"
 #include "io/Buffer.h"
-#include "io/FileMap.h"
 #include "io/FileReader.h"
 #include "metadata/BlackArea.h"
 #include "metadata/Camera.h"

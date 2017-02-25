@@ -38,8 +38,8 @@
 #include "decoders/Rw2Decoder.h"         // for Rw2Decoder
 #include "decoders/SrwDecoder.h"         // for SrwDecoder
 #include "decoders/ThreefrDecoder.h"     // for ThreefrDecoder
+#include "io/Buffer.h"                   // for Buffer
 #include "io/ByteStream.h"               // for ByteStream
-#include "io/FileMap.h"                  // for FileMap
 #include "parsers/TiffParserException.h" // for TiffParserException
 #include "tiff/TiffEntry.h"              // for TiffEntry
 #include "tiff/TiffTag.h"                // for TiffTag::DNGVERSION, TiffTa...
@@ -75,7 +75,7 @@ TiffRootIFDOwner parseTiff(const Buffer &data) {
 }
 
 RawDecoder* makeDecoder(TiffRootIFDOwner root, Buffer &data) {
-  FileMap* mInput = &data;
+  Buffer* mInput = &data;
   if (!root)
     ThrowTPE("TiffIFD is null.");
 

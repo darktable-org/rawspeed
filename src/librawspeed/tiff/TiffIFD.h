@@ -25,7 +25,6 @@
 #include "io/Buffer.h"                   // for Buffer (ptr only), DataBuffer
 #include "io/ByteStream.h"               // for ByteStream
 #include "io/Endianness.h"               // for getHostEndianness, Endianne...
-#include "io/FileMap.h"                  // for FileMap
 #include "parsers/TiffParserException.h" // for ThrowTPE
 #include "tiff/TiffTag.h"                // for TiffTag
 #include <map>                           // for map, _Rb_tree_const_iterator
@@ -111,7 +110,7 @@ inline bool isTiffInNativeByteOrder(const ByteStream& bs, uint32 pos, const char
   ThrowTPE("Failed to parse TIFF endianess information in %s.", context);
 }
 
-inline Endianness getTiffEndianness(const FileMap* file) {
+inline Endianness getTiffEndianness(const Buffer* file) {
   ushort16 magic = *(ushort16*)file->getData(0, 2);
   if (magic == 0x4949)
     return little;

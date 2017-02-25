@@ -24,11 +24,12 @@
 #include "common/Common.h"                // for uint32, ushort16
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "io/FileMap.h"                   // for FileMap
 #include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
 #include <algorithm>                      // for move
 
 namespace RawSpeed {
+
+class Buffer;
 
 class ByteStream;
 
@@ -39,8 +40,8 @@ class DcrDecoder final : public AbstractTiffDecoder
 public:
   // please revert _this_ commit, once IWYU can handle inheriting constructors
   // using AbstractTiffDecoder::AbstractTiffDecoder;
-  DcrDecoder(TiffRootIFDOwner&& root, FileMap* file)
-    : AbstractTiffDecoder(move(root), file) {}
+  DcrDecoder(TiffRootIFDOwner&& root, Buffer* file)
+      : AbstractTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;

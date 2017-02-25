@@ -22,8 +22,9 @@
 #include "decoders/PefDecoder.h"
 #include "common/Common.h"                    // for uint32, BitOrder::BitO...
 #include "common/Point.h"                     // for iPoint2D
-#include "decoders/RawDecoderException.h"     // for ThrowRDE
+#include "decoders/RawDecoderException.h"     // for RawDecoderException (p...
 #include "decompressors/PentaxDecompressor.h" // for decodePentax
+#include "io/Buffer.h"                        // for Buffer
 #include "io/ByteStream.h"                    // for ByteStream
 #include "io/IOException.h"                   // for IOException
 #include "metadata/ColorFilterArray.h"        // for CFAColor::CFA_GREEN

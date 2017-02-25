@@ -24,7 +24,6 @@
 #include "common/Common.h" // for uint32, uchar8, uint64
 #include "io/Buffer.h"     // for Buffer::size_type, BUFFER_PADDING
 #include "io/ByteStream.h"  // for ByteStream
-#include "io/FileMap.h"     // for FileMap
 #include "io/IOException.h" // for IOException (ptr only), ThrowIOE
 #include <cassert>          // for assert
 #include <cstring>          // for memcpy
@@ -95,8 +94,7 @@ public:
       : ByteStream(s.getSubStream(s.getPosition(), s.getRemainSize())) {}
 
   // deprecated:
-  BitStream(FileMap* f, size_type offset)
-    : ByteStream(f->getSubView(offset)) {}
+  BitStream(Buffer* f, size_type offset) : ByteStream(f->getSubView(offset)) {}
 
   inline void fill(uint32 nbits = Cache::MaxGetBits) {
     assert(nbits <= Cache::MaxGetBits);

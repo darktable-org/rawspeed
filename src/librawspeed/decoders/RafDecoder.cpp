@@ -22,8 +22,9 @@
 #include "decoders/RafDecoder.h"
 #include "common/Common.h"                          // for uint32, ushort16
 #include "common/Point.h"                           // for iPoint2D, iRecta...
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for getHostEndianness
 #include "metadata/BlackArea.h"                     // for BlackArea
@@ -44,7 +45,7 @@ using namespace std;
 
 namespace RawSpeed {
 
-bool RafDecoder::isRAF(FileMap* input) {
+bool RafDecoder::isRAF(Buffer* input) {
   static const char magic[] = "FUJIFILMCCD-RAW ";
   static const size_t magic_size = sizeof(magic) - 1; // excluding \0
   const unsigned char* data = input->getData(0, magic_size);

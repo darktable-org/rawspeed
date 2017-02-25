@@ -22,6 +22,7 @@
 #include "parsers/CiffParser.h"
 #include "common/Common.h"               // for trimSpaces
 #include "decoders/CrwDecoder.h"         // for CrwDecoder
+#include "io/Buffer.h"                   // for Buffer
 #include "parsers/CiffParserException.h" // for ThrowCPE, CiffParserException
 #include "tiff/CiffEntry.h"              // for CiffEntry
 #include "tiff/CiffIFD.h"                // for CiffIFD
@@ -37,7 +38,7 @@ namespace RawSpeed {
 
 class RawDecoder;
 
-CiffParser::CiffParser(FileMap *inputData)
+CiffParser::CiffParser(Buffer* inputData)
     : mInput(inputData), mRootIFD(nullptr) {}
 
 CiffParser::~CiffParser() {
