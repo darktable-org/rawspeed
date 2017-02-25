@@ -7,7 +7,6 @@ FILE(GLOB IO_SOURCES
   "BitStream.h"
   "Buffer.cpp"
   "Buffer.h"
-  "ByteStream.cpp"
   "ByteStream.h"
   "Endianness.h"
   "FileIOException.h"

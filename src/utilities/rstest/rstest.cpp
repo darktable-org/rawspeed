@@ -1,4 +1,6 @@
 /*
+    RawSpeed - RAW file decoder.
+
     Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
