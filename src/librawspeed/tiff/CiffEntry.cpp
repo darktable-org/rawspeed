@@ -41,11 +41,11 @@ CiffEntry::CiffEntry(FileMap* f, uint32 value_data, uint32 offset) {
   if (datalocation == 0x0000) { // Data is offset in value_data
     bytesize = getU32LE(f->getData(offset + 2, 4));
     data_offset = getU32LE(f->getData(offset + 6, 4)) + value_data;
-    data = f->getDataWrt(data_offset, bytesize);
+    data = f->getData(data_offset, bytesize);
   } else if (datalocation == 0x4000) { // Data is stored directly in entry
     data_offset = offset + 2;
     bytesize = 8; // Maximum of 8 bytes of data (the size and offset fields)
-    data = f->getDataWrt(data_offset, bytesize);
+    data = f->getData(data_offset, bytesize);
   } else
     ThrowCPE("Don't understand data location 0x%x\n", datalocation);
 
