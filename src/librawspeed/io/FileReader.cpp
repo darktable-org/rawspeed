@@ -21,8 +21,10 @@
 #include "io/FileReader.h"
 #include "io/Buffer.h"          // for Buffer
 #include "io/FileIOException.h" // for FileIOException
+#include <algorithm>            // for move
 #include <cstdio>               // for fclose, fseek, fopen, fread, ftell
 #include <fcntl.h>              // for SEEK_END, SEEK_SET
+#include <memory>               // for unique_ptr
 
 #if !defined(__unix__) && !defined(__APPLE__)
 #include <io.h>
@@ -38,7 +40,6 @@ FileMap* FileReader::readFile() {
 #if defined(__unix__) || defined(__APPLE__)
   int bytes_read = 0;
   FILE *file;
-  char *dest;
   long size;
 
   file = fopen(mFilename, "rb");
@@ -52,25 +53,16 @@ FileMap* FileReader::readFile() {
   }
   fseek(file, 0, SEEK_SET);
 
-#if 0
-  // Not used, as it is slower than sync read
-
-  uchar8* pa = (uchar8*)mmap(0, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
-  FileMap *fileData = new FileMap(pa, size);
-
-#else
-  auto *fileData = new FileMap(size);
-
-  dest = (char *)fileData->getDataWrt(0, size);
-  bytes_read = fread(dest, 1, size, file);
+  auto dest = Buffer::Create(size);
+  bytes_read = fread(dest.get(), 1, size, file);
   fclose(file);
-  if (size != bytes_read) {
-    delete fileData;
+  if (size != bytes_read)
     ThrowFIE("Could not read file.");
-  }
-#endif
+
+  auto* fileData = new Buffer(move(dest), size);
 
 #else // __unix__
+
   HANDLE file_h;  // File handle
   file_h = CreateFile(mFilename, GENERIC_READ, FILE_SHARE_READ, nullptr,
                       OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
@@ -84,18 +76,20 @@ FileMap* FileReader::readFile() {
   if (!f_size.LowPart)
     ThrowFIE("File is 0 bytes.");
 
-  FileMap *fileData = new FileMap(f_size.LowPart);
+  auto dest = Buffer::Create(f_size.LowPart);
 
   DWORD bytes_read;
-  if (!ReadFile(file_h, fileData->getDataWrt(0, fileData->getSize()),
-                fileData->getSize(), &bytes_read, nullptr)) {
+  if (!ReadFile(file_h, dest.get(), f_size.LowPart, &bytes_read, nullptr)) {
     CloseHandle(file_h);
-    delete fileData;
     ThrowFIE("Could not read file.");
   }
+
   CloseHandle(file_h);
 
+  auto* fileData = new Buffer(move(dest), f_size.LowPart);
+
 #endif // __unix__
+
   return fileData;
 }
 
