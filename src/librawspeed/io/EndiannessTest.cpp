@@ -104,8 +104,8 @@ protected:
       memcpy(&in, &(v.first), sizeof(T2));
       memcpy(&expected, &(v.second), sizeof(T2));
     } else {
-      memcpy(&in, &(v.first), sizeof(T2));
-      memcpy(&expected, &(v.second), sizeof(T2));
+      memcpy(&in, &(v.second), sizeof(T2));
+      memcpy(&expected, &(v.first), sizeof(T2));
     }
   }
   T2 getByteSwappedT(const void* data, bool bswap) {
