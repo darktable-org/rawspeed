@@ -123,7 +123,12 @@ protected:
   ushort16 expected; // expected output
 };
 
-#define ROWS(v, p, pv) make_tuple((v), (p), ((v) <= (pv)) ? (v) : (pv)),
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+#define ROW(v, p, pv) make_tuple((v), (p), MIN(pv, MAX(v, 0))),
+
+#define ROWS(v, p, pv) ROW(-v, p, 0) ROW(v, p, pv)
 
 #define THREEROWS(v, p)                                                        \
   ROWS(((1 << (v)) - 1), (p), ((1 << (p)) - 1))                                \
@@ -150,6 +155,11 @@ static const ClampBitsType ClampBitsValues[] = {
 INSTANTIATE_TEST_CASE_P(ClampBitsTest, ClampBitsTest,
                         ::testing::ValuesIn(ClampBitsValues));
 TEST_P(ClampBitsTest, ClampBitsTest) { ASSERT_EQ(clampBits(in, n), expected); }
+TEST(ClampBitsDeathTest, Only16Bit) {
+#ifndef NDEBUG
+  ASSERT_DEATH({ ASSERT_EQ(clampBits(0, 17), 0); }, "n <= 16");
+#endif
+}
 
 using TrimSpacesType = std::tr1::tuple<string, string>;
 class TrimSpacesTest : public ::testing::TestWithParam<TrimSpacesType> {
