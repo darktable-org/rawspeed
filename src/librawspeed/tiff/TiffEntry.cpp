@@ -133,10 +133,13 @@ short16 TiffEntry::getI16(uint32 index) const {
 uint32 TiffEntry::getU32(uint32 index) const {
   if (type == TIFF_SHORT)
     return getU16(index);
-  if (!(type == TIFF_LONG || type == TIFF_OFFSET || type == TIFF_BYTE || type == TIFF_UNDEFINED || type == TIFF_RATIONAL || type == TIFF_SRATIONAL))
+  if (!(type == TIFF_LONG || type == TIFF_OFFSET || type == TIFF_BYTE ||
+        type == TIFF_UNDEFINED || type == TIFF_RATIONAL ||
+        type == TIFF_SRATIONAL)) {
     ThrowTPE("Wrong type %u encountered. Expected Long, Offset, Rational or "
              "Undefined on 0x%x",
              type, tag);
+  }
 
   return data.peek<uint32>(index);
 }
@@ -152,10 +155,11 @@ int32 TiffEntry::getI32(uint32 index) const {
 }
 
 float TiffEntry::getFloat(uint32 index) const {
-  if (!isFloat())
+  if (!isFloat()) {
     ThrowTPE("Wrong type 0x%x encountered. Expected Float or something "
              "convertible on 0x%x",
              type, tag);
+  }
 
   switch (type) {
   case TIFF_DOUBLE: return data.peek<double>(index);

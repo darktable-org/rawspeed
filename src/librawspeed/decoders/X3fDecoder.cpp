@@ -22,8 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include "common/Common.h"                // for ushort16, uint32, uchar8
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D, iRectangle2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable::signExtend
+#include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/Buffer.h"                    // for Buffer::size_type
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/Endianness.h"                // for getHostEndianness, Endiann...
@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include "tiff/TiffEntry.h"               // IWYU pragma: keep
 #include "tiff/TiffIFD.h"                 // for TiffID, TiffRootIFD, TiffR...
 #include <algorithm>                      // for max
+#include <cassert>                        // for assert
 #include <cstdlib>                        // for atoi
 #include <cstring>                        // for memset
 #include <map>                            // for map, _Rb_tree_iterator

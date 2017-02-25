@@ -188,7 +188,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       CiffEntry *wb_data = mRootIFD->getEntryRecursive(CIFF_WHITEBALANCE);
       /* CANON EOS D60, CANON EOS 10D, CANON EOS 300D */
       if (wb_index > 9)
-        ThrowRDE("CrwDecoder: invalid white balance index");
+        ThrowRDE("Invalid white balance index");
       int wb_offset = 1 + ("0134567028"[wb_index]-'0') * 4;
       mRaw->metadata.wbCoeffs[0] = wb_data->getU16(wb_offset + 0);
       mRaw->metadata.wbCoeffs[1] = wb_data->getU16(wb_offset + 1);

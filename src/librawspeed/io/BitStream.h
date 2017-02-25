@@ -21,12 +21,13 @@
 
 #pragma once
 
-#include "common/Common.h"  // for uint32, uint64, uchar8
-#include "io/Buffer.h"      // for BUFFER_PADDING, Buffer::size_type
+#include "common/Common.h" // for uint32, uchar8, uint64
+#include "io/Buffer.h"     // for Buffer::size_type, BUFFER_PADDING
 #include "io/ByteStream.h"  // for ByteStream
 #include "io/FileMap.h"     // for FileMap
-#include "io/IOException.h" // for ThrowIOE
+#include "io/IOException.h" // for IOException (ptr only), ThrowIOE
 #include <cassert>          // for assert
+#include <cstring>          // for memcpy
 
 namespace RawSpeed {
 

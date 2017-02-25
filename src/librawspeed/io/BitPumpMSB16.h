@@ -22,6 +22,7 @@
 
 #include "common/Common.h" // for ushort16, uchar8
 #include "io/BitStream.h"  // for BitStream, BitStreamCacheRightInLeftOut
+#include "io/Buffer.h"     // for Buffer::size_type
 #include "io/Endianness.h" // for getLE
 
 namespace RawSpeed {

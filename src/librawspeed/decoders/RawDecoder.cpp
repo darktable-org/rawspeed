@@ -108,10 +108,11 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
     } catch (IOException &e) {
       if (i>0)
         mRaw->setError(e.what());
-      else
+      else {
         ThrowRDE("IO error occurred in first slice, unable to decode more. "
                  "Error is: %s",
                  e.what());
+      }
     }
     offY += slice.h;
   }

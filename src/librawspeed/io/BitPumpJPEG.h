@@ -21,7 +21,8 @@
 #pragma once
 
 #include "common/Common.h" // for uchar8, uint32
-#include "io/BitStream.h"  // for BitStream, BitStreamCacheRightInLeftOut
+#include "io/BitStream.h"  // for BitStreamCacheRightInLeftOut, BitStream
+#include "io/Buffer.h"     // for Buffer::size_type
 #include "io/Endianness.h" // for getBE
 
 namespace RawSpeed {

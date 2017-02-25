@@ -34,7 +34,7 @@ namespace RawSpeed {
 // 0 : allocate exactly as much data as required
 // 4 : add minimum number of bytes to keep all BitStream implementations happy
 //     this disables the bounds checking, saves about 1% on modern CPUs
-#define BUFFER_PADDING 0
+#define BUFFER_PADDING 0UL
 
 /*************************************************************************
  * This is the buffer abstaction.

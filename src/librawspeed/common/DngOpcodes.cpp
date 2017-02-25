@@ -20,14 +20,15 @@
 */
 
 #include "common/DngOpcodes.h"
-#include "common/Common.h"                // for uint32...
-#include "common/Point.h"                 // for iRectangle2D
+#include "common/Common.h"                // for uint32, ushort16, make_unique
+#include "common/Point.h"                 // for iPoint2D, iRectangle2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "common/Threading.h"             // for pthread_mutex_lock, pthrea...
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/Endianness.h"
-#include "tiff/TiffEntry.h" // for TiffEntry
-#include <cmath>            // for pow
+#include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
+#include "io/ByteStream.h"                // for ByteStream
+#include "io/Endianness.h"                // for getHostEndianness, Endiann...
+#include "tiff/TiffEntry.h"               // for TiffEntry
+#include <algorithm>                      // for fill_n
+#include <cmath>                          // for pow
 
 using namespace std;
 
@@ -235,7 +236,7 @@ public:
   PolynomialMap(ByteStream& bs) : LookupOpcode(bs) {
     vector<double> polynomial;
 
-    polynomial.resize(bs.getU32() + 1);
+    polynomial.resize(bs.getU32() + 1UL);
 
     if (polynomial.size() > 9)
       ThrowRDE("A polynomial with more than 8 degrees not allowed");

@@ -55,10 +55,11 @@ RawImage OrfDecoder::decodeRawInternal() {
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
 
-  if (counts->count != offsets->count)
+  if (counts->count != offsets->count) {
     ThrowRDE(
         "Byte count number does not match strip size: count:%u, strips:%u ",
         counts->count, offsets->count);
+  }
 
   //TODO: this code assumes that all strips are layed out directly after another without padding and in order
   uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();

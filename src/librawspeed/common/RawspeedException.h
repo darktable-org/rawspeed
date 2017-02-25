@@ -53,19 +53,6 @@ ThrowException(const char* fmt, ...) {
   throw T(buf);
 }
 
-#define XSTR(a) #a
-#define STR(a) XSTR(a)
-
-#ifndef DEBUG
-#define ThrowExceptionHelper(CLASS, fmt, ...)                                  \
-  ThrowException<CLASS>("%s, line " STR(__LINE__) ": " fmt,                    \
-                        __PRETTY_FUNCTION__, ##__VA_ARGS__)
-#else
-#define ThrowExceptionHelper(CLASS, fmt, ...)                                  \
-  ThrowException<CLASS>(__FILE__ ":" STR(__LINE__) ": %s: " fmt,               \
-                        __PRETTY_FUNCTION__, ##__VA_ARGS__)
-#endif
-
 class RawspeedException : public std::runtime_error {
 private:
   void log(const char* msg) {
@@ -78,6 +65,19 @@ public:
   }
   RawspeedException(const char* msg) : std::runtime_error(msg) { log(msg); }
 };
+
+#define XSTR(a) #a
+#define STR(a) XSTR(a)
+
+#ifndef DEBUG
+#define ThrowExceptionHelper(CLASS, fmt, ...)                                  \
+  ThrowException<CLASS>("%s, line " STR(__LINE__) ": " fmt,                    \
+                        __PRETTY_FUNCTION__, ##__VA_ARGS__)
+#else
+#define ThrowExceptionHelper(CLASS, fmt, ...)                                  \
+  ThrowException<CLASS>(__FILE__ ":" STR(__LINE__) ": %s: " fmt,               \
+                        __PRETTY_FUNCTION__, ##__VA_ARGS__)
+#endif
 
 #define ThrowRSE(...) ThrowExceptionHelper(RawspeedException, __VA_ARGS__)
 

@@ -95,10 +95,12 @@ bool __attribute__((pure)) CiffEntry::isInt() {
 }
 
 uint32 CiffEntry::getU32(uint32 num) {
-  if (!isInt())
+  if (!isInt()) {
     ThrowCPE(
         "Wrong type 0x%x encountered. Expected Long, Short or Byte at 0x%x",
         type, tag);
+  }
+
   if (type == CIFF_BYTE)
     return getByte(num);
   if (type == CIFF_SHORT)
