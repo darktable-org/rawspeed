@@ -102,15 +102,19 @@ RawImage ArwDecoder::decodeRawInternal() {
       for (int i=26; i-- > 22; )
         key = key << 8 | head[i];
 
-      // "Decrypt" the whole image buffer in place
-      uchar8 *image_data = mFile->getDataWrt(off, len);
-      SonyDecrypt((uint32 *) image_data, len/4, key);
+      // "Decrypt" the whole image buffer
+      auto image_data = mFile->getData(off, len);
+      auto image_decoded = Buffer::Create(len);
+      SonyDecrypt((uint32*)image_data, (uint32*)image_decoded.get(), len / 4,
+                  key);
+
+      Buffer di(move(image_decoded), len);
 
       // And now decode as a normal 16bit raw
       mRaw->dim = iPoint2D(width, height);
       mRaw->createData();
 
-      UncompressedDecompressor u(*mFile, off, len, mRaw, uncorrectedRawValues);
+      UncompressedDecompressor u(di, 0, len, mRaw, uncorrectedRawValues);
       u.decode16BitRawBEunpacked(width, height);
 
       return mRaw;
