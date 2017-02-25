@@ -413,11 +413,18 @@ void ArwDecoder::GetWB() {
     uint32 len = sony_length->getU32();
     uint32 key = getU32LE(sony_key->getData(4));
 
-    //TODO: replace ugly inplace decryption of (const) raw data
-    auto *ifp_data = (uint32 *)mFile->getDataWrt(off, len);
-    SonyDecrypt(ifp_data, len/4, key);
+    // "Decrypt" IFD
+    const auto& ifd_crypt = priv->getRootIfdData();
+    auto ifd_size = ifd_crypt.getSize();
+    auto ifd_decoded = Buffer::Create(ifd_size);
+    memcpy(ifd_decoded.get(), ifd_crypt.begin(), ifd_size);
 
-    TiffRootIFD encryptedIFD(priv->getRootIfdData(), off);
+    SonyDecrypt((uint32*)(ifd_crypt.getData(off, len)),
+                (uint32*)(ifd_decoded.get() + off), len / 4, key);
+
+    Buffer decIFD(move(ifd_decoded), ifd_size);
+    DataBuffer dbIDD(decIFD, priv->getRootIfdData().isInNativeByteOrder());
+    TiffRootIFD encryptedIFD(dbIDD, off);
 
     if (encryptedIFD.hasEntry(SONYGRBGLEVELS)){
       TiffEntry *wb = encryptedIFD.getEntry(SONYGRBGLEVELS);
