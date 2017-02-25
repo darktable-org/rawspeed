@@ -409,7 +409,7 @@ RawImage DngDecoder::decodeRawInternal() {
       // Apply stage 1 codes
       try{
         DngOpcodes codes(raw->getEntry(OPCODELIST1));
-        mRaw = codes.applyOpCodes(mRaw);
+        codes.applyOpCodes(mRaw);
       } catch (RawDecoderException &e) {
         // We push back errors from the opcode parser, since the image may still be usable
         mRaw->setError(e.what());
@@ -459,7 +459,7 @@ RawImage DngDecoder::decodeRawInternal() {
       // Apply stage 2 codes
       try{
         DngOpcodes codes(raw->getEntry(OPCODELIST2));
-        mRaw = codes.applyOpCodes(mRaw);
+        codes.applyOpCodes(mRaw);
       } catch (RawDecoderException &e) {
         // We push back errors from the opcode parser, since the image may still be usable
         mRaw->setError(e.what());
