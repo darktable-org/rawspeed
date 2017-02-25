@@ -26,12 +26,19 @@
 
 namespace RawSpeed {
 
-Buffer::Buffer(size_type size_) : size(size_) {
+uchar8* Buffer::Create(size_type size) {
   if (!size)
     ThrowIOE("Trying to allocate 0 bytes sized buffer.");
-  data = (uchar8*)alignedMalloc<16>(roundUp(size + BUFFER_PADDING, 16));
+
+  auto data = (uchar8*)alignedMalloc<16>(roundUp(size + BUFFER_PADDING, 16));
   if (!data)
     ThrowIOE("Failed to allocate %uz bytes memory buffer.", size);
+
+  return data;
+}
+
+Buffer::Buffer(size_type size_) : size(size_) {
+  data = const_cast<decltype(data)>(Create(size));
   isOwner = true;
 }
 

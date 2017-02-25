@@ -50,6 +50,9 @@ class Buffer
 public:
   using size_type = uint32;
 
+  // allocates the databuffer, and returns owning non-const pointer.
+  static uchar8* Create(size_type size);
+
   // constructs an empty buffer
   Buffer() = default;
   // Allocates the memory
