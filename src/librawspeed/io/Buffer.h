@@ -124,11 +124,6 @@ public:
 //  void corrupt(int errors);
 //  Buffer* cloneRandomSize();
 
-  // deprecated:
-  inline uchar8* getDataWrt(size_type offset, size_type count) {
-    return const_cast<uchar8*>(getData(offset, count));
-  }
-
 protected:
   const uchar8* data = nullptr;
   size_type size = 0;
