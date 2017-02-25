@@ -23,24 +23,42 @@
 #include "common/Common.h"  // for uint64, uchar8, alignedMalloc, _aligne...
 #include "common/Memory.h"  // for alignedMalloc, alignedFree
 #include "io/IOException.h" // for IOException, ThrowIOE
+#include <memory>           // for unique_ptr
+
+using std::unique_ptr;
 
 namespace RawSpeed {
 
-uchar8* Buffer::Create(size_type size) {
+unique_ptr<uchar8, decltype(&alignedFree)> Buffer::Create(size_type size) {
   if (!size)
     ThrowIOE("Trying to allocate 0 bytes sized buffer.");
 
-  auto data = (uchar8*)alignedMalloc<16>(roundUp(size + BUFFER_PADDING, 16));
-  if (!data)
+  unique_ptr<uchar8, decltype(&alignedFree)> data(
+      (uchar8*)alignedMalloc<16>(roundUp(size + BUFFER_PADDING, 16)),
+      alignedFree);
+  if (!data.get())
     ThrowIOE("Failed to allocate %uz bytes memory buffer.", size);
 
   return data;
 }
 
-Buffer::Buffer(size_type size_) : size(size_) {
-  data = const_cast<decltype(data)>(Create(size));
+Buffer::Buffer(unique_ptr<uchar8, decltype(&alignedFree)> data_,
+               size_type size_)
+    : size(size_) {
+  if (!size)
+    ThrowIOE("Buffer has zero size?");
+
+  if (data_.get_deleter() != alignedFree)
+    ThrowIOE("Wrong deleter. Expected RawSpeed::alignedFree()");
+
+  data = data_.release();
+  if (!data)
+    ThrowIOE("Memory buffer is nonexistant");
+
   isOwner = true;
 }
+
+Buffer::Buffer(size_type size_) : Buffer(Create(size_), size_) {}
 
 Buffer::~Buffer() {
   if (isOwner) {

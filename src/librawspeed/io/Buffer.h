@@ -21,10 +21,12 @@
 
 #pragma once
 
-#include "common/Common.h" // for uchar8, uint32, uint64
-#include "io/IOException.h"// for ThrowIOE
-#include "io/Endianness.h" // for getByteSwapped
-#include <algorithm>       // for swap
+#include "common/Common.h"  // for uchar8, uint32, uint64
+#include "common/Memory.h"  // for alignedFree
+#include "io/Endianness.h"  // for getByteSwapped
+#include "io/IOException.h" // for ThrowIOE
+#include <algorithm>        // for swap
+#include <memory>           // for unique_ptr
 
 namespace RawSpeed {
 
@@ -51,12 +53,17 @@ public:
   using size_type = uint32;
 
   // allocates the databuffer, and returns owning non-const pointer.
-  static uchar8* Create(size_type size);
+  static std::unique_ptr<uchar8, decltype(&alignedFree)> Create(size_type size);
 
   // constructs an empty buffer
   Buffer() = default;
+  // creates buffer from owning unique_ptr
+  Buffer(std::unique_ptr<uchar8, decltype(&alignedFree)> data_,
+         size_type size_);
+
   // Allocates the memory
   Buffer(size_type size);
+
   // Data already allocated
   explicit Buffer(const uchar8 *data_, size_type size_)
       : data(data_), size(size_) {}
