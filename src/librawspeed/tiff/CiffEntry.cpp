@@ -178,15 +178,6 @@ void CiffEntry::setData( const void *in_data, uint32 byte_count )
   memcpy(own_data, in_data, byte_count);
 }
 
-uchar8* CiffEntry::getDataWrt()
-{
-  if (!own_data) {
-    own_data = new uchar8[bytesize];
-    memcpy(own_data, data, bytesize);
-  }
-  return own_data;
-}
-
 #ifdef _MSC_VER
 #pragma warning(disable: 4996) // this function or variable may be unsafe
 #endif
