@@ -346,7 +346,8 @@ void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 }
 
-void ArwDecoder::SonyDecrypt(uint32 *buffer, uint32 len, uint32 key) {
+void ArwDecoder::SonyDecrypt(uint32* ibuf, uint32* obuf, uint32 len,
+                             uint32 key) {
   if (0 == len)
     return;
 
@@ -370,15 +371,23 @@ void ArwDecoder::SonyDecrypt(uint32 *buffer, uint32 len, uint32 key) {
     memcpy(&pv, pad + (p & 127), sizeof(uint32));
 
     uint32 bv;
-    memcpy(&bv, buffer, sizeof(uint32));
+    memcpy(&bv, ibuf, sizeof(uint32));
 
     bv ^= pv;
 
-    memcpy(buffer, &bv, sizeof(uint32));
+    memcpy(obuf, &bv, sizeof(uint32));
 
-    buffer++;
+    ibuf++;
+    obuf++;
     p++;
   }
+}
+
+void ArwDecoder::SonyDecrypt(uint32* buffer, uint32 len, uint32 key) {
+  if (0 == len)
+    return;
+
+  return SonyDecrypt(buffer, buffer, len, key);
 }
 
 void ArwDecoder::GetWB() {

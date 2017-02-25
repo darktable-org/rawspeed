@@ -52,6 +52,7 @@ protected:
   void DecodeARW(ByteStream &input, uint32 w, uint32 h);
   void DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp);
   void DecodeUncompressed(const TiffIFD* raw);
+  void SonyDecrypt(uint32* ibuf, uint32* obuf, uint32 len, uint32 key);
   void SonyDecrypt(uint32 *buffer, uint32 len, uint32 key);
   void GetWB();
   ByteStream in;
