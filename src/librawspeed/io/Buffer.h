@@ -22,15 +22,19 @@
 #pragma once
 
 #include "common/Common.h" // for uchar8, uint32, uint64
+#include "io/IOException.h"// for ThrowIOE
 #include "io/Endianness.h" // for getByteSwapped
 #include <algorithm>       // for swap
 
 namespace RawSpeed {
 
-// All file maps have this much space extra at the end. This is useful for
-// BitPump* that needs to have a bit of extra space at the end to be able to
-// do more efficient reads without crashing
-#define FILEMAP_MARGIN 16UL
+// This allows to specify the nuber of bytes that each Buffer needs to
+// allocate additionally to be able to remove one runtime bounds check
+// in BitSream::fill. There are two options:
+// 0 : allocate exactly as much data as required
+// 4 : add minimum number of bytes to keep all BitStream implementations happy
+//     this disables the bounds checking, saves about 1% on modern CPUs
+#define BUFFER_PADDING 0
 
 /*************************************************************************
  * This is the buffer abstaction.
@@ -72,7 +76,12 @@ public:
   }
 
   // get pointer to memory at 'offset', make sure at least 'count' bytes are accessable
-  const uchar8* getData(size_type offset, size_type count) const;
+  const uchar8* getData(size_type offset, size_type count) const {
+    if (!isValid(offset, count))
+      ThrowIOE("Buffer overflow: image file may be truncated");
+
+    return &data[offset];
+  }
 
   // convenience getter for single bytes
   uchar8 operator[](size_type offset) const {
@@ -96,12 +105,8 @@ public:
     return size;
   }
 
-  inline bool isValid(size_type offset) const {
-    return offset < size;
-  }
-
-  inline bool isValid(size_type offset, size_type count) const {
-    return (uint64)offset + count - 1 < size;
+  inline bool isValid(size_type offset, size_type count = 1) const {
+    return (uint64)offset + count - 1 < (uint64)size + BUFFER_PADDING;
   }
 
 //  Buffer* clone();

@@ -177,18 +177,18 @@ void MosDecoder::DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32
       else if ((col & 7) == 0) {
         for (unsigned int &i : len) {
           int32 j = 0;
-          for (; j < 5 && !pump.getBitsSafe(1); j++);
+          for (; j < 5 && !pump.getBits(1); j++);
           if (j--)
-            i = length[j * 2 + pump.getBitsSafe(1)];
+            i = length[j * 2 + pump.getBits(1)];
         }
       }
 
       int i = len[col & 1];
       if (i == 14)
-        img[col] = pred[col & 1] = pump.getBitsSafe(16);
+        img[col] = pred[col & 1] = pump.getBits(16);
       else
         img[col] = pred[col & 1] +=
-            (signed)pump.getBitsSafe(i) + 1 - (1 << (i - 1));
+            (signed)pump.getBits(i) + 1 - (1 << (i - 1));
     }
   }
 }

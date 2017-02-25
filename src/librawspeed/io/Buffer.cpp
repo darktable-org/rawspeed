@@ -29,7 +29,7 @@ namespace RawSpeed {
 Buffer::Buffer(size_type size_) : size(size_) {
   if (!size)
     ThrowIOE("Trying to allocate 0 bytes sized buffer.");
-  data = (uchar8*)alignedMalloc<16>(roundUp(size + FILEMAP_MARGIN, 16));
+  data = (uchar8*)alignedMalloc<16>(roundUp(size + BUFFER_PADDING, 16));
   if (!data)
     ThrowIOE("Failed to allocate %uz bytes memory buffer.", size);
   isOwner = true;
@@ -71,20 +71,5 @@ void Buffer::corrupt(int errors) {
   }
 }
 #endif
-
-const uchar8* Buffer::getData(size_type offset, size_type count) const
-{
-  if (count == 0)
-    ThrowIOE("Trying to get a pointer to zero sized buffer?!");
-
-  uint64 totaloffset = (uint64)offset + (uint64)count - 1;
-  uint64 totalsize = (uint64)size + FILEMAP_MARGIN;
-
-  // Give out data up to FILEMAP_MARGIN more bytes than are really in the
-  // file as that is useful for some of the BitPump code
-  if (!isValid(offset) || totaloffset >= totalsize)
-    ThrowIOE("Attempting to read file out of bounds.");
-  return &data[offset];
-}
 
 } // namespace RawSpeed

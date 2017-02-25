@@ -98,7 +98,6 @@ void AriDecoder::decodeThreaded(RawDecoderThread * t) {
       uint32 b = bits.getBits(12);
       dest[x*2] = b;
       dest[x*2+1] = a;
-      bits.checkPos();
     }
   }
 }

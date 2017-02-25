@@ -22,7 +22,7 @@
 #pragma once
 
 #include "common/Common.h"  // for uint32, uint64, uchar8
-#include "io/Buffer.h"      // for FILEMAP_MARGIN, Buffer::size_type
+#include "io/Buffer.h"      // for BUFFER_PADDING, Buffer::size_type
 #include "io/ByteStream.h"  // for ByteStream
 #include "io/FileMap.h"     // for FileMap
 #include "io/IOException.h" // for ThrowIOE
@@ -79,41 +79,42 @@ struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
   }
 };
 
-// Note: Allocated buffer MUST be at least FILEMAP_MARGIN bytes larger than
-// the compressed bit stream requires, see implementation of cache and fill()
-
 template<typename Tag, typename Cache>
-class BitStream
+class BitStream : private ByteStream
 {
-  using size_type = ByteStream::size_type;
-  const uchar8* data = nullptr;
-  const size_type size = 0;
-  size_type pos = 0; // Offset/position inside data buffer in bytes
   Cache cache;
 
-  // this method has to be implemented in the concrete BitStream template specializations
-  void fillCache();
+  // this method hase to be implemented in the concrete BitStream template
+  // specializations. It needs to process up to 4 bytes of input and return
+  // the number of bytes processed
+  size_type fillCache(const uchar8* input);
 
 public:
   BitStream(ByteStream& s)
-    : data(s.peekData(s.getRemainSize())), size(s.getRemainSize() + FILEMAP_MARGIN) {}
+      : ByteStream(s.getSubStream(s.getPosition(), s.getRemainSize())) {}
 
   // deprecated:
-  BitStream(FileMap *f, size_type offset, size_type size_)
-      : data(f->getData(offset, size_)), size(size_ + FILEMAP_MARGIN) {}
   BitStream(FileMap* f, size_type offset)
-    : BitStream(f, offset, f->getSize()-offset) {}
-
+    : ByteStream(f->getSubView(offset)) {}
 
   inline void fill(uint32 nbits = Cache::MaxGetBits) {
     assert(nbits <= Cache::MaxGetBits);
     if (cache.fillLevel < nbits) {
-#if 1
+#if BUFFER_PADDING==0
       // disabling this run-time bounds check saves about 1% on intel x86-64
-      if (pos + Cache::MaxGetBits/8 >= size)
-        ThrowIOE("Buffer overflow read in BitStream");
+      if (pos + Cache::MaxGetBits/8 > size) {
+        if (pos < size) {
+          uchar8 tmp[4] = {0, 0, 0, 0};
+          memcpy(tmp, data + pos, size - pos);
+          pos += fillCache(tmp);
+        } else if (pos < size + 4) {
+          cache.push(0, Cache::MaxGetBits);
+          pos += Cache::MaxGetBits/8;
+        } else
+          ThrowIOE("Buffer overflow read in BitStream");
+      } else
 #endif
-      fillCache();
+        pos += fillCache(data + pos);
     }
   }
 
@@ -153,16 +154,6 @@ public:
     if (nbits > cache.fillLevel)
       ThrowIOE("skipBits overflow");
     cache.skip(nbits);
-  }
-
-  // deprecated (the above interface is already 'always save'):
-  inline uint32 getBitsSafe(uint32 nbits) {
-    return getBits(nbits);
-  }
-
-  inline void checkPos() const {
-    if (pos >= size)
-      ThrowIOE("Out of buffer read");
   }
 };
 

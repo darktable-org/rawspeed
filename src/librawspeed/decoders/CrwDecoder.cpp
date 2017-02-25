@@ -332,7 +332,7 @@ uint32 CrwDecoder::getbithuff (BitPumpJPEG &pump, int nbits, ushort16 *huff)
 {
   uint32 c = pump.peekBits(nbits);
   // Skip bits given by the high order bits of the huff table
-  pump.getBitsSafe(huff[c] >> 8);
+  pump.getBits(huff[c] >> 8);
   // Return the lower order bits
   return (uchar8) huff[c];
 }
@@ -360,7 +360,7 @@ void CrwDecoder::decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 
         i  += leaf >> 4;
         len = leaf & 15;
         if (len == 0) continue;
-        diff = pump.getBitsSafe(len);
+        diff = pump.getBits(len);
         diff = HuffmanTable::signExtended(diff, len);
         if (i < 64) diffbuf[i] = diff;
       }
