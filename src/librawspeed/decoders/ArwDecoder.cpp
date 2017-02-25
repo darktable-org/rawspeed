@@ -94,8 +94,10 @@ RawImage ArwDecoder::decodeRawInternal() {
       uint32 offset = (*keyData) * 4;
       keyData = mFile->getData(key_off + offset, 4);
       uint32 key = getU32BE(keyData);
-      uchar8 *head = mFile->getDataWrt(head_off, 40);
-      SonyDecrypt((uint32 *) head, 10, key);
+      static const size_t head_size = 40;
+      const uchar8* head_orig = mFile->getData(head_off, head_size);
+      vector<uchar8> head(head_size);
+      SonyDecrypt((uint32*)head_orig, (uint32*)&head[0], 10, key);
       for (int i=26; i-- > 22; )
         key = key << 8 | head[i];
 
