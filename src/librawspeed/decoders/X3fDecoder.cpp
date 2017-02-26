@@ -32,8 +32,8 @@
 #include "tiff/TiffIFD.h"                 // for TiffID, TiffRootIFD, TiffR...
 #include <algorithm>                      // for max
 #include <cassert>                        // for assert
-#include <cstdlib>                        // for atoi
 #include <cstring>                        // for memset
+#include <istream>                        // for basic_istream::operator>>
 #include <map>                            // for map, _Rb_tree_iterator
 #include <memory>                         // for unique_ptr
 #include <string>                         // for string
@@ -85,8 +85,10 @@ void X3fDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (readName()) {
     if (checkCameraSupported(meta, camera_make, camera_model, "" )) {
       int iso = 0;
-      if (hasProp("ISO"))
-        iso = atoi(getProp("ISO").c_str());
+      if (hasProp("ISO")) {
+        std::istringstream iss(getProp("ISO"));
+        iss >> iso;
+      }
       setMetaData(meta, camera_make, camera_model, "", iso);
       return;
     }

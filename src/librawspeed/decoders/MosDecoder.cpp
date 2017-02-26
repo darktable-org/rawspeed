@@ -33,8 +33,8 @@
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag::TILEOFF...
 #include <algorithm>                                // for move
-#include <cstdio>                                   // for sscanf
 #include <cstring>                                  // for memchr
+#include <istream>                                  // for istringstream
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for string, allocator
 
@@ -216,8 +216,10 @@ void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         if (!memchr(bs.peekData(bs.getRemainSize()), 0, bs.getRemainSize()))
           break;
         uint32 tmp[4] = {0};
-        sscanf(bs.peekString(), "%u %u %u %u", &tmp[0], &tmp[1], &tmp[2], &tmp[3]);
-        if (tmp[0] > 0 && tmp[1] > 0 && tmp[2] > 0 && tmp[3] > 0) {
+        std::istringstream iss(bs.peekString());
+        iss >> tmp[0] >> tmp[1] >> tmp[2] >> tmp[3];
+        if (!iss.fail() && tmp[0] > 0 && tmp[1] > 0 && tmp[2] > 0 &&
+            tmp[3] > 0) {
           mRaw->metadata.wbCoeffs[0] = (float) tmp[0]/tmp[1];
           mRaw->metadata.wbCoeffs[1] = (float) tmp[0]/tmp[2];
           mRaw->metadata.wbCoeffs[2] = (float) tmp[0]/tmp[3];
