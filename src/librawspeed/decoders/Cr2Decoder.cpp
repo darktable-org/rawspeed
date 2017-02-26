@@ -353,7 +353,7 @@ static inline void interpolate_420(const int* sraw_coeffs, RawImage& mRaw,
     off = 0;
 
     // Last line
-    for (int x = 0; x < w; x++) {
+    for (int x = 0; x < w + 1; x++) {
       int Y = c_line[off];
       int Cb = c_line[off+1] - hue;
       int Cr = c_line[off+2] - hue;
