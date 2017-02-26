@@ -12,7 +12,7 @@ if(iwyu_tool_path)
   add_custom_command(
     OUTPUT "${CMAKE_BINARY_DIR}/iwyu.log"
     COMMAND "${iwyu_tool_path}" -v -p "${CMAKE_BINARY_DIR}"
-            -- --mapping_file=${IWYU_IMP} 2>
+            -- --mapping_file=${IWYU_IMP} --check_also=${CMAKE_SOURCE_DIR}/src/* --check_also=${CMAKE_SOURCE_DIR}/src/*/* --check_also=${CMAKE_SOURCE_DIR}/src/*/*/* --check_also=${CMAKE_SOURCE_DIR}/src/*/*/*/* 2>
             "${CMAKE_BINARY_DIR}/iwyu.log"
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
     COMMENT "Running include-what-you-use tool"
