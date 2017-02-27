@@ -24,10 +24,13 @@
 
 #include "common/Common.h"    // for uint32
 #include "common/RawImage.h"  // for RawImage
-#include "common/Threading.h" // for pthread_t
 #include <memory>             // for unique_ptr
 #include <queue>              // for queue
 #include <vector>             // for vector
+
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+#endif
 
 namespace RawSpeed {
 

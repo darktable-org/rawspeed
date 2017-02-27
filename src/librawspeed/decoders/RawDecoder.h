@@ -25,9 +25,12 @@
 
 #include "common/Common.h"    // for uint32, BitOrder
 #include "common/RawImage.h"  // for RawImage
-#include "common/Threading.h" // for pthread_t
 #include "metadata/Camera.h"  // for Hints
 #include <string>             // for string
+
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+#endif
 
 namespace RawSpeed {
 

@@ -24,11 +24,14 @@
 
 #include "common/Common.h"             // for uint32, uchar8, ushort16, wri...
 #include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
-#include "common/Threading.h"          // for pthread_mutex_t, pthread_attr_t
 #include "metadata/BlackArea.h"        // for BlackArea
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray
 #include <string>                      // for string
 #include <vector>                      // for vector
+
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+#endif
 
 namespace RawSpeed {
 

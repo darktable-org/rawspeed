@@ -11,7 +11,6 @@ FILE(GLOB COMMON_SOURCES
   "DngOpcodes.cpp"
   "DngOpcodes.h"
   "RawspeedException.h"
-  "Threading.h"
 )
 
 set(RAWSPEED_SOURCES "${RAWSPEED_SOURCES};${COMMON_SOURCES}" PARENT_SCOPE)
