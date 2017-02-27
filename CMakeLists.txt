@@ -38,6 +38,11 @@ if(WITH_PUGIXML)
 else()
   set(USE_BUNDLED_PUGIXML OFF CACHE BOOL "Build and use pugixml in-tree" FORCE)
 endif()
+if(WITH_PUGIXML AND USE_BUNDLED_PUGIXML)
+  option(ALLOW_DOWNLOADING_PUGIXML "If pugixml src tree is not found in location specified by PUGIXML_PATH, do fetch the archive from internet" OFF)
+else()
+  set(ALLOW_DOWNLOADING_PUGIXML OFF CACHE BOOL "If pugixml src tree is not found in location specified by PUGIXML_PATH, do fetch the archive from internet" FORCE)
+endif()
 option(WITH_JPEG "Enable JPEG support for DNG Lossy JPEG support" ON)
 option(WITH_ZLIB "Enable ZLIB support for DNG deflate support" ON)
 if(WITH_ZLIB)
@@ -63,6 +68,8 @@ option(BUILD_TOOLS "Build some tools (identify, rstest)." ON)
 
 set(GOOGLETEST_PATH "/usr/src/googletest" CACHE PATH
                     "Path to the googletest root tree. Should contain googletest and googlemock subdirs. And CMakeLists.txt in root, and in both of these subdirs")
+
+set(PUGIXML_PATH "/usr/src/pugixml" CACHE PATH "Path to the pugixml root tree.")
 
 set(ZLIB_PATH "/usr/src/zlib" CACHE PATH "Path to the zlib root tree.")
 

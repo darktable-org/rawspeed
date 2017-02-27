@@ -5,14 +5,15 @@ project(pugixml-download NONE)
 # Enable ExternalProject CMake module
 include(ExternalProject)
 
-# Download and install GoogleTest
+option(ALLOW_DOWNLOADING_PUGIXML "If pugixml src tree is not found in location specified by PUGIXML_PATH, do fetch the archive from internet" OFF)
+set(PUGIXML_PATH "/usr/src/pugixml" CACHE PATH "Path to the pugixml root tree.")
 
-set(PUGIXML_PATH "/usr/src/pugixml")
+# Download and install pugixml
 
-#message(FATAL_ERROR "1 CMAKE_BINARY_DIR ${CMAKE_BINARY_DIR}")
-
+message(STATUS "Looking for pugixml sources")
+message(STATUS "Looking for pugixml sources in ${PUGIXML_PATH}")
 if(EXISTS "${PUGIXML_PATH}" AND IS_DIRECTORY "${PUGIXML_PATH}" AND EXISTS "${PUGIXML_PATH}/CMakeLists.txt")
-  message(STATUS "Found Pugixml in ${PUGIXML_PATH}")
+  message(STATUS "Found pugixml in ${PUGIXML_PATH}")
 
   ExternalProject_Add(
     pugixml
@@ -26,18 +27,21 @@ if(EXISTS "${PUGIXML_PATH}" AND IS_DIRECTORY "${PUGIXML_PATH}" AND EXISTS "${PUG
     TEST_COMMAND      ""
   )
 else()
-  message(WARNING "Did not find Pugixml! Will have to fetch from web...")
-
-  ExternalProject_Add(
-    pugixml
-    URL               https://github.com/zeux/pugixml/releases/download/v1.8.1/pugixml-1.8.1.tar.gz
-    URL_HASH          SHA512=1aec6f8cd0c385b66e848020d94d331db788c78523f72d145726738433a784b518084ec45a6eeffb0a6585bcf2759d09ad1e3d304d15d99068d43dbfd6db9d31
-    PREFIX            "${CMAKE_BINARY_DIR}/pugixml"
-    SOURCE_DIR        "${CMAKE_BINARY_DIR}/pugixml-src"
-    BINARY_DIR        "${CMAKE_BINARY_DIR}/pugixml-build"
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND     ""
-    INSTALL_COMMAND   ""
-    TEST_COMMAND      ""
-  )
+  if(NOT ALLOW_DOWNLOADING_PUGIXML)
+    message(SEND_ERROR "Did not find pugixml sources! Either pass correct path in PUGIXML_PATH, or enable ALLOW_DOWNLOADING_PUGIXML, or disable BUILD_TESTING.")
+  else()
+    message(WARNING "Did not find pugixml sources! Fetching from web...")
+    ExternalProject_Add(
+      pugixml
+      URL               https://github.com/zeux/pugixml/releases/download/v1.8.1/pugixml-1.8.1.tar.gz
+      URL_HASH          SHA512=1aec6f8cd0c385b66e848020d94d331db788c78523f72d145726738433a784b518084ec45a6eeffb0a6585bcf2759d09ad1e3d304d15d99068d43dbfd6db9d31
+      PREFIX            "${CMAKE_BINARY_DIR}/pugixml"
+      SOURCE_DIR        "${CMAKE_BINARY_DIR}/pugixml-src"
+      BINARY_DIR        "${CMAKE_BINARY_DIR}/pugixml-build"
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND     ""
+      INSTALL_COMMAND   ""
+      TEST_COMMAND      ""
+    )
+  endif()
 endif()
