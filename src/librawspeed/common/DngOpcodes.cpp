@@ -48,7 +48,7 @@ public:
 
 // ****************************************************************************
 
-class FixBadPixelsConstant : public DngOpcode {
+class FixBadPixelsConstant final : public DngOpcode {
   uint32 value;
 
 public:
@@ -81,7 +81,7 @@ public:
 
 // ****************************************************************************
 
-class FixBadPixelsList : public DngOpcode {
+class FixBadPixelsList final : public DngOpcode {
   std::vector<uint32> badPixels;
 
 public:
@@ -141,7 +141,7 @@ protected:
 
 // ****************************************************************************
 
-class TrimBounds : public ROIOpcode {
+class TrimBounds final : public ROIOpcode {
 public:
   TrimBounds(ByteStream& bs) : ROIOpcode(bs) {}
 
@@ -213,7 +213,7 @@ protected:
 
 // ****************************************************************************
 
-class TableMap : public LookupOpcode {
+class TableMap final : public LookupOpcode {
 public:
   TableMap(ByteStream& bs) : LookupOpcode(bs) {
     auto count = bs.getU32();
@@ -231,7 +231,7 @@ public:
 
 // ****************************************************************************
 
-class PolynomialMap : public LookupOpcode {
+class PolynomialMap final : public LookupOpcode {
 public:
   PolynomialMap(ByteStream& bs) : LookupOpcode(bs) {
     vector<double> polynomial;
@@ -284,7 +284,7 @@ struct SelectY {
   static inline uint32 select(uint32 x, uint32 y) { return y; }
 };
 
-template <typename S> class OffsetPerRowOrCol : public DeltaRowOrColBase {
+template <typename S> class OffsetPerRowOrCol final : public DeltaRowOrColBase {
 public:
   OffsetPerRowOrCol(ByteStream& bs) : DeltaRowOrColBase(bs, 65535.0f) {}
 
@@ -304,7 +304,7 @@ public:
 using OffsetPerRow = OffsetPerRowOrCol<SelectY>;
 using OffsetPerCol = OffsetPerRowOrCol<SelectX>;
 
-template <typename S> class ScalePerRowOrCol : public DeltaRowOrColBase {
+template <typename S> class ScalePerRowOrCol final : public DeltaRowOrColBase {
 public:
   ScalePerRowOrCol(ByteStream& bs) : DeltaRowOrColBase(bs, 1024.0f) {}
 
