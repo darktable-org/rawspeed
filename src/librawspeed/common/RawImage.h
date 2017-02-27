@@ -194,7 +194,7 @@ class RawImageDataU16 final : public RawImageData {
 public:
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
-  void setWithLookUp(ushort16 value, uchar8* dst, uint32* random) final;
+  void setWithLookUp(ushort16 value, uchar8* dst, uint32* random) override;
 
 protected:
   void scaleValues(int start_y, int end_y) override;

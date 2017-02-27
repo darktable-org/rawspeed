@@ -38,6 +38,7 @@ endif()
 
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wsuggest-final-types)
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wsuggest-final-methods)
+CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wsuggest-override)
 
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-error=suggest-final-types)
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-error=suggest-final-methods)
