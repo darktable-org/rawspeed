@@ -5,17 +5,45 @@ project(zlib-download NONE)
 # Enable ExternalProject CMake module
 include(ExternalProject)
 
-ExternalProject_Add(
-  zlib
-  URL               https://downloads.sourceforge.net/project/libpng/zlib/1.2.8/zlib-1.2.8.tar.xz
-  URL_HASH          SHA512=405fbb4fc9ca8a59f34488205f403e77d4f184b08d344efbec6a8f558cac0512ee6cda1dc01b7913d61d9bed04cc710e61db1081bb8782c139fcb727f586fa54
-#  URL               https://downloads.sourceforge.net/project/libpng/zlib/1.2.11/zlib-1.2.11.tar.xz
-#  URL_HASH          SHA512=b7f50ada138c7f93eb7eb1631efccd1d9f03a5e77b6c13c8b757017b2d462e19d2d3e01c50fad60a4ae1bc86d431f6f94c72c11ff410c25121e571953017cb67
-  PREFIX            "${CMAKE_BINARY_DIR}/zlib"
-  SOURCE_DIR        "${CMAKE_BINARY_DIR}/zlib-src"
-  BINARY_DIR        "${CMAKE_BINARY_DIR}/zlib-build"
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND     ""
-  INSTALL_COMMAND   ""
-  TEST_COMMAND      ""
-)
+option(ALLOW_DOWNLOADING_ZLIB "If ZLIB src tree is not found in location specified by ZLIB_PATH, do fetch the archive from internet" OFF)
+set(ZLIB_PATH "/usr/src/zlib" CACHE PATH "Path to the zlib root tree.")
+
+# Download and install ZLIB
+
+message(STATUS "Looking for ZLIB sources")
+message(STATUS "Looking for ZLIB sources in ${ZLIB_PATH}")
+if(EXISTS "${ZLIB_PATH}" AND IS_DIRECTORY "${ZLIB_PATH}" AND EXISTS "${ZLIB_PATH}/CMakeLists.txt")
+  message(STATUS "Found ZLIB in ${ZLIB_PATH}")
+
+  ExternalProject_Add(
+    zlib
+    URL               "${ZLIB_PATH}"
+    PREFIX            "${CMAKE_BINARY_DIR}/zlib"
+    SOURCE_DIR        "${CMAKE_BINARY_DIR}/zlib-src"
+    BINARY_DIR        "${CMAKE_BINARY_DIR}/zlib-build"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND     ""
+    INSTALL_COMMAND   ""
+    TEST_COMMAND      ""
+  )
+else()
+  if(NOT ALLOW_DOWNLOADING_ZLIB)
+    message(SEND_ERROR "Did not find ZLIB sources! Either pass correct path in ZLIB_PATH, or enable ALLOW_DOWNLOADING_ZLIB, or disable USE_BUNDLED_ZLIB or disable WITH_ZLIB.")
+  else()
+    message(WARNING "Did not find ZLIB sources! Fetching from web...")
+    ExternalProject_Add(
+      zlib
+      URL               https://downloads.sourceforge.net/project/libpng/zlib/1.2.8/zlib-1.2.8.tar.xz
+      URL_HASH          SHA512=405fbb4fc9ca8a59f34488205f403e77d4f184b08d344efbec6a8f558cac0512ee6cda1dc01b7913d61d9bed04cc710e61db1081bb8782c139fcb727f586fa54
+#     URL               https://downloads.sourceforge.net/project/libpng/zlib/1.2.11/zlib-1.2.11.tar.xz
+#     URL_HASH          SHA512=b7f50ada138c7f93eb7eb1631efccd1d9f03a5e77b6c13c8b757017b2d462e19d2d3e01c50fad60a4ae1bc86d431f6f94c72c11ff410c25121e571953017cb67
+      PREFIX            "${CMAKE_BINARY_DIR}/zlib"
+      SOURCE_DIR        "${CMAKE_BINARY_DIR}/zlib-src"
+      BINARY_DIR        "${CMAKE_BINARY_DIR}/zlib-build"
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND     ""
+      INSTALL_COMMAND   ""
+      TEST_COMMAND      ""
+    )
+  endif()
+endif()

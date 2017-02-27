@@ -45,6 +45,11 @@ if(WITH_ZLIB)
 else()
   set(USE_BUNDLED_ZLIB OFF CACHE BOOL "Build and use zlib in-tree" FORCE)
 endif()
+if(WITH_ZLIB AND USE_BUNDLED_ZLIB)
+  option(ALLOW_DOWNLOADING_ZLIB "If ZLIB src tree is not found in location specified by ZLIB_PATH, do fetch the archive from internet" OFF)
+else()
+  set(ALLOW_DOWNLOADING_ZLIB OFF CACHE BOOL "If ZLIB src tree is not found in location specified by ZLIB_PATH, do fetch the archive from internet" FORCE)
+endif()
 option(USE_XMLLINT "Run xmllint to test if data/cameras.xml is valid" ON)
 option(USE_IWYU "Run iwyu tool when compiling sources" OFF)
 option(USE_CLANG_TIDY "Run clang-tidy tool when compiling sources" OFF)
@@ -58,6 +63,8 @@ option(BUILD_TOOLS "Build some tools (identify, rstest)." ON)
 
 set(GOOGLETEST_PATH "/usr/src/googletest" CACHE PATH
                     "Path to the googletest root tree. Should contain googletest and googlemock subdirs. And CMakeLists.txt in root, and in both of these subdirs")
+
+set(ZLIB_PATH "/usr/src/zlib" CACHE PATH "Path to the zlib root tree.")
 
 # Add a sensible build type default and warning because empty means no optimization and no debug info.
 if(NOT CMAKE_BUILD_TYPE)
