@@ -20,10 +20,8 @@
 
 #pragma once
 
-#include "common/Common.h"                // for uchar8, int32
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "io/BitPumpMSB.h"                // for BitPumpMSB
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
 #include <algorithm>                      // for move
 #include <string>                         // for string
@@ -46,15 +44,9 @@ public:
   void checkSupportInternal(const CameraMetaData* meta) override;
 
 private:
-  struct encTableItem {
-    uchar8 encLen;
-    uchar8 diffLen;
-  };
-
   int getDecoderVersion() const override { return 3; }
   void decodeCompressed(const TiffIFD* raw);
   void decodeCompressed2(const TiffIFD* raw, int bits);
-  int32 samsungDiff (BitPumpMSB &pump, encTableItem *tbl);
   void decodeCompressed3(const TiffIFD* raw, int bits);
   std::string getMode();
 };

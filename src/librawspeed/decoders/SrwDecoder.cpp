@@ -24,6 +24,7 @@
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
+#include "io/BitPumpMSB.h"                // for BitPumpMSB
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
 #include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
@@ -200,6 +201,13 @@ void SrwDecoder::decodeCompressed( const TiffIFD* raw )
   }
 }
 
+struct encTableItem {
+  uchar8 encLen;
+  uchar8 diffLen;
+};
+
+static int32 samsungDiff(BitPumpMSB& pump, vector<encTableItem> tbl);
+
 // Decoder for compressed srw files (NX3000 and later)
 void SrwDecoder::decodeCompressed2( const TiffIFD* raw, int bits)
 {
@@ -218,7 +226,7 @@ void SrwDecoder::decodeCompressed2( const TiffIFD* raw, int bits)
   // difference) and 13 bits (differences between 12 bits numbers can need 13)
   const uchar8 tab[14][2] = {{3,4}, {3,7}, {2,6}, {2,5}, {4,3}, {6,0}, {7,9},
                                {8,10}, {9,11}, {10,12}, {10,13}, {5,1}, {4,8}, {4,2}};
-  encTableItem tbl[1024];
+  vector<encTableItem> tbl(1024);
   ushort16 vpred[2][2] = {{0,0},{0,0}}, hpred[2];
 
   // We generate a 1024 entry table (to be addressed by reading 10 bits) by
@@ -252,8 +260,7 @@ void SrwDecoder::decodeCompressed2( const TiffIFD* raw, int bits)
   }
 }
 
-int32 SrwDecoder::samsungDiff (BitPumpMSB &pump, encTableItem *tbl)
-{
+static int32 samsungDiff(BitPumpMSB& pump, vector<encTableItem> tbl) {
   // We read 10 bits to index into our table
   uint32 c = pump.peekBits(10);
   // Skip the bits that were used to encode this case
