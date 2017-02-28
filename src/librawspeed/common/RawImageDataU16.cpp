@@ -153,9 +153,13 @@ void RawImageDataU16::scaleBlackWhite() {
   startWorker(RawImageWorker::SCALE_VALUES, true);
 }
 
-#if _MSC_VER > 1399 || defined(__SSE2__)
-
 void RawImageDataU16::scaleValues(int start_y, int end_y) {
+#if !(_MSC_VER > 1399 || defined(__SSE2__))
+
+  return scaleValues_plain(start_y, end_y);
+
+#else
+
   bool use_sse2;
 #ifdef _MSC_VER
   int info[4];
@@ -168,184 +172,180 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
   int depth_values = whitePoint - blackLevelSeparate[0];
   float app_scale = 65535.0f / depth_values;
 
+  // Check SSE2
+  if (use_sse2 && app_scale < 63) {
+    scaleValues_SSE2(start_y, end_y);
+  } else {
+    scaleValues_plain(start_y, end_y);
+  }
+
+#endif
+}
+
+#if _MSC_VER > 1399 || defined(__SSE2__)
+void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
+  int depth_values = whitePoint - blackLevelSeparate[0];
+  float app_scale = 65535.0f / depth_values;
+
   // Scale in 30.2 fp
   auto full_scale_fp = (int)(app_scale * 4.0f);
   // Half Scale in 18.14 fp
   auto half_scale_fp = (int)(app_scale * 4095.0f);
 
-  // Check SSE2
-  if (use_sse2 && app_scale < 63) {
+  __m128i sseround;
+  __m128i ssesub2;
+  __m128i ssesign;
+  __m128i rand_mul;
+  __m128i rand_mask;
+  __m128i sse_full_scale_fp;
+  __m128i sse_half_scale_fp;
 
-    __m128i sseround;
-    __m128i ssesub2;
-    __m128i ssesign;
-    __m128i rand_mul;
-    __m128i rand_mask;
-    __m128i sse_full_scale_fp;
-    __m128i sse_half_scale_fp;
+  auto* sub_mul = (uint32*)alignedMallocArray<16, __m128i>(4);
+  if (!sub_mul)
+    ThrowRDE("Out of memory, failed to allocate 128 bytes");
+  uint32 gw = pitch / 16;
+  // 10 bit fraction
+  uint32 mul = (int)(1024.0f * 65535.0f /
+                     (float)(whitePoint - blackLevelSeparate[mOffset.x & 1]));
+  mul |= ((int)(1024.0f * 65535.0f /
+                (float)(whitePoint - blackLevelSeparate[(mOffset.x + 1) & 1])))
+         << 16;
+  uint32 b = blackLevelSeparate[mOffset.x & 1] |
+             (blackLevelSeparate[(mOffset.x + 1) & 1] << 16);
 
-    auto* sub_mul = (uint32*)alignedMallocArray<16, __m128i>(4);
-    if (!sub_mul)
-	  ThrowRDE("Out of memory, failed to allocate 128 bytes");
-    uint32 gw = pitch / 16;
-    // 10 bit fraction
-    uint32 mul = (int)(1024.0f * 65535.0f /
-                       (float)(whitePoint - blackLevelSeparate[mOffset.x & 1]));
-    mul |= ((int)(1024.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[(mOffset.x+1)&1])))<<16;
-    uint32 b = blackLevelSeparate[mOffset.x&1] | (blackLevelSeparate[(mOffset.x+1)&1]<<16);
+  for (int i = 0; i < 4; i++) {
+    sub_mul[i] = b;       // Subtract even lines
+    sub_mul[4 + i] = mul; // Multiply even lines
+  }
 
-    for (int i = 0; i< 4; i++) {
-      sub_mul[i] = b;     // Subtract even lines
-      sub_mul[4+i] = mul;   // Multiply even lines
-    }
+  mul = (int)(1024.0f * 65535.0f /
+              (float)(whitePoint - blackLevelSeparate[2 + (mOffset.x & 1)]));
+  mul |= ((int)(1024.0f * 65535.0f /
+                (float)(whitePoint -
+                        blackLevelSeparate[2 + ((mOffset.x + 1) & 1)])))
+         << 16;
+  b = blackLevelSeparate[2 + (mOffset.x & 1)] |
+      (blackLevelSeparate[2 + ((mOffset.x + 1) & 1)] << 16);
 
-    mul = (int)(1024.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[2+(mOffset.x&1)]));
-    mul |= ((int)(1024.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[2+((mOffset.x+1)&1)])))<<16;
-    b = blackLevelSeparate[2+(mOffset.x&1)] | (blackLevelSeparate[2+((mOffset.x+1)&1)]<<16);
+  for (int i = 0; i < 4; i++) {
+    sub_mul[8 + i] = b;    // Subtract odd lines
+    sub_mul[12 + i] = mul; // Multiply odd lines
+  }
 
-    for (int i = 0; i< 4; i++) {
-      sub_mul[8+i] = b;   // Subtract odd lines
-      sub_mul[12+i] = mul;  // Multiply odd lines
-    }
+  sseround = _mm_set_epi32(512, 512, 512, 512);
+  ssesub2 = _mm_set_epi32(32768, 32768, 32768, 32768);
+  ssesign = _mm_set_epi32(0x80008000, 0x80008000, 0x80008000, 0x80008000);
+  sse_full_scale_fp = _mm_set1_epi32(full_scale_fp | (full_scale_fp << 16));
+  sse_half_scale_fp = _mm_set1_epi32(half_scale_fp >> 4);
 
-    sseround = _mm_set_epi32(512, 512, 512, 512);
-    ssesub2 = _mm_set_epi32(32768, 32768, 32768, 32768);
-    ssesign = _mm_set_epi32(0x80008000, 0x80008000, 0x80008000, 0x80008000);
-    sse_full_scale_fp = _mm_set1_epi32(full_scale_fp|(full_scale_fp<<16));
-    sse_half_scale_fp = _mm_set1_epi32(half_scale_fp >> 4);
-
-    if (mDitherScale) {
-      rand_mul = _mm_set1_epi32(0x4d9f1d32);
-    } else {
-      rand_mul = _mm_set1_epi32(0);
-    }
-    rand_mask = _mm_set1_epi32(0x00ff00ff);  // 8 random bits
-
-    for (int y = start_y; y < end_y; y++) {
-      __m128i sserandom;
-      if (mDitherScale) {
-          sserandom = _mm_set_epi32(dim.x*1676+y*18000, dim.x*2342+y*34311, dim.x*4272+y*12123, dim.x*1234+y*23464);
-      } else {
-        sserandom = _mm_setzero_si128();
-      }
-      auto *pixel = (__m128i *)&data[(mOffset.y + y) * pitch];
-      __m128i ssescale, ssesub;
-      if (((y + mOffset.y) & 1) == 0) {
-        ssesub = _mm_load_si128((__m128i*)&sub_mul[0]);
-        ssescale = _mm_load_si128((__m128i*)&sub_mul[4]);
-      } else {
-        ssesub = _mm_load_si128((__m128i*)&sub_mul[8]);
-        ssescale = _mm_load_si128((__m128i*)&sub_mul[12]);
-      }
-
-      for (uint32 x = 0 ; x < gw; x++) {
-        __m128i pix_high;
-        __m128i temp;
-        _mm_prefetch((char*)(pixel+1), _MM_HINT_T0);
-        __m128i pix_low = _mm_load_si128(pixel);
-        // Subtract black
-        pix_low = _mm_subs_epu16(pix_low, ssesub);
-        // Multiply the two unsigned shorts and combine it to 32 bit result
-        pix_high = _mm_mulhi_epu16(pix_low, ssescale);
-        temp = _mm_mullo_epi16(pix_low, ssescale);
-        pix_low = _mm_unpacklo_epi16(temp, pix_high);
-        pix_high = _mm_unpackhi_epi16(temp, pix_high);
-        // Add rounder
-        pix_low = _mm_add_epi32(pix_low, sseround);
-        pix_high = _mm_add_epi32(pix_high, sseround);
-
-        sserandom = _mm_xor_si128(_mm_mulhi_epi16(sserandom, rand_mul), _mm_mullo_epi16(sserandom, rand_mul));
-        __m128i rand_masked = _mm_and_si128(sserandom, rand_mask);  // Get 8 random bits
-        rand_masked = _mm_mullo_epi16(rand_masked, sse_full_scale_fp);
-
-        __m128i zero = _mm_setzero_si128();
-        __m128i rand_lo = _mm_sub_epi32(sse_half_scale_fp, _mm_unpacklo_epi16(rand_masked,zero));
-        __m128i rand_hi = _mm_sub_epi32(sse_half_scale_fp, _mm_unpackhi_epi16(rand_masked,zero));
-
-        pix_low = _mm_add_epi32(pix_low, rand_lo);
-        pix_high = _mm_add_epi32(pix_high, rand_hi);
-
-        // Shift down
-        pix_low = _mm_srai_epi32(pix_low, 10);
-        pix_high = _mm_srai_epi32(pix_high, 10);
-        // Subtract to avoid clipping
-        pix_low = _mm_sub_epi32(pix_low, ssesub2);
-        pix_high = _mm_sub_epi32(pix_high, ssesub2);
-        // Pack
-        pix_low = _mm_packs_epi32(pix_low, pix_high);
-        // Shift sign off
-        pix_low = _mm_xor_si128(pix_low, ssesign);
-        _mm_store_si128(pixel, pix_low);
-        pixel++;
-      }
-    }
-    alignedFree(sub_mul);
+  if (mDitherScale) {
+    rand_mul = _mm_set1_epi32(0x4d9f1d32);
   } else {
-    // Not SSE2
-    int gw = dim.x * cpp;
-    int mul[4];
-    int sub[4];
-    for (int i = 0; i < 4; i++) {
-      int v = i;
-      if ((mOffset.x&1) != 0)
-        v ^= 1;
-      if ((mOffset.y&1) != 0)
-        v ^= 2;
-      mul[i] = (int)(16384.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[v]));
-      sub[i] = blackLevelSeparate[v];
+    rand_mul = _mm_set1_epi32(0);
+  }
+  rand_mask = _mm_set1_epi32(0x00ff00ff); // 8 random bits
+
+  for (int y = start_y; y < end_y; y++) {
+    __m128i sserandom;
+    if (mDitherScale) {
+      sserandom =
+          _mm_set_epi32(dim.x * 1676 + y * 18000, dim.x * 2342 + y * 34311,
+                        dim.x * 4272 + y * 12123, dim.x * 1234 + y * 23464);
+    } else {
+      sserandom = _mm_setzero_si128();
     }
-    for (int y = start_y; y < end_y; y++) {
-      int v = dim.x + y * 36969;
-      auto *pixel = (ushort16 *)getData(0, y);
-      int *mul_local = &mul[2*(y&1)];
-      int *sub_local = &sub[2*(y&1)];
-      for (int x = 0 ; x < gw; x++) {
-        int rand;
-        if (mDitherScale) {
-          v = 18000 *(v & 65535) + (v >> 16);
-          rand = half_scale_fp - (full_scale_fp * (v&2047));
-        } else {
-          rand = 0;
-        }
-        pixel[x] = clampBits(((pixel[x] - sub_local[x&1]) * mul_local[x&1] + 8192 + rand) >> 14, 16);
-      }
+    auto* pixel = (__m128i*)&data[(mOffset.y + y) * pitch];
+    __m128i ssescale, ssesub;
+    if (((y + mOffset.y) & 1) == 0) {
+      ssesub = _mm_load_si128((__m128i*)&sub_mul[0]);
+      ssescale = _mm_load_si128((__m128i*)&sub_mul[4]);
+    } else {
+      ssesub = _mm_load_si128((__m128i*)&sub_mul[8]);
+      ssescale = _mm_load_si128((__m128i*)&sub_mul[12]);
+    }
+
+    for (uint32 x = 0; x < gw; x++) {
+      __m128i pix_high;
+      __m128i temp;
+      _mm_prefetch((char*)(pixel + 1), _MM_HINT_T0);
+      __m128i pix_low = _mm_load_si128(pixel);
+      // Subtract black
+      pix_low = _mm_subs_epu16(pix_low, ssesub);
+      // Multiply the two unsigned shorts and combine it to 32 bit result
+      pix_high = _mm_mulhi_epu16(pix_low, ssescale);
+      temp = _mm_mullo_epi16(pix_low, ssescale);
+      pix_low = _mm_unpacklo_epi16(temp, pix_high);
+      pix_high = _mm_unpackhi_epi16(temp, pix_high);
+      // Add rounder
+      pix_low = _mm_add_epi32(pix_low, sseround);
+      pix_high = _mm_add_epi32(pix_high, sseround);
+
+      sserandom = _mm_xor_si128(_mm_mulhi_epi16(sserandom, rand_mul),
+                                _mm_mullo_epi16(sserandom, rand_mul));
+      __m128i rand_masked =
+          _mm_and_si128(sserandom, rand_mask); // Get 8 random bits
+      rand_masked = _mm_mullo_epi16(rand_masked, sse_full_scale_fp);
+
+      __m128i zero = _mm_setzero_si128();
+      __m128i rand_lo = _mm_sub_epi32(sse_half_scale_fp,
+                                      _mm_unpacklo_epi16(rand_masked, zero));
+      __m128i rand_hi = _mm_sub_epi32(sse_half_scale_fp,
+                                      _mm_unpackhi_epi16(rand_masked, zero));
+
+      pix_low = _mm_add_epi32(pix_low, rand_lo);
+      pix_high = _mm_add_epi32(pix_high, rand_hi);
+
+      // Shift down
+      pix_low = _mm_srai_epi32(pix_low, 10);
+      pix_high = _mm_srai_epi32(pix_high, 10);
+      // Subtract to avoid clipping
+      pix_low = _mm_sub_epi32(pix_low, ssesub2);
+      pix_high = _mm_sub_epi32(pix_high, ssesub2);
+      // Pack
+      pix_low = _mm_packs_epi32(pix_low, pix_high);
+      // Shift sign off
+      pix_low = _mm_xor_si128(pix_low, ssesign);
+      _mm_store_si128(pixel, pix_low);
+      pixel++;
     }
   }
+  alignedFree(sub_mul);
 }
+#endif
 
-#else
-
-void RawImageDataU16::scaleValues(int start_y, int end_y) {
-  int gw = dim.x * cpp;
-  int mul[4];
-  int sub[4];
+void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
   int depth_values = whitePoint - blackLevelSeparate[0];
   float app_scale = 65535.0f / depth_values;
 
   // Scale in 30.2 fp
-  int full_scale_fp = (int)(app_scale * 4.0f);
+  auto full_scale_fp = (int)(app_scale * 4.0f);
   // Half Scale in 18.14 fp
-  int half_scale_fp = (int)(app_scale * 4095.0f);
+  auto half_scale_fp = (int)(app_scale * 4095.0f);
 
+  // Not SSE2
+  int gw = dim.x * cpp;
+  int mul[4];
+  int sub[4];
   for (int i = 0; i < 4; i++) {
     int v = i;
-    if ((mOffset.x&1) != 0)
+    if ((mOffset.x & 1) != 0)
       v ^= 1;
-    if ((mOffset.y&1) != 0)
+    if ((mOffset.y & 1) != 0)
       v ^= 2;
-    mul[i] = (int)(16384.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[v]));
+    mul[i] = (int)(16384.0f * 65535.0f /
+                   (float)(whitePoint - blackLevelSeparate[v]));
     sub[i] = blackLevelSeparate[v];
   }
   for (int y = start_y; y < end_y; y++) {
     int v = dim.x + y * 36969;
-    ushort16 *pixel = (ushort16*)getData(0, y);
-    int *mul_local = &mul[2*(y&1)];
-    int *sub_local = &sub[2*(y&1)];
-    for (int x = 0 ; x < gw; x++) {
+    auto* pixel = (ushort16*)getData(0, y);
+    int* mul_local = &mul[2 * (y & 1)];
+    int* sub_local = &sub[2 * (y & 1)];
+    for (int x = 0; x < gw; x++) {
       int rand;
       if (mDitherScale) {
-        v = 18000 *(v & 65535) + (v >> 16);
-        rand = half_scale_fp - (full_scale_fp * (v&2047));
+        v = 18000 * (v & 65535) + (v >> 16);
+        rand = half_scale_fp - (full_scale_fp * (v & 2047));
       } else {
         rand = 0;
       }
@@ -356,8 +356,6 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
     }
   }
 }
-
-#endif
 
 /* This performs a 4 way interpolated pixel */
 /* The value is interpolated from the 4 closest valid pixels in */
