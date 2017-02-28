@@ -14,9 +14,6 @@ message(STATUS "Checking for -std=c++11 support - works")
 add_definitions(-g3)
 add_definitions(-ggdb3)
 
-# should be fixed IMHO
-CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-fno-strict-aliasing)
-
 # assertions
 if(CMAKE_BUILD_TYPE MATCHES "^[Re][Ee][Ll][Ee][Aa][Ss][Ee]$")
   add_definitions(-DNDEBUG)
