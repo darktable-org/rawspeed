@@ -320,26 +320,6 @@ RawImage DngDecoder::decodeRawInternal() {
   // Now load the image
   decodeData(raw, compression, sample_format);
 
-  // Fetch the white balance
-  if (mRootIFD->hasEntryRecursive(ASSHOTNEUTRAL)) {
-    TiffEntry *as_shot_neutral = mRootIFD->getEntryRecursive(ASSHOTNEUTRAL);
-    if (as_shot_neutral->count == 3) {
-      for (uint32 i=0; i<3; i++)
-        mRaw->metadata.wbCoeffs[i] = 1.0f/as_shot_neutral->getFloat(i);
-    }
-  } else if (mRootIFD->hasEntryRecursive(ASSHOTWHITEXY)) {
-    TiffEntry *as_shot_white_xy = mRootIFD->getEntryRecursive(ASSHOTWHITEXY);
-    if (as_shot_white_xy->count == 2) {
-      mRaw->metadata.wbCoeffs[0] = as_shot_white_xy->getFloat(0);
-      mRaw->metadata.wbCoeffs[1] = as_shot_white_xy->getFloat(1);
-      mRaw->metadata.wbCoeffs[2] = 1 - mRaw->metadata.wbCoeffs[0] - mRaw->metadata.wbCoeffs[1];
-
-      const float d65_white[3] = { 0.950456, 1, 1.088754 };
-      for (uint32 i=0; i<3; i++)
-          mRaw->metadata.wbCoeffs[i] /= d65_white[i];
-    }
-  }
-
   // Crop
   if (raw->hasEntry(ACTIVEAREA)) {
     iPoint2D new_size(mRaw->dim.x, mRaw->dim.y);
@@ -492,6 +472,27 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       mRaw->metadata.canonical_id = mRootIFD->getEntryRecursive(UNIQUECAMERAMODEL)->getString();
     } else {
       mRaw->metadata.canonical_id = id.make + " " + id.model;
+    }
+  }
+
+  // Fetch the white balance
+  if (mRootIFD->hasEntryRecursive(ASSHOTNEUTRAL)) {
+    TiffEntry* as_shot_neutral = mRootIFD->getEntryRecursive(ASSHOTNEUTRAL);
+    if (as_shot_neutral->count == 3) {
+      for (uint32 i = 0; i < 3; i++)
+        mRaw->metadata.wbCoeffs[i] = 1.0f / as_shot_neutral->getFloat(i);
+    }
+  } else if (mRootIFD->hasEntryRecursive(ASSHOTWHITEXY)) {
+    TiffEntry* as_shot_white_xy = mRootIFD->getEntryRecursive(ASSHOTWHITEXY);
+    if (as_shot_white_xy->count == 2) {
+      mRaw->metadata.wbCoeffs[0] = as_shot_white_xy->getFloat(0);
+      mRaw->metadata.wbCoeffs[1] = as_shot_white_xy->getFloat(1);
+      mRaw->metadata.wbCoeffs[2] =
+          1 - mRaw->metadata.wbCoeffs[0] - mRaw->metadata.wbCoeffs[1];
+
+      const float d65_white[3] = {0.950456, 1, 1.088754};
+      for (uint32 i = 0; i < 3; i++)
+        mRaw->metadata.wbCoeffs[i] /= d65_white[i];
     }
   }
 }
