@@ -85,9 +85,9 @@ const Camera* CameraMetaData::getCamera(const string& make,
                                         const string& model) const {
   auto id = getId(make, model, "");
 
-  auto iter = find_if(cameras.begin(), cameras.end(),
-                      [id](decltype(*cameras.begin())& i) -> bool {
-                        const auto cid = i.first;
+  auto iter = find_if(cameras.cbegin(), cameras.cend(),
+                      [&id](decltype(*cameras.cbegin())& i) -> bool {
+                        const auto& cid = i.first;
                         return tie(id.make, id.model) ==
                                tie(cid.make, cid.model);
                       });
