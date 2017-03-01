@@ -44,14 +44,13 @@ public:
   DngSliceElement(uint32 off, uint32 count, uint32 offsetX, uint32 offsetY,
                   uint32 w, uint32 h)
       : byteOffset(off), byteCount(count), offX(offsetX), offY(offsetY),
-        width(w), height(h), mUseBigtable(false) {}
+        width(w), height(h) {}
   const uint32 byteOffset;
   const uint32 byteCount;
   const uint32 offX;
   const uint32 offY;
   const uint32 width;
   const uint32 height;
-  bool mUseBigtable;
 };
 
 class DngDecoderThread
