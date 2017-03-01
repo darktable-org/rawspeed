@@ -304,34 +304,21 @@ RawImage DngDecoder::decodeRawInternal() {
   if (sample_format == 3 && bps != 32 && compression != 8)
     ThrowRDE("Uncompressed float point must be 32 bits per sample.");
 
-  try {
-    mRaw->dim.x = raw->getEntry(IMAGEWIDTH)->getU32();
-    mRaw->dim.y = raw->getEntry(IMAGELENGTH)->getU32();
-  } catch (TiffParserException &) {
-    ThrowRDE("Could not read basic image information.");
-  }
+  mRaw->dim.x = raw->getEntry(IMAGEWIDTH)->getU32();
+  mRaw->dim.y = raw->getEntry(IMAGELENGTH)->getU32();
 
-  try {
+  if (mRaw->isCFA)
+    parseCFA(raw);
 
-    if (mRaw->isCFA)
-      parseCFA(raw);
+  uint32 cpp = raw->getEntry(SAMPLESPERPIXEL)->getU32();
 
-    uint32 cpp = raw->getEntry(SAMPLESPERPIXEL)->getU32();
+  if (cpp > 4)
+    ThrowRDE("More than 4 samples per pixel is not supported.");
 
-    if (cpp > 4)
-      ThrowRDE("More than 4 samples per pixel is not supported.");
+  mRaw->setCpp(cpp);
 
-    mRaw->setCpp(cpp);
-
-    // Now load the image
-    try {
-      decodeData(raw, compression, sample_format);
-    } catch (TiffParserException& e) {
-      ThrowRDE("Unsupported format, tried strips and tiles:\n%s", e.what());
-    }
-  } catch (TiffParserException &e) {
-    ThrowRDE("Image could not be read:\n%s", e.what());
-  }
+  // Now load the image
+  decodeData(raw, compression, sample_format);
 
   // Fetch the white balance
   if (mRootIFD->hasEntryRecursive(ASSHOTNEUTRAL)) {
