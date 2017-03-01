@@ -131,7 +131,8 @@ public:
 
   void setCodeValues(const Buffer& data) {
     // spec says max 16 but Hasselblad ignores that -> allow 17
-    assert(data.getSize() <= 17);
+    // Canon's old CRW really ignores this ...
+    assert(data.getSize() <= 162);
     codeValues.assign(data.begin(), data.end());
   }
 

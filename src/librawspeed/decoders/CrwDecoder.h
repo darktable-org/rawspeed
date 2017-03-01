@@ -21,10 +21,9 @@
 
 #pragma once
 
-#include "common/Common.h"       // for uint32, ushort16, uchar8
+#include "common/Common.h"       // for uint32, uchar8
 #include "common/RawImage.h"     // for RawImage
 #include "decoders/RawDecoder.h" // for RawDecoder
-#include "io/BitPumpJPEG.h"      // for BitPumpJPEG
 
 namespace RawSpeed {
 
@@ -45,11 +44,7 @@ public:
 protected:
   int getDecoderVersion() const override { return 0; }
   CiffIFD *mRootIFD;
-  void makeDecoder(int n, const uchar8 *source);
-  void initHuffTables (uint32 table);
-  uint32 getbithuff (BitPumpJPEG &pump, int nbits, ushort16 *huff);
   void decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 height);
-  ushort16 *mHuff[2];
 };
 
 } // namespace RawSpeed

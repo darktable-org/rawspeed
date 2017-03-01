@@ -21,11 +21,12 @@
 */
 
 #include "decoders/CrwDecoder.h"
-#include "common/Common.h"                // for ushort16, uint32, uchar8
-#include "common/Memory.h"                // for alignedFree, alignedMalloc...
+#include "common/Common.h"                // for uint32, ushort16, uchar8
 #include "common/Point.h"                 // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable::signExtend
+#include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable
+#include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
+#include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
 #include "metadata/Camera.h"              // for Hints
 #include "metadata/ColorFilterArray.h"    // for CFAColor::CFA_GREEN, CFACo...
@@ -33,6 +34,7 @@
 #include "tiff/CiffIFD.h"                 // for CiffIFD
 #include "tiff/CiffTag.h"                 // for CiffTag, CiffTag::CIFF_MAK...
 #include <algorithm>                      // for min
+#include <array>                          // for array
 #include <cmath>                          // for copysignf, expf, logf
 #include <cstdio>                         // for fprintf, stderr
 #include <cstdlib>                        // for abs
@@ -49,20 +51,12 @@ class CameraMetaData;
 
 CrwDecoder::CrwDecoder(CiffIFD* rootIFD, Buffer* file)
     : RawDecoder(file), mRootIFD(rootIFD) {
-  mHuff[0] = nullptr;
-  mHuff[1] = nullptr;
 }
 
 CrwDecoder::~CrwDecoder() {
   if (mRootIFD)
     delete mRootIFD;
   mRootIFD = nullptr;
-  if (mHuff[0] != nullptr)
-    alignedFree(mHuff[0]);
-  if (mHuff[1] != nullptr)
-    alignedFree(mHuff[1]);
-  mHuff[0] = nullptr;
-  mHuff[1] = nullptr;
 }
 
 RawImage CrwDecoder::decodeRawInternal() {
@@ -233,42 +227,19 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         1111111           0xff
  */
 
-void CrwDecoder::makeDecoder (int n, const uchar8 *source)
-{
-  int max, len, h, i, j;
-  const uchar8 *count;
-
-  if (n > 1) {
+static HuffmanTable makeDecoder(int n, const uchar8* source) {
+  if (n > 1)
     ThrowRDE("Invalid table number specified");
-  }
 
-  count = (source += 16) - 17;
-  for (max=16; max && !count[max]; max--);
+  HuffmanTable ht;
+  auto count = ht.setNCodesPerLength(Buffer(source, 16));
+  ht.setCodeValues(Buffer(source + 16, count));
+  ht.setup(false, false);
 
-  if (mHuff[n] != nullptr) {
-    alignedFree(mHuff[n]);
-    mHuff[n] = nullptr;
-  }
-
-  auto* huff = (ushort16*)alignedMallocArray<16, ushort16, true>(1UL + (1UL << max));
-
-  if (!huff)
-    ThrowRDE("Couldn't allocate table");
-
-  huff[0] = max;
-  for (h = len = 1; len <= max; len++) {
-    for (i = 0; i < count[len]; i++, ++source) {
-      for (j=0; j < 1 << (max-len); j++)
-        if (h <= 1 << max)
-          huff[h++] = len << 8 | *source;
-    }
-  }
-
-  mHuff[n] = huff;
+  return ht;
 }
 
-void CrwDecoder::initHuffTables (uint32 table)
-{
+static array<HuffmanTable, 2> initHuffTables(uint32 table) {
   static const uchar8 first_tree[3][29] = {
     { 0,1,4,2,3,1,2,0,0,0,0,0,0,0,0,0,
       0x04,0x03,0x05,0x06,0x02,0x07,0x01,0x08,0x09,0x00,0x0a,0x0b,0xff  },
@@ -324,17 +295,11 @@ void CrwDecoder::initHuffTables (uint32 table)
       0xd3,0xaa,0xc4,0xca,0xf2,0xb1,0xe4,0xd1,0x83,0x63,0xea,0xc3,
       0xe2,0x82,0xf1,0xa3,0xc2,0xa1,0xc1,0xe3,0xa2,0xe1,0xff,0xff  }
   };
-  makeDecoder(0, first_tree[table]);
-  makeDecoder(1, second_tree[table]);
-}
 
-uint32 CrwDecoder::getbithuff (BitPumpJPEG &pump, int nbits, ushort16 *huff)
-{
-  uint32 c = pump.peekBits(nbits);
-  // Skip bits given by the high order bits of the huff table
-  pump.getBits(huff[c] >> 8);
-  // Return the lower order bits
-  return (uchar8) huff[c];
+  array<HuffmanTable, 2> mHuff = {
+      {makeDecoder(0, first_tree[table]), makeDecoder(1, second_tree[table])}};
+
+  return mHuff;
 }
 
 void CrwDecoder::decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 height)
@@ -342,7 +307,7 @@ void CrwDecoder::decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 
   int nblocks;
   int block, diffbuf[64], leaf, len, diff, carry=0, pnum=0, base[2];
 
-  initHuffTables (dec_table);
+  auto mHuff = initHuffTables(dec_table);
 
   uint32 offset = 540 + lowbits*height*width/4;
   ByteStream input(mFile, offset);
@@ -354,7 +319,7 @@ void CrwDecoder::decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 
     for (block=0; block < nblocks; block++) {
       memset (diffbuf, 0, sizeof diffbuf);
       for (uint32 i=0; i < 64; i++ ) {
-        leaf = getbithuff(pump, *mHuff[i > 0], mHuff[i > 0]+1);
+        leaf = mHuff[i > 0].decodeLength(pump);
         if (leaf == 0 && i) break;
         if (leaf == 0xff) continue;
         i  += leaf >> 4;
