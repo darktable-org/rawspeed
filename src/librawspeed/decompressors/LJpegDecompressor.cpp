@@ -52,14 +52,19 @@ void LJpegDecompressor::decodeScan()
     if (frame.compInfo[i].superH != 1 || frame.compInfo[i].superV != 1)
       ThrowRDE("Unsupported subsampling");
 
-  if (frame.cps == 2)
+  switch (frame.cps) {
+  case 2:
     decodeN<2>();
-  else if (frame.cps == 3)
+    break;
+  case 3:
     decodeN<3>();
-  else if (frame.cps == 4)
+    break;
+  case 4:
     decodeN<4>();
-  else
-    ThrowRDE("Unsupported number of components");
+    break;
+  default:
+    ThrowRDE("Unsupported number of components: %u", frame.cps);
+  }
 }
 
 // N_COMP == number of components (2, 3 or 4)

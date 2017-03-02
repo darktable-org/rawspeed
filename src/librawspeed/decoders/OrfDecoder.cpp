@@ -172,11 +172,13 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
       if (border) {
         if (y_border && x < 2)
           pred = 0;
-        else if (y_border)
-          pred = left0;
         else {
-          pred = dest[-pitch+((int)x)];
-          nw0 = pred;
+          if (y_border)
+            pred = left0;
+          else {
+            pred = dest[-pitch + ((int)x)];
+            nw0 = pred;
+          }
         }
         dest[x] = pred + ((diff * 4) | low);
         // Set predictor
@@ -229,11 +231,13 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
       if (border) {
         if (y_border && x < 2)
           pred = 0;
-        else if (y_border)
-          pred = left1;
         else {
-          pred = dest[-pitch+((int)x)];
-          nw1 = pred;
+          if (y_border)
+            pred = left1;
+          else {
+            pred = dest[-pitch + ((int)x)];
+            nw1 = pred;
+          }
         }
         dest[x] = left1 = pred + ((diff * 4) | low);
       } else {
@@ -297,14 +301,23 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           // Order is assumed to be RGGB
           if (blackEntry->count == 4) {
             for (int i = 0; i < 4; i++) {
-              if (mRaw->cfa.getColorAt(i&1, i>>1) == CFA_RED)
-                mRaw->blackLevelSeparate[i] = blackEntry->getU16(0);
-              else if (mRaw->cfa.getColorAt(i&1, i>>1) == CFA_BLUE)
-                mRaw->blackLevelSeparate[i] = blackEntry->getU16(3);
-              else if (mRaw->cfa.getColorAt(i&1, i>>1) == CFA_GREEN && i<2)
-                mRaw->blackLevelSeparate[i] = blackEntry->getU16(1);
-              else if (mRaw->cfa.getColorAt(i&1, i>>1) == CFA_GREEN)
-                mRaw->blackLevelSeparate[i] = blackEntry->getU16(2);
+              auto c = mRaw->cfa.getColorAt(i & 1, i >> 1);
+              int j;
+              switch (c) {
+              case CFA_RED:
+                j = 0;
+                break;
+              case CFA_GREEN:
+                j = i < 2 ? 1 : 2;
+                break;
+              case CFA_BLUE:
+                j = 3;
+                break;
+              default:
+                ThrowRDE("Unexpected CFA color: %u", c);
+              }
+
+              mRaw->blackLevelSeparate[i] = blackEntry->getU16(j);
             }
             // Adjust whitelevel based on the read black (we assume the dynamic range is the same)
             mRaw->whitePoint -= (mRaw->blackLevel - mRaw->blackLevelSeparate[0]);

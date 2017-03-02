@@ -283,12 +283,18 @@ RawImage DngDecoder::decodeRawInternal() {
 
   int compression = raw->getEntry(COMPRESSION)->getU16();
 
-  if (sample_format == 1)
+  switch (sample_format) {
+  case 1:
     mRaw = RawImage::create(TYPE_USHORT16);
-  else if (sample_format == 3)
+    break;
+  case 3:
     mRaw = RawImage::create(TYPE_FLOAT32);
-  else
-    ThrowRDE("Only 16 bit unsigned or float point data supported.");
+    break;
+  default:
+    ThrowRDE("Only 16 bit unsigned or float point data supported. Sample "
+             "format %u is not supported.",
+             sample_format);
+  }
 
   mRaw->isCFA = (raw->getEntry(PHOTOMETRICINTERPRETATION)->getU16() == 32803);
 

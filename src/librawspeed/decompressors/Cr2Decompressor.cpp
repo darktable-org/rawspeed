@@ -26,6 +26,7 @@
 #include "io/BitPumpJPEG.h"               // for BitStream<>::getBufferPosi...
 #include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for min, copy_n, move
+#include <cassert>                        // for assert
 
 using namespace std;
 
@@ -58,15 +59,21 @@ void Cr2Decompressor::decodeScan()
 
     if (frame.compInfo[0].superV == 2)
       decodeN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
-    else // frame.compInfo[0].superV == 1
+    else {
+      assert(frame.compInfo[0].superV == 1);
       decodeN_X_Y<3, 2, 1>(); // Cr2 sRaw2/sRaw
+    }
   } else {
-    if (frame.cps == 2)
+    switch (frame.cps) {
+    case 2:
       decodeN_X_Y<2, 1, 1>();
-    else if (frame.cps == 4)
+      break;
+    case 4:
       decodeN_X_Y<4, 1, 1>();
-    else
-      ThrowRDE("Unsupported number of components");
+      break;
+    default:
+      ThrowRDE("Unsupported number of components: %u", frame.cps);
+    }
   }
 }
 

@@ -464,10 +464,15 @@ void Cr2Decoder::sRawInterpolate() {
   if (subSampling.y == 1 && subSampling.x == 2) {
     if (isOldSraw)
       interpolate_422<0>(getHue(), mRaw, sraw_coeffs, width, height, 0, height);
-    else if (isNewSraw)
-      interpolate_422<2>(getHue(), mRaw, sraw_coeffs, width, height, 0, height);
-    else
-      interpolate_422<1>(getHue(), mRaw, sraw_coeffs, width, height, 0, height);
+    else {
+      if (isNewSraw) {
+        interpolate_422<2>(getHue(), mRaw, sraw_coeffs, width, height, 0,
+                           height);
+      } else {
+        interpolate_422<1>(getHue(), mRaw, sraw_coeffs, width, height, 0,
+                           height);
+      }
+    }
   } else if (subSampling.y == 2 && subSampling.x == 2) {
     if (isNewSraw)
       interpolate_420<2>(getHue(), mRaw, sraw_coeffs, width, height, 0, height);

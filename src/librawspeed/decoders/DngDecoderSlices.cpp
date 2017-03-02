@@ -196,8 +196,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
 #pragma message "JPEG is not present! Lossy JPEG DNG will not be supported!"
     ThrowRDE("jpeg support is disabled.");
 #endif
-  }
-  else
+  } else
     mRaw->setError("DngDecoderSlices: Unknown compression");
 }
 

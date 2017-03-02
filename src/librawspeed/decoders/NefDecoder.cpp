@@ -204,12 +204,14 @@ void NefDecoder::DecodeUncompressed() {
     try {
       if (hints.has("coolpixmangled"))
         readCoolpixMangledRaw(in, size, pos, width*bitPerPixel / 8);
-      else if (hints.has("coolpixsplit"))
-        readCoolpixSplitRaw(in, size, pos, width*bitPerPixel / 8);
       else {
-        UncompressedDecompressor u(in, mRaw, uncorrectedRawValues);
-        u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, bitPerPixel,
-                              bitorder ? BitOrder_Jpeg : BitOrder_Plain);
+        if (hints.has("coolpixsplit"))
+          readCoolpixSplitRaw(in, size, pos, width * bitPerPixel / 8);
+        else {
+          UncompressedDecompressor u(in, mRaw, uncorrectedRawValues);
+          u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, bitPerPixel,
+                                bitorder ? BitOrder_Jpeg : BitOrder_Plain);
+        }
       }
     } catch (RawDecoderException &e) {
       if (i>0)

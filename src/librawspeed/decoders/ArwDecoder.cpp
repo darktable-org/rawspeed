@@ -468,12 +468,16 @@ void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
       for (sh = 0; sh < 4 && 0x80 << sh <= _max - _min; sh++);
       for (int i = 0; i < 16; i++) {
         int p;
-        if (i == _imax) p = _max;
-        else if (i == _imin) p = _min;
+        if (i == _imax)
+          p = _max;
         else {
-          p = (bits.getBits(7) << sh) + _min;
-          if (p > 0x7ff)
-            p = 0x7ff;
+          if (i == _imin)
+            p = _min;
+          else {
+            p = (bits.getBits(7) << sh) + _min;
+            if (p > 0x7ff)
+              p = 0x7ff;
+          }
         }
         mRaw->setWithLookUp(p << 1, (uchar8*)&dest[x+i*2], &random);
       }
