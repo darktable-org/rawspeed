@@ -8,19 +8,23 @@ CheckOptions:
   - key:             google-readability-braces-around-statements.ShortStatementLines
     value:           '3'
   - key:             google-readability-function-size.BranchThreshold
-    value:           '38'
+    value:           '37'
   - key:             google-readability-function-size.LineThreshold
-    value:           '210'
+    value:           '183'
   - key:             google-readability-function-size.StatementThreshold
-    value:           '169'
+    value:           '153'
+  - key:             google-readability-function-size.ParameterThreshold
+    value:           '6'
   - key:             readability-braces-around-statements.ShortStatementLines
     value:           '3'
   - key:             readability-function-size.BranchThreshold
-    value:           '38'
+    value:           '37'
   - key:             readability-function-size.LineThreshold
-    value:           '210'
+    value:           '183'
   - key:             readability-function-size.StatementThreshold
-    value:           '169'
+    value:           '153'
+  - key:             readability-function-size.ParameterThreshold
+    value:           '6'
   - key:             readability-simplify-boolean-expr.ChainedConditionalAssignment
     value:           '1'
   - key:             readability-simplify-boolean-expr.ChainedConditionalReturn
