@@ -32,10 +32,10 @@ public:
   constexpr iPoint2D(int a, int b) : x(a), y(b) {}
 
   constexpr iPoint2D operator+(const iPoint2D& rhs) const {
-    return iPoint2D(x + rhs.x, y + rhs.y);
+    return {x + rhs.x, y + rhs.y};
   }
   constexpr iPoint2D operator-(const iPoint2D& rhs) const {
-    return iPoint2D(x - rhs.x, y - rhs.y);
+    return {x - rhs.x, y - rhs.y};
   }
 
   iPoint2D& operator+=(const iPoint2D& rhs) {
@@ -76,7 +76,7 @@ public:
 
   // FIXME: C++14
   constexpr iPoint2D getSmallest(const iPoint2D& rhs) const {
-    return iPoint2D(x < rhs.x ? x : rhs.x, y < rhs.y ? y : rhs.y);
+    return {x < rhs.x ? x : rhs.x, y < rhs.y ? y : rhs.y};
   }
 
   int x = 0;
