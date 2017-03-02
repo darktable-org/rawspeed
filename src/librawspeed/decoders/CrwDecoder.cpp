@@ -54,8 +54,7 @@ CrwDecoder::CrwDecoder(CiffIFD* rootIFD, Buffer* file)
 }
 
 CrwDecoder::~CrwDecoder() {
-  if (mRootIFD)
-    delete mRootIFD;
+  delete mRootIFD;
   mRootIFD = nullptr;
 }
 

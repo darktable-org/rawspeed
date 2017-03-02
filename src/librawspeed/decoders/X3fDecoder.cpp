@@ -49,8 +49,8 @@ X3fDecoder::X3fDecoder(Buffer* file) : RawDecoder(file) {
 }
 
 X3fDecoder::~X3fDecoder() {
-  if (bytes)
-    delete bytes;
+  delete bytes;
+
   if (huge_table)
     alignedFree(huge_table);
   if (line_offsets)

@@ -54,10 +54,7 @@ CiffEntry::CiffEntry(Buffer* f, uint32 value_data, uint32 offset) {
   count = bytesize >> getElementShift();
 }
 
-CiffEntry::~CiffEntry() {
-  if (own_data)
-    delete[] own_data;
-}
+CiffEntry::~CiffEntry() { delete[] own_data; }
 
 uint32 __attribute__((pure)) CiffEntry::getElementShift() {
   switch (type) {

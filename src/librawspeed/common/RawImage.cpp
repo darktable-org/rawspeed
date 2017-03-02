@@ -72,9 +72,9 @@ RawImageData::~RawImageData() {
   pthread_mutex_destroy(&errMutex);
   pthread_mutex_destroy(&mBadPixelMutex);
 #endif
-  if (table != nullptr) {
-    delete table;
-  }
+
+  delete table;
+
   errors.clear();
   destroyData();
 }
@@ -541,9 +541,8 @@ void RawImageData::sixteenBitLookup() {
 
 void RawImageData::setTable( TableLookUp *t )
 {
-  if (table != nullptr) {
-    delete table;
-  }
+  delete table;
+
   table = t;
 }
 
@@ -567,10 +566,8 @@ TableLookUp::TableLookUp( int _ntables, bool _dither ) : ntables(_ntables), dith
 
 TableLookUp::~TableLookUp()
 {
-  if (tables != nullptr) {
-    delete[] tables;
-    tables = nullptr;
-  }
+  delete[] tables;
+  tables = nullptr;
 }
 
 

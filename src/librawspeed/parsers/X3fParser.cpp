@@ -71,10 +71,8 @@ X3fParser::X3fParser(Buffer* file) {
 }
 
 void X3fParser::freeObjects() {
-  if (bytes)
-    delete bytes;
-  if (decoder)
-    delete decoder;
+  delete bytes;
+  delete decoder;
   decoder = nullptr;
   bytes = nullptr;
 }

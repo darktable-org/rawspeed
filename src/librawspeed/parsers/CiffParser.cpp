@@ -42,8 +42,7 @@ CiffParser::CiffParser(Buffer* inputData)
     : mInput(inputData), mRootIFD(nullptr) {}
 
 CiffParser::~CiffParser() {
-  if (mRootIFD)
-    delete mRootIFD;
+  delete mRootIFD;
   mRootIFD = nullptr;
 }
 
@@ -55,8 +54,7 @@ void CiffParser::parseData() {
   if (data[0] != 0x49 || data[1] != 0x49)
     ThrowCPE("Not a CIFF file (ID)");
 
-  if (mRootIFD)
-    delete mRootIFD;
+  delete mRootIFD;
 
   mRootIFD = new CiffIFD(mInput, data[2], mInput->getSize());
 }
