@@ -20,6 +20,7 @@
 
 #include "decompressors/NikonDecompressor.h"
 #include "common/Common.h"              // for uint32, ushort16, clampBits
+#include "common/Point.h"               // for iPoint2D
 #include "common/RawImage.h"            // for RawImage, RawImageData, RawI...
 #include "decompressors/HuffmanTable.h" // for HuffmanTable
 #include "io/BitPumpMSB.h"              // for BitPumpMSB, BitStream<>::fil...
@@ -61,7 +62,9 @@ static HuffmanTable createHuffmanTable(uint32 huffSelect) {
   return ht;
 }
 
-void decompressNikon(RawImage& mRaw, ByteStream&& data, ByteStream metadata, uint32 w, uint32 h, uint32 bitsPS, bool uncorrectedRawValues) {
+void decompressNikon(RawImage& mRaw, ByteStream&& data, ByteStream metadata,
+                     const iPoint2D& size, uint32 bitsPS,
+                     bool uncorrectedRawValues) {
   uint32 v0 = metadata.getByte();
   uint32 v1 = metadata.getByte();
   uint32 huffSelect = 0;
@@ -122,11 +125,11 @@ void decompressNikon(RawImage& mRaw, ByteStream&& data, ByteStream metadata, uin
 
   int pLeft1 = 0;
   int pLeft2 = 0;
-  uint32 cw = w / 2;
+  uint32 cw = size.x / 2;
   uint32 random = bits.peekBits(24);
   //allow gcc to devirtualize the calls below
   auto *rawdata = (RawImageDataU16 *)mRaw.get();
-  for (uint32 y = 0; y < h; y++) {
+  for (uint32 y = 0; y < (unsigned)size.y; y++) {
     if (split && y == split) {
       ht = createHuffmanTable(huffSelect + 1);
     }

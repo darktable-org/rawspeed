@@ -25,8 +25,12 @@
 
 namespace RawSpeed {
 
+class iPoint2D;
+
 class RawImage;
 
-void decompressNikon(RawImage& mRaw, ByteStream&& data, ByteStream meta, uint32 w, uint32 h, uint32 bitsPS, bool uncorrectedRawValues);
+void decompressNikon(RawImage& mRaw, ByteStream&& data, ByteStream metadata,
+                     const iPoint2D& size, uint32 bitsPS,
+                     bool uncorrectedRawValues);
 
 } // namespace RawSpeed
