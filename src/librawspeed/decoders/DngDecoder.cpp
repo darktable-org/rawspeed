@@ -153,7 +153,7 @@ void DngDecoder::parseCFA(const TiffIFD* raw) {
 
   mRaw->cfa.setSize(cfaSize);
 
-  const map<uint32, CFAColor> int2enum = {
+  static const map<uint32, CFAColor> int2enum = {
       {0, CFA_RED},     {1, CFA_GREEN},  {2, CFA_BLUE},  {3, CFA_CYAN},
       {4, CFA_MAGENTA}, {5, CFA_YELLOW}, {6, CFA_WHITE},
   };
