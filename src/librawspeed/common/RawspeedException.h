@@ -66,7 +66,10 @@ public:
   RawspeedException(const char* msg) : std::runtime_error(msg) { log(msg); }
 };
 
+#undef XSTR
 #define XSTR(a) #a
+
+#undef STR
 #define STR(a) XSTR(a)
 
 #ifndef DEBUG
