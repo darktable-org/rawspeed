@@ -146,6 +146,18 @@ public:
 
     int maxCodeLength = nCodesPerLength.size()-1;
 
+    // precompute how much code entries there are
+    size_t maxCodesCount = 0;
+    for (int l = 1; l <= maxCodeLength; ++l) {
+      for (int i = 0; i < nCodesPerLength[l]; ++i) {
+        maxCodesCount++;
+      }
+    }
+
+    // reserve all the memory. avoids lots of small allocs
+    code_len.reserve(maxCodesCount);
+    codes.reserve(maxCodesCount);
+
     // Figure C.1: make table of Huffman code length for each symbol
     // Figure C.2: generate the codes themselves
     uint32 code = 0;
@@ -158,6 +170,9 @@ public:
       }
       code <<= 1;
     }
+
+    assert(code_len.size() == maxCodesCount);
+    assert(codes.size() == maxCodesCount);
 
     // Figure F.15: generate decoding tables
     codeOffsetOL.resize(maxCodeLength + 1UL, 0xffff);
