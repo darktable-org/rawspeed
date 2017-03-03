@@ -214,10 +214,10 @@ void DngDecoder::decodeData(const TiffIFD* raw, int compression, uint32 sample_f
 
     for (uint32 y = 0; y < tilesY; y++) {
       for (uint32 x = 0; x < tilesX; x++) {
-        DngSliceElement e(offsets->getU32(x + y * tilesX),
-                          counts->getU32(x + y * tilesX), tilew * x, tileh * y,
-                          tilew, tileh);
-        slices.addSlice(e);
+        auto e = make_unique<DngSliceElement>(
+            offsets->getU32(x + y * tilesX), counts->getU32(x + y * tilesX),
+            tilew * x, tileh * y, tilew, tileh);
+        slices.addSlice(move(e));
       }
     }
   } else { // Strips
@@ -238,13 +238,14 @@ void DngDecoder::decodeData(const TiffIFD* raw, int compression, uint32 sample_f
 
     uint32 offY = 0;
     for (uint32 s = 0; s < counts->count; s++) {
-      DngSliceElement e(offsets->getU32(s), counts->getU32(s), 0, offY,
-                        mRaw->dim.x, yPerSlice);
+      auto e =
+          make_unique<DngSliceElement>(offsets->getU32(s), counts->getU32(s), 0,
+                                       offY, mRaw->dim.x, yPerSlice);
       offY += yPerSlice;
 
-      if (mFile->isValid(e.byteOffset,
-                         e.byteCount)) // Only decode if size is valid
-        slices.addSlice(e);
+      if (mFile->isValid(e->byteOffset,
+                         e->byteCount)) // Only decode if size is valid
+        slices.addSlice(move(e));
     }
   }
   uint32 nSlices = slices.size();

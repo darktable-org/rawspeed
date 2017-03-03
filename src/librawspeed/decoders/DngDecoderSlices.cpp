@@ -63,15 +63,15 @@ DngDecoderSlices::DngDecoderSlices(Buffer* file, const RawImage& img,
   compression = _compression;
 }
 
-void DngDecoderSlices::addSlice(const DngSliceElement &slice) {
-  slices.push(slice);
+void DngDecoderSlices::addSlice(std::unique_ptr<DngSliceElement>&& slice) {
+  slices.emplace(move(slice));
 }
 
 void DngDecoderSlices::startDecoding() {
 #ifndef HAVE_PTHREAD
   DngDecoderThread t(this);
   while (!slices.empty()) {
-    t.slices.push(slices.front());
+    t.slices.emplace(move(slices.front()));
     slices.pop();
   }
   DecodeThread(&t);
@@ -86,16 +86,18 @@ void DngDecoderSlices::startDecoding() {
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
+  threads.reserve(nThreads);
+
   for (uint32 i = 0; i < nThreads; i++) {
     auto t = make_unique<DngDecoderThread>(this);
     for (int j = 0; j < slicesPerThread ; j++) {
       if (!slices.empty()) {
-        t->slices.push(slices.front());
+        t->slices.emplace(move(slices.front()));
         slices.pop();
       }
     }
     pthread_create(&t->threadid, &attr, DecodeThread, t.get());
-    threads.push_back(move(t));
+    threads.emplace_back(move(t));
   }
   pthread_attr_destroy(&attr);
 
@@ -110,19 +112,19 @@ void DngDecoderSlices::startDecoding() {
 void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
   if (compression == 1) {
     while (!t->slices.empty()) {
-      DngSliceElement e = t->slices.front();
+      auto e = move(t->slices.front());
       t->slices.pop();
 
-      UncompressedDecompressor decompressor(*mFile, e.byteOffset, e.byteCount,
+      UncompressedDecompressor decompressor(*mFile, e->byteOffset, e->byteCount,
                                             mRaw,
                                             true /* does not matter here */);
 
-      size_t thisTileLength = e.offY + e.height > (uint32)mRaw->dim.y
-                                  ? mRaw->dim.y - e.offY
-                                  : e.height;
+      size_t thisTileLength = e->offY + e->height > (uint32)mRaw->dim.y
+                                  ? mRaw->dim.y - e->offY
+                                  : e->height;
 
       iPoint2D size(mRaw->dim.x, thisTileLength);
-      iPoint2D pos(0, e.offY);
+      iPoint2D pos(0, e->offY);
 
       bool big_endian = (getTiffEndianness(mFile) == big);
       // DNG spec says that if not 8 or 16 bit/sample, always use big endian
@@ -141,11 +143,11 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
     }
   } else if (compression == 7) {
     while (!t->slices.empty()) {
-      DngSliceElement e = t->slices.front();
+      auto e = move(t->slices.front());
       t->slices.pop();
-      LJpegDecompressor d(*mFile, e.byteOffset, e.byteCount, mRaw);
+      LJpegDecompressor d(*mFile, e->byteOffset, e->byteCount, mRaw);
       try {
-        d.decode(e.offX, e.offY, mFixLjpeg);
+        d.decode(e->offX, e->offY, mFixLjpeg);
       } catch (RawDecoderException &err) {
         mRaw->setError(err.what());
       } catch (IOException &err) {
@@ -157,13 +159,13 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
 #ifdef HAVE_ZLIB
     unsigned char *uBuffer = nullptr;
     while (!t->slices.empty()) {
-      DngSliceElement e = t->slices.front();
+      auto e = move(t->slices.front());
       t->slices.pop();
 
-      DeflateDecompressor z(*mFile, e.byteOffset, e.byteCount, mRaw, mPredictor,
-                            mBps);
+      DeflateDecompressor z(*mFile, e->byteOffset, e->byteCount, mRaw,
+                            mPredictor, mBps);
       try {
-        z.decode(&uBuffer, e.width, e.height, e.offX, e.offY);
+        z.decode(&uBuffer, e->width, e->height, e->offX, e->offY);
       } catch (RawDecoderException &err) {
         mRaw->setError(err.what());
       } catch (IOException &err) {
@@ -181,11 +183,11 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
 #ifdef HAVE_JPEG
     /* Each slice is a JPEG image */
     while (!t->slices.empty()) {
-      DngSliceElement e = t->slices.front();
+      auto e = move(t->slices.front());
       t->slices.pop();
-      JpegDecompressor j(*mFile, e.byteOffset, e.byteCount, mRaw);
+      JpegDecompressor j(*mFile, e->byteOffset, e->byteCount, mRaw);
       try {
-        j.decode(e.offX, e.offY);
+        j.decode(e->offX, e->offY);
       } catch (RawDecoderException &err) {
         mRaw->setError(err.what());
       } catch (IOException &err) {

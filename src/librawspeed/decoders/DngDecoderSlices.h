@@ -60,7 +60,7 @@ public:
   pthread_t threadid;
 #endif
   DngDecoderThread(DngDecoderSlices* parent_) : parent(parent_) {}
-  std::queue<DngSliceElement> slices;
+  std::queue<std::unique_ptr<DngSliceElement>> slices;
   DngDecoderSlices* parent;
 };
 
@@ -69,11 +69,11 @@ class DngDecoderSlices
 {
 public:
   DngDecoderSlices(Buffer* file, const RawImage& img, int compression);
-  void addSlice(const DngSliceElement &slice);
+  void addSlice(std::unique_ptr<DngSliceElement>&& slice);
   void startDecoding();
   void decodeSlice(DngDecoderThread* t);
   int __attribute__((pure)) size();
-  std::queue<DngSliceElement> slices;
+  std::queue<std::unique_ptr<DngSliceElement>> slices;
   std::vector<std::unique_ptr<DngDecoderThread>> threads;
   Buffer* mFile;
   RawImage mRaw;
