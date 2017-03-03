@@ -26,6 +26,7 @@
 #include <algorithm>                      // for copy
 #include <cassert>                        // for assert
 #include <cstddef>                        // for size_t
+#include <iterator>                       // for distance
 #include <numeric>                        // for accumulate
 #include <vector>                         // for vector, allocator, operator==
 
@@ -133,7 +134,11 @@ public:
     // spec says max 16 but Hasselblad ignores that -> allow 17
     // Canon's old CRW really ignores this ...
     assert(data.getSize() <= 162);
-    codeValues.assign(data.begin(), data.end());
+    codeValues.clear();
+    const size_t maxCount = std::distance(data.begin(), data.end());
+    codeValues.reserve(maxCount);
+    std::copy(data.begin(), data.end(), std::back_inserter(codeValues));
+    assert(codeValues.size() == maxCount);
   }
 
   void setup(bool fullDecode, bool fixDNGBug16_) {
