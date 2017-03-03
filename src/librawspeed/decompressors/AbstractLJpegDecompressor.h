@@ -182,6 +182,9 @@ protected:
   uint32 Pt = 0;
   std::array<HuffmanTable*, 4> huff{{}}; // 4 pointers into the store
   std::vector<std::unique_ptr<HuffmanTable>> huffmanTableStore; // std::vector of unique HTs
+
+private:
+  HuffmanTable ht_; // temporary table, used
 };
 
 } // namespace RawSpeed

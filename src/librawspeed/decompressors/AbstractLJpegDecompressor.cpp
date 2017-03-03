@@ -146,27 +146,26 @@ void AbstractLJpegDecompressor::parseDHT() {
     if (huff[htIndex] != nullptr)
       ThrowRDE("Duplicate table definition");
 
-    auto ht = make_unique<HuffmanTable>();
-
     // copy 16 bytes from input stream to number of codes per length table
-    uint32 nCodes = ht->setNCodesPerLength(input.getBuffer(16));
+    uint32 nCodes = ht_.setNCodesPerLength(input.getBuffer(16));
     // spec says 16 different codes is max but Hasselblad violates that -> 17
     if (nCodes > 17 || headerLength < 1 + 16 + nCodes)
       ThrowRDE("Invalid DHT table.");
 
     // copy nCodes bytes from input stream to code values table
-    ht->setCodeValues(input.getBuffer(nCodes));
+    ht_.setCodeValues(input.getBuffer(nCodes));
 
     // see if we already have a HuffmanTable with the same codes
     for (const auto& i : huffmanTableStore)
-      if (*i == *ht)
+      if (*i == ht_)
         huff[htIndex] = i.get();
 
     if (!huff[htIndex]) {
-      // setup new ht and put it into the store
-      ht->setup(fullDecodeHT, fixDng16Bug);
-      huff[htIndex] = ht.get();
-      huffmanTableStore.emplace_back(std::move(ht));
+      // setup new ht_ and put it into the store
+      auto dHT = make_unique<HuffmanTable>(ht_);
+      dHT->setup(fullDecodeHT, fixDng16Bug);
+      huff[htIndex] = dHT.get();
+      huffmanTableStore.emplace_back(std::move(dHT));
     }
     headerLength -= 1 + 16 + nCodes;
   }
