@@ -24,6 +24,7 @@
 #include "common/Common.h"       // for uint32, uchar8
 #include "common/RawImage.h"     // for RawImage
 #include "decoders/RawDecoder.h" // for RawDecoder
+#include <array>                 // for array
 
 namespace RawSpeed {
 
@@ -32,6 +33,8 @@ class Buffer;
 class CameraMetaData;
 
 class CiffIFD;
+
+class HuffmanTable;
 
 class CrwDecoder final : public RawDecoder {
 public:
@@ -45,6 +48,9 @@ protected:
   int getDecoderVersion() const override { return 0; }
   CiffIFD *mRootIFD;
   void decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 height);
+  static float canonEv(long in);
+  static HuffmanTable makeDecoder(int n, const uchar8* source);
+  static std::array<HuffmanTable, 2> initHuffTables(uint32 table);
 };
 
 } // namespace RawSpeed

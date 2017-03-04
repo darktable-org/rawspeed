@@ -98,7 +98,7 @@ void CrwDecoder::checkSupportInternal(const CameraMetaData* meta) {
 }
 
 // based on exiftool's Image::ExifTool::Canon::CanonEv
-static float canonEv(const long in) {
+float __attribute__((const)) CrwDecoder::canonEv(const long in) {
   // remove sign
   long val = abs(in);
   // remove fraction
@@ -226,7 +226,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         1111111           0xff
  */
 
-static HuffmanTable makeDecoder(int n, const uchar8* source) {
+HuffmanTable CrwDecoder::makeDecoder(int n, const uchar8* source) {
   if (n > 1)
     ThrowRDE("Invalid table number specified");
 
@@ -238,7 +238,7 @@ static HuffmanTable makeDecoder(int n, const uchar8* source) {
   return ht;
 }
 
-static array<HuffmanTable, 2> initHuffTables(uint32 table) {
+array<HuffmanTable, 2> CrwDecoder::initHuffTables(uint32 table) {
   static const uchar8 first_tree[3][29] = {
     { 0,1,4,2,3,1,2,0,0,0,0,0,0,0,0,0,
       0x04,0x03,0x05,0x06,0x02,0x07,0x01,0x08,0x09,0x00,0x0a,0x0b,0xff  },
