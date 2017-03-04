@@ -46,6 +46,9 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void checkSupportInternal(const CameraMetaData* meta) override;
 
+protected:
+  struct NefSlice;
+
 private:
   int getDecoderVersion() const override { return 5; }
   bool D100IsCompressed(uint32 offset);
@@ -62,12 +65,10 @@ private:
   ushort16* gammaCurve(double pwr, double ts, int mode, int imax);
 };
 
-class NefSlice {
-public:
-  NefSlice() { h = offset = count = 0; }
-  uint32 h;
-  uint32 offset;
-  uint32 count;
+struct NefDecoder::NefSlice {
+  uint32 h = 0;
+  uint32 offset = 0;
+  uint32 count = 0;
 };
 
 } // namespace RawSpeed
