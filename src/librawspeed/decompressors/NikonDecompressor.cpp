@@ -32,7 +32,7 @@ using namespace std;
 
 namespace RawSpeed {
 
-static const uchar8 nikon_tree[][2][16] = {
+const uchar8 NikonDecompressor::nikon_tree[][2][16] = {
     {/* 12-bit lossy */
      {0, 1, 5, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0},
      {5, 4, 3, 6, 2, 7, 1, 0, 8, 9, 11, 10, 12}},
@@ -54,7 +54,7 @@ static const uchar8 nikon_tree[][2][16] = {
 
 };
 
-static HuffmanTable createHuffmanTable(uint32 huffSelect) {
+HuffmanTable NikonDecompressor::createHuffmanTable(uint32 huffSelect) {
   HuffmanTable ht;
   uint32 count = ht.setNCodesPerLength(Buffer(nikon_tree[huffSelect][0], 16));
   ht.setCodeValues(Buffer(nikon_tree[huffSelect][1], count));
@@ -62,9 +62,9 @@ static HuffmanTable createHuffmanTable(uint32 huffSelect) {
   return ht;
 }
 
-void decompressNikon(RawImage& mRaw, ByteStream&& data, ByteStream metadata,
-                     const iPoint2D& size, uint32 bitsPS,
-                     bool uncorrectedRawValues) {
+void NikonDecompressor::decompress(RawImage& mRaw, ByteStream&& data,
+                                   ByteStream metadata, const iPoint2D& size,
+                                   uint32 bitsPS, bool uncorrectedRawValues) {
   uint32 v0 = metadata.getByte();
   uint32 v1 = metadata.getByte();
   uint32 huffSelect = 0;

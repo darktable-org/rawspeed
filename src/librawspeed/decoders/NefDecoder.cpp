@@ -24,7 +24,7 @@
 #include "common/Memory.h"                          // for alignedFree, ali...
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE, RawDec...
-#include "decompressors/NikonDecompressor.h"        // for decompressNikon
+#include "decompressors/NikonDecompressor.h" // for NikonDecompressor::decompress
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/BitPumpMSB.h"                          // for BitPumpMSB
 #include "io/BitPumpMSB32.h"                        // for BitPumpMSB32
@@ -107,7 +107,7 @@ RawImage NefDecoder::decodeRawInternal() {
   }
 
   try {
-    decompressNikon(
+    NikonDecompressor::decompress(
         mRaw, ByteStream(mFile, offsets->getU32(), counts->getU32()),
         meta->getData(), mRaw->dim, bitPerPixel, uncorrectedRawValues);
   } catch (IOException &e) {

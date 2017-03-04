@@ -29,8 +29,17 @@ class iPoint2D;
 
 class RawImage;
 
-void decompressNikon(RawImage& mRaw, ByteStream&& data, ByteStream metadata,
-                     const iPoint2D& size, uint32 bitsPS,
-                     bool uncorrectedRawValues);
+class HuffmanTable;
+
+class NikonDecompressor final {
+public:
+  static void decompress(RawImage& mRaw, ByteStream&& data, ByteStream metadata,
+                         const iPoint2D& size, uint32 bitsPS,
+                         bool uncorrectedRawValues);
+
+private:
+  static const uchar8 nikon_tree[][2][16];
+  static HuffmanTable createHuffmanTable(uint32 huffSelect);
+};
 
 } // namespace RawSpeed
