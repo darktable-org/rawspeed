@@ -73,6 +73,7 @@ void PentaxDecompressor::decompress(RawImage& mRaw, ByteStream&& data,
         ht.nCodesPerLength.at(v1[c])++;
       }
       /* Find smallest */
+      ht.codeValues.reserve(depth);
       for (uint32 i = 0; i < depth; i++) {
         uint32 sm_val = 0xfffffff;
         uint32 sm_num = 0xff;
@@ -85,6 +86,7 @@ void PentaxDecompressor::decompress(RawImage& mRaw, ByteStream&& data,
         ht.codeValues.push_back(sm_num);
         v2[sm_num]=0xffffffff;
       }
+      assert(ht.codeValues.size() == depth);
     } else {
       ThrowRDE("Unknown Huffman table type.");
     }
