@@ -34,7 +34,7 @@ using namespace std;
 
 namespace RawSpeed {
 
-class DngOpcode {
+class DngOpcodes::DngOpcode {
 public:
   virtual ~DngOpcode() = default;
 
@@ -48,7 +48,7 @@ public:
 
 // ****************************************************************************
 
-class FixBadPixelsConstant final : public DngOpcode {
+class DngOpcodes::FixBadPixelsConstant final : public DngOpcodes::DngOpcode {
   uint32 value;
 
 public:
@@ -81,7 +81,7 @@ public:
 
 // ****************************************************************************
 
-class FixBadPixelsList final : public DngOpcode {
+class DngOpcodes::FixBadPixelsList final : public DngOpcodes::DngOpcode {
   std::vector<uint32> badPixels;
 
 public:
@@ -119,7 +119,7 @@ public:
 
 // ****************************************************************************
 
-class ROIOpcode : public DngOpcode {
+class DngOpcodes::ROIOpcode : public DngOpcodes::DngOpcode {
 protected:
   uint32 top, left, bottom, right;
 
@@ -141,7 +141,7 @@ protected:
 
 // ****************************************************************************
 
-class TrimBounds final : public ROIOpcode {
+class DngOpcodes::TrimBounds final : public ROIOpcode {
 public:
   TrimBounds(ByteStream& bs) : ROIOpcode(bs) {}
 
@@ -152,7 +152,7 @@ public:
 
 // ****************************************************************************
 
-class PixelOpcode : public ROIOpcode {
+class DngOpcodes::PixelOpcode : public ROIOpcode {
 protected:
   uint32 firstPlane, planes, rowPitch, colPitch;
 
@@ -193,7 +193,7 @@ protected:
 
 // ****************************************************************************
 
-class LookupOpcode : public PixelOpcode {
+class DngOpcodes::LookupOpcode : public PixelOpcode {
 protected:
   vector<ushort16> lookup;
 
@@ -213,7 +213,7 @@ protected:
 
 // ****************************************************************************
 
-class TableMap final : public LookupOpcode {
+class DngOpcodes::TableMap final : public LookupOpcode {
 public:
   TableMap(ByteStream& bs) : LookupOpcode(bs) {
     auto count = bs.getU32();
@@ -231,7 +231,7 @@ public:
 
 // ****************************************************************************
 
-class PolynomialMap final : public LookupOpcode {
+class DngOpcodes::PolynomialMap final : public LookupOpcode {
 public:
   PolynomialMap(ByteStream& bs) : LookupOpcode(bs) {
     vector<double> polynomial;
@@ -257,7 +257,16 @@ public:
 
 // ****************************************************************************
 
-class DeltaRowOrColBase : public PixelOpcode {
+class DngOpcodes::DeltaRowOrColBase : public PixelOpcode {
+public:
+  struct SelectX {
+    static inline uint32 select(uint32 x, uint32 y) { return x; }
+  };
+
+  struct SelectY {
+    static inline uint32 select(uint32 x, uint32 y) { return y; }
+  };
+
 protected:
   vector<float> deltaF;
   vector<int> deltaI;
@@ -276,15 +285,8 @@ protected:
 
 // ****************************************************************************
 
-struct SelectX {
-  static inline uint32 select(uint32 x, uint32 y) { return x; }
-};
-
-struct SelectY {
-  static inline uint32 select(uint32 x, uint32 y) { return y; }
-};
-
-template <typename S> class OffsetPerRowOrCol final : public DeltaRowOrColBase {
+template <typename S>
+class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrColBase {
 public:
   OffsetPerRowOrCol(ByteStream& bs) : DeltaRowOrColBase(bs, 65535.0f) {}
 
@@ -301,10 +303,8 @@ public:
   }
 };
 
-using OffsetPerRow = OffsetPerRowOrCol<SelectY>;
-using OffsetPerCol = OffsetPerRowOrCol<SelectX>;
-
-template <typename S> class ScalePerRowOrCol final : public DeltaRowOrColBase {
+template <typename S>
+class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrColBase {
 public:
   ScalePerRowOrCol(ByteStream& bs) : DeltaRowOrColBase(bs, 1024.0f) {}
 
@@ -321,15 +321,18 @@ public:
   }
 };
 
-using ScalePerRow = ScalePerRowOrCol<SelectY>;
-using ScalePerCol = ScalePerRowOrCol<SelectX>;
-
 // ****************************************************************************
 
 DngOpcodes::DngOpcodes(TiffEntry* entry) {
   ByteStream bs = entry->getData();
   // DNG opcodes seem to be always stored in big endian
   bs.setInNativeByteOrder(getHostEndianness() == big);
+
+  using OffsetPerRow = OffsetPerRowOrCol<DeltaRowOrColBase::SelectY>;
+  using OffsetPerCol = OffsetPerRowOrCol<DeltaRowOrColBase::SelectX>;
+
+  using ScalePerRow = ScalePerRowOrCol<DeltaRowOrColBase::SelectY>;
+  using ScalePerCol = ScalePerRowOrCol<DeltaRowOrColBase::SelectX>;
 
   auto opcode_count = bs.getU32();
   for (auto i = 0u; i < opcode_count; i++) {

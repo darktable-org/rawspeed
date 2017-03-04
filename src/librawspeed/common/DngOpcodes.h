@@ -30,16 +30,29 @@ class RawImage;
 
 class TiffEntry;
 
-class DngOpcode;
-
 class DngOpcodes
 {
-  std::vector<std::unique_ptr<DngOpcode>> opcodes;
-
 public:
   DngOpcodes(TiffEntry* entry);
   ~DngOpcodes();
   void applyOpCodes(RawImage& ri);
+
+private:
+  class DngOpcode;
+  std::vector<std::unique_ptr<DngOpcode>> opcodes;
+
+protected:
+  class FixBadPixelsConstant;
+  class FixBadPixelsList;
+  class ROIOpcode;
+  class TrimBounds;
+  class PixelOpcode;
+  class LookupOpcode;
+  class TableMap;
+  class PolynomialMap;
+  class DeltaRowOrColBase;
+  template <typename S> class OffsetPerRowOrCol;
+  template <typename S> class ScalePerRowOrCol;
 };
 
 } // namespace RawSpeed
