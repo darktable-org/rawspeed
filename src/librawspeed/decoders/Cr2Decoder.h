@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "common/Common.h"                // for ushort16
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
@@ -49,6 +50,26 @@ protected:
   RawImage decodeNewFormat();
   void sRawInterpolate();
   int getHue();
+
+  static inline void STORE_RGB(ushort16* X, int r, int g, int b, int offset);
+
+  template <int version>
+  static inline void YUV_TO_RGB(int Y, int Cb, int Cr, const int* sraw_coeffs,
+                                ushort16* X, int offset);
+
+  template <int version>
+  static inline void interpolate_422(const int* sraw_coeffs, RawImage& mRaw,
+                                     int hue, int hue_last, int w, int h);
+  template <int version>
+  static inline void interpolate_420(const int* sraw_coeffs, RawImage& mRaw,
+                                     int hue, int w, int h);
+
+  template <int version>
+  static void interpolate_422(int hue, RawImage& mRaw, int* sraw_coeffs, int w,
+                              int h);
+  template <int version>
+  static void interpolate_420(int hue, RawImage& mRaw, int* sraw_coeffs, int w,
+                              int h);
 };
 
 } // namespace RawSpeed
