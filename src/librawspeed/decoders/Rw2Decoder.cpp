@@ -50,8 +50,7 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-struct PanaBitpump
-{
+struct Rw2Decoder::PanaBitpump {
   static constexpr uint32 BufSize = 0x4000;
   ByteStream input;
   vector<uchar8> buf;

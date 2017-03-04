@@ -49,6 +49,7 @@ public:
 protected:
   int getDecoderVersion() const override { return 2; }
   void decodeThreaded(RawDecoderThread *t) override;
+  struct PanaBitpump;
 
 private:
   void DecodeRw2();
