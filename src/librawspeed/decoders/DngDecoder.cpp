@@ -175,8 +175,6 @@ void DngDecoder::parseCFA(const TiffIFD* raw) {
 }
 
 void DngDecoder::decodeData(const TiffIFD* raw, int compression, uint32 sample_format) {
-  mRaw->createData();
-
   if (compression == 8 && sample_format != 3) {
     ThrowRDE("Only float format is supported for "
              "deflate-compressed data.");
@@ -251,6 +249,8 @@ void DngDecoder::decodeData(const TiffIFD* raw, int compression, uint32 sample_f
   uint32 nSlices = slices.size();
   if (!nSlices)
     ThrowRDE("No valid slices found.");
+
+  mRaw->createData();
 
   slices.startDecoding();
 
