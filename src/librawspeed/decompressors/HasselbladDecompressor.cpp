@@ -30,7 +30,7 @@ namespace RawSpeed {
 
 // Returns len bits as a signed value.
 // Highest bit is a sign bit
-inline static int getBits(BitPumpMSB32& bs, int len) {
+inline int HasselbladDecompressor::getBits(BitPumpMSB32& bs, int len) {
   int diff = bs.getBits(len);
   diff = len > 0 ? HuffmanTable::signExtended(diff, len) : diff;
   if (diff == 65535)

@@ -23,6 +23,7 @@
 
 #include "common/RawImage.h"                         // for RawImage
 #include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
+#include "io/BitPumpMSB32.h"                         // for BitPumpMSB32
 #include "io/Buffer.h"                               // for Buffer, Buffer:...
 
 namespace RawSpeed {
@@ -42,6 +43,8 @@ public:
       : AbstractLJpegDecompressor(data, offset, img) {}
 
   void decode(int pixelBaseOffset_);
+
+  static inline int getBits(BitPumpMSB32& bs, int len);
 };
 
 } // namespace RawSpeed
