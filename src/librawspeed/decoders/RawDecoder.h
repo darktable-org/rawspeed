@@ -184,14 +184,14 @@ protected:
 
   /* Hints set for the camera after checkCameraSupported has been called from the implementation*/
   Hints hints;
+
+  struct RawSlice;
 };
 
-class RawSlice {
-public:
-  RawSlice() { h = offset = count = 0; }
-  uint32 h;
-  uint32 offset;
-  uint32 count;
+struct RawDecoder::RawSlice {
+  uint32 h = 0;
+  uint32 offset = 0;
+  uint32 count = 0;
 };
 
 } // namespace RawSpeed
