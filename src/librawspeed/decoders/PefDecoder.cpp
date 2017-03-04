@@ -23,7 +23,7 @@
 #include "common/Common.h"                    // for uint32, BitOrder::BitO...
 #include "common/Point.h"                     // for iPoint2D
 #include "decoders/RawDecoderException.h"     // for RawDecoderException (p...
-#include "decompressors/PentaxDecompressor.h" // for decodePentax
+#include "decompressors/PentaxDecompressor.h" // for PentaxDecompressor
 #include "io/Buffer.h"                        // for Buffer
 #include "io/ByteStream.h"                    // for ByteStream
 #include "io/IOException.h"                   // for IOException
@@ -70,7 +70,9 @@ RawImage PefDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
   try {
-    decodePentax(mRaw, ByteStream(mFile, offsets->getU32(), counts->getU32()), getRootIFD());
+    PentaxDecompressor::decompress(
+        mRaw, ByteStream(mFile, offsets->getU32(), counts->getU32()),
+        getRootIFD());
   } catch (IOException &e) {
     mRaw->setError(e.what());
     // Let's ignore it, it may have delivered somewhat useful data.

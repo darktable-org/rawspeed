@@ -37,12 +37,13 @@ namespace RawSpeed {
 
 // 16 entries of codes per bit length
 // 13 entries of code values
-static const uchar8 pentax_tree[][2][16] = {
+const uchar8 PentaxDecompressor::pentax_tree[][2][16] = {
     {{0, 2, 3, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0},
      {3, 4, 2, 5, 1, 6, 0, 7, 8, 9, 10, 11, 12}},
 };
 
-void decodePentax(RawImage& mRaw, ByteStream&& data, TiffIFD* root) {
+void PentaxDecompressor::decompress(RawImage& mRaw, ByteStream&& data,
+                                    TiffIFD* root) {
 
   HuffmanTable ht;
 
