@@ -201,12 +201,10 @@ void SrwDecoder::decodeCompressed( const TiffIFD* raw )
   }
 }
 
-struct encTableItem {
+struct SrwDecoder::encTableItem {
   uchar8 encLen;
   uchar8 diffLen;
 };
-
-static int32 samsungDiff(BitPumpMSB& pump, vector<encTableItem> tbl);
 
 // Decoder for compressed srw files (NX3000 and later)
 void SrwDecoder::decodeCompressed2( const TiffIFD* raw, int bits)
@@ -260,7 +258,8 @@ void SrwDecoder::decodeCompressed2( const TiffIFD* raw, int bits)
   }
 }
 
-static int32 samsungDiff(BitPumpMSB& pump, vector<encTableItem> tbl) {
+int32 SrwDecoder::samsungDiff(BitPumpMSB& pump,
+                              const vector<encTableItem>& tbl) {
   // We read 10 bits to index into our table
   uint32 c = pump.peekBits(10);
   // Skip the bits that were used to encode this case
