@@ -31,6 +31,8 @@
 using namespace std;
 using namespace RawSpeed;
 
+namespace RawSpeedTest {
+
 using powerOfTwoType = std::tr1::tuple<int, bool>;
 class PowerOfTwoTest : public ::testing::TestWithParam<powerOfTwoType> {
 protected:
@@ -314,3 +316,5 @@ TEST_P(CopyPixelsTest, CopyPixelsTest) {
   copy();
   compare();
 }
+
+} // namespace RawSpeedTest

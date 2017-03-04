@@ -26,6 +26,8 @@
 using namespace std;
 using namespace RawSpeed;
 
+namespace RawSpeedTest {
+
 class BlackAreaTest
     : public ::testing::TestWithParam<std::tr1::tuple<int, int, bool>> {
 protected:
@@ -198,3 +200,5 @@ TEST_P(BlackAreaTest, AssignmentGetters) {
     checkHelper(Area, *AreaOrig);
   });
 }
+
+} // namespace RawSpeedTest

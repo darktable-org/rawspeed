@@ -30,6 +30,8 @@
 using namespace std;
 using namespace RawSpeed;
 
+namespace RawSpeedTest {
+
 static const std::string camfile(CMAKE_SOURCE_DIR "/data/cameras.xml");
 
 TEST(CameraMetaDataTest, CamerasXml) {
@@ -77,3 +79,5 @@ TEST(CameraMetaDataTest, PrefixSearch) {
                              "NIKON D3-with-some-bogus-prefix"));
   });
 }
+
+} // namespace RawSpeedTest

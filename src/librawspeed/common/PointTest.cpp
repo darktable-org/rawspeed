@@ -26,9 +26,15 @@
 using namespace std;
 using namespace RawSpeed;
 
+namespace RawSpeed {
+
 ::std::ostream& operator<<(::std::ostream& os, const iPoint2D p) {
   return os << "(" << p.x << ", " << p.y << ")";
 }
+
+} // namespace RawSpeed
+
+namespace RawSpeedTest {
 
 TEST(PointTest, Constructor) {
   int x = -10, y = 15;
@@ -740,3 +746,5 @@ TEST_P(SmallestTest, GetSmallestTest) {
     ASSERT_EQ(c.getSmallest(c), c);
   });
 }
+
+} // namespace RawSpeedTest

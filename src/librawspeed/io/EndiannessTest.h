@@ -26,6 +26,8 @@
 using namespace std;
 using namespace RawSpeed;
 
+namespace RawSpeedTest {
+
 template <typename T> struct intPair {
   T first;
   T second;
@@ -493,3 +495,5 @@ static const uint64Type uint64Values[] = {
     {0xfb4ee3defb5f3a2b, 0x2b3a5ffbdee34efb},
     {0xfe7280e85ee3f665, 0x65f6e35ee88072fe},
 };
+
+} // namespace RawSpeedTest

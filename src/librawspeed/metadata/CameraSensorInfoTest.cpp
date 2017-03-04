@@ -33,6 +33,8 @@
 using namespace std;
 using namespace RawSpeed;
 
+namespace RawSpeedTest {
+
 std::vector<int> ISOList(6);
 
 int main(int argc, char **argv) {
@@ -314,3 +316,5 @@ TEST_P(CameraSensorInfoTest, isIsoWithin) {
       ASSERT_FALSE(Info.isIsoWithin(data.Iso));
   });
 }
+
+} // namespace RawSpeedTest

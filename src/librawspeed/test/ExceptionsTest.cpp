@@ -36,6 +36,8 @@
 using namespace std;
 using namespace RawSpeed;
 
+namespace RawSpeedTest {
+
 static const std::string msg("my very Smart error Message #1 !");
 
 #define FMT "%s"
@@ -188,3 +190,5 @@ TYPED_TEST(ExceptionsTest, ThrowHelperTestMessage) {
     ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
   }
 }
+
+} // namespace RawSpeedTest

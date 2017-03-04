@@ -25,6 +25,8 @@
 using namespace std;
 using namespace RawSpeed;
 
+namespace RawSpeedTest {
+
 TEST(CameraTest, HintsEmpty) {
   Hints hints;
   ASSERT_FALSE(hints.has("something"));
@@ -150,3 +152,5 @@ TEST_P(BoolHintTest, HintsBool) {
   ASSERT_TRUE(hints.has(key));
   ASSERT_FALSE(hints.get(key, true));
 }
+
+} // namespace RawSpeedTest

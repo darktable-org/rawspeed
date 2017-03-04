@@ -30,6 +30,8 @@
 using namespace std;
 using namespace RawSpeed;
 
+namespace RawSpeedTest {
+
 TEST(EndiannessTest, getHostEndiannessTests) {
 #if defined(__BYTE_ORDER__)
   ASSERT_EQ(getHostEndiannessRuntime(), getHostEndianness());
@@ -354,3 +356,5 @@ TEST_P(doubleTest, getNOP) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getBEt(&in), in);
   }
 }
+
+} // namespace RawSpeedTest

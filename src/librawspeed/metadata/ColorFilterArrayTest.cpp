@@ -37,6 +37,8 @@ namespace RawSpeed {
 
 } // namespace RawSpeed
 
+namespace RawSpeedTest {
+
 using Bayer2x2 = std::tr1::tuple<CFAColor, CFAColor, CFAColor, CFAColor>;
 
 static const iPoint2D square(2, 2);
@@ -275,3 +277,5 @@ TEST_P(ColorFilterArrayShiftTest, shiftEqualityTest) {
     ASSERT_EQ(f, ColorFilterArray::shiftDcrawFilter(fo, x, y));
   });
 }
+
+} // namespace RawSpeedTest

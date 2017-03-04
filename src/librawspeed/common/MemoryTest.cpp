@@ -29,6 +29,8 @@
 using namespace std;
 using namespace RawSpeed;
 
+namespace RawSpeedTest {
+
 static constexpr const size_t alloc_alignment = 16;
 
 template <typename T> class AlignedMallocTest : public testing::Test {
@@ -222,3 +224,5 @@ TYPED_TEST(AlignedMallocTest, TemplateArraySizeRoundUpTest) {
     alignedFree(ptr);
   });
 }
+
+} // namespace RawSpeedTest
