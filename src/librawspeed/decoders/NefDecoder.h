@@ -23,6 +23,7 @@
 #include "common/Common.h"                // for uint32, ushort16
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
+#include "decoders/RawDecoder.h"          // for RawDecoder::RawSlice
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
 #include <algorithm>                      // for move
 #include <string>                         // for string
@@ -47,7 +48,7 @@ public:
   void checkSupportInternal(const CameraMetaData* meta) override;
 
 protected:
-  struct NefSlice;
+  struct NefSlice final : public RawSlice {};
 
 private:
   int getDecoderVersion() const override { return 5; }
@@ -63,12 +64,6 @@ private:
   std::string getMode();
   std::string getExtendedMode(const std::string &mode);
   ushort16* gammaCurve(double pwr, double ts, int mode, int imax);
-};
-
-struct NefDecoder::NefSlice {
-  uint32 h = 0;
-  uint32 offset = 0;
-  uint32 count = 0;
 };
 
 } // namespace RawSpeed
