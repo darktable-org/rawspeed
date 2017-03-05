@@ -24,6 +24,8 @@
 #include "common/Common.h"       // for uint32, BitOrder::BitOrder_Jpeg16
 #include "common/RawImage.h"     // for RawImage
 #include "decoders/RawDecoder.h" // for RawDecoder
+#include <map>                   // for map
+#include <string>                // for string, basic_st...
 
 namespace RawSpeed {
 
@@ -39,6 +41,7 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 private:
+  static const std::map<std::string, BitOrder> order2enum;
   void parseHints();
 
 protected:
