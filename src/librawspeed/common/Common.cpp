@@ -24,8 +24,7 @@
 
 namespace RawSpeed {
 
-void writeLog(int priority, const char *format, ...)
-{
+void writeLog(DEBUG_PRIO priority, const char* format, ...) {
 #ifndef _DEBUG
   if (priority < DEBUG_PRIO_INFO)
 #endif // _DEBUG

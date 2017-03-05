@@ -44,12 +44,15 @@ using int32 = signed int;
 using ushort16 = unsigned short;
 using short16 = signed short;
 
-const int DEBUG_PRIO_ERROR = 0x10;
-const int DEBUG_PRIO_WARNING = 0x100;
-const int DEBUG_PRIO_INFO = 0x1000;
-const int DEBUG_PRIO_EXTRA = 0x10000;
+enum DEBUG_PRIO {
+  DEBUG_PRIO_ERROR = 0x10,
+  DEBUG_PRIO_WARNING = 0x100,
+  DEBUG_PRIO_INFO = 0x1000,
+  DEBUG_PRIO_EXTRA = 0x10000
+};
 
-void writeLog(int priority, const char *format, ...) __attribute__((format(printf, 2, 3)));
+void writeLog(DEBUG_PRIO priority, const char* format, ...)
+    __attribute__((format(printf, 2, 3)));
 
 inline void copyPixels(uchar8* dest, int dstPitch, const uchar8* src,
                        int srcPitch, int rowSize, int height)
