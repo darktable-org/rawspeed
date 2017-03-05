@@ -195,6 +195,17 @@ TEST_P(ColorFilterArrayTest, AssignmentConstructor) {
   });
 }
 
+TEST_P(ColorFilterArrayTest, SetColorAt) {
+  ASSERT_NO_THROW({
+    ColorFilterArray cfa({2, 2});
+    cfa.setColorAt({0, 0}, std::tr1::get<0>(param));
+    cfa.setColorAt({1, 0}, std::tr1::get<1>(param));
+    cfa.setColorAt({0, 1}, std::tr1::get<2>(param));
+    cfa.setColorAt({1, 1}, std::tr1::get<3>(param));
+    check(&cfa, param);
+  });
+}
+
 TEST_P(ColorFilterArrayTest, ToDcraw) {
   ASSERT_NO_THROW({
     ColorFilterArray cfa;
