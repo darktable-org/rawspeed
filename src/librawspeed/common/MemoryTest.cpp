@@ -35,31 +35,42 @@ static constexpr const size_t alloc_alignment = 16;
 
 template <typename T> class AlignedMallocTest : public testing::Test {
 public:
-  static constexpr const size_t alloc_cnt = 8;
+  static constexpr const size_t alloc_cnt = 16;
   static constexpr const size_t alloc_sizeof = sizeof(T);
   static constexpr const size_t alloc_size = alloc_cnt * alloc_sizeof;
 
   inline void TheTest(T* ptr) {
     ASSERT_TRUE(((uintptr_t)ptr % alloc_alignment) == 0);
-    ptr[0] = 11;
-    ptr[1] = 22;
-    ptr[2] = 33;
-    ptr[3] = 44;
-    ptr[4] = 55;
-    ptr[5] = 66;
-    ptr[6] = 77;
-    ptr[7] = 88;
+    ptr[0] = 0;
+    ptr[1] = 8;
+    ptr[2] = 16;
+    ptr[3] = 24;
+    ptr[4] = 32;
+    ptr[5] = 40;
+    ptr[6] = 48;
+    ptr[7] = 56;
+    ptr[8] = 64;
+    ptr[9] = 72;
+    ptr[10] = 80;
+    ptr[11] = 88;
+    ptr[12] = 96;
+    ptr[13] = 104;
+    ptr[14] = 112;
+    ptr[15] = 120;
+
     ASSERT_EQ((int64)ptr[0] + ptr[1] + ptr[2] + ptr[3] + ptr[4] + ptr[5] +
-                  ptr[6] + ptr[7],
-              396UL);
+                  ptr[6] + ptr[7] + ptr[8] + ptr[9] + ptr[10] + ptr[11] +
+                  ptr[12] + ptr[13] + ptr[14] + ptr[15],
+              960UL);
   }
 };
 
 template <typename T>
 class AlignedMallocDeathTest : public AlignedMallocTest<T> {};
 
-using Classes = testing::Types<int, unsigned int, short16, ushort16, int32,
-                               uint32, int64, uint64, float, double>;
+using Classes =
+    testing::Types<int, unsigned int, char8, uchar8, short16, ushort16, int32,
+                   uint32, int64, uint64, float, double>;
 
 TYPED_TEST_CASE(AlignedMallocTest, Classes);
 
@@ -139,6 +150,8 @@ TYPED_TEST(AlignedMallocTest, TemplateArrayTest) {
 }
 
 TYPED_TEST(AlignedMallocTest, TemplateArrayHandlesOverflowTest) {
+  if (this->alloc_sizeof == 1)
+    return;
   ASSERT_NO_THROW({
     static const size_t nmemb = 1 + (SIZE_MAX / this->alloc_sizeof);
     TypeParam* ptr = (TypeParam*)alignedMallocArray<alloc_alignment>(
