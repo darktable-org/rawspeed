@@ -109,6 +109,9 @@ public:
   const uchar8* getData(uint32 size) { return data.getData(size); }
 
   const DataBuffer& getRootIfdData() const;
+
+protected:
+  static const uint32 datashifts[];
 };
 
 } // namespace RawSpeed
