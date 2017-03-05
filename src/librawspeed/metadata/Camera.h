@@ -94,6 +94,9 @@ public:
   int decoderVersion;
   Hints hints;
 protected:
+  static const std::map<char, CFAColor> char2enum;
+  static const std::map<std::string, CFAColor> str2enum;
+
   void parseCFA(const pugi::xml_node &node);
   void parseCrop(const pugi::xml_node &node);
   void parseBlackAreas(const pugi::xml_node &node);

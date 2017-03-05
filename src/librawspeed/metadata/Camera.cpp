@@ -74,13 +74,13 @@ static string name(const xml_node &a) {
   return string(a.name());
 }
 
-static const map<char, CFAColor> char2enum = {
+const map<char, CFAColor> Camera::char2enum = {
     {'g', CFA_GREEN},      {'r', CFA_RED},  {'b', CFA_BLUE},
     {'f', CFA_FUJI_GREEN}, {'c', CFA_CYAN}, {'m', CFA_MAGENTA},
     {'y', CFA_YELLOW},
 };
 
-static const map<string, CFAColor> str2enum = {
+const map<string, CFAColor> Camera::str2enum = {
     {"GREEN", CFA_GREEN},   {"RED", CFA_RED},
     {"BLUE", CFA_BLUE},     {"FUJI_GREEN", CFA_FUJI_GREEN},
     {"CYAN", CFA_CYAN},     {"MAGENTA", CFA_MAGENTA},
