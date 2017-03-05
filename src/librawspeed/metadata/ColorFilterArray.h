@@ -22,6 +22,7 @@
 
 #include "common/Common.h" // for uint32
 #include "common/Point.h"  // for iPoint2D
+#include <map>             // for map
 #include <string>          // for string
 #include <vector>          // for vector
 
@@ -63,6 +64,9 @@ public:
   static std::string colorToString(CFAColor c);
   static uint32 __attribute__((const))
   shiftDcrawFilter(uint32 filter, int x, int y);
+
+protected:
+  static const std::map<CFAColor, std::string> color2String;
 };
 
 // FC macro from dcraw outputs, given the filters definition, the dcraw color

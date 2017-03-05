@@ -155,13 +155,12 @@ uint32 ColorFilterArray::shiftDcrawFilter(uint32 filter, int x, int y)
   return filter;
 }
 
-const static map<CFAColor, string> color2String = {
+const map<CFAColor, string> ColorFilterArray::color2String = {
     {CFA_RED, "RED"},         {CFA_GREEN, "GREEN"},
     {CFA_BLUE, "BLUE"},       {CFA_CYAN, "CYAN"},
     {CFA_MAGENTA, "MAGENTA"}, {CFA_YELLOW, "YELLOW"},
     {CFA_WHITE, "WHITE"},     {CFA_FUJI_GREEN, "FUJIGREEN"},
-    {CFA_UNKNOWN, "UNKNOWN"}
-};
+    {CFA_UNKNOWN, "UNKNOWN"}};
 
 string ColorFilterArray::colorToString(CFAColor c)
 {
