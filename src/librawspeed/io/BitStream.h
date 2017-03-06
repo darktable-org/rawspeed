@@ -99,7 +99,7 @@ public:
   inline void fill(uint32 nbits = Cache::MaxGetBits) {
     assert(nbits <= Cache::MaxGetBits);
     if (cache.fillLevel < nbits) {
-#if BUFFER_PADDING==0
+#if BUFFER_PADDING < 4
       // disabling this run-time bounds check saves about 1% on intel x86-64
       if (pos + Cache::MaxGetBits/8 > size) {
         if (pos < size) {

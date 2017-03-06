@@ -32,11 +32,16 @@ namespace RawSpeed {
 
 // This allows to specify the nuber of bytes that each Buffer needs to
 // allocate additionally to be able to remove one runtime bounds check
-// in BitSream::fill. There are two options:
+// in BitSream::fill. There are two sane choices:
 // 0 : allocate exactly as much data as required
-// 4 : add minimum number of bytes to keep all BitStream implementations happy
-//     this disables the bounds checking, saves about 1% on modern CPUs
+// 4 : increase allocation size by 4 bytes
 #define BUFFER_PADDING 0UL
+
+// if the padding is >= 4, bounds checking in BitStream::fill are not compiled,
+// which supposedly saves about 1% on modern CPUs
+// WARNING: if the padding is >= 4, do *NOT* create Buffer from
+// passed unowning pointer and size. Or, subtract BUFFER_PADDING from size.
+// else bound checks will malfunction => bad things can happen !!!
 
 /*************************************************************************
  * This is the buffer abstaction.
@@ -65,8 +70,12 @@ public:
   Buffer(size_type size);
 
   // Data already allocated
-  explicit Buffer(const uchar8 *data_, size_type size_)
-      : data(data_), size(size_) {}
+  explicit Buffer(const uchar8* data_, size_type size_)
+      : data(data_), size(size_) {
+    static_assert(BUFFER_PADDING == 0, "please do make sure that you do NOT "
+                                       "call this function from YOUR code, and "
+                                       "then comment-out this assert.");
+  }
   // creates a (non-owning) copy / view of rhs
   Buffer(const Buffer& rhs)
     : data(rhs.data), size(rhs.size) {}
