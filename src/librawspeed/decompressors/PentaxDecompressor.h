@@ -22,6 +22,7 @@
 #pragma once
 
 #include "common/Common.h" // for uint32
+#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 
 namespace RawSpeed {
 
@@ -31,7 +32,7 @@ class RawImage;
 
 class TiffIFD;
 
-class PentaxDecompressor final {
+class PentaxDecompressor final : public AbstractDecompressor {
 public:
   static void decompress(RawImage& mRaw, ByteStream&& data, TiffIFD* root);
 

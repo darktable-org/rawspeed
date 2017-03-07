@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,27 +20,8 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/ByteStream.h"                      // for ByteStream
-
 namespace RawSpeed {
 
-class iPoint2D;
-
-class RawImage;
-
-class HuffmanTable;
-
-class NikonDecompressor final : public AbstractDecompressor {
-public:
-  static void decompress(RawImage& mRaw, ByteStream&& data, ByteStream metadata,
-                         const iPoint2D& size, uint32 bitsPS,
-                         bool uncorrectedRawValues);
-
-private:
-  static const uchar8 nikon_tree[][2][16];
-  static HuffmanTable createHuffmanTable(uint32 huffSelect);
-};
+class AbstractDecompressor {};
 
 } // namespace RawSpeed

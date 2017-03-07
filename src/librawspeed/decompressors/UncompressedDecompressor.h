@@ -22,17 +22,18 @@
 
 #pragma once
 
-#include "common/Common.h"   // for uint32, BitOrder
-#include "common/RawImage.h" // for RawImage
-#include "io/Buffer.h"       // for Buffer, Buffer::size_type
-#include "io/ByteStream.h"   // for ByteStream
-#include <algorithm>         // for move
+#include "common/Common.h"                      // for uint32, BitOrder
+#include "common/RawImage.h"                    // for RawImage
+#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "io/Buffer.h"                          // for Buffer, Buffer::size_type
+#include "io/ByteStream.h"                      // for ByteStream
+#include <algorithm>                            // for move
 
 namespace RawSpeed {
 
 class iPoint2D;
 
-class UncompressedDecompressor {
+class UncompressedDecompressor final : public AbstractDecompressor {
 public:
   UncompressedDecompressor(ByteStream input_, const RawImage& img,
                            bool uncorrectedRawValues_)

@@ -1,4 +1,5 @@
 FILE(GLOB DECOMPRESSOR_SOURCES
+  "AbstractDecompressor.h"
   "AbstractLJpegDecompressor.cpp"
   "AbstractLJpegDecompressor.h"
   "Cr2Decompressor.cpp"

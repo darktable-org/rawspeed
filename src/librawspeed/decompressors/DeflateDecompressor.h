@@ -26,12 +26,13 @@
 
 #include "common/Common.h"   // for getHostEndianness, uint32, Endianness::big
 #include "common/RawImage.h" // for RawImage
-#include "io/Buffer.h"       // for Buffer, Buffer::size_type
-#include "io/ByteStream.h"   // for ByteStream
+#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "io/Buffer.h"                          // for Buffer, Buffer::size_type
+#include "io/ByteStream.h"                      // for ByteStream
 
 namespace RawSpeed {
 
-class DeflateDecompressor {
+class DeflateDecompressor final : public AbstractDecompressor {
 public:
   DeflateDecompressor(const Buffer& data, Buffer::size_type offset,
                       Buffer::size_type size, const RawImage& img,

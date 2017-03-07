@@ -24,15 +24,16 @@
 
 #ifdef HAVE_JPEG
 
-#include "common/Common.h"   // for uint32
-#include "common/RawImage.h" // for RawImage
-#include "io/Buffer.h"       // for Buffer, Buffer::size_type
-#include "io/ByteStream.h"   // for ByteStream
-#include "io/Endianness.h"   // for getHostEndianness, Endianness::big
+#include "common/Common.h"                      // for uint32
+#include "common/RawImage.h"                    // for RawImage
+#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "io/Buffer.h"                          // for Buffer, Buffer::size_type
+#include "io/ByteStream.h"                      // for ByteStream
+#include "io/Endianness.h" // for getHostEndianness, Endianness::big
 
 namespace RawSpeed {
 
-class JpegDecompressor {
+class JpegDecompressor final : public AbstractDecompressor {
 public:
   JpegDecompressor(const Buffer& data, Buffer::size_type offset,
                    Buffer::size_type size, const RawImage& img)
@@ -45,6 +46,7 @@ public:
   void decode(uint32 offsetX, uint32 offsetY);
 
 protected:
+  struct JpegDecompressStruct;
   ByteStream input;
   RawImage mRaw;
 };

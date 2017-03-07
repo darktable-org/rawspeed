@@ -21,15 +21,16 @@
 
 #pragma once
 
-#include "common/Common.h"              // for uint32, ushort16
-#include "common/RawImage.h"            // for RawImage
-#include "decompressors/HuffmanTable.h" // for HuffmanTable
-#include "io/Buffer.h"                  // for Buffer, Buffer::size_type
-#include "io/ByteStream.h"              // for ByteStream
-#include "io/Endianness.h"              // for getHostEndianness, Endiannes...
-#include <array>                        // for array
-#include <memory>                       // for unique_ptr
-#include <vector>                       // for vector
+#include "common/Common.h"                      // for uint32, ushort16
+#include "common/RawImage.h"                    // for RawImage
+#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "decompressors/HuffmanTable.h"         // for HuffmanTable
+#include "io/Buffer.h"                          // for Buffer, Buffer::size_type
+#include "io/ByteStream.h"                      // for ByteStream
+#include "io/Endianness.h" // for getHostEndianness, Endiannes...
+#include <array>           // for array
+#include <memory>          // for unique_ptr
+#include <vector>          // for vector
 
 /*
  * The following enum and two structs are stolen from the IJG JPEG library
@@ -136,8 +137,7 @@ public:
   bool initialized = false;
 };
 
-class AbstractLJpegDecompressor
-{
+class AbstractLJpegDecompressor : public AbstractDecompressor {
 public:
   AbstractLJpegDecompressor(const Buffer& data, Buffer::size_type offset,
                             Buffer::size_type size, const RawImage& img)

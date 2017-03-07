@@ -97,7 +97,7 @@ static void jpeg_mem_src_int(j_decompress_ptr cinfo,
 METHODDEF(void)
 my_error_throw(j_common_ptr cinfo) { ThrowRDE("JPEG decoder error!"); }
 
-struct JpegDecompressStruct : jpeg_decompress_struct {
+struct JpegDecompressor::JpegDecompressStruct : jpeg_decompress_struct {
   struct jpeg_error_mgr jerr;
   JpegDecompressStruct() {
     jpeg_create_decompress(this);
