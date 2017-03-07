@@ -53,7 +53,7 @@ class TiffIFD
 
   friend class TiffEntry;
   friend class FiffParser;
-  friend TiffRootIFDOwner parseTiff(const Buffer& data);
+  friend class TiffParser;
 
   // make sure we never copy-constuct/assign a TiffIFD to keep the owning subcontainers contents save
   TiffIFD(const TiffIFD &) = delete;            // NOLINT

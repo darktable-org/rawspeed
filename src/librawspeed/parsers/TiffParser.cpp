@@ -57,7 +57,7 @@ namespace RawSpeed {
 
 class RawDecoder;
 
-TiffRootIFDOwner parseTiff(const Buffer &data) {
+TiffRootIFDOwner TiffParser::parse(const Buffer& data) {
   ByteStream bs(data, 0);
   bs.setInNativeByteOrder(isTiffInNativeByteOrder(bs, 0, "TIFF header"));
   bs.skipBytes(2);
@@ -74,7 +74,7 @@ TiffRootIFDOwner parseTiff(const Buffer &data) {
   return root;
 }
 
-RawDecoder* makeDecoder(TiffRootIFDOwner root, Buffer &data) {
+RawDecoder* TiffParser::makeDecoder(TiffRootIFDOwner root, Buffer& data) {
   Buffer* mInput = &data;
   if (!root)
     ThrowTPE("TiffIFD is null.");

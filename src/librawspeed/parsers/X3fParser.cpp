@@ -35,10 +35,9 @@ using namespace std;
 
 namespace RawSpeed {
 
-X3fParser::X3fParser(Buffer* file) {
+X3fParser::X3fParser(Buffer* file) : RawParser(file) {
   decoder = nullptr;
   bytes = nullptr;
-  mFile = file;
   uint32 size = file->getSize();
   if (size<104+128)
     ThrowRDE("X3F file too small");
@@ -90,7 +89,7 @@ static string getIdAsString(ByteStream *bytes) {
 
 void X3fParser::readDirectory()
 {
-  bytes->setPosition(mFile->getSize()-4);
+  bytes->setPosition(mInput->getSize() - 4);
   uint32 dir_off = bytes->getU32();
   bytes->setPosition(dir_off);
 

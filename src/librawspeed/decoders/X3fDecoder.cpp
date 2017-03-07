@@ -27,7 +27,7 @@
 #include "io/Buffer.h"                    // for Buffer::size_type
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/Endianness.h"                // for getHostEndianness, Endiann...
-#include "parsers/TiffParser.h"           // for parseTiff
+#include "parsers/TiffParser.h"           // for TiffParser::parse
 #include "tiff/TiffEntry.h"               // IWYU pragma: keep
 #include "tiff/TiffIFD.h"                 // for TiffID, TiffRootIFD, TiffR...
 #include <algorithm>                      // for max
@@ -125,7 +125,8 @@ bool X3fDecoder::readName() {
       i.skipBytes(6);
       if (i.getU32() == 0x66697845) { // Match text 'Exif'
         try {
-          TiffRootIFDOwner root = parseTiff(mFile->getSubView(cimg.dataOffset+12, i.getRemainSize()));
+          TiffRootIFDOwner root = TiffParser::parse(
+              mFile->getSubView(cimg.dataOffset + 12, i.getRemainSize()));
           auto id = root->getID();
           camera_model = id.model;
           camera_make = id.make;

@@ -83,7 +83,8 @@ void TiffIFD::parseIFDEntry(ByteStream& bs) {
 TiffIFD::TiffIFD(const DataBuffer& data, uint32 offset, TiffIFD* parent_)
     : parent(parent_) {
 
-  // see parseTiff: UINT32_MAX is used to mark the "virtual" top level TiffRootIFD in a tiff file
+  // see TiffParser::parse: UINT32_MAX is used to mark the "virtual" top level
+  // TiffRootIFD in a tiff file
   if (offset == UINT32_MAX)
     return;
 

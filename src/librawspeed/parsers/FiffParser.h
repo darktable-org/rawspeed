@@ -20,21 +20,20 @@
 
 #pragma once
 
+#include "parsers/RawParser.h" // for RawParser
+
 namespace RawSpeed {
 
 class Buffer;
 
 class RawDecoder;
 
-class FiffParser {
+class FiffParser final : public RawParser {
 public:
   FiffParser(Buffer* input);
   virtual ~FiffParser() = default;
 
   virtual RawDecoder* getDecoder();
-
-protected:
-  Buffer* mInput;
 };
 
 } // namespace RawSpeed

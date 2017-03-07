@@ -39,7 +39,7 @@ namespace RawSpeed {
 class RawDecoder;
 
 CiffParser::CiffParser(Buffer* inputData)
-    : mInput(inputData), mRootIFD(nullptr) {}
+    : RawParser(inputData), mRootIFD(nullptr) {}
 
 CiffParser::~CiffParser() {
   delete mRootIFD;

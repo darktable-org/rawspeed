@@ -28,7 +28,7 @@ class CameraMetaData;
 
 class RawDecoder;
 
-class RawParser final {
+class RawParser {
 public:
   RawParser(Buffer* inputData) : mInput(inputData) {}
   RawDecoder* getDecoder(const CameraMetaData* meta = nullptr);

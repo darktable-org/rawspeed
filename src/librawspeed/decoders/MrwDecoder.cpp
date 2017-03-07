@@ -28,7 +28,7 @@
 #include "io/Endianness.h"                          // for getU16BE, getU32BE
 #include "io/IOException.h"                         // for IOException
 #include "metadata/Camera.h"                        // for Hints
-#include "parsers/TiffParser.h"                     // for parseTiff
+#include "parsers/TiffParser.h"                     // for TiffParser::parse
 #include "tiff/TiffEntry.h"                         // IWYU pragma: keep
 #include "tiff/TiffIFD.h"                           // for TiffID, TiffRoot...
 #include <algorithm>                                // for max
@@ -83,7 +83,7 @@ void MrwDecoder::parseHeader() {
       break;
     case 0x545457: // TTW
       // Base value for offsets needs to be at the beginning of the TIFF block, not the file
-      rootIFD = parseTiff(mFile->getSubView(currpos+8));
+      rootIFD = TiffParser::parse(mFile->getSubView(currpos + 8));
       break;
     }
     currpos += max(len + 8, 1u); // max(,1) to make sure we make progress

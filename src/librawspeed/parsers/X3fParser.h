@@ -20,9 +20,10 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32
-#include <map>             // for map
-#include <string>          // for string
+#include "common/Common.h"     // for uint32
+#include "parsers/RawParser.h" // for RawParser
+#include <map>                 // for map
+#include <string>              // for string
 
 namespace RawSpeed {
 
@@ -75,7 +76,7 @@ public:
   std::map<std::string, std::string> props;
 };
 
-class X3fParser {
+class X3fParser final : public RawParser {
 public:
   X3fParser(Buffer* file);
   ~X3fParser();
@@ -87,7 +88,6 @@ protected:
   void freeObjects();
   ByteStream *bytes;
   X3fDecoder *decoder;
-  Buffer* mFile;
 };
 
 } // namespace RawSpeed

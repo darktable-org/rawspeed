@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include "parsers/RawParser.h" // for RawParser
+
 namespace RawSpeed {
 
 class Buffer;
@@ -29,7 +31,7 @@ class CiffIFD;
 
 class RawDecoder;
 
-class CiffParser final {
+class CiffParser final : public RawParser {
 public:
   CiffParser(Buffer* input);
   ~CiffParser();
@@ -40,8 +42,8 @@ public:
   CiffIFD* RootIFD() const { return mRootIFD; }
   /* Merges root of other CIFF into this - clears the root of the other */
   void MergeIFD(CiffParser* other_ciff);
+
 protected:
-  Buffer* mInput;
   CiffIFD* mRootIFD;
 };
 

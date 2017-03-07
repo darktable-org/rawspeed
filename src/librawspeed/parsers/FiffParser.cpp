@@ -26,7 +26,7 @@
 #include "io/ByteStream.h"               // for ByteStream
 #include "io/Endianness.h"               // for getU32BE, getHostEndianness
 #include "parsers/FiffParserException.h" // for ThrowFPE
-#include "parsers/TiffParser.h"          // for parseTiff, makeDecoder
+#include "parsers/TiffParser.h" // for TiffParser::parse, TiffParser::makeDecoder
 #include "parsers/TiffParserException.h" // for TiffParserException
 #include "tiff/TiffEntry.h"              // for TiffEntry, TiffDataType::TI...
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD, TiffI...
@@ -40,7 +40,7 @@ namespace RawSpeed {
 
 class RawDecoder;
 
-FiffParser::FiffParser(Buffer* inputData) : mInput(inputData) {}
+FiffParser::FiffParser(Buffer* inputData) : RawParser(inputData) {}
 
 RawDecoder* FiffParser::getDecoder() {
   const uchar8* data = mInput->getData(0, 104);
@@ -50,14 +50,14 @@ RawDecoder* FiffParser::getDecoder() {
   uint32 third_ifd = getU32BE(data + 0x5C);
 
   try {
-    TiffRootIFDOwner rootIFD = parseTiff(mInput->getSubView(first_ifd));
+    TiffRootIFDOwner rootIFD = TiffParser::parse(mInput->getSubView(first_ifd));
     TiffIFDOwner subIFD = make_unique<TiffIFD>();
 
     if (mInput->isValid(second_ifd)) {
       // RAW Tiff on newer models, pointer to raw data on older models
       // -> so we try parsing as Tiff first and add it as data if parsing fails
       try {
-        rootIFD->add(parseTiff(mInput->getSubView(second_ifd)));
+        rootIFD->add(TiffParser::parse(mInput->getSubView(second_ifd)));
       } catch (TiffParserException&) {
         // the offset will be interpreted relative to the rootIFD where this
         // subIFD gets inserted
@@ -104,7 +104,7 @@ RawDecoder* FiffParser::getDecoder() {
 
     rootIFD->add(move(subIFD));
 
-    return makeDecoder(move(rootIFD), *mInput);
+    return TiffParser::makeDecoder(move(rootIFD), *mInput);
   } catch (TiffParserException&) {
     ThrowFPE("No decoder found. Sorry.");
   }
