@@ -8530,8 +8530,8 @@
 			<ColorRow y="4">GGBGGR</ColorRow>
 			<ColorRow y="5">GGRGGB</ColorRow>
 		</CFA2>
-		<Crop x="0" y="0" width="-126" height="0"/>
-		<Sensor black="1024" white="16383"/>
+		<Crop x="0" y="0" width="-128" height="0"/>
+		<Sensor black="1022" white="16383"/>
 	</Camera>
 	<Camera make="FUJIFILM" model="X-M1">
 		<ID make="Fujifilm" model="X-M1">Fujifilm X-M1</ID>
