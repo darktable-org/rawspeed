@@ -283,7 +283,7 @@ public:
       code_l++;
     }
 
-    if (code > maxCodeOL[code_l])
+    if (code_l >= maxCodeOL.size() || code > maxCodeOL[code_l])
       ThrowRDE("bad Huffman code: %u (len: %u)", code, code_l);
 
     int diff_l = codeValues[code - codeOffsetOL[code_l]];
