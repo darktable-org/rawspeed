@@ -189,12 +189,6 @@ void RawDecoder::setMetaData(const CameraMetaData* meta, const string& make,
       new_size.y = mRaw->dim.y - cam->cropPos.y + new_size.y;
 
     mRaw->subFrame(iRectangle2D(cam->cropPos, new_size));
-
-    // Shift CFA to match crop
-    if (cam->cropPos.x & 1)
-      mRaw->cfa.shiftLeft();
-    if (cam->cropPos.y & 1)
-      mRaw->cfa.shiftDown();
   }
 
   const CameraSensorInfo *sensor = cam->getSensorInfo(iso_speed);

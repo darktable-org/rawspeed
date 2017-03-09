@@ -365,10 +365,6 @@ RawImage DngDecoder::decodeRawInternal() {
       ThrowRDE("No positive crop area");
 
     mRaw->subFrame(cropped);
-    if (mRaw->isCFA && cropped.pos.x %2 == 1)
-      mRaw->cfa.shiftLeft();
-    if (mRaw->isCFA && cropped.pos.y %2 == 1)
-      mRaw->cfa.shiftDown();
   }
   if (mRaw->dim.area() <= 0)
     ThrowRDE("No image left after crop");
