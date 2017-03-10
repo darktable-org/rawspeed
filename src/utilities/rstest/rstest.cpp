@@ -73,7 +73,7 @@ struct Timer {
 
 string img_hash(RawImage &r) {
   ostringstream oss;
-  char line[256];
+  char line[1024];
 
 #define APPEND(...)                                                            \
   do {                                                                         \
