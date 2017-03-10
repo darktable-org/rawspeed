@@ -46,7 +46,7 @@ void LJpegDecompressor::decode(uint32 offsetX, uint32 offsetY, bool fixDng16Bug_
 void LJpegDecompressor::decodeScan()
 {
   if (predictorMode != 1)
-    ThrowRDE("Unsupported predictor mode");
+    ThrowRDE("Unsupported predictor mode: %u", predictorMode);
 
   for (uint32 i = 0; i < frame.cps;  i++)
     if (frame.compInfo[i].superH != 1 || frame.compInfo[i].superV != 1)
