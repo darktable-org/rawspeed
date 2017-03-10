@@ -44,6 +44,9 @@ CiffIFD::CiffIFD(Buffer* f, uint32 start, uint32 end, uint32 _depth) {
   CIFF_DEPTH(_depth);
   mFile = f;
 
+  if (end < 4)
+    ThrowCPE("File is probably corrupted.");
+
   uint32 valuedata_size = getU32LE(f->getData(end-4, 4));
   ushort16 dircount = getU16LE(f->getData(start+valuedata_size, 2));
 
