@@ -40,6 +40,7 @@
 #include <cstdlib>                        // for abs
 #include <cstring>                        // for memset
 #include <exception>                      // for exception
+#include <memory>                         // for unique_ptr
 #include <string>                         // for string
 #include <vector>                         // for vector
 
@@ -49,14 +50,8 @@ namespace RawSpeed {
 
 class CameraMetaData;
 
-CrwDecoder::CrwDecoder(CiffIFD* rootIFD, Buffer* file)
-    : RawDecoder(file), mRootIFD(rootIFD) {
-}
-
-CrwDecoder::~CrwDecoder() {
-  delete mRootIFD;
-  mRootIFD = nullptr;
-}
+CrwDecoder::CrwDecoder(std::unique_ptr<CiffIFD> rootIFD, Buffer* file)
+    : RawDecoder(file), mRootIFD(move(rootIFD)) {}
 
 RawImage CrwDecoder::decodeRawInternal() {
   CiffEntry *sensorInfo = mRootIFD->getEntryRecursive(CIFF_SENSORINFO);

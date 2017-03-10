@@ -21,24 +21,25 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32
-#include "tiff/CiffTag.h"  // for CiffTag
-#include <map>             // for map
-#include <string>          // for string
-#include <vector>          // for vector
+#include "common/Common.h"  // for uint32
+#include "tiff/CiffEntry.h" // IWYU pragma: keep
+#include "tiff/CiffTag.h"   // for CiffTag
+#include <map>              // for map
+#include <memory>           // for unique_ptr
+#include <string>           // for string
+#include <vector>           // for vector
 
 namespace RawSpeed {
 
 class Buffer;
 
-class CiffEntry;
-
 class CiffIFD final {
 public:
   CiffIFD(Buffer* f, uint32 start, uint32 end, uint32 depth = 0);
-  ~CiffIFD();
-  std::vector<CiffIFD*> mSubIFD;
-  std::map<CiffTag, CiffEntry*> mEntry;
+
+  std::vector<std::unique_ptr<CiffIFD>> mSubIFD;
+  std::map<CiffTag, std::unique_ptr<CiffEntry>> mEntry;
+
   std::vector<CiffIFD*> getIFDsWithTag(CiffTag tag);
   CiffEntry* getEntry(CiffTag tag);
   bool __attribute__((pure)) hasEntry(CiffTag tag);

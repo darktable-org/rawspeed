@@ -28,6 +28,7 @@
 #include "tiff/CiffIFD.h"                // for CiffIFD
 #include "tiff/CiffTag.h"                // for CiffTag::CIFF_MAKEMODEL
 #include <map>                           // for map
+#include <memory>                        // for unique_ptr
 #include <string>                        // for operator==, allocator, basi...
 #include <utility>                       // for pair
 #include <vector>                        // for vector
@@ -38,13 +39,7 @@ namespace RawSpeed {
 
 class RawDecoder;
 
-CiffParser::CiffParser(Buffer* inputData)
-    : RawParser(inputData), mRootIFD(nullptr) {}
-
-CiffParser::~CiffParser() {
-  delete mRootIFD;
-  mRootIFD = nullptr;
-}
+CiffParser::CiffParser(Buffer* inputData) : RawParser(inputData) {}
 
 void CiffParser::parseData() {
   if (mInput->getSize() < 16)
@@ -54,17 +49,12 @@ void CiffParser::parseData() {
   if (data[0] != 0x49 || data[1] != 0x49)
     ThrowCPE("Not a CIFF file (ID)");
 
-  delete mRootIFD;
-
-  mRootIFD = new CiffIFD(mInput, data[2], mInput->getSize());
+  mRootIFD = make_unique<CiffIFD>(mInput, data[2], mInput->getSize());
 }
 
 RawDecoder* CiffParser::getDecoder() {
   if (!mRootIFD)
     parseData();
-
-  /* Copy, so we can pass it on and not have it destroyed with ourselves */
-  CiffIFD* root = mRootIFD;
 
   vector<CiffIFD*> potentials;
   potentials = mRootIFD->getIFDsWithTag(CIFF_MAKEMODEL);
@@ -73,8 +63,7 @@ RawDecoder* CiffParser::getDecoder() {
     for (auto &potential : potentials) {
       string make = trimSpaces(potential->getEntry(CIFF_MAKEMODEL)->getString());
       if (make == "Canon") {
-        mRootIFD = nullptr;
-        return new CrwDecoder(root, mInput);
+        return new CrwDecoder(move(mRootIFD), mInput);
       }
     }
   }
@@ -88,13 +77,13 @@ void CiffParser::MergeIFD( CiffParser* other_ciff)
   if (!other_ciff || !other_ciff->mRootIFD || other_ciff->mRootIFD->mSubIFD.empty())
     return;
 
-  CiffIFD *other_root = other_ciff->mRootIFD;
+  CiffIFD* other_root = other_ciff->mRootIFD.get();
   for (auto &i : other_root->mSubIFD) {
-    mRootIFD->mSubIFD.push_back(i);
+    mRootIFD->mSubIFD.push_back(move(i));
   }
 
   for (auto &i : other_root->mEntry) {
-    mRootIFD->mEntry[i.first] = i.second;
+    mRootIFD->mEntry[i.first] = move(i.second);
   }
   other_root->mSubIFD.clear();
   other_root->mEntry.clear();

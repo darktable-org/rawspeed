@@ -27,6 +27,7 @@
 #include "parsers/CiffParserException.h" // for ThrowCPE, CiffParserException
 #include "tiff/CiffEntry.h"              // for CiffEntry, CiffDataType::CI...
 #include <map>                           // for map, _Rb_tree_iterator
+#include <memory>                        // for unique_ptr
 #include <string>                        // for allocator, operator==, string
 #include <utility>                       // for pair
 #include <vector>                        // for vector
@@ -57,38 +58,27 @@ CiffIFD::CiffIFD(Buffer* f, uint32 start, uint32 end, uint32 _depth) {
     if (!mFile->isValid(entry_offset, 10))
       break;
 
-    CiffEntry *t = nullptr;
+    unique_ptr<CiffEntry> t(nullptr);
     try {
-      t = new CiffEntry(f, start, entry_offset);
+      t = make_unique<CiffEntry>(f, start, entry_offset);
     } catch (IOException &) { // Ignore unparsable entry
       continue;
     }
 
     if (t->type == CIFF_SUB1 || t->type == CIFF_SUB2) {
       try {
-        mSubIFD.push_back(new CiffIFD(f, t->data_offset, t->data_offset+t->bytesize, depth));
-        delete(t);
+        mSubIFD.push_back(make_unique<CiffIFD>(
+            f, t->data_offset, t->data_offset + t->bytesize, depth));
       } catch (
           CiffParserException &) { // Unparsable subifds are added as entries
-        mEntry[t->tag] = t;
+        mEntry[t->tag] = move(t);
       } catch (IOException &) { // Unparsable private data are added as entries
-        mEntry[t->tag] = t;
+        mEntry[t->tag] = move(t);
       }
     } else {
-      mEntry[t->tag] = t;
+      mEntry[t->tag] = move(t);
     }
   }
-}
-
-CiffIFD::~CiffIFD() {
-  for (auto &i : mEntry) {
-    delete (i.second);
-  }
-  mEntry.clear();
-  for (auto &i : mSubIFD) {
-    delete i;
-  }
-  mSubIFD.clear();
 }
 
 bool __attribute__((pure)) CiffIFD::hasEntryRecursive(CiffTag tag) {
@@ -118,7 +108,7 @@ vector<CiffIFD*> CiffIFD::getIFDsWithTag(CiffTag tag) {
 vector<CiffIFD*> CiffIFD::getIFDsWithTagWhere(CiffTag tag, uint32 isValue) {
   vector<CiffIFD*> matchingIFDs;
   if (mEntry.find(tag) != mEntry.end()) {
-    CiffEntry* entry = mEntry[tag];
+    CiffEntry* entry = mEntry[tag].get();
     if (entry->isInt() && entry->getU32() == isValue)
       matchingIFDs.push_back(this);
   }
@@ -135,7 +125,7 @@ vector<CiffIFD *> CiffIFD::getIFDsWithTagWhere(CiffTag tag,
                                                const string &isValue) {
   vector<CiffIFD*> matchingIFDs;
   if (mEntry.find(tag) != mEntry.end()) {
-    CiffEntry* entry = mEntry[tag];
+    CiffEntry* entry = mEntry[tag].get();
     if (entry->isString() && isValue == entry->getString())
       matchingIFDs.push_back(this);
   }
@@ -150,7 +140,7 @@ vector<CiffIFD *> CiffIFD::getIFDsWithTagWhere(CiffTag tag,
 
 CiffEntry* CiffIFD::getEntryRecursive(CiffTag tag) {
   if (mEntry.find(tag) != mEntry.end()) {
-    return mEntry[tag];
+    return mEntry[tag].get();
   }
   for (auto &i : mSubIFD) {
     CiffEntry *entry = i->getEntryRecursive(tag);
@@ -162,7 +152,7 @@ CiffEntry* CiffIFD::getEntryRecursive(CiffTag tag) {
 
 CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag, uint32 isValue) {
   if (mEntry.find(tag) != mEntry.end()) {
-    CiffEntry* entry = mEntry[tag];
+    CiffEntry* entry = mEntry[tag].get();
     if (entry->isInt() && entry->getU32() == isValue)
       return entry;
   }
@@ -176,7 +166,7 @@ CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag, uint32 isValue) {
 
 CiffEntry *CiffIFD::getEntryRecursiveWhere(CiffTag tag, const string &isValue) {
   if (mEntry.find(tag) != mEntry.end()) {
-    CiffEntry* entry = mEntry[tag];
+    CiffEntry* entry = mEntry[tag].get();
     if (entry->isString() && isValue == entry->getString())
       return entry;
   }
@@ -190,7 +180,7 @@ CiffEntry *CiffIFD::getEntryRecursiveWhere(CiffTag tag, const string &isValue) {
 
 CiffEntry* CiffIFD::getEntry(CiffTag tag) {
   if (mEntry.find(tag) != mEntry.end()) {
-    return mEntry[tag];
+    return mEntry[tag].get();
   }
   ThrowCPE("Entry 0x%x not found.", tag);
   return nullptr;
