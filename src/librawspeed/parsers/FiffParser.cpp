@@ -32,6 +32,7 @@
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD, TiffI...
 #include "tiff/TiffTag.h"                // for TiffTag, TiffTag::FUJIOLDWB
 #include <algorithm>                     // for move
+#include <limits>                        // for numeric_limits
 #include <memory>                        // for default_delete, unique_ptr
 
 using namespace std;
@@ -45,7 +46,12 @@ FiffParser::FiffParser(Buffer* inputData) : RawParser(inputData) {}
 RawDecoder* FiffParser::getDecoder() {
   const uchar8* data = mInput->getData(0, 104);
 
-  uint32 first_ifd = getU32BE(data + 0x54) + 12;
+  uint32 first_ifd = getU32BE(data + 0x54);
+  if (first_ifd >= numeric_limits<uint32>::max() - 12)
+    ThrowFPE("Not Fiff. First IFD too far away");
+
+  first_ifd += 12;
+
   uint32 second_ifd = getU32BE(data + 0x64);
   uint32 third_ifd = getU32BE(data + 0x5C);
 
