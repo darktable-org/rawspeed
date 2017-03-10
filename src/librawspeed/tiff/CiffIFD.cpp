@@ -26,6 +26,7 @@
 #include "io/IOException.h"              // for IOException
 #include "parsers/CiffParserException.h" // for ThrowCPE, CiffParserException
 #include "tiff/CiffEntry.h"              // for CiffEntry, CiffDataType::CI...
+#include <limits>                        // for numeric_limits
 #include <map>                           // for map, _Rb_tree_iterator
 #include <memory>                        // for unique_ptr
 #include <string>                        // for allocator, operator==, string
@@ -48,6 +49,10 @@ CiffIFD::CiffIFD(Buffer* f, uint32 start, uint32 end, uint32 _depth) {
     ThrowCPE("File is probably corrupted.");
 
   uint32 valuedata_size = getU32LE(f->getData(end-4, 4));
+
+  if (valuedata_size >= numeric_limits<uint32>::max() - start)
+    ThrowCPE("Valuedata size is too big. Image is probably corrupted.");
+
   ushort16 dircount = getU16LE(f->getData(start+valuedata_size, 2));
 
 //  fprintf(stderr, "Found %d entries between %d and %d after %d data bytes\n",
