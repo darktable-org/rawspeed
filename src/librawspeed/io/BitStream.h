@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2017 Axel Waggershauser
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -41,7 +42,13 @@ struct BitStreamCacheBase
   uint64 cache = 0; // the acutal bits stored in the cache
   unsigned int fillLevel = 0; // bits left in cache
   static constexpr unsigned Size = sizeof(cache)*8;
+
+  // how many bits could be requested to be filled
   static constexpr unsigned MaxGetBits = Size/2;
+
+  // maximal number of bytes the implementation may read.
+  // NOTE: this is not the same as MaxGetBits/8 !!!
+  static constexpr unsigned MaxProcessBytes = 8;
 };
 
 struct BitStreamCacheLeftInRightOut : BitStreamCacheBase
@@ -85,8 +92,8 @@ class BitStream : private ByteStream
   Cache cache;
 
   // this method hase to be implemented in the concrete BitStream template
-  // specializations. It needs to process up to 4 bytes of input and return
-  // the number of bytes processed
+  // specializations. It will return the number of bytes processed. It needs
+  // to process up to BitStreamCacheBase::MaxProcessBytes bytes of input.
   size_type fillCache(const uchar8* input);
 
 public:
@@ -96,24 +103,47 @@ public:
   // deprecated:
   BitStream(Buffer* f, size_type offset) : ByteStream(f->getSubView(offset)) {}
 
+private:
+  inline void fillSafe() {
+    if (pos + BitStreamCacheBase::MaxProcessBytes <= size) {
+      uchar8 tmp[BitStreamCacheBase::MaxProcessBytes] = {0};
+      assert(!(size - pos < BitStreamCacheBase::MaxProcessBytes));
+      memcpy(tmp, data + pos, BitStreamCacheBase::MaxProcessBytes);
+      pos += fillCache(tmp);
+    } else if (pos < size) {
+      uchar8 tmp[BitStreamCacheBase::MaxProcessBytes] = {0};
+      assert(size - pos < BitStreamCacheBase::MaxProcessBytes);
+      memcpy(tmp, data + pos, size - pos);
+      pos += fillCache(tmp);
+    } else if (pos < size + Cache::MaxGetBits / 8) {
+      // yes, this case needs to continue using Cache::MaxGetBits
+      // assert(size <= pos);
+      cache.push(0, Cache::MaxGetBits);
+      pos += Cache::MaxGetBits / 8;
+    } else {
+      // assert(size < pos);
+      ThrowIOE("Buffer overflow read in BitStream");
+    }
+  }
+
+public:
   inline void fill(uint32 nbits = Cache::MaxGetBits) {
     assert(nbits <= Cache::MaxGetBits);
     if (cache.fillLevel < nbits) {
-#if BUFFER_PADDING < 4
+#if defined(DEBUG)
+      // really slow, but best way to check all the assumptions.
+      fillSafe();
+#elif BUFFER_PADDING >= 8
+      static_assert(BitStreamCacheBase::MaxProcessBytes == 8,
+                    "update these too");
+      pos += fillCache(data + pos);
+#else
       // disabling this run-time bounds check saves about 1% on intel x86-64
-      if (pos + Cache::MaxGetBits/8 > size) {
-        if (pos < size) {
-          uchar8 tmp[4] = {0, 0, 0, 0};
-          memcpy(tmp, data + pos, size - pos);
-          pos += fillCache(tmp);
-        } else if (pos < size + 4) {
-          cache.push(0, Cache::MaxGetBits);
-          pos += Cache::MaxGetBits/8;
-        } else
-          ThrowIOE("Buffer overflow read in BitStream");
-      } else
-#endif
+      if (pos + BitStreamCacheBase::MaxProcessBytes <= size)
         pos += fillCache(data + pos);
+      else
+        fillSafe();
+#endif
     }
   }
 

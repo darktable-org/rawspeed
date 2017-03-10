@@ -32,9 +32,9 @@ namespace RawSpeed {
 
 // This allows to specify the nuber of bytes that each Buffer needs to
 // allocate additionally to be able to remove one runtime bounds check
-// in BitSream::fill. There are two sane choices:
-// 0 : allocate exactly as much data as required
-// 4 : increase allocation size by 4 bytes
+// in BitStream::fill. There are two sane choices:
+// 0 : allocate exactly as much data as required, or
+// set it to the value of  BitStreamCacheBase::MaxProcessBytes
 #define BUFFER_PADDING 0UL
 
 // if the padding is >= 4, bounds checking in BitStream::fill are not compiled,
