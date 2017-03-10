@@ -41,52 +41,74 @@ namespace RawSpeed {
   if ((depth = (_depth) + 1) > 10)                                             \
     ThrowCPE("sub-micron matryoshka dolls are ignored");
 
-CiffIFD::CiffIFD(Buffer* f, uint32 start, uint32 end, uint32 _depth) {
+CiffIFD::CiffIFD(Buffer* f, uint32 start, uint32 end, CiffIFD* _parent,
+                 uint32 _depth)
+    : parent(_parent), mFile(f) {
   CIFF_DEPTH(_depth);
-  mFile = f;
 
   if (end < 4)
     ThrowCPE("File is probably corrupted.");
 
-  uint32 valuedata_size = getU32LE(f->getData(end-4, 4));
+  uint32 valuedata_size = getU32LE(mFile->getData(end - 4, 4));
 
   if (valuedata_size >= numeric_limits<uint32>::max() - start)
     ThrowCPE("Valuedata size is too big. Image is probably corrupted.");
 
-  ushort16 dircount = getU16LE(f->getData(start+valuedata_size, 2));
+  ushort16 dircount = getU16LE(mFile->getData(start + valuedata_size, 2));
 
-//  fprintf(stderr, "Found %d entries between %d and %d after %d data bytes\n",
-//                  dircount, start, end, valuedata_size);
+  //  fprintf(stderr, "Found %d entries between %d and %d after %d data
+  //  bytes\n",
+  //                  dircount, start, end, valuedata_size);
 
   for (uint32 i = 0; i < dircount; i++) {
     int entry_offset = start+valuedata_size+2+i*10;
 
-    // If the space for the entry is no longer valid stop reading any more as
-    // the file is broken or truncated
     if (!mFile->isValid(entry_offset, 10))
       break;
 
-    unique_ptr<CiffEntry> t(nullptr);
+    unique_ptr<CiffEntry> t;
+
     try {
-      t = make_unique<CiffEntry>(f, start, entry_offset);
-    } catch (IOException &) { // Ignore unparsable entry
-      continue;
+      t = make_unique<CiffEntry>(mFile, start, entry_offset);
+    } catch (IOException&) {
+      // Ignore unparsable entry
+      return;
     }
 
-    if (t->type == CIFF_SUB1 || t->type == CIFF_SUB2) {
-      try {
-        mSubIFD.push_back(make_unique<CiffIFD>(
-            f, t->data_offset, t->data_offset + t->bytesize, depth));
-      } catch (
-          CiffParserException &) { // Unparsable subifds are added as entries
-        mEntry[t->tag] = move(t);
-      } catch (IOException &) { // Unparsable private data are added as entries
-        mEntry[t->tag] = move(t);
+    try {
+      switch (t->type) {
+      case CIFF_SUB1:
+      case CIFF_SUB2:
+        add(make_unique<CiffIFD>(mFile, t->data_offset,
+                                 t->data_offset + t->bytesize, this, depth));
+        break;
+
+      default:
+        add(move(t));
       }
-    } else {
-      mEntry[t->tag] = move(t);
+    } catch (...) {
+      // Unparsable private data are added as entries
+      add(move(t));
     }
   }
+}
+
+void CiffIFD::add(std::unique_ptr<CiffIFD> subIFD) {
+  CiffIFD* p = this;
+  for (int i = 1; p; ++i, p = p->parent)
+    if (i > 10)
+      ThrowCPE("CiffIFD cascading overflow.");
+
+  if (mSubIFD.size() > 100)
+    ThrowCPE("CIFF file has too many SubIFDs, probably broken");
+
+  subIFD->parent = this;
+  mSubIFD.push_back(move(subIFD));
+}
+
+void CiffIFD::add(std::unique_ptr<CiffEntry> entry) {
+  entry->parent = this;
+  mEntry[entry->tag] = move(entry);
 }
 
 bool __attribute__((pure)) CiffIFD::hasEntryRecursive(CiffTag tag) {

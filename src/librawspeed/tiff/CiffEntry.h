@@ -30,6 +30,8 @@ namespace RawSpeed {
 
 class Buffer;
 
+class CiffIFD;
+
 /*
  * Tag data type information.
  */
@@ -46,6 +48,8 @@ enum CiffDataType {
 
 class CiffEntry
 {
+  friend class CiffIFD;
+
 public:
   CiffEntry(Buffer* f, uint32 value_data, uint32 offset);
   ~CiffEntry();
@@ -69,6 +73,7 @@ public:
   bool __attribute__((pure)) isString();
 
 protected:
+  CiffIFD* parent = nullptr;
   std::string getValueAsString();
   uchar8* own_data;
   const uchar8* data;

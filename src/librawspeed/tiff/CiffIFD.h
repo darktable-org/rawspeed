@@ -34,11 +34,17 @@ namespace RawSpeed {
 class Buffer;
 
 class CiffIFD final {
+  CiffIFD* parent = nullptr;
+
 public:
-  CiffIFD(Buffer* f, uint32 start, uint32 end, uint32 depth = 0);
+  CiffIFD(Buffer* f, uint32 start, uint32 end, CiffIFD* _parent,
+          uint32 depth = 0);
 
   std::vector<std::unique_ptr<CiffIFD>> mSubIFD;
   std::map<CiffTag, std::unique_ptr<CiffEntry>> mEntry;
+
+  void add(std::unique_ptr<CiffIFD> subIFD);
+  void add(std::unique_ptr<CiffEntry> entry);
 
   std::vector<CiffIFD*> getIFDsWithTag(CiffTag tag);
   CiffEntry* getEntry(CiffTag tag);
