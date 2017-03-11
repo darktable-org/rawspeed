@@ -34,15 +34,16 @@ namespace RawSpeed {
 class Buffer;
 
 class CiffIFD final {
-  CiffIFD* parent = nullptr;
+  CiffIFD* parent;
 
 public:
-  CiffIFD(Buffer* f, uint32 start, uint32 end, CiffIFD* _parent,
+  CiffIFD(CiffIFD* parent, Buffer* f, uint32 start, uint32 end,
           uint32 depth = 0);
 
   std::vector<std::unique_ptr<CiffIFD>> mSubIFD;
   std::map<CiffTag, std::unique_ptr<CiffEntry>> mEntry;
 
+  void checkOverflow();
   void add(std::unique_ptr<CiffIFD> subIFD);
   void add(std::unique_ptr<CiffEntry> entry);
 

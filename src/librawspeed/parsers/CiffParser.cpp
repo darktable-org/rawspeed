@@ -49,7 +49,7 @@ void CiffParser::parseData() {
   if (data[0] != 0x49 || data[1] != 0x49)
     ThrowCPE("Not a CIFF file (ID)");
 
-  mRootIFD = make_unique<CiffIFD>(mInput, data[2], mInput->getSize(), nullptr);
+  mRootIFD = make_unique<CiffIFD>(nullptr, mInput, data[2], mInput->getSize());
 }
 
 RawDecoder* CiffParser::getDecoder() {

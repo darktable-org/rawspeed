@@ -41,10 +41,12 @@ namespace RawSpeed {
   if ((depth = (_depth) + 1) > 10)                                             \
     ThrowCPE("sub-micron matryoshka dolls are ignored");
 
-CiffIFD::CiffIFD(Buffer* f, uint32 start, uint32 end, CiffIFD* _parent,
+CiffIFD::CiffIFD(CiffIFD* parent_, Buffer* f, uint32 start, uint32 end,
                  uint32 _depth)
-    : parent(_parent), mFile(f) {
+    : parent(parent_), mFile(f) {
   CIFF_DEPTH(_depth);
+
+  checkOverflow();
 
   if (end < 4)
     ThrowCPE("File is probably corrupted.");
@@ -79,8 +81,8 @@ CiffIFD::CiffIFD(Buffer* f, uint32 start, uint32 end, CiffIFD* _parent,
       switch (t->type) {
       case CIFF_SUB1:
       case CIFF_SUB2:
-        add(make_unique<CiffIFD>(mFile, t->data_offset,
-                                 t->data_offset + t->bytesize, this, depth));
+        add(make_unique<CiffIFD>(this, mFile, t->data_offset,
+                                 t->data_offset + t->bytesize, depth));
         break;
 
       default:
@@ -93,12 +95,14 @@ CiffIFD::CiffIFD(Buffer* f, uint32 start, uint32 end, CiffIFD* _parent,
   }
 }
 
-void CiffIFD::add(std::unique_ptr<CiffIFD> subIFD) {
+void CiffIFD::checkOverflow() {
   CiffIFD* p = this;
   for (int i = 1; p; ++i, p = p->parent)
-    if (i > 10)
+    if (i > 5)
       ThrowCPE("CiffIFD cascading overflow.");
+}
 
+void CiffIFD::add(std::unique_ptr<CiffIFD> subIFD) {
   if (mSubIFD.size() > 100)
     ThrowCPE("CIFF file has too many SubIFDs, probably broken");
 
