@@ -13,3 +13,7 @@ add_subdirectory(librawspeed)
 if(BUILD_TOOLS)
   add_subdirectory(utilities)
 endif()
+
+if(BUILD_FUZZERS)
+  add_subdirectory(fuzzers)
+endif()

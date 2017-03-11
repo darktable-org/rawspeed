@@ -99,6 +99,36 @@ MARK_AS_ADVANCED(
     CMAKE_CXX_FLAGS_SANITIZE
     CMAKE_C_FLAGS_SANITIZE )
 
+set(fuzz "-O3 -ffast-math")
+set(fuzz "${fuzz} ${asan} ${ubsan} -fsanitize-coverage=edge,indirect-calls,trace-pc-guard,trace-cmp")
+set(fuzz "${fuzz} -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION")
+SET(CMAKE_CXX_FLAGS_FUZZ
+    "${fuzz}"
+    CACHE STRING "Flags used by the C++ compiler during FUZZ builds."
+    FORCE )
+SET(CMAKE_C_FLAGS_FUZZ
+    "${fuzz}"
+    CACHE STRING "Flags used by the C compiler during FUZZ builds."
+    FORCE )
+SET(CMAKE_EXE_LINKER_FLAGS_FUZZ
+    "${fuzz}"
+    CACHE STRING "Flags used for linking binaries during FUZZ builds."
+    FORCE )
+SET(CMAKE_SHARED_LINKER_FLAGS_FUZZ
+    "${fuzz}"
+    CACHE STRING "Flags used by the shared libraries linker during FUZZ builds."
+    FORCE )
+SET(CMAKE_SHARED_MODULE_FLAGS_FUZZ
+    "${fuzz}"
+    CACHE STRING "Flags used by the module linker during FUZZ builds."
+    FORCE )
+MARK_AS_ADVANCED(
+    CMAKE_CXX_FLAGS_FUZZ
+    CMAKE_C_FLAGS_FUZZ
+    CMAKE_EXE_LINKER_FLAGS_FUZZ
+    CMAKE_SHARED_LINKER_FLAGS_FUZZ
+    CMAKE_SHARED_MODULE_FLAGS_FUZZ )
+
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -O2")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O2")
 

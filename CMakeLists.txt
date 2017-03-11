@@ -72,6 +72,7 @@ else()
   set(ALLOW_DOWNLOADING_GOOGLEBENCHMARK OFF CACHE BOOL "If googlebenchmark src tree is not found in location specified by GOOGLEBENCHMARK_PATH, do fetch the archive from internet" FORCE)
 endif()
 option(BUILD_DOCS "Build the documentation (mainly, using Doxygen)." OFF)
+option(BUILD_FUZZERS "Build the fuzzing tree." ON)
 
 set(GOOGLETEST_PATH "/usr/src/googletest" CACHE PATH
                     "Path to the googletest root tree. Should contain googletest and googlemock subdirs. And CMakeLists.txt in root, and in both of these subdirs")
@@ -82,6 +83,8 @@ set(ZLIB_PATH "/usr/src/zlib" CACHE PATH "Path to the zlib root tree.")
 
 set(GOOGLEBENCHMARK_PATH "/usr/src/googlebenchmark" CACHE PATH
                     "Path to the googlebenchmark root tree.")
+
+set(LIBFUZZER_ARCHIVE "/usr/local/lib/llvm/lib/libFuzzer.a" CACHE FILEPATH "Filepath to the libFuzzer.a archive.")
 
 include(build-type)
 
