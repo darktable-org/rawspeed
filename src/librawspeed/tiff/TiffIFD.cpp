@@ -43,7 +43,7 @@ void TiffIFD::parseIFDEntry(ByteStream& bs) {
   auto origPos = bs.getPosition();
 
   try {
-    t = make_unique<TiffEntry>(bs);
+    t = make_unique<TiffEntry>(this, bs);
   } catch (IOException&) { // Ignore unparsable entry
     // fix probably broken position due to interruption by exception
     // i.e. setting it to the next entry.
@@ -66,7 +66,7 @@ void TiffIFD::parseIFDEntry(ByteStream& bs) {
     case SUBIFDS:
     case EXIFIFDPOINTER:
       for (uint32 j = 0; j < t->count; j++) {
-        add(make_unique<TiffIFD>(bs, t->getU32(j), this));
+        add(make_unique<TiffIFD>(this, bs, t->getU32(j)));
         // if (getSubIFDs().back()->getNextIFD() != 0)
         //   cerr << "detected chained subIFds" << endl;
       }
@@ -80,13 +80,15 @@ void TiffIFD::parseIFDEntry(ByteStream& bs) {
   }
 }
 
-TiffIFD::TiffIFD(const DataBuffer& data, uint32 offset, TiffIFD* parent_)
+TiffIFD::TiffIFD(TiffIFD* parent_, const DataBuffer& data, uint32 offset)
     : parent(parent_) {
 
   // see TiffParser::parse: UINT32_MAX is used to mark the "virtual" top level
   // TiffRootIFD in a tiff file
   if (offset == UINT32_MAX)
     return;
+
+  checkOverflow();
 
   ByteStream bs = data;
   bs.setPosition(offset);
@@ -202,7 +204,7 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(TiffEntry* t)
   }
 
   // Attempt to parse the rest as an IFD
-  return make_unique<TiffRootIFD>(bs, bs.getPosition());
+  return make_unique<TiffRootIFD>(this, bs, bs.getPosition());
 }
 
 std::vector<const TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) const {
@@ -238,11 +240,15 @@ TiffEntry* __attribute__((pure)) TiffIFD::getEntryRecursive(TiffTag tag) const {
   return nullptr;
 }
 
-void TiffIFD::add(TiffIFDOwner subIFD) {
+void TiffIFD::checkOverflow() {
   TiffIFD* p = this;
   for (int i = 1; p; ++i, p = p->parent )
     if (i > 10)
       ThrowTPE("TiffIFD cascading overflow.");
+}
+
+void TiffIFD::add(TiffIFDOwner subIFD) {
+  checkOverflow();
   if (subIFDs.size() > 100)
     ThrowTPE("TIFF file has too many SubIFDs, probably broken");
   subIFD->parent = this;

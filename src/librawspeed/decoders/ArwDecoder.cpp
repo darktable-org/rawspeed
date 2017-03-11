@@ -401,7 +401,7 @@ void ArwDecoder::GetWB() {
   // Set the whitebalance for all the modern ARW formats (everything after A100)
   if (mRootIFD->hasEntryRecursive(DNGPRIVATEDATA)) {
     TiffEntry *priv = mRootIFD->getEntryRecursive(DNGPRIVATEDATA);
-    TiffRootIFD makerNoteIFD(priv->getRootIfdData(), priv->getU32());
+    TiffRootIFD makerNoteIFD(nullptr, priv->getRootIfdData(), priv->getU32());
 
     TiffEntry *sony_offset = makerNoteIFD.getEntryRecursive(SONY_OFFSET);
     TiffEntry *sony_length = makerNoteIFD.getEntryRecursive(SONY_LENGTH);
@@ -424,7 +424,7 @@ void ArwDecoder::GetWB() {
 
     Buffer decIFD(move(ifd_decoded), ifd_size);
     DataBuffer dbIDD(decIFD, priv->getRootIfdData().isInNativeByteOrder());
-    TiffRootIFD encryptedIFD(dbIDD, off);
+    TiffRootIFD encryptedIFD(nullptr, dbIDD, off);
 
     if (encryptedIFD.hasEntry(SONYGRBGLEVELS)){
       TiffEntry *wb = encryptedIFD.getEntry(SONYGRBGLEVELS);

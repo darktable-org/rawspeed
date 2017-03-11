@@ -283,7 +283,8 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       TiffEntry *img_entry = mRootIFD->getEntryRecursive(OLYMPUSIMAGEPROCESSING);
       try {
         // get makernote ifd with containing Buffer
-        TiffRootIFD image_processing(img_entry->getRootIfdData(), img_entry->getU32());
+        TiffRootIFD image_processing(nullptr, img_entry->getRootIfdData(),
+                                     img_entry->getU32());
 
         // Get the WB
         if(image_processing.hasEntry((TiffTag) 0x0100)) {

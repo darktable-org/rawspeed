@@ -41,7 +41,7 @@ const uint32 TiffEntry::datashifts[] = {0, 0, 0, 1, 2, 3, 0,
                                         0, 1, 2, 3, 2, 3, 2};
 //                                  0-1-2-3-4-5-6-7-8-9-10-11-12-13
 
-TiffEntry::TiffEntry(ByteStream &bs) {
+TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream& bs) : parent(parent_) {
   tag = (TiffTag)bs.getU16();
   const ushort16 numType = bs.getU16();
   if (numType > TIFF_OFFSET)
@@ -81,9 +81,10 @@ TiffEntry::TiffEntry(ByteStream &bs) {
   }
 }
 
-TiffEntry::TiffEntry(TiffTag tag_, TiffDataType type_, uint32 count_,
-                     ByteStream &&data_)
-    : data(std::move(data_)), tag(tag_), type(type_), count(count_) {
+TiffEntry::TiffEntry(TiffIFD* parent_, TiffTag tag_, TiffDataType type_,
+                     uint32 count_, ByteStream&& data_)
+    : parent(parent_), data(std::move(data_)), tag(tag_), type(type_),
+      count(count_) {
   // check for count << datashift overflow
   if (count > UINT32_MAX >> datashifts[type])
     ThrowTPE("integer overflow in size calculation.");

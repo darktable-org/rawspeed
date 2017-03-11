@@ -66,9 +66,11 @@ TiffRootIFDOwner TiffParser::parse(const Buffer& data) {
   if (magic != 42 && magic != 0x4f52 && magic != 0x5352 && magic != 0x55) // ORF has 0x4f52/0x5352, RW2 0x55 - Brillant!
     ThrowTPE("Not a TIFF file (magic 42)");
 
-  TiffRootIFDOwner root = make_unique<TiffRootIFD>(bs, UINT32_MAX); // tell TiffIFD constructur not to parse bs as IFD
+  TiffRootIFDOwner root = make_unique<TiffRootIFD>(
+      nullptr, bs,
+      UINT32_MAX); // tell TiffIFD constructur not to parse bs as IFD
   for( uint32 nextIFD = bs.getU32(); nextIFD; nextIFD = root->getSubIFDs().back()->getNextIFD() ) {
-    root->add(make_unique<TiffIFD>(bs, nextIFD, root.get()));
+    root->add(make_unique<TiffIFD>(root.get(), bs, nextIFD));
   }
 
   return root;

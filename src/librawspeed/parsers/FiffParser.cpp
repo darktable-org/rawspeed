@@ -69,12 +69,12 @@ RawDecoder* FiffParser::getDecoder() {
         // subIFD gets inserted
         uint32 rawOffset = second_ifd - first_ifd;
         subIFD->add(
-            make_unique<TiffEntry>(FUJI_STRIPOFFSETS, TIFF_OFFSET, 1,
-                                   ByteStream::createCopy(&rawOffset, 4)));
+            make_unique<TiffEntry>(subIFD.get(), FUJI_STRIPOFFSETS, TIFF_OFFSET,
+                                   1, ByteStream::createCopy(&rawOffset, 4)));
         uint32 max_size = mInput->getSize() - second_ifd;
-        subIFD->add(
-            make_unique<TiffEntry>(FUJI_STRIPBYTECOUNTS, TIFF_LONG, 1,
-                                   ByteStream::createCopy(&max_size, 4)));
+        subIFD->add(make_unique<TiffEntry>(
+            subIFD.get(), FUJI_STRIPBYTECOUNTS, TIFF_LONG, 1,
+            ByteStream::createCopy(&max_size, 4)));
       }
     }
 
@@ -101,7 +101,7 @@ RawDecoder* FiffParser::getDecoder() {
 
         uint32 count = type == TIFF_SHORT ? length / 2 : length;
         subIFD->add(make_unique<TiffEntry>(
-            (TiffTag)tag, type, count,
+            subIFD.get(), (TiffTag)tag, type, count,
             bytes.getSubStream(bytes.getPosition(), length)));
 
         bytes.skipBytes(length);

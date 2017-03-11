@@ -47,7 +47,7 @@ using TiffEntryOwner = std::unique_ptr<TiffEntry>;
 class TiffIFD
 {
   uint32 nextIFD = 0;
-  TiffIFD* parent = nullptr;
+  TiffIFD* parent;
   std::vector<TiffIFDOwner> subIFDs;
   std::map<TiffTag, TiffEntryOwner> entries;
 
@@ -59,6 +59,7 @@ class TiffIFD
   TiffIFD(const TiffIFD &) = delete;            // NOLINT
   TiffIFD &operator=(const TiffIFD &) = delete; // NOLINT
 
+  void checkOverflow();
   void add(TiffIFDOwner subIFD);
   void add(TiffEntryOwner entry);
   TiffRootIFDOwner parseDngPrivateData(TiffEntry *t);
@@ -67,8 +68,9 @@ class TiffIFD
 
 public:
   TiffIFD() = default;
-  TiffIFD(const DataBuffer& data, uint32 offset, TiffIFD* parent);
+  TiffIFD(TiffIFD* parent, const DataBuffer& data, uint32 offset);
   virtual ~TiffIFD() = default;
+
   uint32 getNextIFD() const {return nextIFD;}
   std::vector<const TiffIFD*> getIFDsWithTag(TiffTag tag) const;
   const TiffIFD* getIFDWithTag(TiffTag tag, uint32 index = 0) const;
@@ -93,8 +95,8 @@ class TiffRootIFD final : public TiffIFD {
 public:
   const DataBuffer rootBuffer;
 
-  TiffRootIFD(const DataBuffer &data, uint32 offset)
-      : TiffIFD(data, offset, nullptr), rootBuffer(data) {}
+  TiffRootIFD(TiffIFD* parent_, const DataBuffer& data, uint32 offset)
+      : TiffIFD(parent_, data, offset), rootBuffer(data) {}
 
   // find the MAKE and MODEL tags identifying the camera
   // note: the returned strings are trimmed automatically

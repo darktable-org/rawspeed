@@ -62,7 +62,8 @@ RawImage DcrDecoder::decodeRawInternal() {
     TiffEntry *ifdoffset = mRootIFD->getEntryRecursive(KODAK_IFD);
     if (!ifdoffset)
       ThrowRDE("Couldn't find the Kodak IFD offset");
-    TiffRootIFD kodakifd(ifdoffset->getRootIfdData(), ifdoffset->getU32());
+    TiffRootIFD kodakifd(nullptr, ifdoffset->getRootIfdData(),
+                         ifdoffset->getU32());
     TiffEntry *linearization = kodakifd.getEntryRecursive(KODAK_LINEARIZATION);
     if (!linearization || linearization->count != 1024 || linearization->type != TIFF_SHORT) {
       ThrowRDE("Couldn't find the linearization table");
