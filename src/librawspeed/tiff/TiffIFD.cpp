@@ -243,7 +243,7 @@ TiffEntry* __attribute__((pure)) TiffIFD::getEntryRecursive(TiffTag tag) const {
 void TiffIFD::checkOverflow() {
   TiffIFD* p = this;
   for (int i = 1; p; ++i, p = p->parent )
-    if (i > 10)
+    if (i > 5)
       ThrowTPE("TiffIFD cascading overflow.");
 }
 
