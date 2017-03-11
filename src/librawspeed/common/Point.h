@@ -21,8 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"  // for uint32
-#include <algorithm>        // for max, min
+#include <algorithm> // for max, min
 
 namespace RawSpeed {
 
@@ -68,7 +67,9 @@ public:
     return x <= rhs.x && y <= rhs.y;
   }
 
-  constexpr uint32 area() const { return (x * y) > 0 ? (x * y) : -(x * y); }
+  constexpr unsigned int area() const {
+    return ((long)x * y) > 0 ? ((long)x * y) : -((long)x * y);
+  }
 
   constexpr bool isThisInside(const iPoint2D& rhs) const {
     return operator<=(rhs);
@@ -115,7 +116,7 @@ public:
     return pos <= checkPoint && getBottomRight() >= checkPoint;
   }
 
-  constexpr uint32 area() const { return dim.area(); }
+  constexpr unsigned int area() const { return dim.area(); }
 
   void offset(const iPoint2D& offset) { pos += offset; }
 
