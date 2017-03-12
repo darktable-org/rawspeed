@@ -83,7 +83,7 @@ if(NOT CMAKE_BUILD_TYPE)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
       set(default_build_type "Coverage")
     else()
-      set(default_build_type "ASAN")
+      set(default_build_type "SANITIZE")
     endif()
   endif()
 
@@ -93,7 +93,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 # yes, these build types need to be specified here in upper-case.
-set(SPECIAL_BUILD_TYPES COVERAGE ASAN UBSAN)
+set(SPECIAL_BUILD_TYPES COVERAGE SANITIZE)
 set(CMAKE_CONFIGURATION_TYPES DEBUG RELWITHDEBINFO RELEASE ${SPECIAL_BUILD_TYPES})
 set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING "All the avaliable build types" FORCE)
 

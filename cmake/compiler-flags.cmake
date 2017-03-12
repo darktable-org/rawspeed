@@ -53,40 +53,30 @@ MARK_AS_ADVANCED(
     CMAKE_SHARED_LINKER_FLAGS_COVERAGE
     CMAKE_SHARED_MODULE_FLAGS_COVERAGE )
 
-set(SANITIZATION_BASE "-fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common")
-set(SANITIZATION_DEFAULTS "${SANITIZATION_BASE} -O1 -fstack-protector-strong")
+# -fstack-protector-all
+set(SANITIZATION_DEFAULTS "-O1 -fno-optimize-sibling-calls")
 
-set(asan "-fsanitize=address -U_FORTIFY_SOURCE")
+set(asan "-fsanitize=address -fno-omit-frame-pointer -fno-common -U_FORTIFY_SOURCE")
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   set(asan "${asan} -fsanitize-address-use-after-scope")
 endif()
-SET(CMAKE_CXX_FLAGS_ASAN
-    "${SANITIZATION_DEFAULTS} ${asan}"
-    CACHE STRING "Flags used by the C++ compiler during ASAN builds."
-    FORCE )
-SET(CMAKE_C_FLAGS_ASAN
-    "${SANITIZATION_DEFAULTS} ${asan}"
-    CACHE STRING "Flags used by the C compiler during ASAN builds."
-    FORCE )
-MARK_AS_ADVANCED(
-    CMAKE_CXX_FLAGS_ASAN
-    CMAKE_C_FLAGS_ASAN )
 
 set(ubsan "-fsanitize=undefined -fno-sanitize-recover=undefined")
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   set(ubsan "${ubsan} -fsanitize=integer -fno-sanitize-recover=integer")
 endif()
-SET(CMAKE_CXX_FLAGS_UBSAN
-    "${SANITIZATION_DEFAULTS} ${ubsan}"
-    CACHE STRING "Flags used by the C++ compiler during UBSAN builds."
+
+SET(CMAKE_CXX_FLAGS_SANITIZE
+    "${SANITIZATION_DEFAULTS} ${asan} ${ubsan}"
+    CACHE STRING "Flags used by the C++ compiler during sanitized (ASAN+UBSAN) builds."
     FORCE )
-SET(CMAKE_C_FLAGS_UBSAN
-    "${SANITIZATION_DEFAULTS} ${ubsan}"
-    CACHE STRING "Flags used by the C compiler during UBSAN builds."
+SET(CMAKE_C_FLAGS_SANITIZE
+    "${SANITIZATION_DEFAULTS} ${asan} ${ubsan}"
+    CACHE STRING "Flags used by the C compiler during sanitized (ASAN+UBSAN) builds."
     FORCE )
 MARK_AS_ADVANCED(
-    CMAKE_CXX_FLAGS_UBSAN
-    CMAKE_C_FLAGS_UBSAN )
+    CMAKE_CXX_FLAGS_SANITIZE
+    CMAKE_C_FLAGS_SANITIZE )
 
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -O2")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O2")
