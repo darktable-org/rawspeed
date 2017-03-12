@@ -553,6 +553,9 @@ void RawImageData::setTable( TableLookUp *t )
 }
 
 void RawImageData::setTable(const ushort16 *table_, int nfilled, bool dither) {
+  assert(table_);
+  assert(nfilled > 0);
+
   auto *t = new TableLookUp(1, dither);
   t->setTable(0, table_, nfilled);
   this->setTable(t);
@@ -578,6 +581,9 @@ TableLookUp::~TableLookUp()
 
 
 void TableLookUp::setTable(int ntable, const ushort16 *table , int nfilled) {
+  assert(table);
+  assert(nfilled > 0);
+
   if (ntable > ntables) {
     ThrowRDE("Table lookup with number greater than number of tables.");
   }

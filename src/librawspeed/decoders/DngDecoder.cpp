@@ -385,7 +385,8 @@ RawImage DngDecoder::decodeRawInternal() {
   }
 
   // Linearization
-  if (raw->hasEntry(LINEARIZATIONTABLE)) {
+  if (raw->hasEntry(LINEARIZATIONTABLE) &&
+      raw->getEntry(LINEARIZATIONTABLE)->count > 0) {
     TiffEntry *lintable = raw->getEntry(LINEARIZATIONTABLE);
     auto table = lintable->getU16Array(lintable->count);
     mRaw->setTable(table.data(), table.size(), !uncorrectedRawValues);
