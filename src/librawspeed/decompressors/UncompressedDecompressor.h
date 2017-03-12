@@ -49,9 +49,6 @@ class UncompressedDecompressor final : public AbstractDecompressor {
   template <Endianness e> void decode12BitRawInterlaced(uint32 w, uint32 h);
   template <Endianness e>
   void decode12BitRawUnpackedLeftAligned(uint32 w, uint32 h);
-  template <Endianness e> void decode12BitRawUnpacked(uint32 w, uint32 h);
-  template <Endianness e> void decode14BitRawUnpacked(uint32 w, uint32 h);
-  template <Endianness e> void decode16BitRawUnpacked(uint32 w, uint32 h);
 
 public:
   UncompressedDecompressor(ByteStream input_, const RawImage& img,
@@ -97,14 +94,8 @@ public:
    * (needs >> 4 shift) */
   void decode12BitRawUnpackedLeftAligned(uint32 w, uint32 h, Endianness e);
 
-  /* Faster version for reading unpacked 12 bit data */
-  void decode12BitRawUnpacked(uint32 w, uint32 h, Endianness e);
-
-  /* Faster version for reading unpacked 14 bit data */
-  void decode14BitRawUnpacked(uint32 w, uint32 h, Endianness e);
-
-  /* Faster version for reading unpacked 16 bit data */
-  void decode16BitRawUnpacked(uint32 w, uint32 h, Endianness e);
+  /* Faster version for reading unpacked data */
+  template <int bits, Endianness e> void decodeRawUnpacked(uint32 w, uint32 h);
 
 protected:
   ByteStream input;
