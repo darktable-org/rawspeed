@@ -319,7 +319,7 @@ void NefDecoder::DecodeD100Uncompressed() {
 
   UncompressedDecompressor u(*mFile, offset, mRaw, uncorrectedRawValues);
 
-  u.decode12BitRawBEWithControl(width, height);
+  u.decode12BitRawWithControl(width, height, big);
 }
 
 void NefDecoder::DecodeSNefUncompressed() {

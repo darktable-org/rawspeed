@@ -28,6 +28,7 @@
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
+#include "io/Endianness.h"                          // for Endianness
 #include "metadata/Camera.h"                        // for Hints
 #include "metadata/ColorFilterArray.h"              // for CFAColor::CFA_GREEN
 #include "tiff/TiffEntry.h"                         // for TiffEntry
@@ -128,7 +129,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       u.decode12BitRawUnpacked(width, height);
     } else if (size >= width*height*3/2) {
       // It's a packed format
-      u.decode12BitRawWithControl(width, height);
+      u.decode12BitRawWithControl(width, height, little);
     } else {
       // It's using the new .RW2 decoding method
       load_flags = 0;

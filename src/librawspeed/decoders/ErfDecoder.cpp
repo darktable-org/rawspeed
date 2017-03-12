@@ -24,6 +24,7 @@
 #include "common/Point.h"                           // for iPoint2D
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer
+#include "io/Endianness.h"                          // for Endianness
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag::EPSONWB
@@ -51,7 +52,7 @@ RawImage ErfDecoder::decodeRawInternal() {
 
   UncompressedDecompressor u(*mFile, off, c2, mRaw, uncorrectedRawValues);
 
-  u.decode12BitRawBEWithControl(width, height);
+  u.decode12BitRawWithControl(width, height, big);
 
   return mRaw;
 }
