@@ -144,9 +144,9 @@ RawImage MosDecoder::decodeRawInternal() {
   int compression = raw->getEntry(COMPRESSION)->getU32();
   if (1 == compression) {
     if (getTiffEndianness(mFile) == big)
-      u.decode16BitRawBEunpacked(width, height);
+      u.decode16BitRawUnpacked(width, height, big);
     else
-      u.decode16BitRawUnpacked(width, height);
+      u.decode16BitRawUnpacked(width, height, little);
   }
   else if (99 == compression || 7 == compression) {
     ThrowRDE("Leaf LJpeg not yet supported");

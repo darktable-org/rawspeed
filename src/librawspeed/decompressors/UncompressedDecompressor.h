@@ -27,6 +27,7 @@
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/Buffer.h"                          // for Buffer, Buffer::size_type
 #include "io/ByteStream.h"                      // for ByteStream
+#include "io/Endianness.h"                      // for Endianness
 #include <algorithm>                            // for move
 
 namespace RawSpeed {
@@ -42,6 +43,8 @@ class UncompressedDecompressor final : public AbstractDecompressor {
 
   // for special packed formats
   int bytesPerLine(int w, bool skips);
+
+  template <Endianness e> void decode16BitRawUnpacked(uint32 w, uint32 h);
 
 public:
   UncompressedDecompressor(ByteStream input_, const RawImage& img,
@@ -100,11 +103,8 @@ public:
   /* Faster version for reading unpacked 14 bit MSB data */
   void decode14BitRawBEunpacked(uint32 w, uint32 h);
 
-  /* Faster version for reading unpacked 16 bit LSB data */
-  void decode16BitRawUnpacked(uint32 w, uint32 h);
-
-  /* Faster version for reading unpacked 16 bit MSB data */
-  void decode16BitRawBEunpacked(uint32 w, uint32 h);
+  /* Faster version for reading unpacked 16 bit data */
+  void decode16BitRawUnpacked(uint32 w, uint32 h, Endianness e);
 
   /* Faster version for reading unpacked 12 bit LSB data */
   void decode12BitRawUnpacked(uint32 w, uint32 h);

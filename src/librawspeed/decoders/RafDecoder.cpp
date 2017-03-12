@@ -102,9 +102,9 @@ RawImage RafDecoder::decodeRawInternal() {
   if (counts->getU32()*8/(width*height) < 10) {
     ThrowRDE("Don't know how to decode compressed images");
   } else if (double_width) {
-    u.decode16BitRawUnpacked(width * 2, height);
+    u.decode16BitRawUnpacked(width * 2, height, little);
   } else if (input.isInNativeByteOrder() == (getHostEndianness() == big)) {
-    u.decode16BitRawBEunpacked(width, height);
+    u.decode16BitRawUnpacked(width, height, big);
   } else {
     if (hints.has("jpeg32_bitorder")) {
       u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
