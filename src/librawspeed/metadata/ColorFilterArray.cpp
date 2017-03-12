@@ -84,7 +84,7 @@ void ColorFilterArray::shiftLeft(int n) {
   if (cfa.empty())
     ThrowRDE("No CFA size set (or set to zero)");
 
-  writeLog(DEBUG_PRIO_EXTRA, "Shift left:%d\n", n);
+  writeLog(DEBUG_PRIO_EXTRA, "Shift left:%d", n);
   n %= size.x;
   if (n == 0)
     return;
@@ -102,7 +102,7 @@ void ColorFilterArray::shiftDown(int n) {
   if (cfa.empty())
     ThrowRDE("No CFA size set (or set to zero)");
 
-  writeLog(DEBUG_PRIO_EXTRA, "Shift down:%d\n", n);
+  writeLog(DEBUG_PRIO_EXTRA, "Shift down:%d", n);
   n %= size.y;
   if (n == 0)
     return;
@@ -211,13 +211,10 @@ uint32 ColorFilterArray::getDcrawFilter() const
       ret |= c << ((x&1)*2 + y*4 + g);
     }
   }
-  for (int y = 0; y < size.y; y++) {
-    for (int x = 0; x < size.x; x++) {
-      writeLog(DEBUG_PRIO_EXTRA, "%s,", colorToString((CFAColor)toDcrawColor(getColorAt(x,y))).c_str());
-    }
-    writeLog(DEBUG_PRIO_EXTRA, "\n");
-  }
-  writeLog(DEBUG_PRIO_EXTRA, "DCRAW filter:%x\n",ret);
+
+  writeLog(DEBUG_PRIO_EXTRA, "%s", asString().c_str());
+  writeLog(DEBUG_PRIO_EXTRA, "DCRAW filter:%x", ret);
+
   return ret;
 }
 

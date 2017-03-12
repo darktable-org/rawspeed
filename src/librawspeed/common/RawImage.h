@@ -252,7 +252,7 @@ inline RawImage RawImage::create(RawImageType type)  {
     case TYPE_FLOAT32:
       return new RawImageDataFloat();
     default:
-      writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!\n");
+      writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!");
   }
   return nullptr;
 }
@@ -263,7 +263,7 @@ inline RawImage RawImage::create(const iPoint2D &dim, RawImageType type,
     case TYPE_USHORT16:
       return new RawImageDataU16(dim, componentsPerPixel);
     default:
-      writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!\n");
+      writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!");
   }
   return nullptr;
 }

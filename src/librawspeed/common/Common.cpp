@@ -39,6 +39,11 @@ void writeLog(DEBUG_PRIO priority, const char* format, ...) {
     vprintf(format, args);
 
   va_end(args);
+
+#ifndef _DEBUG
+  if (priority < DEBUG_PRIO_INFO)
+#endif // _DEBUG
+    printf("%s", "\n");
 }
 
 } // Namespace RawSpeed

@@ -119,7 +119,8 @@ RawImageDataFloat::RawImageDataFloat() {
         blackLevel = (int)b;
       if (whitePoint == 65536)
         whitePoint = (int)m;
-      writeLog(DEBUG_PRIO_INFO, "Estimated black:%d, Estimated white: %d\n", blackLevel, whitePoint);
+      writeLog(DEBUG_PRIO_INFO, "Estimated black:%d, Estimated white: %d",
+               blackLevel, whitePoint);
     }
 
     /* If filter has not set separate blacklevel, compute or fetch it */

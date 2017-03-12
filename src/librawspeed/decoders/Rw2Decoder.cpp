@@ -330,7 +330,7 @@ std::string Rw2Decoder::guessMode() {
     closest_match = "1:1";
     min_diff  = t;
   }
-  writeLog(DEBUG_PRIO_EXTRA, "Mode guess: '%s'\n", closest_match.c_str());
+  writeLog(DEBUG_PRIO_EXTRA, "Mode guess: '%s'", closest_match.c_str());
   return closest_match;
 }
 

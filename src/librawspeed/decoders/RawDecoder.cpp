@@ -123,9 +123,10 @@ void RawDecoder::askForSamples(const CameraMetaData* meta, const string& make,
   if ("dng" == mode)
     return;
 
-  writeLog(DEBUG_PRIO_WARNING, "Unable to find camera in database: '%s' '%s' "
-                               "'%s'\nPlease consider providing samples on "
-                               "<https://raw.pixls.us/>, thanks!\n",
+  writeLog(DEBUG_PRIO_WARNING,
+           "Unable to find camera in database: '%s' '%s' "
+           "'%s'\nPlease consider providing samples on "
+           "<https://raw.pixls.us/>, thanks!",
            make.c_str(), model.c_str(), mode.c_str());
 }
 

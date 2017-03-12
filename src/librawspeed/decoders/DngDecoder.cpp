@@ -300,9 +300,9 @@ RawImage DngDecoder::decodeRawInternal() {
   mRaw->isCFA = (raw->getEntry(PHOTOMETRICINTERPRETATION)->getU16() == 32803);
 
   if (mRaw->isCFA)
-    writeLog(DEBUG_PRIO_EXTRA, "This is a CFA image\n");
+    writeLog(DEBUG_PRIO_EXTRA, "This is a CFA image");
   else {
-    writeLog(DEBUG_PRIO_EXTRA, "This is NOT a CFA image\n");
+    writeLog(DEBUG_PRIO_EXTRA, "This is NOT a CFA image");
   }
 
   if (sample_format == 1 && bps > 16)

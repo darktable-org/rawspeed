@@ -49,14 +49,14 @@ ThrowException(const char* fmt, ...) {
   va_start(val, fmt);
   vsnprintf(buf, sizeof(buf), fmt, val);
   va_end(val);
-  writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s\n", buf);
+  writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s", buf);
   throw T(buf);
 }
 
 class RawspeedException : public std::runtime_error {
 private:
   void log(const char* msg) {
-    writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s\n", msg);
+    writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s", msg);
   }
 
 public:

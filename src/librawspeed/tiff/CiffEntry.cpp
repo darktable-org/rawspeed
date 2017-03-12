@@ -55,7 +55,7 @@ CiffEntry::CiffEntry(Buffer* f, uint32 value_data, uint32 offset) {
     bytesize = 8; // Maximum of 8 bytes of data (the size and offset fields)
     data = f->getData(data_offset, bytesize);
   } else
-    ThrowCPE("Don't understand data location 0x%x\n", datalocation);
+    ThrowCPE("Don't understand data location 0x%x", datalocation);
 
   // Set the number of items using the shift
   count = bytesize >> getElementShift();

@@ -162,11 +162,14 @@ iPoint2D __attribute__((pure)) RawImageData::getCropOffset() const {
 
 void RawImageData::subFrame(iRectangle2D crop) {
   if (!crop.dim.isThisInside(dim - crop.pos)) {
-    writeLog(DEBUG_PRIO_WARNING, "WARNING: RawImageData::subFrame - Attempted to create new subframe larger than original size. Crop skipped.\n");
+    writeLog(DEBUG_PRIO_WARNING, "WARNING: RawImageData::subFrame - Attempted "
+                                 "to create new subframe larger than original "
+                                 "size. Crop skipped.");
     return;
   }
   if (crop.pos.x < 0 || crop.pos.y < 0 || !crop.hasPositiveArea()) {
-    writeLog(DEBUG_PRIO_WARNING, "WARNING: RawImageData::subFrame - Negative crop offset. Crop skipped.\n");
+    writeLog(DEBUG_PRIO_WARNING, "WARNING: RawImageData::subFrame - Negative "
+                                 "crop offset. Crop skipped.");
     return;
   }
 
