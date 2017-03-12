@@ -106,7 +106,7 @@ void OrfDecoder::decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 si
     else
       u.decode12BitRawBEunpackedLeftAligned(w, h);
   } else if (size >= w*h*3/2) { // We're in one of those weird interlaced packed raws
-    u.decode12BitRawBEInterlaced(w, h);
+    u.decode12BitRawInterlaced(w, h, big);
   } else {
     ThrowRDE("Don't know how to handle the encoding in this file");
   }

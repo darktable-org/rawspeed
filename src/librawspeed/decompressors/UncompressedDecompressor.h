@@ -46,6 +46,7 @@ class UncompressedDecompressor final : public AbstractDecompressor {
 
   template <Endianness e> void decode12BitRaw(uint32 w, uint32 h);
   template <Endianness e> void decode12BitRawWithControl(uint32 w, uint32 h);
+  template <Endianness e> void decode12BitRawInterlaced(uint32 w, uint32 h);
   template <Endianness e> void decode12BitRawUnpacked(uint32 w, uint32 h);
   template <Endianness e> void decode14BitRawUnpacked(uint32 w, uint32 h);
   template <Endianness e> void decode16BitRawUnpacked(uint32 w, uint32 h);
@@ -87,8 +88,8 @@ public:
    * pixels */
   void decode12BitRawWithControl(uint32 w, uint32 h, Endianness e);
 
-  /* Faster version for unpacking 12 bit MSB data with interlaced lines */
-  void decode12BitRawBEInterlaced(uint32 w, uint32 h);
+  /* Faster version for unpacking 12 bit data with interlaced lines */
+  void decode12BitRawInterlaced(uint32 w, uint32 h, Endianness e);
 
   /* Faster version for reading unpacked 12 bit MSB data that is left aligned
    * (needs >> 4 shift) */

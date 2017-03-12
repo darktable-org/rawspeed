@@ -303,7 +303,10 @@ void UncompressedDecompressor::decode12BitRawWithControl(uint32 w, uint32 h,
   }
 }
 
-void UncompressedDecompressor::decode12BitRawBEInterlaced(uint32 w, uint32 h) {
+template <Endianness e>
+void UncompressedDecompressor::decode12BitRawInterlaced(uint32 w, uint32 h) {
+  static_assert(e == big, "unknown endiannes");
+
   uint32 perline = bytesPerLine(w, false);
 
   sanityCheck(&h, perline);
@@ -325,12 +328,28 @@ void UncompressedDecompressor::decode12BitRawBEInterlaced(uint32 w, uint32 h) {
     for (uint32 x = 0; x < w; x += 2) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;
-      dest[x] = (g1 << 4) | (g2 >> 4);
+
+      if (e == big)
+        dest[x] = (g1 << 4) | (g2 >> 4);
+
       uint32 g3 = *in++;
-      dest[x + 1] = ((g2 & 0x0f) << 8) | g3;
+
+      if (e == big)
+        dest[x + 1] = ((g2 & 0x0f) << 8) | g3;
     }
   }
   input.skipBytes(input.getRemainSize());
+}
+
+void UncompressedDecompressor::decode12BitRawInterlaced(uint32 w, uint32 h,
+                                                        Endianness e) {
+  switch (e) {
+  case big:
+    decode12BitRawInterlaced<big>(w, h);
+    break;
+  default:
+    ThrowIOE("Unknow endiannes: %i", e);
+  }
 }
 
 void UncompressedDecompressor::decode12BitRawBEunpackedLeftAligned(uint32 w,
