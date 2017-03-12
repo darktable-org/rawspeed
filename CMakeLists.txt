@@ -89,8 +89,22 @@ if(NOT CMAKE_BUILD_TYPE)
 
   message("WARNING: Defaulting to CMAKE_BUILD_TYPE=${default_build_type}. Use ccmake to set a proper value.")
 
-  SET(CMAKE_BUILD_TYPE ${default_build_type} CACHE STRING "Choose the type of build, options are: None Coverage Debug RelWithDebInfo Release." FORCE)
+  SET(CMAKE_BUILD_TYPE ${default_build_type} CACHE STRING "" FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
+
+# yes, these build types need to be specified here in upper-case.
+set(SPECIAL_BUILD_TYPES COVERAGE ASAN UBSAN)
+set(CMAKE_CONFIGURATION_TYPES DEBUG RELWITHDEBINFO RELEASE ${SPECIAL_BUILD_TYPES})
+set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING "All the avaliable build types" FORCE)
+
+string(TOUPPER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE)
+SET(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "Choose the type of build, options are: ${CMAKE_CONFIGURATION_TYPES}." FORCE )
+
+# is this one of the known build types?
+list (FIND CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE} BUILD_TYPE)
+if (${BUILD_TYPE} EQUAL -1)
+ message(SEND_ERROR "Unknown build type: ${CMAKE_BUILD_TYPE}. Please specify one of: ${CMAKE_CONFIGURATION_TYPES}")
+endif()
 
 if(USE_IWYU)
   include(iwyu)
