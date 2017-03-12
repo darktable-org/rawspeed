@@ -208,7 +208,19 @@ void UncompressedDecompressor::decode8BitRaw(uint32 w, uint32 h) {
 
 template <Endianness e, bool skips = false>
 void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
+  static constexpr const auto bits = 12;
+
   static_assert(e == little || e == big, "unknown endiannes");
+
+  static constexpr const auto shift = 16 - bits;
+  static constexpr const auto pack = 8 - shift;
+  static constexpr const auto mask = (1 << pack) - 1;
+
+  static_assert(bits == 12 && pack == 4, "wrong pack");
+
+  static_assert((bits == 12 && mask == 0x0f) || (bits == 14 && mask == 0x3f) ||
+                    (bits == 16 && mask == 0xff),
+                "wrong mask");
 
   uint32 perline = bytesPerLine(w, false);
 
@@ -224,17 +236,18 @@ void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;
 
-      if (e == little)
-        dest[x] = g1 | ((g2 & 0xf) << 8);
-      else
-        dest[x] = (g1 << 4) | (g2 >> 4);
+      auto process = [dest](uint32 i, bool invert, uint32 p1, uint32 p2) {
+        if (!(invert ^ (e == little)))
+          dest[i] = (p1 << pack) | (p2 >> pack);
+        else
+          dest[i] = ((p2 & mask) << 8) | p1;
+      };
 
-      uint32 g3 = *in++;
+      process(x, false, g1, g2);
 
-      if (e == little)
-        dest[x + 1] = (g2 >> 4) | (g3 << 4);
-      else
-        dest[x + 1] = ((g2 & 0x0f) << 8) | g3;
+      g1 = *in++;
+
+      process(x + 1, true, g1, g2);
 
       if (skips && ((x % 10) == 8))
         in++;
