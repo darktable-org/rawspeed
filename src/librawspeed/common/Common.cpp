@@ -22,9 +22,15 @@
 #include <cstdarg> // for va_end, va_list, va_start
 #include <cstdio>  // for printf, vprintf
 
+// #define _DEBUG
+
 namespace RawSpeed {
 
 void writeLog(DEBUG_PRIO priority, const char* format, ...) {
+#if defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION) && !defined(_DEBUG)
+  return;
+#endif
+
 #ifndef _DEBUG
   if (priority < DEBUG_PRIO_INFO)
 #endif // _DEBUG
