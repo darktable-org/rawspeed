@@ -44,6 +44,7 @@ class UncompressedDecompressor final : public AbstractDecompressor {
   // for special packed formats
   int bytesPerLine(int w, bool skips);
 
+  template <Endianness e> void decode12BitRaw(uint32 w, uint32 h);
   template <Endianness e> void decode16BitRawUnpacked(uint32 w, uint32 h);
 
 public:
@@ -76,8 +77,8 @@ public:
   /* Faster versions for unpacking 8 bit data */
   void decode8BitRaw(uint32 w, uint32 h);
 
-  /* Faster version for unpacking 12 bit LSB data */
-  void decode12BitRaw(uint32 w, uint32 h);
+  /* Faster version for unpacking 12 bit data */
+  void decode12BitRaw(uint32 w, uint32 h, Endianness e);
 
   /* Faster version for unpacking 12 bit LSB data with a control byte every 10
    * pixels */
@@ -86,9 +87,6 @@ public:
   /* Faster version for unpacking 12 bit MSB data with a control byte every 10
    * pixels */
   void decode12BitRawBEWithControl(uint32 w, uint32 h);
-
-  /* Faster version for unpacking 12 bit MSB data */
-  void decode12BitRawBE(uint32 w, uint32 h);
 
   /* Faster version for unpacking 12 bit MSB data with interlaced lines */
   void decode12BitRawBEInterlaced(uint32 w, uint32 h);

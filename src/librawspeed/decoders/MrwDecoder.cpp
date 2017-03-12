@@ -98,7 +98,7 @@ RawImage MrwDecoder::decodeRawInternal() {
 
   try {
     if (packed)
-      u.decode12BitRawBE(raw_width, raw_height);
+      u.decode12BitRaw(raw_width, raw_height, big);
     else
       u.decode12BitRawBEunpacked(raw_width, raw_height);
   } catch (IOException &e) {

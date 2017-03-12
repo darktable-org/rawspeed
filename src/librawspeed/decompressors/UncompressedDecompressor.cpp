@@ -172,7 +172,7 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
     }
     if (bitPerPixel == 12 && (int)w == inputPitch * 8 / 12 &&
         getHostEndianness() == little) {
-      decode12BitRaw(w, h);
+      decode12BitRaw(w, h, little);
       return;
     }
     BitPumpPlain bits(input);
@@ -206,7 +206,10 @@ void UncompressedDecompressor::decode8BitRaw(uint32 w, uint32 h) {
   }
 }
 
+template <Endianness e>
 void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
+  static_assert(e == little || e == big, "unknown endiannes");
+
   uint32 perline = bytesPerLine(w, false);
 
   sanityCheck(&h, perline);
@@ -220,10 +223,33 @@ void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
     for (uint32 x = 0; x < w; x += 2) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;
-      dest[x] = g1 | ((g2 & 0xf) << 8);
+
+      if (e == little)
+        dest[x] = g1 | ((g2 & 0xf) << 8);
+      else
+        dest[x] = (g1 << 4) | (g2 >> 4);
+
       uint32 g3 = *in++;
-      dest[x + 1] = (g2 >> 4) | (g3 << 4);
+
+      if (e == little)
+        dest[x + 1] = (g2 >> 4) | (g3 << 4);
+      else
+        dest[x + 1] = ((g2 & 0x0f) << 8) | g3;
     }
+  }
+}
+
+void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h,
+                                              Endianness e) {
+  switch (e) {
+  case little:
+    decode12BitRaw<little>(w, h);
+    break;
+  case big:
+    decode12BitRaw<big>(w, h);
+    break;
+  default:
+    ThrowIOE("Unknow endiannes: %i", e);
   }
 }
 
@@ -270,27 +296,6 @@ void UncompressedDecompressor::decode12BitRawBEWithControl(uint32 w, uint32 h) {
       dest[x + 1] = ((g2 & 0x0f) << 8) | g3;
       if ((x % 10) == 8)
         in++;
-    }
-  }
-}
-
-void UncompressedDecompressor::decode12BitRawBE(uint32 w, uint32 h) {
-  uint32 perline = bytesPerLine(w, false);
-
-  sanityCheck(&h, perline);
-
-  uchar8* data = mRaw->getData();
-  uint32 pitch = mRaw->pitch;
-  const uchar8* in = input.getData(perline * h);
-
-  for (uint32 y = 0; y < h; y++) {
-    auto* dest = (ushort16*)&data[y * pitch];
-    for (uint32 x = 0; x < w; x += 2) {
-      uint32 g1 = *in++;
-      uint32 g2 = *in++;
-      dest[x] = (g1 << 4) | (g2 >> 4);
-      uint32 g3 = *in++;
-      dest[x + 1] = ((g2 & 0x0f) << 8) | g3;
     }
   }
 }

@@ -24,6 +24,7 @@
 #include "common/Point.h"                           // for iPoint2D
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer
+#include "io/Endianness.h"                          // for Endiannes
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffIFD, TiffRoo...
 #include "tiff/TiffTag.h"                           // for TiffTag::STRIPOF...
@@ -49,7 +50,7 @@ RawImage MefDecoder::decodeRawInternal() {
 
   UncompressedDecompressor u(*mFile, off, mRaw, uncorrectedRawValues);
 
-  u.decode12BitRawBE(width, height);
+  u.decode12BitRaw(width, height, big);
 
   return mRaw;
 }
