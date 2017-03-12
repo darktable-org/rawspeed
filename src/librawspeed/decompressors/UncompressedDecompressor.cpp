@@ -389,7 +389,10 @@ void UncompressedDecompressor::decode12BitRawUnpacked(uint32 w, uint32 h,
   }
 }
 
-void UncompressedDecompressor::decode14BitRawBEunpacked(uint32 w, uint32 h) {
+template <Endianness e>
+void UncompressedDecompressor::decode14BitRawUnpacked(uint32 w, uint32 h) {
+  static_assert(e == big, "unknown endiannes");
+
   sanityCheck(w, &h, 2);
 
   uchar8* data = mRaw->getData();
@@ -401,8 +404,21 @@ void UncompressedDecompressor::decode14BitRawBEunpacked(uint32 w, uint32 h) {
     for (uint32 x = 0; x < w; x += 1) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;
-      dest[x] = ((g1 & 0x3f) << 8) | g2;
+
+      if (e == big)
+        dest[x] = ((g1 & 0x3f) << 8) | g2;
     }
+  }
+}
+
+void UncompressedDecompressor::decode14BitRawUnpacked(uint32 w, uint32 h,
+                                                      Endianness e) {
+  switch (e) {
+  case big:
+    decode14BitRawUnpacked<big>(w, h);
+    break;
+  default:
+    ThrowIOE("Unknow endiannes: %i", e);
   }
 }
 

@@ -236,7 +236,7 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) {
   UncompressedDecompressor u(*mFile, off, c2, mRaw, uncorrectedRawValues);
 
   if (hints.has("sr2_format"))
-    u.decode14BitRawBEunpacked(width, height);
+    u.decode14BitRawUnpacked(width, height, big);
   else
     u.decode16BitRawUnpacked(width, height, little);
 }
