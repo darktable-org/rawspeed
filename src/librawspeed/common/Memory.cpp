@@ -50,6 +50,14 @@ void* alignedMalloc(size_t size, size_t alignment) {
 
   void* ptr = nullptr;
 
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+  // workaround ASAN's broken allocator_may_return_null option
+  // if trying to alloc more than 4GB, just return null.
+  // else it would abort() the whole program...
+  if (size > 4UL << 30UL)
+    return ptr;
+#endif
+
 #if defined(HAVE_POSIX_MEMALIGN)
   if (0 != posix_memalign(&ptr, alignment, size))
     return nullptr;
