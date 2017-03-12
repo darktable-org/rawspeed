@@ -67,6 +67,10 @@ RawDecoder* FiffParser::getDecoder() {
       } catch (TiffParserException&) {
         // the offset will be interpreted relative to the rootIFD where this
         // subIFD gets inserted
+
+        if (second_ifd <= first_ifd)
+          ThrowFPE("Fiff is corrupted: second IFD is not after the first IFD");
+
         uint32 rawOffset = second_ifd - first_ifd;
         subIFD->add(
             make_unique<TiffEntry>(subIFD.get(), FUJI_STRIPOFFSETS, TIFF_OFFSET,
