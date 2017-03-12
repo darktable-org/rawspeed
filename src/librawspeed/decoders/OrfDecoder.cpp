@@ -102,7 +102,7 @@ void OrfDecoder::decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 si
     u.readUncompressedRaw(dimensions, pos, w * 12 / 8, 12, BitOrder_Jpeg32);
   } else if (size >= w*h*2) { // We're in an unpacked raw
     if (s.isInNativeByteOrder())
-      u.decode12BitRawUnpacked(w, h);
+      u.decode12BitRawUnpacked(w, h, little);
     else
       u.decode12BitRawBEunpackedLeftAligned(w, h);
   } else if (size >= w*h*3/2) { // We're in one of those weird interlaced packed raws

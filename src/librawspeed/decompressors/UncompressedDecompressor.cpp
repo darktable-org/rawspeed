@@ -333,23 +333,6 @@ void UncompressedDecompressor::decode12BitRawBEInterlaced(uint32 w, uint32 h) {
   input.skipBytes(input.getRemainSize());
 }
 
-void UncompressedDecompressor::decode12BitRawBEunpacked(uint32 w, uint32 h) {
-  sanityCheck(w, &h, 2);
-
-  uchar8* data = mRaw->getData();
-  uint32 pitch = mRaw->pitch;
-  const uchar8* in = input.getData(w * h * 2);
-
-  for (uint32 y = 0; y < h; y++) {
-    auto* dest = (ushort16*)&data[y * pitch];
-    for (uint32 x = 0; x < w; x += 1) {
-      uint32 g1 = *in++;
-      uint32 g2 = *in++;
-      dest[x] = ((g1 & 0x0f) << 8) | g2;
-    }
-  }
-}
-
 void UncompressedDecompressor::decode12BitRawBEunpackedLeftAligned(uint32 w,
                                                                    uint32 h) {
   sanityCheck(w, &h, 2);
@@ -365,6 +348,44 @@ void UncompressedDecompressor::decode12BitRawBEunpackedLeftAligned(uint32 w,
       uint32 g2 = *in++;
       dest[x] = (((g1 << 8) | (g2 & 0xf0)) >> 4);
     }
+  }
+}
+
+template <Endianness e>
+void UncompressedDecompressor::decode12BitRawUnpacked(uint32 w, uint32 h) {
+  static_assert(e == little || e == big, "unknown endiannes");
+
+  sanityCheck(w, &h, 2);
+
+  uchar8* data = mRaw->getData();
+  uint32 pitch = mRaw->pitch;
+  const uchar8* in = input.getData(w * h * 2);
+
+  for (uint32 y = 0; y < h; y++) {
+    auto* dest = (ushort16*)&data[y * pitch];
+    for (uint32 x = 0; x < w; x += 1) {
+      uint32 g1 = *in++;
+      uint32 g2 = *in++;
+
+      if (e == little)
+        dest[x] = ((g2 << 8) | g1) >> 4;
+      else
+        dest[x] = ((g1 & 0x0f) << 8) | g2;
+    }
+  }
+}
+
+void UncompressedDecompressor::decode12BitRawUnpacked(uint32 w, uint32 h,
+                                                      Endianness e) {
+  switch (e) {
+  case little:
+    decode12BitRawUnpacked<little>(w, h);
+    break;
+  case big:
+    decode12BitRawUnpacked<big>(w, h);
+    break;
+  default:
+    ThrowIOE("Unknow endiannes: %i", e);
   }
 }
 
@@ -420,23 +441,6 @@ void UncompressedDecompressor::decode16BitRawUnpacked(uint32 w, uint32 h,
     break;
   default:
     ThrowIOE("Unknow endiannes: %i", e);
-  }
-}
-
-void UncompressedDecompressor::decode12BitRawUnpacked(uint32 w, uint32 h) {
-  sanityCheck(w, &h, 2);
-
-  uchar8* data = mRaw->getData();
-  uint32 pitch = mRaw->pitch;
-  const uchar8* in = input.getData(w * h * 2);
-
-  for (uint32 y = 0; y < h; y++) {
-    auto* dest = (ushort16*)&data[y * pitch];
-    for (uint32 x = 0; x < w; x += 1) {
-      uint32 g1 = *in++;
-      uint32 g2 = *in++;
-      dest[x] = ((g2 << 8) | g1) >> 4;
-    }
   }
 }
 

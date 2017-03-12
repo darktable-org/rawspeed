@@ -126,7 +126,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
 
     if (size >= width*height*2) {
       // It's completely unpacked little-endian
-      u.decode12BitRawUnpacked(width, height);
+      u.decode12BitRawUnpacked(width, height, little);
     } else if (size >= width*height*3/2) {
       // It's a packed format
       u.decode12BitRawWithControl(width, height, little);
