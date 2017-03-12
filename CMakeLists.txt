@@ -106,6 +106,14 @@ if (${BUILD_TYPE} EQUAL -1)
  message(SEND_ERROR "Unknown build type: ${CMAKE_BUILD_TYPE}. Please specify one of: ${CMAKE_CONFIGURATION_TYPES}")
 endif()
 
+# is this a special build?
+list (FIND SPECIAL_BUILD_TYPES ${CMAKE_BUILD_TYPE} SPECIAL_BUILD)
+if (${SPECIAL_BUILD} EQUAL -1)
+ unset(SPECIAL_BUILD)
+else()
+ set(SPECIAL_BUILD 1)
+endif()
+
 if(USE_IWYU)
   include(iwyu)
 endif()
