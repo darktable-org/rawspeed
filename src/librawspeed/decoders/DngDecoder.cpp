@@ -189,7 +189,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, int compression, uint32 sample_f
     uint32 predictor = raw->getEntry(PREDICTOR)->getU32();
     slices.mPredictor = predictor;
   }
-  slices.mBps = raw->getEntry(BITSPERSAMPLE)->getU32();
+  slices.mBps = bps;
   if (raw->hasEntry(TILEOFFSETS)) {
     uint32 tilew = raw->getEntry(TILEWIDTH)->getU32();
     uint32 tileh = raw->getEntry(TILELENGTH)->getU32();
@@ -276,7 +276,10 @@ RawImage DngDecoder::decodeRawInternal() {
   }
 
   const TiffIFD* raw = data[0];
-  uint32 bps = raw->getEntry(BITSPERSAMPLE)->getU32();
+
+  bps = raw->getEntry(BITSPERSAMPLE)->getU32();
+  if (bps < 1 || bps > 32)
+    ThrowRDE("Unsupported bit per sample count: %u.", bps);
 
   uint32 sample_format = 1;
   if (raw->hasEntry(SAMPLEFORMAT))
@@ -408,7 +411,7 @@ RawImage DngDecoder::decodeRawInternal() {
   }
 
  // Default white level is (2 ** BitsPerSample) - 1
-  mRaw->whitePoint = (1UL << raw->getEntry(BITSPERSAMPLE)->getU16()) - 1UL;
+  mRaw->whitePoint = (1UL << bps) - 1UL;
 
   if (raw->hasEntry(WHITELEVEL)) {
     TiffEntry *whitelevel = raw->getEntry(WHITELEVEL);

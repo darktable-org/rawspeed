@@ -51,6 +51,9 @@ protected:
   bool decodeMaskedAreas(const TiffIFD* raw);
   bool decodeBlackLevels(const TiffIFD* raw);
   void setBlack(const TiffIFD* raw);
+
+private:
+  int bps = -1;
 };
 
 } // namespace RawSpeed
