@@ -75,11 +75,10 @@ public:
   void decode8BitRaw(uint32 w, uint32 h);
 
   /* Faster version for unpacking 12 bit data */
+  /* interlaced - is data with interlaced lines ? */
   /* skips - is there control byte every 10 pixels ? */
-  template <Endianness e, bool skips = false> void decode12BitRaw(uint32 w, uint32 h);
-
-  /* Faster version for unpacking 12 bit data with interlaced lines */
-  template <Endianness e> void decode12BitRawInterlaced(uint32 w, uint32 h);
+  template <Endianness e, bool interlaced = false, bool skips = false>
+  void decode12BitRaw(uint32 w, uint32 h);
 
   /* Faster version for reading unpacked 12 bit data that is left aligned
    * (needs >> 4 shift) */

@@ -206,7 +206,7 @@ void UncompressedDecompressor::decode8BitRaw(uint32 w, uint32 h) {
   }
 }
 
-template <Endianness e, bool skips = false>
+template <Endianness e, bool interlaced, bool skips>
 void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
   static constexpr const auto bits = 12;
 
@@ -228,10 +228,20 @@ void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
 
   uchar8* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
-  const uchar8* in = input.getData(perline * h);
-
-  for (uint32 y = 0; y < h; y++) {
+  const uchar8* in = input.peekData(perline * h);
+  uint32 half = (h + 1) >> 1;
+  for (uint32 row = 0; row < h; row++) {
+    uint32 y = !interlaced ? row : row % half * 2 + row / half;
     auto* dest = (ushort16*)&data[y * pitch];
+
+    if (interlaced && y == 1) {
+      // The second field starts at a 2048 byte aligment
+      uint32 offset = ((half * w * 3 / 2 >> 11) + 1) << 11;
+      if (offset > input.getRemainSize())
+        ThrowIOE("Trying to jump to invalid offset %d", offset);
+      in = input.peekData(input.getRemainSize()) + offset;
+    }
+
     for (uint32 x = 0; x < w; x += 2) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;
@@ -253,53 +263,14 @@ void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
         in++;
     }
   }
-}
-
-template void UncompressedDecompressor::decode12BitRaw<little, false>(uint32 w, uint32 h);
-template void UncompressedDecompressor::decode12BitRaw<big, false>(uint32 w, uint32 h);
-template void UncompressedDecompressor::decode12BitRaw<little, true>(uint32 w, uint32 h);
-template void UncompressedDecompressor::decode12BitRaw<big, true>(uint32 w, uint32 h);
-
-template <Endianness e>
-void UncompressedDecompressor::decode12BitRawInterlaced(uint32 w, uint32 h) {
-  static_assert(e == big, "unknown endiannes");
-
-  uint32 perline = bytesPerLine(w, false);
-
-  sanityCheck(&h, perline);
-
-  uchar8* data = mRaw->getData();
-  uint32 pitch = mRaw->pitch;
-  const uchar8* in = input.peekData(perline * h);
-  uint32 half = (h + 1) >> 1;
-  for (uint32 row = 0; row < h; row++) {
-    uint32 y = row % half * 2 + row / half;
-    auto* dest = (ushort16*)&data[y * pitch];
-    if (y == 1) {
-      // The second field starts at a 2048 byte aligment
-      uint32 offset = ((half * w * 3 / 2 >> 11) + 1) << 11;
-      if (offset > input.getRemainSize())
-        ThrowIOE("Trying to jump to invalid offset %d", offset);
-      in = input.peekData(input.getRemainSize()) + offset;
-    }
-    for (uint32 x = 0; x < w; x += 2) {
-      uint32 g1 = *in++;
-      uint32 g2 = *in++;
-
-      if (e == big)
-        dest[x] = (g1 << 4) | (g2 >> 4);
-
-      uint32 g3 = *in++;
-
-      if (e == big)
-        dest[x + 1] = ((g2 & 0x0f) << 8) | g3;
-    }
-  }
   input.skipBytes(input.getRemainSize());
 }
 
-template void UncompressedDecompressor::decode12BitRawInterlaced<big>(uint32 w,
-                                                                      uint32 h);
+template void UncompressedDecompressor::decode12BitRaw<little, false, false>(uint32 w, uint32 h);
+template void UncompressedDecompressor::decode12BitRaw<big, false, false>(uint32 w, uint32 h);
+template void UncompressedDecompressor::decode12BitRaw<big, true, false>(uint32 w, uint32 h);
+template void UncompressedDecompressor::decode12BitRaw<little, false, true>(uint32 w, uint32 h);
+template void UncompressedDecompressor::decode12BitRaw<big, false, true>(uint32 w, uint32 h);
 
 template <Endianness e>
 void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(uint32 w,

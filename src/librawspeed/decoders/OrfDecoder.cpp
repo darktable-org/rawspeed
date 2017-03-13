@@ -96,7 +96,7 @@ RawImage OrfDecoder::decodeRawInternal() {
 void OrfDecoder::decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 size) {
   UncompressedDecompressor u(s, mRaw, uncorrectedRawValues);
   if (hints.has("packed_with_control"))
-    u.decode12BitRaw<little, true>(w, h);
+    u.decode12BitRaw<little, false, true>(w, h);
   else if (hints.has("jpeg32_bitorder")) {
     iPoint2D dimensions(w, h), pos(0, 0);
     u.readUncompressedRaw(dimensions, pos, w * 12 / 8, 12, BitOrder_Jpeg32);
@@ -106,7 +106,7 @@ void OrfDecoder::decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 si
     else
       u.decode12BitRawUnpackedLeftAligned<big>(w, h);
   } else if (size >= w*h*3/2) { // We're in one of those weird interlaced packed raws
-    u.decode12BitRawInterlaced<big>(w, h);
+    u.decode12BitRaw<big, true>(w, h);
   } else {
     ThrowRDE("Don't know how to handle the encoding in this file");
   }
