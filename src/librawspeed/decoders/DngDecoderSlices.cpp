@@ -32,6 +32,7 @@
 #include "tiff/TiffEntry.h"                         // IWYU pragma: keep
 #include "tiff/TiffIFD.h"                           // for getTiffEndianness
 #include <algorithm>                                // for move
+#include <cassert>                                  // for assert
 #include <cstdio>                                   // for size_t
 #include <exception>                                // for exception
 #include <memory>                                   // for allocator_traits...
@@ -110,6 +111,12 @@ void DngDecoderSlices::startDecoding() {
 }
 
 void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
+  assert(t);
+  assert(mRaw->dim.x > 0);
+  assert(mRaw->dim.y > 0);
+  assert(mRaw->getCpp() > 0);
+  assert(mBps > 0 && mBps <= 32);
+
   if (compression == 1) {
     while (!t->slices.empty()) {
       auto e = move(t->slices.front());
