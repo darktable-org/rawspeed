@@ -14,10 +14,11 @@ message(STATUS "Checking for -std=c++11 support - works")
 add_definitions(-g3)
 add_definitions(-ggdb3)
 
-# assertions
-if(CMAKE_BUILD_TYPE MATCHES "^[Re][Ee][Ll][Ee][Aa][Ss][Ee]$")
+if(CMAKE_BUILD_TYPE STREQUAL "RELEASE")
+  # want assertions in all but Release build type.
   add_definitions(-DNDEBUG)
-else()
+elseif(NOT CMAKE_BUILD_TYPE STREQUAL "RELWITHDEBINFO")
+  # if not Release and not RelWithDebInfo build, enable extra debug mode
   add_definitions(-DDEBUG)
 endif()
 

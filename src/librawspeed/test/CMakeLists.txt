@@ -4,7 +4,7 @@ FILE(GLOB RAWSPEED_TEST_SOURCES
   "RawSpeed.cpp"
 )
 
-if(CMAKE_BUILD_TYPE MATCHES "^[Cc][Oo][Vv][Ee][Rr][Aa][Gg][Ee]$")
+if(CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
   # want all the symbols.
   add_library(rawspeed_test SHARED $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_TEST_SOURCES})
 else()
