@@ -128,7 +128,7 @@ public:
   }
 
   inline bool isValid(size_type offset, size_type count = 1) const {
-    return (uint64)offset + count < (uint64)size + BUFFER_PADDING + 1;
+    return (uint64)offset + count <= (uint64)size + BUFFER_PADDING;
   }
 
 //  Buffer* clone();
