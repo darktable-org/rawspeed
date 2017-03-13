@@ -298,16 +298,8 @@ void UncompressedDecompressor::decode12BitRawInterlaced(uint32 w, uint32 h) {
   input.skipBytes(input.getRemainSize());
 }
 
-void UncompressedDecompressor::decode12BitRawInterlaced(uint32 w, uint32 h,
-                                                        Endianness e) {
-  switch (e) {
-  case big:
-    decode12BitRawInterlaced<big>(w, h);
-    break;
-  default:
-    ThrowIOE("Unknow endiannes: %i", e);
-  }
-}
+template void UncompressedDecompressor::decode12BitRawInterlaced<big>(uint32 w,
+                                                                      uint32 h);
 
 template <Endianness e>
 void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(uint32 w,
@@ -332,17 +324,9 @@ void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(uint32 w,
   }
 }
 
-void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(uint32 w,
-                                                                 uint32 h,
-                                                                 Endianness e) {
-  switch (e) {
-  case big:
-    decode12BitRawUnpackedLeftAligned<big>(w, h);
-    break;
-  default:
-    ThrowIOE("Unknow endiannes: %i", e);
-  }
-}
+template void
+UncompressedDecompressor::decode12BitRawUnpackedLeftAligned<big>(uint32 w,
+                                                                 uint32 h);
 
 template <int bits, Endianness e>
 void UncompressedDecompressor::decodeRawUnpacked(uint32 w, uint32 h) {

@@ -44,10 +44,6 @@ class UncompressedDecompressor final : public AbstractDecompressor {
   // for special packed formats
   int bytesPerLine(int w, bool skips);
 
-  template <Endianness e> void decode12BitRawInterlaced(uint32 w, uint32 h);
-  template <Endianness e>
-  void decode12BitRawUnpackedLeftAligned(uint32 w, uint32 h);
-
 public:
   UncompressedDecompressor(ByteStream input_, const RawImage& img,
                            bool uncorrectedRawValues_)
@@ -80,15 +76,15 @@ public:
 
   /* Faster version for unpacking 12 bit data */
   /* skips - is there control byte every 10 pixels ? */
-  template <Endianness e, bool skips = false>
-  void decode12BitRaw(uint32 w, uint32 h);
+  template <Endianness e, bool skips = false> void decode12BitRaw(uint32 w, uint32 h);
 
   /* Faster version for unpacking 12 bit data with interlaced lines */
-  void decode12BitRawInterlaced(uint32 w, uint32 h, Endianness e);
+  template <Endianness e> void decode12BitRawInterlaced(uint32 w, uint32 h);
 
   /* Faster version for reading unpacked 12 bit data that is left aligned
    * (needs >> 4 shift) */
-  void decode12BitRawUnpackedLeftAligned(uint32 w, uint32 h, Endianness e);
+  template <Endianness e>
+  void decode12BitRawUnpackedLeftAligned(uint32 w, uint32 h);
 
   /* Faster version for reading unpacked data */
   template <int bits, Endianness e> void decodeRawUnpacked(uint32 w, uint32 h);
