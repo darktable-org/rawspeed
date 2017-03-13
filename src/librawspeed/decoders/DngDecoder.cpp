@@ -319,8 +319,8 @@ RawImage DngDecoder::decodeRawInternal() {
 
   uint32 cpp = raw->getEntry(SAMPLESPERPIXEL)->getU32();
 
-  if (cpp > 4)
-    ThrowRDE("More than 4 samples per pixel is not supported.");
+  if (cpp < 1 || cpp > 4)
+    ThrowRDE("Unsupported samples per pixel count: %u.", cpp);
 
   mRaw->setCpp(cpp);
 
