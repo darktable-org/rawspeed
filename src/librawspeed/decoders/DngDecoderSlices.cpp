@@ -138,9 +138,16 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
         big_endian = true;
 
       try {
-        decompressor.readUncompressedRaw(
-            size, pos, mRaw->getCpp() * mRaw->dim.x * mBps / 8, mBps,
-            big_endian ? BitOrder_Jpeg : BitOrder_Plain);
+        const int inputPitchBits = mRaw->getCpp() * mRaw->dim.x * mBps;
+        assert(inputPitchBits > 0);
+
+        const int inputPitch = inputPitchBits / 8;
+        if (inputPitch == 0)
+          ThrowRDE("Data input pitch is too short. Can not decode!");
+
+        decompressor.readUncompressedRaw(size, pos, inputPitch, mBps,
+                                         big_endian ? BitOrder_Jpeg
+                                                    : BitOrder_Plain);
       } catch (RawDecoderException& err) {
         mRaw->setError(err.what());
       } catch (IOException& err) {

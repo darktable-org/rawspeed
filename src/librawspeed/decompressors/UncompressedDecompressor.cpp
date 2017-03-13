@@ -96,6 +96,9 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
                                                    int inputPitch,
                                                    int bitPerPixel,
                                                    BitOrder order) {
+  assert(inputPitch > 0);
+  assert(bitPerPixel > 0);
+
   uchar8* data = mRaw->getData();
   uint32 outPitch = mRaw->pitch;
   uint32 w = size.x;
