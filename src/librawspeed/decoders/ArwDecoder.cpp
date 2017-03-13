@@ -114,7 +114,7 @@ RawImage ArwDecoder::decodeRawInternal() {
       mRaw->dim = iPoint2D(width, height);
       mRaw->createData();
 
-      UncompressedDecompressor u(di, 0, len, mRaw, uncorrectedRawValues);
+      UncompressedDecompressor u(di, 0, len, mRaw);
       u.decodeRawUnpacked<16, big>(width, height);
 
       return mRaw;
@@ -233,7 +233,7 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  UncompressedDecompressor u(*mFile, off, c2, mRaw, uncorrectedRawValues);
+  UncompressedDecompressor u(*mFile, off, c2, mRaw);
 
   if (hints.has("sr2_format"))
     u.decodeRawUnpacked<14, big>(width, height);

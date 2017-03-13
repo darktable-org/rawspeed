@@ -50,7 +50,7 @@ RawImage ErfDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  UncompressedDecompressor u(*mFile, off, c2, mRaw, uncorrectedRawValues);
+  UncompressedDecompressor u(*mFile, off, c2, mRaw);
 
   u.decode12BitRaw<big, false, true>(width, height);
 

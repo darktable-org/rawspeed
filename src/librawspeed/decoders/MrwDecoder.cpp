@@ -94,7 +94,7 @@ RawImage MrwDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(raw_width, raw_height);
   mRaw->createData();
 
-  UncompressedDecompressor u(*mFile, data_offset, mRaw, uncorrectedRawValues);
+  UncompressedDecompressor u(*mFile, data_offset, mRaw);
 
   try {
     if (packed)

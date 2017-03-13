@@ -95,7 +95,7 @@ RawImage RafDecoder::decodeRawInternal() {
   ByteStream input = offsets->getRootIfdData();
   input.setPosition(offsets->getU32());
 
-  UncompressedDecompressor u(input, mRaw, uncorrectedRawValues);
+  UncompressedDecompressor u(input, mRaw);
 
   iPoint2D pos(0, 0);
 

@@ -188,6 +188,7 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
   }
 }
 
+template <bool uncorrectedRawValues>
 void UncompressedDecompressor::decode8BitRaw(uint32 w, uint32 h) {
   sanityCheck(w, &h, 1);
 
@@ -205,6 +206,9 @@ void UncompressedDecompressor::decode8BitRaw(uint32 w, uint32 h) {
     }
   }
 }
+
+template void UncompressedDecompressor::decode8BitRaw<false>(uint32 w, uint32 h);
+template void UncompressedDecompressor::decode8BitRaw<true>(uint32 w, uint32 h);
 
 template <Endianness e, bool interlaced, bool skips>
 void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {

@@ -45,21 +45,16 @@ class UncompressedDecompressor final : public AbstractDecompressor {
   int bytesPerLine(int w, bool skips);
 
 public:
-  UncompressedDecompressor(ByteStream input_, const RawImage& img,
-                           bool uncorrectedRawValues_)
-      : input(std::move(input_)), mRaw(img),
-        uncorrectedRawValues(uncorrectedRawValues_) {}
+  UncompressedDecompressor(ByteStream input_, const RawImage& img)
+      : input(std::move(input_)), mRaw(img) {}
 
   UncompressedDecompressor(const Buffer& data, Buffer::size_type offset,
-                           Buffer::size_type size, const RawImage& img,
-                           bool uncorrectedRawValues_)
-      : UncompressedDecompressor(ByteStream(data, offset, size), img,
-                                 uncorrectedRawValues_) {}
+                           Buffer::size_type size, const RawImage& img)
+      : UncompressedDecompressor(ByteStream(data, offset, size), img) {}
 
   UncompressedDecompressor(const Buffer& data, Buffer::size_type offset,
-                           const RawImage& img, bool uncorrectedRawValues_)
-      : UncompressedDecompressor(data, offset, data.getSize() - offset, img,
-                                 uncorrectedRawValues_) {}
+                           const RawImage& img)
+      : UncompressedDecompressor(data, offset, data.getSize() - offset, img) {}
 
   /* Helper function for decoders, that will unpack uncompressed image data */
   /* input: Input image, positioned at first pixel */
@@ -72,7 +67,7 @@ public:
                            int bitPerPixel, BitOrder order);
 
   /* Faster versions for unpacking 8 bit data */
-  void decode8BitRaw(uint32 w, uint32 h);
+  template <bool uncorrectedRawValues> void decode8BitRaw(uint32 w, uint32 h);
 
   /* Faster version for unpacking 12 bit data */
   /* interlaced - is data with interlaced lines ? */
@@ -91,7 +86,6 @@ public:
 protected:
   ByteStream input;
   RawImage mRaw;
-  bool uncorrectedRawValues;
 };
 
 } // namespace RawSpeed

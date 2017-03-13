@@ -122,7 +122,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
 
     uint32 size = mFile->getSize() - offset;
 
-    UncompressedDecompressor u(ByteStream(mFile, offset), mRaw, uncorrectedRawValues);
+    UncompressedDecompressor u(ByteStream(mFile, offset), mRaw);
 
     if (size >= width*height*2) {
       // It's completely unpacked little-endian

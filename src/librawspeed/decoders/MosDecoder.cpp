@@ -139,7 +139,7 @@ RawImage MosDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  UncompressedDecompressor u(*mFile, off, mRaw, uncorrectedRawValues);
+  UncompressedDecompressor u(*mFile, off, mRaw);
 
   int compression = raw->getEntry(COMPRESSION)->getU32();
   if (1 == compression) {

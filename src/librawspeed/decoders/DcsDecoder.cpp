@@ -63,9 +63,12 @@ RawImage DcsDecoder::decodeRawInternal() {
   if (!uncorrectedRawValues)
     mRaw->setTable(table.data(), table.size(), true);
 
-  UncompressedDecompressor u(*mFile, off, c2, mRaw, uncorrectedRawValues);
+  UncompressedDecompressor u(*mFile, off, c2, mRaw);
 
-  u.decode8BitRaw(width, height);
+  if (uncorrectedRawValues)
+    u.decode8BitRaw<true>(width, height);
+  else
+    u.decode8BitRaw<false>(width, height);
 
   // Set the table, if it should be needed later.
   if (uncorrectedRawValues) {

@@ -48,7 +48,7 @@ RawImage MefDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  UncompressedDecompressor u(*mFile, off, mRaw, uncorrectedRawValues);
+  UncompressedDecompressor u(*mFile, off, mRaw);
 
   u.decode12BitRaw<big>(width, height);
 

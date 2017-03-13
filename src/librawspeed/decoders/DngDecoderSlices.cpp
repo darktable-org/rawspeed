@@ -116,8 +116,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
       t->slices.pop();
 
       UncompressedDecompressor decompressor(*mFile, e->byteOffset, e->byteCount,
-                                            mRaw,
-                                            true /* does not matter here */);
+                                            mRaw);
 
       size_t thisTileLength = e->offY + e->height > (uint32)mRaw->dim.y
                                   ? mRaw->dim.y - e->offY

@@ -92,8 +92,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
   offY = 0;
   for (uint32 i = 0; i < slices.size(); i++) {
     RawSlice slice = slices[i];
-    UncompressedDecompressor u(*mFile, slice.offset, slice.count, mRaw,
-                               uncorrectedRawValues);
+    UncompressedDecompressor u(*mFile, slice.offset, slice.count, mRaw);
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
     bitPerPixel = (int)((uint64)((uint64)slice.count * 8u) / (slice.h * width));

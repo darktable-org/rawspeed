@@ -210,7 +210,7 @@ void NefDecoder::DecodeUncompressed() {
         if (hints.has("coolpixsplit"))
           readCoolpixSplitRaw(in, size, pos, width * bitPerPixel / 8);
         else {
-          UncompressedDecompressor u(in, mRaw, uncorrectedRawValues);
+          UncompressedDecompressor u(in, mRaw);
           u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, bitPerPixel,
                                 bitorder ? BitOrder_Jpeg : BitOrder_Plain);
         }
@@ -317,7 +317,7 @@ void NefDecoder::DecodeD100Uncompressed() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  UncompressedDecompressor u(*mFile, offset, mRaw, uncorrectedRawValues);
+  UncompressedDecompressor u(*mFile, offset, mRaw);
 
   u.decode12BitRaw<big, false, true>(width, height);
 }
