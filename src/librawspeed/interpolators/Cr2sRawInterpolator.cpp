@@ -35,6 +35,12 @@ struct Cr2sRawInterpolator::YCbCr final {
   int Cb;
   int Cr;
 
+  inline static void LoadY(YCbCr* dst, const YCbCr& src) {
+    assert(dst);
+
+    dst->Y = src.Y;
+  }
+
   inline static void LoadY(YCbCr* p, const ushort16* data) {
     assert(p);
     assert(data);
@@ -81,6 +87,14 @@ struct Cr2sRawInterpolator::YCbCr final {
     // FIXME: dcraw does +1 before >> 1
     Cb = (p0.Cb + p2.Cb) >> 1;
     Cr = (p0.Cr + p2.Cr) >> 1;
+  }
+
+  inline void interpolate(const YCbCr& p0, const YCbCr& p1, const YCbCr& p2,
+                          const YCbCr& p3) {
+    // Y is already good, need to interpolate Cb and Cr
+    // FIXME: dcraw does +1 before >> 1
+    Cb = (p0.Cb + p1.Cb + p2.Cb + p3.Cb) >> 2;
+    Cr = (p0.Cr + p1.Cr + p2.Cr + p3.Cr) >> 2;
   }
 };
 
@@ -168,12 +182,11 @@ inline void Cr2sRawInterpolator::interpolate_422(int hue, int hue_last, int w,
 // Note: Not thread safe, since it writes inplace.
 template <int version>
 inline void Cr2sRawInterpolator::interpolate_420(int hue, int w, int h) {
-  // Last pixel should not be interpolated
-  w--;
+  assert(w >= 2);
+  assert(w % 2 == 0);
 
-  const int end_h = h - 1;
-
-  static constexpr const bool atLastLine = true;
+  assert(h >= 2);
+  assert(h % 2 == 0);
 
   // Current line
   ushort16* c_line;
@@ -182,79 +195,194 @@ inline void Cr2sRawInterpolator::interpolate_420(int hue, int w, int h) {
   // Next line again
   ushort16* nn_line;
 
-  int off;
+  // the format is:
+  //          p0             p1             p2             p3
+  //  row 0: [ Y1 Cb  Cr  ] [ Y2 ... ... ] [ Y1 Cb  Cr  ] [ Y2 ... ... ] ...
+  //  row 1: [ Y3 ... ... ] [ Y4 ... ... ] [ Y3 ... ... ] [ Y4 ... ... ] ...
+  //  row 2: [ Y1 Cb  Cr  ] [ Y2 ... ... ] [ Y1 Cb  Cr  ] [ Y2 ... ... ] ...
+  //  row 3: [ Y3 ... ... ] [ Y4 ... ... ] [ Y3 ... ... ] [ Y4 ... ... ] ...
+  //           .. .   .       .. .   .       .. .   .       .. .   .
+  // i.e. on even rows, even pixels are full, rest of pixels need interpolation
+  // first, on even rows, odd pixels are interpolated using 422 algo (marked *)
+  //          p0             p1             p2             p3
+  //  row 0: [ Y1 Cb  Cr  ] [ Y2 Cb* Cr* ] [ Y1 Cb  Cr  ] [ Y2 Cb* Cr* ] ...
+  //  row 1: [ Y3 ... ... ] [ Y4 ... ... ] [ Y3 ... ... ] [ Y4 ... ... ] ...
+  //  row 2: [ Y1 Cb  Cr  ] [ Y2 Cb* Cr* ] [ Y1 Cb  Cr  ] [ Y2 Cb* Cr* ] ...
+  //  row 3: [ Y3 ... ... ] [ Y4 ... ... ] [ Y3 ... ... ] [ Y4 ... ... ] ...
+  //           .. .   .       .. .   .       .. .   .
+  // then,  on odd rows, even pixels are interpolated (marked with #)
+  //          p0             p1             p2             p3
+  //  row 0: [ Y1 Cb  Cr  ] [ Y2 Cb* Cr* ] [ Y1 Cb  Cr  ] [ Y2 Cb* Cr* ] ...
+  //  row 1: [ Y3 Cb# Cr# ] [ Y4 ... ... ] [ Y3 Cb# Cr# ] [ Y4 ... ... ] ...
+  //  row 2: [ Y1 Cb  Cr  ] [ Y2 Cb* Cr* ] [ Y1 Cb  Cr  ] [ Y2 Cb* Cr* ] ...
+  //  row 3: [ Y3 Cb# Cr# ] [ Y4 ... ... ] [ Y3 Cb# Cr# ] [ Y4 ... ... ] ...
+  //           .. .   .       .. .   .       .. .   .
+  // and finally, on odd rows, odd pixels are interpolated from * (marked $)
+  //          p0             p1             p2             p3
+  //  row 0: [ Y1 Cb  Cr  ] [ Y2 Cb* Cr* ] [ Y1 Cb  Cr  ] [ Y2 Cb* Cr* ] ...
+  //  row 1: [ Y3 Cb# Cr# ] [ Y4 Cb$ Cr$ ] [ Y3 Cb# Cr# ] [ Y4 Cb$ Cr$ ] ...
+  //  row 2: [ Y1 Cb  Cr  ] [ Y2 Cb* Cr* ] [ Y1 Cb  Cr  ] [ Y2 Cb* Cr* ] ...
+  //  row 3: [ Y3 Cb# Cr# ] [ Y4 Cb$ Cr$ ] [ Y3 Cb# Cr# ] [ Y4 Cb$ Cr$ ] ...
+  //           .. .   .       .. .   .       .. .   .
+  // see http://lclevy.free.fr/cr2/#sraw
 
-  for (int y = 0; y < end_h; y++) {
-    c_line = (ushort16*)mRaw->getData(0, y * 2);
-    n_line = (ushort16*)mRaw->getData(0, y * 2 + 1);
-    nn_line = (ushort16*)mRaw->getData(0, y * 2 + 2);
-    off = 0;
-    for (int x = 0; x < w; x++) {
-      int Y = c_line[off];
-      int Cb = c_line[off + 1] - hue;
-      int Cr = c_line[off + 2] - hue;
-      YUV_TO_RGB<version>(Y, Cb, Cr, c_line, off);
+  int y;
+  for (y = 0; y < h - 2; y += 2) {
+    assert(y + 4 <= h);
+    assert(y % 2 == 0);
 
-      Y = c_line[off + 3];
-      int Cb2 = (Cb + c_line[off + 1 + 6] - hue) >> 1;
-      int Cr2 = (Cr + c_line[off + 2 + 6] - hue) >> 1;
-      YUV_TO_RGB<version>(Y, Cb2, Cr2, c_line, off + 3);
+    c_line = (ushort16*)mRaw->getData(0, y);
+    n_line = (ushort16*)mRaw->getData(0, y + 1);
+    nn_line = (ushort16*)mRaw->getData(0, y + 2);
+
+    assert(c_line);
+    assert(n_line);
+    assert(nn_line);
+
+    int x;
+    for (x = 0; x < w - 2; x += 2) {
+      assert(x + 4 <= w);
+      assert(x % 2 == 0);
+
+      YCbCr p0(c_line);
+      p0.signExtend();
+      p0.applyHue(hue);
+      YUV_TO_RGB<version>(p0.Y, p0.Cb, p0.Cr, c_line, 0);
+      c_line += 3;
+
+      YCbCr::LoadY(&p0, c_line);
+
+      YCbCr p1;
+      YCbCr::LoadCbCr(&p1, c_line + 3);
+      p1.signExtend();
+      p1.applyHue(hue);
+
+      YCbCr p2;
+      YCbCr::LoadY(&p2, p0);
+      p2.interpolate(p0, p1);
+      YUV_TO_RGB<version>(p2.Y, p2.Cb, p2.Cr, c_line, 0);
+      c_line += 3;
 
       // Next line
-      Y = n_line[off];
-      int Cb3 = (Cb + nn_line[off + 1] - hue) >> 1;
-      int Cr3 = (Cr + nn_line[off + 2] - hue) >> 1;
-      YUV_TO_RGB<version>(Y, Cb3, Cr3, n_line, off);
+      YCbCr p3;
+      YCbCr::LoadY(&p3, n_line);
+      YCbCr::LoadCbCr(&p3, nn_line);
+      p3.signExtend();
+      p3.applyHue(hue);
+      p3.interpolate(p0, p3);
+      YUV_TO_RGB<version>(p3.Y, p3.Cb, p3.Cr, n_line, 0);
+      n_line += 3;
+      nn_line += 6;
 
-      Y = n_line[off + 3];
-      Cb = (Cb + Cb2 + Cb3 + nn_line[off + 1 + 6] - hue) >>
-           2; // Left + Above + Right +Below
-      Cr = (Cr + Cr2 + Cr3 + nn_line[off + 2 + 6] - hue) >> 2;
-      YUV_TO_RGB<version>(Y, Cb, Cr, n_line, off + 3);
-      off += 6;
+      YCbCr p4;
+      YCbCr::LoadCbCr(&p4, nn_line);
+      p4.signExtend();
+      p4.applyHue(hue);
+
+      YCbCr::LoadY(&p0, n_line);
+      p0.interpolate(p0, p2, p3, p4);
+      YUV_TO_RGB<version>(p0.Y, p0.Cb, p0.Cr, n_line, 0);
+      n_line += 3;
     }
-    int Y = c_line[off];
-    int Cb = c_line[off + 1] - hue;
-    int Cr = c_line[off + 2] - hue;
-    YUV_TO_RGB<version>(Y, Cb, Cr, c_line, off);
 
-    Y = c_line[off + 3];
-    YUV_TO_RGB<version>(Y, Cb, Cr, c_line, off + 3);
+    assert(x + 2 == w);
+    assert(x % 2 == 0);
+
+    // Last two pixels of the lines, the format is:
+    //              p0             p1
+    //  row 0: ... [ Y1 Cb  Cr  ] [ Y2 ... ... ]
+    //  row 1: ... [ Y3 ... ... ] [ Y4 ... ... ]
+    //  row 2: ... [ Y1 Cb  Cr  ] [ Y2 ... ... ]
+    //  row 3: ... [ Y3 ... ... ] [ Y4 ... ... ]
+    //               .. .   .       .. .   .
+
+    YCbCr p0(c_line);
+    p0.signExtend();
+    p0.applyHue(hue);
+    YUV_TO_RGB<version>(p0.Y, p0.Cb, p0.Cr, c_line, 0);
+    c_line += 3;
+
+    YCbCr::LoadY(&p0, c_line);
+    YUV_TO_RGB<version>(p0.Y, p0.Cb, p0.Cr, c_line, 0);
+    c_line += 3;
 
     // Next line
-    Y = n_line[off];
-    Cb = (Cb + nn_line[off + 1] - hue) >> 1;
-    Cr = (Cr + nn_line[off + 2] - hue) >> 1;
-    YUV_TO_RGB<version>(Y, Cb, Cr, n_line, off);
+    YCbCr p1;
+    YCbCr::LoadY(&p1, n_line);
 
-    Y = n_line[off + 3];
-    YUV_TO_RGB<version>(Y, Cb, Cr, n_line, off + 3);
+    YCbCr p2;
+    YCbCr::LoadCbCr(&p2, nn_line);
+    p2.signExtend();
+    p2.applyHue(hue);
+
+    p1.interpolate(p0, p2);
+    YUV_TO_RGB<version>(p1.Y, p1.Cb, p1.Cr, n_line, 0);
+    n_line += 3;
+
+    YCbCr::LoadY(&p1, n_line);
+    YUV_TO_RGB<version>(p1.Y, p1.Cb, p1.Cr, n_line, 0);
+    n_line += 3;
   }
 
-  if (atLastLine) {
-    c_line = (ushort16*)mRaw->getData(0, end_h * 2);
-    n_line = (ushort16*)mRaw->getData(0, end_h * 2 + 1);
-    off = 0;
+  assert(y + 2 == h);
+  assert(y % 2 == 0);
 
-    // Last line
-    for (int x = 0; x < w + 1; x++) {
-      int Y = c_line[off];
-      int Cb = c_line[off + 1] - hue;
-      int Cr = c_line[off + 2] - hue;
-      YUV_TO_RGB<version>(Y, Cb, Cr, c_line, off);
+  c_line = (ushort16*)mRaw->getData(0, y);
+  n_line = (ushort16*)mRaw->getData(0, y + 1);
+  nn_line = nullptr;
 
-      Y = c_line[off + 3];
-      YUV_TO_RGB<version>(Y, Cb, Cr, c_line, off + 3);
+  assert(c_line);
+  assert(n_line);
 
-      // Next line
-      Y = n_line[off];
-      YUV_TO_RGB<version>(Y, Cb, Cr, n_line, off);
+  // Last two lines, the format is:
+  //          p0             p1             p2             p3
+  //           .. .   .       .. .   .       .. .   .       .. .   .
+  //  row 0: [ Y1 Cb  Cr  ] [ Y2 ... ... ] [ Y1 Cb  Cr  ] [ Y2 ... ... ] ...
+  //  row 1: [ Y3 ... ... ] [ Y4 ... ... ] [ Y3 ... ... ] [ Y4 ... ... ] ...
 
-      Y = n_line[off + 3];
-      YUV_TO_RGB<version>(Y, Cb, Cr, n_line, off + 3);
-      off += 6;
-    }
+  int x;
+  for (x = 0; x < w; x += 2) {
+    assert(x + 2 <= w);
+    // FIXME: assert(x + 4 <= w);
+    assert(x % 2 == 0);
+
+    // load, process and output first pixel of first row, which is full
+    YCbCr p(c_line);
+    p.signExtend();
+    p.applyHue(hue);
+    YUV_TO_RGB<version>(p.Y, p.Cb, p.Cr, c_line, 0);
+    c_line += 3;
+
+    // rest keeps Cb/Cr from this original pixel
+
+    // load Y from second pixel of first row; and output
+    YCbCr::LoadY(&p, c_line);
+    YUV_TO_RGB<version>(p.Y, p.Cb, p.Cr, c_line, 0);
+    c_line += 3;
+
+    // load Y from first pixel of second row; and output
+    YCbCr::LoadY(&p, n_line);
+    YUV_TO_RGB<version>(p.Y, p.Cb, p.Cr, n_line, 0);
+    n_line += 3;
+
+    // load Y from second pixel of second row; and output
+    YCbCr::LoadY(&p, n_line);
+    YUV_TO_RGB<version>(p.Y, p.Cb, p.Cr, n_line, 0);
+    n_line += 3;
   }
+
+  assert(y + 2 == h);
+  assert(y % 2 == 0);
+
+  // FIXME !!!
+  // assert(x + 2 == w);
+  assert(x % 2 == 0);
+
+  // Last two pixels of last two lines, the format is:
+  //               p0             p1
+  //                .. .   .       .. .   .
+  //  row 0:  ... [ Y1 Cb  Cr  ] [ Y2 ... ... ]
+  //  row 1:  ... [ Y3 ... ... ] [ Y4 ... ... ]
 }
 
 inline void Cr2sRawInterpolator::STORE_RGB(ushort16* X, int r, int g, int b,
@@ -309,7 +437,7 @@ template <int version> void Cr2sRawInterpolator::interpolate_422(int w, int h) {
 }
 
 template <int version> void Cr2sRawInterpolator::interpolate_420(int w, int h) {
-  auto hue = -raw_hue + 16384;
+  auto hue = raw_hue;
   interpolate_420<version>(hue, w, h);
 }
 
@@ -336,8 +464,8 @@ void Cr2sRawInterpolator::interpolate(int version) {
       __builtin_unreachable();
     }
   } else if (subSampling.y == 2 && subSampling.x == 2) {
-    int width = mRaw->dim.x / subSampling.x;
-    int height = mRaw->dim.y / subSampling.y;
+    int width = mRaw->dim.x;
+    int height = mRaw->dim.y;
 
     switch (version) {
     // no known sraws with "version 0"
