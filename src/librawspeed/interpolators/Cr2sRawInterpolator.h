@@ -41,10 +41,9 @@ public:
   void interpolate(int version);
 
 protected:
-  template <int version>
-  inline void YUV_TO_RGB(int Y, int Cb, int Cr, ushort16* X, int offset);
+  template <int version> inline void YUV_TO_RGB(const YCbCr& p, ushort16* X);
 
-  inline void STORE_RGB(ushort16* X, int r, int g, int b, int offset);
+  inline void STORE_RGB(ushort16* X, int r, int g, int b);
 
   template <int version>
   inline void interpolate_422_row(ushort16* data, int hue, int hue_last, int w);

@@ -82,6 +82,11 @@ struct Cr2sRawInterpolator::YCbCr final {
     Cr += hue;
   }
 
+  inline void process(int hue) {
+    signExtend();
+    applyHue(hue);
+  }
+
   inline void interpolate(const YCbCr& p0, const YCbCr& p2) {
     // Y is already good, need to interpolate Cb and Cr
     // FIXME: dcraw does +1 before >> 1
@@ -125,9 +130,8 @@ inline void Cr2sRawInterpolator::interpolate_422_row(ushort16* data, int hue,
 
     // load, process and output first pixel, which is full
     YCbCr p0(data);
-    p0.signExtend();
-    p0.applyHue(hue);
-    YUV_TO_RGB<version>(p0.Y, p0.Cb, p0.Cr, data, 0);
+    p0.process(hue);
+    YUV_TO_RGB<version>(p0, data);
     data += 3;
 
     // load Y from second pixel, Cb/Cr need to be interpolated
@@ -137,12 +141,11 @@ inline void Cr2sRawInterpolator::interpolate_422_row(ushort16* data, int hue,
     // load Cb/Cr from third pixel, process
     YCbCr p2;
     YCbCr::LoadCbCr(&p2, data + 3);
-    p2.signExtend();
-    p2.applyHue(hue);
+    p2.process(hue);
 
     // and finally, interpolate and output the second pixel
     p1.interpolate(p0, p2);
-    YUV_TO_RGB<version>(p1.Y, p1.Cb, p1.Cr, data, 0);
+    YUV_TO_RGB<version>(p1, data);
     data += 3;
   }
 
@@ -155,14 +158,13 @@ inline void Cr2sRawInterpolator::interpolate_422_row(ushort16* data, int hue,
 
   // load, process and output first pixel, which is full
   YCbCr p(data);
-  p.signExtend();
-  p.applyHue(hue_last);
-  YUV_TO_RGB<version>(p.Y, p.Cb, p.Cr, data, 0);
+  p.process(hue_last);
+  YUV_TO_RGB<version>(p, data);
   data += 3;
 
   // load Y from second pixel, keep Cb/Cr from previous pixel, and output
   YCbCr::LoadY(&p, data);
-  YUV_TO_RGB<version>(p.Y, p.Cb, p.Cr, data, 0);
+  YUV_TO_RGB<version>(p, data);
   data += 3;
 }
 
@@ -245,43 +247,39 @@ inline void Cr2sRawInterpolator::interpolate_420(int hue, int w, int h) {
       assert(x % 2 == 0);
 
       YCbCr p0(c_line);
-      p0.signExtend();
-      p0.applyHue(hue);
-      YUV_TO_RGB<version>(p0.Y, p0.Cb, p0.Cr, c_line, 0);
+      p0.process(hue);
+      YUV_TO_RGB<version>(p0, c_line);
       c_line += 3;
 
       YCbCr::LoadY(&p0, c_line);
 
       YCbCr p1;
       YCbCr::LoadCbCr(&p1, c_line + 3);
-      p1.signExtend();
-      p1.applyHue(hue);
+      p1.process(hue);
 
       YCbCr p2;
       YCbCr::LoadY(&p2, p0);
       p2.interpolate(p0, p1);
-      YUV_TO_RGB<version>(p2.Y, p2.Cb, p2.Cr, c_line, 0);
+      YUV_TO_RGB<version>(p2, c_line);
       c_line += 3;
 
       // Next line
       YCbCr p3;
       YCbCr::LoadY(&p3, n_line);
       YCbCr::LoadCbCr(&p3, nn_line);
-      p3.signExtend();
-      p3.applyHue(hue);
+      p3.process(hue);
       p3.interpolate(p0, p3);
-      YUV_TO_RGB<version>(p3.Y, p3.Cb, p3.Cr, n_line, 0);
+      YUV_TO_RGB<version>(p3, n_line);
       n_line += 3;
       nn_line += 6;
 
       YCbCr p4;
       YCbCr::LoadCbCr(&p4, nn_line);
-      p4.signExtend();
-      p4.applyHue(hue);
+      p4.process(hue);
 
       YCbCr::LoadY(&p0, n_line);
       p0.interpolate(p0, p2, p3, p4);
-      YUV_TO_RGB<version>(p0.Y, p0.Cb, p0.Cr, n_line, 0);
+      YUV_TO_RGB<version>(p0, n_line);
       n_line += 3;
     }
 
@@ -297,13 +295,12 @@ inline void Cr2sRawInterpolator::interpolate_420(int hue, int w, int h) {
     //               .. .   .       .. .   .
 
     YCbCr p0(c_line);
-    p0.signExtend();
-    p0.applyHue(hue);
-    YUV_TO_RGB<version>(p0.Y, p0.Cb, p0.Cr, c_line, 0);
+    p0.process(hue);
+    YUV_TO_RGB<version>(p0, c_line);
     c_line += 3;
 
     YCbCr::LoadY(&p0, c_line);
-    YUV_TO_RGB<version>(p0.Y, p0.Cb, p0.Cr, c_line, 0);
+    YUV_TO_RGB<version>(p0, c_line);
     c_line += 3;
 
     // Next line
@@ -312,15 +309,14 @@ inline void Cr2sRawInterpolator::interpolate_420(int hue, int w, int h) {
 
     YCbCr p2;
     YCbCr::LoadCbCr(&p2, nn_line);
-    p2.signExtend();
-    p2.applyHue(hue);
+    p2.process(hue);
 
     p1.interpolate(p0, p2);
-    YUV_TO_RGB<version>(p1.Y, p1.Cb, p1.Cr, n_line, 0);
+    YUV_TO_RGB<version>(p1, n_line);
     n_line += 3;
 
     YCbCr::LoadY(&p1, n_line);
-    YUV_TO_RGB<version>(p1.Y, p1.Cb, p1.Cr, n_line, 0);
+    YUV_TO_RGB<version>(p1, n_line);
     n_line += 3;
   }
 
@@ -348,26 +344,25 @@ inline void Cr2sRawInterpolator::interpolate_420(int hue, int w, int h) {
 
     // load, process and output first pixel of first row, which is full
     YCbCr p(c_line);
-    p.signExtend();
-    p.applyHue(hue);
-    YUV_TO_RGB<version>(p.Y, p.Cb, p.Cr, c_line, 0);
+    p.process(hue);
+    YUV_TO_RGB<version>(p, c_line);
     c_line += 3;
 
     // rest keeps Cb/Cr from this original pixel
 
     // load Y from second pixel of first row; and output
     YCbCr::LoadY(&p, c_line);
-    YUV_TO_RGB<version>(p.Y, p.Cb, p.Cr, c_line, 0);
+    YUV_TO_RGB<version>(p, c_line);
     c_line += 3;
 
     // load Y from first pixel of second row; and output
     YCbCr::LoadY(&p, n_line);
-    YUV_TO_RGB<version>(p.Y, p.Cb, p.Cr, n_line, 0);
+    YUV_TO_RGB<version>(p, n_line);
     n_line += 3;
 
     // load Y from second pixel of second row; and output
     YCbCr::LoadY(&p, n_line);
-    YUV_TO_RGB<version>(p.Y, p.Cb, p.Cr, n_line, 0);
+    YUV_TO_RGB<version>(p, n_line);
     n_line += 3;
   }
 
@@ -385,43 +380,47 @@ inline void Cr2sRawInterpolator::interpolate_420(int hue, int w, int h) {
   //  row 1:  ... [ Y3 ... ... ] [ Y4 ... ... ]
 }
 
-inline void Cr2sRawInterpolator::STORE_RGB(ushort16* X, int r, int g, int b,
-                                           int offset) {
-  X[offset + 0] = clampBits(r >> 8, 16);
-  X[offset + 1] = clampBits(g >> 8, 16);
-  X[offset + 2] = clampBits(b >> 8, 16);
+inline void Cr2sRawInterpolator::STORE_RGB(ushort16* X, int r, int g, int b) {
+  assert(X);
+
+  X[0] = clampBits(r >> 8, 16);
+  X[1] = clampBits(g >> 8, 16);
+  X[2] = clampBits(b >> 8, 16);
 }
 
 template </* int version */>
 /* Algorithm found in EOS 40D */
-inline void Cr2sRawInterpolator::YUV_TO_RGB<0>(int Y, int Cb, int Cr,
-                                               ushort16* X, int offset) {
+inline void Cr2sRawInterpolator::YUV_TO_RGB<0>(const YCbCr& p, ushort16* X) {
+  assert(X);
+
   int r, g, b;
-  r = sraw_coeffs[0] * (Y + Cr - 512);
-  g = sraw_coeffs[1] * (Y + ((-778 * Cb - (Cr * 2048)) >> 12) - 512);
-  b = sraw_coeffs[2] * (Y + (Cb - 512));
-  STORE_RGB(X, r, g, b, offset);
+  r = sraw_coeffs[0] * (p.Y + p.Cr - 512);
+  g = sraw_coeffs[1] * (p.Y + ((-778 * p.Cb - (p.Cr * 2048)) >> 12) - 512);
+  b = sraw_coeffs[2] * (p.Y + (p.Cb - 512));
+  STORE_RGB(X, r, g, b);
 }
 
 template </* int version */>
-inline void Cr2sRawInterpolator::YUV_TO_RGB<1>(int Y, int Cb, int Cr,
-                                               ushort16* X, int offset) {
+inline void Cr2sRawInterpolator::YUV_TO_RGB<1>(const YCbCr& p, ushort16* X) {
+  assert(X);
+
   int r, g, b;
-  r = sraw_coeffs[0] * (Y + ((50 * Cb + 22929 * Cr) >> 12));
-  g = sraw_coeffs[1] * (Y + ((-5640 * Cb - 11751 * Cr) >> 12));
-  b = sraw_coeffs[2] * (Y + ((29040 * Cb - 101 * Cr) >> 12));
-  STORE_RGB(X, r, g, b, offset);
+  r = sraw_coeffs[0] * (p.Y + ((50 * p.Cb + 22929 * p.Cr) >> 12));
+  g = sraw_coeffs[1] * (p.Y + ((-5640 * p.Cb - 11751 * p.Cr) >> 12));
+  b = sraw_coeffs[2] * (p.Y + ((29040 * p.Cb - 101 * p.Cr) >> 12));
+  STORE_RGB(X, r, g, b);
 }
 
 template </* int version */>
 /* Algorithm found in EOS 5d Mk III */
-inline void Cr2sRawInterpolator::YUV_TO_RGB<2>(int Y, int Cb, int Cr,
-                                               ushort16* X, int offset) {
+inline void Cr2sRawInterpolator::YUV_TO_RGB<2>(const YCbCr& p, ushort16* X) {
+  assert(X);
+
   int r, g, b;
-  r = sraw_coeffs[0] * (Y + Cr);
-  g = sraw_coeffs[1] * (Y + ((-778 * Cb - (Cr * 2048)) >> 12));
-  b = sraw_coeffs[2] * (Y + Cb);
-  STORE_RGB(X, r, g, b, offset);
+  r = sraw_coeffs[0] * (p.Y + p.Cr);
+  g = sraw_coeffs[1] * (p.Y + ((-778 * p.Cb - (p.Cr * 2048)) >> 12));
+  b = sraw_coeffs[2] * (p.Y + p.Cb);
+  STORE_RGB(X, r, g, b);
 }
 
 template </* int version */>
