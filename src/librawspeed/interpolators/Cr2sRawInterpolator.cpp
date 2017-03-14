@@ -30,6 +30,60 @@ using namespace std;
 
 namespace RawSpeed {
 
+struct Cr2sRawInterpolator::YCbCr final {
+  int Y;
+  int Cb;
+  int Cr;
+
+  inline static void LoadY(YCbCr* p, const ushort16* data) {
+    assert(p);
+    assert(data);
+
+    p->Y = data[0];
+  }
+
+  inline static void LoadCbCr(YCbCr* p, const ushort16* data) {
+    assert(p);
+    assert(data);
+
+    p->Cb = data[1];
+    p->Cr = data[2];
+  }
+
+  inline static void Load(YCbCr* p, const ushort16* data) {
+    assert(p);
+    assert(data);
+
+    LoadY(p, data);
+    LoadCbCr(p, data);
+  }
+
+  YCbCr() = default;
+
+  explicit YCbCr(ushort16* data) {
+    assert(data);
+
+    Load(this, data);
+  }
+
+  inline void signExtend() {
+    Cb -= 16384;
+    Cr -= 16384;
+  }
+
+  inline void applyHue(int hue) {
+    Cb += hue;
+    Cr += hue;
+  }
+
+  inline void interpolate(const YCbCr& p0, const YCbCr& p2) {
+    // Y is already good, need to interpolate Cb and Cr
+    // FIXME: dcraw does +1 before >> 1
+    Cb = (p0.Cb + p2.Cb) >> 1;
+    Cr = (p0.Cr + p2.Cr) >> 1;
+  }
+};
+
 /* sRaw interpolators - ugly as sin, but does the job in reasonably speed */
 
 // Note: Thread safe.

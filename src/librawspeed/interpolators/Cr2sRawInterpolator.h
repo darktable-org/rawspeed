@@ -32,6 +32,8 @@ class Cr2sRawInterpolator final {
   std::array<int, 3> sraw_coeffs;
   int raw_hue;
 
+  struct YCbCr;
+
 public:
   Cr2sRawInterpolator(RawImage& mRaw_, std::array<int, 3> sraw_coeffs_, int hue)
       : mRaw(mRaw_), sraw_coeffs(sraw_coeffs_), raw_hue(hue) {}
