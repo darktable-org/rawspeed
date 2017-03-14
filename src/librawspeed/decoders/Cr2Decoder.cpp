@@ -25,18 +25,20 @@
 #include "common/Point.h"                  // for iPoint2D
 #include "decoders/RawDecoderException.h"  // for RawDecoderException, Thro...
 #include "decompressors/Cr2Decompressor.h" // for Cr2Decompressor
-#include "io/ByteStream.h"                 // for ByteStream
-#include "io/Endianness.h"                 // for getHostEndianness, Endian...
-#include "io/IOException.h"                // for IOException
-#include "metadata/Camera.h"               // for Hints
-#include "metadata/ColorFilterArray.h"     // for CFAColor::CFA_GREEN, CFAC...
-#include "parsers/TiffParserException.h"   // for ThrowTPE
-#include "tiff/TiffEntry.h"                // for TiffEntry, TiffDataType::...
-#include "tiff/TiffTag.h"                  // for TiffTag, TiffTag::CANONCO...
-#include <exception>                       // for exception
-#include <memory>                          // for unique_ptr, allocator
-#include <string>                          // for string
-#include <vector>                          // for vector
+#include "interpolators/Cr2sRawInterpolator.h" // for Cr2sRawInterpolator
+#include "io/ByteStream.h"                     // for ByteStream
+#include "io/Endianness.h"               // for getHostEndianness, Endian...
+#include "io/IOException.h"              // for IOException
+#include "metadata/Camera.h"             // for Hints
+#include "metadata/ColorFilterArray.h"   // for CFAColor::CFA_GREEN, CFAC...
+#include "parsers/TiffParserException.h" // for ThrowTPE
+#include "tiff/TiffEntry.h"              // for TiffEntry, TiffDataType::...
+#include "tiff/TiffTag.h"                // for TiffTag, TiffTag::CANONCO...
+#include <array>                         // for array
+#include <exception>                     // for exception
+#include <memory>                        // for unique_ptr, allocator
+#include <string>                        // for string
+#include <vector>                        // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
 using namespace std;
@@ -232,202 +234,6 @@ int Cr2Decoder::getHue() {
   return (mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x);
 }
 
-/* sRaw interpolators - ugly as sin, but does the job in reasonably speed */
-
-// Note: Thread safe.
-
-template <int version>
-inline void Cr2Decoder::interpolate_422(const int* sraw_coeffs, RawImage& mRaw,
-                                        int hue, int hue_last, int w, int h) {
-  // Last pixel should not be interpolated
-  w--;
-
-  // Current line
-  ushort16* c_line;
-
-  for (int y = 0; y < h; y++) {
-    c_line = (ushort16*)mRaw->getData(0, y);
-    int off = 0;
-    for (int x = 0; x < w; x++) {
-      int Y = c_line[off];
-      int Cb = c_line[off+1] - hue;
-      int Cr = c_line[off+2] - hue;
-      YUV_TO_RGB<version>(Y, Cb, Cr, sraw_coeffs, c_line, off);
-      off += 3;
-
-      Y = c_line[off];
-      int Cb2 = (Cb + c_line[off+1+3] - hue) >> 1;
-      int Cr2 = (Cr + c_line[off+2+3] - hue) >> 1;
-      YUV_TO_RGB<version>(Y, Cb2, Cr2, sraw_coeffs, c_line, off);
-      off += 3;
-    }
-    // Last two pixels
-    int Y = c_line[off];
-    int Cb = c_line[off + 1] - hue_last;
-    int Cr = c_line[off + 2] - hue_last;
-    YUV_TO_RGB<version>(Y, Cb, Cr, sraw_coeffs, c_line, off);
-
-    Y = c_line[off+3];
-    YUV_TO_RGB<version>(Y, Cb, Cr, sraw_coeffs, c_line, off + 3);
-  }
-}
-
-// Note: Not thread safe, since it writes inplace.
-template <int version>
-inline void Cr2Decoder::interpolate_420(const int* sraw_coeffs, RawImage& mRaw,
-                                        int hue, int w, int h) {
-  // Last pixel should not be interpolated
-  w--;
-
-  const int end_h = h - 1;
-
-  static constexpr const bool atLastLine = true;
-
-  // Current line
-  ushort16* c_line;
-  // Next line
-  ushort16* n_line;
-  // Next line again
-  ushort16* nn_line;
-
-  int off;
-
-  for (int y = 0; y < end_h; y++) {
-    c_line = (ushort16*)mRaw->getData(0, y * 2);
-    n_line = (ushort16*)mRaw->getData(0, y * 2 + 1);
-    nn_line = (ushort16*)mRaw->getData(0, y * 2 + 2);
-    off = 0;
-    for (int x = 0; x < w; x++) {
-      int Y = c_line[off];
-      int Cb = c_line[off+1] - hue;
-      int Cr = c_line[off+2] - hue;
-      YUV_TO_RGB<version>(Y, Cb, Cr, sraw_coeffs, c_line, off);
-
-      Y = c_line[off+3];
-      int Cb2 = (Cb + c_line[off+1+6] - hue) >> 1;
-      int Cr2 = (Cr + c_line[off+2+6] - hue) >> 1;
-      YUV_TO_RGB<version>(Y, Cb2, Cr2, sraw_coeffs, c_line, off + 3);
-
-      // Next line
-      Y = n_line[off];
-      int Cb3 = (Cb + nn_line[off+1] - hue) >> 1;
-      int Cr3 = (Cr + nn_line[off+2] - hue) >> 1;
-      YUV_TO_RGB<version>(Y, Cb3, Cr3, sraw_coeffs, n_line, off);
-
-      Y = n_line[off+3];
-      Cb = (Cb + Cb2 + Cb3 + nn_line[off+1+6] - hue) >> 2;  //Left + Above + Right +Below
-      Cr = (Cr + Cr2 + Cr3 + nn_line[off+2+6] - hue) >> 2;
-      YUV_TO_RGB<version>(Y, Cb, Cr, sraw_coeffs, n_line, off + 3);
-      off += 6;
-    }
-    int Y = c_line[off];
-    int Cb = c_line[off+1] - hue;
-    int Cr = c_line[off+2] - hue;
-    YUV_TO_RGB<version>(Y, Cb, Cr, sraw_coeffs, c_line, off);
-
-    Y = c_line[off+3];
-    YUV_TO_RGB<version>(Y, Cb, Cr, sraw_coeffs, c_line, off + 3);
-
-    // Next line
-    Y = n_line[off];
-    Cb = (Cb + nn_line[off+1] - hue) >> 1;
-    Cr = (Cr + nn_line[off+2] - hue) >> 1;
-    YUV_TO_RGB<version>(Y, Cb, Cr, sraw_coeffs, n_line, off);
-
-    Y = n_line[off+3];
-    YUV_TO_RGB<version>(Y, Cb, Cr, sraw_coeffs, n_line, off + 3);
-  }
-
-  if (atLastLine) {
-    c_line = (ushort16*)mRaw->getData(0, end_h * 2);
-    n_line = (ushort16*)mRaw->getData(0, end_h * 2 + 1);
-    off = 0;
-
-    // Last line
-    for (int x = 0; x < w + 1; x++) {
-      int Y = c_line[off];
-      int Cb = c_line[off+1] - hue;
-      int Cr = c_line[off+2] - hue;
-      YUV_TO_RGB<version>(Y, Cb, Cr, sraw_coeffs, c_line, off);
-
-      Y = c_line[off+3];
-      YUV_TO_RGB<version>(Y, Cb, Cr, sraw_coeffs, c_line, off + 3);
-
-      // Next line
-      Y = n_line[off];
-      YUV_TO_RGB<version>(Y, Cb, Cr, sraw_coeffs, n_line, off);
-
-      Y = n_line[off+3];
-      YUV_TO_RGB<version>(Y, Cb, Cr, sraw_coeffs, n_line, off + 3);
-      off += 6;
-    }
-  }
-}
-
-template <int version>
-void Cr2Decoder::interpolate_422(int hue, RawImage& mRaw, int* sraw_coeffs,
-                                 int w, int h) {
-  hue = -hue + 16384;
-  interpolate_422<version>(sraw_coeffs, mRaw, hue, hue, w, h);
-}
-
-template <int version>
-void Cr2Decoder::interpolate_420(int hue, RawImage& mRaw, int* sraw_coeffs,
-                                 int w, int h) {
-  hue = -hue + 16384;
-  interpolate_420<version>(sraw_coeffs, mRaw, hue, w, h);
-}
-
-inline void Cr2Decoder::STORE_RGB(ushort16* X, int r, int g, int b,
-                                  int offset) {
-  X[offset + 0] = clampBits(r >> 8, 16);
-  X[offset + 1] = clampBits(g >> 8, 16);
-  X[offset + 2] = clampBits(b >> 8, 16);
-}
-
-template </* int version */>
-inline void Cr2Decoder::YUV_TO_RGB<1>(int Y, int Cb, int Cr,
-                                      const int* sraw_coeffs, ushort16* X,
-                                      int offset) {
-  int r, g, b;
-  r = sraw_coeffs[0] * (Y + ((50 * Cb + 22929 * Cr) >> 12));
-  g = sraw_coeffs[1] * (Y + ((-5640 * Cb - 11751 * Cr) >> 12));
-  b = sraw_coeffs[2] * (Y + ((29040 * Cb - 101 * Cr) >> 12));
-  STORE_RGB(X, r, g, b, offset);
-}
-
-template </* int version */>
-/* Algorithm found in EOS 40D */
-inline void Cr2Decoder::YUV_TO_RGB<0>(int Y, int Cb, int Cr,
-                                      const int* sraw_coeffs, ushort16* X,
-                                      int offset) {
-  int r, g, b;
-  r = sraw_coeffs[0] * (Y + Cr - 512);
-  g = sraw_coeffs[1] * (Y + ((-778 * Cb - (Cr * 2048)) >> 12) - 512);
-  b = sraw_coeffs[2] * (Y + (Cb - 512));
-  STORE_RGB(X, r, g, b, offset);
-}
-
-template </* int version */>
-void Cr2Decoder::interpolate_422<0>(int hue, RawImage& mRaw, int* sraw_coeffs,
-                                    int w, int h) {
-  hue = -hue + 16384;
-  auto hue_last = 16384;
-  interpolate_422<0>(sraw_coeffs, mRaw, hue, hue_last, w, h);
-}
-
-template </* int version */>
-/* Algorithm found in EOS 5d Mk III */
-inline void Cr2Decoder::YUV_TO_RGB<2>(int Y, int Cb, int Cr,
-                                      const int* sraw_coeffs, ushort16* X,
-                                      int offset) {
-  int r, g, b;
-  r = sraw_coeffs[0] * (Y + Cr);
-  g = sraw_coeffs[1] * (Y + ((-778 * Cb - (Cr * 2048)) >> 12));
-  b = sraw_coeffs[2] * (Y + Cb);
-  STORE_RGB(X, r, g, b, offset);
-}
-
 // Interpolate and convert sRaw data.
 void Cr2Decoder::sRawInterpolate() {
   TiffEntry* wb = mRootIFD->getEntryRecursive(CANONCOLORDATA);
@@ -437,7 +243,7 @@ void Cr2Decoder::sRawInterpolate() {
   // Offset to sRaw coefficients used to reconstruct uncorrected RGB data.
   uint32 offset = 78;
 
-  int sraw_coeffs[3];
+  std::array<int, 3> sraw_coeffs;
   sraw_coeffs[0] = wb->getU16(offset + 0);
   sraw_coeffs[1] =
       (wb->getU16(offset + 1) + wb->getU16(offset + 2) + 1) >> 1;
@@ -452,27 +258,20 @@ void Cr2Decoder::sRawInterpolate() {
   bool isOldSraw = hints.has("sraw_40d");
   bool isNewSraw = hints.has("sraw_new");
 
-  const auto& subSampling = mRaw->metadata.subsampling;
-  int width = mRaw->dim.x / subSampling.x;
-  int height = mRaw->dim.y / subSampling.y;
+  Cr2sRawInterpolator i(mRaw, sraw_coeffs, getHue());
 
-  if (subSampling.y == 1 && subSampling.x == 2) {
-    if (isOldSraw)
-      interpolate_422<0>(getHue(), mRaw, sraw_coeffs, width, height);
-    else {
-      if (isNewSraw) {
-        interpolate_422<2>(getHue(), mRaw, sraw_coeffs, width, height);
-      } else {
-        interpolate_422<1>(getHue(), mRaw, sraw_coeffs, width, height);
-      }
+  int version;
+  if (isOldSraw)
+    version = 0;
+  else {
+    if (isNewSraw) {
+      version = 2;
+    } else {
+      version = 1;
     }
-  } else if (subSampling.y == 2 && subSampling.x == 2) {
-    if (isNewSraw)
-      interpolate_420<2>(getHue(), mRaw, sraw_coeffs, width, height);
-    else
-      interpolate_420<1>(getHue(), mRaw, sraw_coeffs, width, height);
-  } else
-    ThrowRDE("Unknown subsampling: (%i; %i)", subSampling.x, subSampling.y);
+  }
+
+  i.interpolate(version);
 }
 
 } // namespace RawSpeed

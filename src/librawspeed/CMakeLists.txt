@@ -4,6 +4,7 @@ add_subdirectory(io)
 add_subdirectory(tiff)
 add_subdirectory(parsers)
 add_subdirectory(decompressors)
+add_subdirectory(interpolators)
 add_subdirectory(decoders)
 
 # list(SORT RAWSPEED_SOURCES)
