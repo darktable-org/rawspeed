@@ -24,6 +24,7 @@
 #include "common/Point.h"                  // for iPoint2D
 #include "common/RawImage.h"               // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h"  // for RawDecoderException (ptr o...
+#include <array>                           // for array
 #include <cassert>                         // for assert
 
 using namespace std;
@@ -94,6 +95,10 @@ struct Cr2sRawInterpolator::YCbCr final {
     Cr = (p0.Cr + p2.Cr) >> 1;
   }
 
+  inline void interpolate(const array<YCbCr, 2>& px) {
+    interpolate(px[0], px[1]);
+  }
+
   inline void interpolate(const YCbCr& p0, const YCbCr& p1, const YCbCr& p2,
                           const YCbCr& p3) {
     // Y is already good, need to interpolate Cb and Cr
@@ -103,10 +108,7 @@ struct Cr2sRawInterpolator::YCbCr final {
   }
 };
 
-/* sRaw interpolators - ugly as sin, but does the job in reasonably speed */
-
-// Note: Thread safe.
-
+// NOTE: Thread safe.
 template <int version>
 inline void Cr2sRawInterpolator::interpolate_422_row(ushort16* data, int hue,
                                                      int hue_last, int w) {
@@ -123,29 +125,37 @@ inline void Cr2sRawInterpolator::interpolate_422_row(ushort16* data, int hue,
   // for last (odd) pixel of the line,  just keep Cb/Cr from previous pixel
   // see http://lclevy.free.fr/cr2/#sraw
 
+  // poor man's circular buffer
+  bool sel = false;
+  array<YCbCr, 2> px;
+
+  // prefetch and prepare first good pixel
+  YCbCr::Load(&px[sel], data);
+  px[sel].process(hue);
+
   int x;
   for (x = 0; x < w - 2; x += 2) {
     assert(x + 4 <= w);
     assert(x % 2 == 0);
 
-    // load, process and output first pixel, which is full
-    YCbCr p0(data);
-    p0.process(hue);
-    YUV_TO_RGB<version>(p0, data);
+    // output first pixel, which is full
+    YUV_TO_RGB<version>(px[sel], data);
     data += 3;
 
     // load Y from second pixel, Cb/Cr need to be interpolated
-    YCbCr p1;
-    YCbCr::LoadY(&p1, data);
+    YCbCr p;
+    YCbCr::LoadY(&p, data);
 
-    // load Cb/Cr from third pixel, process
-    YCbCr p2;
-    YCbCr::LoadCbCr(&p2, data + 3);
-    p2.process(hue);
+    // switch to next cell in cicular buffer
+    sel = !sel;
 
-    // and finally, interpolate and output the second pixel
-    p1.interpolate(p0, p2);
-    YUV_TO_RGB<version>(p1, data);
+    // load third pixel, which is full, process
+    YCbCr::Load(&px[sel], data + 3);
+    px[sel].process(hue);
+
+    // and finally, interpolate and output the middle pixel
+    p.interpolate(px);
+    YUV_TO_RGB<version>(p, data);
     data += 3;
   }
 
@@ -181,7 +191,9 @@ inline void Cr2sRawInterpolator::interpolate_422(int hue, int hue_last, int w,
   }
 }
 
-// Note: Not thread safe, since it writes inplace.
+/* sRaw interpolators - ugly as sin, but does the job in reasonably speed */
+
+// NOTE: Not thread safe, since it writes inplace.
 template <int version>
 inline void Cr2sRawInterpolator::interpolate_420(int hue, int w, int h) {
   assert(w >= 2);
