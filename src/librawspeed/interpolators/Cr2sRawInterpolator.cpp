@@ -165,15 +165,13 @@ inline void Cr2sRawInterpolator::interpolate_422_row(ushort16* data, int w) {
   //      p0             p1
   //  .. [ Y1 Cb  Cr  ] [ Y2 ... ... ]
 
-  // load, process and output first pixel, which is full
-  YCbCr p(data);
-  p.process(hue);
-  YUV_TO_RGB<version>(p, data);
+  // output first pixel, which is full
+  YUV_TO_RGB<version>(px[sel], data);
   data += 3;
 
   // load Y from second pixel, keep Cb/Cr from previous pixel, and output
-  YCbCr::LoadY(&p, data);
-  YUV_TO_RGB<version>(p, data);
+  YCbCr::LoadY(&px[sel], data);
+  YUV_TO_RGB<version>(px[sel], data);
   data += 3;
 }
 
