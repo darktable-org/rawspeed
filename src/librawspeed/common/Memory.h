@@ -24,7 +24,7 @@
 
 #include "common/Common.h" // for isPowerOfTwo
 #include <cstddef>         // for size_t
-#include <cstdint>         // for SIZE_MAX, uintptr_t
+#include <cstdint>         // for SIZE_MAX
 
 namespace RawSpeed {
 
@@ -43,7 +43,7 @@ template <size_t alignment>
 inline void* __attribute__((malloc, warn_unused_result, alloc_size(1)))
 alignedMalloc(size_t size) {
   static_assert(isPowerOfTwo(alignment), "not power-of-two");
-  static_assert(((uintptr_t)alignment % sizeof(void*)) == 0,
+  static_assert(isAligned(alignment, sizeof(void*)),
                 "not multiple of sizeof(void*)");
 
 #if !(defined(HAVE_POSIX_MEMALIGN) || defined(HAVE_ALIGNED_ALLOC) ||           \

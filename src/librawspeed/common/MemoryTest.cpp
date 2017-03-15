@@ -110,7 +110,7 @@ TYPED_TEST(AlignedMallocDeathTest, AlignedMallocAssertions) {
         this->TheTest(ptr);
         alignedFree(ptr);
       },
-      "alignment % sizeof");
+      "isAligned\\(alignment\\, sizeof\\(void\\*\\)\\)");
   ASSERT_DEATH(
       {
         TypeParam* ptr =
@@ -118,7 +118,7 @@ TYPED_TEST(AlignedMallocDeathTest, AlignedMallocAssertions) {
         this->TheTest(ptr);
         alignedFree(ptr);
       },
-      "size % alignment");
+      "isAligned\\(size\\, alignment\\)");
 #endif
 }
 
@@ -177,7 +177,7 @@ TYPED_TEST(AlignedMallocDeathTest, TemplateArrayAssertions) {
             1, 1 + sizeof(TypeParam));
         alignedFree(ptr);
       },
-      "size % alignment");
+      "isAligned\\(size\\, alignment\\)");
 #endif
 }
 
@@ -216,7 +216,7 @@ TEST(AlignedMallocDeathTest, TemplateArraySizeAssertions) {
         uchar8* ptr = (uchar8*)(alignedMallocArray<alloc_alignment, uchar8>(1));
         alignedFree(ptr);
       },
-      "size % alignment");
+      "isAligned\\(size\\, alignment\\)");
 #endif
 }
 

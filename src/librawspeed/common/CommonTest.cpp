@@ -84,6 +84,25 @@ INSTANTIATE_TEST_CASE_P(RoundUpTest, RoundUpTest,
                         ::testing::ValuesIn(RoundUpValues));
 TEST_P(RoundUpTest, RoundUpTest) { ASSERT_EQ(roundUp(in, multiple), expected); }
 
+using IsAlignedType = std::tr1::tuple<size_t, size_t>;
+class IsAlignedTest : public ::testing::TestWithParam<IsAlignedType> {
+protected:
+  IsAlignedTest() = default;
+  virtual void SetUp() {
+    value = std::tr1::get<0>(GetParam());
+    multiple = std::tr1::get<1>(GetParam());
+  }
+
+  size_t value;
+  size_t multiple;
+};
+INSTANTIATE_TEST_CASE_P(IsAlignedTest, IsAlignedTest,
+                        ::testing::Combine(::testing::Range(0UL, 32UL),
+                                           ::testing::Range(0UL, 32UL)));
+TEST_P(IsAlignedTest, IsAlignedAfterRoundUpTest) {
+  ASSERT_TRUE(isAligned(roundUp(value, multiple), multiple));
+}
+
 using IsInType = std::tr1::tuple<string, bool>;
 class IsInTest : public ::testing::TestWithParam<IsInType> {
 protected:

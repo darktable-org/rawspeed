@@ -23,15 +23,15 @@
 #include "rawspeedconfig.h"
 
 #include <algorithm>        // for forward
+#include <cassert>          // for assert
+#include <cstdint>          // for uintptr_t
 #include <cstring>          // for memcpy, size_t
 #include <initializer_list> // for initializer_list
 #include <memory>           // for unique_ptr, allocator
 #include <string>           // for string
 #include <vector>           // for vector
-#include <cassert>          // for assert
 
 int rawspeed_get_number_of_processor_cores();
-
 
 namespace RawSpeed {
 
@@ -78,6 +78,12 @@ roundUp(size_t value, size_t multiple) {
   return ((multiple == 0) || (value % multiple == 0))
              ? value
              : value + multiple - (value % multiple);
+}
+
+template <typename T>
+constexpr inline __attribute__((const)) bool isAligned(T value,
+                                                       size_t multiple) {
+  return (multiple == 0) || ((uintptr_t)value % multiple == 0);
 }
 
 template <typename T, typename T2>

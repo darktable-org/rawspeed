@@ -23,7 +23,7 @@
 #include "common/Memory.h"
 
 #ifndef NDEBUG
-#include "common/Common.h" // for isPowerOfTwo
+#include "common/Common.h" // for isPowerOfTwo, isAligned
 #endif
 
 #include <cassert> // for assert
@@ -45,8 +45,8 @@ namespace RawSpeed {
 
 void* alignedMalloc(size_t size, size_t alignment) {
   assert(isPowerOfTwo(alignment)); // for posix_memalign, _aligned_malloc
-  assert(((uintptr_t)alignment % sizeof(void*)) == 0); // for posix_memalign
-  assert(((uintptr_t)size % alignment) == 0);          // for aligned_alloc
+  assert(isAligned(alignment, sizeof(void*))); // for posix_memalign
+  assert(isAligned(size, alignment));          // for aligned_alloc
 
   void* ptr = nullptr;
 
@@ -78,7 +78,7 @@ void* alignedMalloc(size_t size, size_t alignment) {
   ptr = malloc(size);
 #endif
 
-  assert(((uintptr_t)ptr % alignment) == 0);
+  assert(isAligned(ptr, alignment));
 
   return ptr;
 }
