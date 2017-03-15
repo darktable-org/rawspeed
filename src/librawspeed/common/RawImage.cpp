@@ -92,6 +92,7 @@ void RawImageData::createData() {
 
   // want each line to start at 16-byte aligned address
   pitch = roundUp((size_t)dim.x * bpp, alignment);
+  padding = pitch - dim.x * bpp;
   data = (uchar8*)alignedMallocArray<alignment>(dim.y, pitch);
 
   if (!data)
@@ -99,13 +100,56 @@ void RawImageData::createData() {
 
   uncropped_dim = dim;
 
-#if defined(DEBUG) && !defined(NDEBUG)
+#ifndef NDEBUG
+  if (dim.y > 1) {
+    // padding is the size of the area after last pixel of line n
+    // and before the first pixel of line n+1
+    assert(getData(dim.x - 1, 0) + bpp + padding == getData(0, 1));
+  }
+
   for (int j = 0; j < dim.y; j++) {
-    auto line = getData(0, j);
+    const uchar8* const line = getData(0, j);
+    // each line is indeed 16-byte aligned
     assert(isAligned(line, alignment));
   }
 #endif
+
+  poisonPadding();
 }
+
+#if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
+void RawImageData::poisonPadding() {
+  if (padding <= 0)
+    return;
+
+  for (int j = 0; j < uncropped_dim.y; j++) {
+    const uchar8* const curr_line_end =
+        getDataUncropped(uncropped_dim.x - 1, j) + bpp;
+
+    // and now poison the padding.
+    ASAN_POISON_MEMORY_REGION(curr_line_end, padding);
+  }
+}
+#else
+void __attribute__((const)) RawImageData::poisonPadding() {}
+#endif
+
+#if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
+void RawImageData::unpoisonPadding() {
+  if (padding <= 0)
+    return;
+
+  for (int j = 0; j < uncropped_dim.y; j++) {
+    const uchar8* const curr_line_end =
+        getDataUncropped(uncropped_dim.x - 1, j) + bpp;
+
+    // and now unpoison the padding.
+    ASAN_UNPOISON_MEMORY_REGION(curr_line_end, padding);
+  }
+}
+#else
+void __attribute__((const)) RawImageData::unpoisonPadding() {}
+#endif
 
 void RawImageData::destroyData() {
   if (data)

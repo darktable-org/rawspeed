@@ -118,6 +118,8 @@ public:
   uint32 getBpp() const { return bpp; }
   void setCpp(uint32 val);
   void createData();
+  void poisonPadding();
+  void unpoisonPadding();
   void destroyData();
   void blitFrom(const RawImage& src, const iPoint2D& srcPos,
                 const iPoint2D& size, const iPoint2D& destPos);
@@ -144,6 +146,11 @@ public:
   void createBadPixelMap();
   iPoint2D dim;
   uint32 pitch = 0;
+
+  // padding is the size of the area after last pixel of line n
+  // and before the first pixel of line n+1
+  uint32 padding = 0;
+
   bool isCFA{true};
   ColorFilterArray cfa;
   int blackLevel = -1;

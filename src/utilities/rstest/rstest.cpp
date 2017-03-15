@@ -135,7 +135,6 @@ string img_hash(RawImage &r) {
 
   APPEND("\n");
 
-  const size_t padding = r->pitch - dimUncropped.x * r->getBpp();
 
   // yes, this is not cool. but i see no way to compute the hash of the
   // full image, without duplicating image, and copying excluding padding
@@ -145,7 +144,7 @@ string img_hash(RawImage &r) {
     line_hashes.resize(dimUncropped.y, md5_init);
     for (int j = 0; j < dimUncropped.y; j++) {
       auto* d = r->getDataUncropped(0, j);
-      md5_hash(d, r->pitch - padding, line_hashes[j]);
+      md5_hash(d, r->pitch - r->padding, line_hashes[j]);
     }
     md5_hash((const uint8_t*)&line_hashes[0],
              sizeof(line_hashes[0]) * line_hashes.size(), hash_of_line_hashes);
