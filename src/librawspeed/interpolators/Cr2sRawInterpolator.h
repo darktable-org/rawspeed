@@ -30,13 +30,13 @@ class RawImage;
 class Cr2sRawInterpolator final {
   RawImage& mRaw;
   std::array<int, 3> sraw_coeffs;
-  int raw_hue;
+  int hue;
 
   struct YCbCr;
 
 public:
-  Cr2sRawInterpolator(RawImage& mRaw_, std::array<int, 3> sraw_coeffs_, int hue)
-      : mRaw(mRaw_), sraw_coeffs(sraw_coeffs_), raw_hue(hue) {}
+  Cr2sRawInterpolator(RawImage& mRaw_, std::array<int, 3> sraw_coeffs_, int hue_)
+      : mRaw(mRaw_), sraw_coeffs(sraw_coeffs_), hue(hue_) {}
 
   void interpolate(int version);
 
@@ -45,15 +45,10 @@ protected:
 
   inline void STORE_RGB(ushort16* X, int r, int g, int b);
 
-  template <int version>
-  inline void interpolate_422_row(ushort16* data, int hue, int hue_last, int w);
-  template <int version>
-  inline void interpolate_422(int hue, int hue_last, int w, int h);
+  template <int version> inline void interpolate_422_row(ushort16* data, int w);
+  template <int version> inline void interpolate_422(int w, int h);
 
-  template <int version> inline void interpolate_420(int hue, int w, int h);
-
-  template <int version> void interpolate_422(int w, int h);
-  template <int version> void interpolate_420(int w, int h);
+  template <int version> inline void interpolate_420(int w, int h);
 };
 
 } // namespace RawSpeed

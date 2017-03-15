@@ -78,14 +78,14 @@ struct Cr2sRawInterpolator::YCbCr final {
     Cr -= 16384;
   }
 
-  inline void applyHue(int hue) {
-    Cb += hue;
-    Cr += hue;
+  inline void applyHue(int hue_) {
+    Cb += hue_;
+    Cr += hue_;
   }
 
-  inline void process(int hue) {
+  inline void process(int hue_) {
     signExtend();
-    applyHue(hue);
+    applyHue(hue_);
   }
 
   inline void interpolate(const YCbCr& p0, const YCbCr& p2) {
@@ -110,8 +110,7 @@ struct Cr2sRawInterpolator::YCbCr final {
 
 // NOTE: Thread safe.
 template <int version>
-inline void Cr2sRawInterpolator::interpolate_422_row(ushort16* data, int hue,
-                                                     int hue_last, int w) {
+inline void Cr2sRawInterpolator::interpolate_422_row(ushort16* data, int w) {
   assert(data);
   assert(w >= 2);
   assert(w % 2 == 0);
@@ -168,7 +167,7 @@ inline void Cr2sRawInterpolator::interpolate_422_row(ushort16* data, int hue,
 
   // load, process and output first pixel, which is full
   YCbCr p(data);
-  p.process(hue_last);
+  p.process(hue);
   YUV_TO_RGB<version>(p, data);
   data += 3;
 
@@ -179,15 +178,14 @@ inline void Cr2sRawInterpolator::interpolate_422_row(ushort16* data, int hue,
 }
 
 template <int version>
-inline void Cr2sRawInterpolator::interpolate_422(int hue, int hue_last, int w,
-                                                 int h) {
+inline void Cr2sRawInterpolator::interpolate_422(int w, int h) {
   assert(w > 0);
   assert(h > 0);
 
   for (int y = 0; y < h; y++) {
     auto data = (ushort16*)mRaw->getData(0, y);
 
-    interpolate_422_row<version>(data, hue, hue_last, w);
+    interpolate_422_row<version>(data, w);
   }
 }
 
@@ -195,7 +193,7 @@ inline void Cr2sRawInterpolator::interpolate_422(int hue, int hue_last, int w,
 
 // NOTE: Not thread safe, since it writes inplace.
 template <int version>
-inline void Cr2sRawInterpolator::interpolate_420(int hue, int w, int h) {
+inline void Cr2sRawInterpolator::interpolate_420(int w, int h) {
   assert(w >= 2);
   assert(w % 2 == 0);
 
@@ -433,23 +431,6 @@ inline void Cr2sRawInterpolator::YUV_TO_RGB<2>(const YCbCr& p, ushort16* X) {
   g = sraw_coeffs[1] * (p.Y + ((-778 * p.Cb - (p.Cr * 2048)) >> 12));
   b = sraw_coeffs[2] * (p.Y + p.Cb);
   STORE_RGB(X, r, g, b);
-}
-
-template </* int version */>
-void Cr2sRawInterpolator::interpolate_422<0>(int w, int h) {
-  auto hue = raw_hue;
-  auto hue_last = 0;
-  interpolate_422<0>(hue, hue_last, w, h);
-}
-
-template <int version> void Cr2sRawInterpolator::interpolate_422(int w, int h) {
-  auto hue = raw_hue;
-  interpolate_422<version>(hue, hue, w, h);
-}
-
-template <int version> void Cr2sRawInterpolator::interpolate_420(int w, int h) {
-  auto hue = raw_hue;
-  interpolate_420<version>(hue, w, h);
 }
 
 // Interpolate and convert sRaw data.
