@@ -48,6 +48,8 @@ protected:
   template <int version> inline void interpolate_422_row(ushort16* data, int w);
   template <int version> inline void interpolate_422(int w, int h);
 
+  template <int version>
+  inline void interpolate_420_row(std::array<ushort16*, 3> line, int w);
   template <int version> inline void interpolate_420(int w, int h);
 };
 
