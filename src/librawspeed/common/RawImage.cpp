@@ -81,17 +81,30 @@ RawImageData::~RawImageData() {
 
 
 void RawImageData::createData() {
+  static constexpr const auto alignment = 16;
+
   if (dim.x > 65535 || dim.y > 65535)
     ThrowRDE("Dimensions too large for allocation.");
   if (dim.x <= 0 || dim.y <= 0)
     ThrowRDE("Dimension of one sides is less than 1 - cannot allocate image.");
   if (data)
     ThrowRDE("Duplicate data allocation in createData.");
-  pitch = roundUp((size_t)dim.x * bpp, 16);
-  data = (uchar8*)alignedMallocArray<16>(dim.y, pitch);
+
+  // want each line to start at 16-byte aligned address
+  pitch = roundUp((size_t)dim.x * bpp, alignment);
+  data = (uchar8*)alignedMallocArray<alignment>(dim.y, pitch);
+
   if (!data)
     ThrowRDE("Memory Allocation failed.");
+
   uncropped_dim = dim;
+
+#if defined(DEBUG) && !defined(NDEBUG)
+  for (int j = 0; j < dim.y; j++) {
+    auto line = getData(0, j);
+    assert(isAligned(line, alignment));
+  }
+#endif
 }
 
 void RawImageData::destroyData() {
