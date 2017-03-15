@@ -35,6 +35,7 @@
 #include "tiff/CiffTag.h"                 // for CiffTag, CiffTag::CIFF_MAK...
 #include <algorithm>                      // for min
 #include <array>                          // for array
+#include <cassert>                        // for cassert
 #include <cmath>                          // for copysignf, expf, logf
 #include <cstdio>                         // for fprintf, stderr
 #include <cstdlib>                        // for abs
@@ -296,6 +297,7 @@ array<HuffmanTable, 2> CrwDecoder::initHuffTables(uint32 table) {
   return mHuff;
 }
 
+// FIXME: this function is absolutely horrible.
 void CrwDecoder::decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 height)
 {
   int nblocks;
@@ -307,8 +309,10 @@ void CrwDecoder::decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 
   ByteStream input(mFile, offset);
   BitPumpJPEG pump(input);
 
+  assert((int)width == mRaw->dim.x);
+  assert((int)height == mRaw->dim.y);
+
   for (uint32 row=0; row < height; row+=8) {
-    auto *dest = (ushort16 *)&mRaw->getData()[row * width * 2];
     nblocks = min(8u, height - row) * width >> 6;
     for (block=0; block < nblocks; block++) {
       memset (diffbuf, 0, sizeof diffbuf);
@@ -328,20 +332,42 @@ void CrwDecoder::decodeRaw(bool lowbits, uint32 dec_table, uint32 width, uint32 
       for (uint32 i=0; i < 64; i++ ) {
         if (pnum++ % width == 0)
           base[0] = base[1] = 512;
-        if ((dest[(block << 6) + i] = base[i & 1] += diffbuf[i]) >> 10)
+
+        base[i & 1] += diffbuf[i];
+
+        if (base[i & 1] >> 10)
           ThrowRDE("Error decompressing");
+
+        const auto shift = (block << 6) + i;
+        const auto j = shift / width;
+        const auto k = shift % width;
+
+        auto* dest = (ushort16*)mRaw->getData(k, row + j);
+
+        *dest = base[i & 1];
       }
     }
+  }
 
-    // Add the uncompressed 2 low bits to the decoded 8 high bits
-    if (lowbits) {
+  // Add the uncompressed 2 low bits to the decoded 8 high bits
+  if (lowbits) {
+    size_t counter = 0;
+    for (uint32 row = 0; row < height; row += 8) {
+
       offset = 26 + row*width/4;
       ByteStream lowbit_input(mFile, offset, height*width/4);
       uint32 lines =
           min(height - row, 8u); // Process 8 rows or however are left
       for (uint32 i=0; i < width/4*lines; i++) {
         uint32 c = ((uint32) lowbit_input.getByte());
-        for (uint32 r=0; r < 8; r+=2, dest++) { // Process 8 bits in pairs
+
+        // Process 8 bits in pairs
+        for (uint32 r = 0; r < 8; r += 2, counter++) {
+          const auto j = counter / width;
+          const auto k = counter % width;
+
+          auto* dest = (ushort16*)mRaw->getData(k, j);
+
           ushort16 val = (*dest << 2) | ((c >> r) & 0x0003);
           if (width == 2672 && val < 512) val += 2; // No idea why this is needed
           *dest = val;
