@@ -89,38 +89,79 @@ struct Cr2sRawInterpolator::YCbCr final {
 // Note: Thread safe.
 
 template <int version>
+inline void Cr2sRawInterpolator::interpolate_422_row(ushort16* data, int hue,
+                                                     int hue_last, int w) {
+  assert(data);
+  assert(w >= 2);
+  assert(w % 2 == 0);
+
+  // the format is:
+  //   p0             p1             p2             p3
+  //  [ Y1 Cb  Cr  ] [ Y2 ... ... ] [ Y1 Cb  Cr  ] [ Y2 ... ... ] ...
+  // i.e. even pixels are full, odd pixels need interpolation:
+  //   p0             p1             p2             p3
+  //  [ Y1 Cb  Cr  ] [ Y2 Cb* Cr* ] [ Y1 Cb  Cr  ] [ Y2 Cb* Cr* ] ...
+  // for last (odd) pixel of the line,  just keep Cb/Cr from previous pixel
+  // see http://lclevy.free.fr/cr2/#sraw
+
+  int x;
+  for (x = 0; x < w - 2; x += 2) {
+    assert(x + 4 <= w);
+    assert(x % 2 == 0);
+
+    // load, process and output first pixel, which is full
+    YCbCr p0(data);
+    p0.signExtend();
+    p0.applyHue(hue);
+    YUV_TO_RGB<version>(p0.Y, p0.Cb, p0.Cr, data, 0);
+    data += 3;
+
+    // load Y from second pixel, Cb/Cr need to be interpolated
+    YCbCr p1;
+    YCbCr::LoadY(&p1, data);
+
+    // load Cb/Cr from third pixel, process
+    YCbCr p2;
+    YCbCr::LoadCbCr(&p2, data + 3);
+    p2.signExtend();
+    p2.applyHue(hue);
+
+    // and finally, interpolate and output the second pixel
+    p1.interpolate(p0, p2);
+    YUV_TO_RGB<version>(p1.Y, p1.Cb, p1.Cr, data, 0);
+    data += 3;
+  }
+
+  assert(x + 2 == w);
+  assert(x % 2 == 0);
+
+  // Last two pixels, the format is:
+  //      p0             p1
+  //  .. [ Y1 Cb  Cr  ] [ Y2 ... ... ]
+
+  // load, process and output first pixel, which is full
+  YCbCr p(data);
+  p.signExtend();
+  p.applyHue(hue_last);
+  YUV_TO_RGB<version>(p.Y, p.Cb, p.Cr, data, 0);
+  data += 3;
+
+  // load Y from second pixel, keep Cb/Cr from previous pixel, and output
+  YCbCr::LoadY(&p, data);
+  YUV_TO_RGB<version>(p.Y, p.Cb, p.Cr, data, 0);
+  data += 3;
+}
+
+template <int version>
 inline void Cr2sRawInterpolator::interpolate_422(int hue, int hue_last, int w,
                                                  int h) {
-  // Last pixel should not be interpolated
-  w--;
-
-  // Current line
-  ushort16* c_line;
+  assert(w > 0);
+  assert(h > 0);
 
   for (int y = 0; y < h; y++) {
-    c_line = (ushort16*)mRaw->getData(0, y);
-    int off = 0;
-    for (int x = 0; x < w; x++) {
-      int Y = c_line[off];
-      int Cb = c_line[off + 1] - hue;
-      int Cr = c_line[off + 2] - hue;
-      YUV_TO_RGB<version>(Y, Cb, Cr, c_line, off);
-      off += 3;
+    auto data = (ushort16*)mRaw->getData(0, y);
 
-      Y = c_line[off];
-      int Cb2 = (Cb + c_line[off + 1 + 3] - hue) >> 1;
-      int Cr2 = (Cr + c_line[off + 2 + 3] - hue) >> 1;
-      YUV_TO_RGB<version>(Y, Cb2, Cr2, c_line, off);
-      off += 3;
-    }
-    // Last two pixels
-    int Y = c_line[off];
-    int Cb = c_line[off + 1] - hue_last;
-    int Cr = c_line[off + 2] - hue_last;
-    YUV_TO_RGB<version>(Y, Cb, Cr, c_line, off);
-
-    Y = c_line[off + 3];
-    YUV_TO_RGB<version>(Y, Cb, Cr, c_line, off + 3);
+    interpolate_422_row<version>(data, hue, hue_last, w);
   }
 }
 
@@ -257,13 +298,13 @@ inline void Cr2sRawInterpolator::YUV_TO_RGB<2>(int Y, int Cb, int Cr,
 
 template </* int version */>
 void Cr2sRawInterpolator::interpolate_422<0>(int w, int h) {
-  auto hue = -raw_hue + 16384;
-  auto hue_last = 16384;
+  auto hue = raw_hue;
+  auto hue_last = 0;
   interpolate_422<0>(hue, hue_last, w, h);
 }
 
 template <int version> void Cr2sRawInterpolator::interpolate_422(int w, int h) {
-  auto hue = -raw_hue + 16384;
+  auto hue = raw_hue;
   interpolate_422<version>(hue, hue, w, h);
 }
 
@@ -277,10 +318,10 @@ void Cr2sRawInterpolator::interpolate(int version) {
   assert(version >= 0 && version <= 2);
 
   const auto& subSampling = mRaw->metadata.subsampling;
-  int width = mRaw->dim.x / subSampling.x;
-  int height = mRaw->dim.y / subSampling.y;
-
   if (subSampling.y == 1 && subSampling.x == 2) {
+    int width = mRaw->dim.x;
+    int height = mRaw->dim.y;
+
     switch (version) {
     case 0:
       interpolate_422<0>(width, height);
@@ -295,6 +336,9 @@ void Cr2sRawInterpolator::interpolate(int version) {
       __builtin_unreachable();
     }
   } else if (subSampling.y == 2 && subSampling.x == 2) {
+    int width = mRaw->dim.x / subSampling.x;
+    int height = mRaw->dim.y / subSampling.y;
+
     switch (version) {
     // no known sraws with "version 0"
     case 1:

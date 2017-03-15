@@ -47,7 +47,10 @@ protected:
   inline void STORE_RGB(ushort16* X, int r, int g, int b, int offset);
 
   template <int version>
+  inline void interpolate_422_row(ushort16* data, int hue, int hue_last, int w);
+  template <int version>
   inline void interpolate_422(int hue, int hue_last, int w, int h);
+
   template <int version> inline void interpolate_420(int hue, int w, int h);
 
   template <int version> void interpolate_422(int w, int h);
