@@ -89,7 +89,7 @@ static void jpeg_mem_src_int(j_decompress_ptr cinfo,
   src->resync_to_restart = jpeg_resync_to_restart; /* use default method */
   src->term_source = term_source;
   src->bytes_in_buffer = nbytes;
-  src->next_input_byte = (JOCTET*)buffer;
+  src->next_input_byte = (const JOCTET*)buffer;
 }
 
 #endif
@@ -114,7 +114,7 @@ void JpegDecompressor::decode(uint32 offX,
 
   vector<JSAMPROW> buffer(1);
 
-  JPEG_MEMSRC(&dinfo, (unsigned char*)input.getData(input.getRemainSize()),
+  JPEG_MEMSRC(&dinfo, input.getData(input.getRemainSize()),
               input.getRemainSize());
 
   if (JPEG_HEADER_OK != jpeg_read_header(&dinfo, static_cast<boolean>(true)))

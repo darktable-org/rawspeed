@@ -286,7 +286,7 @@ inline void RawImageDataU16::setWithLookUp(ushort16 value, uchar8* dst, uint32* 
     return;
   }
   if (table->dither) {
-    auto *t = (uint32 *)table->tables;
+    auto* t = (const uint32*)table->tables;
     uint32 lookup = t[value];
     uint32 base = lookup & 0xffff;
     uint32 delta = lookup >> 16;

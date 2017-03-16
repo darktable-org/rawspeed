@@ -98,15 +98,15 @@ RawImage ArwDecoder::decodeRawInternal() {
       static const size_t head_size = 40;
       const uchar8* head_orig = mFile->getData(head_off, head_size);
       vector<uchar8> head(head_size);
-      SonyDecrypt((uint32*)head_orig, (uint32*)&head[0], 10, key);
+      SonyDecrypt((const uint32*)head_orig, (uint32*)&head[0], 10, key);
       for (int i=26; i-- > 22; )
         key = key << 8 | head[i];
 
       // "Decrypt" the whole image buffer
       auto image_data = mFile->getData(off, len);
       auto image_decoded = Buffer::Create(len);
-      SonyDecrypt((uint32*)image_data, (uint32*)image_decoded.get(), len / 4,
-                  key);
+      SonyDecrypt((const uint32*)image_data, (uint32*)image_decoded.get(),
+                  len / 4, key);
 
       Buffer di(move(image_decoded), len);
 
@@ -353,7 +353,7 @@ void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 }
 
-void ArwDecoder::SonyDecrypt(uint32* ibuf, uint32* obuf, uint32 len,
+void ArwDecoder::SonyDecrypt(const uint32* ibuf, uint32* obuf, uint32 len,
                              uint32 key) {
   if (0 == len)
     return;
@@ -390,13 +390,6 @@ void ArwDecoder::SonyDecrypt(uint32* ibuf, uint32* obuf, uint32 len,
   }
 }
 
-void ArwDecoder::SonyDecrypt(uint32* buffer, uint32 len, uint32 key) {
-  if (0 == len)
-    return;
-
-  return SonyDecrypt(buffer, buffer, len, key);
-}
-
 void ArwDecoder::GetWB() {
   // Set the whitebalance for all the modern ARW formats (everything after A100)
   if (mRootIFD->hasEntryRecursive(DNGPRIVATEDATA)) {
@@ -419,7 +412,7 @@ void ArwDecoder::GetWB() {
     auto ifd_decoded = Buffer::Create(ifd_size);
     memcpy(ifd_decoded.get(), ifd_crypt.begin(), ifd_size);
 
-    SonyDecrypt((uint32*)(ifd_crypt.getData(off, len)),
+    SonyDecrypt((const uint32*)(ifd_crypt.getData(off, len)),
                 (uint32*)(ifd_decoded.get() + off), len / 4, key);
 
     Buffer decIFD(move(ifd_decoded), ifd_size);

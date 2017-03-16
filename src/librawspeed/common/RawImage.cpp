@@ -409,11 +409,11 @@ void RawImageData::fixBadPixelsThread( int start_y, int end_y )
   int bad_count = 0;
 #endif
   for (int y = start_y; y < end_y; y++) {
-    auto *bad_map = (uint32 *)&mBadPixelMap[y * mBadPixelMapPitch];
+    auto* bad_map = (const uint32*)&mBadPixelMap[y * mBadPixelMapPitch];
     for (int x = 0 ; x < gw; x++) {
       // Test if there is a bad pixel within these 32 pixels
       if (bad_map[x] != 0) {
-        auto *bad = (uchar8 *)&bad_map[x];
+        auto* bad = (const uchar8*)&bad_map[x];
         // Go through each pixel
         for (int i = 0; i < 4; i++) {
           for (int j = 0; j < 8; j++) {
