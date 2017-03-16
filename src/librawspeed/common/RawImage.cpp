@@ -92,7 +92,22 @@ void RawImageData::createData() {
 
   // want each line to start at 16-byte aligned address
   pitch = roundUp((size_t)dim.x * bpp, alignment);
+  assert(isAligned(pitch, alignment));
+
+#if defined(DEBUG) || __has_feature(address_sanitizer) ||                      \
+    defined(__SANITIZE_ADDRESS__)
+  // want to ensure that we have some padding
+  pitch += alignment * alignment;
+  assert(isAligned(pitch, alignment));
+#endif
+
   padding = pitch - dim.x * bpp;
+
+#if defined(DEBUG) || __has_feature(address_sanitizer) ||                      \
+    defined(__SANITIZE_ADDRESS__)
+  assert(padding > 0);
+#endif
+
   data = (uchar8*)alignedMallocArray<alignment>(dim.y, pitch);
 
   if (!data)
