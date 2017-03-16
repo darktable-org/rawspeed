@@ -21,6 +21,7 @@
 #include "RawSpeed-API.h"
 
 #include "io/Endianness.h" // for getHostEndianness, BSWAP16, Endianness::l...
+#include "md5.h"           // for md5_hash
 #include <chrono>          // for milliseconds, steady_clock, duration, dur...
 #include <cstdint>         // for uint8_t
 #include <cstdio>          // for snprintf, size_t, fclose, fopen, fprintf
@@ -52,8 +53,6 @@ int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
 
 using namespace std;
 using namespace RawSpeed;
-
-std::string md5_hash(const uint8_t *message, size_t len);
 
 struct Timer {
   mutable chrono::steady_clock::time_point start = chrono::steady_clock::now();
