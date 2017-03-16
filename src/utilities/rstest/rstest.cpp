@@ -26,7 +26,6 @@
 #include <cstdint>         // for uint8_t
 #include <cstdio>          // for snprintf, size_t, fclose, fopen, fprintf
 #include <cstdlib>         // for system
-#include <cstring>         // for memset
 #include <fstream>         // IWYU pragma: keep
 #include <iomanip>         // for operator<<, setw
 #include <iostream>        // for cout, cerr, left, internal
@@ -37,6 +36,8 @@
 #include <string>          // for string, char_traits, operator+, operator<<
 #include <type_traits>     // for enable_if<>::type
 #include <utility>         // for pair
+#include <vector>          // for vector
+// IWYU pragma: no_include <ext/alloc_traits.h>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -113,7 +114,12 @@ string img_hash(RawImage &r) {
   APPEND("dimCropped: %dx%d\n", r->dim.x, r->dim.y);
   const iPoint2D cropTL = r->getCropOffset();
   APPEND("cropOffset: %dx%d\n", cropTL.x, cropTL.y);
-  APPEND("pitch: %d\n", r->pitch);
+
+  // NOTE: pitch is internal property, a function of dimUncropped.x, bpp and
+  // some additional padding overhead, to align each line lenght to be a
+  // multiple of (currently) 16 bytes. And maybe with some additional
+  // const offset. there is no point in showing it here, it may differ.
+  // APPEND("pitch: %d\n", r->pitch);
 
   APPEND("blackAreas: ");
   for (auto ba : r->blackAreas)
@@ -129,17 +135,24 @@ string img_hash(RawImage &r) {
 
   APPEND("\n");
 
-  // clear the bytes at the end of each line, so we get a consistent hash
-  size_t padding = r->pitch - dimUncropped.x * r->getBpp();
-  if (padding) {
-    uint8_t *d = r->getDataUncropped(0, 1) - padding;
-    for (int i = 0; i < r->getUncroppedDim().y; ++i, d += r->pitch)
-      memset(d, 0, padding);
+  const size_t padding = r->pitch - dimUncropped.x * r->getBpp();
+
+  // yes, this is not cool. but i see no way to compute the hash of the
+  // full image, without duplicating image, and copying excluding padding
+  md5_state hash_of_line_hashes = md5_init;
+  {
+    vector<md5_state> line_hashes;
+    line_hashes.resize(dimUncropped.y, md5_init);
+    for (int j = 0; j < dimUncropped.y; j++) {
+      auto* d = r->getDataUncropped(0, j);
+      md5_hash(d, r->pitch - padding, line_hashes[j]);
+    }
+    md5_hash((const uint8_t*)&line_hashes[0],
+             sizeof(line_hashes[0]) * line_hashes.size(), hash_of_line_hashes);
   }
-  string hash =
-      md5_hash(r->getDataUncropped(0, 0),
-               static_cast<size_t>(r->pitch) * r->getUncroppedDim().y);
-  APPEND("data md5sum: %s\n", hash.c_str());
+
+  APPEND("md5sum of per-line md5sums: %s\n",
+         hash_to_string(hash_of_line_hashes).c_str());
 
   for (const string& e : r->errors)
     APPEND("WARNING: [rawspeed] %s\n", e.c_str());
