@@ -119,6 +119,9 @@ void SrwDecoder::decodeCompressed( const TiffIFD* raw )
     BitPumpMSB32 bits(mFile, line_offset);
     int op[4];
     auto *img = (ushort16 *)mRaw->getData(0, y);
+    const auto* const past_last =
+        (ushort16*)(mRaw->getData(width - 1, y) + mRaw->getBpp());
+
     ushort16* img_up = (ushort16*)mRaw->getData(0, max(0, (int)y - 1));
     ushort16* img_up2 = (ushort16*)mRaw->getData(0, max(0, (int)y - 2));
     // Image is arranged in groups of 16 pixels horizontally
@@ -169,7 +172,9 @@ void SrwDecoder::decodeCompressed( const TiffIFD* raw )
           int32 adj = 0;
           if (b)
             adj = ((int32)bits.getBits(b) << (32 - b) >> (32 - b));
-          img[c] = adj + pred_left;
+
+          if (img + c < past_last)
+            img[c] = adj + pred_left;
         }
         // Now we decode odd pixels
         pred_left = x ? img[-1] : 128;
@@ -178,7 +183,9 @@ void SrwDecoder::decodeCompressed( const TiffIFD* raw )
           int32 adj = 0;
           if (b)
             adj = ((int32)bits.getBits(b) << (32 - b) >> (32 - b));
-          img[c] = adj + pred_left;
+
+          if (img + c < past_last)
+            img[c] = adj + pred_left;
         }
       }
       img += 16;
