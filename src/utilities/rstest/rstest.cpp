@@ -52,6 +52,14 @@ int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
 }
 #endif
 
+std::string img_hash(RawSpeed::RawImage& r);
+
+void writePPM(const RawSpeed::RawImage& raw, const std::string& fn);
+
+size_t process(const std::string& filename,
+               const RawSpeed::CameraMetaData* metadata, bool create,
+               bool dump);
+
 using namespace std;
 using namespace RawSpeed;
 

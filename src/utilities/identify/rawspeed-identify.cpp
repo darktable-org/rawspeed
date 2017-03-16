@@ -42,6 +42,8 @@ int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
 
 using namespace RawSpeed;
 
+std::string find_cameras_xml(const char* argv0);
+
 std::string find_cameras_xml(const char *argv0) {
   struct stat statbuf;
 

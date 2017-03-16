@@ -64,6 +64,7 @@ public:
   DngDecoderSlices* parent;
 };
 
+void* DecodeThread(void* _this);
 
 class DngDecoderSlices
 {

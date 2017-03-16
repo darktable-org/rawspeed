@@ -65,6 +65,8 @@ protected:
   int end_y;
 };
 
+void* RawImageWorkerThread(void* _this);
+
 class TableLookUp {
 public:
   TableLookUp(int ntables, bool dither);

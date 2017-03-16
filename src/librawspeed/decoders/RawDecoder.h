@@ -57,6 +57,8 @@ class RawDecoderThread
     uint32 taskNo = -1;
 };
 
+void* RawDecoderDecodeThread(void* _this);
+
 class RawDecoder
 {
 public:
