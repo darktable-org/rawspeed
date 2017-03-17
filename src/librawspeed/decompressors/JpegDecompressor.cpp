@@ -50,7 +50,9 @@ namespace RawSpeed {
 
 #ifdef HAVE_JPEG_MEM_SRC
 
-#define JPEG_MEMSRC(A, B, C) jpeg_mem_src(A, B, C)
+// FIXME: some libjpeg versions discard const qual for the input data pointer
+// should this be a cmake check?
+#define JPEG_MEMSRC(A, B, C) jpeg_mem_src(A, const_cast<unsigned char*>(B), C)
 
 #else
 
