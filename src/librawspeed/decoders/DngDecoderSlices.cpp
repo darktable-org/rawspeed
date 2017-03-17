@@ -129,7 +129,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
                                   ? mRaw->dim.y - e->offY
                                   : e->height;
 
-      iPoint2D size(mRaw->dim.x, thisTileLength);
+      iPoint2D tileSize(mRaw->dim.x, thisTileLength);
       iPoint2D pos(0, e->offY);
 
       bool big_endian = (getTiffEndianness(mFile) == big);
@@ -145,7 +145,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
         if (inputPitch == 0)
           ThrowRDE("Data input pitch is too short. Can not decode!");
 
-        decompressor.readUncompressedRaw(size, pos, inputPitch, mBps,
+        decompressor.readUncompressedRaw(tileSize, pos, inputPitch, mBps,
                                          big_endian ? BitOrder_Jpeg
                                                     : BitOrder_Plain);
       } catch (RawDecoderException& err) {
