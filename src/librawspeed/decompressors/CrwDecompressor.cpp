@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/CrwDecompressor.h"
-#include "common/Common.h"                // for uint32, uchar8, ushort16
+#include "common/Common.h"                // for uint32, ushort16, uchar8
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
@@ -31,7 +31,7 @@
 #include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for min
 #include <array>                          // for array
-#include <cstring>                        // for memset, size_t
+#include <cassert>                        // for assert
 
 using namespace std;
 
@@ -68,7 +68,10 @@ namespace RawSpeed {
  */
 
 HuffmanTable CrwDecompressor::makeDecoder(int n, const uchar8* source) {
-  if (n > 1)
+  assert(n >= 0 && n <= 1);
+  assert(source);
+
+  if (n < 0 || n > 1)
     ThrowRDE("Invalid table number specified");
 
   HuffmanTable ht;
@@ -80,6 +83,8 @@ HuffmanTable CrwDecompressor::makeDecoder(int n, const uchar8* source) {
 }
 
 array<HuffmanTable, 2> CrwDecompressor::initHuffTables(uint32 table) {
+  assert(table <= 2);
+
   static const uchar8 first_tree[3][29] = {
       {0,    1,    4,    2,    3,    1,    2,    0,    0,    0,
        0,    0,    0,    0,    0,    0,    0x04, 0x03, 0x05, 0x06,
@@ -144,11 +149,49 @@ array<HuffmanTable, 2> CrwDecompressor::initHuffTables(uint32 table) {
   return mHuff;
 }
 
-// FIXME: this function is absolutely horrible.
+// FIXME: this function is horrible.
+inline void
+CrwDecompressor::decodeBlock(std::array<int, 64>* diffBuf,
+                             const std::array<HuffmanTable, 2>& mHuff,
+                             BitPumpJPEG* pump) {
+  assert(diffBuf);
+  assert(pump);
+
+  // decode the block
+  for (int i = 0; i < 64; i++) {
+    const int leaf = mHuff[i > 0].decodeLength(*pump);
+    assert(leaf >= 0);
+
+    if (leaf == 0 && i)
+      break;
+
+    if (leaf == 0xff)
+      continue;
+
+    i += leaf >> 4;
+
+    const int len = leaf & 15;
+
+    if (len == 0)
+      continue;
+
+    int diff = pump->getBits(len);
+
+    if (i >= 64)
+      break;
+
+    diff = HuffmanTable::signExtended(diff, len);
+
+    (*diffBuf)[i] = diff;
+  }
+}
+
+// FIXME: this function is horrible.
 void CrwDecompressor::decompress(RawImage& mRaw, RawSpeed::Buffer* mFile,
                                  uint32 dec_table, bool lowbits) {
-  int nblocks;
-  int block, diffbuf[64], leaf, len, diff, carry = 0, pnum = 0, base[2];
+  assert(mFile);
+
+  int carry = 0, base[2];
 
   auto mHuff = initHuffTables(dec_table);
 
@@ -159,69 +202,82 @@ void CrwDecompressor::decompress(RawImage& mRaw, RawSpeed::Buffer* mFile,
   ByteStream input(mFile, offset);
   BitPumpJPEG pump(input);
 
-  for (uint32 row = 0; row < height; row += 8) {
-    nblocks = min(8u, height - row) * width >> 6;
-    for (block = 0; block < nblocks; block++) {
-      memset(diffbuf, 0, sizeof diffbuf);
-      for (uint32 i = 0; i < 64; i++) {
-        leaf = mHuff[i > 0].decodeLength(pump);
-        if (leaf == 0 && i)
-          break;
-        if (leaf == 0xff)
-          continue;
-        i += leaf >> 4;
-        len = leaf & 15;
-        if (len == 0)
-          continue;
-        diff = pump.getBits(len);
-        diff = HuffmanTable::signExtended(diff, len);
-        if (i < 64)
-          diffbuf[i] = diff;
-      }
-      diffbuf[0] += carry;
-      carry = diffbuf[0];
-      for (uint32 i = 0; i < 64; i++) {
-        if (pnum++ % width == 0)
+  for (uint32 j = 0; j < height;) {
+    const int nBlocks = min(8u, height - j) * width >> 6;
+    assert(nBlocks > 0);
+
+    ushort16* dest = nullptr;
+
+    uint32 i = 0;
+
+    for (int block = 0; block < nBlocks; block++) {
+      array<int, 64> diffBuf = {{}};
+      decodeBlock(&diffBuf, mHuff, &pump);
+
+      // predict and output the block
+
+      diffBuf[0] += carry;
+      carry = diffBuf[0];
+
+      for (uint32 k = 0; k < 64; k++, i++, dest++) {
+        if (i % width == 0) {
+          // new line
+          i = 0;
+
+          dest = (ushort16*)mRaw->getData(0, j);
+
+          j++;
           base[0] = base[1] = 512;
+        }
 
-        base[i & 1] += diffbuf[i];
+        base[k & 1] += diffBuf[k];
 
-        if (base[i & 1] >> 10)
+        if (base[k & 1] >> 10)
           ThrowRDE("Error decompressing");
 
-        const auto shift = (block << 6) + i;
-        const auto j = shift / width;
-        const auto k = shift % width;
-
-        auto* dest = (ushort16*)mRaw->getData(k, row + j);
-
-        *dest = base[i & 1];
+        assert(dest);
+        *dest = base[k & 1];
       }
     }
   }
 
   // Add the uncompressed 2 low bits to the decoded 8 high bits
   if (lowbits) {
-    size_t counter = 0;
-    for (uint32 row = 0; row < height; row += 8) {
+    offset = 26;
+    ByteStream lowbitInput(mFile, offset, height * width / 4);
 
-      offset = 26 + row * width / 4;
-      ByteStream lowbit_input(mFile, offset, height * width / 4);
-      uint32 lines =
-          min(height - row, 8u); // Process 8 rows or however are left
-      for (uint32 i = 0; i < width / 4 * lines; i++) {
-        uint32 c = ((uint32)lowbit_input.getByte());
+    for (uint32 j = 0; j < height;) {
+      // Process 8 rows or however are left
+      const uint32 lines = min(height - j, 8u);
+
+      // Process 8 rows or however are left
+      const uint32 nBlocks = width / 4 * lines;
+      assert(nBlocks > 0);
+
+      ushort16* dest = nullptr;
+
+      uint32 i = 0;
+
+      for (uint32 block = 0; block < nBlocks; block++) {
+        auto c = (uint32)lowbitInput.getByte();
 
         // Process 8 bits in pairs
-        for (uint32 r = 0; r < 8; r += 2, counter++) {
-          const auto j = counter / width;
-          const auto k = counter % width;
+        for (uint32 r = 0; r < 8; r += 2, i++, dest++) {
+          if (i % width == 0) {
+            // new line
+            i = 0;
 
-          auto* dest = (ushort16*)mRaw->getData(k, j);
+            dest = (ushort16*)mRaw->getData(0, j);
+
+            j++;
+          }
 
           ushort16 val = (*dest << 2) | ((c >> r) & 0x0003);
+
           if (width == 2672 && val < 512)
             val += 2; // No idea why this is needed
+
+          assert(dest);
           *dest = val;
         }
       }

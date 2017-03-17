@@ -23,6 +23,7 @@
 
 #include "common/Common.h"                      // for uint32, uchar8
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "io/BitPumpJPEG.h"                     // for BitPumpJPEG
 #include <array>                                // for array
 
 namespace RawSpeed {
@@ -41,6 +42,10 @@ public:
 private:
   static HuffmanTable makeDecoder(int n, const uchar8* source);
   static std::array<HuffmanTable, 2> initHuffTables(uint32 table);
+
+  inline static void decodeBlock(std::array<int, 64>* diffBuf,
+                                 const std::array<HuffmanTable, 2>& mHuff,
+                                 BitPumpJPEG* pump);
 };
 
 } // namespace RawSpeed
