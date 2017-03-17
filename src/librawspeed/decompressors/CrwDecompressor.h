@@ -21,28 +21,26 @@
 
 #pragma once
 
-#include "common/RawImage.h"     // for RawImage
-#include "decoders/RawDecoder.h" // for RawDecoder
-#include "tiff/CiffIFD.h"        // for CiffIFD
-#include <memory>                // for unique_ptr
+#include "common/Common.h"                      // for uint32, uchar8
+#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include <array>                                // for array
 
 namespace RawSpeed {
 
 class Buffer;
 
-class CameraMetaData;
+class RawImage;
 
-class CrwDecoder final : public RawDecoder {
+class HuffmanTable;
+
+class CrwDecompressor final : public AbstractDecompressor {
 public:
-  CrwDecoder(std::unique_ptr<CiffIFD> rootIFD, Buffer* file);
-  RawImage decodeRawInternal() override;
-  void checkSupportInternal(const CameraMetaData* meta) override;
-  void decodeMetaDataInternal(const CameraMetaData* meta) override;
+  static void decompress(RawImage& mRaw, RawSpeed::Buffer* mFile,
+                         uint32 dec_table, bool lowbits);
 
-protected:
-  std::unique_ptr<CiffIFD> mRootIFD;
-  int getDecoderVersion() const override { return 0; }
-  static float canonEv(long in);
+private:
+  static HuffmanTable makeDecoder(int n, const uchar8* source);
+  static std::array<HuffmanTable, 2> initHuffTables(uint32 table);
 };
 
 } // namespace RawSpeed

@@ -4,6 +4,8 @@ FILE(GLOB DECOMPRESSOR_SOURCES
   "AbstractLJpegDecompressor.h"
   "Cr2Decompressor.cpp"
   "Cr2Decompressor.h"
+  "CrwDecompressor.cpp"
+  "CrwDecompressor.h"
   "DeflateDecompressor.cpp"
   "DeflateDecompressor.h"
   "HasselbladDecompressor.cpp"
