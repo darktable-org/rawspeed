@@ -140,11 +140,16 @@ uchar8 CiffEntry::getByte(uint32 num) {
 string CiffEntry::getString() {
   if (type != CIFF_ASCII)
     ThrowCPE("Wrong type 0x%x encountered. Expected Ascii", type);
+
+  if (count == 0)
+    return string("");
+
   if (!own_data) {
     own_data = new uchar8[count];
     memcpy(own_data, data, count);
     own_data[count-1] = 0;  // Ensure string is not larger than count defines
   }
+
   return string((const char*)&own_data[0]);
 }
 
