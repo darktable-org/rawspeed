@@ -48,7 +48,7 @@ class ColorFilterArray
 
 public:
   ColorFilterArray() = default;
-  ColorFilterArray(const iPoint2D& size);
+  explicit ColorFilterArray(const iPoint2D& size);
 
   void setSize(const iPoint2D& size);
   void setColorAt(iPoint2D pos, CFAColor c);

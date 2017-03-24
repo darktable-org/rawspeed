@@ -46,7 +46,7 @@ class RawDecoder;
 class RawDecoderThread
 {
   public:
-    RawDecoderThread(RawDecoder* parent_) : parent(parent_) {}
+    explicit RawDecoderThread(RawDecoder* parent_) : parent(parent_) {}
     uint32 start_y = 0;
     uint32 end_y = 0;
     const char* error = nullptr;
@@ -67,7 +67,7 @@ public:
   /* The Buffer is not owned by this class, will not be deleted, and must remain
    */
   /* valid while this object exists */
-  RawDecoder(Buffer* file);
+  explicit RawDecoder(Buffer* file);
   virtual ~RawDecoder() = default;
 
   /* Check if the decoder can decode the image from this camera */

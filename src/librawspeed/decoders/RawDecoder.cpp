@@ -304,7 +304,7 @@ RawSpeed::RawImage RawDecoder::decodeRaw()
   } catch (IOException &e) {
     ThrowRDE("%s", e.what());
   }
-  return nullptr;
+  return RawImage(nullptr);
 }
 
 void RawDecoder::decodeMetaData(const CameraMetaData* meta) {

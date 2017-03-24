@@ -22,13 +22,14 @@
 
 #include "common/Common.h"                      // for uint32
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/ByteStream.h"                      // for ByteStream
 
 namespace RawSpeed {
 
 class iPoint2D;
 
 class RawImage;
+
+class ByteStream;
 
 class HuffmanTable;
 

@@ -29,7 +29,7 @@ class Buffer;
 class FileWriter
 {
 public:
-  FileWriter(const char *filename);
+  explicit FileWriter(const char* filename);
 
   void writeFile(Buffer* fileMap, uint32 size = 0);
   const char* Filename() const { return mFilename; }

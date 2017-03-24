@@ -28,8 +28,9 @@ namespace RawSpeed {
 
 class TiffParserException final : public RawspeedException {
 public:
-  TiffParserException(const std::string& msg) : RawspeedException(msg) {}
-  TiffParserException(const char* msg) : RawspeedException(msg) {}
+  explicit TiffParserException(const std::string& msg)
+      : RawspeedException(msg) {}
+  explicit TiffParserException(const char* msg) : RawspeedException(msg) {}
 };
 
 #define ThrowTPE(...) ThrowExceptionHelper(TiffParserException, __VA_ARGS__)

@@ -97,11 +97,12 @@ class BitStream : private ByteStream
   size_type fillCache(const uchar8* input);
 
 public:
-  BitStream(ByteStream& s)
+  explicit BitStream(ByteStream& s)
       : ByteStream(s.getSubStream(s.getPosition(), s.getRemainSize())) {}
 
   // deprecated:
-  BitStream(Buffer* f, size_type offset) : ByteStream(f->getSubView(offset)) {}
+  BitStream(Buffer* f, size_type offset)
+      : ByteStream(DataBuffer(f->getSubView(offset))) {}
 
 private:
   inline void fillSafe() {

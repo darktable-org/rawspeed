@@ -28,8 +28,9 @@ namespace RawSpeed {
 
 class RawDecoderException : public RawspeedException {
 public:
-  RawDecoderException(const std::string& msg) : RawspeedException(msg) {}
-  RawDecoderException(const char* msg) : RawspeedException(msg) {}
+  explicit RawDecoderException(const std::string& msg)
+      : RawspeedException(msg) {}
+  explicit RawDecoderException(const char* msg) : RawspeedException(msg) {}
 };
 
 #define ThrowRDE(...) ThrowExceptionHelper(RawDecoderException, __VA_ARGS__)

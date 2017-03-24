@@ -59,7 +59,7 @@ public:
 #ifdef HAVE_PTHREAD
   pthread_t threadid;
 #endif
-  DngDecoderThread(DngDecoderSlices* parent_) : parent(parent_) {}
+  explicit DngDecoderThread(DngDecoderSlices* parent_) : parent(parent_) {}
   std::queue<std::unique_ptr<DngSliceElement>> slices;
   DngDecoderSlices* parent;
 };

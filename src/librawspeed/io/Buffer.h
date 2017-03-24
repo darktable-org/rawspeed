@@ -67,7 +67,7 @@ public:
          size_type size_);
 
   // Allocates the memory
-  Buffer(size_type size);
+  explicit Buffer(size_type size);
 
   // Data already allocated
   explicit Buffer(const uchar8* data_, size_type size_)
@@ -152,7 +152,7 @@ class DataBuffer : public Buffer
   bool inNativeByteOrder = true;
 public:
   DataBuffer() = default;
-  DataBuffer(const Buffer &data_, bool inNativeByteOrder_ = true)
+  explicit DataBuffer(const Buffer& data_, bool inNativeByteOrder_ = true)
       : Buffer(data_), inNativeByteOrder(inNativeByteOrder_) {}
 
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap byte order if required

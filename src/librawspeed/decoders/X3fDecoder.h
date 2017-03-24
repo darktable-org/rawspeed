@@ -38,7 +38,7 @@ class Buffer;
 
 class X3fDecoder final : public RawDecoder {
 public:
-  X3fDecoder(Buffer* file);
+  explicit X3fDecoder(Buffer* file);
   ~X3fDecoder() override;
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;

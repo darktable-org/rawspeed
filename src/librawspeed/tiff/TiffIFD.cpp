@@ -90,7 +90,7 @@ TiffIFD::TiffIFD(TiffIFD* parent_, const DataBuffer& data, uint32 offset)
 
   checkOverflow();
 
-  ByteStream bs = data;
+  ByteStream bs(data);
   bs.setPosition(offset);
 
   auto numEntries = bs.getU16(); // Directory entries in this IFD

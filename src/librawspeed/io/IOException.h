@@ -28,8 +28,8 @@ namespace RawSpeed {
 
 class IOException final : public RawspeedException {
 public:
-  IOException(const std::string& msg) : RawspeedException(msg) {}
-  IOException(const char* msg) : RawspeedException(msg) {}
+  explicit IOException(const std::string& msg) : RawspeedException(msg) {}
+  explicit IOException(const char* msg) : RawspeedException(msg) {}
 };
 
 #define ThrowIOE(...) ThrowExceptionHelper(IOException, __VA_ARGS__)

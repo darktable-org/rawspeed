@@ -215,7 +215,7 @@ protected:
   void doLookup(int start_y, int end_y) override;
 
   RawImageDataU16();
-  RawImageDataU16(const iPoint2D &dim, uint32 cpp = 1);
+  explicit RawImageDataU16(const iPoint2D& dim, uint32 cpp = 1);
   friend class RawImage;
 };
 
@@ -230,7 +230,7 @@ protected:
   void fixBadPixel(uint32 x, uint32 y, int component = 0) override;
   [[noreturn]] void doLookup(int start_y, int end_y) override;
   RawImageDataFloat();
-  RawImageDataFloat(const iPoint2D &dim, uint32 cpp = 1);
+  explicit RawImageDataFloat(const iPoint2D& dim, uint32 cpp = 1);
   friend class RawImage;
 };
 
@@ -242,8 +242,8 @@ protected:
                           uint32 componentsPerPixel = 1);
    RawImageData* operator->() const { return p_; }
    RawImageData& operator*() const { return *p_; }
-   RawImage(RawImageData* p);  // p must not be NULL
-  ~RawImage();
+   explicit RawImage(RawImageData* p); // p must not be NULL
+   ~RawImage();
    RawImage(const RawImage& p);
    RawImage& operator=(const RawImage& p) noexcept;
    RawImage& operator=(RawImage&& p) noexcept;
@@ -257,24 +257,24 @@ inline RawImage RawImage::create(RawImageType type)  {
   switch (type)
   {
     case TYPE_USHORT16:
-      return new RawImageDataU16();
+      return RawImage(new RawImageDataU16());
     case TYPE_FLOAT32:
-      return new RawImageDataFloat();
+      return RawImage(new RawImageDataFloat());
     default:
       writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!");
   }
-  return nullptr;
+  return RawImage(nullptr);
 }
 
 inline RawImage RawImage::create(const iPoint2D &dim, RawImageType type,
                                  uint32 componentsPerPixel) {
   switch (type) {
     case TYPE_USHORT16:
-      return new RawImageDataU16(dim, componentsPerPixel);
+      return RawImage(new RawImageDataU16(dim, componentsPerPixel));
     default:
       writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!");
   }
-  return nullptr;
+  return RawImage(nullptr);
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,

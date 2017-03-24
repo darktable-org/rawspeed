@@ -33,7 +33,7 @@ class TiffEntry;
 class DngOpcodes
 {
 public:
-  DngOpcodes(TiffEntry* entry);
+  explicit DngOpcodes(TiffEntry* entry);
   ~DngOpcodes();
   void applyOpCodes(RawImage& ri);
 

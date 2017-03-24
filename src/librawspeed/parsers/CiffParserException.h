@@ -29,8 +29,9 @@ namespace RawSpeed {
 
 class CiffParserException final : public RawspeedException {
 public:
-  CiffParserException(const std::string& msg) : RawspeedException(msg) {}
-  CiffParserException(const char* msg) : RawspeedException(msg) {}
+  explicit CiffParserException(const std::string& msg)
+      : RawspeedException(msg) {}
+  explicit CiffParserException(const char* msg) : RawspeedException(msg) {}
 };
 
 #define ThrowCPE(...) ThrowExceptionHelper(CiffParserException, __VA_ARGS__)

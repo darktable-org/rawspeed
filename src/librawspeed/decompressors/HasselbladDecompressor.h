@@ -21,12 +21,13 @@
 
 #pragma once
 
-#include "common/RawImage.h"                         // for RawImage
 #include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
 #include "io/BitPumpMSB32.h"                         // for BitPumpMSB32
 #include "io/Buffer.h"                               // for Buffer, Buffer:...
 
 namespace RawSpeed {
+
+class RawImage;
 
 class HasselbladDecompressor final : public AbstractLJpegDecompressor
 {

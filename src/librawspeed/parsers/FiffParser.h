@@ -30,7 +30,7 @@ class RawDecoder;
 
 class FiffParser final : public RawParser {
 public:
-  FiffParser(Buffer* input);
+  explicit FiffParser(Buffer* input);
   virtual ~FiffParser() = default;
 
   virtual RawDecoder* getDecoder();

@@ -52,7 +52,7 @@ class DngOpcodes::FixBadPixelsConstant final : public DngOpcodes::DngOpcode {
   uint32 value;
 
 public:
-  FixBadPixelsConstant(ByteStream& bs) {
+  explicit FixBadPixelsConstant(ByteStream& bs) {
     value = bs.getU32();
     bs.getU32(); // Bayer Phase not used
   }
@@ -85,7 +85,7 @@ class DngOpcodes::FixBadPixelsList final : public DngOpcodes::DngOpcode {
   std::vector<uint32> badPixels;
 
 public:
-  FixBadPixelsList(ByteStream& bs) {
+  explicit FixBadPixelsList(ByteStream& bs) {
     bs.getU32(); // Skip phase - we don't care
     auto badPointCount = bs.getU32();
     auto badRectCount = bs.getU32();
@@ -123,7 +123,7 @@ class DngOpcodes::ROIOpcode : public DngOpcodes::DngOpcode {
 protected:
   uint32 top, left, bottom, right;
 
-  ROIOpcode(ByteStream& bs) {
+  explicit ROIOpcode(ByteStream& bs) {
     top = bs.getU32();
     left = bs.getU32();
     bottom = bs.getU32();
@@ -143,7 +143,7 @@ protected:
 
 class DngOpcodes::TrimBounds final : public ROIOpcode {
 public:
-  TrimBounds(ByteStream& bs) : ROIOpcode(bs) {}
+  explicit TrimBounds(ByteStream& bs) : ROIOpcode(bs) {}
 
   void apply(RawImage& ri) override {
     ri->subFrame(iRectangle2D(left, top, right - left, bottom - top));
@@ -156,7 +156,7 @@ class DngOpcodes::PixelOpcode : public ROIOpcode {
 protected:
   uint32 firstPlane, planes, rowPitch, colPitch;
 
-  PixelOpcode(ByteStream& bs) : ROIOpcode(bs) {
+  explicit PixelOpcode(ByteStream& bs) : ROIOpcode(bs) {
     firstPlane = bs.getU32();
     planes = bs.getU32();
     rowPitch = bs.getU32();
@@ -197,7 +197,7 @@ class DngOpcodes::LookupOpcode : public PixelOpcode {
 protected:
   vector<ushort16> lookup;
 
-  LookupOpcode(ByteStream& bs) : PixelOpcode(bs), lookup(65536) {}
+  explicit LookupOpcode(ByteStream& bs) : PixelOpcode(bs), lookup(65536) {}
 
   void setup(const RawImage& ri) override {
     PixelOpcode::setup(ri);
@@ -215,7 +215,7 @@ protected:
 
 class DngOpcodes::TableMap final : public LookupOpcode {
 public:
-  TableMap(ByteStream& bs) : LookupOpcode(bs) {
+  explicit TableMap(ByteStream& bs) : LookupOpcode(bs) {
     auto count = bs.getU32();
 
     if (count == 0 || count > 65536)
@@ -233,7 +233,7 @@ public:
 
 class DngOpcodes::PolynomialMap final : public LookupOpcode {
 public:
-  PolynomialMap(ByteStream& bs) : LookupOpcode(bs) {
+  explicit PolynomialMap(ByteStream& bs) : LookupOpcode(bs) {
     vector<double> polynomial;
 
     polynomial.resize(bs.getU32() + 1UL);
@@ -288,7 +288,8 @@ protected:
 template <typename S>
 class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrColBase {
 public:
-  OffsetPerRowOrCol(ByteStream& bs) : DeltaRowOrColBase(bs, 65535.0f) {}
+  explicit OffsetPerRowOrCol(ByteStream& bs)
+      : DeltaRowOrColBase(bs, 65535.0f) {}
 
   void apply(RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {
@@ -306,7 +307,7 @@ public:
 template <typename S>
 class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrColBase {
 public:
-  ScalePerRowOrCol(ByteStream& bs) : DeltaRowOrColBase(bs, 1024.0f) {}
+  explicit ScalePerRowOrCol(ByteStream& bs) : DeltaRowOrColBase(bs, 1024.0f) {}
 
   void apply(RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {

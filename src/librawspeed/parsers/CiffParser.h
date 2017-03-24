@@ -33,7 +33,7 @@ class RawDecoder;
 
 class CiffParser final : public RawParser {
 public:
-  CiffParser(Buffer* input);
+  explicit CiffParser(Buffer* input);
 
   void parseData();
   RawDecoder* getDecoder();

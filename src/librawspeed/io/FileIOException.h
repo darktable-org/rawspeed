@@ -29,8 +29,8 @@ namespace RawSpeed {
 
 class FileIOException final : public RawDecoderException {
 public:
-  FileIOException(const std::string& msg) : RawDecoderException(msg) {}
-  FileIOException(const char* msg) : RawDecoderException(msg) {}
+  explicit FileIOException(const std::string& msg) : RawDecoderException(msg) {}
+  explicit FileIOException(const char* msg) : RawDecoderException(msg) {}
 };
 
 #define ThrowFIE(...) ThrowExceptionHelper(FileIOException, __VA_ARGS__)

@@ -73,7 +73,7 @@ public:
 class Camera
 {
 public:
-  Camera(pugi::xml_node &camera);
+  explicit Camera(pugi::xml_node& camera);
   Camera(const Camera* camera, uint32 alias_num);
   const CameraSensorInfo* getSensorInfo(int iso) const;
   std::string make;

@@ -39,7 +39,7 @@ class X3fDirectory
 {
 public:
   X3fDirectory() : id(std::string()) {}
-  X3fDirectory(ByteStream *bytes);
+  explicit X3fDirectory(ByteStream* bytes);
   uint32 offset{0};
   uint32 length{0};
   std::string id;
@@ -78,7 +78,7 @@ public:
 
 class X3fParser final : public RawParser {
 public:
-  X3fParser(Buffer* file);
+  explicit X3fParser(Buffer* file);
   ~X3fParser();
   RawDecoder* getDecoder();
 

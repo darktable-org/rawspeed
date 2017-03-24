@@ -60,10 +60,12 @@ private:
   }
 
 public:
-  RawspeedException(const std::string& msg) : std::runtime_error(msg) {
+  explicit RawspeedException(const std::string& msg) : std::runtime_error(msg) {
     log(msg.c_str());
   }
-  RawspeedException(const char* msg) : std::runtime_error(msg) { log(msg); }
+  explicit RawspeedException(const char* msg) : std::runtime_error(msg) {
+    log(msg);
+  }
 };
 
 #undef XSTR

@@ -21,6 +21,7 @@
 
 #include "decompressors/HasselbladDecompressor.h"
 #include "common/Common.h"              // for uint32, ushort16
+#include "common/RawImage.h"            // for RawImage, RawImageData
 #include "decompressors/HuffmanTable.h" // for HuffmanTable
 #include "io/BitPumpMSB32.h"            // for BitPumpMSB32, BitStream<>::f...
 #include "io/ByteStream.h"              // for ByteStream

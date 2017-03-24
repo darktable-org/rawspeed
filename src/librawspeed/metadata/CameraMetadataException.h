@@ -28,8 +28,9 @@ namespace RawSpeed {
 
 class CameraMetadataException final : public RawspeedException {
 public:
-  CameraMetadataException(const std::string& msg) : RawspeedException(msg) {}
-  CameraMetadataException(const char* msg) : RawspeedException(msg) {}
+  explicit CameraMetadataException(const std::string& msg)
+      : RawspeedException(msg) {}
+  explicit CameraMetadataException(const char* msg) : RawspeedException(msg) {}
 };
 
 #define ThrowCME(...) ThrowExceptionHelper(CameraMetadataException, __VA_ARGS__)

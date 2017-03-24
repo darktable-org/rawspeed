@@ -37,8 +37,7 @@ protected:
 
 public:
   ByteStream() = default;
-  ByteStream(const DataBuffer& buffer)
-    : DataBuffer(buffer) {}
+  explicit ByteStream(const DataBuffer& buffer) : DataBuffer(buffer) {}
   ByteStream(const Buffer &buffer, size_type offset, size_type size_,
              bool inNativeByteOrder_ = true)
       : DataBuffer(buffer.getSubView(0, offset + size_), inNativeByteOrder_),
