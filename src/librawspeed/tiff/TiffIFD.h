@@ -55,10 +55,6 @@ class TiffIFD
   friend class FiffParser;
   friend class TiffParser;
 
-  // make sure we never copy-constuct/assign a TiffIFD to keep the owning subcontainers contents save
-  TiffIFD(const TiffIFD &) = delete;            // NOLINT
-  TiffIFD &operator=(const TiffIFD &) = delete; // NOLINT
-
   void checkOverflow();
   void add(TiffIFDOwner subIFD);
   void add(TiffEntryOwner entry);
@@ -70,6 +66,11 @@ public:
   TiffIFD() = default;
   TiffIFD(TiffIFD* parent, const DataBuffer& data, uint32 offset);
   virtual ~TiffIFD() = default;
+
+  // make sure we never copy-constuct/assign a TiffIFD to keep the owning
+  // subcontainers contents save
+  TiffIFD(const TiffIFD&) = delete;
+  TiffIFD& operator=(const TiffIFD&) = delete;
 
   uint32 getNextIFD() const {return nextIFD;}
   std::vector<const TiffIFD*> getIFDsWithTag(TiffTag tag) const;
