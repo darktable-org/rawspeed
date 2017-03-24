@@ -504,8 +504,10 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(ASSHOTNEUTRAL)) {
     TiffEntry* as_shot_neutral = mRootIFD->getEntryRecursive(ASSHOTNEUTRAL);
     if (as_shot_neutral->count == 3) {
-      for (uint32 i = 0; i < 3; i++)
-        mRaw->metadata.wbCoeffs[i] = 1.0f / as_shot_neutral->getFloat(i);
+      for (uint32 i = 0; i < 3; i++) {
+        float c = as_shot_neutral->getFloat(i);
+        mRaw->metadata.wbCoeffs[i] = (c != 0.0f) ? (1.0f / c) : 0.0f;
+      }
     }
   } else if (mRootIFD->hasEntryRecursive(ASSHOTWHITEXY)) {
     TiffEntry* as_shot_white_xy = mRootIFD->getEntryRecursive(ASSHOTWHITEXY);
