@@ -65,6 +65,12 @@ else()
   set(ALLOW_DOWNLOADING_GOOGLETEST OFF CACHE BOOL "If googletest src tree is not found in location specified by GOOGLETEST_PATH, do fetch the archive from internet" FORCE)
 endif()
 option(BUILD_TOOLS "Build some tools (identify, rstest)." ON)
+option(BUILD_BENCHMARKING "Build some benchmarks." OFF)
+if(BUILD_BENCHMARKING)
+  option(ALLOW_DOWNLOADING_GOOGLEBENCHMARK "If googlebenchmark src tree is not found in location specified by GOOGLEBENCHMARK_PATH, do fetch the archive from internet" OFF)
+else()
+  set(ALLOW_DOWNLOADING_GOOGLEBENCHMARK OFF CACHE BOOL "If googlebenchmark src tree is not found in location specified by GOOGLEBENCHMARK_PATH, do fetch the archive from internet" FORCE)
+endif()
 
 set(GOOGLETEST_PATH "/usr/src/googletest" CACHE PATH
                     "Path to the googletest root tree. Should contain googletest and googlemock subdirs. And CMakeLists.txt in root, and in both of these subdirs")
@@ -72,6 +78,9 @@ set(GOOGLETEST_PATH "/usr/src/googletest" CACHE PATH
 set(PUGIXML_PATH "/usr/src/pugixml" CACHE PATH "Path to the pugixml root tree.")
 
 set(ZLIB_PATH "/usr/src/zlib" CACHE PATH "Path to the zlib root tree.")
+
+set(GOOGLEBENCHMARK_PATH "/usr/src/googlebenchmark" CACHE PATH
+                    "Path to the googlebenchmark root tree.")
 
 include(build-type)
 

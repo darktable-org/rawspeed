@@ -11,6 +11,12 @@ if(BUILD_TESTING)
   add_dependencies(dependencies gtest gmock_main)
 endif()
 
+if(BUILD_BENCHMARKING)
+  include(GoogleBenchmark)
+
+  add_dependencies(dependencies benchmark)
+endif()
+
 if(WITH_PTHREADS)
   message(STATUS "Looking for PThreads")
   set(CMAKE_THREAD_PREFER_PTHREAD 1)
