@@ -22,7 +22,11 @@ elseif(NOT CMAKE_BUILD_TYPE STREQUAL "RELWITHDEBINFO")
   add_definitions(-DDEBUG)
 endif()
 
-set(linkerflags "-Wl,--as-needed")
+IF(NOT APPLE)
+  set(linkerflags "-Wl,--as-needed")
+ELSE()
+  set(linkerflags "")
+ENDIF()
 # NOT CMAKE_STATIC_LINKER_FLAGS
 SET(CMAKE_SHARED_LINKER_FLAGS
     "${CMAKE_SHARED_LINKER_FLAGS} ${linkerflags}"
