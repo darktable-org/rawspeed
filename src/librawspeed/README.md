@@ -1,6 +1,6 @@
-#RawSpeed Developer Information
+# RawSpeed Developer Information
 
-##Include files
+## Include files
 
 All needed headers are available by including “RawSpeed-API.h”. You must have the pthread library and headers installed and available.
 
@@ -10,7 +10,7 @@ You must implement a single function: “int rawspeed_get_number_of_processor_co
 
 Everything is encapsulated on a “RawSpeed” namespace. To avoid clutter the examples below assume you have a “using namespace RawSpeed;” before using the code.
 
-##The Camera Definition file
+## The Camera Definition file
 
 This file describes basic information about different cameras, so new cameras can be supported without code changes. See the separate documentation on the [Camera Definition File](/data/README.md).
 
@@ -40,7 +40,7 @@ You can disable specific cameras in the xml file, or if you would want to do it 
     metadata.disableCamera("Fuji")
 ```
 
-##Using RawSpeed
+## Using RawSpeed
 
 You need to have the file data in a Buffer object. This can either be created by supplying the file content in memory using Buffer(buffer_pointer, size_of_buffer), or use a “FileReader” object to read the content of a file, like this:
 
@@ -140,7 +140,7 @@ delete decoder;
 
 Actually the map and decoder can be deallocated once the metadata has been decoded. The RawImage will automatically be deallocated when it goes out of scope and the decoder has been deallocated. After that all data pointers that have been retrieved will no longer be usable.
 
-##Tips & Tricks
+## Tips & Tricks
 
 You will most likely find that a relatively long time is spent actually reading the file. The biggest trick to speeding up raw reading is to have some sort of prefetching going on while the file is being decoded. This is the main reason why RawSpeed decodes from memory, and doesn’t use direct file reads while decoding.
 
@@ -150,7 +150,7 @@ A more complex option is to read the file to a memory portion, which is then giv
 
 You might want to try out memory mapped files. However this approach has in practical tests shown to be just as fast in best cases (when file is cached), or slower (uncached files).
 
-##Bad pixel elimination
+## Bad pixel elimination
 
 A few cameras will mark bad pixels within their RAW files in various ways. For the camera we know how to this will be picked up by RawSpeed. By default these pixels are eliminated by 4-way interpolating to the closest valid pixels in an on-axis search from the current pixel.
 
@@ -186,7 +186,7 @@ This enables you to quickly search through the array. If you for instance cast t
 
 Note that all positions are uncropped image positions. Also note that if you keep the interpolation enabled you can still retrieve the mBadPixelMap, but the mBadPixelPositions will be cleared.
 
-##Updating Camera Support
+## Updating Camera Support
 
 If you implement an autoupdate feature, you simply update “cameras.xml” and delete and re-create the CameraMetaData object.
 
@@ -195,18 +195,18 @@ There might of course be some specific cameras that require code-changes to work
 That means you should safely be able to update cameras.xml to a newer version, and cameras requiring a code update will then simply refuse to open.
 
 
-##Format Specific Notes
+## Format Specific Notes
 
-###Canon sRaw/mRaw
+### Canon sRaw/mRaw
 Canon reduced resolution Raws (mRaw/sRaw) are returned as RGB with 3 component per pixel without whitebalance compensation, so color balance should match ordinary CR2 images. The subsampled color components are linearly interpolated.
 
 This is even more complicated by the fact that Canon has changed the way they store the sraw whitebalance values. This means that on newer cameras, you might have to specify "invert_sraw_wb" as a hint to properly decode the whitebalance on these casmeras. To see examples of this, search cameras.xml for "invert_sraw_wb".
 
-###Sigma Foveon Support
+### Sigma Foveon Support
 
 Sigma Foveon (x3f-based) images are delivered as raw image values. dcraw offers a "cleanup" function, that will reduce noise in Foveon images. RawSpeed does not have an equivalent function, so if you want to use RawSpeed as a drop-in replacement, you will either have to convert the dcraw "foveon_interpolate", or implement similar noise reduction, if you want it.
 
-###Fuji Rotated Support
+### Fuji Rotated Support
 
 By default RawSpeed delivers Fuji SuperCCD images as 45 degree rotated images.
 
@@ -221,18 +221,18 @@ RawDecoder->fujiRotate = false;
 Do however note the CFA colors are still referring to the rotated color positions.
 
 
-##Other options
+## Other options
 
-###RawDecoder -> uncorrectedRawValues
+### RawDecoder -> uncorrectedRawValues
 If you enable this on the decoder before calling RawDecoder->decodeRaw(), you will get complely unscaled values. Some cameras have a "compressed" mode, where a non-linear compression curve is applied to the image data. If you enable this parameter the compression curve will not be applied to the image. Currently there is no way to retrieve the compression curve, so this option is only useful for diagnostics.
 
 
-###RawImage.mDitherScale
+### RawImage.mDitherScale
 This option will determine whether dither is applied when values are scaled to 16 bits. Dither is applied as a random value between "+-scalefactor/2". This will make it so that images with less number of bits/pixel doesn't have a big tendency for posterization, since values close to eachother will be spaced out a bit.
 
 Another way of putting it, is that if your camera saves 12 bit per pixel, when RawSpeed upscales this to 16 bits, the 4 "new" bits will be random instead of always the same value.
 
-##Memory Usage
+## Memory Usage
 
 RawSpeed will need:
 

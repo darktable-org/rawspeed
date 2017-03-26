@@ -1,4 +1,4 @@
-#RawSpeed Camera Definition File
+# RawSpeed Camera Definition File
 
 The camera definition file is used for decoding images which doesn’t require any code changes. This enables us to add support for cameras which where not yet released when the code was written.
 
@@ -26,7 +26,7 @@ The camera definition file is used for decoding images which doesn’t require a
 
 Let’s go through it line for line:
 
-##Camera Name
+## Camera Name
 
 ```xml
 <Camera make="Panasonic" model="DMC-FZ45" mode="4:3" supported="yes" decoder_version="0">
@@ -40,7 +40,7 @@ The supported tag specifies whether a camera is supported. If this tag isn’t a
 
 The decoder_version is a possibility to disable decoding, if the decoder version is too old to properly decode the images from this camera. If the code version of RawSpeed is too old to decode this camera type, it will refuse to do so. If this isn’t specified it is assumed that all older versions of RawSpeed can decode the image.
 
-##Camera ID
+## Camera ID
 
 ```xml
 <ID make="Panasonic" model="DMC-FZ45">Panasonic DMC-FZ45</ID>
@@ -48,7 +48,7 @@ The decoder_version is a possibility to disable decoding, if the decoder version
 
 This sets the canonical name for the camera. The content of the tag should be the same as the UniqueCameraModel DNG field in the Adobe DNG converted raw file and can be used to match the camera against DCP files or other external references. The make and model attributes are clean names (no repetitions, spurious words, etc) that can be used in UI. If the Alias tag is omitted the make and model from the Camera tag are used instead (joined with a space for UniqueCameraModel), so in this particular case the tag is actually not needed.
 
-##CFA Colors
+## CFA Colors
 
 ```xml
   <CFA width="2" height="2">
@@ -71,7 +71,7 @@ Valid colors are:
 
 Colors are G(reen), R(ed), B(blue) , F(uji green), C(yan), M(agenta) and Y(ellow).
 
-##Image Cropping
+## Image Cropping
 
 ```xml
   <Crop x="0" y="0" width="-58" height="-10"/>
@@ -79,7 +79,7 @@ Colors are G(reen), R(ed), B(blue) , F(uji green), C(yan), M(agenta) and Y(ellow
 
 This is the cropping to be applied to the image. x & y are specified relative to the top-left of the image and is specified in pixels. Width & Height can be a number which is the desired output size in pixels. A negative number for width or height specifies a number of pixels that must be cropped from the bottom/right side of the image.
 
-##Sensor Info
+## Sensor Info
 
 ```xml
   <Sensor black="150" white="4097" iso_min="0" iso_max="0"/>
@@ -95,7 +95,7 @@ Both ISO values are inclusive, so specify ranges so they don’t overlap (0->399
 
 For backward compatibility, leave the default value as the last entry.
 
-##Sensor Black Areas
+## Sensor Black Areas
 
 ```xml
   <BlackAreas>
@@ -110,7 +110,7 @@ All the areas are summed up in a histogram for each color component, and the med
 
 If any black areas are defined it will override any “black” value set in the Sensor definition.
 
-##Decoder Hints
+## Decoder Hints
 
 ```xml
   <Hints>
@@ -120,7 +120,7 @@ If any black areas are defined it will override any “black” value set in the
 
 This may contain manufacturer-specific hints for decoding. This can result in the code taking a specific decoder path, or otherwise treat the image differently. This is mainly used when it isn’t possible to determine which way to decode the image directly from the image data.
 
-##Camera Model Aliases
+## Camera Model Aliases
 
 ```xml
   <Aliases>
