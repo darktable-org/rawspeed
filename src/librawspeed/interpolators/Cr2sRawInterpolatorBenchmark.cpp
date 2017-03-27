@@ -70,19 +70,18 @@ static inline void BM_Cr2sRawInterpolator(benchmark::State& state) {
   while (state.KeepRunning())
     i.interpolate(version::value);
 
-  state.SetItemsProcessed((size_t)dim.x * dim.y * state.iterations());
-  state.SetBytesProcessed(3 * sizeof(ushort16) * state.items_processed());
+  state.SetComplexityN(dim.area());
+  state.SetItemsProcessed(state.complexity_length_n() * state.iterations());
+  state.SetBytesProcessed(3UL * sizeof(ushort16) * state.items_processed());
 }
 
 static inline void CustomArguments(benchmark::internal::Benchmark* b) {
+  b->RangeMultiplier(2);
 #if 1
-  // from 1MPix to 256MPix
-  b->RangeMultiplier(2)->Range(1 << 20, 256 << 20);
+  b->Arg(256 << 20)->Unit(benchmark::kMillisecond);
 #else
-  b->Arg(256 << 20);
+  b->Range(1, 1024 << 20)->Complexity(benchmark::oN);
 #endif
-
-  b->Unit(benchmark::kMillisecond);
 }
 
 static constexpr const iPoint2D S422(2, 1);
