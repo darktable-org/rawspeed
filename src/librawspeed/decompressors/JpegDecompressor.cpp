@@ -120,8 +120,8 @@ void JpegDecompressor::decode(uint32 offX,
 
   vector<JSAMPROW> buffer(1);
 
-  JPEG_MEMSRC(&dinfo, input.getData(input.getRemainSize()),
-              input.getRemainSize());
+  const auto size = input.getRemainSize();
+  JPEG_MEMSRC(&dinfo, input.getData(size), size);
 
   if (JPEG_HEADER_OK != jpeg_read_header(&dinfo, static_cast<boolean>(true)))
     ThrowRDE("Unable to read JPEG header");
