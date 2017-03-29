@@ -125,7 +125,13 @@ RawImage Cr2Decoder::decodeNewFormat() {
   TiffEntry* offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
 
-  Cr2Decompressor d(*mFile, offsets->getU32(), counts->getU32(), mRaw);
+  const uint32 byteOffset = offsets->getU32();
+  const uint32 byteCount = counts->getU32();
+
+  if (!mFile->isValid(byteOffset, byteCount))
+    ThrowRDE("Strip is larger than the data; image may be truncated.");
+
+  Cr2Decompressor d(*mFile, byteOffset, byteCount, mRaw);
 
   try {
     d.decode(s_width);
