@@ -31,6 +31,7 @@
 #include "tiff/TiffEntry.h"               // IWYU pragma: keep
 #include "tiff/TiffIFD.h"                 // for TiffID, TiffRootIFD, TiffR...
 #include <algorithm>                      // for max
+#include <array>                          // for array
 #include <cassert>                        // for assert
 #include <cstring>                        // for memset
 #include <istream>                        // for basic_istream::operator>>
@@ -410,7 +411,10 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
             ThrowRDE("Invalid Huffman value. Image Corrupt");
           }
           bits.skipBitsNoFill(nbits);
-          i += curve[(val >> 5)];
+
+          const ushort16 curveElement = val >> 5;
+          assert(curveElement < curve.size());
+          i += curve[curveElement];
           dst[0] = clampBits(i, 16);
           dst++;
         }

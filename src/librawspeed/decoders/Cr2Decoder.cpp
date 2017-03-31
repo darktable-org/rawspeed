@@ -26,6 +26,7 @@
 #include "decoders/RawDecoderException.h"  // for RawDecoderException, Thro...
 #include "decompressors/Cr2Decompressor.h" // for Cr2Decompressor
 #include "interpolators/Cr2sRawInterpolator.h" // for Cr2sRawInterpolator
+#include "io/Buffer.h"                         // for Buffer
 #include "io/ByteStream.h"                     // for ByteStream
 #include "io/Endianness.h"               // for getHostEndianness, Endian...
 #include "io/IOException.h"              // for IOException
