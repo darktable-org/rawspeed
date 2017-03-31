@@ -37,18 +37,6 @@ namespace RawSpeedTest {
 
 std::vector<int> ISOList(6);
 
-int main(int argc, char **argv) {
-  ISOList.push_back(0);
-
-  int n = {25};
-  std::generate(ISOList.begin() + 1, ISOList.end(), [&n] { return n *= 4; });
-
-  std::srand(2016122923);
-
-  testing::InitGoogleMock(&argc, argv);
-  return RUN_ALL_TESTS();
-}
-
 class CameraSensorInfoTestDumb
     : public ::testing::TestWithParam<std::tr1::tuple<int, int>> {
 protected:
@@ -318,3 +306,16 @@ TEST_P(CameraSensorInfoTest, isIsoWithin) {
 }
 
 } // namespace RawSpeedTest
+
+int main(int argc, char** argv) {
+  RawSpeedTest::ISOList.push_back(0);
+
+  int n = {25};
+  std::generate(RawSpeedTest::ISOList.begin() + 1, RawSpeedTest::ISOList.end(),
+                [&n] { return n *= 4; });
+
+  std::srand(2016122923);
+
+  testing::InitGoogleMock(&argc, argv);
+  return RUN_ALL_TESTS();
+}
