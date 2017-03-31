@@ -24,17 +24,24 @@ dist: trusty # *sigh*
 group: unstable
 sudo: required
 
+git:
+  depth: 9999999
+
 services:
   - docker
 
 before_install:
-  - if [[ "$LEGACY" == "UGH" ]]; then
-      sudo apt-get update -qq && sudo apt-get upgrade -qq cmake g++-4.8 git libjpeg-dev libpugixml-dev libxml2-utils make ninja-build zlib1g-dev;
+  - if [[ "$EXTRA" == "NODOCKER" ]]; then
+      travis_retry sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y;
+      travis_retry sudo apt-get update -q;
+      travis_retry sudo apt-get upgrade -y -q -f --fix-missing cmake g++-4.8 g++-6 git libjpeg-dev libpugixml-dev libxml2-utils make ninja-build zlib1g-dev;
     elif [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       docker pull darktable/rawspeed;
-      sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y;
-      sudo apt-get update -q;
-      sudo apt-get upgrade -q g++-6;
+      if [[ "$FLAVOR" == "Coverage" ]]; then
+        travis_retry sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y;
+        travis_retry sudo apt-get update -q;
+        travis_retry sudo apt-get upgrade -y -q -f --fix-missing g++-6;
+      fi;
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update && brew tap Homebrew/bundle && cd .ci && brew bundle --verbose; fi
 
 env:
@@ -58,27 +65,43 @@ matrix:
     sudo: required
     services:
       - docker
-    env: CC=clang-3.9 CXX=clang++-3.9
+    env: CC=clang-3.9 CXX=clang++-3.9 ECO="-DWITH_PTHREADS=OFF"
   - os: linux
-    sudo: required
-    services:
-      - docker
-    env: ECO="-DWITH_PTHREADS=OFF"
+    env: CC=gcc-4.8 CXX=g++-4.8 EXTRA=NODOCKER
   - os: linux
-    env: CC=gcc-4.8 CXX=g++-4.8 LEGACY=UGH
+    language: cpp
+    env: EXTRA=NODOCKER SONARQUBE=ON
+    addons:
+      sonarqube:
+        organization: "darktable-org"
+        branches:
+          - develop
+          - master
+    cache:
+      directories:
+        - '$HOME/.sonar/cache'
 
 # linux clang Coverage build OOM's in gcov during final codecov report collection
 # OSX gcc Coverage build produces invalid .gcno files
 
 script:
-  - if [[ "$LEGACY" == "UGH" ]]; then
+  - if [[ "$EXTRA" == "NODOCKER" ]]; then
       export SRC_DIR="$TRAVIS_BUILD_DIR";
       export BUILD_DIR="$SRC_DIR/build";
       export INSTALL_PREFIX="$SRC_DIR/install";
       export ECO="$ECO -DALLOW_DOWNLOADING_GOOGLETEST=ON";
       mkdir "$BUILD_DIR";
       mkdir "$INSTALL_PREFIX";
-      "$SRC_DIR/.ci/ci-script.sh";
+      if [[ "$SONARQUBE" == "ON" ]]; then
+        export CC=gcc-6;
+        export CXX=g++-6;
+        build-wrapper-linux-x86-64 --out-dir "$SRC_DIR/bw-output/" "$SRC_DIR/.ci/ci-script.sh";
+        cd "$SRC_DIR";
+        sudo chmod 0777 "$HOME/.gitconfig";
+        sonar-scanner -X -Dsonar.projectVersion="$TRAVIS_COMMIT";
+      else
+        "$SRC_DIR/.ci/ci-script.sh";
+      fi;
     elif [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       mkdir "$TRAVIS_BUILD_DIR/build";
       docker run --read-only --tmpfs /tmp --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $BUILD_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS --env CC --env CXX --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR --env ECO darktable/rawspeed sh -c "$SRC_DIR/.ci/ci-script.sh";
@@ -93,6 +116,7 @@ script:
     fi
 
 after_success:
+  if [[ "$FLAVOR" == "Coverage" ]]; then
     cd "$TRAVIS_BUILD_DIR";
     curl -s https://codecov.io/bash > codecov;
     chmod +x codecov;
@@ -108,3 +132,4 @@ after_success:
       export CXX=AppleClang;
     fi;
     ./codecov -e PLATFORM,CXX -F unittests $GCOVEXE $GCOVARGS;
+  fi;
