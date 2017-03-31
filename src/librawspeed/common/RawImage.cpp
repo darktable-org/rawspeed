@@ -270,7 +270,8 @@ void RawImageData::createBadPixelMap()
   if (!isAllocated())
     ThrowRDE("(internal) Bad pixel map cannot be allocated before image.");
   mBadPixelMapPitch = roundUp(uncropped_dim.x / 8, 16);
-  mBadPixelMap = (uchar8*)alignedMallocArray<16>(uncropped_dim.y, mBadPixelMapPitch);
+  mBadPixelMap =
+      (uchar8*)(alignedMallocArray<16>(uncropped_dim.y, mBadPixelMapPitch));
   memset(mBadPixelMap, 0, (size_t)mBadPixelMapPitch * uncropped_dim.y);
   if (!mBadPixelMap)
     ThrowRDE("Memory Allocation failed.");

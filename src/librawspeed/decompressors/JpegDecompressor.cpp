@@ -132,7 +132,7 @@ void JpegDecompressor::decode(uint32 offX,
   int row_stride = dinfo.output_width * dinfo.output_components;
 
   unique_ptr<uchar8[], decltype(&alignedFree)> complete_buffer(
-      (uchar8*)alignedMallocArray<16>(dinfo.output_height, row_stride),
+      (uchar8*)(alignedMallocArray<16>(dinfo.output_height, row_stride)),
       alignedFree);
   while (dinfo.output_scanline < dinfo.output_height) {
     buffer[0] = (JSAMPROW)(

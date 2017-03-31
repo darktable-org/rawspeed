@@ -37,3 +37,7 @@ cscope.out
 testimg
 Release-*
 Debug-*
+
+# sonarqube
+.scannerwork/
+bw-output/
