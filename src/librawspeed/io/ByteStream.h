@@ -25,6 +25,7 @@
 #include "common/Memory.h"  // for alignedMalloc
 #include "io/Buffer.h"      // for Buffer::size_type, Buffer, DataBuffer
 #include "io/IOException.h" // for ThrowIOE
+#include <cassert>          // for assert
 #include <cstddef>          // for ptrdiff_t
 #include <cstring>          // for memcmp, memcpy
 
@@ -155,12 +156,23 @@ public:
   // this is only used for DNGPRIVATEDATA handling to restore the original offset
   // in case the private data / maker note has been moved within in the file
   // TODO: could add a lower bound check later if required.
-  void rebase(size_type newPosition, size_type newSize) {
+  void rebase(const size_type newPosition, const size_type newSize) {
+    // does that pair (position, size) make sense for this buffer? may throw
+    const uchar8* const dataRebaseCheck = Buffer::getData(newPosition, newSize);
+    (void)dataRebaseCheck;
+
     const uchar8* dataAtNewPosition = getData(newSize);
-    if ((std::ptrdiff_t)newPosition > (std::ptrdiff_t)dataAtNewPosition)
-      ThrowIOE("Out of bounds access in ByteStream");
     data = dataAtNewPosition - newPosition;
     size = newPosition + newSize;
+
+    // buffer sanity self-check
+    const uchar8* const rebasedCheck = peekData(size);
+    (void)rebasedCheck;
+
+    // check that all the assumptions still hold, and we rebased correctly
+    assert(getPosition() == newPosition);
+    assert(getSize() == newSize);
+    assert(dataRebaseCheck == rebasedCheck);
   }
 
   // special factory function to set up internal buffer with copy of passed data.
