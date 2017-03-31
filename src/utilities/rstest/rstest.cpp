@@ -328,7 +328,7 @@ static int usage(const char* progname) {
 
 int main(int argc, char **argv) {
 
-  auto hasFlag = [&](string flag) {
+  auto hasFlag = [argc, argv](string flag) {
     bool found = false;
     for (int i = 1; i < argc; ++i) {
       if (!argv[i] || argv[i] != flag)
