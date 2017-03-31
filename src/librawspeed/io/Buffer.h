@@ -84,6 +84,7 @@ public:
     : data(rhs.data), size(rhs.size), isOwner(rhs.isOwner) { rhs.isOwner = false; }
   // Frees memory if owned
   ~Buffer();
+  Buffer& operator=(Buffer&& rhs);
   Buffer& operator=(const Buffer& rhs);
 
   Buffer getSubView(size_type offset, size_type size_) const {

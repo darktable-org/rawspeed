@@ -66,12 +66,23 @@ Buffer::~Buffer() {
   }
 }
 
-Buffer& Buffer::operator=(const Buffer &rhs)
-{
-  this->~Buffer();
+Buffer& Buffer::operator=(Buffer&& rhs) {
+  if (isOwner)
+    alignedFree(const_cast<uchar8*>(data));
+
   data = rhs.data;
   size = rhs.size;
-  isOwner = false;
+  isOwner = rhs.isOwner;
+
+  rhs.isOwner = false;
+
+  return *this;
+}
+
+Buffer& Buffer::operator=(const Buffer& rhs) {
+  Buffer unOwningTmp(rhs.data, rhs.size);
+  *this = std::move(unOwningTmp);
+  assert(!isOwner);
   return *this;
 }
 
