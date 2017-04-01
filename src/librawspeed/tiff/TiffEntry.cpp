@@ -197,8 +197,12 @@ string TiffEntry::getString() const {
 const DataBuffer &TiffEntry::getRootIfdData() const {
   TiffIFD* p = parent;
   TiffRootIFD* r = nullptr;
-  while (p && !(r = dynamic_cast<TiffRootIFD*>(p)))
+  while (p) {
+    r = dynamic_cast<TiffRootIFD*>(p);
+    if (r)
+      break;
     p = p->parent;
+  }
   if (!r)
     ThrowTPE("Internal error in TiffIFD data structure.");
   return r->rootBuffer;
