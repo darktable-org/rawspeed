@@ -51,8 +51,6 @@ ThrowException(const char* fmt, ...) {
   va_end(val);
   writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s", buf);
   throw T(buf);
-
-  __builtin_unreachable();
 }
 
 class RawspeedException : public std::runtime_error {
