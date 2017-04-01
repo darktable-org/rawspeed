@@ -124,6 +124,15 @@ TYPED_TEST(AlignedMallocDeathTest, AlignedMallocAssertions) {
 
 #pragma GCC diagnostic pop
 
+TEST(AlignedMallocDeathTest, AlignedFreeHandlesNullptr) {
+  ASSERT_EXIT(
+      {
+        alignedFree(nullptr);
+        exit(0);
+      },
+      ::testing::ExitedWithCode(0), "");
+}
+
 TYPED_TEST(AlignedMallocTest, TemplateTest) {
   ASSERT_NO_THROW({
     TypeParam* ptr =
