@@ -75,46 +75,45 @@ void DngDecoder::dropUnsuportedChunks(vector<const TiffIFD*>& data) {
     }
 
     // subsampled ?
-    if (isSubsampled) {
-      i = data.erase(i);
-      continue;
-    }
+    bool supported = !isSubsampled;
 
     switch (comp) {
     case 1: // uncompressed
-      ++i;
-      break;
     case 7: // lossless JPEG
-      ++i;
-      break;
-    case 8: // deflate
 #ifdef HAVE_ZLIB
-      ++i;
-#else
+    case 8: // deflate
+#endif
+#ifdef HAVE_JPEG
+    case 0x884c: // lossy JPEG
+#endif
+      supported &= true; // no change, if supported, then is still supported.
+      break;
+
+#ifndef HAVE_ZLIB
+    case 8: // deflate
 #pragma message                                                                \
     "ZLIB is not present! Deflate compression will not be supported!"
-      i = data.erase(i);
       writeLog(DEBUG_PRIO_WARNING, "DNG Decoder: found Deflate-encoded chunk, "
                                    "but the deflate support was disabled at "
                                    "build!");
 #endif
-      break;
+#ifndef HAVE_JPEG
     case 0x884c: // lossy JPEG
-#ifdef HAVE_JPEG
-      ++i;
-#else
 #pragma message                                                                \
     "JPEG is not present! Lossy JPEG compression will not be supported!"
-      i = data.erase(i);
       writeLog(DEBUG_PRIO_WARNING, "DNG Decoder: found lossy JPEG-encoded "
                                    "chunk, but the jpeg support was "
                                    "disabled at build!");
 #endif
-      break;
     default:
-      i = data.erase(i);
+      supported = false;
       break;
     }
+
+    if (supported)
+      ++i;
+    else
+      i = data.erase(i);
   }
 }
 
