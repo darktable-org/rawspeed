@@ -309,7 +309,7 @@ RawSpeed::RawImage RawDecoder::decodeRaw()
 
 void RawDecoder::decodeMetaData(const CameraMetaData* meta) {
   try {
-    return decodeMetaDataInternal(meta);
+    decodeMetaDataInternal(meta);
   } catch (TiffParserException &e) {
     ThrowRDE("%s", e.what());
   } catch (FileIOException &e) {
@@ -321,7 +321,7 @@ void RawDecoder::decodeMetaData(const CameraMetaData* meta) {
 
 void RawDecoder::checkSupport(const CameraMetaData* meta) {
   try {
-    return checkSupportInternal(meta);
+    checkSupportInternal(meta);
   } catch (TiffParserException &e) {
     ThrowRDE("%s", e.what());
   } catch (FileIOException &e) {
