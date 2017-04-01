@@ -59,10 +59,7 @@ void *DecodeThread(void *_this) {
 
 DngDecoderSlices::DngDecoderSlices(Buffer* file, const RawImage& img,
                                    int _compression)
-    : mFile(file), mRaw(img) {
-  mFixLjpeg = false;
-  compression = _compression;
-}
+    : mFile(file), mRaw(img), mFixLjpeg(false), compression(_compression) {}
 
 void DngDecoderSlices::addSlice(std::unique_ptr<DngSliceElement>&& slice) {
   slices.emplace(move(slice));
