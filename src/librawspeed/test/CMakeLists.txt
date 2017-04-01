@@ -54,12 +54,15 @@ set(CMAKE_CXX_CLANG_TIDY_SAVE "${CMAKE_CXX_CLANG_TIDY}")
 
 unset(CMAKE_CXX_CLANG_TIDY)
 
+set(UNITTEST_REPORT_PATH "${CMAKE_BINARY_DIR}/unittest-reports/")
+file(MAKE_DIRECTORY "${UNITTEST_REPORT_PATH}")
+
 foreach(IN ${RAWSPEED_TESTS_SOURCES})
   get_filename_component(TESTNAME ${IN} NAME_WE)
   add_executable(${TESTNAME} ${IN})
   target_link_libraries(${TESTNAME} rawspeed_test)
   # GTEST_ADD_TESTS(${TESTNAME} "" AUTO)
-  add_test(NAME ${TESTNAME} COMMAND ${TESTNAME})
+  add_test(NAME ${TESTNAME} COMMAND ${TESTNAME} --gtest_output=xml:${UNITTEST_REPORT_PATH})
   add_dependencies(tests ${TESTNAME})
 endforeach()
 
