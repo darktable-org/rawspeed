@@ -183,7 +183,7 @@ void writePPM(const RawImage& raw, const string& fn) {
 
   // Write pixels
   for (int y = 0; y < height; ++y) {
-    auto *row = reinterpret_cast<unsigned short *>(raw->getData(0, y));
+    auto* row = (unsigned short*)(raw->getData(0, y));
     // PPM is big-endian
     for (int x = 0; x < width; ++x)
       row[x] = getU16BE(row + x);
