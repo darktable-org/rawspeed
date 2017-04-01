@@ -55,6 +55,9 @@ int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
 std::string img_hash(RawSpeed::RawImage& r);
 
 void writePPM(const RawSpeed::RawImage& raw, const std::string& fn);
+void writePFM(const RawSpeed::RawImage& raw, const std::string& fn);
+
+void writeImage(const RawSpeed::RawImage& raw, const std::string& fn);
 
 size_t process(const std::string& filename,
                const RawSpeed::CameraMetaData* metadata, bool create,
@@ -170,7 +173,7 @@ string img_hash(RawImage &r) {
 }
 
 void writePPM(const RawImage& raw, const string& fn) {
-  FILE *f = fopen(fn.c_str(), "wb");
+  FILE* f = fopen((fn + ".ppm").c_str(), "wb");
 
   int width = raw->dim.x;
   int height = raw->dim.y;
@@ -188,9 +191,57 @@ void writePPM(const RawImage& raw, const string& fn) {
     for (int x = 0; x < width; ++x)
       row[x] = getU16BE(row + x);
 
-    fwrite(row, 2, width, f);
+    fwrite(row, sizeof(*row), width, f);
   }
   fclose(f);
+}
+
+void writePFM(const RawImage& raw, const string& fn) {
+  FILE* f = fopen((fn + ".pfm").c_str(), "wb");
+
+  int width = raw->dim.x;
+  int height = raw->dim.y;
+  string format = raw->getCpp() == 1 ? "Pf" : "PF";
+
+  // Write PFM header. if scale < 0, it is little-endian, if >= 0 - big-endian
+  int len = fprintf(f, "%s\n%d %d\n-1.0", format.c_str(), width, height);
+
+  // make sure that data starts at aligned offset. for sse
+  static const auto dataAlignment = 16;
+  const int sseLen = roundUp(len, dataAlignment);
+  len += fprintf(f, "%0*i\n", sseLen - len - 1, 0);
+
+  // did we write a multiple of an alignment value?
+  assert(isAligned(len, dataAlignment));
+  assert(ftell(f) == len);
+  assert(isAligned(ftell(f), dataAlignment));
+
+  width *= raw->getCpp();
+
+  // Write pixels
+  for (int y = 0; y < height; ++y) {
+    // NOTE: pfm has rows in reverse order
+    const int row_in = height - 1 - y;
+    auto* row = (float*)(raw->getData(0, row_in));
+
+    // PFM can have any endiannes, let's write little-endian
+    for (int x = 0; x < width; ++x)
+      row[x] = getU16LE(row + x);
+
+    fwrite(row, sizeof(*row), width, f);
+  }
+  fclose(f);
+}
+
+void writeImage(const RawImage& raw, const string& fn) {
+  switch (raw->getDataType()) {
+  case TYPE_USHORT16:
+    writePPM(raw, fn);
+    break;
+  case TYPE_FLOAT32:
+    writePFM(raw, fn);
+    break;
+  }
 }
 
 size_t process(const string& filename, const CameraMetaData* metadata,
@@ -248,7 +299,7 @@ size_t process(const string& filename, const CameraMetaData* metadata,
     ofstream f(hashfile);
     f << img_hash(raw);
     if (dump)
-      writePPM(raw, filename + ".ppm");
+      writeImage(raw, filename);
   } else {
     string truth((istreambuf_iterator<char>(hf)), istreambuf_iterator<char>());
     string h = img_hash(raw);
@@ -256,7 +307,7 @@ size_t process(const string& filename, const CameraMetaData* metadata,
       ofstream f(filename + ".hash.failed");
       f << h;
       if (dump)
-        writePPM(raw, filename + ".failed.ppm");
+        writeImage(raw, filename + ".failed");
       throw std::runtime_error("hash/metadata mismatch");
     }
   }
