@@ -558,12 +558,9 @@ void *RawImageWorkerThread(void *_this) {
   return nullptr;
 }
 
-RawImageWorker::RawImageWorker( RawImageData *_img, RawImageWorkerTask _task, int _start_y, int _end_y )
-{
-  data = _img;
-  start_y = _start_y;
-  end_y = _end_y;
-  task = _task;
+RawImageWorker::RawImageWorker(RawImageData* _img, RawImageWorkerTask _task,
+                               int _start_y, int _end_y)
+    : data(_img), task(_task), start_y(_start_y), end_y(_end_y) {
 #ifdef HAVE_PTHREAD
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
