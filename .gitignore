@@ -41,3 +41,8 @@ Debug-*
 # sonarqube
 .scannerwork/
 bw-output/
+
+# coverage
+*.gcno
+*.gcda
+*.gcov
