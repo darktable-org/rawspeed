@@ -67,6 +67,13 @@ size_t process(const std::string& filename,
 using namespace std;
 using namespace RawSpeed;
 
+class RstestHashMismatch final : public std::runtime_error {
+public:
+  explicit RstestHashMismatch(const std::string& msg)
+      : std::runtime_error(msg){};
+  explicit RstestHashMismatch(const char* msg) : std::runtime_error(msg){};
+};
+
 struct Timer {
   mutable chrono::steady_clock::time_point start = chrono::steady_clock::now();
   size_t operator()() const {
@@ -309,7 +316,7 @@ size_t process(const string& filename, const CameraMetaData* metadata,
       f << h;
       if (dump)
         writeImage(raw, filename + ".failed");
-      throw std::runtime_error("hash/metadata mismatch");
+      throw RstestHashMismatch("hash/metadata mismatch");
     }
   }
 
