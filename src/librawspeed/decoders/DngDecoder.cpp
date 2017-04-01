@@ -131,9 +131,9 @@ void DngDecoder::parseCFA(const TiffIFD* raw) {
   // Does NOT contain dimensions as some documents state
   TiffEntry* cPat = raw->getEntry(CFAPATTERN);
 
+  // Map from the order in the image, to the position in the CFA
   /*
   if (raw->hasEntry(CFAPLANECOLOR)) {
-    // Map from the order in the image, to the position in the CFA
     TiffEntry* e = raw->getEntry(CFAPLANECOLOR);
 
     const unsigned char* cPlaneOrder = e->getData();
