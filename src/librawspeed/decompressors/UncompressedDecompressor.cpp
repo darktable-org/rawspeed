@@ -70,7 +70,7 @@ void UncompressedDecompressor::sanityCheck(uint32 w, uint32* h, int bpp) {
   const auto bpl = bpp * w;
   assert(bpl > 0);
 
-  return sanityCheck(h, bpl);
+  sanityCheck(h, bpl);
 }
 
 int UncompressedDecompressor::bytesPerLine(int w, bool skips) {
