@@ -522,33 +522,44 @@ void RawImageData::clearArea( iRectangle2D area, uchar8 val /*= 0*/ )
     memset(getData(area.getLeft(), y), val, (size_t)area.getWidth() * bpp);
 }
 
-RawImage& RawImage::operator=(const RawImage& p) noexcept {
-  if (this == &p)      // Same object?
-    return *this;      // Yes, so skip assignment, and just return *this.
+RawImage& RawImage::operator=(RawImage&& rhs) noexcept {
+  if (this == &rhs)
+    return *this;
+
 #ifdef HAVE_PTHREAD
   pthread_mutex_lock(&p_->mymutex);
 #endif
+
   // Retain the old RawImageData before overwriting it
   RawImageData* const old = p_;
-  p_ = p.p_;
+  p_ = rhs.p_;
+
   // Increment use on new data
   ++p_->dataRefCount;
+
   // If the RawImageData previously used by "this" is unused, delete it.
   if (--old->dataRefCount == 0) {
 #ifdef HAVE_PTHREAD
     pthread_mutex_unlock(&(old->mymutex));
 #endif
+
     delete old;
   } else {
 #ifdef HAVE_PTHREAD
     pthread_mutex_unlock(&(old->mymutex));
 #endif
   }
+
   return *this;
 }
 
-RawImage& RawImage::operator=(RawImage&& p) noexcept {
-  operator=(p);
+RawImage& RawImage::operator=(const RawImage& rhs) noexcept {
+  if (this == &rhs)
+    return *this;
+
+  RawImage tmp(rhs);
+  *this = std::move(tmp);
+
   return *this;
 }
 
