@@ -22,6 +22,7 @@
 
 #include "io/Endianness.h" // for getHostEndianness, BSWAP16, Endianness::l...
 #include "md5.h"           // for md5_hash
+#include <cassert>         // for assert
 #include <chrono>          // for milliseconds, steady_clock, duration, dur...
 #include <cstdint>         // for uint8_t
 #include <cstdio>          // for snprintf, size_t, fclose, fopen, fprintf

@@ -35,6 +35,7 @@
 #include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD, TiffID
 #include "tiff/TiffTag.h"                 // for TiffTag::UNIQUECAMERAMODEL
 #include <algorithm>                      // for move
+#include <cassert>                        // for assert
 #include <cstdio>                         // for printf
 #include <cstring>                        // for memset
 #include <map>                            // for map

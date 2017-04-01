@@ -18,10 +18,11 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h" // for uchar8, int64, int32, short16, uint32
 #include "common/Memory.h" // for alignedMallocArray, alignedFree, alignedM...
+#include "common/Common.h" // for uchar8, int64, int32, short16, uint32
 #include <cstddef>         // for size_t
 #include <cstdint>         // for SIZE_MAX, uintptr_t
+#include <cstdlib>         // for exit
 #include <gtest/gtest.h>   // for Message, TestPartResult, TestPartResult::...
 #include <memory>          // for unique_ptr
 #include <string>          // for string

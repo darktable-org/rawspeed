@@ -20,9 +20,10 @@
 */
 
 #include "io/Buffer.h"
-#include "common/Common.h"  // for uint64, uchar8, alignedMalloc, _aligne...
-#include "common/Memory.h"  // for alignedMalloc, alignedFree
-#include "io/IOException.h" // for IOException, ThrowIOE
+#include "common/Common.h"  // for uchar8, roundUp
+#include "common/Memory.h"  // for alignedFree, alignedMalloc
+#include "io/IOException.h" // for IOException (ptr only), ThrowIOE
+#include <cassert>          // for assert
 #include <memory>           // for unique_ptr
 
 using std::unique_ptr;
@@ -66,7 +67,7 @@ Buffer::~Buffer() {
   }
 }
 
-Buffer& Buffer::operator=(Buffer&& rhs) {
+Buffer& Buffer::operator=(Buffer&& rhs) noexcept {
   if (isOwner)
     alignedFree(const_cast<uchar8*>(data));
 
