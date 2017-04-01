@@ -68,6 +68,9 @@ Buffer::~Buffer() {
 }
 
 Buffer& Buffer::operator=(Buffer&& rhs) noexcept {
+  if (this == &rhs)
+    return *this;
+
   if (isOwner)
     alignedFree(const_cast<uchar8*>(data));
 
@@ -81,9 +84,13 @@ Buffer& Buffer::operator=(Buffer&& rhs) noexcept {
 }
 
 Buffer& Buffer::operator=(const Buffer& rhs) {
+  if (this == &rhs)
+    return *this;
+
   Buffer unOwningTmp(rhs.data, rhs.size);
   *this = std::move(unOwningTmp);
   assert(!isOwner);
+
   return *this;
 }
 
