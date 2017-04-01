@@ -155,7 +155,7 @@ void RawImageDataU16::scaleBlackWhite() {
 }
 
 void RawImageDataU16::scaleValues(int start_y, int end_y) {
-#if !(_MSC_VER > 1399 || defined(__SSE2__))
+#if !((defined(_MSC_VER) && _MSC_VER > 1399) || defined(__SSE2__))
 
   return scaleValues_plain(start_y, end_y);
 
@@ -183,7 +183,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 #endif
 }
 
-#if _MSC_VER > 1399 || defined(__SSE2__)
+#if (defined(_MSC_VER) && _MSC_VER > 1399) || defined(__SSE2__)
 void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   int depth_values = whitePoint - blackLevelSeparate[0];
   float app_scale = 65535.0f / depth_values;

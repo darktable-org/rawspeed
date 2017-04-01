@@ -130,7 +130,7 @@ RawImageDataFloat::RawImageDataFloat() {
     startWorker(RawImageWorker::SCALE_VALUES, true);
 }
 
-#if 0 // _MSC_VER > 1399 || defined(__SSE2__)
+#if 0 // (defined(_MSC_VER) && _MSC_VER > 1399) || defined(__SSE2__)
 
   void RawImageDataFloat::scaleValues(int start_y, int end_y) {
     bool use_sse2;
