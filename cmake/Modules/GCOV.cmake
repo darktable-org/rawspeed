@@ -18,6 +18,6 @@ file(MAKE_DIRECTORY "${GCOV_REPORT_PATH}")
 add_custom_target(
   gcov
   COMMAND find "${CMAKE_SOURCE_DIR}" -type f -name '*.gcno' -exec "${GCOV_PATH}" -abflpu  {} + > /dev/null
-  WORKING_DIRECTORY "${GCOV_REPORT_PATH}"
+  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
   COMMENT "Running gcov tool on all the *.gcno files"
 )

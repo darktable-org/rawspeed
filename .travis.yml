@@ -98,7 +98,7 @@ script:
         export GCOV=gcov-6;
         build-wrapper-linux-x86-64 --out-dir "$SRC_DIR/bw-output/" "$SRC_DIR/.ci/ci-script.sh";
         cd "$BUILD_DIR";
-        make gcov;
+        cmake --build "$BUILD_DIR" --target gcov
         cd "$SRC_DIR";
         sudo chmod 0777 "$HOME/.gitconfig";
         sonar-scanner -X -Dsonar.projectVersion="$TRAVIS_COMMIT";
