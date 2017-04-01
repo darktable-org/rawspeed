@@ -70,7 +70,7 @@ matrix:
     env: CC=gcc-4.8 CXX=g++-4.8 EXTRA=NODOCKER
   - os: linux
     language: cpp
-    env: EXTRA=NODOCKER SONARQUBE=ON
+    env: EXTRA=NODOCKER SONARQUBE=ON FLAVOR=Coverage
     addons:
       sonarqube:
         organization: "darktable-org"
@@ -120,7 +120,7 @@ script:
     fi
 
 after_success:
-  if [[ "$FLAVOR" == "Coverage" ]]; then
+  if [[ "$FLAVOR" == "Coverage" && "$SONARQUBE" != "ON" ]]; then
     cd "$TRAVIS_BUILD_DIR";
     curl -s https://codecov.io/bash > codecov;
     chmod +x codecov;
