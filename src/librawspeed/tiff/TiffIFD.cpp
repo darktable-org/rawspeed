@@ -21,17 +21,18 @@
 */
 
 #include "tiff/TiffIFD.h"
-#include "common/Common.h"  // for getHostEndianness, uint32, make_unique
-#include "io/IOException.h" // for IOException
-#include "tiff/TiffEntry.h" // for TiffEntry
-#include "tiff/TiffTag.h"   // for TiffTag, ::DNGPRIVATEDATA, ::EXIFIFDPOINTER
-#include <algorithm>        // for move
-#include <cstdint>          // for UINT32_MAX
-#include <map>              // for map, _Rb_tree_const_iterator, allocator
-#include <memory>           // for default_delete, unique_ptr
-#include <string>           // for operator==, string, basic_string
-#include <utility>          // for pair
-#include <vector>           // for vector
+#include "common/Common.h" // for getHostEndianness, uint32, make_unique
+#include "common/RawspeedException.h" // for RawspeedException
+#include "io/IOException.h"           // for IOException
+#include "tiff/TiffEntry.h"           // for TiffEntry
+#include "tiff/TiffTag.h" // for TiffTag, ::DNGPRIVATEDATA, ::EXIFIFDPOINTER
+#include <algorithm>      // for move
+#include <cstdint>        // for UINT32_MAX
+#include <map>            // for map, _Rb_tree_const_iterator, allocator
+#include <memory>         // for default_delete, unique_ptr
+#include <string>         // for operator==, string, basic_string
+#include <utility>        // for pair
+#include <vector>         // for vector
 
 using namespace std;
 
@@ -75,7 +76,7 @@ void TiffIFD::parseIFDEntry(ByteStream& bs) {
     default:
       add(move(t));
     }
-  } catch (...) { // Unparsable private data are added as entries
+  } catch (RawspeedException) { // Unparsable private data are added as entries
     add(move(t));
   }
 }

@@ -23,6 +23,7 @@
 #include "common/Common.h"                // for uint32, uchar8, writeLog
 #include "common/DngOpcodes.h"            // for DngOpcodes
 #include "common/Point.h"                 // for iPoint2D, iRectangle2D
+#include "common/RawspeedException.h"     // for RawspeedException
 #include "decoders/DngDecoderSlices.h"    // for DngDecoderSlices, DngSlice...
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "io/Buffer.h"                    // for Buffer
@@ -480,7 +481,7 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   try {
     id = mRootIFD->getID();
-  } catch (...) {
+  } catch (RawspeedException) {
     // not all dngs have MAKE/MODEL entries,
     // will be dealt with by using UNIQUECAMERAMODEL below
   }

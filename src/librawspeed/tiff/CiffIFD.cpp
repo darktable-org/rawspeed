@@ -21,6 +21,7 @@
 
 #include "tiff/CiffIFD.h"
 #include "common/Common.h"               // for uint32, ushort16
+#include "common/RawspeedException.h"    // for RawspeedException
 #include "io/Buffer.h"                   // for Buffer
 #include "io/Endianness.h"               // for getU16LE, getU32LE
 #include "io/IOException.h"              // for IOException
@@ -88,7 +89,7 @@ CiffIFD::CiffIFD(CiffIFD* parent_, Buffer* f, uint32 start, uint32 end,
       default:
         add(move(t));
       }
-    } catch (...) {
+    } catch (RawspeedException) {
       // Unparsable private data are added as entries
       add(move(t));
     }
