@@ -32,7 +32,7 @@
 namespace RawSpeed {
 
 template <typename T>
-[[noreturn]] void __attribute__((noreturn, format(printf, 1, 2)))
+[[noreturn]] static inline void __attribute__((noreturn, format(printf, 1, 2)))
 ThrowException(const char* fmt, ...) {
   static constexpr size_t bufSize = 8192;
 #if defined(HAVE_THREAD_LOCAL)
@@ -51,6 +51,8 @@ ThrowException(const char* fmt, ...) {
   va_end(val);
   writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s", buf);
   throw T(buf);
+
+  __builtin_unreachable();
 }
 
 class RawspeedException : public std::runtime_error {

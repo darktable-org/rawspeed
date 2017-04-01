@@ -194,8 +194,8 @@ void DngDecoder::decodeData(const TiffIFD* raw, int compression, uint32 sample_f
     uint32 tilew = raw->getEntry(TILEWIDTH)->getU32();
     uint32 tileh = raw->getEntry(TILELENGTH)->getU32();
 
-    if (!tilew || !tileh)
-      ThrowRDE("Invalid tile size");
+    if (!(tilew > 0 && tileh > 0))
+      ThrowRDE("Invalid tile size: (%u, %u)", tilew, tileh);
 
     assert(tilew > 0);
     uint32 tilesX = (mRaw->dim.x + tilew - 1) / tilew;
