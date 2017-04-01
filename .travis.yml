@@ -102,7 +102,7 @@ script:
         cd "$SRC_DIR";
         sudo chmod 0777 "$HOME/.gitconfig";
         sonar-scanner -X -Dsonar.projectVersion="$TRAVIS_COMMIT";
-        find "$SRC_DIR" -type f -name '*.gcov' -exec rm {} + > /dev/null
+        find "$SRC_DIR" -type f -name '*.gcov' -exec rm {} + > /dev/null;
       else
         "$SRC_DIR/.ci/ci-script.sh";
       fi;
