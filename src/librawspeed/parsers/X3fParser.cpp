@@ -65,7 +65,7 @@ X3fParser::X3fParser(Buffer* file) : RawParser(file) {
     }
   } catch (RawDecoderException &e) {
     freeObjects();
-    throw e;
+    throw;
   }
 }
 
