@@ -31,6 +31,7 @@
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD
 #include "tiff/TiffTag.h"                           // for TiffTag::COMPRES...
+#include <cassert>                                  // for assert
 #include <memory>                                   // for unique_ptr
 
 namespace RawSpeed {

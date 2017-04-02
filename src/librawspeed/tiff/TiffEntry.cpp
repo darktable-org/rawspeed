@@ -26,6 +26,7 @@
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
 #include "tiff/TiffTag.h"                // for ::DNGPRIVATEDATA, ::EXIFIFD...
 #include <algorithm>                     // for move
+#include <cassert>                       // for assert
 #include <cstdint>                       // for UINT32_MAX
 #include <cstring>                       // for strnlen
 #include <string>                        // for string

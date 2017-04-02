@@ -30,6 +30,7 @@
 #include "tiff/TiffEntry.h"               // for TiffEntry, TiffDataType::T...
 #include "tiff/TiffIFD.h"                 // for TiffRootIFD, TiffIFD
 #include "tiff/TiffTag.h"                 // for TiffTag, TiffTag::CFAPATTERN
+#include <cassert>                        // for assert
 #include <memory>                         // for unique_ptr
 #include <vector>                         // for vector
 

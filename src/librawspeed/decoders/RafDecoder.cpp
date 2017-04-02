@@ -35,6 +35,7 @@
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag::FUJIOLDWB
+#include <cassert>                                  // for assert
 #include <cstdio>                                   // for size_t
 #include <cstring>                                  // for memcmp
 #include <memory>                                   // for unique_ptr, allo...

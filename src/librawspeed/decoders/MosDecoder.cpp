@@ -33,6 +33,7 @@
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag::TILEOFF...
 #include <algorithm>                                // for move
+#include <cassert>                                  // for assert
 #include <cstring>                                  // for memchr
 #include <istream>                                  // for istringstream
 #include <memory>                                   // for unique_ptr

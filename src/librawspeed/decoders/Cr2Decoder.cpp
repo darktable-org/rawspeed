@@ -36,6 +36,7 @@
 #include "tiff/TiffEntry.h"              // for TiffEntry, TiffDataType::...
 #include "tiff/TiffTag.h"                // for TiffTag, TiffTag::CANONCO...
 #include <array>                         // for array
+#include <cassert>                       // for assert
 #include <exception>                     // for exception
 #include <memory>                        // for unique_ptr, allocator
 #include <string>                        // for string

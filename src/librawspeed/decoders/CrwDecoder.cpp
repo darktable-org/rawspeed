@@ -31,6 +31,7 @@
 #include "tiff/CiffIFD.h"                  // for CiffIFD
 #include "tiff/CiffTag.h"                  // for CiffTag, CiffTag::CIFF_MA...
 #include <algorithm>                       // for move
+#include <cassert>                         // for assert
 #include <cmath>                           // for copysignf, expf, logf
 #include <cstdio>                          // for fprintf, stderr
 #include <cstdlib>                         // for abs

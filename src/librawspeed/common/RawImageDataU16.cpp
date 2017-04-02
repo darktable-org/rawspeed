@@ -26,6 +26,7 @@
 #include "metadata/BlackArea.h"           // for BlackArea
 #include <algorithm>                      // for fill, max, min
 #include <array>                          // for array
+#include <cassert>                        // for assert
 #include <vector>                         // for vector
 
 #if defined(__SSE2__)
