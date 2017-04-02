@@ -198,7 +198,10 @@ void CrwDecompressor::decompress(RawImage& mRaw, RawSpeed::Buffer* mFile,
   const uint32 height = mRaw->dim.y;
   const uint32 width = mRaw->dim.x;
 
-  uint32 offset = 540 + lowbits * height * width / 4;
+  uint32 offset = 540;
+  if (lowbits)
+    offset += height * width / 4;
+
   ByteStream input(mFile, offset);
   BitPumpJPEG pump(input);
 
