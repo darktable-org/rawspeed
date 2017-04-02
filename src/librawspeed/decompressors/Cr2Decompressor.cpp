@@ -43,7 +43,8 @@ void Cr2Decompressor::decodeScan()
 
   bool isSubSampled = false;
   for (uint32 i = 0; i < frame.cps;  i++)
-    isSubSampled |= frame.compInfo[i].superH != 1 || frame.compInfo[i].superV != 1;
+    isSubSampled = isSubSampled || frame.compInfo[i].superH != 1 ||
+                   frame.compInfo[i].superV != 1;
 
   if (isSubSampled) {
     if (mRaw->isCFA)
