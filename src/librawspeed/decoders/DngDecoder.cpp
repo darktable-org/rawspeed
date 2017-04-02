@@ -86,7 +86,7 @@ void DngDecoder::dropUnsuportedChunks(vector<const TiffIFD*>& data) {
 #ifdef HAVE_JPEG
     case 0x884c: // lossy JPEG
 #endif
-      supported &= true; // no change, if supported, then is still supported.
+      // no change, if supported, then is still supported.
       break;
 
 #ifndef HAVE_ZLIB
