@@ -114,13 +114,6 @@ inline uint32 getThreadCount()
 #endif
 }
 
-#ifdef _MSC_VER
-// See http://tinyurl.com/hqfuznc
-#if _MSC_VER >= 1900
-extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
-#endif
-#endif
-
 // clampBits clamps the given int to the range 0 .. 2^n-1, with n <= 16
 inline ushort16 __attribute__((const)) clampBits(int x, uint32 n) {
   assert(n <= 16);
