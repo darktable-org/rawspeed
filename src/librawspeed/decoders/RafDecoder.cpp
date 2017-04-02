@@ -153,7 +153,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 
   bool rotate = hints.has("fuji_rotate");
-  rotate = rotate & fujiRotate;
+  rotate = rotate && fujiRotate;
 
   // Rotate 45 degrees - could be multithreaded.
   if (rotate && !this->uncorrectedRawValues) {
