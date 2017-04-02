@@ -70,8 +70,8 @@ using namespace RawSpeed;
 class RstestHashMismatch final : public std::runtime_error {
 public:
   explicit RstestHashMismatch(const std::string& msg)
-      : std::runtime_error(msg){};
-  explicit RstestHashMismatch(const char* msg) : std::runtime_error(msg){};
+      : std::runtime_error(msg) {}
+  explicit RstestHashMismatch(const char* msg) : std::runtime_error(msg) {}
 };
 
 struct Timer {
