@@ -46,7 +46,10 @@
 #include <vector>                                   // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
-using namespace std;
+using std::vector;
+using std::string;
+using std::min;
+using std::ostringstream;
 
 namespace RawSpeed {
 

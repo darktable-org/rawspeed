@@ -33,7 +33,10 @@
 #include <xmmintrin.h> // for _MM_HINT_T0, _mm_prefetch
 #endif
 
-using namespace std;
+using std::vector;
+using std::min;
+using std::max;
+using std::array;
 
 namespace RawSpeed {
 

@@ -44,7 +44,9 @@ extern "C" {
 // IWYU pragma: no_include <jmorecfg.h>
 }
 
-using namespace std;
+using std::vector;
+using std::unique_ptr;
+using std::min;
 
 namespace RawSpeed {
 

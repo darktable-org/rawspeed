@@ -31,7 +31,7 @@
 #include <string>                         // for string, basic_string, oper...
 #include <vector>                         // for vector
 
-using namespace std;
+using std::string;
 
 namespace RawSpeed {
 

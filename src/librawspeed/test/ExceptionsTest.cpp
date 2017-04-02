@@ -33,8 +33,15 @@
 #include <stdexcept>                          // for runtime_error
 #include <string>                             // for string
 
-using namespace std;
-using namespace RawSpeed;
+using std::unique_ptr;
+using RawSpeed::RawspeedException;
+using RawSpeed::CameraMetadataException;
+using RawSpeed::CiffParserException;
+using RawSpeed::FileIOException;
+using RawSpeed::IOException;
+using RawSpeed::RawDecoderException;
+using RawSpeed::TiffParserException;
+using RawSpeed::FiffParserException;
 
 namespace RawSpeedTest {
 

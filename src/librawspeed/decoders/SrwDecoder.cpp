@@ -40,7 +40,10 @@
 #include <string>                         // for string
 #include <vector>                         // for vector
 
-using namespace std;
+using std::max;
+using std::vector;
+using std::string;
+using std::ostringstream;
 
 namespace RawSpeed {
 

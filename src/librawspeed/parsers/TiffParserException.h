@@ -33,6 +33,7 @@ public:
   explicit TiffParserException(const char* msg) : RawspeedException(msg) {}
 };
 
-#define ThrowTPE(...) ThrowExceptionHelper(TiffParserException, __VA_ARGS__)
+#define ThrowTPE(...)                                                          \
+  ThrowExceptionHelper(RawSpeed::TiffParserException, __VA_ARGS__)
 
 } // namespace RawSpeed

@@ -29,7 +29,10 @@
 #include <stdexcept>                      // for out_of_range
 #include <string>                         // for string, allocator
 
-using namespace std;
+using std::vector;
+using std::string;
+using std::out_of_range;
+using std::map;
 
 namespace RawSpeed {
 

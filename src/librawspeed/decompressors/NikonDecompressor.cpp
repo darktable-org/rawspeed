@@ -29,7 +29,7 @@
 #include <cstdio>                       // for size_t, NULL
 #include <vector>                       // for vector, allocator
 
-using namespace std;
+using std::vector;
 
 namespace RawSpeed {
 

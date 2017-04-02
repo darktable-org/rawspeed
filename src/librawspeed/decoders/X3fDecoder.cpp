@@ -41,7 +41,9 @@
 #include <utility>                        // for pair
 #include <vector>                         // for vector
 
-using namespace std;
+using std::string;
+using std::unique_ptr;
+using std::max;
 
 namespace RawSpeed {
 

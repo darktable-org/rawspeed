@@ -30,8 +30,8 @@
 #include <string>             // for string
 #include <vector>             // for vector, allocator
 
-using namespace std;
-using namespace RawSpeed;
+using std::unique_ptr;
+using RawSpeed::CameraSensorInfo;
 
 namespace RawSpeedTest {
 

@@ -42,7 +42,9 @@
 #include <string>                                   // for string, basic_st...
 #include <vector>                                   // for vector
 
-using namespace std;
+using std::vector;
+using std::string;
+using std::min;
 
 namespace RawSpeed {
 

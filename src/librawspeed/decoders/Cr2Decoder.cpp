@@ -42,7 +42,8 @@
 #include <vector>                        // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
-using namespace std;
+using std::string;
+using std::vector;
 
 namespace RawSpeed {
 

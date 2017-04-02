@@ -27,8 +27,18 @@
 #include <memory>          // for unique_ptr
 #include <string>          // for string
 
-using namespace std;
-using namespace RawSpeed;
+using std::unique_ptr;
+using RawSpeed::char8;
+using RawSpeed::uchar8;
+using RawSpeed::short16;
+using RawSpeed::ushort16;
+using RawSpeed::int32;
+using RawSpeed::uint32;
+using RawSpeed::int64;
+using RawSpeed::uint64;
+using RawSpeed::alignedMalloc;
+using RawSpeed::alignedMallocArray;
+using RawSpeed::alignedFree;
 
 namespace RawSpeedTest {
 

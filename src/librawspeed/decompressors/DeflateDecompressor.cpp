@@ -34,8 +34,6 @@ extern "C" {
 // IWYU pragma: no_include <zconf.h>
 }
 
-using namespace std;
-
 namespace RawSpeed {
 
 // decodeFPDeltaRow(): MIT License, copyright 2014 Javier Celaya

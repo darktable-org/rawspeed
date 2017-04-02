@@ -33,6 +33,7 @@ public:
   explicit CameraMetadataException(const char* msg) : RawspeedException(msg) {}
 };
 
-#define ThrowCME(...) ThrowExceptionHelper(CameraMetadataException, __VA_ARGS__)
+#define ThrowCME(...)                                                          \
+  ThrowExceptionHelper(RawSpeed::CameraMetadataException, __VA_ARGS__)
 
 } // namespace RawSpeed

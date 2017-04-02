@@ -29,7 +29,7 @@
 #include <algorithm>                      // for min, copy_n, move
 #include <cassert>                        // for assert
 
-using namespace std;
+using std::copy_n;
 
 namespace RawSpeed {
 

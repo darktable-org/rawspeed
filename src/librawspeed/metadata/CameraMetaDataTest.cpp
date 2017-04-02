@@ -27,8 +27,8 @@
 #include <memory>                    // for unique_ptr
 #include <string>                    // for string
 
-using namespace std;
-using namespace RawSpeed;
+using std::unique_ptr;
+using RawSpeed::CameraMetaData;
 
 namespace RawSpeedTest {
 

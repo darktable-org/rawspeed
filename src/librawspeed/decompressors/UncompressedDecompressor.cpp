@@ -34,7 +34,7 @@
 #include <algorithm>                      // for min
 #include <cassert>                        // for assert
 
-using namespace std;
+using std::min;
 
 namespace RawSpeed {
 

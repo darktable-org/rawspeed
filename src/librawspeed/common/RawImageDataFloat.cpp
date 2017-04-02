@@ -26,7 +26,8 @@
 #include <algorithm>                      // for max, min
 #include <vector>                         // for vector
 
-using namespace std;
+using std::min;
+using std::max;
 
 namespace RawSpeed {
 

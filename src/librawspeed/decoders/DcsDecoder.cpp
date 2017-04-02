@@ -31,8 +31,6 @@
 #include <memory>                                   // for unique_ptr
 #include <vector>                                   // for vector
 
-using namespace std;
-
 namespace RawSpeed {
 
 class CameraMetaData;

@@ -30,8 +30,6 @@
 #include "tiff/TiffTag.h"                           // for TiffTag::EPSONWB
 #include <memory>                                   // for unique_ptr
 
-using namespace std;
-
 namespace RawSpeed {
 
 class CameraMetaData;

@@ -76,14 +76,15 @@ public:
 
 #ifndef DEBUG
 #define ThrowExceptionHelper(CLASS, fmt, ...)                                  \
-  ThrowException<CLASS>("%s, line " STR(__LINE__) ": " fmt,                    \
-                        __PRETTY_FUNCTION__, ##__VA_ARGS__)
+  RawSpeed::ThrowException<CLASS>("%s, line " STR(__LINE__) ": " fmt,          \
+                                  __PRETTY_FUNCTION__, ##__VA_ARGS__)
 #else
 #define ThrowExceptionHelper(CLASS, fmt, ...)                                  \
-  ThrowException<CLASS>(__FILE__ ":" STR(__LINE__) ": %s: " fmt,               \
-                        __PRETTY_FUNCTION__, ##__VA_ARGS__)
+  RawSpeed::ThrowException<CLASS>(__FILE__ ":" STR(__LINE__) ": %s: " fmt,     \
+                                  __PRETTY_FUNCTION__, ##__VA_ARGS__)
 #endif
 
-#define ThrowRSE(...) ThrowExceptionHelper(RawspeedException, __VA_ARGS__)
+#define ThrowRSE(...)                                                          \
+  ThrowExceptionHelper(RawSpeed::RawspeedException, __VA_ARGS__)
 
 } // namespace RawSpeed

@@ -45,7 +45,11 @@
 #include <pthread.h>
 #endif
 
-using namespace std;
+using std::vector;
+using std::move;
+using std::min;
+using std::string;
+using std::fabs;
 
 namespace RawSpeed {
 

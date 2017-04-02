@@ -31,7 +31,9 @@
 #include <cstdlib>                        // for free
 #include <cstring>                        // for memset, memcpy, strdup
 
-using namespace std;
+using std::fill_n;
+using std::string;
+using std::min;
 
 namespace RawSpeed {
 

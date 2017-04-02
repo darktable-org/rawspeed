@@ -26,8 +26,18 @@
 #include <iosfwd>                      // for ostream
 #include <string>                      // for string, operator<<
 
-using namespace std;
-using namespace RawSpeed;
+using std::string;
+using RawSpeed::uint32;
+using RawSpeed::iPoint2D;
+using RawSpeed::CFAColor;
+using RawSpeed::ColorFilterArray;
+using RawSpeed::CFA_RED;
+using RawSpeed::CFA_GREEN;
+using RawSpeed::CFA_BLUE;
+using RawSpeed::CFA_CYAN;
+using RawSpeed::CFA_MAGENTA;
+using RawSpeed::CFA_FUJI_GREEN;
+using RawSpeed::CFA_YELLOW;
 
 namespace RawSpeed {
 

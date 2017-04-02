@@ -40,7 +40,17 @@ int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
 }
 #endif
 
-using namespace RawSpeed;
+using RawSpeed::CameraMetaData;
+using RawSpeed::FileReader;
+using RawSpeed::Buffer;
+using RawSpeed::RawParser;
+using RawSpeed::RawDecoder;
+using RawSpeed::RawImage;
+using RawSpeed::uchar8;
+using RawSpeed::uint32;
+using RawSpeed::iPoint2D;
+using RawSpeed::TYPE_USHORT16;
+using RawSpeed::TYPE_FLOAT32;
 
 std::string find_cameras_xml(const char* argv0);
 

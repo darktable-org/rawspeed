@@ -30,7 +30,9 @@
 #include <string>                        // for string, allocator
 #include <vector>                        // for vector
 
-using namespace std;
+using std::numeric_limits;
+using std::string;
+using std::vector;
 
 namespace RawSpeed {
 

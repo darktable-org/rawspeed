@@ -30,7 +30,8 @@
 #include <algorithm>                      // for fill_n
 #include <cmath>                          // for pow
 
-using namespace std;
+using std::vector;
+using std::fill_n;
 
 namespace RawSpeed {
 

@@ -30,7 +30,7 @@
 #include <cstring>                       // for strnlen
 #include <string>                        // for string
 
-using namespace std;
+using std::string;
 
 namespace RawSpeed {
 

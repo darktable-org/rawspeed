@@ -35,7 +35,7 @@
 #include <limits>                        // for numeric_limits
 #include <memory>                        // for default_delete, unique_ptr
 
-using namespace std;
+using std::numeric_limits;
 
 namespace RawSpeed {
 

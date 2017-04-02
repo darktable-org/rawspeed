@@ -28,8 +28,24 @@
 #include <string>          // for basic_string, string, allocator
 #include <vector>          // for vector
 
-using namespace std;
-using namespace RawSpeed;
+using std::make_tuple;
+using std::string;
+using std::vector;
+using std::numeric_limits;
+using std::min;
+using RawSpeed::isPowerOfTwo;
+using RawSpeed::ushort16;
+using RawSpeed::uchar8;
+using RawSpeed::roundUp;
+using RawSpeed::isAligned;
+using RawSpeed::isIn;
+using RawSpeed::clampBits;
+using RawSpeed::trimSpaces;
+using RawSpeed::splitString;
+using RawSpeed::unroll_loop;
+using RawSpeed::getThreadCount;
+using RawSpeed::make_unique;
+using RawSpeed::copyPixels;
 
 namespace RawSpeedTest {
 

@@ -33,6 +33,7 @@ public:
   explicit RawDecoderException(const char* msg) : RawspeedException(msg) {}
 };
 
-#define ThrowRDE(...) ThrowExceptionHelper(RawDecoderException, __VA_ARGS__)
+#define ThrowRDE(...)                                                          \
+  ThrowExceptionHelper(RawSpeed::RawDecoderException, __VA_ARGS__)
 
 } // namespace RawSpeed

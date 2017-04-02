@@ -38,7 +38,7 @@
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for string, allocator
 
-using namespace std;
+using std::string;
 
 namespace RawSpeed {
 

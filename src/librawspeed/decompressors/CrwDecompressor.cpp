@@ -33,7 +33,8 @@
 #include <array>                          // for array
 #include <cassert>                        // for assert
 
-using namespace std;
+using std::array;
+using std::min;
 
 namespace RawSpeed {
 

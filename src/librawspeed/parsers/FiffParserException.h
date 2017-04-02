@@ -32,6 +32,7 @@ public:
   explicit FiffParserException(const char* msg) : RawspeedException(msg) {}
 };
 
-#define ThrowFPE(...) ThrowExceptionHelper(FiffParserException, __VA_ARGS__)
+#define ThrowFPE(...)                                                          \
+  ThrowExceptionHelper(RawSpeed::FiffParserException, __VA_ARGS__)
 
 } // namespace RawSpeed

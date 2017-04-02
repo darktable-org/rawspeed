@@ -64,8 +64,36 @@ size_t process(const std::string& filename,
                const RawSpeed::CameraMetaData* metadata, bool create,
                bool dump);
 
-using namespace std;
-using namespace RawSpeed;
+using std::chrono::steady_clock;
+using std::string;
+using std::ostringstream;
+using std::vector;
+using std::ifstream;
+using std::istreambuf_iterator;
+using std::ofstream;
+using std::cout;
+using std::setw;
+using std::left;
+using std::endl;
+using std::unique_ptr;
+using std::internal;
+using std::map;
+using std::cerr;
+using RawSpeed::CameraMetaData;
+using RawSpeed::FileReader;
+using RawSpeed::Buffer;
+using RawSpeed::RawParser;
+using RawSpeed::RawDecoder;
+using RawSpeed::RawImage;
+using RawSpeed::uchar8;
+using RawSpeed::uint32;
+using RawSpeed::iPoint2D;
+using RawSpeed::TYPE_USHORT16;
+using RawSpeed::TYPE_FLOAT32;
+using RawSpeed::getU16BE;
+using RawSpeed::getU32LE;
+using RawSpeed::isAligned;
+using RawSpeed::roundUp;
 
 class RstestHashMismatch final : public std::runtime_error {
 public:
@@ -75,12 +103,13 @@ public:
 };
 
 struct Timer {
-  mutable chrono::steady_clock::time_point start = chrono::steady_clock::now();
+  mutable std::chrono::steady_clock::time_point start =
+      std::chrono::steady_clock::now();
   size_t operator()() const {
-    auto ms = chrono::duration_cast<chrono::milliseconds>(
-                  chrono::steady_clock::now() - start)
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                  std::chrono::steady_clock::now() - start)
                   .count();
-    start = chrono::steady_clock::now();
+    start = std::chrono::steady_clock::now();
     return ms;
   }
 };
@@ -234,7 +263,7 @@ void writePFM(const RawImage& raw, const string& fn) {
 
     // PFM can have any endiannes, let's write little-endian
     for (int x = 0; x < width; ++x)
-      row[x] = getU16LE(row + x);
+      row[x] = getU32LE(row + x);
 
     fwrite(row, sizeof(*row), width, f);
   }

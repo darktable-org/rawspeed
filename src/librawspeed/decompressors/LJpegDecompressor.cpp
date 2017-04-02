@@ -27,7 +27,8 @@
 #include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for min, copy_n
 
-using namespace std;
+using std::copy_n;
+using std::min;
 
 namespace RawSpeed {
 

@@ -34,7 +34,10 @@
 #include <utility>                       // for pair
 #include <vector>                        // for vector
 
-using namespace std;
+using std::string;
+using std::vector;
+using std::numeric_limits;
+using std::unique_ptr;
 
 namespace RawSpeed {
 

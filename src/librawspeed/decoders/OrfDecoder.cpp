@@ -41,7 +41,9 @@
 #include <cstring>                                  // for memset
 #include <memory>                                   // for unique_ptr
 
-using namespace std;
+using std::unique_ptr;
+using std::min;
+using std::signbit;
 
 namespace RawSpeed {
 

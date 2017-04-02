@@ -33,7 +33,7 @@
 #include <memory>                         // for unique_ptr
 #include <vector>                         // for vector
 
-using namespace std;
+using std::min;
 
 namespace RawSpeed {
 

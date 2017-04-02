@@ -23,8 +23,8 @@
 #include <gtest/gtest.h> // for IsNullLiteralHelper, AssertionResult, gtest_ar
 #include <memory>        // for unique_ptr
 
-using namespace std;
-using namespace RawSpeed;
+using std::unique_ptr;
+using RawSpeed::BlackArea;
 
 namespace RawSpeedTest {
 

@@ -22,7 +22,7 @@
 #include <algorithm> // for move
 #include <vector>    // for vector
 
-using namespace std;
+using std::vector;
 
 namespace RawSpeed {
 

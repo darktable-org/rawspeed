@@ -34,7 +34,8 @@
 #include <utility>        // for pair
 #include <vector>         // for vector
 
-using namespace std;
+using std::string;
+using std::vector;
 
 namespace RawSpeed {
 

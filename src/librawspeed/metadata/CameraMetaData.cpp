@@ -29,11 +29,12 @@
 #include <utility>                            // for pair
 #include <vector>                             // for vector
 
-using namespace std;
+using std::string;
+using pugi::xml_node;
+using pugi::xml_document;
+using pugi::xml_parse_result;
 
 namespace RawSpeed {
-
-using namespace pugi;
 
 CameraMetaData::CameraMetaData(const char *docname) {
   xml_document doc;

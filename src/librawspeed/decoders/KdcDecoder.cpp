@@ -33,8 +33,6 @@
 #include "tiff/TiffTag.h"                           // for TiffTag::COMPRES...
 #include <memory>                                   // for unique_ptr
 
-using namespace std;
-
 namespace RawSpeed {
 
 RawImage KdcDecoder::decodeRawInternal() {

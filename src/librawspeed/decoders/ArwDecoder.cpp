@@ -44,7 +44,9 @@
 #include <string>                                   // for operator==, basi...
 #include <vector>                                   // for vector
 
-using namespace std;
+using std::vector;
+using std::string;
+using std::max;
 
 namespace RawSpeed {
 

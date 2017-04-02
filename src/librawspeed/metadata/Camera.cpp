@@ -31,11 +31,12 @@
 #include <string>                             // for string, allocator, ope...
 #include <vector>                             // for vector
 
-using namespace std;
+using std::vector;
+using std::string;
+using std::map;
+using pugi::xml_node;
 
 namespace RawSpeed {
-
-using namespace pugi;
 
 Camera::Camera(pugi::xml_node &camera) : cfa(iPoint2D(0,0)) {
   make = canonical_make = camera.attribute("make").as_string();

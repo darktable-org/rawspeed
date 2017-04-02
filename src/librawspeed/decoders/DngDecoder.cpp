@@ -45,7 +45,9 @@
 #include <string>                         // for string, operator+, basic_s...
 #include <vector>                         // for vector, allocator
 
-using namespace std;
+using std::vector;
+using std::map;
+using std::string;
 
 namespace RawSpeed {
 

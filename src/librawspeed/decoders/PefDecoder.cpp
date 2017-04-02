@@ -33,8 +33,6 @@
 #include "tiff/TiffTag.h"                     // for TiffTag, TiffTag::ISOS...
 #include <memory>                             // for unique_ptr
 
-using namespace std;
-
 namespace RawSpeed {
 
 RawImage PefDecoder::decodeRawInternal() {

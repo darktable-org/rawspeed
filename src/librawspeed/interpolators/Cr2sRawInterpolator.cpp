@@ -28,7 +28,8 @@
 #include <cassert>                         // for assert
 #include <type_traits>                     // for is_pod
 
-using namespace std;
+using std::is_pod;
+using std::array;
 
 namespace RawSpeed {
 

@@ -29,14 +29,12 @@
 #include <stdexcept>                                // for out_of_range
 #include <string>                                   // for string, basic_st...
 
+using std::map;
+using std::string;
+
 namespace RawSpeed {
+
 class Buffer;
-} // namespace RawSpeed
-
-using namespace std;
-
-namespace RawSpeed {
-
 class CameraMetaData;
 
 NakedDecoder::NakedDecoder(Buffer* file, const Camera* c)

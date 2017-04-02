@@ -35,7 +35,7 @@
 #include <cmath>                                    // for NAN
 #include <memory>                                   // for unique_ptr
 
-using namespace std;
+using std::max;
 
 namespace RawSpeed {
 
