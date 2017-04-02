@@ -278,7 +278,7 @@ void X3fDecoder::decompressSigma( X3fImage &image )
     //We create a HUGE table that contains all values up to the
     //maximum code length. Luckily values can only be up to 10
     //bits, so we can get away with using 2 bytes/value
-    huge_table = (ushort16*)alignedMallocArray<16, ushort16>(1UL << max_len);
+    huge_table = alignedMallocArray<ushort16, 16, ushort16>(1UL << max_len);
     if (!huge_table)
       ThrowRDE("Memory Allocation failed.");
 
@@ -296,7 +296,7 @@ void X3fDecoder::decompressSigma( X3fImage &image )
     }
     // Load offsets
     ByteStream i2(mFile, image.dataOffset+image.dataSize-mRaw->dim.y*4, (ByteStream::size_type)mRaw->dim.y*4);
-    line_offsets = (uint32*)alignedMallocArray<16, uint32>(mRaw->dim.y);
+    line_offsets = alignedMallocArray<uint32, 16, uint32>(mRaw->dim.y);
     if (!line_offsets)
       ThrowRDE("Memory Allocation failed.");
     for (int y = 0; y < mRaw->dim.y; y++) {

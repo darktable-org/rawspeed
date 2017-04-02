@@ -150,7 +150,7 @@ RawImageDataFloat::RawImageDataFloat() {
       __m128i sseround;
       __m128i ssesub2;
       __m128i ssesign;
-      uint32* sub_mul = (uint32*)alignedMallocArray(4, sizeof(__m128i));
+      auto* sub_mul = alignedMallocArray<uint32, 16, __m128i>(4);
 	  if (!sub_mul)
 		ThrowRDE("Out of memory, failed to allocate 128 bytes");
 

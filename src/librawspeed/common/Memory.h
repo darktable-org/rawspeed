@@ -38,10 +38,11 @@ void* alignedMalloc(size_t size, size_t alignment)
     __attribute__((malloc, warn_unused_result, alloc_size(1), alloc_align(2),
                    deprecated("use alignedMalloc<alignment>(size)")));
 
-template <size_t alignment>
+template <typename T, size_t alignment>
 // coverity[+alloc]
-inline void* __attribute__((malloc, warn_unused_result, alloc_size(1)))
+inline T* __attribute__((malloc, warn_unused_result, alloc_size(1)))
 alignedMalloc(size_t size) {
+  static_assert(alignment >= alignof(T), "unsufficient alignment");
   static_assert(isPowerOfTwo(alignment), "not power-of-two");
   static_assert(isAligned(alignment, sizeof(void*)),
                 "not multiple of sizeof(void*)");
@@ -56,14 +57,14 @@ alignedMalloc(size_t size) {
 #endif
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  return alignedMalloc(size, alignment);
+  return (T*)alignedMalloc(size, alignment);
 }
 
 #pragma GCC diagnostic pop
 
-template <size_t alignment, bool doRoundUp = false>
+template <typename T, size_t alignment, bool doRoundUp = false>
 // coverity[+alloc]
-inline void* __attribute__((malloc, warn_unused_result))
+inline T* __attribute__((malloc, warn_unused_result))
 alignedMallocArray(size_t nmemb, size_t size) {
   // Check for size_t overflow
   if (size && nmemb > SIZE_MAX / size)
@@ -74,18 +75,20 @@ alignedMallocArray(size_t nmemb, size_t size) {
   if (doRoundUp)
     size = roundUp(size, alignment);
 
-  return alignedMalloc<alignment>(size);
+  return alignedMalloc<T, alignment>(size);
 }
 
-template <size_t alignment, typename T, bool doRoundUp = false>
+template <typename T, size_t alignment, typename T2, bool doRoundUp = false>
 // coverity[+alloc]
-inline void* __attribute__((malloc, warn_unused_result))
+inline T* __attribute__((malloc, warn_unused_result))
 alignedMallocArray(size_t nmemb) {
   static_assert(sizeof(T), "???");
+  static_assert(sizeof(T2), "???");
   static_assert(alignment >= alignof(T), "unsufficient alignment");
-  static_assert(isPowerOfTwo(sizeof(T)), "not power-of-two");
+  static_assert(alignment >= alignof(T2), "unsufficient alignment");
+  static_assert(isPowerOfTwo(sizeof(T2)), "not power-of-two");
 
-  return alignedMallocArray<alignment, doRoundUp>(nmemb, sizeof(T));
+  return alignedMallocArray<T, alignment, doRoundUp>(nmemb, sizeof(T2));
 }
 
 // coverity[+free : arg-0]

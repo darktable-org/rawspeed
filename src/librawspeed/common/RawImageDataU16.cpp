@@ -204,7 +204,7 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   __m128i sse_full_scale_fp;
   __m128i sse_half_scale_fp;
 
-  auto* sub_mul = (uint32*)alignedMallocArray<16, __m128i>(4);
+  auto* sub_mul = alignedMallocArray<uint32, 16, __m128i>(4);
   if (!sub_mul)
     ThrowRDE("Out of memory, failed to allocate 128 bytes");
 

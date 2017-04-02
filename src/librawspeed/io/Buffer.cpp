@@ -35,7 +35,7 @@ unique_ptr<uchar8, decltype(&alignedFree)> Buffer::Create(size_type size) {
     ThrowIOE("Trying to allocate 0 bytes sized buffer.");
 
   unique_ptr<uchar8, decltype(&alignedFree)> data(
-      (uchar8*)alignedMalloc<16>(roundUp(size + BUFFER_PADDING, 16)),
+      alignedMalloc<uchar8, 16>(roundUp(size + BUFFER_PADDING, 16)),
       &alignedFree);
   if (!data.get())
     ThrowIOE("Failed to allocate %uz bytes memory buffer.", size);
