@@ -34,6 +34,9 @@ public:
 };
 
 #define ThrowCME(...)                                                          \
-  ThrowExceptionHelper(RawSpeed::CameraMetadataException, __VA_ARGS__)
+  do {                                                                         \
+    ThrowExceptionHelper(RawSpeed::CameraMetadataException, __VA_ARGS__);      \
+    __builtin_unreachable();                                                   \
+  } while (false)
 
 } // namespace RawSpeed

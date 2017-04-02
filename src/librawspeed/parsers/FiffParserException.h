@@ -33,6 +33,9 @@ public:
 };
 
 #define ThrowFPE(...)                                                          \
-  ThrowExceptionHelper(RawSpeed::FiffParserException, __VA_ARGS__)
+  do {                                                                         \
+    ThrowExceptionHelper(RawSpeed::FiffParserException, __VA_ARGS__);          \
+    __builtin_unreachable();                                                   \
+  } while (false)
 
 } // namespace RawSpeed
