@@ -109,7 +109,7 @@ struct JpegDecompressor::JpegDecompressStruct : jpeg_decompress_struct {
     jpeg_create_decompress(this);
 
     err = jpeg_std_error(&jerr);
-    jerr.error_exit = my_error_throw;
+    jerr.error_exit = &my_error_throw;
   }
   ~JpegDecompressStruct() { jpeg_destroy_decompress(this); }
 };
@@ -133,7 +133,7 @@ void JpegDecompressor::decode(uint32 offX,
 
   unique_ptr<uchar8[], decltype(&alignedFree)> complete_buffer(
       (uchar8*)(alignedMallocArray<16>(dinfo.output_height, row_stride)),
-      alignedFree);
+      &alignedFree);
   while (dinfo.output_scanline < dinfo.output_height) {
     buffer[0] = (JSAMPROW)(
         &complete_buffer[(size_t)dinfo.output_scanline * row_stride]);

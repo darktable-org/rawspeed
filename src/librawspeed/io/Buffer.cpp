@@ -36,7 +36,7 @@ unique_ptr<uchar8, decltype(&alignedFree)> Buffer::Create(size_type size) {
 
   unique_ptr<uchar8, decltype(&alignedFree)> data(
       (uchar8*)alignedMalloc<16>(roundUp(size + BUFFER_PADDING, 16)),
-      alignedFree);
+      &alignedFree);
   if (!data.get())
     ThrowIOE("Failed to allocate %uz bytes memory buffer.", size);
 
@@ -49,7 +49,7 @@ Buffer::Buffer(unique_ptr<uchar8, decltype(&alignedFree)> data_,
   if (!size)
     ThrowIOE("Buffer has zero size?");
 
-  if (data_.get_deleter() != alignedFree)
+  if (data_.get_deleter() != &alignedFree)
     ThrowIOE("Wrong deleter. Expected RawSpeed::alignedFree()");
 
   data = data_.release();
