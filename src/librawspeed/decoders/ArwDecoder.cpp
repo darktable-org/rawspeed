@@ -404,8 +404,13 @@ void ArwDecoder::GetWB() {
     if(!sony_offset || !sony_length || !sony_key || sony_key->count != 4)
       ThrowRDE("couldn't find the correct metadata for WB decoding");
 
+    assert(sony_offset != nullptr);
     uint32 off = sony_offset->getU32();
+
+    assert(sony_length != nullptr);
     uint32 len = sony_length->getU32();
+
+    assert(sony_key != nullptr);
     uint32 key = getU32LE(sony_key->getData(4));
 
     // "Decrypt" IFD

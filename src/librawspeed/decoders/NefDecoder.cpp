@@ -558,6 +558,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
   if (!wb)
     ThrowRDE("Unable to locate whitebalance needed for decompression");
 
+  assert(wb != nullptr);
   if (wb->count != 4 || wb->type != TIFF_RATIONAL)
     ThrowRDE("Whitebalance has unknown count or type");
 
@@ -646,9 +647,9 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
 #define SQR(x) ((x)*(x))
 ushort16* NefDecoder::gammaCurve(double pwr, double ts, int mode, int imax) {
   auto* curve = (ushort16*)alignedMallocArray<16, ushort16>(65536);
-  if (curve == nullptr) {
+  if (curve == nullptr)
     ThrowRDE("Unable to allocate gamma curve");
-  }
+
   int i;
   double g[6], bnd[2]={0,0}, r;
   g[0] = pwr;
@@ -669,9 +670,10 @@ ushort16* NefDecoder::gammaCurve(double pwr, double ts, int mode, int imax) {
   else g[5] = 1 / (g[1]*SQR(g[3])/2 + 1
     - g[2] - g[3] - g[2]*g[3]*(log(g[3]) - 1)) - 1;
 
-  if (!mode--) {
+  if (!mode--)
     ThrowRDE("Unimplemented mode");
-  }
+
+  assert(curve != nullptr);
   for (i=0; i < 0x10000; i++) {
     curve[i] = 0xffff;
     if ((r = (double) i / imax) < 1) {

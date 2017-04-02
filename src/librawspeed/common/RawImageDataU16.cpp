@@ -207,6 +207,9 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   auto* sub_mul = (uint32*)alignedMallocArray<16, __m128i>(4);
   if (!sub_mul)
     ThrowRDE("Out of memory, failed to allocate 128 bytes");
+
+  assert(sub_mul != nullptr);
+
   uint32 gw = pitch / 16;
   // 10 bit fraction
   uint32 mul = (int)(1024.0f * 65535.0f /

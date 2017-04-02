@@ -205,6 +205,8 @@ const DataBuffer &TiffEntry::getRootIfdData() const {
   }
   if (!r)
     ThrowTPE("Internal error in TiffIFD data structure.");
+
+  assert(r != nullptr);
   return r->rootBuffer;
 }
 

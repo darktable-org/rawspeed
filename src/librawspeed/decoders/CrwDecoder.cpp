@@ -56,6 +56,7 @@ RawImage CrwDecoder::decodeRawInternal() {
   if (!sensorInfo || sensorInfo->count < 6 || sensorInfo->type != CIFF_SHORT)
     ThrowRDE("Couldn't find image sensor info");
 
+  assert(sensorInfo != nullptr);
   uint32 width = sensorInfo->getU16(1);
   uint32 height = sensorInfo->getU16(2);
 
@@ -63,6 +64,7 @@ RawImage CrwDecoder::decodeRawInternal() {
   if (!decTable || decTable->type != CIFF_LONG)
     ThrowRDE("Couldn't find decoder table");
 
+  assert(decTable != nullptr);
   uint32 dec_table = decTable->getU32();
   if (dec_table > 2)
     ThrowRDE("Unknown decoder table %d", dec_table);

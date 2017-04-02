@@ -106,6 +106,8 @@ RawImage Cr2Decoder::decodeNewFormat() {
   TiffEntry* sensorInfoE = mRootIFD->getEntryRecursive(CANON_SENSOR_INFO);
   if (!sensorInfoE)
     ThrowTPE("failed to get SensorInfo from MakerNote");
+
+  assert(sensorInfoE != nullptr);
   iPoint2D dim(sensorInfoE->getU16(1), sensorInfoE->getU16(2));
 
   int componentsPerPixel = 1;
@@ -252,6 +254,8 @@ void Cr2Decoder::sRawInterpolate() {
   uint32 offset = 78;
 
   std::array<int, 3> sraw_coeffs;
+
+  assert(wb != nullptr);
   sraw_coeffs[0] = wb->getU16(offset + 0);
   sraw_coeffs[1] =
       (wb->getU16(offset + 1) + wb->getU16(offset + 2) + 1) >> 1;

@@ -134,8 +134,11 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (!cam)
     ThrowRDE("Couldn't find camera");
 
+  assert(cam != nullptr);
+
   iPoint2D new_size(mRaw->dim);
   iPoint2D crop_offset = iPoint2D(0,0);
+
   if (applyCrop) {
     new_size = cam->cropSize;
     crop_offset = cam->cropPos;
@@ -145,7 +148,6 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       new_size.x = mRaw->dim.x / (double_width ? 2 : 1) - cam->cropPos.x + new_size.x;
     else
       new_size.x /= (double_width ? 2 : 1);
-
     if (new_size.y <= 0)
       new_size.y = mRaw->dim.y - cam->cropPos.y + new_size.y;
   }

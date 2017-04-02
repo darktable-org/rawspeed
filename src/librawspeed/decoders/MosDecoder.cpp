@@ -56,6 +56,8 @@ MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, Buffer* file)
     TiffEntry *xmp = mRootIFD->getEntryRecursive(XMP);
     if (!xmp)
       ThrowRDE("Couldn't find the XMP");
+
+    assert(xmp != nullptr);
     string xmpText = xmp->getString();
     make = getXMPTag(xmpText, "Make");
     model = getXMPTag(xmpText, "Model");

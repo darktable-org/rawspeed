@@ -56,6 +56,7 @@ RawImage DcsDecoder::decodeRawInternal() {
   if (!linearization || linearization->count != 256 || linearization->type != TIFF_SHORT)
     ThrowRDE("Couldn't find the linearization table");
 
+  assert(linearization != nullptr);
   auto table = linearization->getU16Array(256);
 
   if (!uncorrectedRawValues)

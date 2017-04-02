@@ -239,7 +239,7 @@ void CrwDecompressor::decompress(RawImage& mRaw, RawSpeed::Buffer* mFile,
         if (base[k & 1] >> 10)
           ThrowRDE("Error decompressing");
 
-        assert(dest);
+        assert(dest != nullptr);
         *dest = base[k & 1];
       }
     }
@@ -276,12 +276,12 @@ void CrwDecompressor::decompress(RawImage& mRaw, RawSpeed::Buffer* mFile,
             j++;
           }
 
+          assert(dest);
           ushort16 val = (*dest << 2) | ((c >> r) & 0x0003);
 
           if (width == 2672 && val < 512)
             val += 2; // No idea why this is needed
 
-          assert(dest);
           *dest = val;
         }
       }

@@ -56,6 +56,8 @@ RawImage KdcDecoder::decodeRawInternal() {
   TiffEntry *offset = mRootIFD->getEntryRecursive(KODAK_KDC_OFFSET);
   if (!offset || offset->count < 13)
     ThrowRDE("Couldn't find the KDC offset");
+
+  assert(offset != nullptr);
   uint32 off = offset->getU32(4) + offset->getU32(12);
 
   // Offset hardcoding gotten from dcraw
