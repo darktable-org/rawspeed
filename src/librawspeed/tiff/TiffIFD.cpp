@@ -76,7 +76,7 @@ void TiffIFD::parseIFDEntry(ByteStream& bs) {
     default:
       add(move(t));
     }
-  } catch (RawspeedException) { // Unparsable private data are added as entries
+  } catch (RawspeedException&) { // Unparsable private data are added as entries
     add(move(t));
   }
 }

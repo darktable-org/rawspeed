@@ -89,7 +89,7 @@ CiffIFD::CiffIFD(CiffIFD* parent_, Buffer* f, uint32 start, uint32 end,
       default:
         add(move(t));
       }
-    } catch (RawspeedException) {
+    } catch (RawspeedException&) {
       // Unparsable private data are added as entries
       add(move(t));
     }
