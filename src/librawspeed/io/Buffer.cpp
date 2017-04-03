@@ -63,7 +63,7 @@ Buffer::Buffer(size_type size_) : Buffer(Create(size_), size_) {}
 
 Buffer::~Buffer() {
   if (isOwner) {
-    alignedFree(const_cast<uchar8*>(data));
+    alignedFreeConstPtr(data);
   }
 }
 
@@ -72,7 +72,7 @@ Buffer& Buffer::operator=(Buffer&& rhs) noexcept {
     return *this;
 
   if (isOwner)
-    alignedFree(const_cast<uchar8*>(data));
+    alignedFreeConstPtr(data);
 
   data = rhs.data;
   size = rhs.size;

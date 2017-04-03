@@ -94,4 +94,7 @@ alignedMallocArray(size_t nmemb) {
 // coverity[+free : arg-0]
 void alignedFree(void* ptr);
 
+// coverity[+free : arg-0]
+void alignedFreeConstPtr(const void* ptr);
+
 } // namespace RawSpeed

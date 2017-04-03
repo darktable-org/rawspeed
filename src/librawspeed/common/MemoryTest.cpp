@@ -39,6 +39,7 @@ using RawSpeed::uint64;
 using RawSpeed::alignedMalloc;
 using RawSpeed::alignedMallocArray;
 using RawSpeed::alignedFree;
+using RawSpeed::alignedFreeConstPtr;
 
 namespace RawSpeedTest {
 
@@ -96,6 +97,17 @@ TYPED_TEST(AlignedMallocTest, BasicTest) {
     this->TheTest(ptr);
     alignedFree(ptr);
   });
+  ASSERT_NO_THROW({
+    const TypeParam* forFree = nullptr;
+    {
+      TypeParam* ptr =
+          (TypeParam*)alignedMalloc(this->alloc_size, alloc_alignment);
+      this->TheTest(ptr);
+      forFree = const_cast<const TypeParam*>(ptr);
+      ptr = nullptr;
+    }
+    alignedFreeConstPtr(forFree);
+  });
 }
 
 TYPED_TEST(AlignedMallocTest, UniquePtrTest) {
@@ -139,6 +151,12 @@ TEST(AlignedMallocDeathTest, AlignedFreeHandlesNullptr) {
   ASSERT_EXIT(
       {
         alignedFree(nullptr);
+        exit(0);
+      },
+      ::testing::ExitedWithCode(0), "");
+  ASSERT_EXIT(
+      {
+        alignedFreeConstPtr(nullptr);
         exit(0);
       },
       ::testing::ExitedWithCode(0), "");
