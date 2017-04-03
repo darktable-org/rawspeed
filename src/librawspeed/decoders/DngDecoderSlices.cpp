@@ -22,6 +22,7 @@
 #include "decoders/DngDecoderSlices.h"
 #include "common/Common.h"                          // for uint32, getThrea...
 #include "common/Point.h"                           // for iPoint2D
+#include "common/RawspeedException.h"               // for RawspeedException
 #include "decoders/RawDecoderException.h"           // for RawDecoderException
 #include "decompressors/DeflateDecompressor.h"      // for DeflateDecompressor
 #include "decompressors/JpegDecompressor.h"         // for JpegDecompressor
@@ -34,7 +35,6 @@
 #include <algorithm>                                // for move
 #include <cassert>                                  // for assert
 #include <cstdio>                                   // for size_t
-#include <exception>                                // for exception
 #include <memory>                                   // for allocator_traits...
 #include <string>                                   // for string, operator+
 #include <vector>                                   // for allocator, vector
@@ -48,11 +48,8 @@ void *DecodeThread(void *_this) {
   DngDecoderSlices* parent = me->parent;
   try {
     parent->decodeSlice(me);
-  } catch (const std::exception &exc) {
-    parent->mRaw->setError(string(
-        string("DNGDEcodeThread: Caught exception: ") + string(exc.what())));
-  } catch (...) {
-    parent->mRaw->setError("DNGDEcodeThread: Caught unhandled exception.");
+  } catch (RawspeedException& e) {
+    parent->mRaw->setError(string("Caught exception: ") + e.what());
   }
   return nullptr;
 }

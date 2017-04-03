@@ -482,7 +482,8 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   try {
     id = mRootIFD->getID();
-  } catch (RawspeedException&) {
+  } catch (RawspeedException& e) {
+    mRaw->setError(e.what());
     // not all dngs have MAKE/MODEL entries,
     // will be dealt with by using UNIQUECAMERAMODEL below
   }

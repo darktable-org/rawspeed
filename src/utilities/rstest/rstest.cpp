@@ -20,7 +20,6 @@
 
 #include "RawSpeed-API.h"
 
-#include "io/Endianness.h" // for getHostEndianness, BSWAP16, Endianness::l...
 #include "md5.h"           // for md5_hash
 #include <cassert>         // for assert
 #include <chrono>          // for milliseconds, steady_clock, duration, dur...
@@ -94,6 +93,7 @@ using RawSpeed::getU16BE;
 using RawSpeed::getU32LE;
 using RawSpeed::isAligned;
 using RawSpeed::roundUp;
+using RawSpeed::RawspeedException;
 
 class RstestHashMismatch final : public std::runtime_error {
 public:
@@ -447,7 +447,7 @@ int main(int argc, char **argv) {
 
     try {
       time += process(argv[i], &metadata, create, dump);
-    } catch (std::runtime_error &e) {
+    } catch (RawspeedException& e) {
 #ifdef _OPENMP
 #pragma omp critical(io)
 #endif

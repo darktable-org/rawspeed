@@ -22,7 +22,6 @@
 #include <cstddef>    // for size_t
 #include <cstdint>    // for uint16_t
 #include <cstdio>     // for fprintf, stdout, stderr, printf
-#include <exception>  // for exception
 #include <memory>     // for unique_ptr
 #include <string>     // for string, operator+
 #include <sys/stat.h> // for stat
@@ -51,6 +50,7 @@ using RawSpeed::uint32;
 using RawSpeed::iPoint2D;
 using RawSpeed::TYPE_USHORT16;
 using RawSpeed::TYPE_FLOAT32;
+using RawSpeed::RawspeedException;
 
 std::string find_cameras_xml(const char* argv0);
 
@@ -261,8 +261,8 @@ int main(int argc, char *argv[]) {
       fprintf(stdout, "Image uint16_t avg: %lf\n",
               sum / (double)(dimUncropped.y * dimUncropped.x));
     }
-  } catch (const std::exception &exc) {
-    printf("ERROR: [rawspeed] %s\n", exc.what());
+  } catch (RawspeedException& e) {
+    printf("ERROR: [rawspeed] %s\n", e.what());
 
     /* if an exception is raised lets not retry or handle the
      specific ones, consider the file as corrupted */

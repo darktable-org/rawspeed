@@ -23,6 +23,7 @@
 #include "decoders/Cr2Decoder.h"
 #include "common/Common.h"                 // for ushort16, clampBits, uint32
 #include "common/Point.h"                  // for iPoint2D
+#include "common/RawspeedException.h"      // for RawspeedException
 #include "decoders/RawDecoderException.h"  // for RawDecoderException, Thro...
 #include "decompressors/Cr2Decompressor.h" // for Cr2Decompressor
 #include "interpolators/Cr2sRawInterpolator.h" // for Cr2sRawInterpolator
@@ -37,7 +38,6 @@
 #include "tiff/TiffTag.h"                // for TiffTag, TiffTag::CANONCO...
 #include <array>                         // for array
 #include <cassert>                       // for assert
-#include <exception>                     // for exception
 #include <memory>                        // for unique_ptr, allocator
 #include <string>                        // for string
 #include <vector>                        // for vector
@@ -224,7 +224,7 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         }
       }
     }
-  } catch (const std::exception& e) {
+  } catch (RawspeedException& e) {
     mRaw->setError(e.what());
     // We caught an exception reading WB, just ignore it
   }

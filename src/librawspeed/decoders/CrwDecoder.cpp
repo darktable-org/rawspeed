@@ -23,6 +23,7 @@
 #include "decoders/CrwDecoder.h"
 #include "common/Common.h"                 // for ushort16, uint32
 #include "common/Point.h"                  // for iPoint2D
+#include "common/RawspeedException.h"      // for RawspeedException
 #include "decoders/RawDecoderException.h"  // for RawDecoderException (ptr ...
 #include "decompressors/CrwDecompressor.h" // for CrwDecompressor
 #include "metadata/Camera.h"               // for Hints
@@ -33,9 +34,7 @@
 #include <algorithm>                       // for move
 #include <cassert>                         // for assert
 #include <cmath>                           // for copysignf, expf, logf
-#include <cstdio>                          // for fprintf, stderr
 #include <cstdlib>                         // for abs
-#include <exception>                       // for exception
 #include <memory>                          // for unique_ptr
 #include <string>                          // for string
 #include <vector>                          // for vector
@@ -182,8 +181,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       mRaw->metadata.wbCoeffs[1] = wb_data->getU16(wb_offset + 1);
       mRaw->metadata.wbCoeffs[2] = wb_data->getU16(wb_offset + 3);
     }
-  } catch (const std::exception& e) {
-    fprintf(stderr, "Got exception: %s\n", e.what());
+  } catch (RawspeedException& e) {
     mRaw->setError(e.what());
     // We caught an exception reading WB, just ignore it
   }

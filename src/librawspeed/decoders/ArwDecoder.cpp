@@ -22,6 +22,7 @@
 #include "decoders/ArwDecoder.h"
 #include "common/Common.h"                          // for uint32, uchar8
 #include "common/Point.h"                           // for iPoint2D
+#include "common/RawspeedException.h"               // for RawspeedException
 #include "decoders/RawDecoder.h"                    // for RawDecoderThread
 #include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/HuffmanTable.h"             // for HuffmanTable
@@ -39,7 +40,6 @@
 #include "tiff/TiffTag.h"                           // for TiffTag::DNGPRIV...
 #include <cassert>                                  // for assert
 #include <cstring>                                  // for memcpy, size_t
-#include <exception>                                // for exception
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for operator==, basi...
 #include <vector>                                   // for vector
@@ -348,7 +348,7 @@ void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   } else { // Everything else but the A100
     try {
       GetWB();
-    } catch (const std::exception& e) {
+    } catch (RawspeedException& e) {
       mRaw->setError(e.what());
       // We caught an exception reading WB, just ignore it
     }
