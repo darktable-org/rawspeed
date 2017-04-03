@@ -27,7 +27,7 @@ target_build()
   cmake --build "$BUILD_DIR" --target install -- $MAKEFLAGS || cmake --build "$BUILD_DIR" --target install -- -j1 -v -k0
 }
 
-df -h --total
+df
 du -hcs "$SRC_DIR"
 du -hcs "$BUILD_DIR"
 du -hcs "$INSTALL_PREFIX"
