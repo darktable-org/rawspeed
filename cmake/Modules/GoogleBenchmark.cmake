@@ -29,6 +29,9 @@ endif()
 # let's insist on static library.
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
+# not interested
+set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+
 set(CMAKE_C_FLAGS_SAVE "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS_SAVE "${CMAKE_CXX_FLAGS}")
 
