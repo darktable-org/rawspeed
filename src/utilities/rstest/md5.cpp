@@ -34,7 +34,8 @@
 #include <string>  // for string
 
 #ifdef ENABLE_SELFTEST
-#include <cstdlib> // for EXIT_FAILURE, EXIT_SUCCESS
+#include <gtest/gtest.h>
+#include <utility> // for pair, make_pair
 #endif
 
 void md5_compress(md5_state& state, const uint8_t block[64]) {
@@ -199,20 +200,31 @@ std::string md5_hash(const uint8_t* message, size_t len) {
 #ifdef ENABLE_SELFTEST
 /* Self-check */
 
-struct testcase {
+using MD5Testcase = std::pair<md5_state, const uint8_t*>;
+class MD5Test : public ::testing::TestWithParam<MD5Testcase> {
+protected:
+  MD5Test() = default;
+  virtual void SetUp() override {
+    auto p = GetParam();
+
+    answer = p.first;
+    message = p.second;
+  }
+
   md5_state answer;
   const uint8_t* message;
 };
 
 #define TESTCASE(a, b, c, d, msg)                                              \
   {                                                                            \
-    {{UINT32_C(a), UINT32_C(b), UINT32_C(c), UINT32_C(d)}},                    \
-        (const uint8_t*)(msg)                                                  \
+    std::make_pair(                                                            \
+        (md5_state){{UINT32_C(a), UINT32_C(b), UINT32_C(c), UINT32_C(d)}},     \
+        (const uint8_t*)(msg))                                                 \
   }
 
 // Note: The MD5 standard specifies that uint32 are serialized to/from bytes in
 // little endian
-static struct testcase testCases[] = {
+static MD5Testcase testCases[] = {
     TESTCASE(0xD98C1DD4, 0x04B2008F, 0x980980E9, 0x7E42F8EC, ""),
     TESTCASE(0xB975C10C, 0xA8B6F1C0, 0xE299C331, 0x61267769, "a"),
     TESTCASE(0x98500190, 0xB04FD23C, 0x7D3F96D6, 0x727FE128, "abc"),
@@ -226,40 +238,13 @@ static struct testcase testCases[] = {
              "678901234567890"),
 };
 
-static bool self_check() {
-  unsigned int i;
-  for (i = 0; i < sizeof(testCases) / sizeof(testCases[i]); i++) {
-    struct testcase* tc = &testCases[i];
+INSTANTIATE_TEST_CASE_P(MD5Test, MD5Test, ::testing::ValuesIn(testCases));
+TEST_P(MD5Test, CheckTestCaseSet) {
+  ASSERT_NO_THROW({
     md5_state hash;
-    md5_hash(tc->message, strlen((const char*)tc->message), hash);
-    printf("%s -> %s\n", tc->message, hash_to_string(hash).c_str());
-    if (hash != tc->answer)
-      return false;
-  }
-  return true;
-}
+    md5_hash(message, strlen((const char*)message), hash);
 
-/* Main program */
-
-int main(int argc, char** argv) {
-  if (!self_check()) {
-    printf("Self-check failed\n");
-    return EXIT_FAILURE;
-  }
-  printf("Self-check passed\n");
-
-#if 0
-	// Benchmark speed
-	md5_state state = {0};
-	uint8_t block[64] = {0};
-	const int N = 10000000;
-	clock_t start_time = clock();
-	int i;
-	for (i = 0; i < N; i++)
-		md5_compress(state, block);
-	printf("Speed: %.1f MB/s\n", (double)N * sizeof(block) / (clock() - start_time) * CLOCKS_PER_SEC / 1000000);
-#endif
-
-  return EXIT_SUCCESS;
+    ASSERT_EQ(hash, answer);
+  });
 }
 #endif
