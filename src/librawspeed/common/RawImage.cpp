@@ -210,7 +210,7 @@ uchar8* RawImageData::getData(uint32 x, uint32 y) {
   if (!data)
     ThrowRDE("Data not yet allocated.");
 
-  return &data[y*pitch+x*bpp];
+  return &data[(size_t)y * pitch + x * bpp];
 }
 
 uchar8* RawImageData::getDataUncropped(uint32 x, uint32 y) {
@@ -223,7 +223,7 @@ uchar8* RawImageData::getDataUncropped(uint32 x, uint32 y) {
   if (!data)
     ThrowRDE("Data not yet allocated.");
 
-  return &data[y*pitch+x*bpp];
+  return &data[(size_t)y * pitch + x * bpp];
 }
 
 iPoint2D __attribute__((pure)) RawSpeed::RawImageData::getUncroppedDim() const {
