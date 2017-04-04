@@ -46,6 +46,7 @@ void AbstractLJpegDecompressor::decode() {
     case M_SOS:  parseSOS(); break;
     case M_DQT:
       ThrowRDE("Not a valid RAW file.");
+      break;
     default:  // Just let it skip to next marker
       break;
     }
