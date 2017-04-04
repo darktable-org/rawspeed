@@ -26,6 +26,7 @@
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/Endianness.h"                // for getHostEndianness, Endiann...
 #include "io/IOException.h"               // for IOException
+#include <cassert>                        // for assert
 #include <cstring>                        // for memset
 #include <map>                            // for map, map<>::mapped_type
 #include <string>                         // for string, basic_string, oper...
@@ -262,12 +263,12 @@ static bool ConvertUTF16toUTF8(const UTF16** sourceStart,
       success = false;
       break;
     }
-    switch (bytesToWrite) { /* note: everything falls through. */
-            case 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 1: *--target =  (UTF8)(ch | firstByteMark[bytesToWrite]);
+    assert(bytesToWrite > 0);
+    for (int i = bytesToWrite; i > 1; i--) {
+      *--target = (UTF8)((ch | byteMark) & byteMask);
+      ch >>= 6;
     }
+    *--target = (UTF8)(ch | firstByteMark[bytesToWrite]);
     target += bytesToWrite;
   }
   // Function modified to retain source + target positions
