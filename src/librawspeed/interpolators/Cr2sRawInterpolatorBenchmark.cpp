@@ -49,7 +49,7 @@ areaToRectangle(size_t area, iPoint2D aspect = {2, 2}) {
   dim.x = roundUp(dim.x, aspect.x);
   dim.y = roundUp(dim.y, aspect.y);
 
-  assert(dim.area() >= area && (dim.area() <= 1.01 * area));
+  assert(dim.area() >= area);
 
   return dim;
 }
