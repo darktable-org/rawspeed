@@ -435,7 +435,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(2);
       mRaw->metadata.wbCoeffs[2] = wb->getFloat(1);
-      if (mRaw->metadata.wbCoeffs[1] == 0.0f)
+      if (mRaw->metadata.wbCoeffs[1] <= 0.0f)
         mRaw->metadata.wbCoeffs[1] = 1.0f;
     }
   } else if (mRootIFD->hasEntryRecursive((TiffTag)0x0097)) {
@@ -566,7 +566,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
   float wb_r = wb->getFloat(0);
   float wb_b = wb->getFloat(1);
 
-  if (wb_r == 0.0f || wb_b == 0.0f)
+  if (wb_r <= 0.0f || wb_b <= 0.0f)
     ThrowRDE("Whitebalance has zero value");
 
   mRaw->metadata.wbCoeffs[0] = wb_r;
