@@ -148,22 +148,24 @@ static inline uint32 __attribute__((const)) fp24ToFloat(uint32 fp24) {
   if (fp24_exponent == 127) {
     // Infinity or NaN
     fp32_exponent = 255;
-  } else if (fp24_exponent == 0 && fp24_fraction == 0) {
-    // +-Zero
-    fp32_exponent = 0;
-    fp32_fraction = 0;
-  } else if (fp24_exponent == 0 && fp24_fraction != 0) {
-    // Subnormal numbers
-    // binary32 equation: -1 ^ sign * 2 ^ (exponent - 127) * 1.fraction
-    // binary24 equation: -1 ^ sign * 2 ^ -62 * 0.fraction, we can represent it
-    // as a normalized value in binary32, we have to shift fraction until we get
-    // 1.new_fraction and decrement exponent for each shift
-    fp32_exponent = -62 + 127;
-    while (!(fp32_fraction & (1 << 23))) {
-      fp32_exponent -= 1;
-      fp32_fraction <<= 1;
+  } else if (fp24_exponent == 0) {
+    if (fp24_fraction == 0) {
+      // +-Zero
+      fp32_exponent = 0;
+      fp32_fraction = 0;
+    } else {
+      // Subnormal numbers
+      // binary32 equation: -1 ^ sign * 2 ^ (exponent - 127) * 1.fraction
+      // binary24 equation: -1 ^ sign * 2 ^ -62 * 0.fraction, we can represent
+      // it as a normalized value in binary32, we have to shift fraction until
+      // we get 1.new_fraction and decrement exponent for each shift
+      fp32_exponent = -62 + 127;
+      while (!(fp32_fraction & (1 << 23))) {
+        fp32_exponent -= 1;
+        fp32_fraction <<= 1;
+      }
+      fp32_fraction &= ((1 << 23) - 1);
     }
-    fp32_fraction &= ((1 << 23) - 1);
   }
   return (sign << 31) | (fp32_exponent << 23) | fp32_fraction;
 }
