@@ -24,6 +24,7 @@ endif()
 
 FILE(GLOB RAWSPEED_TESTS_SOURCES
   "../common/CommonTest.cpp"
+  "../common/CpuidTest.cpp"
   "../common/MemoryTest.cpp"
   "../common/PointTest.cpp"
   "../io/EndiannessTest.cpp"

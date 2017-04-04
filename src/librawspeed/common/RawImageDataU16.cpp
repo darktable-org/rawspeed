@@ -30,6 +30,7 @@
 #include <vector>                         // for vector
 
 #if defined(__SSE2__)
+#include "common/Cpuid.h" // for Cpuid
 #include <emmintrin.h> // for __m128i, _mm_load_si128
 #include <xmmintrin.h> // for _MM_HINT_T0, _mm_prefetch
 #endif
@@ -165,20 +166,11 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 
 #else
 
-  bool use_sse2;
-#ifdef _MSC_VER
-  int info[4];
-  __cpuid(info, 1);
-  use_sse2 = !!(info[3]&(1 << 26));
-#else
-  use_sse2 = true;
-#endif
-
   int depth_values = whitePoint - blackLevelSeparate[0];
   float app_scale = 65535.0f / depth_values;
 
   // Check SSE2
-  if (use_sse2 && app_scale < 63) {
+  if (Cpuid::SSE2() && app_scale < 63) {
     scaleValues_SSE2(start_y, end_y);
   } else {
     scaleValues_plain(start_y, end_y);
