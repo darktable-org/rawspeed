@@ -23,12 +23,10 @@ if(BUILD_TESTING)
 
   unset(CMAKE_CXX_CLANG_TIDY)
 
-  add_executable(md5 md5.cpp)
-  target_compile_definitions(md5
-    PRIVATE -DENABLE_SELFTEST
-  )
-  target_link_libraries(md5 gtest_main)
-  add_test(NAME utilities/rstest/md5 COMMAND md5 --gtest_output=xml:${UNITTEST_REPORT_PATH})
+  add_executable(MD5Test md5.cpp MD5Test.cpp)
+  target_link_libraries(MD5Test gtest_main)
+  add_test(NAME utilities/rstest/md5 COMMAND MD5Test --gtest_output=xml:${UNITTEST_REPORT_PATH})
+  add_dependencies(tests MD5Test)
 
   add_test(NAME utilities/rstest COMMAND rstest)
 endif()

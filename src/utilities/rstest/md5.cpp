@@ -33,11 +33,6 @@
 #include <cstring> // for memset, strlen, memcmp, memcpy
 #include <string>  // for string
 
-#ifdef ENABLE_SELFTEST
-#include <gtest/gtest.h>
-#include <utility> // for pair, make_pair
-#endif
-
 void md5_compress(md5_state& state, const uint8_t block[64]) {
 #define LOADSCHEDULE(i)                                                        \
   schedule[i] =                                                                \
@@ -196,55 +191,3 @@ std::string md5_hash(const uint8_t* message, size_t len) {
   md5_hash(message, len, hash);
   return hash_to_string(hash);
 }
-
-#ifdef ENABLE_SELFTEST
-/* Self-check */
-
-using MD5Testcase = std::pair<md5_state, const uint8_t*>;
-class MD5Test : public ::testing::TestWithParam<MD5Testcase> {
-protected:
-  MD5Test() = default;
-  virtual void SetUp() override {
-    auto p = GetParam();
-
-    answer = p.first;
-    message = p.second;
-  }
-
-  md5_state answer;
-  const uint8_t* message;
-};
-
-#define TESTCASE(a, b, c, d, msg)                                              \
-  {                                                                            \
-    std::make_pair(                                                            \
-        (md5_state){{UINT32_C(a), UINT32_C(b), UINT32_C(c), UINT32_C(d)}},     \
-        (const uint8_t*)(msg))                                                 \
-  }
-
-// Note: The MD5 standard specifies that uint32 are serialized to/from bytes in
-// little endian
-static MD5Testcase testCases[] = {
-    TESTCASE(0xD98C1DD4, 0x04B2008F, 0x980980E9, 0x7E42F8EC, ""),
-    TESTCASE(0xB975C10C, 0xA8B6F1C0, 0xE299C331, 0x61267769, "a"),
-    TESTCASE(0x98500190, 0xB04FD23C, 0x7D3F96D6, 0x727FE128, "abc"),
-    TESTCASE(0x7D696BF9, 0x8D93B77C, 0x312F5A52, 0xD061F1AA, "message digest"),
-    TESTCASE(0xD7D3FCC3, 0x00E49261, 0x6C49FB7D, 0x3BE167CA,
-             "abcdefghijklmnopqrstuvwxyz"),
-    TESTCASE(0x98AB74D1, 0xF5D977D2, 0x2C1C61A5, 0x9F9D419F,
-             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"),
-    TESTCASE(0xA2F4ED57, 0x55C9E32B, 0x2EDA49AC, 0x7AB60721,
-             "12345678901234567890123456789012345678901234567890123456789012345"
-             "678901234567890"),
-};
-
-INSTANTIATE_TEST_CASE_P(MD5Test, MD5Test, ::testing::ValuesIn(testCases));
-TEST_P(MD5Test, CheckTestCaseSet) {
-  ASSERT_NO_THROW({
-    md5_state hash;
-    md5_hash(message, strlen((const char*)message), hash);
-
-    ASSERT_EQ(hash, answer);
-  });
-}
-#endif

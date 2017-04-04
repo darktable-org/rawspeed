@@ -51,7 +51,7 @@
 
 // see https://github.com/google/sanitizers/wiki/AddressSanitizerManualPoisoning
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
-#include <sanitizer/asan_interface.h>
+#include <sanitizer/asan_interface.h> // IWYU pragma: export
 #else
 #define ASAN_POISON_MEMORY_REGION(addr, size) ((void)(addr), (void)(size))
 #define ASAN_UNPOISON_MEMORY_REGION(addr, size) ((void)(addr), (void)(size))
