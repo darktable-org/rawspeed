@@ -22,6 +22,7 @@
 #include "common/Common.h"                // for ushort16, uint32, uchar8
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D, iRectangle2D
+#include "common/RawspeedException.h"     // for RawspeedException
 #include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/Buffer.h"                    // for Buffer::size_type
@@ -136,7 +137,7 @@ bool X3fDecoder::readName() {
           mProperties.props["CAMMANUF"] = id.make;
           mProperties.props["CAMMODEL"] = id.model;
           return true;
-        } catch (...) {
+        } catch (RawspeedException&) {
           return false;
         }
       }
