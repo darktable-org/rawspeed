@@ -32,7 +32,6 @@
 #include <map>             // for map
 #include <memory>          // for unique_ptr, allocator
 #include <sstream>         // IWYU pragma: keep
-#include <stdexcept>       // for runtime_error
 #include <string>          // for string, char_traits, operator+, operator<<
 #include <type_traits>     // for enable_if<>::type
 #include <utility>         // for pair
@@ -95,11 +94,11 @@ using RawSpeed::isAligned;
 using RawSpeed::roundUp;
 using RawSpeed::RawspeedException;
 
-class RstestHashMismatch final : public std::runtime_error {
+class RstestHashMismatch final : public RawSpeed::RawspeedException {
 public:
   explicit RstestHashMismatch(const std::string& msg)
-      : std::runtime_error(msg) {}
-  explicit RstestHashMismatch(const char* msg) : std::runtime_error(msg) {}
+      : RawspeedException(msg) {}
+  explicit RstestHashMismatch(const char* msg) : RawspeedException(msg) {}
 };
 
 struct Timer {
