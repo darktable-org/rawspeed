@@ -51,17 +51,6 @@ int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
 }
 #endif
 
-std::string img_hash(RawSpeed::RawImage& r);
-
-void writePPM(const RawSpeed::RawImage& raw, const std::string& fn);
-void writePFM(const RawSpeed::RawImage& raw, const std::string& fn);
-
-void writeImage(const RawSpeed::RawImage& raw, const std::string& fn);
-
-size_t process(const std::string& filename,
-               const RawSpeed::CameraMetaData* metadata, bool create,
-               bool dump);
-
 using std::chrono::steady_clock;
 using std::string;
 using std::ostringstream;
@@ -93,6 +82,21 @@ using RawSpeed::getU32LE;
 using RawSpeed::isAligned;
 using RawSpeed::roundUp;
 using RawSpeed::RawspeedException;
+
+namespace RawSpeed {
+
+namespace rstest {
+
+std::string img_hash(RawSpeed::RawImage& r);
+
+void writePPM(const RawSpeed::RawImage& raw, const std::string& fn);
+void writePFM(const RawSpeed::RawImage& raw, const std::string& fn);
+
+void writeImage(const RawSpeed::RawImage& raw, const std::string& fn);
+
+size_t process(const std::string& filename,
+               const RawSpeed::CameraMetaData* metadata, bool create,
+               bool dump);
 
 class RstestHashMismatch final : public RawSpeed::RawspeedException {
 public:
@@ -415,6 +419,14 @@ static int usage(const char* progname) {
 )";
   return 0;
 }
+
+} // namespace rstest
+
+} // namespace RawSpeed
+
+using RawSpeed::rstest::usage;
+using RawSpeed::rstest::process;
+using RawSpeed::rstest::results;
 
 int main(int argc, char **argv) {
 
