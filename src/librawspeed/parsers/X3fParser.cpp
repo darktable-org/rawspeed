@@ -40,31 +40,29 @@ X3fParser::X3fParser(Buffer* file) : RawParser(file) {
   decoder = nullptr;
   bytes = nullptr;
   uint32 size = file->getSize();
-  if (size<104+128)
+  if (size < 104 + 128)
     ThrowRDE("X3F file too small");
 
   bytes = new ByteStream(file, 0, size, getHostEndianness() == little);
 
   try {
-    try {
-      // Read signature
-      if (bytes->getU32() != 0x62564f46)
-        ThrowRDE("Not an X3f file (Signature)");
+    // Read signature
+    if (bytes->getU32() != 0x62564f46)
+      ThrowRDE("Not an X3f file (Signature)");
 
-      uint32 version = bytes->getU32();
-      if (version < 0x00020000)
-        ThrowRDE("File version too old");
+    uint32 version = bytes->getU32();
+    if (version < 0x00020000)
+      ThrowRDE("File version too old");
 
-      // Skip identifier + mark bits
-      bytes->skipBytes(16+4);
+    // Skip identifier + mark bits
+    bytes->skipBytes(16 + 4);
 
-      bytes->setPosition(0);
-      decoder = new X3fDecoder(file);
-      readDirectory();
-    } catch (IOException &e) {
-      ThrowRDE("IO Error while reading header: %s", e.what());
-    }
-  } catch (RawDecoderException &e) {
+    bytes->setPosition(0);
+    decoder = new X3fDecoder(file);
+    readDirectory();
+  } catch (IOException& e) {
+    ThrowRDE("IO Error while reading header: %s", e.what());
+  } catch (RawDecoderException& e) {
     freeObjects();
     throw;
   }
