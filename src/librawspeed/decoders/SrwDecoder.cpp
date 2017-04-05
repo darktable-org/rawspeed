@@ -310,9 +310,10 @@ void SrwDecoder::decodeCompressed3(const TiffIFD* raw, int bits)
   // The format includes an optimization code that sets 3 flags to change the
   // decoding parameters
   uint32 optflags = startpump.getBits(4);
-  #define OPT_SKIP 1 // Skip checking if we need differences from previous line
-  #define OPT_MV   2 // Simplify motion vector definition
-  #define OPT_QP   4 // Don't scale the diff values
+
+#define OPT_SKIP 1 // Skip checking if we need differences from previous line
+#define OPT_MV 2   // Simplify motion vector definition
+#define OPT_QP 4   // Don't scale the diff values
 
   startpump.getBits(8);  // OverlapWidth
   startpump.getBits(8);  // reserved
