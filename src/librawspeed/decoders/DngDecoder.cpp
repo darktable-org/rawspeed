@@ -31,7 +31,6 @@
 #include "metadata/Camera.h"              // for Camera
 #include "metadata/CameraMetaData.h"      // for CameraMetaData
 #include "metadata/ColorFilterArray.h"    // for CFAColor, ColorFilterArray
-#include "parsers/TiffParserException.h"  // for TiffParserException
 #include "tiff/TiffEntry.h"               // for TiffEntry, TiffDataType::T...
 #include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD, TiffID
 #include "tiff/TiffTag.h"                 // for TiffTag::UNIQUECAMERAMODEL
@@ -68,16 +67,30 @@ DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, Buffer* file)
 
 void DngDecoder::dropUnsuportedChunks(vector<const TiffIFD*>& data) {
   for (auto i = data.begin(); i != data.end();) {
-    int comp = (*i)->getEntry(COMPRESSION)->getU16();
+    const auto& ifd = *i;
+
+    int comp = ifd->getEntry(COMPRESSION)->getU16();
     bool isSubsampled = false;
-    try {
-      isSubsampled = (*i)->getEntry(NEWSUBFILETYPE)->getU32() &
-                     1; // bit 0 is on if image is subsampled
-    } catch (TiffParserException&) {
+    bool isAlpha = false;
+
+    if (ifd->hasEntry(NEWSUBFILETYPE) &&
+        ifd->getEntry(NEWSUBFILETYPE)->isInt()) {
+      const uint32 NewSubFileType = (*i)->getEntry(NEWSUBFILETYPE)->getU32();
+
+      // bit 0 is on if image is subsampled.
+      // the value itself can be either 1, or 0x10001.
+      // or 5 for "Transparency information for subsampled raw images"
+      isSubsampled = NewSubFileType & (1 << 0);
+
+      // bit 2 is on if image contains transparency information.
+      // the value itself can be either 4 or 5
+      isAlpha = NewSubFileType & (1 << 2);
+
+      assert((NewSubFileType == 0) || isSubsampled || isAlpha);
     }
 
-    // subsampled ?
-    bool supported = !isSubsampled;
+    // normal raw?
+    bool supported = !isSubsampled && !isAlpha;
 
     switch (comp) {
     case 1: // uncompressed
