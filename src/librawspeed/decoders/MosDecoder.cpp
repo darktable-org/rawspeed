@@ -105,6 +105,7 @@ RawImage MosDecoder::decodeRawInternal() {
       case 0x10f: data_offset  = data+base; break;
       case 0x21c: strip_offset = data+base; break;
       case 0x21d: black_level  = data>>2;   break;
+      default: break;
       }
     }
     if (width <= 0 || height <= 0)

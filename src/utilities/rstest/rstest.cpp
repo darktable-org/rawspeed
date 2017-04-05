@@ -277,6 +277,9 @@ void writeImage(const RawImage& raw, const string& fn) {
   case TYPE_FLOAT32:
     writePFM(raw, fn);
     break;
+  default:
+    __builtin_unreachable();
+    break;
   }
 }
 

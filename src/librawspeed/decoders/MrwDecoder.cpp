@@ -85,6 +85,8 @@ void MrwDecoder::parseHeader() {
       // Base value for offsets needs to be at the beginning of the TIFF block, not the file
       rootIFD = TiffParser::parse(mFile->getSubView(currpos + 8));
       break;
+    default:
+      break;
     }
     currpos += max(len + 8, 1u); // max(,1) to make sure we make progress
   }

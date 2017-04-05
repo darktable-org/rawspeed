@@ -77,8 +77,9 @@ uint32 __attribute__((pure)) CiffEntry::getElementShift() {
     case CIFF_SUB1:
     case CIFF_SUB2:
       return 2;
+    default:
+      return 0;
   }
-  return 0;
 }
 
 uint32 __attribute__((pure)) CiffEntry::getElementSize() {
@@ -93,8 +94,9 @@ uint32 __attribute__((pure)) CiffEntry::getElementSize() {
     case CIFF_SUB1:
     case CIFF_SUB2:
       return 4;
+    default:
+      return 0;
   }
-  return 0;
 }
 
 bool __attribute__((pure)) CiffEntry::isInt() {

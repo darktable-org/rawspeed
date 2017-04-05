@@ -35,6 +35,7 @@
 #include "tiff/TiffIFD.h"                 // for TiffRootIFD, TiffIFD, TiffID
 #include "tiff/TiffTag.h"                 // for TiffTag::STRIPOFFSETS, Tif...
 #include <algorithm>                      // for max
+#include <cassert>                        // for assert
 #include <memory>                         // for unique_ptr
 #include <sstream>                        // for ostringstream, operator<<
 #include <string>                         // for string
@@ -134,12 +135,17 @@ void SrwDecoder::decodeCompressed( const TiffIFD* raw )
       for (int &i : op)
         i = bits.getBitsNoFill(2);
       for (int i = 0; i < 4; i++) {
+        assert(op[i] >= 0 && op[i] <= 3);
         switch (op[i]) {
           case 3: len[i] = bits.getBits(4);
             break;
           case 2: len[i]--;
             break;
           case 1: len[i]++;
+            break;
+          default:
+            // FIXME: it can be zero too.
+            break;
         }
         if (len[i] < 0)
           ThrowRDE("Bit length less than 0.");
@@ -404,11 +410,13 @@ void SrwDecoder::decodeCompressed3(const TiffIFD* raw, int bits)
         for (uint32 i=0; i<4; i++) {
           // The color is 0-Green 1-Blue 2-Red
           uint32 colornum = (row % 2 != 0) ? i>>1 : ((i>>1)+2) % 3;
+          assert(flags[i] <= 3);
           switch(flags[i]) {
             case 0: diffBits[i] = diffBitsMode[colornum][0]; break;
             case 1: diffBits[i] = diffBitsMode[colornum][0]+1; break;
             case 2: diffBits[i] = diffBitsMode[colornum][0]-1; break;
             case 3: diffBits[i] = pump.getBits(4); break;
+            default: __builtin_unreachable(); break;
           }
           diffBitsMode[colornum][0] = diffBitsMode[colornum][1];
           diffBitsMode[colornum][1] = diffBits[i];
