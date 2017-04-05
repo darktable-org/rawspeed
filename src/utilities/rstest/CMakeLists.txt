@@ -30,3 +30,10 @@ if(BUILD_TESTING)
 
   add_test(NAME utilities/rstest COMMAND rstest)
 endif()
+
+if(BUILD_BENCHMARKING)
+  add_executable(MD5Benchmark md5.cpp MD5Benchmark.cpp)
+  target_link_libraries(MD5Benchmark benchmark)
+
+  add_dependencies(benchmarks MD5Benchmark)
+endif()
