@@ -332,14 +332,16 @@ void X3fPropertyCollection::addProperties( ByteStream *bytes, uint32 offset, uin
     uint32 key_pos = bytes->getU32();
     uint32 value_pos = bytes->getU32();
     uint32 old_pos = bytes->getPosition();
-    try {
+
+    if (bytes->isValid(key_pos * 2 + data_start, 2) &&
+        bytes->isValid(value_pos * 2 + data_start, 2)) {
       bytes->setPosition(key_pos * 2 + data_start);
       string key = getString(bytes);
       bytes->setPosition(value_pos * 2 + data_start);
       string val = getString(bytes);
       props[key] = val;
-    } catch (IOException &) {
     }
+
     bytes->setPosition(old_pos);
   }
 }
