@@ -41,7 +41,9 @@ public:
 
   // Will be called once before processing.
   // Can be used for preparing pre-calculated values, etc.
-  virtual void setup(const RawImage& ri) {}
+  virtual void setup(const RawImage& ri) {
+    // NOP by default. child class shall override this if needed.
+  }
 
   // Will be called for actual processing.
   virtual void apply(RawImage& ri) = 0;

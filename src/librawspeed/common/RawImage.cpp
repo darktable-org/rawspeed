@@ -148,7 +148,11 @@ void RawImageData::poisonPadding() {
   }
 }
 #else
-void __attribute__((const)) RawImageData::poisonPadding() {}
+void __attribute__((const)) RawImageData::poisonPadding() {
+  // if we are building without ASAN, then there is no need/way to poison.
+  // however, i think it is better to have such an empty function rather
+  // than making this whole function not exist in ASAN-less builds
+}
 #endif
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
@@ -165,7 +169,11 @@ void RawImageData::unpoisonPadding() {
   }
 }
 #else
-void __attribute__((const)) RawImageData::unpoisonPadding() {}
+void __attribute__((const)) RawImageData::unpoisonPadding() {
+  // if we are building without ASAN, then there is no need/way to poison.
+  // however, i think it is better to have such an empty function rather
+  // than making this whole function not exist in ASAN-less builds
+}
 #endif
 
 void RawImageData::destroyData() {

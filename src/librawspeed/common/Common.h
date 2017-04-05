@@ -185,7 +185,10 @@ struct unroll_loop_t {
 
 template <typename Lambda>
 struct unroll_loop_t<Lambda, 0> {
-  inline static void repeat(const Lambda& f) {}
+  inline static void repeat(const Lambda& f) {
+    // this method is correctly empty.
+    // only needed as part of compile time 'manual' branch unrolling
+  }
 };
 
 template <size_t N, typename Lambda>
