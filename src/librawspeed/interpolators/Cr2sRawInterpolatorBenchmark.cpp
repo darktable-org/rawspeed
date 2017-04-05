@@ -78,10 +78,11 @@ static inline void BM_Cr2sRawInterpolator(benchmark::State& state) {
 static inline void CustomArguments(benchmark::internal::Benchmark* b) {
   b->RangeMultiplier(2);
 #if 1
-  b->Arg(256 << 20)->Unit(benchmark::kMillisecond);
+  b->Arg(256 << 20);
 #else
   b->Range(1, 1024 << 20)->Complexity(benchmark::oN);
 #endif
+  b->Unit(benchmark::kMillisecond);
 }
 
 static constexpr const iPoint2D S422(2, 1);
