@@ -32,7 +32,7 @@
 #include <memory>                                   // for unique_ptr
 #include <vector>                                   // for vector
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 
@@ -84,4 +84,4 @@ void DcsDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, "", 0);
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

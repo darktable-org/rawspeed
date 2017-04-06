@@ -46,7 +46,7 @@ using std::string;
 using std::unique_ptr;
 using std::max;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 X3fDecoder::X3fDecoder(Buffer* file) : RawDecoder(file) {
   bytes = new ByteStream(file, 0, getHostEndianness() == little);
@@ -482,4 +482,4 @@ Buffer* X3fDecoder::getCompressedData() {
   return nullptr;
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

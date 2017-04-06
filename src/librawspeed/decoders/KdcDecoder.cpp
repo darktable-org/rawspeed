@@ -34,7 +34,7 @@
 #include <cassert>                                  // for assert
 #include <memory>                                   // for unique_ptr
 
-namespace RawSpeed {
+namespace rawspeed {
 
 RawImage KdcDecoder::decodeRawInternal() {
   if (!mRootIFD->hasEntryRecursive(COMPRESSION))
@@ -112,4 +112,4 @@ void KdcDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

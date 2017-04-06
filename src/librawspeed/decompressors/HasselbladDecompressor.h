@@ -25,7 +25,7 @@
 #include "io/BitPumpMSB32.h"                         // for BitPumpMSB32
 #include "io/Buffer.h"                               // for Buffer, Buffer:...
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class RawImage;
 
@@ -48,4 +48,4 @@ public:
   static inline int getBits(BitPumpMSB32& bs, int len);
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

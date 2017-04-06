@@ -27,7 +27,7 @@
 #include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
 #include <string>                         // for string
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 class Buffer;
@@ -49,4 +49,4 @@ protected:
   void DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32 width, uint32 height);
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

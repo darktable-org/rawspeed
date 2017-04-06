@@ -42,7 +42,7 @@
 #include <string>                                   // for string
 #include <vector>                                   // for vector
 
-namespace RawSpeed {
+namespace rawspeed {
 
 bool RafDecoder::isRAF(Buffer* input) {
   static const char magic[] = "FUJIFILMCCD-RAW ";
@@ -253,5 +253,4 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 }
 
-
-} // namespace RawSpeed
+} // namespace rawspeed

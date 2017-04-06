@@ -34,16 +34,16 @@
 #include <string>                             // for string
 
 using std::unique_ptr;
-using RawSpeed::RawspeedException;
-using RawSpeed::CameraMetadataException;
-using RawSpeed::CiffParserException;
-using RawSpeed::FileIOException;
-using RawSpeed::IOException;
-using RawSpeed::RawDecoderException;
-using RawSpeed::TiffParserException;
-using RawSpeed::FiffParserException;
+using rawspeed::RawspeedException;
+using rawspeed::CameraMetadataException;
+using rawspeed::CiffParserException;
+using rawspeed::FileIOException;
+using rawspeed::IOException;
+using rawspeed::RawDecoderException;
+using rawspeed::TiffParserException;
+using rawspeed::FiffParserException;
 
-namespace RawSpeedTest {
+namespace rawspeed_test {
 
 static const std::string msg("my very Smart error Message #1 !");
 
@@ -198,4 +198,4 @@ TYPED_TEST(ExceptionsTest, ThrowHelperTestMessage) {
   }
 }
 
-} // namespace RawSpeedTest
+} // namespace rawspeed_test

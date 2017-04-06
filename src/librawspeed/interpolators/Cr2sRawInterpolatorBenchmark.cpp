@@ -29,12 +29,12 @@
 #include <cstddef>                             // for size_t
 #include <type_traits>                         // for integral_constant
 
-using RawSpeed::Cr2sRawInterpolator;
-using RawSpeed::RawImage;
-using RawSpeed::TYPE_USHORT16;
-using RawSpeed::iPoint2D;
-using RawSpeed::roundUp;
-using RawSpeed::ushort16;
+using rawspeed::Cr2sRawInterpolator;
+using rawspeed::RawImage;
+using rawspeed::TYPE_USHORT16;
+using rawspeed::iPoint2D;
+using rawspeed::roundUp;
+using rawspeed::ushort16;
 using std::array;
 using std::integral_constant;
 using std::sqrt;

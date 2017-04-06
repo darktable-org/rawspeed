@@ -31,7 +31,7 @@
 #include "io/ByteStream.h"                      // for ByteStream
 #include "io/Endianness.h" // for getHostEndianness, Endianness::big
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class JpegDecompressor final : public AbstractDecompressor {
 public:
@@ -51,7 +51,7 @@ protected:
   RawImage mRaw;
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed
 
 #else
 

@@ -31,9 +31,9 @@
 #include <vector>             // for vector, allocator
 
 using std::unique_ptr;
-using RawSpeed::CameraSensorInfo;
+using rawspeed::CameraSensorInfo;
 
-namespace RawSpeedTest {
+namespace rawspeed_test {
 
 std::vector<int> ISOList(6);
 
@@ -305,14 +305,14 @@ TEST_P(CameraSensorInfoTest, isIsoWithin) {
   });
 }
 
-} // namespace RawSpeedTest
+} // namespace rawspeed_test
 
 int main(int argc, char** argv) {
-  RawSpeedTest::ISOList.push_back(0);
+  rawspeed_test::ISOList.push_back(0);
 
   int n = {25};
-  std::generate(RawSpeedTest::ISOList.begin() + 1, RawSpeedTest::ISOList.end(),
-                [&n] { return n *= 4; });
+  std::generate(rawspeed_test::ISOList.begin() + 1,
+                rawspeed_test::ISOList.end(), [&n] { return n *= 4; });
 
   std::srand(2016122923);
 

@@ -48,7 +48,7 @@ using std::vector;
 using std::map;
 using std::string;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, Buffer* file)
     : AbstractTiffDecoder(move(rootIFD), file) {
@@ -676,4 +676,4 @@ void DngDecoder::setBlack(const TiffIFD* raw) {
   if (raw->hasEntry(BLACKLEVEL))
     decodeBlackLevels(raw);
 }
-} // namespace RawSpeed
+} // namespace rawspeed

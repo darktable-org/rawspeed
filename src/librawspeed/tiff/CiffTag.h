@@ -21,7 +21,7 @@
 
 #pragma once
 
-namespace RawSpeed {
+namespace rawspeed {
 
 enum CiffTag {
   CIFF_NULL         = 0x0000,
@@ -36,4 +36,4 @@ enum CiffTag {
   CIFF_EXIF         = 0x300b,
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

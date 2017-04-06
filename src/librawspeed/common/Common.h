@@ -33,7 +33,7 @@
 
 int rawspeed_get_number_of_processor_cores();
 
-namespace RawSpeed {
+namespace rawspeed {
 
 using char8 = signed char;
 using uchar8 = unsigned char;
@@ -196,4 +196,4 @@ inline void unroll_loop(const Lambda& f) {
   unroll_loop_t<Lambda, N>::repeat(f);
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

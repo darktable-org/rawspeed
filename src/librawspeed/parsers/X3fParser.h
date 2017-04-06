@@ -25,7 +25,7 @@
 #include <map>                 // for map
 #include <string>              // for string
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Buffer;
 
@@ -90,4 +90,4 @@ protected:
   X3fDecoder *decoder;
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

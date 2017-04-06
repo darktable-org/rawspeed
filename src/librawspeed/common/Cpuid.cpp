@@ -20,7 +20,7 @@
 
 #include "common/Cpuid.h"
 
-namespace RawSpeed {
+namespace rawspeed {
 
 #if defined(__i386__) || defined(__x86_64__)
 
@@ -41,4 +41,4 @@ bool Cpuid::SSE2() { return false; }
 
 #endif
 
-} // namespace RawSpeed
+} // namespace rawspeed

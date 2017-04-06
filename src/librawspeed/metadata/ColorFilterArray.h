@@ -26,7 +26,7 @@
 #include <string>          // for string
 #include <vector>          // for vector
 
-namespace RawSpeed {
+namespace rawspeed {
 
 enum CFAColor {
   // see also DngDecoder
@@ -73,4 +73,4 @@ protected:
 // number for that given position in the CFA pattern
 // #define FC(filters,row,col) ((filters) >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
 
-} // namespace RawSpeed
+} // namespace rawspeed

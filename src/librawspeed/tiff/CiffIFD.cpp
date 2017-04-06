@@ -39,7 +39,7 @@ using std::vector;
 using std::numeric_limits;
 using std::unique_ptr;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 #define CIFF_DEPTH(_depth)                                                     \
   if ((depth = (_depth) + 1) > 10)                                             \
@@ -228,4 +228,4 @@ bool __attribute__((pure)) CiffIFD::hasEntry(CiffTag tag) {
   return mEntry.find(tag) != mEntry.end();
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

@@ -33,7 +33,7 @@
 
 using std::string;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class DataBuffer;
 
@@ -211,4 +211,4 @@ const DataBuffer &TiffEntry::getRootIfdData() const {
   return r->rootBuffer;
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

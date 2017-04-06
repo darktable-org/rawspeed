@@ -24,7 +24,7 @@
 #include "common/RawspeedException.h" // for RawspeedException
 #include <string>                     // for string
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class IOException final : public RawspeedException {
 public:
@@ -34,8 +34,8 @@ public:
 
 #define ThrowIOE(...)                                                          \
   do {                                                                         \
-    ThrowExceptionHelper(RawSpeed::IOException, __VA_ARGS__);                  \
+    ThrowExceptionHelper(rawspeed::IOException, __VA_ARGS__);                  \
     __builtin_unreachable();                                                   \
   } while (false)
 
-} // namespace RawSpeed
+} // namespace rawspeed

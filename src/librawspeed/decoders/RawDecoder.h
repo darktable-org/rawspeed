@@ -32,7 +32,7 @@
 #include <pthread.h>
 #endif
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Buffer;
 
@@ -196,4 +196,4 @@ struct RawDecoder::RawSlice {
   uint32 count = 0;
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

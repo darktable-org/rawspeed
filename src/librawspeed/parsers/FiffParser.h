@@ -22,7 +22,7 @@
 
 #include "parsers/RawParser.h" // for RawParser
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Buffer;
 
@@ -36,4 +36,4 @@ public:
   virtual RawDecoder* getDecoder();
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

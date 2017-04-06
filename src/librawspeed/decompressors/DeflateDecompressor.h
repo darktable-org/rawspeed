@@ -30,7 +30,7 @@
 #include "io/Buffer.h"                          // for Buffer, Buffer::size_type
 #include "io/ByteStream.h"                      // for ByteStream
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class DeflateDecompressor final : public AbstractDecompressor {
 public:
@@ -51,7 +51,7 @@ protected:
   int bps;
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed
 
 #else
 

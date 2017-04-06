@@ -62,7 +62,7 @@
 * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 */
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class HuffmanTable
 {
@@ -301,4 +301,4 @@ public:
   }
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

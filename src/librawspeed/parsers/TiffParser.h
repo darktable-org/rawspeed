@@ -23,7 +23,7 @@
 #include "parsers/RawParser.h" // for RawParser
 #include "tiff/TiffIFD.h"      // for TiffRootIFDOwner
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Buffer;
 
@@ -39,4 +39,4 @@ public:
   static RawDecoder* makeDecoder(TiffRootIFDOwner root, Buffer& data);
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

@@ -28,7 +28,7 @@
 
 using std::unique_ptr;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 unique_ptr<uchar8, decltype(&alignedFree)> Buffer::Create(size_type size) {
   if (!size)
@@ -50,7 +50,7 @@ Buffer::Buffer(unique_ptr<uchar8, decltype(&alignedFree)> data_,
     ThrowIOE("Buffer has zero size?");
 
   if (data_.get_deleter() != &alignedFree)
-    ThrowIOE("Wrong deleter. Expected RawSpeed::alignedFree()");
+    ThrowIOE("Wrong deleter. Expected rawspeed::alignedFree()");
 
   data = data_.release();
   if (!data)
@@ -116,4 +116,4 @@ void Buffer::corrupt(int errors) {
 }
 #endif
 
-} // namespace RawSpeed
+} // namespace rawspeed

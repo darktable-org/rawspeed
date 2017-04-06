@@ -23,7 +23,7 @@
 #include "common/Common.h" // for ushort16
 #include <array>           // for array
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class RawImage;
 
@@ -53,4 +53,4 @@ protected:
   template <int version> inline void interpolate_420(int w, int h);
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

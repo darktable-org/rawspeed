@@ -28,20 +28,20 @@
 #include <string>          // for string
 
 using std::unique_ptr;
-using RawSpeed::char8;
-using RawSpeed::uchar8;
-using RawSpeed::short16;
-using RawSpeed::ushort16;
-using RawSpeed::int32;
-using RawSpeed::uint32;
-using RawSpeed::int64;
-using RawSpeed::uint64;
-using RawSpeed::alignedMalloc;
-using RawSpeed::alignedMallocArray;
-using RawSpeed::alignedFree;
-using RawSpeed::alignedFreeConstPtr;
+using rawspeed::char8;
+using rawspeed::uchar8;
+using rawspeed::short16;
+using rawspeed::ushort16;
+using rawspeed::int32;
+using rawspeed::uint32;
+using rawspeed::int64;
+using rawspeed::uint64;
+using rawspeed::alignedMalloc;
+using rawspeed::alignedMallocArray;
+using rawspeed::alignedFree;
+using rawspeed::alignedFreeConstPtr;
 
-namespace RawSpeedTest {
+namespace rawspeed_test {
 
 static constexpr const size_t alloc_alignment = 16;
 
@@ -274,4 +274,4 @@ TYPED_TEST(AlignedMallocTest, TemplateArraySizeRoundUpTest) {
   });
 }
 
-} // namespace RawSpeedTest
+} // namespace rawspeed_test

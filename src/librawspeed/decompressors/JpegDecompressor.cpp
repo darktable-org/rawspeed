@@ -48,7 +48,7 @@ using std::vector;
 using std::unique_ptr;
 using std::min;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 #ifdef HAVE_JPEG_MEM_SRC
 
@@ -157,7 +157,7 @@ void JpegDecompressor::decode(uint32 offX,
   }
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed
 
 #else
 

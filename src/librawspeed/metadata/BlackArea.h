@@ -22,7 +22,7 @@
 
 #include "common/Common.h" // for uint32
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class BlackArea final {
 public:
@@ -33,4 +33,4 @@ public:
   bool isVertical;  // Otherwise horizontal
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

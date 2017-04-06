@@ -23,11 +23,11 @@
 #include "common/Common.h" // for int32, short16, uint32, uint64, ushort16
 #include <gmock/gmock.h>   // for make_tuple, tuple
 
-using RawSpeed::ushort16;
-using RawSpeed::uint32;
-using RawSpeed::uint64;
+using rawspeed::ushort16;
+using rawspeed::uint32;
+using rawspeed::uint64;
 
-namespace RawSpeedTest {
+namespace rawspeed_test {
 
 template <typename T> struct intPair {
   T first;
@@ -497,4 +497,4 @@ static const uint64Type uint64Values[] = {
     {0xfe7280e85ee3f665, 0x65f6e35ee88072fe},
 };
 
-} // namespace RawSpeedTest
+} // namespace rawspeed_test

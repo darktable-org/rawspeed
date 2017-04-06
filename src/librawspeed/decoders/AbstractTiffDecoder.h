@@ -27,7 +27,7 @@
 #include <memory>                // for unique_ptr
 #include <string>                // for string
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 
@@ -67,4 +67,4 @@ public:
   const TiffIFD* getIFDWithLargestImage(TiffTag filter = IMAGEWIDTH) const;
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

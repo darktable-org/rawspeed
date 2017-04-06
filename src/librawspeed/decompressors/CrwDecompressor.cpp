@@ -36,7 +36,7 @@
 using std::array;
 using std::min;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 // The rest of this file was ported as is from dcraw.c. I don't claim to
 // understand it but have tried my best to make it work safely
@@ -188,7 +188,7 @@ CrwDecompressor::decodeBlock(std::array<int, 64>* diffBuf,
 }
 
 // FIXME: this function is horrible.
-void CrwDecompressor::decompress(RawImage& mRaw, RawSpeed::Buffer* mFile,
+void CrwDecompressor::decompress(RawImage& mRaw, rawspeed::Buffer* mFile,
                                  uint32 dec_table, bool lowbits) {
   assert(mFile);
 
@@ -289,4 +289,4 @@ void CrwDecompressor::decompress(RawImage& mRaw, RawSpeed::Buffer* mFile,
   }
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

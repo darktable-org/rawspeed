@@ -24,7 +24,7 @@
 #include "io/Buffer.h"                               // for Buffer, Buffer:...
 #include <vector>                                    // for vector
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class RawImage;
 
@@ -49,4 +49,4 @@ public:
   void decode(std::vector<int> slicesWidths);
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

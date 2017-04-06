@@ -46,7 +46,7 @@
 using std::string;
 using std::vector;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 RawImage Cr2Decoder::decodeOldFormat() {
   uint32 offset = 0;
@@ -287,4 +287,4 @@ void Cr2Decoder::sRawInterpolate() {
   i.interpolate(version);
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

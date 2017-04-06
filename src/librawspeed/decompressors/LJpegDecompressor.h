@@ -24,7 +24,7 @@
 #include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
 #include "io/Buffer.h"                               // for Buffer, Buffer:...
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class RawImage;
 
@@ -48,4 +48,4 @@ public:
   void decode(uint32 offsetX, uint32 offsetY, bool fixDng16Bug);
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

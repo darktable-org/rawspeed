@@ -32,7 +32,7 @@
 #include <pthread.h>
 #endif
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Buffer;
 
@@ -85,4 +85,4 @@ public:
   int compression;
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

@@ -30,7 +30,7 @@
 using std::copy_n;
 using std::min;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 void LJpegDecompressor::decode(uint32 offsetX, uint32 offsetY, bool fixDng16Bug_) {
   if ((int)offsetX >= mRaw->dim.x)
@@ -114,4 +114,4 @@ void LJpegDecompressor::decodeN()
   input.skipBytes(bitStream.getBufferPosition());
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

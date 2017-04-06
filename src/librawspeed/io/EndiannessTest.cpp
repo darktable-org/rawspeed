@@ -29,21 +29,21 @@
 
 using std::setfill;
 using std::setw;
-using RawSpeed::short16;
-using RawSpeed::int32;
-using RawSpeed::getHostEndianness;
-using RawSpeed::getHostEndiannessRuntime;
-using RawSpeed::getByteSwapped;
-using RawSpeed::getBE;
-using RawSpeed::getLE;
-using RawSpeed::little;
-using RawSpeed::big;
-using RawSpeed::getU16BE;
-using RawSpeed::getU16LE;
-using RawSpeed::getU32BE;
-using RawSpeed::getU32LE;
+using rawspeed::short16;
+using rawspeed::int32;
+using rawspeed::getHostEndianness;
+using rawspeed::getHostEndiannessRuntime;
+using rawspeed::getByteSwapped;
+using rawspeed::getBE;
+using rawspeed::getLE;
+using rawspeed::little;
+using rawspeed::big;
+using rawspeed::getU16BE;
+using rawspeed::getU16LE;
+using rawspeed::getU32BE;
+using rawspeed::getU32LE;
 
-namespace RawSpeedTest {
+namespace rawspeed_test {
 
 TEST(EndiannessTest, getHostEndiannessTests) {
 #if defined(__BYTE_ORDER__)
@@ -370,4 +370,4 @@ TEST_P(doubleTest, getNOP) {
   }
 }
 
-} // namespace RawSpeedTest
+} // namespace rawspeed_test

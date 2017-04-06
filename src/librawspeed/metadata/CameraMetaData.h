@@ -25,7 +25,7 @@
 #include <string>          // for string
 #include <tuple>           // for tuple
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Camera;
 
@@ -67,4 +67,4 @@ protected:
   bool addCamera(Camera* cam);
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

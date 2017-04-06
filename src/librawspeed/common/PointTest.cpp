@@ -27,17 +27,17 @@ using std::move;
 using std::pair;
 using std::make_pair;
 using std::tuple;
-using RawSpeed::iPoint2D;
+using rawspeed::iPoint2D;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 ::std::ostream& operator<<(::std::ostream& os, const iPoint2D p) {
   return os << "(" << p.x << ", " << p.y << ")";
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed
 
-namespace RawSpeedTest {
+namespace rawspeed_test {
 
 TEST(PointTest, Constructor) {
   int x = -10, y = 15;
@@ -750,4 +750,4 @@ TEST_P(SmallestTest, GetSmallestTest) {
   });
 }
 
-} // namespace RawSpeedTest
+} // namespace rawspeed_test

@@ -37,7 +37,7 @@
 
 using std::max;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 
@@ -137,4 +137,4 @@ void MrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

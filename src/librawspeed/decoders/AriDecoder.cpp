@@ -32,7 +32,7 @@
 #include <cstring>                        // for memcmp, size_t
 #include <string>                         // for string
 
-namespace RawSpeed {
+namespace rawspeed {
 
 AriDecoder::AriDecoder(Buffer* file) : RawDecoder(file) {
   if (mFile->getSize() < 4096) {
@@ -122,4 +122,4 @@ void AriDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

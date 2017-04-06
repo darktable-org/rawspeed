@@ -52,7 +52,7 @@ using std::string;
 using std::min;
 using std::ostringstream;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 RawImage NefDecoder::decodeRawInternal() {
   auto raw = mRootIFD->getIFDWithTag(CFAPATTERN);
@@ -688,4 +688,4 @@ ushort16* NefDecoder::gammaCurve(double pwr, double ts, int mode, int imax) {
 }
 #undef SQR
 
-} // namespace RawSpeed
+} // namespace rawspeed

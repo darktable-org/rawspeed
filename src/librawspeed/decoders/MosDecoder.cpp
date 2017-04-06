@@ -41,7 +41,7 @@
 
 using std::string;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 
@@ -238,4 +238,4 @@ void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     mRaw->blackLevel = black_level;
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

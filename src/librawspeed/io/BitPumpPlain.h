@@ -25,7 +25,7 @@
 #include "io/Buffer.h"     // for Buffer::size_type
 #include "io/Endianness.h" // for getLE
 
-namespace RawSpeed {
+namespace rawspeed {
 
 struct PlainBitPumpTag;
 
@@ -50,4 +50,4 @@ template <> inline void BitPumpPlain::setBufferPosition(size_type newPos)
   cache.cache = 0;
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

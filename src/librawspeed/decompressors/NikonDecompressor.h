@@ -23,7 +23,7 @@
 #include "common/Common.h"                      // for uint32
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class iPoint2D;
 
@@ -44,4 +44,4 @@ private:
   static HuffmanTable createHuffmanTable(uint32 huffSelect);
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

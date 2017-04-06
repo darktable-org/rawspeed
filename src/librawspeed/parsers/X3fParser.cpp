@@ -34,7 +34,7 @@
 
 using std::string;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 X3fParser::X3fParser(Buffer* file) : RawParser(file) {
   decoder = nullptr;
@@ -344,4 +344,4 @@ void X3fPropertyCollection::addProperties( ByteStream *bytes, uint32 offset, uin
   }
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

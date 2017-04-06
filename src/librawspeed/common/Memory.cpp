@@ -41,7 +41,7 @@ extern "C" {
 #include <cstdlib> // for posix_memalign / aligned_alloc / malloc; free
 #endif
 
-namespace RawSpeed {
+namespace rawspeed {
 
 void* alignedMalloc(size_t size, size_t alignment) {
   assert(isPowerOfTwo(alignment)); // for posix_memalign, _aligned_malloc
@@ -104,4 +104,4 @@ void alignedFreeConstPtr(const void* ptr) {
 #endif
 }
 
-} // Namespace RawSpeed
+} // namespace rawspeed

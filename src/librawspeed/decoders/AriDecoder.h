@@ -25,7 +25,7 @@
 #include "decoders/RawDecoder.h" // for RawDecoder, RawDecoderThread (ptr o...
 #include <string>                // for string
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 
@@ -49,4 +49,4 @@ protected:
   float mWB[3];
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

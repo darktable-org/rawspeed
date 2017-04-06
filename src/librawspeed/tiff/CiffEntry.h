@@ -26,7 +26,7 @@
 #include <string>          // for string
 #include <vector>          // for vector
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Buffer;
 
@@ -83,4 +83,4 @@ protected:
 #endif
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

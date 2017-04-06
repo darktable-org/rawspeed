@@ -8,7 +8,7 @@ RawSpeed uses pthreads, libjpeg ~~and libxml2~~, which is the only external requ
 
 You must implement a single function: “int rawspeed_get_number_of_processor_cores();”, which should return the maximum number of threads that should be used for decoding, if multithreaded decoding is possible.
 
-Everything is encapsulated on a “RawSpeed” namespace. To avoid clutter the examples below assume you have a “using namespace RawSpeed;” before using the code.
+Everything is encapsulated on a “rawspeed” namespace. To avoid clutter the examples below assume you have a “using namespace rawspeed;” before using the code.
 
 ## The Camera Definition file
 

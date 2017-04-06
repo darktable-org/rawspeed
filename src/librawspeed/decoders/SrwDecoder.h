@@ -29,7 +29,7 @@
 #include <string>                         // for string
 #include <vector>                         // for vector
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 class Buffer;
@@ -58,4 +58,4 @@ private:
                            const std::vector<encTableItem>& tbl);
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

@@ -26,7 +26,7 @@
 #include <cstddef>         // for size_t
 #include <cstdint>         // for SIZE_MAX
 
-namespace RawSpeed {
+namespace rawspeed {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"
@@ -97,4 +97,4 @@ void alignedFree(void* ptr);
 // coverity[+free : arg-0]
 void alignedFreeConstPtr(const void* ptr);
 
-} // namespace RawSpeed
+} // namespace rawspeed

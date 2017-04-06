@@ -52,7 +52,7 @@
 
 using std::string;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class RawDecoder;
 
@@ -159,4 +159,4 @@ RawDecoder* TiffParser::makeDecoder(TiffRootIFDOwner root, Buffer& data) {
   return nullptr;
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

@@ -26,7 +26,7 @@
 #include "io/BitPumpJPEG.h"                     // for BitPumpJPEG
 #include <array>                                // for array
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Buffer;
 
@@ -36,7 +36,7 @@ class HuffmanTable;
 
 class CrwDecompressor final : public AbstractDecompressor {
 public:
-  static void decompress(RawImage& mRaw, RawSpeed::Buffer* mFile,
+  static void decompress(RawImage& mRaw, rawspeed::Buffer* mFile,
                          uint32 dec_table, bool lowbits);
 
 private:
@@ -48,4 +48,4 @@ private:
                                  BitPumpJPEG* pump);
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

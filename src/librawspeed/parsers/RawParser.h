@@ -20,7 +20,7 @@
 
 #pragma once
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Buffer;
 
@@ -37,4 +37,4 @@ protected:
   Buffer* mInput;
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

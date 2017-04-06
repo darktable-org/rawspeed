@@ -34,7 +34,7 @@ using std::string;
 using std::out_of_range;
 using std::map;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 ColorFilterArray::ColorFilterArray(const iPoint2D &_size) {
   setSize(_size);
@@ -221,4 +221,4 @@ uint32 ColorFilterArray::getDcrawFilter() const
   return ret;
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

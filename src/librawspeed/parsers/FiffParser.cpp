@@ -37,7 +37,7 @@
 
 using std::numeric_limits;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class RawDecoder;
 
@@ -120,4 +120,4 @@ RawDecoder* FiffParser::getDecoder() {
   }
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

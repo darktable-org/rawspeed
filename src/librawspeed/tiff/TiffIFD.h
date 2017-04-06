@@ -32,7 +32,7 @@
 #include <string>                        // for string
 #include <vector>                        // for vector
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class TiffEntry;
 
@@ -123,4 +123,4 @@ inline Endianness getTiffEndianness(const Buffer* file) {
   ThrowTPE("Failed to parse TIFF endianess information.");
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

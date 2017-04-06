@@ -31,7 +31,7 @@
 #include <string>                // for string
 #include <vector>                // for vector
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class ByteStream;
 class CameraMetaData;
@@ -80,4 +80,4 @@ protected:
   std::string camera_model;
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

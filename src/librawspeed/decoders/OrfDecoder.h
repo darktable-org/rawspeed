@@ -27,7 +27,7 @@
 #include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
 #include <algorithm>                      // for move
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class ByteStream;
 class CameraMetaData;
@@ -50,4 +50,4 @@ private:
   void decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 size);
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

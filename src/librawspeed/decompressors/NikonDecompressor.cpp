@@ -31,7 +31,7 @@
 
 using std::vector;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 const uchar8 NikonDecompressor::nikon_tree[][2][16] = {
     {/* 12-bit lossy */
@@ -156,4 +156,4 @@ void NikonDecompressor::decompress(RawImage& mRaw, ByteStream&& data,
   }
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

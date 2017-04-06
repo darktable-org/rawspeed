@@ -35,7 +35,7 @@ namespace pugi {
 class xml_node;
 } // namespace pugi
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Hints
 {
@@ -108,4 +108,4 @@ protected:
   void parseCameraChild(const pugi::xml_node &node);
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

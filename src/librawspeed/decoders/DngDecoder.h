@@ -26,7 +26,7 @@
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
 #include <vector>                         // for vector
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 
@@ -56,4 +56,4 @@ private:
   int bps = -1;
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

@@ -26,7 +26,7 @@
 #include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
 #include <algorithm>                      // for move
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 class Buffer;
@@ -46,4 +46,4 @@ protected:
   int getDecoderVersion() const override { return 0; }
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

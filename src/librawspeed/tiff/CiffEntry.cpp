@@ -34,7 +34,7 @@ using std::numeric_limits;
 using std::string;
 using std::vector;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 CiffEntry::CiffEntry(Buffer* f, uint32 value_data, uint32 offset) {
   own_data = nullptr;
@@ -224,4 +224,4 @@ std::string CiffEntry::getValueAsString()
   return ret;
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

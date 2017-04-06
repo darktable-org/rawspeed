@@ -25,7 +25,7 @@
 #include "common/RawspeedException.h"
 #include <string>
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CiffParserException final : public RawspeedException {
 public:
@@ -36,8 +36,8 @@ public:
 
 #define ThrowCPE(...)                                                          \
   do {                                                                         \
-    ThrowExceptionHelper(RawSpeed::CiffParserException, __VA_ARGS__);          \
+    ThrowExceptionHelper(rawspeed::CiffParserException, __VA_ARGS__);          \
     __builtin_unreachable();                                                   \
   } while (false)
 
-} // namespace RawSpeed
+} // namespace rawspeed

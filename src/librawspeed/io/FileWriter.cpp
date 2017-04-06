@@ -30,7 +30,7 @@
 #include <windows.h>
 #endif // !defined(__unix__) && !defined(__APPLE__)
 
-namespace RawSpeed {
+namespace rawspeed {
 
 FileWriter::FileWriter(const char *_filename) : mFilename(_filename) {}
 
@@ -71,4 +71,4 @@ void FileWriter::writeFile(Buffer* filemap, uint32 size) {
 #endif // __unix__
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

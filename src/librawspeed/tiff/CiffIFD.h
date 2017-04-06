@@ -29,7 +29,7 @@
 #include <string>           // for string
 #include <vector>           // for vector
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Buffer;
 
@@ -63,4 +63,4 @@ protected:
   uint32 depth;
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

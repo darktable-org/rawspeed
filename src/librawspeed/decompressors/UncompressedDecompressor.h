@@ -30,7 +30,7 @@
 #include "io/Endianness.h"                      // for Endianness
 #include <algorithm>                            // for move
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class iPoint2D;
 
@@ -88,4 +88,4 @@ protected:
   RawImage mRaw;
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

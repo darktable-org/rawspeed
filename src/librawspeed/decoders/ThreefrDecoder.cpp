@@ -31,7 +31,7 @@
 #include "tiff/TiffTag.h"                         // for TiffTag::ASSHOTNEU...
 #include <memory>                                 // for unique_ptr
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 
@@ -72,4 +72,4 @@ void ThreefrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

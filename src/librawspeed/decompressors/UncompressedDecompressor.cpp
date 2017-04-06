@@ -36,7 +36,7 @@
 
 using std::min;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 void UncompressedDecompressor::sanityCheck(uint32* h, int bpl) {
   assert(h != nullptr);
@@ -344,4 +344,4 @@ template void UncompressedDecompressor::decodeRawUnpacked<14, big>(uint32 w, uin
 template void UncompressedDecompressor::decodeRawUnpacked<16, little>(uint32 w, uint32 h);
 template void UncompressedDecompressor::decodeRawUnpacked<16, big>(uint32 w, uint32 h);
 
-} // namespace RawSpeed
+} // namespace rawspeed

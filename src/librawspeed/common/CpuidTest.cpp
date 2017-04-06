@@ -23,9 +23,9 @@
 #include <gtest/gtest.h>  // for AssertionResult, DeathTest, Test, AssertHe...
 #include <string>         // for string
 
-using RawSpeed::Cpuid;
+using rawspeed::Cpuid;
 
-namespace RawSpeedTest {
+namespace rawspeed_test {
 
 TEST(CpuidDeathTest, SSE2Test) {
   ASSERT_EXIT(
@@ -40,4 +40,4 @@ TEST(CpuidDeathTest, SSE2Test) {
       ::testing::ExitedWithCode(0), "");
 }
 
-} // namespace RawSpeedTest
+} // namespace rawspeed_test

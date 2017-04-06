@@ -29,7 +29,7 @@
 using std::min;
 using std::max;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 RawImageDataFloat::RawImageDataFloat() {
   bpp = 4;
@@ -378,5 +378,4 @@ void RawImageDataFloat::setWithLookUp(ushort16 value, uchar8* dst, uint32* rando
   ThrowRDE("Float point lookup tables not implemented");
 }
 
-
-} // namespace RawSpeed
+} // namespace rawspeed

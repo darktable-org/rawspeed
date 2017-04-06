@@ -27,7 +27,7 @@
 #include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
 #include <algorithm>                      // for move
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Buffer;
 
@@ -52,4 +52,4 @@ protected:
   void decodeKodak65000Segment(ByteStream &input, ushort16 *out, uint32 bsize);
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

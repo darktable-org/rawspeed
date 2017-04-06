@@ -39,7 +39,7 @@ int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
 }
 #endif
 
-namespace RawSpeed {
+namespace rawspeed {
 
 namespace identify {
 
@@ -110,21 +110,21 @@ std::string find_cameras_xml(const char *argv0) {
 
 } // namespace identify
 
-} // namespace RawSpeed
+} // namespace rawspeed
 
-using RawSpeed::CameraMetaData;
-using RawSpeed::FileReader;
-using RawSpeed::Buffer;
-using RawSpeed::RawParser;
-using RawSpeed::RawDecoder;
-using RawSpeed::RawImage;
-using RawSpeed::uchar8;
-using RawSpeed::uint32;
-using RawSpeed::iPoint2D;
-using RawSpeed::TYPE_USHORT16;
-using RawSpeed::TYPE_FLOAT32;
-using RawSpeed::RawspeedException;
-using RawSpeed::identify::find_cameras_xml;
+using rawspeed::CameraMetaData;
+using rawspeed::FileReader;
+using rawspeed::Buffer;
+using rawspeed::RawParser;
+using rawspeed::RawDecoder;
+using rawspeed::RawImage;
+using rawspeed::uchar8;
+using rawspeed::uint32;
+using rawspeed::iPoint2D;
+using rawspeed::TYPE_USHORT16;
+using rawspeed::TYPE_FLOAT32;
+using rawspeed::RawspeedException;
+using rawspeed::identify::find_cameras_xml;
 
 int main(int argc, char *argv[]) {
 

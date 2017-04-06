@@ -24,7 +24,7 @@
 #include "common/RawspeedException.h" // for ThrowException, RawspeedException
 #include <string>                     // for string
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class RawDecoderException : public RawspeedException {
 public:
@@ -35,8 +35,8 @@ public:
 
 #define ThrowRDE(...)                                                          \
   do {                                                                         \
-    ThrowExceptionHelper(RawSpeed::RawDecoderException, __VA_ARGS__);          \
+    ThrowExceptionHelper(rawspeed::RawDecoderException, __VA_ARGS__);          \
     __builtin_unreachable();                                                   \
   } while (false)
 
-} // namespace RawSpeed
+} // namespace rawspeed

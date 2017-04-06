@@ -30,7 +30,7 @@
 #include <utility>                        // for move
 #include <vector>                         // for vector
 
-namespace RawSpeed {
+namespace rawspeed {
 
 void AbstractLJpegDecompressor::decode() {
   if (getNextMarker(false) != M_SOI)
@@ -185,4 +185,4 @@ JpegMarker AbstractLJpegDecompressor::getNextMarker(bool allowskip) {
   return (JpegMarker)c1;
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

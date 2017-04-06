@@ -20,8 +20,8 @@
 
 #pragma once
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class AbstractDecompressor {};
 
-} // namespace RawSpeed
+} // namespace rawspeed

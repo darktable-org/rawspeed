@@ -41,7 +41,7 @@
 
 using std::string;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 void *DecodeThread(void *_this) {
   auto *me = (DngDecoderThread *)_this;
@@ -213,4 +213,4 @@ int __attribute__((pure)) DngDecoderSlices::size() {
   return (int)slices.size();
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

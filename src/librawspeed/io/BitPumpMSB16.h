@@ -25,7 +25,7 @@
 #include "io/Buffer.h"     // for Buffer::size_type
 #include "io/Endianness.h" // for getLE
 
-namespace RawSpeed {
+namespace rawspeed {
 
 struct MSB16BitPumpTag;
 
@@ -44,4 +44,4 @@ inline BitPumpMSB16::size_type BitPumpMSB16::fillCache(const uchar8* input)
   return 4;
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

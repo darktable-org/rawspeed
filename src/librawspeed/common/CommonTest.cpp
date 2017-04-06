@@ -33,21 +33,21 @@ using std::string;
 using std::vector;
 using std::numeric_limits;
 using std::min;
-using RawSpeed::isPowerOfTwo;
-using RawSpeed::ushort16;
-using RawSpeed::uchar8;
-using RawSpeed::roundUp;
-using RawSpeed::isAligned;
-using RawSpeed::isIn;
-using RawSpeed::clampBits;
-using RawSpeed::trimSpaces;
-using RawSpeed::splitString;
-using RawSpeed::unroll_loop;
-using RawSpeed::getThreadCount;
-using RawSpeed::make_unique;
-using RawSpeed::copyPixels;
+using rawspeed::isPowerOfTwo;
+using rawspeed::ushort16;
+using rawspeed::uchar8;
+using rawspeed::roundUp;
+using rawspeed::isAligned;
+using rawspeed::isIn;
+using rawspeed::clampBits;
+using rawspeed::trimSpaces;
+using rawspeed::splitString;
+using rawspeed::unroll_loop;
+using rawspeed::getThreadCount;
+using rawspeed::make_unique;
+using rawspeed::copyPixels;
 
-namespace RawSpeedTest {
+namespace rawspeed_test {
 
 using powerOfTwoType = std::tr1::tuple<int, bool>;
 class PowerOfTwoTest : public ::testing::TestWithParam<powerOfTwoType> {
@@ -352,4 +352,4 @@ TEST_P(CopyPixelsTest, CopyPixelsTest) {
   compare();
 }
 
-} // namespace RawSpeedTest
+} // namespace rawspeed_test

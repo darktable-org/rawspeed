@@ -27,7 +27,7 @@
 #include <map>                   // for map
 #include <string>                // for string, basic_st...
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Camera;
 class CameraMetaData;
@@ -56,4 +56,4 @@ protected:
   BitOrder bo{BitOrder_Jpeg16};
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

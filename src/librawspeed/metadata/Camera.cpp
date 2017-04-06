@@ -36,7 +36,7 @@ using std::string;
 using std::map;
 using pugi::xml_node;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 Camera::Camera(pugi::xml_node &camera) : cfa(iPoint2D(0,0)) {
   make = canonical_make = camera.attribute("make").as_string();
@@ -323,4 +323,4 @@ const CameraSensorInfo* Camera::getSensorInfo(int iso) const {
   return candidates.front();
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

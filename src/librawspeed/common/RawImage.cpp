@@ -35,7 +35,7 @@ using std::fill_n;
 using std::string;
 using std::min;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 RawImageData::RawImageData() : cfa(iPoint2D(0, 0)) {
   fill_n(blackLevelSeparate, 4, -1);
@@ -234,7 +234,7 @@ uchar8* RawImageData::getDataUncropped(uint32 x, uint32 y) {
   return &data[(size_t)y * pitch + x * bpp];
 }
 
-iPoint2D __attribute__((pure)) RawSpeed::RawImageData::getUncroppedDim() const {
+iPoint2D __attribute__((pure)) rawspeed::RawImageData::getUncroppedDim() const {
   return uncropped_dim;
 }
 
@@ -713,5 +713,4 @@ ushort16* TableLookUp::getTable(int n) {
   return &tables[n * TABLE_SIZE];
 }
 
-
-} // namespace RawSpeed
+} // namespace rawspeed

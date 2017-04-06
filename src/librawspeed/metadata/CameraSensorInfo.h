@@ -22,7 +22,7 @@
 
 #include <vector> // for vector
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraSensorInfo final {
 public:
@@ -37,4 +37,4 @@ public:
   std::vector<int> mBlackLevelSeparate;
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

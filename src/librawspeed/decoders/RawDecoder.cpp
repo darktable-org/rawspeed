@@ -46,7 +46,7 @@ using std::vector;
 using std::string;
 using std::min;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 RawDecoder::RawDecoder(Buffer* file) : mRaw(RawImage::create()), mFile(file) {
   failOnUnknown = false;
@@ -290,8 +290,7 @@ void RawDecoder::decodeThreaded(RawDecoderThread * t) {
   ThrowRDE("This class does not support threaded decoding");
 }
 
-RawSpeed::RawImage RawDecoder::decodeRaw()
-{
+rawspeed::RawImage RawDecoder::decodeRaw() {
   try {
     RawImage raw = decodeRawInternal();
     raw->metadata.pixelAspectRatio =
@@ -376,4 +375,4 @@ void RawDecoder::startTasks( uint32 tasks )
 #endif
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

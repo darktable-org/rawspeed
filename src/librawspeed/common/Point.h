@@ -23,7 +23,7 @@
 
 #include <algorithm> // for max, min
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class iPoint2D {
 public:
@@ -193,4 +193,4 @@ public:
   iPoint2D dim{0, 0};
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

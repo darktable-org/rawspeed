@@ -34,7 +34,7 @@ using pugi::xml_node;
 using pugi::xml_document;
 using pugi::xml_parse_result;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 CameraMetaData::CameraMetaData(const char *docname) {
   xml_document doc;
@@ -157,4 +157,4 @@ void CameraMetaData::disableCamera(const string &make, const string &model) {
   }
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

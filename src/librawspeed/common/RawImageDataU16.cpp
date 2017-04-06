@@ -40,7 +40,7 @@ using std::min;
 using std::max;
 using std::array;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 RawImageDataU16::RawImageDataU16() {
   dataType = TYPE_USHORT16;
@@ -489,4 +489,4 @@ void RawImageDataU16::doLookup( int start_y, int end_y )
   ThrowRDE("Table lookup with multiple components not implemented");
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

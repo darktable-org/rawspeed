@@ -43,7 +43,7 @@ using std::vector;
 using std::string;
 using std::abs;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 
@@ -189,4 +189,4 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, make, model, mode, iso);
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

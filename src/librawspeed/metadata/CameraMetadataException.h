@@ -24,7 +24,7 @@
 #include "common/RawspeedException.h"
 #include <string> // for string
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetadataException final : public RawspeedException {
 public:
@@ -35,8 +35,8 @@ public:
 
 #define ThrowCME(...)                                                          \
   do {                                                                         \
-    ThrowExceptionHelper(RawSpeed::CameraMetadataException, __VA_ARGS__);      \
+    ThrowExceptionHelper(rawspeed::CameraMetadataException, __VA_ARGS__);      \
     __builtin_unreachable();                                                   \
   } while (false)
 
-} // namespace RawSpeed
+} // namespace rawspeed

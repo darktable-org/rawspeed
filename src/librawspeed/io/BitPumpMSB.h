@@ -24,7 +24,7 @@
 #include "io/BitStream.h"  // for BitStream, BitStreamCacheRightInLeftOut
 #include "io/Endianness.h" // for getBE
 
-namespace RawSpeed {
+namespace rawspeed {
 
 struct MSBBitPumpTag;
 
@@ -42,4 +42,4 @@ inline BitPumpMSB::size_type BitPumpMSB::fillCache(const uchar8* input)
   return 4;
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

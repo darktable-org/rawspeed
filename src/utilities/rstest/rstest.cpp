@@ -66,39 +66,39 @@ using std::unique_ptr;
 using std::internal;
 using std::map;
 using std::cerr;
-using RawSpeed::CameraMetaData;
-using RawSpeed::FileReader;
-using RawSpeed::Buffer;
-using RawSpeed::RawParser;
-using RawSpeed::RawDecoder;
-using RawSpeed::RawImage;
-using RawSpeed::uchar8;
-using RawSpeed::uint32;
-using RawSpeed::iPoint2D;
-using RawSpeed::TYPE_USHORT16;
-using RawSpeed::TYPE_FLOAT32;
-using RawSpeed::getU16BE;
-using RawSpeed::getU32LE;
-using RawSpeed::isAligned;
-using RawSpeed::roundUp;
-using RawSpeed::RawspeedException;
+using rawspeed::CameraMetaData;
+using rawspeed::FileReader;
+using rawspeed::Buffer;
+using rawspeed::RawParser;
+using rawspeed::RawDecoder;
+using rawspeed::RawImage;
+using rawspeed::uchar8;
+using rawspeed::uint32;
+using rawspeed::iPoint2D;
+using rawspeed::TYPE_USHORT16;
+using rawspeed::TYPE_FLOAT32;
+using rawspeed::getU16BE;
+using rawspeed::getU32LE;
+using rawspeed::isAligned;
+using rawspeed::roundUp;
+using rawspeed::RawspeedException;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 namespace rstest {
 
-std::string img_hash(RawSpeed::RawImage& r);
+std::string img_hash(rawspeed::RawImage& r);
 
-void writePPM(const RawSpeed::RawImage& raw, const std::string& fn);
-void writePFM(const RawSpeed::RawImage& raw, const std::string& fn);
+void writePPM(const rawspeed::RawImage& raw, const std::string& fn);
+void writePFM(const rawspeed::RawImage& raw, const std::string& fn);
 
-void writeImage(const RawSpeed::RawImage& raw, const std::string& fn);
+void writeImage(const rawspeed::RawImage& raw, const std::string& fn);
 
 size_t process(const std::string& filename,
-               const RawSpeed::CameraMetaData* metadata, bool create,
+               const rawspeed::CameraMetaData* metadata, bool create,
                bool dump);
 
-class RstestHashMismatch final : public RawSpeed::RawspeedException {
+class RstestHashMismatch final : public rawspeed::RawspeedException {
 public:
   explicit RstestHashMismatch(const std::string& msg)
       : RawspeedException(msg) {}
@@ -422,11 +422,11 @@ static int usage(const char* progname) {
 
 } // namespace rstest
 
-} // namespace RawSpeed
+} // namespace rawspeed
 
-using RawSpeed::rstest::usage;
-using RawSpeed::rstest::process;
-using RawSpeed::rstest::results;
+using rawspeed::rstest::usage;
+using rawspeed::rstest::process;
+using rawspeed::rstest::results;
 
 int main(int argc, char **argv) {
 

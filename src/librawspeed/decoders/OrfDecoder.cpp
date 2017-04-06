@@ -45,7 +45,7 @@ using std::unique_ptr;
 using std::min;
 using std::signbit;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 
@@ -334,4 +334,4 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

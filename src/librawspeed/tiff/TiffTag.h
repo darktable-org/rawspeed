@@ -25,7 +25,7 @@
 
 #pragma once
 
-namespace RawSpeed {
+namespace rawspeed {
 
 enum TiffTag {
   INTEROPERABILITYINDEX  = 0x0001,
@@ -352,4 +352,4 @@ enum TiffTag {
   KODAK_IFD2 = 0xFE00,
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

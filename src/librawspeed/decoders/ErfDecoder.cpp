@@ -30,7 +30,7 @@
 #include "tiff/TiffTag.h"                           // for TiffTag::EPSONWB
 #include <memory>                                   // for unique_ptr
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 
@@ -69,4 +69,4 @@ void ErfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

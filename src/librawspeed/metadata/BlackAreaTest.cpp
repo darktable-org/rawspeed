@@ -24,9 +24,9 @@
 #include <memory>        // for unique_ptr
 
 using std::unique_ptr;
-using RawSpeed::BlackArea;
+using rawspeed::BlackArea;
 
-namespace RawSpeedTest {
+namespace rawspeed_test {
 
 class BlackAreaTest
     : public ::testing::TestWithParam<std::tr1::tuple<int, int, bool>> {
@@ -201,4 +201,4 @@ TEST_P(BlackAreaTest, AssignmentGetters) {
   });
 }
 
-} // namespace RawSpeedTest
+} // namespace rawspeed_test

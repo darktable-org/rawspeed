@@ -33,7 +33,7 @@
 #include <pthread.h>
 #endif
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class RawImage;
 
@@ -125,7 +125,7 @@ public:
   void destroyData();
   void blitFrom(const RawImage& src, const iPoint2D& srcPos,
                 const iPoint2D& size, const iPoint2D& destPos);
-  RawSpeed::RawImageType getDataType() const { return dataType; }
+  rawspeed::RawImageType getDataType() const { return dataType; }
   uchar8* getData();
   uchar8* getData(uint32 x, uint32 y);    // Not super fast, but safe. Don't use per pixel.
   uchar8* getDataUncropped(uint32 x, uint32 y);
@@ -303,4 +303,4 @@ inline void RawImageDataU16::setWithLookUp(ushort16 value, uchar8* dst, uint32* 
   *dest = t[value];
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

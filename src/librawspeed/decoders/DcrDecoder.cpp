@@ -36,7 +36,7 @@
 
 using std::min;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 
@@ -169,4 +169,4 @@ void DcrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, "", 0);
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

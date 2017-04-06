@@ -34,7 +34,7 @@ extern "C" {
 // IWYU pragma: no_include <zconf.h>
 }
 
-namespace RawSpeed {
+namespace rawspeed {
 
 // decodeFPDeltaRow(): MIT License, copyright 2014 Javier Celaya
 // <jcelaya@gmail.com>
@@ -246,7 +246,7 @@ void DeflateDecompressor::decode(unsigned char** uBuffer, int width, int height,
   }
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed
 
 #else
 

@@ -37,7 +37,7 @@
 using std::string;
 using std::vector;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 void TiffIFD::parseIFDEntry(ByteStream& bs) {
   TiffEntryOwner t;
@@ -286,4 +286,4 @@ TiffID TiffRootIFD::getID() const
   return id;
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

@@ -31,7 +31,7 @@
 using std::is_pod;
 using std::array;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 struct Cr2sRawInterpolator::YCbCr final {
   int Y;
@@ -522,4 +522,4 @@ void Cr2sRawInterpolator::interpolate(int version) {
     ThrowRDE("Unknown subsampling: (%i; %i)", subSampling.x, subSampling.y);
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

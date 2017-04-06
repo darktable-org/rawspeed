@@ -28,7 +28,7 @@
 #include <cassert>          // for assert
 #include <cstring>          // for memcmp, memcpy
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class ByteStream : public DataBuffer
 {
@@ -186,4 +186,4 @@ public:
   }
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

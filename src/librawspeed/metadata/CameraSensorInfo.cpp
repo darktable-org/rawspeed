@@ -24,7 +24,7 @@
 
 using std::vector;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 CameraSensorInfo::CameraSensorInfo(int black_level, int white_level,
                                    int min_iso, int max_iso,
@@ -40,4 +40,4 @@ bool __attribute__((pure)) CameraSensorInfo::isDefault() const {
   return (0 == mMinIso && 0 == mMaxIso);
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

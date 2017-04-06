@@ -25,7 +25,7 @@
 #include "decoders/RawDecoderException.h" // for RawDecoderException
 #include <string>                         // for string
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class FileIOException final : public RawDecoderException {
 public:
@@ -35,8 +35,8 @@ public:
 
 #define ThrowFIE(...)                                                          \
   do {                                                                         \
-    ThrowExceptionHelper(RawSpeed::FileIOException, __VA_ARGS__);              \
+    ThrowExceptionHelper(rawspeed::FileIOException, __VA_ARGS__);              \
     __builtin_unreachable();                                                   \
   } while (false)
 
-} // namespace RawSpeed
+} // namespace rawspeed

@@ -26,7 +26,7 @@
 #include "tiff/CiffIFD.h"        // for CiffIFD
 #include <memory>                // for unique_ptr
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Buffer;
 
@@ -45,4 +45,4 @@ protected:
   static float canonEv(long in);
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

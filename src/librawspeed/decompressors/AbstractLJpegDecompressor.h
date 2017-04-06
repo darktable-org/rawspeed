@@ -37,7 +37,7 @@
  * Comments added by tm. See also Copyright in HuffmanTable.h.
  */
 
-namespace RawSpeed {
+namespace rawspeed {
 
 enum JpegMarker { /* JPEG marker codes			*/
   M_STUFF = 0x00,
@@ -187,4 +187,4 @@ private:
   HuffmanTable ht_; // temporary table, used
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

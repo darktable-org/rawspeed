@@ -31,7 +31,7 @@
 
 using std::copy_n;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 void Cr2Decompressor::decodeScan()
 {
@@ -177,4 +177,4 @@ void Cr2Decompressor::decodeN_X_Y()
   input.skipBytes(bitStream.getBufferPosition());
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

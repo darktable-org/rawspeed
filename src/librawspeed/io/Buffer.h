@@ -28,7 +28,7 @@
 #include <algorithm>        // for swap
 #include <memory>           // for unique_ptr
 
-namespace RawSpeed {
+namespace rawspeed {
 
 // This allows to specify the nuber of bytes that each Buffer needs to
 // allocate additionally to be able to remove one runtime bounds check
@@ -171,4 +171,4 @@ public:
   }
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

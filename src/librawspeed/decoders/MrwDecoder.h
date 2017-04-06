@@ -26,7 +26,7 @@
 #include "decoders/RawDecoder.h" // for RawDecoder
 #include "tiff/TiffIFD.h"        // for TiffRootIFDOwner
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 class Buffer;
@@ -47,4 +47,4 @@ protected:
   float wb_coeffs[4];
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

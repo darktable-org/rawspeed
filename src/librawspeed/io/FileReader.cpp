@@ -32,7 +32,7 @@
 #include <windows.h>
 #endif // !defined(__unix__) && !defined(__APPLE__)
 
-namespace RawSpeed {
+namespace rawspeed {
 
 FileReader::FileReader(const char *_filename) : mFilename(_filename) {}
 
@@ -93,4 +93,4 @@ Buffer* FileReader::readFile() {
   return fileData;
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

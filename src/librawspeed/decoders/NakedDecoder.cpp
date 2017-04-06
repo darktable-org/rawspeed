@@ -32,7 +32,7 @@
 using std::map;
 using std::string;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Buffer;
 class CameraMetaData;
@@ -97,4 +97,4 @@ void NakedDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, cam->make, cam->model, cam->mode, 0);
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

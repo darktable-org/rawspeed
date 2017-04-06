@@ -51,7 +51,7 @@ using std::min;
 using std::string;
 using std::fabs;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 
@@ -339,4 +339,4 @@ std::string Rw2Decoder::guessMode() {
   return closest_match;
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

@@ -25,7 +25,7 @@
 #include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
 #include <algorithm>                      // for move
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 
@@ -51,4 +51,4 @@ protected:
   int getHue();
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

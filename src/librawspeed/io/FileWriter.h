@@ -22,7 +22,7 @@
 
 #include "common/Common.h" // for uint32
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Buffer;
 
@@ -39,4 +39,4 @@ private:
   const char* mFilename;
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

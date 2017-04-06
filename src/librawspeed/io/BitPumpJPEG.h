@@ -25,7 +25,7 @@
 #include "io/Buffer.h"     // for Buffer::size_type
 #include "io/Endianness.h" // for getBE
 
-namespace RawSpeed {
+namespace rawspeed {
 
 struct JPEGBitPumpTag;
 
@@ -79,4 +79,4 @@ template <> inline BitPumpJPEG::size_type BitPumpJPEG::getBufferPosition() const
   return pos;
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

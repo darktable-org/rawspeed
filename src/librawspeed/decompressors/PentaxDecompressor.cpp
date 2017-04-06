@@ -33,7 +33,7 @@
 #include <cassert>                        // for assert
 #include <vector>                         // for vector, allocator
 
-namespace RawSpeed {
+namespace rawspeed {
 
 // 16 entries of codes per bit length
 // 13 entries of code values
@@ -126,4 +126,4 @@ void PentaxDecompressor::decompress(RawImage& mRaw, ByteStream&& data,
   }
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

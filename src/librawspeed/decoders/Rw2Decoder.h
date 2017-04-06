@@ -28,7 +28,7 @@
 #include <algorithm>                      // for move
 #include <string>                         // for string
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class CameraMetaData;
 class RawDecoderThread;
@@ -58,4 +58,4 @@ private:
   uint32 load_flags = 0;
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

@@ -33,7 +33,7 @@
 using std::vector;
 using std::fill_n;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class DngOpcodes::DngOpcode {
 public:
@@ -394,4 +394,4 @@ void DngOpcodes::applyOpCodes(RawImage& ri) {
   }
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

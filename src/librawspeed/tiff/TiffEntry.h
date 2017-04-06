@@ -28,7 +28,7 @@
 #include <string>          // for string
 #include <vector>          // for vector
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class DataBuffer;
 
@@ -115,4 +115,4 @@ protected:
   static const uint32 datashifts[];
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

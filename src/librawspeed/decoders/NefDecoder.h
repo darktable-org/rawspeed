@@ -28,7 +28,7 @@
 #include <algorithm>                      // for move
 #include <string>                         // for string
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class ByteStream;
 class CameraMetaData;
@@ -66,4 +66,4 @@ private:
   ushort16* gammaCurve(double pwr, double ts, int mode, int imax);
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

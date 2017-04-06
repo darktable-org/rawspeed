@@ -29,7 +29,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace RawSpeed {
+namespace rawspeed {
 
 template <typename T>
 [[noreturn]] static inline void __attribute__((noreturn, format(printf, 1, 2)))
@@ -77,14 +77,14 @@ public:
 #ifndef DEBUG
 #define ThrowExceptionHelper(CLASS, fmt, ...)                                  \
   do {                                                                         \
-    RawSpeed::ThrowException<CLASS>("%s, line " STR(__LINE__) ": " fmt,        \
+    rawspeed::ThrowException<CLASS>("%s, line " STR(__LINE__) ": " fmt,        \
                                     __PRETTY_FUNCTION__, ##__VA_ARGS__);       \
     __builtin_unreachable();                                                   \
   } while (false)
 #else
 #define ThrowExceptionHelper(CLASS, fmt, ...)                                  \
   do {                                                                         \
-    RawSpeed::ThrowException<CLASS>(__FILE__ ":" STR(__LINE__) ": %s: " fmt,   \
+    rawspeed::ThrowException<CLASS>(__FILE__ ":" STR(__LINE__) ": %s: " fmt,   \
                                     __PRETTY_FUNCTION__, ##__VA_ARGS__);       \
     __builtin_unreachable();                                                   \
   } while (false)
@@ -92,8 +92,8 @@ public:
 
 #define ThrowRSE(...)                                                          \
   do {                                                                         \
-    ThrowExceptionHelper(RawSpeed::RawspeedException, __VA_ARGS__);            \
+    ThrowExceptionHelper(rawspeed::RawspeedException, __VA_ARGS__);            \
     __builtin_unreachable();                                                   \
   } while (false)
 
-} // namespace RawSpeed
+} // namespace rawspeed

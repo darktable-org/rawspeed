@@ -23,7 +23,7 @@
 #include "common/RawspeedException.h"
 #include <string>
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class FiffParserException final : public RawspeedException {
 public:
@@ -34,8 +34,8 @@ public:
 
 #define ThrowFPE(...)                                                          \
   do {                                                                         \
-    ThrowExceptionHelper(RawSpeed::FiffParserException, __VA_ARGS__);          \
+    ThrowExceptionHelper(rawspeed::FiffParserException, __VA_ARGS__);          \
     __builtin_unreachable();                                                   \
   } while (false)
 
-} // namespace RawSpeed
+} // namespace rawspeed

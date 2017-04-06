@@ -36,7 +36,7 @@
 #include "parsers/X3fParser.h"            // for X3fParser
 #include "tiff/TiffEntry.h"               // IWYU pragma: keep
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Camera;
 
@@ -109,4 +109,4 @@ RawDecoder* RawParser::getDecoder(const CameraMetaData* meta) {
   return nullptr;
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

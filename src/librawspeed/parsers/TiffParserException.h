@@ -24,7 +24,7 @@
 #include "common/RawspeedException.h"
 #include <string>
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class TiffParserException final : public RawspeedException {
 public:
@@ -35,8 +35,8 @@ public:
 
 #define ThrowTPE(...)                                                          \
   do {                                                                         \
-    ThrowExceptionHelper(RawSpeed::TiffParserException, __VA_ARGS__);          \
+    ThrowExceptionHelper(rawspeed::TiffParserException, __VA_ARGS__);          \
     __builtin_unreachable();                                                   \
   } while (false)
 
-} // namespace RawSpeed
+} // namespace rawspeed

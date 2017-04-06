@@ -24,7 +24,7 @@
 #include "common/Common.h" // for uint32
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class ByteStream;
 
@@ -40,4 +40,4 @@ private:
   static const uchar8 pentax_tree[][2][16];
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

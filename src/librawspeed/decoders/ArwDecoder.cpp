@@ -48,7 +48,7 @@ using std::vector;
 using std::string;
 using std::max;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 RawImage ArwDecoder::decodeRawInternal() {
   const TiffIFD* raw = nullptr;
@@ -486,4 +486,4 @@ void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
   }
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

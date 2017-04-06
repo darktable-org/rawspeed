@@ -27,7 +27,7 @@
 #include "io/ByteStream.h"              // for ByteStream
 #include <array>                        // for array
 
-namespace RawSpeed {
+namespace rawspeed {
 
 // Returns len bits as a signed value.
 // Highest bit is a sign bit
@@ -70,4 +70,4 @@ void HasselbladDecompressor::decode(int pixelBaseOffset_)
   AbstractLJpegDecompressor::decode();
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

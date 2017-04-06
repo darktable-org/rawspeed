@@ -20,7 +20,7 @@
 
 #pragma once
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class Buffer;
 
@@ -37,4 +37,4 @@ private:
   const char* mFilename;
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

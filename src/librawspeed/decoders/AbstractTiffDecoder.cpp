@@ -25,7 +25,7 @@
 #include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD, Tiff...
 #include <vector>                         // for vector
 
-namespace RawSpeed {
+namespace rawspeed {
 
 const TiffIFD* AbstractTiffDecoder::getIFDWithLargestImage(TiffTag filter) const
 {
@@ -48,4 +48,4 @@ const TiffIFD* AbstractTiffDecoder::getIFDWithLargestImage(TiffTag filter) const
   return res;
 }
 
-} // namespace RawSpeed
+} // namespace rawspeed

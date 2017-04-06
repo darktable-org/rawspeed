@@ -46,7 +46,7 @@ using std::vector;
 using std::string;
 using std::ostringstream;
 
-namespace RawSpeed {
+namespace rawspeed {
 
 RawImage SrwDecoder::decodeRawInternal() {
   auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
@@ -497,5 +497,4 @@ void SrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 }
 
-
-} // namespace RawSpeed
+} // namespace rawspeed

@@ -24,7 +24,7 @@
 #include <memory> // for unique_ptr
 #include <vector> // for vector
 
-namespace RawSpeed {
+namespace rawspeed {
 
 class RawImage;
 
@@ -55,4 +55,4 @@ protected:
   template <typename S> class ScalePerRowOrCol;
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed

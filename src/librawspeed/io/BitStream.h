@@ -29,7 +29,7 @@
 #include <cassert>          // for assert
 #include <cstring>          // for memcpy
 
-namespace RawSpeed {
+namespace rawspeed {
 
 // simple 64-bit wide cache implementation that acts like a FiFo.
 // There are two variants:
@@ -187,4 +187,4 @@ public:
   }
 };
 
-} // namespace RawSpeed
+} // namespace rawspeed
