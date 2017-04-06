@@ -27,14 +27,14 @@
  *   Software.
  */
 
-#include "md5.h"         // for md5_state, md5_hash
+#include "md5.h"         // for rawspeed::md5::state, md5_hash
 #include <array>         // for array
 #include <cstdint>       // for UINT32_C, uint8_t
 #include <cstring>       // for strlen
 #include <gtest/gtest.h> // for AssertionResult, IsNullLiteralHelper, Param...
 #include <utility>       // for pair, make_pair
 
-using MD5Testcase = std::pair<md5_state, const uint8_t*>;
+using MD5Testcase = std::pair<rawspeed::md5::md5_state, const uint8_t*>;
 class MD5Test : public ::testing::TestWithParam<MD5Testcase> {
 protected:
   MD5Test() = default;
@@ -45,15 +45,15 @@ protected:
     message = p.second;
   }
 
-  md5_state answer;
+  rawspeed::md5::md5_state answer;
   const uint8_t* message;
 };
 
 #define TESTCASE(a, b, c, d, msg)                                              \
   {                                                                            \
-    std::make_pair(                                                            \
-        (md5_state){{UINT32_C(a), UINT32_C(b), UINT32_C(c), UINT32_C(d)}},     \
-        (const uint8_t*)(msg))                                                 \
+    std::make_pair((rawspeed::md5::md5_state){{UINT32_C(a), UINT32_C(b),       \
+                                               UINT32_C(c), UINT32_C(d)}},     \
+                   (const uint8_t*)(msg))                                      \
   }
 
 // Note: The MD5 standard specifies that uint32 are serialized to/from bytes in
@@ -75,8 +75,8 @@ static MD5Testcase testCases[] = {
 INSTANTIATE_TEST_CASE_P(MD5Test, MD5Test, ::testing::ValuesIn(testCases));
 TEST_P(MD5Test, CheckTestCaseSet) {
   ASSERT_NO_THROW({
-    md5_state hash;
-    md5_hash(message, strlen((const char*)message), hash);
+    rawspeed::md5::md5_state hash;
+    rawspeed::md5::md5_hash(message, strlen((const char*)message), hash);
 
     ASSERT_EQ(hash, answer);
   });

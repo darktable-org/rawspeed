@@ -189,20 +189,21 @@ string img_hash(RawImage &r) {
 
   // yes, this is not cool. but i see no way to compute the hash of the
   // full image, without duplicating image, and copying excluding padding
-  md5_state hash_of_line_hashes = md5_init;
+  rawspeed::md5::md5_state hash_of_line_hashes = rawspeed::md5::md5_init;
   {
-    vector<md5_state> line_hashes;
-    line_hashes.resize(dimUncropped.y, md5_init);
+    vector<rawspeed::md5::md5_state> line_hashes;
+    line_hashes.resize(dimUncropped.y, rawspeed::md5::md5_init);
     for (int j = 0; j < dimUncropped.y; j++) {
       auto* d = r->getDataUncropped(0, j);
-      md5_hash(d, r->pitch - r->padding, line_hashes[j]);
+      rawspeed::md5::md5_hash(d, r->pitch - r->padding, line_hashes[j]);
     }
-    md5_hash((const uint8_t*)&line_hashes[0],
-             sizeof(line_hashes[0]) * line_hashes.size(), hash_of_line_hashes);
+    rawspeed::md5::md5_hash((const uint8_t*)&line_hashes[0],
+                            sizeof(line_hashes[0]) * line_hashes.size(),
+                            hash_of_line_hashes);
   }
 
   APPEND("md5sum of per-line md5sums: %s\n",
-         hash_to_string(hash_of_line_hashes).c_str());
+         rawspeed::md5::hash_to_string(hash_of_line_hashes).c_str());
 
   for (const string& e : r->errors)
     APPEND("WARNING: [rawspeed] %s\n", e.c_str());

@@ -33,7 +33,14 @@
 #include <cstring> // for memset, strlen, memcmp, memcpy
 #include <string>  // for string
 
-void md5_compress(md5_state& state, const uint8_t block[64]) {
+namespace rawspeed {
+
+namespace md5 {
+
+// hashes 64 bytes at once
+static void md5_compress(md5_state& state, const uint8_t block[64]);
+
+static void md5_compress(md5_state& state, const uint8_t block[64]) {
 #define LOADSCHEDULE(i)                                                        \
   schedule[i] =                                                                \
       (uint32_t)block[(i)*4 + 0] << 0 | (uint32_t)block[(i)*4 + 1] << 8 |      \
@@ -191,3 +198,7 @@ std::string md5_hash(const uint8_t* message, size_t len) {
   md5_hash(message, len, hash);
   return hash_to_string(hash);
 }
+
+} // namespace md5
+
+} // namespace rawspeed

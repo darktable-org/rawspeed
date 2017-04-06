@@ -32,14 +32,15 @@
 #include <cstdio>  // for size_t
 #include <string>  // for string
 
+namespace rawspeed {
+
+namespace md5 {
+
 using md5_state = std::array<uint32_t, 4>;
 
 static constexpr const md5_state md5_init = {
     {UINT32_C(0x67452301), UINT32_C(0xEFCDAB89), UINT32_C(0x98BADCFE),
      UINT32_C(0x10325476)}};
-
-// hashes 64 bytes at once
-void md5_compress(md5_state& state, const uint8_t block[64]);
 
 // computes hash of the buffer message with length len
 void md5_hash(const uint8_t* message, size_t len, md5_state& hash);
@@ -49,3 +50,7 @@ std::string hash_to_string(const md5_state& hash);
 
 // computes hash of the buffer message with length len and returns it as string
 std::string md5_hash(const uint8_t* message, size_t len);
+
+} // namespace md5
+
+} // namespace rawspeed
