@@ -207,7 +207,7 @@ void CrwDecompressor::decompress(RawImage& mRaw, rawspeed::Buffer* mFile,
   BitPumpJPEG pump(input);
 
   for (uint32 j = 0; j < height;) {
-    const int nBlocks = min(8u, height - j) * width >> 6;
+    const int nBlocks = min(8U, height - j) * width >> 6;
     assert(nBlocks > 0);
 
     ushort16* dest = nullptr;
@@ -252,7 +252,7 @@ void CrwDecompressor::decompress(RawImage& mRaw, rawspeed::Buffer* mFile,
 
     for (uint32 j = 0; j < height;) {
       // Process 8 rows or however are left
-      const uint32 lines = min(height - j, 8u);
+      const uint32 lines = min(height - j, 8U);
 
       // Process 8 rows or however are left
       const uint32 nBlocks = width / 4 * lines;

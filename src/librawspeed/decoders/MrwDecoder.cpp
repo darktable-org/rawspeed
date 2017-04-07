@@ -89,7 +89,7 @@ void MrwDecoder::parseHeader() {
     default:
       break;
     }
-    currpos += max(len + 8, 1u); // max(,1) to make sure we make progress
+    currpos += max(len + 8, 1U); // max(,1) to make sure we make progress
   }
 }
 

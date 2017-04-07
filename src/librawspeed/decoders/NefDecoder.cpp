@@ -626,8 +626,8 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
         g4 = in[3];
         g5 = in[4];
         g6 = in[5];
-        cb2 = (static_cast<float>((g4 | ((g5 & 0x0f) << 8))) + cb) * 0.5f;
-        cr2 = (static_cast<float>(((g5 >> 4) | (g6 << 4))) + cr) * 0.5f;
+        cb2 = (static_cast<float>((g4 | ((g5 & 0x0f) << 8))) + cb) * 0.5F;
+        cr2 = (static_cast<float>(((g5 >> 4) | (g6 << 4))) + cr) * 0.5F;
       }
 
       cb -= 2048;

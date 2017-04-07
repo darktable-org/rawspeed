@@ -343,7 +343,7 @@ void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           mRaw->metadata.wbCoeffs[2] = static_cast<float>(tmp[3]);
           break;
         }
-        currpos += max(len + 8, 1u); // max(,1) to make sure we make progress
+        currpos += max(len + 8, 1U); // max(,1) to make sure we make progress
       }
     }
   } else { // Everything else but the A100

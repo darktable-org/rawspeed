@@ -119,7 +119,7 @@ void DcrDecoder::decodeKodak65000(ByteStream &input, uint32 w, uint32 h) {
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
     for (uint32 x = 0 ; x < w; x += 256) {
       pred[0] = pred[1] = 0;
-      uint32 len = min(256u, w - x);
+      uint32 len = min(256U, w - x);
       decodeKodak65000Segment(input, buf, len);
       for (uint32 i = 0; i < len; i++) {
         ushort16 value = pred[i & 1] += buf[i];
