@@ -85,9 +85,9 @@ RawImage DcrDecoder::decodeRawInternal() {
     //        in dcraw.c parse_kodak_ifd() for all that weirdness
     TiffEntry* blob = kodakifd.getEntryRecursive(static_cast<TiffTag>(0x03fd));
     if (blob && blob->count == 72) {
-      mRaw->metadata.wbCoeffs[0] = 2048.0f / blob->getU16(20);
-      mRaw->metadata.wbCoeffs[1] = 2048.0f / blob->getU16(21);
-      mRaw->metadata.wbCoeffs[2] = 2048.0f / blob->getU16(22);
+      mRaw->metadata.wbCoeffs[0] = 2048.0F / blob->getU16(20);
+      mRaw->metadata.wbCoeffs[1] = 2048.0F / blob->getU16(21);
+      mRaw->metadata.wbCoeffs[2] = 2048.0F / blob->getU16(22);
     }
 
     try {

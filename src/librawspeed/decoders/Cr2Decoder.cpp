@@ -216,7 +216,7 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         mRaw->metadata.wbCoeffs[1] =
             (static_cast<float>(g9_wb->getU32(wb_offset + 0)) +
              static_cast<float>(g9_wb->getU32(wb_offset + 3))) /
-            2.0f;
+            2.0F;
         mRaw->metadata.wbCoeffs[2] =
             static_cast<float>(g9_wb->getU32(wb_offset + 2));
       } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0xa4))) {
@@ -270,9 +270,9 @@ void Cr2Decoder::sRawInterpolate() {
 
   if (hints.has("invert_sraw_wb")) {
     sraw_coeffs[0] = static_cast<int>(
-        1024.0f / (static_cast<float>(sraw_coeffs[0]) / 1024.0f));
+        1024.0F / (static_cast<float>(sraw_coeffs[0]) / 1024.0F));
     sraw_coeffs[2] = static_cast<int>(
-        1024.0f / (static_cast<float>(sraw_coeffs[2]) / 1024.0f));
+        1024.0F / (static_cast<float>(sraw_coeffs[2]) / 1024.0F));
   }
 
   /* Determine sRaw coefficients */

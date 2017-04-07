@@ -283,7 +283,7 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       mRootIFD->hasEntryRecursive(OLYMPUSBLUEMULTIPLIER)) {
     mRaw->metadata.wbCoeffs[0] = static_cast<float>(
         mRootIFD->getEntryRecursive(OLYMPUSREDMULTIPLIER)->getU16());
-    mRaw->metadata.wbCoeffs[1] = 256.0f;
+    mRaw->metadata.wbCoeffs[1] = 256.0F;
     mRaw->metadata.wbCoeffs[2] = static_cast<float>(
         mRootIFD->getEntryRecursive(OLYMPUSBLUEMULTIPLIER)->getU16());
   } else {
@@ -301,7 +301,7 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
               image_processing.getEntry(static_cast<TiffTag>(0x0100));
           if (wb->count == 2 || wb->count == 4) {
             mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
-            mRaw->metadata.wbCoeffs[1] = 256.0f;
+            mRaw->metadata.wbCoeffs[1] = 256.0F;
             mRaw->metadata.wbCoeffs[2] = wb->getFloat(1);
           }
         }

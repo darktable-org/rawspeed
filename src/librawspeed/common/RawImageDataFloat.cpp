@@ -94,7 +94,7 @@ RawImageDataFloat::RawImageDataFloat() {
 
     for (int i = 0 ; i < 4; i++) {
       blackLevelSeparate[i] =
-          static_cast<int>(65535.0f * accPixels[i] / totalpixels);
+          static_cast<int>(65535.0F * accPixels[i] / totalpixels);
     }
 
     /* If this is not a CFA image, we do not use separate blacklevels, use average */
@@ -148,7 +148,7 @@ RawImageDataFloat::RawImageDataFloat() {
     use_sse2 = true;
 #endif
 
-    float app_scale = 65535.0f / (whitePoint - blackLevelSeparate[0]);
+    float app_scale = 65535.0F / (whitePoint - blackLevelSeparate[0]);
     // Check SSE2
     if (use_sse2 && app_scale < 63) {
 
@@ -161,8 +161,8 @@ RawImageDataFloat::RawImageDataFloat() {
 
       uint32 gw = pitch / 16;
       // 10 bit fraction
-      uint32 mul = (int)(1024.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[mOffset.x&1]));
-      mul |= ((int)(1024.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[(mOffset.x+1)&1])))<<16;
+      uint32 mul = (int)(1024.0F * 65535.0F / (float)(whitePoint - blackLevelSeparate[mOffset.x&1]));
+      mul |= ((int)(1024.0F * 65535.0F / (float)(whitePoint - blackLevelSeparate[(mOffset.x+1)&1])))<<16;
       uint32 b = blackLevelSeparate[mOffset.x&1] | (blackLevelSeparate[(mOffset.x+1)&1]<<16);
 
       for (int i = 0; i< 4; i++) {
@@ -170,8 +170,8 @@ RawImageDataFloat::RawImageDataFloat() {
         sub_mul[4+i] = mul;   // Multiply even lines
       }
 
-      mul = (int)(1024.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[2+(mOffset.x&1)]));
-      mul |= ((int)(1024.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[2+((mOffset.x+1)&1)])))<<16;
+      mul = (int)(1024.0F * 65535.0F / (float)(whitePoint - blackLevelSeparate[2+(mOffset.x&1)]));
+      mul |= ((int)(1024.0F * 65535.0F / (float)(whitePoint - blackLevelSeparate[2+((mOffset.x+1)&1)])))<<16;
       b = blackLevelSeparate[2+(mOffset.x&1)] | (blackLevelSeparate[2+((mOffset.x+1)&1)]<<16);
 
       for (int i = 0; i< 4; i++) {
@@ -235,7 +235,7 @@ RawImageDataFloat::RawImageDataFloat() {
           v ^= 1;
         if ((mOffset.y&1) != 0)
           v ^= 2;
-        mul[i] = (int)(16384.0f * 65535.0f / (float)(whitePoint - blackLevelSeparate[v]));
+        mul[i] = (int)(16384.0F * 65535.0F / (float)(whitePoint - blackLevelSeparate[v]));
         sub[i] = blackLevelSeparate[v];
       }
       for (int y = start_y; y < end_y; y++) {
@@ -262,7 +262,7 @@ RawImageDataFloat::RawImageDataFloat() {
       if ((mOffset.y&1) != 0)
         v ^= 2;
       mul[i] =
-          65535.0f / static_cast<float>(whitePoint - blackLevelSeparate[v]);
+          65535.0F / static_cast<float>(whitePoint - blackLevelSeparate[v]);
       sub[i] = static_cast<float>(blackLevelSeparate[v]);
     }
     for (int y = start_y; y < end_y; y++) {
@@ -339,16 +339,16 @@ void RawImageDataFloat::fixBadPixel( uint32 x, uint32 y, int component )
 
   float total_div = 0.000001f;
   if (total_dist_x) {
-    weight[0] = dist[0] > 0.0f ? (total_dist_x - dist[0]) / total_dist_x : 0;
-    weight[1] = 1.0f - weight[0];
+    weight[0] = dist[0] > 0.0F ? (total_dist_x - dist[0]) / total_dist_x : 0;
+    weight[1] = 1.0F - weight[0];
     total_div += 1;
   }
 
   // Find y weights
   float total_dist_y = dist[2] + dist[3];
   if (total_dist_y) {
-    weight[2] = dist[2] > 0.0f ? (total_dist_y - dist[2]) / total_dist_y : 0;
-    weight[3] = 1.0f - weight[2];
+    weight[2] = dist[2] > 0.0F ? (total_dist_y - dist[2]) / total_dist_y : 0;
+    weight[3] = 1.0F - weight[2];
     total_div += 1;
   }
 
@@ -377,7 +377,7 @@ void RawImageDataFloat::doLookup( int start_y, int end_y ) {
 void RawImageDataFloat::setWithLookUp(ushort16 value, uchar8* dst, uint32* random) {
   auto* dest = reinterpret_cast<float*>(dst);
   if (table == nullptr) {
-    *dest = static_cast<float>(value) * (1.0f / 65535);
+    *dest = static_cast<float>(value) * (1.0F / 65535);
     return;
   }
 

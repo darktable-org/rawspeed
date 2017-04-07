@@ -225,7 +225,7 @@ int main(int argc, char *argv[]) {
     fprintf(stdout, "fuji_rotation_pos: %d\n", r->metadata.fujiRotationPos);
     fprintf(stdout, "pixel_aspect_ratio: %f\n", r->metadata.pixelAspectRatio);
 
-    double sum = 0.0f;
+    double sum = 0.0F;
     {
       uchar8 *const data = r->getDataUncropped(0, 0);
 
@@ -243,7 +243,7 @@ int main(int argc, char *argv[]) {
             sum / static_cast<double>(dimUncropped.y * dimUncropped.x * bpp));
 
     if (r->getDataType() == TYPE_FLOAT32) {
-      sum = 0.0f;
+      sum = 0.0F;
       auto* const data = reinterpret_cast<float*>(r->getDataUncropped(0, 0));
 
 #ifdef _OPENMP
@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
       fprintf(stdout, "Image float avg: %lf\n",
               sum / static_cast<double>(dimUncropped.y * dimUncropped.x));
     } else if (r->getDataType() == TYPE_USHORT16) {
-      sum = 0.0f;
+      sum = 0.0F;
       auto* const data = reinterpret_cast<uint16_t*>(r->getDataUncropped(0, 0));
 
 #ifdef _OPENMP

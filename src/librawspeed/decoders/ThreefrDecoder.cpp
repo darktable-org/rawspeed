@@ -67,7 +67,7 @@ void ThreefrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     TiffEntry *wb = mRootIFD->getEntryRecursive(ASSHOTNEUTRAL);
     if (wb->count == 3) {
       for (uint32 i=0; i<3; i++)
-        mRaw->metadata.wbCoeffs[i] = 1.0f/wb->getFloat(i);
+        mRaw->metadata.wbCoeffs[i] = 1.0F / wb->getFloat(i);
     }
   }
 }

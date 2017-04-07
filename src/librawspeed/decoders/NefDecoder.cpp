@@ -435,8 +435,8 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(2);
       mRaw->metadata.wbCoeffs[2] = wb->getFloat(1);
-      if (mRaw->metadata.wbCoeffs[1] <= 0.0f)
-        mRaw->metadata.wbCoeffs[1] = 1.0f;
+      if (mRaw->metadata.wbCoeffs[1] <= 0.0F)
+        mRaw->metadata.wbCoeffs[1] = 1.0F;
     }
   } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x0097))) {
     TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x0097));
@@ -501,10 +501,10 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     auto* tmp = wb->getData(wb->count);
     if (wb->count == 2560 && wb->type == TIFF_UNDEFINED) {
       mRaw->metadata.wbCoeffs[0] =
-          static_cast<float>(getU16BE(tmp + 1248)) / 256.0f;
-      mRaw->metadata.wbCoeffs[1] = 1.0f;
+          static_cast<float>(getU16BE(tmp + 1248)) / 256.0F;
+      mRaw->metadata.wbCoeffs[1] = 1.0F;
       mRaw->metadata.wbCoeffs[2] =
-          static_cast<float>(getU16BE(tmp + 1250)) / 256.0f;
+          static_cast<float>(getU16BE(tmp + 1250)) / 256.0F;
     } else if (!strncmp(reinterpret_cast<const char*>(tmp), "NRW ", 4)) {
       uint32 offset = 0;
       if (strncmp(reinterpret_cast<const char*>(tmp) + 4, "0100", 4) != 0 &&
@@ -577,11 +577,11 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
   float wb_r = wb->getFloat(0);
   float wb_b = wb->getFloat(1);
 
-  if (wb_r <= 0.0f || wb_b <= 0.0f)
+  if (wb_r <= 0.0F || wb_b <= 0.0F)
     ThrowRDE("Whitebalance has zero value");
 
   mRaw->metadata.wbCoeffs[0] = wb_r;
-  mRaw->metadata.wbCoeffs[1] = 1.0f;
+  mRaw->metadata.wbCoeffs[1] = 1.0F;
   mRaw->metadata.wbCoeffs[2] = wb_b;
 
   auto inv_wb_r = static_cast<int>(1024.0 / wb_r);

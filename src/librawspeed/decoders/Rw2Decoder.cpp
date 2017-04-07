@@ -314,36 +314,36 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
              raw->hasEntry(static_cast<TiffTag>(0x0012))) {
     mRaw->metadata.wbCoeffs[0] = static_cast<float>(
         raw->getEntry(static_cast<TiffTag>(0x0011))->getU16());
-    mRaw->metadata.wbCoeffs[1] = 256.0f;
+    mRaw->metadata.wbCoeffs[1] = 256.0F;
     mRaw->metadata.wbCoeffs[2] = static_cast<float>(
         raw->getEntry(static_cast<TiffTag>(0x0012))->getU16());
   }
 }
 
 std::string Rw2Decoder::guessMode() {
-  float ratio = 3.0f / 2.0f;  // Default
+  float ratio = 3.0F / 2.0F; // Default
 
   if (!mRaw->isAllocated())
     return "";
 
   ratio = static_cast<float>(mRaw->dim.x) / static_cast<float>(mRaw->dim.y);
 
-  float min_diff = fabs(ratio - 16.0f / 9.0f);
+  float min_diff = fabs(ratio - 16.0F / 9.0F);
   std::string closest_match = "16:9";
 
-  float t = fabs(ratio - 3.0f / 2.0f);
+  float t = fabs(ratio - 3.0F / 2.0F);
   if (t < min_diff) {
     closest_match = "3:2";
     min_diff  = t;
   }
 
-  t = fabs(ratio - 4.0f / 3.0f);
+  t = fabs(ratio - 4.0F / 3.0F);
   if (t < min_diff) {
     closest_match =  "4:3";
     min_diff  = t;
   }
 
-  t = fabs(ratio - 1.0f);
+  t = fabs(ratio - 1.0F);
   if (t < min_diff) {
     closest_match = "1:1";
     min_diff  = t;

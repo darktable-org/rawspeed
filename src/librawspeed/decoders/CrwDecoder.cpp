@@ -100,12 +100,12 @@ float __attribute__((const)) CrwDecoder::canonEv(const long in) {
   val -= long(frac);
   // convert 1/3 (0x0c) and 2/3 (0x14) codes
   if (frac == 0x0c) {
-    frac = 32.0f / 3;
+    frac = 32.0F / 3;
   }
   else if (frac == 0x14) {
-    frac = 64.0f / 3;
+    frac = 64.0F / 3;
   }
-  return copysignf((val + frac) / 32.0f, in);
+  return copysignf((val + frac) / 32.0F, in);
 }
 
 void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
@@ -126,8 +126,8 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     if (shot_info->type == CIFF_SHORT && shot_info->count >= 2) {
       // os << exp(canonEv(value.toLong()) * log(2.0)) * 100.0 / 32.0;
       ushort16 iso_index = shot_info->getU16(2);
-      iso = expf(canonEv(static_cast<long>(iso_index)) * logf(2.0)) * 100.0f /
-            32.0f;
+      iso = expf(canonEv(static_cast<long>(iso_index)) * logf(2.0)) * 100.0F /
+            32.0F;
     }
   }
 
@@ -143,7 +143,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         mRaw->metadata.wbCoeffs[1] =
             static_cast<float>((1024.0 / wb->getByte(73)) +
                                (1024.0 / wb->getByte(74))) /
-            2.0f;
+            2.0F;
         mRaw->metadata.wbCoeffs[2] =
             static_cast<float>(1024.0 / wb->getByte(75));
       } else if (wb->type == CIFF_BYTE && wb->count > 768) { // Other G series and S series cameras
@@ -177,7 +177,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         mRaw->metadata.wbCoeffs[0] = static_cast<float>(entry->getU16(51));
         mRaw->metadata.wbCoeffs[1] = (static_cast<float>(entry->getU16(50)) +
                                       static_cast<float>(entry->getU16(53))) /
-                                     2.0f;
+                                     2.0F;
         mRaw->metadata.wbCoeffs[2] = static_cast<float>(entry->getU16(52));
       }
     }

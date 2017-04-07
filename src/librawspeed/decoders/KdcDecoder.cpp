@@ -108,12 +108,12 @@ void KdcDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       mRaw->metadata.wbCoeffs[0] =
           static_cast<float>(((static_cast<ushort16>(wb->getByte(148))) << 8) |
                              wb->getByte(149)) /
-          256.0f;
-      mRaw->metadata.wbCoeffs[1] = 1.0f;
+          256.0F;
+      mRaw->metadata.wbCoeffs[1] = 1.0F;
       mRaw->metadata.wbCoeffs[2] =
           static_cast<float>(((static_cast<ushort16>(wb->getByte(150))) << 8) |
                              wb->getByte(151)) /
-          256.0f;
+          256.0F;
     }
   }
 }

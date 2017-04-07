@@ -444,7 +444,7 @@ RawImage DngDecoder::decodeRawInternal() {
       // Test average for bias
       uint32 cw = mRaw->dim.x * mRaw->getCpp();
       auto* pixels = reinterpret_cast<ushort16*>(mRaw->getData(0, 500));
-      float avg = 0.0f;
+      float avg = 0.0F;
       for (uint32 x = 0; x < cw; x++) {
         avg += static_cast<float>(pixels[x]);
       }
@@ -531,7 +531,7 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     if (as_shot_neutral->count == 3) {
       for (uint32 i = 0; i < 3; i++) {
         float c = as_shot_neutral->getFloat(i);
-        mRaw->metadata.wbCoeffs[i] = (c > 0.0f) ? (1.0f / c) : 0.0f;
+        mRaw->metadata.wbCoeffs[i] = (c > 0.0F) ? (1.0F / c) : 0.0F;
       }
     }
   } else if (mRootIFD->hasEntryRecursive(ASSHOTWHITEXY)) {
@@ -642,26 +642,26 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) {
     TiffEntry *blackleveldeltav = raw->getEntry(BLACKLEVELDELTAV);
     if (static_cast<int>(blackleveldeltav->count) < mRaw->dim.y)
       ThrowRDE("BLACKLEVELDELTAV array is too small");
-    float black_sum[2] = {0.0f, 0.0f};
+    float black_sum[2] = {0.0F, 0.0F};
     for (int i = 0; i < mRaw->dim.y; i++)
       black_sum[i&1] += blackleveldeltav->getFloat(i);
 
     for (int i = 0; i < 4; i++)
       mRaw->blackLevelSeparate[i] += static_cast<int>(
-          black_sum[i >> 1] / static_cast<float>(mRaw->dim.y) * 2.0f);
+          black_sum[i >> 1] / static_cast<float>(mRaw->dim.y) * 2.0F);
   }
 
   if (raw->hasEntry(BLACKLEVELDELTAH)){
     TiffEntry *blackleveldeltah = raw->getEntry(BLACKLEVELDELTAH);
     if (static_cast<int>(blackleveldeltah->count) < mRaw->dim.x)
       ThrowRDE("BLACKLEVELDELTAH array is too small");
-    float black_sum[2] = {0.0f, 0.0f};
+    float black_sum[2] = {0.0F, 0.0F};
     for (int i = 0; i < mRaw->dim.x; i++)
       black_sum[i&1] += blackleveldeltah->getFloat(i);
 
     for (int i = 0; i < 4; i++)
       mRaw->blackLevelSeparate[i] += static_cast<int>(
-          black_sum[i & 1] / static_cast<float>(mRaw->dim.x) * 2.0f);
+          black_sum[i & 1] / static_cast<float>(mRaw->dim.x) * 2.0F);
   }
   return true;
 }

@@ -176,16 +176,16 @@ float TiffEntry::getFloat(uint32 index) const {
   case TIFF_RATIONAL: {
     uint32 a = getU32(index*2);
     uint32 b = getU32(index*2+1);
-    return b ? static_cast<float>(a) / b : 0.f;
+    return b ? static_cast<float>(a) / b : 0.0F;
   }
   case TIFF_SRATIONAL: {
     auto a = static_cast<int>(getU32(index * 2));
     auto b = static_cast<int>(getU32(index * 2 + 1));
-    return b ? static_cast<float>(a) / b : 0.f;
+    return b ? static_cast<float>(a) / b : 0.0F;
   }
   default:
     // unreachable
-    return 0.0f;
+    return 0.0F;
   }
 }
 

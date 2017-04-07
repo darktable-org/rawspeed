@@ -94,14 +94,14 @@ public:
     auto badRectCount = bs.getU32();
 
     // Read points
-    for (auto i = 0u; i < badPointCount; ++i) {
+    for (auto i = 0U; i < badPointCount; ++i) {
       auto y = bs.getU32();
       auto x = bs.getU32();
       badPixels.push_back(y << 16 | x);
     }
 
     // Read rects
-    for (auto i = 0u; i < badRectCount; ++i) {
+    for (auto i = 0U; i < badRectCount; ++i) {
       auto top = bs.getU32();
       auto left = bs.getU32();
       auto bottom = bs.getU32();
@@ -187,7 +187,7 @@ protected:
       // Add offset, so this is always first plane
       src += firstPlane;
       for (auto x = left; x < right; x += colPitch) {
-        for (auto p = 0u; p < planes; ++p)
+        for (auto p = 0U; p < planes; ++p)
           src[x * cpp + p] = op(x, y, src[x * cpp + p]);
       }
     }
@@ -224,7 +224,7 @@ public:
     if (count == 0 || count > 65536)
       ThrowRDE("Invalid size of lookup table");
 
-    for (auto i = 0u; i < count; ++i)
+    for (auto i = 0U; i < count; ++i)
       lookup[i] = bs.getU16();
 
     if (count < lookup.size())
@@ -249,7 +249,7 @@ public:
 
     // Create lookup
     lookup.resize(65536);
-    for (auto i = 0u; i < lookup.size(); ++i) {
+    for (auto i = 0U; i < lookup.size(); ++i) {
       double val = polynomial[0];
       for (auto j = 1u; j < polynomial.size(); ++j)
         val += polynomial[j] * pow(i / 65536.0, j);
@@ -292,7 +292,7 @@ template <typename S>
 class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrColBase {
 public:
   explicit OffsetPerRowOrCol(ByteStream& bs)
-      : DeltaRowOrColBase(bs, 65535.0f) {}
+      : DeltaRowOrColBase(bs, 65535.0F) {}
 
   void apply(RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {
@@ -310,7 +310,7 @@ public:
 template <typename S>
 class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrColBase {
 public:
-  explicit ScalePerRowOrCol(ByteStream& bs) : DeltaRowOrColBase(bs, 1024.0f) {}
+  explicit ScalePerRowOrCol(ByteStream& bs) : DeltaRowOrColBase(bs, 1024.0F) {}
 
   void apply(RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {
@@ -339,7 +339,7 @@ DngOpcodes::DngOpcodes(TiffEntry* entry) {
   using ScalePerCol = ScalePerRowOrCol<DeltaRowOrColBase::SelectX>;
 
   auto opcode_count = bs.getU32();
-  for (auto i = 0u; i < opcode_count; i++) {
+  for (auto i = 0U; i < opcode_count; i++) {
     auto code = bs.getU32();
     bs.getU32(); // ignore version
     auto flags = bs.getU32();

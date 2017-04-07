@@ -56,7 +56,7 @@ void NakedDecoder::parseHints() {
     if (!cHints.has(name))
       ThrowRDE("%s %s: couldn't find %s", make, model, name.c_str());
 
-    return cHints.get(name, 0u);
+    return cHints.get(name, 0U);
   };
 
   width = parseHint("full_width");

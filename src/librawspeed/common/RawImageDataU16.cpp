@@ -171,7 +171,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 #else
 
   int depth_values = whitePoint - blackLevelSeparate[0];
-  float app_scale = 65535.0f / depth_values;
+  float app_scale = 65535.0F / depth_values;
 
   // Check SSE2
   if (Cpuid::SSE2() && app_scale < 63) {
@@ -186,12 +186,12 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 #if (defined(_MSC_VER) && _MSC_VER > 1399) || defined(__SSE2__)
 void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   int depth_values = whitePoint - blackLevelSeparate[0];
-  float app_scale = 65535.0f / depth_values;
+  float app_scale = 65535.0F / depth_values;
 
   // Scale in 30.2 fp
-  auto full_scale_fp = static_cast<int>(app_scale * 4.0f);
+  auto full_scale_fp = static_cast<int>(app_scale * 4.0F);
   // Half Scale in 18.14 fp
-  auto half_scale_fp = static_cast<int>(app_scale * 4095.0f);
+  auto half_scale_fp = static_cast<int>(app_scale * 4095.0F);
 
   __m128i sseround;
   __m128i ssesub2;
@@ -210,10 +210,10 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   uint32 gw = pitch / 16;
   // 10 bit fraction
   uint32 mul = static_cast<int>(
-      1024.0f * 65535.0f /
+      1024.0F * 65535.0F /
       static_cast<float>(whitePoint - blackLevelSeparate[mOffset.x & 1]));
   mul |= (static_cast<int>(
-             1024.0f * 65535.0f /
+             1024.0F * 65535.0F /
              static_cast<float>(whitePoint -
                                 blackLevelSeparate[(mOffset.x + 1) & 1])))
          << 16;
@@ -226,10 +226,10 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   }
 
   mul = static_cast<int>(
-      1024.0f * 65535.0f /
+      1024.0F * 65535.0F /
       static_cast<float>(whitePoint - blackLevelSeparate[2 + (mOffset.x & 1)]));
   mul |= (static_cast<int>(
-             1024.0f * 65535.0f /
+             1024.0F * 65535.0F /
              static_cast<float>(whitePoint -
                                 blackLevelSeparate[2 + ((mOffset.x + 1) & 1)])))
          << 16;
@@ -324,12 +324,12 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
 
 void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
   int depth_values = whitePoint - blackLevelSeparate[0];
-  float app_scale = 65535.0f / depth_values;
+  float app_scale = 65535.0F / depth_values;
 
   // Scale in 30.2 fp
-  auto full_scale_fp = static_cast<int>(app_scale * 4.0f);
+  auto full_scale_fp = static_cast<int>(app_scale * 4.0F);
   // Half Scale in 18.14 fp
-  auto half_scale_fp = static_cast<int>(app_scale * 4095.0f);
+  auto half_scale_fp = static_cast<int>(app_scale * 4095.0F);
 
   // Not SSE2
   int gw = dim.x * cpp;
@@ -342,7 +342,7 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
     if ((mOffset.y & 1) != 0)
       v ^= 2;
     mul[i] = static_cast<int>(
-        16384.0f * 65535.0f /
+        16384.0F * 65535.0F /
         static_cast<float>(whitePoint - blackLevelSeparate[v]));
     sub[i] = blackLevelSeparate[v];
   }
