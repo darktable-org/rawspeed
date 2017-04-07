@@ -67,9 +67,6 @@ CiffEntry::~CiffEntry() { delete[] own_data; }
 
 uint32 __attribute__((pure)) CiffEntry::getElementShift() {
   switch (type) {
-    case CIFF_BYTE:
-    case CIFF_ASCII:
-      return 0;
     case CIFF_SHORT:
       return 1;
     case CIFF_LONG:
@@ -77,6 +74,8 @@ uint32 __attribute__((pure)) CiffEntry::getElementShift() {
     case CIFF_SUB1:
     case CIFF_SUB2:
       return 2;
+    case CIFF_BYTE:
+    case CIFF_ASCII:
     default:
       return 0;
   }
