@@ -44,7 +44,7 @@ using std::string;
 namespace rawspeed {
 
 void *DecodeThread(void *_this) {
-  auto *me = (DngDecoderThread *)_this;
+  auto* me = static_cast<DngDecoderThread*>(_this);
   DngDecoderSlices* parent = me->parent;
   try {
     parent->decodeSlice(me);
@@ -74,8 +74,9 @@ void DngDecoderSlices::startDecoding() {
   // Create threads
 
   nThreads = getThreadCount();
-  int slicesPerThread = ((int)slices.size() + nThreads - 1) / nThreads;
-//  decodedSlices = 0;
+  int slicesPerThread =
+      (static_cast<int>(slices.size()) + nThreads - 1) / nThreads;
+  //  decodedSlices = 0;
   pthread_attr_t attr;
   /* Initialize and set thread detached attribute */
   pthread_attr_init(&attr);
@@ -119,9 +120,10 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
       UncompressedDecompressor decompressor(*mFile, e->byteOffset, e->byteCount,
                                             mRaw);
 
-      size_t thisTileLength = e->offY + e->height > (uint32)mRaw->dim.y
-                                  ? mRaw->dim.y - e->offY
-                                  : e->height;
+      size_t thisTileLength =
+          e->offY + e->height > static_cast<uint32>(mRaw->dim.y)
+              ? mRaw->dim.y - e->offY
+              : e->height;
 
       iPoint2D tileSize(mRaw->dim.x, thisTileLength);
       iPoint2D pos(0, e->offY);
@@ -210,7 +212,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
 }
 
 int __attribute__((pure)) DngDecoderSlices::size() {
-  return (int)slices.size();
+  return static_cast<int>(slices.size());
 }
 
 } // namespace rawspeed

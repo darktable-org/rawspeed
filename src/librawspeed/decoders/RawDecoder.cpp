@@ -97,7 +97,9 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
     UncompressedDecompressor u(*mFile, slice.offset, slice.count, mRaw);
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
-    bitPerPixel = (int)((uint64)((uint64)slice.count * 8u) / (slice.h * width));
+    bitPerPixel = static_cast<int>(
+        static_cast<uint64>(static_cast<uint64>(slice.count) * 8u) /
+        (slice.h * width));
     try {
       u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, bitPerPixel,
                             order);
@@ -229,7 +231,7 @@ void RawDecoder::setMetaData(const CameraMetaData* meta, const string& make,
 
 
 void *RawDecoderDecodeThread(void *_this) {
-  auto *me = (RawDecoderThread *)_this;
+  auto* me = static_cast<RawDecoderThread*>(_this);
   try {
      me->parent->decodeThreaded(me);
   } catch (RawDecoderException &ex) {
@@ -250,7 +252,7 @@ void RawDecoder::startThreads() {
 #else
   uint32 threads;
   bool fail = false;
-  threads = min((unsigned)mRaw->dim.y, getThreadCount());
+  threads = min(static_cast<unsigned>(mRaw->dim.y), getThreadCount());
   int y_offset = 0;
   int y_per_thread = (mRaw->dim.y + threads - 1) / threads;
 
@@ -341,7 +343,7 @@ void RawDecoder::startTasks( uint32 tasks )
 
   // We don't need a thread
   if (threads == 1) {
-    while ((uint32)ctask < tasks) {
+    while (static_cast<uint32>(ctask) < tasks) {
       t[0].taskNo = ctask++;
       RawDecoderDecodeThread(&t[0]);
     }
@@ -357,8 +359,8 @@ void RawDecoder::startTasks( uint32 tasks )
 
   /* TODO: Create a way to re-use threads */
   void *status;
-  while ((uint32)ctask < tasks) {
-    for (uint32 i = 0; i < threads && (uint32)ctask < tasks; i++) {
+  while (static_cast<uint32>(ctask) < tasks) {
+    for (uint32 i = 0; i < threads && static_cast<uint32>(ctask) < tasks; i++) {
       t[i].taskNo = ctask++;
       pthread_create(&t[i].threadid, &attr, RawDecoderDecodeThread, &t[i]);
     }

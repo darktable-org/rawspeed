@@ -79,7 +79,8 @@ void MrwDecoder::parseHeader() {
       break;
     case 0x574247: // WBG
       for (uint32 i = 0; i < 4; i++)
-        wb_coeffs[i] = (float)getU16BE(data + currpos + 12 + i * 2);
+        wb_coeffs[i] =
+            static_cast<float>(getU16BE(data + currpos + 12 + i * 2));
       break;
     case 0x545457: // TTW
       // Base value for offsets needs to be at the beginning of the TIFF block, not the file
@@ -127,13 +128,13 @@ void MrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, id.make, id.model, "", iso);
 
   if (hints.has("swapped_wb")) {
-    mRaw->metadata.wbCoeffs[0] = (float) wb_coeffs[2];
-    mRaw->metadata.wbCoeffs[1] = (float) wb_coeffs[0];
-    mRaw->metadata.wbCoeffs[2] = (float) wb_coeffs[1];
+    mRaw->metadata.wbCoeffs[0] = wb_coeffs[2];
+    mRaw->metadata.wbCoeffs[1] = wb_coeffs[0];
+    mRaw->metadata.wbCoeffs[2] = wb_coeffs[1];
   } else {
-    mRaw->metadata.wbCoeffs[0] = (float) wb_coeffs[0];
-    mRaw->metadata.wbCoeffs[1] = (float) wb_coeffs[1];
-    mRaw->metadata.wbCoeffs[2] = (float) wb_coeffs[3];
+    mRaw->metadata.wbCoeffs[0] = wb_coeffs[0];
+    mRaw->metadata.wbCoeffs[1] = wb_coeffs[1];
+    mRaw->metadata.wbCoeffs[2] = wb_coeffs[3];
   }
 }
 

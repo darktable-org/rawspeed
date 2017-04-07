@@ -174,7 +174,7 @@ inline void Cr2sRawInterpolator::interpolate_422(int w, int h) {
   assert(h > 0);
 
   for (int y = 0; y < h; y++) {
-    auto data = (ushort16*)mRaw->getData(0, y);
+    auto data = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
 
     interpolate_422_row<version>(data, w);
   }
@@ -336,9 +336,9 @@ inline void Cr2sRawInterpolator::interpolate_420(int w, int h) {
     assert(y + 4 <= h);
     assert(y % 2 == 0);
 
-    line[0] = (ushort16*)mRaw->getData(0, y);
-    line[1] = (ushort16*)mRaw->getData(0, y + 1);
-    line[2] = (ushort16*)mRaw->getData(0, y + 2);
+    line[0] = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
+    line[1] = reinterpret_cast<ushort16*>(mRaw->getData(0, y + 1));
+    line[2] = reinterpret_cast<ushort16*>(mRaw->getData(0, y + 2));
 
     interpolate_420_row<version>(line, w);
   }
@@ -346,8 +346,8 @@ inline void Cr2sRawInterpolator::interpolate_420(int w, int h) {
   assert(y + 2 == h);
   assert(y % 2 == 0);
 
-  line[0] = (ushort16*)mRaw->getData(0, y);
-  line[1] = (ushort16*)mRaw->getData(0, y + 1);
+  line[0] = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
+  line[1] = reinterpret_cast<ushort16*>(mRaw->getData(0, y + 1));
   line[2] = nullptr;
 
   assert(line[0]);

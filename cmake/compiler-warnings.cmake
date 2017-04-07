@@ -24,6 +24,8 @@ CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wextra-semi)
 
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wextra)
 
+CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wold-style-casts)
+
 # as per http://lars-lab.jpl.nasa.gov/JPL_Coding_Standard_C.pdf
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wtraditional)
 CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wshadow)

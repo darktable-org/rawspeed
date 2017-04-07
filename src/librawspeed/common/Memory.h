@@ -57,7 +57,7 @@ alignedMalloc(size_t size) {
 #endif
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  return (T*)alignedMalloc(size, alignment);
+  return reinterpret_cast<T*>(alignedMalloc(size, alignment));
 }
 
 #pragma GCC diagnostic pop

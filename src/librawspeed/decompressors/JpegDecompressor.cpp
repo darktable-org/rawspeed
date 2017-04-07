@@ -129,7 +129,7 @@ void JpegDecompressor::decode(uint32 offX,
     ThrowRDE("Unable to read JPEG header");
 
   jpeg_start_decompress(&dinfo);
-  if (dinfo.output_components != (int)mRaw->getCpp())
+  if (dinfo.output_components != static_cast<int>(mRaw->getCpp()))
     ThrowRDE("Component count doesn't match");
   int row_stride = dinfo.output_width * dinfo.output_components;
 
@@ -137,8 +137,9 @@ void JpegDecompressor::decode(uint32 offX,
       alignedMallocArray<uchar8, 16>(dinfo.output_height, row_stride),
       &alignedFree);
   while (dinfo.output_scanline < dinfo.output_height) {
-    buffer[0] = (JSAMPROW)(
-        &complete_buffer[(size_t)dinfo.output_scanline * row_stride]);
+    buffer[0] = static_cast<JSAMPROW>(
+        &complete_buffer[static_cast<size_t>(dinfo.output_scanline) *
+                         row_stride]);
     if (0 == jpeg_read_scanlines(&dinfo, &buffer[0], 1))
       ThrowRDE("JPEG Error while decompressing image.");
   }
@@ -148,8 +149,8 @@ void JpegDecompressor::decode(uint32 offX,
   int copy_w = min(mRaw->dim.x - offX, dinfo.output_width);
   int copy_h = min(mRaw->dim.y - offY, dinfo.output_height);
   for (int y = 0; y < copy_h; y++) {
-    uchar8* src = &complete_buffer[(size_t)row_stride * y];
-    auto* dst = (ushort16*)mRaw->getData(offX, y + offY);
+    uchar8* src = &complete_buffer[static_cast<size_t>(row_stride) * y];
+    auto* dst = reinterpret_cast<ushort16*>(mRaw->getData(offX, y + offY));
     for (int x = 0; x < copy_w; x++) {
       for (int c = 0; c < dinfo.output_components; c++)
         *dst++ = (*src++);

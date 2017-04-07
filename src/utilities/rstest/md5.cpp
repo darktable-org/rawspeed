@@ -177,17 +177,17 @@ void md5_hash(const uint8_t* message, size_t len, md5_state& hash) {
     memset(block, 0, 56);
   }
 
-  block[64 - 8] = (uint8_t)((len & 0x1FU) << 3);
+  block[64 - 8] = static_cast<uint8_t>((len & 0x1FU) << 3);
   len >>= 5;
   for (i = 1; i < 8; i++, len >>= 8)
-    block[64 - 8 + i] = (uint8_t)len;
+    block[64 - 8 + i] = static_cast<uint8_t>(len);
   md5_compress(hash, block);
 }
 
 std::string hash_to_string(const md5_state& hash) {
   char res[2 * sizeof(hash) + 1];
-  auto* h = (const uint8_t*)(&hash[0]);
-  for (int i = 0; i < (int)sizeof(hash); ++i)
+  auto* h = reinterpret_cast<const uint8_t*>(&hash[0]);
+  for (int i = 0; i < static_cast<int>(sizeof(hash)); ++i)
     snprintf(res + 2 * i, 3, "%02x", h[i]);
   res[32] = 0;
   return res;

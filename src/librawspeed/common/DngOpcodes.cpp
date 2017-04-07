@@ -73,7 +73,7 @@ public:
     iPoint2D crop = ri->getCropOffset();
     uint32 offset = crop.x | (crop.y << 16);
     for (auto y = 0; y < ri->dim.y; ++y) {
-      auto* src = (ushort16*)ri->getData(0, y);
+      auto* src = reinterpret_cast<ushort16*>(ri->getData(0, y));
       for (auto x = 0; x < ri->dim.x; ++x) {
         if (src[x] == value)
           ri->mBadPixelPositions.push_back(offset + (y << 16 | x));
@@ -183,7 +183,7 @@ protected:
   template <typename T, typename OP> void applyOP(RawImage& ri, OP op) {
     int cpp = ri->getCpp();
     for (auto y = top; y < bottom; y += rowPitch) {
-      auto* src = (T*)ri->getData(0, y);
+      auto* src = reinterpret_cast<T*>(ri->getData(0, y));
       // Add offset, so this is always first plane
       src += firstPlane;
       for (auto x = left; x < right; x += colPitch) {
@@ -253,7 +253,7 @@ public:
       double val = polynomial[0];
       for (auto j = 1u; j < polynomial.size(); ++j)
         val += polynomial[j] * pow(i / 65536.0, j);
-      lookup[i] = (clampBits((int)(val * 65535.5), 16));
+      lookup[i] = (clampBits(static_cast<int>(val * 65535.5), 16));
     }
   }
 };
@@ -282,7 +282,7 @@ protected:
 
     deltaI.reserve(deltaF.size());
     for (auto f : deltaF)
-      deltaI.emplace_back((int)(f2iScale * f));
+      deltaI.emplace_back(static_cast<int>(f2iScale * f));
   }
 };
 

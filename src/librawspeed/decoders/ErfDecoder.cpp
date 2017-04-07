@@ -62,9 +62,11 @@ void ErfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     TiffEntry *wb = mRootIFD->getEntryRecursive(EPSONWB);
     if (wb->count == 256) {
       // Magic values taken directly from dcraw
-      mRaw->metadata.wbCoeffs[0] = (float) wb->getU16(24) * 508.0f * 1.078f / (float)0x10000;
+      mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(24)) * 508.0f *
+                                   1.078f / static_cast<float>(0x10000);
       mRaw->metadata.wbCoeffs[1] = 1.0f;
-      mRaw->metadata.wbCoeffs[2] = (float) wb->getU16(25) * 382.0f * 1.173f / (float)0x10000;
+      mRaw->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(25)) * 382.0f *
+                                   1.173f / static_cast<float>(0x10000);
     }
   }
 }

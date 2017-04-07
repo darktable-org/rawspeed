@@ -60,7 +60,7 @@ public:
   }
 
   inline void check(size_type bytes) const {
-    if ((uint64)pos + bytes > size)
+    if (static_cast<uint64>(pos) + bytes > size)
       ThrowIOE("Out of bounds access in ByteStream");
   }
 
@@ -137,7 +137,7 @@ public:
     do {
       check(1);
     } while (data[p++] != 0);
-    return (const char*)&data[pos];
+    return reinterpret_cast<const char*>(&data[pos]);
   }
 
   // Increments the stream to after the next zero byte and returns the bytes in between (not a copy).
@@ -147,7 +147,7 @@ public:
     do {
       check(1);
     } while (data[pos++] != 0);
-    return (const char*)&data[start];
+    return reinterpret_cast<const char*>(&data[start]);
   }
 
   // recalculate the internal data/position information such that current position

@@ -39,9 +39,9 @@ namespace rawspeed {
 CiffEntry::CiffEntry(Buffer* f, uint32 value_data, uint32 offset) {
   own_data = nullptr;
   ushort16 p = getU16LE(f->getData(offset, 2));
-  tag = (CiffTag) (p & 0x3fff);
+  tag = static_cast<CiffTag>(p & 0x3fff);
   ushort16 datalocation = (p & 0xc000);
-  type = (CiffDataType) (p & 0x3800);
+  type = static_cast<CiffDataType>(p & 0x3800);
   if (datalocation == 0x0000) { // Data is offset in value_data
     bytesize = getU32LE(f->getData(offset + 2, 4));
 
@@ -153,7 +153,7 @@ string CiffEntry::getString() {
     own_data[count-1] = 0;  // Ensure string is not larger than count defines
   }
 
-  return string((const char*)&own_data[0]);
+  return string(reinterpret_cast<const char*>(&own_data[0]));
 }
 
 vector<string> CiffEntry::getStrings() {
@@ -168,7 +168,7 @@ vector<string> CiffEntry::getStrings() {
   uint32 start = 0;
   for (uint32 i=0; i< count; i++) {
     if (own_data[i] == 0) {
-      strs.emplace_back((const char *)&own_data[start]);
+      strs.emplace_back(reinterpret_cast<const char*>(&own_data[start]));
       start = i+1;
     }
   }
@@ -198,7 +198,7 @@ void CiffEntry::setData( const void *in_data, uint32 byte_count )
 std::string CiffEntry::getValueAsString()
 {
   if (type == CIFF_ASCII)
-    return string((const char*)&data[0]);
+    return string(reinterpret_cast<const char*>(&data[0]));
   auto *temp_string = new char[4096];
   if (count == 1) {
     switch (type) {

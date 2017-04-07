@@ -196,7 +196,7 @@ public:
     decodeLookup.resize(1 << LookupDepth);
     for (size_t i = 0; i < codes.size(); i++) {
       uchar8 code_l = code_len[i];
-      if (code_l > (int)LookupDepth)
+      if (code_l > static_cast<int>(LookupDepth))
         break;
 
       ushort16 ll = codes[i] << (LookupDepth - code_l);
@@ -215,7 +215,8 @@ public:
 
           if (diff_l) {
             uint32 diff = (c >> (LookupDepth - code_l - diff_l)) & ((1 << diff_l) - 1);
-            decodeLookup[c] |= (uint32)signExtended(diff, diff_l) << PayloadShift;
+            decodeLookup[c] |= static_cast<uint32>(signExtended(diff, diff_l))
+                               << PayloadShift;
           }
         }
       }

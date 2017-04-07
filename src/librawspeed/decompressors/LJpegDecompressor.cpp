@@ -33,9 +33,9 @@ using std::min;
 namespace rawspeed {
 
 void LJpegDecompressor::decode(uint32 offsetX, uint32 offsetY, bool fixDng16Bug_) {
-  if ((int)offsetX >= mRaw->dim.x)
+  if (static_cast<int>(offsetX) >= mRaw->dim.x)
     ThrowRDE("X offset outside of image");
-  if ((int)offsetY >= mRaw->dim.y)
+  if (static_cast<int>(offsetY) >= mRaw->dim.y)
     ThrowRDE("Y offset outside of image");
   offX = offsetX;
   offY = offsetY;
@@ -86,10 +86,11 @@ void LJpegDecompressor::decodeN()
     // blobs. The tiles at the bottom and the right may extend beyond the
     // dimension of the raw image buffer. The excessive content has to be
     // ignored. For y, we can simply stop decoding when we reached the border.
-    if (destY >= (unsigned)mRaw->dim.y)
+    if (destY >= static_cast<unsigned>(mRaw->dim.y))
       break;
 
-    auto dest = (ushort16*)mRaw->getDataUncropped(offX, destY);
+    auto dest =
+        reinterpret_cast<ushort16*>(mRaw->getDataUncropped(offX, destY));
 
     copy_n(predNext, N_COMP, pred.data());
     // the predictor for the next line is the start of this line

@@ -102,13 +102,13 @@ RawImage NefDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  raw = mRootIFD->getIFDWithTag((TiffTag)0x8c);
+  raw = mRootIFD->getIFDWithTag(static_cast<TiffTag>(0x8c));
 
   TiffEntry *meta;
-  if (raw->hasEntry((TiffTag)0x96)) {
-    meta = raw->getEntry((TiffTag)0x96);
+  if (raw->hasEntry(static_cast<TiffTag>(0x96))) {
+    meta = raw->getEntry(static_cast<TiffTag>(0x96));
   } else {
-    meta = raw->getEntry((TiffTag)0x8c);  // Fall back
+    meta = raw->getEntry(static_cast<TiffTag>(0x8c)); // Fall back
   }
 
   try {
@@ -244,7 +244,7 @@ void NefDecoder::readCoolpixMangledRaw(ByteStream &input, iPoint2D& size, iPoint
   uint32 h = size.y;
   uint32 cpp = mRaw->getCpp();
   if (input.getRemainSize() < (inputPitch*h)) {
-    if ((int)input.getRemainSize() > inputPitch)
+    if (static_cast<int>(input.getRemainSize()) > inputPitch)
       h = input.getRemainSize() / inputPitch - 1;
     else
       ThrowIOE(
@@ -257,12 +257,12 @@ void NefDecoder::readCoolpixMangledRaw(ByteStream &input, iPoint2D& size, iPoint
     ThrowRDE("Invalid x offset");
 
   uint32 y = offset.y;
-  h = min(h + (uint32)offset.y, (uint32)mRaw->dim.y);
+  h = min(h + static_cast<uint32>(offset.y), static_cast<uint32>(mRaw->dim.y));
   w *= cpp;
   BitPumpMSB32 in(input);
   for (; y < h; y++) {
-    auto *dest =
-        (ushort16 *)&data[offset.x * sizeof(ushort16) * cpp + y * outPitch];
+    auto* dest = reinterpret_cast<ushort16*>(
+        &data[offset.x * sizeof(ushort16) * cpp + y * outPitch]);
     for (uint32 x = 0 ; x < w; x++) {
       dest[x] = in.getBits(12);
     }
@@ -277,7 +277,7 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream &input, iPoint2D& size, iPoint2D
   uint32 h = size.y;
   uint32 cpp = mRaw->getCpp();
   if (input.getRemainSize() < (inputPitch*h)) {
-    if ((int)input.getRemainSize() > inputPitch)
+    if (static_cast<int>(input.getRemainSize()) > inputPitch)
       h = input.getRemainSize() / inputPitch - 1;
     else
       ThrowIOE(
@@ -290,20 +290,20 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream &input, iPoint2D& size, iPoint2D
     ThrowRDE("Invalid x offset");
 
   uint32 y = offset.y;
-  h = min(h + (uint32)offset.y, (uint32)mRaw->dim.y);
+  h = min(h + static_cast<uint32>(offset.y), static_cast<uint32>(mRaw->dim.y));
   w *= cpp;
   h /= 2;
   BitPumpMSB in(input);
   for (; y < h; y++) {
-    auto *dest =
-        (ushort16 *)&data[offset.x * sizeof(ushort16) * cpp + y * 2 * outPitch];
+    auto* dest = reinterpret_cast<ushort16*>(
+        &data[offset.x * sizeof(ushort16) * cpp + y * 2 * outPitch]);
     for (uint32 x = 0 ; x < w; x++) {
       dest[x] =  in.getBits(12);
     }
   }
   for (y = offset.y; y < h; y++) {
-    auto *dest = (ushort16 *)&data[offset.x * sizeof(ushort16) * cpp +
-                                   (y * 2 + 1) * outPitch];
+    auto* dest = reinterpret_cast<ushort16*>(
+        &data[offset.x * sizeof(ushort16) * cpp + (y * 2 + 1) * outPitch]);
     for (uint32 x = 0 ; x < w; x++) {
       dest[x] =  in.getBits(12);
     }
@@ -429,8 +429,8 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   0x3b,0x2d,0xeb,0x25,0x49,0xfa,0xa3,0xaa,0x39,0xa7,0xc5,0xa7,0x50,0x11,0x36,0xfb,
   0xc6,0x67,0x4a,0xf5,0xa5,0x12,0x65,0x7e,0xb0,0xdf,0xaf,0x4e,0xb3,0x61,0x7f,0x2f};
 
-  if (mRootIFD->hasEntryRecursive((TiffTag)12)) {
-    TiffEntry* wb = mRootIFD->getEntryRecursive((TiffTag)12);
+  if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(12))) {
+    TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(12));
     if (wb->count == 4) {
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(2);
@@ -438,26 +438,28 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       if (mRaw->metadata.wbCoeffs[1] <= 0.0f)
         mRaw->metadata.wbCoeffs[1] = 1.0f;
     }
-  } else if (mRootIFD->hasEntryRecursive((TiffTag)0x0097)) {
-    TiffEntry* wb = mRootIFD->getEntryRecursive((TiffTag)0x0097);
+  } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x0097))) {
+    TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x0097));
     if (wb->count > 4) {
       uint32 version = 0;
       for (uint32 i=0; i<4; i++)
         version = (version << 4) + wb->getByte(i)-'0';
       if (version == 0x100 && wb->count >= 80 && wb->type == TIFF_UNDEFINED) {
-        mRaw->metadata.wbCoeffs[0] = (float) wb->getU16(36);
-        mRaw->metadata.wbCoeffs[2] = (float) wb->getU16(37);
-        mRaw->metadata.wbCoeffs[1] = (float) wb->getU16(38);
+        mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(36));
+        mRaw->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(37));
+        mRaw->metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(38));
       } else if (version == 0x103 && wb->count >= 26 && wb->type == TIFF_UNDEFINED) {
-        mRaw->metadata.wbCoeffs[0] = (float) wb->getU16(10);
-        mRaw->metadata.wbCoeffs[1] = (float) wb->getU16(11);
-        mRaw->metadata.wbCoeffs[2] = (float) wb->getU16(12);
+        mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(10));
+        mRaw->metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(11));
+        mRaw->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(12));
       } else if (((version == 0x204 && wb->count >= 564) ||
                   (version == 0x205 && wb->count >= 284)) &&
-                 mRootIFD->hasEntryRecursive((TiffTag)0x001d) &&
-                 mRootIFD->hasEntryRecursive((TiffTag)0x00a7)) {
+                 mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x001d)) &&
+                 mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x00a7))) {
         // Get the serial number
-        string serial = mRootIFD->getEntryRecursive((TiffTag)0x001d)->getString();
+        string serial =
+            mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x001d))
+                ->getString();
         uint32 serialno = 0;
         for (char c : serial) {
           if (c >= '0' && c <= '9')
@@ -467,7 +469,8 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         }
 
         // Get the decryption key
-        TiffEntry *key = mRootIFD->getEntryRecursive((TiffTag)0x00a7);
+        TiffEntry* key =
+            mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x00a7));
         const uchar8 *keydata = key->getData(4);
         uint32 keyno = keydata[0]^keydata[1]^keydata[2]^keydata[3];
 
@@ -485,30 +488,38 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
         // Finally set the WB coeffs
         uint32 off = (version == 0x204) ? 6 : 14;
-        mRaw->metadata.wbCoeffs[0] = (float)getU16BE(buf + off + 0);
-        mRaw->metadata.wbCoeffs[1] = (float)getU16BE(buf + off + 2);
-        mRaw->metadata.wbCoeffs[2] = (float)getU16BE(buf + off + 6);
+        mRaw->metadata.wbCoeffs[0] =
+            static_cast<float>(getU16BE(buf + off + 0));
+        mRaw->metadata.wbCoeffs[1] =
+            static_cast<float>(getU16BE(buf + off + 2));
+        mRaw->metadata.wbCoeffs[2] =
+            static_cast<float>(getU16BE(buf + off + 6));
       }
     }
-  } else if (mRootIFD->hasEntryRecursive((TiffTag)0x0014)) {
-    TiffEntry* wb = mRootIFD->getEntryRecursive((TiffTag)0x0014);
-    auto* tmp = (const uchar8*)wb->getData(wb->count);
+  } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x0014))) {
+    TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x0014));
+    auto* tmp = wb->getData(wb->count);
     if (wb->count == 2560 && wb->type == TIFF_UNDEFINED) {
-      mRaw->metadata.wbCoeffs[0] = (float) getU16BE(tmp + 1248) / 256.0f;
+      mRaw->metadata.wbCoeffs[0] =
+          static_cast<float>(getU16BE(tmp + 1248)) / 256.0f;
       mRaw->metadata.wbCoeffs[1] = 1.0f;
-      mRaw->metadata.wbCoeffs[2] = (float) getU16BE(tmp + 1250) / 256.0f;
-    } else if (!strncmp((const char*)tmp, "NRW ", 4)) {
+      mRaw->metadata.wbCoeffs[2] =
+          static_cast<float>(getU16BE(tmp + 1250)) / 256.0f;
+    } else if (!strncmp(reinterpret_cast<const char*>(tmp), "NRW ", 4)) {
       uint32 offset = 0;
-      if (strncmp((const char*)tmp + 4, "0100", 4) != 0 && wb->count > 72)
+      if (strncmp(reinterpret_cast<const char*>(tmp) + 4, "0100", 4) != 0 &&
+          wb->count > 72)
         offset = 56;
       else if (wb->count > 1572)
         offset = 1556;
 
       if (offset) {
         tmp += offset;
-        mRaw->metadata.wbCoeffs[0] = (float)(getU32LE(tmp + 0) << 2);
-        mRaw->metadata.wbCoeffs[1] = (float)(getU32LE(tmp + 4) + getU32LE(tmp + 8));
-        mRaw->metadata.wbCoeffs[2] = (float)(getU32LE(tmp + 12) << 2);
+        mRaw->metadata.wbCoeffs[0] = static_cast<float>(getU32LE(tmp + 0) << 2);
+        mRaw->metadata.wbCoeffs[1] =
+            static_cast<float>(getU32LE(tmp + 4) + getU32LE(tmp + 8));
+        mRaw->metadata.wbCoeffs[2] =
+            static_cast<float>(getU32LE(tmp + 12) << 2);
       }
     }
   }
@@ -545,7 +556,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
     ThrowIOE("got a %u wide sNEF, aborting", w);
 
   if (input.getRemainSize() < (w*h*3)) {
-    if ((uint32)input.getRemainSize() > w*3) {
+    if (static_cast<uint32>(input.getRemainSize()) > w * 3) {
       h = input.getRemainSize() / (w*3) - 1;
       mRaw->setError("Image truncated (file is too short)");
     } else
@@ -555,7 +566,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
 
   // We need to read the applied whitebalance, since we should return
   // data before whitebalance, so we "unapply" it.
-  TiffEntry* wb = mRootIFD->getEntryRecursive((TiffTag)12);
+  TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(12));
   if (!wb)
     ThrowRDE("Unable to locate whitebalance needed for decompression");
 
@@ -573,26 +584,26 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
   mRaw->metadata.wbCoeffs[1] = 1.0f;
   mRaw->metadata.wbCoeffs[2] = wb_b;
 
-  auto inv_wb_r = (int)(1024.0 / wb_r);
-  auto inv_wb_b = (int)(1024.0 / wb_b);
+  auto inv_wb_r = static_cast<int>(1024.0 / wb_r);
+  auto inv_wb_b = static_cast<int>(1024.0 / wb_b);
 
   ushort16* curve = gammaCurve(1/2.4, 12.92, 1, 4095);
   // Scale output values to 16 bits.
   for (int i = 0 ; i < 4096; i++) {
-    curve[i] = clampBits((int)curve[i] << 2, 16);
+    curve[i] = clampBits(static_cast<int>(curve[i]) << 2, 16);
   }
   mRaw->setTable(curve, 4095, true);
   alignedFree(curve);
 
   ushort16 tmp;
-  auto *tmpch = (uchar8 *)&tmp;
+  auto* tmpch = reinterpret_cast<uchar8*>(&tmp);
 
   uchar8* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
   const uchar8 *in = input.getData(w*h*3);
 
   for (uint32 y = 0; y < h; y++) {
-    auto *dest = (ushort16 *)&data[y * pitch];
+    auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
     uint32 random = in[0] + (in[1] << 8) +  (in[2] << 16);
     for (uint32 x = 0 ; x < w*3; x += 6) {
       uint32 g1 = in[0];
@@ -603,10 +614,10 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
       uint32 g6 = in[5];
 
       in+=6;
-      auto y1 = (float)(g1 | ((g2 & 0x0f) << 8));
-      auto y2 = (float)((g2 >> 4) | (g3 << 4));
-      auto cb = (float)(g4 | ((g5 & 0x0f) << 8));
-      auto cr = (float)((g5 >> 4) | (g6 << 4));
+      auto y1 = static_cast<float>(g1 | ((g2 & 0x0f) << 8));
+      auto y2 = static_cast<float>((g2 >> 4) | (g3 << 4));
+      auto cb = static_cast<float>(g4 | ((g5 & 0x0f) << 8));
+      auto cr = static_cast<float>((g5 >> 4) | (g6 << 4));
 
       float cb2 = cb;
       float cr2 = cr;
@@ -615,8 +626,8 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
         g4 = in[3];
         g5 = in[4];
         g6 = in[5];
-        cb2 = ((float)((g4 | ((g5 & 0x0f) << 8))) + cb) * 0.5f;
-        cr2 = ((float)(((g5 >> 4) | (g6 << 4))) + cr)* 0.5f;
+        cb2 = (static_cast<float>((g4 | ((g5 & 0x0f) << 8))) + cb) * 0.5f;
+        cr2 = (static_cast<float>(((g5 >> 4) | (g6 << 4))) + cr) * 0.5f;
       }
 
       cb -= 2048;
@@ -624,20 +635,28 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
       cb2 -= 2048;
       cr2 -= 2048;
 
-      mRaw->setWithLookUp(clampBits((int)(y1 + 1.370705 * cr), 12), tmpch, &random);
+      mRaw->setWithLookUp(clampBits(static_cast<int>(y1 + 1.370705 * cr), 12),
+                          tmpch, &random);
       dest[x] = clampBits((inv_wb_r * tmp + (1<<9)) >> 10, 15);
 
-      mRaw->setWithLookUp(clampBits((int)(y1 - 0.337633 * cb - 0.698001 * cr), 12), (uchar8*)&dest[x+1], &random);
+      mRaw->setWithLookUp(
+          clampBits(static_cast<int>(y1 - 0.337633 * cb - 0.698001 * cr), 12),
+          reinterpret_cast<uchar8*>(&dest[x + 1]), &random);
 
-      mRaw->setWithLookUp(clampBits((int)(y1 + 1.732446 * cb), 12), tmpch, &random);
+      mRaw->setWithLookUp(clampBits(static_cast<int>(y1 + 1.732446 * cb), 12),
+                          tmpch, &random);
       dest[x+2]   = clampBits((inv_wb_b * tmp + (1<<9)) >> 10, 15);
 
-      mRaw->setWithLookUp(clampBits((int)(y2 + 1.370705 * cr2), 12), tmpch, &random);
+      mRaw->setWithLookUp(clampBits(static_cast<int>(y2 + 1.370705 * cr2), 12),
+                          tmpch, &random);
       dest[x+3] = clampBits((inv_wb_r * tmp + (1<<9)) >> 10, 15);
 
-      mRaw->setWithLookUp(clampBits((int)(y2 - 0.337633 * cb2 - 0.698001 * cr2), 12), (uchar8*)&dest[x+4], &random);
+      mRaw->setWithLookUp(
+          clampBits(static_cast<int>(y2 - 0.337633 * cb2 - 0.698001 * cr2), 12),
+          reinterpret_cast<uchar8*>(&dest[x + 4]), &random);
 
-      mRaw->setWithLookUp(clampBits((int)(y2 + 1.732446 * cb2), 12), tmpch, &random);
+      mRaw->setWithLookUp(clampBits(static_cast<int>(y2 + 1.732446 * cb2), 12),
+                          tmpch, &random);
       dest[x+5] = clampBits((inv_wb_b * tmp + (1<<9)) >> 10, 15);
     }
   }
@@ -677,11 +696,15 @@ ushort16* NefDecoder::gammaCurve(double pwr, double ts, int mode, int imax) {
   assert(curve != nullptr);
   for (i=0; i < 0x10000; i++) {
     curve[i] = 0xffff;
-    if ((r = (double) i / imax) < 1) {
-      curve[i] = (ushort16)(0x10000 * ( mode
-        ? (r < g[3] ? r*g[1] : (g[0] ? pow( r,g[0])*(1+g[4])-g[4] : log(r)*g[2]+1))
-        : (r < g[2] ? r/g[1] : (g[0] ? pow((r+g[4])/(1+g[4]),1/g[0]) : exp((r-1)/g[2]))))
-      );
+    if ((r = static_cast<double>(i) / imax) < 1) {
+      curve[i] = static_cast<ushort16>(
+          0x10000 *
+          (mode ? (r < g[3] ? r * g[1]
+                            : (g[0] ? pow(r, g[0]) * (1 + g[4]) - g[4]
+                                    : log(r) * g[2] + 1))
+                : (r < g[2] ? r / g[1]
+                            : (g[0] ? pow((r + g[4]) / (1 + g[4]), 1 / g[0])
+                                    : exp((r - 1) / g[2])))));
     }
   }
   return curve;

@@ -47,7 +47,7 @@ void UncompressedDecompressor::sanityCheck(uint32* h, int bpl) {
   if (input.getRemainSize() >= bpl * *h)
     return; // all good!
 
-  if ((int)input.getRemainSize() < bpl)
+  if (static_cast<int>(input.getRemainSize()) < bpl)
     ThrowIOE("Not enough data to decode a single line. Image file truncated.");
 
   mRaw->setError("Image truncated (file is too short)");
@@ -113,13 +113,13 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
     ThrowRDE("Unsupported bit depth");
 
   uint32 skipBits = inputPitch - w * cpp * bitPerPixel / 8; // Skip per line
-  if (oy > (uint64)mRaw->dim.y)
+  if (oy > static_cast<uint64>(mRaw->dim.y))
     ThrowRDE("Invalid y offset");
-  if (ox + size.x > (uint64)mRaw->dim.x)
+  if (ox + size.x > static_cast<uint64>(mRaw->dim.x))
     ThrowRDE("Invalid x offset");
 
   uint64 y = oy;
-  h = min(h + oy, (uint64)mRaw->dim.y);
+  h = min(h + oy, static_cast<uint64>(mRaw->dim.y));
 
   if (mRaw->getDataType() == TYPE_FLOAT32) {
     if (bitPerPixel != 32)
@@ -134,8 +134,8 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
     BitPumpMSB bits(input);
     w *= cpp;
     for (; y < h; y++) {
-      auto* dest =
-          (ushort16*)&data[offset.x * sizeof(ushort16) * cpp + y * outPitch];
+      auto* dest = reinterpret_cast<ushort16*>(
+          &data[offset.x * sizeof(ushort16) * cpp + y * outPitch]);
       for (uint32 x = 0; x < w; x++) {
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
@@ -146,8 +146,8 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
     BitPumpMSB16 bits(input);
     w *= cpp;
     for (; y < h; y++) {
-      auto* dest =
-          (ushort16*)&data[offset.x * sizeof(ushort16) * cpp + y * outPitch];
+      auto* dest = reinterpret_cast<ushort16*>(
+          &data[offset.x * sizeof(ushort16) * cpp + y * outPitch]);
       for (uint32 x = 0; x < w; x++) {
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
@@ -158,8 +158,8 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
     BitPumpMSB32 bits(input);
     w *= cpp;
     for (; y < h; y++) {
-      auto* dest =
-          (ushort16*)&data[offset.x * sizeof(ushort16) * cpp + y * outPitch];
+      auto* dest = reinterpret_cast<ushort16*>(
+          &data[offset.x * sizeof(ushort16) * cpp + y * outPitch]);
       for (uint32 x = 0; x < w; x++) {
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
@@ -173,7 +173,7 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
                  w * mRaw->getBpp(), h - y);
       return;
     }
-    if (bitPerPixel == 12 && (int)w == inputPitch * 8 / 12 &&
+    if (bitPerPixel == 12 && static_cast<int>(w) == inputPitch * 8 / 12 &&
         getHostEndianness() == little) {
       decode12BitRaw<little>(w, h);
       return;
@@ -181,7 +181,8 @@ void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
     BitPumpPlain bits(input);
     w *= cpp;
     for (; y < h; y++) {
-      auto* dest = (ushort16*)&data[offset.x * sizeof(ushort16) + y * outPitch];
+      auto* dest = reinterpret_cast<ushort16*>(
+          &data[offset.x * sizeof(ushort16) + y * outPitch]);
       for (uint32 x = 0; x < w; x++) {
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
@@ -200,12 +201,13 @@ void UncompressedDecompressor::decode8BitRaw(uint32 w, uint32 h) {
   const uchar8* in = input.getData(w * h);
   uint32 random = 0;
   for (uint32 y = 0; y < h; y++) {
-    auto* dest = (ushort16*)&data[y * pitch];
+    auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
     for (uint32 x = 0; x < w; x += 1) {
       if (uncorrectedRawValues)
         dest[x] = *in++;
       else
-        mRaw->setWithLookUp(*in++, (uchar8*)&dest[x], &random);
+        mRaw->setWithLookUp(*in++, reinterpret_cast<uchar8*>(&dest[x]),
+                            &random);
     }
   }
 }
@@ -239,7 +241,7 @@ void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
   uint32 half = (h + 1) >> 1;
   for (uint32 row = 0; row < h; row++) {
     uint32 y = !interlaced ? row : row % half * 2 + row / half;
-    auto* dest = (ushort16*)&data[y * pitch];
+    auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
 
     if (interlaced && y == 1) {
       // The second field starts at a 2048 byte aligment
@@ -291,7 +293,7 @@ void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(uint32 w,
   const uchar8* in = input.getData(w * h * 2);
 
   for (uint32 y = 0; y < h; y++) {
-    auto* dest = (ushort16*)&data[y * pitch];
+    auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
     for (uint32 x = 0; x < w; x += 1) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;
@@ -325,7 +327,7 @@ void UncompressedDecompressor::decodeRawUnpacked(uint32 w, uint32 h) {
   const uchar8* in = input.getData(w * h * 2);
 
   for (uint32 y = 0; y < h; y++) {
-    auto* dest = (ushort16*)&data[y * pitch];
+    auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
     for (uint32 x = 0; x < w; x += 1) {
       uint32 g1 = *in++;
       uint32 g2 = *in++;

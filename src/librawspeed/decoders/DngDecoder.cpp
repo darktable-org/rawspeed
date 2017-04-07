@@ -267,7 +267,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, int compression, uint32 sample_f
     uint32 yPerSlice = raw->hasEntry(ROWSPERSTRIP) ?
           raw->getEntry(ROWSPERSTRIP)->getU32() : mRaw->dim.y;
 
-    if (yPerSlice == 0 || yPerSlice > (uint32)mRaw->dim.y)
+    if (yPerSlice == 0 || yPerSlice > static_cast<uint32>(mRaw->dim.y))
       ThrowRDE("Invalid y per slice");
 
     uint32 offY = 0;
@@ -443,12 +443,12 @@ RawImage DngDecoder::decodeRawInternal() {
     if (false) { // NOLINT else would need preprocessor
       // Test average for bias
       uint32 cw = mRaw->dim.x * mRaw->getCpp();
-      auto *pixels = (ushort16 *)mRaw->getData(0, 500);
+      auto* pixels = reinterpret_cast<ushort16*>(mRaw->getData(0, 500));
       float avg = 0.0f;
       for (uint32 x = 0; x < cw; x++) {
-        avg += (float)pixels[x];
+        avg += static_cast<float>(pixels[x]);
       }
-      printf("Average:%f\n", avg/(float)cw);
+      printf("Average:%f\n", avg / static_cast<float>(cw));
     }
   }
 
@@ -620,7 +620,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) {
     return false;
 
   TiffEntry* black_entry = raw->getEntry(BLACKLEVEL);
-  if ((int)black_entry->count < blackdim.x*blackdim.y)
+  if (static_cast<int>(black_entry->count) < blackdim.x * blackdim.y)
     ThrowRDE("BLACKLEVEL entry is too small");
 
   if (blackdim.x < 2 || blackdim.y < 2) {
@@ -640,26 +640,28 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) {
   // DNG Spec says we must add black in deltav and deltah
   if (raw->hasEntry(BLACKLEVELDELTAV)) {
     TiffEntry *blackleveldeltav = raw->getEntry(BLACKLEVELDELTAV);
-    if ((int)blackleveldeltav->count < mRaw->dim.y)
+    if (static_cast<int>(blackleveldeltav->count) < mRaw->dim.y)
       ThrowRDE("BLACKLEVELDELTAV array is too small");
     float black_sum[2] = {0.0f, 0.0f};
     for (int i = 0; i < mRaw->dim.y; i++)
       black_sum[i&1] += blackleveldeltav->getFloat(i);
 
     for (int i = 0; i < 4; i++)
-      mRaw->blackLevelSeparate[i] += (int)(black_sum[i>>1] / (float)mRaw->dim.y * 2.0f);
+      mRaw->blackLevelSeparate[i] += static_cast<int>(
+          black_sum[i >> 1] / static_cast<float>(mRaw->dim.y) * 2.0f);
   }
 
   if (raw->hasEntry(BLACKLEVELDELTAH)){
     TiffEntry *blackleveldeltah = raw->getEntry(BLACKLEVELDELTAH);
-    if ((int)blackleveldeltah->count < mRaw->dim.x)
+    if (static_cast<int>(blackleveldeltah->count) < mRaw->dim.x)
       ThrowRDE("BLACKLEVELDELTAH array is too small");
     float black_sum[2] = {0.0f, 0.0f};
     for (int i = 0; i < mRaw->dim.x; i++)
       black_sum[i&1] += blackleveldeltah->getFloat(i);
 
     for (int i = 0; i < 4; i++)
-      mRaw->blackLevelSeparate[i] += (int)(black_sum[i&1] / (float)mRaw->dim.x * 2.0f);
+      mRaw->blackLevelSeparate[i] += static_cast<int>(
+          black_sum[i & 1] / static_cast<float>(mRaw->dim.x) * 2.0f);
   }
   return true;
 }

@@ -82,7 +82,7 @@ static string getIdAsString(ByteStream *bytes) {
   for (int i = 0; i < 4; i++)
     id[i] = bytes->getByte();
   id[4] = 0;
-  return string((const char*)id);
+  return string(reinterpret_cast<const char*>(id));
 }
 
 
@@ -246,10 +246,14 @@ static bool ConvertUTF16toUTF8(const UTF16** sourceStart,
       }
     }
     /* Figure out how many bytes the result will require */
-    if (ch < (UTF32)0x80) {      bytesToWrite = 1;
-    } else if (ch < (UTF32)0x800) {     bytesToWrite = 2;
-    } else if (ch < (UTF32)0x10000) {   bytesToWrite = 3;
-    } else if (ch < (UTF32)0x110000) {  bytesToWrite = 4;
+    if (ch < static_cast<UTF32>(0x80)) {
+      bytesToWrite = 1;
+    } else if (ch < static_cast<UTF32>(0x800)) {
+      bytesToWrite = 2;
+    } else if (ch < static_cast<UTF32>(0x10000)) {
+      bytesToWrite = 3;
+    } else if (ch < static_cast<UTF32>(0x110000)) {
+      bytesToWrite = 4;
     } else {                            bytesToWrite = 3;
     ch = UNI_REPLACEMENT_CHAR;
     }
@@ -263,10 +267,10 @@ static bool ConvertUTF16toUTF8(const UTF16** sourceStart,
     }
     assert(bytesToWrite > 0);
     for (int i = bytesToWrite; i > 1; i--) {
-      *--target = (UTF8)((ch | byteMark) & byteMask);
+      *--target = static_cast<UTF8>((ch | byteMark) & byteMask);
       ch >>= 6;
     }
-    *--target = (UTF8)(ch | firstByteMark[bytesToWrite]);
+    *--target = static_cast<UTF8>(ch | firstByteMark[bytesToWrite]);
     target += bytesToWrite;
   }
   // Function modified to retain source + target positions
@@ -277,7 +281,8 @@ static bool ConvertUTF16toUTF8(const UTF16** sourceStart,
 
 string X3fPropertyCollection::getString( ByteStream *bytes ) {
   uint32 max_len = bytes->getRemainSize() / 2;
-  const auto *start = (const UTF16 *)bytes->getData(max_len * 2);
+  const auto* start =
+      reinterpret_cast<const UTF16*>(bytes->getData(max_len * 2));
   const UTF16* src_end = start;
   uint32 i = 0;
   for (; i < max_len && start == src_end; i++) {
@@ -289,7 +294,7 @@ string X3fPropertyCollection::getString( ByteStream *bytes ) {
     auto *dest = new UTF8[i * 4UL + 1];
     memset(dest, 0, i * 4UL + 1);
     if (ConvertUTF16toUTF8(&start, src_end, &dest, &dest[i * 4 - 1])) {
-      string ret((const char*)dest);
+      string ret(reinterpret_cast<const char*>(dest));
       delete[] dest;
       return ret;
     }

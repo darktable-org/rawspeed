@@ -129,23 +129,28 @@ void NikonDecompressor::decompress(RawImage& mRaw, ByteStream&& data,
   uint32 cw = size.x / 2;
   uint32 random = bits.peekBits(24);
   //allow gcc to devirtualize the calls below
-  auto *rawdata = (RawImageDataU16 *)mRaw.get();
-  for (uint32 y = 0; y < (unsigned)size.y; y++) {
+  auto* rawdata = reinterpret_cast<RawImageDataU16*>(mRaw.get());
+  for (uint32 y = 0; y < static_cast<unsigned>(size.y); y++) {
     if (split && y == split) {
       ht = createHuffmanTable(huffSelect + 1);
     }
-    auto *dest = (ushort16 *)&draw[y * pitch]; // Adjust destination
+    auto* dest =
+        reinterpret_cast<ushort16*>(&draw[y * pitch]); // Adjust destination
     pUp1[y&1] += ht.decodeNext(bits);
     pUp2[y&1] += ht.decodeNext(bits);
     pLeft1 = pUp1[y&1];
     pLeft2 = pUp2[y&1];
-    rawdata->setWithLookUp(clampBits(pLeft1,15), (uchar8*)dest++, &random);
-    rawdata->setWithLookUp(clampBits(pLeft2,15), (uchar8*)dest++, &random);
+    rawdata->setWithLookUp(clampBits(pLeft1, 15),
+                           reinterpret_cast<uchar8*>(dest++), &random);
+    rawdata->setWithLookUp(clampBits(pLeft2, 15),
+                           reinterpret_cast<uchar8*>(dest++), &random);
     for (uint32 x = 1; x < cw; x++) {
       pLeft1 += ht.decodeNext(bits);
       pLeft2 += ht.decodeNext(bits);
-      rawdata->setWithLookUp(clampBits(pLeft1,15), (uchar8*)dest++, &random);
-      rawdata->setWithLookUp(clampBits(pLeft2,15), (uchar8*)dest++, &random);
+      rawdata->setWithLookUp(clampBits(pLeft1, 15),
+                             reinterpret_cast<uchar8*>(dest++), &random);
+      rawdata->setWithLookUp(clampBits(pLeft2, 15),
+                             reinterpret_cast<uchar8*>(dest++), &random);
     }
   }
 

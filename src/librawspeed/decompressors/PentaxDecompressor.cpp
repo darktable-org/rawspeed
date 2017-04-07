@@ -48,8 +48,8 @@ void PentaxDecompressor::decompress(RawImage& mRaw, ByteStream&& data,
   HuffmanTable ht;
 
   /* Attempt to read huffman table, if found in makernote */
-  if (root->hasEntryRecursive((TiffTag)0x220)) {
-    TiffEntry *t = root->getEntryRecursive((TiffTag)0x220);
+  if (root->hasEntryRecursive(static_cast<TiffTag>(0x220))) {
+    TiffEntry* t = root->getEntryRecursive(static_cast<TiffTag>(0x220));
     if (t->type == TIFF_UNDEFINED) {
 
       ByteStream stream = t->getData();
@@ -110,7 +110,8 @@ void PentaxDecompressor::decompress(RawImage& mRaw, ByteStream&& data,
   int pLeft2 = 0;
 
   for (uint32 y = 0;y < h;y++) {
-    dest = (ushort16*) & draw[y*mRaw->pitch];  // Adjust destination
+    dest = reinterpret_cast<ushort16*>(
+        &draw[y * mRaw->pitch]); // Adjust destination
     pUp1[y&1] += ht.decodeNext(bs);
     pUp2[y&1] += ht.decodeNext(bs);
     dest[0] = pLeft1 = pUp1[y&1];

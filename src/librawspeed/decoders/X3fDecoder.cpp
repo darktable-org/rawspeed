@@ -68,7 +68,7 @@ string X3fDecoder::getIdAsString(ByteStream *bytes_) {
   for (int i = 0; i < 4; i++)
     id[i] = bytes_->getByte();
   id[4] = 0;
-  return string((const char*)id);
+  return string(reinterpret_cast<const char*>(id));
 }
 
 
@@ -230,18 +230,30 @@ void X3fDecoder::decompressSigma( X3fImage &image )
       int h = planeDim[0].y;
       for (int i = 0; i < 2;  i++) {
         for (int y = 0; y < h; y++) {
-          ushort16* dst = (ushort16*)mRaw->getData(0, y * 2 )+ i;
-          ushort16* dst_down = (ushort16*)mRaw->getData(0, y * 2 + 1) + i;
-          ushort16* blue = (ushort16*)mRaw->getData(0, y * 2) + 2;
-          ushort16* blue_down = (ushort16*)mRaw->getData(0, y * 2 + 1) + 2;
+          ushort16* dst =
+              reinterpret_cast<ushort16*>(mRaw->getData(0, y * 2)) + i;
+          ushort16* dst_down =
+              reinterpret_cast<ushort16*>(mRaw->getData(0, y * 2 + 1)) + i;
+          ushort16* blue =
+              reinterpret_cast<ushort16*>(mRaw->getData(0, y * 2)) + 2;
+          ushort16* blue_down =
+              reinterpret_cast<ushort16*>(mRaw->getData(0, y * 2 + 1)) + 2;
           for (int x = 0; x < w; x++) {
             // Interpolate 1 missing pixel
-            int blue_mid = ((int)blue[0] + (int)blue[3] + (int)blue_down[0] + (int)blue_down[3] + 2)>>2;
+            int blue_mid =
+                (static_cast<int>(blue[0]) + static_cast<int>(blue[3]) +
+                 static_cast<int>(blue_down[0]) +
+                 static_cast<int>(blue_down[3]) + 2) >>
+                2;
             int avg = dst[0];
-            dst[0] = clampBits(((int)blue[0] - blue_mid) + avg, 16);
-            dst[3] = clampBits(((int)blue[3] - blue_mid) + avg, 16);
-            dst_down[0] = clampBits(((int)blue_down[0] - blue_mid) + avg, 16);
-            dst_down[3] = clampBits(((int)blue_down[3] - blue_mid) + avg, 16);
+            dst[0] =
+                clampBits((static_cast<int>(blue[0]) - blue_mid) + avg, 16);
+            dst[3] =
+                clampBits((static_cast<int>(blue[3]) - blue_mid) + avg, 16);
+            dst_down[0] = clampBits(
+                (static_cast<int>(blue_down[0]) - blue_mid) + avg, 16);
+            dst_down[3] = clampBits(
+                (static_cast<int>(blue_down[3]) - blue_mid) + avg, 16);
             dst += 6;
             blue += 6;
             blue_down += 6;
@@ -255,7 +267,7 @@ void X3fDecoder::decompressSigma( X3fImage &image )
 
   if (image.format == 6) {
     for (short &i : curve) {
-      i = (short)input.getU16();
+      i = static_cast<short>(input.getU16());
     }
     max_len = 0;
 
@@ -296,7 +308,8 @@ void X3fDecoder::decompressSigma( X3fImage &image )
       }
     }
     // Load offsets
-    ByteStream i2(mFile, image.dataOffset+image.dataSize-mRaw->dim.y*4, (ByteStream::size_type)mRaw->dim.y*4);
+    ByteStream i2(mFile, image.dataOffset + image.dataSize - mRaw->dim.y * 4,
+                  static_cast<ByteStream::size_type>(mRaw->dim.y) * 4);
     line_offsets = alignedMallocArray<uint32, 16, uint32>(mRaw->dim.y);
     if (!line_offsets)
       ThrowRDE("Memory Allocation failed.");
@@ -336,7 +349,7 @@ void X3fDecoder::createSigmaTable(ByteStream *bytes_, int codes) {
       uint32 val_bits = val>>4;
       if (code_bits + val_bits < 14) {
         uint32 low_pos = 14-code_bits-val_bits;
-        int v = (int)(i>>low_pos)&((1<<val_bits) - 1);
+        int v = (i >> low_pos) & ((1 << val_bits) - 1);
         v = HuffmanTable::signExtended(v, val_bits);
         big_table[i] = (v<<8) | (code_bits+val_bits);
       } else {
@@ -378,7 +391,8 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
       j = pred[i];
 
     for (int y = 0; y < dim.y; y++) {
-      ushort16* dst = (ushort16*)mRaw->getData(0, y << subs) + i;
+      ushort16* dst =
+          reinterpret_cast<ushort16*>(mRaw->getData(0, y << subs)) + i;
       int diff1= SigmaDecode(&bits);
       int diff2 = SigmaDecode(&bits);
       dst[0] = pred_left[0] = pred_up[y & 1] = pred_up[y & 1] + diff1;
@@ -404,7 +418,7 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
     int predictor[3];
     for (uint32 y = t->start_y; y < t->end_y; y++) {
       BitPumpMSB bits(mFile, line_offsets[y]);
-      auto *dst = (ushort16 *)mRaw->getData(0, y);
+      auto* dst = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
       predictor[0] = predictor[1] = predictor[2] = 0;
       for (int x = 0; x < mRaw->dim.x; x++) {
         for (int &i : predictor) {

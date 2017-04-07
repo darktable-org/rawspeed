@@ -197,7 +197,7 @@ string img_hash(RawImage &r) {
       auto* d = r->getDataUncropped(0, j);
       rawspeed::md5::md5_hash(d, r->pitch - r->padding, line_hashes[j]);
     }
-    rawspeed::md5::md5_hash((const uint8_t*)&line_hashes[0],
+    rawspeed::md5::md5_hash(reinterpret_cast<const uint8_t*>(&line_hashes[0]),
                             sizeof(line_hashes[0]) * line_hashes.size(),
                             hash_of_line_hashes);
   }
@@ -227,7 +227,7 @@ void writePPM(const RawImage& raw, const string& fn) {
 
   // Write pixels
   for (int y = 0; y < height; ++y) {
-    auto* row = (unsigned short*)(raw->getData(0, y));
+    auto* row = reinterpret_cast<unsigned short*>(raw->getData(0, y));
     // PPM is big-endian
     for (int x = 0; x < width; ++x)
       row[x] = getU16BE(row + x);
@@ -263,7 +263,7 @@ void writePFM(const RawImage& raw, const string& fn) {
   for (int y = 0; y < height; ++y) {
     // NOTE: pfm has rows in reverse order
     const int row_in = height - 1 - y;
-    auto* row = (float*)(raw->getData(0, row_in));
+    auto* row = reinterpret_cast<float*>(raw->getData(0, row_in));
 
     // PFM can have any endiannes, let's write little-endian
     for (int x = 0; x < width; ++x)

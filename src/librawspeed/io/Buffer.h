@@ -121,7 +121,10 @@ public:
 
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap byte order if required
   template<typename T> inline T get(bool inNativeByteOrder, size_type offset, size_type index = 0) const {
-    return getByteSwapped<T>(getData(offset + index*(size_type)sizeof(T), (size_type)sizeof(T)), !inNativeByteOrder);
+    return getByteSwapped<T>(
+        getData(offset + index * static_cast<size_type>(sizeof(T)),
+                static_cast<size_type>(sizeof(T))),
+        !inNativeByteOrder);
   }
 
   inline size_type getSize() const {
@@ -129,7 +132,8 @@ public:
   }
 
   inline bool isValid(size_type offset, size_type count = 1) const {
-    return (uint64)offset + count <= (uint64)size + BUFFER_PADDING;
+    return static_cast<uint64>(offset) + count <=
+           static_cast<uint64>(size) + BUFFER_PADDING;
   }
 
 //  Buffer* clone();

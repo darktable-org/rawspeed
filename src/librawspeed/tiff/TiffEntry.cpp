@@ -43,11 +43,11 @@ const uint32 TiffEntry::datashifts[] = {0, 0, 0, 1, 2, 3, 0,
 //                                  0-1-2-3-4-5-6-7-8-9-10-11-12-13
 
 TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream& bs) : parent(parent_) {
-  tag = (TiffTag)bs.getU16();
+  tag = static_cast<TiffTag>(bs.getU16());
   const ushort16 numType = bs.getU16();
   if (numType > TIFF_OFFSET)
     ThrowTPE("Error reading TIFF structure. Unknown Type 0x%x encountered.", numType);
-  type = (TiffDataType) numType;
+  type = static_cast<TiffDataType>(numType);
   count = bs.getU32();
 
   // check for count << datashift overflow
@@ -168,18 +168,20 @@ float TiffEntry::getFloat(uint32 index) const {
   case TIFF_DOUBLE: return data.peek<double>(index);
   case TIFF_FLOAT:  return data.peek<float>(index);
   case TIFF_LONG:
-  case TIFF_SHORT:  return (float)getU32(index);
+  case TIFF_SHORT:
+    return static_cast<float>(getU32(index));
   case TIFF_SLONG:
-  case TIFF_SSHORT: return (float)getI32(index);
+  case TIFF_SSHORT:
+    return static_cast<float>(getI32(index));
   case TIFF_RATIONAL: {
     uint32 a = getU32(index*2);
     uint32 b = getU32(index*2+1);
-    return b ? (float) a/b : 0.f;
+    return b ? static_cast<float>(a) / b : 0.f;
   }
   case TIFF_SRATIONAL: {
-    auto a = (int)getU32(index * 2);
-    auto b = (int)getU32(index * 2 + 1);
-    return b ? (float) a/b : 0.f;
+    auto a = static_cast<int>(getU32(index * 2));
+    auto b = static_cast<int>(getU32(index * 2 + 1));
+    return b ? static_cast<float>(a) / b : 0.f;
   }
   default:
     // unreachable

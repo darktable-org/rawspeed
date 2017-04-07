@@ -182,7 +182,7 @@ JpegMarker AbstractLJpegDecompressor::getNextMarker(bool allowskip) {
   if (!(c0 == 0xFF && c1 != 0 && c1 != 0xFF))
     ThrowRDE("(Noskip) Expected marker not found. Propably corrupt file.");
 
-  return (JpegMarker)c1;
+  return static_cast<JpegMarker>(c1);
 }
 
 } // namespace rawspeed

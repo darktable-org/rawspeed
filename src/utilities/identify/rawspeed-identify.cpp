@@ -232,43 +232,46 @@ int main(int argc, char *argv[]) {
 #ifdef _OPENMP
 #pragma omp parallel for default(none) schedule(static) reduction(+ : sum)
 #endif
-      for (size_t k = 0; k < ((size_t)dimUncropped.y * dimUncropped.x * bpp);
+      for (size_t k = 0;
+           k < (static_cast<size_t>(dimUncropped.y) * dimUncropped.x * bpp);
            k++) {
-        sum += (double)data[k];
+        sum += static_cast<double>(data[k]);
       }
     }
     fprintf(stdout, "Image byte sum: %lf\n", sum);
     fprintf(stdout, "Image byte avg: %lf\n",
-            sum / (double)(dimUncropped.y * dimUncropped.x * bpp));
+            sum / static_cast<double>(dimUncropped.y * dimUncropped.x * bpp));
 
     if (r->getDataType() == TYPE_FLOAT32) {
       sum = 0.0f;
-      auto *const data = (float *)r->getDataUncropped(0, 0);
+      auto* const data = reinterpret_cast<float*>(r->getDataUncropped(0, 0));
 
 #ifdef _OPENMP
 #pragma omp parallel for default(none) schedule(static) reduction(+ : sum)
 #endif
-      for (size_t k = 0; k < ((size_t)dimUncropped.y * dimUncropped.x); k++) {
-        sum += (double)data[k];
+      for (size_t k = 0;
+           k < (static_cast<size_t>(dimUncropped.y) * dimUncropped.x); k++) {
+        sum += static_cast<double>(data[k]);
       }
 
       fprintf(stdout, "Image float sum: %lf\n", sum);
       fprintf(stdout, "Image float avg: %lf\n",
-              sum / (double)(dimUncropped.y * dimUncropped.x));
+              sum / static_cast<double>(dimUncropped.y * dimUncropped.x));
     } else if (r->getDataType() == TYPE_USHORT16) {
       sum = 0.0f;
-      auto *const data = (uint16_t *)r->getDataUncropped(0, 0);
+      auto* const data = reinterpret_cast<uint16_t*>(r->getDataUncropped(0, 0));
 
 #ifdef _OPENMP
 #pragma omp parallel for default(none) schedule(static) reduction(+ : sum)
 #endif
-      for (size_t k = 0; k < ((size_t)dimUncropped.y * dimUncropped.x); k++) {
-        sum += (double)data[k];
+      for (size_t k = 0;
+           k < (static_cast<size_t>(dimUncropped.y) * dimUncropped.x); k++) {
+        sum += static_cast<double>(data[k]);
       }
 
       fprintf(stdout, "Image uint16_t sum: %lf\n", sum);
       fprintf(stdout, "Image uint16_t avg: %lf\n",
-              sum / (double)(dimUncropped.y * dimUncropped.x));
+              sum / static_cast<double>(dimUncropped.y * dimUncropped.x));
     }
   } catch (RawspeedException& e) {
     printf("ERROR: [rawspeed] %s\n", e.what());

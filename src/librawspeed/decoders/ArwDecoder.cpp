@@ -100,15 +100,16 @@ RawImage ArwDecoder::decodeRawInternal() {
       static const size_t head_size = 40;
       const uchar8* head_orig = mFile->getData(head_off, head_size);
       vector<uchar8> head(head_size);
-      SonyDecrypt((const uint32*)head_orig, (uint32*)&head[0], 10, key);
+      SonyDecrypt(reinterpret_cast<const uint32*>(head_orig),
+                  reinterpret_cast<uint32*>(&head[0]), 10, key);
       for (int i=26; i-- > 22; )
         key = key << 8 | head[i];
 
       // "Decrypt" the whole image buffer
       auto image_data = mFile->getData(off, len);
       auto image_decoded = Buffer::Create(len);
-      SonyDecrypt((const uint32*)image_data, (uint32*)image_decoded.get(),
-                  len / 4, key);
+      SonyDecrypt(reinterpret_cast<const uint32*>(image_data),
+                  reinterpret_cast<uint32*>(image_decoded.get()), len / 4, key);
 
       Buffer di(move(image_decoded), len);
 
@@ -249,7 +250,7 @@ void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
 
   BitPumpMSB bits(input);
   uchar8* data = mRaw->getData();
-  auto *dest = (ushort16 *)&data[0];
+  auto* dest = reinterpret_cast<ushort16*>(&data[0]);
   uint32 pitch = mRaw->pitch / sizeof(ushort16);
   int sum = 0;
   for (int64 x = w - 1; x >= 0; x--) {
@@ -289,7 +290,7 @@ void ArwDecoder::DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp) {
     const uchar8 *inData = input.getData(input.getRemainSize());
 
     for (uint32 y = 0; y < h; y++) {
-      auto *dest = (ushort16 *)&outData[y * pitch];
+      auto* dest = reinterpret_cast<ushort16*>(&outData[y * pitch]);
       for (uint32 x = 0 ; x < w; x += 2) {
         uint32 g1 = *inData++;
         uint32 g2 = *inData++;
@@ -337,9 +338,9 @@ void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           for(uint32 i=0; i<4; i++)
             tmp[i] = getU16LE(dpd + currpos + 12 + i * 2);
 
-          mRaw->metadata.wbCoeffs[0] = (float) tmp[0];
-          mRaw->metadata.wbCoeffs[1] = (float) tmp[1];
-          mRaw->metadata.wbCoeffs[2] = (float) tmp[3];
+          mRaw->metadata.wbCoeffs[0] = static_cast<float>(tmp[0]);
+          mRaw->metadata.wbCoeffs[1] = static_cast<float>(tmp[1]);
+          mRaw->metadata.wbCoeffs[2] = static_cast<float>(tmp[3]);
           break;
         }
         currpos += max(len + 8, 1u); // max(,1) to make sure we make progress
@@ -419,8 +420,9 @@ void ArwDecoder::GetWB() {
     auto ifd_decoded = Buffer::Create(ifd_size);
     memcpy(ifd_decoded.get(), ifd_crypt.begin(), ifd_size);
 
-    SonyDecrypt((const uint32*)(ifd_crypt.getData(off, len)),
-                (uint32*)(ifd_decoded.get() + off), len / 4, key);
+    SonyDecrypt(reinterpret_cast<const uint32*>(ifd_crypt.getData(off, len)),
+                reinterpret_cast<uint32*>(ifd_decoded.get() + off), len / 4,
+                key);
 
     Buffer decIFD(move(ifd_decoded), ifd_size);
     DataBuffer dbIDD(decIFD, priv->getRootIfdData().isInNativeByteOrder());
@@ -453,7 +455,7 @@ void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
 
   BitPumpPlain bits(in);
   for (uint32 y = t->start_y; y < t->end_y; y++) {
-    auto *dest = (ushort16 *)&data[y * pitch];
+    auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
     // Realign
     bits.setBufferPosition(w*y);
     uint32 random = bits.peekBits(24);
@@ -479,7 +481,8 @@ void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
               p = 0x7ff;
           }
         }
-        mRaw->setWithLookUp(p << 1, (uchar8*)&dest[x+i*2], &random);
+        mRaw->setWithLookUp(p << 1, reinterpret_cast<uchar8*>(&dest[x + i * 2]),
+                            &random);
       }
       x += x & 1 ? 31 : 1;  // Skip to next 32 pixels
     }

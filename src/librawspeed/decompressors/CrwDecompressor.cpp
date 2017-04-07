@@ -228,7 +228,7 @@ void CrwDecompressor::decompress(RawImage& mRaw, rawspeed::Buffer* mFile,
           // new line
           i = 0;
 
-          dest = (ushort16*)mRaw->getData(0, j);
+          dest = reinterpret_cast<ushort16*>(mRaw->getData(0, j));
 
           j++;
           base[0] = base[1] = 512;
@@ -263,7 +263,7 @@ void CrwDecompressor::decompress(RawImage& mRaw, rawspeed::Buffer* mFile,
       uint32 i = 0;
 
       for (uint32 block = 0; block < nBlocks; block++) {
-        auto c = (uint32)lowbitInput.getByte();
+        auto c = static_cast<uint32>(lowbitInput.getByte());
 
         // Process 8 bits in pairs
         for (uint32 r = 0; r < 8; r += 2, i++, dest++) {
@@ -271,7 +271,7 @@ void CrwDecompressor::decompress(RawImage& mRaw, rawspeed::Buffer* mFile,
             // new line
             i = 0;
 
-            dest = (ushort16*)mRaw->getData(0, j);
+            dest = reinterpret_cast<ushort16*>(mRaw->getData(0, j));
 
             j++;
           }

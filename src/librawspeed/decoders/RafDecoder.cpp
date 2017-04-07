@@ -176,11 +176,12 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     rotated->metadata = mRaw->metadata;
     rotated->metadata.fujiRotationPos = rotationPos;
 
-    int dest_pitch = (int)rotated->pitch / 2;
-    auto *dst = (ushort16 *)rotated->getData(0, 0);
+    int dest_pitch = static_cast<int>(rotated->pitch) / 2;
+    auto* dst = reinterpret_cast<ushort16*>(rotated->getData(0, 0));
 
     for (int y = 0; y < new_size.y; y++) {
-      auto *src = (ushort16 *)mRaw->getData(crop_offset.x, crop_offset.y + y);
+      auto* src = reinterpret_cast<ushort16*>(
+          mRaw->getData(crop_offset.x, crop_offset.y + y));
       for (int x = 0; x < new_size.x; x++) {
         int h, w;
         if (alt_layout) { // Swapped x and y

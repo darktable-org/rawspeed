@@ -108,8 +108,8 @@ RawImage Rw2Decoder::decodeRawInternal() {
   else
     raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
 
-  uint32 height = raw->getEntry((TiffTag)3)->getU16();
-  uint32 width = raw->getEntry((TiffTag)2)->getU16();
+  uint32 height = raw->getEntry(static_cast<TiffTag>(3))->getU16();
+  uint32 width = raw->getEntry(static_cast<TiffTag>(2))->getU16();
 
   if (isOldPanasonic) {
     TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
@@ -182,7 +182,7 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
 
   vector<uint32> zero_pos;
   for (y = t->start_y; y < t->end_y; y++) {
-    auto *dest = (ushort16 *)mRaw->getData(0, y);
+    auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
     for (x = 0; x < w; x++) {
       pred[0] = pred[1] = nonz[0] = nonz[1] = 0;
       int u = 0;
@@ -267,10 +267,15 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
                            : mRootIFD->getIFDWithTag(STRIPOFFSETS);
 
   // Read blacklevels
-  if (raw->hasEntry((TiffTag)0x1c) && raw->hasEntry((TiffTag)0x1d) && raw->hasEntry((TiffTag)0x1e)) {
-    const int blackRed = raw->getEntry((TiffTag)0x1c)->getU32() + 15;
-    const int blackGreen = raw->getEntry((TiffTag)0x1d)->getU32() + 15;
-    const int blackBlue = raw->getEntry((TiffTag)0x1e)->getU32() + 15;
+  if (raw->hasEntry(static_cast<TiffTag>(0x1c)) &&
+      raw->hasEntry(static_cast<TiffTag>(0x1d)) &&
+      raw->hasEntry(static_cast<TiffTag>(0x1e))) {
+    const int blackRed =
+        raw->getEntry(static_cast<TiffTag>(0x1c))->getU32() + 15;
+    const int blackGreen =
+        raw->getEntry(static_cast<TiffTag>(0x1d))->getU32() + 15;
+    const int blackBlue =
+        raw->getEntry(static_cast<TiffTag>(0x1e))->getU32() + 15;
 
     for(int i = 0; i < 2; i++) {
       for(int j = 0; j < 2; j++) {
@@ -296,14 +301,22 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 
   // Read WB levels
-  if (raw->hasEntry((TiffTag)0x0024) && raw->hasEntry((TiffTag)0x0025) && raw->hasEntry((TiffTag)0x0026)) {
-    mRaw->metadata.wbCoeffs[0] = (float) raw->getEntry((TiffTag)0x0024)->getU16();
-    mRaw->metadata.wbCoeffs[1] = (float) raw->getEntry((TiffTag)0x0025)->getU16();
-    mRaw->metadata.wbCoeffs[2] = (float) raw->getEntry((TiffTag)0x0026)->getU16();
-  } else if (raw->hasEntry((TiffTag)0x0011) && raw->hasEntry((TiffTag)0x0012)) {
-    mRaw->metadata.wbCoeffs[0] = (float) raw->getEntry((TiffTag)0x0011)->getU16();
+  if (raw->hasEntry(static_cast<TiffTag>(0x0024)) &&
+      raw->hasEntry(static_cast<TiffTag>(0x0025)) &&
+      raw->hasEntry(static_cast<TiffTag>(0x0026))) {
+    mRaw->metadata.wbCoeffs[0] = static_cast<float>(
+        raw->getEntry(static_cast<TiffTag>(0x0024))->getU16());
+    mRaw->metadata.wbCoeffs[1] = static_cast<float>(
+        raw->getEntry(static_cast<TiffTag>(0x0025))->getU16());
+    mRaw->metadata.wbCoeffs[2] = static_cast<float>(
+        raw->getEntry(static_cast<TiffTag>(0x0026))->getU16());
+  } else if (raw->hasEntry(static_cast<TiffTag>(0x0011)) &&
+             raw->hasEntry(static_cast<TiffTag>(0x0012))) {
+    mRaw->metadata.wbCoeffs[0] = static_cast<float>(
+        raw->getEntry(static_cast<TiffTag>(0x0011))->getU16());
     mRaw->metadata.wbCoeffs[1] = 256.0f;
-    mRaw->metadata.wbCoeffs[2] = (float) raw->getEntry((TiffTag)0x0012)->getU16();
+    mRaw->metadata.wbCoeffs[2] = static_cast<float>(
+        raw->getEntry(static_cast<TiffTag>(0x0012))->getU16());
   }
 }
 
@@ -313,7 +326,7 @@ std::string Rw2Decoder::guessMode() {
   if (!mRaw->isAllocated())
     return "";
 
-  ratio = (float)mRaw->dim.x / (float)mRaw->dim.y;
+  ratio = static_cast<float>(mRaw->dim.x) / static_cast<float>(mRaw->dim.y);
 
   float min_diff = fabs(ratio - 16.0f / 9.0f);
   std::string closest_match = "16:9";

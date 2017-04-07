@@ -1,5 +1,5 @@
 ---
-Checks:          '*,-clang-analyzer-*,-clang-diagnostic-*,-cppcoreguidelines-*,-cert-dcl50-cpp,-cert-env33-c,-cert-err58-cpp,-google-default-arguments,-google-readability-casting,-google-readability-todo,-google-runtime-int,-google-runtime-references,-llvm-header-guard,-llvm-include-order,-misc-unused-parameters,-readability-implicit-bool-cast,-readability-inconsistent-declaration-parameter-name,-hicpp-member-init,-hicpp-special-member-functions'
+Checks:          '*,-clang-analyzer-*,-clang-diagnostic-*,-cppcoreguidelines-*,-cert-dcl50-cpp,-cert-env33-c,-cert-err58-cpp,-google-default-arguments,-google-readability-todo,-google-runtime-int,-google-runtime-references,-llvm-header-guard,-llvm-include-order,-misc-unused-parameters,-readability-implicit-bool-cast,-readability-inconsistent-declaration-parameter-name,-hicpp-member-init,-hicpp-special-member-functions'
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
 AnalyzeTemporaryDtors: false

@@ -174,7 +174,7 @@ void MosDecoder::DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32
     int32 pred[2];
     uint32 len[2];
     pred[0] = pred[1] = 0;
-    auto *img = (ushort16 *)mRaw->getData(0, row);
+    auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, row));
     for (uint32 col=0; col < width; col++) {
       if (col >= (width & -8))
         len[0] = len[1] = 14;
@@ -192,7 +192,7 @@ void MosDecoder::DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32
         img[col] = pred[col & 1] = pump.getBits(16);
       else
         img[col] = pred[col & 1] +=
-            (signed)pump.getBits(i) + 1 - (1 << (i - 1));
+            static_cast<signed>(pump.getBits(i)) + 1 - (1 << (i - 1));
     }
   }
 }
@@ -224,9 +224,9 @@ void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         iss >> tmp[0] >> tmp[1] >> tmp[2] >> tmp[3];
         if (!iss.fail() && tmp[0] > 0 && tmp[1] > 0 && tmp[2] > 0 &&
             tmp[3] > 0) {
-          mRaw->metadata.wbCoeffs[0] = (float) tmp[0]/tmp[1];
-          mRaw->metadata.wbCoeffs[1] = (float) tmp[0]/tmp[2];
-          mRaw->metadata.wbCoeffs[2] = (float) tmp[0]/tmp[3];
+          mRaw->metadata.wbCoeffs[0] = static_cast<float>(tmp[0]) / tmp[1];
+          mRaw->metadata.wbCoeffs[1] = static_cast<float>(tmp[0]) / tmp[2];
+          mRaw->metadata.wbCoeffs[2] = static_cast<float>(tmp[0]) / tmp[3];
         }
         break;
       }

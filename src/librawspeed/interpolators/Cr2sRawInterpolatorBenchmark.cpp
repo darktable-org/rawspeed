@@ -42,7 +42,8 @@ using std::sqrt;
 static inline iPoint2D __attribute__((const))
 areaToRectangle(size_t area, iPoint2D aspect = {2, 2}) {
   double sqSide = sqrt(area);
-  double sqARatio = sqrt((double)aspect.x / (double)aspect.y);
+  double sqARatio =
+      sqrt(static_cast<double>(aspect.x) / static_cast<double>(aspect.y));
 
   iPoint2D dim(ceil(sqSide * sqARatio), ceil(sqSide / sqARatio));
 

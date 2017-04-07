@@ -66,10 +66,12 @@ void RawImageDataU16::calculateBlackAreas() {
 
     /* Process horizontal area */
     if (!area.isVertical) {
-      if ((int)area.offset+(int)area.size > uncropped_dim.y)
+      if (static_cast<int>(area.offset) + static_cast<int>(area.size) >
+          uncropped_dim.y)
         ThrowRDE("Offset + size is larger than height of image");
       for (uint32 y = area.offset; y < area.offset+area.size; y++) {
-        auto *pixel = (ushort16 *)getDataUncropped(mOffset.x, y);
+        auto* pixel =
+            reinterpret_cast<ushort16*>(getDataUncropped(mOffset.x, y));
         auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
         for (int x = mOffset.x; x < dim.x+mOffset.x; x++) {
           localhist[((x&1)<<16) + *pixel]++;
@@ -80,10 +82,12 @@ void RawImageDataU16::calculateBlackAreas() {
 
     /* Process vertical area */
     if (area.isVertical) {
-      if ((int)area.offset+(int)area.size > uncropped_dim.x)
+      if (static_cast<int>(area.offset) + static_cast<int>(area.size) >
+          uncropped_dim.x)
         ThrowRDE("Offset + size is larger than width of image");
       for (int y = mOffset.y; y < dim.y+mOffset.y; y++) {
-        auto *pixel = (ushort16 *)getDataUncropped(area.offset, y);
+        auto* pixel =
+            reinterpret_cast<ushort16*>(getDataUncropped(area.offset, y));
         auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
         for (uint32 x = area.offset; x < area.size+area.offset; x++) {
           localhist[((x&1)<<16) + *pixel]++;
@@ -131,10 +135,10 @@ void RawImageDataU16::scaleBlackWhite() {
     int b = 65536;
     int m = 0;
     for (int row = skipBorder; row < (dim.y - skipBorder);row++) {
-      auto *pixel = (ushort16 *)getData(skipBorder, row);
+      auto* pixel = reinterpret_cast<ushort16*>(getData(skipBorder, row));
       for (int col = skipBorder ; col < gw ; col++) {
-        b = min((int)*pixel, b);
-        m = max((int)*pixel, m);
+        b = min(static_cast<int>(*pixel), b);
+        m = max(static_cast<int>(*pixel), m);
         pixel++;
       }
     }
@@ -185,9 +189,9 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   float app_scale = 65535.0f / depth_values;
 
   // Scale in 30.2 fp
-  auto full_scale_fp = (int)(app_scale * 4.0f);
+  auto full_scale_fp = static_cast<int>(app_scale * 4.0f);
   // Half Scale in 18.14 fp
-  auto half_scale_fp = (int)(app_scale * 4095.0f);
+  auto half_scale_fp = static_cast<int>(app_scale * 4095.0f);
 
   __m128i sseround;
   __m128i ssesub2;
@@ -205,10 +209,13 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
 
   uint32 gw = pitch / 16;
   // 10 bit fraction
-  uint32 mul = (int)(1024.0f * 65535.0f /
-                     (float)(whitePoint - blackLevelSeparate[mOffset.x & 1]));
-  mul |= ((int)(1024.0f * 65535.0f /
-                (float)(whitePoint - blackLevelSeparate[(mOffset.x + 1) & 1])))
+  uint32 mul = static_cast<int>(
+      1024.0f * 65535.0f /
+      static_cast<float>(whitePoint - blackLevelSeparate[mOffset.x & 1]));
+  mul |= (static_cast<int>(
+             1024.0f * 65535.0f /
+             static_cast<float>(whitePoint -
+                                blackLevelSeparate[(mOffset.x + 1) & 1])))
          << 16;
   uint32 b = blackLevelSeparate[mOffset.x & 1] |
              (blackLevelSeparate[(mOffset.x + 1) & 1] << 16);
@@ -218,11 +225,13 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
     sub_mul[4 + i] = mul; // Multiply even lines
   }
 
-  mul = (int)(1024.0f * 65535.0f /
-              (float)(whitePoint - blackLevelSeparate[2 + (mOffset.x & 1)]));
-  mul |= ((int)(1024.0f * 65535.0f /
-                (float)(whitePoint -
-                        blackLevelSeparate[2 + ((mOffset.x + 1) & 1)])))
+  mul = static_cast<int>(
+      1024.0f * 65535.0f /
+      static_cast<float>(whitePoint - blackLevelSeparate[2 + (mOffset.x & 1)]));
+  mul |= (static_cast<int>(
+             1024.0f * 65535.0f /
+             static_cast<float>(whitePoint -
+                                blackLevelSeparate[2 + ((mOffset.x + 1) & 1)])))
          << 16;
   b = blackLevelSeparate[2 + (mOffset.x & 1)] |
       (blackLevelSeparate[2 + ((mOffset.x + 1) & 1)] << 16);
@@ -254,14 +263,14 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
     } else {
       sserandom = _mm_setzero_si128();
     }
-    auto* pixel = (__m128i*)&data[(mOffset.y + y) * pitch];
+    auto* pixel = reinterpret_cast<__m128i*>(&data[(mOffset.y + y) * pitch]);
     __m128i ssescale, ssesub;
     if (((y + mOffset.y) & 1) == 0) {
-      ssesub = _mm_load_si128((__m128i*)&sub_mul[0]);
-      ssescale = _mm_load_si128((__m128i*)&sub_mul[4]);
+      ssesub = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[0]));
+      ssescale = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[4]));
     } else {
-      ssesub = _mm_load_si128((__m128i*)&sub_mul[8]);
-      ssescale = _mm_load_si128((__m128i*)&sub_mul[12]);
+      ssesub = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[8]));
+      ssescale = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[12]));
     }
 
     for (uint32 x = 0; x < gw; x++) {
@@ -318,9 +327,9 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
   float app_scale = 65535.0f / depth_values;
 
   // Scale in 30.2 fp
-  auto full_scale_fp = (int)(app_scale * 4.0f);
+  auto full_scale_fp = static_cast<int>(app_scale * 4.0f);
   // Half Scale in 18.14 fp
-  auto half_scale_fp = (int)(app_scale * 4095.0f);
+  auto half_scale_fp = static_cast<int>(app_scale * 4095.0f);
 
   // Not SSE2
   int gw = dim.x * cpp;
@@ -332,13 +341,14 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
       v ^= 1;
     if ((mOffset.y & 1) != 0)
       v ^= 2;
-    mul[i] = (int)(16384.0f * 65535.0f /
-                   (float)(whitePoint - blackLevelSeparate[v]));
+    mul[i] = static_cast<int>(
+        16384.0f * 65535.0f /
+        static_cast<float>(whitePoint - blackLevelSeparate[v]));
     sub[i] = blackLevelSeparate[v];
   }
   for (int y = start_y; y < end_y; y++) {
     int v = dim.x + y * 36969;
-    auto* pixel = (ushort16*)getData(0, y);
+    auto* pixel = reinterpret_cast<ushort16*>(getData(0, y));
     int* mul_local = &mul[2 * (y & 1)];
     int* sub_local = &sub[2 * (y & 1)];
     for (int x = 0; x < gw; x++) {
@@ -376,44 +386,48 @@ void RawImageDataU16::fixBadPixel( uint32 x, uint32 y, int component )
   int step = isCFA ? 2 : 1;
 
   // Find pixel to the left
-  int x_find = (int)x - step;
+  int x_find = static_cast<int>(x) - step;
   int curr = 0;
   while (x_find >= 0 && values[curr] < 0) {
     if (0 == ((bad_line[x_find>>3] >> (x_find&7)) & 1)) {
-      values[curr] = ((ushort16*)getDataUncropped(x_find, y))[component];
-      dist[curr] = (int)x-x_find;
+      values[curr] =
+          (reinterpret_cast<ushort16*>(getDataUncropped(x_find, y)))[component];
+      dist[curr] = static_cast<int>(x) - x_find;
     }
     x_find -= step;
   }
   // Find pixel to the right
-  x_find = (int)x + step;
+  x_find = static_cast<int>(x) + step;
   curr = 1;
   while (x_find < uncropped_dim.x && values[curr] < 0) {
     if (0 == ((bad_line[x_find>>3] >> (x_find&7)) & 1)) {
-      values[curr] = ((ushort16*)getDataUncropped(x_find, y))[component];
-      dist[curr] = x_find-(int)x;
+      values[curr] =
+          (reinterpret_cast<ushort16*>(getDataUncropped(x_find, y)))[component];
+      dist[curr] = x_find - static_cast<int>(x);
     }
     x_find += step;
   }
 
   bad_line = &mBadPixelMap[x>>3];
   // Find pixel upwards
-  int y_find = (int)y - step;
+  int y_find = static_cast<int>(y) - step;
   curr = 2;
   while (y_find >= 0 && values[curr] < 0) {
     if (0 == ((bad_line[y_find*mBadPixelMapPitch] >> (x&7)) & 1)) {
-      values[curr] = ((ushort16*)getDataUncropped(x, y_find))[component];
-      dist[curr] = (int)y-y_find;
+      values[curr] =
+          (reinterpret_cast<ushort16*>(getDataUncropped(x, y_find)))[component];
+      dist[curr] = static_cast<int>(y) - y_find;
     }
     y_find -= step;
   }
   // Find pixel downwards
-  y_find = (int)y + step;
+  y_find = static_cast<int>(y) + step;
   curr = 3;
   while (y_find < uncropped_dim.y && values[curr] < 0) {
     if (0 == ((bad_line[y_find*mBadPixelMapPitch] >> (x&7)) & 1)) {
-      values[curr] = ((ushort16*)getDataUncropped(x, y_find))[component];
-      dist[curr] = y_find-(int)y;
+      values[curr] =
+          (reinterpret_cast<ushort16*>(getDataUncropped(x, y_find)))[component];
+      dist[curr] = y_find - static_cast<int>(y);
     }
     y_find += step;
   }
@@ -442,12 +456,12 @@ void RawImageDataU16::fixBadPixel( uint32 x, uint32 y, int component )
       total_pixel += values[i] * weight[i];
 
   total_pixel >>= total_shifts;
-  auto *pix = (ushort16 *)getDataUncropped(x, y);
+  auto* pix = reinterpret_cast<ushort16*>(getDataUncropped(x, y));
   pix[component] = clampBits(total_pixel, 16);
 
   /* Process other pixels - could be done inline, since we have the weights */
   if (cpp > 1 && component == 0)
-    for (int i = 1; i < (int)cpp; i++)
+    for (int i = 1; i < static_cast<int>(cpp); i++)
       fixBadPixel(x,y,i);
 }
 
@@ -457,10 +471,10 @@ void RawImageDataU16::doLookup( int start_y, int end_y )
   if (table->ntables == 1) {
     if (table->dither) {
       int gw = uncropped_dim.x * cpp;
-      auto *t = (uint32 *)table->getTable(0);
+      auto* t = reinterpret_cast<uint32*>(table->getTable(0));
       for (int y = start_y; y < end_y; y++) {
         uint32 v = (uncropped_dim.x + y * 13) ^ 0x45694584;
-        auto *pixel = (ushort16 *)getDataUncropped(0, y);
+        auto* pixel = reinterpret_cast<ushort16*>(getDataUncropped(0, y));
         for (int x = 0 ; x < gw; x++) {
           ushort16 p = *pixel;
           uint32 lookup = t[p];
@@ -478,7 +492,7 @@ void RawImageDataU16::doLookup( int start_y, int end_y )
     int gw = uncropped_dim.x * cpp;
     ushort16 *t = table->getTable(0);
     for (int y = start_y; y < end_y; y++) {
-      auto *pixel = (ushort16 *)getDataUncropped(0, y);
+      auto* pixel = reinterpret_cast<ushort16*>(getDataUncropped(0, y));
       for (int x = 0 ; x < gw; x++) {
         *pixel = t[*pixel];
         pixel ++;
