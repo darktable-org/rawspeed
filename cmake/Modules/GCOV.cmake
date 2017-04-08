@@ -12,10 +12,15 @@ endif()
 
 find_package(GCov)
 
+set(GCOV_OPTS "-pb")
+
+if(NOT APPLE)
+  set(GCOV_OPTS "--source-prefix \"${CMAKE_SOURCE_DIR}\" ${GCOV_OPTS} -arflu")
+endif()
+
 add_custom_target(
   gcov
-  COMMAND find "${CMAKE_BINARY_DIR}" -type f -name '*.gcov' -exec rm {} + > /dev/null
-  COMMAND find "${CMAKE_BINARY_DIR}" -type f -name '*.gcno' -exec "${GCOV_PATH}" --source-prefix "${CMAKE_SOURCE_DIR}" -abrflpu {} + > /dev/null
+  COMMAND find "${CMAKE_BINARY_DIR}" -type f -name '*.gcno' -exec "${GCOV_PATH}" ${GCOV_OPTS} {} + > /dev/null
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
   COMMENT "Running gcov tool on all the *.gcno files"
 )
