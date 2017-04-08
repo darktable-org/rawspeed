@@ -30,7 +30,7 @@ then
   GENERATOR="$G"
 fi
 
-if [[ "$GENERATOR" == "Unix Makefiles" ]];
+if [ "$GENERATOR" = "Unix Makefiles" ];
 then
   VERBOSE="VERBOSE=1";
   KEEPGOING="-k"
