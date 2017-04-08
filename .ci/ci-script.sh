@@ -23,6 +23,16 @@ target_build()
 
   ctest --output-on-failure || ctest --rerun-failed -V -VV
 
+  case "$FLAVOR" in
+  "Coverage")
+    cmake --build "$BUILD_DIR" -- --target gcov
+    mkdir "$BUILD_DIR/gcov-reports-unittest"
+    find "$BUILD_DIR" -type f -name '*.gcov' -exec mv -t "$BUILD_DIR/gcov-reports-unittest" {} + > /dev/null
+    ;;
+  *)
+    ;;
+  esac
+
   # and now check that it installs where told and only there.
   cmake --build "$BUILD_DIR" --target install -- $MAKEFLAGS || cmake --build "$BUILD_DIR" --target install -- -j1 -v -k0
 }
@@ -37,6 +47,7 @@ CMAKE_BUILD_TYPE="RelWithDebInfo"
 case "$FLAVOR" in
   "Coverage")
     CMAKE_BUILD_TYPE="Coverage"
+    G="Unix Makefiles"
     ;;
   *)
     ;;
