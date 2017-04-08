@@ -15,7 +15,8 @@ find_package(GCov)
 set(GCOV_OPTS "-pb")
 
 if(NOT APPLE)
-  set(GCOV_OPTS --source-prefix "${CMAKE_SOURCE_DIR}" ${GCOV_OPTS} -arflu)
+  # DONT elide source prefix.
+  set(GCOV_OPTS ${GCOV_OPTS} -aflu)
 endif()
 
 add_custom_target(
