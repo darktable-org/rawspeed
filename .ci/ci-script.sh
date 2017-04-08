@@ -54,7 +54,7 @@ target_build()
 
 handle_coverage_data()
 {
-  cmake --build "$BUILD_DIR" -- --target gcov
+  cmake --build "$BUILD_DIR" --target gcov
   mkdir "$BUILD_DIR/gcov-reports-unittest"
   find "$BUILD_DIR" -type f -name '*.gcov' -exec mv -t "$BUILD_DIR/gcov-reports-unittest" {} + > /dev/null
 }
