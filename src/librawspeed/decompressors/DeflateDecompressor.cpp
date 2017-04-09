@@ -189,10 +189,10 @@ static inline void expandFP24(unsigned char* dst, int width) {
 
 void DeflateDecompressor::decode(unsigned char** uBuffer, int width, int height,
                                  uint32 offX, uint32 offY) {
-  uLongf dstLen = width * height * 4UL;
+  uLongf dstLen = sizeof(float) * width * height;
 
   if (!*uBuffer)
-    *uBuffer = new unsigned char[sizeof(float) * width * height];
+    *uBuffer = new unsigned char[dstLen];
 
   const auto cSize = input.getRemainSize();
   const unsigned char* cBuffer = input.getData(cSize);
