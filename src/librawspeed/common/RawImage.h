@@ -262,19 +262,21 @@ inline RawImage RawImage::create(RawImageType type)  {
       return RawImage(new RawImageDataFloat());
     default:
       writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!");
+      __builtin_unreachable();
+
   }
-  return RawImage(nullptr);
 }
 
-inline RawImage RawImage::create(const iPoint2D &dim, RawImageType type,
-                                 uint32 componentsPerPixel) {
+inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type, uint32 componentsPerPixel) {
   switch (type) {
-    case TYPE_USHORT16:
-      return RawImage(new RawImageDataU16(dim, componentsPerPixel));
-    default:
-      writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!");
+  case TYPE_USHORT16:
+    return RawImage(new RawImageDataU16(dim, componentsPerPixel));
+  case TYPE_FLOAT32:
+    return RawImage(new RawImageDataFloat(dim, componentsPerPixel));
+  default:
+    writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!");
+    __builtin_unreachable();
   }
-  return RawImage(nullptr);
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,
