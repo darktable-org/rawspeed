@@ -19,41 +19,21 @@
 */
 
 #include "interpolators/Cr2sRawInterpolator.h" // for Cr2sRawInterpolator
+#include "benchmark/Common.h"                  // for areaToRectangle
 #include "common/Common.h"                     // for roundUp, ushort16
 #include "common/Point.h"                      // for iPoint2D
 #include "common/RawImage.h"                   // for RawImage, ImageMetaData
 #include <array>                               // for array
-#include <benchmark/benchmark_api.h>           // for State, Benchmark, BEN...
-#include <cassert>                             // for assert
-#include <cmath>                               // for ceil, sqrt
-#include <cstddef>                             // for size_t
+#include <benchmark/benchmark_api.h>           // for Benchmark, State, BEN...
 #include <type_traits>                         // for integral_constant
 
 using rawspeed::Cr2sRawInterpolator;
 using rawspeed::RawImage;
 using rawspeed::TYPE_USHORT16;
 using rawspeed::iPoint2D;
-using rawspeed::roundUp;
 using rawspeed::ushort16;
 using std::array;
 using std::integral_constant;
-using std::sqrt;
-
-static inline iPoint2D __attribute__((const))
-areaToRectangle(size_t area, iPoint2D aspect = {2, 2}) {
-  double sqSide = sqrt(area);
-  double sqARatio =
-      sqrt(static_cast<double>(aspect.x) / static_cast<double>(aspect.y));
-
-  iPoint2D dim(ceil(sqSide * sqARatio), ceil(sqSide / sqARatio));
-
-  dim.x = roundUp(dim.x, aspect.x);
-  dim.y = roundUp(dim.y, aspect.y);
-
-  assert(dim.area() >= area);
-
-  return dim;
-}
 
 template <int N> using v = integral_constant<int, N>;
 

@@ -1,6 +1,7 @@
 add_custom_target(benchmarks ALL)
 
 FILE(GLOB RAWSPEED_BENCH_SOURCES
+  "../benchmark/Common.cpp"
   "../test/RawSpeed.cpp"
 )
 
