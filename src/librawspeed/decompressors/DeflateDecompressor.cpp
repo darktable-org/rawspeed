@@ -199,7 +199,7 @@ void DeflateDecompressor::decode(unsigned char** uBuffer, int width, int height,
 
   int err = uncompress(*uBuffer, &dstLen, cBuffer, cSize);
   if (err != Z_OK) {
-    ThrowRDE("failed to uncompress tile: %d", err);
+    ThrowRDE("failed to uncompress tile: %d (%s)", err, zError(err));
   }
 
   int predFactor = 0;
@@ -231,8 +231,10 @@ void DeflateDecompressor::decode(unsigned char** uBuffer, int width, int height,
     unsigned char* dst =
         static_cast<unsigned char*>(mRaw->getData()) +
         ((offY + row) * mRaw->pitch + offX * sizeof(float) * mRaw->getCpp());
+
     if (predFactor)
       decodeFPDeltaRow(src, dst, thisTileWidth, width, bytesps, predFactor);
+
     switch (bytesps) {
     case 2:
       expandFP16(dst, thisTileWidth);

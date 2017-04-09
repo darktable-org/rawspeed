@@ -27,6 +27,13 @@ FILE(GLOB RAWSPEED_BENCHMARKS_SOURCES
   "../interpolators/Cr2sRawInterpolatorBenchmark.cpp"
 )
 
+if(HAVE_ZLIB)
+  FILE(GLOB RAWSPEED_BENCHMARKS_SOURCES
+    ${RAWSPEED_BENCHMARKS_SOURCES}
+    "../decompressors/DeflateDecompressorBenchmark.cpp"
+  )
+endif()
+
 foreach(IN ${RAWSPEED_BENCHMARKS_SOURCES})
   get_filename_component(BENCHNAME ${IN} NAME_WE)
   add_executable(${BENCHNAME} ${IN})
