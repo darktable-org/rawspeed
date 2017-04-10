@@ -29,11 +29,8 @@
 #include "io/Endianness.h"                // for getHostEndianness, Endiann...
 #include <cassert>                        // for assert
 #include <cstdio>                         // for size_t
-
-extern "C" {
 #include <zlib.h>
 // IWYU pragma: no_include <zconf.h>
-}
 
 namespace rawspeed {
 

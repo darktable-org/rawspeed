@@ -24,6 +24,7 @@
 #ifdef HAVE_JPEG
 
 #include "decompressors/JpegDecompressor.h"
+
 #include "common/Common.h"                // for uchar8, uint32, ushort16
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D
@@ -31,18 +32,15 @@
 #include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for min
 #include <cstdio>                         // for size_t
+#include <jpeglib.h>                      // for jpeg
 #include <memory>                         // for unique_ptr
 #include <vector>                         // for vector
+// IWYU pragma: no_include <jconfig.h>
+// IWYU pragma: no_include <jmorecfg.h>
 
 #ifndef HAVE_JPEG_MEM_SRC
 #include "io/IOException.h" // for ThrowIOE
 #endif
-
-extern "C" {
-#include <jpeglib.h> // for jpeg_source_mgr, jpeg_decompress_struct
-// IWYU pragma: no_include <jconfig.h>
-// IWYU pragma: no_include <jmorecfg.h>
-}
 
 using std::vector;
 using std::unique_ptr;

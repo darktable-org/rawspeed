@@ -31,15 +31,12 @@
 #include <cstddef>                             // for size_t
 #include <memory>                              // for unique_ptr
 #include <type_traits>                         // for integral_constant
+#include <zlib.h>
+// IWYU pragma: no_include <zconf.h>
 
 #ifndef NDEBUG
 #include <limits> // for numeric_limits
 #endif
-
-extern "C" {
-#include <zlib.h>
-// IWYU pragma: no_include <zconf.h>
-}
 
 using rawspeed::Buffer;
 using rawspeed::DeflateDecompressor;
