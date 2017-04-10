@@ -82,7 +82,8 @@ RawImage RafDecoder::decodeRawInternal() {
     bps = raw->getEntry(FUJI_BITSPERSAMPLE)->getU32();
 
   // x-trans sensors report 14bpp, but data isn't packed so read as 16bpp
-  if (bps == 14) bps = 16;
+  if (bps == 14)
+    bps = 16;
 
   // Some fuji SuperCCD cameras include a second raw image next to the first one
   // that is identical but darker to the first. The two combined can produce

@@ -98,14 +98,27 @@ RawImage MosDecoder::decodeRawInternal() {
       // uint32 len  = getU32LE(insideTiff + offset + pos + 8);
       uint32 data = getU32LE(insideTiff + offset + pos + 12);
       pos += 16;
-      switch(tag) {
-      case 0x107: wb_offset    = data+base;      break;
-      case 0x108: width        = data;      break;
-      case 0x109: height       = data;      break;
-      case 0x10f: data_offset  = data+base; break;
-      case 0x21c: strip_offset = data+base; break;
-      case 0x21d: black_level  = data>>2;   break;
-      default: break;
+      switch (tag) {
+      case 0x107:
+        wb_offset = data + base;
+        break;
+      case 0x108:
+        width = data;
+        break;
+      case 0x109:
+        height = data;
+        break;
+      case 0x10f:
+        data_offset = data + base;
+        break;
+      case 0x21c:
+        strip_offset = data + base;
+        break;
+      case 0x21d:
+        black_level = data >> 2;
+        break;
+      default:
+        break;
       }
     }
     if (width <= 0 || height <= 0)

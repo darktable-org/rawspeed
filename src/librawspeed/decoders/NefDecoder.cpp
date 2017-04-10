@@ -133,7 +133,9 @@ bool NefDecoder::D100IsCompressed(uint32 offset) {
   int i;
 
   for (i = 15; i < 256; i += 16)
-    if (test[i]) return true;
+    if (test[i])
+      return true;
+
   return false;
 }
 
@@ -679,16 +681,24 @@ ushort16* NefDecoder::gammaCurve(double pwr, double ts, int mode, int imax) {
   if (g[1] && (g[1]-1)*(g[0]-1) <= 0) {
     for (i=0; i < 48; i++) {
       g[2] = (bnd[0] + bnd[1])/2;
-      if (g[0]) bnd[(pow(g[2]/g[1],-g[0]) - 1)/g[0] - 1/g[2] > -1] = g[2];
-      else	bnd[g[2]/exp(1-1/g[2]) < g[1]] = g[2];
+      if (g[0])
+        bnd[(pow(g[2] / g[1], -g[0]) - 1) / g[0] - 1 / g[2] > -1] = g[2];
+      else
+        bnd[g[2] / exp(1 - 1 / g[2]) < g[1]] = g[2];
     }
     g[3] = g[2] / g[1];
-    if (g[0]) g[4] = g[2] * (1/g[0] - 1);
+    if (g[0])
+      g[4] = g[2] * (1 / g[0] - 1);
   }
-  if (g[0]) g[5] = 1 / (g[1]*SQR(g[3])/2 - g[4]*(1 - g[3]) +
-    (1 - pow(g[3],1+g[0]))*(1 + g[4])/(1 + g[0])) - 1;
-  else g[5] = 1 / (g[1]*SQR(g[3])/2 + 1
-    - g[2] - g[3] - g[2]*g[3]*(log(g[3]) - 1)) - 1;
+  if (g[0]) {
+    g[5] = 1 / (g[1] * SQR(g[3]) / 2 - g[4] * (1 - g[3]) +
+                (1 - pow(g[3], 1 + g[0])) * (1 + g[4]) / (1 + g[0])) -
+           1;
+  } else {
+    g[5] = 1 / (g[1] * SQR(g[3]) / 2 + 1 - g[2] - g[3] -
+                g[2] * g[3] * (log(g[3]) - 1)) -
+           1;
+  }
 
   if (!mode--)
     ThrowRDE("Unimplemented mode");

@@ -78,8 +78,10 @@ void NikonDecompressor::decompress(RawImage& mRaw, ByteStream&& data,
   if (v0 == 73 || v1 == 88)
     metadata.skipBytes(2110);
 
-  if (v0 == 70) huffSelect = 2;
-  if (bitsPS == 14) huffSelect += 3;
+  if (v0 == 70)
+    huffSelect = 2;
+  if (bitsPS == 14)
+    huffSelect += 3;
 
   pUp1[0] = metadata.getU16();
   pUp1[1] = metadata.getU16();

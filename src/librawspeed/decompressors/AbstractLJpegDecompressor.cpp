@@ -41,13 +41,19 @@ void AbstractLJpegDecompressor::decode() {
     m = getNextMarker(true);
 
     switch (m) {
-    case M_DHT:  parseDHT(); break;
-    case M_SOF3: parseSOF(&frame); break;
-    case M_SOS:  parseSOS(); break;
+    case M_DHT:
+      parseDHT();
+      break;
+    case M_SOF3:
+      parseSOF(&frame);
+      break;
+    case M_SOS:
+      parseSOS();
+      break;
     case M_DQT:
       ThrowRDE("Not a valid RAW file.");
       break;
-    default:  // Just let it skip to next marker
+    default: // Just let it skip to next marker
       break;
     }
   } while (m != M_EOI);

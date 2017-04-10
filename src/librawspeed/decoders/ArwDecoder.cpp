@@ -256,16 +256,26 @@ void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
   for (int64 x = w - 1; x >= 0; x--) {
     for (uint32 y = 0; y < h + 1; y += 2) {
       bits.fill();
-      if (y == h) y = 1;
+
+      if (y == h)
+        y = 1;
+
       uint32 len = 4 - bits.getBitsNoFill(2);
-      if (len == 3 && bits.getBitsNoFill(1)) len = 0;
+
+      if (len == 3 && bits.getBitsNoFill(1))
+        len = 0;
+
       if (len == 4)
-        while (len < 17 && !bits.getBitsNoFill(1)) len++;
+        while (len < 17 && !bits.getBitsNoFill(1))
+          len++;
+
       int diff = bits.getBits(len);
       diff = len ? HuffmanTable::signExtended(diff, len) : diff;
       sum += diff;
       assert(!(sum >> 12));
-      if (y < h) dest[x+y*pitch] = sum;
+
+      if (y < h)
+        dest[x + y * pitch] = sum;
     }
   }
 }
