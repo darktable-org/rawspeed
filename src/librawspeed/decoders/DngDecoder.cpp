@@ -135,9 +135,8 @@ void DngDecoder::dropUnsuportedChunks(vector<const TiffIFD*>& data) {
 void DngDecoder::parseCFA(const TiffIFD* raw) {
 
   // Check if layout is OK, if present
-  if (raw->hasEntry(CFALAYOUT))
-    if (raw->getEntry(CFALAYOUT)->getU16() != 1)
-      ThrowRDE("Unsupported CFA Layout.");
+  if (raw->hasEntry(CFALAYOUT) && raw->getEntry(CFALAYOUT)->getU16() != 1)
+    ThrowRDE("Unsupported CFA Layout.");
 
   TiffEntry* cfadim = raw->getEntry(CFAREPEATPATTERNDIM);
   if (cfadim->count != 2)
@@ -381,11 +380,11 @@ RawImage DngDecoder::decodeRawInternal() {
       ThrowRDE("active area has %d values instead of 4", active_area->count);
 
     auto corners = active_area->getU32Array(4);
-    if (iPoint2D(corners[1], corners[0]).isThisInside(mRaw->dim)) {
-      if (iPoint2D(corners[3], corners[2]).isThisInside(mRaw->dim)) {
-        iRectangle2D crop(corners[1], corners[0], corners[3] - corners[1], corners[2] - corners[0]);
-        mRaw->subFrame(crop);
-      }
+    if (iPoint2D(corners[1], corners[0]).isThisInside(mRaw->dim) &&
+        iPoint2D(corners[3], corners[2]).isThisInside(mRaw->dim)) {
+      iRectangle2D crop(corners[1], corners[0], corners[3] - corners[1],
+                        corners[2] - corners[0]);
+      mRaw->subFrame(crop);
     }
   }
 
@@ -415,17 +414,14 @@ RawImage DngDecoder::decodeRawInternal() {
     ThrowRDE("No image left after crop");
 
   // Apply stage 1 opcodes
-  if (applyStage1DngOpcodes) {
-    if (raw->hasEntry(OPCODELIST1))
-    {
-      // Apply stage 1 codes
-      try{
-        DngOpcodes codes(raw->getEntry(OPCODELIST1));
-        codes.applyOpCodes(mRaw);
-      } catch (RawDecoderException &e) {
-        // We push back errors from the opcode parser, since the image may still be usable
-        mRaw->setError(e.what());
-      }
+  if (applyStage1DngOpcodes && raw->hasEntry(OPCODELIST1)) {
+    try {
+      DngOpcodes codes(raw->getEntry(OPCODELIST1));
+      codes.applyOpCodes(mRaw);
+    } catch (RawDecoderException& e) {
+      // We push back errors from the opcode parser, since the image may still
+      // be usable
+      mRaw->setError(e.what());
     }
   }
 
@@ -464,24 +460,25 @@ RawImage DngDecoder::decodeRawInternal() {
   setBlack(raw);
 
   // Apply opcodes to lossy DNG
-  if (compression == 0x884c && !uncorrectedRawValues) {
-    if (raw->hasEntry(OPCODELIST2))
-    {
-      // We must apply black/white scaling
-      mRaw->scaleBlackWhite();
-      // Apply stage 2 codes
-      try{
-        DngOpcodes codes(raw->getEntry(OPCODELIST2));
-        codes.applyOpCodes(mRaw);
-      } catch (RawDecoderException &e) {
-        // We push back errors from the opcode parser, since the image may still be usable
-        mRaw->setError(e.what());
-      }
-      mRaw->blackAreas.clear();
-      mRaw->blackLevel = 0;
-      mRaw->blackLevelSeparate[0] = mRaw->blackLevelSeparate[1] = mRaw->blackLevelSeparate[2] = mRaw->blackLevelSeparate[3] = 0;
-      mRaw->whitePoint = 65535;
+  if (compression == 0x884c && !uncorrectedRawValues &&
+      raw->hasEntry(OPCODELIST2)) {
+    // We must apply black/white scaling
+    mRaw->scaleBlackWhite();
+
+    // Apply stage 2 codes
+    try {
+      DngOpcodes codes(raw->getEntry(OPCODELIST2));
+      codes.applyOpCodes(mRaw);
+    } catch (RawDecoderException& e) {
+      // We push back errors from the opcode parser, since the image may still
+      // be usable
+      mRaw->setError(e.what());
     }
+    mRaw->blackAreas.clear();
+    mRaw->blackLevel = 0;
+    mRaw->blackLevelSeparate[0] = mRaw->blackLevelSeparate[1] =
+        mRaw->blackLevelSeparate[2] = mRaw->blackLevelSeparate[3] = 0;
+    mRaw->whitePoint = 65535;
   }
 
   return mRaw;
@@ -668,9 +665,8 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) {
 
 void DngDecoder::setBlack(const TiffIFD* raw) {
 
-  if (raw->hasEntry(MASKEDAREAS))
-    if (decodeMaskedAreas(raw))
-      return;
+  if (raw->hasEntry(MASKEDAREAS) && decodeMaskedAreas(raw))
+    return;
 
   // Black defaults to 0
   memset(mRaw->blackLevelSeparate,0,sizeof(mRaw->blackLevelSeparate));

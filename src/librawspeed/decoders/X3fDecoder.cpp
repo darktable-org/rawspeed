@@ -86,15 +86,13 @@ RawImage X3fDecoder::decodeRawInternal()
 }
 
 void X3fDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
-  if (readName()) {
-    if (checkCameraSupported(meta, camera_make, camera_model, "" )) {
-      int iso = 0;
-      if (hasProp("ISO")) {
-        std::istringstream iss(getProp("ISO"));
-        iss >> iso;
-      }
-      setMetaData(meta, camera_make, camera_model, "", iso);
+  if (readName() && checkCameraSupported(meta, camera_make, camera_model, "")) {
+    int iso = 0;
+    if (hasProp("ISO")) {
+      std::istringstream iss(getProp("ISO"));
+      iss >> iso;
     }
+    setMetaData(meta, camera_make, camera_model, "", iso);
   }
 }
 
@@ -157,10 +155,9 @@ void X3fDecoder::checkSupportInternal(const CameraMetaData* meta) {
   auto img = mImages.begin();
   for (; img !=  mImages.end(); ++img) {
     X3fImage cimg = *img;
-    if (cimg.type == 1 || cimg.type == 3) {
-      if (cimg.format == 30 || cimg.format == 35)
-        return;
-    }
+    if ((cimg.type == 1 || cimg.type == 3) &&
+        (cimg.format == 30 || cimg.format == 35))
+      return;
   }
   ThrowRDE("Unable to determine camera name.");
 }
