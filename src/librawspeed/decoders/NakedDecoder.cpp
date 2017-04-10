@@ -52,7 +52,7 @@ void NakedDecoder::parseHints() {
   const auto& make = cam->make.c_str();
   const auto& model = cam->model.c_str();
 
-  auto parseHint = [&cHints, &make, &model](const string& name) -> uint32 {
+  auto parseHint = [&cHints, &make, &model](const string& name) {
     if (!cHints.has(name))
       ThrowRDE("%s %s: couldn't find %s", make, model, name.c_str());
 
