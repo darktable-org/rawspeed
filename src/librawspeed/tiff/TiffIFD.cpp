@@ -67,11 +67,8 @@ void TiffIFD::parseIFDEntry(ByteStream& bs) {
     case FUJI_RAW_IFD:
     case SUBIFDS:
     case EXIFIFDPOINTER:
-      for (uint32 j = 0; j < t->count; j++) {
+      for (uint32 j = 0; j < t->count; j++)
         add(make_unique<TiffIFD>(this, bs, t->getU32(j)));
-        // if (getSubIFDs().back()->getNextIFD() != 0)
-        //   cerr << "detected chained subIFds" << endl;
-      }
       break;
 
     default:
