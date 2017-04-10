@@ -92,6 +92,8 @@ std::string img_hash(rawspeed::RawImage& r);
 void writePPM(const rawspeed::RawImage& raw, const std::string& fn);
 void writePFM(const rawspeed::RawImage& raw, const std::string& fn);
 
+md5::md5_state imgDataHash(const rawspeed::RawImage& raw);
+
 void writeImage(const rawspeed::RawImage& raw, const std::string& fn);
 
 size_t process(const std::string& filename,
@@ -116,6 +118,27 @@ struct Timer {
     return ms;
   }
 };
+
+// yes, this is not cool. but i see no way to compute the hash of the
+// full image, without duplicating image, and copying excluding padding
+md5::md5_state imgDataHash(const RawImage& raw) {
+  md5::md5_state ret = md5::md5_init;
+
+  const iPoint2D dimUncropped = raw->getUncroppedDim();
+
+  vector<md5::md5_state> line_hashes;
+  line_hashes.resize(dimUncropped.y, md5::md5_init);
+
+  for (int j = 0; j < dimUncropped.y; j++) {
+    auto* d = raw->getDataUncropped(0, j);
+    md5::md5_hash(d, raw->pitch - raw->padding, line_hashes[j]);
+  }
+
+  md5::md5_hash(reinterpret_cast<const uint8_t*>(&line_hashes[0]),
+                sizeof(line_hashes[0]) * line_hashes.size(), ret);
+
+  return ret;
+}
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -186,22 +209,7 @@ string img_hash(RawImage &r) {
 
   APPEND("\n");
 
-
-  // yes, this is not cool. but i see no way to compute the hash of the
-  // full image, without duplicating image, and copying excluding padding
-  rawspeed::md5::md5_state hash_of_line_hashes = rawspeed::md5::md5_init;
-  {
-    vector<rawspeed::md5::md5_state> line_hashes;
-    line_hashes.resize(dimUncropped.y, rawspeed::md5::md5_init);
-    for (int j = 0; j < dimUncropped.y; j++) {
-      auto* d = r->getDataUncropped(0, j);
-      rawspeed::md5::md5_hash(d, r->pitch - r->padding, line_hashes[j]);
-    }
-    rawspeed::md5::md5_hash(reinterpret_cast<const uint8_t*>(&line_hashes[0]),
-                            sizeof(line_hashes[0]) * line_hashes.size(),
-                            hash_of_line_hashes);
-  }
-
+  rawspeed::md5::md5_state hash_of_line_hashes = imgDataHash(r);
   APPEND("md5sum of per-line md5sums: %s\n",
          rawspeed::md5::hash_to_string(hash_of_line_hashes).c_str());
 
