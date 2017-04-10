@@ -39,7 +39,6 @@ public:
                       int predictor_, int bps_)
       : input(data, offset, size), mRaw(img), predictor(predictor_), bps(bps_) {
   }
-  virtual ~DeflateDecompressor() = default;
 
   void decode(unsigned char** uBuffer, int width, int height, uint32 offX,
               uint32 offY);

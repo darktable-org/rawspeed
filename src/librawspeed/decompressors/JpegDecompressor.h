@@ -41,7 +41,6 @@ public:
   JpegDecompressor(const Buffer& data, Buffer::size_type offset,
                    const RawImage& img)
       : JpegDecompressor(data, offset, data.getSize() - offset, img) {}
-  virtual ~JpegDecompressor() = default;
 
   void decode(uint32 offsetX, uint32 offsetY);
 
