@@ -31,12 +31,15 @@ class Buffer;
 
 class RawDecoder;
 
+class CameraMetaData;
+
 class CiffParser final : public RawParser {
 public:
   explicit CiffParser(Buffer* input);
 
   void parseData();
-  RawDecoder* getDecoder();
+  RawDecoder* getDecoder(const CameraMetaData* meta = nullptr) override;
+
   /* Returns the Root IFD - this object still retains ownership */
   CiffIFD* RootIFD() const { return mRootIFD.get(); }
   /* Merges root of other CIFF into this - clears the root of the other */

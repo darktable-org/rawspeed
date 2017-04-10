@@ -115,8 +115,7 @@ void X3fParser::readDirectory()
   }
 }
 
-RawDecoder* X3fParser::getDecoder()
-{
+RawDecoder* X3fParser::getDecoder(const CameraMetaData* meta) {
   if (nullptr == decoder)
     ThrowRDE("No decoder found!");
   RawDecoder *ret = decoder;

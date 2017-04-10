@@ -53,7 +53,7 @@ void CiffParser::parseData() {
   mRootIFD = make_unique<CiffIFD>(nullptr, mInput, data[2], mInput->getSize());
 }
 
-RawDecoder* CiffParser::getDecoder() {
+RawDecoder* CiffParser::getDecoder(const CameraMetaData* meta) {
   if (!mRootIFD)
     parseData();
 

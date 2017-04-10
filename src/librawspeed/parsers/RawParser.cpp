@@ -69,7 +69,7 @@ RawDecoder* RawParser::getDecoder(const CameraMetaData* meta) {
   if (RafDecoder::isRAF(mInput)) {
     try {
       FiffParser p(mInput);
-      return p.getDecoder();
+      return p.getDecoder(meta);
     } catch (FiffParserException&) {
     }
   }
@@ -82,7 +82,7 @@ RawDecoder* RawParser::getDecoder(const CameraMetaData* meta) {
 
   try {
     X3fParser parser(mInput);
-    return parser.getDecoder();
+    return parser.getDecoder(meta);
   } catch (RawDecoderException &) {
   }
 
@@ -90,7 +90,7 @@ RawDecoder* RawParser::getDecoder(const CameraMetaData* meta) {
   try {
     CiffParser p(mInput);
     p.parseData();
-    return p.getDecoder();
+    return p.getDecoder(meta);
   } catch (CiffParserException &) {
   }
 

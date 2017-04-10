@@ -33,6 +33,8 @@ class ByteStream;
 
 class RawDecoder;
 
+class CameraMetaData;
+
 class X3fDecoder;
 
 class X3fDirectory
@@ -80,7 +82,7 @@ class X3fParser final : public RawParser {
 public:
   explicit X3fParser(Buffer* file);
   ~X3fParser();
-  RawDecoder* getDecoder();
+  RawDecoder* getDecoder(const CameraMetaData* meta = nullptr) override;
 
 protected:
   void readDirectory();

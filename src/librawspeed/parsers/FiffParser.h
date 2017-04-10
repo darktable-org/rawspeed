@@ -28,11 +28,13 @@ class Buffer;
 
 class RawDecoder;
 
+class CameraMetaData;
+
 class FiffParser final : public RawParser {
 public:
   explicit FiffParser(Buffer* input);
 
-  virtual RawDecoder* getDecoder();
+  RawDecoder* getDecoder(const CameraMetaData* meta = nullptr) override;
 };
 
 } // namespace rawspeed

@@ -43,7 +43,7 @@ class RawDecoder;
 
 FiffParser::FiffParser(Buffer* inputData) : RawParser(inputData) {}
 
-RawDecoder* FiffParser::getDecoder() {
+RawDecoder* FiffParser::getDecoder(const CameraMetaData* meta) {
   const uchar8* data = mInput->getData(0, 104);
 
   uint32 first_ifd = getU32BE(data + 0x54);
