@@ -48,7 +48,7 @@ public:
   void checkSupportInternal(const CameraMetaData* meta) override;
 
 protected:
-  struct NefSlice final : public RawSlice {};
+  struct NefSlice final : RawSlice {};
 
 private:
   int getDecoderVersion() const override { return 5; }
