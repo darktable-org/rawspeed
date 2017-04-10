@@ -74,9 +74,8 @@ uint32 __attribute__((pure)) CiffEntry::getElementShift() {
     case CIFF_SUB1:
     case CIFF_SUB2:
       return 2;
-    case CIFF_BYTE:
-    case CIFF_ASCII:
     default:
+      // e.g. CIFF_BYTE or CIFF_ASCII
       return 0;
   }
 }
