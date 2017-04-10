@@ -86,9 +86,7 @@ struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
   }
 };
 
-template<typename Tag, typename Cache>
-class BitStream : private ByteStream
-{
+template <typename Tag, typename Cache> class BitStream : public ByteStream {
   Cache cache;
 
   // this method hase to be implemented in the concrete BitStream template
