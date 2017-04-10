@@ -45,7 +45,7 @@ public:
 
   void decode(int pixelBaseOffset_);
 
-  static inline int getBits(BitPumpMSB32& bs, int len);
+  static int getBits(BitPumpMSB32& bs, int len);
 };
 
 } // namespace rawspeed

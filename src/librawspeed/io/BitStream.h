@@ -152,7 +152,7 @@ public:
   inline size_type getBufferPosition() const {
     return pos - (cache.fillLevel >> 3);
   }
-  inline void setBufferPosition(size_type newPos);
+  void setBufferPosition(size_type newPos);
 
   inline uint32 __attribute__((pure)) peekBitsNoFill(uint32 nbits) {
     assert(nbits <= Cache::MaxGetBits && nbits <= cache.fillLevel);
