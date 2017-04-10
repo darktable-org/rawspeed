@@ -289,26 +289,9 @@ void ArwDecoder::DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp) {
   } // End bpp = 8
 
   if (bpp == 12) {
-    if (input.getRemainSize() < (w * 3 / 2))
-      ThrowRDE("Image data section too small, file probably truncated");
+    UncompressedDecompressor u(input, mRaw);
+    u.decode12BitRaw<little>(w, h);
 
-    if (input.getRemainSize() < (w*h*3 / 2))
-      h = input.getRemainSize() / (w * 3 / 2) - 1;
-
-    uchar8 *outData = mRaw->getData();
-    uint32 pitch = mRaw->pitch;
-    const uchar8 *inData = input.getData(input.getRemainSize());
-
-    for (uint32 y = 0; y < h; y++) {
-      auto* dest = reinterpret_cast<ushort16*>(&outData[y * pitch]);
-      for (uint32 x = 0 ; x < w; x += 2) {
-        uint32 g1 = *inData++;
-        uint32 g2 = *inData++;
-        dest[x] = (g1 | ((g2 & 0xf) << 8));
-        uint32 g3 = *inData++;
-        dest[x+1] = ((g2 >> 4) | (g3 << 4));
-      }
-    }
     // Shift scales, since black and white are the same as compressed precision
     mShiftDownScale = 2;
     return;
