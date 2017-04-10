@@ -31,6 +31,8 @@ class RawDecoder;
 class RawParser {
 public:
   explicit RawParser(Buffer* inputData) : mInput(inputData) {}
+  virtual ~RawParser() = default;
+
   virtual RawDecoder* getDecoder(const CameraMetaData* meta = nullptr);
 
 protected:

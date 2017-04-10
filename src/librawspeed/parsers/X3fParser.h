@@ -81,7 +81,8 @@ public:
 class X3fParser final : public RawParser {
 public:
   explicit X3fParser(Buffer* file);
-  ~X3fParser();
+  ~X3fParser() override;
+
   RawDecoder* getDecoder(const CameraMetaData* meta = nullptr) override;
 
 protected:
