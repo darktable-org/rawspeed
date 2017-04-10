@@ -344,8 +344,9 @@ void RawDecoder::startTasks( uint32 tasks )
   // We don't need a thread
   if (threads == 1) {
     while (static_cast<uint32>(ctask) < tasks) {
-      t[0].taskNo = ctask++;
+      t[0].taskNo = ctask;
       RawDecoderDecodeThread(&t[0]);
+      ctask++;
     }
     return;
   }
@@ -360,8 +361,9 @@ void RawDecoder::startTasks( uint32 tasks )
   /* TODO: Create a way to re-use threads */
   void *status;
   while (static_cast<uint32>(ctask) < tasks) {
-    for (uint32 i = 0; i < threads && static_cast<uint32>(ctask) < tasks; i++) {
-      t[i].taskNo = ctask++;
+    for (uint32 i = 0; i < threads && static_cast<uint32>(ctask) < tasks;
+         i++, ctask++) {
+      t[i].taskNo = ctask;
       pthread_create(&t[i].threadid, &attr, RawDecoderDecodeThread, &t[i]);
     }
     for (uint32 i = 0; i < threads; i++) {

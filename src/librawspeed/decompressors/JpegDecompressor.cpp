@@ -150,8 +150,8 @@ void JpegDecompressor::decode(uint32 offX,
     uchar8* src = &complete_buffer[static_cast<size_t>(row_stride) * y];
     auto* dst = reinterpret_cast<ushort16*>(mRaw->getData(offX, y + offY));
     for (int x = 0; x < copy_w; x++) {
-      for (int c = 0; c < dinfo.output_components; c++)
-        *dst++ = (*src++);
+      for (int c = 0; c < dinfo.output_components; c++, src++, dst++)
+        *dst = *src;
     }
   }
 }

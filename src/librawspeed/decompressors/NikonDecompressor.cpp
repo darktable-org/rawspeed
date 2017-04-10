@@ -142,17 +142,21 @@ void NikonDecompressor::decompress(RawImage& mRaw, ByteStream&& data,
     pUp2[y&1] += ht.decodeNext(bits);
     pLeft1 = pUp1[y&1];
     pLeft2 = pUp2[y&1];
+
     rawdata->setWithLookUp(clampBits(pLeft1, 15),
-                           reinterpret_cast<uchar8*>(dest++), &random);
+                           reinterpret_cast<uchar8*>(dest + 0), &random);
     rawdata->setWithLookUp(clampBits(pLeft2, 15),
-                           reinterpret_cast<uchar8*>(dest++), &random);
-    for (uint32 x = 1; x < cw; x++) {
+                           reinterpret_cast<uchar8*>(dest + 1), &random);
+    dest += 2;
+
+    for (uint32 x = 1; x < cw; x++, dest += 2) {
       pLeft1 += ht.decodeNext(bits);
       pLeft2 += ht.decodeNext(bits);
+
       rawdata->setWithLookUp(clampBits(pLeft1, 15),
-                             reinterpret_cast<uchar8*>(dest++), &random);
+                             reinterpret_cast<uchar8*>(dest + 0), &random);
       rawdata->setWithLookUp(clampBits(pLeft2, 15),
-                             reinterpret_cast<uchar8*>(dest++), &random);
+                             reinterpret_cast<uchar8*>(dest + 1), &random);
     }
   }
 

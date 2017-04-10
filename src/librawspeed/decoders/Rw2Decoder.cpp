@@ -187,6 +187,8 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
       pred[0] = pred[1] = nonz[0] = nonz[1] = 0;
       int u = 0;
       for (i = 0; i < 14; i++) {
+        // FIXME: can be deduplicated.
+
         // Even pixels
         if (u == 2)
         {
@@ -201,7 +203,10 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
           }
         } else if ((nonz[0] = bits.getBits(8)) || i > 11)
           pred[0] = nonz[0] << 4 | bits.getBits(4);
-        *dest++ = pred[0];
+
+        *dest = pred[0];
+        dest++;
+
         if (zero_is_bad && 0 == pred[0])
           zero_pos.push_back((y<<16) | (x*14+i));
 
@@ -221,7 +226,10 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
           }
         } else if ((nonz[1] = bits.getBits(8)) || i > 11)
           pred[1] = nonz[1] << 4 | bits.getBits(4);
-        *dest++ = pred[1];
+
+        *dest = pred[1];
+        dest++;
+
         if (zero_is_bad && 0 == pred[1])
           zero_pos.push_back((y<<16) | (x*14+i));
         u++;

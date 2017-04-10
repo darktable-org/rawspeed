@@ -312,7 +312,8 @@ RawImage::~RawImage() {
 #ifdef HAVE_PTHREAD
   pthread_mutex_lock(&p_->mymutex);
 #endif
-  if (--p_->dataRefCount == 0) {
+  --p_->dataRefCount;
+  if (p_->dataRefCount == 0) {
 #ifdef HAVE_PTHREAD
     pthread_mutex_unlock(&p_->mymutex);
 #endif
@@ -550,8 +551,11 @@ RawImage& RawImage::operator=(RawImage&& rhs) noexcept {
   // Increment use on new data
   ++p_->dataRefCount;
 
+  // and decrement use on old data
+  --old->dataRefCount;
+
   // If the RawImageData previously used by "this" is unused, delete it.
-  if (--old->dataRefCount == 0) {
+  if (old->dataRefCount == 0) {
 #ifdef HAVE_PTHREAD
     pthread_mutex_unlock(&(old->mymutex));
 #endif

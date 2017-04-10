@@ -74,7 +74,8 @@ void RawImageDataU16::calculateBlackAreas() {
             reinterpret_cast<ushort16*>(getDataUncropped(mOffset.x, y));
         auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
         for (int x = mOffset.x; x < dim.x+mOffset.x; x++) {
-          localhist[((x&1)<<16) + *pixel]++;
+          const auto hBin = ((x & 1) << 16) + *pixel;
+          localhist[hBin]++;
         }
       }
       totalpixels += area.size * dim.x;
@@ -90,7 +91,8 @@ void RawImageDataU16::calculateBlackAreas() {
             reinterpret_cast<ushort16*>(getDataUncropped(area.offset, y));
         auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
         for (uint32 x = area.offset; x < area.size+area.offset; x++) {
-          localhist[((x&1)<<16) + *pixel]++;
+          const auto hBin = ((x & 1) << 16) + *pixel;
+          localhist[hBin]++;
         }
       }
       totalpixels += area.size * dim.y;

@@ -195,8 +195,8 @@ void MosDecoder::DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32
         for (unsigned int &i : len) {
           int32 j = 0;
           for (; j < 5 && !pump.getBits(1); j++);
-          if (j--)
-            i = length[j * 2 + pump.getBits(1)];
+          if (j > 0)
+            i = length[2 * (j - 1) + pump.getBits(1)];
         }
       }
 

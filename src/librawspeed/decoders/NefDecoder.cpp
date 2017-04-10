@@ -485,8 +485,11 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         bs.skipBytes(version == 0x204 ? 284 : 4);
 
         uchar8 buf[14+8];
-        for (unsigned char &i : buf)
-          i = bs.getByte() ^ (cj += ci * ck++);
+        for (unsigned char& i : buf) {
+          cj += ci * ck;
+          i = bs.getByte() ^ cj;
+          ck++;
+        }
 
         // Finally set the WB coeffs
         uint32 off = (version == 0x204) ? 6 : 14;
@@ -700,8 +703,10 @@ ushort16* NefDecoder::gammaCurve(double pwr, double ts, int mode, int imax) {
            1;
   }
 
-  if (!mode--)
+  if (mode == 0)
     ThrowRDE("Unimplemented mode");
+
+  mode--;
 
   assert(curve != nullptr);
   for (i=0; i < 0x10000; i++) {

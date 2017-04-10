@@ -102,8 +102,8 @@ RawImage ArwDecoder::decodeRawInternal() {
       vector<uchar8> head(head_size);
       SonyDecrypt(reinterpret_cast<const uint32*>(head_orig),
                   reinterpret_cast<uint32*>(&head[0]), 10, key);
-      for (int i=26; i-- > 22; )
-        key = key << 8 | head[i];
+      for (int i = 26; i > 22; i--)
+        key = key << 8 | head[i - 1];
 
       // "Decrypt" the whole image buffer
       auto image_data = mFile->getData(off, len);

@@ -220,7 +220,8 @@ static bool ConvertUTF16toUTF8(const UTF16** sourceStart,
     const UTF32 byteMask = 0xBF;
     const UTF32 byteMark = 0x80;
     const UTF16* oldSource = source; /* In case we have to back up because of target overflow. */
-    ch = *source++;
+    ch = *source;
+    source++;
     /* If we have a surrogate pair, convert to UTF32 first. */
     if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_HIGH_END) {
       /* If the 16 bits following the high surrogate are in the source buffer... */
@@ -266,10 +267,12 @@ static bool ConvertUTF16toUTF8(const UTF16** sourceStart,
     }
     assert(bytesToWrite > 0);
     for (int i = bytesToWrite; i > 1; i--) {
-      *--target = static_cast<UTF8>((ch | byteMark) & byteMask);
+      target--;
+      *target = static_cast<UTF8>((ch | byteMark) & byteMask);
       ch >>= 6;
     }
-    *--target = static_cast<UTF8>(ch | firstByteMark[bytesToWrite]);
+    target--;
+    *target = static_cast<UTF8>(ch | firstByteMark[bytesToWrite]);
     target += bytesToWrite;
   }
   // Function modified to retain source + target positions

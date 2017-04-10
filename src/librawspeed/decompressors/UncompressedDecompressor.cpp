@@ -202,12 +202,11 @@ void UncompressedDecompressor::decode8BitRaw(uint32 w, uint32 h) {
   uint32 random = 0;
   for (uint32 y = 0; y < h; y++) {
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
-    for (uint32 x = 0; x < w; x += 1) {
+    for (uint32 x = 0; x < w; x++, in++) {
       if (uncorrectedRawValues)
-        dest[x] = *in++;
+        dest[x] = *in;
       else
-        mRaw->setWithLookUp(*in++, reinterpret_cast<uchar8*>(&dest[x]),
-                            &random);
+        mRaw->setWithLookUp(*in, reinterpret_cast<uchar8*>(&dest[x]), &random);
     }
   }
 }
@@ -251,9 +250,9 @@ void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
       in = input.peekData(input.getRemainSize()) + offset;
     }
 
-    for (uint32 x = 0; x < w; x += 2) {
-      uint32 g1 = *in++;
-      uint32 g2 = *in++;
+    for (uint32 x = 0; x < w; x += 2, in += 3) {
+      uint32 g1 = in[0];
+      uint32 g2 = in[1];
 
       auto process = [dest](uint32 i, bool invert, uint32 p1, uint32 p2) {
         if (!(invert ^ (e == little)))
@@ -264,7 +263,7 @@ void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
 
       process(x, false, g1, g2);
 
-      g1 = *in++;
+      g1 = in[2];
 
       process(x + 1, true, g1, g2);
 
@@ -294,9 +293,9 @@ void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(uint32 w,
 
   for (uint32 y = 0; y < h; y++) {
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
-    for (uint32 x = 0; x < w; x += 1) {
-      uint32 g1 = *in++;
-      uint32 g2 = *in++;
+    for (uint32 x = 0; x < w; x += 1, in += 2) {
+      uint32 g1 = in[0];
+      uint32 g2 = in[1];
 
       if (e == big)
         dest[x] = (((g1 << 8) | (g2 & 0xf0)) >> 4);
@@ -328,9 +327,9 @@ void UncompressedDecompressor::decodeRawUnpacked(uint32 w, uint32 h) {
 
   for (uint32 y = 0; y < h; y++) {
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
-    for (uint32 x = 0; x < w; x += 1) {
-      uint32 g1 = *in++;
-      uint32 g2 = *in++;
+    for (uint32 x = 0; x < w; x += 1, in += 2) {
+      uint32 g1 = in[0];
+      uint32 g2 = in[1];
 
       if (e == little)
         dest[x] = ((g2 << 8) | g1) >> shift;
