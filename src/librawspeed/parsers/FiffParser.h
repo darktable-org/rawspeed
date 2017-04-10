@@ -21,6 +21,7 @@
 #pragma once
 
 #include "parsers/RawParser.h" // for RawParser
+#include "tiff/TiffIFD.h"      // for TiffRootIFDOwner
 
 namespace rawspeed {
 
@@ -34,7 +35,11 @@ class FiffParser final : public RawParser {
 public:
   explicit FiffParser(Buffer* input);
 
+  void parseData();
   RawDecoder* getDecoder(const CameraMetaData* meta = nullptr) override;
+
+protected:
+  TiffRootIFDOwner rootIFD;
 };
 
 } // namespace rawspeed
