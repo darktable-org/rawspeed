@@ -27,6 +27,7 @@
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/Endianness.h"                // for getHostEndianness, Endiann...
+#include <cassert>                        // for assert
 #include <cstdio>                         // for size_t
 
 extern "C" {
@@ -235,6 +236,7 @@ void DeflateDecompressor::decode(unsigned char** uBuffer, int width, int height,
     if (predFactor)
       decodeFPDeltaRow(src, dst, thisTileWidth, width, bytesps, predFactor);
 
+    assert(bytesps >= 2 && bytesps <= 4);
     switch (bytesps) {
     case 2:
       expandFP16(dst, thisTileWidth);
@@ -243,8 +245,10 @@ void DeflateDecompressor::decode(unsigned char** uBuffer, int width, int height,
       expandFP24(dst, thisTileWidth);
       break;
     case 4:
-    default:
       // No need to expand FP32
+      break;
+    default:
+      __builtin_unreachable();
       break;
     }
   }
