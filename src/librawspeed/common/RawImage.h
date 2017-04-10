@@ -107,8 +107,6 @@ public:
 
   // ISO speed. If known the value is set, otherwise it will be '0'.
   int isoSpeed;
-
-private:
 };
 
 class RawImageData

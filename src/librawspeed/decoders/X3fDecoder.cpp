@@ -94,7 +94,6 @@ void X3fDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         iss >> iso;
       }
       setMetaData(meta, camera_make, camera_model, "", iso);
-      return;
     }
   }
 }
@@ -437,7 +436,6 @@ void X3fDecoder::decodeThreaded( RawDecoderThread* t )
         }
       }
     }
-    return;
   }
 }
 
