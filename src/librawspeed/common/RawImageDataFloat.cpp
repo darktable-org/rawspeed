@@ -298,7 +298,7 @@ void RawImageDataFloat::fixBadPixel( uint32 x, uint32 y, int component )
   while (x_find >= 0 && values[curr] < 0) {
     if (0 == ((bad_line[x_find>>3] >> (x_find&7)) & 1)) {
       values[curr] = (reinterpret_cast<float*>(getData(x_find, y)))[component];
-      dist[curr] = float(static_cast<int>(x) - x_find);
+      dist[curr] = static_cast<float>(static_cast<int>(x) - x_find);
     }
     x_find-=2;
   }
@@ -308,7 +308,7 @@ void RawImageDataFloat::fixBadPixel( uint32 x, uint32 y, int component )
   while (x_find < uncropped_dim.x && values[curr] < 0) {
     if (0 == ((bad_line[x_find>>3] >> (x_find&7)) & 1)) {
       values[curr] = (reinterpret_cast<float*>(getData(x_find, y)))[component];
-      dist[curr] = float(x_find - static_cast<int>(x));
+      dist[curr] = static_cast<float>(x_find - static_cast<int>(x));
     }
     x_find+=2;
   }
@@ -320,7 +320,7 @@ void RawImageDataFloat::fixBadPixel( uint32 x, uint32 y, int component )
   while (y_find >= 0 && values[curr] < 0) {
     if (0 == ((bad_line[y_find*mBadPixelMapPitch] >> (x&7)) & 1)) {
       values[curr] = (reinterpret_cast<float*>(getData(x, y_find)))[component];
-      dist[curr] = float(static_cast<int>(y) - y_find);
+      dist[curr] = static_cast<float>(static_cast<int>(y) - y_find);
     }
     y_find-=2;
   }
@@ -330,7 +330,7 @@ void RawImageDataFloat::fixBadPixel( uint32 x, uint32 y, int component )
   while (y_find < uncropped_dim.y && values[curr] < 0) {
     if (0 == ((bad_line[y_find*mBadPixelMapPitch] >> (x&7)) & 1)) {
       values[curr] = (reinterpret_cast<float*>(getData(x, y_find)))[component];
-      dist[curr] = float(y_find - static_cast<int>(y));
+      dist[curr] = static_cast<float>(y_find - static_cast<int>(y));
     }
     y_find+=2;
   }

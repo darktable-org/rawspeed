@@ -97,7 +97,7 @@ float __attribute__((const)) CrwDecoder::canonEv(const long in) {
   long val = abs(in);
   // remove fraction
   auto frac = static_cast<float>(val & 0x1f);
-  val -= long(frac);
+  val -= static_cast<long>(frac);
   // convert 1/3 (0x0c) and 2/3 (0x14) codes
   if (frac == 0x0c) {
     frac = 32.0F / 3;
