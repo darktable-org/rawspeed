@@ -266,7 +266,8 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
       sserandom = _mm_setzero_si128();
     }
     auto* pixel = reinterpret_cast<__m128i*>(&data[(mOffset.y + y) * pitch]);
-    __m128i ssescale, ssesub;
+    __m128i ssescale;
+    __m128i ssesub;
     if (((y + mOffset.y) & 1) == 0) {
       ssesub = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[0]));
       ssescale = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[4]));

@@ -88,7 +88,11 @@ RawImage MosDecoder::decodeRawInternal() {
     uint32 entries = getU32LE(insideTiff + offset);
     uint32 pos = 8; // Skip another 4 bytes
 
-    uint32 width=0, height=0, strip_offset=0, data_offset=0, wb_offset=0;
+    uint32 width = 0;
+    uint32 height = 0;
+    uint32 strip_offset = 0;
+    uint32 data_offset = 0;
+    uint32 wb_offset = 0;
     for (; entries > 0; entries--) {
       if (offset+base+pos+16 > mFile->getSize())
         ThrowRDE("offset out of bounds");

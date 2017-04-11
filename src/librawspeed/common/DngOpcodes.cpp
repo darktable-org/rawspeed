@@ -124,7 +124,10 @@ public:
 
 class DngOpcodes::ROIOpcode : public DngOpcodes::DngOpcode {
 protected:
-  uint32 top, left, bottom, right;
+  uint32 top;
+  uint32 left;
+  uint32 bottom;
+  uint32 right;
 
   explicit ROIOpcode(ByteStream& bs) {
     top = bs.getU32();
@@ -157,7 +160,10 @@ public:
 
 class DngOpcodes::PixelOpcode : public ROIOpcode {
 protected:
-  uint32 firstPlane, planes, rowPitch, colPitch;
+  uint32 firstPlane;
+  uint32 planes;
+  uint32 rowPitch;
+  uint32 colPitch;
 
   explicit PixelOpcode(ByteStream& bs) : ROIOpcode(bs) {
     firstPlane = bs.getU32();

@@ -42,10 +42,13 @@ public:
 
 protected:
   int getDecoderVersion() const override { return 0; }
-  uint32 mWidth, mHeight, mIso;
+  uint32 mWidth;
+  uint32 mHeight;
+  uint32 mIso;
   std::string mModel;
   std::string mEncoder;
-  uint32 mDataOffset, mDataSize;
+  uint32 mDataOffset;
+  uint32 mDataSize;
   float mWB[3];
 };
 

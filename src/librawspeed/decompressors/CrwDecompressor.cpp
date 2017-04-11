@@ -192,7 +192,8 @@ void CrwDecompressor::decompress(RawImage& mRaw, rawspeed::Buffer* mFile,
                                  uint32 dec_table, bool lowbits) {
   assert(mFile);
 
-  int carry = 0, base[2];
+  int carry = 0;
+  int base[2];
 
   auto mHuff = initHuffTables(dec_table);
 

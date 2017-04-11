@@ -29,7 +29,10 @@ namespace rawspeed {
 #if defined(__i386__) || defined(__x86_64__)
 
 bool Cpuid::SSE2() {
-  unsigned int eax, ebx, ecx, edx;
+  unsigned int eax;
+  unsigned int ebx;
+  unsigned int ecx;
+  unsigned int edx;
 
   if (!__get_cpuid(1, &eax, &ebx, &ecx, &edx))
     return false;

@@ -166,7 +166,12 @@ void Rw2Decoder::DecodeRw2() {
 }
 
 void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
-  int x, i, j, sh = 0, pred[2], nonz[2];
+  int x;
+  int i;
+  int j;
+  int sh = 0;
+  int pred[2];
+  int nonz[2];
   int w = mRaw->dim.x / 14;
   uint32 y;
 

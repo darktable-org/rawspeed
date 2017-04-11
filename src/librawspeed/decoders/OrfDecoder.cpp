@@ -100,7 +100,8 @@ void OrfDecoder::decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 si
   if (hints.has("packed_with_control"))
     u.decode12BitRaw<little, false, true>(w, h);
   else if (hints.has("jpeg32_bitorder")) {
-    iPoint2D dimensions(w, h), pos(0, 0);
+    iPoint2D dimensions(w, h);
+    iPoint2D pos(0, 0);
     u.readUncompressedRaw(dimensions, pos, w * 12 / 8, 12, BitOrder_Jpeg32);
   } else if (size >= w*h*2) { // We're in an unpacked raw
     if (s.isInNativeByteOrder())
@@ -122,8 +123,19 @@ void OrfDecoder::decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 si
  */
 
 void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
-  int nbits, sign, low, high, i, left0, nw0, left1, nw1;
-  int acarry0[3], acarry1[3], pred, diff;
+  int nbits;
+  int sign;
+  int low;
+  int high;
+  int i;
+  int left0;
+  int nw0;
+  int left1;
+  int nw1;
+  int acarry0[3];
+  int acarry1[3];
+  int pred;
+  int diff;
 
   uchar8* data = mRaw->getData();
   int pitch = mRaw->pitch;

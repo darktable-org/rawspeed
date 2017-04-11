@@ -35,7 +35,8 @@ class LJpegDecompressor final : public AbstractLJpegDecompressor
   void decodeScan() override;
   template<int N_COMP> void decodeN();
 
-  uint32 offX = 0, offY = 0;
+  uint32 offX = 0;
+  uint32 offY = 0;
 
 public:
   LJpegDecompressor(const Buffer& data, Buffer::size_type offset,

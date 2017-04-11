@@ -244,7 +244,8 @@ void SrwDecoder::decodeCompressed2( const TiffIFD* raw, int bits)
   const uchar8 tab[14][2] = {{3,4}, {3,7}, {2,6}, {2,5}, {4,3}, {6,0}, {7,9},
                                {8,10}, {9,11}, {10,12}, {10,13}, {5,1}, {4,8}, {4,2}};
   vector<encTableItem> tbl(1024);
-  ushort16 vpred[2][2] = {{0,0},{0,0}}, hpred[2];
+  ushort16 vpred[2][2] = {{0, 0}, {0, 0}};
+  ushort16 hpred[2];
 
   // We generate a 1024 entry table (to be addressed by reading 10 bits) by
   // consecutively filling in 2^(10-N) positions where N is the variable number of

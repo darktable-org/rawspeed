@@ -384,7 +384,8 @@ static int results(const map<string, string>& failedTests) {
     const string oldhash(i.first + ".hash");
     const string newhash(oldhash + ".failed");
 
-    ifstream oldfile(oldhash), newfile(newhash);
+    ifstream oldfile(oldhash);
+    ifstream newfile(newhash);
 
     // if neither hashes exist, nothing to append...
     if (!(oldfile.good() || newfile.good()))

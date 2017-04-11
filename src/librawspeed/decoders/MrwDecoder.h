@@ -42,7 +42,10 @@ public:
 protected:
   int getDecoderVersion() const override { return 0; }
   void parseHeader();
-  uint32 raw_width, raw_height, data_offset, packed;
+  uint32 raw_width;
+  uint32 raw_height;
+  uint32 data_offset;
+  uint32 packed;
   TiffRootIFDOwner rootIFD;
   float wb_coeffs[4];
 };

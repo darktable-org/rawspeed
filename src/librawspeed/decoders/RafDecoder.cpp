@@ -184,7 +184,8 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       auto* src = reinterpret_cast<ushort16*>(
           mRaw->getData(crop_offset.x, crop_offset.y + y));
       for (int x = 0; x < new_size.x; x++) {
-        int h, w;
+        int h;
+        int w;
         if (alt_layout) { // Swapped x and y
           h = rotatedsize - (new_size.y + 1 - y + (x >> 1));
           w = ((x+1) >> 1) + y;

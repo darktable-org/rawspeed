@@ -451,10 +451,9 @@ template </* int version */>
 inline void Cr2sRawInterpolator::YUV_TO_RGB<0>(const YCbCr& p, ushort16* X) {
   assert(X);
 
-  int r, g, b;
-  r = sraw_coeffs[0] * (p.Y + p.Cr - 512);
-  g = sraw_coeffs[1] * (p.Y + ((-778 * p.Cb - (p.Cr * 2048)) >> 12) - 512);
-  b = sraw_coeffs[2] * (p.Y + (p.Cb - 512));
+  int r = sraw_coeffs[0] * (p.Y + p.Cr - 512);
+  int g = sraw_coeffs[1] * (p.Y + ((-778 * p.Cb - (p.Cr * 2048)) >> 12) - 512);
+  int b = sraw_coeffs[2] * (p.Y + (p.Cb - 512));
   STORE_RGB(X, r, g, b);
 }
 
@@ -462,10 +461,9 @@ template </* int version */>
 inline void Cr2sRawInterpolator::YUV_TO_RGB<1>(const YCbCr& p, ushort16* X) {
   assert(X);
 
-  int r, g, b;
-  r = sraw_coeffs[0] * (p.Y + ((50 * p.Cb + 22929 * p.Cr) >> 12));
-  g = sraw_coeffs[1] * (p.Y + ((-5640 * p.Cb - 11751 * p.Cr) >> 12));
-  b = sraw_coeffs[2] * (p.Y + ((29040 * p.Cb - 101 * p.Cr) >> 12));
+  int r = sraw_coeffs[0] * (p.Y + ((50 * p.Cb + 22929 * p.Cr) >> 12));
+  int g = sraw_coeffs[1] * (p.Y + ((-5640 * p.Cb - 11751 * p.Cr) >> 12));
+  int b = sraw_coeffs[2] * (p.Y + ((29040 * p.Cb - 101 * p.Cr) >> 12));
   STORE_RGB(X, r, g, b);
 }
 
@@ -474,10 +472,9 @@ template </* int version */>
 inline void Cr2sRawInterpolator::YUV_TO_RGB<2>(const YCbCr& p, ushort16* X) {
   assert(X);
 
-  int r, g, b;
-  r = sraw_coeffs[0] * (p.Y + p.Cr);
-  g = sraw_coeffs[1] * (p.Y + ((-778 * p.Cb - (p.Cr * 2048)) >> 12));
-  b = sraw_coeffs[2] * (p.Y + p.Cb);
+  int r = sraw_coeffs[0] * (p.Y + p.Cr);
+  int g = sraw_coeffs[1] * (p.Y + ((-778 * p.Cb - (p.Cr * 2048)) >> 12));
+  int b = sraw_coeffs[2] * (p.Y + p.Cb);
   STORE_RGB(X, r, g, b);
 }
 

@@ -179,7 +179,8 @@ void AbstractLJpegDecompressor::parseDHT() {
 }
 
 JpegMarker AbstractLJpegDecompressor::getNextMarker(bool allowskip) {
-  uchar8 c0, c1 = input.getByte();
+  uchar8 c0;
+  uchar8 c1 = input.getByte();
   do {
     c0 = c1;
     c1 = input.getByte();
