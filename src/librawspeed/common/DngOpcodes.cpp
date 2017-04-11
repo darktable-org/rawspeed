@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2017 Axel Waggershauser
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,7 +21,7 @@
 */
 
 #include "common/DngOpcodes.h"
-#include "common/Common.h"                // for uint32, ushort16, make_unique
+#include "common/Common.h"                // for uint32, ushort16, clampBits
 #include "common/Point.h"                 // for iPoint2D, iRectangle2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
@@ -30,9 +31,11 @@
 #include <algorithm>                      // for fill_n
 #include <cmath>                          // for pow
 #include <stdexcept>                      // for out_of_range
+#include <tuple>                          // for tie, tuple
 
 using std::vector;
 using std::fill_n;
+using std::make_pair;
 
 namespace rawspeed {
 
@@ -336,62 +339,38 @@ public:
 
 DngOpcodes::DngOpcodes(TiffEntry* entry) {
   ByteStream bs = entry->getData();
-  // DNG opcodes seem to be always stored in big endian
+  // DNG opcodes are always stored in big-endian byte order.
   bs.setInNativeByteOrder(getHostEndianness() == big);
-
-  using OffsetPerRow = OffsetPerRowOrCol<DeltaRowOrColBase::SelectY>;
-  using OffsetPerCol = OffsetPerRowOrCol<DeltaRowOrColBase::SelectX>;
-
-  using ScalePerRow = ScalePerRowOrCol<DeltaRowOrColBase::SelectY>;
-  using ScalePerCol = ScalePerRowOrCol<DeltaRowOrColBase::SelectX>;
 
   auto opcode_count = bs.getU32();
   for (auto i = 0U; i < opcode_count; i++) {
     auto code = bs.getU32();
     bs.getU32(); // ignore version
+#ifdef DEBUG
+    bs.getU32(); // ignore flags
+#else
     auto flags = bs.getU32();
+#endif
     auto expected_pos = bs.getU32() + bs.getPosition();
 
-    switch (code) {
-    case 4:
-      opcodes.push_back(make_unique<FixBadPixelsConstant>(bs));
-      break;
-    case 5:
-      opcodes.push_back(make_unique<FixBadPixelsList>(bs));
-      break;
-    case 6:
-      opcodes.push_back(make_unique<TrimBounds>(bs));
-      break;
-    case 7:
-      opcodes.push_back(make_unique<TableMap>(bs));
-      break;
-    case 8:
-      opcodes.push_back(make_unique<PolynomialMap>(bs));
-      break;
-    case 10:
-      opcodes.push_back(make_unique<OffsetPerRow>(bs));
-      break;
-    case 11:
-      opcodes.push_back(make_unique<OffsetPerCol>(bs));
-      break;
-    case 12:
-      opcodes.push_back(make_unique<ScalePerRow>(bs));
-      break;
-    case 13:
-      opcodes.push_back(make_unique<ScalePerCol>(bs));
-      break;
-    default:
-      // Throw Error if not marked as optional
-      if (!(flags & 1)) {
-        const char* codeName = nullptr;
-        try {
-          codeName = OpCodeMap.at(code);
-        } catch (std::out_of_range&) {
-          ThrowRDE("Unknown unhandled Opcode: %d", code);
-        }
-        ThrowRDE("Unsupported Opcode: %d (%s)", code, codeName);
-      }
+    const char* opName = nullptr;
+    constructor_t opConstructor = nullptr;
+    try {
+      std::tie(opName, opConstructor) = Map.at(code);
+    } catch (std::out_of_range&) {
+      ThrowRDE("Unknown unhandled Opcode: %d", code);
     }
+
+    if (opConstructor != nullptr)
+      opcodes.emplace_back(opConstructor(bs));
+    else {
+#ifndef DEBUG
+      // Throw Error if not marked as optional
+      if (!(flags & 1))
+#endif
+        ThrowRDE("Unsupported Opcode: %d (%s)", code, opName);
+    }
+
     if (bs.getPosition() != expected_pos)
       ThrowRDE("Inconsistent length of opcode");
   }
@@ -408,13 +387,51 @@ void DngOpcodes::applyOpCodes(RawImage& ri) {
   }
 }
 
-const std::map<uint32, const char*> DngOpcodes::OpCodeMap{
-    {1, "WarpRectilinear"},   {2, "WarpFisheye"},
-    {3, "FixVignetteRadial"}, {4, "FixBadPixelsConstant"},
-    {5, "FixBadPixelsList"},  {6, "TrimBounds"},
-    {7, "MapTable"},          {8, "MapPolynomial"},
-    {9, "GainMap"},           {10, "DeltaPerRow"},
-    {11, "DeltaPerColumn"},   {12, "ScalePerRow"},
-    {13, "ScalePerColumn"}};
+template <class Opcode>
+std::unique_ptr<DngOpcodes::DngOpcode> DngOpcodes::constructor(ByteStream& bs) {
+  return make_unique<Opcode>(bs);
+}
+
+// ALL opcodes specified in DNG Specification MUST be listed here.
+// however, some of them might not be implemented.
+const std::map<uint32, std::pair<const char*, DngOpcodes::constructor_t>>
+    DngOpcodes::Map = {
+        {1U, make_pair("WarpRectilinear", nullptr)},
+        {2U, make_pair("WarpFisheye", nullptr)},
+        {3U, make_pair("FixVignetteRadial", nullptr)},
+        {4U,
+         make_pair("FixBadPixelsConstant",
+                   &DngOpcodes::constructor<DngOpcodes::FixBadPixelsConstant>)},
+        {5U, make_pair("FixBadPixelsList",
+                       &DngOpcodes::constructor<DngOpcodes::FixBadPixelsList>)},
+        {6U, make_pair("TrimBounds",
+                       &DngOpcodes::constructor<DngOpcodes::TrimBounds>)},
+        {7U,
+         make_pair("MapTable", &DngOpcodes::constructor<DngOpcodes::TableMap>)},
+        {8U, make_pair("MapPolynomial",
+                       &DngOpcodes::constructor<DngOpcodes::PolynomialMap>)},
+        {9U, make_pair("GainMap", nullptr)},
+        {10U,
+         make_pair(
+             "DeltaPerRow",
+             &DngOpcodes::constructor<
+                 DngOpcodes::OffsetPerRowOrCol<DeltaRowOrColBase::SelectY>>)},
+        {11U,
+         make_pair(
+             "DeltaPerColumn",
+             &DngOpcodes::constructor<
+                 DngOpcodes::OffsetPerRowOrCol<DeltaRowOrColBase::SelectX>>)},
+        {12U,
+         make_pair(
+             "ScalePerRow",
+             &DngOpcodes::constructor<
+                 DngOpcodes::ScalePerRowOrCol<DeltaRowOrColBase::SelectY>>)},
+        {13U,
+         make_pair(
+             "ScalePerColumn",
+             &DngOpcodes::constructor<
+                 DngOpcodes::ScalePerRowOrCol<DeltaRowOrColBase::SelectX>>)},
+
+};
 
 } // namespace rawspeed
