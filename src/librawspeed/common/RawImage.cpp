@@ -30,6 +30,7 @@
 #include <cmath>                          // for NAN
 #include <cstdlib>                        // for free
 #include <cstring>                        // for memset, memcpy, strdup
+#include <memory>                         // for unique_ptr
 
 using std::fill_n;
 using std::string;
@@ -410,21 +411,23 @@ void RawImageData::startWorker(RawImageWorker::RawImageWorkerTask task, bool cro
   }
 
 #ifdef HAVE_PTHREAD
-  auto **workers = new RawImageWorker *[threads];
+  std::vector<RawImageWorker> workers;
+  workers.reserve(threads);
+
   int y_offset = 0;
   int y_per_thread = (height + threads - 1) / threads;
 
   for (int i = 0; i < threads; i++) {
     int y_end = min(y_offset + y_per_thread, height);
-    workers[i] = new RawImageWorker(this, task, y_offset, y_end);
-    workers[i]->startThread();
+
+    workers.emplace_back(this, task, y_offset, y_end);
+    workers.back().startThread();
+
     y_offset = y_end;
   }
-  for (int i = 0; i < threads; i++) {
-    workers[i]->waitForThread();
-    delete workers[i];
-  }
-  delete[] workers;
+
+  for (auto& worker : workers)
+    worker.waitForThread();
 #else
   ThrowRDE("Unreachable");
 #endif
