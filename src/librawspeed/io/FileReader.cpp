@@ -25,6 +25,7 @@
 #include <algorithm>            // for move
 #include <cstdio>               // for fclose, fseek, fopen, fread, ftell
 #include <fcntl.h>              // for SEEK_END, SEEK_SET
+#include <limits>               // for numeric_limits
 #include <memory>               // for unique_ptr
 
 #if !defined(__unix__) && !defined(__APPLE__)
@@ -48,6 +49,10 @@ std::unique_ptr<Buffer> FileReader::readFile() {
     ThrowFIE("Could not open file.");
   fseek(file, 0, SEEK_END);
   size = ftell(file);
+  if (size > std::numeric_limits<Buffer::size_type>::max()) {
+    fclose(file);
+    ThrowFIE("File is too big.");
+  }
   if (size <= 0) {
     fclose(file);
     ThrowFIE("File is 0 bytes.");
@@ -74,7 +79,14 @@ std::unique_ptr<Buffer> FileReader::readFile() {
   LARGE_INTEGER f_size;
   GetFileSizeEx(file_h , &f_size);
 
-  if (!f_size.LowPart)
+  static_assert(
+      std::numeric_limits<Buffer::size_type>::max() ==
+          std::numeric_limits<decltype(f_size.LowPart)>::max(),
+      "once Buffer migrates to 64-bit index, this needs to be updated.");
+
+  if (HighPart > 0)
+    ThrowFIE("File is too big.");
+  if (f_size.LowPart <= 0)
     ThrowFIE("File is 0 bytes.");
 
   auto dest = Buffer::Create(f_size.LowPart);
@@ -87,7 +99,10 @@ std::unique_ptr<Buffer> FileReader::readFile() {
 
   CloseHandle(file_h);
 
-  auto* fileData = make_unique<Buffer>(move(dest), f_size.LowPart);
+  if (f_size.LowPart != bytes_read)
+    ThrowFIE("Could not read file.");
+
+  auto fileData = make_unique<Buffer>(move(dest), f_size.LowPart);
 
 #endif // __unix__
 
