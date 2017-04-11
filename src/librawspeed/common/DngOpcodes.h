@@ -21,8 +21,10 @@
 
 #pragma once
 
-#include <memory> // for unique_ptr
-#include <vector> // for vector
+#include "common/Common.h" // for uint32
+#include <map>             // for map
+#include <memory>          // for unique_ptr
+#include <vector>          // for vector
 
 namespace rawspeed {
 
@@ -32,6 +34,8 @@ class TiffEntry;
 
 class DngOpcodes
 {
+  static const std::map<uint32, const char*> OpCodeMap;
+
 public:
   explicit DngOpcodes(TiffEntry* entry);
   ~DngOpcodes();

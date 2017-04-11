@@ -29,6 +29,7 @@
 #include "tiff/TiffEntry.h"               // for TiffEntry
 #include <algorithm>                      // for fill_n
 #include <cmath>                          // for pow
+#include <stdexcept>                      // for out_of_range
 
 using std::vector;
 using std::fill_n;
@@ -381,8 +382,15 @@ DngOpcodes::DngOpcodes(TiffEntry* entry) {
       break;
     default:
       // Throw Error if not marked as optional
-      if (!(flags & 1))
-        ThrowRDE("Unsupported Opcode: %d", code);
+      if (!(flags & 1)) {
+        const char* codeName = nullptr;
+        try {
+          codeName = OpCodeMap.at(code);
+        } catch (std::out_of_range&) {
+          ThrowRDE("Unknown unhandled Opcode: %d", code);
+        }
+        ThrowRDE("Unsupported Opcode: %d (%s)", code, codeName);
+      }
     }
     if (bs.getPosition() != expected_pos)
       ThrowRDE("Inconsistent length of opcode");
@@ -399,5 +407,14 @@ void DngOpcodes::applyOpCodes(RawImage& ri) {
     code->apply(ri);
   }
 }
+
+const std::map<uint32, const char*> DngOpcodes::OpCodeMap{
+    {1, "WarpRectilinear"},   {2, "WarpFisheye"},
+    {3, "FixVignetteRadial"}, {4, "FixBadPixelsConstant"},
+    {5, "FixBadPixelsList"},  {6, "TrimBounds"},
+    {7, "MapTable"},          {8, "MapPolynomial"},
+    {9, "GainMap"},           {10, "DeltaPerRow"},
+    {11, "DeltaPerColumn"},   {12, "ScalePerRow"},
+    {13, "ScalePerColumn"}};
 
 } // namespace rawspeed
