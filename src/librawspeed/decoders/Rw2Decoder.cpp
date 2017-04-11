@@ -186,53 +186,31 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
     for (x = 0; x < w; x++) {
       pred[0] = pred[1] = nonz[0] = nonz[1] = 0;
       int u = 0;
-      for (i = 0; i < 14; i++) {
-        // FIXME: can be deduplicated.
-
-        // Even pixels
-        if (u == 2)
-        {
-          sh = 4 >> (3 - bits.getBits(2));
-          u = -1;
-        }
-        if (nonz[0]) {
-          if ((j = bits.getBits(8))) {
-            if ((pred[0] -= 0x80 << sh) < 0 || sh == 4)
-              pred[0] &= ~(-(1 << sh));
-            pred[0] += j << sh;
+      for (i = 0; i < 14;) {
+        for (int c = 0; c < 2; c++) {
+          if (u == 2) {
+            sh = 4 >> (3 - bits.getBits(2));
+            u = -1;
           }
-        } else if ((nonz[0] = bits.getBits(8)) || i > 11)
-          pred[0] = nonz[0] << 4 | bits.getBits(4);
 
-        *dest = pred[0];
-        dest++;
+          if (nonz[c]) {
+            if ((j = bits.getBits(8))) {
+              if ((pred[c] -= 0x80 << sh) < 0 || sh == 4)
+                pred[c] &= ~(-(1 << sh));
+              pred[c] += j << sh;
+            }
+          } else if ((nonz[c] = bits.getBits(8)) || i > 11)
+            pred[c] = nonz[c] << 4 | bits.getBits(4);
 
-        if (zero_is_bad && 0 == pred[0])
-          zero_pos.push_back((y<<16) | (x*14+i));
+          *dest = pred[c];
 
-        // Odd pixels
-        i++;
-        u++;
-        if (u == 2)
-        {
-          sh = 4 >> (3 - bits.getBits(2));
-          u = -1;
+          if (zero_is_bad && 0 == pred[c])
+            zero_pos.push_back((y << 16) | (x * 14 + i));
+
+          i++;
+          u++;
+          dest++;
         }
-        if (nonz[1]) {
-          if ((j = bits.getBits(8))) {
-            if ((pred[1] -= 0x80 << sh) < 0 || sh == 4)
-              pred[1] &= ~(-(1 << sh));
-            pred[1] += j << sh;
-          }
-        } else if ((nonz[1] = bits.getBits(8)) || i > 11)
-          pred[1] = nonz[1] << 4 | bits.getBits(4);
-
-        *dest = pred[1];
-        dest++;
-
-        if (zero_is_bad && 0 == pred[1])
-          zero_pos.push_back((y<<16) | (x*14+i));
-        u++;
       }
     }
   }
