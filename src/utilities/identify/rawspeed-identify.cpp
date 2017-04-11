@@ -114,7 +114,6 @@ std::string find_cameras_xml(const char *argv0) {
 
 using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
-using rawspeed::Buffer;
 using rawspeed::RawParser;
 using rawspeed::RawImage;
 using rawspeed::uchar8;
@@ -156,7 +155,7 @@ int main(int argc, char *argv[]) {
 
     FileReader f(argv[1]);
 
-    std::unique_ptr<Buffer> m(f.readFile());
+    auto m(f.readFile());
 
     RawParser t(m.get());
 

@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <memory> // for unique_ptr
+
 namespace rawspeed {
 
 class Buffer;
@@ -29,7 +31,7 @@ class FileReader
 public:
   explicit FileReader(const char* filename);
 
-  Buffer* readFile();
+  std::unique_ptr<Buffer> readFile();
   const char* Filename() const { return mFilename; }
   //  void Filename(const char * val) { mFilename = val; }
 

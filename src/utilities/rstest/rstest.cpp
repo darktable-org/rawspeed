@@ -62,13 +62,11 @@ using std::cout;
 using std::setw;
 using std::left;
 using std::endl;
-using std::unique_ptr;
 using std::internal;
 using std::map;
 using std::cerr;
 using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
-using rawspeed::Buffer;
 using rawspeed::RawParser;
 using rawspeed::RawImage;
 using rawspeed::uchar8;
@@ -320,7 +318,7 @@ size_t process(const string& filename, const CameraMetaData* metadata,
 
   FileReader reader(filename.c_str());
 
-  unique_ptr<Buffer> map = unique_ptr<Buffer>(reader.readFile());
+  auto map(reader.readFile());
   // Buffer* map = readFile( argv[1] );
 
   Timer t;

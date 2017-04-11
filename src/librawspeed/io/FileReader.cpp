@@ -19,8 +19,9 @@
 */
 
 #include "io/FileReader.h"
+#include "common/Common.h"      // for make_unique
 #include "io/Buffer.h"          // for Buffer
-#include "io/FileIOException.h" // for FileIOException
+#include "io/FileIOException.h" // for FileIOException (ptr only), ThrowFIE
 #include <algorithm>            // for move
 #include <cstdio>               // for fclose, fseek, fopen, fread, ftell
 #include <fcntl.h>              // for SEEK_END, SEEK_SET
@@ -36,7 +37,7 @@ namespace rawspeed {
 
 FileReader::FileReader(const char *_filename) : mFilename(_filename) {}
 
-Buffer* FileReader::readFile() {
+std::unique_ptr<Buffer> FileReader::readFile() {
 #if defined(__unix__) || defined(__APPLE__)
   int bytes_read = 0;
   FILE *file;
@@ -59,7 +60,7 @@ Buffer* FileReader::readFile() {
   if (size != bytes_read)
     ThrowFIE("Could not read file.");
 
-  auto* fileData = new Buffer(move(dest), size);
+  auto fileData = make_unique<Buffer>(move(dest), size);
 
 #else // __unix__
 
@@ -86,7 +87,7 @@ Buffer* FileReader::readFile() {
 
   CloseHandle(file_h);
 
-  auto* fileData = new Buffer(move(dest), f_size.LowPart);
+  auto* fileData = make_unique<Buffer>(move(dest), f_size.LowPart);
 
 #endif // __unix__
 
