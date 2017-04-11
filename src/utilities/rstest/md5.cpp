@@ -179,8 +179,10 @@ void md5_hash(const uint8_t* message, size_t len, md5_state& hash) {
 
   block[64 - 8] = static_cast<uint8_t>((len & 0x1FU) << 3);
   len >>= 5;
-  for (i = 1; i < 8; i++, len >>= 8)
+  for (i = 1; i < 8; i++) {
     block[64 - 8 + i] = static_cast<uint8_t>(len);
+    len >>= 8;
+  }
   md5_compress(hash, block);
 }
 

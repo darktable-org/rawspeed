@@ -101,9 +101,12 @@ CiffIFD::CiffIFD(CiffIFD* parent_, Buffer* f, uint32 start, uint32 end,
 
 void CiffIFD::checkOverflow() {
   CiffIFD* p = this;
-  for (int i = 1; p; ++i, p = p->parent)
+  int i = 0;
+  while ((p = p->parent) != nullptr) {
+    i++;
     if (i > 5)
       ThrowCPE("CiffIFD cascading overflow.");
+  }
 }
 
 void CiffIFD::add(std::unique_ptr<CiffIFD> subIFD) {

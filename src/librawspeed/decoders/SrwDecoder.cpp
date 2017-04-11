@@ -257,7 +257,8 @@ void SrwDecoder::decodeCompressed2( const TiffIFD* raw, int bits)
   for (auto i : tab) {
     for (int32 c = 0; c < (1024 >> i[0]); c++) {
       tbl[n].encLen = i[0];
-      tbl[n++].diffLen = i[1];
+      tbl[n].diffLen = i[1];
+      n++;
     }
   }
 

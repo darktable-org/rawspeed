@@ -202,11 +202,12 @@ void UncompressedDecompressor::decode8BitRaw(uint32 w, uint32 h) {
   uint32 random = 0;
   for (uint32 y = 0; y < h; y++) {
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
-    for (uint32 x = 0; x < w; x++, in++) {
+    for (uint32 x = 0; x < w; x++) {
       if (uncorrectedRawValues)
         dest[x] = *in;
       else
         mRaw->setWithLookUp(*in, reinterpret_cast<uchar8*>(&dest[x]), &random);
+      in++;
     }
   }
 }

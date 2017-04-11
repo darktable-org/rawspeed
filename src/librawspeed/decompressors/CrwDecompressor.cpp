@@ -223,7 +223,7 @@ void CrwDecompressor::decompress(RawImage& mRaw, rawspeed::Buffer* mFile,
       diffBuf[0] += carry;
       carry = diffBuf[0];
 
-      for (uint32 k = 0; k < 64; k++, i++, dest++) {
+      for (uint32 k = 0; k < 64; k++) {
         if (i % width == 0) {
           // new line
           i = 0;
@@ -241,6 +241,9 @@ void CrwDecompressor::decompress(RawImage& mRaw, rawspeed::Buffer* mFile,
 
         assert(dest != nullptr);
         *dest = base[k & 1];
+
+        i++;
+        dest++;
       }
     }
   }
@@ -266,7 +269,7 @@ void CrwDecompressor::decompress(RawImage& mRaw, rawspeed::Buffer* mFile,
         auto c = static_cast<uint32>(lowbitInput.getByte());
 
         // Process 8 bits in pairs
-        for (uint32 r = 0; r < 8; r += 2, i++, dest++) {
+        for (uint32 r = 0; r < 8; r += 2) {
           if (i % width == 0) {
             // new line
             i = 0;
@@ -283,6 +286,8 @@ void CrwDecompressor::decompress(RawImage& mRaw, rawspeed::Buffer* mFile,
             val += 2; // No idea why this is needed
 
           *dest = val;
+          i++;
+          dest++;
         }
       }
     }

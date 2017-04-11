@@ -60,8 +60,10 @@ RawImageDataFloat::RawImageDataFloat() {
           auto* pixel =
               reinterpret_cast<float*>(getDataUncropped(mOffset.x, y));
 
-          for (int x = mOffset.x; x < dim.x + mOffset.x; x++, pixel++)
+          for (int x = mOffset.x; x < dim.x + mOffset.x; x++) {
             accPixels[((y & 1) << 1) | (x & 1)] += *pixel;
+            pixel++;
+          }
         }
         totalpixels += area.size * dim.x;
       }
@@ -75,9 +77,10 @@ RawImageDataFloat::RawImageDataFloat() {
           auto* pixel =
               reinterpret_cast<float*>(getDataUncropped(area.offset, y));
 
-          for (uint32 x = area.offset; x < area.size + area.offset;
-               x++, pixel++)
+          for (uint32 x = area.offset; x < area.size + area.offset; x++) {
             accPixels[((y & 1) << 1) | (x & 1)] += *pixel;
+            pixel++;
+          }
         }
         totalpixels += area.size * dim.y;
       }
