@@ -38,7 +38,8 @@ public:
   explicit CiffParser(Buffer* input);
 
   void parseData();
-  RawDecoder* getDecoder(const CameraMetaData* meta = nullptr) override;
+  std::unique_ptr<RawDecoder>
+  getDecoder(const CameraMetaData* meta = nullptr) override;
 
   /* Returns the Root IFD - this object still retains ownership */
   CiffIFD* RootIFD() const { return mRootIFD.get(); }

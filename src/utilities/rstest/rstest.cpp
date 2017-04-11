@@ -70,7 +70,6 @@ using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
 using rawspeed::Buffer;
 using rawspeed::RawParser;
-using rawspeed::RawDecoder;
 using rawspeed::RawImage;
 using rawspeed::uchar8;
 using rawspeed::uint32;
@@ -327,8 +326,7 @@ size_t process(const string& filename, const CameraMetaData* metadata,
   Timer t;
 
   RawParser parser(map.get());
-  unique_ptr<RawDecoder> decoder =
-      unique_ptr<RawDecoder>(parser.getDecoder(metadata));
+  auto decoder(parser.getDecoder(metadata));
   // RawDecoder* decoder = parseRaw( map );
 
   decoder->failOnUnknown = false;

@@ -20,25 +20,24 @@
 */
 
 #include "parsers/CiffParser.h"
-#include "common/Common.h"               // for trimSpaces
+#include "common/Common.h"               // for make_unique, trimSpaces
 #include "decoders/CrwDecoder.h"         // for CrwDecoder
+#include "decoders/RawDecoder.h"         // for RawDecoder
 #include "io/Buffer.h"                   // for Buffer
-#include "parsers/CiffParserException.h" // for ThrowCPE, CiffParserException
+#include "parsers/CiffParserException.h" // for CiffParserException (ptr only)
 #include "tiff/CiffEntry.h"              // for CiffEntry
 #include "tiff/CiffIFD.h"                // for CiffIFD
 #include "tiff/CiffTag.h"                // for CiffTag::CIFF_MAKEMODEL
-#include <map>                           // for map
-#include <memory>                        // for unique_ptr
-#include <string>                        // for operator==, allocator, basi...
-#include <utility>                       // for pair
+#include <map>                           // for map, map<>::mapped_type
+#include <memory>                        // for unique_ptr, default_delete
+#include <string>                        // for operator==, basic_string
+#include <utility>                       // for move, pair
 #include <vector>                        // for vector
 
 using std::vector;
 using std::string;
 
 namespace rawspeed {
-
-class RawDecoder;
 
 CiffParser::CiffParser(Buffer* inputData) : RawParser(inputData) {}
 
@@ -53,7 +52,7 @@ void CiffParser::parseData() {
   mRootIFD = make_unique<CiffIFD>(nullptr, mInput, data[2], mInput->getSize());
 }
 
-RawDecoder* CiffParser::getDecoder(const CameraMetaData* meta) {
+std::unique_ptr<RawDecoder> CiffParser::getDecoder(const CameraMetaData* meta) {
   if (!mRootIFD)
     parseData();
 
@@ -64,7 +63,7 @@ RawDecoder* CiffParser::getDecoder(const CameraMetaData* meta) {
     for (auto &potential : potentials) {
       string make = trimSpaces(potential->getEntry(CIFF_MAKEMODEL)->getString());
       if (make == "Canon") {
-        return new CrwDecoder(move(mRootIFD), mInput);
+        return make_unique<CrwDecoder>(move(mRootIFD), mInput);
       }
     }
   }

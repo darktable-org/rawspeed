@@ -23,6 +23,7 @@
 #include "common/Common.h"     // for uint32
 #include "parsers/RawParser.h" // for RawParser
 #include <map>                 // for map
+#include <memory>              // for unique_ptr
 #include <string>              // for string
 
 namespace rawspeed {
@@ -83,14 +84,15 @@ public:
   explicit X3fParser(Buffer* file);
   ~X3fParser() override;
 
-  RawDecoder* getDecoder(const CameraMetaData* meta = nullptr) override;
+  std::unique_ptr<RawDecoder>
+  getDecoder(const CameraMetaData* meta = nullptr) override;
 
 protected:
   void readDirectory();
   std::string getId();
   void freeObjects();
   ByteStream *bytes;
-  X3fDecoder *decoder;
+  std::unique_ptr<X3fDecoder> decoder;
 };
 
 } // namespace rawspeed

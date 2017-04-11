@@ -22,21 +22,23 @@
 
 #include "parsers/RawParser.h" // for RawParser
 #include "tiff/TiffIFD.h"      // for TiffRootIFDOwner
+#include <memory>              // for unique_ptr
 
 namespace rawspeed {
 
 class Buffer;
 
-class RawDecoder;
-
 class CameraMetaData;
+
+class RawDecoder;
 
 class FiffParser final : public RawParser {
 public:
   explicit FiffParser(Buffer* input);
 
   void parseData();
-  RawDecoder* getDecoder(const CameraMetaData* meta = nullptr) override;
+  std::unique_ptr<RawDecoder>
+  getDecoder(const CameraMetaData* meta = nullptr) override;
 
 protected:
   TiffRootIFDOwner rootIFD;

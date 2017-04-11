@@ -19,13 +19,15 @@
 */
 
 #include "parsers/X3fParser.h"
-#include "common/Common.h"                // for uint32, uchar8
+#include "common/Common.h"                // for uint32, uchar8, make_unique
+#include "decoders/RawDecoder.h"          // for RawDecoder
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "decoders/X3fDecoder.h"          // for X3fDecoder
 #include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/Endianness.h"                // for getHostEndianness, Endiann...
 #include "io/IOException.h"               // for IOException
+#include <algorithm>                      // for move
 #include <cassert>                        // for assert
 #include <cstring>                        // for memset
 #include <map>                            // for map, map<>::mapped_type
@@ -58,7 +60,7 @@ X3fParser::X3fParser(Buffer* file) : RawParser(file) {
     bytes->skipBytes(16 + 4);
 
     bytes->setPosition(0);
-    decoder = new X3fDecoder(file);
+    decoder = make_unique<X3fDecoder>(file);
     readDirectory();
   } catch (IOException& e) {
     ThrowRDE("IO Error while reading header: %s", e.what());
@@ -70,8 +72,6 @@ X3fParser::X3fParser(Buffer* file) : RawParser(file) {
 
 void X3fParser::freeObjects() {
   delete bytes;
-  delete decoder;
-  decoder = nullptr;
   bytes = nullptr;
 }
 
@@ -115,12 +115,10 @@ void X3fParser::readDirectory()
   }
 }
 
-RawDecoder* X3fParser::getDecoder(const CameraMetaData* meta) {
+std::unique_ptr<RawDecoder> X3fParser::getDecoder(const CameraMetaData* meta) {
   if (nullptr == decoder)
     ThrowRDE("No decoder found!");
-  RawDecoder *ret = decoder;
-  decoder = nullptr;
-  return ret;
+  return std::move(decoder);
 }
 
 X3fDirectory::X3fDirectory( ByteStream *bytes )

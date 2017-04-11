@@ -22,10 +22,12 @@
 
 #include "parsers/FiffParser.h"
 #include "common/Common.h"               // for make_unique, uint32, uchar8
+#include "decoders/RawDecoder.h"         // for RawDecoder
 #include "io/Buffer.h"                   // for Buffer
 #include "io/ByteStream.h"               // for ByteStream
 #include "io/Endianness.h"               // for getU32BE, getHostEndianness
 #include "parsers/FiffParserException.h" // for ThrowFPE
+#include "parsers/RawParser.h"           // for RawParser
 #include "parsers/TiffParser.h" // for TiffParser::parse, TiffParser::makeDecoder
 #include "parsers/TiffParserException.h" // for TiffParserException
 #include "tiff/TiffEntry.h"              // for TiffEntry, TiffDataType::TI...
@@ -38,8 +40,6 @@
 using std::numeric_limits;
 
 namespace rawspeed {
-
-class RawDecoder;
 
 FiffParser::FiffParser(Buffer* inputData) : RawParser(inputData) {}
 
@@ -114,7 +114,7 @@ void FiffParser::parseData() {
   rootIFD->add(move(subIFD));
 }
 
-RawDecoder* FiffParser::getDecoder(const CameraMetaData* meta) {
+std::unique_ptr<RawDecoder> FiffParser::getDecoder(const CameraMetaData* meta) {
   if (!rootIFD)
     parseData();
 

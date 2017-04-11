@@ -116,7 +116,6 @@ using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
 using rawspeed::Buffer;
 using rawspeed::RawParser;
-using rawspeed::RawDecoder;
 using rawspeed::RawImage;
 using rawspeed::uchar8;
 using rawspeed::uint32;
@@ -161,7 +160,7 @@ int main(int argc, char *argv[]) {
 
     RawParser t(m.get());
 
-    std::unique_ptr<RawDecoder> d(t.getDecoder(meta.get()));
+    auto d(t.getDecoder(meta.get()));
 
     if (!d.get()) {
       fprintf(stderr, "ERROR: Couldn't get a RawDecoder instance\n");

@@ -36,6 +36,7 @@
 #include "decoders/OrfDecoder.h"         // for OrfDecoder
 #include "decoders/PefDecoder.h"         // for PefDecoder
 #include "decoders/RafDecoder.h"         // for RafDecoder
+#include "decoders/RawDecoder.h"         // for RawDecoder
 #include "decoders/Rw2Decoder.h"         // for Rw2Decoder
 #include "decoders/SrwDecoder.h"         // for SrwDecoder
 #include "decoders/ThreefrDecoder.h"     // for ThreefrDecoder
@@ -53,8 +54,6 @@
 using std::string;
 
 namespace rawspeed {
-
-class RawDecoder;
 
 TiffRootIFDOwner TiffParser::parse(const Buffer& data) {
   ByteStream bs(data, 0);
@@ -75,14 +74,15 @@ TiffRootIFDOwner TiffParser::parse(const Buffer& data) {
   return root;
 }
 
-RawDecoder* TiffParser::makeDecoder(TiffRootIFDOwner root, Buffer& data) {
+std::unique_ptr<RawDecoder> TiffParser::makeDecoder(TiffRootIFDOwner root,
+                                                    Buffer& data) {
   Buffer* mInput = &data;
   if (!root)
     ThrowTPE("TiffIFD is null.");
 
   if (root->hasEntryRecursive(DNGVERSION)) {  // We have a dng image entry
     try {
-      return new DngDecoder(move(root), mInput);
+      return make_unique<DngDecoder>(move(root), mInput);
     } catch (RawspeedException& e) {
       //TODO: remove this exception type conversion
       ThrowTPE("%s", e.what());
@@ -95,54 +95,54 @@ RawDecoder* TiffParser::makeDecoder(TiffRootIFDOwner root, Buffer& data) {
     string model = id.model;
 
     if (make == "Canon") {
-      return new Cr2Decoder(move(root), mInput);
+      return make_unique<Cr2Decoder>(move(root), mInput);
     }
     if (make == "FUJIFILM") {
-      return new RafDecoder(move(root), mInput);
+      return make_unique<RafDecoder>(move(root), mInput);
     }
     if (make == "NIKON CORPORATION" || make == "NIKON") {
-      return new NefDecoder(move(root), mInput);
+      return make_unique<NefDecoder>(move(root), mInput);
     }
     if (make == "OLYMPUS IMAGING CORP." || make == "OLYMPUS CORPORATION" ||
         make == "OLYMPUS OPTICAL CO.,LTD") {
-      return new OrfDecoder(move(root), mInput);
+      return make_unique<OrfDecoder>(move(root), mInput);
     }
     if (make == "SONY") {
-      return new ArwDecoder(move(root), mInput);
+      return make_unique<ArwDecoder>(move(root), mInput);
     }
     if (make == "PENTAX Corporation" || make == "RICOH IMAGING COMPANY, LTD." ||
         make == "PENTAX") {
-      return new PefDecoder(move(root), mInput);
+      return make_unique<PefDecoder>(move(root), mInput);
     }
     if (make == "Panasonic" || make == "LEICA") {
-      return new Rw2Decoder(move(root), mInput);
+      return make_unique<Rw2Decoder>(move(root), mInput);
     }
     if (make == "SAMSUNG") {
-      return new SrwDecoder(move(root), mInput);
+      return make_unique<SrwDecoder>(move(root), mInput);
     }
     if (make == "Mamiya-OP Co.,Ltd.") {
-      return new MefDecoder(move(root), mInput);
+      return make_unique<MefDecoder>(move(root), mInput);
     }
     if (make == "Kodak") {
       if (model == "DCS560C")
-        return new Cr2Decoder(move(root), mInput);
+        return make_unique<Cr2Decoder>(move(root), mInput);
 
-      return new DcrDecoder(move(root), mInput);
+      return make_unique<DcrDecoder>(move(root), mInput);
     }
     if (make == "KODAK") {
-      return new DcsDecoder(move(root), mInput);
+      return make_unique<DcsDecoder>(move(root), mInput);
     }
     if (make == "EASTMAN KODAK COMPANY") {
-      return new KdcDecoder(move(root), mInput);
+      return make_unique<KdcDecoder>(move(root), mInput);
     }
     if (make == "SEIKO EPSON CORP.") {
-      return new ErfDecoder(move(root), mInput);
+      return make_unique<ErfDecoder>(move(root), mInput);
     }
     if (make == "Hasselblad") {
-      return new ThreefrDecoder(move(root), mInput);
+      return make_unique<ThreefrDecoder>(move(root), mInput);
     }
     if (make == "Leaf" || make == "Phase One A/S") {
-      return new MosDecoder(move(root), mInput);
+      return make_unique<MosDecoder>(move(root), mInput);
     }
   } catch (const TiffParserException&) {
     // Last ditch effort to identify Leaf cameras that don't have a Tiff Make set
@@ -150,7 +150,7 @@ RawDecoder* TiffParser::makeDecoder(TiffRootIFDOwner root, Buffer& data) {
     if (softwareIFD) {
       string software = trimSpaces(softwareIFD->getString());
       if (software == "Camera Library") {
-        return new MosDecoder(move(root), mInput);
+        return make_unique<MosDecoder>(move(root), mInput);
       }
     }
   }
