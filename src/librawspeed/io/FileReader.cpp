@@ -84,7 +84,7 @@ std::unique_ptr<Buffer> FileReader::readFile() {
           std::numeric_limits<decltype(f_size.LowPart)>::max(),
       "once Buffer migrates to 64-bit index, this needs to be updated.");
 
-  if (HighPart > 0)
+  if (f_size.HighPart > 0)
     ThrowFIE("File is too big.");
   if (f_size.LowPart <= 0)
     ThrowFIE("File is 0 bytes.");
