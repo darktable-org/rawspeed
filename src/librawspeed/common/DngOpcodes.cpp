@@ -29,6 +29,7 @@
 #include "io/Endianness.h"                // for getHostEndianness, Endiann...
 #include "tiff/TiffEntry.h"               // for TiffEntry
 #include <algorithm>                      // for fill_n
+#include <cassert>                        // for assert
 #include <cmath>                          // for pow
 #include <stdexcept>                      // for out_of_range
 #include <tuple>                          // for tie, tuple
@@ -342,7 +343,9 @@ DngOpcodes::DngOpcodes(TiffEntry* entry) {
   // DNG opcodes are always stored in big-endian byte order.
   bs.setInNativeByteOrder(getHostEndianness() == big);
 
-  auto opcode_count = bs.getU32();
+  const auto opcode_count = bs.getU32();
+  opcodes.reserve(opcode_count);
+
   for (auto i = 0U; i < opcode_count; i++) {
     auto code = bs.getU32();
     bs.getU32(); // ignore version
@@ -374,6 +377,8 @@ DngOpcodes::DngOpcodes(TiffEntry* entry) {
     if (bs.getPosition() != expected_pos)
       ThrowRDE("Inconsistent length of opcode");
   }
+
+  assert(opcodes.size() == opcode_count);
 }
 
 // defined here as empty destrutor, otherwise we'd need a complete definition
