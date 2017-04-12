@@ -28,11 +28,13 @@
 #include <limits>               // for numeric_limits
 #include <memory>               // for unique_ptr
 
-#if !defined(__unix__) && !defined(__APPLE__)
+#if defined(__unix__) || defined(__APPLE__)
+#include <type_traits> // for make_unsigned
+#else
 #include <io.h>
 #include <tchar.h>
 #include <windows.h>
-#endif // !defined(__unix__) && !defined(__APPLE__)
+#endif
 
 namespace rawspeed {
 
@@ -49,13 +51,14 @@ std::unique_ptr<Buffer> FileReader::readFile() {
     ThrowFIE("Could not open file.");
   fseek(file, 0, SEEK_END);
   size = ftell(file);
-  if (size > std::numeric_limits<Buffer::size_type>::max()) {
-    fclose(file);
-    ThrowFIE("File is too big.");
-  }
   if (size <= 0) {
     fclose(file);
     ThrowFIE("File is 0 bytes.");
+  }
+  if (static_cast<std::make_unsigned<decltype(size)>::type>(size) >
+      std::numeric_limits<Buffer::size_type>::max()) {
+    fclose(file);
+    ThrowFIE("File is too big.");
   }
   fseek(file, 0, SEEK_SET);
 
