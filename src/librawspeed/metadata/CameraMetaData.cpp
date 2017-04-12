@@ -47,22 +47,15 @@ CameraMetaData::CameraMetaData(const char *docname) {
   }
 
   for (xml_node camera : doc.child("Cameras").children("Camera")) {
-    auto *cam = new Camera(camera);
+    const auto* cam = addCamera(make_unique<Camera>(camera));
 
-    if (!addCamera(cam))
+    if (cam == nullptr)
       continue;
 
     // Create cameras for aliases.
     for (uint32 i = 0; i < cam->aliases.size(); i++) {
-      addCamera(new Camera(cam, i));
+      addCamera(make_unique<Camera>(cam, i));
     }
-  }
-}
-
-CameraMetaData::~CameraMetaData() {
-  auto i = cameras.begin();
-  for (; i != cameras.end(); ++i) {
-    delete((*i).second);
   }
 }
 
@@ -79,7 +72,7 @@ static inline CameraId getId(const string& make, const string& model,
 const Camera* CameraMetaData::getCamera(const string& make, const string& model,
                                         const string& mode) const {
   auto camera = cameras.find(getId(make, model, mode));
-  return camera == cameras.end() ? nullptr : camera->second;
+  return camera == cameras.end() ? nullptr : camera->second.get();
 }
 
 const Camera* CameraMetaData::getCamera(const string& make,
@@ -96,7 +89,7 @@ const Camera* CameraMetaData::getCamera(const string& make,
   if (iter == cameras.end())
     return nullptr;
 
-  return iter->second;
+  return iter->second.get();
 }
 
 bool CameraMetaData::hasCamera(const string& make, const string& model,
@@ -115,32 +108,30 @@ CameraMetaData::hasChdkCamera(uint32 filesize) const {
   return chdkCameras.end() != chdkCameras.find(filesize);
 }
 
-bool CameraMetaData::addCamera( Camera* cam )
-{
+const Camera* CameraMetaData::addCamera(std::unique_ptr<Camera> cam) {
   auto id = getId(cam->make, cam->model, cam->mode);
   if (cameras.end() != cameras.find(id)) {
     writeLog(
         DEBUG_PRIO_WARNING,
         "CameraMetaData: Duplicate entry found for camera: %s %s, Skipping!",
         cam->make.c_str(), cam->model.c_str());
-    delete cam;
-    return false;
+    return nullptr;
   }
-  cameras[id] = cam;
+  cameras[id] = std::move(cam);
 
-  if (string::npos != cam->mode.find("chdk")) {
-    auto filesize_hint = cam->hints.get("filesize", string());
+  if (string::npos != cameras[id]->mode.find("chdk")) {
+    auto filesize_hint = cameras[id]->hints.get("filesize", string());
     if (filesize_hint.empty()) {
       writeLog(DEBUG_PRIO_WARNING,
                "CameraMetaData: CHDK camera: %s %s, no \"filesize\" hint set!",
-               cam->make.c_str(), cam->model.c_str());
+               cameras[id]->make.c_str(), cameras[id]->model.c_str());
     } else {
-      chdkCameras[stoi(filesize_hint)] = cam;
+      chdkCameras[stoi(filesize_hint)] = cameras[id].get();
       // writeLog(DEBUG_PRIO_WARNING, "CHDK camera: %s %s size:%u",
-      // cam->make.c_str(), cam->model.c_str(), size);
+      // cameras[id]->make.c_str(), cameras[id]->model.c_str(), size);
     }
   }
-  return true;
+  return cameras[id].get();
 }
 
 void CameraMetaData::disableMake(const string &make) {

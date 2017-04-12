@@ -22,6 +22,7 @@
 
 #include "common/Common.h" // for uint32
 #include <map>             // for map
+#include <memory>          // for unique_ptr
 #include <string>          // for string
 #include <tuple>           // for tuple
 
@@ -44,8 +45,8 @@ class CameraMetaData final {
 public:
   CameraMetaData() = default;
   explicit CameraMetaData(const char* docname);
-  ~CameraMetaData();
-  std::map<CameraId, Camera*> cameras;
+
+  std::map<CameraId, std::unique_ptr<Camera>> cameras;
   std::map<uint32,Camera*> chdkCameras;
 
   // searches for camera with given make + model + mode
@@ -64,7 +65,7 @@ public:
   void disableCamera(const std::string &make, const std::string &model);
 
 protected:
-  bool addCamera(Camera* cam);
+  const Camera* addCamera(std::unique_ptr<Camera> cam);
 };
 
 } // namespace rawspeed
