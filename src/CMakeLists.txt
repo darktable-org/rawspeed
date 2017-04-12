@@ -111,6 +111,8 @@ else()
   message(STATUS "ZLIB is disabled, DNG deflate support won't be available.")
 endif()
 
+include(compiler-warnings)
+
 include(memory-align-alloc)
 include(thread-local)
 

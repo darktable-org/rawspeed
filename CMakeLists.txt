@@ -98,7 +98,6 @@ endif()
 
 include(compiler-versions)
 include(compiler-flags)
-include(compiler-warnings)
 
 add_custom_target(check ALL)
 add_custom_target(dependencies ALL)
