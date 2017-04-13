@@ -53,11 +53,25 @@ void Cr2Decompressor::decodeScan()
     if (mRaw->getCpp() != frame.cps)
       ThrowRDE("Subsampled component count does not match image.");
 
-    if (frame.cps != 3 || frame.compInfo[0].superH != 2 ||
-        (frame.compInfo[0].superV != 2 && frame.compInfo[0].superV != 1) ||
-        frame.compInfo[1].superH != 1 || frame.compInfo[1].superV != 1 ||
-        frame.compInfo[2].superH != 1 || frame.compInfo[2].superV != 1)
-      ThrowRDE("Unsupported subsampling");
+    if (frame.cps != 3)
+      ThrowRDE("Unsupported number of subsampled components: %u", frame.cps);
+
+    // see http://lclevy.free.fr/cr2/#sraw for overview table
+    bool isSupported = frame.compInfo[0].superH == 2;
+
+    isSupported = isSupported && (frame.compInfo[0].superV == 1 ||
+                                  frame.compInfo[0].superV == 2);
+
+    for (uint32 i = 1; i < frame.cps; i++)
+      isSupported = isSupported && frame.compInfo[i].superH == 1 &&
+                    frame.compInfo[i].superV == 1;
+
+    if (!isSupported) {
+      ThrowRDE("Unsupported subsampling ([[%u, %u], [%u, %u], [%u, %u]])",
+               frame.compInfo[0].superH, frame.compInfo[0].superV,
+               frame.compInfo[1].superH, frame.compInfo[1].superV,
+               frame.compInfo[2].superH, frame.compInfo[2].superV);
+    }
 
     if (frame.compInfo[0].superV == 2)
       decodeN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
