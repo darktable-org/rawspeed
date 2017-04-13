@@ -36,7 +36,7 @@ extern "C" int rawspeed_get_number_of_processor_cores() {
   return omp_get_num_procs();
 }
 #else
-iextern "C" nt __attribute__((const)) rawspeed_get_number_of_processor_cores() {
+extern "C" int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
   return 1;
 }
 #endif
