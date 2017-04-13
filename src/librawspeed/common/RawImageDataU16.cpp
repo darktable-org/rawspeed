@@ -279,7 +279,7 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
     for (uint32 x = 0; x < gw; x++) {
       __m128i pix_high;
       __m128i temp;
-      _mm_prefetch((char*)(pixel + 1), _MM_HINT_T0);
+      _mm_prefetch(reinterpret_cast<char*>(pixel + 1), _MM_HINT_T0);
       __m128i pix_low = _mm_load_si128(pixel);
       // Subtract black
       pix_low = _mm_subs_epu16(pix_low, ssesub);

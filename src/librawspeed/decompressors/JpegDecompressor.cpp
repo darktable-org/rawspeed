@@ -52,7 +52,8 @@ namespace rawspeed {
 
 // FIXME: some libjpeg versions discard const qual for the input data pointer
 // should this be a cmake check?
-#define JPEG_MEMSRC(A, B, C) jpeg_mem_src(A, const_cast<unsigned char*>(B), C)
+#define JPEG_MEMSRC(A, B, C)                                                   \
+  jpeg_mem_src(A, const_cast<unsigned char*>(B), C) // NOLINT
 
 #else
 
@@ -121,6 +122,7 @@ void JpegDecompressor::decode(uint32 offX,
   vector<JSAMPROW> buffer(1);
 
   const auto size = input.getRemainSize();
+
   JPEG_MEMSRC(&dinfo, input.getData(size), size);
 
   if (JPEG_HEADER_OK != jpeg_read_header(&dinfo, static_cast<boolean>(true)))

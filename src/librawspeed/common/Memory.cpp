@@ -75,7 +75,7 @@ void* alignedMalloc(size_t size, size_t alignment) {
   assert(alignment <= 16);
 #endif
 
-  ptr = malloc(size);
+  ptr = malloc(size); // NOLINT
 #endif
 
   assert(isAligned(ptr, alignment));
@@ -89,7 +89,7 @@ void alignedFree(void* ptr) {
 #elif defined(HAVE_ALIGNED_MALLOC)
   _aligned_free(ptr);
 #else
-  free(ptr);
+  free(ptr);                    // NOLINT
 #endif
 }
 
@@ -100,7 +100,7 @@ void alignedFreeConstPtr(const void* ptr) {
 #elif defined(HAVE_ALIGNED_MALLOC)
   _aligned_free(const_cast<void*>(ptr));
 #else
-  free(const_cast<void*>(ptr));
+  free(const_cast<void*>(ptr)); // NOLINT
 #endif
 }
 
