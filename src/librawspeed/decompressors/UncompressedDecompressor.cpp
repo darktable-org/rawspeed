@@ -227,9 +227,7 @@ void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
 
   static_assert(bits == 12 && pack == 4, "wrong pack");
 
-  static_assert((bits == 12 && mask == 0x0f) || (bits == 14 && mask == 0x3f) ||
-                    (bits == 16 && mask == 0xff),
-                "wrong mask");
+  static_assert(bits == 12 && mask == 0x0f, "wrong mask");
 
   uint32 perline = bytesPerLine(w, false);
 
@@ -316,9 +314,9 @@ void UncompressedDecompressor::decodeRawUnpacked(uint32 w, uint32 h) {
   static constexpr const auto shift = 16 - bits;
   static constexpr const auto mask = (1 << (8 - shift)) - 1;
 
-  static_assert((bits == 12 && mask == 0x0f) || (bits == 14 && mask == 0x3f) ||
-                    (bits == 16 && mask == 0xff),
-                "wrong mask");
+  static_assert((bits == 12 && mask == 0x0f) || bits != 12, "wrong mask");
+  static_assert((bits == 14 && mask == 0x3f) || bits != 14, "wrong mask");
+  static_assert((bits == 16 && mask == 0xff) || bits != 16, "wrong mask");
 
   sanityCheck(w, &h, 2);
 
