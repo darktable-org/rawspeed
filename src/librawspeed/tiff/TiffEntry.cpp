@@ -105,9 +105,19 @@ bool __attribute__((pure)) TiffEntry::isString() const {
 }
 
 bool __attribute__((pure)) TiffEntry::isFloat() const {
-  return  (type == TIFF_FLOAT || type == TIFF_DOUBLE || type == TIFF_RATIONAL ||
-           type == TIFF_SRATIONAL || type == TIFF_LONG || type == TIFF_SLONG ||
-           type == TIFF_SHORT || type == TIFF_SSHORT);
+  switch (type) {
+  case TIFF_FLOAT:
+  case TIFF_DOUBLE:
+  case TIFF_RATIONAL:
+  case TIFF_SRATIONAL:
+  case TIFF_LONG:
+  case TIFF_SLONG:
+  case TIFF_SHORT:
+  case TIFF_SSHORT:
+    return true;
+  default:
+    return false;
+  }
 }
 
 uchar8 TiffEntry::getByte(uint32 index) const {
