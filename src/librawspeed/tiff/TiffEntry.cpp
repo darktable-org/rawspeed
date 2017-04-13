@@ -146,15 +146,21 @@ short16 TiffEntry::getI16(uint32 index) const {
 uint32 TiffEntry::getU32(uint32 index) const {
   if (type == TIFF_SHORT)
     return getU16(index);
-  if (!(type == TIFF_LONG || type == TIFF_OFFSET || type == TIFF_BYTE ||
-        type == TIFF_UNDEFINED || type == TIFF_RATIONAL ||
-        type == TIFF_SRATIONAL)) {
+
+  switch (type) {
+  case TIFF_LONG:
+  case TIFF_OFFSET:
+  case TIFF_BYTE:
+  case TIFF_UNDEFINED:
+  case TIFF_RATIONAL:
+  case TIFF_SRATIONAL:
+    return data.peek<uint32>(index);
+  default:
     ThrowTPE("Wrong type %u encountered. Expected Long, Offset, Rational or "
              "Undefined on 0x%x",
              type, tag);
+    break;
   }
-
-  return data.peek<uint32>(index);
 }
 
 int32 TiffEntry::getI32(uint32 index) const {
