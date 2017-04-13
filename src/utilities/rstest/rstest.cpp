@@ -254,8 +254,22 @@ void writePFM(const RawImage& raw, const string& fn) {
 
   // make sure that data starts at aligned offset. for sse
   static const auto dataAlignment = 16;
-  const int sseLen = roundUp(len, dataAlignment);
-  len += fprintf(f, "%0*i\n", sseLen - len - 1, 0);
+
+  // regardless of padding, we need to write \n separator
+  const int realLen = len + 1;
+  // the first byte after that \n will be aligned
+  const int paddedLen = roundUp(realLen, dataAlignment);
+  assert(paddedLen > len);
+  assert(isAligned(paddedLen, dataAlignment));
+
+  // how much padding?
+  const int padding = paddedLen - realLen;
+  assert(padding >= 0);
+  assert(isAligned(realLen + padding, dataAlignment));
+
+  // and actually write padding + new line
+  len += fprintf(f, "%0*i\n", padding, 0);
+  assert(paddedLen == len);
 
   // did we write a multiple of an alignment value?
   assert(isAligned(len, dataAlignment));
