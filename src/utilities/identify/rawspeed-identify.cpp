@@ -272,7 +272,7 @@ int main(int argc, char *argv[]) {
               sum / static_cast<double>(dimUncropped.y * dimUncropped.x));
     }
   } catch (RawspeedException& e) {
-    printf("ERROR: [rawspeed] %s\n", e.what());
+    fprintf(stderr, "ERROR: [rawspeed] %s\n", e.what());
 
     /* if an exception is raised lets not retry or handle the
      specific ones, consider the file as corrupted */

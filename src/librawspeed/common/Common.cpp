@@ -34,7 +34,7 @@ void writeLog(DEBUG_PRIO priority, const char* format, ...) {
 #ifndef _DEBUG
   if (priority < DEBUG_PRIO_INFO)
 #endif // _DEBUG
-    printf("%s", "RawSpeed:");
+    fprintf(stdout, "%s", "RawSpeed:");
 
   va_list args;
   va_start(args, format);
@@ -42,14 +42,14 @@ void writeLog(DEBUG_PRIO priority, const char* format, ...) {
 #ifndef _DEBUG
   if(priority < DEBUG_PRIO_INFO)
 #endif // _DEBUG
-    vprintf(format, args);
+    vfprintf(stdout, format, args);
 
   va_end(args);
 
 #ifndef _DEBUG
   if (priority < DEBUG_PRIO_INFO)
 #endif // _DEBUG
-    printf("%s", "\n");
+    fprintf(stdout, "%s", "\n");
 }
 
 } // namespace rawspeed

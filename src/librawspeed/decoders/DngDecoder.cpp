@@ -145,20 +145,6 @@ void DngDecoder::parseCFA(const TiffIFD* raw) {
   // Does NOT contain dimensions as some documents state
   TiffEntry* cPat = raw->getEntry(CFAPATTERN);
 
-  // Map from the order in the image, to the position in the CFA
-  /*
-  if (raw->hasEntry(CFAPLANECOLOR)) {
-    TiffEntry* e = raw->getEntry(CFAPLANECOLOR);
-
-    const unsigned char* cPlaneOrder = e->getData();
-    printf("Planecolor: ");
-    for (uint32 i = 0; i < e->count; i++) {
-      printf("%u,",cPlaneOrder[i]);
-    }
-    printf("\n");
-  }
-  */
-
   iPoint2D cfaSize(cfadim->getU32(1), cfadim->getU32(0));
   if (cfaSize.area() != cPat->count) {
     ThrowRDE("CFA pattern dimension and pattern count does not "
