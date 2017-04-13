@@ -171,7 +171,8 @@ public:
       for (int i = 0; i < nCodesPerLength[l]; ++i) {
         assert(code <= 0xffff);
         code_len.push_back(l);
-        codes.push_back(code++);
+        codes.push_back(code);
+        code++;
       }
       code <<= 1;
     }
