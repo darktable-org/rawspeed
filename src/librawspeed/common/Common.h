@@ -32,7 +32,7 @@
 #include <type_traits>      // for enable_if, is_pointer
 #include <vector>           // for vector
 
-int rawspeed_get_number_of_processor_cores();
+extern "C" int rawspeed_get_number_of_processor_cores();
 
 namespace rawspeed {
 

@@ -44,9 +44,11 @@
 
 // define this function, it is only declared in rawspeed:
 #ifdef _OPENMP
-int rawspeed_get_number_of_processor_cores() { return omp_get_num_procs(); }
+extern "C" int rawspeed_get_number_of_processor_cores() {
+  return omp_get_num_procs();
+}
 #else
-int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
+extern "C" int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
   return 1;
 }
 #endif
