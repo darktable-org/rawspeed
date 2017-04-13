@@ -159,7 +159,7 @@ void SrwDecoder::decodeCompressed( const TiffIFD* raw )
         // Upward prediction
         // First we decode even pixels
         for (int c = 0; c < 16; c += 2) {
-          int b = len[(c >> 3)];
+          int b = len[c >> 3];
           int32 adj = 0;
           if (b)
             adj = (static_cast<int32>(bits.getBits(b)) << (32 - b) >> (32 - b));
@@ -180,7 +180,7 @@ void SrwDecoder::decodeCompressed( const TiffIFD* raw )
         // First we decode even pixels
         int pred_left = x ? img[-2] : 128;
         for (int c = 0; c < 16; c += 2) {
-          int b = len[(c >> 3)];
+          int b = len[c >> 3];
           int32 adj = 0;
           if (b)
             adj = (static_cast<int32>(bits.getBits(b)) << (32 - b) >> (32 - b));

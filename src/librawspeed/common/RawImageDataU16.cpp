@@ -484,7 +484,7 @@ void RawImageDataU16::doLookup( int start_y, int end_y )
           uint32 base = lookup & 0xffff;
           uint32 delta = lookup >> 16;
           v = 15700 *(v & 65535) + (v >> 16);
-          uint32 pix = base + (((delta * (v&2047) + 1024)) >> 12);
+          uint32 pix = base + ((delta * (v & 2047) + 1024) >> 12);
           *pixel = pix;
           pixel++;
         }
