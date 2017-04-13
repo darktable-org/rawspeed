@@ -68,12 +68,8 @@ namespace rawspeed {
         1111111           0xff
  */
 
-HuffmanTable CrwDecompressor::makeDecoder(int n, const uchar8* source) {
-  assert(n >= 0 && n <= 1);
+HuffmanTable CrwDecompressor::makeDecoder(const uchar8* source) {
   assert(source);
-
-  if (n < 0 || n > 1)
-    ThrowRDE("Invalid table number specified");
 
   HuffmanTable ht;
   auto count = ht.setNCodesPerLength(Buffer(source, 16));
@@ -145,7 +141,7 @@ array<HuffmanTable, 2> CrwDecompressor::initHuffTables(uint32 table) {
        0xe2, 0x82, 0xf1, 0xa3, 0xc2, 0xa1, 0xc1, 0xe3, 0xa2, 0xe1, 0xff, 0xff}};
 
   array<HuffmanTable, 2> mHuff = {
-      {makeDecoder(0, first_tree[table]), makeDecoder(1, second_tree[table])}};
+      {makeDecoder(first_tree[table]), makeDecoder(second_tree[table])}};
 
   return mHuff;
 }

@@ -40,7 +40,7 @@ public:
                          uint32 dec_table, bool lowbits);
 
 private:
-  static HuffmanTable makeDecoder(int n, const uchar8* source);
+  static HuffmanTable makeDecoder(const uchar8* source);
   static std::array<HuffmanTable, 2> initHuffTables(uint32 table);
 
   inline static void decodeBlock(std::array<int, 64>* diffBuf,
