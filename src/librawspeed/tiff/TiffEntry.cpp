@@ -161,6 +161,7 @@ uint32 TiffEntry::getU32(uint32 index) const {
              type, tag);
     break;
   }
+  __builtin_unreachable();
 }
 
 int32 TiffEntry::getI32(uint32 index) const {
