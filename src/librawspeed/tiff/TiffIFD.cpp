@@ -145,7 +145,7 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(TiffEntry* t)
     makeEntry = p->getEntryRecursive(MAKE);
     p = p->parent;
   } while (!makeEntry && p);
-  string make = makeEntry ? trimSpaces(makeEntry->getString()) : "";
+  string make = makeEntry != nullptr ? trimSpaces(makeEntry->getString()) : "";
 
   ByteStream bs = t->getData();
 

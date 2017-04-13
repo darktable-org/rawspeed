@@ -270,7 +270,7 @@ void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
           len++;
 
       int diff = bits.getBits(len);
-      diff = len ? HuffmanTable::signExtended(diff, len) : diff;
+      diff = len != 0 ? HuffmanTable::signExtended(diff, len) : diff;
       sum += diff;
       assert(!(sum >> 12));
 
@@ -480,7 +480,7 @@ void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
         mRaw->setWithLookUp(p << 1, reinterpret_cast<uchar8*>(&dest[x + i * 2]),
                             &random);
       }
-      x += x & 1 ? 31 : 1;  // Skip to next 32 pixels
+      x += ((x & 1) != 0) ? 31 : 1; // Skip to next 32 pixels
     }
   }
 }

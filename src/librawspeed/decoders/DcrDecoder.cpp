@@ -164,7 +164,7 @@ void DcrDecoder::decodeKodak65000Segment(ByteStream &input, ushort16 *out, uint3
     uint32 diff = static_cast<uint32>(bitbuf) & (0xffff >> (16 - len));
     bitbuf >>= len;
     bits -= len;
-    diff = len ? HuffmanTable::signExtended(diff, len) : diff;
+    diff = len != 0 ? HuffmanTable::signExtended(diff, len) : diff;
     out[i] = diff;
   }
 }

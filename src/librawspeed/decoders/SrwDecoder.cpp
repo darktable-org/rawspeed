@@ -178,7 +178,7 @@ void SrwDecoder::decodeCompressed( const TiffIFD* raw )
       } else {
         // Left to right prediction
         // First we decode even pixels
-        int pred_left = x ? img[-2] : 128;
+        int pred_left = x != 0 ? img[-2] : 128;
         for (int c = 0; c < 16; c += 2) {
           int b = len[c >> 3];
           int32 adj = 0;
@@ -189,7 +189,7 @@ void SrwDecoder::decodeCompressed( const TiffIFD* raw )
             img[c] = adj + pred_left;
         }
         // Now we decode odd pixels
-        pred_left = x ? img[-1] : 128;
+        pred_left = x != 0 ? img[-1] : 128;
         for (int c = 1; c < 16; c += 2) {
           int b = len[2 | (c >> 3)];
           int32 adj = 0;
@@ -290,7 +290,7 @@ int32 SrwDecoder::samsungDiff(BitPumpMSB& pump,
   int32 diff = pump.getBits(len);
 
   // If the first bit is 0 we need to turn this into a negative number
-  diff = len ? HuffmanTable::signExtended(diff, len) : diff;
+  diff = len != 0 ? HuffmanTable::signExtended(diff, len) : diff;
 
   return diff;
 }
@@ -398,7 +398,7 @@ void SrwDecoder::decodeCompressed3(const TiffIFD* raw, int bits)
           if ((row+i) & 0x1) // Red or blue pixels use same color two lines up
             refpixel = img_up2 + i + slideOffset;
           else // Green pixel N uses Green pixel N from row above (top left or top right)
-            refpixel = img_up + i + slideOffset + ((i%2) ? -1 : 1);
+            refpixel = img_up + i + slideOffset + (((i % 2) != 0) ? -1 : 1);
 
           // In some cases we use as reference interpolation of this pixel and the next
           if (doAverage)

@@ -46,7 +46,7 @@ void FileWriter::writeFile(Buffer* filemap, uint32 size) {
     ThrowFIE("Could not open file.");
 
   const auto src = filemap->getData(0, filemap->getSize());
-  bytes_written = fwrite(src, 1, size ? size : filemap->getSize(), file);
+  bytes_written = fwrite(src, 1, size != 0 ? size : filemap->getSize(), file);
   fclose(file);
   if (size != bytes_written) {
     ThrowFIE("Could not write file.");
