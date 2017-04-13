@@ -35,6 +35,8 @@ class Buffer;
 
 class CiffIFD final {
   CiffIFD* parent;
+  Buffer* mFile;
+  uint32 depth;
 
 public:
   CiffIFD(CiffIFD* parent, Buffer* f, uint32 start, uint32 end,
@@ -57,10 +59,6 @@ public:
   std::vector<CiffIFD *> getIFDsWithTagWhere(CiffTag tag, const std::string &isValue);
   std::vector<CiffIFD*> getIFDsWithTagWhere(CiffTag tag, uint32 isValue);
   Buffer* getBuffer() { return mFile; }
-
-protected:
-  Buffer* mFile;
-  uint32 depth;
 };
 
 } // namespace rawspeed

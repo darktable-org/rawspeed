@@ -33,6 +33,11 @@
 namespace rawspeed {
 
 class DeflateDecompressor final : public AbstractDecompressor {
+  ByteStream input;
+  RawImage mRaw;
+  int predictor;
+  int bps;
+
 public:
   DeflateDecompressor(const Buffer& data, Buffer::size_type offset,
                       Buffer::size_type size, const RawImage& img,
@@ -42,12 +47,6 @@ public:
 
   void decode(unsigned char** uBuffer, int width, int height, uint32 offX,
               uint32 offY);
-
-protected:
-  ByteStream input;
-  RawImage mRaw;
-  int predictor;
-  int bps;
 };
 
 } // namespace rawspeed

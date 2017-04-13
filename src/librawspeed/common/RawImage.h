@@ -47,14 +47,7 @@ public:
     SCALE_VALUES = 1, FIX_BAD_PIXELS = 2, APPLY_LOOKUP = 3 | 0x1000, FULL_IMAGE = 0x1000
   };
 
-  RawImageWorker(RawImageData *img, RawImageWorkerTask task, int start_y, int end_y);
-#ifdef HAVE_PTHREAD
-  ~RawImageWorker();
-  void startThread();
-  void waitForThread();
-#endif
-  void performTask();
-protected:
+private:
 #ifdef HAVE_PTHREAD
   pthread_t threadid;
   pthread_attr_t attr;
@@ -63,6 +56,16 @@ protected:
   RawImageWorkerTask task;
   int start_y;
   int end_y;
+
+public:
+  RawImageWorker(RawImageData* img, RawImageWorkerTask task, int start_y,
+                 int end_y);
+#ifdef HAVE_PTHREAD
+  ~RawImageWorker();
+  void startThread();
+  void waitForThread();
+#endif
+  void performTask();
 };
 
 void* RawImageWorkerThread(void* _this);
@@ -175,6 +178,9 @@ public:
   pthread_mutex_t mBadPixelMutex;   // Mutex for 'mBadPixelPositions, must be used if more than 1 thread is accessing vector
 #endif
 
+private:
+  uint32 dataRefCount = 0;
+
 protected:
   RawImageType dataType;
   RawImageData();
@@ -184,7 +190,6 @@ protected:
   virtual void fixBadPixel( uint32 x, uint32 y, int component = 0) = 0;
   void fixBadPixelsThread(int start_y, int end_y);
   void startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped );
-  uint32 dataRefCount = 0;
   uchar8* data = nullptr;
   uint32 cpp = 1; // Components per pixel
   uint32 bpp = 0; // Bytes per pixel.

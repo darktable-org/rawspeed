@@ -33,15 +33,14 @@ class CameraMetaData;
 class RawDecoder;
 
 class FiffParser final : public RawParser {
+  TiffRootIFDOwner rootIFD;
+
 public:
   explicit FiffParser(Buffer* input);
 
   void parseData();
   std::unique_ptr<RawDecoder>
   getDecoder(const CameraMetaData* meta = nullptr) override;
-
-protected:
-  TiffRootIFDOwner rootIFD;
 };
 
 } // namespace rawspeed

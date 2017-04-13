@@ -50,6 +50,15 @@ class CiffEntry
 {
   friend class CiffIFD;
 
+  CiffIFD* parent = nullptr;
+
+  uchar8* own_data;
+  const uchar8* data;
+#ifdef _DEBUG
+  int debug_intVal;
+  float debug_floatVal;
+#endif
+
 public:
   CiffEntry(Buffer* f, uint32 value_data, uint32 offset);
   ~CiffEntry();
@@ -73,14 +82,7 @@ public:
   bool __attribute__((pure)) isString();
 
 protected:
-  CiffIFD* parent = nullptr;
   std::string getValueAsString();
-  uchar8* own_data;
-  const uchar8* data;
-#ifdef _DEBUG
-  int debug_intVal;
-  float debug_floatVal;
-#endif
 };
 
 } // namespace rawspeed

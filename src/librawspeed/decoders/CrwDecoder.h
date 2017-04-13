@@ -33,6 +33,8 @@ class Buffer;
 class CameraMetaData;
 
 class CrwDecoder final : public RawDecoder {
+  std::unique_ptr<CiffIFD> mRootIFD;
+
 public:
   CrwDecoder(std::unique_ptr<CiffIFD> rootIFD, Buffer* file);
   RawImage decodeRawInternal() override;
@@ -40,7 +42,6 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 protected:
-  std::unique_ptr<CiffIFD> mRootIFD;
   int getDecoderVersion() const override { return 0; }
   static float canonEv(long in);
 };

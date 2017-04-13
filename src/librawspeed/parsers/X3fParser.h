@@ -80,6 +80,9 @@ public:
 };
 
 class X3fParser final : public RawParser {
+  ByteStream* bytes;
+  std::unique_ptr<X3fDecoder> decoder;
+
 public:
   explicit X3fParser(Buffer* file);
   ~X3fParser() override;
@@ -91,8 +94,6 @@ protected:
   void readDirectory();
   std::string getId();
   void freeObjects();
-  ByteStream *bytes;
-  std::unique_ptr<X3fDecoder> decoder;
 };
 
 } // namespace rawspeed

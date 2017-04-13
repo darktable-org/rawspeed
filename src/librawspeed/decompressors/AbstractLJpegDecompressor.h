@@ -138,6 +138,10 @@ public:
 };
 
 class AbstractLJpegDecompressor : public AbstractDecompressor {
+  // std::vector of unique HTs, to not recreate HT, but cache them
+  std::vector<std::unique_ptr<HuffmanTable>> huffmanTableStore;
+  HuffmanTable ht_;      // temporary table, used
+
 public:
   AbstractLJpegDecompressor(const Buffer& data, Buffer::size_type offset,
                             Buffer::size_type size, const RawImage& img)
@@ -181,10 +185,6 @@ protected:
   uint32 predictorMode = 0;
   uint32 Pt = 0;
   std::array<HuffmanTable*, 4> huff{{}}; // 4 pointers into the store
-  std::vector<std::unique_ptr<HuffmanTable>> huffmanTableStore; // std::vector of unique HTs
-
-private:
-  HuffmanTable ht_; // temporary table, used
 };
 
 } // namespace rawspeed

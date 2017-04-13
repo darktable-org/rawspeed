@@ -33,6 +33,8 @@ class Buffer;
 
 class RafDecoder final : public AbstractTiffDecoder
 {
+  bool alt_layout = false;
+
 public:
   // please revert _this_ commit, once IWYU can handle inheriting constructors
   // using AbstractTiffDecoder::AbstractTiffDecoder;
@@ -47,7 +49,6 @@ public:
 protected:
   int getDecoderVersion() const override { return 1; }
   void DecodeRaf();
-  bool alt_layout = false;
 };
 
 } // namespace rawspeed

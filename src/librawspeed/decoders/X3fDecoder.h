@@ -38,12 +38,29 @@ class CameraMetaData;
 class Buffer;
 
 class X3fDecoder final : public RawDecoder {
+  ByteStream* bytes = nullptr;
+  X3fImage* curr_image = nullptr;
+  int pred[3];
+  uint32 plane_sizes[3];
+  uint32 plane_offset[3];
+  iPoint2D planeDim[3];
+  uchar8 code_table[256];
+  int32 big_table[1 << 14];
+  uint32* line_offsets = nullptr;
+  ushort16* huge_table = nullptr;
+  std::array<short, 1024> curve;
+  uint32 max_len = 0;
+  std::string camera_make;
+  std::string camera_model;
+
 public:
   explicit X3fDecoder(Buffer* file);
   ~X3fDecoder() override;
+
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void checkSupportInternal(const CameraMetaData* meta) override;
+
   Buffer* getCompressedData() override;
   std::vector<X3fDirectory> mDirectory;
   std::vector<X3fImage> mImages;
@@ -51,33 +68,23 @@ public:
 
 protected:
   int getDecoderVersion() const override { return 1; }
+
   void decodeThreaded(RawDecoderThread *t) override;
+
   void readDirectory();
   std::string getId();
-  ByteStream* bytes = nullptr;
+
   bool hasProp(const char* key) {
     return mProperties.props.find(key) != mProperties.props.end();
   }
   std::string getProp(const char* key);
+
   void decompressSigma( X3fImage &image );
   void createSigmaTable(ByteStream *bytes, int codes);
   int SigmaDecode(BitPumpMSB *bits);
   std::string getIdAsString(ByteStream *bytes);
   void SigmaSkipOne(BitPumpMSB *bits);
   bool readName();
-  X3fImage* curr_image = nullptr;
-  int pred[3];
-  uint32 plane_sizes[3];
-  uint32 plane_offset[3];
-  iPoint2D planeDim[3];
-  uchar8 code_table[256];
-  int32 big_table[1<<14];
-  uint32* line_offsets = nullptr;
-  ushort16* huge_table = nullptr;
-  std::array<short, 1024> curve;
-  uint32 max_len = 0;
-  std::string camera_make;
-  std::string camera_model;
 };
 
 } // namespace rawspeed

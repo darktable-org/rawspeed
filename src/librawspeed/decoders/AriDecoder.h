@@ -32,6 +32,15 @@ class CameraMetaData;
 class Buffer;
 
 class AriDecoder final : public RawDecoder {
+  uint32 mWidth;
+  uint32 mHeight;
+  uint32 mIso;
+  std::string mModel;
+  std::string mEncoder;
+  uint32 mDataOffset;
+  uint32 mDataSize;
+  float mWB[3];
+
 public:
   explicit AriDecoder(Buffer* file);
   RawImage decodeRawInternal() override;
@@ -42,14 +51,6 @@ public:
 
 protected:
   int getDecoderVersion() const override { return 0; }
-  uint32 mWidth;
-  uint32 mHeight;
-  uint32 mIso;
-  std::string mModel;
-  std::string mEncoder;
-  uint32 mDataOffset;
-  uint32 mDataSize;
-  float mWB[3];
 };
 
 } // namespace rawspeed

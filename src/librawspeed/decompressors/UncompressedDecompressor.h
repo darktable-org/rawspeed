@@ -35,6 +35,9 @@ namespace rawspeed {
 class iPoint2D;
 
 class UncompressedDecompressor final : public AbstractDecompressor {
+  ByteStream input;
+  RawImage mRaw;
+
   // check buffer size, throw, or compute minimal height that can be decoded
   void sanityCheck(uint32* h, int bpl);
 
@@ -82,10 +85,6 @@ public:
 
   /* Faster version for reading unpacked data */
   template <int bits, Endianness e> void decodeRawUnpacked(uint32 w, uint32 h);
-
-protected:
-  ByteStream input;
-  RawImage mRaw;
 };
 
 } // namespace rawspeed

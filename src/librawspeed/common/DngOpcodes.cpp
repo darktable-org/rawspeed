@@ -128,21 +128,21 @@ public:
 // ****************************************************************************
 
 class DngOpcodes::ROIOpcode : public DngOpcodes::DngOpcode {
-protected:
-  uint32 top;
-  uint32 left;
-  uint32 bottom;
-  uint32 right;
+  iRectangle2D roi;
 
+protected:
   explicit ROIOpcode(ByteStream& bs) {
-    top = bs.getU32();
-    left = bs.getU32();
-    bottom = bs.getU32();
-    right = bs.getU32();
+    uint32 top = bs.getU32();
+    uint32 left = bs.getU32();
+    uint32 bottom = bs.getU32();
+    uint32 right = bs.getU32();
+
+    roi = iRectangle2D(left, top, right - left, bottom - top);
   }
 
+  const iRectangle2D& __attribute((pure)) getRoi() const { return roi; }
+
   void setup(const RawImage& ri) override {
-    iRectangle2D roi(left, top, right - left, bottom - top);
     iRectangle2D fullImage(0, 0, ri->dim.x, ri->dim.y);
 
     if (!roi.isThisInside(fullImage))
@@ -156,20 +156,18 @@ class DngOpcodes::TrimBounds final : public ROIOpcode {
 public:
   explicit TrimBounds(ByteStream& bs) : ROIOpcode(bs) {}
 
-  void apply(RawImage& ri) override {
-    ri->subFrame(iRectangle2D(left, top, right - left, bottom - top));
-  }
+  void apply(RawImage& ri) override { ri->subFrame(getRoi()); }
 };
 
 // ****************************************************************************
 
 class DngOpcodes::PixelOpcode : public ROIOpcode {
-protected:
   uint32 firstPlane;
   uint32 planes;
   uint32 rowPitch;
   uint32 colPitch;
 
+protected:
   explicit PixelOpcode(ByteStream& bs) : ROIOpcode(bs) {
     firstPlane = bs.getU32();
     planes = bs.getU32();
@@ -193,11 +191,12 @@ protected:
   // coordinates of the pixel value v.
   template <typename T, typename OP> void applyOP(RawImage& ri, OP op) {
     int cpp = ri->getCpp();
-    for (auto y = top; y < bottom; y += rowPitch) {
+    const iRectangle2D& ROI = getRoi();
+    for (auto y = ROI.getTop(); y < ROI.getBottom(); y += rowPitch) {
       auto* src = reinterpret_cast<T*>(ri->getData(0, y));
       // Add offset, so this is always first plane
       src += firstPlane;
-      for (auto x = left; x < right; x += colPitch) {
+      for (auto x = ROI.getLeft(); x < ROI.getRight(); x += colPitch) {
         for (auto p = 0U; p < planes; ++p)
           src[x * cpp + p] = op(x, y, src[x * cpp + p]);
       }
