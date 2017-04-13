@@ -459,8 +459,11 @@ void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
       int _min = bits.getBits(11);
       int _imax = bits.getBits(4);
       int _imin = bits.getBits(4);
-      int sh;
-      for (sh = 0; sh < 4 && 0x80 << sh <= _max - _min; sh++);
+
+      int sh = 0;
+      while ((sh < 4) && ((0x80 << sh) <= (_max - _min)))
+        sh++;
+
       for (int i = 0; i < 16; i++) {
         int p;
         if (i == _imax)
