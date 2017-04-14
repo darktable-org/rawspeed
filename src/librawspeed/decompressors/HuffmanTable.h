@@ -125,8 +125,10 @@ public:
     nCodesPerLength.resize(17);
     std::copy(data.begin(), data.end(), &nCodesPerLength[1]);
     // trim empty entries from the codes per length table on the right
-    while (nCodesPerLength.back() == 0)
+    while (!nCodesPerLength.empty() && nCodesPerLength.back() == 0)
       nCodesPerLength.pop_back();
+    if (nCodesPerLength.empty())
+      ThrowRDE("Codes-per-length table is empty");
     return std::accumulate(data.begin(), data.end(), 0);
   }
 
@@ -149,6 +151,7 @@ public:
     // store the codes themselfs (bit patterns found inside the stream)
     std::vector<ushort16> codes;  // index is just sequential number
 
+    assert(!nCodesPerLength.empty());
     int maxCodeLength = nCodesPerLength.size()-1;
 
     // precompute how much code entries there are
@@ -167,9 +170,13 @@ public:
     // Figure C.2: generate the codes themselves
     uint32 code = 0;
     for (int l = 1; l <= maxCodeLength; ++l) {
-      assert(nCodesPerLength[l] < (1<<l));
+      if (!(nCodesPerLength[l] < (1 << l)))
+        ThrowRDE("Corrupt Huffman");
+
       for (int i = 0; i < nCodesPerLength[l]; ++i) {
-        assert(code <= 0xffff);
+        if (!(code <= 0xffff))
+          ThrowRDE("Code is too big. Corrupt Huffman table");
+
         code_len.push_back(l);
         codes.push_back(code);
         code++;
@@ -204,6 +211,9 @@ public:
       ushort16 ul = ll | ((1 << (LookupDepth - code_l)) - 1);
       ushort16 diff_l = codeValues[i];
       for (ushort16 c = ll; c <= ul; c++) {
+        if (!(c < decodeLookup.size()))
+          ThrowRDE("Corrupt Huffman");
+
         if (!FlagMask || !fullDecode || diff_l + code_l > LookupDepth) {
           // lookup bit depth is too small to fit both the encoded length
           // and the final difference value.
@@ -256,7 +266,9 @@ public:
   // one to return the fully decoded diff.
   // All ifs depending on this bool will be optimized out by the compiler
   template<typename BIT_STREAM, bool FULL_DECODE> inline int decode(BIT_STREAM& bs) const {
-    // 32 is the absolute maximum combined length of code + diff
+    // ~~32 is the absolute maximum combined length of code + diff~~
+    // // FIXME: no it's not.
+
     // for processors supporting bmi2 instructions, using maxCodePlusDiffLength()
     // might be benifitial
     bs.fill(32);
@@ -274,6 +286,7 @@ public:
     if (len) {
       // if the flag bit is not set but len != 0, the payload is the number of bits to sign extend and return
       int l_diff = val >> PayloadShift;
+      // assert(len + l_diff <= 32); // FIXME: WTF???
       return FULL_DECODE ? signExtended(bs.getBitsNoFill(l_diff), l_diff) : l_diff;
     }
 
@@ -287,6 +300,9 @@ public:
 
     if (code_l >= maxCodeOL.size() || code > maxCodeOL[code_l])
       ThrowRDE("bad Huffman code: %u (len: %u)", code, code_l);
+
+    if (code < codeOffsetOL[code_l])
+      ThrowRDE("likely corrupt Huffman code: %u (len: %u)", code, code_l);
 
     int diff_l = codeValues[code - codeOffsetOL[code_l]];
 
