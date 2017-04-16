@@ -63,7 +63,7 @@ HuffmanTable NikonDecompressor::createHuffmanTable(uint32 huffSelect) {
   return ht;
 }
 
-void NikonDecompressor::decompress(RawImage& mRaw, ByteStream&& data,
+void NikonDecompressor::decompress(RawImage* mRaw, ByteStream&& data,
                                    ByteStream metadata, const iPoint2D& size,
                                    uint32 bitsPS, bool uncorrectedRawValues) {
   uint32 v0 = metadata.getByte();
@@ -119,19 +119,19 @@ void NikonDecompressor::decompress(RawImage& mRaw, ByteStream&& data,
   HuffmanTable ht = createHuffmanTable(huffSelect);
 
   if (!uncorrectedRawValues) {
-    mRaw->setTable(&curve[0], curve.size()-1, true);
+    mRaw->get()->setTable(&curve[0], curve.size() - 1, true);
   }
 
   BitPumpMSB bits(data);
-  uchar8 *draw = mRaw->getData();
-  uint32 pitch = mRaw->pitch;
+  uchar8* draw = mRaw->get()->getData();
+  uint32 pitch = mRaw->get()->pitch;
 
   int pLeft1 = 0;
   int pLeft2 = 0;
   uint32 cw = size.x / 2;
   uint32 random = bits.peekBits(24);
   //allow gcc to devirtualize the calls below
-  auto* rawdata = reinterpret_cast<RawImageDataU16*>(mRaw.get());
+  auto* rawdata = reinterpret_cast<RawImageDataU16*>(mRaw->get());
   for (uint32 y = 0; y < static_cast<unsigned>(size.y); y++) {
     if (split && y == split) {
       ht = createHuffmanTable(huffSelect + 1);
@@ -164,9 +164,9 @@ void NikonDecompressor::decompress(RawImage& mRaw, ByteStream&& data,
   }
 
   if (uncorrectedRawValues) {
-    mRaw->setTable(&curve[0], curve.size(), false);
+    mRaw->get()->setTable(&curve[0], curve.size(), false);
   } else {
-    mRaw->setTable(nullptr);
+    mRaw->get()->setTable(nullptr);
   }
 }
 

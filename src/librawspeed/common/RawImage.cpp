@@ -200,7 +200,7 @@ void RawImageData::setCpp(uint32 val) {
   bpp *= val;
 }
 
-uchar8* RawImageData::getData() {
+uchar8* RawImageData::getData() const {
   if (!data)
     ThrowRDE("Data not yet allocated.");
   return &data[mOffset.y*pitch+mOffset.x*bpp];

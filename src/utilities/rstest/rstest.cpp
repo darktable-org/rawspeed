@@ -86,7 +86,7 @@ namespace rawspeed {
 
 namespace rstest {
 
-std::string img_hash(rawspeed::RawImage& r);
+std::string img_hash(const rawspeed::RawImage& r);
 
 void writePPM(const rawspeed::RawImage& raw, const std::string& fn);
 void writePFM(const rawspeed::RawImage& raw, const std::string& fn);
@@ -144,7 +144,7 @@ md5::md5_state imgDataHash(const RawImage& raw) {
 #pragma GCC diagnostic ignored "-Wframe-larger-than="
 #pragma GCC diagnostic ignored "-Wstack-usage="
 
-string img_hash(RawImage &r) {
+string img_hash(const RawImage& r) {
   ostringstream oss;
   char line[1024];
 

@@ -34,7 +34,8 @@ class TiffIFD;
 
 class PentaxDecompressor final : public AbstractDecompressor {
 public:
-  static void decompress(RawImage& mRaw, ByteStream&& data, TiffIFD* root);
+  static void decompress(const RawImage& mRaw, ByteStream&& data,
+                         TiffIFD* root);
 
 private:
   static const uchar8 pentax_tree[][2][16];

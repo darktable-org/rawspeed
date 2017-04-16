@@ -42,7 +42,7 @@ const uchar8 PentaxDecompressor::pentax_tree[][2][16] = {
      {3, 4, 2, 5, 1, 6, 0, 7, 8, 9, 10, 11, 12}},
 };
 
-void PentaxDecompressor::decompress(RawImage& mRaw, ByteStream&& data,
+void PentaxDecompressor::decompress(const RawImage& mRaw, ByteStream&& data,
                                     TiffIFD* root) {
 
   HuffmanTable ht;

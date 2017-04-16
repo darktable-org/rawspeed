@@ -113,7 +113,7 @@ RawImage NefDecoder::decodeRawInternal() {
 
   try {
     NikonDecompressor::decompress(
-        mRaw, ByteStream(mFile, offsets->getU32(), counts->getU32()),
+        &mRaw, ByteStream(mFile, offsets->getU32(), counts->getU32()),
         meta->getData(), mRaw->dim, bitPerPixel, uncorrectedRawValues);
   } catch (IOException &e) {
     mRaw->setError(e.what());

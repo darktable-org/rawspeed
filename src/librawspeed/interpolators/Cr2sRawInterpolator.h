@@ -28,14 +28,15 @@ namespace rawspeed {
 class RawImage;
 
 class Cr2sRawInterpolator final {
-  RawImage& mRaw;
+  const RawImage& mRaw;
   std::array<int, 3> sraw_coeffs;
   int hue;
 
   struct YCbCr;
 
 public:
-  Cr2sRawInterpolator(RawImage& mRaw_, std::array<int, 3> sraw_coeffs_, int hue_)
+  Cr2sRawInterpolator(const RawImage& mRaw_, std::array<int, 3> sraw_coeffs_,
+                      int hue_)
       : mRaw(mRaw_), sraw_coeffs(sraw_coeffs_), hue(hue_) {}
 
   void interpolate(int version);

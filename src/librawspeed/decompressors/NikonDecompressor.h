@@ -35,7 +35,7 @@ class HuffmanTable;
 
 class NikonDecompressor final : public AbstractDecompressor {
 public:
-  static void decompress(RawImage& mRaw, ByteStream&& data, ByteStream metadata,
+  static void decompress(RawImage* mRaw, ByteStream&& data, ByteStream metadata,
                          const iPoint2D& size, uint32 bitsPS,
                          bool uncorrectedRawValues);
 

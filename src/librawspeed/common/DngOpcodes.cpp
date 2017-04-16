@@ -51,7 +51,7 @@ public:
   }
 
   // Will be called for actual processing.
-  virtual void apply(RawImage& ri) = 0;
+  virtual void apply(const RawImage& ri) = 0;
 };
 
 // ****************************************************************************
@@ -74,7 +74,7 @@ public:
       ThrowRDE("Only 1 component images supported");
   }
 
-  void apply(RawImage& ri) override {
+  void apply(const RawImage& ri) override {
     iPoint2D crop = ri->getCropOffset();
     uint32 offset = crop.x | (crop.y << 16);
     for (auto y = 0; y < ri->dim.y; ++y) {
@@ -119,7 +119,7 @@ public:
     }
   }
 
-  void apply(RawImage& ri) override {
+  void apply(const RawImage& ri) override {
     ri->mBadPixelPositions.insert(ri->mBadPixelPositions.begin(),
                                   badPixels.begin(), badPixels.end());
   }
@@ -156,7 +156,7 @@ class DngOpcodes::TrimBounds final : public ROIOpcode {
 public:
   explicit TrimBounds(ByteStream& bs) : ROIOpcode(bs) {}
 
-  void apply(RawImage& ri) override { ri->subFrame(getRoi()); }
+  void apply(const RawImage& ri) override { ri->subFrame(getRoi()); }
 };
 
 // ****************************************************************************
@@ -189,7 +189,7 @@ protected:
   // traverses the current ROI and applies the operation OP to each pixel,
   // i.e. each pixel value v is replaced by op(x, y, v), where x/y are the
   // coordinates of the pixel value v.
-  template <typename T, typename OP> void applyOP(RawImage& ri, OP op) {
+  template <typename T, typename OP> void applyOP(const RawImage& ri, OP op) {
     int cpp = ri->getCpp();
     const iRectangle2D& ROI = getRoi();
     for (auto y = ROI.getTop(); y < ROI.getBottom(); y += rowPitch) {
@@ -218,7 +218,7 @@ protected:
       ThrowRDE("Only 16 bit images supported");
   }
 
-  void apply(RawImage& ri) override {
+  void apply(const RawImage& ri) override {
     applyOP<ushort16>(
         ri, [this](uint32 x, uint32 y, ushort16 v) { return lookup[v]; });
   }
@@ -304,7 +304,7 @@ public:
   explicit OffsetPerRowOrCol(ByteStream& bs)
       : DeltaRowOrColBase(bs, 65535.0F) {}
 
-  void apply(RawImage& ri) override {
+  void apply(const RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {
       applyOP<ushort16>(ri, [this](uint32 x, uint32 y, ushort16 v) {
         return clampBits(deltaI[S::select(x, y)] + v, 16);
@@ -322,7 +322,7 @@ class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrColBase {
 public:
   explicit ScalePerRowOrCol(ByteStream& bs) : DeltaRowOrColBase(bs, 1024.0F) {}
 
-  void apply(RawImage& ri) override {
+  void apply(const RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {
       applyOP<ushort16>(ri, [this](uint32 x, uint32 y, ushort16 v) {
         return clampBits((deltaI[S::select(x, y)] * v + 512) >> 10, 16);
@@ -384,7 +384,7 @@ DngOpcodes::DngOpcodes(TiffEntry* entry) {
 // of the the DngOpcode type in DngOpcodes.h
 DngOpcodes::~DngOpcodes() = default;
 
-void DngOpcodes::applyOpCodes(RawImage& ri) {
+void DngOpcodes::applyOpCodes(const RawImage& ri) {
   for (const auto& code : opcodes) {
     code->setup(ri);
     code->apply(ri);
