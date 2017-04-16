@@ -76,7 +76,7 @@ INSTANTIATE_TEST_CASE_P(MD5Test, MD5Test, ::testing::ValuesIn(testCases));
 TEST_P(MD5Test, CheckTestCaseSet) {
   ASSERT_NO_THROW({
     rawspeed::md5::md5_state hash;
-    rawspeed::md5::md5_hash(message, strlen((const char*)message), hash);
+    rawspeed::md5::md5_hash(message, strlen((const char*)message), &hash);
 
     ASSERT_EQ(hash, answer);
   });

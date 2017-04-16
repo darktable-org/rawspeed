@@ -43,7 +43,7 @@ static constexpr const md5_state md5_init = {
      UINT32_C(0x10325476)}};
 
 // computes hash of the buffer message with length len
-void md5_hash(const uint8_t* message, size_t len, md5_state& hash);
+void md5_hash(const uint8_t* message, size_t len, md5_state* hash);
 
 // returns hash as string
 std::string hash_to_string(const md5_state& hash);

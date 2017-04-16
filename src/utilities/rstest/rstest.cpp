@@ -130,11 +130,11 @@ md5::md5_state imgDataHash(const RawImage& raw) {
 
   for (int j = 0; j < dimUncropped.y; j++) {
     auto* d = raw->getDataUncropped(0, j);
-    md5::md5_hash(d, raw->pitch - raw->padding, line_hashes[j]);
+    md5::md5_hash(d, raw->pitch - raw->padding, &line_hashes[j]);
   }
 
   md5::md5_hash(reinterpret_cast<const uint8_t*>(&line_hashes[0]),
-                sizeof(line_hashes[0]) * line_hashes.size(), ret);
+                sizeof(line_hashes[0]) * line_hashes.size(), &ret);
 
   return ret;
 }

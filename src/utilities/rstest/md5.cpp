@@ -38,9 +38,9 @@ namespace rawspeed {
 namespace md5 {
 
 // hashes 64 bytes at once
-static void md5_compress(md5_state& state, const uint8_t block[64]);
+static void md5_compress(md5_state* state, const uint8_t block[64]);
 
-static void md5_compress(md5_state& state, const uint8_t block[64]) {
+static void md5_compress(md5_state* state, const uint8_t block[64]) {
 #define LOADSCHEDULE(i)                                                        \
   schedule[i] =                                                                \
       (uint32_t)block[(i)*4 + 0] << 0 | (uint32_t)block[(i)*4 + 1] << 8 |      \
@@ -78,10 +78,10 @@ static void md5_compress(md5_state& state, const uint8_t block[64]) {
   a = 0UL + (a) + (expr) + UINT32_C(t) + schedule[k];                          \
   (a) = 0UL + (b) + ROTL32(a, s);
 
-  uint32_t a = state[0];
-  uint32_t b = state[1];
-  uint32_t c = state[2];
-  uint32_t d = state[3];
+  uint32_t a = (*state)[0];
+  uint32_t b = (*state)[1];
+  uint32_t c = (*state)[2];
+  uint32_t d = (*state)[3];
 
   ROUND0(a, b, c, d, 0, 7, 0xD76AA478)
   ROUND0(d, a, b, c, 1, 12, 0xE8C7B756)
@@ -148,16 +148,16 @@ static void md5_compress(md5_state& state, const uint8_t block[64]) {
   ROUND3(c, d, a, b, 2, 15, 0x2AD7D2BB)
   ROUND3(b, c, d, a, 9, 21, 0xEB86D391)
 
-  state[0] = 0UL + state[0] + a;
-  state[1] = 0UL + state[1] + b;
-  state[2] = 0UL + state[2] + c;
-  state[3] = 0UL + state[3] + d;
+  (*state)[0] = 0UL + (*state)[0] + a;
+  (*state)[1] = 0UL + (*state)[1] + b;
+  (*state)[2] = 0UL + (*state)[2] + c;
+  (*state)[3] = 0UL + (*state)[3] + d;
 }
 
 /* Full message hasher */
 
-void md5_hash(const uint8_t* message, size_t len, md5_state& hash) {
-  hash = md5_init;
+void md5_hash(const uint8_t* message, size_t len, md5_state* hash) {
+  *hash = md5_init;
 
   size_t i;
   for (i = 0; len - i >= 64; i += 64)
@@ -197,7 +197,7 @@ std::string hash_to_string(const md5_state& hash) {
 
 std::string md5_hash(const uint8_t* message, size_t len) {
   md5_state hash;
-  md5_hash(message, len, hash);
+  md5_hash(message, len, &hash);
   return hash_to_string(hash);
 }
 
