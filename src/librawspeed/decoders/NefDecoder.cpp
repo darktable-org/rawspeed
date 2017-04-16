@@ -239,7 +239,8 @@ void NefDecoder::DecodeUncompressed() {
   }
 }
 
-void NefDecoder::readCoolpixMangledRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch) {
+void NefDecoder::readCoolpixMangledRaw(ByteStream& input, const iPoint2D& size,
+                                       const iPoint2D& offset, int inputPitch) {
   uchar8* data = mRaw->getData();
   uint32 outPitch = mRaw->pitch;
   uint32 w = size.x;
@@ -271,8 +272,8 @@ void NefDecoder::readCoolpixMangledRaw(ByteStream &input, iPoint2D& size, iPoint
   }
 }
 
-
-void NefDecoder::readCoolpixSplitRaw(ByteStream &input, iPoint2D& size, iPoint2D& offset, int inputPitch) {
+void NefDecoder::readCoolpixSplitRaw(ByteStream& input, const iPoint2D& size,
+                                     const iPoint2D& offset, int inputPitch) {
   uchar8* data = mRaw->getData();
   uint32 outPitch = mRaw->pitch;
   uint32 w = size.x;

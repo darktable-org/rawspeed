@@ -91,8 +91,8 @@ int UncompressedDecompressor::bytesPerLine(int w, bool skips) {
   return perline;
 }
 
-void UncompressedDecompressor::readUncompressedRaw(iPoint2D& size,
-                                                   iPoint2D& offset,
+void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
+                                                   const iPoint2D& offset,
                                                    int inputPitch,
                                                    int bitPerPixel,
                                                    BitOrder order) {
