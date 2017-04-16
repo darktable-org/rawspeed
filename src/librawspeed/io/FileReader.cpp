@@ -76,8 +76,8 @@ std::unique_ptr<Buffer> FileReader::readFile() {
 
   using file_ptr = std::unique_ptr<HANDLE, decltype(&CloseHandle)>;
   file_ptr file(CreateFile(fileName, GENERIC_READ, FILE_SHARE_READ, nullptr,
-                           OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
-                , &CloseHandle);
+                           OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr),
+                &CloseHandle);
 
   if (file == INVALID_HANDLE_VALUE)
     ThrowFIE("Could not open file \"%s\".", fileName);
