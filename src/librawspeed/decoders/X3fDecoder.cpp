@@ -170,9 +170,7 @@ string X3fDecoder::getProp(const char* key )
   return nullptr;
 }
 
-
-void X3fDecoder::decompressSigma( X3fImage &image )
-{
+void X3fDecoder::decompressSigma(const X3fImage& image) {
   ByteStream input(mFile, image.dataOffset, image.dataSize);
   mRaw->dim.x = image.width;
   mRaw->dim.y = image.height;

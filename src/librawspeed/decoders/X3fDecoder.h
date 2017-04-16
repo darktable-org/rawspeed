@@ -39,7 +39,7 @@ class Buffer;
 
 class X3fDecoder final : public RawDecoder {
   ByteStream* bytes = nullptr;
-  X3fImage* curr_image = nullptr;
+  const X3fImage* curr_image = nullptr;
   int pred[3];
   uint32 plane_sizes[3];
   uint32 plane_offset[3];
@@ -79,7 +79,7 @@ protected:
   }
   std::string getProp(const char* key);
 
-  void decompressSigma( X3fImage &image );
+  void decompressSigma(const X3fImage& image);
   void createSigmaTable(ByteStream *bytes, int codes);
   int SigmaDecode(BitPumpMSB *bits);
   std::string getIdAsString(ByteStream *bytes);
