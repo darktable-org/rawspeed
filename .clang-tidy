@@ -42,5 +42,5 @@ CheckOptions:
   - key:             readability-identifier-naming.NamespaceCase
     value:           lower_case
   - key:             google-runtime-references.WhiteListTypes
-    value:           'benchmark::State;  rawspeed::BitStream<rawspeed::MSBBitPumpTag, rawspeed::BitStreamCacheRightInLeftOut>; rawspeed::ByteStream'
+    value:           'benchmark::State;  rawspeed::ByteStream'
 ...

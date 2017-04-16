@@ -54,7 +54,7 @@ private:
   void decodeCompressed2(const TiffIFD* raw, int bits);
   void decodeCompressed3(const TiffIFD* raw, int bits);
   std::string getMode();
-  static int32 samsungDiff(BitPumpMSB& pump,
+  static int32 samsungDiff(BitPumpMSB* pump,
                            const std::vector<encTableItem>& tbl);
 };
 

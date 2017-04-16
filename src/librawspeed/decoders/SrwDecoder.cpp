@@ -267,7 +267,7 @@ void SrwDecoder::decodeCompressed2( const TiffIFD* raw, int bits)
   for (uint32 y = 0; y < height; y++) {
     auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
     for (uint32 x = 0; x < width; x++) {
-      int32 diff = samsungDiff(pump, tbl);
+      int32 diff = samsungDiff(&pump, tbl);
       if (x < 2)
         hpred[x] = vpred[y & 1][x] += diff;
       else
@@ -279,15 +279,15 @@ void SrwDecoder::decodeCompressed2( const TiffIFD* raw, int bits)
   }
 }
 
-int32 SrwDecoder::samsungDiff(BitPumpMSB& pump,
+int32 SrwDecoder::samsungDiff(BitPumpMSB* pump,
                               const vector<encTableItem>& tbl) {
   // We read 10 bits to index into our table
-  uint32 c = pump.peekBits(10);
+  uint32 c = pump->peekBits(10);
   // Skip the bits that were used to encode this case
-  pump.getBits(tbl[c].encLen);
+  pump->getBits(tbl[c].encLen);
   // Read the number of bits the table tells me
   int32 len = tbl[c].diffLen;
-  int32 diff = pump.getBits(len);
+  int32 diff = pump->getBits(len);
 
   // If the first bit is 0 we need to turn this into a negative number
   diff = len != 0 ? HuffmanTable::signExtended(diff, len) : diff;
