@@ -38,7 +38,7 @@ using pugi::xml_node;
 
 namespace rawspeed {
 
-Camera::Camera(pugi::xml_node &camera) : cfa(iPoint2D(0,0)) {
+Camera::Camera(const pugi::xml_node& camera) : cfa(iPoint2D(0, 0)) {
   make = canonical_make = camera.attribute("make").as_string();
   if (make.empty())
     ThrowCME(R"("make" attribute not found.)");
