@@ -2,6 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -38,78 +39,76 @@
 
 namespace rawspeed {
 
-FileReader::FileReader(const char *_filename) : mFilename(_filename) {}
-
 std::unique_ptr<Buffer> FileReader::readFile() {
+  size_t fileSize = 0;
+
 #if defined(__unix__) || defined(__APPLE__)
-  int bytes_read = 0;
-  FILE *file;
-  long size;
+  using file_ptr = std::unique_ptr<FILE, decltype(&fclose)>;
+  file_ptr file(fopen(fileName, "rb"), &fclose);
 
-  file = fopen(mFilename, "rb");
   if (file == nullptr)
-    ThrowFIE("Could not open file.");
-  fseek(file, 0, SEEK_END);
-  size = ftell(file);
-  if (size <= 0) {
-    fclose(file);
+    ThrowFIE("Could not open file \"%s\".", fileName);
+
+  fseek(file.get(), 0, SEEK_END);
+  const auto size = ftell(file.get());
+
+  if (size <= 0)
     ThrowFIE("File is 0 bytes.");
-  }
-  if (static_cast<std::make_unsigned<decltype(size)>::type>(size) >
-      std::numeric_limits<Buffer::size_type>::max()) {
-    fclose(file);
-    ThrowFIE("File is too big.");
-  }
-  fseek(file, 0, SEEK_SET);
 
-  auto dest = Buffer::Create(size);
-  bytes_read = fread(dest.get(), 1, size, file);
-  fclose(file);
-  if (size != bytes_read)
-    ThrowFIE("Could not read file.");
+  fileSize = static_cast<std::make_unsigned<decltype(size)>::type>(size);
 
-  auto fileData = make_unique<Buffer>(move(dest), size);
+  if (fileSize > std::numeric_limits<Buffer::size_type>::max())
+    ThrowFIE("File is too big (%zu bytes).", fileSize);
+
+  fseek(file.get(), 0, SEEK_SET);
+
+  auto dest = Buffer::Create(fileSize);
+
+  auto bytes_read = fread(dest.get(), 1, fileSize, file.get());
+  if (fileSize != bytes_read) {
+    ThrowFIE("Could not read file, %s.",
+             feof(file.get()) ? "reached end-of-file"
+                              : (ferror(file.get()) ? "file reading error"
+                                                    : "unknown problem"));
+  }
 
 #else // __unix__
 
-  HANDLE file_h;  // File handle
-  file_h = CreateFile(mFilename, GENERIC_READ, FILE_SHARE_READ, nullptr,
-                      OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
-  if (file_h == INVALID_HANDLE_VALUE) {
-    ThrowFIE("Could not open file.");
-  }
+  using file_ptr = std::unique_ptr<HANDLE, decltype(&CloseHandle)>;
+  file_ptr file(CreateFile(fileName, GENERIC_READ, FILE_SHARE_READ, nullptr,
+                           OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
+                , &CloseHandle);
 
-  LARGE_INTEGER f_size;
-  GetFileSizeEx(file_h , &f_size);
+  if (file == INVALID_HANDLE_VALUE)
+    ThrowFIE("Could not open file \"%s\".", fileName);
+
+  LARGE_INTEGER size;
+  GetFileSizeEx(file.get(), &size);
 
   static_assert(
       std::numeric_limits<Buffer::size_type>::max() ==
-          std::numeric_limits<decltype(f_size.LowPart)>::max(),
+          std::numeric_limits<decltype(size.LowPart)>::max(),
       "once Buffer migrates to 64-bit index, this needs to be updated.");
 
-  if (f_size.HighPart > 0)
+  if (size.HighPart > 0)
     ThrowFIE("File is too big.");
-  if (f_size.LowPart <= 0)
+  if (size.LowPart <= 0)
     ThrowFIE("File is 0 bytes.");
 
-  auto dest = Buffer::Create(f_size.LowPart);
+  auto dest = Buffer::Create(size.LowPart);
 
   DWORD bytes_read;
-  if (!ReadFile(file_h, dest.get(), f_size.LowPart, &bytes_read, nullptr)) {
-    CloseHandle(file_h);
-    ThrowFIE("Could not read file.");
-  }
-
-  CloseHandle(file_h);
-
-  if (f_size.LowPart != bytes_read)
+  if (!ReadFile(file.get(), dest.get(), size.LowPart, &bytes_read, nullptr))
     ThrowFIE("Could not read file.");
 
-  auto fileData = make_unique<Buffer>(move(dest), f_size.LowPart);
+  if (size.LowPart != bytes_read)
+    ThrowFIE("Could not read file.");
+
+  fileSize = size.LowPart;
 
 #endif // __unix__
 
-  return fileData;
+  return make_unique<Buffer>(move(dest), fileSize);
 }
 
 } // namespace rawspeed

@@ -28,15 +28,12 @@ class Buffer;
 
 class FileReader
 {
+  const char* fileName;
+
 public:
-  explicit FileReader(const char* filename);
+  explicit FileReader(const char* fileName_) : fileName(fileName_) {}
 
   std::unique_ptr<Buffer> readFile();
-  const char* Filename() const { return mFilename; }
-  //  void Filename(const char * val) { mFilename = val; }
-
-private:
-  const char* mFilename;
 };
 
 } // namespace rawspeed
