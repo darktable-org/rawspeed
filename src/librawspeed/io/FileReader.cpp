@@ -79,7 +79,7 @@ std::unique_ptr<Buffer> FileReader::readFile() {
                            OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr),
                 &CloseHandle);
 
-  if (file == INVALID_HANDLE_VALUE)
+  if (file.get() == INVALID_HANDLE_VALUE)
     ThrowFIE("Could not open file \"%s\".", fileName);
 
   LARGE_INTEGER size;
