@@ -103,9 +103,8 @@ class HuffmanTable
     return nCodesPerLength.size()-1 + codeValues.size()-1;
   }
 
-public:
-
   // These two fields directly represent the contents of a JPEG DHT field
+
   // 1. The number of codes there are per bit length, this is index 1 based.
   // (there are always 0 codes of length 0)
   std::vector<int> nCodesPerLength; // index is length of code
@@ -115,6 +114,7 @@ public:
   // signExtended() is used to decode the difference bits to a signed int.
   std::vector<uchar8> codeValues;   // index is just sequential number
 
+public:
   bool operator==(const HuffmanTable& other) const {
     return nCodesPerLength == other.nCodesPerLength
         && codeValues      == other.codeValues;
