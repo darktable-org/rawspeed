@@ -32,11 +32,11 @@ CheckOptions:
   - key:             performance-for-range-copy.WarnOnAllAutoCopies
     value:           '1'
   - key:             google-build-namespaces.HeaderFileExtensions
-    value:           'h,hh,hpp,hxx,h++,'
+    value:           'h,hh,hpp,hxx,'
   - key:             google-global-names-in-headers.HeaderFileExtensions
-    value:           'h,hh,hpp,hxx,h++,'
+    value:           'h,hh,hpp,hxx,'
   - key:             misc-definitions-in-headers.HeaderFileExtensions
-    value:           'h,hh,hpp,hxx,h++,'
+    value:           'h,hh,hpp,hxx,'
   - key:             misc-definitions-in-headers.UseHeaderFileExtension
     value:           '1'
   - key:             readability-identifier-naming.NamespaceCase
