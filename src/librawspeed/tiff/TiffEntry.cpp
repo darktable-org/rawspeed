@@ -154,14 +154,15 @@ uint32 TiffEntry::getU32(uint32 index) const {
   case TIFF_UNDEFINED:
   case TIFF_RATIONAL:
   case TIFF_SRATIONAL:
-    return data.peek<uint32>(index);
+    break;
   default:
     ThrowTPE("Wrong type %u encountered. Expected Long, Offset, Rational or "
              "Undefined on 0x%x",
              type, tag);
     break;
   }
-  __builtin_unreachable();
+
+  return data.peek<uint32>(index);
 }
 
 int32 TiffEntry::getI32(uint32 index) const {
