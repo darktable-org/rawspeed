@@ -54,7 +54,7 @@ void *DecodeThread(void *_this) {
   return nullptr;
 }
 
-DngDecoderSlices::DngDecoderSlices(Buffer* file, const RawImage& img,
+DngDecoderSlices::DngDecoderSlices(const Buffer* file, const RawImage& img,
                                    int _compression)
     : mFile(file), mRaw(img), mFixLjpeg(false), compression(_compression) {}
 

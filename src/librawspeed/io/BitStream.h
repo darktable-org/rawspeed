@@ -99,7 +99,7 @@ public:
       : ByteStream(s.getSubStream(s.getPosition(), s.getRemainSize())) {}
 
   // deprecated:
-  BitStream(Buffer* f, size_type offset)
+  BitStream(const Buffer* f, size_type offset)
       : ByteStream(DataBuffer(f->getSubView(offset))) {}
 
 private:

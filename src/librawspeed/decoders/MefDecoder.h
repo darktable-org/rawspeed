@@ -36,7 +36,7 @@ class MefDecoder final : public AbstractTiffDecoder
 public:
   // please revert _this_ commit, once IWYU can handle inheriting constructors
   // using AbstractTiffDecoder::AbstractTiffDecoder;
-  MefDecoder(TiffRootIFDOwner&& root, Buffer* file)
+  MefDecoder(TiffRootIFDOwner&& root, const Buffer* file)
       : AbstractTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;

@@ -45,7 +45,7 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, Buffer* file)
+MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file)
     : AbstractTiffDecoder(move(rootIFD), file) {
   black_level = 0;
 

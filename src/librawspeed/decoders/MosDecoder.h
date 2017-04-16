@@ -35,7 +35,7 @@ class Buffer;
 class MosDecoder final : public AbstractTiffDecoder
 {
 public:
-  MosDecoder(TiffRootIFDOwner&& rootIFD, Buffer* file);
+  MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file);
 
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;

@@ -43,7 +43,7 @@ class CameraMetaData;
 
 MrwDecoder::MrwDecoder(Buffer* file) : RawDecoder(file) { parseHeader(); }
 
-int MrwDecoder::isMRW(Buffer* input) {
+int MrwDecoder::isMRW(const Buffer* input) {
   const uchar8* data = input->getData(0, 4);
   return data[0] == 0x00 && data[1] == 0x4D && data[2] == 0x52 && data[3] == 0x4D;
 }

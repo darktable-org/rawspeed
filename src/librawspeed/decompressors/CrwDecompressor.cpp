@@ -184,7 +184,7 @@ CrwDecompressor::decodeBlock(std::array<int, 64>* diffBuf,
 }
 
 // FIXME: this function is horrible.
-void CrwDecompressor::decompress(const RawImage& mRaw, rawspeed::Buffer* mFile,
+void CrwDecompressor::decompress(const RawImage& mRaw, const Buffer* mFile,
                                  uint32 dec_table, bool lowbits) {
   assert(mFile);
 

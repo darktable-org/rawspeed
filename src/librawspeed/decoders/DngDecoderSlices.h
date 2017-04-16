@@ -69,14 +69,14 @@ void* DecodeThread(void* _this);
 class DngDecoderSlices
 {
 public:
-  DngDecoderSlices(Buffer* file, const RawImage& img, int compression);
+  DngDecoderSlices(const Buffer* file, const RawImage& img, int compression);
   void addSlice(std::unique_ptr<DngSliceElement>&& slice);
   void startDecoding();
   void decodeSlice(DngDecoderThread* t);
   int __attribute__((pure)) size();
   std::queue<std::unique_ptr<DngSliceElement>> slices;
   std::vector<std::unique_ptr<DngDecoderThread>> threads;
-  Buffer* mFile;
+  const Buffer* mFile;
   RawImage mRaw;
   bool mFixLjpeg;
   uint32 mPredictor;

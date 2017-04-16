@@ -45,7 +45,7 @@ public:
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
-  static int isMRW(Buffer* input);
+  static int isMRW(const Buffer* input);
 
 protected:
   int getDecoderVersion() const override { return 0; }

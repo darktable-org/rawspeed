@@ -35,7 +35,7 @@ class Buffer;
 class DngDecoder final : public AbstractTiffDecoder
 {
 public:
-  DngDecoder(TiffRootIFDOwner&& rootIFD, Buffer* file);
+  DngDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file);
 
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;

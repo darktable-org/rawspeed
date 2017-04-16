@@ -75,8 +75,8 @@ TiffRootIFDOwner TiffParser::parse(const Buffer& data) {
 }
 
 std::unique_ptr<RawDecoder> TiffParser::makeDecoder(TiffRootIFDOwner root,
-                                                    Buffer& data) {
-  Buffer* mInput = &data;
+                                                    const Buffer& data) {
+  const Buffer* mInput = &data;
   if (!root)
     ThrowTPE("TiffIFD is null.");
 

@@ -39,7 +39,7 @@ class SrwDecoder final : public AbstractTiffDecoder
 public:
   // please revert _this_ commit, once IWYU can handle inheriting constructors
   // using AbstractTiffDecoder::AbstractTiffDecoder;
-  SrwDecoder(TiffRootIFDOwner&& root, Buffer* file)
+  SrwDecoder(TiffRootIFDOwner&& root, const Buffer* file)
       : AbstractTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;

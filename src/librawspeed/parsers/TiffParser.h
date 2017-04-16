@@ -38,7 +38,7 @@ public:
 
   // transfers ownership of TiffIFD into RawDecoder
   static std::unique_ptr<RawDecoder> makeDecoder(TiffRootIFDOwner root,
-                                                 Buffer& data);
+                                                 const Buffer& data);
 };
 
 } // namespace rawspeed

@@ -50,7 +50,7 @@ using std::string;
 
 namespace rawspeed {
 
-DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, Buffer* file)
+DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file)
     : AbstractTiffDecoder(move(rootIFD), file) {
   const uchar8* v = mRootIFD->getEntryRecursive(DNGVERSION)->getData(4);
 

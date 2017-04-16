@@ -67,7 +67,7 @@ public:
   /* The Buffer is not owned by this class, will not be deleted, and must remain
    */
   /* valid while this object exists */
-  explicit RawDecoder(Buffer* file);
+  explicit RawDecoder(const Buffer* file);
   virtual ~RawDecoder() = default;
 
   /* Check if the decoder can decode the image from this camera */
@@ -175,7 +175,7 @@ protected:
   void decodeUncompressed(const TiffIFD* rawIFD, BitOrder order);
 
   /* The Raw input file to be decoded */
-  Buffer* mFile;
+  const Buffer* mFile;
 
   /* Decoder version */
   /* This can be used to avoid newer version of an xml file to indicate that a file */

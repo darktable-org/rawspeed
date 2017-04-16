@@ -48,7 +48,8 @@ using std::min;
 
 namespace rawspeed {
 
-RawDecoder::RawDecoder(Buffer* file) : mRaw(RawImage::create()), mFile(file) {
+RawDecoder::RawDecoder(const Buffer* file)
+    : mRaw(RawImage::create()), mFile(file) {
   failOnUnknown = false;
   interpolateBadPixels = true;
   applyStage1DngOpcodes = true;

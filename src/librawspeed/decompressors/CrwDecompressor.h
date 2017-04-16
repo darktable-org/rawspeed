@@ -36,7 +36,7 @@ class HuffmanTable;
 
 class CrwDecompressor final : public AbstractDecompressor {
 public:
-  static void decompress(const RawImage& mRaw, rawspeed::Buffer* mFile,
+  static void decompress(const RawImage& mRaw, const Buffer* mFile,
                          uint32 dec_table, bool lowbits);
 
 private:
