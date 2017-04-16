@@ -91,7 +91,7 @@ RawImage DcrDecoder::decodeRawInternal() {
     }
 
     try {
-      decodeKodak65000(input, width, height);
+      decodeKodak65000(&input, width, height);
     } catch (IOException &) {
       mRaw->setError("IO error occurred while reading image. Returning partial result.");
     }
@@ -108,7 +108,7 @@ RawImage DcrDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void DcrDecoder::decodeKodak65000(ByteStream &input, uint32 w, uint32 h) {
+void DcrDecoder::decodeKodak65000(ByteStream* input, uint32 w, uint32 h) {
   ushort16 buf[256];
   uint32 pred[2];
   uchar8* data = mRaw->getData();
@@ -137,26 +137,27 @@ void DcrDecoder::decodeKodak65000(ByteStream &input, uint32 w, uint32 h) {
   }
 }
 
-void DcrDecoder::decodeKodak65000Segment(ByteStream &input, ushort16 *out, uint32 bsize) {
+void DcrDecoder::decodeKodak65000Segment(ByteStream* input, ushort16* out,
+                                         uint32 bsize) {
   uchar8 blen[768];
   uint64 bitbuf=0;
   uint32 bits=0;
 
   bsize = (bsize + 3) & -4;
   for (uint32 i=0; i < bsize; i+=2) {
-    blen[i] = input.peekByte() & 15;
-    blen[i+1] = input.getByte() >> 4;
+    blen[i] = input->peekByte() & 15;
+    blen[i + 1] = input->getByte() >> 4;
   }
   if ((bsize & 7) == 4) {
-    bitbuf = (static_cast<uint64>(input.getByte())) << 8UL;
-    bitbuf += (static_cast<int>(input.getByte()));
+    bitbuf = (static_cast<uint64>(input->getByte())) << 8UL;
+    bitbuf += (static_cast<int>(input->getByte()));
     bits = 16;
   }
   for (uint32 i=0; i < bsize; i++) {
     uint32 len = blen[i];
     if (bits < len) {
       for (uint32 j=0; j < 32; j+=8) {
-        bitbuf += static_cast<long long>(static_cast<int>(input.getByte()))
+        bitbuf += static_cast<long long>(static_cast<int>(input->getByte()))
                   << (bits + (j ^ 8));
       }
       bits += 32;

@@ -55,7 +55,7 @@ public:
 
   // return ByteStream that starts at given offset
   // i.e. this->data + offset == getSubStream(offset).data
-  ByteStream getSubStream(size_type offset, size_type size_) {
+  ByteStream getSubStream(size_type offset, size_type size_) const {
     return ByteStream(getSubView(offset, size_), 0, isInNativeByteOrder());
   }
 

@@ -60,9 +60,9 @@ protected:
   template <typename S> class ScalePerRowOrCol;
 
   template <class Opcode>
-  static std::unique_ptr<DngOpcode> constructor(ByteStream& bs);
+  static std::unique_ptr<DngOpcode> constructor(ByteStream* bs);
 
-  using constructor_t = std::unique_ptr<DngOpcode> (*)(ByteStream& bs);
+  using constructor_t = std::unique_ptr<DngOpcode> (*)(ByteStream* bs);
   static const std::map<uint32, std::pair<const char*, constructor_t>> Map;
 };
 

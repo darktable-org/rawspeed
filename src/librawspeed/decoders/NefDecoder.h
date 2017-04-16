@@ -58,11 +58,11 @@ private:
   void DecodeUncompressed();
   void DecodeD100Uncompressed();
   void DecodeSNefUncompressed();
-  void readCoolpixMangledRaw(ByteStream& input, const iPoint2D& size,
+  void readCoolpixMangledRaw(const ByteStream& input, const iPoint2D& size,
                              const iPoint2D& offset, int inputPitch);
-  void readCoolpixSplitRaw(ByteStream& input, const iPoint2D& size,
+  void readCoolpixSplitRaw(const ByteStream& input, const iPoint2D& size,
                            const iPoint2D& offset, int inputPitch);
-  void DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h);
+  void DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h);
   std::string getMode();
   std::string getExtendedMode(const std::string &mode);
   ushort16* gammaCurve(double pwr, double ts, int mode, int imax);

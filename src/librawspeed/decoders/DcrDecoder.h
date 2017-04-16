@@ -48,8 +48,8 @@ public:
 
 protected:
   int getDecoderVersion() const override { return 0; }
-  void decodeKodak65000(ByteStream &input, uint32 w, uint32 h);
-  void decodeKodak65000Segment(ByteStream &input, ushort16 *out, uint32 bsize);
+  void decodeKodak65000(ByteStream* input, uint32 w, uint32 h);
+  void decodeKodak65000Segment(ByteStream* input, ushort16* out, uint32 bsize);
 };
 
 } // namespace rawspeed

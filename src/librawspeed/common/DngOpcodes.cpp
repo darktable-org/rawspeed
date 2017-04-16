@@ -60,9 +60,9 @@ class DngOpcodes::FixBadPixelsConstant final : public DngOpcodes::DngOpcode {
   uint32 value;
 
 public:
-  explicit FixBadPixelsConstant(ByteStream& bs) {
-    value = bs.getU32();
-    bs.getU32(); // Bayer Phase not used
+  explicit FixBadPixelsConstant(ByteStream* bs) {
+    value = bs->getU32();
+    bs->getU32(); // Bayer Phase not used
   }
 
   void setup(const RawImage& ri) override {
@@ -93,24 +93,24 @@ class DngOpcodes::FixBadPixelsList final : public DngOpcodes::DngOpcode {
   std::vector<uint32> badPixels;
 
 public:
-  explicit FixBadPixelsList(ByteStream& bs) {
-    bs.getU32(); // Skip phase - we don't care
-    auto badPointCount = bs.getU32();
-    auto badRectCount = bs.getU32();
+  explicit FixBadPixelsList(ByteStream* bs) {
+    bs->getU32(); // Skip phase - we don't care
+    auto badPointCount = bs->getU32();
+    auto badRectCount = bs->getU32();
 
     // Read points
     for (auto i = 0U; i < badPointCount; ++i) {
-      auto y = bs.getU32();
-      auto x = bs.getU32();
+      auto y = bs->getU32();
+      auto x = bs->getU32();
       badPixels.push_back(y << 16 | x);
     }
 
     // Read rects
     for (auto i = 0U; i < badRectCount; ++i) {
-      auto top = bs.getU32();
-      auto left = bs.getU32();
-      auto bottom = bs.getU32();
-      auto right = bs.getU32();
+      auto top = bs->getU32();
+      auto left = bs->getU32();
+      auto bottom = bs->getU32();
+      auto right = bs->getU32();
       for (auto y = top; y <= bottom; ++y) {
         for (auto x = left; x <= right; ++x) {
           badPixels.push_back(y << 16 | x);
@@ -131,11 +131,11 @@ class DngOpcodes::ROIOpcode : public DngOpcodes::DngOpcode {
   iRectangle2D roi;
 
 protected:
-  explicit ROIOpcode(ByteStream& bs) {
-    uint32 top = bs.getU32();
-    uint32 left = bs.getU32();
-    uint32 bottom = bs.getU32();
-    uint32 right = bs.getU32();
+  explicit ROIOpcode(ByteStream* bs) {
+    uint32 top = bs->getU32();
+    uint32 left = bs->getU32();
+    uint32 bottom = bs->getU32();
+    uint32 right = bs->getU32();
 
     roi = iRectangle2D(left, top, right - left, bottom - top);
   }
@@ -154,7 +154,7 @@ protected:
 
 class DngOpcodes::TrimBounds final : public ROIOpcode {
 public:
-  explicit TrimBounds(ByteStream& bs) : ROIOpcode(bs) {}
+  explicit TrimBounds(ByteStream* bs) : ROIOpcode(bs) {}
 
   void apply(const RawImage& ri) override { ri->subFrame(getRoi()); }
 };
@@ -168,11 +168,11 @@ class DngOpcodes::PixelOpcode : public ROIOpcode {
   uint32 colPitch;
 
 protected:
-  explicit PixelOpcode(ByteStream& bs) : ROIOpcode(bs) {
-    firstPlane = bs.getU32();
-    planes = bs.getU32();
-    rowPitch = bs.getU32();
-    colPitch = bs.getU32();
+  explicit PixelOpcode(ByteStream* bs) : ROIOpcode(bs) {
+    firstPlane = bs->getU32();
+    planes = bs->getU32();
+    rowPitch = bs->getU32();
+    colPitch = bs->getU32();
 
     if (planes == 0)
       ThrowRDE("Zero planes");
@@ -210,7 +210,7 @@ class DngOpcodes::LookupOpcode : public PixelOpcode {
 protected:
   vector<ushort16> lookup;
 
-  explicit LookupOpcode(ByteStream& bs) : PixelOpcode(bs), lookup(65536) {}
+  explicit LookupOpcode(ByteStream* bs) : PixelOpcode(bs), lookup(65536) {}
 
   void setup(const RawImage& ri) override {
     PixelOpcode::setup(ri);
@@ -228,14 +228,14 @@ protected:
 
 class DngOpcodes::TableMap final : public LookupOpcode {
 public:
-  explicit TableMap(ByteStream& bs) : LookupOpcode(bs) {
-    auto count = bs.getU32();
+  explicit TableMap(ByteStream* bs) : LookupOpcode(bs) {
+    auto count = bs->getU32();
 
     if (count == 0 || count > 65536)
       ThrowRDE("Invalid size of lookup table");
 
     for (auto i = 0U; i < count; ++i)
-      lookup[i] = bs.getU16();
+      lookup[i] = bs->getU16();
 
     if (count < lookup.size())
       fill_n(&lookup[count], lookup.size() - count, lookup[count - 1]);
@@ -246,16 +246,16 @@ public:
 
 class DngOpcodes::PolynomialMap final : public LookupOpcode {
 public:
-  explicit PolynomialMap(ByteStream& bs) : LookupOpcode(bs) {
+  explicit PolynomialMap(ByteStream* bs) : LookupOpcode(bs) {
     vector<double> polynomial;
 
-    polynomial.resize(bs.getU32() + 1UL);
+    polynomial.resize(bs->getU32() + 1UL);
 
     if (polynomial.size() > 9)
       ThrowRDE("A polynomial with more than 8 degrees not allowed");
 
     for (auto& coeff : polynomial)
-      coeff = bs.get<double>();
+      coeff = bs->get<double>();
 
     // Create lookup
     lookup.resize(65536);
@@ -284,11 +284,11 @@ protected:
   vector<float> deltaF;
   vector<int> deltaI;
 
-  DeltaRowOrColBase(ByteStream& bs, float f2iScale) : PixelOpcode(bs) {
-    deltaF.resize(bs.getU32());
+  DeltaRowOrColBase(ByteStream* bs, float f2iScale) : PixelOpcode(bs) {
+    deltaF.resize(bs->getU32());
 
     for (auto& f : deltaF)
-      f = bs.get<float>();
+      f = bs->get<float>();
 
     deltaI.reserve(deltaF.size());
     for (auto f : deltaF)
@@ -301,7 +301,7 @@ protected:
 template <typename S>
 class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrColBase {
 public:
-  explicit OffsetPerRowOrCol(ByteStream& bs)
+  explicit OffsetPerRowOrCol(ByteStream* bs)
       : DeltaRowOrColBase(bs, 65535.0F) {}
 
   void apply(const RawImage& ri) override {
@@ -320,7 +320,7 @@ public:
 template <typename S>
 class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrColBase {
 public:
-  explicit ScalePerRowOrCol(ByteStream& bs) : DeltaRowOrColBase(bs, 1024.0F) {}
+  explicit ScalePerRowOrCol(ByteStream* bs) : DeltaRowOrColBase(bs, 1024.0F) {}
 
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {
@@ -364,7 +364,7 @@ DngOpcodes::DngOpcodes(TiffEntry* entry) {
     }
 
     if (opConstructor != nullptr)
-      opcodes.emplace_back(opConstructor(bs));
+      opcodes.emplace_back(opConstructor(&bs));
     else {
 #ifndef DEBUG
       // Throw Error if not marked as optional
@@ -392,7 +392,7 @@ void DngOpcodes::applyOpCodes(const RawImage& ri) {
 }
 
 template <class Opcode>
-std::unique_ptr<DngOpcodes::DngOpcode> DngOpcodes::constructor(ByteStream& bs) {
+std::unique_ptr<DngOpcodes::DngOpcode> DngOpcodes::constructor(ByteStream* bs) {
   return make_unique<Opcode>(bs);
 }
 

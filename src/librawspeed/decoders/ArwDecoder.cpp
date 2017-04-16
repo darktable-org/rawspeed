@@ -244,7 +244,7 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) {
     u.decodeRawUnpacked<16, little>(width, height);
 }
 
-void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
+void ArwDecoder::DecodeARW(const ByteStream& input, uint32 w, uint32 h) {
   if (0 == w)
     return;
 
@@ -280,7 +280,8 @@ void ArwDecoder::DecodeARW(ByteStream &input, uint32 w, uint32 h) {
   }
 }
 
-void ArwDecoder::DecodeARW2(ByteStream &input, uint32 w, uint32 h, uint32 bpp) {
+void ArwDecoder::DecodeARW2(const ByteStream& input, uint32 w, uint32 h,
+                            uint32 bpp) {
 
   if (bpp == 8) {
     in = input;

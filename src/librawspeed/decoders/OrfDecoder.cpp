@@ -87,7 +87,7 @@ RawImage OrfDecoder::decodeRawInternal() {
     if (offsets->count != 1 || hints.has("force_uncompressed"))
       decodeUncompressed(input, width, height, size);
     else
-      decodeCompressed(input, width, height);
+      decodeCompressed(&input, width, height);
   } catch (IOException &e) {
      mRaw->setError(e.what());
   }
@@ -95,7 +95,8 @@ RawImage OrfDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void OrfDecoder::decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 size) {
+void OrfDecoder::decodeUncompressed(const ByteStream& s, uint32 w, uint32 h,
+                                    uint32 size) {
   UncompressedDecompressor u(s, mRaw);
   if (hints.has("packed_with_control"))
     u.decode12BitRaw<little, false, true>(w, h);
@@ -122,7 +123,7 @@ void OrfDecoder::decodeUncompressed(ByteStream& s, uint32 w, uint32 h, uint32 si
  * is based on the output of all previous pixel (bar the first four)
  */
 
-void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
+void OrfDecoder::decodeCompressed(ByteStream* s, uint32 w, uint32 h) {
   int nbits;
   int sign;
   int low;
@@ -152,8 +153,8 @@ void OrfDecoder::decodeCompressed(ByteStream& s, uint32 w, uint32 h) {
   }
   left0 = nw0 = left1 = nw1 = 0;
 
-  s.skipBytes(7);
-  BitPumpMSB bits(s);
+  s->skipBytes(7);
+  BitPumpMSB bits(*s);
 
   for (uint32 y = 0; y < h; y++) {
     memset(acarry0, 0, sizeof acarry0);

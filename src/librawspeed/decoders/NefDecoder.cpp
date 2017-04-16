@@ -239,7 +239,8 @@ void NefDecoder::DecodeUncompressed() {
   }
 }
 
-void NefDecoder::readCoolpixMangledRaw(ByteStream& input, const iPoint2D& size,
+void NefDecoder::readCoolpixMangledRaw(const ByteStream& input,
+                                       const iPoint2D& size,
                                        const iPoint2D& offset, int inputPitch) {
   uchar8* data = mRaw->getData();
   uint32 outPitch = mRaw->pitch;
@@ -272,7 +273,8 @@ void NefDecoder::readCoolpixMangledRaw(ByteStream& input, const iPoint2D& size,
   }
 }
 
-void NefDecoder::readCoolpixSplitRaw(ByteStream& input, const iPoint2D& size,
+void NefDecoder::readCoolpixSplitRaw(const ByteStream& input,
+                                     const iPoint2D& size,
                                      const iPoint2D& offset, int inputPitch) {
   uchar8* data = mRaw->getData();
   uint32 outPitch = mRaw->pitch;
@@ -342,7 +344,7 @@ void NefDecoder::DecodeSNefUncompressed() {
 
   ByteStream in(mFile, offset);
 
-  DecodeNikonSNef(in, width, height);
+  DecodeNikonSNef(&in, width, height);
 }
 
 void NefDecoder::checkSupportInternal(const CameraMetaData* meta) {
@@ -557,13 +559,13 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 // We un-apply the whitebalance, so output matches lossless.
 // Note that values are scaled. See comment below on details.
 // OPTME: It would be trivial to run this multithreaded.
-void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
+void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h) {
   if (w < 6)
     ThrowIOE("got a %u wide sNEF, aborting", w);
 
-  if (input.getRemainSize() < (w*h*3)) {
-    if (static_cast<uint32>(input.getRemainSize()) > w * 3) {
-      h = input.getRemainSize() / (w*3) - 1;
+  if (input->getRemainSize() < (w * h * 3)) {
+    if (static_cast<uint32>(input->getRemainSize()) > w * 3) {
+      h = input->getRemainSize() / (w * 3) - 1;
       mRaw->setError("Image truncated (file is too short)");
     } else
       ThrowIOE(
@@ -606,7 +608,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream &input, uint32 w, uint32 h) {
 
   uchar8* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
-  const uchar8 *in = input.getData(w*h*3);
+  const uchar8* in = input->getData(w * h * 3);
 
   for (uint32 y = 0; y < h; y++) {
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
