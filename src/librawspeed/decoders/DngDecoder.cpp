@@ -65,8 +65,8 @@ DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, Buffer* file)
     mFixLjpeg = false;
 }
 
-void DngDecoder::dropUnsuportedChunks(vector<const TiffIFD*>& data) {
-  for (auto i = data.begin(); i != data.end();) {
+void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
+  for (auto i = data->begin(); i != data->end();) {
     const auto& ifd = *i;
 
     int comp = ifd->getEntry(COMPRESSION)->getU16();
@@ -128,7 +128,7 @@ void DngDecoder::dropUnsuportedChunks(vector<const TiffIFD*>& data) {
     if (supported)
       ++i;
     else
-      i = data.erase(i);
+      i = data->erase(i);
   }
 }
 
@@ -293,7 +293,7 @@ RawImage DngDecoder::decodeRawInternal() {
   if (data.empty())
     ThrowRDE("No image data found");
 
-  dropUnsuportedChunks(data);
+  dropUnsuportedChunks(&data);
 
   if (data.empty())
     ThrowRDE("No RAW chunks found");
