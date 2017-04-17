@@ -40,12 +40,13 @@ public:
                          uint32 dec_table, bool lowbits);
 
 private:
-  static HuffmanTable makeDecoder(const uchar8* source);
-  static std::array<HuffmanTable, 2> initHuffTables(uint32 table);
+  using crw_hts = std::array<std::array<HuffmanTable, 2>, 2>;
+  static HuffmanTable makeDecoder(const uchar8* ncpl, const uchar8* values);
+  static crw_hts initHuffTables(uint32 table);
 
   inline static void decodeBlock(std::array<int, 64>* diffBuf,
-                                 const std::array<HuffmanTable, 2>& mHuff,
-                                 BitPumpJPEG* pump);
+                                 const crw_hts& mHuff, BitPumpJPEG* lPump,
+                                 BitPumpJPEG* iPump);
 };
 
 } // namespace rawspeed
