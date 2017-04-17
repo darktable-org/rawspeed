@@ -140,7 +140,7 @@ protected:
     roi = iRectangle2D(left, top, right - left, bottom - top);
   }
 
-  const iRectangle2D& __attribute((pure)) getRoi() const { return roi; }
+  const iRectangle2D& __attribute__((pure)) getRoi() const { return roi; }
 
   void setup(const RawImage& ri) override {
     iRectangle2D fullImage(0, 0, ri->dim.x, ri->dim.y);

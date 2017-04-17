@@ -24,7 +24,7 @@ namespace rawspeed {
 
 class Cpuid final {
 public:
-  static bool __attribute((const)) SSE2();
+  static bool __attribute__((const)) SSE2();
 };
 
 } // namespace rawspeed

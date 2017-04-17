@@ -71,6 +71,7 @@ if(BUILD_BENCHMARKING)
 else()
   set(ALLOW_DOWNLOADING_GOOGLEBENCHMARK OFF CACHE BOOL "If googlebenchmark src tree is not found in location specified by GOOGLEBENCHMARK_PATH, do fetch the archive from internet" FORCE)
 endif()
+option(BUILD_DOCS "Build the documentation (mainly, using Doxygen)." OFF)
 
 set(GOOGLETEST_PATH "/usr/src/googletest" CACHE PATH
                     "Path to the googletest root tree. Should contain googletest and googlemock subdirs. And CMakeLists.txt in root, and in both of these subdirs")
@@ -104,6 +105,10 @@ add_custom_target(dependencies ALL)
 
 add_subdirectory(src)
 add_subdirectory(data)
+
+if(BUILD_DOCS)
+  add_subdirectory(docs)
+endif()
 
 if(BUILD_TESTING AND CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
   include(CodeCoverage)
