@@ -24,10 +24,10 @@
 #include "common/Common.h"                // for uint32, uchar8, ushort16
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/BitPumpLSB.h"                // for BitPumpLSB
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
 #include "io/BitPumpMSB16.h"              // for BitPumpMSB16
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
-#include "io/BitPumpPlain.h"              // for BitPumpPlain
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/Endianness.h"                // for getHostEndianness, Endiann...
 #include "io/IOException.h"               // for ThrowIOE
@@ -178,7 +178,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
       decode12BitRaw<little>(w, h);
       return;
     }
-    BitPumpPlain bits(input);
+    BitPumpLSB bits(input);
     w *= cpp;
     for (; y < h; y++) {
       auto* dest = reinterpret_cast<ushort16*>(

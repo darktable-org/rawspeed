@@ -1,9 +1,9 @@
 FILE(GLOB IO_SOURCES
   "BitPumpJPEG.h"
+  "BitPumpLSB.h"
   "BitPumpMSB.h"
   "BitPumpMSB16.h"
   "BitPumpMSB32.h"
-  "BitPumpPlain.h"
   "BitStream.h"
   "Buffer.cpp"
   "Buffer.h"

@@ -27,8 +27,8 @@
 #include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/HuffmanTable.h"             // for HuffmanTable
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/BitPumpLSB.h"                          // for BitPumpLSB
 #include "io/BitPumpMSB.h"                          // for BitPumpMSB
-#include "io/BitPumpPlain.h"                        // for BitPumpPlain
 #include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for getU32BE, getU32LE
@@ -447,7 +447,7 @@ void ArwDecoder::decodeThreaded(RawDecoderThread * t) {
   uint32 pitch = mRaw->pitch;
   int32 w = mRaw->dim.x;
 
-  BitPumpPlain bits(in);
+  BitPumpLSB bits(in);
   for (uint32 y = t->start_y; y < t->end_y; y++) {
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
     // Realign

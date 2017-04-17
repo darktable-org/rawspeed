@@ -32,19 +32,17 @@ struct PlainBitPumpTag;
 // The PlainPump is ordered in LSB bit order,
 // i.e. we push into the cache from the left and read it from the right
 
-using BitPumpPlain = BitStream<PlainBitPumpTag, BitStreamCacheLeftInRightOut>;
+using BitPumpLSB = BitStream<PlainBitPumpTag, BitStreamCacheLeftInRightOut>;
 
 template <>
-inline BitPumpPlain::size_type BitPumpPlain::fillCache(const uchar8* input)
-{
+inline BitPumpLSB::size_type BitPumpLSB::fillCache(const uchar8* input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
 
   cache.push(getLE<uint32>(input), 32);
   return 4;
 }
 
-template <> inline void BitPumpPlain::setBufferPosition(size_type newPos)
-{
+template <> inline void BitPumpLSB::setBufferPosition(size_type newPos) {
   pos = newPos;
   cache.fillLevel = 0;
   cache.cache = 0;
