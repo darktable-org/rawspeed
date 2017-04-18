@@ -73,6 +73,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     // should have consumed 16 bytes for n-codes-per-length,
     // at *least* 1 byte as code value, and 1 byte as 'fixDNGBug16' boolean
     assert(bs.getPosition() >= 18);
+
+    // FIXME: BitPumpJPEG timeouts
     rawspeed::PUMP bits(bs);
 
     while (true)
