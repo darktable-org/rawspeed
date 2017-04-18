@@ -29,7 +29,7 @@ extern "C" int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
   return 1;
 }
 
-static const rawspeed::CameraMetaData metadata{{}};
+static const rawspeed::CameraMetaData metadata{};
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
