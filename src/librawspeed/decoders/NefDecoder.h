@@ -58,8 +58,6 @@ private:
   void DecodeUncompressed();
   void DecodeD100Uncompressed();
   void DecodeSNefUncompressed();
-  void readCoolpixMangledRaw(const ByteStream& input, const iPoint2D& size,
-                             const iPoint2D& offset, int inputPitch);
   void readCoolpixSplitRaw(const ByteStream& input, const iPoint2D& size,
                            const iPoint2D& offset, int inputPitch);
   void DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h);

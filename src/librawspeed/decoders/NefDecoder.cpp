@@ -210,9 +210,11 @@ void NefDecoder::DecodeUncompressed() {
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
     try {
-      if (hints.has("coolpixmangled"))
-        readCoolpixMangledRaw(in, size, pos, width*bitPerPixel / 8);
-      else {
+      if (hints.has("coolpixmangled")) {
+        UncompressedDecompressor u(in, mRaw);
+        u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, 12,
+                              BitOrder_Jpeg32);
+      } else {
         if (hints.has("coolpixsplit"))
           readCoolpixSplitRaw(in, size, pos, width * bitPerPixel / 8);
         else {
@@ -236,40 +238,6 @@ void NefDecoder::DecodeUncompressed() {
       }
     }
     offY += slice.h;
-  }
-}
-
-void NefDecoder::readCoolpixMangledRaw(const ByteStream& input,
-                                       const iPoint2D& size,
-                                       const iPoint2D& offset, int inputPitch) {
-  uchar8* data = mRaw->getData();
-  uint32 outPitch = mRaw->pitch;
-  uint32 w = size.x;
-  uint32 h = size.y;
-  uint32 cpp = mRaw->getCpp();
-  if (input.getRemainSize() < (inputPitch*h)) {
-    if (static_cast<int>(input.getRemainSize()) > inputPitch)
-      h = input.getRemainSize() / inputPitch - 1;
-    else
-      ThrowIOE(
-          "Not enough data to decode a single line. Image file truncated.");
-  }
-
-  if (offset.y > mRaw->dim.y)
-    ThrowRDE("Invalid y offset");
-  if (offset.x + size.x > mRaw->dim.x)
-    ThrowRDE("Invalid x offset");
-
-  uint32 y = offset.y;
-  h = min(h + static_cast<uint32>(offset.y), static_cast<uint32>(mRaw->dim.y));
-  w *= cpp;
-  BitPumpMSB32 in(input);
-  for (; y < h; y++) {
-    auto* dest = reinterpret_cast<ushort16*>(
-        &data[offset.x * sizeof(ushort16) * cpp + y * outPitch]);
-    for (uint32 x = 0 ; x < w; x++) {
-      dest[x] = in.getBits(12);
-    }
   }
 }
 
