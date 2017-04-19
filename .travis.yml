@@ -33,6 +33,8 @@ services:
 before_install:
   - if [[ "$SONARQUBE" == "ON" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || ("$TRAVIS_BRANCH" != "develop" && "$TRAVIS_BRANCH" != "master")) ]]; then
       exit;
+    elif [[ "$TARGET" == "WWW" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || "$TRAVIS_BRANCH" != "develop") ]]; then
+      exit;
     elif [[ "$EXTRA" == "NODOCKER" ]]; then
       travis_retry sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y;
       travis_retry sudo apt-get update -q;
@@ -77,6 +79,11 @@ matrix:
     cache:
       directories:
         - '$HOME/.sonar/cache'
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    env: CC=clang-3.9 CXX=clang++-3.9 TARGET=WWW
 
 # linux clang Coverage build OOM's in gcov during final codecov report collection
 # OSX gcc Coverage build produces invalid .gcno files
@@ -106,6 +113,9 @@ script:
       fi;
     elif [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       mkdir "$TRAVIS_BUILD_DIR/build";
+      if [[ "$TARGET" == "WWW" && "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_SECURE_ENV_VARS" == "true" && "$TRAVIS_BRANCH" == "develop" ]]; then
+        "$SRC_DIR/.ci/www-prepare.sh";
+      fi;
       docker run --read-only --tmpfs /tmp --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $BUILD_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS --env CC --env CXX --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR --env ECO darktable/rawspeed sh -c "$SRC_DIR/.ci/ci-script.sh";
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       export SRC_DIR="$TRAVIS_BUILD_DIR";
@@ -131,4 +141,6 @@ after_success:
       export CXX=AppleClang;
     fi;
     ./codecov -e PLATFORM,CXX -F unittests -X gcov -s "$TRAVIS_BUILD_DIR/build/gcov-reports-unittest";
+  elif [[ "$TARGET" == "WWW" && "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_SECURE_ENV_VARS" == "true" && "$TRAVIS_BRANCH" == "develop" ]]; then
+    "$SRC_DIR/.ci/www-finish.sh";
   fi;

@@ -25,6 +25,15 @@ case "$FLAVOR" in
     ;;
 esac
 
+case "$TARGET" in
+  "WWW")
+    G="Unix Makefiles"
+    ECO="${ECO} -DBUILD_DOCS=ON"
+    ;;
+  *)
+    ;;
+esac
+
 if [ ! -z "${G+x}" ];
 then
   GENERATOR="$G"
@@ -52,6 +61,11 @@ target_build()
   cmake --build "$BUILD_DIR" --target install -- $MAKEFLAGS || cmake --build "$BUILD_DIR" --target install -- -j1 $VERBOSE $KEEPGOING
 }
 
+target_www()
+{
+  cmake --build "$BUILD_DIR" -- $VERBOSE docs
+}
+
 handle_coverage_data()
 {
   cmake --build "$BUILD_DIR" --target gcov
@@ -75,6 +89,9 @@ cmake -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" -G"$GENERATOR" -DCMAKE_BUILD_TYPE
 case "$TARGET" in
   "build")
     target_build
+    ;;
+  "WWW")
+    target_www
     ;;
   *)
     exit 1
