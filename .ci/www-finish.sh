@@ -39,10 +39,10 @@ ENCRYPTED_KEY_VAR="encrypted_${ENCRYPTION_LABEL}_key"
 ENCRYPTED_IV_VAR="encrypted_${ENCRYPTION_LABEL}_iv"
 ENCRYPTED_KEY=${!ENCRYPTED_KEY_VAR}
 ENCRYPTED_IV=${!ENCRYPTED_IV_VAR}
-openssl aes-256-cbc -K $ENCRYPTED_KEY -iv $ENCRYPTED_IV -in wro_deploy.enc -out wro_deploy -d
-chmod 600 wro_deploy
+openssl aes-256-cbc -K $ENCRYPTED_KEY -iv $ENCRYPTED_IV -in "$TRAVIS_BUILD_DIR/.ci/wro_deploy.enc" -out "$TRAVIS_BUILD_DIR/.ci/wro_deploy" -d
+chmod 600 "$TRAVIS_BUILD_DIR/.ci/wro_deploy"
 eval `ssh-agent -s`
-ssh-add wro_deploy
+ssh-add "$TRAVIS_BUILD_DIR/.ci/wro_deploy"
 
 # Now that we're all set up, we can push.
 git push $SSH_REPO $TARGET_BRANCH
