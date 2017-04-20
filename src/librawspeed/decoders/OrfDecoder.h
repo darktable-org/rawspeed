@@ -36,8 +36,6 @@ class Buffer;
 class OrfDecoder final : public AbstractTiffDecoder
 {
 public:
-  // please revert _this_ commit, once IWYU can handle inheriting constructors
-  // using AbstractTiffDecoder::AbstractTiffDecoder;
   OrfDecoder(TiffRootIFDOwner&& root, const Buffer* file)
       : AbstractTiffDecoder(move(root), file) {}
 

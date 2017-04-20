@@ -37,8 +37,6 @@ class Buffer;
 class Rw2Decoder final : public AbstractTiffDecoder
 {
 public:
-  // please revert _this_ commit, once IWYU can handle inheriting constructors
-  // using AbstractTiffDecoder::AbstractTiffDecoder;
   Rw2Decoder(TiffRootIFDOwner&& root, const Buffer* file)
       : AbstractTiffDecoder(move(root), file) {}
 

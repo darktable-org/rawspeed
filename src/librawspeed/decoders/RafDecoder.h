@@ -36,8 +36,6 @@ class RafDecoder final : public AbstractTiffDecoder
   bool alt_layout = false;
 
 public:
-  // please revert _this_ commit, once IWYU can handle inheriting constructors
-  // using AbstractTiffDecoder::AbstractTiffDecoder;
   RafDecoder(TiffRootIFDOwner&& root, const Buffer* file)
       : AbstractTiffDecoder(move(root), file) {}
 
