@@ -213,14 +213,14 @@ void NefDecoder::DecodeUncompressed() {
       if (hints.has("coolpixmangled")) {
         UncompressedDecompressor u(in, mRaw);
         u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, 12,
-                              BitOrder_Jpeg32);
+                              BitOrder_MSB32);
       } else {
         if (hints.has("coolpixsplit"))
           readCoolpixSplitRaw(in, size, pos, width * bitPerPixel / 8);
         else {
           UncompressedDecompressor u(in, mRaw);
           u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, bitPerPixel,
-                                bitorder ? BitOrder_Jpeg : BitOrder_Plain);
+                                bitorder ? BitOrder_MSB : BitOrder_LSB);
         }
       }
     } catch (RawDecoderException &e) {

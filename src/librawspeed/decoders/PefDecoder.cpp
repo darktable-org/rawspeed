@@ -41,7 +41,7 @@ RawImage PefDecoder::decodeRawInternal() {
   int compression = raw->getEntry(COMPRESSION)->getU32();
 
   if (1 == compression || compression == 32773) {
-    decodeUncompressed(raw, BitOrder_Jpeg);
+    decodeUncompressed(raw, BitOrder_MSB);
     return mRaw;
   }
 

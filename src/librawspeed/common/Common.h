@@ -175,10 +175,11 @@ inline std::vector<std::string> splitString(const std::string& input,
 }
 
 enum BitOrder {
-  BitOrder_Plain,  /* Memory order */
-  BitOrder_Jpeg,   /* Input is added to stack byte by byte, and output is lifted from top */
-  BitOrder_Jpeg16, /* Same as above, but 16 bits at the time */
-  BitOrder_Jpeg32, /* Same as above, but 32 bits at the time */
+  BitOrder_LSB,   /* Memory order */
+  BitOrder_MSB,   /* Input is added to stack byte by byte, and output is lifted
+                     from top */
+  BitOrder_MSB16, /* Same as above, but 16 bits at the time */
+  BitOrder_MSB32, /* Same as above, but 32 bits at the time */
 };
 
 // little 'forced' loop unrolling helper tool, example:

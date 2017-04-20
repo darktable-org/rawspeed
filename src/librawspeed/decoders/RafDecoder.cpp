@@ -108,10 +108,9 @@ RawImage RafDecoder::decodeRawInternal() {
   } else {
     if (hints.has("jpeg32_bitorder")) {
       u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
-                            BitOrder_Jpeg32);
+                            BitOrder_MSB32);
     } else {
-      u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
-                            BitOrder_Plain);
+      u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps, BitOrder_LSB);
     }
   }
 

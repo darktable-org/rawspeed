@@ -60,7 +60,7 @@ RawImage SrwDecoder::decodeRawInternal() {
   if (32769 == compression)
   {
     bool bit_order = hints.get("msb_override", false);
-    this->decodeUncompressed(raw, bit_order ? BitOrder_Jpeg : BitOrder_Plain);
+    this->decodeUncompressed(raw, bit_order ? BitOrder_MSB : BitOrder_LSB);
     return mRaw;
   }
 
@@ -68,7 +68,7 @@ RawImage SrwDecoder::decodeRawInternal() {
   {
     if (!raw->hasEntry(static_cast<TiffTag>(40976))) {
       bool bit_order = hints.get("msb_override", bits == 12);
-      this->decodeUncompressed(raw, bit_order ? BitOrder_Jpeg : BitOrder_Plain);
+      this->decodeUncompressed(raw, bit_order ? BitOrder_MSB : BitOrder_LSB);
       return mRaw;
     }
     uint32 nslices = raw->getEntry(STRIPOFFSETS)->count;

@@ -130,7 +130,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
     return;
   }
 
-  if (BitOrder_Jpeg == order) {
+  if (BitOrder_MSB == order) {
     BitPumpMSB bits(input);
     w *= cpp;
     for (; y < h; y++) {
@@ -142,7 +142,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
       }
       bits.skipBits(skipBits);
     }
-  } else if (BitOrder_Jpeg16 == order) {
+  } else if (BitOrder_MSB16 == order) {
     BitPumpMSB16 bits(input);
     w *= cpp;
     for (; y < h; y++) {
@@ -154,7 +154,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
       }
       bits.skipBits(skipBits);
     }
-  } else if (BitOrder_Jpeg32 == order) {
+  } else if (BitOrder_MSB32 == order) {
     BitPumpMSB32 bits(input);
     w *= cpp;
     for (; y < h; y++) {
