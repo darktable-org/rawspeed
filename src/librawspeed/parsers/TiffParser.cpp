@@ -94,7 +94,7 @@ std::unique_ptr<RawDecoder> TiffParser::makeDecoder(TiffRootIFDOwner root,
     string make = id.make;
     string model = id.model;
 
-    if (make == "Canon") {
+    if (make == "Canon" || (make == "Kodak" && model == "DCS560C")) {
       return make_unique<Cr2Decoder>(move(root), mInput);
     }
     if (make == "FUJIFILM") {
@@ -124,9 +124,6 @@ std::unique_ptr<RawDecoder> TiffParser::makeDecoder(TiffRootIFDOwner root,
       return make_unique<MefDecoder>(move(root), mInput);
     }
     if (make == "Kodak") {
-      if (model == "DCS560C")
-        return make_unique<Cr2Decoder>(move(root), mInput);
-
       return make_unique<DcrDecoder>(move(root), mInput);
     }
     if (make == "KODAK") {
