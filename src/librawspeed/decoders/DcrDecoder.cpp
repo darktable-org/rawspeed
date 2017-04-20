@@ -21,15 +21,13 @@
 
 #include "decoders/DcrDecoder.h"
 #include "common/Common.h"                // for uint32, uchar8, ushort16
-#include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/IOException.h"               // for IOException
 #include "tiff/TiffEntry.h"               // for TiffEntry, TiffDataType::T...
 #include "tiff/TiffIFD.h"                 // for TiffRootIFD, TiffIFD
-#include "tiff/TiffTag.h"                 // for TiffTag, TiffTag::CFAPATTERN
+#include "tiff/TiffTag.h"                 // for TiffTag, TiffTag::COMPRESSION
 #include <cassert>                        // for assert
 #include <memory>                         // for unique_ptr
 #include <vector>                         // for vector
@@ -41,21 +39,8 @@ namespace rawspeed {
 class CameraMetaData;
 
 RawImage DcrDecoder::decodeRawInternal() {
-  auto raw = mRootIFD->getIFDWithTag(CFAPATTERN);
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
-  uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
-  uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getU32();
+  SimpleTiffDecoder::prepareForRawDecoding();
 
-  if (off > mFile->getSize())
-    ThrowRDE("Offset is out of bounds");
-
-  if (c2 > mFile->getSize() - off) {
-    mRaw->setError("Warning: byte count larger than file size, file probably truncated.");
-  }
-
-  mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
   ByteStream input(mFile, off);
 
   int compression = raw->getEntry(COMPRESSION)->getU32();

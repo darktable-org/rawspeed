@@ -20,13 +20,10 @@
 */
 
 #include "decoders/ErfDecoder.h"
-#include "common/Common.h"                          // for uint32
-#include "common/Point.h"                           // for iPoint2D
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer
-#include "io/Endianness.h"                          // for Endianness
+#include "io/Endianness.h"                          // for Endianness::big
 #include "tiff/TiffEntry.h"                         // for TiffEntry
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
+#include "tiff/TiffIFD.h"                           // for TiffRootIFD
 #include "tiff/TiffTag.h"                           // for TiffTag::EPSONWB
 #include <memory>                                   // for unique_ptr
 
@@ -35,18 +32,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 RawImage ErfDecoder::decodeRawInternal() {
-  auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS, 1);
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
-  uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
-  uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getU32();
-
-  if (c2 > mFile->getSize() - off) {
-    mRaw->setError("Warning: byte count larger than file size, file probably truncated.");
-  }
-
-  mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
+  SimpleTiffDecoder::prepareForRawDecoding();
 
   UncompressedDecompressor u(*mFile, off, c2, mRaw);
 

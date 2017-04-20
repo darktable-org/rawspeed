@@ -22,7 +22,7 @@
 #pragma once
 
 #include "common/RawImage.h"              // for RawImage
-#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
+#include "decoders/SimpleTiffDecoder.h"   // for SimpleTiffDecoder
 #include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
 #include <algorithm>                      // for move
 
@@ -32,11 +32,10 @@ class Buffer;
 
 class CameraMetaData;
 
-class ErfDecoder final : public AbstractTiffDecoder
-{
+class ErfDecoder final : public SimpleTiffDecoder {
 public:
   ErfDecoder(TiffRootIFDOwner&& root, const Buffer* file)
-      : AbstractTiffDecoder(move(root), file) {}
+      : SimpleTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;

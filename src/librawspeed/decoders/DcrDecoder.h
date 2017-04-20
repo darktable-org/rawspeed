@@ -23,7 +23,7 @@
 
 #include "common/Common.h"                // for uint32, ushort16
 #include "common/RawImage.h"              // for RawImage
-#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
+#include "decoders/SimpleTiffDecoder.h"   // for SimpleTiffDecoder
 #include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
 #include <algorithm>                      // for move
 
@@ -35,11 +35,10 @@ class ByteStream;
 
 class CameraMetaData;
 
-class DcrDecoder final : public AbstractTiffDecoder
-{
+class DcrDecoder final : public SimpleTiffDecoder {
 public:
   DcrDecoder(TiffRootIFDOwner&& root, const Buffer* file)
-      : AbstractTiffDecoder(move(root), file) {}
+      : SimpleTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;

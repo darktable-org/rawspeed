@@ -42,6 +42,8 @@ FILE(GLOB DECODER_SOURCES
   "RawDecoderException.h"
   "Rw2Decoder.cpp"
   "Rw2Decoder.h"
+  "SimpleTiffDecoder.cpp"
+  "SimpleTiffDecoder.h"
   "SrwDecoder.cpp"
   "SrwDecoder.h"
   "ThreefrDecoder.cpp"

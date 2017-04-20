@@ -27,7 +27,6 @@
 #include "decompressors/NikonDecompressor.h" // for NikonDecompressor::decompress
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/BitPumpMSB.h"                          // for BitPumpMSB
-#include "io/BitPumpMSB32.h"                        // for BitPumpMSB32
 #include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for getU16BE, getU32LE
