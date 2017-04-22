@@ -34,8 +34,8 @@ class CameraMetaData;
 
 class DcsDecoder final : public SimpleTiffDecoder {
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer* file);
+  static bool __attribute__((pure))
+  isAppropriateDecoder(const TiffRootIFD* rootIFD, const Buffer* file);
   DcsDecoder(TiffRootIFDOwner&& root, const Buffer* file)
       : SimpleTiffDecoder(move(root), file) {}
 

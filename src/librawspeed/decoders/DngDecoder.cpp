@@ -50,8 +50,9 @@ using std::string;
 
 namespace rawspeed {
 
-bool DngDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+bool __attribute__((pure))
+DngDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                 const Buffer* file) {
   return rootIFD->hasEntryRecursive(DNGVERSION);
 }
 
