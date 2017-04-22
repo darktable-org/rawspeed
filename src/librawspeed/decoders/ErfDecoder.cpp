@@ -26,10 +26,21 @@
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD
 #include "tiff/TiffTag.h"                           // for TiffTag::EPSONWB
 #include <memory>                                   // for unique_ptr
+#include <string>                                   // for operator==, string
 
 namespace rawspeed {
 
 class CameraMetaData;
+
+bool ErfDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                      const Buffer* file) {
+  const auto id = rootIFD->getID();
+  const std::string& make = id.make;
+
+  // FIXME: magic
+
+  return make == "SEIKO EPSON CORP.";
+}
 
 RawImage ErfDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();

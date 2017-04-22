@@ -34,6 +34,8 @@ class Buffer;
 class ThreefrDecoder final : public AbstractTiffDecoder
 {
 public:
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                   const Buffer* file);
   ThreefrDecoder(TiffRootIFDOwner&& root, const Buffer* file)
       : AbstractTiffDecoder(move(root), file) {}
 

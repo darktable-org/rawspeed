@@ -42,8 +42,7 @@
 #include "decoders/ThreefrDecoder.h"     // for ThreefrDecoder
 #include "io/ByteStream.h"               // for ByteStream
 #include "parsers/TiffParserException.h" // for TiffParserException
-#include "tiff/TiffEntry.h"              // for TiffEntry
-#include "tiff/TiffTag.h"                // for TiffTag::DNGVERSION, TiffTa...
+#include "tiff/TiffEntry.h"              // IWYU pragma: keep
 #include <cassert>                       // for assert
 #include <cstdint>                       // for UINT32_MAX
 #include <memory>                        // for unique_ptr
@@ -81,82 +80,19 @@ std::unique_ptr<RawDecoder> TiffParser::makeDecoder(TiffRootIFDOwner root,
   if (!root)
     ThrowTPE("TiffIFD is null.");
 
-  try {
-    for (const auto& decoder : Map) {
-      checker_t dChecker = nullptr;
-      constructor_t dConstructor = nullptr;
+  for (const auto& decoder : Map) {
+    checker_t dChecker = nullptr;
+    constructor_t dConstructor = nullptr;
 
-      std::tie(dChecker, dConstructor) = decoder;
+    std::tie(dChecker, dConstructor) = decoder;
 
-      assert(dChecker);
-      assert(dConstructor);
+    assert(dChecker);
+    assert(dConstructor);
 
-      if (!dChecker(root.get(), mInput))
-        continue;
+    if (!dChecker(root.get(), mInput))
+      continue;
 
-      return dConstructor(move(root), mInput);
-    }
-
-    auto id = root->getID();
-    string make = id.make;
-    string model = id.model;
-
-    if (make == "Canon" || (make == "Kodak" && model == "DCS560C")) {
-      return make_unique<Cr2Decoder>(move(root), mInput);
-    }
-    if (make == "FUJIFILM") {
-      return make_unique<RafDecoder>(move(root), mInput);
-    }
-    if (make == "NIKON CORPORATION" || make == "NIKON") {
-      return make_unique<NefDecoder>(move(root), mInput);
-    }
-    if (make == "OLYMPUS IMAGING CORP." || make == "OLYMPUS CORPORATION" ||
-        make == "OLYMPUS OPTICAL CO.,LTD") {
-      return make_unique<OrfDecoder>(move(root), mInput);
-    }
-    if (make == "SONY") {
-      return make_unique<ArwDecoder>(move(root), mInput);
-    }
-    if (make == "PENTAX Corporation" || make == "RICOH IMAGING COMPANY, LTD." ||
-        make == "PENTAX") {
-      return make_unique<PefDecoder>(move(root), mInput);
-    }
-    if (make == "Panasonic" || make == "LEICA") {
-      return make_unique<Rw2Decoder>(move(root), mInput);
-    }
-    if (make == "SAMSUNG") {
-      return make_unique<SrwDecoder>(move(root), mInput);
-    }
-    if (make == "Mamiya-OP Co.,Ltd.") {
-      return make_unique<MefDecoder>(move(root), mInput);
-    }
-    if (make == "Kodak") {
-      return make_unique<DcrDecoder>(move(root), mInput);
-    }
-    if (make == "KODAK") {
-      return make_unique<DcsDecoder>(move(root), mInput);
-    }
-    if (make == "EASTMAN KODAK COMPANY") {
-      return make_unique<KdcDecoder>(move(root), mInput);
-    }
-    if (make == "SEIKO EPSON CORP.") {
-      return make_unique<ErfDecoder>(move(root), mInput);
-    }
-    if (make == "Hasselblad") {
-      return make_unique<ThreefrDecoder>(move(root), mInput);
-    }
-    if (make == "Leaf" || make == "Phase One A/S") {
-      return make_unique<MosDecoder>(move(root), mInput);
-    }
-  } catch (const TiffParserException&) {
-    // Last ditch effort to identify Leaf cameras that don't have a Tiff Make set
-    TiffEntry* softwareIFD = root->getEntryRecursive(SOFTWARE);
-    if (softwareIFD) {
-      string software = trimSpaces(softwareIFD->getString());
-      if (software == "Camera Library") {
-        return make_unique<MosDecoder>(move(root), mInput);
-      }
-    }
+    return dConstructor(move(root), mInput);
   }
 
   ThrowTPE("No decoder found. Sorry.");
@@ -172,9 +108,16 @@ std::unique_ptr<RawDecoder> TiffParser::constructor(TiffRootIFDOwner&& root,
 #define DECODER(name)                                                          \
   { std::make_pair(&name::isAppropriateDecoder, &constructor<name>) }
 
-const std::array<std::pair<TiffParser::checker_t, TiffParser::constructor_t>, 1>
-    TiffParser::Map = {
-        DECODER(DngDecoder),
-};
+const std::array<std::pair<TiffParser::checker_t, TiffParser::constructor_t>,
+                 16>
+    TiffParser::Map = {{
+        DECODER(DngDecoder), DECODER(MosDecoder), DECODER(Cr2Decoder),
+        DECODER(RafDecoder), DECODER(NefDecoder), DECODER(OrfDecoder),
+        DECODER(ArwDecoder), DECODER(PefDecoder), DECODER(Rw2Decoder),
+        DECODER(SrwDecoder), DECODER(MefDecoder), DECODER(DcrDecoder),
+        DECODER(DcsDecoder), DECODER(KdcDecoder), DECODER(ErfDecoder),
+        DECODER(ThreefrDecoder),
+
+    }};
 
 } // namespace rawspeed

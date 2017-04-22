@@ -51,6 +51,16 @@ bool RafDecoder::isRAF(Buffer* input) {
   return 0 == memcmp(&data[0], magic, magic_size);
 }
 
+bool RafDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                      const Buffer* file) {
+  const auto id = rootIFD->getID();
+  const std::string& make = id.make;
+
+  // FIXME: magic
+
+  return make == "FUJIFILM";
+}
+
 RawImage RafDecoder::decodeRawInternal() {
   auto raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
   uint32 height = 0;

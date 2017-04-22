@@ -50,6 +50,16 @@ using std::max;
 
 namespace rawspeed {
 
+bool ArwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                      const Buffer* file) {
+  const auto id = rootIFD->getID();
+  const std::string& make = id.make;
+
+  // FIXME: magic
+
+  return make == "SONY";
+}
+
 RawImage ArwDecoder::decodeRawInternal() {
   const TiffIFD* raw = nullptr;
   vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);

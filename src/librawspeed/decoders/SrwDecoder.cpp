@@ -48,6 +48,16 @@ using std::ostringstream;
 
 namespace rawspeed {
 
+bool SrwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                      const Buffer* file) {
+  const auto id = rootIFD->getID();
+  const std::string& make = id.make;
+
+  // FIXME: magic
+
+  return make == "SAMSUNG";
+}
+
 RawImage SrwDecoder::decodeRawInternal() {
   auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
 

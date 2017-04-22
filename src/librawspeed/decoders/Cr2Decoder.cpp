@@ -39,7 +39,7 @@
 #include <array>                         // for array
 #include <cassert>                       // for assert
 #include <memory>                        // for unique_ptr, allocator
-#include <string>                        // for string
+#include <string>                        // for string, operator==
 #include <vector>                        // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
@@ -47,6 +47,17 @@ using std::string;
 using std::vector;
 
 namespace rawspeed {
+
+bool Cr2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                      const Buffer* file) {
+  const auto id = rootIFD->getID();
+  const std::string& make = id.make;
+  const std::string& model = id.model;
+
+  // FIXME: magic
+
+  return make == "Canon" || (make == "Kodak" && model == "DCS560C");
+}
 
 RawImage Cr2Decoder::decodeOldFormat() {
   uint32 offset = 0;

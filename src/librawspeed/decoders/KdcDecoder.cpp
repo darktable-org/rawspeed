@@ -33,8 +33,19 @@
 #include "tiff/TiffTag.h"                           // for TiffTag::COMPRES...
 #include <cassert>                                  // for assert
 #include <memory>                                   // for unique_ptr
+#include <string>                                   // for operator==, string
 
 namespace rawspeed {
+
+bool KdcDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                      const Buffer* file) {
+  const auto id = rootIFD->getID();
+  const std::string& make = id.make;
+
+  // FIXME: magic
+
+  return make == "EASTMAN KODAK COMPANY";
+}
 
 RawImage KdcDecoder::decodeRawInternal() {
   if (!mRootIFD->hasEntryRecursive(COMPRESSION))

@@ -35,6 +35,8 @@ class Buffer;
 class MosDecoder final : public AbstractTiffDecoder
 {
 public:
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                   const Buffer* file);
   MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file);
 
   RawImage decodeRawInternal() override;

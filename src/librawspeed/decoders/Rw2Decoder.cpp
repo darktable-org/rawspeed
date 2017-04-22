@@ -55,6 +55,16 @@ namespace rawspeed {
 
 class CameraMetaData;
 
+bool Rw2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                      const Buffer* file) {
+  const auto id = rootIFD->getID();
+  const std::string& make = id.make;
+
+  // FIXME: magic
+
+  return make == "Panasonic" || make == "LEICA";
+}
+
 struct Rw2Decoder::PanaBitpump {
   static constexpr uint32 BufSize = 0x4000;
   ByteStream input;

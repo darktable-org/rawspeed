@@ -36,6 +36,8 @@ class RafDecoder final : public AbstractTiffDecoder
   bool alt_layout = false;
 
 public:
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                   const Buffer* file);
   RafDecoder(TiffRootIFDOwner&& root, const Buffer* file)
       : AbstractTiffDecoder(move(root), file) {}
 

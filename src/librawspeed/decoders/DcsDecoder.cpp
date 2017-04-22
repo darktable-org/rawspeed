@@ -27,11 +27,22 @@
 #include "tiff/TiffTag.h"                           // for TiffTag::GRAYRES...
 #include <cassert>                                  // for assert
 #include <memory>                                   // for unique_ptr
+#include <string>                                   // for operator==, string
 #include <vector>                                   // for vector
 
 namespace rawspeed {
 
 class CameraMetaData;
+
+bool DcsDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                      const Buffer* file) {
+  const auto id = rootIFD->getID();
+  const std::string& make = id.make;
+
+  // FIXME: magic
+
+  return make == "KODAK";
+}
 
 RawImage DcsDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();

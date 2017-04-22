@@ -53,6 +53,16 @@ using std::ostringstream;
 
 namespace rawspeed {
 
+bool NefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                      const Buffer* file) {
+  const auto id = rootIFD->getID();
+  const std::string& make = id.make;
+
+  // FIXME: magic
+
+  return make == "NIKON CORPORATION" || make == "NIKON";
+}
+
 RawImage NefDecoder::decodeRawInternal() {
   auto raw = mRootIFD->getIFDWithTag(CFAPATTERN);
   int compression = raw->getEntry(COMPRESSION)->getU32();

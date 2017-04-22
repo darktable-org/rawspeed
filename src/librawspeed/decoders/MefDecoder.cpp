@@ -23,8 +23,19 @@
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Endianness.h"                          // for Endianness::big
 #include "tiff/TiffEntry.h"                         // IWYU pragma: keep
+#include <string>                                   // for operator==, string
 
 namespace rawspeed {
+
+bool MefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                      const Buffer* file) {
+  const auto id = rootIFD->getID();
+  const std::string& make = id.make;
+
+  // FIXME: magic
+
+  return make == "Mamiya-OP Co.,Ltd.";
+}
 
 RawImage MefDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();

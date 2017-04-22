@@ -39,6 +39,8 @@ class Buffer;
 class ArwDecoder final : public AbstractTiffDecoder
 {
 public:
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                   const Buffer* file);
   ArwDecoder(TiffRootIFDOwner&& root, const Buffer* file)
       : AbstractTiffDecoder(move(root), file) {}
 

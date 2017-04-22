@@ -38,6 +38,8 @@ class Buffer;
 class NefDecoder final : public AbstractTiffDecoder
 {
 public:
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                   const Buffer* file);
   NefDecoder(TiffRootIFDOwner&& root, const Buffer* file)
       : AbstractTiffDecoder(move(root), file) {}
 

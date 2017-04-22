@@ -30,6 +30,7 @@
 #include "tiff/TiffTag.h"                 // for TiffTag, TiffTag::COMPRESSION
 #include <cassert>                        // for assert
 #include <memory>                         // for unique_ptr
+#include <string>                         // for operator==, string
 #include <vector>                         // for vector
 
 using std::min;
@@ -37,6 +38,16 @@ using std::min;
 namespace rawspeed {
 
 class CameraMetaData;
+
+bool DcrDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                      const Buffer* file) {
+  const auto id = rootIFD->getID();
+  const std::string& make = id.make;
+
+  // FIXME: magic
+
+  return make == "Kodak";
+}
 
 RawImage DcrDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();

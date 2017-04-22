@@ -40,6 +40,7 @@
 #include <cstdlib>                                  // for abs
 #include <cstring>                                  // for memset
 #include <memory>                                   // for unique_ptr
+#include <string>                                   // for operator==, string
 
 using std::unique_ptr;
 using std::min;
@@ -48,6 +49,17 @@ using std::signbit;
 namespace rawspeed {
 
 class CameraMetaData;
+
+bool OrfDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                      const Buffer* file) {
+  const auto id = rootIFD->getID();
+  const std::string& make = id.make;
+
+  // FIXME: magic
+
+  return make == "OLYMPUS IMAGING CORP." || make == "OLYMPUS CORPORATION" ||
+         make == "OLYMPUS OPTICAL CO.,LTD";
+}
 
 RawImage OrfDecoder::decodeRawInternal() {
   auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);

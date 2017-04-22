@@ -32,8 +32,20 @@
 #include "tiff/TiffIFD.h"                     // for TiffRootIFD, TiffIFD
 #include "tiff/TiffTag.h"                     // for TiffTag, TiffTag::ISOS...
 #include <memory>                             // for unique_ptr
+#include <string>                             // for operator==, string
 
 namespace rawspeed {
+
+bool PefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                      const Buffer* file) {
+  const auto id = rootIFD->getID();
+  const std::string& make = id.make;
+
+  // FIXME: magic
+
+  return make == "PENTAX Corporation" ||
+         make == "RICOH IMAGING COMPANY, LTD." || make == "PENTAX";
+}
 
 RawImage PefDecoder::decodeRawInternal() {
   auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);

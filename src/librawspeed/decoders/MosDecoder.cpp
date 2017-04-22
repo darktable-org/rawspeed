@@ -29,6 +29,7 @@
 #include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for getU32LE, getLE
+#include "parsers/TiffParserException.h"            // for TiffParserException
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag::TILEOFF...
@@ -44,6 +45,27 @@ using std::string;
 namespace rawspeed {
 
 class CameraMetaData;
+
+bool MosDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                      const Buffer* file) {
+  try {
+    const auto id = rootIFD->getID();
+    const std::string& make = id.make;
+
+    // FIXME: magic
+
+    return make == "Leaf" || make == "Phase One A/S";
+  } catch (const TiffParserException&) {
+    // Last ditch effort to identify Leaf cameras that don't have a Tiff Make
+    // set
+    TiffEntry* softwareIFD = rootIFD->getEntryRecursive(SOFTWARE);
+    if (!softwareIFD)
+      return false;
+
+    const string software = trimSpaces(softwareIFD->getString());
+    return software == "Camera Library";
+  }
+}
 
 MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file)
     : AbstractTiffDecoder(move(rootIFD), file) {
