@@ -22,7 +22,9 @@
 
 #include "parsers/RawParser.h" // for RawParser
 #include "tiff/TiffIFD.h"      // for TiffRootIFDOwner
+#include <array>               // for array
 #include <memory>              // for unique_ptr
+#include <utility>             // for pair
 
 namespace rawspeed {
 
@@ -39,6 +41,14 @@ public:
   // transfers ownership of TiffIFD into RawDecoder
   static std::unique_ptr<RawDecoder> makeDecoder(TiffRootIFDOwner root,
                                                  const Buffer& data);
+
+  template <class Decoder>
+  static std::unique_ptr<RawDecoder> constructor(TiffRootIFDOwner&& root,
+                                                 const Buffer* data);
+  using checker_t = bool (*)(const TiffRootIFD* root, const Buffer* data);
+  using constructor_t = std::unique_ptr<RawDecoder> (*)(TiffRootIFDOwner&& root,
+                                                        const Buffer* data);
+  static const std::array<std::pair<checker_t, constructor_t>, 1> Map;
 };
 
 } // namespace rawspeed

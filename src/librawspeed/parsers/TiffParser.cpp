@@ -4,6 +4,7 @@
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014 Pedro Côrte-Real
     Copyright (C) 2017 Axel Waggershauser
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -22,7 +23,6 @@
 
 #include "parsers/TiffParser.h"
 #include "common/Common.h"               // for make_unique, trimSpaces
-#include "common/RawspeedException.h"    // for RawspeedException
 #include "decoders/ArwDecoder.h"         // for ArwDecoder
 #include "decoders/Cr2Decoder.h"         // for Cr2Decoder
 #include "decoders/DcrDecoder.h"         // for DcrDecoder
@@ -44,10 +44,11 @@
 #include "parsers/TiffParserException.h" // for TiffParserException
 #include "tiff/TiffEntry.h"              // for TiffEntry
 #include "tiff/TiffTag.h"                // for TiffTag::DNGVERSION, TiffTa...
-#include <algorithm>                     // for move
+#include <cassert>                       // for assert
 #include <cstdint>                       // for UINT32_MAX
 #include <memory>                        // for unique_ptr
 #include <string>                        // for operator==, basic_string
+#include <tuple>                         // for tie, tuple
 #include <vector>                        // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
@@ -80,16 +81,22 @@ std::unique_ptr<RawDecoder> TiffParser::makeDecoder(TiffRootIFDOwner root,
   if (!root)
     ThrowTPE("TiffIFD is null.");
 
-  if (root->hasEntryRecursive(DNGVERSION)) {  // We have a dng image entry
-    try {
-      return make_unique<DngDecoder>(move(root), mInput);
-    } catch (RawspeedException& e) {
-      //TODO: remove this exception type conversion
-      ThrowTPE("%s", e.what());
-    }
-  }
-
   try {
+    for (const auto& decoder : Map) {
+      checker_t dChecker = nullptr;
+      constructor_t dConstructor = nullptr;
+
+      std::tie(dChecker, dConstructor) = decoder;
+
+      assert(dChecker);
+      assert(dConstructor);
+
+      if (!dChecker(root.get(), mInput))
+        continue;
+
+      return dConstructor(move(root), mInput);
+    }
+
     auto id = root->getID();
     string make = id.make;
     string model = id.model;
@@ -155,5 +162,19 @@ std::unique_ptr<RawDecoder> TiffParser::makeDecoder(TiffRootIFDOwner root,
   ThrowTPE("No decoder found. Sorry.");
   return nullptr;
 }
+
+template <class Decoder>
+std::unique_ptr<RawDecoder> TiffParser::constructor(TiffRootIFDOwner&& root,
+                                                    const Buffer* data) {
+  return make_unique<Decoder>(std::move(root), data);
+}
+
+#define DECODER(name)                                                          \
+  { std::make_pair(&name::isAppropriateDecoder, &constructor<name>) }
+
+const std::array<std::pair<TiffParser::checker_t, TiffParser::constructor_t>, 1>
+    TiffParser::Map = {
+        DECODER(DngDecoder),
+};
 
 } // namespace rawspeed

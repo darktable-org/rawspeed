@@ -35,6 +35,8 @@ class Buffer;
 class DngDecoder final : public AbstractTiffDecoder
 {
 public:
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                   const Buffer* file);
   DngDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file);
 
   RawImage decodeRawInternal() override;
