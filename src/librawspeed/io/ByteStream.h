@@ -70,7 +70,7 @@ public:
     check(0);
   }
   inline size_type getRemainSize() const { return size-pos; }
-  inline const uchar8* peekData(size_type count) {
+  inline const uchar8* peekData(size_type count) const {
     return Buffer::getData(pos, count);
   }
   inline const uchar8* getData(size_type count) {
@@ -133,10 +133,8 @@ public:
   inline float getFloat() { return get<float>(); }
 
   const char* peekString() const {
-    size_type p = pos;
-    do {
-      check(1);
-    } while (data[p++] != 0);
+    if (memchr(peekData(getRemainSize()), 0, getRemainSize()) == nullptr)
+      ThrowIOE("String is not null-terminated");
     return reinterpret_cast<const char*>(&data[pos]);
   }
 
