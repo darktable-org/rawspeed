@@ -14,4 +14,5 @@ endif()
 add_custom_target(fuzzers ALL)
 
 add_subdirectory(HuffmanTable)
+add_subdirectory(TiffParser)
 add_subdirectory(rawspeed)
