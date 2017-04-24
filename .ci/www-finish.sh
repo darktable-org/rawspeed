@@ -47,4 +47,4 @@ eval `ssh-agent -s`
 ssh-add "$TRAVIS_BUILD_DIR/.ci/wro_deploy"
 
 # Now that we're all set up, we can push.
-git push $SSH_REPO $TARGET_BRANCH
+git push -f $SSH_REPO $TARGET_BRANCH
