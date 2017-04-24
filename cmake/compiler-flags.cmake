@@ -100,7 +100,7 @@ MARK_AS_ADVANCED(
     CMAKE_C_FLAGS_SANITIZE )
 
 set(fuzz "-O3 -ffast-math")
-set(fuzz "${fuzz} ${asan} ${ubsan} -fsanitize-coverage=edge,indirect-calls,trace-pc-guard,trace-cmp")
+set(fuzz "${fuzz} ${asan} ${ubsan} -fsanitize-coverage=trace-pc-guard,indirect-calls,trace-cmp")
 set(fuzz "${fuzz} -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION")
 SET(CMAKE_CXX_FLAGS_FUZZ
     "${fuzz}"
