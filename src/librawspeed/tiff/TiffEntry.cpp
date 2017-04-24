@@ -211,8 +211,11 @@ string TiffEntry::getString() const {
   if (type != TIFF_ASCII && type != TIFF_BYTE)
     ThrowTPE("Wrong type 0x%x encountered. Expected Ascii or Byte", type);
 
-  const char* s = data.peekString();
-  return string(s, strnlen(s, count));
+  // *NOT* ByteStream::peekString() !
+  const auto bufSize = data.getRemainSize();
+  const auto* buf = data.peekData(bufSize);
+  const auto* s = reinterpret_cast<const char*>(buf);
+  return string(s, strnlen(s, bufSize));
 }
 
 const DataBuffer &TiffEntry::getRootIfdData() const {
