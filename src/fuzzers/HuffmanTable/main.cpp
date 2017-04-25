@@ -83,7 +83,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     return 0;
   }
 
-  return 0;
+  __builtin_unreachable();
 }
 
 // for i in $(seq -w 0 64); do dd if=/dev/urandom bs=1024 count=1024 of=$i; done

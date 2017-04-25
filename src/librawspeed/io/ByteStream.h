@@ -154,21 +154,24 @@ public:
   // in case the private data / maker note has been moved within in the file
   // TODO: could add a lower bound check later if required.
   void rebase(const size_type newPosition, const size_type newSize) {
-    // does that pair (position, size) make sense for this buffer? may throw
-    const uchar8* const dataRebaseCheck __attribute__((unused)) =
-        Buffer::getData(newPosition, newSize);
+// does that pair (position, size) make sense for this buffer? may throw
+#ifndef NDEBUG
+    const uchar8* const dataRebaseCheck = Buffer::getData(newPosition, newSize);
+#endif
 
     const uchar8* dataAtNewPosition = getData(newSize);
     data = dataAtNewPosition - newPosition;
     size = newPosition + newSize;
 
+#ifndef NDEBUG
     // buffer sanity self-check. should not throw, unless there is a mistake
-    const uchar8* const rebasedCheck __attribute__((unused)) = peekData(size);
+    const uchar8* const rebasedCheck = peekData(size);
 
     // check that all the assumptions still hold, and we rebased correctly
     assert(getPosition() == newPosition);
     assert(getSize() == newSize);
     assert(dataRebaseCheck == rebasedCheck);
+#endif
   }
 
   // special factory function to set up internal buffer with copy of passed data.

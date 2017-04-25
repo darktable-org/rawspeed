@@ -36,9 +36,17 @@ FILE(GLOB RAWSPEED_TESTS_SOURCES
   "ExceptionsTest.cpp"
 )
 
-CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-suggest-attribute=const)
-CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-suggest-override)
-CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-missing-prototypes)
+set (DISABLED_WARNING_FLAGS
+  "missing-prototypes"
+  "missing-variable-declarations"
+  "suggest-attribute=const"
+  "suggest-override"
+  "used-but-marked-unused"
+)
+
+foreach(warning ${DISABLED_WARNING_FLAGS})
+  CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-${warning})
+endforeach()
 
 if(NOT SPECIAL_BUILD)
   # should be < 64Kb

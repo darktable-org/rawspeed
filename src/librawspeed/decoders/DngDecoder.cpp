@@ -36,7 +36,6 @@
 #include "tiff/TiffTag.h"                 // for TiffTag::UNIQUECAMERAMODEL
 #include <algorithm>                      // for move
 #include <cassert>                        // for assert
-#include <cstdio>                         // for printf
 #include <cstring>                        // for memset
 #include <map>                            // for map
 #include <memory>                         // for unique_ptr, allocator_trai...
@@ -426,17 +425,6 @@ RawImage DngDecoder::decodeRawInternal() {
     if (!uncorrectedRawValues) {
       mRaw->sixteenBitLookup();
       mRaw->setTable(nullptr);
-    }
-
-    if (false) { // NOLINT else would need preprocessor
-      // Test average for bias
-      uint32 cw = mRaw->dim.x * mRaw->getCpp();
-      auto* pixels = reinterpret_cast<ushort16*>(mRaw->getData(0, 500));
-      float avg = 0.0F;
-      for (uint32 x = 0; x < cw; x++) {
-        avg += static_cast<float>(pixels[x]);
-      }
-      printf("Average:%f\n", avg / static_cast<float>(cw));
     }
   }
 

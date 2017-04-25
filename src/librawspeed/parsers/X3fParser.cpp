@@ -64,7 +64,7 @@ X3fParser::X3fParser(Buffer* file) : RawParser(file) {
     readDirectory();
   } catch (IOException& e) {
     ThrowRDE("IO Error while reading header: %s", e.what());
-  } catch (RawDecoderException& e) {
+  } catch (RawDecoderException&) {
     freeObjects();
     throw;
   }
