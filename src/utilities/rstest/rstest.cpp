@@ -305,7 +305,6 @@ void writeImage(const RawImage& raw, const string& fn) {
     break;
   default:
     __builtin_unreachable();
-    break;
   }
 }
 

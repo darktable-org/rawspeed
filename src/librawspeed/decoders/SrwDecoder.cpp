@@ -443,7 +443,6 @@ void SrwDecoder::decodeCompressed3(const TiffIFD* raw, int bits)
             break;
           default:
             __builtin_unreachable();
-            break;
           }
           diffBitsMode[colornum][0] = diffBitsMode[colornum][1];
           diffBitsMode[colornum][1] = diffBits[i];

@@ -246,7 +246,6 @@ void DeflateDecompressor::decode(unsigned char** uBuffer, int width, int height,
       break;
     default:
       __builtin_unreachable();
-      break;
     }
   }
 }
