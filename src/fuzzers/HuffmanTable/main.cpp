@@ -39,11 +39,9 @@
 #include <cstdint>                      // for uint8_t
 #include <cstdio>                       // for size_t
 
-rawspeed::HuffmanTable createHuffmanTable(rawspeed::ByteStream* bs);
-
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
-rawspeed::HuffmanTable createHuffmanTable(rawspeed::ByteStream* bs) {
+static rawspeed::HuffmanTable createHuffmanTable(rawspeed::ByteStream* bs) {
   rawspeed::HuffmanTable ht;
 
   // first 16 bytes are consumed as n-codes-per-length
