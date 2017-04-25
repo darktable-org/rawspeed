@@ -170,7 +170,8 @@ protected:
   }
 
   template <int N_COMP>
-  std::array<ushort16, N_COMP> getInitialPredictors() const {
+  __attribute__((pure)) std::array<ushort16, N_COMP>
+  getInitialPredictors() const {
     std::array<ushort16, N_COMP> pred;
     pred.fill(1 << (frame.prec - Pt - 1));
     return pred;
