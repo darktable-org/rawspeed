@@ -17,8 +17,8 @@ add_definitions(-ggdb3)
 if(CMAKE_BUILD_TYPE STREQUAL "RELEASE")
   # want assertions in all but Release build type.
   add_definitions(-DNDEBUG)
-elseif(NOT CMAKE_BUILD_TYPE STREQUAL "RELWITHDEBINFO")
-  # if not Release and not RelWithDebInfo build, enable extra debug mode
+elseif(NOT (CMAKE_BUILD_TYPE STREQUAL "RELWITHDEBINFO" OR CMAKE_BUILD_TYPE STREQUAL "FUZZ"))
+  # if not Release/RelWithDebInfo/Fuzz build, enable extra debug mode
   add_definitions(-DDEBUG)
 endif()
 
@@ -100,7 +100,8 @@ MARK_AS_ADVANCED(
     CMAKE_C_FLAGS_SANITIZE )
 
 set(fuzz "-O3 -ffast-math")
-set(fuzz "${fuzz} ${asan} ${ubsan} -fsanitize-coverage=trace-pc-guard,indirect-calls,trace-cmp")
+set(fuzz "${fuzz} ${asan} ${ubsan}")
+set(fuzz "${fuzz} -fsanitize-coverage=trace-pc-guard,indirect-calls,trace-cmp")
 set(fuzz "${fuzz} -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION")
 SET(CMAKE_CXX_FLAGS_FUZZ
     "${fuzz}"
