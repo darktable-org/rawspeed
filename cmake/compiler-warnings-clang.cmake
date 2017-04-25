@@ -34,6 +34,11 @@ if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
   list(APPEND CLANG_DISABLED_WARNING_FLAGS "unreachable-code")
 endif()
 
+if(NOT (UNIX OR APPLE))
+  # bogus warnings about std functions...
+  list(APPEND CLANG_DISABLED_WARNING_FLAGS "used-but-marked-unused")
+endif()
+
 foreach(warning ${CLANG_WARNING_FLAGS})
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-W${warning})
 endforeach()
