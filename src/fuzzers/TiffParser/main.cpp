@@ -18,6 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#ifndef GETDECODER
+#error GETDECODER must be defined as bool
+#endif
+
 #include "common/RawspeedException.h" // for RawspeedException
 #include "io/Buffer.h"                // for Buffer, DataBuffer
 #include "parsers/TiffParser.h"       // for Tiff
@@ -25,6 +29,11 @@
 #include <cassert>                    // for assert
 #include <cstdint>                    // for uint8_t
 #include <cstdio>                     // for size_t
+
+#if GETDECODER
+#include "decoders/RawDecoder.h" // IWYU pragma: keep
+#include <algorithm>             // for move
+#endif
 
 // define this function, it is only declared in rawspeed:
 // for fuzzing, do not want any threading.
@@ -39,7 +48,14 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
   try {
     const rawspeed::Buffer buffer(Data, Size);
-    rawspeed::TiffParser::parse(buffer);
+#if GETDECODER
+    auto ifd =
+#endif
+        rawspeed::TiffParser::parse(buffer);
+
+#if GETDECODER
+    rawspeed::TiffParser::makeDecoder(std::move(ifd), buffer);
+#endif
   } catch (rawspeed::RawspeedException&) {
     return 0;
   }
