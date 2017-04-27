@@ -98,7 +98,7 @@ ADD_CUSTOM_TARGET(coverage-html
   COMMAND ${LCOV_PATH} --directory ${CMAKE_BINARY_DIR} --capture --output-file ${coverage_info}
   # COMMAND ${LCOV_PATH} --remove ${coverage_info} 'test/*' '/usr/*' --output-file ${coverage_cleaned}
   COMMAND ${LCOV_PATH} --extract ${coverage_info} '*/librawspeed/*' --output-file ${coverage_cleaned}
-  COMMAND ${LCOV_PATH} --remove ${coverage_cleaned} '*/*Test.cpp' '*/*Decoder*.*' --output-file ${coverage_final}
+  COMMAND ${LCOV_PATH} --remove ${coverage_cleaned} '*/*Test.cpp' --output-file ${coverage_final}
   COMMAND ${GENHTML_PATH} --demangle-cpp --precision 2 -o coverage ${coverage_final}
   COMMAND ${CMAKE_COMMAND} -E remove ${coverage_info} ${coverage_cleaned} ${coverage_final}
 
@@ -153,7 +153,7 @@ FUNCTION(SETUP_TARGET_FOR_COVERAGE _targetname _testrunner _outputname)
 		COMMAND ${LCOV_PATH} --directory . --capture --output-file ${coverage_info}
 		# COMMAND ${LCOV_PATH} --remove ${coverage_info} 'test/*' '/usr/*' --output-file ${coverage_cleaned}
 		COMMAND ${LCOV_PATH} --extract ${coverage_info} '*/librawspeed/*' --output-file ${coverage_cleaned}
-		COMMAND ${LCOV_PATH} --remove ${coverage_cleaned} '*/*Test.cpp' '*/*Decoder*.*' --output-file ${coverage_final}
+                COMMAND ${LCOV_PATH} --remove ${coverage_cleaned} '*/*Test.cpp' --output-file ${coverage_final}
 		COMMAND ${GENHTML_PATH} --demangle-cpp --precision 2 -o ${_outputname} ${coverage_final}
 		COMMAND ${CMAKE_COMMAND} -E remove ${coverage_info} ${coverage_cleaned} ${coverage_final}
 
