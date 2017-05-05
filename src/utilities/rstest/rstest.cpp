@@ -140,6 +140,8 @@ md5::md5_state imgDataHash(const RawImage& raw) {
 }
 
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-warning-option"
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma GCC diagnostic ignored "-Wframe-larger-than="
 #pragma GCC diagnostic ignored "-Wstack-usage="
