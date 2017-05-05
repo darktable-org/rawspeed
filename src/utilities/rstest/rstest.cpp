@@ -476,7 +476,7 @@ int main(int argc, char **argv) {
   size_t time = 0;
   map<string, string> failedTests;
 #ifdef _OPENMP
-#pragma omp parallel for default(shared) schedule(static, 1) reduction(+ : time)
+#pragma omp parallel for default(shared) schedule(dynamic, 1) reduction(+ : time)
 #endif
   for (int i = 1; i < argc; ++i) {
     if (!argv[i])
