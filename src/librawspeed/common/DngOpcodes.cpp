@@ -22,6 +22,7 @@
 
 #include "common/DngOpcodes.h"
 #include "common/Common.h"                // for uint32, ushort16, clampBits
+#include "common/Mutex.h"                 // for MutexLocker
 #include "common/Point.h"                 // for iPoint2D, iRectangle2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
@@ -75,6 +76,7 @@ public:
   }
 
   void apply(const RawImage& ri) override {
+    MutexLocker guard(&ri->mBadPixelMutex);
     iPoint2D crop = ri->getCropOffset();
     uint32 offset = crop.x | (crop.y << 16);
     for (auto y = 0; y < ri->dim.y; ++y) {
@@ -120,6 +122,7 @@ public:
   }
 
   void apply(const RawImage& ri) override {
+    MutexLocker guard(&ri->mBadPixelMutex);
     ri->mBadPixelPositions.insert(ri->mBadPixelPositions.begin(),
                                   badPixels.begin(), badPixels.end());
   }

@@ -26,6 +26,7 @@
 #include "rawspeedconfig.h"
 
 #include "common/Common.h"
+#include "common/Mutex.h"
 #include "common/Point.h"
 #include "common/RawImage.h"
 #include "common/RawspeedException.h"

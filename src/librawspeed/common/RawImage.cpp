@@ -292,14 +292,9 @@ RawImage::~RawImage() {
   p_->mymutex.Unlock();
 }
 
-void RawImageData::copyErrorsFrom(const RawImage& other) {
-  for (auto &error : other->errors) {
-    setError(error);
-  }
-}
-
 void RawImageData::transferBadPixelsToMap()
 {
+  MutexLocker guard(&mBadPixelMutex);
   if (mBadPixelPositions.empty())
     return;
 
@@ -509,25 +504,7 @@ RawImage& RawImage::operator=(RawImage&& rhs) noexcept {
   if (this == &rhs)
     return *this;
 
-  RawImageData* old = nullptr;
-
-  {
-    MutexLocker guard(&p_->mymutex);
-
-    // Retain the old RawImageData before overwriting it
-    old = p_;
-    p_ = rhs.p_;
-
-    // Increment use on new data
-    ++p_->dataRefCount;
-
-    // and decrement use on old data
-    --old->dataRefCount;
-  }
-
-  // If the RawImageData previously used by "this" is unused, delete it.
-  if (old->dataRefCount == 0)
-    delete old;
+  std::swap(p_, rhs.p_);
 
   return *this;
 }

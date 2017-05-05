@@ -22,6 +22,7 @@
 #include "decoders/DngDecoder.h"
 #include "common/Common.h"                // for uint32, uchar8, writeLog
 #include "common/DngOpcodes.h"            // for DngOpcodes
+#include "common/Mutex.h"                 // for MutexLocker
 #include "common/Point.h"                 // for iPoint2D, iRectangle2D
 #include "common/RawspeedException.h"     // for RawspeedException
 #include "decoders/DngDecoderSlices.h"    // for DngDecoderSlices, DngSlice...
@@ -288,6 +289,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, int compression, uint32 sample_f
 
   slices.startDecoding();
 
+  MutexLocker guard(&mRaw->errMutex);
   if (mRaw->errors.size() >= nSlices) {
     ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
              mRaw->errors[0].c_str());

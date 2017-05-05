@@ -211,8 +211,11 @@ string img_hash(const RawImage& r) {
   APPEND("pixel_aspect_ratio: %f\n", r->metadata.pixelAspectRatio);
 
   APPEND("badPixelPositions: ");
-  for (uint32 p : r->mBadPixelPositions)
-    APPEND("%d, ", p);
+  {
+    MutexLocker guard(&r->mBadPixelMutex);
+    for (uint32 p : r->mBadPixelPositions)
+      APPEND("%d, ", p);
+  }
 
   APPEND("\n");
 
@@ -220,8 +223,11 @@ string img_hash(const RawImage& r) {
   APPEND("md5sum of per-line md5sums: %s\n",
          rawspeed::md5::hash_to_string(hash_of_line_hashes).c_str());
 
-  for (const string& e : r->errors)
-    APPEND("WARNING: [rawspeed] %s\n", e.c_str());
+  {
+    MutexLocker guard(&r->errMutex);
+    for (const string& e : r->errors)
+      APPEND("WARNING: [rawspeed] %s\n", e.c_str());
+  }
 
 #undef APPEND
 

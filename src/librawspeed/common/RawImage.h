@@ -139,9 +139,8 @@ public:
   virtual void calculateBlackAreas() = 0;
   virtual void setWithLookUp(ushort16 value, uchar8* dst, uint32* random) = 0;
   void sixteenBitLookup();
-  void transferBadPixelsToMap();
-  void fixBadPixels();
-  void copyErrorsFrom(const RawImage& other) REQUIRES(!errMutex);
+  void transferBadPixelsToMap() REQUIRES(!mBadPixelMutex);
+  void fixBadPixels() REQUIRES(!mBadPixelMutex);
   void expandBorder(iRectangle2D validData);
   void setTable(const ushort16* table, int nfilled, bool dither);
   void setTable(TableLookUp *t);
@@ -161,13 +160,16 @@ public:
   int blackLevelSeparate[4];
   int whitePoint = 65536;
   std::vector<BlackArea> blackAreas;
+
   /* Vector containing silent errors that occurred doing decoding, that may have lead to */
   /* an incomplete image. */
-  std::vector<std::string> errors;
+  std::vector<std::string> errors GUARDED_BY(errMutex);
   void setError(const std::string& err) REQUIRES(!errMutex);
+
   /* Vector containing the positions of bad pixels */
   /* Format is x | (y << 16), so maximum pixel position is 65535 */
-  std::vector<uint32> mBadPixelPositions;    // Positions of zeroes that must be interpolated
+  // Positions of zeroes that must be interpolated
+  std::vector<uint32> mBadPixelPositions GUARDED_BY(mBadPixelMutex);
   uchar8* mBadPixelMap = nullptr;
   uint32 mBadPixelMapPitch = 0;
   bool mDitherScale =
@@ -179,7 +181,7 @@ public:
                         // than 1 thread is accessing vector
 
 private:
-  uint32 dataRefCount = 0;
+  uint32 dataRefCount GUARDED_BY(mymutex) = 0;
 
 protected:
   RawImageType dataType;
