@@ -34,17 +34,11 @@
 
 using std::fill_n;
 using std::string;
-using std::min;
 
 namespace rawspeed {
 
 RawImageData::RawImageData() : cfa(iPoint2D(0, 0)) {
   fill_n(blackLevelSeparate, 4, -1);
-#ifdef HAVE_PTHREAD
-  pthread_mutex_init(&mymutex, nullptr);
-  pthread_mutex_init(&errMutex, nullptr);
-  pthread_mutex_init(&mBadPixelMutex, nullptr);
-#endif
 }
 
 RawImageData::RawImageData(const iPoint2D& _dim, uint32 _bpc, uint32 _cpp)
@@ -52,11 +46,6 @@ RawImageData::RawImageData(const iPoint2D& _dim, uint32 _bpc, uint32 _cpp)
       bpp(_bpc * _cpp) {
   fill_n(blackLevelSeparate, 4, -1);
   createData();
-#ifdef HAVE_PTHREAD
-  pthread_mutex_init(&mymutex, nullptr);
-  pthread_mutex_init(&errMutex, nullptr);
-  pthread_mutex_init(&mBadPixelMutex, nullptr);
-#endif
 }
 
 ImageMetaData::ImageMetaData() {
@@ -70,11 +59,6 @@ ImageMetaData::ImageMetaData() {
 RawImageData::~RawImageData() {
   assert(dataRefCount == 0);
   mOffset = iPoint2D(0, 0);
-#ifdef HAVE_PTHREAD
-  pthread_mutex_destroy(&mymutex);
-  pthread_mutex_destroy(&errMutex);
-  pthread_mutex_destroy(&mBadPixelMutex);
-#endif
 
   delete table;
 
@@ -267,13 +251,8 @@ void RawImageData::subFrame(iRectangle2D crop) {
 }
 
 void RawImageData::setError(const string& err) {
-#ifdef HAVE_PTHREAD
-  pthread_mutex_lock(&errMutex);
-#endif
+  MutexLocker guard(&errMutex);
   errors.push_back(err);
-#ifdef HAVE_PTHREAD
-  pthread_mutex_unlock(&errMutex);
-#endif
 }
 
 void RawImageData::createBadPixelMap()
@@ -290,40 +269,27 @@ void RawImageData::createBadPixelMap()
 }
 
 RawImage::RawImage(RawImageData* p) : p_(p) {
-#ifdef HAVE_PTHREAD
-  pthread_mutex_lock(&p_->mymutex);
-#endif
+  MutexLocker guard(&p_->mymutex);
   ++p_->dataRefCount;
-#ifdef HAVE_PTHREAD
-  pthread_mutex_unlock(&p_->mymutex);
-#endif
 }
 
 RawImage::RawImage(const RawImage& p) : p_(p.p_) {
-#ifdef HAVE_PTHREAD
-  pthread_mutex_lock(&p_->mymutex);
-#endif
+  MutexLocker guard(&p_->mymutex);
   ++p_->dataRefCount;
-#ifdef HAVE_PTHREAD
-  pthread_mutex_unlock(&p_->mymutex);
-#endif
 }
 
 RawImage::~RawImage() {
-#ifdef HAVE_PTHREAD
-  pthread_mutex_lock(&p_->mymutex);
-#endif
+  p_->mymutex.Lock();
+
   --p_->dataRefCount;
+
   if (p_->dataRefCount == 0) {
-#ifdef HAVE_PTHREAD
-    pthread_mutex_unlock(&p_->mymutex);
-#endif
+    p_->mymutex.Unlock();
     delete p_;
     return;
   }
-#ifdef HAVE_PTHREAD
-  pthread_mutex_unlock(&p_->mymutex);
-#endif
+
+  p_->mymutex.Unlock();
 }
 
 void RawImageData::copyErrorsFrom(const RawImage& other) {
@@ -418,7 +384,7 @@ void RawImageData::startWorker(RawImageWorker::RawImageWorkerTask task, bool cro
   int y_per_thread = (height + threads - 1) / threads;
 
   for (int i = 0; i < threads; i++) {
-    int y_end = min(y_offset + y_per_thread, height);
+    int y_end = std::min(y_offset + y_per_thread, height);
 
     workers.emplace_back(this, task, y_offset, y_end);
     workers.back().startThread();
@@ -543,32 +509,25 @@ RawImage& RawImage::operator=(RawImage&& rhs) noexcept {
   if (this == &rhs)
     return *this;
 
-#ifdef HAVE_PTHREAD
-  pthread_mutex_lock(&p_->mymutex);
-#endif
+  RawImageData* old = nullptr;
 
-  // Retain the old RawImageData before overwriting it
-  RawImageData* const old = p_;
-  p_ = rhs.p_;
+  {
+    MutexLocker guard(&p_->mymutex);
 
-  // Increment use on new data
-  ++p_->dataRefCount;
+    // Retain the old RawImageData before overwriting it
+    old = p_;
+    p_ = rhs.p_;
 
-  // and decrement use on old data
-  --old->dataRefCount;
+    // Increment use on new data
+    ++p_->dataRefCount;
+
+    // and decrement use on old data
+    --old->dataRefCount;
+  }
 
   // If the RawImageData previously used by "this" is unused, delete it.
-  if (old->dataRefCount == 0) {
-#ifdef HAVE_PTHREAD
-    pthread_mutex_unlock(&(old->mymutex));
-#endif
-
+  if (old->dataRefCount == 0)
     delete old;
-  } else {
-#ifdef HAVE_PTHREAD
-    pthread_mutex_unlock(&(old->mymutex));
-#endif
-  }
 
   return *this;
 }

@@ -19,9 +19,9 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
 #include "decoders/Rw2Decoder.h"
 #include "common/Common.h"                          // for uint32, uchar8
+#include "common/Mutex.h"                           // for MutexLocker
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoder.h"                    // for RawDecoderThread
 #include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
@@ -40,10 +40,6 @@
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for string, allocator
 #include <vector>                                   // for vector
-
-#ifdef HAVE_PTHREAD
-#include <pthread.h>
-#endif
 
 using std::vector;
 using std::move;
@@ -230,13 +226,8 @@ void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
     }
   }
   if (zero_is_bad && !zero_pos.empty()) {
-#ifdef HAVE_PTHREAD
-    pthread_mutex_lock(&mRaw->mBadPixelMutex);
-#endif
+    MutexLocker guard(&mRaw->mBadPixelMutex);
     mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(), zero_pos.begin(), zero_pos.end());
-#ifdef HAVE_PTHREAD
-    pthread_mutex_unlock(&mRaw->mBadPixelMutex);
-#endif
   }
 }
 

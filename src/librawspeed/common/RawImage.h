@@ -23,6 +23,7 @@
 #include "rawspeedconfig.h"
 
 #include "common/Common.h"             // for uint32, uchar8, ushort16, wri...
+#include "common/Mutex.h"              // for Mutex
 #include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
 #include "metadata/BlackArea.h"        // for BlackArea
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray
@@ -140,7 +141,7 @@ public:
   void sixteenBitLookup();
   void transferBadPixelsToMap();
   void fixBadPixels();
-  void copyErrorsFrom(const RawImage& other);
+  void copyErrorsFrom(const RawImage& other) REQUIRES(!errMutex);
   void expandBorder(iRectangle2D validData);
   void setTable(const ushort16* table, int nfilled, bool dither);
   void setTable(TableLookUp *t);
@@ -163,7 +164,7 @@ public:
   /* Vector containing silent errors that occurred doing decoding, that may have lead to */
   /* an incomplete image. */
   std::vector<std::string> errors;
-  void setError(const std::string& err);
+  void setError(const std::string& err) REQUIRES(!errMutex);
   /* Vector containing the positions of bad pixels */
   /* Format is x | (y << 16), so maximum pixel position is 65535 */
   std::vector<uint32> mBadPixelPositions;    // Positions of zeroes that must be interpolated
@@ -173,10 +174,9 @@ public:
       true; // Should upscaling be done with dither to minimize banding?
   ImageMetaData metadata;
 
-#ifdef HAVE_PTHREAD
-  pthread_mutex_t errMutex;   // Mutex for 'errors'
-  pthread_mutex_t mBadPixelMutex;   // Mutex for 'mBadPixelPositions, must be used if more than 1 thread is accessing vector
-#endif
+  Mutex errMutex;       // Mutex for 'errors'
+  Mutex mBadPixelMutex; // Mutex for 'mBadPixelPositions, must be used if more
+                        // than 1 thread is accessing vector
 
 private:
   uint32 dataRefCount = 0;
@@ -197,9 +197,7 @@ protected:
   iPoint2D mOffset;
   iPoint2D uncropped_dim;
   TableLookUp* table = nullptr;
-#ifdef HAVE_PTHREAD
-  pthread_mutex_t mymutex;
-#endif
+  Mutex mymutex;
 };
 
 class RawImageDataU16 final : public RawImageData {
