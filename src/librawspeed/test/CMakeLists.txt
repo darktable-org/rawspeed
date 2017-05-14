@@ -14,6 +14,7 @@ endif()
 target_link_libraries(rawspeed_test PUBLIC ${RAWSPEED_LIBS})
 target_compile_definitions(rawspeed_test PUBLIC "$<TARGET_PROPERTY:rawspeed,COMPILE_DEFINITIONS>")
 target_include_directories(rawspeed_test PUBLIC "$<TARGET_PROPERTY:rawspeed,INCLUDE_DIRECTORIES>")
+target_include_directories(rawspeed_test SYSTEM PUBLIC "$<TARGET_PROPERTY:rawspeed,INTERFACE_SYSTEM_INCLUDE_DIRECTORIES>")
 add_dependencies(rawspeed_test rawspeed)
 
 target_link_libraries(rawspeed_test PUBLIC gtest gmock_main)

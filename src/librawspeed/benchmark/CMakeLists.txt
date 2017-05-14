@@ -15,6 +15,7 @@ endif()
 target_link_libraries(rawspeed_benchmark PUBLIC ${RAWSPEED_LIBS})
 target_compile_definitions(rawspeed_benchmark PUBLIC "$<TARGET_PROPERTY:rawspeed,COMPILE_DEFINITIONS>")
 target_include_directories(rawspeed_benchmark PUBLIC "$<TARGET_PROPERTY:rawspeed,INCLUDE_DIRECTORIES>")
+target_include_directories(rawspeed_benchmark SYSTEM PUBLIC "$<TARGET_PROPERTY:rawspeed,INTERFACE_SYSTEM_INCLUDE_DIRECTORIES>")
 add_dependencies(rawspeed_benchmark rawspeed)
 
 target_link_libraries(rawspeed_benchmark PUBLIC benchmark)

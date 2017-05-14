@@ -21,72 +21,11 @@
 #pragma once
 
 #include "rawspeedconfig.h"
+#include "ThreadSafetyAnalysis.h"
 
 #ifdef HAVE_PTHREAD
 #include <pthread.h>
 #endif
-
-// see https://clang.llvm.org/docs/ThreadSafetyAnalysis.html#mutexheader
-
-// Enable thread safety attributes only with clang.
-// The attributes can be safely erased when compiling with other compilers.
-#if defined(__clang__) && (!defined(SWIG))
-#define RS_THREAD_ANNOTATION_ATTRIBUTE(x) __attribute__((x))
-#else
-#define RS_THREAD_ANNOTATION_ATTRIBUTE(x) // no-op
-#endif
-
-#define CAPABILITY(x) RS_THREAD_ANNOTATION_ATTRIBUTE(capability(x))
-
-#define SCOPED_CAPABILITY RS_THREAD_ANNOTATION_ATTRIBUTE(scoped_lockable)
-
-#define GUARDED_BY(x) RS_THREAD_ANNOTATION_ATTRIBUTE(guarded_by(x))
-
-#define PT_GUARDED_BY(x) RS_THREAD_ANNOTATION_ATTRIBUTE(pt_guarded_by(x))
-
-#define ACQUIRED_BEFORE(...)                                                   \
-  RS_THREAD_ANNOTATION_ATTRIBUTE(acquired_before(__VA_ARGS__))
-
-#define ACQUIRED_AFTER(...)                                                    \
-  RS_THREAD_ANNOTATION_ATTRIBUTE(acquired_after(__VA_ARGS__))
-
-#define REQUIRES(...)                                                          \
-  RS_THREAD_ANNOTATION_ATTRIBUTE(requires_capability(__VA_ARGS__))
-
-#define REQUIRES_SHARED(...)                                                   \
-  RS_THREAD_ANNOTATION_ATTRIBUTE(requires_shared_capability(__VA_ARGS__))
-
-#define ACQUIRE(...)                                                           \
-  RS_THREAD_ANNOTATION_ATTRIBUTE(acquire_capability(__VA_ARGS__))
-
-#define ACQUIRE_SHARED(...)                                                    \
-  RS_THREAD_ANNOTATION_ATTRIBUTE(acquire_shared_capability(__VA_ARGS__))
-
-#define RELEASE(...)                                                           \
-  RS_THREAD_ANNOTATION_ATTRIBUTE(release_capability(__VA_ARGS__))
-
-#define RELEASE_SHARED(...)                                                    \
-  RS_THREAD_ANNOTATION_ATTRIBUTE(release_shared_capability(__VA_ARGS__))
-
-#define TRY_ACQUIRE(...)                                                       \
-  RS_THREAD_ANNOTATION_ATTRIBUTE(try_acquire_capability(__VA_ARGS__))
-
-#define TRY_ACQUIRE_SHARED(...)                                                \
-  RS_THREAD_ANNOTATION_ATTRIBUTE(try_acquire_shared_capability(__VA_ARGS__))
-
-#define EXCLUDES(...)                                                          \
-  RS_THREAD_ANNOTATION_ATTRIBUTE(locks_excluded(__VA_ARGS__))
-
-#define ASSERT_CAPABILITY(x)                                                   \
-  RS_THREAD_ANNOTATION_ATTRIBUTE(assert_capability(x))
-
-#define ASSERT_SHARED_CAPABILITY(x)                                            \
-  RS_THREAD_ANNOTATION_ATTRIBUTE(assert_shared_capability(x))
-
-#define RETURN_CAPABILITY(x) RS_THREAD_ANNOTATION_ATTRIBUTE(lock_returned(x))
-
-#define NO_THREAD_SAFETY_ANALYSIS                                              \
-  RS_THREAD_ANNOTATION_ATTRIBUTE(no_thread_safety_analysis)
 
 namespace rawspeed {
 
