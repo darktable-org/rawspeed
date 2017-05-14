@@ -223,11 +223,9 @@ string img_hash(const RawImage& r) {
   APPEND("md5sum of per-line md5sums: %s\n",
          rawspeed::md5::hash_to_string(hash_of_line_hashes).c_str());
 
-  {
-    MutexLocker guard(&r->errMutex);
-    for (const string& e : r->errors)
-      APPEND("WARNING: [rawspeed] %s\n", e.c_str());
-  }
+  const auto errors = r->getErrors();
+  for (const string& e : errors)
+    APPEND("WARNING: [rawspeed] %s\n", e.c_str());
 
 #undef APPEND
 

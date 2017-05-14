@@ -188,11 +188,9 @@ int main(int argc, char *argv[]) {
     d->decodeMetaData(meta.get());
     r = d->mRaw;
 
-    {
-      rawspeed::MutexLocker guard(&r->errMutex);
-      for (auto& error : r->errors)
-        fprintf(stderr, "WARNING: [rawspeed] %s\n", error.c_str());
-    }
+    const auto errors = r->getErrors();
+    for (auto& error : errors)
+      fprintf(stderr, "WARNING: [rawspeed] %s\n", error.c_str());
 
     fprintf(stdout, "blackLevel: %d\n", r->blackLevel);
     fprintf(stdout, "whitePoint: %d\n", r->whitePoint);

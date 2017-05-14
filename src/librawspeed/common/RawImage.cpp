@@ -62,7 +62,6 @@ RawImageData::~RawImageData() {
 
   delete table;
 
-  errors.clear();
   destroyData();
 }
 
@@ -248,11 +247,6 @@ void RawImageData::subFrame(iRectangle2D crop) {
 
   mOffset += crop.pos;
   dim = crop.dim;
-}
-
-void RawImageData::setError(const string& err) {
-  MutexLocker guard(&errMutex);
-  errors.push_back(err);
 }
 
 void RawImageData::createBadPixelMap()

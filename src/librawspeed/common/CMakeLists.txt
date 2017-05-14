@@ -4,6 +4,8 @@ FILE(GLOB COMMON_SOURCES
   "Cpuid.cpp"
   "DngOpcodes.cpp"
   "DngOpcodes.h"
+  "ErrorLog.cpp"
+  "ErrorLog.h"
   "Memory.cpp"
   "Memory.h"
   "Mutex.h"
@@ -13,7 +15,6 @@ FILE(GLOB COMMON_SOURCES
   "RawImageDataFloat.cpp"
   "RawImageDataU16.cpp"
   "RawspeedException.h"
-
 )
 
 set(RAWSPEED_SOURCES "${RAWSPEED_SOURCES};${COMMON_SOURCES}" PARENT_SCOPE)

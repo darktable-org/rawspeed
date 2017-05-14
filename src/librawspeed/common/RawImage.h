@@ -22,7 +22,9 @@
 
 #include "rawspeedconfig.h"
 
+#include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
 #include "common/Common.h"             // for uint32, uchar8, ushort16, wri...
+#include "common/ErrorLog.h"           // for ErrorLog
 #include "common/Mutex.h"              // for Mutex
 #include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
 #include "metadata/BlackArea.h"        // for BlackArea
@@ -113,8 +115,7 @@ public:
   int isoSpeed;
 };
 
-class RawImageData
-{
+class RawImageData : public ErrorLog {
   friend class RawImageWorker;
 public:
   virtual ~RawImageData();
@@ -161,11 +162,6 @@ public:
   int whitePoint = 65536;
   std::vector<BlackArea> blackAreas;
 
-  /* Vector containing silent errors that occurred doing decoding, that may have lead to */
-  /* an incomplete image. */
-  std::vector<std::string> errors GUARDED_BY(errMutex);
-  void setError(const std::string& err) REQUIRES(!errMutex);
-
   /* Vector containing the positions of bad pixels */
   /* Format is x | (y << 16), so maximum pixel position is 65535 */
   // Positions of zeroes that must be interpolated
@@ -176,7 +172,6 @@ public:
       true; // Should upscaling be done with dither to minimize banding?
   ImageMetaData metadata;
 
-  Mutex errMutex;       // Mutex for 'errors'
   Mutex mBadPixelMutex; // Mutex for 'mBadPixelPositions, must be used if more
                         // than 1 thread is accessing vector
 

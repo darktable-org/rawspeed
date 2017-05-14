@@ -22,7 +22,6 @@
 #include "rawspeedconfig.h" // for HAVE_PTHREAD
 #include "decoders/RawDecoder.h"
 #include "common/Common.h"                          // for uint32, getThrea...
-#include "common/Mutex.h"                           // for MutexLocker
 #include "common/Point.h"                           // for iPoint2D, iRecta...
 #include "decoders/RawDecoderException.h"           // for ThrowRDE, RawDec...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
@@ -286,8 +285,7 @@ void RawDecoder::startThreads() {
   }
 #endif
 
-  MutexLocker guard(&mRaw->errMutex);
-  if (mRaw->errors.size() >= threads)
+  if (mRaw->isTooManyErrors(threads))
     ThrowRDE("All threads reported errors. Cannot load image.");
 }
 
@@ -374,8 +372,7 @@ void RawDecoder::startTasks( uint32 tasks )
     }
   }
 
-  MutexLocker guard(&mRaw->errMutex);
-  if (mRaw->errors.size() >= tasks)
+  if (mRaw->isTooManyErrors(tasks))
     ThrowRDE("All threads reported errors. Cannot load image.");
 
 #else
