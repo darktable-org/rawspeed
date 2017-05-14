@@ -28,6 +28,7 @@ set (CLANG_DISABLED_WARNING_FLAGS
   "unused-macros"
   "unused-parameter"
   "weak-vtables"
+  "zero-as-null-pointer-constant" # temporary
 )
 
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
