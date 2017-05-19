@@ -26,6 +26,7 @@ endif()
 
 FILE(GLOB RAWSPEED_BENCHMARKS_SOURCES
   "../interpolators/Cr2sRawInterpolatorBenchmark.cpp"
+  "../io/BitStreamBenchmark.cpp"
 )
 
 if(HAVE_ZLIB)
