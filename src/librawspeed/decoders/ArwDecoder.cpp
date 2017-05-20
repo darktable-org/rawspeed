@@ -187,7 +187,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  auto *curve = new ushort16[0x4001];
+  std::vector<ushort16> curve(0x4001);
   TiffEntry *c = raw->getEntry(SONY_CURVE);
   uint32 sony_curve[] = { 0, 0, 0, 0, 0, 4095 };
 
@@ -202,7 +202,7 @@ RawImage ArwDecoder::decodeRawInternal() {
       curve[j] = curve[j-1] + (1 << i);
 
   if (!uncorrectedRawValues)
-    mRaw->setTable(curve, 0x4000, true);
+    mRaw->setTable(curve.data(), 0x4000, true);
 
   uint32 c2 = counts->getU32();
   uint32 off = offsets->getU32();
@@ -227,12 +227,10 @@ RawImage ArwDecoder::decodeRawInternal() {
 
   // Set the table, if it should be needed later.
   if (uncorrectedRawValues) {
-    mRaw->setTable(curve, 0x4000, false);
+    mRaw->setTable(curve.data(), 0x4000, false);
   } else {
     mRaw->setTable(nullptr);
   }
-
-  delete[] curve;
 
   return mRaw;
 }
