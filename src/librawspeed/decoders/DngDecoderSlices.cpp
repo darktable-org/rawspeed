@@ -166,7 +166,7 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
     /* Deflate compression */
   } else if (compression == 8) {
 #ifdef HAVE_ZLIB
-    unsigned char *uBuffer = nullptr;
+    std::unique_ptr<unsigned char[]> uBuffer;
     while (!t->slices.empty()) {
       auto e = move(t->slices.front());
       t->slices.pop();
@@ -181,7 +181,6 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
         mRaw->setError(err.what());
       }
     }
-    delete [] uBuffer;
 #else
 #pragma message                                                                \
     "ZLIB is not present! Deflate compression will not be supported!"

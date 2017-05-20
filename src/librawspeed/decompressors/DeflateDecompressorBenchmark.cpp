@@ -109,15 +109,13 @@ static inline void BM_DeflateDecompressor(benchmark::State& state) {
     break;
   }
 
-  unsigned char* uBuffer = nullptr;
+  std::unique_ptr<unsigned char[]> uBuffer;
 
   while (state.KeepRunning()) {
     DeflateDecompressor d(buf, 0, buf.getSize(), mRaw, predictor, BPS::value);
 
     d.decode(&uBuffer, mRaw->dim.x, mRaw->dim.y, 0, 0);
   }
-
-  delete[] uBuffer;
 
   state.SetComplexityN(dim.area());
   state.SetItemsProcessed(state.complexity_length_n() * state.iterations());

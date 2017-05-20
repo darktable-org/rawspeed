@@ -185,17 +185,18 @@ static inline void expandFP24(unsigned char* dst, int width) {
   }
 }
 
-void DeflateDecompressor::decode(unsigned char** uBuffer, int width, int height,
-                                 uint32 offX, uint32 offY) {
+void DeflateDecompressor::decode(std::unique_ptr<unsigned char[]>* uBuffer,
+                                 int width, int height, uint32 offX,
+                                 uint32 offY) {
   uLongf dstLen = sizeof(float) * width * height;
 
-  if (!*uBuffer)
-    *uBuffer = new unsigned char[dstLen];
+  if (!uBuffer->get())
+    *uBuffer = std::unique_ptr<unsigned char[]>(new unsigned char[dstLen]);
 
   const auto cSize = input.getRemainSize();
   const unsigned char* cBuffer = input.getData(cSize);
 
-  int err = uncompress(*uBuffer, &dstLen, cBuffer, cSize);
+  int err = uncompress(uBuffer->get(), &dstLen, cBuffer, cSize);
   if (err != Z_OK) {
     ThrowRDE("failed to uncompress tile: %d (%s)", err, zError(err));
   }
@@ -225,7 +226,7 @@ void DeflateDecompressor::decode(unsigned char** uBuffer, int width, int height,
                              : width;
 
   for (size_t row = 0; row < thisTileLength; ++row) {
-    unsigned char* src = *uBuffer + row * width * bytesps;
+    unsigned char* src = uBuffer->get() + row * width * bytesps;
     unsigned char* dst =
         static_cast<unsigned char*>(mRaw->getData()) +
         ((offY + row) * mRaw->pitch + offX * sizeof(float) * mRaw->getCpp());

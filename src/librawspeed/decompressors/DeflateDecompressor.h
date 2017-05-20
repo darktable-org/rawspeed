@@ -29,6 +29,7 @@
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/Buffer.h"                          // for Buffer, Buffer::size_type
 #include "io/ByteStream.h"                      // for ByteStream
+#include <memory>                               // for unique_ptr
 
 namespace rawspeed {
 
@@ -45,8 +46,8 @@ public:
       : input(data, offset, size), mRaw(img), predictor(predictor_), bps(bps_) {
   }
 
-  void decode(unsigned char** uBuffer, int width, int height, uint32 offX,
-              uint32 offY);
+  void decode(std::unique_ptr<unsigned char[]>* uBuffer, int width, int height,
+              uint32 offX, uint32 offY);
 };
 
 } // namespace rawspeed
