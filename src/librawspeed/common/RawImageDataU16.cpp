@@ -27,6 +27,7 @@
 #include <algorithm>                      // for fill, max, min
 #include <array>                          // for array
 #include <cassert>                        // for assert
+#include <memory>                         // for operator==, unique_ptr
 #include <vector>                         // for vector
 
 #if defined(__SSE2__)

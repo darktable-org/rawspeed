@@ -29,6 +29,7 @@
 #include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
 #include "metadata/BlackArea.h"        // for BlackArea
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray
+#include <memory>                      // for unique_ptr, operator==
 #include <string>                      // for string
 #include <vector>                      // for vector
 
@@ -144,7 +145,7 @@ public:
   void fixBadPixels() REQUIRES(!mBadPixelMutex);
   void expandBorder(iRectangle2D validData);
   void setTable(const ushort16* table, int nfilled, bool dither);
-  void setTable(TableLookUp *t);
+  void setTable(std::unique_ptr<TableLookUp> t);
 
   bool isAllocated() {return !!data;}
   void createBadPixelMap();
@@ -193,7 +194,7 @@ protected:
   friend class RawImage;
   iPoint2D mOffset;
   iPoint2D uncropped_dim;
-  TableLookUp* table = nullptr;
+  std::unique_ptr<TableLookUp> table;
   Mutex mymutex;
 };
 

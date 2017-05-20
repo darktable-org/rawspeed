@@ -18,12 +18,13 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "common/RawImage.h"              // for RawImageDataFloat, RawImag...
 #include "common/Common.h"                // for uchar8, uint32, writeLog
 #include "common/Point.h"                 // for iPoint2D
-#include "common/RawImage.h"              // for RawImageDataFloat, RawImag...
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea
 #include <algorithm>                      // for max, min
+#include <memory>                         // for operator==, unique_ptr
 #include <vector>                         // for vector
 
 using std::min;

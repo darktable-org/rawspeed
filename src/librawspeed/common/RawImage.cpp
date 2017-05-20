@@ -60,8 +60,6 @@ RawImageData::~RawImageData() {
   assert(dataRefCount == 0);
   mOffset = iPoint2D(0, 0);
 
-  delete table;
-
   destroyData();
 }
 
@@ -579,20 +577,17 @@ void RawImageData::sixteenBitLookup() {
   startWorker(RawImageWorker::APPLY_LOOKUP, true);
 }
 
-void RawImageData::setTable( TableLookUp *t )
-{
-  delete table;
-
-  table = t;
+void RawImageData::setTable(std::unique_ptr<TableLookUp> t) {
+  table = std::move(t);
 }
 
 void RawImageData::setTable(const ushort16 *table_, int nfilled, bool dither) {
   assert(table_);
   assert(nfilled > 0);
 
-  auto *t = new TableLookUp(1, dither);
+  auto t = make_unique<TableLookUp>(1, dither);
   t->setTable(0, table_, nfilled);
-  this->setTable(t);
+  this->setTable(std::move(t));
 }
 
 const int TABLE_SIZE = 65536 * 2;
