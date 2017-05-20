@@ -25,10 +25,9 @@
 #include "common/RawspeedException.h"     // for RawspeedException
 #include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/Buffer.h"                    // for Buffer::size_type
+#include "io/Buffer.h"                    // for Buffer, Buffer::size_type
 #include "io/ByteStream.h"                // for ByteStream
-#include "io/Endianness.h"                // for getHostEndianness, Endiann...
-#include "parsers/TiffParser.h"           // for TiffParser::parse
+#include "parsers/TiffParser.h"           // for TiffParser
 #include "tiff/TiffEntry.h"               // IWYU pragma: keep
 #include "tiff/TiffIFD.h"                 // for TiffID, TiffRootIFD, TiffR...
 #include <algorithm>                      // for max
@@ -48,13 +47,9 @@ using std::max;
 
 namespace rawspeed {
 
-X3fDecoder::X3fDecoder(Buffer* file) : RawDecoder(file) {
-  bytes = new ByteStream(file, 0, getHostEndianness() == little);
-}
+X3fDecoder::X3fDecoder(Buffer* file) : RawDecoder(file){};
 
 X3fDecoder::~X3fDecoder() {
-  delete bytes;
-
   if (huge_table)
     alignedFree(huge_table);
   if (line_offsets)

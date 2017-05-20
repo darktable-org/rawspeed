@@ -39,43 +39,29 @@ using std::string;
 namespace rawspeed {
 
 X3fParser::X3fParser(Buffer* file) : RawParser(file) {
-  decoder = nullptr;
-  bytes = nullptr;
   uint32 size = file->getSize();
   if (size < 104 + 128)
     ThrowRDE("X3F file too small");
 
-  bytes = new ByteStream(file, 0, size, getHostEndianness() == little);
+  bytes = ByteStream(file, 0, size, getHostEndianness() == little);
 
   try {
     // Read signature
-    if (bytes->getU32() != 0x62564f46)
+    if (bytes.getU32() != 0x62564f46)
       ThrowRDE("Not an X3f file (Signature)");
 
-    uint32 version = bytes->getU32();
+    uint32 version = bytes.getU32();
     if (version < 0x00020000)
       ThrowRDE("File version too old");
 
     // Skip identifier + mark bits
-    bytes->skipBytes(16 + 4);
+    bytes.skipBytes(16 + 4);
 
-    bytes->setPosition(0);
-    decoder = make_unique<X3fDecoder>(file);
-    readDirectory();
+    bytes.setPosition(0);
   } catch (IOException& e) {
     ThrowRDE("IO Error while reading header: %s", e.what());
-  } catch (RawDecoderException&) {
-    freeObjects();
-    throw;
   }
 }
-
-void X3fParser::freeObjects() {
-  delete bytes;
-  bytes = nullptr;
-}
-
-X3fParser::~X3fParser() { freeObjects(); }
 
 static string getIdAsString(ByteStream *bytes) {
   uchar8 id[5];
@@ -85,40 +71,45 @@ static string getIdAsString(ByteStream *bytes) {
   return string(reinterpret_cast<const char*>(id));
 }
 
-
-void X3fParser::readDirectory()
-{
-  bytes->setPosition(mInput->getSize() - 4);
-  uint32 dir_off = bytes->getU32();
-  bytes->setPosition(dir_off);
+void X3fParser::readDirectory(X3fDecoder* decoder) {
+  bytes.setPosition(mInput->getSize() - 4);
+  uint32 dir_off = bytes.getU32();
+  bytes.setPosition(dir_off);
 
   // Check signature
-  if ("SECd" != getIdAsString(bytes))
+  if ("SECd" != getIdAsString(&bytes))
     ThrowRDE("Unable to locate directory");
 
-  uint32 version = bytes->getU32();
+  uint32 version = bytes.getU32();
   if (version < 0x00020000)
     ThrowRDE("File version too old (directory)");
 
-  uint32 n_entries = bytes->getU32();
+  uint32 n_entries = bytes.getU32();
   for (uint32 i = 0; i < n_entries; i++) {
-    X3fDirectory dir(bytes);
+    X3fDirectory dir(&bytes);
     decoder->mDirectory.push_back(dir);
-    uint32 old_pos = bytes->getPosition();
+    uint32 old_pos = bytes.getPosition();
     if ("IMA2" == dir.id || "IMAG" == dir.id) {
-      decoder->mImages.emplace_back(bytes, dir.offset, dir.length);
+      decoder->mImages.emplace_back(&bytes, dir.offset, dir.length);
     }
     if ("PROP" == dir.id) {
-      decoder->mProperties.addProperties(bytes, dir.offset, dir.length);
+      decoder->mProperties.addProperties(&bytes, dir.offset, dir.length);
     }
-    bytes->setPosition(old_pos);
+    bytes.setPosition(old_pos);
   }
 }
 
 std::unique_ptr<RawDecoder> X3fParser::getDecoder(const CameraMetaData* meta) {
-  if (nullptr == decoder)
-    ThrowRDE("No decoder found!");
-  return std::move(decoder);
+  try {
+    auto decoder = make_unique<X3fDecoder>(mInput);
+    readDirectory(decoder.get());
+
+    if (nullptr == decoder)
+      ThrowRDE("No decoder found!");
+    return std::move(decoder);
+  } catch (IOException& e) {
+    ThrowRDE("IO Error while reading header: %s", e.what());
+  }
 }
 
 X3fDirectory::X3fDirectory( ByteStream *bytes )

@@ -25,7 +25,6 @@
 #include "common/RawImage.h"     // for RawImage
 #include "decoders/RawDecoder.h" // for RawDecoder, RawDecoderThread (ptr o...
 #include "io/BitPumpMSB.h"       // for BitPumpMSB
-#include "parsers/X3fParser.h"   // for X3fPropertyCollection, X3fDirectory
 #include <array>                 // for array
 #include <map>                   // for map, _Rb_tree_iterator
 #include <string>                // for string
@@ -37,8 +36,45 @@ class ByteStream;
 class CameraMetaData;
 class Buffer;
 
+class X3fImage {
+public:
+  X3fImage();
+  X3fImage(ByteStream* bytes, uint32 offset, uint32 length);
+  /*  1 = RAW X3 (SD1)
+  2 = thumbnail or maybe just RGB
+  3 = RAW X3 */
+  uint32 type;
+  /*  3 = 3x8 bit pixmap
+  6 = 3x10 bit huffman with map table
+  11 = 3x8 bit huffman
+  18 = JPEG */
+  uint32 format;
+  uint32 width;
+  uint32 height;
+  // Pitch in bytes, 0 if Huffman encoded
+  uint32 pitchB;
+  uint32 dataOffset;
+  uint32 dataSize;
+};
+
+class X3fDirectory {
+public:
+  X3fDirectory() : id(std::string()) {}
+  explicit X3fDirectory(ByteStream* bytes);
+  uint32 offset{0};
+  uint32 length{0};
+  std::string id;
+  std::string sectionID;
+};
+
+class X3fPropertyCollection {
+public:
+  void addProperties(ByteStream* bytes, uint32 offset, uint32 length);
+  std::string getString(ByteStream* bytes);
+  std::map<std::string, std::string> props;
+};
+
 class X3fDecoder final : public RawDecoder {
-  ByteStream* bytes = nullptr;
   const X3fImage* curr_image = nullptr;
   int pred[3];
   uint32 plane_sizes[3];
