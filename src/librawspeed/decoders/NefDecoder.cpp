@@ -20,11 +20,10 @@
 */
 
 #include "decoders/NefDecoder.h"
-#include "common/Common.h"                   // for uint32, uchar8
-#include "common/Memory.h"                   // for alignedFree, ali...
-#include "common/Point.h"                    // for iPoint2D
-#include "decoders/RawDecoderException.h"    // for ThrowRDE, RawDec...
-#include "decompressors/NikonDecompressor.h" // for NikonDecompressor::decompress
+#include "common/Common.h"                          // for uint32, uchar8
+#include "common/Point.h"                           // for iPoint2D
+#include "decoders/RawDecoderException.h"           // for ThrowRDE, RawDec...
+#include "decompressors/NikonDecompressor.h"        // for NikonDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/BitPumpMSB.h"                          // for BitPumpMSB
 #include "io/Buffer.h"                              // for Buffer
@@ -42,7 +41,7 @@
 #include <cstring>                                  // for strncmp
 #include <memory>                                   // for unique_ptr, allo...
 #include <sstream>                                  // for operator<<, ostr...
-#include <string>                                   // for string, operator<<
+#include <string>                                   // for string, operator==
 #include <vector>                                   // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
@@ -572,13 +571,12 @@ void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h) {
   auto inv_wb_r = static_cast<int>(1024.0 / wb_r);
   auto inv_wb_b = static_cast<int>(1024.0 / wb_b);
 
-  ushort16* curve = gammaCurve(1/2.4, 12.92, 1, 4095);
+  auto curve = gammaCurve(1 / 2.4, 12.92, 1, 4095);
   // Scale output values to 16 bits.
   for (int i = 0 ; i < 4096; i++) {
     curve[i] = clampBits(static_cast<int>(curve[i]) << 2, 16);
   }
-  mRaw->setTable(curve, 4095, true);
-  alignedFree(curve);
+  mRaw->setTable(curve.data(), 4095, true);
 
   ushort16 tmp;
   auto* tmpch = reinterpret_cast<uchar8*>(&tmp);
@@ -650,10 +648,9 @@ void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h) {
 
 // From:  dcraw.c -- Dave Coffin's raw photo decoder
 #define SQR(x) ((x)*(x))
-ushort16* NefDecoder::gammaCurve(double pwr, double ts, int mode, int imax) {
-  auto* curve = alignedMallocArray<ushort16, 16, ushort16>(65536);
-  if (curve == nullptr)
-    ThrowRDE("Unable to allocate gamma curve");
+std::vector<ushort16> NefDecoder::gammaCurve(double pwr, double ts, int mode,
+                                             int imax) {
+  std::vector<ushort16> curve(65536);
 
   int i;
   double g[6], bnd[2]={0,0}, r;
@@ -688,7 +685,6 @@ ushort16* NefDecoder::gammaCurve(double pwr, double ts, int mode, int imax) {
 
   mode--;
 
-  assert(curve != nullptr);
   for (i=0; i < 0x10000; i++) {
     curve[i] = 0xffff;
     if ((r = static_cast<double>(i) / imax) < 1) {
@@ -702,6 +698,9 @@ ushort16* NefDecoder::gammaCurve(double pwr, double ts, int mode, int imax) {
                                     : exp((r - 1) / g[2])))));
     }
   }
+
+  assert(curve.size() == 65536);
+
   return curve;
 }
 #undef SQR

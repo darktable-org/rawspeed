@@ -27,6 +27,7 @@
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
 #include <algorithm>                      // for move
 #include <string>                         // for string
+#include <vector>                         // for vector
 
 namespace rawspeed {
 
@@ -63,7 +64,7 @@ private:
   void DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h);
   std::string getMode();
   std::string getExtendedMode(const std::string &mode);
-  ushort16* gammaCurve(double pwr, double ts, int mode, int imax);
+  std::vector<ushort16> gammaCurve(double pwr, double ts, int mode, int imax);
 };
 
 } // namespace rawspeed
