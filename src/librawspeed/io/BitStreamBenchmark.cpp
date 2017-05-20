@@ -18,6 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "common/Common.h"           // for roundUp
 #include "io/BitPumpJPEG.h"          // for BitPumpJPEG
 #include "io/BitPumpLSB.h"           // for BitPumpLSB, BitStream<>::fillCache
 #include "io/BitPumpMSB.h"           // for BitPumpMSB
@@ -25,7 +26,6 @@
 #include "io/BitPumpMSB32.h"         // for BitPumpMSB32
 #include "io/Buffer.h"               // for Buffer, Buffer::size_type, Data...
 #include "io/ByteStream.h"           // for ByteStream
-#include <algorithm>                 // for min
 #include <benchmark/benchmark_api.h> // for State, Benchmark, Initialize
 #include <cassert>                   // for assert
 #include <cstddef>                   // for size_t
@@ -56,6 +56,9 @@ static inline void BM_BitStream(benchmark::State& state, bool inNativeByteOrder,
 
   assert(Step <= fillSize);
 
+  assert((Step == 1) || rawspeed::isAligned(Step, 2));
+  assert((fillSize == 1) || rawspeed::isAligned(fillSize, 2));
+
   const rawspeed::Buffer b(state.range(0));
   assert(b.getSize() > 0);
   assert(b.getSize() == (size_t)state.range(0));
@@ -69,20 +72,25 @@ static inline void BM_BitStream(benchmark::State& state, bool inNativeByteOrder,
   while (state.KeepRunning()) {
     pump.resetBufferPosition();
 
-    for (processedBits = 0; processedBits <= b.getSize();) {
+    for (processedBits = 0; processedBits <= 8 * b.getSize();) {
       pump.fill(fillSize);
 
       // NOTE: you may want to change the callee here
       for (auto i = 0U; i < fillSize; i += Step)
-        pump.skipBits(Step);
+        pump.skipBitsNoFill(Step);
 
       processedBits += fillSize;
     }
   }
 
+  assert(processedBits > fillSize);
+  processedBits -= fillSize;
+
+  assert(rawspeed::roundUp(8 * b.getSize(), fillSize) == processedBits);
+
   state.SetComplexityN(processedBits / 8);
-  state.SetItemsProcessed(state.complexity_length_n() * state.iterations());
-  state.SetBytesProcessed(state.items_processed());
+  state.SetItemsProcessed(processedBits * state.iterations());
+  state.SetBytesProcessed(state.items_processed() / 8);
 }
 
 static inline void CustomArguments(benchmark::internal::Benchmark* b) {
@@ -90,11 +98,7 @@ static inline void CustomArguments(benchmark::internal::Benchmark* b) {
 #if 1
   b->Arg(256 << 20);
 #else
-  const size_t maxBytes =
-      std::min(static_cast<size_t>(std::numeric_limits<int>::max()),
-               static_cast<size_t>(
-                   std::numeric_limits<rawspeed::Buffer::size_type>::max()));
-  b->Range(1, maxBytes);
+  b->Range(1, 1024 << 20);
   b->Complexity(benchmark::oN);
 #endif
   b->Unit(benchmark::kMillisecond);
