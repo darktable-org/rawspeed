@@ -594,20 +594,11 @@ const int TABLE_SIZE = 65536 * 2;
 
 // Creates n numre of tables.
 TableLookUp::TableLookUp( int _ntables, bool _dither ) : ntables(_ntables), dither(_dither) {
-  tables = nullptr;
   if (ntables < 1) {
     ThrowRDE("Cannot construct 0 tables");
   }
-  tables = new ushort16[ntables * TABLE_SIZE];
-  memset(tables, 0, sizeof(ushort16) * ntables * TABLE_SIZE);
+  tables.resize(ntables * TABLE_SIZE, ushort16(0));
 }
-
-TableLookUp::~TableLookUp()
-{
-  delete[] tables;
-  tables = nullptr;
-}
-
 
 void TableLookUp::setTable(int ntable, const ushort16 *table , int nfilled) {
   assert(table);

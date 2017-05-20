@@ -77,11 +77,11 @@ void* RawImageWorkerThread(void* _this);
 class TableLookUp {
 public:
   TableLookUp(int ntables, bool dither);
-  ~TableLookUp();
+
   void setTable(int ntable, const ushort16* table, int nfilled);
   ushort16* getTable(int n);
   const int ntables;
-  ushort16* tables;
+  std::vector<ushort16> tables;
   const bool dither;
 };
 
@@ -289,7 +289,7 @@ inline void RawImageDataU16::setWithLookUp(ushort16 value, uchar8* dst, uint32* 
     return;
   }
   if (table->dither) {
-    auto* t = reinterpret_cast<const uint32*>(table->tables);
+    auto* t = reinterpret_cast<const uint32*>(table->tables.data());
     uint32 lookup = t[value];
     uint32 base = lookup & 0xffff;
     uint32 delta = lookup >> 16;
@@ -300,8 +300,7 @@ inline void RawImageDataU16::setWithLookUp(ushort16 value, uchar8* dst, uint32* 
     *dest = pix;
     return;
   }
-  auto* t = table->tables;
-  *dest = t[value];
+  *dest = table->tables[value];
 }
 
 } // namespace rawspeed
