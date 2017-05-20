@@ -424,7 +424,7 @@ RawImage DngDecoder::decodeRawInternal() {
       raw->getEntry(LINEARIZATIONTABLE)->count > 0) {
     TiffEntry *lintable = raw->getEntry(LINEARIZATIONTABLE);
     auto table = lintable->getU16Array(lintable->count);
-    mRaw->setTable(table.data(), table.size(), !uncorrectedRawValues);
+    mRaw->setTable(table, !uncorrectedRawValues);
     if (!uncorrectedRawValues) {
       mRaw->sixteenBitLookup();
       mRaw->setTable(nullptr);

@@ -98,14 +98,14 @@ RawImage Cr2Decoder::decodeOldFormat() {
   if (curve && curve->type == TIFF_SHORT && curve->count == 4096) {
     auto table = curve->getU16Array(curve->count);
     if (!uncorrectedRawValues) {
-      mRaw->setTable(table.data(), table.size(), true);
+      mRaw->setTable(table, true);
       // Apply table
       mRaw->sixteenBitLookup();
       // Delete table
       mRaw->setTable(nullptr);
     } else {
       // We want uncorrected, but we store the table.
-      mRaw->setTable(table.data(), table.size(), false);
+      mRaw->setTable(table, false);
     }
   }
 

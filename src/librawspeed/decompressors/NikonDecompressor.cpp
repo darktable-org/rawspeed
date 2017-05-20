@@ -116,11 +116,13 @@ void NikonDecompressor::decompress(RawImage* mRaw, ByteStream&& data,
     }
   }
 
+  // and drop the last value
+  curve.resize(curve.size() - 1);
+
   HuffmanTable ht = createHuffmanTable(huffSelect);
 
-  if (!uncorrectedRawValues) {
-    mRaw->get()->setTable(&curve[0], curve.size() - 1, true);
-  }
+  if (!uncorrectedRawValues)
+    mRaw->get()->setTable(curve, true);
 
   BitPumpMSB bits(data);
   uchar8* draw = mRaw->get()->getData();
@@ -163,11 +165,10 @@ void NikonDecompressor::decompress(RawImage* mRaw, ByteStream&& data,
     }
   }
 
-  if (uncorrectedRawValues) {
-    mRaw->get()->setTable(&curve[0], curve.size(), false);
-  } else {
+  if (uncorrectedRawValues)
+    mRaw->get()->setTable(curve, false);
+  else
     mRaw->get()->setTable(nullptr);
-  }
 }
 
 } // namespace rawspeed

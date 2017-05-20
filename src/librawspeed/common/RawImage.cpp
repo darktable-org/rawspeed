@@ -581,12 +581,11 @@ void RawImageData::setTable(std::unique_ptr<TableLookUp> t) {
   table = std::move(t);
 }
 
-void RawImageData::setTable(const ushort16 *table_, int nfilled, bool dither) {
-  assert(table_);
-  assert(nfilled > 0);
+void RawImageData::setTable(const std::vector<ushort16>& table_, bool dither) {
+  assert(!table_.empty());
 
   auto t = make_unique<TableLookUp>(1, dither);
-  t->setTable(0, table_, nfilled);
+  t->setTable(0, table_);
   this->setTable(std::move(t));
 }
 
@@ -600,9 +599,10 @@ TableLookUp::TableLookUp( int _ntables, bool _dither ) : ntables(_ntables), dith
   tables.resize(ntables * TABLE_SIZE, ushort16(0));
 }
 
-void TableLookUp::setTable(int ntable, const ushort16 *table , int nfilled) {
-  assert(table);
-  assert(nfilled > 0);
+void TableLookUp::setTable(int ntable, const std::vector<ushort16>& table) {
+  assert(!table.empty());
+
+  const int nfilled = table.size();
 
   if (ntable > ntables) {
     ThrowRDE("Table lookup with number greater than number of tables.");

@@ -572,11 +572,14 @@ void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h) {
   auto inv_wb_b = static_cast<int>(1024.0 / wb_b);
 
   auto curve = gammaCurve(1 / 2.4, 12.92, 1, 4095);
+
   // Scale output values to 16 bits.
   for (int i = 0 ; i < 4096; i++) {
     curve[i] = clampBits(static_cast<int>(curve[i]) << 2, 16);
   }
-  mRaw->setTable(curve.data(), 4095, true);
+
+  curve.resize(4095);
+  mRaw->setTable(curve, true);
 
   ushort16 tmp;
   auto* tmpch = reinterpret_cast<uchar8*>(&tmp);

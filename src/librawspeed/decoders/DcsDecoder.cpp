@@ -28,7 +28,6 @@
 #include <cassert>                                  // for assert
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for operator==, string
-#include <vector>                                   // for vector
 
 namespace rawspeed {
 
@@ -55,7 +54,7 @@ RawImage DcsDecoder::decodeRawInternal() {
   auto table = linearization->getU16Array(256);
 
   if (!uncorrectedRawValues)
-    mRaw->setTable(table.data(), table.size(), true);
+    mRaw->setTable(table, true);
 
   UncompressedDecompressor u(*mFile, off, c2, mRaw);
 
@@ -65,11 +64,10 @@ RawImage DcsDecoder::decodeRawInternal() {
     u.decode8BitRaw<false>(width, height);
 
   // Set the table, if it should be needed later.
-  if (uncorrectedRawValues) {
-    mRaw->setTable(table.data(), table.size(), false);
-  } else {
+  if (uncorrectedRawValues)
+    mRaw->setTable(table, false);
+  else
     mRaw->setTable(nullptr);
-  }
 
   return mRaw;
 }

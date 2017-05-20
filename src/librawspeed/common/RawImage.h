@@ -78,7 +78,7 @@ class TableLookUp {
 public:
   TableLookUp(int ntables, bool dither);
 
-  void setTable(int ntable, const ushort16* table, int nfilled);
+  void setTable(int ntable, const std::vector<ushort16>& table);
   ushort16* getTable(int n);
   const int ntables;
   std::vector<ushort16> tables;
@@ -144,7 +144,7 @@ public:
   void transferBadPixelsToMap() REQUIRES(!mBadPixelMutex);
   void fixBadPixels() REQUIRES(!mBadPixelMutex);
   void expandBorder(iRectangle2D validData);
-  void setTable(const ushort16* table, int nfilled, bool dither);
+  void setTable(const std::vector<ushort16>& table_, bool dither);
   void setTable(std::unique_ptr<TableLookUp> t);
 
   bool isAllocated() {return !!data;}

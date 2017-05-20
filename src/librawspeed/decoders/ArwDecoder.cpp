@@ -202,7 +202,7 @@ RawImage ArwDecoder::decodeRawInternal() {
       curve[j] = curve[j-1] + (1 << i);
 
   if (!uncorrectedRawValues)
-    mRaw->setTable(curve.data(), 0x4000, true);
+    mRaw->setTable(curve, true);
 
   uint32 c2 = counts->getU32();
   uint32 off = offsets->getU32();
@@ -226,11 +226,10 @@ RawImage ArwDecoder::decodeRawInternal() {
   }
 
   // Set the table, if it should be needed later.
-  if (uncorrectedRawValues) {
-    mRaw->setTable(curve.data(), 0x4000, false);
-  } else {
+  if (uncorrectedRawValues)
+    mRaw->setTable(curve, false);
+  else
     mRaw->setTable(nullptr);
-  }
 
   return mRaw;
 }
