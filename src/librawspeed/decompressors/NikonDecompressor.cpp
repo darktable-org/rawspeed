@@ -22,6 +22,7 @@
 #include "common/Common.h"              // for uint32, ushort16, clampBits
 #include "common/Point.h"               // for iPoint2D
 #include "common/RawImage.h"            // for RawImage, RawImageData, RawI...
+#include "common/TableLookUp.h"         // for TableLookUp
 #include "decompressors/HuffmanTable.h" // for HuffmanTable
 #include "io/BitPumpMSB.h"              // for BitPumpMSB, BitStream<>::fil...
 #include "io/Buffer.h"                  // for Buffer

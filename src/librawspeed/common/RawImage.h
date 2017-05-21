@@ -27,6 +27,7 @@
 #include "common/ErrorLog.h"           // for ErrorLog
 #include "common/Mutex.h"              // for Mutex
 #include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
+#include "common/TableLookUp.h"        // for TableLookUp
 #include "metadata/BlackArea.h"        // for BlackArea
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray
 #include <memory>                      // for unique_ptr, operator==
@@ -73,18 +74,6 @@ public:
 };
 
 void* RawImageWorkerThread(void* _this);
-
-class TableLookUp {
-public:
-  TableLookUp(int ntables, bool dither);
-
-  void setTable(int ntable, const std::vector<ushort16>& table);
-  ushort16* getTable(int n);
-  const int ntables;
-  std::vector<ushort16> tables;
-  const bool dither;
-};
-
 
 class ImageMetaData {
 public:

@@ -15,6 +15,8 @@ FILE(GLOB COMMON_SOURCES
   "RawImageDataFloat.cpp"
   "RawImageDataU16.cpp"
   "RawspeedException.h"
+  "TableLookUp.cpp"
+  "TableLookUp.h"
 )
 
 set(RAWSPEED_SOURCES "${RAWSPEED_SOURCES};${COMMON_SOURCES}" PARENT_SCOPE)
