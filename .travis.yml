@@ -36,9 +36,11 @@ before_install:
     elif [[ "$TARGET" == "WWW" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || "$TRAVIS_BRANCH" != "develop") ]]; then
       exit;
     elif [[ "$EXTRA" == "NODOCKER" ]]; then
+      echo "oracle-java8-installer hold" | sudo dpkg --set-selections;
+      echo "oracle-java9-installer hold" | sudo dpkg --set-selections;
       travis_retry sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y;
       travis_retry sudo apt-get update -q;
-      travis_retry sudo apt-get upgrade -y -q -f --fix-missing cmake g++-4.8 g++-6 git libjpeg-dev libpugixml-dev libxml2-utils make ninja-build zlib1g-dev;
+      travis_retry sudo apt-get install -y -q -f --fix-missing cmake g++-4.8 g++-6 git libjpeg-dev libpugixml-dev libxml2-utils make ninja-build zlib1g-dev;
     elif [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       docker pull darktable/rawspeed;
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update && brew tap Homebrew/bundle && cd .ci && brew bundle --verbose; fi
