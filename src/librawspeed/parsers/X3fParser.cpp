@@ -19,20 +19,20 @@
 */
 
 #include "parsers/X3fParser.h"
-#include "common/Common.h"                // for uint32, uchar8, make_unique
-#include "decoders/RawDecoder.h"          // for RawDecoder
-#include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
-#include "decoders/X3fDecoder.h"          // for X3fDecoder
-#include "io/Buffer.h"                    // for Buffer
-#include "io/ByteStream.h"                // for ByteStream
-#include "io/Endianness.h"                // for getHostEndianness, Endiann...
-#include "io/IOException.h"               // for IOException
-#include <algorithm>                      // for move
-#include <cassert>                        // for assert
-#include <cstring>                        // for memset
-#include <map>                            // for map, map<>::mapped_type
-#include <string>                         // for string, basic_string, oper...
-#include <vector>                         // for vector
+#include "common/Common.h"              // for uint32, uchar8, make_unique
+#include "decoders/RawDecoder.h"        // for RawDecoder
+#include "decoders/X3fDecoder.h"        // for X3fDecoder
+#include "io/Buffer.h"                  // for Buffer
+#include "io/ByteStream.h"              // for ByteStream
+#include "io/Endianness.h"              // for getHostEndianness, Endiann...
+#include "io/IOException.h"             // for IOException
+#include "parsers/X3fParserException.h" // for X3fParserException
+#include <algorithm>                    // for move
+#include <cassert>                      // for assert
+#include <cstring>                      // for memset
+#include <map>                          // for map, map<>::mapped_type
+#include <string>                       // for string, basic_string, oper...
+#include <vector>                       // for vector
 
 using std::string;
 
@@ -41,25 +41,25 @@ namespace rawspeed {
 X3fParser::X3fParser(Buffer* file) : RawParser(file) {
   uint32 size = file->getSize();
   if (size < 104 + 128)
-    ThrowRDE("X3F file too small");
+    ThrowXPE("X3F file too small");
 
   bytes = ByteStream(file, 0, size, getHostEndianness() == little);
 
   try {
     // Read signature
     if (bytes.getU32() != 0x62564f46)
-      ThrowRDE("Not an X3f file (Signature)");
+      ThrowXPE("Not an X3f file (Signature)");
 
     uint32 version = bytes.getU32();
     if (version < 0x00020000)
-      ThrowRDE("File version too old");
+      ThrowXPE("File version too old");
 
     // Skip identifier + mark bits
     bytes.skipBytes(16 + 4);
 
     bytes.setPosition(0);
   } catch (IOException& e) {
-    ThrowRDE("IO Error while reading header: %s", e.what());
+    ThrowXPE("IO Error while reading header: %s", e.what());
   }
 }
 
@@ -78,11 +78,11 @@ void X3fParser::readDirectory(X3fDecoder* decoder) {
 
   // Check signature
   if ("SECd" != getIdAsString(&bytes))
-    ThrowRDE("Unable to locate directory");
+    ThrowXPE("Unable to locate directory");
 
   uint32 version = bytes.getU32();
   if (version < 0x00020000)
-    ThrowRDE("File version too old (directory)");
+    ThrowXPE("File version too old (directory)");
 
   uint32 n_entries = bytes.getU32();
   for (uint32 i = 0; i < n_entries; i++) {
@@ -105,10 +105,10 @@ std::unique_ptr<RawDecoder> X3fParser::getDecoder(const CameraMetaData* meta) {
     readDirectory(decoder.get());
 
     if (nullptr == decoder)
-      ThrowRDE("No decoder found!");
+      ThrowXPE("No decoder found!");
     return std::move(decoder);
   } catch (IOException& e) {
-    ThrowRDE("IO Error while reading header: %s", e.what());
+    ThrowXPE("IO Error while reading header: %s", e.what());
   }
 }
 
@@ -129,11 +129,11 @@ X3fImage::X3fImage( ByteStream *bytes, uint32 offset, uint32 length )
   bytes->setPosition(offset);
   string id = getIdAsString(bytes);
   if (id != "SECi")
-    ThrowRDE("Unknown Image signature");
+    ThrowXPE("Unknown Image signature");
 
   uint32 version = bytes->getU32();
   if (version < 0x00020000)
-    ThrowRDE("File version too old (image)");
+    ThrowXPE("File version too old (image)");
 
   type = bytes->getU32();
   format = bytes->getU32();
@@ -299,18 +299,18 @@ void X3fPropertyCollection::addProperties( ByteStream *bytes, uint32 offset, uin
   bytes->setPosition(offset);
   string id = getIdAsString(bytes);
   if (id != "SECp")
-    ThrowRDE("Unknown Property signature");
+    ThrowXPE("Unknown Property signature");
 
   uint32 version = bytes->getU32();
   if (version < 0x00020000)
-    ThrowRDE("File version too old (properties)");
+    ThrowXPE("File version too old (properties)");
 
   uint32 entries = bytes->getU32();
   if (!entries)
     return;
 
   if (0 != bytes->getU32())
-    ThrowRDE("Unknown property character encoding");
+    ThrowXPE("Unknown property character encoding");
 
   // Skip 4 reserved bytes
   bytes->skipBytes(4);
@@ -319,7 +319,7 @@ void X3fPropertyCollection::addProperties( ByteStream *bytes, uint32 offset, uin
   bytes->skipBytes(4);
 
   if (entries > 1000)
-    ThrowRDE("Unreasonable number of properties: %u", entries);
+    ThrowXPE("Unreasonable number of properties: %u", entries);
 
   uint32 data_start = bytes->getPosition() + entries*8;
   for (uint32 i = 0; i < entries; i++) {

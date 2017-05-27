@@ -36,6 +36,7 @@
 #include "parsers/TiffParser.h"           // for TiffParser
 #include "parsers/TiffParserException.h"  // for TiffParserException
 #include "parsers/X3fParser.h"            // for X3fParser
+#include "parsers/X3fParserException.h"   // for X3fParserException
 #include "tiff/TiffEntry.h"               // IWYU pragma: keep
 
 namespace rawspeed {
@@ -84,7 +85,7 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
   try {
     X3fParser parser(mInput);
     return parser.getDecoder(meta);
-  } catch (RawDecoderException &) {
+  } catch (X3fParserException&) {
   }
 
   // CIFF images
