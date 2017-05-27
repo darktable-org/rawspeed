@@ -107,6 +107,11 @@ add_custom_target(check ALL)
 add_custom_target(dependencies ALL)
 
 add_subdirectory(src)
+
+if(BUILD_FUZZERS)
+  add_subdirectory(fuzz)
+endif()
+
 add_subdirectory(data)
 
 if(BUILD_DOCS)
