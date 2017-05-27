@@ -18,3 +18,8 @@
 
 int rand(void) { /* ignore */
 }
+
+namespace std {
+int rand(void) { /* ignore */
+}
+} // namespace std
