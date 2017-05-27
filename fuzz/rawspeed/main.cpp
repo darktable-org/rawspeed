@@ -37,7 +37,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   // static const CameraMetaData metadata(CMAKE_SOURCE_DIR "/data/cameras.xml");
 
   try {
-    rawspeed::Buffer buffer(Data, Size);
+    const rawspeed::Buffer buffer(Data, Size);
     rawspeed::RawParser parser(&buffer);
     auto decoder = parser.getDecoder(/*&metadata*/);
 

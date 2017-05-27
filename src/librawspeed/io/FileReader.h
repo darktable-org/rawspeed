@@ -33,7 +33,7 @@ class FileReader
 public:
   explicit FileReader(const char* fileName_) : fileName(fileName_) {}
 
-  std::unique_ptr<Buffer> readFile();
+  std::unique_ptr<const Buffer> readFile();
 };
 
 } // namespace rawspeed

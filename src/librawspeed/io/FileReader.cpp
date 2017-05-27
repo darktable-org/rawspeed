@@ -38,7 +38,7 @@
 
 namespace rawspeed {
 
-std::unique_ptr<Buffer> FileReader::readFile() {
+std::unique_ptr<const Buffer> FileReader::readFile() {
   size_t fileSize = 0;
 
 #if defined(__unix__) || defined(__APPLE__)
