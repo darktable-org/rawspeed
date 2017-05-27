@@ -13,6 +13,7 @@ FILE(GLOB PARSER_SOURCES
   "TiffParserException.h"
   "X3fParser.cpp"
   "X3fParser.h"
+  "X3fParserException.h"
 )
 
 set(RAWSPEED_SOURCES "${RAWSPEED_SOURCES};${PARSER_SOURCES}" PARENT_SCOPE)
