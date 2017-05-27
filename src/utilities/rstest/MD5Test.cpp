@@ -46,7 +46,7 @@ protected:
   }
 
   rawspeed::md5::md5_state answer;
-  const uint8_t* message;
+  const uint8_t* message = nullptr;
 };
 
 #define TESTCASE(a, b, c, d, msg)                                              \
