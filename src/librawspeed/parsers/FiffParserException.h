@@ -20,16 +20,17 @@
 
 #pragma once
 
-#include "common/RawspeedException.h"
+#include "common/RawspeedException.h"   // for ThrowExceptionHelper
+#include "parsers/RawParserException.h" // for ThrowRPE, RawParserException
 #include <string>
 
 namespace rawspeed {
 
-class FiffParserException final : public RawspeedException {
+class FiffParserException final : public RawParserException {
 public:
   explicit FiffParserException(const std::string& msg)
-      : RawspeedException(msg) {}
-  explicit FiffParserException(const char* msg) : RawspeedException(msg) {}
+      : RawParserException(msg) {}
+  explicit FiffParserException(const char* msg) : RawParserException(msg) {}
 };
 
 #define ThrowFPE(...)                                                          \
