@@ -25,6 +25,7 @@
 #include "metadata/CameraMetadataException.h" // for CameraMetadataExceptio...
 #include "parsers/CiffParserException.h"      // for CiffParserException (p...
 #include "parsers/FiffParserException.h"      // for FiffParserException (p...
+#include "parsers/RawParserException.h"       // for ThrowRPE, RawParserEx...
 #include "parsers/TiffParserException.h"      // for ThrowTPE, TiffParserEx...
 #include <exception>                          // for exception
 #include <gmock/gmock.h>                      // for MakePredicateFormatter...
@@ -42,6 +43,7 @@ using rawspeed::IOException;
 using rawspeed::RawDecoderException;
 using rawspeed::TiffParserException;
 using rawspeed::FiffParserException;
+using rawspeed::RawParserException;
 
 namespace rawspeed_test {
 
@@ -78,6 +80,10 @@ template <> void* MetaHelper<RawDecoderException>(const char* str) {
   ThrowRDE(FMT, str);
 }
 
+template <> void* MetaHelper<RawParserException>(const char* str) {
+  ThrowRPE(FMT, str);
+}
+
 template <> void* MetaHelper<TiffParserException>(const char* str) {
   ThrowTPE(FMT, str);
 }
@@ -88,10 +94,11 @@ template <> void* MetaHelper<FiffParserException>(const char* str) {
 
 template <class T> class ExceptionsTest : public testing::Test {};
 
-using Classes = testing::Types<RawspeedException, CameraMetadataException,
-                               CiffParserException, FileIOException,
-                               IOException, RawDecoderException,
-                               TiffParserException, FiffParserException>;
+using Classes =
+    testing::Types<RawspeedException, CameraMetadataException,
+                   CiffParserException, FileIOException, IOException,
+                   RawDecoderException, TiffParserException,
+                   FiffParserException, RawParserException>;
 
 TYPED_TEST_CASE(ExceptionsTest, Classes);
 
