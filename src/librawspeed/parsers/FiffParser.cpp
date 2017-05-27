@@ -56,7 +56,7 @@ void FiffParser::parseData() {
   uint32 third_ifd = getU32BE(data + 0x5C);
 
   rootIFD = TiffParser::parse(mInput->getSubView(first_ifd));
-  TiffIFDOwner subIFD = make_unique<TiffIFD>();
+  TiffIFDOwner subIFD = make_unique<TiffIFD>(rootIFD.get());
 
   if (mInput->isValid(second_ifd)) {
     // RAW Tiff on newer models, pointer to raw data on older models

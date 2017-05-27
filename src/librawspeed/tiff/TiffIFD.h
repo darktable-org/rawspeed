@@ -63,7 +63,7 @@ class TiffIFD
   void parseIFDEntry(ByteStream* bs);
 
 public:
-  TiffIFD() = default;
+  explicit TiffIFD(TiffIFD* parent);
   TiffIFD(TiffIFD* parent, const DataBuffer& data, uint32 offset);
   virtual ~TiffIFD() = default;
 
