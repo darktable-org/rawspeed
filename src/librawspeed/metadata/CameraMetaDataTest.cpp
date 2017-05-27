@@ -46,31 +46,27 @@ TEST(CameraMetaDataTest, PrefixSearch) {
   ASSERT_NO_THROW({
     CameraMetaData Data(camfile.c_str());
 
-    ASSERT_NE(
-        nullptr,
-        Data.getCamera("NIKON CORPORATION", "NIKON D3", "14bit-compressed"));
-    ASSERT_EQ(
-        "D3",
-        Data.getCamera("NIKON CORPORATION", "NIKON D3", "14bit-compressed")
-            ->canonical_model);
+    const auto* d3 =
+        Data.getCamera("NIKON CORPORATION", "NIKON D3", "14bit-compressed");
+    ASSERT_NE(nullptr, d3);
+    ASSERT_EQ("D3", d3->canonical_model);
 
     ASSERT_EQ(nullptr,
               Data.getCamera("NIKON CORPORATION", "NIKON D3",
                              "14bit-compressed-with-some-bogus-prefix"));
-    ASSERT_EQ(nullptr,
-              Data.getCamera("NIKON CORPORATION",
-                             "NIKON D3-with-some-bogus-prefix",
-                             "14bit-compressed"));
+    ASSERT_EQ(nullptr, Data.getCamera("NIKON CORPORATION",
+                                      "NIKON D3-with-some-bogus-prefix",
+                                      "14bit-compressed"));
     ASSERT_EQ(nullptr,
               Data.getCamera("NIKON CORPORATION-with-some-bogus-prefix",
                              "NIKON D3", "14bit-compressed"));
 
-    ASSERT_NE(nullptr, Data.getCamera("NIKON CORPORATION", "NIKON D3"));
-    ASSERT_EQ("D3",
-              Data.getCamera("NIKON CORPORATION", "NIKON D3")->canonical_model);
-    ASSERT_EQ(
-        nullptr,
-        Data.getCamera("NIKON CORPORATION", "NIKON D3-with-some-bogus-prefix"));
+    d3 = Data.getCamera("NIKON CORPORATION", "NIKON D3");
+    ASSERT_NE(nullptr, d3);
+    ASSERT_EQ("D3", d3->canonical_model);
+
+    ASSERT_EQ(nullptr, Data.getCamera("NIKON CORPORATION",
+                                      "NIKON D3-with-some-bogus-prefix"));
     ASSERT_EQ(
         nullptr,
         Data.getCamera("NIKON CORPORATION-with-some-bogus-prefix", "NIKON D3"));
