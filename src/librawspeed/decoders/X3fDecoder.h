@@ -90,7 +90,7 @@ class X3fDecoder final : public RawDecoder {
   std::string camera_model;
 
 public:
-  explicit X3fDecoder(Buffer* file);
+  explicit X3fDecoder(const Buffer* file);
   ~X3fDecoder() override;
 
   RawImage decodeRawInternal() override;

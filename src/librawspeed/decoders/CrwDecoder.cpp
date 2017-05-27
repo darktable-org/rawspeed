@@ -47,7 +47,7 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-CrwDecoder::CrwDecoder(std::unique_ptr<CiffIFD> rootIFD, Buffer* file)
+CrwDecoder::CrwDecoder(std::unique_ptr<CiffIFD> rootIFD, const Buffer* file)
     : RawDecoder(file), mRootIFD(move(rootIFD)) {}
 
 RawImage CrwDecoder::decodeRawInternal() {

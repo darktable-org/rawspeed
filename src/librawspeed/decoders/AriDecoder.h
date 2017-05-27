@@ -42,12 +42,12 @@ class AriDecoder final : public RawDecoder {
   float mWB[3];
 
 public:
-  explicit AriDecoder(Buffer* file);
+  explicit AriDecoder(const Buffer* file);
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void decodeThreaded(RawDecoderThread *t) override;
-  static bool isARI(Buffer* input);
+  static bool isARI(const Buffer* input);
 
 protected:
   int getDecoderVersion() const override { return 0; }

@@ -55,7 +55,7 @@ using std::string;
 
 namespace rawspeed {
 
-TiffParser::TiffParser(Buffer* file) : RawParser(file) {}
+TiffParser::TiffParser(const Buffer* file) : RawParser(file) {}
 
 std::unique_ptr<RawDecoder> TiffParser::getDecoder(const CameraMetaData* meta) {
   return TiffParser::makeDecoder(TiffParser::parse(*mInput), *mInput);

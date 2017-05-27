@@ -37,7 +37,7 @@ class CiffParser final : public RawParser {
   std::unique_ptr<CiffIFD> mRootIFD;
 
 public:
-  explicit CiffParser(Buffer* input);
+  explicit CiffParser(const Buffer* input);
 
   void parseData();
   std::unique_ptr<RawDecoder>

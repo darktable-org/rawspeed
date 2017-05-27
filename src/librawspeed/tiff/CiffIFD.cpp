@@ -45,7 +45,7 @@ namespace rawspeed {
   if ((depth = (_depth) + 1) > 10)                                             \
     ThrowCPE("sub-micron matryoshka dolls are ignored");
 
-CiffIFD::CiffIFD(CiffIFD* parent_, Buffer* f, uint32 start, uint32 end,
+CiffIFD::CiffIFD(CiffIFD* parent_, const Buffer* f, uint32 start, uint32 end,
                  uint32 _depth)
     : parent(parent_), mFile(f) {
   CIFF_DEPTH(_depth);

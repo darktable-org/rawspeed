@@ -36,7 +36,7 @@ class CrwDecoder final : public RawDecoder {
   std::unique_ptr<CiffIFD> mRootIFD;
 
 public:
-  CrwDecoder(std::unique_ptr<CiffIFD> rootIFD, Buffer* file);
+  CrwDecoder(std::unique_ptr<CiffIFD> rootIFD, const Buffer* file);
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;

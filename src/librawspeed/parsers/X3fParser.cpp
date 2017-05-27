@@ -38,7 +38,7 @@ using std::string;
 
 namespace rawspeed {
 
-X3fParser::X3fParser(Buffer* file) : RawParser(file) {
+X3fParser::X3fParser(const Buffer* file) : RawParser(file) {
   uint32 size = file->getSize();
   if (size < 104 + 128)
     ThrowXPE("X3F file too small");

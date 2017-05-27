@@ -36,7 +36,7 @@ using std::vector;
 
 namespace rawspeed {
 
-CiffEntry::CiffEntry(Buffer* f, uint32 value_data, uint32 offset) {
+CiffEntry::CiffEntry(const Buffer* f, uint32 value_data, uint32 offset) {
   own_data = nullptr;
   ushort16 p = getU16LE(f->getData(offset, 2));
   tag = static_cast<CiffTag>(p & 0x3fff);

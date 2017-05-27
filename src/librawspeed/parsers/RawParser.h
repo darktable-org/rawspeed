@@ -32,14 +32,14 @@ class RawDecoder;
 
 class RawParser {
 public:
-  explicit RawParser(Buffer* inputData) : mInput(inputData) {}
+  explicit RawParser(const Buffer* inputData) : mInput(inputData) {}
   virtual ~RawParser() = default;
 
   virtual std::unique_ptr<RawDecoder>
   getDecoder(const CameraMetaData* meta = nullptr);
 
 protected:
-  Buffer* mInput;
+  const Buffer* mInput;
 };
 
 } // namespace rawspeed

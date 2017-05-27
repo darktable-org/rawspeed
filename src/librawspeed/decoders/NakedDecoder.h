@@ -47,7 +47,7 @@ class NakedDecoder final : public RawDecoder {
   void parseHints();
 
 public:
-  NakedDecoder(Buffer* file, const Camera* c);
+  NakedDecoder(const Buffer* file, const Camera* c);
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;

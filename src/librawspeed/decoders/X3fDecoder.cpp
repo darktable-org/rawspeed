@@ -47,7 +47,7 @@ using std::max;
 
 namespace rawspeed {
 
-X3fDecoder::X3fDecoder(Buffer* file) : RawDecoder(file){};
+X3fDecoder::X3fDecoder(const Buffer* file) : RawDecoder(file){};
 
 X3fDecoder::~X3fDecoder() {
   if (huge_table)

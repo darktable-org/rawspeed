@@ -41,7 +41,7 @@ class MrwDecoder final : public RawDecoder {
   float wb_coeffs[4];
 
 public:
-  explicit MrwDecoder(Buffer* file);
+  explicit MrwDecoder(const Buffer* file);
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;

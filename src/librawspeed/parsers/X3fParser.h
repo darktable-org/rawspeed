@@ -39,7 +39,7 @@ class X3fParser final : public RawParser {
   ByteStream bytes;
 
 public:
-  explicit X3fParser(Buffer* file);
+  explicit X3fParser(const Buffer* file);
 
   std::unique_ptr<RawDecoder>
   getDecoder(const CameraMetaData* meta = nullptr) override;

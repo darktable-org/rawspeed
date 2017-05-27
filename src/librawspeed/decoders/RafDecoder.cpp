@@ -44,7 +44,7 @@
 
 namespace rawspeed {
 
-bool RafDecoder::isRAF(Buffer* input) {
+bool RafDecoder::isRAF(const Buffer* input) {
   static const char magic[] = "FUJIFILMCCD-RAW ";
   static const size_t magic_size = sizeof(magic) - 1; // excluding \0
   const unsigned char* data = input->getData(0, magic_size);

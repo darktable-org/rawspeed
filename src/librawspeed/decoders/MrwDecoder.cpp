@@ -41,7 +41,7 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-MrwDecoder::MrwDecoder(Buffer* file) : RawDecoder(file) { parseHeader(); }
+MrwDecoder::MrwDecoder(const Buffer* file) : RawDecoder(file) { parseHeader(); }
 
 int MrwDecoder::isMRW(const Buffer* input) {
   const uchar8* data = input->getData(0, 4);

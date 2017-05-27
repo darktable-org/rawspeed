@@ -36,7 +36,7 @@ class CameraMetaData;
 
 class TiffParser final : public RawParser {
 public:
-  explicit TiffParser(Buffer* file);
+  explicit TiffParser(const Buffer* file);
 
   std::unique_ptr<RawDecoder>
   getDecoder(const CameraMetaData* meta = nullptr) override;

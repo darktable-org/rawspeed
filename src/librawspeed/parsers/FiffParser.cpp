@@ -41,7 +41,7 @@ using std::numeric_limits;
 
 namespace rawspeed {
 
-FiffParser::FiffParser(Buffer* inputData) : RawParser(inputData) {}
+FiffParser::FiffParser(const Buffer* inputData) : RawParser(inputData) {}
 
 void FiffParser::parseData() {
   const uchar8* data = mInput->getData(0, 104);

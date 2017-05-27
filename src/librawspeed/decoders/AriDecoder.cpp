@@ -34,7 +34,7 @@
 
 namespace rawspeed {
 
-AriDecoder::AriDecoder(Buffer* file) : RawDecoder(file) {
+AriDecoder::AriDecoder(const Buffer* file) : RawDecoder(file) {
   if (mFile->getSize() < 4096) {
     ThrowRDE("File too small (no header)");
   }
@@ -70,7 +70,7 @@ AriDecoder::AriDecoder(Buffer* file) : RawDecoder(file) {
   }
 }
 
-bool AriDecoder::isARI(Buffer* input) {
+bool AriDecoder::isARI(const Buffer* input) {
   static const char magic[] = "ARRI\x12\x34\x56\x78";
   static const size_t magic_size = sizeof(magic) - 1; // excluding \0
   const unsigned char* data = input->getData(0, magic_size);

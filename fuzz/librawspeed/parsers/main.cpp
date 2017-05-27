@@ -62,7 +62,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   assert(Data);
 
-  rawspeed::Buffer buffer(Data, Size);
+  const rawspeed::Buffer buffer(Data, Size);
 
   try {
     rawspeed::PARSER parser(&buffer);

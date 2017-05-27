@@ -60,7 +60,7 @@ class CiffEntry
 #endif
 
 public:
-  CiffEntry(Buffer* f, uint32 value_data, uint32 offset);
+  CiffEntry(const Buffer* f, uint32 value_data, uint32 offset);
   ~CiffEntry();
   uint32 getU32(uint32 num=0);
   ushort16 getU16(uint32 num=0);
