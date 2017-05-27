@@ -18,22 +18,36 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#ifndef PARSER
+#error PARSER must be defined
+#endif
+
 #ifndef GETDECODER
 #error GETDECODER must be defined as bool
 #endif
 
-#include "common/RawspeedException.h" // for RawspeedException
-#include "io/Buffer.h"                // for Buffer, DataBuffer
-#include "parsers/TiffParser.h"       // for Tiff
-#include "tiff/TiffEntry.h"           // IWYU pragma: keep
-#include <cassert>                    // for assert
-#include <cstdint>                    // for uint8_t
-#include <cstdio>                     // for size_t
+#include "io/Buffer.h"                   // for Buffer, DataBuffer
+#include "parsers/CiffParser.h"          // IWYU pragma: keep
+#include "parsers/CiffParserException.h" // IWYU pragma: keep
+#include "parsers/FiffParser.h"          // IWYU pragma: keep
+#include "parsers/FiffParserException.h" // IWYU pragma: keep
+#include "parsers/RawParser.h"           // IWYU pragma: keep
+#include "parsers/RawParserException.h"  // IWYU pragma: keep
+#include "parsers/TiffParser.h"          // IWYU pragma: keep
+#include "parsers/TiffParserException.h" // IWYU pragma: keep
+#include "parsers/X3fParser.h"           // IWYU pragma: keep
+#include "parsers/X3fParserException.h"  // IWYU pragma: keep
+#include "tiff/TiffEntry.h"              // IWYU pragma: keep
+#include <cassert>                       // for assert
+#include <cstdint>                       // for uint8_t
+#include <cstdio>                        // for size_t
 
 #if GETDECODER
 #include "decoders/RawDecoder.h" // IWYU pragma: keep
-#include <algorithm>             // for move
 #endif
+
+#define TOKENPASTE2(x, y) x##y
+#define TOKENPASTE(x, y) TOKENPASTE2(x, y)
 
 // define this function, it is only declared in rawspeed:
 // for fuzzing, do not want any threading.
@@ -41,22 +55,22 @@ extern "C" int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
   return 1;
 }
 
+using PARSERException = TOKENPASTE(rawspeed::PARSER, Exception);
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   assert(Data);
 
+  rawspeed::Buffer buffer(Data, Size);
+
   try {
-    const rawspeed::Buffer buffer(Data, Size);
-#if GETDECODER
-    auto ifd =
-#endif
-        rawspeed::TiffParser::parse(buffer);
+    rawspeed::PARSER parser(&buffer);
 
 #if GETDECODER
-    rawspeed::TiffParser::makeDecoder(std::move(ifd), buffer);
+    parser.getDecoder();
 #endif
-  } catch (rawspeed::RawspeedException&) {
+  } catch (PARSERException&) {
     return 0;
   }
 
