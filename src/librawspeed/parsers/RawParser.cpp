@@ -89,7 +89,6 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
   // CIFF images
   try {
     CiffParser p(mInput);
-    p.parseData();
     return p.getDecoder(meta);
   } catch (CiffParserException &) {
   }
