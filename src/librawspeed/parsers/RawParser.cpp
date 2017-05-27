@@ -76,7 +76,8 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
 
   // Ordinary TIFF images
   try {
-    return TiffParser::makeDecoder(TiffParser::parse(*mInput), *mInput);
+    TiffParser p(mInput);
+    return p.getDecoder(meta);
   } catch (TiffParserException &) {
   }
 

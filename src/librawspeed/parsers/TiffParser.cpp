@@ -55,6 +55,12 @@ using std::string;
 
 namespace rawspeed {
 
+TiffParser::TiffParser(Buffer* file) : RawParser(file) {}
+
+std::unique_ptr<RawDecoder> TiffParser::getDecoder(const CameraMetaData* meta) {
+  return TiffParser::makeDecoder(TiffParser::parse(*mInput), *mInput);
+}
+
 TiffRootIFDOwner TiffParser::parse(const Buffer& data) {
   ByteStream bs(data, 0);
   bs.setInNativeByteOrder(isTiffInNativeByteOrder(bs, 0, "TIFF header"));

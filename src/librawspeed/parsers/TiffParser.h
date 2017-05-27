@@ -32,8 +32,15 @@ class Buffer;
 
 class RawDecoder;
 
+class CameraMetaData;
+
 class TiffParser final : public RawParser {
 public:
+  explicit TiffParser(Buffer* file);
+
+  std::unique_ptr<RawDecoder>
+  getDecoder(const CameraMetaData* meta = nullptr) override;
+
   // TiffRootIFDOwner contains pointers into 'data' but if is is non-owning, it
   // may be deleted immediately
   static TiffRootIFDOwner parse(const Buffer& data);
