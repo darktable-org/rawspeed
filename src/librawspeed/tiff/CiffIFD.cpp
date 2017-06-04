@@ -57,8 +57,7 @@ void CiffIFD::parseIFDEntry(ByteStream* bs) {
     switch (t->type) {
     case CIFF_SUB1:
     case CIFF_SUB2: {
-      auto subStream = bs->getSubStream(t->data_offset, t->bytesize);
-      add(make_unique<CiffIFD>(this, &subStream));
+      add(make_unique<CiffIFD>(this, &t->data));
       break;
     }
 

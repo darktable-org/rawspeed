@@ -22,13 +22,12 @@
 #pragma once
 
 #include "common/Common.h" // for uint32, uchar8, ushort16
+#include "io/ByteStream.h" // for ByteStream
 #include "tiff/CiffTag.h"  // for CiffTag
 #include <string>          // for string
 #include <vector>          // for vector
 
 namespace rawspeed {
-
-class ByteStream;
 
 class CiffIFD;
 
@@ -51,38 +50,28 @@ class CiffEntry
   friend class CiffIFD;
 
   CiffIFD* parent = nullptr;
-
-  uchar8* own_data;
-  const uchar8* data;
-#ifdef _DEBUG
-  int debug_intVal;
-  float debug_floatVal;
-#endif
+  ByteStream data;
 
 public:
   explicit CiffEntry(ByteStream* bs);
-  ~CiffEntry();
+
+  uchar8 getByte(uint32 num = 0);
   uint32 getU32(uint32 num=0);
   ushort16 getU16(uint32 num=0);
+
   std::string getString();
   std::vector<std::string> getStrings();
-  uchar8 getByte(uint32 num=0);
-  const uchar8* getData() {return data;}
-  void setData(const void *data, uint32 byte_count );
+
   uint32 __attribute__((pure)) getElementSize();
   uint32 __attribute__((pure)) getElementShift();
+
   // variables:
   CiffTag tag;
   CiffDataType type;
   uint32 count;
-  uint32 bytesize;
-  uint32 data_offset;
-  uint32 getDataOffset() const { return data_offset; }
+
   bool __attribute__((pure)) isInt();
   bool __attribute__((pure)) isString();
-
-protected:
-  std::string getValueAsString();
 };
 
 } // namespace rawspeed
