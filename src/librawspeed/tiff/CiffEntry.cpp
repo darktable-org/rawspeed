@@ -36,26 +36,24 @@ using std::vector;
 
 namespace rawspeed {
 
-CiffEntry::CiffEntry(const Buffer* f, uint32 value_data, uint32 offset) {
+CiffEntry::CiffEntry(const Buffer* mFile, uint32 offset) {
   own_data = nullptr;
-  ushort16 p = getU16LE(f->getData(offset, 2));
+  ushort16 p = getU16LE(mFile->getData(offset, 2));
   tag = static_cast<CiffTag>(p & 0x3fff);
   ushort16 datalocation = (p & 0xc000);
   type = static_cast<CiffDataType>(p & 0x3800);
   if (datalocation == 0x0000) { // Data is offset in value_data
-    bytesize = getU32LE(f->getData(offset + 2, 4));
+    bytesize = getU32LE(mFile->getData(offset + 2, 4));
 
-    data_offset = getU32LE(f->getData(offset + 6, 4));
-    if (data_offset >= numeric_limits<uint32>::max() - value_data)
+    data_offset = getU32LE(mFile->getData(offset + 6, 4));
+    if (data_offset >= numeric_limits<uint32>::max())
       ThrowCPE("Corrupt data offset.");
 
-    data_offset += value_data;
-
-    data = f->getData(data_offset, bytesize);
+    data = mFile->getData(data_offset, bytesize);
   } else if (datalocation == 0x4000) { // Data is stored directly in entry
     data_offset = offset + 2;
     bytesize = 8; // Maximum of 8 bytes of data (the size and offset fields)
-    data = f->getData(data_offset, bytesize);
+    data = mFile->getData(data_offset, bytesize);
   } else
     ThrowCPE("Don't understand data location 0x%x", datalocation);
 

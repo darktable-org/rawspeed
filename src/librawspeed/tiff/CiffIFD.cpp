@@ -63,7 +63,7 @@ CiffIFD::CiffIFD(CiffIFD* parent_, const Buffer* mFile) : parent(parent_) {
     unique_ptr<CiffEntry> t;
 
     try {
-      t = make_unique<CiffEntry>(mFile, 0, entry_offset);
+      t = make_unique<CiffEntry>(mFile, entry_offset);
     } catch (IOException&) {
       // Ignore unparsable entry
       return;
