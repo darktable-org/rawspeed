@@ -34,19 +34,15 @@ class RawDecoder;
 class CameraMetaData;
 
 class CiffParser final : public RawParser {
-  std::unique_ptr<CiffIFD> mRootIFD;
+  std::unique_ptr<const CiffIFD> mRootIFD;
 
 public:
   explicit CiffParser(const Buffer* input);
 
   void parseData();
+
   std::unique_ptr<RawDecoder>
   getDecoder(const CameraMetaData* meta = nullptr) override;
-
-  /* Returns the Root IFD - this object still retains ownership */
-  CiffIFD* RootIFD() const { return mRootIFD.get(); }
-  /* Merges root of other CIFF into this - clears the root of the other */
-  void MergeIFD(CiffParser* other_ciff);
 };
 
 } // namespace rawspeed

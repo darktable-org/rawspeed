@@ -27,6 +27,7 @@
 #endif
 
 #include "io/Buffer.h"                   // for Buffer, DataBuffer
+#include "io/IOException.h"              // for IOException
 #include "parsers/CiffParser.h"          // IWYU pragma: keep
 #include "parsers/CiffParserException.h" // IWYU pragma: keep
 #include "parsers/FiffParser.h"          // IWYU pragma: keep
@@ -71,6 +72,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     parser.getDecoder();
 #endif
   } catch (PARSERException&) {
+    return 0;
+  } catch (rawspeed::IOException&) {
     return 0;
   }
 

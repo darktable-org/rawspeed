@@ -70,7 +70,7 @@ void CiffIFD::parseIFDEntry(ByteStream* bs) {
   }
 }
 
-CiffIFD::CiffIFD(CiffIFD* parent_, ByteStream* mFile) : parent(parent_) {
+CiffIFD::CiffIFD(const CiffIFD* parent_, ByteStream* mFile) : parent(parent_) {
   checkOverflow();
 
   if (mFile->getSize() < 4)
@@ -86,8 +86,8 @@ CiffIFD::CiffIFD(CiffIFD* parent_, ByteStream* mFile) : parent(parent_) {
     parseIFDEntry(mFile);
 }
 
-void CiffIFD::checkOverflow() {
-  CiffIFD* p = this;
+void CiffIFD::checkOverflow() const {
+  const CiffIFD* p = this;
   int i = 0;
   while ((p = p->parent) != nullptr) {
     i++;
@@ -109,113 +109,130 @@ void CiffIFD::add(std::unique_ptr<CiffEntry> entry) {
   mEntry[entry->tag] = move(entry);
 }
 
-bool __attribute__((pure)) CiffIFD::hasEntryRecursive(CiffTag tag) {
-  if (mEntry.find(tag) != mEntry.end())
+bool __attribute__((pure)) CiffIFD::hasEntryRecursive(CiffTag tag) const {
+  if (mEntry.count(tag) > 0)
     return true;
-  for (auto &i : mSubIFD) {
+
+  for (const auto& i : mSubIFD) {
     if (i->hasEntryRecursive(tag))
       return true;
   }
+
   return false;
 }
 
-vector<CiffIFD*> CiffIFD::getIFDsWithTag(CiffTag tag) {
-  vector<CiffIFD*> matchingIFDs;
-  if (mEntry.find(tag) != mEntry.end()) {
+vector<const CiffIFD*> CiffIFD::getIFDsWithTag(CiffTag tag) const {
+  vector<const CiffIFD*> matchingIFDs;
+
+  if (mEntry.count(tag) > 0)
     matchingIFDs.push_back(this);
+
+  for (const auto& i : mSubIFD) {
+    const auto t = i->getIFDsWithTag(tag);
+    matchingIFDs.insert(matchingIFDs.end(), t.begin(), t.end());
   }
-  for (auto &i : mSubIFD) {
-    vector<CiffIFD *> t = i->getIFDsWithTag(tag);
-    for (auto j : t) {
-      matchingIFDs.push_back(j);
-    }
-  }
+
   return matchingIFDs;
 }
 
-vector<CiffIFD*> CiffIFD::getIFDsWithTagWhere(CiffTag tag, uint32 isValue) {
-  vector<CiffIFD*> matchingIFDs;
-  if (mEntry.find(tag) != mEntry.end()) {
-    CiffEntry* entry = mEntry[tag].get();
+vector<const CiffIFD*> CiffIFD::getIFDsWithTagWhere(CiffTag tag,
+                                                    uint32 isValue) const {
+  vector<const CiffIFD*> matchingIFDs;
+
+  const auto found = mEntry.find(tag);
+  if (found != mEntry.end()) {
+    const auto entry = found->second.get();
     if (entry->isInt() && entry->getU32() == isValue)
       matchingIFDs.push_back(this);
   }
-  for (auto &i : mSubIFD) {
-    vector<CiffIFD *> t = i->getIFDsWithTag(tag);
-    for (auto j : t) {
-      matchingIFDs.push_back(j);
-    }
+
+  for (const auto& i : mSubIFD) {
+    const auto t = i->getIFDsWithTagWhere(tag, isValue);
+    matchingIFDs.insert(matchingIFDs.end(), t.begin(), t.end());
   }
+
   return matchingIFDs;
 }
 
-vector<CiffIFD *> CiffIFD::getIFDsWithTagWhere(CiffTag tag,
-                                               const string &isValue) {
-  vector<CiffIFD*> matchingIFDs;
-  if (mEntry.find(tag) != mEntry.end()) {
-    CiffEntry* entry = mEntry[tag].get();
+vector<const CiffIFD*>
+CiffIFD::getIFDsWithTagWhere(CiffTag tag, const string& isValue) const {
+  vector<const CiffIFD*> matchingIFDs;
+
+  const auto found = mEntry.find(tag);
+  if (found != mEntry.end()) {
+    const auto entry = found->second.get();
     if (entry->isString() && isValue == entry->getString())
       matchingIFDs.push_back(this);
   }
-  for (auto &i : mSubIFD) {
-    vector<CiffIFD *> t = i->getIFDsWithTag(tag);
-    for (auto j : t) {
-      matchingIFDs.push_back(j);
-    }
+
+  for (const auto& i : mSubIFD) {
+    const auto t = i->getIFDsWithTagWhere(tag, isValue);
+    matchingIFDs.insert(matchingIFDs.end(), t.begin(), t.end());
   }
+
   return matchingIFDs;
 }
 
-CiffEntry* CiffIFD::getEntryRecursive(CiffTag tag) {
-  if (mEntry.find(tag) != mEntry.end()) {
-    return mEntry[tag].get();
-  }
-  for (auto &i : mSubIFD) {
-    CiffEntry *entry = i->getEntryRecursive(tag);
+const CiffEntry* CiffIFD::getEntryRecursive(CiffTag tag) const {
+  const auto found = mEntry.find(tag);
+  if (found != mEntry.end())
+    return found->second.get();
+
+  for (const auto& i : mSubIFD) {
+    const CiffEntry* entry = i->getEntryRecursive(tag);
     if (entry)
       return entry;
   }
+
   return nullptr;
 }
 
-CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag, uint32 isValue) {
-  if (mEntry.find(tag) != mEntry.end()) {
-    CiffEntry* entry = mEntry[tag].get();
+const CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag,
+                                                 uint32 isValue) const {
+  const auto found = mEntry.find(tag);
+  if (found != mEntry.end()) {
+    const auto entry = found->second.get();
     if (entry->isInt() && entry->getU32() == isValue)
       return entry;
   }
-  for (auto &i : mSubIFD) {
-    CiffEntry *entry = i->getEntryRecursive(tag);
+
+  for (const auto& i : mSubIFD) {
+    const CiffEntry* entry = i->getEntryRecursiveWhere(tag, isValue);
     if (entry)
       return entry;
   }
+
   return nullptr;
 }
 
-CiffEntry *CiffIFD::getEntryRecursiveWhere(CiffTag tag, const string &isValue) {
-  if (mEntry.find(tag) != mEntry.end()) {
-    CiffEntry* entry = mEntry[tag].get();
+const CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag,
+                                                 const string& isValue) const {
+  const auto found = mEntry.find(tag);
+  if (found != mEntry.end()) {
+    const auto entry = found->second.get();
     if (entry->isString() && isValue == entry->getString())
       return entry;
   }
-  for (auto &i : mSubIFD) {
-    CiffEntry *entry = i->getEntryRecursive(tag);
+
+  for (const auto& i : mSubIFD) {
+    const CiffEntry* entry = i->getEntryRecursiveWhere(tag, isValue);
     if (entry)
       return entry;
   }
+
   return nullptr;
 }
 
-CiffEntry* CiffIFD::getEntry(CiffTag tag) {
-  if (mEntry.find(tag) != mEntry.end()) {
-    return mEntry[tag].get();
-  }
+const CiffEntry* CiffIFD::getEntry(CiffTag tag) const {
+  const auto found = mEntry.find(tag);
+  if (found != mEntry.end())
+    return found->second.get();
+
   ThrowCPE("Entry 0x%x not found.", tag);
-  return nullptr;
 }
 
-bool __attribute__((pure)) CiffIFD::hasEntry(CiffTag tag) {
-  return mEntry.find(tag) != mEntry.end();
+bool __attribute__((pure)) CiffIFD::hasEntry(CiffTag tag) const {
+  return mEntry.count(tag) > 0;
 }
 
 } // namespace rawspeed

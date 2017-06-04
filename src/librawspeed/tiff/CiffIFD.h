@@ -34,29 +34,35 @@ namespace rawspeed {
 class ByteStream;
 
 class CiffIFD final {
-  CiffIFD* parent;
+  const CiffIFD* parent;
+
+  std::vector<std::unique_ptr<const CiffIFD>> mSubIFD;
+  std::map<CiffTag, std::unique_ptr<const CiffEntry>> mEntry;
+
+  void checkOverflow() const;
+
+  void add(std::unique_ptr<CiffIFD> subIFD);
+  void add(std::unique_ptr<CiffEntry> entry);
 
   void parseIFDEntry(ByteStream* bs);
 
 public:
-  CiffIFD(CiffIFD* parent, ByteStream* mFile);
+  CiffIFD(const CiffIFD* parent, ByteStream* mFile);
 
-  std::vector<std::unique_ptr<CiffIFD>> mSubIFD;
-  std::map<CiffTag, std::unique_ptr<CiffEntry>> mEntry;
+  std::vector<const CiffIFD*> getIFDsWithTag(CiffTag tag) const;
+  std::vector<const CiffIFD*> getIFDsWithTagWhere(CiffTag tag,
+                                                  uint32 isValue) const;
+  std::vector<const CiffIFD*>
+  getIFDsWithTagWhere(CiffTag tag, const std::string& isValue) const;
 
-  void checkOverflow();
-  void add(std::unique_ptr<CiffIFD> subIFD);
-  void add(std::unique_ptr<CiffEntry> entry);
+  bool __attribute__((pure)) hasEntry(CiffTag tag) const;
+  bool __attribute__((pure)) hasEntryRecursive(CiffTag tag) const;
 
-  std::vector<CiffIFD*> getIFDsWithTag(CiffTag tag);
-  CiffEntry* getEntry(CiffTag tag);
-  bool __attribute__((pure)) hasEntry(CiffTag tag);
-  bool __attribute__((pure)) hasEntryRecursive(CiffTag tag);
-  CiffEntry* getEntryRecursive(CiffTag tag);
-  CiffEntry* getEntryRecursiveWhere(CiffTag tag, uint32 isValue);
-  CiffEntry *getEntryRecursiveWhere(CiffTag tag, const std::string &isValue);
-  std::vector<CiffIFD *> getIFDsWithTagWhere(CiffTag tag, const std::string &isValue);
-  std::vector<CiffIFD*> getIFDsWithTagWhere(CiffTag tag, uint32 isValue);
+  const CiffEntry* getEntry(CiffTag tag) const;
+  const CiffEntry* getEntryRecursive(CiffTag tag) const;
+  const CiffEntry* getEntryRecursiveWhere(CiffTag tag, uint32 isValue) const;
+  const CiffEntry* getEntryRecursiveWhere(CiffTag tag,
+                                          const std::string& isValue) const;
 };
 
 } // namespace rawspeed

@@ -30,13 +30,10 @@
 #include "tiff/CiffEntry.h"              // for CiffEntry
 #include "tiff/CiffIFD.h"                // for CiffIFD
 #include "tiff/CiffTag.h"                // for CiffTag::CIFF_MAKEMODEL
-#include <map>                           // for map, map<>::mapped_type
 #include <memory>                        // for unique_ptr, default_delete
 #include <string>                        // for operator==, basic_string
 #include <utility>                       // for move, pair
-#include <vector>                        // for vector
 
-using std::vector;
 using std::string;
 
 namespace rawspeed {
@@ -59,37 +56,19 @@ std::unique_ptr<RawDecoder> CiffParser::getDecoder(const CameraMetaData* meta) {
   if (!mRootIFD)
     parseData();
 
-  vector<CiffIFD*> potentials;
-  potentials = mRootIFD->getIFDsWithTag(CIFF_MAKEMODEL);
+  const auto potentials(mRootIFD->getIFDsWithTag(CIFF_MAKEMODEL));
 
-  if (!potentials.empty()) {  // We have make entry
-    for (auto &potential : potentials) {
-      string make = trimSpaces(potential->getEntry(CIFF_MAKEMODEL)->getString());
-      if (make == "Canon") {
-        return make_unique<CrwDecoder>(move(mRootIFD), mInput);
-      }
-    }
+  for (const auto& potential : potentials) {
+    const auto mm = potential->getEntry(CIFF_MAKEMODEL);
+    const string make = trimSpaces(mm->getString());
+
+    if (make != "Canon")
+      continue;
+
+    return make_unique<CrwDecoder>(move(mRootIFD), mInput);
   }
 
   ThrowCPE("No decoder found. Sorry.");
-  return nullptr;
-}
-
-void CiffParser::MergeIFD( CiffParser* other_ciff)
-{
-  if (!other_ciff || !other_ciff->mRootIFD || other_ciff->mRootIFD->mSubIFD.empty())
-    return;
-
-  CiffIFD* other_root = other_ciff->mRootIFD.get();
-  for (auto &i : other_root->mSubIFD) {
-    mRootIFD->mSubIFD.push_back(move(i));
-  }
-
-  for (auto &i : other_root->mEntry) {
-    mRootIFD->mEntry[i.first] = move(i.second);
-  }
-  other_root->mSubIFD.clear();
-  other_root->mEntry.clear();
 }
 
 } // namespace rawspeed

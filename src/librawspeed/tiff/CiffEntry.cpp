@@ -65,7 +65,7 @@ CiffEntry::CiffEntry(ByteStream* bs) {
   count = bytesize >> getElementShift();
 }
 
-uint32 __attribute__((pure)) CiffEntry::getElementShift() {
+uint32 __attribute__((pure)) CiffEntry::getElementShift() const {
   switch (type) {
     case CIFF_SHORT:
       return 1;
@@ -80,7 +80,7 @@ uint32 __attribute__((pure)) CiffEntry::getElementShift() {
   }
 }
 
-uint32 __attribute__((pure)) CiffEntry::getElementSize() {
+uint32 __attribute__((pure)) CiffEntry::getElementSize() const {
   switch (type) {
     case CIFF_BYTE:
     case CIFF_ASCII:
@@ -97,11 +97,11 @@ uint32 __attribute__((pure)) CiffEntry::getElementSize() {
   }
 }
 
-bool __attribute__((pure)) CiffEntry::isInt() {
+bool __attribute__((pure)) CiffEntry::isInt() const {
   return (type == CIFF_LONG || type == CIFF_SHORT || type ==  CIFF_BYTE);
 }
 
-uint32 CiffEntry::getU32(uint32 num) {
+uint32 CiffEntry::getU32(uint32 num) const {
   if (!isInt()) {
     ThrowCPE(
         "Wrong type 0x%x encountered. Expected Long, Short or Byte at 0x%x",
@@ -116,21 +116,21 @@ uint32 CiffEntry::getU32(uint32 num) {
   return data.peek<uint32>(num);
 }
 
-ushort16 CiffEntry::getU16(uint32 num) {
+ushort16 CiffEntry::getU16(uint32 num) const {
   if (type != CIFF_SHORT && type != CIFF_BYTE)
     ThrowCPE("Wrong type 0x%x encountered. Expected Short at 0x%x", type, tag);
 
   return data.peek<ushort16>(num);
 }
 
-uchar8 CiffEntry::getByte(uint32 num) {
+uchar8 CiffEntry::getByte(uint32 num) const {
   if (type != CIFF_BYTE)
     ThrowCPE("Wrong type 0x%x encountered. Expected Byte at 0x%x", type, tag);
 
   return data.peek<uchar8>(num);
 }
 
-string CiffEntry::getString() {
+string CiffEntry::getString() const {
   if (type != CIFF_ASCII)
     ThrowCPE("Wrong type 0x%x encountered. Expected Ascii", type);
 
@@ -140,7 +140,7 @@ string CiffEntry::getString() {
   return data.peekString();
 }
 
-vector<string> CiffEntry::getStrings() {
+vector<string> CiffEntry::getStrings() const {
   if (type != CIFF_ASCII)
     ThrowCPE("Wrong type 0x%x encountered. Expected Ascii", type);
 
@@ -160,7 +160,7 @@ vector<string> CiffEntry::getStrings() {
   return strs;
 }
 
-bool __attribute__((pure)) CiffEntry::isString() {
+bool __attribute__((pure)) CiffEntry::isString() const {
   return (type == CIFF_ASCII);
 }
 
