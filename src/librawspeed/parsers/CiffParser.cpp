@@ -62,10 +62,8 @@ std::unique_ptr<RawDecoder> CiffParser::getDecoder(const CameraMetaData* meta) {
     const auto mm = potential->getEntry(CIFF_MAKEMODEL);
     const string make = trimSpaces(mm->getString());
 
-    if (make != "Canon")
-      continue;
-
-    return make_unique<CrwDecoder>(move(mRootIFD), mInput);
+    if (make == "Canon")
+      return make_unique<CrwDecoder>(move(mRootIFD), mInput);
   }
 
   ThrowCPE("No decoder found. Sorry.");
