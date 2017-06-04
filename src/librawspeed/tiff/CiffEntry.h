@@ -28,7 +28,7 @@
 
 namespace rawspeed {
 
-class Buffer;
+class ByteStream;
 
 class CiffIFD;
 
@@ -60,7 +60,7 @@ class CiffEntry
 #endif
 
 public:
-  CiffEntry(const Buffer* f, uint32 offset);
+  explicit CiffEntry(ByteStream* bs);
   ~CiffEntry();
   uint32 getU32(uint32 num=0);
   ushort16 getU16(uint32 num=0);

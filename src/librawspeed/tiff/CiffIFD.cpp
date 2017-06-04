@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014 Pedro Côrte-Real
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -22,12 +23,10 @@
 #include "tiff/CiffIFD.h"
 #include "common/Common.h"               // for uint32, ushort16
 #include "common/RawspeedException.h"    // for RawspeedException
-#include "io/Buffer.h"                   // for Buffer
-#include "io/Endianness.h"               // for getU16LE, getU32LE
+#include "io/ByteStream.h"               // for ByteStream
 #include "io/IOException.h"              // for IOException
 #include "parsers/CiffParserException.h" // for ThrowCPE, CiffParserException
 #include "tiff/CiffEntry.h"              // for CiffEntry, CiffDataType::CI...
-#include <limits>                        // for numeric_limits
 #include <map>                           // for map, _Rb_tree_iterator
 #include <memory>                        // for unique_ptr
 #include <string>                        // for allocator, operator==, string
@@ -36,56 +35,56 @@
 
 using std::string;
 using std::vector;
-using std::numeric_limits;
 using std::unique_ptr;
 
 namespace rawspeed {
 
-CiffIFD::CiffIFD(CiffIFD* parent_, const Buffer* mFile) : parent(parent_) {
+void CiffIFD::parseIFDEntry(ByteStream* bs) {
+  unique_ptr<CiffEntry> t;
+
+  auto origPos = bs->getPosition();
+
+  try {
+    t = make_unique<CiffEntry>(bs);
+  } catch (IOException&) {
+    // Ignore unparsable entry, but fix probably broken position due to
+    // interruption by exception; i.e. setting it to the next entry.
+    bs->setPosition(origPos + 10);
+    return;
+  }
+
+  try {
+    switch (t->type) {
+    case CIFF_SUB1:
+    case CIFF_SUB2: {
+      auto subStream = bs->getSubStream(t->data_offset, t->bytesize);
+      add(make_unique<CiffIFD>(this, &subStream));
+      break;
+    }
+
+    default:
+      add(move(t));
+    }
+  } catch (RawspeedException&) {
+    // Unparsable private data are added as entries
+    add(move(t));
+  }
+}
+
+CiffIFD::CiffIFD(CiffIFD* parent_, ByteStream* mFile) : parent(parent_) {
   checkOverflow();
 
   if (mFile->getSize() < 4)
     ThrowCPE("File is probably corrupted.");
 
-  uint32 valuedata_size = getU32LE(mFile->getData(mFile->getSize() - 4, 4));
+  mFile->setPosition(mFile->getSize() - 4);
+  uint32 valuedata_size = mFile->getU32();
 
-  if (valuedata_size >= numeric_limits<uint32>::max())
-    ThrowCPE("Valuedata size is too big. Image is probably corrupted.");
+  mFile->setPosition(valuedata_size);
+  ushort16 dircount = mFile->getU16();
 
-  ushort16 dircount = getU16LE(mFile->getData(valuedata_size, 2));
-
-  for (uint32 i = 0; i < dircount; i++) {
-    int entry_offset = valuedata_size + 2 + i * 10;
-
-    if (!mFile->isValid(entry_offset, 10))
-      break;
-
-    unique_ptr<CiffEntry> t;
-
-    try {
-      t = make_unique<CiffEntry>(mFile, entry_offset);
-    } catch (IOException&) {
-      // Ignore unparsable entry
-      return;
-    }
-
-    try {
-      switch (t->type) {
-      case CIFF_SUB1:
-      case CIFF_SUB2: {
-        const auto subBuf = mFile->getSubView(t->data_offset, t->bytesize);
-        add(make_unique<CiffIFD>(this, &subBuf));
-        break;
-      }
-
-      default:
-        add(move(t));
-      }
-    } catch (RawspeedException&) {
-      // Unparsable private data are added as entries
-      add(move(t));
-    }
-  }
+  for (uint32 i = 0; i < dircount; i++)
+    parseIFDEntry(mFile);
 }
 
 void CiffIFD::checkOverflow() {

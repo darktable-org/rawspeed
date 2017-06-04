@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014 Pedro Côrte-Real
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -22,40 +23,41 @@
 #include "tiff/CiffEntry.h"
 #include "common/Common.h"               // for uchar8, uint32, ushort16
 #include "io/Buffer.h"                   // for Buffer
+#include "io/ByteStream.h"               // for ByteStream
 #include "io/Endianness.h"               // for getU32LE, getU16LE
 #include "parsers/CiffParserException.h" // for ThrowCPE
 #include <cstdio>                        // for sprintf
 #include <cstring>                       // for memcpy, strlen
-#include <limits>                        // for numeric_limits
 #include <string>                        // for string, allocator
 #include <vector>                        // for vector
 
-using std::numeric_limits;
 using std::string;
 using std::vector;
 
 namespace rawspeed {
 
-CiffEntry::CiffEntry(const Buffer* mFile, uint32 offset) {
+CiffEntry::CiffEntry(ByteStream* bs) {
   own_data = nullptr;
-  ushort16 p = getU16LE(mFile->getData(offset, 2));
+
+  ushort16 p = bs->getU16();
+
   tag = static_cast<CiffTag>(p & 0x3fff);
   ushort16 datalocation = (p & 0xc000);
   type = static_cast<CiffDataType>(p & 0x3800);
+
   if (datalocation == 0x0000) { // Data is offset in value_data
-    bytesize = getU32LE(mFile->getData(offset + 2, 4));
-
-    data_offset = getU32LE(mFile->getData(offset + 6, 4));
-    if (data_offset >= numeric_limits<uint32>::max())
-      ThrowCPE("Corrupt data offset.");
-
-    data = mFile->getData(data_offset, bytesize);
+    bytesize = bs->getU32();
+    data_offset = bs->getU32();
   } else if (datalocation == 0x4000) { // Data is stored directly in entry
-    data_offset = offset + 2;
-    bytesize = 8; // Maximum of 8 bytes of data (the size and offset fields)
-    data = mFile->getData(data_offset, bytesize);
+    data_offset = bs->getPosition();
+
+    // Maximum of 8 bytes of data (the size and offset fields)
+    bytesize = 8;
+    bs->skipBytes(bytesize);
   } else
     ThrowCPE("Don't understand data location 0x%x", datalocation);
+
+  data = bs->Buffer::getData(data_offset, bytesize);
 
   // Set the number of items using the shift
   count = bytesize >> getElementShift();

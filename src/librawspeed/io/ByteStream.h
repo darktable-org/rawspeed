@@ -59,6 +59,10 @@ public:
     return ByteStream(getSubView(offset, size_), 0, isInNativeByteOrder());
   }
 
+  ByteStream getSubStream(size_type offset) const {
+    return ByteStream(getSubView(offset), 0, isInNativeByteOrder());
+  }
+
   inline void check(size_type bytes) const {
     if (static_cast<uint64>(pos) + bytes > size)
       ThrowIOE("Out of bounds access in ByteStream");

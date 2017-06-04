@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014 Pedro Côrte-Real
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -23,7 +24,8 @@
 #include "common/Common.h"               // for make_unique, trimSpaces
 #include "decoders/CrwDecoder.h"         // for CrwDecoder
 #include "decoders/RawDecoder.h"         // for RawDecoder
-#include "io/Buffer.h"                   // for Buffer
+#include "io/ByteStream.h"               // for ByteStream
+#include "io/Endianness.h"               // for getHostEndianness, Endianne...
 #include "parsers/CiffParserException.h" // for CiffParserException (ptr only)
 #include "tiff/CiffEntry.h"              // for CiffEntry
 #include "tiff/CiffIFD.h"                // for CiffIFD
@@ -42,15 +44,15 @@ namespace rawspeed {
 CiffParser::CiffParser(const Buffer* inputData) : RawParser(inputData) {}
 
 void CiffParser::parseData() {
-  if (mInput->getSize() < 16)
-    ThrowCPE("Not a CIFF file (size too small)");
-  const unsigned char* data = mInput->getData(0, 16);
+  ByteStream bs(*mInput, 0);
+  bs.setInNativeByteOrder(getHostEndianness() == little);
 
-  if (data[0] != 0x49 || data[1] != 0x49)
+  ushort16 magic = bs.getU16();
+  if (magic != 0x4949)
     ThrowCPE("Not a CIFF file (ID)");
 
-  const auto subBuf = mInput->getSubView(data[2]);
-  mRootIFD = make_unique<CiffIFD>(nullptr, &subBuf);
+  ByteStream subStream(bs.getSubStream(bs.getByte()));
+  mRootIFD = make_unique<CiffIFD>(nullptr, &subStream);
 }
 
 std::unique_ptr<RawDecoder> CiffParser::getDecoder(const CameraMetaData* meta) {

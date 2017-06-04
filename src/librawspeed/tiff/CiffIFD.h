@@ -31,13 +31,15 @@
 
 namespace rawspeed {
 
-class Buffer;
+class ByteStream;
 
 class CiffIFD final {
   CiffIFD* parent;
 
+  void parseIFDEntry(ByteStream* bs);
+
 public:
-  CiffIFD(CiffIFD* parent, const Buffer* mFile);
+  CiffIFD(CiffIFD* parent, ByteStream* mFile);
 
   std::vector<std::unique_ptr<CiffIFD>> mSubIFD;
   std::map<CiffTag, std::unique_ptr<CiffEntry>> mEntry;
