@@ -35,10 +35,9 @@ class Buffer;
 
 class CiffIFD final {
   CiffIFD* parent;
-  const Buffer* mFile;
 
 public:
-  CiffIFD(CiffIFD* parent, const Buffer* f, uint32 start, uint32 end);
+  CiffIFD(CiffIFD* parent, const Buffer* f, uint32 start);
 
   std::vector<std::unique_ptr<CiffIFD>> mSubIFD;
   std::map<CiffTag, std::unique_ptr<CiffEntry>> mEntry;
@@ -56,7 +55,6 @@ public:
   CiffEntry *getEntryRecursiveWhere(CiffTag tag, const std::string &isValue);
   std::vector<CiffIFD *> getIFDsWithTagWhere(CiffTag tag, const std::string &isValue);
   std::vector<CiffIFD*> getIFDsWithTagWhere(CiffTag tag, uint32 isValue);
-  const Buffer* getBuffer() { return mFile; }
 };
 
 } // namespace rawspeed

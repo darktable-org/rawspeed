@@ -41,14 +41,14 @@ using std::unique_ptr;
 
 namespace rawspeed {
 
-CiffIFD::CiffIFD(CiffIFD* parent_, const Buffer* f, uint32 start, uint32 end)
-    : parent(parent_), mFile(f) {
+CiffIFD::CiffIFD(CiffIFD* parent_, const Buffer* mFile, uint32 start)
+    : parent(parent_) {
   checkOverflow();
 
-  if (end < 4)
+  if (mFile->getSize() < 4)
     ThrowCPE("File is probably corrupted.");
 
-  uint32 valuedata_size = getU32LE(mFile->getData(end - 4, 4));
+  uint32 valuedata_size = getU32LE(mFile->getData(mFile->getSize() - 4, 4));
 
   if (valuedata_size >= numeric_limits<uint32>::max() - start)
     ThrowCPE("Valuedata size is too big. Image is probably corrupted.");
@@ -77,10 +77,11 @@ CiffIFD::CiffIFD(CiffIFD* parent_, const Buffer* f, uint32 start, uint32 end)
     try {
       switch (t->type) {
       case CIFF_SUB1:
-      case CIFF_SUB2:
-        add(make_unique<CiffIFD>(this, mFile, t->data_offset,
-                                 t->data_offset + t->bytesize));
+      case CIFF_SUB2: {
+        const auto subBuf = mFile->getSubView(t->data_offset, t->bytesize);
+        add(make_unique<CiffIFD>(this, &subBuf, 0));
         break;
+      }
 
       default:
         add(move(t));
