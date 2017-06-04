@@ -41,15 +41,8 @@ using std::unique_ptr;
 
 namespace rawspeed {
 
-#define CIFF_DEPTH(_depth)                                                     \
-  if ((depth = (_depth) + 1) > 10)                                             \
-    ThrowCPE("sub-micron matryoshka dolls are ignored");
-
-CiffIFD::CiffIFD(CiffIFD* parent_, const Buffer* f, uint32 start, uint32 end,
-                 uint32 _depth)
+CiffIFD::CiffIFD(CiffIFD* parent_, const Buffer* f, uint32 start, uint32 end)
     : parent(parent_), mFile(f) {
-  CIFF_DEPTH(_depth);
-
   checkOverflow();
 
   if (end < 4)
@@ -86,7 +79,7 @@ CiffIFD::CiffIFD(CiffIFD* parent_, const Buffer* f, uint32 start, uint32 end,
       case CIFF_SUB1:
       case CIFF_SUB2:
         add(make_unique<CiffIFD>(this, mFile, t->data_offset,
-                                 t->data_offset + t->bytesize, depth));
+                                 t->data_offset + t->bytesize));
         break;
 
       default:

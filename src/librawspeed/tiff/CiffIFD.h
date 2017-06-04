@@ -36,11 +36,9 @@ class Buffer;
 class CiffIFD final {
   CiffIFD* parent;
   const Buffer* mFile;
-  uint32 depth;
 
 public:
-  CiffIFD(CiffIFD* parent, const Buffer* f, uint32 start, uint32 end,
-          uint32 depth = 0);
+  CiffIFD(CiffIFD* parent, const Buffer* f, uint32 start, uint32 end);
 
   std::vector<std::unique_ptr<CiffIFD>> mSubIFD;
   std::map<CiffTag, std::unique_ptr<CiffEntry>> mEntry;
