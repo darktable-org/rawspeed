@@ -41,8 +41,7 @@ using std::unique_ptr;
 
 namespace rawspeed {
 
-CiffIFD::CiffIFD(CiffIFD* parent_, const Buffer* mFile, uint32 start)
-    : parent(parent_) {
+CiffIFD::CiffIFD(CiffIFD* parent_, const Buffer* mFile) : parent(parent_) {
   checkOverflow();
 
   if (mFile->getSize() < 4)
@@ -50,17 +49,13 @@ CiffIFD::CiffIFD(CiffIFD* parent_, const Buffer* mFile, uint32 start)
 
   uint32 valuedata_size = getU32LE(mFile->getData(mFile->getSize() - 4, 4));
 
-  if (valuedata_size >= numeric_limits<uint32>::max() - start)
+  if (valuedata_size >= numeric_limits<uint32>::max())
     ThrowCPE("Valuedata size is too big. Image is probably corrupted.");
 
-  ushort16 dircount = getU16LE(mFile->getData(start + valuedata_size, 2));
-
-  //  fprintf(stderr, "Found %d entries between %d and %d after %d data
-  //  bytes\n",
-  //                  dircount, start, end, valuedata_size);
+  ushort16 dircount = getU16LE(mFile->getData(valuedata_size, 2));
 
   for (uint32 i = 0; i < dircount; i++) {
-    int entry_offset = start+valuedata_size+2+i*10;
+    int entry_offset = valuedata_size + 2 + i * 10;
 
     if (!mFile->isValid(entry_offset, 10))
       break;
@@ -68,7 +63,7 @@ CiffIFD::CiffIFD(CiffIFD* parent_, const Buffer* mFile, uint32 start)
     unique_ptr<CiffEntry> t;
 
     try {
-      t = make_unique<CiffEntry>(mFile, start, entry_offset);
+      t = make_unique<CiffEntry>(mFile, 0, entry_offset);
     } catch (IOException&) {
       // Ignore unparsable entry
       return;
@@ -79,7 +74,7 @@ CiffIFD::CiffIFD(CiffIFD* parent_, const Buffer* mFile, uint32 start)
       case CIFF_SUB1:
       case CIFF_SUB2: {
         const auto subBuf = mFile->getSubView(t->data_offset, t->bytesize);
-        add(make_unique<CiffIFD>(this, &subBuf, 0));
+        add(make_unique<CiffIFD>(this, &subBuf));
         break;
       }
 

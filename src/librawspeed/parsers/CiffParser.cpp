@@ -50,7 +50,7 @@ void CiffParser::parseData() {
     ThrowCPE("Not a CIFF file (ID)");
 
   const auto subBuf = mInput->getSubView(data[2]);
-  mRootIFD = make_unique<CiffIFD>(nullptr, &subBuf, 0);
+  mRootIFD = make_unique<CiffIFD>(nullptr, &subBuf);
 }
 
 std::unique_ptr<RawDecoder> CiffParser::getDecoder(const CameraMetaData* meta) {

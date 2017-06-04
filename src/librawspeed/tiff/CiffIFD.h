@@ -37,7 +37,7 @@ class CiffIFD final {
   CiffIFD* parent;
 
 public:
-  CiffIFD(CiffIFD* parent, const Buffer* f, uint32 start);
+  CiffIFD(CiffIFD* parent, const Buffer* mFile);
 
   std::vector<std::unique_ptr<CiffIFD>> mSubIFD;
   std::map<CiffTag, std::unique_ptr<CiffEntry>> mEntry;
