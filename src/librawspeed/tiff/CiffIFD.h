@@ -47,29 +47,32 @@ class CiffIFD final {
   void parseIFDEntry(ByteStream* bs);
 
   template <typename Lambda>
-  std::vector<const CiffIFD*> getIFDsWithTagIf(CiffTag tag,
-                                               const Lambda& f) const;
+  std::vector<const CiffIFD*> __attribute__((pure))
+  getIFDsWithTagIf(CiffTag tag, const Lambda& f) const;
 
   template <typename Lambda>
-  const CiffEntry* getEntryRecursiveIf(CiffTag tag, const Lambda& f) const;
+  const CiffEntry* __attribute__((pure))
+  getEntryRecursiveIf(CiffTag tag, const Lambda& f) const;
 
 public:
   CiffIFD(const CiffIFD* parent, ByteStream* mFile);
 
-  std::vector<const CiffIFD*> getIFDsWithTag(CiffTag tag) const;
-  std::vector<const CiffIFD*> getIFDsWithTagWhere(CiffTag tag,
-                                                  uint32 isValue) const;
-  std::vector<const CiffIFD*>
+  std::vector<const CiffIFD*> __attribute__((pure))
+  getIFDsWithTag(CiffTag tag) const;
+  std::vector<const CiffIFD*> __attribute__((pure))
+  getIFDsWithTagWhere(CiffTag tag, uint32 isValue) const;
+  std::vector<const CiffIFD*> __attribute__((pure))
   getIFDsWithTagWhere(CiffTag tag, const std::string& isValue) const;
 
   bool __attribute__((pure)) hasEntry(CiffTag tag) const;
   bool __attribute__((pure)) hasEntryRecursive(CiffTag tag) const;
 
-  const CiffEntry* getEntry(CiffTag tag) const;
-  const CiffEntry* getEntryRecursive(CiffTag tag) const;
-  const CiffEntry* getEntryRecursiveWhere(CiffTag tag, uint32 isValue) const;
-  const CiffEntry* getEntryRecursiveWhere(CiffTag tag,
-                                          const std::string& isValue) const;
+  const CiffEntry* __attribute__((pure)) getEntry(CiffTag tag) const;
+  const CiffEntry* __attribute__((pure)) getEntryRecursive(CiffTag tag) const;
+  const CiffEntry* __attribute__((pure))
+  getEntryRecursiveWhere(CiffTag tag, uint32 isValue) const;
+  const CiffEntry* __attribute__((pure))
+  getEntryRecursiveWhere(CiffTag tag, const std::string& isValue) const;
 };
 
 } // namespace rawspeed
