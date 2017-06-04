@@ -109,6 +109,67 @@ void CiffIFD::add(std::unique_ptr<CiffEntry> entry) {
   mEntry[entry->tag] = move(entry);
 }
 
+template <typename Lambda>
+std::vector<const CiffIFD*> CiffIFD::getIFDsWithTagIf(CiffTag tag,
+                                                      const Lambda& f) const {
+  std::vector<const CiffIFD*> matchingIFDs;
+
+  const auto found = mEntry.find(tag);
+  if (found != mEntry.end()) {
+    const auto entry = found->second.get();
+    if (f(entry))
+      matchingIFDs.push_back(this);
+  }
+
+  for (const auto& i : mSubIFD) {
+    const auto t = i->getIFDsWithTagIf(tag, f);
+    matchingIFDs.insert(matchingIFDs.end(), t.begin(), t.end());
+  }
+
+  return matchingIFDs;
+}
+
+template <typename Lambda>
+const CiffEntry* CiffIFD::getEntryRecursiveIf(CiffTag tag,
+                                              const Lambda& f) const {
+  const auto found = mEntry.find(tag);
+  if (found != mEntry.end()) {
+    const auto entry = found->second.get();
+    if (f(entry))
+      return entry;
+  }
+
+  for (const auto& i : mSubIFD) {
+    const CiffEntry* entry = i->getEntryRecursiveIf(tag, f);
+    if (entry)
+      return entry;
+  }
+
+  return nullptr;
+}
+
+vector<const CiffIFD*> CiffIFD::getIFDsWithTag(CiffTag tag) const {
+  return getIFDsWithTagIf(tag, [](const CiffEntry*) { return true; });
+}
+
+vector<const CiffIFD*> CiffIFD::getIFDsWithTagWhere(CiffTag tag,
+                                                    uint32 isValue) const {
+  return getIFDsWithTagIf(tag, [&isValue](const CiffEntry* entry) {
+    return entry->isInt() && entry->getU32() == isValue;
+  });
+}
+
+vector<const CiffIFD*>
+CiffIFD::getIFDsWithTagWhere(CiffTag tag, const string& isValue) const {
+  return getIFDsWithTagIf(tag, [&isValue](const CiffEntry* entry) {
+    return entry->isString() && isValue == entry->getString();
+  });
+}
+
+bool __attribute__((pure)) CiffIFD::hasEntry(CiffTag tag) const {
+  return mEntry.count(tag) > 0;
+}
+
 bool __attribute__((pure)) CiffIFD::hasEntryRecursive(CiffTag tag) const {
   if (mEntry.count(tag) > 0)
     return true;
@@ -121,108 +182,6 @@ bool __attribute__((pure)) CiffIFD::hasEntryRecursive(CiffTag tag) const {
   return false;
 }
 
-vector<const CiffIFD*> CiffIFD::getIFDsWithTag(CiffTag tag) const {
-  vector<const CiffIFD*> matchingIFDs;
-
-  if (mEntry.count(tag) > 0)
-    matchingIFDs.push_back(this);
-
-  for (const auto& i : mSubIFD) {
-    const auto t = i->getIFDsWithTag(tag);
-    matchingIFDs.insert(matchingIFDs.end(), t.begin(), t.end());
-  }
-
-  return matchingIFDs;
-}
-
-vector<const CiffIFD*> CiffIFD::getIFDsWithTagWhere(CiffTag tag,
-                                                    uint32 isValue) const {
-  vector<const CiffIFD*> matchingIFDs;
-
-  const auto found = mEntry.find(tag);
-  if (found != mEntry.end()) {
-    const auto entry = found->second.get();
-    if (entry->isInt() && entry->getU32() == isValue)
-      matchingIFDs.push_back(this);
-  }
-
-  for (const auto& i : mSubIFD) {
-    const auto t = i->getIFDsWithTagWhere(tag, isValue);
-    matchingIFDs.insert(matchingIFDs.end(), t.begin(), t.end());
-  }
-
-  return matchingIFDs;
-}
-
-vector<const CiffIFD*>
-CiffIFD::getIFDsWithTagWhere(CiffTag tag, const string& isValue) const {
-  vector<const CiffIFD*> matchingIFDs;
-
-  const auto found = mEntry.find(tag);
-  if (found != mEntry.end()) {
-    const auto entry = found->second.get();
-    if (entry->isString() && isValue == entry->getString())
-      matchingIFDs.push_back(this);
-  }
-
-  for (const auto& i : mSubIFD) {
-    const auto t = i->getIFDsWithTagWhere(tag, isValue);
-    matchingIFDs.insert(matchingIFDs.end(), t.begin(), t.end());
-  }
-
-  return matchingIFDs;
-}
-
-const CiffEntry* CiffIFD::getEntryRecursive(CiffTag tag) const {
-  const auto found = mEntry.find(tag);
-  if (found != mEntry.end())
-    return found->second.get();
-
-  for (const auto& i : mSubIFD) {
-    const CiffEntry* entry = i->getEntryRecursive(tag);
-    if (entry)
-      return entry;
-  }
-
-  return nullptr;
-}
-
-const CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag,
-                                                 uint32 isValue) const {
-  const auto found = mEntry.find(tag);
-  if (found != mEntry.end()) {
-    const auto entry = found->second.get();
-    if (entry->isInt() && entry->getU32() == isValue)
-      return entry;
-  }
-
-  for (const auto& i : mSubIFD) {
-    const CiffEntry* entry = i->getEntryRecursiveWhere(tag, isValue);
-    if (entry)
-      return entry;
-  }
-
-  return nullptr;
-}
-
-const CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag,
-                                                 const string& isValue) const {
-  const auto found = mEntry.find(tag);
-  if (found != mEntry.end()) {
-    const auto entry = found->second.get();
-    if (entry->isString() && isValue == entry->getString())
-      return entry;
-  }
-
-  for (const auto& i : mSubIFD) {
-    const CiffEntry* entry = i->getEntryRecursiveWhere(tag, isValue);
-    if (entry)
-      return entry;
-  }
-
-  return nullptr;
-}
-
 const CiffEntry* CiffIFD::getEntry(CiffTag tag) const {
   const auto found = mEntry.find(tag);
   if (found != mEntry.end())
@@ -231,8 +190,22 @@ const CiffEntry* CiffIFD::getEntry(CiffTag tag) const {
   ThrowCPE("Entry 0x%x not found.", tag);
 }
 
-bool __attribute__((pure)) CiffIFD::hasEntry(CiffTag tag) const {
-  return mEntry.count(tag) > 0;
+const CiffEntry* CiffIFD::getEntryRecursive(CiffTag tag) const {
+  return getEntryRecursiveIf(tag, [](const CiffEntry*) { return true; });
+}
+
+const CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag,
+                                                 uint32 isValue) const {
+  return getEntryRecursiveIf(tag, [&isValue](const CiffEntry* entry) {
+    return entry->isInt() && entry->getU32() == isValue;
+  });
+}
+
+const CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag,
+                                                 const string& isValue) const {
+  return getEntryRecursiveIf(tag, [&isValue](const CiffEntry* entry) {
+    return entry->isString() && isValue == entry->getString();
+  });
 }
 
 } // namespace rawspeed

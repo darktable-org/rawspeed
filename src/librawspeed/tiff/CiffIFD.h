@@ -46,6 +46,13 @@ class CiffIFD final {
 
   void parseIFDEntry(ByteStream* bs);
 
+  template <typename Lambda>
+  std::vector<const CiffIFD*> getIFDsWithTagIf(CiffTag tag,
+                                               const Lambda& f) const;
+
+  template <typename Lambda>
+  const CiffEntry* getEntryRecursiveIf(CiffTag tag, const Lambda& f) const;
+
 public:
   CiffIFD(const CiffIFD* parent, ByteStream* mFile);
 
