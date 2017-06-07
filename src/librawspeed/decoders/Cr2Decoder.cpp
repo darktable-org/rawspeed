@@ -98,16 +98,11 @@ RawImage Cr2Decoder::decodeOldFormat() {
   TiffEntry* curve = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x123));
   if (curve && curve->type == TIFF_SHORT && curve->count == 4096) {
     auto table = curve->getU16Array(curve->count);
-    if (!uncorrectedRawValues) {
-      mRaw->setTable(table, true);
-      // Apply table
+    RawImageCurveGuard curveHandler(&mRaw, table, uncorrectedRawValues);
+
+    // Apply table
+    if (!uncorrectedRawValues)
       mRaw->sixteenBitLookup();
-      // Delete table
-      mRaw->setTable(nullptr);
-    } else {
-      // We want uncorrected, but we store the table.
-      mRaw->setTable(table, false);
-    }
   }
 
   return mRaw;

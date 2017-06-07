@@ -205,8 +205,7 @@ RawImage ArwDecoder::decodeRawInternal() {
     for (uint32 j = sony_curve[i] + 1; j <= sony_curve[i+1]; j++)
       curve[j] = curve[j-1] + (1 << i);
 
-  if (!uncorrectedRawValues)
-    mRaw->setTable(curve, true);
+  RawImageCurveGuard curveHandler(&mRaw, curve, uncorrectedRawValues);
 
   uint32 c2 = counts->getU32();
   uint32 off = offsets->getU32();
@@ -228,12 +227,6 @@ RawImage ArwDecoder::decodeRawInternal() {
     mRaw->setError(e.what());
     // Let's ignore it, it may have delivered somewhat useful data.
   }
-
-  // Set the table, if it should be needed later.
-  if (uncorrectedRawValues)
-    mRaw->setTable(curve, false);
-  else
-    mRaw->setTable(nullptr);
 
   return mRaw;
 }

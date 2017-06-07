@@ -580,7 +580,8 @@ void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h) {
   }
 
   curve.resize(4095);
-  mRaw->setTable(curve, true);
+
+  RawImageCurveGuard curveHandler(&mRaw, curve, false);
 
   ushort16 tmp;
   auto* tmpch = reinterpret_cast<uchar8*>(&tmp);
@@ -647,7 +648,6 @@ void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h) {
       dest[x+5] = clampBits((inv_wb_b * tmp + (1<<9)) >> 10, 15);
     }
   }
-  mRaw->setTable(nullptr);
 }
 
 // From:  dcraw.c -- Dave Coffin's raw photo decoder

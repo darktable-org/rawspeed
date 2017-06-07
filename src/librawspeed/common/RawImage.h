@@ -292,4 +292,28 @@ inline void RawImageDataU16::setWithLookUp(ushort16 value, uchar8* dst, uint32* 
   *dest = table->tables[value];
 }
 
+class RawImageCurveGuard final {
+  RawImage* mRaw;
+  const std::vector<ushort16>& curve;
+  const bool uncorrectedRawValues;
+
+public:
+  RawImageCurveGuard(RawImage* raw, const std::vector<ushort16>& curve_,
+                     bool uncorrectedRawValues_)
+      : mRaw(raw), curve(curve_), uncorrectedRawValues(uncorrectedRawValues_) {
+    if (uncorrectedRawValues)
+      return;
+
+    (*mRaw)->setTable(curve, true);
+  }
+
+  ~RawImageCurveGuard() {
+    // Set the table, if it should be needed later.
+    if (uncorrectedRawValues)
+      (*mRaw)->setTable(curve, false);
+    else
+      (*mRaw)->setTable(nullptr);
+  }
+};
+
 } // namespace rawspeed

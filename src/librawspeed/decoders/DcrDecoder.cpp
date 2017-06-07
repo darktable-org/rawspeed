@@ -72,8 +72,7 @@ RawImage DcrDecoder::decodeRawInternal() {
     assert(linearization != nullptr);
     auto linTable = linearization->getU16Array(1024);
 
-    if (!uncorrectedRawValues)
-      mRaw->setTable(linTable, true);
+    RawImageCurveGuard curveHandler(&mRaw, linTable, uncorrectedRawValues);
 
     // FIXME: dcraw does all sorts of crazy things besides this to fetch
     //        WB from what appear to be presets and calculate it in weird ways
@@ -91,12 +90,6 @@ RawImage DcrDecoder::decodeRawInternal() {
     } catch (IOException &) {
       mRaw->setError("IO error occurred while reading image. Returning partial result.");
     }
-
-    // Set the table, if it should be needed later.
-    if (uncorrectedRawValues)
-      mRaw->setTable(linTable, false);
-    else
-      mRaw->setTable(nullptr);
   } else
     ThrowRDE("Unsupported compression %d", compression);
 

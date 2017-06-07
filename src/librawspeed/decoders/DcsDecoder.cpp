@@ -54,8 +54,7 @@ RawImage DcsDecoder::decodeRawInternal() {
   assert(linearization != nullptr);
   auto table = linearization->getU16Array(256);
 
-  if (!uncorrectedRawValues)
-    mRaw->setTable(table, true);
+  RawImageCurveGuard curveHandler(&mRaw, table, uncorrectedRawValues);
 
   UncompressedDecompressor u(*mFile, off, c2, mRaw);
 
@@ -63,12 +62,6 @@ RawImage DcsDecoder::decodeRawInternal() {
     u.decode8BitRaw<true>(width, height);
   else
     u.decode8BitRaw<false>(width, height);
-
-  // Set the table, if it should be needed later.
-  if (uncorrectedRawValues)
-    mRaw->setTable(table, false);
-  else
-    mRaw->setTable(nullptr);
 
   return mRaw;
 }

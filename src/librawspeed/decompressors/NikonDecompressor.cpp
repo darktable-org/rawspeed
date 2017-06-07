@@ -122,8 +122,7 @@ void NikonDecompressor::decompress(RawImage* mRaw, ByteStream&& data,
 
   HuffmanTable ht = createHuffmanTable(huffSelect);
 
-  if (!uncorrectedRawValues)
-    mRaw->get()->setTable(curve, true);
+  RawImageCurveGuard curveHandler(mRaw, curve, uncorrectedRawValues);
 
   BitPumpMSB bits(data);
   uchar8* draw = mRaw->get()->getData();
@@ -165,11 +164,6 @@ void NikonDecompressor::decompress(RawImage* mRaw, ByteStream&& data,
       dest += 2;
     }
   }
-
-  if (uncorrectedRawValues)
-    mRaw->get()->setTable(curve, false);
-  else
-    mRaw->get()->setTable(nullptr);
 }
 
 } // namespace rawspeed
