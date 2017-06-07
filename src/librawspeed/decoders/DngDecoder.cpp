@@ -183,7 +183,7 @@ void DngDecoder::parseCFA(const TiffIFD* raw) {
   }
 }
 
-void DngDecoder::decodeData(const TiffIFD* raw, int compression, uint32 sample_format) {
+void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
   if (compression == 8 && sample_format != 3) {
     ThrowRDE("Only float format is supported for "
              "deflate-compressed data.");
@@ -321,7 +321,7 @@ RawImage DngDecoder::decodeRawInternal() {
   if (raw->hasEntry(SAMPLEFORMAT))
     sample_format = raw->getEntry(SAMPLEFORMAT)->getU32();
 
-  int compression = raw->getEntry(COMPRESSION)->getU16();
+  compression = raw->getEntry(COMPRESSION)->getU16();
 
   switch (sample_format) {
   case 1:
@@ -364,8 +364,14 @@ RawImage DngDecoder::decodeRawInternal() {
   mRaw->setCpp(cpp);
 
   // Now load the image
-  decodeData(raw, compression, sample_format);
+  decodeData(raw, sample_format);
 
+  handleMetadata(raw);
+
+  return mRaw;
+}
+
+void DngDecoder::handleMetadata(const TiffIFD* raw) {
   // Crop
   if (raw->hasEntry(ACTIVEAREA)) {
     iPoint2D new_size(mRaw->dim.x, mRaw->dim.y);
@@ -464,8 +470,6 @@ RawImage DngDecoder::decodeRawInternal() {
         mRaw->blackLevelSeparate[2] = mRaw->blackLevelSeparate[3] = 0;
     mRaw->whitePoint = 65535;
   }
-
-  return mRaw;
 }
 
 void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {

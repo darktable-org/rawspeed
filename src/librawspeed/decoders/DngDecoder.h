@@ -48,14 +48,15 @@ protected:
   bool mFixLjpeg;
   void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
   void parseCFA(const TiffIFD* raw);
-  void decodeData(const TiffIFD* raw, int compression, uint32 sample_format);
-  void printMetaData();
+  void decodeData(const TiffIFD* raw, uint32 sample_format);
+  void handleMetadata(const TiffIFD* raw);
   bool decodeMaskedAreas(const TiffIFD* raw);
   bool decodeBlackLevels(const TiffIFD* raw);
   void setBlack(const TiffIFD* raw);
 
 private:
   int bps = -1;
+  int compression = -1;
 };
 
 } // namespace rawspeed
