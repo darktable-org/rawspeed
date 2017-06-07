@@ -61,6 +61,49 @@ bool ArwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   return make == "SONY";
 }
 
+RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
+  raw = mRootIFD->getIFDWithTag(IMAGEWIDTH);
+
+  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32 len = width * height * 2;
+
+  // Constants taken from dcraw
+  uint32 off = 862144;
+  uint32 key_off = 200896;
+  uint32 head_off = 164600;
+
+  // Replicate the dcraw contortions to get the "decryption" key
+  const uchar8* keyData = mFile->getData(key_off, 1);
+  uint32 offset = (*keyData) * 4;
+  keyData = mFile->getData(key_off + offset, 4);
+  uint32 key = getU32BE(keyData);
+  static const size_t head_size = 40;
+  const uchar8* head_orig = mFile->getData(head_off, head_size);
+  vector<uchar8> head(head_size);
+  SonyDecrypt(reinterpret_cast<const uint32*>(head_orig),
+              reinterpret_cast<uint32*>(&head[0]), 10, key);
+  for (int i = 26; i > 22; i--)
+    key = key << 8 | head[i - 1];
+
+  // "Decrypt" the whole image buffer
+  auto image_data = mFile->getData(off, len);
+  auto image_decoded = Buffer::Create(len);
+  SonyDecrypt(reinterpret_cast<const uint32*>(image_data),
+              reinterpret_cast<uint32*>(image_decoded.get()), len / 4, key);
+
+  Buffer di(move(image_decoded), len);
+
+  // And now decode as a normal 16bit raw
+  mRaw->dim = iPoint2D(width, height);
+  mRaw->createData();
+
+  UncompressedDecompressor u(di, 0, len, mRaw);
+  u.decodeRawUnpacked<16, big>(width, height);
+
+  return mRaw;
+}
+
 RawImage ArwDecoder::decodeRawInternal() {
   const TiffIFD* raw = nullptr;
   vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(STRIPOFFSETS);
@@ -91,48 +134,8 @@ RawImage ArwDecoder::decodeRawInternal() {
       return mRaw;
     }
 
-    if (hints.has("srf_format")) {
-      raw = mRootIFD->getIFDWithTag(IMAGEWIDTH);
-
-      uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-      uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
-      uint32 len = width*height*2;
-
-      // Constants taken from dcraw
-      uint32 off = 862144;
-      uint32 key_off = 200896;
-      uint32 head_off = 164600;
-
-      // Replicate the dcraw contortions to get the "decryption" key
-      const uchar8 *keyData = mFile->getData(key_off, 1);
-      uint32 offset = (*keyData) * 4;
-      keyData = mFile->getData(key_off + offset, 4);
-      uint32 key = getU32BE(keyData);
-      static const size_t head_size = 40;
-      const uchar8* head_orig = mFile->getData(head_off, head_size);
-      vector<uchar8> head(head_size);
-      SonyDecrypt(reinterpret_cast<const uint32*>(head_orig),
-                  reinterpret_cast<uint32*>(&head[0]), 10, key);
-      for (int i = 26; i > 22; i--)
-        key = key << 8 | head[i - 1];
-
-      // "Decrypt" the whole image buffer
-      auto image_data = mFile->getData(off, len);
-      auto image_decoded = Buffer::Create(len);
-      SonyDecrypt(reinterpret_cast<const uint32*>(image_data),
-                  reinterpret_cast<uint32*>(image_decoded.get()), len / 4, key);
-
-      Buffer di(move(image_decoded), len);
-
-      // And now decode as a normal 16bit raw
-      mRaw->dim = iPoint2D(width, height);
-      mRaw->createData();
-
-      UncompressedDecompressor u(di, 0, len, mRaw);
-      u.decodeRawUnpacked<16, big>(width, height);
-
-      return mRaw;
-    }
+    if (hints.has("srf_format"))
+      return decodeSRF(raw);
 
     ThrowRDE("No image data found");
   }
