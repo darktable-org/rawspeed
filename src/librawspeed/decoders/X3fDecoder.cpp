@@ -52,10 +52,7 @@ X3fDecoder::X3fDecoder(const Buffer* file) : RawDecoder(file){};
 X3fDecoder::~X3fDecoder() {
   if (huge_table)
     alignedFree(huge_table);
-  if (line_offsets)
-    alignedFree(line_offsets);
   huge_table = nullptr;
-  line_offsets = nullptr;
 }
 
 string X3fDecoder::getIdAsString(ByteStream *bytes_) {
@@ -299,11 +296,10 @@ void X3fDecoder::decompressSigma(const X3fImage& image) {
     // Load offsets
     ByteStream i2(mFile, image.dataOffset + image.dataSize - mRaw->dim.y * 4,
                   static_cast<ByteStream::size_type>(mRaw->dim.y) * 4);
-    line_offsets = alignedMallocArray<uint32, 16, uint32>(mRaw->dim.y);
-    if (!line_offsets)
-      ThrowRDE("Memory Allocation failed.");
+    line_offsets.reserve(mRaw->dim.y);
     for (int y = 0; y < mRaw->dim.y; y++) {
-      line_offsets[y] = i2.getU32() + input.getPosition() + image.dataOffset;
+      line_offsets.emplace_back(i2.getU32() + input.getPosition() +
+                                image.dataOffset);
     }
     startThreads();
     return;

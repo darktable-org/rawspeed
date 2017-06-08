@@ -82,7 +82,7 @@ class X3fDecoder final : public RawDecoder {
   iPoint2D planeDim[3];
   uchar8 code_table[256];
   int32 big_table[1 << 14];
-  uint32* line_offsets = nullptr;
+  std::vector<uint32> line_offsets;
   ushort16* huge_table = nullptr;
   std::array<short, 1024> curve;
   uint32 max_len = 0;
