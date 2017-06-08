@@ -432,7 +432,10 @@ void X3fDecoder::SigmaSkipOne(BitPumpMSB *bits) {
   uint32 code = bits->peekBitsNoFill(14);
   int32 bigv = big_table[code];
   if (bigv != 0xf) {
-    bits->skipBitsNoFill(bigv&0xff);
+    const auto skip = bigv & 0xff;
+    if (skip >= 18)
+      ThrowRDE("Unsupported. :(");
+    bits->skipBitsNoFill(skip);
     return;
   }
   uchar8 val = code_table[code>>6];
@@ -452,6 +455,9 @@ int X3fDecoder::SigmaDecode(BitPumpMSB *bits) {
   uint32 code = bits->peekBitsNoFill(14);
   int32 bigv = big_table[code];
   if (bigv != 0xf) {
+    const auto skip = bigv & 0xff;
+    if (skip >= 18)
+      ThrowRDE("Unsupported. :(");
     bits->skipBitsNoFill(bigv&0xff);
     return bigv >> 8;
   }
