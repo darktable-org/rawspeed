@@ -339,7 +339,8 @@ void X3fDecoder::createSigmaTable(ByteStream *bytes_, int codes) {
       if (code_bits + val_bits < 14) {
         uint32 low_pos = 14-code_bits-val_bits;
         int v = (i >> low_pos) & ((1 << val_bits) - 1);
-        v = HuffmanTable::signExtended(v, val_bits);
+        if (val_bits != 0)
+          v = HuffmanTable::signExtended(v, val_bits);
         big_table[i] = (256 * v) | (code_bits + val_bits);
       } else {
         big_table[i] = 0xf;
