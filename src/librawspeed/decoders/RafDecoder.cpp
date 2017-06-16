@@ -87,6 +87,9 @@ RawImage RafDecoder::decodeRawInternal() {
   if (offsets->count != 1 || counts->count != 1)
     ThrowRDE("Multiple Strips found: %u %u", offsets->count, counts->count);
 
+  if (counts->getU32() * 8 / (width * height) < 10)
+    ThrowRDE("Don't know how to decode compressed images");
+
   int bps = 16;
   if (raw->hasEntry(FUJI_BITSPERSAMPLE))
     bps = raw->getEntry(FUJI_BITSPERSAMPLE)->getU32();
@@ -110,9 +113,7 @@ RawImage RafDecoder::decodeRawInternal() {
 
   iPoint2D pos(0, 0);
 
-  if (counts->getU32()*8/(width*height) < 10) {
-    ThrowRDE("Don't know how to decode compressed images");
-  } else if (double_width) {
+  if (double_width) {
     u.decodeRawUnpacked<16, little>(width * 2, height);
   } else if (input.isInNativeByteOrder() == (getHostEndianness() == big)) {
     u.decodeRawUnpacked<16, big>(width, height);
