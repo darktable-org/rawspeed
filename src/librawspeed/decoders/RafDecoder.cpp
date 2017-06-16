@@ -91,6 +91,9 @@ RawImage RafDecoder::decodeRawInternal() {
   if (raw->hasEntry(FUJI_BITSPERSAMPLE))
     bps = raw->getEntry(FUJI_BITSPERSAMPLE)->getU32();
 
+  ByteStream input(offsets->getRootIfdData());
+  input = input.getSubStream(offsets->getU32(), counts->getU32());
+
   // x-trans sensors report 14bpp, but data isn't packed so read as 16bpp
   if (bps == 14)
     bps = 16;
@@ -102,8 +105,6 @@ RawImage RafDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width*(double_width ? 2 : 1), height);
   mRaw->createData();
-  ByteStream input(offsets->getRootIfdData());
-  input.setPosition(offsets->getU32());
 
   UncompressedDecompressor u(input, mRaw);
 
