@@ -90,23 +90,45 @@ RawImage RafDecoder::decodeRawInternal() {
   if (counts->getU32() * 8 / (width * height) < 10)
     ThrowRDE("Don't know how to decode compressed images");
 
-  int bps = 16;
-  if (raw->hasEntry(FUJI_BITSPERSAMPLE))
-    bps = raw->getEntry(FUJI_BITSPERSAMPLE)->getU32();
-
   ByteStream input(offsets->getRootIfdData());
   input = input.getSubStream(offsets->getU32(), counts->getU32());
 
-  // x-trans sensors report 14bpp, but data isn't packed so read as 16bpp
-  if (bps == 14)
-    bps = 16;
+  // x-trans sensors report 14bpp, but data isn't packed
+  // thus, unless someone has any better ideas, let's autodetect it.
+  int bps;
 
   // Some fuji SuperCCD cameras include a second raw image next to the first one
   // that is identical but darker to the first. The two combined can produce
   // a higher dynamic range image. Right now we're ignoring it.
-  bool double_width = hints.has("double_width_unpacked");
+  bool double_width;
 
-  mRaw->dim = iPoint2D(width*(double_width ? 2 : 1), height);
+  if (8UL * counts->getU32() >= 2UL * 16UL * width * height) {
+    bps = 16;
+    double_width = true;
+  } else if (8UL * counts->getU32() >= 2UL * 14UL * width * height) {
+    bps = 14;
+    double_width = true;
+  } else if (8UL * counts->getU32() >= 2UL * 12UL * width * height) {
+    bps = 12;
+    double_width = true;
+  } else if (8UL * counts->getU32() >= 16UL * width * height) {
+    bps = 16;
+    double_width = false;
+  } else if (8UL * counts->getU32() >= 14UL * width * height) {
+    bps = 14;
+    double_width = false;
+  } else if (8UL * counts->getU32() >= 12UL * width * height) {
+    bps = 12;
+    double_width = false;
+  } else
+    ThrowRDE("Can not detect bitdepth. StripByteCounts = %u, width = %u, "
+             "height = %u",
+             counts->getU32(), width, height);
+
+  double_width = hints.has("double_width_unpacked");
+  const uint32 real_width = double_width ? 2U * width : width;
+
+  mRaw->dim = iPoint2D(real_width, height);
   mRaw->createData();
 
   UncompressedDecompressor u(input, mRaw);
