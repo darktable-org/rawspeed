@@ -146,9 +146,12 @@ public:
   // If the first byte is zero, stream is incremented one.
   const char* getString() {
     size_type start = pos;
+    bool isNullTerminator = false;
     do {
       check(1);
-    } while (data[pos++] != 0);
+      isNullTerminator = (data[pos] == '\0');
+      pos++;
+    } while (!isNullTerminator);
     return reinterpret_cast<const char*>(&data[start]);
   }
 
