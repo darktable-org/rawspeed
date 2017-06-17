@@ -161,13 +161,16 @@ inline std::vector<std::string> splitString(const std::string& input,
   while (true) {
     const char* begin = str;
 
-    while (*str != c && *str)
+    while (*str != c && *str != '\0')
       str++;
 
     if (begin != str)
       result.emplace_back(begin, str);
 
-    if (0 == *str++)
+    const bool isNullTerminator = (*str == '\0');
+    str++;
+
+    if (isNullTerminator)
       break;
   }
 
