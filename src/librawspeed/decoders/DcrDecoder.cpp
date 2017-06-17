@@ -21,7 +21,6 @@
 
 #include "decoders/DcrDecoder.h"
 #include "common/Common.h"                // for uint32, uchar8, ushort16
-#include "common/TableLookUp.h"           // for TableLookUp
 #include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/ByteStream.h"                // for ByteStream

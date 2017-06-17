@@ -120,10 +120,11 @@ RawImage RafDecoder::decodeRawInternal() {
   } else if (8UL * counts->getU32() >= 12UL * width * height) {
     bps = 12;
     double_width = false;
-  } else
+  } else {
     ThrowRDE("Can not detect bitdepth. StripByteCounts = %u, width = %u, "
              "height = %u",
              counts->getU32(), width, height);
+  }
 
   double_width = hints.has("double_width_unpacked");
   const uint32 real_width = double_width ? 2U * width : width;

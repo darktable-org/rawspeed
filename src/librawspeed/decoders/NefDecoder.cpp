@@ -44,7 +44,6 @@
 #include <string>                                   // for string, operator==
 #include <vector>                                   // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
-#include "common/TableLookUp.h" // for TableLookUp
 
 using std::vector;
 using std::string;

@@ -23,7 +23,6 @@
 #include "common/Common.h"                          // for uint32, uchar8
 #include "common/Point.h"                           // for iPoint2D
 #include "common/RawspeedException.h"               // for RawspeedException
-#include "common/TableLookUp.h"                     // for TableLookUp
 #include "decoders/RawDecoder.h"                    // for RawDecoderThread
 #include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/HuffmanTable.h"             // for HuffmanTable

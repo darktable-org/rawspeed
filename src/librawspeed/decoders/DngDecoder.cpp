@@ -24,7 +24,6 @@
 #include "common/DngOpcodes.h"            // for DngOpcodes
 #include "common/Point.h"                 // for iPoint2D, iRectangle2D
 #include "common/RawspeedException.h"     // for RawspeedException
-#include "common/TableLookUp.h"           // for TableLookUp
 #include "decoders/DngDecoderSlices.h"    // for DngDecoderSlices, DngSlice...
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "io/Buffer.h"                    // for Buffer
