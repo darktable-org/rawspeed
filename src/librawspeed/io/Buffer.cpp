@@ -59,8 +59,6 @@ Buffer::Buffer(unique_ptr<uchar8, decltype(&alignedFree)> data_,
   isOwner = true;
 }
 
-Buffer::Buffer(size_type size_) : Buffer(Create(size_), size_) {}
-
 Buffer::~Buffer() {
   if (isOwner) {
     alignedFreeConstPtr(data);
