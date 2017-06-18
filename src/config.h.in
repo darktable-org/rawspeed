@@ -29,8 +29,8 @@
 #cmakedefine HAVE_JPEG
 #cmakedefine HAVE_JPEG_MEM_SRC
 
-#cmakedefine HAVE_THREAD_LOCAL
-#cmakedefine HAVE___THREAD
+#cmakedefine HAVE_CXX_THREAD_LOCAL
+#cmakedefine HAVE_GCC_THREAD_LOCAL
 
 // which aligned memory allocation function is avaliable, if any?
 // only the first one found will be enabled

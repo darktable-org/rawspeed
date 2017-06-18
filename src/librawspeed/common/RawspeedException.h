@@ -35,9 +35,9 @@ template <typename T>
 [[noreturn]] void __attribute__((noreturn, format(printf, 1, 2)))
 ThrowException(const char* fmt, ...) {
   static constexpr size_t bufSize = 8192;
-#if defined(HAVE_THREAD_LOCAL)
+#if defined(HAVE_CXX_THREAD_LOCAL)
   static thread_local char buf[bufSize];
-#elif defined(HAVE___THREAD)
+#elif defined(HAVE_GCC_THREAD_LOCAL)
   static __thread char buf[bufSize];
 #else
 #pragma message                                                                \

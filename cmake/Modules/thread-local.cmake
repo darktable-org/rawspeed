@@ -5,8 +5,8 @@ static thread_local int tls;
 int main(void)
 {
   return 0;
-}" HAVE_THREAD_LOCAL)
-if(HAVE_THREAD_LOCAL)
+}" HAVE_CXX_THREAD_LOCAL)
+if(HAVE_CXX_THREAD_LOCAL)
   return()
 endif()
 
@@ -15,8 +15,8 @@ static __thread int tls;
 int main(void)
 {
   return 0;
-}" HAVE___THREAD)
-if(HAVE___THREAD)
+}" HAVE_GCC_THREAD_LOCAL)
+if(HAVE_GCC_THREAD_LOCAL)
   return()
 endif()
 
