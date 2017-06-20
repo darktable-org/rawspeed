@@ -25,6 +25,7 @@
 #include <cstdio>               // for fclose, fopen, fwrite, FILE, NULL
 
 #if !defined(__unix__) && !defined(__APPLE__)
+#include "io/FileIO.h" // for widenFileName
 #include <io.h>
 #include <tchar.h>
 #include <windows.h>
@@ -53,9 +54,11 @@ void FileWriter::writeFile(Buffer* filemap, uint32 size) {
   }
 
 #else // __unix__
+  auto wFileName = widenFileName(mFilename);
   HANDLE file_h;  // File handle
-  file_h = CreateFile(mFilename, GENERIC_WRITE, FILE_SHARE_WRITE, nullptr,
-                      CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
+  file_h =
+      CreateFileW(wFileName.data(), GENERIC_WRITE, FILE_SHARE_WRITE, nullptr,
+                  CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
   if (file_h == INVALID_HANDLE_VALUE) {
     ThrowFIE("Could not open file.");
   }

@@ -31,6 +31,7 @@
 #include <type_traits>          // for make_unsigned
 
 #if !(defined(__unix__) || defined(__APPLE__))
+#include "io/FileIO.h" // for widenFileName
 #include <io.h>
 #include <tchar.h>
 #include <windows.h>
@@ -73,10 +74,13 @@ std::unique_ptr<const Buffer> FileReader::readFile() {
 
 #else // __unix__
 
+  auto wFileName = widenFileName(fileName);
+
   using file_ptr = std::unique_ptr<std::remove_pointer<HANDLE>::type,
                                    decltype(&CloseHandle)>;
-  file_ptr file(CreateFile(fileName, GENERIC_READ, FILE_SHARE_READ, nullptr,
-                           OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr),
+  file_ptr file(CreateFileW(wFileName.data(), GENERIC_READ, FILE_SHARE_READ,
+                            nullptr, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN,
+                            nullptr),
                 &CloseHandle);
 
   if (file.get() == INVALID_HANDLE_VALUE)
