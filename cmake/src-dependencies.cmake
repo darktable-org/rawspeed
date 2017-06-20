@@ -66,6 +66,8 @@ if(WITH_PUGIXML)
     set(HAVE_PUGIXML 1)
     include_directories(SYSTEM ${Pugixml_INCLUDE_DIRS})
   endif()
+else()
+  message(STATUS "Pugixml library support is disabled. I hope you know what you are doing.")
 endif()
 
 if(WITH_JPEG)

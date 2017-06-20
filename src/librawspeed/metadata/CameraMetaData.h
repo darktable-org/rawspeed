@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
 #include "common/Common.h" // for uint32
 #include <map>             // for map
 #include <memory>          // for unique_ptr
@@ -44,7 +45,10 @@ struct CameraId {
 class CameraMetaData final {
 public:
   CameraMetaData() = default;
+
+#ifdef HAVE_PUGIXML
   explicit CameraMetaData(const char* docname);
+#endif
 
   std::map<CameraId, std::unique_ptr<Camera>> cameras;
   std::map<uint32,Camera*> chdkCameras;

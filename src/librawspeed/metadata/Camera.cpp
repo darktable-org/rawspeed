@@ -26,18 +26,22 @@
 #include <cctype>                             // for tolower
 #include <cstdio>                             // for size_t
 #include <map>                                // for map
-#include <pugixml.hpp>                        // for xml_node, xml_attribute
 #include <stdexcept>                          // for out_of_range
 #include <string>                             // for string, allocator, ope...
 #include <vector>                             // for vector
 
+#ifdef HAVE_PUGIXML
+#include <pugixml.hpp> // for xml_node, xml_attribute
+using pugi::xml_node;
+#endif
+
 using std::vector;
 using std::string;
 using std::map;
-using pugi::xml_node;
 
 namespace rawspeed {
 
+#ifdef HAVE_PUGIXML
 Camera::Camera(const pugi::xml_node& camera) : cfa(iPoint2D(0, 0)) {
   make = canonical_make = camera.attribute("make").as_string();
   if (make.empty())
@@ -58,6 +62,7 @@ Camera::Camera(const pugi::xml_node& camera) : cfa(iPoint2D(0, 0)) {
     parseCameraChild(c);
   }
 }
+#endif
 
 Camera::Camera(const Camera* camera, uint32 alias_num) : cfa(iPoint2D(0,0))
 {
@@ -71,9 +76,11 @@ Camera::Camera(const Camera* camera, uint32 alias_num) : cfa(iPoint2D(0,0))
   canonical_aliases.clear();
 }
 
+#ifdef HAVE_PUGIXML
 static string name(const xml_node &a) {
   return string(a.name());
 }
+#endif
 
 const map<char, CFAColor> Camera::char2enum = {
     {'g', CFA_GREEN},      {'r', CFA_RED},  {'b', CFA_BLUE},
@@ -88,6 +95,7 @@ const map<string, CFAColor> Camera::str2enum = {
     {"YELLOW", CFA_YELLOW},
 };
 
+#ifdef HAVE_PUGIXML
 void Camera::parseCFA(const xml_node &cur) {
   if (name(cur) != "CFA" && name(cur) != "CFA2")
     ThrowCME("Not an CFA/CFA2 node!");
@@ -294,6 +302,7 @@ void Camera::parseCameraChild(const xml_node &cur) {
     parseSensor(cur);
   }
 }
+#endif
 
 const CameraSensorInfo* Camera::getSensorInfo(int iso) const {
   if (sensorInfo.empty()) {

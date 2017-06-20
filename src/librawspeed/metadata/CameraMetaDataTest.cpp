@@ -32,6 +32,8 @@ using rawspeed::CameraMetaData;
 
 namespace rawspeed_test {
 
+#ifdef HAVE_PUGIXML
+
 static const std::string camfile(CMAKE_SOURCE_DIR "/data/cameras.xml");
 
 TEST(CameraMetaDataTest, CamerasXml) {
@@ -75,5 +77,7 @@ TEST(CameraMetaDataTest, PrefixSearch) {
                              "NIKON D3-with-some-bogus-prefix"));
   });
 }
+
+#endif
 
 } // namespace rawspeed_test

@@ -20,6 +20,8 @@
 
 #pragma once
 
+#cmakedefine HAVE_PUGIXML
+
 #cmakedefine HAVE_PTHREAD
 
 #cmakedefine HAVE_PUGIXML

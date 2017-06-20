@@ -141,8 +141,13 @@ int main(int argc, char *argv[]) {
   // fprintf(stderr, "Using cameras.xml from '%s'\n", camfile);
 
   try {
-    std::unique_ptr<const CameraMetaData> meta(
-        new CameraMetaData(camfile.c_str()));
+    std::unique_ptr<const CameraMetaData> meta;
+
+#ifdef HAVE_PUGIXML
+    meta = rawspeed::make_unique<CameraMetaData>(camfile.c_str());
+#else
+    meta = rawspeed::make_unique<CameraMetaData>();
+#endif
 
     if (!meta.get()) {
       fprintf(stderr, "ERROR: Couldn't get a CameraMetaData instance\n");

@@ -7,4 +7,6 @@ if(USE_XMLLINT)
   check_xml(${CMAKE_CURRENT_SOURCE_DIR}/cameras.xml ${CMAKE_CURRENT_SOURCE_DIR}/cameras.xsd)
 endif(USE_XMLLINT)
 
-install(FILES cameras.xml showcameras.xsl DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/darktable/rawspeed)
+if(WITH_PUGIXML)
+  install(FILES cameras.xml showcameras.xsl DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/darktable/rawspeed)
+endif()

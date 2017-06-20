@@ -24,18 +24,22 @@
 #include "metadata/CameraMetadataException.h" // for ThrowCME
 #include <algorithm>                          // for find_if
 #include <map>                                // for _Rb_tree_iterator, map
-#include <pugixml.hpp>                        // for xml_document, xml_pars...
 #include <string>                             // for string, operator==
 #include <utility>                            // for pair
 #include <vector>                             // for vector
 
-using std::string;
+#ifdef HAVE_PUGIXML
+#include <pugixml.hpp> // for xml_document, xml_pars...
 using pugi::xml_node;
 using pugi::xml_document;
 using pugi::xml_parse_result;
+#endif
+
+using std::string;
 
 namespace rawspeed {
 
+#ifdef HAVE_PUGIXML
 CameraMetaData::CameraMetaData(const char *docname) {
   xml_document doc;
   xml_parse_result result = doc.load_file(docname);
@@ -58,6 +62,7 @@ CameraMetaData::CameraMetaData(const char *docname) {
     }
   }
 }
+#endif
 
 static inline CameraId getId(const string& make, const string& model,
                              const string& mode) {

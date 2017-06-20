@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
 #include "common/Common.h"             // for uint32
 #include "common/Point.h"              // for iPoint2D
 #include "metadata/BlackArea.h"        // for BlackArea
@@ -31,9 +32,13 @@
 #include <utility>                     // for pair
 #include <vector>                      // for vector
 
+#ifdef HAVE_PUGIXML
+
 namespace pugi {
 class xml_node;
 } // namespace pugi
+
+#endif
 
 namespace rawspeed {
 
@@ -73,7 +78,10 @@ public:
 class Camera
 {
 public:
+#ifdef HAVE_PUGIXML
   explicit Camera(const pugi::xml_node& camera);
+#endif
+
   Camera(const Camera* camera, uint32 alias_num);
   const CameraSensorInfo* getSensorInfo(int iso) const;
   std::string make;
@@ -97,6 +105,7 @@ protected:
   static const std::map<char, CFAColor> char2enum;
   static const std::map<std::string, CFAColor> str2enum;
 
+#ifdef HAVE_PUGIXML
   void parseCFA(const pugi::xml_node &node);
   void parseCrop(const pugi::xml_node &node);
   void parseBlackAreas(const pugi::xml_node &node);
@@ -106,6 +115,7 @@ protected:
   void parseSensor(const pugi::xml_node &node);
 
   void parseCameraChild(const pugi::xml_node &node);
+#endif
 };
 
 } // namespace rawspeed

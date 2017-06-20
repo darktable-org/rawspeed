@@ -487,7 +487,11 @@ int main(int argc, char **argv) {
   if (1 == argc || help)
     return usage(argv[0]);
 
+#ifdef HAVE_PUGIXML
   const CameraMetaData metadata(CMAKE_SOURCE_DIR "/data/cameras.xml");
+#else
+  const CameraMetaData metadata{};
+#endif
 
   size_t time = 0;
   map<string, string> failedTests;
