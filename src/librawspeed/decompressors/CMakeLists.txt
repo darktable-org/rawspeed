@@ -1,4 +1,4 @@
-FILE(GLOB DECOMPRESSOR_SOURCES
+FILE(GLOB SOURCES
   "AbstractDecompressor.h"
   "AbstractLJpegDecompressor.cpp"
   "AbstractLJpegDecompressor.h"
@@ -23,4 +23,6 @@ FILE(GLOB DECOMPRESSOR_SOURCES
   "UncompressedDecompressor.h"
 )
 
-set(RAWSPEED_SOURCES "${RAWSPEED_SOURCES};${DECOMPRESSOR_SOURCES}" PARENT_SCOPE)
+target_sources(rawspeed PRIVATE
+  ${SOURCES}
+)

@@ -1,4 +1,4 @@
-FILE(GLOB DECODER_SOURCES
+FILE(GLOB SOURCES
   "AbstractTiffDecoder.cpp"
   "AbstractTiffDecoder.h"
   "AriDecoder.cpp"
@@ -52,4 +52,6 @@ FILE(GLOB DECODER_SOURCES
   "X3fDecoder.h"
 )
 
-set(RAWSPEED_SOURCES "${RAWSPEED_SOURCES};${DECODER_SOURCES}" PARENT_SCOPE)
+target_sources(rawspeed PRIVATE
+  ${SOURCES}
+)

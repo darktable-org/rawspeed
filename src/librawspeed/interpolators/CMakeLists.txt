@@ -1,6 +1,8 @@
-FILE(GLOB INTERPOLATOR_SOURCES
+FILE(GLOB SOURCES
   "Cr2sRawInterpolator.cpp"
   "Cr2sRawInterpolator.h"
 )
 
-set(RAWSPEED_SOURCES "${RAWSPEED_SOURCES};${INTERPOLATOR_SOURCES}" PARENT_SCOPE)
+target_sources(rawspeed PRIVATE
+  ${SOURCES}
+)

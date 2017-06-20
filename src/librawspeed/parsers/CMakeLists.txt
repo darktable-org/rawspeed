@@ -1,4 +1,4 @@
-FILE(GLOB PARSER_SOURCES
+FILE(GLOB SOURCES
   "CiffParser.cpp"
   "CiffParser.h"
   "CiffParserException.h"
@@ -16,4 +16,6 @@ FILE(GLOB PARSER_SOURCES
   "X3fParserException.h"
 )
 
-set(RAWSPEED_SOURCES "${RAWSPEED_SOURCES};${PARSER_SOURCES}" PARENT_SCOPE)
+target_sources(rawspeed PRIVATE
+  ${SOURCES}
+)

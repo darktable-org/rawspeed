@@ -1,4 +1,4 @@
-FILE(GLOB TIFF_SOURCES
+FILE(GLOB SOURCES
   "TiffEntry.cpp"
   "TiffEntry.h"
   "TiffIFD.cpp"
@@ -11,4 +11,6 @@ FILE(GLOB TIFF_SOURCES
   "CiffTag.h"
 )
 
-set(RAWSPEED_SOURCES "${RAWSPEED_SOURCES};${TIFF_SOURCES}" PARENT_SCOPE)
+target_sources(rawspeed PRIVATE
+  ${SOURCES}
+)

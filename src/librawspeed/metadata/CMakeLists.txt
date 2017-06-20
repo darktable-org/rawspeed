@@ -1,4 +1,4 @@
-FILE(GLOB METADATA_SOURCES
+FILE(GLOB SOURCES
   "BlackArea.h"
   "Camera.cpp"
   "Camera.h"
@@ -11,4 +11,6 @@ FILE(GLOB METADATA_SOURCES
   "ColorFilterArray.h"
 )
 
-set(RAWSPEED_SOURCES "${RAWSPEED_SOURCES};${METADATA_SOURCES}" PARENT_SCOPE)
+target_sources(rawspeed PRIVATE
+  ${SOURCES}
+)

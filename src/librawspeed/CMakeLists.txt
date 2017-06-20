@@ -1,3 +1,5 @@
+add_library(rawspeed OBJECT)
+
 add_subdirectory(common)
 add_subdirectory(metadata)
 add_subdirectory(io)
@@ -7,17 +9,12 @@ add_subdirectory(decompressors)
 add_subdirectory(interpolators)
 add_subdirectory(decoders)
 
-# list(SORT RAWSPEED_SOURCES)
-list(REMOVE_DUPLICATES RAWSPEED_SOURCES)
-
 #
 # build librawspeed
 #
 if(WIN32)
   set(RAWSPEED_LIBS "msvcrt")
 endif(WIN32)
-
-add_library(rawspeed OBJECT ${RAWSPEED_SOURCES})
 
 target_include_directories(rawspeed PUBLIC ${CONFIG_INCLUDE_PATH})
 target_include_directories(rawspeed PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
