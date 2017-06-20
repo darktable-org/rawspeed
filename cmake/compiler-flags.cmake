@@ -100,8 +100,15 @@ MARK_AS_ADVANCED(
     CMAKE_C_FLAGS_SANITIZE )
 
 set(fuzz "-O3 -ffast-math")
-set(fuzz "${fuzz} ${asan} ${ubsan}")
-set(fuzz "${fuzz} -fsanitize-coverage=trace-pc-guard,indirect-calls,trace-cmp")
+
+if(NOT DEFINED ENV{LIB_FUZZING_ENGINE})
+  # specialhandling: oss-fuzz provides all the needed flags already.
+  set(fuzz "${fuzz} ${asan} ${ubsan}")
+  set(fuzz "${fuzz} -fsanitize-coverage=trace-pc-guard,indirect-calls,trace-cmp")
+else()
+  message(STATUS "LIB_FUZZING_ENGINE env variable is set, assuming this is oss-fuzz, not setting special compiler flags.")
+endif()
+
 set(fuzz "${fuzz} -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION")
 SET(CMAKE_CXX_FLAGS_FUZZ
     "${fuzz}"
