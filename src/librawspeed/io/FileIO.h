@@ -38,9 +38,10 @@ std::vector<wchar_t> widenFileName(const char* fileName) {
                      std::placeholders::_1, std::placeholders::_2);
 
   // how many wide characters are needed to store converted string?
-  const auto expectedLen = f(nullptr, 0) wFileName.resize(expectedLen);
+  const auto expectedLen = f(nullptr, 0);
+  wFileName.resize(expectedLen);
 
-  // convert. did we get expected number of characters?
+  // convert.
   const auto actualLen = f(wFileName.data(), wFileName.size());
 
   // did we get expected number of characters?
