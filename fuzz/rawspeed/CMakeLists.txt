@@ -4,8 +4,6 @@ target_link_libraries(RawSpeedFuzzer rawspeed_static)
 target_link_libraries(RawSpeedFuzzer libFuzzer)
 target_include_directories(RawSpeedFuzzer PUBLIC "${CONFIG_INCLUDE_PATH}")
 
-if(TARGET libFuzzer_dummy)
-  add_test(NAME fuzzers/RawSpeedFuzzer COMMAND RawSpeedFuzzer)
-endif()
+add_fuzz_target(RawSpeedFuzzer)
 
 add_dependencies(fuzzers RawSpeedFuzzer)

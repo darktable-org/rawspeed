@@ -15,9 +15,7 @@ function(add_decoder {decoder})
   target_link_libraries(${fuzzer} libFuzzer)
   target_include_directories(${fuzzer} PUBLIC "${CONFIG_INCLUDE_PATH}")
 
-  if(TARGET libFuzzer_dummy)
-    add_test(NAME fuzzers/${fuzzer} COMMAND ${fuzzer})
-  endif()
+  add_fuzz_target(${fuzzer})
 
   add_dependencies(TiffBasedDecoderFuzzers ${fuzzer})
 endfunction()
