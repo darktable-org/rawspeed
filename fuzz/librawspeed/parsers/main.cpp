@@ -73,6 +73,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 #endif
   } catch (PARSERException&) {
     return 0;
+  } catch (rawspeed::RawDecoderException&) {
+    return 0;
   } catch (rawspeed::IOException&) {
     return 0;
   }
