@@ -29,7 +29,7 @@
 
 namespace rawspeed {
 
-std::vector<wchar_t> widenFileName(const char* fileName) {
+inline std::vector<wchar_t> widenFileName(const char* fileName) {
   assert(fileName);
 
   std::vector<wchar_t> wFileName;
