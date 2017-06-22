@@ -30,10 +30,12 @@ RawSpeed…
 - provides automatic black level calculation for cameras having such information.
 - optionally crops off  “junk” areas of images, containing no valid image information.
 - can add support for new cameras by adding definitions to an xml file.
-- ~~is extensively crash-tested on broken files~~.
-- decodes images from memory, not a file stream. You can use a memory mapped file, but it is rarely faster.
+- decodes images from memory, not a file stream.
+- is being continuously fuzzed as part of the `oss-fuzz`_ project.
 - is currently tested on |rpu-button-cameras| unique cameras, on |rpu-button-samples| unique samples. **Please contribute samples**!
 - open source under the `LGPL v2`_ license.
+
+.. _oss-fuzz: https://github.com/google/oss-fuzz
 
 .. |rpu-button-cameras| image:: https://raw.pixls.us/button-cameras.svg
     :target: https://raw.pixls.us/
