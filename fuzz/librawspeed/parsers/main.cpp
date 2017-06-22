@@ -26,22 +26,23 @@
 #error GETDECODER must be defined as bool
 #endif
 
-#include "io/Buffer.h"                   // for Buffer, DataBuffer
-#include "io/IOException.h"              // for IOException
-#include "parsers/CiffParser.h"          // IWYU pragma: keep
-#include "parsers/CiffParserException.h" // IWYU pragma: keep
-#include "parsers/FiffParser.h"          // IWYU pragma: keep
-#include "parsers/FiffParserException.h" // IWYU pragma: keep
-#include "parsers/RawParser.h"           // IWYU pragma: keep
-#include "parsers/RawParserException.h"  // IWYU pragma: keep
-#include "parsers/TiffParser.h"          // IWYU pragma: keep
-#include "parsers/TiffParserException.h" // IWYU pragma: keep
-#include "parsers/X3fParser.h"           // IWYU pragma: keep
-#include "parsers/X3fParserException.h"  // IWYU pragma: keep
-#include "tiff/TiffEntry.h"              // IWYU pragma: keep
-#include <cassert>                       // for assert
-#include <cstdint>                       // for uint8_t
-#include <cstdio>                        // for size_t
+#include "decoders/RawDecoderException.h" // for RawDecoderException, ThrowRDE
+#include "io/Buffer.h"                    // for Buffer, DataBuffer
+#include "io/IOException.h"               // for IOException
+#include "parsers/CiffParser.h"           // IWYU pragma: keep
+#include "parsers/CiffParserException.h"  // IWYU pragma: keep
+#include "parsers/FiffParser.h"           // IWYU pragma: keep
+#include "parsers/FiffParserException.h"  // IWYU pragma: keep
+#include "parsers/RawParser.h"            // IWYU pragma: keep
+#include "parsers/RawParserException.h"   // IWYU pragma: keep
+#include "parsers/TiffParser.h"           // IWYU pragma: keep
+#include "parsers/TiffParserException.h"  // IWYU pragma: keep
+#include "parsers/X3fParser.h"            // IWYU pragma: keep
+#include "parsers/X3fParserException.h"   // IWYU pragma: keep
+#include "tiff/TiffEntry.h"               // IWYU pragma: keep
+#include <cassert>                        // for assert
+#include <cstdint>                        // for uint8_t
+#include <cstdio>                         // for size_t
 
 #if GETDECODER
 #include "decoders/RawDecoder.h" // IWYU pragma: keep
