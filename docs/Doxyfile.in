@@ -875,7 +875,9 @@ RECURSIVE              = YES
 # run.
 
 EXCLUDE                = @CMAKE_BINARY_DIR@ \
-                         @PROJECT_BINARY_DIR@
+                         @PROJECT_BINARY_DIR@ \
+                         *.md \
+                         *.markdown
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -984,7 +986,7 @@ FILTER_SOURCE_PATTERNS =
 # (index.html). This can be useful if you have a project on for instance GitHub
 # and want to reuse the introduction page also for the doxygen output.
 
-USE_MDFILE_AS_MAINPAGE = @PROJECT_SOURCE_DIR@/README.md
+USE_MDFILE_AS_MAINPAGE =
 
 #---------------------------------------------------------------------------
 # Configuration options related to source browsing
