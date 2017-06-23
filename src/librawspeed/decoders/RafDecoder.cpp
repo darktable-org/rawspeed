@@ -172,7 +172,7 @@ void RafDecoder::checkSupportInternal(const CameraMetaData* meta) {
     auto id = mRootIFD->getID();
     const Camera* cam = meta->getCamera(id.make, id.model, mRaw->metadata.mode);
     if (!cam)
-      ThrowRDE("Couldn't find camera %s %s", id.make, id.model);
+      ThrowRDE("Couldn't find camera %s %s", id.make.c_str(), id.model.c_str());
 
     mRaw->cfa = cam->cfa;
   }

@@ -8,7 +8,7 @@
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
     License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
+    version 2.1 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -342,7 +342,7 @@ void FujiDecompressor::fuji_read_code(struct fuji_compressed_block* info,
   info->cur_bit = (8 - (bits_left_in_byte & 7)) & 7;
 }
 
-int FujiDecompressor::bitDiff(int value1, int value2) {
+int __attribute__((const)) FujiDecompressor::bitDiff(int value1, int value2) {
   int decBits = 0;
 
   if (value2 < value1)
