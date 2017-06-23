@@ -21,7 +21,9 @@
 #ifndef RAF_DECOMPRESSOR_H
 #define RAF_DECOMPRESSOR_H
 
-#include "LJpegDecompressor.h"
+#include "common/Common.h"   // for uint64, uchar8, ushort16
+#include "common/RawImage.h" // for RawImage
+#include "io/Buffer.h"       // for Buffer
 
 namespace rawspeed {
 

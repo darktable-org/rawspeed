@@ -20,10 +20,13 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include <stdlib.h>
-
-#include "FujiDecompressor.h"
-#include <algorithm> // for move
+#include "decompressors/FujiDecompressor.h"
+#include "decoders/RawDecoderException.h" // for CFAColor::CFA_BLUE, CFAColor:...
+#include "metadata/ColorFilterArray.h" // for CFAColor::CFA_BLUE, CFAColor:...
+#include <algorithm>                   // for min, max, move
+#include <cstdlib>                     // for abs, free, malloc, calloc
+#include <cstring>                     // for memcpy, memset
+// IWYU pragma: no_include <bits/std_abs.h>
 
 namespace rawspeed {
 
