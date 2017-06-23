@@ -30,7 +30,6 @@
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Endianness.h"                          // for Endianness::big
 #include "io/IOException.h"                         // for IOException
-#include "tiff/TiffEntry.h"                         // IWYU pragma: keep
 #include "tiff/TiffIFD.h"                           // for getTiffEndianness
 #include <algorithm>                                // for move
 #include <cassert>                                  // for assert

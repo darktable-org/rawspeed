@@ -29,7 +29,6 @@
 #include "io/IOException.h"                         // for IOException
 #include "metadata/Camera.h"                        // for Hints
 #include "parsers/TiffParser.h"                     // for TiffParser::parse
-#include "tiff/TiffEntry.h"                         // IWYU pragma: keep
 #include "tiff/TiffIFD.h"                           // for TiffID, TiffRoot...
 #include <algorithm>                                // for max
 #include <cmath>                                    // for NAN

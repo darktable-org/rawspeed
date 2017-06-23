@@ -28,7 +28,6 @@
 #include "io/Buffer.h"                    // for Buffer, Buffer::size_type
 #include "io/ByteStream.h"                // for ByteStream
 #include "parsers/TiffParser.h"           // for TiffParser
-#include "tiff/TiffEntry.h"               // IWYU pragma: keep
 #include "tiff/TiffIFD.h"                 // for TiffID, TiffRootIFD, TiffR...
 #include <algorithm>                      // for max
 #include <array>                          // for array

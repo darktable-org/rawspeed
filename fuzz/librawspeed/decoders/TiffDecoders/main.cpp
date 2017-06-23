@@ -43,7 +43,6 @@
 #include "io/Buffer.h"                // for Buffer, DataBuffer
 #include "metadata/CameraMetaData.h"  // for CameraMetaData
 #include "parsers/TiffParser.h"       // for TiffParser
-#include "tiff/TiffEntry.h"           // IWYU pragma: keep
 #include <algorithm>                  // for move
 #include <cassert>                    // for assert
 #include <cstdint>                    // for uint8_t

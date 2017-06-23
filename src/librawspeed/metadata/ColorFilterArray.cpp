@@ -28,6 +28,7 @@
 #include <map>                            // for map
 #include <stdexcept>                      // for out_of_range
 #include <string>                         // for string, allocator
+// IWYU pragma: no_include <bits/std_abs.h>
 
 using std::vector;
 using std::string;

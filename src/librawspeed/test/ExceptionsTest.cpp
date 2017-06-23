@@ -28,12 +28,13 @@
 #include "parsers/RawParserException.h"       // for ThrowRPE, RawParserEx...
 #include "parsers/TiffParserException.h"      // for ThrowTPE, TiffParserEx...
 #include "parsers/X3fParserException.h"       // for ThrowXPE, X3fParserExc...
-#include <exception>                          // for exception
+#include <exception>                          // IWYU pragma: keep
 #include <gmock/gmock.h>                      // for MakePredicateFormatter...
 #include <gtest/gtest.h>                      // for Message, TestPartResult
 #include <memory>                             // for unique_ptr
 #include <stdexcept>                          // for runtime_error
 #include <string>                             // for string
+// IWYU pragma: no_include <bits/exception.h>
 
 using std::unique_ptr;
 using rawspeed::RawspeedException;

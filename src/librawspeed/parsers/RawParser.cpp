@@ -37,7 +37,6 @@
 #include "parsers/TiffParserException.h"  // for TiffParserException
 #include "parsers/X3fParser.h"            // for X3fParser
 #include "parsers/X3fParserException.h"   // for X3fParserException
-#include "tiff/TiffEntry.h"               // IWYU pragma: keep
 
 namespace rawspeed {
 

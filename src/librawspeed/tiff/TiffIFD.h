@@ -26,6 +26,7 @@
 #include "io/ByteStream.h"               // for ByteStream
 #include "io/Endianness.h"               // for getHostEndianness, Endianne...
 #include "parsers/TiffParserException.h" // for ThrowTPE
+#include "tiff/TiffEntry.h"              // for TiffEntry
 #include "tiff/TiffTag.h"                // for TiffTag
 #include <map>                           // for map, _Rb_tree_const_iterator
 #include <memory>                        // for unique_ptr
@@ -33,8 +34,6 @@
 #include <vector>                        // for vector
 
 namespace rawspeed {
-
-class TiffEntry;
 
 class TiffIFD;
 

@@ -34,10 +34,10 @@
 #include <algorithm>                       // for move
 #include <cassert>                         // for assert
 #include <cmath>                           // for copysignf, expf, logf
-#include <cstdlib>                         // for abs
 #include <memory>                          // for unique_ptr
 #include <string>                          // for string
 #include <vector>                          // for vector
+// IWYU pragma: no_include <bits/std_abs.h>
 
 using std::vector;
 using std::string;

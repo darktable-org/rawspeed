@@ -22,7 +22,6 @@
 #include "decoders/MefDecoder.h"
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Endianness.h"                          // for Endianness::big
-#include "tiff/TiffEntry.h"                         // IWYU pragma: keep
 #include <string>                                   // for operator==, string
 
 namespace rawspeed {

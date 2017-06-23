@@ -42,7 +42,6 @@
 #include "decoders/ThreefrDecoder.h"     // for ThreefrDecoder
 #include "io/ByteStream.h"               // for ByteStream
 #include "parsers/TiffParserException.h" // for TiffParserException
-#include "tiff/TiffEntry.h"              // IWYU pragma: keep
 #include <cassert>                       // for assert
 #include <cstdint>                       // for UINT32_MAX
 #include <memory>                        // for unique_ptr
