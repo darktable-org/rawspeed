@@ -31,7 +31,7 @@ services:
   - docker
 
 before_install:
-  - if [[ "$TARGET" == "SONARQUBE" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || ("$TRAVIS_BRANCH" != "develop" && "$TRAVIS_BRANCH" != "master")) ]]; then
+  - if [[ "$TARGET" == "SONARQUBE" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || ("$TRAVIS_BRANCH" != "develop" && "$TRAVIS_BRANCH" != "master" && "$TRAVIS_BRANCH" != "raf-compressed")) ]]; then
       exit;
     elif [[ "$TARGET" == "WWW" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || "$TRAVIS_BRANCH" != "develop") ]]; then
       exit;
@@ -89,7 +89,7 @@ matrix:
 # OSX gcc Coverage build produces invalid .gcno files
 
 script:
-  - if [[ "$TARGET" == "SONARQUBE" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || ("$TRAVIS_BRANCH" != "develop" && "$TRAVIS_BRANCH" != "master")) ]]; then
+  - if [[ "$TARGET" == "SONARQUBE" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || ("$TRAVIS_BRANCH" != "develop" && "$TRAVIS_BRANCH" != "master" && "$TRAVIS_BRANCH" != "raf-compressed")) ]]; then
       exit;
     fi;
   - if [[ "$TARGET" == "WWW" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || "$TRAVIS_BRANCH" != "develop") ]]; then
