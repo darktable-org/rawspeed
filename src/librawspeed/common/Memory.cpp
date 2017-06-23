@@ -52,9 +52,10 @@ void* alignedMalloc(size_t size, size_t alignment) {
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
   // workaround ASAN's broken allocator_may_return_null option
-  // if trying to alloc more than 4GB, just return null.
+  // plus, avoidance of libFuzzer's rss_limit_mb option
+  // if trying to alloc more than 2GB, just return null.
   // else it would abort() the whole program...
-  if (size > 4UL << 30UL)
+  if (size > 2UL << 30UL)
     return ptr;
 #endif
 
