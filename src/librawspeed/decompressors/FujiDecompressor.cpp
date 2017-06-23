@@ -560,9 +560,12 @@ void FujiDecompressor::fuji_extend_blue(ushort* linebuf[_ltotal],
 void FujiDecompressor::xtrans_decode_block(
     struct fuji_compressed_block* info,
     const struct fuji_compressed_params* params, int cur_line) {
-  int r_even_pos = 0, r_odd_pos = 1;
-  int g_even_pos = 0, g_odd_pos = 1;
-  int b_even_pos = 0, b_odd_pos = 1;
+  int r_even_pos = 0;
+  int r_odd_pos = 1;
+  int g_even_pos = 0;
+  int g_odd_pos = 1;
+  int b_even_pos = 0;
+  int b_odd_pos = 1;
 
   int errcnt = 0;
 
@@ -591,7 +594,8 @@ void FujiDecompressor::xtrans_decode_block(
   fuji_extend_red(info->linebuf, line_width);
   fuji_extend_green(info->linebuf, line_width);
 
-  g_even_pos = 0, g_odd_pos = 1;
+  g_even_pos = 0;
+  g_odd_pos = 1;
 
   while (g_even_pos < line_width || g_odd_pos < line_width) {
     if (g_even_pos < line_width) {
@@ -616,8 +620,10 @@ void FujiDecompressor::xtrans_decode_block(
   fuji_extend_green(info->linebuf, line_width);
   fuji_extend_blue(info->linebuf, line_width);
 
-  r_even_pos = 0, r_odd_pos = 1;
-  g_even_pos = 0, g_odd_pos = 1;
+  r_even_pos = 0;
+  r_odd_pos = 1;
+  g_even_pos = 0;
+  g_odd_pos = 1;
 
   while (g_even_pos < line_width || g_odd_pos < line_width) {
     if (g_even_pos < line_width) {
@@ -648,8 +654,10 @@ void FujiDecompressor::xtrans_decode_block(
   fuji_extend_red(info->linebuf, line_width);
   fuji_extend_green(info->linebuf, line_width);
 
-  g_even_pos = 0, g_odd_pos = 1;
-  b_even_pos = 0, b_odd_pos = 1;
+  g_even_pos = 0;
+  g_odd_pos = 1;
+  b_even_pos = 0;
+  b_odd_pos = 1;
 
   while (g_even_pos < line_width || g_odd_pos < line_width) {
     if (g_even_pos < line_width) {
@@ -681,8 +689,10 @@ void FujiDecompressor::xtrans_decode_block(
   fuji_extend_green(info->linebuf, line_width);
   fuji_extend_blue(info->linebuf, line_width);
 
-  r_even_pos = 0, r_odd_pos = 1;
-  g_even_pos = 0, g_odd_pos = 1;
+  r_even_pos = 0;
+  r_odd_pos = 1;
+  g_even_pos = 0;
+  g_odd_pos = 1;
 
   while (g_even_pos < line_width || g_odd_pos < line_width) {
     if (g_even_pos < line_width) {
@@ -713,8 +723,10 @@ void FujiDecompressor::xtrans_decode_block(
   fuji_extend_red(info->linebuf, line_width);
   fuji_extend_green(info->linebuf, line_width);
 
-  g_even_pos = 0, g_odd_pos = 1;
-  b_even_pos = 0, b_odd_pos = 1;
+  g_even_pos = 0;
+  g_odd_pos = 1;
+  b_even_pos = 0;
+  b_odd_pos = 1;
 
   while (g_even_pos < line_width || g_odd_pos < line_width) {
     if (g_even_pos < line_width) {
@@ -754,9 +766,12 @@ void FujiDecompressor::xtrans_decode_block(
 void FujiDecompressor::fuji_bayer_decode_block(
     struct fuji_compressed_block* info,
     const struct fuji_compressed_params* params, int cur_line) {
-  int r_even_pos = 0, r_odd_pos = 1;
-  int g_even_pos = 0, g_odd_pos = 1;
-  int b_even_pos = 0, b_odd_pos = 1;
+  int r_even_pos = 0;
+  int r_odd_pos = 1;
+  int g_even_pos = 0;
+  int g_odd_pos = 1;
+  int b_even_pos = 0;
+  int b_odd_pos = 1;
 
   int errcnt = 0;
 
@@ -785,7 +800,8 @@ void FujiDecompressor::fuji_bayer_decode_block(
   fuji_extend_red(info->linebuf, line_width);
   fuji_extend_green(info->linebuf, line_width);
 
-  g_even_pos = 0, g_odd_pos = 1;
+  g_even_pos = 0;
+  g_odd_pos = 1;
 
   while (g_even_pos < line_width || g_odd_pos < line_width) {
     if (g_even_pos < line_width) {
@@ -809,8 +825,10 @@ void FujiDecompressor::fuji_bayer_decode_block(
 
   fuji_extend_green(info->linebuf, line_width);
   fuji_extend_blue(info->linebuf, line_width);
-  r_even_pos = 0, r_odd_pos = 1;
-  g_even_pos = 0, g_odd_pos = 1;
+  r_even_pos = 0;
+  r_odd_pos = 1;
+  g_even_pos = 0;
+  g_odd_pos = 1;
 
   while (g_even_pos < line_width || g_odd_pos < line_width) {
     if (g_even_pos < line_width) {
@@ -835,8 +853,10 @@ void FujiDecompressor::fuji_bayer_decode_block(
   fuji_extend_red(info->linebuf, line_width);
   fuji_extend_green(info->linebuf, line_width);
 
-  g_even_pos = 0, g_odd_pos = 1;
-  b_even_pos = 0, b_odd_pos = 1;
+  g_even_pos = 0;
+  g_odd_pos = 1;
+  b_even_pos = 0;
+  b_odd_pos = 1;
 
   while (g_even_pos < line_width || g_odd_pos < line_width) {
     if (g_even_pos < line_width) {
@@ -861,8 +881,10 @@ void FujiDecompressor::fuji_bayer_decode_block(
   fuji_extend_green(info->linebuf, line_width);
   fuji_extend_blue(info->linebuf, line_width);
 
-  r_even_pos = 0, r_odd_pos = 1;
-  g_even_pos = 0, g_odd_pos = 1;
+  r_even_pos = 0;
+  r_odd_pos = 1;
+  g_even_pos = 0;
+  g_odd_pos = 1;
 
   while (g_even_pos < line_width || g_odd_pos < line_width) {
     if (g_even_pos < line_width) {
@@ -887,8 +909,10 @@ void FujiDecompressor::fuji_bayer_decode_block(
   fuji_extend_red(info->linebuf, line_width);
   fuji_extend_green(info->linebuf, line_width);
 
-  g_even_pos = 0, g_odd_pos = 1;
-  b_even_pos = 0, b_odd_pos = 1;
+  g_even_pos = 0;
+  g_odd_pos = 1;
+  b_even_pos = 0;
+  b_odd_pos = 1;
 
   while (g_even_pos < line_width || g_odd_pos < line_width) {
     if (g_even_pos < line_width) {
