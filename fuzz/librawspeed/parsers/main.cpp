@@ -26,38 +26,29 @@
 #error GETDECODER must be defined as bool
 #endif
 
-#include "decoders/RawDecoderException.h" // for RawDecoderException, ThrowRDE
-#include "io/Buffer.h"                    // for Buffer, DataBuffer
-#include "io/IOException.h"               // for IOException
-#include "parsers/CiffParser.h"           // IWYU pragma: keep
-#include "parsers/CiffParserException.h"  // IWYU pragma: keep
-#include "parsers/FiffParser.h"           // IWYU pragma: keep
-#include "parsers/FiffParserException.h"  // IWYU pragma: keep
-#include "parsers/RawParser.h"            // IWYU pragma: keep
-#include "parsers/RawParserException.h"   // IWYU pragma: keep
-#include "parsers/TiffParser.h"           // IWYU pragma: keep
-#include "parsers/TiffParserException.h"  // IWYU pragma: keep
-#include "parsers/X3fParser.h"            // IWYU pragma: keep
-#include "parsers/X3fParserException.h"   // IWYU pragma: keep
-#include "tiff/TiffEntry.h"               // IWYU pragma: keep
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint8_t
-#include <cstdio>                         // for size_t
+#include "io/Buffer.h"                  // for Buffer, DataBuffer
+#include "io/IOException.h"             // for IOException
+#include "parsers/CiffParser.h"         // IWYU pragma: keep
+#include "parsers/FiffParser.h"         // IWYU pragma: keep
+#include "parsers/RawParser.h"          // IWYU pragma: keep
+#include "parsers/RawParserException.h" // for RawParserException
+#include "parsers/TiffParser.h"         // IWYU pragma: keep
+#include "parsers/X3fParser.h"          // IWYU pragma: keep
+#include "tiff/TiffEntry.h"             // IWYU pragma: keep
+#include <cassert>                      // for assert
+#include <cstdint>                      // for uint8_t
+#include <cstdio>                       // for size_t
 
 #if GETDECODER
-#include "decoders/RawDecoder.h" // IWYU pragma: keep
+#include "decoders/RawDecoder.h"          // IWYU pragma: keep
+#include "decoders/RawDecoderException.h" // for RawDecoderException, ThrowRDE
 #endif
-
-#define TOKENPASTE2(x, y) x##y
-#define TOKENPASTE(x, y) TOKENPASTE2(x, y)
 
 // define this function, it is only declared in rawspeed:
 // for fuzzing, do not want any threading.
 extern "C" int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
   return 1;
 }
-
-using PARSERException = TOKENPASTE(rawspeed::PARSER, Exception);
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -72,10 +63,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 #if GETDECODER
     parser.getDecoder();
 #endif
-  } catch (PARSERException&) {
+  } catch (rawspeed::RawParserException&) {
     return 0;
+#if GETDECODER
   } catch (rawspeed::RawDecoderException&) {
     return 0;
+#endif
   } catch (rawspeed::IOException&) {
     return 0;
   }
