@@ -185,8 +185,8 @@ void FujiDecompressor::copy_line_to_xtrans(struct fuji_compressed_block* info,
   ushort* line_buf = 0;
   int index;
 
-  ushort* raw_block_data =
-      (ushort*)mImg->getData(fuji_block_width * cur_block, 6 * cur_line);
+  auto* raw_block_data = reinterpret_cast<ushort*>(
+      mImg->getData(fuji_block_width * cur_block, 6 * cur_line));
   int row_count = 0;
 
   for (int i = 0; i < 3; i++) {
@@ -243,8 +243,8 @@ void FujiDecompressor::copy_line_to_bayer(struct fuji_compressed_block* info,
   // TODO: check CFA, use CFA from camera.xml
   int fuji_bayer[2][2] = {{0, 1}, {1, 2}};
 
-  ushort* raw_block_data =
-      (ushort*)mImg->getData(fuji_block_width * cur_block, 6 * cur_line);
+  auto* raw_block_data = reinterpret_cast<ushort*>(
+      mImg->getData(fuji_block_width * cur_block, 6 * cur_line));
 
   int row_count = 0;
 
