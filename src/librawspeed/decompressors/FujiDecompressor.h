@@ -25,6 +25,8 @@
 
 namespace rawspeed {
 
+using ushort = ushort16;
+
 class FujiDecompressor //: public LJpegDecompressor
 {
 public:
