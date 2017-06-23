@@ -1,13 +1,14 @@
 add_custom_target(ParserFuzzers ALL)
 add_dependencies(fuzzers ParserFuzzers)
 
-function(add_parser_fuzzer parser variant boolvar)
+function(add_parser_fuzzer parser variant boolvar boolvar2)
   set(fuzzer "${parser}Fuzzer${variant}")
   add_executable(${fuzzer} main.cpp)
   target_compile_definitions(${fuzzer}
     PRIVATE
       -DPARSER=${parser}
       -DGETDECODER=${boolvar}
+      -DDECODE=${boolvar2}
   )
 
   set_target_properties(${fuzzer} PROPERTIES LINKER_LANGUAGE CXX)
@@ -30,6 +31,7 @@ set(PARSERS
 
 foreach(parser IN LISTS PARSERS)
   set(parser "${parser}Parser")
-  add_parser_fuzzer(${parser} "" false)
-  add_parser_fuzzer(${parser} "-GetDecoder" true)
+  add_parser_fuzzer(${parser} "" false false)
+  add_parser_fuzzer(${parser} "-GetDecoder" true false)
+  add_parser_fuzzer(${parser} "-GetDecoder-Decode" true true)
 endforeach()

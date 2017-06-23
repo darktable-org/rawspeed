@@ -26,6 +26,10 @@
 #error GETDECODER must be defined as bool
 #endif
 
+#ifndef DECODE
+#error DECODE must be defined as bool
+#endif
+
 #include "io/Buffer.h"                  // for Buffer, DataBuffer
 #include "io/IOException.h"             // for IOException
 #include "parsers/CiffParser.h"         // IWYU pragma: keep
@@ -41,6 +45,11 @@
 #if GETDECODER
 #include "decoders/RawDecoder.h"          // IWYU pragma: keep
 #include "decoders/RawDecoderException.h" // for RawDecoderException, ThrowRDE
+#if DECODE
+#include "common/RawspeedException.h" // for RawspeedException
+#include "metadata/CameraMetaData.h"  // for CameraMetaData
+#include <memory>                     // for unique_ptr
+#endif
 #endif
 
 // define this function, it is only declared in rawspeed:
@@ -48,6 +57,10 @@
 extern "C" int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
   return 1;
 }
+
+#if GETDECODER && DECODE
+static const rawspeed::CameraMetaData metadata{};
+#endif
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -60,7 +73,19 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     rawspeed::PARSER parser(&buffer);
 
 #if GETDECODER
-    parser.getDecoder();
+#if DECODE
+    auto decoder =
+#endif
+        parser.getDecoder();
+#endif
+
+#if DECODE
+    decoder->applyCrop = false;
+    decoder->failOnUnknown = false;
+    // decoder->checkSupport(&metadata);
+
+    decoder->decodeRaw();
+    decoder->decodeMetaData(&metadata);
 #endif
   } catch (rawspeed::RawParserException&) {
     return 0;
@@ -70,6 +95,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 #endif
   } catch (rawspeed::IOException&) {
     return 0;
+#if DECODE
+  } catch (rawspeed::RawspeedException&) {
+    return 0;
+#endif
   }
 
   return 0;
