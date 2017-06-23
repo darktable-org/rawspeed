@@ -49,6 +49,9 @@ public:
 protected:
   int getDecoderVersion() const override { return 1; }
   void DecodeRaf();
+
+private:
+  int isCompressed();
 };
 
 } // namespace rawspeed

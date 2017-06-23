@@ -24,6 +24,7 @@
 #include "common/Point.h"                           // for iPoint2D, iRecta...
 #include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "decompressors/FujiDecompressor.h"
 #include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for getHostEndianness
@@ -65,6 +66,7 @@ RawImage RafDecoder::decodeRawInternal() {
   auto raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
   uint32 height = 0;
   uint32 width = 0;
+  bool isCompressed = false;
 
   if (raw->hasEntry(FUJI_RAWIMAGEFULLHEIGHT)) {
     height = raw->getEntry(FUJI_RAWIMAGEFULLHEIGHT)->getU32();
@@ -88,7 +90,7 @@ RawImage RafDecoder::decodeRawInternal() {
     ThrowRDE("Multiple Strips found: %u %u", offsets->count, counts->count);
 
   if (counts->getU32() * 8 / (width * height) < 10)
-    ThrowRDE("Don't know how to decode compressed images");
+    isCompressed = true;
 
   ByteStream input(offsets->getRootIfdData());
   input = input.getSubStream(offsets->getU32(), counts->getU32());
@@ -120,6 +122,9 @@ RawImage RafDecoder::decodeRawInternal() {
   } else if (8UL * counts->getU32() >= 12UL * width * height) {
     bps = 12;
     double_width = false;
+  } else if (isCompressed) {
+    bps = 16;
+    double_width = false;
   } else {
     ThrowRDE("Can not detect bitdepth. StripByteCounts = %u, width = %u, "
              "height = %u",
@@ -136,7 +141,12 @@ RawImage RafDecoder::decodeRawInternal() {
 
   iPoint2D pos(0, 0);
 
-  if (double_width) {
+  if (isCompressed) {
+    mRaw->metadata.mode = "compressed";
+
+    FujiDecompressor fujiDecompress(input, mRaw, 0);
+    fujiDecompress.fuji_compressed_load_raw();
+  } else if (double_width) {
     u.decodeRawUnpacked<16, little>(width * 2, height);
   } else if (input.isInNativeByteOrder() == (getHostEndianness() == big)) {
     u.decodeRawUnpacked<16, big>(width, height);
@@ -155,6 +165,17 @@ RawImage RafDecoder::decodeRawInternal() {
 void RafDecoder::checkSupportInternal(const CameraMetaData* meta) {
   if (!this->checkCameraSupported(meta, mRootIFD->getID(), ""))
     ThrowRDE("Unknown camera. Will not guess.");
+
+  if (isCompressed()) {
+    mRaw->metadata.mode = "compressed";
+
+    auto id = mRootIFD->getID();
+    const Camera* cam = meta->getCamera(id.make, id.model, mRaw->metadata.mode);
+    if (!cam)
+      ThrowRDE("Couldn't find camera %s %s", id.make.c_str(), id.model.c_str());
+
+    mRaw->cfa = cam->cfa;
+  }
 }
 
 void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
@@ -166,7 +187,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   // This is where we'd normally call setMetaData but since we may still need
   // to rotate the image for SuperCCD cameras we do everything ourselves
   auto id = mRootIFD->getID();
-  const Camera* cam = meta->getCamera(id.make, id.model, "");
+  const Camera* cam = meta->getCamera(id.make, id.model, mRaw->metadata.mode);
   if (!cam)
     ThrowRDE("Couldn't find camera");
 
@@ -288,6 +309,30 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       mRaw->metadata.wbCoeffs[2] = wb->getFloat(3);
     }
   }
+}
+
+int RafDecoder::isCompressed() {
+  auto raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
+  uint32 height = 0;
+  uint32 width = 0;
+
+  if (raw->hasEntry(FUJI_RAWIMAGEFULLHEIGHT)) {
+    height = raw->getEntry(FUJI_RAWIMAGEFULLHEIGHT)->getU32();
+    width = raw->getEntry(FUJI_RAWIMAGEFULLWIDTH)->getU32();
+  } else if (raw->hasEntry(IMAGEWIDTH)) {
+    TiffEntry* e = raw->getEntry(IMAGEWIDTH);
+    height = e->getU16(0);
+    width = e->getU16(1);
+  } else
+    ThrowRDE("Unable to locate image size");
+
+  uint32 count = raw->getEntry(FUJI_STRIPBYTECOUNTS)->getU32();
+  if (count  *8 / (width * height) < 10) {
+    return 1;
+  } else {
+    return 0;
+  }
+
 }
 
 } // namespace rawspeed
