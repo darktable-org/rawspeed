@@ -40,13 +40,14 @@ int xtrans_abs[6][6] = {{1,1,0,1,1,2},
                         {0,2,1,2,0,1}};
 */
 
-FujiDecompressor::FujiDecompressor(Buffer input_, RawImage img, int offset)
+FujiDecompressor::FujiDecompressor(Buffer input_, const RawImage& img,
+                                   int offset)
     : input(std::move(input_)), mImg(img) {
   data_offset = offset;
   parse_fuji_compressed_header();
 }
 
-FujiDecompressor::~FujiDecompressor(void) {}
+FujiDecompressor::~FujiDecompressor() = default;
 
 void FujiDecompressor::init_fuji_compr(struct fuji_compressed_params* info) {
   int cur_val;
@@ -57,7 +58,7 @@ void FujiDecompressor::init_fuji_compr(struct fuji_compressed_params* info) {
     ThrowRDE("fuji_block_checks");
   }
 
-  info->q_table = (char*)malloc(32768);
+  info->q_table = static_cast<char*>(malloc(32768));
 
   if (fuji_raw_type == 16) {
     info->line_width = (fuji_block_width * 2) / 3;
@@ -130,8 +131,9 @@ void FujiDecompressor::fuji_fill_buffer(struct fuji_compressed_block* info) {
 
     if (info->cur_buf_size < 1) { // nothing read
       if (info->fillbytes > 0) {
-        int ls = std::max(1, std::min(info->fillbytes, (int)FUJI_BUF_SIZE));
-        info->cur_buf = 0;
+        int ls = std::max(
+            1, std::min(info->fillbytes, static_cast<int>(FUJI_BUF_SIZE)));
+        info->cur_buf = nullptr;
         info->fillbytes -= ls;
       }
     }
@@ -144,8 +146,8 @@ void FujiDecompressor::init_fuji_block(
     struct fuji_compressed_block* info,
     const struct fuji_compressed_params* params, uint64 raw_offset,
     unsigned dsize) {
-  info->linealloc =
-      (ushort*)calloc(sizeof(ushort), _ltotal * (params->line_width + 2));
+  info->linealloc = static_cast<ushort*>(
+      calloc(sizeof(ushort), _ltotal * (params->line_width + 2)));
 
   uint64 fsize = input.getSize();
   info->max_read_size = std::min(unsigned(fsize - raw_offset),
@@ -163,13 +165,14 @@ void FujiDecompressor::init_fuji_block(
   info->cur_pos = 0;
   info->cur_buf_offset = raw_offset;
 
-  for (int j = 0; j < 3; j++)
+  for (int j = 0; j < 3; j++) {
     for (int i = 0; i < 41; i++) {
       info->grad_even[j][i].value1 = params->maxDiff;
       info->grad_even[j][i].value2 = 1;
       info->grad_odd[j][i].value1 = params->maxDiff;
       info->grad_odd[j][i].value2 = 1;
     }
+  }
 
   info->cur_buf_size = 0;
   fuji_fill_buffer(info);
@@ -182,7 +185,7 @@ void FujiDecompressor::copy_line_to_xtrans(struct fuji_compressed_block* info,
   ushort* lineBufG[6];
   ushort* lineBufR[3];
   int pixel_count;
-  ushort* line_buf = 0;
+  ushort* line_buf = nullptr;
   int index;
 
   auto* raw_block_data = reinterpret_cast<ushort*>(
@@ -287,7 +290,8 @@ void FujiDecompressor::copy_line_to_bayer(struct fuji_compressed_block* info,
 }
 
 #define fuji_quant_gradient(i, v1, v2)                                         \
-  (9 * i->q_table[i->q_point[4] + (v1)] + i->q_table[i->q_point[4] + (v2)])
+  (9 * (i)->q_table[(i)->q_point[4] + (v1)] +                                  \
+   (i)->q_table[(i)->q_point[4] + (v2)])
 
 void FujiDecompressor::fuji_zerobits(struct fuji_compressed_block* info,
                                      int* count) {
@@ -341,7 +345,8 @@ void FujiDecompressor::fuji_read_code(struct fuji_compressed_block* info,
   *data <<= bits_left;
   bits_left_in_byte -= bits_left;
   *data |= ((1 << bits_left) - 1) &
-           ((unsigned)info->cur_buf[info->cur_pos] >> bits_left_in_byte);
+           (static_cast<unsigned>(info->cur_buf[info->cur_pos]) >>
+            bits_left_in_byte);
   info->cur_bit = (8 - (bits_left_in_byte & 7)) & 7;
 }
 
@@ -974,8 +979,8 @@ void FujiDecompressor::fuji_decode_strip(
     }
 
     // copy data from line buffers and advance
-    for (int i = 0; i < 6; i++) {
-      memcpy(info.linebuf[mtable[i].a], info.linebuf[mtable[i].b], line_size);
+    for (auto i : mtable) {
+      memcpy(info.linebuf[i.a], info.linebuf[i.b], line_size);
     }
 
     if (fuji_raw_type == 16) {
@@ -984,11 +989,11 @@ void FujiDecompressor::fuji_decode_strip(
       copy_line_to_bayer(&info, cur_line, cur_block, cur_block_width);
     }
 
-    for (int i = 0; i < 3; i++) {
-      memset(info.linebuf[ztable[i].a], 0, ztable[i].b * line_size);
-      info.linebuf[ztable[i].a][0] = info.linebuf[ztable[i].a - 1][1];
-      info.linebuf[ztable[i].a][info_common->line_width + 1] =
-          info.linebuf[ztable[i].a - 1][info_common->line_width];
+    for (auto i : ztable) {
+      memset(info.linebuf[i.a], 0, i.b * line_size);
+      info.linebuf[i.a][0] = info.linebuf[i.a - 1][1];
+      info.linebuf[i.a][info_common->line_width + 1] =
+          info.linebuf[i.a - 1][info_common->line_width];
     }
   }
 
@@ -1016,8 +1021,10 @@ void FujiDecompressor::fuji_compressed_load_raw() {
   init_fuji_compr(&common_info);
 
   // read block sizes
-  block_sizes = (unsigned*)malloc(sizeof(unsigned) * fuji_total_blocks);
-  raw_block_offsets = (uint64*)malloc(sizeof(uint64) * fuji_total_blocks);
+  block_sizes =
+      static_cast<unsigned*>(malloc(sizeof(unsigned) * fuji_total_blocks));
+  raw_block_offsets =
+      static_cast<uint64*>(malloc(sizeof(uint64) * fuji_total_blocks));
 
   raw_offset = sizeof(unsigned) * fuji_total_blocks;
 
@@ -1035,7 +1042,8 @@ void FujiDecompressor::fuji_compressed_load_raw() {
 
   // calculating raw block offsets
   for (cur_block = 0; cur_block < fuji_total_blocks; cur_block++) {
-    unsigned bsize = sgetn(4, (uchar8*)(block_sizes + cur_block));
+    unsigned bsize =
+        sgetn(4, reinterpret_cast<uchar8*>(block_sizes + cur_block));
     block_sizes[cur_block] = bsize;
   }
 

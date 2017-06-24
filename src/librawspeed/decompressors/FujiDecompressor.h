@@ -31,8 +31,8 @@ namespace rawspeed {
 class FujiDecompressor //: public LJpegDecompressor
 {
 public:
-  FujiDecompressor(Buffer input, RawImage img, int offset);
-  ~FujiDecompressor(void);
+  FujiDecompressor(Buffer input, const RawImage& img, int offset);
+  ~FujiDecompressor();
 
   using ushort = ushort16;
 
