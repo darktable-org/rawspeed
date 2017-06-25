@@ -11,8 +11,11 @@ else()
   add_library(libFuzzer STATIC IMPORTED "${LIBFUZZER_ARCHIVE}")
   set_property(TARGET libFuzzer PROPERTY IMPORTED_LOCATION "${LIBFUZZER_ARCHIVE}")
 
+  file(GLOB FUZZ_DICT "common.dict")
+
   macro(add_fuzz_target fuzzer)
     install(TARGETS ${fuzzer} DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    install(FILES "${FUZZ_DICT}" DESTINATION "${CMAKE_INSTALL_BINDIR}" RENAME "${fuzzer}.dict")
   endmacro()
 endif()
 
