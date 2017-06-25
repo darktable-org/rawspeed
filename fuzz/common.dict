@@ -32,7 +32,7 @@
 
 # TIFF makernotes
 "MakN"
-"AOC\0"
+"AOC\x00"
 "PENTAX"
 "Pentax makernote"
 "FUJIFILM\x0c\x00\x00\x00"
