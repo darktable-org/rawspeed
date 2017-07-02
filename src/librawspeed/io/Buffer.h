@@ -115,6 +115,7 @@ public:
 
   // get pointer to memory at 'offset', make sure at least 'count' bytes are accessable
   const uchar8* getData(size_type offset, size_type count) const {
+    assert(data);
     if (!isValid(offset, count))
       ThrowIOE("Buffer overflow: image file may be truncated");
 
@@ -128,9 +129,11 @@ public:
 
   // std begin/end iterators to allow for range loop
   const uchar8* begin() const {
+    assert(data);
     return data;
   }
   const uchar8* end() const {
+    assert(data);
     return data + size;
   }
 
