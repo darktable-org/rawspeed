@@ -118,7 +118,7 @@ public:
     if (!isValid(offset, count))
       ThrowIOE("Buffer overflow: image file may be truncated");
 
-    return &data[offset];
+    return data + offset;
   }
 
   // convenience getter for single bytes
