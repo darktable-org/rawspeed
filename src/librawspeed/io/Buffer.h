@@ -106,6 +106,9 @@ public:
   }
 
   Buffer getSubView(size_type offset) const {
+    if (!isValid(0, offset))
+      ThrowIOE("Buffer overflow: image file may be truncated");
+
     size_type newSize = size - offset;
     return getSubView(offset, newSize);
   }
