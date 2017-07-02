@@ -76,6 +76,9 @@ RawImage RafDecoder::decodeRawInternal() {
   } else
     ThrowRDE("Unable to locate image size");
 
+  if (height < 1 || width < 1)
+    ThrowRDE("Bad image dimensions");
+
   if (raw->hasEntry(FUJI_LAYOUT)) {
     TiffEntry *e = raw->getEntry(FUJI_LAYOUT);
     alt_layout = !(e->getByte(0) >> 7);
