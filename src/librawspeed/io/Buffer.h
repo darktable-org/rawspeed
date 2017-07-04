@@ -188,6 +188,10 @@ public:
     std::swap(inNativeByteOrder, value);
     return value;
   }
+
+  inline bool setByteOrder(Endianness e) {
+    return setInNativeByteOrder(getHostEndianness() == e);
+  }
 };
 
 } // namespace rawspeed
