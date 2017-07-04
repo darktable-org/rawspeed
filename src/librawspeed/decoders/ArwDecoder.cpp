@@ -335,22 +335,25 @@ void ArwDecoder::ParseA100WB() {
     if (!len)
       ThrowRDE("Found entry of zero lenght, corrupt.");
 
-    if (0x574247 == tag) { // WBG
-      bs.skipBytes(4);
-
-      ushort16 tmp[4];
-      bs.setByteOrder(little);
-      for (auto& coeff : tmp)
-        coeff = bs.getU16();
-
-      mRaw->metadata.wbCoeffs[0] = static_cast<float>(tmp[0]);
-      mRaw->metadata.wbCoeffs[1] = static_cast<float>(tmp[1]);
-      mRaw->metadata.wbCoeffs[2] = static_cast<float>(tmp[3]);
-
-      return;
+    if (0x574247 != tag) { // WBG
+      // not the tag we are interested in, skip
+      bs.skipBytes(len);
+      continue;
     }
 
-    bs.skipBytes(len);
+    bs.skipBytes(4);
+
+    ushort16 tmp[4];
+    bs.setByteOrder(little);
+    for (auto& coeff : tmp)
+      coeff = bs.getU16();
+
+    mRaw->metadata.wbCoeffs[0] = static_cast<float>(tmp[0]);
+    mRaw->metadata.wbCoeffs[1] = static_cast<float>(tmp[1]);
+    mRaw->metadata.wbCoeffs[2] = static_cast<float>(tmp[3]);
+
+    // only need this one block, no need to process any further
+    break;
   }
 }
 
@@ -370,15 +373,15 @@ void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   mRaw->blackLevel >>= mShiftDownScale;
 
   // Set the whitebalance
-  if (id.model == "DSLR-A100") { // Handle the MRW style WB of the A100
-    ParseA100WB();
-  } else { // Everything else but the A100
-    try {
+  try {
+    if (id.model == "DSLR-A100") { // Handle the MRW style WB of the A100
+      ParseA100WB();
+    } else { // Everything else but the A100
       GetWB();
-    } catch (RawspeedException& e) {
-      mRaw->setError(e.what());
-      // We caught an exception reading WB, just ignore it
     }
+  } catch (RawspeedException& e) {
+    mRaw->setError(e.what());
+    // We caught an exception reading WB, just ignore it
   }
 }
 
