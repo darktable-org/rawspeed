@@ -66,9 +66,11 @@ void MrwDecoder::parseHeader() {
 
   // ... and offset to the image data at the same time
   const auto dataOffset = bs.getPosition() + headerSize;
+  assert(bs.getPosition() == 8);
 
   // now, let's parse rest of the header.
-  bs = bs.getSubStream(bs.getPosition(), headerSize);
+  bs = bs.getSubStream(0, dataOffset);
+  bs.skipBytes(8);
 
   while (bs.getRemainSize() > 0) {
     uint32 tag = bs.getU32();
@@ -130,11 +132,9 @@ void MrwDecoder::parseHeader() {
     bs.setPosition(origPos + len);
   }
 
-  bs = ByteStream(db);
-  bs.skipBytes(dataOffset);
-
+  // processed all of the header. the image data is directly next
   const auto imageSize = raw_height * raw_width * bpp / 8;
-  imageData = bs.getBuffer(imageSize);
+  imageData = db.getSubView(bs.getPosition(), imageSize);
 }
 
 RawImage MrwDecoder::decodeRawInternal() {
