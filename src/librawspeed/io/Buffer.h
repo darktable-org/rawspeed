@@ -26,6 +26,7 @@
 #include "io/Endianness.h"  // for getByteSwapped
 #include "io/IOException.h" // for ThrowIOE
 #include <algorithm>        // for swap
+#include <cassert>          // for assert
 #include <memory>           // for unique_ptr
 
 namespace rawspeed {
