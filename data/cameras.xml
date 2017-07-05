@@ -451,6 +451,27 @@
 			<Alias id="EOS Kiss X8i">Canon EOS Kiss X8i</Alias>
 		</Aliases>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS 800D">
+		<ID make="Canon" model="EOS 800D">Canon EOS 800D</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="266" y="42" width="-6" height="-4"/>
+		<Sensor black="2049" white="14338"/>
+		<Sensor black="511" white="11892" iso_list="100"/>
+		<Sensor black="511" white="14338" iso_list="200"/>
+		<BlackAreas>
+			<Vertical x="0" width="260"/>
+			<Horizontal y="2" height="36"/>
+		</BlackAreas>
+		<Aliases>
+			<Alias id="EOS Rebel T7i">Canon EOS Rebel T7i</Alias>
+			<Alias id="EOS Kiss X9i">Canon EOS Kiss X9i</Alias>
+		</Aliases>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS 760D">
 		<ID make="Canon" model="EOS 760D">Canon EOS 760D</ID>
 		<CFA width="2" height="2">
