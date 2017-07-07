@@ -26,6 +26,7 @@
 #include "io/Endianness.h"  // for getByteSwapped
 #include "io/IOException.h" // for ThrowIOE
 #include <algorithm>        // for swap
+#include <cassert>          // for assert
 #include <memory>           // for unique_ptr
 
 namespace rawspeed {
@@ -106,16 +107,20 @@ public:
   }
 
   Buffer getSubView(size_type offset) const {
+    if (!isValid(0, offset))
+      ThrowIOE("Buffer overflow: image file may be truncated");
+
     size_type newSize = size - offset;
     return getSubView(offset, newSize);
   }
 
   // get pointer to memory at 'offset', make sure at least 'count' bytes are accessable
   const uchar8* getData(size_type offset, size_type count) const {
+    assert(data);
     if (!isValid(offset, count))
       ThrowIOE("Buffer overflow: image file may be truncated");
 
-    return &data[offset];
+    return data + offset;
   }
 
   // convenience getter for single bytes
@@ -125,9 +130,11 @@ public:
 
   // std begin/end iterators to allow for range loop
   const uchar8* begin() const {
+    assert(data);
     return data;
   }
   const uchar8* end() const {
+    assert(data);
     return data + size;
   }
 
@@ -180,6 +187,10 @@ public:
   inline bool setInNativeByteOrder(bool value) {
     std::swap(inNativeByteOrder, value);
     return value;
+  }
+
+  inline bool setByteOrder(Endianness e) {
+    return setInNativeByteOrder(getHostEndianness() == e);
   }
 };
 

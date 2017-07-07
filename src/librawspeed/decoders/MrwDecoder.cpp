@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014-2015 Pedro Côrte-Real
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,21 +21,19 @@
 */
 
 #include "decoders/MrwDecoder.h"
-#include "common/Common.h"                          // for uchar8, uint32
+#include "common/Common.h"                          // for uint32
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer
-#include "io/Endianness.h"                          // for getU16BE, getU32BE
+#include "io/Buffer.h"                              // for Buffer, DataBuffer
+#include "io/ByteStream.h"                          // for ByteStream
+#include "io/Endianness.h"                          // for Endianness::big
 #include "io/IOException.h"                         // for IOException
 #include "metadata/Camera.h"                        // for Hints
-#include "parsers/TiffParser.h"                     // for TiffParser::parse
+#include "parsers/TiffParser.h"                     // for TiffParser
 #include "tiff/TiffIFD.h"                           // for TiffID, TiffRoot...
-#include <algorithm>                                // for max
-#include <cmath>                                    // for NAN
+#include <cstring>                                  // for memcmp, size_t
 #include <memory>                                   // for unique_ptr
-
-using std::max;
 
 namespace rawspeed {
 
@@ -43,60 +42,108 @@ class CameraMetaData;
 MrwDecoder::MrwDecoder(const Buffer* file) : RawDecoder(file) { parseHeader(); }
 
 int MrwDecoder::isMRW(const Buffer* input) {
-  const uchar8* data = input->getData(0, 4);
-  return data[0] == 0x00 && data[1] == 0x4D && data[2] == 0x52 && data[3] == 0x4D;
+  static const char magic[] = {0x00, 'M', 'R', 'M'};
+  static const size_t magic_size = sizeof(magic);
+  static_assert(4 == magic_size, "wrong magic size");
+
+  const unsigned char* data = input->getData(0, magic_size);
+  return 0 == memcmp(&data[0], magic, magic_size);
 }
 
 void MrwDecoder::parseHeader() {
-  if (mFile->getSize() < 30)
-    ThrowRDE("Not a valid MRW file (size too small)");
-
   if (!isMRW(mFile))
     ThrowRDE("This isn't actually a MRW file, why are you calling me?");
 
-  const unsigned char* data = mFile->getData(0,8);
-  data_offset = getU32BE(data + 4) + 8;
-  data = mFile->getData(0,data_offset);
+  const DataBuffer db(*mFile, getHostEndianness() == big);
+  ByteStream bs(db);
 
-  if (!mFile->isValid(data_offset))
-    ThrowRDE("Data offset is invalid");
+  // magic
+  bs.skipBytes(4);
 
-  // Make sure all values have at least been initialized
-  raw_width = raw_height = packed = 0;
-  wb_coeffs[0] = wb_coeffs[1] = wb_coeffs[2] = wb_coeffs[3] = NAN;
+  // the size of the rest of the header, up to the image data
+  const auto headerSize = bs.getU32();
+  bs.check(headerSize);
 
-  uint32 currpos = 8;
-  // At most we read 20 bytes from currpos so check we don't step outside that
-  while (currpos + 20 < data_offset) {
-    uint32 tag = getU32BE(data + currpos);
-    uint32 len = getU32BE(data + currpos + 4);
-    switch(tag) {
-    case 0x505244: // PRD
-      raw_height = getU16BE(data + currpos + 16);
-      raw_width = getU16BE(data + currpos + 18);
-      packed = (data[currpos+24] == 12);
-      break;
-    case 0x574247: // WBG
-      for (uint32 i = 0; i < 4; i++)
-        wb_coeffs[i] =
-            static_cast<float>(getU16BE(data + currpos + 12 + i * 2));
-      break;
-    case 0x545457: // TTW
-      // Base value for offsets needs to be at the beginning of the TIFF block, not the file
-      rootIFD = TiffParser::parse(mFile->getSubView(currpos + 8));
-      break;
-    default:
+  // ... and offset to the image data at the same time
+  const auto dataOffset = bs.getPosition() + headerSize;
+  assert(bs.getPosition() == 8);
+
+  // now, let's parse rest of the header.
+  bs = bs.getSubStream(0, dataOffset);
+  bs.skipBytes(8);
+
+  while (bs.getRemainSize() > 0) {
+    uint32 tag = bs.getU32();
+    uint32 len = bs.getU32();
+    bs.check(len);
+    if (!len)
+      ThrowRDE("Found entry of zero lenght, MRW is corrupt.");
+
+    const auto origPos = bs.getPosition();
+
+    switch (tag) {
+    case 0x505244: {            // PRD
+      bs.skipBytes(8);          // Version Number
+      raw_height = bs.getU16(); // CCD Size Y
+      raw_width = bs.getU16();  // CCD Size X
+      bs.skipBytes(2);          // Image Size Y
+      bs.skipBytes(2);          // Image Size X
+
+      bpp = bs.getByte(); // DataSize
+      if (12 != bpp && 16 != bpp)
+        ThrowRDE("Unknown data size");
+
+      if (12 != bs.getByte()) // PixelSize
+        ThrowRDE("Unexpected pixel size");
+
+      const auto SM = bs.getByte(); // StorageMethod
+      if (0x52 != SM && 0x59 != SM)
+        ThrowRDE("Unknown storage method");
+      packed = (0x59 == SM);
+
+      if ((12 == bpp) != packed)
+        ThrowRDE("Packed/BPP sanity check failed!");
+
+      bs.skipBytes(1); // Unknown1
+      bs.skipBytes(2); // Unknown2
+      bs.skipBytes(2); // BayerPattern
       break;
     }
-    currpos += max(len + 8, 1U); // max(,1) to make sure we make progress
+    case 0x545457: // TTW
+      // Base value for offsets needs to be at the beginning of the TIFF block,
+      // not the file
+      rootIFD = TiffParser::parse(bs.getBuffer(len));
+      break;
+    case 0x574247:     // WBG
+      bs.skipBytes(4); // 4 factors
+      static_assert(4 == (sizeof(wb_coeffs) / sizeof(wb_coeffs[0])),
+                    "wrong coeff count");
+      for (auto& wb_coeff : wb_coeffs)
+        wb_coeff = static_cast<float>(bs.getU16()); // gain
+
+      // FIXME?
+      // Gf = Gr / 2^(6+F)
+      break;
+    default:
+      // unknown block, let's just ignore
+      break;
+    }
+
+    bs.setPosition(origPos + len);
   }
+
+  // processed all of the header. the image data is directly next
+  const auto imageSize = raw_height * raw_width * bpp / 8;
+  imageData = db.getSubView(bs.getPosition(), imageSize);
 }
 
 RawImage MrwDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(raw_width, raw_height);
   mRaw->createData();
 
-  UncompressedDecompressor u(*mFile, data_offset, mRaw);
+  DataBuffer db(imageData, getHostEndianness() == big);
+  ByteStream bs(db);
+  UncompressedDecompressor u(bs, mRaw);
 
   try {
     if (packed)
@@ -112,6 +159,9 @@ RawImage MrwDecoder::decodeRawInternal() {
 }
 
 void MrwDecoder::checkSupportInternal(const CameraMetaData* meta) {
+  if (!rootIFD)
+    ThrowRDE("Couldn't find make and model");
+
   auto id = rootIFD->getID();
   this->checkCameraSupported(meta, id.make, id.model, "");
 }

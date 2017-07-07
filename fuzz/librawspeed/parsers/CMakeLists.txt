@@ -31,7 +31,7 @@ set(PARSERS
 
 foreach(parser IN LISTS PARSERS)
   set(parser "${parser}Parser")
-  add_parser_fuzzer(${parser} "" false false)
+  # add_parser_fuzzer(${parser} "" false false)
   add_parser_fuzzer(${parser} "-GetDecoder" true false)
   add_parser_fuzzer(${parser} "-GetDecoder-Decode" true true)
 endforeach()

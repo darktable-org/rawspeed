@@ -104,6 +104,7 @@ public:
 
 private:
   inline void fillSafe() {
+    assert(data);
     if (pos + BitStreamCacheBase::MaxProcessBytes <= size) {
       uchar8 tmp[BitStreamCacheBase::MaxProcessBytes] = {0};
       assert(!(size - pos < BitStreamCacheBase::MaxProcessBytes));
@@ -127,6 +128,7 @@ private:
 
 public:
   inline void fill(uint32 nbits = Cache::MaxGetBits) {
+    assert(data);
     assert(nbits <= Cache::MaxGetBits);
     if (cache.fillLevel < nbits) {
 #if defined(DEBUG)

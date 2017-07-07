@@ -18,13 +18,17 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "io/Buffer.h"      // for Buffer
-#include "io/FileReader.h"  // for FileReader
-#include "io/IOException.h" // for IOException
-#include <cstdint>          // for uint8_t
-#include <cstdlib>          // for EXIT_SUCCESS, size_t
-#include <iostream>         // for operator<<, cout, ostream
-#include <memory>           // for unique_ptr
+#include "io/Buffer.h"          // for Buffer
+#include "io/FileIOException.h" // for FileIOException
+#include "io/FileReader.h"      // for FileReader
+#include <cstdint>              // for uint8_t
+#include <cstdlib>              // for EXIT_SUCCESS, size_t
+#include <iostream>             // for operator<<, cout, ostream
+#include <memory>               // for unique_ptr
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -36,16 +40,19 @@ static int usage() {
   return EXIT_SUCCESS;
 }
 
-static void process(const char* filename) {
+static void process(const char* filename) noexcept {
+  rawspeed::FileReader reader(filename);
+  std::unique_ptr<const rawspeed::Buffer> buf;
+
   try {
-    rawspeed::FileReader reader(filename);
-    auto map(reader.readFile());
-    LLVMFuzzerTestOneInput(map->getData(0, map->getSize()), map->getSize());
-  } catch (rawspeed::IOException&) {
+    buf = reader.readFile();
+  } catch (rawspeed::FileIOException&) {
     // failed to read the file for some reason.
     // just ignore it.
     return;
   }
+
+  LLVMFuzzerTestOneInput(buf->getData(0, buf->getSize()), buf->getSize());
 }
 
 int main(int argc, char** argv) {
@@ -53,7 +60,11 @@ int main(int argc, char** argv) {
     return usage();
 
 #ifdef _OPENMP
-#pragma omp parallel for default(shared) schedule(static)
+  const auto corpusCount = argc - 1;
+  auto chunkSize = (corpusCount / (10 * omp_get_num_threads()));
+  if (chunkSize <= 1)
+    chunkSize = 1;
+#pragma omp parallel for default(shared) schedule(dynamic, chunkSize)
 #endif
   for (int i = 1; i < argc; ++i)
     process(argv[i]);

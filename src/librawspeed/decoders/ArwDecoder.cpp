@@ -46,7 +46,6 @@
 
 using std::vector;
 using std::string;
-using std::max;
 
 namespace rawspeed {
 
@@ -303,6 +302,61 @@ void ArwDecoder::DecodeARW2(const ByteStream& input, uint32 w, uint32 h,
   ThrowRDE("Unsupported bit depth");
 }
 
+void ArwDecoder::ParseA100WB() {
+  if (!mRootIFD->hasEntryRecursive(DNGPRIVATEDATA))
+    return;
+
+  // only contains the offset, not the length!
+  TiffEntry* priv = mRootIFD->getEntryRecursive(DNGPRIVATEDATA);
+  ByteStream bs = priv->getData();
+  bs.setByteOrder(little);
+  const uint32 off = bs.getU32();
+
+  bs = ByteStream(*mFile, off);
+
+  // MRW style, see MrwDecoder
+
+  bs.setByteOrder(big);
+  uint32 tag = bs.getU32();
+  if (0x4D5249 != tag) // MRI
+    ThrowRDE("Can not parse DNGPRIVATEDATA, invalid tag (0x%x).", tag);
+
+  bs.setByteOrder(little);
+  uint32 len = bs.getU32();
+
+  bs = bs.getSubStream(bs.getPosition(), len);
+
+  while (bs.getRemainSize() > 0) {
+    bs.setByteOrder(big);
+    tag = bs.getU32();
+    bs.setByteOrder(little);
+    len = bs.getU32();
+    bs.check(len);
+    if (!len)
+      ThrowRDE("Found entry of zero lenght, corrupt.");
+
+    if (0x574247 != tag) { // WBG
+      // not the tag we are interested in, skip
+      bs.skipBytes(len);
+      continue;
+    }
+
+    bs.skipBytes(4);
+
+    ushort16 tmp[4];
+    bs.setByteOrder(little);
+    for (auto& coeff : tmp)
+      coeff = bs.getU16();
+
+    mRaw->metadata.wbCoeffs[0] = static_cast<float>(tmp[0]);
+    mRaw->metadata.wbCoeffs[1] = static_cast<float>(tmp[1]);
+    mRaw->metadata.wbCoeffs[2] = static_cast<float>(tmp[3]);
+
+    // only need this one block, no need to process any further
+    break;
+  }
+}
+
 void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   //Default
   int iso = 0;
@@ -319,37 +373,15 @@ void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   mRaw->blackLevel >>= mShiftDownScale;
 
   // Set the whitebalance
-  if (id.model == "DSLR-A100") { // Handle the MRW style WB of the A100
-    if (mRootIFD->hasEntryRecursive(DNGPRIVATEDATA)) {
-      TiffEntry *priv = mRootIFD->getEntryRecursive(DNGPRIVATEDATA);
-      const uchar8 *offdata = priv->getData(4);
-      uint32 off = getU32LE(offdata);
-      uint32 length = mFile->getSize()-off;
-      const unsigned char *dpd = mFile->getData(off, length);
-      uint32 currpos = 8;
-      while (currpos+20 < length) {
-        uint32 tag = getU32BE(dpd + currpos + 0);
-        uint32 len = getU32LE(dpd + currpos + 4);
-        if (tag == 0x574247) { /* WBG */
-          ushort16 tmp[4];
-          for(uint32 i=0; i<4; i++)
-            tmp[i] = getU16LE(dpd + currpos + 12 + i * 2);
-
-          mRaw->metadata.wbCoeffs[0] = static_cast<float>(tmp[0]);
-          mRaw->metadata.wbCoeffs[1] = static_cast<float>(tmp[1]);
-          mRaw->metadata.wbCoeffs[2] = static_cast<float>(tmp[3]);
-          break;
-        }
-        currpos += max(len + 8, 1U); // max(,1) to make sure we make progress
-      }
-    }
-  } else { // Everything else but the A100
-    try {
+  try {
+    if (id.model == "DSLR-A100") { // Handle the MRW style WB of the A100
+      ParseA100WB();
+    } else { // Everything else but the A100
       GetWB();
-    } catch (RawspeedException& e) {
-      mRaw->setError(e.what());
-      // We caught an exception reading WB, just ignore it
     }
+  } catch (RawspeedException& e) {
+    mRaw->setError(e.what());
+    // We caught an exception reading WB, just ignore it
   }
 }
 

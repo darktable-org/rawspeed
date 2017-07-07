@@ -24,21 +24,23 @@
 #include "common/Common.h"       // for uint32
 #include "common/RawImage.h"     // for RawImage
 #include "decoders/RawDecoder.h" // for RawDecoder
+#include "io/Buffer.h"           // for Buffer
 #include "tiff/TiffIFD.h"        // for TiffRootIFDOwner
+#include <cmath>                 // for NAN
 
 namespace rawspeed {
 
 class CameraMetaData;
-class Buffer;
 
 class MrwDecoder final : public RawDecoder {
   TiffRootIFDOwner rootIFD;
 
-  uint32 raw_width;
-  uint32 raw_height;
-  uint32 data_offset;
-  uint32 packed;
-  float wb_coeffs[4];
+  uint32 raw_width = 0;
+  uint32 raw_height = 0;
+  Buffer imageData;
+  uint32 bpp = 0;
+  uint32 packed = 0;
+  float wb_coeffs[4] = {NAN, NAN, NAN, NAN};
 
 public:
   explicit MrwDecoder(const Buffer* file);

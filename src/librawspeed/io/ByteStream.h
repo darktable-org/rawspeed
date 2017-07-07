@@ -89,6 +89,7 @@ public:
   }
 
   inline uchar8 peekByte(size_type i = 0) const {
+    assert(data);
     check(i+1);
     return data[pos+i];
   }
@@ -100,6 +101,7 @@ public:
 
   inline bool hasPatternAt(const char *pattern, size_type size_,
                            size_type relPos) const {
+    assert(data);
     if (!isValid(pos + relPos, size_))
       return false;
     return memcmp(&data[pos + relPos], pattern, size_) == 0;
@@ -117,6 +119,7 @@ public:
   }
 
   inline uchar8 getByte() {
+    assert(data);
     check(1);
     return data[pos++];
   }
@@ -137,6 +140,7 @@ public:
   inline float getFloat() { return get<float>(); }
 
   const char* peekString() const {
+    assert(data);
     if (memchr(peekData(getRemainSize()), 0, getRemainSize()) == nullptr)
       ThrowIOE("String is not null-terminated");
     return reinterpret_cast<const char*>(&data[pos]);
@@ -145,6 +149,7 @@ public:
   // Increments the stream to after the next zero byte and returns the bytes in between (not a copy).
   // If the first byte is zero, stream is incremented one.
   const char* getString() {
+    assert(data);
     size_type start = pos;
     bool isNullTerminator = false;
     do {
