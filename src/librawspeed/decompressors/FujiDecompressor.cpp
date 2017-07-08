@@ -216,9 +216,9 @@ void FujiDecompressor::copy_line_to_xtrans(struct fuji_compressed_block* info,
       case CFA_BLUE: // blue
         line_buf = lineBufB[row_count >> 1];
         break;
+
       default:
-        ThrowRDE("unknown color in CFA");
-        break;
+        __builtin_unreachable();
       }
 
       index = (((pixel_count * 2 / 3) & 0x7FFFFFFE) | ((pixel_count % 3) & 1)) +
@@ -243,7 +243,7 @@ void FujiDecompressor::copy_line_to_bayer(struct fuji_compressed_block* info,
   ushort* line_buf;
 
   // TODO: check CFA, use CFA from camera.xml
-  int fuji_bayer[2][2] = {{0, 1}, {1, 2}};
+  // int fuji_bayer[2][2] = {{0, 1}, {1, 2}};
 
   auto* raw_block_data = reinterpret_cast<ushort*>(
       mImg->getData(fuji_block_width * cur_block, 6 * cur_line));
@@ -263,17 +263,17 @@ void FujiDecompressor::copy_line_to_bayer(struct fuji_compressed_block* info,
     pixel_count = 0;
 
     while (pixel_count < cur_block_width) {
-      switch (fuji_bayer[row_count & 1][pixel_count & 1]) {
-      case 0: // red
+      // switch (fuji_bayer[row_count & 1][pixel_count & 1]) {
+      switch (mImg->cfa.getColorAt(pixel_count, row_count)) {
+      case CFA_RED: // red
         line_buf = lineBufR[row_count >> 1];
         break;
 
-      case 1:  // green
-      case 3:  // second green
+      case CFA_GREEN: // green
         line_buf = lineBufG[row_count];
         break;
 
-      case 2: // blue
+      case CFA_BLUE: // blue
         line_buf = lineBufB[row_count >> 1];
         break;
 
