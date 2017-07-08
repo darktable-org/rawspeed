@@ -58,7 +58,7 @@ void FujiDecompressor::init_fuji_compr(struct fuji_compressed_params* info) {
     ThrowRDE("fuji_block_checks");
   }
 
-  info->q_table = static_cast<char*>(malloc(32768));
+  info->q_table.resize(32768);
 
   if (fuji_raw_type == 16) {
     info->line_width = (fuji_block_width * 2) / 3;
@@ -75,7 +75,7 @@ void FujiDecompressor::init_fuji_compr(struct fuji_compressed_params* info) {
 
   cur_val = -info->q_point[4];
 
-  for (qt = info->q_table; cur_val <= info->q_point[4]; ++qt, ++cur_val) {
+  for (qt = &info->q_table[0]; cur_val <= info->q_point[4]; ++qt, ++cur_val) {
     if (cur_val <= -info->q_point[3]) {
       *qt = -4;
     } else if (cur_val <= -info->q_point[2]) {
@@ -104,6 +104,9 @@ void FujiDecompressor::init_fuji_compr(struct fuji_compressed_params* info) {
     info->max_bits = 56;
     info->maxDiff = 256;
   } else if (info->q_point[4] == 0xFFF) {
+    ThrowRDE("Aha, finally, a 12-bit compressed RAF! Please consider providing "
+             "samples on <https://raw.pixls.us/>, thanks!");
+
     info->total_values = 4096;
     info->raw_bits = 12;
     info->max_bits = 48;
@@ -1057,7 +1060,6 @@ void FujiDecompressor::fuji_compressed_load_raw() {
 
   free(block_sizes);
   free(raw_block_offsets);
-  free(common_info.q_table);
 }
 
 void FujiDecompressor::fuji_decode_loop(

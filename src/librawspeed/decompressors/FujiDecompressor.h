@@ -24,6 +24,7 @@
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/Buffer.h"                          // for Buffer
+#include <vector>                               // for vector
 
 namespace rawspeed {
 
@@ -38,7 +39,7 @@ public:
 
 protected:
   struct fuji_compressed_params {
-    char* q_table;  /* quantization table */
+    std::vector<char> q_table; /* quantization table */
     int q_point[5]; /* quantization points */
     int max_bits;
     int min_value;
