@@ -33,7 +33,6 @@ namespace rawspeed {
 class FujiDecompressor final : public AbstractDecompressor {
 public:
   FujiDecompressor(ByteStream input, const RawImage& img, int offset);
-  ~FujiDecompressor();
 
   using ushort = ushort16;
 

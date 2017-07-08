@@ -43,8 +43,6 @@ FujiDecompressor::FujiDecompressor(ByteStream input_, const RawImage& img,
   }
 }
 
-FujiDecompressor::~FujiDecompressor() = default;
-
 void FujiDecompressor::init_fuji_compr(struct fuji_compressed_params* info) {
   int cur_val;
   char* qt;
