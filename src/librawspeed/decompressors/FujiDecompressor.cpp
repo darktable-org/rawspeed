@@ -184,12 +184,6 @@ void FujiDecompressor::copy_line(struct fuji_compressed_block* info,
   ushort* lineBufB[3];
   ushort* lineBufG[6];
   ushort* lineBufR[3];
-  int pixel_count;
-  ushort* line_buf = nullptr;
-
-  auto* raw_block_data = reinterpret_cast<ushort*>(
-      mImg->getData(fuji_block_width * cur_block, 6 * cur_line));
-  int row_count = 0;
 
   for (int i = 0; i < 3; i++) {
     lineBufR[i] = info->linebuf[_R2 + i] + 1;
@@ -200,9 +194,15 @@ void FujiDecompressor::copy_line(struct fuji_compressed_block* info,
     lineBufG[i] = info->linebuf[_G2 + i] + 1;
   }
 
+  int row_count = 0;
   while (row_count < 6) {
-    pixel_count = 0;
+    auto* const raw_block_data = reinterpret_cast<ushort*>(
+        mImg->getData(fuji_block_width * cur_block, 6 * cur_line + row_count));
+
+    int pixel_count = 0;
     while (pixel_count < cur_block_width) {
+      ushort* line_buf = nullptr;
+
       //      switch (xtrans_abs[row_count][ (pixel_count % 6)]) {
       switch (mImg->cfa.getColorAt(pixel_count, row_count)) {
       case CFA_RED: // red
@@ -227,7 +227,6 @@ void FujiDecompressor::copy_line(struct fuji_compressed_block* info,
     }
 
     ++row_count;
-    raw_block_data += raw_width;
   }
 }
 
