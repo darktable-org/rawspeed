@@ -131,13 +131,11 @@ void FujiDecompressor::fuji_fill_buffer(struct fuji_compressed_block* info) {
       }
     }
 
-    if (info->cur_buf_size < 1) { // nothing read
-      if (info->fillbytes > 0) {
-        int ls = std::max(
-            1, std::min(info->fillbytes, static_cast<int>(FUJI_BUF_SIZE)));
-        info->cur_buf = nullptr;
-        info->fillbytes -= ls;
-      }
+    if (info->cur_buf_size < 1 && info->fillbytes > 0) { // nothing read
+      int ls = std::max(
+          1, std::min(info->fillbytes, static_cast<int>(FUJI_BUF_SIZE)));
+      info->cur_buf = nullptr;
+      info->fillbytes -= ls;
     }
 
     info->max_read_size -= info->cur_buf_size;
