@@ -273,13 +273,15 @@ void FujiDecompressor::copy_line_to_bayer(struct fuji_compressed_block* info,
 
       case 1:  // green
       case 3:  // second green
-      default: // to make static analyzer happy
         line_buf = lineBufG[row_count];
         break;
 
       case 2: // blue
         line_buf = lineBufB[row_count >> 1];
         break;
+
+      default:
+        __builtin_unreachable();
       }
 
       raw_block_data[pixel_count] = line_buf[pixel_count >> 1];
