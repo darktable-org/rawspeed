@@ -1017,15 +1017,16 @@ void FujiDecompressor::fuji_compressed_load_raw() {
   struct fuji_compressed_params common_info;
   int cur_block;
   unsigned* block_sizes;
-  uint64 raw_offset, *raw_block_offsets;
+  uint64 raw_offset;
 
   init_fuji_compr(&common_info);
 
   // read block sizes
   block_sizes =
       static_cast<unsigned*>(malloc(sizeof(unsigned) * fuji_total_blocks));
-  raw_block_offsets =
-      static_cast<uint64*>(malloc(sizeof(uint64) * fuji_total_blocks));
+
+  std::vector<uint64> raw_block_offsets;
+  raw_block_offsets.resize(fuji_total_blocks);
 
   raw_offset = sizeof(unsigned) * fuji_total_blocks;
 
@@ -1053,11 +1054,10 @@ void FujiDecompressor::fuji_compressed_load_raw() {
         raw_block_offsets[cur_block - 1] + block_sizes[cur_block - 1];
   }
 
-  fuji_decode_loop(&common_info, fuji_total_blocks, raw_block_offsets,
+  fuji_decode_loop(&common_info, fuji_total_blocks, raw_block_offsets.data(),
                    block_sizes);
 
   free(block_sizes);
-  free(raw_block_offsets);
 }
 
 void FujiDecompressor::fuji_decode_loop(
