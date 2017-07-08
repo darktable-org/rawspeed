@@ -32,6 +32,7 @@
 #include "metadata/Camera.h"                        // for Hints
 #include "parsers/TiffParser.h"                     // for TiffParser
 #include "tiff/TiffIFD.h"                           // for TiffID, TiffRoot...
+#include <cassert>                                  // for assert
 #include <cstring>                                  // for memcmp, size_t
 #include <memory>                                   // for unique_ptr
 
