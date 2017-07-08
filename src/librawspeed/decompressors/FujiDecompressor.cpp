@@ -975,8 +975,6 @@ void FujiDecompressor::parse_fuji_compressed_header() {
   fuji_raw_type = h_raw_type;
   raw_width = h_raw_width;
   raw_height = h_raw_height;
-
-  data_offset += header_size;
 }
 
 } // namespace rawspeed
