@@ -975,6 +975,11 @@ void FujiDecompressor::parse_fuji_compressed_header() {
     ThrowRDE("compressed RAF header check");
   }
 
+  if (12 == h_raw_bits) {
+    ThrowRDE("Aha, finally, a 12-bit compressed RAF! Please consider providing "
+             "samples on <https://raw.pixls.us/>, thanks!");
+  }
+
   // modify data
   fuji_total_lines = h_total_lines;
   fuji_total_blocks = h_blocks_in_row;
