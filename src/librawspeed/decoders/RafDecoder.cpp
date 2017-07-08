@@ -100,7 +100,7 @@ RawImage RafDecoder::decodeRawInternal() {
 
     mRaw->metadata.mode = "compressed";
 
-    FujiDecompressor fujiDecompress(input, mRaw, 0);
+    FujiDecompressor fujiDecompress(input, mRaw);
     fujiDecompress.fuji_compressed_load_raw();
 
     return mRaw;

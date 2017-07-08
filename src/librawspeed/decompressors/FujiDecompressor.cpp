@@ -32,9 +32,8 @@
 
 namespace rawspeed {
 
-FujiDecompressor::FujiDecompressor(ByteStream input_, const RawImage& img,
-                                   int offset)
-    : input(std::move(input_)), mImg(img), data_offset(offset) {
+FujiDecompressor::FujiDecompressor(ByteStream input_, const RawImage& img)
+    : input(std::move(input_)), mImg(img) {
   parse_fuji_compressed_header();
 
   for (int i = 0; i < 6; i++) {
