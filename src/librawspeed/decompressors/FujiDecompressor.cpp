@@ -814,28 +814,33 @@ void FujiDecompressor::fuji_bayer_decode_block(
   g_even_pos = 0;
   g_odd_pos = 1;
 
-  while (g_even_pos < line_width || g_odd_pos < line_width) {
-    if (g_even_pos < line_width) {
-      errcnt += fuji_decode_sample_even(info, params, info->linebuf[_G3] + 1,
-                                        g_even_pos, info->grad_even[1]);
-      g_even_pos += 2;
-      errcnt += fuji_decode_sample_even(info, params, info->linebuf[_B2] + 1,
-                                        b_even_pos, info->grad_even[1]);
-      b_even_pos += 2;
+  auto pass_GB = [&](_xt_lines c0, int g0, _xt_lines c1, int g1) {
+    while (g_even_pos < line_width || g_odd_pos < line_width) {
+      if (g_even_pos < line_width) {
+        errcnt += fuji_decode_sample_even(info, params, info->linebuf[c0] + 1,
+                                          g_even_pos, info->grad_even[g0]);
+        g_even_pos += 2;
+        errcnt += fuji_decode_sample_even(info, params, info->linebuf[c1] + 1,
+                                          b_even_pos, info->grad_even[g0]);
+        b_even_pos += 2;
+      }
+
+      if (g_even_pos > 8) {
+        errcnt += fuji_decode_sample_odd(info, params, info->linebuf[c0] + 1,
+                                         g_odd_pos, info->grad_odd[g1]);
+        g_odd_pos += 2;
+        errcnt += fuji_decode_sample_odd(info, params, info->linebuf[c1] + 1,
+                                         b_odd_pos, info->grad_odd[g1]);
+        b_odd_pos += 2;
+      }
     }
 
-    if (g_even_pos > 8) {
-      errcnt += fuji_decode_sample_odd(info, params, info->linebuf[_G3] + 1,
-                                       g_odd_pos, info->grad_odd[1]);
-      g_odd_pos += 2;
-      errcnt += fuji_decode_sample_odd(info, params, info->linebuf[_B2] + 1,
-                                       b_odd_pos, info->grad_odd[1]);
-      b_odd_pos += 2;
-    }
-  }
+    fuji_extend_green(info->linebuf, line_width);
+    fuji_extend_blue(info->linebuf, line_width);
+  };
 
-  fuji_extend_green(info->linebuf, line_width);
-  fuji_extend_blue(info->linebuf, line_width);
+  pass_GB(_G3, 1, _B2, 1);
+
   r_even_pos = 0;
   r_odd_pos = 1;
   g_even_pos = 0;
@@ -848,28 +853,7 @@ void FujiDecompressor::fuji_bayer_decode_block(
   b_even_pos = 0;
   b_odd_pos = 1;
 
-  while (g_even_pos < line_width || g_odd_pos < line_width) {
-    if (g_even_pos < line_width) {
-      errcnt += fuji_decode_sample_even(info, params, info->linebuf[_G5] + 1,
-                                        g_even_pos, info->grad_even[0]);
-      g_even_pos += 2;
-      errcnt += fuji_decode_sample_even(info, params, info->linebuf[_B3] + 1,
-                                        b_even_pos, info->grad_even[0]);
-      b_even_pos += 2;
-    }
-
-    if (g_even_pos > 8) {
-      errcnt += fuji_decode_sample_odd(info, params, info->linebuf[_G5] + 1,
-                                       g_odd_pos, info->grad_odd[0]);
-      g_odd_pos += 2;
-      errcnt += fuji_decode_sample_odd(info, params, info->linebuf[_B3] + 1,
-                                       b_odd_pos, info->grad_odd[0]);
-      b_odd_pos += 2;
-    }
-  }
-
-  fuji_extend_green(info->linebuf, line_width);
-  fuji_extend_blue(info->linebuf, line_width);
+  pass_GB(_G5, 0, _B3, 0);
 
   r_even_pos = 0;
   r_odd_pos = 1;
@@ -883,28 +867,7 @@ void FujiDecompressor::fuji_bayer_decode_block(
   b_even_pos = 0;
   b_odd_pos = 1;
 
-  while (g_even_pos < line_width || g_odd_pos < line_width) {
-    if (g_even_pos < line_width) {
-      errcnt += fuji_decode_sample_even(info, params, info->linebuf[_G7] + 1,
-                                        g_even_pos, info->grad_even[2]);
-      g_even_pos += 2;
-      errcnt += fuji_decode_sample_even(info, params, info->linebuf[_B4] + 1,
-                                        b_even_pos, info->grad_even[2]);
-      b_even_pos += 2;
-    }
-
-    if (g_even_pos > 8) {
-      errcnt += fuji_decode_sample_odd(info, params, info->linebuf[_G7] + 1,
-                                       g_odd_pos, info->grad_odd[2]);
-      g_odd_pos += 2;
-      errcnt += fuji_decode_sample_odd(info, params, info->linebuf[_B4] + 1,
-                                       b_odd_pos, info->grad_odd[2]);
-      b_odd_pos += 2;
-    }
-  }
-
-  fuji_extend_green(info->linebuf, line_width);
-  fuji_extend_blue(info->linebuf, line_width);
+  pass_GB(_G7, 2, _B4, 2);
 
   if (errcnt) {
     ThrowRDE("fuji decode bayer block");
