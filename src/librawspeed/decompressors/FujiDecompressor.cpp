@@ -902,15 +902,12 @@ void FujiDecompressor::fuji_compressed_load_raw() {
     input.skipBytes(padding);
   }
 
+  // calculating raw block offsets
   std::vector<uint64> raw_block_offsets;
   raw_block_offsets.resize(fuji_total_blocks);
-
-  raw_block_offsets[0] = input.getPosition();
-
-  // calculating raw block offsets
-  for (int cur_block = 1; cur_block < fuji_total_blocks; cur_block++) {
-    input.skipBytes(block_sizes[cur_block - 1]);
+  for (int cur_block = 0; cur_block < fuji_total_blocks; cur_block++) {
     raw_block_offsets[cur_block] = input.getPosition();
+    input.skipBytes(block_sizes[cur_block]);
   }
 
   fuji_decode_loop(&common_info, fuji_total_blocks, raw_block_offsets.data(),
