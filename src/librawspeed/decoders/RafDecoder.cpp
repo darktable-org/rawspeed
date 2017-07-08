@@ -96,11 +96,13 @@ RawImage RafDecoder::decodeRawInternal() {
 
   if (isCompressed()) {
     mRaw->dim = iPoint2D(width, height);
-    mRaw->createData();
 
     mRaw->metadata.mode = "compressed";
 
     FujiDecompressor fujiDecompress(input, mRaw);
+
+    mRaw->createData();
+
     fujiDecompress.fuji_compressed_load_raw();
 
     return mRaw;
