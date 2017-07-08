@@ -886,9 +886,6 @@ void FujiDecompressor::fuji_decode_strip(
 
 void FujiDecompressor::fuji_compressed_load_raw() {
   struct fuji_compressed_params common_info;
-  int cur_block;
-  uint64 raw_offset;
-
   init_fuji_compr(&common_info);
 
   // read block sizes
@@ -897,21 +894,20 @@ void FujiDecompressor::fuji_compressed_load_raw() {
   for (auto& block_size : block_sizes)
     block_size = input.getU32();
 
+  // some padding?
+  const uint64 raw_offset = sizeof(uint32) * fuji_total_blocks;
+  if (raw_offset & 0xC) {
+    const int padding = 0x10 - (raw_offset & 0xC);
+    input.skipBytes(padding);
+  }
+
   std::vector<uint64> raw_block_offsets;
   raw_block_offsets.resize(fuji_total_blocks);
 
-  raw_offset = sizeof(unsigned) * fuji_total_blocks;
-
-  if (raw_offset & 0xC) {
-    raw_offset += 0x10 - (raw_offset & 0xC);
-  }
-
-  raw_offset += data_offset;
-
-  raw_block_offsets[0] = raw_offset;
+  raw_block_offsets[0] = input.getPosition();
 
   // calculating raw block offsets
-  for (cur_block = 1; cur_block < fuji_total_blocks; cur_block++) {
+  for (int cur_block = 1; cur_block < fuji_total_blocks; cur_block++) {
     raw_block_offsets[cur_block] =
         raw_block_offsets[cur_block - 1] + block_sizes[cur_block - 1];
   }
