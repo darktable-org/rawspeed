@@ -20,10 +20,11 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint64, uchar8, ushort16
+#include "common/Common.h"                      // for uint64, uchar8, usho...
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/Buffer.h"                          // for Buffer
+#include "io/ByteStream.h"                      // for ByteStream
+#include "metadata/ColorFilterArray.h"          // for CFAColor
 #include <array>                                // for array
 #include <vector>                               // for vector
 
@@ -31,7 +32,7 @@ namespace rawspeed {
 
 class FujiDecompressor final : public AbstractDecompressor {
 public:
-  FujiDecompressor(Buffer input, const RawImage& img, int offset);
+  FujiDecompressor(ByteStream input, const RawImage& img, int offset);
   ~FujiDecompressor();
 
   using ushort = ushort16;
@@ -92,7 +93,7 @@ protected:
   };
 
 private:
-  Buffer input;
+  ByteStream input;
   RawImage mImg;
 
   std::array<std::array<CFAColor, 6>, 6> CFA;

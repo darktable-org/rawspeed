@@ -21,16 +21,18 @@
 */
 
 #include "decompressors/FujiDecompressor.h"
-#include "decoders/RawDecoderException.h" // for CFAColor::CFA_BLUE, CFAColor:...
-#include "metadata/ColorFilterArray.h" // for CFAColor::CFA_BLUE, CFAColor:...
-#include <algorithm>                   // for min, max, move
-#include <cstdlib>                     // for abs, free, malloc, calloc
-#include <cstring>                     // for memcpy, memset
+#include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
+#include "io/Buffer.h"                    // for Buffer
+#include "metadata/ColorFilterArray.h"    // for CFAColor::CFA_BLUE, CFACol...
+#include <algorithm>                      // for min, max, move
+#include <cstdlib>                        // for abs
+#include <cstring>                        // for memcpy, memset
 // IWYU pragma: no_include <bits/std_abs.h>
+// IWYU pragma: no_include <ext/alloc_traits.h>
 
 namespace rawspeed {
 
-FujiDecompressor::FujiDecompressor(Buffer input_, const RawImage& img,
+FujiDecompressor::FujiDecompressor(ByteStream input_, const RawImage& img,
                                    int offset)
     : input(std::move(input_)), mImg(img), data_offset(offset) {
   parse_fuji_compressed_header();
@@ -122,7 +124,8 @@ void FujiDecompressor::fuji_fill_buffer(struct fuji_compressed_block* info) {
     {
       info->cur_buf_size = info->max_read_size;
       if (info->cur_buf_size > 0) {
-        info->cur_buf = input.getData(info->cur_buf_offset, info->cur_buf_size);
+        info->cur_buf =
+            input.Buffer::getData(info->cur_buf_offset, info->cur_buf_size);
       }
     }
 
@@ -915,9 +918,10 @@ void FujiDecompressor::fuji_compressed_load_raw() {
 
   raw_offset += data_offset;
 
-  memcpy(block_sizes.data(),
-         input.getData(data_offset, sizeof(unsigned) * fuji_total_blocks),
-         sizeof(unsigned) * fuji_total_blocks);
+  memcpy(
+      block_sizes.data(),
+      input.Buffer::getData(data_offset, sizeof(unsigned) * fuji_total_blocks),
+      sizeof(unsigned) * fuji_total_blocks);
 
   raw_block_offsets[0] = raw_offset;
 
@@ -965,7 +969,7 @@ void FujiDecompressor::parse_fuji_compressed_header() {
   uchar8 h_blocks_in_row;
   ushort h_total_lines;
 
-  const uchar8* header = input.getData(data_offset, header_size);
+  const uchar8* header = input.Buffer::getData(data_offset, header_size);
 
   signature = sgetn(2, header);
   version = header[2];
