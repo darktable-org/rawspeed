@@ -42,8 +42,7 @@ int xtrans_abs[6][6] = {{1,1,0,1,1,2},
 
 FujiDecompressor::FujiDecompressor(Buffer input_, const RawImage& img,
                                    int offset)
-    : input(std::move(input_)), mImg(img) {
-  data_offset = offset;
+    : input(std::move(input_)), mImg(img), data_offset(offset) {
   parse_fuji_compressed_header();
 }
 
