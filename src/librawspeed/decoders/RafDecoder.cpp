@@ -23,8 +23,8 @@
 #include "common/Common.h"                          // for uint32, ushort16
 #include "common/Point.h"                           // for iPoint2D, iRecta...
 #include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
+#include "decompressors/FujiDecompressor.h"         // for FujiDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "decompressors/FujiDecompressor.h"
 #include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for getHostEndianness
@@ -66,7 +66,6 @@ RawImage RafDecoder::decodeRawInternal() {
   auto raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
   uint32 height = 0;
   uint32 width = 0;
-  bool isCompressed = false;
 
   if (raw->hasEntry(FUJI_RAWIMAGEFULLHEIGHT)) {
     height = raw->getEntry(FUJI_RAWIMAGEFULLHEIGHT)->getU32();
@@ -92,11 +91,20 @@ RawImage RafDecoder::decodeRawInternal() {
   if (offsets->count != 1 || counts->count != 1)
     ThrowRDE("Multiple Strips found: %u %u", offsets->count, counts->count);
 
-  if (counts->getU32() * 8 / (width * height) < 10)
-    isCompressed = true;
-
   ByteStream input(offsets->getRootIfdData());
   input = input.getSubStream(offsets->getU32(), counts->getU32());
+
+  if (isCompressed()) {
+    mRaw->dim = iPoint2D(width, height);
+    mRaw->createData();
+
+    mRaw->metadata.mode = "compressed";
+
+    FujiDecompressor fujiDecompress(input.getBuffer(input.getSize()), mRaw, 0);
+    fujiDecompress.fuji_compressed_load_raw();
+
+    return mRaw;
+  }
 
   // x-trans sensors report 14bpp, but data isn't packed
   // thus, unless someone has any better ideas, let's autodetect it.
@@ -106,6 +114,8 @@ RawImage RafDecoder::decodeRawInternal() {
   // that is identical but darker to the first. The two combined can produce
   // a higher dynamic range image. Right now we're ignoring it.
   bool double_width;
+
+  assert(!isCompressed());
 
   if (8UL * counts->getU32() >= 2UL * 16UL * width * height) {
     bps = 16;
@@ -125,9 +135,6 @@ RawImage RafDecoder::decodeRawInternal() {
   } else if (8UL * counts->getU32() >= 12UL * width * height) {
     bps = 12;
     double_width = false;
-  } else if (isCompressed) {
-    bps = 16;
-    double_width = false;
   } else {
     ThrowRDE("Can not detect bitdepth. StripByteCounts = %u, width = %u, "
              "height = %u",
@@ -140,27 +147,19 @@ RawImage RafDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(real_width, height);
   mRaw->createData();
 
-  if (isCompressed) {
-    mRaw->metadata.mode = "compressed";
+  UncompressedDecompressor u(input, mRaw);
 
-    FujiDecompressor fujiDecompress(input.getBuffer(input.getSize()), mRaw, 0);
-    fujiDecompress.fuji_compressed_load_raw();
+  if (double_width) {
+    u.decodeRawUnpacked<16, little>(width * 2, height);
+  } else if (input.isInNativeByteOrder() == (getHostEndianness() == big)) {
+    u.decodeRawUnpacked<16, big>(width, height);
   } else {
-    UncompressedDecompressor u(input, mRaw);
-
-    if (double_width) {
-      u.decodeRawUnpacked<16, little>(width * 2, height);
-    } else if (input.isInNativeByteOrder() == (getHostEndianness() == big)) {
-      u.decodeRawUnpacked<16, big>(width, height);
+    iPoint2D pos(0, 0);
+    if (hints.has("jpeg32_bitorder")) {
+      u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
+                            BitOrder_MSB32);
     } else {
-      iPoint2D pos(0, 0);
-      if (hints.has("jpeg32_bitorder")) {
-        u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
-                              BitOrder_MSB32);
-      } else {
-        u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
-                              BitOrder_LSB);
-      }
+      u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps, BitOrder_LSB);
     }
   }
 
