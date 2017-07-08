@@ -149,8 +149,7 @@ void FujiDecompressor::init_fuji_block(
     struct fuji_compressed_block* info,
     const struct fuji_compressed_params* params, uint64 raw_offset,
     unsigned dsize) {
-  info->linealloc = static_cast<ushort*>(
-      calloc(sizeof(ushort), _ltotal * (params->line_width + 2)));
+  info->linealloc.resize(_ltotal * (params->line_width + 2));
 
   uint64 fsize = input.getSize();
   info->max_read_size = std::min(unsigned(fsize - raw_offset),
@@ -158,7 +157,7 @@ void FujiDecompressor::init_fuji_block(
   // info->max_read_size = fsize;
   info->fillbytes = 1;
 
-  info->linebuf[_R0] = info->linealloc;
+  info->linebuf[_R0] = &info->linealloc[0];
 
   for (int i = _R1; i <= _B4; i++) {
     info->linebuf[i] = info->linebuf[i - 1] + params->line_width + 2;
@@ -1001,7 +1000,6 @@ void FujiDecompressor::fuji_decode_strip(
   }
 
   // release data
-  free(info.linealloc);
   // free (info.cur_buf);
 }
 

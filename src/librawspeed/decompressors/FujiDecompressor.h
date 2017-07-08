@@ -86,7 +86,7 @@ protected:
     int fillbytes;          // Counter to add extra byte for block size N*16
     struct int_pair grad_even[3][41]; // tables of gradients
     struct int_pair grad_odd[3][41];
-    ushort* linealloc;
+    std::vector<ushort> linealloc;
     ushort* linebuf[_ltotal];
   };
 
