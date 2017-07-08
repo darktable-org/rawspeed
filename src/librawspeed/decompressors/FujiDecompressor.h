@@ -114,6 +114,11 @@ private:
                        const struct fuji_compressed_params* params,
                        uint64 raw_offset, unsigned dsize);
   void fuji_fill_buffer(struct fuji_compressed_block* info);
+
+  template <typename T>
+  void copy_line(struct fuji_compressed_block* info, int cur_line,
+                 int cur_block, int cur_block_width, T&& idx);
+
   void copy_line_to_xtrans(struct fuji_compressed_block* info, int cur_line,
                            int cur_block, int cur_block_width);
   void copy_line_to_bayer(struct fuji_compressed_block* info, int cur_line,
