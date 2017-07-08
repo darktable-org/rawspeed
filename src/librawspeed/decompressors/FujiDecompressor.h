@@ -18,15 +18,13 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef RAF_DECOMPRESSOR_H
-#define RAF_DECOMPRESSOR_H
+#pragma once
 
 #include "common/Common.h"   // for uint64, uchar8, ushort16
 #include "common/RawImage.h" // for RawImage
 #include "io/Buffer.h"       // for Buffer
 
 namespace rawspeed {
-
 
 class FujiDecompressor //: public LJpegDecompressor
 {
@@ -146,5 +144,3 @@ private:
 };
 
 } // namespace rawspeed
-
-#endif // RAF_DECOMPRESSOR_H
