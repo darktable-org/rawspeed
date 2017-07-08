@@ -892,9 +892,10 @@ void FujiDecompressor::fuji_compressed_load_raw() {
   init_fuji_compr(&common_info);
 
   // read block sizes
-  std::vector<unsigned> block_sizes;
+  std::vector<uint32> block_sizes;
   block_sizes.resize(fuji_total_blocks);
-  static_assert(sizeof(unsigned) == 4, "oops");
+  for (auto& block_size : block_sizes)
+    block_size = input.getU32();
 
   std::vector<uint64> raw_block_offsets;
   raw_block_offsets.resize(fuji_total_blocks);
@@ -907,20 +908,9 @@ void FujiDecompressor::fuji_compressed_load_raw() {
 
   raw_offset += data_offset;
 
-  memcpy(
-      block_sizes.data(),
-      input.Buffer::getData(data_offset, sizeof(unsigned) * fuji_total_blocks),
-      sizeof(unsigned) * fuji_total_blocks);
-
   raw_block_offsets[0] = raw_offset;
 
   // calculating raw block offsets
-  for (cur_block = 0; cur_block < fuji_total_blocks; cur_block++) {
-    Buffer b(reinterpret_cast<uchar8*>(block_sizes.data()),
-             sizeof(block_sizes[0]) * block_sizes.size());
-    block_sizes[cur_block] = b.get<unsigned>(false, 0, cur_block);
-  }
-
   for (cur_block = 1; cur_block < fuji_total_blocks; cur_block++) {
     raw_block_offsets[cur_block] =
         raw_block_offsets[cur_block - 1] + block_sizes[cur_block - 1];
