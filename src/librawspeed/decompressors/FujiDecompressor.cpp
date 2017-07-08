@@ -23,6 +23,7 @@
 #include "decompressors/FujiDecompressor.h"
 #include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
 #include "io/Buffer.h"                    // for Buffer
+#include "io/Endianness.h"                // for Endianness::big
 #include "metadata/ColorFilterArray.h"    // for CFAColor::CFA_BLUE, CFACol...
 #include <algorithm>                      // for min, max, move
 #include <cstdlib>                        // for abs
@@ -908,8 +909,8 @@ void FujiDecompressor::fuji_compressed_load_raw() {
 
   // calculating raw block offsets
   for (int cur_block = 1; cur_block < fuji_total_blocks; cur_block++) {
-    raw_block_offsets[cur_block] =
-        raw_block_offsets[cur_block - 1] + block_sizes[cur_block - 1];
+    input.skipBytes(block_sizes[cur_block - 1]);
+    raw_block_offsets[cur_block] = input.getPosition();
   }
 
   fuji_decode_loop(&common_info, fuji_total_blocks, raw_block_offsets.data(),
