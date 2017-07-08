@@ -140,25 +140,27 @@ RawImage RafDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(real_width, height);
   mRaw->createData();
 
-  UncompressedDecompressor u(input, mRaw);
-
-  iPoint2D pos(0, 0);
-
   if (isCompressed) {
     mRaw->metadata.mode = "compressed";
 
-    FujiDecompressor fujiDecompress(input, mRaw, 0);
+    FujiDecompressor fujiDecompress(input.getBuffer(input.getSize()), mRaw, 0);
     fujiDecompress.fuji_compressed_load_raw();
-  } else if (double_width) {
-    u.decodeRawUnpacked<16, little>(width * 2, height);
-  } else if (input.isInNativeByteOrder() == (getHostEndianness() == big)) {
-    u.decodeRawUnpacked<16, big>(width, height);
   } else {
-    if (hints.has("jpeg32_bitorder")) {
-      u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
-                            BitOrder_MSB32);
+    UncompressedDecompressor u(input, mRaw);
+
+    if (double_width) {
+      u.decodeRawUnpacked<16, little>(width * 2, height);
+    } else if (input.isInNativeByteOrder() == (getHostEndianness() == big)) {
+      u.decodeRawUnpacked<16, big>(width, height);
     } else {
-      u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps, BitOrder_LSB);
+      iPoint2D pos(0, 0);
+      if (hints.has("jpeg32_bitorder")) {
+        u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
+                              BitOrder_MSB32);
+      } else {
+        u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
+                              BitOrder_LSB);
+      }
     }
   }
 
