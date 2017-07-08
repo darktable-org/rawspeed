@@ -30,20 +30,15 @@
 
 namespace rawspeed {
 
-// hardcoded X-T2 CFA
-/*
-int xtrans_abs[6][6] = {{1,1,0,1,1,2},
-                        {1,1,2,1,1,0},
-                        {2,0,1,0,2,1},
-                        {1,1,2,1,1,0},
-                        {1,1,0,1,1,2},
-                        {0,2,1,2,0,1}};
-*/
-
 FujiDecompressor::FujiDecompressor(Buffer input_, const RawImage& img,
                                    int offset)
     : input(std::move(input_)), mImg(img), data_offset(offset) {
   parse_fuji_compressed_header();
+
+  for (int i = 0; i < 6; i++) {
+    for (int j = 0; j < 6; j++)
+      CFA[i][j] = mImg->cfa.getColorAt(j, i);
+  }
 }
 
 FujiDecompressor::~FujiDecompressor() = default;
@@ -203,8 +198,7 @@ void FujiDecompressor::copy_line(struct fuji_compressed_block* info,
     while (pixel_count < cur_block_width) {
       ushort* line_buf = nullptr;
 
-      //      switch (xtrans_abs[row_count][ (pixel_count % 6)]) {
-      switch (mImg->cfa.getColorAt(pixel_count, row_count)) {
+      switch (CFA[row_count][(pixel_count % 6)]) {
       case CFA_RED: // red
         line_buf = lineBufR[row_count >> 1];
         break;

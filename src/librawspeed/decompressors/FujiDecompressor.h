@@ -24,6 +24,7 @@
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/Buffer.h"                          // for Buffer
+#include <array>                                // for array
 #include <vector>                               // for vector
 
 namespace rawspeed {
@@ -93,6 +94,8 @@ protected:
 private:
   Buffer input;
   RawImage mImg;
+
+  std::array<std::array<CFAColor, 6>, 6> CFA;
 
   int fuji_total_lines;
   int fuji_total_blocks;
