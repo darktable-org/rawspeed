@@ -20,14 +20,14 @@
 
 #pragma once
 
-#include "common/Common.h"   // for uint64, uchar8, ushort16
-#include "common/RawImage.h" // for RawImage
-#include "io/Buffer.h"       // for Buffer
+#include "common/Common.h"                      // for uint64, uchar8, ushort16
+#include "common/RawImage.h"                    // for RawImage
+#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "io/Buffer.h"                          // for Buffer
 
 namespace rawspeed {
 
-class FujiDecompressor //: public LJpegDecompressor
-{
+class FujiDecompressor final : public AbstractDecompressor {
 public:
   FujiDecompressor(Buffer input, const RawImage& img, int offset);
   ~FujiDecompressor();
