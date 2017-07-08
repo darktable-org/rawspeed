@@ -374,14 +374,19 @@ int FujiDecompressor::fuji_decode_sample_even(
   int interp_val = 0;
   int errcnt = 0;
 
-  int sample = 0, code = 0;
+  int sample = 0;
+  int code = 0;
   ushort* line_buf_cur = line_buf + pos;
   int Rb = line_buf_cur[-2 - params->line_width];
   int Rc = line_buf_cur[-3 - params->line_width];
   int Rd = line_buf_cur[-1 - params->line_width];
   int Rf = line_buf_cur[-4 - 2 * params->line_width];
 
-  int grad, gradient, diffRcRb, diffRfRb, diffRdRb;
+  int grad;
+  int gradient;
+  int diffRcRb;
+  int diffRfRb;
+  int diffRdRb;
 
   grad = fuji_quant_gradient(params, Rb - Rf, Rc - Rb);
   gradient = std::abs(grad);
@@ -455,7 +460,8 @@ int FujiDecompressor::fuji_decode_sample_odd(
   int interp_val = 0;
   int errcnt = 0;
 
-  int sample = 0, code = 0;
+  int sample = 0;
+  int code = 0;
   ushort* line_buf_cur = line_buf + pos;
   int Ra = line_buf_cur[-1];
   int Rb = line_buf_cur[-2 - params->line_width];
@@ -463,7 +469,8 @@ int FujiDecompressor::fuji_decode_sample_odd(
   int Rd = line_buf_cur[-1 - params->line_width];
   int Rg = line_buf_cur[1];
 
-  int grad, gradient;
+  int grad;
+  int gradient;
 
   grad = fuji_quant_gradient(params, Rb - Rc, Rc - Ra);
   gradient = std::abs(grad);
@@ -869,7 +876,8 @@ void FujiDecompressor::fuji_bayer_decode_block(
 void FujiDecompressor::fuji_decode_strip(
     const struct fuji_compressed_params* info_common, int cur_block,
     uint64 raw_offset, unsigned dsize) {
-  int cur_block_width, cur_line;
+  int cur_block_width;
+  int cur_line;
   unsigned line_size;
   struct fuji_compressed_block info;
 
@@ -883,12 +891,13 @@ void FujiDecompressor::fuji_decode_strip(
   }
 
   struct i_pair {
-    int a, b;
+    int a;
+    int b;
   };
 
   const i_pair mtable[6] = {{_R0, _R3}, {_R1, _R4}, {_G0, _G6},
-                            {_G1, _G7}, {_B0, _B3}, {_B1, _B4}},
-               ztable[3] = {{_R2, 3}, {_G2, 6}, {_B2, 3}};
+                            {_G1, _G7}, {_B0, _B3}, {_B1, _B4}};
+  const i_pair ztable[3] = {{_R2, 3}, {_G2, 6}, {_B2, 3}};
 
   for (cur_line = 0; cur_line < fuji_total_lines; cur_line++) {
     if (fuji_raw_type == 16) {
