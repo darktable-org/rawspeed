@@ -34,6 +34,8 @@ namespace rawspeed {
 
 FujiDecompressor::FujiDecompressor(ByteStream input_, const RawImage& img)
     : input(std::move(input_)), mImg(img) {
+  input.setByteOrder(big);
+
   parse_fuji_compressed_header();
 
   for (int i = 0; i < 6; i++) {
@@ -882,16 +884,6 @@ void FujiDecompressor::fuji_decode_strip(
   // free (info.cur_buf);
 }
 
-static unsigned sgetn(int n, const uchar8* s) {
-  unsigned result = 0;
-
-  while (n-- > 0) {
-    result = (result << 8) | (*s++);
-  }
-
-  return result;
-}
-
 void FujiDecompressor::fuji_compressed_load_raw() {
   struct fuji_compressed_params common_info;
   int cur_block;
@@ -953,31 +945,19 @@ void FujiDecompressor::fuji_decode_loop(
 }
 
 void FujiDecompressor::parse_fuji_compressed_header() {
-  const uint32 header_size = 16;
+  static const uint32 header_size = 16;
+  input.check(header_size);
 
-  ushort signature;
-  uchar8 version;
-  uchar8 h_raw_type;
-  uchar8 h_raw_bits;
-  ushort h_raw_height;
-  ushort h_raw_rounded_width;
-  ushort h_raw_width;
-  ushort h_block_size;
-  uchar8 h_blocks_in_row;
-  ushort h_total_lines;
-
-  const uchar8* header = input.Buffer::getData(data_offset, header_size);
-
-  signature = sgetn(2, header);
-  version = header[2];
-  h_raw_type = header[3];
-  h_raw_bits = header[4];
-  h_raw_height = sgetn(2, header + 5);
-  h_raw_rounded_width = sgetn(2, header + 7);
-  h_raw_width = sgetn(2, header + 9);
-  h_block_size = sgetn(2, header + 11);
-  h_blocks_in_row = header[13];
-  h_total_lines = sgetn(2, header + 14);
+  const ushort signature = input.getU16();
+  const uchar8 version = input.getByte();
+  const uchar8 h_raw_type = input.getByte();
+  const uchar8 h_raw_bits = input.getByte();
+  const ushort h_raw_height = input.getU16();
+  const ushort h_raw_rounded_width = input.getU16();
+  const ushort h_raw_width = input.getU16();
+  const ushort h_block_size = input.getU16();
+  const uchar8 h_blocks_in_row = input.getByte();
+  const ushort h_total_lines = input.getU16();
 
   // general validation
   if (signature != 0x4953 || version != 1 || h_raw_height > 0x3000 ||
