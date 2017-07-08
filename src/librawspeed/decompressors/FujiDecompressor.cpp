@@ -355,9 +355,15 @@ void FujiDecompressor::fuji_read_code(struct fuji_compressed_block* info,
 int __attribute__((const)) FujiDecompressor::bitDiff(int value1, int value2) {
   int decBits = 0;
 
-  if (value2 < value1)
-    while (decBits <= 12 && (value2 << ++decBits) < value1)
-      ;
+  if (value2 >= value1)
+    return decBits;
+
+  while (decBits <= 12) {
+    ++decBits;
+
+    if ((value2 << decBits) >= value1)
+      return decBits;
+  }
 
   return decBits;
 }
