@@ -564,7 +564,7 @@ void FujiDecompressor::fuji_extend_blue(ushort* linebuf[_ltotal],
   fuji_extend_generic(linebuf, line_width, _B2, _B4);
 }
 
-void FujiDecompressor::xtrans_decode_block(
+void FujiDecompressor::xtrans_decode_block( // NOLINT
     struct fuji_compressed_block* info,
     const struct fuji_compressed_params* params, int cur_line) {
   int r_even_pos = 0;
