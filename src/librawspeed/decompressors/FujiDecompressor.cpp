@@ -198,7 +198,7 @@ void FujiDecompressor::copy_line(struct fuji_compressed_block* info,
     while (pixel_count < cur_block_width) {
       ushort* line_buf = nullptr;
 
-      switch (CFA[row_count][(pixel_count % 6)]) {
+      switch (CFA[row_count][pixel_count % 6]) {
       case CFA_RED: // red
         line_buf = lineBufR[row_count >> 1];
         break;
