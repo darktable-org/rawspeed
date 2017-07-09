@@ -85,8 +85,8 @@ protected:
     int cur_buf_size;       // buffer size
     const uchar8* cur_buf;  // currently read block
     int fillbytes;          // Counter to add extra byte for block size N*16
-    struct int_pair grad_even[3][41]; // tables of gradients
-    struct int_pair grad_odd[3][41];
+    int_pair grad_even[3][41]; // tables of gradients
+    int_pair grad_odd[3][41];
     std::vector<ushort> linealloc;
     ushort* linebuf[_ltotal];
   };
@@ -106,36 +106,33 @@ private:
   int raw_height;
 
   void parse_fuji_compressed_header();
-  void init_fuji_compr(struct fuji_compressed_params* info);
-  void fuji_decode_loop(const struct fuji_compressed_params* common_info,
-                        int count, uint64* raw_block_offsets,
-                        unsigned* block_sizes);
-  void fuji_decode_strip(const struct fuji_compressed_params* info_common,
+  void init_fuji_compr(fuji_compressed_params* info);
+  void fuji_decode_loop(const fuji_compressed_params* common_info, int count,
+                        uint64* raw_block_offsets, unsigned* block_sizes);
+  void fuji_decode_strip(const fuji_compressed_params* info_common,
                          int cur_block, uint64 raw_offset, unsigned dsize);
-  void init_fuji_block(struct fuji_compressed_block* info,
-                       const struct fuji_compressed_params* params,
-                       uint64 raw_offset, unsigned dsize);
-  void fuji_fill_buffer(struct fuji_compressed_block* info);
+  void init_fuji_block(fuji_compressed_block* info,
+                       const fuji_compressed_params* params, uint64 raw_offset,
+                       unsigned dsize);
+  void fuji_fill_buffer(fuji_compressed_block* info);
 
   template <typename T>
-  void copy_line(struct fuji_compressed_block* info, int cur_line,
-                 int cur_block, int cur_block_width, T&& idx);
+  void copy_line(fuji_compressed_block* info, int cur_line, int cur_block,
+                 int cur_block_width, T&& idx);
 
-  void copy_line_to_xtrans(struct fuji_compressed_block* info, int cur_line,
+  void copy_line_to_xtrans(fuji_compressed_block* info, int cur_line,
                            int cur_block, int cur_block_width);
-  void copy_line_to_bayer(struct fuji_compressed_block* info, int cur_line,
+  void copy_line_to_bayer(fuji_compressed_block* info, int cur_line,
                           int cur_block, int cur_block_width);
-  void fuji_zerobits(struct fuji_compressed_block* info, int* count);
-  void fuji_read_code(struct fuji_compressed_block* info, int* data,
-                      int bits_to_read);
+  void fuji_zerobits(fuji_compressed_block* info, int* count);
+  void fuji_read_code(fuji_compressed_block* info, int* data, int bits_to_read);
   int bitDiff(int value1, int value2);
-  int fuji_decode_sample_even(struct fuji_compressed_block* info,
-                              const struct fuji_compressed_params* params,
-                              ushort* line_buf, int pos,
-                              struct int_pair* grads);
-  int fuji_decode_sample_odd(struct fuji_compressed_block* info,
-                             const struct fuji_compressed_params* params,
-                             ushort* line_buf, int pos, struct int_pair* grads);
+  int fuji_decode_sample_even(fuji_compressed_block* info,
+                              const fuji_compressed_params* params,
+                              ushort* line_buf, int pos, int_pair* grads);
+  int fuji_decode_sample_odd(fuji_compressed_block* info,
+                             const fuji_compressed_params* params,
+                             ushort* line_buf, int pos, int_pair* grads);
   void fuji_decode_interpolation_even(int line_width, ushort* line_buf,
                                       int pos);
   void fuji_extend_generic(ushort* linebuf[_ltotal], int line_width, int start,
@@ -143,11 +140,10 @@ private:
   void fuji_extend_red(ushort* linebuf[_ltotal], int line_width);
   void fuji_extend_green(ushort* linebuf[_ltotal], int line_width);
   void fuji_extend_blue(ushort* linebuf[_ltotal], int line_width);
-  void xtrans_decode_block(struct fuji_compressed_block* info,
-                           const struct fuji_compressed_params* params,
-                           int cur_line);
-  void fuji_bayer_decode_block(struct fuji_compressed_block* info,
-                               const struct fuji_compressed_params* params,
+  void xtrans_decode_block(fuji_compressed_block* info,
+                           const fuji_compressed_params* params, int cur_line);
+  void fuji_bayer_decode_block(fuji_compressed_block* info,
+                               const fuji_compressed_params* params,
                                int cur_line);
 };
 

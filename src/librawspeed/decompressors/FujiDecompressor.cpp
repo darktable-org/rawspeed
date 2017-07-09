@@ -45,7 +45,7 @@ FujiDecompressor::FujiDecompressor(ByteStream input_, const RawImage& img)
   }
 }
 
-void FujiDecompressor::init_fuji_compr(struct fuji_compressed_params* info) {
+void FujiDecompressor::init_fuji_compr(fuji_compressed_params* info) {
   int cur_val;
   char* qt;
 
@@ -114,7 +114,7 @@ void FujiDecompressor::init_fuji_compr(struct fuji_compressed_params* info) {
 
 #define FUJI_BUF_SIZE 0x10000u
 
-void FujiDecompressor::fuji_fill_buffer(struct fuji_compressed_block* info) {
+void FujiDecompressor::fuji_fill_buffer(fuji_compressed_block* info) {
   if (info->cur_pos >= info->cur_buf_size) {
     info->cur_pos = 0;
     info->cur_buf_offset += info->cur_buf_size;
@@ -140,10 +140,9 @@ void FujiDecompressor::fuji_fill_buffer(struct fuji_compressed_block* info) {
   }
 }
 
-void FujiDecompressor::init_fuji_block(
-    struct fuji_compressed_block* info,
-    const struct fuji_compressed_params* params, uint64 raw_offset,
-    unsigned dsize) {
+void FujiDecompressor::init_fuji_block(fuji_compressed_block* info,
+                                       const fuji_compressed_params* params,
+                                       uint64 raw_offset, unsigned dsize) {
   info->linealloc.resize(_ltotal * (params->line_width + 2));
 
   uint64 fsize = input.getSize();
@@ -176,9 +175,8 @@ void FujiDecompressor::init_fuji_block(
 }
 
 template <typename T>
-void FujiDecompressor::copy_line(struct fuji_compressed_block* info,
-                                 int cur_line, int cur_block,
-                                 int cur_block_width, T&& idx) {
+void FujiDecompressor::copy_line(fuji_compressed_block* info, int cur_line,
+                                 int cur_block, int cur_block_width, T&& idx) {
   ushort* lineBufB[3];
   ushort* lineBufG[6];
   ushort* lineBufR[3];
@@ -227,7 +225,7 @@ void FujiDecompressor::copy_line(struct fuji_compressed_block* info,
   }
 }
 
-void FujiDecompressor::copy_line_to_xtrans(struct fuji_compressed_block* info,
+void FujiDecompressor::copy_line_to_xtrans(fuji_compressed_block* info,
                                            int cur_line, int cur_block,
                                            int cur_block_width) {
   auto index = [](int pixel_count) {
@@ -238,7 +236,7 @@ void FujiDecompressor::copy_line_to_xtrans(struct fuji_compressed_block* info,
   copy_line(info, cur_line, cur_block, cur_block_width, index);
 }
 
-void FujiDecompressor::copy_line_to_bayer(struct fuji_compressed_block* info,
+void FujiDecompressor::copy_line_to_bayer(fuji_compressed_block* info,
                                           int cur_line, int cur_block,
                                           int cur_block_width) {
   auto index = [](int pixel_count) { return pixel_count >> 1; };
@@ -250,8 +248,7 @@ void FujiDecompressor::copy_line_to_bayer(struct fuji_compressed_block* info,
   (9 * (i)->q_table[(i)->q_point[4] + (v1)] +                                  \
    (i)->q_table[(i)->q_point[4] + (v2)])
 
-void FujiDecompressor::fuji_zerobits(struct fuji_compressed_block* info,
-                                     int* count) {
+void FujiDecompressor::fuji_zerobits(fuji_compressed_block* info, int* count) {
   uchar8 zero = 0;
   *count = 0;
 
@@ -273,8 +270,8 @@ void FujiDecompressor::fuji_zerobits(struct fuji_compressed_block* info,
   }
 }
 
-void FujiDecompressor::fuji_read_code(struct fuji_compressed_block* info,
-                                      int* data, int bits_to_read) {
+void FujiDecompressor::fuji_read_code(fuji_compressed_block* info, int* data,
+                                      int bits_to_read) {
   uchar8 bits_left = bits_to_read;
   uchar8 bits_left_in_byte = 8 - (info->cur_bit & 7);
   *data = 0;
@@ -324,9 +321,8 @@ int __attribute__((const)) FujiDecompressor::bitDiff(int value1, int value2) {
 }
 
 int FujiDecompressor::fuji_decode_sample_even(
-    struct fuji_compressed_block* info,
-    const struct fuji_compressed_params* params, ushort* line_buf, int pos,
-    struct int_pair* grads) {
+    fuji_compressed_block* info, const fuji_compressed_params* params,
+    ushort* line_buf, int pos, int_pair* grads) {
   int interp_val = 0;
   int errcnt = 0;
 
@@ -410,9 +406,8 @@ int FujiDecompressor::fuji_decode_sample_even(
 }
 
 int FujiDecompressor::fuji_decode_sample_odd(
-    struct fuji_compressed_block* info,
-    const struct fuji_compressed_params* params, ushort* line_buf, int pos,
-    struct int_pair* grads) {
+    fuji_compressed_block* info, const fuji_compressed_params* params,
+    ushort* line_buf, int pos, int_pair* grads) {
   int interp_val = 0;
   int errcnt = 0;
 
@@ -533,8 +528,8 @@ void FujiDecompressor::fuji_extend_blue(ushort* linebuf[_ltotal],
 }
 
 void FujiDecompressor::xtrans_decode_block( // NOLINT
-    struct fuji_compressed_block* info,
-    const struct fuji_compressed_params* params, int cur_line) {
+    fuji_compressed_block* info, const fuji_compressed_params* params,
+    int cur_line) {
   int r_even_pos = 0;
   int r_odd_pos = 1;
   int g_even_pos = 0;
@@ -739,8 +734,8 @@ void FujiDecompressor::xtrans_decode_block( // NOLINT
 }
 
 void FujiDecompressor::fuji_bayer_decode_block(
-    struct fuji_compressed_block* info,
-    const struct fuji_compressed_params* params, int cur_line) {
+    fuji_compressed_block* info, const fuji_compressed_params* params,
+    int cur_line) {
   int r_even_pos = 0;
   int r_odd_pos = 1;
   int g_even_pos = 0;
@@ -830,12 +825,12 @@ void FujiDecompressor::fuji_bayer_decode_block(
 }
 
 void FujiDecompressor::fuji_decode_strip(
-    const struct fuji_compressed_params* info_common, int cur_block,
-    uint64 raw_offset, unsigned dsize) {
+    const fuji_compressed_params* info_common, int cur_block, uint64 raw_offset,
+    unsigned dsize) {
   int cur_block_width;
   int cur_line;
   unsigned line_size;
-  struct fuji_compressed_block info;
+  fuji_compressed_block info;
 
   init_fuji_block(&info, info_common, raw_offset, dsize);
   line_size = sizeof(ushort) * (info_common->line_width + 2);
@@ -886,7 +881,7 @@ void FujiDecompressor::fuji_decode_strip(
 }
 
 void FujiDecompressor::fuji_compressed_load_raw() {
-  struct fuji_compressed_params common_info;
+  fuji_compressed_params common_info;
   init_fuji_compr(&common_info);
 
   // read block sizes
@@ -915,7 +910,7 @@ void FujiDecompressor::fuji_compressed_load_raw() {
 }
 
 void FujiDecompressor::fuji_decode_loop(
-    const struct fuji_compressed_params* common_info, int count,
+    const fuji_compressed_params* common_info, int count,
     uint64* raw_block_offsets, unsigned* block_sizes) {
 
 #ifdef _OPENMP
