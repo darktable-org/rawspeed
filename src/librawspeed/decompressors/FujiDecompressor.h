@@ -40,6 +40,8 @@ public:
 
 protected:
   struct fuji_compressed_params {
+    explicit fuji_compressed_params(const FujiDecompressor& d);
+
     std::vector<char> q_table; /* quantization table */
     int q_point[5]; /* quantization points */
     int max_bits;
@@ -106,7 +108,6 @@ private:
   int raw_height;
 
   void parse_fuji_compressed_header();
-  void init_fuji_compr(fuji_compressed_params* info);
   void fuji_decode_loop(const fuji_compressed_params* common_info, int count,
                         uint64* raw_block_offsets, unsigned* block_sizes);
   void fuji_decode_strip(const fuji_compressed_params* info_common,

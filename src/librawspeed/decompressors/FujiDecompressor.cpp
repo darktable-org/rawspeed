@@ -45,48 +45,49 @@ FujiDecompressor::FujiDecompressor(ByteStream input_, const RawImage& img)
   }
 }
 
-void FujiDecompressor::init_fuji_compr(fuji_compressed_params* info) {
+FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
+    const FujiDecompressor& d) {
   int cur_val;
   char* qt;
 
-  if ((fuji_block_width % 3 && fuji_raw_type == 16) ||
-      (fuji_block_width & 1 && fuji_raw_type == 0)) {
+  if ((d.fuji_block_width % 3 && d.fuji_raw_type == 16) ||
+      (d.fuji_block_width & 1 && d.fuji_raw_type == 0)) {
     ThrowRDE("fuji_block_checks");
   }
 
-  info->q_table.resize(32768);
+  q_table.resize(32768);
 
-  if (fuji_raw_type == 16) {
-    info->line_width = (fuji_block_width * 2) / 3;
+  if (d.fuji_raw_type == 16) {
+    line_width = (d.fuji_block_width * 2) / 3;
   } else {
-    info->line_width = fuji_block_width >> 1;
+    line_width = d.fuji_block_width >> 1;
   }
 
-  info->q_point[0] = 0;
-  info->q_point[1] = 0x12;
-  info->q_point[2] = 0x43;
-  info->q_point[3] = 0x114;
-  info->q_point[4] = (1 << fuji_bits) - 1;
-  info->min_value = 0x40;
+  q_point[0] = 0;
+  q_point[1] = 0x12;
+  q_point[2] = 0x43;
+  q_point[3] = 0x114;
+  q_point[4] = (1 << d.fuji_bits) - 1;
+  min_value = 0x40;
 
-  cur_val = -info->q_point[4];
+  cur_val = -q_point[4];
 
-  for (qt = &info->q_table[0]; cur_val <= info->q_point[4]; ++qt, ++cur_val) {
-    if (cur_val <= -info->q_point[3]) {
+  for (qt = &q_table[0]; cur_val <= q_point[4]; ++qt, ++cur_val) {
+    if (cur_val <= -q_point[3]) {
       *qt = -4;
-    } else if (cur_val <= -info->q_point[2]) {
+    } else if (cur_val <= -q_point[2]) {
       *qt = -3;
-    } else if (cur_val <= -info->q_point[1]) {
+    } else if (cur_val <= -q_point[1]) {
       *qt = -2;
     } else if (cur_val < 0) {
       *qt = -1;
     } else if (cur_val == 0) {
       *qt = 0;
-    } else if (cur_val < info->q_point[1]) {
+    } else if (cur_val < q_point[1]) {
       *qt = 1;
-    } else if (cur_val < info->q_point[2]) {
+    } else if (cur_val < q_point[2]) {
       *qt = 2;
-    } else if (cur_val < info->q_point[3]) {
+    } else if (cur_val < q_point[3]) {
       *qt = 3;
     } else {
       *qt = 4;
@@ -94,19 +95,19 @@ void FujiDecompressor::init_fuji_compr(fuji_compressed_params* info) {
   }
 
   // populting gradients
-  if (info->q_point[4] == 0x3FFF) {
-    info->total_values = 0x4000;
-    info->raw_bits = 14;
-    info->max_bits = 56;
-    info->maxDiff = 256;
-  } else if (info->q_point[4] == 0xFFF) {
+  if (q_point[4] == 0x3FFF) {
+    total_values = 0x4000;
+    raw_bits = 14;
+    max_bits = 56;
+    maxDiff = 256;
+  } else if (q_point[4] == 0xFFF) {
     ThrowRDE("Aha, finally, a 12-bit compressed RAF! Please consider providing "
              "samples on <https://raw.pixls.us/>, thanks!");
 
-    info->total_values = 4096;
-    info->raw_bits = 12;
-    info->max_bits = 48;
-    info->maxDiff = 64;
+    total_values = 4096;
+    raw_bits = 12;
+    max_bits = 48;
+    maxDiff = 64;
   } else {
     ThrowRDE("FUJI q_point");
   }
@@ -881,8 +882,7 @@ void FujiDecompressor::fuji_decode_strip(
 }
 
 void FujiDecompressor::fuji_compressed_load_raw() {
-  fuji_compressed_params common_info;
-  init_fuji_compr(&common_info);
+  fuji_compressed_params common_info(*this);
 
   // read block sizes
   std::vector<uint32> block_sizes;
