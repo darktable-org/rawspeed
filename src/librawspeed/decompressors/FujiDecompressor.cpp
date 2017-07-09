@@ -141,38 +141,37 @@ void FujiDecompressor::fuji_fill_buffer(fuji_compressed_block* info) {
   }
 }
 
-void FujiDecompressor::init_fuji_block(fuji_compressed_block* info,
-                                       const fuji_compressed_params* params,
-                                       uint64 raw_offset, unsigned dsize) {
-  info->linealloc.resize(_ltotal * (params->line_width + 2));
+FujiDecompressor::fuji_compressed_block::fuji_compressed_block(
+    const FujiDecompressor& d, const fuji_compressed_params* params,
+    uint64 raw_offset, unsigned dsize) {
+  linealloc.resize(_ltotal * (params->line_width + 2));
 
-  uint64 fsize = input.getSize();
-  info->max_read_size = std::min(unsigned(fsize - raw_offset),
-                                 dsize + 16); // Data size may be incorrect?
-  // info->max_read_size = fsize;
-  info->fillbytes = 1;
+  uint64 fsize = d.input.getSize();
+  max_read_size = std::min(unsigned(fsize - raw_offset),
+                           dsize + 16); // Data size may be incorrect?
+  // max_read_size = fsize;
+  fillbytes = 1;
 
-  info->linebuf[_R0] = &info->linealloc[0];
+  linebuf[_R0] = &linealloc[0];
 
   for (int i = _R1; i <= _B4; i++) {
-    info->linebuf[i] = info->linebuf[i - 1] + params->line_width + 2;
+    linebuf[i] = linebuf[i - 1] + params->line_width + 2;
   }
 
-  info->cur_bit = 0;
-  info->cur_pos = 0;
-  info->cur_buf_offset = raw_offset;
+  cur_bit = 0;
+  cur_pos = 0;
+  cur_buf_offset = raw_offset;
 
   for (int j = 0; j < 3; j++) {
     for (int i = 0; i < 41; i++) {
-      info->grad_even[j][i].value1 = params->maxDiff;
-      info->grad_even[j][i].value2 = 1;
-      info->grad_odd[j][i].value1 = params->maxDiff;
-      info->grad_odd[j][i].value2 = 1;
+      grad_even[j][i].value1 = params->maxDiff;
+      grad_even[j][i].value2 = 1;
+      grad_odd[j][i].value1 = params->maxDiff;
+      grad_odd[j][i].value2 = 1;
     }
   }
 
-  info->cur_buf_size = 0;
-  fuji_fill_buffer(info);
+  cur_buf_size = 0;
 }
 
 template <typename T>
@@ -831,9 +830,10 @@ void FujiDecompressor::fuji_decode_strip(
   int cur_block_width;
   int cur_line;
   unsigned line_size;
-  fuji_compressed_block info;
 
-  init_fuji_block(&info, info_common, raw_offset, dsize);
+  fuji_compressed_block info(*this, info_common, raw_offset, dsize);
+  fuji_fill_buffer(&info);
+
   line_size = sizeof(ushort) * (info_common->line_width + 2);
 
   cur_block_width = fuji_block_width;

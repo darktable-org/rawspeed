@@ -80,6 +80,10 @@ protected:
   };
 
   struct fuji_compressed_block {
+    fuji_compressed_block(const FujiDecompressor& d,
+                          const fuji_compressed_params* params,
+                          uint64 raw_offset, unsigned dsize);
+
     int cur_bit;            // current bit being read (from left to right)
     int cur_pos;            // current position in a buffer
     uint64 cur_buf_offset;  // offset of this buffer in a file
@@ -112,9 +116,6 @@ private:
                         uint64* raw_block_offsets, unsigned* block_sizes);
   void fuji_decode_strip(const fuji_compressed_params* info_common,
                          int cur_block, uint64 raw_offset, unsigned dsize);
-  void init_fuji_block(fuji_compressed_block* info,
-                       const fuji_compressed_params* params, uint64 raw_offset,
-                       unsigned dsize);
   void fuji_fill_buffer(fuji_compressed_block* info);
 
   template <typename T>
