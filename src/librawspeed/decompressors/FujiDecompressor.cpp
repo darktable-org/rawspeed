@@ -113,44 +113,10 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
   }
 }
 
-#define FUJI_BUF_SIZE 0x10000u
-
-void FujiDecompressor::fuji_fill_buffer(fuji_compressed_block* info) {
-  if (info->cur_pos >= info->cur_buf_size) {
-    info->cur_pos = 0;
-    info->cur_buf_offset += info->cur_buf_size;
-#ifdef _OPENMP
-#pragma omp critical
-#endif
-    {
-      info->cur_buf_size = info->max_read_size;
-      if (info->cur_buf_size > 0) {
-        info->cur_buf =
-            input.Buffer::getData(info->cur_buf_offset, info->cur_buf_size);
-      }
-    }
-
-    if (info->cur_buf_size < 1 && info->fillbytes > 0) { // nothing read
-      int ls = std::max(
-          1, std::min(info->fillbytes, static_cast<int>(FUJI_BUF_SIZE)));
-      info->cur_buf = nullptr;
-      info->fillbytes -= ls;
-    }
-
-    info->max_read_size -= info->cur_buf_size;
-  }
-}
-
 FujiDecompressor::fuji_compressed_block::fuji_compressed_block(
     const FujiDecompressor& d, const fuji_compressed_params* params,
-    uint64 raw_offset, unsigned dsize) {
+    ByteStream strip) {
   linealloc.resize(_ltotal * (params->line_width + 2));
-
-  uint64 fsize = d.input.getSize();
-  max_read_size = std::min(unsigned(fsize - raw_offset),
-                           dsize + 16); // Data size may be incorrect?
-  // max_read_size = fsize;
-  fillbytes = 1;
 
   linebuf[_R0] = &linealloc[0];
 
@@ -160,7 +126,6 @@ FujiDecompressor::fuji_compressed_block::fuji_compressed_block(
 
   cur_bit = 0;
   cur_pos = 0;
-  cur_buf_offset = raw_offset;
 
   for (int j = 0; j < 3; j++) {
     for (int i = 0; i < 41; i++) {
@@ -171,7 +136,7 @@ FujiDecompressor::fuji_compressed_block::fuji_compressed_block(
     }
   }
 
-  cur_buf_size = 0;
+  cur_buf = strip.getData(strip.getSize());
 }
 
 template <typename T>
@@ -259,7 +224,6 @@ void FujiDecompressor::fuji_zerobits(fuji_compressed_block* info, int* count) {
 
     if (!info->cur_bit) {
       ++info->cur_pos;
-      fuji_fill_buffer(info);
     }
 
     if (zero) {
@@ -286,7 +250,6 @@ void FujiDecompressor::fuji_read_code(fuji_compressed_block* info, int* data,
       bits_left -= bits_left_in_byte;
       *data |= info->cur_buf[info->cur_pos] & ((1 << bits_left_in_byte) - 1);
       ++info->cur_pos;
-      fuji_fill_buffer(info);
       bits_left_in_byte = 8;
     } while (bits_left >= 8);
   }
@@ -825,14 +788,13 @@ void FujiDecompressor::fuji_bayer_decode_block(
 }
 
 void FujiDecompressor::fuji_decode_strip(
-    const fuji_compressed_params* info_common, int cur_block, uint64 raw_offset,
-    unsigned dsize) {
+    const fuji_compressed_params* info_common, int cur_block,
+    ByteStream strip) {
   int cur_block_width;
   int cur_line;
   unsigned line_size;
 
-  fuji_compressed_block info(*this, info_common, raw_offset, dsize);
-  fuji_fill_buffer(&info);
+  fuji_compressed_block info(*this, info_common, std::move(strip));
 
   line_size = sizeof(ushort) * (info_common->line_width + 2);
 
@@ -898,28 +860,23 @@ void FujiDecompressor::fuji_compressed_load_raw() {
   }
 
   // calculating raw block offsets
-  std::vector<uint64> raw_block_offsets;
-  raw_block_offsets.resize(fuji_total_blocks);
-  for (int cur_block = 0; cur_block < fuji_total_blocks; cur_block++) {
-    raw_block_offsets[cur_block] = input.getPosition();
-    input.skipBytes(block_sizes[cur_block]);
-  }
+  std::vector<ByteStream> strips;
+  strips.reserve(fuji_total_blocks);
+  for (const auto& block_size : block_sizes)
+    strips.emplace_back(input.getStream(block_size));
 
-  fuji_decode_loop(&common_info, fuji_total_blocks, raw_block_offsets.data(),
-                   block_sizes.data());
+  fuji_decode_loop(&common_info, strips);
 }
 
 void FujiDecompressor::fuji_decode_loop(
-    const fuji_compressed_params* common_info, int count,
-    uint64* raw_block_offsets, unsigned* block_sizes) {
+    const fuji_compressed_params* common_info, std::vector<ByteStream> strips) {
 
-#ifdef _OPENMP
-#pragma omp parallel for
-#endif
+  // FIXME: figure out a sane way to pthread-ize this !
 
-  for (int cur_block = 0; cur_block < count; cur_block++) {
-    fuji_decode_strip(common_info, cur_block, raw_block_offsets[cur_block],
-                      block_sizes[cur_block]);
+  int block = 0;
+  for (auto& strip : strips) {
+    fuji_decode_strip(common_info, block, strip);
+    block++;
   }
 }
 

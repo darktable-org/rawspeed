@@ -82,15 +82,11 @@ protected:
   struct fuji_compressed_block {
     fuji_compressed_block(const FujiDecompressor& d,
                           const fuji_compressed_params* params,
-                          uint64 raw_offset, unsigned dsize);
+                          ByteStream strip);
 
     int cur_bit;            // current bit being read (from left to right)
     int cur_pos;            // current position in a buffer
-    uint64 cur_buf_offset;  // offset of this buffer in a file
-    unsigned max_read_size; // Amount of data to be read
-    int cur_buf_size;       // buffer size
     const uchar8* cur_buf;  // currently read block
-    int fillbytes;          // Counter to add extra byte for block size N*16
     int_pair grad_even[3][41]; // tables of gradients
     int_pair grad_odd[3][41];
     std::vector<ushort> linealloc;
@@ -112,11 +108,10 @@ private:
   int raw_height;
 
   void parse_fuji_compressed_header();
-  void fuji_decode_loop(const fuji_compressed_params* common_info, int count,
-                        uint64* raw_block_offsets, unsigned* block_sizes);
+  void fuji_decode_loop(const fuji_compressed_params* common_info,
+                        std::vector<ByteStream> strips);
   void fuji_decode_strip(const fuji_compressed_params* info_common,
-                         int cur_block, uint64 raw_offset, unsigned dsize);
-  void fuji_fill_buffer(fuji_compressed_block* info);
+                         int cur_block, ByteStream strip);
 
   template <typename T>
   void copy_line(fuji_compressed_block* info, int cur_line, int cur_block,
