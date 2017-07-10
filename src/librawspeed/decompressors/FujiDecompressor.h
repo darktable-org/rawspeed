@@ -20,9 +20,10 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint64, uchar8, usho...
+#include "common/Common.h"                      // for ushort16
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "io/BitPumpMSB.h"                      // for BitPumpMSB
 #include "io/ByteStream.h"                      // for ByteStream
 #include "metadata/ColorFilterArray.h"          // for CFAColor
 #include <array>                                // for array
@@ -82,11 +83,10 @@ protected:
   struct fuji_compressed_block {
     fuji_compressed_block(const FujiDecompressor& d,
                           const fuji_compressed_params* params,
-                          ByteStream strip);
+                          const ByteStream& strip);
 
-    int cur_bit;            // current bit being read (from left to right)
-    int cur_pos;            // current position in a buffer
-    const uchar8* cur_buf;  // currently read block
+    BitPumpMSB pump;
+
     int_pair grad_even[3][41]; // tables of gradients
     int_pair grad_odd[3][41];
     std::vector<ushort> linealloc;
@@ -111,7 +111,7 @@ private:
   void fuji_decode_loop(const fuji_compressed_params* common_info,
                         std::vector<ByteStream> strips);
   void fuji_decode_strip(const fuji_compressed_params* info_common,
-                         int cur_block, ByteStream strip);
+                         int cur_block, const ByteStream& strip);
 
   template <typename T>
   void copy_line(fuji_compressed_block* info, int cur_line, int cur_block,

@@ -22,14 +22,12 @@
 
 #include "decompressors/FujiDecompressor.h"
 #include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
-#include "io/Buffer.h"                    // for Buffer
 #include "io/Endianness.h"                // for Endianness::big
 #include "metadata/ColorFilterArray.h"    // for CFAColor::CFA_BLUE, CFACol...
-#include <algorithm>                      // for min, max, move
+#include <algorithm>                      // for min, move
 #include <cstdlib>                        // for abs
 #include <cstring>                        // for memcpy, memset
 // IWYU pragma: no_include <bits/std_abs.h>
-// IWYU pragma: no_include <ext/alloc_traits.h>
 
 namespace rawspeed {
 
@@ -115,7 +113,8 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
 
 FujiDecompressor::fuji_compressed_block::fuji_compressed_block(
     const FujiDecompressor& d, const fuji_compressed_params* params,
-    ByteStream strip) {
+    const ByteStream& strip)
+    : pump(strip) {
   linealloc.resize(_ltotal * (params->line_width + 2));
 
   linebuf[_R0] = &linealloc[0];
@@ -123,9 +122,6 @@ FujiDecompressor::fuji_compressed_block::fuji_compressed_block(
   for (int i = _R1; i <= _B4; i++) {
     linebuf[i] = linebuf[i - 1] + params->line_width + 2;
   }
-
-  cur_bit = 0;
-  cur_pos = 0;
 
   for (int j = 0; j < 3; j++) {
     for (int i = 0; i < 41; i++) {
@@ -135,8 +131,6 @@ FujiDecompressor::fuji_compressed_block::fuji_compressed_block(
       grad_odd[j][i].value2 = 1;
     }
   }
-
-  cur_buf = strip.getData(strip.getSize());
 }
 
 template <typename T>
@@ -218,17 +212,10 @@ void FujiDecompressor::fuji_zerobits(fuji_compressed_block* info, int* count) {
   *count = 0;
 
   while (zero == 0) {
-    zero = (info->cur_buf[info->cur_pos] >> (7 - info->cur_bit)) & 1;
-    info->cur_bit++;
-    info->cur_bit &= 7;
+    zero = info->pump.getBits(1);
 
-    if (!info->cur_bit) {
-      ++info->cur_pos;
-    }
-
-    if (zero) {
+    if (zero)
       break;
-    }
 
     ++*count;
   }
@@ -236,35 +223,7 @@ void FujiDecompressor::fuji_zerobits(fuji_compressed_block* info, int* count) {
 
 void FujiDecompressor::fuji_read_code(fuji_compressed_block* info, int* data,
                                       int bits_to_read) {
-  uchar8 bits_left = bits_to_read;
-  uchar8 bits_left_in_byte = 8 - (info->cur_bit & 7);
-  *data = 0;
-
-  if (!bits_to_read) {
-    return;
-  }
-
-  if (bits_to_read >= bits_left_in_byte) {
-    do {
-      *data <<= bits_left_in_byte;
-      bits_left -= bits_left_in_byte;
-      *data |= info->cur_buf[info->cur_pos] & ((1 << bits_left_in_byte) - 1);
-      ++info->cur_pos;
-      bits_left_in_byte = 8;
-    } while (bits_left >= 8);
-  }
-
-  if (!bits_left) {
-    info->cur_bit = (8 - (bits_left_in_byte & 7)) & 7;
-    return;
-  }
-
-  *data <<= bits_left;
-  bits_left_in_byte -= bits_left;
-  *data |= ((1 << bits_left) - 1) &
-           (static_cast<unsigned>(info->cur_buf[info->cur_pos]) >>
-            bits_left_in_byte);
-  info->cur_bit = (8 - (bits_left_in_byte & 7)) & 7;
+  *data = info->pump.getBits(bits_to_read);
 }
 
 int __attribute__((const)) FujiDecompressor::bitDiff(int value1, int value2) {
@@ -789,12 +748,12 @@ void FujiDecompressor::fuji_bayer_decode_block(
 
 void FujiDecompressor::fuji_decode_strip(
     const fuji_compressed_params* info_common, int cur_block,
-    ByteStream strip) {
+    const ByteStream& strip) {
   int cur_block_width;
   int cur_line;
   unsigned line_size;
 
-  fuji_compressed_block info(*this, info_common, std::move(strip));
+  fuji_compressed_block info(*this, info_common, strip);
 
   line_size = sizeof(ushort) * (info_common->line_width + 2);
 
