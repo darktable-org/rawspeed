@@ -35,7 +35,23 @@ FujiDecompressor::FujiDecompressor(ByteStream input_, const RawImage& img)
     : input(std::move(input_)), mImg(img) {
   input.setByteOrder(big);
 
-  parse_fuji_compressed_header();
+  FujiHeader h(&input);
+  if (!h)
+    ThrowRDE("compressed RAF header check");
+
+  if (12 == h.raw_bits) {
+    ThrowRDE("Aha, finally, a 12-bit compressed RAF! Please consider providing "
+             "samples on <https://raw.pixls.us/>, thanks!");
+  }
+
+  // modify data
+  fuji_total_lines = h.total_lines;
+  fuji_total_blocks = h.blocks_in_row;
+  fuji_block_width = h.block_size;
+  fuji_bits = h.raw_bits;
+  fuji_raw_type = h.raw_type;
+  raw_width = h.raw_width;
+  raw_height = h.raw_height;
 
   for (int i = 0; i < 6; i++) {
     for (int j = 0; j < 6; j++)
@@ -830,50 +846,33 @@ void FujiDecompressor::fuji_decode_loop(
   }
 }
 
-void FujiDecompressor::parse_fuji_compressed_header() {
-  static const uint32 header_size = 16;
-  input.check(header_size);
+FujiDecompressor::FujiHeader::FujiHeader(ByteStream* bs) {
+  signature = bs->getU16();
+  version = bs->getByte();
+  raw_type = bs->getByte();
+  raw_bits = bs->getByte();
+  raw_height = bs->getU16();
+  raw_rounded_width = bs->getU16();
+  raw_width = bs->getU16();
+  block_size = bs->getU16();
+  blocks_in_row = bs->getByte();
+  total_lines = bs->getU16();
+}
 
-  const ushort signature = input.getU16();
-  const uchar8 version = input.getByte();
-  const uchar8 h_raw_type = input.getByte();
-  const uchar8 h_raw_bits = input.getByte();
-  const ushort h_raw_height = input.getU16();
-  const ushort h_raw_rounded_width = input.getU16();
-  const ushort h_raw_width = input.getU16();
-  const ushort h_block_size = input.getU16();
-  const uchar8 h_blocks_in_row = input.getByte();
-  const ushort h_total_lines = input.getU16();
-
+FujiDecompressor::FujiHeader::operator bool() const {
   // general validation
-  if (signature != 0x4953 || version != 1 || h_raw_height > 0x3000 ||
-      h_raw_height < 6 || h_raw_height % 6 || h_raw_width > 0x3000 ||
-      h_raw_width < 0x300 || h_raw_width % 24 || h_raw_rounded_width > 0x3000 ||
-      h_raw_rounded_width < h_block_size ||
-      h_raw_rounded_width % h_block_size ||
-      h_raw_rounded_width - h_raw_width >= h_block_size ||
-      h_block_size != 0x300 || h_blocks_in_row > 0x10 || h_blocks_in_row == 0 ||
-      h_blocks_in_row != h_raw_rounded_width / h_block_size ||
-      h_total_lines > 0x800 || h_total_lines == 0 ||
-      h_total_lines != h_raw_height / 6 ||
-      (h_raw_bits != 12 && h_raw_bits != 14) ||
-      (h_raw_type != 16 && h_raw_type != 0)) {
-    ThrowRDE("compressed RAF header check");
-  }
+  const bool invalid =
+      (signature != 0x4953 || version != 1 || raw_height > 0x3000 ||
+       raw_height < 6 || raw_height % 6 || raw_width > 0x3000 ||
+       raw_width < 0x300 || raw_width % 24 || raw_rounded_width > 0x3000 ||
+       raw_rounded_width < block_size || raw_rounded_width % block_size ||
+       raw_rounded_width - raw_width >= block_size || block_size != 0x300 ||
+       blocks_in_row > 0x10 || blocks_in_row == 0 ||
+       blocks_in_row != raw_rounded_width / block_size || total_lines > 0x800 ||
+       total_lines == 0 || total_lines != raw_height / 6 ||
+       (raw_bits != 12 && raw_bits != 14) || (raw_type != 16 && raw_type != 0));
 
-  if (12 == h_raw_bits) {
-    ThrowRDE("Aha, finally, a 12-bit compressed RAF! Please consider providing "
-             "samples on <https://raw.pixls.us/>, thanks!");
-  }
-
-  // modify data
-  fuji_total_lines = h_total_lines;
-  fuji_total_blocks = h_blocks_in_row;
-  fuji_block_width = h_block_size;
-  fuji_bits = h_raw_bits;
-  fuji_raw_type = h_raw_type;
-  raw_width = h_raw_width;
-  raw_height = h_raw_height;
+  return !invalid;
 }
 
 } // namespace rawspeed

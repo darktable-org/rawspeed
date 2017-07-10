@@ -33,9 +33,25 @@ namespace rawspeed {
 
 class FujiDecompressor final : public AbstractDecompressor {
 public:
-  FujiDecompressor(ByteStream input, const RawImage& img);
-
   using ushort = ushort16;
+
+  struct FujiHeader {
+    explicit FujiHeader(ByteStream* input_);
+    explicit operator bool() const; // validity check
+
+    ushort signature;
+    uchar8 version;
+    uchar8 raw_type;
+    uchar8 raw_bits;
+    ushort raw_height;
+    ushort raw_rounded_width;
+    ushort raw_width;
+    ushort block_size;
+    uchar8 blocks_in_row;
+    ushort total_lines;
+  };
+
+  FujiDecompressor(ByteStream input, const RawImage& img);
 
   void fuji_compressed_load_raw();
 
@@ -106,7 +122,6 @@ private:
   int raw_width;
   int raw_height;
 
-  void parse_fuji_compressed_header();
   void fuji_decode_loop(const fuji_compressed_params* common_info,
                         std::vector<ByteStream> strips);
   void fuji_decode_strip(const fuji_compressed_params* info_common,
