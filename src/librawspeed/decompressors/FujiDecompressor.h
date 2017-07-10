@@ -36,6 +36,8 @@ public:
   using ushort = ushort16;
 
   struct FujiHeader {
+    FujiHeader() = default;
+
     explicit FujiHeader(ByteStream* input_);
     explicit __attribute__((pure)) operator bool() const; // validity check
 
@@ -114,13 +116,7 @@ private:
 
   std::array<std::array<CFAColor, 6>, 6> CFA;
 
-  int fuji_total_lines;
-  int fuji_total_blocks;
-  int fuji_block_width;
-  int fuji_bits;
-  int fuji_raw_type;
-  int raw_width;
-  int raw_height;
+  FujiHeader header;
 
   void fuji_decode_loop(const fuji_compressed_params* common_info,
                         std::vector<ByteStream> strips);

@@ -35,23 +35,14 @@ FujiDecompressor::FujiDecompressor(ByteStream input_, const RawImage& img)
     : input(std::move(input_)), mImg(img) {
   input.setByteOrder(big);
 
-  FujiHeader h(&input);
-  if (!h)
+  header = FujiHeader(&input);
+  if (!header)
     ThrowRDE("compressed RAF header check");
 
-  if (12 == h.raw_bits) {
+  if (12 == header.raw_bits) {
     ThrowRDE("Aha, finally, a 12-bit compressed RAF! Please consider providing "
              "samples on <https://raw.pixls.us/>, thanks!");
   }
-
-  // modify data
-  fuji_total_lines = h.total_lines;
-  fuji_total_blocks = h.blocks_in_row;
-  fuji_block_width = h.block_size;
-  fuji_bits = h.raw_bits;
-  fuji_raw_type = h.raw_type;
-  raw_width = h.raw_width;
-  raw_height = h.raw_height;
 
   for (int i = 0; i < 6; i++) {
     for (int j = 0; j < 6; j++)
@@ -64,24 +55,24 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
   int cur_val;
   char* qt;
 
-  if ((d.fuji_block_width % 3 && d.fuji_raw_type == 16) ||
-      (d.fuji_block_width & 1 && d.fuji_raw_type == 0)) {
+  if ((d.header.block_size % 3 && d.header.raw_type == 16) ||
+      (d.header.block_size & 1 && d.header.raw_type == 0)) {
     ThrowRDE("fuji_block_checks");
   }
 
   q_table.resize(32768);
 
-  if (d.fuji_raw_type == 16) {
-    line_width = (d.fuji_block_width * 2) / 3;
+  if (d.header.raw_type == 16) {
+    line_width = (d.header.block_size * 2) / 3;
   } else {
-    line_width = d.fuji_block_width >> 1;
+    line_width = d.header.block_size >> 1;
   }
 
   q_point[0] = 0;
   q_point[1] = 0x12;
   q_point[2] = 0x43;
   q_point[3] = 0x114;
-  q_point[4] = (1 << d.fuji_bits) - 1;
+  q_point[4] = (1 << d.header.raw_bits) - 1;
   min_value = 0x40;
 
   cur_val = -q_point[4];
@@ -167,7 +158,7 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info, int cur_line,
   int row_count = 0;
   while (row_count < 6) {
     auto* const raw_block_data = reinterpret_cast<ushort*>(
-        mImg->getData(fuji_block_width * cur_block, 6 * cur_line + row_count));
+        mImg->getData(header.block_size * cur_block, 6 * cur_line + row_count));
 
     int pixel_count = 0;
     while (pixel_count < cur_block_width) {
@@ -767,10 +758,10 @@ void FujiDecompressor::fuji_decode_strip(
 
   line_size = sizeof(ushort) * (info_common->line_width + 2);
 
-  cur_block_width = fuji_block_width;
+  cur_block_width = header.block_size;
 
-  if (cur_block + 1 == fuji_total_blocks) {
-    cur_block_width = raw_width % fuji_block_width;
+  if (cur_block + 1 == header.blocks_in_row) {
+    cur_block_width = header.raw_width % header.block_size;
   }
 
   struct i_pair {
@@ -782,8 +773,8 @@ void FujiDecompressor::fuji_decode_strip(
                             {_G1, _G7}, {_B0, _B3}, {_B1, _B4}};
   const i_pair ztable[3] = {{_R2, 3}, {_G2, 6}, {_B2, 3}};
 
-  for (cur_line = 0; cur_line < fuji_total_lines; cur_line++) {
-    if (fuji_raw_type == 16) {
+  for (cur_line = 0; cur_line < header.total_lines; cur_line++) {
+    if (header.raw_type == 16) {
       xtrans_decode_block(&info, info_common, cur_line);
     } else {
       fuji_bayer_decode_block(&info, info_common, cur_line);
@@ -794,7 +785,7 @@ void FujiDecompressor::fuji_decode_strip(
       memcpy(info.linebuf[i.a], info.linebuf[i.b], line_size);
     }
 
-    if (fuji_raw_type == 16) {
+    if (header.raw_type == 16) {
       copy_line_to_xtrans(&info, cur_line, cur_block, cur_block_width);
     } else {
       copy_line_to_bayer(&info, cur_line, cur_block, cur_block_width);
@@ -814,12 +805,12 @@ void FujiDecompressor::fuji_compressed_load_raw() {
 
   // read block sizes
   std::vector<uint32> block_sizes;
-  block_sizes.resize(fuji_total_blocks);
+  block_sizes.resize(header.blocks_in_row);
   for (auto& block_size : block_sizes)
     block_size = input.getU32();
 
   // some padding?
-  const uint64 raw_offset = sizeof(uint32) * fuji_total_blocks;
+  const uint64 raw_offset = sizeof(uint32) * header.blocks_in_row;
   if (raw_offset & 0xC) {
     const int padding = 0x10 - (raw_offset & 0xC);
     input.skipBytes(padding);
@@ -827,7 +818,7 @@ void FujiDecompressor::fuji_compressed_load_raw() {
 
   // calculating raw block offsets
   std::vector<ByteStream> strips;
-  strips.reserve(fuji_total_blocks);
+  strips.reserve(header.blocks_in_row);
   for (const auto& block_size : block_sizes)
     strips.emplace_back(input.getStream(block_size));
 
