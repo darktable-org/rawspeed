@@ -81,8 +81,7 @@ protected:
   };
 
   struct fuji_compressed_block {
-    fuji_compressed_block(const FujiDecompressor& d,
-                          const fuji_compressed_params* params,
+    fuji_compressed_block(const fuji_compressed_params* params,
                           const ByteStream& strip);
 
     BitPumpMSB pump;

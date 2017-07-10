@@ -112,8 +112,7 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
 }
 
 FujiDecompressor::fuji_compressed_block::fuji_compressed_block(
-    const FujiDecompressor& d, const fuji_compressed_params* params,
-    const ByteStream& strip)
+    const fuji_compressed_params* params, const ByteStream& strip)
     : pump(strip) {
   linealloc.resize(_ltotal * (params->line_width + 2));
 
@@ -748,7 +747,7 @@ void FujiDecompressor::fuji_decode_strip(
   int cur_line;
   unsigned line_size;
 
-  fuji_compressed_block info(*this, info_common, strip);
+  fuji_compressed_block info(info_common, strip);
 
   line_size = sizeof(ushort) * (info_common->line_width + 2);
 
