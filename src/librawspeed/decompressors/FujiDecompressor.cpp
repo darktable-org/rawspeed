@@ -792,9 +792,6 @@ void FujiDecompressor::fuji_decode_strip(
           info.linebuf[i.a - 1][info_common->line_width];
     }
   }
-
-  // release data
-  // free (info.cur_buf);
 }
 
 void FujiDecompressor::fuji_compressed_load_raw() {
