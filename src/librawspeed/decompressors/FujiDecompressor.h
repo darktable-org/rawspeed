@@ -39,16 +39,16 @@ public:
     explicit FujiHeader(ByteStream* input_);
     explicit __attribute__((pure)) operator bool() const; // validity check
 
-    ushort signature;
-    uchar8 version;
-    uchar8 raw_type;
-    uchar8 raw_bits;
-    ushort raw_height;
-    ushort raw_rounded_width;
-    ushort raw_width;
-    ushort block_size;
-    uchar8 blocks_in_row;
-    ushort total_lines;
+    const ushort signature;
+    const uchar8 version;
+    const uchar8 raw_type;
+    const uchar8 raw_bits;
+    const ushort raw_height;
+    const ushort raw_rounded_width;
+    const ushort raw_width;
+    const ushort block_size;
+    const uchar8 blocks_in_row;
+    const ushort total_lines;
   };
 
   FujiDecompressor(ByteStream input, const RawImage& img);

@@ -846,18 +846,12 @@ void FujiDecompressor::fuji_decode_loop(
   }
 }
 
-FujiDecompressor::FujiHeader::FujiHeader(ByteStream* bs) {
-  signature = bs->getU16();
-  version = bs->getByte();
-  raw_type = bs->getByte();
-  raw_bits = bs->getByte();
-  raw_height = bs->getU16();
-  raw_rounded_width = bs->getU16();
-  raw_width = bs->getU16();
-  block_size = bs->getU16();
-  blocks_in_row = bs->getByte();
-  total_lines = bs->getU16();
-}
+FujiDecompressor::FujiHeader::FujiHeader(ByteStream* bs)
+    : signature(bs->getU16()), version(bs->getByte()), raw_type(bs->getByte()),
+      raw_bits(bs->getByte()), raw_height(bs->getU16()),
+      raw_rounded_width(bs->getU16()), raw_width(bs->getU16()),
+      block_size(bs->getU16()), blocks_in_row(bs->getByte()),
+      total_lines(bs->getU16()) {}
 
 FujiDecompressor::FujiHeader::operator bool() const {
   // general validation
