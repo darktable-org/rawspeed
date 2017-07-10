@@ -37,7 +37,7 @@ public:
 
   struct FujiHeader {
     explicit FujiHeader(ByteStream* input_);
-    explicit operator bool() const; // validity check
+    explicit __attribute__((pure)) operator bool() const; // validity check
 
     ushort signature;
     uchar8 version;
