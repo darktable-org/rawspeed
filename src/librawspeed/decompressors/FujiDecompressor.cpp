@@ -221,11 +221,6 @@ void FujiDecompressor::fuji_zerobits(fuji_compressed_block* info, int* count) {
   }
 }
 
-void FujiDecompressor::fuji_read_code(fuji_compressed_block* info, int* data,
-                                      int bits_to_read) {
-  *data = info->pump.getBits(bits_to_read);
-}
-
 int __attribute__((const)) FujiDecompressor::bitDiff(int value1, int value2) {
   int decBits = 0;
 
@@ -280,10 +275,10 @@ int FujiDecompressor::fuji_decode_sample_even(
 
   if (sample < params->max_bits - params->raw_bits - 1) {
     int decBits = bitDiff(grads[gradient].value1, grads[gradient].value2);
-    fuji_read_code(info, &code, decBits);
+    code = info->pump.getBits(decBits);
     code += sample << decBits;
   } else {
-    fuji_read_code(info, &code, params->raw_bits);
+    code = info->pump.getBits(params->raw_bits);
     code++;
   }
 
@@ -358,10 +353,10 @@ int FujiDecompressor::fuji_decode_sample_odd(
 
   if (sample < params->max_bits - params->raw_bits - 1) {
     int decBits = bitDiff(grads[gradient].value1, grads[gradient].value2);
-    fuji_read_code(info, &code, decBits);
+    code = info->pump.getBits(decBits);
     code += sample << decBits;
   } else {
-    fuji_read_code(info, &code, params->raw_bits);
+    code = info->pump.getBits(params->raw_bits);
     code++;
   }
 

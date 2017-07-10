@@ -122,7 +122,6 @@ private:
   void copy_line_to_bayer(fuji_compressed_block* info, int cur_line,
                           int cur_block, int cur_block_width);
   void fuji_zerobits(fuji_compressed_block* info, int* count);
-  void fuji_read_code(fuji_compressed_block* info, int* data, int bits_to_read);
   int bitDiff(int value1, int value2);
   int fuji_decode_sample_even(fuji_compressed_block* info,
                               const fuji_compressed_params* params,
