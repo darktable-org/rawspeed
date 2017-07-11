@@ -33,24 +33,22 @@ namespace rawspeed {
 
 class FujiDecompressor final : public AbstractDecompressor {
 public:
-  using ushort = ushort16;
-
   struct FujiHeader {
     FujiHeader() = default;
 
     explicit FujiHeader(ByteStream* input_);
     explicit __attribute__((pure)) operator bool() const; // validity check
 
-    ushort signature;
+    ushort16 signature;
     uchar8 version;
     uchar8 raw_type;
     uchar8 raw_bits;
-    ushort raw_height;
-    ushort raw_rounded_width;
-    ushort raw_width;
-    ushort block_size;
+    ushort16 raw_height;
+    ushort16 raw_rounded_width;
+    ushort16 raw_width;
+    ushort16 block_size;
     uchar8 blocks_in_row;
-    ushort total_lines;
+    ushort16 total_lines;
   };
 
   FujiDecompressor(ByteStream input, const RawImage& img);
@@ -68,7 +66,7 @@ protected:
     int raw_bits;
     int total_values;
     int maxDiff;
-    ushort line_width;
+    ushort16 line_width;
   };
 
   struct int_pair {
@@ -105,8 +103,8 @@ protected:
 
     int_pair grad_even[3][41]; // tables of gradients
     int_pair grad_odd[3][41];
-    std::vector<ushort> linealloc;
-    ushort* linebuf[_ltotal];
+    std::vector<ushort16> linealloc;
+    ushort16* linebuf[_ltotal];
   };
 
 private:
@@ -135,19 +133,19 @@ private:
   int bitDiff(int value1, int value2);
   int fuji_decode_sample_even(fuji_compressed_block* info,
                               const fuji_compressed_params* params,
-                              BitPumpMSB* pump, ushort* line_buf, int pos,
+                              BitPumpMSB* pump, ushort16* line_buf, int pos,
                               int_pair* grads);
   int fuji_decode_sample_odd(fuji_compressed_block* info,
                              const fuji_compressed_params* params,
-                             BitPumpMSB* pump, ushort* line_buf, int pos,
+                             BitPumpMSB* pump, ushort16* line_buf, int pos,
                              int_pair* grads);
-  void fuji_decode_interpolation_even(int line_width, ushort* line_buf,
+  void fuji_decode_interpolation_even(int line_width, ushort16* line_buf,
                                       int pos);
-  void fuji_extend_generic(ushort* linebuf[_ltotal], int line_width, int start,
-                           int end);
-  void fuji_extend_red(ushort* linebuf[_ltotal], int line_width);
-  void fuji_extend_green(ushort* linebuf[_ltotal], int line_width);
-  void fuji_extend_blue(ushort* linebuf[_ltotal], int line_width);
+  void fuji_extend_generic(ushort16* linebuf[_ltotal], int line_width,
+                           int start, int end);
+  void fuji_extend_red(ushort16* linebuf[_ltotal], int line_width);
+  void fuji_extend_green(ushort16* linebuf[_ltotal], int line_width);
+  void fuji_extend_blue(ushort16* linebuf[_ltotal], int line_width);
   void xtrans_decode_block(fuji_compressed_block* info,
                            const fuji_compressed_params* params,
                            BitPumpMSB* pump, int cur_line);
