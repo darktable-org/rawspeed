@@ -99,10 +99,9 @@ protected:
   };
 
   struct fuji_compressed_block {
-    fuji_compressed_block(const fuji_compressed_params* params,
-                          const ByteStream& strip);
+    fuji_compressed_block() = default;
 
-    BitPumpMSB pump;
+    void reset(const fuji_compressed_params* params);
 
     int_pair grad_even[3][41]; // tables of gradients
     int_pair grad_odd[3][41];
@@ -121,7 +120,8 @@ private:
   void fuji_decode_loop(const fuji_compressed_params* common_info,
                         std::vector<ByteStream> strips);
   void fuji_decode_strip(const fuji_compressed_params* info_common,
-                         int cur_block, const ByteStream& strip);
+                         fuji_compressed_block* info_block,
+                         const ByteStream& bs, int cur_block);
 
   template <typename T>
   void copy_line(fuji_compressed_block* info, int cur_line, int cur_block,
@@ -131,14 +131,16 @@ private:
                            int cur_block, int cur_block_width);
   void copy_line_to_bayer(fuji_compressed_block* info, int cur_line,
                           int cur_block, int cur_block_width);
-  void fuji_zerobits(fuji_compressed_block* info, int* count);
+  void fuji_zerobits(BitPumpMSB* pump, int* count);
   int bitDiff(int value1, int value2);
   int fuji_decode_sample_even(fuji_compressed_block* info,
                               const fuji_compressed_params* params,
-                              ushort* line_buf, int pos, int_pair* grads);
+                              BitPumpMSB* pump, ushort* line_buf, int pos,
+                              int_pair* grads);
   int fuji_decode_sample_odd(fuji_compressed_block* info,
                              const fuji_compressed_params* params,
-                             ushort* line_buf, int pos, int_pair* grads);
+                             BitPumpMSB* pump, ushort* line_buf, int pos,
+                             int_pair* grads);
   void fuji_decode_interpolation_even(int line_width, ushort* line_buf,
                                       int pos);
   void fuji_extend_generic(ushort* linebuf[_ltotal], int line_width, int start,
@@ -147,10 +149,11 @@ private:
   void fuji_extend_green(ushort* linebuf[_ltotal], int line_width);
   void fuji_extend_blue(ushort* linebuf[_ltotal], int line_width);
   void xtrans_decode_block(fuji_compressed_block* info,
-                           const fuji_compressed_params* params, int cur_line);
+                           const fuji_compressed_params* params,
+                           BitPumpMSB* pump, int cur_line);
   void fuji_bayer_decode_block(fuji_compressed_block* info,
                                const fuji_compressed_params* params,
-                               int cur_line);
+                               BitPumpMSB* pump, int cur_line);
 };
 
 } // namespace rawspeed
