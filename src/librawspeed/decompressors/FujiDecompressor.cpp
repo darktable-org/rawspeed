@@ -887,7 +887,8 @@ FujiDecompressor::FujiHeader::operator bool() const {
       (signature != 0x4953 || version != 1 || raw_height > 0x3000 ||
        raw_height < 6 || raw_height % 6 || raw_width > 0x3000 ||
        raw_width < 0x300 || raw_width % 24 || raw_rounded_width > 0x3000 ||
-       raw_rounded_width < block_size || raw_rounded_width % block_size ||
+       block_size < 1 || raw_rounded_width < block_size ||
+       raw_rounded_width % block_size ||
        raw_rounded_width - raw_width >= block_size || block_size != 0x300 ||
        blocks_in_row > 0x10 || blocks_in_row == 0 ||
        blocks_in_row != raw_rounded_width / block_size || total_lines > 0x800 ||
