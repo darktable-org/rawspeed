@@ -36,14 +36,15 @@ RUN echo 'APT::Get::Assume-Yes "true";' > /etc/apt/apt.conf.d/80forceyes
 # Fix broken packages
 RUN echo 'APT::Get::Fix-Missing "true";' > /etc/apt/apt.conf.d/80fixmissin
 
-ENV LLVM_VER=3.9
+ENV GCC_VER=7
+ENV LLVM_VER=4.0
 
 # pls keep sorted :)
 RUN rm -rf /var/lib/apt/lists/* && apt-get update && \
     apt-get install clang++-$LLVM_VER clang-tidy-$LLVM_VER cmake curl \
-    default-jdk-headless default-jre-headless dirmngr doxygen g++ git gnupg \
-    googletest graphviz libjpeg-dev libpugixml-dev libxml2-utils make \
-    ninja-build unzip zlib1g-dev&& apt-get clean && rm -rf /var/lib/apt/lists/*
+    default-jdk-headless default-jre-headless dirmngr doxygen g++-$GCC_VER git \
+    gnupg googletest graphviz libjpeg-dev libpugixml-dev libxml2-utils make \
+    ninja-build unzip zlib1g-dev && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # sonarqube support.
 

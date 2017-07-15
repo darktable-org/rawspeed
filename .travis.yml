@@ -16,20 +16,6 @@ notifications:
 
 language: generic
 
-os:
-  - linux
-  - osx
-
-dist: trusty # *sigh*
-group: unstable
-sudo: required
-
-git:
-  depth: 9999999
-
-services:
-  - docker
-
 before_install:
   - if [[ "$TARGET" == "SONARQUBE" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || ("$TRAVIS_BRANCH" != "develop" && "$TRAVIS_BRANCH" != "master" && "$TRAVIS_BRANCH" != "raf-compressed")) ]]; then
       exit;
@@ -57,9 +43,6 @@ env:
     - INSTALL_PREFIX=/build/rawspeed-install
     - CFLAGS="-pipe" CXXFLAGS="-pipe"
     - TARGET=build
-  matrix:
-    - CC=cc CXX=c++
-    - CC=cc CXX=c++ FLAVOR=Coverage
 
 matrix:
   fast_finish: true
@@ -68,14 +51,32 @@ matrix:
     sudo: required
     services:
       - docker
-    env: CC=clang-3.9 CXX=clang++-3.9 ECO="-DWITH_PTHREADS=OFF"
+    env: CC=gcc-7 CXX=g++-7
   - os: linux
+    sudo: required
+    services:
+      - docker
+    env: CC=gcc-7 CXX=g++-7 GCOV=gcov-7 FLAVOR=Coverage
+  - os: osx
+    env: CC=cc CXX=c++
+  - os: osx
+    env: CC=cc CXX=c++ FLAVOR=Coverage
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    env: CC=clang-4.0 CXX=clang++-4.0 ECO="-DWITH_PTHREADS=OFF"
+  - os: linux
+    dist: trusty
+    sudo: required
     env: CC=gcc-4.8 CXX=g++-4.8 EXTRA=NODOCKER
   - os: linux
     sudo: required
     services:
       - docker
-    env: CC=cc CXX=c++ TARGET=SONARQUBE FLAVOR=Coverage EXTRA_OPTS="--tmpfs /root/.sonar --volume $HOME/.sonar/cache:/root/.sonar/cache"
+    env: CC=gcc-7 CXX=g++-7 GCOV=gcov-7 TARGET=SONARQUBE FLAVOR=Coverage EXTRA_OPTS="--tmpfs /root/.sonar --volume $HOME/.sonar/cache:/root/.sonar/cache"
+    git:
+      depth: 9999999
     cache:
       directories:
         - '$HOME/.sonar/cache'
@@ -83,7 +84,7 @@ matrix:
     sudo: required
     services:
       - docker
-    env: CC=clang-3.9 CXX=clang++-3.9 TARGET=WWW
+    env: CC=clang-4.0 CXX=clang++-4.0 TARGET=WWW
 
 # linux clang Coverage build OOM's in gcov during final codecov report collection
 # OSX gcc Coverage build produces invalid .gcno files
@@ -119,11 +120,11 @@ script:
         export CMD="build-wrapper-linux-x86-64 --out-dir \"$BUILD_DIR/bw-output/\" $CMD";
       fi;
 
-      docker run --read-only --tmpfs /tmp --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $BUILD_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS $EXTRA_OPTS --env CC --env CXX --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR --env ECO darktable/rawspeed sh -c "$CMD";
+      docker run --read-only --tmpfs /tmp --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $BUILD_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS $EXTRA_OPTS --env CC --env CXX --env GCOV --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR --env ECO darktable/rawspeed sh -c "$CMD";
 
       if [[ "$TARGET2" == "SONARQUBE" ]]; then
         export CMD="sonar-scanner -X -Dsonar.login=\"$SONAR_TOKEN\" -Dsonar.branch=\"$TRAVIS_BRANCH\" -Dsonar.projectVersion=\"$TRAVIS_COMMIT\"";
-        docker run --read-only --tmpfs /tmp --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $SRC_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS $EXTRA_OPTS --env CC --env CXX --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR --env ECO darktable/rawspeed sh -c "$CMD";
+        docker run --read-only --tmpfs /tmp --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $SRC_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS $EXTRA_OPTS --env CC --env CXX --env GCOV --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR --env ECO darktable/rawspeed sh -c "$CMD";
       fi;
 
       export TARGET="$TARGET2";
