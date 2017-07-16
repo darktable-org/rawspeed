@@ -144,8 +144,9 @@ void FujiDecompressor::fuji_compressed_block::reset(
 }
 
 template <typename T>
-void FujiDecompressor::copy_line(fuji_compressed_block* info, int cur_line,
-                                 int cur_block, int cur_block_width, T&& idx) {
+void FujiDecompressor::copy_line(fuji_compressed_block* info,
+                                 const FujiStrip& strip, int cur_line,
+                                 T&& idx) {
   ushort16* lineBufB[3];
   ushort16* lineBufG[6];
   ushort16* lineBufR[3];
@@ -159,13 +160,11 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info, int cur_line,
     lineBufG[i] = info->linebuf[_G2 + i] + 1;
   }
 
-  int row_count = 0;
-  while (row_count < 6) {
+  for (int row_count = 0; row_count < FujiStrip::lineHeight(); row_count++) {
     auto* const raw_block_data = reinterpret_cast<ushort16*>(
-        mImg->getData(header.block_size * cur_block, 6 * cur_line + row_count));
+        mImg->getData(strip.offsetX(), strip.offsetY(cur_line) + row_count));
 
-    int pixel_count = 0;
-    while (pixel_count < cur_block_width) {
+    for (int pixel_count = 0; pixel_count < strip.width(); pixel_count++) {
       ushort16* line_buf = nullptr;
 
       switch (CFA[row_count][pixel_count % 6]) {
@@ -186,31 +185,27 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info, int cur_line,
       }
 
       raw_block_data[pixel_count] = line_buf[idx(pixel_count)];
-
-      ++pixel_count;
     }
-
-    ++row_count;
   }
 }
 
 void FujiDecompressor::copy_line_to_xtrans(fuji_compressed_block* info,
-                                           int cur_line, int cur_block,
-                                           int cur_block_width) {
+                                           const FujiStrip& strip,
+                                           int cur_line) {
   auto index = [](int pixel_count) {
     return (((pixel_count * 2 / 3) & 0x7FFFFFFE) | ((pixel_count % 3) & 1)) +
            ((pixel_count % 3) >> 1);
   };
 
-  copy_line(info, cur_line, cur_block, cur_block_width, index);
+  copy_line(info, strip, cur_line, index);
 }
 
 void FujiDecompressor::copy_line_to_bayer(fuji_compressed_block* info,
-                                          int cur_line, int cur_block,
-                                          int cur_block_width) {
+                                          const FujiStrip& strip,
+                                          int cur_line) {
   auto index = [](int pixel_count) { return pixel_count >> 1; };
 
-  copy_line(info, cur_line, cur_block, cur_block_width, index);
+  copy_line(info, strip, cur_line, index);
 }
 
 #define fuji_quant_gradient(i, v1, v2)                                         \
@@ -777,20 +772,10 @@ void FujiDecompressor::fuji_bayer_decode_block(
 
 void FujiDecompressor::fuji_decode_strip(
     const fuji_compressed_params* info_common,
-    fuji_compressed_block* info_block, const ByteStream& bs, int cur_block) {
-  BitPumpMSB pump(bs);
+    fuji_compressed_block* info_block, const FujiStrip& strip) {
+  BitPumpMSB pump(strip.bs);
 
-  int cur_block_width;
-  int cur_line;
-  unsigned line_size;
-
-  line_size = sizeof(ushort16) * (info_common->line_width + 2);
-
-  cur_block_width = header.block_size;
-
-  if (cur_block + 1 == header.blocks_in_row) {
-    cur_block_width = header.raw_width % header.block_size;
-  }
+  const unsigned line_size = sizeof(ushort16) * (info_common->line_width + 2);
 
   struct i_pair {
     int a;
@@ -801,7 +786,7 @@ void FujiDecompressor::fuji_decode_strip(
                             {_G1, _G7}, {_B0, _B3}, {_B1, _B4}};
   const i_pair ztable[3] = {{_R2, 3}, {_G2, 6}, {_B2, 3}};
 
-  for (cur_line = 0; cur_line < header.total_lines; cur_line++) {
+  for (int cur_line = 0; cur_line < strip.height(); cur_line++) {
     if (header.raw_type == 16) {
       xtrans_decode_block(info_block, info_common, &pump, cur_line);
     } else {
@@ -814,9 +799,9 @@ void FujiDecompressor::fuji_decode_strip(
     }
 
     if (header.raw_type == 16) {
-      copy_line_to_xtrans(info_block, cur_line, cur_block, cur_block_width);
+      copy_line_to_xtrans(info_block, strip, cur_line);
     } else {
-      copy_line_to_bayer(info_block, cur_line, cur_block, cur_block_width);
+      copy_line_to_bayer(info_block, strip, cur_line);
     }
 
     for (auto i : ztable) {
@@ -845,26 +830,28 @@ void FujiDecompressor::fuji_compressed_load_raw() {
   }
 
   // calculating raw block offsets
-  std::vector<ByteStream> strips;
+  std::vector<FujiStrip> strips;
   strips.reserve(header.blocks_in_row);
-  for (const auto& block_size : block_sizes)
-    strips.emplace_back(input.getStream(block_size));
+
+  int block = 0;
+  for (const auto& block_size : block_sizes) {
+    strips.emplace_back(header, block, input.getStream(block_size));
+    block++;
+  }
 
   fuji_decode_loop(&common_info, strips);
 }
 
 void FujiDecompressor::fuji_decode_loop(
-    const fuji_compressed_params* common_info, std::vector<ByteStream> strips) {
+    const fuji_compressed_params* common_info, std::vector<FujiStrip> strips) {
 
   // FIXME: figure out a sane way to pthread-ize this !
 
-  int block = 0;
   fuji_compressed_block block_info;
 
   for (auto& strip : strips) {
     block_info.reset(common_info);
-    fuji_decode_strip(common_info, &block_info, strip, block);
-    block++;
+    fuji_decode_strip(common_info, &block_info, strip);
   }
 }
 
@@ -885,14 +872,15 @@ FujiDecompressor::FujiHeader::operator bool() const {
   // general validation
   const bool invalid =
       (signature != 0x4953 || version != 1 || raw_height > 0x3000 ||
-       raw_height < 6 || raw_height % 6 || raw_width > 0x3000 ||
+       raw_height < FujiStrip::lineHeight() ||
+       raw_height % FujiStrip::lineHeight() || raw_width > 0x3000 ||
        raw_width < 0x300 || raw_width % 24 || raw_rounded_width > 0x3000 ||
        block_size < 1 || raw_rounded_width < block_size ||
        raw_rounded_width % block_size ||
        raw_rounded_width - raw_width >= block_size || block_size != 0x300 ||
        blocks_in_row > 0x10 || blocks_in_row == 0 ||
        blocks_in_row != raw_rounded_width / block_size || total_lines > 0x800 ||
-       total_lines == 0 || total_lines != raw_height / 6 ||
+       total_lines == 0 || total_lines != raw_height / FujiStrip::lineHeight() ||
        (raw_bits != 12 && raw_bits != 14) || (raw_type != 16 && raw_type != 0));
 
   return !invalid;
