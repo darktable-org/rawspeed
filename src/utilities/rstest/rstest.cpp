@@ -232,8 +232,10 @@ string img_hash(const RawImage& r) {
   return oss.str();
 }
 
+using file_ptr = std::unique_ptr<FILE, decltype(&fclose)>;
+
 void writePPM(const RawImage& raw, const string& fn) {
-  FILE* f = fopen((fn + ".ppm").c_str(), "wb");
+  file_ptr f(fopen((fn + ".ppm").c_str(), "wb"), &fclose);
 
   const iPoint2D dimUncropped = raw->getUncroppedDim();
   int width = dimUncropped.x;
@@ -241,7 +243,7 @@ void writePPM(const RawImage& raw, const string& fn) {
   string format = raw->getCpp() == 1 ? "P5" : "P6";
 
   // Write PPM header
-  fprintf(f, "%s\n%d %d\n65535\n", format.c_str(), width, height);
+  fprintf(f.get(), "%s\n%d %d\n65535\n", format.c_str(), width, height);
 
   width *= raw->getCpp();
 
@@ -252,13 +254,12 @@ void writePPM(const RawImage& raw, const string& fn) {
     for (int x = 0; x < width; ++x)
       row[x] = getU16BE(row + x);
 
-    fwrite(row, sizeof(*row), width, f);
+    fwrite(row, sizeof(*row), width, f.get());
   }
-  fclose(f);
 }
 
 void writePFM(const RawImage& raw, const string& fn) {
-  FILE* f = fopen((fn + ".pfm").c_str(), "wb");
+  file_ptr f(fopen((fn + ".pfm").c_str(), "wb"), &fclose);
 
   const iPoint2D dimUncropped = raw->getUncroppedDim();
   int width = dimUncropped.x;
@@ -266,7 +267,7 @@ void writePFM(const RawImage& raw, const string& fn) {
   string format = raw->getCpp() == 1 ? "Pf" : "PF";
 
   // Write PFM header. if scale < 0, it is little-endian, if >= 0 - big-endian
-  int len = fprintf(f, "%s\n%d %d\n-1.0", format.c_str(), width, height);
+  int len = fprintf(f.get(), "%s\n%d %d\n-1.0", format.c_str(), width, height);
 
   // make sure that data starts at aligned offset. for sse
   static const auto dataAlignment = 16;
@@ -284,13 +285,13 @@ void writePFM(const RawImage& raw, const string& fn) {
   assert(isAligned(realLen + padding, dataAlignment));
 
   // and actually write padding + new line
-  len += fprintf(f, "%0*i\n", padding, 0);
+  len += fprintf(f.get(), "%0*i\n", padding, 0);
   assert(paddedLen == len);
 
   // did we write a multiple of an alignment value?
   assert(isAligned(len, dataAlignment));
-  assert(ftell(f) == len);
-  assert(isAligned(ftell(f), dataAlignment));
+  assert(ftell(f.get()) == len);
+  assert(isAligned(ftell(f.get()), dataAlignment));
 
   width *= raw->getCpp();
 
@@ -304,9 +305,8 @@ void writePFM(const RawImage& raw, const string& fn) {
     for (int x = 0; x < width; ++x)
       row[x] = getU32LE(row + x);
 
-    fwrite(row, sizeof(*row), width, f);
+    fwrite(row, sizeof(*row), width, f.get());
   }
-  fclose(f);
 }
 
 void writeImage(const RawImage& raw, const string& fn) {
