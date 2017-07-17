@@ -95,15 +95,20 @@ RawImage RafDecoder::decodeRawInternal() {
   input = input.getSubStream(offsets->getU32(), counts->getU32());
 
   if (isCompressed()) {
-    mRaw->dim = iPoint2D(width, height);
-
     mRaw->metadata.mode = "compressed";
 
-    FujiDecompressor fujiDecompress(input, mRaw);
+    mRaw->dim = iPoint2D(width, height);
+
+    FujiDecompressor f(input, mRaw);
+
+    const iPoint2D hDim(f.header.raw_width, f.header.raw_height);
+
+    if (mRaw->dim != hDim)
+      ThrowRDE("RAF header specifies different dimensions!");
 
     mRaw->createData();
 
-    fujiDecompress.fuji_compressed_load_raw();
+    f.fuji_compressed_load_raw();
 
     return mRaw;
   }

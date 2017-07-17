@@ -52,6 +52,8 @@ public:
     ushort16 total_lines;
   };
 
+  FujiHeader header;
+
   struct FujiStrip {
     // part of which 'image' this block is
     const FujiHeader& h;
@@ -155,8 +157,6 @@ private:
   RawImage mImg;
 
   std::array<std::array<CFAColor, 6>, 6> CFA;
-
-  FujiHeader header;
 
   void fuji_decode_loop(const fuji_compressed_params* common_info,
                         std::vector<FujiStrip> strips);
