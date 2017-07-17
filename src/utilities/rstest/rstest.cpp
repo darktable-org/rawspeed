@@ -235,8 +235,9 @@ string img_hash(const RawImage& r) {
 void writePPM(const RawImage& raw, const string& fn) {
   FILE* f = fopen((fn + ".ppm").c_str(), "wb");
 
-  int width = raw->dim.x;
-  int height = raw->dim.y;
+  const iPoint2D dimUncropped = raw->getUncroppedDim();
+  int width = dimUncropped.x;
+  int height = dimUncropped.y;
   string format = raw->getCpp() == 1 ? "P5" : "P6";
 
   // Write PPM header
@@ -246,7 +247,7 @@ void writePPM(const RawImage& raw, const string& fn) {
 
   // Write pixels
   for (int y = 0; y < height; ++y) {
-    auto* row = reinterpret_cast<unsigned short*>(raw->getData(0, y));
+    auto* row = reinterpret_cast<unsigned short*>(raw->getDataUncropped(0, y));
     // PPM is big-endian
     for (int x = 0; x < width; ++x)
       row[x] = getU16BE(row + x);
@@ -259,8 +260,9 @@ void writePPM(const RawImage& raw, const string& fn) {
 void writePFM(const RawImage& raw, const string& fn) {
   FILE* f = fopen((fn + ".pfm").c_str(), "wb");
 
-  int width = raw->dim.x;
-  int height = raw->dim.y;
+  const iPoint2D dimUncropped = raw->getUncroppedDim();
+  int width = dimUncropped.x;
+  int height = dimUncropped.y;
   string format = raw->getCpp() == 1 ? "Pf" : "PF";
 
   // Write PFM header. if scale < 0, it is little-endian, if >= 0 - big-endian
@@ -296,7 +298,7 @@ void writePFM(const RawImage& raw, const string& fn) {
   for (int y = 0; y < height; ++y) {
     // NOTE: pfm has rows in reverse order
     const int row_in = height - 1 - y;
-    auto* row = reinterpret_cast<float*>(raw->getData(0, row_in));
+    auto* row = reinterpret_cast<float*>(raw->getDataUncropped(0, row_in));
 
     // PFM can have any endiannes, let's write little-endian
     for (int x = 0; x < width; ++x)
