@@ -107,9 +107,12 @@ size_t process(const std::string& filename,
 
 class RstestHashMismatch final : public rawspeed::RawspeedException {
 public:
-  explicit RstestHashMismatch(const std::string& msg)
-      : RawspeedException(msg) {}
-  explicit RstestHashMismatch(const char* msg) : RawspeedException(msg) {}
+  size_t time;
+
+  explicit RstestHashMismatch(const std::string& msg, size_t time_)
+      : RawspeedException(msg), time(time_) {}
+  explicit RstestHashMismatch(const char* msg, size_t time_)
+      : RawspeedException(msg), time(time_) {}
 };
 
 struct Timer {
@@ -391,7 +394,7 @@ size_t process(const string& filename, const CameraMetaData* metadata,
       f << h;
       if (dump)
         writeImage(raw, filename + ".failed");
-      throw RstestHashMismatch("hash/metadata mismatch");
+      throw RstestHashMismatch("hash/metadata mismatch", time);
     }
   }
 
@@ -505,7 +508,12 @@ int main(int argc, char **argv) {
       continue;
 
     try {
-      time += process(argv[i], &metadata, create, dump);
+      try {
+        time += process(argv[i], &metadata, create, dump);
+      } catch (rawspeed::rstest::RstestHashMismatch& e) {
+        time += e.time;
+        throw;
+      }
     } catch (RawspeedException& e) {
 #ifdef _OPENMP
 #pragma omp critical(io)
