@@ -191,13 +191,29 @@
     <xs:attribute type="CFA2TypeWidthType" name="width" use="required"/>
     <xs:attribute type="CFA2TypeHeightType" name="height" use="required"/>
   </xs:complexType>
+  <xs:simpleType name="CropTypeSizeOrNegOffset">
+    <xs:union>
+      <xs:simpleType>
+        <xs:restriction base="xs:unsignedShort">
+          <xs:minInclusive value="1296"/>
+          <xs:maxInclusive value="6080"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction base="xs:short">
+          <xs:minInclusive value="-236"/>
+          <xs:maxInclusive value="0"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
   <xs:complexType name="CropType">
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute type="xs:unsignedShort" name="x" use="required"/>
         <xs:attribute type="xs:unsignedByte" name="y" use="required"/>
-        <xs:attribute type="xs:short" name="width" use="required"/>
-        <xs:attribute type="xs:short" name="height" use="required"/>
+        <xs:attribute type="CropTypeSizeOrNegOffset" name="width" use="required"/>
+        <xs:attribute type="CropTypeSizeOrNegOffset" name="height" use="required"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
