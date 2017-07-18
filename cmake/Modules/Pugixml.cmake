@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 project(pugixml NONE)
 
 # Download and unpack pugixml at configure time
-configure_file(${CMAKE_SOURCE_DIR}/cmake/Modules/Pugixml.cmake.in ${CMAKE_BINARY_DIR}/pugixml/CMakeLists.txt @ONLY)
+configure_file(${CMAKE_CURRENT_LIST_DIR}/Pugixml.cmake.in ${CMAKE_BINARY_DIR}/pugixml/CMakeLists.txt @ONLY)
 
 execute_process(
   COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}"
