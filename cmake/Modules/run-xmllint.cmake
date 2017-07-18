@@ -9,7 +9,7 @@ macro (check_xml XML XSD)
     OUTPUT  ${TOUCH}
     COMMAND ${Xmllint_BIN} --nonet --valid --noout --schema ${XSD} ${XML}
     COMMAND ${CMAKE_COMMAND} -E touch ${TOUCH} # will be empty!
-    DEPENDS ${XML}
+    DEPENDS ${XML} ${XSD}
     COMMENT "Checking validity of ${FILENAME}"
   )
 
