@@ -3,7 +3,11 @@ cmake_minimum_required(VERSION 3.0)
 project(zlib NONE)
 
 # Download and unpack zlib at configure time
-configure_file(${CMAKE_CURRENT_LIST_DIR}/cmake/Modules/Zlib.cmake.in ${CMAKE_BINARY_DIR}/zlib/CMakeLists.txt @ONLY)
+if(${CMAKE_SOURCE_DIR} EQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+  configure_file(${CMAKE_SOURCE_DIR}/cmake/Modules/Zlib.cmake.in ${CMAKE_BINARY_DIR}/zlib/CMakeLists.txt @ONLY)
+else()
+  configure_file(${CMAKE_CURRENT_LIST_DIR}/cmake/Modules/Zlib.cmake.in ${CMAKE_BINARY_DIR}/zlib/CMakeLists.txt @ONLY)
+endif()
 
 execute_process(
   COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}"
