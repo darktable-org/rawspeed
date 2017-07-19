@@ -183,7 +183,7 @@ void RafDecoder::decodeThreaded(RawDecoderThread* t) {
   assert(f);
 
   const auto nThreads = getThreadCount();
-  assert(t->taskNo >= 0 && t->taskNo < nThreads);
+  assert(t->taskNo < nThreads);
 
   const auto slicesPerThread =
       (f->header.blocks_in_row + nThreads - 1) / nThreads;
