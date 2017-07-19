@@ -27,8 +27,10 @@
 #include "io/BitPumpMSB.h"                      // for BitPumpMSB
 #include "io/ByteStream.h"                      // for ByteStream
 #include "metadata/ColorFilterArray.h"          // for CFAColor
+#include <algorithm>                            // for move
 #include <array>                                // for array
 #include <cassert>                              // for cassert
+#include <cstddef>                              // for size_t
 #include <vector>                               // for vector
 
 namespace rawspeed {

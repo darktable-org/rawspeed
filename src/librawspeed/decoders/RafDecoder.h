@@ -31,6 +31,7 @@ namespace rawspeed {
 class CameraMetaData;
 class Buffer;
 class FujiDecompressor;
+class RawDecoderThread;
 
 class RafDecoder final : public AbstractTiffDecoder
 {
