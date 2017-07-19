@@ -1,7 +1,8 @@
 /*
-    FujiDecompressor - Decompress Fujifilm compressed RAF.
+    RawSpeed - RAW file decoder.
 
     Copyright (C) 2017 Uwe Müssel
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
