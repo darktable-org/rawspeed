@@ -99,16 +99,21 @@ RawImage RafDecoder::decodeRawInternal() {
 
     mRaw->dim = iPoint2D(width, height);
 
-    FujiDecompressor f(input, mRaw);
+    FujiDecompressor _f(input, mRaw);
+    f = &_f;
 
-    const iPoint2D hDim(f.header.raw_width, f.header.raw_height);
+    const iPoint2D hDim(f->header.raw_width, f->header.raw_height);
 
     if (mRaw->dim != hDim)
       ThrowRDE("RAF header specifies different dimensions!");
 
     mRaw->createData();
 
-    f.fuji_compressed_load_raw();
+    _f.fuji_compressed_load_raw();
+
+    startTasks(getThreadCount());
+
+    f = nullptr;
 
     return mRaw;
   }
@@ -171,6 +176,22 @@ RawImage RafDecoder::decodeRawInternal() {
   }
 
   return mRaw;
+}
+
+void RafDecoder::decodeThreaded(RawDecoderThread* t) {
+  assert(f);
+
+  const auto nThreads = getThreadCount();
+  assert(t->taskNo >= 0 && t->taskNo < nThreads);
+
+  const auto slicesPerThread =
+      (f->header.blocks_in_row + nThreads - 1) / nThreads;
+  assert(slicesPerThread * nThreads >= f->header.blocks_in_row);
+
+  const auto startSlice = slicesPerThread * t->taskNo;
+  const auto endSlice = startSlice + slicesPerThread;
+
+  f->fuji_decode_loop(startSlice, endSlice);
 }
 
 void RafDecoder::checkSupportInternal(const CameraMetaData* meta) {

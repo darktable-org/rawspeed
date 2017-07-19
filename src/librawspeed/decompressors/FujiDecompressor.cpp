@@ -146,7 +146,7 @@ void FujiDecompressor::fuji_compressed_block::reset(
 template <typename T>
 void FujiDecompressor::copy_line(fuji_compressed_block* info,
                                  const FujiStrip& strip, int cur_line,
-                                 T&& idx) {
+                                 T&& idx) const {
   ushort16* lineBufB[3];
   ushort16* lineBufG[6];
   ushort16* lineBufR[3];
@@ -191,7 +191,7 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info,
 
 void FujiDecompressor::copy_line_to_xtrans(fuji_compressed_block* info,
                                            const FujiStrip& strip,
-                                           int cur_line) {
+                                           int cur_line) const {
   auto index = [](int pixel_count) {
     return (((pixel_count * 2 / 3) & 0x7FFFFFFE) | ((pixel_count % 3) & 1)) +
            ((pixel_count % 3) >> 1);
@@ -202,7 +202,7 @@ void FujiDecompressor::copy_line_to_xtrans(fuji_compressed_block* info,
 
 void FujiDecompressor::copy_line_to_bayer(fuji_compressed_block* info,
                                           const FujiStrip& strip,
-                                          int cur_line) {
+                                          int cur_line) const {
   auto index = [](int pixel_count) { return pixel_count >> 1; };
 
   copy_line(info, strip, cur_line, index);
@@ -212,7 +212,7 @@ void FujiDecompressor::copy_line_to_bayer(fuji_compressed_block* info,
   (9 * (i)->q_table[(i)->q_point[4] + (v1)] +                                  \
    (i)->q_table[(i)->q_point[4] + (v2)])
 
-void FujiDecompressor::fuji_zerobits(BitPumpMSB* pump, int* count) {
+void FujiDecompressor::fuji_zerobits(BitPumpMSB* pump, int* count) const {
   uchar8 zero = 0;
   *count = 0;
 
@@ -226,7 +226,8 @@ void FujiDecompressor::fuji_zerobits(BitPumpMSB* pump, int* count) {
   }
 }
 
-int __attribute__((const)) FujiDecompressor::bitDiff(int value1, int value2) {
+int __attribute__((const))
+FujiDecompressor::bitDiff(int value1, int value2) const {
   int decBits = 0;
 
   if (value2 >= value1)
@@ -244,7 +245,7 @@ int __attribute__((const)) FujiDecompressor::bitDiff(int value1, int value2) {
 
 int FujiDecompressor::fuji_decode_sample_even(
     fuji_compressed_block* info, const fuji_compressed_params* params,
-    BitPumpMSB* pump, ushort16* line_buf, int pos, int_pair* grads) {
+    BitPumpMSB* pump, ushort16* line_buf, int pos, int_pair* grads) const {
   int interp_val = 0;
   int errcnt = 0;
 
@@ -329,7 +330,7 @@ int FujiDecompressor::fuji_decode_sample_even(
 
 int FujiDecompressor::fuji_decode_sample_odd(
     fuji_compressed_block* info, const fuji_compressed_params* params,
-    BitPumpMSB* pump, ushort16* line_buf, int pos, int_pair* grads) {
+    BitPumpMSB* pump, ushort16* line_buf, int pos, int_pair* grads) const {
   int interp_val = 0;
   int errcnt = 0;
 
@@ -407,7 +408,7 @@ int FujiDecompressor::fuji_decode_sample_odd(
 
 void FujiDecompressor::fuji_decode_interpolation_even(int line_width,
                                                       ushort16* line_buf,
-                                                      int pos) {
+                                                      int pos) const {
   ushort16* line_buf_cur = line_buf + pos;
   int Rb = line_buf_cur[-2 - line_width];
   int Rc = line_buf_cur[-3 - line_width];
@@ -427,7 +428,8 @@ void FujiDecompressor::fuji_decode_interpolation_even(int line_width,
 }
 
 void FujiDecompressor::fuji_extend_generic(ushort16* linebuf[_ltotal],
-                                           int line_width, int start, int end) {
+                                           int line_width, int start,
+                                           int end) const {
   for (int i = start; i <= end; i++) {
     linebuf[i][0] = linebuf[i - 1][1];
     linebuf[i][line_width + 1] = linebuf[i - 1][line_width];
@@ -435,23 +437,23 @@ void FujiDecompressor::fuji_extend_generic(ushort16* linebuf[_ltotal],
 }
 
 void FujiDecompressor::fuji_extend_red(ushort16* linebuf[_ltotal],
-                                       int line_width) {
+                                       int line_width) const {
   fuji_extend_generic(linebuf, line_width, _R2, _R4);
 }
 
 void FujiDecompressor::fuji_extend_green(ushort16* linebuf[_ltotal],
-                                         int line_width) {
+                                         int line_width) const {
   fuji_extend_generic(linebuf, line_width, _G2, _G7);
 }
 
 void FujiDecompressor::fuji_extend_blue(ushort16* linebuf[_ltotal],
-                                        int line_width) {
+                                        int line_width) const {
   fuji_extend_generic(linebuf, line_width, _B2, _B4);
 }
 
 void FujiDecompressor::xtrans_decode_block( // NOLINT
     fuji_compressed_block* info, const fuji_compressed_params* params,
-    BitPumpMSB* pump, int cur_line) {
+    BitPumpMSB* pump, int cur_line) const {
   int r_even_pos = 0;
   int r_odd_pos = 1;
   int g_even_pos = 0;
@@ -677,7 +679,7 @@ void FujiDecompressor::xtrans_decode_block( // NOLINT
 
 void FujiDecompressor::fuji_bayer_decode_block(
     fuji_compressed_block* info, const fuji_compressed_params* params,
-    BitPumpMSB* pump, int cur_line) {
+    BitPumpMSB* pump, int cur_line) const {
   int r_even_pos = 0;
   int r_odd_pos = 1;
   int g_even_pos = 0;
@@ -772,7 +774,7 @@ void FujiDecompressor::fuji_bayer_decode_block(
 
 void FujiDecompressor::fuji_decode_strip(
     const fuji_compressed_params* info_common,
-    fuji_compressed_block* info_block, const FujiStrip& strip) {
+    fuji_compressed_block* info_block, const FujiStrip& strip) const {
   BitPumpMSB pump(strip.bs);
 
   const unsigned line_size = sizeof(ushort16) * (info_common->line_width + 2);
@@ -814,7 +816,7 @@ void FujiDecompressor::fuji_decode_strip(
 }
 
 void FujiDecompressor::fuji_compressed_load_raw() {
-  fuji_compressed_params common_info(*this);
+  common_info = fuji_compressed_params(*this);
 
   // read block sizes
   std::vector<uint32> block_sizes;
@@ -830,7 +832,6 @@ void FujiDecompressor::fuji_compressed_load_raw() {
   }
 
   // calculating raw block offsets
-  std::vector<FujiStrip> strips;
   strips.reserve(header.blocks_in_row);
 
   int block = 0;
@@ -838,20 +839,14 @@ void FujiDecompressor::fuji_compressed_load_raw() {
     strips.emplace_back(header, block, input.getStream(block_size));
     block++;
   }
-
-  fuji_decode_loop(&common_info, strips);
 }
 
-void FujiDecompressor::fuji_decode_loop(
-    const fuji_compressed_params* common_info, std::vector<FujiStrip> strips) {
-
-  // FIXME: figure out a sane way to pthread-ize this !
-
+void FujiDecompressor::fuji_decode_loop(size_t start, size_t end) const {
   fuji_compressed_block block_info;
 
-  for (auto& strip : strips) {
-    block_info.reset(common_info);
-    fuji_decode_strip(common_info, &block_info, strip);
+  for (size_t i = start; i < end && i < strips.size(); i++) {
+    block_info.reset(&common_info);
+    fuji_decode_strip(&common_info, &block_info, strips[i]);
   }
 }
 
