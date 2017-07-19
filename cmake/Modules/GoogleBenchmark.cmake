@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 project(googlebenchmark NONE)
 
 # Download and unpack googlebenchmark at configure time
-configure_file(${CMAKE_SOURCE_DIR}/cmake/Modules/GoogleBenchmark.cmake.in ${CMAKE_BINARY_DIR}/googlebenchmark/CMakeLists.txt @ONLY)
+configure_file(${RAWSPEED_SOURCE_DIR}/cmake/Modules/GoogleBenchmark.cmake.in ${CMAKE_BINARY_DIR}/googlebenchmark/CMakeLists.txt @ONLY)
 
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}"
   -DALLOW_DOWNLOADING_GOOGLEBENCHMARK=${ALLOW_DOWNLOADING_GOOGLEBENCHMARK} -DGOOGLEBENCHMARK_PATH:PATH=${GOOGLEBENCHMARK_PATH} .
