@@ -201,7 +201,7 @@
       </xs:simpleType>
       <xs:simpleType>
         <xs:restriction base="xs:short">
-          <xs:minInclusive value="-236"/>
+          <xs:minInclusive value="-936"/>
           <xs:maxInclusive value="0"/>
         </xs:restriction>
       </xs:simpleType>
@@ -442,6 +442,7 @@
       <xs:enumeration value="sNEF-uncompressed"/>
       <xs:enumeration value="sRaw1"/>
       <xs:enumeration value="sRaw2"/>
+      <xs:enumeration value="compressed"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="CameraTypeSupportedType">

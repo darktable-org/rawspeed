@@ -87,6 +87,11 @@ public:
     pos += size_;
     return ret;
   }
+  inline ByteStream getStream(size_type size_) {
+    ByteStream ret = getSubStream(pos, size_);
+    pos += size_;
+    return ret;
+  }
 
   inline uchar8 peekByte(size_type i = 0) const {
     assert(data);

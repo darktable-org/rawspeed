@@ -8,6 +8,8 @@ FILE(GLOB SOURCES
   "CrwDecompressor.h"
   "DeflateDecompressor.cpp"
   "DeflateDecompressor.h"
+  "FujiDecompressor.cpp"
+  "FujiDecompressor.h"
   "HasselbladDecompressor.cpp"
   "HasselbladDecompressor.h"
   "HuffmanTable.h"

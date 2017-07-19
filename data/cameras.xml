@@ -8611,6 +8611,28 @@
 		<Crop x="48" y="0" width="-48" height="0"/>
 		<Sensor black="260" white="4000"/>
 	</Camera>
+	<Camera make="FUJIFILM" model="GFX 50S">
+		<ID make="Fujifilm" model="GFX 50S">Fujifilm GFX 50S</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-936" height="0"/>
+		<Sensor black="65" white="16383"/>
+	</Camera>
+	<Camera make="FUJIFILM" model="GFX 50S" mode="compressed">
+		<ID make="Fujifilm" model="GFX 50S">Fujifilm GFX 50S</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-936" height="0"/>
+		<Sensor black="65" white="16383"/>
+	</Camera>
 	<Camera make="FUJIFILM" model="X-Pro1">
 		<ID make="Fujifilm" model="X-Pro1">Fujifilm X-Pro1</ID>
 		<CFA2 width="6" height="6">
@@ -8635,6 +8657,19 @@
 			<ColorRow y="5">GGRGGB</ColorRow>
 		</CFA2>
 		<Crop x="0" y="0" width="-128" height="0"/>
+		<Sensor black="1024" white="16383"/>
+	</Camera>
+	<Camera make="FUJIFILM" model="X-Pro2" mode="compressed">
+		<ID make="Fujifilm" model="X-Pro2">Fujifilm X-Pro2</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="12" width="-16" height="-12"/>
 		<Sensor black="1024" white="16383"/>
 	</Camera>
 	<Camera make="FUJIFILM" model="X70">
@@ -8711,6 +8746,19 @@
 			<ColorRow y="5">GGRGGB</ColorRow>
 		</CFA2>
 		<Crop x="0" y="0" width="-126" height="0"/>
+		<Sensor black="1024" white="16383"/>
+	</Camera>
+	<Camera make="FUJIFILM" model="X100F" mode="compressed">
+		<ID make="Fujifilm" model="X100F">Fujifilm X100F</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="12" width="-16" height="-12"/>
 		<Sensor black="1024" white="16383"/>
 	</Camera>
 	<Camera make="FUJIFILM" model="X100S">
@@ -8866,6 +8914,19 @@
 		<Crop x="0" y="0" width="-126" height="0"/>
 		<Sensor black="1024" white="16383"/>
 	</Camera>
+	<Camera make="FUJIFILM" model="X-T2" mode="compressed">
+		<ID make="Fujifilm" model="X-T2">Fujifilm X-T2</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="12" width="-16" height="-12"/>
+		<Sensor black="1024" white="16383"/>
+	</Camera>
 	<Camera make="FUJIFILM" model="X-T10">
 		<ID make="Fujifilm" model="X-T10">Fujifilm X-T10</ID>
 		<CFA2 width="6" height="6">
@@ -8890,6 +8951,19 @@
 			<ColorRow y="5">GGRGGB</ColorRow>
 		</CFA2>
 		<Crop x="0" y="0" width="-126" height="0"/>
+		<Sensor black="1024" white="16383"/>
+	</Camera>
+	<Camera make="FUJIFILM" model="X-T20" mode="compressed">
+		<ID make="Fujifilm" model="X-T20">Fujifilm X-T20</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="12" width="-16" height="-12"/>
 		<Sensor black="1024" white="16383"/>
 	</Camera>
 	<Camera make="KONICA MINOLTA" model="DYNAX 5D">
