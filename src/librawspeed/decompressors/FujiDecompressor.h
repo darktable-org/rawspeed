@@ -77,13 +77,14 @@ public:
 
     // how many horizontal pixels does this block encode?
     int width() const {
-      int width = h.block_size;
+      // if this is not the last block, we are good.
+      if ((n + 1) != h.blocks_in_row)
+        return h.block_size;
 
-      // is this the last block?
-      if ((n + 1) == h.blocks_in_row)
-        width = h.raw_width % width;
+      // ok, this is the last block...
 
-      return width;
+      assert(h.block_size * h.blocks_in_row >= h.raw_width);
+      return h.raw_width - h.block_size * n;
     }
 
     // where vertically does this block start?
