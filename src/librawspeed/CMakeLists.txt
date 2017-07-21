@@ -41,7 +41,7 @@ target_include_directories(rawspeed_static SYSTEM PUBLIC "$<TARGET_PROPERTY:raws
 target_link_libraries(rawspeed_static PUBLIC ${RAWSPEED_LIBS})
 add_dependencies(rawspeed_static rawspeed)
 
-if(WITH_OPENMP AND OPENMP_FOUND)
+if(WITH_OPENMP AND OPENMP_FOUND AND OpenMP_CXX_FLAGS)
   target_compile_options(rawspeed_static INTERFACE ${OpenMP_CXX_FLAGS})
   target_link_libraries(rawspeed_static INTERFACE ${OpenMP_CXX_FLAGS})
 endif()

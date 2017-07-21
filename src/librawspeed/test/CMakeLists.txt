@@ -19,8 +19,9 @@ add_dependencies(rawspeed_test rawspeed)
 
 target_link_libraries(rawspeed_test PUBLIC gtest gmock_main)
 
-if(WITH_OPENMP AND OPENMP_FOUND)
-  target_link_libraries(rawspeed_test INTERFACE ${OpenMP_CXX_FLAGS})
+if(WITH_OPENMP AND OPENMP_FOUND AND OpenMP_CXX_FLAGS)
+  target_compile_options(rawspeed_test PUBLIC ${OpenMP_CXX_FLAGS})
+  target_link_libraries(rawspeed_test PUBLIC ${OpenMP_CXX_FLAGS})
 endif()
 
 FILE(GLOB RAWSPEED_TESTS_SOURCES
