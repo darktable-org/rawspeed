@@ -21,7 +21,8 @@ add_dependencies(rawspeed_benchmark rawspeed)
 target_link_libraries(rawspeed_benchmark PUBLIC benchmark)
 
 if(WITH_OPENMP AND OPENMP_FOUND)
-  target_link_libraries(rawspeed_benchmark INTERFACE ${OpenMP_CXX_FLAGS})
+  target_compile_options(rawspeed_benchmark PUBLIC ${OpenMP_CXX_FLAGS})
+  target_link_libraries(rawspeed_benchmark PUBLIC ${OpenMP_CXX_FLAGS})
 endif()
 
 FILE(GLOB RAWSPEED_BENCHMARKS_SOURCES
