@@ -41,7 +41,8 @@ class JpegDecompressor final : public AbstractDecompressor {
 public:
   JpegDecompressor(const Buffer& data, Buffer::size_type offset,
                    Buffer::size_type size, const RawImage& img)
-      : input(data, offset, size, getHostEndianness() == big), mRaw(img) {}
+      : input(data, offset, size, getHostEndianness() == Endianness::big),
+        mRaw(img) {}
   JpegDecompressor(const Buffer& data, Buffer::size_type offset,
                    const RawImage& img)
       : JpegDecompressor(data, offset, data.getSize() - offset, img) {}

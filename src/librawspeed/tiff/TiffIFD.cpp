@@ -118,7 +118,7 @@ TiffRootIFDOwner TiffIFD::parseDngPrivateData(TiffEntry* t) {
   if (!bs.skipPrefix("MakN", 4))
     ThrowTPE("Not Makernote");
 
-  bs.setInNativeByteOrder(big == getHostEndianness());
+  bs.setInNativeByteOrder(getHostEndianness() == Endianness::big);
   uint32 makerNoteSize = bs.getU32();
   if (makerNoteSize != bs.getRemainSize())
     ThrowTPE("Error reading TIFF structure (invalid size). File Corrupt");
@@ -171,7 +171,7 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(TiffEntry* t)
   } else if (bs.hasPrefix("PENTAX", 6)) {
     setup(true, 10, 8, "Pentax makernote");
   } else if (bs.hasPrefix("FUJIFILM\x0c\x00\x00\x00", 12)) {
-    bs.setInNativeByteOrder(getHostEndianness() == little);
+    bs.setInNativeByteOrder(getHostEndianness() == Endianness::little);
     setup(true, 12);
   } else if (bs.hasPrefix("Nikon\x00\x02", 7)) {
     // this is Nikon type 3 maker note format
@@ -198,9 +198,9 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(TiffEntry* t)
 
     // At least one MAKE has not been handled explicitly and starts its MakerNote with an endian prefix: Kodak
     if (bs.skipPrefix("II", 2)) {
-      bs.setInNativeByteOrder( getHostEndianness() == little );
+      bs.setInNativeByteOrder(getHostEndianness() == Endianness::little);
     } else if (bs.skipPrefix("MM", 2)) {
-      bs.setInNativeByteOrder( getHostEndianness() == big );
+      bs.setInNativeByteOrder(getHostEndianness() == Endianness::big);
     }
   }
 

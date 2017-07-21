@@ -343,7 +343,7 @@ public:
 DngOpcodes::DngOpcodes(TiffEntry* entry) {
   ByteStream bs = entry->getData();
   // DNG opcodes are always stored in big-endian byte order.
-  bs.setInNativeByteOrder(getHostEndianness() == big);
+  bs.setInNativeByteOrder(getHostEndianness() == Endianness::big);
 
   const auto opcode_count = bs.getU32();
   opcodes.reserve(opcode_count);

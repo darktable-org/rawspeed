@@ -97,7 +97,7 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
   mRaw->createData();
 
   UncompressedDecompressor u(di, 0, len, mRaw);
-  u.decodeRawUnpacked<16, big>(width, height);
+  u.decodeRawUnpacked<16, Endianness::big>(width, height);
 
   return mRaw;
 }
@@ -241,9 +241,9 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) {
   UncompressedDecompressor u(*mFile, off, c2, mRaw);
 
   if (hints.has("sr2_format"))
-    u.decodeRawUnpacked<14, big>(width, height);
+    u.decodeRawUnpacked<14, Endianness::big>(width, height);
   else
-    u.decodeRawUnpacked<16, little>(width, height);
+    u.decodeRawUnpacked<16, Endianness::little>(width, height);
 }
 
 void ArwDecoder::DecodeARW(const ByteStream& input, uint32 w, uint32 h) {
@@ -293,7 +293,7 @@ void ArwDecoder::DecodeARW2(const ByteStream& input, uint32 w, uint32 h,
 
   if (bpp == 12) {
     UncompressedDecompressor u(input, mRaw);
-    u.decode12BitRaw<little>(w, h);
+    u.decode12BitRaw<Endianness::little>(w, h);
 
     // Shift scales, since black and white are the same as compressed precision
     mShiftDownScale = 2;
@@ -309,27 +309,27 @@ void ArwDecoder::ParseA100WB() {
   // only contains the offset, not the length!
   TiffEntry* priv = mRootIFD->getEntryRecursive(DNGPRIVATEDATA);
   ByteStream bs = priv->getData();
-  bs.setByteOrder(little);
+  bs.setByteOrder(Endianness::little);
   const uint32 off = bs.getU32();
 
   bs = ByteStream(*mFile, off);
 
   // MRW style, see MrwDecoder
 
-  bs.setByteOrder(big);
+  bs.setByteOrder(Endianness::big);
   uint32 tag = bs.getU32();
   if (0x4D5249 != tag) // MRI
     ThrowRDE("Can not parse DNGPRIVATEDATA, invalid tag (0x%x).", tag);
 
-  bs.setByteOrder(little);
+  bs.setByteOrder(Endianness::little);
   uint32 len = bs.getU32();
 
   bs = bs.getSubStream(bs.getPosition(), len);
 
   while (bs.getRemainSize() > 0) {
-    bs.setByteOrder(big);
+    bs.setByteOrder(Endianness::big);
     tag = bs.getU32();
-    bs.setByteOrder(little);
+    bs.setByteOrder(Endianness::little);
     len = bs.getU32();
     bs.check(len);
     if (!len)
@@ -344,7 +344,7 @@ void ArwDecoder::ParseA100WB() {
     bs.skipBytes(4);
 
     ushort16 tmp[4];
-    bs.setByteOrder(little);
+    bs.setByteOrder(Endianness::little);
     for (auto& coeff : tmp)
       coeff = bs.getU16();
 

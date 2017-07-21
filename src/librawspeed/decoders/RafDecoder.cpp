@@ -163,9 +163,10 @@ RawImage RafDecoder::decodeRawInternal() {
   UncompressedDecompressor u(input, mRaw);
 
   if (double_width) {
-    u.decodeRawUnpacked<16, little>(width * 2, height);
-  } else if (input.isInNativeByteOrder() == (getHostEndianness() == big)) {
-    u.decodeRawUnpacked<16, big>(width, height);
+    u.decodeRawUnpacked<16, Endianness::little>(width * 2, height);
+  } else if (input.isInNativeByteOrder() ==
+             (getHostEndianness() == Endianness::big)) {
+    u.decodeRawUnpacked<16, Endianness::big>(width, height);
   } else {
     iPoint2D pos(0, 0);
     if (hints.has("jpeg32_bitorder")) {

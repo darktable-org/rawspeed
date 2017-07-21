@@ -105,9 +105,9 @@ public:
 
 inline bool isTiffInNativeByteOrder(const ByteStream& bs, uint32 pos, const char* context = "") {
   if (bs.hasPatternAt("II", 2, pos))
-    return getHostEndianness() == little;
+    return getHostEndianness() == Endianness::little;
   if (bs.hasPatternAt("MM", 2, pos))
-    return getHostEndianness() == big;
+    return getHostEndianness() == Endianness::big;
 
   ThrowTPE("Failed to parse TIFF endianess information in %s.", context);
 }
@@ -115,9 +115,9 @@ inline bool isTiffInNativeByteOrder(const ByteStream& bs, uint32 pos, const char
 inline Endianness getTiffEndianness(const Buffer* file) {
   ushort16 magic = *reinterpret_cast<const ushort16*>(file->getData(0, 2));
   if (magic == 0x4949)
-    return little;
+    return Endianness::little;
   if (magic == 0x4d4d)
-    return big;
+    return Endianness::big;
 
   ThrowTPE("Failed to parse TIFF endianess information.");
 }

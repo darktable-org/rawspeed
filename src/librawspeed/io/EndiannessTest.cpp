@@ -36,8 +36,7 @@ using rawspeed::getHostEndiannessRuntime;
 using rawspeed::getByteSwapped;
 using rawspeed::getBE;
 using rawspeed::getLE;
-using rawspeed::little;
-using rawspeed::big;
+using rawspeed::Endianness;
 using rawspeed::getU16BE;
 using rawspeed::getU16LE;
 using rawspeed::getU32BE;
@@ -151,31 +150,31 @@ TEST_P(ushort16Test, typedSwap) {
   ASSERT_PRED_FORMAT2(HexEquals{}, getByteSwappedT(&in, true), expected);
 }
 TEST_P(ushort16Test, get) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getBEt(&in), expected);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getLEt(&in), expected);
   }
 }
 TEST_P(ushort16Test, getNOP) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getLEt(&in), in);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getBEt(&in), in);
   }
 }
 
 TEST_P(ushort16Test, getU16) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getU16BE(&in), expected);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getU16LE(&in), expected);
   }
 }
 TEST_P(ushort16Test, getU16NOP) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getU16LE(&in), in);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getU16BE(&in), in);
   }
 }
@@ -195,16 +194,16 @@ TEST_P(short16Test, typedSwap) {
   ASSERT_PRED_FORMAT2(HexEquals{}, getByteSwappedT(&in, true), expected);
 }
 TEST_P(short16Test, get) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getBEt(&in), expected);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getLEt(&in), expected);
   }
 }
 TEST_P(short16Test, getNOP) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getLEt(&in), in);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getBEt(&in), in);
   }
 }
@@ -226,31 +225,31 @@ TEST_P(uint32Test, typedSwap) {
   ASSERT_PRED_FORMAT2(HexEquals{}, getByteSwappedT(&in, true), expected);
 }
 TEST_P(uint32Test, get) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getBEt(&in), expected);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getLEt(&in), expected);
   }
 }
 TEST_P(uint32Test, getNOP) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getLEt(&in), in);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getBEt(&in), in);
   }
 }
 
 TEST_P(uint32Test, getU32) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getU32BE(&in), expected);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getU32LE(&in), expected);
   }
 }
 TEST_P(uint32Test, getU32NOP) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getU32LE(&in), in);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getU32BE(&in), in);
   }
 }
@@ -269,16 +268,16 @@ TEST_P(int32Test, typedSwap) {
   ASSERT_PRED_FORMAT2(HexEquals{}, getByteSwappedT(&in, true), expected);
 }
 TEST_P(int32Test, get) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getBEt(&in), expected);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getLEt(&in), expected);
   }
 }
 TEST_P(int32Test, getNOP) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getLEt(&in), in);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getBEt(&in), in);
   }
 }
@@ -300,16 +299,16 @@ TEST_P(uint64Test, typedSwap) {
   ASSERT_PRED_FORMAT2(HexEquals{}, getByteSwappedT(&in, true), expected);
 }
 TEST_P(uint64Test, get) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getBEt(&in), expected);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getLEt(&in), expected);
   }
 }
 TEST_P(uint64Test, getNOP) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getLEt(&in), in);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getBEt(&in), in);
   }
 }
@@ -328,16 +327,16 @@ TEST_P(floatTest, typedSwap) {
   ASSERT_PRED_FORMAT2(HexEquals{}, getByteSwappedT(&in, true), expected);
 }
 TEST_P(floatTest, get) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getBEt(&in), expected);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getLEt(&in), expected);
   }
 }
 TEST_P(floatTest, getNOP) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getLEt(&in), in);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getBEt(&in), in);
   }
 }
@@ -356,16 +355,16 @@ TEST_P(doubleTest, typedSwap) {
   ASSERT_PRED_FORMAT2(HexEquals{}, getByteSwappedT(&in, true), expected);
 }
 TEST_P(doubleTest, get) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getBEt(&in), expected);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getLEt(&in), expected);
   }
 }
 TEST_P(doubleTest, getNOP) {
-  if (getHostEndianness() == little) {
+  if (getHostEndianness() == Endianness::little) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getLEt(&in), in);
-  } else if (getHostEndianness() == big) {
+  } else if (getHostEndianness() == Endianness::big) {
     ASSERT_PRED_FORMAT2(HexEquals{}, getBEt(&in), in);
   }
 }

@@ -47,7 +47,7 @@ RawImage ErfDecoder::decodeRawInternal() {
 
   UncompressedDecompressor u(*mFile, off, c2, mRaw);
 
-  u.decode12BitRaw<big, false, true>(width, height);
+  u.decode12BitRaw<Endianness::big, false, true>(width, height);
 
   return mRaw;
 }

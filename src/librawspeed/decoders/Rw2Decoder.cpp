@@ -136,10 +136,10 @@ RawImage Rw2Decoder::decodeRawInternal() {
 
     if (size >= width*height*2) {
       // It's completely unpacked little-endian
-      u.decodeRawUnpacked<12, little>(width, height);
+      u.decodeRawUnpacked<12, Endianness::little>(width, height);
     } else if (size >= width*height*3/2) {
       // It's a packed format
-      u.decode12BitRaw<little, false, true>(width, height);
+      u.decode12BitRaw<Endianness::little, false, true>(width, height);
     } else {
       // It's using the new .RW2 decoding method
       load_flags = 0;

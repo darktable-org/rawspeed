@@ -72,7 +72,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
     offset = ifd->getEntry(STRIPOFFSETS)->getU32();
   }
 
-  ByteStream b(mFile, offset+41, getHostEndianness() == big);
+  ByteStream b(mFile, offset + 41, getHostEndianness() == Endianness::big);
   int height = b.getU16();
   int width = b.getU16();
 

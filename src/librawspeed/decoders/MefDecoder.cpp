@@ -41,7 +41,7 @@ RawImage MefDecoder::decodeRawInternal() {
 
   UncompressedDecompressor u(*mFile, off, mRaw);
 
-  u.decode12BitRaw<big>(width, height);
+  u.decode12BitRaw<Endianness::big>(width, height);
 
   return mRaw;
 }

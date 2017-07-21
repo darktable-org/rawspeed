@@ -55,7 +55,7 @@ void MrwDecoder::parseHeader() {
   if (!isMRW(mFile))
     ThrowRDE("This isn't actually a MRW file, why are you calling me?");
 
-  const DataBuffer db(*mFile, getHostEndianness() == big);
+  const DataBuffer db(*mFile, getHostEndianness() == Endianness::big);
   ByteStream bs(db);
 
   // magic
@@ -142,15 +142,15 @@ RawImage MrwDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(raw_width, raw_height);
   mRaw->createData();
 
-  DataBuffer db(imageData, getHostEndianness() == big);
+  DataBuffer db(imageData, getHostEndianness() == Endianness::big);
   ByteStream bs(db);
   UncompressedDecompressor u(bs, mRaw);
 
   try {
     if (packed)
-      u.decode12BitRaw<big>(raw_width, raw_height);
+      u.decode12BitRaw<Endianness::big>(raw_width, raw_height);
     else
-      u.decodeRawUnpacked<12, big>(raw_width, raw_height);
+      u.decodeRawUnpacked<12, Endianness::big>(raw_width, raw_height);
   } catch (IOException &e) {
     mRaw->setError(e.what());
     // Let's ignore it, it may have delivered somewhat useful data.

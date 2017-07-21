@@ -34,7 +34,7 @@ namespace rawspeed {
 
 FujiDecompressor::FujiDecompressor(ByteStream input_, const RawImage& img)
     : input(std::move(input_)), mImg(img) {
-  input.setByteOrder(big);
+  input.setByteOrder(Endianness::big);
 
   header = FujiHeader(&input);
   if (!header)
