@@ -68,6 +68,7 @@ int main(int argc, char** argv) {
     const char* fName = argv[i];
     auto* b = benchmark::RegisterBenchmark(fName, &BM_RawSpeed, fName);
     b->Unit(benchmark::kMillisecond);
+    b->UseRealTime();
   }
 
   benchmark::RunSpecifiedBenchmarks();
