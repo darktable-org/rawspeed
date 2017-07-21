@@ -18,10 +18,12 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "RawSpeed-API.h"            // for RawDecoder, FileReader, RawParser
-#include <benchmark/benchmark_api.h> // for Initialize, RegisterBenchmark
+#include "RawSpeed-API.h"            // for RawDecoder, Buffer, FileReader
+#include <benchmark/benchmark_api.h> // for State, Benchmark, DoNotOptimize
+#include <ctime>                     // for clock, clock_t, CLOCKS_PER_SEC
 #include <memory>                    // for unique_ptr
-#include <string>                    // for string
+#include <string>                    // for string, to_string
+// IWYU pragma: no_include <sys/time.h>
 
 using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
@@ -38,6 +40,8 @@ static inline void BM_RawSpeed(benchmark::State& state, const char* fileName) {
   FileReader reader(fileName);
   const auto map(reader.readFile());
 
+  const std::clock_t c_start = std::clock();
+
   while (state.KeepRunning()) {
     RawParser parser(map.get());
     auto decoder(parser.getDecoder(&metadata));
@@ -52,9 +56,13 @@ static inline void BM_RawSpeed(benchmark::State& state, const char* fileName) {
     benchmark::DoNotOptimize(raw);
   }
 
+  const std::clock_t c_end = std::clock();
+
   std::string label("filesize=");
   label += std::to_string(map->getSize() / (1UL << 10UL));
-  label += "KB";
+  label += "KB;CPU-seconds=";
+  label += std::to_string(1000.0 * (c_end - c_start) / CLOCKS_PER_SEC);
+  label += "ms";
   state.SetLabel(label.c_str());
 
   state.SetItemsProcessed(state.iterations());
