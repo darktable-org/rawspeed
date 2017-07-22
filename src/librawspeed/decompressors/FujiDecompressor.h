@@ -87,7 +87,7 @@ public:
       // ok, this is the last block...
 
       assert(h.block_size * h.blocks_in_row >= h.raw_width);
-      return h.raw_width - h.block_size * n;
+      return h.raw_width - offsetX();
     }
 
     // where vertically does this block start?
