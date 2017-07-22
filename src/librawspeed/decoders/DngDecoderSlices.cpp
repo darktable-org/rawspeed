@@ -127,7 +127,10 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
       iPoint2D tileSize(mRaw->dim.x, thisTileLength);
       iPoint2D pos(0, e->offY);
 
-      bool big_endian = (getTiffEndianness(mFile) == Endianness::big);
+      const DataBuffer db(*mFile);
+      const ByteStream bs(db);
+
+      bool big_endian = (getTiffByteOrder(bs, 0) == Endianness::big);
       // DNG spec says that if not 8 or 16 bit/sample, always use big endian
       if (mBps != 8 && mBps != 16)
         big_endian = true;
