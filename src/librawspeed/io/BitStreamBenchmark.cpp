@@ -38,11 +38,12 @@ using rawspeed::BitPumpMSB;
 using rawspeed::BitPumpMSB16;
 using rawspeed::BitPumpMSB32;
 using rawspeed::BitPumpJPEG;
+using rawspeed::Endianness;
 
 static constexpr const size_t STEP_MAX = 32;
 
 template <typename Pump>
-static inline void BM_BitStream(benchmark::State& state, bool inNativeByteOrder,
+static inline void BM_BitStream(benchmark::State& state, Endianness endianness,
                                 unsigned int fillSize, unsigned int Step) {
   assert(state.range(0) > 0);
   assert((size_t)state.range(0) <=
@@ -63,7 +64,7 @@ static inline void BM_BitStream(benchmark::State& state, bool inNativeByteOrder,
   assert(b.getSize() > 0);
   assert(b.getSize() == (size_t)state.range(0));
 
-  const rawspeed::DataBuffer db(b, inNativeByteOrder);
+  const rawspeed::DataBuffer db(b, endianness);
   const rawspeed::ByteStream bs(db);
 
   Pump pump(bs);
@@ -104,8 +105,8 @@ static inline void CustomArguments(benchmark::internal::Benchmark* b) {
   b->Unit(benchmark::kMillisecond);
 }
 
-using Native = std::integral_constant<bool, true>;
-using NonNative = std::integral_constant<bool, false>;
+using Big = std::integral_constant<Endianness, Endianness::big>;
+using Little = std::integral_constant<Endianness, Endianness::little>;
 
 template <typename BO, typename PUMP>
 void registerPump(const char* byteOrder, const char* pumpName) {
@@ -129,7 +130,7 @@ void registerPump(const char* byteOrder, const char* pumpName) {
 }
 
 #define REG_PUMP_2(BO, PUMP) registerPump<BO, PUMP>(#BO, #PUMP);
-#define REGISTER_PUMP(PUMP) REG_PUMP_2(Native, PUMP) REG_PUMP_2(NonNative, PUMP)
+#define REGISTER_PUMP(PUMP) REG_PUMP_2(Big, PUMP) REG_PUMP_2(Little, PUMP)
 
 int main(int argc, char** argv) {
   REGISTER_PUMP(BitPumpLSB);

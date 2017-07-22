@@ -42,7 +42,7 @@ CiffParser::CiffParser(const Buffer* inputData) : RawParser(inputData) {}
 
 void CiffParser::parseData() {
   ByteStream bs(*mInput, 0);
-  bs.setInNativeByteOrder(getHostEndianness() == Endianness::little);
+  bs.setByteOrder(Endianness::little);
 
   ushort16 magic = bs.getU16();
   if (magic != 0x4949)

@@ -164,8 +164,9 @@ RawImage RafDecoder::decodeRawInternal() {
 
   if (double_width) {
     u.decodeRawUnpacked<16, Endianness::little>(width * 2, height);
-  } else if (input.isInNativeByteOrder() ==
-             (getHostEndianness() == Endianness::big)) {
+  } else if (input.getByteOrder() == Endianness::big &&
+             getHostEndianness() == Endianness::little) {
+    // FIXME: ^ that if seems fishy
     u.decodeRawUnpacked<16, Endianness::big>(width, height);
   } else {
     iPoint2D pos(0, 0);

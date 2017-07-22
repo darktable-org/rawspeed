@@ -39,7 +39,7 @@ AriDecoder::AriDecoder(const Buffer* file) : RawDecoder(file) {
     ThrowRDE("File too small (no header)");
   }
   try {
-    ByteStream s(mFile, 8, getHostEndianness() == Endianness::little);
+    ByteStream s(mFile, 8, Endianness::little);
     mDataOffset = s.getU32();
     uint32 someNumber = s.getU32(); // Value: 3?
     uint32 segmentLength = s.getU32(); // Value: 0x3c = length

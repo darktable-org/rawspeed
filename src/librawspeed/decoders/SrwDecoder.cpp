@@ -122,8 +122,7 @@ void SrwDecoder::decodeCompressed( const TiffIFD* raw )
   uint32 compressed_offset =
       raw->getEntry(static_cast<TiffTag>(40976))->getU32();
 
-  ByteStream bs(mFile, compressed_offset,
-                getHostEndianness() == Endianness::little);
+  ByteStream bs(mFile, compressed_offset, Endianness::little);
 
   for (uint32 y = 0; y < height; y++) {
     uint32 line_offset = offset + bs.getI32();

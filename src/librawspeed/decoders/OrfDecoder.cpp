@@ -116,8 +116,9 @@ void OrfDecoder::decodeUncompressed(const ByteStream& s, uint32 w, uint32 h,
     iPoint2D dimensions(w, h);
     iPoint2D pos(0, 0);
     u.readUncompressedRaw(dimensions, pos, w * 12 / 8, 12, BitOrder_MSB32);
-  } else if (size >= w*h*2) { // We're in an unpacked raw
-    if (s.isInNativeByteOrder())
+  } else if (size >= w * h * 2) { // We're in an unpacked raw
+    // FIXME: seems fishy
+    if (s.getByteOrder() == getHostEndianness())
       u.decodeRawUnpacked<12, Endianness::little>(w, h);
     else
       u.decode12BitRawUnpackedLeftAligned<Endianness::big>(w, h);

@@ -62,7 +62,7 @@ std::unique_ptr<RawDecoder> TiffParser::getDecoder(const CameraMetaData* meta) {
 
 TiffRootIFDOwner TiffParser::parse(const Buffer& data) {
   ByteStream bs(data, 0);
-  bs.setInNativeByteOrder(isTiffInNativeByteOrder(bs, 0, "TIFF header"));
+  bs.setByteOrder(getTiffByteOrder(bs, 0, "TIFF header"));
   bs.skipBytes(2);
 
   ushort16 magic = bs.getU16();

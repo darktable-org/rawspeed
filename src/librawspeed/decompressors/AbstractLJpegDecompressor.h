@@ -145,8 +145,7 @@ class AbstractLJpegDecompressor : public AbstractDecompressor {
 public:
   AbstractLJpegDecompressor(const Buffer& data, Buffer::size_type offset,
                             Buffer::size_type size, const RawImage& img)
-      : input(data, offset, size, getHostEndianness() == Endianness::big),
-        mRaw(img) {}
+      : input(data, offset, size, Endianness::big), mRaw(img) {}
   AbstractLJpegDecompressor(const Buffer& data, Buffer::size_type offset,
                             const RawImage& img)
       : AbstractLJpegDecompressor(data, offset, data.getSize() - offset, img) {}

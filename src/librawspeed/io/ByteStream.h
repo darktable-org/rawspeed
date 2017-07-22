@@ -38,29 +38,30 @@ protected:
 public:
   ByteStream() = default;
   explicit ByteStream(const DataBuffer& buffer) : DataBuffer(buffer) {}
-  ByteStream(const Buffer &buffer, size_type offset, size_type size_,
-             bool inNativeByteOrder_ = true)
-      : DataBuffer(buffer.getSubView(0, offset + size_), inNativeByteOrder_),
+  ByteStream(const Buffer& buffer, size_type offset, size_type size_,
+             Endianness endianness_ = Endianness::little)
+      : DataBuffer(buffer.getSubView(0, offset + size_), endianness_),
         pos(offset) {}
-  ByteStream(const Buffer &buffer, size_type offset,
-             bool inNativeByteOrder_ = true)
-      : DataBuffer(buffer, inNativeByteOrder_), pos(offset) {}
+  ByteStream(const Buffer& buffer, size_type offset,
+             Endianness endianness_ = Endianness::little)
+      : DataBuffer(buffer, endianness_), pos(offset) {}
 
   // deprecated:
   ByteStream(const Buffer* f, size_type offset, size_type size_,
-             bool inNativeByteOrder_ = true)
-      : ByteStream(*f, offset, size_, inNativeByteOrder_) {}
-  ByteStream(const Buffer* f, size_type offset, bool inNativeByteOrder_ = true)
-      : ByteStream(*f, offset, inNativeByteOrder_) {}
+             Endianness endianness_ = Endianness::little)
+      : ByteStream(*f, offset, size_, endianness_) {}
+  ByteStream(const Buffer* f, size_type offset,
+             Endianness endianness_ = Endianness::little)
+      : ByteStream(*f, offset, endianness_) {}
 
   // return ByteStream that starts at given offset
   // i.e. this->data + offset == getSubStream(offset).data
   ByteStream getSubStream(size_type offset, size_type size_) const {
-    return ByteStream(getSubView(offset, size_), 0, isInNativeByteOrder());
+    return ByteStream(getSubView(offset, size_), 0, getByteOrder());
   }
 
   ByteStream getSubStream(size_type offset) const {
-    return ByteStream(getSubView(offset), 0, isInNativeByteOrder());
+    return ByteStream(getSubView(offset), 0, getByteOrder());
   }
 
   inline void check(size_type bytes) const {

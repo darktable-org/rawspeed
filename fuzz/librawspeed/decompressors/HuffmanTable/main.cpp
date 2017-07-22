@@ -63,7 +63,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
   try {
     const rawspeed::Buffer b(Data, Size);
-    const rawspeed::DataBuffer db(b, true);
+    const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
     const rawspeed::HuffmanTable ht = createHuffmanTable(&bs);

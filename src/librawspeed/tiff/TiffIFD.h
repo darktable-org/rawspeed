@@ -103,11 +103,12 @@ public:
   TiffID getID() const;
 };
 
-inline bool isTiffInNativeByteOrder(const ByteStream& bs, uint32 pos, const char* context = "") {
+inline Endianness getTiffByteOrder(const ByteStream& bs, uint32 pos,
+                                   const char* context = "") {
   if (bs.hasPatternAt("II", 2, pos))
-    return getHostEndianness() == Endianness::little;
+    return Endianness::little;
   if (bs.hasPatternAt("MM", 2, pos))
-    return getHostEndianness() == Endianness::big;
+    return Endianness::big;
 
   ThrowTPE("Failed to parse TIFF endianess information in %s.", context);
 }

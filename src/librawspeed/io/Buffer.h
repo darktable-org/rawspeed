@@ -166,31 +166,33 @@ public:
  * of its contents and can therefore provide save access to larger than
  * byte sized data, like int, float, etc.
  */
-class DataBuffer : public Buffer
-{
-  bool inNativeByteOrder = true;
+class DataBuffer : public Buffer {
+  // FIXME: default should be Endianness::unknown !
+
+  Endianness endianness = Endianness::little;
 
 public:
   DataBuffer() = default;
-  explicit DataBuffer(const Buffer& data_, bool inNativeByteOrder_ = true)
-      : Buffer(data_), inNativeByteOrder(inNativeByteOrder_) {}
 
-  // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap byte order if required
-  template<typename T> inline T get(size_type offset, size_type index = 0) const {
-    return Buffer::get<T>(inNativeByteOrder, offset, index);
+  explicit DataBuffer(const Buffer& data_,
+                      Endianness endianness_ = Endianness::little)
+      : Buffer(data_), endianness(endianness_) {}
+
+  // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap
+  // byte order if required
+  template <typename T>
+  inline T get(size_type offset, size_type index = 0) const {
+    assert(Endianness::unknown != endianness);
+    assert(Endianness::little == endianness || Endianness::big == endianness);
+
+    return Buffer::get<T>(getHostEndianness() == endianness, offset, index);
   }
 
-  inline bool isInNativeByteOrder() const {
-    return inNativeByteOrder;
-  }
+  inline Endianness getByteOrder() const { return endianness; }
 
-  inline bool setInNativeByteOrder(bool value) {
-    std::swap(inNativeByteOrder, value);
-    return value;
-  }
-
-  inline bool setByteOrder(Endianness e) {
-    return setInNativeByteOrder(getHostEndianness() == e);
+  inline Endianness setByteOrder(Endianness endianness_) {
+    std::swap(endianness, endianness_);
+    return endianness_;
   }
 };
 

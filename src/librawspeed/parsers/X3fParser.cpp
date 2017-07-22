@@ -43,7 +43,7 @@ X3fParser::X3fParser(const Buffer* file) : RawParser(file) {
   if (size < 104 + 128)
     ThrowXPE("X3F file too small");
 
-  bytes = ByteStream(file, 0, size, getHostEndianness() == Endianness::little);
+  bytes = ByteStream(file, 0, size, Endianness::little);
 
   try {
     // Read signature

@@ -454,7 +454,7 @@ void ArwDecoder::GetWB() {
                 key);
 
     Buffer decIFD(move(ifd_decoded), ifd_size);
-    DataBuffer dbIDD(decIFD, priv->getRootIfdData().isInNativeByteOrder());
+    DataBuffer dbIDD(decIFD, priv->getRootIfdData().getByteOrder());
     TiffRootIFD encryptedIFD(nullptr, dbIDD, off);
 
     if (encryptedIFD.hasEntry(SONYGRBGLEVELS)){
