@@ -27,6 +27,10 @@
 #include <string>                    // for string, to_string
 // IWYU pragma: no_include <sys/time.h>
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #define HAVE_STEADY_CLOCK
 
 using rawspeed::CameraMetaData;
@@ -81,7 +85,16 @@ template <typename Clock, typename Unit = std::milli> struct Timer {
 
 } // namespace
 
-static inline void BM_RawSpeed(benchmark::State& state, const char* fileName) {
+static int currThreadCount;
+
+extern "C" int __attribute__((pure)) rawspeed_get_number_of_processor_cores() {
+  return currThreadCount;
+}
+
+static inline void BM_RawSpeed(benchmark::State& state, const char* fileName,
+                               int threads) {
+  currThreadCount = threads;
+
 #ifdef HAVE_PUGIXML
   static const CameraMetaData metadata(CMAKE_SOURCE_DIR "/data/cameras.xml");
 #else
@@ -124,18 +137,49 @@ static inline void BM_RawSpeed(benchmark::State& state, const char* fileName) {
   state.SetBytesProcessed(state.iterations() * map->getSize());
 }
 
+static void addBench(const char* fName, std::string tName, int threads) {
+  tName += std::to_string(threads);
+
+  auto* b =
+      benchmark::RegisterBenchmark(tName.c_str(), &BM_RawSpeed, fName, threads);
+  b->Unit(benchmark::kMillisecond);
+  b->UseRealTime();
+}
+
 int main(int argc, char** argv) {
   benchmark::Initialize(&argc, argv);
 
+  auto hasFlag = [argc, argv](std::string flag) {
+    bool found = false;
+    for (int i = 1; i < argc; ++i) {
+      if (!argv[i] || argv[i] != flag)
+        continue;
+      found = true;
+      argv[i] = nullptr;
+    }
+    return found;
+  };
+
+  bool threading = hasFlag("-t");
+
+#ifdef _OPENMP
+  const auto threadsMax = omp_get_num_procs();
+#else
+  const auto threadsMax = 1;
+#endif
+
+  const auto threadsMin = threading ? 1 : threadsMax;
+
   for (int i = 1; i < argc; i++) {
+    if (!argv[i])
+      continue;
+
     const char* fName = argv[i];
     std::string tName(fName);
     tName += "/threads:";
-    tName += std::to_string(rawspeed_get_number_of_processor_cores());
 
-    auto* b = benchmark::RegisterBenchmark(tName.c_str(), &BM_RawSpeed, fName);
-    b->Unit(benchmark::kMillisecond);
-    b->UseRealTime();
+    for (auto threads = threadsMin; threads <= threadsMax; threads++)
+      addBench(fName, tName, threads);
   }
 
   benchmark::RunSpecifiedBenchmarks();
