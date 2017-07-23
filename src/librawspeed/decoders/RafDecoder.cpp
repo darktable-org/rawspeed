@@ -40,7 +40,9 @@
 #include <cassert>                                  // for assert
 #include <cstdio>                                   // for size_t
 #include <cstring>                                  // for memcmp
+#include <iterator>                                 // for next
 #include <memory>                                   // for unique_ptr, allo...
+#include <numeric>                                  // for accumulate
 #include <string>                                   // for string
 #include <vector>                                   // for vector
 
@@ -112,7 +114,7 @@ RawImage RafDecoder::decodeRawInternal() {
 
     _f.fuji_compressed_load_raw();
 
-    startTasks(getThreadCount());
+    startTasks(std::min(getThreadCount(), uint32(f->header.blocks_in_row)));
 
     f = nullptr;
 
@@ -186,13 +188,34 @@ void RafDecoder::decodeThreaded(RawDecoderThread* t) {
 
   const auto nThreads = getThreadCount();
   assert(t->taskNo < nThreads);
+  assert(t->taskNo < f->header.blocks_in_row);
 
-  const auto slicesPerThread =
-      (f->header.blocks_in_row + nThreads - 1) / nThreads;
-  assert(slicesPerThread * nThreads >= f->header.blocks_in_row);
+  std::vector<int> slicesPerThread;
+  slicesPerThread.resize(nThreads, 0);
 
-  const auto startSlice = slicesPerThread * t->taskNo;
-  const auto endSlice = startSlice + slicesPerThread;
+  // split all the slices between all the threads 'evenly'
+  int slicesLeft = f->header.blocks_in_row;
+  while (slicesLeft > 0) {
+    for (auto& bucket : slicesPerThread) {
+      --slicesLeft;
+      ++bucket;
+      if (0 == slicesLeft)
+        break;
+    }
+  }
+  assert(slicesLeft == 0);
+  assert(std::accumulate(slicesPerThread.begin(), slicesPerThread.end(), 0) ==
+         f->header.blocks_in_row);
+
+  const auto spti = slicesPerThread.begin();
+  int startSlice = std::accumulate(spti, std::next(spti, t->taskNo), 0);
+  int endSlice = std::accumulate(spti, std::next(spti, t->taskNo + 1), 0);
+
+  assert(startSlice >= 0);
+  assert(startSlice < f->header.blocks_in_row);
+  assert(endSlice > 0);
+  assert(endSlice > startSlice);
+  assert(endSlice <= f->header.blocks_in_row);
 
   f->fuji_decode_loop(startSlice, endSlice);
 }
