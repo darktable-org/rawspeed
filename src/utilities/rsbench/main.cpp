@@ -19,7 +19,7 @@
 */
 
 #include "RawSpeed-API.h"            // for RawDecoder, Buffer, FileReader
-#include <benchmark/benchmark_api.h> // for State, Benchmark, DoNotOptimize
+#include <benchmark/benchmark.h>     // for State, Benchmark, DoNotOptimize
 #include <chrono>                    // for duration, high_resolution_clock
 #include <ctime>                     // for clock, clock_t
 #include <memory>                    // for unique_ptr

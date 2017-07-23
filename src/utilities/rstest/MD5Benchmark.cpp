@@ -19,7 +19,7 @@
 */
 
 #include "md5.h"                     // for md5_hash, md5_state
-#include <benchmark/benchmark_api.h> // for State, Benchmark, BENCHMARK
+#include <benchmark/benchmark.h>     // for State, Benchmark, BENCHMARK
 #include <cstdint>                   // for uint8_t
 #include <cstdlib>                   // for free, malloc, size_t
 #include <memory>                    // for unique_ptr

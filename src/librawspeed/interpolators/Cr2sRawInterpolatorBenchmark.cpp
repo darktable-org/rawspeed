@@ -24,7 +24,7 @@
 #include "common/Point.h"                      // for iPoint2D
 #include "common/RawImage.h"                   // for RawImage, ImageMetaData
 #include <array>                               // for array
-#include <benchmark/benchmark_api.h>           // for Benchmark, State, BEN...
+#include <benchmark/benchmark.h>               // for Benchmark, State, BEN...
 #include <type_traits>                         // for integral_constant
 
 using rawspeed::Cr2sRawInterpolator;

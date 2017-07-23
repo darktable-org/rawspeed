@@ -26,7 +26,7 @@
 #include "common/RawImage.h"                   // for RawImage, RawImageData
 #include "io/Buffer.h"                         // for Buffer
 #include <algorithm>                           // for move
-#include <benchmark/benchmark_api.h>           // for Benchmark, BENCHMARK_...
+#include <benchmark/benchmark.h>               // for Benchmark, BENCHMARK_...
 #include <cassert>                             // for assert
 #include <cstddef>                             // for size_t
 #include <memory>                              // for unique_ptr

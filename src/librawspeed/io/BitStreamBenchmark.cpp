@@ -26,7 +26,7 @@
 #include "io/BitPumpMSB32.h"         // for BitPumpMSB32
 #include "io/Buffer.h"               // for Buffer, Buffer::size_type, Data...
 #include "io/ByteStream.h"           // for ByteStream
-#include <benchmark/benchmark_api.h> // for State, Benchmark, Initialize
+#include <benchmark/benchmark.h>     // for State, Benchmark, Initialize
 #include <cassert>                   // for assert
 #include <cstddef>                   // for size_t
 #include <limits>                    // for numeric_limits
