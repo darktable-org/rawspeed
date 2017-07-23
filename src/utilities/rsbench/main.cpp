@@ -72,12 +72,14 @@ struct ChooseClockType {
 #endif
 };
 
-template <typename Clock, typename Unit = std::milli> struct Timer {
+template <typename Clock, typename period = std::ratio<1, 1>> struct Timer {
+  using rep = double;
+  using duration = std::chrono::duration<rep, period>;
+
   mutable typename Clock::time_point start = Clock::now();
 
-  using T = std::chrono::duration<double, Unit>;
-  T operator()() const {
-    T elapsed = Clock::now() - start;
+  duration operator()() const {
+    duration elapsed = Clock::now() - start;
     start = Clock::now();
     return elapsed;
   }
@@ -121,17 +123,16 @@ static inline void BM_RawSpeed(benchmark::State& state, const char* fileName,
     benchmark::DoNotOptimize(raw);
   }
 
-  auto WallTime = WT();
-  auto TotalTime = TT();
-  auto ThreadingFactor = TotalTime.count() / WallTime.count();
-
-  std::string label("FileSize=");
+  std::string label("FileSize,KB=");
   label += std::to_string(map->getSize() / (1UL << 10UL));
-  label += "KB;CPUTime=";
-  label += std::to_string(TotalTime.count());
-  label += "ms;ThreadingFactor=";
-  label += std::to_string(ThreadingFactor);
   state.SetLabel(label.c_str());
+
+  const auto WallTime = WT();
+  const auto TotalTime = TT();
+  const auto ThreadingFactor = TotalTime.count() / WallTime.count();
+
+  state.counters["CPUTime,s"] = TotalTime.count();
+  state.counters["ThreadingFactor"] = ThreadingFactor;
 
   state.SetItemsProcessed(state.iterations());
   state.SetBytesProcessed(state.iterations() * map->getSize());
