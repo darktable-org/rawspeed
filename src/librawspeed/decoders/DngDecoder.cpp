@@ -195,8 +195,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
 
   DngDecoderSlices slices(mFile, mRaw, compression);
   if (raw->hasEntry(PREDICTOR)) {
-    uint32 predictor = raw->getEntry(PREDICTOR)->getU32();
-    slices.mPredictor = predictor;
+    slices.mPredictor = raw->getEntry(PREDICTOR)->getU32();
   }
   slices.mBps = bps;
   if (raw->hasEntry(TILEOFFSETS)) {
@@ -208,14 +207,17 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
 
     assert(tilew > 0);
     uint32 tilesX = (mRaw->dim.x + tilew - 1) / tilew;
-    assert(tilesX > 0);
+    if (!tilesX)
+      ThrowRDE("Zero tiles horizontally");
 
     assert(tileh > 0);
     uint32 tilesY = (mRaw->dim.y + tileh - 1) / tileh;
-    assert(tilesY > 0);
+    if (!tilesY)
+      ThrowRDE("Zero tiles vertically");
 
     uint32 nTiles = tilesX * tilesY;
-    assert(nTiles > 0);
+    if (!nTiles || tilesX * tilesY != nTiles)
+      ThrowRDE("Uncorrect total number of slices");
 
     TiffEntry* offsets = raw->getEntry(TILEOFFSETS);
     TiffEntry* counts = raw->getEntry(TILEBYTECOUNTS);
