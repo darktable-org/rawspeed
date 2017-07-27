@@ -230,7 +230,7 @@ void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
 
   static_assert(bits == 12 && mask == 0x0f, "wrong mask");
 
-  uint32 perline = bytesPerLine(w, false);
+  uint32 perline = bytesPerLine(w, skips);
 
   sanityCheck(&h, perline);
 
