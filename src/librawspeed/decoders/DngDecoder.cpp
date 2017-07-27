@@ -93,8 +93,6 @@ void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
       // bit 2 is on if image contains transparency information.
       // the value itself can be either 4 or 5
       isAlpha = NewSubFileType & (1 << 2);
-
-      assert((NewSubFileType == 0) || isSubsampled || isAlpha);
     }
 
     // normal raw?
