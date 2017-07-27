@@ -274,7 +274,9 @@ void ArwDecoder::DecodeARW(const ByteStream& input, uint32 w, uint32 h) {
       int diff = bits.getBits(len);
       diff = len != 0 ? HuffmanTable::signExtended(diff, len) : diff;
       sum += diff;
-      assert(!(sum >> 12));
+
+      if ((sum >> 12) > 0)
+        ThrowRDE("Error decompressing");
 
       if (y < h)
         dest[x + y * pitch] = sum;
