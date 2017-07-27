@@ -103,9 +103,11 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
     bitPerPixel = static_cast<int>(
         static_cast<uint64>(static_cast<uint64>(slice.count) * 8U) /
         (slice.h * width));
+    const auto inputPitch = width * bitPerPixel / 8;
+    if (!inputPitch)
+      ThrowRDE("Bad input pitch. Can not decode anything.");
     try {
-      u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, bitPerPixel,
-                            order);
+      u.readUncompressedRaw(size, pos, inputPitch, bitPerPixel, order);
     } catch (RawDecoderException &e) {
       if (i>0)
         mRaw->setError(e.what());
