@@ -90,7 +90,9 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
 
   mRaw->dim = iPoint2D(width, offY);
   mRaw->createData();
-  mRaw->whitePoint = (1<<bitPerPixel)-1;
+
+  // Default white level is (2 ** BitsPerSample) - 1
+  mRaw->whitePoint = (1UL << bitPerPixel) - 1UL;
 
   offY = 0;
   for (uint32 i = 0; i < slices.size(); i++) {
