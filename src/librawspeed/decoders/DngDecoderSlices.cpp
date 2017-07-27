@@ -124,6 +124,9 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
               ? mRaw->dim.y - e->offY
               : e->height;
 
+      if (thisTileLength == 0)
+        ThrowRDE("Tile is empty. Can not decode!");
+
       iPoint2D tileSize(mRaw->dim.x, thisTileLength);
       iPoint2D pos(0, e->offY);
 
