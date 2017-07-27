@@ -38,13 +38,11 @@ void SimpleTiffDecoder::prepareForRawDecoding() {
   off = raw->getEntry(STRIPOFFSETS)->getU32();
   c2 = raw->getEntry(STRIPBYTECOUNTS)->getU32();
 
-  if (off > mFile->getSize())
-    ThrowRDE("Offset is out of bounds");
+  if (!mFile->isValid(off, c2))
+    ThrowRDE("Image is truncated.");
 
-  if (c2 > mFile->getSize() - off) {
-    mRaw->setError(
-        "Warning: byte count larger than file size, file probably truncated.");
-  }
+  if (0 == width || 0 == height)
+    ThrowRDE("Image has zero size.");
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
