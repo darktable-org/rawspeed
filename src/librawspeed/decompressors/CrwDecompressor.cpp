@@ -231,7 +231,8 @@ void CrwDecompressor::decompress(const RawImage& mRaw, const Buffer* mFile,
 
   for (uint32 j = 0; j < height;) {
     const int nBlocks = min(8U, height - j) * width >> 6;
-    assert(nBlocks > 0);
+    if (nBlocks <= 0)
+      ThrowRDE("Image too small, not even a single block.");
 
     ushort16* dest = nullptr;
 
@@ -282,7 +283,8 @@ void CrwDecompressor::decompress(const RawImage& mRaw, const Buffer* mFile,
 
       // Process 8 rows or however are left
       const uint32 nBlocks = width / 4 * lines;
-      assert(nBlocks > 0);
+      if (nBlocks <= 0)
+        ThrowRDE("Image too small, not even a single block.");
 
       ushort16* dest = nullptr;
 
