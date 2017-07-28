@@ -18,20 +18,21 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h"           // for roundUp
-#include "io/BitPumpJPEG.h"          // for BitPumpJPEG
-#include "io/BitPumpLSB.h"           // for BitPumpLSB, BitStream<>::fillCache
-#include "io/BitPumpMSB.h"           // for BitPumpMSB
-#include "io/BitPumpMSB16.h"         // for BitPumpMSB16
-#include "io/BitPumpMSB32.h"         // for BitPumpMSB32
-#include "io/Buffer.h"               // for Buffer, Buffer::size_type, Data...
-#include "io/ByteStream.h"           // for ByteStream
-#include <benchmark/benchmark.h>     // for State, Benchmark, Initialize
-#include <cassert>                   // for assert
-#include <cstddef>                   // for size_t
-#include <limits>                    // for numeric_limits
-#include <string>                    // for string, to_string
-#include <type_traits>               // for integral_constant
+#include "common/Common.h"       // for roundUp
+#include "io/BitPumpJPEG.h"      // for BitPumpJPEG
+#include "io/BitPumpLSB.h"       // for BitPumpLSB, BitStream<>::fillCache
+#include "io/BitPumpMSB.h"       // for BitPumpMSB
+#include "io/BitPumpMSB16.h"     // for BitPumpMSB16
+#include "io/BitPumpMSB32.h"     // for BitPumpMSB32
+#include "io/Buffer.h"           // for Buffer, Buffer::size_type, Data...
+#include "io/ByteStream.h"       // for ByteStream
+#include "io/Endianness.h"       // for Endianness, Endianness::big, Endian...
+#include <benchmark/benchmark.h> // for State, Benchmark, Initialize
+#include <cassert>               // for assert
+#include <cstddef>               // for size_t
+#include <limits>                // for numeric_limits
+#include <string>                // for string, to_string
+#include <type_traits>           // for integral_constant
 
 using rawspeed::BitPumpLSB;
 using rawspeed::BitPumpMSB;

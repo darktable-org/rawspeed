@@ -28,6 +28,8 @@
 #include "decompressors/JpegDecompressor.h"         // for JpegDecompressor
 #include "decompressors/LJpegDecompressor.h"        // for LJpegDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/Buffer.h"                              // for Buffer (ptr only)
+#include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness::big
 #include "io/IOException.h"                         // for IOException
 #include "tiff/TiffIFD.h"                           // for getTiffEndianness

@@ -24,6 +24,7 @@
 #include "common/Common.h"  // for uchar8, int32, uint32, ushort16, roundUp
 #include "common/Memory.h"  // for alignedMalloc
 #include "io/Buffer.h"      // for Buffer::size_type, Buffer, DataBuffer
+#include "io/Endianness.h"  // for Endianness, Endianness::little
 #include "io/IOException.h" // for IOException (ptr only), ThrowIOE
 #include <cassert>          // for assert
 #include <cstring>          // for memcmp, memcpy
