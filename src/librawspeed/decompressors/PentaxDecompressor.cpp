@@ -132,8 +132,11 @@ void PentaxDecompressor::decompress(const RawImage& mRaw, ByteStream&& data,
       pLeft2 += ht.decodeNext(bs);
       dest[x] =  pLeft1;
       dest[x+1] =  pLeft2;
-      assert(pLeft1 >= 0 && pLeft1 <= (65536));
-      assert(pLeft2 >= 0 && pLeft2 <= (65536));
+
+      if (pLeft1 < 0 || pLeft1 > 65535)
+        ThrowRDE("decoded value out of bounds at %d:%d", x, y);
+      if (pLeft2 < 0 || pLeft2 > 65535)
+        ThrowRDE("decoded value out of bounds at %d:%d", x, y);
     }
   }
 }
