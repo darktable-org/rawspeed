@@ -23,6 +23,7 @@
 
 #include "common/Common.h" // for uint32
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "decompressors/HuffmanTable.h"         // for HuffmanTable
 
 namespace rawspeed {
 
@@ -38,6 +39,10 @@ public:
                          TiffIFD* root);
 
 private:
+  static HuffmanTable SetupHuffmanTable_Legacy();
+  static HuffmanTable SetupHuffmanTable_Modern(TiffIFD* root);
+  static HuffmanTable SetupHuffmanTable(TiffIFD* root);
+
   static const uchar8 pentax_tree[][2][16];
 };
 
