@@ -384,6 +384,9 @@ int RafDecoder::isCompressed() {
   } else
     ThrowRDE("Unable to locate image size");
 
+  if (!width || !height)
+    ThrowRDE("Image has zero size");
+
   uint32 count = raw->getEntry(FUJI_STRIPBYTECOUNTS)->getU32();
 
   return count * 8 / (width * height) < 10;
