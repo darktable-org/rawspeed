@@ -62,7 +62,10 @@ RawImage SrwDecoder::decodeRawInternal() {
   auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
 
   int compression = raw->getEntry(COMPRESSION)->getU32();
-  int bits = raw->getEntry(BITSPERSAMPLE)->getU32();
+  const int bits = raw->getEntry(BITSPERSAMPLE)->getU32();
+
+  if (12 != bits && 14 != bits)
+    ThrowRDE("Unsupported bits per sample");
 
   if (32769 != compression && 32770 != compression && 32772 != compression && 32773 != compression)
     ThrowRDE("Unsupported compression");
