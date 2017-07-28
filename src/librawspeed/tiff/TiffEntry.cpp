@@ -159,7 +159,6 @@ uint32 TiffEntry::getU32(uint32 index) const {
     ThrowTPE("Wrong type %u encountered. Expected Long, Offset, Rational or "
              "Undefined on 0x%x",
              type, tag);
-    break;
   }
 
   return data.peek<uint32>(index);

@@ -101,7 +101,6 @@ std::unique_ptr<RawDecoder> TiffParser::makeDecoder(TiffRootIFDOwner root,
   }
 
   ThrowTPE("No decoder found. Sorry.");
-  return nullptr;
 }
 
 template <class Decoder>

@@ -109,8 +109,8 @@ RawImage SrwDecoder::decodeRawInternal() {
     return mRaw;
   }
   ThrowRDE("Unsupported compression");
-  return mRaw;
 }
+
 // Decoder for compressed srw files (NX300 and later)
 void SrwDecoder::decodeCompressed( const TiffIFD* raw )
 {

@@ -34,9 +34,6 @@ public:
 };
 
 #define ThrowFIE(...)                                                          \
-  do {                                                                         \
-    ThrowExceptionHelper(rawspeed::FileIOException, __VA_ARGS__);              \
-    __builtin_unreachable();                                                   \
-  } while (false)
+  ThrowExceptionHelper(rawspeed::FileIOException, __VA_ARGS__);
 
 } // namespace rawspeed

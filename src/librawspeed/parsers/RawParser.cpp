@@ -106,7 +106,6 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
 
   // File could not be decoded, so no further options for now.
   ThrowRDE("No decoder found. Sorry.");
-  return nullptr;
 }
 
 } // namespace rawspeed

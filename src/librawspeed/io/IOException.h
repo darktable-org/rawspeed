@@ -32,10 +32,6 @@ public:
   explicit IOException(const char* msg) : RawspeedException(msg) {}
 };
 
-#define ThrowIOE(...)                                                          \
-  do {                                                                         \
-    ThrowExceptionHelper(rawspeed::IOException, __VA_ARGS__);                  \
-    __builtin_unreachable();                                                   \
-  } while (false)
+#define ThrowIOE(...) ThrowExceptionHelper(rawspeed::IOException, __VA_ARGS__)
 
 } // namespace rawspeed

@@ -36,9 +36,6 @@ public:
 };
 
 #define ThrowCPE(...)                                                          \
-  do {                                                                         \
-    ThrowExceptionHelper(rawspeed::CiffParserException, __VA_ARGS__);          \
-    __builtin_unreachable();                                                   \
-  } while (false)
+  ThrowExceptionHelper(rawspeed::CiffParserException, __VA_ARGS__)
 
 } // namespace rawspeed

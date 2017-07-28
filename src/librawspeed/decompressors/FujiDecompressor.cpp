@@ -110,10 +110,12 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
     ThrowRDE("Aha, finally, a 12-bit compressed RAF! Please consider providing "
              "samples on <https://raw.pixls.us/>, thanks!");
 
-    total_values = 4096;
-    raw_bits = 12;
-    max_bits = 48;
-    maxDiff = 64;
+    /* kept for future, once there is a sample.
+     total_values = 4096;
+     raw_bits = 12;
+     max_bits = 48;
+     maxDiff = 64;
+    */
   } else {
     ThrowRDE("FUJI q_point");
   }

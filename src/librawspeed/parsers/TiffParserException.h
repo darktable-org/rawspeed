@@ -35,9 +35,6 @@ public:
 };
 
 #define ThrowTPE(...)                                                          \
-  do {                                                                         \
-    ThrowExceptionHelper(rawspeed::TiffParserException, __VA_ARGS__);          \
-    __builtin_unreachable();                                                   \
-  } while (false)
+  ThrowExceptionHelper(rawspeed::TiffParserException, __VA_ARGS__)
 
 } // namespace rawspeed

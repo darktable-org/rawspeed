@@ -34,9 +34,6 @@ public:
 };
 
 #define ThrowXPE(...)                                                          \
-  do {                                                                         \
-    ThrowExceptionHelper(rawspeed::X3fParserException, __VA_ARGS__);           \
-    __builtin_unreachable();                                                   \
-  } while (false)
+  ThrowExceptionHelper(rawspeed::X3fParserException, __VA_ARGS__)
 
 } // namespace rawspeed

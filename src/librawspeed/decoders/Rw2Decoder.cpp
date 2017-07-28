@@ -286,7 +286,6 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           default:
             ThrowRDE("Unexpected CFA color %s.",
                      ColorFilterArray::colorToString(c).c_str());
-            break;
         }
       }
     }

@@ -34,9 +34,6 @@ public:
 };
 
 #define ThrowRDE(...)                                                          \
-  do {                                                                         \
-    ThrowExceptionHelper(rawspeed::RawDecoderException, __VA_ARGS__);          \
-    __builtin_unreachable();                                                   \
-  } while (false)
+  ThrowExceptionHelper(rawspeed::RawDecoderException, __VA_ARGS__)
 
 } // namespace rawspeed

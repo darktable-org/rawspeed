@@ -33,9 +33,6 @@ public:
 };
 
 #define ThrowRPE(...)                                                          \
-  do {                                                                         \
-    ThrowExceptionHelper(rawspeed::RawParserException, __VA_ARGS__);           \
-    __builtin_unreachable();                                                   \
-  } while (false)
+  ThrowExceptionHelper(rawspeed::RawParserException, __VA_ARGS__)
 
 } // namespace rawspeed
