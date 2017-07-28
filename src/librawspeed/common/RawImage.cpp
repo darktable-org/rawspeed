@@ -386,8 +386,7 @@ void RawImageData::startWorker(RawImageWorker::RawImageWorkerTask task, bool cro
 #endif
 }
 
-void RawImageData::fixBadPixelsThread( int start_y, int end_y )
-{
+void RawImageData::fixBadPixelsThread(int start_y, int end_y) {
   int gw = (uncropped_dim.x + 15) / 32;
 #ifdef __AFL_COMPILER
   int bad_count = 0;
@@ -395,21 +394,21 @@ void RawImageData::fixBadPixelsThread( int start_y, int end_y )
   for (int y = start_y; y < end_y; y++) {
     auto* bad_map =
         reinterpret_cast<const uint32*>(&mBadPixelMap[y * mBadPixelMapPitch]);
-    for (int x = 0 ; x < gw; x++) {
+    for (int x = 0; x < gw; x++) {
       // Test if there is a bad pixel within these 32 pixels
-      if (bad_map[x] != 0) {
-        auto* bad = reinterpret_cast<const uchar8*>(&bad_map[x]);
-        // Go through each pixel
-        for (int i = 0; i < 4; i++) {
-          for (int j = 0; j < 8; j++) {
-            if (1 == ((bad[i]>>j) & 1)) {
+      if (bad_map[x] == 0)
+        continue;
+      auto* bad = reinterpret_cast<const uchar8*>(&bad_map[x]);
+      // Go through each pixel
+      for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 8; j++) {
+          if (1 != ((bad[i] >> j) & 1))
+            continue;
 #ifdef __AFL_COMPILER
-              if (bad_count++ > 100)
-                ThrowRDE("The bad pixels are too damn high!");
+          if (bad_count++ > 100)
+            ThrowRDE("The bad pixels are too damn high!");
 #endif
-              fixBadPixel(x*32+i*8+j, y, 0);
-            }
-          }
+          fixBadPixel(x * 32 + i * 8 + j, y, 0);
         }
       }
     }
