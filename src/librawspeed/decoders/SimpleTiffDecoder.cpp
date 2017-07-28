@@ -41,6 +41,9 @@ void SimpleTiffDecoder::prepareForRawDecoding() {
   if (!mFile->isValid(off, c2))
     ThrowRDE("Image is truncated.");
 
+  if (c2 == 0)
+    ThrowRDE("No image data found.");
+
   if (0 == width || 0 == height)
     ThrowRDE("Image has zero size.");
 
