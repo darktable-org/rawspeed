@@ -20,12 +20,16 @@ endif()
 if(WITH_PTHREADS)
   message(STATUS "Looking for PThreads")
   set(CMAKE_THREAD_PREFER_PTHREAD 1)
-  find_package(Threads REQUIRED)
+  find_package(Threads)
   if(NOT CMAKE_USE_PTHREADS_INIT)
     message(SEND_ERROR "Did not found POSIX Threads! Either make it find PThreads, or pass -DWITH_PTHREADS=OFF to disable threading.")
   else()
     message(STATUS "Looking for PThreads - found")
     set(HAVE_PTHREAD 1)
+    set_package_properties(Threads PROPERTIES
+                           TYPE RECOMMENDED
+                           DESCRIPTION "POSIX Threads"
+                           PURPOSE "Used for parallelization of the library itself")
   endif()
 else()
   message(STATUS "PThread-based threading is disabled. Not searching for PThreads")
@@ -36,6 +40,9 @@ if(WITH_OPENMP)
   find_package(OpenMP)
   if(OPENMP_FOUND)
     message(STATUS "Looking for OpenMP - found")
+    set_package_properties(OpenMP PROPERTIES
+                           TYPE OPTIONAL
+                           PURPOSE "Used for parallelization of tools (NOT library!)")
   else()
     message(WARNING "Looking for OpenMP - failed. utilities will not use openmp-based parallelization")
   endif()
@@ -65,6 +72,11 @@ if(WITH_PUGIXML)
   if(Pugixml_FOUND)
     set(HAVE_PUGIXML 1)
     include_directories(SYSTEM ${Pugixml_INCLUDE_DIRS})
+    set_package_properties(Pugixml PROPERTIES
+                           TYPE REQUIRED
+                           URL http://pugixml.org/
+                           DESCRIPTION "Light-weight, simple and fast XML parser"
+                           PURPOSE "Used for loading of data/cameras.xml")
   endif()
 else()
   message(STATUS "Pugixml library support is disabled. I hope you know what you are doing.")
@@ -72,13 +84,18 @@ endif()
 
 if(WITH_JPEG)
   message(STATUS "Looking for JPEG")
-  find_package(JPEG REQUIRED)
+  find_package(JPEG)
   if(NOT JPEG_FOUND)
     message(SEND_ERROR "Did not find JPEG! Either make it find JPEG, or pass -DWITH_JPEG=OFF to disable JPEG.")
   else()
     message(STATUS "Looking for JPEG - found")
     include_directories(SYSTEM ${JPEG_INCLUDE_DIRS})
     set(HAVE_JPEG 1)
+
+    set_package_properties(JPEG PROPERTIES
+                           TYPE RECOMMENDED
+                           DESCRIPTION "free library for handling the JPEG image data format, implements a JPEG codec"
+                           PURPOSE "Used for decoding DNG Lossy JPEG compression")
 
     include(CheckJPEGSymbols)
   endif()
@@ -108,7 +125,11 @@ if (WITH_ZLIB)
 
   if(ZLIB_FOUND)
     set(HAVE_ZLIB 1)
-  endif()
+    set_package_properties(ZLIB PROPERTIES
+                           TYPE RECOMMENDED
+                           DESCRIPTION "software library used for data compression"
+                           PURPOSE "Used for decoding DNG Deflate compression")
+    endif()
 else()
   message(STATUS "ZLIB is disabled, DNG deflate support won't be available.")
 endif()

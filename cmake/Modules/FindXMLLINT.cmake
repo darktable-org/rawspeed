@@ -1,13 +1,10 @@
-if(NOT USE_XMLLINT)
-  return()
-endif()
-
-message(STATUS "Looking for xmllint tool")
 find_program(Xmllint_BIN xmllint)
-if(${Xmllint_BIN} STREQUAL "Xmllint_BIN-NOTFOUND")
-  message(SEND_ERROR "Looking for xmllint tool - failed")
-  set(USE_XMLLINT OFF)
-else(${Xmllint_BIN} STREQUAL "Xmllint_BIN-NOTFOUND")
-  mark_as_advanced(Xmllint_BIN)
-  message(STATUS "Looking for xmllint tool - found")
-endif(${Xmllint_BIN} STREQUAL "Xmllint_BIN-NOTFOUND")
+find_package_handle_standard_args(XMLLINT
+  DEFAULT_MSG
+  Xmllint_BIN)
+
+SET_PACKAGE_PROPERTIES(XMLLINT PROPERTIES
+  URL http://xmlsoft.org/
+  DESCRIPTION "command line XML tool"
+  PURPOSE "Used for validation of data/cameras.xml"
+)

@@ -20,6 +20,7 @@ else()
 endif()
 
 include(GNUInstallDirs)
+include(FeatureSummary)
 
 if(NOT (CMAKE_VERSION VERSION_LESS 3.4.0-rc1))
   project(rawspeed CXX)
@@ -131,3 +132,5 @@ if(BUILD_TESTING AND CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
   setup_target_for_coverage(coverage ctest coverage)
   include(GCOV)
 endif()
+
+feature_summary(WHAT ALL)
