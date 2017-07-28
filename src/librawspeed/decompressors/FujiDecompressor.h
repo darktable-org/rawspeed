@@ -170,8 +170,7 @@ private:
 
   std::vector<FujiStrip> strips;
 
-  void fuji_decode_strip(const fuji_compressed_params* info_common,
-                         fuji_compressed_block* info_block,
+  void fuji_decode_strip(fuji_compressed_block* info_block,
                          const FujiStrip& strip) const;
 
   template <typename T>
@@ -186,11 +185,9 @@ private:
   void fuji_zerobits(BitPumpMSB* pump, int* count) const;
   int bitDiff(int value1, int value2) const;
   int fuji_decode_sample_even(fuji_compressed_block* info,
-                              const fuji_compressed_params* params,
                               BitPumpMSB* pump, ushort16* line_buf, int pos,
                               int_pair* grads) const;
   int fuji_decode_sample_odd(fuji_compressed_block* info,
-                             const fuji_compressed_params* params,
                              BitPumpMSB* pump, ushort16* line_buf, int pos,
                              int_pair* grads) const;
   void fuji_decode_interpolation_even(int line_width, ushort16* line_buf,
@@ -201,10 +198,8 @@ private:
   void fuji_extend_green(ushort16* linebuf[_ltotal], int line_width) const;
   void fuji_extend_blue(ushort16* linebuf[_ltotal], int line_width) const;
   void xtrans_decode_block(fuji_compressed_block* info,
-                           const fuji_compressed_params* params,
                            BitPumpMSB* pump, int cur_line) const;
   void fuji_bayer_decode_block(fuji_compressed_block* info,
-                               const fuji_compressed_params* params,
                                BitPumpMSB* pump, int cur_line) const;
 };
 
