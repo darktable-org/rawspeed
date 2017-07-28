@@ -167,67 +167,65 @@ RawImage Rw2Decoder::decodeRawInternal() {
   return mRaw;
 }
 
-void Rw2Decoder::DecodeRw2() {
-  startThreads();
-}
+void Rw2Decoder::DecodeRw2() { startThreads(); }
 
-void Rw2Decoder::decodeThreaded(RawDecoderThread * t) {
-  int x;
-  int i;
-  int j;
-  int sh = 0;
-  int pred[2];
-  int nonz[2];
-  int w = mRaw->dim.x / 14;
-  uint32 y;
-
-  bool zero_is_bad = ! hints.has("zero_is_not_bad");
-
-  /* 9 + 1/7 bits per pixel */
-  int skip = w * 14 * t->start_y * 9;
-  skip += w * 2 * t->start_y;
-  skip /= 8;
+void Rw2Decoder::decodeThreaded(RawDecoderThread* t) {
+  const bool zero_is_bad = !hints.has("zero_is_not_bad");
 
   PanaBitpump bits(ByteStream(mFile, offset), load_flags);
-  bits.skipBytes(skip);
+
+  /* 9 + 1/7 bits per pixel */
+  bits.skipBytes(8 * mRaw->dim.x * t->start_y / 7);
 
   vector<uint32> zero_pos;
-  for (y = t->start_y; y < t->end_y; y++) {
+  for (uint32 y = t->start_y; y < t->end_y; y++) {
+    int sh = 0;
+    int pred[2];
+    int nonz[2];
+    int u = 0;
+
     auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
-    for (x = 0; x < w; x++) {
-      pred[0] = pred[1] = nonz[0] = nonz[1] = 0;
-      int u = 0;
-      for (i = 0; i < 14;) {
-        for (int c = 0; c < 2; c++) {
-          if (u == 2) {
-            sh = 4 >> (3 - bits.getBits(2));
-            u = -1;
-          }
+    for (int x = 0; x < mRaw->dim.x; x++) {
+      const int i = x % 14;
+      const int c = x & 1;
 
-          if (nonz[c]) {
-            if ((j = bits.getBits(8))) {
-              if ((pred[c] -= 0x80 << sh) < 0 || sh == 4)
-                pred[c] &= ~(-(1 << sh));
-              pred[c] += j << sh;
-            }
-          } else if ((nonz[c] = bits.getBits(8)) || i > 11)
-            pred[c] = nonz[c] << 4 | bits.getBits(4);
+      // did we process one whole block of 14 pixels?
+      if (i == 0)
+        u = pred[0] = pred[1] = nonz[0] = nonz[1] = 0;
 
-          *dest = pred[c];
-
-          if (zero_is_bad && 0 == pred[c])
-            zero_pos.push_back((y << 16) | (x * 14 + i));
-
-          i++;
-          u++;
-          dest++;
-        }
+      if (u == 2) {
+        sh = 4 >> (3 - bits.getBits(2));
+        u = -1;
       }
+
+      if (nonz[c]) {
+        int j = bits.getBits(8);
+        if (j) {
+          pred[c] -= 0x80 << sh;
+          if (pred[c] < 0 || sh == 4)
+            pred[c] &= ~(-(1 << sh));
+          pred[c] += j << sh;
+        }
+      } else {
+        nonz[c] = bits.getBits(8);
+        if (nonz[c] || i > 11)
+          pred[c] = nonz[c] << 4 | bits.getBits(4);
+      }
+
+      *dest = pred[c];
+
+      if (zero_is_bad && 0 == pred[c])
+        zero_pos.push_back((y << 16) | x);
+
+      u++;
+      dest++;
     }
   }
+
   if (zero_is_bad && !zero_pos.empty()) {
     MutexLocker guard(&mRaw->mBadPixelMutex);
-    mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(), zero_pos.begin(), zero_pos.end());
+    mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
+                                    zero_pos.begin(), zero_pos.end());
   }
 }
 
