@@ -312,57 +312,51 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     mRaw->metadata.wbCoeffs[1] = 256.0F;
     mRaw->metadata.wbCoeffs[2] = static_cast<float>(
         mRootIFD->getEntryRecursive(OLYMPUSBLUEMULTIPLIER)->getU16());
-  } else {
+  } else if (mRootIFD->hasEntryRecursive(OLYMPUSIMAGEPROCESSING)) {
     // Newer cameras process the Image Processing SubIFD in the makernote
-    if(mRootIFD->hasEntryRecursive(OLYMPUSIMAGEPROCESSING)) {
-      TiffEntry *img_entry = mRootIFD->getEntryRecursive(OLYMPUSIMAGEPROCESSING);
-      try {
-        // get makernote ifd with containing Buffer
-        TiffRootIFD image_processing(nullptr, img_entry->getRootIfdData(),
-                                     img_entry->getU32());
+    TiffEntry* img_entry = mRootIFD->getEntryRecursive(OLYMPUSIMAGEPROCESSING);
+    // get makernote ifd with containing Buffer
+    TiffRootIFD image_processing(nullptr, img_entry->getRootIfdData(),
+                                 img_entry->getU32());
 
-        // Get the WB
-        if (image_processing.hasEntry(static_cast<TiffTag>(0x0100))) {
-          TiffEntry* wb =
-              image_processing.getEntry(static_cast<TiffTag>(0x0100));
-          if (wb->count == 2 || wb->count == 4) {
-            mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
-            mRaw->metadata.wbCoeffs[1] = 256.0F;
-            mRaw->metadata.wbCoeffs[2] = wb->getFloat(1);
+    // Get the WB
+    if (image_processing.hasEntry(static_cast<TiffTag>(0x0100))) {
+      TiffEntry* wb = image_processing.getEntry(static_cast<TiffTag>(0x0100));
+      if (wb->count == 2 || wb->count == 4) {
+        mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
+        mRaw->metadata.wbCoeffs[1] = 256.0F;
+        mRaw->metadata.wbCoeffs[2] = wb->getFloat(1);
+      }
+    }
+
+    // Get the black levels
+    if (image_processing.hasEntry(static_cast<TiffTag>(0x0600))) {
+      TiffEntry* blackEntry =
+          image_processing.getEntry(static_cast<TiffTag>(0x0600));
+      // Order is assumed to be RGGB
+      if (blackEntry->count == 4) {
+        for (int i = 0; i < 4; i++) {
+          auto c = mRaw->cfa.getColorAt(i & 1, i >> 1);
+          int j;
+          switch (c) {
+          case CFA_RED:
+            j = 0;
+            break;
+          case CFA_GREEN:
+            j = i < 2 ? 1 : 2;
+            break;
+          case CFA_BLUE:
+            j = 3;
+            break;
+          default:
+            ThrowRDE("Unexpected CFA color: %u", c);
           }
-        }
 
-        // Get the black levels
-        if (image_processing.hasEntry(static_cast<TiffTag>(0x0600))) {
-          TiffEntry* blackEntry =
-              image_processing.getEntry(static_cast<TiffTag>(0x0600));
-          // Order is assumed to be RGGB
-          if (blackEntry->count == 4) {
-            for (int i = 0; i < 4; i++) {
-              auto c = mRaw->cfa.getColorAt(i & 1, i >> 1);
-              int j;
-              switch (c) {
-              case CFA_RED:
-                j = 0;
-                break;
-              case CFA_GREEN:
-                j = i < 2 ? 1 : 2;
-                break;
-              case CFA_BLUE:
-                j = 3;
-                break;
-              default:
-                ThrowRDE("Unexpected CFA color: %u", c);
-              }
-
-              mRaw->blackLevelSeparate[i] = blackEntry->getU16(j);
-            }
-            // Adjust whitelevel based on the read black (we assume the dynamic range is the same)
-            mRaw->whitePoint -= (mRaw->blackLevel - mRaw->blackLevelSeparate[0]);
-          }
+          mRaw->blackLevelSeparate[i] = blackEntry->getU16(j);
         }
-      } catch (TiffParserException &e) {
-        mRaw->setError(e.what());
+        // Adjust whitelevel based on the read black (we assume the dynamic
+        // range is the same)
+        mRaw->whitePoint -= (mRaw->blackLevel - mRaw->blackLevelSeparate[0]);
       }
     }
   }
