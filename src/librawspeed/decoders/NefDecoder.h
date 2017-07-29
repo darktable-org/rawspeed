@@ -26,6 +26,7 @@
 #include "decoders/RawDecoder.h"          // for RawDecoder::RawSlice
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
 #include <algorithm>                      // for move
+#include <array>                          // for array
 #include <string>                         // for string
 #include <vector>                         // for vector
 
@@ -65,6 +66,10 @@ private:
   std::string getMode();
   std::string getExtendedMode(const std::string &mode);
   std::vector<ushort16> gammaCurve(double pwr, double ts, int mode, int imax);
+
+  // We use this for the D50 and D2X whacky WB "encryption"
+  static const std::array<uchar8, 256> serialmap;
+  static const std::array<uchar8, 256> keymap;
 };
 
 } // namespace rawspeed

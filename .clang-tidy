@@ -12,7 +12,7 @@ CheckOptions:
   - key:             readability-function-size.BranchThreshold
     value:           '34'
   - key:             readability-function-size.LineThreshold
-    value:           '166'
+    value:           '165'
   - key:             readability-function-size.StatementThreshold
     value:           '141'
   - key:             readability-function-size.ParameterThreshold
