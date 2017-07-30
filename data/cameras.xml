@@ -766,14 +766,21 @@
 			<Hint name="invert_sraw_wb" value=""/>
 		</Hints>
 	</Camera>
-        <Camera make="Canon" model="Canon EOS 6D Mark II" supported="no">
-          <ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
-        </Camera>
-        <Camera make="Canon" model="Canon EOS 6D Mark II" supported="no" mode="sRaw1">
-          <ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
-        </Camera>
-        <Camera make="Canon" model="Canon EOS 6D Mark II" supported="no" mode="sRaw2">
-          <ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
+        <Camera make="Canon" model="Canon EOS 6D Mark II" decoder_version="9" supported="no">
+        <!-- need samples, see https://redmine.darktable.org/issues/11678 -->
+                <ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
+                <CFA width="2" height="2">
+                        <Color x="0" y="0">RED</Color>
+                        <Color x="1" y="0">GREEN</Color>
+                        <Color x="0" y="1">GREEN</Color>
+                        <Color x="1" y="1">BLUE</Color>
+                </CFA>
+                <Crop x="128" y="52" width="-4" height="-4"/>
+                <Sensor black="2048" white="16383"/>
+                <BlackAreas>
+                        <Vertical x="2" width="116"/>
+                        <Horizontal y="8" height="32"/>
+                </BlackAreas>
         </Camera>
         <Camera make="Canon" model="Canon EOS 7D" decoder_version="1">
 		<ID make="Canon" model="EOS 7D">Canon EOS 7D</ID>

@@ -127,11 +127,12 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
   vector<int> s_width;
   TiffEntry* cr2SliceEntry = raw->getEntryRecursive(CANONCR2SLICE);
-  if (cr2SliceEntry && cr2SliceEntry->getU16(0) > 0) {
+  if (cr2SliceEntry && cr2SliceEntry->count == 3) {
     for (int i = 0; i < cr2SliceEntry->getU16(0); i++)
       s_width.push_back(cr2SliceEntry->getU16(1));
     s_width.push_back(cr2SliceEntry->getU16(2));
-  }
+  } else
+    ThrowRDE("Strange CR2, can not find CANONCR2SLICE tag.");
 
   TiffEntry* offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
