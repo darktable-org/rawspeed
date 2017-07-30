@@ -766,7 +766,16 @@
 			<Hint name="invert_sraw_wb" value=""/>
 		</Hints>
 	</Camera>
-	<Camera make="Canon" model="Canon EOS 7D" decoder_version="1">
+        <Camera make="Canon" model="Canon EOS 6D Mark II" supported="no">
+          <ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
+        </Camera>
+        <Camera make="Canon" model="Canon EOS 6D Mark II" supported="no" mode="sRaw1">
+          <ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
+        </Camera>
+        <Camera make="Canon" model="Canon EOS 6D Mark II" supported="no" mode="sRaw2">
+          <ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
+        </Camera>
+        <Camera make="Canon" model="Canon EOS 7D" decoder_version="1">
 		<ID make="Canon" model="EOS 7D">Canon EOS 7D</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
