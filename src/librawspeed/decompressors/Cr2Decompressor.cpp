@@ -38,8 +38,18 @@ void Cr2Decompressor::decodeScan()
   if (predictorMode != 1)
     ThrowRDE("Unsupported predictor mode.");
 
-  if (slicesWidths.empty())
-    slicesWidths.push_back(frame.w * frame.cps);
+  if (slicesWidths.empty()) {
+    const int slicesWidth = frame.w * frame.cps;
+    if (slicesWidth > mRaw->dim.x)
+      ThrowRDE("Don't know slicing pattern, and failed to guess it.");
+
+    slicesWidths.push_back(slicesWidth);
+  }
+
+  for (const auto& slicesWidth : slicesWidths) {
+    if (slicesWidth > mRaw->dim.x)
+      ThrowRDE("Slice is longer than image's height, which is unsupported.");
+  }
 
   bool isSubSampled = false;
   for (uint32 i = 0; i < frame.cps;  i++)
