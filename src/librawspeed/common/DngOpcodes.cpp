@@ -396,7 +396,7 @@ void DngOpcodes::applyOpCodes(const RawImage& ri) {
 
 template <class Opcode>
 std::unique_ptr<DngOpcodes::DngOpcode> DngOpcodes::constructor(ByteStream* bs) {
-  return make_unique<Opcode>(bs);
+  return std::make_unique<Opcode>(bs);
 }
 
 // ALL opcodes specified in DNG Specification MUST be listed here.

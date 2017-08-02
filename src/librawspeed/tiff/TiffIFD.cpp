@@ -45,7 +45,7 @@ void TiffIFD::parseIFDEntry(ByteStream* bs) {
   auto origPos = bs->getPosition();
 
   try {
-    t = make_unique<TiffEntry>(this, bs);
+    t = std::make_unique<TiffEntry>(this, bs);
   } catch (IOException&) { // Ignore unparsable entry
     // fix probably broken position due to interruption by exception
     // i.e. setting it to the next entry.
@@ -68,7 +68,7 @@ void TiffIFD::parseIFDEntry(ByteStream* bs) {
     case SUBIFDS:
     case EXIFIFDPOINTER:
       for (uint32 j = 0; j < t->count; j++)
-        add(make_unique<TiffIFD>(this, *bs, t->getU32(j)));
+        add(std::make_unique<TiffIFD>(this, *bs, t->getU32(j)));
       break;
 
     default:
@@ -205,7 +205,7 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(TiffEntry* t)
   }
 
   // Attempt to parse the rest as an IFD
-  return make_unique<TiffRootIFD>(this, bs, bs.getPosition());
+  return std::make_unique<TiffRootIFD>(this, bs, bs.getPosition());
 }
 
 std::vector<const TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) const {

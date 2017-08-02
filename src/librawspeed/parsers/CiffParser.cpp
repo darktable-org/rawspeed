@@ -49,7 +49,7 @@ void CiffParser::parseData() {
     ThrowCPE("Not a CIFF file (ID)");
 
   ByteStream subStream(bs.getSubStream(bs.getByte()));
-  mRootIFD = make_unique<CiffIFD>(nullptr, &subStream);
+  mRootIFD = std::make_unique<CiffIFD>(nullptr, &subStream);
 }
 
 std::unique_ptr<RawDecoder> CiffParser::getDecoder(const CameraMetaData* meta) {
@@ -63,7 +63,7 @@ std::unique_ptr<RawDecoder> CiffParser::getDecoder(const CameraMetaData* meta) {
     const string make = trimSpaces(mm->getString());
 
     if (make == "Canon")
-      return make_unique<CrwDecoder>(move(mRootIFD), mInput);
+      return std::make_unique<CrwDecoder>(move(mRootIFD), mInput);
   }
 
   ThrowCPE("No decoder found. Sorry.");

@@ -101,7 +101,7 @@ void X3fParser::readDirectory(X3fDecoder* decoder) {
 
 std::unique_ptr<RawDecoder> X3fParser::getDecoder(const CameraMetaData* meta) {
   try {
-    auto decoder = make_unique<X3fDecoder>(mInput);
+    auto decoder = std::make_unique<X3fDecoder>(mInput);
     readDirectory(decoder.get());
 
     if (nullptr == decoder)

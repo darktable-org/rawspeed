@@ -44,7 +44,6 @@ using rawspeed::trimSpaces;
 using rawspeed::splitString;
 using rawspeed::unroll_loop;
 using rawspeed::getThreadCount;
-using rawspeed::make_unique;
 using rawspeed::copyPixels;
 
 namespace rawspeed_test {
@@ -283,11 +282,11 @@ TEST(GetThreadCountTest, Test) {
 
 TEST(MakeUniqueTest, Test) {
   ASSERT_NO_THROW({
-    auto s = make_unique<int>(0);
+    auto s = std::make_unique<int>(0);
     ASSERT_EQ(*s, 0);
   });
   ASSERT_NO_THROW({
-    auto s = make_unique<int>(314);
+    auto s = std::make_unique<int>(314);
     ASSERT_EQ(*s, 314);
   });
 }

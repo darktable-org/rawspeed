@@ -144,9 +144,9 @@ int main(int argc, char *argv[]) {
     std::unique_ptr<const CameraMetaData> meta;
 
 #ifdef HAVE_PUGIXML
-    meta = rawspeed::make_unique<CameraMetaData>(camfile.c_str());
+    meta = std::make_unique<CameraMetaData>(camfile.c_str());
 #else
-    meta = rawspeed::make_unique<CameraMetaData>();
+    meta = std::make_unique<CameraMetaData>();
 #endif
 
     if (!meta.get()) {

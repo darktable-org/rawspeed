@@ -45,7 +45,7 @@ void CiffIFD::parseIFDEntry(ByteStream* bs) {
   auto origPos = bs->getPosition();
 
   try {
-    t = make_unique<CiffEntry>(bs);
+    t = std::make_unique<CiffEntry>(bs);
   } catch (IOException&) {
     // Ignore unparsable entry, but fix probably broken position due to
     // interruption by exception; i.e. setting it to the next entry.
@@ -57,7 +57,7 @@ void CiffIFD::parseIFDEntry(ByteStream* bs) {
     switch (t->type) {
     case CIFF_SUB1:
     case CIFF_SUB2: {
-      add(make_unique<CiffIFD>(this, &t->data));
+      add(std::make_unique<CiffIFD>(this, &t->data));
       break;
     }
 

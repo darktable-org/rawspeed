@@ -86,7 +86,7 @@ void DngDecoderSlices::startDecoding() {
   threads.reserve(nThreads);
 
   for (uint32 i = 0; i < nThreads; i++) {
-    auto t = make_unique<DngDecoderThread>(this);
+    auto t = std::make_unique<DngDecoderThread>(this);
     for (int j = 0; j < slicesPerThread ; j++) {
       if (!slices.empty()) {
         t->slices.emplace(move(slices.front()));

@@ -51,14 +51,14 @@ CameraMetaData::CameraMetaData(const char *docname) {
   }
 
   for (xml_node camera : doc.child("Cameras").children("Camera")) {
-    const auto* cam = addCamera(make_unique<Camera>(camera));
+    const auto* cam = addCamera(std::make_unique<Camera>(camera));
 
     if (cam == nullptr)
       continue;
 
     // Create cameras for aliases.
     for (uint32 i = 0; i < cam->aliases.size(); i++) {
-      addCamera(make_unique<Camera>(cam, i));
+      addCamera(std::make_unique<Camera>(cam, i));
     }
   }
 }

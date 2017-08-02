@@ -583,7 +583,7 @@ void RawImageData::setTable(std::unique_ptr<TableLookUp> t) {
 void RawImageData::setTable(const std::vector<ushort16>& table_, bool dither) {
   assert(!table_.empty());
 
-  auto t = make_unique<TableLookUp>(1, dither);
+  auto t = std::make_unique<TableLookUp>(1, dither);
   t->setTable(0, table_);
   this->setTable(std::move(t));
 }

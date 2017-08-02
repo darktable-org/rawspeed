@@ -241,8 +241,8 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
         const uint32 offX = tilew * x;
         const uint32 offY = tileh * y;
 
-        auto e = make_unique<DngSliceElement>(offset, count, offX, offY, tilew,
-                                              tileh);
+        auto e = std::make_unique<DngSliceElement>(offset, count, offX, offY,
+                                                   tilew, tileh);
 
         // Only decode if size is valid
         if (mFile->isValid(e->byteOffset, e->byteCount))
@@ -273,8 +273,8 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
       if (count < 1)
         continue;
 
-      auto e = make_unique<DngSliceElement>(offset, count, 0, offY, mRaw->dim.x,
-                                            yPerSlice);
+      auto e = std::make_unique<DngSliceElement>(offset, count, 0, offY,
+                                                 mRaw->dim.x, yPerSlice);
 
       offY += yPerSlice;
 

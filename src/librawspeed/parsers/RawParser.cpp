@@ -20,7 +20,6 @@
 */
 
 #include "parsers/RawParser.h"
-#include "common/Common.h"                // for make_unique
 #include "decoders/AriDecoder.h"          // for AriDecoder
 #include "decoders/MrwDecoder.h"          // for MrwDecoder
 #include "decoders/NakedDecoder.h"        // for NakedDecoder
@@ -52,14 +51,14 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
   // MRW images are easy to check for, let's try that first
   if (MrwDecoder::isMRW(mInput)) {
     try {
-      return make_unique<MrwDecoder>(mInput);
+      return std::make_unique<MrwDecoder>(mInput);
     } catch (RawDecoderException &) {
     }
   }
 
   if (AriDecoder::isARI(mInput)) {
     try {
-      return make_unique<AriDecoder>(mInput);
+      return std::make_unique<AriDecoder>(mInput);
     } catch (RawDecoderException &) {
     }
   }
@@ -99,7 +98,7 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
     const Camera* c = meta->getChdkCamera(mInput->getSize());
 
     try {
-      return make_unique<NakedDecoder>(mInput, c);
+      return std::make_unique<NakedDecoder>(mInput, c);
     } catch (RawDecoderException &) {
     }
   }

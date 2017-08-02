@@ -22,7 +22,6 @@
 #error DECODER must be defined
 #endif
 
-#include "common/Common.h"            // for make_unique
 #include "common/RawspeedException.h" // for RawspeedException
 #include "decoders/ArwDecoder.h"      // IWYU pragma: keep
 #include "decoders/Cr2Decoder.h"      // IWYU pragma: keep
@@ -72,7 +71,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     // only check that the check does not crash.
     (void)DECODER::isAppropriateDecoder(ifd.get(), &buffer);
 
-    auto decoder = rawspeed::make_unique<DECODER>(std::move(ifd), &buffer);
+    auto decoder = std::make_unique<DECODER>(std::move(ifd), &buffer);
 
     decoder->applyCrop = false;
     decoder->failOnUnknown = false;
