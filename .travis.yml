@@ -26,7 +26,7 @@ before_install:
       echo "oracle-java9-installer hold" | sudo dpkg --set-selections;
       travis_retry sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y;
       travis_retry sudo apt-get update -q;
-      travis_retry sudo apt-get install -y -q -f --fix-missing cmake g++-4.8 g++-6 git libjpeg-dev libpugixml-dev libxml2-utils make ninja-build zlib1g-dev;
+      travis_retry sudo apt-get install -y -q -f --fix-missing cmake g++-4.9 g++-6 git libjpeg-dev libpugixml-dev libxml2-utils make ninja-build zlib1g-dev;
     elif [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       docker pull darktable/rawspeed;
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
@@ -69,7 +69,7 @@ matrix:
   - os: linux
     dist: trusty
     sudo: required
-    env: CC=gcc-4.8 CXX=g++-4.8 EXTRA=NODOCKER
+    env: CC=gcc-4.9 CXX=g++-4.9 EXTRA=NODOCKER
   - os: linux
     sudo: required
     services:

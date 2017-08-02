@@ -155,80 +155,85 @@ md5::md5_state imgDataHash(const RawImage& raw) {
 #pragma GCC diagnostic ignored "-Wframe-larger-than="
 #pragma GCC diagnostic ignored "-Wstack-usage="
 
-string img_hash(const RawImage& r) {
-  ostringstream oss;
+static void __attribute__((format(printf, 2, 3)))
+APPEND(ostringstream* oss, const char* format, ...) {
   char line[1024];
 
-#define APPEND(...)                                                            \
-  do {                                                                         \
-    snprintf(line, sizeof(line), __VA_ARGS__);                                 \
-    oss << line;                                                               \
-  } while (false)
+  va_list args;
+  va_start(args, format);
+  vsnprintf(line, sizeof(line), format, args);
+  va_end(args);
 
-  APPEND("make: %s\n", r->metadata.make.c_str());
-  APPEND("model: %s\n", r->metadata.model.c_str());
-  APPEND("mode: %s\n", r->metadata.mode.c_str());
+  *oss << line;
+}
 
-  APPEND("canonical_make: %s\n", r->metadata.canonical_make.c_str());
-  APPEND("canonical_model: %s\n", r->metadata.canonical_model.c_str());
-  APPEND("canonical_alias: %s\n", r->metadata.canonical_alias.c_str());
-  APPEND("canonical_id: %s\n", r->metadata.canonical_id.c_str());
+string img_hash(const RawImage& r) {
+  ostringstream oss;
 
-  APPEND("isoSpeed: %d\n", r->metadata.isoSpeed);
-  APPEND("blackLevel: %d\n", r->blackLevel);
-  APPEND("whitePoint: %d\n", r->whitePoint);
+  APPEND(&oss, "make: %s\n", r->metadata.make.c_str());
+  APPEND(&oss, "model: %s\n", r->metadata.model.c_str());
+  APPEND(&oss, "mode: %s\n", r->metadata.mode.c_str());
 
-  APPEND("blackLevelSeparate: %d %d %d %d\n", r->blackLevelSeparate[0],
+  APPEND(&oss, "canonical_make: %s\n", r->metadata.canonical_make.c_str());
+  APPEND(&oss, "canonical_model: %s\n", r->metadata.canonical_model.c_str());
+  APPEND(&oss, "canonical_alias: %s\n", r->metadata.canonical_alias.c_str());
+  APPEND(&oss, "canonical_id: %s\n", r->metadata.canonical_id.c_str());
+
+  APPEND(&oss, "isoSpeed: %d\n", r->metadata.isoSpeed);
+  APPEND(&oss, "blackLevel: %d\n", r->blackLevel);
+  APPEND(&oss, "whitePoint: %d\n", r->whitePoint);
+
+  APPEND(&oss, "blackLevelSeparate: %d %d %d %d\n", r->blackLevelSeparate[0],
          r->blackLevelSeparate[1], r->blackLevelSeparate[2],
          r->blackLevelSeparate[3]);
 
-  APPEND("wbCoeffs: %f %f %f %f\n", r->metadata.wbCoeffs[0],
+  APPEND(&oss, "wbCoeffs: %f %f %f %f\n", r->metadata.wbCoeffs[0],
          r->metadata.wbCoeffs[1], r->metadata.wbCoeffs[2],
          r->metadata.wbCoeffs[3]);
 
-  APPEND("isCFA: %d\n", r->isCFA);
-  APPEND("cfa: %s\n", r->cfa.asString().c_str());
-  APPEND("filters: 0x%x\n", r->cfa.getDcrawFilter());
-  APPEND("bpp: %d\n", r->getBpp());
-  APPEND("cpp: %d\n", r->getCpp());
-  APPEND("dataType: %d\n", r->getDataType());
+  APPEND(&oss, "isCFA: %d\n", r->isCFA);
+  APPEND(&oss, "cfa: %s\n", r->cfa.asString().c_str());
+  APPEND(&oss, "filters: 0x%x\n", r->cfa.getDcrawFilter());
+  APPEND(&oss, "bpp: %d\n", r->getBpp());
+  APPEND(&oss, "cpp: %d\n", r->getCpp());
+  APPEND(&oss, "dataType: %d\n", r->getDataType());
 
   const iPoint2D dimUncropped = r->getUncroppedDim();
-  APPEND("dimUncropped: %dx%d\n", dimUncropped.x, dimUncropped.y);
-  APPEND("dimCropped: %dx%d\n", r->dim.x, r->dim.y);
+  APPEND(&oss, "dimUncropped: %dx%d\n", dimUncropped.x, dimUncropped.y);
+  APPEND(&oss, "dimCropped: %dx%d\n", r->dim.x, r->dim.y);
   const iPoint2D cropTL = r->getCropOffset();
-  APPEND("cropOffset: %dx%d\n", cropTL.x, cropTL.y);
+  APPEND(&oss, "cropOffset: %dx%d\n", cropTL.x, cropTL.y);
 
   // NOTE: pitch is internal property, a function of dimUncropped.x, bpp and
   // some additional padding overhead, to align each line lenght to be a
   // multiple of (currently) 16 bytes. And maybe with some additional
   // const offset. there is no point in showing it here, it may differ.
-  // APPEND("pitch: %d\n", r->pitch);
+  // APPEND(&oss, "pitch: %d\n", r->pitch);
 
-  APPEND("blackAreas: ");
+  APPEND(&oss, "blackAreas: ");
   for (auto ba : r->blackAreas)
-    APPEND("%d:%dx%d, ", ba.isVertical, ba.offset, ba.size);
-  APPEND("\n");
+    APPEND(&oss, "%d:%dx%d, ", ba.isVertical, ba.offset, ba.size);
+  APPEND(&oss, "\n");
 
-  APPEND("fuji_rotation_pos: %d\n", r->metadata.fujiRotationPos);
-  APPEND("pixel_aspect_ratio: %f\n", r->metadata.pixelAspectRatio);
+  APPEND(&oss, "fuji_rotation_pos: %d\n", r->metadata.fujiRotationPos);
+  APPEND(&oss, "pixel_aspect_ratio: %f\n", r->metadata.pixelAspectRatio);
 
-  APPEND("badPixelPositions: ");
+  APPEND(&oss, "badPixelPositions: ");
   {
     MutexLocker guard(&r->mBadPixelMutex);
     for (uint32 p : r->mBadPixelPositions)
-      APPEND("%d, ", p);
+      APPEND(&oss, "%d, ", p);
   }
 
-  APPEND("\n");
+  APPEND(&oss, "\n");
 
   rawspeed::md5::md5_state hash_of_line_hashes = imgDataHash(r);
-  APPEND("md5sum of per-line md5sums: %s\n",
+  APPEND(&oss, "md5sum of per-line md5sums: %s\n",
          rawspeed::md5::hash_to_string(hash_of_line_hashes).c_str());
 
   const auto errors = r->getErrors();
   for (const string& e : errors)
-    APPEND("WARNING: [rawspeed] %s\n", e.c_str());
+    APPEND(&oss, "WARNING: [rawspeed] %s\n", e.c_str());
 
 #undef APPEND
 

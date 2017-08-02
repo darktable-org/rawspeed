@@ -22,12 +22,10 @@
 
 #include "rawspeedconfig.h"
 
-#include <algorithm>        // for forward
 #include <cassert>          // for assert
 #include <cstdint>          // for uintptr_t
 #include <cstring>          // for memcpy, size_t
 #include <initializer_list> // for initializer_list
-#include <memory>           // for unique_ptr, allocator
 #include <string>           // for string
 #include <type_traits>      // for enable_if, is_pointer
 #include <vector>           // for vector
@@ -107,14 +105,6 @@ isIn(const T value, const std::initializer_list<T2>& list) {
       return true;
   return false;
 }
-
-// until we allow c++14 code
-#if __cplusplus < 201402L
-template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args) {
-  return std::unique_ptr<T>(new T(std::forward<Args>(args)...)); // NOLINT
-}
-#endif
 
 inline uint32 getThreadCount()
 {

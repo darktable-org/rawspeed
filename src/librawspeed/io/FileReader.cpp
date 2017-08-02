@@ -20,7 +20,6 @@
 */
 
 #include "io/FileReader.h"
-#include "common/Common.h"      // for make_unique
 #include "io/Buffer.h"          // for Buffer
 #include "io/FileIOException.h" // for FileIOException (ptr only), ThrowFIE
 #include <algorithm>            // for move
@@ -112,7 +111,7 @@ std::unique_ptr<const Buffer> FileReader::readFile() {
 
 #endif // __unix__
 
-  return make_unique<Buffer>(move(dest), fileSize);
+  return std::make_unique<Buffer>(move(dest), fileSize);
 }
 
 } // namespace rawspeed
