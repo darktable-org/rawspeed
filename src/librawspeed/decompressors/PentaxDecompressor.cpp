@@ -76,8 +76,8 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(TiffIFD* root) {
   for (uint32 i = 0; i < depth; i++) {
     v1[i] = stream.getByte();
 
-    if (v1[i] > 12)
-      ThrowRDE("Huffmantable corrupt: v1[%i]=%i, should be <=12", depth, v1[i]);
+    if (v1[i] == 0 || v1[i] > 12)
+      ThrowRDE("Data corrupt: v1[%i]=%i, expected [1..12]", depth, v1[i]);
   }
 
   std::vector<uchar8> nCodesPerLength;
