@@ -10,11 +10,11 @@ CheckOptions:
   - key:             google-readability-braces-around-statements.ShortStatementLines
     value:           '3'
   - key:             readability-function-size.BranchThreshold
-    value:           '34'
+    value:           '24'
   - key:             readability-function-size.LineThreshold
     value:           '165'
   - key:             readability-function-size.StatementThreshold
-    value:           '141'
+    value:           '135'
   - key:             readability-function-size.ParameterThreshold
     value:           '6'
   - key:             readability-function-size.NestingThreshold
