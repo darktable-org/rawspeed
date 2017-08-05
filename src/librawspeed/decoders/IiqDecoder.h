@@ -32,12 +32,12 @@ namespace rawspeed {
 class CameraMetaData;
 class Buffer;
 
-class MosDecoder final : public AbstractTiffDecoder
-{
+class IiqDecoder final : public AbstractTiffDecoder {
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                    const Buffer* file);
-  MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file);
+  IiqDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file)
+      : AbstractTiffDecoder(move(rootIFD), file) {}
 
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;
@@ -45,8 +45,9 @@ public:
 
 protected:
   int getDecoderVersion() const override { return 0; }
-  std::string make, model;
-  std::string getXMPTag(const std::string &xmp, const std::string &tag);
+  uint32 black_level = 0;
+  void DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32 width,
+                       uint32 height);
 };
 
 } // namespace rawspeed

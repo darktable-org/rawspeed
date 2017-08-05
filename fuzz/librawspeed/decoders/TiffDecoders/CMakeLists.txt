@@ -28,6 +28,7 @@ set(DECODERS
   "DcsDecoder"
   "DngDecoder"
   "ErfDecoder"
+  "IiqDecoder"
   "KdcDecoder"
   "MefDecoder"
   "MosDecoder"

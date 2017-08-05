@@ -29,6 +29,7 @@
 #include "decoders/DcsDecoder.h"      // IWYU pragma: keep
 #include "decoders/DngDecoder.h"      // IWYU pragma: keep
 #include "decoders/ErfDecoder.h"      // IWYU pragma: keep
+#include "decoders/IiqDecoder.h"      // IWYU pragma: keep
 #include "decoders/KdcDecoder.h"      // IWYU pragma: keep
 #include "decoders/MefDecoder.h"      // IWYU pragma: keep
 #include "decoders/MosDecoder.h"      // IWYU pragma: keep

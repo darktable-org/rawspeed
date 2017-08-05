@@ -29,6 +29,7 @@
 #include "decoders/DcsDecoder.h"         // for DcsDecoder
 #include "decoders/DngDecoder.h"         // for DngDecoder
 #include "decoders/ErfDecoder.h"         // for ErfDecoder
+#include "decoders/IiqDecoder.h"         // for IiqDecoder
 #include "decoders/KdcDecoder.h"         // for KdcDecoder
 #include "decoders/MefDecoder.h"         // for MefDecoder
 #include "decoders/MosDecoder.h"         // for MosDecoder
@@ -113,13 +114,24 @@ std::unique_ptr<RawDecoder> TiffParser::constructor(TiffRootIFDOwner&& root,
   { std::make_pair(&name::isAppropriateDecoder, &constructor<name>) }
 
 const std::array<std::pair<TiffParser::checker_t, TiffParser::constructor_t>,
-                 16>
+                 17>
     TiffParser::Map = {{
-        DECODER(DngDecoder), DECODER(MosDecoder), DECODER(Cr2Decoder),
-        DECODER(RafDecoder), DECODER(NefDecoder), DECODER(OrfDecoder),
-        DECODER(ArwDecoder), DECODER(PefDecoder), DECODER(Rw2Decoder),
-        DECODER(SrwDecoder), DECODER(MefDecoder), DECODER(DcrDecoder),
-        DECODER(DcsDecoder), DECODER(KdcDecoder), DECODER(ErfDecoder),
+        DECODER(DngDecoder),
+        DECODER(MosDecoder),
+        DECODER(IiqDecoder),
+        DECODER(Cr2Decoder),
+        DECODER(RafDecoder),
+        DECODER(NefDecoder),
+        DECODER(OrfDecoder),
+        DECODER(ArwDecoder),
+        DECODER(PefDecoder),
+        DECODER(Rw2Decoder),
+        DECODER(SrwDecoder),
+        DECODER(MefDecoder),
+        DECODER(DcrDecoder),
+        DECODER(DcsDecoder),
+        DECODER(KdcDecoder),
+        DECODER(ErfDecoder),
         DECODER(ThreefrDecoder),
 
     }};
