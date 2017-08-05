@@ -26,7 +26,6 @@ set(PARSERS
   "Fiff"
   "Raw"
   "Tiff"
-  "X3f"
 )
 
 foreach(parser IN LISTS PARSERS)

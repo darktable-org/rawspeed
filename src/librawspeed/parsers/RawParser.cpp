@@ -34,8 +34,6 @@
 #include "parsers/FiffParserException.h"  // for FiffParserException
 #include "parsers/TiffParser.h"           // for TiffParser
 #include "parsers/TiffParserException.h"  // for TiffParserException
-#include "parsers/X3fParser.h"            // for X3fParser
-#include "parsers/X3fParserException.h"   // for X3fParserException
 
 namespace rawspeed {
 
@@ -78,12 +76,6 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
     TiffParser p(mInput);
     return p.getDecoder(meta);
   } catch (TiffParserException &) {
-  }
-
-  try {
-    X3fParser parser(mInput);
-    return parser.getDecoder(meta);
-  } catch (X3fParserException&) {
   }
 
   // CIFF images

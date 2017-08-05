@@ -27,7 +27,6 @@
 #include "parsers/FiffParserException.h"      // for FiffParserException (p...
 #include "parsers/RawParserException.h"       // for ThrowRPE, RawParserEx...
 #include "parsers/TiffParserException.h"      // for ThrowTPE, TiffParserEx...
-#include "parsers/X3fParserException.h"       // for ThrowXPE, X3fParserExc...
 #include <exception>                          // IWYU pragma: keep
 #include <gmock/gmock.h>                      // for MakePredicateFormatter...
 #include <gtest/gtest.h>                      // for Message, TestPartResult
@@ -46,7 +45,6 @@ using rawspeed::RawDecoderException;
 using rawspeed::TiffParserException;
 using rawspeed::FiffParserException;
 using rawspeed::RawParserException;
-using rawspeed::X3fParserException;
 
 namespace rawspeed_test {
 
@@ -95,17 +93,13 @@ template <> void* MetaHelper<FiffParserException>(const char* str) {
   ThrowFPE(FMT, str);
 }
 
-template <> void* MetaHelper<X3fParserException>(const char* str) {
-  ThrowXPE(FMT, str);
-}
-
 template <class T> class ExceptionsTest : public testing::Test {};
 
 using Classes =
     testing::Types<RawspeedException, CameraMetadataException,
                    CiffParserException, FileIOException, IOException,
                    RawDecoderException, TiffParserException,
-                   FiffParserException, RawParserException, X3fParserException>;
+                   FiffParserException, RawParserException>;
 
 TYPED_TEST_CASE(ExceptionsTest, Classes);
 

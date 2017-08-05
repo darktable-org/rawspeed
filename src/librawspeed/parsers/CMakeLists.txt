@@ -11,9 +11,6 @@ FILE(GLOB SOURCES
   "TiffParser.cpp"
   "TiffParser.h"
   "TiffParserException.h"
-  "X3fParser.cpp"
-  "X3fParser.h"
-  "X3fParserException.h"
 )
 
 target_sources(rawspeed PRIVATE

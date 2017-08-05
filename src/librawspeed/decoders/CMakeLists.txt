@@ -48,8 +48,6 @@ FILE(GLOB SOURCES
   "SrwDecoder.h"
   "ThreefrDecoder.cpp"
   "ThreefrDecoder.h"
-  "X3fDecoder.cpp"
-  "X3fDecoder.h"
 )
 
 target_sources(rawspeed PRIVATE

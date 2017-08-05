@@ -37,7 +37,6 @@
 #include "parsers/RawParser.h"          // IWYU pragma: keep
 #include "parsers/RawParserException.h" // for RawParserException
 #include "parsers/TiffParser.h"         // IWYU pragma: keep
-#include "parsers/X3fParser.h"          // IWYU pragma: keep
 #include <cassert>                      // for assert
 #include <cstdint>                      // for uint8_t
 #include <cstdio>                       // for size_t

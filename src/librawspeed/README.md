@@ -204,7 +204,7 @@ This is even more complicated by the fact that Canon has changed the way they st
 
 ### Sigma Foveon Support
 
-Sigma Foveon (x3f-based) images are delivered as raw image values. dcraw offers a "cleanup" function, that will reduce noise in Foveon images. RawSpeed does not have an equivalent function, so if you want to use RawSpeed as a drop-in replacement, you will either have to convert the dcraw "foveon_interpolate", or implement similar noise reduction, if you want it.
+Sigma Foveon (x3f-based) images are not supported. If you want them to be supported, help welcomed :)
 
 ### Fuji Rotated Support
 
