@@ -766,23 +766,43 @@
 			<Hint name="invert_sraw_wb" value=""/>
 		</Hints>
 	</Camera>
-        <Camera make="Canon" model="Canon EOS 6D Mark II" decoder_version="9" supported="no">
-        <!-- need samples, see https://redmine.darktable.org/issues/11678 -->
-                <ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
-                <CFA width="2" height="2">
-                        <Color x="0" y="0">RED</Color>
-                        <Color x="1" y="0">GREEN</Color>
-                        <Color x="0" y="1">GREEN</Color>
-                        <Color x="1" y="1">BLUE</Color>
-                </CFA>
-                <Crop x="128" y="52" width="-4" height="-4"/>
-                <Sensor black="2048" white="16383"/>
-                <BlackAreas>
-                        <Vertical x="2" width="116"/>
-                        <Horizontal y="8" height="32"/>
-                </BlackAreas>
-        </Camera>
-        <Camera make="Canon" model="Canon EOS 7D" decoder_version="1">
+	<Camera make="Canon" model="Canon EOS 6D Mark II" decoder_version="9">
+		<ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="128" y="52" width="-4" height="-4"/>
+		<Sensor black="2049" white="14558"/>
+		<Sensor black="513" white="14558" iso_list="50 100 125 200 250"/>
+		<Sensor black="513" white="11301" iso_list="160"/>
+		<Sensor black="2049" white="11301" iso_list="320 640 1250 2500 5000 10000"/>
+		<BlackAreas>
+			<Vertical x="2" width="116"/>
+			<Horizontal y="8" height="32"/>
+		</BlackAreas>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS 6D Mark II" mode="sRaw1" decoder_version="9">
+		<ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="16383"/> <!-- don't know -->
+		<Hints>
+			<Hint name="sraw_new" value=""/>
+			<Hint name="invert_sraw_wb" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS 6D Mark II" mode="sRaw2" decoder_version="9">
+		<ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="16383"/> <!-- don't know -->
+		<Hints>
+			<Hint name="sraw_new" value=""/>
+			<Hint name="invert_sraw_wb" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS 7D" decoder_version="1">
 		<ID make="Canon" model="EOS 7D">Canon EOS 7D</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
