@@ -779,12 +779,12 @@ FujiDecompressor::FujiHeader::operator bool() const {
        raw_height < FujiStrip::lineHeight() ||
        raw_height % FujiStrip::lineHeight() || raw_width > 0x3000 ||
        raw_width < 0x300 || raw_width % 24 || raw_rounded_width > 0x3000 ||
-       block_size < 1 || raw_rounded_width < block_size ||
+       block_size != 0x300 || raw_rounded_width < block_size ||
        raw_rounded_width % block_size ||
-       raw_rounded_width - raw_width >= block_size || block_size != 0x300 ||
-       blocks_in_row > 0x10 || blocks_in_row == 0 ||
-       blocks_in_row != raw_rounded_width / block_size || total_lines > 0x800 ||
-       total_lines == 0 || total_lines != raw_height / FujiStrip::lineHeight() ||
+       raw_rounded_width - raw_width >= block_size || blocks_in_row > 0x10 ||
+       blocks_in_row == 0 || blocks_in_row != raw_rounded_width / block_size ||
+       total_lines > 0x800 || total_lines == 0 ||
+       total_lines != raw_height / FujiStrip::lineHeight() ||
        (raw_bits != 12 && raw_bits != 14) || (raw_type != 16 && raw_type != 0));
 
   return !invalid;
