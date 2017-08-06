@@ -273,6 +273,18 @@ void FujiDecompressor::fuji_decode_sample_even_internal(
   }
 }
 
+int FujiDecompressor::fuji_decode_sample_even_internal_2(int grad,
+                                                         int interp_val,
+                                                         int code) const {
+  if (grad < 0) {
+    interp_val = (interp_val >> 2) - code;
+  } else {
+    interp_val = (interp_val >> 2) + code;
+  }
+
+  return interp_val;
+}
+
 int FujiDecompressor::fuji_decode_sample_even(fuji_compressed_block* info,
                                               BitPumpMSB* pump,
                                               ushort16* line_buf, int* pos,
@@ -319,11 +331,7 @@ int FujiDecompressor::fuji_decode_sample_even(fuji_compressed_block* info,
 
   grads[gradient].value2++;
 
-  if (grad < 0) {
-    interp_val = (interp_val >> 2) - code;
-  } else {
-    interp_val = (interp_val >> 2) + code;
-  }
+  interp_val = fuji_decode_sample_even_internal_2(grad, interp_val, code);
 
   if (interp_val < 0) {
     interp_val += common_info.total_values;
@@ -359,6 +367,18 @@ void FujiDecompressor::fuji_decode_sample_odd_internal(
   } else {
     *interp_val = (Ra + Rg) >> 1;
   }
+}
+
+int FujiDecompressor::fuji_decode_sample_odd_internal_2(int grad,
+                                                        int interp_val,
+                                                        int code) const {
+  if (grad < 0) {
+    interp_val -= code;
+  } else {
+    interp_val += code;
+  }
+
+  return interp_val;
 }
 
 int FujiDecompressor::fuji_decode_sample_odd(fuji_compressed_block* info,
@@ -407,11 +427,7 @@ int FujiDecompressor::fuji_decode_sample_odd(fuji_compressed_block* info,
 
   grads[gradient].value2++;
 
-  if (grad < 0) {
-    interp_val -= code;
-  } else {
-    interp_val += code;
-  }
+  interp_val = fuji_decode_sample_odd_internal_2(grad, interp_val, code);
 
   if (interp_val < 0) {
     interp_val += common_info.total_values;
