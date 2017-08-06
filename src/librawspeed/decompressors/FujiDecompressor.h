@@ -184,9 +184,15 @@ private:
 
   void fuji_zerobits(BitPumpMSB* pump, int* count) const;
   int bitDiff(int value1, int value2) const;
+  void fuji_decode_sample_even_internal(const ushort16* line_buf_cur,
+                                        int* interp_val, int* grad,
+                                        int* gradient) const;
   int fuji_decode_sample_even(fuji_compressed_block* info, BitPumpMSB* pump,
                               ushort16* line_buf, int* pos,
                               int_pair* grads) const;
+  void fuji_decode_sample_odd_internal(const ushort16* line_buf_cur,
+                                       int* interp_val, int* grad,
+                                       int* gradient) const;
   int fuji_decode_sample_odd(fuji_compressed_block* info, BitPumpMSB* pump,
                              ushort16* line_buf, int* pos,
                              int_pair* grads) const;

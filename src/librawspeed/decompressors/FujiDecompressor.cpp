@@ -246,6 +246,33 @@ FujiDecompressor::bitDiff(int value1, int value2) const {
   return decBits;
 }
 
+void FujiDecompressor::fuji_decode_sample_even_internal(
+    const ushort16* line_buf_cur, int* interp_val, int* grad,
+    int* gradient) const {
+  int Rb = line_buf_cur[-2 - common_info.line_width];
+  int Rc = line_buf_cur[-3 - common_info.line_width];
+  int Rd = line_buf_cur[-1 - common_info.line_width];
+  int Rf = line_buf_cur[-4 - 2 * common_info.line_width];
+
+  int diffRcRb;
+  int diffRfRb;
+  int diffRdRb;
+
+  *grad = fuji_quant_gradient(Rb - Rf, Rc - Rb);
+  *gradient = std::abs(*grad);
+  diffRcRb = std::abs(Rc - Rb);
+  diffRfRb = std::abs(Rf - Rb);
+  diffRdRb = std::abs(Rd - Rb);
+
+  if (diffRcRb > diffRfRb && diffRcRb > diffRdRb) {
+    *interp_val = Rf + Rd + 2 * Rb;
+  } else if (diffRdRb > diffRcRb && diffRdRb > diffRfRb) {
+    *interp_val = Rf + Rc + 2 * Rb;
+  } else {
+    *interp_val = Rd + Rc + 2 * Rb;
+  }
+}
+
 int FujiDecompressor::fuji_decode_sample_even(fuji_compressed_block* info,
                                               BitPumpMSB* pump,
                                               ushort16* line_buf, int* pos,
@@ -256,30 +283,11 @@ int FujiDecompressor::fuji_decode_sample_even(fuji_compressed_block* info,
   int sample = 0;
   int code = 0;
   ushort16* line_buf_cur = line_buf + *pos;
-  int Rb = line_buf_cur[-2 - common_info.line_width];
-  int Rc = line_buf_cur[-3 - common_info.line_width];
-  int Rd = line_buf_cur[-1 - common_info.line_width];
-  int Rf = line_buf_cur[-4 - 2 * common_info.line_width];
 
   int grad;
   int gradient;
-  int diffRcRb;
-  int diffRfRb;
-  int diffRdRb;
 
-  grad = fuji_quant_gradient(Rb - Rf, Rc - Rb);
-  gradient = std::abs(grad);
-  diffRcRb = std::abs(Rc - Rb);
-  diffRfRb = std::abs(Rf - Rb);
-  diffRdRb = std::abs(Rd - Rb);
-
-  if (diffRcRb > diffRfRb && diffRcRb > diffRdRb) {
-    interp_val = Rf + Rd + 2 * Rb;
-  } else if (diffRdRb > diffRcRb && diffRdRb > diffRfRb) {
-    interp_val = Rf + Rc + 2 * Rb;
-  } else {
-    interp_val = Rd + Rc + 2 * Rb;
-  }
+  fuji_decode_sample_even_internal(line_buf_cur, &interp_val, &grad, &gradient);
 
   fuji_zerobits(pump, &sample);
 
@@ -334,6 +342,25 @@ int FujiDecompressor::fuji_decode_sample_even(fuji_compressed_block* info,
   return errcnt;
 }
 
+void FujiDecompressor::fuji_decode_sample_odd_internal(
+    const ushort16* line_buf_cur, int* interp_val, int* grad,
+    int* gradient) const {
+  int Ra = line_buf_cur[-1];
+  int Rb = line_buf_cur[-2 - common_info.line_width];
+  int Rc = line_buf_cur[-3 - common_info.line_width];
+  int Rd = line_buf_cur[-1 - common_info.line_width];
+  int Rg = line_buf_cur[1];
+
+  *grad = fuji_quant_gradient(Rb - Rc, Rc - Ra);
+  *gradient = std::abs(*grad);
+
+  if ((Rb > Rc && Rb > Rd) || (Rb < Rc && Rb < Rd)) {
+    *interp_val = (Rg + Ra + 2 * Rb) >> 2;
+  } else {
+    *interp_val = (Ra + Rg) >> 1;
+  }
+}
+
 int FujiDecompressor::fuji_decode_sample_odd(fuji_compressed_block* info,
                                              BitPumpMSB* pump,
                                              ushort16* line_buf, int* pos,
@@ -344,23 +371,11 @@ int FujiDecompressor::fuji_decode_sample_odd(fuji_compressed_block* info,
   int sample = 0;
   int code = 0;
   ushort16* line_buf_cur = line_buf + *pos;
-  int Ra = line_buf_cur[-1];
-  int Rb = line_buf_cur[-2 - common_info.line_width];
-  int Rc = line_buf_cur[-3 - common_info.line_width];
-  int Rd = line_buf_cur[-1 - common_info.line_width];
-  int Rg = line_buf_cur[1];
 
   int grad;
   int gradient;
 
-  grad = fuji_quant_gradient(Rb - Rc, Rc - Ra);
-  gradient = std::abs(grad);
-
-  if ((Rb > Rc && Rb > Rd) || (Rb < Rc && Rb < Rd)) {
-    interp_val = (Rg + Ra + 2 * Rb) >> 2;
-  } else {
-    interp_val = (Ra + Rg) >> 1;
-  }
+  fuji_decode_sample_odd_internal(line_buf_cur, &interp_val, &grad, &gradient);
 
   fuji_zerobits(pump, &sample);
 
