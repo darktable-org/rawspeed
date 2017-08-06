@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014-2015 Pedro Côrte-Real
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -39,6 +40,7 @@
 #include <istream>                                  // for istringstream
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for string, allocator
+#include <vector>                                   // for vector
 
 using std::string;
 
@@ -51,42 +53,49 @@ bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
-  // FIXME: magic
+  const DataBuffer db(*file, Endianness::little);
 
-  return make == "Phase One A/S";
+  return make == "Phase One A/S" && db.get<uint32>(8) == 0x49494949;
 }
 
 RawImage IiqDecoder::decodeRawInternal() {
-  uint32 base = 8;
-  // We get a pointer up to the end of the file as we check offset bounds later
-  const uchar8* insideTiff = mFile->getData(base, mFile->getSize() - base);
-  if (getU32LE(insideTiff) != 0x49494949)
-    ThrowRDE("Not IIQ. Why are you calling me?");
+  const Buffer buf(mFile->getSubView(8));
+  const DataBuffer db(buf, Endianness::little);
+  ByteStream bs(db);
 
-  uint32 offset = getU32LE(insideTiff + 8);
-  if (offset + base + 4 > mFile->getSize())
-    ThrowRDE("offset out of bounds");
+  bs.skipBytes(4); // Phase One magic
+  bs.skipBytes(4); // padding?
 
-  uint32 entries = getU32LE(insideTiff + offset);
-  uint32 pos = 8; // Skip another 4 bytes
+  const auto origPos = bs.getPosition();
+
+  const uint32 entries_offset = bs.getU32();
+
+  bs.setPosition(entries_offset);
+
+  const uint32 entries_count = bs.getU32();
+  bs.skipBytes(4); // ???
+
+  // this is how much is to be read for all the entries
+  ByteStream es(bs.getStream(16 * entries_count));
+
+  bs.setPosition(origPos);
 
   uint32 width = 0;
   uint32 height = 0;
-  uint32 strip_offset = 0;
-  uint32 data_offset = 0;
-  uint32 wb_offset = 0;
-  for (; entries > 0; entries--) {
-    if (offset + base + pos + 16 > mFile->getSize())
-      ThrowRDE("offset out of bounds");
 
-    uint32 tag = getU32LE(insideTiff + offset + pos + 0);
-    // uint32 type = getU32LE(insideTiff + offset + pos + 4);
-    // uint32 len  = getU32LE(insideTiff + offset + pos + 8);
-    uint32 data = getU32LE(insideTiff + offset + pos + 12);
-    pos += 16;
+  Buffer raw_data;
+  ByteStream block_offsets;
+  ByteStream wb;
+
+  for (uint32 entry = 0; entry < entries_count; entry++) {
+    const uint32 tag = es.getU32();
+    es.skipBytes(4); // type
+    const uint32 len = es.getU32();
+    const uint32 data = es.getU32();
+
     switch (tag) {
     case 0x107:
-      wb_offset = data + base;
+      wb = bs.getSubStream(data, len);
       break;
     case 0x108:
       width = data;
@@ -95,51 +104,57 @@ RawImage IiqDecoder::decodeRawInternal() {
       height = data;
       break;
     case 0x10f:
-      data_offset = data + base;
+      raw_data = bs.getSubView(data, len);
       break;
     case 0x21c:
-      strip_offset = data + base;
+      // they are not guaranteed to be sequential!
+      block_offsets = bs.getSubStream(data, len);
       break;
     case 0x21d:
       black_level = data >> 2;
       break;
     default:
+      // FIXME: is there a "block_sizes" entry?
       break;
     }
   }
+
   if (width <= 0 || height <= 0)
     ThrowRDE("couldn't find width and height");
-  if (strip_offset + height * 4 > mFile->getSize())
-    ThrowRDE("strip offsets out of bounds");
-  if (data_offset > mFile->getSize())
-    ThrowRDE("data offset out of bounds");
+
+  block_offsets = block_offsets.getStream(4 * height);
+
+  std::vector<IiqStrip> strips;
+  strips.reserve(height);
+
+  for (uint32 row = 0; row < height; row++) {
+    // FIXME: is there a "block_sizes" entry?
+    const DataBuffer slice(raw_data.getSubView(block_offsets.getU32()));
+    strips.emplace_back(row, ByteStream(slice));
+  }
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  DecodePhaseOneC(data_offset, strip_offset, width, height);
+  DecodePhaseOneC(strips, width, height);
 
-  const uchar8* data = mFile->getData(wb_offset, 12);
-  for (int i = 0; i < 3; i++) {
-    mRaw->metadata.wbCoeffs[i] = getLE<float>(data + i * 4);
-  }
+  for (int i = 0; i < 3; i++)
+    mRaw->metadata.wbCoeffs[i] = wb.getFloat();
 
   return mRaw;
 }
 
-void IiqDecoder::DecodePhaseOneC(uint32 data_offset, uint32 strip_offset,
+void IiqDecoder::DecodePhaseOneC(const std::vector<IiqStrip>& strips,
                                  uint32 width, uint32 height) {
   const int length[] = {8, 7, 6, 9, 11, 10, 5, 12, 14, 13};
 
-  for (uint32 row = 0; row < height; row++) {
-    uint32 off =
-        data_offset + getU32LE(mFile->getData(strip_offset + row * 4, 4));
+  for (const auto& strip : strips) {
+    BitPumpMSB32 pump(strip.bs);
 
-    BitPumpMSB32 pump(mFile, off);
     int32 pred[2];
     uint32 len[2];
     pred[0] = pred[1] = 0;
-    auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, row));
+    auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, strip.n));
     for (uint32 col = 0; col < width; col++) {
       if (col >= (width & -8))
         len[0] = len[1] = 14;

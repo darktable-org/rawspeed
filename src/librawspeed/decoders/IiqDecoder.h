@@ -24,8 +24,10 @@
 #include "common/Common.h"                // for uint32
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
+#include "io/ByteStream.h"                // for ByteStream
 #include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
 #include <string>                         // for string
+#include <vector>                         // for vector
 
 namespace rawspeed {
 
@@ -44,9 +46,16 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 protected:
+  struct IiqStrip {
+    const int n;
+    const ByteStream bs;
+
+    IiqStrip(int block, ByteStream bs_) : n(block), bs(std::move(bs_)) {}
+  };
+
   int getDecoderVersion() const override { return 0; }
   uint32 black_level = 0;
-  void DecodePhaseOneC(uint32 data_offset, uint32 strip_offset, uint32 width,
+  void DecodePhaseOneC(const std::vector<IiqStrip>& strips, uint32 width,
                        uint32 height);
 };
 
