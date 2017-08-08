@@ -116,10 +116,10 @@ public:
 
   // get pointer to memory at 'offset', make sure at least 'count' bytes are accessable
   const uchar8* getData(size_type offset, size_type count) const {
-    assert(data);
     if (!isValid(offset, count))
       ThrowIOE("Buffer overflow: image file may be truncated");
 
+    assert(data);
     return data + offset;
   }
 
