@@ -136,27 +136,30 @@ void PentaxDecompressor::decompress(const RawImage& mRaw, ByteStream&& data,
   HuffmanTable ht = SetupHuffmanTable(root);
 
   BitPumpMSB bs(data);
-  uchar8 *draw = mRaw->getData();
-  ushort16 *dest;
-  uint32 w = mRaw->dim.x;
-  uint32 h = mRaw->dim.y;
+  uchar8* draw = mRaw->getData();
+
+  assert(mRaw->dim.y > 0);
+  assert(mRaw->dim.x > 0);
+  assert(mRaw->dim.x % 2 == 0);
+
   int pUp1[2] = {0, 0};
   int pUp2[2] = {0, 0};
-  int pLeft1 = 0;
-  int pLeft2 = 0;
 
-  for (uint32 y = 0;y < h;y++) {
-    dest = reinterpret_cast<ushort16*>(
-        &draw[y * mRaw->pitch]); // Adjust destination
-    pUp1[y&1] += ht.decodeNext(bs);
-    pUp2[y&1] += ht.decodeNext(bs);
-    dest[0] = pLeft1 = pUp1[y&1];
-    dest[1] = pLeft2 = pUp2[y&1];
-    for (uint32 x = 2; x < w ; x += 2) {
+  for (int y = 0; y < mRaw->dim.y && mRaw->dim.x >= 2; y++) {
+    auto* dest = reinterpret_cast<ushort16*>(&draw[y * mRaw->pitch]);
+
+    pUp1[y & 1] += ht.decodeNext(bs);
+    pUp2[y & 1] += ht.decodeNext(bs);
+
+    int pLeft1 = dest[0] = pUp1[y & 1];
+    int pLeft2 = dest[1] = pUp2[y & 1];
+
+    for (int x = 2; x < mRaw->dim.x; x += 2) {
       pLeft1 += ht.decodeNext(bs);
       pLeft2 += ht.decodeNext(bs);
-      dest[x] =  pLeft1;
-      dest[x+1] =  pLeft2;
+
+      dest[x] = pLeft1;
+      dest[x + 1] = pLeft2;
 
       if (pLeft1 < 0 || pLeft1 > 65535)
         ThrowRDE("decoded value out of bounds at %d:%d", x, y);
