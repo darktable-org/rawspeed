@@ -28,6 +28,7 @@
 #include "io/IOException.h" // for IOException (ptr only), ThrowIOE
 #include <cassert>          // for assert
 #include <cstring>          // for memcmp, memcpy
+#include <limits>           // for numeric_limits
 
 namespace rawspeed {
 
@@ -93,6 +94,11 @@ public:
     ByteStream ret = getSubStream(pos, size_);
     pos += size_;
     return ret;
+  }
+  inline ByteStream getStream(size_type nmemb, size_type size_) {
+    if (size_ && nmemb > std::numeric_limits<size_type>::max() / size_)
+      ThrowIOE("Integer overflow when calculating stream lenght");
+    return getStream(nmemb * size_);
   }
 
   inline uchar8 peekByte(size_type i = 0) const {

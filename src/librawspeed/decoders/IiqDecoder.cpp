@@ -122,7 +122,7 @@ RawImage IiqDecoder::decodeRawInternal() {
   if (width <= 0 || height <= 0)
     ThrowRDE("couldn't find width and height");
 
-  block_offsets = block_offsets.getStream(4 * height);
+  block_offsets = block_offsets.getStream(height, sizeof(uint32));
 
   std::vector<IiqStrip> strips;
   strips.reserve(height);
