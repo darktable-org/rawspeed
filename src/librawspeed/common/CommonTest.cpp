@@ -37,6 +37,7 @@ using rawspeed::isPowerOfTwo;
 using rawspeed::ushort16;
 using rawspeed::uchar8;
 using rawspeed::roundUp;
+using rawspeed::roundUpDivision;
 using rawspeed::isAligned;
 using rawspeed::isIn;
 using rawspeed::clampBits;
@@ -98,6 +99,34 @@ static const RoundUpType RoundUpValues[] = {
 INSTANTIATE_TEST_CASE_P(RoundUpTest, RoundUpTest,
                         ::testing::ValuesIn(RoundUpValues));
 TEST_P(RoundUpTest, RoundUpTest) { ASSERT_EQ(roundUp(in, multiple), expected); }
+
+using RoundUpDivisionType = std::tr1::tuple<size_t, size_t, size_t>;
+class RoundUpDivisionTest
+    : public ::testing::TestWithParam<RoundUpDivisionType> {
+protected:
+  RoundUpDivisionTest() = default;
+  virtual void SetUp() {
+    in = std::tr1::get<0>(GetParam());
+    divider = std::tr1::get<1>(GetParam());
+    expected = std::tr1::get<2>(GetParam());
+  }
+
+  size_t in; // input
+  size_t divider;
+  size_t expected; // expected output
+};
+static const RoundUpDivisionType RoundUpDivisionValues[] = {
+    make_tuple(0, 10, 0), make_tuple(10, 10, 1), make_tuple(10, 1, 10),
+    make_tuple(10, 2, 5), make_tuple(10, 3, 4),  make_tuple(10, 4, 3),
+    make_tuple(10, 5, 2), make_tuple(10, 6, 2),  make_tuple(10, 7, 2),
+    make_tuple(10, 8, 2), make_tuple(10, 9, 2),
+
+};
+INSTANTIATE_TEST_CASE_P(RoundUpDivisionTest, RoundUpDivisionTest,
+                        ::testing::ValuesIn(RoundUpDivisionValues));
+TEST_P(RoundUpDivisionTest, RoundUpDivisionTest) {
+  ASSERT_EQ(roundUpDivision(in, divider), expected);
+}
 
 using IsAlignedType = std::tr1::tuple<int, int>;
 class IsAlignedTest : public ::testing::TestWithParam<IsAlignedType> {

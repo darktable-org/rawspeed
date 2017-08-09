@@ -79,6 +79,11 @@ roundUp(size_t value, size_t multiple) {
              : value + multiple - (value % multiple);
 }
 
+constexpr inline size_t __attribute__((const))
+roundUpDivision(size_t value, size_t div) {
+  return (value + (div - 1)) / div;
+}
+
 template <class T>
 inline constexpr __attribute__((const)) bool
 isAligned(T value, size_t multiple,
