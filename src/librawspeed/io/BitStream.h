@@ -96,6 +96,8 @@ class BitStream final : public ByteStream {
   size_type fillCache(const uchar8* input);
 
 public:
+  BitStream() = default;
+
   explicit BitStream(const ByteStream& s)
       : ByteStream(s.getSubStream(s.getPosition(), s.getRemainSize())) {}
 
