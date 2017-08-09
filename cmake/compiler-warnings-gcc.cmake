@@ -43,8 +43,12 @@ endif()
 
 set (GCC_DISABLED_WARNING_FLAGS
   "unused-parameter"
-  "error=suggest-final-types"
-  "error=suggest-final-methods"
+)
+
+set (GCC_NOERROR_WARNING_FLAGS
+  "suggest-final-methods"
+  "suggest-final-types"
+  "suggest-override"
 )
 
 foreach(warning ${GCC_WARNING_FLAGS})
@@ -53,4 +57,8 @@ endforeach()
 
 foreach(warning ${GCC_DISABLED_WARNING_FLAGS})
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-${warning})
+endforeach()
+
+foreach(warning ${GCC_NOERROR_WARNING_FLAGS})
+  CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-error=${warning})
 endforeach()
