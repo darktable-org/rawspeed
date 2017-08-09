@@ -2,6 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,6 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "decompressors/PentaxDecompressor.h"
 #include "common/Common.h"                // for uint32, uchar8, ushort16
 #include "common/Point.h"                 // for iPoint2D
@@ -53,7 +55,7 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable_Legacy() {
   return ht;
 }
 
-HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(TiffIFD* root) {
+HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(const TiffIFD* root) {
   HuffmanTable ht;
 
   /* Attempt to read huffman table, if found in makernote */
@@ -118,7 +120,7 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(TiffIFD* root) {
   return ht;
 }
 
-HuffmanTable PentaxDecompressor::SetupHuffmanTable(TiffIFD* root) {
+HuffmanTable PentaxDecompressor::SetupHuffmanTable(const TiffIFD* root) {
   HuffmanTable ht;
 
   if (root->hasEntryRecursive(static_cast<TiffTag>(0x220)))
@@ -131,42 +133,103 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable(TiffIFD* root) {
   return ht;
 }
 
-void PentaxDecompressor::decompress(const RawImage& mRaw, ByteStream&& data,
-                                    TiffIFD* root) {
-  HuffmanTable ht = SetupHuffmanTable(root);
+template <PentaxDecompressor::ThreadingModel TM>
+void PentaxDecompressor::decompressInternal(int row_start, int row_end) const {
+#ifndef HAVE_PTHREAD
+  static_assert(TM == ThreadingModel::NoThreading, "if there are no pthreads, "
+                                                   "then serial optimized "
+                                                   "codepath should be called");
+#endif
 
-  BitPumpMSB bs(data);
+  assert(!((disableThreading || getThreadCount() <= 1) ^
+           (TM == ThreadingModel::NoThreading)) &&
+         "either there is just one thread, and serial optimized codepath is "
+         "called; or there is more than one thread, and paralell optimized "
+         "codepaths are called");
+
+  BitPumpMSB bs;
+
+  if (TM != ThreadingModel::SlaveThread) {
+    assert(row_start == 0);
+    assert(row_end > row_start);
+    assert(mRaw->dim.y == row_end);
+
+    bs = BitPumpMSB(input);
+  }
+
   uchar8* draw = mRaw->getData();
 
   assert(mRaw->dim.y > 0);
   assert(mRaw->dim.x > 0);
   assert(mRaw->dim.x % 2 == 0);
+  assert(row_end <= mRaw->dim.y);
 
-  int pUp1[2] = {0, 0};
-  int pUp2[2] = {0, 0};
+  int pUp[2][2] = {{0, 0}, {0, 0}};
 
-  for (int y = 0; y < mRaw->dim.y && mRaw->dim.x >= 2; y++) {
+  for (int y = row_start; y < row_end && mRaw->dim.x >= 2; y++) {
     auto* dest = reinterpret_cast<ushort16*>(&draw[y * mRaw->pitch]);
 
-    pUp1[y & 1] += ht.decodeNext(bs);
-    pUp2[y & 1] += ht.decodeNext(bs);
+    int pred[2];
 
-    int pLeft1 = dest[0] = pUp1[y & 1];
-    int pLeft2 = dest[1] = pUp2[y & 1];
+    // first two pixels of the row
+    if (TM != ThreadingModel::SlaveThread) {
+      // decode differences, do prediction, store predicted values
+      dest[0] = pred[0] = pUp[0][y & 1] += ht.decodeNext(bs);
+      dest[1] = pred[1] = pUp[1][y & 1] += ht.decodeNext(bs);
+    } else {
+      // already predicted, just read initial predictor values.
+      pred[0] = dest[0];
+      pred[1] = dest[1];
+    }
 
     for (int x = 2; x < mRaw->dim.x; x += 2) {
-      pLeft1 += ht.decodeNext(bs);
-      pLeft2 += ht.decodeNext(bs);
+      int diff[2];
 
-      dest[x] = pLeft1;
-      dest[x + 1] = pLeft2;
+      if (TM != ThreadingModel::SlaveThread) {
+        // if this is not the prediction slave threads, decode next difference
+        diff[0] = ht.decodeNext(bs);
+        diff[1] = ht.decodeNext(bs);
+      } else {
+        // else, read next difference from the the output
+        diff[0] = dest[x];
+        diff[1] = dest[x + 1];
+      }
 
-      if (pLeft1 < 0 || pLeft1 > 65535)
-        ThrowRDE("decoded value out of bounds at %d:%d", x, y);
-      if (pLeft2 < 0 || pLeft2 > 65535)
-        ThrowRDE("decoded value out of bounds at %d:%d", x, y);
+      if (TM == ThreadingModel::MainThread) {
+        // if this is the main thread, just store the differences
+        dest[x] = diff[0];
+        dest[x + 1] = diff[1];
+      } else {
+        // else, do prediction, store predicted values
+        dest[x] = pred[0] += diff[0];
+        dest[x + 1] = pred[1] += diff[1];
+
+        if (dest[x] < 0 || dest[x] > 65535)
+          ThrowRDE("decoded value out of bounds at (%d, %d)", x, y);
+        if (dest[x + 1] < 0 || dest[x + 1] > 65535)
+          ThrowRDE("decoded value out of bounds at (%d, %d)", x, y);
+      }
     }
   }
+}
+
+#ifdef HAVE_PTHREAD
+void PentaxDecompressor::decompressThreaded(
+    const RawDecompressorThread* t) const {
+  decompressInternal<ThreadingModel::SlaveThread>(t->start_y, t->end_y);
+}
+#endif
+
+void PentaxDecompressor::decompress() const {
+#ifdef HAVE_PTHREAD
+  if (!disableThreading && getThreadCount() > 1) {
+    decompressInternal<ThreadingModel::MainThread>(0, mRaw->dim.y);
+    startThreading();
+    return;
+  }
+#endif
+
+  decompressInternal<ThreadingModel::NoThreading>(0, mRaw->dim.y);
 }
 
 } // namespace rawspeed

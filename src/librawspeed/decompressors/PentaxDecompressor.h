@@ -21,29 +21,56 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "decompressors/HuffmanTable.h"         // for HuffmanTable
+#include "rawspeedconfig.h"                                 // for HAVE_PTHREAD
+#include "common/Common.h"                                  // for uint32
+#include "common/RawImage.h"                                // for RawImage
+#include "decompressors/AbstractParallelizedDecompressor.h" // for AbstractPar..
+#include "decompressors/HuffmanTable.h"                     // for HuffmanTable
+#include "io/ByteStream.h"                                  // for ByteStream
+#include <algorithm>                                        // for move
 
 namespace rawspeed {
 
-class ByteStream;
-
-class RawImage;
-
 class TiffIFD;
 
-class PentaxDecompressor final : public AbstractDecompressor {
-public:
-  static void decompress(const RawImage& mRaw, ByteStream&& data,
-                         TiffIFD* root);
+class PentaxDecompressor final : public AbstractParallelizedDecompressor {
+  const ByteStream input;
+  const TiffIFD* root;
+  const HuffmanTable ht;
 
-private:
+  enum class ThreadingModel {
+    // no threading whatsoever, need to do everything right here and now.
+    NoThreading = 0,
+
+    // threaded. only do the preparatory work that has to be done sequentially
+    MainThread = 1,
+
+    // threaded. runs strictly after MainThread. finishes decoding parallelized
+    SlaveThread = 2,
+  };
+
+  template <ThreadingModel t>
+  void decompressInternal(int row_start, int row_end) const;
+
   static HuffmanTable SetupHuffmanTable_Legacy();
-  static HuffmanTable SetupHuffmanTable_Modern(TiffIFD* root);
-  static HuffmanTable SetupHuffmanTable(TiffIFD* root);
+  static HuffmanTable SetupHuffmanTable_Modern(const TiffIFD* root);
+  static HuffmanTable SetupHuffmanTable(const TiffIFD* root);
 
   static const uchar8 pentax_tree[][2][16];
+
+#ifdef HAVE_PTHREAD
+  void decompressThreaded(const RawDecompressorThread* t) const final;
+#endif
+
+  // according to benchmarks, does not appear to be profitable.
+  static constexpr const bool disableThreading = true;
+
+public:
+  PentaxDecompressor(ByteStream input_, const RawImage& img, TiffIFD* root_)
+      : AbstractParallelizedDecompressor(img), input(std::move(input_)),
+        root(root_), ht(SetupHuffmanTable(root)) {}
+
+  void decompress() const;
 };
 
 } // namespace rawspeed
