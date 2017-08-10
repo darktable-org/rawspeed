@@ -2,6 +2,12 @@ include(CheckCXXCompilerFlag)
 include(CpuMarch)
 include(CheckCXXCompilerFlagAndEnableIt)
 
+# yes, need to keep both the CMAKE_CXX_FLAGS and CMAKE_CXX_STANDARD.
+# with just the CMAKE_CXX_STANDARD, try_compile() breaks:
+#   https://gitlab.kitware.com/cmake/cmake/issues/16456
+# with just the CMAKE_CXX_FLAGS, 'bundled' pugixml breaks tests
+#   https://github.com/darktable-org/rawspeed/issues/112#issuecomment-321517003
+
 message(STATUS "Checking for -std=c++14 support")
 CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
 if(NOT COMPILER_SUPPORTS_CXX14)
@@ -19,6 +25,10 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
   message(STATUS "Checking for -std=c++14 support - works")
 endif()
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # always debug info
 add_definitions(-g3)
