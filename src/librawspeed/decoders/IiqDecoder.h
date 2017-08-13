@@ -35,7 +35,8 @@ class CameraMetaData;
 class Buffer;
 
 class IiqDecoder final : public AbstractTiffDecoder {
-  std::vector<uint32> computeSizes(const std::vector<uint32>& offsets,
+  std::vector<uint32> computeSizes(const Buffer& raw_data,
+                                   const std::vector<uint32>& offsets,
                                    uint32 height) const;
 
 public:
