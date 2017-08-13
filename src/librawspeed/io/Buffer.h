@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
 #include "common/Common.h"  // for uchar8, uint32, uint64
 #include "common/Memory.h"  // for alignedFree
 #include "io/Endianness.h"  // for getByteSwapped
@@ -71,7 +72,9 @@ public:
   Buffer() = default;
 
   // Allocates the memory
-  explicit Buffer(size_type size_) : Buffer(Create(size_), size_) {}
+  explicit Buffer(size_type size_) : Buffer(Create(size_), size_) {
+    assert(!ASAN_REGION_IS_POISONED(data, size));
+  }
 
   // creates buffer from owning unique_ptr
   Buffer(std::unique_ptr<uchar8, decltype(&alignedFree)> data_,
@@ -83,15 +86,20 @@ public:
     static_assert(BUFFER_PADDING == 0, "please do make sure that you do NOT "
                                        "call this function from YOUR code, and "
                                        "then comment-out this assert.");
+    assert(!ASAN_REGION_IS_POISONED(data, size));
   }
 
   // creates a (non-owning) copy / view of rhs
-  Buffer(const Buffer& rhs)
-    : data(rhs.data), size(rhs.size) {}
+  Buffer(const Buffer& rhs) : data(rhs.data), size(rhs.size) {
+    assert(!ASAN_REGION_IS_POISONED(data, size));
+  }
 
   // Move data and ownership from rhs to this
   Buffer(Buffer&& rhs) noexcept
-    : data(rhs.data), size(rhs.size), isOwner(rhs.isOwner) { rhs.isOwner = false; }
+      : data(rhs.data), size(rhs.size), isOwner(rhs.isOwner) {
+    assert(!ASAN_REGION_IS_POISONED(data, size));
+    rhs.isOwner = false;
+  }
 
   // Frees memory if owned
   ~Buffer();
@@ -120,6 +128,8 @@ public:
       ThrowIOE("Buffer overflow: image file may be truncated");
 
     assert(data);
+    assert(!ASAN_REGION_IS_POISONED(data + offset, count));
+
     return data + offset;
   }
 
@@ -131,10 +141,12 @@ public:
   // std begin/end iterators to allow for range loop
   const uchar8* begin() const {
     assert(data);
+    assert(!ASAN_REGION_IS_POISONED(data, 0));
     return data;
   }
   const uchar8* end() const {
     assert(data);
+    assert(!ASAN_REGION_IS_POISONED(data, size));
     return data + size;
   }
 
@@ -147,6 +159,7 @@ public:
   }
 
   inline size_type getSize() const {
+    assert(!ASAN_REGION_IS_POISONED(data, size));
     return size;
   }
 

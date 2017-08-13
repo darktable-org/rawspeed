@@ -69,6 +69,7 @@ public:
   inline void check(size_type bytes) const {
     if (static_cast<uint64>(pos) + bytes > size)
       ThrowIOE("Out of bounds access in ByteStream");
+    assert(!ASAN_REGION_IS_POISONED(data + pos, bytes));
   }
 
   inline size_type getPosition() const { return pos; }
