@@ -35,6 +35,9 @@ class CameraMetaData;
 class Buffer;
 
 class IiqDecoder final : public AbstractTiffDecoder {
+  std::vector<uint32> computeSizes(const std::vector<uint32>& offsets,
+                                   uint32 height) const;
+
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                    const Buffer* file);

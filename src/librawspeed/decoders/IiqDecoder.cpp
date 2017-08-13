@@ -38,6 +38,7 @@
 #include <cassert>                                  // for assert
 #include <cstring>                                  // for memchr
 #include <istream>                                  // for istringstream
+#include <iterator>                                 // for advance
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for string, allocator
 #include <vector>                                   // for vector
@@ -56,6 +57,44 @@ bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   const DataBuffer db(*file, Endianness::little);
 
   return make == "Phase One A/S" && db.get<uint32>(8) == 0x49494949;
+}
+
+std::vector<uint32> IiqDecoder::computeSizes(const std::vector<uint32>& offsets,
+                                             uint32 height) const {
+  assert(height > 0);
+  assert(offsets.size() == (1 + height));
+
+  std::vector<uint32> sizes;
+  sizes.reserve(offsets.size());
+
+  for (auto offset_iterator = std::begin(offsets);
+       offset_iterator < std::prev(std::end(offsets));
+       std::advance(offset_iterator, 1)) {
+    // so... here's the thing. offsets are not guaranteed to be in
+    // monotonically increasing order. so for each element of 'offsets',
+    // we need to find a element (which is located after the current element),
+    // which specifies larger offset.
+    // and only then by subtracting those two offsets we get the slice size.
+
+    const auto found_iterator =
+        std::find_if(std::next(offset_iterator), std::end(offsets),
+                     [&offset_iterator](uint32 otherOffset) {
+                       return otherOffset > *offset_iterator;
+                     });
+
+    if (found_iterator == std::end(offsets))
+      ThrowRDE("Invalid slice offsets. Corrupt raw.");
+
+    assert(found_iterator > offset_iterator);
+    const auto size = *found_iterator - *offset_iterator;
+    assert(size > 0);
+
+    sizes.emplace_back(size);
+  }
+
+  assert(sizes.size() == height);
+
+  return sizes;
 }
 
 RawImage IiqDecoder::decodeRawInternal() {
@@ -124,12 +163,24 @@ RawImage IiqDecoder::decodeRawInternal() {
 
   block_offsets = block_offsets.getStream(height, sizeof(uint32));
 
+  std::vector<uint32> offsets;
+  offsets.reserve(1 + height);
+
+  for (uint32 row = 0; row < height; row++)
+    offsets.emplace_back(block_offsets.getU32());
+
+  // to simplify slice size calculation, we insert a dummy offset,
+  // which will be used much like end()
+  offsets.emplace_back(raw_data.getSize());
+
+  std::vector<uint32> sizes(computeSizes(offsets, height));
+
   std::vector<IiqStrip> strips;
   strips.reserve(height);
 
   for (uint32 row = 0; row < height; row++) {
     // FIXME: is there a "block_sizes" entry?
-    const DataBuffer slice(raw_data.getSubView(block_offsets.getU32()));
+    const DataBuffer slice(raw_data.getSubView(offsets[row], sizes[row]));
     strips.emplace_back(row, ByteStream(slice));
   }
 
