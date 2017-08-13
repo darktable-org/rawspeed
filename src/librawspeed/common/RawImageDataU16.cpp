@@ -31,7 +31,7 @@
 #include <memory>                         // for operator==, unique_ptr
 #include <vector>                         // for vector
 
-#if defined(__SSE2__)
+#ifdef WITH_SSE2
 #include "common/Cpuid.h" // for Cpuid
 #include <emmintrin.h> // for __m128i, _mm_load_si128
 #include <xmmintrin.h> // for _MM_HINT_T0, _mm_prefetch
@@ -168,7 +168,7 @@ void RawImageDataU16::scaleBlackWhite() {
 }
 
 void RawImageDataU16::scaleValues(int start_y, int end_y) {
-#if !((defined(_MSC_VER) && _MSC_VER > 1399) || defined(__SSE2__))
+#ifndef WITH_SSE2
 
   return scaleValues_plain(start_y, end_y);
 
@@ -187,7 +187,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 #endif
 }
 
-#if (defined(_MSC_VER) && _MSC_VER > 1399) || defined(__SSE2__)
+#ifdef WITH_SSE2
 void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   int depth_values = whitePoint - blackLevelSeparate[0];
   float app_scale = 65535.0F / depth_values;

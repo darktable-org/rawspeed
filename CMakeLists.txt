@@ -39,6 +39,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(INTERPROCEDURAL_OPTIMIZATION ON)
 
 option(BINARY_PACKAGE_BUILD "Sets march optimization to generic" OFF)
+option(WITH_SSE2 "If SSE2 support is avaliable, do build SSE2 codepaths" ON)
 option(WITH_PTHREADS "Enable threading support through pthread. Highly recommended" ON)
 option(WITH_OPENMP "Enable OpenMP support. Only used for tools, not the library itself." ON)
 option(WITH_PUGIXML "Enable XML support for cameras.xml reading" ON)

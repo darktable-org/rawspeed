@@ -18,6 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "common/Cpuid.h" // for Cpuid
 #include <cstdlib>        // for exit
 #include <gtest/gtest.h>  // for AssertionResult, DeathTest, Test, AssertHe...
@@ -27,6 +28,7 @@ using rawspeed::Cpuid;
 
 namespace rawspeed_test {
 
+// do not care about WITH_SSE2 here.
 TEST(CpuidDeathTest, SSE2Test) {
 #if defined(__SSE2__)
   ASSERT_EXIT(
