@@ -71,8 +71,7 @@ RawImage PefDecoder::decodeRawInternal() {
         "Byte count number does not match strip size: count:%u, strips:%u ",
         counts->count, offsets->count);
   }
-  if (!mFile->isValid(offsets->getU32(), counts->getU32()))
-    ThrowRDE("Truncated file.");
+  ByteStream bs(mFile, offsets->getU32(), counts->getU32());
 
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
@@ -81,11 +80,10 @@ RawImage PefDecoder::decodeRawInternal() {
     ThrowRDE("Incorrect image dimensions (%u, %u).", width, height);
 
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
   try {
-    PentaxDecompressor::decompress(
-        mRaw, ByteStream(mFile, offsets->getU32(), counts->getU32()),
-        getRootIFD());
+    PentaxDecompressor p(mRaw, getRootIFD());
+    mRaw->createData();
+    p.decompress(bs);
   } catch (IOException &e) {
     mRaw->setError(e.what());
     // Let's ignore it, it may have delivered somewhat useful data.

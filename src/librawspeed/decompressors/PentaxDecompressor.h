@@ -21,7 +21,8 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32
+#include "common/Common.h"                      // for uint32
+#include "common/RawImage.h"                    // for RawImage, RawImageData
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable
 
@@ -34,9 +35,14 @@ class RawImage;
 class TiffIFD;
 
 class PentaxDecompressor final : public AbstractDecompressor {
+  RawImage mRaw;
+  const HuffmanTable ht;
+
 public:
-  static void decompress(const RawImage& mRaw, ByteStream&& data,
-                         TiffIFD* root);
+  PentaxDecompressor(const RawImage& img, TiffIFD* root)
+      : mRaw(img), ht(SetupHuffmanTable(root)) {}
+
+  void decompress(const ByteStream& data) const;
 
 private:
   static HuffmanTable SetupHuffmanTable_Legacy();

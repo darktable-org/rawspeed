@@ -131,10 +131,7 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable(TiffIFD* root) {
   return ht;
 }
 
-void PentaxDecompressor::decompress(const RawImage& mRaw, ByteStream&& data,
-                                    TiffIFD* root) {
-  HuffmanTable ht = SetupHuffmanTable(root);
-
+void PentaxDecompressor::decompress(const ByteStream& data) const {
   BitPumpMSB bs(data);
   uchar8* draw = mRaw->getData();
 
