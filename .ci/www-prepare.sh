@@ -13,8 +13,8 @@ fi
 # Save some useful information
 REPO="https://github.com/LebedevRI/www.rawspeed.org.git"
 
-mkdir -p "$TRAVIS_BUILD_DIR/build/docs/doxygen/"
-cd "$TRAVIS_BUILD_DIR/build/docs/doxygen/"
+mkdir -p "$TRAVIS_BUILD_DIR/build/docs/"
+cd "$TRAVIS_BUILD_DIR/build/docs/"
 
 # Clone the existing gh-pages for this repo into out/
 # Create a new empty branch if gh-pages doesn't exist yet (should only happen on first deply)

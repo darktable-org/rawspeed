@@ -81,7 +81,7 @@ if(BUILD_BENCHMARKING)
 else()
   set(ALLOW_DOWNLOADING_GOOGLEBENCHMARK OFF CACHE BOOL "If googlebenchmark src tree is not found in location specified by GOOGLEBENCHMARK_PATH, do fetch the archive from internet" FORCE)
 endif()
-option(BUILD_DOCS "Build the documentation (mainly, using Doxygen)." OFF)
+option(BUILD_DOCS "Build the documentation (Sphinx+Doxygen)." OFF)
 option(BUILD_FUZZERS "Build the fuzzing tree." ON)
 
 set(GOOGLETEST_PATH "/usr/src/googletest" CACHE PATH
