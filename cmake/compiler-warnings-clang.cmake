@@ -13,7 +13,7 @@ set (CLANG_WARNING_FLAGS
 set (CLANG_DISABLED_WARNING_FLAGS
   "c++98-compat"
   "c++98-compat-pedantic"
-  "conversion"
+  "conversion" # FIXME: really need to enable this one
   "covered-switch-default"
   "deprecated"
   "double-promotion"
@@ -22,7 +22,6 @@ set (CLANG_DISABLED_WARNING_FLAGS
   "gnu-zero-variadic-macro-arguments"
   "old-style-cast"
   "padded"
-  "sign-conversion"
   "switch-enum"
   "unused-macros"
   "unused-parameter"
