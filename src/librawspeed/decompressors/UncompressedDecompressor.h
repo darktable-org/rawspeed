@@ -87,4 +87,45 @@ public:
   template <int bits, Endianness e> void decodeRawUnpacked(uint32 w, uint32 h);
 };
 
+extern template void UncompressedDecompressor::decode8BitRaw<false>(uint32 w,
+                                                                    uint32 h);
+extern template void UncompressedDecompressor::decode8BitRaw<true>(uint32 w,
+                                                                   uint32 h);
+
+extern template void
+UncompressedDecompressor::decode12BitRaw<Endianness::little, false, false>(
+    uint32 w, uint32 h);
+extern template void
+UncompressedDecompressor::decode12BitRaw<Endianness::big, false, false>(
+    uint32 w, uint32 h);
+extern template void
+UncompressedDecompressor::decode12BitRaw<Endianness::big, true, false>(
+    uint32 w, uint32 h);
+extern template void
+UncompressedDecompressor::decode12BitRaw<Endianness::little, false, true>(
+    uint32 w, uint32 h);
+extern template void
+UncompressedDecompressor::decode12BitRaw<Endianness::big, false, true>(
+    uint32 w, uint32 h);
+
+extern template void
+UncompressedDecompressor::decode12BitRawUnpackedLeftAligned<Endianness::big>(
+    uint32 w, uint32 h);
+
+extern template void
+UncompressedDecompressor::decodeRawUnpacked<12, Endianness::little>(uint32 w,
+                                                                    uint32 h);
+extern template void
+UncompressedDecompressor::decodeRawUnpacked<12, Endianness::big>(uint32 w,
+                                                                 uint32 h);
+extern template void
+UncompressedDecompressor::decodeRawUnpacked<14, Endianness::big>(uint32 w,
+                                                                 uint32 h);
+extern template void
+UncompressedDecompressor::decodeRawUnpacked<16, Endianness::little>(uint32 w,
+                                                                    uint32 h);
+extern template void
+UncompressedDecompressor::decodeRawUnpacked<16, Endianness::big>(uint32 w,
+                                                                 uint32 h);
+
 } // namespace rawspeed

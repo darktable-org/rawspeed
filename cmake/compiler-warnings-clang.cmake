@@ -24,7 +24,6 @@ set (CLANG_DISABLED_WARNING_FLAGS
   "padded"
   "sign-conversion"
   "switch-enum"
-  "undefined-func-template"
   "unused-macros"
   "unused-parameter"
   "weak-vtables"
