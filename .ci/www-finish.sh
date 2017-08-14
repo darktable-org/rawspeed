@@ -20,7 +20,6 @@ git config user.name "Travis CI"
 git config user.email "travis@travis-ci.org"
 
 date > .timestamp
-touch .nojekyll
 echo "rawspeed.org" > CNAME
 
 # # If there are no changes (e.g. this is a README update) then just bail.
