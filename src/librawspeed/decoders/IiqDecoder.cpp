@@ -59,53 +59,45 @@ bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   return make == "Phase One A/S" && db.get<uint32>(8) == 0x49494949;
 }
 
-std::vector<uint32> IiqDecoder::computeSizes(const Buffer& raw_data,
-                                             const std::vector<uint32>& offsets,
-                                             uint32 height) const {
+std::vector<IiqDecoder::IiqStrip>
+IiqDecoder::computeSripes(const Buffer& raw_data,
+                          std::vector<IiqOffset>&& offsets,
+                          uint32 height) const {
   assert(height > 0);
   assert(offsets.size() == (1 + height));
 
-  // only for bounds checking
   ByteStream bs(DataBuffer(raw_data, Endianness::little));
 
-  // FIXME: surely there is a nice way to avoid the first copy?
-  std::vector<uint32> sortedOffsets(offsets);
-  std::sort(sortedOffsets.begin(), sortedOffsets.end());
+  // so... here's the thing. offsets are not guaranteed to be in
+  // monotonically increasing order. so for each element of 'offsets',
+  // we need to find element which specifies next larger offset.
+  // and only then by subtracting those two offsets we get the slice size.
 
-  std::vector<uint32> sizes;
-  sizes.reserve(offsets.size());
+  std::sort(offsets.begin(), offsets.end(),
+            [](const IiqOffset& a, const IiqOffset& b) {
+              if (a.offset == b.offset)
+                ThrowRDE("Two identical offsets found. Corrupt raw.");
+              return a.offset < b.offset;
+            });
 
-  for (auto offset_iterator = std::begin(offsets);
-       offset_iterator < std::prev(std::end(offsets));
-       std::advance(offset_iterator, 1)) {
-    // so... here's the thing. offsets are not guaranteed to be in
-    // monotonically increasing order. so for each element of 'offsets',
-    // we need to find element which specifies next larger offset.
-    // and only then by subtracting those two offsets we get the slice size.
+  std::vector<IiqDecoder::IiqStrip> slices;
+  slices.reserve(height);
 
-    // find current offset in the sorted vector of offsets
-    const auto sorted_iterator = std::find(
-        std::begin(sortedOffsets), std::end(sortedOffsets), *offset_iterator);
-    assert(sorted_iterator != std::end(sortedOffsets));
+  auto offset_iterator = std::begin(offsets);
+  auto next_offset_iterator = std::next(offset_iterator);
+  while (next_offset_iterator < std::end(offsets)) {
+    const auto size = next_offset_iterator->offset - offset_iterator->offset;
+    assert(size > 0);
 
-    const auto next_sorted_iterator = std::next(sorted_iterator);
-    if (next_sorted_iterator == std::end(offsets))
-      ThrowRDE("Invalid slice offsets. Corrupt raw.");
+    slices.emplace_back(offset_iterator->n, bs.getStream(size));
 
-    const auto size = *next_sorted_iterator - *sorted_iterator;
-    assert(size >= 0);
-
-    if (size == 0)
-      ThrowRDE("Invalid slice offsets. Corrupt raw.");
-
-    bs.skipBytes(size); // check that we are still within the raw chunk.
-
-    sizes.emplace_back(size);
+    std::advance(offset_iterator, 1);
+    std::advance(next_offset_iterator, 1);
   }
 
-  assert(sizes.size() == height);
+  assert(slices.size() == height);
 
-  return sizes;
+  return slices;
 }
 
 RawImage IiqDecoder::decodeRawInternal() {
@@ -174,26 +166,18 @@ RawImage IiqDecoder::decodeRawInternal() {
 
   block_offsets = block_offsets.getStream(height, sizeof(uint32));
 
-  std::vector<uint32> offsets;
+  std::vector<IiqOffset> offsets;
   offsets.reserve(1 + height);
 
   for (uint32 row = 0; row < height; row++)
-    offsets.emplace_back(block_offsets.getU32());
+    offsets.emplace_back(row, block_offsets.getU32());
 
   // to simplify slice size calculation, we insert a dummy offset,
   // which will be used much like end()
-  offsets.emplace_back(raw_data.getSize());
+  offsets.emplace_back(height, raw_data.getSize());
 
-  std::vector<uint32> sizes(computeSizes(raw_data, offsets, height));
-
-  std::vector<IiqStrip> strips;
-  strips.reserve(height);
-
-  for (uint32 row = 0; row < height; row++) {
-    // FIXME: is there a "block_sizes" entry?
-    const DataBuffer slice(raw_data.getSubView(offsets[row], sizes[row]));
-    strips.emplace_back(row, ByteStream(slice));
-  }
+  const std::vector<IiqStrip> strips(
+      computeSripes(raw_data, std::move(offsets), height));
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();

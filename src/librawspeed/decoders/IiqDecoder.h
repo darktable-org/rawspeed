@@ -35,9 +35,24 @@ class CameraMetaData;
 class Buffer;
 
 class IiqDecoder final : public AbstractTiffDecoder {
-  std::vector<uint32> computeSizes(const Buffer& raw_data,
-                                   const std::vector<uint32>& offsets,
-                                   uint32 height) const;
+  struct IiqOffset {
+    uint32 n;
+    uint32 offset;
+
+    IiqOffset() = default;
+    IiqOffset(uint32 block, uint32 offset_) : n(block), offset(offset_) {}
+  };
+
+  struct IiqStrip {
+    const int n;
+    const ByteStream bs;
+
+    IiqStrip(int block, ByteStream bs_) : n(block), bs(std::move(bs_)) {}
+  };
+
+  std::vector<IiqStrip> computeSripes(const Buffer& raw_data,
+                                      std::vector<IiqOffset>&& offsets,
+                                      uint32 height) const;
 
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
@@ -50,13 +65,6 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 protected:
-  struct IiqStrip {
-    const int n;
-    const ByteStream bs;
-
-    IiqStrip(int block, ByteStream bs_) : n(block), bs(std::move(bs_)) {}
-  };
-
   int getDecoderVersion() const override { return 0; }
   uint32 black_level = 0;
   void DecodePhaseOneC(const std::vector<IiqStrip>& strips, uint32 width,
