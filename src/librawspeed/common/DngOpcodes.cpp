@@ -380,7 +380,9 @@ DngOpcodes::DngOpcodes(TiffEntry* entry) {
       ThrowRDE("Inconsistent length of opcode");
   }
 
+#ifdef DEBUG
   assert(opcodes.size() == opcode_count);
+#endif
 }
 
 // defined here as empty destrutor, otherwise we'd need a complete definition
