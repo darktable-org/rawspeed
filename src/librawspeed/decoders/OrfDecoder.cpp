@@ -88,6 +88,9 @@ RawImage OrfDecoder::decodeRawInternal() {
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
 
+  if (!width || !height || width % 2 != 0)
+    ThrowRDE("Bad raw dimensions");
+
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
@@ -136,17 +139,19 @@ void OrfDecoder::decodeUncompressed(const ByteStream& s, uint32 w, uint32 h,
  */
 
 void OrfDecoder::decodeCompressed(ByteStream* s, uint32 w, uint32 h) {
+  assert(h > 0);
+  assert(w > 0);
+  assert(w % 2 == 0);
+
   int nbits;
   int sign;
   int low;
   int high;
   int i;
-  int left0;
-  int nw0;
-  int left1;
-  int nw1;
-  int acarry0[3];
-  int acarry1[3];
+  int left0 = 0;
+  int nw0 = 0;
+  int left1 = 0;
+  int nw1 = 0;
   int pred;
   int diff;
 
@@ -163,14 +168,14 @@ void OrfDecoder::decodeCompressed(ByteStream* s, uint32 w, uint32 h) {
         break;
     bittable[i] = min(12,high);
   }
-  left0 = nw0 = left1 = nw1 = 0;
 
   s->skipBytes(7);
   BitPumpMSB bits(*s);
 
   for (uint32 y = 0; y < h; y++) {
-    memset(acarry0, 0, sizeof acarry0);
-    memset(acarry1, 0, sizeof acarry1);
+    int acarry0[3] = {};
+    int acarry1[3] = {};
+
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
     bool y_border = y < 2;
     bool border = true;
