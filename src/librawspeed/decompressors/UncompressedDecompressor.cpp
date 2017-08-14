@@ -236,6 +236,8 @@ void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
 
   uchar8* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
+
+  // FIXME: maybe check size of interlaced data?
   const uchar8* in = input.peekData(perline * h);
   uint32 half = (h + 1) >> 1;
   for (uint32 row = 0; row < h; row++) {
@@ -244,10 +246,9 @@ void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
 
     if (interlaced && y == 1) {
       // The second field starts at a 2048 byte aligment
-      uint32 offset = ((half * w * 3 / 2 >> 11) + 1) << 11;
-      if (offset > input.getRemainSize())
-        ThrowIOE("Trying to jump to invalid offset %d", offset);
-      in = input.peekData(input.getRemainSize()) + offset;
+      const uint32 offset = ((half * w * 3 / 2 >> 11) + 1) << 11;
+      input.skipBytes(offset);
+      in = input.peekData(perline * (h - row));
     }
 
     for (uint32 x = 0; x < w; x += 2, in += 3) {
