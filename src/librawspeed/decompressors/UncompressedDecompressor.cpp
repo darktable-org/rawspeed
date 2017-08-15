@@ -42,7 +42,7 @@ void UncompressedDecompressor::sanityCheck(uint32* h, int bpl) {
   assert(h != nullptr);
   assert(*h > 0);
   assert(bpl > 0);
-  assert(input.getRemainSize() > 0);
+  assert(input.getSize() > 0);
 
   if (input.getRemainSize() >= bpl * *h)
     return; // all good!
