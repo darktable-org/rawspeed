@@ -209,6 +209,15 @@ void NefDecoder::DecodeUncompressed() {
 
   bitPerPixel = hints.get("real_bpp", bitPerPixel);
 
+  switch (bitPerPixel) {
+  case 12:
+  case 14:
+  case 16:
+    break;
+  default:
+    ThrowRDE("Invalid bpp found: %u", bitPerPixel);
+  }
+
   bool bitorder = ! hints.has("msb_override");
 
   offY = 0;
