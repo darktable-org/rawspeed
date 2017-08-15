@@ -205,12 +205,19 @@ void IiqDecoder::DecodeStrip(const IiqStrip& strip, uint32 width,
       len[0] = len[1] = 14;
     else if ((col & 7) == 0) {
       for (unsigned int& i : len) {
-        int32 j = 0;
+        int j = 0;
 
-        for (; j < 5; j++)
-          if (pump.getBits(1) != 0)
+        for (; j < 5; j++) {
+          if (pump.getBits(1) != 0) {
+            if (col == 0)
+              ThrowRDE("Can not initialize lenghts. Data is corrupt.");
+
+            // else, we have previously initialized lenghts, so we are fine
             break;
+          }
+        }
 
+        assert((col == 0 && j > 0) || col != 0);
         if (j > 0)
           i = length[2 * (j - 1) + pump.getBits(1)];
       }
