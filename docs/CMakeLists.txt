@@ -55,7 +55,7 @@ endif()
 add_custom_target(sphinx
   "${SPHINX_BUILD_PATH}" -b html "${CMAKE_CURRENT_SOURCE_DIR}" html
   WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-  COMMENT "Generating API documentation with Doxygen"
+  COMMENT "Generating documentation with Sphinx"
   VERBATIM
 )
 
