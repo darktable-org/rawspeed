@@ -54,6 +54,8 @@ class IiqDecoder final : public AbstractTiffDecoder {
                                       std::vector<IiqOffset>&& offsets,
                                       uint32 height) const;
 
+  void DecodeStrip(const IiqStrip& strip, uint32 width, uint32 height);
+
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                    const Buffer* file);

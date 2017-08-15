@@ -190,41 +190,45 @@ RawImage IiqDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void IiqDecoder::DecodePhaseOneC(const std::vector<IiqStrip>& strips,
-                                 uint32 width, uint32 height) {
+void IiqDecoder::DecodeStrip(const IiqStrip& strip, uint32 width,
+                             uint32 height) {
   const int length[] = {8, 7, 6, 9, 11, 10, 5, 12, 14, 13};
 
-  for (const auto& strip : strips) {
-    BitPumpMSB32 pump(strip.bs);
+  BitPumpMSB32 pump(strip.bs);
 
-    int32 pred[2];
-    uint32 len[2];
-    pred[0] = pred[1] = 0;
-    auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, strip.n));
-    for (uint32 col = 0; col < width; col++) {
-      if (col >= (width & -8))
-        len[0] = len[1] = 14;
-      else if ((col & 7) == 0) {
-        for (unsigned int& i : len) {
-          int32 j = 0;
+  int32 pred[2];
+  uint32 len[2];
+  pred[0] = pred[1] = 0;
+  auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, strip.n));
+  for (uint32 col = 0; col < width; col++) {
+    if (col >= (width & -8))
+      len[0] = len[1] = 14;
+    else if ((col & 7) == 0) {
+      for (unsigned int& i : len) {
+        int32 j = 0;
 
-          for (; j < 5; j++)
-            if (pump.getBits(1) != 0)
-              break;
+        for (; j < 5; j++)
+          if (pump.getBits(1) != 0)
+            break;
 
-          if (j > 0)
-            i = length[2 * (j - 1) + pump.getBits(1)];
-        }
+        if (j > 0)
+          i = length[2 * (j - 1) + pump.getBits(1)];
       }
-
-      int i = len[col & 1];
-      if (i == 14)
-        img[col] = pred[col & 1] = pump.getBits(16);
-      else
-        img[col] = pred[col & 1] +=
-            static_cast<signed>(pump.getBits(i)) + 1 - (1 << (i - 1));
     }
+
+    int i = len[col & 1];
+    if (i == 14)
+      img[col] = pred[col & 1] = pump.getBits(16);
+    else
+      img[col] = pred[col & 1] +=
+          static_cast<signed>(pump.getBits(i)) + 1 - (1 << (i - 1));
   }
+}
+
+void IiqDecoder::DecodePhaseOneC(const std::vector<IiqStrip>& strips,
+                                 uint32 width, uint32 height) {
+  for (const auto& strip : strips)
+    DecodeStrip(strip, width, height);
 }
 
 void IiqDecoder::checkSupportInternal(const CameraMetaData* meta) {
