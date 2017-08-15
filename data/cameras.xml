@@ -2529,7 +2529,7 @@
 			<Color x="0" y="1">RED</Color>
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
-		<Crop x="8" y="2" width="-24" height="-2"/>
+		<Crop x="12" y="2" width="-26" height="-6"/>
 		<Sensor black="0" white="3880"/>
 	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON D40" mode="12bit-compressed">
