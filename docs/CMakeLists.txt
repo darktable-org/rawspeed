@@ -53,8 +53,8 @@ else()
 endif()
 
 add_custom_target(sphinx
-  "${SPHINX_BUILD_PATH}" -b html "${CMAKE_CURRENT_SOURCE_DIR}" html
-  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+  "${SPHINX_BUILD_PATH}" -b html -a -c "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/html"
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
   COMMENT "Generating documentation with Sphinx"
   VERBATIM
 )

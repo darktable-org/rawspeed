@@ -8,7 +8,10 @@ Welcome to RawSpeed's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :hidden:
+
+   ../README
+   CameraSupport
 
 .. include:: ../README.rst
 
@@ -16,5 +19,4 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
