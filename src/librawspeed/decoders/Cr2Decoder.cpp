@@ -118,7 +118,14 @@ RawImage Cr2Decoder::decodeNewFormat() {
     ThrowTPE("failed to get SensorInfo from MakerNote");
 
   assert(sensorInfoE != nullptr);
-  iPoint2D dim(sensorInfoE->getU16(1), sensorInfoE->getU16(2));
+
+  const ushort16 width = sensorInfoE->getU16(1);
+  const ushort16 height = sensorInfoE->getU16(2);
+
+  if (!width || !height || width > 8896 || height > 5920)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
+  iPoint2D dim(width, height);
 
   int componentsPerPixel = 1;
   TiffIFD* raw = mRootIFD->getSubIFDs()[3].get();
