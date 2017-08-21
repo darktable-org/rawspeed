@@ -76,8 +76,8 @@ RawImage PefDecoder::decodeRawInternal() {
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
 
-  if (!width || !height || width % 2 != 0)
-    ThrowRDE("Incorrect image dimensions (%u, %u).", width, height);
+  if (!width || !height || width % 2 != 0 || width > 7392 || height > 4950)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   mRaw->dim = iPoint2D(width, height);
   try {
