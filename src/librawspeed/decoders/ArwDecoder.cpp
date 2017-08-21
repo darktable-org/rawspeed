@@ -236,6 +236,10 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) {
   uint32 c2 = raw->getEntry(STRIPBYTECOUNTS)->getU32();
 
   mRaw->dim = iPoint2D(width, height);
+
+  if (width == 0 || height == 0 || width > 8000 || height > 5320)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
   mRaw->createData();
 
   UncompressedDecompressor u(*mFile, off, c2, mRaw);
