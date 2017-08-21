@@ -332,11 +332,15 @@ void NefDecoder::DecodeD100Uncompressed() {
   u.decode12BitRaw<Endianness::big, false, true>(width, height);
 }
 
+// FIXME: RPU has just one sample (./Nikon/D810/D810_Small.NEF)
 void NefDecoder::DecodeSNefUncompressed() {
   auto raw = getIFDWithLargestImage(CFAPATTERN);
   uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+
+  if (width == 0 || height == 0 || width > 3680 || height > 2456)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->setCpp(3);
