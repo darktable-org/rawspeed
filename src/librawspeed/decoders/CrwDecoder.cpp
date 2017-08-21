@@ -32,6 +32,7 @@
 #include "tiff/CiffIFD.h"                  // for CiffIFD
 #include "tiff/CiffTag.h"                  // for CiffTag, CiffTag::CIFF_MA...
 #include <algorithm>                       // for move
+#include <array>                           // for array
 #include <cassert>                         // for assert
 #include <cmath>                           // for copysignf, expf, logf
 #include <memory>                          // for unique_ptr
@@ -143,14 +144,18 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       if (wb->type == CIFF_BYTE && wb->count == 768) {
         // We're in a D30 file, values are RGGB
         // This will probably not get used anyway as a 0x102c tag should exist
-        mRaw->metadata.wbCoeffs[0] =
-            static_cast<float>(1024.0 / wb->getByte(72));
+        std::array<uchar8, 4> wbMuls{{wb->getByte(72), wb->getByte(73),
+                                      wb->getByte(74), wb->getByte(75)}};
+        for (const auto& mul : wbMuls) {
+          if (0 == mul)
+            ThrowRDE("WB coeffient is zero!");
+        }
+
+        mRaw->metadata.wbCoeffs[0] = static_cast<float>(1024.0 / wbMuls[0]);
         mRaw->metadata.wbCoeffs[1] =
-            static_cast<float>((1024.0 / wb->getByte(73)) +
-                               (1024.0 / wb->getByte(74))) /
+            static_cast<float>((1024.0 / wbMuls[1]) + (1024.0 / wbMuls[2])) /
             2.0F;
-        mRaw->metadata.wbCoeffs[2] =
-            static_cast<float>(1024.0 / wb->getByte(75));
+        mRaw->metadata.wbCoeffs[2] = static_cast<float>(1024.0 / wbMuls[3]);
       } else if (wb->type == CIFF_BYTE && wb->count > 768) { // Other G series and S series cameras
         // correct offset for most cameras
         int offset = hints.get("wb_offset", 120);
