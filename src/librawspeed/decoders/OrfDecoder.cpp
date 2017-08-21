@@ -88,8 +88,8 @@ RawImage OrfDecoder::decodeRawInternal() {
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
 
-  if (!width || !height || width % 2 != 0)
-    ThrowRDE("Bad raw dimensions");
+  if (!width || !height || width % 2 != 0 || width > 9280 || height > 6932)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
