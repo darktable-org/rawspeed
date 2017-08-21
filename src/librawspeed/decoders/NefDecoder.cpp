@@ -212,7 +212,12 @@ void NefDecoder::DecodeUncompressed() {
   if (slices.empty())
     ThrowRDE("No valid slices found. File probably truncated.");
 
-  mRaw->dim = iPoint2D(width, offY);
+  height = offY;
+
+  if (width == 0 || height == 0 || width > 7424 || height > 4928)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
+  mRaw->dim = iPoint2D(width, height);
 
   mRaw->createData();
   if (bitPerPixel == 14 && width*slices[0].h*2 == slices[0].count)
