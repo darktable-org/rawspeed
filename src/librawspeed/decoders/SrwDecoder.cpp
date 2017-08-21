@@ -119,6 +119,10 @@ void SrwDecoder::decodeCompressed( const TiffIFD* raw )
 {
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+
+  if (width == 0 || height == 0 || width > 5546 || height > 3714)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
   const uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
