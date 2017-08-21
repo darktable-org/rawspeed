@@ -110,6 +110,14 @@ RawImage NefDecoder::decodeRawInternal() {
   if (width == 0 || height == 0 || width > 7424 || height > 4928)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
+  switch (bitPerPixel) {
+  case 12:
+  case 14:
+    break;
+  default:
+    ThrowRDE("Invalid bpp found: %u", bitPerPixel);
+  }
+
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
