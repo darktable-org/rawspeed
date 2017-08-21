@@ -161,8 +161,9 @@ RawImage IiqDecoder::decodeRawInternal() {
     }
   }
 
-  if (width <= 0 || height <= 0)
-    ThrowRDE("couldn't find width and height");
+  // FIXME: could be wrong. max "active pixels" in "Sensor+" mode - "101 MP"
+  if (width == 0 || height == 0 || width > 11608 || height > 8708)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   block_offsets = block_offsets.getStream(height, sizeof(uint32));
 
