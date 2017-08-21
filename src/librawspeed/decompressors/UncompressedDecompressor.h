@@ -59,6 +59,9 @@ public:
                            const RawImage& img)
       : UncompressedDecompressor(data, offset, data.getSize() - offset, img) {}
 
+  UncompressedDecompressor(const Buffer& data, const RawImage& img)
+      : UncompressedDecompressor(data, 0, img) {}
+
   /* Helper function for decoders, that will unpack uncompressed image data */
   /* input: Input image, positioned at first pixel */
   /* size: Size of the image to decode in pixels */

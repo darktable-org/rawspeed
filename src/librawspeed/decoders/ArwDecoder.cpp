@@ -240,9 +240,14 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) {
   if (width == 0 || height == 0 || width > 8000 || height > 5320)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
+  if (c2 == 0)
+    ThrowRDE("Strip is empty, nothing to decode!");
+
+  const Buffer buf(mFile->getSubView(off, c2));
+
   mRaw->createData();
 
-  UncompressedDecompressor u(*mFile, off, c2, mRaw);
+  UncompressedDecompressor u(buf, mRaw);
 
   if (hints.has("sr2_format"))
     u.decodeRawUnpacked<14, Endianness::big>(width, height);
