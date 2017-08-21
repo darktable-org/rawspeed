@@ -63,7 +63,7 @@ Camera Support
 
     for make, models in unique_makes.items():
         print(make)
-        print('-' * 80, "\n\n")
+        print('=' * len(make), "\n")
 
         print("Known cameras: ", len(models), "\n")
 

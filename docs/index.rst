@@ -10,7 +10,7 @@ Welcome to RawSpeed's documentation!
    :maxdepth: 2
    :hidden:
 
-   ../README
+   self
    CameraSupport
 
 .. include:: ../README.rst
