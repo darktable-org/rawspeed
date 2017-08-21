@@ -84,6 +84,9 @@ RawImage Cr2Decoder::decodeOldFormat() {
   }
   width *= 2; // components
 
+  if (!width || !height || width > 4082 || height > 2718)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
   mRaw = RawImage::create({width, height});
 
   Cr2Decompressor l(*mFile, offset, mRaw);
