@@ -52,6 +52,10 @@ RawImage ThreefrDecoder::decodeRawInternal() {
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
   uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
 
+  // FIXME: could be wrong. max "active pixels" - "100 MP"
+  if (width == 0 || height == 0 || width > 11600 || height > 8700)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
