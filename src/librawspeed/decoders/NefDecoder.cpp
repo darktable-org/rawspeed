@@ -107,6 +107,9 @@ RawImage NefDecoder::decodeRawInternal() {
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
   uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
 
+  if (width == 0 || height == 0 || width > 7424 || height > 4928)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
