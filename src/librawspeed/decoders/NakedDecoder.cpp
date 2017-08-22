@@ -61,9 +61,18 @@ void NakedDecoder::parseHints() {
 
   width = parseHint("full_width");
   height = parseHint("full_height");
+
+  if (width == 0 || height == 0)
+    ThrowRDE("%s %s: image is of zero size?", make, model);
+
   filesize = parseHint("filesize");
   offset = cHints.get("offset", 0);
+  if (filesize == 0 || offset >= filesize)
+    ThrowRDE("%s %s: no image data found", make, model);
+
   bits = cHints.get("bits", (filesize-offset)*8/width/height);
+  if (bits == 0)
+    ThrowRDE("%s %s: image bpp is invalid: %u", make, model, bits);
 
   auto order = cHints.get("order", string());
   if (!order.empty()) {
