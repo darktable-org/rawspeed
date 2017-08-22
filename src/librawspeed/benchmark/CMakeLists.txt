@@ -7,23 +7,17 @@ FILE(GLOB RAWSPEED_BENCH_SOURCES
 
 if(CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
   # want all the symbols.
-  add_library(rawspeed_benchmark SHARED $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_BENCH_SOURCES})
+  add_library(rawspeed_benchmark SHARED)
 else()
-  add_library(rawspeed_benchmark STATIC $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_BENCH_SOURCES})
+  add_library(rawspeed_benchmark STATIC)
 endif()
 
-target_link_libraries(rawspeed_benchmark PUBLIC ${RAWSPEED_LIBS})
-target_compile_definitions(rawspeed_benchmark PUBLIC "$<TARGET_PROPERTY:rawspeed,COMPILE_DEFINITIONS>")
-target_include_directories(rawspeed_benchmark PUBLIC "$<TARGET_PROPERTY:rawspeed,INCLUDE_DIRECTORIES>")
-target_include_directories(rawspeed_benchmark SYSTEM PUBLIC "$<TARGET_PROPERTY:rawspeed,INTERFACE_SYSTEM_INCLUDE_DIRECTORIES>")
-add_dependencies(rawspeed_benchmark rawspeed)
+target_sources(rawspeed_benchmark PRIVATE
+  ${RAWSPEED_BENCH_SOURCES}
+)
 
+target_link_libraries(rawspeed_benchmark PUBLIC rawspeed)
 target_link_libraries(rawspeed_benchmark PUBLIC benchmark)
-
-if(WITH_OPENMP AND OPENMP_FOUND AND OpenMP_CXX_FLAGS)
-  target_compile_options(rawspeed_benchmark PUBLIC ${OpenMP_CXX_FLAGS})
-  target_link_libraries(rawspeed_benchmark PUBLIC ${OpenMP_CXX_FLAGS})
-endif()
 
 FILE(GLOB RAWSPEED_BENCHMARKS_SOURCES
   "../interpolators/Cr2sRawInterpolatorBenchmark.cpp"
@@ -40,7 +34,8 @@ endif()
 foreach(IN ${RAWSPEED_BENCHMARKS_SOURCES})
   get_filename_component(BENCHNAME ${IN} NAME_WE)
   add_executable(${BENCHNAME} ${IN})
-  target_link_libraries(${BENCHNAME} rawspeed_benchmark)
+  target_link_libraries(${BENCHNAME} PUBLIC rawspeed)
+  target_link_libraries(${BENCHNAME} PUBLIC rawspeed_benchmark)
 
   add_dependencies(benchmarks ${BENCHNAME})
 endforeach()

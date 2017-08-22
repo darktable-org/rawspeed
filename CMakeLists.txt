@@ -36,8 +36,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(INTERPROCEDURAL_OPTIMIZATION ON)
-
 option(BINARY_PACKAGE_BUILD "Sets march optimization to generic" OFF)
 option(WITH_SSE2 "If SSE2 support is avaliable, do build SSE2 codepaths" ON)
 option(WITH_PTHREADS "Enable threading support through pthread. Highly recommended" ON)
@@ -115,6 +113,8 @@ include(compiler-flags)
 
 add_custom_target(check ALL)
 add_custom_target(dependencies ALL)
+
+set_directory_properties(PROPERTIES COMPILE_OPTIONS "-Werror")
 
 add_subdirectory(src)
 

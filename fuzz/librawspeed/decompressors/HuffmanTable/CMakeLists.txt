@@ -14,10 +14,8 @@ function(add_ht_fuzzer pump decode)
       -DFULLDECODE=${${decode}}
   )
 
-  set_target_properties(${fuzzer} PROPERTIES LINKER_LANGUAGE CXX)
-  target_link_libraries(${fuzzer} rawspeed_static)
+  target_link_libraries(${fuzzer} rawspeed)
   target_link_libraries(${fuzzer} libFuzzer)
-  target_include_directories(${fuzzer} PUBLIC "${CONFIG_INCLUDE_PATH}")
 
   add_fuzz_target(${fuzzer})
 

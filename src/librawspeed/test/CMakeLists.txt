@@ -6,23 +6,17 @@ FILE(GLOB RAWSPEED_TEST_SOURCES
 
 if(CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
   # want all the symbols.
-  add_library(rawspeed_test SHARED $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_TEST_SOURCES})
+  add_library(rawspeed_test SHARED)
 else()
-  add_library(rawspeed_test STATIC $<TARGET_OBJECTS:rawspeed> ${RAWSPEED_TEST_SOURCES})
+  add_library(rawspeed_test STATIC)
 endif()
 
-target_link_libraries(rawspeed_test PUBLIC ${RAWSPEED_LIBS})
-target_compile_definitions(rawspeed_test PUBLIC "$<TARGET_PROPERTY:rawspeed,COMPILE_DEFINITIONS>")
-target_include_directories(rawspeed_test PUBLIC "$<TARGET_PROPERTY:rawspeed,INCLUDE_DIRECTORIES>")
-target_include_directories(rawspeed_test SYSTEM PUBLIC "$<TARGET_PROPERTY:rawspeed,INTERFACE_SYSTEM_INCLUDE_DIRECTORIES>")
-add_dependencies(rawspeed_test rawspeed)
+target_sources(rawspeed_test PRIVATE
+  ${RAWSPEED_TEST_SOURCES}
+)
 
+target_link_libraries(rawspeed_test PUBLIC rawspeed)
 target_link_libraries(rawspeed_test PUBLIC gtest gmock_main)
-
-if(WITH_OPENMP AND OPENMP_FOUND AND OpenMP_CXX_FLAGS)
-  target_compile_options(rawspeed_test PUBLIC ${OpenMP_CXX_FLAGS})
-  target_link_libraries(rawspeed_test PUBLIC ${OpenMP_CXX_FLAGS})
-endif()
 
 FILE(GLOB RAWSPEED_TESTS_SOURCES
   "../common/CommonTest.cpp"
@@ -72,6 +66,7 @@ file(MAKE_DIRECTORY "${UNITTEST_REPORT_PATH}")
 foreach(IN ${RAWSPEED_TESTS_SOURCES})
   get_filename_component(TESTNAME ${IN} NAME_WE)
   add_executable(${TESTNAME} ${IN})
+  target_link_libraries(${TESTNAME} rawspeed)
   target_link_libraries(${TESTNAME} rawspeed_test)
   # GTEST_ADD_TESTS(${TESTNAME} "" AUTO)
   add_test(NAME ${TESTNAME} COMMAND ${TESTNAME} --gtest_output=xml:${UNITTEST_REPORT_PATH})

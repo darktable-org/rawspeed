@@ -1,7 +1,5 @@
 add_executable(rstest rstest.cpp md5.cpp)
-set_target_properties(rstest PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(rstest rawspeed_static)
-target_include_directories(rstest PUBLIC "${CONFIG_INCLUDE_PATH}")
+target_link_libraries(rstest rawspeed)
 
 if(BUILD_TESTING)
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-suggest-attribute=const)

@@ -26,6 +26,7 @@ if(WITH_PTHREADS)
   else()
     message(STATUS "Looking for PThreads - found")
     set(HAVE_PTHREAD 1)
+    target_link_libraries(rawspeed PUBLIC Threads::Threads)
     set_package_properties(Threads PROPERTIES
                            TYPE RECOMMENDED
                            DESCRIPTION "POSIX Threads"
@@ -40,6 +41,14 @@ if(WITH_OPENMP)
   find_package(OpenMP)
   if(OPENMP_FOUND)
     message(STATUS "Looking for OpenMP - found")
+
+    if(NOT TARGET OpenMP::OpenMP)
+      add_library(OpenMP::OpenMP INTERFACE IMPORTED)
+      set_property(TARGET OpenMP::OpenMP PROPERTY INTERFACE_COMPILE_OPTIONS "${OpenMP_CXX_FLAGS}")
+      set_property(TARGET OpenMP::OpenMP PROPERTY INTERFACE_LINK_LIBRARIES "${OpenMP_CXX_FLAGS}")
+    endif()
+
+    target_link_libraries(rawspeed INTERFACE OpenMP::OpenMP)
     set_package_properties(OpenMP PROPERTIES
                            TYPE OPTIONAL
                            PURPOSE "Used for parallelization of tools (NOT library!)")
@@ -71,7 +80,14 @@ if(WITH_PUGIXML)
 
   if(Pugixml_FOUND)
     set(HAVE_PUGIXML 1)
-    include_directories(SYSTEM ${Pugixml_INCLUDE_DIRS})
+
+    if(NOT TARGET Pugixml::Pugixml)
+      add_library(Pugixml::Pugixml INTERFACE IMPORTED)
+      set_property(TARGET Pugixml::Pugixml PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${Pugixml_INCLUDE_DIRS}")
+      set_property(TARGET Pugixml::Pugixml PROPERTY INTERFACE_LINK_LIBRARIES "${Pugixml_LIBRARIES}")
+    endif()
+
+    target_link_libraries(rawspeed PUBLIC Pugixml::Pugixml)
     set_package_properties(Pugixml PROPERTIES
                            TYPE REQUIRED
                            URL http://pugixml.org/
@@ -89,9 +105,15 @@ if(WITH_JPEG)
     message(SEND_ERROR "Did not find JPEG! Either make it find JPEG, or pass -DWITH_JPEG=OFF to disable JPEG.")
   else()
     message(STATUS "Looking for JPEG - found")
-    include_directories(SYSTEM ${JPEG_INCLUDE_DIRS})
     set(HAVE_JPEG 1)
 
+    if(NOT TARGET JPEG::JPEG)
+      add_library(JPEG::JPEG INTERFACE IMPORTED)
+      set_property(TARGET JPEG::JPEG PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${JPEG_INCLUDE_DIRS}")
+      set_property(TARGET JPEG::JPEG PROPERTY INTERFACE_LINK_LIBRARIES "${JPEG_LIBRARIES}")
+    endif()
+
+    target_link_libraries(rawspeed PUBLIC JPEG::JPEG)
     set_package_properties(JPEG PROPERTIES
                            TYPE RECOMMENDED
                            DESCRIPTION "free library for handling the JPEG image data format, implements a JPEG codec"
@@ -111,7 +133,6 @@ if (WITH_ZLIB)
       message(SEND_ERROR "Did not find ZLIB! Either make it find ZLIB, or pass -DWITH_ZLIB=OFF to disable ZLIB, or pass -DUSE_BUNDLED_ZLIB=ON to enable in-tree ZLIB.")
     else()
       message(STATUS "Looking for ZLIB - found (system)")
-      include_directories(SYSTEM ${ZLIB_INCLUDE_DIRS})
     endif()
   else()
     include(Zlib)
@@ -125,6 +146,7 @@ if (WITH_ZLIB)
 
   if(ZLIB_FOUND)
     set(HAVE_ZLIB 1)
+    target_link_libraries(rawspeed PUBLIC ZLIB::ZLIB)
     set_package_properties(ZLIB PROPERTIES
                            TYPE RECOMMENDED
                            DESCRIPTION "software library used for data compression"

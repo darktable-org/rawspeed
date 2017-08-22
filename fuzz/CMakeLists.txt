@@ -3,7 +3,7 @@ set(ALL_FUZZERS "" CACHE INTERNAL "" FORCE)
 if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_BUILD_TYPE STREQUAL "FUZZ"))
   message(WARNING "For fuzzets to function, compiler must be Clang, and build type must be FUZZ.")
   add_library(libFuzzer_dummy STATIC "${CMAKE_CURRENT_SOURCE_DIR}/libFuzzer_dummy_main.cpp")
-  target_link_libraries(libFuzzer_dummy rawspeed_static)
+  target_link_libraries(libFuzzer_dummy rawspeed)
   add_library(libFuzzer ALIAS libFuzzer_dummy)
 
   macro(add_fuzz_target fuzzer)
