@@ -94,7 +94,11 @@ TiffIFD::TiffIFD(TiffIFD* parent_, const DataBuffer& data, uint32 offset)
   ByteStream bs(data);
   bs.setPosition(offset);
 
-  auto numEntries = bs.getU16(); // Directory entries in this IFD
+  // Directory entries in this IFD
+  auto numEntries = bs.getU16();
+
+  // each entry is 12 bytes + 4-byte offset to the next IFD at the end
+  bs.check(4 + 12 * numEntries);
 
   for (uint32 i = 0; i < numEntries; i++)
     parseIFDEntry(&bs);
