@@ -7,13 +7,6 @@ add_subdirectory(decompressors)
 add_subdirectory(interpolators)
 add_subdirectory(decoders)
 
-#
-# build librawspeed
-#
-if(WIN32)
-  target_link_libraries(rawspeed PUBLIC "msvcrt")
-endif(WIN32)
-
 target_include_directories(rawspeed PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 if(BUILD_TESTING)
