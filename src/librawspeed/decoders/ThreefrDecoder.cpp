@@ -81,8 +81,13 @@ void ThreefrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(ASSHOTNEUTRAL)) {
     TiffEntry *wb = mRootIFD->getEntryRecursive(ASSHOTNEUTRAL);
     if (wb->count == 3) {
-      for (uint32 i=0; i<3; i++)
-        mRaw->metadata.wbCoeffs[i] = 1.0F / wb->getFloat(i);
+      for (uint32 i = 0; i < 3; i++) {
+        const float div = wb->getFloat(i);
+        if (div == 0.0f)
+          ThrowRDE("Can not decode WB, multiplier is zero/");
+
+        mRaw->metadata.wbCoeffs[i] = 1.0F / div;
+      }
     }
   }
 }
