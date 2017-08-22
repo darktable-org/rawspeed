@@ -365,7 +365,6 @@ void SrwDecoder::decodeCompressed3(const TiffIFD* raw, int bits)
   // First 1 or 4 bits to specify which reference pixels to use, then a section
   // that specifies for each pixel the number of bits in the difference, then
   // the actual difference bits
-  uint32 motion;
   uint32 diffBitsMode[3][2] = {{0}};
   uint32 line_offset = startpump.getBufferPosition();
   for (uint32 row=0; row < height; row++) {
@@ -380,7 +379,7 @@ void SrwDecoder::decodeCompressed3(const TiffIFD* raw, int bits)
     ushort16* img_up2 = reinterpret_cast<ushort16*>(
         mRaw->getData(0, max(0, static_cast<int>(row) - 2)));
     // Initialize the motion and diff modes at the start of the line
-    motion = 7;
+    uint32 motion = 7;
     // By default we are not scaling values at all
     int32 scale = 0;
     for (auto &i : diffBitsMode)
@@ -404,9 +403,8 @@ void SrwDecoder::decodeCompressed3(const TiffIFD* raw, int bits)
       if (motion == 7) {
         // The base case, just set all pixels to the previous ones on the same line
         // If we're at the left edge we just start at the initial value
-        for (uint32 i=0; i<16; i++) {
+        for (uint32 i = 0; i < 16; i++)
           img[i] = (col == 0) ? initVal : *(img+i-2);
-        }
       } else {
         // The complex case, we now need to actually lookup one or two lines above
         if (row < 2)
