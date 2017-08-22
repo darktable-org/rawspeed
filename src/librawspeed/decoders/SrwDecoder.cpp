@@ -352,7 +352,8 @@ void SrwDecoder::decodeCompressed3(const TiffIFD* raw, int bits)
   startpump.getBits(2);  // reserved
   uint32 initVal = startpump.getBits(14);
 
-  if (width == 0 || height == 0 || width > 6496 || height > 4336)
+  if (width == 0 || height == 0 || width % 16 != 0 || width > 6496 ||
+      height > 4336)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   mRaw->dim = iPoint2D(width, height);
@@ -385,6 +386,7 @@ void SrwDecoder::decodeCompressed3(const TiffIFD* raw, int bits)
     for (auto &i : diffBitsMode)
       i[0] = i[1] = (row == 0 || row == 1) ? 7 : 4;
 
+    assert(width >= 16);
     for (uint32 col=0; col < width; col += 16) {
       if (!(optflags & OPT_QP) && !(col & 63)) {
         int32 scalevals[] = {0,-2,2};
