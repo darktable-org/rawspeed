@@ -296,6 +296,13 @@ TEST_P(ColorFilterArrayShiftTest, shiftEqualityTest) {
     cfa.shiftDown(y);
     uint32 f = cfa.getDcrawFilter();
     ASSERT_EQ(f, ColorFilterArray::shiftDcrawFilter(fo, x, y));
+
+    cfa = cfaOrig;
+    iPoint2D p(x, y);
+    cfa.shiftLeft(p.x);
+    cfa.shiftDown(p.y);
+    f = cfa.getDcrawFilter();
+    ASSERT_EQ(f, ColorFilterArray::shiftDcrawFilter(fo, x, y));
   });
 }
 
