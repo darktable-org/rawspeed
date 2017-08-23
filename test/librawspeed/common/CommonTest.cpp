@@ -28,24 +28,24 @@
 #include <string>          // for basic_string, string, allocator
 #include <vector>          // for vector
 
-using std::make_tuple;
-using std::string;
-using std::vector;
-using std::numeric_limits;
-using std::min;
-using rawspeed::isPowerOfTwo;
-using rawspeed::ushort16;
-using rawspeed::uchar8;
-using rawspeed::roundUp;
-using rawspeed::roundUpDivision;
+using rawspeed::clampBits;
+using rawspeed::copyPixels;
+using rawspeed::getThreadCount;
 using rawspeed::isAligned;
 using rawspeed::isIn;
-using rawspeed::clampBits;
-using rawspeed::trimSpaces;
+using rawspeed::isPowerOfTwo;
+using rawspeed::roundUp;
+using rawspeed::roundUpDivision;
 using rawspeed::splitString;
+using rawspeed::trimSpaces;
+using rawspeed::uchar8;
 using rawspeed::unroll_loop;
-using rawspeed::getThreadCount;
-using rawspeed::copyPixels;
+using rawspeed::ushort16;
+using std::make_tuple;
+using std::min;
+using std::numeric_limits;
+using std::string;
+using std::vector;
 
 namespace rawspeed_test {
 
@@ -172,8 +172,7 @@ TEST_P(IsInTest, IsInTest) {
   ASSERT_EQ(isIn(in, {"foo", "foo2", "bar", "baz"}), expected);
 }
 
-using ClampBitsType =
-    std::tr1::tuple<int, int, ushort16>;
+using ClampBitsType = std::tr1::tuple<int, int, ushort16>;
 class ClampBitsTest : public ::testing::TestWithParam<ClampBitsType> {
 protected:
   ClampBitsTest() = default;

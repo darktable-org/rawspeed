@@ -23,11 +23,11 @@
 #include <ostream>        // for operator<<, basic_ostream::operator<<, ost...
 #include <utility>        // for make_pair, pair, move
 
+using rawspeed::iPoint2D;
+using std::make_pair;
 using std::move;
 using std::pair;
-using std::make_pair;
 using std::tuple;
-using rawspeed::iPoint2D;
 
 namespace rawspeed {
 

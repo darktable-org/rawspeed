@@ -22,9 +22,9 @@
 #include <gtest/gtest.h>     // for AssertionResult, GetBoolAssertionFailur...
 #include <string>            // for basic_string, string
 
+using rawspeed::Hints;
 using std::string;
 using std::to_string;
-using rawspeed::Hints;
 
 namespace rawspeed_test {
 

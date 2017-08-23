@@ -19,12 +19,12 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "metadata/BlackArea.h"   // for BlackArea
+#include "metadata/BlackArea.h" // for BlackArea
 #include <gtest/gtest.h> // for IsNullLiteralHelper, AssertionResult, gtest_ar
 #include <memory>        // for unique_ptr
 
-using std::unique_ptr;
 using rawspeed::BlackArea;
+using std::unique_ptr;
 
 namespace rawspeed_test {
 

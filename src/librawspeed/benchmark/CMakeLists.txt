@@ -2,7 +2,7 @@ add_custom_target(benchmarks ALL)
 
 FILE(GLOB RAWSPEED_BENCH_SOURCES
   "../benchmark/Common.cpp"
-  "../test/RawSpeed.cpp"
+  "${CMAKE_SOURCE_DIR}/test/librawspeed/test/RawSpeed.cpp"
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "COVERAGE")

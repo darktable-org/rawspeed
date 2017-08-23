@@ -23,9 +23,9 @@
 #include "common/Common.h" // for int32, short16, uint32, uint64, ushort16
 #include <gmock/gmock.h>   // for make_tuple, tuple
 
-using rawspeed::ushort16;
 using rawspeed::uint32;
 using rawspeed::uint64;
+using rawspeed::ushort16;
 
 namespace rawspeed_test {
 

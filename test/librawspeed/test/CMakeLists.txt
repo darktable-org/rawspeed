@@ -1,5 +1,3 @@
-add_custom_target(tests ALL)
-
 FILE(GLOB RAWSPEED_TEST_SOURCES
   "RawSpeed.cpp"
 )

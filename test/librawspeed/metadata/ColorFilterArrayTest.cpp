@@ -19,25 +19,25 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "metadata/ColorFilterArray.h" // for ColorFilterArray, CFAColor
 #include "common/Common.h"             // for uint32
 #include "common/Point.h"              // for iPoint2D
-#include "metadata/ColorFilterArray.h" // for ColorFilterArray, CFAColor
 #include <gtest/gtest.h>               // for AssertionResult, IsNullLitera...
 #include <iosfwd>                      // for ostream
 #include <string>                      // for string, operator<<
 
-using std::string;
-using rawspeed::uint32;
-using rawspeed::iPoint2D;
 using rawspeed::CFAColor;
-using rawspeed::ColorFilterArray;
-using rawspeed::CFA_RED;
-using rawspeed::CFA_GREEN;
 using rawspeed::CFA_BLUE;
 using rawspeed::CFA_CYAN;
-using rawspeed::CFA_MAGENTA;
 using rawspeed::CFA_FUJI_GREEN;
+using rawspeed::CFA_GREEN;
+using rawspeed::CFA_MAGENTA;
+using rawspeed::CFA_RED;
 using rawspeed::CFA_YELLOW;
+using rawspeed::ColorFilterArray;
+using rawspeed::iPoint2D;
+using rawspeed::uint32;
+using std::string;
 
 namespace rawspeed {
 
@@ -164,12 +164,12 @@ INSTANTIATE_TEST_CASE_P(CYGM, ColorFilterArrayTest,
                         testing::Combine(Bayer_CYGM, Bayer_CYGM, Bayer_CYGM,
                                          Bayer_CYGM));
 
-static void setHelper(ColorFilterArray *cfa, Bayer2x2 param) {
+static void setHelper(ColorFilterArray* cfa, Bayer2x2 param) {
   cfa->setCFA(square, std::tr1::get<0>(param), std::tr1::get<1>(param),
               std::tr1::get<2>(param), std::tr1::get<3>(param));
 }
 
-static void check(ColorFilterArray *cfa, Bayer2x2 param) {
+static void check(ColorFilterArray* cfa, Bayer2x2 param) {
   ASSERT_EQ(cfa->getColorAt(0, 0), std::tr1::get<0>(param));
   ASSERT_EQ(cfa->getColorAt(1, 0), std::tr1::get<1>(param));
   ASSERT_EQ(cfa->getColorAt(0, 1), std::tr1::get<2>(param));

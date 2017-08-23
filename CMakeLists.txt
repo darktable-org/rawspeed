@@ -113,10 +113,15 @@ include(compiler-flags)
 
 add_custom_target(check ALL)
 add_custom_target(dependencies ALL)
+add_custom_target(tests ALL)
 
 set_directory_properties(PROPERTIES COMPILE_OPTIONS "-Werror")
 
 add_subdirectory(src)
+
+if(BUILD_TESTING)
+  add_subdirectory(test)
+endif()
 
 if(BUILD_FUZZERS)
   add_subdirectory(fuzz)

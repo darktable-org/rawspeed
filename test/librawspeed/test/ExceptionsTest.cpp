@@ -35,16 +35,16 @@
 #include <string>                             // for string
 // IWYU pragma: no_include <bits/exception.h>
 
-using std::unique_ptr;
-using rawspeed::RawspeedException;
 using rawspeed::CameraMetadataException;
 using rawspeed::CiffParserException;
+using rawspeed::FiffParserException;
 using rawspeed::FileIOException;
 using rawspeed::IOException;
 using rawspeed::RawDecoderException;
-using rawspeed::TiffParserException;
-using rawspeed::FiffParserException;
 using rawspeed::RawParserException;
+using rawspeed::RawspeedException;
+using rawspeed::TiffParserException;
+using std::unique_ptr;
 
 namespace rawspeed_test {
 
@@ -138,24 +138,24 @@ TYPED_TEST(ExceptionsTest, Throw) {
 
   ASSERT_ANY_THROW({
     std::unique_ptr<TypeParam> Exception(new TypeParam(msg));
-    throw * Exception.get();
+    throw *Exception.get();
   });
   EXPECT_THROW(
       {
         std::unique_ptr<TypeParam> Exception(new TypeParam(msg));
-        throw * Exception.get();
+        throw *Exception.get();
       },
       std::runtime_error);
   EXPECT_THROW(
       {
         std::unique_ptr<TypeParam> Exception(new TypeParam(msg));
-        throw * Exception.get();
+        throw *Exception.get();
       },
       RawspeedException);
   EXPECT_THROW(
       {
         std::unique_ptr<TypeParam> Exception(new TypeParam(msg));
-        throw * Exception.get();
+        throw *Exception.get();
       },
       TypeParam);
 }
@@ -169,7 +169,7 @@ TYPED_TEST(ExceptionsTest, ThrowMessage) {
 
   try {
     std::unique_ptr<TypeParam> Exception(new TypeParam(msg));
-    throw * Exception.get();
+    throw *Exception.get();
   } catch (std::exception& ex) {
     ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
   }
@@ -177,7 +177,7 @@ TYPED_TEST(ExceptionsTest, ThrowMessage) {
   try {
     std::unique_ptr<TypeParam> ExceptionOne(new TypeParam(msg));
     const std::unique_ptr<const TypeParam> ExceptionTwo(new TypeParam(msg));
-    throw * ExceptionTwo.get();
+    throw *ExceptionTwo.get();
   } catch (std::exception& ex) {
     ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
   }
@@ -185,7 +185,7 @@ TYPED_TEST(ExceptionsTest, ThrowMessage) {
   try {
     const TypeParam ExceptionOne(msg);
     std::unique_ptr<TypeParam> ExceptionTwo(new TypeParam(msg));
-    throw * ExceptionTwo.get();
+    throw *ExceptionTwo.get();
   } catch (std::exception& ex) {
     ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
   }

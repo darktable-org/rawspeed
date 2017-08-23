@@ -20,18 +20,18 @@
 */
 
 #include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
-#include <algorithm>          // for generate
-#include <cstdlib>            // for rand, srand
-#include <gmock/gmock.h>      // for get, InitGoogleMock, tuple
-#include <gtest/gtest.h>      // for IsNullLiteralHelper, AssertionResult
-#include <iostream>           // for operator<<, basic_ostream::operator<<
-#include <limits>             // for numeric_limits
-#include <memory>             // for unique_ptr
-#include <string>             // for string
-#include <vector>             // for vector, allocator
+#include <algorithm>                   // for generate
+#include <cstdlib>                     // for rand, srand
+#include <gmock/gmock.h>               // for get, InitGoogleMock, tuple
+#include <gtest/gtest.h> // for IsNullLiteralHelper, AssertionResult
+#include <iostream>      // for operator<<, basic_ostream::operator<<
+#include <limits>        // for numeric_limits
+#include <memory>        // for unique_ptr
+#include <string>        // for string
+#include <vector>        // for vector, allocator
 
-using std::unique_ptr;
 using rawspeed::CameraSensorInfo;
+using std::unique_ptr;
 
 namespace rawspeed_test {
 
@@ -54,7 +54,7 @@ protected:
     mMaxIso = std::tr1::get<1>(GetParam());
   }
 
-  void checkHelper(const CameraSensorInfo &csi) {
+  void checkHelper(const CameraSensorInfo& csi) {
     ASSERT_EQ(csi.mBlackLevel, mBlackLevel);
     ASSERT_EQ(csi.mWhiteLevel, mWhiteLevel);
     ASSERT_EQ(csi.mMinIso, mMinIso);
@@ -62,7 +62,7 @@ protected:
     ASSERT_EQ(csi.mBlackLevelSeparate, mBlackLevelSeparate);
   }
 
-  void checkHelper(const CameraSensorInfo &a, const CameraSensorInfo &b) {
+  void checkHelper(const CameraSensorInfo& a, const CameraSensorInfo& b) {
     ASSERT_EQ(a.mBlackLevel, b.mBlackLevel);
     ASSERT_EQ(a.mWhiteLevel, b.mWhiteLevel);
     ASSERT_EQ(a.mMinIso, b.mMinIso);
@@ -230,8 +230,8 @@ struct IsoExpectationsT {
   bool isIsoWithin;
   bool isDefault;
 
-  friend std::ostream &operator<<(std::ostream &os,
-                                  const IsoExpectationsT &obj) {
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const IsoExpectationsT& obj) {
     return os << "min ISO: " << obj.mMinIso << "; test iso: " << obj.Iso
               << ", max ISO: " << obj.mMaxIso
               << "; is iso within: " << obj.isIsoWithin

@@ -27,20 +27,20 @@
 #include <iostream>        // for hex, endl, ostream
 #include <utility>         // for get
 
-using std::setfill;
-using std::setw;
-using rawspeed::short16;
-using rawspeed::int32;
+using rawspeed::Endianness;
+using rawspeed::getBE;
+using rawspeed::getByteSwapped;
 using rawspeed::getHostEndianness;
 using rawspeed::getHostEndiannessRuntime;
-using rawspeed::getByteSwapped;
-using rawspeed::getBE;
 using rawspeed::getLE;
-using rawspeed::Endianness;
 using rawspeed::getU16BE;
 using rawspeed::getU16LE;
 using rawspeed::getU32BE;
 using rawspeed::getU32LE;
+using rawspeed::int32;
+using rawspeed::short16;
+using std::setfill;
+using std::setw;
 
 namespace rawspeed_test {
 
