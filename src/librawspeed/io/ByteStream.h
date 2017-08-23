@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "rawspeedconfig.h" // for ASAN_REGION_IS_POISONED
 #include "common/Common.h"  // for uchar8, int32, uint32, ushort16, roundUp
 #include "common/Memory.h"  // for alignedMalloc
 #include "io/Buffer.h"      // for Buffer::size_type, Buffer, DataBuffer

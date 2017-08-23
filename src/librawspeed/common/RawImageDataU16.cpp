@@ -18,6 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"               // for WITH_SSE2
 #include "common/RawImage.h"              // for RawImageDataU16, TableLookUp
 #include "common/Common.h"                // for ushort16, uint32, uchar8
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...

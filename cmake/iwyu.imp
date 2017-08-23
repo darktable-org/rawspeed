@@ -1,4 +1,7 @@
 [
+ { include: ["<zconf.h>", "private", "<zlib.h>", "public"] },
+ { include: ["<jconfig.h>", "private", "<jpeglib.h>", "public"] },
+ { include: ["<jmorecfg.h>", "private", "<jpeglib.h>", "public"] },
  { include: ["@<gtest/.*>", "private", "<gtest/gtest.h>", "public"] },
  { include: ["@<gmock/.*>", "private", "<gmock/gmock.h>", "public"] },
  { include: ["<ThreadSafetyAnalysis.h>", "private", "\"ThreadSafetyAnalysis.h\"", "public"] }

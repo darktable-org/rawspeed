@@ -25,6 +25,10 @@
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 
+#ifdef HAVE_PTHREAD
+#include <pthread.h> // for pthread_t
+#endif
+
 namespace rawspeed {
 
 class RawDecompressorThread;

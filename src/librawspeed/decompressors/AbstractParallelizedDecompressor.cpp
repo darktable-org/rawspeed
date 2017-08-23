@@ -20,8 +20,10 @@
 
 #include "rawspeedconfig.h"                                 // for HAVE_PTHREAD
 #include "decompressors/AbstractParallelizedDecompressor.h" // for AbstractPar..
+#include "common/Point.h"                                   // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDec...
 #include <algorithm>                      // for min
+#include <cassert>                        // for assert
 #include <vector>                         // for vector
 
 namespace rawspeed {

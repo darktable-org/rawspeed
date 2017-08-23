@@ -30,8 +30,6 @@ namespace rawspeed {
 
 class ByteStream;
 
-class RawImage;
-
 class TiffIFD;
 
 class PentaxDecompressor final : public AbstractDecompressor {

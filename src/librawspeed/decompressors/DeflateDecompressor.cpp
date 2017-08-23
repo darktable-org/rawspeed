@@ -30,7 +30,6 @@
 #include <cassert>                        // for assert
 #include <cstdio>                         // for size_t
 #include <zlib.h>
-// IWYU pragma: no_include <zconf.h>
 
 namespace rawspeed {
 

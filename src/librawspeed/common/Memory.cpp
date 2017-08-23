@@ -31,8 +31,7 @@
 
 #if defined(HAVE_MM_MALLOC)
 // for _mm_malloc, _mm_free
-#include <xmmintrin.h> // IWYU pragma: keep
-// IWYU pragma: no_include <mm_malloc.h>
+#include <xmmintrin.h>
 #elif defined(HAVE_ALIGNED_MALLOC)
 extern "C" {
 #include <malloc.h> // for _aligned_malloc, _aligned_free

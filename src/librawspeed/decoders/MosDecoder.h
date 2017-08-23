@@ -21,10 +21,9 @@
 
 #pragma once
 
-#include "common/Common.h"                // for uint32
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
+#include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
 #include <string>                         // for string
 
 namespace rawspeed {

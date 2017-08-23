@@ -35,8 +35,6 @@
 #include <jpeglib.h>                      // for jpeg
 #include <memory>                         // for unique_ptr
 #include <vector>                         // for vector
-// IWYU pragma: no_include <jconfig.h>
-// IWYU pragma: no_include <jmorecfg.h>
 
 #ifndef HAVE_JPEG_MEM_SRC
 #include "io/IOException.h" // for ThrowIOE

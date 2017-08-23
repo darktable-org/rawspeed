@@ -28,7 +28,6 @@
  */
 
 #include "md5.h"         // for rawspeed::md5::state, md5_hash
-#include <array>         // for array
 #include <cstdint>       // for UINT32_C, uint8_t
 #include <cstring>       // for strlen
 #include <gtest/gtest.h> // for AssertionResult, IsNullLiteralHelper, Param...

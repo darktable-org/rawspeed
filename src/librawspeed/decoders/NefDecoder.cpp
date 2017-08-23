@@ -43,7 +43,6 @@
 #include <sstream>                                  // for operator<<, ostr...
 #include <string>                                   // for string, operator==
 #include <vector>                                   // for vector
-// IWYU pragma: no_include <ext/alloc_traits.h>
 
 using std::vector;
 using std::string;

@@ -26,7 +26,6 @@
 #include <memory>                // for unique_ptr
 #include <ratio>                 // for milli, ratio
 #include <string>                // for string, to_string
-// IWYU pragma: no_include <sys/time.h>
 
 #ifdef _OPENMP
 #include <omp.h>

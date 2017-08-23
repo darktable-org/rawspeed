@@ -34,6 +34,8 @@
 #include <cmath>                          // for pow
 #include <stdexcept>                      // for out_of_range
 #include <tuple>                          // for tie, tuple
+// IWYU pragma: no_include <ext/alloc_traits.h>
+// IWYU pragma: no_include <type_traits>
 
 using std::vector;
 using std::fill_n;
