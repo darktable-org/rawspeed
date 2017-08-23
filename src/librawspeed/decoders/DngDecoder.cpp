@@ -181,6 +181,20 @@ void DngDecoder::parseCFA(const TiffIFD* raw) {
       mRaw->cfa.setColorAt(iPoint2D(x, y), c2);
     }
   }
+
+  // the cfa is specified relative to the ActiveArea. we want it relative (0,0)
+  // Since in handleMetadata(), in subFrame() we unconditionally shift CFA by
+  // activearea+DefaultCropOrigin; here we need to undo the 'ACTIVEAREA' part.
+  if (!raw->hasEntry(ACTIVEAREA))
+    return;
+
+  TiffEntry* active_area = raw->getEntry(ACTIVEAREA);
+  if (active_area->count != 4)
+    ThrowRDE("active area has %d values instead of 4", active_area->count);
+
+  auto aa = active_area->getFloatArray(2);
+  mRaw->cfa.shiftLeft(aa[1]);
+  mRaw->cfa.shiftDown(aa[0]);
 }
 
 void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
