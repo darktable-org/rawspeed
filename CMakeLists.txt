@@ -115,18 +115,12 @@ add_custom_target(check ALL)
 add_custom_target(dependencies ALL)
 add_custom_target(tests ALL)
 
+include(compiler-warnings)
 set_directory_properties(PROPERTIES COMPILE_OPTIONS "-Werror")
 
-add_library(rawspeed STATIC)
-
-include(src-dependencies)
-
-include(compiler-warnings)
-
-include(memory-align-alloc)
-include(thread-local)
-
 add_subdirectory(src)
+
+include(OpenMP)
 
 if(BUILD_TESTING)
   add_subdirectory(test)
