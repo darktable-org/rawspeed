@@ -10,6 +10,10 @@ target_compile_definitions(${rsidentify}
 
 target_link_libraries(${rsidentify} rawspeed)
 
+if(WITH_OPENMP AND OPENMP_FOUND AND TARGET OpenMP::OpenMP)
+  target_link_libraries(${rsidentify} OpenMP::OpenMP)
+endif()
+
 if(BUILD_TESTING)
   add_test(NAME utilities/${rsidentify} COMMAND ${rsidentify})
 endif()

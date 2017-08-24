@@ -14,8 +14,11 @@ target_sources(rawspeed_test PRIVATE
 )
 
 target_link_libraries(rawspeed_test PUBLIC rawspeed)
-target_link_libraries(rawspeed_test PUBLIC OpenMP::OpenMP)
 target_link_libraries(rawspeed_test PUBLIC gtest gmock_main)
+
+if(WITH_OPENMP AND OPENMP_FOUND AND TARGET OpenMP::OpenMP)
+  target_link_libraries(rawspeed_test PUBLIC OpenMP::OpenMP)
+endif()
 
 FILE(GLOB RAWSPEED_TESTS_SOURCES
   "../common/CommonTest.cpp"

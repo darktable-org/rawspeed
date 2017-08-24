@@ -17,8 +17,11 @@ target_sources(rawspeed_benchmark PRIVATE
 )
 
 target_link_libraries(rawspeed_benchmark PUBLIC rawspeed)
-target_link_libraries(rawspeed_benchmark PUBLIC OpenMP::OpenMP)
 target_link_libraries(rawspeed_benchmark PUBLIC benchmark)
+
+if(WITH_OPENMP AND OPENMP_FOUND AND TARGET OpenMP::OpenMP)
+  target_link_libraries(rawspeed_benchmark PUBLIC OpenMP::OpenMP)
+endif()
 
 FILE(GLOB RAWSPEED_BENCHMARKS_SOURCES
   "../interpolators/Cr2sRawInterpolatorBenchmark.cpp"
