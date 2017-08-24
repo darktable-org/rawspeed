@@ -17,6 +17,7 @@ target_sources(rawspeed_benchmark PRIVATE
 )
 
 target_link_libraries(rawspeed_benchmark PUBLIC rawspeed)
+target_link_libraries(rawspeed_benchmark PUBLIC OpenMP::OpenMP)
 target_link_libraries(rawspeed_benchmark PUBLIC benchmark)
 
 FILE(GLOB RAWSPEED_BENCHMARKS_SOURCES

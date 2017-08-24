@@ -48,7 +48,6 @@ if(WITH_OPENMP)
       set_property(TARGET OpenMP::OpenMP PROPERTY INTERFACE_LINK_LIBRARIES "${OpenMP_CXX_FLAGS}")
     endif()
 
-    target_link_libraries(rawspeed INTERFACE OpenMP::OpenMP)
     set_package_properties(OpenMP PROPERTIES
                            TYPE OPTIONAL
                            PURPOSE "Used for parallelization of tools (NOT library!)")

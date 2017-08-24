@@ -14,6 +14,7 @@ target_sources(rawspeed_test PRIVATE
 )
 
 target_link_libraries(rawspeed_test PUBLIC rawspeed)
+target_link_libraries(rawspeed_test PUBLIC OpenMP::OpenMP)
 target_link_libraries(rawspeed_test PUBLIC gtest gmock_main)
 
 FILE(GLOB RAWSPEED_TESTS_SOURCES

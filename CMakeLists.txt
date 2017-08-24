@@ -117,6 +117,15 @@ add_custom_target(tests ALL)
 
 set_directory_properties(PROPERTIES COMPILE_OPTIONS "-Werror")
 
+add_library(rawspeed STATIC)
+
+include(src-dependencies)
+
+include(compiler-warnings)
+
+include(memory-align-alloc)
+include(thread-local)
+
 add_subdirectory(src)
 
 if(BUILD_TESTING)
