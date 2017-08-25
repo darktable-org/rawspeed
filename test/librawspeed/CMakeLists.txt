@@ -20,7 +20,7 @@ file(MAKE_DIRECTORY "${UNITTEST_REPORT_PATH}")
 
 function(add_rs_test src)
   get_filename_component(TESTNAME ${src} NAME_WE)
-  add_executable(${TESTNAME} ${IN})
+  add_executable(${TESTNAME} ${src})
   target_link_libraries(${TESTNAME} rawspeed)
   target_link_libraries(${TESTNAME} rawspeed_test)
   # GTEST_ADD_TESTS(${TESTNAME} "" AUTO)
