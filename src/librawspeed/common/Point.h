@@ -76,8 +76,9 @@ public:
     return operator<=(rhs);
   }
 
+  // FIXME: constexpr once gcc5+
   constexpr iPoint2D getSmallest(const iPoint2D& rhs) const {
-    return {std::min(x, rhs.x), std::min(y, rhs.y)};
+    return {x < rhs.x ? x : rhs.x, y < rhs.y ? y : rhs.y};
   }
 
   int x = 0;

@@ -25,8 +25,9 @@
 
 namespace rawspeed {
 
+// FIXME: constexpr once gcc5+
 template <typename T> struct RangesOverlapCmp final {
-  constexpr bool operator()(const T& lhs, const T& rhs) const {
+  /*constexpr*/ bool operator()(const T& lhs, const T& rhs) const {
     return !RangesOverlap(lhs, rhs);
   }
 };
