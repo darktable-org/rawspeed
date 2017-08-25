@@ -22,6 +22,7 @@
 #pragma once
 
 #include "common/Common.h"               // for uint32, ushort16
+#include "common/NORangesSet.h"          // for NORangesSet
 #include "io/Buffer.h"                   // for Buffer (ptr only), DataBuffer
 #include "io/ByteStream.h"               // for ByteStream
 #include "io/Endianness.h"               // for getHostEndianness, Endianne...
@@ -57,13 +58,16 @@ class TiffIFD
   void checkOverflow();
   void add(TiffIFDOwner subIFD);
   void add(TiffEntryOwner entry);
-  TiffRootIFDOwner parseDngPrivateData(TiffEntry *t);
-  TiffRootIFDOwner parseMakerNote(TiffEntry *t);
-  void parseIFDEntry(ByteStream* bs);
+  TiffRootIFDOwner parseDngPrivateData(NORangesSet<Buffer>* ifds, TiffEntry* t);
+  TiffRootIFDOwner parseMakerNote(NORangesSet<Buffer>* ifds, TiffEntry* t);
+  void parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream* bs);
 
 public:
   explicit TiffIFD(TiffIFD* parent);
-  TiffIFD(TiffIFD* parent, const DataBuffer& data, uint32 offset);
+
+  TiffIFD(TiffIFD* parent, NORangesSet<Buffer>* ifds, const DataBuffer& data,
+          uint32 offset);
+
   virtual ~TiffIFD() = default;
 
   // make sure we never copy-constuct/assign a TiffIFD to keep the owning
@@ -95,8 +99,9 @@ class TiffRootIFD final : public TiffIFD {
 public:
   const DataBuffer rootBuffer;
 
-  TiffRootIFD(TiffIFD* parent_, const DataBuffer& data, uint32 offset)
-      : TiffIFD(parent_, data, offset), rootBuffer(data) {}
+  TiffRootIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
+              const DataBuffer& data, uint32 offset)
+      : TiffIFD(parent_, ifds, data, offset), rootBuffer(data) {}
 
   // find the MAKE and MODEL tags identifying the camera
   // note: the returned strings are trimmed automatically

@@ -21,25 +21,26 @@
 */
 
 #include "tiff/TiffIFD.h"
-#include "common/Common.h" // for getHostEndianness, uint32, make_unique
+#include "common/Common.h"            // for getHostEndianness, uint32, make_...
+#include "common/NORangesSet.h"       // for NORangesSet
 #include "common/RawspeedException.h" // for RawspeedException
 #include "io/IOException.h"           // for IOException
 #include "tiff/TiffEntry.h"           // for TiffEntry
-#include "tiff/TiffTag.h" // for TiffTag, ::DNGPRIVATEDATA, ::EXIFIFDPOINTER
-#include <algorithm>      // for move
-#include <cstdint>        // for UINT32_MAX
-#include <map>            // for map, _Rb_tree_const_iterator, allocator
-#include <memory>         // for default_delete, unique_ptr
-#include <string>         // for operator==, string, basic_string
-#include <utility>        // for pair
-#include <vector>         // for vector
+#include "tiff/TiffTag.h"             // for TiffTag, ::DNGPRIVATEDATA, ::EXI...
+#include <algorithm>                  // for move
+#include <cstdint>                    // for UINT32_MAX
+#include <map>                        // for map, _Rb_tree_const_iterator, al...
+#include <memory>                     // for default_delete, unique_ptr
+#include <string>                     // for operator==, string, basic_string
+#include <utility>                    // for pair
+#include <vector>                     // for vector
 
 using std::string;
 using std::vector;
 
 namespace rawspeed {
 
-void TiffIFD::parseIFDEntry(ByteStream* bs) {
+void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream* bs) {
   TiffEntryOwner t;
 
   auto origPos = bs->getPosition();
@@ -56,19 +57,19 @@ void TiffIFD::parseIFDEntry(ByteStream* bs) {
   try {
     switch (t->tag) {
     case DNGPRIVATEDATA:
-      add(parseDngPrivateData(t.get()));
+      add(parseDngPrivateData(ifds, t.get()));
       break;
 
     case MAKERNOTE:
     case MAKERNOTE_ALT:
-      add(parseMakerNote(t.get()));
+      add(parseMakerNote(ifds, t.get()));
       break;
 
     case FUJI_RAW_IFD:
     case SUBIFDS:
     case EXIFIFDPOINTER:
       for (uint32 j = 0; j < t->count; j++)
-        add(std::make_unique<TiffIFD>(this, *bs, t->getU32(j)));
+        add(std::make_unique<TiffIFD>(this, ifds, *bs, t->getU32(j)));
       break;
 
     default:
@@ -81,7 +82,8 @@ void TiffIFD::parseIFDEntry(ByteStream* bs) {
 
 TiffIFD::TiffIFD(TiffIFD* parent_) : parent(parent_) {}
 
-TiffIFD::TiffIFD(TiffIFD* parent_, const DataBuffer& data, uint32 offset)
+TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
+                 const DataBuffer& data, uint32 offset)
     : TiffIFD(parent_) {
 
   // see TiffParser::parse: UINT32_MAX is used to mark the "virtual" top level
@@ -97,16 +99,22 @@ TiffIFD::TiffIFD(TiffIFD* parent_, const DataBuffer& data, uint32 offset)
   // Directory entries in this IFD
   auto numEntries = bs.getU16();
 
-  // each entry is 12 bytes + 4-byte offset to the next IFD at the end
-  bs.check(4 + 12 * numEntries);
+  // 2 bytes for entry count
+  // each entry is 12 bytes
+  // 4-byte offset to the next IFD at the end
+  const auto IFDFullSize = 2 + 4 + 12 * numEntries;
+  const Buffer IFDBuf(data.getSubView(offset, IFDFullSize));
+  if (ifds && !ifds->emplace(IFDBuf).second)
+    ThrowTPE("Two IFD's overlap. Raw corrupt!");
 
   for (uint32 i = 0; i < numEntries; i++)
-    parseIFDEntry(&bs);
+    parseIFDEntry(ifds, &bs);
 
   nextIFD = bs.getU32();
 }
 
-TiffRootIFDOwner TiffIFD::parseDngPrivateData(TiffEntry* t) {
+TiffRootIFDOwner TiffIFD::parseDngPrivateData(NORangesSet<Buffer>* ifds,
+                                              TiffEntry* t) {
   /*
   1. Six bytes containing the zero-terminated string "Adobe". (The DNG specification calls for the DNGPrivateData tag to start with an ASCII string identifying the creator/format).
   2. 4 bytes: an ASCII string ("MakN" for a Makernote),  indicating what sort of data is being stored here. Note that this is not zero-terminated.
@@ -136,12 +144,12 @@ TiffRootIFDOwner TiffIFD::parseDngPrivateData(TiffEntry* t) {
   // Update the underlying buffer of t, such that the maker note data starts at its original offset
   bs.rebase(makerNoteOffset, makerNoteSize);
 
-  return parseMakerNote(t);
+  return parseMakerNote(ifds, t);
 }
 
 /* This will attempt to parse makernotes and return it as an IFD */
-TiffRootIFDOwner TiffIFD::parseMakerNote(TiffEntry* t)
-{
+TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
+                                         TiffEntry* t) {
   // go up the IFD tree and try to find the MAKE entry on each level.
   // we can not go all the way to the top first because this partial tree
   // is not yet added to the TiffRootIFD.
@@ -209,7 +217,7 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(TiffEntry* t)
   }
 
   // Attempt to parse the rest as an IFD
-  return std::make_unique<TiffRootIFD>(this, bs, bs.getPosition());
+  return std::make_unique<TiffRootIFD>(this, ifds, bs, bs.getPosition());
 }
 
 std::vector<const TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) const {

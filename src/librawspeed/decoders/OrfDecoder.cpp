@@ -320,7 +320,7 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     // Newer cameras process the Image Processing SubIFD in the makernote
     TiffEntry* img_entry = mRootIFD->getEntryRecursive(OLYMPUSIMAGEPROCESSING);
     // get makernote ifd with containing Buffer
-    TiffRootIFD image_processing(nullptr, img_entry->getRootIfdData(),
+    TiffRootIFD image_processing(nullptr, nullptr, img_entry->getRootIfdData(),
                                  img_entry->getU32());
 
     // Get the WB

@@ -60,7 +60,7 @@ RawImage DcrDecoder::decodeRawInternal() {
       ThrowRDE("Couldn't find the Kodak IFD offset");
 
     assert(ifdoffset != nullptr);
-    TiffRootIFD kodakifd(nullptr, ifdoffset->getRootIfdData(),
+    TiffRootIFD kodakifd(nullptr, nullptr, ifdoffset->getRootIfdData(),
                          ifdoffset->getU32());
 
     TiffEntry *linearization = kodakifd.getEntryRecursive(KODAK_LINEARIZATION);

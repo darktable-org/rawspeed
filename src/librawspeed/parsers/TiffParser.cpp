@@ -23,6 +23,7 @@
 
 #include "parsers/TiffParser.h"
 #include "common/Common.h"               // for make_unique, trimSpaces
+#include "common/NORangesSet.h"          // for NORangesSet
 #include "decoders/ArwDecoder.h"         // for ArwDecoder
 #include "decoders/Cr2Decoder.h"         // for Cr2Decoder
 #include "decoders/DcrDecoder.h"         // for DcrDecoder
@@ -71,10 +72,14 @@ TiffRootIFDOwner TiffParser::parse(const Buffer& data) {
     ThrowTPE("Not a TIFF file (magic 42)");
 
   TiffRootIFDOwner root = std::make_unique<TiffRootIFD>(
-      nullptr, bs,
+      nullptr, nullptr, bs,
       UINT32_MAX); // tell TiffIFD constructur not to parse bs as IFD
-  for( uint32 nextIFD = bs.getU32(); nextIFD; nextIFD = root->getSubIFDs().back()->getNextIFD() ) {
-    root->add(std::make_unique<TiffIFD>(root.get(), bs, nextIFD));
+
+  NORangesSet<Buffer> ifds;
+
+  for (uint32 IFDOffset = bs.getU32(); IFDOffset;
+       IFDOffset = root->getSubIFDs().back()->getNextIFD()) {
+    root->add(std::make_unique<TiffIFD>(root.get(), &ifds, bs, IFDOffset));
   }
 
   return root;
