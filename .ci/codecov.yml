@@ -1,6 +1,10 @@
 codecov:
   notify:
     require_ci_to_pass: true
+    irc:
+      default:
+        server: "chat.freenode.net"
+        channel: '#rawspeed'
 coverage:
   precision: 2
   range: "0...100"
@@ -10,8 +14,7 @@ coverage:
     patch: false
     project: false
   ignore:
-    - "src/librawspeed/**/test/.*"
-    - "src/librawspeed/**/*Test*"
+    - "**/test/**/*"
 parsers:
   gcov:
     branch_detection:
