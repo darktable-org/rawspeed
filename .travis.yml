@@ -44,10 +44,11 @@ env:
     - CFLAGS="-pipe" CXXFLAGS="-pipe"
     - TARGET=build
 
-matrix:
+jobs:
   fast_finish: true
   include:
-  - os: linux
+  - stage: test
+    os: linux
     sudo: required
     services:
       - docker
@@ -70,7 +71,8 @@ matrix:
     dist: trusty
     sudo: required
     env: CC=gcc-4.9 CXX=g++-4.9 EXTRA=NODOCKER
-  - os: linux
+  - stage: deploy
+    os: linux
     sudo: required
     services:
       - docker
