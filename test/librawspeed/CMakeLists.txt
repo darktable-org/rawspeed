@@ -24,7 +24,9 @@ function(add_rs_test src)
   target_link_libraries(${TESTNAME} rawspeed)
   target_link_libraries(${TESTNAME} rawspeed_test)
   # GTEST_ADD_TESTS(${TESTNAME} "" AUTO)
-  add_test(NAME ${TESTNAME} COMMAND ${TESTNAME} --gtest_output=xml:${UNITTEST_REPORT_PATH})
+  add_test(NAME ${TESTNAME}
+    COMMAND ${TESTNAME} --gtest_output=xml:${UNITTEST_REPORT_PATH}
+    WORKING_DIRECTORY "$<TARGET_PROPERTY:rawspeed_test,BINARY_DIR>")
   add_dependencies(tests ${TESTNAME})
 endfunction()
 
