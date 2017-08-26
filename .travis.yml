@@ -23,7 +23,7 @@ before_install:
       exit;
     elif [[ "$FLAVOR" == "Coverage" && "$TRAVIS_OS_NAME" == "linux" ]]; then
       travis_retry sudo apt-get install -y -q -f --fix-missing lftp;
-      lftp -c mirror -c -P 4 -v --delete https://raw.pixls.us/data-unique/ $HOME/$RPUU_DST;
+      lftp -c mirror -P 4 -v --delete https://raw.pixls.us/data-unique/ $HOME/$RPUU_DST;
     elif [[ "$EXTRA" == "NODOCKER" && "$TRAVIS_OS_NAME" == "linux" ]]; then
       echo "oracle-java8-installer hold" | sudo dpkg --set-selections;
       echo "oracle-java9-installer hold" | sudo dpkg --set-selections;
