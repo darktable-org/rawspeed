@@ -23,7 +23,7 @@ before_install:
       exit;
     elif [[ "$FLAVOR" == "Coverage" && "$TRAVIS_OS_NAME" == "linux" ]]; then
       travis_retry sudo apt-get install -y -q -f --fix-missing lftp;
-      lftp -c mirror -c -v --delete https://raw.pixls.us/data-unique/ $HOME/$RPUU_DST;
+      lftp -c mirror -c -P 4 -v --delete https://raw.pixls.us/data-unique/ $HOME/$RPUU_DST;
     elif [[ "$EXTRA" == "NODOCKER" && "$TRAVIS_OS_NAME" == "linux" ]]; then
       echo "oracle-java8-installer hold" | sudo dpkg --set-selections;
       echo "oracle-java9-installer hold" | sudo dpkg --set-selections;
@@ -54,11 +54,13 @@ jobs:
   include:
   - stage: test
     os: linux
+    dist: trusty
     sudo: required
     services:
       - docker
     env: CC=gcc-7 CXX=g++-7
   - os: linux
+    dist: trusty
     sudo: required
     services:
       - docker
@@ -71,6 +73,7 @@ jobs:
   - os: osx
     env: CC=cc CXX=c++ FLAVOR=Coverage
   - os: linux
+    dist: trusty
     sudo: required
     services:
       - docker
@@ -81,6 +84,7 @@ jobs:
     env: CC=gcc-4.9 CXX=g++-4.9 EXTRA=NODOCKER
   - stage: deploy
     os: linux
+    dist: trusty
     sudo: required
     services:
       - docker
@@ -92,6 +96,7 @@ jobs:
         - '$HOME/$RPUU_DST'
         - '$HOME/.sonar/cache'
   - os: linux
+    dist: trusty
     sudo: required
     services:
       - docker
