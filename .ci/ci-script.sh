@@ -73,6 +73,15 @@ handle_coverage_data()
   mv "$BUILD_DIR"/*.gcov "$BUILD_DIR/gcov-reports-unittest"
 }
 
+handle_sample_coverage_data()
+{
+  cmake --build "$BUILD_DIR" --target gcov-clean
+  cmake --build "$BUILD_DIR" --target rstest-check
+  cmake --build "$BUILD_DIR" --target gcov
+  mkdir "$BUILD_DIR/gcov-reports-rsa"
+  mv "$BUILD_DIR"/*.gcov "$BUILD_DIR/gcov-reports-rsa"
+}
+
 diskspace()
 {
   df
@@ -101,6 +110,9 @@ esac
 case "$FLAVOR" in
   "Coverage")
     handle_coverage_data
+    if [[ $ECO == *"ENABLE_SAMPLEBASED_TESTING"* ]]; then
+      handle_sample_coverage_data
+    fi
     ;;
   *)
     ;;

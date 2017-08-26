@@ -25,3 +25,10 @@ add_custom_target(
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
   COMMENT "Running gcov tool on all the *.gcno files"
 )
+
+add_custom_target(
+  gcov-clean
+  COMMAND find "${CMAKE_BINARY_DIR}" -type f -name '*.gcda' -delete > /dev/null
+  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+  COMMENT "Removing all the *.gcda files"
+)
