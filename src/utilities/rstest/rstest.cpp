@@ -100,9 +100,14 @@ md5::md5_state imgDataHash(const rawspeed::RawImage& raw);
 
 void writeImage(const rawspeed::RawImage& raw, const std::string& fn);
 
+struct options {
+  bool create;
+  bool force;
+  bool dump;
+};
+
 size_t process(const std::string& filename,
-               const rawspeed::CameraMetaData* metadata, bool create,
-               bool dump);
+               const rawspeed::CameraMetaData* metadata, const options& o);
 
 class RstestHashMismatch final : public rawspeed::RawspeedException {
 public:
@@ -330,20 +335,21 @@ void writeImage(const RawImage& raw, const string& fn) {
 }
 
 size_t process(const string& filename, const CameraMetaData* metadata,
-               bool create, bool dump) {
+               const options& o) {
 
   const string hashfile(filename + ".hash");
 
   // if creating hash and hash exists -> skip current file
   // if not creating and hash is missing -> skip as well
+  // unless in force mode
   ifstream hf(hashfile);
-  if (hf.good() == create) {
+  if (hf.good() == o.create && !o.force) {
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
 #ifdef _OPENMP
 #pragma omp critical(io)
 #endif
     cout << left << setw(55) << filename << ": hash "
-         << (create ? "exists" : "missing") << ", skipping" << endl;
+         << (o.create ? "exists" : "missing") << ", skipping" << endl;
 #endif
     return 0;
   }
@@ -385,18 +391,26 @@ size_t process(const string& filename, const CameraMetaData* metadata,
        << endl;
 #endif
 
-  if (create) {
+  if (o.create) {
+    // write the hash. if force is set, then we are potentially overwriting here
     ofstream f(hashfile);
     f << img_hash(raw);
-    if (dump)
+    if (o.dump)
       writeImage(raw, filename);
   } else {
-    string truth((istreambuf_iterator<char>(hf)), istreambuf_iterator<char>());
+    // do generate the hash string regardless.
     string h = img_hash(raw);
+
+    // normally, here we would compare the old hash with the new one
+    // but if the force is set, and the hash does not exist, do nothing.
+    if (!hf.good() && o.force)
+      return time;
+
+    string truth((istreambuf_iterator<char>(hf)), istreambuf_iterator<char>());
     if (h != truth) {
       ofstream f(filename + ".hash.failed");
       f << h;
-      if (dump)
+      if (o.dump)
         writeImage(raw, filename + ".failed");
       throw RstestHashMismatch("hash/metadata mismatch", time);
     }
@@ -407,15 +421,20 @@ size_t process(const string& filename, const CameraMetaData* metadata,
 
 #pragma GCC diagnostic pop
 
-static int results(const map<string, string>& failedTests) {
+static int results(const map<string, string>& failedTests, const options& o) {
   if (failedTests.empty()) {
-    cout << "All good, no tests failed!" << endl;
+    cout << "All good, ";
+    if (!o.create)
+      cout << "no tests failed!" << endl;
+    else
+      cout << "all hashes created!" << endl;
     return 0;
   }
 
   cerr << "WARNING: the following " << failedTests.size()
        << " tests have failed:\n";
 
+  bool rstestlog = false;
   for (const auto& i : failedTests) {
     cerr << i.second << "\n";
 #ifndef WIN32
@@ -429,6 +448,8 @@ static int results(const map<string, string>& failedTests) {
     if (!(oldfile.good() || newfile.good()))
       continue;
 
+    rstestlog = true;
+
     // DIFF(1): -N, --new-file  treat absent files as empty
     string cmd(R"(diff -N -u0 ")");
     cmd += oldhash;
@@ -440,7 +461,8 @@ static int results(const map<string, string>& failedTests) {
   }
 #endif
 
-  cerr << "See rstest.log for details.\n";
+  if (rstestlog)
+    cerr << "See rstest.log for details.\n";
 
   return 1;
 }
@@ -449,13 +471,16 @@ static int usage(const char* progname) {
   cout << "usage: " << progname << R"(
   [-h] print this help
   [-c] for each file: decode, compute hash and store it.
-       If hash exists, it does not recompute it!
+       If hash exists, it does not recompute it, unless option -f is set!
+  [-f] if -c is set, then it will override the existing hashes.
+       If -c is not set, and the hash does not exist, then just decode,
+       but do not write the hash!
   [-d] store decoded image as PPM
   <FILE[S]> the file[s] to work on.
 
   With no options given, each raw with an accompanying hash will be decoded
-  and compared to the existing hash. A summary of all errors/failed hash
-  comparisons will be reported at the end.
+  and compared (unless option -f is set!) to the existing hash. A summary of
+  all errors/failed hash comparisons will be reported at the end.
 
   Suggested workflow for easy regression testing:
     1. remove all .hash files and build 'trusted' version of this program
@@ -473,6 +498,7 @@ static int usage(const char* progname) {
 } // namespace rawspeed
 
 using rawspeed::rstest::usage;
+using rawspeed::rstest::options;
 using rawspeed::rstest::process;
 using rawspeed::rstest::results;
 
@@ -489,12 +515,13 @@ int main(int argc, char **argv) {
     return found;
   };
 
-  bool help = hasFlag("-h");
-  bool create = hasFlag("-c");
-  bool dump = hasFlag("-d");
-
-  if (1 == argc || help)
+  if (1 == argc || hasFlag("-h"))
     return usage(argv[0]);
+
+  options o;
+  o.create = hasFlag("-c");
+  o.force = hasFlag("-f");
+  o.dump = hasFlag("-d");
 
 #ifdef HAVE_PUGIXML
   const CameraMetaData metadata(CMAKE_SOURCE_DIR "/data/cameras.xml");
@@ -513,7 +540,7 @@ int main(int argc, char **argv) {
 
     try {
       try {
-        time += process(argv[i], &metadata, create, dump);
+        time += process(argv[i], &metadata, o);
       } catch (rawspeed::rstest::RstestHashMismatch& e) {
         time += e.time;
         throw;
@@ -534,5 +561,5 @@ int main(int argc, char **argv) {
 
   cout << "Total decoding time: " << time / 1000.0 << "s" << endl << endl;
 
-  return results(failedTests);
+  return results(failedTests, o);
 }
