@@ -81,6 +81,11 @@ else()
 endif()
 option(BUILD_DOCS "Build the documentation (Sphinx+Doxygen)." OFF)
 option(BUILD_FUZZERS "Build the fuzzing tree." ON)
+if(BUILD_TOOLS AND BUILD_TESTING)
+  option(ENABLE_SAMPLEBASED_TESTING "If enabled, allows to use rstest to check the samples specified by REFERENCE_SAMPLE_ARCHIVE" OFF)
+else()
+  set(ENABLE_SAMPLEBASED_TESTING OFF CACHE BOOL "If enabled, allows to use rstest to check the samples specified by REFERENCE_SAMPLE_ARCHIVE" FORCE)
+endif()
 
 set(GOOGLETEST_PATH "/usr/src/googletest" CACHE PATH
                     "Path to the googletest root tree. Should contain googletest and googlemock subdirs. And CMakeLists.txt in root, and in both of these subdirs")
@@ -93,6 +98,8 @@ set(GOOGLEBENCHMARK_PATH "/usr/src/googlebenchmark" CACHE PATH
                     "Path to the googlebenchmark root tree.")
 
 set(LIBFUZZER_ARCHIVE "/usr/local/lib/llvm/lib/libFuzzer.a" CACHE FILEPATH "Filepath to the libFuzzer.a archive.")
+
+set(REFERENCE_SAMPLE_ARCHIVE "~/raw-camera-samples/raw.pixls.us-unique" CACHE PATH "The location of the reference sample set to use. Should contain filelist.sha1 and timestamp.txt")
 
 include(build-type)
 

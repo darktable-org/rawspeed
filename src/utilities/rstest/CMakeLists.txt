@@ -41,3 +41,7 @@ if(BUILD_BENCHMARKING)
 
   add_dependencies(benchmarks MD5Benchmark)
 endif()
+
+if(ENABLE_SAMPLEBASED_TESTING)
+  include(sample-based-testing)
+endif()
