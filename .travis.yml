@@ -167,9 +167,9 @@ after_success:
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       export CXX=AppleClang;
     fi;
-    ./codecov -e PLATFORM,CXX -F unittests -X gcov -s "$TRAVIS_BUILD_DIR/build/gcov-reports-unittest";
+    ./codecov -e PLATFORM,CXX -F unittests -X gcov -s "$TRAVIS_BUILD_DIR/build/gcov-reports-unittest" -Z;
     if [[ "$FLAVOR" == "Coverage" && "$TRAVIS_OS_NAME" == "linux" ]]; then
-      ./codecov -e PLATFORM,CXX -F integration,rpu-u -X gcov -s "$TRAVIS_BUILD_DIR/build/gcov-reports-rsa";
+      ./codecov -e PLATFORM,CXX -F integration,rpu_u -X gcov -s "$TRAVIS_BUILD_DIR/build/gcov-reports-rsa" -Z;
     fi;
   elif [[ "$TARGET" == "WWW" && "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_SECURE_ENV_VARS" == "true" && "$TRAVIS_BRANCH" == "develop" ]]; then
     "$TRAVIS_BUILD_DIR/.ci/www-finish.sh";

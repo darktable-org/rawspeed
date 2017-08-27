@@ -42,4 +42,4 @@ on_success:
       cd \"${APPVEYOR_BUILD_FOLDER}\";
       curl -s https://codecov.io/bash > codecov;
       chmod +x codecov;
-      ./codecov -e PLATFORM,CXX -F unittests -X gcov -s \"$TRAVIS_BUILD_DIR/build/gcov-reports-unittest\";"
+      ./codecov -e PLATFORM,CXX -F unittests -X gcov -s \"${APPVEYOR_BUILD_FOLDER}/build/gcov-reports-unittest\" -Z;
