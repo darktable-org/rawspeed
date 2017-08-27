@@ -22,8 +22,8 @@ before_install:
     elif [[ "$TARGET" == "WWW" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || "$TRAVIS_BRANCH" != "develop") ]]; then
       exit;
     elif [[ "$FLAVOR" == "Coverage" && "$TRAVIS_OS_NAME" == "linux" ]]; then
-      travis_retry sudo apt-get install -y -q -f --fix-missing lftp;
-      lftp -c mirror --delete --loop --verbose=1 https://raw.pixls.us/data-unique/ $HOME/$RPUU_DST;
+      travis_retry sudo apt-get install -y -q -f --fix-missing wget;
+      wget -r -np -nH --cut-dirs=1 -R "index.html*" https://raw.pixls.us/data-unique/ --directory-prefix=$HOME/$RPUU_DST;
     elif [[ "$EXTRA" == "NODOCKER" && "$TRAVIS_OS_NAME" == "linux" ]]; then
       echo "oracle-java8-installer hold" | sudo dpkg --set-selections;
       echo "oracle-java9-installer hold" | sudo dpkg --set-selections;
