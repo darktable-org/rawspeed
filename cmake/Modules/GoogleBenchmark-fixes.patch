@@ -1,0 +1,1357 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f7f1566..4265a6c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -138,2 +138,2 @@ else()
+-  set(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_DEBUG}" CACHE STRING
+-    "Flags used by the C++ compiler during coverage builds."
++  set(BENCHMARK_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_DEBUG}"
++    CACHE STRING "Flags used by the C++ compiler during coverage builds."
+@@ -141,3 +141,2 @@ else()
+-  set(CMAKE_EXE_LINKER_FLAGS_COVERAGE
+-    "${CMAKE_EXE_LINKER_FLAGS_DEBUG}" CACHE STRING
+-    "Flags used for linking binaries during coverage builds."
++  set(BENCHMARK_EXE_LINKER_FLAGS_COVERAGE "${CMAKE_EXE_LINKER_FLAGS_DEBUG}"
++    CACHE STRING "Flags used for linking binaries during coverage builds."
+@@ -145,3 +144,2 @@ else()
+-  set(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
+-    "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}" CACHE STRING
+-    "Flags used by the shared libraries linker during coverage builds."
++  set(BENCHMARK_SHARED_LINKER_FLAGS_COVERAGE "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}"
++    CACHE STRING "Flags used by the shared libraries linker during coverage builds."
+@@ -150,3 +148,3 @@ else()
+-    CMAKE_CXX_FLAGS_COVERAGE
+-    CMAKE_EXE_LINKER_FLAGS_COVERAGE
+-    CMAKE_SHARED_LINKER_FLAGS_COVERAGE)
++    BENCHMARK_CXX_FLAGS_COVERAGE
++    BENCHMARK_EXE_LINKER_FLAGS_COVERAGE
++    BENCHMARK_SHARED_LINKER_FLAGS_COVERAGE)
+@@ -154,2 +152 @@ else()
+-    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Coverage."
+-    FORCE)
++    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Coverage.")
+diff --git a/README.md b/README.md
+index 2430d93..407ee66 100644
+--- a/README.md
++++ b/README.md
+@@ -226,2 +226 @@ Additionally `RegisterBenchmark` allows any callable object to be registered
+-as a benchmark. Including capturing lambdas and function objects. This
+-allows the creation
++as a benchmark. Including capturing lambdas and function objects.
+@@ -244 +243 @@ it is guaranteed that none of the threads will start until all have called
+-`KeepRunning`, and all will have finished before KeepRunning returns false. As
++`KeepRunning`, and all will have finished before `KeepRunning` returns `false`. As
+@@ -277 +276 @@ correct or accurate enough, completely manual timing is supported using
+-the `UseManualTime` function. 
++the `UseManualTime` function.
+@@ -387 +386 @@ the registered benchmark object.
+-## Reporting the mean and standard devation by repeated benchmarks
++## Reporting the mean, median and standard deviation by repeated benchmarks
+@@ -395,2 +394,2 @@ The number of runs of each benchmark is specified globally by the
+-`Repetitions` on the registered benchmark object. When a benchmark is run
+-more than once the mean and standard deviation of the runs will be reported.
++`Repetitions` on the registered benchmark object. When a benchmark is run more
++than once the mean, median and standard deviation of the runs will be reported.
+@@ -401 +400 @@ are reported. By default the result of each repeated run is reported. When this
+-option is 'true' only the mean and standard deviation of the runs is reported.
++option is `true` only the mean, median and standard deviation of the runs is reported.
+@@ -404,0 +404,23 @@ the value of the flag for that benchmark.
++## User-defined statistics for repeated benchmarks
++While having mean, median and standard deviation is nice, this may not be
++enough for everyone. For example you may want to know what is the largest
++observation, e.g. because you have some real-time constraints. This is easy.
++The following code will specify a custom statistic to be calculated, defined
++by a lambda function.
++
++```c++
++void BM_spin_empty(benchmark::State& state) {
++  while (state.KeepRunning()) {
++    for (int x = 0; x < state.range(0); ++x) {
++      benchmark::DoNotOptimize(x);
++    }
++  }
++}
++
++BENCHMARK(BM_spin_empty)
++  ->ComputeStatistics("max", [](const std::vector<double>& v) -> double {
++    return *(std::max_element(std::begin(v), std::end(v)));
++  })
++  ->Arg(512);
++```
++
+@@ -407 +429 @@ Fixture tests are created by
+-first defining a type that derives from ::benchmark::Fixture and then
++first defining a type that derives from `::benchmark::Fixture` and then
+@@ -617 +639 @@ The Console format is intended to be a human readable format. By default
+-the format generates color output. Context is output on stderr and the 
++the format generates color output. Context is output on stderr and the
+diff --git a/cmake/AddCXXCompilerFlag.cmake b/cmake/AddCXXCompilerFlag.cmake
+index 0b176ba..17d5f3d 100644
+--- a/cmake/AddCXXCompilerFlag.cmake
++++ b/cmake/AddCXXCompilerFlag.cmake
+@@ -41 +41 @@ function(add_cxx_compiler_flag FLAG)
+-    set(CMAKE_CXX_FLAGS${VARIANT} "${CMAKE_CXX_FLAGS${VARIANT}} ${FLAG}" PARENT_SCOPE)
++    set(CMAKE_CXX_FLAGS${VARIANT} "${CMAKE_CXX_FLAGS${VARIANT}} ${BENCHMARK_CXX_FLAGS${VARIANT}} ${FLAG}" PARENT_SCOPE)
+diff --git a/cmake/CXXFeatureCheck.cmake b/cmake/CXXFeatureCheck.cmake
+index 2c4460f..b2a8217 100644
+--- a/cmake/CXXFeatureCheck.cmake
++++ b/cmake/CXXFeatureCheck.cmake
+@@ -25 +25 @@ function(cxx_feature_check FILE)
+-    set(HAVE_${VAR} 1 CACHE INTERNAL "Feature test for ${FILE}" PARENT_SCOPE)
++    set(HAVE_${VAR} 1 PARENT_SCOPE)
+@@ -28,0 +29 @@ function(cxx_feature_check FILE)
++
+@@ -30,4 +31,20 @@ function(cxx_feature_check FILE)
+-  try_run(RUN_${FEATURE} COMPILE_${FEATURE}
+-          ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${FILE}.cpp
+-          CMAKE_FLAGS ${BENCHMARK_CXX_LINKER_FLAGS}
+-          LINK_LIBRARIES ${BENCHMARK_CXX_LIBRARIES})
++  if(CMAKE_CROSSCOMPILING)
++    try_compile(COMPILE_${FEATURE}
++            ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${FILE}.cpp
++            CMAKE_FLAGS ${BENCHMARK_CXX_LINKER_FLAGS}
++            LINK_LIBRARIES ${BENCHMARK_CXX_LIBRARIES})
++    if(COMPILE_${FEATURE})
++      message(WARNING
++            "If you see build failures due to cross compilation, try setting HAVE_${VAR} to 0")
++      set(RUN_${FEATURE} 0)
++    else()
++      set(RUN_${FEATURE} 1)
++    endif()
++  else()
++    message("-- Performing Test ${FEATURE}")
++    try_run(RUN_${FEATURE} COMPILE_${FEATURE}
++            ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${FILE}.cpp
++            CMAKE_FLAGS ${BENCHMARK_CXX_LINKER_FLAGS}
++            LINK_LIBRARIES ${BENCHMARK_CXX_LIBRARIES})
++  endif()
++
+@@ -36 +53 @@ function(cxx_feature_check FILE)
+-    set(HAVE_${VAR} 1 CACHE INTERNAL "Feature test for ${FILE}" PARENT_SCOPE)
++    set(HAVE_${VAR} 1 PARENT_SCOPE)
+@@ -46 +62,0 @@ endfunction()
+-
+diff --git a/include/benchmark/benchmark.h b/include/benchmark/benchmark.h
+index bd3b0ff..a1ce704 100644
+--- a/include/benchmark/benchmark.h
++++ b/include/benchmark/benchmark.h
+@@ -380,0 +381,12 @@ typedef double(BigOFunc)(int);
++// StatisticsFunc is passed to a benchmark in order to compute some descriptive
++// statistics over all the measurements of some type
++typedef double(StatisticsFunc)(const std::vector<double>&);
++
++struct Statistics {
++  std::string name_;
++  StatisticsFunc* compute_;
++
++  Statistics(std::string name, StatisticsFunc* compute)
++    : name_(name), compute_(compute) {}
++};
++
+@@ -700,0 +713,3 @@ class Benchmark {
++  // Add this statistics to be computed over all the values of benchmark run
++  Benchmark* ComputeStatistics(std::string name, StatisticsFunc* statistics);
++
+@@ -760,0 +776 @@ class Benchmark {
++  std::vector<Statistics> statistics_;
+@@ -1067,0 +1084,3 @@ class BenchmarkReporter {
++    // what statistics to compute from the measurements
++    const std::vector<Statistics>* statistics;
++
+diff --git a/src/benchmark.cc b/src/benchmark.cc
+index 1ba0a50..90ed157 100644
+--- a/src/benchmark.cc
++++ b/src/benchmark.cc
+@@ -39,0 +40 @@
++#include "statistics.h"
+@@ -44 +44,0 @@
+-#include "stat.h"
+@@ -258,0 +259 @@ BenchmarkReporter::Run CreateRunReport(
++    report.statistics = b.statistics;
+@@ -483,0 +485 @@ void RunBenchmarks(const std::vector<Benchmark::Instance>& benchmarks,
++  size_t stat_field_width = 0;
+@@ -487,0 +490,3 @@ void RunBenchmarks(const std::vector<Benchmark::Instance>& benchmarks,
++
++    for(const auto& Stat : *benchmark.statistics)
++      stat_field_width = std::max<size_t>(stat_field_width, Stat.name_.size());
+@@ -489 +494 @@ void RunBenchmarks(const std::vector<Benchmark::Instance>& benchmarks,
+-  if (has_repetitions) name_field_width += std::strlen("_stddev");
++  if (has_repetitions) name_field_width += 1 + stat_field_width;
+diff --git a/src/benchmark_api_internal.h b/src/benchmark_api_internal.h
+index 36d2340..d481dc5 100644
+--- a/src/benchmark_api_internal.h
++++ b/src/benchmark_api_internal.h
+@@ -27,0 +28 @@ struct Benchmark::Instance {
++  const std::vector<Statistics>* statistics;
+diff --git a/src/benchmark_register.cc b/src/benchmark_register.cc
+index ed70d82..c1b8067 100644
+--- a/src/benchmark_register.cc
++++ b/src/benchmark_register.cc
+@@ -39,0 +40 @@
++#include "statistics.h"
+@@ -43 +43,0 @@
+-#include "stat.h"
+@@ -161,0 +162 @@ bool BenchmarkFamilies::FindBenchmarks(
++        instance.statistics = &family->statistics_;
+@@ -239 +240,5 @@ Benchmark::Benchmark(const char* name)
+-      complexity_lambda_(nullptr) {}
++      complexity_lambda_(nullptr) {
++  ComputeStatistics("mean", StatisticsMean);
++  ComputeStatistics("median", StatisticsMedian);
++  ComputeStatistics("stddev", StatisticsStdDev);
++}
+@@ -411,0 +417,6 @@ Benchmark* Benchmark::Complexity(BigOFunc* complexity) {
++Benchmark* Benchmark::ComputeStatistics(std::string name,
++                                        StatisticsFunc* statistics) {
++  statistics_.emplace_back(name, statistics);
++  return this;
++}
++
+diff --git a/src/complexity.cc b/src/complexity.cc
+index 33975be..8883269 100644
+--- a/src/complexity.cc
++++ b/src/complexity.cc
+@@ -24 +23,0 @@
+-#include "stat.h"
+@@ -153,103 +151,0 @@ LeastSq MinimalLeastSq(const std::vector<int>& n,
+-std::vector<BenchmarkReporter::Run> ComputeStats(
+-    const std::vector<BenchmarkReporter::Run>& reports) {
+-  typedef BenchmarkReporter::Run Run;
+-  std::vector<Run> results;
+-
+-  auto error_count =
+-      std::count_if(reports.begin(), reports.end(),
+-                    [](Run const& run) { return run.error_occurred; });
+-
+-  if (reports.size() - error_count < 2) {
+-    // We don't report aggregated data if there was a single run.
+-    return results;
+-  }
+-  // Accumulators.
+-  Stat1_d real_accumulated_time_stat;
+-  Stat1_d cpu_accumulated_time_stat;
+-  Stat1_d bytes_per_second_stat;
+-  Stat1_d items_per_second_stat;
+-  // All repetitions should be run with the same number of iterations so we
+-  // can take this information from the first benchmark.
+-  int64_t const run_iterations = reports.front().iterations;
+-  // create stats for user counters
+-  struct CounterStat {
+-    Counter c;
+-    Stat1_d s;
+-  };
+-  std::map< std::string, CounterStat > counter_stats;
+-  for(Run const& r : reports) {
+-    for(auto const& cnt : r.counters) {
+-      auto it = counter_stats.find(cnt.first);
+-      if(it == counter_stats.end()) {
+-        counter_stats.insert({cnt.first, {cnt.second, Stat1_d{}}});
+-      } else {
+-        CHECK_EQ(counter_stats[cnt.first].c.flags, cnt.second.flags);
+-      }
+-    }
+-  }
+-
+-  // Populate the accumulators.
+-  for (Run const& run : reports) {
+-    CHECK_EQ(reports[0].benchmark_name, run.benchmark_name);
+-    CHECK_EQ(run_iterations, run.iterations);
+-    if (run.error_occurred) continue;
+-    real_accumulated_time_stat +=
+-        Stat1_d(run.real_accumulated_time / run.iterations);
+-    cpu_accumulated_time_stat +=
+-        Stat1_d(run.cpu_accumulated_time / run.iterations);
+-    items_per_second_stat += Stat1_d(run.items_per_second);
+-    bytes_per_second_stat += Stat1_d(run.bytes_per_second);
+-    // user counters
+-    for(auto const& cnt : run.counters) {
+-      auto it = counter_stats.find(cnt.first);
+-      CHECK_NE(it, counter_stats.end());
+-      it->second.s += Stat1_d(cnt.second);
+-    }
+-  }
+-
+-  // Get the data from the accumulator to BenchmarkReporter::Run's.
+-  Run mean_data;
+-  mean_data.benchmark_name = reports[0].benchmark_name + "_mean";
+-  mean_data.iterations = run_iterations;
+-  mean_data.real_accumulated_time =
+-      real_accumulated_time_stat.Mean() * run_iterations;
+-  mean_data.cpu_accumulated_time =
+-      cpu_accumulated_time_stat.Mean() * run_iterations;
+-  mean_data.bytes_per_second = bytes_per_second_stat.Mean();
+-  mean_data.items_per_second = items_per_second_stat.Mean();
+-  mean_data.time_unit = reports[0].time_unit;
+-  // user counters
+-  for(auto const& kv : counter_stats) {
+-    auto c = Counter(kv.second.s.Mean(), counter_stats[kv.first].c.flags);
+-    mean_data.counters[kv.first] = c;
+-  }
+-
+-  // Only add label to mean/stddev if it is same for all runs
+-  mean_data.report_label = reports[0].report_label;
+-  for (std::size_t i = 1; i < reports.size(); i++) {
+-    if (reports[i].report_label != reports[0].report_label) {
+-      mean_data.report_label = "";
+-      break;
+-    }
+-  }
+-
+-  Run stddev_data;
+-  stddev_data.benchmark_name = reports[0].benchmark_name + "_stddev";
+-  stddev_data.report_label = mean_data.report_label;
+-  stddev_data.iterations = 0;
+-  stddev_data.real_accumulated_time = real_accumulated_time_stat.StdDev();
+-  stddev_data.cpu_accumulated_time = cpu_accumulated_time_stat.StdDev();
+-  stddev_data.bytes_per_second = bytes_per_second_stat.StdDev();
+-  stddev_data.items_per_second = items_per_second_stat.StdDev();
+-  stddev_data.time_unit = reports[0].time_unit;
+-  // user counters
+-  for(auto const& kv : counter_stats) {
+-    auto c = Counter(kv.second.s.StdDev(), counter_stats[kv.first].c.flags);
+-    stddev_data.counters[kv.first] = c;
+-  }
+-
+-  results.push_back(mean_data);
+-  results.push_back(stddev_data);
+-  return results;
+-}
+-
+diff --git a/src/complexity.h b/src/complexity.h
+index c0ca60e..df29b48 100644
+--- a/src/complexity.h
++++ b/src/complexity.h
+@@ -28,6 +27,0 @@ namespace benchmark {
+-// Return a vector containing the mean and standard devation information for
+-// the specified list of reports. If 'reports' contains less than two
+-// non-errored runs an empty vector is returned
+-std::vector<BenchmarkReporter::Run> ComputeStats(
+-    const std::vector<BenchmarkReporter::Run>& reports);
+-
+@@ -59,0 +54 @@ std::string GetBigOString(BigO complexity);
++
+diff --git a/src/console_reporter.cc b/src/console_reporter.cc
+index 4bb6f71..1226d23 100644
+--- a/src/console_reporter.cc
++++ b/src/console_reporter.cc
+@@ -151 +151 @@ void ConsoleReporter::PrintRunData(const Run& result) {
+-    auto const& s = HumanReadableNumber(c.second.value);
++    auto const& s = HumanReadableNumber(c.second.value, 1000);
+diff --git a/src/json_reporter.cc b/src/json_reporter.cc
+index edf6ecc..a49f5b0 100644
+--- a/src/json_reporter.cc
++++ b/src/json_reporter.cc
+@@ -23,0 +24,2 @@
++#include <iomanip> // for setprecision
++#include <limits>
+@@ -51 +53,8 @@ std::string FormatKV(std::string const& key, double value) {
+-  return StringPrintF("\"%s\": %.2f", key.c_str(), value);
++  std::stringstream ss;
++  ss << '"' << key << "\": ";
++
++  const auto max_digits10 = std::numeric_limits<decltype (value)>::max_digits10;
++  const auto max_fractional_digits10 = max_digits10 - 1;
++
++  ss << std::scientific << std::setprecision(max_fractional_digits10) << value;
++  return ss.str();
+@@ -128 +137 @@ void JSONReporter::PrintRunData(Run const& run) {
+-        << FormatKV("real_time", RoundDouble(run.GetAdjustedRealTime()))
++        << FormatKV("real_time", run.GetAdjustedRealTime())
+@@ -131 +140 @@ void JSONReporter::PrintRunData(Run const& run) {
+-        << FormatKV("cpu_time", RoundDouble(run.GetAdjustedCPUTime()));
++        << FormatKV("cpu_time", run.GetAdjustedCPUTime());
+@@ -136 +145 @@ void JSONReporter::PrintRunData(Run const& run) {
+-        << FormatKV("cpu_coefficient", RoundDouble(run.GetAdjustedCPUTime()))
++        << FormatKV("cpu_coefficient", run.GetAdjustedCPUTime())
+@@ -139 +148 @@ void JSONReporter::PrintRunData(Run const& run) {
+-        << FormatKV("real_coefficient", RoundDouble(run.GetAdjustedRealTime()))
++        << FormatKV("real_coefficient", run.GetAdjustedRealTime())
+@@ -150 +159 @@ void JSONReporter::PrintRunData(Run const& run) {
+-        << FormatKV("bytes_per_second", RoundDouble(run.bytes_per_second));
++        << FormatKV("bytes_per_second", run.bytes_per_second);
+@@ -155 +164 @@ void JSONReporter::PrintRunData(Run const& run) {
+-        << FormatKV("items_per_second", RoundDouble(run.items_per_second));
++        << FormatKV("items_per_second", run.items_per_second);
+@@ -160 +169 @@ void JSONReporter::PrintRunData(Run const& run) {
+-        << FormatKV(c.first, RoundDouble(c.second));
++        << FormatKV(c.first, c.second);
+diff --git a/src/reporter.cc b/src/reporter.cc
+index aacd453..9a0830b 100644
+--- a/src/reporter.cc
++++ b/src/reporter.cc
+@@ -25 +24,0 @@
+-#include "stat.h"
+diff --git a/src/stat.h b/src/stat.h
+deleted file mode 100644
+index d356875..0000000
+--- a/src/stat.h
++++ /dev/null
+@@ -1,310 +0,0 @@
+-#ifndef BENCHMARK_STAT_H_
+-#define BENCHMARK_STAT_H_
+-
+-#include <cmath>
+-#include <limits>
+-#include <ostream>
+-#include <type_traits>
+-
+-namespace benchmark {
+-
+-template <typename VType, typename NumType>
+-class Stat1;
+-
+-template <typename VType, typename NumType>
+-class Stat1MinMax;
+-
+-typedef Stat1<float, int64_t> Stat1_f;
+-typedef Stat1<double, int64_t> Stat1_d;
+-typedef Stat1MinMax<float, int64_t> Stat1MinMax_f;
+-typedef Stat1MinMax<double, int64_t> Stat1MinMax_d;
+-
+-template <typename VType>
+-class Vector2;
+-template <typename VType>
+-class Vector3;
+-template <typename VType>
+-class Vector4;
+-
+-template <typename VType, typename NumType>
+-class Stat1 {
+- public:
+-  typedef Stat1<VType, NumType> Self;
+-
+-  Stat1() { Clear(); }
+-  // Create a sample of value dat and weight 1
+-  explicit Stat1(const VType &dat) {
+-    sum_ = dat;
+-    sum_squares_ = Sqr(dat);
+-    numsamples_ = 1;
+-  }
+-  // Create statistics for all the samples between begin (included)
+-  // and end(excluded)
+-  explicit Stat1(const VType *begin, const VType *end) {
+-    Clear();
+-    for (const VType *item = begin; item < end; ++item) {
+-      (*this) += Stat1(*item);
+-    }
+-  }
+-  // Create a sample of value dat and weight w
+-  Stat1(const VType &dat, const NumType &w) {
+-    sum_ = w * dat;
+-    sum_squares_ = w * Sqr(dat);
+-    numsamples_ = w;
+-  }
+-  // Copy operator
+-  Stat1(const Self &stat) {
+-    sum_ = stat.sum_;
+-    sum_squares_ = stat.sum_squares_;
+-    numsamples_ = stat.numsamples_;
+-  }
+-
+-  void Clear() {
+-    numsamples_ = NumType();
+-    sum_squares_ = sum_ = VType();
+-  }
+-
+-  Self &operator=(const Self &stat) {
+-    sum_ = stat.sum_;
+-    sum_squares_ = stat.sum_squares_;
+-    numsamples_ = stat.numsamples_;
+-    return (*this);
+-  }
+-  // Merge statistics from two sample sets.
+-  Self &operator+=(const Self &stat) {
+-    sum_ += stat.sum_;
+-    sum_squares_ += stat.sum_squares_;
+-    numsamples_ += stat.numsamples_;
+-    return (*this);
+-  }
+-  // The operation opposite to +=
+-  Self &operator-=(const Self &stat) {
+-    sum_ -= stat.sum_;
+-    sum_squares_ -= stat.sum_squares_;
+-    numsamples_ -= stat.numsamples_;
+-    return (*this);
+-  }
+-  // Multiply the weight of the set of samples by a factor k
+-  Self &operator*=(const VType &k) {
+-    sum_ *= k;
+-    sum_squares_ *= k;
+-    numsamples_ *= k;
+-    return (*this);
+-  }
+-
+-  // Merge statistics from two sample sets.
+-  Self operator+(const Self &stat) const { return Self(*this) += stat; }
+-
+-  // The operation opposite to +
+-  Self operator-(const Self &stat) const { return Self(*this) -= stat; }
+-
+-  // Multiply the weight of the set of samples by a factor k
+-  Self operator*(const VType &k) const { return Self(*this) *= k; }
+-
+-  // Return the total weight of this sample set
+-  NumType numSamples() const { return numsamples_; }
+-
+-  // Return the sum of this sample set
+-  VType Sum() const { return sum_; }
+-
+-  // Return the mean of this sample set
+-  VType Mean() const {
+-    if (numsamples_ == 0) return VType();
+-    return sum_ * (1.0 / numsamples_);
+-  }
+-
+-  // Return the mean of this sample set and compute the standard deviation at
+-  // the same time.
+-  VType Mean(VType *stddev) const {
+-    if (numsamples_ == 0) return VType();
+-    VType mean = sum_ * (1.0 / numsamples_);
+-    if (stddev) {
+-      // Sample standard deviation is undefined for n = 1
+-      if (numsamples_ == 1) {
+-        *stddev = VType();
+-      } else {
+-        VType avg_squares = sum_squares_ * (1.0 / numsamples_);
+-        *stddev = Sqrt(numsamples_ / (numsamples_ - 1.0) * (avg_squares - Sqr(mean)));
+-      }
+-    }
+-    return mean;
+-  }
+-
+-  // Return the standard deviation of the sample set
+-  VType StdDev() const {
+-    VType stddev = VType();
+-    Mean(&stddev);
+-    return stddev;
+-  }
+-
+- private:
+-  static_assert(std::is_integral<NumType>::value &&
+-                    !std::is_same<NumType, bool>::value,
+-                "NumType must be an integral type that is not bool.");
+-  // Let i be the index of the samples provided (using +=)
+-  // and weight[i],value[i] be the data of sample #i
+-  // then the variables have the following meaning:
+-  NumType numsamples_;  // sum of weight[i];
+-  VType sum_;           // sum of weight[i]*value[i];
+-  VType sum_squares_;   // sum of weight[i]*value[i]^2;
+-
+-  // Template function used to square a number.
+-  // For a vector we square all components
+-  template <typename SType>
+-  static inline SType Sqr(const SType &dat) {
+-    return dat * dat;
+-  }
+-
+-  template <typename SType>
+-  static inline Vector2<SType> Sqr(const Vector2<SType> &dat) {
+-    return dat.MulComponents(dat);
+-  }
+-
+-  template <typename SType>
+-  static inline Vector3<SType> Sqr(const Vector3<SType> &dat) {
+-    return dat.MulComponents(dat);
+-  }
+-
+-  template <typename SType>
+-  static inline Vector4<SType> Sqr(const Vector4<SType> &dat) {
+-    return dat.MulComponents(dat);
+-  }
+-
+-  // Template function used to take the square root of a number.
+-  // For a vector we square all components
+-  template <typename SType>
+-  static inline SType Sqrt(const SType &dat) {
+-    // Avoid NaN due to imprecision in the calculations
+-    if (dat < 0) return 0;
+-    return sqrt(dat);
+-  }
+-
+-  template <typename SType>
+-  static inline Vector2<SType> Sqrt(const Vector2<SType> &dat) {
+-    // Avoid NaN due to imprecision in the calculations
+-    return Max(dat, Vector2<SType>()).Sqrt();
+-  }
+-
+-  template <typename SType>
+-  static inline Vector3<SType> Sqrt(const Vector3<SType> &dat) {
+-    // Avoid NaN due to imprecision in the calculations
+-    return Max(dat, Vector3<SType>()).Sqrt();
+-  }
+-
+-  template <typename SType>
+-  static inline Vector4<SType> Sqrt(const Vector4<SType> &dat) {
+-    // Avoid NaN due to imprecision in the calculations
+-    return Max(dat, Vector4<SType>()).Sqrt();
+-  }
+-};
+-
+-// Useful printing function
+-template <typename VType, typename NumType>
+-std::ostream &operator<<(std::ostream &out, const Stat1<VType, NumType> &s) {
+-  out << "{ avg = " << s.Mean() << " std = " << s.StdDev()
+-      << " nsamples = " << s.NumSamples() << "}";
+-  return out;
+-}
+-
+-// Stat1MinMax: same as Stat1, but it also
+-// keeps the Min and Max values; the "-"
+-// operator is disabled because it cannot be implemented
+-// efficiently
+-template <typename VType, typename NumType>
+-class Stat1MinMax : public Stat1<VType, NumType> {
+- public:
+-  typedef Stat1MinMax<VType, NumType> Self;
+-
+-  Stat1MinMax() { Clear(); }
+-  // Create a sample of value dat and weight 1
+-  explicit Stat1MinMax(const VType &dat) : Stat1<VType, NumType>(dat) {
+-    max_ = dat;
+-    min_ = dat;
+-  }
+-  // Create statistics for all the samples between begin (included)
+-  // and end(excluded)
+-  explicit Stat1MinMax(const VType *begin, const VType *end) {
+-    Clear();
+-    for (const VType *item = begin; item < end; ++item) {
+-      (*this) += Stat1MinMax(*item);
+-    }
+-  }
+-  // Create a sample of value dat and weight w
+-  Stat1MinMax(const VType &dat, const NumType &w)
+-      : Stat1<VType, NumType>(dat, w) {
+-    max_ = dat;
+-    min_ = dat;
+-  }
+-  // Copy operator
+-  Stat1MinMax(const Self &stat) : Stat1<VType, NumType>(stat) {
+-    max_ = stat.max_;
+-    min_ = stat.min_;
+-  }
+-
+-  void Clear() {
+-    Stat1<VType, NumType>::Clear();
+-    if (std::numeric_limits<VType>::has_infinity) {
+-      min_ = std::numeric_limits<VType>::infinity();
+-      max_ = -std::numeric_limits<VType>::infinity();
+-    } else {
+-      min_ = std::numeric_limits<VType>::max();
+-      max_ = std::numeric_limits<VType>::min();
+-    }
+-  }
+-
+-  Self &operator=(const Self &stat) {
+-    this->Stat1<VType, NumType>::operator=(stat);
+-    max_ = stat.max_;
+-    min_ = stat.min_;
+-    return (*this);
+-  }
+-  // Merge statistics from two sample sets.
+-  Self &operator+=(const Self &stat) {
+-    this->Stat1<VType, NumType>::operator+=(stat);
+-    if (stat.max_ > max_) max_ = stat.max_;
+-    if (stat.min_ < min_) min_ = stat.min_;
+-    return (*this);
+-  }
+-  // Multiply the weight of the set of samples by a factor k
+-  Self &operator*=(const VType &stat) {
+-    this->Stat1<VType, NumType>::operator*=(stat);
+-    return (*this);
+-  }
+-  // Merge statistics from two sample sets.
+-  Self operator+(const Self &stat) const { return Self(*this) += stat; }
+-  // Multiply the weight of the set of samples by a factor k
+-  Self operator*(const VType &k) const { return Self(*this) *= k; }
+-
+-  // Return the maximal value in this sample set
+-  VType Max() const { return max_; }
+-  // Return the minimal value in this sample set
+-  VType Min() const { return min_; }
+-
+- private:
+-  // The - operation makes no sense with Min/Max
+-  // unless we keep the full list of values (but we don't)
+-  // make it private, and let it undefined so nobody can call it
+-  Self &operator-=(const Self &stat);  // senseless. let it undefined.
+-
+-  // The operation opposite to -
+-  Self operator-(const Self &stat) const;  // senseless. let it undefined.
+-
+-  // Let i be the index of the samples provided (using +=)
+-  // and weight[i],value[i] be the data of sample #i
+-  // then the variables have the following meaning:
+-  VType max_;  // max of value[i]
+-  VType min_;  // min of value[i]
+-};
+-
+-// Useful printing function
+-template <typename VType, typename NumType>
+-std::ostream &operator<<(std::ostream &out,
+-                         const Stat1MinMax<VType, NumType> &s) {
+-  out << "{ avg = " << s.Mean() << " std = " << s.StdDev()
+-      << " nsamples = " << s.NumSamples() << " min = " << s.Min()
+-      << " max = " << s.Max() << "}";
+-  return out;
+-}
+-}  // end namespace benchmark
+-
+-#endif  // BENCHMARK_STAT_H_
+diff --git a/src/statistics.cc b/src/statistics.cc
+new file mode 100644
+index 0000000..5932ad4
+--- /dev/null
++++ b/src/statistics.cc
+@@ -0,0 +1,175 @@
++// Copyright 2016 Ismael Jimenez Martinez. All rights reserved.
++// Copyright 2017 Roman Lebedev. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++#include "benchmark/benchmark.h"
++
++#include <algorithm>
++#include <cmath>
++#include <string>
++#include <vector>
++#include <numeric>
++#include "check.h"
++#include "statistics.h"
++
++namespace benchmark {
++
++auto StatisticsSum = [](const std::vector<double>& v) {
++  return std::accumulate(v.begin(), v.end(), 0.0);
++};
++
++double StatisticsMean(const std::vector<double>& v) {
++  if (v.size() == 0) return 0.0;
++  return StatisticsSum(v) * (1.0 / v.size());
++}
++
++double StatisticsMedian(const std::vector<double>& v) {
++  if (v.size() < 3) return StatisticsMean(v);
++  std::vector<double> partial;
++  // we need roundDown(count/2)+1 slots
++  partial.resize(1 + (v.size() / 2));
++  std::partial_sort_copy(v.begin(), v.end(), partial.begin(), partial.end());
++  // did we have odd number of samples?
++  // if yes, then the last element of partially-sorted vector is the median
++  // it no, then the average of the last two elements is the median
++  if(v.size() % 2 == 1)
++    return partial.back();
++  return (partial[partial.size() - 2] + partial[partial.size() - 1]) / 2.0;
++}
++
++// Return the sum of the squares of this sample set
++auto SumSquares = [](const std::vector<double>& v) {
++  return std::inner_product(v.begin(), v.end(), v.begin(), 0.0);
++};
++
++auto Sqr = [](const double dat) { return dat * dat; };
++auto Sqrt = [](const double dat) {
++  // Avoid NaN due to imprecision in the calculations
++  if (dat < 0.0) return 0.0;
++  return std::sqrt(dat);
++};
++
++double StatisticsStdDev(const std::vector<double>& v) {
++  const auto mean = StatisticsMean(v);
++  if (v.size() == 0) return mean;
++
++  // Sample standard deviation is undefined for n = 1
++  if (v.size() == 1)
++    return 0.0;
++
++  const double avg_squares = SumSquares(v) * (1.0 / v.size());
++  return Sqrt(v.size() / (v.size() - 1.0) * (avg_squares - Sqr(mean)));
++}
++
++std::vector<BenchmarkReporter::Run> ComputeStats(
++    const std::vector<BenchmarkReporter::Run>& reports) {
++  typedef BenchmarkReporter::Run Run;
++  std::vector<Run> results;
++
++  auto error_count =
++      std::count_if(reports.begin(), reports.end(),
++                    [](Run const& run) { return run.error_occurred; });
++
++  if (reports.size() - error_count < 2) {
++    // We don't report aggregated data if there was a single run.
++    return results;
++  }
++
++  // Accumulators.
++  std::vector<double> real_accumulated_time_stat;
++  std::vector<double> cpu_accumulated_time_stat;
++  std::vector<double> bytes_per_second_stat;
++  std::vector<double> items_per_second_stat;
++
++  real_accumulated_time_stat.reserve(reports.size());
++  cpu_accumulated_time_stat.reserve(reports.size());
++  bytes_per_second_stat.reserve(reports.size());
++  items_per_second_stat.reserve(reports.size());
++
++  // All repetitions should be run with the same number of iterations so we
++  // can take this information from the first benchmark.
++  int64_t const run_iterations = reports.front().iterations;
++  // create stats for user counters
++  struct CounterStat {
++    Counter c;
++    std::vector<double> s;
++  };
++  std::map< std::string, CounterStat > counter_stats;
++  for(Run const& r : reports) {
++    for(auto const& cnt : r.counters) {
++      auto it = counter_stats.find(cnt.first);
++      if(it == counter_stats.end()) {
++        counter_stats.insert({cnt.first, {cnt.second, std::vector<double>{}}});
++        it = counter_stats.find(cnt.first);
++        it->second.s.reserve(reports.size());
++      } else {
++        CHECK_EQ(counter_stats[cnt.first].c.flags, cnt.second.flags);
++      }
++    }
++  }
++
++  // Populate the accumulators.
++  for (Run const& run : reports) {
++    CHECK_EQ(reports[0].benchmark_name, run.benchmark_name);
++    CHECK_EQ(run_iterations, run.iterations);
++    if (run.error_occurred) continue;
++    real_accumulated_time_stat.emplace_back(run.real_accumulated_time);
++    cpu_accumulated_time_stat.emplace_back(run.cpu_accumulated_time);
++    items_per_second_stat.emplace_back(run.items_per_second);
++    bytes_per_second_stat.emplace_back(run.bytes_per_second);
++    // user counters
++    for(auto const& cnt : run.counters) {
++      auto it = counter_stats.find(cnt.first);
++      CHECK_NE(it, counter_stats.end());
++      it->second.s.emplace_back(cnt.second);
++    }
++  }
++
++  // Only add label if it is same for all runs
++  std::string report_label = reports[0].report_label;
++  for (std::size_t i = 1; i < reports.size(); i++) {
++    if (reports[i].report_label != report_label) {
++      report_label = "";
++      break;
++    }
++  }
++
++  for(const auto& Stat : *reports[0].statistics) {
++    // Get the data from the accumulator to BenchmarkReporter::Run's.
++    Run data;
++    data.benchmark_name = reports[0].benchmark_name + "_" + Stat.name_;
++    data.report_label = report_label;
++    data.iterations = run_iterations;
++
++    data.real_accumulated_time = Stat.compute_(real_accumulated_time_stat);
++    data.cpu_accumulated_time = Stat.compute_(cpu_accumulated_time_stat);
++    data.bytes_per_second = Stat.compute_(bytes_per_second_stat);
++    data.items_per_second = Stat.compute_(items_per_second_stat);
++
++    data.time_unit = reports[0].time_unit;
++
++    // user counters
++    for(auto const& kv : counter_stats) {
++      const auto uc_stat = Stat.compute_(kv.second.s);
++      auto c = Counter(uc_stat, counter_stats[kv.first].c.flags);
++      data.counters[kv.first] = c;
++    }
++
++    results.push_back(data);
++  }
++
++  return results;
++}
++
++}  // end namespace benchmark
+diff --git a/src/statistics.h b/src/statistics.h
+new file mode 100644
+index 0000000..7eccc85
+--- /dev/null
++++ b/src/statistics.h
+@@ -0,0 +1,37 @@
++// Copyright 2016 Ismael Jimenez Martinez. All rights reserved.
++// Copyright 2017 Roman Lebedev. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++#ifndef STATISTICS_H_
++#define STATISTICS_H_
++
++#include <vector>
++
++#include "benchmark/benchmark.h"
++
++namespace benchmark {
++
++// Return a vector containing the mean, median and standard devation information
++// (and any user-specified info) for the specified list of reports. If 'reports'
++// contains less than two non-errored runs an empty vector is returned
++std::vector<BenchmarkReporter::Run> ComputeStats(
++    const std::vector<BenchmarkReporter::Run>& reports);
++
++double StatisticsMean(const std::vector<double>& v);
++double StatisticsMedian(const std::vector<double>& v);
++double StatisticsStdDev(const std::vector<double>& v);
++
++}  // end namespace benchmark
++
++#endif  // STATISTICS_H_
+diff --git a/src/string_util.cc b/src/string_util.cc
+index cd4e7cf..29edb2a 100644
+--- a/src/string_util.cc
++++ b/src/string_util.cc
+@@ -30,2 +29,0 @@ static const int64_t kUnitsSize = arraysize(kBigSIUnits);
+-}  // end anonymous namespace
+-
+@@ -103 +101 @@ std::string ToBinaryStringFullySpecified(double value, double threshold,
+-                                         int precision) {
++                                         int precision, double one_k = 1024.0) {
+@@ -106 +104 @@ std::string ToBinaryStringFullySpecified(double value, double threshold,
+-  ToExponentAndMantissa(value, threshold, precision, 1024.0, &mantissa,
++  ToExponentAndMantissa(value, threshold, precision, one_k, &mantissa,
+@@ -110,0 +109,2 @@ std::string ToBinaryStringFullySpecified(double value, double threshold,
++}  // end namespace
++
+@@ -118 +118 @@ void AppendHumanReadable(int n, std::string* str) {
+-std::string HumanReadableNumber(double n) {
++std::string HumanReadableNumber(double n, double one_k) {
+@@ -122 +122 @@ std::string HumanReadableNumber(double n) {
+-  return ToBinaryStringFullySpecified(n, 1.1, 1);
++  return ToBinaryStringFullySpecified(n, 1.1, 1, one_k);
+diff --git a/src/string_util.h b/src/string_util.h
+index 0b190b9..c3d53bf 100644
+--- a/src/string_util.h
++++ b/src/string_util.h
+@@ -13 +13 @@ void AppendHumanReadable(int n, std::string* str);
+-std::string HumanReadableNumber(double n);
++std::string HumanReadableNumber(double n, double one_k = 1024.0);
+diff --git a/test/CMakeLists.txt b/test/CMakeLists.txt
+index b55612b..02d5861 100644
+--- a/test/CMakeLists.txt
++++ b/test/CMakeLists.txt
+@@ -109,4 +108,0 @@ if (BENCHMARK_HAS_CXX03_FLAG)
+-  set(CXX03_FLAGS "${CMAKE_CXX_FLAGS}")
+-  string(REPLACE "-std=c++11" "-std=c++03" CXX03_FLAGS "${CXX03_FLAGS}")
+-  string(REPLACE "-std=c++0x" "-std=c++03" CXX03_FLAGS "${CXX03_FLAGS}")
+-
+@@ -115 +111,12 @@ if (BENCHMARK_HAS_CXX03_FLAG)
+-      PROPERTIES COMPILE_FLAGS "${CXX03_FLAGS}")
++      PROPERTIES
++      COMPILE_FLAGS "-std=c++03")
++  # libstdc++ provides different definitions within <map> between dialects. When
++  # LTO is enabled and -Werror is specified GCC diagnoses this ODR violation
++  # causing the test to fail to compile. To prevent this we explicitly disable
++  # the warning.
++  check_cxx_compiler_flag(-Wno-odr BENCHMARK_HAS_WNO_ODR)
++  if (BENCHMARK_ENABLE_LTO AND BENCHMARK_HAS_WNO_ODR)
++    set_target_properties(cxx03_test
++        PROPERTIES
++        LINK_FLAGS "-Wno-odr")
++  endif()
+diff --git a/test/complexity_test.cc b/test/complexity_test.cc
+index 62d1154..e8a5a7d 100644
+--- a/test/complexity_test.cc
++++ b/test/complexity_test.cc
+@@ -28,2 +28,2 @@ int AddComplexityTest(std::string big_o_test_name, std::string rms_test_name,
+-                        {"\"cpu_coefficient\": [0-9]+,$", MR_Next},
+-                        {"\"real_coefficient\": [0-9]{1,5},$", MR_Next},
++                        {"\"cpu_coefficient\": %float,$", MR_Next},
++                        {"\"real_coefficient\": %float,$", MR_Next},
+diff --git a/test/reporter_output_test.cc b/test/reporter_output_test.cc
+index 4a48143..bd33dc3 100644
+--- a/test/reporter_output_test.cc
++++ b/test/reporter_output_test.cc
+@@ -31,2 +31,2 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_basic\",$"},
+-                       {"\"real_time\": %int,$", MR_Next},
+-                       {"\"cpu_time\": %int,$", MR_Next},
++                       {"\"real_time\": %float,$", MR_Next},
++                       {"\"cpu_time\": %float,$", MR_Next},
+@@ -52,2 +52,2 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_bytes_per_second\",$"},
+-                       {"\"real_time\": %int,$", MR_Next},
+-                       {"\"cpu_time\": %int,$", MR_Next},
++                       {"\"real_time\": %float,$", MR_Next},
++                       {"\"cpu_time\": %float,$", MR_Next},
+@@ -55 +55 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_bytes_per_second\",$"},
+-                       {"\"bytes_per_second\": %int$", MR_Next},
++                       {"\"bytes_per_second\": %float$", MR_Next},
+@@ -74,2 +74,2 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_items_per_second\",$"},
+-                       {"\"real_time\": %int,$", MR_Next},
+-                       {"\"cpu_time\": %int,$", MR_Next},
++                       {"\"real_time\": %float,$", MR_Next},
++                       {"\"cpu_time\": %float,$", MR_Next},
+@@ -77 +77 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_items_per_second\",$"},
+-                       {"\"items_per_second\": %int$", MR_Next},
++                       {"\"items_per_second\": %float$", MR_Next},
+@@ -95,2 +95,2 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_label\",$"},
+-                       {"\"real_time\": %int,$", MR_Next},
+-                       {"\"cpu_time\": %int,$", MR_Next},
++                       {"\"real_time\": %float,$", MR_Next},
++                       {"\"cpu_time\": %float,$", MR_Next},
+@@ -184,0 +185,18 @@ void BM_Repeat(benchmark::State& state) {
++// need two repetitions min to be able to output any aggregate output
++BENCHMARK(BM_Repeat)->Repetitions(2);
++ADD_CASES(TC_ConsoleOut, {{"^BM_Repeat/repeats:2 %console_report$"},
++                          {"^BM_Repeat/repeats:2 %console_report$"},
++                          {"^BM_Repeat/repeats:2_mean %console_report$"},
++                          {"^BM_Repeat/repeats:2_median %console_report$"},
++                          {"^BM_Repeat/repeats:2_stddev %console_report$"}});
++ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_Repeat/repeats:2\",$"},
++                       {"\"name\": \"BM_Repeat/repeats:2\",$"},
++                       {"\"name\": \"BM_Repeat/repeats:2_mean\",$"},
++                       {"\"name\": \"BM_Repeat/repeats:2_median\",$"},
++                       {"\"name\": \"BM_Repeat/repeats:2_stddev\",$"}});
++ADD_CASES(TC_CSVOut, {{"^\"BM_Repeat/repeats:2\",%csv_report$"},
++                      {"^\"BM_Repeat/repeats:2\",%csv_report$"},
++                      {"^\"BM_Repeat/repeats:2_mean\",%csv_report$"},
++                      {"^\"BM_Repeat/repeats:2_median\",%csv_report$"},
++                      {"^\"BM_Repeat/repeats:2_stddev\",%csv_report$"}});
++// but for two repetitions, mean and median is the same, so let's repeat..
+@@ -189,0 +208 @@ ADD_CASES(TC_ConsoleOut, {{"^BM_Repeat/repeats:3 %console_report$"},
++                          {"^BM_Repeat/repeats:3_median %console_report$"},
+@@ -194,0 +214 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_Repeat/repeats:3\",$"},
++                       {"\"name\": \"BM_Repeat/repeats:3_median\",$"},
+@@ -199,0 +220 @@ ADD_CASES(TC_CSVOut, {{"^\"BM_Repeat/repeats:3\",%csv_report$"},
++                      {"^\"BM_Repeat/repeats:3_median\",%csv_report$"},
+@@ -200,0 +222,23 @@ ADD_CASES(TC_CSVOut, {{"^\"BM_Repeat/repeats:3\",%csv_report$"},
++// median differs between even/odd number of repetitions, so just to be sure
++BENCHMARK(BM_Repeat)->Repetitions(4);
++ADD_CASES(TC_ConsoleOut, {{"^BM_Repeat/repeats:4 %console_report$"},
++                          {"^BM_Repeat/repeats:4 %console_report$"},
++                          {"^BM_Repeat/repeats:4 %console_report$"},
++                          {"^BM_Repeat/repeats:4 %console_report$"},
++                          {"^BM_Repeat/repeats:4_mean %console_report$"},
++                          {"^BM_Repeat/repeats:4_median %console_report$"},
++                          {"^BM_Repeat/repeats:4_stddev %console_report$"}});
++ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_Repeat/repeats:4\",$"},
++                       {"\"name\": \"BM_Repeat/repeats:4\",$"},
++                       {"\"name\": \"BM_Repeat/repeats:4\",$"},
++                       {"\"name\": \"BM_Repeat/repeats:4\",$"},
++                       {"\"name\": \"BM_Repeat/repeats:4_mean\",$"},
++                       {"\"name\": \"BM_Repeat/repeats:4_median\",$"},
++                       {"\"name\": \"BM_Repeat/repeats:4_stddev\",$"}});
++ADD_CASES(TC_CSVOut, {{"^\"BM_Repeat/repeats:4\",%csv_report$"},
++                      {"^\"BM_Repeat/repeats:4\",%csv_report$"},
++                      {"^\"BM_Repeat/repeats:4\",%csv_report$"},
++                      {"^\"BM_Repeat/repeats:4\",%csv_report$"},
++                      {"^\"BM_Repeat/repeats:4_mean\",%csv_report$"},
++                      {"^\"BM_Repeat/repeats:4_median\",%csv_report$"},
++                      {"^\"BM_Repeat/repeats:4_stddev\",%csv_report$"}});
+@@ -221,0 +266 @@ ADD_CASES(TC_ConsoleOut,
++           {"^BM_SummaryRepeat/repeats:3_median %console_report$"},
+@@ -224,0 +270 @@ ADD_CASES(TC_JSONOut, {{".*BM_SummaryRepeat/repeats:3 ", MR_Not},
++                       {"\"name\": \"BM_SummaryRepeat/repeats:3_median\",$"},
+@@ -227,0 +274 @@ ADD_CASES(TC_CSVOut, {{".*BM_SummaryRepeat/repeats:3 ", MR_Not},
++                      {"^\"BM_SummaryRepeat/repeats:3_median\",%csv_report$"},
+@@ -240,0 +288 @@ ADD_CASES(TC_ConsoleOut,
++           {"^BM_RepeatTimeUnit/repeats:3_median %console_us_report$"},
+@@ -244,0 +293,2 @@ ADD_CASES(TC_JSONOut, {{".*BM_RepeatTimeUnit/repeats:3 ", MR_Not},
++                       {"\"name\": \"BM_RepeatTimeUnit/repeats:3_median\",$"},
++                       {"\"time_unit\": \"us\",?$"},
+@@ -249,0 +300 @@ ADD_CASES(TC_CSVOut,
++           {"^\"BM_RepeatTimeUnit/repeats:3_median\",%csv_us_report$"},
+@@ -251,0 +303,38 @@ ADD_CASES(TC_CSVOut,
++// ========================================================================= //
++// -------------------- Testing user-provided statistics ------------------- //
++// ========================================================================= //
++
++const auto UserStatistics = [](const std::vector<double>& v) {
++  return v.back();
++};
++void BM_UserStats(benchmark::State& state) {
++  while (state.KeepRunning()) {
++  }
++}
++BENCHMARK(BM_UserStats)
++    ->Repetitions(3)
++    ->ComputeStatistics("", UserStatistics);
++// check that user-provided stats is calculated, and is after the default-ones
++// empty string as name is intentional, it would sort before anything else
++ADD_CASES(TC_ConsoleOut, {{"^BM_UserStats/repeats:3 %console_report$"},
++                          {"^BM_UserStats/repeats:3 %console_report$"},
++                          {"^BM_UserStats/repeats:3 %console_report$"},
++                          {"^BM_UserStats/repeats:3_mean %console_report$"},
++                          {"^BM_UserStats/repeats:3_median %console_report$"},
++                          {"^BM_UserStats/repeats:3_stddev %console_report$"},
++                          {"^BM_UserStats/repeats:3_ %console_report$"}});
++ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_UserStats/repeats:3\",$"},
++                       {"\"name\": \"BM_UserStats/repeats:3\",$"},
++                       {"\"name\": \"BM_UserStats/repeats:3\",$"},
++                       {"\"name\": \"BM_UserStats/repeats:3_mean\",$"},
++                       {"\"name\": \"BM_UserStats/repeats:3_median\",$"},
++                       {"\"name\": \"BM_UserStats/repeats:3_stddev\",$"},
++                       {"\"name\": \"BM_UserStats/repeats:3_\",$"}});
++ADD_CASES(TC_CSVOut, {{"^\"BM_UserStats/repeats:3\",%csv_report$"},
++                      {"^\"BM_UserStats/repeats:3\",%csv_report$"},
++                      {"^\"BM_UserStats/repeats:3\",%csv_report$"},
++                      {"^\"BM_UserStats/repeats:3_mean\",%csv_report$"},
++                      {"^\"BM_UserStats/repeats:3_median\",%csv_report$"},
++                      {"^\"BM_UserStats/repeats:3_stddev\",%csv_report$"},
++                      {"^\"BM_UserStats/repeats:3_\",%csv_report$"}});
++
+diff --git a/test/user_counters_tabular_test.cc b/test/user_counters_tabular_test.cc
+index 5fc5b4d..c7e7598 100644
+--- a/test/user_counters_tabular_test.cc
++++ b/test/user_counters_tabular_test.cc
+@@ -72,2 +72,2 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_Counters_Tabular/threads:%int\",$"},
+-                       {"\"real_time\": %int,$", MR_Next},
+-                       {"\"cpu_time\": %int,$", MR_Next},
++                       {"\"real_time\": %float,$", MR_Next},
++                       {"\"cpu_time\": %float,$", MR_Next},
+@@ -116,2 +116,2 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_CounterRates_Tabular/threads:%int\",$"},
+-                       {"\"real_time\": %int,$", MR_Next},
+-                       {"\"cpu_time\": %int,$", MR_Next},
++                       {"\"real_time\": %float,$", MR_Next},
++                       {"\"cpu_time\": %float,$", MR_Next},
+@@ -160,2 +160,2 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_CounterSet0_Tabular/threads:%int\",$"},
+-                       {"\"real_time\": %int,$", MR_Next},
+-                       {"\"cpu_time\": %int,$", MR_Next},
++                       {"\"real_time\": %float,$", MR_Next},
++                       {"\"cpu_time\": %float,$", MR_Next},
+@@ -192,2 +192,2 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_CounterSet1_Tabular/threads:%int\",$"},
+-                       {"\"real_time\": %int,$", MR_Next},
+-                       {"\"cpu_time\": %int,$", MR_Next},
++                       {"\"real_time\": %float,$", MR_Next},
++                       {"\"cpu_time\": %float,$", MR_Next},
+@@ -228,2 +228,2 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_CounterSet2_Tabular/threads:%int\",$"},
+-                       {"\"real_time\": %int,$", MR_Next},
+-                       {"\"cpu_time\": %int,$", MR_Next},
++                       {"\"real_time\": %float,$", MR_Next},
++                       {"\"cpu_time\": %float,$", MR_Next},
+diff --git a/test/user_counters_test.cc b/test/user_counters_test.cc
+index 66df48b..d9c052b 100644
+--- a/test/user_counters_test.cc
++++ b/test/user_counters_test.cc
+@@ -31,2 +31,2 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_Counters_Simple\",$"},
+-                       {"\"real_time\": %int,$", MR_Next},
+-                       {"\"cpu_time\": %int,$", MR_Next},
++                       {"\"real_time\": %float,$", MR_Next},
++                       {"\"cpu_time\": %float,$", MR_Next},
+@@ -67,2 +67,2 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_Counters_WithBytesAndItemsPSec\",$"},
+-                       {"\"real_time\": %int,$", MR_Next},
+-                       {"\"cpu_time\": %int,$", MR_Next},
++                       {"\"real_time\": %float,$", MR_Next},
++                       {"\"cpu_time\": %float,$", MR_Next},
+@@ -70,2 +70,2 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_Counters_WithBytesAndItemsPSec\",$"},
+-                       {"\"bytes_per_second\": %int,$", MR_Next},
+-                       {"\"items_per_second\": %int,$", MR_Next},
++                       {"\"bytes_per_second\": %float,$", MR_Next},
++                       {"\"items_per_second\": %float,$", MR_Next},
+@@ -105,2 +105,2 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_Counters_Rate\",$"},
+-                       {"\"real_time\": %int,$", MR_Next},
+-                       {"\"cpu_time\": %int,$", MR_Next},
++                       {"\"real_time\": %float,$", MR_Next},
++                       {"\"cpu_time\": %float,$", MR_Next},
+@@ -136,2 +136,2 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_Counters_Threads/threads:%int\",$"},
+-                       {"\"real_time\": %int,$", MR_Next},
+-                       {"\"cpu_time\": %int,$", MR_Next},
++                       {"\"real_time\": %float,$", MR_Next},
++                       {"\"cpu_time\": %float,$", MR_Next},
+@@ -166,2 +166,2 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_Counters_AvgThreads/threads:%int\",$"},
+-                       {"\"real_time\": %int,$", MR_Next},
+-                       {"\"cpu_time\": %int,$", MR_Next},
++                       {"\"real_time\": %float,$", MR_Next},
++                       {"\"cpu_time\": %float,$", MR_Next},
+@@ -197,2 +197,2 @@ ADD_CASES(TC_JSONOut, {{"\"name\": \"BM_Counters_AvgThreadsRate/threads:%int\",$
+-                       {"\"real_time\": %int,$", MR_Next},
+-                       {"\"cpu_time\": %int,$", MR_Next},
++                       {"\"real_time\": %float,$", MR_Next},
++                       {"\"cpu_time\": %float,$", MR_Next},
+diff --git a/tools/compare_bench.py b/tools/compare_bench.py
+index d54baaa..7bbf0d0 100755
+--- a/tools/compare_bench.py
++++ b/tools/compare_bench.py
+@@ -42,2 +41,0 @@ def main():
+-    # FIXME this is a dummy argument which will never actually match
+-    # any --benchmark flags but it helps generate a better usage message
+@@ -45 +43 @@ def main():
+-        'benchmark_options', metavar='benchmark_option', nargs='*',
++        'benchmark_options', metavar='benchmark_options', nargs=argparse.REMAINDER,
+@@ -52 +50,2 @@ def main():
+-    if args.benchmark_options:
++    if unknown_args:
++        # should never happen
+@@ -54 +53 @@ def main():
+-              % args.benchmark_options)
++              % unknown_args)
+@@ -56 +55 @@ def main():
+-    benchmark_options = unknown_args
++    benchmark_options = args.benchmark_options
+diff --git a/tools/gbench/Inputs/test1_run1.json b/tools/gbench/Inputs/test1_run1.json
+index 37faed4..d7ec6a9 100644
+--- a/tools/gbench/Inputs/test1_run1.json
++++ b/tools/gbench/Inputs/test1_run1.json
+@@ -30,0 +31,14 @@
++    {
++      "name": "BM_1PercentFaster",
++      "iterations": 1000,
++      "real_time": 100,
++      "cpu_time": 100,
++      "time_unit": "ns"
++    },
++    {
++      "name": "BM_1PercentSlower",
++      "iterations": 1000,
++      "real_time": 100,
++      "cpu_time": 100,
++      "time_unit": "ns"
++    },
+@@ -57,0 +72,28 @@
++    },
++    {
++      "name": "BM_10PercentCPUToTime",
++      "iterations": 1000,
++      "real_time": 100,
++      "cpu_time": 100,
++      "time_unit": "ns"
++    },
++    {
++      "name": "BM_ThirdFaster",
++      "iterations": 1000,
++      "real_time": 100,
++      "cpu_time": 100,
++      "time_unit": "ns"
++    },
++    {
++      "name": "BM_BadTimeUnit",
++      "iterations": 1000,
++      "real_time": 0.4,
++      "cpu_time": 0.5,
++      "time_unit": "s"
++    },
++    {
++      "name": "BM_DifferentTimeUnit",
++      "iterations": 1,
++      "real_time": 1,
++      "cpu_time": 1,
++      "time_unit": "s"
+@@ -60 +102 @@
+-}
+\ No newline at end of file
++}
+diff --git a/tools/gbench/Inputs/test1_run2.json b/tools/gbench/Inputs/test1_run2.json
+index aed5151..59a5ffa 100644
+--- a/tools/gbench/Inputs/test1_run2.json
++++ b/tools/gbench/Inputs/test1_run2.json
+@@ -30,0 +31,14 @@
++    {
++      "name": "BM_1PercentFaster",
++      "iterations": 1000,
++      "real_time": 98.9999999,
++      "cpu_time": 98.9999999,
++      "time_unit": "ns"
++    },
++    {
++      "name": "BM_1PercentSlower",
++      "iterations": 1000,
++      "real_time": 100.9999999,
++      "cpu_time": 100.9999999,
++      "time_unit": "ns"
++    },
+@@ -48,2 +62,2 @@
+-      "real_time": 10000,
+-      "cpu_time": 10000,
++      "real_time": 1.0000e+04,
++      "cpu_time": 1.0000e+04,
+@@ -57,0 +72,28 @@
++    },
++    {
++      "name": "BM_10PercentCPUToTime",
++      "iterations": 1000,
++      "real_time": 110,
++      "cpu_time": 90,
++      "time_unit": "ns"
++    },
++    {
++      "name": "BM_ThirdFaster",
++      "iterations": 1000,
++      "real_time": 66.665,
++      "cpu_time": 66.664,
++      "time_unit": "ns"
++    },
++    {
++      "name": "BM_BadTimeUnit",
++      "iterations": 1000,
++      "real_time": 0.04,
++      "cpu_time": 0.6,
++      "time_unit": "s"
++    },
++    {
++      "name": "BM_DifferentTimeUnit",
++      "iterations": 1,
++      "real_time": 1,
++      "cpu_time": 1,
++      "time_unit": "ns"
+@@ -60 +102 @@
+-}
+\ No newline at end of file
++}
+diff --git a/tools/gbench/report.py b/tools/gbench/report.py
+index 015d33d..666a609 100644
+--- a/tools/gbench/report.py
++++ b/tools/gbench/report.py
+@@ -74 +74 @@ def generate_difference_report(json1, json2, use_color=True):
+-    first_col_width = find_longest_name(json1['benchmarks']) + 5
++    first_col_width = find_longest_name(json1['benchmarks'])
+@@ -80 +80 @@ def generate_difference_report(json1, json2, use_color=True):
+-    first_line = "{:<{}s}     Time           CPU           Old           New".format(
++    first_line = "{:<{}s}            Time             CPU      Time Old      Time New       CPU Old       CPU New".format(
+@@ -89,0 +90,3 @@ def generate_difference_report(json1, json2, use_color=True):
++        if bn['time_unit'] != other_bench['time_unit']:
++            continue
++
+@@ -97 +100 @@ def generate_difference_report(json1, json2, use_color=True):
+-        fmt_str = "{}{:<{}s}{endc}{}{:+9.2f}{endc}{}{:+14.2f}{endc}{:14d}{:14d}"
++        fmt_str = "{}{:<{}s}{endc}{}{:+16.4f}{endc}{}{:+16.4f}{endc}{:14.0f}{:14.0f}{endc}{:14.0f}{:14.0f}"
+@@ -102,0 +106 @@ def generate_difference_report(json1, json2, use_color=True):
++            bn['real_time'], other_bench['real_time'],
+@@ -126,7 +130,12 @@ class TestReportDifference(unittest.TestCase):
+-            ['BM_SameTimes', '+0.00', '+0.00', '10', '10'],
+-            ['BM_2xFaster', '-0.50', '-0.50', '50', '25'],
+-            ['BM_2xSlower', '+1.00', '+1.00', '50', '100'],
+-            ['BM_10PercentFaster', '-0.10', '-0.10', '100', '90'],
+-            ['BM_10PercentSlower', '+0.10', '+0.10', '100', '110'],
+-            ['BM_100xSlower', '+99.00', '+99.00', '100', '10000'],
+-            ['BM_100xFaster', '-0.99', '-0.99', '10000', '100'],
++            ['BM_SameTimes', '+0.0000', '+0.0000', '10', '10', '10', '10'],
++            ['BM_2xFaster', '-0.5000', '-0.5000', '50', '25', '50', '25'],
++            ['BM_2xSlower', '+1.0000', '+1.0000', '50', '100', '50', '100'],
++            ['BM_1PercentFaster', '-0.0100', '-0.0100', '100', '99', '100', '99'],
++            ['BM_1PercentSlower', '+0.0100', '+0.0100', '100', '101', '100', '101'],
++            ['BM_10PercentFaster', '-0.1000', '-0.1000', '100', '90', '100', '90'],
++            ['BM_10PercentSlower', '+0.1000', '+0.1000', '100', '110', '100', '110'],
++            ['BM_100xSlower', '+99.0000', '+99.0000', '100', '10000', '100', '10000'],
++            ['BM_100xFaster', '-0.9900', '-0.9900', '10000', '100', '10000', '100'],
++            ['BM_10PercentCPUToTime', '+0.1000', '-0.1000', '100', '110', '100', '90'],
++            ['BM_ThirdFaster', '-0.3333', '-0.3334', '100', '67', '100', '67'],
++            ['BM_BadTimeUnit', '-0.9000', '+0.2000', '0', '0', '0', '1'],
+@@ -139 +148 @@ class TestReportDifference(unittest.TestCase):
+-        for i in xrange(0, len(output_lines)):
++        for i in range(0, len(output_lines)):
+@@ -141 +150 @@ class TestReportDifference(unittest.TestCase):
+-            self.assertEqual(len(parts), 5)
++            self.assertEqual(len(parts), 7)
