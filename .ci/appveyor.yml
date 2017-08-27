@@ -36,6 +36,9 @@ build_script:
 on_success:
   - SET "PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%"
   - C:\msys64\usr\bin\bash --login -c "
+      if [[ "$FLAVOR" != "Coverage" ]]; then
+        exit;
+      fi;
       export PATH=/c/msys64/mingw64/bin:/c/msys64/usr/bin:$PATH;
       export PLATFORM=windows;
       export CXX=GCC;
