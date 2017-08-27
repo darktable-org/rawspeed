@@ -112,7 +112,7 @@ case "$FLAVOR" in
     handle_coverage_data
 
     substring="ENABLE_SAMPLEBASED_TESTING"
-    if ["${ECO#*$substring}" != "$ECO"];
+    if [ "${ECO#*$substring}" != "$ECO" ];
     then
       handle_sample_coverage_data
     fi
