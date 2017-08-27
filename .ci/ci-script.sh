@@ -110,7 +110,10 @@ esac
 case "$FLAVOR" in
   "Coverage")
     handle_coverage_data
-    if [[ $ECO == *"ENABLE_SAMPLEBASED_TESTING"* ]]; then
+
+    substring="ENABLE_SAMPLEBASED_TESTING"
+    if ["${ECO#*$substring}" != "$ECO"];
+    then
       handle_sample_coverage_data
     fi
     ;;
