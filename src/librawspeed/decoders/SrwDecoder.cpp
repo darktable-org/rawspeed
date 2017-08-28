@@ -87,11 +87,8 @@ RawImage SrwDecoder::decodeRawInternal() {
     uint32 nslices = raw->getEntry(STRIPOFFSETS)->count;
     if (nslices != 1)
       ThrowRDE("Only one slice supported, found %u", nslices);
-    try {
-      decodeCompressed(raw);
-    } catch (RawDecoderException& e) {
-      mRaw->setError(e.what());
-    }
+
+    decodeCompressed(raw);
     return mRaw;
   }
   if (32772 == compression)
@@ -99,11 +96,8 @@ RawImage SrwDecoder::decodeRawInternal() {
     uint32 nslices = raw->getEntry(STRIPOFFSETS)->count;
     if (nslices != 1)
       ThrowRDE("Only one slice supported, found %u", nslices);
-    try {
-      decodeCompressed2(raw, bits);
-    } catch (RawDecoderException& e) {
-      mRaw->setError(e.what());
-    }
+
+    decodeCompressed2(raw, bits);
     return mRaw;
   }
   if (32773 == compression)
