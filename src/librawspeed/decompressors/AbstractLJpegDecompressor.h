@@ -23,6 +23,7 @@
 
 #include "common/Common.h"                      // for uint32, ushort16
 #include "common/RawImage.h"                    // for RawImage
+#include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable
 #include "io/Buffer.h"                          // for Buffer, Buffer::size_type
@@ -164,8 +165,15 @@ protected:
   template <int N_COMP>
   std::array<HuffmanTable*, N_COMP> getHuffmanTables() const {
     std::array<HuffmanTable*, N_COMP> ht;
-    for (int i = 0; i < N_COMP; ++i)
-      ht[i] = huff[frame.compInfo[i].dcTblNo];
+    for (int i = 0; i < N_COMP; ++i) {
+      const auto dcTblNo = frame.compInfo[i].dcTblNo;
+      if (dcTblNo > huff.size()) {
+        ThrowRDE("Decoding table %u for comp %i does not exist (tables = %lu)",
+                 dcTblNo, i, huff.size());
+      }
+      ht[i] = huff[dcTblNo];
+    }
+
     return ht;
   }
 
