@@ -26,6 +26,7 @@
 #include "io/BitPumpMSB32.h"            // for BitPumpMSB32, BitStream<>::f...
 #include "io/ByteStream.h"              // for ByteStream
 #include <array>                        // for array
+#include <cassert>                      // for assert
 
 namespace rawspeed {
 
@@ -39,8 +40,17 @@ inline int HasselbladDecompressor::getBits(BitPumpMSB32* bs, int len) {
   return diff;
 }
 
-void HasselbladDecompressor::decodeScan()
-{
+void HasselbladDecompressor::decodeScan() {
+  if (frame.w != static_cast<unsigned>(mRaw->dim.x) ||
+      frame.h != static_cast<unsigned>(mRaw->dim.y)) {
+    ThrowRDE("LJPEG frame does not match EXIF dimensions: (%u; %u) vs (%i; %i)",
+             frame.w, frame.h, mRaw->dim.x, mRaw->dim.y);
+  }
+
+  assert(frame.h > 0);
+  assert(frame.w > 0);
+  assert(frame.w % 2 == 0);
+
   BitPumpMSB32 bitStream(input);
   // Pixels are packed two at a time, not like LJPEG:
   // [p1_length_as_huffman][p2_length_as_huffman][p0_diff_with_length][p1_diff_with_length]|NEXT PIXELS
