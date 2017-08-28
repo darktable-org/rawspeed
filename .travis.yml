@@ -16,25 +16,39 @@ notifications:
 
 language: generic
 
-before_install:
+install:
   - if [[ "$TARGET" == "SONARQUBE" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || ("$TRAVIS_BRANCH" != "develop" && "$TRAVIS_BRANCH" != "master")) ]]; then
       exit;
-    elif [[ "$TARGET" == "WWW" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || "$TRAVIS_BRANCH" != "develop") ]]; then
+    fi;
+  - if [[ "$TARGET" == "WWW" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || "$TRAVIS_BRANCH" != "develop") ]]; then
       exit;
-    elif [[ "$FLAVOR" == "Coverage" && "$TRAVIS_OS_NAME" == "linux" ]]; then
-      travis_retry sudo apt-get install -y -q -f --fix-missing wget;
-      wget -c -r -np -nH --cut-dirs=1 -R "index.html*" https://raw.pixls.us/data-unique/ --directory-prefix=$HOME/$RPUU_DST;
-    elif [[ "$EXTRA" == "NODOCKER" && "$TRAVIS_OS_NAME" == "linux" ]]; then
+    fi;
+  - if [[ "$FLAVOR" == "Coverage" && "$TRAVIS_OS_NAME" == "linux" ]]; then
+      travis_retry sudo apt-get install -y -q -f --fix-missing rsync;
+      exit;
+    fi;
+  - if [[ "$EXTRA" == "NODOCKER" && "$TRAVIS_OS_NAME" == "linux" ]]; then
       echo "oracle-java8-installer hold" | sudo dpkg --set-selections;
       echo "oracle-java9-installer hold" | sudo dpkg --set-selections;
       travis_retry sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y;
       travis_retry sudo apt-get update -q;
-      travis_retry sudo apt-get install -y -q -f --fix-missing cmake g++-4.9 g++-6 git libjpeg-dev libpugixml-dev libxml2-utils make ninja-build zlib1g-dev;
-    elif [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      docker pull darktable/rawspeed || exit $?;
-    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      brew update && brew tap Homebrew/bundle && cd .ci && brew bundle --verbose;
-    fi
+      travis_retry sudo apt-get install -y -q -f --fix-missing cmake g++-4.9 git libjpeg-dev libpugixml-dev libxml2-utils make ninja-build zlib1g-dev;
+      exit;
+    fi;
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      travis_retry docker pull darktable/rawspeed;
+      exit;
+    fi;
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      travis_retry brew update && brew tap Homebrew/bundle && cd .ci && brew bundle --verbose;
+      exit;
+    fi;
+
+before_script:
+  - if [[ "$FLAVOR" == "Coverage" && "$TRAVIS_OS_NAME" == "linux" ]]; then
+      travis_retry rsync -vvrLtW --preallocate --delete --compress --compress-level=1 --stats --progress rsync://raw.pixls.us/data-unique/ $HOME/$RPUU_DST && cd $HOME/$RPUU_DST && sha1sum -c --strict filelist.sha1;
+      exit;
+    fi;
 
 env:
   global:
@@ -106,6 +120,7 @@ jobs:
 # OSX gcc Coverage build produces invalid .gcno files
 
 script:
+  - set -e
   - if [[ "$TARGET" == "SONARQUBE" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || ("$TRAVIS_BRANCH" != "develop" && "$TRAVIS_BRANCH" != "master")) ]]; then
       exit;
     fi;
@@ -136,11 +151,11 @@ script:
         export CMD="build-wrapper-linux-x86-64 --out-dir \"$BUILD_DIR/bw-output/\" $CMD";
       fi;
 
-      docker run --read-only --tmpfs /tmp --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $BUILD_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS $EXTRA_OPTS --env CC --env CXX --env GCOV --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR --env ECO darktable/rawspeed sh -c "$CMD" || exit $?;
+      docker run --read-only --tmpfs /tmp --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $BUILD_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS $EXTRA_OPTS --env CC --env CXX --env GCOV --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR --env ECO darktable/rawspeed sh -c "$CMD";
 
       if [[ "$TARGET2" == "SONARQUBE" ]]; then
         export CMD="sonar-scanner -X -Dsonar.login=\"$SONAR_TOKEN\" -Dsonar.branch=\"$TRAVIS_BRANCH\" -Dsonar.projectVersion=\"$TRAVIS_COMMIT\"";
-        docker run --read-only --tmpfs /tmp --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $SRC_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS $EXTRA_OPTS --env CC --env CXX --env GCOV --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR --env ECO darktable/rawspeed sh -c "$CMD" || exit $?;
+        docker run --read-only --tmpfs /tmp --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $SRC_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS $EXTRA_OPTS --env CC --env CXX --env GCOV --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR --env ECO darktable/rawspeed sh -c "$CMD";
       fi;
 
       export TARGET="$TARGET2";
