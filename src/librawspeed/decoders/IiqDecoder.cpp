@@ -75,8 +75,11 @@ IiqDecoder::computeSripes(const Buffer& raw_data,
   slices.reserve(height);
 
   auto offset_iterator = std::begin(offsets);
+  bs.skipBytes(offset_iterator->offset);
+
   auto next_offset_iterator = std::next(offset_iterator);
   while (next_offset_iterator < std::end(offsets)) {
+    assert(next_offset_iterator->offset > offset_iterator->offset);
     const auto size = next_offset_iterator->offset - offset_iterator->offset;
     assert(size > 0);
 
