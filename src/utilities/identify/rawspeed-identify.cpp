@@ -26,6 +26,10 @@
 #include <string>     // for string, operator+
 #include <sys/stat.h> // for stat
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -126,7 +130,7 @@ using rawspeed::TYPE_FLOAT32;
 using rawspeed::RawspeedException;
 using rawspeed::identify::find_cameras_xml;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) { // NOLINT
 
   if (argc != 2) {
     fprintf(stderr, "Usage: darktable-rs-identify <file>\n");
@@ -138,7 +142,7 @@ int main(int argc, char *argv[]) {
     // fprintf(stderr, "ERROR: Couldn't find cameras.xml\n");
     return 2;
   }
-  // fprintf(stderr, "Using cameras.xml from '%s'\n", camfile);
+  // fprintf(stderr, "Using cameras.xml from '%s'\n", camfile.c_str());
 
   try {
     std::unique_ptr<const CameraMetaData> meta;
@@ -158,9 +162,27 @@ int main(int argc, char *argv[]) {
     __AFL_INIT();
 #endif
 
-    fprintf(stderr, "Loading file: \"%s\"\n", argv[1]);
+#ifndef _WIN32
+    char* imageFileName = argv[1];
+#else
+    // turn the locale ANSI encoded string into UTF-8 so that FileReader can
+    // turn it into UTF-16 later
+    int size = MultiByteToWideChar(CP_ACP, 0, argv[1], -1, NULL, 0);
+    std::wstring wImageFileName;
+    wImageFileName.resize(size);
+    MultiByteToWideChar(CP_ACP, 0, argv[1], -1, &wImageFileName.data(), size);
+    size = WideCharToMultiByte(CP_UTF8, 0, &wImageFileName.data(), -1, NULL, 0,
+                               NULL, NULL);
+    std::string _imageFileName;
+    _imageFileName.resize(size);
+    char* imageFileName = &_imageFileName.data();
+    WideCharToMultiByte(CP_UTF8, 0, &wImageFileName.data(), -1, imageFileName,
+                        size, NULL, NULL);
+#endif
 
-    FileReader f(argv[1]);
+    fprintf(stderr, "Loading file: \"%s\"\n", imageFileName);
+
+    FileReader f(imageFileName);
 
     auto m(f.readFile());
 
@@ -285,7 +307,7 @@ int main(int argc, char *argv[]) {
 
     /* if an exception is raised lets not retry or handle the
      specific ones, consider the file as corrupted */
-    return 0;
+    return 2;
   }
 
   return 0;
