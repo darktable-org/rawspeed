@@ -77,7 +77,9 @@ RawImage SrwDecoder::decodeRawInternal() {
     if (nslices != 1)
       ThrowRDE("Only one slice supported, found %u", nslices);
 
-    decodeCompressed(raw);
+    SamsungV0Decompressor s0(mRaw, raw, mFile);
+    s0.decompress();
+
     return mRaw;
   }
   if (32772 == compression)
@@ -86,36 +88,18 @@ RawImage SrwDecoder::decodeRawInternal() {
     if (nslices != 1)
       ThrowRDE("Only one slice supported, found %u", nslices);
 
-    decodeCompressed2(raw, bits);
+    SamsungV1Decompressor s1(mRaw, raw, mFile, bits);
+    s1.decompress();
+
     return mRaw;
   }
   if (32773 == compression)
   {
-    decodeCompressed3(raw, bits);
+    SamsungV2Decompressor s2(mRaw, raw, mFile, bits);
+    s2.decompress();
     return mRaw;
   }
   ThrowRDE("Unsupported compression");
-}
-
-// Decoder for compressed srw files (NX300 and later)
-void SrwDecoder::decodeCompressed( const TiffIFD* raw )
-{
-  SamsungV0Decompressor s0(mRaw, raw, mFile);
-  s0.decompress();
-}
-
-// Decoder for compressed srw files (NX3000 and later)
-void SrwDecoder::decodeCompressed2( const TiffIFD* raw, int bits)
-{
-  SamsungV1Decompressor s1(mRaw, raw, mFile, bits);
-  s1.decompress();
-}
-
-// Decoder for third generation compressed SRW files (NX1)
-void SrwDecoder::decodeCompressed3(const TiffIFD* raw, int bits)
-{
-  SamsungV2Decompressor s2(mRaw, raw, mFile, bits);
-  s2.decompress();
 }
 
 std::string SrwDecoder::getMode() {
