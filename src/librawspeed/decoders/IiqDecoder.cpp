@@ -21,29 +21,20 @@
 */
 
 #include "decoders/IiqDecoder.h"
-#include "common/Common.h"                          // for uint32, uchar8
-#include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoder.h"                    // for RawDecoder
-#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/BitPumpMSB32.h"                        // for BitPumpMSB32
-#include "io/Buffer.h"                              // for Buffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for getU32LE, getLE
-#include "parsers/TiffParserException.h"            // for TiffParserException
-#include "tiff/TiffEntry.h"                         // for TiffEntry
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag::TILEOFF...
-#include <algorithm>                                // for move
-#include <cassert>                                  // for assert
-#include <cstring>                                  // for memchr
-#include <istream>                                  // for istringstream
-#include <iterator>                                 // for advance
-#include <memory>                                   // for unique_ptr
-#include <string>                                   // for string, allocator
-#include <vector>                                   // for vector
-
-using std::string;
+#include "common/Common.h"                // for uint32, int32, ushort16
+#include "common/Point.h"                 // for iPoint2D
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/BitPumpMSB32.h"              // for BitPumpMSB32
+#include "io/Buffer.h"                    // for Buffer, DataBuffer
+#include "io/ByteStream.h"                // for ByteStream
+#include "io/Endianness.h"                // for Endianness, Endianness::li...
+#include "tiff/TiffIFD.h"                 // for TiffRootIFD, TiffID
+#include <algorithm>                      // for move, sort
+#include <cassert>                        // for assert
+#include <iterator>                       // for advance, begin, end, next
+#include <memory>                         // for unique_ptr
+#include <string>                         // for operator==, string
+#include <vector>                         // for vector
 
 namespace rawspeed {
 

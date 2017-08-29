@@ -21,7 +21,8 @@
 #pragma once
 
 #include "common/Range.h" // for RangesOverlap
-#include <set>            // for set
+#include <set>            // IWYU pragma: export
+// IWYU pragma: no_include <bits/stl_set.h>
 
 namespace rawspeed {
 

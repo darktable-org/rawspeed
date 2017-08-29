@@ -28,7 +28,6 @@
 #include "io/Buffer.h"                              // for Buffer
 #include "io/FileIOException.h"                     // for FileIOException
 #include "io/IOException.h"                         // for IOException
-#include "metadata/BlackArea.h"                     // for BlackArea
 #include "metadata/Camera.h"                        // for Camera, Hints
 #include "metadata/CameraMetaData.h"                // for CameraMetaData
 #include "metadata/CameraSensorInfo.h"              // for CameraSensorInfo

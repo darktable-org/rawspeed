@@ -25,7 +25,6 @@
 #include <cstdlib>         // for exit
 #include <gtest/gtest.h>   // for Message, TestPartResult, TestPartResult::...
 #include <memory>          // for unique_ptr
-#include <string>          // for string
 
 using rawspeed::alignedFree;
 using rawspeed::alignedFreeConstPtr;

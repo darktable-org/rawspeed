@@ -20,21 +20,24 @@
 
 #include "RawSpeed-API.h"
 
-#include "md5.h"           // for md5_hash
-#include <cassert>         // for assert
-#include <chrono>          // for milliseconds, steady_clock, duration, dur...
-#include <cstdint>         // for uint8_t
-#include <cstdio>          // for snprintf, size_t, fclose, fopen, fprintf
-#include <cstdlib>         // for system
-#include <fstream>
-#include <iostream>        // for cout, cerr, left, internal
-#include <map>             // for map
-#include <memory>          // for unique_ptr, allocator
-#include <sstream>
-#include <string>          // for string, char_traits, operator+, operator<<
-#include <type_traits>     // for enable_if<>::type
-#include <utility>         // for pair
-#include <vector>          // for vector
+#include "md5.h"       // for md5_hash
+#include <cassert>     // for assert
+#include <chrono>      // for milliseconds, steady_clock, duration, dur...
+#include <cstdarg>     // for va_end, va_list, va_start
+#include <cstdint>     // for uint8_t
+#include <cstdio>      // for snprintf, size_t, fclose, fopen, fprintf
+#include <cstdlib>     // for system
+#include <fstream>     // IWYU pragma: keep
+#include <iostream>    // for cout, cerr, left, internal
+#include <map>         // for map
+#include <memory>      // for unique_ptr, allocator
+#include <sstream>     // IWYU pragma: keep
+#include <string>      // for string, char_traits, operator+, operator<<
+#include <type_traits> // for enable_if<>::type
+#include <utility>     // for pair
+#include <vector>      // for vector
+
+// IWYU pragma: no_include <ext/alloc_traits.h>
 
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
 #include <iomanip> // for operator<<, setw

@@ -27,7 +27,6 @@
 #include <iostream>      // for operator<<, basic_ostream::operator<<
 #include <limits>        // for numeric_limits
 #include <memory>        // for unique_ptr
-#include <string>        // for string
 #include <vector>        // for vector, allocator
 
 using rawspeed::CameraSensorInfo;

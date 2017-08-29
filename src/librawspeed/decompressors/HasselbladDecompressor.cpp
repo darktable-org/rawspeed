@@ -20,13 +20,15 @@
 */
 
 #include "decompressors/HasselbladDecompressor.h"
-#include "common/Common.h"              // for uint32, ushort16
-#include "common/RawImage.h"            // for RawImage, RawImageData
-#include "decompressors/HuffmanTable.h" // for HuffmanTable
-#include "io/BitPumpMSB32.h"            // for BitPumpMSB32, BitStream<>::f...
-#include "io/ByteStream.h"              // for ByteStream
-#include <array>                        // for array
-#include <cassert>                      // for assert
+#include "common/Common.h"                // for uint32, ushort16
+#include "common/Point.h"                 // for iPoint2D
+#include "common/RawImage.h"              // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable
+#include "io/BitPumpMSB32.h"              // for BitPumpMSB32, BitStream<>::f...
+#include "io/ByteStream.h"                // for ByteStream
+#include <array>                          // for array
+#include <cassert>                        // for assert
 
 namespace rawspeed {
 

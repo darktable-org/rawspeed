@@ -19,9 +19,11 @@
 */
 
 #include "common/NORangesSet.h" // for NORangesSet
+#include "common/Range.h"       // for Range
 #include "common/RangeTest.h"   // for RangeDoesntContain, RangeContains
 #include <gtest/gtest.h>        // for TEST, ASSERT_EQ, ASSERT_TRUE, ASSERT_F...
-#include <set>                  // for set
+#include <utility>              // for pair
+// IWYU pragma: no_forward_declare rawspeed::Range
 
 using rawspeed::NORangesSet;
 using rawspeed::Range;

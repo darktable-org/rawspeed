@@ -19,8 +19,10 @@
 */
 
 #include "common/Range.h" // for Range
-#include <gtest/gtest.h>  // for TEST, ASSERT_EQ, ASSERT_TRUE, ASSERT_FALSE
+#include <gtest/gtest.h>  // for make_tuple, tuple, ParamIteratorInterface
+#include <ostream>        // for basic_ostream::operator<<, operator<<, ost...
 #include <set>            // for set
+#include <utility>        // for __tuple_element_t
 
 using rawspeed::Range;
 

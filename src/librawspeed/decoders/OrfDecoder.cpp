@@ -35,9 +35,9 @@
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
 #include <algorithm>                                // for min
+#include <cassert>                                  // for assert
 #include <cmath>                                    // for signbit
 #include <cstdlib>                                  // for abs
-#include <cstring>                                  // for memset
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for operator==, string
 

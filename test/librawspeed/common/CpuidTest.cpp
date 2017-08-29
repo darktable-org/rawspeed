@@ -18,11 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
+#include "rawspeedconfig.h" // IWYU pragma: keep
 #include "common/Cpuid.h" // for Cpuid
 #include <cstdlib>        // for exit
 #include <gtest/gtest.h>  // for AssertionResult, DeathTest, Test, AssertHe...
-#include <string>         // for string
 
 using rawspeed::Cpuid;
 

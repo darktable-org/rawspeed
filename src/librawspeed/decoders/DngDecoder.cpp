@@ -27,7 +27,6 @@
 #include "decoders/DngDecoderSlices.h"    // for DngDecoderSlices, DngSlice...
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "io/Buffer.h"                    // for Buffer
-#include "metadata/BlackArea.h"           // for BlackArea
 #include "metadata/Camera.h"              // for Camera
 #include "metadata/CameraMetaData.h"      // for CameraMetaData
 #include "metadata/ColorFilterArray.h"    // for CFAColor, ColorFilterArray

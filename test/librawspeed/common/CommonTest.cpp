@@ -27,6 +27,7 @@
 #include <memory>          // for unique_ptr
 #include <string>          // for basic_string, string, allocator
 #include <vector>          // for vector
+// IWYU pragma: no_include <type_traits>
 
 using rawspeed::clampBits;
 using rawspeed::copyPixels;

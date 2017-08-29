@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h"
+#include "common/Common.h" // IWYU pragma: keep
 
 #ifdef _OPENMP
 #include <omp.h>
