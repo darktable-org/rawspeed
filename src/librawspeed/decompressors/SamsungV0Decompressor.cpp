@@ -40,9 +40,9 @@
 namespace rawspeed {
 
 SamsungV0Decompressor::SamsungV0Decompressor(const RawImage& image,
-                                             const TiffIFD* ifd,
-                                             const Buffer* file)
-    : AbstractSamsungDecompressor(image), raw(ifd), mFile(file) {
+                                             const TiffIFD* raw,
+                                             const Buffer* mFile)
+    : AbstractSamsungDecompressor(image) {
   const uint32 width = mRaw->dim.x;
   const uint32 height = mRaw->dim.y;
 

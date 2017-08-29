@@ -33,9 +33,6 @@ class TiffIFD;
 
 // Decoder for compressed srw files (NX300 and later)
 class SamsungV0Decompressor final : public AbstractSamsungDecompressor {
-  const TiffIFD* raw;
-  const Buffer* mFile;
-
   std::vector<ByteStream> stripes;
 
   void computeStripes(ByteStream bso, ByteStream bsr);
