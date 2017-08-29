@@ -21,6 +21,7 @@
 
 #include "decoders/SrwDecoder.h"
 #include "common/Common.h"                       // for BitOrder::BitOrder_LSB
+#include "common/Point.h"                        // for iPoint2D
 #include "decoders/RawDecoderException.h"        // for ThrowRDE
 #include "decompressors/SamsungV0Decompressor.h" // for SamsungV0Decompressor
 #include "decompressors/SamsungV1Decompressor.h" // for SamsungV1Decompressor
@@ -72,9 +73,16 @@ RawImage SrwDecoder::decodeRawInternal() {
     return mRaw;
   }
 
+  const uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
+  const uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+  mRaw->dim = iPoint2D(width, height);
+
   if (32770 == compression)
   {
     SamsungV0Decompressor s0(mRaw, raw, mFile);
+
+    mRaw->createData();
+
     s0.decompress();
 
     return mRaw;

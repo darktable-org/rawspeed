@@ -35,8 +35,7 @@ class SamsungV0Decompressor final : public AbstractSamsungDecompressor {
 
 public:
   SamsungV0Decompressor(const RawImage& image, const TiffIFD* ifd,
-                        const Buffer* file)
-      : AbstractSamsungDecompressor(image), raw(ifd), mFile(file) {}
+                        const Buffer* file);
 
   void decompress();
 };

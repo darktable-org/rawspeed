@@ -37,15 +37,20 @@
 
 namespace rawspeed {
 
-void SamsungV0Decompressor::decompress() {
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
-
+SamsungV0Decompressor::SamsungV0Decompressor(const RawImage& image,
+                                             const TiffIFD* ifd,
+                                             const Buffer* file)
+    : AbstractSamsungDecompressor(image), raw(ifd), mFile(file) {
+  const uint32 width = mRaw->dim.x;
+  const uint32 height = mRaw->dim.y;
   if (width == 0 || height == 0 || width < 16 || width > 5546 || height > 3714)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+}
 
-  mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
+void SamsungV0Decompressor::decompress() {
+  const uint32 width = mRaw->dim.x;
+  const uint32 height = mRaw->dim.y;
+
   const uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
   uint32 compressed_offset =
       raw->getEntry(static_cast<TiffTag>(40976))->getU32();
