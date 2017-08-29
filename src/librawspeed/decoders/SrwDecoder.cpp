@@ -82,7 +82,8 @@ RawImage SrwDecoder::decodeRawInternal() {
   if (32772 == compression)
   {
     uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
-    const ByteStream bs(mFile, offset);
+    uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
+    const ByteStream bs(mFile, offset, count);
 
     SamsungV1Decompressor s1(mRaw, raw, &bs, bits);
     s1.decompress();
