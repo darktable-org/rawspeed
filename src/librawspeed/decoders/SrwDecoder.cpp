@@ -63,21 +63,16 @@ RawImage SrwDecoder::decodeRawInternal() {
   if (nslices != 1)
     ThrowRDE("Only one slice supported, found %u", nslices);
 
-  if (32769 == compression)
-  {
-    bool bit_order = hints.get("msb_override", false);
+  const auto wrongComp =
+      32770 == compression && !raw->hasEntry(static_cast<TiffTag>(40976));
+  if (32769 == compression || wrongComp) {
+    bool bit_order = hints.get("msb_override", wrongComp ? bits == 12 : false);
     this->decodeUncompressed(raw, bit_order ? BitOrder_MSB : BitOrder_LSB);
     return mRaw;
   }
 
   if (32770 == compression)
   {
-    if (!raw->hasEntry(static_cast<TiffTag>(40976))) {
-      bool bit_order = hints.get("msb_override", bits == 12);
-      this->decodeUncompressed(raw, bit_order ? BitOrder_MSB : BitOrder_LSB);
-      return mRaw;
-    }
-
     SamsungV0Decompressor s0(mRaw, raw, mFile);
     s0.decompress();
 
