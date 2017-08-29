@@ -52,10 +52,11 @@ void SamsungV0Decompressor::decompress() {
   const uint32 height = mRaw->dim.y;
 
   const uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
+  const uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
   uint32 compressed_offset =
       raw->getEntry(static_cast<TiffTag>(40976))->getU32();
 
-  ByteStream bs(mFile, compressed_offset, Endianness::little);
+  ByteStream bs(mFile, compressed_offset, count, Endianness::little);
 
   for (uint32 y = 0; y < height; y++) {
     uint32 line_offset = offset + bs.getI32();
