@@ -35,11 +35,6 @@
 #include <string>                                // for string, operator==
 #include <vector>                                // for vector
 
-using std::max;
-using std::vector;
-using std::string;
-using std::ostringstream;
-
 namespace rawspeed {
 
 bool SrwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
@@ -123,9 +118,9 @@ void SrwDecoder::decodeCompressed3(const TiffIFD* raw, int bits)
   s2.decompress();
 }
 
-string SrwDecoder::getMode() {
-  vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
-  ostringstream mode;
+std::string SrwDecoder::getMode() {
+  std::vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
+  std::ostringstream mode;
   if (!data.empty() && data[0]->hasEntryRecursive(BITSPERSAMPLE)) {
     mode << data[0]->getEntryRecursive(BITSPERSAMPLE)->getU32() << "bit";
     return mode.str();
@@ -135,7 +130,7 @@ string SrwDecoder::getMode() {
 
 void SrwDecoder::checkSupportInternal(const CameraMetaData* meta) {
   auto id = mRootIFD->getID();
-  string mode = getMode();
+  std::string mode = getMode();
   if (meta->hasCamera(id.make, id.model, mode))
     this->checkCameraSupported(meta, id, getMode());
   else
@@ -148,7 +143,7 @@ void SrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();
 
   auto id = mRootIFD->getID();
-  string mode = getMode();
+  std::string mode = getMode();
   if (meta->hasCamera(id.make, id.model, mode))
     setMetaData(meta, id, mode, iso);
   else
