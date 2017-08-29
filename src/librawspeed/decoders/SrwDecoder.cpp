@@ -59,6 +59,10 @@ RawImage SrwDecoder::decodeRawInternal() {
   if (32769 != compression && 32770 != compression && 32772 != compression && 32773 != compression)
     ThrowRDE("Unsupported compression");
 
+  uint32 nslices = raw->getEntry(STRIPOFFSETS)->count;
+  if (nslices != 1)
+    ThrowRDE("Only one slice supported, found %u", nslices);
+
   if (32769 == compression)
   {
     bool bit_order = hints.get("msb_override", false);
@@ -73,9 +77,6 @@ RawImage SrwDecoder::decodeRawInternal() {
       this->decodeUncompressed(raw, bit_order ? BitOrder_MSB : BitOrder_LSB);
       return mRaw;
     }
-    uint32 nslices = raw->getEntry(STRIPOFFSETS)->count;
-    if (nslices != 1)
-      ThrowRDE("Only one slice supported, found %u", nslices);
 
     SamsungV0Decompressor s0(mRaw, raw, mFile);
     s0.decompress();
@@ -84,10 +85,6 @@ RawImage SrwDecoder::decodeRawInternal() {
   }
   if (32772 == compression)
   {
-    uint32 nslices = raw->getEntry(STRIPOFFSETS)->count;
-    if (nslices != 1)
-      ThrowRDE("Only one slice supported, found %u", nslices);
-
     SamsungV1Decompressor s1(mRaw, raw, mFile, bits);
     s1.decompress();
 
