@@ -26,6 +26,8 @@ FILE(GLOB SOURCES
   "PentaxDecompressor.h"
   "SamsungV0Decompressor.cpp"
   "SamsungV0Decompressor.h"
+  "SamsungV1Decompressor.cpp"
+  "SamsungV1Decompressor.h"
   "UncompressedDecompressor.cpp"
   "UncompressedDecompressor.h"
 )

@@ -20,14 +20,11 @@
 
 #pragma once
 
-#include "common/Common.h"                // for int32
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "io/BitPumpMSB.h"                // for BitPumpMSB
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
 #include <algorithm>                      // for move
 #include <string>                         // for string
-#include <vector>                         // for vector
 
 namespace rawspeed {
 
@@ -47,15 +44,11 @@ public:
   void checkSupportInternal(const CameraMetaData* meta) override;
 
 private:
-  struct encTableItem;
-
   int getDecoderVersion() const override { return 3; }
   void decodeCompressed(const TiffIFD* raw);
   void decodeCompressed2(const TiffIFD* raw, int bits);
   void decodeCompressed3(const TiffIFD* raw, int bits);
   std::string getMode();
-  static int32 samsungDiff(BitPumpMSB* pump,
-                           const std::vector<encTableItem>& tbl);
 };
 
 } // namespace rawspeed
