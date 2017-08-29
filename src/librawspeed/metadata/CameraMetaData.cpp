@@ -42,7 +42,12 @@ namespace rawspeed {
 #ifdef HAVE_PUGIXML
 CameraMetaData::CameraMetaData(const char *docname) {
   xml_document doc;
+
+#if defined(__unix__) || defined(__APPLE__)
   xml_parse_result result = doc.load_file(docname);
+#else
+  xml_parse_result result = doc.load_file(pugi::as_wide(docname).c_str());
+#endif
 
   if (!result) {
     ThrowCME(
