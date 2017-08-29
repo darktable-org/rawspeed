@@ -116,6 +116,13 @@ void SamsungV0Decompressor::decompress() const {
   }
 }
 
+int32 SamsungV0Decompressor::calcAdj(BitPumpMSB32* bits, int b) {
+  int32 adj = 0;
+  if (b)
+    adj = (static_cast<int32>(bits->getBits(b)) << (32 - b) >> (32 - b));
+  return adj;
+}
+
 void SamsungV0Decompressor::decompressStrip(uint32 y,
                                             const ByteStream& bs) const {
   const uint32 width = mRaw->dim.x;
@@ -172,9 +179,8 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
       // First we decode even pixels
       for (int c = 0; c < 16; c += 2) {
         int b = len[c >> 3];
-        int32 adj = 0;
-        if (b)
-          adj = (static_cast<int32>(bits.getBits(b)) << (32 - b) >> (32 - b));
+        int32 adj = calcAdj(&bits, b);
+
         img[c] = adj + img_up[c];
       }
 
@@ -183,9 +189,8 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
       // is beyond me, it will hurt compression a deal.
       for (int c = 1; c < 16; c += 2) {
         int b = len[2 | (c >> 3)];
-        int32 adj = 0;
-        if (b)
-          adj = (static_cast<int32>(bits.getBits(b)) << (32 - b) >> (32 - b));
+        int32 adj = calcAdj(&bits, b);
+
         img[c] = adj + img_up2[c];
       }
     } else {
@@ -194,9 +199,7 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
       int pred_left = x != 0 ? img[-2] : 128;
       for (int c = 0; c < 16; c += 2) {
         int b = len[c >> 3];
-        int32 adj = 0;
-        if (b)
-          adj = (static_cast<int32>(bits.getBits(b)) << (32 - b) >> (32 - b));
+        int32 adj = calcAdj(&bits, b);
 
         if (img + c < past_last)
           img[c] = adj + pred_left;
@@ -206,9 +209,7 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
       pred_left = x != 0 ? img[-1] : 128;
       for (int c = 1; c < 16; c += 2) {
         int b = len[2 | (c >> 3)];
-        int32 adj = 0;
-        if (b)
-          adj = (static_cast<int32>(bits.getBits(b)) << (32 - b) >> (32 - b));
+        int32 adj = calcAdj(&bits, b);
 
         if (img + c < past_last)
           img[c] = adj + pred_left;
