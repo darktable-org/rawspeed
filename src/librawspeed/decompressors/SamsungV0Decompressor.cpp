@@ -59,7 +59,7 @@ void SamsungV0Decompressor::decompress() {
   ByteStream bs(mFile, compressed_offset, count, Endianness::little);
 
   for (uint32 y = 0; y < height; y++) {
-    uint32 line_offset = offset + bs.getI32();
+    uint32 line_offset = offset + bs.getU32();
     if (line_offset >= mFile->getSize())
       ThrowRDE("Offset outside image file, file probably truncated.");
     int len[4];
