@@ -4,6 +4,7 @@ FILE(GLOB SOURCES
   "AbstractLJpegDecompressor.h"
   "AbstractParallelizedDecompressor.cpp"
   "AbstractParallelizedDecompressor.h"
+  "AbstractSamsungDecompressor.h"
   "Cr2Decompressor.cpp"
   "Cr2Decompressor.h"
   "CrwDecompressor.cpp"
@@ -23,6 +24,8 @@ FILE(GLOB SOURCES
   "NikonDecompressor.h"
   "PentaxDecompressor.cpp"
   "PentaxDecompressor.h"
+  "SamsungV0Decompressor.cpp"
+  "SamsungV0Decompressor.h"
   "UncompressedDecompressor.cpp"
   "UncompressedDecompressor.h"
 )

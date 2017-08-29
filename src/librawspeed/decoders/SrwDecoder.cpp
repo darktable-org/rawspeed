@@ -20,26 +20,24 @@
 */
 
 #include "decoders/SrwDecoder.h"
-#include "common/Common.h"                // for uint32, ushort16, int32
-#include "common/Point.h"                 // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/BitPumpMSB.h"                // for BitPumpMSB
-#include "io/BitPumpMSB32.h"              // for BitPumpMSB32
-#include "io/Buffer.h"                    // for Buffer
-#include "io/ByteStream.h"                // for ByteStream
-#include "io/Endianness.h"                // for getHostEndianness, Endiann...
-#include "metadata/Camera.h"              // for Hints
-#include "metadata/CameraMetaData.h"      // for CameraMetaData
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include "tiff/TiffIFD.h"                 // for TiffRootIFD, TiffIFD, TiffID
-#include "tiff/TiffTag.h"                 // for TiffTag::STRIPOFFSETS, Tif...
-#include <algorithm>                      // for max
-#include <cassert>                        // for assert
-#include <memory>                         // for unique_ptr
-#include <sstream>                        // for ostringstream, operator<<
-#include <string>                         // for string
-#include <vector>                         // for vector
+#include "common/Common.h"                       // for uint32, ushort16
+#include "common/Point.h"                        // for iPoint2D
+#include "decoders/RawDecoderException.h"        // for ThrowRDE
+#include "decompressors/HuffmanTable.h"          // for HuffmanTable
+#include "decompressors/SamsungV0Decompressor.h" // for SamsungV0Decompressor
+#include "io/BitPumpMSB.h"                       // for BitPumpMSB
+#include "io/BitPumpMSB32.h"                     // for BitPumpMSB32
+#include "metadata/Camera.h"                     // for Hints
+#include "metadata/CameraMetaData.h"             // for CameraMetaData
+#include "tiff/TiffEntry.h"                      // for TiffEntry
+#include "tiff/TiffIFD.h"                        // for TiffRootIFD, TiffIFD
+#include "tiff/TiffTag.h"                        // for TiffTag::STRIPOFFSETS
+#include <algorithm>                             // for max
+#include <cassert>                               // for assert
+#include <memory>                                // for unique_ptr, allocat...
+#include <sstream>                               // for operator<<, ostring...
+#include <string>                                // for string, operator==
+#include <vector>                                // for vector
 
 using std::max;
 using std::vector;
@@ -111,124 +109,8 @@ RawImage SrwDecoder::decodeRawInternal() {
 // Decoder for compressed srw files (NX300 and later)
 void SrwDecoder::decodeCompressed( const TiffIFD* raw )
 {
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
-
-  if (width == 0 || height == 0 || width < 16 || width > 5546 || height > 3714)
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
-
-  mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
-  const uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
-  uint32 compressed_offset =
-      raw->getEntry(static_cast<TiffTag>(40976))->getU32();
-
-  ByteStream bs(mFile, compressed_offset, Endianness::little);
-
-  for (uint32 y = 0; y < height; y++) {
-    uint32 line_offset = offset + bs.getI32();
-    if (line_offset >= mFile->getSize())
-      ThrowRDE("Offset outside image file, file probably truncated.");
-    int len[4];
-    for (int &i : len)
-      i = y < 2 ? 7 : 4;
-    BitPumpMSB32 bits(mFile, line_offset);
-    int op[4];
-    auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
-    const auto* const past_last = reinterpret_cast<ushort16*>(
-        mRaw->getData(width - 1, y) + mRaw->getBpp());
-
-    ushort16* img_up = reinterpret_cast<ushort16*>(
-        mRaw->getData(0, max(0, static_cast<int>(y) - 1)));
-    ushort16* img_up2 = reinterpret_cast<ushort16*>(
-        mRaw->getData(0, max(0, static_cast<int>(y) - 2)));
-    // Image is arranged in groups of 16 pixels horizontally
-    for (uint32 x = 0; x < width; x += 16) {
-      bits.fill();
-      bool dir = !!bits.getBitsNoFill(1);
-      for (int &i : op)
-        i = bits.getBitsNoFill(2);
-      for (int i = 0; i < 4; i++) {
-        assert(op[i] >= 0 && op[i] <= 3);
-        switch (op[i]) {
-          case 3: len[i] = bits.getBits(4);
-            break;
-          case 2: len[i]--;
-            break;
-          case 1: len[i]++;
-            break;
-          default:
-            // FIXME: it can be zero too.
-            break;
-        }
-        if (len[i] < 0)
-          ThrowRDE("Bit length less than 0.");
-        if (len[i] > 16)
-          ThrowRDE("Bit Length more than 16.");
-      }
-      if (dir) {
-        // Upward prediction
-        // First we decode even pixels
-        for (int c = 0; c < 16; c += 2) {
-          int b = len[c >> 3];
-          int32 adj = 0;
-          if (b)
-            adj = (static_cast<int32>(bits.getBits(b)) << (32 - b) >> (32 - b));
-          img[c] = adj + img_up[c];
-        }
-        // Now we decode odd pixels
-        // Why on earth upward prediction only looks up 1 line above
-        // is beyond me, it will hurt compression a deal.
-        for (int c = 1; c < 16; c += 2) {
-          int b = len[2 | (c >> 3)];
-          int32 adj = 0;
-          if (b)
-            adj = (static_cast<int32>(bits.getBits(b)) << (32 - b) >> (32 - b));
-          img[c] = adj + img_up2[c];
-        }
-      } else {
-        // Left to right prediction
-        // First we decode even pixels
-        int pred_left = x != 0 ? img[-2] : 128;
-        for (int c = 0; c < 16; c += 2) {
-          int b = len[c >> 3];
-          int32 adj = 0;
-          if (b)
-            adj = (static_cast<int32>(bits.getBits(b)) << (32 - b) >> (32 - b));
-
-          if (img + c < past_last)
-            img[c] = adj + pred_left;
-        }
-        // Now we decode odd pixels
-        pred_left = x != 0 ? img[-1] : 128;
-        for (int c = 1; c < 16; c += 2) {
-          int b = len[2 | (c >> 3)];
-          int32 adj = 0;
-          if (b)
-            adj = (static_cast<int32>(bits.getBits(b)) << (32 - b) >> (32 - b));
-
-          if (img + c < past_last)
-            img[c] = adj + pred_left;
-        }
-      }
-      img += 16;
-      img_up += 16;
-      img_up2 += 16;
-    }
-  }
-
-  // Swap red and blue pixels to get the final CFA pattern
-  for (uint32 y = 0; y < height-1; y+=2) {
-    auto* topline = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
-    auto* bottomline = reinterpret_cast<ushort16*>(mRaw->getData(0, y + 1));
-    for (uint32 x = 0; x < width-1; x += 2) {
-      ushort16 temp = topline[1];
-      topline[1] = bottomline[0];
-      bottomline[0] = temp;
-      topline += 2;
-      bottomline += 2;
-    }
-  }
+  SamsungV0Decompressor s0(mRaw, raw, mFile);
+  s0.decompress();
 }
 
 struct SrwDecoder::encTableItem {
