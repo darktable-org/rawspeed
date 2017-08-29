@@ -170,14 +170,14 @@ int main(int argc, char* argv[]) { // NOLINT
     int size = MultiByteToWideChar(CP_ACP, 0, argv[1], -1, NULL, 0);
     std::wstring wImageFileName;
     wImageFileName.resize(size);
-    MultiByteToWideChar(CP_ACP, 0, argv[1], -1, wImageFileName.data(), size);
-    size = WideCharToMultiByte(CP_UTF8, 0, wImageFileName.data(), -1, NULL, 0,
+    MultiByteToWideChar(CP_ACP, 0, argv[1], -1, &wImageFileName[0], size);
+    size = WideCharToMultiByte(CP_UTF8, 0, &wImageFileName[0], -1, NULL, 0,
                                NULL, NULL);
     std::string _imageFileName;
     _imageFileName.resize(size);
-    char* imageFileName = _imageFileName.data();
-    WideCharToMultiByte(CP_UTF8, 0, wImageFileName.data(), -1, imageFileName,
-                        size, NULL, NULL);
+    char* imageFileName = &_imageFileName[0];
+    WideCharToMultiByte(CP_UTF8, 0, &wImageFileName[0], -1, imageFileName, size,
+                        NULL, NULL);
 #endif
 
     fprintf(stderr, "Loading file: \"%s\"\n", imageFileName);
