@@ -34,6 +34,8 @@
 #include "tiff/TiffTag.h"                 // for TiffTag, TiffTag::IMAGELENGTH
 #include <algorithm>                      // for max
 #include <cassert>                        // for assert
+#include <iterator>                       // for advance, begin, end, next
+#include <vector>                         // for vector
 
 namespace rawspeed {
 
@@ -43,29 +45,67 @@ SamsungV0Decompressor::SamsungV0Decompressor(const RawImage& image,
     : AbstractSamsungDecompressor(image), raw(ifd), mFile(file) {
   const uint32 width = mRaw->dim.x;
   const uint32 height = mRaw->dim.y;
+
   if (width == 0 || height == 0 || width < 16 || width > 5546 || height > 3714)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
+  const TiffEntry* sliceOffsets = raw->getEntry(static_cast<TiffTag>(40976));
+  if (sliceOffsets->type != TIFF_LONG || sliceOffsets->count != 1)
+    ThrowRDE("Entry 40976 is corrupt");
+
+  ByteStream bso(mFile, sliceOffsets->getU32(), 4 * height, Endianness::little);
+
+  const uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
+  const uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
+  Buffer rbuf(mFile->getSubView(offset, count));
+  ByteStream bsr(DataBuffer(rbuf, Endianness::little));
+
+  computeStripes(bso, bsr);
+}
+
+// FIXME: this is very close to IiqDecoder::computeSripes()
+void SamsungV0Decompressor::computeStripes(ByteStream bso, ByteStream bsr) {
+  const uint32 height = mRaw->dim.y;
+
+  std::vector<uint32> offsets;
+  offsets.reserve(1 + height);
+  for (uint32 y = 0; y < height; y++) {
+    offsets.emplace_back(bso.getU32());
+    if (y > 0 && offsets[y] <= offsets[y - 1])
+      ThrowRDE("Offset for line %u is out of sequence.", y);
+  }
+  offsets.emplace_back(bsr.getSize());
+
+  stripes.reserve(height);
+
+  auto offset_iterator = std::begin(offsets);
+  bsr.skipBytes(*offset_iterator);
+
+  auto next_offset_iterator = std::next(offset_iterator);
+  while (next_offset_iterator < std::end(offsets)) {
+    assert(*next_offset_iterator > *offset_iterator);
+    const auto size = *next_offset_iterator - *offset_iterator;
+    assert(size > 0);
+
+    stripes.emplace_back(bsr.getStream(size));
+
+    std::advance(offset_iterator, 1);
+    std::advance(next_offset_iterator, 1);
+  }
+
+  assert(stripes.size() == height);
 }
 
 void SamsungV0Decompressor::decompress() {
   const uint32 width = mRaw->dim.x;
   const uint32 height = mRaw->dim.y;
 
-  const uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
-  const uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
-  uint32 compressed_offset =
-      raw->getEntry(static_cast<TiffTag>(40976))->getU32();
-
-  ByteStream bs(mFile, compressed_offset, count, Endianness::little);
-
   for (uint32 y = 0; y < height; y++) {
-    uint32 line_offset = offset + bs.getU32();
-    if (line_offset >= mFile->getSize())
-      ThrowRDE("Offset outside image file, file probably truncated.");
+    BitPumpMSB32 bits(stripes[y]);
+
     int len[4];
     for (int& i : len)
       i = y < 2 ? 7 : 4;
-    BitPumpMSB32 bits(mFile, line_offset);
     int op[4];
     auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
     const auto* const past_last = reinterpret_cast<ushort16*>(

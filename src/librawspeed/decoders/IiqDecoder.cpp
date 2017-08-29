@@ -50,6 +50,7 @@ bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   return make == "Phase One A/S" && db.get<uint32>(8) == 0x49494949;
 }
 
+// FIXME: this is very close to SamsungV0Decompressor::computeStripes()
 std::vector<IiqDecoder::IiqStrip>
 IiqDecoder::computeSripes(const Buffer& raw_data,
                           std::vector<IiqOffset>&& offsets,
