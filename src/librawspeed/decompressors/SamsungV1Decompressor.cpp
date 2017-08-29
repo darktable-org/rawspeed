@@ -27,9 +27,6 @@
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include "tiff/TiffIFD.h"                 // for TiffIFD
-#include "tiff/TiffTag.h"                 // for TiffTag::IMAGELENGTH, Tiff...
 #include <memory>                         // for allocator_traits<>::value_...
 #include <vector>                         // for vector
 
@@ -39,6 +36,16 @@ struct SamsungV1Decompressor::encTableItem {
   uchar8 encLen;
   uchar8 diffLen;
 };
+
+SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
+                                             const ByteStream* bs_, int bit)
+    : AbstractSamsungDecompressor(image), bs(bs_), bits(bit) {
+  const uint32 width = mRaw->dim.x;
+  const uint32 height = mRaw->dim.y;
+
+  if (width == 0 || height == 0 || width > 5664 || height > 3714)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+}
 
 int32 SamsungV1Decompressor::samsungDiff(BitPumpMSB* pump,
                                          const std::vector<encTableItem>& tbl) {
@@ -57,14 +64,8 @@ int32 SamsungV1Decompressor::samsungDiff(BitPumpMSB* pump,
 }
 
 void SamsungV1Decompressor::decompress() {
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
-
-  if (width == 0 || height == 0 || width > 5664 || height > 3714)
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
-
-  mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
+  const uint32 width = mRaw->dim.x;
+  const uint32 height = mRaw->dim.y;
 
   // This format has a variable length encoding of how many bits are needed
   // to encode the difference between pixels, we use a table to process it

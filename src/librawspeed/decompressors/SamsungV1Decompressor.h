@@ -29,7 +29,6 @@ namespace rawspeed {
 
 class ByteStream;
 class RawImage;
-class TiffIFD;
 
 // Decoder for compressed srw files (NX3000 and later)
 class SamsungV1Decompressor final : public AbstractSamsungDecompressor {
@@ -37,14 +36,11 @@ class SamsungV1Decompressor final : public AbstractSamsungDecompressor {
   static int32 samsungDiff(BitPumpMSB* pump,
                            const std::vector<encTableItem>& tbl);
 
-  const TiffIFD* raw;
   const ByteStream* bs;
   int bits;
 
 public:
-  SamsungV1Decompressor(const RawImage& image, const TiffIFD* ifd,
-                        const ByteStream* bs_, int bit)
-      : AbstractSamsungDecompressor(image), raw(ifd), bs(bs_), bits(bit) {}
+  SamsungV1Decompressor(const RawImage& image, const ByteStream* bs_, int bit);
 
   void decompress();
 };

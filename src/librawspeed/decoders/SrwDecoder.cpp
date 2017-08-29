@@ -93,7 +93,10 @@ RawImage SrwDecoder::decodeRawInternal() {
     uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
     const ByteStream bs(mFile, offset, count);
 
-    SamsungV1Decompressor s1(mRaw, raw, &bs, bits);
+    SamsungV1Decompressor s1(mRaw, &bs, bits);
+
+    mRaw->createData();
+
     s1.decompress();
 
     return mRaw;
