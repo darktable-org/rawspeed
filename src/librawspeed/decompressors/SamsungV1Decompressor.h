@@ -27,7 +27,7 @@
 
 namespace rawspeed {
 
-class Buffer;
+class ByteStream;
 class RawImage;
 class TiffIFD;
 
@@ -38,13 +38,13 @@ class SamsungV1Decompressor final : public AbstractSamsungDecompressor {
                            const std::vector<encTableItem>& tbl);
 
   const TiffIFD* raw;
-  const Buffer* mFile;
+  const ByteStream* bs;
   int bits;
 
 public:
   SamsungV1Decompressor(const RawImage& image, const TiffIFD* ifd,
-                        const Buffer* file, int bit)
-      : AbstractSamsungDecompressor(image), raw(ifd), mFile(file), bits(bit) {}
+                        const ByteStream* bs_, int bit)
+      : AbstractSamsungDecompressor(image), raw(ifd), bs(bs_), bits(bit) {}
 
   void decompress();
 };

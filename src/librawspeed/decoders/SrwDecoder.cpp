@@ -25,6 +25,7 @@
 #include "decompressors/SamsungV0Decompressor.h" // for SamsungV0Decompressor
 #include "decompressors/SamsungV1Decompressor.h" // for SamsungV1Decompressor
 #include "decompressors/SamsungV2Decompressor.h" // for SamsungV2Decompressor
+#include "io/ByteStream.h"                       // for ByteStream
 #include "metadata/Camera.h"                     // for Hints
 #include "metadata/CameraMetaData.h"             // for CameraMetaData
 #include "tiff/TiffEntry.h"                      // for TiffEntry
@@ -80,7 +81,10 @@ RawImage SrwDecoder::decodeRawInternal() {
   }
   if (32772 == compression)
   {
-    SamsungV1Decompressor s1(mRaw, raw, mFile, bits);
+    uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
+    const ByteStream bs(mFile, offset);
+
+    SamsungV1Decompressor s1(mRaw, raw, &bs, bits);
     s1.decompress();
 
     return mRaw;

@@ -59,7 +59,6 @@ int32 SamsungV1Decompressor::samsungDiff(BitPumpMSB* pump,
 void SamsungV1Decompressor::decompress() {
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
-  uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
 
   if (width == 0 || height == 0 || width > 5664 || height > 3714)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
@@ -96,7 +95,7 @@ void SamsungV1Decompressor::decompress() {
     }
   }
 
-  BitPumpMSB pump(mFile, offset);
+  BitPumpMSB pump(*bs);
   for (uint32 y = 0; y < height; y++) {
     auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
     for (uint32 x = 0; x < width; x++) {
