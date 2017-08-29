@@ -26,6 +26,7 @@
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
+#include "io/ByteStream.h"                // for ByteStream
 #include "tiff/TiffEntry.h"               // for TiffEntry
 #include "tiff/TiffIFD.h"                 // for TiffIFD
 #include "tiff/TiffTag.h"                 // for TiffTag::STRIPOFFSETS
@@ -42,7 +43,8 @@ namespace rawspeed {
 
 void SamsungV2Decompressor::decompress() {
   uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
-  BitPumpMSB32 startpump(mFile, offset);
+  const uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
+  BitPumpMSB32 startpump(ByteStream(mFile, offset, count));
 
   // Process the initial metadata bits, we only really use initVal, width and
   // height (the last two match the TIFF values anyway)
