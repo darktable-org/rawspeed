@@ -18,8 +18,8 @@
   </xs:simpleType>
   <xs:simpleType name="IDTypeMakeType">
     <xs:restriction base="xs:string">
-      <xs:pattern value="[a-zA-Z ]{4,10}"/>
-      <xs:minLength value="4"/>
+      <xs:pattern value="[a-zA-Z ]{2,10}"/>
+      <xs:minLength value="2"/>
       <xs:maxLength value="10"/>
       <xs:enumeration value="Canon"/>
       <xs:enumeration value="Epson"/>
@@ -27,6 +27,7 @@
       <xs:enumeration value="GITUP"/>
       <xs:enumeration value="Hasselblad"/>
       <xs:enumeration value="Kodak"/>
+      <xs:enumeration value="LG"/>
       <xs:enumeration value="Leaf"/>
       <xs:enumeration value="Leica"/>
       <xs:enumeration value="Mamiya"/>
@@ -40,6 +41,7 @@
       <xs:enumeration value="Phase One"/>
       <xs:enumeration value="Ricoh"/>
       <xs:enumeration value="Samsung"/>
+      <xs:enumeration value="Sigma"/>
       <xs:enumeration value="Sinar"/>
       <xs:enumeration value="Sony"/>
     </xs:restriction>
@@ -371,9 +373,11 @@
       <xs:enumeration value="KONICA MINOLTA"/>
       <xs:enumeration value="Kodak"/>
       <xs:enumeration value="Konica Minolta Camera, Inc."/>
-      <xs:enumeration value="LEICA"/>
-      <xs:enumeration value="Leaf"/>
       <xs:enumeration value="LEICA CAMERA AG"/>
+      <xs:enumeration value="LEICA"/>
+      <xs:enumeration value="LG Mobile"/>
+      <xs:enumeration value="LGE"/>
+      <xs:enumeration value="Leaf"/>
       <xs:enumeration value="Leica Camera AG"/>
       <xs:enumeration value="Mamiya-OP Co.,Ltd."/>
       <xs:enumeration value="Matrix"/>
@@ -400,14 +404,17 @@
       <xs:enumeration value="RICOH"/>
       <xs:enumeration value="RoverShot"/>
       <xs:enumeration value="SAMSUNG DIGITAL IMA"/>
+      <xs:enumeration value="SAMSUNG TECHWIN Co."/>
       <xs:enumeration value="SAMSUNG"/>
       <xs:enumeration value="SEIKO EPSON CORP."/>
+      <xs:enumeration value="SIGMA"/>
       <xs:enumeration value="SONY"/>
       <xs:enumeration value="ST Micro"/>
       <xs:enumeration value="Samsung"/>
       <xs:enumeration value="Sinar Photography AG"/>
       <xs:enumeration value="Sinar"/>
       <xs:enumeration value="Sony"/>
+      <xs:enumeration value="samsung"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="CameraModelType">

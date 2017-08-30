@@ -9524,6 +9524,18 @@
 	<Camera make="SAMSUNG DIGITAL IMA" model="SAMSUNG GX20" mode="dng">
 		<ID make="Samsung" model="GX20">Samsung GX20</ID>
 	</Camera>
+	<Camera make="samsung" model="SM-G920F">
+		<ID make="Samsung" model="G920F">Samsung G920F</ID>
+	</Camera>
+	<Camera make="samsung" model="SM-G935F">
+		<ID make="Samsung" model="G935F">Samsung G935F</ID>
+	</Camera>
+	<Camera make="SAMSUNG TECHWIN Co." model="SAMSUNG GX10">
+		<ID make="Samsung" model="GX10">Samsung GX10</ID>
+	</Camera>
+	<Camera make="SAMSUNG TECHWIN Co." model="SAMSUNG GX20">
+		<ID make="Samsung" model="GX20">Samsung GX20</ID>
+	</Camera>
 	<Camera make="Nokia" model="Lumia 1020" mode="dng">
 		<ID make="Nokia" model="Lumia 1020">Nokia Lumia 1020</ID>
 	</Camera>
@@ -9535,6 +9547,27 @@
 	</Camera>
 	<Camera make="Nikon" model="LS-5000" mode="dng">
 		<ID make="Nikon" model="LS-5000">Nikon LS-5000</ID>
+	</Camera>
+	<Camera make="SIGMA" model="SIGMA DP1" mode="dng" supported="no">
+		<ID make="Sigma" model="DP1">Sigma DP1</ID>
+	</Camera>
+	<Camera make="SIGMA" model="SIGMA DP1 Merrill" mode="dng" supported="no">
+		<ID make="Sigma" model="DP1 Merrill">Sigma DP1 Merrill</ID>
+	</Camera>
+	<Camera make="LGE" model="Nexus 5X" mode="dng">
+		<ID make="LG" model="Nexus 5X">LG Nexus 5X</ID>
+	</Camera>
+	<Camera make="LGE" model="LG-D855" mode="dng">
+		<ID make="LG" model="D855">LG D855</ID>
+	</Camera>
+	<Camera make="LGE" model="LG-US996" mode="dng">
+		<ID make="LG" model="US996">LG US996</ID>
+	</Camera>
+	<Camera make="LG Mobile" model="LG-H815" mode="dng">
+		<ID make="LG" model="H815">LG H815</ID>
+	</Camera>
+	<Camera make="LG Mobile" model="VS995" mode="dng">
+		<ID make="LG" model="VS995">LG VS995</ID>
 	</Camera>
 	<!-- CHDK Cameras -->
 	<Camera make="AVT" model="F-080C" supported="no" mode="chdk">
