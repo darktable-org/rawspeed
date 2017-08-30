@@ -158,10 +158,6 @@ int main(int argc, char* argv[]) { // NOLINT
       return 2;
     }
 
-#ifdef __AFL_HAVE_MANUAL_CONTROL
-    __AFL_INIT();
-#endif
-
 #ifndef _WIN32
     char* imageFileName = argv[1];
 #else
