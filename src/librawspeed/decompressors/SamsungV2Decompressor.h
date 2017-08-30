@@ -44,6 +44,8 @@ class SamsungV2Decompressor final : public AbstractSamsungDecompressor {
 
   ByteStream data;
 
+  void decompressRow(uint32 row);
+
 public:
   SamsungV2Decompressor(const RawImage& image, const TiffIFD* ifd,
                         const Buffer* file, int bit);
