@@ -41,7 +41,10 @@ namespace rawspeed {
 // in contact and Loring von Palleske (Samsung) for pointing to the open-source
 // code of Samsung's DNG converter at http://opensource.samsung.com/
 
-void SamsungV2Decompressor::decompress() {
+SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
+                                             const TiffIFD* ifd,
+                                             const Buffer* file, int bit)
+    : AbstractSamsungDecompressor(image), raw(ifd), mFile(file), bits(bit) {
   uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
   const uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
   BitPumpMSB32 startpump(ByteStream(mFile, offset, count));
@@ -50,17 +53,17 @@ void SamsungV2Decompressor::decompress() {
   // height (the last two match the TIFF values anyway)
   startpump.getBits(16); // NLCVersion
   startpump.getBits(4);  // ImgFormat
-  uint32 bitDepth = startpump.getBits(4) + 1;
+  bitDepth = startpump.getBits(4) + 1;
   startpump.getBits(4); // NumBlkInRCUnit
   startpump.getBits(4); // CompressionRatio
-  uint32 width = startpump.getBits(16);
-  uint32 height = startpump.getBits(16);
+  width = startpump.getBits(16);
+  height = startpump.getBits(16);
   startpump.getBits(16); // TileWidth
   startpump.getBits(4);  // reserved
 
   // The format includes an optimization code that sets 3 flags to change the
   // decoding parameters
-  uint32 optflags = startpump.getBits(4);
+  optflags = startpump.getBits(4);
 
 #define OPT_SKIP 1 // Skip checking if we need differences from previous line
 #define OPT_MV 2   // Simplify motion vector definition
@@ -70,28 +73,35 @@ void SamsungV2Decompressor::decompress() {
   startpump.getBits(8); // reserved
   startpump.getBits(8); // Inc
   startpump.getBits(2); // reserved
-  uint32 initVal = startpump.getBits(14);
+  initVal = startpump.getBits(14);
 
   if (width == 0 || height == 0 || width % 16 != 0 || width > 6496 ||
       height > 4336)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-  mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
+  if (width != static_cast<uint32>(mRaw->dim.x) ||
+      height != static_cast<uint32>(mRaw->dim.y))
+    ThrowRDE("EXIF image dimensions do not match dimensions from raw header");
 
+  data = startpump.getStream(startpump.getRemainSize());
+}
+
+void SamsungV2Decompressor::decompress() {
   // The format is relatively straightforward. Each line gets encoded as a set
   // of differences from pixels from another line. Pixels are grouped in blocks
   // of 16 (8 green, 8 red or blue). Each block is encoded in three sections.
   // First 1 or 4 bits to specify which reference pixels to use, then a section
   // that specifies for each pixel the number of bits in the difference, then
   // the actual difference bits
+
   uint32 diffBitsMode[3][2] = {{0}};
-  uint32 line_offset = startpump.getBufferPosition();
   for (uint32 row = 0; row < height; row++) {
     // Align pump to 16byte boundary
+    const auto line_offset = data.getPosition();
     if ((line_offset & 0xf) != 0)
-      line_offset += 16 - (line_offset & 0xf);
-    BitPumpMSB32 pump(mFile, offset + line_offset);
+      data.skipBytes(16 - (line_offset & 0xf));
+
+    BitPumpMSB32 pump(data);
 
     auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, row));
     ushort16* img_up = reinterpret_cast<ushort16*>(
@@ -211,7 +221,7 @@ void SamsungV2Decompressor::decompress() {
       img_up += 16;
       img_up2 += 16;
     }
-    line_offset += pump.getBufferPosition();
+    data.skipBytes(pump.getBufferPosition());
   }
 }
 

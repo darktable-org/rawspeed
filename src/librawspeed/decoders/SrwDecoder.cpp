@@ -104,7 +104,11 @@ RawImage SrwDecoder::decodeRawInternal() {
   if (32773 == compression)
   {
     SamsungV2Decompressor s2(mRaw, raw, mFile, bits);
+
+    mRaw->createData();
+
     s2.decompress();
+
     return mRaw;
   }
   ThrowRDE("Unsupported compression");

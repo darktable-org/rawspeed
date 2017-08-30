@@ -20,7 +20,9 @@
 
 #pragma once
 
+#include "common/Common.h"                             // for uint32
 #include "decompressors/AbstractSamsungDecompressor.h" // for AbstractSamsu...
+#include "io/ByteStream.h"                             // for ByteStream
 
 namespace rawspeed {
 
@@ -34,10 +36,17 @@ class SamsungV2Decompressor final : public AbstractSamsungDecompressor {
   const Buffer* mFile;
   int bits;
 
+  uint32 bitDepth;
+  uint32 width;
+  uint32 height;
+  uint32 optflags;
+  uint32 initVal;
+
+  ByteStream data;
+
 public:
   SamsungV2Decompressor(const RawImage& image, const TiffIFD* ifd,
-                        const Buffer* file, int bit)
-      : AbstractSamsungDecompressor(image), raw(ifd), mFile(file), bits(bit) {}
+                        const Buffer* file, int bit);
 
   void decompress();
 };
