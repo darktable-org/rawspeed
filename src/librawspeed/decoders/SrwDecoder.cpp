@@ -103,7 +103,11 @@ RawImage SrwDecoder::decodeRawInternal() {
   }
   if (32773 == compression)
   {
-    SamsungV2Decompressor s2(mRaw, raw, mFile, bits);
+    uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
+    uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
+    const ByteStream bs(mFile, offset, count);
+
+    SamsungV2Decompressor s2(mRaw, bs, bits);
 
     mRaw->createData();
 

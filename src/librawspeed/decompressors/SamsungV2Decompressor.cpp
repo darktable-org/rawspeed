@@ -27,9 +27,6 @@
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
 #include "io/ByteStream.h"                // for ByteStream
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include "tiff/TiffIFD.h"                 // for TiffIFD
-#include "tiff/TiffTag.h"                 // for TiffTag::STRIPOFFSETS
 #include <algorithm>                      // for max
 #include <cassert>                        // for assert
 
@@ -42,12 +39,9 @@ namespace rawspeed {
 // code of Samsung's DNG converter at http://opensource.samsung.com/
 
 SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
-                                             const TiffIFD* ifd,
-                                             const Buffer* file, int bit)
-    : AbstractSamsungDecompressor(image), raw(ifd), mFile(file), bits(bit) {
-  uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
-  const uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
-  BitPumpMSB32 startpump(ByteStream(mFile, offset, count));
+                                             const ByteStream& bs, int bit)
+    : AbstractSamsungDecompressor(image), bits(bit) {
+  BitPumpMSB32 startpump(bs);
 
   // Process the initial metadata bits, we only really use initVal, width and
   // height (the last two match the TIFF values anyway)
