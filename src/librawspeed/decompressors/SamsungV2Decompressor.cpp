@@ -94,7 +94,6 @@ void SamsungV2Decompressor::decompress() {
   // that specifies for each pixel the number of bits in the difference, then
   // the actual difference bits
 
-  uint32 diffBitsMode[3][2] = {{0}};
   for (uint32 row = 0; row < height; row++) {
     // Align pump to 16byte boundary
     const auto line_offset = data.getPosition();
@@ -112,6 +111,8 @@ void SamsungV2Decompressor::decompress() {
     uint32 motion = 7;
     // By default we are not scaling values at all
     int32 scale = 0;
+
+    uint32 diffBitsMode[3][2] = {{0}};
     for (auto& i : diffBitsMode)
       i[0] = i[1] = (row == 0 || row == 1) ? 7 : 4;
 
