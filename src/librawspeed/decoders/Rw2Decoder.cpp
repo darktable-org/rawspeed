@@ -118,6 +118,9 @@ RawImage Rw2Decoder::decodeRawInternal() {
   uint32 width = raw->getEntry(static_cast<TiffTag>(2))->getU16();
 
   if (isOldPanasonic) {
+    if (width == 0 || height == 0 || width > 4290 || height > 2751)
+      ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
     TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
 
     if (offsets->count != 1) {
@@ -146,6 +149,8 @@ RawImage Rw2Decoder::decodeRawInternal() {
       DecodeRw2();
     }
   } else {
+    if (width == 0 || height == 0 || width > 5488 || height > 3904)
+      ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
     mRaw->dim = iPoint2D(width, height);
     mRaw->createData();
