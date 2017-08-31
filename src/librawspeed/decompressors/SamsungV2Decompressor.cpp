@@ -38,6 +38,36 @@ namespace rawspeed {
 // in contact and Loring von Palleske (Samsung) for pointing to the open-source
 // code of Samsung's DNG converter at http://opensource.samsung.com/
 
+enum struct SamsungV2Decompressor::OptFlags : uint32 {
+  NONE = 0U,       // no flags
+  SKIP = 1U << 0U, // Skip checking if we need differences from previous line
+  MV = 1U << 1U,   // Simplify motion vector definition
+  QP = 1U << 2U,   // Don't scale the diff values
+
+  // all possible flags
+  ALL = SKIP | MV | QP,
+};
+
+constexpr SamsungV2Decompressor::OptFlags
+operator|(SamsungV2Decompressor::OptFlags lhs,
+          SamsungV2Decompressor::OptFlags rhs) {
+  return static_cast<SamsungV2Decompressor::OptFlags>(
+      static_cast<std::underlying_type<SamsungV2Decompressor::OptFlags>::type>(
+          lhs) |
+      static_cast<std::underlying_type<SamsungV2Decompressor::OptFlags>::type>(
+          rhs));
+}
+
+constexpr bool operator&(SamsungV2Decompressor::OptFlags lhs,
+                         SamsungV2Decompressor::OptFlags rhs) {
+  const auto intersect = static_cast<SamsungV2Decompressor::OptFlags>(
+      static_cast<std::underlying_type<SamsungV2Decompressor::OptFlags>::type>(
+          lhs) &
+      static_cast<std::underlying_type<SamsungV2Decompressor::OptFlags>::type>(
+          rhs));
+  return intersect != SamsungV2Decompressor::OptFlags::NONE;
+}
+
 SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
                                              const ByteStream& bs, int bit)
     : AbstractSamsungDecompressor(image), bits(bit) {
@@ -57,11 +87,10 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
 
   // The format includes an optimization code that sets 3 flags to change the
   // decoding parameters
-  optflags = startpump.getBits(4);
-
-#define OPT_SKIP 1 // Skip checking if we need differences from previous line
-#define OPT_MV 2   // Simplify motion vector definition
-#define OPT_QP 4   // Don't scale the diff values
+  const uint32 optflags = startpump.getBits(4);
+  if (optflags > static_cast<uint32>(OptFlags::ALL))
+    ThrowRDE("Invalid opt flags %x", optflags);
+  _flags = static_cast<OptFlags>(optflags);
 
   startpump.getBits(8); // OverlapWidth
   startpump.getBits(8); // reserved
@@ -81,10 +110,49 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
 }
 
 void SamsungV2Decompressor::decompress() {
-  for (uint32 row = 0; row < height; row++)
-    decompressRow(row);
+  switch (_flags) {
+  case OptFlags::NONE:
+    for (uint32 row = 0; row < height; row++)
+      decompressRow<OptFlags::NONE>(row);
+    break;
+  case OptFlags::ALL:
+    for (uint32 row = 0; row < height; row++)
+      decompressRow<OptFlags::ALL>(row);
+    break;
+
+  case OptFlags::SKIP:
+    for (uint32 row = 0; row < height; row++)
+      decompressRow<OptFlags::SKIP>(row);
+    break;
+  case OptFlags::MV:
+    for (uint32 row = 0; row < height; row++)
+      decompressRow<OptFlags::MV>(row);
+    break;
+  case OptFlags::QP:
+    for (uint32 row = 0; row < height; row++)
+      decompressRow<OptFlags::QP>(row);
+    break;
+
+  case OptFlags::SKIP | OptFlags::MV:
+    for (uint32 row = 0; row < height; row++)
+      decompressRow<OptFlags::SKIP | OptFlags::MV>(row);
+    break;
+  case OptFlags::SKIP | OptFlags::QP:
+    for (uint32 row = 0; row < height; row++)
+      decompressRow<OptFlags::SKIP | OptFlags::QP>(row);
+    break;
+
+  case OptFlags::MV | OptFlags::QP:
+    for (uint32 row = 0; row < height; row++)
+      decompressRow<OptFlags::MV | OptFlags::QP>(row);
+    break;
+
+  default:
+    __builtin_unreachable();
+  }
 }
 
+template <SamsungV2Decompressor::OptFlags optflags>
 void SamsungV2Decompressor::decompressRow(uint32 row) {
   // The format is relatively straightforward. Each line gets encoded as a set
   // of differences from pixels from another line. Pixels are grouped in blocks
@@ -105,6 +173,7 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
       mRaw->getData(0, std::max(0, static_cast<int>(row) - 1)));
   ushort16* img_up2 = reinterpret_cast<ushort16*>(
       mRaw->getData(0, std::max(0, static_cast<int>(row) - 2)));
+
   // Initialize the motion and diff modes at the start of the line
   uint32 motion = 7;
   // By default we are not scaling values at all
@@ -116,19 +185,21 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
 
   assert(width >= 16);
   for (uint32 col = 0; col < width; col += 16) {
-    if (!(optflags & OPT_QP) && !(col & 63)) {
+    if (!(optflags & OptFlags::QP) && !(col & 63)) {
       int32 scalevals[] = {0, -2, 2};
       uint32 i = pump.getBits(2);
       scale = i < 3 ? scale + scalevals[i] : pump.getBits(12);
     }
 
     // First we figure out which reference pixels mode we're in
-    if (optflags & OPT_MV)
+    if (optflags & OptFlags::MV)
       motion = pump.getBits(1) ? 3 : 7;
     else if (!pump.getBits(1))
       motion = pump.getBits(3);
+
     if ((row == 0 || row == 1) && (motion != 7))
       ThrowRDE("At start of image and motion isn't 7. File corrupted?");
+
     if (motion == 7) {
       // The base case, just set all pixels to the previous ones on the same
       // line If we're at the left edge we just start at the initial value
@@ -140,6 +211,7 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
       if (row < 2)
         ThrowRDE(
             "Got a previous line lookup on first two lines. File corrupted?");
+
       int32 motionOffset[7] = {-4, -2, -2, 0, 0, 2, 4};
       int32 motionDoAverage[7] = {0, 0, 1, 0, 1, 0, 0};
 
@@ -148,6 +220,7 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
 
       for (uint32 i = 0; i < 16; i++) {
         ushort16* refpixel;
+
         if ((row + i) & 0x1) // Red or blue pixels use same color two lines up
           refpixel = img_up2 + i + slideOffset;
         else // Green pixel N uses Green pixel N from row above (top left or
@@ -165,13 +238,15 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
 
     // Figure out how many difference bits we have to read for each pixel
     uint32 diffBits[4] = {0};
-    if (optflags & OPT_SKIP || !pump.getBits(1)) {
+    if (optflags & OptFlags::SKIP || !pump.getBits(1)) {
       uint32 flags[4];
       for (unsigned int& flag : flags)
         flag = pump.getBits(2);
+
       for (uint32 i = 0; i < 4; i++) {
         // The color is 0-Green 1-Blue 2-Red
         uint32 colornum = (row % 2 != 0) ? i >> 1 : ((i >> 1) + 2) % 3;
+
         assert(flags[i] <= 3);
         switch (flags[i]) {
         case 0:
@@ -189,8 +264,10 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
         default:
           __builtin_unreachable();
         }
+
         diffBitsMode[colornum][0] = diffBitsMode[colornum][1];
         diffBitsMode[colornum][1] = diffBits[i];
+
         if (diffBits[i] > bitDepth + 1)
           ThrowRDE("Too many difference bits. File corrupted?");
       }
@@ -220,6 +297,7 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
     img_up += 16;
     img_up2 += 16;
   }
+
   data.skipBytes(pump.getBufferPosition());
 }
 

@@ -30,17 +30,21 @@ class RawImage;
 
 // Decoder for third generation compressed SRW files (NX1)
 class SamsungV2Decompressor final : public AbstractSamsungDecompressor {
+public:
+  enum struct OptFlags : uint32;
+
+protected:
   int bits;
 
   uint32 bitDepth;
   uint32 width;
   uint32 height;
-  uint32 optflags;
+  OptFlags _flags;
   uint32 initVal;
 
   ByteStream data;
 
-  void decompressRow(uint32 row);
+  template <OptFlags optflags> void decompressRow(uint32 row);
 
 public:
   SamsungV2Decompressor(const RawImage& image, const ByteStream& bs, int bit);
