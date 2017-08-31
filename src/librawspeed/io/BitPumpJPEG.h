@@ -59,9 +59,11 @@ inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uchar8* input)
       const int c1 = input[p++];
       if (c1 != 0) {
         // Found FF/xx with xx != 00. This is the end of stream marker.
-        // Rewind pos to the FF byte, in case we get called again.
         // Fill the cache with zeros and keep on doing that from now on.
-        p -= 2;
+
+        // Normally we would rewind the pos to the FF byte, but in order to
+        // prevent potential endless loop on corrupt lossless jpeg, let's not.
+
         cache.cache &= ~0xFF;
         cache.cache <<= 64 - cache.fillLevel;
         cache.fillLevel = 64;
