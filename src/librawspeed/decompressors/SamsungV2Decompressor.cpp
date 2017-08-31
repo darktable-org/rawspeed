@@ -60,12 +60,14 @@ operator|(SamsungV2Decompressor::OptFlags lhs,
 
 constexpr bool operator&(SamsungV2Decompressor::OptFlags lhs,
                          SamsungV2Decompressor::OptFlags rhs) {
-  const auto intersect = static_cast<SamsungV2Decompressor::OptFlags>(
-      static_cast<std::underlying_type<SamsungV2Decompressor::OptFlags>::type>(
-          lhs) &
-      static_cast<std::underlying_type<SamsungV2Decompressor::OptFlags>::type>(
-          rhs));
-  return intersect != SamsungV2Decompressor::OptFlags::NONE;
+  return SamsungV2Decompressor::OptFlags::NONE !=
+         static_cast<SamsungV2Decompressor::OptFlags>(
+             static_cast<
+                 std::underlying_type<SamsungV2Decompressor::OptFlags>::type>(
+                 lhs) &
+             static_cast<
+                 std::underlying_type<SamsungV2Decompressor::OptFlags>::type>(
+                 rhs));
 }
 
 SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
