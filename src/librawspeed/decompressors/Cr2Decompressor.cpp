@@ -200,8 +200,6 @@ void Cr2Decompressor::decodeN_X_Y()
       processedLineSlices += yStepSize;
     }
   }
-
-  input.skipBytes(bitStream.getBufferPosition());
 }
 
 } // namespace rawspeed
