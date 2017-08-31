@@ -69,11 +69,8 @@ void SamsungV0Decompressor::computeStripes(ByteStream bso, ByteStream bsr) {
 
   std::vector<uint32> offsets;
   offsets.reserve(1 + height);
-  for (uint32 y = 0; y < height; y++) {
+  for (uint32 y = 0; y < height; y++)
     offsets.emplace_back(bso.getU32());
-    if (y > 0 && offsets[y] <= offsets[y - 1])
-      ThrowRDE("Offset for line %u is out of sequence.", y);
-  }
   offsets.emplace_back(bsr.getSize());
 
   stripes.reserve(height);
@@ -83,7 +80,9 @@ void SamsungV0Decompressor::computeStripes(ByteStream bso, ByteStream bsr) {
 
   auto next_offset_iterator = std::next(offset_iterator);
   while (next_offset_iterator < std::end(offsets)) {
-    assert(*next_offset_iterator > *offset_iterator);
+    if (*offset_iterator >= *next_offset_iterator)
+      ThrowRDE("Line offsets are out of sequence or slice is empty.");
+
     const auto size = *next_offset_iterator - *offset_iterator;
     assert(size > 0);
 
