@@ -344,17 +344,32 @@ public:
 
 DngOpcodes::DngOpcodes(TiffEntry* entry) {
   ByteStream bs = entry->getData();
+
   // DNG opcodes are always stored in big-endian byte order.
   bs.setByteOrder(Endianness::big);
 
   const auto opcode_count = bs.getU32();
+  auto origPos = bs.getPosition();
+
+  // validate opcode count. we either have to do this, or we can't preallocate
+  for (auto i = 0U; i < opcode_count; i++) {
+    bs.skipBytes(4); // code
+    bs.skipBytes(4); // version
+    bs.skipBytes(4); // flags
+    const auto opcode_size = bs.getU32();
+    bs.skipBytes(opcode_size);
+  }
+
+  bs.setPosition(origPos);
+
+  // okay, we may indeed have that many opcodes in here. now let's reserve
   opcodes.reserve(opcode_count);
 
   for (auto i = 0U; i < opcode_count; i++) {
     auto code = bs.getU32();
-    bs.getU32(); // ignore version
+    bs.skipBytes(4); // ignore version
 #ifdef DEBUG
-    bs.getU32(); // ignore flags
+    bs.skipBytes(4); // ignore flags
 #else
     auto flags = bs.getU32();
 #endif
