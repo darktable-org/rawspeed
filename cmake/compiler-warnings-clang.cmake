@@ -22,7 +22,6 @@ set (CLANG_DISABLED_WARNING_FLAGS
   "gnu-zero-variadic-macro-arguments"
   "old-style-cast"
   "padded"
-  "switch" # false-positives with enums
   "switch-enum"
   "unused-macros"
   "unused-parameter"

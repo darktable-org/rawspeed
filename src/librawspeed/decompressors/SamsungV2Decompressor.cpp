@@ -133,6 +133,8 @@ void SamsungV2Decompressor::decompress() {
       decompressRow<OptFlags::QP>(row);
     break;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch"
   case OptFlags::SKIP | OptFlags::MV:
     for (uint32 row = 0; row < height; row++)
       decompressRow<OptFlags::SKIP | OptFlags::MV>(row);
@@ -146,6 +148,7 @@ void SamsungV2Decompressor::decompress() {
     for (uint32 row = 0; row < height; row++)
       decompressRow<OptFlags::MV | OptFlags::QP>(row);
     break;
+#pragma GCC diagnostic pop
 
   default:
     __builtin_unreachable();
