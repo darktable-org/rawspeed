@@ -64,6 +64,10 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
 
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+
+  if (width == 0 || height == 0 || width > 3360 || height > 2460)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
   uint32 len = width * height * 2;
 
   // Constants taken from dcraw
