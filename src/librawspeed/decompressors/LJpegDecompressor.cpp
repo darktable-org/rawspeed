@@ -112,7 +112,6 @@ void LJpegDecompressor::decodeN()
       });
     }
   }
-  input.skipBytes(bitStream.getBufferPosition());
 }
 
 } // namespace rawspeed
