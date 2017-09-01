@@ -36,6 +36,8 @@ class ByteStream;
 class CameraMetaData;
 
 class DcrDecoder final : public SimpleTiffDecoder {
+  void checkImageDimensions() override;
+
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                    const Buffer* file);

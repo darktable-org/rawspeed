@@ -48,6 +48,11 @@ bool DcrDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   return make == "Kodak";
 }
 
+void DcrDecoder::checkImageDimensions() {
+  if (width > 4516 || height > 3012)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+}
+
 RawImage DcrDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
