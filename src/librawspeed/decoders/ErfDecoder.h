@@ -33,6 +33,8 @@ class Buffer;
 class CameraMetaData;
 
 class ErfDecoder final : public SimpleTiffDecoder {
+  void checkImageDimensions() override;
+
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                    const Buffer* file);

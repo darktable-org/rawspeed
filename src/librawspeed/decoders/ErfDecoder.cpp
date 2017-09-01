@@ -20,6 +20,7 @@
 */
 
 #include "decoders/ErfDecoder.h"
+#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Endianness.h"                          // for Endianness::big
 #include "tiff/TiffEntry.h"                         // for TiffEntry
@@ -40,6 +41,11 @@ bool ErfDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   // FIXME: magic
 
   return make == "SEIKO EPSON CORP.";
+}
+
+void ErfDecoder::checkImageDimensions() {
+  if (width > 3040 || height > 2024)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 }
 
 RawImage ErfDecoder::decodeRawInternal() {
