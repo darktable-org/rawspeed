@@ -32,6 +32,8 @@ class CameraMetaData;
 class Buffer;
 
 class MefDecoder final : public SimpleTiffDecoder {
+  void checkImageDimensions() override;
+
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                    const Buffer* file);

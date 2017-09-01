@@ -20,6 +20,7 @@
 */
 
 #include "decoders/MefDecoder.h"
+#include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Endianness.h"                          // for Endianness::big
 #include <string>                                   // for operator==, string
@@ -34,6 +35,11 @@ bool MefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   // FIXME: magic
 
   return make == "Mamiya-OP Co.,Ltd.";
+}
+
+void MefDecoder::checkImageDimensions() {
+  if (width > 4016 || height > 5344)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 }
 
 RawImage MefDecoder::decodeRawInternal() {
