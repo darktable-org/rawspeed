@@ -47,6 +47,8 @@ void SimpleTiffDecoder::prepareForRawDecoding() {
   if (0 == width || 0 == height)
     ThrowRDE("Image has zero size.");
 
+  checkImageDimensions();
+
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 }

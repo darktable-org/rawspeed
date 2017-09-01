@@ -32,6 +32,8 @@ namespace rawspeed {
 class Buffer;
 
 class SimpleTiffDecoder : public AbstractTiffDecoder {
+  virtual void checkImageDimensions() {}
+
 public:
   SimpleTiffDecoder(TiffRootIFDOwner&& root, const Buffer* file)
       : AbstractTiffDecoder(move(root), file) {}
