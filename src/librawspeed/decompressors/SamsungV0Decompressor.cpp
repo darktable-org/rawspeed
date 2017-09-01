@@ -175,6 +175,10 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
 
     if (dir) {
       // Upward prediction
+
+      if (x + 16 >= width)
+        ThrowRDE("Upward prediction for the last block of pixels. Raw corrupt");
+
       // First we decode even pixels
       for (int c = 0; c < 16; c += 2) {
         int b = len[c >> 3];
