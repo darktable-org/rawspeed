@@ -43,6 +43,11 @@ bool DcsDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   return make == "KODAK";
 }
 
+void DcsDecoder::checkImageDimensions() {
+  if (width > 3072 || height > 2048)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+}
+
 RawImage DcsDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
