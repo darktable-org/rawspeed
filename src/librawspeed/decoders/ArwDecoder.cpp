@@ -190,6 +190,9 @@ RawImage ArwDecoder::decodeRawInternal() {
   if (arw1)
     height += 8;
 
+  if (width == 0 || height == 0 || width > 8000 || height > 5320)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
