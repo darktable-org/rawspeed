@@ -397,7 +397,8 @@ DngOpcodes::DngOpcodes(TiffEntry* entry) {
         ThrowRDE("Unsupported Opcode: %d (%s)", code, opName);
     }
 
-    assert(opcode_bs.getRemainSize() == 0);
+    if (opcode_bs.getRemainSize() != 0)
+      ThrowRDE("Inconsistent length of opcode");
   }
 
 #ifdef DEBUG
