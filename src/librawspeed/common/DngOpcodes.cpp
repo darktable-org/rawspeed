@@ -254,13 +254,14 @@ public:
   explicit PolynomialMap(ByteStream* bs) : LookupOpcode(bs) {
     vector<double> polynomial;
 
-    polynomial.resize(bs->getU32() + 1UL);
-
-    if (polynomial.size() > 9)
+    const auto polynomial_size = bs->getU32() + 1UL;
+    bs->check(8UL * polynomial_size);
+    if (polynomial_size > 9)
       ThrowRDE("A polynomial with more than 8 degrees not allowed");
 
-    for (auto& coeff : polynomial)
-      coeff = bs->get<double>();
+    polynomial.reserve(polynomial_size);
+    std::generate_n(std::back_insert_iterator<std::vector<double>>(polynomial),
+                    polynomial_size, [&bs]() { return bs->get<double>(); });
 
     // Create lookup
     lookup.resize(65536);
