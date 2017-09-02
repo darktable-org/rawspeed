@@ -290,13 +290,15 @@ protected:
   vector<int> deltaI;
 
   DeltaRowOrColBase(ByteStream* bs, float f2iScale) : PixelOpcode(bs) {
-    deltaF.resize(bs->getU32());
+    const auto deltaF_count = bs->getU32();
+    bs->check(4 * deltaF_count);
 
-    for (auto& f : deltaF)
-      f = bs->get<float>();
+    deltaF.reserve(deltaF_count);
+    std::generate_n(std::back_insert_iterator<std::vector<float>>(deltaF),
+                    deltaF_count, [&bs]() { return bs->get<float>(); });
 
     deltaI.reserve(deltaF.size());
-    for (auto f : deltaF)
+    for (const auto f : deltaF)
       deltaI.emplace_back(static_cast<int>(f2iScale * f));
   }
 };
