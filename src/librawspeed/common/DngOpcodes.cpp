@@ -376,7 +376,8 @@ DngOpcodes::DngOpcodes(TiffEntry* entry) {
 #else
     auto flags = bs.getU32();
 #endif
-    auto expected_pos = bs.getU32() + bs.getPosition();
+    const auto opcode_size = bs.getU32();
+    ByteStream opcode_bs = bs.getStream(opcode_size);
 
     const char* opName = nullptr;
     constructor_t opConstructor = nullptr;
@@ -387,7 +388,7 @@ DngOpcodes::DngOpcodes(TiffEntry* entry) {
     }
 
     if (opConstructor != nullptr)
-      opcodes.emplace_back(opConstructor(&bs));
+      opcodes.emplace_back(opConstructor(&opcode_bs));
     else {
 #ifndef DEBUG
       // Throw Error if not marked as optional
@@ -396,8 +397,7 @@ DngOpcodes::DngOpcodes(TiffEntry* entry) {
         ThrowRDE("Unsupported Opcode: %d (%s)", code, opName);
     }
 
-    if (bs.getPosition() != expected_pos)
-      ThrowRDE("Inconsistent length of opcode");
+    assert(opcode_bs.getRemainSize() == 0);
   }
 
 #ifdef DEBUG
