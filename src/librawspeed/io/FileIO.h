@@ -29,12 +29,14 @@
 
 namespace rawspeed {
 
-template <typename Tin, typename Conv, typename Tout>
-inline Tout convertFileName(Tin fileName, Conv&& converter, UINT CodePage) {
+template <typename Tin, typename Conv, typename Tout, typename... Extra>
+inline Tout convertFileName(Tin fileName, Conv&& converter, UINT CodePage,
+                            Extra&&... params) {
   Tout cFileName;
 
-  auto f = std::bind(converter, CodePage, 0, &fileName[0], -1,
-                     std::placeholders::_1, std::placeholders::_2);
+  auto f =
+      std::bind(converter, CodePage, 0, &fileName[0], -1, std::placeholders::_1,
+                std::placeholders::_2, std::forward<Extra>(params)...);
 
   // how many characters are needed to store converted string?
   const auto expectedLen = f(nullptr, 0);
@@ -59,7 +61,8 @@ inline std::wstring widenFileName(std::string fileName,
 inline std::string unwidenFileName(std::wstring fileName,
                                    UINT CodePage = CP_UTF8) {
   return convertFileName<std::wstring, decltype(WideCharToMultiByte),
-                         std::string>(fileName, WideCharToMultiByte, CodePage);
+                         std::string>(fileName, WideCharToMultiByte, CodePage,
+                                      NULL, FALSE);
 }
 
 inline std::string ANSIfileNameToUTF8(std::string fileName) {
