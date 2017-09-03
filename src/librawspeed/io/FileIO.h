@@ -29,8 +29,8 @@
 
 namespace rawspeed {
 
-inline template <typename Conv, typename Tin, typename Tout>
-Tout convertFileName(Tin fileName, Conv&& converter, UINT CodePage) {
+template <typename Conv, typename Tin, typename Tout>
+inline Tout convertFileName(Tin fileName, Conv&& converter, UINT CodePage) {
   Tout cFileName;
 
   auto f = std::bind(converter, CodePage, 0, &fileName[0], -1,
