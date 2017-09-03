@@ -23,32 +23,45 @@
 #include "io/FileIOException.h" // for FileIOException (ptr only), ThrowFIE
 #include <functional>           // for bind
 #include <io.h>
+#include <string> // for string, wstring
 #include <tchar.h>
-#include <vector> // for vector
 #include <windows.h>
 
 namespace rawspeed {
 
-inline std::wstring widenFileName(const char* fileName) {
-  assert(fileName);
+inline template <typename Conv, typename Tin, typename Tout>
+Tout convertFileName(Tin fileName, Conv&& converter, UINT CodePage) {
+  Tout cFileName;
 
-  std::wstring wFileName;
-
-  auto f = std::bind(MultiByteToWideChar, CP_UTF8, 0, fileName, -1,
+  auto f = std::bind(converter, CodePage, 0, &fileName[0], -1,
                      std::placeholders::_1, std::placeholders::_2);
 
-  // how many wide characters are needed to store converted string?
+  // how many characters are needed to store converted string?
   const auto expectedLen = f(nullptr, 0);
-  wFileName.resize(expectedLen);
+  cFileName.resize(expectedLen);
 
   // convert.
-  const auto actualLen = f(&wFileName[0], wFileName.size());
+  const auto actualLen = f(&cFileName[0], cFileName.size());
 
   // did we get expected number of characters?
   if (actualLen != expectedLen)
-    ThrowFIE("Could not convert filename \"%s\".", fileName);
+    ThrowFIE("Could not convert filename \"%s\".", fileName.c_str());
 
-  return wFileName;
+  return cFileName;
+}
+
+inline std::wstring widenFileName(std::string fileName,
+                                  UINT CodePage = CP_UTF8) {
+  return convertFileName(fileName, MultiByteToWideChar, CodePage);
+}
+
+inline std::string unwidenFileName(std::wstring fileName,
+                                   UINT CodePage = CP_UTF8) {
+  return convertFileName(fileName, WideCharToMultiByte, CodePage);
+}
+
+inline std::string ANSIfileNameToUTF8(std::string fileName) {
+  return unwidenFileName(widenFileName(fileName, CP_ACP), CP_UTF8);
 }
 
 } // namespace rawspeed

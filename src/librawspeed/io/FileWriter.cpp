@@ -56,9 +56,8 @@ void FileWriter::writeFile(Buffer* filemap, uint32 size) {
 #else // __unix__
   auto wFileName = widenFileName(mFilename);
   HANDLE file_h;  // File handle
-  file_h =
-      CreateFileW(wFileName.data(), GENERIC_WRITE, FILE_SHARE_WRITE, nullptr,
-                  CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
+  file_h = CreateFileW(&wFileName[0], GENERIC_WRITE, FILE_SHARE_WRITE, nullptr,
+                       CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
   if (file_h == INVALID_HANDLE_VALUE) {
     ThrowFIE("Could not open file.");
   }
