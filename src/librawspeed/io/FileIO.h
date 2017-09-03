@@ -29,10 +29,10 @@
 
 namespace rawspeed {
 
-inline std::vector<wchar_t> widenFileName(const char* fileName) {
+inline std::wstring widenFileName(const char* fileName) {
   assert(fileName);
 
-  std::vector<wchar_t> wFileName;
+  std::wstring wFileName;
 
   auto f = std::bind(MultiByteToWideChar, CP_UTF8, 0, fileName, -1,
                      std::placeholders::_1, std::placeholders::_2);
@@ -42,7 +42,7 @@ inline std::vector<wchar_t> widenFileName(const char* fileName) {
   wFileName.resize(expectedLen);
 
   // convert.
-  const auto actualLen = f(wFileName.data(), wFileName.size());
+  const auto actualLen = f(&wFileName[0], wFileName.size());
 
   // did we get expected number of characters?
   if (actualLen != expectedLen)
