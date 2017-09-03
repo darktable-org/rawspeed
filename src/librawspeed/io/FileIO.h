@@ -29,7 +29,7 @@
 
 namespace rawspeed {
 
-template <typename Conv, typename Tin, typename Tout>
+template <typename Tin, typename Conv, typename Tout>
 inline Tout convertFileName(Tin fileName, Conv&& converter, UINT CodePage) {
   Tout cFileName;
 
@@ -52,12 +52,14 @@ inline Tout convertFileName(Tin fileName, Conv&& converter, UINT CodePage) {
 
 inline std::wstring widenFileName(std::string fileName,
                                   UINT CodePage = CP_UTF8) {
-  return convertFileName(fileName, MultiByteToWideChar, CodePage);
+  return convertFileName<std::string, decltype(MultiByteToWideChar),
+                         std::wstring>(fileName, MultiByteToWideChar, CodePage);
 }
 
 inline std::string unwidenFileName(std::wstring fileName,
                                    UINT CodePage = CP_UTF8) {
-  return convertFileName(fileName, WideCharToMultiByte, CodePage);
+  return convertFileName<std::wstring, decltype(WideCharToMultiByte),
+                         std::string>(fileName, WideCharToMultiByte, CodePage);
 }
 
 inline std::string ANSIfileNameToUTF8(std::string fileName) {
