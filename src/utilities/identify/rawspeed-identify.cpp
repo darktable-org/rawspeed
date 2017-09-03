@@ -27,7 +27,6 @@
 #include <sys/stat.h> // for stat
 
 #ifdef _WIN32
-#include "io/FileIO.h" // for ANSIFileNameToUTF8
 #include <windows.h>
 #endif
 
@@ -164,8 +163,17 @@ int main(int argc, char* argv[]) { // NOLINT
 #else
     // turn the locale ANSI encoded string into UTF-8 so that FileReader can
     // turn it into UTF-16 later
-    const auto _imageFileName = ANSIfileNameToUTF8(argv[1]);
-    conts char* imageFileName = _imageFileName.data();
+    int size = MultiByteToWideChar(CP_ACP, 0, argv[1], -1, NULL, 0);
+    std::wstring wImageFileName;
+    wImageFileName.resize(size);
+    MultiByteToWideChar(CP_ACP, 0, argv[1], -1, &wImageFileName[0], size);
+    size = WideCharToMultiByte(CP_UTF8, 0, &wImageFileName[0], -1, NULL, 0,
+                               NULL, NULL);
+    std::string _imageFileName;
+    _imageFileName.resize(size);
+    char* imageFileName = &_imageFileName[0];
+    WideCharToMultiByte(CP_UTF8, 0, &wImageFileName[0], -1, imageFileName, size,
+                        NULL, NULL);
 #endif
 
     fprintf(stderr, "Loading file: \"%s\"\n", imageFileName);

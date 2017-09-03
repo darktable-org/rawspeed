@@ -77,7 +77,7 @@ std::unique_ptr<const Buffer> FileReader::readFile() {
 
   using file_ptr = std::unique_ptr<std::remove_pointer<HANDLE>::type,
                                    decltype(&CloseHandle)>;
-  file_ptr file(CreateFileW(&wFileName[0], GENERIC_READ, FILE_SHARE_READ,
+  file_ptr file(CreateFileW(wFileName.data(), GENERIC_READ, FILE_SHARE_READ,
                             nullptr, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN,
                             nullptr),
                 &CloseHandle);
