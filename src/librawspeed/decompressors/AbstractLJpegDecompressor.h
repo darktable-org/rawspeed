@@ -166,10 +166,11 @@ protected:
   std::array<HuffmanTable*, N_COMP> getHuffmanTables() const {
     std::array<HuffmanTable*, N_COMP> ht;
     for (int i = 0; i < N_COMP; ++i) {
-      const auto dcTblNo = frame.compInfo[i].dcTblNo;
-      if (dcTblNo >= huff.size()) {
-        ThrowRDE("Decoding table %u for comp %i does not exist (tables = %lu)",
-                 dcTblNo, i, huff.size());
+      const unsigned dcTblNo = frame.compInfo[i].dcTblNo;
+      const unsigned dcTbls = huff.size();
+      if (dcTblNo >= dcTbls) {
+        ThrowRDE("Decoding table %u for comp %i does not exist (tables = %u)",
+                 dcTblNo, i, dcTbls);
       }
       ht[i] = huff[dcTblNo];
     }
