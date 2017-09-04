@@ -20,8 +20,9 @@
 
 #pragma once
 
-#include <algorithm> // for min
+#include <algorithm> // for generate_n, min
 #include <cassert>   // for assert
+#include <iterator>  // for back_insert_iterator
 #include <numeric>   // for accumulate
 #include <vector>    // for vector
 
@@ -33,19 +34,22 @@ inline std::vector<unsigned> sliceUp(unsigned bucketsNum, unsigned pieces) {
   if (!bucketsNum || !pieces)
     return buckets;
 
-  buckets.resize(std::min(bucketsNum, pieces), 0U);
+  bucketsNum = std::min(bucketsNum, pieces);
+  buckets.reserve(bucketsNum);
 
-  // split all the pieces between all the threads 'evenly'
-  unsigned piecesLeft = pieces;
-  while (piecesLeft > 0U) {
-    for (auto& bucket : buckets) {
-      --piecesLeft;
-      ++bucket;
-      if (0U == piecesLeft)
-        break;
-    }
-  }
-  assert(piecesLeft == 0U);
+  const auto quot = pieces / bucketsNum;
+  auto rem = pieces % bucketsNum;
+
+  std::generate_n(std::back_insert_iterator<std::vector<unsigned>>(buckets),
+                  bucketsNum, [quot, &rem]() {
+                    auto bucket = quot;
+                    if (rem > 0) {
+                      bucket++;
+                      rem--;
+                    }
+                    return bucket;
+                  });
+
   assert(std::accumulate(buckets.begin(), buckets.end(), 0UL) == pieces);
 
   return buckets;

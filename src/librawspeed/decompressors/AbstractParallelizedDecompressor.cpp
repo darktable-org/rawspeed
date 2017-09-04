@@ -25,6 +25,7 @@
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include <algorithm>                      // for min
 #include <cassert>                        // for assert
+#include <memory>                         // for allocator_traits<>::value_...
 #include <vector>                         // for vector
 
 namespace rawspeed {

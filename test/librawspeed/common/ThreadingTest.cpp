@@ -19,11 +19,10 @@
 */
 
 #include "common/Threading.h" // for sliceUp
-#include <algorithm>          // for generate_n, min
+#include <algorithm>          // for min
 #include <array>              // for array
 #include <cassert>            // for assert
 #include <gtest/gtest.h>      // for make_tuple, tuple, ParamIteratorInterface
-#include <iterator>           // for back_insert_iterator
 #include <map>                // for _Rb_tree_const_iterator, map, map<>::c...
 #include <numeric>            // for accumulate
 #include <utility>            // for pair
@@ -32,6 +31,32 @@
 using rawspeed::sliceUp;
 
 namespace rawspeed_test {
+
+// reference implementation, which is readable.
+inline std::vector<unsigned> sliceUp_dumb(unsigned bucketsNum,
+                                          unsigned pieces) {
+  std::vector<unsigned> buckets;
+
+  if (!bucketsNum || !pieces)
+    return buckets;
+
+  buckets.resize(std::min(bucketsNum, pieces), 0U);
+
+  // split all the pieces between all the threads 'evenly'
+  unsigned piecesLeft = pieces;
+  while (piecesLeft > 0U) {
+    for (auto& bucket : buckets) {
+      --piecesLeft;
+      ++bucket;
+      if (0U == piecesLeft)
+        break;
+    }
+  }
+  assert(piecesLeft == 0U);
+  assert(std::accumulate(buckets.begin(), buckets.end(), 0UL) == pieces);
+
+  return buckets;
+}
 
 using twoValsType = std::tr1::tuple<unsigned, unsigned>;
 
@@ -108,35 +133,8 @@ INSTANTIATE_TEST_CASE_P(SaneValues, SliceUpTest,
                         testing::Combine(testing::Range(0U, 5U),
                                          testing::Range(0U, 7U)));
 
+TEST_P(SliceUpTest, ReferenceTest) { Check(sliceUp_dumb(threads, pieces)); }
 TEST_P(SliceUpTest, Test) { Check(sliceUp(threads, pieces)); }
-
-inline std::vector<unsigned> sliceUpFast(unsigned bucketsNum, unsigned pieces) {
-  std::vector<unsigned> buckets;
-
-  if (!bucketsNum || !pieces)
-    return buckets;
-
-  bucketsNum = std::min(bucketsNum, pieces);
-  buckets.reserve(bucketsNum);
-
-  const auto quot = pieces / bucketsNum;
-  auto rem = pieces % bucketsNum;
-
-  std::generate_n(std::back_insert_iterator<std::vector<unsigned>>(buckets),
-                  bucketsNum, [quot, &rem]() {
-                    auto bucket = quot;
-                    if (rem > 0) {
-                      bucket++;
-                      rem--;
-                    }
-                    return bucket;
-                  });
-
-  assert(std::accumulate(buckets.begin(), buckets.end(), 0UL) == pieces);
-
-  return buckets;
-}
-TEST_P(SliceUpTest, TestFast) { Check(sliceUpFast(threads, pieces)); }
 
 class SliceUpTortureTest : public ::testing::TestWithParam<twoValsType> {
 protected:
@@ -152,8 +150,8 @@ protected:
 INSTANTIATE_TEST_CASE_P(ManyValues, SliceUpTortureTest,
                         testing::Combine(testing::Range(0U, 17U),
                                          testing::Range(0U, 63U)));
-TEST_P(SliceUpTortureTest, BruteForcetest) {
-  ASSERT_EQ(sliceUp(threads, pieces), sliceUpFast(threads, pieces));
+TEST_P(SliceUpTortureTest, BruteForceTest) {
+  ASSERT_EQ(sliceUp(threads, pieces), sliceUp_dumb(threads, pieces));
 }
 
 } // namespace rawspeed_test
