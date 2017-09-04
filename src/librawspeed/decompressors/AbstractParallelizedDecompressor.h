@@ -46,6 +46,8 @@ public:
   explicit AbstractParallelizedDecompressor(const RawImage& img) : mRaw(img) {}
   virtual ~AbstractParallelizedDecompressor() = default;
 
+  virtual void decode() const;
+
 protected:
   RawImage mRaw;
 

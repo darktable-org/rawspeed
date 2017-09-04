@@ -54,10 +54,8 @@ AbstractParallelizedDecompressor::piecesPerThread(uint32 threads,
 #endif
 
 #ifdef HAVE_PTHREAD
-void AbstractParallelizedDecompressor::startThreading(uint32 pieces = 0) const {
+void AbstractParallelizedDecompressor::startThreading(uint32 pieces) const {
   assert(getThreadCount() > 1);
-  if (0 == pieces)
-    pieces = mRaw->dim.y;
 
   const uint32 threadNum =
       std::min(static_cast<uint32>(pieces), getThreadCount());
@@ -118,10 +116,7 @@ void AbstractParallelizedDecompressor::startThreading(uint32 pieces = 0) const {
     ThrowRDE("Unable to start threads");
 }
 #else
-void AbstractParallelizedDecompressor::startThreading(uint32 pieces = 0) const {
-  if (0 == pieces)
-    pieces = mRaw->dim.y;
-
+void AbstractParallelizedDecompressor::startThreading(uint32 pieces) const {
   RawDecompressorThread t(this, 1);
   t.taskNo = 0;
   t.start = 0;
@@ -130,5 +125,9 @@ void AbstractParallelizedDecompressor::startThreading(uint32 pieces = 0) const {
   RawDecompressorThread::start_routine(&t);
 }
 #endif
+
+void AbstractParallelizedDecompressor::decode() const {
+  startThreading(mRaw->dim.y);
+}
 
 } // namespace rawspeed
