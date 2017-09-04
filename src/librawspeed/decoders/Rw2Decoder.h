@@ -31,7 +31,6 @@
 namespace rawspeed {
 
 class CameraMetaData;
-class RawDecoderThread;
 class Buffer;
 
 class Rw2Decoder final : public AbstractTiffDecoder
@@ -48,11 +47,8 @@ public:
 
 protected:
   int getDecoderVersion() const override { return 2; }
-  void decodeThreaded(RawDecoderThread *t) override;
-  struct PanaBitpump;
 
 private:
-  void DecodeRw2();
   std::string guessMode();
   uint32 offset = 0;
   uint32 load_flags = 0;

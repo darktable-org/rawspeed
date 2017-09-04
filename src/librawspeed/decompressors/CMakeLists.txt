@@ -22,6 +22,8 @@ FILE(GLOB SOURCES
   "LJpegDecompressor.h"
   "NikonDecompressor.cpp"
   "NikonDecompressor.h"
+  "PanasonicDecompressor.cpp"
+  "PanasonicDecompressor.h"
   "PentaxDecompressor.cpp"
   "PentaxDecompressor.h"
   "SamsungV0Decompressor.cpp"
