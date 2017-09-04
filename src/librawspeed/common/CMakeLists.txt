@@ -19,6 +19,7 @@ FILE(GLOB SOURCES
   "RawspeedException.h"
   "TableLookUp.cpp"
   "TableLookUp.h"
+  "Threading.h"
 )
 
 target_sources(rawspeed PRIVATE

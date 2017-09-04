@@ -21,37 +21,13 @@
 #include "rawspeedconfig.h" // for HAVE_PTHREAD
 #include "decompressors/AbstractParallelizedDecompressor.h"
 #include "common/Point.h"                 // for iPoint2D
+#include "common/Threading.h"             // for sliceUp
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include <algorithm>                      // for min
 #include <cassert>                        // for assert
-#include <numeric>                        // for accumulate
 #include <vector>                         // for vector
 
 namespace rawspeed {
-
-#ifdef HAVE_PTHREAD
-std::vector<uint32>
-AbstractParallelizedDecompressor::piecesPerThread(uint32 threads,
-                                                  uint32 pieces) {
-  std::vector<uint32> buckets;
-  buckets.resize(threads, 0);
-
-  // split all the pieces between all the threads 'evenly'
-  int piecesLeft = pieces;
-  while (piecesLeft > 0) {
-    for (auto& bucket : buckets) {
-      --piecesLeft;
-      ++bucket;
-      if (0 == piecesLeft)
-        break;
-    }
-  }
-  assert(piecesLeft == 0);
-  assert(std::accumulate(buckets.begin(), buckets.end(), 0UL) == pieces);
-
-  return buckets;
-}
-#endif
 
 #ifdef HAVE_PTHREAD
 void AbstractParallelizedDecompressor::startThreading(uint32 pieces) const {
@@ -61,7 +37,7 @@ void AbstractParallelizedDecompressor::startThreading(uint32 pieces) const {
       std::min(static_cast<uint32>(pieces), getThreadCount());
   assert(threadNum > 1);
 
-  const std::vector<uint32> buckets = piecesPerThread(threadNum, pieces);
+  const auto buckets = sliceUp(threadNum, pieces);
 
   std::vector<RawDecompressorThread> threads(
       threadNum, RawDecompressorThread(this, threadNum));

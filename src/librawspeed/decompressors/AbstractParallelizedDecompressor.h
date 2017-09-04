@@ -24,7 +24,6 @@
 #include "common/Common.h"                      // for uint32, BitOrder
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include <vector>                               // for vector
 
 #ifdef HAVE_PTHREAD
 #include <pthread.h> // for pthread_t
@@ -35,10 +34,6 @@ namespace rawspeed {
 class RawDecompressorThread;
 
 class AbstractParallelizedDecompressor : AbstractDecompressor {
-#ifdef HAVE_PTHREAD
-  static std::vector<uint32> piecesPerThread(uint32 threads, uint32 pieces);
-#endif
-
   friend class RawDecompressorThread;
   virtual void decompressThreaded(const RawDecompressorThread* t) const = 0;
 
