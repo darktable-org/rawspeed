@@ -148,12 +148,6 @@ protected:
   /* If all threads report an error an exception will be thrown*/
   void startThreads();
 
-  /* Helper function for decoders -  */
-  /* The function returns when all tasks are done */
-  /* All errors are silently pushed into the "errors" array.*/
-  /* If all threads report an error an exception will be thrown*/
-  void startTasks(uint32 tasks);
-
   /* Ask for sample submisson, if makes sense */
   void askForSamples(const CameraMetaData* meta, const std::string& make,
                      const std::string& model, const std::string& mode) const;

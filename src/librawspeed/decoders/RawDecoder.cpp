@@ -340,49 +340,4 @@ void RawDecoder::checkSupport(const CameraMetaData* meta) {
   }
 }
 
-void RawDecoder::startTasks( uint32 tasks )
-{
-  uint32 threads;
-  threads = min(tasks, getThreadCount());
-  int ctask = 0;
-  vector<RawDecoderThread> t(threads, RawDecoderThread(this));
-
-  // We don't need a thread
-  if (threads == 1) {
-    while (static_cast<uint32>(ctask) < tasks) {
-      t[0].taskNo = ctask;
-      RawDecoderDecodeThread(&t[0]);
-      ctask++;
-    }
-    return;
-  }
-
-#ifdef HAVE_PTHREAD
-  pthread_attr_t attr;
-
-  /* Initialize and set thread detached attribute */
-  pthread_attr_init(&attr);
-  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-
-  /* TODO: Create a way to re-use threads */
-  void *status;
-  while (static_cast<uint32>(ctask) < tasks) {
-    for (uint32 i = 0; i < threads && static_cast<uint32>(ctask) < tasks; i++) {
-      t[i].taskNo = ctask;
-      pthread_create(&t[i].threadid, &attr, RawDecoderDecodeThread, &t[i]);
-      ctask++;
-    }
-    for (uint32 i = 0; i < threads; i++) {
-      pthread_join(t[i].threadid, &status);
-    }
-  }
-
-  if (mRaw->isTooManyErrors(tasks))
-    ThrowRDE("All threads reported errors. Cannot load image.");
-
-#else
-  ThrowRDE("Unreachable");
-#endif
-}
-
 } // namespace rawspeed
