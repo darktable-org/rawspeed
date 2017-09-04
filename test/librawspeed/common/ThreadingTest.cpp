@@ -19,9 +19,12 @@
 */
 
 #include "common/Threading.h" // for sliceUp
+#include <algorithm>          // for generate_n, min
 #include <array>              // for array
+#include <cassert>            // for assert
 #include <gtest/gtest.h>      // for make_tuple, tuple, ParamIteratorInterface
-#include <map>                // for _Rb_tree_const_iterator, map
+#include <iterator>           // for back_insert_iterator
+#include <map>                // for _Rb_tree_const_iterator, map, map<>::c...
 #include <numeric>            // for accumulate
 #include <utility>            // for pair
 #include <vector>             // for vector
@@ -106,5 +109,51 @@ INSTANTIATE_TEST_CASE_P(SaneValues, SliceUpTest,
                                          testing::Range(0U, 7U)));
 
 TEST_P(SliceUpTest, Test) { Check(sliceUp(threads, pieces)); }
+
+inline std::vector<unsigned> sliceUpFast(unsigned bucketsNum, unsigned pieces) {
+  std::vector<unsigned> buckets;
+
+  if (!bucketsNum || !pieces)
+    return buckets;
+
+  bucketsNum = std::min(bucketsNum, pieces);
+  buckets.reserve(bucketsNum);
+
+  const auto quot = pieces / bucketsNum;
+  auto rem = pieces % bucketsNum;
+
+  std::generate_n(std::back_insert_iterator<std::vector<unsigned>>(buckets),
+                  bucketsNum, [quot, &rem]() {
+                    auto bucket = quot;
+                    if (rem > 0) {
+                      bucket++;
+                      rem--;
+                    }
+                    return bucket;
+                  });
+
+  assert(std::accumulate(buckets.begin(), buckets.end(), 0UL) == pieces);
+
+  return buckets;
+}
+TEST_P(SliceUpTest, TestFast) { Check(sliceUpFast(threads, pieces)); }
+
+class SliceUpTortureTest : public ::testing::TestWithParam<twoValsType> {
+protected:
+  SliceUpTortureTest() = default;
+  virtual void SetUp() {
+    threads = std::tr1::get<0>(GetParam());
+    pieces = std::tr1::get<1>(GetParam());
+  }
+
+  unsigned threads;
+  unsigned pieces;
+};
+INSTANTIATE_TEST_CASE_P(ManyValues, SliceUpTortureTest,
+                        testing::Combine(testing::Range(0U, 17U),
+                                         testing::Range(0U, 63U)));
+TEST_P(SliceUpTortureTest, BruteForcetest) {
+  ASSERT_EQ(sliceUp(threads, pieces), sliceUpFast(threads, pieces));
+}
 
 } // namespace rawspeed_test
