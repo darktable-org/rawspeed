@@ -75,7 +75,7 @@
 ]>
 
 <Cameras>
-	<Camera make="ARRI" model="ALEXA">
+	<Camera make="ARRI" model="ALEXA" supported="no"> <!-- no samples -->
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
 			<Color x="1" y="0">RED</Color>
