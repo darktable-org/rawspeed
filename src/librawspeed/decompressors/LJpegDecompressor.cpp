@@ -19,12 +19,11 @@
 */
 
 #include "decompressors/LJpegDecompressor.h"
-#include "common/Common.h"                // for unroll_loop, uint32, ushort16
+#include "common/Common.h"                // for uint32, unroll_loop, ushort16
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/BitPumpJPEG.h"               // for BitStream<>::getBufferPosi...
-#include "io/ByteStream.h"                // for ByteStream
+#include "io/BitPumpJPEG.h"               // for BitPumpJPEG
 #include <algorithm>                      // for min, copy_n
 
 using std::copy_n;

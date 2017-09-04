@@ -21,7 +21,12 @@
 */
 
 #include "decompressors/PanasonicDecompressor.h"
-#include <vector> // for vector
+#include "common/Mutex.h"    // for MutexLocker
+#include "common/Point.h"    // for iPoint2D
+#include "common/RawImage.h" // for RawImage, RawImageData
+#include <algorithm>         // for min, move
+#include <cstring>           // for memcpy
+#include <vector>            // for vector
 
 namespace rawspeed {
 

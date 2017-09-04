@@ -20,27 +20,22 @@
 */
 
 #include "decoders/Rw2Decoder.h"
-#include "common/Common.h"                          // for uint32, uchar8
-#include "common/Mutex.h"                           // for MutexLocker
+#include "common/Common.h"                          // for writeLog, uint32
 #include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoder.h"                    // for RawDecoderThread
-#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
-#include "decompressors/PanasonicDecompressor.h"    // for PanasonicDecompressor
+#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decompressors/PanasonicDecompressor.h"    // for PanasonicDecompr...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness
+#include "io/Endianness.h"                          // for Endianness, Endi...
 #include "metadata/Camera.h"                        // for Hints
 #include "metadata/ColorFilterArray.h"              // for CFAColor::CFA_GREEN
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffIFD, TiffRoo...
 #include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <algorithm>                                // for min, move
 #include <cmath>                                    // for fabs
-#include <cstring>                                  // for memcpy
 #include <memory>                                   // for unique_ptr
-#include <string>                                   // for string, allocator
-#include <vector>                                   // for vector
+#include <string>                                   // for string, operator==
 
 using std::string;
 using std::fabs;

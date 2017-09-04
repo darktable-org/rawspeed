@@ -18,10 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"                                 // for HAVE_PTHREAD
-#include "decompressors/AbstractParallelizedDecompressor.h" // for AbstractPar..
-#include "common/Point.h"                                   // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE, RawDec...
+#include "rawspeedconfig.h" // for HAVE_PTHREAD
+#include "decompressors/AbstractParallelizedDecompressor.h"
+#include "common/Point.h"                 // for iPoint2D
+#include "decoders/RawDecoderException.h" // for ThrowRDE
 #include <algorithm>                      // for min
 #include <cassert>                        // for assert
 #include <numeric>                        // for accumulate

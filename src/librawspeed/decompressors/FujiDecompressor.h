@@ -21,19 +21,19 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for ushort16
-#include "common/RawImage.h"                    // for RawImage
-#include "decompressors/AbstractParallelizedDecompressor.h" // for AbstractPar..
-#include "io/BitPumpMSB.h"                      // for BitPumpMSB
-#include "io/ByteStream.h"                      // for ByteStream
-#include "metadata/ColorFilterArray.h"          // for CFAColor
-#include <algorithm>                            // for move
-#include <array>                                // for array
-#include <cassert>                              // for cassert
-#include <cstddef>                              // for size_t
-#include <vector>                               // for vector
+#include "common/Common.h"                                  // for ushort16
+#include "decompressors/AbstractParallelizedDecompressor.h" // for Abstract...
+#include "io/BitPumpMSB.h"                                  // for BitPumpMSB
+#include "io/ByteStream.h"                                  // for ByteStream
+#include "metadata/ColorFilterArray.h"                      // for CFAColor
+#include <algorithm>                                        // for move
+#include <array>                                            // for array
+#include <cassert>                                          // for assert
+#include <vector>                                           // for vector
 
 namespace rawspeed {
+
+class RawImage;
 
 class FujiDecompressor final : public AbstractParallelizedDecompressor {
   void decompressThreaded(const RawDecompressorThread* t) const final;

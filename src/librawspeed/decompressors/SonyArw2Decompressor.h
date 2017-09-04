@@ -20,11 +20,12 @@
 
 #pragma once
 
-#include "common/RawImage.h"                                // for RawImage
-#include "decompressors/AbstractParallelizedDecompressor.h" // for AbstractPar..
+#include "decompressors/AbstractParallelizedDecompressor.h" // for Abstract...
 #include "io/ByteStream.h"                                  // for ByteStream
 
 namespace rawspeed {
+
+class RawImage;
 
 class SonyArw2Decompressor final : public AbstractParallelizedDecompressor {
   void decompressThreaded(const RawDecompressorThread* t) const final;

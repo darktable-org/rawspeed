@@ -29,6 +29,7 @@
 #include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for max
 #include <cassert>                        // for assert
+#include <type_traits>                    // for underlying_type, underlyin...
 
 namespace rawspeed {
 

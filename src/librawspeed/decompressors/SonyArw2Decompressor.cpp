@@ -21,8 +21,12 @@
 */
 
 #include "decompressors/SonyArw2Decompressor.h"
-#include "decompressors/AbstractParallelizedDecompressor.h" // for AbstractPar..
+#include "common/Common.h"                                  // for uchar8
+#include "common/Point.h"                                   // for iPoint2D
+#include "common/RawImage.h"                                // for RawImage
+#include "decompressors/AbstractParallelizedDecompressor.h" // for RawDecom...
 #include "io/BitPumpLSB.h"                                  // for BitPumpLSB
+#include <algorithm>                                        // for move
 
 namespace rawspeed {
 

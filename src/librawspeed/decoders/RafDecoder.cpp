@@ -22,26 +22,24 @@
 #include "decoders/RafDecoder.h"
 #include "common/Common.h"                          // for uint32, ushort16
 #include "common/Point.h"                           // for iPoint2D, iRecta...
-#include "decoders/RawDecoder.h"                    // for RawDecoderThread
-#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
+#include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/FujiDecompressor.h"         // for FujiDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for getHostEndianness
+#include "io/Endianness.h"                          // for Endianness, getH...
 #include "metadata/Camera.h"                        // for Camera, Hints
 #include "metadata/CameraMetaData.h"                // for CameraMetaData
 #include "metadata/CameraSensorInfo.h"              // for CameraSensorInfo
 #include "metadata/ColorFilterArray.h"              // for ColorFilterArray
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag::FUJIOLDWB
+#include "tiff/TiffTag.h"                           // for TiffTag::FUJI_RA...
 #include <cassert>                                  // for assert
 #include <cstdio>                                   // for size_t
 #include <cstring>                                  // for memcmp
-#include <iterator>                                 // for next
-#include <memory>                                   // for unique_ptr, allo...
-#include <string>                                   // for string
+#include <memory>                                   // for unique_ptr
+#include <string>                                   // for string, operator==
 #include <vector>                                   // for vector
 
 namespace rawspeed {

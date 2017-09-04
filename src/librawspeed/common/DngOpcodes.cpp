@@ -23,15 +23,16 @@
 #include "common/DngOpcodes.h"
 #include "common/Common.h"                // for uint32, ushort16, clampBits
 #include "common/Mutex.h"                 // for MutexLocker
-#include "common/Point.h"                 // for iPoint2D, iRectangle2D
+#include "common/Point.h"                 // for iRectangle2D, iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
+#include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/ByteStream.h"                // for ByteStream
-#include "io/Endianness.h"                // for getHostEndianness, Endiann...
+#include "io/Endianness.h"                // for Endianness, Endianness::big
 #include "tiff/TiffEntry.h"               // for TiffEntry
-#include <algorithm>                      // for fill_n
+#include <algorithm>                      // for generate_n, fill_n
 #include <cassert>                        // for assert
 #include <cmath>                          // for pow
+#include <iterator>                       // for back_insert_iterator
 #include <stdexcept>                      // for out_of_range
 #include <tuple>                          // for tie, tuple
 // IWYU pragma: no_include <ext/alloc_traits.h>

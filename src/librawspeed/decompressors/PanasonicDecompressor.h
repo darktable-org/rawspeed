@@ -20,10 +20,13 @@
 
 #pragma once
 
-#include "decompressors/AbstractParallelizedDecompressor.h" // for AbstractPar..
+#include "common/Common.h"                                  // for uint32
+#include "decompressors/AbstractParallelizedDecompressor.h" // for Abstract...
 #include "io/ByteStream.h"                                  // for ByteStream
 
 namespace rawspeed {
+
+class RawImage;
 
 class PanasonicDecompressor final : public AbstractParallelizedDecompressor {
   struct PanaBitpump;
