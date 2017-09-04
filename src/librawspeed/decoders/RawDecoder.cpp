@@ -43,7 +43,6 @@
 
 using std::vector;
 using std::string;
-using std::min;
 
 namespace rawspeed {
 
@@ -234,69 +233,6 @@ void RawDecoder::setMetaData(const CameraMetaData* meta, const string& make,
       }
     }
   }
-}
-
-
-void *RawDecoderDecodeThread(void *_this) {
-  auto* me = static_cast<RawDecoderThread*>(_this);
-  try {
-     me->parent->decodeThreaded(me);
-  } catch (RawDecoderException &ex) {
-    me->parent->mRaw->setError(ex.what());
-  } catch (IOException &ex) {
-    me->parent->mRaw->setError(ex.what());
-  }
-  return nullptr;
-}
-
-void RawDecoder::startThreads() {
-#ifndef HAVE_PTHREAD
-  uint32 threads = 1;
-  RawDecoderThread t(this);
-  t.start_y = 0;
-  t.end_y = mRaw->dim.y;
-  RawDecoderDecodeThread(&t);
-#else
-  uint32 threads;
-  bool fail = false;
-  threads = min(static_cast<unsigned>(mRaw->dim.y), getThreadCount());
-  int y_offset = 0;
-  int y_per_thread = (mRaw->dim.y + threads - 1) / threads;
-
-  vector<RawDecoderThread> t(threads, RawDecoderThread(this));
-
-  /* Initialize and set thread detached attribute */
-  pthread_attr_t attr;
-  pthread_attr_init(&attr);
-  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-
-  for (uint32 i = 0; i < threads; i++) {
-    t[i].start_y = y_offset;
-    t[i].end_y = min(y_offset + y_per_thread, mRaw->dim.y);
-    if (pthread_create(&t[i].threadid, &attr, RawDecoderDecodeThread, &t[i]) != 0) {
-      // If a failure occurs, we need to wait for the already created threads to finish
-      threads = i-1;
-      fail = true;
-    }
-    y_offset = t[i].end_y;
-  }
-
-  for (uint32 i = 0; i < threads; i++) {
-    pthread_join(t[i].threadid, nullptr);
-  }
-  pthread_attr_destroy(&attr);
-
-  if (fail) {
-    ThrowRDE("Unable to start threads");
-  }
-#endif
-
-  if (mRaw->isTooManyErrors(threads))
-    ThrowRDE("All threads reported errors. Cannot load image.");
-}
-
-void RawDecoder::decodeThreaded(RawDecoderThread * t) {
-  ThrowRDE("This class does not support threaded decoding");
 }
 
 rawspeed::RawImage RawDecoder::decodeRaw() {

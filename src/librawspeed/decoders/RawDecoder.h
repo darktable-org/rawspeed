@@ -28,10 +28,6 @@
 #include "metadata/Camera.h"  // for Hints
 #include <string>             // for string
 
-#ifdef HAVE_PTHREAD
-#include <pthread.h>
-#endif
-
 namespace rawspeed {
 
 class Buffer;
@@ -39,25 +35,6 @@ class Buffer;
 class CameraMetaData;
 
 class TiffIFD;
-
-class RawDecoder;
-
-/* Class with information delivered to RawDecoder::decodeThreaded() */
-class RawDecoderThread
-{
-  public:
-    explicit RawDecoderThread(RawDecoder* parent_) : parent(parent_) {}
-    uint32 start_y = 0;
-    uint32 end_y = 0;
-    const char* error = nullptr;
-#ifdef HAVE_PTHREAD
-    pthread_t threadid;
-#endif
-    RawDecoder* parent;
-    uint32 taskNo = -1;
-};
-
-void* RawDecoderDecodeThread(void* _this);
 
 class RawDecoder
 {
@@ -89,10 +66,6 @@ public:
   /* The image is expected to be cropped after this, but black/whitelevel */
   /* compensation is not expected to be applied to the image */
   void decodeMetaData(const CameraMetaData* meta);
-
-  /* Called function for filters that are capable of doing simple multi-threaded decode */
-  /* The delivered class gives information on what part of the image should be decoded. */
-  [[noreturn]] virtual void decodeThreaded(RawDecoderThread* t);
 
   /* Allows access to the root IFD structure */
   /* If image isn't TIFF based NULL will be returned */
@@ -141,12 +114,6 @@ protected:
   virtual RawImage decodeRawInternal() = 0;
   virtual void decodeMetaDataInternal(const CameraMetaData* meta) = 0;
   virtual void checkSupportInternal(const CameraMetaData* meta) = 0;
-
-  /* Helper function for decoders - splits the image vertically and starts of decoder threads */
-  /* The function returns when all threads are done */
-  /* All errors are silently pushed into the "errors" array.*/
-  /* If all threads report an error an exception will be thrown*/
-  void startThreads();
 
   /* Ask for sample submisson, if makes sense */
   void askForSamples(const CameraMetaData* meta, const std::string& make,
