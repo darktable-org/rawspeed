@@ -24,20 +24,46 @@
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDec...
 #include <algorithm>                      // for min
 #include <cassert>                        // for assert
+#include <numeric>                        // for accumulate
 #include <vector>                         // for vector
 
 namespace rawspeed {
 
 #ifdef HAVE_PTHREAD
-void AbstractParallelizedDecompressor::startThreading() const {
+std::vector<uint32>
+AbstractParallelizedDecompressor::piecesPerThread(uint32 threads,
+                                                  uint32 pieces) {
+  std::vector<uint32> buckets;
+  buckets.resize(threads, 0);
+
+  // split all the pieces between all the threads 'evenly'
+  int piecesLeft = pieces;
+  while (piecesLeft > 0) {
+    for (auto& bucket : buckets) {
+      --piecesLeft;
+      ++bucket;
+      if (0 == piecesLeft)
+        break;
+    }
+  }
+  assert(piecesLeft == 0);
+  assert(std::accumulate(buckets.begin(), buckets.end(), 0UL) == pieces);
+
+  return buckets;
+}
+#endif
+
+#ifdef HAVE_PTHREAD
+void AbstractParallelizedDecompressor::startThreading(uint32 pieces = 0) const {
   assert(getThreadCount() > 1);
+  if (0 == pieces)
+    pieces = mRaw->dim.y;
+
   const uint32 threadNum =
-      std::min(static_cast<uint32>(mRaw->dim.y), getThreadCount());
+      std::min(static_cast<uint32>(pieces), getThreadCount());
   assert(threadNum > 1);
 
-  const int y_per_thread = roundUpDivision(mRaw->dim.y, threadNum);
-  assert(threadNum * y_per_thread >= (uint32)mRaw->dim.y);
-  assert((threadNum - 1) * y_per_thread < (uint32)mRaw->dim.y);
+  const std::vector<uint32> buckets = piecesPerThread(threadNum, pieces);
 
   std::vector<RawDecompressorThread> threads(
       threadNum, RawDecompressorThread(this, threadNum));
@@ -49,14 +75,25 @@ void AbstractParallelizedDecompressor::startThreading() const {
 
   uint32 i = 0;
   bool fail = false;
-  int y_offset = 0;
+  int offset = 0;
   for (auto& t : threads) {
     t.taskNo = i;
 
-    t.start_y = y_offset;
-    t.end_y = t.start_y + y_per_thread;
+    t.start = offset;
+    t.end = t.start + buckets[i];
 
-    t.end_y = std::min(t.end_y, uint32(mRaw->dim.y));
+    assert(t.start < pieces);
+    assert(t.end > 0);
+    assert(t.end > t.start);
+    assert(t.end <= pieces);
+
+#ifndef NDEBUG
+    if (i > 0) {
+      assert(t.start > threads[i - 1].start);
+      assert(t.end > threads[i - 1].end);
+      assert(t.start == threads[i - 1].end);
+    }
+#endif
 
     if (pthread_create(&t.threadid, &attr, RawDecompressorThread::start_routine,
                        &t) != 0) {
@@ -68,7 +105,7 @@ void AbstractParallelizedDecompressor::startThreading() const {
       break;
     }
 
-    y_offset = t.end_y;
+    offset = t.end;
     i++;
   }
 
@@ -79,6 +116,18 @@ void AbstractParallelizedDecompressor::startThreading() const {
 
   if (fail)
     ThrowRDE("Unable to start threads");
+}
+#else
+void AbstractParallelizedDecompressor::startThreading(uint32 pieces = 0) const {
+  if (0 == pieces)
+    pieces = mRaw->dim.y;
+
+  RawDecompressorThread t(this, 1);
+  t.taskNo = 0;
+  t.start = 0;
+  t.end = pieces;
+
+  RawDecompressorThread::start_routine(&t);
 }
 #endif
 

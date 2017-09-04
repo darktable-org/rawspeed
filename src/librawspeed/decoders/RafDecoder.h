@@ -30,7 +30,6 @@ namespace rawspeed {
 
 class CameraMetaData;
 class Buffer;
-class FujiDecompressor;
 class RawDecoderThread;
 
 class RafDecoder final : public AbstractTiffDecoder
@@ -50,11 +49,9 @@ public:
 
 protected:
   int getDecoderVersion() const override { return 1; }
-  void decodeThreaded(RawDecoderThread* t) override;
 
 private:
   int isCompressed();
-  const FujiDecompressor* f = nullptr;
 };
 
 } // namespace rawspeed

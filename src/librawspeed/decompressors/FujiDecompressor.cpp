@@ -29,11 +29,12 @@
 #include <cstdlib>                        // for abs
 #include <cstring>                        // for memcpy, memset
 // IWYU pragma: no_include <bits/std_abs.h>
+#include "decompressors/AbstractParallelizedDecompressor.h" // for AbstractPar..
 
 namespace rawspeed {
 
-FujiDecompressor::FujiDecompressor(ByteStream input_, const RawImage& img)
-    : input(std::move(input_)), mImg(img) {
+FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
+    : AbstractParallelizedDecompressor(img), input(std::move(input_)) {
   input.setByteOrder(Endianness::big);
 
   header = FujiHeader(&input);
@@ -47,8 +48,10 @@ FujiDecompressor::FujiDecompressor(ByteStream input_, const RawImage& img)
 
   for (int i = 0; i < 6; i++) {
     for (int j = 0; j < 6; j++)
-      CFA[i][j] = mImg->cfa.getColorAt(j, i);
+      CFA[i][j] = mRaw->cfa.getColorAt(j, i);
   }
+
+  fuji_compressed_load_raw();
 }
 
 FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
@@ -165,7 +168,7 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info,
 
   for (int row_count = 0; row_count < FujiStrip::lineHeight(); row_count++) {
     auto* const raw_block_data = reinterpret_cast<ushort16*>(
-        mImg->getData(strip.offsetX(), strip.offsetY(cur_line) + row_count));
+        mRaw->getData(strip.offsetX(), strip.offsetY(cur_line) + row_count));
 
     for (int pixel_count = 0; pixel_count < strip.width(); pixel_count++) {
       ushort16* line_buf = nullptr;
@@ -754,10 +757,13 @@ void FujiDecompressor::fuji_compressed_load_raw() {
   }
 }
 
-void FujiDecompressor::fuji_decode_loop(size_t start, size_t end) const {
+void FujiDecompressor::decode() const { startThreading(header.blocks_in_row); }
+
+void FujiDecompressor::decompressThreaded(
+    const RawDecompressorThread* t) const {
   fuji_compressed_block block_info;
 
-  for (size_t i = start; i < end && i < strips.size(); i++) {
+  for (size_t i = t->start; i < t->end && i < strips.size(); i++) {
     block_info.reset(&common_info);
     fuji_decode_strip(&block_info, strips[i]);
   }
