@@ -32,8 +32,6 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-class RawDecoderThread;
-
 class Buffer;
 
 class ArwDecoder final : public AbstractTiffDecoder
@@ -46,7 +44,6 @@ public:
 
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
-  void decodeThreaded(RawDecoderThread *t) override;
 
 protected:
   void ParseA100WB();

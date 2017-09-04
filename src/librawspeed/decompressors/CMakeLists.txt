@@ -30,6 +30,8 @@ FILE(GLOB SOURCES
   "SamsungV1Decompressor.h"
   "SamsungV2Decompressor.cpp"
   "SamsungV2Decompressor.h"
+  "SonyArw2Decompressor.cpp"
+  "SonyArw2Decompressor.h"
   "UncompressedDecompressor.cpp"
   "UncompressedDecompressor.h"
 )
