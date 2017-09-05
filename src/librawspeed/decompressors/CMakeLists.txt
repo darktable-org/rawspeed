@@ -1,5 +1,7 @@
 FILE(GLOB SOURCES
   "AbstractDecompressor.h"
+  "AbstractDngDecompressor.cpp"
+  "AbstractDngDecompressor.h"
   "AbstractLJpegDecompressor.cpp"
   "AbstractLJpegDecompressor.h"
   "AbstractParallelizedDecompressor.cpp"

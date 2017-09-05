@@ -18,11 +18,11 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
-#include "decoders/DngDecoderSlices.h"
-#include "common/Common.h"                          // for uint32, getThrea...
+#include "rawspeedconfig.h" // for HAVE_JPEG, HAVE_...
+#include "decompressors/AbstractDngDecompressor.h"
+#include "common/Common.h"                          // for BitOrder::BitOrd...
 #include "common/Point.h"                           // for iPoint2D
-#include "common/RawspeedException.h"               // for RawspeedException
+#include "common/RawImage.h"                        // for RawImageData
 #include "decoders/RawDecoderException.h"           // for RawDecoderException
 #include "decompressors/DeflateDecompressor.h"      // for DeflateDecompressor
 #include "decompressors/JpegDecompressor.h"         // for JpegDecompressor
@@ -30,83 +30,30 @@
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer (ptr only)
 #include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness::big
+#include "io/Endianness.h"                          // for Endianness, Endi...
 #include "io/IOException.h"                         // for IOException
-#include "tiff/TiffIFD.h"                           // for getTiffEndianness
-#include <algorithm>                                // for move
+#include "tiff/TiffIFD.h"                           // for getTiffByteOrder
 #include <cassert>                                  // for assert
 #include <cstdio>                                   // for size_t
-#include <memory>                                   // for allocator_traits...
-#include <string>                                   // for string, operator+
-#include <vector>                                   // for allocator, vector
-
-using std::string;
+#include <memory>                                   // for unique_ptr
+#include <vector>                                   // for vector
 
 namespace rawspeed {
 
-void *DecodeThread(void *_this) {
-  auto* me = static_cast<DngDecoderThread*>(_this);
-  DngDecoderSlices* parent = me->parent;
-  try {
-    parent->decodeSlice(me);
-  } catch (RawspeedException& e) {
-    parent->mRaw->setError(string("Caught exception: ") + e.what());
-  }
-  return nullptr;
+AbstractDngDecompressor::AbstractDngDecompressor(const Buffer* file,
+                                                 const RawImage& img,
+                                                 int _compression)
+    : AbstractParallelizedDecompressor(img), mFile(file), mFixLjpeg(false),
+      compression(_compression) {}
+
+void AbstractDngDecompressor::addSlice(DngSliceElement slice) {
+  slices.emplace_back(slice);
 }
 
-DngDecoderSlices::DngDecoderSlices(const Buffer* file, const RawImage& img,
-                                   int _compression)
-    : mFile(file), mRaw(img), mFixLjpeg(false), compression(_compression) {}
+void AbstractDngDecompressor::decode() const { startThreading(slices.size()); }
 
-void DngDecoderSlices::addSlice(std::unique_ptr<DngSliceElement>&& slice) {
-  slices.emplace(move(slice));
-}
-
-void DngDecoderSlices::startDecoding() {
-#ifndef HAVE_PTHREAD
-  DngDecoderThread t(this);
-  while (!slices.empty()) {
-    t.slices.emplace(move(slices.front()));
-    slices.pop();
-  }
-  DecodeThread(&t);
-#else
-  // Create threads
-
-  nThreads = getThreadCount();
-  int slicesPerThread =
-      (static_cast<int>(slices.size()) + nThreads - 1) / nThreads;
-  //  decodedSlices = 0;
-  pthread_attr_t attr;
-  /* Initialize and set thread detached attribute */
-  pthread_attr_init(&attr);
-  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-
-  threads.reserve(nThreads);
-
-  for (uint32 i = 0; i < nThreads; i++) {
-    auto t = std::make_unique<DngDecoderThread>(this);
-    for (int j = 0; j < slicesPerThread ; j++) {
-      if (!slices.empty()) {
-        t->slices.emplace(move(slices.front()));
-        slices.pop();
-      }
-    }
-    pthread_create(&t->threadid, &attr, DecodeThread, t.get());
-    threads.emplace_back(move(t));
-  }
-  pthread_attr_destroy(&attr);
-
-  void *status;
-  for (auto& thread : threads) {
-    pthread_join(thread->threadid, &status);
-  }
-  threads.clear();
-#endif
-}
-
-void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
+void AbstractDngDecompressor::decompressThreaded(
+    const RawDecompressorThread* t) const {
   assert(t);
   assert(mRaw->dim.x > 0);
   assert(mRaw->dim.y > 0);
@@ -114,9 +61,8 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
   assert(mBps > 0 && mBps <= 32);
 
   if (compression == 1) {
-    while (!t->slices.empty()) {
-      auto e = move(t->slices.front());
-      t->slices.pop();
+    for (size_t i = t->start; i < t->end && i < slices.size(); i++) {
+      auto e = &slices[i];
 
       UncompressedDecompressor decompressor(*mFile, e->byteOffset, e->byteCount,
                                             mRaw);
@@ -158,15 +104,14 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
       }
     }
   } else if (compression == 7) {
-    while (!t->slices.empty()) {
-      auto e = move(t->slices.front());
-      t->slices.pop();
+    for (size_t i = t->start; i < t->end && i < slices.size(); i++) {
+      auto e = &slices[i];
       LJpegDecompressor d(*mFile, e->byteOffset, e->byteCount, mRaw);
       try {
         d.decode(e->offX, e->offY, mFixLjpeg);
-      } catch (RawDecoderException &err) {
+      } catch (RawDecoderException& err) {
         mRaw->setError(err.what());
-      } catch (IOException &err) {
+      } catch (IOException& err) {
         mRaw->setError(err.what());
       }
     }
@@ -174,17 +119,16 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
   } else if (compression == 8) {
 #ifdef HAVE_ZLIB
     std::unique_ptr<unsigned char[]> uBuffer;
-    while (!t->slices.empty()) {
-      auto e = move(t->slices.front());
-      t->slices.pop();
+    for (size_t i = t->start; i < t->end && i < slices.size(); i++) {
+      auto e = &slices[i];
 
       DeflateDecompressor z(*mFile, e->byteOffset, e->byteCount, mRaw,
                             mPredictor, mBps);
       try {
         z.decode(&uBuffer, e->width, e->height, e->offX, e->offY);
-      } catch (RawDecoderException &err) {
+      } catch (RawDecoderException& err) {
         mRaw->setError(err.what());
-      } catch (IOException &err) {
+      } catch (IOException& err) {
         mRaw->setError(err.what());
       }
     }
@@ -197,15 +141,14 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
   } else if (compression == 0x884c) {
 #ifdef HAVE_JPEG
     /* Each slice is a JPEG image */
-    while (!t->slices.empty()) {
-      auto e = move(t->slices.front());
-      t->slices.pop();
+    for (size_t i = t->start; i < t->end && i < slices.size(); i++) {
+      auto e = &slices[i];
       JpegDecompressor j(*mFile, e->byteOffset, e->byteCount, mRaw);
       try {
         j.decode(e->offX, e->offY);
-      } catch (RawDecoderException &err) {
+      } catch (RawDecoderException& err) {
         mRaw->setError(err.what());
-      } catch (IOException &err) {
+      } catch (IOException& err) {
         mRaw->setError(err.what());
       }
     }
@@ -214,10 +157,10 @@ void DngDecoderSlices::decodeSlice(DngDecoderThread* t) {
     ThrowRDE("jpeg support is disabled.");
 #endif
   } else
-    mRaw->setError("DngDecoderSlices: Unknown compression");
+    mRaw->setError("AbstractDngDecompressor: Unknown compression");
 }
 
-int __attribute__((pure)) DngDecoderSlices::size() {
+int __attribute__((pure)) AbstractDngDecompressor::size() {
   return static_cast<int>(slices.size());
 }
 

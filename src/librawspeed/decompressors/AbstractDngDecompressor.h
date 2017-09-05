@@ -20,26 +20,16 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"
-
-#include "common/Common.h"    // for uint32
-#include "common/RawImage.h"  // for RawImage
-#include <memory>             // for unique_ptr
-#include <queue>              // for queue
-#include <vector>             // for vector
-
-#ifdef HAVE_PTHREAD
-#include <pthread.h>
-#endif
+#include "common/Common.h"                                  // for uint32
+#include "decompressors/AbstractParallelizedDecompressor.h" // for Abstract...
+#include <vector>                                           // for vector
 
 namespace rawspeed {
 
 class Buffer;
+class RawImage;
 
-class DngDecoderSlices;
-
-class DngSliceElement
-{
+class DngSliceElement {
 public:
   DngSliceElement(uint32 off, uint32 count, uint32 offsetX, uint32 offsetY,
                   uint32 w, uint32 h)
@@ -53,31 +43,21 @@ public:
   const uint32 height;
 };
 
-class DngDecoderThread
-{
-public:
-#ifdef HAVE_PTHREAD
-  pthread_t threadid;
-#endif
-  explicit DngDecoderThread(DngDecoderSlices* parent_) : parent(parent_) {}
-  std::queue<std::unique_ptr<DngSliceElement>> slices;
-  DngDecoderSlices* parent;
-};
+class AbstractDngDecompressor final : public AbstractParallelizedDecompressor {
+  void decompressThreaded(const RawDecompressorThread* t) const final;
 
-void* DecodeThread(void* _this);
-
-class DngDecoderSlices
-{
 public:
-  DngDecoderSlices(const Buffer* file, const RawImage& img, int compression);
-  void addSlice(std::unique_ptr<DngSliceElement>&& slice);
-  void startDecoding();
-  void decodeSlice(DngDecoderThread* t);
+  AbstractDngDecompressor(const Buffer* file, const RawImage& img,
+                          int compression);
+
+  void addSlice(DngSliceElement slice);
+
+  void decode() const final;
+
   int __attribute__((pure)) size();
-  std::queue<std::unique_ptr<DngSliceElement>> slices;
-  std::vector<std::unique_ptr<DngDecoderThread>> threads;
+  std::vector<DngSliceElement> slices;
+
   const Buffer* mFile;
-  RawImage mRaw;
   bool mFixLjpeg;
   uint32 mPredictor;
   uint32 mBps;

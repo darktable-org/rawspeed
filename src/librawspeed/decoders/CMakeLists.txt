@@ -13,8 +13,6 @@ FILE(GLOB SOURCES
   "DcsDecoder.h"
   "DngDecoder.cpp"
   "DngDecoder.h"
-  "DngDecoderSlices.cpp"
-  "DngDecoderSlices.h"
   "ErfDecoder.cpp"
   "ErfDecoder.h"
   "IiqDecoder.cpp"

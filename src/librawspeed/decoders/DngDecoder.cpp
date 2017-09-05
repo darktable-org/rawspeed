@@ -20,27 +20,27 @@
 
 #include "rawspeedconfig.h" // for HAVE_JPEG, HAVE_ZLIB
 #include "decoders/DngDecoder.h"
-#include "common/Common.h"                // for uint32, uchar8, writeLog
-#include "common/DngOpcodes.h"            // for DngOpcodes
-#include "common/Point.h"                 // for iPoint2D, iRectangle2D
-#include "common/RawspeedException.h"     // for RawspeedException
-#include "decoders/DngDecoderSlices.h"    // for DngDecoderSlices, DngSlice...
-#include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
-#include "io/Buffer.h"                    // for Buffer
-#include "metadata/Camera.h"              // for Camera
-#include "metadata/CameraMetaData.h"      // for CameraMetaData
-#include "metadata/ColorFilterArray.h"    // for CFAColor, ColorFilterArray
-#include "tiff/TiffEntry.h"               // for TiffEntry, TiffDataType::T...
-#include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD, TiffID
-#include "tiff/TiffTag.h"                 // for TiffTag::UNIQUECAMERAMODEL
-#include <algorithm>                      // for move
-#include <cassert>                        // for assert
-#include <cstring>                        // for memset
-#include <map>                            // for map
-#include <memory>                         // for unique_ptr, allocator_trai...
-#include <stdexcept>                      // for out_of_range
-#include <string>                         // for string, operator+, basic_s...
-#include <vector>                         // for vector, allocator
+#include "common/Common.h"                         // for uint32, writeLog
+#include "common/DngOpcodes.h"                     // for DngOpcodes
+#include "common/Point.h"                          // for iPoint2D, iRectan...
+#include "common/RawspeedException.h"              // for RawspeedException
+#include "decoders/RawDecoderException.h"          // for ThrowRDE, RawDeco...
+#include "decompressors/AbstractDngDecompressor.h" // for AbstractDngDecomp...
+#include "io/Buffer.h"                             // for Buffer
+#include "metadata/Camera.h"                       // for Camera
+#include "metadata/CameraMetaData.h"               // for CameraMetaData
+#include "metadata/ColorFilterArray.h"             // for CFAColor, ColorFi...
+#include "tiff/TiffEntry.h"                        // for TiffEntry, TiffDa...
+#include "tiff/TiffIFD.h"                          // for TiffIFD, TiffRootIFD
+#include "tiff/TiffTag.h"                          // for TiffTag::ACTIVEAREA
+#include <algorithm>                               // for move
+#include <cassert>                                 // for assert
+#include <cstring>                                 // for memset
+#include <map>                                     // for map
+#include <memory>                                  // for unique_ptr
+#include <stdexcept>                               // for out_of_range
+#include <string>                                  // for string, operator+
+#include <vector>                                  // for vector, allocator
 
 using std::vector;
 using std::map;
@@ -206,7 +206,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
              "JPEG-compressed data.");
   }
 
-  DngDecoderSlices slices(mFile, mRaw, compression);
+  AbstractDngDecompressor slices(mFile, mRaw, compression);
   if (raw->hasEntry(PREDICTOR)) {
     slices.mPredictor = raw->getEntry(PREDICTOR)->getU32();
   }
@@ -254,12 +254,11 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
         const uint32 offX = tilew * x;
         const uint32 offY = tileh * y;
 
-        auto e = std::make_unique<DngSliceElement>(offset, count, offX, offY,
-                                                   tilew, tileh);
+        DngSliceElement e(offset, count, offX, offY, tilew, tileh);
 
         // Only decode if size is valid
-        if (mFile->isValid(e->byteOffset, e->byteCount))
-          slices.addSlice(move(e));
+        if (mFile->isValid(e.byteOffset, e.byteCount))
+          slices.addSlice(e);
       }
     }
   } else { // Strips
@@ -286,14 +285,13 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
       if (count < 1)
         continue;
 
-      auto e = std::make_unique<DngSliceElement>(offset, count, 0, offY,
-                                                 mRaw->dim.x, yPerSlice);
+      DngSliceElement e(offset, count, 0, offY, mRaw->dim.x, yPerSlice);
 
       offY += yPerSlice;
 
       // Only decode if size is valid
-      if (mFile->isValid(e->byteOffset, e->byteCount))
-        slices.addSlice(move(e));
+      if (mFile->isValid(e.byteOffset, e.byteCount))
+        slices.addSlice(e);
     }
   }
   uint32 nSlices = slices.size();
@@ -302,7 +300,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
 
   mRaw->createData();
 
-  slices.startDecoding();
+  slices.decode();
 
   std::string firstErr;
   if (mRaw->isTooManyErrors(nSlices, &firstErr)) {
