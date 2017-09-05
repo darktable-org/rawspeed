@@ -25,6 +25,7 @@
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include <cassert>                        // for assert
 #include <memory>                         // for allocator_traits<>::value_...
+#include <string>                         // for string
 #include <vector>                         // for vector
 
 namespace rawspeed {
@@ -36,6 +37,12 @@ void AbstractParallelizedDecompressor::decompressOne(uint32 pieces) const {
   t.end = pieces;
 
   RawDecompressorThread::start_routine(&t);
+
+  std::string firstErr;
+  if (mRaw->isTooManyErrors(1, &firstErr)) {
+    ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
+             firstErr.c_str());
+  }
 };
 
 #ifdef HAVE_PTHREAD
@@ -98,6 +105,12 @@ void AbstractParallelizedDecompressor::startThreading(uint32 pieces) const {
 
   if (fail)
     ThrowRDE("Unable to start threads");
+
+  std::string firstErr;
+  if (mRaw->isTooManyErrors(1, &firstErr)) {
+    ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
+             firstErr.c_str());
+  }
 }
 #else
 void AbstractParallelizedDecompressor::startThreading(uint32 pieces) const {

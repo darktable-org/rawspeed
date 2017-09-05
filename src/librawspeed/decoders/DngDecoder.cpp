@@ -301,12 +301,6 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
   mRaw->createData();
 
   slices.decode();
-
-  std::string firstErr;
-  if (mRaw->isTooManyErrors(nSlices, &firstErr)) {
-    ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
-             firstErr.c_str());
-  }
 }
 
 RawImage DngDecoder::decodeRawInternal() {
