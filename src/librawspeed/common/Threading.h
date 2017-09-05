@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <algorithm> // for generate_n, min
+#include <algorithm> // for fill_n, min
 #include <cassert>   // for assert
 #include <iterator>  // for back_insert_iterator
 #include <numeric>   // for accumulate
@@ -38,18 +38,14 @@ inline std::vector<unsigned> sliceUp(unsigned bucketsNum, unsigned pieces) {
   buckets.reserve(bucketsNum);
 
   const auto quot = pieces / bucketsNum;
-  auto rem = pieces % bucketsNum;
+  const auto rem = pieces % bucketsNum;
 
-  std::generate_n(std::back_insert_iterator<std::vector<unsigned>>(buckets),
-                  bucketsNum, [quot, &rem]() {
-                    auto bucket = quot;
-                    if (rem > 0) {
-                      bucket++;
-                      rem--;
-                    }
-                    return bucket;
-                  });
+  std::fill_n(std::back_insert_iterator<std::vector<unsigned>>(buckets), rem,
+              1 + quot);
+  std::fill_n(std::back_insert_iterator<std::vector<unsigned>>(buckets),
+              bucketsNum - rem, quot);
 
+  assert(buckets.size() == bucketsNum);
   assert(std::accumulate(buckets.begin(), buckets.end(), 0UL) == pieces);
 
   return buckets;
