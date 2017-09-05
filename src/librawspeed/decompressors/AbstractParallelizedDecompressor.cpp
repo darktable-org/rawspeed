@@ -23,25 +23,32 @@
 #include "common/Point.h"                 // for iPoint2D
 #include "common/Threading.h"             // for sliceUp
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include <algorithm>                      // for min
 #include <cassert>                        // for assert
 #include <memory>                         // for allocator_traits<>::value_...
 #include <vector>                         // for vector
 
 namespace rawspeed {
 
+void AbstractParallelizedDecompressor::decompressOne(uint32 pieces) const {
+  RawDecompressorThread t(this, 1);
+  t.taskNo = 0;
+  t.start = 0;
+  t.end = pieces;
+
+  RawDecompressorThread::start_routine(&t);
+};
+
 #ifdef HAVE_PTHREAD
 void AbstractParallelizedDecompressor::startThreading(uint32 pieces) const {
-  assert(getThreadCount() > 1);
+  assert(pieces > 0);
+  assert(getThreadCount() > 0);
+  const auto buckets = sliceUp(getThreadCount(), pieces);
 
-  const uint32 threadNum =
-      std::min(static_cast<uint32>(pieces), getThreadCount());
-  assert(threadNum > 1);
-
-  const auto buckets = sliceUp(threadNum, pieces);
+  if (buckets.size() == 1)
+    return decompressOne(pieces);
 
   std::vector<RawDecompressorThread> threads(
-      threadNum, RawDecompressorThread(this, threadNum));
+      buckets.size(), RawDecompressorThread(this, buckets.size()));
 
   /* Initialize and set thread detached attribute */
   pthread_attr_t attr;
@@ -94,12 +101,7 @@ void AbstractParallelizedDecompressor::startThreading(uint32 pieces) const {
 }
 #else
 void AbstractParallelizedDecompressor::startThreading(uint32 pieces) const {
-  RawDecompressorThread t(this, 1);
-  t.taskNo = 0;
-  t.start = 0;
-  t.end = pieces;
-
-  RawDecompressorThread::start_routine(&t);
+  decompressOne(pieces);
 }
 #endif
 

@@ -37,6 +37,8 @@ class AbstractParallelizedDecompressor : AbstractDecompressor {
   friend class RawDecompressorThread;
   virtual void decompressThreaded(const RawDecompressorThread* t) const = 0;
 
+  void decompressOne(uint32 pieces) const;
+
 public:
   explicit AbstractParallelizedDecompressor(const RawImage& img) : mRaw(img) {}
   virtual ~AbstractParallelizedDecompressor() = default;
@@ -46,7 +48,7 @@ public:
 protected:
   RawImage mRaw;
 
-  virtual void startThreading(uint32 pieces) const final;
+  void startThreading(uint32 pieces) const;
 };
 
 class RawDecompressorThread final {
