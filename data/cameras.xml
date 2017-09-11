@@ -10871,6 +10871,38 @@
 			<Hint name="full_height" value="2592"/>
 		</Hints>
 	</Camera>
+	<Camera make="GITUP" model="GIT2P" mode="chdk-a">
+		<ID make="GITUP" model="GIT2P">GITUP GIT2P</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="4160" white="65535"/>
+		<Hints>
+			<Hint name="filesize" value="32257024"/>
+			<Hint name="full_width" value="4624"/>
+			<Hint name="full_height" value="3488"/>
+		</Hints>
+	</Camera>
+	<Camera make="GITUP" model="GIT2P" mode="chdk-b">
+		<ID make="GITUP" model="GIT2P">GITUP GIT2P</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="4160" white="65535"/>
+		<Hints>
+			<Hint name="filesize" value="24192768"/>
+			<Hint name="full_width" value="4624"/>
+			<Hint name="full_height" value="2616"/>
+		</Hints>
+	</Camera>
 </Cameras>
 <!--
 vim: tabstop=8 shiftwidth=8 softtabstop=8
