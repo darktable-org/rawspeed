@@ -36,19 +36,39 @@ void AbstractLJpegDecompressor::decode() {
   if (getNextMarker(false) != M_SOI)
     ThrowRDE("Image did not start with SOI. Probably not an LJPEG");
 
+  struct FoundMarkers {
+    bool DHT = false;
+    bool SOF = false;
+    bool SOS = false;
+  } FoundMarkers;
+
   JpegMarker m;
   do {
     m = getNextMarker(true);
 
     switch (m) {
     case M_DHT:
+      // there can be more than one DHT markers.
+      // FIXME: do we really want to reparse and use the last one?
       parseDHT();
+      FoundMarkers.DHT = true;
       break;
     case M_SOF3:
+      if (FoundMarkers.SOF)
+        ThrowRDE("Found second SOF marker");
+      // SOF is not required to be after DHT
       parseSOF(&frame);
+      FoundMarkers.SOF = true;
       break;
     case M_SOS:
+      if (FoundMarkers.SOS)
+        ThrowRDE("Found second SOS marker");
+      if (!FoundMarkers.DHT)
+        ThrowRDE("Did not find DHT marker before SOS.");
+      if (!FoundMarkers.SOF)
+        ThrowRDE("Did not find SOF marker before SOS.");
       parseSOS();
+      FoundMarkers.SOS = true;
       break;
     case M_DQT:
       ThrowRDE("Not a valid RAW file.");
@@ -56,6 +76,9 @@ void AbstractLJpegDecompressor::decode() {
       break;
     }
   } while (m != M_EOI);
+
+  if (!FoundMarkers.SOS)
+    ThrowRDE("Did not find SOS marker.");
 }
 
 void AbstractLJpegDecompressor::parseSOF(SOFInfo* sof) {
