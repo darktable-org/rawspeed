@@ -424,7 +424,7 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
   // Apply stage 1 opcodes
   if (applyStage1DngOpcodes && raw->hasEntry(OPCODELIST1)) {
     try {
-      DngOpcodes codes(raw->getEntry(OPCODELIST1));
+      DngOpcodes codes(mRaw, raw->getEntry(OPCODELIST1));
       codes.applyOpCodes(mRaw);
     } catch (RawDecoderException& e) {
       // We push back errors from the opcode parser, since the image may still
@@ -462,7 +462,7 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
 
     // Apply stage 2 codes
     try {
-      DngOpcodes codes(raw->getEntry(OPCODELIST2));
+      DngOpcodes codes(mRaw, raw->getEntry(OPCODELIST2));
       codes.applyOpCodes(mRaw);
     } catch (RawDecoderException& e) {
       // We push back errors from the opcode parser, since the image may still

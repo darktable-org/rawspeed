@@ -38,7 +38,7 @@ class ByteStream;
 class DngOpcodes
 {
 public:
-  explicit DngOpcodes(TiffEntry* entry);
+  DngOpcodes(const RawImage& ri, TiffEntry* entry);
   ~DngOpcodes();
   void applyOpCodes(const RawImage& ri);
 
@@ -60,9 +60,11 @@ protected:
   template <typename S> class ScalePerRowOrCol;
 
   template <class Opcode>
-  static std::unique_ptr<DngOpcode> constructor(ByteStream* bs);
+  static std::unique_ptr<DngOpcode> constructor(const RawImage& ri,
+                                                ByteStream* bs);
 
-  using constructor_t = std::unique_ptr<DngOpcode> (*)(ByteStream* bs);
+  using constructor_t = std::unique_ptr<DngOpcode> (*)(const RawImage& ri,
+                                                       ByteStream* bs);
   static const std::map<uint32, std::pair<const char*, constructor_t>> Map;
 };
 

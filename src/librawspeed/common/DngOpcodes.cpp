@@ -64,7 +64,7 @@ class DngOpcodes::FixBadPixelsConstant final : public DngOpcodes::DngOpcode {
   uint32 value;
 
 public:
-  explicit FixBadPixelsConstant(ByteStream* bs) {
+  explicit FixBadPixelsConstant(const RawImage& ri, ByteStream* bs) {
     value = bs->getU32();
     bs->getU32(); // Bayer Phase not used
   }
@@ -98,7 +98,7 @@ class DngOpcodes::FixBadPixelsList final : public DngOpcodes::DngOpcode {
   std::vector<uint32> badPixels;
 
 public:
-  explicit FixBadPixelsList(ByteStream* bs) {
+  explicit FixBadPixelsList(const RawImage& ri, ByteStream* bs) {
     bs->getU32(); // Skip phase - we don't care
     auto badPointCount = bs->getU32();
     auto badRectCount = bs->getU32();
@@ -143,7 +143,7 @@ class DngOpcodes::ROIOpcode : public DngOpcodes::DngOpcode {
   iRectangle2D roi;
 
 protected:
-  explicit ROIOpcode(ByteStream* bs) {
+  explicit ROIOpcode(const RawImage& ri, ByteStream* bs) {
     uint32 top = bs->getU32();
     uint32 left = bs->getU32();
     uint32 bottom = bs->getU32();
@@ -166,7 +166,7 @@ protected:
 
 class DngOpcodes::TrimBounds final : public ROIOpcode {
 public:
-  explicit TrimBounds(ByteStream* bs) : ROIOpcode(bs) {}
+  explicit TrimBounds(const RawImage& ri, ByteStream* bs) : ROIOpcode(ri, bs) {}
 
   void apply(const RawImage& ri) override { ri->subFrame(getRoi()); }
 };
@@ -180,7 +180,7 @@ class DngOpcodes::PixelOpcode : public ROIOpcode {
   uint32 colPitch;
 
 protected:
-  explicit PixelOpcode(ByteStream* bs) : ROIOpcode(bs) {
+  explicit PixelOpcode(const RawImage& ri, ByteStream* bs) : ROIOpcode(ri, bs) {
     firstPlane = bs->getU32();
     planes = bs->getU32();
     rowPitch = bs->getU32();
@@ -222,7 +222,8 @@ class DngOpcodes::LookupOpcode : public PixelOpcode {
 protected:
   vector<ushort16> lookup;
 
-  explicit LookupOpcode(ByteStream* bs) : PixelOpcode(bs), lookup(65536) {}
+  explicit LookupOpcode(const RawImage& ri, ByteStream* bs)
+      : PixelOpcode(ri, bs), lookup(65536) {}
 
   void setup(const RawImage& ri) override {
     PixelOpcode::setup(ri);
@@ -240,7 +241,7 @@ protected:
 
 class DngOpcodes::TableMap final : public LookupOpcode {
 public:
-  explicit TableMap(ByteStream* bs) : LookupOpcode(bs) {
+  explicit TableMap(const RawImage& ri, ByteStream* bs) : LookupOpcode(ri, bs) {
     auto count = bs->getU32();
 
     if (count == 0 || count > 65536)
@@ -258,7 +259,8 @@ public:
 
 class DngOpcodes::PolynomialMap final : public LookupOpcode {
 public:
-  explicit PolynomialMap(ByteStream* bs) : LookupOpcode(bs) {
+  explicit PolynomialMap(const RawImage& ri, ByteStream* bs)
+      : LookupOpcode(ri, bs) {
     vector<double> polynomial;
 
     const auto polynomial_size = bs->getU32() + 1UL;
@@ -297,7 +299,8 @@ protected:
   vector<float> deltaF;
   vector<int> deltaI;
 
-  DeltaRowOrColBase(ByteStream* bs, float f2iScale) : PixelOpcode(bs) {
+  DeltaRowOrColBase(const RawImage& ri, ByteStream* bs, float f2iScale)
+      : PixelOpcode(ri, bs) {
     const auto deltaF_count = bs->getU32();
     bs->check(4 * deltaF_count);
 
@@ -316,8 +319,8 @@ protected:
 template <typename S>
 class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrColBase {
 public:
-  explicit OffsetPerRowOrCol(ByteStream* bs)
-      : DeltaRowOrColBase(bs, 65535.0F) {}
+  explicit OffsetPerRowOrCol(const RawImage& ri, ByteStream* bs)
+      : DeltaRowOrColBase(ri, bs, 65535.0F) {}
 
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {
@@ -335,7 +338,8 @@ public:
 template <typename S>
 class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrColBase {
 public:
-  explicit ScalePerRowOrCol(ByteStream* bs) : DeltaRowOrColBase(bs, 1024.0F) {}
+  explicit ScalePerRowOrCol(const RawImage& ri, ByteStream* bs)
+      : DeltaRowOrColBase(ri, bs, 1024.0F) {}
 
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {
@@ -352,7 +356,7 @@ public:
 
 // ****************************************************************************
 
-DngOpcodes::DngOpcodes(TiffEntry* entry) {
+DngOpcodes::DngOpcodes(const RawImage& ri, TiffEntry* entry) {
   ByteStream bs = entry->getData();
 
   // DNG opcodes are always stored in big-endian byte order.
@@ -395,7 +399,7 @@ DngOpcodes::DngOpcodes(TiffEntry* entry) {
     }
 
     if (opConstructor != nullptr)
-      opcodes.emplace_back(opConstructor(&opcode_bs));
+      opcodes.emplace_back(opConstructor(ri, &opcode_bs));
     else {
 #ifndef DEBUG
       // Throw Error if not marked as optional
@@ -425,8 +429,9 @@ void DngOpcodes::applyOpCodes(const RawImage& ri) {
 }
 
 template <class Opcode>
-std::unique_ptr<DngOpcodes::DngOpcode> DngOpcodes::constructor(ByteStream* bs) {
-  return std::make_unique<Opcode>(bs);
+std::unique_ptr<DngOpcodes::DngOpcode>
+DngOpcodes::constructor(const RawImage& ri, ByteStream* bs) {
+  return std::make_unique<Opcode>(ri, bs);
 }
 
 // ALL opcodes specified in DNG Specification MUST be listed here.
