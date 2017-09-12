@@ -103,11 +103,14 @@ public:
     auto badPointCount = bs->getU32();
     auto badRectCount = bs->getU32();
 
+    bs->check(2 * 4 * badPointCount + 4 * 4 * badRectCount);
+
     // Read points
+    badPixels.reserve(badPixels.size() + badPointCount);
     for (auto i = 0U; i < badPointCount; ++i) {
       auto y = bs->getU32();
       auto x = bs->getU32();
-      badPixels.push_back(y << 16 | x);
+      badPixels.emplace_back(y << 16 | x);
     }
 
     // Read rects
@@ -116,9 +119,12 @@ public:
       auto left = bs->getU32();
       auto bottom = bs->getU32();
       auto right = bs->getU32();
+
+      auto area = (1 + bottom - top) * (1 + right - left);
+      badPixels.reserve(badPixels.size() + area);
       for (auto y = top; y <= bottom; ++y) {
         for (auto x = left; x <= right; ++x) {
-          badPixels.push_back(y << 16 | x);
+          badPixels.emplace_back(y << 16 | x);
         }
       }
     }
