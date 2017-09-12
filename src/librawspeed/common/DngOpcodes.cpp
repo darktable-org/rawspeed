@@ -99,6 +99,9 @@ class DngOpcodes::FixBadPixelsList final : public DngOpcodes::DngOpcode {
 
 public:
   explicit FixBadPixelsList(const RawImage& ri, ByteStream* bs) {
+    const iRectangle2D fullImage(0, 0, ri->getUncroppedDim().x,
+                                 ri->getUncroppedDim().y);
+
     bs->getU32(); // Skip phase - we don't care
     auto badPointCount = bs->getU32();
     auto badRectCount = bs->getU32();
@@ -110,6 +113,11 @@ public:
     for (auto i = 0U; i < badPointCount; ++i) {
       auto y = bs->getU32();
       auto x = bs->getU32();
+
+      const iPoint2D badPoint(x, y);
+      if (!fullImage.isPointInside(badPoint))
+        ThrowRDE("Bad point not inside image.");
+
       badPixels.emplace_back(y << 16 | x);
     }
 
@@ -119,6 +127,10 @@ public:
       auto left = bs->getU32();
       auto bottom = bs->getU32();
       auto right = bs->getU32();
+
+      const iRectangle2D badRect(left, top, right - left, bottom - top);
+      if (!badRect.isThisInside(fullImage))
+        ThrowRDE("Bad rectangle not inside image.");
 
       auto area = (1 + bottom - top) * (1 + right - left);
       badPixels.reserve(badPixels.size() + area);
