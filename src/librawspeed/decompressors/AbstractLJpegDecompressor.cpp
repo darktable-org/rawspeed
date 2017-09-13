@@ -163,10 +163,11 @@ void AbstractLJpegDecompressor::parseSOS() {
 }
 
 void AbstractLJpegDecompressor::parseDHT() {
-  uint32 headerLength = input.getU16() - 2; // Subtract myself
+  ByteStream dht(input.getStream(input.peekU16()));
+  dht.skipBytes(2); // headerLength
 
-  while (headerLength)  {
-    uint32 b = input.getByte();
+  while (dht.getRemainSize() > 0) {
+    uint32 b = dht.getByte();
 
     uint32 htClass = b >> 4;
     if (htClass != 0)
@@ -180,13 +181,14 @@ void AbstractLJpegDecompressor::parseDHT() {
       ThrowRDE("Duplicate table definition");
 
     // copy 16 bytes from input stream to number of codes per length table
-    uint32 nCodes = ht_.setNCodesPerLength(input.getBuffer(16));
+    uint32 nCodes = ht_.setNCodesPerLength(dht.getBuffer(16));
+
     // spec says 16 different codes is max but Hasselblad violates that -> 17
-    if (nCodes > 17 || headerLength < 1 + 16 + nCodes)
+    if (nCodes > 17)
       ThrowRDE("Invalid DHT table.");
 
     // copy nCodes bytes from input stream to code values table
-    ht_.setCodeValues(input.getBuffer(nCodes));
+    ht_.setCodeValues(dht.getBuffer(nCodes));
 
     // see if we already have a HuffmanTable with the same codes
     for (const auto& i : huffmanTableStore)
@@ -200,7 +202,6 @@ void AbstractLJpegDecompressor::parseDHT() {
       huff[htIndex] = dHT.get();
       huffmanTableStore.emplace_back(std::move(dHT));
     }
-    headerLength -= 1 + 16 + nCodes;
   }
 }
 

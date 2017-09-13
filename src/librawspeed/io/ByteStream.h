@@ -143,6 +143,8 @@ public:
     return DataBuffer::get<T>(pos, i);
   }
 
+  inline ushort16 peekU16() { return peek<ushort16>(); }
+
   template<typename T> inline T get() {
     auto ret = peek<T>();
     pos += sizeof(T);
