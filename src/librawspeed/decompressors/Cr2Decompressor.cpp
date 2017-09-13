@@ -45,11 +45,6 @@ void Cr2Decompressor::decodeScan()
     slicesWidths.push_back(slicesWidth);
   }
 
-  for (const auto& slicesWidth : slicesWidths) {
-    if (slicesWidth > mRaw->dim.x)
-      ThrowRDE("Slice is longer than image's height, which is unsupported.");
-  }
-
   bool isSubSampled = false;
   for (uint32 i = 0; i < frame.cps;  i++)
     isSubSampled = isSubSampled || frame.compInfo[i].superH != 1 ||
@@ -136,6 +131,11 @@ void Cr2Decompressor::decodeN_X_Y()
     // fix the inconsistent slice width in sRaw mode, ask Canon.
     for (auto& sliceWidth : slicesWidths)
       sliceWidth = sliceWidth * 3 / 2;
+  }
+
+  for (const auto& slicesWidth : slicesWidths) {
+    if (slicesWidth > mRaw->dim.x)
+      ThrowRDE("Slice is longer than image's height, which is unsupported.");
   }
 
   // To understand the CR2 slice handling and sampling factor behavior, see
