@@ -46,6 +46,9 @@ void AbstractLJpegDecompressor::decode() {
   do {
     m = getNextMarker(true);
 
+    if (m == M_EOI)
+      break;
+
     switch (m) {
     case M_DHT:
       if (FoundMarkers.SOS)
