@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2017 Axel Waggershauser
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -49,13 +50,16 @@ void AbstractLJpegDecompressor::decode() {
     if (m == M_EOI)
       break;
 
+    ByteStream data(input.getStream(input.peekU16()));
+    data.skipBytes(2); // headerLength
+
     switch (m) {
     case M_DHT:
       if (FoundMarkers.SOS)
         ThrowRDE("Found second DHT marker after SOS");
       // there can be more than one DHT markers.
       // FIXME: do we really want to reparse and use the last one?
-      parseDHT();
+      parseDHT(data);
       FoundMarkers.DHT = true;
       break;
     case M_SOF3:
@@ -64,7 +68,7 @@ void AbstractLJpegDecompressor::decode() {
       if (FoundMarkers.SOF)
         ThrowRDE("Found second SOF marker");
       // SOF is not required to be after DHT
-      parseSOF(&frame);
+      parseSOF(data, &frame);
       FoundMarkers.SOF = true;
       break;
     case M_SOS:
@@ -74,7 +78,7 @@ void AbstractLJpegDecompressor::decode() {
         ThrowRDE("Did not find DHT marker before SOS.");
       if (!FoundMarkers.SOF)
         ThrowRDE("Did not find SOF marker before SOS.");
-      parseSOS();
+      parseSOS(data);
       FoundMarkers.SOS = true;
       break;
     case M_DQT:
@@ -88,10 +92,7 @@ void AbstractLJpegDecompressor::decode() {
     ThrowRDE("Did not find SOS marker.");
 }
 
-void AbstractLJpegDecompressor::parseSOF(SOFInfo* sof) {
-  ByteStream sofInput(input.getStream(input.peekU16()));
-  sofInput.skipBytes(2); // headerLength
-
+void AbstractLJpegDecompressor::parseSOF(ByteStream sofInput, SOFInfo* sof) {
   sof->prec = sofInput.getByte();
   sof->h = sofInput.getU16();
   sof->w = sofInput.getU16();
@@ -133,11 +134,8 @@ void AbstractLJpegDecompressor::parseSOF(SOFInfo* sof) {
   mRaw->metadata.subsampling.y = sof->compInfo[0].superV;
 }
 
-void AbstractLJpegDecompressor::parseSOS() {
+void AbstractLJpegDecompressor::parseSOS(ByteStream sos) {
   assert(frame.initialized);
-
-  ByteStream sos(input.getStream(input.peekU16()));
-  sos.skipBytes(2); // headerLength
 
   if (sos.getRemainSize() != 1 + 2 * frame.cps + 3)
     ThrowRDE("Invalid SOS header length.");
@@ -177,10 +175,7 @@ void AbstractLJpegDecompressor::parseSOS() {
   decodeScan();
 }
 
-void AbstractLJpegDecompressor::parseDHT() {
-  ByteStream dht(input.getStream(input.peekU16()));
-  dht.skipBytes(2); // headerLength
-
+void AbstractLJpegDecompressor::parseDHT(ByteStream dht) {
   while (dht.getRemainSize() > 0) {
     uint32 b = dht.getByte();
 

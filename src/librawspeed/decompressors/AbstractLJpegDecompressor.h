@@ -157,9 +157,9 @@ protected:
   bool fullDecodeHT = true;  // FullDecode Huffman
 
   void decode();
-  void parseSOF(SOFInfo* i);
-  void parseSOS();
-  void parseDHT();
+  void parseSOF(ByteStream data, SOFInfo* i);
+  void parseSOS(ByteStream data);
+  void parseDHT(ByteStream data);
   JpegMarker getNextMarker(bool allowskip);
 
   template <int N_COMP>
