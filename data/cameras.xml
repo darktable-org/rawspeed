@@ -7037,6 +7037,38 @@
 			<Alias>DMC-TZ70</Alias>
 		</Aliases>
 	</Camera>
+	<Camera make="Panasonic" model="DMC-TZ81">
+		<ID make="Panasonic" model="DMC-TZ81">Panasonic DMC-ZS60</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-128" height="0"/>
+		<Sensor black="142" white="4095"/>
+		<Aliases>
+			<Alias>DMC-ZS60</Alias>
+			<Alias>DMC-TZ80</Alias>
+			<Alias>DMC-TZ85</Alias>
+		</Aliases>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-TZ81" mode="4:3">
+		<ID make="Panasonic" model="DMC-TZ81">Panasonic DMC-ZS60</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-128" height="0"/>
+		<Sensor black="142" white="4095"/>
+		<Aliases>
+			<Alias>DMC-ZS60</Alias>
+			<Alias>DMC-TZ80</Alias>
+			<Alias>DMC-TZ85</Alias>
+		</Aliases>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-TZ100">
 		<ID make="Panasonic" model="DMC-TZ100">Panasonic DMC-ZS100</ID>
 		<CFA width="2" height="2">
