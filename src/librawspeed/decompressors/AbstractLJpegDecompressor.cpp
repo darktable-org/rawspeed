@@ -131,22 +131,23 @@ void AbstractLJpegDecompressor::parseSOF(SOFInfo* sof) {
 }
 
 void AbstractLJpegDecompressor::parseSOS() {
-  if (!frame.initialized)
-    ThrowRDE("Frame not yet initialized (SOF Marker not parsed)");
+  assert(frame.initialized);
 
-  uint32 headerLength = input.getU16();
-  if (headerLength != 3 + frame.cps * 2 + 3)
+  ByteStream sos(input.getStream(input.peekU16()));
+  sos.skipBytes(2); // headerLength
+
+  if (sos.getRemainSize() != 1 + 2 * frame.cps + 3)
     ThrowRDE("Invalid SOS header length.");
 
-  uint32 soscps = input.getByte();
+  uint32 soscps = sos.getByte();
   if (frame.cps != soscps)
     ThrowRDE("Component number mismatch.");
 
   for (uint32 i = 0; i < frame.cps; i++) {
-    uint32 cs = input.getByte();
-    uint32 td = input.getByte() >> 4;
+    uint32 cs = sos.getByte();
+    uint32 td = sos.getByte() >> 4;
 
-    if (td > 3 || !huff[td])
+    if (td >= huff.size() || !huff[td])
       ThrowRDE("Invalid Huffman table selection.");
 
     int ciIndex = -1;
@@ -162,13 +163,13 @@ void AbstractLJpegDecompressor::parseSOS() {
   }
 
   // Get predictor, see table H.1 from the JPEG spec
-  predictorMode = input.getByte();
+  predictorMode = sos.getByte();
   // The spec says predictoreMode is in [0..7], but Hasselblad uses '8'.
   if (predictorMode > 8)
     ThrowRDE("Invalid predictor mode.");
 
-  input.skipBytes(1);         // Se + Ah Not used in LJPEG
-  Pt = input.getByte() & 0xf; // Point Transform
+  sos.skipBytes(1);         // Se + Ah Not used in LJPEG
+  Pt = sos.getByte() & 0xf; // Point Transform
 
   decodeScan();
 }
