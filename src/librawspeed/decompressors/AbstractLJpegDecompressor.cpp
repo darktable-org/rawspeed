@@ -48,12 +48,16 @@ void AbstractLJpegDecompressor::decode() {
 
     switch (m) {
     case M_DHT:
+      if (FoundMarkers.SOS)
+        ThrowRDE("Found second DHT marker after SOS");
       // there can be more than one DHT markers.
       // FIXME: do we really want to reparse and use the last one?
       parseDHT();
       FoundMarkers.DHT = true;
       break;
     case M_SOF3:
+      if (FoundMarkers.SOS)
+        ThrowRDE("Found second SOF marker after SOS");
       if (FoundMarkers.SOF)
         ThrowRDE("Found second SOF marker");
       // SOF is not required to be after DHT
