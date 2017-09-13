@@ -87,9 +87,11 @@ RawImage Cr2Decoder::decodeOldFormat() {
   if (!width || !height || width > 4082 || height > 2718)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
+  const ByteStream bs(mFile->getSubView(offset), 0);
+
   mRaw = RawImage::create({width, height});
 
-  Cr2Decompressor l(*mFile, offset, mRaw);
+  Cr2Decompressor l(bs, mRaw);
   try {
     l.decode({width});
   } catch (IOException& e) {
@@ -168,16 +170,12 @@ RawImage Cr2Decoder::decodeNewFormat() {
     }
   } // EOS 20D, EOS-1D Mark II, let Cr2Decompressor guess.
 
-  TiffEntry* offsets = raw->getEntry(STRIPOFFSETS);
-  TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
+  const uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
+  const uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
 
-  const uint32 byteOffset = offsets->getU32();
-  const uint32 byteCount = counts->getU32();
+  const ByteStream bs(mFile->getSubView(offset, count), 0);
 
-  if (!mFile->isValid(byteOffset, byteCount))
-    ThrowRDE("Strip is larger than the data; image may be truncated.");
-
-  Cr2Decompressor d(*mFile, byteOffset, byteCount, mRaw);
+  Cr2Decompressor d(bs, mRaw);
 
   try {
     d.decode(s_width);
