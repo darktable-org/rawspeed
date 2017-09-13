@@ -86,33 +86,44 @@ void AbstractLJpegDecompressor::decode() {
 }
 
 void AbstractLJpegDecompressor::parseSOF(SOFInfo* sof) {
-  uint32 headerLength = input.getU16();
-  sof->prec = input.getByte();
-  sof->h = input.getU16();
-  sof->w = input.getU16();
-  sof->cps = input.getByte();
+  ByteStream sofInput(input.getStream(input.peekU16()));
+  sofInput.skipBytes(2); // headerLength
+
+  sof->prec = sofInput.getByte();
+  sof->h = sofInput.getU16();
+  sof->w = sofInput.getU16();
+  sof->cps = sofInput.getByte();
+
+  if (sof->prec < 2 || sof->prec > 16)
+    ThrowRDE("Invalid precision (%u).", sof->prec);
 
   if (sof->h == 0 || sof->w == 0)
     ThrowRDE("Frame width or height set to zero");
 
-  if (sof->prec > 16)
-    ThrowRDE("More than 16 bits per channel is not supported.");
-
   if (sof->cps > 4 || sof->cps < 1)
     ThrowRDE("Only from 1 to 4 components are supported.");
 
-  if (headerLength != 8 + sof->cps*3)
+  if (sofInput.getRemainSize() != 3 * sof->cps)
     ThrowRDE("Header size mismatch.");
 
   for (uint32 i = 0; i < sof->cps; i++) {
-    sof->compInfo[i].componentId = input.getByte();
-    uint32 subs = input.getByte();
+    sof->compInfo[i].componentId = sofInput.getByte();
+
+    uint32 subs = sofInput.getByte();
     frame.compInfo[i].superV = subs & 0xf;
     frame.compInfo[i].superH = subs >> 4;
-    uint32 Tq = input.getByte();
+
+    if (frame.compInfo[i].superV < 1 || frame.compInfo[i].superV > 4)
+      ThrowRDE("Horizontal sampling factor is invalid.");
+
+    if (frame.compInfo[i].superH < 1 || frame.compInfo[i].superH > 4)
+      ThrowRDE("Horizontal sampling factor is invalid.");
+
+    uint32 Tq = sofInput.getByte();
     if (Tq != 0)
       ThrowRDE("Quantized components not supported.");
   }
+
   sof->initialized = true;
 
   mRaw->metadata.subsampling.x = sof->compInfo[0].superH;
