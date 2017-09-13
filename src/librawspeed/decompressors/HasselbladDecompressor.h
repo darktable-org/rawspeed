@@ -24,6 +24,7 @@
 #include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
 #include "io/BitPumpMSB32.h"                         // for BitPumpMSB32
 #include "io/Buffer.h"                               // for Buffer, Buffer:...
+#include "io/ByteStream.h"                           // for ByteStream
 
 namespace rawspeed {
 
@@ -36,12 +37,8 @@ class HasselbladDecompressor final : public AbstractLJpegDecompressor
   void decodeScan() override;
 
 public:
-  HasselbladDecompressor(const Buffer& data, Buffer::size_type offset,
-                         Buffer::size_type size, const RawImage& img)
-      : AbstractLJpegDecompressor(data, offset, size, img) {}
-  HasselbladDecompressor(const Buffer& data, Buffer::size_type offset,
-                         const RawImage& img)
-      : AbstractLJpegDecompressor(data, offset, img) {}
+  HasselbladDecompressor(const ByteStream& bs, const RawImage& img)
+      : AbstractLJpegDecompressor(bs, img) {}
 
   void decode(int pixelBaseOffset_);
 

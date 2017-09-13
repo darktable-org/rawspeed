@@ -24,6 +24,7 @@
 #include "common/Point.h"                         // for iPoint2D
 #include "decoders/RawDecoderException.h"         // for ThrowRDE
 #include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompre...
+#include "io/ByteStream.h"                        // for ByteStream
 #include "io/IOException.h"                       // for IOException
 #include "metadata/Camera.h"                      // for Hints
 #include "metadata/ColorFilterArray.h"            // for CFAColor::CFA_GREEN
@@ -52,16 +53,19 @@ RawImage ThreefrDecoder::decodeRawInternal() {
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
   uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
+  // STRIPBYTECOUNTS is strange/invalid for the existing 3FR samples...
 
   // FIXME: could be wrong. max "active pixels" - "100 MP"
   if (width == 0 || height == 0 || width % 2 != 0 || width > 11600 ||
       height > 8700)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
+  const ByteStream bs(mFile->getSubView(off), 0);
+
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  HasselbladDecompressor l(*mFile, off, mRaw);
+  HasselbladDecompressor l(bs, mRaw);
   int pixelBaseOffset = hints.get("pixelBaseOffset", 0);
 
   try {
