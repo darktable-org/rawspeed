@@ -61,7 +61,6 @@ public:
   bool mFixLjpeg;
   uint32 mPredictor;
   uint32 mBps;
-  uint32 nThreads;
   int compression;
 };
 
