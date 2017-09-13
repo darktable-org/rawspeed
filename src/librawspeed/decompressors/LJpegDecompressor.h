@@ -43,14 +43,6 @@ public:
   LJpegDecompressor(const ByteStream& bs, const RawImage& img)
       : AbstractLJpegDecompressor(bs, img) {}
 
-  LJpegDecompressor(const Buffer& data, Buffer::size_type offset,
-                    Buffer::size_type size, const RawImage& img)
-      : AbstractLJpegDecompressor(data, offset, size, img) {}
-
-  LJpegDecompressor(const Buffer& data, Buffer::size_type offset,
-                    const RawImage& img)
-      : AbstractLJpegDecompressor(data, offset, img) {}
-
   void decode(uint32 offsetX, uint32 offsetY, bool fixDng16Bug);
 };
 
