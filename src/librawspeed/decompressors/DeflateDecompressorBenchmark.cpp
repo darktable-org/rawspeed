@@ -25,6 +25,7 @@
 #include "common/Point.h"                      // for iPoint2D
 #include "common/RawImage.h"                   // for RawImage, RawImageData
 #include "io/Buffer.h"                         // for Buffer
+#include "io/ByteStream.h"                     // for ByteStream
 #include <algorithm>                           // for move
 #include <benchmark/benchmark.h>               // for Benchmark, BENCHMARK_...
 #include <cassert>                             // for assert
@@ -110,8 +111,10 @@ static inline void BM_DeflateDecompressor(benchmark::State& state) {
 
   std::unique_ptr<unsigned char[]> uBuffer;
 
+  const rawspeed::ByteStream bs(buf, 0, buf.getSize());
+
   while (state.KeepRunning()) {
-    DeflateDecompressor d(buf, 0, buf.getSize(), mRaw, predictor, BPS::value);
+    DeflateDecompressor d(bs, mRaw, predictor, BPS::value);
 
     d.decode(&uBuffer, mRaw->dim.x, mRaw->dim.y, 0, 0);
   }

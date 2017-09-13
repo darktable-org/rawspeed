@@ -206,7 +206,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
              "JPEG-compressed data.");
   }
 
-  AbstractDngDecompressor slices(mFile, mRaw, compression);
+  AbstractDngDecompressor slices(mRaw, compression);
   if (raw->hasEntry(PREDICTOR)) {
     slices.mPredictor = raw->getEntry(PREDICTOR)->getU32();
   }
@@ -251,14 +251,13 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
         if (count < 1)
           continue;
 
+        ByteStream bs(mFile->getSubView(offset, count), 0);
+
         const uint32 offX = tilew * x;
         const uint32 offY = tileh * y;
 
-        DngSliceElement e(offset, count, offX, offY, tilew, tileh);
-
-        // Only decode if size is valid
-        if (mFile->isValid(e.byteOffset, e.byteCount))
-          slices.addSlice(e);
+        DngSliceElement e(bs, offX, offY, tilew, tileh);
+        slices.addSlice(e);
       }
     }
   } else { // Strips
@@ -285,13 +284,11 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
       if (count < 1)
         continue;
 
-      DngSliceElement e(offset, count, 0, offY, mRaw->dim.x, yPerSlice);
+      ByteStream bs(mFile->getSubView(offset, count), 0);
+      DngSliceElement e(bs, /*offsetX=*/0, offY, mRaw->dim.x, yPerSlice);
 
+      slices.addSlice(e);
       offY += yPerSlice;
-
-      // Only decode if size is valid
-      if (mFile->isValid(e.byteOffset, e.byteCount))
-        slices.addSlice(e);
     }
   }
   uint32 nSlices = slices.size();

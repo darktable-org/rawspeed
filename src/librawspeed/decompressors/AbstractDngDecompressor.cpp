@@ -40,11 +40,9 @@
 
 namespace rawspeed {
 
-AbstractDngDecompressor::AbstractDngDecompressor(const Buffer* file,
-                                                 const RawImage& img,
+AbstractDngDecompressor::AbstractDngDecompressor(const RawImage& img,
                                                  int _compression)
-    : AbstractParallelizedDecompressor(img), mFile(file), mFixLjpeg(false),
-      compression(_compression) {}
+    : AbstractParallelizedDecompressor(img), compression(_compression) {}
 
 void AbstractDngDecompressor::addSlice(DngSliceElement slice) {
   slices.emplace_back(slice);
@@ -64,8 +62,7 @@ void AbstractDngDecompressor::decompressThreaded(
     for (size_t i = t->start; i < t->end && i < slices.size(); i++) {
       auto e = &slices[i];
 
-      UncompressedDecompressor decompressor(*mFile, e->byteOffset, e->byteCount,
-                                            mRaw);
+      UncompressedDecompressor decompressor(e->bs, mRaw);
 
       size_t thisTileLength =
           e->offY + e->height > static_cast<uint32>(mRaw->dim.y)
@@ -78,10 +75,9 @@ void AbstractDngDecompressor::decompressThreaded(
       iPoint2D tileSize(mRaw->dim.x, thisTileLength);
       iPoint2D pos(0, e->offY);
 
-      const DataBuffer db(*mFile);
-      const ByteStream bs(db);
+      // FIXME: does bytestream have correct byteorder from the src file?
+      bool big_endian = e->bs.getByteOrder() == Endianness::big;
 
-      bool big_endian = (getTiffByteOrder(bs, 0) == Endianness::big);
       // DNG spec says that if not 8 or 16 bit/sample, always use big endian
       if (mBps != 8 && mBps != 16)
         big_endian = true;
@@ -106,7 +102,7 @@ void AbstractDngDecompressor::decompressThreaded(
   } else if (compression == 7) {
     for (size_t i = t->start; i < t->end && i < slices.size(); i++) {
       auto e = &slices[i];
-      LJpegDecompressor d(*mFile, e->byteOffset, e->byteCount, mRaw);
+      LJpegDecompressor d(e->bs, mRaw);
       try {
         d.decode(e->offX, e->offY, mFixLjpeg);
       } catch (RawDecoderException& err) {
@@ -122,8 +118,7 @@ void AbstractDngDecompressor::decompressThreaded(
     for (size_t i = t->start; i < t->end && i < slices.size(); i++) {
       auto e = &slices[i];
 
-      DeflateDecompressor z(*mFile, e->byteOffset, e->byteCount, mRaw,
-                            mPredictor, mBps);
+      DeflateDecompressor z(e->bs, mRaw, mPredictor, mBps);
       try {
         z.decode(&uBuffer, e->width, e->height, e->offX, e->offY);
       } catch (RawDecoderException& err) {
@@ -143,7 +138,7 @@ void AbstractDngDecompressor::decompressThreaded(
     /* Each slice is a JPEG image */
     for (size_t i = t->start; i < t->end && i < slices.size(); i++) {
       auto e = &slices[i];
-      JpegDecompressor j(*mFile, e->byteOffset, e->byteCount, mRaw);
+      JpegDecompressor j(e->bs, mRaw);
       try {
         j.decode(e->offX, e->offY);
       } catch (RawDecoderException& err) {

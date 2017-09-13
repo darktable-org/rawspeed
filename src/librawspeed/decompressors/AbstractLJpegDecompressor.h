@@ -31,6 +31,7 @@
 #include "io/Endianness.h" // for getHostEndianness, Endiannes...
 #include <array>           // for array
 #include <memory>          // for unique_ptr
+#include <utility>         // for move
 #include <vector>          // for vector
 
 /*
@@ -144,12 +145,19 @@ class AbstractLJpegDecompressor : public AbstractDecompressor {
   HuffmanTable ht_;      // temporary table, used
 
 public:
+  AbstractLJpegDecompressor(ByteStream bs, const RawImage& img)
+      : input(std::move(bs)), mRaw(img) {
+    input.setByteOrder(Endianness::big);
+  }
+
   AbstractLJpegDecompressor(const Buffer& data, Buffer::size_type offset,
                             Buffer::size_type size, const RawImage& img)
       : input(data, offset, size, Endianness::big), mRaw(img) {}
+
   AbstractLJpegDecompressor(const Buffer& data, Buffer::size_type offset,
                             const RawImage& img)
       : AbstractLJpegDecompressor(data, offset, data.getSize() - offset, img) {}
+
   virtual ~AbstractLJpegDecompressor() = default;
 
 protected:

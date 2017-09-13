@@ -30,6 +30,7 @@
 #include "io/Buffer.h"                          // for Buffer, Buffer::size_type
 #include "io/ByteStream.h"                      // for ByteStream
 #include <memory>                               // for unique_ptr
+#include <utility>                              // for move
 
 namespace rawspeed {
 
@@ -40,11 +41,9 @@ class DeflateDecompressor final : public AbstractDecompressor {
   int bps;
 
 public:
-  DeflateDecompressor(const Buffer& data, Buffer::size_type offset,
-                      Buffer::size_type size, const RawImage& img,
-                      int predictor_, int bps_)
-      : input(data, offset, size), mRaw(img), predictor(predictor_), bps(bps_) {
-  }
+  DeflateDecompressor(ByteStream bs, const RawImage& img, int predictor_,
+                      int bps_)
+      : input(std::move(bs)), mRaw(img), predictor(predictor_), bps(bps_) {}
 
   void decode(std::unique_ptr<unsigned char[]>* uBuffer, int width, int height,
               uint32 offX, uint32 offY);

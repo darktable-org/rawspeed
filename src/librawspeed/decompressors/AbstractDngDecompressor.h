@@ -22,21 +22,20 @@
 
 #include "common/Common.h"                                  // for uint32
 #include "decompressors/AbstractParallelizedDecompressor.h" // for Abstract...
+#include "io/ByteStream.h"                                  // for ByteStream
+#include <utility>                                          // for move
 #include <vector>                                           // for vector
 
 namespace rawspeed {
 
-class Buffer;
 class RawImage;
 
-class DngSliceElement {
-public:
-  DngSliceElement(uint32 off, uint32 count, uint32 offsetX, uint32 offsetY,
-                  uint32 w, uint32 h)
-      : byteOffset(off), byteCount(count), offX(offsetX), offY(offsetY),
-        width(w), height(h) {}
-  const uint32 byteOffset;
-  const uint32 byteCount;
+struct DngSliceElement {
+  DngSliceElement(ByteStream bs_, uint32 offsetX, uint32 offsetY, uint32 w,
+                  uint32 h)
+      : bs(std::move(bs_)), offX(offsetX), offY(offsetY), width(w), height(h) {}
+
+  const ByteStream bs;
   const uint32 offX;
   const uint32 offY;
   const uint32 width;
@@ -47,8 +46,7 @@ class AbstractDngDecompressor final : public AbstractParallelizedDecompressor {
   void decompressThreaded(const RawDecompressorThread* t) const final;
 
 public:
-  AbstractDngDecompressor(const Buffer* file, const RawImage& img,
-                          int compression);
+  AbstractDngDecompressor(const RawImage& img, int compression);
 
   void addSlice(DngSliceElement slice);
 
@@ -57,8 +55,7 @@ public:
   int __attribute__((pure)) size();
   std::vector<DngSliceElement> slices;
 
-  const Buffer* mFile;
-  bool mFixLjpeg;
+  bool mFixLjpeg = false;
   uint32 mPredictor;
   uint32 mBps;
   int compression;
