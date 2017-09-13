@@ -77,3 +77,11 @@ template <typename T> struct remove_all_const<T *const> {
 #define ASAN_UNPOISON_MEMORY_REGION(addr, size) ((void)(addr), (void)(size))
 #define ASAN_REGION_IS_POISONED(addr, size) (0)
 #endif
+
+#if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
+#include <sanitizer/msan_interface.h> // IWYU pragma: export
+#define MSAN_MEM_IS_INITIALIZED(addr, size)                                    \
+  __msan_check_mem_is_initialized(addr, size)
+#else
+#define MSAN_MEM_IS_INITIALIZED(addr, size) (0)
+#endif

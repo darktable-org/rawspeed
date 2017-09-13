@@ -19,6 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "decoders/RawDecoder.h"
 #include "common/Common.h"                          // for uint32, splitString
 #include "common/Point.h"                           // for iPoint2D, iRecta...
@@ -235,10 +236,15 @@ void RawDecoder::setMetaData(const CameraMetaData* meta, const string& make,
 rawspeed::RawImage RawDecoder::decodeRaw() {
   try {
     RawImage raw = decodeRawInternal();
+    raw->checkMemIsInitialized();
+
     raw->metadata.pixelAspectRatio =
         hints.get("pixel_aspect_ratio", raw->metadata.pixelAspectRatio);
-    if (interpolateBadPixels)
+    if (interpolateBadPixels) {
       raw->fixBadPixels();
+      raw->checkMemIsInitialized();
+    }
+
     return raw;
   } catch (TiffParserException &e) {
     ThrowRDE("%s", e.what());

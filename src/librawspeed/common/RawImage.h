@@ -115,6 +115,7 @@ public:
   void createData();
   void poisonPadding();
   void unpoisonPadding();
+  void checkMemIsInitialized();
   void destroyData();
   void blitFrom(const RawImage& src, const iPoint2D& srcPos,
                 const iPoint2D& size, const iPoint2D& destPos);

@@ -157,6 +157,26 @@ void __attribute__((const)) RawImageData::unpoisonPadding() {
 }
 #endif
 
+#if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
+void RawImageData::checkMemIsInitialized() {
+  const auto rowsize = bpp * uncropped_dim.x;
+  for (int j = 0; j < uncropped_dim.y; j++) {
+    const uchar8* const curr_line = getDataUncropped(0, j);
+
+    // and check that image line is initialized.
+    // do note that we are avoiding padding here.
+    MSAN_MEM_IS_INITIALIZED(curr_line, rowsize);
+  }
+}
+#else
+void __attribute__((const)) RawImageData::checkMemIsInitialized() {
+  // if we are building without MSAN, then there is no way to check whether
+  // the image data was fully initialized. however, i think it is better to
+  // have such an empty function rather than making this whole function not
+  // exist in MSAN-less builds
+}
+#endif
+
 void RawImageData::destroyData() {
   if (data)
     alignedFree(data);
