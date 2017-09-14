@@ -21,6 +21,7 @@
 
 #include "decoders/KdcDecoder.h"
 #include "common/Common.h"                          // for uint32, ushort16
+#include "common/NORangesSet.h"                     // for NORangesSet
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
@@ -96,7 +97,9 @@ void KdcDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(KODAK_IFD2)) {
     TiffEntry *ifdoffset = mRootIFD->getEntryRecursive(KODAK_IFD2);
     try {
-      TiffRootIFD kodakifd(nullptr, nullptr, ifdoffset->getRootIfdData(),
+      NORangesSet<Buffer> ifds;
+
+      TiffRootIFD kodakifd(nullptr, &ifds, ifdoffset->getRootIfdData(),
                            ifdoffset->getU32());
 
       if (kodakifd.hasEntryRecursive(KODAK_KDC_WB)) {
