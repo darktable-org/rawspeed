@@ -79,14 +79,10 @@ RawImage PefDecoder::decodeRawInternal() {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   mRaw->dim = iPoint2D(width, height);
-  try {
-    PentaxDecompressor p(mRaw, getRootIFD());
-    mRaw->createData();
-    p.decompress(bs);
-  } catch (IOException &e) {
-    mRaw->setError(e.what());
-    // Let's ignore it, it may have delivered somewhat useful data.
-  }
+
+  PentaxDecompressor p(mRaw, getRootIFD());
+  mRaw->createData();
+  p.decompress(bs);
 
   return mRaw;
 }
