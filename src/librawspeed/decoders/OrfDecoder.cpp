@@ -21,6 +21,7 @@
 
 #include "decoders/OrfDecoder.h"
 #include "common/Common.h"                          // for uint32, ushort16
+#include "common/NORangesSet.h"                     // for NORangesSet
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
@@ -320,7 +321,9 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     // Newer cameras process the Image Processing SubIFD in the makernote
     TiffEntry* img_entry = mRootIFD->getEntryRecursive(OLYMPUSIMAGEPROCESSING);
     // get makernote ifd with containing Buffer
-    TiffRootIFD image_processing(nullptr, nullptr, img_entry->getRootIfdData(),
+    NORangesSet<Buffer> ifds;
+
+    TiffRootIFD image_processing(nullptr, &ifds, img_entry->getRootIfdData(),
                                  img_entry->getU32());
 
     // Get the WB
