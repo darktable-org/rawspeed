@@ -446,6 +446,8 @@ void ArwDecoder::GetWB() {
     TiffRootIFD makerNoteIFD(nullptr, nullptr, priv->getRootIfdData(),
                              priv->getU32());
 
+    // NOTE: can not use NORangeSet here. strangely makes everything slow.
+
     TiffEntry *sony_offset = makerNoteIFD.getEntryRecursive(SONY_OFFSET);
     TiffEntry *sony_length = makerNoteIFD.getEntryRecursive(SONY_LENGTH);
     TiffEntry *sony_key = makerNoteIFD.getEntryRecursive(SONY_KEY);
