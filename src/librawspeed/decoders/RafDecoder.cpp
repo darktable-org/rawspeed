@@ -76,8 +76,8 @@ RawImage RafDecoder::decodeRawInternal() {
   } else
     ThrowRDE("Unable to locate image size");
 
-  if (height < 1 || width < 1)
-    ThrowRDE("Bad image dimensions");
+  if (width == 0 || height == 0 || width > 9216 || height > 6210)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   if (raw->hasEntry(FUJI_LAYOUT)) {
     TiffEntry *e = raw->getEntry(FUJI_LAYOUT);
@@ -338,8 +338,8 @@ int RafDecoder::isCompressed() {
   } else
     ThrowRDE("Unable to locate image size");
 
-  if (!width || !height)
-    ThrowRDE("Image has zero size");
+  if (width == 0 || height == 0 || width > 9216 || height > 6210)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   uint32 count = raw->getEntry(FUJI_STRIPBYTECOUNTS)->getU32();
 
