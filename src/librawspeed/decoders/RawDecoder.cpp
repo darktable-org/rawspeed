@@ -66,6 +66,14 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
   if (width == 0 || height == 0 || width > 5632 || height > 3720)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
+  switch (bitPerPixel) {
+  case 12:
+  case 14:
+    break;
+  default:
+    ThrowRDE("Unexpected bits per pixel: %u.", bitPerPixel);
+  };
+
   vector<RawSlice> slices;
   uint32 offY = 0;
 
