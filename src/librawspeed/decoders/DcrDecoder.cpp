@@ -21,6 +21,7 @@
 
 #include "decoders/DcrDecoder.h"
 #include "common/Common.h"                // for uint32, uchar8, ushort16
+#include "common/NORangesSet.h"           // for NORangesSet
 #include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/ByteStream.h"                // for ByteStream
@@ -64,8 +65,10 @@ RawImage DcrDecoder::decodeRawInternal() {
     if (!ifdoffset)
       ThrowRDE("Couldn't find the Kodak IFD offset");
 
+    NORangesSet<Buffer> ifds;
+
     assert(ifdoffset != nullptr);
-    TiffRootIFD kodakifd(nullptr, nullptr, ifdoffset->getRootIfdData(),
+    TiffRootIFD kodakifd(nullptr, &ifds, ifdoffset->getRootIfdData(),
                          ifdoffset->getU32());
 
     TiffEntry *linearization = kodakifd.getEntryRecursive(KODAK_LINEARIZATION);
