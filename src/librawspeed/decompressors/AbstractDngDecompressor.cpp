@@ -44,10 +44,6 @@ AbstractDngDecompressor::AbstractDngDecompressor(const RawImage& img,
                                                  int _compression)
     : AbstractParallelizedDecompressor(img), compression(_compression) {}
 
-void AbstractDngDecompressor::addSlice(DngSliceElement slice) {
-  slices.emplace_back(slice);
-}
-
 void AbstractDngDecompressor::decode() const { startThreading(slices.size()); }
 
 void AbstractDngDecompressor::decompressThreaded(
@@ -153,10 +149,6 @@ void AbstractDngDecompressor::decompressThreaded(
 #endif
   } else
     mRaw->setError("AbstractDngDecompressor: Unknown compression");
-}
-
-int __attribute__((pure)) AbstractDngDecompressor::size() {
-  return static_cast<int>(slices.size());
 }
 
 } // namespace rawspeed

@@ -48,11 +48,8 @@ class AbstractDngDecompressor final : public AbstractParallelizedDecompressor {
 public:
   AbstractDngDecompressor(const RawImage& img, int compression);
 
-  void addSlice(DngSliceElement slice);
-
   void decode() const final;
 
-  int __attribute__((pure)) size();
   std::vector<DngSliceElement> slices;
 
   bool mFixLjpeg = false;

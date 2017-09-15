@@ -240,6 +240,8 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
                offsets->count, counts->count, nTiles);
     }
 
+    slices.slices.reserve(nTiles);
+
     slices.mFixLjpeg = mFixLjpeg;
 
     for (uint32 y = 0; y < tilesY; y++) {
@@ -257,7 +259,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
         const uint32 offY = tileh * y;
 
         DngSliceElement e(bs, offX, offY, tilew, tileh);
-        slices.addSlice(e);
+        slices.slices.emplace_back(e);
       }
     }
   } else { // Strips
@@ -269,6 +271,8 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
                "count:%u, stips:%u ",
                counts->count, offsets->count);
     }
+
+    slices.slices.reserve(counts->count);
 
     uint32 yPerSlice = raw->hasEntry(ROWSPERSTRIP) ?
           raw->getEntry(ROWSPERSTRIP)->getU32() : mRaw->dim.y;
@@ -287,11 +291,11 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
       ByteStream bs(mFile->getSubView(offset, count), 0);
       DngSliceElement e(bs, /*offsetX=*/0, offY, mRaw->dim.x, yPerSlice);
 
-      slices.addSlice(e);
+      slices.slices.emplace_back(e);
       offY += yPerSlice;
     }
   }
-  uint32 nSlices = slices.size();
+  uint32 nSlices = slices.slices.size();
   if (!nSlices)
     ThrowRDE("No valid slices found.");
 
