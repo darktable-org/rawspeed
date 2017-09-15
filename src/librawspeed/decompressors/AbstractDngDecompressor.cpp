@@ -40,10 +40,6 @@
 
 namespace rawspeed {
 
-AbstractDngDecompressor::AbstractDngDecompressor(const RawImage& img,
-                                                 int _compression)
-    : AbstractParallelizedDecompressor(img), compression(_compression) {}
-
 void AbstractDngDecompressor::decode() const { startThreading(slices.size()); }
 
 void AbstractDngDecompressor::decompressThreaded(

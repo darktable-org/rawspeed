@@ -46,16 +46,19 @@ class AbstractDngDecompressor final : public AbstractParallelizedDecompressor {
   void decompressThreaded(const RawDecompressorThread* t) const final;
 
 public:
-  AbstractDngDecompressor(const RawImage& img, int compression);
+  AbstractDngDecompressor(const RawImage& img, int compression_,
+                          bool mFixLjpeg_, uint32 mBps_, uint32 mPredictor_)
+      : AbstractParallelizedDecompressor(img), compression(compression_),
+        mFixLjpeg(mFixLjpeg_), mBps(mBps_), mPredictor(mPredictor_) {}
 
   void decode() const final;
 
   std::vector<DngSliceElement> slices;
 
-  bool mFixLjpeg = false;
-  uint32 mPredictor;
-  uint32 mBps;
-  int compression;
+  const int compression;
+  const bool mFixLjpeg = false;
+  const uint32 mBps;
+  const uint32 mPredictor;
 };
 
 } // namespace rawspeed

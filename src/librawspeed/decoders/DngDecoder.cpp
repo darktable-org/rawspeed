@@ -206,11 +206,12 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
              "JPEG-compressed data.");
   }
 
-  AbstractDngDecompressor slices(mRaw, compression);
-  if (raw->hasEntry(PREDICTOR)) {
-    slices.mPredictor = raw->getEntry(PREDICTOR)->getU32();
-  }
-  slices.mBps = bps;
+  uint32 predictor = -1;
+  if (raw->hasEntry(PREDICTOR))
+    predictor = raw->getEntry(PREDICTOR)->getU32();
+
+  AbstractDngDecompressor slices(mRaw, compression, mFixLjpeg, bps, predictor);
+
   if (raw->hasEntry(TILEOFFSETS)) {
     uint32 tilew = raw->getEntry(TILEWIDTH)->getU32();
     uint32 tileh = raw->getEntry(TILELENGTH)->getU32();
@@ -241,8 +242,6 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
     }
 
     slices.slices.reserve(nTiles);
-
-    slices.mFixLjpeg = mFixLjpeg;
 
     for (uint32 y = 0; y < tilesY; y++) {
       for (uint32 x = 0; x < tilesX; x++) {
