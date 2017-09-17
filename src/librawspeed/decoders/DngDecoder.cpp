@@ -271,13 +271,17 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
                counts->count, offsets->count);
     }
 
-    slices.slices.reserve(counts->count);
-
     uint32 yPerSlice = raw->hasEntry(ROWSPERSTRIP) ?
           raw->getEntry(ROWSPERSTRIP)->getU32() : mRaw->dim.y;
 
-    if (yPerSlice == 0 || yPerSlice > static_cast<uint32>(mRaw->dim.y))
-      ThrowRDE("Invalid y per slice");
+    const uint32 yTotal = yPerSlice * counts->count;
+    if (yPerSlice == 0 || yPerSlice > static_cast<uint32>(mRaw->dim.y) ||
+        yTotal < static_cast<uint32>(mRaw->dim.y)) {
+      ThrowRDE("Invalid y per slice %u or strip count %u (height = %u, got %u)",
+               yPerSlice, counts->count, mRaw->dim.y, yTotal);
+    }
+
+    slices.slices.reserve(counts->count);
 
     uint32 offY = 0;
     for (uint32 s = 0; s < counts->count; s++) {
@@ -293,9 +297,12 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
       slices.slices.emplace_back(e);
       offY += yPerSlice;
     }
+
+    assert(static_cast<uint32>(mRaw->dim.y) <= offY);
+    assert(slices.slices.size() == counts->count);
   }
-  uint32 nSlices = slices.slices.size();
-  if (!nSlices)
+
+  if (slices.slices.empty())
     ThrowRDE("No valid slices found.");
 
   mRaw->createData();
