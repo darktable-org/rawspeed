@@ -183,7 +183,6 @@ bool NefDecoder::NEFIsUncompressedRGB(const TiffIFD* raw) {
 
 void NefDecoder::DecodeUncompressed() {
   auto raw = getIFDWithLargestImage(CFAPATTERN);
-  uint32 nslices = raw->getEntry(STRIPOFFSETS)->count;
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
   uint32 yPerSlice = raw->getEntry(ROWSPERSTRIP)->getU32();
@@ -191,10 +190,28 @@ void NefDecoder::DecodeUncompressed() {
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
   uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
 
+  mRaw->dim = iPoint2D(width, height);
+
+  if (width == 0 || height == 0 || width > 8288 || height > 5520)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
+  if (counts->count != offsets->count) {
+    ThrowRDE("Byte count number does not match strip size: "
+             "count:%u, stips:%u ",
+             counts->count, offsets->count);
+  }
+
+  const uint32 yTotal = yPerSlice * counts->count;
+  if (yPerSlice == 0 || yTotal < static_cast<uint32>(mRaw->dim.y)) {
+    ThrowRDE("Invalid y per slice %u or strip count %u (height = %u, got %u)",
+             yPerSlice, counts->count, mRaw->dim.y, yTotal);
+  }
+
   vector<NefSlice> slices;
+  slices.reserve(counts->count);
   uint32 offY = 0;
 
-  for (uint32 s = 0; s < nslices; s++) {
+  for (uint32 s = 0; s < counts->count; s++) {
     NefSlice slice;
     slice.offset = offsets->getU32(s);
     slice.count = counts->getU32(s);
@@ -209,19 +226,17 @@ void NefDecoder::DecodeUncompressed() {
 
     offY = min(height, offY + yPerSlice);
 
-    if (mFile->isValid(slice.offset, slice.count)) // Only decode if size is valid
-      slices.push_back(slice);
+    if (!mFile->isValid(slice.offset, slice.count))
+      ThrowRDE("Slice offset/count invalid");
+
+    slices.push_back(slice);
   }
 
   if (slices.empty())
     ThrowRDE("No valid slices found. File probably truncated.");
 
-  height = offY;
-
-  if (width == 0 || height == 0 || width > 8288 || height > 5520)
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
-
-  mRaw->dim = iPoint2D(width, height);
+  assert(height == offY);
+  assert(slices.size() == counts->count);
 
   mRaw->createData();
   if (bitPerPixel == 14 && width*slices[0].h*2 == slices[0].count)
