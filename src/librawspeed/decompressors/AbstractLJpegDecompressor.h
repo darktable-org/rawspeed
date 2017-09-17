@@ -182,6 +182,10 @@ protected:
   __attribute__((pure)) std::array<ushort16, N_COMP>
   getInitialPredictors() const {
     std::array<ushort16, N_COMP> pred;
+    if (frame.prec < (Pt + 1)) {
+      ThrowRDE("Invalid precision (%u) and point transform (%u) combination!",
+               frame.prec, Pt);
+    }
     pred.fill(1 << (frame.prec - Pt - 1));
     return pred;
   }
