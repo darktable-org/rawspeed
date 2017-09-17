@@ -213,25 +213,24 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
   AbstractDngDecompressor slices(mRaw, compression, mFixLjpeg, bps, predictor);
 
   if (raw->hasEntry(TILEOFFSETS)) {
-    uint32 tilew = raw->getEntry(TILEWIDTH)->getU32();
-    uint32 tileh = raw->getEntry(TILELENGTH)->getU32();
+    const uint32 tilew = raw->getEntry(TILEWIDTH)->getU32();
+    const uint32 tileh = raw->getEntry(TILELENGTH)->getU32();
 
     if (!(tilew > 0 && tileh > 0))
       ThrowRDE("Invalid tile size: (%u, %u)", tilew, tileh);
 
     assert(tilew > 0);
-    uint32 tilesX = (mRaw->dim.x + tilew - 1) / tilew;
+    const uint32 tilesX = roundUpDivision(mRaw->dim.x, tilew);
     if (!tilesX)
       ThrowRDE("Zero tiles horizontally");
 
     assert(tileh > 0);
-    uint32 tilesY = (mRaw->dim.y + tileh - 1) / tileh;
+    const uint32 tilesY = roundUpDivision(mRaw->dim.y, tileh);
     if (!tilesY)
       ThrowRDE("Zero tiles vertically");
 
-    uint32 nTiles = tilesX * tilesY;
-    if (!nTiles || tilesX * tilesY != nTiles)
-      ThrowRDE("Uncorrect total number of slices");
+    const uint32 nTiles = tilesX * tilesY;
+    assert(nTiles > 0);
 
     TiffEntry* offsets = raw->getEntry(TILEOFFSETS);
     TiffEntry* counts = raw->getEntry(TILEBYTECOUNTS);
@@ -261,6 +260,8 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
         slices.slices.emplace_back(e);
       }
     }
+
+    assert(slices.slices.size() == nTiles);
   } else { // Strips
     TiffEntry* offsets = raw->getEntry(STRIPOFFSETS);
     TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
@@ -366,6 +367,9 @@ RawImage DngDecoder::decodeRawInternal() {
 
   mRaw->dim.x = raw->getEntry(IMAGEWIDTH)->getU32();
   mRaw->dim.y = raw->getEntry(IMAGELENGTH)->getU32();
+
+  if (mRaw->dim.x == 0 || mRaw->dim.y == 0)
+    ThrowRDE("Image has zero size");
 
   if (mRaw->isCFA)
     parseCFA(raw);
