@@ -169,8 +169,13 @@ void AbstractLJpegDecompressor::parseSOS(ByteStream sos) {
   if (predictorMode > 8)
     ThrowRDE("Invalid predictor mode.");
 
-  sos.skipBytes(1);         // Se + Ah Not used in LJPEG
-  Pt = sos.getByte() & 0xf; // Point Transform
+  // Se + Ah Not used in LJPEG
+  if (sos.getByte() != 0)
+    ThrowRDE("Se/Ah not zero.");
+
+  Pt = sos.getByte(); // Point Transform
+  if (Pt > 15)
+    ThrowRDE("Invalid Point transform.");
 
   decodeScan();
 }
