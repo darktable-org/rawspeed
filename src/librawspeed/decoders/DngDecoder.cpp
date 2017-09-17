@@ -250,7 +250,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
         const auto count = counts->getU32(s);
 
         if (count < 1)
-          continue;
+          ThrowRDE("Tile %u;%u is empty", x, y);
 
         ByteStream bs(mFile->getSubView(offset, count), 0);
 
@@ -285,7 +285,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
       const auto count = counts->getU32(s);
 
       if (count < 1)
-        continue;
+        ThrowRDE("Slice %u is empty", s);
 
       ByteStream bs(mFile->getSubView(offset, count), 0);
       DngSliceElement e(bs, /*offsetX=*/0, offY, mRaw->dim.x, yPerSlice);
