@@ -22,11 +22,13 @@
 
 #include "tiff/CiffIFD.h"
 #include "common/Common.h"               // for uint32, ushort16
+#include "common/NORangesSet.h"          // for NORangesSet
 #include "common/RawspeedException.h"    // for RawspeedException
 #include "io/ByteStream.h"               // for ByteStream
 #include "io/IOException.h"              // for IOException
 #include "parsers/CiffParserException.h" // for ThrowCPE, CiffParserException
 #include "tiff/CiffEntry.h"              // for CiffEntry, CiffDataType::CI...
+#include <cassert>                       // for assert
 #include <map>                           // for map, _Rb_tree_iterator
 #include <memory>                        // for unique_ptr
 #include <string>                        // for allocator, operator==, string
@@ -39,7 +41,10 @@ using std::unique_ptr;
 
 namespace rawspeed {
 
-void CiffIFD::parseIFDEntry(ByteStream* bs) {
+void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream* bs) {
+  assert(ifds);
+  assert(bs);
+
   unique_ptr<CiffEntry> t;
 
   auto origPos = bs->getPosition();
@@ -57,7 +62,7 @@ void CiffIFD::parseIFDEntry(ByteStream* bs) {
     switch (t->type) {
     case CIFF_SUB1:
     case CIFF_SUB2: {
-      add(std::make_unique<CiffIFD>(this, &t->data));
+      add(std::make_unique<CiffIFD>(this, ifds, &t->data));
       break;
     }
 
@@ -70,20 +75,34 @@ void CiffIFD::parseIFDEntry(ByteStream* bs) {
   }
 }
 
-CiffIFD::CiffIFD(const CiffIFD* parent_, ByteStream* mFile) : parent(parent_) {
+CiffIFD::CiffIFD(const CiffIFD* parent_, NORangesSet<Buffer>* ifds,
+                 ByteStream* mFile)
+    : parent(parent_) {
+  assert(ifds);
+  assert(mFile);
+
   checkOverflow();
 
   if (mFile->getSize() < 4)
     ThrowCPE("File is probably corrupted.");
 
+  // last 4 bytes is the offset to the beginning of the [first?] IFD
   mFile->setPosition(mFile->getSize() - 4);
-  uint32 valuedata_size = mFile->getU32();
+  uint32 offset = mFile->getU32();
+  mFile->setPosition(offset);
 
-  mFile->setPosition(valuedata_size);
+  // count of the Directory entries in this IFD
   ushort16 dircount = mFile->getU16();
 
+  // 2 bytes for entry count
+  // each entry is 10 bytes
+  const auto IFDFullSize = 2 + 10 * dircount;
+  const Buffer IFDBuf(mFile->getSubView(offset, IFDFullSize));
+  if (!ifds->emplace(IFDBuf).second)
+    ThrowCPE("Two IFD's overlap. Raw corrupt!");
+
   for (uint32 i = 0; i < dircount; i++)
-    parseIFDEntry(mFile);
+    parseIFDEntry(ifds, mFile);
 }
 
 void CiffIFD::checkOverflow() const {

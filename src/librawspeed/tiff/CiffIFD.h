@@ -21,13 +21,14 @@
 
 #pragma once
 
-#include "common/Common.h"  // for uint32
-#include "tiff/CiffEntry.h" // IWYU pragma: keep
-#include "tiff/CiffTag.h"   // for CiffTag
-#include <map>              // for map
-#include <memory>           // for unique_ptr
-#include <string>           // for string
-#include <vector>           // for vector
+#include "common/Common.h"      // for uint32
+#include "common/NORangesSet.h" // for NORangesSet
+#include "tiff/CiffEntry.h"     // IWYU pragma: keep
+#include "tiff/CiffTag.h"       // for CiffTag
+#include <map>                  // for map
+#include <memory>               // for unique_ptr
+#include <string>               // for string
+#include <vector>               // for vector
 
 namespace rawspeed {
 
@@ -44,7 +45,7 @@ class CiffIFD final {
   void add(std::unique_ptr<CiffIFD> subIFD);
   void add(std::unique_ptr<CiffEntry> entry);
 
-  void parseIFDEntry(ByteStream* bs);
+  void parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream* bs);
 
   template <typename Lambda>
   std::vector<const CiffIFD*> __attribute__((pure))
@@ -55,7 +56,7 @@ class CiffIFD final {
   getEntryRecursiveIf(CiffTag tag, const Lambda& f) const;
 
 public:
-  CiffIFD(const CiffIFD* parent, ByteStream* mFile);
+  CiffIFD(const CiffIFD* parent, NORangesSet<Buffer>* ifds, ByteStream* mFile);
 
   std::vector<const CiffIFD*> __attribute__((pure))
   getIFDsWithTag(CiffTag tag) const;
