@@ -198,6 +198,10 @@ void NefDecoder::DecodeUncompressed() {
     NefSlice slice;
     slice.offset = offsets->getU32(s);
     slice.count = counts->getU32(s);
+
+    if (slice.count < 1)
+      ThrowRDE("Slice %u is empty", s);
+
     if (offY + yPerSlice > height)
       slice.h = height - offY;
     else
