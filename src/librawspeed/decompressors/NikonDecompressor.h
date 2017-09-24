@@ -22,6 +22,7 @@
 
 #include "common/Common.h"                      // for uint32
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include <vector>                               // for vector
 
 namespace rawspeed {
 
@@ -41,6 +42,8 @@ public:
 
 private:
   static const uchar8 nikon_tree[][2][16];
+  static std::vector<ushort16> createCurve(ByteStream* metadata, uint32 bitsPS,
+                                           uint32 v0, uint32 v1, uint32* split);
   static HuffmanTable createHuffmanTable(uint32 huffSelect);
 };
 

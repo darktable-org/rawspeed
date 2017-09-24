@@ -30,8 +30,6 @@
 #include <cstdio>                         // for size_t, NULL
 #include <vector>                         // for vector, allocator
 
-using std::vector;
-
 namespace rawspeed {
 
 const uchar8 NikonDecompressor::nikon_tree[][2][16] = {
@@ -55,6 +53,55 @@ const uchar8 NikonDecompressor::nikon_tree[][2][16] = {
      {7, 6, 8, 5, 9, 4, 10, 3, 11, 12, 2, 0, 1, 13, 14}},
 
 };
+
+std::vector<ushort16> NikonDecompressor::createCurve(ByteStream* metadata,
+                                                     uint32 bitsPS, uint32 v0,
+                                                     uint32 v1, uint32* split) {
+  // 'curve' will hold a peace wise linearly interpolated function.
+  // there are 'csize' segements, each is 'step' values long.
+  // the very last value is not part of the used table but necessary
+  // to linearly interpolate the last segment, therefor the '+1/-1'
+  // size adjustments of 'curve'.
+  std::vector<ushort16> curve((1 << bitsPS & 0x7fff) + 1);
+  assert(curve.size() > 1);
+
+  for (size_t i = 0; i < curve.size(); i++)
+    curve[i] = i;
+
+  uint32 step = 0;
+  uint32 csize = metadata->getU16();
+  if (csize > 1)
+    step = curve.size() / (csize - 1);
+
+  if (v0 == 68 && v1 == 32 && step > 0) {
+    for (size_t i = 0; i < csize; i++)
+      curve[i * step] = metadata->getU16();
+    for (size_t i = 0; i < curve.size() - 1; i++) {
+      curve[i] = (curve[i - i % step] * (step - i % step) +
+                  curve[i - i % step + step] * (i % step)) /
+                 step;
+    }
+
+    metadata->setPosition(562);
+    *split = metadata->getU16();
+  } else if (v0 != 70) {
+    if (csize == 0 || csize > 0x4001)
+      ThrowRDE("Don't know how to compute curve! csize = %u", csize);
+
+    curve.resize(csize + 1UL);
+    assert(curve.size() > 1);
+
+    for (uint32 i = 0; i < csize; i++) {
+      curve[i] = metadata->getU16();
+    }
+  }
+
+  // and drop the last value
+  curve.resize(curve.size() - 1);
+  assert(!curve.empty());
+
+  return curve;
+}
 
 HuffmanTable NikonDecompressor::createHuffmanTable(uint32 huffSelect) {
   HuffmanTable ht;
@@ -91,48 +138,9 @@ void NikonDecompressor::decompress(RawImage* mRaw, ByteStream&& data,
   pUp2[0] = metadata.getU16();
   pUp2[1] = metadata.getU16();
 
-  // 'curve' will hold a peace wise linearly interpolated function.
-  // there are 'csize' segements, each is 'step' values long.
-  // the very last value is not part of the used table but necessary
-  // to linearly interpolate the last segment, therefor the '+1/-1'
-  // size adjustments of 'curve'.
-  vector<ushort16> curve((1 << bitsPS & 0x7fff)+1);
-  assert(curve.size() > 1);
-
-  for (size_t i = 0; i < curve.size(); i++)
-    curve[i] = i;
-
-  uint32 step = 0;
-  uint32 csize = metadata.getU16();
-  if (csize  > 1)
-    step = curve.size() / (csize - 1);
-
-  if (v0 == 68 && v1 == 32 && step > 0) {
-    for (size_t i = 0; i < csize; i++)
-      curve[i*step] = metadata.getU16();
-    for (size_t i = 0; i < curve.size()-1; i++)
-      curve[i] = (curve[i-i%step] * (step - i % step) +
-                  curve[i-i%step+step] * (i % step)) / step;
-    metadata.setPosition(562);
-    split = metadata.getU16();
-  } else if (v0 != 70) {
-    if (csize == 0 || csize > 0x4001)
-      ThrowRDE("Don't know how to compute curve! csize = %u", csize);
-
-    curve.resize(csize + 1UL);
-    assert(curve.size() > 1);
-
-    for (uint32 i = 0; i < csize; i++) {
-      curve[i] = metadata.getU16();
-    }
-  }
-
-  // and drop the last value
-  curve.resize(curve.size() - 1);
-  assert(!curve.empty());
-
   HuffmanTable ht = createHuffmanTable(huffSelect);
 
+  auto curve = createCurve(&metadata, bitsPS, v0, v1, &split);
   RawImageCurveGuard curveHandler(mRaw, curve, uncorrectedRawValues);
 
   BitPumpMSB bits(data);
