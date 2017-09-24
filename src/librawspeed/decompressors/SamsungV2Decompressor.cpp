@@ -227,11 +227,20 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
       for (uint32 i = 0; i < 16; i++) {
         ushort16* refpixel;
 
-        if ((row + i) & 0x1) // Red or blue pixels use same color two lines up
+        if ((row + i) & 0x1) {
+          // Red or blue pixels use same color two lines up
           refpixel = img_up2 + i + slideOffset;
-        else // Green pixel N uses Green pixel N from row above (top left or
-             // top right)
+
+          if (col == 0 && img_up2 > refpixel)
+            ThrowRDE("Bad motion %u at the beginning of the row", motion);
+        } else {
+          // Green pixel N uses Green pixel N from row above
+          // (top left or top right)
           refpixel = img_up + i + slideOffset + (((i % 2) != 0) ? -1 : 1);
+
+          if (col == 0 && img_up > refpixel)
+            ThrowRDE("Bad motion %u at the beginning of the row", motion);
+        }
 
         // In some cases we use as reference interpolation of this pixel and
         // the next
