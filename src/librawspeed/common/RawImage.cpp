@@ -37,13 +37,13 @@ using std::string;
 namespace rawspeed {
 
 RawImageData::RawImageData() : cfa(iPoint2D(0, 0)) {
-  fill_n(blackLevelSeparate, 4, -1);
+  blackLevelSeparate.fill(-1);
 }
 
 RawImageData::RawImageData(const iPoint2D& _dim, uint32 _bpc, uint32 _cpp)
     : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), cpp(_cpp),
       bpp(_bpc * _cpp) {
-  fill_n(blackLevelSeparate, 4, -1);
+  blackLevelSeparate.fill(-1);
   createData();
 }
 

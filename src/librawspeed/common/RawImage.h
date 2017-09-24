@@ -30,6 +30,7 @@
 #include "common/TableLookUp.h"        // for TableLookUp
 #include "metadata/BlackArea.h"        // for BlackArea
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray
+#include <array>                       // for array
 #include <memory>                      // for unique_ptr, operator==
 #include <string>                      // for string
 #include <vector>                      // for vector
@@ -149,7 +150,7 @@ public:
   bool isCFA{true};
   ColorFilterArray cfa;
   int blackLevel = -1;
-  int blackLevelSeparate[4];
+  std::array<int, 4> blackLevelSeparate;
   int whitePoint = 65536;
   std::vector<BlackArea> blackAreas;
 

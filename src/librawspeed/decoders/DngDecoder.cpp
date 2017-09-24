@@ -36,6 +36,7 @@
 #include <algorithm>                               // for move
 #include <cassert>                                 // for assert
 #include <cstring>                                 // for memset
+#include <limits>                                  // for numeric_limits
 #include <map>                                     // for map
 #include <memory>                                  // for unique_ptr
 #include <stdexcept>                               // for out_of_range
@@ -630,17 +631,31 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) {
   if (static_cast<int>(black_entry->count) < blackdim.x * blackdim.y)
     ThrowRDE("BLACKLEVEL entry is too small");
 
+  using BlackType = decltype(mRaw->blackLevelSeparate)::value_type;
+
   if (blackdim.x < 2 || blackdim.y < 2) {
     // We so not have enough to fill all individually, read a single and copy it
     float value = black_entry->getFloat();
+
+    if (value < std::numeric_limits<BlackType>::min() ||
+        value > std::numeric_limits<BlackType>::max())
+      ThrowRDE("Error decoding black level");
+
     for (int y = 0; y < 2; y++) {
       for (int x = 0; x < 2; x++)
         mRaw->blackLevelSeparate[y*2+x] = value;
     }
   } else {
     for (int y = 0; y < 2; y++) {
-      for (int x = 0; x < 2; x++)
-        mRaw->blackLevelSeparate[y*2+x] = black_entry->getFloat(y*blackdim.x+x);
+      for (int x = 0; x < 2; x++) {
+        float value = black_entry->getFloat(y * blackdim.x + x);
+
+        if (value < std::numeric_limits<BlackType>::min() ||
+            value > std::numeric_limits<BlackType>::max())
+          ThrowRDE("Error decoding black level");
+
+        mRaw->blackLevelSeparate[y * 2 + x] = value;
+      }
     }
   }
 
@@ -679,7 +694,7 @@ void DngDecoder::setBlack(const TiffIFD* raw) {
     return;
 
   // Black defaults to 0
-  memset(mRaw->blackLevelSeparate,0,sizeof(mRaw->blackLevelSeparate));
+  mRaw->blackLevelSeparate.fill(0);
 
   if (raw->hasEntry(BLACKLEVEL))
     decodeBlackLevels(raw);
