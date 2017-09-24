@@ -39,10 +39,10 @@ class UncompressedDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
 
   // check buffer size, throw, or compute minimal height that can be decoded
-  void sanityCheck(uint32* h, int bpl);
+  void sanityCheck(const uint32* h, int bpl);
 
   // check buffer size, throw, or compute minimal height that can be decoded
-  void sanityCheck(uint32 w, uint32* h, int bpp);
+  void sanityCheck(uint32 w, const uint32* h, int bpp);
 
   // for special packed formats
   int bytesPerLine(int w, bool skips);

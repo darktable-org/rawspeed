@@ -38,7 +38,7 @@ using std::min;
 
 namespace rawspeed {
 
-void UncompressedDecompressor::sanityCheck(uint32* h, int bpl) {
+void UncompressedDecompressor::sanityCheck(const uint32* h, int bpl) {
   assert(h != nullptr);
   assert(*h > 0);
   assert(bpl > 0);
@@ -59,10 +59,13 @@ void UncompressedDecompressor::sanityCheck(uint32* h, int bpl) {
   assert(min_h < *h);
   assert(input.getRemainSize() >= bpl * min_h);
 
-  *h = min_h;
+  ThrowIOE("Image truncated, only %u of %u lines found", min_h, *h);
+  // FIXME: need to come up with some common variable to allow proceeding here
+
+  // *h = min_h;
 }
 
-void UncompressedDecompressor::sanityCheck(uint32 w, uint32* h, int bpp) {
+void UncompressedDecompressor::sanityCheck(uint32 w, const uint32* h, int bpp) {
   assert(w > 0);
   assert(bpp > 0);
 
