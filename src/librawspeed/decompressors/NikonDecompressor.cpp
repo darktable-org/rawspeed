@@ -19,15 +19,16 @@
 */
 
 #include "decompressors/NikonDecompressor.h"
-#include "common/Common.h"              // for uint32, ushort16, clampBits
-#include "common/Point.h"               // for iPoint2D
-#include "common/RawImage.h"            // for RawImage, RawImageData, RawI...
-#include "decompressors/HuffmanTable.h" // for HuffmanTable
-#include "io/BitPumpMSB.h"              // for BitPumpMSB, BitStream<>::fil...
-#include "io/Buffer.h"                  // for Buffer
-#include "io/ByteStream.h"              // for ByteStream
-#include <cstdio>                       // for size_t, NULL
-#include <vector>                       // for vector, allocator
+#include "common/Common.h"                // for uint32, ushort16, clampBits
+#include "common/Point.h"                 // for iPoint2D
+#include "common/RawImage.h"              // for RawImage, RawImageData, RawI...
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable
+#include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::fil...
+#include "io/Buffer.h"                    // for Buffer
+#include "io/ByteStream.h"                // for ByteStream
+#include <cstdio>                         // for size_t, NULL
+#include <vector>                         // for vector, allocator
 
 using std::vector;
 
@@ -66,6 +67,8 @@ HuffmanTable NikonDecompressor::createHuffmanTable(uint32 huffSelect) {
 void NikonDecompressor::decompress(RawImage* mRaw, ByteStream&& data,
                                    ByteStream metadata, const iPoint2D& size,
                                    uint32 bitsPS, bool uncorrectedRawValues) {
+  assert(bitsPS > 0);
+
   uint32 v0 = metadata.getByte();
   uint32 v1 = metadata.getByte();
   uint32 huffSelect = 0;
@@ -94,6 +97,8 @@ void NikonDecompressor::decompress(RawImage* mRaw, ByteStream&& data,
   // to linearly interpolate the last segment, therefor the '+1/-1'
   // size adjustments of 'curve'.
   vector<ushort16> curve((1 << bitsPS & 0x7fff)+1);
+  assert(curve.size() > 1);
+
   for (size_t i = 0; i < curve.size(); i++)
     curve[i] = i;
 
@@ -101,6 +106,7 @@ void NikonDecompressor::decompress(RawImage* mRaw, ByteStream&& data,
   uint32 csize = metadata.getU16();
   if (csize  > 1)
     step = curve.size() / (csize - 1);
+
   if (v0 == 68 && v1 == 32 && step > 0) {
     for (size_t i = 0; i < csize; i++)
       curve[i*step] = metadata.getU16();
@@ -109,8 +115,13 @@ void NikonDecompressor::decompress(RawImage* mRaw, ByteStream&& data,
                   curve[i-i%step+step] * (i % step)) / step;
     metadata.setPosition(562);
     split = metadata.getU16();
-  } else if (v0 != 70 && csize <= 0x4001) {
+  } else if (v0 != 70) {
+    if (csize == 0 || csize > 0x4001)
+      ThrowRDE("Don't know how to compute curve! csize = %u", csize);
+
     curve.resize(csize + 1UL);
+    assert(curve.size() > 1);
+
     for (uint32 i = 0; i < csize; i++) {
       curve[i] = metadata.getU16();
     }
@@ -118,6 +129,7 @@ void NikonDecompressor::decompress(RawImage* mRaw, ByteStream&& data,
 
   // and drop the last value
   curve.resize(curve.size() - 1);
+  assert(!curve.empty());
 
   HuffmanTable ht = createHuffmanTable(huffSelect);
 
