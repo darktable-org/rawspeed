@@ -99,8 +99,8 @@ class DngOpcodes::FixBadPixelsList final : public DngOpcodes::DngOpcode {
 
 public:
   explicit FixBadPixelsList(const RawImage& ri, ByteStream* bs) {
-    const iRectangle2D fullImage(0, 0, ri->getUncroppedDim().x,
-                                 ri->getUncroppedDim().y);
+    const iRectangle2D fullImage(0, 0, ri->getUncroppedDim().x - 1,
+                                 ri->getUncroppedDim().y - 1);
 
     bs->getU32(); // Skip phase - we don't care
     auto badPointCount = bs->getU32();
