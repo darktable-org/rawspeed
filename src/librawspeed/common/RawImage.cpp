@@ -313,8 +313,12 @@ void RawImageData::transferBadPixelsToMap()
     createBadPixelMap();
 
   for (unsigned int pos : mBadPixelPositions) {
-    uint32 pos_x = pos&0xffff;
-    uint32 pos_y = pos>>16;
+    ushort16 pos_x = pos & 0xffff;
+    ushort16 pos_y = pos >> 16;
+
+    assert(pos_x < static_cast<ushort16>(uncropped_dim.x));
+    assert(pos_y < static_cast<ushort16>(uncropped_dim.y));
+
     mBadPixelMap[mBadPixelMapPitch * pos_y + (pos_x >> 3)] |= 1 << (pos_x&7);
   }
   mBadPixelPositions.clear();
