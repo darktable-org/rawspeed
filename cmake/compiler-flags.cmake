@@ -95,7 +95,7 @@ MARK_AS_ADVANCED(
     CMAKE_MODULE_LINKER_FLAGS_COVERAGE )
 
 # -fstack-protector-all
-set(SANITIZATION_DEFAULTS "-O1 -fno-optimize-sibling-calls")
+set(SANITIZATION_DEFAULTS "-O3 -fno-optimize-sibling-calls")
 
 set(asan "-fsanitize=address -fno-omit-frame-pointer -fno-common -U_FORTIFY_SOURCE")
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
