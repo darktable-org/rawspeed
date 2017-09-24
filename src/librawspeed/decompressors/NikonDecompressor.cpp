@@ -149,10 +149,12 @@ void NikonDecompressor::decompress(RawImage* mRaw, ByteStream&& data,
 
   int pLeft1 = 0;
   int pLeft2 = 0;
-  uint32 cw = size.x / 2;
   uint32 random = bits.peekBits(24);
   //allow gcc to devirtualize the calls below
   auto* rawdata = reinterpret_cast<RawImageDataU16*>(mRaw->get());
+
+  assert(size.x % 2 == 0);
+  assert(size.x >= 2);
   for (uint32 y = 0; y < static_cast<unsigned>(size.y); y++) {
     if (split && y == split) {
       ht = createHuffmanTable(huffSelect + 1);
@@ -171,7 +173,7 @@ void NikonDecompressor::decompress(RawImage* mRaw, ByteStream&& data,
 
     dest += 2;
 
-    for (uint32 x = 1; x < cw; x++) {
+    for (uint32 x = 2; x < static_cast<uint32>(size.x); x += 2) {
       pLeft1 += ht.decodeNext(bits);
       pLeft2 += ht.decodeNext(bits);
 
