@@ -229,16 +229,22 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
     if (!tilesY)
       ThrowRDE("Zero tiles vertically");
 
-    const uint32 nTiles = tilesX * tilesY;
-    assert(nTiles > 0);
-
     TiffEntry* offsets = raw->getEntry(TILEOFFSETS);
     TiffEntry* counts = raw->getEntry(TILEBYTECOUNTS);
-    if (offsets->count != counts->count || offsets->count != nTiles) {
-      ThrowRDE("Tile count mismatch: offsets:%u count:%u, "
-               "calculated:%u",
-               offsets->count, counts->count, nTiles);
+    if (offsets->count != counts->count) {
+      ThrowRDE("Tile count mismatch: offsets:%u count:%u", offsets->count,
+               counts->count);
     }
+
+    // tilesX * tilesY may overflow, but division is fine, so let's do that.
+    if (offsets->count / tilesX != tilesY ||
+        offsets->count / tilesY != tilesX) {
+      ThrowRDE("Tile X/Y count mismatch: total:%u X:%u, Y:%u", offsets->count,
+               tilesX, tilesY);
+    }
+
+    const uint32 nTiles = tilesX * tilesY;
+    assert(nTiles > 0);
 
     slices.slices.reserve(nTiles);
 
