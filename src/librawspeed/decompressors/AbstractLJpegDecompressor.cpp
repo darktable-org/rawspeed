@@ -107,6 +107,11 @@ void AbstractLJpegDecompressor::parseSOF(ByteStream sofInput, SOFInfo* sof) {
   if (sof->cps > 4 || sof->cps < 1)
     ThrowRDE("Only from 1 to 4 components are supported.");
 
+  if (sof->cps < mRaw->getCpp()) {
+    ThrowRDE("Component count should be no less than sample count (%u vs %u).",
+             sof->cps, mRaw->getCpp());
+  }
+
   if (sofInput.getRemainSize() != 3 * sof->cps)
     ThrowRDE("Header size mismatch.");
 

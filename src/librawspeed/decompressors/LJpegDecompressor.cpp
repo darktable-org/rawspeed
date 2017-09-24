@@ -95,6 +95,11 @@ void LJpegDecompressor::decodeN()
     // the predictor for the next line is the start of this line
     predNext = dest;
 
+    assert(mRaw->getCpp() > 0);
+    assert(N_COMP > 0);
+    assert(N_COMP >= mRaw->getCpp());
+    assert((N_COMP / mRaw->getCpp()) > 0);
+
     unsigned width = min(frame.w,
                          (mRaw->dim.x - offX) / (N_COMP / mRaw->getCpp()));
 
