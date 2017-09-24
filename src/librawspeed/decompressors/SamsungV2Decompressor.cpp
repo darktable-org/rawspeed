@@ -192,7 +192,7 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
   assert(width >= 16);
   for (uint32 col = 0; col < width; col += 16) {
     if (!(optflags & OptFlags::QP) && !(col & 63)) {
-      int32 scalevals[] = {0, -2, 2};
+      static constexpr int32 scalevals[] = {0, -2, 2};
       uint32 i = pump.getBits(2);
       scale = i < 3 ? scale + scalevals[i] : pump.getBits(12);
     }
@@ -218,8 +218,8 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
         ThrowRDE(
             "Got a previous line lookup on first two lines. File corrupted?");
 
-      int32 motionOffset[7] = {-4, -2, -2, 0, 0, 2, 4};
-      int32 motionDoAverage[7] = {0, 0, 1, 0, 1, 0, 0};
+      static constexpr int32 motionOffset[7] = {-4, -2, -2, 0, 0, 2, 4};
+      static constexpr int32 motionDoAverage[7] = {0, 0, 1, 0, 1, 0, 0};
 
       int32 slideOffset = motionOffset[motion];
       int32 doAverage = motionDoAverage[motion];
