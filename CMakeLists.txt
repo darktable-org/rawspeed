@@ -86,6 +86,11 @@ if(BUILD_TOOLS AND BUILD_TESTING)
 else()
   set(ENABLE_SAMPLEBASED_TESTING OFF CACHE BOOL "If enabled, allows to use rstest to check the samples specified by REFERENCE_SAMPLE_ARCHIVE" FORCE)
 endif()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  option(USE_LLVM_OPT_REPORT "(Clang only) Save compiler optimizations records and show them" OFF)
+else()
+  set(USE_LLVM_OPT_REPORT OFF CACHE BOOL "(Clang only) Save compiler optimizations records and show them" FORCE)
+endif()
 
 set(GOOGLETEST_PATH "/usr/src/googletest" CACHE PATH
                     "Path to the googletest root tree. Should contain googletest and googlemock subdirs. And CMakeLists.txt in root, and in both of these subdirs")
@@ -105,6 +110,10 @@ include(build-type)
 
 if(USE_IWYU)
   include(iwyu)
+endif()
+
+if(USE_LLVM_OPT_REPORT)
+  include(llvm-opt-report)
 endif()
 
 if((UNIX OR APPLE) AND USE_CLANG_TIDY)
