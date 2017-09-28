@@ -92,11 +92,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
   mRaw = RawImage::create({width, height});
 
   Cr2Decompressor l(bs, mRaw);
-  try {
-    l.decode({width});
-  } catch (IOException& e) {
-    mRaw->setError(e.what());
-  }
+  l.decode({width});
 
   // deal with D2000 GrayResponseCurve
   TiffEntry* curve = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x123));
