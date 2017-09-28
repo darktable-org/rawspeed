@@ -190,6 +190,7 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
     i[0] = i[1] = (row == 0 || row == 1) ? 7 : 4;
 
   assert(width >= 16);
+  assert(width % 16 == 0);
   for (uint32 col = 0; col < width; col += 16) {
     if (!(optflags & OptFlags::QP) && !(col & 63)) {
       static constexpr int32 scalevals[] = {0, -2, 2};
@@ -233,6 +234,10 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
 
           if (col == 0 && img_up2 > refpixel)
             ThrowRDE("Bad motion %u at the beginning of the row", motion);
+          if (col + 16 == width &&
+              ((refpixel >= img_up2 + 16) ||
+               (doAverage && (refpixel + 2 >= img_up2 + 16))))
+            ThrowRDE("Bad motion %u at the end of the row", motion);
         } else {
           // Green pixel N uses Green pixel N from row above
           // (top left or top right)
