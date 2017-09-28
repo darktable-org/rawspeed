@@ -73,6 +73,13 @@ void LJpegDecompressor::decodeScan()
 template <int N_COMP>
 void LJpegDecompressor::decodeN()
 {
+  assert(mRaw->getCpp() > 0);
+  assert(N_COMP > 0);
+  assert(N_COMP >= mRaw->getCpp());
+  assert((N_COMP / mRaw->getCpp()) > 0);
+
+  assert(mRaw->dim.x >= N_COMP);
+
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
   auto predNext = pred.data();
@@ -94,11 +101,6 @@ void LJpegDecompressor::decodeN()
     copy_n(predNext, N_COMP, pred.data());
     // the predictor for the next line is the start of this line
     predNext = dest;
-
-    assert(mRaw->getCpp() > 0);
-    assert(N_COMP > 0);
-    assert(N_COMP >= mRaw->getCpp());
-    assert((N_COMP / mRaw->getCpp()) > 0);
 
     unsigned width = min(frame.w,
                          (mRaw->dim.x - offX) / (N_COMP / mRaw->getCpp()));

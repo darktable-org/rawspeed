@@ -112,6 +112,11 @@ void AbstractLJpegDecompressor::parseSOF(ByteStream sofInput, SOFInfo* sof) {
              sof->cps, mRaw->getCpp());
   }
 
+  if (sof->cps > static_cast<uint32>(mRaw->dim.x)) {
+    ThrowRDE("Component count should be no greater than row length (%u vs %u).",
+             sof->cps, mRaw->dim.x);
+  }
+
   if (sofInput.getRemainSize() != 3 * sof->cps)
     ThrowRDE("Header size mismatch.");
 
