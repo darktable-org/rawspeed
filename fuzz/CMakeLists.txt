@@ -1,3 +1,6 @@
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/all-fuzzers.txt" ALL_EXPECTED_FUZZERS)
+list(SORT ALL_EXPECTED_FUZZERS)
+
 set(ALL_FUZZERS "" CACHE INTERNAL "" FORCE)
 
 if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_BUILD_TYPE STREQUAL "FUZZ"))
@@ -38,3 +41,9 @@ add_subdirectory(librawspeed)
 add_subdirectory(rawspeed)
 
 add_subdirectory(corpora)
+
+list(SORT ALL_FUZZERS)
+if(NOT "${ALL_FUZZERS}" STREQUAL "${ALL_EXPECTED_FUZZERS}")
+  message(SEND_ERROR "Actual list of fuzzers does not match the expected list: "
+    "${ALL_FUZZERS} vs ${ALL_EXPECTED_FUZZERS}")
+endif()
