@@ -1,4 +1,6 @@
 find_program(Xmllint_BIN xmllint)
+
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(XMLLINT
   DEFAULT_MSG
   Xmllint_BIN)
