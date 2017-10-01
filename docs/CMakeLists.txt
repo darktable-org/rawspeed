@@ -40,6 +40,14 @@ add_custom_target(doxygen
   WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
   COMMENT "Generating API documentation with Doxygen"
   VERBATIM
+  USES_TERMINAL
+)
+
+add_custom_target(
+  doxygen-clean
+  COMMAND "${CMAKE_COMMAND}" -E remove_directory "${CMAKE_CURRENT_BINARY_DIR}/html/doxygen"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+  COMMENT "Removing Doxygen-generated HTML API documentation"
 )
 
 add_dependencies(docs doxygen)
@@ -57,6 +65,14 @@ add_custom_target(sphinx
   WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
   COMMENT "Generating documentation with Sphinx"
   VERBATIM
+  USES_TERMINAL
+)
+
+add_custom_target(
+  docs-clean
+  COMMAND "${CMAKE_COMMAND}" -E remove_directory "${CMAKE_CURRENT_BINARY_DIR}/html"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+  COMMENT "Removing generated HTML documentation (both sphinx and doxygen)"
 )
 
 add_dependencies(docs sphinx)
