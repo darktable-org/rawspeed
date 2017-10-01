@@ -33,7 +33,7 @@ install:
       travis_retry sudo apt-get install -y -q -f --fix-missing cmake g++-4.9 git libjpeg-dev libpugixml-dev libxml2-utils make ninja-build zlib1g-dev;
     fi;
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      travis_retry brew update && brew tap Homebrew/bundle && cd .ci && brew bundle --verbose;
+      travis_retry brew update > /dev/null && brew tap Homebrew/bundle && cd .ci && brew bundle --verbose;
     fi;
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$FLAVOR" == "Coverage" ]]; then
       travis_retry sudo apt-get install -y -q -f --fix-missing rsync;
