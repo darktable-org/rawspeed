@@ -32,28 +32,32 @@ add_custom_command(TARGET rstest-create
   COMMAND rstest -c ${REFERENCE_SAMPLES}
   WORKING_DIRECTORY "${REFERENCE_SAMPLE_ARCHIVE}"
   COMMENT "Running rstest on all the samples in the sample set to generate the missing hashes"
-  VERBATIM)
+  VERBATIM
+  USES_TERMINAL)
 
 add_custom_target(rstest-recreate)
 add_custom_command(TARGET rstest-recreate
   COMMAND rstest -c -f ${REFERENCE_SAMPLES}
   WORKING_DIRECTORY "${REFERENCE_SAMPLE_ARCHIVE}"
   COMMENT "Running rstest on all the samples in the sample set to [re]generate all the hashes"
-  VERBATIM)
+  VERBATIM
+  USES_TERMINAL)
 
 add_custom_target(rstest-test) # hashes must exist beforehand
 add_custom_command(TARGET rstest-test
   COMMAND rstest ${REFERENCE_SAMPLES}
   WORKING_DIRECTORY "${REFERENCE_SAMPLE_ARCHIVE}"
   COMMENT "Running rstest on all the samples in the sample set to check for regressions"
-  VERBATIM)
+  VERBATIM
+  USES_TERMINAL)
 
 add_custom_target(rstest-check) # hashes should exist beforehand if you want to check for regressions
 add_custom_command(TARGET rstest-check
   COMMAND rstest -f ${REFERENCE_SAMPLES}
   WORKING_DIRECTORY "${REFERENCE_SAMPLE_ARCHIVE}"
   COMMENT "Trying to decode all the samples in the sample set"
-  VERBATIM)
+  VERBATIM
+  USES_TERMINAL)
 
 add_custom_target(rstest-clean)
 add_custom_command(TARGET rstest-clean
