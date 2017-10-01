@@ -65,7 +65,7 @@ MARK_AS_ADVANCED(
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
 
-if("${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   set(coverage_compilation "-fprofile-instr-generate=\"default-%m-%p.profraw\" -fcoverage-mapping")
   set(coverage_link "")
 elseif(CMAKE_COMPILER_IS_GNUCXX)

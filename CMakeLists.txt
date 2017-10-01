@@ -153,10 +153,11 @@ if(BUILD_DOCS)
 endif()
 
 if(BUILD_TESTING AND CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
-  if("${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     include(llvm-profdata)
     include(llvm-cov)
-  elseif(CMAKE_COMPILER_IS_GNUCXX)
+  elseif(CMAKE_COMPILER_IS_GNUCXX OR
+         CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     include(gcc-gcov)
 
     find_package(LCov)

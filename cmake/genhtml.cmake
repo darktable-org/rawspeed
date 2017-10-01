@@ -1,4 +1,4 @@
-if("${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 3)
     message(FATAL_ERROR "Clang version must be 3.0.0 or greater! Aborting...")
   endif()
