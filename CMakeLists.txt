@@ -157,9 +157,19 @@ if(BUILD_TESTING AND CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
     include(llvm-profdata)
     include(llvm-cov)
   elseif(CMAKE_COMPILER_IS_GNUCXX)
-    include(CodeCoverage)
-    setup_target_for_coverage(coverage ctest coverage)
-    include(GCOV)
+    include(gcc-gcov)
+
+    find_package(LCov)
+    find_package(GenHtml REQUIRED)
+
+    if(LCov_FOUND AND GenHtml_FOUND)
+      include(lcov)
+      include(genhtml)
+      include(gcc-coverage)
+    else()
+      message(WARNING "Did not find lcov and genhtml."
+                      "Will not be able to generate HTML reports")
+    endif()
   endif()
 endif()
 
