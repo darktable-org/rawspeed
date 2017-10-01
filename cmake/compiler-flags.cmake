@@ -65,8 +65,14 @@ MARK_AS_ADVANCED(
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
 
-set(coverage_compilation "-fprofile-arcs -ftest-coverage")
-set(coverage_link "--coverage")
+if("${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
+  set(coverage_compilation "-fprofile-instr-generate=\"default-%m-%p.profraw\" -fcoverage-mapping")
+  set(coverage_link "")
+elseif(CMAKE_COMPILER_IS_GNUCXX)
+  set(coverage_compilation "-fprofile-arcs -ftest-coverage")
+  set(coverage_link "--coverage")
+endif()
+
 SET(CMAKE_CXX_FLAGS_COVERAGE
     "${coverage_compilation}"
     CACHE STRING "Flags used by the C++ compiler during coverage builds."
