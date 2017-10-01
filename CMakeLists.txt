@@ -14,9 +14,9 @@ endif(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 # if rawspeed is added as a submodule to another build,
 # this CMakeLists.txt should be added via add_subdirectory().
 if(${CMAKE_SOURCE_DIR} EQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-  set(RAWSPEED_SOURCE_DIR "${CMAKE_SOURCE_DIR}" CACHE BOOL "" FORCE)
+  set(RAWSPEED_SOURCE_DIR "${CMAKE_SOURCE_DIR}" CACHE PATH "" FORCE)
 else()
-  set(RAWSPEED_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE BOOL "" FORCE)
+  set(RAWSPEED_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE PATH "" FORCE)
 endif()
 
 include(GNUInstallDirs)
