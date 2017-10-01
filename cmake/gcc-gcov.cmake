@@ -28,10 +28,10 @@ add_custom_target(
   USES_TERMINAL
 )
 
+# DONT remove *.gcov files here!
 add_custom_target(
   gcov-clean
   COMMAND "${FIND_PATH}" "${CMAKE_BINARY_DIR}" -type f -name '*.gcda' -delete > /dev/null
-  COMMAND "${FIND_PATH}" "${CMAKE_BINARY_DIR}" -type f -name '*.gcov' -delete > /dev/null
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-  COMMENT "Removing all the *.gcda and *.gcov files"
+  COMMENT "Removing all the *.gcda files"
 )

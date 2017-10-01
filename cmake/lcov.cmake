@@ -57,5 +57,5 @@ add_custom_target(
   COMMAND "${LCOV_PATH}" --directory "${CMAKE_BINARY_DIR}" --zerocounters > /dev/null
   COMMAND "${CMAKE_COMMAND}" -E remove lcov.baseline.info lcov.coverage.info lcov.total.info lcov.cleaned.info lcov.final.info
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-  COMMENT "Removing all the *.gcda files"
+  COMMENT "Resetting all execution counts to zero."
 )
