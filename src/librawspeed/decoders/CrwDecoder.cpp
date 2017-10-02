@@ -62,7 +62,8 @@ RawImage CrwDecoder::decodeRawInternal() {
   uint32 width = sensorInfo->getU16(1);
   uint32 height = sensorInfo->getU16(2);
 
-  if (width == 0 || height == 0 || width > 4104 || height > 3048)
+  if (width == 0 || height == 0 || width % 4 != 0 || width > 4104 ||
+      height > 3048)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   const CiffEntry* decTable = mRootIFD->getEntryRecursive(CIFF_DECODERTABLE);

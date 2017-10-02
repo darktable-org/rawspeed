@@ -275,37 +275,29 @@ void CrwDecompressor::decompress(const RawImage& mRaw, const Buffer* mFile,
   // Add the uncompressed 2 low bits to the decoded 8 high bits
   if (lowbits) {
     offset = 26;
-    ByteStream lowbitInput(mFile, offset, height * width / 4);
 
-    for (uint32 j = 0; j < height;) {
-      // Process 8 rows or however are left
-      const uint32 lines = min(height - j, 8U);
+    assert(width > 0);
+    assert(width % 4 == 0);
+    assert(height > 0);
 
-      // Process 8 rows or however are left
-      const uint32 nBlocks = width / 4 * lines;
-      if (nBlocks <= 0)
-        ThrowRDE("Image too small, not even a single block.");
+    // Each block is 4 pairs of 2 bits, so we have 1 block per 4 pixels
+    const unsigned lBlocks = 1 * height * width / 4;
+    assert(lBlocks > 0);
 
-      ushort16* dest = nullptr;
+    ByteStream lowbitInput(mFile, offset, lBlocks);
 
-      uint32 i = 0;
+    for (uint32 j = 0; j < height; j++) {
+      auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, j));
 
-      for (uint32 block = 0; block < nBlocks; block++) {
-        auto c = static_cast<uint32>(lowbitInput.getByte());
+      assert(width % 4 == 0);
+      for (uint32 i = 0; i < width; /* NOTE: i += 4 */) {
+        const uchar8 c = lowbitInput.getByte();
+        // LSB-packed: p3 << 6 | p2 << 4 | p1 << 2 | p0 << 0
 
-        // Process 8 bits in pairs
-        for (uint32 r = 0; r < 8; r += 2) {
-          if (i % width == 0) {
-            // new line
-            i = 0;
-
-            dest = reinterpret_cast<ushort16*>(mRaw->getData(0, j));
-
-            j++;
-          }
-
-          assert(dest);
-          ushort16 val = (*dest << 2) | ((c >> r) & 0x0003);
+        // We have read 8 bits, which is 4 pairs of 2 bits. So process 4 pixels.
+        for (uint32 p = 0; p < 4; p++) {
+          ushort16 low = (c >> (2 * p)) & 0b11;
+          ushort16 val = (*dest << 2) | low;
 
           if (width == 2672 && val < 512)
             val += 2; // No idea why this is needed
