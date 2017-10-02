@@ -34,7 +34,6 @@
 #include <cassert>                        // for assert
 
 using std::array;
-using std::min;
 
 namespace rawspeed {
 
@@ -212,33 +211,38 @@ void CrwDecompressor::decompress(const RawImage& mRaw, const Buffer* mFile,
                                  uint32 dec_table, bool lowbits) {
   assert(mFile);
 
-  int carry = 0;
-  int base[2];
-
-  auto mHuff = initHuffTables(dec_table);
-
   const uint32 height = mRaw->dim.y;
   const uint32 width = mRaw->dim.x;
 
-  uint32 offset = 540;
-  if (lowbits)
-    offset += height * width / 4;
+  {
+    assert(width > 0);
+    assert(width % 4 == 0);
+    assert(height > 0);
 
-  ByteStream input(mFile, offset);
-  // FIXME: fix this to not require two pumps
-  BitPumpJPEG lPump(input);
-  BitPumpJPEG iPump(input);
+    auto mHuff = initHuffTables(dec_table);
 
-  for (uint32 j = 0; j < height;) {
-    const int nBlocks = min(8U, height - j) * width >> 6;
-    if (nBlocks <= 0)
-      ThrowRDE("Image too small, not even a single block.");
+    uint32 offset = 540;
+    if (lowbits)
+      offset += height * width / 4;
 
+    // Each block encodes 64 pixels
+    assert((height * width) % 64 == 0);
+    const unsigned hBlocks = height * width / 64;
+    assert(hBlocks > 0);
+
+    ByteStream input(mFile, offset);
+    // FIXME: fix this to not require two pumps
+    BitPumpJPEG lPump(input);
+    BitPumpJPEG iPump(input);
+
+    int carry = 0;
+    int base[2];
+
+    uint32 j = 0;
     ushort16* dest = nullptr;
-
     uint32 i = 0;
 
-    for (int block = 0; block < nBlocks; block++) {
+    for (unsigned block = 0; block < hBlocks; block++) {
       array<int, 64> diffBuf = {{}};
       decodeBlock(&diffBuf, mHuff, &lPump, &iPump);
 
@@ -249,7 +253,7 @@ void CrwDecompressor::decompress(const RawImage& mRaw, const Buffer* mFile,
 
       for (uint32 k = 0; k < 64; k++) {
         if (i % width == 0) {
-          // new line
+          // new line. sadly, does not always happen when k == 0.
           i = 0;
 
           dest = reinterpret_cast<ushort16*>(mRaw->getData(0, j));
@@ -270,11 +274,13 @@ void CrwDecompressor::decompress(const RawImage& mRaw, const Buffer* mFile,
         dest++;
       }
     }
+    assert(j == height);
+    assert(i == width);
   }
 
   // Add the uncompressed 2 low bits to the decoded 8 high bits
   if (lowbits) {
-    offset = 26;
+    uint32 offset = 26;
 
     assert(width > 0);
     assert(width % 4 == 0);
