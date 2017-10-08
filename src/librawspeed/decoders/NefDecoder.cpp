@@ -252,39 +252,25 @@ void NefDecoder::DecodeUncompressed() {
   bool bitorder = ! hints.has("msb_override");
 
   offY = 0;
-  for (uint32 i = 0; i < slices.size(); i++) {
-    NefSlice slice = slices[i];
+  for (const NefSlice& slice : slices) {
     ByteStream in(mFile, slice.offset, slice.count);
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
-    try {
-      if (hints.has("coolpixmangled")) {
-        UncompressedDecompressor u(in, mRaw);
-        u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, 12,
-                              BitOrder_MSB32);
-      } else {
-        if (hints.has("coolpixsplit"))
-          readCoolpixSplitRaw(in, size, pos, width * bitPerPixel / 8);
-        else {
-          UncompressedDecompressor u(in, mRaw);
-          u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, bitPerPixel,
-                                bitorder ? BitOrder_MSB : BitOrder_LSB);
-        }
-      }
-    } catch (RawDecoderException &e) {
-      if (i>0)
-        mRaw->setError(e.what());
-      else
-        throw;
-    } catch (IOException &e) {
-      if (i>0)
-        mRaw->setError(e.what());
+
+    if (hints.has("coolpixmangled")) {
+      UncompressedDecompressor u(in, mRaw);
+      u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, 12,
+                            BitOrder_MSB32);
+    } else {
+      if (hints.has("coolpixsplit"))
+        readCoolpixSplitRaw(in, size, pos, width * bitPerPixel / 8);
       else {
-        ThrowRDE("IO error occurred in first slice, unable to decode more. "
-                 "Error is: %s",
-                 e.what());
+        UncompressedDecompressor u(in, mRaw);
+        u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, bitPerPixel,
+                              bitorder ? BitOrder_MSB : BitOrder_LSB);
       }
     }
+
     offY += slice.h;
   }
 }
