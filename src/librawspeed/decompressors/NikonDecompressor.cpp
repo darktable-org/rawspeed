@@ -84,11 +84,10 @@ std::vector<ushort16> NikonDecompressor::createCurve(ByteStream* metadata,
 
       const uint32 a_pos = i - b_scale;
       const uint32 b_pos = a_pos + step;
-      assert(a_pos >= 0);
       assert(a_pos < curve.size());
       assert(b_pos > 0);
       assert(b_pos < curve.size());
-      assert(a_pos != b_pos);
+      assert(a_pos < b_pos);
 
       const uint32 a_scale = step - b_scale;
       curve[i] = (a_scale * curve[a_pos] + b_scale * curve[b_pos]) / step;
