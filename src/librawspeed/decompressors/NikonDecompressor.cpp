@@ -74,12 +74,24 @@ std::vector<ushort16> NikonDecompressor::createCurve(ByteStream* metadata,
     step = curve.size() / (csize - 1);
 
   if (v0 == 68 && v1 == 32 && step > 0) {
+    if ((csize - 1) * step != curve.size() - 1)
+      ThrowRDE("Bad curve segment count (%u)", csize);
+
     for (size_t i = 0; i < csize; i++)
       curve[i * step] = metadata->getU16();
     for (size_t i = 0; i < curve.size() - 1; i++) {
-      curve[i] = (curve[i - i % step] * (step - i % step) +
-                  curve[i - i % step + step] * (i % step)) /
-                 step;
+      const uint32 b_scale = i % step;
+
+      const uint32 a_pos = i - b_scale;
+      const uint32 b_pos = a_pos + step;
+      assert(a_pos >= 0);
+      assert(a_pos < curve.size());
+      assert(b_pos > 0);
+      assert(b_pos < curve.size());
+      assert(a_pos != b_pos);
+
+      const uint32 a_scale = step - b_scale;
+      curve[i] = (a_scale * curve[a_pos] + b_scale * curve[b_pos]) / step;
     }
 
     metadata->setPosition(562);
