@@ -42,6 +42,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     auto decoder = parser.getDecoder(/*&metadata*/);
 
     decoder->applyCrop = false;
+    decoder->interpolateBadPixels = false;
     decoder->failOnUnknown = false;
     // decoder->checkSupport(&metadata);
 

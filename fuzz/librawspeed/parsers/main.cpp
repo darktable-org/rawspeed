@@ -80,6 +80,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
 #if DECODE
     decoder->applyCrop = false;
+    decoder->interpolateBadPixels = false;
     decoder->failOnUnknown = false;
     // decoder->checkSupport(&metadata);
 

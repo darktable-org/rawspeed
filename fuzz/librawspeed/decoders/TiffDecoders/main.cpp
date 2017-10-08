@@ -75,6 +75,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     auto decoder = std::make_unique<DECODER>(std::move(ifd), &buffer);
 
     decoder->applyCrop = false;
+    decoder->interpolateBadPixels = false;
     decoder->failOnUnknown = false;
     // decoder->checkSupport(&metadata);
 
