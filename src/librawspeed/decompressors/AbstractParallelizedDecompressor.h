@@ -33,7 +33,7 @@ namespace rawspeed {
 
 class RawDecompressorThread;
 
-class AbstractParallelizedDecompressor : AbstractDecompressor {
+class AbstractParallelizedDecompressor : public AbstractDecompressor {
   friend class RawDecompressorThread;
   virtual void decompressThreaded(const RawDecompressorThread* t) const = 0;
 
