@@ -125,12 +125,7 @@ RawImage ArwDecoder::decodeRawInternal() {
       mRaw->createData();
       ByteStream input(mFile, off);
 
-      try {
-        DecodeARW(input, width, height);
-      } catch (IOException &e) {
-        mRaw->setError(e.what());
-        // Let's ignore it, it may have delivered somewhat useful data.
-      }
+      DecodeARW(input, width, height);
 
       return mRaw;
     }
@@ -144,12 +139,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   raw = data[0];
   int compression = raw->getEntry(COMPRESSION)->getU32();
   if (1 == compression) {
-    try {
-      DecodeUncompressed(raw);
-    } catch (IOException &e) {
-      mRaw->setError(e.what());
-    }
-
+    DecodeUncompressed(raw);
     return mRaw;
   }
 
@@ -222,15 +212,10 @@ RawImage ArwDecoder::decodeRawInternal() {
 
   ByteStream input(mFile, off, c2);
 
-  try {
-    if (arw1)
-      DecodeARW(input, width, height);
-    else
-      DecodeARW2(input, width, height, bitPerPixel);
-  } catch (IOException &e) {
-    mRaw->setError(e.what());
-    // Let's ignore it, it may have delivered somewhat useful data.
-  }
+  if (arw1)
+    DecodeARW(input, width, height);
+  else
+    DecodeARW2(input, width, height, bitPerPixel);
 
   return mRaw;
 }
