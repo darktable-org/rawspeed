@@ -62,6 +62,40 @@ MARK_AS_ADVANCED(
     CMAKE_EXE_LINKER_FLAGS
     CMAKE_MODULE_LINKER_FLAGS )
 
+if(RAWSPEED_ENABLE_LTO)
+  include(llvm-toolchain)
+
+  set(lto_compile "-flto=thin")
+  set(lto_link "-flto=thin -fuse-ld=\"${LLVMLLD_EXECUTABLE}\" ${LLVMLLD_INCREMENTAL_LDFLAGS}")
+
+  set(CMAKE_C_FLAGS
+      "${CMAKE_C_FLAGS} ${lto_compile}"
+      CACHE STRING "Flags used by the C compiler during all builds."
+      FORCE )
+  set(CMAKE_CXX_FLAGS
+      "${CMAKE_CXX_FLAGS} ${lto_compile}"
+      CACHE STRING "Flags used by the C++ compiler during all builds."
+      FORCE )
+  set(CMAKE_EXE_LINKER_FLAGS
+      "${CMAKE_EXE_LINKER_FLAGS} ${lto_link}"
+      CACHE STRING "Flags used for linking binaries during all builds."
+      FORCE )
+  set(CMAKE_SHARED_LINKER_FLAGS
+      "${CMAKE_SHARED_LINKER_FLAGS} ${lto_link}"
+      CACHE STRING "Flags used by the shared libraries linker during all builds."
+      FORCE )
+  set(CMAKE_MODULE_LINKER_FLAGS
+      "${CMAKE_MODULE_LINKER_FLAGS} ${lto_link}"
+      CACHE STRING "Flags used by the module linker during all builds."
+      FORCE )
+  mark_as_advanced(
+      CMAKE_C_FLAGS
+      CMAKE_CXX_FLAGS
+      CMAKE_EXE_LINKER_FLAGS
+      CMAKE_SHARED_LINKER_FLAGS
+      CMAKE_MODULE_LINKER_FLAGS )
+endif()
+
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
 
