@@ -106,6 +106,20 @@ set(LIBFUZZER_ARCHIVE "/usr/local/lib/llvm/lib/libFuzzer.a" CACHE FILEPATH "File
 
 set(REFERENCE_SAMPLE_ARCHIVE "~/raw-camera-samples/raw.pixls.us-unique" CACHE PATH "The location of the reference sample set to use. Should contain filelist.sha1 and timestamp.txt")
 
+if(CMAKE_MAKE_PROGRAM MATCHES "ninja")
+  set(RAWSPEED_PARALLEL_LINK_JOBS "" CACHE STRING
+    "Define the maximum number of concurrent link jobs.")
+
+  if(RAWSPEED_PARALLEL_LINK_JOBS)
+    set_property(GLOBAL APPEND PROPERTY
+                 JOB_POOLS link_job_pool=${RAWSPEED_PARALLEL_LINK_JOBS})
+    set(CMAKE_JOB_POOL_LINK link_job_pool)
+  endif()
+else()
+  set(RAWSPEED_PARALLEL_LINK_JOBS "" CACHE STRING
+      "(Ninja-only) Define the maximum number of concurrent link jobs." FORCE)
+endif()
+
 include(build-type)
 
 if(USE_IWYU)
