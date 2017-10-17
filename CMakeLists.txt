@@ -38,6 +38,17 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(BINARY_PACKAGE_BUILD "Sets march optimization to generic" OFF)
 option(WITH_SSE2 "If SSE2 support is avaliable, do build SSE2 codepaths" ON)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  option(RAWSPEED_USE_LIBCXX "(Clang only) Build using libc++ as the standard library." OFF)
+
+  # when OSX_DEPLOYMENT_TARGET is 10.9 and newer, the default is libc++,
+  # but for no reason let's always specify/use libc++ for apple.
+  if(APPLE)
+    set(RAWSPEED_USE_LIBCXX ON)
+  endif()
+else()
+  set(RAWSPEED_USE_LIBCXX OFF CACHE BOOL "(Clang only) Build using libc++ as the standard library." FORCE)
+endif()
 option(WITH_PTHREADS "Enable threading support through pthread. Highly recommended" ON)
 option(WITH_OPENMP "Enable OpenMP support. Only used for tools, not the library itself." ON)
 option(WITH_PUGIXML "Enable XML support for cameras.xml reading" ON)
@@ -133,6 +144,10 @@ else()
 endif()
 
 include(build-type)
+
+if(RAWSPEED_USE_LIBCXX)
+  include(libc++)
+endif()
 
 if(USE_IWYU)
   include(iwyu)
