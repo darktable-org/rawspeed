@@ -1,6 +1,6 @@
 # RawSpeed Camera Definition File
 
-The camera definition file is used for decoding images which doesn’t require any code changes. This enables us to add support for cameras which where not yet released when the code was written.
+The camera definition file is used for decoding images which don’t require any code changes. This enables us to add support for cameras which were not yet released when the code was written.
 
 ```xml
 <Camera make="Panasonic" model="DMC-FZ45" mode="4:3" supported="yes" decoder_version="0">
@@ -57,7 +57,7 @@ This sets the canonical name for the camera. The content of the tag should be th
   </CFA>
 ```
 
-This refers to the color layout of the sensor. This is the position at of the colors on the uncropped image, so it will be the same no matter what crop you specify. Currently only 2×2 CFA patterns are possible.
+This refers to the color layout of the sensor. This is the position of the colors on the uncropped image, so it will be the same no matter what crop you specify. Currently only 2×2 CFA patterns are possible.
 
 From version 2, there is an alternative syntax; *CFA2*. This definition allows for sizes *bigger than 2x2* and has a simpler syntax:
 
@@ -77,7 +77,7 @@ Colors are G(reen), R(ed), B(blue) , F(uji green), C(yan), M(agenta) and Y(ellow
   <Crop x="0" y="0" width="-58" height="-10"/>
 ```
 
-This is the cropping to be applied to the image. x & y are specified relative to the top-left of the image and is specified in pixels. Width & Height can be a number which is the desired output size in pixels. A negative number for width or height specifies a number of pixels that must be cropped from the bottom/right side of the image.
+This is the cropping to be applied to the image. x & y are specified relative to the top-left of the image and are specified in pixels. Width & Height can be a number which is the desired output size in pixels. A negative number for width or height specifies a number of pixels that must be cropped from the bottom/right side of the image.
 
 ## Sensor Info
 
@@ -128,4 +128,4 @@ This may contain manufacturer-specific hints for decoding. This can result in th
   </Aliases>
 ```
 
-This is a possibility to add one or more model aliases for a camera, which may have different model names in different regions. The id attribute specifies the clean model name for this alias, if ommited defaults to alias value (so in this case is not really needed).
+This is a possibility to add one or more model aliases for a camera, which may have different model names in different regions. The id attribute specifies the clean model name for this alias, if omitted defaults to alias value (so in this case is not really needed).
