@@ -27,6 +27,7 @@
 #include "io/BitPumpJPEG.h"               // for BitPumpJPEG
 #include <algorithm>                      // for move, copy_n
 #include <cassert>                        // for assert
+#include <numeric>                        // for accumulate
 
 using std::copy_n;
 
@@ -137,6 +138,10 @@ void Cr2Decompressor::decodeN_X_Y()
     if (slicesWidth > mRaw->dim.x)
       ThrowRDE("Slice is longer than image's height, which is unsupported.");
   }
+
+  if (frame.h * std::accumulate(slicesWidths.begin(), slicesWidths.end(), 0) <
+      mRaw->dim.area())
+    ThrowRDE("Incorrrect slice height / slice widths! Less than image size.");
 
   // To understand the CR2 slice handling and sampling factor behavior, see
   // https://github.com/lclevy/libcraw2/blob/master/docs/cr2_lossless.pdf?raw=true
