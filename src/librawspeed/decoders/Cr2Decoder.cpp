@@ -173,14 +173,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
   Cr2Decompressor d(bs, mRaw);
 
-  try {
-    d.decode(s_width);
-  } catch (RawDecoderException &e) {
-    mRaw->setError(e.what());
-  } catch (IOException &e) {
-    // Let's try to ignore this - it might be truncated data, so something might be useful.
-    mRaw->setError(e.what());
-  }
+  d.decode(s_width);
 
   if (mRaw->metadata.subsampling.x > 1 || mRaw->metadata.subsampling.y > 1)
     sRawInterpolate();
