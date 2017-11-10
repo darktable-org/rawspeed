@@ -133,15 +133,19 @@
       <xs:maxLength value="6"/>
       <xs:enumeration value="BG"/>
       <xs:enumeration value="BGBRGR"/>
+      <xs:enumeration value="BGGRGG"/>
       <xs:enumeration value="BRGRBG"/>
       <xs:enumeration value="GB"/>
       <xs:enumeration value="GBGGRG"/>
+      <xs:enumeration value="GBRGRB"/>
       <xs:enumeration value="GGBGGR"/>
       <xs:enumeration value="GGRGGB"/>
       <xs:enumeration value="GR"/>
+      <xs:enumeration value="GRBGBR"/>
       <xs:enumeration value="GRGGBG"/>
       <xs:enumeration value="RBGBRG"/>
       <xs:enumeration value="RG"/>
+      <xs:enumeration value="RGGBGG"/>
       <xs:enumeration value="RGRBGB"/>
     </xs:restriction>
   </xs:simpleType>
