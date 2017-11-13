@@ -71,7 +71,7 @@ static inline void BM_BitStream(benchmark::State& state, Endianness endianness,
   Pump pump(bs);
 
   size_t processedBits = 0;
-  while (state.KeepRunning()) {
+  for (auto _ : state) {
     pump.resetBufferPosition();
 
     for (processedBits = 0; processedBits <= 8 * b.getSize();) {

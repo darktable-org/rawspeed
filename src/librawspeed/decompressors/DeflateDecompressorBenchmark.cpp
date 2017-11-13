@@ -113,7 +113,7 @@ static inline void BM_DeflateDecompressor(benchmark::State& state) {
 
   const rawspeed::ByteStream bs(buf, 0, buf.getSize());
 
-  while (state.KeepRunning()) {
+  for (auto _ : state) {
     DeflateDecompressor d(bs, mRaw, predictor, BPS::value);
 
     d.decode(&uBuffer, mRaw->dim.x, mRaw->dim.y, 0, 0);

@@ -48,7 +48,7 @@ static inline void BM_Cr2sRawInterpolator(benchmark::State& state) {
 
   Cr2sRawInterpolator i(mRaw, sraw_coeffs, hue);
 
-  while (state.KeepRunning())
+  for (auto _ : state)
     i.interpolate(version::value);
 
   state.SetComplexityN(dim.area());

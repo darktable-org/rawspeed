@@ -110,7 +110,7 @@ static inline void BM_RawSpeed(benchmark::State& state, const char* fileName,
   Timer<ChooseClockType::type> WT;
   Timer<CPUClock> TT;
 
-  while (state.KeepRunning()) {
+  for (auto _ : state) {
     RawParser parser(map.get());
     auto decoder(parser.getDecoder(&metadata));
 

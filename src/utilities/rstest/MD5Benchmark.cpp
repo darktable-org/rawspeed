@@ -28,7 +28,7 @@ static inline void BM_MD5(benchmark::State& state) {
   const size_t bufsize = state.range(0) * sizeof(char);
   std::unique_ptr<char, decltype(&free)> buf((char*)malloc(bufsize), &free);
 
-  while (state.KeepRunning()) {
+  for (auto _ : state) {
     rawspeed::md5::md5_state hash;
     rawspeed::md5::md5_hash((uint8_t*)buf.get(), bufsize, &hash);
   }
