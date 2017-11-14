@@ -161,6 +161,15 @@ RawImage ArwDecoder::decodeRawInternal() {
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
   uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
 
+  switch (bitPerPixel) {
+  case 8:
+  case 12:
+  case 14:
+    break;
+  default:
+    ThrowRDE("Unexpected bits per pixel: %u", bitPerPixel);
+  }
+
   // Sony E-550 marks compressed 8bpp ARW with 12 bit per pixel
   // this makes the compression detect it as a ARW v1.
   // This camera has however another MAKER entry, so we MAY be able
