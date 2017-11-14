@@ -179,7 +179,8 @@ RawImage ArwDecoder::decodeRawInternal() {
   if (arw1)
     height += 8;
 
-  if (width == 0 || height == 0 || width > 8000 || height > 5320)
+  if (width == 0 || height == 0 || height % 2 != 0 || width > 8000 ||
+      height > 5320)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   mRaw->dim = iPoint2D(width, height);
@@ -247,8 +248,9 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) {
 }
 
 void ArwDecoder::DecodeARW(const ByteStream& input, uint32 w, uint32 h) {
-  if (0 == w)
-    return;
+  assert(w > 0);
+  assert(h > 0);
+  assert(h % 2 == 0);
 
   BitPumpMSB bits(input);
   uchar8* data = mRaw->getData();
