@@ -73,6 +73,7 @@ void MrwDecoder::parseHeader() {
   bs = bs.getSubStream(0, dataOffset);
   bs.skipBytes(8);
 
+  bool foundPRD = false;
   while (bs.getRemainSize() > 0) {
     uint32 tag = bs.getU32();
     uint32 len = bs.getU32();
@@ -84,9 +85,16 @@ void MrwDecoder::parseHeader() {
 
     switch (tag) {
     case 0x505244: {            // PRD
+      foundPRD = true;
       bs.skipBytes(8);          // Version Number
       raw_height = bs.getU16(); // CCD Size Y
       raw_width = bs.getU16();  // CCD Size X
+
+      if (!raw_width || !raw_height || raw_width > 3280 || raw_height > 2456) {
+        ThrowRDE("Unexpected image dimensions found: (%u; %u)", raw_width,
+                 raw_height);
+      }
+
       bs.skipBytes(2);          // Image Size Y
       bs.skipBytes(2);          // Image Size X
 
@@ -133,9 +141,16 @@ void MrwDecoder::parseHeader() {
     bs.setPosition(origPos + len);
   }
 
+  if (!foundPRD)
+    ThrowRDE("Did not find PRD tag. Image corrupt.");
+
   // processed all of the header. the image data is directly next
-  const auto imageSize = raw_height * raw_width * bpp / 8;
-  imageData = db.getSubView(bs.getPosition(), imageSize);
+
+  const auto imageBits = raw_height * raw_width * bpp;
+  assert(imageBits > 0);
+  assert(imageBits % 8 == 0);
+
+  imageData = db.getSubView(bs.getPosition(), imageBits / 8);
 }
 
 RawImage MrwDecoder::decodeRawInternal() {
