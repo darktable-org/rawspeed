@@ -90,8 +90,10 @@ std::string find_cameras_xml(const char *argv0) {
 #endif
   }
 
+#ifdef RAWSPEED_STANDALONE_BUILD
   // running from build dir?
   found_camfile = std::string(CMAKE_SOURCE_DIR "/data/cameras.xml");
+#endif
 
   if (stat(found_camfile.c_str(), &statbuf)) {
 #ifndef __APPLE__

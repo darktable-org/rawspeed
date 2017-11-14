@@ -47,7 +47,13 @@
 #cmakedefine HAVE_MM_MALLOC
 #cmakedefine HAVE_ALIGNED_MALLOC
 
+#cmakedefine RAWSPEED_STANDALONE_BUILD
+#ifdef RAWSPEED_STANDALONE_BUILD
 #define CMAKE_SOURCE_DIR "@CMAKE_SOURCE_DIR@"
+#else
+// If rawspeed is being built as part of some larger build, we can not retain
+// the CMAKE_SOURCE_DIR, because that would affect the reproducible builds.
+#endif
 
 // see http://clang.llvm.org/docs/LanguageExtensions.html
 #ifndef __has_feature      // Optional of course.
