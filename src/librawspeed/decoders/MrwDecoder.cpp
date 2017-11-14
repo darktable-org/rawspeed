@@ -161,15 +161,10 @@ RawImage MrwDecoder::decodeRawInternal() {
   ByteStream bs(db);
   UncompressedDecompressor u(bs, mRaw);
 
-  try {
-    if (packed)
-      u.decode12BitRaw<Endianness::big>(raw_width, raw_height);
-    else
-      u.decodeRawUnpacked<12, Endianness::big>(raw_width, raw_height);
-  } catch (IOException &e) {
-    mRaw->setError(e.what());
-    // Let's ignore it, it may have delivered somewhat useful data.
-  }
+  if (packed)
+    u.decode12BitRaw<Endianness::big>(raw_width, raw_height);
+  else
+    u.decodeRawUnpacked<12, Endianness::big>(raw_width, raw_height);
 
   return mRaw;
 }
