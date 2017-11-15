@@ -15,6 +15,7 @@ HuffmanTableFuzzer-BitPumpMSB32-NoFullDecode
 RawParserFuzzer-GetDecoder
 RawParserFuzzer-GetDecoder-Decode
 RawSpeedFuzzer
+SonyArw1DecompressorFuzzer
 TiffDecoderFuzzer-ArwDecoder
 TiffDecoderFuzzer-Cr2Decoder
 TiffDecoderFuzzer-DcrDecoder
