@@ -102,6 +102,9 @@ void MrwDecoder::parseHeader() {
       if (12 != bpp && 16 != bpp)
         ThrowRDE("Unknown data size");
 
+      if ((raw_height * raw_width * bpp) % 8 != 0)
+        ThrowRDE("Bad combination of image size and raw dimensions.");
+
       if (12 != bs.getByte()) // PixelSize
         ThrowRDE("Unexpected pixel size");
 
