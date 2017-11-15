@@ -118,7 +118,7 @@ void AbstractParallelizedDecompressor::startThreading(uint32 pieces) const {
 }
 #endif
 
-void AbstractParallelizedDecompressor::decode() const {
+void AbstractParallelizedDecompressor::decompress() const {
   startThreading(mRaw->dim.y);
 }
 

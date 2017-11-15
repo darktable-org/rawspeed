@@ -99,7 +99,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       // It's using the new .RW2 decoding method
       PanasonicDecompressor p(mRaw, ByteStream(mFile, offset),
                               hints.has("zero_is_not_bad"), load_flags);
-      p.decode();
+      p.decompress();
     }
   } else {
     if (width == 0 || height == 0 || width > 5488 || height > 3904)
@@ -123,7 +123,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
     // It's using the new .RW2 decoding method
     PanasonicDecompressor p(mRaw, ByteStream(mFile, offset),
                             hints.has("zero_is_not_bad"), load_flags);
-    p.decode();
+    p.decompress();
   }
 
   return mRaw;

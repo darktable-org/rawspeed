@@ -51,7 +51,7 @@ public:
       : AbstractParallelizedDecompressor(img), compression(compression_),
         mFixLjpeg(mFixLjpeg_), mBps(mBps_), mPredictor(mPredictor_) {}
 
-  void decode() const final;
+  void decompress() const final;
 
   std::vector<DngSliceElement> slices;
 

@@ -106,7 +106,7 @@ public:
 
   void fuji_compressed_load_raw();
 
-  void decode() const final;
+  void decompress() const final;
 
 protected:
   struct fuji_compressed_params {

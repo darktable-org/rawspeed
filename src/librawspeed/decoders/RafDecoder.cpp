@@ -107,7 +107,7 @@ RawImage RafDecoder::decodeRawInternal() {
 
     mRaw->createData();
 
-    f.decode();
+    f.decompress();
 
     return mRaw;
   }

@@ -56,7 +56,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     mRaw->createData();
 
-    a.decode();
+    a.decompress();
 
     mRaw->checkMemIsInitialized();
   } catch (rawspeed::RawspeedException&) {

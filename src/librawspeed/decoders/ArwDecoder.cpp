@@ -265,7 +265,7 @@ void ArwDecoder::DecodeARW2(const ByteStream& input, uint32 w, uint32 h,
   if (bpp == 8) {
     SonyArw2Decompressor a2(mRaw, input);
     mRaw->createData();
-    a2.decode();
+    a2.decompress();
     return;
   } // End bpp = 8
 

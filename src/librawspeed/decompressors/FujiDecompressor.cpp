@@ -758,7 +758,9 @@ void FujiDecompressor::fuji_compressed_load_raw() {
   }
 }
 
-void FujiDecompressor::decode() const { startThreading(header.blocks_in_row); }
+void FujiDecompressor::decompress() const {
+  startThreading(header.blocks_in_row);
+}
 
 void FujiDecompressor::decompressThreaded(
     const RawDecompressorThread* t) const {

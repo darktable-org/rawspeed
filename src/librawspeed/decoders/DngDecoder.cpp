@@ -315,7 +315,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
 
   mRaw->createData();
 
-  slices.decode();
+  slices.decompress();
 }
 
 RawImage DngDecoder::decodeRawInternal() {

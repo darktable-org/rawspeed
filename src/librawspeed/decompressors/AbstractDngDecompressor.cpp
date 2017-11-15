@@ -40,7 +40,9 @@
 
 namespace rawspeed {
 
-void AbstractDngDecompressor::decode() const { startThreading(slices.size()); }
+void AbstractDngDecompressor::decompress() const {
+  startThreading(slices.size());
+}
 
 void AbstractDngDecompressor::decompressThreaded(
     const RawDecompressorThread* t) const {
