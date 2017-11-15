@@ -13,6 +13,7 @@ add_subdirectory(HuffmanTable)
 
 set(DECOMPRESSORS
   "SonyArw1Decompressor"
+  "SonyArw2Decompressor"
 )
 
 foreach(decompressor IN LISTS DECOMPRESSORS)
