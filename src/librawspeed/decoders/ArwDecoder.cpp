@@ -25,6 +25,7 @@
 #include "common/RawspeedException.h"               // for RawspeedException
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/HuffmanTable.h"             // for HuffmanTable
+#include "decompressors/SonyArw1Decompressor.h"     // for SonyArw1Decompre...
 #include "decompressors/SonyArw2Decompressor.h"     // for SonyArw2Decompre...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/BitPumpMSB.h"                          // for BitPumpMSB
@@ -122,10 +123,11 @@ RawImage ArwDecoder::decodeRawInternal() {
       uint32 height = 2608;
 
       mRaw->dim = iPoint2D(width, height);
-      mRaw->createData();
-      ByteStream input(mFile, off);
 
-      DecodeARW(input, width, height);
+      ByteStream input(mFile, off);
+      SonyArw1Decompressor a(mRaw);
+      mRaw->createData();
+      a.decompress(input);
 
       return mRaw;
     }
@@ -193,7 +195,6 @@ RawImage ArwDecoder::decodeRawInternal() {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
 
   std::vector<ushort16> curve(0x4001);
   TiffEntry *c = raw->getEntry(SONY_CURVE);
@@ -222,9 +223,11 @@ RawImage ArwDecoder::decodeRawInternal() {
 
   ByteStream input(mFile, off, c2);
 
-  if (arw1)
-    DecodeARW(input, width, height);
-  else
+  if (arw1) {
+    SonyArw1Decompressor a(mRaw);
+    mRaw->createData();
+    a.decompress(input);
+  } else
     DecodeARW2(input, width, height, bitPerPixel);
 
   return mRaw;
@@ -256,55 +259,18 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) {
     u.decodeRawUnpacked<16, Endianness::little>(width, height);
 }
 
-void ArwDecoder::DecodeARW(const ByteStream& input, uint32 w, uint32 h) {
-  assert(w > 0);
-  assert(h > 0);
-  assert(h % 2 == 0);
-
-  BitPumpMSB bits(input);
-  uchar8* data = mRaw->getData();
-  auto* dest = reinterpret_cast<ushort16*>(&data[0]);
-  uint32 pitch = mRaw->pitch / sizeof(ushort16);
-  int sum = 0;
-  for (int64 x = w - 1; x >= 0; x--) {
-    for (uint32 y = 0; y < h + 1; y += 2) {
-      bits.fill();
-
-      if (y == h)
-        y = 1;
-
-      uint32 len = 4 - bits.getBitsNoFill(2);
-
-      if (len == 3 && bits.getBitsNoFill(1))
-        len = 0;
-
-      if (len == 4)
-        while (len < 17 && !bits.getBitsNoFill(1))
-          len++;
-
-      int diff = bits.getBits(len);
-      diff = len != 0 ? HuffmanTable::signExtended(diff, len) : diff;
-      sum += diff;
-
-      if ((sum >> 12) > 0)
-        ThrowRDE("Error decompressing");
-
-      if (y < h)
-        dest[x + y * pitch] = sum;
-    }
-  }
-}
-
 void ArwDecoder::DecodeARW2(const ByteStream& input, uint32 w, uint32 h,
                             uint32 bpp) {
 
   if (bpp == 8) {
     SonyArw2Decompressor a2(mRaw, input);
+    mRaw->createData();
     a2.decode();
     return;
   } // End bpp = 8
 
   if (bpp == 12) {
+    mRaw->createData();
     UncompressedDecompressor u(input, mRaw);
     u.decode12BitRaw<Endianness::little>(w, h);
 

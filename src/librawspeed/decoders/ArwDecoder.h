@@ -50,7 +50,6 @@ protected:
 
   int getDecoderVersion() const override { return 1; }
   RawImage decodeSRF(const TiffIFD* raw);
-  void DecodeARW(const ByteStream& input, uint32 w, uint32 h);
   void DecodeARW2(const ByteStream& input, uint32 w, uint32 h, uint32 bpp);
   void DecodeUncompressed(const TiffIFD* raw);
   void SonyDecrypt(const uint32* ibuf, uint32* obuf, uint32 len, uint32 key);
