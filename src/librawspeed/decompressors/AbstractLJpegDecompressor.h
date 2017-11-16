@@ -144,6 +144,9 @@ class AbstractLJpegDecompressor : public AbstractDecompressor {
   std::vector<std::unique_ptr<HuffmanTable>> huffmanTableStore;
   HuffmanTable ht_;      // temporary table, used
 
+  uint32 Pt = 0;
+  std::array<HuffmanTable*, 4> huff{{}}; // 4 pointers into the store
+
 public:
   AbstractLJpegDecompressor(ByteStream bs, const RawImage& img)
       : input(std::move(bs)), mRaw(img) {
@@ -197,8 +200,6 @@ protected:
 
   SOFInfo frame;
   uint32 predictorMode = 0;
-  uint32 Pt = 0;
-  std::array<HuffmanTable*, 4> huff{{}}; // 4 pointers into the store
 };
 
 } // namespace rawspeed
