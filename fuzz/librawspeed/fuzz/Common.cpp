@@ -34,6 +34,11 @@ rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs) {
   if (type != rawspeed::TYPE_USHORT16 && type != rawspeed::TYPE_FLOAT32)
     ThrowRSE("Unknown image type: %u", type);
 
-  return rawspeed::RawImage::create(rawspeed::iPoint2D(width, height),
-                                    rawspeed::RawImageType(type), cpp);
+  rawspeed::RawImage mRaw(
+      rawspeed::RawImage::create(rawspeed::RawImageType(type)));
+
+  mRaw->dim = rawspeed::iPoint2D(width, height);
+  mRaw->setCpp(cpp);
+
+  return mRaw;
 };
