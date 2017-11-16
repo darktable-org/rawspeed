@@ -29,6 +29,7 @@
 #include <cmath>                          // for NAN
 #include <cstdlib>                        // for free
 #include <cstring>                        // for memset, memcpy, strdup
+#include <limits>                         // for numeric_limits
 #include <memory>                         // for unique_ptr
 
 using std::fill_n;
@@ -41,8 +42,13 @@ RawImageData::RawImageData() : cfa(iPoint2D(0, 0)) {
 }
 
 RawImageData::RawImageData(const iPoint2D& _dim, uint32 _bpc, uint32 _cpp)
-    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), cpp(_cpp),
-      bpp(_bpc * _cpp) {
+    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), cpp(_cpp) {
+  assert(_bpc > 0);
+
+  if (cpp > std::numeric_limits<decltype(bpp)>::max() / _bpc)
+    ThrowRDE("Components-per-pixel is too large.");
+
+  bpp = _bpc * _cpp;
   blackLevelSeparate.fill(-1);
   createData();
 }
