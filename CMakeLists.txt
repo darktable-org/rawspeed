@@ -115,8 +115,6 @@ set(ZLIB_PATH "/usr/src/zlib" CACHE PATH "Path to the zlib root tree.")
 set(GOOGLEBENCHMARK_PATH "/usr/src/googlebenchmark" CACHE PATH
                     "Path to the googlebenchmark root tree.")
 
-set(LIBFUZZER_ARCHIVE "/usr/local/lib/llvm/lib/libFuzzer.a" CACHE FILEPATH "Filepath to the libFuzzer.a archive.")
-
 set(REFERENCE_SAMPLE_ARCHIVE "~/raw-camera-samples/raw.pixls.us-unique" CACHE PATH "The location of the reference sample set to use. Should contain filelist.sha1 and timestamp.txt")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")

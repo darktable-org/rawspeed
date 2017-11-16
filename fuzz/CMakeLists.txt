@@ -21,8 +21,9 @@ if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_BUILD_TYPE STREQUAL "FU
     add_test(NAME fuzzers/${fuzzer} COMMAND ${fuzzer})
   endmacro()
 else()
-  add_library(libFuzzer STATIC IMPORTED "${LIBFUZZER_ARCHIVE}")
-  set_property(TARGET libFuzzer PROPERTY IMPORTED_LOCATION "${LIBFUZZER_ARCHIVE}")
+  add_library(libFuzzer INTERFACE)
+  target_compile_options(libFuzzer INTERFACE "-fsanitize=fuzzer")
+  target_link_libraries (libFuzzer INTERFACE "-fsanitize=fuzzer")
 
   file(GLOB FUZZ_DICT "common.dict")
 

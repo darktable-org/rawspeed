@@ -164,7 +164,7 @@ set(fuzz "-O3 -ffast-math")
 if(NOT DEFINED ENV{LIB_FUZZING_ENGINE})
   # specialhandling: oss-fuzz provides all the needed flags already.
   set(fuzz "${fuzz} ${asan} ${ubsan}")
-  set(fuzz "${fuzz} -fsanitize-coverage=trace-pc-guard,indirect-calls,trace-cmp")
+  set(fuzz "${fuzz} -fsanitize=fuzzer-no-link")
 else()
   message(STATUS "LIB_FUZZING_ENGINE env variable is set, assuming this is oss-fuzz, not setting special compiler flags.")
 endif()
