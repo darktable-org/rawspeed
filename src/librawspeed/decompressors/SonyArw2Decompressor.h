@@ -33,7 +33,7 @@ class SonyArw2Decompressor final : public AbstractParallelizedDecompressor {
   ByteStream input;
 
 public:
-  SonyArw2Decompressor(const RawImage& img, ByteStream input);
+  SonyArw2Decompressor(const RawImage& img, const ByteStream& input);
 };
 
 } // namespace rawspeed

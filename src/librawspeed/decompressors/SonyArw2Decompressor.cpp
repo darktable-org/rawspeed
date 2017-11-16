@@ -24,6 +24,7 @@
 #include "common/Common.h"                                  // for uchar8
 #include "common/Point.h"                                   // for iPoint2D
 #include "common/RawImage.h"                                // for RawImage
+#include "decoders/RawDecoderException.h"                   // for ThrowRDE, ...
 #include "decompressors/AbstractParallelizedDecompressor.h" // for RawDecom...
 #include "io/BitPumpLSB.h"                                  // for BitPumpLSB
 #include <algorithm>                                        // for move
@@ -31,10 +32,20 @@
 namespace rawspeed {
 
 SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
-                                           ByteStream input_)
-    : AbstractParallelizedDecompressor(img), input(std::move(input_)) {
+                                           const ByteStream& input_)
+    : AbstractParallelizedDecompressor(img) {
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+      mRaw->getBpp() != 2)
+    ThrowRDE("Unexpected component count / data type");
+
+  const uint32 w = mRaw->dim.x;
+  const uint32 h = mRaw->dim.y;
+
+  if (w == 0 || h == 0 || w > 8000 || h > 5320)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", w, h);
+
   // 1 byte per pixel
-  input.check(mRaw->dim.x * mRaw->dim.y);
+  input = input_.peekStream(mRaw->dim.x * mRaw->dim.y);
 }
 
 void SonyArw2Decompressor::decompressThreaded(

@@ -92,8 +92,11 @@ public:
     pos += size_;
     return ret;
   }
+  inline ByteStream peekStream(size_type size_) const {
+    return getSubStream(pos, size_);
+  }
   inline ByteStream getStream(size_type size_) {
-    ByteStream ret = getSubStream(pos, size_);
+    ByteStream ret = peekStream(size_);
     pos += size_;
     return ret;
   }
