@@ -1,4 +1,6 @@
 FILE(GLOB RAWSPEED_FUZZ_SOURCES
+  "Common.cpp"
+  "Common.h"
   "RawSpeed.cpp"
 )
 

@@ -21,6 +21,7 @@
 #include "decompressors/SonyArw1Decompressor.h" // for SonyArw1Decompre...
 #include "common/RawImage.h"                    // for RawImage
 #include "common/RawspeedException.h"           // for RawspeedException
+#include "fuzz/Common.h"                        // for CreateRawImage
 #include "io/Buffer.h"                          // for Buffer, DataBuffer
 #include "io/ByteStream.h"                      // for ByteStream
 #include "io/Endianness.h"                      // for Endianness, Endianness::
@@ -38,13 +39,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
-    const rawspeed::uint32 width = bs.getU32();
-    const rawspeed::uint32 height = bs.getU32();
-    const auto format = rawspeed::RawImageType(bs.getU32());
-    const rawspeed::uint32 cpp = bs.getU32();
-
-    rawspeed::RawImage mRaw(rawspeed::RawImage::create(
-        rawspeed::iPoint2D(width, height), format, cpp));
+    rawspeed::RawImage mRaw(CreateRawImage(&bs));
 
     rawspeed::SonyArw1Decompressor a(mRaw);
 

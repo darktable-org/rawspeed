@@ -11,7 +11,6 @@ else()
 endif()
 
 target_link_libraries(rawspeed_fuzz PUBLIC rawspeed)
-target_include_directories(rawspeed_fuzz PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_BUILD_TYPE STREQUAL "FUZZ"))
   message(WARNING "For fuzzets to function, compiler must be Clang, and build type must be FUZZ.")
