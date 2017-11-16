@@ -18,18 +18,22 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "fuzz/Common.h"     // for CreateRawImage
-#include "common/RawImage.h" // for RawImage
-#include "io/ByteStream.h"   // for ByteStream
+#include "fuzz/Common.h"              // for CreateRawImage
+#include "common/RawImage.h"          // for RawImage
+#include "common/RawspeedException.h" // for RawspeedException
+#include "io/ByteStream.h"            // for ByteStream
 
 rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs) {
   assert(bs);
 
   const rawspeed::uint32 width = bs->getU32();
   const rawspeed::uint32 height = bs->getU32();
-  const auto format = rawspeed::RawImageType(bs->getU32());
+  const rawspeed::uint32 type = bs->getU32();
   const rawspeed::uint32 cpp = bs->getU32();
 
-  return rawspeed::RawImage::create(rawspeed::iPoint2D(width, height), format,
-                                    cpp);
+  if (type != rawspeed::TYPE_USHORT16 && type != rawspeed::TYPE_FLOAT32)
+    ThrowRSE("Unknown image type: %u", type);
+
+  return rawspeed::RawImage::create(rawspeed::iPoint2D(width, height),
+                                    rawspeed::RawImageType(type), cpp);
 };
