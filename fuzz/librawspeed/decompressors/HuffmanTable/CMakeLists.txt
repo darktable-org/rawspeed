@@ -14,9 +14,6 @@ function(add_ht_fuzzer pump decode)
       -DFULLDECODE=${${decode}}
   )
 
-  target_link_libraries(${fuzzer} rawspeed)
-  target_link_libraries(${fuzzer} libFuzzer)
-
   add_fuzz_target(${fuzzer})
 
   add_dependencies(HuffmanTableFuzzers ${fuzzer})

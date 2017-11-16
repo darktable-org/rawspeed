@@ -10,9 +10,6 @@ function(add_decoder {decoder})
       -DDECODER=${decoder}
   )
 
-  target_link_libraries(${fuzzer} rawspeed)
-  target_link_libraries(${fuzzer} libFuzzer)
-
   add_fuzz_target(${fuzzer})
 
   add_dependencies(TiffBasedDecoderFuzzers ${fuzzer})

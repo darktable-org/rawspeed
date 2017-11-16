@@ -11,9 +11,6 @@ function(add_parser_fuzzer parser variant boolvar boolvar2)
       -DDECODE=${boolvar2}
   )
 
-  target_link_libraries(${fuzzer} rawspeed)
-  target_link_libraries(${fuzzer} libFuzzer)
-
   add_fuzz_target(${fuzzer})
 
   add_dependencies(ParserFuzzers ${fuzzer})

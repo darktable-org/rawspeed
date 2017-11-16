@@ -51,12 +51,6 @@
 #endif
 #endif
 
-// define this function, it is only declared in rawspeed:
-// for fuzzing, do not want any threading.
-extern "C" int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
-  return 1;
-}
-
 #if GETDECODER && DECODE
 static const rawspeed::CameraMetaData metadata{};
 #endif

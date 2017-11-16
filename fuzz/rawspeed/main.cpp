@@ -23,12 +23,6 @@
 #include <cstdint>        // for uint8_t
 #include <memory>         // for unique_ptr
 
-// define this function, it is only declared in rawspeed:
-// for fuzzing, do not want any threading.
-extern "C" int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
-  return 1;
-}
-
 static const rawspeed::CameraMetaData metadata{};
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
