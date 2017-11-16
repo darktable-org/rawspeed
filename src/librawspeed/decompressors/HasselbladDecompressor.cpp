@@ -53,6 +53,8 @@ void HasselbladDecompressor::decodeScan() {
   assert(frame.w > 0);
   assert(frame.w % 2 == 0);
 
+  const auto ht = getHuffmanTables<1>();
+
   BitPumpMSB32 bitStream(input);
   // Pixels are packed two at a time, not like LJPEG:
   // [p1_length_as_huffman][p2_length_as_huffman][p0_diff_with_length][p1_diff_with_length]|NEXT PIXELS
@@ -61,8 +63,8 @@ void HasselbladDecompressor::decodeScan() {
     int p1 = 0x8000 + pixelBaseOffset;
     int p2 = 0x8000 + pixelBaseOffset;
     for (uint32 x = 0; x < frame.w; x += 2) {
-      int len1 = huff[0]->decodeLength(bitStream);
-      int len2 = huff[0]->decodeLength(bitStream);
+      int len1 = ht[0]->decodeLength(bitStream);
+      int len2 = ht[0]->decodeLength(bitStream);
       p1 += getBits(&bitStream, len1);
       p2 += getBits(&bitStream, len2);
       dest[x] = p1;
