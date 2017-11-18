@@ -161,12 +161,12 @@ MARK_AS_ADVANCED(
 
 set(fuzz "-O3 -ffast-math")
 
-if(NOT DEFINED ENV{LIB_FUZZING_ENGINE})
-  # specialhandling: oss-fuzz provides all the needed flags already.
+if(NOT LIB_FUZZING_ENGINE)
   set(fuzz "${fuzz} ${asan} ${ubsan}")
   set(fuzz "${fuzz} -fsanitize=fuzzer-no-link")
 else()
-  message(STATUS "LIB_FUZZING_ENGINE env variable is set, assuming this is oss-fuzz, not setting special compiler flags.")
+  # specialhandling: oss-fuzz provides all the needed flags already.
+  message(STATUS "LIB_FUZZING_ENGINE override option is passed, not setting special compiler flags.")
 endif()
 
 set(fuzz "${fuzz} -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION")
