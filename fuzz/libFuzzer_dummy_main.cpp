@@ -56,7 +56,7 @@ static void process(const char* filename) noexcept {
 }
 
 int main(int argc, char** argv) {
-  if (1 == argc)
+  if (1 == argc || (2 == argc && std::string("-help=1") == argv[1]))
     return usage();
 
 #ifdef _OPENMP
