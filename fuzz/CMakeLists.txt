@@ -12,6 +12,16 @@ endif()
 
 target_link_libraries(rawspeed_fuzz PUBLIC rawspeed)
 
+macro(add_fuzz_target__base fuzzer)
+  target_link_libraries(${fuzzer} PUBLIC rawspeed)
+  target_link_libraries(${fuzzer} PUBLIC rawspeed_fuzz)
+
+  list(APPEND ALL_FUZZERS "${fuzzer}")
+  set(ALL_FUZZERS "${ALL_FUZZERS}" CACHE INTERNAL "" FORCE)
+
+  add_test(NAME fuzzers/${fuzzer} COMMAND ${fuzzer} -help=1)
+endmacro()
+
 if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_BUILD_TYPE STREQUAL "FUZZ"))
   message(WARNING "For fuzzets to function, compiler must be Clang, and build type must be FUZZ.")
 
@@ -24,13 +34,7 @@ if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_BUILD_TYPE STREQUAL "FU
   endif()
 
   macro(add_fuzz_target fuzzer)
-    target_link_libraries(${fuzzer} PUBLIC rawspeed)
-    target_link_libraries(${fuzzer} PUBLIC rawspeed_fuzz)
-
-    list(APPEND ALL_FUZZERS "${fuzzer}")
-    set(ALL_FUZZERS "${ALL_FUZZERS}" CACHE INTERNAL "" FORCE)
-
-    add_test(NAME fuzzers/${fuzzer} COMMAND ${fuzzer})
+    add_fuzz_target__base(${fuzzer})
   endmacro()
 else()
   if(NOT LIB_FUZZING_ENGINE)
@@ -48,11 +52,7 @@ else()
   file(GLOB FUZZ_DICT "common.dict")
 
   macro(add_fuzz_target fuzzer)
-    target_link_libraries(${fuzzer} PUBLIC rawspeed)
-    target_link_libraries(${fuzzer} PUBLIC rawspeed_fuzz)
-
-    list(APPEND ALL_FUZZERS ${fuzzer})
-    set(ALL_FUZZERS "${ALL_FUZZERS}" CACHE INTERNAL "" FORCE)
+    add_fuzz_target__base(${fuzzer})
 
     install(TARGETS ${fuzzer} DESTINATION "${CMAKE_INSTALL_BINDIR}")
     install(FILES "${FUZZ_DICT}" DESTINATION "${CMAKE_INSTALL_BINDIR}" RENAME "${fuzzer}.dict")
