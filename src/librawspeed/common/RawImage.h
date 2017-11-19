@@ -116,6 +116,7 @@ public:
   void createData();
   void poisonPadding();
   void unpoisonPadding();
+  void checkRowIsInitialized(int row);
   void checkMemIsInitialized();
   void destroyData();
   void blitFrom(const RawImage& src, const iPoint2D& srcPos,
