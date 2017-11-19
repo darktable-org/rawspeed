@@ -125,6 +125,7 @@ int32 SamsungV0Decompressor::calcAdj(BitPumpMSB32* bits, int b) {
 void SamsungV0Decompressor::decompressStrip(uint32 y,
                                             const ByteStream& bs) const {
   const uint32 width = mRaw->dim.x;
+  assert(width > 0);
 
   BitPumpMSB32 bits(bs);
 
@@ -175,6 +176,9 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
 
     if (dir) {
       // Upward prediction
+
+      if (y < 2)
+        ThrowRDE("Upward prediction for the first two rows. Raw corrupt");
 
       if (x + 16 >= width)
         ThrowRDE("Upward prediction for the last block of pixels. Raw corrupt");
