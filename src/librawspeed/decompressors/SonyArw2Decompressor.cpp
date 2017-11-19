@@ -41,7 +41,7 @@ SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
   const uint32 w = mRaw->dim.x;
   const uint32 h = mRaw->dim.y;
 
-  if (w == 0 || h == 0 || w > 8000 || h > 5320)
+  if (w == 0 || h == 0 || w % 32 != 0 || w > 8000 || h > 5320)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", w, h);
 
   // 1 byte per pixel
@@ -53,6 +53,10 @@ void SonyArw2Decompressor::decompressThreaded(
   uchar8* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
   int32 w = mRaw->dim.x;
+
+  assert(mRaw->dim.x > 0);
+  assert(mRaw->dim.x % 32 == 0);
+  assert(mRaw->dim.y > 0);
 
   BitPumpLSB bits(input);
   for (uint32 y = t->start; y < t->end; y++) {
