@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "benchmark/Common.h"
+#include "bench/Common.h"
 #include "common/Common.h" // for roundUp
 #include "common/Point.h"  // for iPoint2D
 #include <cassert>         // for assert

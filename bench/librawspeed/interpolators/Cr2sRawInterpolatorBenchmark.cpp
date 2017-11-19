@@ -19,7 +19,7 @@
 */
 
 #include "interpolators/Cr2sRawInterpolator.h" // for Cr2sRawInterpolator
-#include "benchmark/Common.h"                  // for areaToRectangle
+#include "bench/Common.h"                      // for areaToRectangle
 #include "common/Common.h"                     // for roundUp, ushort16
 #include "common/Point.h"                      // for iPoint2D
 #include "common/RawImage.h"                   // for RawImage, ImageMetaData
@@ -28,9 +28,9 @@
 #include <type_traits>                         // for integral_constant
 
 using rawspeed::Cr2sRawInterpolator;
+using rawspeed::iPoint2D;
 using rawspeed::RawImage;
 using rawspeed::TYPE_USHORT16;
-using rawspeed::iPoint2D;
 using rawspeed::ushort16;
 using std::array;
 using std::integral_constant;

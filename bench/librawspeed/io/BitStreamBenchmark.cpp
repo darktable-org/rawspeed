@@ -34,11 +34,11 @@
 #include <string>                // for string, to_string
 #include <type_traits>           // for integral_constant
 
+using rawspeed::BitPumpJPEG;
 using rawspeed::BitPumpLSB;
 using rawspeed::BitPumpMSB;
 using rawspeed::BitPumpMSB16;
 using rawspeed::BitPumpMSB32;
-using rawspeed::BitPumpJPEG;
 using rawspeed::Endianness;
 
 static constexpr const size_t STEP_MAX = 32;

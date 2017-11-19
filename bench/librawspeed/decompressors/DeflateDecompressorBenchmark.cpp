@@ -19,7 +19,7 @@
 */
 
 #include "decompressors/DeflateDecompressor.h" // for DeflateDecompressor
-#include "benchmark/Common.h"                  // for areaToRectangle
+#include "bench/Common.h"                      // for areaToRectangle
 #include "common/Common.h"                     // for isAligned, isPowerOfTwo
 #include "common/Memory.h"                     // for alignedFree
 #include "common/Point.h"                      // for iPoint2D

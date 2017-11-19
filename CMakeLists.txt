@@ -177,12 +177,20 @@ add_custom_target(tests ALL)
 include(compiler-warnings)
 set_directory_properties(PROPERTIES COMPILE_OPTIONS "-Werror")
 
+if(BUILD_BENCHMARKING)
+  add_custom_target(benchmarks ALL)
+endif()
+
 add_subdirectory(src)
 
 include(OpenMP)
 
 if(BUILD_TESTING)
   add_subdirectory(test)
+endif()
+
+if(BUILD_BENCHMARKING)
+  add_subdirectory(bench)
 endif()
 
 if(BUILD_FUZZERS)
