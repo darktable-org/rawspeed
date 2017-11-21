@@ -9120,12 +9120,12 @@
 	<Camera make="FUJIFILM" model="X-E3" mode="compressed">
 		<ID make="Fujifilm" model="X-E3">Fujifilm X-E3</ID>
 		<CFA2 width="6" height="6">
-			<ColorRow y="0">RGGBGG</ColorRow>
-			<ColorRow y="1">BGGRGG</ColorRow>
-			<ColorRow y="2">GRBGBR</ColorRow>
-			<ColorRow y="3">BGGRGG</ColorRow>
-			<ColorRow y="4">RGGBGG</ColorRow>
-			<ColorRow y="5">GBRGRB</ColorRow>
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
 		<Crop x="0" y="18" width="-24" height="-12"/>
 		<Sensor black="1023" white="16383"/>
