@@ -7,14 +7,14 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
 endif()
 
 find_package(LLVMCov REQUIRED)
-find_package(CppFilt REQUIRED)
+find_package(Demangler REQUIRED)
 
 # FIXME: all this does not really work because only the rstest coverage is shown
 
 add_custom_target(
   coverage-show
   DEPENDS rstest
-  COMMAND "${LLVMCOV_PATH}" show -Xdemangler=$<TARGET_FILE:c++filt> -instr-profile "${CMAKE_BINARY_DIR}/rawspeed.profdata" "$<TARGET_FILE:rstest>" -format html -output-dir "${CMAKE_BINARY_DIR}/coverage"
+  COMMAND "${LLVMCOV_PATH}" show -Xdemangler=$<TARGET_FILE:demangler> -instr-profile "${CMAKE_BINARY_DIR}/rawspeed.profdata" "$<TARGET_FILE:rstest>" -format html -output-dir "${CMAKE_BINARY_DIR}/coverage"
   COMMAND "${CMAKE_COMMAND}" -E echo "Use $$ sensible-browser \"./coverage/index.html\" to view the coverage report."
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
   COMMENT "Running llvm-cov tool on the *.profdata file to generate HTML coverage report"
