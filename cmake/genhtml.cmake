@@ -11,6 +11,7 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
 endif()
 
 find_package(GenHtml REQUIRED)
+find_package(CppFilt REQUIRED)
 
 add_custom_target(
   genhtml
