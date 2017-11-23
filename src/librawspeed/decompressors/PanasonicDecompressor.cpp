@@ -45,6 +45,8 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
 
   if (width == 0 || height == 0 || width > 5488 || height > 3904)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
+  input.check(load_flags);
 }
 
 struct PanasonicDecompressor::PanaBitpump {
