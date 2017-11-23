@@ -122,10 +122,29 @@ HuffmanTable NikonDecompressor::createHuffmanTable(uint32 huffSelect) {
   return ht;
 }
 
-void NikonDecompressor::decompress(RawImage* mRaw, ByteStream&& data,
-                                   ByteStream metadata, const iPoint2D& size,
-                                   uint32 bitsPS, bool uncorrectedRawValues) {
-  assert(bitsPS > 0);
+NikonDecompressor::NikonDecompressor(const RawImage& raw, uint32 bitsPS_)
+    : mRaw(raw), bitsPS(bitsPS_) {
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+      mRaw->getBpp() != 2)
+    ThrowRDE("Unexpected component count / data type");
+
+  if (mRaw->dim.x == 0 || mRaw->dim.y == 0 || mRaw->dim.x % 2 != 0 ||
+      mRaw->dim.x > 8288 || mRaw->dim.y > 5520)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+             mRaw->dim.y);
+
+  switch (bitsPS) {
+  case 12:
+  case 14:
+    break;
+  default:
+    ThrowRDE("Invalid bpp found: %u", bitsPS);
+  }
+}
+
+void NikonDecompressor::decompress(ByteStream metadata, const ByteStream& data,
+                                   bool uncorrectedRawValues) {
+  const iPoint2D& size = mRaw->dim;
 
   uint32 v0 = metadata.getByte();
   uint32 v1 = metadata.getByte();
@@ -152,17 +171,17 @@ void NikonDecompressor::decompress(RawImage* mRaw, ByteStream&& data,
   HuffmanTable ht = createHuffmanTable(huffSelect);
 
   auto curve = createCurve(&metadata, bitsPS, v0, v1, &split);
-  RawImageCurveGuard curveHandler(mRaw, curve, uncorrectedRawValues);
+  RawImageCurveGuard curveHandler(&mRaw, curve, uncorrectedRawValues);
 
   BitPumpMSB bits(data);
-  uchar8* draw = mRaw->get()->getData();
-  uint32 pitch = mRaw->get()->pitch;
+  uchar8* draw = mRaw->getData();
+  uint32 pitch = mRaw->pitch;
 
   int pLeft1 = 0;
   int pLeft2 = 0;
   uint32 random = bits.peekBits(24);
   //allow gcc to devirtualize the calls below
-  auto* rawdata = reinterpret_cast<RawImageDataU16*>(mRaw->get());
+  auto* rawdata = reinterpret_cast<RawImageDataU16*>(mRaw.get());
 
   assert(size.x % 2 == 0);
   assert(size.x >= 2);

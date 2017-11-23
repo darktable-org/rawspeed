@@ -107,20 +107,7 @@ RawImage NefDecoder::decodeRawInternal() {
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
   uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
 
-  if (width == 0 || height == 0 || width % 2 != 0 || width > 8288 ||
-      height > 5520)
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
-
-  switch (bitPerPixel) {
-  case 12:
-  case 14:
-    break;
-  default:
-    ThrowRDE("Invalid bpp found: %u", bitPerPixel);
-  }
-
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
 
   raw = mRootIFD->getIFDWithTag(static_cast<TiffTag>(0x8c));
 
@@ -131,9 +118,11 @@ RawImage NefDecoder::decodeRawInternal() {
     meta = raw->getEntry(static_cast<TiffTag>(0x8c)); // Fall back
   }
 
-  NikonDecompressor::decompress(
-      &mRaw, ByteStream(mFile, offsets->getU32(), counts->getU32()),
-      meta->getData(), mRaw->dim, bitPerPixel, uncorrectedRawValues);
+  ByteStream rawData(mFile, offsets->getU32(), counts->getU32());
+
+  NikonDecompressor n(mRaw, bitPerPixel);
+  mRaw->createData();
+  n.decompress(meta->getData(), rawData, uncorrectedRawValues);
 
   return mRaw;
 }
