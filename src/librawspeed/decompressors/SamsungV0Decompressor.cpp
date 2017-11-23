@@ -43,15 +43,17 @@ SamsungV0Decompressor::SamsungV0Decompressor(const RawImage& image,
                                              const ByteStream& bso,
                                              const ByteStream& bsr)
     : AbstractSamsungDecompressor(image) {
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+      mRaw->getBpp() != 2)
+    ThrowRDE("Unexpected component count / data type");
+
   const uint32 width = mRaw->dim.x;
   const uint32 height = mRaw->dim.y;
 
   if (width == 0 || height == 0 || width < 16 || width > 5546 || height > 3714)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-  bso.check(height, 4);
-
-  computeStripes(bso, bsr);
+  computeStripes(bso.peekStream(height, 4), bsr);
 }
 
 // FIXME: this is very close to IiqDecoder::computeSripes()

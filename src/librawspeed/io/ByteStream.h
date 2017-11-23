@@ -113,6 +113,11 @@ public:
   inline ByteStream peekStream(size_type size_) const {
     return getSubStream(pos, size_);
   }
+  inline ByteStream peekStream(size_type nmemb, size_type size_) const {
+    if (size_ && nmemb > std::numeric_limits<size_type>::max() / size_)
+      ThrowIOE("Integer overflow when calculating stream lenght");
+    return peekStream(nmemb * size_);
+  }
   inline ByteStream getStream(size_type size_) {
     ByteStream ret = peekStream(size_);
     pos += size_;
