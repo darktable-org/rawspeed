@@ -30,6 +30,7 @@ rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs) {
   const rawspeed::uint32 height = bs->getU32();
   const rawspeed::uint32 type = bs->getU32();
   const rawspeed::uint32 cpp = bs->getU32();
+  const rawspeed::uint32 isCFA = bs->getU32();
 
   if (type != rawspeed::TYPE_USHORT16 && type != rawspeed::TYPE_FLOAT32)
     ThrowRSE("Unknown image type: %u", type);
@@ -39,6 +40,7 @@ rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs) {
 
   mRaw->dim = rawspeed::iPoint2D(width, height);
   mRaw->setCpp(cpp);
+  mRaw->isCFA = isCFA;
 
   return mRaw;
 };
