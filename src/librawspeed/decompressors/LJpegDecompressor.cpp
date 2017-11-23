@@ -31,6 +31,25 @@ using std::min;
 
 namespace rawspeed {
 
+LJpegDecompressor::LJpegDecompressor(const ByteStream& bs, const RawImage& img)
+    : AbstractLJpegDecompressor(bs, img) {
+  if (mRaw->getDataType() != TYPE_USHORT16)
+    ThrowRDE("Unexpected data type (%u)", mRaw->getDataType());
+
+  if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == 2) ||
+        (mRaw->getCpp() == 3 && mRaw->getBpp() == 6)))
+    ThrowRDE("Unexpected component count (%u)", mRaw->getCpp());
+
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+  // Yeah, sure, here it would be just dumb to leave this for production :)
+  if (!mRaw->dim.x || !mRaw->dim.y || mRaw->dim.x > 7424 ||
+      mRaw->dim.y > 5552) {
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+             mRaw->dim.y);
+  }
+#endif
+}
+
 void LJpegDecompressor::decode(uint32 offsetX, uint32 offsetY, bool fixDng16Bug_) {
   if (static_cast<int>(offsetX) >= mRaw->dim.x)
     ThrowRDE("X offset outside of image");

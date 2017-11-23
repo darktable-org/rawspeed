@@ -40,8 +40,7 @@ class LJpegDecompressor final : public AbstractLJpegDecompressor
   uint32 offY = 0;
 
 public:
-  LJpegDecompressor(const ByteStream& bs, const RawImage& img)
-      : AbstractLJpegDecompressor(bs, img) {}
+  LJpegDecompressor(const ByteStream& bs, const RawImage& img);
 
   void decode(uint32 offsetX, uint32 offsetY, bool fixDng16Bug);
 };
