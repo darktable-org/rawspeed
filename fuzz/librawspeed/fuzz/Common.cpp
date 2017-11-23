@@ -18,10 +18,13 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "fuzz/Common.h"              // for CreateRawImage
-#include "common/RawImage.h"          // for RawImage
-#include "common/RawspeedException.h" // for RawspeedException
-#include "io/ByteStream.h"            // for ByteStream
+#include "fuzz/Common.h"               // for CreateRawImage
+#include "common/Point.h"              // for iPoint2D
+#include "common/RawImage.h"           // for RawImage
+#include "common/RawspeedException.h"  // for RawspeedException
+#include "io/ByteStream.h"             // for ByteStream
+#include "metadata/ColorFilterArray.h" // for ColorFilterArray
+#include <limits>                      // for numeric_limits
 
 rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs) {
   assert(bs);
@@ -43,4 +46,32 @@ rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs) {
   mRaw->isCFA = isCFA;
 
   return mRaw;
+};
+
+rawspeed::ColorFilterArray CreateCFA(rawspeed::ByteStream* bs) {
+  assert(bs);
+
+  const rawspeed::uint32 cfaWidth = bs->getU32();
+  const rawspeed::uint32 cfaHeight = bs->getU32();
+
+  rawspeed::ColorFilterArray cfa;
+
+  if (cfaHeight &&
+      cfaWidth > std::numeric_limits<decltype(cfaWidth)>::max() / cfaHeight)
+    ThrowIOE("Integer overflow when calculating CFA area");
+  bs->check(cfaWidth * cfaHeight, 4);
+
+  cfa.setSize(rawspeed::iPoint2D(cfaWidth, cfaHeight));
+
+  for (auto x = 0U; x < cfaWidth; x++) {
+    for (auto y = 0U; y < cfaHeight; y++) {
+      const rawspeed::uint32 color = bs->getU32();
+      if (color < rawspeed::CFA_BEGIN || color > rawspeed::CFA_END)
+        ThrowRSE("Unknown color: %u", color);
+
+      cfa.setColorAt(rawspeed::iPoint2D(x, y), rawspeed::CFAColor(color));
+    }
+  }
+
+  return cfa;
 };

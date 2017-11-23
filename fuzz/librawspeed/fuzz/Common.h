@@ -18,7 +18,9 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/RawImage.h" // for RawImage
-#include "io/ByteStream.h"   // for ByteStream
+#include "common/RawImage.h"           // for RawImage
+#include "io/ByteStream.h"             // for ByteStream
+#include "metadata/ColorFilterArray.h" // for ColorFilterArray
 
 rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs);
+rawspeed::ColorFilterArray CreateCFA(rawspeed::ByteStream* bs);

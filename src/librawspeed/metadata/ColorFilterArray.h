@@ -38,7 +38,10 @@ enum CFAColor {
   CFA_YELLOW = 5,
   CFA_WHITE = 6,
   CFA_FUJI_GREEN = 7,
-  CFA_UNKNOWN = 255
+  CFA_UNKNOWN = 255,
+
+  CFA_BEGIN = CFA_RED,
+  CFA_END = CFA_FUJI_GREEN,
 };
 
 class ColorFilterArray
