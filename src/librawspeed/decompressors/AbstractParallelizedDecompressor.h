@@ -23,7 +23,9 @@
 #include "rawspeedconfig.h"                     // for HAVE_PTHREAD
 #include "common/Common.h"                      // for uint32, BitOrder
 #include "common/RawImage.h"                    // for RawImage
+#include "decoders/RawDecoderException.h"       // for RawDecoderException
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "io/IOException.h"                     // for IOException
 
 #ifdef HAVE_PTHREAD
 #include <pthread.h> // for pthread_t
@@ -59,9 +61,15 @@ public:
                         uint32 tasksTotal_)
       : parent(parent_), tasksTotal(tasksTotal_) {}
 
-  static void* start_routine(void* arg) {
+  static void* start_routine(void* arg) noexcept {
     const auto* this_ = static_cast<const RawDecompressorThread*>(arg);
-    this_->parent->decompressThreaded(this_);
+    try {
+      this_->parent->decompressThreaded(this_);
+    } catch (RawDecoderException& err) {
+      this_->parent->mRaw->setError(err.what());
+    } catch (IOException& err) {
+      this_->parent->mRaw->setError(err.what());
+    }
     return nullptr;
   }
 
