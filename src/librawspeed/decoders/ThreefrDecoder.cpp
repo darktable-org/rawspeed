@@ -55,17 +55,12 @@ RawImage ThreefrDecoder::decodeRawInternal() {
   uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
   // STRIPBYTECOUNTS is strange/invalid for the existing 3FR samples...
 
-  // FIXME: could be wrong. max "active pixels" - "100 MP"
-  if (width == 0 || height == 0 || width % 2 != 0 || width > 11600 ||
-      height > 8700)
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
-
   const ByteStream bs(mFile->getSubView(off), 0);
 
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
 
   HasselbladDecompressor l(bs, mRaw);
+  mRaw->createData();
 
   int pixelBaseOffset = hints.get("pixelBaseOffset", 0);
   l.decode(pixelBaseOffset);

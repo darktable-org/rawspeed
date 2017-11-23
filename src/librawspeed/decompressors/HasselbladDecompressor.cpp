@@ -32,6 +32,21 @@
 
 namespace rawspeed {
 
+HasselbladDecompressor::HasselbladDecompressor(const ByteStream& bs,
+                                               const RawImage& img)
+    : AbstractLJpegDecompressor(bs, img) {
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+      mRaw->getBpp() != 2)
+    ThrowRDE("Unexpected component count / data type");
+
+  // FIXME: could be wrong. max "active pixels" - "100 MP"
+  if (mRaw->dim.x == 0 || mRaw->dim.y == 0 || mRaw->dim.x % 2 != 0 ||
+      mRaw->dim.x > 11600 || mRaw->dim.y > 8700) {
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+             mRaw->dim.y);
+  }
+}
+
 // Returns len bits as a signed value.
 // Highest bit is a sign bit
 inline int HasselbladDecompressor::getBits(BitPumpMSB32* bs, int len) {
