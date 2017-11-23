@@ -40,8 +40,8 @@
 namespace rawspeed {
 
 SamsungV0Decompressor::SamsungV0Decompressor(const RawImage& image,
-                                             const TiffIFD* raw,
-                                             const Buffer* mFile)
+                                             const ByteStream& bso,
+                                             const ByteStream& bsr)
     : AbstractSamsungDecompressor(image) {
   const uint32 width = mRaw->dim.x;
   const uint32 height = mRaw->dim.y;
@@ -49,16 +49,7 @@ SamsungV0Decompressor::SamsungV0Decompressor(const RawImage& image,
   if (width == 0 || height == 0 || width < 16 || width > 5546 || height > 3714)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-  const TiffEntry* sliceOffsets = raw->getEntry(static_cast<TiffTag>(40976));
-  if (sliceOffsets->type != TIFF_LONG || sliceOffsets->count != 1)
-    ThrowRDE("Entry 40976 is corrupt");
-
-  ByteStream bso(mFile, sliceOffsets->getU32(), 4 * height, Endianness::little);
-
-  const uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
-  const uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
-  Buffer rbuf(mFile->getSubView(offset, count));
-  ByteStream bsr(DataBuffer(rbuf, Endianness::little));
+  bso.check(height, 4);
 
   computeStripes(bso, bsr);
 }

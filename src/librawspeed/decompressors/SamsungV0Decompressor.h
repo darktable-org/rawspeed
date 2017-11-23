@@ -43,8 +43,8 @@ class SamsungV0Decompressor final : public AbstractSamsungDecompressor {
   static int32 calcAdj(BitPumpMSB32* bits, int b);
 
 public:
-  SamsungV0Decompressor(const RawImage& image, const TiffIFD* ifd,
-                        const Buffer* file);
+  SamsungV0Decompressor(const RawImage& image, const ByteStream& bso,
+                        const ByteStream& bsr);
 
   void decompress() const;
 };

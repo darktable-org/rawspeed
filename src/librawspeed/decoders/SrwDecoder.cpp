@@ -79,7 +79,19 @@ RawImage SrwDecoder::decodeRawInternal() {
 
   if (32770 == compression)
   {
-    SamsungV0Decompressor s0(mRaw, raw, mFile);
+    const TiffEntry* sliceOffsets = raw->getEntry(static_cast<TiffTag>(40976));
+    if (sliceOffsets->type != TIFF_LONG || sliceOffsets->count != 1)
+      ThrowRDE("Entry 40976 is corrupt");
+
+    ByteStream bso(mFile, sliceOffsets->getU32(), 4 * height,
+                   Endianness::little);
+
+    const uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
+    const uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
+    Buffer rbuf(mFile->getSubView(offset, count));
+    ByteStream bsr(DataBuffer(rbuf, Endianness::little));
+
+    SamsungV0Decompressor s0(mRaw, bso, bsr);
 
     mRaw->createData();
 
