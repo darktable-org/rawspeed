@@ -66,7 +66,7 @@ rawspeed::ColorFilterArray CreateCFA(rawspeed::ByteStream* bs) {
   for (auto x = 0U; x < cfaWidth; x++) {
     for (auto y = 0U; y < cfaHeight; y++) {
       const rawspeed::uint32 color = bs->getU32();
-      if (color < rawspeed::CFA_BEGIN || color > rawspeed::CFA_END)
+      if (color >= static_cast<rawspeed::uint32>(rawspeed::CFA_END))
         ThrowRSE("Unknown color: %u", color);
 
       cfa.setColorAt(rawspeed::iPoint2D(x, y), rawspeed::CFAColor(color));
