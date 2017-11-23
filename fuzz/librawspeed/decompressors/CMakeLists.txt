@@ -11,6 +11,7 @@ add_subdirectory(HuffmanTable)
 
 set(DECOMPRESSORS
   "Cr2Decompressor"
+  "DummyLJpegDecompressor"
   "OlympusDecompressor"
   "SonyArw1Decompressor"
   "SonyArw2Decompressor"
