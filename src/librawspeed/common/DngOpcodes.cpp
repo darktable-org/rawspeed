@@ -314,7 +314,7 @@ protected:
   DeltaRowOrColBase(const RawImage& ri, ByteStream* bs, float f2iScale)
       : PixelOpcode(ri, bs) {
     const auto deltaF_count = bs->getU32();
-    bs->check(4 * deltaF_count);
+    bs->check(deltaF_count, 4);
 
     deltaF.reserve(deltaF_count);
     std::generate_n(std::back_inserter(deltaF), deltaF_count,
