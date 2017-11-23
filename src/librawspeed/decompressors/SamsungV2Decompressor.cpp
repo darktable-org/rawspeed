@@ -292,6 +292,8 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
           diffBits[i] = diffBitsMode[colornum][0] + 1;
           break;
         case 2:
+          if (diffBitsMode[colornum][0] == 0)
+            ThrowRDE("Difference bits underflow. File corrupted?");
           diffBits[i] = diffBitsMode[colornum][0] - 1;
           break;
         case 3:
