@@ -22,25 +22,32 @@
 #pragma once
 
 #include "common/Common.h"                      // for uint32, uchar8
+#include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "decompressors/HuffmanTable.h"         // for HuffmanTable
 #include "io/BitPumpJPEG.h"                     // for BitPumpJPEG
+#include "io/Buffer.h"                          // for Buffer
+#include "io/ByteStream.h"                      // for ByteStream
 #include <array>                                // for array
+#include <memory>                               // for unique_ptr
 
 namespace rawspeed {
 
-class Buffer;
-
-class RawImage;
-
-class HuffmanTable;
-
 class CrwDecompressor final : public AbstractDecompressor {
+  using crw_hts = std::array<std::array<HuffmanTable, 2>, 2>;
+
+  RawImage mRaw;
+  crw_hts mHuff;
+  const bool lowbits;
+  const Buffer mFile;
+
 public:
-  static void decompress(const RawImage& mRaw, const Buffer* mFile,
-                         uint32 dec_table, bool lowbits);
+  CrwDecompressor(const RawImage& img, uint32 dec_table_, bool lowbits_,
+                  const Buffer* file);
+
+  void decompress() const;
 
 private:
-  using crw_hts = std::array<std::array<HuffmanTable, 2>, 2>;
   static HuffmanTable makeDecoder(const uchar8* ncpl, const uchar8* values);
   static crw_hts initHuffTables(uint32 table);
 

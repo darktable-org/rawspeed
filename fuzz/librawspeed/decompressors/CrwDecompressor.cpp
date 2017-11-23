@@ -44,10 +44,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const rawspeed::uint32 dec_table = bs.getU32();
     const rawspeed::uint32 lowbits = bs.getU32();
 
-    mRaw->createData();
-
     rawspeed::Buffer mFile = bs.getBuffer(bs.getRemainSize());
-    rawspeed::CrwDecompressor::decompress(mRaw, &mFile, dec_table, lowbits);
+
+    rawspeed::CrwDecompressor c(mRaw, dec_table, lowbits, &mFile);
+    mRaw->createData();
+    c.decompress();
 
     mRaw->checkMemIsInitialized();
   } catch (rawspeed::RawspeedException&) {

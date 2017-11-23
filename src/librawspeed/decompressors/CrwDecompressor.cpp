@@ -31,14 +31,28 @@
 #include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for min
 #include <array>                          // for array
-#include <cassert>                        // for assert
+#include <memory>                         // for make_unique
 
 using std::array;
 
 namespace rawspeed {
 
-// The rest of this file was ported as is from dcraw.c. I don't claim to
-// understand it but have tried my best to make it work safely
+CrwDecompressor::CrwDecompressor(const RawImage& img, uint32 dec_table,
+                                 bool lowbits_, const Buffer* file)
+    : mRaw(img), lowbits(lowbits_), mFile(*file) {
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+      mRaw->getBpp() != 2)
+    ThrowRDE("Unexpected component count / data type");
+
+  const uint32 width = mRaw->dim.x;
+  const uint32 height = mRaw->dim.y;
+
+  if (width == 0 || height == 0 || width % 4 != 0 || width > 4104 ||
+      height > 3048 || (height * width) % 64 != 0)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
+  mHuff = initHuffTables(dec_table);
+}
 
 HuffmanTable CrwDecompressor::makeDecoder(const uchar8* ncpl,
                                           const uchar8* values) {
@@ -53,7 +67,8 @@ HuffmanTable CrwDecompressor::makeDecoder(const uchar8* ncpl,
 }
 
 CrwDecompressor::crw_hts CrwDecompressor::initHuffTables(uint32 table) {
-  assert(table <= 2);
+  if (table > 2)
+    ThrowRDE("Wrong table number: %u", table);
 
   // NCodesPerLength
   static const uchar8 first_tree_ncpl[3][16] = {
@@ -207,10 +222,7 @@ inline void CrwDecompressor::decodeBlock(std::array<int, 64>* diffBuf,
 }
 
 // FIXME: this function is horrible.
-void CrwDecompressor::decompress(const RawImage& mRaw, const Buffer* mFile,
-                                 uint32 dec_table, bool lowbits) {
-  assert(mFile);
-
+void CrwDecompressor::decompress() const {
   const uint32 height = mRaw->dim.y;
   const uint32 width = mRaw->dim.x;
 
@@ -218,8 +230,6 @@ void CrwDecompressor::decompress(const RawImage& mRaw, const Buffer* mFile,
     assert(width > 0);
     assert(width % 4 == 0);
     assert(height > 0);
-
-    auto mHuff = initHuffTables(dec_table);
 
     uint32 offset = 540;
     if (lowbits)

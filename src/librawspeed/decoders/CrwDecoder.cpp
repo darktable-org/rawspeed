@@ -61,10 +61,7 @@ RawImage CrwDecoder::decodeRawInternal() {
   assert(sensorInfo != nullptr);
   uint32 width = sensorInfo->getU16(1);
   uint32 height = sensorInfo->getU16(2);
-
-  if (width == 0 || height == 0 || width % 4 != 0 || width > 4104 ||
-      height > 3048 || (height * width) % 64 != 0)
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+  mRaw->dim = iPoint2D(width, height);
 
   const CiffEntry* decTable = mRootIFD->getEntryRecursive(CIFF_DECODERTABLE);
   if (!decTable || decTable->type != CIFF_LONG)
@@ -72,14 +69,12 @@ RawImage CrwDecoder::decodeRawInternal() {
 
   assert(decTable != nullptr);
   uint32 dec_table = decTable->getU32();
-  if (dec_table > 2)
-    ThrowRDE("Unknown decoder table %d", dec_table);
-
-  mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
 
   bool lowbits = ! hints.has("no_decompressed_lowbits");
-  CrwDecompressor::decompress(mRaw, mFile, dec_table, lowbits);
+
+  CrwDecompressor c(mRaw, dec_table, lowbits, mFile);
+  mRaw->createData();
+  c.decompress();
 
   return mRaw;
 }
