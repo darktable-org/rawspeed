@@ -66,7 +66,7 @@ RUN set -x \
     && unzip sonar-scanner-cli.zip \
     && mv sonar-scanner-$SONAR_SCANNER_CLI_VERSION $SONARQUBE_HOME \
     && rm sonar-scanner-cli.zip* \
-    && curl -o build-wrapper.zip -fSL https://sonarqube.com/static/cpp/build-wrapper-linux-x86.zip \
+    && curl -o build-wrapper.zip -fSL https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip \
     && unzip build-wrapper.zip \
     && mv build-wrapper-linux-x86/* $SONARQUBE_HOME/bin \
     && rm build-wrapper.zip* \
