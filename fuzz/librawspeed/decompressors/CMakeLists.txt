@@ -19,6 +19,7 @@ set(DECOMPRESSORS
   "NikonDecompressor"
   "OlympusDecompressor"
   "PanasonicDecompressor"
+  "PentaxDecompressor"
   "SonyArw1Decompressor"
   "SonyArw2Decompressor"
 )

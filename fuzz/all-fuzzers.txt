@@ -21,6 +21,7 @@ LJpegDecompressorFuzzer
 NikonDecompressorFuzzer
 OlympusDecompressorFuzzer
 PanasonicDecompressorFuzzer
+PentaxDecompressorFuzzer
 RawParserFuzzer-GetDecoder
 RawParserFuzzer-GetDecoder-Decode
 RawSpeedFuzzer
