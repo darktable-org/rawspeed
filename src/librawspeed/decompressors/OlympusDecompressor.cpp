@@ -31,6 +31,7 @@
 #include <algorithm>                            // for move
 #include <algorithm>                            // for min
 #include <cmath>                                // for signbit
+#include <cstdlib>                              // for abs
 #include <memory>                               // for unique_ptr
 
 namespace rawspeed {
