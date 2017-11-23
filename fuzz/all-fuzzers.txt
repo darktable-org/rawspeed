@@ -26,6 +26,7 @@ RawParserFuzzer-GetDecoder
 RawParserFuzzer-GetDecoder-Decode
 RawSpeedFuzzer
 SamsungV1DecompressorFuzzer
+SamsungV2DecompressorFuzzer
 SonyArw1DecompressorFuzzer
 SonyArw2DecompressorFuzzer
 TiffDecoderFuzzer-ArwDecoder
