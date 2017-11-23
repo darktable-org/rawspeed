@@ -42,6 +42,20 @@ const uchar8 PentaxDecompressor::pentax_tree[][2][16] = {
      {3, 4, 2, 5, 1, 6, 0, 7, 8, 9, 10, 11, 12}},
 };
 
+PentaxDecompressor::PentaxDecompressor(const RawImage& img,
+                                       ByteStream* metaData)
+    : mRaw(img), ht(SetupHuffmanTable(metaData)) {
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+      mRaw->getBpp() != 2)
+    ThrowRDE("Unexpected component count / data type");
+
+  if (!mRaw->dim.x || !mRaw->dim.y || mRaw->dim.x % 2 != 0 ||
+      mRaw->dim.x > 7392 || mRaw->dim.y > 4950) {
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+             mRaw->dim.y);
+  }
+}
+
 HuffmanTable PentaxDecompressor::SetupHuffmanTable_Legacy() {
   HuffmanTable ht;
 

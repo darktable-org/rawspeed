@@ -37,8 +37,7 @@ class PentaxDecompressor final : public AbstractDecompressor {
   const HuffmanTable ht;
 
 public:
-  PentaxDecompressor(const RawImage& img, ByteStream* metaData)
-      : mRaw(img), ht(SetupHuffmanTable(metaData)) {}
+  PentaxDecompressor(const RawImage& img, ByteStream* metaData);
 
   void decompress(const ByteStream& data) const;
 
