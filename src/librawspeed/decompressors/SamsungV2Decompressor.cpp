@@ -74,6 +74,18 @@ constexpr bool operator&(SamsungV2Decompressor::OptFlags lhs,
 SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
                                              const ByteStream& bs, int bit)
     : AbstractSamsungDecompressor(image), bits(bit) {
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+      mRaw->getBpp() != 2)
+    ThrowRDE("Unexpected component count / data type");
+
+  switch (bit) {
+  case 12:
+  case 14:
+    break;
+  default:
+    ThrowRDE("Unexpected bit per pixel (%u)", bit);
+  }
+
   BitPumpMSB32 startpump(bs);
 
   // Process the initial metadata bits, we only really use initVal, width and
