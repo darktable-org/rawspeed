@@ -281,8 +281,8 @@ public:
       ThrowRDE("A polynomial with more than 8 degrees not allowed");
 
     polynomial.reserve(polynomial_size);
-    std::generate_n(std::back_insert_iterator<std::vector<double>>(polynomial),
-                    polynomial_size, [&bs]() { return bs->get<double>(); });
+    std::generate_n(std::back_inserter(polynomial), polynomial_size,
+                    [&bs]() { return bs->get<double>(); });
 
     // Create lookup
     lookup.resize(65536);
@@ -317,8 +317,8 @@ protected:
     bs->check(4 * deltaF_count);
 
     deltaF.reserve(deltaF_count);
-    std::generate_n(std::back_insert_iterator<std::vector<float>>(deltaF),
-                    deltaF_count, [&bs]() { return bs->get<float>(); });
+    std::generate_n(std::back_inserter(deltaF), deltaF_count,
+                    [&bs]() { return bs->get<float>(); });
 
     deltaI.reserve(deltaF.size());
     for (const auto f : deltaF)

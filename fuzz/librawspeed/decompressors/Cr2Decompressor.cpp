@@ -49,9 +49,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const unsigned sliceCount = bs.getU32();
     bs.check(sliceCount, sizeof(slice_type));
     slicesWidths.reserve(sliceCount);
-    std::generate_n(
-        std::back_insert_iterator<std::vector<slice_type>>(slicesWidths),
-        sliceCount, [&bs]() -> slice_type { return bs.get<slice_type>(); });
+    std::generate_n(std::back_inserter(slicesWidths), sliceCount,
+                    [&bs]() -> slice_type { return bs.get<slice_type>(); });
 
     rawspeed::Cr2Decompressor c(bs, mRaw);
     mRaw->createData();

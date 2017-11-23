@@ -40,10 +40,8 @@ inline std::vector<unsigned> sliceUp(unsigned bucketsNum, unsigned pieces) {
   const auto quot = pieces / bucketsNum;
   const auto rem = pieces % bucketsNum;
 
-  std::fill_n(std::back_insert_iterator<std::vector<unsigned>>(buckets), rem,
-              1 + quot);
-  std::fill_n(std::back_insert_iterator<std::vector<unsigned>>(buckets),
-              bucketsNum - rem, quot);
+  std::fill_n(std::back_inserter(buckets), rem, 1 + quot);
+  std::fill_n(std::back_inserter(buckets), bucketsNum - rem, quot);
 
   assert(buckets.size() == bucketsNum);
   assert(std::accumulate(buckets.begin(), buckets.end(), 0UL) == pieces);
