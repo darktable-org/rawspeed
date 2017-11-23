@@ -90,15 +90,16 @@ RawImage OrfDecoder::decodeRawInternal() {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
 
   ByteStream input(offsets->getRootIfdData());
   input.setPosition(off);
 
-  if (offsets->count != 1 || hints.has("force_uncompressed"))
+  if (offsets->count != 1 || hints.has("force_uncompressed")) {
+    mRaw->createData();
     decodeUncompressed(input, width, height, size);
-  else {
+  } else {
     OlympusDecompressor o(mRaw);
+    mRaw->createData();
     o.decompress(std::move(input));
   }
 

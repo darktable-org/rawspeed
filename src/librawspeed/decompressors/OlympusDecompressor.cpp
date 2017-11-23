@@ -35,7 +35,17 @@
 
 namespace rawspeed {
 
-OlympusDecompressor::OlympusDecompressor(const RawImage& img) : mRaw(img) {}
+OlympusDecompressor::OlympusDecompressor(const RawImage& img) : mRaw(img) {
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+      mRaw->getBpp() != 2)
+    ThrowRDE("Unexpected component count / data type");
+
+  const uint32 w = mRaw->dim.x;
+  const uint32 h = mRaw->dim.y;
+
+  if (w == 0 || h == 0 || w % 2 != 0 || w > 9280 || h > 6932)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", w, h);
+}
 
 /* This is probably the slowest decoder of them all.
  * I cannot see any way to effectively speed up the prediction
