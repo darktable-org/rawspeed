@@ -80,7 +80,19 @@ RawImage PefDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
 
-  PentaxDecompressor p(mRaw, getRootIFD());
+  ByteStream* metaData = nullptr;
+  ByteStream stream;
+  if (getRootIFD()->hasEntryRecursive(static_cast<TiffTag>(0x220))) {
+    /* Attempt to read huffman table, if found in makernote */
+    TiffEntry* t = getRootIFD()->getEntryRecursive(static_cast<TiffTag>(0x220));
+    if (t->type != TIFF_UNDEFINED)
+      ThrowRDE("Unknown Huffman table type.");
+
+    stream = t->getData();
+    metaData = &stream;
+  }
+
+  PentaxDecompressor p(mRaw, metaData);
   mRaw->createData();
   p.decompress(bs);
 

@@ -53,15 +53,8 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable_Legacy() {
   return ht;
 }
 
-HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(TiffIFD* root) {
+HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
   HuffmanTable ht;
-
-  /* Attempt to read huffman table, if found in makernote */
-  TiffEntry* t = root->getEntryRecursive(static_cast<TiffTag>(0x220));
-  if (t->type != TIFF_UNDEFINED)
-    ThrowRDE("Unknown Huffman table type.");
-
-  ByteStream stream = t->getData();
 
   const uint32 depth = stream.getU16() + 12;
   if (depth > 15)
@@ -118,11 +111,11 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(TiffIFD* root) {
   return ht;
 }
 
-HuffmanTable PentaxDecompressor::SetupHuffmanTable(TiffIFD* root) {
+HuffmanTable PentaxDecompressor::SetupHuffmanTable(ByteStream* metaData) {
   HuffmanTable ht;
 
-  if (root->hasEntryRecursive(static_cast<TiffTag>(0x220)))
-    ht = SetupHuffmanTable_Modern(root);
+  if (metaData)
+    ht = SetupHuffmanTable_Modern(*metaData);
   else
     ht = SetupHuffmanTable_Legacy();
 

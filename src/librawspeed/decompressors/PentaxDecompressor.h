@@ -37,15 +37,15 @@ class PentaxDecompressor final : public AbstractDecompressor {
   const HuffmanTable ht;
 
 public:
-  PentaxDecompressor(const RawImage& img, TiffIFD* root)
-      : mRaw(img), ht(SetupHuffmanTable(root)) {}
+  PentaxDecompressor(const RawImage& img, ByteStream* metaData)
+      : mRaw(img), ht(SetupHuffmanTable(metaData)) {}
 
   void decompress(const ByteStream& data) const;
 
 private:
   static HuffmanTable SetupHuffmanTable_Legacy();
-  static HuffmanTable SetupHuffmanTable_Modern(TiffIFD* root);
-  static HuffmanTable SetupHuffmanTable(TiffIFD* root);
+  static HuffmanTable SetupHuffmanTable_Modern(ByteStream stream);
+  static HuffmanTable SetupHuffmanTable(ByteStream* metaData);
 
   static const uchar8 pentax_tree[][2][16];
 };
