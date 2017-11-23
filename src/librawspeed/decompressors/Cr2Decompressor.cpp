@@ -33,6 +33,15 @@ using std::copy_n;
 
 namespace rawspeed {
 
+Cr2Decompressor::Cr2Decompressor(const ByteStream& bs, const RawImage& img)
+    : AbstractLJpegDecompressor(bs, img) {
+  if (!mRaw->dim.x || !mRaw->dim.y || mRaw->dim.x > 8896 ||
+      mRaw->dim.y > 5920) {
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+             mRaw->dim.y);
+  }
+}
+
 void Cr2Decompressor::decodeScan()
 {
   if (predictorMode != 1)

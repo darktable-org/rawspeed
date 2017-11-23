@@ -84,14 +84,12 @@ RawImage Cr2Decoder::decodeOldFormat() {
   }
   width *= 2; // components
 
-  if (!width || !height || width > 4082 || height > 2718)
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+  mRaw->dim = {width, height};
 
   const ByteStream bs(mFile->getSubView(offset), 0);
 
-  mRaw = RawImage::create({width, height});
-
   Cr2Decompressor l(bs, mRaw);
+  mRaw->createData();
   l.decode({width});
 
   // deal with D2000 GrayResponseCurve
@@ -119,11 +117,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
   const ushort16 width = sensorInfoE->getU16(1);
   const ushort16 height = sensorInfoE->getU16(2);
-
-  if (!width || !height || width > 8896 || height > 5920)
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
-
-  iPoint2D dim(width, height);
+  mRaw->dim = {width, height};
 
   int componentsPerPixel = 1;
   TiffIFD* raw = mRootIFD->getSubIFDs()[3].get();
@@ -131,7 +125,8 @@ RawImage Cr2Decoder::decodeNewFormat() {
       raw->getEntry(CANON_SRAWTYPE)->getU32() == 4)
     componentsPerPixel = 3;
 
-  mRaw = RawImage::create(dim, TYPE_USHORT16, componentsPerPixel);
+  mRaw->setCpp(componentsPerPixel);
+  mRaw->isCFA = (mRaw->getCpp() == 1);
 
   vector<int> s_width;
   // there are four cases:
@@ -172,7 +167,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
   const ByteStream bs(mFile->getSubView(offset, count), 0);
 
   Cr2Decompressor d(bs, mRaw);
-
+  mRaw->createData();
   d.decode(s_width);
 
   if (mRaw->metadata.subsampling.x > 1 || mRaw->metadata.subsampling.y > 1)

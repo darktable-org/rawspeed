@@ -40,9 +40,7 @@ class Cr2Decompressor final : public AbstractLJpegDecompressor
   template<int N_COMP, int X_S_F, int Y_S_F> void decodeN_X_Y();
 
 public:
-  Cr2Decompressor(const ByteStream& bs, const RawImage& img)
-      : AbstractLJpegDecompressor(bs, img) {}
-
+  Cr2Decompressor(const ByteStream& bs, const RawImage& img);
   void decode(std::vector<int> slicesWidths);
 };
 
