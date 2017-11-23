@@ -44,10 +44,14 @@ public:
   ByteStream(const Buffer& buffer, size_type offset, size_type size_,
              Endianness endianness_ = Endianness::little)
       : DataBuffer(buffer.getSubView(0, offset + size_), endianness_),
-        pos(offset) {}
+        pos(offset) {
+    check(0);
+  }
   ByteStream(const Buffer& buffer, size_type offset,
              Endianness endianness_ = Endianness::little)
-      : DataBuffer(buffer, endianness_), pos(offset) {}
+      : DataBuffer(buffer, endianness_), pos(offset) {
+    check(0);
+  }
 
   // deprecated:
   ByteStream(const Buffer* f, size_type offset, size_type size_,
@@ -79,12 +83,20 @@ public:
     check(nmemb * size_);
   }
 
-  inline size_type getPosition() const { return pos; }
+  inline size_type getPosition() const {
+    assert(size >= pos);
+    check(0);
+    return pos;
+  }
   inline void setPosition(size_type newPos) {
     pos = newPos;
     check(0);
   }
-  inline size_type getRemainSize() const { return size-pos; }
+  inline size_type getRemainSize() const {
+    assert(size >= pos);
+    check(0);
+    return size - pos;
+  }
   inline const uchar8* peekData(size_type count) const {
     return Buffer::getData(pos, count);
   }
