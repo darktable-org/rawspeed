@@ -86,6 +86,9 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
     ThrowRDE("Unexpected bit per pixel (%u)", bit);
   }
 
+  static constexpr const auto headerSize = 16;
+  bs.check(headerSize);
+
   BitPumpMSB32 startpump(bs);
 
   // Process the initial metadata bits, we only really use initVal, width and
@@ -112,6 +115,8 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   startpump.getBits(8); // Inc
   startpump.getBits(2); // reserved
   initVal = startpump.getBits(14);
+
+  assert(startpump.getPosition() == headerSize);
 
   if (width == 0 || height == 0 || width % 16 != 0 || width > 6496 ||
       height > 4336)
