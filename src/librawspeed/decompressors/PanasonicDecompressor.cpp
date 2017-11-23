@@ -35,7 +35,17 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
                                              bool zero_is_not_bad,
                                              uint32 load_flags_)
     : AbstractParallelizedDecompressor(img), input(std::move(input_)),
-      zero_is_bad(!zero_is_not_bad), load_flags(load_flags_) {}
+      zero_is_bad(!zero_is_not_bad), load_flags(load_flags_) {
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+      mRaw->getBpp() != 2)
+    ThrowRDE("Unexpected component count / data type");
+
+  const uint32 width = mRaw->dim.x;
+  const uint32 height = mRaw->dim.y;
+
+  if (width == 0 || height == 0 || width > 5488 || height > 3904)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+}
 
 struct PanasonicDecompressor::PanaBitpump {
   static constexpr uint32 BufSize = 0x4000;

@@ -81,7 +81,6 @@ RawImage Rw2Decoder::decodeRawInternal() {
       ThrowRDE("Invalid image data offset, cannot decode.");
 
     mRaw->dim = iPoint2D(width, height);
-    mRaw->createData();
 
     uint32 size = mFile->getSize() - offset;
 
@@ -89,9 +88,11 @@ RawImage Rw2Decoder::decodeRawInternal() {
 
     if (size >= width*height*2) {
       // It's completely unpacked little-endian
+      mRaw->createData();
       u.decodeRawUnpacked<12, Endianness::little>(width, height);
     } else if (size >= width*height*3/2) {
       // It's a packed format
+      mRaw->createData();
       u.decode12BitRaw<Endianness::little, false, true>(width, height);
     } else {
       // It's using the new .RW2 decoding method
@@ -99,14 +100,12 @@ RawImage Rw2Decoder::decodeRawInternal() {
       // It's using the new .RW2 decoding method
       PanasonicDecompressor p(mRaw, ByteStream(mFile, offset),
                               hints.has("zero_is_not_bad"), load_flags);
+      mRaw->createData();
       p.decompress();
     }
   } else {
-    if (width == 0 || height == 0 || width > 5488 || height > 3904)
-      ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
-
     mRaw->dim = iPoint2D(width, height);
-    mRaw->createData();
+
     TiffEntry *offsets = raw->getEntry(PANASONIC_STRIPOFFSET);
 
     if (offsets->count != 1) {
@@ -123,6 +122,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
     // It's using the new .RW2 decoding method
     PanasonicDecompressor p(mRaw, ByteStream(mFile, offset),
                             hints.has("zero_is_not_bad"), load_flags);
+    mRaw->createData();
     p.decompress();
   }
 
