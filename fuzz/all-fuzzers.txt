@@ -25,6 +25,7 @@ PentaxDecompressorFuzzer
 RawParserFuzzer-GetDecoder
 RawParserFuzzer-GetDecoder-Decode
 RawSpeedFuzzer
+SamsungV0DecompressorFuzzer
 SamsungV1DecompressorFuzzer
 SamsungV2DecompressorFuzzer
 SonyArw1DecompressorFuzzer
