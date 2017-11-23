@@ -35,6 +35,13 @@ namespace rawspeed {
 
 Cr2Decompressor::Cr2Decompressor(const ByteStream& bs, const RawImage& img)
     : AbstractLJpegDecompressor(bs, img) {
+  if (mRaw->getDataType() != TYPE_USHORT16)
+    ThrowRDE("Unexpected data type");
+
+  if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == 2) ||
+        (mRaw->getCpp() == 3 && mRaw->getBpp() == 6)))
+    ThrowRDE("Unexpected cpp: %u", mRaw->getCpp());
+
   if (!mRaw->dim.x || !mRaw->dim.y || mRaw->dim.x > 8896 ||
       mRaw->dim.y > 5920) {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
