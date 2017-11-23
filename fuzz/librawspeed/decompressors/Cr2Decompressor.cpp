@@ -47,7 +47,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     using slice_type = int;
     std::vector<slice_type> slicesWidths;
     const unsigned sliceCount = bs.getU32();
-    bs.check(sizeof(slice_type) * sliceCount);
+    bs.check(sliceCount, sizeof(slice_type));
     slicesWidths.reserve(sliceCount);
     std::generate_n(
         std::back_insert_iterator<std::vector<slice_type>>(slicesWidths),

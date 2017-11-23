@@ -73,6 +73,12 @@ public:
     assert(!ASAN_REGION_IS_POISONED(data + pos, bytes));
   }
 
+  inline void check(size_type nmemb, size_type size_) const {
+    if (size_ && nmemb > std::numeric_limits<size_type>::max() / size_)
+      ThrowIOE("Integer overflow when calculating stream lenght");
+    check(nmemb * size_);
+  }
+
   inline size_type getPosition() const { return pos; }
   inline void setPosition(size_type newPos) {
     pos = newPos;
