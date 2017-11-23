@@ -10,6 +10,7 @@ endmacro()
 add_subdirectory(HuffmanTable)
 
 set(DECOMPRESSORS
+  "Cr2Decompressor"
   "OlympusDecompressor"
   "SonyArw1Decompressor"
   "SonyArw2Decompressor"
