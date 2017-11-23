@@ -175,15 +175,15 @@ void SamsungV2Decompressor::decompress() {
   }
 }
 
+// The format is relatively straightforward. Each line gets encoded as a set
+// of differences from pixels from another line. Pixels are grouped in blocks
+// of 16 (8 green, 8 red or blue). Each block is encoded in three sections.
+// First 1 or 4 bits to specify which reference pixels to use, then a section
+// that specifies for each pixel the number of bits in the difference, then
+// the actual difference bits
+
 template <SamsungV2Decompressor::OptFlags optflags>
 void SamsungV2Decompressor::decompressRow(uint32 row) {
-  // The format is relatively straightforward. Each line gets encoded as a set
-  // of differences from pixels from another line. Pixels are grouped in blocks
-  // of 16 (8 green, 8 red or blue). Each block is encoded in three sections.
-  // First 1 or 4 bits to specify which reference pixels to use, then a section
-  // that specifies for each pixel the number of bits in the difference, then
-  // the actual difference bits
-
   // Align pump to 16byte boundary
   const auto line_offset = data.getPosition();
   if ((line_offset & 0xf) != 0)
