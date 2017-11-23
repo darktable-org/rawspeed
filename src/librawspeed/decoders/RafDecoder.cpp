@@ -100,11 +100,6 @@ RawImage RafDecoder::decodeRawInternal() {
 
     FujiDecompressor f(mRaw, input);
 
-    const iPoint2D hDim(f.header.raw_width, f.header.raw_height);
-
-    if (mRaw->dim != hDim)
-      ThrowRDE("RAF header specifies different dimensions!");
-
     mRaw->createData();
 
     f.decompress();

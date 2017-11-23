@@ -5,6 +5,7 @@ CrwDecompressorFuzzer
 DummyLJpegDecompressorFuzzer
 FiffParserFuzzer-GetDecoder
 FiffParserFuzzer-GetDecoder-Decode
+FujiDecompressorFuzzer
 HuffmanTableFuzzer-BitPumpJPEG-FullDecode
 HuffmanTableFuzzer-BitPumpJPEG-NoFullDecode
 HuffmanTableFuzzer-BitPumpLSB-FullDecode

@@ -42,6 +42,9 @@ FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
   if (!header)
     ThrowRDE("compressed RAF header check");
 
+  if (mRaw->dim != iPoint2D(header.raw_width, header.raw_height))
+    ThrowRDE("RAF header specifies different dimensions!");
+
   if (12 == header.raw_bits) {
     ThrowRDE("Aha, finally, a 12-bit compressed RAF! Please consider providing "
              "samples on <https://raw.pixls.us/>, thanks!");

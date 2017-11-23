@@ -13,6 +13,7 @@ set(DECOMPRESSORS
   "Cr2Decompressor"
   "CrwDecompressor"
   "DummyLJpegDecompressor"
+  "FujiDecompressor"
   "OlympusDecompressor"
   "SonyArw1Decompressor"
   "SonyArw2Decompressor"
