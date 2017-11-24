@@ -110,6 +110,7 @@ static inline void BM_RawSpeed(benchmark::State& state, const char* fileName,
   Timer<ChooseClockType::type> WT;
   Timer<CPUClock> TT;
 
+  unsigned pixels = 0;
   for (auto _ : state) {
     RawParser parser(map.get());
     auto decoder(parser.getDecoder(&metadata));
@@ -122,18 +123,25 @@ static inline void BM_RawSpeed(benchmark::State& state, const char* fileName,
     RawImage raw = decoder->mRaw;
 
     benchmark::DoNotOptimize(raw);
+
+    pixels = raw->getUncroppedDim().area();
   }
 
-  std::string label("FileSize,KB=");
-  label += std::to_string(map->getSize() / (1UL << 10UL));
+  std::string label("FileSize,MB=");
+  label += std::to_string(double(map->getSize()) / double(1UL << 20UL));
+  label += "; MPix=";
+  label += std::to_string(double(pixels) / 1e+06);
   state.SetLabel(label.c_str());
 
   const auto WallTime = WT();
   const auto TotalTime = TT();
   const auto ThreadingFactor = TotalTime.count() / WallTime.count();
 
-  state.counters["CPUTime,s"] = TotalTime.count();
-  state.counters["ThreadingFactor"] = ThreadingFactor;
+  state.counters.insert({
+      {"Pixels/s", benchmark::Counter(pixels, benchmark::Counter::kIsRate)},
+      {"CPUTime,s", TotalTime.count()},
+      {"ThreadingFactor", ThreadingFactor},
+  });
 
   state.SetItemsProcessed(state.iterations());
   state.SetBytesProcessed(state.iterations() * map->getSize());
