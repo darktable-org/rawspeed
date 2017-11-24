@@ -136,8 +136,8 @@ public:
   }
 
   inline void skipBytes(size_type nbytes) {
+    check(nbytes);
     pos += nbytes;
-    check(0);
   }
 
   inline bool hasPatternAt(const char *pattern, size_type size_,
