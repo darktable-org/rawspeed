@@ -272,12 +272,12 @@ void CrwDecompressor::decompress() const {
           base[0] = base[1] = 512;
         }
 
+        assert(dest != nullptr);
         base[k & 1] += diffBuf[k];
 
         if (base[k & 1] >> 10)
           ThrowRDE("Error decompressing");
 
-        assert(dest != nullptr);
         *dest = base[k & 1];
 
         i++;
