@@ -129,9 +129,13 @@ if(CMAKE_MAKE_PROGRAM MATCHES "ninja")
   set(RAWSPEED_PARALLEL_LINK_JOBS "" CACHE STRING
     "Define the maximum number of concurrent link jobs.")
 
-  if(RAWSPEED_ENABLE_LTO AND NOT RAWSPEED_PARALLEL_LINK_JOBS)
-    message(WARNING "RAWSPEED_ENABLE_LTO is enabled but RAWSPEED_PARALLEL_LINK_JOBS is not set.\nConsider setting RAWSPEED_PARALLEL_LINK_JOBS to 1!")
-  elseif(RAWSPEED_PARALLEL_LINK_JOBS)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
+     RAWSPEED_ENABLE_LTO AND NOT RAWSPEED_PARALLEL_LINK_JOBS)
+     message(STATUS "Clang's ThinLTO provides its own parallel linking - limiting parallel link jobs to 2.")
+     set(RAWSPEED_PARALLEL_LINK_JOBS "2")
+  endif()
+
+  if(RAWSPEED_PARALLEL_LINK_JOBS)
     set_property(GLOBAL APPEND PROPERTY
                  JOB_POOLS link_job_pool=${RAWSPEED_PARALLEL_LINK_JOBS})
     set(CMAKE_JOB_POOL_LINK link_job_pool)
