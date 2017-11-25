@@ -63,10 +63,15 @@ MARK_AS_ADVANCED(
     CMAKE_MODULE_LINKER_FLAGS )
 
 if(RAWSPEED_ENABLE_LTO)
-  include(llvm-toolchain)
-
-  set(lto_compile "-flto=thin")
-  set(lto_link "-flto=thin -fuse-ld=\"${LLVMLLD_EXECUTABLE}\" ${LLVMLLD_INCREMENTAL_LDFLAGS}")
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    include(llvm-toolchain)
+    set(lto_compile "-flto=thin")
+    set(lto_link "-flto=thin -fuse-ld=\"${LLVMLLD_EXECUTABLE}\" ${LLVMLLD_INCREMENTAL_LDFLAGS}")
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    include(gcc-toolchain)
+    set(lto_compile "-flto")
+    set(lto_link "-flto")
+  endif()
 
   set(CMAKE_C_FLAGS
       "${CMAKE_C_FLAGS} ${lto_compile}"

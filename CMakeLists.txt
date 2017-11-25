@@ -119,11 +119,7 @@ set(LIB_FUZZING_ENGINE "OFF" CACHE STRING "Either OFF, or overrides location of 
 
 set(REFERENCE_SAMPLE_ARCHIVE "~/raw-camera-samples/raw.pixls.us-unique" CACHE PATH "The location of the reference sample set to use. Should contain filelist.sha1 and timestamp.txt")
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  option(RAWSPEED_ENABLE_LTO "(Clang only) Add -flto=thin flag to the compile and link command lines, enabling link-time optimization." OFF)
-else()
-  set(RAWSPEED_ENABLE_LTO OFF CACHE BOOL "(Clang only) Add -flto=thin flag to the compile and link command lines, enabling link-time optimization." FORCE)
-endif()
+option(RAWSPEED_ENABLE_LTO "Add appropriate flag to the compile and link command lines, enabling link-time optimization." OFF)
 
 if(CMAKE_MAKE_PROGRAM MATCHES "ninja")
   set(RAWSPEED_PARALLEL_LINK_JOBS "" CACHE STRING
@@ -144,7 +140,7 @@ else()
   set(RAWSPEED_PARALLEL_LINK_JOBS "" CACHE STRING
       "(Ninja-only) Define the maximum number of concurrent link jobs." FORCE)
 
-  if(RAWSPEED_ENABLE_LTO)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND RAWSPEED_ENABLE_LTO)
     message(WARNING "RAWSPEED_ENABLE_LTO is enabled but RAWSPEED_PARALLEL_LINK_JOBS is only supported for Ninja.\nConsider using Ninja Generator!")
   endif()
 endif()
