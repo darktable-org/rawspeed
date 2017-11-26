@@ -177,32 +177,16 @@ public:
 
     // Read rects
     for (auto i = 0U; i < badRectCount; ++i) {
-      auto top = bs->getU32();
-      auto left = bs->getU32();
-      auto bottom = bs->getU32();
-      auto right = bs->getU32();
+      const DummyROIOpcode dummy(ri, bs);
 
-      const iPoint2D topLeft(left, top);
-      const iPoint2D bottomRight(right, bottom);
-
-      if (!(fullImage.isPointInside(topLeft) &&
-            fullImage.isPointInside(bottomRight) && bottomRight >= topLeft)) {
-        ThrowRDE(
-            "Rectangle (%u, %u, %u, %u) not inside image (%u, %u, %u, %u).",
-            topLeft.x, topLeft.y, bottomRight.x, bottomRight.y,
-            fullImage.getTopLeft().x, fullImage.getTopLeft().y,
-            fullImage.getBottomRight().x, fullImage.getBottomRight().y);
-      }
-
-      iRectangle2D badRect;
-      badRect.setTopLeft(topLeft);
-      badRect.setBottomRightAbsolute(bottomRight);
+      const iRectangle2D badRect = dummy.getRoi();
       assert(badRect.isThisInside(fullImage));
 
-      auto area = (1 + bottom - top) * (1 + right - left);
+      auto area = (1 + badRect.getBottom() - badRect.getTop()) *
+                  (1 + badRect.getRight() - badRect.getLeft());
       badPixels.reserve(badPixels.size() + area);
-      for (auto y = top; y <= bottom; ++y) {
-        for (auto x = left; x <= right; ++x) {
+      for (auto y = badRect.getTop(); y <= badRect.getBottom(); ++y) {
+        for (auto x = badRect.getLeft(); x <= badRect.getRight(); ++x) {
           badPixels.emplace_back(y << 16 | x);
         }
       }
