@@ -106,7 +106,11 @@ public:
     auto badPointCount = bs->getU32();
     auto badRectCount = bs->getU32();
 
-    bs->check(2 * 4 * badPointCount + 4 * 4 * badRectCount);
+    // first, check that we indeed have much enough data
+    const auto origPos = bs->getPosition();
+    bs->skipBytes(badPointCount, 2 * 4);
+    bs->skipBytes(badRectCount, 4 * 4);
+    bs->setPosition(origPos);
 
     // Read points
     badPixels.reserve(badPixels.size() + badPointCount);
