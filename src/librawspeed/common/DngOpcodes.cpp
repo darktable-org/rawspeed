@@ -132,9 +132,22 @@ public:
       auto bottom = bs->getU32();
       auto right = bs->getU32();
 
-      const iRectangle2D badRect(left, top, right - left, bottom - top);
-      if (!badRect.isThisInside(fullImage))
-        ThrowRDE("Bad rectangle not inside image.");
+      const iPoint2D topLeft(left, top);
+      const iPoint2D bottomRight(right, bottom);
+
+      if (!(fullImage.isPointInside(topLeft) &&
+            fullImage.isPointInside(bottomRight) && bottomRight >= topLeft)) {
+        ThrowRDE(
+            "Rectangle (%u, %u, %u, %u) not inside image (%u, %u, %u, %u).",
+            topLeft.x, topLeft.y, bottomRight.x, bottomRight.y,
+            fullImage.getTopLeft().x, fullImage.getTopLeft().y,
+            fullImage.getBottomRight().x, fullImage.getBottomRight().y);
+      }
+
+      iRectangle2D badRect;
+      badRect.setTopLeft(topLeft);
+      badRect.setBottomRightAbsolute(bottomRight);
+      assert(badRect.isThisInside(fullImage));
 
       auto area = (1 + bottom - top) * (1 + right - left);
       badPixels.reserve(badPixels.size() + area);
