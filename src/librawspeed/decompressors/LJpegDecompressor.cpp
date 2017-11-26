@@ -40,10 +40,12 @@ LJpegDecompressor::LJpegDecompressor(const ByteStream& bs, const RawImage& img)
         (mRaw->getCpp() == 3 && mRaw->getBpp() == 6)))
     ThrowRDE("Unexpected component count (%u)", mRaw->getCpp());
 
+  if (mRaw->dim.x == 0 || mRaw->dim.y == 0)
+    ThrowRDE("Image has zero size");
+
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
   // Yeah, sure, here it would be just dumb to leave this for production :)
-  if (!mRaw->dim.x || !mRaw->dim.y || mRaw->dim.x > 7424 ||
-      mRaw->dim.y > 5552) {
+  if (mRaw->dim.x > 7424 || mRaw->dim.y > 5552) {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);
   }
