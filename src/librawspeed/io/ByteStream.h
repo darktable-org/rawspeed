@@ -71,16 +71,17 @@ public:
     return ByteStream(getSubView(offset), 0, getByteOrder());
   }
 
-  inline void check(size_type bytes) const {
+  inline size_type check(size_type bytes) const {
     if (static_cast<uint64>(pos) + bytes > size)
       ThrowIOE("Out of bounds access in ByteStream");
     assert(!ASAN_REGION_IS_POISONED(data + pos, bytes));
+    return bytes;
   }
 
-  inline void check(size_type nmemb, size_type size_) const {
+  inline size_type check(size_type nmemb, size_type size_) const {
     if (size_ && nmemb > std::numeric_limits<size_type>::max() / size_)
       ThrowIOE("Integer overflow when calculating stream lenght");
-    check(nmemb * size_);
+    return check(nmemb * size_);
   }
 
   inline size_type getPosition() const {
