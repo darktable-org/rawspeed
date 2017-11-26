@@ -136,9 +136,9 @@ public:
     return data[pos+i];
   }
 
-  inline void skipBytes(size_type nbytes) {
-    check(nbytes);
-    pos += nbytes;
+  inline void skipBytes(size_type nbytes) { pos += check(nbytes); }
+  inline void skipBytes(size_type nmemb, size_type size_) {
+    pos += check(nmemb, size_);
   }
 
   inline bool hasPatternAt(const char *pattern, size_type size_,
