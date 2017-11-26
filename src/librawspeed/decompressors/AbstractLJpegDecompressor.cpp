@@ -33,6 +33,23 @@
 
 namespace rawspeed {
 
+AbstractLJpegDecompressor::AbstractLJpegDecompressor(ByteStream bs,
+                                                     const RawImage& img)
+    : input(std::move(bs)), mRaw(img) {
+  input.setByteOrder(Endianness::big);
+
+  if (mRaw->dim.x == 0 || mRaw->dim.y == 0)
+    ThrowRDE("Image has zero size");
+
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+  // Yeah, sure, here it would be just dumb to leave this for production :)
+  if (mRaw->dim.x > 8896 || mRaw->dim.y > 6304) {
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+             mRaw->dim.y);
+  }
+#endif
+}
+
 void AbstractLJpegDecompressor::decode() {
   if (getNextMarker(false) != M_SOI)
     ThrowRDE("Image did not start with SOI. Probably not an LJPEG");

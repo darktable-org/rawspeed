@@ -148,10 +148,7 @@ class AbstractLJpegDecompressor : public AbstractDecompressor {
   std::array<HuffmanTable*, 4> huff{{}}; // 4 pointers into the store
 
 public:
-  AbstractLJpegDecompressor(ByteStream bs, const RawImage& img)
-      : input(std::move(bs)), mRaw(img) {
-    input.setByteOrder(Endianness::big);
-  }
+  AbstractLJpegDecompressor(ByteStream bs, const RawImage& img);
 
   virtual ~AbstractLJpegDecompressor() = default;
 
