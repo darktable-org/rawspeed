@@ -127,6 +127,23 @@ protected:
 
 // ****************************************************************************
 
+class DngOpcodes::DummyROIOpcode final : public ROIOpcode {
+public:
+  explicit DummyROIOpcode(const RawImage& ri, ByteStream* bs)
+      : ROIOpcode(ri, bs) {}
+
+  const iRectangle2D& __attribute__((pure)) getRoi() const {
+    return ROIOpcode::getRoi();
+  }
+
+  [[noreturn]] void apply(const RawImage& ri) final {
+    assert(false && "You should not be calling this.");
+    __builtin_unreachable();
+  }
+};
+
+// ****************************************************************************
+
 class DngOpcodes::FixBadPixelsList final : public DngOpcodes::DngOpcode {
   std::vector<uint32> badPixels;
 

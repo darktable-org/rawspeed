@@ -50,6 +50,7 @@ protected:
   class FixBadPixelsConstant;
   class FixBadPixelsList;
   class ROIOpcode;
+  class DummyROIOpcode;
   class TrimBounds;
   class PixelOpcode;
   class LookupOpcode;
