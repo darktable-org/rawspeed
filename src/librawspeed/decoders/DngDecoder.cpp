@@ -378,6 +378,14 @@ RawImage DngDecoder::decodeRawInternal() {
   if (mRaw->dim.x == 0 || mRaw->dim.y == 0)
     ThrowRDE("Image has zero size");
 
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+  // Yeah, sure, here it would be just dumb to leave this for production :)
+  if (mRaw->dim.x > 7424 || mRaw->dim.y > 5552) {
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+             mRaw->dim.y);
+  }
+#endif
+
   if (mRaw->isCFA)
     parseCFA(raw);
 
