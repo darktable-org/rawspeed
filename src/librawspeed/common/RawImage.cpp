@@ -226,11 +226,10 @@ uchar8* RawImageData::getData() const {
 }
 
 uchar8* RawImageData::getData(uint32 x, uint32 y) {
-  if (static_cast<int>(x) >= dim.x)
+  if (x >= static_cast<unsigned>(uncropped_dim.x))
     ThrowRDE("X Position outside image requested.");
-  if (static_cast<int>(y) >= dim.y) {
+  if (y >= static_cast<unsigned>(uncropped_dim.y))
     ThrowRDE("Y Position outside image requested.");
-  }
 
   x += mOffset.x;
   y += mOffset.y;
@@ -242,11 +241,10 @@ uchar8* RawImageData::getData(uint32 x, uint32 y) {
 }
 
 uchar8* RawImageData::getDataUncropped(uint32 x, uint32 y) {
-  if (static_cast<int>(x) >= uncropped_dim.x)
+  if (x >= static_cast<unsigned>(uncropped_dim.x))
     ThrowRDE("X Position outside image requested.");
-  if (static_cast<int>(y) >= uncropped_dim.y) {
+  if (y >= static_cast<unsigned>(uncropped_dim.y))
     ThrowRDE("Y Position outside image requested.");
-  }
 
   if (!data)
     ThrowRDE("Data not yet allocated.");
