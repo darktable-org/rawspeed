@@ -94,6 +94,39 @@ public:
 
 // ****************************************************************************
 
+class DngOpcodes::ROIOpcode : public DngOpcodes::DngOpcode {
+  iRectangle2D roi;
+
+protected:
+  explicit ROIOpcode(const RawImage& ri, ByteStream* bs) {
+    const iRectangle2D fullImage(0, 0, ri->dim.x, ri->dim.y);
+
+    uint32 top = bs->getU32();
+    uint32 left = bs->getU32();
+    uint32 bottom = bs->getU32();
+    uint32 right = bs->getU32();
+
+    const iPoint2D topLeft(left, top);
+    const iPoint2D bottomRight(right, bottom);
+
+    if (!(fullImage.isPointInside(topLeft) &&
+          fullImage.isPointInside(bottomRight) && bottomRight >= topLeft)) {
+      ThrowRDE("Rectangle (%u, %u, %u, %u) not inside image (%u, %u, %u, %u).",
+               topLeft.x, topLeft.y, bottomRight.x, bottomRight.y,
+               fullImage.getTopLeft().x, fullImage.getTopLeft().y,
+               fullImage.getBottomRight().x, fullImage.getBottomRight().y);
+    }
+
+    roi.setTopLeft(topLeft);
+    roi.setBottomRightAbsolute(bottomRight);
+    assert(roi.isThisInside(fullImage));
+  }
+
+  const iRectangle2D& __attribute__((pure)) getRoi() const { return roi; }
+};
+
+// ****************************************************************************
+
 class DngOpcodes::FixBadPixelsList final : public DngOpcodes::DngOpcode {
   std::vector<uint32> badPixels;
 
@@ -164,39 +197,6 @@ public:
     ri->mBadPixelPositions.insert(ri->mBadPixelPositions.begin(),
                                   badPixels.begin(), badPixels.end());
   }
-};
-
-// ****************************************************************************
-
-class DngOpcodes::ROIOpcode : public DngOpcodes::DngOpcode {
-  iRectangle2D roi;
-
-protected:
-  explicit ROIOpcode(const RawImage& ri, ByteStream* bs) {
-    const iRectangle2D fullImage(0, 0, ri->dim.x, ri->dim.y);
-
-    uint32 top = bs->getU32();
-    uint32 left = bs->getU32();
-    uint32 bottom = bs->getU32();
-    uint32 right = bs->getU32();
-
-    const iPoint2D topLeft(left, top);
-    const iPoint2D bottomRight(right, bottom);
-
-    if (!(fullImage.isPointInside(topLeft) &&
-          fullImage.isPointInside(bottomRight) && bottomRight >= topLeft)) {
-      ThrowRDE("Rectangle (%u, %u, %u, %u) not inside image (%u, %u, %u, %u).",
-               topLeft.x, topLeft.y, bottomRight.x, bottomRight.y,
-               fullImage.getTopLeft().x, fullImage.getTopLeft().y,
-               fullImage.getBottomRight().x, fullImage.getBottomRight().y);
-    }
-
-    roi.setTopLeft(topLeft);
-    roi.setBottomRightAbsolute(bottomRight);
-    assert(roi.isThisInside(fullImage));
-  }
-
-  const iRectangle2D& __attribute__((pure)) getRoi() const { return roi; }
 };
 
 // ****************************************************************************
