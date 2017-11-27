@@ -40,14 +40,22 @@ namespace rawspeed {
 
 class CameraMetaData;
 
+bool IiqDecoder::isAppropriateDecoder(const Buffer* file) {
+  assert(file);
+
+  const DataBuffer db(*file, Endianness::little);
+
+  // The IIQ magic. Is present for all IIQ raws.
+  return db.get<uint32>(8) == 0x49494949;
+}
+
 bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                       const Buffer* file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
-  const DataBuffer db(*file, Endianness::little);
-
-  return make == "Phase One A/S" && db.get<uint32>(8) == 0x49494949;
+  return IiqDecoder::isAppropriateDecoder(file) &&
+         (make == "Phase One A/S" || make == "Leaf");
 }
 
 // FIXME: this is very close to SamsungV0Decompressor::computeStripes()

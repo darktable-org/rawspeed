@@ -57,8 +57,10 @@ class IiqDecoder final : public AbstractTiffDecoder {
   void DecodeStrip(const IiqStrip& strip, uint32 width, uint32 height);
 
 public:
+  static bool isAppropriateDecoder(const Buffer* file);
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                    const Buffer* file);
+
   IiqDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file)
       : AbstractTiffDecoder(move(rootIFD), file) {}
 

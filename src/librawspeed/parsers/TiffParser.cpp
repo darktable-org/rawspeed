@@ -116,7 +116,11 @@ std::unique_ptr<RawDecoder> TiffParser::constructor(TiffRootIFDOwner&& root,
 }
 
 #define DECODER(name)                                                          \
-  { std::make_pair(&name::isAppropriateDecoder, &constructor<name>) }
+  {                                                                            \
+    std::make_pair(                                                            \
+        static_cast<TiffParser::checker_t>(&name::isAppropriateDecoder),       \
+        &constructor<name>)                                                    \
+  }
 
 const std::array<std::pair<TiffParser::checker_t, TiffParser::constructor_t>,
                  17>

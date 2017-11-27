@@ -22,6 +22,7 @@
 #include "decoders/MosDecoder.h"
 #include "common/Common.h"                          // for uint32, uchar8
 #include "common/Point.h"                           // for iPoint2D
+#include "decoders/IiqDecoder.h"                    // for IiqDecoder::isAppr...
 #include "decoders/RawDecoder.h"                    // for RawDecoder
 #include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
@@ -51,9 +52,9 @@ bool MosDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
     const auto id = rootIFD->getID();
     const std::string& make = id.make;
 
-    // FIXME: magic
-
-    return make == "Leaf";
+    // This is messy. see https://github.com/darktable-org/rawspeed/issues/116
+    // Old Leafs are MOS, new ones are IIQ. Use IIQ's magic to differentiate.
+    return make == "Leaf" && !IiqDecoder::isAppropriateDecoder(file);
   } catch (const TiffParserException&) {
     // Last ditch effort to identify Leaf cameras that don't have a Tiff Make
     // set
