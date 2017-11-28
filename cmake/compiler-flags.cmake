@@ -40,6 +40,13 @@ if(CMAKE_BUILD_TYPE STREQUAL "RELEASE")
 elseif(NOT (CMAKE_BUILD_TYPE STREQUAL "RELWITHDEBINFO" OR CMAKE_BUILD_TYPE STREQUAL "FUZZ"))
   # if not Release/RelWithDebInfo/Fuzz build, enable extra debug mode
   add_definitions(-DDEBUG)
+
+  # all this does not work with integer sanitizer
+  # add_definitions(-D_GLIBCXX_ASSERTIONS)
+  # add_definitions(-D_GLIBCXX_DEBUG)
+  # add_definitions(-D_GLIBCXX_DEBUG_PEDANTIC)
+
+  add_definitions(-D_GLIBCXX_SANITIZE_VECTOR)
 endif()
 
 IF(NOT APPLE)
