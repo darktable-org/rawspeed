@@ -75,7 +75,7 @@ IiqDecoder::computeSripes(const Buffer& raw_data,
 
   std::sort(offsets.begin(), offsets.end(),
             [](const IiqOffset& a, const IiqOffset& b) {
-              if (a.offset == b.offset)
+              if (a.offset == b.offset && &a != &b)
                 ThrowRDE("Two identical offsets found. Corrupt raw.");
               return a.offset < b.offset;
             });
