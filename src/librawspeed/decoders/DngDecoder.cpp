@@ -643,7 +643,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) {
     return false;
 
   TiffEntry* black_entry = raw->getEntry(BLACKLEVEL);
-  if (static_cast<int>(black_entry->count) < blackdim.x * blackdim.y)
+  if (black_entry->count < blackdim.area())
     ThrowRDE("BLACKLEVEL entry is too small");
 
   using BlackType = decltype(mRaw->blackLevelSeparate)::value_type;
