@@ -22,13 +22,16 @@
 #pragma once
 
 #include <algorithm> // for max, min
+#include <type_traits> // for make_unsigned
 
 namespace rawspeed {
 
 class iPoint2D {
 public:
+  using value_type = int;
+
   constexpr iPoint2D() = default;
-  constexpr iPoint2D(int a, int b) : x(a), y(b) {}
+  constexpr iPoint2D(value_type a, value_type b) : x(a), y(b) {}
 
   constexpr iPoint2D operator+(const iPoint2D& rhs) const {
     return {x + rhs.x, y + rhs.y};
@@ -67,7 +70,7 @@ public:
     return x <= rhs.x && y <= rhs.y;
   }
 
-  constexpr unsigned int area() const {
+  constexpr std::make_unsigned<value_type>::type area() const {
     return (static_cast<long>(x) * y) > 0 ? (static_cast<long>(x) * y)
                                           : -(static_cast<long>(x) * y);
   }
@@ -81,8 +84,8 @@ public:
     return {x < rhs.x ? x : rhs.x, y < rhs.y ? y : rhs.y};
   }
 
-  int x = 0;
-  int y = 0;
+  value_type x = 0;
+  value_type y = 0;
 };
 
 /* Helper class for managing a rectangle in 2D space. */
