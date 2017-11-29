@@ -407,19 +407,30 @@ RawImage DngDecoder::decodeRawInternal() {
 void DngDecoder::handleMetadata(const TiffIFD* raw) {
   // Crop
   if (raw->hasEntry(ACTIVEAREA)) {
-    iPoint2D new_size(mRaw->dim.x, mRaw->dim.y);
-
     TiffEntry *active_area = raw->getEntry(ACTIVEAREA);
     if (active_area->count != 4)
       ThrowRDE("active area has %d values instead of 4", active_area->count);
 
-    auto corners = active_area->getU32Array(4);
-    if (iPoint2D(corners[1], corners[0]).isThisInside(mRaw->dim) &&
-        iPoint2D(corners[3], corners[2]).isThisInside(mRaw->dim)) {
-      iRectangle2D crop(corners[1], corners[0], corners[3] - corners[1],
-                        corners[2] - corners[0]);
-      mRaw->subFrame(crop);
+    const iRectangle2D fullImage(0, 0, mRaw->dim.x, mRaw->dim.y);
+
+    const auto corners = active_area->getU32Array(4);
+    const iPoint2D topLeft(corners[1], corners[0]);
+    const iPoint2D bottomRight(corners[3], corners[2]);
+
+    if (!(fullImage.isPointInside(topLeft) &&
+          fullImage.isPointInside(bottomRight) && bottomRight >= topLeft)) {
+      ThrowRDE("Rectangle (%u, %u, %u, %u) not inside image (%u, %u, %u, %u).",
+               topLeft.x, topLeft.y, bottomRight.x, bottomRight.y,
+               fullImage.getTopLeft().x, fullImage.getTopLeft().y,
+               fullImage.getBottomRight().x, fullImage.getBottomRight().y);
     }
+
+    iRectangle2D crop;
+    crop.setTopLeft(topLeft);
+    crop.setBottomRightAbsolute(bottomRight);
+    assert(fullImage.isThisInside(fullImage));
+
+    mRaw->subFrame(crop);
   }
 
   if (raw->hasEntry(DEFAULTCROPORIGIN) && raw->hasEntry(DEFAULTCROPSIZE)) {
