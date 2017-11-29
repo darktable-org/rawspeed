@@ -192,7 +192,13 @@ void DngDecoder::parseCFA(const TiffIFD* raw) {
   if (active_area->count != 4)
     ThrowRDE("active area has %d values instead of 4", active_area->count);
 
-  auto aa = active_area->getFloatArray(2);
+  const auto aa = active_area->getFloatArray(2);
+  if (std::any_of(aa.cbegin(), aa.cend(), [](const auto v) {
+        return v < std::numeric_limits<iPoint2D::value_type>::min() ||
+               v > std::numeric_limits<iPoint2D::value_type>::max();
+      }))
+    ThrowRDE("Error decoding active area");
+
   mRaw->cfa.shiftLeft(aa[1]);
   mRaw->cfa.shiftDown(aa[0]);
 }
@@ -439,13 +445,27 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     TiffEntry *size_entry = raw->getEntry(DEFAULTCROPSIZE);
 
     /* Read crop position (sometimes is rational so use float) */
-    auto tl = origin_entry->getFloatArray(2);
-    if (iPoint2D(tl[0], tl[1]).isThisInside(mRaw->dim))
-      cropped = iRectangle2D(tl[0], tl[1], 0, 0);
+    const auto tl = origin_entry->getFloatArray(2);
+    if (std::any_of(tl.cbegin(), tl.cend(), [](const auto v) {
+          return v < std::numeric_limits<iPoint2D::value_type>::min() ||
+                 v > std::numeric_limits<iPoint2D::value_type>::max();
+        }))
+      ThrowRDE("Error decoding default crop origin");
+
+    iPoint2D cropOrigin(tl[0], tl[1]);
+    if (cropped.isPointInside(cropOrigin))
+      cropped = iRectangle2D(cropOrigin, {0, 0});
 
     cropped.dim = mRaw->dim - cropped.pos;
+
     /* Read size (sometimes is rational so use float) */
-    auto sz = size_entry->getFloatArray(2);
+    const auto sz = size_entry->getFloatArray(2);
+    if (std::any_of(sz.cbegin(), sz.cend(), [](const auto v) {
+          return v < std::numeric_limits<iPoint2D::value_type>::min() ||
+                 v > std::numeric_limits<iPoint2D::value_type>::max();
+        }))
+      ThrowRDE("Error decoding default crop size");
+
     iPoint2D size(sz[0], sz[1]);
     if ((size + cropped.pos).isThisInside(mRaw->dim))
       cropped.dim = size;
