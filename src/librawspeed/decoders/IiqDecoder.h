@@ -73,6 +73,10 @@ protected:
   uint32 black_level = 0;
   void DecodePhaseOneC(const std::vector<IiqStrip>& strips, uint32 width,
                        uint32 height);
+  void CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
+                        uint32 split_col);
+  void CorrectQuadrantMultipliersCombined(ByteStream data, uint32 split_row,
+                                          uint32 split_col);
 };
 
 } // namespace rawspeed
