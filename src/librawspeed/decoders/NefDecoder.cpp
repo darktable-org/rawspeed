@@ -586,8 +586,12 @@ void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h) {
   float wb_r = wb->getFloat(0);
   float wb_b = wb->getFloat(1);
 
-  if (wb_r <= 0.0F || wb_b <= 0.0F)
-    ThrowRDE("Whitebalance has zero value");
+  // Deduced purely emperically.
+  // Using Spectral power distribution functions (see darktable's temperature
+  // module), no valid kelvin temperature seem to be able to produce values
+  // that would violate these limits.
+  if (wb_r < 0.0001F || wb_b < 0.0001F || wb_r > 10.0F || wb_b > 10.0F)
+    ThrowRDE("Whitebalance has bad values (%f, %f)", wb_r, wb_b);
 
   mRaw->metadata.wbCoeffs[0] = wb_r;
   mRaw->metadata.wbCoeffs[1] = 1.0F;
