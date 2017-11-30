@@ -92,6 +92,10 @@ void HasselbladDecompressor::decodeScan() {
 void HasselbladDecompressor::decode(int pixelBaseOffset_)
 {
   pixelBaseOffset = pixelBaseOffset_;
+
+  if (pixelBaseOffset < -65536 || pixelBaseOffset > 65535)
+    ThrowRDE("Either the offset %i or the bounds are wrong.", pixelBaseOffset);
+
   // We cannot use fully decoding huffman table,
   // because values are packed two pixels at the time.
   fullDecodeHT = false;
