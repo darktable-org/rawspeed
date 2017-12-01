@@ -70,7 +70,7 @@ handle_coverage_data()
 {
   cmake --build "$BUILD_DIR" --target gcov
   mkdir "$BUILD_DIR/gcov-reports-unittest"
-  find "$BUILD_DIR" -not -path '$BUILD_DIR/gcov-reports-unittest/*' -not -path '$BUILD_DIR/gcov-reports-rsa/*' -iname '*.gcov' -exec mv "{}" "$BUILD_DIR/gcov-reports-unittest" \;
+  find "$BUILD_DIR" -maxdepth 1 -iname '*.gcov' -exec mv "{}" "$BUILD_DIR/gcov-reports-unittest" \;
 }
 
 handle_sample_coverage_data()
@@ -79,7 +79,7 @@ handle_sample_coverage_data()
   cmake --build "$BUILD_DIR" --target rstest-check
   cmake --build "$BUILD_DIR" --target gcov
   mkdir "$BUILD_DIR/gcov-reports-rsa"
-  find "$BUILD_DIR" -not -path '$BUILD_DIR/gcov-reports-unittest/*' -not -path '$BUILD_DIR/gcov-reports-rsa/*' -iname '*.gcov' -exec mv "{}" "$BUILD_DIR/gcov-reports-rsa" \;
+  find "$BUILD_DIR" -maxdepth 1 -iname '*.gcov' -exec mv "{}" "$BUILD_DIR/gcov-reports-rsa" \;
 }
 
 diskspace()
