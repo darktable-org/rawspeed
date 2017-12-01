@@ -79,10 +79,10 @@ jobs:
     cache:
       directories:
         - '$HOME/$RPUU_DST'
-  - os: osx
-    env: CC=cc CXX=c++
-  - os: osx
-    env: CC=cc CXX=c++ FLAVOR=Coverage
+  #- os: osx
+  #  env: CC=cc CXX=c++
+  #- os: osx
+  #  env: CC=cc CXX=c++ FLAVOR=Coverage
   - os: linux
     dist: trusty
     sudo: required
