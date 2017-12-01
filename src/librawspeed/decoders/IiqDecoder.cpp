@@ -23,6 +23,7 @@
 #include "decoders/IiqDecoder.h"
 #include "common/Common.h"                // for uint32, int32, ushort16
 #include "common/Point.h"                 // for iPoint2D
+#include "common/Spline.h"                // for calculateCurve
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
 #include "io/Buffer.h"                    // for Buffer, DataBuffer
@@ -288,11 +289,71 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
   }
 }
 
+// This method defines a correction that compensates for the fact that
+// IIQ files may come from a camera with multiple (four, in this case)
+// sensors combined into a single "sensor."  Because the different
+// sensors may have slightly different responses, we need to multiply
+// the pixels in each by a correction factor to ensure that they blend
+// together smoothly.  The correction factor is not a single
+// multiplier, but a curve defined by seven control points.  Each
+// curve's control points share the same seven X-coordinates.
 void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
                                                     uint32 split_row,
                                                     uint32 split_col) {
-  // TODO: Implementation
 
+  // The curves should all include (0, 0) and (65535, 65535), so the
+  // first and last points are predefined and the middle seven are
+  // read from the file
+  std::array<uint32, 9> shared_x_coords;
+  shared_x_coords.fill(0);
+  shared_x_coords.back() = 65535;
+  std::generate_n(std::next(shared_x_coords.begin()), 7,
+                  [&data] { return data.getU32(); });
+
+  std::array<std::array<std::vector<iPoint2D>, 2>, 2> control_points;
+  for (auto& quadRow : control_points) {
+    for (auto& quadrant : quadRow) {
+      quadrant.emplace_back(0, 0);
+
+      for (int i = 1; i < 8; i++) {
+        // These multipliers are expressed in ten-thousandths in the
+        // file
+        const int y_coord = (data.getU32() * shared_x_coords[i]) / 10000;
+        quadrant.emplace_back(shared_x_coords[i], y_coord);
+      }
+
+      quadrant.emplace_back(65535, 65535);
+      assert(quadrant.size() == 9);
+    }
+  }
+
+  for (int quadRow = 0; quadRow < 2; quadRow++) {
+    for (int quadCol = 0; quadCol < 2; quadCol++) {
+      const std::vector<ushort16> curve =
+          Spline::calculateCurve(control_points[quadRow][quadCol]);
+
+      int row_start = quadRow == 0 ? 0 : split_row;
+      int row_end = quadRow == 0 ? split_row : mRaw->dim.y;
+      int col_start = quadCol == 0 ? 0 : split_col;
+      int col_end = quadCol == 0 ? split_col : mRaw->dim.x;
+
+      for (int row = row_start; row < row_end; row++) {
+        ushort16* pixel =
+            reinterpret_cast<ushort16*>(mRaw->getData(col_start, row));
+        for (int col = col_start; col < col_end; col++, pixel++) {
+          // This adjustment is expected to be made with the
+          // black-level already subtracted from the pixel values.
+          // Because this is kept as metadata and not subtracted at
+          // this point, to make the correction work we subtract the
+          // appropriate amount before indexing into the curve and
+          // then add it back so that subtracting the black level
+          // later will work as expected
+          const ushort16 diff = *pixel < black_level ? *pixel : black_level;
+          *pixel = curve[*pixel - diff] + diff;
+        }
+      }
+    }
+  }
 }
 
 void IiqDecoder::checkSupportInternal(const CameraMetaData* meta) {
