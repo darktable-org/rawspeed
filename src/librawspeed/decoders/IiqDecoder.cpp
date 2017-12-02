@@ -127,10 +127,13 @@ RawImage IiqDecoder::decodeRawInternal() {
 
   uint32 width = 0;
   uint32 height = 0;
+  uint32 split_row = 0;
+  uint32 split_col = 0;
 
   Buffer raw_data;
   ByteStream block_offsets;
   ByteStream wb;
+  ByteStream correction_meta_data;
 
   for (uint32 entry = 0; entry < entries_count; entry++) {
     const uint32 tag = es.getU32();
@@ -151,12 +154,21 @@ RawImage IiqDecoder::decodeRawInternal() {
     case 0x10f:
       raw_data = bs.getSubView(data, len);
       break;
+    case 0x110:
+      correction_meta_data = bs.getSubStream(data);
+      break;
     case 0x21c:
       // they are not guaranteed to be sequential!
       block_offsets = bs.getSubStream(data, len);
       break;
     case 0x21d:
       black_level = data >> 2;
+      break;
+    case 0x222:
+      split_col = data;
+      break;
+    case 0x224:
+      split_row = data;
       break;
     default:
       // FIXME: is there a "block_sizes" entry?
@@ -187,6 +199,9 @@ RawImage IiqDecoder::decodeRawInternal() {
   mRaw->createData();
 
   DecodePhaseOneC(strips, width, height);
+  if (correction_meta_data.getSize() != 0) {
+    CorrectPhaseOneC(correction_meta_data, split_row, split_col);
+  }
 
   for (int i = 0; i < 3; i++)
     mRaw->metadata.wbCoeffs[i] = wb.getFloat();
@@ -240,6 +255,47 @@ void IiqDecoder::DecodePhaseOneC(const std::vector<IiqStrip>& strips,
                                  uint32 width, uint32 height) {
   for (const auto& strip : strips)
     DecodeStrip(strip, width, height);
+}
+
+void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
+                                  uint32 split_col) {
+  ByteStream meta_data_base(meta_data.getSubStream(0));
+
+  meta_data.skipBytes(8);
+  const uint32 bytes_to_entries = meta_data.getU32();
+  meta_data.skipBytes(bytes_to_entries - 12);
+  const uint32 entries_count = meta_data.getU32();
+  meta_data.skipBytes(4);
+
+  // this is how much is to be read for all the entries
+  ByteStream entries(meta_data.getStream(16 * entries_count));
+
+  bool quadrant_multiplier_applied = false;
+
+  for (uint32 entry = 0; entry < entries_count; entry++) {
+    const uint32 tag = entries.getU32();
+    const uint32 len = entries.getU32();
+    const uint32 data = entries.getU32();
+
+    switch (tag) {
+    case 0x431:
+      if (!quadrant_multiplier_applied) {
+        CorrectQuadrantMultipliersCombined(
+            meta_data_base.getSubStream(data, len), split_row, split_col);
+      }
+      quadrant_multiplier_applied = true;
+      break;
+    default:
+      break;
+    }
+  }
+}
+
+void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
+                                                    uint32 split_row,
+                                                    uint32 split_col) {
+  // TODO: Implementation
+
 }
 
 void IiqDecoder::checkSupportInternal(const CameraMetaData* meta) {
