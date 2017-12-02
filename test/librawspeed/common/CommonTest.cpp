@@ -305,6 +305,49 @@ TEST(UnrollLoopTest, Test) {
   });
 }
 
+template <int iterations>
+static void UnrollLoopTestIsMonotonicallyPositiveTest() {
+  static_assert(iterations >= 0, "negative iteration count makes no sense.");
+
+  int invocation = 0;
+
+  std::vector<int> expected;
+  expected.reserve(iterations);
+  invocation = 0;
+  std::generate_n(std::back_inserter(expected), iterations,
+                  [&invocation]() -> int { return invocation++; });
+  if (iterations > 0) {
+    ASSERT_EQ(expected.size(), iterations);
+    ASSERT_EQ(expected.front(), 0);
+    ASSERT_EQ(expected.back(), iterations - 1);
+  }
+
+  std::vector<int> data;
+  data.reserve(iterations);
+  invocation = 0;
+  unroll_loop<iterations>([&](int i) {
+    ASSERT_GE(invocation, 0);
+    ASSERT_GE(i, 0);
+    ASSERT_LT(invocation, iterations);
+    ASSERT_LT(i, iterations);
+    ASSERT_EQ(i, invocation);
+
+    data.emplace_back(i);
+    invocation++;
+  });
+
+  ASSERT_EQ(data.size(), expected.size());
+  ASSERT_EQ(data, expected);
+}
+
+TEST(UnrollLoopTest, IsMonotonicallyPositiveTest) {
+  UnrollLoopTestIsMonotonicallyPositiveTest<0>();
+  UnrollLoopTestIsMonotonicallyPositiveTest<1>();
+  UnrollLoopTestIsMonotonicallyPositiveTest<2>();
+  UnrollLoopTestIsMonotonicallyPositiveTest<3>();
+  UnrollLoopTestIsMonotonicallyPositiveTest<4>();
+}
+
 TEST(GetThreadCountTest, Test) {
   ASSERT_NO_THROW({ ASSERT_GE(getThreadCount(), 1); });
 }
