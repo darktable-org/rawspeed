@@ -74,6 +74,9 @@ void LJpegDecompressor::decodeScan()
     if (frame.compInfo[i].superH != 1 || frame.compInfo[i].superV != 1)
       ThrowRDE("Unsupported subsampling");
 
+  if((mRaw->getCpp() * (mRaw->dim.x - offX)) < frame.cps)
+    ThrowRDE("Got less pixels than the components per sample");
+
   switch (frame.cps) {
   case 2:
     decodeN<2>();
@@ -100,6 +103,7 @@ void LJpegDecompressor::decodeN()
   assert((N_COMP / mRaw->getCpp()) > 0);
 
   assert(mRaw->dim.x >= N_COMP);
+  assert((mRaw->getCpp() * (mRaw->dim.x - offX)) >= N_COMP);
 
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
