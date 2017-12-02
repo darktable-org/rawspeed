@@ -27,7 +27,6 @@
 #include <algorithm>                      // for min, copy_n
 
 using std::copy_n;
-using std::min;
 
 namespace rawspeed {
 
@@ -127,8 +126,8 @@ void LJpegDecompressor::decodeN()
     // the predictor for the next line is the start of this line
     predNext = dest;
 
-    unsigned width = min(frame.w,
-                         (mRaw->dim.x - offX) / (N_COMP / mRaw->getCpp()));
+    unsigned width =
+        std::min(frame.w, (mRaw->getCpp() * (mRaw->dim.x - offX)) / N_COMP);
 
     // For x, we first process all pixels within the image buffer ...
     for (unsigned x = 0; x < width; ++x) {
