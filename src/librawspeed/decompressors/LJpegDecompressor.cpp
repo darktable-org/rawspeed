@@ -52,10 +52,11 @@ LJpegDecompressor::LJpegDecompressor(const ByteStream& bs, const RawImage& img)
 }
 
 void LJpegDecompressor::decode(uint32 offsetX, uint32 offsetY, bool fixDng16Bug_) {
-  if (static_cast<int>(offsetX) >= mRaw->dim.x)
+  if (offsetX >= static_cast<unsigned>(mRaw->dim.x))
     ThrowRDE("X offset outside of image");
-  if (static_cast<int>(offsetY) >= mRaw->dim.y)
+  if (offsetY >= static_cast<unsigned>(mRaw->dim.y))
     ThrowRDE("Y offset outside of image");
+
   offX = offsetX;
   offY = offsetY;
 
@@ -73,7 +74,8 @@ void LJpegDecompressor::decodeScan()
     if (frame.compInfo[i].superH != 1 || frame.compInfo[i].superV != 1)
       ThrowRDE("Unsupported subsampling");
 
-  if((mRaw->getCpp() * (mRaw->dim.x - offX)) < frame.cps)
+  assert(static_cast<unsigned>(mRaw->dim.x) > offX);
+  if ((mRaw->getCpp() * (mRaw->dim.x - offX)) < frame.cps)
     ThrowRDE("Got less pixels than the components per sample");
 
   switch (frame.cps) {
