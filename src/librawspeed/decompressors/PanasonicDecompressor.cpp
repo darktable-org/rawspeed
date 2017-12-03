@@ -46,11 +46,13 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
   if (width == 0 || height == 0 || width > 5488 || height > 3904)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
+  if (BufSize < load_flags)
+    ThrowRDE("Bad load_flags: %u, less than BufSize (%u)", load_flags, BufSize);
+
   input.check(load_flags);
 }
 
 struct PanasonicDecompressor::PanaBitpump {
-  static constexpr uint32 BufSize = 0x4000;
   ByteStream input;
   std::vector<uchar8> buf;
   int vbits = 0;
@@ -76,6 +78,7 @@ struct PanasonicDecompressor::PanaBitpump {
        * part of the file. Since there is no chance of affecting output buffer
        * size we allow the decoder to decode this
        */
+      assert(BufSize >= load_flags);
       auto size = std::min(input.getRemainSize(), BufSize - load_flags);
       memcpy(buf.data() + load_flags, input.getData(size), size);
 

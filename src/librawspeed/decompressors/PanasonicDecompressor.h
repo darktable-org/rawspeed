@@ -29,6 +29,7 @@ namespace rawspeed {
 class RawImage;
 
 class PanasonicDecompressor final : public AbstractParallelizedDecompressor {
+  static constexpr uint32 BufSize = 0x4000;
   struct PanaBitpump;
 
   void decompressThreaded(const RawDecompressorThread* t) const final;
