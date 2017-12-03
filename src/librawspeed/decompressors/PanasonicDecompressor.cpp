@@ -43,7 +43,8 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
   const uint32 width = mRaw->dim.x;
   const uint32 height = mRaw->dim.y;
 
-  if (width == 0 || height == 0 || width > 5488 || height > 3904)
+  if (width == 0 || height == 0 || width % 14 != 0 || width > 5488 ||
+      height > 3904)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   if (BufSize < load_flags)
@@ -99,48 +100,53 @@ void PanasonicDecompressor::decompressThreaded(
   /* 9 + 1/7 bits per pixel */
   bits.skipBytes(8 * mRaw->dim.x * t->start / 7);
 
+  assert(mRaw->dim.x % 14 == 0);
+  const auto blocks = mRaw->dim.x / 14;
+
   std::vector<uint32> zero_pos;
   for (uint32 y = t->start; y < t->end; y++) {
     int sh = 0;
-    int pred[2];
-    int nonz[2];
-    int u = 0;
 
     auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
-    for (int x = 0; x < mRaw->dim.x; x++) {
-      const int i = x % 14;
-      const int c = x & 1;
+    for (int block = 0; block < blocks; block++) {
+      std::array<int, 2> pred;
+      pred.fill(0);
 
-      // did we process one whole block of 14 pixels?
-      if (i == 0)
-        u = pred[0] = pred[1] = nonz[0] = nonz[1] = 0;
+      std::array<int, 2> nonz;
+      nonz.fill(0);
 
-      if (u == 2) {
-        sh = 4 >> (3 - bits.getBits(2));
-        u = -1;
-      }
+      int u = 0;
 
-      if (nonz[c]) {
-        int j = bits.getBits(8);
-        if (j) {
-          pred[c] -= 0x80 << sh;
-          if (pred[c] < 0 || sh == 4)
-            pred[c] &= ~(-(1 << sh));
-          pred[c] += j << sh;
+      for (int x = 0; x < 14; x++) {
+        const int c = x & 1;
+
+        if (u == 2) {
+          sh = 4 >> (3 - bits.getBits(2));
+          u = -1;
         }
-      } else {
-        nonz[c] = bits.getBits(8);
-        if (nonz[c] || i > 11)
-          pred[c] = nonz[c] << 4 | bits.getBits(4);
+
+        if (nonz[c]) {
+          int j = bits.getBits(8);
+          if (j) {
+            pred[c] -= 0x80 << sh;
+            if (pred[c] < 0 || sh == 4)
+              pred[c] &= ~(-(1 << sh));
+            pred[c] += j << sh;
+          }
+        } else {
+          nonz[c] = bits.getBits(8);
+          if (nonz[c] || x > 11)
+            pred[c] = nonz[c] << 4 | bits.getBits(4);
+        }
+
+        *dest = pred[c];
+
+        if (zero_is_bad && 0 == pred[c])
+          zero_pos.push_back((y << 16) | (14 * block + x));
+
+        u++;
+        dest++;
       }
-
-      *dest = pred[c];
-
-      if (zero_is_bad && 0 == pred[c])
-        zero_pos.push_back((y << 16) | x);
-
-      u++;
-      dest++;
     }
   }
 
