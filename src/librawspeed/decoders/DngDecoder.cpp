@@ -305,6 +305,8 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
       if (count < 1)
         ThrowRDE("Slice %u is empty", s);
 
+      assert(offY < static_cast<uint32>(mRaw->dim.y));
+
       ByteStream bs(mFile->getSubView(offset, count), 0);
       DngSliceElement e(bs, /*offsetX=*/0, offY, mRaw->dim.x, yPerSlice);
 
