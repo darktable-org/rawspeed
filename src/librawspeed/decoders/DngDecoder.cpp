@@ -288,11 +288,10 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
     uint32 yPerSlice = raw->hasEntry(ROWSPERSTRIP) ?
           raw->getEntry(ROWSPERSTRIP)->getU32() : mRaw->dim.y;
 
-    const uint32 yTotal = yPerSlice * counts->count;
     if (yPerSlice == 0 || yPerSlice > static_cast<uint32>(mRaw->dim.y) ||
-        yTotal < static_cast<uint32>(mRaw->dim.y)) {
-      ThrowRDE("Invalid y per slice %u or strip count %u (height = %u, got %u)",
-               yPerSlice, counts->count, mRaw->dim.y, yTotal);
+        roundUpDivision(mRaw->dim.y, yPerSlice) != counts->count) {
+      ThrowRDE("Invalid y per slice %u or strip count %u (height = %u)",
+               yPerSlice, counts->count, mRaw->dim.y);
     }
 
     slices.slices.reserve(counts->count);
