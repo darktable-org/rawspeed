@@ -81,7 +81,7 @@ roundUp(size_t value, size_t multiple) {
 
 constexpr inline size_t __attribute__((const))
 roundUpDivision(size_t value, size_t div) {
-  return (value + (div - 1)) / div;
+  return (value != 0) ? (1 + ((value - 1) / div)) : 0;
 }
 
 template <class T>
