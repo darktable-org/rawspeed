@@ -99,8 +99,10 @@ class DngOpcodes::ROIOpcode : public DngOpcodes::DngOpcode {
   iRectangle2D roi;
 
 protected:
-  explicit ROIOpcode(const RawImage& ri, ByteStream* bs) {
-    const iRectangle2D fullImage(0, 0, ri->dim.x, ri->dim.y);
+  explicit ROIOpcode(const RawImage& ri, ByteStream* bs, bool minusOne) {
+    const iRectangle2D fullImage =
+        minusOne ? iRectangle2D(0, 0, ri->dim.x - 1, ri->dim.y - 1)
+                 : iRectangle2D(0, 0, ri->dim.x, ri->dim.y);
 
     uint32 top = bs->getU32();
     uint32 left = bs->getU32();
@@ -131,7 +133,7 @@ protected:
 class DngOpcodes::DummyROIOpcode final : public ROIOpcode {
 public:
   explicit DummyROIOpcode(const RawImage& ri, ByteStream* bs)
-      : ROIOpcode(ri, bs) {}
+      : ROIOpcode(ri, bs, true) {}
 
   const iRectangle2D& __attribute__((pure)) getRoi() const {
     return ROIOpcode::getRoi();
@@ -183,8 +185,7 @@ public:
       const iRectangle2D badRect = dummy.getRoi();
       assert(badRect.isThisInside(fullImage));
 
-      auto area = (1 + badRect.getBottom() - badRect.getTop()) *
-                  (1 + badRect.getRight() - badRect.getLeft());
+      auto area = (1 + badRect.getHeight()) * (1 + badRect.getWidth());
       badPixels.reserve(badPixels.size() + area);
       for (auto y = badRect.getTop(); y <= badRect.getBottom(); ++y) {
         for (auto x = badRect.getLeft(); x <= badRect.getRight(); ++x) {
@@ -205,7 +206,8 @@ public:
 
 class DngOpcodes::TrimBounds final : public ROIOpcode {
 public:
-  explicit TrimBounds(const RawImage& ri, ByteStream* bs) : ROIOpcode(ri, bs) {}
+  explicit TrimBounds(const RawImage& ri, ByteStream* bs)
+      : ROIOpcode(ri, bs, false) {}
 
   void apply(const RawImage& ri) override { ri->subFrame(getRoi()); }
 };
@@ -219,7 +221,8 @@ class DngOpcodes::PixelOpcode : public ROIOpcode {
   uint32 colPitch;
 
 protected:
-  explicit PixelOpcode(const RawImage& ri, ByteStream* bs) : ROIOpcode(ri, bs) {
+  explicit PixelOpcode(const RawImage& ri, ByteStream* bs)
+      : ROIOpcode(ri, bs, false) {
     firstPlane = bs->getU32();
     planes = bs->getU32();
 
