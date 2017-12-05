@@ -131,7 +131,7 @@ public:
     return pos <= checkPoint && getBottomRight() >= checkPoint;
   }
 
-  constexpr unsigned int area() const { return dim.area(); }
+  unsigned int area() const { return dim.area(); }
 
   void offset(const iPoint2D& offset_) { pos += offset_; }
 
