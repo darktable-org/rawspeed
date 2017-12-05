@@ -33,6 +33,7 @@
 #include <cassert>                        // for assert
 #include <cmath>                          // for pow
 #include <iterator>                       // for back_insert_iterator
+#include <limits>                         // for numeric_limits
 #include <stdexcept>                      // for out_of_range
 #include <tuple>                          // for tie, tuple
 // IWYU pragma: no_include <ext/alloc_traits.h>
@@ -335,22 +336,41 @@ public:
     static inline uint32 select(uint32 /*x*/, uint32 y) { return y; }
   };
 
+  void setup(const RawImage& ri) override {
+    PixelOpcode::setup(ri);
+
+    // If we are working on a float image, no need to convert to int
+    if (ri->getDataType() != TYPE_USHORT16)
+      return;
+
+    deltaI.reserve(deltaF.size());
+    for (const auto f : deltaF) {
+      if (!valueIsOk(f))
+        ThrowRDE("Got float %f which is unacceptable.", f);
+      deltaI.emplace_back(static_cast<int>(f2iScale * f));
+    }
+  }
+
 protected:
+  const float f2iScale;
   vector<float> deltaF;
   vector<int> deltaI;
 
-  DeltaRowOrColBase(const RawImage& ri, ByteStream* bs, float f2iScale)
-      : PixelOpcode(ri, bs) {
+  // only meaningful for ushort16 images!
+  virtual bool valueIsOk(float value) = 0;
+
+  DeltaRowOrColBase(const RawImage& ri, ByteStream* bs, float f2iScale_)
+      : PixelOpcode(ri, bs), f2iScale(f2iScale_) {
     const auto deltaF_count = bs->getU32();
     bs->check(deltaF_count, 4);
 
     deltaF.reserve(deltaF_count);
-    std::generate_n(std::back_inserter(deltaF), deltaF_count,
-                    [&bs]() { return bs->get<float>(); });
-
-    deltaI.reserve(deltaF.size());
-    for (const auto f : deltaF)
-      deltaI.emplace_back(static_cast<int>(f2iScale * f));
+    std::generate_n(std::back_inserter(deltaF), deltaF_count, [&bs]() {
+      const auto F = bs->get<float>();
+      if (!std::isfinite(F))
+        ThrowRDE("Got bad float %f.", F);
+      return F;
+    });
   }
 };
 
@@ -358,9 +378,18 @@ protected:
 
 template <typename S>
 class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrColBase {
+  // We have pixel value in range of [0..65535]. We apply some offset X.
+  // For this to generate a value within the same range , the offset X needs
+  // to have an absolute value of 65535. Since the offset is multiplied
+  // by f2iScale before applying, we need to divide by f2iScale here.
+  const double absLimit;
+
+  bool valueIsOk(float value) final { return std::abs(value) <= absLimit; }
+
 public:
   explicit OffsetPerRowOrCol(const RawImage& ri, ByteStream* bs)
-      : DeltaRowOrColBase(ri, bs, 65535.0F) {}
+      : DeltaRowOrColBase(ri, bs, 65535.0F),
+        absLimit(double(std::numeric_limits<ushort16>::max()) / f2iScale) {}
 
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {
@@ -377,9 +406,22 @@ public:
 
 template <typename S>
 class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrColBase {
+  // We have pixel value in range of [0..65535]. We scale by float X.
+  // For this to generate a value within the same range , the scale X needs
+  // to be in the range [0..65535]. Since the offset is multiplied
+  // by f2iScale before applying, we need to divide by f2iScale here.
+  // So the maxLimit has the same value as absLimit for OffsetPerRowOrCol.
+  static constexpr const double minLimit = 0.0;
+  const double maxLimit;
+
+  bool valueIsOk(float value) final {
+    return value >= minLimit && value <= maxLimit;
+  }
+
 public:
   explicit ScalePerRowOrCol(const RawImage& ri, ByteStream* bs)
-      : DeltaRowOrColBase(ri, bs, 1024.0F) {}
+      : DeltaRowOrColBase(ri, bs, 1024.0F),
+        maxLimit(double(std::numeric_limits<ushort16>::max()) / f2iScale) {}
 
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {
