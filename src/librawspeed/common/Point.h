@@ -22,13 +22,15 @@
 #pragma once
 
 #include <algorithm> // for max, min
-#include <type_traits> // for make_unsigned
+#include <cassert>   // for assert
+#include <type_traits> // for make_signed
 
 namespace rawspeed {
 
 class iPoint2D {
 public:
   using value_type = int;
+  using area_type = unsigned long long;
 
   constexpr iPoint2D() = default;
   constexpr iPoint2D(value_type a, value_type b) : x(a), y(b) {}
@@ -70,9 +72,18 @@ public:
     return x <= rhs.x && y <= rhs.y;
   }
 
-  constexpr std::make_unsigned<value_type>::type area() const {
-    return (static_cast<long>(x) * y) > 0 ? (static_cast<long>(x) * y)
-                                          : -(static_cast<long>(x) * y);
+  area_type area() const {
+    using signed_area = std::make_signed<area_type>::type;
+
+    if (x >= 0 && y >= 0)
+      return static_cast<area_type>(x) * static_cast<area_type>(y);
+    if (x >= 0 && y < 0)
+      return static_cast<area_type>(x) * (-1 * static_cast<signed_area>(y));
+    if (y >= 0 && x < 0)
+      return static_cast<area_type>(y) * (-1 * static_cast<signed_area>(x));
+
+    assert(x < 0 && y < 0);
+    return static_cast<signed_area>(x) * static_cast<signed_area>(y);
   }
 
   constexpr bool isThisInside(const iPoint2D& rhs) const {

@@ -49,7 +49,7 @@ void ColorFilterArray::setSize(const iPoint2D& _size)
     // Bayer, FC() supports 2x8 pattern
     // X-Trans is 6x6 pattern
     // is there anything bigger?
-    ThrowRDE("if your CFA pattern is really %d pixels "
+    ThrowRDE("if your CFA pattern is really %llu pixels "
              "in area we may as well give up now",
              size.area());
   }

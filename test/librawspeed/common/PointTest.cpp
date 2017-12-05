@@ -20,12 +20,14 @@
 
 #include "common/Point.h" // for iPoint2D
 #include <gtest/gtest.h>  // for make_tuple, AssertionResult, IsNullLiteral...
+#include <limits>         // for numeric_limits
 #include <ostream>        // for operator<<, basic_ostream::operator<<, ost...
 #include <utility>        // for make_pair, pair, move
 
 using rawspeed::iPoint2D;
 using std::make_pair;
 using std::move;
+using std::numeric_limits;
 using std::pair;
 using std::tuple;
 
@@ -38,6 +40,15 @@ namespace rawspeed {
 } // namespace rawspeed
 
 namespace rawspeed_test {
+
+static constexpr iPoint2D::area_type maxVal =
+    numeric_limits<iPoint2D::value_type>::max();
+static constexpr iPoint2D::area_type minVal =
+    numeric_limits<iPoint2D::value_type>::min();
+static constexpr iPoint2D::area_type absMinVal = -minVal;
+static constexpr iPoint2D::area_type maxAreaVal = maxVal * maxVal;
+static constexpr iPoint2D::area_type minAreaVal = absMinVal * absMinVal;
+static constexpr iPoint2D::area_type mixAreaVal = maxVal * absMinVal;
 
 TEST(PointTest, Constructor) {
   int x = -10, y = 15;
@@ -307,7 +318,7 @@ TEST_P(PointTest, SubTest2) {
   });
 }
 
-using areaType = tuple<IntPair, int>;
+using areaType = tuple<IntPair, iPoint2D::area_type>;
 class AreaTest : public ::testing::TestWithParam<areaType> {
 protected:
   AreaTest() = default;
@@ -321,7 +332,7 @@ protected:
   }
 
   iPoint2D p;
-  int a;
+  iPoint2D::area_type a;
 };
 
 /*
@@ -339,15 +350,38 @@ do
   done;
 done;
 */
-static const areaType valueMul[]{
-    make_tuple(make_pair(-5, -5), 25), make_tuple(make_pair(-5, 0), 0),
-    make_tuple(make_pair(-5, 5), 25),  make_tuple(make_pair(0, -5), 0),
-    make_tuple(make_pair(0, 0), 0),    make_tuple(make_pair(0, 5), 0),
-    make_tuple(make_pair(5, -5), 25),  make_tuple(make_pair(5, 0), 0),
+static const areaType valueArea[]{
+    make_tuple(make_pair(-5, -5), 25),
+    make_tuple(make_pair(-5, 0), 0),
+    make_tuple(make_pair(-5, 5), 25),
+    make_tuple(make_pair(0, -5), 0),
+    make_tuple(make_pair(0, 0), 0),
+    make_tuple(make_pair(0, 5), 0),
+    make_tuple(make_pair(5, -5), 25),
+    make_tuple(make_pair(5, 0), 0),
     make_tuple(make_pair(5, 5), 25),
 
+    make_tuple(make_pair(minVal, 0), 0),
+    make_tuple(make_pair(maxVal, 0), 0),
+    make_tuple(make_pair(minVal, -1), absMinVal),
+    make_tuple(make_pair(maxVal, -1), maxVal),
+    make_tuple(make_pair(minVal, 1), absMinVal),
+    make_tuple(make_pair(maxVal, 1), maxVal),
+
+    make_tuple(make_pair(0, minVal), 0),
+    make_tuple(make_pair(0, maxVal), 0),
+    make_tuple(make_pair(-1, minVal), absMinVal),
+    make_tuple(make_pair(-1, maxVal), maxVal),
+    make_tuple(make_pair(1, minVal), absMinVal),
+    make_tuple(make_pair(1, maxVal), maxVal),
+
+    make_tuple(make_pair(minVal, minVal), minAreaVal),
+    make_tuple(make_pair(minVal, maxVal), mixAreaVal),
+    make_tuple(make_pair(maxVal, minVal), mixAreaVal),
+    make_tuple(make_pair(maxVal, maxVal), maxAreaVal),
+
 };
-INSTANTIATE_TEST_CASE_P(SubTest, AreaTest, ::testing::ValuesIn(valueMul));
+INSTANTIATE_TEST_CASE_P(AreaTest, AreaTest, ::testing::ValuesIn(valueArea));
 TEST_P(AreaTest, AreaTest) {
   ASSERT_NO_THROW({ ASSERT_EQ(p.area(), a); });
 }
