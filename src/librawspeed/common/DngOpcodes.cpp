@@ -252,6 +252,8 @@ protected:
       auto* src = reinterpret_cast<T*>(ri->getData(0, y));
       // Add offset, so this is always first plane
       src += firstPlane;
+      // FIXME: is op() really supposed to recieve global image coordinates,
+      // and not [0..ROI.getHeight()-1][0..ROI.getWidth()-1] ?
       for (auto x = ROI.getLeft(); x < ROI.getRight(); x += colPitch) {
         for (auto p = 0U; p < planes; ++p)
           src[x * cpp + p] = op(x, y, src[x * cpp + p]);
@@ -373,6 +375,17 @@ protected:
       : DeltaRowOrColBase(ri, bs), f2iScale(f2iScale_) {
     const auto deltaF_count = bs->getU32();
     bs->check(deltaF_count, 4);
+
+    // See PixelOpcode::applyOP(). We will access deltaF/deltaI up to (excl.)
+    // either ROI.getRight() or ROI.getBottom() index. Thus, we need to have
+    // either ROI.getRight() or ROI.getBottom() elements in there.
+    // FIXME: i guess not strictly true with pitch != 1.
+    const auto expectedSize =
+        S::select(getRoi().getRight(), getRoi().getBottom());
+    if (expectedSize != deltaF_count) {
+      ThrowRDE("Got unexpected number of elements (%u), expected %u.",
+               expectedSize, deltaF_count);
+    }
 
     deltaF.reserve(deltaF_count);
     std::generate_n(std::back_inserter(deltaF), deltaF_count, [&bs]() {
