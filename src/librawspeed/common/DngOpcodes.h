@@ -57,7 +57,7 @@ protected:
   class TableMap;
   class PolynomialMap;
   class DeltaRowOrColBase;
-  class DeltaRowOrCol;
+  template <typename S> class DeltaRowOrCol;
   template <typename S> class OffsetPerRowOrCol;
   template <typename S> class ScalePerRowOrCol;
 

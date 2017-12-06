@@ -343,6 +343,7 @@ protected:
   DeltaRowOrColBase(const RawImage& ri, ByteStream* bs) : PixelOpcode(ri, bs) {}
 };
 
+template <typename S>
 class DngOpcodes::DeltaRowOrCol : public DeltaRowOrColBase {
 public:
   void setup(const RawImage& ri) override {
@@ -386,7 +387,7 @@ protected:
 // ****************************************************************************
 
 template <typename S>
-class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol {
+class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol<S> {
   // We have pixel value in range of [0..65535]. We apply some offset X.
   // For this to generate a value within the same range , the offset X needs
   // to have an absolute value of 65535. Since the offset is multiplied
@@ -397,24 +398,26 @@ class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol {
 
 public:
   explicit OffsetPerRowOrCol(const RawImage& ri, ByteStream* bs)
-      : DeltaRowOrCol(ri, bs, 65535.0F),
-        absLimit(double(std::numeric_limits<ushort16>::max()) / f2iScale) {}
+      : DeltaRowOrCol<S>(ri, bs, 65535.0F),
+        absLimit(double(std::numeric_limits<ushort16>::max()) /
+                 this->f2iScale) {}
 
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {
-      applyOP<ushort16>(ri, [this](uint32 x, uint32 y, ushort16 v) {
-        return clampBits(deltaI[S::select(x, y)] + v, 16);
-      });
+      this->template applyOP<ushort16>(
+          ri, [this](uint32 x, uint32 y, ushort16 v) {
+            return clampBits(this->deltaI[S::select(x, y)] + v, 16);
+          });
     } else {
-      applyOP<float>(ri, [this](uint32 x, uint32 y, float v) {
-        return deltaF[S::select(x, y)] + v;
+      this->template applyOP<float>(ri, [this](uint32 x, uint32 y, float v) {
+        return this->deltaF[S::select(x, y)] + v;
       });
     }
   }
 };
 
 template <typename S>
-class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol {
+class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol<S> {
   // We have pixel value in range of [0..65535]. We scale by float X.
   // For this to generate a value within the same range , the scale X needs
   // to be in the range [0..65535]. Since the offset is multiplied
@@ -429,17 +432,19 @@ class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol {
 
 public:
   explicit ScalePerRowOrCol(const RawImage& ri, ByteStream* bs)
-      : DeltaRowOrCol(ri, bs, 1024.0F),
-        maxLimit(double(std::numeric_limits<ushort16>::max()) / f2iScale) {}
+      : DeltaRowOrCol<S>(ri, bs, 1024.0F),
+        maxLimit(double(std::numeric_limits<ushort16>::max()) /
+                 this->f2iScale) {}
 
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {
-      applyOP<ushort16>(ri, [this](uint32 x, uint32 y, ushort16 v) {
-        return clampBits((deltaI[S::select(x, y)] * v + 512) >> 10, 16);
+      this->template applyOP<ushort16>(ri, [this](uint32 x, uint32 y,
+                                                  ushort16 v) {
+        return clampBits((this->deltaI[S::select(x, y)] * v + 512) >> 10, 16);
       });
     } else {
-      applyOP<float>(ri, [this](uint32 x, uint32 y, float v) {
-        return deltaF[S::select(x, y)] * v;
+      this->template applyOP<float>(ri, [this](uint32 x, uint32 y, float v) {
+        return this->deltaF[S::select(x, y)] * v;
       });
     }
   }
