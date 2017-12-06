@@ -339,6 +339,12 @@ public:
     static inline uint32 select(uint32 /*x*/, uint32 y) { return y; }
   };
 
+protected:
+  DeltaRowOrColBase(const RawImage& ri, ByteStream* bs) : PixelOpcode(ri, bs) {}
+};
+
+class DngOpcodes::DeltaRowOrCol : public DeltaRowOrColBase {
+public:
   void setup(const RawImage& ri) override {
     PixelOpcode::setup(ri);
 
@@ -362,8 +368,8 @@ protected:
   // only meaningful for ushort16 images!
   virtual bool valueIsOk(float value) = 0;
 
-  DeltaRowOrColBase(const RawImage& ri, ByteStream* bs, float f2iScale_)
-      : PixelOpcode(ri, bs), f2iScale(f2iScale_) {
+  DeltaRowOrCol(const RawImage& ri, ByteStream* bs, float f2iScale_)
+      : DeltaRowOrColBase(ri, bs), f2iScale(f2iScale_) {
     const auto deltaF_count = bs->getU32();
     bs->check(deltaF_count, 4);
 
@@ -380,7 +386,7 @@ protected:
 // ****************************************************************************
 
 template <typename S>
-class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrColBase {
+class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol {
   // We have pixel value in range of [0..65535]. We apply some offset X.
   // For this to generate a value within the same range , the offset X needs
   // to have an absolute value of 65535. Since the offset is multiplied
@@ -391,7 +397,7 @@ class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrColBase {
 
 public:
   explicit OffsetPerRowOrCol(const RawImage& ri, ByteStream* bs)
-      : DeltaRowOrColBase(ri, bs, 65535.0F),
+      : DeltaRowOrCol(ri, bs, 65535.0F),
         absLimit(double(std::numeric_limits<ushort16>::max()) / f2iScale) {}
 
   void apply(const RawImage& ri) override {
@@ -408,7 +414,7 @@ public:
 };
 
 template <typename S>
-class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrColBase {
+class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol {
   // We have pixel value in range of [0..65535]. We scale by float X.
   // For this to generate a value within the same range , the scale X needs
   // to be in the range [0..65535]. Since the offset is multiplied
@@ -423,7 +429,7 @@ class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrColBase {
 
 public:
   explicit ScalePerRowOrCol(const RawImage& ri, ByteStream* bs)
-      : DeltaRowOrColBase(ri, bs, 1024.0F),
+      : DeltaRowOrCol(ri, bs, 1024.0F),
         maxLimit(double(std::numeric_limits<ushort16>::max()) / f2iScale) {}
 
   void apply(const RawImage& ri) override {
