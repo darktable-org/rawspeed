@@ -36,10 +36,17 @@ class PanasonicDecompressor final : public AbstractParallelizedDecompressor {
 
   ByteStream input;
   bool zero_is_bad;
+
+  // The RW2 raw image buffer is split into sections of BufSize bytes.
+  // If load_flags is 0, then last section is not nessesairly full.
+  // If load_flags is not 0, then each section has two parts:
+  //     bytes: [0..load_flags-1][load_flags..BufSize-1]
+  //     pixels: [a..b][0..a-1]
+  //   I.e. these two parts need to be swapped around.
   uint32 load_flags;
 
 public:
-  PanasonicDecompressor(const RawImage& img, ByteStream input_,
+  PanasonicDecompressor(const RawImage& img, const ByteStream& input_,
                         bool zero_is_not_bad, uint32 load_flags_);
 };
 

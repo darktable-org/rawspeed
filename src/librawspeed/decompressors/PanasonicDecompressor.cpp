@@ -31,11 +31,11 @@
 namespace rawspeed {
 
 PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
-                                             ByteStream input_,
+                                             const ByteStream& input_,
                                              bool zero_is_not_bad,
                                              uint32 load_flags_)
-    : AbstractParallelizedDecompressor(img), input(std::move(input_)),
-      zero_is_bad(!zero_is_not_bad), load_flags(load_flags_) {
+    : AbstractParallelizedDecompressor(img), zero_is_bad(!zero_is_not_bad),
+      load_flags(load_flags_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
@@ -50,7 +50,14 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
   if (BufSize < load_flags)
     ThrowRDE("Bad load_flags: %u, less than BufSize (%u)", load_flags, BufSize);
 
-  input.check(load_flags);
+  // Naive count of bytes that given pixel count requires.
+  const auto rawBytesNormal = 8U * mRaw->dim.area() / 7U;
+  // If load_flags is zero, than that size is the size we need to read.
+  // But if it is not, then we need to round up to multiple of BufSize, because
+  // of splitting&rotation of each BufSize's slice in half at load_flags bytes.
+  const auto bufSize =
+      load_flags == 0 ? rawBytesNormal : roundUp(rawBytesNormal, BufSize);
+  input = input_.peekStream(bufSize);
 }
 
 struct PanasonicDecompressor::PanaBitpump {
