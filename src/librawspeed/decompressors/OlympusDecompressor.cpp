@@ -30,6 +30,7 @@
 #include "io/BitPumpMSB.h"                      // for BitPumpMSB
 #include <algorithm>                            // for move
 #include <algorithm>                            // for min
+#include <array>                                // for array
 #include <cmath>                                // for signbit
 #include <cstdlib>                              // for abs
 #include <memory>                               // for unique_ptr
@@ -65,10 +66,8 @@ void OlympusDecompressor::decompress(ByteStream input) const {
   int low;
   int high;
   int i;
-  int left0 = 0;
-  int nw0 = 0;
-  int left1 = 0;
-  int nw1 = 0;
+  std::array<int, 2> left{};
+  std::array<int, 2> nw{};
   int pred;
   int diff;
 
@@ -90,16 +89,17 @@ void OlympusDecompressor::decompress(ByteStream input) const {
   BitPumpMSB bits(input);
 
   for (uint32 y = 0; y < static_cast<uint32>(mRaw->dim.y); y++) {
-    int acarry0[3] = {};
-    int acarry1[3] = {};
+    std::array<std::array<int, 3>, 2> acarry{};
 
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
     bool y_border = y < 2;
     bool border = true;
     for (uint32 x = 0; x < static_cast<uint32>(mRaw->dim.x); x++) {
+      int c = 0;
+
       bits.fill();
-      i = 2 * (acarry0[2] < 3);
-      for (nbits = 2 + i; static_cast<ushort16>(acarry0[0]) >> (nbits + i);
+      i = 2 * (acarry[c][2] < 3);
+      for (nbits = 2 + i; static_cast<ushort16>(acarry[c][0]) >> (nbits + i);
            nbits++)
         ;
 
@@ -115,53 +115,54 @@ void OlympusDecompressor::decompress(ByteStream input) const {
       } else
         bits.skipBitsNoFill(high + 1 + 3);
 
-      acarry0[0] = (high << nbits) | bits.getBits(nbits);
-      diff = (acarry0[0] ^ sign) + acarry0[1];
-      acarry0[1] = (diff * 3 + acarry0[1]) >> 5;
-      acarry0[2] = acarry0[0] > 16 ? 0 : acarry0[2] + 1;
+      acarry[c][0] = (high << nbits) | bits.getBits(nbits);
+      diff = (acarry[c][0] ^ sign) + acarry[c][1];
+      acarry[c][1] = (diff * 3 + acarry[c][1]) >> 5;
+      acarry[c][2] = acarry[c][0] > 16 ? 0 : acarry[c][2] + 1;
 
       if (border) {
         if (y_border && x < 2)
           pred = 0;
         else {
           if (y_border)
-            pred = left0;
+            pred = left[c];
           else {
             pred = dest[-pitch + (static_cast<int>(x))];
-            nw0 = pred;
+            nw[c] = pred;
           }
         }
         dest[x] = pred + ((diff * 4) | low);
         // Set predictor
-        left0 = dest[x];
+        left[c] = dest[x];
       } else {
         // Have local variables for values used several tiles
         // (having a "ushort16 *dst_up" that caches dest[-pitch+((int)x)] is
         // actually slower, probably stack spill or aliasing)
         int up = dest[-pitch + (static_cast<int>(x))];
-        int leftMinusNw = left0 - nw0;
-        int upMinusNw = up - nw0;
+        int leftMinusNw = left[c] - nw[c];
+        int upMinusNw = up - nw[c];
         // Check if sign is different, and they are both not zero
         if ((std::signbit(leftMinusNw) ^ std::signbit(upMinusNw)) &&
             (leftMinusNw != 0 && upMinusNw != 0)) {
           if (std::abs(leftMinusNw) > 32 || std::abs(upMinusNw) > 32)
-            pred = left0 + upMinusNw;
+            pred = left[c] + upMinusNw;
           else
-            pred = (left0 + up) >> 1;
+            pred = (left[c] + up) >> 1;
         } else
-          pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left0 : up;
+          pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left[c] : up;
 
         dest[x] = pred + ((diff * 4) | low);
         // Set predictors
-        left0 = dest[x];
-        nw0 = up;
+        left[c] = dest[x];
+        nw[c] = up;
       }
 
       // ODD PIXELS
       x += 1;
+      c = 1;
       bits.fill();
-      i = 2 * (acarry1[2] < 3);
-      for (nbits = 2 + i; static_cast<ushort16>(acarry1[0]) >> (nbits + i);
+      i = 2 * (acarry[c][2] < 3);
+      for (nbits = 2 + i; static_cast<ushort16>(acarry[c][0]) >> (nbits + i);
            nbits++)
         ;
       b = bits.peekBitsNoFill(15);
@@ -176,40 +177,40 @@ void OlympusDecompressor::decompress(ByteStream input) const {
       } else
         bits.skipBitsNoFill(high + 1 + 3);
 
-      acarry1[0] = (high << nbits) | bits.getBits(nbits);
-      diff = (acarry1[0] ^ sign) + acarry1[1];
-      acarry1[1] = (diff * 3 + acarry1[1]) >> 5;
-      acarry1[2] = acarry1[0] > 16 ? 0 : acarry1[2] + 1;
+      acarry[c][0] = (high << nbits) | bits.getBits(nbits);
+      diff = (acarry[c][0] ^ sign) + acarry[c][1];
+      acarry[c][1] = (diff * 3 + acarry[c][1]) >> 5;
+      acarry[c][2] = acarry[c][0] > 16 ? 0 : acarry[c][2] + 1;
 
       if (border) {
         if (y_border && x < 2)
           pred = 0;
         else {
           if (y_border)
-            pred = left1;
+            pred = left[c];
           else {
             pred = dest[-pitch + (static_cast<int>(x))];
-            nw1 = pred;
+            nw[c] = pred;
           }
         }
-        dest[x] = left1 = pred + ((diff * 4) | low);
+        dest[x] = left[c] = pred + ((diff * 4) | low);
       } else {
         int up = dest[-pitch + (static_cast<int>(x))];
-        int leftMinusNw = left1 - nw1;
-        int upMinusNw = up - nw1;
+        int leftMinusNw = left[c] - nw[c];
+        int upMinusNw = up - nw[c];
 
         // Check if sign is different, and they are both not zero
         if ((std::signbit(leftMinusNw) ^ std::signbit(upMinusNw)) &&
             (leftMinusNw != 0 && upMinusNw != 0)) {
           if (std::abs(leftMinusNw) > 32 || std::abs(upMinusNw) > 32)
-            pred = left1 + upMinusNw;
+            pred = left[c] + upMinusNw;
           else
-            pred = (left1 + up) >> 1;
+            pred = (left[c] + up) >> 1;
         } else
-          pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left1 : up;
+          pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left[c] : up;
 
-        dest[x] = left1 = pred + ((diff * 4) | low);
-        nw1 = up;
+        dest[x] = left[c] = pred + ((diff * 4) | low);
+        nw[c] = up;
       }
       border = y_border;
     }
