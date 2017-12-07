@@ -66,8 +66,8 @@ void OlympusDecompressor::decompress(ByteStream input) const {
   int low;
   int high;
   int i;
-  std::array<int, 2> left{};
-  std::array<int, 2> nw{};
+  std::array<int, 2> left{{}};
+  std::array<int, 2> nw{{}};
   int pred;
   int diff;
 
@@ -89,7 +89,7 @@ void OlympusDecompressor::decompress(ByteStream input) const {
   BitPumpMSB bits(input);
 
   for (uint32 y = 0; y < static_cast<uint32>(mRaw->dim.y); y++) {
-    std::array<std::array<int, 3>, 2> acarry{};
+    std::array<std::array<int, 3>, 2> acarry{{}};
 
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
     bool y_border = y < 2;
