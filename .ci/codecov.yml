@@ -3,7 +3,7 @@ codecov:
     require_ci_to_pass: true
     irc:
       default:
-        server: chat.freenode.net
+        server: "chat.freenode.net"
         channel: '#rawspeed'
 coverage:
   precision: 2
@@ -14,6 +14,9 @@ coverage:
     patch: false
     project: false
   ignore:
+    - "test"
+    - "test/*"
+    - "test/**/*"
     - "**/test/**/*"
 parsers:
   gcov:
