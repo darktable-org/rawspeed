@@ -75,6 +75,7 @@ TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream* bs) : parent(parent_) {
       // the tags outside of the maker note area are currently not used anyway)
       data = *bs;
       data.setPosition(data_offset);
+      data.check(byte_size);
 #endif
     } else {
       data = bs->getSubStream(data_offset, byte_size);
