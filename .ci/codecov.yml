@@ -14,10 +14,7 @@ coverage:
     patch: false
     project: false
   ignore:
-    - "test"
-    - "test/*"
-    - "test/**/*"
-    - "**/test/**/*"
+    - **/test/**/*
 parsers:
   gcov:
     branch_detection:
