@@ -2,6 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2017 Axel Waggershauser
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -121,15 +122,14 @@ void LJpegDecompressor::decodeN()
 
   BitPumpJPEG bitStream(input);
 
-  for (unsigned y = 0; y < frame.h; ++y) {
-    auto destY = offY + y;
-    // A recoded DNG might be split up into tiles of self contained LJpeg
-    // blobs. The tiles at the bottom and the right may extend beyond the
-    // dimension of the raw image buffer. The excessive content has to be
-    // ignored. For y, we can simply stop decoding when we reached the border.
-    if (destY >= static_cast<unsigned>(mRaw->dim.y))
-      break;
+  // A recoded DNG might be split up into tiles of self contained LJpeg blobs.
+  // The tiles at the bottom and the right may extend beyond the dimension of
+  // the raw image buffer. The excessive content has to be ignored.
 
+  // For y, we can simply stop decoding when we reached the border.
+  for (unsigned y = 0; y < std::min(frame.h, std::min(h, mRaw->dim.y - offY));
+       ++y) {
+    auto destY = offY + y;
     auto dest =
         reinterpret_cast<ushort16*>(mRaw->getDataUncropped(offX, destY));
 
@@ -137,8 +137,8 @@ void LJpegDecompressor::decodeN()
     // the predictor for the next line is the start of this line
     predNext = dest;
 
-    unsigned width =
-        std::min(frame.w, (mRaw->getCpp() * (mRaw->dim.x - offX)) / N_COMP);
+    unsigned width = std::min(
+        frame.w, (mRaw->getCpp() * std::min(w, mRaw->dim.x - offX)) / N_COMP);
 
     // For x, we first process all pixels within the image buffer ...
     for (unsigned x = 0; x < width; ++x) {
