@@ -81,6 +81,12 @@ void LJpegDecompressor::decodeScan()
   if ((mRaw->getCpp() * (mRaw->dim.x - offX)) < frame.cps)
     ThrowRDE("Got less pixels than the components per sample");
 
+  const auto frameWidth = frame.cps * frame.w;
+  if (frameWidth < w || frame.h < h) {
+    ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
+             frameWidth, frame.h, w, h);
+  }
+
   switch (frame.cps) {
   case 2:
     decodeN<2>();
