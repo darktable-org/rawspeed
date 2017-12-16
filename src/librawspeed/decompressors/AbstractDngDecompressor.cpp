@@ -98,7 +98,7 @@ void AbstractDngDecompressor::decompressThreaded(
       auto e = &slices[i];
       LJpegDecompressor d(e->bs, mRaw);
       try {
-        d.decode(e->offX, e->offY, mFixLjpeg);
+        d.decode(e->offX, e->offY, e->width, e->height, mFixLjpeg);
       } catch (RawDecoderException& err) {
         mRaw->setError(err.what());
       } catch (IOException& err) {

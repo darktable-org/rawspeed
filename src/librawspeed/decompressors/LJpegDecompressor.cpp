@@ -51,7 +51,8 @@ LJpegDecompressor::LJpegDecompressor(const ByteStream& bs, const RawImage& img)
 #endif
 }
 
-void LJpegDecompressor::decode(uint32 offsetX, uint32 offsetY, bool fixDng16Bug_) {
+void LJpegDecompressor::decode(uint32 offsetX, uint32 offsetY, uint32 width,
+                               uint32 height, bool fixDng16Bug_) {
   if (offsetX >= static_cast<unsigned>(mRaw->dim.x))
     ThrowRDE("X offset outside of image");
   if (offsetY >= static_cast<unsigned>(mRaw->dim.y))
@@ -59,6 +60,8 @@ void LJpegDecompressor::decode(uint32 offsetX, uint32 offsetY, bool fixDng16Bug_
 
   offX = offsetX;
   offY = offsetY;
+  w = width;
+  h = height;
 
   fixDng16Bug = fixDng16Bug_;
 
