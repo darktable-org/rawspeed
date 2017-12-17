@@ -43,10 +43,8 @@ public:
   constexpr T __attribute__((const)) end() const { return base + T(size); }
 };
 
-// FIXME: constexpr once gcc5+
-
 template <typename Tr, typename Tv>
-inline /*constexpr*/ bool __attribute__((const))
+inline constexpr bool __attribute__((const))
 RangeContains(const Tr& r, Tv pos) {
   if (pos < r.begin())
     return false;
@@ -56,7 +54,7 @@ RangeContains(const Tr& r, Tv pos) {
 }
 
 template <typename T>
-inline /*constexpr*/ bool __attribute__((const))
+inline constexpr bool __attribute__((const))
 RangesOverlap(const T& lhs, const T& rhs) {
   if (&lhs == &rhs)
     return true;

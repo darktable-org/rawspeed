@@ -72,7 +72,7 @@ public:
     return x <= rhs.x && y <= rhs.y;
   }
 
-  area_type area() const {
+  area_type __attribute__((pure)) area() const {
     using signed_area = std::make_signed<area_type>::type;
 
     if (x >= 0 && y >= 0)
@@ -90,7 +90,6 @@ public:
     return operator<=(rhs);
   }
 
-  // FIXME: constexpr once gcc5+
   constexpr iPoint2D getSmallest(const iPoint2D& rhs) const {
     return {x < rhs.x ? x : rhs.x, y < rhs.y ? y : rhs.y};
   }
