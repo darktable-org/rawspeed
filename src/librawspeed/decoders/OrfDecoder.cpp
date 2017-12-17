@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014-2015 Pedro Côrte-Real
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -58,12 +59,8 @@ bool OrfDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
          make == "OLYMPUS OPTICAL CO.,LTD";
 }
 
-RawImage OrfDecoder::decodeRawInternal() {
+ByteStream OrfDecoder::handleSlices() const {
   auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
-
-  int compression = raw->getEntry(COMPRESSION)->getU32();
-  if (1 != compression)
-    ThrowRDE("Unsupported compression");
 
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
@@ -74,14 +71,46 @@ RawImage OrfDecoder::decodeRawInternal() {
         counts->count, offsets->count);
   }
 
-  //TODO: this code assumes that all strips are layed out directly after another without padding and in order
-  uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
-  uint32 size = 0;
-  for (uint32 i=0; i < counts->count; i++)
-    size += counts->getU32(i);
+  const uint32 off = offsets->getU32(0);
+  uint32 size = counts->getU32(0);
+  auto end = [&off, &size]() -> uint32 { return off + size; };
 
-  if (!mFile->isValid(off, size))
-    ThrowRDE("Truncated file");
+  for (uint32 i = 0; i < counts->count; i++) {
+    const auto offset = offsets->getU32(i);
+    const auto count = counts->getU32(i);
+    if (!mFile->isValid(offset, count))
+      ThrowRDE("Truncated file");
+
+    if (count < 1)
+      ThrowRDE("Empty slice");
+
+    if (i == 0)
+      continue;
+
+    if (offset < end())
+      ThrowRDE("Slices overlap");
+
+    // Now, everything would be great, but some uncompressed raws
+    // (packed_with_control i believe) have "padding" between at least
+    // the first two slices, and we need to account for it.
+    const uint32 padding = offset - end();
+
+    size += padding;
+    size += count;
+  }
+
+  ByteStream input(offsets->getRootIfdData());
+  input.setPosition(off);
+
+  return input.getStream(size);
+}
+
+RawImage OrfDecoder::decodeRawInternal() {
+  auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
+
+  int compression = raw->getEntry(COMPRESSION)->getU32();
+  if (1 != compression)
+    ThrowRDE("Unsupported compression");
 
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
@@ -91,12 +120,12 @@ RawImage OrfDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
 
-  ByteStream input(offsets->getRootIfdData());
-  input.setPosition(off);
+  ByteStream input(handleSlices());
 
-  if (offsets->count != 1 || hints.has("force_uncompressed")) {
+  if (raw->getEntry(STRIPOFFSETS)->count != 1 ||
+      hints.has("force_uncompressed")) {
     mRaw->createData();
-    decodeUncompressed(input, width, height, size);
+    decodeUncompressed(input, width, height, input.getSize());
   } else {
     OlympusDecompressor o(mRaw);
     mRaw->createData();

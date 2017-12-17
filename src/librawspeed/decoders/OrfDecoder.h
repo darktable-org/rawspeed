@@ -24,6 +24,7 @@
 #include "common/Common.h"                // for uint32
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
+#include "io/ByteStream.h"                // for ByteStream
 #include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
 #include <algorithm>                      // for move
 
@@ -35,6 +36,8 @@ class Buffer;
 
 class OrfDecoder final : public AbstractTiffDecoder
 {
+  ByteStream handleSlices() const;
+
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                    const Buffer* file);
