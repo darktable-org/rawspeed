@@ -112,8 +112,9 @@ protected:
     const iPoint2D topLeft(left, top);
     const iPoint2D bottomRight(right, bottom);
 
-    if (!(fullImage.isPointInside(topLeft) &&
-          fullImage.isPointInside(bottomRight) && bottomRight >= topLeft)) {
+    if (!(fullImage.isPointInsideInclusive(topLeft) &&
+          fullImage.isPointInsideInclusive(bottomRight) &&
+          bottomRight >= topLeft)) {
       ThrowRDE("Rectangle (%u, %u, %u, %u) not inside image (%u, %u, %u, %u).",
                topLeft.x, topLeft.y, bottomRight.x, bottomRight.y,
                fullImage.getTopLeft().x, fullImage.getTopLeft().y,
@@ -172,7 +173,7 @@ public:
       auto x = bs->getU32();
 
       const iPoint2D badPoint(x, y);
-      if (!fullImage.isPointInside(badPoint))
+      if (!fullImage.isPointInsideInclusive(badPoint))
         ThrowRDE("Bad point not inside image.");
 
       badPixels.emplace_back(y << 16 | x);

@@ -127,7 +127,7 @@ public:
            getBottomRight() <= otherPoint.getBottomRight();
   }
 
-  constexpr bool isPointInside(const iPoint2D& checkPoint) const {
+  constexpr bool isPointInsideInclusive(const iPoint2D& checkPoint) const {
     return pos <= checkPoint && getBottomRight() >= checkPoint;
   }
 

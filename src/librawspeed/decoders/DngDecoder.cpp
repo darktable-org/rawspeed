@@ -424,8 +424,9 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     const iPoint2D topLeft(corners[1], corners[0]);
     const iPoint2D bottomRight(corners[3], corners[2]);
 
-    if (!(fullImage.isPointInside(topLeft) &&
-          fullImage.isPointInside(bottomRight) && bottomRight >= topLeft)) {
+    if (!(fullImage.isPointInsideInclusive(topLeft) &&
+          fullImage.isPointInsideInclusive(bottomRight) &&
+          bottomRight >= topLeft)) {
       ThrowRDE("Rectangle (%u, %u, %u, %u) not inside image (%u, %u, %u, %u).",
                topLeft.x, topLeft.y, bottomRight.x, bottomRight.y,
                fullImage.getTopLeft().x, fullImage.getTopLeft().y,
@@ -454,7 +455,7 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
       ThrowRDE("Error decoding default crop origin");
 
     iPoint2D cropOrigin(tl[0], tl[1]);
-    if (cropped.isPointInside(cropOrigin))
+    if (cropped.isPointInsideInclusive(cropOrigin))
       cropped = iRectangle2D(cropOrigin, {0, 0});
 
     cropped.dim = mRaw->dim - cropped.pos;
@@ -638,8 +639,9 @@ bool DngDecoder::decodeMaskedAreas(const TiffIFD* raw) {
     iPoint2D topleft = iPoint2D(rects[i * 4UL + 1UL], rects[i * 4UL]);
     iPoint2D bottomright = iPoint2D(rects[i * 4UL + 3UL], rects[i * 4UL + 2UL]);
 
-    if (!(fullImage.isPointInside(topleft) &&
-          fullImage.isPointInside(bottomright) && (topleft < bottomright)))
+    if (!(fullImage.isPointInsideInclusive(topleft) &&
+          fullImage.isPointInsideInclusive(bottomright) &&
+          (topleft < bottomright)))
       ThrowRDE("Bad masked area.");
 
     // Is this a horizontal box, only add it if it covers the active width of the image
