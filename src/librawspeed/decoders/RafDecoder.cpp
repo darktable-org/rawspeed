@@ -338,7 +338,12 @@ int RafDecoder::isCompressed() {
 
   uint32 count = raw->getEntry(FUJI_STRIPBYTECOUNTS)->getU32();
 
-  return count * 8 / (width * height) < 10;
+  // The uncompressed raf's can be 12/14 bpp, so if it is less than that,
+  // then we are likely in compressed raf.
+  // FIXME: this can't be the correct way to detect this. But i'm not seeing
+  // anything in the diff between exiv2/exiftool dumps of {un,}compressed raws.
+  // Maybe we are supposed to check for valid FujiDecompressor::FujiHeader ?
+  return count * 8 / (width * height) < 12;
 }
 
 } // namespace rawspeed
