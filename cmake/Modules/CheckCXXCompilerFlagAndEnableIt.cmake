@@ -1,10 +1,15 @@
 include(CheckCXXCompilerFlag)
 
+function(mangle_flag_name PREFIX FLAG OUTPUT)
+  string(TOUPPER "${PREFIX}_${FLAG}" MANGLED_FLAG)
+  string(REPLACE "+" "X" MANGLED_FLAG ${MANGLED_FLAG})
+  string(REGEX REPLACE "[^A-Za-z_0-9]" "_" MANGLED_FLAG ${MANGLED_FLAG})
+  string(REGEX REPLACE "_+" "_" MANGLED_FLAG ${MANGLED_FLAG})
+  set(${OUTPUT} "${MANGLED_FLAG}" PARENT_SCOPE)
+endfunction()
+
 macro (CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT _FLAG)
-  string(TOUPPER "${_FLAG}" _RESULT)
-  string(REPLACE "-" "_" _RESULT "${_RESULT}")
-  string(REPLACE "=" "_" _RESULT "${_RESULT}")
-  set(_RESULT "HAVE_CXX_FLAG${_RESULT}")
+  mangle_flag_name("RAWSPEED_HAVE_CXX_FLAG" "${_FLAG}" _RESULT)
 
   set(CMAKE_REQUIRED_FLAGS_ORIG "${CMAKE_REQUIRED_FLAGS}")
   set(CMAKE_REQUIRED_FLAGS "${CMAKE_CXX_FLAGS}")
