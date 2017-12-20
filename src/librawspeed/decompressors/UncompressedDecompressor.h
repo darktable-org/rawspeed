@@ -57,7 +57,7 @@ public:
 
   UncompressedDecompressor(const Buffer& data, Buffer::size_type offset,
                            const RawImage& img)
-      : UncompressedDecompressor(data, offset, data.getSize() - offset, img) {}
+      : UncompressedDecompressor(ByteStream(data, offset), img) {}
 
   UncompressedDecompressor(const Buffer& data, const RawImage& img)
       : UncompressedDecompressor(data, 0, img) {}
