@@ -43,8 +43,7 @@ public:
   explicit ByteStream(const DataBuffer& buffer) : DataBuffer(buffer) {}
   ByteStream(const Buffer& buffer, size_type offset, size_type size_,
              Endianness endianness_ = Endianness::little)
-      : DataBuffer(buffer.getSubView(0, offset + size_), endianness_),
-        pos(offset) {
+      : DataBuffer(buffer.getSubView(offset, size_), endianness_) {
     check(0);
   }
   ByteStream(const Buffer& buffer, size_type offset,
