@@ -41,11 +41,12 @@ ENV LLVM_VER=5.0
 
 # pls keep sorted :)
 RUN rm -rf /var/lib/apt/lists/* && apt-get update && \
-    apt-get install clang++-$LLVM_VER clang-tidy-$LLVM_VER cmake curl \
-    default-jdk-headless default-jre-headless dirmngr doxygen g++-$GCC_VER git \
-    gnupg googletest graphviz libjpeg-dev libpugixml-dev libxml2-utils make \
-    ninja-build python3-sphinx python3-sphinx-rtd-theme unzip zlib1g-dev \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    apt-get install \
+    clang++-$LLVM_VER clang-tidy-$LLVM_VER clang-tools-$LLVM_VER \
+    cmake curl default-jdk-headless default-jre-headless dirmngr doxygen \
+    g++-$GCC_VER git gnupg googletest graphviz libjpeg-dev libpugixml-dev \
+    libxml2-utils make ninja-build python3-sphinx python3-sphinx-rtd-theme \
+    unzip zlib1g-dev && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # sonarqube support.
 
