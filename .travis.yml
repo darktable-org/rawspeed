@@ -88,7 +88,7 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=clang-4.0 CXX=clang++-4.0 ECO="-DWITH_PTHREADS=OFF"
+    env: CC=clang-5.0 CXX=clang++-5.0 ECO="-DWITH_PTHREADS=OFF"
   - os: linux
     dist: trusty
     sudo: required
@@ -111,7 +111,7 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=clang-4.0 CXX=clang++-4.0 TARGET=WWW
+    env: CC=clang-5.0 CXX=clang++-5.0 TARGET=WWW
 
 # linux clang Coverage build OOM's in gcov during final codecov report collection
 # OSX gcc Coverage build produces invalid .gcno files
