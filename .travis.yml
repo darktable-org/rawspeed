@@ -88,6 +88,12 @@ jobs:
     sudo: required
     services:
       - docker
+    env: CC=clang-5.0 CXX=clang++-5.0 TARGET=STATICANALYSIS
+  - os: linux
+    dist: trusty
+    sudo: required
+    services:
+      - docker
     env: CC=clang-5.0 CXX=clang++-5.0 ECO="-DWITH_PTHREADS=OFF"
   - os: linux
     dist: trusty
@@ -138,6 +144,10 @@ script:
 
       export TARGET2="$TARGET";
       export CMD="$SRC_DIR/.ci/ci-script.sh";
+      if [[ "$TARGET" == "STATICANALYSIS" ]]; then
+        export TARGET="build";
+        export CMD="scan-build-5.0 --use-cc=\"$CC\" --use-c++=\"$CXX\" --force-analyze-debug-code --status-bugs -disable-checker deadcode.DeadStores $CMD";
+      fi;
       if [[ "$TARGET" == "SONARQUBE" ]]; then
         export TARGET="build";
         export CMD="build-wrapper-linux-x86-64 --out-dir \"$BUILD_DIR/bw-output/\" $CMD";
