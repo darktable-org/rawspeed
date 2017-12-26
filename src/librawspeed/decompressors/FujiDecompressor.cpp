@@ -22,6 +22,7 @@
 */
 
 #include "decompressors/FujiDecompressor.h"
+#include "common/Common.h"                                  // for roundUpDiv...
 #include "common/RawImage.h"                                // for RawImage
 #include "decoders/RawDecoderException.h"                   // for ThrowRDE
 #include "decompressors/AbstractParallelizedDecompressor.h" // for RawDecom...
@@ -799,6 +800,7 @@ FujiDecompressor::FujiHeader::operator bool() const {
        raw_rounded_width % block_size ||
        raw_rounded_width - raw_width >= block_size || blocks_in_row > 0x10 ||
        blocks_in_row == 0 || blocks_in_row != raw_rounded_width / block_size ||
+       blocks_in_row != roundUpDivision(raw_width, block_size) ||
        total_lines > 0x800 || total_lines == 0 ||
        total_lines != raw_height / FujiStrip::lineHeight() ||
        (raw_bits != 12 && raw_bits != 14) || (raw_type != 16 && raw_type != 0));
