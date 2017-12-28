@@ -92,11 +92,7 @@ RawImage DcrDecoder::decodeRawInternal() {
       mRaw->metadata.wbCoeffs[2] = 2048.0F / blob->getU16(22);
     }
 
-    try {
-      decodeKodak65000(&input, width, height);
-    } catch (IOException &) {
-      mRaw->setError("IO error occurred while reading image. Returning partial result.");
-    }
+    decodeKodak65000(&input, width, height);
   } else
     ThrowRDE("Unsupported compression %d", compression);
 
