@@ -32,7 +32,7 @@
 namespace rawspeed {
 
 template <typename T>
-[[noreturn]] void __attribute__((noreturn, format(printf, 1, 2)))
+[[noreturn]] void __attribute__((noreturn, noinline, format(printf, 1, 2)))
 ThrowException(const char* fmt, ...) {
   static constexpr size_t bufSize = 8192;
 #if defined(HAVE_CXX_THREAD_LOCAL)
