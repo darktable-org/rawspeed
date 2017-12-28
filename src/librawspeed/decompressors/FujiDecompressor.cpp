@@ -56,8 +56,18 @@ FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
   }
 
   for (int i = 0; i < 6; i++) {
-    for (int j = 0; j < 6; j++)
-      CFA[i][j] = mRaw->cfa.getColorAt(j, i);
+    for (int j = 0; j < 6; j++) {
+      const CFAColor c = mRaw->cfa.getColorAt(j, i);
+      switch (c) {
+      case CFA_RED:
+      case CFA_GREEN:
+      case CFA_BLUE:
+        CFA[i][j] = c;
+        break;
+      default:
+        ThrowRDE("Got unexpected color %u", c);
+      }
+    }
   }
 
   fuji_compressed_load_raw();
