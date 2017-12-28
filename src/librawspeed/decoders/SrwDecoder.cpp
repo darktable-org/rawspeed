@@ -83,8 +83,9 @@ RawImage SrwDecoder::decodeRawInternal() {
     if (sliceOffsets->type != TIFF_LONG || sliceOffsets->count != 1)
       ThrowRDE("Entry 40976 is corrupt");
 
-    ByteStream bso(mFile, sliceOffsets->getU32(), 4 * height,
-                   Endianness::little);
+    ByteStream bso(DataBuffer(*mFile, Endianness::little));
+    bso.skipBytes(sliceOffsets->getU32());
+    bso = bso.getStream(height, 4);
 
     const uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
     const uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
