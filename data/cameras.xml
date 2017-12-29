@@ -7553,6 +7553,17 @@
 		<Crop x="2" y="2" width="-44" height="0"/>
 		<Sensor black="64" white="4000"/>
 	</Camera>
+	<Camera make="RICOH IMAGING COMPANY, LTD." model="PENTAX KP">
+		<ID make="Pentax" model="KP">Pentax KP</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="60" y="32" width="-28" height="-4"/>
+		<Sensor black="128" white="16254"/>
+	</Camera>
 	<Camera make="PENTAX" model="PENTAX K200D">
 		<ID make="Pentax" model="K200D">Pentax K200D</ID>
 		<CFA width="2" height="2">
