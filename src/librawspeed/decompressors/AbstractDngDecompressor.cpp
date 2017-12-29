@@ -63,11 +63,16 @@ void AbstractDngDecompressor::decompressThreaded(
               ? mRaw->dim.y - e->offY
               : e->height;
 
+      size_t thisTileWidth =
+          e->offX + e->width > static_cast<uint32>(mRaw->dim.x)
+              ? mRaw->dim.x - e->offX
+              : e->width;
+
       if (thisTileLength == 0)
         ThrowRDE("Tile is empty. Can not decode!");
 
-      iPoint2D tileSize(mRaw->dim.x, thisTileLength);
-      iPoint2D pos(0, e->offY);
+      iPoint2D tileSize(thisTileWidth, thisTileLength);
+      iPoint2D pos(e->offX, e->offY);
 
       // FIXME: does bytestream have correct byteorder from the src file?
       bool big_endian = e->bs.getByteOrder() == Endianness::big;
@@ -77,7 +82,7 @@ void AbstractDngDecompressor::decompressThreaded(
         big_endian = true;
 
       try {
-        const int inputPitchBits = mRaw->getCpp() * mRaw->dim.x * mBps;
+        const int inputPitchBits = mRaw->getCpp() * e->width * mBps;
         assert(inputPitchBits > 0);
 
         const int inputPitch = inputPitchBits / 8;
