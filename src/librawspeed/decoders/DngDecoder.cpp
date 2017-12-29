@@ -483,8 +483,12 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
   // Apply stage 1 opcodes
   if (applyStage1DngOpcodes && raw->hasEntry(OPCODELIST1)) {
     try {
-      DngOpcodes codes(mRaw, raw->getEntry(OPCODELIST1));
-      codes.applyOpCodes(mRaw);
+      TiffEntry* opcodes = raw->getEntry(OPCODELIST1);
+      // The entry might exist, but it might be empty, which means no opcodes
+      if (opcodes->count > 0) {
+        DngOpcodes codes(mRaw, opcodes);
+        codes.applyOpCodes(mRaw);
+      }
     } catch (RawDecoderException& e) {
       // We push back errors from the opcode parser, since the image may still
       // be usable
