@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014 Pedro Côrte-Real
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -21,31 +22,29 @@
 
 #pragma once
 
-#include "common/RawImage.h"              // for RawImage
-#include "decoders/SimpleTiffDecoder.h"   // for SimpleTiffDecoder
-#include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
-#include <algorithm>                      // for move
+#include "common/Common.h"                      // for ushort16
+#include "common/RawImage.h"                    // for RawImage
+#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "io/ByteStream.h"                      // for ByteStream
+#include <array>                                // for array
 
 namespace rawspeed {
 
-class Buffer;
+class KodakDecompressor final : public AbstractDecompressor {
+  RawImage mRaw;
+  ByteStream input;
+  bool uncorrectedRawValues;
 
-class CameraMetaData;
+  static constexpr int segment_size = 256; // pixels
+  using segment = std::array<ushort16, segment_size>;
 
-class DcrDecoder final : public SimpleTiffDecoder {
-  void checkImageDimensions() override;
+  segment decodeSegment(uint32 bsize);
 
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer* file);
-  DcrDecoder(TiffRootIFDOwner&& root, const Buffer* file)
-      : SimpleTiffDecoder(move(root), file) {}
+  KodakDecompressor(const RawImage& img, ByteStream bs,
+                    bool uncorrectedRawValues_);
 
-  RawImage decodeRawInternal() override;
-  void decodeMetaDataInternal(const CameraMetaData* meta) override;
-
-protected:
-  int getDecoderVersion() const override { return 0; }
+  void decompress();
 };
 
 } // namespace rawspeed
