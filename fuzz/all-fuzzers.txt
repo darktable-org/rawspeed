@@ -17,6 +17,7 @@ HuffmanTableFuzzer-BitPumpMSB16-FullDecode
 HuffmanTableFuzzer-BitPumpMSB16-NoFullDecode
 HuffmanTableFuzzer-BitPumpMSB32-FullDecode
 HuffmanTableFuzzer-BitPumpMSB32-NoFullDecode
+KodakDecompressorFuzzer
 LJpegDecompressorFuzzer
 NikonDecompressorFuzzer
 OlympusDecompressorFuzzer
