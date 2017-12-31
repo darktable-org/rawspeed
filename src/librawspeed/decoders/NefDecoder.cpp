@@ -454,8 +454,13 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x0097));
     if (wb->count > 4) {
       uint32 version = 0;
-      for (uint32 i=0; i<4; i++)
-        version = (version << 4) + wb->getByte(i)-'0';
+      for (uint32 i = 0; i < 4; i++) {
+        const auto v = wb->getByte(i);
+        if (v < '0' || v > '9')
+          ThrowRDE("Bad version component: %c - not a digit", v);
+        version = (version << 4) + v - '0';
+      }
+
       if (version == 0x100 && wb->count >= 80 && wb->type == TIFF_UNDEFINED) {
         mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(36));
         mRaw->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(37));

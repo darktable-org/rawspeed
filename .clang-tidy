@@ -8,7 +8,7 @@ CheckOptions:
   - key:             readability-braces-around-statements.ShortStatementLines
     value:           '3'
   - key:             readability-function-size.BranchThreshold
-    value:           '24'
+    value:           '25'
   - key:             readability-function-size.LineThreshold
     value:           '160'
   - key:             readability-function-size.StatementThreshold
