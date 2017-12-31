@@ -35,6 +35,7 @@
 #include "tiff/TiffIFD.h"                           // for getTiffByteOrder
 #include <cassert>                                  // for assert
 #include <cstdio>                                   // for size_t
+#include <limits>                                   // for numeric_limits
 #include <memory>                                   // for unique_ptr
 #include <vector>                                   // for vector
 
@@ -49,7 +50,7 @@ void AbstractDngDecompressor::decompressThreaded(
   assert(t);
   assert(mRaw->dim.x > 0);
   assert(mRaw->dim.y > 0);
-  assert(mRaw->getCpp() > 0);
+  assert(mRaw->getCpp() > 0 && mRaw->getCpp() <= 4);
   assert(mBps > 0 && mBps <= 32);
 
   if (compression == 1) {
@@ -82,8 +83,14 @@ void AbstractDngDecompressor::decompressThreaded(
         big_endian = true;
 
       try {
-        const int inputPitchBits = mRaw->getCpp() * e->width * mBps;
+        const uint32 inputPixelBits = mRaw->getCpp() * mBps;
+
+        if (e->width > std::numeric_limits<int>::max() / inputPixelBits)
+          ThrowIOE("Integer overflow when calculating input pitch");
+
+        const int inputPitchBits = inputPixelBits * e->width;
         assert(inputPitchBits > 0);
+        assert(inputPitchBits % 8 == 0);
 
         const int inputPitch = inputPitchBits / 8;
         if (inputPitch == 0)
