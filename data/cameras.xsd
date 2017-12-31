@@ -37,6 +37,7 @@
       <xs:enumeration value="Olympus"/>
       <xs:enumeration value="OnePlus"/>
       <xs:enumeration value="Panasonic"/>
+      <xs:enumeration value="Paralenz"/>
       <xs:enumeration value="Pentax"/>
       <xs:enumeration value="Phase One"/>
       <xs:enumeration value="Ricoh"/>
@@ -401,6 +402,7 @@
       <xs:enumeration value="PENTAX RICOH IMAGING"/>
       <xs:enumeration value="PENTAX"/>
       <xs:enumeration value="Panasonic"/>
+      <xs:enumeration value="Paralenz"/>
       <xs:enumeration value="Pentax"/>
       <xs:enumeration value="Phase One A/S"/>
       <xs:enumeration value="Pixelink"/>

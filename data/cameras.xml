@@ -11148,6 +11148,22 @@
 			<Hint name="full_height" value="2616"/>
 		</Hints>
 	</Camera>
+	<Camera make="Paralenz" model="Dive Camera" mode="chdk">
+		<ID make="Paralenz" model="Dive Camera">Paralenz Dive Camera</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="1024" white="16383"/>
+		<Hints>
+			<Hint name="filesize" value="16588800"/>
+			<Hint name="full_width" value="3840"/>
+			<Hint name="full_height" value="2160"/>
+		</Hints>
+	</Camera>
 </Cameras>
 <!--
 vim: tabstop=8 shiftwidth=8 softtabstop=8
