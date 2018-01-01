@@ -23,6 +23,7 @@
 #include "decoders/IiqDecoder.h"
 #include "common/Common.h"                // for uint32, int32, ushort16
 #include "common/Point.h"                 // for iPoint2D
+#include "common/Spline.h"                // for calculateCurve
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
 #include "io/Buffer.h"                    // for Buffer, DataBuffer
@@ -127,10 +128,13 @@ RawImage IiqDecoder::decodeRawInternal() {
 
   uint32 width = 0;
   uint32 height = 0;
+  uint32 split_row = 0;
+  uint32 split_col = 0;
 
   Buffer raw_data;
   ByteStream block_offsets;
   ByteStream wb;
+  ByteStream correction_meta_data;
 
   for (uint32 entry = 0; entry < entries_count; entry++) {
     const uint32 tag = es.getU32();
@@ -151,12 +155,21 @@ RawImage IiqDecoder::decodeRawInternal() {
     case 0x10f:
       raw_data = bs.getSubView(data, len);
       break;
+    case 0x110:
+      correction_meta_data = bs.getSubStream(data);
+      break;
     case 0x21c:
       // they are not guaranteed to be sequential!
       block_offsets = bs.getSubStream(data, len);
       break;
     case 0x21d:
       black_level = data >> 2;
+      break;
+    case 0x222:
+      split_col = data;
+      break;
+    case 0x224:
+      split_row = data;
       break;
     default:
       // FIXME: is there a "block_sizes" entry?
@@ -167,6 +180,10 @@ RawImage IiqDecoder::decodeRawInternal() {
   // FIXME: could be wrong. max "active pixels" in "Sensor+" mode - "101 MP"
   if (width == 0 || height == 0 || width > 11608 || height > 8708)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
+  if (split_col > width || split_row > height)
+    ThrowRDE("Invalid sensor quadrant split values (%u, %u)", split_row,
+             split_col);
 
   block_offsets = block_offsets.getStream(height, sizeof(uint32));
 
@@ -187,6 +204,8 @@ RawImage IiqDecoder::decodeRawInternal() {
   mRaw->createData();
 
   DecodePhaseOneC(strips, width, height);
+  if (correction_meta_data.getSize() != 0)
+    CorrectPhaseOneC(correction_meta_data, split_row, split_col);
 
   for (int i = 0; i < 3; i++)
     mRaw->metadata.wbCoeffs[i] = wb.getFloat();
@@ -240,6 +259,101 @@ void IiqDecoder::DecodePhaseOneC(const std::vector<IiqStrip>& strips,
                                  uint32 width, uint32 height) {
   for (const auto& strip : strips)
     DecodeStrip(strip, width, height);
+}
+
+void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
+                                  uint32 split_col) {
+  meta_data.skipBytes(8);
+  const uint32 bytes_to_entries = meta_data.getU32();
+  meta_data.setPosition(bytes_to_entries);
+  const uint32 entries_count = meta_data.getU32();
+  meta_data.skipBytes(4);
+
+  // this is how much is to be read for all the entries
+  ByteStream entries(meta_data.getStream(entries_count, 12));
+  meta_data.setPosition(0);
+
+  for (uint32 entry = 0; entry < entries_count; entry++) {
+    const uint32 tag = entries.getU32();
+    const uint32 len = entries.getU32();
+    const uint32 offset = entries.getU32();
+
+    switch (tag) {
+    case 0x431:
+      CorrectQuadrantMultipliersCombined(meta_data.getSubStream(offset, len),
+                                         split_row, split_col);
+      return;
+    default:
+      break;
+    }
+  }
+}
+
+// This method defines a correction that compensates for the fact that
+// IIQ files may come from a camera with multiple (four, in this case)
+// sensors combined into a single "sensor."  Because the different
+// sensors may have slightly different responses, we need to multiply
+// the pixels in each by a correction factor to ensure that they blend
+// together smoothly.  The correction factor is not a single
+// multiplier, but a curve defined by seven control points.  Each
+// curve's control points share the same seven X-coordinates.
+void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
+                                                    uint32 split_row,
+                                                    uint32 split_col) {
+
+  // The curves should all include (0, 0) and (65535, 65535), so the
+  // first and last points are predefined and the middle seven are
+  // read from the file
+  std::array<uint32, 9> shared_x_coords;
+  shared_x_coords.fill(0);
+  shared_x_coords.back() = 65535;
+  std::generate_n(std::next(shared_x_coords.begin()), 7,
+                  [&data] { return data.getU32(); });
+
+  std::array<std::array<std::vector<iPoint2D>, 2>, 2> control_points;
+  for (auto& quadRow : control_points) {
+    for (auto& quadrant : quadRow) {
+      quadrant.emplace_back(0, 0);
+
+      for (int i = 1; i < 8; i++) {
+        // These multipliers are expressed in ten-thousandths in the
+        // file
+        const int y_coord = (data.getU32() * shared_x_coords[i]) / 10000;
+        quadrant.emplace_back(shared_x_coords[i], y_coord);
+      }
+
+      quadrant.emplace_back(65535, 65535);
+      assert(quadrant.size() == 9);
+    }
+  }
+
+  for (int quadRow = 0; quadRow < 2; quadRow++) {
+    for (int quadCol = 0; quadCol < 2; quadCol++) {
+      const std::vector<ushort16> curve =
+          Spline::calculateCurve(control_points[quadRow][quadCol]);
+
+      int row_start = quadRow == 0 ? 0 : split_row;
+      int row_end = quadRow == 0 ? split_row : mRaw->dim.y;
+      int col_start = quadCol == 0 ? 0 : split_col;
+      int col_end = quadCol == 0 ? split_col : mRaw->dim.x;
+
+      for (int row = row_start; row < row_end; row++) {
+        ushort16* pixel =
+            reinterpret_cast<ushort16*>(mRaw->getData(col_start, row));
+        for (int col = col_start; col < col_end; col++, pixel++) {
+          // This adjustment is expected to be made with the
+          // black-level already subtracted from the pixel values.
+          // Because this is kept as metadata and not subtracted at
+          // this point, to make the correction work we subtract the
+          // appropriate amount before indexing into the curve and
+          // then add it back so that subtracting the black level
+          // later will work as expected
+          const ushort16 diff = *pixel < black_level ? *pixel : black_level;
+          *pixel = curve[*pixel - diff] + diff;
+        }
+      }
+    }
+  }
 }
 
 void IiqDecoder::checkSupportInternal(const CameraMetaData* meta) {
