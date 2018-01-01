@@ -163,7 +163,7 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="48" y="6" width="0" height="-2"/>
+		<Crop x="52" y="10" width="0" height="-6"/>
 		<Sensor black="126" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="46"/>
