@@ -204,7 +204,7 @@ RawImage IiqDecoder::decodeRawInternal() {
   mRaw->createData();
 
   DecodePhaseOneC(strips, width, height);
-  if (correction_meta_data.getSize() != 0)
+  if (correction_meta_data.getSize() != 0 && iiq)
     CorrectPhaseOneC(correction_meta_data, split_row, split_col);
 
   for (int i = 0; i < 3; i++)
@@ -280,6 +280,9 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
 
     switch (tag) {
     case 0x431:
+      if (!iiq.quadrantMultipliers)
+        return;
+
       CorrectQuadrantMultipliersCombined(meta_data.getSubStream(offset, len),
                                          split_row, split_col);
       return;

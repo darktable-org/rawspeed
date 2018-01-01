@@ -100,6 +100,14 @@ public:
   /* Should Fuji images be rotated? */
   bool fujiRotate;
 
+  struct {
+    /* Should Quadrant Multipliers be applied to the IIQ raws? */
+    bool quadrantMultipliers = true;
+
+    // Is *any* of the corrections enabled?
+    explicit operator bool() const { return quadrantMultipliers /*|| ...*/; }
+  } iiq;
+
   /* Retrieve the main RAW chunk */
   /* Returns NULL if unknown */
   virtual Buffer* getCompressedData() { return nullptr; }
