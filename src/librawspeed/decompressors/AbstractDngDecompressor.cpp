@@ -90,7 +90,12 @@ void AbstractDngDecompressor::decompressThreaded(
 
         const int inputPitchBits = inputPixelBits * e->width;
         assert(inputPitchBits > 0);
-        assert(inputPitchBits % 8 == 0);
+
+        if (inputPitchBits % 8 != 0) {
+          ThrowRDE("Bad combination of cpp (%u), bps (%u) and width (%u), the "
+                   "pitch is %u bits, which is not a multiple of 8 (1 byte)",
+                   mRaw->getCpp(), mBps, e->width, inputPitchBits);
+        }
 
         const int inputPitch = inputPitchBits / 8;
         if (inputPitch == 0)
