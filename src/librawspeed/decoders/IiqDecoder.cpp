@@ -338,7 +338,7 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
       int col_end = quadCol == 0 ? split_col : mRaw->dim.x;
 
       for (int row = row_start; row < row_end; row++) {
-        ushort16* pixel =
+        auto* pixel =
             reinterpret_cast<ushort16*>(mRaw->getData(col_start, row));
         for (int col = col_start; col < col_end; col++, pixel++) {
           // This adjustment is expected to be made with the
