@@ -6,7 +6,7 @@ rawspeed |travis-ci| |appveyor-ci| OBS_ |codecov| |coverity status|
 .. |appveyor-ci| image:: https://ci.appveyor.com/api/projects/status/7pqy0gdr9mp16xu2/branch/develop?svg=true
     :target: https://ci.appveyor.com/project/LebedevRI/rawspeed/branch/develop
 
-.. _OBS: https://build.opensuse.org/project/monitor/home:LebedevRI
+.. _OBS: https://build.opensuse.org/project/monitor/graphics:darktable:master
 
 .. |codecov| image:: https://codecov.io/gh/darktable-org/rawspeed/branch/develop/graph/badge.svg
     :target: https://codecov.io/gh/darktable-org/rawspeed
