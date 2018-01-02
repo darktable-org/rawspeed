@@ -117,7 +117,13 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
 
   const int outPixelBits = w * cpp * bitPerPixel;
   assert(outPixelBits > 0);
-  assert(outPixelBits % 8 == 0);
+
+  if (outPixelBits % 8 != 0) {
+    ThrowRDE("Bad combination of cpp (%u), bps (%u) and width (%u), the "
+             "pitch is %u bits, which is not a multiple of 8 (1 byte)",
+             cpp, bitPerPixel, w, outPixelBits);
+  }
+
   const int outPixelBytes = outPixelBits / 8;
 
   uint32 skipBits = inputPitch - outPixelBytes; // Skip per line
