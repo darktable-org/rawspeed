@@ -22,14 +22,42 @@
 
 #include "common/Common.h" // for ushort16
 #include "common/Point.h"  // for iPoint2D
+#include <algorithm>       // for adjacent_find
+#include <cassert>         // for assert
 #include <vector>          // for vector
 
 namespace rawspeed {
 
+// This is a Natural Cubic Spline. The second derivative at curve ends are zero.
+// See https://en.wikipedia.org/wiki/Spline_(mathematics)
+// section "Algorithm for computing natural cubic splines"
 class Spline final {
 public:
   static std::vector<ushort16>
   calculateCurve(const std::vector<iPoint2D>& control_points) {
+    assert(control_points.size() >= 2 &&
+           "Need at least two points to interpolate between");
+
+    // Expect the X coords of the curve to start/end at the extreme values
+    assert(control_points.front().x == 0);
+    assert(control_points.back().x == 65535);
+
+    assert(std::adjacent_find(
+               control_points.cbegin(), control_points.cend(),
+               [](const iPoint2D& lhs, const iPoint2D& rhs) -> bool {
+                 return lhs.x >= rhs.x;
+               }) == control_points.cend() &&
+           "The X coordinates must all be strictly increasing");
+
+#ifndef NDEBUG
+    // The Y coords must be limited to ushort16
+    std::for_each(control_points.cbegin(), control_points.cend(),
+                  [](const iPoint2D& p) -> void {
+                    assert(p.y >= 0);
+                    assert(p.y <= 65535);
+                  });
+#endif
+
     const int num_coords = control_points.size();
     const int num_segments = num_coords - 1;
 
