@@ -3,7 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014-2015 Pedro Côrte-Real
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2017-2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -30,8 +30,9 @@
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/Endianness.h"                // for Endianness, Endianness::li...
 #include "tiff/TiffIFD.h"                 // for TiffRootIFD, TiffID
-#include <algorithm>                      // for move, sort
+#include <algorithm>                      // for move, sort, adjacent_find
 #include <cassert>                        // for assert
+#include <functional>                     // for greater_equal
 #include <iterator>                       // for advance, begin, end, next
 #include <memory>                         // for unique_ptr
 #include <string>                         // for operator==, string
@@ -312,6 +313,11 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
   shared_x_coords.back() = 65535;
   std::generate_n(std::next(shared_x_coords.begin()), 7,
                   [&data] { return data.getU32(); });
+
+  // Check that the middle coordinates make sense.
+  if (std::adjacent_find(shared_x_coords.cbegin(), shared_x_coords.cend(),
+                         std::greater_equal<>()) != shared_x_coords.cend())
+    ThrowRDE("The X coordinates must all be strictly increasing");
 
   std::array<std::array<std::vector<iPoint2D>, 2>, 2> control_points;
   for (auto& quadRow : control_points) {
