@@ -323,6 +323,7 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
   std::array<std::array<std::vector<iPoint2D>, 2>, 2> control_points;
   for (auto& quadRow : control_points) {
     for (auto& quadrant : quadRow) {
+      quadrant.reserve(9);
       quadrant.emplace_back(0, 0);
 
       for (int i = 1; i < 8; i++) {
