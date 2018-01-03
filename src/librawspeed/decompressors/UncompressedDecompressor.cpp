@@ -44,24 +44,20 @@ void UncompressedDecompressor::sanityCheck(const uint32* h, int bpl) {
   assert(bpl > 0);
   assert(input.getSize() > 0);
 
-  if (input.getRemainSize() >= bpl * *h)
+  // How many multiples of bpl are there in the input buffer?
+  // The remainder is ignored/discarded.
+  const auto fullRows = input.getRemainSize() / bpl;
+
+  // If more than the output height, we are all good.
+  if (fullRows >= *h)
     return; // all good!
 
-  if (static_cast<int>(input.getRemainSize()) < bpl)
+  if (fullRows == 0)
     ThrowIOE("Not enough data to decode a single line. Image file truncated.");
 
-  mRaw->setError("Image truncated (file is too short)");
+  ThrowIOE("Image truncated, only %u of %u lines found", fullRows, *h);
 
-  assert(((int)input.getRemainSize() >= bpl) &&
-         (input.getRemainSize() < bpl * *h));
-
-  const auto min_h = input.getRemainSize() / bpl;
-  assert(min_h < *h);
-  assert(input.getRemainSize() >= bpl * min_h);
-
-  ThrowIOE("Image truncated, only %u of %u lines found", min_h, *h);
   // FIXME: need to come up with some common variable to allow proceeding here
-
   // *h = min_h;
 }
 
