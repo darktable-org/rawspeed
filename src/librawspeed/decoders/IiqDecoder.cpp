@@ -304,15 +304,16 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
 void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
                                                     uint32 split_row,
                                                     uint32 split_col) {
-
-  // The curves should all include (0, 0) and (65535, 65535), so the
-  // first and last points are predefined and the middle seven are
-  // read from the file
   std::array<uint32, 9> shared_x_coords;
-  shared_x_coords.fill(0);
-  shared_x_coords.back() = 65535;
+
+  // Read the middle seven points from the file
   std::generate_n(std::next(shared_x_coords.begin()), 7,
                   [&data] { return data.getU32(); });
+
+  // All the curves include (0, 0) and (65535, 65535),
+  // so the first and last points are predefined
+  shared_x_coords.front() = 0;
+  shared_x_coords.back() = 65535;
 
   // Check that the middle coordinates make sense.
   if (std::adjacent_find(shared_x_coords.cbegin(), shared_x_coords.cend(),
