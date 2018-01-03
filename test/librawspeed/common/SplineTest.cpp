@@ -20,10 +20,16 @@
 
 #include "common/Spline.h" // for Spline
 #include <gtest/gtest.h>   // for AssertionResult, DeathTest, Test, AssertHe...
+#include <type_traits>     // for is_same
 
 using rawspeed::Spline;
 
 namespace rawspeed_test {
+
+TEST(SplineStaticTest, DefaultIsUshort16) {
+  static_assert(std::is_same<Spline<>::value_type, rawspeed::ushort16>::value,
+                "wrong default type");
+}
 
 #ifndef NDEBUG
 TEST(SplineDeathTest, AtLeastTwoPoints) {
@@ -103,6 +109,28 @@ TEST(SplineTest, IntegerReverseIdentityTest) {
   ASSERT_EQ(s.size(), 65536);
   for (auto x = 0U; x < s.size(); ++x) {
     ASSERT_EQ(s[x], 65535 - x) << "    Where x is: " << x;
+  }
+}
+
+TEST(SplineTest, DoubleIdentityTest) {
+  const auto s = Spline<double>::calculateCurve({{0, 0}, {65535, 65535}});
+  ASSERT_FALSE(s.empty());
+  ASSERT_EQ(s.size(), 65536);
+  for (auto x = 0U; x < s.size(); ++x) {
+    const double expected = x;
+    ASSERT_DOUBLE_EQ(s[x], expected);
+    ASSERT_EQ(s[x], expected);
+  }
+}
+
+TEST(SplineTest, DoubleReverseIdentityTest) {
+  const auto s = Spline<double>::calculateCurve({{0, 65535}, {65535, 0}});
+  ASSERT_FALSE(s.empty());
+  ASSERT_EQ(s.size(), 65536);
+  for (auto x = 0U; x < s.size(); ++x) {
+    const double expected = 65535 - x;
+    ASSERT_DOUBLE_EQ(s[x], expected);
+    ASSERT_EQ(s[x], expected);
   }
 }
 
