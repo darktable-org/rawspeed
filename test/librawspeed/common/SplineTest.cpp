@@ -19,10 +19,19 @@
 */
 
 #include "common/Spline.h" // for Spline
+#include <array>           // for array
 #include <gtest/gtest.h>   // for AssertionResult, DeathTest, Test, AssertHe...
 #include <type_traits>     // for is_same
 
 using rawspeed::Spline;
+
+namespace rawspeed {
+
+::std::ostream& operator<<(::std::ostream& os, const iPoint2D p) {
+  return os << "(" << p.x << ", " << p.y << ")";
+}
+
+} // namespace rawspeed
 
 namespace rawspeed_test {
 
@@ -95,42 +104,44 @@ TEST(SplineDeathTest, XIsStrictlyIncreasing) {
 }
 #endif
 
-TEST(SplineTest, IntegerIdentityTest) {
-  const auto s = Spline<>::calculateCurve({{0, 0}, {65535, 65535}});
-  ASSERT_FALSE(s.empty());
-  ASSERT_EQ(s.size(), 65536);
-  for (auto x = 0U; x < s.size(); ++x)
-    ASSERT_EQ(s[x], x);
-}
+using identityType = std::array<rawspeed::iPoint2D, 2>;
+template <typename T>
+class IdentityTest : public ::testing::TestWithParam<identityType> {
+protected:
+  IdentityTest() = default;
+  virtual void SetUp() {
+    edges = GetParam();
 
-TEST(SplineTest, IntegerReverseIdentityTest) {
-  const auto s = Spline<>::calculateCurve({{0, 65535}, {65535, 0}});
-  ASSERT_FALSE(s.empty());
-  ASSERT_EQ(s.size(), 65536);
-  for (auto x = 0U; x < s.size(); ++x) {
-    ASSERT_EQ(s[x], 65535 - x) << "    Where x is: " << x;
+    interpolated =
+        Spline<T>::calculateCurve({std::begin(edges), std::end(edges)});
+
+    ASSERT_FALSE(interpolated.empty());
+    ASSERT_EQ(interpolated.size(), 65536);
   }
+
+  std::array<rawspeed::iPoint2D, 2> edges;
+  std::vector<T> interpolated;
+};
+static const identityType identityValues[] = {
+    {{{0, 0}, {65535, 65535}}},
+    {{{0, 65535}, {65535, 0}}},
+};
+
+using IntegerIdentityTest = IdentityTest<rawspeed::ushort16>;
+INSTANTIATE_TEST_CASE_P(IntegerIdentityTest, IntegerIdentityTest,
+                        ::testing::ValuesIn(identityValues));
+TEST_P(IntegerIdentityTest, ValuesAreLinearlyInterpolated) {
+  for (auto x = edges.front().y; x < edges.back().y; ++x)
+    ASSERT_EQ(interpolated[x], x);
 }
 
-TEST(SplineTest, DoubleIdentityTest) {
-  const auto s = Spline<double>::calculateCurve({{0, 0}, {65535, 65535}});
-  ASSERT_FALSE(s.empty());
-  ASSERT_EQ(s.size(), 65536);
-  for (auto x = 0U; x < s.size(); ++x) {
-    const double expected = x;
-    ASSERT_DOUBLE_EQ(s[x], expected);
-    ASSERT_EQ(s[x], expected);
-  }
-}
-
-TEST(SplineTest, DoubleReverseIdentityTest) {
-  const auto s = Spline<double>::calculateCurve({{0, 65535}, {65535, 0}});
-  ASSERT_FALSE(s.empty());
-  ASSERT_EQ(s.size(), 65536);
-  for (auto x = 0U; x < s.size(); ++x) {
-    const double expected = 65535 - x;
-    ASSERT_DOUBLE_EQ(s[x], expected);
-    ASSERT_EQ(s[x], expected);
+using DoubleIdentityTest = IdentityTest<double>;
+INSTANTIATE_TEST_CASE_P(DoubleIdentityTest, DoubleIdentityTest,
+                        ::testing::ValuesIn(identityValues));
+TEST_P(DoubleIdentityTest, ValuesAreLinearlyInterpolated) {
+  for (auto x = edges.front().y; x < edges.back().y; ++x) {
+    ASSERT_DOUBLE_EQ(interpolated[x], x);
+    ASSERT_EQ(interpolated[x], x);
   }
 }
 
