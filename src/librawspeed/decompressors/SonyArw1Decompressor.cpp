@@ -77,7 +77,7 @@ void SonyArw1Decompressor::decompress(const ByteStream& input) const {
       diff = len != 0 ? HuffmanTable::signExtended(diff, len) : diff;
       sum += diff;
 
-      if ((sum >> 12) > 0)
+      if (sum < 0 || (sum >> 12) > 0)
         ThrowRDE("Error decompressing");
 
       if (y < h)
