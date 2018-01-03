@@ -145,4 +145,33 @@ TEST_P(DoubleIdentityTest, ValuesAreLinearlyInterpolated) {
   }
 }
 
+std::vector<int> calculateSteps(int numCp) {
+  std::vector<int> steps;
+
+  const auto ptsTotal = 2U + numCp;
+  steps.reserve(ptsTotal);
+
+  int x = 0;
+  const auto step = 65536 / (ptsTotal - 1);
+  std::generate_n(std::back_inserter(steps), ptsTotal, [&x, step]() {
+    const int val = std::min(x, 65535);
+    x += step;
+    return val;
+  });
+
+  assert(ptsTotal == steps.size());
+  return steps;
+}
+TEST(CalculateStepsTest, SimpleTest) {
+  {
+    const int steps = 0;
+    const std::vector<int> res{0, 65535};
+    ASSERT_EQ(calculateSteps(steps), res);
+  }
+  {
+    const int steps = 1;
+    const std::vector<int> res{0, 32768, 65535};
+    ASSERT_EQ(calculateSteps(steps), res);
+  }
+}
 } // namespace rawspeed_test
