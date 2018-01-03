@@ -174,4 +174,67 @@ TEST(CalculateStepsTest, SimpleTest) {
     ASSERT_EQ(calculateSteps(steps), res);
   }
 }
+
+using constantType = std::tuple<int, int>;
+template <typename T>
+class ConstantTest : public ::testing::TestWithParam<constantType> {
+protected:
+  ConstantTest() = default;
+
+  void calculateEdges() {
+    const auto steps = calculateSteps(numCp);
+    edges.reserve(steps.size());
+
+    for (const int step : steps)
+      edges.emplace_back(step, constant);
+
+    assert(steps.size() == edges.size());
+  }
+
+  virtual void SetUp() {
+    auto p = GetParam();
+
+    constant = std::get<0>(p);
+    numCp = std::get<1>(p);
+
+    calculateEdges();
+
+    // EXPECT_TRUE(false) << ::testing::PrintToString((edges));
+
+    interpolated =
+        Spline<T>::calculateCurve({std::begin(edges), std::end(edges)});
+
+    ASSERT_FALSE(interpolated.empty());
+    ASSERT_EQ(interpolated.size(), 65536);
+  }
+
+  int constant;
+  int numCp;
+
+  std::vector<rawspeed::iPoint2D> edges;
+  std::vector<T> interpolated;
+};
+
+constexpr auto NumExtraSteps = 3;
+static const auto constantValues =
+    ::testing::Combine(::testing::ValuesIn(calculateSteps(NumExtraSteps)),
+                       ::testing::Range(0, 1 + NumExtraSteps));
+
+using IntegerConstantTest = ConstantTest<rawspeed::ushort16>;
+INSTANTIATE_TEST_CASE_P(IntegerConstantTest, IntegerConstantTest,
+                        constantValues);
+TEST_P(IntegerConstantTest, AllValuesAreEqual) {
+  for (const auto value : interpolated)
+    ASSERT_EQ(value, constant);
+}
+
+using DoubleConstantTest = ConstantTest<double>;
+INSTANTIATE_TEST_CASE_P(DoubleConstantTest, DoubleConstantTest, constantValues);
+TEST_P(DoubleConstantTest, AllValuesAreEqual) {
+  for (const auto value : interpolated) {
+    ASSERT_DOUBLE_EQ(value, constant);
+    ASSERT_EQ(value, constant);
+  }
+}
+
 } // namespace rawspeed_test
