@@ -341,7 +341,7 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
   for (int quadRow = 0; quadRow < 2; quadRow++) {
     for (int quadCol = 0; quadCol < 2; quadCol++) {
       const std::vector<ushort16> curve =
-          Spline::calculateCurve(control_points[quadRow][quadCol]);
+          Spline<>::calculateCurve(control_points[quadRow][quadCol]);
 
       int row_start = quadRow == 0 ? 0 : split_row;
       int row_end = quadRow == 0 ? split_row : mRaw->dim.y;
