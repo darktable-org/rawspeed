@@ -20,6 +20,7 @@
 
 #include "common/Spline.h" // for Spline
 #include <array>           // for array
+#include <cmath>           // for acos
 #include <gtest/gtest.h>   // for AssertionResult, DeathTest, Test, AssertHe...
 #include <type_traits>     // for is_same
 
@@ -253,5 +254,135 @@ TEST_P(DoubleConstantTest, AllValuesAreEqual) {
     ASSERT_EQ(value, constant);
   }
 }
+
+class AbstractReferenceTest {
+public:
+  using T = long double;
+
+  static constexpr T xMax = 65535;
+  static constexpr T yMax =
+      std::numeric_limits<rawspeed::iPoint2D::value_type>::max();
+
+  virtual T calculateRefVal(int x) const = 0;
+
+  virtual ~AbstractReferenceTest() = default;
+};
+
+template <int mul, int div>
+class SinReferenceTest : public AbstractReferenceTest {
+public:
+  T calculateRefVal(int x) const final {
+    const T pi = std::acos(T(-1));
+    const T x2arg = T(mul) * pi / (div * xMax);
+
+    return yMax * std::sin(x2arg * T(x));
+  }
+
+  virtual ~SinReferenceTest() = default;
+};
+
+using referenceType = std::tuple<int, long double>;
+
+template <typename Tb>
+class ReferenceTest : public Tb,
+                      public ::testing::TestWithParam<referenceType> {
+protected:
+  using T = AbstractReferenceTest::T;
+
+  ReferenceTest() = default;
+
+  void calculateReference() {
+    const auto xPoints = calculateSteps(numPts);
+
+    reference.reserve(xPoints.size());
+    for (const auto xPoint : xPoints)
+      reference.emplace_back(xPoint, this->calculateRefVal(xPoint));
+
+    assert(reference.size() == xPoints.size());
+  }
+
+  virtual void SetUp() {
+    const auto p = GetParam();
+
+    numPts = std::get<0>(p);
+    absError = std::get<1>(p);
+
+    calculateReference();
+
+    interpolated = Spline<T>::calculateCurve(reference);
+    ASSERT_FALSE(interpolated.empty());
+    ASSERT_EQ(interpolated.size(), AbstractReferenceTest::xMax + 1);
+  }
+
+  void check() const {
+    for (auto x = reference.front().x; x < reference.back().x; ++x) {
+      const T referen = this->calculateRefVal(x) / this->yMax;
+      const T interpo = T(interpolated[x]) / this->yMax;
+      ASSERT_NEAR(interpo, referen, absError);
+    }
+  }
+
+  int numPts;
+  long double absError;
+
+  std::vector<rawspeed::iPoint2D> reference;
+  std::vector<T> interpolated;
+};
+
+const AbstractReferenceTest::T AbstractReferenceTest::xMax;
+
+using Sin2PiRefTest = ReferenceTest<SinReferenceTest<2, 1>>;
+static const referenceType sin2PiRefValues[] = {
+    // clang-format off
+    {0,    1.0E-00},
+    {1,    1.0E+01},
+    {2,    1.0E-00},
+    {3,    1.0E-01},
+    {4,    1.0E-02},
+    {5,    1.0E-02},
+    {6,    1.0E-02},
+    {7,    1.0E-02},
+    {8,    1.0E-03},
+    {9,    1.0E-03},
+    {10,   1.0E-03},
+    {23,   1.0E-04},
+    {48,   1.0E-06},
+    {98,   1.0E-07},
+    {248,  1.0E-08},
+    {498,  1.0E-09},
+    {998,  1.0E-09},
+    {9998, 1.0E-09},
+    // clang-format on
+};
+INSTANTIATE_TEST_CASE_P(Sin2Pi, Sin2PiRefTest,
+                        ::testing::ValuesIn(sin2PiRefValues));
+TEST_P(Sin2PiRefTest, NearlyMatchesReference) { check(); }
+
+using SinPi2RefTest = ReferenceTest<SinReferenceTest<1, 2>>;
+static const referenceType sinPi2RefValues[] = {
+    // clang-format off
+    {0,    1.0E-00},
+    {1,    1.0E-01},
+    {2,    1.0E-01},
+    {3,    1.0E-02},
+    {4,    1.0E-02},
+    {5,    1.0E-02},
+    {6,    1.0E-02},
+    {7,    1.0E-02},
+    {8,    1.0E-02},
+    {9,    1.0E-02},
+    {10,   1.0E-02},
+    {23,   1.0E-03},
+    {48,   1.0E-04},
+    {98,   1.0E-04},
+    {248,  1.0E-05},
+    {498,  1.0E-06},
+    {998,  1.0E-06},
+    {9998, 1.0E-08},
+    // clang-format on
+};
+INSTANTIATE_TEST_CASE_P(SinPi2, SinPi2RefTest,
+                        ::testing::ValuesIn(sinPi2RefValues));
+TEST_P(SinPi2RefTest, NearlyMatchesReference) { check(); }
 
 } // namespace rawspeed_test
