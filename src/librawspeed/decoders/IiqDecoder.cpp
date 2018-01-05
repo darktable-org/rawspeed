@@ -329,7 +329,10 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
       for (int i = 1; i < 8; i++) {
         // These multipliers are expressed in ten-thousandths in the
         // file
-        const int y_coord = (data.getU32() * shared_x_coords[i]) / 10000;
+        const int y_coord =
+            (uint64(data.getU32()) * shared_x_coords[i]) / 10000;
+        if (y_coord > 65535)
+          ThrowRDE("The Y coordinate %u is too large", y_coord);
         quadrant.emplace_back(shared_x_coords[i], y_coord);
       }
 
