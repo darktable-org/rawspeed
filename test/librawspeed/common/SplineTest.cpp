@@ -145,18 +145,22 @@ TEST_P(DoubleIdentityTest, ValuesAreLinearlyInterpolated) {
   }
 }
 
+template <typename T> T lerp(T v0, T v1, T t) {
+  return (1.0 - t) * v0 + t * v1;
+}
+
 std::vector<int> calculateSteps(int numCp) {
   std::vector<int> steps;
 
   const auto ptsTotal = 2U + numCp;
   steps.reserve(ptsTotal);
 
-  int x = 0;
-  const auto step = 65536 / (ptsTotal - 1);
-  std::generate_n(std::back_inserter(steps), ptsTotal, [&x, step]() {
-    const int val = std::min(x, 65535);
-    x += step;
-    return val;
+  const auto dt = 1.0 / (ptsTotal - 1);
+  double t = 0.0;
+  std::generate_n(std::back_inserter(steps), ptsTotal, [dt, &t]() {
+    const double x = lerp(0.0, 65535.0, t);
+    t += dt;
+    return x + 0.5;
   });
 
   assert(ptsTotal == steps.size());
@@ -172,6 +176,19 @@ TEST(CalculateStepsTest, SimpleTest) {
     const int steps = 1;
     const std::vector<int> res{0, 32768, 65535};
     ASSERT_EQ(calculateSteps(steps), res);
+  }
+  {
+    for (auto steps = 0; steps < 255; steps++) {
+      const auto pts = calculateSteps(steps);
+      ASSERT_EQ(pts.front(), 0) << "Where steps = " << steps;
+      ASSERT_EQ(pts.back(), 65535) << "Where steps = " << steps;
+    }
+  }
+  {
+    const int steps = 65534;
+    const auto pts = calculateSteps(steps);
+    for (auto x = 0U; x < pts.size(); x++)
+      ASSERT_EQ(pts[x], x);
   }
 }
 
