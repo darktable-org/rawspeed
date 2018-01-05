@@ -280,6 +280,8 @@ public:
 
   virtual ~SinReferenceTest() = default;
 };
+const AbstractReferenceTest::T AbstractReferenceTest::xMax;
+const AbstractReferenceTest::T AbstractReferenceTest::yMax;
 
 using referenceType = std::tuple<int, long double>;
 
@@ -328,8 +330,6 @@ protected:
   std::vector<rawspeed::iPoint2D> reference;
   std::vector<T> interpolated;
 };
-
-const AbstractReferenceTest::T AbstractReferenceTest::xMax;
 
 using Sin2PiRefTest = ReferenceTest<SinReferenceTest<2, 1>>;
 static const referenceType sin2PiRefValues[] = {
