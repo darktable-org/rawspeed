@@ -25,6 +25,7 @@
 #include <type_traits>     // for is_same
 
 using rawspeed::Spline;
+using std::make_tuple;
 
 namespace rawspeed {
 
@@ -267,6 +268,8 @@ public:
 
   virtual ~AbstractReferenceTest() = default;
 };
+constexpr AbstractReferenceTest::T AbstractReferenceTest::xMax;
+constexpr AbstractReferenceTest::T AbstractReferenceTest::yMax;
 
 template <int mul, int div>
 class SinReferenceTest : public AbstractReferenceTest {
@@ -280,10 +283,9 @@ public:
 
   virtual ~SinReferenceTest() = default;
 };
-const AbstractReferenceTest::T AbstractReferenceTest::xMax;
-const AbstractReferenceTest::T AbstractReferenceTest::yMax;
 
-using referenceType = std::tuple<int, long double>;
+// Number of knots (excl. 2 explicit points), magnitude of the abs error.
+using referenceType = std::tr1::tuple<int, int>;
 
 template <typename Tb>
 class ReferenceTest : public Tb,
@@ -307,7 +309,7 @@ protected:
     const auto p = GetParam();
 
     numPts = std::get<0>(p);
-    absError = std::get<1>(p);
+    absError = std::pow(T(10), T(std::get<1>(p)));
 
     calculateReference();
 
@@ -332,26 +334,26 @@ protected:
 };
 
 using Sin2PiRefTest = ReferenceTest<SinReferenceTest<2, 1>>;
-static const referenceType sin2PiRefValues[] = {
+static constexpr referenceType sin2PiRefValues[] = {
     // clang-format off
-    {0,    1.0E-00},
-    {1,    1.0E+01},
-    {2,    1.0E-00},
-    {3,    1.0E-01},
-    {4,    1.0E-02},
-    {5,    1.0E-02},
-    {6,    1.0E-02},
-    {7,    1.0E-02},
-    {8,    1.0E-03},
-    {9,    1.0E-03},
-    {10,   1.0E-03},
-    {23,   1.0E-04},
-    {48,   1.0E-06},
-    {98,   1.0E-07},
-    {248,  1.0E-08},
-    {498,  1.0E-09},
-    {998,  1.0E-09},
-    {9998, 1.0E-09},
+    make_tuple(0,    -0),
+    make_tuple(1,    +1),
+    make_tuple(2,    -0),
+    make_tuple(3,    -1),
+    make_tuple(4,    -2),
+    make_tuple(5,    -2),
+    make_tuple(6,    -2),
+    make_tuple(7,    -2),
+    make_tuple(8,    -3),
+    make_tuple(9,    -3),
+    make_tuple(10,   -3),
+    make_tuple(23,   -4),
+    make_tuple(48,   -6),
+    make_tuple(98,   -7),
+    make_tuple(248,  -8),
+    make_tuple(498,  -9),
+    make_tuple(998,  -9),
+    make_tuple(9998, -9),
     // clang-format on
 };
 INSTANTIATE_TEST_CASE_P(Sin2Pi, Sin2PiRefTest,
@@ -359,26 +361,26 @@ INSTANTIATE_TEST_CASE_P(Sin2Pi, Sin2PiRefTest,
 TEST_P(Sin2PiRefTest, NearlyMatchesReference) { check(); }
 
 using SinPi2RefTest = ReferenceTest<SinReferenceTest<1, 2>>;
-static const referenceType sinPi2RefValues[] = {
+static constexpr referenceType sinPi2RefValues[] = {
     // clang-format off
-    {0,    1.0E-00},
-    {1,    1.0E-01},
-    {2,    1.0E-01},
-    {3,    1.0E-02},
-    {4,    1.0E-02},
-    {5,    1.0E-02},
-    {6,    1.0E-02},
-    {7,    1.0E-02},
-    {8,    1.0E-02},
-    {9,    1.0E-02},
-    {10,   1.0E-02},
-    {23,   1.0E-03},
-    {48,   1.0E-04},
-    {98,   1.0E-04},
-    {248,  1.0E-05},
-    {498,  1.0E-06},
-    {998,  1.0E-06},
-    {9998, 1.0E-08},
+    make_tuple(0,    -0),
+    make_tuple(1,    -1),
+    make_tuple(2,    -1),
+    make_tuple(3,    -2),
+    make_tuple(4,    -2),
+    make_tuple(5,    -2),
+    make_tuple(6,    -2),
+    make_tuple(7,    -2),
+    make_tuple(8,    -2),
+    make_tuple(9,    -2),
+    make_tuple(10,   -2),
+    make_tuple(23,   -3),
+    make_tuple(48,   -4),
+    make_tuple(98,   -4),
+    make_tuple(248,  -5),
+    make_tuple(498,  -6),
+    make_tuple(998,  -6),
+    make_tuple(9998, -8),
     // clang-format on
 };
 INSTANTIATE_TEST_CASE_P(SinPi2, SinPi2RefTest,
