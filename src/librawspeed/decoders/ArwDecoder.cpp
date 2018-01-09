@@ -186,13 +186,13 @@ RawImage ArwDecoder::decodeRawInternal() {
     }
   }
 
-  bool arw1 = counts->getU32() * 8 != width * height * bitPerPixel;
-  if (arw1)
-    height += 8;
-
   if (width == 0 || height == 0 || height % 2 != 0 || width > 8000 ||
       height > 5320)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
+  bool arw1 = uint64(counts->getU32()) * 8 != width * height * bitPerPixel;
+  if (arw1)
+    height += 8;
 
   mRaw->dim = iPoint2D(width, height);
 
