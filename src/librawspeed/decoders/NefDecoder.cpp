@@ -152,7 +152,12 @@ bool NefDecoder::NEFIsUncompressed(const TiffIFD* raw) {
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
   uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
 
-  return counts->getU32(0) == width*height*bitPerPixel/8;
+  const uint64 bitCount = uint64(8) * counts->getU32(0);
+  if (bitCount % bitPerPixel != 0)
+    return false;
+
+  const auto pixelCount = bitCount / bitPerPixel;
+  return pixelCount == iPoint2D(width, height).area();
 }
 
 /* At least the D810 has a broken firmware that tags uncompressed images
