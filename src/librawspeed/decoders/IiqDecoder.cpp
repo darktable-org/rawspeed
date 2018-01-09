@@ -123,7 +123,7 @@ RawImage IiqDecoder::decodeRawInternal() {
   bs.skipBytes(4); // ???
 
   // this is how much is to be read for all the entries
-  ByteStream es(bs.getStream(16 * entries_count));
+  ByteStream es(bs.getStream(entries_count, 16));
 
   bs.setPosition(origPos);
 
