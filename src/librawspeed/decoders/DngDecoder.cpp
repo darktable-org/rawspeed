@@ -739,9 +739,13 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) {
       black_sum[i&1] += blackleveldeltah->getFloat(i);
 
     for (int i = 0; i < 4; i++) {
-      if (__builtin_sadd_overflow(mRaw->blackLevelSeparate[i],
-                                  black_sum[i & 1] /
-                                      static_cast<float>(mRaw->dim.x) * 2.0F,
+      const float value =
+          black_sum[i & 1] / static_cast<float>(mRaw->dim.x) * 2.0F;
+      if (value < std::numeric_limits<BlackType>::min() ||
+          value > std::numeric_limits<BlackType>::max())
+        ThrowRDE("Error decoding black level");
+
+      if (__builtin_sadd_overflow(mRaw->blackLevelSeparate[i], value,
                                   &mRaw->blackLevelSeparate[i]))
         ThrowRDE("Integer overflow when calculating black level");
     }
