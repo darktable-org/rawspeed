@@ -16,7 +16,18 @@ if(BUILD_TOOLS)
   add_subdirectory(utilities)
 endif()
 
+<<<<<<< HEAD
 install(TARGETS rawspeed DESTINATION lib)
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/librawspeed" DESTINATION include
         FILES_MATCHING PATTERN "*.h")
+=======
+set(PRIVATE_LIBS "-lpthread -ljpeg -lrawspeed")
+set(DEST_DIR "${CMAKE_INSTALL_PREFIX}")
+CONFIGURE_FILE("librawspeed.pc.in" "rawspeed.pc" @ONLY)
+
+install(TARGETS rawspeed DESTINATION lib)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/librawspeed" DESTINATION include
+        FILES_MATCHING PATTERN "*.h")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/rawspeed.pc" DESTINATION lib/pkgconfig)
+>>>>>>> Added a pkgconfig file to the install
 

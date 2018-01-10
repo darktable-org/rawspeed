@@ -1,0 +1,11 @@
+prefix=@DEST_DIR@
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: librawspeed
+Description: A fast camera raw file decoder (https://github.com/darkroom-org/rawspeed).
+Version: 3.1
+
+Libs: -L${libdir} @PRIVATE_LIBS@
+Cflags: -I${includedir}
