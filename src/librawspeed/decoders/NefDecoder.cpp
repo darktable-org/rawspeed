@@ -153,7 +153,7 @@ bool NefDecoder::NEFIsUncompressed(const TiffIFD* raw) {
   uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
 
   const uint64 bitCount = uint64(8) * counts->getU32(0);
-  if (bitCount % bitPerPixel != 0)
+  if (!bitPerPixel || bitCount % bitPerPixel != 0)
     return false;
 
   const auto pixelCount = bitCount / bitPerPixel;
