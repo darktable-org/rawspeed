@@ -15,3 +15,8 @@ add_subdirectory(librawspeed)
 if(BUILD_TOOLS)
   add_subdirectory(utilities)
 endif()
+
+install(TARGETS rawspeed DESTINATION lib)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/librawspeed" DESTINATION include
+        FILES_MATCHING PATTERN "*.h")
+
