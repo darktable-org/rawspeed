@@ -164,11 +164,14 @@ bool NefDecoder::NEFIsUncompressed(const TiffIFD* raw) {
    as if they were compressed. For those cases we set uncompressed mode
    by figuring out that the image is the size of uncompressed packing */
 bool NefDecoder::NEFIsUncompressedRGB(const TiffIFD* raw) {
-  TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
+  uint32 byteCount = raw->getEntry(STRIPBYTECOUNTS)->getU32(0);
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
 
-  return counts->getU32(0) == width*height*3;
+  if (byteCount % 3 != 0)
+    return false;
+
+  return byteCount / 3 == iPoint2D(width, height).area();
 }
 
 void NefDecoder::DecodeUncompressed() {
