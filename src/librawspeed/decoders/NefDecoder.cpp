@@ -527,13 +527,12 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x0014))) {
     TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x0014));
     ByteStream bs = wb->getData();
-    auto* tmp = wb->getData(wb->count);
     if (wb->count == 2560 && wb->type == TIFF_UNDEFINED) {
-      mRaw->metadata.wbCoeffs[0] =
-          static_cast<float>(getU16BE(tmp + 1248)) / 256.0F;
+      bs.skipBytes(1248);
+      bs.setByteOrder(Endianness::big);
+      mRaw->metadata.wbCoeffs[0] = static_cast<float>(bs.getU16()) / 256.0;
       mRaw->metadata.wbCoeffs[1] = 1.0F;
-      mRaw->metadata.wbCoeffs[2] =
-          static_cast<float>(getU16BE(tmp + 1250)) / 256.0F;
+      mRaw->metadata.wbCoeffs[2] = static_cast<float>(bs.getU16()) / 256.0;
     } else if (bs.hasPatternAt("NRW ", 4, 0)) {
       uint32 offset = 0;
       if (!bs.hasPatternAt("0100", 4, 4) && wb->count > 72)
