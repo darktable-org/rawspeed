@@ -73,10 +73,10 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
              counts->count, offsets->count);
   }
 
-  const uint32 yTotal = yPerSlice * counts->count;
-  if (yPerSlice == 0 || yTotal != static_cast<uint32>(mRaw->dim.y)) {
-    ThrowRDE("Invalid y per slice %u or strip count %u (height = %u, got %u)",
-             yPerSlice, counts->count, mRaw->dim.y, yTotal);
+  if (yPerSlice == 0 || yPerSlice > static_cast<uint32>(mRaw->dim.y) ||
+      roundUpDivision(mRaw->dim.y, yPerSlice) != counts->count) {
+    ThrowRDE("Invalid y per slice %u or strip count %u (height = %u)",
+             yPerSlice, counts->count, mRaw->dim.y);
   }
 
   switch (bitPerPixel) {
