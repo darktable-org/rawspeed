@@ -40,6 +40,8 @@ void TableLookUp::setTable(int ntable, const std::vector<ushort16>& table) {
   assert(!table.empty());
 
   const int nfilled = table.size();
+  if (nfilled >= 65536)
+    ThrowRDE("Table lookup with %i entries is unsupported", nfilled);
 
   if (ntable > ntables) {
     ThrowRDE("Table lookup with number greater than number of tables.");
