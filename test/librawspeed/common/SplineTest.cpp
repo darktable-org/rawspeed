@@ -168,31 +168,71 @@ std::vector<int> calculateSteps(int numCp) {
   assert(ptsTotal == steps.size());
   return steps;
 }
-TEST(CalculateStepsTest, SimpleTest) {
-  {
-    const int steps = 0;
-    const std::vector<int> res{0, 65535};
-    ASSERT_EQ(calculateSteps(steps), res);
-  }
-  {
-    const int steps = 1;
-    const std::vector<int> res{0, 32768, 65535};
-    ASSERT_EQ(calculateSteps(steps), res);
-  }
-  {
-    for (auto steps = 0; steps < 255; steps++) {
-      const auto pts = calculateSteps(steps);
-      ASSERT_EQ(pts.front(), 0) << "Where steps = " << steps;
-      ASSERT_EQ(pts.back(), 65535) << "Where steps = " << steps;
-    }
-  }
-  {
-    const int steps = 65534;
-    const auto pts = calculateSteps(steps);
-    for (auto x = 0U; x < pts.size(); x++)
-      ASSERT_EQ(pts[x], x);
-  }
+TEST(CalculateStepsEdgesTest, IdentityTest) {
+  const int steps = 65534;
+  const auto pts = calculateSteps(steps);
+  for (auto x = 0U; x < pts.size(); x++)
+    ASSERT_EQ(pts[x], x);
 }
+
+class CalculateStepsEdgesTest : public ::testing::TestWithParam<int> {
+protected:
+  CalculateStepsEdgesTest() = default;
+  virtual void SetUp() {
+    extraSteps = GetParam();
+    got = calculateSteps(extraSteps);
+  }
+
+  int extraSteps;
+  std::vector<int> got;
+};
+INSTANTIATE_TEST_CASE_P(CalculateStepsEdgesTest, CalculateStepsEdgesTest,
+                        ::testing::Range(0, 254));
+TEST_P(CalculateStepsEdgesTest, Count) {
+  ASSERT_EQ(got.size(), 2 + extraSteps);
+}
+TEST_P(CalculateStepsEdgesTest, EdgesAreProper) {
+  ASSERT_EQ(got.front(), 0);
+  ASSERT_EQ(got.back(), 65535);
+}
+
+using calculateStepsType = std::tuple<int, std::vector<int>>;
+class CalculateStepsTest : public ::testing::TestWithParam<calculateStepsType> {
+protected:
+  CalculateStepsTest() = default;
+  virtual void SetUp() {
+    const auto p = GetParam();
+    extraSteps = std::get<0>(p);
+    expected = std::get<1>(p);
+
+    got = calculateSteps(extraSteps);
+  }
+
+  int extraSteps;
+  std::vector<int> expected;
+  std::vector<int> got;
+};
+static const calculateStepsType calculateStepsValues[] = {
+    // clang-format off
+    {0, {0, 65535}},
+    {1, {0, 32768, 65535}},
+    {2, {0, 21845, 43690, 65535}},
+    {3, {0, 16384, 32768, 49151, 65535}},
+    {4, {0, 13107, 26214, 39321, 52428, 65535}},
+    {5, {0, 10923, 21845, 32768, 43690, 54612, 65535}},
+    {6, {0, 9362, 18724, 28086, 37449, 46811, 56173, 65535}},
+    {7, {0, 8192, 16384, 24576, 32768, 40959, 49151, 57343, 65535}},
+    {8, {0, 7282, 14563, 21845, 29127, 36408, 43690, 50972, 58253, 65535}},
+    // clang-format on
+};
+
+INSTANTIATE_TEST_CASE_P(CalculateStepsTest, CalculateStepsTest,
+                        ::testing::ValuesIn(calculateStepsValues));
+TEST_P(CalculateStepsTest, Count) {
+  ASSERT_EQ(expected.size(), got.size());
+  ASSERT_EQ(got.size(), 2 + extraSteps);
+}
+TEST_P(CalculateStepsTest, GotExpectedOutput) { ASSERT_EQ(got, expected); }
 
 using constantType = std::tuple<int, int>;
 template <typename T>
