@@ -373,7 +373,7 @@ using Sin2PiRefTest = ReferenceTest<SinReferenceTest<2, 1>>;
 static const referenceType sin2PiRefValues[] = {
     // clang-format off
     make_tuple(0,    1.0E-00),
-    make_tuple(1,    1.0E+01),
+    make_tuple(1,    1.0E+01), // FIXME: should be 1.0E-00
     make_tuple(2,    1.0E-00),
     make_tuple(3,    1.0E-01),
     make_tuple(4,    1.0E-02),
@@ -383,13 +383,10 @@ static const referenceType sin2PiRefValues[] = {
     make_tuple(8,    1.0E-03),
     make_tuple(9,    1.0E-03),
     make_tuple(10,   1.0E-03),
-    make_tuple(23,   1.0E-04),
-    make_tuple(48,   1.0E-06),
-    make_tuple(98,   1.0E-07),
-    make_tuple(248,  1.0E-08),
-    make_tuple(498,  1.0E-09),
-    make_tuple(998,  1.0E-09),
-    make_tuple(9998, 1.0E-09),
+    make_tuple(11,   1.0E-03),
+    make_tuple(12,   1.0E-03),
+    make_tuple(13,   1.0E-03),
+    make_tuple(14,   1.0E-04),
     // clang-format on
 };
 INSTANTIATE_TEST_CASE_P(Sin2Pi, Sin2PiRefTest,
