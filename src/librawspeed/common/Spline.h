@@ -62,7 +62,6 @@ private:
     // Extra values used during computation
     std::vector<double> h(num_segments);
     std::vector<double> alpha(num_segments);
-    std::vector<double> l(num_coords);
     std::vector<double> mu(num_coords);
     std::vector<double> z(num_coords);
 
@@ -81,15 +80,14 @@ private:
     // the y value (Segment::a) of last point, so drop that 'segment' now
     segments.pop_back();
 
-    l[0] = mu[0] = z[0] = 0;
+    mu[0] = z[0] = 0;
 
     for (int i = 1; i < num_segments; i++) {
-      l[i] = 2 * (xCp[i + 1] - xCp[i - 1]) - (h[i - 1] * mu[i - 1]);
-      mu[i] = h[i] / l[i];
-      z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
+      const double l = 2 * (xCp[i + 1] - xCp[i - 1]) - (h[i - 1] * mu[i - 1]);
+      mu[i] = h[i] / l;
+      z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l;
     }
 
-    l.back() = 1;
     z.back() = segments.back().c = 0;
 
     for (int i = num_segments - 1; i >= 0; i--) {
