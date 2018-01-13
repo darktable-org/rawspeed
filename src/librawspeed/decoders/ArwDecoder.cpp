@@ -404,11 +404,11 @@ void ArwDecoder::SonyDecrypt(const uint32* ibuf, uint32* obuf, uint32 len,
 void ArwDecoder::GetWB() {
   // Set the whitebalance for all the modern ARW formats (everything after A100)
   if (mRootIFD->hasEntryRecursive(DNGPRIVATEDATA)) {
-    TiffEntry *priv = mRootIFD->getEntryRecursive(DNGPRIVATEDATA);
-    TiffRootIFD makerNoteIFD(nullptr, nullptr, priv->getRootIfdData(),
-                             priv->getU32());
+    NORangesSet<Buffer> ifds_undecoded;
 
-    // NOTE: can not use NORangeSet here. strangely makes everything slow.
+    TiffEntry *priv = mRootIFD->getEntryRecursive(DNGPRIVATEDATA);
+    TiffRootIFD makerNoteIFD(nullptr, &ifds_undecoded, priv->getRootIfdData(),
+                             priv->getU32());
 
     TiffEntry *sony_offset = makerNoteIFD.getEntryRecursive(SONY_OFFSET);
     TiffEntry *sony_length = makerNoteIFD.getEntryRecursive(SONY_LENGTH);
@@ -435,9 +435,10 @@ void ArwDecoder::GetWB() {
                 reinterpret_cast<uint32*>(ifd_decoded.get() + off), len / 4,
                 key);
 
+    NORangesSet<Buffer> ifds_decoded;
     Buffer decIFD(move(ifd_decoded), ifd_size);
     DataBuffer dbIDD(decIFD, priv->getRootIfdData().getByteOrder());
-    TiffRootIFD encryptedIFD(nullptr, nullptr, dbIDD, off);
+    TiffRootIFD encryptedIFD(nullptr, &ifds_decoded, dbIDD, off);
 
     if (encryptedIFD.hasEntry(SONYGRBGLEVELS)){
       TiffEntry *wb = encryptedIFD.getEntry(SONYGRBGLEVELS);
