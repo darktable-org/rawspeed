@@ -38,24 +38,23 @@ namespace rawspeed {
 template <typename T = ushort16,
           typename = std::enable_if_t<std::is_arithmetic<T>::value>>
 class Spline final {
+  // These are the constant factors for each segment of the curve.
+  // Each segment i will have the formula:
+  // f(x) = a[i] + b[i]*(x - x[i]) + c[i]*(x - x[i])^2 + d[i]*(x - x[i])^3
+  struct Segment {
+    double a;
+    double b;
+    double c;
+    double d;
+  };
+
   int num_coords;
   int num_segments;
 
   std::vector<int> xCp;
-
-  // These are the constant factors for each segment of the curve.
-  // Each segment i will have the formula:
-  // f(x) = a[i] + b[i]*(x - x[i]) + c[i]*(x - x[i])^2 + d[i]*(x - x[i])^3
-  std::vector<double> a;
-  std::vector<double> b;
-  std::vector<double> c;
-  std::vector<double> d;
+  std::vector<Segment> segments;
 
   void prepare() {
-    b.resize(num_segments);
-    c.resize(num_coords);
-    d.resize(num_segments);
-
     // Extra values used during computation
     std::vector<double> h(num_segments);
     std::vector<double> alpha(num_segments);
@@ -66,9 +65,17 @@ class Spline final {
     for (int i = 0; i < num_segments; i++)
       h[i] = xCp[i + 1] - xCp[i];
 
-    for (int i = 1; i < num_segments; i++)
-      alpha[i] =
-          (3. / h[i]) * (a[i + 1] - a[i]) - (3. / h[i - 1]) * (a[i] - a[i - 1]);
+    for (int i = 1; i < num_segments; i++) {
+      Segment& sp = segments[i - 1];
+      Segment& s = segments[i];
+      Segment& sn = segments[i + 1];
+
+      alpha[i] = (3. / h[i]) * (sn.a - s.a) - (3. / h[i - 1]) * (s.a - sp.a);
+    }
+
+    // The last element is nonsensical, and was only used to temporairly store
+    // the y value (Segment::a) of last point, so drop that 'segment' now
+    segments.pop_back();
 
     l[0] = mu[0] = z[0] = 0;
 
@@ -78,14 +85,20 @@ class Spline final {
       z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
     }
 
-    l[num_segments] = 1;
-    z[num_segments] = c[num_segments] = 0;
+    l.back() = 1;
+    z.back() = segments.back().c = 0;
 
     for (int i = num_segments - 1; i >= 0; i--) {
-      c[i] = z[i] - mu[i] * c[i + 1];
-      b[i] = (a[i + 1] - a[i]) / h[i] - h[i] * (c[i + 1] + 2 * c[i]) / 3.;
-      d[i] = (c[i + 1] - c[i]) / (3. * h[i]);
+      Segment& s = segments[i];
+      Segment& sn = segments[i + 1];
+
+      s.c = z[i] - mu[i] * sn.c;
+      s.b = (sn.a - s.a) / h[i] - h[i] * (sn.c + 2 * s.c) / 3.;
+      s.d = (sn.c - s.c) / (3. * h[i]);
     }
+
+    assert(static_cast<typename decltype(segments)::size_type>(num_segments) ==
+           segments.size());
   }
 
 public:
@@ -121,10 +134,10 @@ public:
     num_segments = num_coords - 1;
 
     xCp.resize(num_coords);
-    a.resize(num_coords);
+    segments.resize(num_coords);
     for (int i = 0; i < num_coords; i++) {
       xCp[i] = control_points[i].x;
-      a[i] = control_points[i].y;
+      segments[i].a = control_points[i].y;
     }
 
     prepare();
@@ -134,12 +147,14 @@ public:
     std::vector<value_type> curve(65536);
 
     for (int i = 0; i < num_segments; i++) {
+      const Segment& s = segments[i];
+
       for (int x = xCp[i]; x <= xCp[i + 1]; x++) {
         double diff = x - xCp[i];
         double diff_2 = diff * diff;
         double diff_3 = diff * diff * diff;
 
-        curve[x] = a[i] + b[i] * diff + c[i] * diff_2 + d[i] * diff_3;
+        curve[x] = s.a + s.b * diff + s.c * diff_2 + s.d * diff_3;
       }
     }
 
