@@ -41,6 +41,8 @@ using std::vector;
 namespace rawspeed {
 
 void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream* bs) {
+  assert(ifds);
+
   TiffEntryOwner t;
 
   auto origPos = bs->getPosition();
@@ -85,11 +87,12 @@ TiffIFD::TiffIFD(TiffIFD* parent_) : parent(parent_) {}
 TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
                  const DataBuffer& data, uint32 offset)
     : TiffIFD(parent_) {
-
   // see TiffParser::parse: UINT32_MAX is used to mark the "virtual" top level
   // TiffRootIFD in a tiff file
   if (offset == UINT32_MAX)
     return;
+
+  assert(ifds);
 
   checkOverflow();
 
@@ -104,7 +107,7 @@ TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
   // 4-byte offset to the next IFD at the end
   const auto IFDFullSize = 2 + 4 + 12 * numEntries;
   const Buffer IFDBuf(data.getSubView(offset, IFDFullSize));
-  if (ifds && !ifds->emplace(IFDBuf).second)
+  if (!ifds->emplace(IFDBuf).second)
     ThrowTPE("Two IFD's overlap. Raw corrupt!");
 
   for (uint32 i = 0; i < numEntries; i++)
@@ -115,6 +118,8 @@ TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
 
 TiffRootIFDOwner TiffIFD::parseDngPrivateData(NORangesSet<Buffer>* ifds,
                                               TiffEntry* t) {
+  assert(ifds);
+
   /*
   1. Six bytes containing the zero-terminated string "Adobe". (The DNG specification calls for the DNGPrivateData tag to start with an ASCII string identifying the creator/format).
   2. 4 bytes: an ASCII string ("MakN" for a Makernote),  indicating what sort of data is being stored here. Note that this is not zero-terminated.
@@ -150,6 +155,8 @@ TiffRootIFDOwner TiffIFD::parseDngPrivateData(NORangesSet<Buffer>* ifds,
 /* This will attempt to parse makernotes and return it as an IFD */
 TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
                                          TiffEntry* t) {
+  assert(ifds);
+
   // go up the IFD tree and try to find the MAKE entry on each level.
   // we can not go all the way to the top first because this partial tree
   // is not yet added to the TiffRootIFD.
