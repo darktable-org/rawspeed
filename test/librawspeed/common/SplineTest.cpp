@@ -52,7 +52,7 @@ TEST(SplineDeathTest, AtLeastTwoPoints) {
       "at least two points");
   ASSERT_DEATH(
       {
-        Spline<> s({{0, {}}});
+        Spline<> s({{0, 0}});
         s.calculateCurve();
       },
       "at least two points");
@@ -161,9 +161,11 @@ protected:
   std::vector<T> interpolated;
 };
 static const identityType identityValues[] = {
-    {{{{0, 0}, {65535, 65535}}}, {{{0.0, 1.0, 0.0, 0.0}}}},
-    {{{{0, 65535}, {65535, 0}}}, {{{65535.0, -1.0, 0.0, 0.0}}}},
-};
+    make_tuple(std::array<rawspeed::iPoint2D, 2>{{{0, 0}, {65535, 65535}}},
+               std::vector<std::array<double, 4>>{{{0.0, 1.0, 0.0, 0.0}}}),
+    make_tuple(
+        std::array<rawspeed::iPoint2D, 2>{{{0, 65535}, {65535, 0}}},
+        std::vector<std::array<double, 4>>{{{65535.0, -1.0, 0.0, 0.0}}})};
 
 using IntegerIdentityTest = IdentityTest<rawspeed::ushort16>;
 INSTANTIATE_TEST_CASE_P(IntegerIdentityTest, IntegerIdentityTest,
@@ -252,15 +254,15 @@ protected:
 };
 static const calculateStepsType calculateStepsValues[] = {
     // clang-format off
-    {0, {0, 65535}},
-    {1, {0, 32768, 65535}},
-    {2, {0, 21845, 43690, 65535}},
-    {3, {0, 16384, 32768, 49151, 65535}},
-    {4, {0, 13107, 26214, 39321, 52428, 65535}},
-    {5, {0, 10923, 21845, 32768, 43690, 54612, 65535}},
-    {6, {0, 9362, 18724, 28086, 37449, 46811, 56173, 65535}},
-    {7, {0, 8192, 16384, 24576, 32768, 40959, 49151, 57343, 65535}},
-    {8, {0, 7282, 14563, 21845, 29127, 36408, 43690, 50972, 58253, 65535}},
+    make_tuple(0, std::vector<int>{0, 65535}),
+    make_tuple(1, std::vector<int>{0, 32768, 65535}),
+    make_tuple(2, std::vector<int>{0, 21845, 43690, 65535}),
+    make_tuple(3, std::vector<int>{0, 16384, 32768, 49151, 65535}),
+    make_tuple(4, std::vector<int>{0, 13107, 26214, 39321, 52428, 65535}),
+    make_tuple(5, std::vector<int>{0, 10923, 21845, 32768, 43690, 54612, 65535}),
+    make_tuple(6, std::vector<int>{0, 9362, 18724, 28086, 37449, 46811, 56173, 65535}),
+    make_tuple(7, std::vector<int>{0, 8192, 16384, 24576, 32768, 40959, 49151, 57343, 65535}),
+    make_tuple(8, std::vector<int>{0, 7282, 14563, 21845, 29127, 36408, 43690, 50972, 58253, 65535}),
     // clang-format on
 };
 
