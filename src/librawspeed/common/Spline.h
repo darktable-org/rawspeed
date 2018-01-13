@@ -71,6 +71,8 @@ public:
     const int num_coords = control_points.size();
     const int num_segments = num_coords - 1;
 
+    std::vector<int> xCp(num_coords);
+
     // These are the constant factors for each segment of the curve.
     // Each segment i will have the formula:
     // f(x) = a[i] + b[i]*(x - x[i]) + c[i]*(x - x[i])^2 + d[i]*(x - x[i])^3
@@ -86,8 +88,10 @@ public:
     std::vector<double> mu(num_coords);
     std::vector<double> z(num_coords);
 
-    for (int i = 0; i < num_coords; i++)
+    for (int i = 0; i < num_coords; i++) {
+      xCp[i] = control_points[i].x;
       a[i] = control_points[i].y;
+    }
 
     for (int i = 0; i < num_segments; i++)
       h[i] = control_points[i + 1].x - control_points[i].x;
@@ -117,8 +121,8 @@ public:
     std::vector<value_type> curve(65536);
 
     for (int i = 0; i < num_segments; i++) {
-      for (int x = control_points[i].x; x <= control_points[i + 1].x; x++) {
-        double diff = x - control_points[i].x;
+      for (int x = xCp[i]; x <= xCp[i + 1]; x++) {
+        double diff = x - xCp[i];
         double diff_2 = diff * diff;
         double diff_3 = diff * diff * diff;
 
