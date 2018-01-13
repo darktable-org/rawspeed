@@ -44,11 +44,22 @@ TEST(SplineStaticTest, DefaultIsUshort16) {
 
 #ifndef NDEBUG
 TEST(SplineDeathTest, AtLeastTwoPoints) {
-  ASSERT_DEATH({ Spline<>::calculateCurve({}); }, "at least two points");
-  ASSERT_DEATH({ Spline<>::calculateCurve({{0, {}}}); }, "at least two points");
+  ASSERT_DEATH(
+      {
+        Spline<> s({});
+        s.calculateCurve();
+      },
+      "at least two points");
+  ASSERT_DEATH(
+      {
+        Spline<> s({{0, {}}});
+        s.calculateCurve();
+      },
+      "at least two points");
   ASSERT_EXIT(
       {
-        Spline<>::calculateCurve({{0, {}}, {65535, {}}});
+        Spline<> s({{0, {}}, {65535, {}}});
+        s.calculateCurve();
         exit(0);
       },
       ::testing::ExitedWithCode(0), "");
@@ -57,12 +68,14 @@ TEST(SplineDeathTest, AtLeastTwoPoints) {
 TEST(SplineDeathTest, XIsFullRange) {
   ASSERT_DEATH(
       {
-        Spline<>::calculateCurve({{1, {}}, {65535, {}}});
+        Spline<> s({{1, {}}, {65535, {}}});
+        s.calculateCurve();
       },
       "front.*0");
   ASSERT_DEATH(
       {
-        Spline<>::calculateCurve({{0, {}}, {65534, {}}});
+        Spline<> s({{0, {}}, {65534, {}}});
+        s.calculateCurve();
       },
       "back.*65535");
 }
@@ -70,12 +83,14 @@ TEST(SplineDeathTest, XIsFullRange) {
 TEST(SplineDeathTest, YIsLimited) {
   ASSERT_DEATH(
       {
-        Spline<>::calculateCurve({{0, {}}, {32767, -1}, {65535, {}}});
+        Spline<> s({{0, {}}, {32767, -1}, {65535, {}}});
+        s.calculateCurve();
       },
       "y >= .*min");
   ASSERT_DEATH(
       {
-        Spline<>::calculateCurve({{0, {}}, {32767, 65536}, {65535, {}}});
+        Spline<> s({{0, {}}, {32767, 65536}, {65535, {}}});
+        s.calculateCurve();
       },
       "y <= .*max");
 }
@@ -83,24 +98,26 @@ TEST(SplineDeathTest, YIsLimited) {
 TEST(SplineDeathTest, XIsStrictlyIncreasing) {
   ASSERT_DEATH(
       {
-        Spline<>::calculateCurve({{0, {}}, {0, {}}, {65535, {}}});
+        Spline<> s({{0, {}}, {0, {}}, {65535, {}}});
+        s.calculateCurve();
       },
       "strictly increasing");
   ASSERT_DEATH(
       {
-        Spline<>::calculateCurve(
-            {{0, {}}, {32767, {}}, {32767, {}}, {65535, {}}});
+        Spline<> s({{0, {}}, {32767, {}}, {32767, {}}, {65535, {}}});
+        s.calculateCurve();
       },
       "strictly increasing");
   ASSERT_DEATH(
       {
-        Spline<>::calculateCurve({{0, {}}, {65535, {}}, {65535, {}}});
+        Spline<> s({{0, {}}, {65535, {}}, {65535, {}}});
+        s.calculateCurve();
       },
       "strictly increasing");
   ASSERT_DEATH(
       {
-        Spline<>::calculateCurve(
-            {{0, {}}, {32767, {}}, {32766, {}}, {65535, {}}});
+        Spline<> s({{0, {}}, {32767, {}}, {32766, {}}, {65535, {}}});
+        s.calculateCurve();
       },
       "strictly increasing");
 }
@@ -114,8 +131,8 @@ protected:
   virtual void SetUp() {
     edges = GetParam();
 
-    interpolated =
-        Spline<T>::calculateCurve({std::begin(edges), std::end(edges)});
+    Spline<T> s({std::begin(edges), std::end(edges)});
+    interpolated = s.calculateCurve();
 
     ASSERT_FALSE(interpolated.empty());
     ASSERT_EQ(interpolated.size(), 65536);
@@ -260,8 +277,8 @@ protected:
 
     // EXPECT_TRUE(false) << ::testing::PrintToString((edges));
 
-    interpolated =
-        Spline<T>::calculateCurve({std::begin(edges), std::end(edges)});
+    Spline<T> s({std::begin(edges), std::end(edges)});
+    interpolated = s.calculateCurve();
 
     ASSERT_FALSE(interpolated.empty());
     ASSERT_EQ(interpolated.size(), 65536);
@@ -349,7 +366,8 @@ protected:
 
     calculateReference();
 
-    interpolated = Spline<T>::calculateCurve(reference);
+    Spline<T> s(reference);
+    interpolated = s.calculateCurve();
     ASSERT_FALSE(interpolated.empty());
     ASSERT_EQ(interpolated.size(), AbstractReferenceTest::xMax + 1);
   }

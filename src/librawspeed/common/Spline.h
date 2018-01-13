@@ -38,11 +38,60 @@ namespace rawspeed {
 template <typename T = ushort16,
           typename = std::enable_if_t<std::is_arithmetic<T>::value>>
 class Spline final {
+  int num_coords;
+  int num_segments;
+
+  std::vector<int> xCp;
+
+  // These are the constant factors for each segment of the curve.
+  // Each segment i will have the formula:
+  // f(x) = a[i] + b[i]*(x - x[i]) + c[i]*(x - x[i])^2 + d[i]*(x - x[i])^3
+  std::vector<double> a;
+  std::vector<double> b;
+  std::vector<double> c;
+  std::vector<double> d;
+
+  void prepare() {
+    b.resize(num_segments);
+    c.resize(num_coords);
+    d.resize(num_segments);
+
+    // Extra values used during computation
+    std::vector<double> h(num_segments);
+    std::vector<double> alpha(num_segments);
+    std::vector<double> l(num_coords);
+    std::vector<double> mu(num_coords);
+    std::vector<double> z(num_coords);
+
+    for (int i = 0; i < num_segments; i++)
+      h[i] = xCp[i + 1] - xCp[i];
+
+    for (int i = 1; i < num_segments; i++)
+      alpha[i] =
+          (3. / h[i]) * (a[i + 1] - a[i]) - (3. / h[i - 1]) * (a[i] - a[i - 1]);
+
+    l[0] = mu[0] = z[0] = 0;
+
+    for (int i = 1; i < num_segments; i++) {
+      l[i] = 2 * (xCp[i + 1] - xCp[i - 1]) - (h[i - 1] * mu[i - 1]);
+      mu[i] = h[i] / l[i];
+      z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
+    }
+
+    l[num_segments] = 1;
+    z[num_segments] = c[num_segments] = 0;
+
+    for (int i = num_segments - 1; i >= 0; i--) {
+      c[i] = z[i] - mu[i] * c[i + 1];
+      b[i] = (a[i + 1] - a[i]) / h[i] - h[i] * (c[i + 1] + 2 * c[i]) / 3.;
+      d[i] = (c[i + 1] - c[i]) / (3. * h[i]);
+    }
+  }
+
 public:
   using value_type = T;
 
-  static std::vector<value_type>
-  calculateCurve(const std::vector<iPoint2D>& control_points) {
+  explicit Spline(const std::vector<iPoint2D>& control_points) {
     assert(control_points.size() >= 2 &&
            "Need at least two points to interpolate between");
 
@@ -68,56 +117,20 @@ public:
     }
 #endif
 
-    const int num_coords = control_points.size();
-    const int num_segments = num_coords - 1;
+    num_coords = control_points.size();
+    num_segments = num_coords - 1;
 
-    std::vector<int> xCp(num_coords);
-
-    // These are the constant factors for each segment of the curve.
-    // Each segment i will have the formula:
-    // f(x) = a[i] + b[i]*(x - x[i]) + c[i]*(x - x[i])^2 + d[i]*(x - x[i])^3
-    std::vector<double> a(num_coords);
-    std::vector<double> b(num_segments);
-    std::vector<double> c(num_coords);
-    std::vector<double> d(num_segments);
-
-    // Extra values used during computation
-    std::vector<double> h(num_segments);
-    std::vector<double> alpha(num_segments);
-    std::vector<double> l(num_coords);
-    std::vector<double> mu(num_coords);
-    std::vector<double> z(num_coords);
-
+    xCp.resize(num_coords);
+    a.resize(num_coords);
     for (int i = 0; i < num_coords; i++) {
       xCp[i] = control_points[i].x;
       a[i] = control_points[i].y;
     }
 
-    for (int i = 0; i < num_segments; i++)
-      h[i] = control_points[i + 1].x - control_points[i].x;
+    prepare();
+  }
 
-    for (int i = 1; i < num_segments; i++)
-      alpha[i] =
-          (3. / h[i]) * (a[i + 1] - a[i]) - (3. / h[i - 1]) * (a[i] - a[i - 1]);
-
-    l[0] = mu[0] = z[0] = 0;
-
-    for (int i = 1; i < num_segments; i++) {
-      l[i] = 2 * (control_points[i + 1].x - control_points[i - 1].x) -
-             (h[i - 1] * mu[i - 1]);
-      mu[i] = h[i] / l[i];
-      z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
-    }
-
-    l[num_segments] = 1;
-    z[num_segments] = c[num_segments] = 0;
-
-    for (int i = num_segments - 1; i >= 0; i--) {
-      c[i] = z[i] - mu[i] * c[i + 1];
-      b[i] = (a[i + 1] - a[i]) / h[i] - h[i] * (c[i + 1] + 2 * c[i]) / 3.;
-      d[i] = (c[i + 1] - c[i]) / (3. * h[i]);
-    }
-
+  std::vector<value_type> calculateCurve() const {
     std::vector<value_type> curve(65536);
 
     for (int i = 0; i < num_segments; i++) {
