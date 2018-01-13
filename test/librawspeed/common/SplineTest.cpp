@@ -396,31 +396,26 @@ INSTANTIATE_TEST_CASE_P(Sin2Pi, Sin2PiRefTest,
                         ::testing::ValuesIn(sin2PiRefValues));
 TEST_P(Sin2PiRefTest, NearlyMatchesReference) { check(); }
 
-using SinPi2RefTest = ReferenceTest<SinReferenceTest<1, 2>>;
-static const referenceType sinPi2RefValues[] = {
+using SinPiRefTest = ReferenceTest<SinReferenceTest<1, 1>>;
+static const referenceType sinPiRefValues[] = {
     // clang-format off
-    make_tuple(0,    1.0E-00),
-    make_tuple(1,    1.0E-01),
-    make_tuple(2,    1.0E-01),
-    make_tuple(3,    1.0E-02),
-    make_tuple(4,    1.0E-02),
-    make_tuple(5,    1.0E-02),
-    make_tuple(6,    1.0E-02),
-    make_tuple(7,    1.0E-02),
-    make_tuple(8,    1.0E-02),
-    make_tuple(9,    1.0E-02),
-    make_tuple(10,   1.0E-02),
-    make_tuple(23,   1.0E-03),
-    make_tuple(48,   1.0E-04),
-    make_tuple(98,   1.0E-04),
-    make_tuple(248,  1.0E-05),
-    make_tuple(498,  1.0E-06),
-    make_tuple(998,  1.0E-06),
-    make_tuple(9998, 1.0E-08),
+    make_tuple(0,  1.0E-00),
+    make_tuple(1,  1.0E-01),
+    make_tuple(2,  1.0E-02),
+    make_tuple(3,  1.0E-02),
+    make_tuple(4,  1.0E-03),
+    make_tuple(5,  1.0E-03),
+    make_tuple(6,  1.0E-03),
+    make_tuple(7,  1.0E-04),
+    make_tuple(8,  1.0E-04),
+    make_tuple(9,  1.0E-04),
+    make_tuple(10, 1.0E-04),
+    make_tuple(11, 1.0E-04),
+    make_tuple(12, 1.0E-05),
     // clang-format on
 };
-INSTANTIATE_TEST_CASE_P(SinPi2, SinPi2RefTest,
-                        ::testing::ValuesIn(sinPi2RefValues));
-TEST_P(SinPi2RefTest, NearlyMatchesReference) { check(); }
+INSTANTIATE_TEST_CASE_P(SinPi, SinPiRefTest,
+                        ::testing::ValuesIn(sinPiRefValues));
+TEST_P(SinPiRefTest, NearlyMatchesReference) { check(); }
 
 } // namespace rawspeed_test
