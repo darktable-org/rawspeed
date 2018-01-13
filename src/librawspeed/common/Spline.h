@@ -38,6 +38,9 @@ namespace rawspeed {
 template <typename T = ushort16,
           typename = std::enable_if_t<std::is_arithmetic<T>::value>>
 class Spline final {
+public:
+  using value_type = T;
+
   // These are the constant factors for each segment of the curve.
   // Each segment i will have the formula:
   // f(x) = a[i] + b[i]*(x - x[i]) + c[i]*(x - x[i])^2 + d[i]*(x - x[i])^3
@@ -48,6 +51,7 @@ class Spline final {
     double d;
   };
 
+private:
   int num_coords;
   int num_segments;
 
@@ -102,8 +106,6 @@ class Spline final {
   }
 
 public:
-  using value_type = T;
-
   explicit Spline(const std::vector<iPoint2D>& control_points) {
     assert(control_points.size() >= 2 &&
            "Need at least two points to interpolate between");
@@ -142,6 +144,8 @@ public:
 
     prepare();
   }
+
+  std::vector<Segment> getSegments() const { return segments; }
 
   std::vector<value_type> calculateCurve() const {
     std::vector<value_type> curve(65536);

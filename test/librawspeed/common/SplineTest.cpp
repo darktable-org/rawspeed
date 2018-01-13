@@ -123,15 +123,32 @@ TEST(SplineDeathTest, XIsStrictlyIncreasing) {
 }
 #endif
 
-using identityType = std::array<rawspeed::iPoint2D, 2>;
+using identityType = std::tuple<std::array<rawspeed::iPoint2D, 2>,
+                                std::vector<std::array<double, 4>>>;
 template <typename T>
 class IdentityTest : public ::testing::TestWithParam<identityType> {
 protected:
   IdentityTest() = default;
+
+  void CheckSegments() const {
+    ASSERT_EQ(gotSegments.size(), expSegments.size());
+    for (auto i = 0U; i < gotSegments.size(); i++) {
+      const auto s0 = gotSegments[i];
+      const auto s1 = expSegments[i];
+      ASSERT_EQ(s0.a, s1[0]);
+      ASSERT_EQ(s0.b, s1[1]);
+      ASSERT_EQ(s0.c, s1[2]);
+      ASSERT_EQ(s0.d, s1[3]);
+    }
+  }
+
   virtual void SetUp() {
-    edges = GetParam();
+    const auto p = GetParam();
+    edges = std::get<0>(p);
+    expSegments = std::get<1>(p);
 
     Spline<T> s({std::begin(edges), std::end(edges)});
+    gotSegments = s.getSegments();
     interpolated = s.calculateCurve();
 
     ASSERT_FALSE(interpolated.empty());
@@ -139,11 +156,13 @@ protected:
   }
 
   std::array<rawspeed::iPoint2D, 2> edges;
+  std::vector<std::array<double, 4>> expSegments;
+  std::vector<typename Spline<T>::Segment> gotSegments;
   std::vector<T> interpolated;
 };
 static const identityType identityValues[] = {
-    {{{0, 0}, {65535, 65535}}},
-    {{{0, 65535}, {65535, 0}}},
+    {{{{0, 0}, {65535, 65535}}}, {{{0.0, 1.0, 0.0, 0.0}}}},
+    {{{{0, 65535}, {65535, 0}}}, {{{65535.0, -1.0, 0.0, 0.0}}}},
 };
 
 using IntegerIdentityTest = IdentityTest<rawspeed::ushort16>;
@@ -153,6 +172,7 @@ TEST_P(IntegerIdentityTest, ValuesAreLinearlyInterpolated) {
   for (auto x = edges.front().y; x < edges.back().y; ++x)
     ASSERT_EQ(interpolated[x], x);
 }
+TEST_P(IntegerIdentityTest, SegmentCoeffients) { CheckSegments(); }
 
 using DoubleIdentityTest = IdentityTest<double>;
 INSTANTIATE_TEST_CASE_P(DoubleIdentityTest, DoubleIdentityTest,
@@ -163,6 +183,7 @@ TEST_P(DoubleIdentityTest, ValuesAreLinearlyInterpolated) {
     ASSERT_EQ(interpolated[x], x);
   }
 }
+TEST_P(DoubleIdentityTest, SegmentCoeffients) { CheckSegments(); }
 
 template <typename T> T lerp(T v0, T v1, T t) {
   return (1.0 - t) * v0 + t * v1;
@@ -267,6 +288,16 @@ protected:
     assert(steps.size() == edges.size());
   }
 
+  void CheckSegments() const {
+    for (auto i = 0U; i < gotSegments.size(); i++) {
+      const auto s0 = gotSegments[i];
+      ASSERT_EQ(s0.a, constant);
+      ASSERT_EQ(s0.b, 0);
+      ASSERT_EQ(s0.c, 0);
+      ASSERT_EQ(s0.d, 0);
+    }
+  }
+
   virtual void SetUp() {
     auto p = GetParam();
 
@@ -278,6 +309,7 @@ protected:
     // EXPECT_TRUE(false) << ::testing::PrintToString((edges));
 
     Spline<T> s({std::begin(edges), std::end(edges)});
+    gotSegments = s.getSegments();
     interpolated = s.calculateCurve();
 
     ASSERT_FALSE(interpolated.empty());
@@ -288,6 +320,7 @@ protected:
   int numCp;
 
   std::vector<rawspeed::iPoint2D> edges;
+  std::vector<typename Spline<T>::Segment> gotSegments;
   std::vector<T> interpolated;
 };
 
@@ -303,6 +336,7 @@ TEST_P(IntegerConstantTest, AllValuesAreEqual) {
   for (const auto value : interpolated)
     ASSERT_EQ(value, constant);
 }
+TEST_P(IntegerConstantTest, SegmentCoeffients) { CheckSegments(); }
 
 using DoubleConstantTest = ConstantTest<double>;
 INSTANTIATE_TEST_CASE_P(DoubleConstantTest, DoubleConstantTest, constantValues);
@@ -312,6 +346,7 @@ TEST_P(DoubleConstantTest, AllValuesAreEqual) {
     ASSERT_EQ(value, constant);
   }
 }
+TEST_P(DoubleConstantTest, SegmentCoeffients) { CheckSegments(); }
 
 class AbstractReferenceTest {
 public:
