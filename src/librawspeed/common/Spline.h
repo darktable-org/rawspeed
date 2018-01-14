@@ -76,10 +76,6 @@ private:
       alpha[i] = (3. / h[i]) * (sn.a - s.a) - (3. / h[i - 1]) * (s.a - sp.a);
     }
 
-    // The last element is nonsensical, and was only used to temporairly store
-    // the y value (Segment::a) of last point, so drop that 'segment' now
-    segments.pop_back();
-
     mu[0] = z[0] = 0;
 
     for (int i = 1; i < num_segments; i++) {
@@ -98,6 +94,10 @@ private:
       s.b = (sn.a - s.a) / h[i] - h[i] * (sn.c + 2 * s.c) / 3.;
       s.d = (sn.c - s.c) / (3. * h[i]);
     }
+
+    // The last segment is nonsensical, and was only used to temporairly store
+    // the a and c to simplify calculations, so drop that 'segment' now
+    segments.pop_back();
 
     assert(static_cast<typename decltype(segments)::size_type>(num_segments) ==
            segments.size());
