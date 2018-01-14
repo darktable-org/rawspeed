@@ -162,11 +162,8 @@ public:
         if (!std::is_floating_point<value_type>::value) {
           interpolated = std::max(
               interpolated, double(std::numeric_limits<value_type>::min()));
-
-          assert(interpolated <=
-                 double(std::numeric_limits<value_type>::max()));
-          // interpolated = std::min(interpolated,
-          // double(std::numeric_limits<value_type>::max()));
+          interpolated = std::min(
+              interpolated, double(std::numeric_limits<value_type>::max()));
         }
 
         curve[x] = interpolated;
