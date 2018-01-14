@@ -24,6 +24,7 @@
 #include "common/Common.h" // for ushort16
 #include "common/Point.h"  // for iPoint2D
 #include <algorithm>       // for adjacent_find
+#include <algorithm>       // for min, max
 #include <cassert>         // for assert
 #include <limits>          // for numeric_limits
 #include <type_traits>     // for enable_if_t, is_arithmetic
@@ -156,7 +157,19 @@ public:
         double diff_2 = diff * diff;
         double diff_3 = diff * diff * diff;
 
-        curve[x] = s.a + s.b * diff + s.c * diff_2 + s.d * diff_3;
+        double interpolated = s.a + s.b * diff + s.c * diff_2 + s.d * diff_3;
+
+        if (!std::is_floating_point<value_type>::value) {
+          interpolated = std::max(
+              interpolated, double(std::numeric_limits<value_type>::min()));
+
+          assert(interpolated <=
+                 double(std::numeric_limits<value_type>::max()));
+          // interpolated = std::min(interpolated,
+          // double(std::numeric_limits<value_type>::max()));
+        }
+
+        curve[x] = interpolated;
       }
     }
 
