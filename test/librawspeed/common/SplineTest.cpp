@@ -123,6 +123,26 @@ TEST(SplineDeathTest, XIsStrictlyIncreasing) {
 }
 #endif
 
+TEST(SplineDeathTest, ClampUshort16Min) {
+  ASSERT_EXIT(
+      {
+        Spline<> s({{0, 0},
+                    {2, 0},
+                    {54, 0},
+                    {128, 0},
+                    {256, 0},
+                    {21504, 0},
+                    {32768, 0},
+                    {57088, 0},
+                    {65535, 65535}});
+        s.calculateCurve();
+        // for x = 484, this used to compute -1.0046832758220527,
+        // which is unrepresentable in ushort16.
+        exit(0);
+      },
+      ::testing::ExitedWithCode(0), "");
+}
+
 using identityType = std::tuple<std::array<rawspeed::iPoint2D, 2>,
                                 std::vector<std::array<double, 4>>>;
 template <typename T>
