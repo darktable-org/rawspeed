@@ -10,10 +10,12 @@ foreach(TOP_CORPORA_DIR ${CORPORA_ROOTS})
 
       if(NOT IsFuzzerName EQUAL -1)
         # get all the files
-        file(GLOB_RECURSE CORPUSES FOLLOW_SYMLINKS "${CORPORA}/*")
+        file(GLOB_RECURSE CORPUSES RELATIVE "${CORPORA}" FOLLOW_SYMLINKS "${CORPORA}/*")
 
         set(test "corpora/${dirname}")
-        add_test(NAME ${test} COMMAND ${dirname} ${CORPUSES})
+        add_test(NAME ${test}
+          COMMAND ${dirname} ${CORPUSES}
+          WORKING_DIRECTORY "${CORPORA}")
         set_tests_properties(${test} PROPERTIES DEPENDS ${dirname})
         set_tests_properties(${test} PROPERTIES TIMEOUT 300)
       endif()
