@@ -485,8 +485,10 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         string serial =
             mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x001d))
                 ->getString();
+        if (serial.length() > 9)
+          ThrowRDE("Serial number is too long (%lu)", serial.length());
         uint32 serialno = 0;
-        for (char c : serial) {
+        for (unsigned char c : serial) {
           if (c >= '0' && c <= '9')
             serialno = serialno*10 + c-'0';
           else
