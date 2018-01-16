@@ -3,7 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2017 Axel Waggershauser
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2017-2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@
 
 #include "parsers/FiffParser.h"
 #include "common/Common.h"               // for make_unique, uint32, uchar8
+#include "decoders/RafDecoder.h"         // for RafDecoder
 #include "decoders/RawDecoder.h"         // for RawDecoder
 #include "io/Buffer.h"                   // for Buffer
 #include "io/ByteStream.h"               // for ByteStream
@@ -118,8 +119,14 @@ std::unique_ptr<RawDecoder> FiffParser::getDecoder(const CameraMetaData* meta) {
   if (!rootIFD)
     parseData();
 
+  // WARNING: do *NOT* fallback to ordinary TIFF parser here!
+  // All the FIFF raws are '.RAF' (Fujifilm). Do use RafDecoder directly.
+
   try {
-    return TiffParser::makeDecoder(move(rootIFD), *mInput);
+    if (!RafDecoder::isAppropriateDecoder(rootIFD.get(), mInput))
+      ThrowFPE("Not a FUJIFILM RAF FIFF.");
+
+    return std::make_unique<RafDecoder>(std::move(rootIFD), mInput);
   } catch (TiffParserException&) {
     ThrowFPE("No decoder found. Sorry.");
   }
