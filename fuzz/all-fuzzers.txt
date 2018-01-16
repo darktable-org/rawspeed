@@ -44,7 +44,6 @@ TiffDecoderFuzzer-MosDecoder
 TiffDecoderFuzzer-NefDecoder
 TiffDecoderFuzzer-OrfDecoder
 TiffDecoderFuzzer-PefDecoder
-TiffDecoderFuzzer-RafDecoder
 TiffDecoderFuzzer-Rw2Decoder
 TiffDecoderFuzzer-SrwDecoder
 TiffDecoderFuzzer-ThreefrDecoder

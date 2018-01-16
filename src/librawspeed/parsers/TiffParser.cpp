@@ -123,13 +123,12 @@ std::unique_ptr<RawDecoder> TiffParser::constructor(TiffRootIFDOwner&& root,
   }
 
 const std::array<std::pair<TiffParser::checker_t, TiffParser::constructor_t>,
-                 17>
+                 16>
     TiffParser::Map = {{
         DECODER(DngDecoder),
         DECODER(MosDecoder),
         DECODER(IiqDecoder),
         DECODER(Cr2Decoder),
-        DECODER(RafDecoder),
         DECODER(NefDecoder),
         DECODER(OrfDecoder),
         DECODER(ArwDecoder),

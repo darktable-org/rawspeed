@@ -30,7 +30,6 @@ set(DECODERS
   "NefDecoder"
   "OrfDecoder"
   "PefDecoder"
-  "RafDecoder"
   "Rw2Decoder"
   "SrwDecoder"
   "ThreefrDecoder"
