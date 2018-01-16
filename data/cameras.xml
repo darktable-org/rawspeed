@@ -127,7 +127,7 @@
 			<Horizontal y="0" height="38"/>
 		</BlackAreas>
 		<Aliases>
-			<Alias id="EOS Rebel SL2">Canon EOS REBEL SL2</Alias>
+			<Alias id="EOS Rebel SL2">Canon EOS Rebel SL2</Alias>
 			<Alias id="EOS Kiss X9">Canon EOS Kiss X9</Alias>
 		</Aliases>
 	</Camera>
