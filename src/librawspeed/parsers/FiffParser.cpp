@@ -45,16 +45,19 @@ namespace rawspeed {
 FiffParser::FiffParser(const Buffer* inputData) : RawParser(inputData) {}
 
 void FiffParser::parseData() {
-  const uchar8* data = mInput->getData(0, 104);
+  ByteStream bs(DataBuffer(*mInput, Endianness::big));
+  bs.skipBytes(0x54);
 
-  uint32 first_ifd = getU32BE(data + 0x54);
+  uint32 first_ifd = bs.getU32();
   if (first_ifd >= numeric_limits<uint32>::max() - 12)
     ThrowFPE("Not Fiff. First IFD too far away");
 
   first_ifd += 12;
 
-  uint32 second_ifd = getU32BE(data + 0x64);
-  uint32 third_ifd = getU32BE(data + 0x5C);
+  bs.skipBytes(4);
+  const uint32 third_ifd = bs.getU32();
+  bs.skipBytes(4);
+  const uint32 second_ifd = bs.getU32();
 
   rootIFD = TiffParser::parse(mInput->getSubView(first_ifd));
   TiffIFDOwner subIFD = std::make_unique<TiffIFD>(rootIFD.get());
