@@ -115,7 +115,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
   if (slices.empty())
     ThrowRDE("No valid slices found. File probably truncated.");
 
-  assert(height == offY);
+  assert(height <= offY);
   assert(slices.size() == counts->count);
 
   mRaw->createData();
