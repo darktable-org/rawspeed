@@ -44,6 +44,7 @@
       <xs:enumeration value="Samsung"/>
       <xs:enumeration value="Sigma"/>
       <xs:enumeration value="Sinar"/>
+      <xs:enumeration value="Sjcam"/>
       <xs:enumeration value="Sony"/>
     </xs:restriction>
   </xs:simpleType>
@@ -309,8 +310,8 @@
   </xs:complexType>
   <xs:simpleType name="HintTypeNameType">
     <xs:restriction base="xs:string">
-      <xs:pattern value="[a-zA-Z0-9_]{6,26}"/>
-      <xs:minLength value="6"/>
+      <xs:pattern value="[a-zA-Z0-9_]{5,26}"/>
+      <xs:minLength value="4"/>
       <xs:maxLength value="26"/>
       <xs:enumeration value="coolpixmangled"/>
       <xs:enumeration value="coolpixsplit"/>
@@ -327,6 +328,7 @@
       <xs:enumeration value="nikon_wb_adjustment"/>
       <xs:enumeration value="no_decompressed_lowbits"/>
       <xs:enumeration value="offset"/>
+      <xs:enumeration value="order"/>
       <xs:enumeration value="packed_with_control"/>
       <xs:enumeration value="pixel_aspect_ratio"/>
       <xs:enumeration value="real_bpp"/>
@@ -419,6 +421,7 @@
       <xs:enumeration value="Samsung"/>
       <xs:enumeration value="Sinar Photography AG"/>
       <xs:enumeration value="Sinar"/>
+      <xs:enumeration value="Sjcam"/>
       <xs:enumeration value="Sony"/>
       <xs:enumeration value="samsung"/>
     </xs:restriction>
