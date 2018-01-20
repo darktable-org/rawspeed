@@ -155,7 +155,7 @@ int main(int argc, char* argv[]) { // NOLINT
     meta = std::make_unique<CameraMetaData>();
 #endif
 
-    if (!meta.get()) {
+    if (!meta) {
       fprintf(stderr, "ERROR: Couldn't get a CameraMetaData instance\n");
       return 2;
     }
@@ -188,7 +188,7 @@ int main(int argc, char* argv[]) { // NOLINT
 
     auto d(t.getDecoder(meta.get()));
 
-    if (!d.get()) {
+    if (!d) {
       fprintf(stderr, "ERROR: Couldn't get a RawDecoder instance\n");
       return 2;
     }

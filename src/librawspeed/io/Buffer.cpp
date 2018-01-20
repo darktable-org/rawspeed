@@ -38,7 +38,7 @@ unique_ptr<uchar8, decltype(&alignedFree)> Buffer::Create(size_type size) {
   unique_ptr<uchar8, decltype(&alignedFree)> data(
       alignedMalloc<uchar8, 16>(roundUp(size + BUFFER_PADDING, 16)),
       &alignedFree);
-  if (!data.get())
+  if (!data)
     ThrowIOE("Failed to allocate %uz bytes memory buffer.", size);
 
   assert(!ASAN_REGION_IS_POISONED(data.get(), size));
