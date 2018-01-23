@@ -121,12 +121,21 @@ TiffRootIFDOwner TiffIFD::parseDngPrivateData(NORangesSet<Buffer>* ifds,
   assert(ifds);
 
   /*
-  1. Six bytes containing the zero-terminated string "Adobe". (The DNG specification calls for the DNGPrivateData tag to start with an ASCII string identifying the creator/format).
-  2. 4 bytes: an ASCII string ("MakN" for a Makernote),  indicating what sort of data is being stored here. Note that this is not zero-terminated.
-  3. A four-byte count (number of data bytes following); this is the length of the original MakerNote data. (This is always in "most significant byte first" format).
-  4. 2 bytes: the byte-order indicator from the original file (the usual 'MM'/4D4D or 'II'/4949).
-  5. 4 bytes: the original file offset for the MakerNote tag data (stored according to the byte order given above).
-  6. The contents of the MakerNote tag. This is a simple byte-for-byte copy, with no modification.
+  1. Six bytes containing the zero-terminated string "Adobe".
+     (The DNG specification calls for the DNGPrivateData tag to start with an
+      ASCII string identifying the creator/format).
+  2. 4 bytes: an ASCII string ("MakN" for a Makernote), indicating what sort of
+     data is being stored here.
+     Note that this is not zero-terminated.
+  3. A four-byte count (number of data bytes following);
+     This is the length of the original MakerNote data.
+     (This is always in "most significant byte first" format).
+  4. 2 bytes: the byte-order indicator from the original file
+     (the usual 'MM'/4D4D or 'II'/4949).
+  5. 4 bytes: the original file offset for the MakerNote tag data
+     (stored according to the byte order given above).
+  6. The contents of the MakerNote tag.
+     This is a simple byte-for-byte copy, with no modification.
   */
   ByteStream& bs = t->getData();
   if (!bs.skipPrefix("Adobe", 6))
