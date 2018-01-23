@@ -241,8 +241,9 @@ std::vector<int> calculateSteps(int numCp) {
   std::generate_n(std::back_inserter(steps), ptsTotal, [dt, &t]() {
     const double x = lerp(0.0, 65535.0, t);
     t += dt;
-    return x + 0.5;
+    return std::lround(x);
   });
+  assert(std::fabs(t - 1.0 - dt) <= 1.0E-14);
 
   assert(ptsTotal == steps.size());
   return steps;
