@@ -7123,6 +7123,7 @@
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="142" white="4095"/>
 		<Aliases>
+			<Alias>DMC-ZS100</Alias>
 			<Alias>DMC-ZS110</Alias>
 			<Alias>DMC-TZ101</Alias>
 			<Alias>DMC-TZ110</Alias>
@@ -7139,6 +7140,7 @@
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="142" white="4095"/>
 		<Aliases>
+			<Alias>DMC-ZS100</Alias>
 			<Alias>DMC-ZS110</Alias>
 			<Alias>DMC-TZ101</Alias>
 			<Alias>DMC-TZ110</Alias>
