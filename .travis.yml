@@ -39,7 +39,7 @@ install:
       travis_retry sudo apt-get install -y -q -f --fix-missing rsync;
     fi;
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$EXTRA" != "NODOCKER" ]]; then
-      travis_retry docker pull darktable/rawspeed;
+      travis_retry travis_wait 5 docker pull darktable/rawspeed;
     fi;
 
 before_script:
