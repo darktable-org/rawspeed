@@ -146,7 +146,7 @@ TiffRootIFDOwner TiffIFD::parseDngPrivateData(NORangesSet<Buffer>* ifds,
 
   bs.setByteOrder(Endianness::big);
   uint32 makerNoteSize = bs.getU32();
-  if (makerNoteSize != bs.getRemainSize())
+  if (makerNoteSize > bs.getRemainSize())
     ThrowTPE("Error reading TIFF structure (invalid size). File Corrupt");
 
   bs.setByteOrder(getTiffByteOrder(bs, 0, "DNG makernote"));
