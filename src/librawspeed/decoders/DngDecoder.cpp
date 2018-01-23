@@ -631,8 +631,8 @@ bool DngDecoder::decodeMaskedAreas(const TiffIFD* raw) {
   /* Since we may both have short or int, copy it to int array. */
   auto rects = masked->getU32Array(nrects*4);
 
-  const iRectangle2D fullImage(0, 0, mRaw->getUncroppedDim().x - 1,
-                               mRaw->getUncroppedDim().y - 1);
+  const iRectangle2D fullImage(0, 0, mRaw->getUncroppedDim().x,
+                               mRaw->getUncroppedDim().y);
   const iPoint2D top = mRaw->getCropOffset();
 
   for (uint32 i = 0; i < nrects; i++) {
