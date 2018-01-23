@@ -7888,6 +7888,17 @@
 		<Crop x="0" y="0" width="-8" height="0"/>
 		<Sensor black="800" white="16300"/>
 	</Camera>
+	<Camera make="SONY" model="DSC-RX10M4">
+		<ID make="Sony" model="DSC-RX10M4">Sony DSC-RX10M4</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-8" height="0"/>
+		<Sensor black="800" white="16380"/>
+	</Camera>
 	<Camera make="SONY" model="DSC-RX100">
 		<ID make="Sony" model="DSC-RX100">Sony DSC-RX100</ID>
 		<CFA width="2" height="2">
