@@ -291,7 +291,7 @@ protected:
     extraSteps = std::get<0>(p);
     expected = std::get<1>(p);
 
-    got = calculateSteps(extraSteps);
+    got = calculateSteps<T>(extraSteps);
   }
 
   int extraSteps;
@@ -311,6 +311,23 @@ static const calculateStepsType calculateStepsValues[] = {
     make_tuple(8, std::vector<int>{0, 7282, 14563, 21845, 29127, 36408, 43690, 50972, 58253, 65535}),
     // clang-format on
 };
+
+using DoubleCalculateStepsTest = CalculateStepsTest<double>;
+INSTANTIATE_TEST_CASE_P(CalculateStepsTest, DoubleCalculateStepsTest,
+                        ::testing::ValuesIn(calculateStepsValues));
+TEST_P(DoubleCalculateStepsTest, Count) {
+  ASSERT_EQ(expected.size(), got.size());
+  ASSERT_EQ(got.size(), 2 + extraSteps);
+}
+TEST_P(DoubleCalculateStepsTest, GotExpectedOutput) {
+  for (auto i = 0U; i < got.size(); i++) {
+    ASSERT_NEAR(got[i], expected[i], 0.5);
+
+    // Check that rounding halfway cases away from zero will work
+    ASSERT_GE(got[i], expected[i] - 0.5);
+    ASSERT_LT(got[i], expected[i] + 0.5);
+  }
+}
 
 using IntegerCalculateStepsTest = CalculateStepsTest<int>;
 INSTANTIATE_TEST_CASE_P(CalculateStepsTest, IntegerCalculateStepsTest,
