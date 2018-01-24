@@ -238,16 +238,14 @@ std::vector<T> calculateSteps(int numCp) {
   const auto ptsTotal = 2U + numCp;
   steps.reserve(ptsTotal);
 
-  const auto dt = 1.0 / (ptsTotal - 1);
-  double t = 0.0;
-  std::generate_n(std::back_inserter(steps), ptsTotal, [dt, &t]() -> T {
-    const double x = lerp(0.0, 65535.0, t);
-    t += dt;
-    if (std::is_floating_point<T>::value)
-      return x;
-    return std::lround(x);
-  });
-  assert(std::fabs(t - 1.0 - dt) <= 1.0E-14);
+  std::generate_n(std::back_inserter(steps), ptsTotal,
+                  [ptsTotal, &steps]() -> T {
+                    const double t = double(steps.size()) / (ptsTotal - 1);
+                    const double x = lerp(0.0, 65535.0, t);
+                    if (std::is_floating_point<T>::value)
+                      return x;
+                    return std::lround(x);
+                  });
 
   assert(ptsTotal == steps.size());
   return steps;
@@ -305,7 +303,7 @@ static const calculateStepsType calculateStepsValues[] = {
     make_tuple(2, std::vector<int>{0, 21845, 43690, 65535}),
     make_tuple(3, std::vector<int>{0, 16384, 32768, 49151, 65535}),
     make_tuple(4, std::vector<int>{0, 13107, 26214, 39321, 52428, 65535}),
-    make_tuple(5, std::vector<int>{0, 10923, 21845, 32768, 43690, 54612, 65535}),
+    make_tuple(5, std::vector<int>{0, 10923, 21845, 32768, 43690, 54613, 65535}),
     make_tuple(6, std::vector<int>{0, 9362, 18724, 28086, 37449, 46811, 56173, 65535}),
     make_tuple(7, std::vector<int>{0, 8192, 16384, 24576, 32768, 40959, 49151, 57343, 65535}),
     make_tuple(8, std::vector<int>{0, 7282, 14563, 21845, 29127, 36408, 43690, 50972, 58253, 65535}),
