@@ -22,7 +22,7 @@
 #include <array>           // for array
 #include <cmath>           // for acos
 #include <gtest/gtest.h>   // for AssertionResult, DeathTest, Test, AssertHe...
-#include <type_traits>     // for is_same
+#include <type_traits>     // for is_same, enable_if_t, is_arithmetic
 
 using rawspeed::Spline;
 using std::make_tuple;
@@ -230,17 +230,21 @@ template <typename T> T lerp(T v0, T v1, T t) {
   return (1.0 - t) * v0 + t * v1;
 }
 
-std::vector<int> calculateSteps(int numCp) {
-  std::vector<int> steps;
+template <typename T = int,
+          typename = std::enable_if_t<std::is_arithmetic<T>::value>>
+std::vector<T> calculateSteps(int numCp) {
+  std::vector<T> steps;
 
   const auto ptsTotal = 2U + numCp;
   steps.reserve(ptsTotal);
 
   const auto dt = 1.0 / (ptsTotal - 1);
   double t = 0.0;
-  std::generate_n(std::back_inserter(steps), ptsTotal, [dt, &t]() {
+  std::generate_n(std::back_inserter(steps), ptsTotal, [dt, &t]() -> T {
     const double x = lerp(0.0, 65535.0, t);
     t += dt;
+    if (std::is_floating_point<T>::value)
+      return x;
     return std::lround(x);
   });
   assert(std::fabs(t - 1.0 - dt) <= 1.0E-14);
@@ -277,6 +281,8 @@ TEST_P(CalculateStepsEdgesTest, EdgesAreProper) {
 }
 
 using calculateStepsType = std::tuple<int, std::vector<int>>;
+
+template <typename T>
 class CalculateStepsTest : public ::testing::TestWithParam<calculateStepsType> {
 protected:
   CalculateStepsTest() = default;
@@ -290,7 +296,7 @@ protected:
 
   int extraSteps;
   std::vector<int> expected;
-  std::vector<int> got;
+  std::vector<T> got;
 };
 static const calculateStepsType calculateStepsValues[] = {
     // clang-format off
@@ -306,13 +312,16 @@ static const calculateStepsType calculateStepsValues[] = {
     // clang-format on
 };
 
-INSTANTIATE_TEST_CASE_P(CalculateStepsTest, CalculateStepsTest,
+using IntegerCalculateStepsTest = CalculateStepsTest<int>;
+INSTANTIATE_TEST_CASE_P(CalculateStepsTest, IntegerCalculateStepsTest,
                         ::testing::ValuesIn(calculateStepsValues));
-TEST_P(CalculateStepsTest, Count) {
+TEST_P(IntegerCalculateStepsTest, Count) {
   ASSERT_EQ(expected.size(), got.size());
   ASSERT_EQ(got.size(), 2 + extraSteps);
 }
-TEST_P(CalculateStepsTest, GotExpectedOutput) { ASSERT_EQ(got, expected); }
+TEST_P(IntegerCalculateStepsTest, GotExpectedOutput) {
+  ASSERT_EQ(got, expected);
+}
 
 using constantType = std::tuple<int, int>;
 template <typename T>
