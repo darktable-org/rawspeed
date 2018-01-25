@@ -88,7 +88,7 @@ void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream* bs) {
   }
 }
 
-TiffIFD::TiffIFD(TiffIFD* parent_) : parent(parent_) {}
+TiffIFD::TiffIFD(TiffIFD* parent_) : parent(parent_) { checkAllSubIFDs(); }
 
 TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
                  const DataBuffer& data, uint32 offset)
@@ -100,7 +100,7 @@ TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
 
   assert(ifds);
 
-  checkOverflow();
+  checkAllSubIFDs();
 
   ByteStream bs(data);
   bs.setPosition(offset);
@@ -275,22 +275,49 @@ TiffEntry* __attribute__((pure)) TiffIFD::getEntryRecursive(TiffTag tag) const {
   return nullptr;
 }
 
-void TiffIFD::checkOverflow() {
-  TiffIFD* p = this;
-  int i = 0;
+const TiffIFD* TiffIFD::getUppermostIFD() const {
+  const TiffIFD* root = this;
+  const TiffIFD* p = this;
+
   while ((p = p->parent) != nullptr) {
-    i++;
-    if (i > 5)
-      ThrowTPE("TiffIFD cascading overflow.");
+    root = p; // This is closer to the root..
   }
+
+  return root;
 }
 
+int TiffIFD::recursivelyCheckSubIFDs(int depth) const {
+  // assert(depth <= TiffIFD::Limits::Depth);
+  if (depth > TiffIFD::Limits::Depth)
+    ThrowTPE("TiffIFD cascading overflow, found %u level IFD", depth);
+
+  int count = subIFDs.size();
+  // assert(count <= TiffIFD::Limits::SubIFDCount);
+  if (count > TiffIFD::Limits::SubIFDCount)
+    ThrowTPE("TIFF IFD has %u SubIFDs", count);
+
+  for (auto& i : subIFDs) {
+    count += i->recursivelyCheckSubIFDs(depth + 1);
+
+    // assert(count <= TiffIFD::Limits::RecursiveSubIFDCount);
+    if (count > TiffIFD::Limits::RecursiveSubIFDCount)
+      ThrowTPE("TIFF IFD file has %u SubIFDs (recursively)", count);
+  }
+
+  return count;
+};
+
+void TiffIFD::checkAllSubIFDs() const {
+  const TiffIFD* root = getUppermostIFD();
+  root->recursivelyCheckSubIFDs(0);
+};
+
 void TiffIFD::add(TiffIFDOwner subIFD) {
-  checkOverflow();
-  if (subIFDs.size() > 100)
-    ThrowTPE("TIFF file has too many SubIFDs, probably broken");
+  subIFD->checkAllSubIFDs();
+  checkAllSubIFDs();
   subIFD->parent = this;
   subIFDs.push_back(move(subIFD));
+  checkAllSubIFDs();
 }
 
 void TiffIFD::add(TiffEntryOwner entry) {
