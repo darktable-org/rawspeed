@@ -55,7 +55,7 @@ class TiffIFD
   friend class FiffParser;
   friend class TiffParser;
 
-  const TiffIFD* getUppermostIFD() const;
+  const __attribute__((pure)) TiffIFD* getUppermostIFD() const;
   int recursivelyCheckSubIFDs(int depth) const;
   void checkAllSubIFDs() const;
 
@@ -69,7 +69,7 @@ class TiffIFD
   // A branch (IFD) can have branches (IFDs) of it's own.
   // We must be careful to weed-out all the degenerative cases that
   // can be produced e.g. via fuzzing, or other means.
-  struct Limits {
+  struct Limits final {
     // How many layers of IFD's can there be?
     // All RPU samples (as of 2018-01-25) are ok with 4.
     // However, let's be on the safe side, and pad it by one.

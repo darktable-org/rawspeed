@@ -16,12 +16,12 @@ set (GCC_WARNING_FLAGS
   "old-style-casts"
   "pointer-arith"
   "strict-prototypes"
-  "suggest-attribute=const"
-  "suggest-attribute=noreturn"
-  "suggest-attribute=pure"
-  "suggest-final-methods"
-  "suggest-final-types"
-  "suggest-override"
+#  "suggest-attribute=const"
+#  "suggest-attribute=noreturn"
+#  "suggest-attribute=pure"
+#  "suggest-final-methods"
+#  "suggest-final-types"
+#  "suggest-override"
   "traditional"
   "vla"
 # "cast-align"
@@ -40,10 +40,12 @@ set (GCC_DISABLED_WARNING_FLAGS
 )
 
 set (GCC_NOERROR_WARNING_FLAGS
-  "suggest-final-methods"
-  "suggest-final-types"
-  "suggest-override"
-  "suggest-attribute=noreturn"
+#  "suggest-attribute=const"
+#  "suggest-attribute=noreturn"
+#  "suggest-attribute=pure"
+#  "suggest-final-methods"
+#  "suggest-final-types"
+#  "suggest-override"
 )
 
 foreach(warning ${GCC_WARNING_FLAGS})
