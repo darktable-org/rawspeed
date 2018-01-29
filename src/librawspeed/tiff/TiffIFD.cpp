@@ -279,8 +279,16 @@ const TiffIFD* TiffIFD::getUppermostIFD() const {
   const TiffIFD* root = this;
   const TiffIFD* p = this;
 
+  int depth = 0;
   while ((p = p->parent) != nullptr) {
+    depth++;
     root = p; // This is closer to the root..
+
+    // Yes, this has to be done here, not only in recursivelyCheckSubIFDs(),
+    // because it might not have been added to the parent's subIFD's yet.
+    // assert(depth <= TiffIFD::Limits::Depth);
+    if (depth > TiffIFD::Limits::Depth)
+      ThrowTPE("TiffIFD cascading overflow, found %u level IFD", depth);
   }
 
   return root;
