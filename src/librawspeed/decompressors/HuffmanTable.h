@@ -106,11 +106,6 @@ public:
     this->fullDecode = fullDecode_;
     this->fixDNGBug16 = fixDNGBug16_;
 
-    // store the code lengths in bits, valid values are 0..16
-    std::vector<uchar8> code_len; // index is just sequential number
-    // store the codes themselves (bit patterns found inside the stream)
-    std::vector<ushort16> codes;  // index is just sequential number
-
     assert(!nCodesPerLength.empty());
     assert(maxCodesCount() > 0);
 
@@ -119,32 +114,10 @@ public:
 
     assert(maxCodePlusDiffLength() <= 32U);
 
-    // reserve all the memory. avoids lots of small allocs
-    code_len.reserve(maxCodesCount());
-    codes.reserve(maxCodesCount());
-
     // Figure C.1: make table of Huffman code length for each symbol
     // Figure C.2: generate the codes themselves
-    uint32 code = 0;
-    for (unsigned int l = 1; l <= maxCodeLength; ++l) {
-      assert(nCodesPerLength[l] <= ((1U << l) - 1U));
-
-      for (unsigned int i = 0; i < nCodesPerLength[l]; ++i) {
-        if (code > 0xffff) {
-          ThrowRDE("Corrupt Huffman: code value overflow on len = %u, %u-th "
-                   "code out of %u\n",
-                   l, i, nCodesPerLength[l]);
-        }
-
-        code_len.push_back(l);
-        codes.push_back(code);
-        code++;
-      }
-      code <<= 1;
-    }
-
-    assert(code_len.size() == maxCodesCount());
-    assert(codes.size() == maxCodesCount());
+    const auto symbols = generateCodeSymbols();
+    assert(symbols.size() == maxCodesCount());
 
     // Figure F.15: generate decoding tables
     codeOffsetOL.resize(maxCodeLength + 1UL, 0xffff);
@@ -152,21 +125,21 @@ public:
     int code_index = 0;
     for (unsigned int l = 1U; l <= maxCodeLength; l++) {
       if (nCodesPerLength[l]) {
-        codeOffsetOL[l] = codes[code_index] - code_index;
+        codeOffsetOL[l] = symbols[code_index].code - code_index;
         code_index += nCodesPerLength[l];
-        maxCodeOL[l] = codes[code_index - 1];
+        maxCodeOL[l] = symbols[code_index - 1].code;
       }
     }
 
     // Generate lookup table for fast decoding lookup.
     // See definition of decodeLookup above
     decodeLookup.resize(1 << LookupDepth);
-    for (size_t i = 0; i < codes.size(); i++) {
-      uchar8 code_l = code_len[i];
+    for (size_t i = 0; i < symbols.size(); i++) {
+      uchar8 code_l = symbols[i].code_len;
       if (code_l > static_cast<int>(LookupDepth))
         break;
 
-      ushort16 ll = codes[i] << (LookupDepth - code_l);
+      ushort16 ll = symbols[i].code << (LookupDepth - code_l);
       ushort16 ul = ll | ((1 << (LookupDepth - code_l)) - 1);
       ushort16 diff_l = codeValues[i];
       for (ushort16 c = ll; c <= ul; c++) {
