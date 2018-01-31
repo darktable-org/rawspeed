@@ -24,7 +24,7 @@
 #include "common/Common.h"                // for ushort16, uchar8, int32
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/Buffer.h"                    // for Buffer
-#include <algorithm>                      // for copy
+#include <algorithm>                      // for copy, min
 #include <cassert>                        // for assert
 #include <cstddef>                        // for size_t
 #include <iterator>                       // for distance
@@ -46,6 +46,26 @@ public:
       assert(code_len > 0);
       assert(code_len <= 16);
       assert(code <= ((1U << code_len) - 1U));
+    }
+
+    static bool HaveCommonPrefix(const CodeSymbol& a, const CodeSymbol& b) {
+      // Let's not self-compare.
+      if (&a == &b)
+        return false;
+
+      auto getNHighBits = [](const CodeSymbol& s, unsigned bits) -> ushort16 {
+        const auto shift = s.code_len - bits;
+        return s.code >> shift;
+      };
+
+      // We have two symbols. Each symbol has some non-zero lenght.
+      // What is the minimal length?
+      const auto len = std::min(a.code_len, b.code_len);
+
+      const auto s0 = getNHighBits(a, len);
+      const auto s1 = getNHighBits(b, len);
+
+      return s0 == s1;
     }
   };
 
