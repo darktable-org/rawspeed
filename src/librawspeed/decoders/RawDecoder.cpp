@@ -124,8 +124,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
   mRaw->whitePoint = (1UL << bitPerPixel) - 1UL;
 
   offY = 0;
-  for (uint32 i = 0; i < slices.size(); i++) {
-    RawSlice slice = slices[i];
+  for (const RawSlice& slice : slices) {
     UncompressedDecompressor u(*mFile, slice.offset, slice.count, mRaw);
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
@@ -135,22 +134,9 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
     const auto inputPitch = width * bitPerPixel / 8;
     if (!inputPitch)
       ThrowRDE("Bad input pitch. Can not decode anything.");
-    try {
-      u.readUncompressedRaw(size, pos, inputPitch, bitPerPixel, order);
-    } catch (RawDecoderException &e) {
-      if (i>0)
-        mRaw->setError(e.what());
-      else
-        throw;
-    } catch (IOException &e) {
-      if (i>0)
-        mRaw->setError(e.what());
-      else {
-        ThrowRDE("IO error occurred in first slice, unable to decode more. "
-                 "Error is: %s",
-                 e.what());
-      }
-    }
+
+    u.readUncompressedRaw(size, pos, inputPitch, bitPerPixel, order);
+
     offY += slice.h;
   }
 }
