@@ -27,7 +27,6 @@
 #include <bitset>                               // for bitset
 #include <gtest/gtest.h>                        // for AssertionResult, ...
 #include <utility>                              // for make_pair, pair, move
-#include <utility>                              // for move
 #include <vector>                               // for vector
 
 using rawspeed::AbstractHuffmanTable;
@@ -44,20 +43,9 @@ bool operator!=(const AbstractHuffmanTable& lhs,
 
 ::std::ostream& operator<<(::std::ostream& os,
                            const AbstractHuffmanTable::CodeSymbol s) {
-  if (s.code_len == 0)
-    return os;
-
   auto str = std::bitset<32>(s.code).to_string();
 
-  // Skip all zero bits, until either we find the first non-zero bit, or the
-  // remaining length is s.code_len
-  size_t size = s.code_len;
-  const auto last_set_bit = str.find_first_of('1');
-  if (last_set_bit != std::string::npos)
-    size = std::max(size, str.size() - last_set_bit);
-  // FIXME ^ all that is glossing over the real bug.
-
-  str = str.substr(str.size() - size);
+  str = str.substr(str.size() - s.code_len);
   return os << "0b" << str;
 }
 
@@ -77,17 +65,70 @@ namespace rawspeed_test {
 
 TEST(AbstractHuffmanTableCodeSymbolTest, Equality) {
 #define s AbstractHuffmanTable::CodeSymbol
-  ASSERT_NE(s(0, 1), s(0, 0));
-  ASSERT_NE(s(0, 0), s(0, 1));
-  ASSERT_NE(s(1, 0), s(0, 0));
-  ASSERT_NE(s(0, 0), s(1, 0));
-
-  ASSERT_EQ(s(0, 0), s(0, 0));
   ASSERT_EQ(s(0, 1), s(0, 1));
-  ASSERT_EQ(s(1, 0), s(1, 0));
   ASSERT_EQ(s(1, 1), s(1, 1));
+
+  ASSERT_NE(s(1, 1), s(0, 1));
+  ASSERT_NE(s(0, 1), s(1, 1));
 #undef s
 }
+
+#ifndef NDEBUG
+TEST(CodeSymbolDeathTest, CodeSymbolLenght) {
+  ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(0, 0); },
+               "CodeSymbol.*code_len > 0");
+  ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(1, 0); },
+               "CodeSymbol.*code_len > 0");
+  ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(0, 17); },
+               "CodeSymbol.*code_len <= 16");
+  ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(1, 17); },
+               "CodeSymbol.*code_len <= 16");
+}
+
+using CodeSymbolType = std::tr1::tuple<int, int, bool>;
+class CodeSymbolDeathTest : public ::testing::TestWithParam<CodeSymbolType> {
+protected:
+  CodeSymbolDeathTest() = default;
+  virtual void SetUp() {
+    auto p = GetParam();
+
+    val = std::tr1::get<0>(p);
+    len = std::tr1::get<1>(p);
+    die = std::tr1::get<2>(p);
+  }
+
+  int val;
+  int len;
+  bool die;
+};
+static const CodeSymbolType CodeSymbolData[]{
+    // clang-format off
+    make_tuple(0b00, 1, false),
+    make_tuple(0b00, 2, false),
+    make_tuple(0b01, 1, false),
+    make_tuple(0b01, 2, false),
+    make_tuple(0b10, 1, true),
+    make_tuple(0b10, 2, false),
+    make_tuple(0b11, 1, true),
+    make_tuple(0b11, 2, false),
+    // clang-format on
+};
+INSTANTIATE_TEST_CASE_P(CodeSymbolDeathTest, CodeSymbolDeathTest,
+                        ::testing::ValuesIn(CodeSymbolData));
+TEST_P(CodeSymbolDeathTest, CodeSymbolDeathTest) {
+  if (die) {
+    ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(val, len); },
+                 "CodeSymbol.*code <= \\(\\(1U << code_len\\) - 1U\\)");
+  } else {
+    ASSERT_EXIT(
+        {
+          AbstractHuffmanTable::CodeSymbol(val, len);
+          exit(0);
+        },
+        ::testing::ExitedWithCode(0), "");
+  }
+}
+#endif
 
 using CodeSymbolPrintDataType = std::tr1::tuple<int, int, std::string>;
 class CodeSymbolPrintTest
@@ -108,17 +149,11 @@ protected:
 };
 static const CodeSymbolPrintDataType CodeSymbolPrintData[]{
     // clang-format off
-    make_tuple(0b00, 0, ""),
     make_tuple(0b00, 1, "0b0"),
     make_tuple(0b00, 2, "0b00"),
-    make_tuple(0b01, 0, ""),
     make_tuple(0b01, 1, "0b1"),
     make_tuple(0b01, 2, "0b01"),
-    make_tuple(0b10, 0, ""),
-    make_tuple(0b10, 1, "0b10"),
     make_tuple(0b10, 2, "0b10"),
-    make_tuple(0b11, 0, ""),
-    make_tuple(0b11, 1, "0b11"),
     make_tuple(0b11, 2, "0b11"),
     // clang-format on
 };
@@ -414,7 +449,7 @@ class DummyHuffmanTableTest : protected AbstractHuffmanTable,
                               public ::testing::Test {};
 
 TEST_F(DummyHuffmanTableTest, CodeSymbolDoesNotOverflow) {
-  std::vector<uchar8> v({1, 3, 7, 15, 31, 63, 1, 1, 1, 1, 1, 1, 1, 1});
+  std::vector<uchar8> v({1, 3});
   v.resize(16);
   Buffer bl(v.data(), v.size());
   const auto cnt = setNCodesPerLength(bl);
@@ -422,7 +457,7 @@ TEST_F(DummyHuffmanTableTest, CodeSymbolDoesNotOverflow) {
   Buffer bv(cv.data(), cv.size());
   setCodeValues(bv);
 
-  // The code value would overflow u16
+  // The 4'th symbol would be 0b100, even though the length is 2, which is bad.
   ASSERT_THROW(generateCodeSymbols(), rawspeed::RawDecoderException);
 }
 
@@ -476,11 +511,6 @@ static const generateCodeSymbolsDataType generateCodeSymbolsData[]{
                    {0b10, 2},
                    {0b11, 2},
                }),
-    make_tuple(
-        std::vector<rawspeed::uchar8>{1, 3},
-        std::vector<AbstractHuffmanTable::CodeSymbol>{
-            {0b0, 1}, {0b10, 2}, {0b11, 2}, {0b100, 2}, // FIXME <- BROKEN!
-        }),
 
 };
 INSTANTIATE_TEST_CASE_P(generateCodeSymbolsTest, generateCodeSymbolsTest,

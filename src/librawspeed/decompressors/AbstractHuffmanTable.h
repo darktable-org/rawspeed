@@ -36,14 +36,16 @@ namespace rawspeed {
 class AbstractHuffmanTable {
 public:
   struct CodeSymbol final {
-    uint32 code; // the codes themselves (bit patterns found inside the stream)
-    uchar8 code_len; // the code lengths in bits, valid values are 1..16
+    ushort16 code;   // the code (bit pattern found inside the stream)
+    uchar8 code_len; // the code length in bits, valid values are 1..16
 
     CodeSymbol() = default;
 
-    CodeSymbol(uint32 code_, uchar8 code_len_)
+    CodeSymbol(ushort16 code_, uchar8 code_len_)
         : code(code_), code_len(code_len_) {
-      // FIXME: code sanity check wrt length!
+      assert(code_len > 0);
+      assert(code_len <= 16);
+      assert(code <= ((1U << code_len) - 1U));
     }
   };
 
@@ -88,12 +90,12 @@ protected:
       assert(nCodesPerLength[l] <= ((1U << l) - 1U));
 
       for (unsigned int i = 0; i < nCodesPerLength[l]; ++i) {
-        // FIXME: the check is too soft, see test.
-        if (code > 0xffff) {
+        if (code > ((1U << l) - 1U)) {
           ThrowRDE("Corrupt Huffman: code value overflow on len = %u, %u-th "
                    "code out of %u\n",
                    l, i, nCodesPerLength[l]);
         }
+        assert(code <= 0xffff);
 
         symbols.emplace_back(code, l);
         code++;
