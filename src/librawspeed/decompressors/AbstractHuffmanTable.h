@@ -91,6 +91,14 @@ protected:
   // signExtended() is used to decode the difference bits to a signed int.
   std::vector<uchar8> codeValues; // index is just sequential number
 
+  static void VerifyCodeSymbols(const std::vector<CodeSymbol>& symbols) {
+    // No two symbols should have the same prefix (high bytes)
+    for (const auto& s0 : symbols) {
+      for (const auto& s1 : symbols)
+        assert(!CodeSymbol::HaveCommonPrefix(s0, s1));
+    }
+  }
+
   std::vector<CodeSymbol> generateCodeSymbols() const {
     std::vector<CodeSymbol> symbols;
 
@@ -120,6 +128,7 @@ protected:
     }
 
     assert(symbols.size() == maxCodesCount());
+    VerifyCodeSymbols(symbols);
 
     return symbols;
   }

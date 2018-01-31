@@ -580,4 +580,33 @@ TEST_P(generateCodeSymbolsTest, generateCodeSymbolsTest) {
   ASSERT_EQ(generateCodeSymbols(), expectedSymbols);
 }
 
+class DummyHuffmanTableTest : public AbstractHuffmanTable,
+                              public ::testing::Test {};
+using DummyHuffmanTableDeathTest = DummyHuffmanTableTest;
+
+#ifndef NDEBUG
+TEST_F(DummyHuffmanTableDeathTest, VerifyCodeSymbolsTest) {
+  {
+    std::vector<AbstractHuffmanTable::CodeSymbol> s{{0b0, 1}};
+    ASSERT_EXIT(
+        {
+          VerifyCodeSymbols(s);
+
+          exit(0);
+        },
+        ::testing::ExitedWithCode(0), "");
+  }
+  {
+    // Duplicates are not ok.
+    std::vector<AbstractHuffmanTable::CodeSymbol> s{{0b0, 1}, {0b0, 1}};
+    ASSERT_DEATH({ VerifyCodeSymbols(s); }, "!CodeSymbol::HaveCommonPrefix");
+  }
+  {
+    // Can not have common prefixes
+    std::vector<AbstractHuffmanTable::CodeSymbol> s{{0b0, 1}, {0b01, 2}};
+    ASSERT_DEATH({ VerifyCodeSymbols(s); }, "!CodeSymbol::HaveCommonPrefix");
+  }
+}
+#endif
+
 } // namespace rawspeed_test
