@@ -90,11 +90,6 @@ protected:
       assert(nCodesPerLength[l] <= ((1U << l) - 1U));
 
       for (unsigned int i = 0; i < nCodesPerLength[l]; ++i) {
-        if (code > ((1U << l) - 1U)) {
-          ThrowRDE("Corrupt Huffman: code value overflow on len = %u, %u-th "
-                   "code out of %u\n",
-                   l, i, nCodesPerLength[l]);
-        }
         assert(code <= 0xffff);
 
         symbols.emplace_back(code, l);
@@ -137,13 +132,27 @@ public:
     if (count > 162)
       ThrowRDE("Too big code-values table");
 
+    unsigned currMaxSymbol = 0;
+
     for (auto codeLen = 1U; codeLen < nCodesPerLength.size(); codeLen++) {
       // we have codeLen bits. make sure that that code count can actually fit
+      const auto maxCodesInCurrLen = (1U << codeLen) - 1U;
       const auto nCodes = nCodesPerLength[codeLen];
-      if (nCodes > ((1U << codeLen) - 1U)) {
+      if (nCodes > maxCodesInCurrLen) {
         ThrowRDE("Corrupt Huffman. Can not have %u codes in %u-bit len", nCodes,
                  codeLen);
       }
+
+      // Also, it all will have to fit into codeLen bits
+      const auto canFitMax = 1 + maxCodesInCurrLen - currMaxSymbol;
+      if (nCodes > canFitMax) {
+        ThrowRDE(
+            "Corrupt Huffman. Can only fit %u out of %u codes in %u-bit len",
+            canFitMax, nCodes, codeLen);
+      }
+
+      currMaxSymbol += nCodes;
+      currMaxSymbol <<= 1;
     }
 
     return count;

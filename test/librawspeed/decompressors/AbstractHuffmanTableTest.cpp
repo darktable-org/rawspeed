@@ -270,6 +270,15 @@ TEST(AbstractHuffmanTableTest, setNCodesPerLengthTooManyCodesForLenght) {
   }
 }
 
+TEST(AbstractHuffmanTableTest, setNCodesPerLengthCodeSymbolOverflow) {
+  ASSERT_NO_THROW(genHT({1}));
+  ASSERT_THROW(genHT({2}), rawspeed::RawDecoderException);
+  ASSERT_NO_THROW(genHT({1, 2}));
+  ASSERT_THROW(genHT({1, 3}), rawspeed::RawDecoderException);
+  ASSERT_NO_THROW(genHT({0, 3}));
+  ASSERT_THROW(genHT({0, 4}), rawspeed::RawDecoderException);
+}
+
 TEST(AbstractHuffmanTableTest, setNCodesPerLengthCounts) {
   ASSERT_EQ(genHTCount({1}), 1);
   ASSERT_EQ(genHTCount({1, 0}), 1);
@@ -278,7 +287,6 @@ TEST(AbstractHuffmanTableTest, setNCodesPerLengthCounts) {
   ASSERT_EQ(genHTCount({0, 3}), 3);
   ASSERT_EQ(genHTCount({1, 1}), 2);
   ASSERT_EQ(genHTCount({1, 2}), 3);
-  ASSERT_EQ(genHTCount({1, 3}), 4);
 }
 
 #ifndef NDEBUG
@@ -443,22 +451,6 @@ INSTANTIATE_TEST_CASE_P(SignExtendTest, SignExtendTest,
                         ::testing::ValuesIn(signExtendData));
 TEST_P(SignExtendTest, SignExtendTest) {
   ASSERT_EQ(AbstractHuffmanTable::signExtended(diff, len), value);
-}
-
-class DummyHuffmanTableTest : protected AbstractHuffmanTable,
-                              public ::testing::Test {};
-
-TEST_F(DummyHuffmanTableTest, CodeSymbolDoesNotOverflow) {
-  std::vector<uchar8> v({1, 3});
-  v.resize(16);
-  Buffer bl(v.data(), v.size());
-  const auto cnt = setNCodesPerLength(bl);
-  std::vector<uchar8> cv(cnt, 0);
-  Buffer bv(cv.data(), cv.size());
-  setCodeValues(bv);
-
-  // The 4'th symbol would be 0b100, even though the length is 2, which is bad.
-  ASSERT_THROW(generateCodeSymbols(), rawspeed::RawDecoderException);
 }
 
 using generateCodeSymbolsDataType =
