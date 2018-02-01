@@ -599,7 +599,36 @@ TEST_F(DummyHuffmanTableDeathTest, VerifyCodeSymbolsTest) {
   {
     // Duplicates are not ok.
     std::vector<AbstractHuffmanTable::CodeSymbol> s{{0b0, 1}, {0b0, 1}};
-    ASSERT_DEATH({ VerifyCodeSymbols(s); }, "!CodeSymbol::HaveCommonPrefix");
+    ASSERT_DEATH({ VerifyCodeSymbols(s); },
+                 "all code symbols are globally ordered");
+  }
+  {
+    std::vector<AbstractHuffmanTable::CodeSymbol> s{{0b0, 1}, {0b1, 1}};
+    ASSERT_EXIT(
+        {
+          VerifyCodeSymbols(s);
+
+          exit(0);
+        },
+        ::testing::ExitedWithCode(0), "");
+  }
+  {
+    // Code Symbols are strictly increasing
+    std::vector<AbstractHuffmanTable::CodeSymbol> s{{0b1, 1}, {0b0, 1}};
+    ASSERT_DEATH({ VerifyCodeSymbols(s); },
+                 "all code symbols are globally ordered");
+  }
+  {
+    // Code Lenghts are not decreasing
+    std::vector<AbstractHuffmanTable::CodeSymbol> s{{0b0, 2}, {0b1, 1}};
+    ASSERT_DEATH({ VerifyCodeSymbols(s); },
+                 "all code symbols are globally ordered");
+  }
+  {
+    // Reverse order
+    std::vector<AbstractHuffmanTable::CodeSymbol> s{{0b10, 2}, {0b0, 1}};
+    ASSERT_DEATH({ VerifyCodeSymbols(s); },
+                 "all code symbols are globally ordered");
   }
   {
     // Can not have common prefixes

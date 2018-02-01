@@ -24,7 +24,7 @@
 #include "common/Common.h"                // for ushort16, uchar8, int32
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/Buffer.h"                    // for Buffer
-#include <algorithm>                      // for copy, min
+#include <algorithm>                      // for copy, min, adjacent_find
 #include <cassert>                        // for assert
 #include <cstddef>                        // for size_t
 #include <iterator>                       // for distance
@@ -92,6 +92,20 @@ protected:
   std::vector<uchar8> codeValues; // index is just sequential number
 
   static void VerifyCodeSymbols(const std::vector<CodeSymbol>& symbols) {
+    // The code symbols are ordered so that all the code values are strictly
+    // increasing and code lenghts are not decreasing.
+    const auto symbolSort = [](const CodeSymbol& lhs,
+                               const CodeSymbol& rhs) -> bool {
+      return std::less<>()(lhs.code, rhs.code) &&
+             std::less_equal<>()(lhs.code_len, rhs.code_len);
+    };
+    assert(std::adjacent_find(symbols.cbegin(), symbols.cend(),
+                              [&symbolSort](const CodeSymbol& lhs,
+                                            const CodeSymbol& rhs) -> bool {
+                                return !symbolSort(lhs, rhs);
+                              }) == symbols.cend() &&
+           "all code symbols are globally ordered");
+
     // No two symbols should have the same prefix (high bytes)
     for (const auto& s0 : symbols) {
       for (const auto& s1 : symbols)
