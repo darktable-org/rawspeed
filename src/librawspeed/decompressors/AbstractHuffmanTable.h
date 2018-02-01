@@ -129,8 +129,6 @@ protected:
     // Figure C.2: generate the codes themselves
     uint32 code = 0;
     for (unsigned int l = 1; l <= maxCodeLength; ++l) {
-      assert(nCodesPerLength[l] <= ((1U << l) - 1U));
-
       for (unsigned int i = 0; i < nCodesPerLength[l]; ++i) {
         assert(code <= 0xffff);
 
@@ -175,27 +173,31 @@ public:
     if (count > 162)
       ThrowRDE("Too big code-values table");
 
-    unsigned currMaxSymbol = 0;
+    // We are at the Root node, len is 1, there are two possible child Nodes
+    unsigned maxCodes = 2;
 
     for (auto codeLen = 1U; codeLen < nCodesPerLength.size(); codeLen++) {
       // we have codeLen bits. make sure that that code count can actually fit
-      const auto maxCodesInCurrLen = (1U << codeLen) - 1U;
+      // E.g. for len 1 we could have two codes: 0b0 and 0b1
+      // (but in that case there can be no other codes (with higher lenghts))
+      const auto maxCodesInCurrLen = (1U << codeLen);
       const auto nCodes = nCodesPerLength[codeLen];
       if (nCodes > maxCodesInCurrLen) {
-        ThrowRDE("Corrupt Huffman. Can not have %u codes in %u-bit len", nCodes,
-                 codeLen);
+        ThrowRDE("Corrupt Huffman. Can never have %u codes in %u-bit len",
+                 nCodes, codeLen);
       }
 
-      // Also, it all will have to fit into codeLen bits
-      const auto canFitMax = 1 + maxCodesInCurrLen - currMaxSymbol;
-      if (nCodes > canFitMax) {
+      // Also, check that we actually can have this much leafs for this lenght
+      if (nCodes > maxCodes) {
         ThrowRDE(
             "Corrupt Huffman. Can only fit %u out of %u codes in %u-bit len",
-            canFitMax, nCodes, codeLen);
+            maxCodes, nCodes, codeLen);
       }
 
-      currMaxSymbol += nCodes;
-      currMaxSymbol <<= 1;
+      // There are nCodes leafs on this level, and those can not be branches
+      maxCodes -= nCodes;
+      // On the next level, rest can be branches, and can have two child Nodes
+      maxCodes *= 2;
     }
 
     return count;

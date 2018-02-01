@@ -324,7 +324,7 @@ TEST(AbstractHuffmanTableTest, setNCodesPerLengthTooManyCodesForLenght) {
     AbstractHuffmanTable ht;
     std::vector<uchar8> v(16, 0);
     Buffer b(v.data(), v.size());
-    for (auto i = 1U; i <= (1U << len) - 1U; i++) {
+    for (auto i = 1U; i <= (1U << len); i++) {
       v[len - 1] = i;
       ASSERT_NO_THROW(ht.setNCodesPerLength(b););
     }
@@ -335,11 +335,13 @@ TEST(AbstractHuffmanTableTest, setNCodesPerLengthTooManyCodesForLenght) {
 
 TEST(AbstractHuffmanTableTest, setNCodesPerLengthCodeSymbolOverflow) {
   ASSERT_NO_THROW(genHT({1}));
-  ASSERT_THROW(genHT({2}), rawspeed::RawDecoderException);
+  ASSERT_NO_THROW(genHT({2}));
+  ASSERT_THROW(genHT({3}), rawspeed::RawDecoderException);
   ASSERT_NO_THROW(genHT({1, 2}));
   ASSERT_THROW(genHT({1, 3}), rawspeed::RawDecoderException);
-  ASSERT_NO_THROW(genHT({0, 3}));
-  ASSERT_THROW(genHT({0, 4}), rawspeed::RawDecoderException);
+  ASSERT_THROW(genHT({2, 1}), rawspeed::RawDecoderException);
+  ASSERT_NO_THROW(genHT({0, 4}));
+  ASSERT_THROW(genHT({0, 5}), rawspeed::RawDecoderException);
 }
 
 TEST(AbstractHuffmanTableTest, setNCodesPerLengthCounts) {
