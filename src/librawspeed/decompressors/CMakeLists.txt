@@ -8,6 +8,7 @@ FILE(GLOB SOURCES
   "AbstractParallelizedDecompressor.cpp"
   "AbstractParallelizedDecompressor.h"
   "AbstractSamsungDecompressor.h"
+  "BinaryHuffmanTree.h"
   "Cr2Decompressor.cpp"
   "Cr2Decompressor.h"
   "CrwDecompressor.cpp"

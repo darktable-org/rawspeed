@@ -1,5 +1,6 @@
 FILE(GLOB RAWSPEED_TEST_SOURCES
   "AbstractHuffmanTableTest.cpp"
+  "BinaryHuffmanTreeTest.cpp"
   "HuffmanTableTest.cpp"
 )
 
