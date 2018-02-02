@@ -1,5 +1,6 @@
 FILE(GLOB RAWSPEED_TEST_SOURCES
   "BitPumpLSBTest.cpp"
+  "BitPumpMSBTest.cpp"
   "EndiannessTest.cpp"
 )
 
