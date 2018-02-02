@@ -1,5 +1,6 @@
 FILE(GLOB RAWSPEED_TEST_SOURCES
   "AbstractHuffmanTableTest.cpp"
+  "HuffmanTableTest.cpp"
 )
 
 foreach(IN ${RAWSPEED_TEST_SOURCES})
