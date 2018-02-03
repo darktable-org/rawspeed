@@ -49,11 +49,6 @@ bool operator!=(const AbstractHuffmanTable& lhs,
   return os << "0b" << str;
 }
 
-bool operator==(const AbstractHuffmanTable::CodeSymbol& lhs,
-                const AbstractHuffmanTable::CodeSymbol& rhs) {
-  return lhs.code == rhs.code && lhs.code_len == rhs.code_len;
-}
-
 bool operator!=(const AbstractHuffmanTable::CodeSymbol& lhs,
                 const AbstractHuffmanTable::CodeSymbol& rhs) {
   return !(lhs == rhs);

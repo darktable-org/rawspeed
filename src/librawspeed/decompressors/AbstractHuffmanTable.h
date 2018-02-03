@@ -240,4 +240,9 @@ public:
   }
 };
 
+inline bool operator==(const AbstractHuffmanTable::CodeSymbol& lhs,
+                       const AbstractHuffmanTable::CodeSymbol& rhs) {
+  return lhs.code == rhs.code && lhs.code_len == rhs.code_len;
+}
+
 } // namespace rawspeed
