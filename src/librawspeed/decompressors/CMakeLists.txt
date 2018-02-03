@@ -20,6 +20,7 @@ FILE(GLOB SOURCES
   "HasselbladDecompressor.h"
   "HuffmanTable.h"
   "HuffmanTableLUT.h"
+  "HuffmanTableVector.h"
   "JpegDecompressor.cpp"
   "JpegDecompressor.h"
   "KodakDecompressor.cpp"

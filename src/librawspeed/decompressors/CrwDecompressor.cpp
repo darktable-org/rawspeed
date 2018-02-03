@@ -223,6 +223,7 @@ inline void CrwDecompressor::decodeBlock(std::array<int, 64>* diffBuf,
       continue;
 
     int diff = lPump->getBits(len);
+    iPump->fill(len);
     iPump->skipBits(len);
 
     if (i >= 64)
