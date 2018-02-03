@@ -27,12 +27,12 @@
 
 namespace rawspeed {
 
-struct PlainBitPumpTag;
+struct LSBBitPumpTag;
 
-// The PlainPump is ordered in LSB bit order,
+// The LSBPump is ordered in LSB bit order,
 // i.e. we push into the cache from the left and read it from the right
 
-using BitPumpLSB = BitStream<PlainBitPumpTag, BitStreamCacheLeftInRightOut>;
+using BitPumpLSB = BitStream<LSBBitPumpTag, BitStreamCacheLeftInRightOut>;
 
 template <>
 inline BitPumpLSB::size_type BitPumpLSB::fillCache(const uchar8* input) {
