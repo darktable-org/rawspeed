@@ -33,23 +33,31 @@ using rawspeed::Endianness;
 namespace rawspeed_test {
 
 template <typename T> class BitPumpTest : public ::testing::Test {
+public:
+  using TestDataType = const std::array<rawspeed::uchar8, 4>;
+
 protected:
-  static const std::array<rawspeed::uchar8, 4> ones;
+  template <typename L> void test(const TestDataType& data, L gen) {
+    const Buffer b(data.data(), data.size());
+
+    for (auto e : {Endianness::little, Endianness::big}) {
+      const DataBuffer db(b, e);
+      const ByteStream bs(db);
+
+      T pump(bs);
+      for (int len = 1; len <= 7; len++)
+        ASSERT_EQ(pump.getBits(len), gen(len)) << "     Where len: " << len;
+    }
+  }
+
+  static TestDataType ones;
 };
 
 TYPED_TEST_CASE_P(BitPumpTest);
 
 TYPED_TEST_P(BitPumpTest, ReadOnesTest) {
-  const Buffer b(this->ones.data(), this->ones.size());
-
-  for (auto e : {Endianness::little, Endianness::big}) {
-    const DataBuffer db(b, e);
-    const ByteStream bs(db);
-
-    TypeParam pump(bs);
-    for (int len = 1; len <= 7; len++)
-      ASSERT_EQ(pump.getBits(len), 1) << "     Where len: " << len;
-  }
+  // I.e. expected values are: "1" "01" "001" ...
+  this->test(this->ones, [](int i) -> unsigned { return 1U; });
 }
 
 REGISTER_TYPED_TEST_CASE_P(BitPumpTest, ReadOnesTest);
