@@ -20,6 +20,7 @@
 
 #include "io/BitPumpJPEG.h" // for BitPumpJPEG
 #include "common/Common.h"  // for uchar8
+#include "io/BitPumpTest.h" // for BitPumpTest
 #include "io/BitStream.h"   // for BitStream
 #include "io/Buffer.h"      // for Buffer
 #include "io/ByteStream.h"  // for ByteStream
@@ -35,23 +36,13 @@ using rawspeed::Endianness;
 
 namespace rawspeed_test {
 
-TEST(BitPumpJPEGTest, IdentityTest) {
-  /* [Byte0 Byte1 Byte2 Byte3] */
-  /* Byte: [Bit0 .. Bit7] */
-  static const std::array<rawspeed::uchar8, 4> data{0b10100100, 0b01000010,
-                                                    0b00001000, 0b00011111};
+template <>
+const std::array<rawspeed::uchar8, 4> BitPumpTest<BitPumpJPEG>::ones = {
+    /* [Byte0 Byte1 Byte2 Byte3] */
+    /* Byte: [Bit0 .. Bit7] */
+    0b10100100, 0b01000010, 0b00001000, 0b00011111};
 
-  const Buffer b(data.data(), data.size());
-
-  for (auto e : {Endianness::little, Endianness::big}) {
-    const DataBuffer db(b, e);
-    const ByteStream bs(db);
-
-    BitPumpJPEG p(bs);
-    for (int len = 1; len <= 7; len++)
-      ASSERT_EQ(p.getBits(len), 1) << "     Where len: " << len;
-  }
-}
+INSTANTIATE_TYPED_TEST_CASE_P(JPEG, BitPumpTest, BitPumpJPEG);
 
 TEST(BitPumpJPEGTest, 0xFF0x00Is0xFFTest) {
   // If 0xFF0x00 byte sequence is found, it is just 0xFF, i.e. 0x00 is ignored.

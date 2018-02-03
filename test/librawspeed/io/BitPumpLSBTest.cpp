@@ -18,39 +18,22 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "io/BitPumpLSB.h" // for BitPumpLSB
-#include "common/Common.h" // for uchar8
-#include "io/BitStream.h"  // for BitStream
-#include "io/Buffer.h"     // for Buffer
-#include "io/ByteStream.h" // for ByteStream
-#include "io/Endianness.h" // for getHostEndianness, Endianness::big, Endia...
-#include <array>           // for array
-#include <gtest/gtest.h>   // for Message, AssertionResult, ASSERT_PRED_FOR...
+#include "io/BitPumpLSB.h"  // for BitPumpLSB
+#include "common/Common.h"  // for uchar8
+#include "io/BitPumpTest.h" // for BitPumpTest
+#include <array>            // for array
+#include <gtest/gtest.h>    // for Message, AssertionResult, ASSERT_PRED_FOR...
 
 using rawspeed::BitPumpLSB;
-using rawspeed::Buffer;
-using rawspeed::ByteStream;
-using rawspeed::DataBuffer;
-using rawspeed::Endianness;
 
 namespace rawspeed_test {
 
-TEST(BitPumpLSBTest, IdentityTest) {
-  /* [Byte0 Byte1 Byte2 Byte3] */
-  /* Byte: [Bit7 .. Bit0] */
-  static const std::array<rawspeed::uchar8, 4> data{0b01001011, 0b10000100,
-                                                    0b00100000, 0b11110000};
+template <>
+const std::array<rawspeed::uchar8, 4> BitPumpTest<BitPumpLSB>::ones = {
+    /* [Byte0 Byte1 Byte2 Byte3] */
+    /* Byte: [Bit7 .. Bit0] */
+    0b01001011, 0b10000100, 0b00100000, 0b11110000};
 
-  const Buffer b(data.data(), data.size());
-
-  for (auto e : {Endianness::little, Endianness::big}) {
-    const DataBuffer db(b, e);
-    const ByteStream bs(db);
-
-    BitPumpLSB p(bs);
-    for (int len = 1; len <= 7; len++)
-      ASSERT_EQ(p.getBits(len), 1) << "     Where len: " << len;
-  }
-}
+INSTANTIATE_TYPED_TEST_CASE_P(LSB, BitPumpTest, BitPumpLSB);
 
 } // namespace rawspeed_test

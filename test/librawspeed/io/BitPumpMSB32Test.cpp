@@ -20,37 +20,20 @@
 
 #include "io/BitPumpMSB32.h" // for BitPumpMSB32
 #include "common/Common.h"   // for uchar8
-#include "io/BitStream.h"    // for BitStream
-#include "io/Buffer.h"       // for Buffer
-#include "io/ByteStream.h"   // for ByteStream
-#include "io/Endianness.h"   // for getHostEndianness, Endianness::big, Endia...
+#include "io/BitPumpTest.h"  // for BitPumpTest
 #include <array>             // for array
 #include <gtest/gtest.h>     // for Message, AssertionResult, ASSERT_PRED_FOR...
 
 using rawspeed::BitPumpMSB32;
-using rawspeed::Buffer;
-using rawspeed::ByteStream;
-using rawspeed::DataBuffer;
-using rawspeed::Endianness;
 
 namespace rawspeed_test {
 
-TEST(BitPumpMSB32Test, IdentityTest) {
-  /* [Byte3 Byte2 Byte1 Byte0] */
-  /* Byte: [Bit0 .. Bit7] */
-  static const std::array<rawspeed::uchar8, 4> data{0b00011111, 0b00001000,
-                                                    0b01000010, 0b10100100};
+template <>
+const std::array<rawspeed::uchar8, 4> BitPumpTest<BitPumpMSB32>::ones = {
+    /* [Byte3 Byte2 Byte1 Byte0] */
+    /* Byte: [Bit0 .. Bit7] */
+    0b00011111, 0b00001000, 0b01000010, 0b10100100};
 
-  const Buffer b(data.data(), data.size());
-
-  for (auto e : {Endianness::little, Endianness::big}) {
-    const DataBuffer db(b, e);
-    const ByteStream bs(db);
-
-    BitPumpMSB32 p(bs);
-    for (int len = 1; len <= 7; len++)
-      ASSERT_EQ(p.getBits(len), 1) << "     Where len: " << len;
-  }
-}
+INSTANTIATE_TYPED_TEST_CASE_P(MSB32, BitPumpTest, BitPumpMSB32);
 
 } // namespace rawspeed_test
