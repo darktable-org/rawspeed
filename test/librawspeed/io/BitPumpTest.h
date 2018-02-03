@@ -51,6 +51,7 @@ protected:
   }
 
   static TestDataType ones;
+  static TestDataType invOnes;
 };
 
 TYPED_TEST_CASE_P(BitPumpTest);
@@ -60,6 +61,11 @@ TYPED_TEST_P(BitPumpTest, ReadOnesTest) {
   this->test(this->ones, [](int i) -> unsigned { return 1U; });
 }
 
-REGISTER_TYPED_TEST_CASE_P(BitPumpTest, ReadOnesTest);
+TYPED_TEST_P(BitPumpTest, ReadInvOnesTest) {
+  // I.e. expected values are: "1" "10" "100" ...
+  this->test(this->invOnes, [](int i) -> unsigned { return 1U << (i - 1); });
+}
+
+REGISTER_TYPED_TEST_CASE_P(BitPumpTest, ReadOnesTest, ReadInvOnesTest);
 
 } // namespace rawspeed_test

@@ -34,6 +34,10 @@ const std::array<rawspeed::uchar8, 4> BitPumpTest<BitPumpMSB32>::ones = {
     /* Byte: [Bit0 .. Bit7] */
     0b00011111, 0b00001000, 0b01000010, 0b10100100};
 
+template <>
+const std::array<rawspeed::uchar8, 4> BitPumpTest<BitPumpMSB32>::invOnes = {
+    0b00001111, 0b00000100, 0b00100001, 0b11010010};
+
 INSTANTIATE_TYPED_TEST_CASE_P(MSB32, BitPumpTest, BitPumpMSB32);
 
 } // namespace rawspeed_test
