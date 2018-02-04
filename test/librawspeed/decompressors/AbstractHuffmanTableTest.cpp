@@ -170,12 +170,12 @@ protected:
   virtual void SetUp() {
     auto p = GetParam();
 
-    a = std::tr1::get<0>(p);
-    b = std::tr1::get<1>(p);
+    symbol = std::tr1::get<0>(p);
+    partial = std::tr1::get<1>(p);
   }
 
-  AbstractHuffmanTable::CodeSymbol a;
-  AbstractHuffmanTable::CodeSymbol b;
+  AbstractHuffmanTable::CodeSymbol symbol;
+  AbstractHuffmanTable::CodeSymbol partial;
 };
 std::vector<AbstractHuffmanTable::CodeSymbol> GenerateAllPossibleCodeSymbols() {
   // change those two together
@@ -197,21 +197,25 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Combine(::testing::ValuesIn(allPossibleCodeSymbols),
                        ::testing::ValuesIn(allPossibleCodeSymbols)));
 TEST_P(CodeSymbolHaveCommonPrefixTest, CodeSymbolHaveCommonPrefixTest) {
-  auto a_str = ::testing::PrintToString(a);
-  auto b_str = ::testing::PrintToString(b);
-  const auto len = std::min(a_str.length(), b_str.length());
+  if (partial.code_len > symbol.code_len)
+    return;
+
+  auto symbol_str = ::testing::PrintToString(symbol);
+  auto partial_str = ::testing::PrintToString(partial);
+  const auto len = std::min(symbol_str.length(), partial_str.length());
   // Trim them to the same lenght (cut end chars)
-  a_str.resize(len);
-  b_str.resize(len);
-  ASSERT_EQ(AbstractHuffmanTable::CodeSymbol::HaveCommonPrefix(a, b),
-            a_str == b_str)
-      << "Where a_str = " << a_str << ", b_str = " << b_str;
+  symbol_str.resize(len);
+  partial_str.resize(len);
+  ASSERT_EQ(AbstractHuffmanTable::CodeSymbol::HaveCommonPrefix(symbol, partial),
+            symbol_str == partial_str)
+      << "Where symbol_str = " << symbol_str
+      << ", partial_str = " << partial_str;
 }
 TEST(CodeSymbolHaveCommonPrefixTest, BasicTest) {
   {
-    // Self-check for common prefix equals false
+    // Self-check for common prefix equals true
     const AbstractHuffmanTable::CodeSymbol s(0b0, 1);
-    ASSERT_FALSE(AbstractHuffmanTable::CodeSymbol::HaveCommonPrefix(s, s));
+    ASSERT_TRUE(AbstractHuffmanTable::CodeSymbol::HaveCommonPrefix(s, s));
   }
   ASSERT_TRUE(
       AbstractHuffmanTable::CodeSymbol::HaveCommonPrefix({0b0, 1}, {0b0, 1}));
@@ -222,6 +226,22 @@ TEST(CodeSymbolHaveCommonPrefixTest, BasicTest) {
   ASSERT_FALSE(
       AbstractHuffmanTable::CodeSymbol::HaveCommonPrefix({0b10, 2}, {0b01, 2}));
 }
+
+#ifndef NDEBUG
+TEST(CodeSymbolHaveCommonPrefixDeathTest, AsymmetricalDeathTest) {
+  ASSERT_DEATH(
+      {
+        AbstractHuffmanTable::CodeSymbol::HaveCommonPrefix({0b0, 1}, {0b0, 2});
+      },
+      "HaveCommonPrefix.*partial.code_len <= symbol.code_len");
+  ASSERT_DEATH(
+      {
+        AbstractHuffmanTable::CodeSymbol::HaveCommonPrefix({0b01, 2},
+                                                           {0b010, 3});
+      },
+      "HaveCommonPrefix.*partial.code_len <= symbol.code_len");
+}
+#endif
 
 auto genHT = [](std::initializer_list<uchar8>&& nCodesPerLength)
     -> AbstractHuffmanTable {

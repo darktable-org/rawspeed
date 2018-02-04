@@ -48,22 +48,17 @@ public:
       assert(code <= ((1U << code_len) - 1U));
     }
 
-    static bool HaveCommonPrefix(const CodeSymbol& a, const CodeSymbol& b) {
-      // Let's not self-compare.
-      if (&a == &b)
-        return false;
+    static bool HaveCommonPrefix(const CodeSymbol& symbol,
+                                 const CodeSymbol& partial) {
+      assert(partial.code_len <= symbol.code_len);
 
       auto getNHighBits = [](const CodeSymbol& s, unsigned bits) -> ushort16 {
         const auto shift = s.code_len - bits;
         return s.code >> shift;
       };
 
-      // We have two symbols. Each symbol has some non-zero lenght.
-      // What is the minimal length?
-      const auto len = std::min(a.code_len, b.code_len);
-
-      const auto s0 = getNHighBits(a, len);
-      const auto s1 = getNHighBits(b, len);
+      const auto s0 = getNHighBits(symbol, partial.code_len);
+      const auto s1 = partial.code;
 
       return s0 == s1;
     }
@@ -107,9 +102,10 @@ protected:
            "all code symbols are globally ordered");
 
     // No two symbols should have the same prefix (high bytes)
-    for (const auto& s0 : symbols) {
-      for (const auto& s1 : symbols)
-        assert(!CodeSymbol::HaveCommonPrefix(s0, s1));
+    // Only analyze the lower triangular matrix, excluding diagonal
+    for (auto sId = 0U; sId < symbols.size(); sId++) {
+      for (auto pId = 0U; pId < sId; pId++)
+        assert(!CodeSymbol::HaveCommonPrefix(symbols[sId], symbols[pId]));
     }
   }
 
