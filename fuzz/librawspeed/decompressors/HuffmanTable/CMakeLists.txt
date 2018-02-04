@@ -4,12 +4,13 @@ add_dependencies(fuzzers HuffmanTableFuzzers)
 set(FullDecode true)
 set(NoFullDecode false)
 
-function(add_ht_fuzzer pump decode)
-  set(fuzzer "HuffmanTableFuzzer-${pump}-${decode}")
+function(add_ht_fuzzer impl pump decode)
+  set(fuzzer "HuffmanTable${impl}Fuzzer-${pump}-${decode}")
 
   add_executable(${fuzzer} main.cpp)
   target_compile_definitions(${fuzzer}
     PRIVATE
+      -DIMPL=HuffmanTable${impl}
       -DPUMP=${pump}
       -DFULLDECODE=${${decode}}
   )
@@ -19,11 +20,14 @@ function(add_ht_fuzzer pump decode)
   add_dependencies(HuffmanTableFuzzers ${fuzzer})
 endfunction()
 
+set(IMPL "LUT" "Vector")
 set(PUMPS "BitPumpLSB" "BitPumpMSB" "BitPumpMSB16" "BitPumpMSB32" "BitPumpJPEG")
 set(DECODE "FullDecode" "NoFullDecode")
 
-foreach(pump IN LISTS PUMPS)
-  foreach(decode IN LISTS DECODE)
-    add_ht_fuzzer(${pump} ${decode})
+foreach(impl IN LISTS IMPL)
+  foreach(pump IN LISTS PUMPS)
+    foreach(decode IN LISTS DECODE)
+      add_ht_fuzzer(${impl} ${pump} ${decode})
+    endforeach()
   endforeach()
 endforeach()
