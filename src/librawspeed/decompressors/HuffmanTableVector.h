@@ -23,6 +23,7 @@
 
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable, ...
+#include <algorithm>                            // for accumulate
 #include <cassert>                              // for assert
 #include <utility>                              // for pair, make_pair
 #include <vector>                               // for vector, allocator, ...
@@ -50,13 +51,16 @@ protected:
       // Does any symbol have this same prefix?
       bool haveCommonPrefix = false;
 
-      for (codeId = 0; codeId < symbols.size(); codeId++) {
+      // Given global ordering and the code length, we know the minimal code id.
+      for (codeId = std::accumulate(&nCodesPerLength[1],
+                                    &nCodesPerLength[partial.code_len], 0U);
+           codeId < symbols.size(); codeId++) {
         const CodeSymbol& symbol = symbols[codeId];
 
         if (symbol == partial) // yay, found?
           return std::make_pair(symbol, codeId);
 
-        haveCommonPrefix |= CodeSymbol::HaveCommonPrefix(partial, symbol);
+        haveCommonPrefix |= CodeSymbol::HaveCommonPrefix(symbol, partial);
       }
 
       // If no symbols have this prefix, then the code is invalid.
