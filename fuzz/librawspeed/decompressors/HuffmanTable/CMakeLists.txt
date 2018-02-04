@@ -4,10 +4,10 @@ add_dependencies(fuzzers HuffmanTableFuzzers)
 set(FullDecode true)
 set(NoFullDecode false)
 
-function(add_ht_fuzzer impl pump decode)
+function(add_ht_solo_fuzzer impl pump decode)
   set(fuzzer "HuffmanTable${impl}Fuzzer-${pump}-${decode}")
 
-  add_executable(${fuzzer} main.cpp)
+  add_executable(${fuzzer} Solo.cpp)
   target_compile_definitions(${fuzzer}
     PRIVATE
       -DIMPL=HuffmanTable${impl}
@@ -27,7 +27,7 @@ set(DECODE "FullDecode" "NoFullDecode")
 foreach(impl IN LISTS IMPL)
   foreach(pump IN LISTS PUMPS)
     foreach(decode IN LISTS DECODE)
-      add_ht_fuzzer(${impl} ${pump} ${decode})
+      add_ht_solo_fuzzer(${impl} ${pump} ${decode})
     endforeach()
   endforeach()
 endforeach()
