@@ -7,6 +7,16 @@ FiffParserFuzzer-GetDecoder
 FiffParserFuzzer-GetDecoder-Decode
 FujiDecompressorFuzzer
 HasselbladDecompressorFuzzer
+HuffmanTableFuzzer-LUTVsVector-BitPumpJPEG-FullDecode
+HuffmanTableFuzzer-LUTVsVector-BitPumpJPEG-NoFullDecode
+HuffmanTableFuzzer-LUTVsVector-BitPumpLSB-FullDecode
+HuffmanTableFuzzer-LUTVsVector-BitPumpLSB-NoFullDecode
+HuffmanTableFuzzer-LUTVsVector-BitPumpMSB-FullDecode
+HuffmanTableFuzzer-LUTVsVector-BitPumpMSB-NoFullDecode
+HuffmanTableFuzzer-LUTVsVector-BitPumpMSB16-FullDecode
+HuffmanTableFuzzer-LUTVsVector-BitPumpMSB16-NoFullDecode
+HuffmanTableFuzzer-LUTVsVector-BitPumpMSB32-FullDecode
+HuffmanTableFuzzer-LUTVsVector-BitPumpMSB32-NoFullDecode
 HuffmanTableLUTFuzzer-BitPumpJPEG-FullDecode
 HuffmanTableLUTFuzzer-BitPumpJPEG-NoFullDecode
 HuffmanTableLUTFuzzer-BitPumpLSB-FullDecode
