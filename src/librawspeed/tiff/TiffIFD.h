@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2017 Axel Waggershauser
+    Copyright (C) 2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -47,17 +48,21 @@ using TiffEntryOwner = std::unique_ptr<TiffEntry>;
 class TiffIFD
 {
   uint32 nextIFD = 0;
+
   TiffIFD* parent;
+
   std::vector<TiffIFDOwner> subIFDs;
+  int subIFDCountRecursive = 0;
+
   std::map<TiffTag, TiffEntryOwner> entries;
 
   friend class TiffEntry;
   friend class FiffParser;
   friend class TiffParser;
 
-  const __attribute__((pure)) TiffIFD* getUppermostIFD() const;
-  int recursivelyCheckSubIFDs(int depth) const;
-  void checkAllSubIFDs() const;
+  void recursivelyIncrementSubIFDCount();
+  void checkSubIFDs() const;
+  void recursivelyCheckSubIFDs() const;
 
   void add(TiffIFDOwner subIFD);
   void add(TiffEntryOwner entry);
@@ -71,18 +76,18 @@ class TiffIFD
   // can be produced e.g. via fuzzing, or other means.
   struct Limits final {
     // How many layers of IFD's can there be?
-    // All RPU samples (as of 2018-01-25) are ok with 4.
+    // All RPU samples (as of 2018-02-09) are ok with 4.
     // However, let's be on the safe side, and pad it by one.
     static constexpr int Depth = 4 + 1;
 
     // How many sub-IFD's can this IFD have?
     // NOTE: only for the given IFD, *NOT* recursively including all sub-IFD's!
-    // All RPU samples (as of 2018-01-25) are ok with 5.
+    // All RPU samples (as of 2018-02-09) are ok with 5.
     // However, let's be on the safe side, and double it.
     static constexpr int SubIFDCount = 5 * 2;
 
     // How many sub-IFD's can this IFD have, recursively?
-    // All RPU samples (as of 2018-01-25) are ok with 14.
+    // All RPU samples (as of 2018-02-09) are ok with 14.
     // However, let's be on the safe side, and double it.
     static constexpr int RecursiveSubIFDCount = 14 * 2;
   };
