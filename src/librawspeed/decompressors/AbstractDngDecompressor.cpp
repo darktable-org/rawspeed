@@ -75,7 +75,6 @@ void AbstractDngDecompressor::decompressThreaded(
       iPoint2D tileSize(thisTileWidth, thisTileLength);
       iPoint2D pos(e->offX, e->offY);
 
-      // FIXME: does bytestream have correct byteorder from the src file?
       bool big_endian = e->bs.getByteOrder() == Endianness::big;
 
       // DNG spec says that if not 8 or 16 bit/sample, always use big endian

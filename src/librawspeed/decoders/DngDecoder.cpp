@@ -264,7 +264,8 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
         if (count < 1)
           ThrowRDE("Tile %u;%u is empty", x, y);
 
-        ByteStream bs(mFile->getSubView(offset, count), 0);
+        ByteStream bs(mFile->getSubView(offset, count), 0,
+                      mRootIFD->rootBuffer.getByteOrder());
 
         const uint32 offX = tilew * x;
         const uint32 offY = tileh * y;
@@ -306,7 +307,8 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
 
       assert(offY < static_cast<uint32>(mRaw->dim.y));
 
-      ByteStream bs(mFile->getSubView(offset, count), 0);
+      ByteStream bs(mFile->getSubView(offset, count), 0,
+                    mRootIFD->rootBuffer.getByteOrder());
       DngSliceElement e(bs, /*offsetX=*/0, offY, mRaw->dim.x, yPerSlice);
 
       slices.slices.emplace_back(e);
