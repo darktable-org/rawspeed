@@ -311,9 +311,7 @@ void TiffIFD::recursivelyCheckSubIFDs() const {
 }
 
 void TiffIFD::add(TiffIFDOwner subIFD) {
-  assert(subIFD->parent == this || !subIFD->parent);
-  subIFD->parent = this;
-  // FIXME: this \/ does not always work because ^
+  assert(subIFD->parent == this);
   subIFD->recursivelyCheckSubIFDs();
 
   subIFDs.push_back(move(subIFD));

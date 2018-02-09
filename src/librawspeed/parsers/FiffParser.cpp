@@ -59,14 +59,15 @@ void FiffParser::parseData() {
   bs.skipBytes(4);
   const uint32 second_ifd = bs.getU32();
 
-  rootIFD = TiffParser::parse(mInput->getSubView(first_ifd));
+  rootIFD = TiffParser::parse(nullptr, mInput->getSubView(first_ifd));
   TiffIFDOwner subIFD = std::make_unique<TiffIFD>(rootIFD.get());
 
   if (mInput->isValid(second_ifd)) {
     // RAW Tiff on newer models, pointer to raw data on older models
     // -> so we try parsing as Tiff first and add it as data if parsing fails
     try {
-      rootIFD->add(TiffParser::parse(mInput->getSubView(second_ifd)));
+      rootIFD->add(
+          TiffParser::parse(rootIFD.get(), mInput->getSubView(second_ifd)));
     } catch (TiffParserException&) {
       // the offset will be interpreted relative to the rootIFD where this
       // subIFD gets inserted

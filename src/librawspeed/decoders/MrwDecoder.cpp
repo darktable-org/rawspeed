@@ -124,7 +124,7 @@ void MrwDecoder::parseHeader() {
     case 0x545457: // TTW
       // Base value for offsets needs to be at the beginning of the TIFF block,
       // not the file
-      rootIFD = TiffParser::parse(bs.getBuffer(len));
+      rootIFD = TiffParser::parse(nullptr, bs.getBuffer(len));
       break;
     case 0x574247:     // WBG
       bs.skipBytes(4); // 4 factors

@@ -49,7 +49,7 @@ class TiffIFD
 {
   uint32 nextIFD = 0;
 
-  TiffIFD* parent;
+  TiffIFD* const parent;
 
   std::vector<TiffIFDOwner> subIFDs;
   int subIFDCountRecursive = 0;
@@ -87,9 +87,9 @@ class TiffIFD
     static constexpr int SubIFDCount = 5 * 2;
 
     // How many sub-IFD's can this IFD have, recursively?
-    // All RPU samples (as of 2018-02-09) are ok with 14.
+    // All RPU samples (as of 2018-02-09) are ok with 13.
     // However, let's be on the safe side, and double it.
-    static constexpr int RecursiveSubIFDCount = 14 * 2;
+    static constexpr int RecursiveSubIFDCount = 13 * 2;
   };
 
 public:

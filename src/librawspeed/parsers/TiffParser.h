@@ -42,7 +42,7 @@ public:
 
   // TiffRootIFDOwner contains pointers into 'data' but if is is non-owning, it
   // may be deleted immediately
-  static TiffRootIFDOwner parse(const Buffer& data);
+  static TiffRootIFDOwner parse(TiffIFD* parent, const Buffer& data);
 
   // transfers ownership of TiffIFD into RawDecoder
   static std::unique_ptr<RawDecoder> makeDecoder(TiffRootIFDOwner root,
