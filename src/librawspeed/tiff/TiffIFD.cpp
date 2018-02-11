@@ -90,7 +90,11 @@ void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream* bs) {
 }
 
 TiffIFD::TiffIFD(TiffIFD* parent_) : parent(parent_) {
-  recursivelyCheckSubIFDs();
+  recursivelyCheckSubIFDs(1);
+  // If we are good (can add this IFD without violating the limits),
+  // we are still here. However, due to the way we add parsed sub-IFD's (lazy),
+  // we need to count this IFD right *NOW*, not when adding it at the end.
+  recursivelyIncrementSubIFDCount();
 }
 
 TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
@@ -102,8 +106,6 @@ TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
     return;
 
   assert(ifds);
-
-  recursivelyCheckSubIFDs();
 
   ByteStream bs(data);
   bs.setPosition(offset);
@@ -279,30 +281,39 @@ TiffEntry* __attribute__((pure)) TiffIFD::getEntryRecursive(TiffTag tag) const {
 }
 
 void TiffIFD::recursivelyIncrementSubIFDCount() {
-  for (TiffIFD* p = this->parent; p != nullptr; p = p->parent)
+  TiffIFD* p = this->parent;
+  if (!p)
+    return;
+
+  p->subIFDCount++;
+
+  for (; p != nullptr; p = p->parent)
     p->subIFDCountRecursive++;
 }
 
-void TiffIFD::checkSubIFDs() const {
-  int count = subIFDs.size();
-  // assert(count <= TiffIFD::Limits::SubIFDCount);
-  if (count > TiffIFD::Limits::SubIFDCount)
+void TiffIFD::checkSubIFDs(int headroom) const {
+  int count = headroom + subIFDCount;
+  if (!headroom)
+    assert(count <= TiffIFD::Limits::SubIFDCount);
+  else if (count > TiffIFD::Limits::SubIFDCount)
     ThrowTPE("TIFF IFD has %u SubIFDs", count);
 
-  count = subIFDCountRecursive;
-  // assert(count <= TiffIFD::Limits::RecursiveSubIFDCount);
-  if (count > TiffIFD::Limits::RecursiveSubIFDCount)
+  count = headroom + subIFDCountRecursive;
+  if (!headroom)
+    assert(count <= TiffIFD::Limits::RecursiveSubIFDCount);
+  else if (count > TiffIFD::Limits::RecursiveSubIFDCount)
     ThrowTPE("TIFF IFD file has %u SubIFDs (recursively)", count);
 }
 
-void TiffIFD::recursivelyCheckSubIFDs() const {
+void TiffIFD::recursivelyCheckSubIFDs(int headroom) const {
   int depth = 0;
   for (const TiffIFD* p = this; p != nullptr;) {
-    // assert(depth <= TiffIFD::Limits::Depth);
-    if (depth > TiffIFD::Limits::Depth)
+    if (!headroom)
+      assert(depth <= TiffIFD::Limits::Depth);
+    else if (depth > TiffIFD::Limits::Depth)
       ThrowTPE("TiffIFD cascading overflow, found %u level IFD", depth);
 
-    p->checkSubIFDs();
+    p->checkSubIFDs(headroom);
 
     // And step up
     p = p->parent;
@@ -312,10 +323,11 @@ void TiffIFD::recursivelyCheckSubIFDs() const {
 
 void TiffIFD::add(TiffIFDOwner subIFD) {
   assert(subIFD->parent == this);
-  subIFD->recursivelyCheckSubIFDs();
+
+  // We are good, and actually can add this sub-IFD, right?
+  subIFD->recursivelyCheckSubIFDs(0);
 
   subIFDs.push_back(move(subIFD));
-  subIFDs.back()->recursivelyIncrementSubIFDCount();
 }
 
 void TiffIFD::add(TiffEntryOwner entry) {

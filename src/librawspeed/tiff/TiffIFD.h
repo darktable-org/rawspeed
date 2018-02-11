@@ -52,6 +52,8 @@ class TiffIFD
   TiffIFD* const parent;
 
   std::vector<TiffIFDOwner> subIFDs;
+
+  int subIFDCount = 0;
   int subIFDCountRecursive = 0;
 
   std::map<TiffTag, TiffEntryOwner> entries;
@@ -61,8 +63,8 @@ class TiffIFD
   friend class TiffParser;
 
   void recursivelyIncrementSubIFDCount();
-  void checkSubIFDs() const;
-  void recursivelyCheckSubIFDs() const;
+  void checkSubIFDs(int headroom) const;
+  void recursivelyCheckSubIFDs(int headroom) const;
 
   void add(TiffIFDOwner subIFD);
   void add(TiffEntryOwner entry);
@@ -76,20 +78,20 @@ class TiffIFD
   // can be produced e.g. via fuzzing, or other means.
   struct Limits final {
     // How many layers of IFD's can there be?
-    // All RPU samples (as of 2018-02-09) are ok with 4.
+    // All RPU samples (as of 2018-02-11) are ok with 4.
     // However, let's be on the safe side, and pad it by one.
     static constexpr int Depth = 4 + 1;
 
     // How many sub-IFD's can this IFD have?
     // NOTE: only for the given IFD, *NOT* recursively including all sub-IFD's!
-    // All RPU samples (as of 2018-02-09) are ok with 5.
+    // All RPU samples (as of 2018-02-11) are ok with 5.
     // However, let's be on the safe side, and double it.
     static constexpr int SubIFDCount = 5 * 2;
 
     // How many sub-IFD's can this IFD have, recursively?
-    // All RPU samples (as of 2018-02-09) are ok with 13.
+    // All RPU samples (as of 2018-02-11) are ok with 14.
     // However, let's be on the safe side, and double it.
-    static constexpr int RecursiveSubIFDCount = 13 * 2;
+    static constexpr int RecursiveSubIFDCount = 14 * 2;
   };
 
 public:
