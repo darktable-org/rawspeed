@@ -45,17 +45,20 @@ void CiffParser::parseData() {
   ByteStream bs(*mInput, 0);
   bs.setByteOrder(Endianness::little);
 
-  ushort16 magic = bs.getU16();
-  if (magic != 0x4949) // "II" / little-endian
+  const ushort16 byteOrder = bs.getU16();
+  if (byteOrder != 0x4949) // "II" / little-endian
     ThrowCPE("Not a CIFF file (endianness)");
 
+  // Offset to the beginning of the CIFF
+  const uint32 headerLength = bs.getU32();
+
+  // 8 bytes of Signature
   if (!CrwDecoder::isCRW(mInput))
     ThrowCPE("Not a CIFF file (ID)");
 
   NORangesSet<Buffer> ifds;
 
-  // Offset to the beginning of the CIFF
-  ByteStream subStream(bs.getSubStream(bs.getByte()));
+  ByteStream subStream(bs.getSubStream(headerLength));
   mRootIFD = std::make_unique<CiffIFD>(nullptr, &ifds, &subStream);
 }
 
