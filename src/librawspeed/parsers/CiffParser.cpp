@@ -22,7 +22,6 @@
 
 #include "parsers/CiffParser.h"
 #include "common/Common.h"               // for make_unique, trimSpaces
-#include "common/NORangesSet.h"          // for NORangesSet
 #include "decoders/CrwDecoder.h"         // for CrwDecoder
 #include "decoders/RawDecoder.h"         // for RawDecoder
 #include "io/ByteStream.h"               // for ByteStream
@@ -56,10 +55,9 @@ void CiffParser::parseData() {
   if (!CrwDecoder::isCRW(mInput))
     ThrowCPE("Not a CIFF file (ID)");
 
-  NORangesSet<Buffer> ifds;
-
-  ByteStream subStream(bs.getSubStream(headerLength));
-  mRootIFD = std::make_unique<CiffIFD>(nullptr, &ifds, &subStream);
+  // *Everything* after the header is the root CIFF Directory
+  ByteStream CIFFRootDirectory(bs.getSubStream(headerLength));
+  mRootIFD = std::make_unique<CiffIFD>(nullptr, &CIFFRootDirectory);
 }
 
 std::unique_ptr<RawDecoder> CiffParser::getDecoder(const CameraMetaData* meta) {

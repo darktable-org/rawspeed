@@ -73,7 +73,7 @@ class CiffIFD final {
   void add(std::unique_ptr<CiffIFD> subIFD);
   void add(std::unique_ptr<CiffEntry> entry);
 
-  void parseIFDEntry(NORangesSet<Buffer>* ifds, NORangesSet<Buffer>* valueDatas,
+  void parseIFDEntry(NORangesSet<Buffer>* valueDatas,
                      const ByteStream* valueData, ByteStream* dirEntries);
 
   template <typename Lambda>
@@ -86,7 +86,7 @@ class CiffIFD final {
 
 public:
   explicit CiffIFD(CiffIFD* parent);
-  CiffIFD(CiffIFD* parent, NORangesSet<Buffer>* ifds, ByteStream* mFile);
+  CiffIFD(CiffIFD* parent, ByteStream* directory);
 
   std::vector<const CiffIFD*> __attribute__((pure))
   getIFDsWithTag(CiffTag tag) const;

@@ -41,11 +41,9 @@ using std::unique_ptr;
 
 namespace rawspeed {
 
-void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds,
-                            NORangesSet<Buffer>* valueDatas,
+void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* valueDatas,
                             const ByteStream* valueData,
                             ByteStream* dirEntries) {
-  assert(ifds);
   assert(valueDatas);
   assert(valueData);
   assert(dirEntries);
@@ -77,7 +75,7 @@ void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds,
     switch (t->type) {
     case CIFF_SUB1:
     case CIFF_SUB2: {
-      add(std::make_unique<CiffIFD>(this, ifds, &t->data));
+      add(std::make_unique<CiffIFD>(this, &t->data));
       break;
     }
 
@@ -98,32 +96,25 @@ CiffIFD::CiffIFD(CiffIFD* const parent_) : parent(parent_) {
   recursivelyIncrementSubIFDCount();
 }
 
-CiffIFD::CiffIFD(CiffIFD* const parent_, NORangesSet<Buffer>* ifds,
-                 ByteStream* mFile)
+CiffIFD::CiffIFD(CiffIFD* const parent_, ByteStream* directory)
     : CiffIFD(parent_) {
-  assert(ifds);
-  assert(mFile);
+  assert(directory);
 
-  if (mFile->getSize() < 4)
+  if (directory->getSize() < 4)
     ThrowCPE("File is probably corrupted.");
 
-  mFile->setPosition(mFile->getSize() - 4);
-  const uint32 valueDataSize = mFile->getU32();
+  directory->setPosition(directory->getSize() - 4);
+  const uint32 valueDataSize = directory->getU32();
 
   // The Recursion. Directory entries store data here. May contain IFDs.
-  mFile->setPosition(0);
-  const ByteStream valueData(mFile->getStream(valueDataSize));
-
-  // Remaining of the IFD. Can't overlap with anything else.
-  ByteStream IFDData(mFile->getStream(mFile->getRemainSize()));
-  if (!ifds->emplace(IFDData).second)
-    ThrowCPE("Two IFD's overlap. Raw corrupt!");
+  directory->setPosition(0);
+  const ByteStream valueData(directory->getStream(valueDataSize));
 
   // count of the Directory entries in this IFD
-  const ushort16 entryCount = IFDData.getU16();
+  const ushort16 entryCount = directory->getU16();
 
   // each entry is 10 bytes
-  ByteStream dirEntries(IFDData.getStream(entryCount, 10));
+  ByteStream dirEntries(directory->getStream(entryCount, 10));
 
   // IFDData might still contain OtherData until the valueDataSize at the end.
   // But we do not care about that.
@@ -133,7 +124,7 @@ CiffIFD::CiffIFD(CiffIFD* const parent_, NORangesSet<Buffer>* ifds,
   NORangesSet<Buffer> valueDatas;
 
   for (uint32 i = 0; i < entryCount; i++)
-    parseIFDEntry(ifds, &valueDatas, &valueData, &dirEntries);
+    parseIFDEntry(&valueDatas, &valueData, &dirEntries);
 }
 
 void CiffIFD::recursivelyIncrementSubIFDCount() {
