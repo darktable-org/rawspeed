@@ -86,7 +86,7 @@ class CiffIFD final {
 
 public:
   explicit CiffIFD(CiffIFD* parent);
-  CiffIFD(CiffIFD* parent, ByteStream* directory);
+  CiffIFD(CiffIFD* parent, ByteStream directory);
 
   std::vector<const CiffIFD*> __attribute__((pure))
   getIFDsWithTag(CiffTag tag) const;

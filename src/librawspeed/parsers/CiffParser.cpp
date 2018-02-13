@@ -57,7 +57,7 @@ void CiffParser::parseData() {
 
   // *Everything* after the header is the root CIFF Directory
   ByteStream CIFFRootDirectory(bs.getSubStream(headerLength));
-  mRootIFD = std::make_unique<CiffIFD>(nullptr, &CIFFRootDirectory);
+  mRootIFD = std::make_unique<CiffIFD>(nullptr, CIFFRootDirectory);
 }
 
 std::unique_ptr<RawDecoder> CiffParser::getDecoder(const CameraMetaData* meta) {
