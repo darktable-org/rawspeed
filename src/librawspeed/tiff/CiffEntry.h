@@ -49,7 +49,6 @@ class CiffEntry
 {
   friend class CiffIFD;
 
-  CiffIFD* parent = nullptr;
   ByteStream data;
 
 public:

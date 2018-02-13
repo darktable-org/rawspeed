@@ -162,7 +162,6 @@ void CiffIFD::add(std::unique_ptr<CiffIFD> subIFD) {
 }
 
 void CiffIFD::add(std::unique_ptr<CiffEntry> entry) {
-  entry->parent = this;
   mEntry[entry->tag] = move(entry);
 }
 
