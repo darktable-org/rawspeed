@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014 Pedro Côrte-Real
+    Copyright (C) 2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -35,12 +36,39 @@ namespace rawspeed {
 class ByteStream;
 
 class CiffIFD final {
-  const CiffIFD* parent;
+  CiffIFD* const parent;
 
   std::vector<std::unique_ptr<const CiffIFD>> mSubIFD;
   std::map<CiffTag, std::unique_ptr<const CiffEntry>> mEntry;
 
-  void checkOverflow() const;
+  int subIFDCount = 0;
+  int subIFDCountRecursive = 0;
+
+  void recursivelyIncrementSubIFDCount();
+  void checkSubIFDs(int headroom) const;
+  void recursivelyCheckSubIFDs(int headroom) const;
+
+  // CIFF IFD are tree-like structure, with branches.
+  // A branch (IFD) can have branches (IFDs) of it's own.
+  // We must be careful to weed-out all the degenerative cases that
+  // can be produced e.g. via fuzzing, or other means.
+  struct Limits final {
+    // How many layers of IFD's can there be?
+    // All RPU samples (as of 2018-02-13) are ok with 3.
+    // However, let's be on the safe side, and pad it by one.
+    static constexpr int Depth = 3 + 1;
+
+    // How many sub-IFD's can this IFD have?
+    // NOTE: only for the given IFD, *NOT* recursively including all sub-IFD's!
+    // All RPU samples (as of 2018-02-13) are ok with 4.
+    // However, let's be on the safe side, and double it.
+    static constexpr int SubIFDCount = 4 * 2;
+
+    // How many sub-IFD's can this IFD have, recursively?
+    // All RPU samples (as of 2018-02-13) are ok with 6.
+    // However, let's be on the safe side, and double it.
+    static constexpr int RecursiveSubIFDCount = 6 * 2;
+  };
 
   void add(std::unique_ptr<CiffIFD> subIFD);
   void add(std::unique_ptr<CiffEntry> entry);
@@ -56,7 +84,8 @@ class CiffIFD final {
   getEntryRecursiveIf(CiffTag tag, const Lambda& f) const;
 
 public:
-  CiffIFD(const CiffIFD* parent, NORangesSet<Buffer>* ifds, ByteStream* mFile);
+  explicit CiffIFD(CiffIFD* parent);
+  CiffIFD(CiffIFD* parent, NORangesSet<Buffer>* ifds, ByteStream* mFile);
 
   std::vector<const CiffIFD*> __attribute__((pure))
   getIFDsWithTag(CiffTag tag) const;

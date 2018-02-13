@@ -3,7 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014 Pedro Côrte-Real
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2017-2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -75,13 +75,19 @@ void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream* bs) {
   }
 }
 
-CiffIFD::CiffIFD(const CiffIFD* parent_, NORangesSet<Buffer>* ifds,
+CiffIFD::CiffIFD(CiffIFD* const parent_) : parent(parent_) {
+  recursivelyCheckSubIFDs(1);
+  // If we are good (can add this IFD without violating the limits),
+  // we are still here. However, due to the way we add parsed sub-IFD's (lazy),
+  // we need to count this IFD right *NOW*, not when adding it at the end.
+  recursivelyIncrementSubIFDCount();
+}
+
+CiffIFD::CiffIFD(CiffIFD* const parent_, NORangesSet<Buffer>* ifds,
                  ByteStream* mFile)
-    : parent(parent_) {
+    : CiffIFD(parent_) {
   assert(ifds);
   assert(mFile);
-
-  checkOverflow();
 
   if (mFile->getSize() < 4)
     ThrowCPE("File is probably corrupted.");
@@ -105,21 +111,53 @@ CiffIFD::CiffIFD(const CiffIFD* parent_, NORangesSet<Buffer>* ifds,
     parseIFDEntry(ifds, mFile);
 }
 
-void CiffIFD::checkOverflow() const {
-  const CiffIFD* p = this;
-  int i = 0;
-  while ((p = p->parent) != nullptr) {
-    i++;
-    if (i > 5)
-      ThrowCPE("CiffIFD cascading overflow.");
+void CiffIFD::recursivelyIncrementSubIFDCount() {
+  CiffIFD* p = this->parent;
+  if (!p)
+    return;
+
+  p->subIFDCount++;
+
+  for (; p != nullptr; p = p->parent)
+    p->subIFDCountRecursive++;
+}
+
+void CiffIFD::checkSubIFDs(int headroom) const {
+  int count = headroom + subIFDCount;
+  if (!headroom)
+    assert(count <= CiffIFD::Limits::SubIFDCount);
+  else if (count > CiffIFD::Limits::SubIFDCount)
+    ThrowCPE("TIFF IFD has %u SubIFDs", count);
+
+  count = headroom + subIFDCountRecursive;
+  if (!headroom)
+    assert(count <= CiffIFD::Limits::RecursiveSubIFDCount);
+  else if (count > CiffIFD::Limits::RecursiveSubIFDCount)
+    ThrowCPE("TIFF IFD file has %u SubIFDs (recursively)", count);
+}
+
+void CiffIFD::recursivelyCheckSubIFDs(int headroom) const {
+  int depth = 0;
+  for (const CiffIFD* p = this; p != nullptr;) {
+    if (!headroom)
+      assert(depth <= CiffIFD::Limits::Depth);
+    else if (depth > CiffIFD::Limits::Depth)
+      ThrowCPE("CiffIFD cascading overflow, found %u level IFD", depth);
+
+    p->checkSubIFDs(headroom);
+
+    // And step up
+    p = p->parent;
+    depth++;
   }
 }
 
 void CiffIFD::add(std::unique_ptr<CiffIFD> subIFD) {
-  if (mSubIFD.size() > 100)
-    ThrowCPE("CIFF file has too many SubIFDs, probably broken");
+  assert(subIFD->parent == this);
 
-  subIFD->parent = this;
+  // We are good, and actually can add this sub-IFD, right?
+  subIFD->recursivelyCheckSubIFDs(0);
+
   mSubIFD.push_back(move(subIFD));
 }
 
