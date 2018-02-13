@@ -21,7 +21,7 @@
 */
 
 #include "tiff/CiffIFD.h"
-#include "common/Common.h"               // for uint32, ushort16
+#include "common/Common.h"               // for uint32, ushort16, isIn
 #include "common/NORangesSet.h"          // for NORangesSet
 #include "common/RawspeedException.h"    // for RawspeedException
 #include "io/ByteStream.h"               // for ByteStream
@@ -168,6 +168,8 @@ void CiffIFD::add(std::unique_ptr<CiffEntry> entry) {
 template <typename Lambda>
 std::vector<const CiffIFD*> CiffIFD::getIFDsWithTagIf(CiffTag tag,
                                                       const Lambda& f) const {
+  assert(isIn(tag, CiffTagsWeCareAbout));
+
   std::vector<const CiffIFD*> matchingIFDs;
 
   const auto found = mEntry.find(tag);
@@ -188,6 +190,8 @@ std::vector<const CiffIFD*> CiffIFD::getIFDsWithTagIf(CiffTag tag,
 template <typename Lambda>
 const CiffEntry* CiffIFD::getEntryRecursiveIf(CiffTag tag,
                                               const Lambda& f) const {
+  assert(isIn(tag, CiffTagsWeCareAbout));
+
   const auto found = mEntry.find(tag);
   if (found != mEntry.end()) {
     const auto entry = found->second.get();
@@ -205,11 +209,13 @@ const CiffEntry* CiffIFD::getEntryRecursiveIf(CiffTag tag,
 }
 
 vector<const CiffIFD*> CiffIFD::getIFDsWithTag(CiffTag tag) const {
+  assert(isIn(tag, CiffTagsWeCareAbout));
   return getIFDsWithTagIf(tag, [](const CiffEntry*) { return true; });
 }
 
 vector<const CiffIFD*> CiffIFD::getIFDsWithTagWhere(CiffTag tag,
                                                     uint32 isValue) const {
+  assert(isIn(tag, CiffTagsWeCareAbout));
   return getIFDsWithTagIf(tag, [&isValue](const CiffEntry* entry) {
     return entry->isInt() && entry->getU32() == isValue;
   });
@@ -217,16 +223,21 @@ vector<const CiffIFD*> CiffIFD::getIFDsWithTagWhere(CiffTag tag,
 
 vector<const CiffIFD*>
 CiffIFD::getIFDsWithTagWhere(CiffTag tag, const string& isValue) const {
+  assert(isIn(tag, CiffTagsWeCareAbout));
   return getIFDsWithTagIf(tag, [&isValue](const CiffEntry* entry) {
     return entry->isString() && isValue == entry->getString();
   });
 }
 
 bool __attribute__((pure)) CiffIFD::hasEntry(CiffTag tag) const {
+  assert(isIn(tag, CiffTagsWeCareAbout));
+
   return mEntry.count(tag) > 0;
 }
 
 bool __attribute__((pure)) CiffIFD::hasEntryRecursive(CiffTag tag) const {
+  assert(isIn(tag, CiffTagsWeCareAbout));
+
   if (mEntry.count(tag) > 0)
     return true;
 
@@ -239,6 +250,8 @@ bool __attribute__((pure)) CiffIFD::hasEntryRecursive(CiffTag tag) const {
 }
 
 const CiffEntry* CiffIFD::getEntry(CiffTag tag) const {
+  assert(isIn(tag, CiffTagsWeCareAbout));
+
   const auto found = mEntry.find(tag);
   if (found != mEntry.end())
     return found->second.get();
@@ -247,11 +260,13 @@ const CiffEntry* CiffIFD::getEntry(CiffTag tag) const {
 }
 
 const CiffEntry* CiffIFD::getEntryRecursive(CiffTag tag) const {
+  assert(isIn(tag, CiffTagsWeCareAbout));
   return getEntryRecursiveIf(tag, [](const CiffEntry*) { return true; });
 }
 
 const CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag,
                                                  uint32 isValue) const {
+  assert(isIn(tag, CiffTagsWeCareAbout));
   return getEntryRecursiveIf(tag, [&isValue](const CiffEntry* entry) {
     return entry->isInt() && entry->getU32() == isValue;
   });
@@ -259,6 +274,7 @@ const CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag,
 
 const CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag,
                                                  const string& isValue) const {
+  assert(isIn(tag, CiffTagsWeCareAbout));
   return getEntryRecursiveIf(tag, [&isValue](const CiffEntry* entry) {
     return entry->isString() && isValue == entry->getString();
   });

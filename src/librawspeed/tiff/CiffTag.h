@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <initializer_list> // for initializer_list
+
 namespace rawspeed {
 
 enum CiffTag {
@@ -34,6 +36,16 @@ enum CiffTag {
   CIFF_RAWDATA      = 0x2005,
   CIFF_SUBIFD       = 0x300a,
   CIFF_EXIF         = 0x300b,
+};
+
+static constexpr std::initializer_list<CiffTag> CiffTagsWeCareAbout = {
+    CIFF_DECODERTABLE,
+    CIFF_MAKEMODEL,
+    CIFF_SENSORINFO,
+    CIFF_SHOTINFO,
+    CIFF_WHITEBALANCE,
+    static_cast<CiffTag>(0x0032), // ???
+    static_cast<CiffTag>(0x102c), // ???
 };
 
 } // namespace rawspeed
