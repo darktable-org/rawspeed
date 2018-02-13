@@ -41,20 +41,22 @@ using std::unique_ptr;
 
 namespace rawspeed {
 
-void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream* bs) {
+void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds,
+                            NORangesSet<Buffer>* valueDatas,
+                            const ByteStream* valueData,
+                            ByteStream* dirEntries) {
   assert(ifds);
-  assert(bs);
+  assert(valueDatas);
+  assert(valueData);
+  assert(dirEntries);
 
   unique_ptr<CiffEntry> t;
-
-  auto origPos = bs->getPosition();
+  ByteStream dirEntry = dirEntries->getStream(10); // Entry is 10 bytes.
 
   try {
-    t = std::make_unique<CiffEntry>(bs);
+    t = std::make_unique<CiffEntry>(valueDatas, valueData, dirEntry);
   } catch (IOException&) {
-    // Ignore unparsable entry, but fix probably broken position due to
-    // interruption by exception; i.e. setting it to the next entry.
-    bs->setPosition(origPos + 10);
+    // Ignore unparsable entry
     return;
   }
 
@@ -105,23 +107,33 @@ CiffIFD::CiffIFD(CiffIFD* const parent_, NORangesSet<Buffer>* ifds,
   if (mFile->getSize() < 4)
     ThrowCPE("File is probably corrupted.");
 
-  // last 4 bytes is the offset to the beginning of the [first?] IFD
   mFile->setPosition(mFile->getSize() - 4);
-  uint32 offset = mFile->getU32();
-  mFile->setPosition(offset);
+  const uint32 valueDataSize = mFile->getU32();
 
-  // count of the Directory entries in this IFD
-  ushort16 dircount = mFile->getU16();
+  // The Recursion. Directory entries store data here. May contain IFDs.
+  mFile->setPosition(0);
+  const ByteStream valueData(mFile->getStream(valueDataSize));
 
-  // 2 bytes for entry count
-  // each entry is 10 bytes
-  const auto IFDFullSize = 2 + 10 * dircount;
-  const Buffer IFDBuf(mFile->getSubView(offset, IFDFullSize));
-  if (!ifds->emplace(IFDBuf).second)
+  // Remaining of the IFD. Can't overlap with anything else.
+  ByteStream IFDData(mFile->getStream(mFile->getRemainSize()));
+  if (!ifds->emplace(IFDData).second)
     ThrowCPE("Two IFD's overlap. Raw corrupt!");
 
-  for (uint32 i = 0; i < dircount; i++)
-    parseIFDEntry(ifds, mFile);
+  // count of the Directory entries in this IFD
+  const ushort16 entryCount = IFDData.getU16();
+
+  // each entry is 10 bytes
+  ByteStream dirEntries(IFDData.getStream(entryCount, 10));
+
+  // IFDData might still contain OtherData until the valueDataSize at the end.
+  // But we do not care about that.
+
+  // Each IFD has it's own valueData area.
+  // In that area, no two entries may overlap.
+  NORangesSet<Buffer> valueDatas;
+
+  for (uint32 i = 0; i < entryCount; i++)
+    parseIFDEntry(ifds, &valueDatas, &valueData, &dirEntries);
 }
 
 void CiffIFD::recursivelyIncrementSubIFDCount() {

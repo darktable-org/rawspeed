@@ -73,7 +73,8 @@ class CiffIFD final {
   void add(std::unique_ptr<CiffIFD> subIFD);
   void add(std::unique_ptr<CiffEntry> entry);
 
-  void parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream* bs);
+  void parseIFDEntry(NORangesSet<Buffer>* ifds, NORangesSet<Buffer>* valueDatas,
+                     const ByteStream* valueData, ByteStream* dirEntries);
 
   template <typename Lambda>
   std::vector<const CiffIFD*> __attribute__((pure))

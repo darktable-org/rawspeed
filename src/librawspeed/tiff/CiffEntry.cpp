@@ -3,7 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014 Pedro Côrte-Real
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2017-2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@
 
 #include "tiff/CiffEntry.h"
 #include "common/Common.h"               // for uchar8, uint32, ushort16
+#include "common/NORangesSet.h"          // for NORangesSet
 #include "io/ByteStream.h"               // for ByteStream
 #include "parsers/CiffParserException.h" // for CiffParserException (ptr only)
 #include <string>                        // for string, allocator
@@ -32,8 +33,9 @@ using std::vector;
 
 namespace rawspeed {
 
-CiffEntry::CiffEntry(ByteStream* bs) {
-  ushort16 p = bs->getU16();
+CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas,
+                     const ByteStream* valueData, ByteStream dirEntry) {
+  ushort16 p = dirEntry.getU16();
 
   tag = static_cast<CiffTag>(p & 0x3fff);
   ushort16 datalocation = (p & 0xc000);
@@ -45,21 +47,22 @@ CiffEntry::CiffEntry(ByteStream* bs) {
   switch (datalocation) {
   case 0x0000:
     // Data is offset in value_data
-    bytesize = bs->getU32();
-    data_offset = bs->getU32();
+    bytesize = dirEntry.getU32();
+    data_offset = dirEntry.getU32();
+    data = valueData->getSubStream(data_offset, bytesize);
+    if (!valueDatas->emplace(data).second)
+      ThrowCPE("Two valueData's overlap. Raw corrupt!");
     break;
   case 0x4000:
     // Data is stored directly in entry
-    data_offset = bs->getPosition();
+    data_offset = dirEntry.getPosition();
     // Maximum of 8 bytes of data (the size and offset fields)
     bytesize = 8;
-    bs->skipBytes(bytesize);
+    data = dirEntry.getStream(bytesize);
     break;
   default:
     ThrowCPE("Don't understand data location 0x%x", datalocation);
   }
-
-  data = bs->getSubStream(data_offset, bytesize);
 
   // Set the number of items using the shift
   count = bytesize >> getElementShift();

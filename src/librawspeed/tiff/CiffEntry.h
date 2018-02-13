@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014 Pedro Côrte-Real
+    Copyright (C) 2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -21,11 +22,12 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32, uchar8, ushort16
-#include "io/ByteStream.h" // for ByteStream
-#include "tiff/CiffTag.h"  // for CiffTag
-#include <string>          // for string
-#include <vector>          // for vector
+#include "common/Common.h"      // for uint32, uchar8, ushort16
+#include "common/NORangesSet.h" // for NORangesSet
+#include "io/ByteStream.h"      // for ByteStream
+#include "tiff/CiffTag.h"       // for CiffTag
+#include <string>               // for string
+#include <vector>               // for vector
 
 namespace rawspeed {
 
@@ -52,7 +54,8 @@ class CiffEntry
   ByteStream data;
 
 public:
-  explicit CiffEntry(ByteStream* bs);
+  explicit CiffEntry(NORangesSet<Buffer>* valueDatas,
+                     const ByteStream* valueData, ByteStream dirEntry);
 
   uchar8 getByte(uint32 num = 0) const;
   uint32 getU32(uint32 num = 0) const;
