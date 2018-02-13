@@ -48,6 +48,15 @@ namespace rawspeed {
 
 class CameraMetaData;
 
+bool CrwDecoder::isCRW(const Buffer* input) {
+  static const char magic[] = "HEAPCCDR";
+  static const size_t magic_offset = 6;
+  static const size_t magic_size = sizeof(magic) - 1; // excluding \0
+  static_assert(magic_size == 8, "Wrong magic size!");
+  const unsigned char* data = input->getData(magic_offset, magic_size);
+  return 0 == memcmp(&data[0], magic, magic_size);
+}
+
 CrwDecoder::CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD,
                        const Buffer* file)
     : RawDecoder(file), mRootIFD(move(rootIFD)) {}

@@ -46,7 +46,10 @@ void CiffParser::parseData() {
   bs.setByteOrder(Endianness::little);
 
   ushort16 magic = bs.getU16();
-  if (magic != 0x4949)
+  if (magic != 0x4949) // "II" / little-endian
+    ThrowCPE("Not a CIFF file (endianness)");
+
+  if (!CrwDecoder::isCRW(mInput))
     ThrowCPE("Not a CIFF file (ID)");
 
   NORangesSet<Buffer> ifds;
