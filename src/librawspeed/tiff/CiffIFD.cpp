@@ -58,6 +58,19 @@ void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream* bs) {
     return;
   }
 
+  switch (t->type) {
+  case CIFF_SUB1:
+  case CIFF_SUB2: {
+    // Ok, have to store it.
+    break;
+  }
+
+  default:
+    // We will never look for this entry. No point in storing it.
+    if (!isIn(t->tag, CiffTagsWeCareAbout))
+      return;
+  }
+
   try {
     switch (t->type) {
     case CIFF_SUB1:
@@ -162,7 +175,9 @@ void CiffIFD::add(std::unique_ptr<CiffIFD> subIFD) {
 }
 
 void CiffIFD::add(std::unique_ptr<CiffEntry> entry) {
+  assert(isIn(entry->tag, CiffTagsWeCareAbout));
   mEntry[entry->tag] = move(entry);
+  assert(mEntry.size() <= CiffTagsWeCareAbout.size());
 }
 
 template <typename Lambda>
