@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014 Pedro Côrte-Real
+    Copyright (C) 2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -39,13 +40,15 @@ class CrwDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
   crw_hts mHuff;
   const bool lowbits;
-  const Buffer mFile;
+
+  ByteStream lowbitInput;
+  ByteStream rawInput;
 
 public:
   CrwDecompressor(const RawImage& img, uint32 dec_table_, bool lowbits_,
-                  const Buffer* file);
+                  ByteStream rawData);
 
-  void decompress() const;
+  void decompress();
 
 private:
   static HuffmanTable makeDecoder(const uchar8* ncpl, const uchar8* values);

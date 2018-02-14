@@ -3,7 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014 Pedro Côrte-Real
-    Copyright (C) 2015 Roman Lebedev
+    Copyright (C) 2015-2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -62,8 +62,11 @@ CrwDecoder::CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD,
     : RawDecoder(file), mRootIFD(move(rootIFD)) {}
 
 RawImage CrwDecoder::decodeRawInternal() {
-  const CiffEntry* sensorInfo = mRootIFD->getEntryRecursive(CIFF_SENSORINFO);
+  const CiffEntry* rawData = mRootIFD->getEntry(CIFF_RAWDATA);
+  if (!rawData)
+    ThrowRDE("Couldn't find the raw data chunk");
 
+  const CiffEntry* sensorInfo = mRootIFD->getEntryRecursive(CIFF_SENSORINFO);
   if (!sensorInfo || sensorInfo->count < 6 || sensorInfo->type != CIFF_SHORT)
     ThrowRDE("Couldn't find image sensor info");
 
@@ -81,7 +84,7 @@ RawImage CrwDecoder::decodeRawInternal() {
 
   bool lowbits = ! hints.has("no_decompressed_lowbits");
 
-  CrwDecompressor c(mRaw, dec_table, lowbits, mFile);
+  CrwDecompressor c(mRaw, dec_table, lowbits, rawData->getData());
   mRaw->createData();
   c.decompress();
 

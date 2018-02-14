@@ -57,6 +57,8 @@ public:
   explicit CiffEntry(NORangesSet<Buffer>* valueDatas,
                      const ByteStream* valueData, ByteStream dirEntry);
 
+  const ByteStream& getData() const { return data; }
+
   uchar8 getByte(uint32 num = 0) const;
   uint32 getU32(uint32 num = 0) const;
   ushort16 getU16(uint32 num = 0) const;

@@ -41,6 +41,7 @@ enum CiffTag {
 static constexpr std::initializer_list<CiffTag> CiffTagsWeCareAbout = {
     CIFF_DECODERTABLE,
     CIFF_MAKEMODEL,
+    CIFF_RAWDATA,
     CIFF_SENSORINFO,
     CIFF_SHOTINFO,
     CIFF_WHITEBALANCE,

@@ -3,7 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014 Pedro Côrte-Real
-    Copyright (C) 2015-2017 Roman Lebedev
+    Copyright (C) 2015-2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -38,8 +38,8 @@ using std::array;
 namespace rawspeed {
 
 CrwDecompressor::CrwDecompressor(const RawImage& img, uint32 dec_table,
-                                 bool lowbits_, const Buffer* file)
-    : mRaw(img), lowbits(lowbits_), mFile(*file) {
+                                 bool lowbits_, ByteStream rawData)
+    : mRaw(img), lowbits(lowbits_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
@@ -50,6 +50,20 @@ CrwDecompressor::CrwDecompressor(const RawImage& img, uint32 dec_table,
   if (width == 0 || height == 0 || width % 4 != 0 || width > 4104 ||
       height > 3048 || (height * width) % 64 != 0)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
+  if (lowbits) {
+    // If there are low bits, the first part (size is calculatable) is low bits
+    // Each block is 4 pairs of 2 bits, so we have 1 block per 4 pixels
+    const unsigned lBlocks = 1 * height * width / 4;
+    assert(lBlocks > 0);
+    lowbitInput = rawData.getStream(lBlocks);
+  }
+
+  // We always ignore next 514 bytes of 'padding'. No idea what is in there.
+  rawData.skipBytes(514);
+
+  // Rest is the high bits.
+  rawInput = rawData.getStream(rawData.getRemainSize());
 
   mHuff = initHuffTables(dec_table);
 }
@@ -222,7 +236,7 @@ inline void CrwDecompressor::decodeBlock(std::array<int, 64>* diffBuf,
 }
 
 // FIXME: this function is horrible.
-void CrwDecompressor::decompress() const {
+void CrwDecompressor::decompress() {
   const uint32 height = mRaw->dim.y;
   const uint32 width = mRaw->dim.x;
 
@@ -231,19 +245,14 @@ void CrwDecompressor::decompress() const {
     assert(width % 4 == 0);
     assert(height > 0);
 
-    uint32 offset = 540;
-    if (lowbits)
-      offset += height * width / 4;
-
     // Each block encodes 64 pixels
+
     assert((height * width) % 64 == 0);
     const unsigned hBlocks = height * width / 64;
     assert(hBlocks > 0);
 
-    ByteStream input(mFile, offset);
-    // FIXME: fix this to not require two pumps
-    BitPumpJPEG lPump(input);
-    BitPumpJPEG iPump(input);
+    BitPumpJPEG lPump(rawInput);
+    BitPumpJPEG iPump(rawInput);
 
     int carry = 0;
     int base[2];
@@ -290,17 +299,9 @@ void CrwDecompressor::decompress() const {
 
   // Add the uncompressed 2 low bits to the decoded 8 high bits
   if (lowbits) {
-    uint32 offset = 26;
-
     assert(width > 0);
     assert(width % 4 == 0);
     assert(height > 0);
-
-    // Each block is 4 pairs of 2 bits, so we have 1 block per 4 pixels
-    const unsigned lBlocks = 1 * height * width / 4;
-    assert(lBlocks > 0);
-
-    ByteStream lowbitInput(mFile, offset, lBlocks);
 
     for (uint32 j = 0; j < height; j++) {
       auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, j));
