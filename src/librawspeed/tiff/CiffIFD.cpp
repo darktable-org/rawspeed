@@ -102,6 +102,12 @@ CiffIFD::CiffIFD(CiffIFD* const parent_, ByteStream directory)
 
   for (uint32 i = 0; i < entryCount; i++)
     parseIFDEntry(&valueDatas, &valueData, &dirEntries);
+
+  assert(valueDatas.size() <= entryCount);
+  assert(mEntry.size() <= CiffTagsWeCareAbout.size());
+  assert(mSubIFD.size() == decltype(mSubIFD)::size_type(subIFDCount));
+  assert(subIFDCount <= subIFDCountRecursive);
+  assert(mEntry.size() + mSubIFD.size() <= entryCount);
 }
 
 void CiffIFD::recursivelyIncrementSubIFDCount() {
