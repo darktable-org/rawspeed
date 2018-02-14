@@ -48,42 +48,21 @@ void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* valueDatas,
   assert(valueData);
   assert(dirEntries);
 
-  unique_ptr<CiffEntry> t;
   ByteStream dirEntry = dirEntries->getStream(10); // Entry is 10 bytes.
 
-  try {
-    t = std::make_unique<CiffEntry>(valueDatas, valueData, dirEntry);
-  } catch (IOException&) {
-    // Ignore unparsable entry
-    return;
-  }
+  auto t = std::make_unique<CiffEntry>(valueDatas, valueData, dirEntry);
 
   switch (t->type) {
   case CIFF_SUB1:
   case CIFF_SUB2: {
-    // Ok, have to store it.
+    add(std::make_unique<CiffIFD>(this, t->data));
     break;
   }
 
   default:
-    // We will never look for this entry. No point in storing it.
+    // Will we ever look for this entry?
     if (!isIn(t->tag, CiffTagsWeCareAbout))
       return;
-  }
-
-  try {
-    switch (t->type) {
-    case CIFF_SUB1:
-    case CIFF_SUB2: {
-      add(std::make_unique<CiffIFD>(this, t->data));
-      break;
-    }
-
-    default:
-      add(move(t));
-    }
-  } catch (RawspeedException&) {
-    // Unparsable private data are added as entries
     add(move(t));
   }
 }
