@@ -36,6 +36,9 @@ class HuffmanTableVector final : public AbstractHuffmanTable {
   bool fullDecode = true;
   bool fixDNGBug16 = false;
 
+  // Given this code len, which code id is the minimal?
+  std::vector<unsigned int> extrCodeIdForLen; // index is length of code
+
 protected:
   template <typename BIT_STREAM>
   inline std::pair<CodeSymbol, unsigned> getSymbol(BIT_STREAM& bs) const {
@@ -52,20 +55,19 @@ protected:
       partial.code <<= 1;
       partial.code |= bit;
 
-      // Does any symbol have this same prefix?
-      bool haveCommonPrefix = false;
-
-      // Given global ordering and the code length, we know the minimal code id.
-      for (codeId = std::accumulate(&nCodesPerLength[1],
-                                    &nCodesPerLength[partial.code_len], 0U);
-           codeId < symbols.size(); codeId++) {
+      // Given global ordering and the code length, we know the code id range.
+      for (codeId = extrCodeIdForLen[partial.code_len];
+           codeId < extrCodeIdForLen[1U + partial.code_len]; codeId++) {
         const CodeSymbol& symbol = symbols[codeId];
-
         if (symbol == partial) // yay, found?
           return std::make_pair(symbol, codeId);
+      }
 
+      // Ok, but does any symbol have this same prefix?
+      bool haveCommonPrefix = false;
+      for (; codeId < symbols.size(); codeId++) {
+        const CodeSymbol& symbol = symbols[codeId];
         haveCommonPrefix |= CodeSymbol::HaveCommonPrefix(symbol, partial);
-
         if (haveCommonPrefix)
           break;
       }
@@ -94,6 +96,15 @@ public:
     // Figure C.2: generate the codes themselves
     symbols = generateCodeSymbols();
     assert(symbols.size() == maxCodesCount());
+
+    extrCodeIdForLen.reserve(1U + nCodesPerLength.size());
+    extrCodeIdForLen.resize(2); // for len 0 and 1, the min code id is always 0
+    for (auto codeLen = 1U; codeLen < nCodesPerLength.size(); codeLen++) {
+      auto minCodeId = extrCodeIdForLen.back();
+      minCodeId += nCodesPerLength[codeLen];
+      extrCodeIdForLen.emplace_back(minCodeId);
+    }
+    assert(extrCodeIdForLen.size() == 1U + nCodesPerLength.size());
   }
 
   template <typename BIT_STREAM> inline int decodeLength(BIT_STREAM& bs) const {
