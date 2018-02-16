@@ -38,15 +38,19 @@ class HuffmanTableVector final : public AbstractHuffmanTable {
 
 protected:
   template <typename BIT_STREAM>
-  inline std::pair<CodeSymbol, unsigned> peekSymbol(BIT_STREAM& bs) const {
+  inline std::pair<CodeSymbol, unsigned> getSymbol(BIT_STREAM& bs) const {
     CodeSymbol partial;
     unsigned codeId;
 
     // Read bits until either find the code or detect the uncorrect code
-    for (partial.code_len = 1;; ++partial.code_len) {
+    for (partial.code = 0, partial.code_len = 1;; ++partial.code_len) {
       assert(partial.code_len <= 16);
 
-      partial.code = bs.peekBits(partial.code_len);
+      // Read one more bit
+      const bool bit = bs.getBits(1);
+
+      partial.code <<= 1;
+      partial.code |= bit;
 
       // Does any symbol have this same prefix?
       bool haveCommonPrefix = false;
@@ -107,11 +111,8 @@ public:
   inline int decode(BIT_STREAM& bs) const {
     assert(FULL_DECODE == fullDecode);
 
-    const auto peeked = peekSymbol(bs);
-    const CodeSymbol symbol = peeked.first;
-    const unsigned codeId = peeked.second;
-
-    bs.skipBits(symbol.code_len);
+    const auto got = getSymbol(bs);
+    const unsigned codeId = got.second;
 
     const int diff_l = codeValues[codeId];
 
