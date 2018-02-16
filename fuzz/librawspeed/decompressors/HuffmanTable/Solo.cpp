@@ -32,6 +32,7 @@
 #include "decompressors/HuffmanTable.h"        // IWYU pragma: keep
 #include "decompressors/HuffmanTable/Common.h" // for createHuffmanTable
 #include "decompressors/HuffmanTableLUT.h"     // IWYU pragma: keep
+#include "decompressors/HuffmanTableTree.h"    // IWYU pragma: keep
 #include "decompressors/HuffmanTableVector.h"  // IWYU pragma: keep
 #include "io/BitPumpJPEG.h"                    // IWYU pragma: keep
 #include "io/BitPumpLSB.h"                     // IWYU pragma: keep

@@ -21,11 +21,13 @@
 #pragma once
 
 #include "decompressors/HuffmanTableLUT.h" // for HuffmanTableLUT
+// #include "decompressors/HuffmanTableTree.h" // for HuffmanTableTree
 // #include "decompressors/HuffmanTableVector.h" // for HuffmanTableVector
 
 namespace rawspeed {
 
 using HuffmanTable = HuffmanTableLUT;
+// using HuffmanTable = HuffmanTableTree;
 // using HuffmanTable = HuffmanTableVector;
 
 } // namespace rawspeed

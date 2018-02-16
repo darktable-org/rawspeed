@@ -37,7 +37,7 @@ function(add_ht_dual_fuzzer impl0 impl1 pump decode)
   add_dependencies(HuffmanTableFuzzers ${fuzzer})
 endfunction()
 
-set(IMPL "LUT" "Vector")
+set(IMPL "LUT" "Tree" "Vector")
 set(PUMPS "BitPumpLSB" "BitPumpMSB" "BitPumpMSB16" "BitPumpMSB32" "BitPumpJPEG")
 set(DECODE "FullDecode" "NoFullDecode")
 
@@ -51,6 +51,8 @@ endforeach()
 
 foreach(pump IN LISTS PUMPS)
   foreach(decode IN LISTS DECODE)
+    add_ht_dual_fuzzer(LUT Tree ${pump} ${decode})
     add_ht_dual_fuzzer(LUT Vector ${pump} ${decode})
+    add_ht_dual_fuzzer(Tree Vector ${pump} ${decode})
   endforeach()
 endforeach()
