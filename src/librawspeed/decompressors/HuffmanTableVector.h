@@ -65,6 +65,9 @@ protected:
           return std::make_pair(symbol, codeId);
 
         haveCommonPrefix |= CodeSymbol::HaveCommonPrefix(symbol, partial);
+
+        if (haveCommonPrefix)
+          break;
       }
 
       // If no symbols have this prefix, then the code is invalid.
