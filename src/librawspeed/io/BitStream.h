@@ -60,7 +60,7 @@ struct BitStreamCacheLeftInRightOut : BitStreamCacheBase
   }
 
   inline uint32 peek(uint32 count) const noexcept {
-    return cache & ((1 << count) - 1);
+    return cache & ((1U << count) - 1U);
   }
 
   inline void skip(uint32 count) noexcept {
@@ -78,7 +78,7 @@ struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
   }
 
   inline uint32 peek(uint32 count) const noexcept {
-    return (cache >> (fillLevel - count)) & ((1 << count) - 1);
+    return (cache >> (fillLevel - count)) & ((1U << count) - 1U);
   }
 
   inline void skip(uint32 count) noexcept {
