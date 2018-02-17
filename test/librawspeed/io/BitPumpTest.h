@@ -37,7 +37,20 @@ public:
   using TestDataType = const std::array<rawspeed::uchar8, 4>;
 
 protected:
-  template <typename L> void test(const TestDataType& data, L gen) {
+  static constexpr auto TestGetBits = [](T* pump, auto gen) -> void {
+    for (int len = 1; len <= 7; len++)
+      ASSERT_EQ(pump->getBits(len), gen(len)) << "     Where len: " << len;
+  };
+
+  static constexpr auto TestPeekBits = [](T* pump, auto gen) -> void {
+    for (int len = 1; len <= 7; len++) {
+      ASSERT_EQ(pump->peekBits(len), gen(len)) << "     Where len: " << len;
+      pump->skipBits(len);
+    }
+  };
+
+  template <typename Test, typename L>
+  void runTest(const TestDataType& data, Test test, L gen) {
     const Buffer b(data.data(), data.size());
 
     for (auto e : {Endianness::little, Endianness::big}) {
@@ -45,8 +58,7 @@ protected:
       const ByteStream bs(db);
 
       T pump(bs);
-      for (int len = 1; len <= 7; len++)
-        ASSERT_EQ(pump.getBits(len), gen(len)) << "     Where len: " << len;
+      test(&pump, gen);
     }
   }
 
@@ -63,14 +75,21 @@ protected:
 
 TYPED_TEST_CASE_P(BitPumpTest);
 
-TYPED_TEST_P(BitPumpTest, ReadOnesTest) {
-  this->test(this->ones, this->onesExpected);
+TYPED_TEST_P(BitPumpTest, GetOnesTest) {
+  this->runTest(this->ones, this->TestGetBits, this->onesExpected);
+}
+TYPED_TEST_P(BitPumpTest, PeekOnesTest) {
+  this->runTest(this->ones, this->TestPeekBits, this->onesExpected);
 }
 
-TYPED_TEST_P(BitPumpTest, ReadInvOnesTest) {
-  this->test(this->invOnes, this->invOnesExpected);
+TYPED_TEST_P(BitPumpTest, GetInvOnesTest) {
+  this->runTest(this->invOnes, this->TestGetBits, this->invOnesExpected);
+}
+TYPED_TEST_P(BitPumpTest, PeekInvOnesTest) {
+  this->runTest(this->invOnes, this->TestPeekBits, this->invOnesExpected);
 }
 
-REGISTER_TYPED_TEST_CASE_P(BitPumpTest, ReadOnesTest, ReadInvOnesTest);
+REGISTER_TYPED_TEST_CASE_P(BitPumpTest, GetOnesTest, PeekOnesTest,
+                           GetInvOnesTest, PeekInvOnesTest);
 
 } // namespace rawspeed_test
