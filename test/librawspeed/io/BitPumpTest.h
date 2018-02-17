@@ -51,19 +51,24 @@ protected:
   }
 
   static TestDataType ones;
+  // I.e. expected values are: "1" "01" "001" ...
+  static constexpr auto onesExpected = [](int i) -> unsigned { return 1U; };
+
   static TestDataType invOnes;
+  // I.e. expected values are: "1" "10" "100" ...
+  static constexpr auto invOnesExpected = [](int i) -> unsigned {
+    return 1U << (i - 1);
+  };
 };
 
 TYPED_TEST_CASE_P(BitPumpTest);
 
 TYPED_TEST_P(BitPumpTest, ReadOnesTest) {
-  // I.e. expected values are: "1" "01" "001" ...
-  this->test(this->ones, [](int i) -> unsigned { return 1U; });
+  this->test(this->ones, this->onesExpected);
 }
 
 TYPED_TEST_P(BitPumpTest, ReadInvOnesTest) {
-  // I.e. expected values are: "1" "10" "100" ...
-  this->test(this->invOnes, [](int i) -> unsigned { return 1U << (i - 1); });
+  this->test(this->invOnes, this->invOnesExpected);
 }
 
 REGISTER_TYPED_TEST_CASE_P(BitPumpTest, ReadOnesTest, ReadInvOnesTest);
