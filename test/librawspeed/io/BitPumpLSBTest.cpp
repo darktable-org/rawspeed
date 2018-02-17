@@ -38,6 +38,16 @@ template <>
 const std::array<rawspeed::uchar8, 4> BitPumpTest<BitPumpLSB>::invOnes = {
     0b00100101, 0b01000010, 0b00010000, 0b11111000};
 
+template <>
+const std::array<rawspeed::uint32, 29>&
+    BitPumpTest<BitPumpLSB>::IncreasingPeekLengthOnesData =
+        BitPumpTest<BitPumpLSB>::IncreasingPeekLengthOnesDataLE;
+
+template <>
+const std::array<rawspeed::uint32, 29>&
+    BitPumpTest<BitPumpLSB>::IncreasingPeekLengthInvOnesData =
+        BitPumpTest<BitPumpLSB>::IncreasingPeekLengthInvOnesDataLE;
+
 INSTANTIATE_TYPED_TEST_CASE_P(LSB, BitPumpTest, BitPumpLSB);
 
 } // namespace rawspeed_test

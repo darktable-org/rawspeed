@@ -46,6 +46,16 @@ template <>
 const std::array<rawspeed::uchar8, 4> BitPumpTest<BitPumpJPEG>::invOnes = {
     0b11010010, 0b00100001, 0b00000100, 0b00001111};
 
+template <>
+const std::array<rawspeed::uint32, 29>&
+    BitPumpTest<BitPumpJPEG>::IncreasingPeekLengthOnesData =
+        BitPumpTest<BitPumpJPEG>::IncreasingPeekLengthOnesDataBE;
+
+template <>
+const std::array<rawspeed::uint32, 29>&
+    BitPumpTest<BitPumpJPEG>::IncreasingPeekLengthInvOnesData =
+        BitPumpTest<BitPumpJPEG>::IncreasingPeekLengthInvOnesDataBE;
+
 INSTANTIATE_TYPED_TEST_CASE_P(JPEG, BitPumpTest, BitPumpJPEG);
 
 TEST(BitPumpJPEGTest, 0xFF0x00Is0xFFTest) {

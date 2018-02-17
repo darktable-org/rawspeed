@@ -49,6 +49,13 @@ protected:
     }
   };
 
+  static constexpr auto TestIncreasingPeekLength = [](T* pump,
+                                                      auto data) -> void {
+    static constexpr auto MaxLen = 28;
+    for (int len = 1; len <= MaxLen; len++)
+      ASSERT_EQ(pump->peekBits(len), data[len]) << "     Where len: " << len;
+  };
+
   template <typename Test, typename L>
   void runTest(const TestDataType& data, Test test, L gen) {
     const Buffer b(data.data(), data.size());
@@ -71,7 +78,70 @@ protected:
   static constexpr auto invOnesExpected = [](int i) -> unsigned {
     return 1U << (i - 1);
   };
+
+  static const std::array<rawspeed::uint32, 29> IncreasingPeekLengthOnesDataLE;
+  static const std::array<rawspeed::uint32, 29> IncreasingPeekLengthOnesDataBE;
+
+  static const std::array<rawspeed::uint32, 29>
+      IncreasingPeekLengthInvOnesDataLE;
+  static const std::array<rawspeed::uint32, 29>
+      IncreasingPeekLengthInvOnesDataBE;
+
+  static const std::array<rawspeed::uint32, 29>& IncreasingPeekLengthOnesData;
+  static const std::array<rawspeed::uint32, 29>&
+      IncreasingPeekLengthInvOnesData;
 };
+
+auto GenOnesLE = [](int zerosToOutput,
+                    int zerosOutputted) -> std::array<rawspeed::uint32, 29> {
+  std::array<rawspeed::uint32, 29> v;
+  unsigned bits = 0;
+  int currBit = -1;
+  for (auto& value : v) {
+    if (zerosToOutput == zerosOutputted) {
+      bits |= 0b1 << currBit;
+      zerosToOutput++;
+      zerosOutputted = 0;
+    }
+    value = bits;
+    zerosOutputted++;
+    currBit++;
+  }
+  return v;
+};
+
+auto GenOnesBE = [](int zerosToOutput,
+                    int zerosOutputted) -> std::array<rawspeed::uint32, 29> {
+  std::array<rawspeed::uint32, 29> v;
+  unsigned bits = 0;
+  for (auto& value : v) {
+    if (zerosToOutput == zerosOutputted) {
+      bits |= 0b1;
+      zerosToOutput++;
+      zerosOutputted = 0;
+    }
+    value = bits;
+    zerosOutputted++;
+    bits <<= 1;
+  }
+  return v;
+};
+
+template <typename T>
+const std::array<rawspeed::uint32, 29>
+    BitPumpTest<T>::IncreasingPeekLengthOnesDataLE = GenOnesLE(0, -1);
+
+template <typename T>
+const std::array<rawspeed::uint32, 29>
+    BitPumpTest<T>::IncreasingPeekLengthOnesDataBE = GenOnesBE(1, 0);
+
+template <typename T>
+const std::array<rawspeed::uint32, 29>
+    BitPumpTest<T>::IncreasingPeekLengthInvOnesDataLE = GenOnesLE(1, 0);
+
+template <typename T>
+const std::array<rawspeed::uint32, 29>
+    BitPumpTest<T>::IncreasingPeekLengthInvOnesDataBE = GenOnesBE(0, -1);
 
 TYPED_TEST_CASE_P(BitPumpTest);
 
@@ -81,6 +151,10 @@ TYPED_TEST_P(BitPumpTest, GetOnesTest) {
 TYPED_TEST_P(BitPumpTest, PeekOnesTest) {
   this->runTest(this->ones, this->TestPeekBits, this->onesExpected);
 }
+TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthOnesTest) {
+  this->runTest(this->ones, this->TestIncreasingPeekLength,
+                this->IncreasingPeekLengthOnesData);
+}
 
 TYPED_TEST_P(BitPumpTest, GetInvOnesTest) {
   this->runTest(this->invOnes, this->TestGetBits, this->invOnesExpected);
@@ -88,8 +162,17 @@ TYPED_TEST_P(BitPumpTest, GetInvOnesTest) {
 TYPED_TEST_P(BitPumpTest, PeekInvOnesTest) {
   this->runTest(this->invOnes, this->TestPeekBits, this->invOnesExpected);
 }
+TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthInvOnesTest) {
+  this->runTest(this->invOnes, this->TestIncreasingPeekLength,
+                this->IncreasingPeekLengthInvOnesData);
+}
 
-REGISTER_TYPED_TEST_CASE_P(BitPumpTest, GetOnesTest, PeekOnesTest,
-                           GetInvOnesTest, PeekInvOnesTest);
+REGISTER_TYPED_TEST_CASE_P(BitPumpTest,
+
+                           GetOnesTest, PeekOnesTest,
+                           IncreasingPeekLengthOnesTest,
+
+                           GetInvOnesTest, PeekInvOnesTest,
+                           IncreasingPeekLengthInvOnesTest);
 
 } // namespace rawspeed_test
