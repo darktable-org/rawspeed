@@ -34,29 +34,32 @@ namespace rawspeed_test {
 
 template <typename T> class BitPumpTest : public ::testing::Test {
 public:
+  using PumpT = typename T::PumpT;
+  using PatternT = typename T::PatternT;
+
   using TestDataType = const std::array<rawspeed::uchar8, 4>;
 
 protected:
-  static constexpr auto TestGetBits = [](T* pump, auto gen) -> void {
+  static constexpr auto TestGetBits = [](PumpT* pump, auto gen) -> void {
     for (int len = 1; len <= 7; len++)
       ASSERT_EQ(pump->getBits(len), gen(len)) << "     Where len: " << len;
   };
 
-  static constexpr auto TestGetBitsNoFill = [](T* pump, auto gen) -> void {
+  static constexpr auto TestGetBitsNoFill = [](PumpT* pump, auto gen) -> void {
     pump->fill(32); // Actually fills 32 bits
     for (int len = 1; len <= 7; len++)
       ASSERT_EQ(pump->getBitsNoFill(len), gen(len))
           << "     Where len: " << len;
   };
 
-  static constexpr auto TestPeekBits = [](T* pump, auto gen) -> void {
+  static constexpr auto TestPeekBits = [](PumpT* pump, auto gen) -> void {
     for (int len = 1; len <= 7; len++) {
       ASSERT_EQ(pump->peekBits(len), gen(len)) << "     Where len: " << len;
       pump->skipBits(len);
     }
   };
 
-  static constexpr auto TestPeekBitsNoFill = [](T* pump, auto gen) -> void {
+  static constexpr auto TestPeekBitsNoFill = [](PumpT* pump, auto gen) -> void {
     pump->fill(32); // Actually fills 32 bits
     for (int len = 1; len <= 7; len++) {
       ASSERT_EQ(pump->peekBitsNoFill(len), gen(len))
@@ -65,19 +68,19 @@ protected:
     }
   };
 
-  static constexpr auto TestIncreasingPeekLength = [](T* pump,
+  static constexpr auto TestIncreasingPeekLength = [](PumpT* pump,
                                                       auto data) -> void {
     static constexpr auto MaxLen = 28;
     for (int len = 1; len <= MaxLen; len++)
-      ASSERT_EQ(pump->peekBits(len), data[len]) << "     Where len: " << len;
+      ASSERT_EQ(pump->peekBits(len), data(len)) << "     Where len: " << len;
   };
 
-  static constexpr auto TestIncreasingPeekLengthNoFill = [](T* pump,
+  static constexpr auto TestIncreasingPeekLengthNoFill = [](PumpT* pump,
                                                             auto data) -> void {
     static constexpr auto MaxLen = 28;
     pump->fill(MaxLen); // Actually fills 32 bits
     for (int len = 1; len <= MaxLen; len++)
-      ASSERT_EQ(pump->peekBitsNoFill(len), data[len])
+      ASSERT_EQ(pump->peekBitsNoFill(len), data(len))
           << "     Where len: " << len;
   };
 
@@ -89,32 +92,61 @@ protected:
       const DataBuffer db(b, e);
       const ByteStream bs(db);
 
-      T pump(bs);
+      PumpT pump(bs);
       test(&pump, gen);
     }
   }
+};
 
-  static TestDataType ones;
-  // I.e. expected values are: "1" "01" "001" ...
-  static constexpr auto onesExpected = [](int i) -> unsigned { return 1U; };
+TYPED_TEST_CASE_P(BitPumpTest);
 
-  static TestDataType invOnes;
-  // I.e. expected values are: "1" "10" "100" ...
-  static constexpr auto invOnesExpected = [](int i) -> unsigned {
-    return 1U << (i - 1);
-  };
+TYPED_TEST_P(BitPumpTest, GetTest) {
+  this->runTest(TypeParam::PatternT::Data, this->TestGetBits,
+                TypeParam::PatternT::element);
+}
+TYPED_TEST_P(BitPumpTest, GetNoFillTest) {
+  this->runTest(TypeParam::PatternT::Data, this->TestGetBitsNoFill,
+                TypeParam::PatternT::element);
+}
+TYPED_TEST_P(BitPumpTest, PeekTest) {
+  this->runTest(TypeParam::PatternT::Data, this->TestPeekBits,
+                TypeParam::PatternT::element);
+}
+TYPED_TEST_P(BitPumpTest, PeekNoFillTest) {
+  this->runTest(TypeParam::PatternT::Data, this->TestPeekBitsNoFill,
+                TypeParam::PatternT::element);
+}
+TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthTest) {
+  this->runTest(TypeParam::PatternT::Data, this->TestIncreasingPeekLength,
+                TypeParam::PatternT::data);
+}
+TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthNoFillTest) {
+  this->runTest(TypeParam::PatternT::Data, this->TestIncreasingPeekLengthNoFill,
+                TypeParam::PatternT::data);
+}
 
-  static const std::array<rawspeed::uint32, 29> IncreasingPeekLengthOnesDataLE;
-  static const std::array<rawspeed::uint32, 29> IncreasingPeekLengthOnesDataBE;
+REGISTER_TYPED_TEST_CASE_P(BitPumpTest, GetTest, GetNoFillTest, PeekTest,
+                           PeekNoFillTest, IncreasingPeekLengthTest,
+                           IncreasingPeekLengthNoFillTest);
 
-  static const std::array<rawspeed::uint32, 29>
-      IncreasingPeekLengthInvOnesDataLE;
-  static const std::array<rawspeed::uint32, 29>
-      IncreasingPeekLengthInvOnesDataBE;
+template <typename Pump, typename PatternTag> struct Pattern {
+  static const std::array<rawspeed::uchar8, 4> Data;
+  static rawspeed::uint32 element(int index);
+  static rawspeed::uint32 data(int len);
+};
 
-  static const std::array<rawspeed::uint32, 29>& IncreasingPeekLengthOnesData;
-  static const std::array<rawspeed::uint32, 29>&
-      IncreasingPeekLengthInvOnesData;
+struct OnesTag;
+template <typename Pump> struct Pattern<Pump, OnesTag> {
+  static const std::array<rawspeed::uchar8, 4> Data;
+  static rawspeed::uint32 element(int index) { return 1U; }
+  static rawspeed::uint32 data(int len);
+};
+
+struct InvOnesTag;
+template <typename Pump> struct Pattern<Pump, InvOnesTag> {
+  static const std::array<rawspeed::uchar8, 4> Data;
+  static rawspeed::uint32 element(int index) { return 1U << (index - 1U); }
+  static rawspeed::uint32 data(int len);
 };
 
 auto GenOnesLE = [](int zerosToOutput,
@@ -134,7 +166,6 @@ auto GenOnesLE = [](int zerosToOutput,
   }
   return v;
 };
-
 auto GenOnesBE = [](int zerosToOutput,
                     int zerosOutputted) -> std::array<rawspeed::uint32, 29> {
   std::array<rawspeed::uint32, 29> v;
@@ -152,75 +183,14 @@ auto GenOnesBE = [](int zerosToOutput,
   return v;
 };
 
-template <typename T>
-const std::array<rawspeed::uint32, 29>
-    BitPumpTest<T>::IncreasingPeekLengthOnesDataLE = GenOnesLE(0, -1);
+template <typename Pump, typename Pattern> struct PumpAndPattern {
+  using PumpT = Pump;
+  using PatternT = Pattern;
+};
 
-template <typename T>
-const std::array<rawspeed::uint32, 29>
-    BitPumpTest<T>::IncreasingPeekLengthOnesDataBE = GenOnesBE(1, 0);
-
-template <typename T>
-const std::array<rawspeed::uint32, 29>
-    BitPumpTest<T>::IncreasingPeekLengthInvOnesDataLE = GenOnesLE(1, 0);
-
-template <typename T>
-const std::array<rawspeed::uint32, 29>
-    BitPumpTest<T>::IncreasingPeekLengthInvOnesDataBE = GenOnesBE(0, -1);
-
-TYPED_TEST_CASE_P(BitPumpTest);
-
-TYPED_TEST_P(BitPumpTest, GetOnesTest) {
-  this->runTest(this->ones, this->TestGetBits, this->onesExpected);
-}
-TYPED_TEST_P(BitPumpTest, GetNoFillOnesTest) {
-  this->runTest(this->ones, this->TestGetBitsNoFill, this->onesExpected);
-}
-TYPED_TEST_P(BitPumpTest, PeekOnesTest) {
-  this->runTest(this->ones, this->TestPeekBits, this->onesExpected);
-}
-TYPED_TEST_P(BitPumpTest, PeekNoFillOnesTest) {
-  this->runTest(this->ones, this->TestPeekBitsNoFill, this->onesExpected);
-}
-TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthOnesTest) {
-  this->runTest(this->ones, this->TestIncreasingPeekLength,
-                this->IncreasingPeekLengthOnesData);
-}
-TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthNoFillOnesTest) {
-  this->runTest(this->ones, this->TestIncreasingPeekLengthNoFill,
-                this->IncreasingPeekLengthOnesData);
-}
-
-TYPED_TEST_P(BitPumpTest, GetInvOnesTest) {
-  this->runTest(this->invOnes, this->TestGetBits, this->invOnesExpected);
-}
-TYPED_TEST_P(BitPumpTest, GetNoFillInvOnesTest) {
-  this->runTest(this->invOnes, this->TestGetBitsNoFill, this->invOnesExpected);
-}
-TYPED_TEST_P(BitPumpTest, PeekInvOnesTest) {
-  this->runTest(this->invOnes, this->TestPeekBits, this->invOnesExpected);
-}
-TYPED_TEST_P(BitPumpTest, PeekNoFillInvOnesTest) {
-  this->runTest(this->invOnes, this->TestPeekBitsNoFill, this->invOnesExpected);
-}
-TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthInvOnesTest) {
-  this->runTest(this->invOnes, this->TestIncreasingPeekLength,
-                this->IncreasingPeekLengthInvOnesData);
-}
-TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthNoFillInvOnesTest) {
-  this->runTest(this->invOnes, this->TestIncreasingPeekLengthNoFill,
-                this->IncreasingPeekLengthInvOnesData);
-}
-
-REGISTER_TYPED_TEST_CASE_P(BitPumpTest,
-
-                           GetOnesTest, GetNoFillOnesTest, PeekOnesTest,
-                           PeekNoFillOnesTest, IncreasingPeekLengthOnesTest,
-                           IncreasingPeekLengthNoFillOnesTest,
-
-                           GetInvOnesTest, GetNoFillInvOnesTest,
-                           PeekInvOnesTest, PeekNoFillInvOnesTest,
-                           IncreasingPeekLengthInvOnesTest,
-                           IncreasingPeekLengthNoFillInvOnesTest);
+template <typename Pump>
+using Patterns =
+    ::testing::Types<PumpAndPattern<Pump, Pattern<Pump, OnesTag>>,
+                     PumpAndPattern<Pump, Pattern<Pump, InvOnesTag>>>;
 
 } // namespace rawspeed_test

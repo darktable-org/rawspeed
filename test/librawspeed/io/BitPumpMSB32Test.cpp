@@ -29,25 +29,24 @@ using rawspeed::BitPumpMSB32;
 namespace rawspeed_test {
 
 template <>
-const std::array<rawspeed::uchar8, 4> BitPumpTest<BitPumpMSB32>::ones = {
+const std::array<rawspeed::uchar8, 4> Pattern<BitPumpMSB32, OnesTag>::Data = {
     /* [Byte3 Byte2 Byte1 Byte0] */
     /* Byte: [Bit0 .. Bit7] */
     0b00011111, 0b00001000, 0b01000010, 0b10100100};
+template <> rawspeed::uint32 Pattern<BitPumpMSB32, OnesTag>::data(int index) {
+  const auto set = GenOnesBE(1, 0);
+  return set[index];
+}
 
 template <>
-const std::array<rawspeed::uchar8, 4> BitPumpTest<BitPumpMSB32>::invOnes = {
-    0b00001111, 0b00000100, 0b00100001, 0b11010010};
-
+const std::array<rawspeed::uchar8, 4> Pattern<BitPumpMSB32, InvOnesTag>::Data =
+    {0b00001111, 0b00000100, 0b00100001, 0b11010010};
 template <>
-const std::array<rawspeed::uint32, 29>&
-    BitPumpTest<BitPumpMSB32>::IncreasingPeekLengthOnesData =
-        BitPumpTest<BitPumpMSB32>::IncreasingPeekLengthOnesDataBE;
+rawspeed::uint32 Pattern<BitPumpMSB32, InvOnesTag>::data(int index) {
+  const auto set = GenOnesBE(0, -1);
+  return set[index];
+}
 
-template <>
-const std::array<rawspeed::uint32, 29>&
-    BitPumpTest<BitPumpMSB32>::IncreasingPeekLengthInvOnesData =
-        BitPumpTest<BitPumpMSB32>::IncreasingPeekLengthInvOnesDataBE;
-
-INSTANTIATE_TYPED_TEST_CASE_P(MSB32, BitPumpTest, BitPumpMSB32);
+INSTANTIATE_TYPED_TEST_CASE_P(MSB32, BitPumpTest, Patterns<BitPumpMSB32>);
 
 } // namespace rawspeed_test
