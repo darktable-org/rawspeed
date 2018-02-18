@@ -54,6 +54,13 @@ template <> rawspeed::uint32 Pattern<BitPumpJPEG, InvOnesTag>::data(int index) {
   return set[index];
 }
 
+// If 0xFF0x00 byte sequence is found, it is just 0xFF, i.e. 0x00 is ignored.
+// So if we want 0xFF, we need to append 0x00 byte
+template <>
+const std::array<rawspeed::uchar8, 8> Pattern<BitPumpJPEG, SaturatedTag>::Data{
+    {rawspeed::uchar8(~0U), 0, rawspeed::uchar8(~0U), 0, rawspeed::uchar8(~0U),
+     0, rawspeed::uchar8(~0U), 0}};
+
 INSTANTIATE_TYPED_TEST_CASE_P(JPEG, BitPumpTest, Patterns<BitPumpJPEG>);
 
 TEST(BitPumpJPEGTest, 0xFF0x00Is0xFFTest) {

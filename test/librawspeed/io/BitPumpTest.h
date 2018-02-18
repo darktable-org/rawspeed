@@ -37,8 +37,6 @@ public:
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
 
-  using TestDataType = const std::array<rawspeed::uchar8, 4>;
-
 protected:
   static constexpr auto TestGetBits = [](PumpT* pump, auto gen) -> void {
     for (int len = 1; len <= 7; len++)
@@ -84,7 +82,7 @@ protected:
           << "     Where len: " << len;
   };
 
-  template <typename Test, typename L>
+  template <typename TestDataType, typename Test, typename L>
   void runTest(const TestDataType& data, Test test, L gen) {
     const Buffer b(data.data(), data.size());
 
@@ -135,6 +133,16 @@ template <typename Pump, typename PatternTag> struct Pattern {
   static rawspeed::uint32 data(int len);
 };
 
+struct ZerosTag;
+template <typename Pump> struct Pattern<Pump, ZerosTag> {
+  static const std::array<rawspeed::uchar8, 4> Data;
+  static rawspeed::uint32 element(int index) { return 0U; }
+  static rawspeed::uint32 data(int len) { return 0U; }
+};
+template <typename Pump>
+const std::array<rawspeed::uchar8, 4> Pattern<Pump, ZerosTag>::Data{
+    {/* zero-init */}};
+
 struct OnesTag;
 template <typename Pump> struct Pattern<Pump, OnesTag> {
   static const std::array<rawspeed::uchar8, 4> Data;
@@ -148,6 +156,17 @@ template <typename Pump> struct Pattern<Pump, InvOnesTag> {
   static rawspeed::uint32 element(int index) { return 1U << (index - 1U); }
   static rawspeed::uint32 data(int len);
 };
+
+struct SaturatedTag;
+template <typename Pump> struct Pattern<Pump, SaturatedTag> {
+  static const std::array<rawspeed::uchar8, 8> Data;
+  static rawspeed::uint32 element(int index) { return (1U << index) - 1U; }
+  static rawspeed::uint32 data(int len) { return (1U << len) - 1U; }
+};
+template <typename Pump>
+const std::array<rawspeed::uchar8, 8> Pattern<Pump, SaturatedTag>::Data{
+    {rawspeed::uchar8(~0U), rawspeed::uchar8(~0U), rawspeed::uchar8(~0U),
+     rawspeed::uchar8(~0U)}};
 
 auto GenOnesLE = [](int zerosToOutput,
                     int zerosOutputted) -> std::array<rawspeed::uint32, 29> {
@@ -190,7 +209,9 @@ template <typename Pump, typename Pattern> struct PumpAndPattern {
 
 template <typename Pump>
 using Patterns =
-    ::testing::Types<PumpAndPattern<Pump, Pattern<Pump, OnesTag>>,
-                     PumpAndPattern<Pump, Pattern<Pump, InvOnesTag>>>;
+    ::testing::Types<PumpAndPattern<Pump, Pattern<Pump, ZerosTag>>,
+                     PumpAndPattern<Pump, Pattern<Pump, OnesTag>>,
+                     PumpAndPattern<Pump, Pattern<Pump, InvOnesTag>>,
+                     PumpAndPattern<Pump, Pattern<Pump, SaturatedTag>>>;
 
 } // namespace rawspeed_test
