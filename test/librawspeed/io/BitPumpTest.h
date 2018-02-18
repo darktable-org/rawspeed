@@ -42,10 +42,26 @@ protected:
       ASSERT_EQ(pump->getBits(len), gen(len)) << "     Where len: " << len;
   };
 
+  static constexpr auto TestGetBitsNoFill = [](T* pump, auto gen) -> void {
+    pump->fill(32); // Actually fills 32 bits
+    for (int len = 1; len <= 7; len++)
+      ASSERT_EQ(pump->getBitsNoFill(len), gen(len))
+          << "     Where len: " << len;
+  };
+
   static constexpr auto TestPeekBits = [](T* pump, auto gen) -> void {
     for (int len = 1; len <= 7; len++) {
       ASSERT_EQ(pump->peekBits(len), gen(len)) << "     Where len: " << len;
       pump->skipBits(len);
+    }
+  };
+
+  static constexpr auto TestPeekBitsNoFill = [](T* pump, auto gen) -> void {
+    pump->fill(32); // Actually fills 32 bits
+    for (int len = 1; len <= 7; len++) {
+      ASSERT_EQ(pump->peekBitsNoFill(len), gen(len))
+          << "     Where len: " << len;
+      pump->skipBitsNoFill(len);
     }
   };
 
@@ -54,6 +70,15 @@ protected:
     static constexpr auto MaxLen = 28;
     for (int len = 1; len <= MaxLen; len++)
       ASSERT_EQ(pump->peekBits(len), data[len]) << "     Where len: " << len;
+  };
+
+  static constexpr auto TestIncreasingPeekLengthNoFill = [](T* pump,
+                                                            auto data) -> void {
+    static constexpr auto MaxLen = 28;
+    pump->fill(MaxLen); // Actually fills 32 bits
+    for (int len = 1; len <= MaxLen; len++)
+      ASSERT_EQ(pump->peekBitsNoFill(len), data[len])
+          << "     Where len: " << len;
   };
 
   template <typename Test, typename L>
@@ -148,31 +173,54 @@ TYPED_TEST_CASE_P(BitPumpTest);
 TYPED_TEST_P(BitPumpTest, GetOnesTest) {
   this->runTest(this->ones, this->TestGetBits, this->onesExpected);
 }
+TYPED_TEST_P(BitPumpTest, GetNoFillOnesTest) {
+  this->runTest(this->ones, this->TestGetBitsNoFill, this->onesExpected);
+}
 TYPED_TEST_P(BitPumpTest, PeekOnesTest) {
   this->runTest(this->ones, this->TestPeekBits, this->onesExpected);
 }
+TYPED_TEST_P(BitPumpTest, PeekNoFillOnesTest) {
+  this->runTest(this->ones, this->TestPeekBitsNoFill, this->onesExpected);
+}
 TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthOnesTest) {
   this->runTest(this->ones, this->TestIncreasingPeekLength,
+                this->IncreasingPeekLengthOnesData);
+}
+TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthNoFillOnesTest) {
+  this->runTest(this->ones, this->TestIncreasingPeekLengthNoFill,
                 this->IncreasingPeekLengthOnesData);
 }
 
 TYPED_TEST_P(BitPumpTest, GetInvOnesTest) {
   this->runTest(this->invOnes, this->TestGetBits, this->invOnesExpected);
 }
+TYPED_TEST_P(BitPumpTest, GetNoFillInvOnesTest) {
+  this->runTest(this->invOnes, this->TestGetBitsNoFill, this->invOnesExpected);
+}
 TYPED_TEST_P(BitPumpTest, PeekInvOnesTest) {
   this->runTest(this->invOnes, this->TestPeekBits, this->invOnesExpected);
+}
+TYPED_TEST_P(BitPumpTest, PeekNoFillInvOnesTest) {
+  this->runTest(this->invOnes, this->TestPeekBitsNoFill, this->invOnesExpected);
 }
 TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthInvOnesTest) {
   this->runTest(this->invOnes, this->TestIncreasingPeekLength,
                 this->IncreasingPeekLengthInvOnesData);
 }
+TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthNoFillInvOnesTest) {
+  this->runTest(this->invOnes, this->TestIncreasingPeekLengthNoFill,
+                this->IncreasingPeekLengthInvOnesData);
+}
 
 REGISTER_TYPED_TEST_CASE_P(BitPumpTest,
 
-                           GetOnesTest, PeekOnesTest,
-                           IncreasingPeekLengthOnesTest,
+                           GetOnesTest, GetNoFillOnesTest, PeekOnesTest,
+                           PeekNoFillOnesTest, IncreasingPeekLengthOnesTest,
+                           IncreasingPeekLengthNoFillOnesTest,
 
-                           GetInvOnesTest, PeekInvOnesTest,
-                           IncreasingPeekLengthInvOnesTest);
+                           GetInvOnesTest, GetNoFillInvOnesTest,
+                           PeekInvOnesTest, PeekNoFillInvOnesTest,
+                           IncreasingPeekLengthInvOnesTest,
+                           IncreasingPeekLengthNoFillInvOnesTest);
 
 } // namespace rawspeed_test
