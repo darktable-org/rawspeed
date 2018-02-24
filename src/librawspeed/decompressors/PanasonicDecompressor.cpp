@@ -43,9 +43,19 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
   const uint32 width = mRaw->dim.x;
   const uint32 height = mRaw->dim.y;
 
-  if (width == 0 || height == 0 || width % 14 != 0 || width > 5488 ||
-      height > 3904)
+  if (width == 0 || height == 0 || width % 14 != 0)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
+  /*
+   * Normally, we would check the image dimensions against some hardcoded
+   * threshold. That is being done as poor man's attempt to catch
+   * obviously-invalid raws, and avoid OOM's during fuzzing. However, there is
+   * a better solution - actually check the size of input buffer to try and
+   * guess whether the image size is valid or not. And in this case, we can do
+   * that, because the compression rate is static and known.
+   */
+  // if (width > 5488 || height > 3912)
+  //   ThrowRDE("Too large image size: (%u; %u)", width, height);
 
   if (BufSize < load_flags)
     ThrowRDE("Bad load_flags: %u, less than BufSize (%u)", load_flags, BufSize);
