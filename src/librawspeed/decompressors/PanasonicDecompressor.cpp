@@ -61,7 +61,10 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
     ThrowRDE("Bad load_flags: %u, less than BufSize (%u)", load_flags, BufSize);
 
   // Naive count of bytes that given pixel count requires.
-  const auto rawBytesNormal = 8U * mRaw->dim.area() / 7U;
+  // Do division first, because we know the remainder is always zero,
+  // and the next multiplication won't overflow.
+  assert(mRaw->dim.area() % 7ULL == 0ULL);
+  const auto rawBytesNormal = (mRaw->dim.area() / 7ULL) * 8ULL;
   // If load_flags is zero, than that size is the size we need to read.
   // But if it is not, then we need to round up to multiple of BufSize, because
   // of splitting&rotation of each BufSize's slice in half at load_flags bytes.
