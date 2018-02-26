@@ -72,6 +72,8 @@ public:
     return x <= rhs.x && y <= rhs.y;
   }
 
+  bool hasPositiveArea() const { return operator>({0, 0}); }
+
   area_type __attribute__((pure)) area() const {
     using signed_area = std::make_signed<area_type>::type;
 

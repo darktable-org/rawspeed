@@ -318,6 +318,37 @@ TEST_P(PointTest, SubTest2) {
   });
 }
 
+using hasPositiveAreaType = std::tuple<int, int>;
+class HasPositiveAreaTest
+    : public ::testing::TestWithParam<hasPositiveAreaType> {
+protected:
+  HasPositiveAreaTest() = default;
+  virtual void SetUp() {
+    auto param = GetParam();
+    p = {std::tr1::get<0>(param), std::tr1::get<1>(param)};
+  }
+
+  iPoint2D p;
+};
+INSTANTIATE_TEST_CASE_P(HasPositiveAreaTest, HasPositiveAreaTest,
+                        ::testing::Combine(::testing::Range(-2, 3),
+                                           ::testing::Range(-2, 3)));
+static const iPoint2D PositiveAreaData[] = {
+    {1, 1},
+    {1, 2},
+    {2, 1},
+    {2, 2},
+};
+TEST_P(HasPositiveAreaTest, HasPositiveAreaTest) {
+  // If the function says it has positive area, it should be in the array.
+  // And the other way around.
+  ASSERT_NO_THROW({
+    ASSERT_EQ(p.hasPositiveArea(), std::find(std::cbegin(PositiveAreaData),
+                                             std::cend(PositiveAreaData),
+                                             p) != std::cend(PositiveAreaData));
+  });
+}
+
 using areaType = tuple<IntPair, iPoint2D::area_type>;
 class AreaTest : public ::testing::TestWithParam<areaType> {
 protected:
