@@ -40,11 +40,10 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
 
-  const uint32 width = mRaw->dim.x;
-  const uint32 height = mRaw->dim.y;
-
-  if (width == 0 || height == 0 || width % 14 != 0)
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 14 != 0) {
+    ThrowRDE("Unexpected image dimensions found: (%i; %i)", mRaw->dim.x,
+             mRaw->dim.y);
+  }
 
   /*
    * Normally, we would check the image dimensions against some hardcoded
