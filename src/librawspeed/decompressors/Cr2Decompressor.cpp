@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2017 Axel Waggershauser
+    Copyright (C) 2017-2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -164,6 +165,10 @@ void Cr2Decompressor::decodeN_X_Y()
   for (const auto& slicesWidth : slicesWidths) {
     if (slicesWidth > mRaw->dim.x)
       ThrowRDE("Slice is longer than image's height, which is unsupported.");
+    if (slicesWidth % xStepSize != 0) {
+      ThrowRDE("Slice width (%u) should be multiple of pixel group size (%u)",
+               slicesWidth, xStepSize);
+    }
   }
 
   if (frame.h * std::accumulate(slicesWidths.begin(), slicesWidths.end(), 0) <
@@ -188,6 +193,7 @@ void Cr2Decompressor::decodeN_X_Y()
       auto dest =
           reinterpret_cast<ushort16*>(mRaw->getDataUncropped(destX, destY));
 
+      assert(sliceWidth % xStepSize == 0);
       for (unsigned x = 0; x < sliceWidth; x += xStepSize) {
         // check if we processed one full raw row worth of pixels
         if (processedPixels == frame.w) {
