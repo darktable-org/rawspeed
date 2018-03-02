@@ -127,6 +127,17 @@ void Cr2Decompressor::decode(std::vector<int> slicesWidths_)
 template <int N_COMP, int X_S_F, int Y_S_F>
 void Cr2Decompressor::decodeN_X_Y()
 {
+  // To understand the CR2 slice handling and sampling factor behavior, see
+  // https://github.com/lclevy/libcraw2/blob/master/docs/cr2_lossless.pdf?raw=true
+
+  // inner loop decodes one group of pixels at a time
+  //  * for <N,1,1>: N  = N*1*1 (full raw)
+  //  * for <3,2,1>: 6  = 3*2*1
+  //  * for <3,2,2>: 12 = 3*2*2
+  // and advances x by N_COMP*X_S_F and y by Y_S_F
+  constexpr int xStepSize = N_COMP * X_S_F;
+  constexpr int yStepSize = Y_S_F;
+
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
   auto predNext = reinterpret_cast<ushort16*>(mRaw->getDataUncropped(0, 0));
@@ -158,17 +169,6 @@ void Cr2Decompressor::decodeN_X_Y()
   if (frame.h * std::accumulate(slicesWidths.begin(), slicesWidths.end(), 0) <
       mRaw->dim.area())
     ThrowRDE("Incorrrect slice height / slice widths! Less than image size.");
-
-  // To understand the CR2 slice handling and sampling factor behavior, see
-  // https://github.com/lclevy/libcraw2/blob/master/docs/cr2_lossless.pdf?raw=true
-
-  // inner loop decodes one group of pixels at a time
-  //  * for <N,1,1>: N  = N*1*1 (full raw)
-  //  * for <3,2,1>: 6  = 3*2*1
-  //  * for <3,2,2>: 12 = 3*2*2
-  // and advances x by N_COMP*X_S_F and y by Y_S_F
-  constexpr int xStepSize = N_COMP * X_S_F;
-  constexpr int yStepSize = Y_S_F;
 
   unsigned processedPixels = 0;
   unsigned processedLineSlices = 0;
