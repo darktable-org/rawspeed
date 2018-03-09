@@ -41,6 +41,8 @@ class LJpegDecompressor final : public AbstractLJpegDecompressor
   uint32 w = 0;
   uint32 h = 0;
 
+  uint32 wBlocks = 0;
+
 public:
   LJpegDecompressor(const ByteStream& bs, const RawImage& img);
 

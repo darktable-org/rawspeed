@@ -82,10 +82,11 @@ void LJpegDecompressor::decodeScan()
   if ((mRaw->getCpp() * (mRaw->dim.x - offX)) < frame.cps)
     ThrowRDE("Got less pixels than the components per sample");
 
-  const auto frameWidth = frame.cps * frame.w;
-  if (frameWidth < w || frame.h < h) {
+  assert((mRaw->getCpp() * w) % frame.cps == 0);
+  wBlocks = (mRaw->getCpp() * w) / frame.cps;
+  if (frame.w < wBlocks || frame.h < h) {
     ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
-             frameWidth, frame.h, w, h);
+             frame.cps * frame.w, frame.h, w, h);
   }
 
   switch (frame.cps) {
@@ -116,8 +117,6 @@ void LJpegDecompressor::decodeN()
   assert(mRaw->dim.x >= N_COMP);
   assert((mRaw->getCpp() * (mRaw->dim.x - offX)) >= N_COMP);
 
-  assert((mRaw->getCpp() * w) % N_COMP == 0);
-
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
   auto predNext = pred.data();
@@ -128,14 +127,11 @@ void LJpegDecompressor::decodeN()
   // The tiles at the bottom and the right may extend beyond the dimension of
   // the raw image buffer. The excessive content has to be ignored.
 
-  const auto height = std::min(frame.h, h);
-  assert(height == h);
-  const auto wBlocks = (mRaw->getCpp() * w) / N_COMP;
-  const auto width = std::min(frame.w, wBlocks);
-  assert(width == wBlocks);
+  assert(frame.h >= h);
+  assert(frame.cps * frame.w >= mRaw->getCpp() * w);
 
   // For y, we can simply stop decoding when we reached the border.
-  for (unsigned y = 0; y < height; ++y) {
+  for (unsigned y = 0; y < h; ++y) {
     auto destY = offY + y;
     auto dest =
         reinterpret_cast<ushort16*>(mRaw->getDataUncropped(offX, destY));
@@ -145,13 +141,13 @@ void LJpegDecompressor::decodeN()
     predNext = dest;
 
     // For x, we first process all pixels within the image buffer ...
-    for (unsigned x = 0; x < width; ++x) {
+    for (unsigned x = 0; x < wBlocks; ++x) {
       unroll_loop<N_COMP>([&](int i) {
         *dest++ = pred[i] += ht[i]->decodeNext(bitStream);
       });
     }
     // ... and discard the rest.
-    for (unsigned x = width; x < frame.w; ++x) {
+    for (unsigned x = wBlocks; x < frame.w; ++x) {
       unroll_loop<N_COMP>([&](int i) {
         ht[i]->decodeNext(bitStream);
       });
