@@ -116,6 +116,8 @@ void LJpegDecompressor::decodeN()
   assert(mRaw->dim.x >= N_COMP);
   assert((mRaw->getCpp() * (mRaw->dim.x - offX)) >= N_COMP);
 
+  assert((mRaw->getCpp() * w) % N_COMP == 0);
+
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
   auto predNext = pred.data();
@@ -127,7 +129,10 @@ void LJpegDecompressor::decodeN()
   // the raw image buffer. The excessive content has to be ignored.
 
   const auto height = std::min(frame.h, h);
-  const auto width = std::min(frame.w, (mRaw->getCpp() * w) / N_COMP);
+  assert(height == h);
+  const auto wBlocks = (mRaw->getCpp() * w) / N_COMP;
+  const auto width = std::min(frame.w, wBlocks);
+  assert(width == wBlocks);
 
   // For y, we can simply stop decoding when we reached the border.
   for (unsigned y = 0; y < height; ++y) {
