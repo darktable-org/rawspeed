@@ -126,9 +126,12 @@ void LJpegDecompressor::decodeN()
   // The tiles at the bottom and the right may extend beyond the dimension of
   // the raw image buffer. The excessive content has to be ignored.
 
+  const auto height = std::min(frame.h, std::min(h, mRaw->dim.y - offY));
+  const auto width = std::min(
+      frame.w, (mRaw->getCpp() * std::min(w, mRaw->dim.x - offX)) / N_COMP);
+
   // For y, we can simply stop decoding when we reached the border.
-  for (unsigned y = 0; y < std::min(frame.h, std::min(h, mRaw->dim.y - offY));
-       ++y) {
+  for (unsigned y = 0; y < height; ++y) {
     auto destY = offY + y;
     auto dest =
         reinterpret_cast<ushort16*>(mRaw->getDataUncropped(offX, destY));
@@ -136,9 +139,6 @@ void LJpegDecompressor::decodeN()
     copy_n(predNext, N_COMP, pred.data());
     // the predictor for the next line is the start of this line
     predNext = dest;
-
-    unsigned width = std::min(
-        frame.w, (mRaw->getCpp() * std::min(w, mRaw->dim.x - offX)) / N_COMP);
 
     // For x, we first process all pixels within the image buffer ...
     for (unsigned x = 0; x < width; ++x) {
