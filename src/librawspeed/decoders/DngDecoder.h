@@ -32,6 +32,8 @@ class CameraMetaData;
 
 class Buffer;
 
+struct DngTilingDescription;
+
 class DngDecoder final : public AbstractTiffDecoder
 {
 public:
@@ -48,6 +50,7 @@ protected:
   bool mFixLjpeg;
   void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
   void parseCFA(const TiffIFD* raw);
+  DngTilingDescription getTilingDescription(const TiffIFD* raw);
   void decodeData(const TiffIFD* raw, uint32 sample_format);
   void handleMetadata(const TiffIFD* raw);
   bool decodeMaskedAreas(const TiffIFD* raw);

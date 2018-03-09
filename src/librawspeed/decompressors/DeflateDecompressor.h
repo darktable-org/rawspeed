@@ -45,8 +45,9 @@ public:
                       int bps_)
       : input(std::move(bs)), mRaw(img), predictor(predictor_), bps(bps_) {}
 
-  void decode(std::unique_ptr<unsigned char[]>* uBuffer, int width, int height,
-              uint32 offX, uint32 offY);
+  void decode(std::unique_ptr<unsigned char[]>* uBuffer, int tileWidthMax,
+              int tileHeightMax, int width, int height, uint32 offX,
+              uint32 offY);
 };
 
 } // namespace rawspeed

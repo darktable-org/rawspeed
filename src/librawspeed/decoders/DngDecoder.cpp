@@ -203,22 +203,7 @@ void DngDecoder::parseCFA(const TiffIFD* raw) {
   mRaw->cfa.shiftDown(aa[0]);
 }
 
-void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
-  if (compression == 8 && sample_format != 3) {
-    ThrowRDE("Only float format is supported for "
-             "deflate-compressed data.");
-  } else if ((compression == 7 || compression == 0x884c) &&
-             sample_format != 1) {
-    ThrowRDE("Only 16 bit unsigned data supported for "
-             "JPEG-compressed data.");
-  }
-
-  uint32 predictor = -1;
-  if (raw->hasEntry(PREDICTOR))
-    predictor = raw->getEntry(PREDICTOR)->getU32();
-
-  AbstractDngDecompressor slices(mRaw, compression, mFixLjpeg, bps, predictor);
-
+DngTilingDescription DngDecoder::getTilingDescription(const TiffIFD* raw) {
   if (raw->hasEntry(TILEOFFSETS)) {
     const uint32 tilew = raw->getEntry(TILEWIDTH)->getU32();
     const uint32 tileh = raw->getEntry(TILELENGTH)->getU32();
@@ -250,75 +235,80 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
                tilesX, tilesY);
     }
 
-    const uint32 nTiles = tilesX * tilesY;
-    assert(nTiles > 0);
+    const unsigned nTiles = tilesX * tilesY;
 
-    slices.slices.reserve(nTiles);
-
-    for (uint32 y = 0; y < tilesY; y++) {
-      for (uint32 x = 0; x < tilesX; x++) {
-        const auto s = x + y * tilesX;
-        const auto offset = offsets->getU32(s);
-        const auto count = counts->getU32(s);
-
-        if (count < 1)
-          ThrowRDE("Tile %u;%u is empty", x, y);
-
-        ByteStream bs(mFile->getSubView(offset, count), 0,
-                      mRootIFD->rootBuffer.getByteOrder());
-
-        const uint32 offX = tilew * x;
-        const uint32 offY = tileh * y;
-
-        DngSliceElement e(bs, offX, offY, tilew, tileh);
-        slices.slices.emplace_back(e);
-      }
-    }
-
-    assert(slices.slices.size() == nTiles);
-  } else { // Strips
-    TiffEntry* offsets = raw->getEntry(STRIPOFFSETS);
-    TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
-
-    if (counts->count != offsets->count) {
-      ThrowRDE("Byte count number does not match strip size: "
-               "count:%u, stips:%u ",
-               counts->count, offsets->count);
-    }
-
-    uint32 yPerSlice = raw->hasEntry(ROWSPERSTRIP) ?
-          raw->getEntry(ROWSPERSTRIP)->getU32() : mRaw->dim.y;
-
-    if (yPerSlice == 0 || yPerSlice > static_cast<uint32>(mRaw->dim.y) ||
-        roundUpDivision(mRaw->dim.y, yPerSlice) != counts->count) {
-      ThrowRDE("Invalid y per slice %u or strip count %u (height = %u)",
-               yPerSlice, counts->count, mRaw->dim.y);
-    }
-
-    slices.slices.reserve(counts->count);
-
-    uint32 offY = 0;
-    for (uint32 s = 0; s < counts->count; s++) {
-      const auto offset = offsets->getU32(s);
-      const auto count = counts->getU32(s);
-
-      if (count < 1)
-        ThrowRDE("Slice %u is empty", s);
-
-      assert(offY < static_cast<uint32>(mRaw->dim.y));
-
-      ByteStream bs(mFile->getSubView(offset, count), 0,
-                    mRootIFD->rootBuffer.getByteOrder());
-      DngSliceElement e(bs, /*offsetX=*/0, offY, mRaw->dim.x, yPerSlice);
-
-      slices.slices.emplace_back(e);
-      offY += yPerSlice;
-    }
-
-    assert(static_cast<uint32>(mRaw->dim.y) <= offY);
-    assert(slices.slices.size() == counts->count);
+    return {mRaw->dim, nTiles, tilew, tileh};
   }
 
+  // Strips
+  TiffEntry* offsets = raw->getEntry(STRIPOFFSETS);
+  TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
+
+  if (counts->count != offsets->count) {
+    ThrowRDE("Byte count number does not match strip size: "
+             "count:%u, stips:%u ",
+             counts->count, offsets->count);
+  }
+
+  uint32 yPerSlice = raw->hasEntry(ROWSPERSTRIP)
+                         ? raw->getEntry(ROWSPERSTRIP)->getU32()
+                         : mRaw->dim.y;
+
+  if (yPerSlice == 0 || yPerSlice > static_cast<uint32>(mRaw->dim.y) ||
+      roundUpDivision(mRaw->dim.y, yPerSlice) != counts->count) {
+    ThrowRDE("Invalid y per slice %u or strip count %u (height = %u)",
+             yPerSlice, counts->count, mRaw->dim.y);
+  }
+
+  return {mRaw->dim, counts->count, static_cast<uint32>(mRaw->dim.x),
+          yPerSlice};
+}
+
+void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
+  if (compression == 8 && sample_format != 3) {
+    ThrowRDE("Only float format is supported for "
+             "deflate-compressed data.");
+  } else if ((compression == 7 || compression == 0x884c) &&
+             sample_format != 1) {
+    ThrowRDE("Only 16 bit unsigned data supported for "
+             "JPEG-compressed data.");
+  }
+
+  uint32 predictor = -1;
+  if (raw->hasEntry(PREDICTOR))
+    predictor = raw->getEntry(PREDICTOR)->getU32();
+
+  AbstractDngDecompressor slices(mRaw, getTilingDescription(raw), compression,
+                                 mFixLjpeg, bps, predictor);
+
+  slices.slices.reserve(slices.dsc.numTiles);
+
+  TiffEntry* offsets = nullptr;
+  TiffEntry* counts = nullptr;
+  if (raw->hasEntry(TILEOFFSETS)) {
+    offsets = raw->getEntry(TILEOFFSETS);
+    counts = raw->getEntry(TILEBYTECOUNTS);
+  } else { // Strips
+    offsets = raw->getEntry(STRIPOFFSETS);
+    counts = raw->getEntry(STRIPBYTECOUNTS);
+  }
+  assert(slices.dsc.numTiles == offsets->count);
+  assert(slices.dsc.numTiles == counts->count);
+
+  for (auto n = 0U; n < slices.dsc.numTiles; n++) {
+    const auto offset = offsets->getU32(n);
+    const auto count = counts->getU32(n);
+
+    if (count < 1)
+      ThrowRDE("Tile %u is empty", n);
+
+    ByteStream bs(mFile->getSubView(offset, count), 0,
+                  mRootIFD->rootBuffer.getByteOrder());
+
+    slices.slices.emplace_back(slices.dsc, n, bs);
+  }
+
+  assert(slices.slices.size() == slices.dsc.numTiles);
   if (slices.slices.empty())
     ThrowRDE("No valid slices found.");
 

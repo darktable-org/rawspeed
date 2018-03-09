@@ -126,9 +126,8 @@ void LJpegDecompressor::decodeN()
   // The tiles at the bottom and the right may extend beyond the dimension of
   // the raw image buffer. The excessive content has to be ignored.
 
-  const auto height = std::min(frame.h, std::min(h, mRaw->dim.y - offY));
-  const auto width = std::min(
-      frame.w, (mRaw->getCpp() * std::min(w, mRaw->dim.x - offX)) / N_COMP);
+  const auto height = std::min(frame.h, h);
+  const auto width = std::min(frame.w, (mRaw->getCpp() * w) / N_COMP);
 
   // For y, we can simply stop decoding when we reached the border.
   for (unsigned y = 0; y < height; ++y) {
