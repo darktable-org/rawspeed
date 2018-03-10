@@ -19,6 +19,7 @@
 */
 
 #if !(defined(__unix__) || defined(__APPLE__))
+#define NOMINMAX // do not want the min()/max() macros!
 
 #include "io/FileIOException.h" // for FileIOException (ptr only), ThrowFIE
 #include <Windows.h>

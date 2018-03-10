@@ -27,6 +27,8 @@
 #include <sys/stat.h> // for stat
 
 #ifdef _WIN32
+#define NOMINMAX // do not want the min()/max() macros!
+
 #include <Windows.h>
 #endif
 

@@ -30,6 +30,8 @@
 #include <type_traits>          // for make_unsigned
 
 #if !(defined(__unix__) || defined(__APPLE__))
+#define NOMINMAX // do not want the min()/max() macros!
+
 #include "io/FileIO.h" // for widenFileName
 #include <Windows.h>
 #include <io.h>
