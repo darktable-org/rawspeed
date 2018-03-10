@@ -31,9 +31,9 @@
 
 #if !(defined(__unix__) || defined(__APPLE__))
 #include "io/FileIO.h" // for widenFileName
+#include <Windows.h>
 #include <io.h>
 #include <tchar.h>
-#include <windows.h>
 #endif
 
 namespace rawspeed {

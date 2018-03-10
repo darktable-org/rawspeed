@@ -21,11 +21,11 @@
 #if !(defined(__unix__) || defined(__APPLE__))
 
 #include "io/FileIOException.h" // for FileIOException (ptr only), ThrowFIE
-#include <functional>           // for bind
+#include <Windows.h>
+#include <functional> // for bind
 #include <io.h>
 #include <tchar.h>
 #include <vector> // for vector
-#include <windows.h>
 
 namespace rawspeed {
 

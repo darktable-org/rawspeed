@@ -27,7 +27,7 @@
 #include <sys/stat.h> // for stat
 
 #ifdef _WIN32
-#include <windows.h>
+#include <Windows.h>
 #endif
 
 #ifdef _OPENMP
