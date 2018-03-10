@@ -71,6 +71,8 @@ void LJpegDecompressor::decode(uint32 offsetX, uint32 offsetY, uint32 width,
 
 void LJpegDecompressor::decodeScan()
 {
+  assert(frame.cps > 0);
+
   if (predictorMode != 1)
     ThrowRDE("Unsupported predictor mode: %u", predictorMode);
 
