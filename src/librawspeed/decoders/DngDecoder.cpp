@@ -235,9 +235,7 @@ DngTilingDescription DngDecoder::getTilingDescription(const TiffIFD* raw) {
                tilesX, tilesY);
     }
 
-    const unsigned nTiles = tilesX * tilesY;
-
-    return {mRaw->dim, nTiles, tilew, tileh};
+    return {mRaw->dim, tilew, tileh};
   }
 
   // Strips
@@ -260,8 +258,7 @@ DngTilingDescription DngDecoder::getTilingDescription(const TiffIFD* raw) {
              yPerSlice, counts->count, mRaw->dim.y);
   }
 
-  return {mRaw->dim, counts->count, static_cast<uint32>(mRaw->dim.x),
-          yPerSlice};
+  return {mRaw->dim, static_cast<uint32>(mRaw->dim.x), yPerSlice};
 }
 
 void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {

@@ -35,9 +35,6 @@ struct DngTilingDescription final {
   // The dimensions of the whole image.
   const iPoint2D& dim;
 
-  // How many tiles are there total?
-  const unsigned numTiles;
-
   // How many horizontal pixels does one tile represent?
   const uint32 tileW;
 
@@ -50,13 +47,14 @@ struct DngTilingDescription final {
   // How many rows is there?
   const uint32 tilesY;
 
-  DngTilingDescription(const iPoint2D& dim_, unsigned numTiles_, uint32 tileW_,
-                       uint32 tileH_)
-      : dim(dim_), numTiles(numTiles_), tileW(tileW_), tileH(tileH_),
+  // How many tiles are there total?
+  const unsigned numTiles;
+
+  DngTilingDescription(const iPoint2D& dim_, uint32 tileW_, uint32 tileH_)
+      : dim(dim_), tileW(tileW_), tileH(tileH_),
         tilesX(roundUpDivision(dim.x, tileW)),
-        tilesY(roundUpDivision(dim.y, tileH)) {
+        tilesY(roundUpDivision(dim.y, tileH)), numTiles(tilesX * tilesY) {
     assert(dim.area() > 0);
-    assert(numTiles > 0);
     assert(tileW > 0);
     assert(tileH > 0);
     assert(tilesX > 0);
@@ -65,7 +63,7 @@ struct DngTilingDescription final {
     assert(tileH * tilesY >= static_cast<unsigned>(dim.y));
     assert(tileW * (tilesX - 1) < static_cast<unsigned>(dim.x));
     assert(tileH * (tilesY - 1) < static_cast<unsigned>(dim.y));
-    assert(tilesX * tilesY == numTiles);
+    assert(numTiles > 0);
   }
 };
 
