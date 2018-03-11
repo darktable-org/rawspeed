@@ -5,6 +5,8 @@
 #ifndef THREAD_SAFETY_ANALYSIS_MUTEX_H
 #define THREAD_SAFETY_ANALYSIS_MUTEX_H
 
+#pragma GCC system_header
+
 // Enable thread safety attributes only with clang.
 // The attributes can be safely erased when compiling with other compilers.
 #if defined(__clang__) && (!defined(SWIG))
