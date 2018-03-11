@@ -137,6 +137,9 @@ void LJpegDecompressor::decodeN()
   assert(frame.h >= h);
   assert(frame.cps * frame.w >= mRaw->getCpp() * w);
 
+  assert(offY + h <= static_cast<unsigned>(mRaw->dim.y));
+  assert(offX + w <= static_cast<unsigned>(mRaw->dim.x));
+
   // For y, we can simply stop decoding when we reached the border.
   for (unsigned y = 0; y < h; ++y) {
     auto destY = offY + y;
