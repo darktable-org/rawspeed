@@ -63,6 +63,9 @@ struct DngTilingDescription final {
     assert(tilesY > 0);
     assert(tileW * tilesX >= static_cast<unsigned>(dim.x));
     assert(tileH * tilesY >= static_cast<unsigned>(dim.y));
+    assert(tileW * (tilesX - 1) < static_cast<unsigned>(dim.x));
+    assert(tileH * (tilesY - 1) < static_cast<unsigned>(dim.y));
+    assert(tilesX * tilesY == numTiles);
   }
 };
 
