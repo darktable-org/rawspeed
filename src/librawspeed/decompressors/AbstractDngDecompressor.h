@@ -99,8 +99,9 @@ struct DngSliceElement final {
         width(!lastColumn ? dsc.tileW : dsc.dim.x - offX),
         height(!lastRow ? dsc.tileH : dsc.dim.y - offY) {
     assert(n < dsc.numTiles);
-    assert(column <= dsc.tilesX);
-    assert(row <= dsc.tilesY);
+    assert(bs.getRemainSize() > 0);
+    assert(column < dsc.tilesX);
+    assert(row < dsc.tilesY);
     assert(offX < static_cast<unsigned>(dsc.dim.x));
     assert(offY < static_cast<unsigned>(dsc.dim.y));
     assert(width > 0);
