@@ -28,7 +28,7 @@ if(EXISTS "${PUGIXML_PATH}" AND IS_DIRECTORY "${PUGIXML_PATH}" AND EXISTS "${PUG
   )
 else()
   if(NOT ALLOW_DOWNLOADING_PUGIXML)
-    message(SEND_ERROR "Did not find pugixml sources! Either pass correct path in PUGIXML_PATH, or enable ALLOW_DOWNLOADING_PUGIXML, or disable BUILD_TESTING.")
+    message(SEND_ERROR "Did not find pugixml sources! Either pass correct path in PUGIXML_PATH, or enable ALLOW_DOWNLOADING_PUGIXML, or disable WITH_PUGIXML.")
   else()
     message(WARNING "Did not find pugixml sources! Fetching from web...")
     ExternalProject_Add(
