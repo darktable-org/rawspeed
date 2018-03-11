@@ -84,8 +84,13 @@ void LJpegDecompressor::decodeScan()
   if ((mRaw->getCpp() * (mRaw->dim.x - offX)) < frame.cps)
     ThrowRDE("Got less pixels than the components per sample");
 
-  assert((mRaw->getCpp() * w) % frame.cps == 0);
-  wBlocks = (mRaw->getCpp() * w) / frame.cps;
+  const auto tilePixelBlocks = mRaw->getCpp() * w;
+  if (tilePixelBlocks % frame.cps != 0) {
+    ThrowRDE("Tile component width (%u) is not multiple of LJpeg CPS (%u)",
+             tilePixelBlocks, frame.cps);
+  }
+
+  wBlocks = tilePixelBlocks / frame.cps;
   if (frame.w < wBlocks || frame.h < h) {
     ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
              frame.cps * frame.w, frame.h, w, h);
