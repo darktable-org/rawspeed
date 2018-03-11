@@ -93,7 +93,7 @@ void LJpegDecompressor::decodeScan()
   wBlocks = tilePixelBlocks / frame.cps;
   if (frame.w < wBlocks || frame.h < h) {
     ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
-             frame.cps * frame.w, frame.h, w, h);
+             frame.cps * frame.w, frame.h, tilePixelBlocks, h);
   }
 
   switch (frame.cps) {
