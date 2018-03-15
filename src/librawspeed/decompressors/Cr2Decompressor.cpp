@@ -183,6 +183,7 @@ void Cr2Decompressor::decodeN_X_Y()
   unsigned processedPixels = 0;
   unsigned processedLineSlices = 0;
   for (unsigned sliceWidth : slicesWidths) {
+    assert(frame.h % yStepSize == 0);
     for (unsigned y = 0; y < frame.h; y += yStepSize) {
       // Fix for Canon 80D mraw format.
       // In that format, `frame` is 4032x3402, while `mRaw` is 4536x3024.
