@@ -200,6 +200,12 @@ void Cr2Decompressor::decodeN_X_Y()
           reinterpret_cast<ushort16*>(mRaw->getDataUncropped(destX, destY));
 
       assert(sliceWidth % xStepSize == 0);
+      if (X_S_F == 1) {
+        if (destX + sliceWidth > static_cast<unsigned>(mRaw->dim.x))
+          ThrowRDE("Bad slice width / frame size / image size combination.");
+      } else {
+        // FIXME.
+      }
       for (unsigned x = 0; x < sliceWidth; x += xStepSize) {
         // check if we processed one full raw row worth of pixels
         if (processedPixels == frame.w) {
