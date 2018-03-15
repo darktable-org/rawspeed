@@ -49,6 +49,8 @@ endif()
 if(NOT (UNIX OR APPLE))
   # bogus warnings about std functions...
   list(APPEND CLANG_DISABLED_WARNING_FLAGS "used-but-marked-unused")
+  # just don't care.
+  list(APPEND CLANG_DISABLED_WARNING_FLAGS "nonportable-system-include-path")
 endif()
 
 foreach(warning ${CLANG_WARNING_FLAGS})
