@@ -58,7 +58,7 @@ std::unique_ptr<const Buffer> FileReader::readFile() {
   if (size <= 0)
     ThrowFIE("File is 0 bytes.");
 
-  fileSize = static_cast<std::make_unsigned<decltype(size)>::type>(size);
+  fileSize = size;
 
   if (fileSize > std::numeric_limits<Buffer::size_type>::max())
     ThrowFIE("File is too big (%zu bytes).", fileSize);
