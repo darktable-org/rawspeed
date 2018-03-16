@@ -135,7 +135,7 @@ void RawImageData::poisonPadding() {
   }
 }
 #else
-void __attribute__((const)) RawImageData::poisonPadding() {
+void RawImageData::poisonPadding() {
   // if we are building without ASAN, then there is no need/way to poison.
   // however, i think it is better to have such an empty function rather
   // than making this whole function not exist in ASAN-less builds
@@ -156,7 +156,7 @@ void RawImageData::unpoisonPadding() {
   }
 }
 #else
-void __attribute__((const)) RawImageData::unpoisonPadding() {
+void RawImageData::unpoisonPadding() {
   // if we are building without ASAN, then there is no need/way to poison.
   // however, i think it is better to have such an empty function rather
   // than making this whole function not exist in ASAN-less builds
@@ -174,7 +174,7 @@ void RawImageData::checkRowIsInitialized(int row) {
   MSAN_MEM_IS_INITIALIZED(curr_line, rowsize);
 }
 #else
-void __attribute__((const)) RawImageData::checkRowIsInitialized(int row) {
+void RawImageData::checkRowIsInitialized(int row) {
   // if we are building without MSAN, then there is no way to check whether
   // the image row was fully initialized. however, i think it is better to
   // have such an empty function rather than making this whole function not
@@ -188,7 +188,7 @@ void RawImageData::checkMemIsInitialized() {
     checkRowIsInitialized(j);
 }
 #else
-void __attribute__((const)) RawImageData::checkMemIsInitialized() {
+void RawImageData::checkMemIsInitialized() {
   // if we are building without MSAN, then there is no way to check whether
   // the image data was fully initialized. however, i think it is better to
   // have such an empty function rather than making this whole function not
