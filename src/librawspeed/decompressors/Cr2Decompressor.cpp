@@ -177,7 +177,7 @@ void Cr2Decompressor::decodeN_X_Y()
   }
 
   if (frame.h * std::accumulate(slicesWidths.begin(), slicesWidths.end(), 0) <
-      mRaw->dim.area())
+      mRaw->getCpp() * mRaw->dim.area())
     ThrowRDE("Incorrrect slice height / slice widths! Less than image size.");
 
   unsigned processedPixels = 0;
