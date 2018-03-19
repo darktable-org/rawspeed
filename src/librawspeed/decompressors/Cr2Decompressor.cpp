@@ -180,6 +180,12 @@ void Cr2Decompressor::decodeN_X_Y()
       mRaw->getCpp() * mRaw->dim.area())
     ThrowRDE("Incorrrect slice height / slice widths! Less than image size.");
 
+  // Do we have completely unneeded slices at the end? Drop them.
+  while (frame.h *
+             std::accumulate(slicesWidths.begin(), slicesWidths.end() - 1, 0) >=
+         mRaw->getCpp() * mRaw->dim.area())
+    slicesWidths.pop_back();
+
   unsigned processedPixels = 0;
   unsigned processedLineSlices = 0;
   for (unsigned sliceWidth : slicesWidths) {
