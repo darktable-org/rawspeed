@@ -50,9 +50,9 @@
   </xs:simpleType>
   <xs:simpleType name="IDTypeModelType">
     <xs:restriction base="xs:string">
-      <xs:pattern value="[a-zA-Z0-9 \-*()]{1,22}"/>
+      <xs:pattern value="[a-zA-Z0-9 \-*()]{1,23}"/>
       <xs:minLength value="1"/>
-      <xs:maxLength value="22"/>
+      <xs:maxLength value="23"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:complexType name="IDType">
