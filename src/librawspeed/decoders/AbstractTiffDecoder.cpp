@@ -38,7 +38,7 @@ const TiffIFD* AbstractTiffDecoder::getIFDWithLargestImage(TiffTag filter) const
   uint32 width = res->getEntry(IMAGEWIDTH)->getU32();
   for (auto ifd : ifds) {
     TiffEntry* widthE = ifd->getEntry(IMAGEWIDTH);
-    // guard agains random maker note entries with the same tag
+    // guard against random maker note entries with the same tag
     if (widthE->count == 1 && widthE->getU32() > width) {
       res = ifd;
       width = widthE->getU32();

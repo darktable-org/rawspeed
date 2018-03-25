@@ -78,7 +78,7 @@ int UncompressedDecompressor::bytesPerLine(int w, bool skips) {
   if ((12 * w) % 8 != 0)
     ThrowIOE("Bad image width");
 
-  // Calulate expected bytes per line.
+  // Calculate expected bytes per line.
   auto perline = (12 * w) / 8;
 
   if (!skips)

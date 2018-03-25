@@ -79,7 +79,7 @@ public:
 
   inline size_type check(size_type nmemb, size_type size_) const {
     if (size_ && nmemb > std::numeric_limits<size_type>::max() / size_)
-      ThrowIOE("Integer overflow when calculating stream lenght");
+      ThrowIOE("Integer overflow when calculating stream length");
     return check(nmemb * size_);
   }
 
@@ -115,7 +115,7 @@ public:
   }
   inline ByteStream peekStream(size_type nmemb, size_type size_) const {
     if (size_ && nmemb > std::numeric_limits<size_type>::max() / size_)
-      ThrowIOE("Integer overflow when calculating stream lenght");
+      ThrowIOE("Integer overflow when calculating stream length");
     return peekStream(nmemb * size_);
   }
   inline ByteStream getStream(size_type size_) {
@@ -125,7 +125,7 @@ public:
   }
   inline ByteStream getStream(size_type nmemb, size_type size_) {
     if (size_ && nmemb > std::numeric_limits<size_type>::max() / size_)
-      ThrowIOE("Integer overflow when calculating stream lenght");
+      ThrowIOE("Integer overflow when calculating stream length");
     return getStream(nmemb * size_);
   }
 

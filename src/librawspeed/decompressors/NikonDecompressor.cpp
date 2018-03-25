@@ -58,9 +58,9 @@ std::vector<ushort16> NikonDecompressor::createCurve(ByteStream* metadata,
                                                      uint32 bitsPS, uint32 v0,
                                                      uint32 v1, uint32* split) {
   // 'curve' will hold a peace wise linearly interpolated function.
-  // there are 'csize' segements, each is 'step' values long.
+  // there are 'csize' segments, each is 'step' values long.
   // the very last value is not part of the used table but necessary
-  // to linearly interpolate the last segment, therefor the '+1/-1'
+  // to linearly interpolate the last segment, therefore the '+1/-1'
   // size adjustments of 'curve'.
   std::vector<ushort16> curve((1 << bitsPS & 0x7fff) + 1);
   assert(curve.size() > 1);

@@ -228,7 +228,7 @@ If you enable this on the decoder before calling RawDecoder->decodeRaw(), you wi
 
 
 ### RawImage.mDitherScale
-This option will determine whether dither is applied when values are scaled to 16 bits. Dither is applied as a random value between "+-scalefactor/2". This will make it so that images with less number of bits/pixel doesn't have a big tendency for posterization, since values close to eachother will be spaced out a bit.
+This option will determine whether dither is applied when values are scaled to 16 bits. Dither is applied as a random value between "+-scalefactor/2". This will make it so that images with less number of bits/pixel doesn't have a big tendency for posterization, since values close to each other will be spaced out a bit.
 
 Another way of putting it, is that if your camera saves 12 bit per pixel, when RawSpeed upscales this to 16 bits, the 4 "new" bits will be random instead of always the same value.
 

@@ -26,7 +26,7 @@
 #include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer
-#include "io/Endianness.h"                          // for Endiannes
+#include "io/Endianness.h"                          // for Endianness
 #include "metadata/Camera.h"                        // for Hints
 #include "parsers/TiffParserException.h"            // for TiffParserException
 #include "tiff/TiffEntry.h"                         // for TiffEntry

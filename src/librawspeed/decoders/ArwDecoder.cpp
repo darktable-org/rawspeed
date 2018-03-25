@@ -312,7 +312,7 @@ void ArwDecoder::ParseA100WB() {
     len = bs.getU32();
     bs.check(len);
     if (!len)
-      ThrowRDE("Found entry of zero lenght, corrupt.");
+      ThrowRDE("Found entry of zero length, corrupt.");
 
     if (0x574247 != tag) { // WBG
       // not the tag we are interested in, skip

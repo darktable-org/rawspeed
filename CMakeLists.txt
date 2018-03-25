@@ -39,7 +39,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(BINARY_PACKAGE_BUILD "Sets march optimization to generic" OFF)
-option(WITH_SSE2 "If SSE2 support is avaliable, do build SSE2 codepaths" ON)
+option(WITH_SSE2 "If SSE2 support is available, do build SSE2 codepaths" ON)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   option(RAWSPEED_USE_LIBCXX "(Clang only) Build using libc++ as the standard library." OFF)
 

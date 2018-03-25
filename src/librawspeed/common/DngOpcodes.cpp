@@ -253,7 +253,7 @@ protected:
       auto* src = reinterpret_cast<T*>(ri->getData(0, y));
       // Add offset, so this is always first plane
       src += firstPlane;
-      // FIXME: is op() really supposed to recieve global image coordinates,
+      // FIXME: is op() really supposed to receive global image coordinates,
       // and not [0..ROI.getHeight()-1][0..ROI.getWidth()-1] ?
       for (auto x = ROI.getLeft(); x < ROI.getRight(); x += colPitch) {
         for (auto p = 0U; p < planes; ++p)
@@ -527,8 +527,8 @@ DngOpcodes::DngOpcodes(const RawImage& ri, TiffEntry* entry) {
 #endif
 }
 
-// defined here as empty destrutor, otherwise we'd need a complete definition
-// of the the DngOpcode type in DngOpcodes.h
+// Defined here as empty destructor, otherwise we'd need a complete definition
+// of the DngOpcode type in DngOpcodes.h
 DngOpcodes::~DngOpcodes() = default;
 
 void DngOpcodes::applyOpCodes(const RawImage& ri) {

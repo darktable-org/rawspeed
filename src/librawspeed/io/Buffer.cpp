@@ -57,7 +57,7 @@ Buffer::Buffer(unique_ptr<uchar8, decltype(&alignedFree)> data_,
 
   data = data_.release();
   if (!data)
-    ThrowIOE("Memory buffer is nonexistant");
+    ThrowIOE("Memory buffer is nonexistent");
 
   assert(!ASAN_REGION_IS_POISONED(data, size));
 

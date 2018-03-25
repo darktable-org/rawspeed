@@ -234,9 +234,9 @@ void IiqDecoder::DecodeStrip(const IiqStrip& strip, uint32 width,
         for (; j < 5; j++) {
           if (pump.getBits(1) != 0) {
             if (col == 0)
-              ThrowRDE("Can not initialize lenghts. Data is corrupt.");
+              ThrowRDE("Can not initialize lengths. Data is corrupt.");
 
-            // else, we have previously initialized lenghts, so we are fine
+            // else, we have previously initialized lengths, so we are fine
             break;
           }
         }

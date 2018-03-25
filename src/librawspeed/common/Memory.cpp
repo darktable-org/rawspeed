@@ -68,7 +68,7 @@ void* alignedMalloc(size_t size, size_t alignment) {
 #elif defined(HAVE_ALIGNED_MALLOC)
   ptr = _aligned_malloc(size, alignment);
 #else
-#pragma message "No aligned malloc() implementation avaliable!"
+#pragma message "No aligned malloc() implementation available!"
   assert(alignment <= alignof(std::max_align_t));
 #ifdef __APPLE__
   // apple malloc() aligns to 16 by default

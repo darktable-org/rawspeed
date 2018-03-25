@@ -183,7 +183,7 @@ public:
 
     // store the code lengths in bits, valid values are 0..16
     std::vector<uchar8> code_len; // index is just sequential number
-    // store the codes themselfs (bit patterns found inside the stream)
+    // store the codes themselves (bit patterns found inside the stream)
     std::vector<ushort16> codes;  // index is just sequential number
 
     assert(!nCodesPerLength.empty());

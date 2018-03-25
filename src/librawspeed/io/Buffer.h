@@ -122,7 +122,7 @@ public:
     return getSubView(offset, newSize);
   }
 
-  // get pointer to memory at 'offset', make sure at least 'count' bytes are accessable
+  // get pointer to memory at 'offset', make sure at least 'count' bytes are accessible
   const uchar8* getData(size_type offset, size_type count) const {
     if (!isValid(offset, count))
       ThrowIOE("Buffer overflow: image file may be truncated");
@@ -175,7 +175,7 @@ public:
 };
 
 /*
- * DataBuffer is a simple extention to Buffer. It knows about the byte order
+ * DataBuffer is a simple extension to Buffer. It knows about the byte order
  * of its contents and can therefore provide save access to larger than
  * byte sized data, like int, float, etc.
  */

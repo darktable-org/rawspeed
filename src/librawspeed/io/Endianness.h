@@ -102,7 +102,7 @@ template <typename T> inline T getByteSwapped(const void* data, bool bswap) {
 // memory location converted to the native byte order of the host.
 // 'BE' suffix: source byte order is known to be big endian
 // 'LE' suffix: source byte order is known to be little endian
-// Note: these functions should be avoided if higher level acess from
+// Note: these functions should be avoided if higher level access from
 // Buffer/DataBuffer classes is available.
 
 template <typename T> inline T getBE(const void* data) {

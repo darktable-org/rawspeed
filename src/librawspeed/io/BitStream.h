@@ -39,7 +39,7 @@ namespace rawspeed {
 
 struct BitStreamCacheBase
 {
-  uint64 cache = 0; // the acutal bits stored in the cache
+  uint64 cache = 0; // the actual bits stored in the cache
   unsigned int fillLevel = 0; // bits left in cache
   static constexpr unsigned Size = sizeof(cache)*8;
 

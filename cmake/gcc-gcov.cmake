@@ -17,7 +17,7 @@ find_package(Find REQUIRED)
 set(GCOV_OPTS "-pb")
 
 if(NOT APPLE)
-  # DONT elide source prefix.
+  # DON'T elide source prefix.
   set(GCOV_OPTS ${GCOV_OPTS} -aflu)
 endif()
 
@@ -29,7 +29,7 @@ add_custom_target(
   USES_TERMINAL
 )
 
-# DONT remove *.gcov files here!
+# DON'T remove *.gcov files here!
 add_custom_target(
   gcov-clean
   COMMAND "${FIND_PATH}" "${CMAKE_BINARY_DIR}" -type f -name '*.gcda' -delete > /dev/null

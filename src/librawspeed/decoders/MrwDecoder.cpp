@@ -79,7 +79,7 @@ void MrwDecoder::parseHeader() {
     uint32 len = bs.getU32();
     bs.check(len);
     if (!len)
-      ThrowRDE("Found entry of zero lenght, MRW is corrupt.");
+      ThrowRDE("Found entry of zero length, MRW is corrupt.");
 
     const auto origPos = bs.getPosition();
 
