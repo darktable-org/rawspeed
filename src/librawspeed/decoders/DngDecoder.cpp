@@ -22,6 +22,7 @@
 #include "decoders/DngDecoder.h"
 #include "common/Common.h"                         // for uint32, writeLog
 #include "common/DngOpcodes.h"                     // for DngOpcodes
+#include "common/NORangesSet.h"                    // for NORangesSet
 #include "common/Point.h"                          // for iPoint2D, iRectan...
 #include "common/RawspeedException.h"              // for RawspeedException
 #include "decoders/RawDecoderException.h"          // for ThrowRDE, RawDeco...
@@ -292,6 +293,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
   assert(slices.dsc.numTiles == offsets->count);
   assert(slices.dsc.numTiles == counts->count);
 
+  NORangesSet<Buffer> tilesLegality;
   for (auto n = 0U; n < slices.dsc.numTiles; n++) {
     const auto offset = offsets->getU32(n);
     const auto count = counts->getU32(n);
@@ -302,12 +304,17 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
     ByteStream bs(mFile->getSubView(offset, count), 0,
                   mRootIFD->rootBuffer.getByteOrder());
 
+    if (!tilesLegality.emplace(bs).second)
+      ThrowTPE("Two tiles overlap. Raw corrupt!");
+
     slices.slices.emplace_back(slices.dsc, n, bs);
   }
 
   assert(slices.slices.size() == slices.dsc.numTiles);
   if (slices.slices.empty())
     ThrowRDE("No valid slices found.");
+
+  // FIXME: should we sort the tiles, to linearize the input reading?
 
   mRaw->createData();
 
