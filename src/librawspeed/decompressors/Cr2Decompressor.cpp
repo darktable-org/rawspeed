@@ -55,12 +55,13 @@ void Cr2Decompressor::decodeScan()
   if (predictorMode != 1)
     ThrowRDE("Unsupported predictor mode.");
 
-  if (slicesWidths.empty()) {
+  if (slicing.empty()) {
     const int slicesWidth = frame.w * frame.cps;
     if (slicesWidth > mRaw->dim.x)
       ThrowRDE("Don't know slicing pattern, and failed to guess it.");
 
-    slicesWidths.push_back(slicesWidth);
+    slicing = Cr2Slicing(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
+                         /*lastSliceWidth=*/slicesWidth);
   }
 
   bool isSubSampled = false;
@@ -115,12 +116,12 @@ void Cr2Decompressor::decodeScan()
   }
 }
 
-void Cr2Decompressor::decode(std::vector<int> slicesWidths_)
-{
-  slicesWidths = move(slicesWidths_);
-  for (auto slicesWidth : slicesWidths) {
-    if (slicesWidth <= 0)
-      ThrowRDE("Bad slice width: %i", slicesWidth);
+void Cr2Decompressor::decode(const Cr2Slicing& slicing_) {
+  slicing = slicing_;
+  for (auto sliceId = 0; sliceId < slicing.numSlices; sliceId++) {
+    const auto sliceWidth = slicing.widthOfSlice(sliceId);
+    if (sliceWidth <= 0)
+      ThrowRDE("Bad slice width: %i", sliceWidth);
   }
 
   AbstractLJpegDecompressor::decode();
@@ -163,32 +164,27 @@ void Cr2Decompressor::decodeN_X_Y()
   if (X_S_F == 2 && Y_S_F == 1)
   {
     // fix the inconsistent slice width in sRaw mode, ask Canon.
-    for (auto& sliceWidth : slicesWidths)
-      sliceWidth = sliceWidth * 3 / 2;
+    for (auto* width : {&slicing.sliceWidth, &slicing.lastSliceWidth})
+      *width = (*width) * 3 / 2;
   }
 
-  for (const auto& slicesWidth : slicesWidths) {
-    if (slicesWidth > mRaw->dim.x)
+  for (const auto& width : {slicing.sliceWidth, slicing.lastSliceWidth}) {
+    if (width > mRaw->dim.x)
       ThrowRDE("Slice is longer than image's height, which is unsupported.");
-    if (slicesWidth % xStepSize != 0) {
+    if (width % xStepSize != 0) {
       ThrowRDE("Slice width (%u) should be multiple of pixel group size (%u)",
-               slicesWidth, xStepSize);
+               width, xStepSize);
     }
   }
 
-  if (frame.h * std::accumulate(slicesWidths.begin(), slicesWidths.end(), 0) <
-      mRaw->getCpp() * mRaw->dim.area())
+  if (frame.h * slicing.totalWidth() < mRaw->getCpp() * mRaw->dim.area())
     ThrowRDE("Incorrrect slice height / slice widths! Less than image size.");
-
-  // Do we have completely unneeded slices at the end? Drop them.
-  while (frame.h *
-             std::accumulate(slicesWidths.begin(), slicesWidths.end() - 1, 0) >=
-         mRaw->getCpp() * mRaw->dim.area())
-    slicesWidths.pop_back();
 
   unsigned processedPixels = 0;
   unsigned processedLineSlices = 0;
-  for (unsigned sliceWidth : slicesWidths) {
+  for (auto sliceId = 0; sliceId < slicing.numSlices; sliceId++) {
+    const unsigned sliceWidth = slicing.widthOfSlice(sliceId);
+
     assert(frame.h % yStepSize == 0);
     for (unsigned y = 0; y < frame.h; y += yStepSize) {
       // Fix for Canon 80D mraw format.
@@ -198,8 +194,8 @@ void Cr2Decompressor::decodeN_X_Y()
       // Those would overflow, hence the break.
       // see FIX_CANON_FRAME_VS_IMAGE_SIZE_MISMATCH
       unsigned destY = processedLineSlices % mRaw->dim.y;
-      unsigned destX =
-          processedLineSlices / mRaw->dim.y * slicesWidths[0] / mRaw->getCpp();
+      unsigned destX = processedLineSlices / mRaw->dim.y * slicing.sliceWidth /
+                       mRaw->getCpp();
       if (destX >= static_cast<unsigned>(mRaw->dim.x))
         break;
       auto dest =

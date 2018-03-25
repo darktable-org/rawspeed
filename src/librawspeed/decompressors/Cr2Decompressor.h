@@ -2,6 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2017 Axel Waggershauser
+    Copyright (C) 2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,28 +21,67 @@
 
 #pragma once
 
+#include "common/Common.h"                           // ushort16
+#include "decoders/RawDecoderException.h"            // for ThrowRDE
 #include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
 #include "io/Buffer.h"                               // for Buffer, Buffer:...
 #include "io/ByteStream.h"                           // for ByteStream
-#include <vector>                                    // for vector
+#include <cassert>                                   // for assert
 
 namespace rawspeed {
 
 class RawImage;
-
+class Cr2Decompressor;
 // Decompresses Lossless JPEGs, with 2-4 components and optional X/Y subsampling
+
+class Cr2Slicing {
+  int numSlices = 0;
+  int sliceWidth = 0;
+  int lastSliceWidth = 0;
+
+  friend class Cr2Decompressor;
+
+public:
+  Cr2Slicing() = default;
+
+  Cr2Slicing(ushort16 numSlices_, ushort16 sliceWidth_,
+             ushort16 lastSliceWidth_)
+      : numSlices(numSlices_), sliceWidth(sliceWidth_),
+        lastSliceWidth(lastSliceWidth_) {
+    if (numSlices < 1)
+      ThrowRDE("Bad slice count: %u", numSlices);
+  }
+
+  bool empty() const {
+    return 0 == numSlices && 0 == sliceWidth && 0 == lastSliceWidth;
+  }
+
+  unsigned widthOfSlice(int sliceId) const {
+    assert(sliceId >= 0);
+    assert(sliceId < numSlices);
+    if ((sliceId + 1) == numSlices)
+      return lastSliceWidth;
+    return sliceWidth;
+  }
+
+  unsigned totalWidth() const {
+    int width = 0;
+    for (auto sliceId = 0; sliceId < numSlices; sliceId++)
+      width += widthOfSlice(sliceId);
+    return width;
+  }
+};
 
 class Cr2Decompressor final : public AbstractLJpegDecompressor
 {
-  // CR2 slices
-  std::vector<int> slicesWidths;
+  Cr2Slicing slicing;
 
   void decodeScan() override;
   template<int N_COMP, int X_S_F, int Y_S_F> void decodeN_X_Y();
 
 public:
   Cr2Decompressor(const ByteStream& bs, const RawImage& img);
-  void decode(std::vector<int> slicesWidths);
+  void decode(const Cr2Slicing& slicing);
 };
 
 } // namespace rawspeed

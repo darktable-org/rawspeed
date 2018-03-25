@@ -40,11 +40,9 @@
 #include <cassert>                       // for assert
 #include <memory>                        // for unique_ptr, allocator
 #include <string>                        // for string, operator==
-#include <vector>                        // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
 using std::string;
-using std::vector;
 
 namespace rawspeed {
 
@@ -91,7 +89,10 @@ RawImage Cr2Decoder::decodeOldFormat() {
 
   Cr2Decompressor l(bs, mRaw);
   mRaw->createData();
-  l.decode({width});
+
+  Cr2Slicing slicing(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
+                     /*lastSliceWidth=*/width);
+  l.decode(slicing);
 
   // deal with D2000 GrayResponseCurve
   TiffEntry* curve = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x123));
@@ -129,7 +130,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
   mRaw->setCpp(componentsPerPixel);
   mRaw->isCFA = (mRaw->getCpp() == 1);
 
-  vector<int> s_width;
+  Cr2Slicing slicing;
   // there are four cases:
   // * there is a tag with three components,
   //   $ last two components are non-zero: all fine then.
@@ -148,10 +149,9 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
     if (cr2SliceEntry->getU16(1) != 0 && cr2SliceEntry->getU16(2) != 0) {
       // first component can be either zero or non-zero, don't care
-      s_width.reserve(1 + cr2SliceEntry->getU16(0));
-      for (int i = 0; i < cr2SliceEntry->getU16(0); i++)
-        s_width.emplace_back(cr2SliceEntry->getU16(1));
-      s_width.emplace_back(cr2SliceEntry->getU16(2));
+      slicing = Cr2Slicing(/*numSlices=*/1 + cr2SliceEntry->getU16(0),
+                           /*sliceWidth=*/cr2SliceEntry->getU16(1),
+                           /*lastSliceWidth=*/cr2SliceEntry->getU16(2));
     } else if (cr2SliceEntry->getU16(0) == 0 && cr2SliceEntry->getU16(1) == 0 &&
                cr2SliceEntry->getU16(2) != 0) {
       // PowerShot G16, PowerShot S120, let Cr2Decompressor guess.
@@ -169,7 +169,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
   Cr2Decompressor d(bs, mRaw);
   mRaw->createData();
-  d.decode(s_width);
+  d.decode(slicing);
 
   if (mRaw->metadata.subsampling.x > 1 || mRaw->metadata.subsampling.y > 1)
     sRawInterpolate();

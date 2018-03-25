@@ -44,17 +44,16 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(&bs));
 
-    using slice_type = int;
-    std::vector<slice_type> slicesWidths;
-    const unsigned sliceCount = bs.getU32();
-    bs.check(sliceCount, sizeof(slice_type));
-    slicesWidths.reserve(sliceCount);
-    std::generate_n(std::back_inserter(slicesWidths), sliceCount,
-                    [&bs]() -> slice_type { return bs.get<slice_type>(); });
+    using slice_type = rawspeed::ushort16;
+    const auto numSlices = bs.get<slice_type>();
+    const auto sliceWidth = bs.get<slice_type>();
+    const auto lastSliceWidth = bs.get<slice_type>();
+
+    const rawspeed::Cr2Slicing slicing(numSlices, sliceWidth, lastSliceWidth);
 
     rawspeed::Cr2Decompressor c(bs, mRaw);
     mRaw->createData();
-    c.decode(std::move(slicesWidths));
+    c.decode(slicing);
 
     mRaw->checkMemIsInitialized();
   } catch (rawspeed::RawspeedException&) {
