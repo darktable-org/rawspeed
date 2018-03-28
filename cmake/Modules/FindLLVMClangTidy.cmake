@@ -1,4 +1,4 @@
-find_program(CLANGTIDY_PATH NAMES clang-tidy clang-tidy-5.0 clang-tidy-4.0)
+find_program(CLANGTIDY_PATH NAMES clang-tidy clang-tidy-6.0)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LLVMClangTidy
