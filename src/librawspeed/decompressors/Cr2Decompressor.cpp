@@ -195,8 +195,8 @@ void Cr2Decompressor::decodeN_X_Y()
       // Those would overflow, hence the break.
       // see FIX_CANON_FRAME_VS_IMAGE_SIZE_MISMATCH
       unsigned destY = processedLineSlices % mRaw->dim.y;
-      unsigned destX = processedLineSlices / mRaw->dim.y * slicing.sliceWidth /
-                       mRaw->getCpp();
+      unsigned destX = processedLineSlices / mRaw->dim.y *
+                       slicing.widthOfSlice(0) / mRaw->getCpp();
       if (destX >= static_cast<unsigned>(mRaw->dim.x))
         break;
       auto dest =
