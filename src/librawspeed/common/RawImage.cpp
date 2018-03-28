@@ -20,6 +20,7 @@
 
 #include "rawspeedconfig.h" // for WITH_SSE2
 #include "common/RawImage.h"
+#include "MemorySanitizer.h"              // for MSan::CheckMemIsInitialized
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "io/IOException.h"               // for IOException
@@ -163,7 +164,6 @@ void RawImageData::unpoisonPadding() {
 }
 #endif
 
-#if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
 void RawImageData::checkRowIsInitialized(int row) {
   const auto rowsize = bpp * uncropped_dim.x;
 
@@ -171,16 +171,8 @@ void RawImageData::checkRowIsInitialized(int row) {
 
   // and check that image line is initialized.
   // do note that we are avoiding padding here.
-  MSAN_MEM_IS_INITIALIZED(curr_line, rowsize);
+  MSan::CheckMemIsInitialized(curr_line, rowsize);
 }
-#else
-void RawImageData::checkRowIsInitialized(int row) {
-  // if we are building without MSAN, then there is no way to check whether
-  // the image row was fully initialized. however, i think it is better to
-  // have such an empty function rather than making this whole function not
-  // exist in MSAN-less builds
-}
-#endif
 
 #if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
 void RawImageData::checkMemIsInitialized() {
@@ -189,10 +181,9 @@ void RawImageData::checkMemIsInitialized() {
 }
 #else
 void RawImageData::checkMemIsInitialized() {
-  // if we are building without MSAN, then there is no way to check whether
-  // the image data was fully initialized. however, i think it is better to
-  // have such an empty function rather than making this whole function not
-  // exist in MSAN-less builds
+  // While we could use the same version for non-MSAN build, even though it
+  // does not do anything, i don't think it will be fully optimized away,
+  // the getDataUncropped() call may still be there. To be re-evaluated.
 }
 #endif
 
