@@ -20,6 +20,7 @@
 
 #include "rawspeedconfig.h" // for WITH_SSE2
 #include "common/RawImage.h"
+#include "AddressSanitizer.h"             // for ASan::...
 #include "MemorySanitizer.h"              // for MSan::CheckMemIsInitialized
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
@@ -132,7 +133,7 @@ void RawImageData::poisonPadding() {
         getDataUncropped(uncropped_dim.x - 1, j) + bpp;
 
     // and now poison the padding.
-    ASAN_POISON_MEMORY_REGION(curr_line_end, padding);
+    ASan::PoisonMemoryRegion(curr_line_end, padding);
   }
 }
 #else
@@ -153,7 +154,7 @@ void RawImageData::unpoisonPadding() {
         getDataUncropped(uncropped_dim.x - 1, j) + bpp;
 
     // and now unpoison the padding.
-    ASAN_UNPOISON_MEMORY_REGION(curr_line_end, padding);
+    ASan::UnPoisonMemoryRegion(curr_line_end, padding);
   }
 }
 #else

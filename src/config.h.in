@@ -62,24 +62,3 @@
 #ifndef __has_extension
 #define __has_extension __has_feature // Compatibility with pre-3.0 compilers.
 #endif
-
-// see https://github.com/google/sanitizers/wiki/AddressSanitizerManualPoisoning
-#if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
-#include <sanitizer/asan_interface.h> // IWYU pragma: export
-#include <type_traits>                // for remove_cv
-template <typename T> struct remove_all_const : std::remove_const<T> {};
-template <typename T> struct remove_all_const<T *> {
-  using type = typename remove_all_const<T>::type *;
-};
-template <typename T> struct remove_all_const<T *const> {
-  using type = typename remove_all_const<T>::type *;
-};
-#define ASAN_REGION_IS_POISONED(addr, size)                                    \
-  __asan_region_is_poisoned(                                                   \
-      const_cast<remove_all_const<decltype(addr)>::type>(addr),  /* NOLINT */  \
-      (size))
-#else
-#define ASAN_POISON_MEMORY_REGION(addr, size) ((void)(addr), (void)(size))
-#define ASAN_UNPOISON_MEMORY_REGION(addr, size) ((void)(addr), (void)(size))
-#define ASAN_REGION_IS_POISONED(addr, size) (0)
-#endif

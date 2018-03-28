@@ -21,15 +21,15 @@
 
 #pragma once
 
-#include "rawspeedconfig.h" // for ASAN_REGION_IS_POISONED
-#include "common/Common.h"  // for uchar8, int32, uint32, ushort16, roundUp
-#include "common/Memory.h"  // for alignedMalloc
-#include "io/Buffer.h"      // for Buffer::size_type, Buffer, DataBuffer
-#include "io/Endianness.h"  // for Endianness, Endianness::little
-#include "io/IOException.h" // for IOException (ptr only), ThrowIOE
-#include <cassert>          // for assert
-#include <cstring>          // for memcmp, memcpy
-#include <limits>           // for numeric_limits
+#include "AddressSanitizer.h" // for ASan::RegionIsPoisoned
+#include "common/Common.h"    // for uchar8, int32, uint32, ushort16, roundUp
+#include "common/Memory.h"    // for alignedMalloc
+#include "io/Buffer.h"        // for Buffer::size_type, Buffer, DataBuffer
+#include "io/Endianness.h"    // for Endianness, Endianness::little
+#include "io/IOException.h"   // for IOException (ptr only), ThrowIOE
+#include <cassert>            // for assert
+#include <cstring>            // for memcmp, memcpy
+#include <limits>             // for numeric_limits
 
 namespace rawspeed {
 
@@ -73,7 +73,7 @@ public:
   inline size_type check(size_type bytes) const {
     if (static_cast<uint64>(pos) + bytes > size)
       ThrowIOE("Out of bounds access in ByteStream");
-    assert(!ASAN_REGION_IS_POISONED(data + pos, bytes));
+    assert(!ASan::RegionIsPoisoned(data + pos, bytes));
     return bytes;
   }
 
