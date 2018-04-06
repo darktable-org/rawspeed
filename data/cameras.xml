@@ -8027,6 +8027,17 @@
 			<Vertical x="6032" width="14"/>
 		</BlackAreas>
 	</Camera>
+	<Camera make="SONY" model="DSC-RX1RM2">
+		<ID make="Sony" model="DSC-RX1RM2">Sony DSC-RX1RM2</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-40" height="0"/>
+		<Sensor black="512" white="16300"/>
+	</Camera>
 	<Camera make="SONY" model="DSLR-A100" decoder_version="1">
 		<ID make="Sony" model="DSLR-A100">Sony DSLR-A100</ID>
 		<CFA width="2" height="2">
