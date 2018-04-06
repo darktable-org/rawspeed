@@ -9696,6 +9696,17 @@
 		<Crop x="3" y="0" width="-3" height="0"/>
 		<Sensor black="19" white="7638"/>
 	</Camera>
+	<Camera make="KODAK" model="EOSDCS3C        FILE VERSION 3">
+		<ID make="Kodak" model="EOS DCS 3">Kodak EOSDCS3</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">RED</Color>
+			<Color x="0" y="1">BLUE</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="6" y="0" width="-6" height="0"/>
+		<Sensor black="0" white="7855"/>
+	</Camera>
 	<Camera make="EASTMAN KODAK COMPANY" model="KODAK P880 ZOOM DIGITAL CAMERA">
 		<ID make="Kodak" model="P880">Kodak P880</ID>
 		<CFA width="2" height="2">
