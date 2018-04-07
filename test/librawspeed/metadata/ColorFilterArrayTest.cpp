@@ -80,7 +80,7 @@ TEST(ColorFilterArrayTestBasic, DISABLED_SetTooBigSize) {
     ColorFilterArray cfa(iPoint2D(1, 1));
     cfa.setSize({6, 8});
   });
-};
+}
 
 TEST(ColorFilterArrayTestBasic, ToDcraw) {
   ASSERT_NO_THROW({

@@ -134,6 +134,6 @@ void KodakDecompressor::decompress() {
       }
     }
   }
-};
+}
 
 } // namespace rawspeed

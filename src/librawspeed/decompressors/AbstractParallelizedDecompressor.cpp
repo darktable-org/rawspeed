@@ -43,7 +43,7 @@ void AbstractParallelizedDecompressor::decompressOne(uint32 pieces) const {
     ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
              firstErr.c_str());
   }
-};
+}
 
 #ifdef HAVE_PTHREAD
 void AbstractParallelizedDecompressor::startThreading(uint32 pieces) const {

@@ -84,6 +84,6 @@ void SonyArw1Decompressor::decompress(const ByteStream& input) const {
         dest[x + y * pitch] = sum;
     }
   }
-};
+}
 
 } // namespace rawspeed

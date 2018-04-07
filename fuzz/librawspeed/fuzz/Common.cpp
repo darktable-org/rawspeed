@@ -46,7 +46,7 @@ rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs) {
   mRaw->isCFA = isCFA;
 
   return mRaw;
-};
+}
 
 rawspeed::ColorFilterArray CreateCFA(rawspeed::ByteStream* bs) {
   assert(bs);
@@ -74,4 +74,4 @@ rawspeed::ColorFilterArray CreateCFA(rawspeed::ByteStream* bs) {
   }
 
   return cfa;
-};
+}
