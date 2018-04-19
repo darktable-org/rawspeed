@@ -17,6 +17,8 @@ CheckOptions:
     value:           '7'
   - key:             readability-function-size.NestingThreshold
     value:           '6'
+  - key:             readability-function-size.VariableThreshold
+    value:           '30'
   - key:             readability-simplify-boolean-expr.ChainedConditionalAssignment
     value:           '1'
   - key:             readability-simplify-boolean-expr.ChainedConditionalReturn
@@ -31,6 +33,8 @@ CheckOptions:
     value:           'h,hh,hpp,hxx,'
   - key:             misc-definitions-in-headers.UseHeaderFileExtension
     value:           '1'
+  - key:             modernize-use-auto.MinTypeNameLength
+    value:           '0'
   - key:             readability-identifier-naming.NamespaceCase
     value:           lower_case
   - key:             google-runtime-references.WhiteListTypes
