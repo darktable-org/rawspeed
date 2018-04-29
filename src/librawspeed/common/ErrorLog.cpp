@@ -20,7 +20,7 @@
 
 #include "ErrorLog.h"
 #include "common/Mutex.h" // for MutexLocker
-#include <algorithm>      // for move
+#include <utility>        // for move
 
 namespace rawspeed {
 

@@ -28,13 +28,15 @@
 #include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, getH...
+#include "metadata/BlackArea.h"                     // for BlackArea
 #include "metadata/Camera.h"                        // for Camera, Hints
 #include "metadata/CameraMetaData.h"                // for CameraMetaData
 #include "metadata/CameraSensorInfo.h"              // for CameraSensorInfo
 #include "metadata/ColorFilterArray.h"              // for ColorFilterArray
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag::FUJI_RA...
+#include "tiff/TiffTag.h"                           // for FUJI_RAWIMAGEFUL...
+#include <array>                                    // for array
 #include <cassert>                                  // for assert
 #include <cstdio>                                   // for size_t
 #include <cstring>                                  // for memcmp

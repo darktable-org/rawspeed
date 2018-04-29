@@ -20,28 +20,32 @@
 
 #include "rawspeedconfig.h" // for HAVE_JPEG, HAVE_ZLIB
 #include "decoders/DngDecoder.h"
-#include "common/Common.h"                         // for uint32, writeLog
+#include "common/Common.h"                         // for uint32, roundUpDi...
 #include "common/DngOpcodes.h"                     // for DngOpcodes
-#include "common/NORangesSet.h"                    // for NORangesSet
+#include "common/NORangesSet.h"                    // for set
 #include "common/Point.h"                          // for iPoint2D, iRectan...
 #include "common/RawspeedException.h"              // for RawspeedException
 #include "decoders/RawDecoderException.h"          // for ThrowRDE, RawDeco...
-#include "decompressors/AbstractDngDecompressor.h" // for AbstractDngDecomp...
-#include "io/Buffer.h"                             // for Buffer
+#include "decompressors/AbstractDngDecompressor.h" // for DngSliceElement
+#include "io/Buffer.h"                             // for Buffer, DataBuffer
+#include "io/ByteStream.h"                         // for ByteStream
+#include "metadata/BlackArea.h"                    // for BlackArea
 #include "metadata/Camera.h"                       // for Camera
 #include "metadata/CameraMetaData.h"               // for CameraMetaData
 #include "metadata/ColorFilterArray.h"             // for CFAColor, ColorFi...
-#include "tiff/TiffEntry.h"                        // for TiffEntry, TiffDa...
+#include "parsers/TiffParserException.h"           // for ThrowTPE
+#include "tiff/TiffEntry.h"                        // for TiffEntry, TIFF_LONG
 #include "tiff/TiffIFD.h"                          // for TiffIFD, TiffRootIFD
-#include "tiff/TiffTag.h"                          // for TiffTag::ACTIVEAREA
-#include <algorithm>                               // for move
+#include "tiff/TiffTag.h"                          // for ACTIVEAREA, TILEO...
+#include <algorithm>                               // for any_of
+#include <array>                                   // for array, array<>::v...
 #include <cassert>                                 // for assert
-#include <cstring>                                 // for memset
 #include <limits>                                  // for numeric_limits
 #include <map>                                     // for map
 #include <memory>                                  // for unique_ptr
 #include <stdexcept>                               // for out_of_range
 #include <string>                                  // for string, operator+
+#include <utility>                                 // for move, pair
 #include <vector>                                  // for vector, allocator
 
 using std::vector;

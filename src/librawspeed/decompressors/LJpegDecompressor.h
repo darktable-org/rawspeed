@@ -22,11 +22,10 @@
 
 #include "common/Common.h"                           // for uint32
 #include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
-#include "io/Buffer.h"                               // for Buffer, Buffer:...
-#include "io/ByteStream.h"                           // for ByteStream
 
 namespace rawspeed {
 
+class ByteStream;
 class RawImage;
 
 // Decompresses Lossless JPEGs, with 2-4 components

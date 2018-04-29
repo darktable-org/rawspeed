@@ -28,7 +28,7 @@
 #include "io/Buffer.h"                          // for Buffer, Buffer::size_type
 #include "io/ByteStream.h"                      // for ByteStream
 #include "io/Endianness.h"                      // for Endianness
-#include <algorithm>                            // for move
+#include <utility>                              // for move
 
 namespace rawspeed {
 

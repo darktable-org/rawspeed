@@ -21,18 +21,20 @@
 */
 
 #include "decompressors/Cr2Decompressor.h"
-#include "common/Common.h"                // for uint32, unroll_loop, ushort16
-#include "common/Point.h"                 // for iPoint2D
+#include "common/Common.h"                // for unroll_loop, uint32, ushort16
+#include "common/Point.h"                 // for iPoint2D, iPoint2D::area_type
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/BitPumpJPEG.h"               // for BitPumpJPEG
-#include <algorithm>                      // for move, copy_n
+#include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
+#include <algorithm>                      // for copy_n
 #include <cassert>                        // for assert
-#include <numeric>                        // for accumulate
+#include <initializer_list>               // for initializer_list
 
 using std::copy_n;
 
 namespace rawspeed {
+
+class ByteStream;
 
 Cr2Decompressor::Cr2Decompressor(const ByteStream& bs, const RawImage& img)
     : AbstractLJpegDecompressor(bs, img) {

@@ -25,12 +25,11 @@
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "io/ByteStream.h"                // for ByteStream
-#include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
-#include <algorithm>                      // for move
+#include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
+#include <utility>                        // for move
 
 namespace rawspeed {
 
-class ByteStream;
 class CameraMetaData;
 class Buffer;
 

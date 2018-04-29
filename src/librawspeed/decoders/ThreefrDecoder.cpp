@@ -24,13 +24,13 @@
 #include "common/Point.h"                         // for iPoint2D
 #include "decoders/RawDecoderException.h"         // for ThrowRDE
 #include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompre...
+#include "io/Buffer.h"                            // for Buffer
 #include "io/ByteStream.h"                        // for ByteStream
-#include "io/IOException.h"                       // for IOException
 #include "metadata/Camera.h"                      // for Hints
-#include "metadata/ColorFilterArray.h"            // for CFAColor::CFA_GREEN
+#include "metadata/ColorFilterArray.h"            // for CFA_GREEN, CFA_BLUE
 #include "tiff/TiffEntry.h"                       // for TiffEntry
 #include "tiff/TiffIFD.h"                         // for TiffRootIFD, TiffIFD
-#include "tiff/TiffTag.h"                         // for TiffTag::ASSHOTNEU...
+#include "tiff/TiffTag.h"                         // for ASSHOTNEUTRAL, STR...
 #include <memory>                                 // for unique_ptr
 #include <string>                                 // for operator==, string
 

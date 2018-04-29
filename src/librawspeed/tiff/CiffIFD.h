@@ -23,7 +23,7 @@
 #pragma once
 
 #include "common/Common.h"      // for uint32
-#include "common/NORangesSet.h" // for NORangesSet
+#include "common/NORangesSet.h" // for set
 #include "tiff/CiffEntry.h"     // IWYU pragma: keep
 #include "tiff/CiffTag.h"       // for CiffTag
 #include <map>                  // for map
@@ -33,6 +33,7 @@
 
 namespace rawspeed {
 
+class Buffer;
 class ByteStream;
 
 class CiffIFD final {

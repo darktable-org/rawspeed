@@ -21,26 +21,21 @@
 */
 
 #include "decoders/OrfDecoder.h"
-#include "common/Common.h"                          // for uint32, ushort16
-#include "common/NORangesSet.h"                     // for NORangesSet
+#include "common/Common.h"                          // for uint32, BitOrder...
+#include "common/NORangesSet.h"                     // for set
 #include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
+#include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/OlympusDecompressor.h"      // for OlympusDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/BitPumpMSB.h"                          // for BitPumpMSB
 #include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness
-#include "io/IOException.h"                         // for IOException
+#include "io/Endianness.h"                          // for Endianness, getH...
 #include "metadata/Camera.h"                        // for Hints
-#include "metadata/ColorFilterArray.h"              // for ColorFilterArray
+#include "metadata/ColorFilterArray.h"              // for CFA_GREEN, CFA_BLUE
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <algorithm>                                // for min
-#include <cassert>                                  // for assert
-#include <cmath>                                    // for signbit
-#include <cstdlib>                                  // for abs
+#include "tiff/TiffTag.h"                           // for STRIPOFFSETS
+#include <array>                                    // for array
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for operator==, string
 

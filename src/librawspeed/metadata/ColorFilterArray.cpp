@@ -20,15 +20,15 @@
 
 #include "metadata/ColorFilterArray.h"
 #include "common/Common.h"                // for writeLog, uint32, DEBUG_PR...
-#include "common/Point.h"                 // for iPoint2D
+#include "common/Point.h"                 // for iPoint2D, iPoint2D::value_...
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include <algorithm>                      // for fill
+#include <cmath>                          // for abs
 #include <cstdarg>                        // for va_arg, va_end, va_list
 #include <cstdlib>                        // for size_t, abs
 #include <map>                            // for map
 #include <stdexcept>                      // for out_of_range
-#include <string>                         // for string, allocator
-// IWYU pragma: no_include <bits/std_abs.h>
+#include <string>                         // for string
 
 using std::vector;
 using std::string;

@@ -25,6 +25,7 @@
 #include <cstdlib>              // for EXIT_SUCCESS, size_t
 #include <iostream>             // for operator<<, cout, ostream
 #include <memory>               // for unique_ptr
+#include <string>               // for operator==, string
 
 #ifdef _OPENMP
 #include <omp.h>

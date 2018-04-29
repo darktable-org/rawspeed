@@ -23,11 +23,12 @@
 
 #include "common/Common.h" // for ushort16
 #include "common/Point.h"  // for iPoint2D
-#include <algorithm>       // for adjacent_find
-#include <algorithm>       // for min, max
+#include <algorithm>       // for max, min, adjacent_find, for_each
 #include <cassert>         // for assert
+#include <functional>      // for greater_equal
 #include <limits>          // for numeric_limits
-#include <type_traits>     // for enable_if_t, is_arithmetic
+#include <memory>          // for allocator_traits<>::value_type
+#include <type_traits>     // for is_floating_point, enable_if_t, is_arithm...
 #include <vector>          // for vector
 
 namespace rawspeed {

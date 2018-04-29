@@ -18,11 +18,20 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Spline.h" // for Spline
+#include "common/Spline.h" // for Spline, Spline<>::value_type
+#include "common/Common.h" // for ushort16
+#include "common/Point.h"  // for iPoint2D, iPoint2D::value_type
+#include <algorithm>       // for generate_n
 #include <array>           // for array
-#include <cmath>           // for acos
-#include <gtest/gtest.h>   // for AssertionResult, DeathTest, Test, AssertHe...
-#include <type_traits>     // for is_same, enable_if_t, is_arithmetic
+#include <cassert>         // for assert
+#include <cmath>           // for lround, acos, sin
+#include <gtest/gtest.h>   // for make_tuple, ParamIteratorInterface, Message
+#include <iterator>        // for begin, end, back_inserter
+#include <limits>          // for numeric_limits
+#include <ostream>         // for operator<<, basic_ostream::operator<<
+#include <stdlib.h>        // for exit
+#include <type_traits>     // for __decay_and_strip<>::__type, enable_if_t
+#include <vector>          // for vector
 
 using rawspeed::Spline;
 using std::make_tuple;

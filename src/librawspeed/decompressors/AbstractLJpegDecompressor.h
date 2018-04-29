@@ -26,13 +26,10 @@
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable
-#include "io/Buffer.h"                          // for Buffer, Buffer::size_type
 #include "io/ByteStream.h"                      // for ByteStream
-#include "io/Endianness.h" // for getHostEndianness, Endiannes...
-#include <array>           // for array
-#include <memory>          // for unique_ptr
-#include <utility>         // for move
-#include <vector>          // for vector
+#include <array>                                // for array
+#include <memory>                               // for unique_ptr
+#include <vector>                               // for vector
 
 /*
  * The following enum and two structs are stolen from the IJG JPEG library

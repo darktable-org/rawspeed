@@ -21,13 +21,15 @@
 */
 
 #include "decompressors/AbstractLJpegDecompressor.h"
-#include "common/Common.h"                // for uint32, make_unique, uchar8
+#include "common/Common.h"                // for uint32, uchar8
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/ByteStream.h"                // for ByteStream
+#include "io/Endianness.h"                // for Endianness, Endianness::big
 #include <array>                          // for array
-#include <memory>                         // for unique_ptr, allocator
+#include <cassert>                        // for assert
+#include <memory>                         // for unique_ptr, make_unique
 #include <utility>                        // for move
 #include <vector>                         // for vector
 

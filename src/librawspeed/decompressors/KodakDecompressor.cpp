@@ -20,15 +20,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
 #include "decompressors/KodakDecompressor.h"
-#include "common/RawImage.h"              // for RawImage
-#include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
+#include "common/Point.h"                 // for iPoint2D
+#include "common/RawImage.h"              // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for min
 #include <array>                          // for array
 #include <cassert>                        // for assert
+#include <utility>                        // for move
 
 namespace rawspeed {
 

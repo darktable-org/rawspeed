@@ -23,11 +23,10 @@
 
 #include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
 #include "io/BitPumpMSB32.h"                         // for BitPumpMSB32
-#include "io/Buffer.h"                               // for Buffer, Buffer:...
-#include "io/ByteStream.h"                           // for ByteStream
 
 namespace rawspeed {
 
+class ByteStream;
 class RawImage;
 
 class HasselbladDecompressor final : public AbstractLJpegDecompressor

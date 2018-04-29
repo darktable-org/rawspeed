@@ -21,22 +21,22 @@
 */
 
 #include "parsers/FiffParser.h"
-#include "common/Common.h"               // for make_unique, uint32, uchar8
+#include "common/Common.h"               // for uint32, ushort16
 #include "decoders/RafDecoder.h"         // for RafDecoder
 #include "decoders/RawDecoder.h"         // for RawDecoder
-#include "io/Buffer.h"                   // for Buffer
+#include "io/Buffer.h"                   // for Buffer, DataBuffer
 #include "io/ByteStream.h"               // for ByteStream
-#include "io/Endianness.h"               // for getU32BE, getHostEndianness
+#include "io/Endianness.h"               // for Endianness, Endianness::big
 #include "parsers/FiffParserException.h" // for ThrowFPE
 #include "parsers/RawParser.h"           // for RawParser
-#include "parsers/TiffParser.h" // for TiffParser::parse, TiffParser::makeDecoder
+#include "parsers/TiffParser.h"          // for TiffParser
 #include "parsers/TiffParserException.h" // for TiffParserException
-#include "tiff/TiffEntry.h"              // for TiffEntry, TiffDataType::TI...
-#include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD, TiffI...
-#include "tiff/TiffTag.h"                // for TiffTag, TiffTag::FUJIOLDWB
-#include <algorithm>                     // for move
+#include "tiff/TiffEntry.h"              // for TiffEntry, TIFF_SHORT, TIFF...
+#include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFDOwner
+#include "tiff/TiffTag.h"                // for FUJIOLDWB, FUJI_STRIPBYTECO...
 #include <limits>                        // for numeric_limits
-#include <memory>                        // for default_delete, unique_ptr
+#include <memory>                        // for make_unique, unique_ptr
+#include <utility>                       // for move
 
 using std::numeric_limits;
 

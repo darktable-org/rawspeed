@@ -20,16 +20,16 @@
 */
 
 #include "decoders/PefDecoder.h"
-#include "common/Common.h"                    // for uint32, BitOrder::BitO...
+#include "common/Common.h"                    // for uint32, BitOrder_MSB
 #include "common/Point.h"                     // for iPoint2D
-#include "decoders/RawDecoderException.h"     // for RawDecoderException (p...
+#include "decoders/RawDecoderException.h"     // for ThrowRDE
 #include "decompressors/PentaxDecompressor.h" // for PentaxDecompressor
 #include "io/ByteStream.h"                    // for ByteStream
-#include "io/IOException.h"                   // for IOException
-#include "metadata/ColorFilterArray.h"        // for CFAColor::CFA_GREEN
-#include "tiff/TiffEntry.h"                   // for TiffEntry
+#include "metadata/ColorFilterArray.h"        // for CFA_GREEN, CFA_BLUE
+#include "tiff/TiffEntry.h"                   // for TiffEntry, TIFF_UNDEFINED
 #include "tiff/TiffIFD.h"                     // for TiffRootIFD, TiffIFD
-#include "tiff/TiffTag.h"                     // for TiffTag, TiffTag::ISOS...
+#include "tiff/TiffTag.h"                     // for TiffTag, ISOSPEEDRATINGS
+#include <array>                              // for array
 #include <memory>                             // for unique_ptr
 #include <string>                             // for operator==, string
 

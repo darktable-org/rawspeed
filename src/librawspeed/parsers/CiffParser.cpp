@@ -21,18 +21,19 @@
 */
 
 #include "parsers/CiffParser.h"
-#include "common/Common.h"               // for make_unique, trimSpaces
+#include "common/Common.h"               // for trimSpaces, uint32, ushort16
 #include "decoders/CrwDecoder.h"         // for CrwDecoder
 #include "decoders/RawDecoder.h"         // for RawDecoder
 #include "io/ByteStream.h"               // for ByteStream
-#include "io/Endianness.h"               // for getHostEndianness, Endianne...
-#include "parsers/CiffParserException.h" // for CiffParserException (ptr only)
+#include "io/Endianness.h"               // for Endianness, Endianness::little
+#include "parsers/CiffParserException.h" // for ThrowCPE
 #include "tiff/CiffEntry.h"              // for CiffEntry
 #include "tiff/CiffIFD.h"                // for CiffIFD
-#include "tiff/CiffTag.h"                // for CiffTag::CIFF_MAKEMODEL
-#include <memory>                        // for unique_ptr, default_delete
-#include <string>                        // for operator==, basic_string
-#include <utility>                       // for move, pair
+#include "tiff/CiffTag.h"                // for CIFF_MAKEMODEL
+#include <memory>                        // for unique_ptr, make_unique
+#include <string>                        // for operator==, string
+#include <utility>                       // for move
+#include <vector>                        // for vector
 
 using std::string;
 

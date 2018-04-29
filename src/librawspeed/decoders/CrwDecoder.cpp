@@ -21,24 +21,25 @@
 */
 
 #include "decoders/CrwDecoder.h"
-#include "common/Common.h"                 // for ushort16, uint32
+#include "common/Common.h"                 // for ushort16, uchar8, uint32
 #include "common/Point.h"                  // for iPoint2D
 #include "common/RawspeedException.h"      // for RawspeedException
-#include "decoders/RawDecoderException.h"  // for RawDecoderException (ptr ...
+#include "decoders/RawDecoderException.h"  // for ThrowRDE
 #include "decompressors/CrwDecompressor.h" // for CrwDecompressor
+#include "io/Buffer.h"                     // for Buffer
 #include "metadata/Camera.h"               // for Hints
-#include "metadata/ColorFilterArray.h"     // for CFAColor::CFA_GREEN, CFAC...
-#include "tiff/CiffEntry.h"                // for CiffEntry, CiffDataType::...
+#include "metadata/ColorFilterArray.h"     // for CFA_GREEN, CFA_BLUE, CFA_RED
+#include "tiff/CiffEntry.h"                // for CiffEntry, CIFF_SHORT
 #include "tiff/CiffIFD.h"                  // for CiffIFD
-#include "tiff/CiffTag.h"                  // for CiffTag, CiffTag::CIFF_MA...
-#include <algorithm>                       // for move
+#include "tiff/CiffTag.h"                  // for CIFF_MAKEMODEL, CIFF_SHOT...
 #include <array>                           // for array
 #include <cassert>                         // for assert
-#include <cmath>                           // for copysignf, expf, logf
+#include <cmath>                           // for abs, copysignf, expf, logf
 #include <memory>                          // for unique_ptr
+#include <string.h>                        // for memcmp, size_t
 #include <string>                          // for string
+#include <utility>                         // for move
 #include <vector>                          // for vector
-// IWYU pragma: no_include <bits/std_abs.h>
 
 using std::vector;
 using std::string;

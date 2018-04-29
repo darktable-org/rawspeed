@@ -21,6 +21,7 @@
 #include "RawSpeed-API.h"
 
 #include "md5.h"       // for md5_hash
+#include <array>       // for array
 #include <cassert>     // for assert
 #include <chrono>      // for milliseconds, steady_clock, duration, dur...
 #include <cstdarg>     // for va_end, va_list, va_start
@@ -36,7 +37,6 @@
 #include <type_traits> // for enable_if<>::type
 #include <utility>     // for pair
 #include <vector>      // for vector
-
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)

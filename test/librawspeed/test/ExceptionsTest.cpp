@@ -33,7 +33,6 @@
 #include <memory>                             // for unique_ptr
 #include <stdexcept>                          // for runtime_error
 #include <string>                             // for string
-// IWYU pragma: no_include <bits/exception.h>
 
 using rawspeed::CameraMetadataException;
 using rawspeed::CiffParserException;

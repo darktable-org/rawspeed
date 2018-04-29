@@ -20,22 +20,15 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32
+#include "common/Common.h"                      // for uint32, ushort16
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/BitPumpMSB.h"                      // for BitPumpMSB
-#include <array>                                // for array
 #include <vector>                               // for vector
 
 namespace rawspeed {
 
-class iPoint2D;
-
-class RawImage;
-
 class ByteStream;
-
-class HuffmanTable;
 
 class NikonDecompressor final : public AbstractDecompressor {
   RawImage mRaw;

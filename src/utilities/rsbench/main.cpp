@@ -18,15 +18,14 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "RawSpeed-API.h"        // for RawDecoder, Buffer, FileReader
-#include <benchmark/benchmark.h> // for State, Benchmark, DoNotOptimize
+#include "RawSpeed-API.h"        // for RawDecoder, Buffer, FileReader, Raw...
+#include <benchmark/benchmark.h> // for Counter, State, DoNotOptimize, Init...
 #include <chrono>                // for duration, high_resolution_clock
 #include <ctime>                 // for clock, clock_t
-#include <map>                   // for map<>::mapped_type
 #include <memory>                // for unique_ptr
-#include <ratio>                 // for milli, ratio
-#include <string>                // for string, to_string
-// IWYU pragma: no_include <sys/time.h>
+#include <ratio>                 // for ratio
+#include <string>                // for string, to_string, operator!=
+#include <sys/time.h>            // for CLOCKS_PER_SEC
 
 #ifdef _OPENMP
 #include <omp.h>

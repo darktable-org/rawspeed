@@ -2,6 +2,11 @@
  { include: ["<zconf.h>", "private", "<zlib.h>", "public"] },
  { include: ["<jconfig.h>", "private", "<jpeglib.h>", "public"] },
  { include: ["<jmorecfg.h>", "private", "<jpeglib.h>", "public"] },
+ { include: ["<bits/std_abs.h>", "private", "<cmath>", "public"] },
+ { include: ["<bits/stl_set.h>", "private", "<set>", "public"] },
+ { include: ["<bits/stdint-uintn.h>", "private", "<cstdint>", "public"] },
+ { include: ["<bits/exception.h>", "private", "<exception>", "public"] },
+ { include: ["<bits/types/clock_t.h>", "private", "<ctime>", "public"] },
  { include: ["@<gtest/.*>", "private", "<gtest/gtest.h>", "public"] },
  { include: ["@<gmock/.*>", "private", "<gmock/gmock.h>", "public"] },
  { include: ["<ThreadSafetyAnalysis.h>", "private", "\"ThreadSafetyAnalysis.h\"", "public"] }

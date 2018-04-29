@@ -27,9 +27,8 @@
 #include "common/Common.h"                      // for uint32
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/Buffer.h"                          // for Buffer, Buffer::size_type
 #include "io/ByteStream.h"                      // for ByteStream
-#include "io/Endianness.h"                      // for getHostEndianness
+#include "io/Endianness.h"                      // for Endianness, Endianne...
 #include <utility>                              // for move
 
 namespace rawspeed {

@@ -21,15 +21,16 @@
 */
 
 #include "tiff/TiffEntry.h"
-#include "common/Common.h"               // for uint32, ushort16, int32
+#include "common/Common.h"               // for uint32, short16, ushort16
 #include "parsers/TiffParserException.h" // for ThrowTPE
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
-#include "tiff/TiffTag.h"                // for ::DNGPRIVATEDATA, ::EXIFIFD...
-#include <algorithm>                     // for move
+#include "tiff/TiffTag.h"                // for TiffTag, DNGPRIVATEDATA
 #include <cassert>                       // for assert
 #include <cstdint>                       // for UINT32_MAX
 #include <cstring>                       // for strnlen
+#include <initializer_list>              // for initializer_list
 #include <string>                        // for string
+#include <utility>                       // for move
 
 using std::string;
 

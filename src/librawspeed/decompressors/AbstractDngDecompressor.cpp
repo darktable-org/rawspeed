@@ -20,7 +20,7 @@
 
 #include "rawspeedconfig.h" // for HAVE_JPEG, HAVE_...
 #include "decompressors/AbstractDngDecompressor.h"
-#include "common/Common.h"                          // for BitOrder::BitOrd...
+#include "common/Common.h"                          // for BitOrder_LSB
 #include "common/Point.h"                           // for iPoint2D
 #include "common/RawImage.h"                        // for RawImageData
 #include "decoders/RawDecoderException.h"           // for RawDecoderException
@@ -28,11 +28,9 @@
 #include "decompressors/JpegDecompressor.h"         // for JpegDecompressor
 #include "decompressors/LJpegDecompressor.h"        // for LJpegDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer (ptr only)
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, Endi...
-#include "io/IOException.h"                         // for IOException
-#include "tiff/TiffIFD.h"                           // for getTiffByteOrder
+#include "io/IOException.h"                         // for IOException, Thr...
 #include <cassert>                                  // for assert
 #include <cstdio>                                   // for size_t
 #include <limits>                                   // for numeric_limits

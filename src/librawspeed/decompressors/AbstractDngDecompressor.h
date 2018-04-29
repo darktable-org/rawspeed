@@ -21,6 +21,7 @@
 #pragma once
 
 #include "common/Common.h"                                  // for uint32
+#include "common/Point.h"                                   // for iPoint2D
 #include "decompressors/AbstractParallelizedDecompressor.h" // for Abstract...
 #include "io/ByteStream.h"                                  // for ByteStream
 #include <cassert>                                          // for assert

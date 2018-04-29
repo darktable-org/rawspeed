@@ -27,11 +27,8 @@
 #include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::f...
 #include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
-#include "tiff/TiffEntry.h"               // for TiffEntry, ::TIFF_UNDEFINED
-#include "tiff/TiffIFD.h"                 // for TiffIFD
-#include "tiff/TiffTag.h"                 // for TiffTag
 #include <cassert>                        // for assert
-#include <vector>                         // for vector, allocator
+#include <vector>                         // for vector
 
 namespace rawspeed {
 

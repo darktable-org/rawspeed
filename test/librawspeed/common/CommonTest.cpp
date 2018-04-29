@@ -18,16 +18,18 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h" // for uchar8, clampBits, isIn, isPower...
-#include <algorithm>       // for fill, min, equal
-#include <cassert>         // for assert
-#include <cstddef>         // for size_t
-#include <gtest/gtest.h>   // for make_tuple, get, IsNullLiteralHe...
-#include <limits>          // for numeric_limits
-#include <memory>          // for unique_ptr
-#include <string>          // for basic_string, string, allocator
-#include <vector>          // for vector
-// IWYU pragma: no_include <type_traits>
+#include "common/Common.h"  // for uchar8, clampBits, roundUp, isIn, isPowe...
+#include <algorithm>        // for fill, min, equal, generate_n
+#include <cassert>          // for assert
+#include <cstddef>          // for size_t
+#include <gtest/gtest.h>    // for make_tuple, get, ParamIteratorInterface
+#include <initializer_list> // for initializer_list
+#include <iterator>         // for back_inserter
+#include <limits>           // for numeric_limits
+#include <memory>           // for make_unique, unique_ptr
+#include <string>           // for string, operator==, basic_string
+#include <type_traits>      // for __decay_and_strip<>::__type
+#include <vector>           // for vector
 
 using rawspeed::clampBits;
 using rawspeed::copyPixels;

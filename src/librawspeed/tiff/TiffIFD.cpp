@@ -22,18 +22,18 @@
 */
 
 #include "tiff/TiffIFD.h"
-#include "common/Common.h"            // for getHostEndianness, uint32, make_...
-#include "common/NORangesSet.h"       // for NORangesSet
+#include "common/Common.h"            // for trimSpaces, uint32
+#include "common/NORangesSet.h"       // for set
 #include "common/RawspeedException.h" // for RawspeedException
 #include "io/IOException.h"           // for IOException
 #include "tiff/TiffEntry.h"           // for TiffEntry
-#include "tiff/TiffTag.h"             // for TiffTag, ::DNGPRIVATEDATA, ::EXI...
-#include <algorithm>                  // for move
+#include "tiff/TiffTag.h"             // for TiffTag, MAKE, DNGPRIVATEDATA
+#include <cassert>                    // for assert
 #include <cstdint>                    // for UINT32_MAX
-#include <map>                        // for map, _Rb_tree_const_iterator, al...
-#include <memory>                     // for default_delete, unique_ptr
-#include <string>                     // for operator==, string, basic_string
-#include <utility>                    // for pair
+#include <map>                        // for map, _Rb_tree_const_iterator
+#include <memory>                     // for unique_ptr, make_unique
+#include <string>                     // for string, operator==
+#include <utility>                    // for move, pair
 #include <vector>                     // for vector
 
 using std::string;

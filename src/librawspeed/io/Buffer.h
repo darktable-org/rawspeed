@@ -21,15 +21,14 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"
-#include "AddressSanitizer.h" // for ASan::RegionIsPoisoned
-#include "common/Common.h"    // for uchar8, uint32, uint64
+#include "AddressSanitizer.h" // for ASan
+#include "common/Common.h"    // for uchar8, uint64, uint32
 #include "common/Memory.h"    // for alignedFree
-#include "io/Endianness.h"    // for getByteSwapped
+#include "io/Endianness.h"    // for Endianness, Endianness::little, getHos...
 #include "io/IOException.h"   // for ThrowIOE
-#include <algorithm>          // for swap
 #include <cassert>            // for assert
 #include <memory>             // for unique_ptr
+#include <utility>            // for swap
 
 namespace rawspeed {
 

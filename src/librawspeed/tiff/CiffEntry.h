@@ -23,7 +23,7 @@
 #pragma once
 
 #include "common/Common.h"      // for uint32, uchar8, ushort16
-#include "common/NORangesSet.h" // for NORangesSet
+#include "common/NORangesSet.h" // for set
 #include "io/ByteStream.h"      // for ByteStream
 #include "tiff/CiffTag.h"       // for CiffTag
 #include <string>               // for string
@@ -31,7 +31,8 @@
 
 namespace rawspeed {
 
-class CiffIFD;
+class Buffer;
+class CiffIFD; // IWYU pragma: keep
 
 /*
  * Tag data type information.

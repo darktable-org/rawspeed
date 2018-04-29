@@ -19,8 +19,8 @@
 */
 
 #include "metadata/CameraSensorInfo.h"
-#include <algorithm> // for move
-#include <vector>    // for vector
+#include <utility> // for move
+#include <vector>  // for vector
 
 using std::vector;
 

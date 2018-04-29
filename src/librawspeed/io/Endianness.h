@@ -24,6 +24,7 @@
 #include "common/Common.h" // for uint32, ushort16, uint64, int32, short16
 #include <cassert>         // for assert
 #include <cstring>         // for memcpy
+// IWYU pragma: no_include "io/EndiannessTest.h"
 
 namespace rawspeed {
 

@@ -19,12 +19,11 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
 #include "io/Buffer.h"
-#include "AddressSanitizer.h" // for ASan::RegionIsPoisoned
+#include "AddressSanitizer.h" // for ASan
 #include "common/Common.h"    // for uchar8, roundUp
-#include "common/Memory.h"    // for alignedFree, alignedMalloc
-#include "io/IOException.h"   // for IOException (ptr only), ThrowIOE
+#include "common/Memory.h"    // for alignedFree, alignedFreeConstPtr, alig...
+#include "io/IOException.h"   // for ThrowIOE
 #include <cassert>            // for assert
 #include <memory>             // for unique_ptr
 

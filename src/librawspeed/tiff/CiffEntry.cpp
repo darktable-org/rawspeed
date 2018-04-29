@@ -21,11 +21,13 @@
 */
 
 #include "tiff/CiffEntry.h"
-#include "common/Common.h"               // for uchar8, uint32, ushort16
-#include "common/NORangesSet.h"          // for NORangesSet
+#include "common/Common.h"               // for uint32, uchar8, ushort16
+#include "common/NORangesSet.h"          // for set
+#include "io/Buffer.h"                   // for Buffer
 #include "io/ByteStream.h"               // for ByteStream
-#include "parsers/CiffParserException.h" // for CiffParserException (ptr only)
-#include <string>                        // for string, allocator
+#include "parsers/CiffParserException.h" // for ThrowCPE
+#include <string>                        // for string
+#include <utility>                       // for pair
 #include <vector>                        // for vector
 
 using std::string;

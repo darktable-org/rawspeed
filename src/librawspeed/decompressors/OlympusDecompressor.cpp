@@ -21,20 +21,19 @@
 */
 
 #include "decompressors/OlympusDecompressor.h"
-#include "common/Common.h"                      // for uchar8
-#include "common/Point.h"                       // for iPoint2D
-#include "common/RawImage.h"                    // for RawImage
-#include "decoders/RawDecoderException.h"       // for ThrowRDE
-#include "decompressors/AbstractDecompressor.h" // for RawDecom...
-#include "decompressors/HuffmanTable.h"         // for HuffmanTable
-#include "io/BitPumpMSB.h"                      // for BitPumpMSB
-#include <algorithm>                            // for move
-#include <algorithm>                            // for min
-#include <array>                                // for array
-#include <cmath>                                // for signbit
-#include <cstdlib>                              // for abs
-#include <memory>                               // for unique_ptr
-#include <type_traits>                          // for enable_if, is_integer
+#include "common/Common.h"                // for uint32, ushort16, uchar8
+#include "common/Point.h"                 // for iPoint2D
+#include "common/RawImage.h"              // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/BitPumpMSB.h"                // for BitPumpMSB
+#include "io/ByteStream.h"                // for ByteStream
+#include <algorithm>                      // for min
+#include <array>                          // for array, array<>::value_type
+#include <cassert>                        // for assert
+#include <cmath>                          // for abs
+#include <cstdlib>                        // for abs
+#include <memory>                         // for unique_ptr
+#include <type_traits>                    // for enable_if_t, is_integral
 
 namespace {
 

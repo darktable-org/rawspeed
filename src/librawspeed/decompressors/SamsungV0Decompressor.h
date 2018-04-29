@@ -28,9 +28,7 @@
 
 namespace rawspeed {
 
-class Buffer;
 class RawImage;
-class TiffIFD;
 
 // Decoder for compressed srw files (NX300 and later)
 class SamsungV0Decompressor final : public AbstractSamsungDecompressor {

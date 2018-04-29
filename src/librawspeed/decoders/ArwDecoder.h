@@ -26,7 +26,7 @@
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "io/ByteStream.h"                // for ByteStream
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
-#include <algorithm>                      // for move
+#include <utility>                        // for move
 
 namespace rawspeed {
 

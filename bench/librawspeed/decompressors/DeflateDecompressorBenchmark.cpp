@@ -26,12 +26,12 @@
 #include "common/RawImage.h"                   // for RawImage, RawImageData
 #include "io/Buffer.h"                         // for Buffer
 #include "io/ByteStream.h"                     // for ByteStream
-#include <algorithm>                           // for move
 #include <benchmark/benchmark.h>               // for Benchmark, BENCHMARK_...
 #include <cassert>                             // for assert
 #include <cstddef>                             // for size_t
 #include <memory>                              // for unique_ptr
 #include <type_traits>                         // for integral_constant
+#include <utility>                             // for move
 #include <zlib.h>
 
 #ifndef NDEBUG

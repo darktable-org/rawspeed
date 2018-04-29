@@ -20,14 +20,13 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"
+#include "rawspeedconfig.h" // for HAVE_ZLIB
 
 #ifdef HAVE_ZLIB
 
-#include "common/Common.h"   // for getHostEndianness, uint32, Endianness::big
-#include "common/RawImage.h" // for RawImage
+#include "common/Common.h"                      // for uint32
+#include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/Buffer.h"                          // for Buffer, Buffer::size_type
 #include "io/ByteStream.h"                      // for ByteStream
 #include <memory>                               // for unique_ptr
 #include <utility>                              // for move

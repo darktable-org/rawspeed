@@ -18,12 +18,15 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "fuzz/Common.h"               // for CreateRawImage
+#include "fuzz/Common.h"
+#include "common/Common.h"             // for uint32
 #include "common/Point.h"              // for iPoint2D
-#include "common/RawImage.h"           // for RawImage
-#include "common/RawspeedException.h"  // for RawspeedException
+#include "common/RawImage.h"           // for RawImage, RawImageData, RawIm...
+#include "common/RawspeedException.h"  // for ThrowRSE
 #include "io/ByteStream.h"             // for ByteStream
-#include "metadata/ColorFilterArray.h" // for ColorFilterArray
+#include "io/IOException.h"            // for ThrowIOE
+#include "metadata/ColorFilterArray.h" // for ColorFilterArray, CFAColor
+#include <cassert>                     // for assert
 #include <limits>                      // for numeric_limits
 
 rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs) {

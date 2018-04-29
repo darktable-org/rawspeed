@@ -20,14 +20,13 @@
 */
 
 #include "io/FileReader.h"
-#include "io/Buffer.h"          // for Buffer
-#include "io/FileIOException.h" // for FileIOException (ptr only), ThrowFIE
-#include <algorithm>            // for move
-#include <cstdio>               // for fclose, fseek, fopen, fread, ftell
+#include "io/Buffer.h"          // for Buffer, Buffer::size_type
+#include "io/FileIOException.h" // for ThrowFIE
+#include <cstdio>               // for fseek, fclose, feof, ferror, fopen
 #include <fcntl.h>              // for SEEK_END, SEEK_SET
 #include <limits>               // for numeric_limits
-#include <memory>               // for unique_ptr
-#include <type_traits>          // for make_unsigned
+#include <memory>               // for unique_ptr, make_unique, operator==
+#include <utility>              // for move
 
 #if !(defined(__unix__) || defined(__APPLE__))
 #ifndef NOMINMAX

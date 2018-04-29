@@ -19,15 +19,15 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
 #include "decoders/RawDecoder.h"
-#include "common/Common.h"                          // for uint32, splitString
+#include "common/Common.h"                          // for uint32, roundUpD...
 #include "common/Point.h"                           // for iPoint2D, iRecta...
-#include "decoders/RawDecoderException.h"           // for ThrowRDE, RawDec...
+#include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer
 #include "io/FileIOException.h"                     // for FileIOException
 #include "io/IOException.h"                         // for IOException
+#include "metadata/BlackArea.h"                     // for BlackArea
 #include "metadata/Camera.h"                        // for Camera, Hints
 #include "metadata/CameraMetaData.h"                // for CameraMetaData
 #include "metadata/CameraSensorInfo.h"              // for CameraSensorInfo
@@ -35,7 +35,9 @@
 #include "parsers/TiffParserException.h"            // for TiffParserException
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffIFD
-#include "tiff/TiffTag.h"                           // for TiffTag::STRIPOF...
+#include "tiff/TiffTag.h"                           // for BITSPERSAMPLE
+#include <array>                                    // for array
+#include <cassert>                                  // for assert
 #include <string>                                   // for string, basic_st...
 #include <vector>                                   // for vector
 

@@ -21,21 +21,24 @@
 */
 
 #include "decoders/IiqDecoder.h"
-#include "common/Common.h"                // for uint32, int32, ushort16
+#include "common/Common.h"                // for uint32, ushort16, int32
 #include "common/Point.h"                 // for iPoint2D
-#include "common/Spline.h"                // for calculateCurve
+#include "common/Spline.h"                // for Spline, Spline<>::value_type
+#include "decoders/RawDecoder.h"          // for RawDecoder::(anonymous)
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
 #include "io/Buffer.h"                    // for Buffer, DataBuffer
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/Endianness.h"                // for Endianness, Endianness::li...
 #include "tiff/TiffIFD.h"                 // for TiffRootIFD, TiffID
-#include <algorithm>                      // for move, sort, adjacent_find
+#include <algorithm>                      // for adjacent_find, generate_n
+#include <array>                          // for array, array<>::const_iter...
 #include <cassert>                        // for assert
 #include <functional>                     // for greater_equal
-#include <iterator>                       // for advance, begin, end, next
+#include <iterator>                       // for advance, next, begin, end
 #include <memory>                         // for unique_ptr
 #include <string>                         // for operator==, string
+#include <utility>                        // for move
 #include <vector>                         // for vector
 
 namespace rawspeed {

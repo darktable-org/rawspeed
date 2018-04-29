@@ -19,16 +19,17 @@
 */
 
 #include "decompressors/NikonDecompressor.h"
-#include "common/Common.h"                // for uint32, ushort16, clampBits
+#include "common/Common.h"                // for uint32, clampBits, ushort16
 #include "common/Point.h"                 // for iPoint2D
-#include "common/RawImage.h"              // for RawImage, RawImageData, RawI...
+#include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::fil...
+#include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::f...
 #include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
-#include <cstdio>                         // for size_t, NULL
-#include <vector>                         // for vector, allocator
+#include <cassert>                        // for assert
+#include <cstdio>                         // for size_t
+#include <vector>                         // for vector
 
 namespace rawspeed {
 

@@ -21,12 +21,16 @@
 */
 
 #include "decompressors/PanasonicDecompressor.h"
-#include "common/Mutex.h"    // for MutexLocker
-#include "common/Point.h"    // for iPoint2D
-#include "common/RawImage.h" // for RawImage, RawImageData
-#include <algorithm>         // for min, move
-#include <cstring>           // for memcpy
-#include <vector>            // for vector
+#include "common/Mutex.h"                 // for MutexLocker
+#include "common/Point.h"                 // for iPoint2D
+#include "common/RawImage.h"              // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include <algorithm>                      // for min
+#include <array>                          // for array
+#include <cassert>                        // for assert
+#include <cstring>                        // for memcpy
+#include <utility>                        // for move
+#include <vector>                         // for vector
 
 namespace rawspeed {
 

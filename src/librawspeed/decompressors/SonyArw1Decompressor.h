@@ -22,11 +22,10 @@
 
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/ByteStream.h"                      // for ByteStream
 
 namespace rawspeed {
 
-class RawImage;
+class ByteStream;
 
 class SonyArw1Decompressor final : public AbstractDecompressor {
   RawImage mRaw;

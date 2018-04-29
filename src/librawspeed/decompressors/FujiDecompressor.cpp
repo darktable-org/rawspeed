@@ -22,16 +22,17 @@
 */
 
 #include "decompressors/FujiDecompressor.h"
-#include "common/Common.h"                                  // for roundUpDiv...
+#include "common/Common.h"                                  // for ushort16
+#include "common/Point.h"                                   // for iPoint2D
 #include "common/RawImage.h"                                // for RawImage
 #include "decoders/RawDecoderException.h"                   // for ThrowRDE
 #include "decompressors/AbstractParallelizedDecompressor.h" // for RawDecom...
 #include "io/Endianness.h"                                  // for Endianness
-#include "metadata/ColorFilterArray.h"                      // for CFAColor...
+#include "metadata/ColorFilterArray.h"                      // for CFA_BLUE
 #include <algorithm>                                        // for fill, min
-#include <cstdlib>                                          // for abs
+#include <cmath>                                            // for abs
+#include <cstdlib>                                          // for abs, size_t
 #include <cstring>                                          // for memcpy
-// IWYU pragma: no_include <bits/std_abs.h>
 
 namespace rawspeed {
 

@@ -23,15 +23,14 @@
 #include "decoders/MrwDecoder.h"
 #include "common/Common.h"                          // for uint32
 #include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
+#include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
+#include "io/Buffer.h"                              // for DataBuffer, Buffer
 #include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness::big
-#include "io/IOException.h"                         // for IOException
+#include "io/Endianness.h"                          // for Endianness, Endi...
 #include "metadata/Camera.h"                        // for Hints
 #include "parsers/TiffParser.h"                     // for TiffParser
-#include "tiff/TiffIFD.h"                           // for TiffID, TiffRoot...
+#include "tiff/TiffIFD.h"                           // for TiffRootIFDOwner
 #include <cassert>                                  // for assert
 #include <cstring>                                  // for memcmp, size_t
 #include <memory>                                   // for unique_ptr

@@ -23,7 +23,7 @@
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
-#include <algorithm>                      // for move
+#include <utility>                        // for move
 
 namespace rawspeed {
 

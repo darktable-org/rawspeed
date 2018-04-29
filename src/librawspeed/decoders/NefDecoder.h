@@ -25,9 +25,9 @@
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "decoders/RawDecoder.h"          // for RawDecoder::RawSlice
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
-#include <algorithm>                      // for move
 #include <array>                          // for array
 #include <string>                         // for string
+#include <utility>                        // for move
 #include <vector>                         // for vector
 
 namespace rawspeed {

@@ -22,10 +22,10 @@
 
 #include "decoders/RawDecoder.h" // for RawDecoder
 #include "tiff/TiffIFD.h"        // for TiffID, TiffRootIFD, TiffRootIFDOwner
-#include "tiff/TiffTag.h"        // for TiffTag::IMAGEWIDTH, TiffTag
-#include <algorithm>             // for move
+#include "tiff/TiffTag.h"        // for IMAGEWIDTH, TiffTag
 #include <memory>                // for unique_ptr
 #include <string>                // for string
+#include <utility>               // for move
 
 namespace rawspeed {
 

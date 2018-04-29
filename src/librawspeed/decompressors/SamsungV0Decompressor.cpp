@@ -21,17 +21,12 @@
 */
 
 #include "decompressors/SamsungV0Decompressor.h"
-#include "common/Common.h"                // for ushort16, uint32, int32
+#include "common/Common.h"                // for uint32, ushort16, int32
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
-#include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
-#include "io/Endianness.h"                // for Endianness, Endianness::li...
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include "tiff/TiffIFD.h"                 // for TiffIFD
-#include "tiff/TiffTag.h"                 // for TiffTag, TiffTag::IMAGELENGTH
 #include <algorithm>                      // for max
 #include <cassert>                        // for assert
 #include <iterator>                       // for advance, begin, end, next

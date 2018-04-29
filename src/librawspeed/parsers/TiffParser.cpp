@@ -22,8 +22,8 @@
 */
 
 #include "parsers/TiffParser.h"
-#include "common/Common.h"               // for make_unique, trimSpaces
-#include "common/NORangesSet.h"          // for NORangesSet
+#include "common/Common.h"               // for uint32, ushort16
+#include "common/NORangesSet.h"          // for set
 #include "decoders/ArwDecoder.h"         // for ArwDecoder
 #include "decoders/Cr2Decoder.h"         // for Cr2Decoder
 #include "decoders/DcrDecoder.h"         // for DcrDecoder
@@ -37,17 +37,16 @@
 #include "decoders/NefDecoder.h"         // for NefDecoder
 #include "decoders/OrfDecoder.h"         // for OrfDecoder
 #include "decoders/PefDecoder.h"         // for PefDecoder
-#include "decoders/RafDecoder.h"         // for RafDecoder
 #include "decoders/RawDecoder.h"         // for RawDecoder
 #include "decoders/Rw2Decoder.h"         // for Rw2Decoder
 #include "decoders/SrwDecoder.h"         // for SrwDecoder
 #include "decoders/ThreefrDecoder.h"     // for ThreefrDecoder
 #include "io/ByteStream.h"               // for ByteStream
-#include "parsers/TiffParserException.h" // for TiffParserException
+#include "parsers/TiffParserException.h" // for ThrowTPE
 #include <cassert>                       // for assert
 #include <cstdint>                       // for UINT32_MAX
-#include <memory>                        // for unique_ptr
-#include <string>                        // for operator==, basic_string
+#include <memory>                        // for make_unique, unique_ptr
+#include <string>                        // for string
 #include <tuple>                         // for tie, tuple
 #include <vector>                        // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>

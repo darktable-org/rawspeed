@@ -24,23 +24,21 @@
 #include "common/Point.h"                           // for iPoint2D
 #include "common/RawspeedException.h"               // for RawspeedException
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
-#include "decompressors/HuffmanTable.h"             // for HuffmanTable
 #include "decompressors/SonyArw1Decompressor.h"     // for SonyArw1Decompre...
 #include "decompressors/SonyArw2Decompressor.h"     // for SonyArw2Decompre...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/BitPumpMSB.h"                          // for BitPumpMSB
 #include "io/Buffer.h"                              // for Buffer, DataBuffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, Endi...
-#include "io/IOException.h"                         // for IOException
 #include "metadata/Camera.h"                        // for Hints
-#include "metadata/ColorFilterArray.h"              // for CFAColor::CFA_GREEN
+#include "metadata/ColorFilterArray.h"              // for CFA_GREEN, CFA_BLUE
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag::DNGPRIV...
+#include "tiff/TiffTag.h"                           // for DNGPRIVATEDATA
 #include <cassert>                                  // for assert
 #include <cstring>                                  // for memcpy, size_t
 #include <memory>                                   // for unique_ptr
+#include <set>                                      // for set
 #include <string>                                   // for operator==, string
 #include <vector>                                   // for vector
 

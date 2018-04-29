@@ -18,21 +18,21 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for WITH_SSE2
+#include "rawspeedconfig.h" // for HAVE_PTHREAD
 #include "common/RawImage.h"
-#include "AddressSanitizer.h"             // for ASan::...
-#include "MemorySanitizer.h"              // for MSan::CheckMemIsInitialized
+#include "MemorySanitizer.h"              // for MSan
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
 #include "io/IOException.h"               // for IOException
 #include "parsers/TiffParserException.h"  // for TiffParserException
-#include <algorithm>                      // for min
+#include <algorithm>                      // for fill_n, min
 #include <cassert>                        // for assert
 #include <cmath>                          // for NAN
-#include <cstdlib>                        // for free
-#include <cstring>                        // for memset, memcpy, strdup
+#include <cstdlib>                        // for size_t
+#include <cstring>                        // for memcpy, memset
 #include <limits>                         // for numeric_limits
-#include <memory>                         // for unique_ptr
+#include <memory>                         // for unique_ptr, make_unique
+#include <utility>                        // for move, swap
 
 using std::fill_n;
 using std::string;

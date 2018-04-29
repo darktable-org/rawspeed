@@ -21,16 +21,14 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32
-#include "common/RawImage.h"                    // for RawImage, RawImageData
+#include "common/Common.h"                      // for uchar8
+#include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable
 
 namespace rawspeed {
 
 class ByteStream;
-
-class TiffIFD;
 
 class PentaxDecompressor final : public AbstractDecompressor {
   RawImage mRaw;

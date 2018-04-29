@@ -21,25 +21,25 @@
 */
 
 #include "decoders/Cr2Decoder.h"
-#include "common/Common.h"                 // for ushort16, clampBits, uint32
-#include "common/Point.h"                  // for iPoint2D
-#include "common/RawspeedException.h"      // for RawspeedException
-#include "decoders/RawDecoderException.h"  // for RawDecoderException, Thro...
-#include "decompressors/Cr2Decompressor.h" // for Cr2Decompressor
+#include "common/Common.h"                     // for uint32, ushort16
+#include "common/Point.h"                      // for iPoint2D
+#include "common/RawspeedException.h"          // for RawspeedException
+#include "decoders/RawDecoderException.h"      // for ThrowRDE
+#include "decompressors/Cr2Decompressor.h"     // for Cr2Decompressor, Cr2S...
 #include "interpolators/Cr2sRawInterpolator.h" // for Cr2sRawInterpolator
 #include "io/Buffer.h"                         // for Buffer
 #include "io/ByteStream.h"                     // for ByteStream
-#include "io/Endianness.h"               // for getHostEndianness, Endian...
-#include "io/IOException.h"              // for IOException
-#include "metadata/Camera.h"             // for Hints
-#include "metadata/ColorFilterArray.h"   // for CFAColor::CFA_GREEN, CFAC...
-#include "parsers/TiffParserException.h" // for ThrowTPE
-#include "tiff/TiffEntry.h"              // for TiffEntry, TiffDataType::...
-#include "tiff/TiffTag.h"                // for TiffTag, TiffTag::CANONCO...
-#include <array>                         // for array
-#include <cassert>                       // for assert
-#include <memory>                        // for unique_ptr, allocator
-#include <string>                        // for string, operator==
+#include "io/Endianness.h"                     // for Endianness, Endiannes...
+#include "metadata/Camera.h"                   // for Hints
+#include "metadata/ColorFilterArray.h"         // for CFA_GREEN, CFA_BLUE
+#include "parsers/TiffParserException.h"       // for ThrowTPE
+#include "tiff/TiffEntry.h"                    // for TiffEntry, TIFF_SHORT
+#include "tiff/TiffTag.h"                      // for TiffTag, CANONCOLORDATA
+#include <array>                               // for array
+#include <cassert>                             // for assert
+#include <memory>                              // for unique_ptr, allocator...
+#include <string>                              // for operator==, string
+#include <vector>                              // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
 using std::string;

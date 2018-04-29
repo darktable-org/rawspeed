@@ -21,18 +21,15 @@
 
 #pragma once
 
-#include "common/Common.h"                           // ushort16
+#include "common/Common.h"                           // for ushort16
 #include "decoders/RawDecoderException.h"            // for ThrowRDE
 #include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
-#include "io/Buffer.h"                               // for Buffer, Buffer:...
-#include "io/ByteStream.h"                           // for ByteStream
 #include <cassert>                                   // for assert
 
 namespace rawspeed {
 
+class ByteStream;
 class RawImage;
-class Cr2Decompressor;
-// Decompresses Lossless JPEGs, with 2-4 components and optional X/Y subsampling
 
 class Cr2Slicing {
   int numSlices = 0;

@@ -18,10 +18,13 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Point.h" // for iPoint2D
-#include <gtest/gtest.h>  // for make_tuple, AssertionResult, IsNullLiteral...
+#include "common/Point.h" // for iPoint2D, iPoint2D::area_type, iPoint2D::v...
+#include <algorithm>      // for find
+#include <gtest/gtest.h>  // for make_tuple, Message, TestPartResult, get
+#include <iterator>       // for cend, cbegin
 #include <limits>         // for numeric_limits
 #include <ostream>        // for operator<<, basic_ostream::operator<<, ost...
+#include <type_traits>    // for __decay_and_strip<>::__type
 #include <utility>        // for make_pair, pair, move
 
 using rawspeed::iPoint2D;

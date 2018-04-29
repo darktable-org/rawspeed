@@ -19,8 +19,11 @@
 */
 
 #include "common/RawImage.h"           // for RawImage
-#include "io/ByteStream.h"             // for ByteStream
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray
+
+namespace rawspeed {
+class ByteStream;
+}
 
 rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs);
 rawspeed::ColorFilterArray CreateCFA(rawspeed::ByteStream* bs);
