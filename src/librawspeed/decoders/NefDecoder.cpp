@@ -120,9 +120,9 @@ RawImage NefDecoder::decodeRawInternal() {
 
   ByteStream rawData(mFile, offsets->getU32(), counts->getU32());
 
-  NikonDecompressor n(mRaw, bitPerPixel);
+  NikonDecompressor n(mRaw, meta->getData(), bitPerPixel);
   mRaw->createData();
-  n.decompress(meta->getData(), rawData, uncorrectedRawValues);
+  n.decompress(rawData, uncorrectedRawValues);
 
   return mRaw;
 }

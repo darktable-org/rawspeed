@@ -23,6 +23,7 @@
 #include "common/Common.h"                      // for uint32
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include <array>                                // for array
 #include <vector>                               // for vector
 
 namespace rawspeed {
@@ -39,11 +40,18 @@ class NikonDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
   uint32 bitsPS;
 
-public:
-  NikonDecompressor(const RawImage& raw, uint32 bitsPS);
+  uint32 huffSelect;
+  uint32 split;
 
-  void decompress(ByteStream metadata, const ByteStream& data,
-                  bool uncorrectedRawValues);
+  int pUp1[2];
+  int pUp2[2];
+
+  std::vector<ushort16> curve;
+
+public:
+  NikonDecompressor(const RawImage& raw, ByteStream metadata, uint32 bitsPS);
+
+  void decompress(const ByteStream& data, bool uncorrectedRawValues);
 
 private:
   static const uchar8 nikon_tree[][2][16];

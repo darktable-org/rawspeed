@@ -122,7 +122,8 @@ HuffmanTable NikonDecompressor::createHuffmanTable(uint32 huffSelect) {
   return ht;
 }
 
-NikonDecompressor::NikonDecompressor(const RawImage& raw, uint32 bitsPS_)
+NikonDecompressor::NikonDecompressor(const RawImage& raw, ByteStream metadata,
+                                     uint32 bitsPS_)
     : mRaw(raw), bitsPS(bitsPS_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
@@ -140,18 +141,9 @@ NikonDecompressor::NikonDecompressor(const RawImage& raw, uint32 bitsPS_)
   default:
     ThrowRDE("Invalid bpp found: %u", bitsPS);
   }
-}
-
-void NikonDecompressor::decompress(ByteStream metadata, const ByteStream& data,
-                                   bool uncorrectedRawValues) {
-  const iPoint2D& size = mRaw->dim;
 
   uint32 v0 = metadata.getByte();
   uint32 v1 = metadata.getByte();
-  uint32 huffSelect = 0;
-  uint32 split = 0;
-  int pUp1[2];
-  int pUp2[2];
 
   writeLog(DEBUG_PRIO_EXTRA, "Nef version v0:%u, v1:%u", v0, v1);
 
@@ -168,10 +160,14 @@ void NikonDecompressor::decompress(ByteStream metadata, const ByteStream& data,
   pUp2[0] = metadata.getU16();
   pUp2[1] = metadata.getU16();
 
-  HuffmanTable ht = createHuffmanTable(huffSelect);
+  curve = createCurve(&metadata, bitsPS, v0, v1, &split);
+}
 
-  auto curve = createCurve(&metadata, bitsPS, v0, v1, &split);
+void NikonDecompressor::decompress(const ByteStream& data,
+                                   bool uncorrectedRawValues) {
   RawImageCurveGuard curveHandler(&mRaw, curve, uncorrectedRawValues);
+
+  HuffmanTable ht = createHuffmanTable(huffSelect);
 
   BitPumpMSB bits(data);
   uchar8* draw = mRaw->getData();
@@ -183,6 +179,7 @@ void NikonDecompressor::decompress(ByteStream metadata, const ByteStream& data,
   //allow gcc to devirtualize the calls below
   auto* rawdata = reinterpret_cast<RawImageDataU16*>(mRaw.get());
 
+  const iPoint2D& size = mRaw->dim;
   assert(size.x % 2 == 0);
   assert(size.x >= 2);
   for (uint32 y = 0; y < static_cast<unsigned>(size.y); y++) {
