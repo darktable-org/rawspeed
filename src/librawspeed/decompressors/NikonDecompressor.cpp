@@ -164,8 +164,12 @@ NikonDecompressor::NikonDecompressor(const RawImage& raw, ByteStream metadata,
 
   curve = createCurve(&metadata, bitsPS, v0, v1, &split);
 
+  // If the 'split' happens outside of the image, it does not actually happen.
+  if (split >= static_cast<unsigned>(mRaw->dim.y))
+    split = 0;
+
   if (split)
-    ThrowRDE("Nikon lossy-after-split raws are broken at the moment.");
+    ThrowRDE("Nikon %i-bit lossy-after-split raws are still broken.", bitsPS);
 }
 
 template <typename Huffman>
