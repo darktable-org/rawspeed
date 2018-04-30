@@ -34,6 +34,10 @@
 #include <memory>                         // for unique_ptr, make_unique
 #include <utility>                        // for move, swap
 
+#if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
+#include "AddressSanitizer.h" // for ASan::...
+#endif
+
 using std::fill_n;
 using std::string;
 

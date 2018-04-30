@@ -35,8 +35,8 @@
 #include <array>                           // for array
 #include <cassert>                         // for assert
 #include <cmath>                           // for abs, copysignf, expf, logf
+#include <cstring>                         // for memcmp, size_t
 #include <memory>                          // for unique_ptr
-#include <string.h>                        // for memcmp, size_t
 #include <string>                          // for string
 #include <utility>                         // for move
 #include <vector>                          // for vector

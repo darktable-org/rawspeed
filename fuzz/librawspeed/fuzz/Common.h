@@ -23,7 +23,7 @@
 
 namespace rawspeed {
 class ByteStream;
-}
+} // namespace rawspeed
 
 rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs);
 rawspeed::ColorFilterArray CreateCFA(rawspeed::ByteStream* bs);
