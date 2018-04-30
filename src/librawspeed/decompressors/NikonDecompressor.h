@@ -34,8 +34,8 @@ class NikonDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
   uint32 bitsPS;
 
-  uint32 huffSelect;
-  uint32 split;
+  uint32 huffSelect = 0;
+  uint32 split = 0;
 
   int pUp1[2];
   int pUp2[2];
