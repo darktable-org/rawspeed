@@ -69,13 +69,13 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=gcc-7 CXX=g++-7
+    env: CC=gcc-8 CXX=g++-8
   - os: linux
     dist: trusty
     sudo: required
     services:
       - docker
-    env: CC=gcc-7 CXX=g++-7 GCOV=gcov-7 FLAVOR=Coverage ECO="-DENABLE_SAMPLEBASED_TESTING=ON" EXTRA_OPTS="$DOCKER_RPUU"
+    env: CC=gcc-8 CXX=g++-8 GCOV=gcov-8 FLAVOR=Coverage ECO="-DENABLE_SAMPLEBASED_TESTING=ON" EXTRA_OPTS="$DOCKER_RPUU"
     cache:
       directories:
         - '$HOME/$RPUU_DST'
@@ -105,7 +105,7 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=gcc-7 CXX=g++-7 GCOV=gcov-7 TARGET=SONARQUBE FLAVOR=Coverage ECO="-DENABLE_SAMPLEBASED_TESTING=ON" EXTRA_OPTS="--tmpfs /root/.sonar --volume $HOME/.sonar/cache:/root/.sonar/cache $DOCKER_RPUU"
+    env: CC=gcc-8 CXX=g++-8 GCOV=gcov-8 TARGET=SONARQUBE FLAVOR=Coverage ECO="-DENABLE_SAMPLEBASED_TESTING=ON" EXTRA_OPTS="--tmpfs /root/.sonar --volume $HOME/.sonar/cache:/root/.sonar/cache $DOCKER_RPUU"
     git:
       depth: 9999999
     cache:
