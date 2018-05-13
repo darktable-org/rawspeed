@@ -50,4 +50,4 @@ static inline void CustomArguments(benchmark::internal::Benchmark* b) {
 
 BENCHMARK(BM_MD5)->Apply(CustomArguments);
 
-BENCHMARK_MAIN()
+BENCHMARK_MAIN();

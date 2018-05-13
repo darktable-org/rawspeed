@@ -34,8 +34,8 @@ else()
     message(WARNING "Did not find GOOGLEBENCHMARK sources! Fetching from web...")
     ExternalProject_Add(
       googlebenchmark
-      URL               https://github.com/google/benchmark/archive/v1.3.0.tar.gz
-      URL_HASH          SHA512=272775e4dbd0ecc65a2a3a64f24e79682b630929dea3af47349329ac8b796341f1197458a67c9aac0e514857ebe7cbc191d18f6fd2c0aea3242562e69d8a6849
+      URL               https://github.com/google/benchmark/archive/v1.4.0.tar.gz
+      URL_HASH          SHA512=4bb5119fe6c0558e5a8b39486169ffcbf24e877ec7f28636dfab1692936b77334f76d28bda2cdada18e5070579da7a5bf0617bfbb6a09848f0b071df8e694d76
       PREFIX            "${CMAKE_BINARY_DIR}/googlebenchmark"
       SOURCE_DIR        "${CMAKE_BINARY_DIR}/googlebenchmark-src"
       BINARY_DIR        "${CMAKE_BINARY_DIR}/googlebenchmark-build"

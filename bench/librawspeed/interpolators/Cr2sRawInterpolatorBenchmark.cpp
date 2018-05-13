@@ -75,4 +75,4 @@ static constexpr const iPoint2D S420(2, 2);
 BENCHMARK_TEMPLATE(BM_Cr2sRawInterpolator, S420, v<1>)->Apply(CustomArguments);
 BENCHMARK_TEMPLATE(BM_Cr2sRawInterpolator, S420, v<2>)->Apply(CustomArguments);
 
-BENCHMARK_MAIN()
+BENCHMARK_MAIN();
