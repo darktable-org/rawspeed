@@ -32,58 +32,96 @@ using rawspeed::Endianness;
 
 namespace rawspeed_test {
 
-template <typename T> class BitPumpTest : public ::testing::Test {
-public:
+template <typename T, typename Tag> struct BitPumpPatternTest {};
+
+struct TestGetBitsTag;
+template <typename T> struct BitPumpPatternTest<T, TestGetBitsTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
 
-protected:
-  static constexpr auto TestGetBits = [](PumpT* pump, auto gen) -> void {
+  template <typename L> static void Test(PumpT* pump, L gen) {
     for (int len = 1; len <= 7; len++)
       ASSERT_EQ(pump->getBits(len), gen(len)) << "     Where len: " << len;
-  };
+  }
+};
 
-  static constexpr auto TestGetBitsNoFill = [](PumpT* pump, auto gen) -> void {
+struct TestGetBitsNoFillTag;
+template <typename T> struct BitPumpPatternTest<T, TestGetBitsNoFillTag> {
+  using PumpT = typename T::PumpT;
+  using PatternT = typename T::PatternT;
+
+  template <typename L> static void Test(PumpT* pump, L gen) {
     pump->fill(32); // Actually fills 32 bits
     for (int len = 1; len <= 7; len++)
       ASSERT_EQ(pump->getBitsNoFill(len), gen(len))
           << "     Where len: " << len;
-  };
+  }
+};
 
-  static constexpr auto TestPeekBits = [](PumpT* pump, auto gen) -> void {
+struct TestPeekBitsTag;
+template <typename T> struct BitPumpPatternTest<T, TestPeekBitsTag> {
+  using PumpT = typename T::PumpT;
+  using PatternT = typename T::PatternT;
+
+  template <typename L> static void Test(PumpT* pump, L gen) {
     for (int len = 1; len <= 7; len++) {
       ASSERT_EQ(pump->peekBits(len), gen(len)) << "     Where len: " << len;
       pump->skipBits(len);
     }
-  };
+  }
+};
 
-  static constexpr auto TestPeekBitsNoFill = [](PumpT* pump, auto gen) -> void {
+struct TestPeekBitsNoFillTag;
+template <typename T> struct BitPumpPatternTest<T, TestPeekBitsNoFillTag> {
+  using PumpT = typename T::PumpT;
+  using PatternT = typename T::PatternT;
+
+  template <typename L> static void Test(PumpT* pump, L gen) {
     pump->fill(32); // Actually fills 32 bits
     for (int len = 1; len <= 7; len++) {
       ASSERT_EQ(pump->peekBitsNoFill(len), gen(len))
           << "     Where len: " << len;
       pump->skipBitsNoFill(len);
     }
-  };
+  }
+};
 
-  static constexpr auto TestIncreasingPeekLength = [](PumpT* pump,
-                                                      auto data) -> void {
-    static constexpr auto MaxLen = 28;
+struct TestIncreasingPeekLengthTag;
+template <typename T>
+struct BitPumpPatternTest<T, TestIncreasingPeekLengthTag> {
+  using PumpT = typename T::PumpT;
+  using PatternT = typename T::PatternT;
+
+  template <typename L> static void Test(PumpT* pump, L data) {
+    static const auto MaxLen = 28;
     for (int len = 1; len <= MaxLen; len++)
       ASSERT_EQ(pump->peekBits(len), data(len)) << "     Where len: " << len;
-  };
+  }
+};
 
-  static constexpr auto TestIncreasingPeekLengthNoFill = [](PumpT* pump,
-                                                            auto data) -> void {
-    static constexpr auto MaxLen = 28;
+struct TestIncreasingPeekLengthNoFillTag;
+template <typename T>
+struct BitPumpPatternTest<T, TestIncreasingPeekLengthNoFillTag> {
+  using PumpT = typename T::PumpT;
+  using PatternT = typename T::PatternT;
+
+  template <typename L> static void Test(PumpT* pump, L data) {
+    static const auto MaxLen = 28;
     pump->fill(MaxLen); // Actually fills 32 bits
     for (int len = 1; len <= MaxLen; len++)
       ASSERT_EQ(pump->peekBitsNoFill(len), data(len))
           << "     Where len: " << len;
-  };
+  }
+};
 
-  template <typename TestDataType, typename Test, typename L>
-  void runTest(const TestDataType& data, Test test, L gen) {
+template <typename T> class BitPumpTest : public ::testing::Test {
+public:
+  using PumpT = typename T::PumpT;
+  using PatternT = typename T::PatternT;
+
+protected:
+  template <typename Tag, typename TestDataType, typename L>
+  void runTest(const TestDataType& data, L gen) {
     const Buffer b(data.data(), data.size());
 
     for (auto e : {Endianness::little, Endianness::big}) {
@@ -91,7 +129,7 @@ protected:
       const ByteStream bs(db);
 
       PumpT pump(bs);
-      test(&pump, gen);
+      BitPumpPatternTest<T, Tag>::Test(&pump, gen);
     }
   }
 };
@@ -99,39 +137,35 @@ protected:
 TYPED_TEST_CASE_P(BitPumpTest);
 
 TYPED_TEST_P(BitPumpTest, GetTest) {
-  this->runTest(TypeParam::PatternT::Data, this->TestGetBits,
-                TypeParam::PatternT::element);
+  this->template runTest<TestGetBitsTag>(TypeParam::PatternT::Data,
+                                         TypeParam::PatternT::element);
 }
 TYPED_TEST_P(BitPumpTest, GetNoFillTest) {
-  this->runTest(TypeParam::PatternT::Data, this->TestGetBitsNoFill,
-                TypeParam::PatternT::element);
+  this->template runTest<TestGetBitsNoFillTag>(TypeParam::PatternT::Data,
+                                               TypeParam::PatternT::element);
 }
 TYPED_TEST_P(BitPumpTest, PeekTest) {
-  this->runTest(TypeParam::PatternT::Data, this->TestPeekBits,
-                TypeParam::PatternT::element);
+  this->template runTest<TestPeekBitsTag>(TypeParam::PatternT::Data,
+                                          TypeParam::PatternT::element);
 }
 TYPED_TEST_P(BitPumpTest, PeekNoFillTest) {
-  this->runTest(TypeParam::PatternT::Data, this->TestPeekBitsNoFill,
-                TypeParam::PatternT::element);
+  this->template runTest<TestPeekBitsNoFillTag>(TypeParam::PatternT::Data,
+                                                TypeParam::PatternT::element);
 }
 TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthTest) {
-  this->runTest(TypeParam::PatternT::Data, this->TestIncreasingPeekLength,
-                TypeParam::PatternT::data);
+  this->template runTest<TestIncreasingPeekLengthTag>(
+      TypeParam::PatternT::Data, TypeParam::PatternT::data);
 }
 TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthNoFillTest) {
-  this->runTest(TypeParam::PatternT::Data, this->TestIncreasingPeekLengthNoFill,
-                TypeParam::PatternT::data);
+  this->template runTest<TestIncreasingPeekLengthNoFillTag>(
+      TypeParam::PatternT::Data, TypeParam::PatternT::data);
 }
 
 REGISTER_TYPED_TEST_CASE_P(BitPumpTest, GetTest, GetNoFillTest, PeekTest,
                            PeekNoFillTest, IncreasingPeekLengthTest,
                            IncreasingPeekLengthNoFillTest);
 
-template <typename Pump, typename PatternTag> struct Pattern {
-  static const std::array<rawspeed::uchar8, 4> Data;
-  static rawspeed::uint32 element(int index);
-  static rawspeed::uint32 data(int len);
-};
+template <typename Pump, typename PatternTag> struct Pattern {};
 
 struct ZerosTag;
 template <typename Pump> struct Pattern<Pump, ZerosTag> {
