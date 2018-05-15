@@ -38,9 +38,9 @@ namespace rawspeed_test {
 
 template <>
 const std::array<rawspeed::uchar8, 4> Pattern<BitPumpJPEG, OnesTag>::Data = {
-    /* [Byte0 Byte1 Byte2 Byte3] */
-    /* Byte: [Bit0 .. Bit7] */
-    0b10100100, 0b01000010, 0b00001000, 0b00011111};
+    {/* [Byte0 Byte1 Byte2 Byte3] */
+     /* Byte: [Bit0 .. Bit7] */
+     0b10100100, 0b01000010, 0b00001000, 0b00011111}};
 template <> rawspeed::uint32 Pattern<BitPumpJPEG, OnesTag>::data(int index) {
   const auto set = GenOnesBE(1, 0);
   return set[index];
@@ -48,7 +48,7 @@ template <> rawspeed::uint32 Pattern<BitPumpJPEG, OnesTag>::data(int index) {
 
 template <>
 const std::array<rawspeed::uchar8, 4> Pattern<BitPumpJPEG, InvOnesTag>::Data = {
-    0b11010010, 0b00100001, 0b00000100, 0b00001111};
+    {0b11010010, 0b00100001, 0b00000100, 0b00001111}};
 template <> rawspeed::uint32 Pattern<BitPumpJPEG, InvOnesTag>::data(int index) {
   const auto set = GenOnesBE(0, -1);
   return set[index];
@@ -66,7 +66,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(JPEG, BitPumpTest, Patterns<BitPumpJPEG>);
 TEST(BitPumpJPEGTest, 0xFF0x00Is0xFFTest) {
   // If 0xFF0x00 byte sequence is found, it is just 0xFF, i.e. 0x00 is ignored.
   static const std::array<rawspeed::uchar8, 2 + 4> data{
-      0xFF, 0x00, 0b10100100, 0b01000010, 0b00001000, 0b00011111};
+      {0xFF, 0x00, 0b10100100, 0b01000010, 0b00001000, 0b00011111}};
 
   const Buffer b(data.data(), data.size());
 
@@ -86,8 +86,8 @@ TEST(BitPumpJPEGTest, 0xFF0x00Is0xFFTest) {
 TEST(BitPumpJPEGTest, 0xFF0xXXIsTheEndTest) {
   // If 0xFF0xXX byte sequence is found, where XX != 0, then it is the end.
   for (rawspeed::uchar8 end = 0x01; end < 0xFF; end++) {
-    static const std::array<rawspeed::uchar8, 2 + 4> data{0xFF, end,  0xFF,
-                                                          0xFF, 0xFF, 0xFF};
+    static const std::array<rawspeed::uchar8, 2 + 4> data{
+        {0xFF, end, 0xFF, 0xFF, 0xFF, 0xFF}};
 
     const Buffer b(data.data(), data.size());
 
