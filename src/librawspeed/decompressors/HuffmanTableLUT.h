@@ -121,8 +121,8 @@ public:
     assert(symbols.size() == maxCodesCount());
 
     // Figure F.15: generate decoding tables
-    codeOffsetOL.resize(maxCodeLength + 1UL, 0xffff);
-    maxCodeOL.resize(maxCodeLength + 1UL);
+    codeOffsetOL.resize(maxCodeLength + 1UL, 0xFFFF);
+    maxCodeOL.resize(maxCodeLength + 1UL, 0xFFFF);
     int code_index = 0;
     for (unsigned int l = 1U; l <= maxCodeLength; l++) {
       if (nCodesPerLength[l]) {
@@ -220,13 +220,15 @@ public:
 
     uint32 code_l = LookupDepth;
     bs.skipBitsNoFill(code_l);
-    while (code_l < maxCodeOL.size() && code > maxCodeOL[code_l]) {
+    while (code_l < maxCodeOL.size() &&
+           (0xFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l])) {
       uint32 temp = bs.getBitsNoFill(1);
       code = (code << 1) | temp;
       code_l++;
     }
 
-    if (code_l >= maxCodeOL.size() || code > maxCodeOL[code_l])
+    if (code_l >= maxCodeOL.size() ||
+        (0xFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l]))
       ThrowRDE("bad Huffman code: %u (len: %u)", code, code_l);
 
     if (code < codeOffsetOL[code_l])
