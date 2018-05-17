@@ -24,6 +24,7 @@
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable, ...
 #include "decompressors/BinaryHuffmanTree.h"    // for BinaryHuffmanTree
+#include "io/BitStream.h"                       // for BitStreamTraits
 #include <algorithm>                            // for for_each
 #include <cassert>                              // for assert
 #include <iterator>                             // for advance
@@ -43,6 +44,8 @@ class HuffmanTableTree final : public AbstractHuffmanTable {
 protected:
   template <typename BIT_STREAM>
   inline ValueType getValue(BIT_STREAM& bs) const {
+    static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
+                  "This BitStream specialization is not marked as usable here");
     CodeSymbol partial;
 
     const auto* top = &(tree.root->getAsBranch());
@@ -118,11 +121,15 @@ public:
   }
 
   template <typename BIT_STREAM> inline int decodeLength(BIT_STREAM& bs) const {
+    static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
+                  "This BitStream specialization is not marked as usable here");
     assert(!fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
 
   template <typename BIT_STREAM> inline int decodeNext(BIT_STREAM& bs) const {
+    static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
+                  "This BitStream specialization is not marked as usable here");
     assert(fullDecode);
     return decode<BIT_STREAM, true>(bs);
   }
@@ -133,6 +140,8 @@ public:
   // All ifs depending on this bool will be optimized out by the compiler
   template <typename BIT_STREAM, bool FULL_DECODE>
   inline int decode(BIT_STREAM& bs) const {
+    static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
+                  "This BitStream specialization is not marked as usable here");
     assert(FULL_DECODE == fullDecode);
 
     const auto codeValue = getValue(bs);

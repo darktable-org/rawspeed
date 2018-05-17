@@ -38,7 +38,7 @@ function(add_ht_dual_fuzzer impl0 impl1 pump decode)
 endfunction()
 
 set(IMPL "LUT" "Tree" "Vector")
-set(PUMPS "BitPumpLSB" "BitPumpMSB" "BitPumpMSB16" "BitPumpMSB32" "BitPumpJPEG")
+set(PUMPS "BitPumpMSB" "BitPumpMSB32" "BitPumpJPEG")
 set(DECODE "FullDecode" "NoFullDecode")
 
 foreach(impl IN LISTS IMPL)

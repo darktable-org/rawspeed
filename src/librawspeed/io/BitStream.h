@@ -86,6 +86,10 @@ struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
   }
 };
 
+template <typename BIT_STREAM> struct BitStreamTraits final {
+  static constexpr bool canUseWithHuffmanTable = false;
+};
+
 template <typename Tag, typename Cache>
 class BitStream final : public ByteStream {
   Cache cache;

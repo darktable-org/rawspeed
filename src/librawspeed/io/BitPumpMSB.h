@@ -33,6 +33,10 @@ struct MSBBitPumpTag;
 
 using BitPumpMSB = BitStream<MSBBitPumpTag, BitStreamCacheRightInLeftOut>;
 
+template <> struct BitStreamTraits<BitPumpMSB> final {
+  static constexpr bool canUseWithHuffmanTable = true;
+};
+
 template <>
 inline BitPumpMSB::size_type BitPumpMSB::fillCache(const uchar8* input)
 {
