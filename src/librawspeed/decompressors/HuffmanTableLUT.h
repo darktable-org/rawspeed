@@ -71,7 +71,7 @@ class HuffmanTableLUT final : public AbstractHuffmanTable {
   // private fields calculated from codesPerBits and codeValues
   // they are index '1' based, so we can directly lookup the value
   // for code length l without decrementing
-  std::vector<ushort16> maxCodeOL;    // index is length of code
+  std::vector<uint32> maxCodeOL;      // index is length of code
   std::vector<ushort16> codeOffsetOL; // index is length of code
 
   // The code can be compiled with two different decode lookup table layouts.
@@ -122,7 +122,7 @@ public:
 
     // Figure F.15: generate decoding tables
     codeOffsetOL.resize(maxCodeLength + 1UL, 0xFFFF);
-    maxCodeOL.resize(maxCodeLength + 1UL, 0xFFFF);
+    maxCodeOL.resize(maxCodeLength + 1UL, 0xFFFFFFFF);
     int code_index = 0;
     for (unsigned int l = 1U; l <= maxCodeLength; l++) {
       if (nCodesPerLength[l]) {
@@ -221,14 +221,14 @@ public:
     uint32 code_l = LookupDepth;
     bs.skipBitsNoFill(code_l);
     while (code_l < maxCodeOL.size() &&
-           (0xFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l])) {
+           (0xFFFFFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l])) {
       uint32 temp = bs.getBitsNoFill(1);
       code = (code << 1) | temp;
       code_l++;
     }
 
     if (code_l >= maxCodeOL.size() ||
-        (0xFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l]))
+        (0xFFFFFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l]))
       ThrowRDE("bad Huffman code: %u (len: %u)", code, code_l);
 
     if (code < codeOffsetOL[code_l])
