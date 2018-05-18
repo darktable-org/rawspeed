@@ -21,6 +21,7 @@ FILE(GLOB SOURCES
   "HasselbladDecompressor.h"
   "HuffmanTable.h"
   "HuffmanTableLUT.h"
+  "HuffmanTableLookup.h"
   "HuffmanTableTree.h"
   "HuffmanTableVector.h"
   "JpegDecompressor.cpp"
