@@ -70,14 +70,10 @@ TEST(AbstractHuffmanTableCodeSymbolTest, Equality) {
 
 #ifndef NDEBUG
 TEST(CodeSymbolDeathTest, CodeSymbolLenght) {
-  ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(0, 0); },
-               "CodeSymbol.*code_len > 0");
-  ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(1, 0); },
-               "CodeSymbol.*code_len > 0");
-  ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(0, 17); },
-               "CodeSymbol.*code_len <= 16");
-  ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(1, 17); },
-               "CodeSymbol.*code_len <= 16");
+  ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(0, 0); }, "code_len > 0");
+  ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(1, 0); }, "code_len > 0");
+  ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(0, 17); }, "code_len <= 16");
+  ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(1, 17); }, "code_len <= 16");
 }
 
 using CodeSymbolType = std::tr1::tuple<int, int, bool>;
@@ -113,7 +109,7 @@ INSTANTIATE_TEST_CASE_P(CodeSymbolDeathTest, CodeSymbolDeathTest,
 TEST_P(CodeSymbolDeathTest, CodeSymbolDeathTest) {
   if (die) {
     ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(val, len); },
-                 "CodeSymbol.*code <= \\(\\(1U << code_len\\) - 1U\\)");
+                 "code <= \\(\\(1U << code_len\\) - 1U\\)");
   } else {
     ASSERT_EXIT(
         {
@@ -233,13 +229,13 @@ TEST(CodeSymbolHaveCommonPrefixDeathTest, AsymmetricalDeathTest) {
       {
         AbstractHuffmanTable::CodeSymbol::HaveCommonPrefix({0b0, 1}, {0b0, 2});
       },
-      "HaveCommonPrefix.*partial.code_len <= symbol.code_len");
+      "partial.code_len <= symbol.code_len");
   ASSERT_DEATH(
       {
         AbstractHuffmanTable::CodeSymbol::HaveCommonPrefix({0b01, 2},
                                                            {0b010, 3});
       },
-      "HaveCommonPrefix.*partial.code_len <= symbol.code_len");
+      "partial.code_len <= symbol.code_len");
 }
 #endif
 
@@ -285,8 +281,7 @@ TEST(AbstractHuffmanTableDeathTest, setNCodesPerLengthRequires16Lengths) {
     AbstractHuffmanTable ht;
 
     if (b.getSize() != 16) {
-      ASSERT_DEATH({ ht.setNCodesPerLength(b); },
-                   "setNCodesPerLength.*data.getSize\\(\\) == 16");
+      ASSERT_DEATH({ ht.setNCodesPerLength(b); }, "data.getSize\\(\\) == 16");
     } else {
       ASSERT_EXIT(
           {
@@ -383,9 +378,8 @@ TEST(AbstractHuffmanTableDeathTest, setCodeValuesRequiresCount) {
       v.resize(cnt);
       Buffer bv(v.data(), v.size());
       if (cnt != count) {
-        ASSERT_DEATH(
-            { ht.setCodeValues(bv); },
-            "setCodeValues\\(.*\\).*data.getSize\\(\\) == maxCodesCount\\(\\)");
+        ASSERT_DEATH({ ht.setCodeValues(bv); },
+                     "data.getSize\\(\\) == maxCodesCount\\(\\)");
       } else {
         ASSERT_EXIT(
             {
@@ -402,8 +396,7 @@ TEST(AbstractHuffmanTableDeathTest, setCodeValuesRequiresLessThan162) {
   auto ht = genHT({0, 0, 0, 0, 0, 0, 0, 162});
   std::vector<uchar8> v(163, 0);
   Buffer bv(v.data(), v.size());
-  ASSERT_DEATH({ ht.setCodeValues(bv); },
-               "setCodeValues\\(.*\\).*data.getSize\\(\\) <= 162");
+  ASSERT_DEATH({ ht.setCodeValues(bv); }, "data.getSize\\(\\) <= 162");
 }
 #endif
 
