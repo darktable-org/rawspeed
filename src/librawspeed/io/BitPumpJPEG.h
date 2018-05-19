@@ -33,6 +33,10 @@ struct JPEGBitPumpTag;
 // i.e. we push into the cache from the right and read it from the left
 using BitPumpJPEG = BitStream<JPEGBitPumpTag, BitStreamCacheRightInLeftOut>;
 
+template <> struct BitStreamTraits<BitPumpJPEG> final {
+  static constexpr bool canUseWithHuffmanTable = true;
+};
+
 template <>
 inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uchar8* input)
 {

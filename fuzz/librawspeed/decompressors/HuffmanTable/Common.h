@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2018 Roman Lebedev
+    Copyright (C) 2017-2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,18 +18,22 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#pragma once
+#include "io/Buffer.h"     // for Buffer
+#include "io/ByteStream.h" // for ByteStream
 
-#include "decompressors/HuffmanTableLUT.h" // for HuffmanTableLUT
-// #include "decompressors/HuffmanTableLookup.h" // for HuffmanTableLookup
-// #include "decompressors/HuffmanTableTree.h" // for HuffmanTableTree
-// #include "decompressors/HuffmanTableVector.h" // for HuffmanTableVector
+template <typename T> static T createHuffmanTable(rawspeed::ByteStream* bs) {
+  T ht;
 
-namespace rawspeed {
+  // first 16 bytes are consumed as n-codes-per-length
+  const auto count = ht.setNCodesPerLength(bs->getBuffer(16));
 
-using HuffmanTable = HuffmanTableLUT;
-// using HuffmanTable = HuffmanTableLookup;
-// using HuffmanTable = HuffmanTableTree;
-// using HuffmanTable = HuffmanTableVector;
+  // and then count more bytes consumed as code values
+  ht.setCodeValues(bs->getBuffer(count));
 
-} // namespace rawspeed
+  // and one more byte as 'fixDNGBug16' boolean
+  const auto bb = bs->getBuffer(1);
+  const bool fixDNGBug16 = bb[0] != 0;
+  ht.setup(FULLDECODE, fixDNGBug16);
+
+  return ht;
+}

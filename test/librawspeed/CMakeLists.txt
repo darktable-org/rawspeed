@@ -31,6 +31,7 @@ function(add_rs_test src)
 endfunction()
 
 add_subdirectory(common)
+add_subdirectory(decompressors)
 add_subdirectory(io)
 add_subdirectory(metadata)
 add_subdirectory(test)
