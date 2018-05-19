@@ -62,8 +62,8 @@ auto genHTFull =
 };
 
 TEST(HuffmanTableTest, DecodeLengthIdentityTest) {
-  static const std::array<rawspeed::uchar8, 4> data{0b01010101, 0b01010101,
-                                                    0b01010101, 0b01010101};
+  static const std::array<rawspeed::uchar8, 4> data{
+      {0b01010101, 0b01010101, 0b01010101, 0b01010101}};
   const Buffer b(data.data(), data.size());
   const DataBuffer db(b, Endianness::little);
   const ByteStream bs(db);
@@ -80,8 +80,8 @@ TEST(HuffmanTableTest, DecodeLengthIdentityTest) {
 }
 
 TEST(HuffmanTableTest, DecodeNextIdentityTest) {
-  static const std::array<rawspeed::uchar8, 4> data{0b00000000, 0b11010101,
-                                                    0b01010101, 0b01111111};
+  static const std::array<rawspeed::uchar8, 4> data{
+      {0b00000000, 0b11010101, 0b01010101, 0b01111111}};
   const Buffer b(data.data(), data.size());
   const DataBuffer db(b, Endianness::little);
   const ByteStream bs(db);
@@ -97,7 +97,7 @@ TEST(HuffmanTableTest, DecodeNextIdentityTest) {
 }
 
 TEST(HuffmanTableTest, DecodeLengthBadCodeTest) {
-  static const std::array<rawspeed::uchar8, 4> data{0b01000000};
+  static const std::array<rawspeed::uchar8, 4> data{{0b01000000}};
   const Buffer b(data.data(), data.size());
   const DataBuffer db(b, Endianness::little);
   const ByteStream bs(db);
@@ -112,7 +112,7 @@ TEST(HuffmanTableTest, DecodeLengthBadCodeTest) {
 }
 
 TEST(HuffmanTableTest, DecodeNextBadCodeTest) {
-  static const std::array<rawspeed::uchar8, 4> data{0b00100000};
+  static const std::array<rawspeed::uchar8, 4> data{{0b00100000}};
   const Buffer b(data.data(), data.size());
   const DataBuffer db(b, Endianness::little);
   const ByteStream bs(db);
