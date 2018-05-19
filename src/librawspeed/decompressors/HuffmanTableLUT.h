@@ -215,6 +215,11 @@ public:
       // if the flag bit is not set but len != 0, the payload is the number of bits to sign extend and return
       const int l_diff = val >> PayloadShift;
       assert((FULL_DECODE && (len + l_diff <= 32)) || !FULL_DECODE);
+      if (FULL_DECODE && l_diff == 16) {
+        if (fixDNGBug16)
+          bs.skipBits(16);
+        return -32768;
+      }
       return FULL_DECODE ? signExtended(bs.getBitsNoFill(l_diff), l_diff) : l_diff;
     }
 
