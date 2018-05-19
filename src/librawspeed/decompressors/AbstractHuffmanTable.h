@@ -87,6 +87,7 @@ protected:
   std::vector<uchar8> codeValues; // index is just sequential number
 
   static void VerifyCodeSymbols(const std::vector<CodeSymbol>& symbols) {
+#ifndef NDEBUG
     // The code symbols are ordered so that all the code values are strictly
     // increasing and code lenghts are not decreasing.
     const auto symbolSort = [](const CodeSymbol& lhs,
@@ -94,6 +95,7 @@ protected:
       return std::less<>()(lhs.code, rhs.code) &&
              std::less_equal<>()(lhs.code_len, rhs.code_len);
     };
+#endif
     assert(std::adjacent_find(symbols.cbegin(), symbols.cend(),
                               [&symbolSort](const CodeSymbol& lhs,
                                             const CodeSymbol& rhs) -> bool {

@@ -123,6 +123,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
       if (failure0 || failure1)
         return 0;
 
+      (void)decoded0;
+      (void)decoded1;
+
       // They both should have decoded the same value.
       assert(decoded0 == decoded1);
     }
