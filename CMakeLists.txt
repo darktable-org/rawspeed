@@ -219,7 +219,7 @@ if(BUILD_TESTING AND CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
       include(genhtml)
       include(gcc-coverage)
     else()
-      message(WARNING "Did not find lcov and genhtml."
+      message(WARNING "Did not find lcov and genhtml. "
                       "Will not be able to generate HTML reports")
     endif()
   endif()
