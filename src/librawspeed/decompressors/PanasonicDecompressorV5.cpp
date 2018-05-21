@@ -138,20 +138,17 @@ void PanasonicDecompressorV5::decompressThreaded(
 
         // FIXME zero_pos needs to be filled for bad pixels
       } else if (bps == 14) {
-        /*
-        raw_block_data[col] = bytes[0] + ((bytes[1] & 0x3F) << 8);
-        raw_block_data[col + 1] = (bytes[1] >> 6) + 4 * (bytes[2]) +
-                                ((bytes[3] & 0xF) << 10);
-        raw_block_data[col + 2] = (bytes[3] >> 4) + 16 * (bytes[4]) +
-                                ((bytes[5] & 3) << 12);
-        raw_block_data[col + 3] = ((bytes[5] & 0xFC) >> 2) + (bytes[6] << 6);
-        raw_block_data[col + 4] = bytes[7] + ((bytes[8] & 0x3F) << 8);
-        raw_block_data[col + 5] = (bytes[8] >> 6) + 4 * bytes[9] + ((bytes[10] &
-        0xF) << 10); raw_block_data[col + 6] = (bytes[10] >> 4) + 16 * bytes[11]
-        + ((bytes[12] & 3) << 12); raw_block_data[col + 7] = ((bytes[12] & 0xFC)
-        >> 2) + (bytes[13] << 6); raw_block_data[col + 8] = bytes[14] +
-        ((bytes[15] & 0x3F) << 8);
-        */
+        *dest++ = bytes[0] + ((bytes[1] & 0x3F) << 8);
+        *dest++ = (bytes[1] >> 6) + 4 * (bytes[2]) + ((bytes[3] & 0xF) << 10);
+        *dest++ = (bytes[3] >> 4) + 16 * (bytes[4]) + ((bytes[5] & 3) << 12);
+        *dest++ = ((bytes[5] & 0xFC) >> 2) + (bytes[6] << 6);
+        *dest++ = bytes[7] + ((bytes[8] & 0x3F) << 8);
+        *dest++ = (bytes[8] >> 6) + 4 * bytes[9] + ((bytes[10] & 0xF) << 10);
+        *dest++ = (bytes[10] >> 4) + 16 * bytes[11] + ((bytes[12] & 3) << 12);
+        *dest++ = ((bytes[12] & 0xFC) >> 2) + (bytes[13] << 6);
+        *dest++ = bytes[14] + ((bytes[15] & 0x3F) << 8);
+
+        // FIXME zero_pos needs to be filled for bad pixels
       }
     }
   }
