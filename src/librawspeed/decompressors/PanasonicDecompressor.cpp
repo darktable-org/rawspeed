@@ -37,9 +37,9 @@ namespace rawspeed {
 PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
                                              const ByteStream& input_,
                                              bool zero_is_not_bad,
-                                             uint32 load_flags_)
+                                             uint32 section_split_offset_)
     : AbstractParallelizedDecompressor(img), zero_is_bad(!zero_is_not_bad),
-      load_flags(load_flags_) {
+      section_split_offset(section_split_offset_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
@@ -60,19 +60,22 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
   // if (width > 5488 || height > 3912)
   //   ThrowRDE("Too large image size: (%u; %u)", width, height);
 
-  if (BufSize < load_flags)
-    ThrowRDE("Bad load_flags: %u, less than BufSize (%u)", load_flags, BufSize);
+  if (BufSize < section_split_offset)
+    ThrowRDE("Bad section_split_offset: %u, less than BufSize (%u)",
+             section_split_offset, BufSize);
 
   // Naive count of bytes that given pixel count requires.
   // Do division first, because we know the remainder is always zero,
   // and the next multiplication won't overflow.
   assert(mRaw->dim.area() % 7ULL == 0ULL);
   const auto rawBytesNormal = (mRaw->dim.area() / 7ULL) * 8ULL;
-  // If load_flags is zero, than that size is the size we need to read.
-  // But if it is not, then we need to round up to multiple of BufSize, because
-  // of splitting&rotation of each BufSize's slice in half at load_flags bytes.
-  const auto bufSize =
-      load_flags == 0 ? rawBytesNormal : roundUp(rawBytesNormal, BufSize);
+  // If section_split_offset is zero, then that we need to read the normal
+  // amount of bytes. But if it is not, then we need to round up to multiple of
+  // BufSize, because of splitting&rotation of each BufSize's slice in half at
+  // section_split_offset bytes.
+  const auto bufSize = section_split_offset == 0
+                           ? rawBytesNormal
+                           : roundUp(rawBytesNormal, BufSize);
   input = input_.peekStream(bufSize);
 }
 
@@ -80,10 +83,10 @@ struct PanasonicDecompressor::PanaBitpump {
   ByteStream input;
   std::vector<uchar8> buf;
   int vbits = 0;
-  uint32 load_flags;
+  uint32 section_split_offset;
 
-  PanaBitpump(ByteStream input_, int load_flags_)
-      : input(std::move(input_)), load_flags(load_flags_) {
+  PanaBitpump(ByteStream input_, int section_split_offset_)
+      : input(std::move(input_)), section_split_offset(section_split_offset_) {
     // get one more byte, so the return statement of getBits does not have
     // to special case for accessing the last byte
     buf.resize(BufSize + 1UL);
@@ -98,15 +101,16 @@ struct PanasonicDecompressor::PanaBitpump {
 
   uint32 getBits(int nbits) {
     if (!vbits) {
-      /* On truncated files this routine will just return just for the truncated
+      /* On truncated files this routine will just return for the truncated
        * part of the file. Since there is no chance of affecting output buffer
        * size we allow the decoder to decode this
        */
-      assert(BufSize >= load_flags);
-      auto size = std::min(input.getRemainSize(), BufSize - load_flags);
-      memcpy(buf.data() + load_flags, input.getData(size), size);
+      assert(BufSize >= section_split_offset);
+      auto size =
+          std::min(input.getRemainSize(), BufSize - section_split_offset);
+      memcpy(buf.data() + section_split_offset, input.getData(size), size);
 
-      size = std::min(input.getRemainSize(), load_flags);
+      size = std::min(input.getRemainSize(), section_split_offset);
       if (size != 0)
         memcpy(buf.data(), input.getData(size), size);
     }
@@ -118,7 +122,7 @@ struct PanasonicDecompressor::PanaBitpump {
 
 void PanasonicDecompressor::decompressThreaded(
     const RawDecompressorThread* t) const {
-  PanaBitpump bits(input, load_flags);
+  PanaBitpump bits(input, section_split_offset);
 
   /* 9 + 1/7 bits per pixel */
   bits.skipBytes(8 * mRaw->dim.x * t->start / 7);

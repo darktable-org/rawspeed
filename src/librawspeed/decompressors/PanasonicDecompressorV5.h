@@ -28,9 +28,10 @@ namespace rawspeed {
 
 class RawImage;
 
-class PanasonicDecompressor final : public AbstractParallelizedDecompressor {
-  static constexpr uint32 BufSize = 0x4000;
-  struct PanaBitpump;
+class PanasonicDecompressorV5 final : public AbstractParallelizedDecompressor {
+  static constexpr uint32 SerializationBlockSize = 0x4000;
+  static constexpr uint32 SerializationBlockSizeMask = 0x3FFF;
+  struct DataPump;
 
   void decompressThreaded(const RawDecompressorThread* t) const final;
 
@@ -45,9 +46,12 @@ class PanasonicDecompressor final : public AbstractParallelizedDecompressor {
   //   I.e. these two parts need to be swapped around.
   uint32 section_split_offset;
 
+  uint32 bps;
+
 public:
-  PanasonicDecompressor(const RawImage& img, const ByteStream& input_,
-                        bool zero_is_not_bad, uint32 section_split_offset_);
+  PanasonicDecompressorV5(const RawImage& img, const ByteStream& input_,
+                          bool zero_is_not_bad, uint32 section_split_offset_,
+                          uint32 bps_);
 };
 
 } // namespace rawspeed
