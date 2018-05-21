@@ -96,11 +96,10 @@ RawImage Rw2Decoder::decodeRawInternal() {
       mRaw->createData();
       u.decode12BitRaw<Endianness::little, false, true>(width, height);
     } else {
-      // It's using the new .RW2 decoding method
-      load_flags = 0;
-      // It's using the new .RW2 decoding method
+      section_split_offset = 0;
       PanasonicDecompressor p(mRaw, ByteStream(mFile, offset),
-                              hints.has("zero_is_not_bad"), load_flags);
+                              hints.has("zero_is_not_bad"),
+                              section_split_offset);
       mRaw->createData();
       p.decompress();
     }
@@ -118,11 +117,9 @@ RawImage Rw2Decoder::decodeRawInternal() {
     if (!mFile->isValid(offset))
       ThrowRDE("Invalid image data offset, cannot decode.");
 
-    // It's using the new .RW2 decoding method
-    load_flags = 0x2008;
-    // It's using the new .RW2 decoding method
+    section_split_offset = 0x2008;
     PanasonicDecompressor p(mRaw, ByteStream(mFile, offset),
-                            hints.has("zero_is_not_bad"), load_flags);
+                            hints.has("zero_is_not_bad"), section_split_offset);
     mRaw->createData();
     p.decompress();
   }
