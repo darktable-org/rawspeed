@@ -30,23 +30,28 @@ class RawImage;
 
 class PanasonicDecompressorV5 final : public AbstractParallelizedDecompressor {
   static constexpr uint32 SerializationBlockSize = 0x4000;
-  static constexpr uint32 SerializationBlockSizeMask = 0x3FFF;
+  static constexpr uint32 SerializationBlockSizeMask =
+      0x3FFF; // == 0x4000 - 1, set all bits
+  static constexpr uint32 PixelDataBlockSize = 16;
+
   struct DataPump;
 
   void decompressThreaded(const RawDecompressorThread* t) const final;
 
   ByteStream input;
-  bool zero_is_bad;
+  const bool zero_is_bad;
 
   // The RW2 raw image buffer is split into sections of BufSize bytes.
-  // If section_split_offset is 0, then last section is not neccesarily full.
-  // If section_split_offset is not 0, then each section has two parts:
+  // If section_split_offset is 0, then the last section is not neccesarily
+  // full. If section_split_offset is not 0, then each section has two parts:
   //     bytes: [0..section_split_offset-1][section_split_offset..BufSize-1]
   //     pixels: [a..b][0..a-1]
   //   I.e. these two parts need to be swapped around.
-  uint32 section_split_offset;
+  const uint32 section_split_offset; // FIXME there is no point in passing this
+                                     // via a constructor; make private constant
 
-  uint32 bps;
+  const uint32 bps;
+  const uint32 encodedDataSize; // computed in constructor
 
 public:
   PanasonicDecompressorV5(const RawImage& img, const ByteStream& input_,

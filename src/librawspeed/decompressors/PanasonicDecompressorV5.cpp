@@ -40,13 +40,17 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
                                                  uint32 section_split_offset_,
                                                  uint32 bps_)
     : AbstractParallelizedDecompressor(img), zero_is_bad(!zero_is_not_bad),
-      section_split_offset(section_split_offset_), bps(bps_) {
+      section_split_offset(section_split_offset_), bps(bps_),
+      encodedDataSize(bps_ == 12 ? 10 : 9) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
 
   // FIXME sanity check sizes
-  // if (width > 5488 || height > 3912)
+  // this will be quite exciting, as the Panasonic G9 high-resolution mode
+  // produces 10480x7794
+  // FIXME the whole point is to check for run-away CPU and for DoS on memory;
+  // focus on that if (width > 5488 || height > 3912)
   //   ThrowRDE("Too large image size: (%u; %u)", width, height);
 
   if (SerializationBlockSize < section_split_offset)
@@ -54,32 +58,46 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
         "Bad section_split_offset: %u, less than SerializationBlockSize (%u)",
         section_split_offset, SerializationBlockSize);
 
-  const uint32 dataBlockSize = 16;
-  const uint32 encodedDataSize = bps == 12 ? 10 : 9;
+  if (mRaw->dim.x % encodedDataSize != 0)
+    ThrowRDE(
+        "Raw x dimension does not work for encoded data size given: (%u; %u)",
+        mRaw->dim.x, encodedDataSize);
 
   const auto rawBytesNormal =
-      (mRaw->dim.area() * dataBlockSize) / encodedDataSize;
+      (mRaw->dim.area() * PixelDataBlockSize) / encodedDataSize;
 
   input = input_.peekStream(rawBytesNormal);
 }
 
 struct PanasonicDecompressorV5::DataPump {
+
   ByteStream input;
   std::vector<uchar8> buf;
   int bufPosition = 0;
   uint32 section_split_offset;
-  const uint32 dataBlockSize = 16;
 
   DataPump(ByteStream input_, int section_split_offset_)
       : input(std::move(input_)), section_split_offset(section_split_offset_) {
-    // get one more byte, so the return statement of getBits does not have
-    // to special case for accessing the last byte
-    buf.resize(SerializationBlockSize + 1UL);
+    buf.resize(SerializationBlockSize);
   }
 
-  void skipBytes(int bytes) {
-    // FIXME assert that alignment matches
-    input.skipBytes(bytes);
+  void skipBytes(rawspeed::Buffer::size_type bytes) {
+
+    rawspeed::Buffer::size_type skippableBytes =
+        (bytes / SerializationBlockSize) * SerializationBlockSize;
+    input.skipBytes(skippableBytes);
+
+    auto emptyReadBytes = bytes - skippableBytes;
+    if (emptyReadBytes % PixelDataBlockSize != 0)
+      ThrowRDE("Skipping empty read bytes does not align with pixel data block "
+               "size; this will lead to failure in decooding: (%u; %u)",
+               emptyReadBytes, PixelDataBlockSize);
+
+    // consume the remainder of the bytes which we cannot just blindly skip
+    while (emptyReadBytes > 0) {
+      /* discard data = */ readBlock();
+      emptyReadBytes -= PixelDataBlockSize;
+    }
   }
 
   uchar8* readBlock() {
@@ -97,7 +115,7 @@ struct PanasonicDecompressorV5::DataPump {
 
     uchar8* blockAddress = buf.data() + bufPosition;
 
-    bufPosition = bufPosition + dataBlockSize;
+    bufPosition += PixelDataBlockSize;
     bufPosition &= SerializationBlockSizeMask;
 
     return blockAddress;
@@ -107,32 +125,33 @@ struct PanasonicDecompressorV5::DataPump {
 void PanasonicDecompressorV5::decompressThreaded(
     const RawDecompressorThread* t) const {
 
-  DataPump dataPump(input, section_split_offset);
-
-  const uint32 dataBlockSize = 16;
+  DataPump threadDataPump(input, section_split_offset);
 
   const auto raw_width = mRaw->dim.x;
-  const uint32 encodedDataSize = bps == 12 ? 10 : 9;
-  // const uint32 blocksPerLine = mRaw->dim.x * encodedDataSize;
+  const auto decodeStreamOffset =
+      (t->start * raw_width * PixelDataBlockSize) / encodedDataSize;
+  threadDataPump.skipBytes(decodeStreamOffset);
 
-  dataPump.skipBytes((t->start * dataBlockSize) / encodedDataSize);
-
-  std::vector<uint32> badPixelTracker; // for bad pixel management
+  std::vector<uint32> badPixelTracker;
   for (uint32 y = t->start; y < t->end; y++) {
 
     auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
 
     for (auto col = 0; col < raw_width; col += encodedDataSize) {
-      uchar8* bytes = dataPump.readBlock();
+      uchar8* bytes = threadDataPump.readBlock();
       if (bps == 12) {
         *dest++ = ((bytes[1] & 0xF) << 8) + bytes[0];
         *dest++ = 16 * bytes[2] + (bytes[1] >> 4);
+
         *dest++ = ((bytes[4] & 0xF) << 8) + bytes[3];
         *dest++ = 16 * bytes[5] + (bytes[4] >> 4);
+
         *dest++ = ((bytes[7] & 0xF) << 8) + bytes[6];
         *dest++ = 16 * bytes[8] + (bytes[7] >> 4);
+
         *dest++ = ((bytes[10] & 0xF) << 8) + bytes[9];
         *dest++ = 16 * bytes[11] + (bytes[10] >> 4);
+
         *dest++ = ((bytes[13] & 0xF) << 8) + bytes[12];
         *dest++ = 16 * bytes[14] + (bytes[13] >> 4);
 
@@ -142,10 +161,12 @@ void PanasonicDecompressorV5::decompressThreaded(
         *dest++ = (bytes[1] >> 6) + 4 * (bytes[2]) + ((bytes[3] & 0xF) << 10);
         *dest++ = (bytes[3] >> 4) + 16 * (bytes[4]) + ((bytes[5] & 3) << 12);
         *dest++ = ((bytes[5] & 0xFC) >> 2) + (bytes[6] << 6);
+
         *dest++ = bytes[7] + ((bytes[8] & 0x3F) << 8);
         *dest++ = (bytes[8] >> 6) + 4 * bytes[9] + ((bytes[10] & 0xF) << 10);
         *dest++ = (bytes[10] >> 4) + 16 * bytes[11] + ((bytes[12] & 3) << 12);
         *dest++ = ((bytes[12] & 0xFC) >> 2) + (bytes[13] << 6);
+
         *dest++ = bytes[14] + ((bytes[15] & 0x3F) << 8);
 
         // FIXME zero_pos needs to be filled for bad pixels
