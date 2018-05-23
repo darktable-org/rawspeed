@@ -116,14 +116,12 @@ struct PanasonicDecompressorV5::DataPump {
   uchar8* readBlock() {
 
     if (!bufPosition) {
-      auto remainSize = input.getRemainSize();
-
-      auto section2size =
-          std::min(remainSize, SerializationBlockSize - section_split_offset);
+      auto section2size = std::min(
+          input.getRemainSize(), SerializationBlockSize - section_split_offset);
       memcpy(buf.data() + section_split_offset, input.getData(section2size),
              section2size);
 
-      auto section1size = std::min(remainSize, section_split_offset);
+      auto section1size = std::min(input.getRemainSize(), section_split_offset);
       if (section1size != 0)
         memcpy(buf.data(), input.getData(section1size), section1size);
     }
