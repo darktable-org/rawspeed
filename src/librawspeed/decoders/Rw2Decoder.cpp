@@ -118,26 +118,25 @@ RawImage Rw2Decoder::decodeRawInternal() {
     if (!mFile->isValid(offset))
       ThrowRDE("Invalid image data offset, cannot decode.");
 
-    const TiffTag PANASONIC_RAWFORMAT = static_cast<TiffTag>(0x2d);
+    static constexpr TiffTag PANASONIC_RAWFORMAT = static_cast<TiffTag>(0x2d);
     bool v5Processing = false;
     if (raw->hasEntry(PANASONIC_RAWFORMAT)) {
-      uint32 rawFormat = raw->getEntry(PANASONIC_RAWFORMAT)->getU16();
+      auto rawFormat = raw->getEntry(PANASONIC_RAWFORMAT)->getU16();
       if (rawFormat == 5) {
         v5Processing = true;
       }
     }
 
-    const TiffTag PANASONIC_BITSPERSAMPLE = static_cast<TiffTag>(0xa);
-    uint32 bitsPerSample = 12;
+    static constexpr TiffTag PANASONIC_BITSPERSAMPLE =
+        static_cast<TiffTag>(0xa);
+    rawspeed::ushort16 bitsPerSample = 12;
     if (raw->hasEntry(PANASONIC_BITSPERSAMPLE)) {
       bitsPerSample = raw->getEntry(PANASONIC_BITSPERSAMPLE)->getU16();
     }
 
     if (v5Processing) {
-      section_split_offset = 0x2008;
       PanasonicDecompressorV5 v5(mRaw, ByteStream(mFile, offset),
-                                 hints.has("zero_is_not_bad"),
-                                 section_split_offset, bitsPerSample);
+                                 hints.has("zero_is_not_bad"), bitsPerSample);
       mRaw->createData();
       v5.decompress();
     } else {
