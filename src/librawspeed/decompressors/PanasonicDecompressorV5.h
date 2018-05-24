@@ -28,26 +28,36 @@ namespace rawspeed {
 
 class RawImage;
 
-class PanasonicDecompressor final : public AbstractParallelizedDecompressor {
-  static constexpr uint32 BufSize = 0x4000;
-  struct PanaBitpump;
+class PanasonicDecompressorV5 final : public AbstractParallelizedDecompressor {
+  static constexpr uint32 SerializationBlockSize = 0x4000;
+  static constexpr uint32 SerializationBlockSizeMask =
+      0x3FFF; // == 0x4000 - 1, set all bits
+
+  // The RW2 raw image buffer is built from individual blocks of size
+  // SerializationBlockSize bytes. These blocks themselves comprise of two
+  // sections, split at swapped at split into sections:
+  //     bytes:
+  //     [0..section_split_offset-1][section_split_offset..SerializationBlockSize-1]
+  //     pixels: [a..b][0..a-1]
+  // When reading, these two sections need to be swapped to enable linear
+  // prcessing..
+  static constexpr uint32 section_split_offset = 0x2008;
+
+  static constexpr uint32 PixelDataBlockSize = 16;
+
+  struct DataPump;
 
   void decompressThreaded(const RawDecompressorThread* t) const final;
 
   ByteStream input;
-  bool zero_is_bad;
+  const bool zero_is_bad;
 
-  // The RW2 raw image buffer is split into sections of BufSize bytes.
-  // If section_split_offset is 0, then the last section is not neccesarily
-  // full. If section_split_offset is not 0, then each section has two parts:
-  //     bytes: [0..section_split_offset-1][section_split_offset..BufSize-1]
-  //     pixels: [a..b][0..a-1]
-  //   I.e. these two parts need to be swapped around.
-  uint32 section_split_offset;
+  const uint32 bps;
+  uint32 encodedDataSize;
 
 public:
-  PanasonicDecompressor(const RawImage& img, const ByteStream& input_,
-                        bool zero_is_not_bad, uint32 section_split_offset_);
+  PanasonicDecompressorV5(const RawImage& img, const ByteStream& input_,
+                          bool zero_is_not_bad, uint32 bps_);
 };
 
 } // namespace rawspeed
