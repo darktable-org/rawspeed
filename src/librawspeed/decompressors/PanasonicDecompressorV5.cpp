@@ -82,18 +82,15 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
   const auto blocksTotalSize = numBlocks * BlockSize;
   input = input_.peekStream(blocksTotalSize);
 
-  chopInputIntoWorkBlocks(*dsc);
+  chopInputIntoBlocks(*dsc);
 }
 
-void PanasonicDecompressorV5::chopInputIntoWorkBlocks(
-    const CompressionDsc& dsc) {
+void PanasonicDecompressorV5::chopInputIntoBlocks(const CompressionDsc& dsc) {
   auto pixelToCoordinate = [width = mRaw->dim.x](unsigned pixel) -> iPoint2D {
     return iPoint2D(pixel % width, pixel / width);
   };
 
-  static_assert(BlockSize % bytesPerPacket == 0, "");
-  const auto pixelsPerBlock =
-      dsc.pixelsPerPacket * (BlockSize / bytesPerPacket);
+  const auto pixelsPerBlock = dsc.pixelsPerPacket * PacketsPerBlock;
 
   assert(input.getRemainSize() % BlockSize == 0);
   const auto numBlocks = input.getRemainSize() / BlockSize;
@@ -106,11 +103,11 @@ void PanasonicDecompressorV5::chopInputIntoWorkBlocks(
   std::generate_n(std::back_inserter(blocks), numBlocks,
                   [input = &input, &currPixel, pixelToCoordinate,
                    pixelsPerBlock]() -> Block {
-                    ByteStream inputBs = input->getStream(BlockSize);
+                    ByteStream bs = input->getStream(BlockSize);
                     iPoint2D beginCoord = pixelToCoordinate(currPixel);
                     currPixel += pixelsPerBlock;
                     iPoint2D endCoord = pixelToCoordinate(currPixel);
-                    return {std::move(inputBs), beginCoord, endCoord};
+                    return {std::move(bs), beginCoord, endCoord};
                   });
 
   // Clamp the end coordinate for the last block.
@@ -119,22 +116,21 @@ void PanasonicDecompressorV5::chopInputIntoWorkBlocks(
 }
 
 class PanasonicDecompressorV5::ProxyStream {
-  ByteStream blocks;
+  ByteStream block;
   std::vector<uchar8> buf;
   ByteStream input;
 
   void parseBlock() {
-    if (input.getRemainSize() > 0)
-      return;
+    assert(buf.empty());
+    assert(block.getRemainSize() == BlockSize);
 
-    assert(buf.size() == BlockSize);
-    static_assert(BlockSize > section_split_offset, "");
+    static_assert(BlockSize > sectionSplitOffset, "");
 
-    ByteStream thisBlock = blocks.getStream(BlockSize);
-
-    Buffer FirstSection = thisBlock.getBuffer(section_split_offset);
-    Buffer SecondSection = thisBlock.getBuffer(thisBlock.getRemainSize());
+    Buffer FirstSection = block.getBuffer(sectionSplitOffset);
+    Buffer SecondSection = block.getBuffer(block.getRemainSize());
     assert(FirstSection.getSize() < SecondSection.getSize());
+
+    buf.resize(BlockSize);
 
     // First copy the second section. This makes it the first section.
     auto bufDst = buf.begin();
@@ -145,17 +141,14 @@ class PanasonicDecompressorV5::ProxyStream {
                                      bufDst);
     assert(buf.end() == bufDst);
 
-    assert(thisBlock.getRemainSize() == 0);
+    assert(block.getRemainSize() == 0);
 
     // And reset the clock.
     input = ByteStream(DataBuffer(Buffer(buf.data(), buf.size())));
   }
 
 public:
-  explicit ProxyStream(ByteStream blocks_) : blocks(std::move(blocks_)) {
-    static_assert(BlockSize % bytesPerPacket == 0, "");
-    buf.resize(BlockSize);
-  }
+  explicit ProxyStream(ByteStream block_) : block(std::move(block_)) {}
 
   const uchar8* getData() {
     parseBlock();
@@ -164,7 +157,7 @@ public:
 };
 
 template <>
-void PanasonicDecompressorV5::processPixelGroup<TwelveBit>(
+void PanasonicDecompressorV5::processPixelPacket<TwelveBit>(
     ushort16* dest, const uchar8* bytes) const {
   *dest++ = ((bytes[1] & 0xF) << 8) + bytes[0];
   *dest++ = 16 * bytes[2] + (bytes[1] >> 4);
@@ -183,7 +176,7 @@ void PanasonicDecompressorV5::processPixelGroup<TwelveBit>(
 }
 
 template <>
-void PanasonicDecompressorV5::processPixelGroup<FourteenBit>(
+void PanasonicDecompressorV5::processPixelPacket<FourteenBit>(
     ushort16* dest, const uchar8* bytes) const {
   *dest++ = bytes[0] + ((bytes[1] & 0x3F) << 8);
   *dest++ = (bytes[1] >> 6) + 4 * (bytes[2]) + ((bytes[3] & 0xF) << 10);
@@ -200,7 +193,9 @@ void PanasonicDecompressorV5::processPixelGroup<FourteenBit>(
 
 template <const PanasonicDecompressorV5::CompressionDsc& dsc>
 void PanasonicDecompressorV5::processBlock(const Block& block) const {
-  ProxyStream proxy(block.inputBs);
+  static_assert(BlockSize % bytesPerPacket == 0, "");
+
+  ProxyStream proxy(block.bs);
   const uchar8* bytes = proxy.getData();
 
   for (int y = block.beginCoord.y; y <= block.endCoord.y; y++) {
@@ -220,7 +215,7 @@ void PanasonicDecompressorV5::processBlock(const Block& block) const {
     assert(endx % dsc.pixelsPerPacket == 0);
 
     for (; x < endx;) {
-      processPixelGroup<dsc>(dest, bytes);
+      processPixelPacket<dsc>(dest, bytes);
 
       x += dsc.pixelsPerPacket;
       dest += dsc.pixelsPerPacket;
