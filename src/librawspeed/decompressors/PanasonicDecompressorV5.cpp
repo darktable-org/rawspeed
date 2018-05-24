@@ -36,10 +36,8 @@ namespace rawspeed {
 
 PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
                                                  const ByteStream& input_,
-                                                 bool zero_is_not_bad,
                                                  uint32 bps_)
-    : AbstractParallelizedDecompressor(img), zero_is_bad(!zero_is_not_bad),
-      bps(bps_) {
+    : AbstractParallelizedDecompressor(img), bps(bps_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
@@ -188,13 +186,6 @@ void PanasonicDecompressorV5::decompressThreaded(
         // FIXME badPixelTracker needs to be filled in case of bad pixels
       }
     }
-  }
-
-  if (zero_is_bad && !badPixelTracker.empty()) {
-    MutexLocker guard(&mRaw->mBadPixelMutex);
-    mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
-                                    badPixelTracker.begin(),
-                                    badPixelTracker.end());
   }
 }
 

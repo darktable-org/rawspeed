@@ -128,7 +128,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
 
     if (v5Processing) {
       PanasonicDecompressorV5 v5(mRaw, ByteStream(mFile, offset),
-                                 hints.has("zero_is_not_bad"), bitsPerSample);
+                                 bitsPerSample);
       mRaw->createData();
       v5.decompress();
     } else {

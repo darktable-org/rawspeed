@@ -51,14 +51,13 @@ class PanasonicDecompressorV5 final : public AbstractParallelizedDecompressor {
   void decompressThreaded(const RawDecompressorThread* t) const final;
 
   ByteStream input;
-  const bool zero_is_bad;
 
   const uint32 bps;
   uint32 encodedDataSize;
 
 public:
   PanasonicDecompressorV5(const RawImage& img, const ByteStream& input_,
-                          bool zero_is_not_bad, uint32 bps_);
+                          uint32 bps_);
 };
 
 } // namespace rawspeed
