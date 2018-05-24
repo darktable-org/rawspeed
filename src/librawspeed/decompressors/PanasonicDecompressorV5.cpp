@@ -107,11 +107,13 @@ void PanasonicDecompressorV5::chopInputIntoBlocks(const CompressionDsc& dsc) {
                     iPoint2D endCoord = pixelToCoordinate(currPixel);
                     return {std::move(bs), beginCoord, endCoord};
                   });
+  assert(blocks.size() == numBlocks);
   assert(currPixel >= mRaw->dim.area());
+  assert(input.getRemainSize() == 0);
 
   // Clamp the end coordinate for the last block.
-  blocks[numBlocks - 1U].endCoord = mRaw->dim;
-  blocks[numBlocks - 1U].endCoord.y -= 1;
+  blocks.back().endCoord = mRaw->dim;
+  blocks.back().endCoord.y -= 1;
 }
 
 class PanasonicDecompressorV5::ProxyStream {
