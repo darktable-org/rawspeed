@@ -118,7 +118,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
     if (!mFile->isValid(offset))
       ThrowRDE("Invalid image data offset, cannot decode.");
 
-    static constexpr TiffTag PANASONIC_RAWFORMAT = static_cast<TiffTag>(0x2d);
+    static constexpr auto PANASONIC_RAWFORMAT = static_cast<TiffTag>(0x2d);
     bool v5Processing = false;
     if (raw->hasEntry(PANASONIC_RAWFORMAT)) {
       auto rawFormat = raw->getEntry(PANASONIC_RAWFORMAT)->getU16();
@@ -127,8 +127,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       }
     }
 
-    static constexpr TiffTag PANASONIC_BITSPERSAMPLE =
-        static_cast<TiffTag>(0xa);
+    static constexpr auto PANASONIC_BITSPERSAMPLE = static_cast<TiffTag>(0xa);
     rawspeed::ushort16 bitsPerSample = 12;
     if (raw->hasEntry(PANASONIC_BITSPERSAMPLE)) {
       bitsPerSample = raw->getEntry(PANASONIC_BITSPERSAMPLE)->getU16();

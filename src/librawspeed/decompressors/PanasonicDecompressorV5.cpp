@@ -51,10 +51,11 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
   // focus on that if (width > 5488 || height > 3912)
   //   ThrowRDE("Too large image size: (%u; %u)", width, height);
 
-  if (SerializationBlockSize < section_split_offset)
+  if (SerializationBlockSize < section_split_offset) {
     ThrowRDE(
         "Bad section_split_offset: %u, less than SerializationBlockSize (%u)",
         section_split_offset, SerializationBlockSize);
+  }
 
   switch (bps_) {
   case 12:
@@ -67,10 +68,11 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
     ThrowRDE("Unsupported bps: %u", bps_);
   }
 
-  if (mRaw->dim.x % encodedDataSize != 0)
+  if (mRaw->dim.x % encodedDataSize != 0) {
     ThrowRDE("Raw dimension x (%u) does not work for the implied encoded data "
              "size (%u)",
              mRaw->dim.x, encodedDataSize);
+  }
 
   const auto rawBytesNormal =
       (mRaw->dim.area() * PixelDataBlockSize) / encodedDataSize;
@@ -88,7 +90,7 @@ struct PanasonicDecompressorV5::DataPump {
       : input(std::move(input_)), section_split_offset(section_split_offset_) {
 
     assert(SerializationBlockSize >= section_split_offset);
-    assert(SerializationBlockSize % PixelDataBlockSize == 0);
+    static_assert(SerializationBlockSize % PixelDataBlockSize == 0, "");
   }
 
   void skipInitialBytes(const rawspeed::Buffer::size_type bytes) {
@@ -100,11 +102,12 @@ struct PanasonicDecompressorV5::DataPump {
     input.skipBytes(skippableBytes);
 
     auto emptyReadBytes = bytes - skippableBytes;
-    if (emptyReadBytes % PixelDataBlockSize != 0)
+    if (emptyReadBytes % PixelDataBlockSize != 0) {
       ThrowRDE(
           "Skipping empty read bytes (%u) does not align with pixel data block "
           "size (%u); this will lead to failure in decooding",
           emptyReadBytes, PixelDataBlockSize);
+    }
 
     // consume the remainder of the bytes which we cannot just blindly skip
     while (emptyReadBytes > 0) {
