@@ -97,7 +97,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       mRaw->createData();
       u.decode12BitRaw<Endianness::little, false, true>(width, height);
     } else {
-      section_split_offset = 0;
+      uint32 section_split_offset = 0;
       PanasonicDecompressor p(mRaw, ByteStream(mFile, offset),
                               hints.has("zero_is_not_bad"),
                               section_split_offset);
@@ -132,7 +132,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       mRaw->createData();
       v5.decompress();
     } else {
-      section_split_offset = 0x2008;
+      uint32 section_split_offset = 0x2008;
       PanasonicDecompressor p(mRaw, ByteStream(mFile, offset),
                               hints.has("zero_is_not_bad"),
                               section_split_offset);
