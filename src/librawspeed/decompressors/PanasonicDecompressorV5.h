@@ -62,6 +62,8 @@ private:
 
   const uint32 bps;
 
+  uint32 numBlocks;
+
   struct Block {
     ByteStream bs;
     iPoint2D beginCoord;

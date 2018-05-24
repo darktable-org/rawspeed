@@ -78,7 +78,7 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
   assert(mRaw->dim.area() % dsc->pixelsPerPacket == 0);
   const auto numPackets = mRaw->dim.area() / dsc->pixelsPerPacket;
   const auto packetsTotalSize = numPackets * bytesPerPacket;
-  const auto numBlocks = roundUpDivision(packetsTotalSize, BlockSize);
+  numBlocks = roundUpDivision(packetsTotalSize, BlockSize);
   const auto blocksTotalSize = numBlocks * BlockSize;
   input = input_.peekStream(blocksTotalSize);
 
@@ -90,12 +90,10 @@ void PanasonicDecompressorV5::chopInputIntoBlocks(const CompressionDsc& dsc) {
     return iPoint2D(pixel % width, pixel / width);
   };
 
-  const auto pixelsPerBlock = dsc.pixelsPerPacket * PacketsPerBlock;
-
-  assert(input.getRemainSize() % BlockSize == 0);
-  const auto numBlocks = input.getRemainSize() / BlockSize;
+  assert(numBlocks * BlockSize == input.getRemainSize());
   blocks.reserve(numBlocks);
 
+  const auto pixelsPerBlock = dsc.pixelsPerPacket * PacketsPerBlock;
   assert((numBlocks - 1U) * pixelsPerBlock < mRaw->dim.area());
   assert(numBlocks * pixelsPerBlock >= mRaw->dim.area());
 
@@ -109,6 +107,7 @@ void PanasonicDecompressorV5::chopInputIntoBlocks(const CompressionDsc& dsc) {
                     iPoint2D endCoord = pixelToCoordinate(currPixel);
                     return {std::move(bs), beginCoord, endCoord};
                   });
+  assert(currPixel >= mRaw->dim.area());
 
   // Clamp the end coordinate for the last block.
   blocks[numBlocks - 1U].endCoord = mRaw->dim;
