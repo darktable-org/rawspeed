@@ -1,9 +1,9 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2009-2014 Klaus Post
-    Copyright (C) 2014 Pedro Côrte-Real
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2018 Alexey Danilchenko
+    Copyright (C) 2018 Stefan Hoffmeister
+    Copyright (C) 2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
