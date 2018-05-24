@@ -22,6 +22,7 @@
 #pragma once
 
 #include "common/Common.h"                                  // for uint32
+#include "common/Point.h"                                   // for i
 #include "common/RawImage.h"                                // for RawImage
 #include "decompressors/AbstractParallelizedDecompressor.h" // for Abstract...
 #include "io/ByteStream.h"                                  // for ByteStream
@@ -54,6 +55,28 @@ class PanasonicDecompressorV5 final : public AbstractDecompressor {
   ByteStream input;
 
   const uint32 bps;
+
+  struct Block {
+    ByteStream inputBs;
+    iPoint2D beginCoord;
+    // The rectangle is an incorrect representation. All the rows
+    // between the first and last one span the entire width of the image.
+    iPoint2D endCoord;
+
+    Block() = default;
+    Block(ByteStream&& inputBs_, iPoint2D beginCoord_, iPoint2D endCoord_)
+        : inputBs(std::move(inputBs_)), beginCoord(beginCoord_),
+          endCoord(endCoord_) {}
+  };
+
+  // If really wanted, this vector could be avoided,
+  // and each Block computed on-the-fly
+  std::vector<Block> blocks;
+
+  void chopInputIntoWorkBlocks();
+
+  void processPixelGroup(ushort16* dest, const uchar8* bytes) const;
+  void processBlock(const Block& block) const;
 
 public:
   PanasonicDecompressorV5(const RawImage& img, const ByteStream& input_,
