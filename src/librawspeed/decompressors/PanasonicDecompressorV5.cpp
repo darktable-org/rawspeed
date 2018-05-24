@@ -38,6 +38,20 @@
 
 namespace rawspeed {
 
+struct PanasonicDecompressorV5::CompressionDsc {
+  int bps;
+  int pixelsPerPacket;
+
+  constexpr CompressionDsc();
+  constexpr CompressionDsc(int bps_, int pixelsPerPacket_)
+      : bps(bps_), pixelsPerPacket(pixelsPerPacket_) {}
+};
+
+static constexpr auto TwelveBit =
+    PanasonicDecompressorV5::CompressionDsc(/*bps=*/12, /*pixelsPerPacket=*/10);
+static constexpr auto FourteenBit =
+    PanasonicDecompressorV5::CompressionDsc(/*bps=*/14, /*pixelsPerPacket=*/9);
+
 PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
                                                  const ByteStream& input_,
                                                  uint32 bps_)
@@ -46,37 +60,40 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
 
+  const CompressionDsc* dsc = nullptr;
   switch (bps) {
   case 12:
-    pixelsPerPacket = 10;
+    dsc = &TwelveBit;
     break;
   case 14:
-    pixelsPerPacket = 9;
+    dsc = &FourteenBit;
     break;
   default:
     ThrowRDE("Unsupported bps: %u", bps);
   }
 
-  if (mRaw->dim.x % pixelsPerPacket != 0)
+  if (mRaw->dim.x % dsc->pixelsPerPacket != 0)
     ThrowRDE("Image width is not a multiple of pixels-per-packet");
 
-  assert(mRaw->dim.area() % pixelsPerPacket == 0);
-  const auto numPackets = mRaw->dim.area() / pixelsPerPacket;
+  assert(mRaw->dim.area() % dsc->pixelsPerPacket == 0);
+  const auto numPackets = mRaw->dim.area() / dsc->pixelsPerPacket;
   const auto packetsTotalSize = numPackets * bytesPerPacket;
   const auto numBlocks = roundUpDivision(packetsTotalSize, BlockSize);
   const auto blocksTotalSize = numBlocks * BlockSize;
   input = input_.peekStream(blocksTotalSize);
 
-  chopInputIntoWorkBlocks();
+  chopInputIntoWorkBlocks(*dsc);
 }
 
-void PanasonicDecompressorV5::chopInputIntoWorkBlocks() {
+void PanasonicDecompressorV5::chopInputIntoWorkBlocks(
+    const CompressionDsc& dsc) {
   auto pixelToCoordinate = [width = mRaw->dim.x](unsigned pixel) -> iPoint2D {
     return iPoint2D(pixel % width, pixel / width);
   };
 
   static_assert(BlockSize % bytesPerPacket == 0, "");
-  const auto pixelsPerBlock = pixelsPerPacket * (BlockSize / bytesPerPacket);
+  const auto pixelsPerBlock =
+      dsc.pixelsPerPacket * (BlockSize / bytesPerPacket);
 
   assert(input.getRemainSize() % BlockSize == 0);
   const auto numBlocks = input.getRemainSize() / BlockSize;
@@ -146,42 +163,42 @@ public:
   }
 };
 
-void PanasonicDecompressorV5::processPixelGroup(ushort16* dest,
-                                                const uchar8* bytes) const {
-  if (bps == 12) {
-    *dest++ = ((bytes[1] & 0xF) << 8) + bytes[0];
-    *dest++ = 16 * bytes[2] + (bytes[1] >> 4);
+template <>
+void PanasonicDecompressorV5::processPixelGroup<TwelveBit>(
+    ushort16* dest, const uchar8* bytes) const {
+  *dest++ = ((bytes[1] & 0xF) << 8) + bytes[0];
+  *dest++ = 16 * bytes[2] + (bytes[1] >> 4);
 
-    *dest++ = ((bytes[4] & 0xF) << 8) + bytes[3];
-    *dest++ = 16 * bytes[5] + (bytes[4] >> 4);
+  *dest++ = ((bytes[4] & 0xF) << 8) + bytes[3];
+  *dest++ = 16 * bytes[5] + (bytes[4] >> 4);
 
-    *dest++ = ((bytes[7] & 0xF) << 8) + bytes[6];
-    *dest++ = 16 * bytes[8] + (bytes[7] >> 4);
+  *dest++ = ((bytes[7] & 0xF) << 8) + bytes[6];
+  *dest++ = 16 * bytes[8] + (bytes[7] >> 4);
 
-    *dest++ = ((bytes[10] & 0xF) << 8) + bytes[9];
-    *dest++ = 16 * bytes[11] + (bytes[10] >> 4);
+  *dest++ = ((bytes[10] & 0xF) << 8) + bytes[9];
+  *dest++ = 16 * bytes[11] + (bytes[10] >> 4);
 
-    *dest++ = ((bytes[13] & 0xF) << 8) + bytes[12];
-    *dest++ = 16 * bytes[14] + (bytes[13] >> 4);
-
-    // FIXME badPixelTracker needs to be filled in case of bad pixels
-  } else if (bps == 14) {
-    *dest++ = bytes[0] + ((bytes[1] & 0x3F) << 8);
-    *dest++ = (bytes[1] >> 6) + 4 * (bytes[2]) + ((bytes[3] & 0xF) << 10);
-    *dest++ = (bytes[3] >> 4) + 16 * (bytes[4]) + ((bytes[5] & 3) << 12);
-    *dest++ = ((bytes[5] & 0xFC) >> 2) + (bytes[6] << 6);
-
-    *dest++ = bytes[7] + ((bytes[8] & 0x3F) << 8);
-    *dest++ = (bytes[8] >> 6) + 4 * bytes[9] + ((bytes[10] & 0xF) << 10);
-    *dest++ = (bytes[10] >> 4) + 16 * bytes[11] + ((bytes[12] & 3) << 12);
-    *dest++ = ((bytes[12] & 0xFC) >> 2) + (bytes[13] << 6);
-
-    *dest++ = bytes[14] + ((bytes[15] & 0x3F) << 8);
-
-    // FIXME badPixelTracker needs to be filled in case of bad pixels
-  }
+  *dest++ = ((bytes[13] & 0xF) << 8) + bytes[12];
+  *dest++ = 16 * bytes[14] + (bytes[13] >> 4);
 }
 
+template <>
+void PanasonicDecompressorV5::processPixelGroup<FourteenBit>(
+    ushort16* dest, const uchar8* bytes) const {
+  *dest++ = bytes[0] + ((bytes[1] & 0x3F) << 8);
+  *dest++ = (bytes[1] >> 6) + 4 * (bytes[2]) + ((bytes[3] & 0xF) << 10);
+  *dest++ = (bytes[3] >> 4) + 16 * (bytes[4]) + ((bytes[5] & 3) << 12);
+  *dest++ = ((bytes[5] & 0xFC) >> 2) + (bytes[6] << 6);
+
+  *dest++ = bytes[7] + ((bytes[8] & 0x3F) << 8);
+  *dest++ = (bytes[8] >> 6) + 4 * bytes[9] + ((bytes[10] & 0xF) << 10);
+  *dest++ = (bytes[10] >> 4) + 16 * bytes[11] + ((bytes[12] & 3) << 12);
+  *dest++ = ((bytes[12] & 0xFC) >> 2) + (bytes[13] << 6);
+
+  *dest++ = bytes[14] + ((bytes[15] & 0x3F) << 8);
+}
+
+template <const PanasonicDecompressorV5::CompressionDsc& dsc>
 void PanasonicDecompressorV5::processBlock(const Block& block) const {
   ProxyStream proxy(block.inputBs);
   const uchar8* bytes = proxy.getData();
@@ -199,23 +216,37 @@ void PanasonicDecompressorV5::processBlock(const Block& block) const {
 
     auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(x, y));
 
-    assert(x % pixelsPerPacket == 0);
-    assert(endx % pixelsPerPacket == 0);
+    assert(x % dsc.pixelsPerPacket == 0);
+    assert(endx % dsc.pixelsPerPacket == 0);
 
     for (; x < endx;) {
-      processPixelGroup(dest, bytes);
+      processPixelGroup<dsc>(dest, bytes);
 
-      x += pixelsPerPacket;
-      dest += pixelsPerPacket;
+      x += dsc.pixelsPerPacket;
+      dest += dsc.pixelsPerPacket;
       bytes += bytesPerPacket;
     }
   }
 }
 
-void PanasonicDecompressorV5::decompress() const {
+template <const PanasonicDecompressorV5::CompressionDsc& dsc>
+void PanasonicDecompressorV5::decompressInternal() const {
   assert(!blocks.empty());
   for (const Block& block : blocks)
-    processBlock(block);
+    processBlock<dsc>(block);
+}
+
+void PanasonicDecompressorV5::decompress() const {
+  switch (bps) {
+  case 12:
+    decompressInternal<TwelveBit>();
+    break;
+  case 14:
+    decompressInternal<FourteenBit>();
+    break;
+  default:
+    __builtin_unreachable();
+  }
 }
 
 } // namespace rawspeed

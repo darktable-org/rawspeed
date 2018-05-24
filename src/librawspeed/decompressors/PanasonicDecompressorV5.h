@@ -32,6 +32,10 @@ namespace rawspeed {
 class RawImage;
 
 class PanasonicDecompressorV5 final : public AbstractDecompressor {
+public:
+  struct CompressionDsc;
+
+private:
   RawImage mRaw;
 
   static constexpr uint32 BlockSize = 0x4000;
@@ -48,7 +52,6 @@ class PanasonicDecompressorV5 final : public AbstractDecompressor {
   // The block themselves consist of packets with fixed sise of bytesPerPacket,
   // and each packet decodes to pixelsPerPacket pixels, which depends on bps.
   static constexpr uint32 bytesPerPacket = 16;
-  uint32 pixelsPerPacket; // depends on bps
 
   class ProxyStream;
 
@@ -73,10 +76,15 @@ class PanasonicDecompressorV5 final : public AbstractDecompressor {
   // and each Block computed on-the-fly
   std::vector<Block> blocks;
 
-  void chopInputIntoWorkBlocks();
+  void chopInputIntoWorkBlocks(const CompressionDsc& dsc);
 
+  template <const CompressionDsc& dsc>
   void processPixelGroup(ushort16* dest, const uchar8* bytes) const;
+
+  template <const CompressionDsc& dsc>
   void processBlock(const Block& block) const;
+
+  template <const CompressionDsc& dsc> void decompressInternal() const;
 
 public:
   PanasonicDecompressorV5(const RawImage& img, const ByteStream& input_,
