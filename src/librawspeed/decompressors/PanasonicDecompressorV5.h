@@ -33,18 +33,16 @@ class RawImage;
 class PanasonicDecompressorV5 final : public AbstractDecompressor {
   RawImage mRaw;
 
-  static constexpr uint32 SerializationBlockSize = 0x4000;
-  static constexpr uint32 SerializationBlockSizeMask =
-      0x3FFF; // == 0x4000 - 1, set all bits
+  static constexpr uint32 BlockSize = 0x4000;
+  static constexpr uint32 BlockSizeMask = BlockSize - 1U;
 
   // The RW2 raw image buffer is built from individual blocks of size
-  // SerializationBlockSize bytes. These blocks themselves comprise of two
-  // sections, split at swapped at split into sections:
-  //     bytes:
-  //     [0..section_split_offset-1][section_split_offset..SerializationBlockSize-1]
-  //     pixels: [a..b][0..a-1]
+  // BlockSize bytes. These blocks themselves comprise of two
+  // sections, split and swapped at section_split_offset:
+  //   bytes:  [0..section_split_offset-1][section_split_offset..BlockSize-1]
+  //   pixels: [a..b][0..a-1]
   // When reading, these two sections need to be swapped to enable linear
-  // prcessing..
+  // processing..
   static constexpr uint32 section_split_offset = 0x2008;
 
   static constexpr uint32 PixelDataBlockSize = 16;

@@ -49,10 +49,9 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
   // focus on that if (width > 5488 || height > 3912)
   //   ThrowRDE("Too large image size: (%u; %u)", width, height);
 
-  if (SerializationBlockSize < section_split_offset) {
-    ThrowRDE(
-        "Bad section_split_offset: %u, less than SerializationBlockSize (%u)",
-        section_split_offset, SerializationBlockSize);
+  if (BlockSize < section_split_offset) {
+    ThrowRDE("Bad section_split_offset: %u, less than BlockSize (%u)",
+             section_split_offset, BlockSize);
   }
 
   switch (bps_) {
@@ -81,14 +80,14 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
 struct PanasonicDecompressorV5::DataPump {
   ByteStream input;
   const uint32 section_split_offset;
-  std::vector<uchar8> buf = std::vector<uchar8>(SerializationBlockSize);
+  std::vector<uchar8> buf = std::vector<uchar8>(BlockSize);
   int bufPosition = 0;
 
   DataPump(ByteStream input_, int section_split_offset_)
       : input(std::move(input_)), section_split_offset(section_split_offset_) {
 
-    assert(SerializationBlockSize >= section_split_offset);
-    static_assert(SerializationBlockSize % PixelDataBlockSize == 0, "");
+    assert(BlockSize >= section_split_offset);
+    static_assert(BlockSize % PixelDataBlockSize == 0, "");
   }
 
   void skipInitialBytes(const rawspeed::Buffer::size_type bytes) {
@@ -96,7 +95,7 @@ struct PanasonicDecompressorV5::DataPump {
     assert(input.getPosition() == 0);
 
     const rawspeed::Buffer::size_type skippableBytes =
-        (bytes / SerializationBlockSize) * SerializationBlockSize;
+        (bytes / BlockSize) * BlockSize;
     input.skipBytes(skippableBytes);
 
     auto emptyReadBytes = bytes - skippableBytes;
@@ -117,8 +116,8 @@ struct PanasonicDecompressorV5::DataPump {
   uchar8* readBlock() {
 
     if (!bufPosition) {
-      auto section2size = std::min(
-          input.getRemainSize(), SerializationBlockSize - section_split_offset);
+      auto section2size =
+          std::min(input.getRemainSize(), BlockSize - section_split_offset);
       memcpy(buf.data() + section_split_offset, input.getData(section2size),
              section2size);
 
@@ -130,7 +129,7 @@ struct PanasonicDecompressorV5::DataPump {
     uchar8* blockAddress = buf.data() + bufPosition;
 
     bufPosition += PixelDataBlockSize;
-    bufPosition &= SerializationBlockSizeMask;
+    bufPosition &= BlockSizeMask;
 
     return blockAddress;
   }
