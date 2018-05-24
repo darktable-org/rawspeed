@@ -22,6 +22,7 @@
 #pragma once
 
 #include "common/Common.h"                                  // for uint32
+#include "common/RawImage.h"                                // for RawImage
 #include "decompressors/AbstractParallelizedDecompressor.h" // for Abstract...
 #include "io/ByteStream.h"                                  // for ByteStream
 
@@ -29,7 +30,9 @@ namespace rawspeed {
 
 class RawImage;
 
-class PanasonicDecompressorV5 final : public AbstractParallelizedDecompressor {
+class PanasonicDecompressorV5 final : public AbstractDecompressor {
+  RawImage mRaw;
+
   static constexpr uint32 SerializationBlockSize = 0x4000;
   static constexpr uint32 SerializationBlockSizeMask =
       0x3FFF; // == 0x4000 - 1, set all bits
@@ -48,8 +51,6 @@ class PanasonicDecompressorV5 final : public AbstractParallelizedDecompressor {
 
   struct DataPump;
 
-  void decompressThreaded(const RawDecompressorThread* t) const final;
-
   ByteStream input;
 
   const uint32 bps;
@@ -58,6 +59,8 @@ class PanasonicDecompressorV5 final : public AbstractParallelizedDecompressor {
 public:
   PanasonicDecompressorV5(const RawImage& img, const ByteStream& input_,
                           uint32 bps_);
+
+  void decompress() const;
 };
 
 } // namespace rawspeed

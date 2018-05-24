@@ -37,7 +37,7 @@ namespace rawspeed {
 PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
                                                  const ByteStream& input_,
                                                  uint32 bps_)
-    : AbstractParallelizedDecompressor(img), bps(bps_) {
+    : mRaw(img), bps(bps_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
@@ -136,18 +136,14 @@ struct PanasonicDecompressorV5::DataPump {
   }
 };
 
-void PanasonicDecompressorV5::decompressThreaded(
-    const RawDecompressorThread* t) const {
+void PanasonicDecompressorV5::decompress() const {
 
   DataPump threadDataPump(input, section_split_offset);
 
   const auto raw_width = mRaw->dim.x;
-  const auto decodeStreamOffset =
-      (t->start * raw_width * PixelDataBlockSize) / encodedDataSize;
-  threadDataPump.skipInitialBytes(decodeStreamOffset);
 
   std::vector<uint32> badPixelTracker;
-  for (uint32 y = t->start; y < t->end; y++) {
+  for (uint32 y = 0; y < static_cast<uint32>(mRaw->dim.y); y++) {
 
     auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
 
