@@ -118,13 +118,8 @@ RawImage Rw2Decoder::decodeRawInternal() {
     if (!mFile->isValid(offset))
       ThrowRDE("Invalid image data offset, cannot decode.");
 
-    bool v5Processing = false;
-    if (raw->hasEntry(PANASONIC_RAWFORMAT)) {
-      auto rawFormat = raw->getEntry(PANASONIC_RAWFORMAT)->getU16();
-      if (rawFormat == 5) {
-        v5Processing = true;
-      }
-    }
+    bool v5Processing = raw->hasEntry(PANASONIC_RAWFORMAT) &&
+                        raw->getEntry(PANASONIC_RAWFORMAT)->getU16() == 5;
 
     rawspeed::ushort16 bitsPerSample = 12;
     if (raw->hasEntry(PANASONIC_BITSPERSAMPLE)) {
