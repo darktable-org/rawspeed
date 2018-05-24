@@ -91,7 +91,6 @@ struct PanasonicDecompressorV5::DataPump {
   }
 
   void skipInitialBytes(const rawspeed::Buffer::size_type bytes) {
-
     assert(input.getPosition() == 0);
 
     const rawspeed::Buffer::size_type skippableBytes =
@@ -114,7 +113,6 @@ struct PanasonicDecompressorV5::DataPump {
   }
 
   uchar8* readBlock() {
-
     if (!bufPosition) {
       auto section2size =
           std::min(input.getRemainSize(), BlockSize - section_split_offset);
@@ -136,18 +134,15 @@ struct PanasonicDecompressorV5::DataPump {
 };
 
 void PanasonicDecompressorV5::decompress() const {
-
   DataPump threadDataPump(input, section_split_offset);
 
-  const auto raw_width = mRaw->dim.x;
-
-  std::vector<uint32> badPixelTracker;
   for (uint32 y = 0; y < static_cast<uint32>(mRaw->dim.y); y++) {
-
     auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
 
-    for (auto col = 0; col < raw_width; col += encodedDataSize) {
+    assert(mRaw->dim.x % encodedDataSize == 0);
+    for (auto x = 0; x < mRaw->dim.x; x += encodedDataSize) {
       uchar8* bytes = threadDataPump.readBlock();
+
       if (bps == 12) {
         *dest++ = ((bytes[1] & 0xF) << 8) + bytes[0];
         *dest++ = 16 * bytes[2] + (bytes[1] >> 4);
