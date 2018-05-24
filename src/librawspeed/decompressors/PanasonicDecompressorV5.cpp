@@ -29,6 +29,7 @@
 #include <array>                          // for array
 #include <cassert>                        // for assert
 #include <cstring>                        // for memcpy
+#include <memory>                         // for uninitialized_copy
 #include <utility>                        // for move
 #include <vector>                         // for vector
 
@@ -42,106 +43,80 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
 
-  // FIXME sanity check sizes
-  // this will be quite exciting, as the Panasonic G9 high-resolution mode
-  // produces 10480x7794
-  // FIXME the whole point is to check for run-away CPU and for DoS on memory;
-  // focus on that if (width > 5488 || height > 3912)
-  //   ThrowRDE("Too large image size: (%u; %u)", width, height);
-
-  if (BlockSize < section_split_offset) {
-    ThrowRDE("Bad section_split_offset: %u, less than BlockSize (%u)",
-             section_split_offset, BlockSize);
-  }
-
-  switch (bps_) {
+  switch (bps) {
   case 12:
-    encodedDataSize = 10;
+    pixelsPerPacket = 10;
     break;
   case 14:
-    encodedDataSize = 9;
+    pixelsPerPacket = 9;
     break;
   default:
-    ThrowRDE("Unsupported bps: %u", bps_);
+    ThrowRDE("Unsupported bps: %u", bps);
   }
 
-  if (mRaw->dim.x % encodedDataSize != 0) {
-    ThrowRDE("Raw dimension x (%u) does not work for the implied encoded data "
-             "size (%u)",
-             mRaw->dim.x, encodedDataSize);
-  }
+  if (mRaw->dim.x % pixelsPerPacket != 0)
+    ThrowRDE("Image width is not a multiple of pixels-per-packet");
 
-  const auto rawBytesNormal =
-      (mRaw->dim.area() * PixelDataBlockSize) / encodedDataSize;
-
-  input = input_.peekStream(rawBytesNormal);
+  assert(mRaw->dim.area() % pixelsPerPacket == 0);
+  auto inputSize = (mRaw->dim.area() / pixelsPerPacket) * bytesPerPacket;
+  inputSize = roundUp(inputSize, BlockSize);
+  input = input_.peekStream(inputSize);
 }
 
-struct PanasonicDecompressorV5::DataPump {
+class PanasonicDecompressorV5::DataPump {
+  ByteStream blocks;
+  std::vector<uchar8> buf;
   ByteStream input;
-  const uint32 section_split_offset;
-  std::vector<uchar8> buf = std::vector<uchar8>(BlockSize);
-  int bufPosition = 0;
 
-  DataPump(ByteStream input_, int section_split_offset_)
-      : input(std::move(input_)), section_split_offset(section_split_offset_) {
+  void parseBlock() {
+    if (input.getRemainSize() > 0)
+      return;
 
-    assert(BlockSize >= section_split_offset);
-    static_assert(BlockSize % PixelDataBlockSize == 0, "");
+    assert(buf.size() == BlockSize);
+    static_assert(BlockSize > section_split_offset, "");
+
+    ByteStream thisBlock = blocks.getStream(BlockSize);
+
+    Buffer FirstSection = thisBlock.getBuffer(section_split_offset);
+    Buffer SecondSection = thisBlock.getBuffer(thisBlock.getRemainSize());
+    assert(FirstSection.getSize() < SecondSection.getSize());
+
+    // First copy the second section. This makes it the first section.
+    auto bufDst = buf.begin();
+    bufDst = std::uninitialized_copy(SecondSection.begin(), SecondSection.end(),
+                                     bufDst);
+    // Now append the original 1'st section right after the new 1'st section.
+    bufDst = std::uninitialized_copy(FirstSection.begin(), FirstSection.end(),
+                                     bufDst);
+    assert(buf.end() == bufDst);
+
+    assert(thisBlock.getRemainSize() == 0);
+
+    // And reset the clock.
+    input = ByteStream(DataBuffer(Buffer(buf.data(), buf.size())));
   }
 
-  void skipInitialBytes(const rawspeed::Buffer::size_type bytes) {
-    assert(input.getPosition() == 0);
-
-    const rawspeed::Buffer::size_type skippableBytes =
-        (bytes / BlockSize) * BlockSize;
-    input.skipBytes(skippableBytes);
-
-    auto emptyReadBytes = bytes - skippableBytes;
-    if (emptyReadBytes % PixelDataBlockSize != 0) {
-      ThrowRDE(
-          "Skipping empty read bytes (%u) does not align with pixel data block "
-          "size (%u); this will lead to failure in decooding",
-          emptyReadBytes, PixelDataBlockSize);
-    }
-
-    // consume the remainder of the bytes which we cannot just blindly skip
-    while (emptyReadBytes > 0) {
-      /* discard data = */ readBlock();
-      emptyReadBytes -= PixelDataBlockSize;
-    }
+public:
+  explicit DataPump(ByteStream blocks_) : blocks(std::move(blocks_)) {
+    static_assert(BlockSize % bytesPerPacket == 0, "");
+    buf.resize(BlockSize);
   }
 
-  uchar8* readBlock() {
-    if (!bufPosition) {
-      auto section2size =
-          std::min(input.getRemainSize(), BlockSize - section_split_offset);
-      memcpy(buf.data() + section_split_offset, input.getData(section2size),
-             section2size);
-
-      auto section1size = std::min(input.getRemainSize(), section_split_offset);
-      if (section1size != 0)
-        memcpy(buf.data(), input.getData(section1size), section1size);
-    }
-
-    uchar8* blockAddress = buf.data() + bufPosition;
-
-    bufPosition += PixelDataBlockSize;
-    bufPosition &= BlockSizeMask;
-
-    return blockAddress;
+  const uchar8* readBlock() {
+    parseBlock();
+    return input.getData(bytesPerPacket);
   }
 };
 
 void PanasonicDecompressorV5::decompress() const {
-  DataPump threadDataPump(input, section_split_offset);
+  DataPump pump(input);
 
   for (uint32 y = 0; y < static_cast<uint32>(mRaw->dim.y); y++) {
     auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
 
-    assert(mRaw->dim.x % encodedDataSize == 0);
-    for (auto x = 0; x < mRaw->dim.x; x += encodedDataSize) {
-      uchar8* bytes = threadDataPump.readBlock();
+    assert(mRaw->dim.x % pixelsPerPacket == 0);
+    for (auto x = 0; x < mRaw->dim.x; x += pixelsPerPacket) {
+      const uchar8* bytes = pump.readBlock();
 
       if (bps == 12) {
         *dest++ = ((bytes[1] & 0xF) << 8) + bytes[0];

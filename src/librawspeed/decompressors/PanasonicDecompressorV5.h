@@ -34,7 +34,6 @@ class PanasonicDecompressorV5 final : public AbstractDecompressor {
   RawImage mRaw;
 
   static constexpr uint32 BlockSize = 0x4000;
-  static constexpr uint32 BlockSizeMask = BlockSize - 1U;
 
   // The RW2 raw image buffer is built from individual blocks of size
   // BlockSize bytes. These blocks themselves comprise of two
@@ -43,16 +42,18 @@ class PanasonicDecompressorV5 final : public AbstractDecompressor {
   //   pixels: [a..b][0..a-1]
   // When reading, these two sections need to be swapped to enable linear
   // processing..
-  static constexpr uint32 section_split_offset = 0x2008;
+  static constexpr uint32 section_split_offset = 0x1FF8;
 
-  static constexpr uint32 PixelDataBlockSize = 16;
+  // The block themselves consist of packets with fixed sise of bytesPerPacket,
+  // and each packet decodes to pixelsPerPacket pixels, which depends on bps.
+  static constexpr uint32 bytesPerPacket = 16;
+  uint32 pixelsPerPacket; // depends on bps
 
-  struct DataPump;
+  class DataPump;
 
   ByteStream input;
 
   const uint32 bps;
-  uint32 encodedDataSize;
 
 public:
   PanasonicDecompressorV5(const RawImage& img, const ByteStream& input_,
