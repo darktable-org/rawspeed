@@ -115,8 +115,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
 
     uint32 offset = offsets->getU32();
 
-    if (!mFile->isValid(offset))
-      ThrowRDE("Invalid image data offset, cannot decode.");
+    ByteStream bs(mFile, offset);
 
     bool v5Processing = raw->hasEntry(PANASONIC_RAWFORMAT) &&
                         raw->getEntry(PANASONIC_RAWFORMAT)->getU16() == 5;
@@ -127,14 +126,12 @@ RawImage Rw2Decoder::decodeRawInternal() {
     }
 
     if (v5Processing) {
-      PanasonicDecompressorV5 v5(mRaw, ByteStream(mFile, offset),
-                                 bitsPerSample);
+      PanasonicDecompressorV5 v5(mRaw, bs, bitsPerSample);
       mRaw->createData();
       v5.decompress();
     } else {
       uint32 section_split_offset = 0x2008;
-      PanasonicDecompressor p(mRaw, ByteStream(mFile, offset),
-                              hints.has("zero_is_not_bad"),
+      PanasonicDecompressor p(mRaw, bs, hints.has("zero_is_not_bad"),
                               section_split_offset);
       mRaw->createData();
       p.decompress();
