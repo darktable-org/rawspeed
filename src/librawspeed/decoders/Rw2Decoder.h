@@ -50,7 +50,6 @@ protected:
 
 private:
   std::string guessMode();
-  uint32 offset = 0;
 };
 
 } // namespace rawspeed

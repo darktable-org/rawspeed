@@ -78,7 +78,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
     if (offsets->count != 1) {
       ThrowRDE("Multiple Strips found: %u", offsets->count);
     }
-    offset = offsets->getU32();
+    uint32 offset = offsets->getU32();
     if (!mFile->isValid(offset))
       ThrowRDE("Invalid image data offset, cannot decode.");
 
@@ -113,7 +113,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       ThrowRDE("Multiple Strips found: %u", offsets->count);
     }
 
-    offset = offsets->getU32();
+    uint32 offset = offsets->getU32();
 
     if (!mFile->isValid(offset))
       ThrowRDE("Invalid image data offset, cannot decode.");
