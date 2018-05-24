@@ -25,6 +25,7 @@
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/BitPumpLSB.h"                // for BitPumpLSB
 #include <algorithm>                      // for min
 #include <algorithm>                      // for generate_n, fill_n
 #include <array>                          // for array
@@ -100,7 +101,7 @@ void PanasonicDecompressorV5::chopInputIntoWorkBlocks() {
   blocks[numBlocks - 1U].endCoord.y -= 1;
 }
 
-class PanasonicDecompressorV5::DataPump {
+class PanasonicDecompressorV5::ProxyStream {
   ByteStream blocks;
   std::vector<uchar8> buf;
   ByteStream input;
@@ -134,12 +135,12 @@ class PanasonicDecompressorV5::DataPump {
   }
 
 public:
-  explicit DataPump(ByteStream blocks_) : blocks(std::move(blocks_)) {
+  explicit ProxyStream(ByteStream blocks_) : blocks(std::move(blocks_)) {
     static_assert(BlockSize % bytesPerPacket == 0, "");
     buf.resize(BlockSize);
   }
 
-  const uchar8* readBlock() {
+  const uchar8* getData() {
     parseBlock();
     return input.getData(BlockSize);
   }
@@ -182,8 +183,8 @@ void PanasonicDecompressorV5::processPixelGroup(ushort16* dest,
 }
 
 void PanasonicDecompressorV5::processBlock(const Block& block) const {
-  DataPump pump(block.inputBs);
-  const uchar8* bytes = pump.readBlock();
+  ProxyStream proxy(block.inputBs);
+  const uchar8* bytes = proxy.getData();
 
   for (int y = block.beginCoord.y; y <= block.endCoord.y; y++) {
     int x = 0;

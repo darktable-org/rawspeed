@@ -50,7 +50,7 @@ class PanasonicDecompressorV5 final : public AbstractDecompressor {
   static constexpr uint32 bytesPerPacket = 16;
   uint32 pixelsPerPacket; // depends on bps
 
-  class DataPump;
+  class ProxyStream;
 
   ByteStream input;
 
