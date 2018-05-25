@@ -25,6 +25,7 @@
 #include "common/Point.h"                                   // for i
 #include "common/RawImage.h"                                // for RawImage
 #include "decompressors/AbstractParallelizedDecompressor.h" // for Abstract...
+#include "io/BitPumpLSB.h"                                  // for BitPumpLSB
 #include "io/ByteStream.h"                                  // for ByteStream
 
 namespace rawspeed {
@@ -32,10 +33,6 @@ namespace rawspeed {
 class RawImage;
 
 class PanasonicDecompressorV5 final : public AbstractParallelizedDecompressor {
-public:
-  struct CompressionDsc;
-
-private:
   // The RW2 raw image buffer consists of individual blocks,
   // each one BlockSize bytes in size.
   static constexpr uint32 BlockSize = 0x4000;
@@ -51,11 +48,21 @@ private:
   // The blocks themselves consist of packets with fixed size of bytesPerPacket,
   // and each packet decodes to pixelsPerPacket pixels, which depends on bps.
   static constexpr uint32 bytesPerPacket = 16;
+  static constexpr uint32 bitsPerPacket = 8 * bytesPerPacket;
   static_assert(BlockSize % bytesPerPacket == 0, "");
   static constexpr uint32 PacketsPerBlock = BlockSize / bytesPerPacket;
 
+  // Contains the decoding recepie for the packet,
+  struct PacketDsc;
+
+  // There are two variants. Which one is to be used depends on image's bps.
+  static const PacketDsc TwelveBitPacket;
+  static const PacketDsc FourteenBitPacket;
+
+  // Takes care of unsplitting&swapping back the block at sectionSplitOffset.
   class ProxyStream;
 
+  // The full input buffer, containing all the blocks.
   ByteStream input;
 
   const uint32 bps;
@@ -78,15 +85,14 @@ private:
   // and each Block computed on-the-fly
   std::vector<Block> blocks;
 
-  void chopInputIntoBlocks(const CompressionDsc& dsc);
+  void chopInputIntoBlocks(const PacketDsc& dsc);
 
-  template <const CompressionDsc& dsc>
-  void processPixelPacket(ushort16* dest, const uchar8* bytes) const;
+  template <const PacketDsc& dsc>
+  void processPixelPacket(BitPumpLSB* bs, ushort16* dest) const;
 
-  template <const CompressionDsc& dsc>
-  void processBlock(const Block& block) const;
+  template <const PacketDsc& dsc> void processBlock(const Block& block) const;
 
-  template <const CompressionDsc& dsc>
+  template <const PacketDsc& dsc>
   void decompressThreadedInternal(const RawDecompressorThread* t) const;
 
   void decompressThreaded(const RawDecompressorThread* t) const final;

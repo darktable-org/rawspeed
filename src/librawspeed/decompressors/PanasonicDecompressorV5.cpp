@@ -37,19 +37,22 @@
 
 namespace rawspeed {
 
-struct PanasonicDecompressorV5::CompressionDsc {
+struct PanasonicDecompressorV5::PacketDsc {
   int bps;
   int pixelsPerPacket;
 
-  constexpr CompressionDsc();
-  constexpr CompressionDsc(int bps_, int pixelsPerPacket_)
-      : bps(bps_), pixelsPerPacket(pixelsPerPacket_) {}
+  constexpr PacketDsc();
+  explicit constexpr PacketDsc(int bps_)
+      : bps(bps_),
+        pixelsPerPacket(PanasonicDecompressorV5::bitsPerPacket / bps) {
+    // NOTE: the division is truncating. There may be some padding bits left.
+  }
 };
 
-static constexpr auto TwelveBit =
-    PanasonicDecompressorV5::CompressionDsc(/*bps=*/12, /*pixelsPerPacket=*/10);
-static constexpr auto FourteenBit =
-    PanasonicDecompressorV5::CompressionDsc(/*bps=*/14, /*pixelsPerPacket=*/9);
+constexpr auto PanasonicDecompressorV5::TwelveBitPacket =
+    PanasonicDecompressorV5::PacketDsc(/*bps=*/12);
+constexpr auto PanasonicDecompressorV5::FourteenBitPacket =
+    PanasonicDecompressorV5::PacketDsc(/*bps=*/14);
 
 PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
                                                  const ByteStream& input_,
@@ -59,13 +62,13 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
 
-  const CompressionDsc* dsc = nullptr;
+  const PacketDsc* dsc = nullptr;
   switch (bps) {
   case 12:
-    dsc = &TwelveBit;
+    dsc = &TwelveBitPacket;
     break;
   case 14:
-    dsc = &FourteenBit;
+    dsc = &FourteenBitPacket;
     break;
   default:
     ThrowRDE("Unsupported bps: %u", bps);
@@ -98,7 +101,7 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
   chopInputIntoBlocks(*dsc);
 }
 
-void PanasonicDecompressorV5::chopInputIntoBlocks(const CompressionDsc& dsc) {
+void PanasonicDecompressorV5::chopInputIntoBlocks(const PacketDsc& dsc) {
   auto pixelToCoordinate = [width = mRaw->dim.x](unsigned pixel) -> iPoint2D {
     return iPoint2D(pixel % width, pixel / width);
   };
@@ -156,58 +159,45 @@ class PanasonicDecompressorV5::ProxyStream {
 
     // And reset the clock.
     input = ByteStream(DataBuffer(Buffer(buf.data(), buf.size())));
+    // input.setByteOrder(Endianness::big); // does not seem to matter?!
   }
 
 public:
   explicit ProxyStream(ByteStream block_) : block(std::move(block_)) {}
 
-  const uchar8* getData() {
+  ByteStream& getStream() {
     parseBlock();
-    return input.getData(BlockSize);
+    return input;
   }
 };
 
-template <>
-void PanasonicDecompressorV5::processPixelPacket<TwelveBit>(
-    ushort16* dest, const uchar8* bytes) const {
-  *dest++ = ((bytes[1] & 0xF) << 8) + bytes[0];
-  *dest++ = 16 * bytes[2] + (bytes[1] >> 4);
+template <const PanasonicDecompressorV5::PacketDsc& dsc>
+void PanasonicDecompressorV5::processPixelPacket(BitPumpLSB* bs,
+                                                 ushort16* dest) const {
+  static_assert(dsc.pixelsPerPacket > 0, "dsc should be compile-time const");
+  static_assert(dsc.bps > 0 && dsc.bps <= 16, "");
 
-  *dest++ = ((bytes[4] & 0xF) << 8) + bytes[3];
-  *dest++ = 16 * bytes[5] + (bytes[4] >> 4);
+  assert(bs->getFillLevel() == 0);
 
-  *dest++ = ((bytes[7] & 0xF) << 8) + bytes[6];
-  *dest++ = 16 * bytes[8] + (bytes[7] >> 4);
+  const ushort16* const endDest = dest + dsc.pixelsPerPacket;
+  for (; dest != endDest;) {
+    bs->fill();
+    for (; bs->getFillLevel() >= dsc.bps; dest++) {
+      assert(dest != endDest);
 
-  *dest++ = ((bytes[10] & 0xF) << 8) + bytes[9];
-  *dest++ = 16 * bytes[11] + (bytes[10] >> 4);
-
-  *dest++ = ((bytes[13] & 0xF) << 8) + bytes[12];
-  *dest++ = 16 * bytes[14] + (bytes[13] >> 4);
+      *dest = bs->getBitsNoFill(dsc.bps);
+    }
+  }
+  bs->skipBitsNoFill(bs->getFillLevel()); // get rid of padding.
 }
 
-template <>
-void PanasonicDecompressorV5::processPixelPacket<FourteenBit>(
-    ushort16* dest, const uchar8* bytes) const {
-  *dest++ = bytes[0] + ((bytes[1] & 0x3F) << 8);
-  *dest++ = (bytes[1] >> 6) + 4 * (bytes[2]) + ((bytes[3] & 0xF) << 10);
-  *dest++ = (bytes[3] >> 4) + 16 * (bytes[4]) + ((bytes[5] & 3) << 12);
-  *dest++ = ((bytes[5] & 0xFC) >> 2) + (bytes[6] << 6);
-
-  *dest++ = bytes[7] + ((bytes[8] & 0x3F) << 8);
-  *dest++ = (bytes[8] >> 6) + 4 * bytes[9] + ((bytes[10] & 0xF) << 10);
-  *dest++ = (bytes[10] >> 4) + 16 * bytes[11] + ((bytes[12] & 3) << 12);
-  *dest++ = ((bytes[12] & 0xFC) >> 2) + (bytes[13] << 6);
-
-  *dest++ = bytes[14] + ((bytes[15] & 0x3F) << 8);
-}
-
-template <const PanasonicDecompressorV5::CompressionDsc& dsc>
+template <const PanasonicDecompressorV5::PacketDsc& dsc>
 void PanasonicDecompressorV5::processBlock(const Block& block) const {
+  static_assert(dsc.pixelsPerPacket > 0, "dsc should be compile-time const");
   static_assert(BlockSize % bytesPerPacket == 0, "");
 
   ProxyStream proxy(block.bs);
-  const uchar8* bytes = proxy.getData();
+  BitPumpLSB bs(proxy.getStream());
 
   for (int y = block.beginCoord.y; y <= block.endCoord.y; y++) {
     int x = 0;
@@ -226,16 +216,15 @@ void PanasonicDecompressorV5::processBlock(const Block& block) const {
     assert(endx % dsc.pixelsPerPacket == 0);
 
     for (; x < endx;) {
-      processPixelPacket<dsc>(dest, bytes);
+      processPixelPacket<dsc>(&bs, dest);
 
       x += dsc.pixelsPerPacket;
       dest += dsc.pixelsPerPacket;
-      bytes += bytesPerPacket;
     }
   }
 }
 
-template <const PanasonicDecompressorV5::CompressionDsc& dsc>
+template <const PanasonicDecompressorV5::PacketDsc& dsc>
 void PanasonicDecompressorV5::decompressThreadedInternal(
     const RawDecompressorThread* t) const {
   assert(t->start < t->end);
@@ -248,10 +237,10 @@ void PanasonicDecompressorV5::decompressThreaded(
     const RawDecompressorThread* t) const {
   switch (bps) {
   case 12:
-    decompressThreadedInternal<TwelveBit>(t);
+    decompressThreadedInternal<TwelveBitPacket>(t);
     break;
   case 14:
-    decompressThreadedInternal<FourteenBit>(t);
+    decompressThreadedInternal<FourteenBitPacket>(t);
     break;
   default:
     __builtin_unreachable();
