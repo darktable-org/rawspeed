@@ -46,7 +46,7 @@ public:
   void checkSupportInternal(const CameraMetaData* meta) override;
 
 protected:
-  int getDecoderVersion() const override { return 2; }
+  int getDecoderVersion() const override { return 3; }
 
 private:
   std::string guessMode();
