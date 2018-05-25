@@ -72,15 +72,29 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
     ThrowRDE("Unsupported bps: %u", bps);
   }
 
-  if (mRaw->dim.x % dsc->pixelsPerPacket != 0)
-    ThrowRDE("Image width is not a multiple of pixels-per-packet");
+  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % dsc->pixelsPerPacket != 0) {
+    ThrowRDE("Unexpected image dimensions found: (%i; %i)", mRaw->dim.x,
+             mRaw->dim.y);
+  }
 
+  // How many pixel packets does the specified pixel count require?
   assert(mRaw->dim.area() % dsc->pixelsPerPacket == 0);
   const auto numPackets = mRaw->dim.area() / dsc->pixelsPerPacket;
-  const auto packetsTotalSize = numPackets * bytesPerPacket;
-  numBlocks = roundUpDivision(packetsTotalSize, BlockSize);
-  const auto blocksTotalSize = numBlocks * BlockSize;
-  input = input_.peekStream(blocksTotalSize);
+  assert(numPackets > 0);
+
+  // And how many blocks that would be? Last block may not be full, pad it.
+  numBlocks = roundUpDivision(numPackets, PacketsPerBlock);
+  assert(numBlocks > 0);
+
+  // How many full blocks does the input contain? This is truncating division.
+  const auto haveBlocks = input_.getRemainSize() / BlockSize;
+
+  // Does the input contain enough blocks?
+  if (haveBlocks < numBlocks)
+    ThrowRDE("Unsufficient count of input blocks for a given image");
+
+  // We only want those blocks we need, no extras.
+  input = input_.peekStream(numBlocks, BlockSize);
 
   chopInputIntoBlocks(*dsc);
 }

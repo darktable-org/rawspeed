@@ -62,7 +62,7 @@ private:
 
   const uint32 bps;
 
-  uint32 numBlocks;
+  size_t numBlocks;
 
   struct Block {
     ByteStream bs;
