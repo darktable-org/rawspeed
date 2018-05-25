@@ -20,6 +20,7 @@ set(DECOMPRESSORS
   "NikonDecompressor"
   "OlympusDecompressor"
   "PanasonicDecompressor"
+  "PanasonicDecompressorV5"
   "PentaxDecompressor"
   "SamsungV0Decompressor"
   "SamsungV1Decompressor"
