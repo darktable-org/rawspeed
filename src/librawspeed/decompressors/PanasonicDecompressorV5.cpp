@@ -55,7 +55,7 @@ static constexpr auto FourteenBit =
 PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
                                                  const ByteStream& input_,
                                                  uint32 bps_)
-    : mRaw(img), bps(bps_) {
+    : AbstractParallelizedDecompressor(img), bps(bps_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
@@ -240,23 +240,31 @@ void PanasonicDecompressorV5::processBlock(const Block& block) const {
 }
 
 template <const PanasonicDecompressorV5::CompressionDsc& dsc>
-void PanasonicDecompressorV5::decompressInternal() const {
-  assert(!blocks.empty());
-  for (const Block& block : blocks)
-    processBlock<dsc>(block);
+void PanasonicDecompressorV5::decompressThreadedInternal(
+    const RawDecompressorThread* t) const {
+  assert(t->start < t->end);
+  assert(t->end <= blocks.size());
+  for (size_t i = t->start; i < t->end; i++)
+    processBlock<dsc>(blocks[i]);
 }
 
-void PanasonicDecompressorV5::decompress() const {
+void PanasonicDecompressorV5::decompressThreaded(
+    const RawDecompressorThread* t) const {
   switch (bps) {
   case 12:
-    decompressInternal<TwelveBit>();
+    decompressThreadedInternal<TwelveBit>(t);
     break;
   case 14:
-    decompressInternal<FourteenBit>();
+    decompressThreadedInternal<FourteenBit>(t);
     break;
   default:
     __builtin_unreachable();
   }
+}
+
+void PanasonicDecompressorV5::decompress() const {
+  assert(blocks.size() == numBlocks);
+  startThreading(blocks.size());
 }
 
 } // namespace rawspeed

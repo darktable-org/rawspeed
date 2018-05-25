@@ -31,13 +31,11 @@ namespace rawspeed {
 
 class RawImage;
 
-class PanasonicDecompressorV5 final : public AbstractDecompressor {
+class PanasonicDecompressorV5 final : public AbstractParallelizedDecompressor {
 public:
   struct CompressionDsc;
 
 private:
-  RawImage mRaw;
-
   // The RW2 raw image buffer consists of individual blocks,
   // each one BlockSize bytes in size.
   static constexpr uint32 BlockSize = 0x4000;
@@ -88,13 +86,16 @@ private:
   template <const CompressionDsc& dsc>
   void processBlock(const Block& block) const;
 
-  template <const CompressionDsc& dsc> void decompressInternal() const;
+  template <const CompressionDsc& dsc>
+  void decompressThreadedInternal(const RawDecompressorThread* t) const;
+
+  void decompressThreaded(const RawDecompressorThread* t) const final;
 
 public:
   PanasonicDecompressorV5(const RawImage& img, const ByteStream& input_,
                           uint32 bps_);
 
-  void decompress() const;
+  void decompress() const final;
 };
 
 } // namespace rawspeed
