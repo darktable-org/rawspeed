@@ -32,7 +32,6 @@
 #include <cassert>                        // for assert
 #include <cstring>                        // for memcpy
 #include <iterator>                       // for back_inserter
-#include <memory>                         // for uninitialized_copy
 #include <utility>                        // for move
 #include <vector>                         // for vector
 
@@ -145,17 +144,14 @@ class PanasonicDecompressorV5::ProxyStream {
     Buffer SecondSection = block.getBuffer(block.getRemainSize());
     assert(FirstSection.getSize() < SecondSection.getSize());
 
-    buf.resize(BlockSize);
+    buf.reserve(BlockSize);
 
     // First copy the second section. This makes it the first section.
-    auto bufDst = buf.begin();
-    bufDst = std::uninitialized_copy(SecondSection.begin(), SecondSection.end(),
-                                     bufDst);
+    buf.insert(buf.end(), SecondSection.begin(), SecondSection.end());
     // Now append the original 1'st section right after the new 1'st section.
-    bufDst = std::uninitialized_copy(FirstSection.begin(), FirstSection.end(),
-                                     bufDst);
-    assert(buf.end() == bufDst);
+    buf.insert(buf.end(), FirstSection.begin(), FirstSection.end());
 
+    assert(buf.size() == BlockSize);
     assert(block.getRemainSize() == 0);
 
     // And reset the clock.
