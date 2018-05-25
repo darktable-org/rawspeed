@@ -24,6 +24,7 @@
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/PanasonicDecompressor.h"    // for PanasonicDecompr...
+#include "decompressors/PanasonicDecompressorV5.h"  // for PanasonicDecompr...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
@@ -77,7 +78,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
     if (offsets->count != 1) {
       ThrowRDE("Multiple Strips found: %u", offsets->count);
     }
-    offset = offsets->getU32();
+    uint32 offset = offsets->getU32();
     if (!mFile->isValid(offset))
       ThrowRDE("Invalid image data offset, cannot decode.");
 
@@ -96,7 +97,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       mRaw->createData();
       u.decode12BitRaw<Endianness::little, false, true>(width, height);
     } else {
-      section_split_offset = 0;
+      uint32 section_split_offset = 0;
       PanasonicDecompressor p(mRaw, ByteStream(mFile, offset),
                               hints.has("zero_is_not_bad"),
                               section_split_offset);
@@ -112,16 +113,29 @@ RawImage Rw2Decoder::decodeRawInternal() {
       ThrowRDE("Multiple Strips found: %u", offsets->count);
     }
 
-    offset = offsets->getU32();
+    uint32 offset = offsets->getU32();
 
-    if (!mFile->isValid(offset))
-      ThrowRDE("Invalid image data offset, cannot decode.");
+    ByteStream bs(mFile, offset);
 
-    section_split_offset = 0x2008;
-    PanasonicDecompressor p(mRaw, ByteStream(mFile, offset),
-                            hints.has("zero_is_not_bad"), section_split_offset);
-    mRaw->createData();
-    p.decompress();
+    bool v5Processing = raw->hasEntry(PANASONIC_RAWFORMAT) &&
+                        raw->getEntry(PANASONIC_RAWFORMAT)->getU16() == 5;
+
+    rawspeed::ushort16 bitsPerSample = 12;
+    if (raw->hasEntry(PANASONIC_BITSPERSAMPLE)) {
+      bitsPerSample = raw->getEntry(PANASONIC_BITSPERSAMPLE)->getU16();
+    }
+
+    if (v5Processing) {
+      PanasonicDecompressorV5 v5(mRaw, bs, bitsPerSample);
+      mRaw->createData();
+      v5.decompress();
+    } else {
+      uint32 section_split_offset = 0x2008;
+      PanasonicDecompressor p(mRaw, bs, hints.has("zero_is_not_bad"),
+                              section_split_offset);
+      mRaw->createData();
+      p.decompress();
+    }
   }
 
   return mRaw;

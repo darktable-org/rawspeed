@@ -160,6 +160,8 @@ public:
     return pos - (cache.fillLevel >> 3);
   }
 
+  inline size_type getFillLevel() const { return cache.fillLevel; }
+
   // rewinds to the beginning of the buffer.
   void resetBufferPosition() {
     pos = 0;

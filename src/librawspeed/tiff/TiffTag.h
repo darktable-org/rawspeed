@@ -35,6 +35,8 @@ enum TiffTag {
   PANASONIC_ISO_SPEED = 23,
   NEWSUBFILETYPE                  = 0x00FE,
   SUBFILETYPE                     = 0x00FF,
+  PANASONIC_BITSPERSAMPLE         = 0xa,
+  PANASONIC_RAWFORMAT             = 0x2d,
   MAKERNOTE_ALT                   = 0x2e,
 
   IMAGEWIDTH    = 0x0100,

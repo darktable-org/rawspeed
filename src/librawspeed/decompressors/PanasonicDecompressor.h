@@ -38,8 +38,8 @@ class PanasonicDecompressor final : public AbstractParallelizedDecompressor {
   bool zero_is_bad;
 
   // The RW2 raw image buffer is split into sections of BufSize bytes.
-  // If section_split_offset is 0, then last section is not neccesarily full.
-  // If section_split_offset is not 0, then each section has two parts:
+  // If section_split_offset is 0, then the last section is not neccesarily
+  // full. If section_split_offset is not 0, then each section has two parts:
   //     bytes: [0..section_split_offset-1][section_split_offset..BufSize-1]
   //     pixels: [a..b][0..a-1]
   //   I.e. these two parts need to be swapped around.
