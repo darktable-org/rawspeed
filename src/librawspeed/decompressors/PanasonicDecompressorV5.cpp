@@ -49,10 +49,12 @@ struct PanasonicDecompressorV5::PacketDsc {
   }
 };
 
-constexpr auto PanasonicDecompressorV5::TwelveBitPacket =
-    PanasonicDecompressorV5::PacketDsc(/*bps=*/12);
-constexpr auto PanasonicDecompressorV5::FourteenBitPacket =
-    PanasonicDecompressorV5::PacketDsc(/*bps=*/14);
+constexpr PanasonicDecompressorV5::PacketDsc
+    PanasonicDecompressorV5::TwelveBitPacket =
+        PanasonicDecompressorV5::PacketDsc(/*bps=*/12);
+constexpr PanasonicDecompressorV5::PacketDsc
+    PanasonicDecompressorV5::FourteenBitPacket =
+        PanasonicDecompressorV5::PacketDsc(/*bps=*/14);
 
 PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
                                                  const ByteStream& input_,
