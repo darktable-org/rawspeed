@@ -20,10 +20,14 @@
 
 #pragma once
 
+// IWYU pragma: begin_exports
+
 #include "decompressors/HuffmanTableLUT.h" // for HuffmanTableLUT
 // #include "decompressors/HuffmanTableLookup.h" // for HuffmanTableLookup
 // #include "decompressors/HuffmanTableTree.h" // for HuffmanTableTree
 // #include "decompressors/HuffmanTableVector.h" // for HuffmanTableVector
+
+// IWYU pragma: end_exports
 
 namespace rawspeed {
 

@@ -21,17 +21,13 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for ushort16, uchar8, int32
+#include "common/Common.h"                      // for uint32, ushort16
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
 #include "io/BitStream.h"                       // for BitStreamTraits
-#include "io/Buffer.h"                          // for Buffer
-#include <algorithm>                            // for copy
 #include <cassert>                              // for assert
-#include <cstddef>                              // for size_t
-#include <iterator>                             // for distance
-#include <numeric>                              // for accumulate
-#include <vector>                               // for vector, allocator, ...
+#include <memory>                               // for allocator_traits<>::...
+#include <vector>                               // for vector
 
 /*
  * The following code is inspired by the IJG JPEG library.

@@ -22,12 +22,11 @@
 #pragma once
 
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
-#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable, ...
+#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
 #include "io/BitStream.h"                       // for BitStreamTraits
-#include <algorithm>                            // for accumulate
 #include <cassert>                              // for assert
-#include <utility>                              // for pair, make_pair
-#include <vector>                               // for vector, allocator, ...
+#include <utility>                              // for make_pair, pair
+#include <vector>                               // for vector
 
 namespace rawspeed {
 

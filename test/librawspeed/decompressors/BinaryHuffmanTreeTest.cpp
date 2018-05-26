@@ -18,8 +18,12 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/BinaryHuffmanTree.h" // for BinaryHuffmanTree
-#include <gtest/gtest.h> // for AssertionResult, DeathTest, Test, AssertHe...
+#include "decompressors/BinaryHuffmanTree.h" // for BinaryHuffmanTree, Bina...
+#include <cstdlib>                           // for exit
+#include <gtest/gtest.h>                     // for AssertionResult, Message
+#include <initializer_list>                  // for initializer_list
+#include <memory>                            // for unique_ptr, make_unique
+#include <vector>                            // for vector
 
 using rawspeed::BinaryHuffmanTree;
 

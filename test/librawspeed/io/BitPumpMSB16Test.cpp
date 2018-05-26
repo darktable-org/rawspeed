@@ -19,14 +19,17 @@
 */
 
 #include "io/BitPumpMSB16.h" // for BitPumpMSB16
-#include "common/Common.h"   // for uchar8
-#include "io/BitPumpTest.h"  // for BitPumpTest
+#include "common/Common.h"   // for uchar8, uint32
+#include "io/BitPumpTest.h"  // for Pattern, (anonymous), GenOnesBE, BitPum...
 #include <array>             // for array
-#include <gtest/gtest.h>     // for Message, AssertionResult, ASSERT_PRED_FOR...
+#include <gtest/gtest.h>     // for INSTANTIATE_TYPED_TEST_CASE_P, Types
 
 using rawspeed::BitPumpMSB16;
 
 namespace rawspeed_test {
+
+struct InvOnesTag;
+struct OnesTag;
 
 template <>
 const std::array<rawspeed::uchar8, 4> Pattern<BitPumpMSB16, OnesTag>::Data = {

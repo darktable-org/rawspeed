@@ -20,9 +20,10 @@
 
 #pragma once
 
-#include <cassert> // for assert
-#include <memory>  // for unique_ptr
-#include <vector>  // for vector
+#include <cassert>          // for assert
+#include <initializer_list> // IWYU pragma: keep
+#include <memory>           // for unique_ptr
+#include <vector>           // for vector
 
 namespace rawspeed {
 

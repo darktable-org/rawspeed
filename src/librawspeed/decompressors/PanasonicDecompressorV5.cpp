@@ -21,17 +21,15 @@
 */
 
 #include "decompressors/PanasonicDecompressorV5.h"
-#include "common/Mutex.h"                 // for MutexLocker
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpLSB.h"                // for BitPumpLSB
-#include <algorithm>                      // for min
-#include <algorithm>                      // for generate_n, fill_n
-#include <array>                          // for array
+#include "io/Buffer.h"                    // for Buffer, DataBuffer
+#include <algorithm>                      // for generate_n
 #include <cassert>                        // for assert
-#include <cstring>                        // for memcpy
-#include <iterator>                       // for back_inserter
+#include <iterator>                       // for back_insert_iterator, back...
+#include <memory>                         // for allocator_traits<>::value_...
 #include <utility>                        // for move
 #include <vector>                         // for vector
 

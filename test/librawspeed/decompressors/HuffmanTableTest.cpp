@@ -18,17 +18,21 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "common/Common.h"                // for uchar8
-#include "decoders/RawDecoderException.h" // for RawDecoderException
-#include "io/BitPumpMSB.h"                // for BitPumpMSB
-#include "io/BitStream.h"                 // for BitStream
-#include "io/Buffer.h"                    // for Buffer
-#include "io/ByteStream.h"                // for ByteStream
-#include "io/Endianness.h"                // for Endianness::little
-#include <array>                          // for array
-#include <gtest/gtest.h>                  // for ASSERT_EQ
-#include <vector>                         // for vector
+#include "decompressors/HuffmanTable.h" // for HuffmanTableLUT, HuffmanTable
+#include "common/Common.h"              // for uchar8
+#include "io/BitPumpMSB.h"              // for BitPumpMSB, BitStream<>::fil...
+#include "io/Buffer.h"                  // for Buffer, DataBuffer
+#include "io/ByteStream.h"              // for ByteStream
+#include "io/Endianness.h"              // for Endianness, Endianness::little
+#include <array>                        // for array
+#include <gtest/gtest.h>                // for Test, Message, TestPartResult
+#include <initializer_list>             // for initializer_list<>::const_it...
+#include <utility>                      // for move
+#include <vector>                       // for vector
+
+namespace rawspeed {
+class RawDecoderException;
+}
 
 using rawspeed::BitPumpMSB;
 using rawspeed::Buffer;

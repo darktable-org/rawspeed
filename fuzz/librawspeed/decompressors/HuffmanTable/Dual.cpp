@@ -39,18 +39,17 @@
 #include "decompressors/HuffmanTableTree.h"    // IWYU pragma: keep
 #include "decompressors/HuffmanTableVector.h"  // IWYU pragma: keep
 #include "io/BitPumpJPEG.h"                    // IWYU pragma: keep
-#include "io/BitPumpLSB.h"                     // IWYU pragma: keep
 #include "io/BitPumpMSB.h"                     // IWYU pragma: keep
-#include "io/BitPumpMSB16.h"                   // IWYU pragma: keep
 #include "io/BitPumpMSB32.h"                   // IWYU pragma: keep
 #include "io/BitStream.h"                      // for BitStream
 #include "io/Buffer.h"                         // for Buffer, DataBuffer
 #include "io/ByteStream.h"                     // for ByteStream
-#include "io/Endianness.h"                     // for Endianness
+#include "io/Endianness.h"                     // for Endianness, Endiannes...
 #include "io/IOException.h"                    // for IOException
 #include <cassert>                             // for assert
 #include <cstdint>                             // for uint8_t
 #include <cstdio>                              // for size_t
+#include <initializer_list>                    // IWYU pragma: keep
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 

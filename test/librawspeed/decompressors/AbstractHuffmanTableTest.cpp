@@ -18,15 +18,18 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
-#include "common/Common.h"                      // for uchar8
-#include "decoders/RawDecoderException.h"       // for RawDecoderException
+#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
+#include "common/Common.h"                      // for uchar8, uint32
 #include "io/Buffer.h"                          // for Buffer
-#include <algorithm>                            // for max
-#include <array>                                // for array
+#include <algorithm>                            // for min
 #include <bitset>                               // for bitset
-#include <gtest/gtest.h>                        // for AssertionResult, ...
-#include <utility>                              // for make_pair, pair, move
+#include <cassert>                              // for assert
+#include <cstdlib>                              // for exit
+#include <gtest/gtest.h>                        // for make_tuple, Message
+#include <initializer_list>                     // for initializer_list<>::...
+#include <ostream>                              // for operator<<, ostream
+#include <string>                               // for basic_string, operat...
+#include <utility>                              // for move
 #include <vector>                               // for vector
 
 using rawspeed::AbstractHuffmanTable;
@@ -35,6 +38,8 @@ using rawspeed::uchar8;
 using std::make_tuple;
 
 namespace rawspeed {
+
+class RawDecoderException;
 
 bool operator!=(const AbstractHuffmanTable& lhs,
                 const AbstractHuffmanTable& rhs) {

@@ -18,15 +18,15 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "io/BitPumpJPEG.h" // for BitPumpJPEG
-#include "common/Common.h"  // for uchar8
-#include "io/BitPumpTest.h" // for BitPumpTest
-#include "io/BitStream.h"   // for BitStream
-#include "io/Buffer.h"      // for Buffer
+#include "io/BitPumpJPEG.h" // for BitPumpJPEG, BitStream<>::fillCache
+#include "common/Common.h"  // for uchar8, uint32
+#include "io/BitPumpTest.h" // for Endianness, Pattern, (anonymous), Buffer
+#include "io/Buffer.h"      // for Buffer, DataBuffer
 #include "io/ByteStream.h"  // for ByteStream
-#include "io/Endianness.h"  // for getHostEndianness, Endianness::big, Endia...
+#include "io/Endianness.h"  // for Endianness, Endianness::big, Endianness:...
 #include <array>            // for array
-#include <gtest/gtest.h>    // for Message, AssertionResult, ASSERT_PRED_FOR...
+#include <gtest/gtest.h>    // for Test, Message, TestInfo (ptr only), ASSE...
+#include <initializer_list> // for initializer_list
 
 using rawspeed::BitPumpJPEG;
 using rawspeed::Buffer;
@@ -35,6 +35,10 @@ using rawspeed::DataBuffer;
 using rawspeed::Endianness;
 
 namespace rawspeed_test {
+
+struct InvOnesTag;
+struct OnesTag;
+struct SaturatedTag;
 
 template <>
 const std::array<rawspeed::uchar8, 4> Pattern<BitPumpJPEG, OnesTag>::Data = {

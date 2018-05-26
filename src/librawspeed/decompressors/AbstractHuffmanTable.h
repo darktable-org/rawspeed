@@ -21,15 +21,16 @@
 
 #pragma once
 
-#include "common/Common.h"                // for ushort16, uchar8, int32
+#include "common/Common.h"                // for uchar8, uint32, ushort16
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/Buffer.h"                    // for Buffer
-#include <algorithm>                      // for copy, min, adjacent_find
+#include <algorithm>                      // for copy, adjacent_find, max_e...
 #include <cassert>                        // for assert
 #include <cstddef>                        // for size_t
-#include <iterator>                       // for distance
+#include <functional>                     // for less, less_equal
+#include <iterator>                       // for back_insert_iterator, back...
 #include <numeric>                        // for accumulate
-#include <vector>                         // for vector, allocator, operator==
+#include <vector>                         // for vector, operator==
 
 namespace rawspeed {
 

@@ -20,21 +20,20 @@
 
 #include "RawSpeed-API.h"
 
-#include "md5.h"       // for md5_hash
+#include "md5.h"       // for md5_state, md5_hash, hash_to_string, md5_init
 #include <array>       // for array
 #include <cassert>     // for assert
-#include <chrono>      // for milliseconds, steady_clock, duration, dur...
+#include <chrono>      // for milliseconds, steady_clock, duration_cast
 #include <cstdarg>     // for va_end, va_list, va_start
 #include <cstdint>     // for uint8_t
-#include <cstdio>      // for snprintf, size_t, fclose, fopen, fprintf
+#include <cstdio>      // for fprintf, fclose, size_t, fopen, ftell, fwrite
 #include <cstdlib>     // for system
 #include <fstream>     // IWYU pragma: keep
-#include <iostream>    // for cout, cerr, left, internal
+#include <iostream>    // for cout, left, cerr, internal
 #include <map>         // for map
-#include <memory>      // for unique_ptr, allocator
+#include <memory>      // for allocator, unique_ptr
 #include <sstream>     // IWYU pragma: keep
-#include <string>      // for string, char_traits, operator+, operator<<
-#include <type_traits> // for enable_if<>::type
+#include <string>      // for string, operator+, operator<<, char_traits
 #include <utility>     // for pair
 #include <vector>      // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
