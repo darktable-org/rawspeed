@@ -32,7 +32,16 @@ class RawImage;
 class PanasonicDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
 
-  static constexpr uint32 BufSize = 0x4000;
+  static constexpr uint32 BlockSize = 0x4000;
+
+  static constexpr int PixelsPerPacket = 14;
+
+  static constexpr uint32 BytesPerPacket = 16;
+
+  static constexpr uint32 PacketsPerBlock = BlockSize / BytesPerPacket;
+
+  int packetsPerRow;
+
   struct PanaBitpump;
 
   ByteStream input;
@@ -46,8 +55,8 @@ class PanasonicDecompressor final : public AbstractDecompressor {
   //   I.e. these two parts need to be swapped around.
   uint32 section_split_offset;
 
-  void processBlock(PanaBitpump* bits, int y, ushort16* dest, int block,
-                    std::vector<uint32>* zero_pos) const;
+  void processPacket(PanaBitpump* bits, int y, ushort16* dest, int block,
+                     std::vector<uint32>* zero_pos) const;
 
 public:
   PanasonicDecompressor(const RawImage& img, const ByteStream& input_,

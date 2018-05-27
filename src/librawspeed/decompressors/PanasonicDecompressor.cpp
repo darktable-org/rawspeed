@@ -44,25 +44,18 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
 
-  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 14 != 0) {
+  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % PixelsPerPacket != 0) {
     ThrowRDE("Unexpected image dimensions found: (%i; %i)", mRaw->dim.x,
              mRaw->dim.y);
   }
 
-  /*
-   * Normally, we would check the image dimensions against some hardcoded
-   * threshold. That is being done as poor man's attempt to catch
-   * obviously-invalid raws, and avoid OOM's during fuzzing. However, there is
-   * a better solution - actually check the size of input buffer to try and
-   * guess whether the image size is valid or not. And in this case, we can do
-   * that, because the compression rate is static and known.
-   */
-  // if (width > 5488 || height > 3912)
-  //   ThrowRDE("Too large image size: (%u; %u)", width, height);
+  if (BlockSize < section_split_offset)
+    ThrowRDE("Bad section_split_offset: %u, less than BlockSize (%u)",
+             section_split_offset, BlockSize);
 
-  if (BufSize < section_split_offset)
-    ThrowRDE("Bad section_split_offset: %u, less than BufSize (%u)",
-             section_split_offset, BufSize);
+  assert(mRaw->dim.x % PixelsPerPacket == 0);
+  packetsPerRow = mRaw->dim.x / PixelsPerPacket;
+  assert(packetsPerRow > 0);
 
   // Naive count of bytes that given pixel count requires.
   // Do division first, because we know the remainder is always zero,
@@ -71,11 +64,11 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
   const auto rawBytesNormal = (mRaw->dim.area() / 7ULL) * 8ULL;
   // If section_split_offset is zero, then that we need to read the normal
   // amount of bytes. But if it is not, then we need to round up to multiple of
-  // BufSize, because of splitting&rotation of each BufSize's slice in half at
-  // section_split_offset bytes.
+  // BlockSize, because of splitting&rotation of each BlockSize's slice in half
+  // at section_split_offset bytes.
   const auto bufSize = section_split_offset == 0
                            ? rawBytesNormal
-                           : roundUp(rawBytesNormal, BufSize);
+                           : roundUp(rawBytesNormal, BlockSize);
   input = input_.peekStream(bufSize);
 }
 
@@ -89,7 +82,7 @@ struct PanasonicDecompressor::PanaBitpump {
       : input(std::move(input_)), section_split_offset(section_split_offset_) {
     // get one more byte, so the return statement of getBits does not have
     // to special case for accessing the last byte
-    buf.resize(BufSize + 1UL);
+    buf.resize(BlockSize + 1UL);
   }
 
   uint32 getBits(int nbits) {
@@ -98,9 +91,9 @@ struct PanasonicDecompressor::PanaBitpump {
        * part of the file. Since there is no chance of affecting output buffer
        * size we allow the decoder to decode this
        */
-      assert(BufSize >= section_split_offset);
+      assert(BlockSize >= section_split_offset);
       auto size =
-          std::min(input.getRemainSize(), BufSize - section_split_offset);
+          std::min(input.getRemainSize(), BlockSize - section_split_offset);
       memcpy(buf.data() + section_split_offset, input.getData(size), size);
 
       size = std::min(input.getRemainSize(), section_split_offset);
@@ -113,9 +106,9 @@ struct PanasonicDecompressor::PanaBitpump {
   }
 };
 
-void PanasonicDecompressor::processBlock(PanaBitpump* bits, int y,
-                                         ushort16* dest, int block,
-                                         std::vector<uint32>* zero_pos) const {
+void PanasonicDecompressor::processPacket(PanaBitpump* bits, int y,
+                                          ushort16* dest, int block,
+                                          std::vector<uint32>* zero_pos) const {
   int sh = 0;
 
   std::array<int, 2> pred;
@@ -126,7 +119,7 @@ void PanasonicDecompressor::processBlock(PanaBitpump* bits, int y,
 
   int u = 0;
 
-  for (int x = 0; x < 14; x++) {
+  for (int x = 0; x < PixelsPerPacket; x++) {
     const int c = x & 1;
 
     if (u == 2) {
@@ -151,7 +144,7 @@ void PanasonicDecompressor::processBlock(PanaBitpump* bits, int y,
     *dest = pred[c];
 
     if (zero_is_bad && 0 == pred[c])
-      zero_pos->push_back((y << 16) | (14 * block + x));
+      zero_pos->push_back((y << 16) | (PixelsPerPacket * block + x));
 
     u++;
     dest++;
@@ -161,17 +154,16 @@ void PanasonicDecompressor::processBlock(PanaBitpump* bits, int y,
 void PanasonicDecompressor::decompress() const {
   PanaBitpump bits(input, section_split_offset);
 
-  assert(mRaw->dim.x % 14 == 0);
-  const auto blocks = mRaw->dim.x / 14;
-
   std::vector<uint32> zero_pos;
   for (int y = 0; y < mRaw->dim.y; y++) {
     auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
 
-    for (int block = 0; block < blocks;) {
-      processBlock(&bits, y, dest, block, &zero_pos);
-      block++;
-      dest += 14;
+    assert(mRaw->dim.x % PixelsPerPacket == 0);
+    assert(mRaw->dim.x / PixelsPerPacket == packetsPerRow);
+    for (int packet = 0; packet < packetsPerRow;) {
+      processPacket(&bits, y, dest, packet, &zero_pos);
+      packet++;
+      dest += PixelsPerPacket;
     }
   }
 
