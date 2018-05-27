@@ -20,19 +20,20 @@
 
 #pragma once
 
-#include "common/Common.h"                                  // for uint32
-#include "decompressors/AbstractParallelizedDecompressor.h" // for Abstract...
-#include "io/ByteStream.h"                                  // for ByteStream
+#include "common/Common.h"                      // for uint32
+#include "common/RawImage.h"                    // for RawImage
+#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "io/ByteStream.h"                      // for ByteStream
 
 namespace rawspeed {
 
 class RawImage;
 
-class PanasonicDecompressor final : public AbstractParallelizedDecompressor {
+class PanasonicDecompressor final : public AbstractDecompressor {
+  RawImage mRaw;
+
   static constexpr uint32 BufSize = 0x4000;
   struct PanaBitpump;
-
-  void decompressThreaded(const RawDecompressorThread* t) const final;
 
   ByteStream input;
   bool zero_is_bad;
@@ -48,6 +49,8 @@ class PanasonicDecompressor final : public AbstractParallelizedDecompressor {
 public:
   PanasonicDecompressor(const RawImage& img, const ByteStream& input_,
                         bool zero_is_not_bad, uint32 section_split_offset_);
+
+  void decompress() const;
 };
 
 } // namespace rawspeed

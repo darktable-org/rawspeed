@@ -38,7 +38,7 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
                                              const ByteStream& input_,
                                              bool zero_is_not_bad,
                                              uint32 section_split_offset_)
-    : AbstractParallelizedDecompressor(img), zero_is_bad(!zero_is_not_bad),
+    : mRaw(img), zero_is_bad(!zero_is_not_bad),
       section_split_offset(section_split_offset_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
@@ -92,13 +92,6 @@ struct PanasonicDecompressor::PanaBitpump {
     buf.resize(BufSize + 1UL);
   }
 
-  void skipBytes(int bytes) {
-    int blocks = (bytes / BufSize) * BufSize;
-    input.skipBytes(blocks);
-    for (int i = blocks; i < bytes; i++)
-      (void)getBits(8);
-  }
-
   uint32 getBits(int nbits) {
     if (!vbits) {
       /* On truncated files this routine will just return for the truncated
@@ -120,18 +113,14 @@ struct PanasonicDecompressor::PanaBitpump {
   }
 };
 
-void PanasonicDecompressor::decompressThreaded(
-    const RawDecompressorThread* t) const {
+void PanasonicDecompressor::decompress() const {
   PanaBitpump bits(input, section_split_offset);
-
-  /* 9 + 1/7 bits per pixel */
-  bits.skipBytes(8 * mRaw->dim.x * t->start / 7);
 
   assert(mRaw->dim.x % 14 == 0);
   const auto blocks = mRaw->dim.x / 14;
 
   std::vector<uint32> zero_pos;
-  for (uint32 y = t->start; y < t->end; y++) {
+  for (int y = 0; y < mRaw->dim.y; y++) {
     int sh = 0;
 
     auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
