@@ -44,7 +44,7 @@ class PanasonicDecompressor final : public AbstractParallelizedDecompressor {
 
   static constexpr uint32 PixelsPerBlock = PixelsPerPacket * PacketsPerBlock;
 
-  struct PanaBitpump;
+  class ProxyStream;
 
   ByteStream input;
   bool zero_is_bad;
@@ -75,7 +75,7 @@ class PanasonicDecompressor final : public AbstractParallelizedDecompressor {
 
   void chopInputIntoBlocks();
 
-  void processPixelPacket(PanaBitpump* bits, int y, ushort16* dest, int xbegin,
+  void processPixelPacket(ProxyStream* bits, int y, ushort16* dest, int xbegin,
                           std::vector<uint32>* zero_pos) const;
 
   void processBlock(const Block& block, std::vector<uint32>* zero_pos) const;

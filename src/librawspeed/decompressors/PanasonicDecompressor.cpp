@@ -110,34 +110,45 @@ void PanasonicDecompressor::chopInputIntoBlocks() {
   blocks.back().endCoord.y -= 1;
 }
 
-struct PanasonicDecompressor::PanaBitpump {
-  ByteStream input;
+class PanasonicDecompressor::ProxyStream {
+  ByteStream block;
+  const uint32 section_split_offset;
   std::vector<uchar8> buf;
-  int vbits = 0;
-  uint32 section_split_offset;
 
-  PanaBitpump(ByteStream input_, int section_split_offset_)
-      : input(std::move(input_)), section_split_offset(section_split_offset_) {
+  int vbits = 0;
+
+  void parseBlock() {
+    assert(buf.empty());
+    assert(block.getRemainSize() <= BlockSize);
+    assert(section_split_offset <= BlockSize);
+
+    Buffer FirstSection = block.getBuffer(section_split_offset);
+    Buffer SecondSection = block.getBuffer(block.getRemainSize());
+    assert(FirstSection.getSize() < SecondSection.getSize());
+
     // get one more byte, so the return statement of getBits does not have
     // to special case for accessing the last byte
-    buf.resize(BlockSize + 1UL);
+    buf.reserve(BlockSize + 1UL);
+
+    // First copy the second section. This makes it the first section.
+    buf.insert(buf.end(), SecondSection.begin(), SecondSection.end());
+    // Now append the original 1'st section right after the new 1'st section.
+    buf.insert(buf.end(), FirstSection.begin(), FirstSection.end());
+
+    assert(block.getRemainSize() == 0);
+
+    // get one more byte, so the return statement of getBits does not have
+    // to special case for accessing the last byte
+    buf.emplace_back(0);
+  }
+
+public:
+  ProxyStream(ByteStream block_, int section_split_offset_)
+      : block(std::move(block_)), section_split_offset(section_split_offset_) {
+    parseBlock();
   }
 
   uint32 getBits(int nbits) {
-    if (!vbits) {
-      /* On truncated files this routine will just return for the truncated
-       * part of the file. Since there is no chance of affecting output buffer
-       * size we allow the decoder to decode this
-       */
-      assert(BlockSize >= section_split_offset);
-      auto size =
-          std::min(input.getRemainSize(), BlockSize - section_split_offset);
-      memcpy(buf.data() + section_split_offset, input.getData(size), size);
-
-      size = std::min(input.getRemainSize(), section_split_offset);
-      if (size != 0)
-        memcpy(buf.data(), input.getData(size), size);
-    }
     vbits = (vbits - nbits) & 0x1ffff;
     int byte = vbits >> 3 ^ 0x3ff0;
     return (buf[byte] | buf[byte + 1UL] << 8) >> (vbits & 7) & ~(-(1 << nbits));
@@ -145,7 +156,7 @@ struct PanasonicDecompressor::PanaBitpump {
 };
 
 void PanasonicDecompressor::processPixelPacket(
-    PanaBitpump* bits, int y, ushort16* dest, int xbegin,
+    ProxyStream* bits, int y, ushort16* dest, int xbegin,
     std::vector<uint32>* zero_pos) const {
   int sh = 0;
 
@@ -191,7 +202,7 @@ void PanasonicDecompressor::processPixelPacket(
 
 void PanasonicDecompressor::processBlock(const Block& block,
                                          std::vector<uint32>* zero_pos) const {
-  PanaBitpump bits(block.bs, section_split_offset);
+  ProxyStream bits(block.bs, section_split_offset);
 
   for (int y = block.beginCoord.y; y <= block.endCoord.y; y++) {
     int x = 0;
