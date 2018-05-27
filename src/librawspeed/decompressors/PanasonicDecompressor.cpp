@@ -121,10 +121,11 @@ void PanasonicDecompressor::decompress() const {
 
   std::vector<uint32> zero_pos;
   for (int y = 0; y < mRaw->dim.y; y++) {
-    int sh = 0;
-
     auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
+
     for (int block = 0; block < blocks; block++) {
+      int sh = 0;
+
       std::array<int, 2> pred;
       pred.fill(0);
 
