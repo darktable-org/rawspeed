@@ -34,6 +34,8 @@
 
 namespace rawspeed {
 
+constexpr uint32 PanasonicDecompressor::BlockSize;
+
 PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
                                              const ByteStream& input_,
                                              bool zero_is_not_bad,
@@ -53,23 +55,59 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
     ThrowRDE("Bad section_split_offset: %u, less than BlockSize (%u)",
              section_split_offset, BlockSize);
 
-  assert(mRaw->dim.x % PixelsPerPacket == 0);
-  packetsPerRow = mRaw->dim.x / PixelsPerPacket;
-  assert(packetsPerRow > 0);
-
   // Naive count of bytes that given pixel count requires.
-  // Do division first, because we know the remainder is always zero,
-  // and the next multiplication won't overflow.
-  assert(mRaw->dim.area() % 7ULL == 0ULL);
-  const auto rawBytesNormal = (mRaw->dim.area() / 7ULL) * 8ULL;
+  assert(mRaw->dim.area() % PixelsPerPacket == 0);
+  const auto bytesTotal = (mRaw->dim.area() / PixelsPerPacket) * BytesPerPacket;
+  assert(bytesTotal > 0);
+
   // If section_split_offset is zero, then that we need to read the normal
   // amount of bytes. But if it is not, then we need to round up to multiple of
   // BlockSize, because of splitting&rotation of each BlockSize's slice in half
   // at section_split_offset bytes.
-  const auto bufSize = section_split_offset == 0
-                           ? rawBytesNormal
-                           : roundUp(rawBytesNormal, BlockSize);
+  const auto bufSize =
+      section_split_offset == 0 ? bytesTotal : roundUp(bytesTotal, BlockSize);
   input = input_.peekStream(bufSize);
+
+  chopInputIntoBlocks();
+}
+
+void PanasonicDecompressor::chopInputIntoBlocks() {
+  auto pixelToCoordinate = [width = mRaw->dim.x](unsigned pixel) -> iPoint2D {
+    return iPoint2D(pixel % width, pixel / width);
+  };
+
+  // If section_split_offset == 0, last block may not be full.
+  const auto blocksTotal = roundUpDivision(input.getRemainSize(), BlockSize);
+  assert(blocksTotal > 0);
+  assert(blocksTotal * PixelsPerBlock >= mRaw->dim.area());
+  blocks.reserve(blocksTotal);
+
+  unsigned currPixel = 0;
+  std::generate_n(std::back_inserter(blocks), blocksTotal,
+                  [input = &input, &currPixel, pixelToCoordinate]() -> Block {
+                    assert(input->getRemainSize() != 0);
+                    const auto blockSize =
+                        std::min(input->getRemainSize(), BlockSize);
+                    assert(blockSize > 0);
+                    assert(blockSize % BytesPerPacket == 0);
+                    const auto packets = blockSize / BytesPerPacket;
+                    assert(packets > 0);
+                    const auto pixels = packets * PixelsPerPacket;
+                    assert(pixels > 0);
+
+                    ByteStream bs = input->getStream(blockSize);
+                    iPoint2D beginCoord = pixelToCoordinate(currPixel);
+                    currPixel += pixels;
+                    iPoint2D endCoord = pixelToCoordinate(currPixel);
+                    return {std::move(bs), beginCoord, endCoord};
+                  });
+  assert(blocks.size() == blocksTotal);
+  assert(currPixel >= mRaw->dim.area());
+  assert(input.getRemainSize() == 0);
+
+  // Clamp the end coordinate for the last block.
+  blocks.back().endCoord = mRaw->dim;
+  blocks.back().endCoord.y -= 1;
 }
 
 struct PanasonicDecompressor::PanaBitpump {
@@ -106,9 +144,9 @@ struct PanasonicDecompressor::PanaBitpump {
   }
 };
 
-void PanasonicDecompressor::processPacket(PanaBitpump* bits, int y,
-                                          ushort16* dest, int block,
-                                          std::vector<uint32>* zero_pos) const {
+void PanasonicDecompressor::processPixelPacket(
+    PanaBitpump* bits, int y, ushort16* dest, int xbegin,
+    std::vector<uint32>* zero_pos) const {
   int sh = 0;
 
   std::array<int, 2> pred;
@@ -119,8 +157,8 @@ void PanasonicDecompressor::processPacket(PanaBitpump* bits, int y,
 
   int u = 0;
 
-  for (int x = 0; x < PixelsPerPacket; x++) {
-    const int c = x & 1;
+  for (int p = 0; p < PixelsPerPacket; p++) {
+    const int c = p & 1;
 
     if (u == 2) {
       sh = 4 >> (3 - bits->getBits(2));
@@ -137,35 +175,55 @@ void PanasonicDecompressor::processPacket(PanaBitpump* bits, int y,
       }
     } else {
       nonz[c] = bits->getBits(8);
-      if (nonz[c] || x > 11)
+      if (nonz[c] || p > 11)
         pred[c] = nonz[c] << 4 | bits->getBits(4);
     }
 
     *dest = pred[c];
 
     if (zero_is_bad && 0 == pred[c])
-      zero_pos->push_back((y << 16) | (PixelsPerPacket * block + x));
+      zero_pos->push_back((y << 16) | (xbegin + p));
 
     u++;
     dest++;
   }
 }
 
-void PanasonicDecompressor::decompress() const {
-  PanaBitpump bits(input, section_split_offset);
+void PanasonicDecompressor::processBlock(const Block& block,
+                                         std::vector<uint32>* zero_pos) const {
+  PanaBitpump bits(block.bs, section_split_offset);
 
-  std::vector<uint32> zero_pos;
-  for (int y = 0; y < mRaw->dim.y; y++) {
-    auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
+  for (int y = block.beginCoord.y; y <= block.endCoord.y; y++) {
+    int x = 0;
+    // First row may not begin at the first column.
+    if (block.beginCoord.y == y)
+      x = block.beginCoord.x;
 
-    assert(mRaw->dim.x % PixelsPerPacket == 0);
-    assert(mRaw->dim.x / PixelsPerPacket == packetsPerRow);
-    for (int packet = 0; packet < packetsPerRow;) {
-      processPacket(&bits, y, dest, packet, &zero_pos);
-      packet++;
+    int endx = mRaw->dim.x;
+    // Last row may end before the last column.
+    if (block.endCoord.y == y)
+      endx = block.endCoord.x;
+
+    auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(x, y));
+
+    assert(x % PixelsPerPacket == 0);
+    assert(endx % PixelsPerPacket == 0);
+
+    for (; x < endx;) {
+      processPixelPacket(&bits, y, dest, x, zero_pos);
+
+      x += PixelsPerPacket;
       dest += PixelsPerPacket;
     }
   }
+}
+
+void PanasonicDecompressor::decompress() const {
+  std::vector<uint32> zero_pos;
+
+  assert(!blocks.empty());
+  for (const Block& block : blocks)
+    processBlock(block, &zero_pos);
 
   if (zero_is_bad && !zero_pos.empty()) {
     MutexLocker guard(&mRaw->mBadPixelMutex);

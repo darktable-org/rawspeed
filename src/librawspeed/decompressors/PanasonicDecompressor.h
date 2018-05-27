@@ -21,9 +21,13 @@
 #pragma once
 
 #include "common/Common.h"                      // for uint32
+#include "common/Point.h"                       // for iPoint2D
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/ByteStream.h"                      // for ByteStream
+#include <cstddef>                              // for size_t
+#include <utility>                              // for move
+#include <vector>                               // for vector
 
 namespace rawspeed {
 
@@ -40,7 +44,7 @@ class PanasonicDecompressor final : public AbstractDecompressor {
 
   static constexpr uint32 PacketsPerBlock = BlockSize / BytesPerPacket;
 
-  int packetsPerRow;
+  static constexpr uint32 PixelsPerBlock = PixelsPerPacket * PacketsPerBlock;
 
   struct PanaBitpump;
 
@@ -55,8 +59,28 @@ class PanasonicDecompressor final : public AbstractDecompressor {
   //   I.e. these two parts need to be swapped around.
   uint32 section_split_offset;
 
-  void processPacket(PanaBitpump* bits, int y, ushort16* dest, int block,
-                     std::vector<uint32>* zero_pos) const;
+  struct Block {
+    ByteStream bs;
+    iPoint2D beginCoord;
+    // The rectangle is an incorrect representation. All the rows
+    // between the first and last one span the entire width of the image.
+    iPoint2D endCoord;
+
+    Block() = default;
+    Block(ByteStream&& bs_, iPoint2D beginCoord_, iPoint2D endCoord_)
+        : bs(std::move(bs_)), beginCoord(beginCoord_), endCoord(endCoord_) {}
+  };
+
+  // If really wanted, this vector could be avoided,
+  // and each Block computed on-the-fly
+  std::vector<Block> blocks;
+
+  void chopInputIntoBlocks();
+
+  void processPixelPacket(PanaBitpump* bits, int y, ushort16* dest, int xbegin,
+                          std::vector<uint32>* zero_pos) const;
+
+  void processBlock(const Block& block, std::vector<uint32>* zero_pos) const;
 
 public:
   PanasonicDecompressor(const RawImage& img, const ByteStream& input_,
