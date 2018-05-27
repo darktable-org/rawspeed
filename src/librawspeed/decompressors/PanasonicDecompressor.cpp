@@ -113,6 +113,51 @@ struct PanasonicDecompressor::PanaBitpump {
   }
 };
 
+void PanasonicDecompressor::processBlock(PanaBitpump* bits, int y,
+                                         ushort16* dest, int block,
+                                         std::vector<uint32>* zero_pos) const {
+  int sh = 0;
+
+  std::array<int, 2> pred;
+  pred.fill(0);
+
+  std::array<int, 2> nonz;
+  nonz.fill(0);
+
+  int u = 0;
+
+  for (int x = 0; x < 14; x++) {
+    const int c = x & 1;
+
+    if (u == 2) {
+      sh = 4 >> (3 - bits->getBits(2));
+      u = -1;
+    }
+
+    if (nonz[c]) {
+      int j = bits->getBits(8);
+      if (j) {
+        pred[c] -= 0x80 << sh;
+        if (pred[c] < 0 || sh == 4)
+          pred[c] &= ~(-(1 << sh));
+        pred[c] += j << sh;
+      }
+    } else {
+      nonz[c] = bits->getBits(8);
+      if (nonz[c] || x > 11)
+        pred[c] = nonz[c] << 4 | bits->getBits(4);
+    }
+
+    *dest = pred[c];
+
+    if (zero_is_bad && 0 == pred[c])
+      zero_pos->push_back((y << 16) | (14 * block + x));
+
+    u++;
+    dest++;
+  }
+}
+
 void PanasonicDecompressor::decompress() const {
   PanaBitpump bits(input, section_split_offset);
 
@@ -123,47 +168,10 @@ void PanasonicDecompressor::decompress() const {
   for (int y = 0; y < mRaw->dim.y; y++) {
     auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
 
-    for (int block = 0; block < blocks; block++) {
-      int sh = 0;
-
-      std::array<int, 2> pred;
-      pred.fill(0);
-
-      std::array<int, 2> nonz;
-      nonz.fill(0);
-
-      int u = 0;
-
-      for (int x = 0; x < 14; x++) {
-        const int c = x & 1;
-
-        if (u == 2) {
-          sh = 4 >> (3 - bits.getBits(2));
-          u = -1;
-        }
-
-        if (nonz[c]) {
-          int j = bits.getBits(8);
-          if (j) {
-            pred[c] -= 0x80 << sh;
-            if (pred[c] < 0 || sh == 4)
-              pred[c] &= ~(-(1 << sh));
-            pred[c] += j << sh;
-          }
-        } else {
-          nonz[c] = bits.getBits(8);
-          if (nonz[c] || x > 11)
-            pred[c] = nonz[c] << 4 | bits.getBits(4);
-        }
-
-        *dest = pred[c];
-
-        if (zero_is_bad && 0 == pred[c])
-          zero_pos.push_back((y << 16) | (14 * block + x));
-
-        u++;
-        dest++;
-      }
+    for (int block = 0; block < blocks;) {
+      processBlock(&bits, y, dest, block, &zero_pos);
+      block++;
+      dest += 14;
     }
   }
 

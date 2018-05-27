@@ -46,6 +46,9 @@ class PanasonicDecompressor final : public AbstractDecompressor {
   //   I.e. these two parts need to be swapped around.
   uint32 section_split_offset;
 
+  void processBlock(PanaBitpump* bits, int y, ushort16* dest, int block,
+                    std::vector<uint32>* zero_pos) const;
+
 public:
   PanasonicDecompressor(const RawImage& img, const ByteStream& input_,
                         bool zero_is_not_bad, uint32 section_split_offset_);
