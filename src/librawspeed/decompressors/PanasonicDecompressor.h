@@ -20,22 +20,20 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32
-#include "common/Point.h"                       // for iPoint2D
-#include "common/RawImage.h"                    // for RawImage
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/ByteStream.h"                      // for ByteStream
-#include <cstddef>                              // for size_t
-#include <utility>                              // for move
-#include <vector>                               // for vector
+#include "common/Common.h"   // for uint32
+#include "common/Point.h"    // for iPoint2D
+#include "common/RawImage.h" // for RawImage
+#include "decompressors/AbstractParallelizedDecompressor.h"
+#include "io/ByteStream.h" // for ByteStream
+#include <cstddef>         // for size_t
+#include <utility>         // for move
+#include <vector>          // for vector
 
 namespace rawspeed {
 
 class RawImage;
 
-class PanasonicDecompressor final : public AbstractDecompressor {
-  RawImage mRaw;
-
+class PanasonicDecompressor final : public AbstractParallelizedDecompressor {
   static constexpr uint32 BlockSize = 0x4000;
 
   static constexpr int PixelsPerPacket = 14;
@@ -82,11 +80,13 @@ class PanasonicDecompressor final : public AbstractDecompressor {
 
   void processBlock(const Block& block, std::vector<uint32>* zero_pos) const;
 
+  void decompressThreaded(const RawDecompressorThread* t) const final;
+
 public:
   PanasonicDecompressor(const RawImage& img, const ByteStream& input_,
                         bool zero_is_not_bad, uint32 section_split_offset_);
 
-  void decompress() const;
+  void decompress() const final;
 };
 
 } // namespace rawspeed

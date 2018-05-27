@@ -40,7 +40,7 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
                                              const ByteStream& input_,
                                              bool zero_is_not_bad,
                                              uint32 section_split_offset_)
-    : mRaw(img), zero_is_bad(!zero_is_not_bad),
+    : AbstractParallelizedDecompressor(img), zero_is_bad(!zero_is_not_bad),
       section_split_offset(section_split_offset_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
@@ -218,18 +218,26 @@ void PanasonicDecompressor::processBlock(const Block& block,
   }
 }
 
-void PanasonicDecompressor::decompress() const {
+void PanasonicDecompressor::decompressThreaded(
+    const RawDecompressorThread* t) const {
   std::vector<uint32> zero_pos;
 
   assert(!blocks.empty());
-  for (const Block& block : blocks)
-    processBlock(block, &zero_pos);
+  assert(t->start < t->end);
+  assert(t->end <= blocks.size());
+  for (size_t i = t->start; i < t->end; i++)
+    processBlock(blocks[i], &zero_pos);
 
   if (zero_is_bad && !zero_pos.empty()) {
     MutexLocker guard(&mRaw->mBadPixelMutex);
     mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
                                     zero_pos.begin(), zero_pos.end());
   }
+}
+
+void PanasonicDecompressor::decompress() const {
+  assert(!blocks.empty());
+  startThreading(blocks.size());
 }
 
 } // namespace rawspeed
