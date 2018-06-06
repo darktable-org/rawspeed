@@ -7254,6 +7254,61 @@
 		<Crop x="0" y="0" width="-56" height="0"/>
 		<Sensor black="143" white="4095"/>
 	</Camera>
+	<Camera make="Panasonic" model="DC-GH5S" decoder_version="3">
+		<ID make="Panasonic" model="DC-GH5S">Panasonic DC-GH5S</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="510" white="8000"/>
+	</Camera>
+	<Camera make="Panasonic" model="DC-GH5S" decoder_version="3" mode="4:3">
+		<ID make="Panasonic" model="DC-GH5S">Panasonic DC-GH5S</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-40" height="0"/>
+		<Sensor black="510" white="8000"/>
+	</Camera>
+	<Camera make="Panasonic" model="DC-GH5S" decoder_version="3" mode="3:2">
+		<ID make="Panasonic" model="DC-GH5S">Panasonic DC-GH5S</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-24" height="0"/>
+		<Sensor black="510" white="8000"/>
+	</Camera>
+	<Camera make="Panasonic" model="DC-GH5S" decoder_version="3" mode="16:9">
+		<ID make="Panasonic" model="DC-GH5S">Panasonic DC-GH5S</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-68" height="0"/>
+		<Sensor black="510" white="8000"/>
+	</Camera>
+	<Camera make="Panasonic" model="DC-GH5S" decoder_version="3" mode="1:1">
+		<ID make="Panasonic" model="DC-GH5S">Panasonic DC-GH5S</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-32" height="0"/>
+		<Sensor black="510" white="8000"/>
+	</Camera>
 	<Camera make="Panasonic" model="DC-G9">
 		<ID make="Panasonic" model="DC-G9">Panasonic DC-G9</ID>
 		<CFA width="2" height="2">
