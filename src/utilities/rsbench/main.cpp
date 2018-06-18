@@ -139,7 +139,7 @@ static inline void BM_RawSpeed(benchmark::State& state, const char* fileName,
   state.counters.insert({
       {"Pixels/s", benchmark::Counter(state.iterations() * double(pixels),
                                       benchmark::Counter::kIsRate)},
-      {"CPUTime,s", TotalTime.count()},
+      {"CPUTime,s", TotalTime.count() / state.iterations()},
       {"ThreadingFactor", ThreadingFactor},
   });
 
