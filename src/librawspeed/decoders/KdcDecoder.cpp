@@ -56,13 +56,23 @@ RawImage KdcDecoder::decodeRawInternal() {
   if (7 != compression)
     ThrowRDE("Unsupported compression %d", compression);
 
+  TiffEntry* ifdoffset = mRootIFD->getEntryRecursive(KODAK_IFD2);
+  if (!ifdoffset)
+    ThrowRDE("Couldn't find the Kodak IFD offset");
+
+  NORangesSet<Buffer> ifds;
+
+  assert(ifdoffset != nullptr);
+  TiffRootIFD kodakifd(nullptr, &ifds, ifdoffset->getRootIfdData(),
+                       ifdoffset->getU32());
+
   uint32 width = 0;
   uint32 height = 0;
-  TiffEntry *ew = mRootIFD->getEntryRecursive(KODAK_KDC_WIDTH);
-  TiffEntry *eh = mRootIFD->getEntryRecursive(KODAK_KDC_HEIGHT);
+  TiffEntry* ew = kodakifd.getEntryRecursive(KODAK_KDC_SENSOR_WIDTH);
+  TiffEntry* eh = kodakifd.getEntryRecursive(KODAK_KDC_SENSOR_HEIGHT);
   if (ew && eh) {
-    width = ew->getU32()+80;
-    height = eh->getU32()+70;
+    width = ew->getU32();
+    height = eh->getU32();
   } else
     ThrowRDE("Unable to retrieve image size");
 
