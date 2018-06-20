@@ -425,15 +425,21 @@ void ArwDecoder::GetWB() {
 
     // "Decrypt" IFD
     const auto& ifd_crypt = priv->getRootIfdData();
-    auto ifd_size = ifd_crypt.getSize();
-    auto ifd_decoded = Buffer::Create(ifd_size);
+    const auto EncryptedBuffer = ifd_crypt.getSubView(off, len);
+    // We do have to prepend 'off' padding, because TIFF uses absolute offsets.
+    const auto DecryptedBufferSize = off + EncryptedBuffer.getSize();
+    auto DecryptedBuffer = Buffer::Create(DecryptedBufferSize);
 
-    SonyDecrypt(reinterpret_cast<const uint32*>(ifd_crypt.getData(off, len)),
-                reinterpret_cast<uint32*>(ifd_decoded.get() + off), len / 4,
+    SonyDecrypt(reinterpret_cast<const uint32*>(EncryptedBuffer.begin()),
+                reinterpret_cast<uint32*>(DecryptedBuffer.get() + off), len / 4,
                 key);
 
     NORangesSet<Buffer> ifds_decoded;
-    Buffer decIFD(move(ifd_decoded), ifd_size);
+    Buffer decIFD(std::move(DecryptedBuffer), DecryptedBufferSize);
+    const Buffer Padding(decIFD.getSubView(0, off));
+    // The Decrypted Root Ifd can not point to preceding padding buffer.
+    ifds_decoded.emplace(Padding);
+
     DataBuffer dbIDD(decIFD, priv->getRootIfdData().getByteOrder());
     TiffRootIFD encryptedIFD(nullptr, &ifds_decoded, dbIDD, off);
 
