@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2017-2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,19 +20,31 @@
 
 #pragma once
 
-#include "common/Common.h"                                  // for uint32
-#include "decompressors/AbstractParallelizedDecompressor.h" // for Abstract...
-#include "io/ByteStream.h"                                  // for ByteStream
+#include "common/Common.h"   // for uint32
+#include "common/Point.h"    // for iPoint2D
+#include "common/RawImage.h" // for RawImage
+#include "decompressors/AbstractParallelizedDecompressor.h"
+#include "io/ByteStream.h" // for ByteStream
+#include <cstddef>         // for size_t
+#include <utility>         // for move
+#include <vector>          // for vector
 
 namespace rawspeed {
 
 class RawImage;
 
 class PanasonicDecompressor final : public AbstractParallelizedDecompressor {
-  static constexpr uint32 BufSize = 0x4000;
-  struct PanaBitpump;
+  static constexpr uint32 BlockSize = 0x4000;
 
-  void decompressThreaded(const RawDecompressorThread* t) const final;
+  static constexpr int PixelsPerPacket = 14;
+
+  static constexpr uint32 BytesPerPacket = 16;
+
+  static constexpr uint32 PacketsPerBlock = BlockSize / BytesPerPacket;
+
+  static constexpr uint32 PixelsPerBlock = PixelsPerPacket * PacketsPerBlock;
+
+  class ProxyStream;
 
   ByteStream input;
   bool zero_is_bad;
@@ -45,9 +57,36 @@ class PanasonicDecompressor final : public AbstractParallelizedDecompressor {
   //   I.e. these two parts need to be swapped around.
   uint32 section_split_offset;
 
+  struct Block {
+    ByteStream bs;
+    iPoint2D beginCoord;
+    // The rectangle is an incorrect representation. All the rows
+    // between the first and last one span the entire width of the image.
+    iPoint2D endCoord;
+
+    Block() = default;
+    Block(ByteStream&& bs_, iPoint2D beginCoord_, iPoint2D endCoord_)
+        : bs(std::move(bs_)), beginCoord(beginCoord_), endCoord(endCoord_) {}
+  };
+
+  // If really wanted, this vector could be avoided,
+  // and each Block computed on-the-fly
+  std::vector<Block> blocks;
+
+  void chopInputIntoBlocks();
+
+  void processPixelPacket(ProxyStream* bits, int y, ushort16* dest, int xbegin,
+                          std::vector<uint32>* zero_pos) const;
+
+  void processBlock(const Block& block, std::vector<uint32>* zero_pos) const;
+
+  void decompressThreaded(const RawDecompressorThread* t) const final;
+
 public:
   PanasonicDecompressor(const RawImage& img, const ByteStream& input_,
                         bool zero_is_not_bad, uint32 section_split_offset_);
+
+  void decompress() const final;
 };
 
 } // namespace rawspeed

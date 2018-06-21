@@ -130,7 +130,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       mRaw->createData();
       v5.decompress();
     } else {
-      uint32 section_split_offset = 0x2008;
+      uint32 section_split_offset = 0x1FF8;
       PanasonicDecompressor p(mRaw, bs, hints.has("zero_is_not_bad"),
                               section_split_offset);
       mRaw->createData();

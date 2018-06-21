@@ -3,7 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014 Pedro Côrte-Real
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2017-2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -34,6 +34,8 @@
 
 namespace rawspeed {
 
+constexpr uint32 PanasonicDecompressor::BlockSize;
+
 PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
                                              const ByteStream& input_,
                                              bool zero_is_not_bad,
@@ -44,144 +46,209 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
 
-  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 14 != 0) {
+  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % PixelsPerPacket != 0) {
     ThrowRDE("Unexpected image dimensions found: (%i; %i)", mRaw->dim.x,
              mRaw->dim.y);
   }
 
-  /*
-   * Normally, we would check the image dimensions against some hardcoded
-   * threshold. That is being done as poor man's attempt to catch
-   * obviously-invalid raws, and avoid OOM's during fuzzing. However, there is
-   * a better solution - actually check the size of input buffer to try and
-   * guess whether the image size is valid or not. And in this case, we can do
-   * that, because the compression rate is static and known.
-   */
-  // if (width > 5488 || height > 3912)
-  //   ThrowRDE("Too large image size: (%u; %u)", width, height);
-
-  if (BufSize < section_split_offset)
-    ThrowRDE("Bad section_split_offset: %u, less than BufSize (%u)",
-             section_split_offset, BufSize);
+  if (BlockSize < section_split_offset)
+    ThrowRDE("Bad section_split_offset: %u, less than BlockSize (%u)",
+             section_split_offset, BlockSize);
 
   // Naive count of bytes that given pixel count requires.
-  // Do division first, because we know the remainder is always zero,
-  // and the next multiplication won't overflow.
-  assert(mRaw->dim.area() % 7ULL == 0ULL);
-  const auto rawBytesNormal = (mRaw->dim.area() / 7ULL) * 8ULL;
+  assert(mRaw->dim.area() % PixelsPerPacket == 0);
+  const auto bytesTotal = (mRaw->dim.area() / PixelsPerPacket) * BytesPerPacket;
+  assert(bytesTotal > 0);
+
   // If section_split_offset is zero, then that we need to read the normal
   // amount of bytes. But if it is not, then we need to round up to multiple of
-  // BufSize, because of splitting&rotation of each BufSize's slice in half at
-  // section_split_offset bytes.
-  const auto bufSize = section_split_offset == 0
-                           ? rawBytesNormal
-                           : roundUp(rawBytesNormal, BufSize);
+  // BlockSize, because of splitting&rotation of each BlockSize's slice in half
+  // at section_split_offset bytes.
+  const auto bufSize =
+      section_split_offset == 0 ? bytesTotal : roundUp(bytesTotal, BlockSize);
   input = input_.peekStream(bufSize);
+
+  chopInputIntoBlocks();
 }
 
-struct PanasonicDecompressor::PanaBitpump {
-  ByteStream input;
-  std::vector<uchar8> buf;
-  int vbits = 0;
-  uint32 section_split_offset;
+void PanasonicDecompressor::chopInputIntoBlocks() {
+  auto pixelToCoordinate = [width = mRaw->dim.x](unsigned pixel) -> iPoint2D {
+    return iPoint2D(pixel % width, pixel / width);
+  };
 
-  PanaBitpump(ByteStream input_, int section_split_offset_)
-      : input(std::move(input_)), section_split_offset(section_split_offset_) {
+  // If section_split_offset == 0, last block may not be full.
+  const auto blocksTotal = roundUpDivision(input.getRemainSize(), BlockSize);
+  assert(blocksTotal > 0);
+  assert(blocksTotal * PixelsPerBlock >= mRaw->dim.area());
+  blocks.reserve(blocksTotal);
+
+  unsigned currPixel = 0;
+  std::generate_n(std::back_inserter(blocks), blocksTotal,
+                  [input = &input, &currPixel, pixelToCoordinate]() -> Block {
+                    assert(input->getRemainSize() != 0);
+                    const auto blockSize =
+                        std::min(input->getRemainSize(), BlockSize);
+                    assert(blockSize > 0);
+                    assert(blockSize % BytesPerPacket == 0);
+                    const auto packets = blockSize / BytesPerPacket;
+                    assert(packets > 0);
+                    const auto pixels = packets * PixelsPerPacket;
+                    assert(pixels > 0);
+
+                    ByteStream bs = input->getStream(blockSize);
+                    iPoint2D beginCoord = pixelToCoordinate(currPixel);
+                    currPixel += pixels;
+                    iPoint2D endCoord = pixelToCoordinate(currPixel);
+                    return {std::move(bs), beginCoord, endCoord};
+                  });
+  assert(blocks.size() == blocksTotal);
+  assert(currPixel >= mRaw->dim.area());
+  assert(input.getRemainSize() == 0);
+
+  // Clamp the end coordinate for the last block.
+  blocks.back().endCoord = mRaw->dim;
+  blocks.back().endCoord.y -= 1;
+}
+
+class PanasonicDecompressor::ProxyStream {
+  ByteStream block;
+  const uint32 section_split_offset;
+  std::vector<uchar8> buf;
+
+  int vbits = 0;
+
+  void parseBlock() {
+    assert(buf.empty());
+    assert(block.getRemainSize() <= BlockSize);
+    assert(section_split_offset <= BlockSize);
+
+    Buffer FirstSection = block.getBuffer(section_split_offset);
+    Buffer SecondSection = block.getBuffer(block.getRemainSize());
+    assert(FirstSection.getSize() < SecondSection.getSize());
+
     // get one more byte, so the return statement of getBits does not have
     // to special case for accessing the last byte
-    buf.resize(BufSize + 1UL);
+    buf.reserve(BlockSize + 1UL);
+
+    // First copy the second section. This makes it the first section.
+    buf.insert(buf.end(), SecondSection.begin(), SecondSection.end());
+    // Now append the original 1'st section right after the new 1'st section.
+    buf.insert(buf.end(), FirstSection.begin(), FirstSection.end());
+
+    assert(block.getRemainSize() == 0);
+
+    // get one more byte, so the return statement of getBits does not have
+    // to special case for accessing the last byte
+    buf.emplace_back(0);
   }
 
-  void skipBytes(int bytes) {
-    int blocks = (bytes / BufSize) * BufSize;
-    input.skipBytes(blocks);
-    for (int i = blocks; i < bytes; i++)
-      (void)getBits(8);
+public:
+  ProxyStream(ByteStream block_, int section_split_offset_)
+      : block(std::move(block_)), section_split_offset(section_split_offset_) {
+    parseBlock();
   }
 
   uint32 getBits(int nbits) {
-    if (!vbits) {
-      /* On truncated files this routine will just return for the truncated
-       * part of the file. Since there is no chance of affecting output buffer
-       * size we allow the decoder to decode this
-       */
-      assert(BufSize >= section_split_offset);
-      auto size =
-          std::min(input.getRemainSize(), BufSize - section_split_offset);
-      memcpy(buf.data() + section_split_offset, input.getData(size), size);
-
-      size = std::min(input.getRemainSize(), section_split_offset);
-      if (size != 0)
-        memcpy(buf.data(), input.getData(size), size);
-    }
     vbits = (vbits - nbits) & 0x1ffff;
     int byte = vbits >> 3 ^ 0x3ff0;
     return (buf[byte] | buf[byte + 1UL] << 8) >> (vbits & 7) & ~(-(1 << nbits));
   }
 };
 
-void PanasonicDecompressor::decompressThreaded(
-    const RawDecompressorThread* t) const {
-  PanaBitpump bits(input, section_split_offset);
+void PanasonicDecompressor::processPixelPacket(
+    ProxyStream* bits, int y, ushort16* dest, int xbegin,
+    std::vector<uint32>* zero_pos) const {
+  int sh = 0;
 
-  /* 9 + 1/7 bits per pixel */
-  bits.skipBytes(8 * mRaw->dim.x * t->start / 7);
+  std::array<int, 2> pred;
+  pred.fill(0);
 
-  assert(mRaw->dim.x % 14 == 0);
-  const auto blocks = mRaw->dim.x / 14;
+  std::array<int, 2> nonz;
+  nonz.fill(0);
 
-  std::vector<uint32> zero_pos;
-  for (uint32 y = t->start; y < t->end; y++) {
-    int sh = 0;
+  int u = 0;
 
-    auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
-    for (int block = 0; block < blocks; block++) {
-      std::array<int, 2> pred;
-      pred.fill(0);
+  for (int p = 0; p < PixelsPerPacket; p++) {
+    const int c = p & 1;
 
-      std::array<int, 2> nonz;
-      nonz.fill(0);
+    if (u == 2) {
+      sh = 4 >> (3 - bits->getBits(2));
+      u = -1;
+    }
 
-      int u = 0;
-
-      for (int x = 0; x < 14; x++) {
-        const int c = x & 1;
-
-        if (u == 2) {
-          sh = 4 >> (3 - bits.getBits(2));
-          u = -1;
-        }
-
-        if (nonz[c]) {
-          int j = bits.getBits(8);
-          if (j) {
-            pred[c] -= 0x80 << sh;
-            if (pred[c] < 0 || sh == 4)
-              pred[c] &= ~(-(1 << sh));
-            pred[c] += j << sh;
-          }
-        } else {
-          nonz[c] = bits.getBits(8);
-          if (nonz[c] || x > 11)
-            pred[c] = nonz[c] << 4 | bits.getBits(4);
-        }
-
-        *dest = pred[c];
-
-        if (zero_is_bad && 0 == pred[c])
-          zero_pos.push_back((y << 16) | (14 * block + x));
-
-        u++;
-        dest++;
+    if (nonz[c]) {
+      int j = bits->getBits(8);
+      if (j) {
+        pred[c] -= 0x80 << sh;
+        if (pred[c] < 0 || sh == 4)
+          pred[c] &= ~(-(1 << sh));
+        pred[c] += j << sh;
       }
+    } else {
+      nonz[c] = bits->getBits(8);
+      if (nonz[c] || p > 11)
+        pred[c] = nonz[c] << 4 | bits->getBits(4);
+    }
+
+    *dest = pred[c];
+
+    if (zero_is_bad && 0 == pred[c])
+      zero_pos->push_back((y << 16) | (xbegin + p));
+
+    u++;
+    dest++;
+  }
+}
+
+void PanasonicDecompressor::processBlock(const Block& block,
+                                         std::vector<uint32>* zero_pos) const {
+  ProxyStream bits(block.bs, section_split_offset);
+
+  for (int y = block.beginCoord.y; y <= block.endCoord.y; y++) {
+    int x = 0;
+    // First row may not begin at the first column.
+    if (block.beginCoord.y == y)
+      x = block.beginCoord.x;
+
+    int endx = mRaw->dim.x;
+    // Last row may end before the last column.
+    if (block.endCoord.y == y)
+      endx = block.endCoord.x;
+
+    auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(x, y));
+
+    assert(x % PixelsPerPacket == 0);
+    assert(endx % PixelsPerPacket == 0);
+
+    for (; x < endx;) {
+      processPixelPacket(&bits, y, dest, x, zero_pos);
+
+      x += PixelsPerPacket;
+      dest += PixelsPerPacket;
     }
   }
+}
+
+void PanasonicDecompressor::decompressThreaded(
+    const RawDecompressorThread* t) const {
+  std::vector<uint32> zero_pos;
+
+  assert(!blocks.empty());
+  assert(t->start < t->end);
+  assert(t->end <= blocks.size());
+  for (size_t i = t->start; i < t->end; i++)
+    processBlock(blocks[i], &zero_pos);
 
   if (zero_is_bad && !zero_pos.empty()) {
     MutexLocker guard(&mRaw->mBadPixelMutex);
     mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
                                     zero_pos.begin(), zero_pos.end());
   }
+}
+
+void PanasonicDecompressor::decompress() const {
+  assert(!blocks.empty());
+  startThreading(blocks.size());
 }
 
 } // namespace rawspeed
