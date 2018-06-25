@@ -433,11 +433,13 @@ public:
 template <typename S>
 class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol<S> {
   // We have pixel value in range of [0..65535]. We scale by float X.
-  // For this to generate a value within the same range , the scale X needs
-  // to be in the range [0..65535]. Since the offset is multiplied
+  // For this to generate a value within the same range, the scale X needs
+  // to be in the range [0..65535]. However, we are operating with 32-bit
+  // signed integer space, so the new value can not be larger than 2^31,
+  // else we'd have signed integer overflow. Since the offset is multiplied
   // by f2iScale before applying, we need to divide by f2iScale here.
-  // So the maxLimit has the same value as absLimit for OffsetPerRowOrCol.
   static constexpr const double minLimit = 0.0;
+  static constexpr int rounding = 512;
   const double maxLimit;
 
   bool valueIsOk(float value) final {
@@ -447,7 +449,8 @@ class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol<S> {
 public:
   explicit ScalePerRowOrCol(const RawImage& ri, ByteStream* bs)
       : DeltaRowOrCol<S>(ri, bs, 1024.0F),
-        maxLimit(double(std::numeric_limits<ushort16>::max()) /
+        maxLimit((double(std::numeric_limits<int>::max() - rounding) /
+                  double(std::numeric_limits<ushort16>::max())) /
                  this->f2iScale) {}
 
   void apply(const RawImage& ri) override {
