@@ -112,6 +112,9 @@ void LJpegDecompressor::decodeScan()
 
   if (trailingPixels == 0) {
     switch (frame.cps) {
+    case 1:
+      decodeN<1>();
+      break;
     case 2:
       decodeN<2>();
       break;
@@ -129,6 +132,7 @@ void LJpegDecompressor::decodeScan()
     // i-cache misses and whatnot. Need to check how not splitting it into
     // two different functions affects performance of the normal case.
     switch (frame.cps) {
+    // Naturally can't happen for CPS=1.
     case 2:
       decodeN<2, /*WeirdWidth=*/true>();
       break;
@@ -193,7 +197,8 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
     // Sometimes we also need to consume one more block, and produce part of it.
     if /*constexpr*/ (WeirdWidth) {
       // FIXME: evaluate i-cache implications due to this being compile-time.
-      static_assert(N_COMP > 1, "can't want part of 1-pixel-wide block");
+      static_assert(N_COMP > 1 || !WeirdWidth,
+                    "can't want part of 1-pixel-wide block");
       // Some rather esoteric DNG's have odd dimensions, e.g. width % 2 = 1.
       // We may end up needing just part of last N_COMP pixels.
       assert(trailingPixels > 0);
