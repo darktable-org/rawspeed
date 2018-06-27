@@ -29,6 +29,7 @@
 #include <array>                          // for array
 #include <cassert>                        // for assert
 #include <cstring>                        // for memcpy
+#include <limits>                         // for numeric_limits
 #include <utility>                        // for move
 #include <vector>                         // for vector
 
@@ -66,6 +67,10 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
   // at section_split_offset bytes.
   const auto bufSize =
       section_split_offset == 0 ? bytesTotal : roundUp(bytesTotal, BlockSize);
+
+  if (bufSize > std::numeric_limits<ByteStream::size_type>::max())
+    ThrowRDE("Raw dimensions require input buffer larger than supported");
+
   input = input_.peekStream(bufSize);
 
   chopInputIntoBlocks();
