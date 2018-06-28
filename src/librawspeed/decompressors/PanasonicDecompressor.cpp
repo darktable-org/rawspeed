@@ -129,7 +129,6 @@ class PanasonicDecompressor::ProxyStream {
 
     Buffer FirstSection = block.getBuffer(section_split_offset);
     Buffer SecondSection = block.getBuffer(block.getRemainSize());
-    assert(FirstSection.getSize() < SecondSection.getSize());
 
     // get one more byte, so the return statement of getBits does not have
     // to special case for accessing the last byte
