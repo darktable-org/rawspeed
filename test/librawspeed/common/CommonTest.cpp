@@ -37,6 +37,7 @@ using rawspeed::getThreadCount;
 using rawspeed::isAligned;
 using rawspeed::isIn;
 using rawspeed::isPowerOfTwo;
+using rawspeed::roundDown;
 using rawspeed::roundUp;
 using rawspeed::roundUpDivision;
 using rawspeed::splitString;
@@ -75,6 +76,34 @@ INSTANTIATE_TEST_CASE_P(PowerOfTwoTest, PowerOfTwoTest,
                         ::testing::ValuesIn(powerOfTwoValues));
 TEST_P(PowerOfTwoTest, PowerOfTwoTest) {
   ASSERT_EQ(isPowerOfTwo(in), expected);
+}
+
+using RoundDownType = std::tr1::tuple<size_t, size_t, size_t>;
+class RoundDownTest : public ::testing::TestWithParam<RoundDownType> {
+protected:
+  RoundDownTest() = default;
+  virtual void SetUp() {
+    in = std::tr1::get<0>(GetParam());
+    multiple = std::tr1::get<1>(GetParam());
+    expected = std::tr1::get<2>(GetParam());
+  }
+
+  size_t in; // input
+  size_t multiple;
+  size_t expected; // expected output
+};
+static const RoundDownType RoundDownValues[] = {
+    make_tuple(0, 0, 0),    make_tuple(0, 10, 0),  make_tuple(10, 0, 10),
+    make_tuple(10, 10, 10), make_tuple(10, 1, 10), make_tuple(10, 2, 10),
+    make_tuple(10, 3, 9),   make_tuple(10, 4, 8),  make_tuple(10, 5, 10),
+    make_tuple(10, 6, 6),   make_tuple(10, 7, 7),  make_tuple(10, 8, 8),
+    make_tuple(10, 9, 9),   make_tuple(10, 11, 0), make_tuple(10, 12, 0),
+
+};
+INSTANTIATE_TEST_CASE_P(RoundDownTest, RoundDownTest,
+                        ::testing::ValuesIn(RoundDownValues));
+TEST_P(RoundDownTest, RoundDownTest) {
+  ASSERT_EQ(roundDown(in, multiple), expected);
 }
 
 using RoundUpType = std::tr1::tuple<size_t, size_t, size_t>;
