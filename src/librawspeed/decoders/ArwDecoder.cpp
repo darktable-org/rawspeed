@@ -418,7 +418,8 @@ void ArwDecoder::GetWB() {
     uint32 off = sony_offset->getU32();
 
     assert(sony_length != nullptr);
-    uint32 len = sony_length->getU32();
+    // The Decryption is done in blocks of 4 bytes.
+    uint32 len = roundDown(sony_length->getU32(), 4);
 
     assert(sony_key != nullptr);
     uint32 key = getU32LE(sony_key->getData(4));
