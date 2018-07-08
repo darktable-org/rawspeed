@@ -3,6 +3,8 @@ include(CheckTypeSize)
 include(CheckPrototypeDefinition)
 include(CheckCXXSymbolExists)
 
+enable_language(C)
+
 set(CMAKE_REQUIRED_INCLUDES_SAVE "${CMAKE_REQUIRED_INCLUDES}")
 set(CMAKE_EXTRA_INCLUDE_FILES_SAVE "${CMAKE_EXTRA_INCLUDE_FILES}")
 set(CMAKE_REQUIRED_LIBRARIES_SAVE "${CMAKE_REQUIRED_LIBRARIES}")
