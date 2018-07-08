@@ -1,8 +1,6 @@
 add_subdirectory(identify)
 
-if(BUILD_TESTING)
-  add_subdirectory(rstest)
-endif()
+add_subdirectory(rstest)
 
 if(BUILD_BENCHMARKING)
   add_subdirectory(rsbench)
