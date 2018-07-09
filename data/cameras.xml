@@ -724,13 +724,33 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="160" y="64" width="-2" height="0"/>
+		<Crop x="164" y="72" width="-6" height="-8"/>
 		<Sensor black="2048" white="15181"/>
 		<Sensor black="2048" white="14466" iso_list="50 100"/>
 		<BlackAreas>
 			<Vertical x="0" width="150"/>
-			<Horizontal y="2" height="60"/>
+			<Horizontal y="40" height="60"/>
 		</BlackAreas>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS 5DS" mode="sRaw1" decoder_version="6">
+		<ID make="Canon" model="EOS 5DS">Canon EOS 5DS</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="52000"/>
+		<Sensor black="0" white="46000" iso_list="50"/>
+		<Hints>
+			<Hint name="sraw_new" value=""/>
+			<Hint name="invert_sraw_wb" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS 5DS" mode="sRaw2" decoder_version="6">
+		<ID make="Canon" model="EOS 5DS">Canon EOS 5DS</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="52000"/>
+		<Sensor black="0" white="46000" iso_list="50"/>
+		<Hints>
+			<Hint name="sraw_new" value=""/>
+			<Hint name="invert_sraw_wb" value=""/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS 5DS R" decoder_version="6">
 		<ID make="Canon" model="EOS 5DS R">Canon EOS 5DS R</ID>
@@ -740,13 +760,33 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="160" y="64" width="-2" height="0"/>
+		<Crop x="164" y="72" width="-6" height="-8"/>
 		<Sensor black="2048" white="15181"/>
 		<Sensor black="2048" white="14466" iso_list="50 100"/>
 		<BlackAreas>
 			<Vertical x="0" width="150"/>
-			<Horizontal y="2" height="60"/>
+			<Horizontal y="40" height="60"/>
 		</BlackAreas>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS 5DS R" mode="sRaw1" decoder_version="6">
+		<ID make="Canon" model="EOS 5DS R">Canon EOS 5DS R</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="52000"/>
+		<Sensor black="0" white="46000" iso_list="50"/>
+		<Hints>
+			<Hint name="sraw_new" value=""/>
+			<Hint name="invert_sraw_wb" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS 5DS R" mode="sRaw2" decoder_version="6">
+		<ID make="Canon" model="EOS 5DS R">Canon EOS 5DS R</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="52000"/>
+		<Sensor black="0" white="46000" iso_list="50"/>
+		<Hints>
+			<Hint name="sraw_new" value=""/>
+			<Hint name="invert_sraw_wb" value=""/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS 6D" decoder_version="2">
 		<ID make="Canon" model="EOS 6D">Canon EOS 6D</ID>
