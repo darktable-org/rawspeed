@@ -14,8 +14,12 @@ set(REFERENCE_SAMPLES)
 set(REFERENCE_SAMPLE_HASHES)
 
 foreach(STR ${_REFERENCE_SAMPLES})
-  string(SUBSTRING "${STR}" 40 -1 SAMPLENAME)
-  string(STRIP "${SAMPLENAME}" SAMPLENAME)
+  # There are two schemes:
+  #   <hash><space><space><filename>      <- read in text mode
+  #   <hash><space><asterisk><filename>   <- read in binary mode
+  # Which for our purpose means:
+  #   <40 chars><char><char><filename>    <- i.e. we just skip first 42 chars.
+  string(SUBSTRING "${STR}" 42 -1 SAMPLENAME)
   set(SAMPLENAME "${REFERENCE_SAMPLE_ARCHIVE}/${SAMPLENAME}")
 
   if(NOT EXISTS "${SAMPLENAME}")
