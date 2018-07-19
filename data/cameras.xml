@@ -9551,6 +9551,20 @@
 		<Crop x="0" y="12" width="-16" height="-12"/>
 		<Sensor black="1024" white="16383"/>
 	</Camera>
+	<Camera make="FUJIFILM" model="X-T100">
+		<ID make="Fujifilm" model="X-T100">Fujifilm X-T100</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="1024" white="16383"/>
+		<Hints>
+			<Hint name="jpeg32_bitorder" value=""/>
+		</Hints>
+	</Camera>
 	<Camera make="KONICA MINOLTA" model="DYNAX 5D">
 		<ID make="Minolta" model="Dynax 5D">Konica Minolta Maxxum 5D</ID>
 		<CFA width="2" height="2">
