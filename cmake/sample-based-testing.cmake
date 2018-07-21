@@ -34,7 +34,7 @@ endforeach()
 add_custom_target(rstest-create)
 add_custom_command(TARGET rstest-create
   COMMAND rstest -c ${REFERENCE_SAMPLES}
-  WORKING_DIRECTORY "${REFERENCE_SAMPLE_ARCHIVE}"
+  WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
   COMMENT "Running rstest on all the samples in the sample set to generate the missing hashes"
   VERBATIM
   USES_TERMINAL)
@@ -42,7 +42,7 @@ add_custom_command(TARGET rstest-create
 add_custom_target(rstest-recreate)
 add_custom_command(TARGET rstest-recreate
   COMMAND rstest -c -f ${REFERENCE_SAMPLES}
-  WORKING_DIRECTORY "${REFERENCE_SAMPLE_ARCHIVE}"
+  WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
   COMMENT "Running rstest on all the samples in the sample set to [re]generate all the hashes"
   VERBATIM
   USES_TERMINAL)
@@ -50,7 +50,7 @@ add_custom_command(TARGET rstest-recreate
 add_custom_target(rstest-test) # hashes must exist beforehand
 add_custom_command(TARGET rstest-test
   COMMAND rstest ${REFERENCE_SAMPLES}
-  WORKING_DIRECTORY "${REFERENCE_SAMPLE_ARCHIVE}"
+  WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
   COMMENT "Running rstest on all the samples in the sample set to check for regressions"
   VERBATIM
   USES_TERMINAL)
@@ -58,7 +58,7 @@ add_custom_command(TARGET rstest-test
 add_custom_target(rstest-check) # hashes should exist beforehand if you want to check for regressions
 add_custom_command(TARGET rstest-check
   COMMAND rstest -f ${REFERENCE_SAMPLES}
-  WORKING_DIRECTORY "${REFERENCE_SAMPLE_ARCHIVE}"
+  WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
   COMMENT "Trying to decode all the samples in the sample set"
   VERBATIM
   USES_TERMINAL)
@@ -66,6 +66,6 @@ add_custom_command(TARGET rstest-check
 add_custom_target(rstest-clean)
 add_custom_command(TARGET rstest-clean
   COMMAND "${CMAKE_COMMAND}" -E remove ${REFERENCE_SAMPLE_HASHES}
-  WORKING_DIRECTORY "${REFERENCE_SAMPLE_ARCHIVE}"
+  WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
   COMMENT "Removing *.hash, *.hash.failed for the each sample in the set"
   VERBATIM)
