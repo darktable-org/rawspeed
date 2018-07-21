@@ -111,7 +111,7 @@ case "$FLAVOR" in
   "Coverage")
     handle_coverage_data
 
-    substring="ENABLE_SAMPLEBASED_TESTING"
+    substring="RAWSPEED_ENABLE_SAMPLE_BASED_TESTING"
     if [ "${ECO#*$substring}" != "$ECO" ];
     then
       handle_sample_coverage_data

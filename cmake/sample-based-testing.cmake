@@ -3,7 +3,7 @@ message(STATUS "Looking for sample set in ${REFERENCE_SAMPLE_ARCHIVE}")
 if(NOT (EXISTS "${REFERENCE_SAMPLE_ARCHIVE}"
     AND EXISTS "${REFERENCE_SAMPLE_ARCHIVE}/filelist.sha1"
     AND EXISTS "${REFERENCE_SAMPLE_ARCHIVE}/timestamp.txt"))
-  message(SEND_ERROR "Did not find sample set for sample-based testing! Either pass correct path in REFERENCE_SAMPLE_ARCHIVE, or disable ENABLE_SAMPLEBASED_TESTING.")
+  message(SEND_ERROR "Did not find sample set for sample-based testing! Either pass correct path in REFERENCE_SAMPLE_ARCHIVE, or disable RAWSPEED_ENABLE_SAMPLE_BASED_TESTING.")
 endif()
 
 message(STATUS "Found sample set in ${REFERENCE_SAMPLE_ARCHIVE}")
