@@ -51,6 +51,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL
 else()
   set(RAWSPEED_USE_LIBCXX OFF CACHE BOOL "(Clang only) Build using libc++ as the standard library." FORCE)
 endif()
+option(RAWSPEED_ENABLE_DEBUG_INFO "Whether to generate debug info or not." ON)
 option(WITH_PTHREADS "Enable threading support through pthread. Highly recommended" ON)
 option(WITH_OPENMP "Enable OpenMP support. Only used for tools, not the library itself." ON)
 option(WITH_PUGIXML "Enable XML support for cameras.xml reading" ON)

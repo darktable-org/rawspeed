@@ -21,9 +21,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# always debug info
-add_definitions(-g3)
-add_definitions(-ggdb3)
+include(debug-info)
 
 if(CMAKE_BUILD_TYPE STREQUAL "RELEASE")
   # want assertions in all but Release build type.
