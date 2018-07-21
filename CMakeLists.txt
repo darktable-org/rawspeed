@@ -96,9 +96,9 @@ endif()
 option(BUILD_DOCS "Build the documentation (Sphinx+Doxygen)." OFF)
 option(BUILD_FUZZERS "Build the fuzzing tree." ON)
 if(BUILD_TOOLS AND BUILD_TESTING)
-  option(RAWSPEED_ENABLE_SAMPLE_BASED_TESTING "If enabled, allows to use rstest to check the samples specified by REFERENCE_SAMPLE_ARCHIVE" OFF)
+  option(RAWSPEED_ENABLE_SAMPLE_BASED_TESTING "If enabled, allows to use rstest to check the samples specified by RAWSPEED_REFERENCE_SAMPLE_ARCHIVE" OFF)
 else()
-  set(RAWSPEED_ENABLE_SAMPLE_BASED_TESTING OFF CACHE BOOL "If enabled, allows to use rstest to check the samples specified by REFERENCE_SAMPLE_ARCHIVE" FORCE)
+  set(RAWSPEED_ENABLE_SAMPLE_BASED_TESTING OFF CACHE BOOL "If enabled, allows to use rstest to check the samples specified by RAWSPEED_REFERENCE_SAMPLE_ARCHIVE" FORCE)
 endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   option(USE_LLVM_OPT_REPORT "(Clang only) Save compiler optimizations records and show them" OFF)
@@ -118,7 +118,7 @@ set(GOOGLEBENCHMARK_PATH "/usr/src/googlebenchmark" CACHE PATH
 
 set(LIB_FUZZING_ENGINE "OFF" CACHE STRING "Either OFF, or overrides location of prebuilt fuzzing engine library (e.g. libFuzzer) that needs to be linked with all fuzz targets.")
 
-set(REFERENCE_SAMPLE_ARCHIVE "~/raw-camera-samples/raw.pixls.us-unique" CACHE PATH "The location of the reference sample set to use. Should contain filelist.sha1 and timestamp.txt")
+set(RAWSPEED_REFERENCE_SAMPLE_ARCHIVE "~/raw-camera-samples/raw.pixls.us-unique" CACHE PATH "The location of the reference sample set to use. Should contain filelist.sha1 and timestamp.txt")
 
 option(RAWSPEED_ENABLE_LTO "Add appropriate flag to the compile and link command lines, enabling link-time optimization." OFF)
 
