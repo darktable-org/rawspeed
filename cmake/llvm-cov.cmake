@@ -14,7 +14,7 @@ find_package(Demangler REQUIRED)
 add_custom_target(
   coverage-show
   DEPENDS rstest
-  COMMAND "${LLVMCOV_PATH}" show -Xdemangler=$<TARGET_FILE:demangler> -instr-profile "${CMAKE_BINARY_DIR}/rawspeed.profdata" "$<TARGET_FILE:rstest>" -format html -output-dir "${CMAKE_BINARY_DIR}/coverage"
+  COMMAND "${LLVMCOV_PATH}" show -Xdemangler=$<TARGET_FILE:demangler> -instr-profile "${RAWSPEED_PROFDATA_FILE}" "$<TARGET_FILE:rstest>" -format html -output-dir "${CMAKE_BINARY_DIR}/coverage"
   COMMAND "${CMAKE_COMMAND}" -E echo "Use $$ sensible-browser \"./coverage/index.html\" to view the coverage report."
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
   COMMENT "Running llvm-cov tool on the *.profdata file to generate HTML coverage report"

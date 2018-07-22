@@ -11,7 +11,7 @@ find_package(Find REQUIRED)
 
 add_custom_target(
   profdata
-  COMMAND "${FIND_PATH}" "${CMAKE_BINARY_DIR}" -type f -name '*.profraw' -exec "${LLVMPROFDATA_PATH}" merge -o "${CMAKE_BINARY_DIR}/rawspeed.profdata" {} + > /dev/null
+  COMMAND "${FIND_PATH}" "${CMAKE_BINARY_DIR}" -type f -name '*.profraw' -exec "${LLVMPROFDATA_PATH}" merge -o "${RAWSPEED_PROFDATA_FILE}" {} + > /dev/null
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
   COMMENT "Running llvm-profdata tool on all the *.profraw files"
 )
