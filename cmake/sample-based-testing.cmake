@@ -31,9 +31,18 @@ foreach(STR ${_REFERENCE_SAMPLES})
   list(APPEND REFERENCE_SAMPLE_HASHES "${SAMPLENAME}.hash.failed")
 endforeach()
 
+set(EXTRA_ENV "")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
+   CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
+  message(WARNING "Warning: sample-based-testing; clang instrumentation profile"
+                  " does not work with threading! Will be passing "
+                  "OMP_NUM_THREADS=1 environment variable.")
+  set(EXTRA_ENV "OMP_NUM_THREADS=1")
+endif()
+
 add_custom_target(rstest-create)
 add_custom_command(TARGET rstest-create
-  COMMAND rstest -c ${REFERENCE_SAMPLES}
+  COMMAND "${CMAKE_COMMAND}" -E env ${EXTRA_ENV} "$<TARGET_FILE:rstest>" -c ${REFERENCE_SAMPLES}
   WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
   COMMENT "Running rstest on all the samples in the sample set to generate the missing hashes"
   VERBATIM
@@ -41,7 +50,7 @@ add_custom_command(TARGET rstest-create
 
 add_custom_target(rstest-recreate)
 add_custom_command(TARGET rstest-recreate
-  COMMAND rstest -c -f ${REFERENCE_SAMPLES}
+  COMMAND "${CMAKE_COMMAND}" -E env ${EXTRA_ENV} "$<TARGET_FILE:rstest>" -c -f ${REFERENCE_SAMPLES}
   WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
   COMMENT "Running rstest on all the samples in the sample set to [re]generate all the hashes"
   VERBATIM
@@ -49,7 +58,7 @@ add_custom_command(TARGET rstest-recreate
 
 add_custom_target(rstest-test) # hashes must exist beforehand
 add_custom_command(TARGET rstest-test
-  COMMAND rstest ${REFERENCE_SAMPLES}
+  COMMAND "${CMAKE_COMMAND}" -E env ${EXTRA_ENV} "$<TARGET_FILE:rstest>" ${REFERENCE_SAMPLES}
   WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
   COMMENT "Running rstest on all the samples in the sample set to check for regressions"
   VERBATIM
@@ -57,7 +66,7 @@ add_custom_command(TARGET rstest-test
 
 add_custom_target(rstest-check) # hashes should exist beforehand if you want to check for regressions
 add_custom_command(TARGET rstest-check
-  COMMAND rstest -f ${REFERENCE_SAMPLES}
+  COMMAND "${CMAKE_COMMAND}" -E env ${EXTRA_ENV} "$<TARGET_FILE:rstest>" -f ${REFERENCE_SAMPLES}
   WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
   COMMENT "Trying to decode all the samples in the sample set"
   VERBATIM
