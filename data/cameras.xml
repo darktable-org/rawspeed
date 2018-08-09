@@ -7273,6 +7273,7 @@
 		<Crop x="0" y="0" width="-128" height="0"/>
 		<Sensor black="143" white="4095"/>
 		<Aliases>
+			<Alias>DC-FZ80</Alias>
 			<Alias>DMC-FZ80</Alias>
 			<Alias>DMC-FZ85</Alias>
 		</Aliases>
@@ -7288,6 +7289,7 @@
 		<Crop x="0" y="0" width="-128" height="0"/>
 		<Sensor black="143" white="4095"/>
 		<Aliases>
+			<Alias>DC-FZ80</Alias>
 			<Alias>DMC-FZ80</Alias>
 			<Alias>DMC-FZ85</Alias>
 		</Aliases>
