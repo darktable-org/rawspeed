@@ -276,7 +276,14 @@ INSTANTIATE_TEST_CASE_P(ClampBitsTest, ClampBitsTest,
 TEST_P(ClampBitsTest, ClampBitsTest) { ASSERT_EQ(clampBits(in, n), expected); }
 TEST(ClampBitsDeathTest, Only16Bit) {
 #ifndef NDEBUG
-  ASSERT_DEATH({ ASSERT_EQ(clampBits(0, 17), 0); }, "n <= 16");
+  ASSERT_DEATH({ ASSERT_EQ(clampBits(0, 17), 0); }, "nBits <= 16");
+#endif
+}
+
+TEST(ClampBitsUnsignedDeathTest, NoNopClamps) {
+#ifndef NDEBUG
+  ASSERT_DEATH({ ASSERT_EQ(clampBits<ushort16>(0, 16), 0); },
+               "BitWidthOfT > nBits");
 #endif
 }
 
