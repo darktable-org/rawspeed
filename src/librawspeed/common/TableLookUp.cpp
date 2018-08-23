@@ -58,7 +58,7 @@ void TableLookUp::setTable(int ntable, const std::vector<ushort16>& table) {
     int lower = i > 0 ? table[i - 1] : center;
     int upper = i < (nfilled - 1) ? table[i + 1] : center;
     int delta = upper - lower;
-    t[i * 2] = center - ((upper - lower + 2) / 4);
+    t[i * 2] = clampBits(center - ((upper - lower + 2) / 4), 16);
     t[i * 2 + 1] = delta;
   }
 
