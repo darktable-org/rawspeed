@@ -205,10 +205,11 @@ const std::array<rawspeed::uchar8, 8> Pattern<Pump, SaturatedTag>::Data{
 auto GenOnesLE = [](int zerosToOutput,
                     int zerosOutputted) -> std::array<rawspeed::uint32, 29> {
   std::array<rawspeed::uint32, 29> v;
-  unsigned bits = 0;
+  rawspeed::uint32 bits = 0;
   int currBit = -1;
   for (auto& value : v) {
     if (zerosToOutput == zerosOutputted) {
+      assert(currBit < 32);
       bits |= 0b1 << currBit;
       zerosToOutput++;
       zerosOutputted = 0;
@@ -222,7 +223,7 @@ auto GenOnesLE = [](int zerosToOutput,
 auto GenOnesBE = [](int zerosToOutput,
                     int zerosOutputted) -> std::array<rawspeed::uint32, 29> {
   std::array<rawspeed::uint32, 29> v;
-  unsigned bits = 0;
+  rawspeed::uint32 bits = 0;
   for (auto& value : v) {
     if (zerosToOutput == zerosOutputted) {
       bits |= 0b1;
