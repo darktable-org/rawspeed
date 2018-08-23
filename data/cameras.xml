@@ -7477,6 +7477,34 @@
 			<Alias>DC-FZ93</Alias>
 		</Aliases>
 	</Camera>
+	<Camera make="Panasonic" model="DC-TZ202">
+		<ID make="Panasonic" model="DC-TZ202">Panasonic DC-ZS200</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="142" white="4095"/>
+		<Aliases>
+			<Alias>DC-TZ200</Alias>
+		</Aliases>
+	</Camera>
+	<Camera make="Panasonic" model="DC-TZ202" mode="3:2">
+		<ID make="Panasonic" model="DC-TZ202">Panasonic DC-ZS200</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="142" white="4095"/>
+		<Aliases>
+			<Alias>DC-TZ200</Alias>
+		</Aliases>
+	</Camera>
 	<Camera make="PENTAX Corporation" model="PENTAX K100D">
 		<ID make="Pentax" model="K100D">Pentax K100D</ID>
 		<CFA width="2" height="2">
