@@ -434,7 +434,7 @@ protected:
     dst.resize((size_t)dstPitch * height);
 
     fill(src.begin(), src.end(), 0);
-    fill(dst.begin(), dst.end(), -1);
+    fill(dst.begin(), dst.end(), static_cast<decltype(dst)::value_type>(-1));
   }
   void generate() {
     uchar8 v = 0;
