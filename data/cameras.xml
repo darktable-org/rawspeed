@@ -10089,6 +10089,17 @@
 		<Crop x="44" y="6" width="-42" height="-82"/>
 		<Sensor black="256" white="62914"/>
 	</Camera>
+	<Camera make="Hasselblad" model="Hasselblad H5D-50c">
+		<ID make="Hasselblad" model="H5D-50c">Hasselblad 50-15-Coated5</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="50" y="104" width="-48" height="0"/>
+		<Sensor black="256" white="62914"/>
+	</Camera>
 	<Camera make="Hasselblad" model="Flash Sync">
 		<ID make="Hasselblad" model="CF132">Hasselblad 22-Uncoated</ID>
 		<CFA width="2" height="2">
