@@ -10056,6 +10056,17 @@
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="32767"/>
 	</Camera>
+	<Camera make="Hasselblad" model="Hasselblad CFV-50">
+		<ID make="Hasselblad" model="CFV-50">Hasselblad 50-Coated</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="48" y="6" width="-42" height="-82"/>
+		<Sensor black="256" white="65535"/>
+	</Camera>
 	<Camera make="Hasselblad" model="Hasselblad H3D">
 		<ID make="Hasselblad" model="H3D">Hasselblad 39-Coated</ID>
 		<CFA width="2" height="2">
