@@ -70,12 +70,13 @@ RawImage DcrDecoder::decodeRawInternal() {
                        ifdoffset->getU32());
 
   TiffEntry* linearization = kodakifd.getEntryRecursive(KODAK_LINEARIZATION);
-  if (!linearization || linearization->count != 1024 ||
+  if (!linearization ||
+      !(linearization->count == 1024 || linearization->count == 4096) ||
       linearization->type != TIFF_SHORT)
     ThrowRDE("Couldn't find the linearization table");
 
   assert(linearization != nullptr);
-  auto linTable = linearization->getU16Array(1024);
+  auto linTable = linearization->getU16Array(linearization->count);
 
   RawImageCurveGuard curveHandler(&mRaw, linTable, uncorrectedRawValues);
 
