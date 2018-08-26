@@ -9936,6 +9936,7 @@
 		<Sensor black="1024" white="65535"/>
 	</Camera>
 	<Camera make="Kodak" model="DCS Pro SLR/n">
+		<ID make="Kodak" model="DCS Pro SLR/n">Kodak DCS Pro SLR/n</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
 			<Color x="1" y="0">RED</Color>
@@ -9943,7 +9944,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="3700"/>
+		<Sensor black="0" white="4095"/>
 	</Camera>
 	<Camera make="Kodak" model="DCS Pro 14nx">
 		<ID make="Kodak" model="DCS Pro 14nx">Kodak DCS Pro 14nx</ID>

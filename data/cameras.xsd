@@ -11,7 +11,7 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified">
   <xs:simpleType name="IDTypeType">
     <xs:restriction base="xs:string">
-      <xs:pattern value="[a-zA-Z0-9 \-*()]{2,38}"/>
+      <xs:pattern value="[a-zA-Z0-9 \-*()/]{2,38}"/>
       <xs:minLength value="2"/>
       <xs:maxLength value="38"/>
     </xs:restriction>
@@ -50,7 +50,7 @@
   </xs:simpleType>
   <xs:simpleType name="IDTypeModelType">
     <xs:restriction base="xs:string">
-      <xs:pattern value="[a-zA-Z0-9 \-*()]{1,23}"/>
+      <xs:pattern value="[a-zA-Z0-9 \-*()/]{1,23}"/>
       <xs:minLength value="1"/>
       <xs:maxLength value="23"/>
     </xs:restriction>
