@@ -94,7 +94,17 @@ RawImage DcrDecoder::decodeRawInternal() {
     }
   }
 
-  KodakDecompressor k(mRaw, input, uncorrectedRawValues);
+  const int bps = [CurveSize = linearization->count]() -> int {
+    switch (CurveSize) {
+    case 1024:
+      return 10;
+    case 4096:
+      return 12;
+    }
+    __builtin_unreachable();
+  }();
+
+  KodakDecompressor k(mRaw, input, bps, uncorrectedRawValues);
   k.decompress();
 
   return mRaw;

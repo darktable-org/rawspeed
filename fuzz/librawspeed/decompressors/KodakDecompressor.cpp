@@ -41,9 +41,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(&bs));
 
+    const bool bps = bs.getU32();
     const bool uncorrectedRawValues = bs.getU32();
 
-    rawspeed::KodakDecompressor k(mRaw, bs.getStream(bs.getRemainSize()),
+    rawspeed::KodakDecompressor k(mRaw, bs.getStream(bs.getRemainSize()), bps,
                                   uncorrectedRawValues);
 
     mRaw->createData();

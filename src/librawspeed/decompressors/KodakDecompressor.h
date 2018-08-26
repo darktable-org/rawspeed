@@ -33,6 +33,7 @@ namespace rawspeed {
 class KodakDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
   ByteStream input;
+  int bps;
   bool uncorrectedRawValues;
 
   static constexpr int segment_size = 256; // pixels
@@ -41,7 +42,7 @@ class KodakDecompressor final : public AbstractDecompressor {
   segment decodeSegment(uint32 bsize);
 
 public:
-  KodakDecompressor(const RawImage& img, ByteStream bs,
+  KodakDecompressor(const RawImage& img, ByteStream bs, int bps,
                     bool uncorrectedRawValues_);
 
   void decompress();

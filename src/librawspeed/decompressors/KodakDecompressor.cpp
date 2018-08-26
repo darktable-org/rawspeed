@@ -36,8 +36,8 @@ namespace rawspeed {
 constexpr int KodakDecompressor::segment_size;
 
 KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
-                                     bool uncorrectedRawValues_)
-    : mRaw(img), input(std::move(bs)),
+                                     int bps_, bool uncorrectedRawValues_)
+    : mRaw(img), input(std::move(bs)), bps(bps_),
       uncorrectedRawValues(uncorrectedRawValues_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
@@ -47,6 +47,9 @@ KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
       mRaw->dim.x > 4516 || mRaw->dim.y > 3012)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);
+
+  if (bps != 10 && bps != 12)
+    ThrowRDE("Unexpected bits per sample: %i", bps);
 
   // Lower estimate: this decompressor requires *at least* half a byte
   // per output pixel
@@ -124,8 +127,8 @@ void KodakDecompressor::decompress() {
         pred[i & 1] += buf[i];
 
         ushort16 value = pred[i & 1];
-        if (value > 1023)
-          ThrowRDE("Value out of bounds %d", value);
+        if (value >= (1U << bps))
+          ThrowRDE("Value out of bounds %d (bps = %i)", value, bps);
 
         if (uncorrectedRawValues)
           dest[x + i] = value;
