@@ -253,9 +253,12 @@ void IiqDecoder::DecodeStrip(const IiqStrip& strip, uint32 width,
     int i = len[col & 1];
     if (i == 14)
       img[col] = pred[col & 1] = pump.getBits(16);
-    else
-      img[col] = pred[col & 1] +=
+    else {
+      pred[col & 1] +=
           static_cast<signed>(pump.getBits(i)) + 1 - (1 << (i - 1));
+      // FIXME: is the truncation the right solution here?
+      img[col] = ushort16(pred[col & 1]);
+    }
   }
 }
 
