@@ -506,8 +506,13 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
       mRaw->sixteenBitLookup();
   }
 
- // Default white level is (2 ** BitsPerSample) - 1
-  mRaw->whitePoint = (1UL << bps) - 1UL;
+  if (mRaw->getDataType() == TYPE_USHORT16) {
+    // Default white level is (2 ** BitsPerSample) - 1
+    mRaw->whitePoint = (1UL << bps) - 1UL;
+  } else if (mRaw->getDataType() == TYPE_FLOAT32) {
+    // Default white level is 1.0f. But we can't represent that here.
+    mRaw->whitePoint = 65535;
+  }
 
   if (raw->hasEntry(WHITELEVEL)) {
     TiffEntry *whitelevel = raw->getEntry(WHITELEVEL);

@@ -145,7 +145,7 @@ void OlympusDecompressor::decompress(ByteStream input) const {
             nw[c] = pred;
           }
         }
-        dest[x] = pred + ((diff * 4) | low);
+        dest[x] = ushort16(pred + ((diff * 4) | low));
         // Set predictor
         left[c] = dest[x];
       } else {
@@ -165,7 +165,7 @@ void OlympusDecompressor::decompress(ByteStream input) const {
         } else
           pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left[c] : up;
 
-        dest[x] = pred + ((diff * 4) | low);
+        dest[x] = ushort16(pred + ((diff * 4) | low));
         // Set predictors
         left[c] = dest[x];
         nw[c] = up;
@@ -207,7 +207,7 @@ void OlympusDecompressor::decompress(ByteStream input) const {
             nw[c] = pred;
           }
         }
-        dest[x] = left[c] = pred + ((diff * 4) | low);
+        dest[x] = left[c] = ushort16(pred + ((diff * 4) | low));
       } else {
         int up = dest[-pitch + (static_cast<int>(x))];
         int leftMinusNw = left[c] - nw[c];
@@ -223,7 +223,7 @@ void OlympusDecompressor::decompress(ByteStream input) const {
         } else
           pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left[c] : up;
 
-        dest[x] = left[c] = pred + ((diff * 4) | low);
+        dest[x] = left[c] = ushort16(pred + ((diff * 4) | low));
         nw[c] = up;
       }
       border = y_border;

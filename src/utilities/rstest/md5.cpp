@@ -58,8 +58,8 @@ static void md5_compress(md5_state* state, const uint8_t block[64]) {
 
   auto ROUND_TAIL = [ROTL32, &schedule](uint32_t& a, uint32_t b, uint32_t expr,
                                         uint32_t k, uint32_t s, uint32_t t) {
-    a = 0UL + a + expr + t + schedule[k];
-    (a) = 0UL + b + ROTL32(a, s);
+    a = uint32_t(0UL + a + expr + t + schedule[k]);
+    (a) = uint32_t(0UL + b + ROTL32(a, s));
   };
 
   auto ROUND0 = [ROUND_TAIL](uint32_t& a, uint32_t b, uint32_t c, uint32_t d,
@@ -152,10 +152,10 @@ static void md5_compress(md5_state* state, const uint8_t block[64]) {
   ROUND3(c, d, a, b, 2, 15, 0x2AD7D2BB);
   ROUND3(b, c, d, a, 9, 21, 0xEB86D391);
 
-  (*state)[0] = 0UL + (*state)[0] + a;
-  (*state)[1] = 0UL + (*state)[1] + b;
-  (*state)[2] = 0UL + (*state)[2] + c;
-  (*state)[3] = 0UL + (*state)[3] + d;
+  (*state)[0] = uint32_t(0UL + (*state)[0] + a);
+  (*state)[1] = uint32_t(0UL + (*state)[1] + b);
+  (*state)[2] = uint32_t(0UL + (*state)[2] + c);
+  (*state)[3] = uint32_t(0UL + (*state)[3] + d);
 }
 
 /* Full message hasher */
