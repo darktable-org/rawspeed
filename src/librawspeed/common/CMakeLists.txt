@@ -1,4 +1,6 @@
 FILE(GLOB SOURCES
+  "ChecksumFile.cpp"
+  "ChecksumFile.h"
   "Common.cpp"
   "Common.h"
   "Cpuid.cpp"
