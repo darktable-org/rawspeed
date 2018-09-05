@@ -156,7 +156,7 @@ script:
       docker run --read-only --tmpfs /tmp --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $BUILD_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS $EXTRA_OPTS --env CC --env CXX --env GCOV --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR --env ECO darktable/rawspeed sh -c "$CMD";
 
       if [[ "$TARGET2" == "SONARQUBE" ]]; then
-        export CMD="sonar-scanner -X -Dproject.settings=\"$SRC_DIR/.ci/sonar-project.properties\" -Dsonar.login=\"$SONAR_TOKEN\" -Dsonar.branch=\"$TRAVIS_BRANCH\" -Dsonar.projectVersion=\"$TRAVIS_COMMIT\"";
+        export CMD="sonar-scanner -Dproject.settings=\"$SRC_DIR/.ci/sonar-project.properties\" -Dsonar.login=\"$SONAR_TOKEN\" -Dsonar.branch=\"$TRAVIS_BRANCH\" -Dsonar.projectVersion=\"$TRAVIS_COMMIT\"";
         docker run --read-only --tmpfs /tmp --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $SRC_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS $EXTRA_OPTS --env CC --env CXX --env GCOV --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR --env ECO darktable/rawspeed sh -c "$CMD";
       fi;
 
