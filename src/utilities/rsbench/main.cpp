@@ -19,6 +19,7 @@
 */
 
 #include "RawSpeed-API.h"        // for RawDecoder, Buffer, FileReader, Raw...
+#include "common/ChecksumFile.h" // for ParseChecksumFile
 #include <benchmark/benchmark.h> // for Counter, State, DoNotOptimize, Init...
 #include <chrono>                // for duration, high_resolution_clock
 #include <ctime>                 // for clock, clock_t
@@ -160,11 +161,11 @@ int main(int argc, char** argv) {
   benchmark::Initialize(&argc, argv);
 
   auto hasFlag = [argc, argv](std::string flag) {
-    bool found = false;
+    int found = 0;
     for (int i = 1; i < argc; ++i) {
       if (!argv[i] || argv[i] != flag)
         continue;
-      found = true;
+      found = i;
       argv[i] = nullptr;
     }
     return found;
@@ -180,16 +181,38 @@ int main(int argc, char** argv) {
 
   const auto threadsMin = threading ? 1 : threadsMax;
 
+  // Were we told to use the repo (i.e. filelist.sha1 in that directory)?
+  int useChecksumFile = hasFlag("-r");
+  std::vector<rawspeed::ChecksumFileEntry> ChecksumFileEntries;
+  if (useChecksumFile && useChecksumFile + 1 < argc) {
+    char*& checksumFileRepo = argv[useChecksumFile + 1];
+    if (checksumFileRepo)
+      ChecksumFileEntries = rawspeed::ReadChecksumFile(checksumFileRepo);
+    checksumFileRepo = nullptr;
+  }
+
+  // If there are normal filenames, append them.
   for (int i = 1; i < argc; i++) {
     if (!argv[i])
       continue;
 
+    rawspeed::ChecksumFileEntry Entry;
     const char* fName = argv[i];
+    // These are supposed to be either absolute paths, or relative the run dir.
+    // We don't do any beautification.
+    Entry.FullFileName = fName;
+    Entry.RelFileName = fName;
+    ChecksumFileEntries.emplace_back(Entry);
+  }
+
+  // And finally, actually add the raws to be benchmarked.
+  for (const auto& Entry : ChecksumFileEntries) {
+    const char* fName = Entry.RelFileName.c_str();
     std::string tName(fName);
     tName += "/threads:";
 
     for (auto threads = threadsMin; threads <= threadsMax; threads++)
-      addBench(fName, tName, threads);
+      addBench(Entry.FullFileName.c_str(), tName, threads);
   }
 
   benchmark::RunSpecifiedBenchmarks();
