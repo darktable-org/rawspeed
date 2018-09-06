@@ -7861,6 +7861,17 @@
 		<Crop x="54" y="32" width="-50" height="-22"/>
 		<Sensor black="0" white="15767"/>
 	</Camera>
+	<Camera make="RICOH IMAGING COMPANY, LTD." model="PENTAX 645Z">
+		<ID make="Pentax" model="645Z">Pentax 645Z</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="48" y="0" width="-60" height="0"/>
+		<Sensor black="1" white="16316"/>
+	</Camera>
 	<Camera make="SAMSUNG" model="EX2F">
 		<ID make="Samsung" model="EX2F">Samsung EX2F</ID>
 		<CFA width="2" height="2">
@@ -10150,6 +10161,9 @@
 	</Camera>
 	<Camera make="PENTAX" model="PENTAX 645D" mode="dng">
 		<ID make="Pentax" model="645D">PENTAX 645D</ID>
+	</Camera>
+	<Camera make="PENTAX" model="PENTAX 645Z" mode="dng">
+		<ID make="Pentax" model="645Z">PENTAX 645Z</ID>
 	</Camera>
 	<Camera make="PENTAX" model="PENTAX K-01" mode="dng">
 		<ID make="Pentax" model="K-01">PENTAX K-01</ID>
