@@ -716,6 +716,26 @@
 			<Horizontal y="0" height="40"/>
 		</BlackAreas>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS 5D Mark IV" mode="sRaw1">
+		<ID make="Canon" model="EOS 5D Mark IV">Canon EOS 5D Mark IV</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="56032"/>
+		<!-- FIXME: iso50? -->
+		<Hints>
+			<Hint name="sraw_new" value=""/>
+			<Hint name="invert_sraw_wb" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS 5D Mark IV" mode="sRaw2">
+		<ID make="Canon" model="EOS 5D Mark IV">Canon EOS 5D Mark IV</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="56032"/>
+		<!-- FIXME: iso50? -->
+		<Hints>
+			<Hint name="sraw_new" value=""/>
+			<Hint name="invert_sraw_wb" value=""/>
+		</Hints>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS 5DS" decoder_version="6">
 		<ID make="Canon" model="EOS 5DS">Canon EOS 5DS</ID>
 		<CFA width="2" height="2">
