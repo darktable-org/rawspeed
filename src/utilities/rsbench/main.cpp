@@ -127,25 +127,24 @@ static inline void BM_RawSpeed(benchmark::State& state, const char* fileName,
     pixels = raw->getUncroppedDim().area();
   }
 
-  std::string label("FileSize,MB=");
-  label += std::to_string(double(map->getSize()) / double(1UL << 20UL));
-  label += "; MPix=";
-  label += std::to_string(double(pixels) / 1e+06);
-  state.SetLabel(label.c_str());
+  // These are total over all the `state.iterations()` iterations.
+  const double CPUTime = TT().count();
+  const double WallTime = WT().count();
 
-  const auto WallTime = WT();
-  const auto TotalTime = TT();
-  const auto ThreadingFactor = TotalTime.count() / WallTime.count();
-
+  // For each iteration:
   state.counters.insert({
-      {"Pixels", benchmark::Counter(state.iterations() * double(pixels),
-                                    benchmark::Counter::kIsRate)},
-      {"CPUTime,s", TotalTime.count() / state.iterations()},
-      {"ThreadingFactor", ThreadingFactor},
+      {"CPUTime,s", CPUTime / state.iterations()},
+      {"WallTime,s", WallTime / state.iterations()},
+      {"CPUTime/WallTime", CPUTime / WallTime}, // 'Threading factor'
+      {"Pixels", pixels},
+      {"Pixels/CPUTime", (state.iterations() * pixels) / CPUTime},
+      {"Pixels/WallTime", (state.iterations() * pixels) / WallTime},
+      /* {"Raws", 1}, */
+      {"Raws/CPUTime", state.iterations() / CPUTime},
+      {"Raws/WallTime", state.iterations() / WallTime},
   });
-
-  state.SetItemsProcessed(state.iterations());
-  state.SetBytesProcessed(state.iterations() * map->getSize());
+  // Could also have counters wrt. the filesize,
+  // but i'm not sure they are interesting.
 }
 
 static void addBench(const char* fName, std::string tName, int threads) {
