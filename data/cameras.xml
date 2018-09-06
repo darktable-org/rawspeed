@@ -7850,6 +7850,17 @@
 		<Crop x="0" y="0" width="3900" height="2616"/>
 		<Sensor black="0" white="4095"/>
 	</Camera>
+	<Camera make="PENTAX" model="PENTAX 645D">
+		<ID make="Pentax" model="645D">Pentax 645D</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">BLUE</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">RED</Color>
+		</CFA>
+		<Crop x="54" y="32" width="-50" height="-22"/>
+		<Sensor black="0" white="15767"/>
+	</Camera>
 	<Camera make="SAMSUNG" model="EX2F">
 		<ID make="Samsung" model="EX2F">Samsung EX2F</ID>
 		<CFA width="2" height="2">
