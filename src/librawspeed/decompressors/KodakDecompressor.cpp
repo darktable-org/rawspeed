@@ -87,6 +87,7 @@ KodakDecompressor::decodeSegment(const uint32 bsize) {
   }
   for (uint32 i = 0; i < bsize; i++) {
     uint32 len = blen[i];
+    assert(len < 16);
 
     if (bits < len) {
       for (uint32 j = 0; j < 32; j += 8) {
@@ -99,10 +100,8 @@ KodakDecompressor::decodeSegment(const uint32 bsize) {
     uint32 diff = static_cast<uint32>(bitbuf) & (0xffff >> (16 - len));
     bitbuf >>= len;
     bits -= len;
-    diff = len != 0 ? HuffmanTable::signExtended(diff, len) : diff;
 
-    // FIXME: this looks strange. I suspect we are doing it backwards.
-    out[i] = ushort16(diff);
+    out[i] = len != 0 ? HuffmanTable::signExtended(diff, len) : diff;
   }
 
   return out;
@@ -121,16 +120,14 @@ void KodakDecompressor::decompress() {
 
       const segment buf = decodeSegment(len);
 
-      // FIXME: unsigned predictor?!
-      std::array<uint32, 2> pred;
+      std::array<int, 2> pred;
       pred.fill(0);
 
       for (uint32 i = 0; i < len; i++) {
         pred[i & 1] += buf[i];
 
-        // FIXME: as with decodeSegment(), something is probably really wrong.
-        auto value = ushort16(pred[i & 1]);
-        if (value >= (1U << bps))
+        int value = pred[i & 1];
+        if (unsigned(value) >= (1U << bps))
           ThrowRDE("Value out of bounds %d (bps = %i)", value, bps);
 
         if (uncorrectedRawValues)
