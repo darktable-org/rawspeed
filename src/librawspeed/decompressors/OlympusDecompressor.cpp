@@ -128,34 +128,42 @@ void OlympusDecompressor::decompress(ByteStream input) const {
       carry[1] = (diff * 3 + carry[1]) >> 5;
       carry[2] = carry[0] > 16 ? 0 : carry[2] + 1;
 
+      auto getLeft = [dest, x]() { return dest[x - 2]; };
+      auto getUp = [dest, pitch, x]() {
+        return dest[-pitch + (static_cast<int>(x))];
+      };
+      auto getLeftUp = [dest, pitch, x]() {
+        return dest[-pitch + (static_cast<int>(x)) - 2];
+      };
+
       int pred;
       if (border) {
         if (y_border && x < 2)
           pred = 0;
         else {
           if (y_border)
-            pred = dest[x - 2];
+            pred = getLeft();
           else {
-            pred = dest[-pitch + (static_cast<int>(x))];
+            pred = getUp();
           }
         }
       } else {
-        // Have local variables for values used several tiles
-        // (having a "ushort16 *dst_up" that caches dest[-pitch+((int)x)] is
-        // actually slower, probably stack spill or aliasing)
-        int up = dest[-pitch + (static_cast<int>(x))];
-        int leftMinusNw =
-            dest[x - 2] - dest[-pitch + (static_cast<int>(x)) - 2];
-        int upMinusNw = up - dest[-pitch + (static_cast<int>(x)) - 2];
+        int left = getLeft();
+        int up = getUp();
+        int leftUp = getLeftUp();
+
+        int leftMinusNw = left - leftUp;
+        int upMinusNw = up - leftUp;
+
         // Check if sign is different, and they are both not zero
         if ((SignBit(leftMinusNw) ^ SignBit(upMinusNw)) &&
             (leftMinusNw != 0 && upMinusNw != 0)) {
           if (std::abs(leftMinusNw) > 32 || std::abs(upMinusNw) > 32)
-            pred = dest[x - 2] + upMinusNw;
+            pred = left + upMinusNw;
           else
-            pred = (dest[x - 2] + up) >> 1;
+            pred = (left + up) >> 1;
         } else
-          pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? dest[x - 2] : up;
+          pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left : up;
       }
 
       dest[x] = pred + ((diff * 4) | low);

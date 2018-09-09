@@ -18,7 +18,7 @@ CheckOptions:
   - key:             readability-function-size.NestingThreshold
     value:           '6'
   - key:             readability-function-size.VariableThreshold
-    value:           '30'
+    value:           '31'
   - key:             readability-simplify-boolean-expr.ChainedConditionalAssignment
     value:           '1'
   - key:             readability-simplify-boolean-expr.ChainedConditionalReturn
