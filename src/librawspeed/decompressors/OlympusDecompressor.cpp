@@ -140,10 +140,6 @@ void OlympusDecompressor::decompress(ByteStream input) const {
             nw[c] = pred;
           }
         }
-        // Set predictor
-        left[c] = pred + ((diff * 4) | low);
-        // Set the pixel
-        dest[x] = left[c];
       } else {
         // Have local variables for values used several tiles
         // (having a "ushort16 *dst_up" that caches dest[-pitch+((int)x)] is
@@ -161,12 +157,13 @@ void OlympusDecompressor::decompress(ByteStream input) const {
         } else
           pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left[c] : up;
 
-        // Set predictors
-        left[c] = pred + ((diff * 4) | low);
         nw[c] = up;
-        // Set the pixel
-        dest[x] = left[c];
       }
+
+      // Set predictor
+      left[c] = pred + ((diff * 4) | low);
+      // Set the pixel
+      dest[x] = left[c];
 
       if (c)
         border = y_border;
