@@ -10041,7 +10041,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="4095"/>
+		<Sensor black="208" white="4095"/>
 	</Camera>
 	<Camera make="KODAK" model="EOSDCS1B        FILE VERSION 3">
 		<ID make="Kodak" model="EOS DCS 1">Kodak EOSDCS1</ID>
