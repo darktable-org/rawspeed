@@ -75,24 +75,15 @@ void OlympusDecompressor::decompress(ByteStream input) const {
   assert(mRaw->dim.x > 0);
   assert(mRaw->dim.x % 2 == 0);
 
-  int nbits;
-  int sign;
-  int low;
-  int high;
-  int i;
-  std::array<int, 2> left{{}};
-  std::array<int, 2> nw{{}};
-  int pred;
-  int diff;
-
   uchar8* data = mRaw->getData();
   int pitch = mRaw->pitch;
 
   /* Build a table to quickly look up "high" value */
   std::unique_ptr<char[]> bittable(new char[4096]); // NOLINT
 
-  for (i = 0; i < 4096; i++) {
+  for (int i = 0; i < 4096; i++) {
     int b = i;
+    int high;
     for (high = 0; high < 12; high++)
       if ((b >> (11 - high)) & 1)
         break;
@@ -104,6 +95,8 @@ void OlympusDecompressor::decompress(ByteStream input) const {
 
   for (uint32 y = 0; y < static_cast<uint32>(mRaw->dim.y); y++) {
     std::array<std::array<int, 3>, 2> acarry{{}};
+    std::array<int, 2> left{{}};
+    std::array<int, 2> nw{{}};
 
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
     bool y_border = y < 2;
@@ -112,15 +105,16 @@ void OlympusDecompressor::decompress(ByteStream input) const {
       int c = x & 1;
 
       bits.fill();
-      i = 2 * (acarry[c][2] < 3);
+      int i = 2 * (acarry[c][2] < 3);
+      int nbits;
       for (nbits = 2 + i; static_cast<ushort16>(acarry[c][0]) >> (nbits + i);
            nbits++)
         ;
 
       int b = bits.peekBitsNoFill(15);
-      sign = (b >> 14) * -1;
-      low = (b >> 12) & 3;
-      high = bittable[b & 4095];
+      int sign = (b >> 14) * -1;
+      int low = (b >> 12) & 3;
+      int high = bittable[b & 4095];
 
       // Skip bytes used above or read bits
       if (high == 12) {
@@ -130,10 +124,11 @@ void OlympusDecompressor::decompress(ByteStream input) const {
         bits.skipBitsNoFill(high + 1 + 3);
 
       acarry[c][0] = (high << nbits) | bits.getBits(nbits);
-      diff = (acarry[c][0] ^ sign) + acarry[c][1];
+      int diff = (acarry[c][0] ^ sign) + acarry[c][1];
       acarry[c][1] = (diff * 3 + acarry[c][1]) >> 5;
       acarry[c][2] = acarry[c][0] > 16 ? 0 : acarry[c][2] + 1;
 
+      int pred;
       if (border) {
         if (y_border && x < 2)
           pred = 0;
