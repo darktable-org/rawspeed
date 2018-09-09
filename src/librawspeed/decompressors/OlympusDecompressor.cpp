@@ -95,7 +95,6 @@ void OlympusDecompressor::decompress(ByteStream input) const {
 
   for (uint32 y = 0; y < static_cast<uint32>(mRaw->dim.y); y++) {
     std::array<std::array<int, 3>, 2> acarry{{}};
-    std::array<int, 2> nw{{}};
 
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
     bool y_border = y < 2;
@@ -138,7 +137,6 @@ void OlympusDecompressor::decompress(ByteStream input) const {
             pred = dest[x - 2];
           else {
             pred = dest[-pitch + (static_cast<int>(x))];
-            nw[c] = pred;
           }
         }
       } else {
@@ -146,8 +144,9 @@ void OlympusDecompressor::decompress(ByteStream input) const {
         // (having a "ushort16 *dst_up" that caches dest[-pitch+((int)x)] is
         // actually slower, probably stack spill or aliasing)
         int up = dest[-pitch + (static_cast<int>(x))];
-        int leftMinusNw = dest[x - 2] - nw[c];
-        int upMinusNw = up - nw[c];
+        int leftMinusNw =
+            dest[x - 2] - dest[-pitch + (static_cast<int>(x)) - 2];
+        int upMinusNw = up - dest[-pitch + (static_cast<int>(x)) - 2];
         // Check if sign is different, and they are both not zero
         if ((SignBit(leftMinusNw) ^ SignBit(upMinusNw)) &&
             (leftMinusNw != 0 && upMinusNw != 0)) {
@@ -157,8 +156,6 @@ void OlympusDecompressor::decompress(ByteStream input) const {
             pred = (dest[x - 2] + up) >> 1;
         } else
           pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? dest[x - 2] : up;
-
-        nw[c] = up;
       }
 
       dest[x] = pred + ((diff * 4) | low);
