@@ -128,13 +128,9 @@ void OlympusDecompressor::decompress(ByteStream input) const {
       carry[1] = (diff * 3 + carry[1]) >> 5;
       carry[2] = carry[0] > 16 ? 0 : carry[2] + 1;
 
-      auto getLeft = [dest, x]() { return dest[x - 2]; };
-      auto getUp = [dest, pitch, x]() {
-        return dest[-pitch + (static_cast<int>(x))];
-      };
-      auto getLeftUp = [dest, pitch, x]() {
-        return dest[-pitch + (static_cast<int>(x)) - 2];
-      };
+      auto getLeft = [dest]() { return dest[-2]; };
+      auto getUp = [dest, pitch]() { return dest[-pitch]; };
+      auto getLeftUp = [dest, pitch]() { return dest[-pitch - 2]; };
 
       int pred;
       if (border) {
@@ -166,10 +162,12 @@ void OlympusDecompressor::decompress(ByteStream input) const {
           pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left : up;
       }
 
-      dest[x] = pred + ((diff * 4) | low);
+      *dest = pred + ((diff * 4) | low);
 
       if (c)
         border = y_border;
+
+      dest++;
     }
   }
 }
