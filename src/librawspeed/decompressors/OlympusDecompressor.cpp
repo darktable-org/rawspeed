@@ -104,10 +104,12 @@ void OlympusDecompressor::decompress(ByteStream input) const {
     for (uint32 x = 0; x < static_cast<uint32>(mRaw->dim.x); x++) {
       int c = x & 1;
 
+      std::array<int, 3>& carry = acarry[c];
+
       bits.fill();
-      int i = 2 * (acarry[c][2] < 3);
+      int i = 2 * (carry[2] < 3);
       int nbits;
-      for (nbits = 2 + i; static_cast<ushort16>(acarry[c][0]) >> (nbits + i);
+      for (nbits = 2 + i; static_cast<ushort16>(carry[0]) >> (nbits + i);
            nbits++)
         ;
 
@@ -123,10 +125,10 @@ void OlympusDecompressor::decompress(ByteStream input) const {
       } else
         bits.skipBitsNoFill(high + 1 + 3);
 
-      acarry[c][0] = (high << nbits) | bits.getBits(nbits);
-      int diff = (acarry[c][0] ^ sign) + acarry[c][1];
-      acarry[c][1] = (diff * 3 + acarry[c][1]) >> 5;
-      acarry[c][2] = acarry[c][0] > 16 ? 0 : acarry[c][2] + 1;
+      carry[0] = (high << nbits) | bits.getBits(nbits);
+      int diff = (carry[0] ^ sign) + carry[1];
+      carry[1] = (diff * 3 + carry[1]) >> 5;
+      carry[2] = carry[0] > 16 ? 0 : carry[2] + 1;
 
       int pred;
       if (border) {
