@@ -54,7 +54,8 @@ bool Cr2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 
   // FIXME: magic
 
-  return make == "Canon" || (make == "Kodak" && model == "DCS560C");
+  return make == "Canon" ||
+         (make == "Kodak" && (model == "DCS520C" || model == "DCS560C"));
 }
 
 RawImage Cr2Decoder::decodeOldFormat() {
