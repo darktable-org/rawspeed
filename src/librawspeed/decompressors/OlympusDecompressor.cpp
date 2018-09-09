@@ -95,7 +95,6 @@ void OlympusDecompressor::decompress(ByteStream input) const {
 
   for (uint32 y = 0; y < static_cast<uint32>(mRaw->dim.y); y++) {
     std::array<std::array<int, 3>, 2> acarry{{}};
-    std::array<int, 2> left{{}};
     std::array<int, 2> nw{{}};
 
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
@@ -136,7 +135,7 @@ void OlympusDecompressor::decompress(ByteStream input) const {
           pred = 0;
         else {
           if (y_border)
-            pred = left[c];
+            pred = dest[x - 2];
           else {
             pred = dest[-pitch + (static_cast<int>(x))];
             nw[c] = pred;
@@ -147,25 +146,22 @@ void OlympusDecompressor::decompress(ByteStream input) const {
         // (having a "ushort16 *dst_up" that caches dest[-pitch+((int)x)] is
         // actually slower, probably stack spill or aliasing)
         int up = dest[-pitch + (static_cast<int>(x))];
-        int leftMinusNw = left[c] - nw[c];
+        int leftMinusNw = dest[x - 2] - nw[c];
         int upMinusNw = up - nw[c];
         // Check if sign is different, and they are both not zero
         if ((SignBit(leftMinusNw) ^ SignBit(upMinusNw)) &&
             (leftMinusNw != 0 && upMinusNw != 0)) {
           if (std::abs(leftMinusNw) > 32 || std::abs(upMinusNw) > 32)
-            pred = left[c] + upMinusNw;
+            pred = dest[x - 2] + upMinusNw;
           else
-            pred = (left[c] + up) >> 1;
+            pred = (dest[x - 2] + up) >> 1;
         } else
-          pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left[c] : up;
+          pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? dest[x - 2] : up;
 
         nw[c] = up;
       }
 
-      // Set predictor
-      left[c] = pred + ((diff * 4) | low);
-      // Set the pixel
-      dest[x] = left[c];
+      dest[x] = pred + ((diff * 4) | low);
 
       if (c)
         border = y_border;
