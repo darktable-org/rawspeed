@@ -109,7 +109,7 @@ void OlympusDecompressor::decompress(ByteStream input) const {
     bool y_border = y < 2;
     bool border = true;
     for (uint32 x = 0; x < static_cast<uint32>(mRaw->dim.x); x++) {
-      int c = 0;
+      int c = x & 1;
 
       bits.fill();
       i = 2 * (acarry[c][2] < 3);
@@ -173,68 +173,8 @@ void OlympusDecompressor::decompress(ByteStream input) const {
         dest[x] = left[c];
       }
 
-      // ODD PIXELS
-      x += 1;
-      c = 1;
-      bits.fill();
-      i = 2 * (acarry[c][2] < 3);
-      for (nbits = 2 + i; static_cast<ushort16>(acarry[c][0]) >> (nbits + i);
-           nbits++)
-        ;
-      b = bits.peekBitsNoFill(15);
-      sign = (b >> 14) * -1;
-      low = (b >> 12) & 3;
-      high = bittable[b & 4095];
-
-      // Skip bytes used above or read bits
-      if (high == 12) {
-        bits.skipBitsNoFill(15);
-        high = bits.getBits(16 - nbits) >> 1;
-      } else
-        bits.skipBitsNoFill(high + 1 + 3);
-
-      acarry[c][0] = (high << nbits) | bits.getBits(nbits);
-      diff = (acarry[c][0] ^ sign) + acarry[c][1];
-      acarry[c][1] = (diff * 3 + acarry[c][1]) >> 5;
-      acarry[c][2] = acarry[c][0] > 16 ? 0 : acarry[c][2] + 1;
-
-      if (border) {
-        if (y_border && x < 2)
-          pred = 0;
-        else {
-          if (y_border)
-            pred = left[c];
-          else {
-            pred = dest[-pitch + (static_cast<int>(x))];
-            nw[c] = pred;
-          }
-        }
-        // Set predictor
-        left[c] = pred + ((diff * 4) | low);
-        // Set the pixel
-        dest[x] = left[c];
-      } else {
-        int up = dest[-pitch + (static_cast<int>(x))];
-        int leftMinusNw = left[c] - nw[c];
-        int upMinusNw = up - nw[c];
-
-        // Check if sign is different, and they are both not zero
-        if ((SignBit(leftMinusNw) ^ SignBit(upMinusNw)) &&
-            (leftMinusNw != 0 && upMinusNw != 0)) {
-          if (std::abs(leftMinusNw) > 32 || std::abs(upMinusNw) > 32)
-            pred = left[c] + upMinusNw;
-          else
-            pred = (left[c] + up) >> 1;
-        } else
-          pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left[c] : up;
-
-        // Set predictors
-        left[c] = pred + ((diff * 4) | low);
-        nw[c] = up;
-        // Set the pixel
-        dest[x] = left[c];
-      }
-      border = y_border;
+      if (c)
+        border = y_border;
     }
   }
 }
