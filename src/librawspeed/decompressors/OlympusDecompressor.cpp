@@ -97,6 +97,7 @@ void OlympusDecompressor::decompress(ByteStream input) const {
     std::array<std::array<int, 3>, 2> acarry{{}};
 
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
+    auto* up_ptr = y > 0 ? &dest[-pitch] : &dest[0];
     for (uint32 x = 0; x < static_cast<uint32>(mRaw->dim.x); x++) {
       int c = x & 1;
 
@@ -127,8 +128,8 @@ void OlympusDecompressor::decompress(ByteStream input) const {
       carry[2] = carry[0] > 16 ? 0 : carry[2] + 1;
 
       auto getLeft = [dest]() { return dest[-2]; };
-      auto getUp = [dest, pitch]() { return dest[-pitch]; };
-      auto getLeftUp = [dest, pitch]() { return dest[-pitch - 2]; };
+      auto getUp = [up_ptr]() { return up_ptr[0]; };
+      auto getLeftUp = [up_ptr]() { return up_ptr[-2]; };
 
       int pred;
       if (y < 2 && x < 2)
@@ -158,6 +159,7 @@ void OlympusDecompressor::decompress(ByteStream input) const {
 
       *dest = pred + ((diff * 4) | low);
       dest++;
+      up_ptr++;
     }
   }
 }
