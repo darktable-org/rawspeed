@@ -4143,6 +4143,21 @@
 		<Crop x="0" y="0" width="4096" height="3072"/>
 		<Sensor black="64" white="4095"/>
 	</Camera>
+	<Camera make="OLYMPUS IMAGING CORP." model="SH-2">
+		<ID make="Olympus" model="SH-2">Olympus SH-2</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">RED</Color>
+			<Color x="0" y="1">BLUE</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="200" white="4000"/>
+		<Hints>
+			<Hint name="force_uncompressed" value=""/>
+			<Hint name="jpeg32_bitorder" value=""/>
+		</Hints>
+	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="SP320">
 		<ID make="Olympus" model="SP320">Olympus SP320</ID>
 		<CFA width="2" height="2">
