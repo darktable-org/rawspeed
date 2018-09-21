@@ -1,6 +1,13 @@
 # RawSpeed Camera Definition File
 
-The camera definition file is used for decoding images which don’t require any code changes. This enables us to add support for cameras which were not yet released when the code was written.
+The camera definition file is used to list the explicitly supported (or unsupported) cameras.
+
+WARNING: the format of that file is **not** stable.
+There is **no** backward (or forward) compatibility guarantees.
+Given RawSpeed code version `V`, only that very `cameras.xml` from that same
+version is guaranteed to work.
+`cameras.xml` from version `V+1` may not work.
+`cameras.xml` from version `V-1` may not work.
 
 ```xml
 <Camera make="Panasonic" model="DMC-FZ45" mode="4:3" supported="yes" decoder_version="0">
