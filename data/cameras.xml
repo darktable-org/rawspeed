@@ -3933,111 +3933,51 @@
 	</Camera>
 	<Camera make="OLYMPUS OPTICAL CO.,LTD" model="C5050Z">
 		<ID make="Olympus" model="C5050Z">Olympus C5050Z</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">BLUE</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">RED</Color>
-		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS CORPORATION" model="C5060WZ">
 		<ID make="Olympus" model="C5060WZ">Olympus C5060WZ</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS CORPORATION" model="C8080WZ">
 		<ID make="Olympus" model="C8080WZ">Olympus C8080WZ</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">BLUE</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">RED</Color>
-		</CFA>
 		<Crop x="0" y="0" width="3280" height="2453"/>
 		<Sensor black="0" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS CORPORATION" model="E-1">
 		<ID make="Olympus" model="E-1">Olympus E-1</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">GREEN</Color>
-			<Color x="1" y="0">RED</Color>
-			<Color x="0" y="1">BLUE</Color>
-			<Color x="1" y="1">GREEN</Color>
-		</CFA>
 		<Crop x="0" y="0" width="2624" height="1966"/>
 		<Sensor black="65" white="4095"/>
 	</Camera>
         <Camera make="OLYMPUS CORPORATION" model="TG-4">
 	        <ID make="Olympus" model="TG-4">Olympus TG-4</ID>
-                <CFA width="2" height="2">
-                        <Color x="0" y="0">GREEN</Color>
-                        <Color x="1" y="0">RED</Color>
-                        <Color x="0" y="1">BLUE</Color>
-                        <Color x="1" y="1">GREEN</Color>
-			</CFA>
 		<Crop x="16" y="8" width="-16" height="-8"/>
                 <Sensor black="0" white="4000"/>
 		</Camera>
 	<Camera make="OLYMPUS CORPORATION" model="TG-5">
 		<ID make="Olympus" model="TG-5">Olympus TG-5</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">GREEN</Color>
-			<Color x="1" y="0">RED</Color>
-			<Color x="0" y="1">BLUE</Color>
-			<Color x="1" y="1">GREEN</Color>
-		</CFA>
 		<Crop x="0" y="0" width="-24" height="0"/>
 		<Sensor black="256" white="4000"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="C7070WZ">
 		<ID make="Olympus" model="C7070WZ">Olympus C7070WZ</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="3088" height="2309"/>
 		<Sensor black="0" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-3">
 		<ID make="Olympus" model="E-3">Olympus E-3</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="3720" height="2800"/>
 		<Sensor black="65" white="4015"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-30">
 		<ID make="Olympus" model="E-30">Olympus E-30</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">BLUE</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">RED</Color>
-		</CFA>
 		<Crop x="0" y="0" width="-6" height="-2"/>
 		<Sensor black="65" white="4015"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-300" decoder_version="3">
 		<ID make="Olympus" model="E-300">Olympus E-300</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="3340" height="2504"/>
 		<Sensor black="63" white="4095"/>
 		<Hints>
@@ -4047,12 +3987,6 @@
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-330" decoder_version="3">
 		<ID make="Olympus" model="E-330">Olympus E-330</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="3250" height="2450"/>
 		<Sensor black="77" white="4095"/>
 		<Hints>
@@ -4062,56 +3996,26 @@
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-400">
 		<ID make="Olympus" model="E-400">Olympus E-400</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">GREEN</Color>
-			<Color x="1" y="0">RED</Color>
-			<Color x="0" y="1">BLUE</Color>
-			<Color x="1" y="1">GREEN</Color>
-		</CFA>
 		<Crop x="0" y="0" width="3768" height="2840"/>
 		<Sensor black="96" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-410">
 		<ID make="Olympus" model="E-410">Olympus E-410</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="3720" height="2800"/>
 		<Sensor black="72" white="3500"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-420">
 		<ID make="Olympus" model="E-420">Olympus E-420</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="3720" height="2800"/>
 		<Sensor black="68" white="4015"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-450">
 		<ID make="Olympus" model="E-450">Olympus E-450</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="69" white="4015"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-500" decoder_version="3">
 		<ID make="Olympus" model="E-500">Olympus E-500</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="3340" height="2504"/>
 		<Sensor black="63" white="3967"/>
 		<Hints>
@@ -4121,56 +4025,26 @@
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-510">
 		<ID make="Olympus" model="E-510">Olympus E-510</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="3720" height="2800"/>
 		<Sensor black="72" white="3500"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-520">
 		<ID make="Olympus" model="E-520">Olympus E-520</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="3720" height="2800"/>
 		<Sensor black="69" white="4015"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-600">
 		<ID make="Olympus" model="E-600">Olympus E-600</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">BLUE</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">RED</Color>
-		</CFA>
 		<Crop x="0" y="0" width="4096" height="3072"/>
 		<Sensor black="64" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-620">
 		<ID make="Olympus" model="E-620">Olympus E-620</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">BLUE</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">RED</Color>
-		</CFA>
 		<Crop x="0" y="0" width="4096" height="3072"/>
 		<Sensor black="64" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="SH-2">
 		<ID make="Olympus" model="SH-2">Olympus SH-2</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">GREEN</Color>
-			<Color x="1" y="0">RED</Color>
-			<Color x="0" y="1">BLUE</Color>
-			<Color x="1" y="1">GREEN</Color>
-		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="200" white="4000"/>
 		<Hints>
@@ -4180,144 +4054,66 @@
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="SP320">
 		<ID make="Olympus" model="SP320">Olympus SP320</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="SP350">
 		<ID make="Olympus" model="SP350">Olympus SP350</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="3280" height="2453"/>
 		<Sensor black="0" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="SP500UZ">
 		<ID make="Olympus" model="SP500UZ">Olympus SP500UZ</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">GREEN</Color>
-			<Color x="1" y="0">BLUE</Color>
-			<Color x="0" y="1">RED</Color>
-			<Color x="1" y="1">GREEN</Color>
-		</CFA>
 		<Crop x="0" y="0" width="2832" height="2117"/>
 		<Sensor black="0" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-5">
 		<ID make="Olympus" model="E-5">Olympus E-5</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">BLUE</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">RED</Color>
-		</CFA>
 		<Crop x="0" y="0" width="-4" height="0"/>
 		<Sensor black="80" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS OPTICAL CO.,LTD" model="E-10">
 		<ID make="Olympus" model="E-10">Olympus E-10</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="2256" height="1684"/>
 		<Sensor black="32" white="1023"/>
 	</Camera>
 	<Camera make="OLYMPUS OPTICAL CO.,LTD" model="E-20,E-20N,E-20P">
 		<ID make="Olympus" model="E-20">Olympus E-20</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="2576" height="1924"/>
 		<Sensor black="0" white="4092"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-M1">
 		<ID make="Olympus" model="E-M1">Olympus E-M1</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">BLUE</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">RED</Color>
-		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="255" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS CORPORATION" model="E-M1MarkII">
 		<ID make="Olympus" model="E-M1MarkII">Olympus E-M1 Mark II</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="254" white="4000"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-M10">
 		<ID make="Olympus" model="E-M10">Olympus E-M10</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="8" y="8" width="-24" height="-8"/>
 		<Sensor black="254" white="4000"/>
 	</Camera>
 	<Camera make="OLYMPUS CORPORATION" model="E-M10MarkII">
 		<ID make="Olympus" model="E-M10 Mark II">Olympus E-M10 Mark II</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="254" white="4000"/>
 	</Camera>
 	<Camera make="OLYMPUS CORPORATION" model="E-M10 Mark III">
 		<ID make="Olympus" model="E-M10 Mark III">Olympus E-M10 Mark III</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="254" white="4000"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-M5">
 		<ID make="Olympus" model="E-M5">Olympus E-M5</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="8" y="8" width="-24" height="-8"/>
 		<Sensor black="255" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-M5MarkII">
 		<ID make="Olympus" model="E-M5 Mark II">Olympus E-M5 Mark II</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="254" white="4000"/>
 		<Sensor black="249" white="4000" iso_min="800" iso_max="3199"/>
@@ -4328,34 +4124,16 @@
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-P1">
 		<ID make="Olympus" model="E-P1">Olympus E-P1</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="4094" height="3082"/>
 		<Sensor black="55" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-PL1">
 		<ID make="Olympus" model="E-PL1">Olympus E-PL1</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="4094" height="3082"/>
 		<Sensor black="55" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-PL2">
 		<ID make="Olympus" model="E-PL2">Olympus E-PL2</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="-4" height="0"/>
 		<Sensor black="45" white="4095"/>
 		<BlackAreas>
@@ -4364,12 +4142,6 @@
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-PL3">
 		<ID make="Olympus" model="E-PL3">Olympus E-PL3</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="-30" height="0"/>
 		<Sensor black="45" white="4095"/>
 		<BlackAreas>
@@ -4378,78 +4150,36 @@
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-PL5">
 		<ID make="Olympus" model="E-PL5">Olympus E-PL5</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="8" y="8" width="-24" height="-8"/>
 		<Sensor black="0" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-PL6">
 		<ID make="Olympus" model="E-PL6">Olympus E-PL6</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="8" y="8" width="-24" height="-8"/>
 		<Sensor black="0" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-PL7">
 		<ID make="Olympus" model="E-PL7">Olympus E-PL7</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="8" y="8" width="-24" height="-8"/>
 		<Sensor black="0" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS CORPORATION" model="E-PL8">
 		<ID make="Olympus" model="E-PL8">Olympus E-PL8</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="8" y="8" width="-24" height="-8"/>
 		<Sensor black="254" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS CORPORATION" model="E-PL9">
 		<ID make="Olympus" model="E-PL9">Olympus E-PL9</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="8" y="8" width="-24" height="-8"/>
 		<Sensor black="248" white="4000"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-P5">
 		<ID make="Olympus" model="E-P5">Olympus E-P5</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="8" y="8" width="-24" height="-8"/>
 		<Sensor black="250" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-PM1">
 		<ID make="Olympus" model="E-PM1">Olympus E-PM1</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="-24" height="0"/>
 		<Sensor black="45" white="4095"/>
 		<BlackAreas>
@@ -4458,67 +4188,31 @@
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-PM2">
 		<ID make="Olympus" model="E-PM2">Olympus E-PM2</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="8" y="8" width="-24" height="-8"/>
 		<Sensor black="250" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-P2">
 		<ID make="Olympus" model="E-P2">Olympus E-P2</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="55" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-P3">
 		<ID make="Olympus" model="E-P3">Olympus E-P3</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="-26" height="0"/>
 		<Sensor black="0" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS CORPORATION" model="PEN-F">
 		<ID make="Olympus" model="PEN-F">Olympus PEN-F</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="254" white="4000"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="XZ-1">
 		<ID make="Olympus" model="XZ-1">Olympus XZ-1</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="0" height="-2"/>
 		<Sensor black="55" white="3972"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="XZ-2" decoder_version="3">
 		<ID make="Olympus" model="XZ-2">Olympus XZ-2</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="0" height="-2"/>
 		<Sensor black="200" white="4092"/>
 		<Hints>
@@ -4528,12 +4222,6 @@
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="XZ-10" decoder_version="3">
 		<ID make="Olympus" model="XZ-10">Olympus XZ-10</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="200" white="3900"/>
 		<Hints>
@@ -4543,23 +4231,11 @@
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="SP570UZ">
 		<ID make="Olympus" model="SP570UZ">Olympus SP570UZ</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">BLUE</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">RED</Color>
-		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="4095"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="STYLUS1">
 		<ID make="Olympus" model="Stylus1">Olympus Stylus1</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
 		<Crop x="0" y="0" width="-14" height="0"/>
 		<Sensor black="200" white="3900"/>
 		<Aliases>
