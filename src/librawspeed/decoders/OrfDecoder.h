@@ -47,6 +47,8 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 private:
+  void parseCFA();
+
   int getDecoderVersion() const override { return 3; }
   void decodeUncompressed(const ByteStream& s, uint32 w, uint32 h, uint32 size);
 };

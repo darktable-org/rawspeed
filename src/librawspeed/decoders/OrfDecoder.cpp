@@ -152,12 +152,51 @@ void OrfDecoder::decodeUncompressed(const ByteStream& s, uint32 w, uint32 h,
   }
 }
 
+void OrfDecoder::parseCFA() {
+  if (!mRootIFD->hasEntryRecursive(EXIFCFAPATTERN))
+    ThrowRDE("No EXIFCFAPATTERN entry found!");
+
+  TiffEntry* CFA = mRootIFD->getEntryRecursive(EXIFCFAPATTERN);
+  if (CFA->type != TiffDataType::TIFF_UNDEFINED || CFA->count != 8) {
+    ThrowRDE("Bad EXIFCFAPATTERN entry (type %u, count %u).", CFA->type,
+             CFA->count);
+  }
+
+  iPoint2D cfaSize(CFA->getU16(0), CFA->getU16(1));
+  if (cfaSize != iPoint2D{2, 2})
+    ThrowRDE("Bad CFA size: (%i, %i)", cfaSize.x, cfaSize.y);
+
+  mRaw->cfa.setSize(cfaSize);
+
+  auto int2enum = [](uchar8 i) -> CFAColor {
+    switch (i) {
+    case 0:
+      return CFA_RED;
+    case 1:
+      return CFA_GREEN;
+    case 2:
+      return CFA_BLUE;
+    default:
+      ThrowRDE("Unexpected CFA color: %u", i);
+    }
+  };
+
+  for (int y = 0; y < cfaSize.y; y++) {
+    for (int x = 0; x < cfaSize.x; x++) {
+      uchar8 c1 = CFA->getByte(4 + x + y * cfaSize.x);
+      CFAColor c2 = int2enum(c1);
+      mRaw->cfa.setColorAt(iPoint2D(x, y), c2);
+    }
+  }
+}
+
 void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
-  mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
 
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
     iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();
+
+  parseCFA();
 
   setMetaData(meta, "", iso);
 
