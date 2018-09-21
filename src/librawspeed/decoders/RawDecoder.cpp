@@ -195,7 +195,11 @@ void RawDecoder::setMetaData(const CameraMetaData* meta, const string& make,
     return;
   }
 
-  mRaw->cfa = cam->cfa;
+  // Only override CFA with the data from cameras.xml if it actually contained
+  // the CFA.
+  if (cam->cfa.getSize().area() > 0)
+    mRaw->cfa = cam->cfa;
+
   mRaw->metadata.canonical_make = cam->canonical_make;
   mRaw->metadata.canonical_model = cam->canonical_model;
   mRaw->metadata.canonical_alias = cam->canonical_alias;
