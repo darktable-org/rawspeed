@@ -117,39 +117,60 @@ RawImage OrfDecoder::decodeRawInternal() {
 
   ByteStream input(handleSlices());
 
-  if (raw->getEntry(STRIPOFFSETS)->count != 1 ||
-      hints.has("force_uncompressed")) {
-    mRaw->createData();
-    decodeUncompressed(input, width, height, input.getSize());
-  } else {
-    OlympusDecompressor o(mRaw);
-    mRaw->createData();
-    o.decompress(std::move(input));
-  }
+  if (decodeUncompressed(input, width, height, input.getSize()))
+    return mRaw;
+
+  if (raw->getEntry(STRIPOFFSETS)->count != 1)
+    ThrowRDE("%u stripes, and not uncompressed. Unsupported.",
+             raw->getEntry(STRIPOFFSETS)->count);
+
+  OlympusDecompressor o(mRaw);
+  mRaw->createData();
+  o.decompress(std::move(input));
 
   return mRaw;
 }
 
-void OrfDecoder::decodeUncompressed(const ByteStream& s, uint32 w, uint32 h,
+bool OrfDecoder::decodeUncompressed(const ByteStream& s, uint32 w, uint32 h,
                                     uint32 size) {
   UncompressedDecompressor u(s, mRaw);
-  if (hints.has("packed_with_control"))
+  // FIXME: most of this logic should be in UncompressedDecompressor,
+  // one way or another.
+
+  if (size == h * ((w * 12 / 8) + ((w + 2) / 10))) {
+    // 12-bit  packed 'with control' raw
+    mRaw->createData();
     u.decode12BitRaw<Endianness::little, false, true>(w, h);
-  else if (hints.has("jpeg32_bitorder")) {
+    return true;
+  }
+
+  if (size == w * h * 12 / 8) { // We're in a 12-bit packed raw
     iPoint2D dimensions(w, h);
     iPoint2D pos(0, 0);
+    mRaw->createData();
     u.readUncompressedRaw(dimensions, pos, w * 12 / 8, 12, BitOrder_MSB32);
-  } else if (size >= w * h * 2) { // We're in an unpacked raw
+    return true;
+  }
+
+  if (size == w * h * 2) { // We're in an unpacked raw
+    mRaw->createData();
     // FIXME: seems fishy
     if (s.getByteOrder() == getHostEndianness())
       u.decodeRawUnpacked<12, Endianness::little>(w, h);
     else
       u.decode12BitRawUnpackedLeftAligned<Endianness::big>(w, h);
-  } else if (size >= w*h*3/2) { // We're in one of those weird interlaced packed raws
-    u.decode12BitRaw<Endianness::big, true>(w, h);
-  } else {
-    ThrowRDE("Don't know how to handle the encoding in this file");
+    return true;
   }
+
+  if (size >
+      w * h * 3 / 2) { // We're in one of those weird interlaced packed raws
+    mRaw->createData();
+    u.decode12BitRaw<Endianness::big, true>(w, h);
+    return true;
+  }
+
+  // Does not appear to be uncomporessed. Maybe it's compressed?
+  return false;
 }
 
 void OrfDecoder::parseCFA() {

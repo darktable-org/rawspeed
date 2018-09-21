@@ -3980,19 +3980,11 @@
 		<ID make="Olympus" model="E-300">Olympus E-300</ID>
 		<Crop x="0" y="0" width="3340" height="2504"/>
 		<Sensor black="63" white="4095"/>
-		<Hints>
-			<Hint name="force_uncompressed" value=""/>
-			<Hint name="packed_with_control" value=""/>
-		</Hints>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-330" decoder_version="3">
 		<ID make="Olympus" model="E-330">Olympus E-330</ID>
 		<Crop x="0" y="0" width="3250" height="2450"/>
 		<Sensor black="77" white="4095"/>
-		<Hints>
-			<Hint name="force_uncompressed" value=""/>
-			<Hint name="packed_with_control" value=""/>
-		</Hints>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-400">
 		<ID make="Olympus" model="E-400">Olympus E-400</ID>
@@ -4018,10 +4010,6 @@
 		<ID make="Olympus" model="E-500">Olympus E-500</ID>
 		<Crop x="0" y="0" width="3340" height="2504"/>
 		<Sensor black="63" white="3967"/>
-		<Hints>
-			<Hint name="force_uncompressed" value=""/>
-			<Hint name="packed_with_control" value=""/>
-		</Hints>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-510">
 		<ID make="Olympus" model="E-510">Olympus E-510</ID>
@@ -4047,10 +4035,6 @@
 		<ID make="Olympus" model="SH-2">Olympus SH-2</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="200" white="4000"/>
-		<Hints>
-			<Hint name="force_uncompressed" value=""/>
-			<Hint name="jpeg32_bitorder" value=""/>
-		</Hints>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="SP320">
 		<ID make="Olympus" model="SP320">Olympus SP320</ID>
@@ -4215,19 +4199,11 @@
 		<ID make="Olympus" model="XZ-2">Olympus XZ-2</ID>
 		<Crop x="0" y="0" width="0" height="-2"/>
 		<Sensor black="200" white="4092"/>
-		<Hints>
-			<Hint name="force_uncompressed" value=""/>
-			<Hint name="jpeg32_bitorder" value=""/>
-		</Hints>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="XZ-10" decoder_version="3">
 		<ID make="Olympus" model="XZ-10">Olympus XZ-10</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="200" white="3900"/>
-		<Hints>
-			<Hint name="force_uncompressed" value=""/>
-			<Hint name="jpeg32_bitorder" value=""/>
-		</Hints>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="SP570UZ">
 		<ID make="Olympus" model="SP570UZ">Olympus SP570UZ</ID>
