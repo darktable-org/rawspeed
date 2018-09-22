@@ -9653,6 +9653,17 @@
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="15000"/>
 	</Camera>
+	<Camera make="Phase One A/S" model="P65+">
+		<ID make="Phase One" model="P65+">Phase One P65+</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="42" y="12" width="-18" height="-48"/>
+		<Sensor black="0" white="16383"/>
+	</Camera>
 	<Camera make="Phase One A/S" model="IQ140">
 		<ID make="Phase One" model="IQ140">Phase One IQ140</ID>
 		<CFA width="2" height="2">
