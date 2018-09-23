@@ -22,14 +22,14 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32
-#include "common/RawImage.h"                    // for RawImage
-#include "decoders/AbstractTiffDecoder.h"       // for AbstractTiffDecoder
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/ByteStream.h"                      // for ByteStream
-#include "tiff/TiffIFD.h"                       // for TiffRootIFD (ptr only)
-#include <utility>                              // for move
-#include <vector>                               // for vector
+#include "common/Common.h"                // for uint32
+#include "common/RawImage.h"              // for RawImage
+#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
+#include "decompressors/AbstractParallelizedDecompressor.h" // for AbstractPa...
+#include "io/ByteStream.h"                                  // for ByteStream
+#include "tiff/TiffIFD.h" // for TiffRootIFD (ptr only)
+#include <utility>        // for move
+#include <vector>         // for vector
 
 namespace rawspeed {
 
@@ -40,17 +40,16 @@ struct PhaseOneStrip {
   PhaseOneStrip(int block, ByteStream bs_) : n(block), bs(std::move(bs_)) {}
 };
 
-class PhaseOneDecompressor final : public AbstractDecompressor {
-  RawImage mRaw;
+class PhaseOneDecompressor final : public AbstractParallelizedDecompressor {
   std::vector<PhaseOneStrip> strips;
 
-  void decompressStrip(const PhaseOneStrip& strip);
+  void decompressStrip(const PhaseOneStrip& strip) const;
+
+  void decompressThreaded(const RawDecompressorThread* t) const final;
 
 public:
   PhaseOneDecompressor(const RawImage& img,
                        std::vector<PhaseOneStrip>&& strips_);
-
-  void decompress();
 };
 
 } // namespace rawspeed

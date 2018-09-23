@@ -46,7 +46,7 @@ namespace rawspeed {
 
 PhaseOneDecompressor::PhaseOneDecompressor(const RawImage& img,
                                            std::vector<PhaseOneStrip>&& strips_)
-    : mRaw(img), strips(std::move(strips_)) {
+    : AbstractParallelizedDecompressor(img), strips(std::move(strips_)) {
   if (mRaw->getDataType() != TYPE_USHORT16)
     ThrowRDE("Unexpected data type");
 
@@ -65,7 +65,7 @@ PhaseOneDecompressor::PhaseOneDecompressor(const RawImage& img,
   }
 }
 
-void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) {
+void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
   uint32 width = mRaw->dim.x;
   assert(width % 2 == 0);
 
@@ -113,9 +113,10 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) {
   }
 }
 
-void PhaseOneDecompressor::decompress() {
-  for (const auto& strip : strips)
-    decompressStrip(strip);
+void PhaseOneDecompressor::decompressThreaded(
+    const RawDecompressorThread* t) const {
+  for (size_t i = t->start; i < t->end && i < strips.size(); i++)
+    decompressStrip(strips[i]);
 }
 
 } // namespace rawspeed
