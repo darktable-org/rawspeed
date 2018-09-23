@@ -21,13 +21,14 @@
 
 #pragma once
 
-#include "common/Common.h"                // for uint32
-#include "common/RawImage.h"              // for RawImage
-#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "io/ByteStream.h"                // for ByteStream
-#include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
-#include <utility>                        // for move
-#include <vector>                         // for vector
+#include "common/Common.h"                      // for uint32
+#include "common/RawImage.h"                    // for RawImage
+#include "decoders/AbstractTiffDecoder.h"       // for AbstractTiffDecoder
+#include "decompressors/PhaseOneDecompressor.h" // for PhaseOneDecompressor
+#include "io/ByteStream.h"                      // for ByteStream
+#include "tiff/TiffIFD.h"                       // for TiffRootIFD (ptr only)
+#include <utility>                              // for move
+#include <vector>                               // for vector
 
 namespace rawspeed {
 
@@ -43,18 +44,9 @@ class IiqDecoder final : public AbstractTiffDecoder {
     IiqOffset(uint32 block, uint32 offset_) : n(block), offset(offset_) {}
   };
 
-  struct IiqStrip {
-    const int n;
-    const ByteStream bs;
-
-    IiqStrip(int block, ByteStream bs_) : n(block), bs(std::move(bs_)) {}
-  };
-
-  std::vector<IiqStrip> computeSripes(const Buffer& raw_data,
-                                      std::vector<IiqOffset>&& offsets,
-                                      uint32 height) const;
-
-  void DecodeStrip(const IiqStrip& strip, uint32 width, uint32 height);
+  std::vector<PhaseOneStrip> computeSripes(const Buffer& raw_data,
+                                           std::vector<IiqOffset>&& offsets,
+                                           uint32 height) const;
 
 public:
   static bool isAppropriateDecoder(const Buffer* file);
@@ -71,8 +63,6 @@ public:
 protected:
   int getDecoderVersion() const override { return 0; }
   uint32 black_level = 0;
-  void DecodePhaseOneC(const std::vector<IiqStrip>& strips, uint32 width,
-                       uint32 height);
   void CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
                         uint32 split_col);
   void CorrectQuadrantMultipliersCombined(ByteStream data, uint32 split_row,

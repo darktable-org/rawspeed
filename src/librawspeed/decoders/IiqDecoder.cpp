@@ -26,20 +26,21 @@
 #include "common/Spline.h"                // for Spline, Spline<>::value_type
 #include "decoders/RawDecoder.h"          // for RawDecoder::(anonymous)
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/BitPumpMSB32.h"              // for BitPumpMSB32
-#include "io/Buffer.h"                    // for Buffer, DataBuffer
-#include "io/ByteStream.h"                // for ByteStream
-#include "io/Endianness.h"                // for Endianness, Endianness::li...
-#include "tiff/TiffIFD.h"                 // for TiffRootIFD, TiffID
-#include <algorithm>                      // for adjacent_find, generate_n
-#include <array>                          // for array, array<>::const_iter...
-#include <cassert>                        // for assert
-#include <functional>                     // for greater_equal
-#include <iterator>                       // for advance, next, begin, end
-#include <memory>                         // for unique_ptr
-#include <string>                         // for operator==, string
-#include <utility>                        // for move
-#include <vector>                         // for vector
+#include "decompressors/PhaseOneDecompressor.h" // for PhaseOneDecompressor
+#include "io/BitPumpMSB32.h"                    // for BitPumpMSB32
+#include "io/Buffer.h"                          // for Buffer, DataBuffer
+#include "io/ByteStream.h"                      // for ByteStream
+#include "io/Endianness.h" // for Endianness, Endianness::li...
+#include "tiff/TiffIFD.h"  // for TiffRootIFD, TiffID
+#include <algorithm>       // for adjacent_find, generate_n
+#include <array>           // for array, array<>::const_iter...
+#include <cassert>         // for assert
+#include <functional>      // for greater_equal
+#include <iterator>        // for advance, next, begin, end
+#include <memory>          // for unique_ptr
+#include <string>          // for operator==, string
+#include <utility>         // for move
+#include <vector>          // for vector
 
 namespace rawspeed {
 
@@ -64,7 +65,7 @@ bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 // FIXME: this is very close to SamsungV0Decompressor::computeStripes()
-std::vector<IiqDecoder::IiqStrip>
+std::vector<PhaseOneStrip>
 IiqDecoder::computeSripes(const Buffer& raw_data,
                           std::vector<IiqOffset>&& offsets,
                           uint32 height) const {
@@ -85,7 +86,7 @@ IiqDecoder::computeSripes(const Buffer& raw_data,
               return a.offset < b.offset;
             });
 
-  std::vector<IiqDecoder::IiqStrip> slices;
+  std::vector<PhaseOneStrip> slices;
   slices.reserve(height);
 
   auto offset_iterator = std::begin(offsets);
@@ -201,13 +202,15 @@ RawImage IiqDecoder::decodeRawInternal() {
   // which will be used much like end()
   offsets.emplace_back(height, raw_data.getSize());
 
-  const std::vector<IiqStrip> strips(
+  std::vector<PhaseOneStrip> strips(
       computeSripes(raw_data, std::move(offsets), height));
 
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
 
-  DecodePhaseOneC(strips, width, height);
+  PhaseOneDecompressor p(mRaw, std::move(strips));
+  mRaw->createData();
+  p.decompress();
+
   if (correction_meta_data.getSize() != 0 && iiq)
     CorrectPhaseOneC(correction_meta_data, split_row, split_col);
 
@@ -215,57 +218,6 @@ RawImage IiqDecoder::decodeRawInternal() {
     mRaw->metadata.wbCoeffs[i] = wb.getFloat();
 
   return mRaw;
-}
-
-void IiqDecoder::DecodeStrip(const IiqStrip& strip, uint32 width,
-                             uint32 height) {
-  const int length[] = {8, 7, 6, 9, 11, 10, 5, 12, 14, 13};
-
-  BitPumpMSB32 pump(strip.bs);
-
-  int32 pred[2];
-  uint32 len[2];
-  pred[0] = pred[1] = 0;
-  auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, strip.n));
-  for (uint32 col = 0; col < width; col++) {
-    if (col >= (width & -8))
-      len[0] = len[1] = 14;
-    else if ((col & 7) == 0) {
-      for (unsigned int& i : len) {
-        int j = 0;
-
-        for (; j < 5; j++) {
-          if (pump.getBits(1) != 0) {
-            if (col == 0)
-              ThrowRDE("Can not initialize lengths. Data is corrupt.");
-
-            // else, we have previously initialized lengths, so we are fine
-            break;
-          }
-        }
-
-        assert((col == 0 && j > 0) || col != 0);
-        if (j > 0)
-          i = length[2 * (j - 1) + pump.getBits(1)];
-      }
-    }
-
-    int i = len[col & 1];
-    if (i == 14)
-      img[col] = pred[col & 1] = pump.getBits(16);
-    else {
-      pred[col & 1] +=
-          static_cast<signed>(pump.getBits(i)) + 1 - (1 << (i - 1));
-      // FIXME: is the truncation the right solution here?
-      img[col] = ushort16(pred[col & 1]);
-    }
-  }
-}
-
-void IiqDecoder::DecodePhaseOneC(const std::vector<IiqStrip>& strips,
-                                 uint32 width, uint32 height) {
-  for (const auto& strip : strips)
-    DecodeStrip(strip, width, height);
 }
 
 void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
