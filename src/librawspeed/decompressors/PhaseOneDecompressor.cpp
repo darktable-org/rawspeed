@@ -69,19 +69,20 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) {
   uint32 width = mRaw->dim.x;
   assert(width % 2 == 0);
 
-  const int length[] = {8, 7, 6, 9, 11, 10, 5, 12, 14, 13};
+  static constexpr std::array<const int, 10> length = {8,  7, 6,  9,  11,
+                                                       10, 5, 12, 14, 13};
 
   BitPumpMSB32 pump(strip.bs);
 
-  int32 pred[2];
-  uint32 len[2];
-  pred[0] = pred[1] = 0;
+  std::array<int32, 2> pred;
+  pred.fill(0);
+  std::array<int, 2> len;
   auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, strip.n));
   for (uint32 col = 0; col < width; col++) {
     if (col >= (width & -8))
       len[0] = len[1] = 14;
     else if ((col & 7) == 0) {
-      for (unsigned int& i : len) {
+      for (int& i : len) {
         int j = 0;
 
         for (; j < 5; j++) {
