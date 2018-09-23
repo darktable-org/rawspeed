@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014 Pedro Côrte-Real
+    Copyright (C) 2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -24,7 +25,7 @@
 #include "common/Common.h"                      // for uint32
 #include "common/RawImage.h"                    // for RawImage
 #include "decoders/AbstractTiffDecoder.h"       // for AbstractTiffDecoder
-#include "decompressors/PhaseOneDecompressor.h" // for PhaseOneDecompressor
+#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/ByteStream.h"                      // for ByteStream
 #include "tiff/TiffIFD.h"                       // for TiffRootIFD (ptr only)
 #include <utility>                              // for move
@@ -32,41 +33,24 @@
 
 namespace rawspeed {
 
-class CameraMetaData;
-class Buffer;
+struct PhaseOneStrip {
+  const int n;
+  const ByteStream bs;
 
-class IiqDecoder final : public AbstractTiffDecoder {
-  struct IiqOffset {
-    uint32 n;
-    uint32 offset;
+  PhaseOneStrip(int block, ByteStream bs_) : n(block), bs(std::move(bs_)) {}
+};
 
-    IiqOffset() = default;
-    IiqOffset(uint32 block, uint32 offset_) : n(block), offset(offset_) {}
-  };
+class PhaseOneDecompressor final : public AbstractDecompressor {
+  RawImage mRaw;
+  std::vector<PhaseOneStrip> strips;
 
-  std::vector<PhaseOneStrip> computeSripes(const Buffer& raw_data,
-                                           std::vector<IiqOffset>&& offsets,
-                                           uint32 height) const;
+  void decompressStrip(const PhaseOneStrip& strip);
 
 public:
-  static bool isAppropriateDecoder(const Buffer* file);
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer* file);
+  PhaseOneDecompressor(const RawImage& img,
+                       std::vector<PhaseOneStrip>&& strips_);
 
-  IiqDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file)
-      : AbstractTiffDecoder(move(rootIFD), file) {}
-
-  RawImage decodeRawInternal() override;
-  void checkSupportInternal(const CameraMetaData* meta) override;
-  void decodeMetaDataInternal(const CameraMetaData* meta) override;
-
-protected:
-  int getDecoderVersion() const override { return 0; }
-  uint32 black_level = 0;
-  void CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
-                        uint32 split_col);
-  void CorrectQuadrantMultipliersCombined(ByteStream data, uint32 split_row,
-                                          uint32 split_col);
+  void decompress();
 };
 
 } // namespace rawspeed
