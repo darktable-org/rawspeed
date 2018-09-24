@@ -20,27 +20,17 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/PhaseOneDecompressor.h" // for PhaseOneDecompressor
-#include "common/Common.h"                      // for uint32, ushort16, int32
-#include "common/Point.h"                       // for iPoint2D
-#include "common/Spline.h" // for Spline, Spline<>::value_type
-#include "decoders/IiqDecoder.h"
-#include "decoders/RawDecoder.h"          // for RawDecoder::(anonymous)
+#include "decompressors/PhaseOneDecompressor.h"
+#include "common/Common.h"                // for int32, uint32, ushort16
+#include "common/Point.h"                 // for iPoint2D
+#include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
-#include "io/Buffer.h"                    // for Buffer, DataBuffer
-#include "io/ByteStream.h"                // for ByteStream
-#include "io/Endianness.h"                // for Endianness, Endianness::li...
-#include "tiff/TiffIFD.h"                 // for TiffRootIFD, TiffID
-#include <algorithm>                      // for adjacent_find, generate_n
-#include <array>                          // for array, array<>::const_iter...
+#include <array>                          // for array
 #include <cassert>                        // for assert
-#include <functional>                     // for greater_equal
-#include <iterator>                       // for advance, next, begin, end
-#include <memory>                         // for unique_ptr
-#include <string>                         // for operator==, string
+#include <stddef.h>                       // for size_t
 #include <utility>                        // for move
-#include <vector>                         // for vector
+#include <vector>                         // for vector, vector<>::size_type
 
 namespace rawspeed {
 

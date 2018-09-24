@@ -18,13 +18,14 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/ChecksumFile.h"      // for ChecksumFileEntry
+#include "common/ChecksumFile.h"
 #include "common/Common.h"            // for splitString
 #include "common/RawspeedException.h" // for ThrowRSE
 #include "io/Buffer.h"                // for Buffer
 #include "io/FileReader.h"            // for FileReader
+#include <cassert>                    // for assert
 #include <memory>                     // for unique_ptr
-#include <string>                     // for string
+#include <string>                     // for string, allocator, operator+
 #include <vector>                     // for vector
 
 namespace rawspeed {

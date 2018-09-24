@@ -21,19 +21,19 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32
-#include "common/RawImage.h"                    // for RawImage
-#include "decoders/AbstractTiffDecoder.h"       // for AbstractTiffDecoder
-#include "decompressors/PhaseOneDecompressor.h" // for PhaseOneDecompressor
-#include "io/ByteStream.h"                      // for ByteStream
-#include "tiff/TiffIFD.h"                       // for TiffRootIFD (ptr only)
-#include <utility>                              // for move
-#include <vector>                               // for vector
+#include "common/Common.h"                // for uint32
+#include "common/RawImage.h"              // for RawImage
+#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
+#include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
+#include <utility>                        // for move
+#include <vector>                         // for vector
 
 namespace rawspeed {
 
-class CameraMetaData;
 class Buffer;
+class ByteStream;
+class CameraMetaData;
+struct PhaseOneStrip;
 
 class IiqDecoder final : public AbstractTiffDecoder {
   struct IiqOffset {

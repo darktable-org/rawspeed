@@ -22,14 +22,14 @@
 
 #include "rawspeedconfig.h"
 
-#include <algorithm>        // for max, min
+#include <algorithm>        // IWYU pragma: keep
 #include <cassert>          // for assert
 #include <climits>          // for CHAR_BIT
 #include <cstdint>          // for uintptr_t
-#include <cstring>          // for memcpy, size_t
+#include <cstring>          // for size_t, memcpy
 #include <initializer_list> // for initializer_list
 #include <string>           // for string
-#include <type_traits>      // for enable_if, is_pointer
+#include <type_traits>      // for enable_if, is_pointer, is_signed, is_uns...
 #include <vector>           // for vector
 
 extern "C" int rawspeed_get_number_of_processor_cores();

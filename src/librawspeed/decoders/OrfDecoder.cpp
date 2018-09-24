@@ -21,7 +21,7 @@
 */
 
 #include "decoders/OrfDecoder.h"
-#include "common/Common.h"                          // for uint32, BitOrder...
+#include "common/Common.h"                          // for uint32, uchar8
 #include "common/NORangesSet.h"                     // for set
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
@@ -30,9 +30,8 @@
 #include "io/Buffer.h"                              // for Buffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, getH...
-#include "metadata/Camera.h"                        // for Hints
-#include "metadata/ColorFilterArray.h"              // for CFA_GREEN, CFA_BLUE
-#include "tiff/TiffEntry.h"                         // for TiffEntry
+#include "metadata/ColorFilterArray.h"              // for ColorFilterArray
+#include "tiff/TiffEntry.h"                         // for TiffEntry, TIFF_...
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for STRIPOFFSETS
 #include <array>                                    // for array

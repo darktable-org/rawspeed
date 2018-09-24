@@ -25,11 +25,14 @@
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include <algorithm>                      // for min
+#include "io/Buffer.h"                    // for Buffer, Buffer::size_type
+#include <algorithm>                      // for generate_n, min
 #include <array>                          // for array
 #include <cassert>                        // for assert
-#include <cstring>                        // for memcpy
+#include <cstddef>                        // for size_t
+#include <iterator>                       // for back_insert_iterator, back...
 #include <limits>                         // for numeric_limits
+#include <memory>                         // for allocator_traits<>::value_...
 #include <utility>                        // for move
 #include <vector>                         // for vector
 

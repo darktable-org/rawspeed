@@ -18,15 +18,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "RawSpeed-API.h"        // for RawDecoder, Buffer, FileReader, Raw...
-#include "common/ChecksumFile.h" // for ParseChecksumFile
-#include <benchmark/benchmark.h> // for Counter, State, DoNotOptimize, Init...
+#include "RawSpeed-API.h"        // for RawDecoder, FileReader, RawImage
+#include "common/ChecksumFile.h" // for ChecksumFileEntry, ReadChecksumFile
+#include <benchmark/benchmark.h> // for State, DoNotOptimize, Initialize
 #include <chrono>                // for duration, high_resolution_clock
 #include <ctime>                 // for clock, clock_t
 #include <memory>                // for unique_ptr
 #include <ratio>                 // for ratio
-#include <string>                // for string, to_string, operator!=
+#include <string>                // for string, operator!=, to_string
 #include <sys/time.h>            // for CLOCKS_PER_SEC
+#include <vector>                // for vector
 
 #ifdef _OPENMP
 #include <omp.h>

@@ -18,11 +18,12 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/ChecksumFile.h"      // for ChecksumFile
-#include "common/RawspeedException.h" // for RawspeedException
-#include <cstdlib>                    // for exit
-#include <gtest/gtest.h> // for AssertionResult, DeathTest, Test, AssertHe...
-#include <string>        // for string
+#include "common/ChecksumFile.h"      // for ParseChecksumFileContent
+#include "common/RawspeedException.h" // IWYU pragma: keep
+#include <gtest/gtest.h> // for AssertionResult, Message, TestPartR...
+#include <memory>        // for allocator_traits<>::value_type
+#include <string>        // for allocator, operator+, string, basic...
+#include <vector>        // for vector
 
 using rawspeed::ParseChecksumFileContent;
 
