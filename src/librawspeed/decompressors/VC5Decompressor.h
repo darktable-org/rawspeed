@@ -63,12 +63,12 @@ class VC5Decompressor final : public AbstractDecompressor
   template<class T>
   class Array2D {
     unsigned int _pitch;
+    T * _data;
   public:
-    T * data;
     unsigned int width, height;
 
     Array2D();
-    Array2D(T * data, const unsigned int width, const unsigned int height, const unsigned int pitch = 0);
+    Array2D(T * data, const unsigned int dataWidth, const unsigned int dataHeight, const unsigned int dataPitch = 0);
     //virtual ~Array2D();
 
     static Array2D<T> create(const unsigned int width, const unsigned int height);
@@ -89,7 +89,7 @@ class VC5Decompressor final : public AbstractDecompressor
     Wavelet();
     virtual ~Wavelet() { clear(); }
 
-    void initialize(uint16_t width, uint16_t height);
+    void initialize(uint16_t waveletWidth, uint16_t waveletHeight);
     void clear();
 
     bool isInitialized() const { return mInitialized; }
@@ -100,12 +100,12 @@ class VC5Decompressor final : public AbstractDecompressor
 
     void reconstructLowband(Array2D<int16_t> dest, const int16_t prescale);
 
-    Array2D<int16_t> bandAsArray2D(const unsigned int iBand) { return Array2D<int16_t>(data[iBand], width, height); }
+    Array2D<int16_t> bandAsArray2D(const unsigned int iBand);
   protected:
     uint32 mDecodedBandMask;
     bool mInitialized;
 
-    void dequantize(Array2D<int16_t> out, Array2D<int16_t> in, int16_t quant);
+    static void dequantize(Array2D<int16_t> out, Array2D<int16_t> in, int16_t quant);
   };
   struct Transform {
     Wavelet wavelet[MAX_NUM_WAVELETS];

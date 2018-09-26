@@ -71,19 +71,19 @@ namespace rawspeed {
 template<class T>
 VC5Decompressor::Array2D<T>::Array2D()
   : _pitch(0)
-  , data(nullptr)
+  , _data(nullptr)
   , width(0)
   , height(0)
 {
 }
 
 template<class T>
-VC5Decompressor::Array2D<T>::Array2D(T * data, const unsigned int width, const unsigned int height, const unsigned int pitch /* = 0 */)
-  : data(data)
-  , width(width)
-  , height(height)
+VC5Decompressor::Array2D<T>::Array2D(T * data, const unsigned int dataWidth, const unsigned int dataHeight, const unsigned int dataPitch /* = 0 */)
+  : _data(data)
+  , width(dataWidth)
+  , height(dataHeight)
 {
-  _pitch = (pitch == 0 ? width : pitch);
+  _pitch = (dataPitch == 0 ? dataWidth : dataPitch);
 }
 /*
 // virtual
@@ -102,33 +102,33 @@ VC5Decompressor::Array2D<T> VC5Decompressor::Array2D<T>::create(const unsigned i
 template<class T>
 void VC5Decompressor::Array2D<T>::destroy()
 {
-  if (data) delete[] data;
+  if (_data) delete[] _data;
   clear();
 }
 
 template<class T>
 void VC5Decompressor::Array2D<T>::clear()
 {
-  data = nullptr;
+  _data = nullptr;
   width = height = _pitch = 0;
 }
 
 template<class T>
 T & VC5Decompressor::Array2D<T>::operator()(const unsigned int x, const unsigned int y)
 {
-  assert(data);
+  assert(_data);
   assert(x < width);
   assert(y < height);
-  return data[y * _pitch + x];
+  return _data[y * _pitch + x];
 }
 
 template<class T>
 T VC5Decompressor::Array2D<T>::operator()(const unsigned int x, const unsigned int y) const
 {
-  assert(data);
+  assert(_data);
   assert(x < width);
   assert(y < height);
-  return data[y * _pitch + x];
+  return _data[y * _pitch + x];
 }
 
 VC5Decompressor::Wavelet::Wavelet()
@@ -143,17 +143,17 @@ VC5Decompressor::Wavelet::Wavelet()
   }
 }
 
-void VC5Decompressor::Wavelet::initialize(uint16_t width, uint16_t height)
+void VC5Decompressor::Wavelet::initialize(uint16_t waveletWidth, uint16_t waveletHeight)
 {
-  this->width = width;
-  this->height = height;
+  this->width = waveletWidth;
+  this->height = waveletHeight;
   numBands = MAX_NUM_BANDS;
-  pitch = width * sizeof(int16_t);
+  pitch = waveletWidth * sizeof(int16_t);
   mDecodedBandMask = 0;
 
-  data[0] = new int16_t[MAX_NUM_BANDS * width * height];
+  data[0] = new int16_t[MAX_NUM_BANDS * waveletWidth * waveletHeight];
   for (int iBand = 1; iBand < MAX_NUM_BANDS; ++iBand)
-    data[iBand] = data[0] + iBand * width * height;
+    data[iBand] = data[0] + iBand * waveletWidth * waveletHeight;
 
   mInitialized = true;
 }
@@ -173,6 +173,12 @@ bool VC5Decompressor::Wavelet::allBandsValid() const
   return mDecodedBandMask == static_cast<uint32>((1 << numBands) - 1);
 }
 
+VC5Decompressor::Array2D<int16_t> VC5Decompressor::Wavelet::bandAsArray2D(const unsigned int iBand)
+{
+  return VC5Decompressor::Array2D<int16_t>(data[iBand], width, height);
+}
+
+
 void VC5Decompressor::Wavelet::clear()
 {
   mInitialized = false;
@@ -183,6 +189,7 @@ void VC5Decompressor::Wavelet::clear()
   }
 }
 
+// static
 void VC5Decompressor::Wavelet::dequantize(Array2D<int16_t> out, Array2D<int16_t> in, int16_t quant)
 {
   for (unsigned int y = 0; y < in.height; ++y) {
@@ -459,20 +466,20 @@ void VC5Decompressor::decode(const unsigned int offsetX, const unsigned int offs
           }
           else {
             // decode highpass band
-            int val = 0;
+            int pixelValue = 0;
             unsigned int count = 0;
             int nPixels = wavelet.width * wavelet.height;
             for (int iPixel = 0; iPixel < nPixels; ) {
-              getRLV(bits, val, count);
+              getRLV(bits, pixelValue, count);
               for (; count > 0; --count) {
                 if (iPixel > nPixels) ThrowRDE("Buffer overflow");
-                wavelet.data[band][iPixel] = static_cast<int16_t>(val);
+                wavelet.data[band][iPixel] = static_cast<int16_t>(pixelValue);
                 ++iPixel;
               }
             }
             if (bits.getPosition() < bits.getSize()) {
-              getRLV(bits, val, count);
-              if (val != MARKER_BAND_END || count != 0) ThrowRDE("EndOfBand marker not found");
+              getRLV(bits, pixelValue, count);
+              if (pixelValue != MARKER_BAND_END || count != 0) ThrowRDE("EndOfBand marker not found");
             }
             wavelet.setBandValid(band);
             wavelet.quant[band] = mVC5.quantization;
