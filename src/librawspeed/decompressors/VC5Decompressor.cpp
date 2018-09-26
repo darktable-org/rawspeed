@@ -290,7 +290,7 @@ void VC5Decompressor::Wavelet::reconstructLowband(Array2D<int16_t> dest, const i
     dest(2 * x, y) = static_cast<int16_t>(even);
     if (2 * x + 1 < dest.width) {
       odd = ((-highpass(x, y) + ((11 * lowpass(x, y) - 4 * lowpass(x - 1, y) + lowpass(x - 2, y) + 4) >> 3)) << descaleShift) >> 1;
-      dest(2 * x + 1, y) = static_cast<int16_t>(even);
+      dest(2 * x + 1, y) = static_cast<int16_t>(odd);
     }
   }
 
@@ -330,9 +330,13 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
   mVC5.image_sequence_number = 0;
   mVC5.quantization = 0;
 
+  int outputBits = 0;
+  for (int wp = img->whitePoint; wp != 0; wp >>= 1) ++outputBits;
+  assert(outputBits <= 16);
+
   mVC5LogTable = new unsigned int[VC5_LOG_TABLE_SIZE];
   for (int i = 0; i < VC5_LOG_TABLE_SIZE; ++i)
-    mVC5LogTable[i] = static_cast<unsigned int>(img->whitePoint * (std::pow(113.0, i / (VC5_LOG_TABLE_SIZE - 1.)) - 1) / 112.);
+    mVC5LogTable[i] = static_cast<unsigned int>(65535 * (std::pow(113.0, i / (VC5_LOG_TABLE_SIZE - 1.)) - 1) / 112.) >> (16 - outputBits);
 }
 
 //virtual
