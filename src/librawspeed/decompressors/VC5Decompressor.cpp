@@ -18,6 +18,11 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+/*
+ * The code in this file is based on the Apache2/MIT dual-licensed code of the
+ * https://github.com/gopro/gpr project
+ */
+
 #include "decompressors/VC5Decompressor.h"
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/Endianness.h"
@@ -85,13 +90,7 @@ VC5Decompressor::Array2D<T>::Array2D(T * data, const unsigned int dataWidth, con
 {
   _pitch = (dataPitch == 0 ? dataWidth : dataPitch);
 }
-/*
-// virtual
-template<class T>
-VC5Decompressor::Array2D<T>::~Array2D()
-{
-}
-*/
+
 // static
 template<class T>
 VC5Decompressor::Array2D<T> VC5Decompressor::Array2D<T>::create(const unsigned int width, const unsigned int height)
@@ -204,7 +203,7 @@ void VC5Decompressor::Wavelet::dequantize(Array2D<int16_t> out, Array2D<int16_t>
   }
 }
 
-void VC5Decompressor::Wavelet::reconstructLowband(Array2D<int16_t> dest, const int16_t prescale)
+void VC5Decompressor::Wavelet::reconstructLowband(Array2D<int16_t> dest, const int16_t prescale, const bool clampUint /* = false */)
 {
   unsigned int x, y;
   int16_t descaleShift = (prescale == 2 ? 2 : 0);
@@ -274,6 +273,10 @@ void VC5Decompressor::Wavelet::reconstructLowband(Array2D<int16_t> dest, const i
     // First col
     int even = ((highpass(x, y) + ((11 * lowpass(x, y) - 4 * lowpass(x + 1, y) + lowpass(x + 2, y) + 4) >> 3)) << descaleShift) >> 1;
     int odd = ((-highpass(x, y) + ((5 * lowpass(x, y) + 4 * lowpass(x + 1, y) - lowpass(x + 2, y) + 4) >> 3)) << descaleShift) >> 1;
+    if (clampUint) {
+      even = clampBits(even, 14);
+      odd = clampBits(odd, 14);
+    }
     dest(2 * x, y) = static_cast<int16_t>(even);
     dest(2 * x + 1, y) = static_cast<int16_t>(odd);
 
@@ -281,15 +284,23 @@ void VC5Decompressor::Wavelet::reconstructLowband(Array2D<int16_t> dest, const i
     for (x = 1; x + 1 < width; ++x) {
       even = ((highpass(x, y) + lowpass(x, y) + ((lowpass(x - 1, y) - lowpass(x + 1, y) + 4) >> 3)) << descaleShift) >> 1;
       odd = ((-highpass(x, y) + lowpass(x, y) + ((lowpass(x + 1, y) - lowpass(x - 1, y) + 4) >> 3)) << descaleShift) >> 1;
+      if (clampUint) {
+        even = clampBits(even, 14);
+        odd = clampBits(odd, 14);
+      }
       dest(2 * x, y) = static_cast<int16_t>(even);
       dest(2 * x + 1, y) = static_cast<int16_t>(odd);
     }
 
     // last col
     even = ((highpass(x, y) + ((5 * lowpass(x, y) + 4 * lowpass(x - 1, y) - lowpass(x - 2, y) + 4) >> 3)) << descaleShift) >> 1;
+    if (clampUint)
+      even = clampBits(even, 14);
     dest(2 * x, y) = static_cast<int16_t>(even);
     if (2 * x + 1 < dest.width) {
       odd = ((-highpass(x, y) + ((11 * lowpass(x, y) - 4 * lowpass(x - 1, y) + lowpass(x - 2, y) + 4) >> 3)) << descaleShift) >> 1;
+      if (clampUint)
+        odd = clampBits(odd, 14);
       dest(2 * x + 1, y) = static_cast<int16_t>(odd);
     }
   }
@@ -552,7 +563,7 @@ void VC5Decompressor::decode(const unsigned int offsetX, const unsigned int offs
     assert(2 * mTransforms[iChannel].wavelet[0].width == width);
     assert(2 * mTransforms[iChannel].wavelet[0].height == height);
     channels[iChannel] = Array2D<int16_t>::create(width, height);
-    mTransforms[iChannel].wavelet[0].reconstructLowband(channels[iChannel], mTransforms[iChannel].prescale[0]);
+    mTransforms[iChannel].wavelet[0].reconstructLowband(channels[iChannel], mTransforms[iChannel].prescale[0], true);
   }
 
   // Convert to RGGB output

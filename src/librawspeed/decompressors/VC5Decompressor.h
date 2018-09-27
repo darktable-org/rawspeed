@@ -98,7 +98,7 @@ class VC5Decompressor final : public AbstractDecompressor
     uint32_t getValidBandMask() const { return mDecodedBandMask; }
     bool allBandsValid() const;
 
-    void reconstructLowband(Array2D<int16_t> dest, const int16_t prescale);
+    void reconstructLowband(Array2D<int16_t> dest, const int16_t prescale, const bool clampUint = false);
 
     Array2D<int16_t> bandAsArray2D(const unsigned int iBand);
   protected:
