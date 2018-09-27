@@ -2066,6 +2066,16 @@
 			<Hint name="wb_offset" value="142"/>
 		</Hints>
 	</Camera>
+	<Camera make="GoPro" model="FUSION">
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="16383"/>
+	</Camera>
 	<Camera make="GoPro" model="HERO5 Black">
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -2077,6 +2087,16 @@
 		<Sensor black="0" white="16383"/>
 	</Camera>
 	<Camera make="GoPro" model="HERO6 Black">
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="16383"/>
+	</Camera>
+	<Camera make="GoPro" model="HERO7 Black">
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
 			<Color x="1" y="0">GREEN</Color>
