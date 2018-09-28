@@ -19,13 +19,15 @@
 */
 
 /*
- * The code in this file is based on the Apache2/MIT dual-licensed code of the
- * https://github.com/gopro/gpr project
+  This is a decompressor for VC-5 raw compression algo, as used in GoPro raws.
+  This implementation is similar to that one of the official reference
+  implementation of the https://github.com/gopro/gpr project, and is producing
+  bitwise-identical output as compared with the Adobe DNG Converter
+  implementation.
  */
 
 #include "decompressors/VC5Decompressor.h"
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/Endianness.h"
 #include <cmath>
 
 // Definitions needed by table17.inc
@@ -47,31 +49,21 @@ typedef struct _rlv {
 #define VC5_TAG_ChannelCount 0x000c
 #define VC5_TAG_ImageWidth 0x0014
 #define VC5_TAG_ImageHeight 0x0015
-#define VC5_TAG_LowpassPrecision                                               \
-  0x0023                             //!< Number of bits per lowpass coefficient
-#define VC5_TAG_SubbandNumber 0x0030 //!< Subband number of this wavelet band
-#define VC5_TAG_Quantization 0x0035  //!< Quantization applied to band
-#define VC5_TAG_ChannelNumber 0x003e //!< Channel number
+#define VC5_TAG_LowpassPrecision 0x0023
+#define VC5_TAG_SubbandNumber 0x0030
+#define VC5_TAG_Quantization 0x0035
+#define VC5_TAG_ChannelNumber 0x003e
 #define VC5_TAG_ImageFormat 0x0054
-#define VC5_TAG_MaxBitsPerComponent                                            \
-  0x0066 //!< Upper bound on the number of bits per component
-#define VC5_TAG_PatternWidth                                                   \
-  0x006a //!< Number of samples per row in each pattern element
-#define VC5_TAG_PatternHeight                                                  \
-  0x006b //!< Number of rows of samples in each pattern element
-#define VC5_TAG_ComponentsPerSample                                            \
-  0x006c //!< Number of components in each sample in the pattern element
-#define VC5_TAG_PrescaleShift                                                  \
-  0x006d //!< Packed prescale shift for each wavelet level
+#define VC5_TAG_MaxBitsPerComponent 0x0066
+#define VC5_TAG_PatternWidth 0x006a
+#define VC5_TAG_PatternHeight 0x006b
+#define VC5_TAG_ComponentsPerSample 0x006c
+#define VC5_TAG_PrescaleShift 0x006d
 
-#define VC5_TAG_LARGE_CHUNK                                                    \
-  0x2000 //!< Large chunk with a 24-bit payload size (in segments)
-#define VC5_TAG_SMALL_CHUNK                                                    \
-  0x4000 //!< Small chunk with a 16-bit payload size (in segments)
-#define VC5_TAG_UniqueImageIdentifier                                          \
-  0x4004 //!< Small chunk containing the identifier and sequence number for the
-         //!< image
-#define VC5_TAG_LargeCodeblock 0x6000 //!< Large chunk that contains a codeblock
+#define VC5_TAG_LARGE_CHUNK 0x2000
+#define VC5_TAG_SMALL_CHUNK 0x4000
+#define VC5_TAG_UniqueImageIdentifier 0x4004
+#define VC5_TAG_LargeCodeblock 0x6000
 
 #define PRECISION_MIN 8
 #define PRECISION_MAX 32
@@ -601,16 +593,13 @@ void VC5Decompressor::decode(const unsigned int offsetX,
         mVC5.image_sequence_number = mBs.getU32();
       }
       /*
-              else if (tag == CODEC_TAG_InverseTransform)
-                else if (tag == CODEC_TAG_InversePermutation)
-                else if (tag == CODEC_TAG_InverseTransform16)
-                else if (IsPartEnabled(enabled_parts, VC5_PART_SECTIONS) &&
-         decoder->section_flag && IsSectionHeader(tag))
+      else if (tag == CODEC_TAG_InverseTransform)
+      else if (tag == CODEC_TAG_InversePermutation)
+      else if (tag == CODEC_TAG_InverseTransform16)
       */
-
       else {
-        //          printf("Encountered unknown tag 0x%04x @ offset 0x%x\n",
-        //          tag, mBs.getPosition());
+        // printf("Encountered unknown tag 0x%04x @ offset 0x%x\n",
+        // tag, mBs.getPosition());
         if (tag & VC5_TAG_LARGE_CHUNK) {
           optional = true;
           chunkSize = 0;

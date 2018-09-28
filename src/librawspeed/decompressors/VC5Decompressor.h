@@ -52,12 +52,8 @@ class VC5Decompressor final : public AbstractDecompressor {
     ushort16 imgWidth, imgHeight, imgFormat;
     ushort16 patternWidth, patternHeight;
     ushort16 cps, bpc, lowpassPrecision;
-    uint8_t image_sequence_identifier[16]; //!< UUID for the unique image
-                                           //!< sequence identifier
-    uint32_t
-        image_sequence_number; //!< Number of the image in the image sequence
-
-    // band
+    uint8_t image_sequence_identifier[16];
+    uint32_t image_sequence_number;
     short16 quantization;
   } mVC5;
 
@@ -71,7 +67,6 @@ class VC5Decompressor final : public AbstractDecompressor {
     Array2D();
     Array2D(T* data, const unsigned int dataWidth,
             const unsigned int dataHeight, const unsigned int dataPitch = 0);
-    // virtual ~Array2D();
 
     static Array2D<T> create(const unsigned int width,
                              const unsigned int height);
