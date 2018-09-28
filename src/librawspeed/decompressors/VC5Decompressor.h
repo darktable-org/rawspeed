@@ -22,9 +22,9 @@
 
 #include "common/Common.h"                      // for uint32
 #include "common/RawImage.h"                    // for RawImageData
-#include "io/ByteStream.h"                      // for ByteStream
-#include "io/BitPumpMSB.h"                      // for BitPumpMSB
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "io/BitPumpMSB.h"                      // for BitPumpMSB
+#include "io/ByteStream.h"                      // for ByteStream
 
 namespace rawspeed {
 
@@ -41,11 +41,10 @@ class RawImage;
 
 #define VC5_LOG_TABLE_SIZE 4096
 
-class VC5Decompressor final : public AbstractDecompressor
-{
+class VC5Decompressor final : public AbstractDecompressor {
   RawImage mImg;
   ByteStream mBs;
-  unsigned int * mVC5LogTable;
+  unsigned int* mVC5LogTable;
 
   struct {
     ushort16 numChannels, numSubbands, numWavelets;
@@ -53,28 +52,32 @@ class VC5Decompressor final : public AbstractDecompressor
     ushort16 imgWidth, imgHeight, imgFormat;
     ushort16 patternWidth, patternHeight;
     ushort16 cps, bpc, lowpassPrecision;
-    uint8_t image_sequence_identifier[16];      //!< UUID for the unique image sequence identifier
-    uint32_t image_sequence_number;             //!< Number of the image in the image sequence
+    uint8_t image_sequence_identifier[16]; //!< UUID for the unique image
+                                           //!< sequence identifier
+    uint32_t
+        image_sequence_number; //!< Number of the image in the image sequence
 
     // band
     short16 quantization;
   } mVC5;
 
-  template<class T>
-  class Array2D {
+  template <class T> class Array2D {
     unsigned int _pitch;
-    T * _data;
+    T* _data;
+
   public:
     unsigned int width, height;
 
     Array2D();
-    Array2D(T * data, const unsigned int dataWidth, const unsigned int dataHeight, const unsigned int dataPitch = 0);
-    //virtual ~Array2D();
+    Array2D(T* data, const unsigned int dataWidth,
+            const unsigned int dataHeight, const unsigned int dataPitch = 0);
+    // virtual ~Array2D();
 
-    static Array2D<T> create(const unsigned int width, const unsigned int height);
+    static Array2D<T> create(const unsigned int width,
+                             const unsigned int height);
     void destroy();
     void clear();
-    inline T & operator()(const unsigned int x, const unsigned int y);
+    inline T& operator()(const unsigned int x, const unsigned int y);
     inline T operator()(const unsigned int x, const unsigned int y) const;
   };
 
@@ -84,7 +87,7 @@ class VC5Decompressor final : public AbstractDecompressor
     uint16_t numBands;
     uint16_t scale[MAX_NUM_BANDS];
     int16_t quant[MAX_NUM_BANDS];
-    int16_t * data[MAX_NUM_BANDS];
+    int16_t* data[MAX_NUM_BANDS];
 
     Wavelet();
     virtual ~Wavelet() { clear(); }
@@ -98,21 +101,24 @@ class VC5Decompressor final : public AbstractDecompressor
     uint32_t getValidBandMask() const { return mDecodedBandMask; }
     bool allBandsValid() const;
 
-    void reconstructLowband(Array2D<int16_t> dest, const int16_t prescale, const bool clampUint = false);
+    void reconstructLowband(Array2D<int16_t> dest, const int16_t prescale,
+                            const bool clampUint = false);
 
     Array2D<int16_t> bandAsArray2D(const unsigned int iBand);
+
   protected:
     uint32 mDecodedBandMask;
     bool mInitialized;
 
-    static void dequantize(Array2D<int16_t> out, Array2D<int16_t> in, int16_t quant);
+    static void dequantize(Array2D<int16_t> out, Array2D<int16_t> in,
+                           int16_t quant);
   };
   struct Transform {
     Wavelet wavelet[MAX_NUM_WAVELETS];
     int16_t prescale[MAX_NUM_WAVELETS];
   } mTransforms[MAX_NUM_CHANNELS];
 
-  static void getRLV(BitPumpMSB & bits, int & value, unsigned int & count);
+  static void getRLV(BitPumpMSB& bits, int& value, unsigned int& count);
   inline unsigned int DecodeLog(const int val) const;
 
 public:
