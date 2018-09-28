@@ -96,7 +96,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     rawspeed::PUMP bits1(bs1);
 
     while (true) {
-      int decoded0, decoded1;
+      int decoded0;
+      int decoded1;
 
       try {
         decoded0 = ht0.decode<decltype(bits0), FULLDECODE>(bits0);

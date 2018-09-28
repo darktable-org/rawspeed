@@ -697,7 +697,9 @@ std::vector<ushort16> NefDecoder::gammaCurve(double pwr, double ts, int mode,
   std::vector<ushort16> curve(65536);
 
   int i;
-  double g[6], bnd[2]={0,0}, r;
+  double g[6];
+  double bnd[2] = {0, 0};
+  double r;
   g[0] = pwr;
   g[1] = ts;
   g[2] = g[3] = g[4] = 0;
