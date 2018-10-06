@@ -136,9 +136,9 @@ TEST(BoolHintTest, HintsBoolTrue) {
   ASSERT_TRUE(hints.get(key, false));
 }
 
-class BoolHintTest : public ::testing::TestWithParam<std::tr1::tuple<string>> {
+class BoolHintTest : public ::testing::TestWithParam<std::tuple<string>> {
 protected:
-  virtual void SetUp() override { notTrue = std::tr1::get<0>(GetParam()); }
+  virtual void SetUp() override { notTrue = std::get<0>(GetParam()); }
   string notTrue;
 };
 INSTANTIATE_TEST_CASE_P(NotTrue, BoolHintTest,

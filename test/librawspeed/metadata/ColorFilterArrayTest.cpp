@@ -49,7 +49,7 @@ namespace rawspeed {
 
 namespace rawspeed_test {
 
-using Bayer2x2 = std::tr1::tuple<CFAColor, CFAColor, CFAColor, CFAColor>;
+using Bayer2x2 = std::tuple<CFAColor, CFAColor, CFAColor, CFAColor>;
 
 static const iPoint2D square(2, 2);
 
@@ -165,15 +165,15 @@ INSTANTIATE_TEST_CASE_P(CYGM, ColorFilterArrayTest,
                                          Bayer_CYGM));
 
 static void setHelper(ColorFilterArray* cfa, Bayer2x2 param) {
-  cfa->setCFA(square, std::tr1::get<0>(param), std::tr1::get<1>(param),
-              std::tr1::get<2>(param), std::tr1::get<3>(param));
+  cfa->setCFA(square, std::get<0>(param), std::get<1>(param),
+              std::get<2>(param), std::get<3>(param));
 }
 
 static void check(ColorFilterArray* cfa, Bayer2x2 param) {
-  ASSERT_EQ(cfa->getColorAt(0, 0), std::tr1::get<0>(param));
-  ASSERT_EQ(cfa->getColorAt(1, 0), std::tr1::get<1>(param));
-  ASSERT_EQ(cfa->getColorAt(0, 1), std::tr1::get<2>(param));
-  ASSERT_EQ(cfa->getColorAt(1, 1), std::tr1::get<3>(param));
+  ASSERT_EQ(cfa->getColorAt(0, 0), std::get<0>(param));
+  ASSERT_EQ(cfa->getColorAt(1, 0), std::get<1>(param));
+  ASSERT_EQ(cfa->getColorAt(0, 1), std::get<2>(param));
+  ASSERT_EQ(cfa->getColorAt(1, 1), std::get<3>(param));
 }
 
 TEST_P(ColorFilterArrayTest, Constructor) {
@@ -208,10 +208,10 @@ TEST_P(ColorFilterArrayTest, AssignmentConstructor) {
 TEST_P(ColorFilterArrayTest, SetColorAt) {
   ASSERT_NO_THROW({
     ColorFilterArray cfa({2, 2});
-    cfa.setColorAt({0, 0}, std::tr1::get<0>(param));
-    cfa.setColorAt({1, 0}, std::tr1::get<1>(param));
-    cfa.setColorAt({0, 1}, std::tr1::get<2>(param));
-    cfa.setColorAt({1, 1}, std::tr1::get<3>(param));
+    cfa.setColorAt({0, 0}, std::get<0>(param));
+    cfa.setColorAt({1, 0}, std::get<1>(param));
+    cfa.setColorAt({0, 1}, std::get<2>(param));
+    cfa.setColorAt({1, 1}, std::get<3>(param));
     check(&cfa, param);
   });
 }
@@ -237,15 +237,15 @@ TEST_P(ColorFilterArrayTest, AsString) {
 
 class ColorFilterArrayShiftTest
     : public ::testing::TestWithParam<
-          std::tr1::tuple<CFAColor, CFAColor, CFAColor, CFAColor, int, int>> {
+          std::tuple<CFAColor, CFAColor, CFAColor, CFAColor, int, int>> {
 protected:
   ColorFilterArrayShiftTest() = default;
   virtual void SetUp() {
     auto param = GetParam();
-    mat = std::make_tuple(std::tr1::get<0>(param), std::tr1::get<1>(param),
-                          std::tr1::get<2>(param), std::tr1::get<3>(param));
-    x = std::tr1::get<4>(param);
-    y = std::tr1::get<5>(param);
+    mat = std::make_tuple(std::get<0>(param), std::get<1>(param),
+                          std::get<2>(param), std::get<3>(param));
+    x = std::get<4>(param);
+    y = std::get<5>(param);
   }
 
   Bayer2x2 mat;

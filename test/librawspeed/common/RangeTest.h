@@ -98,13 +98,13 @@ template <typename T>
          << rhs << ") do overlap.";
 }
 
-using twoRangesType = std::tr1::tuple<int, unsigned, int, unsigned>;
+using twoRangesType = std::tuple<int, unsigned, int, unsigned>;
 class TwoRangesTest : public ::testing::TestWithParam<twoRangesType> {
 protected:
   TwoRangesTest() = default;
   virtual void SetUp() {
-    r0 = Range<int>(std::tr1::get<0>(GetParam()), std::tr1::get<1>(GetParam()));
-    r1 = Range<int>(std::tr1::get<2>(GetParam()), std::tr1::get<3>(GetParam()));
+    r0 = Range<int>(std::get<0>(GetParam()), std::get<1>(GetParam()));
+    r1 = Range<int>(std::get<2>(GetParam()), std::get<3>(GetParam()));
   }
 
   Range<int> r0;

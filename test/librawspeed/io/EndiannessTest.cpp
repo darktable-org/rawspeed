@@ -111,10 +111,10 @@ protected:
   AbstractGetByteSwappedTest() = default;
   virtual void SetUp() {
     auto p = this->GetParam();
-    auto v = std::tr1::get<0>(p);
+    auto v = std::get<0>(p);
 
     // swap them around? the test is symmetrical
-    if (std::tr1::get<1>(p)) {
+    if (std::get<1>(p)) {
       memcpy(&in, &(v.first), sizeof(T2));
       memcpy(&expected, &(v.second), sizeof(T2));
     } else {

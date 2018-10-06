@@ -81,16 +81,16 @@ TEST(CodeSymbolDeathTest, CodeSymbolLenght) {
   ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(1, 17); }, "code_len <= 16");
 }
 
-using CodeSymbolType = std::tr1::tuple<int, int, bool>;
+using CodeSymbolType = std::tuple<int, int, bool>;
 class CodeSymbolDeathTest : public ::testing::TestWithParam<CodeSymbolType> {
 protected:
   CodeSymbolDeathTest() = default;
   virtual void SetUp() {
     auto p = GetParam();
 
-    val = std::tr1::get<0>(p);
-    len = std::tr1::get<1>(p);
-    die = std::tr1::get<2>(p);
+    val = std::get<0>(p);
+    len = std::get<1>(p);
+    die = std::get<2>(p);
   }
 
   int val;
@@ -126,7 +126,7 @@ TEST_P(CodeSymbolDeathTest, CodeSymbolDeathTest) {
 }
 #endif
 
-using CodeSymbolPrintDataType = std::tr1::tuple<int, int, std::string>;
+using CodeSymbolPrintDataType = std::tuple<int, int, std::string>;
 class CodeSymbolPrintTest
     : public ::testing::TestWithParam<CodeSymbolPrintDataType> {
 protected:
@@ -134,9 +134,9 @@ protected:
   virtual void SetUp() {
     auto p = GetParam();
 
-    val = std::tr1::get<0>(p);
-    len = std::tr1::get<1>(p);
-    str = std::tr1::get<2>(p);
+    val = std::get<0>(p);
+    len = std::get<1>(p);
+    str = std::get<2>(p);
   }
 
   int val;
@@ -162,8 +162,8 @@ TEST_P(CodeSymbolPrintTest, CodeSymbolPrintTest) {
 }
 
 using CodeSymbolHaveCommonPrefixDataType =
-    std::tr1::tuple<AbstractHuffmanTable::CodeSymbol,
-                    AbstractHuffmanTable::CodeSymbol>;
+    std::tuple<AbstractHuffmanTable::CodeSymbol,
+               AbstractHuffmanTable::CodeSymbol>;
 class CodeSymbolHaveCommonPrefixTest
     : public ::testing::TestWithParam<CodeSymbolHaveCommonPrefixDataType> {
 protected:
@@ -171,8 +171,8 @@ protected:
   virtual void SetUp() {
     auto p = GetParam();
 
-    symbol = std::tr1::get<0>(p);
-    partial = std::tr1::get<1>(p);
+    symbol = std::get<0>(p);
+    partial = std::get<1>(p);
   }
 
   AbstractHuffmanTable::CodeSymbol symbol;
@@ -435,17 +435,16 @@ TEST(AbstractHuffmanTableTest, EqualCompareAndTrimming) {
   ASSERT_NE(genHTFull({1, 0}, {0}), genHTFull({1}, {1}));
 }
 
-using SignExtendDataType =
-    std::tr1::tuple<rawspeed::uint32, rawspeed::uint32, int>;
+using SignExtendDataType = std::tuple<rawspeed::uint32, rawspeed::uint32, int>;
 class SignExtendTest : public ::testing::TestWithParam<SignExtendDataType> {
 protected:
   SignExtendTest() = default;
   virtual void SetUp() {
     auto p = GetParam();
 
-    diff = std::tr1::get<0>(p);
-    len = std::tr1::get<1>(p);
-    value = std::tr1::get<2>(p);
+    diff = std::get<0>(p);
+    len = std::get<1>(p);
+    value = std::get<2>(p);
   }
 
   rawspeed::uint32 diff;
@@ -532,8 +531,8 @@ TEST_P(SignExtendTest, SignExtendTest) {
 }
 
 using generateCodeSymbolsDataType =
-    std::tr1::tuple<std::vector<uchar8>,
-                    std::vector<AbstractHuffmanTable::CodeSymbol>>;
+    std::tuple<std::vector<uchar8>,
+               std::vector<AbstractHuffmanTable::CodeSymbol>>;
 class generateCodeSymbolsTest
     : protected AbstractHuffmanTable,
       public ::testing::TestWithParam<generateCodeSymbolsDataType> {
@@ -542,9 +541,9 @@ protected:
   virtual void SetUp() {
     auto p = GetParam();
 
-    ncpl = std::tr1::get<0>(p);
+    ncpl = std::get<0>(p);
     ncpl.resize(16);
-    expectedSymbols = std::tr1::get<1>(p);
+    expectedSymbols = std::get<1>(p);
   }
 
   std::vector<uchar8> ncpl;

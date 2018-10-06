@@ -35,7 +35,7 @@ template <typename T> struct intPair {
 };
 
 using ushort16Type = intPair<ushort16>;
-using ushort16TType = std::tr1::tuple<ushort16Type, bool>;
+using ushort16TType = std::tuple<ushort16Type, bool>;
 static const ushort16Type ushort16Values[] = {
     {0x01cd, 0xcd01}, {0x024e, 0x4e02}, {0x0726, 0x2607}, {0x07e3, 0xe307},
     {0x0857, 0x5708}, {0x0a0c, 0x0c0a}, {0x0a3c, 0x3c0a}, {0x0a5a, 0x5a0a},
@@ -104,7 +104,7 @@ static const ushort16Type ushort16Values[] = {
 };
 
 using uint32Type = intPair<uint32>;
-using uint32TType = std::tr1::tuple<uint32Type, bool>;
+using uint32TType = std::tuple<uint32Type, bool>;
 static const uint32Type uint32Values[] = {
     {0x017c2230, 0x30227c01}, {0x03b26f3a, 0x3a6fb203},
     {0x03e67a66, 0x667ae603}, {0x073bac8d, 0x8dac3b07},
@@ -237,7 +237,7 @@ static const uint32Type uint32Values[] = {
 };
 
 using uint64Type = intPair<uint64>;
-using uint64TType = std::tr1::tuple<uint64Type, bool>;
+using uint64TType = std::tuple<uint64Type, bool>;
 static const uint64Type uint64Values[] = {
     {0x01a4f185910d9936, 0x36990d9185f1a401},
     {0x030d4fdc9f4011b5, 0xb511409fdc4f0d03},

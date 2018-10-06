@@ -37,7 +37,7 @@ namespace rawspeed_test {
 std::vector<int> ISOList(6);
 
 class CameraSensorInfoTestDumb
-    : public ::testing::TestWithParam<std::tr1::tuple<int, int>> {
+    : public ::testing::TestWithParam<std::tuple<int, int>> {
 protected:
   CameraSensorInfoTestDumb()
       : mBlackLevel(std::rand()), // NOLINT do not need crypto-level randomness
@@ -49,8 +49,8 @@ protected:
             std::rand()  // NOLINT do not need crypto-level randomness
         }) {}
   virtual void SetUp() override {
-    mMinIso = std::tr1::get<0>(GetParam());
-    mMaxIso = std::tr1::get<1>(GetParam());
+    mMinIso = std::get<0>(GetParam());
+    mMaxIso = std::get<1>(GetParam());
   }
 
   void checkHelper(const CameraSensorInfo& csi) {

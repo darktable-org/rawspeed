@@ -58,7 +58,7 @@ inline std::vector<unsigned> sliceUp_dumb(unsigned bucketsNum,
   return buckets;
 }
 
-using twoValsType = std::tr1::tuple<unsigned, unsigned>;
+using twoValsType = std::tuple<unsigned, unsigned>;
 
 static const std::map<twoValsType, std::array<unsigned, 4>> Expected{
     {std::make_tuple(0U, 0U), {{}}},
@@ -103,8 +103,8 @@ class SliceUpTest : public ::testing::TestWithParam<twoValsType> {
 protected:
   SliceUpTest() = default;
   virtual void SetUp() {
-    threads = std::tr1::get<0>(GetParam());
-    pieces = std::tr1::get<1>(GetParam());
+    threads = std::get<0>(GetParam());
+    pieces = std::get<1>(GetParam());
 
     expected = Expected.find(GetParam());
     ASSERT_NE(expected, Expected.end());
@@ -140,8 +140,8 @@ class SliceUpTortureTest : public ::testing::TestWithParam<twoValsType> {
 protected:
   SliceUpTortureTest() = default;
   virtual void SetUp() {
-    threads = std::tr1::get<0>(GetParam());
-    pieces = std::tr1::get<1>(GetParam());
+    threads = std::get<0>(GetParam());
+    pieces = std::get<1>(GetParam());
   }
 
   unsigned threads;

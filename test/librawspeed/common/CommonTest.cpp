@@ -53,13 +53,13 @@ using std::vector;
 
 namespace rawspeed_test {
 
-using powerOfTwoType = std::tr1::tuple<int, bool>;
+using powerOfTwoType = std::tuple<int, bool>;
 class PowerOfTwoTest : public ::testing::TestWithParam<powerOfTwoType> {
 protected:
   PowerOfTwoTest() = default;
   virtual void SetUp() {
-    in = std::tr1::get<0>(GetParam());
-    expected = std::tr1::get<1>(GetParam());
+    in = std::get<0>(GetParam());
+    expected = std::get<1>(GetParam());
   }
 
   int in;        // input
@@ -78,14 +78,14 @@ TEST_P(PowerOfTwoTest, PowerOfTwoTest) {
   ASSERT_EQ(isPowerOfTwo(in), expected);
 }
 
-using RoundDownType = std::tr1::tuple<size_t, size_t, size_t>;
+using RoundDownType = std::tuple<size_t, size_t, size_t>;
 class RoundDownTest : public ::testing::TestWithParam<RoundDownType> {
 protected:
   RoundDownTest() = default;
   virtual void SetUp() {
-    in = std::tr1::get<0>(GetParam());
-    multiple = std::tr1::get<1>(GetParam());
-    expected = std::tr1::get<2>(GetParam());
+    in = std::get<0>(GetParam());
+    multiple = std::get<1>(GetParam());
+    expected = std::get<2>(GetParam());
   }
 
   size_t in; // input
@@ -106,14 +106,14 @@ TEST_P(RoundDownTest, RoundDownTest) {
   ASSERT_EQ(roundDown(in, multiple), expected);
 }
 
-using RoundUpType = std::tr1::tuple<size_t, size_t, size_t>;
+using RoundUpType = std::tuple<size_t, size_t, size_t>;
 class RoundUpTest : public ::testing::TestWithParam<RoundUpType> {
 protected:
   RoundUpTest() = default;
   virtual void SetUp() {
-    in = std::tr1::get<0>(GetParam());
-    multiple = std::tr1::get<1>(GetParam());
-    expected = std::tr1::get<2>(GetParam());
+    in = std::get<0>(GetParam());
+    multiple = std::get<1>(GetParam());
+    expected = std::get<2>(GetParam());
   }
 
   size_t in; // input
@@ -132,15 +132,15 @@ INSTANTIATE_TEST_CASE_P(RoundUpTest, RoundUpTest,
                         ::testing::ValuesIn(RoundUpValues));
 TEST_P(RoundUpTest, RoundUpTest) { ASSERT_EQ(roundUp(in, multiple), expected); }
 
-using RoundUpDivisionType = std::tr1::tuple<size_t, size_t, size_t>;
+using RoundUpDivisionType = std::tuple<size_t, size_t, size_t>;
 class RoundUpDivisionTest
     : public ::testing::TestWithParam<RoundUpDivisionType> {
 protected:
   RoundUpDivisionTest() = default;
   virtual void SetUp() {
-    in = std::tr1::get<0>(GetParam());
-    divider = std::tr1::get<1>(GetParam());
-    expected = std::tr1::get<2>(GetParam());
+    in = std::get<0>(GetParam());
+    divider = std::get<1>(GetParam());
+    expected = std::get<2>(GetParam());
   }
 
   size_t in; // input
@@ -183,13 +183,13 @@ TEST_P(RoundUpDivisionTest, RoundUpDivisionTest) {
   ASSERT_EQ(roundUpDivision(in, divider), expected);
 }
 
-using IsAlignedType = std::tr1::tuple<int, int>;
+using IsAlignedType = std::tuple<int, int>;
 class IsAlignedTest : public ::testing::TestWithParam<IsAlignedType> {
 protected:
   IsAlignedTest() = default;
   virtual void SetUp() {
-    value = std::tr1::get<0>(GetParam());
-    multiple = std::tr1::get<1>(GetParam());
+    value = std::get<0>(GetParam());
+    multiple = std::get<1>(GetParam());
   }
 
   int value;
@@ -202,13 +202,13 @@ TEST_P(IsAlignedTest, IsAlignedAfterRoundUpTest) {
   ASSERT_TRUE(isAligned(roundUp(value, multiple), multiple));
 }
 
-using IsInType = std::tr1::tuple<string, bool>;
+using IsInType = std::tuple<string, bool>;
 class IsInTest : public ::testing::TestWithParam<IsInType> {
 protected:
   IsInTest() = default;
   virtual void SetUp() {
-    in = std::tr1::get<0>(GetParam());
-    expected = std::tr1::get<1>(GetParam());
+    in = std::get<0>(GetParam());
+    expected = std::get<1>(GetParam());
   }
 
   string in;     // input
@@ -227,14 +227,14 @@ TEST_P(IsInTest, IsInTest) {
   ASSERT_EQ(isIn(in, {"foo", "foo2", "bar", "baz"}), expected);
 }
 
-using ClampBitsType = std::tr1::tuple<int, int, ushort16>;
+using ClampBitsType = std::tuple<int, int, ushort16>;
 class ClampBitsTest : public ::testing::TestWithParam<ClampBitsType> {
 protected:
   ClampBitsTest() = default;
   virtual void SetUp() {
-    in = std::tr1::get<0>(GetParam());
-    n = std::tr1::get<1>(GetParam());
-    expected = std::tr1::get<2>(GetParam());
+    in = std::get<0>(GetParam());
+    n = std::get<1>(GetParam());
+    expected = std::get<2>(GetParam());
   }
 
   int in; // input
@@ -287,13 +287,13 @@ TEST(ClampBitsUnsignedDeathTest, NoNopClamps) {
 #endif
 }
 
-using TrimSpacesType = std::tr1::tuple<string, string>;
+using TrimSpacesType = std::tuple<string, string>;
 class TrimSpacesTest : public ::testing::TestWithParam<TrimSpacesType> {
 protected:
   TrimSpacesTest() = default;
   virtual void SetUp() {
-    in = std::tr1::get<0>(GetParam());
-    out = std::tr1::get<1>(GetParam());
+    in = std::get<0>(GetParam());
+    out = std::get<1>(GetParam());
   }
 
   string in;  // input
@@ -323,14 +323,14 @@ INSTANTIATE_TEST_CASE_P(TrimSpacesTest, TrimSpacesTest,
                         ::testing::ValuesIn(TrimSpacesValues));
 TEST_P(TrimSpacesTest, TrimSpacesTest) { ASSERT_EQ(trimSpaces(in), out); }
 
-using splitStringType = std::tr1::tuple<string, char, vector<string>>;
+using splitStringType = std::tuple<string, char, vector<string>>;
 class SplitStringTest : public ::testing::TestWithParam<splitStringType> {
 protected:
   SplitStringTest() = default;
   virtual void SetUp() {
-    in = std::tr1::get<0>(GetParam());
-    sep = std::tr1::get<1>(GetParam());
-    out = std::tr1::get<2>(GetParam());
+    in = std::get<0>(GetParam());
+    sep = std::get<1>(GetParam());
+    out = std::get<2>(GetParam());
   }
 
   string in;          // input
@@ -424,15 +424,15 @@ TEST(MakeUniqueTest, Test) {
   });
 }
 
-using copyPixelsType = std::tr1::tuple<int, int, int, int>;
+using copyPixelsType = std::tuple<int, int, int, int>;
 class CopyPixelsTest : public ::testing::TestWithParam<copyPixelsType> {
 protected:
   CopyPixelsTest() = default;
   virtual void SetUp() {
-    dstPitch = std::tr1::get<0>(GetParam());
-    srcPitch = std::tr1::get<1>(GetParam());
-    rowSize = min(min(std::tr1::get<2>(GetParam()), srcPitch), dstPitch);
-    height = std::tr1::get<3>(GetParam());
+    dstPitch = std::get<0>(GetParam());
+    srcPitch = std::get<1>(GetParam());
+    rowSize = min(min(std::get<2>(GetParam()), srcPitch), dstPitch);
+    height = std::get<3>(GetParam());
 
     assert(srcPitch * height < numeric_limits<uchar8>::max());
     assert(dstPitch * height < numeric_limits<uchar8>::max());

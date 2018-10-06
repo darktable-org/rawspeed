@@ -147,20 +147,20 @@ TEST(PointTest, NonEqualityOperator) {
 }
 
 using IntPair = pair<int, int>;
-using Six = std::tr1::tuple<IntPair, IntPair, IntPair>;
+using Six = std::tuple<IntPair, IntPair, IntPair>;
 class PointTest : public ::testing::TestWithParam<Six> {
 protected:
   PointTest() = default;
   virtual void SetUp() {
     auto p = GetParam();
 
-    auto pair = std::tr1::get<0>(p);
+    auto pair = std::get<0>(p);
     a = iPoint2D(pair.first, pair.second);
 
-    pair = std::tr1::get<1>(p);
+    pair = std::get<1>(p);
     b = iPoint2D(pair.first, pair.second);
 
-    pair = std::tr1::get<2>(p);
+    pair = std::get<2>(p);
     c = iPoint2D(pair.first, pair.second);
   }
 
@@ -328,7 +328,7 @@ protected:
   HasPositiveAreaTest() = default;
   virtual void SetUp() {
     auto param = GetParam();
-    p = {std::tr1::get<0>(param), std::tr1::get<1>(param)};
+    p = {std::get<0>(param), std::get<1>(param)};
   }
 
   iPoint2D p;
@@ -359,10 +359,10 @@ protected:
   virtual void SetUp() {
     auto param = GetParam();
 
-    auto pair = std::tr1::get<0>(param);
+    auto pair = std::get<0>(param);
     p = iPoint2D(pair.first, pair.second);
 
-    a = std::tr1::get<1>(param);
+    a = std::get<1>(param);
   }
 
   iPoint2D p;
@@ -421,24 +421,24 @@ TEST_P(AreaTest, AreaTest) {
 }
 
 using operatorsType =
-    std::tr1::tuple<IntPair, IntPair, bool, bool, bool, bool, bool>;
+    std::tuple<IntPair, IntPair, bool, bool, bool, bool, bool>;
 class OperatorsTest : public ::testing::TestWithParam<operatorsType> {
 protected:
   OperatorsTest() = default;
   virtual void SetUp() {
     auto p = GetParam();
 
-    auto pair = std::tr1::get<0>(p);
+    auto pair = std::get<0>(p);
     a = iPoint2D(pair.first, pair.second);
 
-    pair = std::tr1::get<1>(p);
+    pair = std::get<1>(p);
     b = iPoint2D(pair.first, pair.second);
 
-    eq = std::tr1::get<2>(p);
-    lt = std::tr1::get<3>(p);
-    gt = std::tr1::get<4>(p);
-    le = std::tr1::get<5>(p);
-    ge = std::tr1::get<6>(p);
+    eq = std::get<2>(p);
+    lt = std::get<3>(p);
+    gt = std::get<4>(p);
+    le = std::get<5>(p);
+    ge = std::get<6>(p);
   }
 
   iPoint2D a;
