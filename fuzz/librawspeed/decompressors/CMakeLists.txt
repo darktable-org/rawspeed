@@ -22,6 +22,7 @@ set(DECOMPRESSORS
   "PanasonicDecompressor"
   "PanasonicDecompressorV5"
   "PentaxDecompressor"
+  "PhaseOneDecompressor"
   "SamsungV0Decompressor"
   "SamsungV1Decompressor"
   "SamsungV2Decompressor"
