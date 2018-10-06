@@ -42,8 +42,8 @@ unset(CMAKE_CXX_INCLUDE_WHAT_YOU_USE)
 
 # XXX make sure that zlib is using it's own headers
 # see https://github.com/madler/zlib/issues/218
-include_directories(BEFORE ${CMAKE_BINARY_DIR}/zlib/zlib-src)
-include_directories(BEFORE ${CMAKE_BINARY_DIR}/zlib/zlib-build)
+include_directories(BEFORE SYSTEM ${CMAKE_BINARY_DIR}/zlib/zlib-src)
+include_directories(BEFORE SYSTEM ${CMAKE_BINARY_DIR}/zlib/zlib-build)
 
 # Add zlib directly to our build. This defines
 # the gtest and gtest_main targets.
