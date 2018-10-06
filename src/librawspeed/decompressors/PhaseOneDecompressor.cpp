@@ -28,7 +28,7 @@
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
 #include <array>                          // for array
 #include <cassert>                        // for assert
-#include <stddef.h>                       // for size_t
+#include <cstddef>                        // for size_t
 #include <utility>                        // for move
 #include <vector>                         // for vector, vector<>::size_type
 
