@@ -26,6 +26,7 @@
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
+#include <algorithm>                      // for for_each
 #include <array>                          // for array
 #include <cassert>                        // for assert
 #include <cstddef>                        // for size_t
@@ -49,10 +50,49 @@ PhaseOneDecompressor::PhaseOneDecompressor(const RawImage& img,
              mRaw->dim.y);
   }
 
+  validateStrips();
+}
+
+void PhaseOneDecompressor::validateStrips() const {
+  // The 'strips' vector should contain exactly one element per row of image.
+
+  // If the lenght is different, then the 'strips' vector is clearly incorrect.
   if (strips.size() != static_cast<decltype(strips)::size_type>(mRaw->dim.y)) {
     ThrowRDE("Height (%u) vs strip count %zu mismatch", mRaw->dim.y,
              strips.size());
   }
+
+  struct RowBin {
+    using value_type = unsigned char;
+    bool isEmpty() const { return data == 0; }
+    void fill() { data = 1; }
+    value_type data = 0;
+  };
+
+  // Now, the strips in 'strips' vector aren't in order.
+  // The 'decltype(strips)::value_type::n' is the row number of a strip.
+  // We need to make sure that we have every row (0..mRaw->dim.y-1), once.
+
+  // There are many ways to do that. Here, we take the histogram of all the
+  // row numbers, and if any bin ends up not being '1' (one strip per row),
+  // then the input is bad.
+  std::vector<RowBin> histogram;
+  histogram.resize(strips.size());
+  int numBinsFilled = 0;
+  std::for_each(strips.begin(), strips.end(),
+                [y = mRaw->dim.y, &histogram,
+                 &numBinsFilled](const PhaseOneStrip& strip) {
+                  if (strip.n < 0 || strip.n >= y)
+                    ThrowRDE("Strip specifies out-of-bounds row %u", strip.n);
+                  RowBin& rowBin = histogram[strip.n];
+                  if (!rowBin.isEmpty())
+                    ThrowRDE("Duplicate row %u", strip.n);
+                  rowBin.fill();
+                  numBinsFilled++;
+                });
+  assert(histogram.size() == strips.size());
+  assert(numBinsFilled == mRaw->dim.y &&
+         "We should only get here if all the rows/bins got filled.");
 }
 
 void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {

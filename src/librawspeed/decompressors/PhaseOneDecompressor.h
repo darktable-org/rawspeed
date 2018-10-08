@@ -45,6 +45,8 @@ class PhaseOneDecompressor final : public AbstractParallelizedDecompressor {
 
   void decompressThreaded(const RawDecompressorThread* t) const final;
 
+  void validateStrips() const;
+
 public:
   PhaseOneDecompressor(const RawImage& img,
                        std::vector<PhaseOneStrip>&& strips_);
