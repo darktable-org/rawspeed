@@ -355,8 +355,10 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
       });
 }
 
-void VC5Decompressor::decode(const unsigned int offsetX,
-                             const unsigned int offsetY) {
+void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
+  if (offsetX || offsetY)
+    ThrowRDE("VC5Decompressor expects to fill the whole image, not some tile.");
+
   unsigned int chunkSize = 0;
   mBs.setByteOrder(Endianness::big);
 
