@@ -91,8 +91,7 @@ VC5Decompressor::Array2D<T>::create(const unsigned int width,
 }
 
 template <class T> void VC5Decompressor::Array2D<T>::destroy() {
-  if (_data)
-    delete[] _data;
+  delete[] _data;
   clear();
 }
 
@@ -397,10 +396,7 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
 }
 
 // virtual
-VC5Decompressor::~VC5Decompressor() {
-  if (mVC5LogTable)
-    delete[] mVC5LogTable;
-}
+VC5Decompressor::~VC5Decompressor() { delete[] mVC5LogTable; }
 
 void VC5Decompressor::decode(const unsigned int offsetX,
                              const unsigned int offsetY) {
