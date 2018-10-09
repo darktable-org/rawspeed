@@ -57,16 +57,16 @@ class VC5Decompressor final : public AbstractDecompressor {
     short16 quantization;
   } mVC5;
 
-  template <class T> class Array2D {
+  template <class T> class Array2DRef {
     unsigned int _pitch = 0;
     T* _data;
 
   public:
     unsigned int width = 0, height = 0;
 
-    Array2D();
-    Array2D(T* data, unsigned int dataWidth, unsigned int dataHeight,
-            unsigned int dataPitch = 0);
+    Array2DRef();
+    Array2DRef(T* data, unsigned int dataWidth, unsigned int dataHeight,
+               unsigned int dataPitch = 0);
 
     static std::vector<T> create(unsigned int width, unsigned int height);
 
@@ -95,16 +95,16 @@ class VC5Decompressor final : public AbstractDecompressor {
     uint32_t getValidBandMask() const { return mDecodedBandMask; }
     bool allBandsValid() const;
 
-    void reconstructLowband(Array2D<int16_t> dest, int16_t prescale,
+    void reconstructLowband(Array2DRef<int16_t> dest, int16_t prescale,
                             bool clampUint = false);
 
-    Array2D<int16_t> bandAsArray2D(unsigned int iBand);
+    Array2DRef<int16_t> bandAsArray2DRef(unsigned int iBand);
 
   protected:
     uint32 mDecodedBandMask = 0;
     bool mInitialized = false;
 
-    static void dequantize(Array2D<int16_t> out, Array2D<int16_t> in,
+    static void dequantize(Array2DRef<int16_t> out, Array2DRef<int16_t> in,
                            int16_t quant);
   };
   struct Transform {

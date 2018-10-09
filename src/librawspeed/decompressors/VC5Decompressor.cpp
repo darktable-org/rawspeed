@@ -73,28 +73,30 @@ struct RLV {
 
 namespace rawspeed {
 
-template <class T> VC5Decompressor::Array2D<T>::Array2D() : _data(nullptr) {}
+template <class T>
+VC5Decompressor::Array2DRef<T>::Array2DRef() : _data(nullptr) {}
 
 template <class T>
-VC5Decompressor::Array2D<T>::Array2D(T* data, const unsigned int dataWidth,
-                                     const unsigned int dataHeight,
-                                     const unsigned int dataPitch /* = 0 */)
+VC5Decompressor::Array2DRef<T>::Array2DRef(
+    T* data, const unsigned int dataWidth, const unsigned int dataHeight,
+    const unsigned int dataPitch /* = 0 */)
     : _data(data), width(dataWidth), height(dataHeight) {
   _pitch = (dataPitch == 0 ? dataWidth : dataPitch);
 }
 
 // static
 template <class T>
-std::vector<T> VC5Decompressor::Array2D<T>::create(const unsigned int width,
-                                                   const unsigned int height) {
+std::vector<T>
+VC5Decompressor::Array2DRef<T>::create(const unsigned int width,
+                                       const unsigned int height) {
   std::vector<T> data;
   data.resize(width * height);
   return data;
 }
 
 template <class T>
-T& VC5Decompressor::Array2D<T>::operator()(const unsigned int x,
-                                           const unsigned int y) {
+T& VC5Decompressor::Array2DRef<T>::operator()(const unsigned int x,
+                                              const unsigned int y) {
   assert(_data);
   assert(x < width);
   assert(y < height);
@@ -102,8 +104,8 @@ T& VC5Decompressor::Array2D<T>::operator()(const unsigned int x,
 }
 
 template <class T>
-T VC5Decompressor::Array2D<T>::operator()(const unsigned int x,
-                                          const unsigned int y) const {
+T VC5Decompressor::Array2DRef<T>::operator()(const unsigned int x,
+                                             const unsigned int y) const {
   assert(_data);
   assert(x < width);
   assert(y < height);
@@ -145,8 +147,8 @@ bool VC5Decompressor::Wavelet::allBandsValid() const {
   return mDecodedBandMask == static_cast<uint32>((1 << numBands) - 1);
 }
 
-VC5Decompressor::Array2D<int16_t>
-VC5Decompressor::Wavelet::bandAsArray2D(const unsigned int iBand) {
+VC5Decompressor::Array2DRef<int16_t>
+VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) {
   return {data[iBand], width, height};
 }
 
@@ -160,8 +162,9 @@ void VC5Decompressor::Wavelet::clear() {
 }
 
 // static
-void VC5Decompressor::Wavelet::dequantize(Array2D<int16_t> out,
-                                          Array2D<int16_t> in, int16_t quant) {
+void VC5Decompressor::Wavelet::dequantize(Array2DRef<int16_t> out,
+                                          Array2DRef<int16_t> in,
+                                          int16_t quant) {
   for (unsigned int y = 0; y < in.height; ++y) {
     for (unsigned int x = 0; x < in.width; ++x) {
       double c = in(x, y);
@@ -175,7 +178,7 @@ void VC5Decompressor::Wavelet::dequantize(Array2D<int16_t> out,
 }
 
 void VC5Decompressor::Wavelet::reconstructLowband(
-    Array2D<int16_t> dest, const int16_t prescale,
+    Array2DRef<int16_t> dest, const int16_t prescale,
     const bool clampUint /* = false */) {
   unsigned int x, y;
   int16_t descaleShift = (prescale == 2 ? 2 : 0);
@@ -188,28 +191,28 @@ void VC5Decompressor::Wavelet::reconstructLowband(
   }
 
   std::vector<int16_t> lowhigh_storage =
-      Array2D<int16_t>::create(width, height);
+      Array2DRef<int16_t>::create(width, height);
   std::vector<int16_t> highlow_storage =
-      Array2D<int16_t>::create(width, height);
+      Array2DRef<int16_t>::create(width, height);
   std::vector<int16_t> highhigh_storage =
-      Array2D<int16_t>::create(width, height);
+      Array2DRef<int16_t>::create(width, height);
 
   std::vector<int16_t> lowpass_storage =
-      Array2D<int16_t>::create(width, 2 * height);
+      Array2DRef<int16_t>::create(width, 2 * height);
   std::vector<int16_t> highpass_storage =
-      Array2D<int16_t>::create(width, 2 * height);
+      Array2DRef<int16_t>::create(width, 2 * height);
 
-  Array2D<int16_t> lowlow(data[0], width, height);
-  Array2D<int16_t> lowhigh(lowhigh_storage.data(), width, height);
-  Array2D<int16_t> highlow(highlow_storage.data(), width, height);
-  Array2D<int16_t> highhigh(highhigh_storage.data(), width, height);
+  Array2DRef<int16_t> lowlow(data[0], width, height);
+  Array2DRef<int16_t> lowhigh(lowhigh_storage.data(), width, height);
+  Array2DRef<int16_t> highlow(highlow_storage.data(), width, height);
+  Array2DRef<int16_t> highhigh(highhigh_storage.data(), width, height);
 
-  Array2D<int16_t> lowpass(lowpass_storage.data(), width, 2 * height);
-  Array2D<int16_t> highpass(highpass_storage.data(), width, 2 * height);
+  Array2DRef<int16_t> lowpass(lowpass_storage.data(), width, 2 * height);
+  Array2DRef<int16_t> highpass(highpass_storage.data(), width, 2 * height);
 
-  dequantize(lowhigh, Array2D<int16_t>(data[1], width, height), quant[1]);
-  dequantize(highlow, Array2D<int16_t>(data[2], width, height), quant[2]);
-  dequantize(highhigh, Array2D<int16_t>(data[3], width, height), quant[3]);
+  dequantize(lowhigh, Array2DRef<int16_t>(data[1], width, height), quant[1]);
+  dequantize(highlow, Array2DRef<int16_t>(data[2], width, height), quant[2]);
+  dequantize(highhigh, Array2DRef<int16_t>(data[3], width, height), quant[3]);
 
   // Vertical reconstruction
   // 1st row
@@ -552,7 +555,7 @@ void VC5Decompressor::decode(const unsigned int offsetX,
         if (idx > 0 && wavelet.allBandsValid() &&
             !transform.wavelet[idx - 1].isBandValid(0)) {
           wavelet.reconstructLowband(
-              transform.wavelet[idx - 1].bandAsArray2D(0),
+              transform.wavelet[idx - 1].bandAsArray2DRef(0),
               transform.prescale[idx]);
           transform.wavelet[idx - 1].setBandValid(0);
         }
@@ -613,22 +616,22 @@ void VC5Decompressor::decode(const unsigned int offsetX,
   }
 
   // Decode final wavelet into image
-  Array2D<uint16_t> out(reinterpret_cast<uint16_t*>(mImg->getData()),
-                        static_cast<unsigned int>(mImg->dim.x),
-                        static_cast<unsigned int>(mImg->dim.y),
-                        mImg->pitch / sizeof(uint16_t));
+  Array2DRef<uint16_t> out(reinterpret_cast<uint16_t*>(mImg->getData()),
+                           static_cast<unsigned int>(mImg->dim.x),
+                           static_cast<unsigned int>(mImg->dim.y),
+                           mImg->pitch / sizeof(uint16_t));
 
   unsigned int width = 2 * mTransforms[0].wavelet[0].width;
   unsigned int height = 2 * mTransforms[0].wavelet[0].height;
 
   std::vector<int16_t> channels_storage[4];
-  Array2D<int16_t> channels[4];
+  Array2DRef<int16_t> channels[4];
   for (unsigned int iChannel = 0; iChannel < MAX_NUM_CHANNELS; ++iChannel) {
     assert(2 * mTransforms[iChannel].wavelet[0].width == width);
     assert(2 * mTransforms[iChannel].wavelet[0].height == height);
-    channels_storage[iChannel] = Array2D<int16_t>::create(width, height);
+    channels_storage[iChannel] = Array2DRef<int16_t>::create(width, height);
     channels[iChannel] =
-        Array2D<int16_t>(channels_storage[iChannel].data(), width, height);
+        Array2DRef<int16_t>(channels_storage[iChannel].data(), width, height);
     mTransforms[iChannel].wavelet[0].reconstructLowband(
         channels[iChannel], mTransforms[iChannel].prescale[0], true);
   }
