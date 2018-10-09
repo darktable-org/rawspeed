@@ -65,15 +65,14 @@ class VC5Decompressor final : public AbstractDecompressor {
     unsigned int width, height;
 
     Array2D();
-    Array2D(T* data, const unsigned int dataWidth,
-            const unsigned int dataHeight, const unsigned int dataPitch = 0);
+    Array2D(T* data, unsigned int dataWidth, unsigned int dataHeight,
+            unsigned int dataPitch = 0);
 
-    static Array2D<T> create(const unsigned int width,
-                             const unsigned int height);
+    static Array2D<T> create(unsigned int width, unsigned int height);
     void destroy();
     void clear();
-    inline T& operator()(const unsigned int x, const unsigned int y);
-    inline T operator()(const unsigned int x, const unsigned int y) const;
+    inline T& operator()(unsigned int x, unsigned int y);
+    inline T operator()(unsigned int x, unsigned int y) const;
   };
 
   class Wavelet {
@@ -91,15 +90,15 @@ class VC5Decompressor final : public AbstractDecompressor {
     void clear();
 
     bool isInitialized() const { return mInitialized; }
-    void setBandValid(const int band);
-    bool isBandValid(const int band) const;
+    void setBandValid(int band);
+    bool isBandValid(int band) const;
     uint32_t getValidBandMask() const { return mDecodedBandMask; }
     bool allBandsValid() const;
 
-    void reconstructLowband(Array2D<int16_t> dest, const int16_t prescale,
-                            const bool clampUint = false);
+    void reconstructLowband(Array2D<int16_t> dest, int16_t prescale,
+                            bool clampUint = false);
 
-    Array2D<int16_t> bandAsArray2D(const unsigned int iBand);
+    Array2D<int16_t> bandAsArray2D(unsigned int iBand);
 
   protected:
     uint32 mDecodedBandMask;
@@ -114,13 +113,13 @@ class VC5Decompressor final : public AbstractDecompressor {
   } mTransforms[MAX_NUM_CHANNELS];
 
   static void getRLV(BitPumpMSB& bits, int& value, unsigned int& count);
-  inline unsigned int DecodeLog(const int val) const;
+  inline unsigned int DecodeLog(int val) const;
 
 public:
   VC5Decompressor(ByteStream bs, const RawImage& img);
   virtual ~VC5Decompressor();
 
-  void decode(const unsigned int offsetX, const unsigned int offsetY);
+  void decode(unsigned int offsetX, unsigned int offsetY);
 };
 
 } // namespace rawspeed
