@@ -163,8 +163,8 @@ void VC5Decompressor::Wavelet::clear() {
   mInitialized = false;
   if (data[0])
     delete[] data[0];
-  for (int i = 0; i < MAX_NUM_BANDS; ++i) {
-    data[i] = nullptr;
+  for (auto& i : data) {
+    i = nullptr;
   }
 }
 
