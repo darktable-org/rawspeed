@@ -112,7 +112,7 @@ class VC5Decompressor final : public AbstractDecompressor {
     int16_t prescale[MAX_NUM_WAVELETS];
   } mTransforms[MAX_NUM_CHANNELS];
 
-  static void getRLV(BitPumpMSB& bits, int& value, unsigned int& count);
+  static void getRLV(BitPumpMSB* bits, int* value, unsigned int* count);
   inline unsigned int DecodeLog(int val) const;
 
 public:

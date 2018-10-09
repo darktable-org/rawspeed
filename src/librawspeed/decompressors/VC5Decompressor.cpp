@@ -535,7 +535,7 @@ void VC5Decompressor::decode(const unsigned int offsetX,
           unsigned int count = 0;
           int nPixels = wavelet.width * wavelet.height;
           for (int iPixel = 0; iPixel < nPixels;) {
-            getRLV(bits, pixelValue, count);
+            getRLV(&bits, &pixelValue, &count);
             for (; count > 0; --count) {
               if (iPixel > nPixels)
                 ThrowRDE("Buffer overflow");
@@ -544,7 +544,7 @@ void VC5Decompressor::decode(const unsigned int offsetX,
             }
           }
           if (bits.getPosition() < bits.getSize()) {
-            getRLV(bits, pixelValue, count);
+            getRLV(&bits, &pixelValue, &count);
             if (pixelValue != MARKER_BAND_END || count != 0)
               ThrowRDE("EndOfBand marker not found");
           }
@@ -663,26 +663,27 @@ void VC5Decompressor::decode(const unsigned int offsetX,
 }
 
 // static
-void VC5Decompressor::getRLV(BitPumpMSB& bits, int& value,
-                             unsigned int& count) {
+void VC5Decompressor::getRLV(BitPumpMSB* bits, int* value,
+                             unsigned int* count) {
   unsigned int iTab;
 
   // Ensure the maximum number of bits are cached to make peekBits() as fast as
   // possible.
-  bits.fill(table17.entries[table17.length - 1].size);
+  bits->fill(table17.entries[table17.length - 1].size);
   for (iTab = 0; iTab < table17.length; ++iTab) {
-    if (table17.entries[iTab].bits == bits.peekBits(table17.entries[iTab].size))
+    if (table17.entries[iTab].bits ==
+        bits->peekBits(table17.entries[iTab].size))
       break;
   }
   if (iTab >= table17.length)
     ThrowRDE("Code not found in codebook");
 
-  bits.skipBits(table17.entries[iTab].size);
-  value = table17.entries[iTab].value;
-  count = table17.entries[iTab].count;
-  if (value != 0) {
-    if (bits.getBits(1))
-      value = -value;
+  bits->skipBits(table17.entries[iTab].size);
+  *value = table17.entries[iTab].value;
+  *count = table17.entries[iTab].count;
+  if (*value != 0) {
+    if (bits->getBits(1))
+      *value = -(*value);
   }
 }
 
