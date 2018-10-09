@@ -54,6 +54,7 @@ struct RLV {
 #define VC5_TAG_ImageWidth 0x0014
 #define VC5_TAG_ImageHeight 0x0015
 #define VC5_TAG_LowpassPrecision 0x0023
+#define VC5_TAG_SubbandCount 0x000E
 #define VC5_TAG_SubbandNumber 0x0030
 #define VC5_TAG_Quantization 0x0035
 #define VC5_TAG_ChannelNumber 0x003e
@@ -311,7 +312,6 @@ void VC5Decompressor::Wavelet::reconstructLowband(
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     : AbstractDecompressor(), mImg(img), mBs(std::move(bs)) {
-  mVC5.numSubbands = 10;
   mVC5.iChannel = 0;
   mVC5.iSubband = 0;
   mVC5.imgWidth = 0;
@@ -405,6 +405,10 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
         ThrowRDE("Image format %i is not 4(RAW)", val);
       mVC5.imgFormat = val; // 4=RAW
       break;
+    case VC5_TAG_SubbandCount:
+      if (val != numSubbands)
+        ThrowRDE("Unexpected subband count %u, expected %u", val, numSubbands);
+      break;
     case VC5_TAG_MaxBitsPerComponent:
       mVC5.bpc = val;
       break;
@@ -415,6 +419,8 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
       mVC5.patternHeight = val;
       break;
     case VC5_TAG_SubbandNumber:
+      if (val >= numSubbands)
+        ThrowRDE("Bad subband number %u", val);
       mVC5.iSubband = val;
       break;
     case VC5_TAG_Quantization:
@@ -521,7 +527,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
         }
 
         mVC5.iSubband++;
-        if (mVC5.iSubband == mVC5.numSubbands) {
+        if (mVC5.iSubband == numSubbands) {
           mVC5.iChannel++;
           mVC5.iSubband = 0;
         }

@@ -30,7 +30,6 @@
 
 namespace rawspeed {
 
-const int MAX_NUM_SUBBANDS = 10;
 const int MAX_NUM_PRESCALE = 8;
 
 class ByteStream;
@@ -45,8 +44,9 @@ class VC5Decompressor final : public AbstractDecompressor {
   static constexpr auto VC5_LOG_TABLE_BITWIDTH = 12;
   SimpleLUT<unsigned, VC5_LOG_TABLE_BITWIDTH> mVC5LogTable;
 
+  static constexpr int numSubbands = 10;
+
   struct {
-    ushort16 numSubbands;
     ushort16 iChannel, iSubband;
     ushort16 imgWidth, imgHeight, imgFormat;
     ushort16 patternWidth, patternHeight;
