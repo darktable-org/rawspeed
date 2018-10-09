@@ -32,7 +32,6 @@ namespace rawspeed {
 
 const int MAX_NUM_CHANNELS = 4;
 const int MAX_NUM_WAVELETS = 3;
-const int MAX_NUM_BANDS = 4;
 const int MAX_NUM_SUBBANDS = 10;
 const int MAX_NUM_PRESCALE = 8;
 
@@ -62,11 +61,11 @@ class VC5Decompressor final : public AbstractDecompressor {
   class Wavelet {
   public:
     uint16_t width, height, pitch;
-    uint16_t numBands;
-    uint16_t scale[MAX_NUM_BANDS];
-    int16_t quant[MAX_NUM_BANDS];
+    static constexpr uint16_t numBands = 4;
+    uint16_t scale[numBands];
+    int16_t quant[numBands];
     std::vector<int16_t> data_storage;
-    int16_t* data[MAX_NUM_BANDS];
+    int16_t* data[numBands];
 
     Wavelet();
     virtual ~Wavelet() { clear(); }

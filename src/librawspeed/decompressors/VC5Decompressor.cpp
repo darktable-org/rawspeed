@@ -76,8 +76,8 @@ struct RLV {
 
 namespace rawspeed {
 
-VC5Decompressor::Wavelet::Wavelet() : numBands(MAX_NUM_BANDS) {
-  for (int i = 0; i < MAX_NUM_BANDS; ++i) {
+VC5Decompressor::Wavelet::Wavelet() {
+  for (int i = 0; i < numBands; ++i) {
     data[i] = nullptr;
     quant[i] = 0;
     scale[i] = 0;
@@ -88,12 +88,11 @@ void VC5Decompressor::Wavelet::initialize(uint16_t waveletWidth,
                                           uint16_t waveletHeight) {
   this->width = waveletWidth;
   this->height = waveletHeight;
-  numBands = MAX_NUM_BANDS;
   pitch = waveletWidth * sizeof(int16_t);
   mDecodedBandMask = 0;
 
-  data_storage.resize(MAX_NUM_BANDS * waveletWidth * waveletHeight);
-  for (int iBand = 0; iBand < MAX_NUM_BANDS; ++iBand)
+  data_storage.resize(numBands * waveletWidth * waveletHeight);
+  for (int iBand = 0; iBand < numBands; ++iBand)
     data[iBand] = &data_storage[iBand * waveletWidth * waveletHeight];
 
   mInitialized = true;
