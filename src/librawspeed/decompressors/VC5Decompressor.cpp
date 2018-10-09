@@ -444,8 +444,10 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
 
       if ((tag & VC5_TAG_LargeCodeblock) == VC5_TAG_LargeCodeblock) {
         Transform& transform = mTransforms[mVC5.iChannel];
-        static int subband_wavelet_index[] = {2, 2, 2, 2, 1, 1, 1, 0, 0, 0};
-        static int subband_band_index[] = {0, 1, 2, 3, 1, 2, 3, 1, 2, 3};
+        static constexpr std::array<int, numSubbands> subband_wavelet_index = {
+            2, 2, 2, 2, 1, 1, 1, 0, 0, 0};
+        static constexpr std::array<int, numSubbands> subband_band_index = {
+            0, 1, 2, 3, 1, 2, 3, 1, 2, 3};
         const int idx = subband_wavelet_index[mVC5.iSubband];
         const int band = subband_band_index[mVC5.iSubband];
         uint16_t channelWidth = mVC5.imgWidth / mVC5.patternWidth;
