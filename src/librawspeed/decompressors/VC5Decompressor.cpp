@@ -85,20 +85,11 @@ VC5Decompressor::Array2D<T>::Array2D(T* data, const unsigned int dataWidth,
 
 // static
 template <class T>
-VC5Decompressor::Array2D<T>
-VC5Decompressor::Array2D<T>::create(const unsigned int width,
-                                    const unsigned int height) {
-  return Array2D<T>(new T[width * height], width, height);
-}
-
-template <class T> void VC5Decompressor::Array2D<T>::destroy() {
-  delete[] _data;
-  clear();
-}
-
-template <class T> void VC5Decompressor::Array2D<T>::clear() {
-  _data = nullptr;
-  width = height = _pitch = 0;
+std::vector<T> VC5Decompressor::Array2D<T>::create(const unsigned int width,
+                                                   const unsigned int height) {
+  std::vector<T> data;
+  data.resize(width * height);
+  return data;
 }
 
 template <class T>
@@ -196,13 +187,25 @@ void VC5Decompressor::Wavelet::reconstructLowband(
       ThrowRDE("Quant value of band %i must not be zero", i);
   }
 
-  Array2D<int16_t> lowlow(data[0], width, height);
-  Array2D<int16_t> lowhigh = Array2D<int16_t>::create(width, height);
-  Array2D<int16_t> highlow = Array2D<int16_t>::create(width, height);
-  Array2D<int16_t> highhigh = Array2D<int16_t>::create(width, height);
+  std::vector<int16_t> lowhigh_storage =
+      Array2D<int16_t>::create(width, height);
+  std::vector<int16_t> highlow_storage =
+      Array2D<int16_t>::create(width, height);
+  std::vector<int16_t> highhigh_storage =
+      Array2D<int16_t>::create(width, height);
 
-  Array2D<int16_t> lowpass = Array2D<int16_t>::create(width, 2 * height);
-  Array2D<int16_t> highpass = Array2D<int16_t>::create(width, 2 * height);
+  std::vector<int16_t> lowpass_storage =
+      Array2D<int16_t>::create(width, 2 * height);
+  std::vector<int16_t> highpass_storage =
+      Array2D<int16_t>::create(width, 2 * height);
+
+  Array2D<int16_t> lowlow(data[0], width, height);
+  Array2D<int16_t> lowhigh(lowhigh_storage.data(), width, height);
+  Array2D<int16_t> highlow(highlow_storage.data(), width, height);
+  Array2D<int16_t> highhigh(highhigh_storage.data(), width, height);
+
+  Array2D<int16_t> lowpass(lowpass_storage.data(), width, 2 * height);
+  Array2D<int16_t> highpass(highpass_storage.data(), width, 2 * height);
 
   dequantize(lowhigh, Array2D<int16_t>(data[1], width, height), quant[1]);
   dequantize(highlow, Array2D<int16_t>(data[2], width, height), quant[2]);
@@ -347,12 +350,6 @@ void VC5Decompressor::Wavelet::reconstructLowband(
       dest(2 * x + 1, y) = static_cast<int16_t>(odd);
     }
   }
-
-  lowhigh.destroy();
-  highlow.destroy();
-  highhigh.destroy();
-  lowpass.destroy();
-  highpass.destroy();
 }
 
 // inline
@@ -624,11 +621,14 @@ void VC5Decompressor::decode(const unsigned int offsetX,
   unsigned int width = 2 * mTransforms[0].wavelet[0].width;
   unsigned int height = 2 * mTransforms[0].wavelet[0].height;
 
+  std::vector<int16_t> channels_storage[4];
   Array2D<int16_t> channels[4];
   for (unsigned int iChannel = 0; iChannel < MAX_NUM_CHANNELS; ++iChannel) {
     assert(2 * mTransforms[iChannel].wavelet[0].width == width);
     assert(2 * mTransforms[iChannel].wavelet[0].height == height);
-    channels[iChannel] = Array2D<int16_t>::create(width, height);
+    channels_storage[iChannel] = Array2D<int16_t>::create(width, height);
+    channels[iChannel] =
+        Array2D<int16_t>(channels_storage[iChannel].data(), width, height);
     mTransforms[iChannel].wavelet[0].reconstructLowband(
         channels[iChannel], mTransforms[iChannel].prescale[0], true);
   }
@@ -654,9 +654,6 @@ void VC5Decompressor::decode(const unsigned int offsetX,
       out(2 * col + 1, 2 * row + 1) = static_cast<uint16_t>(DecodeLog(b));
     }
   }
-
-  for (auto& channel : channels)
-    channel.destroy();
 }
 
 // static

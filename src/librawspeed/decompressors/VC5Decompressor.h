@@ -68,9 +68,8 @@ class VC5Decompressor final : public AbstractDecompressor {
     Array2D(T* data, unsigned int dataWidth, unsigned int dataHeight,
             unsigned int dataPitch = 0);
 
-    static Array2D<T> create(unsigned int width, unsigned int height);
-    void destroy();
-    void clear();
+    static std::vector<T> create(unsigned int width, unsigned int height);
+
     inline T& operator()(unsigned int x, unsigned int y);
     inline T operator()(unsigned int x, unsigned int y) const;
   };
