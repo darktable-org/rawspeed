@@ -413,7 +413,7 @@ void VC5Decompressor::decode(const unsigned int offsetX,
 
   bool done = false;
   while (!done) {
-    int16_t tag = static_cast<int16_t>(mBs.getU16());
+    auto tag = static_cast<int16_t>(mBs.getU16());
     ushort16 val = mBs.getU16();
 
     bool optional;
