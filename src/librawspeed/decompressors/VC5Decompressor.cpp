@@ -313,7 +313,6 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     : AbstractDecompressor(), mImg(img), mBs(std::move(bs)) {
   mVC5.numChannels = 0;
   mVC5.numSubbands = 10;
-  mVC5.numWavelets = 3;
   mVC5.iChannel = 0;
   mVC5.iSubband = 0;
   mVC5.imgWidth = 0;
@@ -423,7 +422,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
       mVC5.cps = val;
       break;
     case VC5_TAG_PrescaleShift:
-      for (int iWavelet = 0; iWavelet < MAX_NUM_WAVELETS; ++iWavelet)
+      for (int iWavelet = 0; iWavelet < Transform::numWavelets; ++iWavelet)
         mTransforms[mVC5.iChannel].prescale[iWavelet] =
             (val >> (14 - 2 * iWavelet)) & 0x03;
       break;
@@ -452,8 +451,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
             ((channelWidth % 2) == 0 ? channelWidth : channelWidth + 1) / 2;
         uint16_t waveletHeight =
             ((channelHeight % 2) == 0 ? channelHeight : channelHeight + 1) / 2;
-        for (int iWavelet = 0; iWavelet < mVC5.numWavelets; ++iWavelet) {
-          Wavelet& wavelet = transform.wavelet[iWavelet];
+        for (Wavelet& wavelet : transform.wavelet) {
           if (wavelet.isInitialized()) {
             if (wavelet.width != waveletWidth ||
                 wavelet.height != waveletHeight)
