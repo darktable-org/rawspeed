@@ -54,6 +54,8 @@ FILE(GLOB SOURCES
   "SonyArw2Decompressor.h"
   "UncompressedDecompressor.cpp"
   "UncompressedDecompressor.h"
+  "VC5Decompressor.cpp"
+  "VC5Decompressor.h"
 )
 
 target_sources(rawspeed PRIVATE

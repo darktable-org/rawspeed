@@ -2066,6 +2066,18 @@
 			<Hint name="wb_offset" value="142"/>
 		</Hints>
 	</Camera>
+	<Camera make="GoPro" model="FUSION" mode="dng">
+		<ID make="GoPro" model="FUSION">GoPro FUSION</ID>
+	</Camera>
+	<Camera make="GoPro" model="HERO5 Black" mode="dng">
+		<ID make="GoPro" model="HERO5 Black">GoPro HERO5 Black</ID>
+	</Camera>
+	<Camera make="GoPro" model="HERO6 Black" mode="dng">
+		<ID make="GoPro" model="HERO6 Black">GoPro HERO6 Black</ID>
+	</Camera>
+	<Camera make="GoPro" model="HERO7 Black" mode="dng">
+		<ID make="GoPro" model="HERO7 Black">GoPro HERO7 Black</ID>
+	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON D100" mode="12bit-compressed">
 		<ID make="Nikon" model="D100">Nikon D100</ID>
 		<CFA width="2" height="2">

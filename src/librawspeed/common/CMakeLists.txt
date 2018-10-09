@@ -20,6 +20,7 @@ FILE(GLOB SOURCES
   "RawImageDataU16.cpp"
   "RawspeedException.h"
   "Spline.h"
+  "table17.inc"
   "TableLookUp.cpp"
   "TableLookUp.h"
   "Threading.h"
