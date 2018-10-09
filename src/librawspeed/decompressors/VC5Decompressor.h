@@ -81,6 +81,7 @@ class VC5Decompressor final : public AbstractDecompressor {
     uint16_t numBands;
     uint16_t scale[MAX_NUM_BANDS];
     int16_t quant[MAX_NUM_BANDS];
+    std::vector<int16_t> data_storage;
     int16_t* data[MAX_NUM_BANDS];
 
     Wavelet();

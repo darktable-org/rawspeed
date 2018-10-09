@@ -135,9 +135,9 @@ void VC5Decompressor::Wavelet::initialize(uint16_t waveletWidth,
   pitch = waveletWidth * sizeof(int16_t);
   mDecodedBandMask = 0;
 
-  data[0] = new int16_t[MAX_NUM_BANDS * waveletWidth * waveletHeight];
-  for (int iBand = 1; iBand < MAX_NUM_BANDS; ++iBand)
-    data[iBand] = data[0] + iBand * waveletWidth * waveletHeight;
+  data_storage.resize(MAX_NUM_BANDS * waveletWidth * waveletHeight);
+  for (int iBand = 0; iBand < MAX_NUM_BANDS; ++iBand)
+    data[iBand] = &data_storage[iBand * waveletWidth * waveletHeight];
 
   mInitialized = true;
 }
@@ -160,9 +160,9 @@ VC5Decompressor::Wavelet::bandAsArray2D(const unsigned int iBand) {
 }
 
 void VC5Decompressor::Wavelet::clear() {
+  data_storage.clear();
+  data_storage.shrink_to_fit();
   mInitialized = false;
-  if (data[0])
-    delete[] data[0];
   for (auto& i : data) {
     i = nullptr;
   }
