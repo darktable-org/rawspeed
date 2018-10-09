@@ -29,6 +29,7 @@
 #include "decompressors/VC5Decompressor.h"
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include <cmath>
+#include <utility>
 
 // Definitions needed by table17.inc
 // Taken from
@@ -364,7 +365,7 @@ unsigned int VC5Decompressor::DecodeLog(const int val) const {
 }
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
-    : AbstractDecompressor(), mImg(img), mBs(bs) {
+    : AbstractDecompressor(), mImg(img), mBs(std::move(bs)) {
   mVC5.numChannels = 0;
   mVC5.numSubbands = 10;
   mVC5.numWavelets = 3;
