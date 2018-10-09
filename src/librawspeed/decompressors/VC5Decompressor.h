@@ -61,13 +61,13 @@ class VC5Decompressor final : public AbstractDecompressor {
   class Wavelet {
   public:
     uint16_t width, height, pitch;
-    static constexpr uint16_t numBands = 4;
-    uint16_t scale[numBands];
-    int16_t quant[numBands];
     std::vector<int16_t> data_storage;
-    int16_t* data[numBands];
 
-    Wavelet();
+    static constexpr uint16_t numBands = 4;
+    std::array<uint16_t, numBands> scale = {};
+    std::array<int16_t, numBands> quant = {};
+    std::array<int16_t*, numBands> data = {};
+
     virtual ~Wavelet() { clear(); }
 
     void initialize(uint16_t waveletWidth, uint16_t waveletHeight);
