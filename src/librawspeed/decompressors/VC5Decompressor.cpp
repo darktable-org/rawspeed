@@ -388,12 +388,13 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
   assert(outputBits <= 16);
 
   mVC5LogTable = new unsigned int[VC5_LOG_TABLE_SIZE];
-  for (int i = 0; i < VC5_LOG_TABLE_SIZE; ++i)
+  for (int i = 0; i < VC5_LOG_TABLE_SIZE; ++i) {
     mVC5LogTable[i] =
         static_cast<unsigned int>(
             65535 * (std::pow(113.0, i / (VC5_LOG_TABLE_SIZE - 1.)) - 1) /
             112.) >>
         (16 - outputBits);
+  }
 }
 
 // virtual
@@ -470,11 +471,12 @@ void VC5Decompressor::decode(const unsigned int offsetX,
             (val >> (14 - 2 * iWavelet)) & 0x03;
       break;
     default:
-      if (tag & VC5_TAG_LARGE_CHUNK)
+      if (tag & VC5_TAG_LARGE_CHUNK) {
         chunkSize =
             static_cast<unsigned int>(((tag & 0xff) << 16) | (val & 0xffff));
-      else if (tag & VC5_TAG_SMALL_CHUNK)
+      } else if (tag & VC5_TAG_SMALL_CHUNK) {
         chunkSize = (val & 0xffff);
+      }
 
       if ((tag & VC5_TAG_LargeCodeblock) == VC5_TAG_LargeCodeblock) {
         Transform& transform = mTransforms[mVC5.iChannel];
@@ -569,10 +571,11 @@ void VC5Decompressor::decode(const unsigned int offsetX,
       } else if (tag == VC5_TAG_UniqueImageIdentifier) {
         if (!optional)
           ThrowRDE("UniqueImageIdentifier tag should be optional");
-        if (val != 9)
+        if (val != 9) {
           ThrowRDE("UniqueImageIdentifier must have a payload of 9 segments/36 "
                    "bytes (%i segments encountered)",
                    val);
+        }
         if (memcmp(mBs.getData(12),
                    "\x06\x0a\x2b\x34\x01\x01\x01\x05\x01\x01\x01\x20", 12) != 0)
           ThrowRDE("UniqueImageIdentifier should start with a UMID label");
