@@ -90,13 +90,14 @@ class VC5Decompressor final : public AbstractDecompressor {
                            int16_t quant);
   };
 
-  static constexpr int numChannels = 4;
   struct Transform {
     static constexpr int numWavelets = 3;
-
     Wavelet wavelet[numWavelets];
     int16_t prescale[numWavelets];
-  } mTransforms[numChannels];
+  };
+
+  static constexpr int numChannels = 4;
+  std::array<Transform, numChannels> mTransforms;
 
   static void getRLV(BitPumpMSB* bits, int* value, unsigned int* count);
 
