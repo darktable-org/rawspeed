@@ -660,6 +660,9 @@ void VC5Decompressor::decode(const unsigned int offsetX,
       out(2 * col + 1, 2 * row + 1) = static_cast<uint16_t>(DecodeLog(b));
     }
   }
+
+  for (auto& channel : channels)
+    channel.destroy();
 }
 
 // static
