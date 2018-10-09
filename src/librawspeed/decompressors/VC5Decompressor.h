@@ -30,7 +30,6 @@
 
 namespace rawspeed {
 
-const int MAX_NUM_CHANNELS = 4;
 const int MAX_NUM_SUBBANDS = 10;
 const int MAX_NUM_PRESCALE = 8;
 
@@ -47,7 +46,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   SimpleLUT<unsigned, VC5_LOG_TABLE_BITWIDTH> mVC5LogTable;
 
   struct {
-    ushort16 numChannels, numSubbands;
+    ushort16 numSubbands;
     ushort16 iChannel, iSubband;
     ushort16 imgWidth, imgHeight, imgFormat;
     ushort16 patternWidth, patternHeight;
@@ -90,12 +89,14 @@ class VC5Decompressor final : public AbstractDecompressor {
     static void dequantize(Array2DRef<int16_t> out, Array2DRef<int16_t> in,
                            int16_t quant);
   };
+
+  static constexpr int numChannels = 4;
   struct Transform {
     static constexpr int numWavelets = 3;
 
     Wavelet wavelet[numWavelets];
     int16_t prescale[numWavelets];
-  } mTransforms[MAX_NUM_CHANNELS];
+  } mTransforms[numChannels];
 
   static void getRLV(BitPumpMSB* bits, int* value, unsigned int* count);
 

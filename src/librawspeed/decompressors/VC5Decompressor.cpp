@@ -311,7 +311,6 @@ void VC5Decompressor::Wavelet::reconstructLowband(
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     : AbstractDecompressor(), mImg(img), mBs(std::move(bs)) {
-  mVC5.numChannels = 0;
   mVC5.numSubbands = 10;
   mVC5.iChannel = 0;
   mVC5.iSubband = 0;
@@ -382,7 +381,8 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
 
     switch (tag) {
     case VC5_TAG_ChannelCount:
-      mVC5.numChannels = val;
+      if (val != numChannels)
+        ThrowRDE("Bad channel count %u, expected %u", val, numChannels);
       break;
     case VC5_TAG_ImageWidth:
       mVC5.imgWidth = val;
@@ -396,6 +396,8 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
       mVC5.lowpassPrecision = val;
       break;
     case VC5_TAG_ChannelNumber:
+      if (val >= numChannels)
+        ThrowRDE("Bad channel number (%u)", val);
       mVC5.iChannel = val;
       break;
     case VC5_TAG_ImageFormat:
@@ -564,7 +566,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
     }
 
     done = true;
-    for (int iChannel = 0; iChannel < mVC5.numChannels && done; ++iChannel) {
+    for (int iChannel = 0; iChannel < numChannels && done; ++iChannel) {
       Wavelet& wavelet = mTransforms[iChannel].wavelet[0];
       if (!wavelet.isInitialized())
         done = false;
@@ -588,7 +590,7 @@ void VC5Decompressor::decodeFinalWavelet() {
 
   std::vector<int16_t> channels_storage[4];
   Array2DRef<int16_t> channels[4];
-  for (unsigned int iChannel = 0; iChannel < MAX_NUM_CHANNELS; ++iChannel) {
+  for (unsigned int iChannel = 0; iChannel < numChannels; ++iChannel) {
     assert(2 * mTransforms[iChannel].wavelet[0].width == width);
     assert(2 * mTransforms[iChannel].wavelet[0].height == height);
     channels_storage[iChannel] = Array2DRef<int16_t>::create(width, height);
