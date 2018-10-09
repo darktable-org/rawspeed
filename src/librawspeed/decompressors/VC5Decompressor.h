@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "common/Array2DRef.h"                  // for Array2DRef
 #include "common/Common.h"                      // for uint32
 #include "common/RawImage.h"                    // for RawImageData
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
@@ -56,23 +57,6 @@ class VC5Decompressor final : public AbstractDecompressor {
     uint32_t image_sequence_number;
     short16 quantization;
   } mVC5;
-
-  template <class T> class Array2DRef {
-    unsigned int _pitch = 0;
-    T* _data;
-
-  public:
-    unsigned int width = 0, height = 0;
-
-    Array2DRef();
-    Array2DRef(T* data, unsigned int dataWidth, unsigned int dataHeight,
-               unsigned int dataPitch = 0);
-
-    static std::vector<T> create(unsigned int width, unsigned int height);
-
-    inline T& operator()(unsigned int x, unsigned int y);
-    inline T operator()(unsigned int x, unsigned int y) const;
-  };
 
   class Wavelet {
   public:

@@ -1,4 +1,5 @@
 FILE(GLOB SOURCES
+  "Array2DRef.h"
   "ChecksumFile.cpp"
   "ChecksumFile.h"
   "Common.cpp"

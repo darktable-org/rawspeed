@@ -27,6 +27,7 @@
  */
 
 #include "decompressors/VC5Decompressor.h"
+#include "common/Array2DRef.h"            // for Array2DRef
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include <cmath>
 #include <utility>
@@ -73,45 +74,6 @@ struct RLV {
 
 namespace rawspeed {
 
-template <class T>
-VC5Decompressor::Array2DRef<T>::Array2DRef() : _data(nullptr) {}
-
-template <class T>
-VC5Decompressor::Array2DRef<T>::Array2DRef(
-    T* data, const unsigned int dataWidth, const unsigned int dataHeight,
-    const unsigned int dataPitch /* = 0 */)
-    : _data(data), width(dataWidth), height(dataHeight) {
-  _pitch = (dataPitch == 0 ? dataWidth : dataPitch);
-}
-
-// static
-template <class T>
-std::vector<T>
-VC5Decompressor::Array2DRef<T>::create(const unsigned int width,
-                                       const unsigned int height) {
-  std::vector<T> data;
-  data.resize(width * height);
-  return data;
-}
-
-template <class T>
-T& VC5Decompressor::Array2DRef<T>::operator()(const unsigned int x,
-                                              const unsigned int y) {
-  assert(_data);
-  assert(x < width);
-  assert(y < height);
-  return _data[y * _pitch + x];
-}
-
-template <class T>
-T VC5Decompressor::Array2DRef<T>::operator()(const unsigned int x,
-                                             const unsigned int y) const {
-  assert(_data);
-  assert(x < width);
-  assert(y < height);
-  return _data[y * _pitch + x];
-}
-
 VC5Decompressor::Wavelet::Wavelet() : numBands(MAX_NUM_BANDS) {
   for (int i = 0; i < MAX_NUM_BANDS; ++i) {
     data[i] = nullptr;
@@ -147,7 +109,7 @@ bool VC5Decompressor::Wavelet::allBandsValid() const {
   return mDecodedBandMask == static_cast<uint32>((1 << numBands) - 1);
 }
 
-VC5Decompressor::Array2DRef<int16_t>
+Array2DRef<int16_t>
 VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) {
   return {data[iBand], width, height};
 }
