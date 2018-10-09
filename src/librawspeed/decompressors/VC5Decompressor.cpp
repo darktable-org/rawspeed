@@ -28,8 +28,10 @@
 
 #include "decompressors/VC5Decompressor.h"
 #include "common/Array2DRef.h"            // for Array2DRef
+#include "common/SimpleLUT.h"             // for SimpleLUT
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include <cmath>
+#include <limits> // for numeric_limits
 #include <utility>
 
 // Definitions needed by table17.inc
@@ -317,14 +319,6 @@ void VC5Decompressor::Wavelet::reconstructLowband(
   }
 }
 
-// inline
-unsigned int VC5Decompressor::DecodeLog(const int val) const {
-  if (val < 0)
-    return mVC5LogTable[0];
-  if (val >= VC5_LOG_TABLE_SIZE)
-    return mVC5LogTable[VC5_LOG_TABLE_SIZE - 1];
-  return mVC5LogTable[val];
-}
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     : AbstractDecompressor(), mImg(img), mBs(std::move(bs)) {
@@ -349,14 +343,27 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     ++outputBits;
   assert(outputBits <= 16);
 
-  mVC5LogTable.resize(VC5_LOG_TABLE_SIZE);
-  for (int i = 0; i < VC5_LOG_TABLE_SIZE; ++i) {
-    mVC5LogTable[i] =
-        static_cast<unsigned int>(
-            65535 * (std::pow(113.0, i / (VC5_LOG_TABLE_SIZE - 1.)) - 1) /
-            112.) >>
-        (16 - outputBits);
-  }
+  mVC5LogTable =
+      decltype(mVC5LogTable)([outputBits](unsigned i, unsigned tableSize) {
+        // The vanilla "inverse log" curve for decoding.
+        auto normalizedCurve = [](auto normalizedI) {
+          return (std::pow(113.0, normalizedI) - 1) / 112.0;
+        };
+
+        auto normalizeI = [tableSize](auto x) { return x / (tableSize - 1.0); };
+        auto denormalizeY = [maxVal = std::numeric_limits<ushort16>::max()](
+                                auto y) { return maxVal * y; };
+        // Adjust for output whitelevel bitdepth.
+        auto rescaleY = [outputBits](auto y) {
+          auto scale = 16 - outputBits;
+          return y >> scale;
+        };
+
+        const auto naiveY = denormalizeY(normalizedCurve(normalizeI(i)));
+        const auto intY = static_cast<unsigned int>(naiveY);
+        const auto rescaledY = rescaleY(intY);
+        return rescaledY;
+      });
 }
 
 void VC5Decompressor::decode(const unsigned int offsetX,
@@ -613,10 +620,10 @@ void VC5Decompressor::decode(const unsigned int offsetX,
       int g1 = gs + gd;
       int g2 = gs - gd;
 
-      out(2 * col + 0, 2 * row + 0) = static_cast<uint16_t>(DecodeLog(r));
-      out(2 * col + 1, 2 * row + 0) = static_cast<uint16_t>(DecodeLog(g1));
-      out(2 * col + 0, 2 * row + 1) = static_cast<uint16_t>(DecodeLog(g2));
-      out(2 * col + 1, 2 * row + 1) = static_cast<uint16_t>(DecodeLog(b));
+      out(2 * col + 0, 2 * row + 0) = static_cast<uint16_t>(mVC5LogTable[r]);
+      out(2 * col + 1, 2 * row + 0) = static_cast<uint16_t>(mVC5LogTable[g1]);
+      out(2 * col + 0, 2 * row + 1) = static_cast<uint16_t>(mVC5LogTable[g2]);
+      out(2 * col + 1, 2 * row + 1) = static_cast<uint16_t>(mVC5LogTable[b]);
     }
   }
 }

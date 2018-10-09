@@ -23,6 +23,7 @@
 #include "common/Array2DRef.h"                  // for Array2DRef
 #include "common/Common.h"                      // for uint32
 #include "common/RawImage.h"                    // for RawImageData
+#include "common/SimpleLUT.h"                   // for SimpleLUT
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/BitPumpMSB.h"                      // for BitPumpMSB
 #include "io/ByteStream.h"                      // for ByteStream
@@ -40,12 +41,12 @@ class RawImage;
 
 // Decompresses VC-5 as used by GoPro
 
-#define VC5_LOG_TABLE_SIZE 4096
-
 class VC5Decompressor final : public AbstractDecompressor {
   RawImage mImg;
   ByteStream mBs;
-  std::vector<unsigned int> mVC5LogTable;
+
+  static constexpr auto VC5_LOG_TABLE_BITWIDTH = 12;
+  SimpleLUT<unsigned, VC5_LOG_TABLE_BITWIDTH> mVC5LogTable;
 
   struct {
     ushort16 numChannels, numSubbands, numWavelets;
@@ -97,7 +98,6 @@ class VC5Decompressor final : public AbstractDecompressor {
   } mTransforms[MAX_NUM_CHANNELS];
 
   static void getRLV(BitPumpMSB* bits, int* value, unsigned int* count);
-  inline unsigned int DecodeLog(int val) const;
 
 public:
   VC5Decompressor(ByteStream bs, const RawImage& img);
