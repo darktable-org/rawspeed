@@ -72,9 +72,7 @@ typedef struct _rlv {
 
 namespace rawspeed {
 
-template <class T>
-VC5Decompressor::Array2D<T>::Array2D()
-    : _pitch(0), _data(nullptr), width(0), height(0) {}
+template <class T> VC5Decompressor::Array2D<T>::Array2D() : _data(nullptr) {}
 
 template <class T>
 VC5Decompressor::Array2D<T>::Array2D(T* data, const unsigned int dataWidth,
@@ -121,8 +119,7 @@ T VC5Decompressor::Array2D<T>::operator()(const unsigned int x,
   return _data[y * _pitch + x];
 }
 
-VC5Decompressor::Wavelet::Wavelet()
-    : numBands(MAX_NUM_BANDS), mDecodedBandMask(0), mInitialized(false) {
+VC5Decompressor::Wavelet::Wavelet() : numBands(MAX_NUM_BANDS) {
   for (int i = 0; i < MAX_NUM_BANDS; ++i) {
     data[i] = nullptr;
     quant[i] = 0;

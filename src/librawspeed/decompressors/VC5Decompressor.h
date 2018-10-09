@@ -58,11 +58,11 @@ class VC5Decompressor final : public AbstractDecompressor {
   } mVC5;
 
   template <class T> class Array2D {
-    unsigned int _pitch;
+    unsigned int _pitch = 0;
     T* _data;
 
   public:
-    unsigned int width, height;
+    unsigned int width = 0, height = 0;
 
     Array2D();
     Array2D(T* data, unsigned int dataWidth, unsigned int dataHeight,
@@ -101,8 +101,8 @@ class VC5Decompressor final : public AbstractDecompressor {
     Array2D<int16_t> bandAsArray2D(unsigned int iBand);
 
   protected:
-    uint32 mDecodedBandMask;
-    bool mInitialized;
+    uint32 mDecodedBandMask = 0;
+    bool mInitialized = false;
 
     static void dequantize(Array2D<int16_t> out, Array2D<int16_t> in,
                            int16_t quant);
