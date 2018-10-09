@@ -66,8 +66,6 @@ class VC5Decompressor final : public AbstractDecompressor {
     std::array<int16_t, numBands> quant = {};
     std::array<int16_t*, numBands> data = {};
 
-    virtual ~Wavelet() { clear(); }
-
     void initialize(uint16_t waveletWidth, uint16_t waveletHeight);
     void clear();
 
