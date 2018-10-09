@@ -98,6 +98,9 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   static void getRLV(BitPumpMSB* bits, int* value, unsigned int* count);
 
+  // FIXME: this *should* be threadedable nicely.
+  void decodeFinalWavelet();
+
 public:
   VC5Decompressor(ByteStream bs, const RawImage& img);
 

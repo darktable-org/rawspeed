@@ -573,6 +573,10 @@ void VC5Decompressor::decode(const unsigned int offsetX,
     }
   }
 
+  decodeFinalWavelet();
+}
+
+void VC5Decompressor::decodeFinalWavelet() {
   // Decode final wavelet into image
   Array2DRef<uint16_t> out(reinterpret_cast<uint16_t*>(mImg->getData()),
                            static_cast<unsigned int>(mImg->dim.x),
@@ -595,6 +599,7 @@ void VC5Decompressor::decode(const unsigned int offsetX,
   }
 
   // Convert to RGGB output
+  // FIXME: this *should* be threadedable nicely.
   for (unsigned int row = 0; row < height; ++row) {
     for (unsigned int col = 0; col < width; ++col) {
       const int mid = 2048;
