@@ -387,7 +387,7 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     ++outputBits;
   assert(outputBits <= 16);
 
-  mVC5LogTable = new unsigned int[VC5_LOG_TABLE_SIZE];
+  mVC5LogTable.resize(VC5_LOG_TABLE_SIZE);
   for (int i = 0; i < VC5_LOG_TABLE_SIZE; ++i) {
     mVC5LogTable[i] =
         static_cast<unsigned int>(
@@ -396,9 +396,6 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
         (16 - outputBits);
   }
 }
-
-// virtual
-VC5Decompressor::~VC5Decompressor() { delete[] mVC5LogTable; }
 
 void VC5Decompressor::decode(const unsigned int offsetX,
                              const unsigned int offsetY) {

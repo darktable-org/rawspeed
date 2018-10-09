@@ -44,7 +44,7 @@ class RawImage;
 class VC5Decompressor final : public AbstractDecompressor {
   RawImage mImg;
   ByteStream mBs;
-  unsigned int* mVC5LogTable;
+  std::vector<unsigned int> mVC5LogTable;
 
   struct {
     ushort16 numChannels, numSubbands, numWavelets;
@@ -118,7 +118,6 @@ class VC5Decompressor final : public AbstractDecompressor {
 
 public:
   VC5Decompressor(ByteStream bs, const RawImage& img);
-  virtual ~VC5Decompressor();
 
   void decode(unsigned int offsetX, unsigned int offsetY);
 };
