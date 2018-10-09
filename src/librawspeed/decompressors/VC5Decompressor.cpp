@@ -156,7 +156,7 @@ bool VC5Decompressor::Wavelet::allBandsValid() const {
 
 VC5Decompressor::Array2D<int16_t>
 VC5Decompressor::Wavelet::bandAsArray2D(const unsigned int iBand) {
-  return VC5Decompressor::Array2D<int16_t>(data[iBand], width, height);
+  return {data[iBand], width, height};
 }
 
 void VC5Decompressor::Wavelet::clear() {
