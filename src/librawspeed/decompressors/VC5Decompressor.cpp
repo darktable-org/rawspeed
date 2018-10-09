@@ -33,12 +33,12 @@
 // Definitions needed by table17.inc
 // Taken from
 // https://github.com/gopro/gpr/blob/a513701afce7b03173213a2f67dfd9dd28fa1868/source/lib/vc5_decoder/vlc.h
-typedef struct _rlv {
+struct RLV {
   uint_fast8_t size; //!< Size of code word in bits
   uint32_t bits;     //!< Code word bits right justified
   uint32_t count;    //!< Run length
   int32_t value;     //!< Run value (unsigned)
-} RLV;
+};
 #define RLVTABLE(n)                                                            \
   static struct {                                                              \
     uint32_t length;                                                           \
