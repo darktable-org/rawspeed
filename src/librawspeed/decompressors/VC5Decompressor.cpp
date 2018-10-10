@@ -119,15 +119,20 @@ void VC5Decompressor::Wavelet::clear() {
 void VC5Decompressor::Wavelet::dequantize(Array2DRef<int16_t> out,
                                           Array2DRef<int16_t> in,
                                           int16_t quant) {
+  auto dequantize = [quant](int16_t val) -> int16_t {
+    double c = val;
+    // Invert companding curve
+    c += (c * c * c * 768) / (255. * 255. * 255.);
+    return static_cast<int16_t>(c) * quant;
+  };
+
+  // FIXME: could use the SimpleLUT,
+  // should be profitable if  in.height * in.width > UINT16_MAX,
+  // and table lookup is faster than that computation.
+
   for (unsigned int y = 0; y < in.height; ++y) {
-    for (unsigned int x = 0; x < in.width; ++x) {
-      double c = in(x, y);
-
-      // Invert companding curve
-      c += (c * c * c * 768) / (255. * 255. * 255.);
-
-      out(x, y) = static_cast<int16_t>(c) * quant;
-    }
+    for (unsigned int x = 0; x < in.width; ++x)
+      out(x, y) = dequantize(in(x, y));
   }
 }
 
