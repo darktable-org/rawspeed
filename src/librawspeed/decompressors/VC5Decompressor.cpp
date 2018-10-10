@@ -443,96 +443,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
       }
 
       if ((tag & VC5_TAG_LargeCodeblock) == VC5_TAG_LargeCodeblock) {
-        Transform& transform = mTransforms[mVC5.iChannel];
-        static constexpr std::array<int, numSubbands> subband_wavelet_index = {
-            2, 2, 2, 2, 1, 1, 1, 0, 0, 0};
-        static constexpr std::array<int, numSubbands> subband_band_index = {
-            0, 1, 2, 3, 1, 2, 3, 1, 2, 3};
-        const int idx = subband_wavelet_index[mVC5.iSubband];
-        const int band = subband_band_index[mVC5.iSubband];
-        uint16_t channelWidth = mVC5.imgWidth / mVC5.patternWidth;
-        uint16_t channelHeight = mVC5.imgHeight / mVC5.patternHeight;
-
-        if (mVC5.patternWidth != 2 || mVC5.patternHeight != 2)
-          ThrowRDE("Invalid RAW file, pattern size != 2x2");
-
-        // Initialize wavelets
-        uint16_t waveletWidth =
-            ((channelWidth % 2) == 0 ? channelWidth : channelWidth + 1) / 2;
-        uint16_t waveletHeight =
-            ((channelHeight % 2) == 0 ? channelHeight : channelHeight + 1) / 2;
-        for (Wavelet& wavelet : transform.wavelet) {
-          if (wavelet.isInitialized()) {
-            if (wavelet.width != waveletWidth ||
-                wavelet.height != waveletHeight)
-              wavelet.clear();
-          }
-          if (!wavelet.isInitialized())
-            wavelet.initialize(waveletWidth, waveletHeight);
-
-          // Pad dimensions as necessary and divide them by two for the next
-          // wavelet
-          if ((waveletWidth % 2) != 0)
-            ++waveletWidth;
-          if ((waveletHeight % 2) != 0)
-            ++waveletHeight;
-          waveletWidth /= 2;
-          waveletHeight /= 2;
-        }
-
-        BitPumpMSB bits(mBs);
-        // Even for BitPump's, getPosition() returns full byte positions
-        // (rounded up)
-        BitPumpMSB::size_type startPos = bits.getPosition();
-        Wavelet& wavelet = transform.wavelet[idx];
-        if (mVC5.iSubband == 0) {
-          // decode lowpass band
-          assert(band == 0);
-          for (int row = 0; row < wavelet.height; ++row) {
-            for (int col = 0; col < wavelet.width; ++col)
-              wavelet.data[0][row * wavelet.width + col] =
-                  static_cast<int16_t>(bits.getBits(mVC5.lowpassPrecision));
-          }
-          wavelet.setBandValid(0);
-        } else {
-          // decode highpass band
-          int pixelValue = 0;
-          unsigned int count = 0;
-          int nPixels = wavelet.width * wavelet.height;
-          for (int iPixel = 0; iPixel < nPixels;) {
-            getRLV(&bits, &pixelValue, &count);
-            for (; count > 0; --count) {
-              if (iPixel > nPixels)
-                ThrowRDE("Buffer overflow");
-              wavelet.data[band][iPixel] = static_cast<int16_t>(pixelValue);
-              ++iPixel;
-            }
-          }
-          if (bits.getPosition() < bits.getSize()) {
-            getRLV(&bits, &pixelValue, &count);
-            if (pixelValue != MARKER_BAND_END || count != 0)
-              ThrowRDE("EndOfBand marker not found");
-          }
-          wavelet.setBandValid(band);
-          wavelet.quant[band] = mVC5.quantization;
-        }
-        mBs.skipBytes(bits.getPosition() - startPos);
-
-        // If this wavelet is fully decoded, reconstruct the low-pass band of
-        // the next lower wavelet
-        if (idx > 0 && wavelet.allBandsValid() &&
-            !transform.wavelet[idx - 1].isBandValid(0)) {
-          wavelet.reconstructLowband(
-              transform.wavelet[idx - 1].bandAsArray2DRef(0),
-              transform.prescale[idx]);
-          transform.wavelet[idx - 1].setBandValid(0);
-        }
-
-        mVC5.iSubband++;
-        if (mVC5.iSubband == numSubbands) {
-          mVC5.iChannel++;
-          mVC5.iSubband = 0;
-        }
+        decodeLargeCodeblock();
       } else if (tag == VC5_TAG_UniqueImageIdentifier) {
         if (!optional)
           ThrowRDE("UniqueImageIdentifier tag should be optional");
@@ -584,6 +495,97 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
   }
 
   decodeFinalWavelet();
+}
+
+void VC5Decompressor::decodeLargeCodeblock() {
+  Transform& transform = mTransforms[mVC5.iChannel];
+  static constexpr std::array<int, numSubbands> subband_wavelet_index = {
+      2, 2, 2, 2, 1, 1, 1, 0, 0, 0};
+  static constexpr std::array<int, numSubbands> subband_band_index = {
+      0, 1, 2, 3, 1, 2, 3, 1, 2, 3};
+  const int idx = subband_wavelet_index[mVC5.iSubband];
+  const int band = subband_band_index[mVC5.iSubband];
+  uint16_t channelWidth = mVC5.imgWidth / mVC5.patternWidth;
+  uint16_t channelHeight = mVC5.imgHeight / mVC5.patternHeight;
+
+  if (mVC5.patternWidth != 2 || mVC5.patternHeight != 2)
+    ThrowRDE("Invalid RAW file, pattern size != 2x2");
+
+  // Initialize wavelets
+  uint16_t waveletWidth =
+      ((channelWidth % 2) == 0 ? channelWidth : channelWidth + 1) / 2;
+  uint16_t waveletHeight =
+      ((channelHeight % 2) == 0 ? channelHeight : channelHeight + 1) / 2;
+  for (Wavelet& wavelet : transform.wavelet) {
+    if (wavelet.isInitialized()) {
+      if (wavelet.width != waveletWidth || wavelet.height != waveletHeight)
+        wavelet.clear();
+    }
+    if (!wavelet.isInitialized())
+      wavelet.initialize(waveletWidth, waveletHeight);
+
+    // Pad dimensions as necessary and divide them by two for the next
+    // wavelet
+    if ((waveletWidth % 2) != 0)
+      ++waveletWidth;
+    if ((waveletHeight % 2) != 0)
+      ++waveletHeight;
+    waveletWidth /= 2;
+    waveletHeight /= 2;
+  }
+
+  BitPumpMSB bits(mBs);
+  // Even for BitPump's, getPosition() returns full byte positions
+  // (rounded up)
+  BitPumpMSB::size_type startPos = bits.getPosition();
+  Wavelet& wavelet = transform.wavelet[idx];
+  if (mVC5.iSubband == 0) {
+    // decode lowpass band
+    assert(band == 0);
+    for (int row = 0; row < wavelet.height; ++row) {
+      for (int col = 0; col < wavelet.width; ++col)
+        wavelet.data[0][row * wavelet.width + col] =
+            static_cast<int16_t>(bits.getBits(mVC5.lowpassPrecision));
+    }
+    wavelet.setBandValid(0);
+  } else {
+    // decode highpass band
+    int pixelValue = 0;
+    unsigned int count = 0;
+    int nPixels = wavelet.width * wavelet.height;
+    for (int iPixel = 0; iPixel < nPixels;) {
+      getRLV(&bits, &pixelValue, &count);
+      for (; count > 0; --count) {
+        if (iPixel > nPixels)
+          ThrowRDE("Buffer overflow");
+        wavelet.data[band][iPixel] = static_cast<int16_t>(pixelValue);
+        ++iPixel;
+      }
+    }
+    if (bits.getPosition() < bits.getSize()) {
+      getRLV(&bits, &pixelValue, &count);
+      if (pixelValue != MARKER_BAND_END || count != 0)
+        ThrowRDE("EndOfBand marker not found");
+    }
+    wavelet.setBandValid(band);
+    wavelet.quant[band] = mVC5.quantization;
+  }
+  mBs.skipBytes(bits.getPosition() - startPos);
+
+  // If this wavelet is fully decoded, reconstruct the low-pass band of
+  // the next lower wavelet
+  if (idx > 0 && wavelet.allBandsValid() &&
+      !transform.wavelet[idx - 1].isBandValid(0)) {
+    wavelet.reconstructLowband(transform.wavelet[idx - 1].bandAsArray2DRef(0),
+                               transform.prescale[idx]);
+    transform.wavelet[idx - 1].setBandValid(0);
+  }
+
+  mVC5.iSubband++;
+  if (mVC5.iSubband == numSubbands) {
+    mVC5.iChannel++;
+    mVC5.iSubband = 0;
+  }
 }
 
 void VC5Decompressor::decodeFinalWavelet() {
