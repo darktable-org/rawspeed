@@ -3903,6 +3903,20 @@
 			<Hint name="real_bpp" value="16"/>
 		</Hints>
 	</Camera>
+	<Camera make="NIKON CORPORATION" model="COOLPIX P1000" mode="12bit-uncompressed">
+		<ID make="Nikon" model="COOLPIX P1000">Nikon Coolpix P1000</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="200" white="4095"/>
+		<Hints>
+			<Hint name="coolpixmangled" value=""/>
+		</Hints>
+	</Camera>
 	<Camera make="NIKON" model="E8800" mode="12bit-compressed" decoder_version="3" supported="no"> <!-- need raw sample for whitelevel -->
 		<ID make="Nikon" model="Coolpix E8800">Nikon Coolpix E8800</ID>
 		<CFA width="2" height="2">
