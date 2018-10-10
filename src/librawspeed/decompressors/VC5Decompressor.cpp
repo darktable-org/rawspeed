@@ -498,10 +498,8 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
     ThrowRDE("Invalid RAW file, pattern size != 2x2");
 
   // Initialize wavelets
-  uint16_t waveletWidth =
-      ((channelWidth % 2) == 0 ? channelWidth : channelWidth + 1) / 2;
-  uint16_t waveletHeight =
-      ((channelHeight % 2) == 0 ? channelHeight : channelHeight + 1) / 2;
+  uint16_t waveletWidth = roundUpDivision(channelWidth, 2);
+  uint16_t waveletHeight = roundUpDivision(channelHeight, 2);
   for (Wavelet& wavelet : transform.wavelet) {
     if (wavelet.isInitialized()) {
       if (wavelet.width != waveletWidth || wavelet.height != waveletHeight)
@@ -510,14 +508,9 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
     if (!wavelet.isInitialized())
       wavelet.initialize(waveletWidth, waveletHeight);
 
-    // Pad dimensions as necessary and divide them by two for the next
-    // wavelet
-    if ((waveletWidth % 2) != 0)
-      ++waveletWidth;
-    if ((waveletHeight % 2) != 0)
-      ++waveletHeight;
-    waveletWidth /= 2;
-    waveletHeight /= 2;
+    // Pad dimensions as necessary and divide them by two for the next wavelet
+    for (auto* dimension : {&waveletWidth, &waveletHeight})
+      *dimension = roundUpDivision(*dimension, 2);
   }
 
   BitPumpMSB bits(bs);
