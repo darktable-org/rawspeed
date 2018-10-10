@@ -525,10 +525,12 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
   if (mVC5.iSubband == 0) {
     // decode lowpass band
     assert(band == 0);
+    auto wdata = wavelet.bandAsArray2DRef(0);
     for (int row = 0; row < wavelet.height; ++row) {
-      for (int col = 0; col < wavelet.width; ++col)
-        wavelet.data[0][row * wavelet.width + col] =
+      for (int col = 0; col < wavelet.width; ++col) {
+        wdata(col, row) =
             static_cast<int16_t>(bits.getBits(mVC5.lowpassPrecision));
+      }
     }
     wavelet.setBandValid(0);
   } else {
