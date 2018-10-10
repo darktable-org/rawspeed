@@ -575,8 +575,8 @@ void VC5Decompressor::decodeFinalWavelet() {
   unsigned int width = 2 * mTransforms[0].wavelet[0].width;
   unsigned int height = 2 * mTransforms[0].wavelet[0].height;
 
-  std::vector<int16_t> channels_storage[4];
-  Array2DRef<int16_t> channels[4];
+  std::array<std::vector<int16_t>, numChannels> channels_storage;
+  std::array<Array2DRef<int16_t>, numChannels> channels;
   for (unsigned int iChannel = 0; iChannel < numChannels; ++iChannel) {
     assert(2 * mTransforms[iChannel].wavelet[0].width == width);
     assert(2 * mTransforms[iChannel].wavelet[0].height == height);
