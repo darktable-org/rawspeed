@@ -443,7 +443,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
       }
 
       if ((tag & VC5_TAG_LargeCodeblock) == VC5_TAG_LargeCodeblock) {
-        decodeLargeCodeblock();
+        decodeLargeCodeblock(mBs.getStream(chunkSize, 4));
       } else if (tag == VC5_TAG_UniqueImageIdentifier) {
         if (!optional)
           ThrowRDE("UniqueImageIdentifier tag should be optional");
@@ -497,7 +497,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
   decodeFinalWavelet();
 }
 
-void VC5Decompressor::decodeLargeCodeblock() {
+void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
   Transform& transform = mTransforms[mVC5.iChannel];
   static constexpr std::array<int, numSubbands> subband_wavelet_index = {
       2, 2, 2, 2, 1, 1, 1, 0, 0, 0};
@@ -534,10 +534,7 @@ void VC5Decompressor::decodeLargeCodeblock() {
     waveletHeight /= 2;
   }
 
-  BitPumpMSB bits(mBs);
-  // Even for BitPump's, getPosition() returns full byte positions
-  // (rounded up)
-  BitPumpMSB::size_type startPos = bits.getPosition();
+  BitPumpMSB bits(bs);
   Wavelet& wavelet = transform.wavelet[idx];
   if (mVC5.iSubband == 0) {
     // decode lowpass band
@@ -570,7 +567,6 @@ void VC5Decompressor::decodeLargeCodeblock() {
     wavelet.setBandValid(band);
     wavelet.quant[band] = mVC5.quantization;
   }
-  mBs.skipBytes(bits.getPosition() - startPos);
 
   // If this wavelet is fully decoded, reconstruct the low-pass band of
   // the next lower wavelet
