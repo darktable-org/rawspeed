@@ -357,7 +357,6 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
   if (offsetX || offsetY)
     ThrowRDE("VC5Decompressor expects to fill the whole image, not some tile.");
 
-  unsigned int chunkSize = 0;
   mBs.setByteOrder(Endianness::big);
 
   assert(mImg->dim.x > 0);
@@ -434,7 +433,8 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
         mTransforms[mVC5.iChannel].prescale[iWavelet] =
             (val >> (14 - 2 * iWavelet)) & 0x03;
       break;
-    default:
+    default: { // A chunk.
+      unsigned int chunkSize = 0;
       if (tag & VC5_TAG_LARGE_CHUNK) {
         chunkSize =
             static_cast<unsigned int>(((tag & 0xff) << 16) | (val & 0xffff));
@@ -482,6 +482,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
         else if (chunkSize > 0)
           mBs.skipBytes(4 * chunkSize); // chunkSize is in units of uint32
       }
+    }
     }
 
     done = true;
