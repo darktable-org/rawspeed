@@ -322,7 +322,6 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
   mVC5.cps = 0;
   mVC5.bpc = 0;
   mVC5.lowpassPrecision = 0;
-  mVC5.image_sequence_number = 0;
   mVC5.quantization = 0;
 
   int outputBits = 0;
@@ -444,44 +443,25 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
 
       if ((tag & VC5_TAG_LargeCodeblock) == VC5_TAG_LargeCodeblock) {
         decodeLargeCodeblock(mBs.getStream(chunkSize, 4));
-      } else if (tag == VC5_TAG_UniqueImageIdentifier) {
-        if (!optional)
-          ThrowRDE("UniqueImageIdentifier tag should be optional");
-        if (val != 9) {
-          ThrowRDE("UniqueImageIdentifier must have a payload of 9 segments/36 "
-                   "bytes (%i segments encountered)",
-                   val);
-        }
-        if (memcmp(mBs.getData(12),
-                   "\x06\x0a\x2b\x34\x01\x01\x01\x05\x01\x01\x01\x20", 12) != 0)
-          ThrowRDE("UniqueImageIdentifier should start with a UMID label");
-        if (mBs.getByte() != 0x13)
-          ThrowRDE("UMID length ist not 0x13");
-        if (memcmp(mBs.getData(3), "\x00\x00\x00", 3) != 0)
-          ThrowRDE("UMID instance number is not 0");
+        break;
+      }
 
-        memcpy(mVC5.image_sequence_identifier,
-               mBs.getData(sizeof(mVC5.image_sequence_identifier)),
-               sizeof(mVC5.image_sequence_identifier));
-        mVC5.image_sequence_number = mBs.getU32();
+      // And finally, we got here if we didn't handle this tag/maybe-chunk.
+
+      // Magic, all the other 'large' chunks are actually optional,
+      // and don't specify any chunk bytes-to-be-skipped.
+      if (tag & VC5_TAG_LARGE_CHUNK) {
+        optional = true;
+        chunkSize = 0;
       }
-      /*
-      else if (tag == CODEC_TAG_InverseTransform)
-      else if (tag == CODEC_TAG_InversePermutation)
-      else if (tag == CODEC_TAG_InverseTransform16)
-      */
-      else {
-        // printf("Encountered unknown tag 0x%04x @ offset 0x%x\n",
-        // tag, mBs.getPosition());
-        if (tag & VC5_TAG_LARGE_CHUNK) {
-          optional = true;
-          chunkSize = 0;
-        }
-        if (!optional)
-          ThrowRDE("Tag 0x%04x should be optional", tag);
-        else if (chunkSize > 0)
-          mBs.skipBytes(4 * chunkSize); // chunkSize is in units of uint32
-      }
+
+      if (!optional)
+        ThrowRDE("Unknown (unhandled) non-optional Tag 0x%04x", tag);
+
+      if (chunkSize)
+        mBs.skipBytes(chunkSize, 4);
+
+      break;
     }
     }
 

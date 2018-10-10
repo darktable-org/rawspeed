@@ -51,8 +51,6 @@ class VC5Decompressor final : public AbstractDecompressor {
     ushort16 imgWidth, imgHeight, imgFormat;
     ushort16 patternWidth, patternHeight;
     ushort16 cps, bpc, lowpassPrecision;
-    uint8_t image_sequence_identifier[16];
-    uint32_t image_sequence_number;
     short16 quantization;
   } mVC5;
 
