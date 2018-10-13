@@ -204,15 +204,9 @@ void VC5Decompressor::Wavelet::reconstructLowband(
     lowpass(x, 2 * y) = static_cast<int16_t>(even);
     lowpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
 
-    even = (highhigh(x, y) + ((11 * lowhigh(x, y) - 4 * lowhigh(x, y + 1) +
-                               lowhigh(x, y + 2) + 4) >>
-                              3)) >>
-           1;
-    odd =
-        (-highhigh(x, y) +
-         ((5 * lowhigh(x, y) + 4 * lowhigh(x, y + 1) - lowhigh(x, y + 2) + 4) >>
-          3)) >>
-        1;
+    even = convolution(even_muls, highhigh, lowhigh);
+    odd = convolution(odd_muls, highhigh, lowhigh);
+
     highpass(x, 2 * y) = static_cast<int16_t>(even);
     highpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
   }
