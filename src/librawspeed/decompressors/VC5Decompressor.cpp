@@ -288,14 +288,14 @@ void VC5Decompressor::Wavelet::reconstructLowband(
   for (y = 0; y < dest.height; ++y) {
     x = 0;
 
-    auto convolution = [x, y, descaleShift](std::array<int, 4> muls,
-                                            Array2DRef<int16_t> high,
-                                            Array2DRef<int16_t> low) {
+    auto convolution = [&x, y, descaleShift](std::array<int, 4> muls,
+                                             Array2DRef<int16_t> high,
+                                             Array2DRef<int16_t> low, int dx) {
       auto highCombined = muls[0] * high(x, y);
-      auto lowsCombined = [muls, low, x, y]() {
+      auto lowsCombined = [muls, low, x, dx, y]() {
         int lows = 0;
         for (int i = 0; i < 3; i++)
-          lows += muls[1 + i] * low(x + i, y);
+          lows += muls[1 + i] * low(static_cast<int>(x) + i * dx, y);
         return lows;
       }();
       // Round up 'lows' up
@@ -313,9 +313,9 @@ void VC5Decompressor::Wavelet::reconstructLowband(
     // First col
 
     static constexpr std::array<int, 4> even_muls = {+1, +11, -4, +1};
-    int even = convolution(even_muls, highpass, lowpass);
+    int even = convolution(even_muls, highpass, lowpass, /*dx*/ +1);
     static constexpr std::array<int, 4> odd_muls = {-1, +5, +4, -1};
-    int odd = convolution(odd_muls, highpass, lowpass);
+    int odd = convolution(odd_muls, highpass, lowpass, /*dx*/ +1);
 
     if (clampUint) {
       even = clampBits(even, 14);
@@ -343,20 +343,15 @@ void VC5Decompressor::Wavelet::reconstructLowband(
     }
 
     // last col
-    even = ((highpass(x, y) + ((5 * lowpass(x, y) + 4 * lowpass(x - 1, y) -
-                                lowpass(x - 2, y) + 4) >>
-                               3))
-            << descaleShift) >>
-           1;
+    static constexpr std::array<int, 4> last_even_muls = {+1, +5, +4, -1};
+    even = convolution(last_even_muls, highpass, lowpass, /*dx*/ -1);
+
     if (clampUint)
       even = clampBits(even, 14);
     dest(2 * x, y) = static_cast<int16_t>(even);
     if (2 * x + 1 < dest.width) {
-      odd = ((-highpass(x, y) + ((11 * lowpass(x, y) - 4 * lowpass(x - 1, y) +
-                                  lowpass(x - 2, y) + 4) >>
-                                 3))
-             << descaleShift) >>
-            1;
+      static constexpr std::array<int, 4> last_odd_muls = {-1, +11, -4, +1};
+      odd = convolution(last_odd_muls, highpass, lowpass, /*dx*/ -1);
       if (clampUint)
         odd = clampBits(odd, 14);
       dest(2 * x + 1, y) = static_cast<int16_t>(odd);
