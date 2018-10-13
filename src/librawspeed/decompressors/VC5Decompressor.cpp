@@ -483,6 +483,18 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
   decodeFinalWavelet();
 }
 
+void VC5Decompressor::decodeLowPassBand(const ByteStream& bs,
+                                        const Wavelet& wavelet) {
+  BitPumpMSB bits(bs);
+  auto wdata = wavelet.bandAsArray2DRef(0);
+  for (int row = 0; row < wavelet.height; ++row) {
+    for (int col = 0; col < wavelet.width; ++col) {
+      wdata(col, row) =
+          static_cast<int16_t>(bits.getBits(mVC5.lowpassPrecision));
+    }
+  }
+}
+
 void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
   Transform& transform = mTransforms[mVC5.iChannel];
   static constexpr std::array<int, numSubbands> subband_wavelet_index = {
@@ -513,19 +525,12 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
       *dimension = roundUpDivision(*dimension, 2);
   }
 
-  BitPumpMSB bits(bs);
   Wavelet& wavelet = transform.wavelet[idx];
   if (mVC5.iSubband == 0) {
-    // decode lowpass band
     assert(band == 0);
-    auto wdata = wavelet.bandAsArray2DRef(0);
-    for (int row = 0; row < wavelet.height; ++row) {
-      for (int col = 0; col < wavelet.width; ++col) {
-        wdata(col, row) =
-            static_cast<int16_t>(bits.getBits(mVC5.lowpassPrecision));
-      }
-    }
+    decodeLowPassBand(bs, wavelet);
   } else {
+    BitPumpMSB bits(bs);
     // decode highpass band
     int pixelValue = 0;
     unsigned int count = 0;
