@@ -326,14 +326,18 @@ void VC5Decompressor::Wavelet::reconstructLowband(
 
     // middle cols
     for (x = 1; x + 1 < width; ++x) {
-      even = ((highpass(x, y) + lowpass(x, y) +
-               ((lowpass(x - 1, y) - lowpass(x + 1, y) + 4) >> 3))
-              << descaleShift) >>
-             1;
-      odd = ((-highpass(x, y) + lowpass(x, y) +
-              ((lowpass(x + 1, y) - lowpass(x - 1, y) + 4) >> 3))
-             << descaleShift) >>
-            1;
+      even =
+          ((highpass(x, y) +
+            ((lowpass(x - 1, y) + 8 * lowpass(x, y) - lowpass(x + 1, y) + 4) >>
+             3))
+           << descaleShift) >>
+          1;
+      odd =
+          ((-highpass(x, y) +
+            ((-lowpass(x - 1, y) + 8 * lowpass(x, y) + lowpass(x + 1, y) + 4) >>
+             3))
+           << descaleShift) >>
+          1;
       if (clampUint) {
         even = clampBits(even, 14);
         odd = clampBits(odd, 14);
