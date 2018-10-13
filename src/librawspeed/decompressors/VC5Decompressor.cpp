@@ -213,21 +213,30 @@ void VC5Decompressor::Wavelet::reconstructLowband(
   // middle rows
   for (y = 1; y + 1 < height; ++y) {
     for (x = 0; x < width; ++x) {
-      int even = (lowlow(x, y) + highlow(x, y) +
-                  ((lowlow(x, y - 1) - lowlow(x, y + 1) + 4) >> 3)) >>
-                 1;
-      int odd = (lowlow(x, y) - highlow(x, y) +
-                 ((lowlow(x, y + 1) - lowlow(x, y - 1) + 4) >> 3)) >>
-                1;
+      int even =
+          (highlow(x, y) +
+           ((lowlow(x, y - 1) + 8 * lowlow(x, y) - lowlow(x, y + 1) + 4) >>
+            3)) >>
+          1;
+      int odd =
+          (-highlow(x, y) +
+           ((-lowlow(x, y - 1) + 8 * lowlow(x, y) + lowlow(x, y + 1) + 4) >>
+            3)) >>
+          1;
+
       lowpass(x, 2 * y) = static_cast<int16_t>(even);
       lowpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
 
-      even = (lowhigh(x, y) + highhigh(x, y) +
-              ((lowhigh(x, y - 1) - lowhigh(x, y + 1) + 4) >> 3)) >>
-             1;
-      odd = (lowhigh(x, y) - highhigh(x, y) +
-             ((lowhigh(x, y + 1) - lowhigh(x, y - 1) + 4) >> 3)) >>
-            1;
+      even =
+          (+highhigh(x, y) +
+           ((+lowhigh(x, y - 1) + 8 * lowhigh(x, y) - lowhigh(x, y + 1) + 4) >>
+            3)) >>
+          1;
+      odd =
+          (-highhigh(x, y) +
+           ((-lowhigh(x, y - 1) + 8 * lowhigh(x, y) + lowhigh(x, y + 1) + 4) >>
+            3)) >>
+          1;
       highpass(x, 2 * y) = static_cast<int16_t>(even);
       highpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
     }
