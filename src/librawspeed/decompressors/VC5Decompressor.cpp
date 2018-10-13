@@ -525,7 +525,6 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
             static_cast<int16_t>(bits.getBits(mVC5.lowpassPrecision));
       }
     }
-    wavelet.setBandValid(0);
   } else {
     // decode highpass band
     int pixelValue = 0;
@@ -545,9 +544,9 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
       if (pixelValue != MARKER_BAND_END || count != 0)
         ThrowRDE("EndOfBand marker not found");
     }
-    wavelet.setBandValid(band);
     wavelet.quant[band] = mVC5.quantization;
   }
+  wavelet.setBandValid(band);
 
   // If this wavelet is fully decoded, reconstruct the low-pass band of
   // the next lower wavelet
