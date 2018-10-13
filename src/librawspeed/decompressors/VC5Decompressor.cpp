@@ -213,30 +213,37 @@ void VC5Decompressor::Wavelet::reconstructLowband(
   // middle rows
   for (y = 1; y + 1 < height; ++y) {
     for (x = 0; x < width; ++x) {
-      int even =
-          (highlow(x, y) +
-           ((lowlow(x, y - 1) + 8 * lowlow(x, y) - lowlow(x, y + 1) + 4) >>
-            3)) >>
-          1;
-      int odd =
-          (-highlow(x, y) +
-           ((-lowlow(x, y - 1) + 8 * lowlow(x, y) + lowlow(x, y + 1) + 4) >>
-            3)) >>
-          1;
+      auto convolution = [x, y](std::array<int, 4> muls,
+                                Array2DRef<int16_t> high,
+                                Array2DRef<int16_t> low) {
+        auto highCombined = muls[0] * high(x, y);
+        auto lowsCombined = [muls, low, x, y]() {
+          int lows = 0;
+          for (int i = 0; i < 3; i++)
+            lows += muls[1 + i] * low(x, y - 1 + i);
+          return lows;
+        }();
+        // Round up 'lows' up
+        lowsCombined += 4;
+        // And finally 'average' them.
+        auto lowsRounded = lowsCombined >> 3;
+        auto total = highCombined + lowsRounded;
+        // And average it.
+        total >>= 1;
+        return total;
+      };
+
+      static constexpr std::array<int, 4> even_muls = {+1, +1, +8, -1};
+      int even = convolution(even_muls, highlow, lowlow);
+      static constexpr std::array<int, 4> odd_muls = {-1, -1, +8, +1};
+      int odd = convolution(odd_muls, highlow, lowlow);
 
       lowpass(x, 2 * y) = static_cast<int16_t>(even);
       lowpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
 
-      even =
-          (+highhigh(x, y) +
-           ((+lowhigh(x, y - 1) + 8 * lowhigh(x, y) - lowhigh(x, y + 1) + 4) >>
-            3)) >>
-          1;
-      odd =
-          (-highhigh(x, y) +
-           ((-lowhigh(x, y - 1) + 8 * lowhigh(x, y) + lowhigh(x, y + 1) + 4) >>
-            3)) >>
-          1;
+      even = convolution(even_muls, highhigh, lowhigh);
+      odd = convolution(odd_muls, highhigh, lowhigh);
+
       highpass(x, 2 * y) = static_cast<int16_t>(even);
       highpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
     }
