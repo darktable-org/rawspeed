@@ -173,39 +173,49 @@ void VC5Decompressor::Wavelet::reconstructLowband(
   dequantize(highlow, Array2DRef<int16_t>(data[2], width, height), quant[2]);
   dequantize(highhigh, Array2DRef<int16_t>(data[3], width, height), quant[3]);
 
+  auto convolution = [&x, &y](std::array<int, 4> muls, Array2DRef<int16_t> high,
+                              auto low, int DescaleShift = 0) {
+    auto highCombined = muls[0] * high(x, y);
+    auto lowsCombined = [muls, low]() {
+      int lows = 0;
+      for (int i = 0; i < 3; i++)
+        lows += muls[1 + i] * low(i);
+      return lows;
+    }();
+    // Round up 'lows' up
+    lowsCombined += 4;
+    // And finally 'average' them.
+    auto lowsRounded = lowsCombined >> 3;
+    auto total = highCombined + lowsRounded;
+    // Descale it.
+    total <<= DescaleShift;
+    // And average it.
+    total >>= 1;
+    return total;
+  };
+
   // Vertical reconstruction
   // 1st row
   y = 0;
   for (x = 0; x < width; ++x) {
-    auto convolution = [x, y](std::array<int, 4> muls, Array2DRef<int16_t> high,
-                              Array2DRef<int16_t> low) {
-      auto highCombined = muls[0] * high(x, y);
-      auto lowsCombined = [muls, low, x, y]() {
-        int lows = 0;
-        for (int i = 0; i < 3; i++)
-          lows += muls[1 + i] * low(x, y + i);
-        return lows;
-      }();
-      // Round up 'lows' up
-      lowsCombined += 4;
-      // And finally 'average' them.
-      auto lowsRounded = lowsCombined >> 3;
-      auto total = highCombined + lowsRounded;
-      // And average it.
-      total >>= 1;
-      return total;
-    };
-
     static constexpr std::array<int, 4> even_muls = {+1, +11, -4, +1};
-    int even = convolution(even_muls, highlow, lowlow);
+    int even = convolution(even_muls, highlow, [&x, &y, lowlow](int delta) {
+      return lowlow(x, y + delta);
+    });
     static constexpr std::array<int, 4> odd_muls = {-1, +5, +4, -1};
-    int odd = convolution(odd_muls, highlow, lowlow);
+    int odd = convolution(odd_muls, highlow, [&x, &y, lowlow](int delta) {
+      return lowlow(x, y + delta);
+    });
 
     lowpass(x, 2 * y) = static_cast<int16_t>(even);
     lowpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
 
-    even = convolution(even_muls, highhigh, lowhigh);
-    odd = convolution(odd_muls, highhigh, lowhigh);
+    even = convolution(even_muls, highhigh, [&x, &y, lowhigh](int delta) {
+      return lowhigh(x, y + delta);
+    });
+    odd = convolution(odd_muls, highhigh, [&x, &y, lowhigh](int delta) {
+      return lowhigh(x, y + delta);
+    });
 
     highpass(x, 2 * y) = static_cast<int16_t>(even);
     highpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
@@ -213,36 +223,24 @@ void VC5Decompressor::Wavelet::reconstructLowband(
   // middle rows
   for (y = 1; y + 1 < height; ++y) {
     for (x = 0; x < width; ++x) {
-      auto convolution = [x, y](std::array<int, 4> muls,
-                                Array2DRef<int16_t> high,
-                                Array2DRef<int16_t> low) {
-        auto highCombined = muls[0] * high(x, y);
-        auto lowsCombined = [muls, low, x, y]() {
-          int lows = 0;
-          for (int i = 0; i < 3; i++)
-            lows += muls[1 + i] * low(x, y - 1 + i);
-          return lows;
-        }();
-        // Round up 'lows' up
-        lowsCombined += 4;
-        // And finally 'average' them.
-        auto lowsRounded = lowsCombined >> 3;
-        auto total = highCombined + lowsRounded;
-        // And average it.
-        total >>= 1;
-        return total;
-      };
-
       static constexpr std::array<int, 4> even_muls = {+1, +1, +8, -1};
-      int even = convolution(even_muls, highlow, lowlow);
+      int even = convolution(even_muls, highlow, [&x, &y, lowlow](int delta) {
+        return lowlow(x, y - 1 + delta);
+      });
       static constexpr std::array<int, 4> odd_muls = {-1, -1, +8, +1};
-      int odd = convolution(odd_muls, highlow, lowlow);
+      int odd = convolution(odd_muls, highlow, [&x, &y, lowlow](int delta) {
+        return lowlow(x, y - 1 + delta);
+      });
 
       lowpass(x, 2 * y) = static_cast<int16_t>(even);
       lowpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
 
-      even = convolution(even_muls, highhigh, lowhigh);
-      odd = convolution(odd_muls, highhigh, lowhigh);
+      even = convolution(even_muls, highhigh, [&x, &y, lowhigh](int delta) {
+        return lowhigh(x, y - 1 + delta);
+      });
+      odd = convolution(odd_muls, highhigh, [&x, &y, lowhigh](int delta) {
+        return lowhigh(x, y - 1 + delta);
+      });
 
       highpass(x, 2 * y) = static_cast<int16_t>(even);
       highpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
@@ -250,35 +248,24 @@ void VC5Decompressor::Wavelet::reconstructLowband(
   }
   // last row
   for (x = 0; x < width; ++x) {
-    auto convolution = [x, y](std::array<int, 4> muls, Array2DRef<int16_t> high,
-                              Array2DRef<int16_t> low) {
-      auto highCombined = muls[0] * high(x, y);
-      auto lowsCombined = [muls, low, x, y]() {
-        int lows = 0;
-        for (int i = 0; i < 3; i++)
-          lows += muls[1 + i] * low(x, y - i);
-        return lows;
-      }();
-      // Round up 'lows' up
-      lowsCombined += 4;
-      // And finally 'average' them.
-      auto lowsRounded = lowsCombined >> 3;
-      auto total = highCombined + lowsRounded;
-      // And average it.
-      total >>= 1;
-      return total;
-    };
-
     static constexpr std::array<int, 4> even_muls = {+1, +5, +4, -1};
-    int even = convolution(even_muls, highlow, lowlow);
+    int even = convolution(even_muls, highlow, [&x, &y, lowlow](int delta) {
+      return lowlow(x, y - delta);
+    });
     static constexpr std::array<int, 4> odd_muls = {-1, +11, -4, +1};
-    int odd = convolution(odd_muls, highlow, lowlow);
+    int odd = convolution(odd_muls, highlow, [&x, &y, lowlow](int delta) {
+      return lowlow(x, y - delta);
+    });
 
     lowpass(x, 2 * y) = static_cast<int16_t>(even);
     lowpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
 
-    even = convolution(even_muls, highhigh, lowhigh);
-    odd = convolution(odd_muls, highhigh, lowhigh);
+    even = convolution(even_muls, highhigh, [&x, &y, lowhigh](int delta) {
+      return lowhigh(x, y - delta);
+    });
+    odd = convolution(odd_muls, highhigh, [&x, &y, lowhigh](int delta) {
+      return lowhigh(x, y - delta);
+    });
 
     highpass(x, 2 * y) = static_cast<int16_t>(even);
     highpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
@@ -288,36 +275,18 @@ void VC5Decompressor::Wavelet::reconstructLowband(
   for (y = 0; y < dest.height; ++y) {
     x = 0;
 
-    auto convolution = [&x, y, descaleShift](
-                           std::array<int, 4> muls, Array2DRef<int16_t> high,
-                           Array2DRef<int16_t> low, int x_shift, int dx) {
-      auto highCombined = muls[0] * high(x, y);
-      auto lowsCombined = [muls, low, x, x_shift, dx, y]() {
-        int lows = 0;
-        for (int i = 0; i < 3; i++)
-          lows += muls[1 + i] * low(static_cast<int>(x) + x_shift + i * dx, y);
-        return lows;
-      }();
-      // Round up 'lows' up
-      lowsCombined += 4;
-      // And finally 'average' them.
-      auto lowsRounded = lowsCombined >> 3;
-      auto total = highCombined + lowsRounded;
-      // Descale it.
-      total <<= descaleShift;
-      // And average it.
-      total >>= 1;
-      return total;
-    };
-
     // First col
 
     static constexpr std::array<int, 4> even_muls = {+1, +11, -4, +1};
-    int even =
-        convolution(even_muls, highpass, lowpass, /*x_shift*/ 0, /*dx*/ +1);
+    int even = convolution(
+        even_muls, highpass,
+        [&x, &y, lowpass](int delta) { return lowpass(x + delta, y); },
+        descaleShift);
     static constexpr std::array<int, 4> odd_muls = {-1, +5, +4, -1};
-    int odd =
-        convolution(odd_muls, highpass, lowpass, /*x_shift*/ 0, /*dx*/ +1);
+    int odd = convolution(
+        odd_muls, highpass,
+        [&x, &y, lowpass](int delta) { return lowpass(x + delta, y); },
+        descaleShift);
 
     if (clampUint) {
       even = clampBits(even, 14);
@@ -329,11 +298,15 @@ void VC5Decompressor::Wavelet::reconstructLowband(
     // middle cols
     for (x = 1; x + 1 < width; ++x) {
       static constexpr std::array<int, 4> middle_even_muls = {+1, +1, +8, -1};
-      even = convolution(middle_even_muls, highpass, lowpass, /*x_shift*/ -1,
-                         /*dx*/ +1);
+      even = convolution(
+          middle_even_muls, highpass,
+          [&x, &y, lowpass](int delta) { return lowpass(x - 1 + delta, y); },
+          descaleShift);
       static constexpr std::array<int, 4> middle_odd_muls = {-1, -1, +8, +1};
-      odd = convolution(middle_odd_muls, highpass, lowpass, /*x_shift*/ -1,
-                        /*dx*/ +1);
+      odd = convolution(
+          middle_odd_muls, highpass,
+          [&x, &y, lowpass](int delta) { return lowpass(x - 1 + delta, y); },
+          descaleShift);
 
       if (clampUint) {
         even = clampBits(even, 14);
@@ -345,16 +318,20 @@ void VC5Decompressor::Wavelet::reconstructLowband(
 
     // last col
     static constexpr std::array<int, 4> last_even_muls = {+1, +5, +4, -1};
-    even = convolution(last_even_muls, highpass, lowpass, /*x_shift*/ 0,
-                       /*dx*/ -1);
+    even = convolution(
+        last_even_muls, highpass,
+        [&x, &y, lowpass](int delta) { return lowpass(x - delta, y); },
+        descaleShift);
 
     if (clampUint)
       even = clampBits(even, 14);
     dest(2 * x, y) = static_cast<int16_t>(even);
     if (2 * x + 1 < dest.width) {
       static constexpr std::array<int, 4> last_odd_muls = {-1, +11, -4, +1};
-      odd = convolution(last_odd_muls, highpass, lowpass, /*x_shift*/ 0,
-                        /*dx*/ -1);
+      odd = convolution(
+          last_odd_muls, highpass,
+          [&x, &y, lowpass](int delta) { return lowpass(x - delta, y); },
+          descaleShift);
       if (clampUint)
         odd = clampBits(odd, 14);
       dest(2 * x + 1, y) = static_cast<int16_t>(odd);
