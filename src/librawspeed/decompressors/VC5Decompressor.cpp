@@ -255,12 +255,9 @@ void VC5Decompressor::Wavelet::reconstructLowband(
 
     static constexpr std::array<int, 4> even_muls = {+1, +5, +4, -1};
     int even = convolution(even_muls, highlow, lowlow);
+    static constexpr std::array<int, 4> odd_muls = {-1, +11, -4, +1};
+    int odd = convolution(odd_muls, highlow, lowlow);
 
-    int odd =
-        (-highlow(x, y) +
-         ((11 * lowlow(x, y) - 4 * lowlow(x, y - 1) + lowlow(x, y - 2) + 4) >>
-          3)) >>
-        1;
     lowpass(x, 2 * y) = static_cast<int16_t>(even);
     lowpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
 
