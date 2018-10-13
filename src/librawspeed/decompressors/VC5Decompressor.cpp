@@ -177,11 +177,27 @@ void VC5Decompressor::Wavelet::reconstructLowband(
   // 1st row
   y = 0;
   for (x = 0; x < width; ++x) {
-    int even =
-        (highlow(x, y) +
-         ((11 * lowlow(x, y) - 4 * lowlow(x, y + 1) + lowlow(x, y + 2) + 4) >>
-          3)) >>
-        1;
+    auto convolution = [x, y](std::array<int, 4> muls, Array2DRef<int16_t> high,
+                              Array2DRef<int16_t> low) {
+      auto highCombined = muls[0] * high(x, y);
+      auto lowsCombined = [muls, low, x, y]() {
+        int lows = 0;
+        for (int i = 0; i < 3; i++)
+          lows += muls[1 + i] * low(x, y + i);
+        return lows;
+      }();
+      // Round up 'lows' up
+      lowsCombined += 4;
+      // And finally 'average' them.
+      auto lowsRounded = lowsCombined >> 3;
+      auto total = highCombined + lowsRounded;
+      // And average it.
+      total >>= 1;
+      return total;
+    };
+
+    static constexpr std::array<int, 4> even_muls = {+1, +11, -4, +1};
+    int even = convolution(even_muls, highlow, lowlow);
     int odd =
         (-highlow(x, y) +
          ((5 * lowlow(x, y) + 4 * lowlow(x, y + 1) - lowlow(x, y + 2) + 4) >>
