@@ -76,7 +76,7 @@ class VC5Decompressor final : public AbstractDecompressor {
     void reconstructLowband(Array2DRef<int16_t> dest, int16_t prescale,
                             bool clampUint = false);
 
-    Array2DRef<int16_t> bandAsArray2DRef(unsigned int iBand);
+    Array2DRef<int16_t> bandAsArray2DRef(unsigned int iBand) const;
 
   protected:
     uint32 mDecodedBandMask = 0;

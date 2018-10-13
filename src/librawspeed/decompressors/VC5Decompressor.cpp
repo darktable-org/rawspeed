@@ -104,7 +104,7 @@ bool VC5Decompressor::Wavelet::allBandsValid() const {
 }
 
 Array2DRef<int16_t>
-VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) {
+VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) const {
   return {data[iBand], width, height};
 }
 
