@@ -495,6 +495,30 @@ void VC5Decompressor::decodeLowPassBand(const ByteStream& bs,
   }
 }
 
+void VC5Decompressor::decodeHighPassBand(const ByteStream& bs, int band,
+                                         Wavelet* wavelet) {
+  BitPumpMSB bits(bs);
+  // decode highpass band
+  int pixelValue = 0;
+  unsigned int count = 0;
+  int nPixels = wavelet->width * wavelet->height;
+  for (int iPixel = 0; iPixel < nPixels;) {
+    getRLV(&bits, &pixelValue, &count);
+    for (; count > 0; --count) {
+      if (iPixel > nPixels)
+        ThrowRDE("Buffer overflow");
+      wavelet->data[band][iPixel] = static_cast<int16_t>(pixelValue);
+      ++iPixel;
+    }
+  }
+  if (bits.getPosition() < bits.getSize()) {
+    getRLV(&bits, &pixelValue, &count);
+    if (pixelValue != MARKER_BAND_END || count != 0)
+      ThrowRDE("EndOfBand marker not found");
+  }
+  wavelet->quant[band] = mVC5.quantization;
+}
+
 void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
   Transform& transform = mTransforms[mVC5.iChannel];
   static constexpr std::array<int, numSubbands> subband_wavelet_index = {
@@ -530,26 +554,7 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
     assert(band == 0);
     decodeLowPassBand(bs, wavelet);
   } else {
-    BitPumpMSB bits(bs);
-    // decode highpass band
-    int pixelValue = 0;
-    unsigned int count = 0;
-    int nPixels = wavelet.width * wavelet.height;
-    for (int iPixel = 0; iPixel < nPixels;) {
-      getRLV(&bits, &pixelValue, &count);
-      for (; count > 0; --count) {
-        if (iPixel > nPixels)
-          ThrowRDE("Buffer overflow");
-        wavelet.data[band][iPixel] = static_cast<int16_t>(pixelValue);
-        ++iPixel;
-      }
-    }
-    if (bits.getPosition() < bits.getSize()) {
-      getRLV(&bits, &pixelValue, &count);
-      if (pixelValue != MARKER_BAND_END || count != 0)
-        ThrowRDE("EndOfBand marker not found");
-    }
-    wavelet.quant[band] = mVC5.quantization;
+    decodeHighPassBand(bs, band, &wavelet);
   }
   wavelet.setBandValid(band);
 
