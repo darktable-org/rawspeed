@@ -315,18 +315,16 @@ void VC5Decompressor::Wavelet::reconstructLowband(
     static constexpr std::array<int, 4> last_even_muls = {+1, +5, +4, -1};
     even = convolution(last_even_muls, highpass, lowpass, getter_last,
                        descaleShift);
+    static constexpr std::array<int, 4> last_odd_muls = {-1, +11, -4, +1};
+    odd = convolution(last_odd_muls, highpass, lowpass, getter_last,
+                      descaleShift);
 
-    if (clampUint)
+    if (clampUint) {
       even = clampBits(even, 14);
-    dest(2 * x, y) = static_cast<int16_t>(even);
-    if (2 * x + 1 < dest.width) {
-      static constexpr std::array<int, 4> last_odd_muls = {-1, +11, -4, +1};
-      odd = convolution(last_odd_muls, highpass, lowpass, getter_last,
-                        descaleShift);
-      if (clampUint)
-        odd = clampBits(odd, 14);
-      dest(2 * x + 1, y) = static_cast<int16_t>(odd);
+      odd = clampBits(odd, 14);
     }
+    dest(2 * x, y) = static_cast<int16_t>(even);
+    dest(2 * x + 1, y) = static_cast<int16_t>(odd);
   }
 }
 
