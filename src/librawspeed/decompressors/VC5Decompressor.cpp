@@ -538,10 +538,12 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
   if (mVC5.patternWidth != 2 || mVC5.patternHeight != 2)
     ThrowRDE("Invalid RAW file, pattern size != 2x2");
 
+  auto& transforms = channels[mVC5.iChannel].transforms;
+
   // Initialize wavelets
   uint16_t waveletWidth = roundUpDivision(channelWidth, 2);
   uint16_t waveletHeight = roundUpDivision(channelHeight, 2);
-  for (Transform& transform : channels[mVC5.iChannel].transforms) {
+  for (Transform& transform : transforms) {
     Wavelet& wavelet = transform.wavelet;
     if (wavelet.isInitialized()) {
       if (wavelet.width != waveletWidth || wavelet.height != waveletHeight)
@@ -555,7 +557,7 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
       *dimension = roundUpDivision(*dimension, 2);
   }
 
-  Wavelet& wavelet = channels[mVC5.iChannel].transforms[idx].wavelet;
+  Wavelet& wavelet = transforms[idx].wavelet;
   if (mVC5.iSubband == 0) {
     assert(band == 0);
     decodeLowPassBand(bs, wavelet.bandAsArray2DRef(0));
@@ -567,11 +569,10 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
   // If this wavelet is fully decoded, reconstruct the low-pass band of
   // the next lower wavelet
   if (idx > 0 && wavelet.allBandsValid() &&
-      !channels[mVC5.iChannel].transforms[idx - 1].wavelet.isBandValid(0)) {
-    wavelet.reconstructLowband(
-        channels[mVC5.iChannel].transforms[idx - 1].wavelet.bandAsArray2DRef(0),
-        channels[mVC5.iChannel].transforms[idx].prescale);
-    channels[mVC5.iChannel].transforms[idx - 1].wavelet.setBandValid(0);
+      !transforms[idx - 1].wavelet.isBandValid(0)) {
+    wavelet.reconstructLowband(transforms[idx - 1].wavelet.bandAsArray2DRef(0),
+                               transforms[idx].prescale);
+    transforms[idx - 1].wavelet.setBandValid(0);
   }
 
   mVC5.iSubband++;
