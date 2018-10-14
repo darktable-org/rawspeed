@@ -581,12 +581,6 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
     data = wavelet.reconstructLowband(transforms[idx].prescale);
     transforms[idx - 1].wavelet.setBandValid(0);
   }
-
-  mVC5.iSubband++;
-  if (mVC5.iSubband == numSubbands) {
-    mVC5.iChannel++;
-    mVC5.iSubband = 0;
-  }
 }
 
 void VC5Decompressor::decodeFinalWavelet() {
