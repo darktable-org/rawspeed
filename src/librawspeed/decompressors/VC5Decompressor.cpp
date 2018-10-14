@@ -444,7 +444,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
       break;
     case VC5_TAG_PrescaleShift:
       for (int iWavelet = 0; iWavelet < Channel::numTransforms; ++iWavelet)
-        mChannel[mVC5.iChannel].transforms[iWavelet].prescale =
+        channels[mVC5.iChannel].transforms[iWavelet].prescale =
             (val >> (14 - 2 * iWavelet)) & 0x03;
       break;
     default: { // A chunk.
@@ -482,7 +482,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
 
     done = true;
     for (int iChannel = 0; iChannel < numChannels && done; ++iChannel) {
-      Wavelet& wavelet = mChannel[iChannel].transforms[0].wavelet;
+      Wavelet& wavelet = channels[iChannel].transforms[0].wavelet;
       if (!wavelet.isInitialized())
         done = false;
       if (!wavelet.allBandsValid())
@@ -542,7 +542,7 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
   // Initialize wavelets
   uint16_t waveletWidth = roundUpDivision(channelWidth, 2);
   uint16_t waveletHeight = roundUpDivision(channelHeight, 2);
-  for (Transform& transform : mChannel[mVC5.iChannel].transforms) {
+  for (Transform& transform : channels[mVC5.iChannel].transforms) {
     Wavelet& wavelet = transform.wavelet;
     if (wavelet.isInitialized()) {
       if (wavelet.width != waveletWidth || wavelet.height != waveletHeight)
@@ -556,7 +556,7 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
       *dimension = roundUpDivision(*dimension, 2);
   }
 
-  Wavelet& wavelet = mChannel[mVC5.iChannel].transforms[idx].wavelet;
+  Wavelet& wavelet = channels[mVC5.iChannel].transforms[idx].wavelet;
   if (mVC5.iSubband == 0) {
     assert(band == 0);
     decodeLowPassBand(bs, wavelet.bandAsArray2DRef(0));
@@ -568,11 +568,11 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
   // If this wavelet is fully decoded, reconstruct the low-pass band of
   // the next lower wavelet
   if (idx > 0 && wavelet.allBandsValid() &&
-      !mChannel[mVC5.iChannel].transforms[idx - 1].wavelet.isBandValid(0)) {
+      !channels[mVC5.iChannel].transforms[idx - 1].wavelet.isBandValid(0)) {
     wavelet.reconstructLowband(
-        mChannel[mVC5.iChannel].transforms[idx - 1].wavelet.bandAsArray2DRef(0),
-        mChannel[mVC5.iChannel].transforms[idx].prescale);
-    mChannel[mVC5.iChannel].transforms[idx - 1].wavelet.setBandValid(0);
+        channels[mVC5.iChannel].transforms[idx - 1].wavelet.bandAsArray2DRef(0),
+        channels[mVC5.iChannel].transforms[idx].prescale);
+    channels[mVC5.iChannel].transforms[idx - 1].wavelet.setBandValid(0);
   }
 
   mVC5.iSubband++;
@@ -589,19 +589,19 @@ void VC5Decompressor::decodeFinalWavelet() {
                            static_cast<unsigned int>(mImg->dim.y),
                            mImg->pitch / sizeof(uint16_t));
 
-  unsigned int width = 2 * mChannel[0].transforms[0].wavelet.width;
-  unsigned int height = 2 * mChannel[0].transforms[0].wavelet.height;
+  unsigned int width = 2 * channels[0].transforms[0].wavelet.width;
+  unsigned int height = 2 * channels[0].transforms[0].wavelet.height;
 
   std::array<std::vector<int16_t>, numChannels> lowbands_storage;
   std::array<Array2DRef<int16_t>, numChannels> lowbands;
   for (unsigned int iChannel = 0; iChannel < numChannels; ++iChannel) {
-    assert(2 * mChannel[iChannel].transforms[0].wavelet.width == width);
-    assert(2 * mChannel[iChannel].transforms[0].wavelet.height == height);
+    assert(2 * channels[iChannel].transforms[0].wavelet.width == width);
+    assert(2 * channels[iChannel].transforms[0].wavelet.height == height);
     lowbands_storage[iChannel] = Array2DRef<int16_t>::create(width, height);
     lowbands[iChannel] =
         Array2DRef<int16_t>(lowbands_storage[iChannel].data(), width, height);
-    mChannel[iChannel].transforms[0].wavelet.reconstructLowband(
-        lowbands[iChannel], mChannel[iChannel].transforms[0].prescale, true);
+    channels[iChannel].transforms[0].wavelet.reconstructLowband(
+        lowbands[iChannel], channels[iChannel].transforms[0].prescale, true);
   }
 
   // Convert to RGGB output

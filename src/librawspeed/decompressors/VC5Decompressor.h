@@ -105,7 +105,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   };
 
   static constexpr int numChannels = 4;
-  std::array<Channel, numChannels> mChannel;
+  std::array<Channel, numChannels> channels;
 
   static void getRLV(BitPumpMSB* bits, int* value, unsigned int* count);
 
