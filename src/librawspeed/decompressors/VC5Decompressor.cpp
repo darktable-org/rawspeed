@@ -81,7 +81,6 @@ void VC5Decompressor::Wavelet::initialize(uint16_t waveletWidth,
                                           uint16_t waveletHeight) {
   this->width = waveletWidth;
   this->height = waveletHeight;
-  pitch = waveletWidth * sizeof(int16_t);
   mDecodedBandMask = 0;
 
   for (auto& band : bands)

@@ -56,7 +56,7 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   class Wavelet {
   public:
-    uint16_t width, height, pitch;
+    uint16_t width, height;
 
     struct Band {
       std::vector<int16_t> data;
