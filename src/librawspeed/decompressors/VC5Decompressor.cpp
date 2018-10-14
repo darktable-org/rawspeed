@@ -367,9 +367,13 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
         ThrowRDE("Bad channel count %u, expected %u", val, numChannels);
       break;
     case VC5Tag::ImageWidth:
+      if (val % mVC5.patternWidth != 0)
+        ThrowRDE("Width %u is not a multiple of %u", val, mVC5.patternWidth);
       mVC5.imgWidth = val;
       break;
     case VC5Tag::ImageHeight:
+      if (val % mVC5.patternHeight != 0)
+        ThrowRDE("Height %u is not a multiple of %u", val, mVC5.patternHeight);
       mVC5.imgHeight = val;
       break;
     case VC5Tag::LowpassPrecision:
