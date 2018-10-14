@@ -595,13 +595,14 @@ void VC5Decompressor::decodeFinalWavelet() {
   std::array<std::vector<int16_t>, numChannels> lowbands_storage;
   std::array<Array2DRef<int16_t>, numChannels> lowbands;
   for (unsigned int iChannel = 0; iChannel < numChannels; ++iChannel) {
-    assert(2 * channels[iChannel].transforms[0].wavelet.width == width);
-    assert(2 * channels[iChannel].transforms[0].wavelet.height == height);
+    auto& transform = channels[iChannel].transforms[0];
+    assert(2 * transform.wavelet.width == width);
+    assert(2 * transform.wavelet.height == height);
     lowbands_storage[iChannel] = Array2DRef<int16_t>::create(width, height);
     lowbands[iChannel] =
         Array2DRef<int16_t>(lowbands_storage[iChannel].data(), width, height);
-    channels[iChannel].transforms[0].wavelet.reconstructLowband(
-        lowbands[iChannel], channels[iChannel].transforms[0].prescale, true);
+    transform.wavelet.reconstructLowband(lowbands[iChannel], transform.prescale,
+                                         true);
   }
 
   // Convert to RGGB output
