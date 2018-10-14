@@ -331,18 +331,6 @@ std::vector<int16_t> VC5Decompressor::Wavelet::reconstructLowband(
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     : AbstractDecompressor(), mImg(img), mBs(std::move(bs)) {
-  mVC5.iChannel = 0;
-  mVC5.iSubband = 0;
-  mVC5.imgWidth = 0;
-  mVC5.imgHeight = 0;
-  mVC5.imgFormat = 4;
-  mVC5.patternWidth = 2;
-  mVC5.patternHeight = 2;
-  mVC5.cps = 0;
-  mVC5.bpc = 0;
-  mVC5.lowpassPrecision = 0;
-  mVC5.quantization = 0;
-
   int outputBits = 0;
   for (int wp = img->whitePoint; wp != 0; wp >>= 1)
     ++outputBits;
@@ -418,9 +406,8 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
       mVC5.iChannel = val;
       break;
     case VC5_TAG_ImageFormat:
-      if (val != 4)
+      if (val != mVC5.imgFormat)
         ThrowRDE("Image format %i is not 4(RAW)", val);
-      mVC5.imgFormat = val; // 4=RAW
       break;
     case VC5_TAG_SubbandCount:
       if (val != numSubbands)
@@ -430,10 +417,12 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
       mVC5.bpc = val;
       break;
     case VC5_TAG_PatternWidth:
-      mVC5.patternWidth = val;
+      if (val != mVC5.patternWidth)
+        ThrowRDE("Bad pattern width %u, not %u", val, mVC5.patternWidth);
       break;
     case VC5_TAG_PatternHeight:
-      mVC5.patternHeight = val;
+      if (val != mVC5.patternHeight)
+        ThrowRDE("Bad pattern height %u, not %u", val, mVC5.patternHeight);
       break;
     case VC5_TAG_SubbandNumber:
       if (val >= numSubbands)

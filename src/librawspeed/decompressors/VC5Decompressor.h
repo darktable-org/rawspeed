@@ -47,10 +47,16 @@ class VC5Decompressor final : public AbstractDecompressor {
   static constexpr int numSubbands = 10;
 
   struct {
-    ushort16 iChannel, iSubband;
-    ushort16 imgWidth, imgHeight, imgFormat;
-    ushort16 patternWidth, patternHeight;
-    ushort16 cps, bpc, lowpassPrecision;
+    ushort16 iChannel;
+    ushort16 iSubband;
+    ushort16 imgWidth;
+    ushort16 imgHeight;
+    const ushort16 imgFormat = 4;
+    const ushort16 patternWidth = 2;
+    const ushort16 patternHeight = 2;
+    ushort16 cps;
+    ushort16 bpc;
+    ushort16 lowpassPrecision;
     short16 quantization;
   } mVC5;
 
