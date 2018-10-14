@@ -50,26 +50,6 @@ struct RLV {
   }
 #include "common/table17.inc"
 
-#define VC5_TAG_ChannelCount 0x000c
-#define VC5_TAG_ImageWidth 0x0014
-#define VC5_TAG_ImageHeight 0x0015
-#define VC5_TAG_LowpassPrecision 0x0023
-#define VC5_TAG_SubbandCount 0x000E
-#define VC5_TAG_SubbandNumber 0x0030
-#define VC5_TAG_Quantization 0x0035
-#define VC5_TAG_ChannelNumber 0x003e
-#define VC5_TAG_ImageFormat 0x0054
-#define VC5_TAG_MaxBitsPerComponent 0x0066
-#define VC5_TAG_PatternWidth 0x006a
-#define VC5_TAG_PatternHeight 0x006b
-#define VC5_TAG_ComponentsPerSample 0x006c
-#define VC5_TAG_PrescaleShift 0x006d
-
-#define VC5_TAG_LARGE_CHUNK 0x2000
-#define VC5_TAG_SMALL_CHUNK 0x4000
-#define VC5_TAG_UniqueImageIdentifier 0x4004
-#define VC5_TAG_LargeCodeblock 0x6000
-
 #define PRECISION_MIN 8
 #define PRECISION_MAX 32
 
@@ -374,82 +354,81 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
 
   bool done = false;
   while (!done) {
-    auto tag = static_cast<int16_t>(mBs.getU16());
+    auto tag = static_cast<VC5Tag>(mBs.getU16());
     ushort16 val = mBs.getU16();
 
-    bool optional;
-    if (tag < 0) {
+    bool optional = matches(tag, VC5Tag::Optional);
+    if (optional)
       tag = -tag;
-      optional = true;
-    } else
-      optional = false;
 
     switch (tag) {
-    case VC5_TAG_ChannelCount:
+    case VC5Tag::ChannelCount:
       if (val != numChannels)
         ThrowRDE("Bad channel count %u, expected %u", val, numChannels);
       break;
-    case VC5_TAG_ImageWidth:
+    case VC5Tag::ImageWidth:
       mVC5.imgWidth = val;
       break;
-    case VC5_TAG_ImageHeight:
+    case VC5Tag::ImageHeight:
       mVC5.imgHeight = val;
       break;
-    case VC5_TAG_LowpassPrecision:
+    case VC5Tag::LowpassPrecision:
       if (val < PRECISION_MIN || val > PRECISION_MAX)
         ThrowRDE("Invalid precision %i", val);
       mVC5.lowpassPrecision = val;
       break;
-    case VC5_TAG_ChannelNumber:
+    case VC5Tag::ChannelNumber:
       if (val >= numChannels)
         ThrowRDE("Bad channel number (%u)", val);
       mVC5.iChannel = val;
       break;
-    case VC5_TAG_ImageFormat:
+    case VC5Tag::ImageFormat:
       if (val != mVC5.imgFormat)
         ThrowRDE("Image format %i is not 4(RAW)", val);
       break;
-    case VC5_TAG_SubbandCount:
+    case VC5Tag::SubbandCount:
       if (val != numSubbands)
         ThrowRDE("Unexpected subband count %u, expected %u", val, numSubbands);
       break;
-    case VC5_TAG_MaxBitsPerComponent:
+    case VC5Tag::MaxBitsPerComponent:
       mVC5.bpc = val;
       break;
-    case VC5_TAG_PatternWidth:
+    case VC5Tag::PatternWidth:
       if (val != mVC5.patternWidth)
         ThrowRDE("Bad pattern width %u, not %u", val, mVC5.patternWidth);
       break;
-    case VC5_TAG_PatternHeight:
+    case VC5Tag::PatternHeight:
       if (val != mVC5.patternHeight)
         ThrowRDE("Bad pattern height %u, not %u", val, mVC5.patternHeight);
       break;
-    case VC5_TAG_SubbandNumber:
+    case VC5Tag::SubbandNumber:
       if (val >= numSubbands)
         ThrowRDE("Bad subband number %u", val);
       mVC5.iSubband = val;
       break;
-    case VC5_TAG_Quantization:
+    case VC5Tag::Quantization:
       mVC5.quantization = static_cast<short16>(val);
       break;
-    case VC5_TAG_ComponentsPerSample:
+    case VC5Tag::ComponentsPerSample:
       mVC5.cps = val;
       break;
-    case VC5_TAG_PrescaleShift:
+    case VC5Tag::PrescaleShift:
       for (int iWavelet = 0; iWavelet < Channel::numTransforms; ++iWavelet)
         channels[mVC5.iChannel].transforms[iWavelet].prescale =
             (val >> (14 - 2 * iWavelet)) & 0x03;
       break;
     default: { // A chunk.
       unsigned int chunkSize = 0;
-      if (tag & VC5_TAG_LARGE_CHUNK) {
-        chunkSize =
-            static_cast<unsigned int>(((tag & 0xff) << 16) | (val & 0xffff));
-      } else if (tag & VC5_TAG_SMALL_CHUNK) {
+      if (matches(tag, VC5Tag::LARGE_CHUNK)) {
+        chunkSize = static_cast<unsigned int>(
+            ((static_cast<std::underlying_type<VC5Tag>::type>(tag) & 0xff)
+             << 16) |
+            (val & 0xffff));
+      } else if (matches(tag, VC5Tag::SMALL_CHUNK)) {
         chunkSize = (val & 0xffff);
       }
 
-      if ((tag & VC5_TAG_LargeCodeblock) == VC5_TAG_LargeCodeblock) {
+      if (is(tag, VC5Tag::LargeCodeblock)) {
         decodeLargeCodeblock(mBs.getStream(chunkSize, 4));
         break;
       }
@@ -458,13 +437,13 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
 
       // Magic, all the other 'large' chunks are actually optional,
       // and don't specify any chunk bytes-to-be-skipped.
-      if (tag & VC5_TAG_LARGE_CHUNK) {
+      if (matches(tag, VC5Tag::LARGE_CHUNK)) {
         optional = true;
         chunkSize = 0;
       }
 
       if (!optional)
-        ThrowRDE("Unknown (unhandled) non-optional Tag 0x%04x", tag);
+        ThrowRDE("Unknown (unhandled) non-optional Tag 0x%04hx", tag);
 
       if (chunkSize)
         mBs.skipBytes(chunkSize, 4);

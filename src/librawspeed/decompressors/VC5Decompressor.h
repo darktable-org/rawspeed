@@ -27,6 +27,7 @@
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/BitPumpMSB.h"                      // for BitPumpMSB
 #include "io/ByteStream.h"                      // for ByteStream
+#include <type_traits>                          // for underlying_type
 
 namespace rawspeed {
 
@@ -36,6 +37,50 @@ class ByteStream;
 class RawImage;
 
 // Decompresses VC-5 as used by GoPro
+
+enum class VC5Tag : int16_t {
+  NoTag = 0x0, // synthetic, not an actual tag
+
+  ChannelCount = 0x000c,
+  ImageWidth = 0x0014,
+  ImageHeight = 0x0015,
+  LowpassPrecision = 0x0023,
+  SubbandCount = 0x000E,
+  SubbandNumber = 0x0030,
+  Quantization = 0x0035,
+  ChannelNumber = 0x003e,
+  ImageFormat = 0x0054,
+  MaxBitsPerComponent = 0x0066,
+  PatternWidth = 0x006a,
+  PatternHeight = 0x006b,
+  ComponentsPerSample = 0x006c,
+  PrescaleShift = 0x006d,
+
+  LARGE_CHUNK = 0x2000,
+  SMALL_CHUNK = 0x4000,
+  UniqueImageIdentifier = 0x4004,
+  LargeCodeblock = 0x6000,
+
+  Optional = int16_t(0x8000U), // only signbit set
+};
+inline VC5Tag operator&(VC5Tag LHS, VC5Tag RHS) {
+  using value_type = std::underlying_type<VC5Tag>::type;
+  return static_cast<VC5Tag>(static_cast<value_type>(LHS) &
+                             static_cast<value_type>(RHS));
+}
+inline bool matches(VC5Tag LHS, VC5Tag RHS) {
+  // Are there any common bit set?
+  return (LHS & RHS) != VC5Tag::NoTag;
+}
+inline bool is(VC5Tag LHS, VC5Tag RHS) {
+  // Does LHS have all the RHS bits set?
+  return (LHS & RHS) == RHS;
+}
+inline VC5Tag operator-(VC5Tag tag) {
+  using value_type = std::underlying_type<VC5Tag>::type;
+  // Negate
+  return static_cast<VC5Tag>(-static_cast<value_type>(tag));
+}
 
 class VC5Decompressor final : public AbstractDecompressor {
   RawImage mImg;
