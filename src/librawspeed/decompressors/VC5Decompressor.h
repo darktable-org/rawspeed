@@ -59,7 +59,6 @@ class VC5Decompressor final : public AbstractDecompressor {
     uint16_t width, height, pitch;
 
     static constexpr uint16_t numBands = 4;
-    std::array<uint16_t, numBands> scale = {};
     std::array<int16_t, numBands> quant = {};
     std::array<std::vector<int16_t>, numBands> data;
 
