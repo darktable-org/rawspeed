@@ -290,34 +290,36 @@ void VC5Decompressor::Wavelet::reconstructLowband(
       ThrowRDE("Quant value of band %i must not be zero", i);
   }
 
-  std::vector<int16_t> lowhigh_storage =
-      Array2DRef<int16_t>::create(width, height);
-  std::vector<int16_t> highlow_storage =
-      Array2DRef<int16_t>::create(width, height);
-  std::vector<int16_t> highhigh_storage =
-      Array2DRef<int16_t>::create(width, height);
-
   std::vector<int16_t> lowpass_storage =
       Array2DRef<int16_t>::create(width, 2 * height);
   std::vector<int16_t> highpass_storage =
       Array2DRef<int16_t>::create(width, 2 * height);
 
-  Array2DRef<int16_t> lowlow(data[0], width, height);
-  Array2DRef<int16_t> lowhigh(lowhigh_storage.data(), width, height);
-  Array2DRef<int16_t> highlow(highlow_storage.data(), width, height);
-  Array2DRef<int16_t> highhigh(highhigh_storage.data(), width, height);
-
   Array2DRef<int16_t> lowpass(lowpass_storage.data(), width, 2 * height);
   Array2DRef<int16_t> highpass(highpass_storage.data(), width, 2 * height);
 
-  dequantize(lowhigh, Array2DRef<int16_t>(data[1], width, height), quant[1]);
-  dequantize(highlow, Array2DRef<int16_t>(data[2], width, height), quant[2]);
-  dequantize(highhigh, Array2DRef<int16_t>(data[3], width, height), quant[3]);
+  {
+    std::vector<int16_t> lowhigh_storage =
+        Array2DRef<int16_t>::create(width, height);
+    std::vector<int16_t> highlow_storage =
+        Array2DRef<int16_t>::create(width, height);
+    std::vector<int16_t> highhigh_storage =
+        Array2DRef<int16_t>::create(width, height);
 
-  // Reconstruct the "immediates", the actual low pass ...
-  reconstructPass(lowpass, highlow, lowlow);
-  // ... and high pass.
-  reconstructPass(highpass, highhigh, lowhigh);
+    Array2DRef<int16_t> lowlow(data[0], width, height);
+    Array2DRef<int16_t> lowhigh(lowhigh_storage.data(), width, height);
+    Array2DRef<int16_t> highlow(highlow_storage.data(), width, height);
+    Array2DRef<int16_t> highhigh(highhigh_storage.data(), width, height);
+
+    dequantize(lowhigh, Array2DRef<int16_t>(data[1], width, height), quant[1]);
+    dequantize(highlow, Array2DRef<int16_t>(data[2], width, height), quant[2]);
+    dequantize(highhigh, Array2DRef<int16_t>(data[3], width, height), quant[3]);
+
+    // Reconstruct the "immediates", the actual low pass ...
+    reconstructPass(lowpass, highlow, lowlow);
+    // ... and high pass.
+    reconstructPass(highpass, highhigh, lowhigh);
+  }
 
   // And finally, combine the low pass, and high pass.
   combineLowHighPass(dest, lowpass, highpass, descaleShift, clampUint);
