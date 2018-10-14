@@ -109,7 +109,7 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   static void getRLV(BitPumpMSB* bits, int* value, unsigned int* count);
 
-  void decodeLowPassBand(const ByteStream& bs, Wavelet* wavelet);
+  void decodeLowPassBand(const ByteStream& bs, Array2DRef<int16_t> dst);
   void decodeHighPassBand(const ByteStream& bs, int band, Wavelet* wavelet);
 
   void decodeLargeCodeblock(const ByteStream& bs);
