@@ -84,9 +84,8 @@ void VC5Decompressor::Wavelet::initialize(uint16_t waveletWidth,
   pitch = waveletWidth * sizeof(int16_t);
   mDecodedBandMask = 0;
 
-  data_storage.resize(numBands * waveletWidth * waveletHeight);
-  for (int iBand = 0; iBand < numBands; ++iBand)
-    data[iBand] = &data_storage[iBand * waveletWidth * waveletHeight];
+  for (auto& band : data)
+    band.resize(waveletWidth * waveletHeight);
 
   mInitialized = true;
 }
@@ -104,15 +103,16 @@ bool VC5Decompressor::Wavelet::allBandsValid() const {
 }
 
 Array2DRef<int16_t>
-VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) const {
-  return {data[iBand], width, height};
+VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) {
+  return {data[iBand].data(), width, height};
 }
 
 void VC5Decompressor::Wavelet::clear() {
-  data_storage.clear();
-  data_storage.shrink_to_fit();
+  for (auto& band : data) {
+    band.clear();
+    band.shrink_to_fit();
+  }
   mInitialized = false;
-  data.fill(nullptr);
 }
 
 // static
@@ -494,11 +494,11 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
 }
 
 void VC5Decompressor::decodeLowPassBand(const ByteStream& bs,
-                                        const Wavelet& wavelet) {
+                                        Wavelet* wavelet) {
   BitPumpMSB bits(bs);
-  auto wdata = wavelet.bandAsArray2DRef(0);
-  for (int row = 0; row < wavelet.height; ++row) {
-    for (int col = 0; col < wavelet.width; ++col) {
+  auto wdata = wavelet->bandAsArray2DRef(0);
+  for (int row = 0; row < wavelet->height; ++row) {
+    for (int col = 0; col < wavelet->width; ++col) {
       wdata(col, row) =
           static_cast<int16_t>(bits.getBits(mVC5.lowpassPrecision));
     }
@@ -562,7 +562,7 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
   Wavelet& wavelet = transform.wavelet[idx];
   if (mVC5.iSubband == 0) {
     assert(band == 0);
-    decodeLowPassBand(bs, wavelet);
+    decodeLowPassBand(bs, &wavelet);
   } else {
     decodeHighPassBand(bs, band, &wavelet);
   }

@@ -57,12 +57,11 @@ class VC5Decompressor final : public AbstractDecompressor {
   class Wavelet {
   public:
     uint16_t width, height, pitch;
-    std::vector<int16_t> data_storage;
 
     static constexpr uint16_t numBands = 4;
     std::array<uint16_t, numBands> scale = {};
     std::array<int16_t, numBands> quant = {};
-    std::array<int16_t*, numBands> data = {};
+    std::array<std::vector<int16_t>, numBands> data;
 
     void initialize(uint16_t waveletWidth, uint16_t waveletHeight);
     void clear();
@@ -83,7 +82,7 @@ class VC5Decompressor final : public AbstractDecompressor {
     void reconstructLowband(Array2DRef<int16_t> dest, int16_t prescale,
                             bool clampUint = false);
 
-    Array2DRef<int16_t> bandAsArray2DRef(unsigned int iBand) const;
+    Array2DRef<int16_t> bandAsArray2DRef(unsigned int iBand);
 
   protected:
     uint32 mDecodedBandMask = 0;
@@ -104,7 +103,7 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   static void getRLV(BitPumpMSB* bits, int* value, unsigned int* count);
 
-  void decodeLowPassBand(const ByteStream& bs, const Wavelet& wavelet);
+  void decodeLowPassBand(const ByteStream& bs, Wavelet* wavelet);
   void decodeHighPassBand(const ByteStream& bs, int band, Wavelet* wavelet);
 
   void decodeLargeCodeblock(const ByteStream& bs);
