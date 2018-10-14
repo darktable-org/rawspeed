@@ -136,63 +136,39 @@ void VC5Decompressor::Wavelet::dequantize(Array2DRef<int16_t> out,
   }
 }
 
-void VC5Decompressor::Wavelet::reconstructLowband(
-    Array2DRef<int16_t> dest, const int16_t prescale,
-    const bool clampUint /* = false */) {
+namespace {
+auto convolute = [](unsigned x, unsigned y, std::array<int, 4> muls,
+                    Array2DRef<int16_t> high, Array2DRef<int16_t> low,
+                    auto lowGetter, int DescaleShift = 0) {
+  auto highCombined = muls[0] * high(x, y);
+  auto lowsCombined = [muls, lowGetter, low]() {
+    int lows = 0;
+    for (int i = 0; i < 3; i++)
+      lows += muls[1 + i] * lowGetter(low, i);
+    return lows;
+  }();
+  // Round up 'lows' up
+  lowsCombined += 4;
+  // And finally 'average' them.
+  auto lowsRounded = lowsCombined >> 3;
+  auto total = highCombined + lowsRounded;
+  // Descale it.
+  total <<= DescaleShift;
+  // And average it.
+  total >>= 1;
+  return total;
+};
+} // namespace
+
+void VC5Decompressor::Wavelet::reconstructLowHighPass(
+    Array2DRef<int16_t> lowpass, Array2DRef<int16_t> highpass,
+    Array2DRef<int16_t> highlow, Array2DRef<int16_t> lowlow,
+    Array2DRef<int16_t> highhigh, Array2DRef<int16_t> lowhigh) {
   unsigned int x, y;
-  int16_t descaleShift = (prescale == 2 ? 2 : 0);
-  // Assert valid quantization values
-  if (quant[0] == 0)
-    quant[0] = 1;
-  for (int i = 0; i < numBands; ++i) {
-    if (quant[i] == 0)
-      ThrowRDE("Quant value of band %i must not be zero", i);
-  }
-
-  std::vector<int16_t> lowhigh_storage =
-      Array2DRef<int16_t>::create(width, height);
-  std::vector<int16_t> highlow_storage =
-      Array2DRef<int16_t>::create(width, height);
-  std::vector<int16_t> highhigh_storage =
-      Array2DRef<int16_t>::create(width, height);
-
-  std::vector<int16_t> lowpass_storage =
-      Array2DRef<int16_t>::create(width, 2 * height);
-  std::vector<int16_t> highpass_storage =
-      Array2DRef<int16_t>::create(width, 2 * height);
-
-  Array2DRef<int16_t> lowlow(data[0], width, height);
-  Array2DRef<int16_t> lowhigh(lowhigh_storage.data(), width, height);
-  Array2DRef<int16_t> highlow(highlow_storage.data(), width, height);
-  Array2DRef<int16_t> highhigh(highhigh_storage.data(), width, height);
-
-  Array2DRef<int16_t> lowpass(lowpass_storage.data(), width, 2 * height);
-  Array2DRef<int16_t> highpass(highpass_storage.data(), width, 2 * height);
-
-  dequantize(lowhigh, Array2DRef<int16_t>(data[1], width, height), quant[1]);
-  dequantize(highlow, Array2DRef<int16_t>(data[2], width, height), quant[2]);
-  dequantize(highhigh, Array2DRef<int16_t>(data[3], width, height), quant[3]);
 
   auto convolution = [&x, &y](std::array<int, 4> muls, Array2DRef<int16_t> high,
-                              Array2DRef<int16_t> low, auto lowGetter,
-                              int DescaleShift = 0) {
-    auto highCombined = muls[0] * high(x, y);
-    auto lowsCombined = [muls, lowGetter, low]() {
-      int lows = 0;
-      for (int i = 0; i < 3; i++)
-        lows += muls[1 + i] * lowGetter(low, i);
-      return lows;
-    }();
-    // Round up 'lows' up
-    lowsCombined += 4;
-    // And finally 'average' them.
-    auto lowsRounded = lowsCombined >> 3;
-    auto total = highCombined + lowsRounded;
-    // Descale it.
-    total <<= DescaleShift;
-    // And average it.
-    total >>= 1;
-    return total;
+                              Array2DRef<int16_t> low, auto lowGetter) {
+    return convolute(x, y, muls, high, low, lowGetter, /*DescaleShift*/ 0);
   };
 
   // Vertical reconstruction
@@ -205,7 +181,6 @@ void VC5Decompressor::Wavelet::reconstructLowband(
 
     static constexpr std::array<int, 4> even_muls = {+1, +11, -4, +1};
     int even = convolution(even_muls, highlow, lowlow, getter);
-
     static constexpr std::array<int, 4> odd_muls = {-1, +5, +4, -1};
     int odd = convolution(odd_muls, highlow, lowlow, getter);
 
@@ -260,6 +235,20 @@ void VC5Decompressor::Wavelet::reconstructLowband(
     highpass(x, 2 * y) = static_cast<int16_t>(even);
     highpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
   }
+}
+
+void VC5Decompressor::Wavelet::combineLowHighPass(Array2DRef<int16_t> dest,
+                                                  Array2DRef<int16_t> lowpass,
+                                                  Array2DRef<int16_t> highpass,
+                                                  int descaleShift,
+                                                  bool clampUint = false) {
+  unsigned int x, y;
+
+  auto convolution =
+      [&x, &y, descaleShift](std::array<int, 4> muls, Array2DRef<int16_t> high,
+                             Array2DRef<int16_t> low, auto lowGetter) {
+        return convolute(x, y, muls, high, low, lowGetter, descaleShift);
+      };
 
   // Horizontal reconstruction
   for (y = 0; y < dest.height; ++y) {
@@ -272,11 +261,9 @@ void VC5Decompressor::Wavelet::reconstructLowband(
     };
 
     static constexpr std::array<int, 4> even_muls = {+1, +11, -4, +1};
-    int even =
-        convolution(even_muls, highpass, lowpass, getter_first, descaleShift);
+    int even = convolution(even_muls, highpass, lowpass, getter_first);
     static constexpr std::array<int, 4> odd_muls = {-1, +5, +4, -1};
-    int odd =
-        convolution(odd_muls, highpass, lowpass, getter_first, descaleShift);
+    int odd = convolution(odd_muls, highpass, lowpass, getter_first);
 
     if (clampUint) {
       even = clampBits(even, 14);
@@ -292,11 +279,9 @@ void VC5Decompressor::Wavelet::reconstructLowband(
       };
 
       static constexpr std::array<int, 4> middle_even_muls = {+1, +1, +8, -1};
-      even = convolution(middle_even_muls, highpass, lowpass, getter,
-                         descaleShift);
+      even = convolution(middle_even_muls, highpass, lowpass, getter);
       static constexpr std::array<int, 4> middle_odd_muls = {-1, -1, +8, +1};
-      odd =
-          convolution(middle_odd_muls, highpass, lowpass, getter, descaleShift);
+      odd = convolution(middle_odd_muls, highpass, lowpass, getter);
 
       if (clampUint) {
         even = clampBits(even, 14);
@@ -313,11 +298,9 @@ void VC5Decompressor::Wavelet::reconstructLowband(
     };
 
     static constexpr std::array<int, 4> last_even_muls = {+1, +5, +4, -1};
-    even = convolution(last_even_muls, highpass, lowpass, getter_last,
-                       descaleShift);
+    even = convolution(last_even_muls, highpass, lowpass, getter_last);
     static constexpr std::array<int, 4> last_odd_muls = {-1, +11, -4, +1};
-    odd = convolution(last_odd_muls, highpass, lowpass, getter_last,
-                      descaleShift);
+    odd = convolution(last_odd_muls, highpass, lowpass, getter_last);
 
     if (clampUint) {
       even = clampBits(even, 14);
@@ -328,6 +311,48 @@ void VC5Decompressor::Wavelet::reconstructLowband(
   }
 }
 
+void VC5Decompressor::Wavelet::reconstructLowband(
+    Array2DRef<int16_t> dest, const int16_t prescale,
+    const bool clampUint /* = false */) {
+  int16_t descaleShift = (prescale == 2 ? 2 : 0);
+  // Assert valid quantization values
+  if (quant[0] == 0)
+    quant[0] = 1;
+  for (int i = 0; i < numBands; ++i) {
+    if (quant[i] == 0)
+      ThrowRDE("Quant value of band %i must not be zero", i);
+  }
+
+  std::vector<int16_t> lowhigh_storage =
+      Array2DRef<int16_t>::create(width, height);
+  std::vector<int16_t> highlow_storage =
+      Array2DRef<int16_t>::create(width, height);
+  std::vector<int16_t> highhigh_storage =
+      Array2DRef<int16_t>::create(width, height);
+
+  std::vector<int16_t> lowpass_storage =
+      Array2DRef<int16_t>::create(width, 2 * height);
+  std::vector<int16_t> highpass_storage =
+      Array2DRef<int16_t>::create(width, 2 * height);
+
+  Array2DRef<int16_t> lowlow(data[0], width, height);
+  Array2DRef<int16_t> lowhigh(lowhigh_storage.data(), width, height);
+  Array2DRef<int16_t> highlow(highlow_storage.data(), width, height);
+  Array2DRef<int16_t> highhigh(highhigh_storage.data(), width, height);
+
+  Array2DRef<int16_t> lowpass(lowpass_storage.data(), width, 2 * height);
+  Array2DRef<int16_t> highpass(highpass_storage.data(), width, 2 * height);
+
+  dequantize(lowhigh, Array2DRef<int16_t>(data[1], width, height), quant[1]);
+  dequantize(highlow, Array2DRef<int16_t>(data[2], width, height), quant[2]);
+  dequantize(highhigh, Array2DRef<int16_t>(data[3], width, height), quant[3]);
+
+  // Reconstruct the "immediates", the actual low pass, and high pass.
+  reconstructLowHighPass(lowpass, highpass, highlow, lowlow, highhigh, lowhigh);
+
+  // And finally, combine the low pass, and high pass.
+  combineLowHighPass(dest, lowpass, highpass, descaleShift, clampUint);
+}
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     : AbstractDecompressor(), mImg(img), mBs(std::move(bs)) {

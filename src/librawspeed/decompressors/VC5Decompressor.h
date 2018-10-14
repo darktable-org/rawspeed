@@ -73,6 +73,18 @@ class VC5Decompressor final : public AbstractDecompressor {
     uint32_t getValidBandMask() const { return mDecodedBandMask; }
     bool allBandsValid() const;
 
+    void reconstructLowHighPass(Array2DRef<int16_t> lowpass,
+                                Array2DRef<int16_t> highpass,
+                                Array2DRef<int16_t> highlow,
+                                Array2DRef<int16_t> lowlow,
+                                Array2DRef<int16_t> highhigh,
+                                Array2DRef<int16_t> lowhigh);
+
+    void combineLowHighPass(Array2DRef<int16_t> dest,
+                            Array2DRef<int16_t> lowpass,
+                            Array2DRef<int16_t> highpass, int descaleShift,
+                            bool clampUint /*= false*/);
+
     void reconstructLowband(Array2DRef<int16_t> dest, int16_t prescale,
                             bool clampUint = false);
 
