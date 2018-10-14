@@ -94,10 +94,14 @@ class VC5Decompressor final : public AbstractDecompressor {
                            int16_t quant);
   };
 
+  struct Transform {
+    Wavelet wavelet;
+    int16_t prescale;
+  };
+
   struct Channel {
-    static constexpr int numWavelets = 3;
-    std::array<Wavelet, numWavelets> wavelet;
-    std::array<int16_t, numWavelets> prescale;
+    static constexpr int numTransforms = 3;
+    std::array<Transform, numTransforms> transforms;
   };
 
   static constexpr int numChannels = 4;
