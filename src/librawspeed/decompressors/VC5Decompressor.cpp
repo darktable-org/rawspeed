@@ -417,7 +417,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
       mVC5.cps = val;
       break;
     case VC5Tag::PrescaleShift:
-      for (int iWavelet = 0; iWavelet < Channel::numTransforms; ++iWavelet)
+      for (int iWavelet = 0; iWavelet < numTransforms; ++iWavelet)
         channels[mVC5.iChannel].transforms[iWavelet].prescale =
             (val >> (14 - 2 * iWavelet)) & 0x03;
       break;
@@ -503,10 +503,33 @@ void VC5Decompressor::decodeHighPassBand(const ByteStream& bs, int band,
 }
 
 void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
-  static constexpr std::array<int, numSubbands> subband_wavelet_index = {
-      2, 2, 2, 2, 1, 1, 1, 0, 0, 0};
-  static constexpr std::array<int, numSubbands> subband_band_index = {
-      0, 1, 2, 3, 1, 2, 3, 1, 2, 3};
+  static const auto subband_wavelet_index = []() {
+    std::array<int, numSubbands> wavelets;
+    int wavelet = 0;
+    for (auto i = wavelets.size() - 1; i > 0;) {
+      for (auto t = 0; t < numTransforms; t++) {
+        wavelets[i] = wavelet;
+        i--;
+      }
+      if (i > 0)
+        wavelet++;
+    }
+    wavelets.front() = wavelet;
+    return wavelets;
+  }();
+  static const auto subband_band_index = []() {
+    std::array<int, numSubbands> bands;
+    bands.front() = 0;
+    for (auto i = 1U; i < bands.size();) {
+      for (int t = 1; t <= numTransforms;) {
+        bands[i] = t;
+        t++;
+        i++;
+      }
+    }
+    return bands;
+  }();
+
   const int idx = subband_wavelet_index[mVC5.iSubband];
   const int band = subband_band_index[mVC5.iSubband];
   uint16_t channelWidth = mVC5.imgWidth / mVC5.patternWidth;

@@ -89,7 +89,9 @@ class VC5Decompressor final : public AbstractDecompressor {
   static constexpr auto VC5_LOG_TABLE_BITWIDTH = 12;
   SimpleLUT<unsigned, VC5_LOG_TABLE_BITWIDTH> mVC5LogTable;
 
-  static constexpr int numSubbands = 10;
+  static constexpr int numWaveletLevels = 3;
+  static constexpr int numTransforms = 3; // how many highpass bands?
+  static constexpr int numSubbands = 1 + numTransforms * numWaveletLevels;
 
   struct {
     ushort16 iChannel;
@@ -151,7 +153,6 @@ class VC5Decompressor final : public AbstractDecompressor {
   };
 
   struct Channel {
-    static constexpr int numTransforms = 3;
     std::array<Transform, numTransforms> transforms;
   };
 
