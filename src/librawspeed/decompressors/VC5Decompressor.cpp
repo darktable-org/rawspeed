@@ -306,14 +306,14 @@ void VC5Decompressor::Wavelet::reconstructLowband(
     std::vector<int16_t> highhigh_storage =
         Array2DRef<int16_t>::create(width, height);
 
-    Array2DRef<int16_t> lowlow(data[0], width, height);
+    Array2DRef<int16_t> lowlow = bandAsArray2DRef(0);
     Array2DRef<int16_t> lowhigh(lowhigh_storage.data(), width, height);
     Array2DRef<int16_t> highlow(highlow_storage.data(), width, height);
     Array2DRef<int16_t> highhigh(highhigh_storage.data(), width, height);
 
-    dequantize(lowhigh, Array2DRef<int16_t>(data[1], width, height), quant[1]);
-    dequantize(highlow, Array2DRef<int16_t>(data[2], width, height), quant[2]);
-    dequantize(highhigh, Array2DRef<int16_t>(data[3], width, height), quant[3]);
+    dequantize(lowhigh, bandAsArray2DRef(1), quant[1]);
+    dequantize(highlow, bandAsArray2DRef(2), quant[2]);
+    dequantize(highhigh, bandAsArray2DRef(3), quant[3]);
 
     // Reconstruct the "immediates", the actual low pass ...
     reconstructPass(lowpass, highlow, lowlow);
