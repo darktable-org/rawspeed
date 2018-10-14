@@ -592,16 +592,16 @@ void VC5Decompressor::decodeFinalWavelet() {
   unsigned int width = 2 * mChannel[0].transforms[0].wavelet.width;
   unsigned int height = 2 * mChannel[0].transforms[0].wavelet.height;
 
-  std::array<std::vector<int16_t>, numChannels> channels_storage;
-  std::array<Array2DRef<int16_t>, numChannels> channels;
+  std::array<std::vector<int16_t>, numChannels> lowbands_storage;
+  std::array<Array2DRef<int16_t>, numChannels> lowbands;
   for (unsigned int iChannel = 0; iChannel < numChannels; ++iChannel) {
     assert(2 * mChannel[iChannel].transforms[0].wavelet.width == width);
     assert(2 * mChannel[iChannel].transforms[0].wavelet.height == height);
-    channels_storage[iChannel] = Array2DRef<int16_t>::create(width, height);
-    channels[iChannel] =
-        Array2DRef<int16_t>(channels_storage[iChannel].data(), width, height);
+    lowbands_storage[iChannel] = Array2DRef<int16_t>::create(width, height);
+    lowbands[iChannel] =
+        Array2DRef<int16_t>(lowbands_storage[iChannel].data(), width, height);
     mChannel[iChannel].transforms[0].wavelet.reconstructLowband(
-        channels[iChannel], mChannel[iChannel].transforms[0].prescale, true);
+        lowbands[iChannel], mChannel[iChannel].transforms[0].prescale, true);
   }
 
   // Convert to RGGB output
@@ -610,10 +610,10 @@ void VC5Decompressor::decodeFinalWavelet() {
     for (unsigned int col = 0; col < width; ++col) {
       const int mid = 2048;
 
-      int gs = channels[0](col, row);
-      int rg = channels[1](col, row) - mid;
-      int bg = channels[2](col, row) - mid;
-      int gd = channels[3](col, row) - mid;
+      int gs = lowbands[0](col, row);
+      int rg = lowbands[1](col, row) - mid;
+      int bg = lowbands[2](col, row) - mid;
+      int gd = lowbands[3](col, row) - mid;
 
       int r = gs + 2 * rg;
       int b = gs + 2 * bg;
