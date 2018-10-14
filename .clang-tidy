@@ -8,17 +8,17 @@ CheckOptions:
   - key:             readability-braces-around-statements.ShortStatementLines
     value:           '3'
   - key:             readability-function-size.BranchThreshold
-    value:           '44'
+    value:           '26'
   - key:             readability-function-size.LineThreshold
-    value:           '259'
+    value:           '167'
   - key:             readability-function-size.StatementThreshold
-    value:           '224'
+    value:           '136'
   - key:             readability-function-size.ParameterThreshold
     value:           '7'
   - key:             readability-function-size.NestingThreshold
-    value:           '7'
+    value:           '6'
   - key:             readability-function-size.VariableThreshold
-    value:           '45'
+    value:           '32'
   - key:             readability-simplify-boolean-expr.ChainedConditionalAssignment
     value:           '1'
   - key:             readability-simplify-boolean-expr.ChainedConditionalReturn
