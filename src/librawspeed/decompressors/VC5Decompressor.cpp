@@ -160,14 +160,13 @@ auto convolute = [](unsigned x, unsigned y, std::array<int, 4> muls,
 };
 } // namespace
 
-void VC5Decompressor::Wavelet::reconstructLowHighPass(
-    Array2DRef<int16_t> lowpass, Array2DRef<int16_t> highpass,
-    Array2DRef<int16_t> highlow, Array2DRef<int16_t> lowlow,
-    Array2DRef<int16_t> highhigh, Array2DRef<int16_t> lowhigh) {
+void VC5Decompressor::Wavelet::reconstructPass(Array2DRef<int16_t> dst,
+                                               Array2DRef<int16_t> high,
+                                               Array2DRef<int16_t> low) {
   unsigned int x, y;
 
-  auto convolution = [&x, &y](std::array<int, 4> muls, Array2DRef<int16_t> high,
-                              Array2DRef<int16_t> low, auto lowGetter) {
+  auto convolution = [&x, &y, high, low](std::array<int, 4> muls,
+                                         auto lowGetter) {
     return convolute(x, y, muls, high, low, lowGetter, /*DescaleShift*/ 0);
   };
 
@@ -175,65 +174,47 @@ void VC5Decompressor::Wavelet::reconstructLowHighPass(
   // 1st row
   y = 0;
   for (x = 0; x < width; ++x) {
-    auto getter = [&x, &y](Array2DRef<int16_t> low, int delta) {
-      return low(x, y + delta);
+    auto getter = [&x, &y](Array2DRef<int16_t> low_, int delta) {
+      return low_(x, y + delta);
     };
 
     static constexpr std::array<int, 4> even_muls = {+1, +11, -4, +1};
-    int even = convolution(even_muls, highlow, lowlow, getter);
+    int even = convolution(even_muls, getter);
     static constexpr std::array<int, 4> odd_muls = {-1, +5, +4, -1};
-    int odd = convolution(odd_muls, highlow, lowlow, getter);
+    int odd = convolution(odd_muls, getter);
 
-    lowpass(x, 2 * y) = static_cast<int16_t>(even);
-    lowpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
-
-    even = convolution(even_muls, highhigh, lowhigh, getter);
-    odd = convolution(odd_muls, highhigh, lowhigh, getter);
-
-    highpass(x, 2 * y) = static_cast<int16_t>(even);
-    highpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
+    dst(x, 2 * y) = static_cast<int16_t>(even);
+    dst(x, 2 * y + 1) = static_cast<int16_t>(odd);
   }
   // middle rows
   for (y = 1; y + 1 < height; ++y) {
     for (x = 0; x < width; ++x) {
-      auto getter = [&x, &y](Array2DRef<int16_t> low, int delta) {
-        return low(x, y - 1 + delta);
+      auto getter = [&x, &y](Array2DRef<int16_t> low_, int delta) {
+        return low_(x, y - 1 + delta);
       };
 
       static constexpr std::array<int, 4> even_muls = {+1, +1, +8, -1};
-      int even = convolution(even_muls, highlow, lowlow, getter);
+      int even = convolution(even_muls, getter);
       static constexpr std::array<int, 4> odd_muls = {-1, -1, +8, +1};
-      int odd = convolution(odd_muls, highlow, lowlow, getter);
+      int odd = convolution(odd_muls, getter);
 
-      lowpass(x, 2 * y) = static_cast<int16_t>(even);
-      lowpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
-
-      even = convolution(even_muls, highhigh, lowhigh, getter);
-      odd = convolution(odd_muls, highhigh, lowhigh, getter);
-
-      highpass(x, 2 * y) = static_cast<int16_t>(even);
-      highpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
+      dst(x, 2 * y) = static_cast<int16_t>(even);
+      dst(x, 2 * y + 1) = static_cast<int16_t>(odd);
     }
   }
   // last row
   for (x = 0; x < width; ++x) {
-    auto getter = [&x, &y](Array2DRef<int16_t> low, int delta) {
-      return low(x, y - delta);
+    auto getter = [&x, &y](Array2DRef<int16_t> low_, int delta) {
+      return low_(x, y - delta);
     };
 
     static constexpr std::array<int, 4> even_muls = {+1, +5, +4, -1};
-    int even = convolution(even_muls, highlow, lowlow, getter);
+    int even = convolution(even_muls, getter);
     static constexpr std::array<int, 4> odd_muls = {-1, +11, -4, +1};
-    int odd = convolution(odd_muls, highlow, lowlow, getter);
+    int odd = convolution(odd_muls, getter);
 
-    lowpass(x, 2 * y) = static_cast<int16_t>(even);
-    lowpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
-
-    even = convolution(even_muls, highhigh, lowhigh, getter);
-    odd = convolution(odd_muls, highhigh, lowhigh, getter);
-
-    highpass(x, 2 * y) = static_cast<int16_t>(even);
-    highpass(x, 2 * y + 1) = static_cast<int16_t>(odd);
+    dst(x, 2 * y) = static_cast<int16_t>(even);
+    dst(x, 2 * y + 1) = static_cast<int16_t>(odd);
   }
 }
 
@@ -347,8 +328,10 @@ void VC5Decompressor::Wavelet::reconstructLowband(
   dequantize(highlow, Array2DRef<int16_t>(data[2], width, height), quant[2]);
   dequantize(highhigh, Array2DRef<int16_t>(data[3], width, height), quant[3]);
 
-  // Reconstruct the "immediates", the actual low pass, and high pass.
-  reconstructLowHighPass(lowpass, highpass, highlow, lowlow, highhigh, lowhigh);
+  // Reconstruct the "immediates", the actual low pass ...
+  reconstructPass(lowpass, highlow, lowlow);
+  // ... and high pass.
+  reconstructPass(highpass, highhigh, lowhigh);
 
   // And finally, combine the low pass, and high pass.
   combineLowHighPass(dest, lowpass, highpass, descaleShift, clampUint);
