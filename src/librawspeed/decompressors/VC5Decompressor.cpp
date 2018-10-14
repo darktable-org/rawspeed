@@ -277,9 +277,8 @@ void VC5Decompressor::Wavelet::combineLowHighPass(Array2DRef<int16_t> dest,
   }
 }
 
-void VC5Decompressor::Wavelet::reconstructLowband(
-    Array2DRef<int16_t> dest, const int16_t prescale,
-    const bool clampUint /* = false */) {
+std::vector<int16_t> VC5Decompressor::Wavelet::reconstructLowband(
+    const int16_t prescale, const bool clampUint /* = false */) {
   int16_t descaleShift = (prescale == 2 ? 2 : 0);
   // Assert valid quantization values
   if (bands[0].quant == 0)
@@ -320,8 +319,14 @@ void VC5Decompressor::Wavelet::reconstructLowband(
     reconstructPass(highpass, highhigh, lowhigh);
   }
 
+  std::vector<int16_t> dest_storage =
+      Array2DRef<int16_t>::create(2 * width, 2 * height);
+  Array2DRef<int16_t> dest(dest_storage.data(), 2 * width, 2 * height);
+
   // And finally, combine the low pass, and high pass.
   combineLowHighPass(dest, lowpass, highpass, descaleShift, clampUint);
+
+  return dest_storage;
 }
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
@@ -570,8 +575,10 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
   // the next lower wavelet
   if (idx > 0 && wavelet.allBandsValid() &&
       !transforms[idx - 1].wavelet.isBandValid(0)) {
-    wavelet.reconstructLowband(transforms[idx - 1].wavelet.bandAsArray2DRef(0),
-                               transforms[idx].prescale);
+    auto& data = transforms[idx - 1].wavelet.bands[0].data;
+    data.clear();
+    data.shrink_to_fit();
+    data = wavelet.reconstructLowband(transforms[idx].prescale);
     transforms[idx - 1].wavelet.setBandValid(0);
   }
 
@@ -598,11 +605,10 @@ void VC5Decompressor::decodeFinalWavelet() {
     auto& transform = channels[iChannel].transforms[0];
     assert(2 * transform.wavelet.width == width);
     assert(2 * transform.wavelet.height == height);
-    lowbands_storage[iChannel] = Array2DRef<int16_t>::create(width, height);
+    lowbands_storage[iChannel] =
+        transform.wavelet.reconstructLowband(transform.prescale, true);
     lowbands[iChannel] =
         Array2DRef<int16_t>(lowbands_storage[iChannel].data(), width, height);
-    transform.wavelet.reconstructLowband(lowbands[iChannel], transform.prescale,
-                                         true);
   }
 
   // Convert to RGGB output
