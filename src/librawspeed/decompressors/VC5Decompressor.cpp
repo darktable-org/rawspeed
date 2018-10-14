@@ -535,6 +535,7 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
   }
 
   Wavelet& wavelet = transforms[idx].wavelet;
+  assert(!wavelet.isBandValid(band) && "don't overwrite existing band");
   if (mVC5.iSubband == 0) {
     assert(band == 0);
     decodeLowPassBand(bs, wavelet.bandAsArray2DRef(0));
