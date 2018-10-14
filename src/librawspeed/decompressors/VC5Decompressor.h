@@ -58,9 +58,12 @@ class VC5Decompressor final : public AbstractDecompressor {
   public:
     uint16_t width, height, pitch;
 
+    struct Band {
+      std::vector<int16_t> data;
+      int16_t quant;
+    };
     static constexpr uint16_t numBands = 4;
-    std::array<int16_t, numBands> quant = {};
-    std::array<std::vector<int16_t>, numBands> data;
+    std::array<Band, numBands> bands;
 
     void initialize(uint16_t waveletWidth, uint16_t waveletHeight);
     void clear();

@@ -84,8 +84,8 @@ void VC5Decompressor::Wavelet::initialize(uint16_t waveletWidth,
   pitch = waveletWidth * sizeof(int16_t);
   mDecodedBandMask = 0;
 
-  for (auto& band : data)
-    band.resize(waveletWidth * waveletHeight);
+  for (auto& band : bands)
+    band.data.resize(waveletWidth * waveletHeight);
 
   mInitialized = true;
 }
@@ -104,13 +104,13 @@ bool VC5Decompressor::Wavelet::allBandsValid() const {
 
 Array2DRef<int16_t>
 VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) {
-  return {data[iBand].data(), width, height};
+  return {bands[iBand].data.data(), width, height};
 }
 
 void VC5Decompressor::Wavelet::clear() {
-  for (auto& band : data) {
-    band.clear();
-    band.shrink_to_fit();
+  for (auto& band : bands) {
+    band.data.clear();
+    band.data.shrink_to_fit();
   }
   mInitialized = false;
 }
@@ -283,10 +283,10 @@ void VC5Decompressor::Wavelet::reconstructLowband(
     const bool clampUint /* = false */) {
   int16_t descaleShift = (prescale == 2 ? 2 : 0);
   // Assert valid quantization values
-  if (quant[0] == 0)
-    quant[0] = 1;
+  if (bands[0].quant == 0)
+    bands[0].quant = 1;
   for (int i = 0; i < numBands; ++i) {
-    if (quant[i] == 0)
+    if (bands[i].quant == 0)
       ThrowRDE("Quant value of band %i must not be zero", i);
   }
 
@@ -311,9 +311,9 @@ void VC5Decompressor::Wavelet::reconstructLowband(
     Array2DRef<int16_t> highlow(highlow_storage.data(), width, height);
     Array2DRef<int16_t> highhigh(highhigh_storage.data(), width, height);
 
-    dequantize(lowhigh, bandAsArray2DRef(1), quant[1]);
-    dequantize(highlow, bandAsArray2DRef(2), quant[2]);
-    dequantize(highhigh, bandAsArray2DRef(3), quant[3]);
+    dequantize(lowhigh, bandAsArray2DRef(1), bands[1].quant);
+    dequantize(highlow, bandAsArray2DRef(2), bands[2].quant);
+    dequantize(highhigh, bandAsArray2DRef(3), bands[3].quant);
 
     // Reconstruct the "immediates", the actual low pass ...
     reconstructPass(lowpass, highlow, lowlow);
@@ -517,7 +517,7 @@ void VC5Decompressor::decodeHighPassBand(const ByteStream& bs, int band,
     for (; count > 0; --count) {
       if (iPixel > nPixels)
         ThrowRDE("Buffer overflow");
-      wavelet->data[band][iPixel] = static_cast<int16_t>(pixelValue);
+      wavelet->bands[band].data[iPixel] = static_cast<int16_t>(pixelValue);
       ++iPixel;
     }
   }
@@ -526,7 +526,7 @@ void VC5Decompressor::decodeHighPassBand(const ByteStream& bs, int band,
     if (pixelValue != MARKER_BAND_END || count != 0)
       ThrowRDE("EndOfBand marker not found");
   }
-  wavelet->quant[band] = mVC5.quantization;
+  wavelet->bands[band].quant = mVC5.quantization;
 }
 
 void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
