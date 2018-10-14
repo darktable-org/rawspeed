@@ -76,9 +76,8 @@ class VC5Decompressor final : public AbstractDecompressor {
     void reconstructPass(Array2DRef<int16_t> dst, Array2DRef<int16_t> high,
                          Array2DRef<int16_t> low);
 
-    void combineLowHighPass(Array2DRef<int16_t> dest,
-                            Array2DRef<int16_t> lowpass,
-                            Array2DRef<int16_t> highpass, int descaleShift,
+    void combineLowHighPass(Array2DRef<int16_t> dest, Array2DRef<int16_t> low,
+                            Array2DRef<int16_t> high, int descaleShift,
                             bool clampUint /*= false*/);
 
     void reconstructLowband(Array2DRef<int16_t> dest, int16_t prescale,

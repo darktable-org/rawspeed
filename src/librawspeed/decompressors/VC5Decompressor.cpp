@@ -138,13 +138,13 @@ void VC5Decompressor::Wavelet::dequantize(Array2DRef<int16_t> out,
 
 namespace {
 auto convolute = [](unsigned x, unsigned y, std::array<int, 4> muls,
-                    Array2DRef<int16_t> high, Array2DRef<int16_t> low,
-                    auto lowGetter, int DescaleShift = 0) {
+                    Array2DRef<int16_t> high, auto lowGetter,
+                    int DescaleShift = 0) {
   auto highCombined = muls[0] * high(x, y);
-  auto lowsCombined = [muls, lowGetter, low]() {
+  auto lowsCombined = [muls, lowGetter]() {
     int lows = 0;
     for (int i = 0; i < 3; i++)
-      lows += muls[1 + i] * lowGetter(low, i);
+      lows += muls[1 + i] * lowGetter(i);
     return lows;
   }();
   // Round up 'lows' up
@@ -165,18 +165,15 @@ void VC5Decompressor::Wavelet::reconstructPass(Array2DRef<int16_t> dst,
                                                Array2DRef<int16_t> low) {
   unsigned int x, y;
 
-  auto convolution = [&x, &y, high, low](std::array<int, 4> muls,
-                                         auto lowGetter) {
-    return convolute(x, y, muls, high, low, lowGetter, /*DescaleShift*/ 0);
+  auto convolution = [&x, &y, high](std::array<int, 4> muls, auto lowGetter) {
+    return convolute(x, y, muls, high, lowGetter, /*DescaleShift*/ 0);
   };
 
   // Vertical reconstruction
   // 1st row
   y = 0;
   for (x = 0; x < width; ++x) {
-    auto getter = [&x, &y](Array2DRef<int16_t> low_, int delta) {
-      return low_(x, y + delta);
-    };
+    auto getter = [&x, &y, low](int delta) { return low(x, y + delta); };
 
     static constexpr std::array<int, 4> even_muls = {+1, +11, -4, +1};
     int even = convolution(even_muls, getter);
@@ -189,9 +186,7 @@ void VC5Decompressor::Wavelet::reconstructPass(Array2DRef<int16_t> dst,
   // middle rows
   for (y = 1; y + 1 < height; ++y) {
     for (x = 0; x < width; ++x) {
-      auto getter = [&x, &y](Array2DRef<int16_t> low_, int delta) {
-        return low_(x, y - 1 + delta);
-      };
+      auto getter = [&x, &y, low](int delta) { return low(x, y - 1 + delta); };
 
       static constexpr std::array<int, 4> even_muls = {+1, +1, +8, -1};
       int even = convolution(even_muls, getter);
@@ -204,9 +199,7 @@ void VC5Decompressor::Wavelet::reconstructPass(Array2DRef<int16_t> dst,
   }
   // last row
   for (x = 0; x < width; ++x) {
-    auto getter = [&x, &y](Array2DRef<int16_t> low_, int delta) {
-      return low_(x, y - delta);
-    };
+    auto getter = [&x, &y, low](int delta) { return low(x, y - delta); };
 
     static constexpr std::array<int, 4> even_muls = {+1, +5, +4, -1};
     int even = convolution(even_muls, getter);
@@ -219,17 +212,16 @@ void VC5Decompressor::Wavelet::reconstructPass(Array2DRef<int16_t> dst,
 }
 
 void VC5Decompressor::Wavelet::combineLowHighPass(Array2DRef<int16_t> dest,
-                                                  Array2DRef<int16_t> lowpass,
-                                                  Array2DRef<int16_t> highpass,
+                                                  Array2DRef<int16_t> low,
+                                                  Array2DRef<int16_t> high,
                                                   int descaleShift,
                                                   bool clampUint = false) {
   unsigned int x, y;
 
-  auto convolution =
-      [&x, &y, descaleShift](std::array<int, 4> muls, Array2DRef<int16_t> high,
-                             Array2DRef<int16_t> low, auto lowGetter) {
-        return convolute(x, y, muls, high, low, lowGetter, descaleShift);
-      };
+  auto convolution = [&x, &y, high, descaleShift](std::array<int, 4> muls,
+                                                  auto lowGetter) {
+    return convolute(x, y, muls, high, lowGetter, descaleShift);
+  };
 
   // Horizontal reconstruction
   for (y = 0; y < dest.height; ++y) {
@@ -237,14 +229,12 @@ void VC5Decompressor::Wavelet::combineLowHighPass(Array2DRef<int16_t> dest,
 
     // First col
 
-    auto getter_first = [&x, &y](Array2DRef<int16_t> low, int delta) {
-      return low(x + delta, y);
-    };
+    auto getter_first = [&x, &y, low](int delta) { return low(x + delta, y); };
 
     static constexpr std::array<int, 4> even_muls = {+1, +11, -4, +1};
-    int even = convolution(even_muls, highpass, lowpass, getter_first);
+    int even = convolution(even_muls, getter_first);
     static constexpr std::array<int, 4> odd_muls = {-1, +5, +4, -1};
-    int odd = convolution(odd_muls, highpass, lowpass, getter_first);
+    int odd = convolution(odd_muls, getter_first);
 
     if (clampUint) {
       even = clampBits(even, 14);
@@ -255,14 +245,12 @@ void VC5Decompressor::Wavelet::combineLowHighPass(Array2DRef<int16_t> dest,
 
     // middle cols
     for (x = 1; x + 1 < width; ++x) {
-      auto getter = [&x, &y](Array2DRef<int16_t> low, int delta) {
-        return low(x - 1 + delta, y);
-      };
+      auto getter = [&x, &y, low](int delta) { return low(x - 1 + delta, y); };
 
       static constexpr std::array<int, 4> middle_even_muls = {+1, +1, +8, -1};
-      even = convolution(middle_even_muls, highpass, lowpass, getter);
+      even = convolution(middle_even_muls, getter);
       static constexpr std::array<int, 4> middle_odd_muls = {-1, -1, +8, +1};
-      odd = convolution(middle_odd_muls, highpass, lowpass, getter);
+      odd = convolution(middle_odd_muls, getter);
 
       if (clampUint) {
         even = clampBits(even, 14);
@@ -274,14 +262,12 @@ void VC5Decompressor::Wavelet::combineLowHighPass(Array2DRef<int16_t> dest,
 
     // last col
 
-    auto getter_last = [&x, &y](Array2DRef<int16_t> low, int delta) {
-      return low(x - delta, y);
-    };
+    auto getter_last = [&x, &y, low](int delta) { return low(x - delta, y); };
 
     static constexpr std::array<int, 4> last_even_muls = {+1, +5, +4, -1};
-    even = convolution(last_even_muls, highpass, lowpass, getter_last);
+    even = convolution(last_even_muls, getter_last);
     static constexpr std::array<int, 4> last_odd_muls = {-1, +11, -4, +1};
-    odd = convolution(last_odd_muls, highpass, lowpass, getter_last);
+    odd = convolution(last_odd_muls, getter_last);
 
     if (clampUint) {
       even = clampBits(even, 14);
