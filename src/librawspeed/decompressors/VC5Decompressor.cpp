@@ -63,9 +63,6 @@ void VC5Decompressor::Wavelet::initialize(uint16_t waveletWidth,
   this->height = waveletHeight;
   mDecodedBandMask = 0;
 
-  for (auto& band : bands)
-    band.data.resize(waveletWidth * waveletHeight);
-
   mInitialized = true;
 }
 
@@ -333,7 +330,6 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
       // Pad dimensions as necessary and divide them by two for the next wavelet
       for (auto* dimension : {&waveletWidth, &waveletHeight})
         *dimension = roundUpDivision(*dimension, 2);
-      // FIXME: we shouldn't be *actually* allocating stuff until last moment.
       wavelet.initialize(waveletWidth, waveletHeight);
     }
   }
