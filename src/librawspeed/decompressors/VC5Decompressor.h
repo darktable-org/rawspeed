@@ -170,7 +170,8 @@ class VC5Decompressor final : public AbstractDecompressor {
 public:
   VC5Decompressor(ByteStream bs, const RawImage& img);
 
-  void decode(unsigned int offsetX, unsigned int offsetY);
+  void decode(unsigned int offsetX, unsigned int offsetY, unsigned int width,
+              unsigned int height);
 };
 
 } // namespace rawspeed

@@ -135,7 +135,7 @@ void AbstractDngDecompressor::decompressThreaded(
       auto e = &slices[i];
       VC5Decompressor d(e->bs, mRaw);
       try {
-        d.decode(e->offX, e->offY);
+        d.decode(e->offX, e->offY, e->width, e->height);
       } catch (RawDecoderException& err) {
         mRaw->setError(err.what());
       } catch (IOException& err) {

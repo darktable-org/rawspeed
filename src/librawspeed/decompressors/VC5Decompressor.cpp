@@ -586,8 +586,9 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
   }
 }
 
-void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
-  if (offsetX || offsetY)
+void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
+                             unsigned int width, unsigned int height) {
+  if (offsetX || offsetY || mImg->dim != iPoint2D(width, height))
     ThrowRDE("VC5Decompressor expects to fill the whole image, not some tile.");
 
   initVC5LogTable();
