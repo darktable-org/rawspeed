@@ -571,6 +571,7 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
   if (mVC5.iSubband == 0) {
     assert(band == 0);
     // low-pass band, only one, for the smallest wavelet, per channel per image
+    wavelet.bands[band].lowpassPrecision = mVC5.lowpassPrecision;
   } else {
     // high-pass bands.
     wavelet.bands[band].quant = mVC5.quantization;

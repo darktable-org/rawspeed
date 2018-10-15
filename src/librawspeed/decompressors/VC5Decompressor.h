@@ -116,6 +116,7 @@ class VC5Decompressor final : public AbstractDecompressor {
       ByteStream bs;
       std::vector<int16_t> data;
       int16_t quant; // only applicable for highpass bands.
+      ushort16 lowpassPrecision; // only applicable for lowpass band.
     };
     static constexpr uint16_t numBands = 4;
     std::array<Band, numBands> bands;
