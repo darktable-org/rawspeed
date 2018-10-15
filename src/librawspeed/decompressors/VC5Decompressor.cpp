@@ -506,19 +506,22 @@ void VC5Decompressor::Wavelet::Band::decodeLowPassBand(const Wavelet& wavelet) {
   }
 }
 
-void VC5Decompressor::decodeHighPassBand(const ByteStream& bs, int band,
-                                         Wavelet* wavelet) {
+void VC5Decompressor::Wavelet::Band::decodeHighPassBand(
+    const Wavelet& wavelet) {
+  data = Array2DRef<int16_t>::create(wavelet.width, wavelet.height);
+  Array2DRef<int16_t> dst(data.data(), wavelet.width, wavelet.height);
+
   BitPumpMSB bits(bs);
   // decode highpass band
   int pixelValue = 0;
   unsigned int count = 0;
-  int nPixels = wavelet->width * wavelet->height;
+  int nPixels = wavelet.width * wavelet.height;
   for (int iPixel = 0; iPixel < nPixels;) {
     getRLV(&bits, &pixelValue, &count);
     for (; count > 0; --count) {
       if (iPixel > nPixels)
         ThrowRDE("Buffer overflow");
-      wavelet->bands[band].data[iPixel] = static_cast<int16_t>(pixelValue);
+      data[iPixel] = static_cast<int16_t>(pixelValue);
       ++iPixel;
     }
   }
@@ -608,7 +611,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
     for (Wavelet& wavelet : channel.wavelets) {
       for (int band = 1; band <= numHighPassBands; band++) {
         Wavelet::Band& highPassBand = wavelet.bands[band];
-        decodeHighPassBand(highPassBand.bs, band, &wavelet);
+        highPassBand.decodeHighPassBand(wavelet);
       }
     }
   }
