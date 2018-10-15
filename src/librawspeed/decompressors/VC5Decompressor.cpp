@@ -302,13 +302,13 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     ThrowRDE("Height %u is not a multiple of %u", mImg->dim.y,
              mVC5.patternHeight);
 
-  const uint16_t channelWidth = mImg->dim.x / mVC5.patternWidth;
-  const uint16_t channelHeight = mImg->dim.y / mVC5.patternHeight;
-
-  // Initialize wavelets
+  // Initialize wavelet sizes.
   for (Channel& channel : channels) {
-    uint16_t waveletWidth = channelWidth;
-    uint16_t waveletHeight = channelHeight;
+    channel.width = mImg->dim.x / mVC5.patternWidth;
+    channel.height = mImg->dim.y / mVC5.patternHeight;
+
+    uint16_t waveletWidth = channel.width;
+    uint16_t waveletHeight = channel.height;
     for (Wavelet& wavelet : channel.wavelets) {
       // Pad dimensions as necessary and divide them by two for the next wavelet
       for (auto* dimension : {&waveletWidth, &waveletHeight})
@@ -608,29 +608,28 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
     }
   }
 
-  // And finally.
-  decodeFinalWavelet();
+  // Finally, for each channel, reconstruct the final lowpass band.
+  for (Channel& channel : channels)
+    channel.data = channel.wavelets.front().reconstructLowband(true);
+
+  // And finally!
+  combineFinalLowpassBands();
 }
 
-void VC5Decompressor::decodeFinalWavelet() {
-  // Decode final wavelet into image
+void VC5Decompressor::combineFinalLowpassBands() {
   Array2DRef<uint16_t> out(reinterpret_cast<uint16_t*>(mImg->getData()),
                            static_cast<unsigned int>(mImg->dim.x),
                            static_cast<unsigned int>(mImg->dim.y),
                            mImg->pitch / sizeof(uint16_t));
 
-  unsigned int width = 2 * channels[0].wavelets[0].width;
-  unsigned int height = 2 * channels[0].wavelets[0].height;
+  const unsigned int width = out.width / 2;
+  const unsigned int height = out.height / 2;
 
-  std::array<std::vector<int16_t>, numChannels> lowbands_storage;
   std::array<Array2DRef<int16_t>, numChannels> lowbands;
   for (unsigned int iChannel = 0; iChannel < numChannels; ++iChannel) {
-    auto& transform = channels[iChannel].wavelets[0];
-    assert(2 * transform.width == width);
-    assert(2 * transform.height == height);
-    lowbands_storage[iChannel] = transform.reconstructLowband(true);
+    Channel& channel = channels[iChannel];
     lowbands[iChannel] =
-        Array2DRef<int16_t>(lowbands_storage[iChannel].data(), width, height);
+        Array2DRef<int16_t>(channel.data.data(), channel.width, channel.height);
   }
 
   // Convert to RGGB output

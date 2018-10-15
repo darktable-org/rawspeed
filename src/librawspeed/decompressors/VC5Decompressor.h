@@ -149,6 +149,9 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   struct Channel {
     std::array<Wavelet, numWaveletLevels> wavelets;
+
+    std::vector<int16_t> data; // the final lowband.
+    uint16_t width, height;
   };
 
   static constexpr int numChannels = 4;
@@ -159,7 +162,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   void parseLargeCodeblock(const ByteStream& bs);
 
   // FIXME: this *should* be threadedable nicely.
-  void decodeFinalWavelet();
+  void combineFinalLowpassBands();
 
   void parseVC5();
 
