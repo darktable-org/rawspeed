@@ -100,7 +100,6 @@ class VC5Decompressor final : public AbstractDecompressor {
     const ushort16 patternWidth = 2;
     const ushort16 patternHeight = 2;
     ushort16 cps;
-    ushort16 bpc;
     ushort16 lowpassPrecision;
     short16 quantization;
   } mVC5;

@@ -404,7 +404,10 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
         ThrowRDE("Unexpected subband count %u, expected %u", val, numSubbands);
       break;
     case VC5Tag::MaxBitsPerComponent:
-      mVC5.bpc = val;
+      if (val != VC5_LOG_TABLE_BITWIDTH) {
+        ThrowRDE("Bad bits per componend %u, not %u", val,
+                 VC5_LOG_TABLE_BITWIDTH);
+      }
       break;
     case VC5Tag::PatternWidth:
       if (val != mVC5.patternWidth)
