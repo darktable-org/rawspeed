@@ -90,8 +90,8 @@ class VC5Decompressor final : public AbstractDecompressor {
   SimpleLUT<unsigned, VC5_LOG_TABLE_BITWIDTH> mVC5LogTable;
 
   static constexpr int numWaveletLevels = 3;
-  static constexpr int numTransforms = 3; // how many highpass bands per level?
-  static constexpr int numSubbands = 1 + numTransforms * numWaveletLevels;
+  static constexpr int numHighPassBands = 3;
+  static constexpr int numSubbands = 1 + numHighPassBands * numWaveletLevels;
 
   struct {
     ushort16 iChannel;
@@ -110,6 +110,7 @@ class VC5Decompressor final : public AbstractDecompressor {
     int16_t prescale;
 
     struct Band {
+      ByteStream bs;
       std::vector<int16_t> data;
       int16_t quant; // only applicable for highpass bands.
     };
@@ -157,6 +158,8 @@ class VC5Decompressor final : public AbstractDecompressor {
   void decodeHighPassBand(const ByteStream& bs, int band, Wavelet* wavelet);
 
   void decodeLargeCodeblock(const ByteStream& bs);
+
+  void nowReallyDecode();
 
   // FIXME: this *should* be threadedable nicely.
   void decodeFinalWavelet();

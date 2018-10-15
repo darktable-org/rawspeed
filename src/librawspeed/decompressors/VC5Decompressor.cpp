@@ -488,14 +488,12 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
     done = true;
     for (int iChannel = 0; iChannel < numChannels && done; ++iChannel) {
       Wavelet& wavelet = channels[iChannel].wavelets[0];
-      if (!wavelet.isInitialized())
-        done = false;
       if (!wavelet.allBandsValid())
         done = false;
     }
   }
 
-  decodeFinalWavelet();
+  nowReallyDecode();
 }
 
 void VC5Decompressor::decodeLowPassBand(const ByteStream& bs,
@@ -569,24 +567,58 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
              mVC5.iChannel);
   }
 
+  wavelet.bands[band].bs = bs;
+
   if (mVC5.iSubband == 0) {
     assert(band == 0);
-    decodeLowPassBand(bs, wavelet.bandAsArray2DRef(0));
+    // low-pass band, only one, for the smallest wavelet, per channel per image
   } else {
-    decodeHighPassBand(bs, band, &wavelet);
+    // high-pass bands.
     wavelet.bands[band].quant = mVC5.quantization;
   }
   wavelet.setBandValid(band);
 
-  // If this wavelet is fully decoded, reconstruct the low-pass band of
-  // the next lower wavelet
-  if (idx > 0 && wavelet.allBandsValid() && !wavelets[idx - 1].isBandValid(0)) {
-    auto& data = wavelets[idx - 1].bands[0].data;
-    data.clear();
-    data.shrink_to_fit();
-    data = wavelet.reconstructLowband();
-    wavelets[idx - 1].setBandValid(0);
+  // If this wavelet is fully specified, mark the low-pass band of the
+  // next lower wavelet as specified.
+  if (idx > 0 && wavelet.allBandsValid()) {
+    Wavelet& nextWavelet = wavelets[idx - 1];
+    assert(!nextWavelet.isBandValid(0));
+    nextWavelet.setBandValid(0);
   }
+}
+
+void VC5Decompressor::nowReallyDecode() {
+  // For every channel, decode low-pass band of the smallest wavelet.
+  for (Channel& channel : channels) {
+    Wavelet& smallestWavelet = channel.wavelets.back();
+    Wavelet::Band& lowPassBand = smallestWavelet.bands[0];
+    decodeLowPassBand(lowPassBand.bs, smallestWavelet.bandAsArray2DRef(0));
+  }
+
+  // Now, decode all high-pass bands for every wavelet level for every channel.
+  for (Channel& channel : channels) {
+    for (Wavelet& wavelet : channel.wavelets) {
+      for (int band = 1; band <= numHighPassBands; band++) {
+        Wavelet::Band& highPassBand = wavelet.bands[band];
+        decodeHighPassBand(highPassBand.bs, band, &wavelet);
+      }
+    }
+  }
+
+  // And now, for every channel, recursively reconstruct the low-pass bands.
+  for (Channel& channel : channels) {
+    for (int waveletLevel = numWaveletLevels - 1; waveletLevel > 0;
+         waveletLevel--) {
+      Wavelet& nextWavelet = channel.wavelets[waveletLevel - 1];
+      auto& futureLowpassBand = nextWavelet.bands[0].data;
+
+      Wavelet& wavelet = channel.wavelets[waveletLevel];
+      futureLowpassBand = wavelet.reconstructLowband();
+    }
+  }
+
+  // And finally.
+  decodeFinalWavelet();
 }
 
 void VC5Decompressor::decodeFinalWavelet() {
