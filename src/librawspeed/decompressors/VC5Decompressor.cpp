@@ -426,7 +426,8 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
       mVC5.quantization = static_cast<short16>(val);
       break;
     case VC5Tag::ComponentsPerSample:
-      mVC5.cps = val;
+      if (val != mVC5.cps)
+        ThrowRDE("Bad compnent per sample count %u, not %u", val, mVC5.cps);
       break;
     case VC5Tag::PrescaleShift:
       for (int iWavelet = 0; iWavelet < numWaveletLevels; ++iWavelet)
