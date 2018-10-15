@@ -512,7 +512,6 @@ void VC5Decompressor::decodeHighPassBand(const ByteStream& bs, int band,
     if (pixelValue != MARKER_BAND_END || count != 0)
       ThrowRDE("EndOfBand marker not found");
   }
-  wavelet->bands[band].quant = mVC5.quantization;
 }
 
 void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
@@ -576,6 +575,7 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
     decodeLowPassBand(bs, wavelet.bandAsArray2DRef(0));
   } else {
     decodeHighPassBand(bs, band, &wavelet);
+    wavelet.bands[band].quant = mVC5.quantization;
   }
   wavelet.setBandValid(band);
 

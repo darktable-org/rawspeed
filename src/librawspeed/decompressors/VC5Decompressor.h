@@ -111,7 +111,7 @@ class VC5Decompressor final : public AbstractDecompressor {
 
     struct Band {
       std::vector<int16_t> data;
-      int16_t quant;
+      int16_t quant; // only applicable for highpass bands.
     };
     static constexpr uint16_t numBands = 4;
     std::array<Band, numBands> bands;
