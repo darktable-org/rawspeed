@@ -110,6 +110,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   class Wavelet {
   public:
     uint16_t width, height;
+    int16_t prescale;
 
     struct Band {
       std::vector<int16_t> data;
@@ -134,8 +135,7 @@ class VC5Decompressor final : public AbstractDecompressor {
                             Array2DRef<int16_t> high, int descaleShift,
                             bool clampUint /*= false*/);
 
-    std::vector<int16_t> reconstructLowband(int16_t prescale,
-                                            bool clampUint = false);
+    std::vector<int16_t> reconstructLowband(bool clampUint = false);
 
     Array2DRef<int16_t> bandAsArray2DRef(unsigned int iBand);
 
@@ -149,7 +149,6 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   struct Transform {
     Wavelet wavelet;
-    int16_t prescale;
   };
 
   struct Channel {

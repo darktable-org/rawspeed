@@ -258,7 +258,7 @@ void VC5Decompressor::Wavelet::combineLowHighPass(Array2DRef<int16_t> dest,
 }
 
 std::vector<int16_t> VC5Decompressor::Wavelet::reconstructLowband(
-    const int16_t prescale, const bool clampUint /* = false */) {
+    const bool clampUint /* = false */) {
   int16_t descaleShift = (prescale == 2 ? 2 : 0);
   // Assert valid quantization values
   if (bands[0].quant == 0)
@@ -418,7 +418,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
       break;
     case VC5Tag::PrescaleShift:
       for (int iWavelet = 0; iWavelet < numTransforms; ++iWavelet)
-        channels[mVC5.iChannel].transforms[iWavelet].prescale =
+        channels[mVC5.iChannel].transforms[iWavelet].wavelet.prescale =
             (val >> (14 - 2 * iWavelet)) & 0x03;
       break;
     default: { // A chunk.
@@ -574,7 +574,7 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
     auto& data = transforms[idx - 1].wavelet.bands[0].data;
     data.clear();
     data.shrink_to_fit();
-    data = wavelet.reconstructLowband(transforms[idx].prescale);
+    data = wavelet.reconstructLowband();
     transforms[idx - 1].wavelet.setBandValid(0);
   }
 }
@@ -595,8 +595,7 @@ void VC5Decompressor::decodeFinalWavelet() {
     auto& transform = channels[iChannel].transforms[0];
     assert(2 * transform.wavelet.width == width);
     assert(2 * transform.wavelet.height == height);
-    lowbands_storage[iChannel] =
-        transform.wavelet.reconstructLowband(transform.prescale, true);
+    lowbands_storage[iChannel] = transform.wavelet.reconstructLowband(true);
     lowbands[iChannel] =
         Array2DRef<int16_t>(lowbands_storage[iChannel].data(), width, height);
   }
