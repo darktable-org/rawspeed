@@ -87,7 +87,10 @@ class VC5Decompressor final : public AbstractDecompressor {
   ByteStream mBs;
 
   static constexpr auto VC5_LOG_TABLE_BITWIDTH = 12;
+  int outputBits;
   SimpleLUT<unsigned, VC5_LOG_TABLE_BITWIDTH> mVC5LogTable;
+
+  void initVC5LogTable();
 
   static constexpr int numWaveletLevels = 3;
   static constexpr int numHighPassBands = 3;
@@ -157,12 +160,12 @@ class VC5Decompressor final : public AbstractDecompressor {
   void decodeLowPassBand(const ByteStream& bs, Array2DRef<int16_t> dst);
   void decodeHighPassBand(const ByteStream& bs, int band, Wavelet* wavelet);
 
-  void decodeLargeCodeblock(const ByteStream& bs);
-
-  void nowReallyDecode();
+  void parseLargeCodeblock(const ByteStream& bs);
 
   // FIXME: this *should* be threadedable nicely.
   void decodeFinalWavelet();
+
+  void parseVC5();
 
 public:
   VC5Decompressor(ByteStream bs, const RawImage& img);

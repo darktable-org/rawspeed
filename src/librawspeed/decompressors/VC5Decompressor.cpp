@@ -338,13 +338,17 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     }
   }
 
-  int outputBits = 0;
+  outputBits = 0;
   for (int wp = img->whitePoint; wp != 0; wp >>= 1)
     ++outputBits;
   assert(outputBits <= 16);
 
-  mVC5LogTable =
-      decltype(mVC5LogTable)([outputBits](unsigned i, unsigned tableSize) {
+  parseVC5();
+}
+
+void VC5Decompressor::initVC5LogTable() {
+  mVC5LogTable = decltype(mVC5LogTable)(
+      [outputBits = outputBits](unsigned i, unsigned tableSize) {
         // The vanilla "inverse log" curve for decoding.
         auto normalizedCurve = [](auto normalizedI) {
           return (std::pow(113.0, normalizedI) - 1) / 112.0;
@@ -366,10 +370,7 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
       });
 }
 
-void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
-  if (offsetX || offsetY)
-    ThrowRDE("VC5Decompressor expects to fill the whole image, not some tile.");
-
+void VC5Decompressor::parseVC5() {
   mBs.setByteOrder(Endianness::big);
 
   assert(mImg->dim.x > 0);
@@ -462,7 +463,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
       }
 
       if (is(tag, VC5Tag::LargeCodeblock)) {
-        decodeLargeCodeblock(mBs.getStream(chunkSize, 4));
+        parseLargeCodeblock(mBs.getStream(chunkSize, 4));
         break;
       }
 
@@ -492,8 +493,6 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
         done = false;
     }
   }
-
-  nowReallyDecode();
 }
 
 void VC5Decompressor::decodeLowPassBand(const ByteStream& bs,
@@ -528,7 +527,7 @@ void VC5Decompressor::decodeHighPassBand(const ByteStream& bs, int band,
   }
 }
 
-void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
+void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
   static const auto subband_wavelet_index = []() {
     std::array<int, numSubbands> wavelets;
     int wavelet = 0;
@@ -587,7 +586,12 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
   }
 }
 
-void VC5Decompressor::nowReallyDecode() {
+void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
+  if (offsetX || offsetY)
+    ThrowRDE("VC5Decompressor expects to fill the whole image, not some tile.");
+
+  initVC5LogTable();
+
   // For every channel, decode low-pass band of the smallest wavelet.
   for (Channel& channel : channels) {
     Wavelet& smallestWavelet = channel.wavelets.back();
