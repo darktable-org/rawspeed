@@ -57,15 +57,6 @@ struct RLV {
 
 namespace rawspeed {
 
-void VC5Decompressor::Wavelet::initialize(uint16_t waveletWidth,
-                                          uint16_t waveletHeight) {
-  this->width = waveletWidth;
-  this->height = waveletHeight;
-  mDecodedBandMask = 0;
-
-  mInitialized = true;
-}
-
 void VC5Decompressor::Wavelet::setBandValid(const int band) {
   mDecodedBandMask |= (1 << band);
 }
@@ -81,14 +72,6 @@ bool VC5Decompressor::Wavelet::allBandsValid() const {
 Array2DRef<int16_t>
 VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) {
   return {bands[iBand].data.data(), width, height};
-}
-
-void VC5Decompressor::Wavelet::clear() {
-  for (auto& band : bands) {
-    band.data.clear();
-    band.data.shrink_to_fit();
-  }
-  mInitialized = false;
 }
 
 // static
@@ -330,7 +313,8 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
       // Pad dimensions as necessary and divide them by two for the next wavelet
       for (auto* dimension : {&waveletWidth, &waveletHeight})
         *dimension = roundUpDivision(*dimension, 2);
-      wavelet.initialize(waveletWidth, waveletHeight);
+      wavelet.width = waveletWidth;
+      wavelet.height = waveletHeight;
     }
   }
 

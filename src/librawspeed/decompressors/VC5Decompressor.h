@@ -124,10 +124,6 @@ class VC5Decompressor final : public AbstractDecompressor {
     static constexpr uint16_t numBands = 4;
     std::array<Band, numBands> bands;
 
-    void initialize(uint16_t waveletWidth, uint16_t waveletHeight);
-    void clear();
-
-    bool isInitialized() const { return mInitialized; }
     void setBandValid(int band);
     bool isBandValid(int band) const;
     uint32_t getValidBandMask() const { return mDecodedBandMask; }
@@ -146,7 +142,6 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   protected:
     uint32 mDecodedBandMask = 0;
-    bool mInitialized = false;
 
     static void dequantize(Array2DRef<int16_t> out, Array2DRef<int16_t> in,
                            int16_t quant);
