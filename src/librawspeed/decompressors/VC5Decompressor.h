@@ -117,6 +117,8 @@ class VC5Decompressor final : public AbstractDecompressor {
       std::vector<int16_t> data;
       int16_t quant; // only applicable for highpass bands.
       ushort16 lowpassPrecision; // only applicable for lowpass band.
+
+      void decodeLowPassBand(const Wavelet& wavelet);
     };
     static constexpr uint16_t numBands = 4;
     std::array<Band, numBands> bands;
@@ -158,7 +160,6 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   static void getRLV(BitPumpMSB* bits, int* value, unsigned int* count);
 
-  void decodeLowPassBand(const ByteStream& bs, Array2DRef<int16_t> dst);
   void decodeHighPassBand(const ByteStream& bs, int band, Wavelet* wavelet);
 
   void parseLargeCodeblock(const ByteStream& bs);

@@ -495,12 +495,14 @@ void VC5Decompressor::parseVC5() {
   }
 }
 
-void VC5Decompressor::decodeLowPassBand(const ByteStream& bs,
-                                        Array2DRef<int16_t> dst) {
+void VC5Decompressor::Wavelet::Band::decodeLowPassBand(const Wavelet& wavelet) {
+  data = Array2DRef<int16_t>::create(wavelet.width, wavelet.height);
+  Array2DRef<int16_t> dst(data.data(), wavelet.width, wavelet.height);
+
   BitPumpMSB bits(bs);
   for (auto row = 0U; row < dst.height; ++row) {
     for (auto col = 0U; col < dst.width; ++col)
-      dst(col, row) = static_cast<int16_t>(bits.getBits(mVC5.lowpassPrecision));
+      dst(col, row) = static_cast<int16_t>(bits.getBits(lowpassPrecision));
   }
 }
 
@@ -598,7 +600,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
   for (Channel& channel : channels) {
     Wavelet& smallestWavelet = channel.wavelets.back();
     Wavelet::Band& lowPassBand = smallestWavelet.bands[0];
-    decodeLowPassBand(lowPassBand.bs, smallestWavelet.bandAsArray2DRef(0));
+    lowPassBand.decodeLowPassBand(smallestWavelet);
   }
 
   // Now, decode all high-pass bands for every wavelet level for every channel.
