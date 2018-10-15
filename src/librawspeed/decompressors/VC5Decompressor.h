@@ -162,7 +162,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   void parseLargeCodeblock(const ByteStream& bs);
 
   // FIXME: this *should* be threadedable nicely.
-  void combineFinalLowpassBands();
+  void combineFinalLowpassBands() const;
 
   void parseVC5();
 

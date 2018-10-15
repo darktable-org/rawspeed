@@ -616,7 +616,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
   combineFinalLowpassBands();
 }
 
-void VC5Decompressor::combineFinalLowpassBands() {
+void VC5Decompressor::combineFinalLowpassBands() const {
   Array2DRef<uint16_t> out(reinterpret_cast<uint16_t*>(mImg->getData()),
                            static_cast<unsigned int>(mImg->dim.x),
                            static_cast<unsigned int>(mImg->dim.y),
@@ -625,11 +625,11 @@ void VC5Decompressor::combineFinalLowpassBands() {
   const unsigned int width = out.width / 2;
   const unsigned int height = out.height / 2;
 
-  std::array<Array2DRef<int16_t>, numChannels> lowbands;
+  std::array<Array2DRef<const int16_t>, numChannels> lowbands;
   for (unsigned int iChannel = 0; iChannel < numChannels; ++iChannel) {
-    Channel& channel = channels[iChannel];
-    lowbands[iChannel] =
-        Array2DRef<int16_t>(channel.data.data(), channel.width, channel.height);
+    const Channel& channel = channels[iChannel];
+    lowbands[iChannel] = Array2DRef<const int16_t>(
+        channel.data.data(), channel.width, channel.height);
   }
 
   // Convert to RGGB output
