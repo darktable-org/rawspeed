@@ -605,12 +605,17 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 
       Wavelet& wavelet = channel.wavelets[waveletLevel];
       futureLowpassBand = wavelet.reconstructLowband();
+
+      wavelet.clear(); // we no longer need it.
     }
   }
 
   // Finally, for each channel, reconstruct the final lowpass band.
-  for (Channel& channel : channels)
-    channel.data = channel.wavelets.front().reconstructLowband(true);
+  for (Channel& channel : channels) {
+    Wavelet& wavelet = channel.wavelets.front();
+    channel.data = wavelet.reconstructLowband(true);
+    wavelet.clear(); // we no longer need it.
+  }
 
   // And finally!
   combineFinalLowpassBands();

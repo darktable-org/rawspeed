@@ -120,9 +120,19 @@ class VC5Decompressor final : public AbstractDecompressor {
 
       void decodeLowPassBand(const Wavelet& wavelet);
       void decodeHighPassBand(const Wavelet& wavelet);
+
+      void clear() {
+        data.clear();
+        data.shrink_to_fit();
+      }
     };
     static constexpr uint16_t numBands = 4;
     std::array<Band, numBands> bands;
+
+    void clear() {
+      for (Band& band : bands)
+        band.clear();
+    }
 
     void setBandValid(int band);
     bool isBandValid(int band) const;
