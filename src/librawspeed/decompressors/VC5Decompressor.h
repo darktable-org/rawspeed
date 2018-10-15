@@ -96,8 +96,6 @@ class VC5Decompressor final : public AbstractDecompressor {
   struct {
     ushort16 iChannel;
     ushort16 iSubband;
-    ushort16 imgWidth;
-    ushort16 imgHeight;
     const ushort16 imgFormat = 4;
     const ushort16 patternWidth = 2;
     const ushort16 patternHeight = 2;

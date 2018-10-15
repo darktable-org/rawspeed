@@ -311,6 +311,17 @@ std::vector<int16_t> VC5Decompressor::Wavelet::reconstructLowband(
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     : AbstractDecompressor(), mImg(img), mBs(std::move(bs)) {
+  if (!mImg->dim.hasPositiveArea())
+    ThrowRDE("Bad image dimensions.");
+
+  if (mImg->dim.x % mVC5.patternWidth != 0)
+    ThrowRDE("Width %u is not a multiple of %u", mImg->dim.x,
+             mVC5.patternWidth);
+
+  if (mImg->dim.y % mVC5.patternHeight != 0)
+    ThrowRDE("Height %u is not a multiple of %u", mImg->dim.y,
+             mVC5.patternHeight);
+
   int outputBits = 0;
   for (int wp = img->whitePoint; wp != 0; wp >>= 1)
     ++outputBits;
@@ -367,14 +378,12 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
         ThrowRDE("Bad channel count %u, expected %u", val, numChannels);
       break;
     case VC5Tag::ImageWidth:
-      if (val % mVC5.patternWidth != 0)
-        ThrowRDE("Width %u is not a multiple of %u", val, mVC5.patternWidth);
-      mVC5.imgWidth = val;
+      if (val != mImg->dim.x)
+        ThrowRDE("Image width mismatch: %u vs %u", val, mImg->dim.x);
       break;
     case VC5Tag::ImageHeight:
-      if (val % mVC5.patternHeight != 0)
-        ThrowRDE("Height %u is not a multiple of %u", val, mVC5.patternHeight);
-      mVC5.imgHeight = val;
+      if (val != mImg->dim.y)
+        ThrowRDE("Image height mismatch: %u vs %u", val, mImg->dim.y);
       break;
     case VC5Tag::LowpassPrecision:
       if (val < PRECISION_MIN || val > PRECISION_MAX)
@@ -532,8 +541,8 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
 
   const int idx = subband_wavelet_index[mVC5.iSubband];
   const int band = subband_band_index[mVC5.iSubband];
-  uint16_t channelWidth = mVC5.imgWidth / mVC5.patternWidth;
-  uint16_t channelHeight = mVC5.imgHeight / mVC5.patternHeight;
+  uint16_t channelWidth = mImg->dim.x / mVC5.patternWidth;
+  uint16_t channelHeight = mImg->dim.y / mVC5.patternHeight;
 
   if (mVC5.patternWidth != 2 || mVC5.patternHeight != 2)
     ThrowRDE("Invalid RAW file, pattern size != 2x2");
