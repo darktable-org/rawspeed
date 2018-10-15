@@ -417,8 +417,8 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
       mVC5.cps = val;
       break;
     case VC5Tag::PrescaleShift:
-      for (int iWavelet = 0; iWavelet < numTransforms; ++iWavelet)
-        channels[mVC5.iChannel].transforms[iWavelet].wavelet.prescale =
+      for (int iWavelet = 0; iWavelet < numWaveletLevels; ++iWavelet)
+        channels[mVC5.iChannel].wavelets[iWavelet].prescale =
             (val >> (14 - 2 * iWavelet)) & 0x03;
       break;
     default: { // A chunk.
@@ -458,7 +458,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY) {
 
     done = true;
     for (int iChannel = 0; iChannel < numChannels && done; ++iChannel) {
-      Wavelet& wavelet = channels[iChannel].transforms[0].wavelet;
+      Wavelet& wavelet = channels[iChannel].wavelets[0];
       if (!wavelet.isInitialized())
         done = false;
       if (!wavelet.allBandsValid())
@@ -507,7 +507,7 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
     std::array<int, numSubbands> wavelets;
     int wavelet = 0;
     for (auto i = wavelets.size() - 1; i > 0;) {
-      for (auto t = 0; t < numTransforms; t++) {
+      for (auto t = 0; t < numWaveletLevels; t++) {
         wavelets[i] = wavelet;
         i--;
       }
@@ -521,7 +521,7 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
     std::array<int, numSubbands> bands;
     bands.front() = 0;
     for (auto i = 1U; i < bands.size();) {
-      for (int t = 1; t <= numTransforms;) {
+      for (int t = 1; t <= numWaveletLevels;) {
         bands[i] = t;
         t++;
         i++;
@@ -538,13 +538,12 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
   if (mVC5.patternWidth != 2 || mVC5.patternHeight != 2)
     ThrowRDE("Invalid RAW file, pattern size != 2x2");
 
-  auto& transforms = channels[mVC5.iChannel].transforms;
+  auto& wavelets = channels[mVC5.iChannel].wavelets;
 
   // Initialize wavelets
   uint16_t waveletWidth = roundUpDivision(channelWidth, 2);
   uint16_t waveletHeight = roundUpDivision(channelHeight, 2);
-  for (Transform& transform : transforms) {
-    Wavelet& wavelet = transform.wavelet;
+  for (Wavelet& wavelet : wavelets) {
     if (wavelet.isInitialized()) {
       if (wavelet.width != waveletWidth || wavelet.height != waveletHeight)
         wavelet.clear();
@@ -557,7 +556,7 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
       *dimension = roundUpDivision(*dimension, 2);
   }
 
-  Wavelet& wavelet = transforms[idx].wavelet;
+  Wavelet& wavelet = wavelets[idx];
   assert(!wavelet.isBandValid(band) && "don't overwrite existing band");
   if (mVC5.iSubband == 0) {
     assert(band == 0);
@@ -569,13 +568,12 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
 
   // If this wavelet is fully decoded, reconstruct the low-pass band of
   // the next lower wavelet
-  if (idx > 0 && wavelet.allBandsValid() &&
-      !transforms[idx - 1].wavelet.isBandValid(0)) {
-    auto& data = transforms[idx - 1].wavelet.bands[0].data;
+  if (idx > 0 && wavelet.allBandsValid() && !wavelets[idx - 1].isBandValid(0)) {
+    auto& data = wavelets[idx - 1].bands[0].data;
     data.clear();
     data.shrink_to_fit();
     data = wavelet.reconstructLowband();
-    transforms[idx - 1].wavelet.setBandValid(0);
+    wavelets[idx - 1].setBandValid(0);
   }
 }
 
@@ -586,16 +584,16 @@ void VC5Decompressor::decodeFinalWavelet() {
                            static_cast<unsigned int>(mImg->dim.y),
                            mImg->pitch / sizeof(uint16_t));
 
-  unsigned int width = 2 * channels[0].transforms[0].wavelet.width;
-  unsigned int height = 2 * channels[0].transforms[0].wavelet.height;
+  unsigned int width = 2 * channels[0].wavelets[0].width;
+  unsigned int height = 2 * channels[0].wavelets[0].height;
 
   std::array<std::vector<int16_t>, numChannels> lowbands_storage;
   std::array<Array2DRef<int16_t>, numChannels> lowbands;
   for (unsigned int iChannel = 0; iChannel < numChannels; ++iChannel) {
-    auto& transform = channels[iChannel].transforms[0];
-    assert(2 * transform.wavelet.width == width);
-    assert(2 * transform.wavelet.height == height);
-    lowbands_storage[iChannel] = transform.wavelet.reconstructLowband(true);
+    auto& transform = channels[iChannel].wavelets[0];
+    assert(2 * transform.width == width);
+    assert(2 * transform.height == height);
+    lowbands_storage[iChannel] = transform.reconstructLowband(true);
     lowbands[iChannel] =
         Array2DRef<int16_t>(lowbands_storage[iChannel].data(), width, height);
   }

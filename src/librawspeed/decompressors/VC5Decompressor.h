@@ -90,7 +90,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   SimpleLUT<unsigned, VC5_LOG_TABLE_BITWIDTH> mVC5LogTable;
 
   static constexpr int numWaveletLevels = 3;
-  static constexpr int numTransforms = 3; // how many highpass bands?
+  static constexpr int numTransforms = 3; // how many highpass bands per level?
   static constexpr int numSubbands = 1 + numTransforms * numWaveletLevels;
 
   struct {
@@ -147,12 +147,8 @@ class VC5Decompressor final : public AbstractDecompressor {
                            int16_t quant);
   };
 
-  struct Transform {
-    Wavelet wavelet;
-  };
-
   struct Channel {
-    std::array<Transform, numTransforms> transforms;
+    std::array<Wavelet, numWaveletLevels> wavelets;
   };
 
   static constexpr int numChannels = 4;
