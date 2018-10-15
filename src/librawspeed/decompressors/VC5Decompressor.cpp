@@ -322,6 +322,22 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     ThrowRDE("Height %u is not a multiple of %u", mImg->dim.y,
              mVC5.patternHeight);
 
+  const uint16_t channelWidth = mImg->dim.x / mVC5.patternWidth;
+  const uint16_t channelHeight = mImg->dim.y / mVC5.patternHeight;
+
+  // Initialize wavelets
+  for (Channel& channel : channels) {
+    uint16_t waveletWidth = channelWidth;
+    uint16_t waveletHeight = channelHeight;
+    for (Wavelet& wavelet : channel.wavelets) {
+      // Pad dimensions as necessary and divide them by two for the next wavelet
+      for (auto* dimension : {&waveletWidth, &waveletHeight})
+        *dimension = roundUpDivision(*dimension, 2);
+      // FIXME: we shouldn't be *actually* allocating stuff until last moment.
+      wavelet.initialize(waveletWidth, waveletHeight);
+    }
+  }
+
   int outputBits = 0;
   for (int wp = img->whitePoint; wp != 0; wp >>= 1)
     ++outputBits;
@@ -544,32 +560,15 @@ void VC5Decompressor::decodeLargeCodeblock(const ByteStream& bs) {
 
   const int idx = subband_wavelet_index[mVC5.iSubband];
   const int band = subband_band_index[mVC5.iSubband];
-  uint16_t channelWidth = mImg->dim.x / mVC5.patternWidth;
-  uint16_t channelHeight = mImg->dim.y / mVC5.patternHeight;
-
-  if (mVC5.patternWidth != 2 || mVC5.patternHeight != 2)
-    ThrowRDE("Invalid RAW file, pattern size != 2x2");
 
   auto& wavelets = channels[mVC5.iChannel].wavelets;
 
-  // Initialize wavelets
-  uint16_t waveletWidth = roundUpDivision(channelWidth, 2);
-  uint16_t waveletHeight = roundUpDivision(channelHeight, 2);
-  for (Wavelet& wavelet : wavelets) {
-    if (wavelet.isInitialized()) {
-      if (wavelet.width != waveletWidth || wavelet.height != waveletHeight)
-        wavelet.clear();
-    }
-    if (!wavelet.isInitialized())
-      wavelet.initialize(waveletWidth, waveletHeight);
-
-    // Pad dimensions as necessary and divide them by two for the next wavelet
-    for (auto* dimension : {&waveletWidth, &waveletHeight})
-      *dimension = roundUpDivision(*dimension, 2);
+  Wavelet& wavelet = wavelets[idx];
+  if (wavelet.isBandValid(band)) {
+    ThrowRDE("Band %u for wavelet %u on channel %u was already seen", band, idx,
+             mVC5.iChannel);
   }
 
-  Wavelet& wavelet = wavelets[idx];
-  assert(!wavelet.isBandValid(band) && "don't overwrite existing band");
   if (mVC5.iSubband == 0) {
     assert(band == 0);
     decodeLowPassBand(bs, wavelet.bandAsArray2DRef(0));
