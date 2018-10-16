@@ -43,8 +43,8 @@ namespace {
 struct RLV {
   const uint_fast8_t size; //!< Size of code word in bits
   const uint32_t bits;     //!< Code word bits right justified
-  const uint32_t count;    //!< Run length
-  const int32_t value;     //!< Run value (unsigned)
+  const uint16_t count;    //!< Run length
+  const uint8_t value;     //!< Run value (unsigned)
 };
 #define RLVTABLE(n)                                                            \
   struct {                                                                     \
