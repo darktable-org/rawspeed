@@ -84,10 +84,7 @@ void VC5Decompressor::Wavelet::dequantize(Array2DRef<int16_t> out,
                                           Array2DRef<int16_t> in,
                                           int16_t quant) {
   auto dequantize = [quant](int16_t val) -> int16_t {
-    double c = val;
-    // Invert companding curve
-    c += (c * c * c * 768) / (255. * 255. * 255.);
-    return static_cast<int16_t>(c) * quant;
+    return mVC5DecompandingTable[uint16_t(val)] * quant;
   };
 
   // FIXME: could use the SimpleLUT,
@@ -354,6 +351,23 @@ void VC5Decompressor::initVC5LogTable() {
         return rescaledY;
       });
 }
+
+const SimpleLUT<int16_t, 16> VC5Decompressor::mVC5DecompandingTable = []() {
+  auto dequantize = [](int16_t val) -> int16_t {
+    double c = val;
+    // Invert companding curve
+    c += (c * c * c * 768) / (255. * 255. * 255.);
+    if (c > std::numeric_limits<int16_t>::max())
+      return std::numeric_limits<int16_t>::max();
+    if (c < std::numeric_limits<int16_t>::min())
+      return std::numeric_limits<int16_t>::min();
+    return c;
+  };
+  return decltype(mVC5DecompandingTable)(
+      [dequantize](unsigned i, unsigned tableSize) {
+        return dequantize(int16_t(uint16_t(i)));
+      });
+}();
 
 void VC5Decompressor::parseVC5() {
   mBs.setByteOrder(Endianness::big);
