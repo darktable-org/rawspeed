@@ -142,16 +142,19 @@ class VC5Decompressor final : public AbstractDecompressor {
     uint32_t getValidBandMask() const { return mDecodedBandMask; }
     bool allBandsValid() const;
 
-    void reconstructPass(Array2DRef<int16_t> dst, Array2DRef<int16_t> high,
-                         Array2DRef<int16_t> low);
+    void reconstructPass(Array2DRef<int16_t> dst,
+                         Array2DRef<const int16_t> high,
+                         Array2DRef<const int16_t> low) const;
 
-    void combineLowHighPass(Array2DRef<int16_t> dest, Array2DRef<int16_t> low,
-                            Array2DRef<int16_t> high, int descaleShift,
-                            bool clampUint /*= false*/);
+    void combineLowHighPass(Array2DRef<int16_t> dest,
+                            Array2DRef<const int16_t> low,
+                            Array2DRef<const int16_t> high, int descaleShift,
+                            bool clampUint /*= false*/) const;
 
     std::vector<int16_t> reconstructLowband(bool clampUint = false);
 
-    Array2DRef<int16_t> bandAsArray2DRef(unsigned int iBand);
+    const Array2DRef<int16_t> bandAsArray2DRef(unsigned int iBand);
+    const Array2DRef<const int16_t> bandAsArray2DRef(unsigned int iBand) const;
 
   protected:
     uint32 mDecodedBandMask = 0;

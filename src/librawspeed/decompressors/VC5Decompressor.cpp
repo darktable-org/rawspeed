@@ -74,14 +74,19 @@ bool VC5Decompressor::Wavelet::allBandsValid() const {
   return mDecodedBandMask == static_cast<uint32>((1 << numBands) - 1);
 }
 
-Array2DRef<int16_t>
+const Array2DRef<int16_t>
 VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) {
+  return {bands[iBand].data.data(), width, height};
+}
+
+const Array2DRef<const int16_t>
+VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) const {
   return {bands[iBand].data.data(), width, height};
 }
 
 namespace {
 auto convolute = [](unsigned x, unsigned y, std::array<int, 4> muls,
-                    Array2DRef<int16_t> high, auto lowGetter,
+                    const Array2DRef<const int16_t> high, auto lowGetter,
                     int DescaleShift = 0) {
   auto highCombined = muls[0] * high(x, y);
   auto lowsCombined = [muls, lowGetter]() {
@@ -103,9 +108,9 @@ auto convolute = [](unsigned x, unsigned y, std::array<int, 4> muls,
 };
 } // namespace
 
-void VC5Decompressor::Wavelet::reconstructPass(Array2DRef<int16_t> dst,
-                                               Array2DRef<int16_t> high,
-                                               Array2DRef<int16_t> low) {
+void VC5Decompressor::Wavelet::reconstructPass(
+    const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> high,
+    const Array2DRef<const int16_t> low) const {
   unsigned int x, y;
 
   auto convolution = [&x, &y, high](std::array<int, 4> muls, auto lowGetter) {
@@ -154,11 +159,10 @@ void VC5Decompressor::Wavelet::reconstructPass(Array2DRef<int16_t> dst,
   }
 }
 
-void VC5Decompressor::Wavelet::combineLowHighPass(Array2DRef<int16_t> dest,
-                                                  Array2DRef<int16_t> low,
-                                                  Array2DRef<int16_t> high,
-                                                  int descaleShift,
-                                                  bool clampUint = false) {
+void VC5Decompressor::Wavelet::combineLowHighPass(
+    const Array2DRef<int16_t> dest, const Array2DRef<const int16_t> low,
+    const Array2DRef<const int16_t> high, int descaleShift,
+    bool clampUint = false) const {
   unsigned int x, y;
 
   auto convolution = [&x, &y, high, descaleShift](std::array<int, 4> muls,
@@ -237,14 +241,15 @@ std::vector<int16_t> VC5Decompressor::Wavelet::reconstructLowband(
   std::vector<int16_t> highpass_storage =
       Array2DRef<int16_t>::create(width, 2 * height);
 
-  Array2DRef<int16_t> lowpass(lowpass_storage.data(), width, 2 * height);
-  Array2DRef<int16_t> highpass(highpass_storage.data(), width, 2 * height);
+  const Array2DRef<int16_t> lowpass(lowpass_storage.data(), width, 2 * height);
+  const Array2DRef<int16_t> highpass(highpass_storage.data(), width,
+                                     2 * height);
 
   {
-    Array2DRef<int16_t> lowlow = bandAsArray2DRef(0);
-    Array2DRef<int16_t> lowhigh = bandAsArray2DRef(1);
-    Array2DRef<int16_t> highlow = bandAsArray2DRef(2);
-    Array2DRef<int16_t> highhigh = bandAsArray2DRef(3);
+    const Array2DRef<const int16_t> lowlow = bandAsArray2DRef(0);
+    const Array2DRef<const int16_t> lowhigh = bandAsArray2DRef(1);
+    const Array2DRef<const int16_t> highlow = bandAsArray2DRef(2);
+    const Array2DRef<const int16_t> highhigh = bandAsArray2DRef(3);
 
     // Reconstruct the "immediates", the actual low pass ...
     reconstructPass(lowpass, highlow, lowlow);
@@ -254,7 +259,7 @@ std::vector<int16_t> VC5Decompressor::Wavelet::reconstructLowband(
 
   std::vector<int16_t> dest_storage =
       Array2DRef<int16_t>::create(2 * width, 2 * height);
-  Array2DRef<int16_t> dest(dest_storage.data(), 2 * width, 2 * height);
+  const Array2DRef<int16_t> dest(dest_storage.data(), 2 * width, 2 * height);
 
   // And finally, combine the low pass, and high pass.
   combineLowHighPass(dest, lowpass, highpass, descaleShift, clampUint);
@@ -467,7 +472,7 @@ void VC5Decompressor::parseVC5() {
 
 void VC5Decompressor::Wavelet::Band::decodeLowPassBand(const Wavelet& wavelet) {
   data = Array2DRef<int16_t>::create(wavelet.width, wavelet.height);
-  Array2DRef<int16_t> dst(data.data(), wavelet.width, wavelet.height);
+  const Array2DRef<int16_t> dst(data.data(), wavelet.width, wavelet.height);
 
   BitPumpMSB bits(bs);
   for (auto row = 0U; row < dst.height; ++row) {
@@ -483,7 +488,7 @@ void VC5Decompressor::Wavelet::Band::decodeHighPassBand(
   };
 
   data = Array2DRef<int16_t>::create(wavelet.width, wavelet.height);
-  Array2DRef<int16_t> dst(data.data(), wavelet.width, wavelet.height);
+  const Array2DRef<int16_t> dst(data.data(), wavelet.width, wavelet.height);
 
   BitPumpMSB bits(bs);
   // decode highpass band
@@ -616,20 +621,22 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 }
 
 void VC5Decompressor::combineFinalLowpassBands() const {
-  Array2DRef<uint16_t> out(reinterpret_cast<uint16_t*>(mImg->getData()),
-                           static_cast<unsigned int>(mImg->dim.x),
-                           static_cast<unsigned int>(mImg->dim.y),
-                           mImg->pitch / sizeof(uint16_t));
+  const Array2DRef<uint16_t> out(reinterpret_cast<uint16_t*>(mImg->getData()),
+                                 static_cast<unsigned int>(mImg->dim.x),
+                                 static_cast<unsigned int>(mImg->dim.y),
+                                 mImg->pitch / sizeof(uint16_t));
 
   const unsigned int width = out.width / 2;
   const unsigned int height = out.height / 2;
 
-  std::array<Array2DRef<const int16_t>, numChannels> lowbands;
-  for (unsigned int iChannel = 0; iChannel < numChannels; ++iChannel) {
-    const Channel& channel = channels[iChannel];
-    lowbands[iChannel] = Array2DRef<const int16_t>(
-        channel.data.data(), channel.width, channel.height);
-  }
+  const Array2DRef<const int16_t> lowbands0 = Array2DRef<const int16_t>(
+      channels[0].data.data(), channels[0].width, channels[0].height);
+  const Array2DRef<const int16_t> lowbands1 = Array2DRef<const int16_t>(
+      channels[1].data.data(), channels[1].width, channels[1].height);
+  const Array2DRef<const int16_t> lowbands2 = Array2DRef<const int16_t>(
+      channels[2].data.data(), channels[2].width, channels[2].height);
+  const Array2DRef<const int16_t> lowbands3 = Array2DRef<const int16_t>(
+      channels[3].data.data(), channels[3].width, channels[3].height);
 
   // Convert to RGGB output
   // FIXME: this *should* be threadedable nicely.
@@ -637,10 +644,10 @@ void VC5Decompressor::combineFinalLowpassBands() const {
     for (unsigned int col = 0; col < width; ++col) {
       const int mid = 2048;
 
-      int gs = lowbands[0](col, row);
-      int rg = lowbands[1](col, row) - mid;
-      int bg = lowbands[2](col, row) - mid;
-      int gd = lowbands[3](col, row) - mid;
+      int gs = lowbands0(col, row);
+      int rg = lowbands1(col, row) - mid;
+      int bg = lowbands2(col, row) - mid;
+      int gd = lowbands3(col, row) - mid;
 
       int r = gs + 2 * rg;
       int b = gs + 2 * bg;

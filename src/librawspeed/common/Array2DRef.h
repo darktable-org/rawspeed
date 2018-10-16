@@ -22,28 +22,39 @@
 #pragma once
 
 #include <cassert> // for assert
-#include <vector>  // for vector
+#include <type_traits>
+#include <vector> // for vector
 
 namespace rawspeed {
 
 template <class T> class Array2DRef {
   unsigned int _pitch = 0;
-  T* _data;
+  T* _data = nullptr;
+
+  friend Array2DRef<const T>; // We need to be able to convert to const version.
 
 public:
   unsigned int width = 0, height = 0;
 
-  Array2DRef();
+  Array2DRef() = default;
+
   Array2DRef(T* data, unsigned int dataWidth, unsigned int dataHeight,
              unsigned int dataPitch = 0);
 
+  // Conversion from Array2DRef<T> to Array2DRef<const T>.
+  template <class T2, typename = std::enable_if_t<std::is_same<
+                          typename std::remove_const<T>::type, T2>::value>>
+  Array2DRef(Array2DRef<T2> RHS) { // NOLINT google-explicit-constructor
+    _data = RHS._data;
+    _pitch = RHS._pitch;
+    width = RHS.width;
+    height = RHS.height;
+  }
+
   static std::vector<T> create(unsigned int width, unsigned int height);
 
-  inline T& operator()(unsigned int x, unsigned int y);
-  inline T operator()(unsigned int x, unsigned int y) const;
+  inline T& operator()(unsigned int x, unsigned int y) const;
 };
-
-template <class T> Array2DRef<T>::Array2DRef() : _data(nullptr) {}
 
 template <class T>
 Array2DRef<T>::Array2DRef(T* data, const unsigned int dataWidth,
@@ -63,15 +74,7 @@ std::vector<T> Array2DRef<T>::create(const unsigned int width,
 }
 
 template <class T>
-T& Array2DRef<T>::operator()(const unsigned int x, const unsigned int y) {
-  assert(_data);
-  assert(x < width);
-  assert(y < height);
-  return _data[y * _pitch + x];
-}
-
-template <class T>
-T Array2DRef<T>::operator()(const unsigned int x, const unsigned int y) const {
+T& Array2DRef<T>::operator()(const unsigned int x, const unsigned int y) const {
   assert(_data);
   assert(x < width);
   assert(y < height);
