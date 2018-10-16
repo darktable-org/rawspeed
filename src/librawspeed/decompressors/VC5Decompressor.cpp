@@ -35,21 +35,25 @@
 #include <limits> // for numeric_limits
 #include <utility>
 
+namespace {
+
 // Definitions needed by table17.inc
 // Taken from
 // https://github.com/gopro/gpr/blob/a513701afce7b03173213a2f67dfd9dd28fa1868/source/lib/vc5_decoder/vlc.h
 struct RLV {
-  uint_fast8_t size; //!< Size of code word in bits
-  uint32_t bits;     //!< Code word bits right justified
-  uint32_t count;    //!< Run length
-  int32_t value;     //!< Run value (unsigned)
+  const uint_fast8_t size; //!< Size of code word in bits
+  const uint32_t bits;     //!< Code word bits right justified
+  const uint32_t count;    //!< Run length
+  const int32_t value;     //!< Run value (unsigned)
 };
 #define RLVTABLE(n)                                                            \
-  static struct {                                                              \
-    uint32_t length;                                                           \
-    RLV entries[n];                                                            \
-  }
+  struct {                                                                     \
+    const uint32_t length;                                                     \
+    const RLV entries[n];                                                      \
+  } constexpr
 #include "common/table17.inc"
+
+} // namespace
 
 #define PRECISION_MIN 8
 #define PRECISION_MAX 32
