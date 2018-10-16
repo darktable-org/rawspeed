@@ -671,9 +671,11 @@ void VC5Decompressor::getRLV(BitPumpMSB* bits, int* value,
                              unsigned int* count) {
   unsigned int iTab;
 
+  static constexpr auto maxBits = 1 + table17.entries[table17.length - 1].size;
+
   // Ensure the maximum number of bits are cached to make peekBits() as fast as
   // possible.
-  bits->fill(table17.entries[table17.length - 1].size);
+  bits->fill(maxBits);
   for (iTab = 0; iTab < table17.length; ++iTab) {
     if (table17.entries[iTab].bits ==
         bits->peekBitsNoFill(table17.entries[iTab].size))
@@ -686,7 +688,7 @@ void VC5Decompressor::getRLV(BitPumpMSB* bits, int* value,
   *value = table17.entries[iTab].value;
   *count = table17.entries[iTab].count;
   if (*value != 0) {
-    if (bits->getBits(1))
+    if (bits->getBitsNoFill(1))
       *value = -(*value);
   }
 }
