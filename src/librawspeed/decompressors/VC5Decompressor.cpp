@@ -672,13 +672,13 @@ void VC5Decompressor::getRLV(BitPumpMSB* bits, int* value,
   bits->fill(table17.entries[table17.length - 1].size);
   for (iTab = 0; iTab < table17.length; ++iTab) {
     if (table17.entries[iTab].bits ==
-        bits->peekBits(table17.entries[iTab].size))
+        bits->peekBitsNoFill(table17.entries[iTab].size))
       break;
   }
   if (iTab >= table17.length)
     ThrowRDE("Code not found in codebook");
 
-  bits->skipBits(table17.entries[iTab].size);
+  bits->skipBitsNoFill(table17.entries[iTab].size);
   *value = table17.entries[iTab].value;
   *count = table17.entries[iTab].count;
   if (*value != 0) {
