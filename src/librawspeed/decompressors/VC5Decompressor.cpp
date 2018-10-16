@@ -79,24 +79,6 @@ VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) {
   return {bands[iBand].data.data(), width, height};
 }
 
-// static
-void VC5Decompressor::Wavelet::dequantize(Array2DRef<int16_t> out,
-                                          Array2DRef<int16_t> in,
-                                          int16_t quant) {
-  auto dequantize = [quant](int16_t val) -> int16_t {
-    return mVC5DecompandingTable[uint16_t(val)] * quant;
-  };
-
-  // FIXME: could use the SimpleLUT,
-  // should be profitable if  in.height * in.width > UINT16_MAX,
-  // and table lookup is faster than that computation.
-
-  for (unsigned int y = 0; y < in.height; ++y) {
-    for (unsigned int x = 0; x < in.width; ++x)
-      out(x, y) = dequantize(in(x, y));
-  }
-}
-
 namespace {
 auto convolute = [](unsigned x, unsigned y, std::array<int, 4> muls,
                     Array2DRef<int16_t> high, auto lowGetter,
@@ -259,21 +241,10 @@ std::vector<int16_t> VC5Decompressor::Wavelet::reconstructLowband(
   Array2DRef<int16_t> highpass(highpass_storage.data(), width, 2 * height);
 
   {
-    std::vector<int16_t> lowhigh_storage =
-        Array2DRef<int16_t>::create(width, height);
-    std::vector<int16_t> highlow_storage =
-        Array2DRef<int16_t>::create(width, height);
-    std::vector<int16_t> highhigh_storage =
-        Array2DRef<int16_t>::create(width, height);
-
     Array2DRef<int16_t> lowlow = bandAsArray2DRef(0);
-    Array2DRef<int16_t> lowhigh(lowhigh_storage.data(), width, height);
-    Array2DRef<int16_t> highlow(highlow_storage.data(), width, height);
-    Array2DRef<int16_t> highhigh(highhigh_storage.data(), width, height);
-
-    dequantize(lowhigh, bandAsArray2DRef(1), bands[1].quant);
-    dequantize(highlow, bandAsArray2DRef(2), bands[2].quant);
-    dequantize(highhigh, bandAsArray2DRef(3), bands[3].quant);
+    Array2DRef<int16_t> lowhigh = bandAsArray2DRef(1);
+    Array2DRef<int16_t> highlow = bandAsArray2DRef(2);
+    Array2DRef<int16_t> highhigh = bandAsArray2DRef(3);
 
     // Reconstruct the "immediates", the actual low pass ...
     reconstructPass(lowpass, highlow, lowlow);
@@ -507,6 +478,10 @@ void VC5Decompressor::Wavelet::Band::decodeLowPassBand(const Wavelet& wavelet) {
 
 void VC5Decompressor::Wavelet::Band::decodeHighPassBand(
     const Wavelet& wavelet) {
+  auto dequantize = [quant = quant](int16_t val) -> int16_t {
+    return mVC5DecompandingTable[uint16_t(val)] * quant;
+  };
+
   data = Array2DRef<int16_t>::create(wavelet.width, wavelet.height);
   Array2DRef<int16_t> dst(data.data(), wavelet.width, wavelet.height);
 
@@ -520,7 +495,7 @@ void VC5Decompressor::Wavelet::Band::decodeHighPassBand(
     for (; count > 0; --count) {
       if (iPixel > nPixels)
         ThrowRDE("Buffer overflow");
-      data[iPixel] = static_cast<int16_t>(pixelValue);
+      data[iPixel] = dequantize(pixelValue);
       ++iPixel;
     }
   }

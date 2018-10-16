@@ -155,9 +155,6 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   protected:
     uint32 mDecodedBandMask = 0;
-
-    static void dequantize(Array2DRef<int16_t> out, Array2DRef<int16_t> in,
-                           int16_t quant);
   };
 
   struct Channel {
