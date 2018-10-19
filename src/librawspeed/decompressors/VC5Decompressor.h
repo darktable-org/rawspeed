@@ -115,26 +115,38 @@ class VC5Decompressor final : public AbstractDecompressor {
     uint16_t width, height;
     int16_t prescale;
 
-    struct Band {
-      ByteStream bs;
+    struct AbstractBand {
       std::vector<int16_t> data;
-      int16_t quant; // only applicable for highpass bands.
-      ushort16 lowpassPrecision; // only applicable for lowpass band.
-
-      void decodeLowPassBand(const Wavelet& wavelet);
-      void decodeHighPassBand(const Wavelet& wavelet);
-
-      void clear() {
-        data.clear();
-        data.shrink_to_fit();
-      }
+      virtual ~AbstractBand() = default;
+      virtual void decode(const Wavelet& wavelet) = 0;
     };
+    struct ReconstructableBand final : AbstractBand {
+      void decode(const Wavelet& wavelet) final;
+    };
+    struct AbstractDecodeableBand : AbstractBand {
+      ByteStream bs;
+      explicit AbstractDecodeableBand(ByteStream bs_) : bs(std::move(bs_)) {}
+    };
+    struct LowPassBand final : AbstractDecodeableBand {
+      ushort16 lowpassPrecision;
+      LowPassBand(ByteStream bs_, ushort16 lowpassPrecision_)
+          : AbstractDecodeableBand(std::move(bs_)),
+            lowpassPrecision(lowpassPrecision_) {}
+      void decode(const Wavelet& wavelet) final;
+    };
+    struct HighPassBand final : AbstractDecodeableBand {
+      int16_t quant;
+      HighPassBand(ByteStream bs_, int16_t quant_)
+          : AbstractDecodeableBand(std::move(bs_)), quant(quant_) {}
+      void decode(const Wavelet& wavelet) final;
+    };
+
     static constexpr uint16_t numBands = 4;
-    std::array<Band, numBands> bands;
+    std::array<std::unique_ptr<AbstractBand>, numBands> bands;
 
     void clear() {
-      for (Band& band : bands)
-        band.clear();
+      for (auto& band : bands)
+        band.reset();
     }
 
     void setBandValid(int band);

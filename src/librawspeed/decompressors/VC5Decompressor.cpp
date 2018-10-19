@@ -76,12 +76,12 @@ bool VC5Decompressor::Wavelet::allBandsValid() const {
 
 const Array2DRef<int16_t>
 VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) {
-  return {bands[iBand].data.data(), width, height};
+  return {bands[iBand]->data.data(), width, height};
 }
 
 const Array2DRef<const int16_t>
 VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) const {
-  return {bands[iBand].data.data(), width, height};
+  return {bands[iBand]->data.data(), width, height};
 }
 
 namespace {
@@ -258,6 +258,13 @@ std::vector<int16_t> VC5Decompressor::Wavelet::reconstructLowband(
   combineLowHighPass(dest, lowpass, highpass, descaleShift, clampUint);
 
   return dest_storage;
+}
+
+void VC5Decompressor::Wavelet::ReconstructableBand::decode(
+    const Wavelet& wavelet) {
+  assert(wavelet.allBandsValid());
+  assert(data.empty());
+  data = wavelet.reconstructLowband();
 }
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
@@ -467,7 +474,7 @@ void VC5Decompressor::parseVC5() {
   }
 }
 
-void VC5Decompressor::Wavelet::Band::decodeLowPassBand(const Wavelet& wavelet) {
+void VC5Decompressor::Wavelet::LowPassBand::decode(const Wavelet& wavelet) {
   data = Array2DRef<int16_t>::create(wavelet.width, wavelet.height);
   const Array2DRef<int16_t> dst(data.data(), wavelet.width, wavelet.height);
 
@@ -478,8 +485,7 @@ void VC5Decompressor::Wavelet::Band::decodeLowPassBand(const Wavelet& wavelet) {
   }
 }
 
-void VC5Decompressor::Wavelet::Band::decodeHighPassBand(
-    const Wavelet& wavelet) {
+void VC5Decompressor::Wavelet::HighPassBand::decode(const Wavelet& wavelet) {
   auto dequantize = [quant = quant](int16_t val) -> int16_t {
     return mVC5DecompandingTable[uint16_t(val)] * quant;
   };
@@ -547,15 +553,13 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
              mVC5.iChannel);
   }
 
-  wavelet.bands[band].bs = bs;
-
+  std::unique_ptr<Wavelet::AbstractBand>& dstBand = wavelet.bands[band];
   if (mVC5.iSubband == 0) {
     assert(band == 0);
     // low-pass band, only one, for the smallest wavelet, per channel per image
-    wavelet.bands[band].lowpassPrecision = mVC5.lowpassPrecision;
+    dstBand = std::make_unique<Wavelet::LowPassBand>(bs, mVC5.lowpassPrecision);
   } else {
-    // high-pass bands.
-    wavelet.bands[band].quant = mVC5.quantization;
+    dstBand = std::make_unique<Wavelet::HighPassBand>(bs, mVC5.quantization);
   }
   wavelet.setBandValid(band);
 
@@ -564,6 +568,7 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
   if (idx > 0 && wavelet.allBandsValid()) {
     Wavelet& nextWavelet = wavelets[idx - 1];
     assert(!nextWavelet.isBandValid(0));
+    nextWavelet.bands[0] = std::make_unique<Wavelet::ReconstructableBand>();
     nextWavelet.setBandValid(0);
   }
 }
@@ -578,16 +583,16 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
   // For every channel, decode low-pass band of the smallest wavelet.
   for (Channel& channel : channels) {
     Wavelet& smallestWavelet = channel.wavelets.back();
-    Wavelet::Band& lowPassBand = smallestWavelet.bands[0];
-    lowPassBand.decodeLowPassBand(smallestWavelet);
+    auto& decodeableLowPassBand = smallestWavelet.bands[0];
+    decodeableLowPassBand->decode(smallestWavelet);
   }
 
   // Now, decode all high-pass bands for every wavelet level for every channel.
   for (Channel& channel : channels) {
     for (Wavelet& wavelet : channel.wavelets) {
-      for (int band = 1; band <= numHighPassBands; band++) {
-        Wavelet::Band& highPassBand = wavelet.bands[band];
-        highPassBand.decodeHighPassBand(wavelet);
+      for (int bandId = 1; bandId <= numHighPassBands; bandId++) {
+        auto& decodeableHighPassBand = wavelet.bands[bandId];
+        decodeableHighPassBand->decode(wavelet);
       }
     }
   }
@@ -596,11 +601,11 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
   for (Channel& channel : channels) {
     for (int waveletLevel = numWaveletLevels - 1; waveletLevel > 0;
          waveletLevel--) {
-      Wavelet& nextWavelet = channel.wavelets[waveletLevel - 1];
-      auto& futureLowpassBand = nextWavelet.bands[0].data;
-
       Wavelet& wavelet = channel.wavelets[waveletLevel];
-      futureLowpassBand = wavelet.reconstructLowband();
+      Wavelet& nextWavelet = channel.wavelets[waveletLevel - 1];
+
+      auto& reconstructableBand = nextWavelet.bands[0];
+      reconstructableBand->decode(wavelet);
 
       wavelet.clear(); // we no longer need it.
     }
