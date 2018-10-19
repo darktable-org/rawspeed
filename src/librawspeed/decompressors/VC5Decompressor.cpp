@@ -615,29 +615,42 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
   // We have to decode those bands via pthreads, due to exception safety.
   decompress();
 
-  // And now, for every channel, recursively reconstruct the low-pass bands.
-  for (Channel& channel : channels) {
+#ifdef HAVE_OPENMP
+#pragma omp parallel default(none)
+  {
+#endif
+
+    // And now, for every channel, recursively reconstruct the low-pass bands.
     for (int waveletLevel = numWaveletLevels - 1; waveletLevel > 0;
          waveletLevel--) {
-      Wavelet& wavelet = channel.wavelets[waveletLevel];
-      Wavelet& nextWavelet = channel.wavelets[waveletLevel - 1];
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+      for (auto channel = channels.begin(); channel < channels.end();
+           ++channel) {
+        Wavelet& wavelet = channel->wavelets[waveletLevel];
+        Wavelet& nextWavelet = channel->wavelets[waveletLevel - 1];
 
-      auto& reconstructableBand = nextWavelet.bands[0];
-      reconstructableBand->decode(wavelet);
+        auto& reconstructableBand = nextWavelet.bands[0];
+        reconstructableBand->decode(wavelet);
 
+        wavelet.clear(); // we no longer need it.
+      }
+    }
+
+    // Finally, for each channel, reconstruct the final lowpass band.
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (auto channel = channels.begin(); channel < channels.end(); ++channel) {
+      Wavelet& wavelet = channel->wavelets.front();
+      channel->data = wavelet.reconstructLowband(true);
       wavelet.clear(); // we no longer need it.
     }
-  }
 
-  // Finally, for each channel, reconstruct the final lowpass band.
 #ifdef HAVE_OPENMP
-#pragma omp parallel for default(none) schedule(static)
-#endif
-  for (auto channel = channels.begin(); channel < channels.end(); ++channel) {
-    Wavelet& wavelet = channel->wavelets.front();
-    channel->data = wavelet.reconstructLowband(true);
-    wavelet.clear(); // we no longer need it.
   }
+#endif
 
   // And finally!
   combineFinalLowpassBands();
