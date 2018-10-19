@@ -5,10 +5,6 @@ endif()
 add_executable(rstest rstest.cpp md5.cpp)
 target_link_libraries(rstest rawspeed)
 
-if(WITH_OPENMP AND OPENMP_FOUND AND TARGET OpenMP::OpenMP)
-  target_link_libraries(rstest OpenMP::OpenMP)
-endif()
-
 if(BUILD_TESTING)
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-suggest-attribute=const)
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-suggest-override)

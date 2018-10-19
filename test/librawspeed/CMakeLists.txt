@@ -9,10 +9,6 @@ target_link_libraries(rawspeed_test PUBLIC rawspeed)
 target_link_libraries(rawspeed_test PUBLIC gtest gmock_main)
 target_include_directories(rawspeed_test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
-if(WITH_OPENMP AND OPENMP_FOUND AND TARGET OpenMP::OpenMP)
-  target_link_libraries(rawspeed_test PUBLIC OpenMP::OpenMP)
-endif()
-
 
 # FIXME: it should be PATH, but then it is escaped, and that breaks gtest
 set(UNITTEST_REPORT_PATH ${CMAKE_BINARY_DIR}/unittest-reports/ CACHE STRING "" FORCE)

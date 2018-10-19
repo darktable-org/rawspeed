@@ -30,14 +30,39 @@ if(WITH_PTHREADS)
     set_package_properties(Threads PROPERTIES
                            TYPE RECOMMENDED
                            DESCRIPTION "POSIX Threads"
-                           PURPOSE "Used for parallelization of the library itself")
+                           PURPOSE "Used for the main parallelization of the library")
   endif()
 else()
   message(STATUS "PThread-based threading is disabled. Not searching for PThreads")
 endif()
-add_feature_info("PThread-based library threading" HAVE_PTHREAD "used for parallelized image decoding")
+add_feature_info("PThread-based threading" HAVE_PTHREAD "used for parallelized image decoding")
 
-include(OpenMP)
+if(WITH_OPENMP)
+  message(STATUS "Looking for OpenMP")
+  find_package(OpenMP)
+  if(OPENMP_FOUND)
+    message(STATUS "Looking for OpenMP - found")
+    set(HAVE_OPENMP 1)
+
+    if(NOT TARGET OpenMP::OpenMP)
+      add_library(OpenMP::OpenMP INTERFACE IMPORTED)
+      set_property(TARGET OpenMP::OpenMP PROPERTY INTERFACE_COMPILE_OPTIONS "${OpenMP_CXX_FLAGS}")
+      set_property(TARGET OpenMP::OpenMP PROPERTY INTERFACE_LINK_LIBRARIES "${OpenMP_CXX_FLAGS}")
+    endif()
+
+    target_link_libraries(rawspeed PUBLIC OpenMP::OpenMP)
+    set_package_properties(OpenMP PROPERTIES
+                           TYPE RECOMMENDED
+                           URL https://www.openmp.org/
+                           DESCRIPTION "Open Multi-Processing"
+                           PURPOSE "Marginally used for parallelization the library")
+  else()
+    message(WARNING "Looking for OpenMP - failed.")
+  endif()
+else()
+  message(STATUS "OpenMP is disabled")
+endif()
+add_feature_info("OpenMP-based threading" HAVE_OPENMP "used for parallelized image decoding")
 
 if(WITH_PUGIXML)
   message(STATUS "Looking for pugixml")
