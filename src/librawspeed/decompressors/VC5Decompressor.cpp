@@ -585,8 +585,8 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
   // All the high-pass bands for all wavelets,
   // in this specific order of decreasing worksize.
   for (int waveletLevel = 0; waveletLevel < numWaveletLevels; waveletLevel++) {
-    for (int bandId = 1; bandId <= numHighPassBands; bandId++) {
-      for (auto channelId = 0; channelId < numChannels; channelId++) {
+    for (auto channelId = 0; channelId < numChannels; channelId++) {
+      for (int bandId = 1; bandId <= numHighPassBands; bandId++) {
         auto& channel = channels[channelId];
         auto& wavelet = channel.wavelets[waveletLevel];
         auto* band = wavelet.bands[bandId].get();
