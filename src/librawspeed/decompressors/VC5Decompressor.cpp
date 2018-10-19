@@ -608,7 +608,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
   {
 #endif
 #ifdef HAVE_OPENMP
-#pragma omp for schedule(static)
+#pragma omp for schedule(guided)
 #endif
     for (auto decodeableBand = allDecodeableBands.begin();
          decodeableBand < allDecodeableBands.end(); ++decodeableBand) {
