@@ -630,9 +630,12 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
   }
 
   // Finally, for each channel, reconstruct the final lowpass band.
-  for (Channel& channel : channels) {
-    Wavelet& wavelet = channel.wavelets.front();
-    channel.data = wavelet.reconstructLowband(true);
+#ifdef HAVE_OPENMP
+#pragma omp parallel for default(none) schedule(static)
+#endif
+  for (auto channel = channels.begin(); channel < channels.end(); ++channel) {
+    Wavelet& wavelet = channel->wavelets.front();
+    channel->data = wavelet.reconstructLowband(true);
     wavelet.clear(); // we no longer need it.
   }
 
