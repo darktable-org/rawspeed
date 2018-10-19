@@ -268,22 +268,22 @@ void VC5Decompressor::Wavelet::ReconstructableBand::decode(
 }
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
-    : AbstractDecompressor(), mImg(img), mBs(std::move(bs)) {
-  if (!mImg->dim.hasPositiveArea())
+    : AbstractDecompressor(), mRaw(img), mBs(std::move(bs)) {
+  if (!mRaw->dim.hasPositiveArea())
     ThrowRDE("Bad image dimensions.");
 
-  if (mImg->dim.x % mVC5.patternWidth != 0)
-    ThrowRDE("Width %u is not a multiple of %u", mImg->dim.x,
+  if (mRaw->dim.x % mVC5.patternWidth != 0)
+    ThrowRDE("Width %u is not a multiple of %u", mRaw->dim.x,
              mVC5.patternWidth);
 
-  if (mImg->dim.y % mVC5.patternHeight != 0)
-    ThrowRDE("Height %u is not a multiple of %u", mImg->dim.y,
+  if (mRaw->dim.y % mVC5.patternHeight != 0)
+    ThrowRDE("Height %u is not a multiple of %u", mRaw->dim.y,
              mVC5.patternHeight);
 
   // Initialize wavelet sizes.
   for (Channel& channel : channels) {
-    channel.width = mImg->dim.x / mVC5.patternWidth;
-    channel.height = mImg->dim.y / mVC5.patternHeight;
+    channel.width = mRaw->dim.x / mVC5.patternWidth;
+    channel.height = mRaw->dim.y / mVC5.patternHeight;
 
     uint16_t waveletWidth = channel.width;
     uint16_t waveletHeight = channel.height;
@@ -348,8 +348,8 @@ const SimpleLUT<int16_t, 16> VC5Decompressor::mVC5DecompandingTable = []() {
 void VC5Decompressor::parseVC5() {
   mBs.setByteOrder(Endianness::big);
 
-  assert(mImg->dim.x > 0);
-  assert(mImg->dim.y > 0);
+  assert(mRaw->dim.x > 0);
+  assert(mRaw->dim.y > 0);
 
   // All VC-5 data must start with "VC-%" (0x56432d35)
   if (mBs.getU32() != 0x56432d35)
@@ -370,12 +370,12 @@ void VC5Decompressor::parseVC5() {
         ThrowRDE("Bad channel count %u, expected %u", val, numChannels);
       break;
     case VC5Tag::ImageWidth:
-      if (val != mImg->dim.x)
-        ThrowRDE("Image width mismatch: %u vs %u", val, mImg->dim.x);
+      if (val != mRaw->dim.x)
+        ThrowRDE("Image width mismatch: %u vs %u", val, mRaw->dim.x);
       break;
     case VC5Tag::ImageHeight:
-      if (val != mImg->dim.y)
-        ThrowRDE("Image height mismatch: %u vs %u", val, mImg->dim.y);
+      if (val != mRaw->dim.y)
+        ThrowRDE("Image height mismatch: %u vs %u", val, mRaw->dim.y);
       break;
     case VC5Tag::LowpassPrecision:
       if (val < PRECISION_MIN || val > PRECISION_MAX)
@@ -575,7 +575,7 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
 
 void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
                              unsigned int width, unsigned int height) {
-  if (offsetX || offsetY || mImg->dim != iPoint2D(width, height))
+  if (offsetX || offsetY || mRaw->dim != iPoint2D(width, height))
     ThrowRDE("VC5Decompressor expects to fill the whole image, not some tile.");
 
   initVC5LogTable();
@@ -623,10 +623,10 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 }
 
 void VC5Decompressor::combineFinalLowpassBands() const noexcept {
-  const Array2DRef<uint16_t> out(reinterpret_cast<uint16_t*>(mImg->getData()),
-                                 static_cast<unsigned int>(mImg->dim.x),
-                                 static_cast<unsigned int>(mImg->dim.y),
-                                 mImg->pitch / sizeof(uint16_t));
+  const Array2DRef<uint16_t> out(reinterpret_cast<uint16_t*>(mRaw->getData()),
+                                 static_cast<unsigned int>(mRaw->dim.x),
+                                 static_cast<unsigned int>(mRaw->dim.y),
+                                 mRaw->pitch / sizeof(uint16_t));
 
   const unsigned int width = out.width / 2;
   const unsigned int height = out.height / 2;
