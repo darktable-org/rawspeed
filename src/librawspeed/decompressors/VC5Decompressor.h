@@ -151,7 +151,7 @@ class VC5Decompressor final : public AbstractDecompressor {
                             Array2DRef<const int16_t> high, int descaleShift,
                             bool clampUint /*= false*/) const;
 
-    std::vector<int16_t> reconstructLowband(bool clampUint = false);
+    std::vector<int16_t> reconstructLowband(bool clampUint = false) const;
 
     const Array2DRef<int16_t> bandAsArray2DRef(unsigned int iBand);
     const Array2DRef<const int16_t> bandAsArray2DRef(unsigned int iBand) const;

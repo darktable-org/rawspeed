@@ -226,15 +226,8 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
 }
 
 std::vector<int16_t> VC5Decompressor::Wavelet::reconstructLowband(
-    const bool clampUint /* = false */) {
+    const bool clampUint /* = false */) const {
   int16_t descaleShift = (prescale == 2 ? 2 : 0);
-  // Assert valid quantization values
-  if (bands[0].quant == 0)
-    bands[0].quant = 1;
-  for (int i = 0; i < numBands; ++i) {
-    if (bands[i].quant == 0)
-      ThrowRDE("Quant value of band %i must not be zero", i);
-  }
 
   std::vector<int16_t> lowpass_storage =
       Array2DRef<int16_t>::create(width, 2 * height);
