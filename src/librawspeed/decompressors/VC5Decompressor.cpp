@@ -648,12 +648,12 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
       wavelet.clear(); // we no longer need it.
     }
 
+    // And finally!
+    combineFinalLowpassBands();
+
 #ifdef HAVE_OPENMP
   }
 #endif
-
-  // And finally!
-  combineFinalLowpassBands();
 }
 
 void VC5Decompressor::combineFinalLowpassBands() const noexcept {
@@ -675,7 +675,9 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
       channels[3].data.data(), channels[3].width, channels[3].height);
 
   // Convert to RGGB output
-  // FIXME: this *should* be threadedable nicely.
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static) collapse(2)
+#endif
   for (unsigned int row = 0; row < height; ++row) {
     for (unsigned int col = 0; col < width; ++col) {
       const int mid = 2048;
