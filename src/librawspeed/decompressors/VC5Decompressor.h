@@ -100,7 +100,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   static constexpr int numSubbands = 1 + numHighPassBands * numWaveletLevels;
 
   struct {
-    ushort16 iChannel;
+    ushort16 iChannel = 0; // FIXME: we need this before we get this.
     ushort16 iSubband;
     const ushort16 imgFormat = 4;
     const ushort16 patternWidth = 2;

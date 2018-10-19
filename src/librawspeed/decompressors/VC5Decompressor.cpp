@@ -415,9 +415,13 @@ void VC5Decompressor::parseVC5() {
         ThrowRDE("Bad compnent per sample count %u, not %u", val, mVC5.cps);
       break;
     case VC5Tag::PrescaleShift:
-      for (int iWavelet = 0; iWavelet < numWaveletLevels; ++iWavelet)
-        channels[mVC5.iChannel].wavelets[iWavelet].prescale =
-            (val >> (14 - 2 * iWavelet)) & 0x03;
+      // FIXME: something is wrong. We get this before VC5Tag::ChannelNumber.
+      // Defaulting to 'mVC5.iChannel=0' seems to work *for existing samples*.
+      for (int iWavelet = 0; iWavelet < numWaveletLevels; ++iWavelet) {
+        auto& channel = channels[mVC5.iChannel];
+        auto& wavelet = channel.wavelets[iWavelet];
+        wavelet.prescale = (val >> (14 - 2 * iWavelet)) & 0x03;
+      }
       break;
     default: { // A chunk.
       unsigned int chunkSize = 0;
