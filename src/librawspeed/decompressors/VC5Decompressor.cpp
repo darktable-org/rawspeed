@@ -582,23 +582,27 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 
   std::vector<DecodeableBand> allDecodeableBands;
   allDecodeableBands.reserve(numSubbandsTotal);
-  for (Channel& channel : channels) {
-    // FIXME: the workload is likely suboptimal here.
-    {
-      // Low-pass band of the smallest wavelet.
-      Wavelet& smallestWavelet = channel.wavelets.back();
-      auto* decodeableLowPassBand =
-          dynamic_cast<Wavelet::LowPassBand*>(smallestWavelet.bands[0].get());
-      allDecodeableBands.emplace_back(decodeableLowPassBand, smallestWavelet);
-    }
-    for (Wavelet& wavelet : channel.wavelets) {
-      // All the high-pass bands for all wavelets.
-      for (int bandId = 1; bandId <= numHighPassBands; bandId++) {
+  // All the high-pass bands for all wavelets,
+  // in this specific order of decreasing worksize.
+  for (int waveletLevel = 0; waveletLevel < numWaveletLevels; waveletLevel++) {
+    for (int bandId = 1; bandId <= numHighPassBands; bandId++) {
+      for (auto channelId = 0; channelId < numChannels; channelId++) {
+        auto& channel = channels[channelId];
+        auto& wavelet = channel.wavelets[waveletLevel];
+        auto* band = wavelet.bands[bandId].get();
         auto* decodeableHighPassBand =
-            dynamic_cast<Wavelet::HighPassBand*>(wavelet.bands[bandId].get());
+            dynamic_cast<Wavelet::HighPassBand*>(band);
         allDecodeableBands.emplace_back(decodeableHighPassBand, wavelet);
       }
     }
+  }
+  // The low-pass bands at the end. I'm guessing they should be fast to decode.
+  for (Channel& channel : channels) {
+    // Low-pass band of the smallest wavelet.
+    Wavelet& smallestWavelet = channel.wavelets.back();
+    auto* decodeableLowPassBand =
+        dynamic_cast<Wavelet::LowPassBand*>(smallestWavelet.bands[0].get());
+    allDecodeableBands.emplace_back(decodeableLowPassBand, smallestWavelet);
   }
   assert(allDecodeableBands.size() == numSubbandsTotal);
 
