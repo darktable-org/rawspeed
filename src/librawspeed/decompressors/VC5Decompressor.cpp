@@ -110,7 +110,7 @@ auto convolute = [](unsigned x, unsigned y, std::array<int, 4> muls,
 
 void VC5Decompressor::Wavelet::reconstructPass(
     const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> high,
-    const Array2DRef<const int16_t> low) const {
+    const Array2DRef<const int16_t> low) const noexcept {
   unsigned int x, y;
 
   auto convolution = [&x, &y, high](std::array<int, 4> muls, auto lowGetter) {
@@ -162,7 +162,7 @@ void VC5Decompressor::Wavelet::reconstructPass(
 void VC5Decompressor::Wavelet::combineLowHighPass(
     const Array2DRef<int16_t> dest, const Array2DRef<const int16_t> low,
     const Array2DRef<const int16_t> high, int descaleShift,
-    bool clampUint = false) const {
+    bool clampUint = false) const noexcept {
   unsigned int x, y;
 
   auto convolution = [&x, &y, high, descaleShift](std::array<int, 4> muls,
@@ -226,7 +226,7 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
 }
 
 std::vector<int16_t> VC5Decompressor::Wavelet::reconstructLowband(
-    const bool clampUint /* = false */) const {
+    const bool clampUint /* = false */) const noexcept {
   int16_t descaleShift = (prescale == 2 ? 2 : 0);
 
   std::vector<int16_t> lowpass_storage =
@@ -261,7 +261,7 @@ std::vector<int16_t> VC5Decompressor::Wavelet::reconstructLowband(
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::decode(
-    const Wavelet& wavelet) {
+    const Wavelet& wavelet) noexcept {
   assert(wavelet.allBandsValid());
   assert(data.empty());
   data = wavelet.reconstructLowband();
@@ -622,7 +622,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
   combineFinalLowpassBands();
 }
 
-void VC5Decompressor::combineFinalLowpassBands() const {
+void VC5Decompressor::combineFinalLowpassBands() const noexcept {
   const Array2DRef<uint16_t> out(reinterpret_cast<uint16_t*>(mImg->getData()),
                                  static_cast<unsigned int>(mImg->dim.x),
                                  static_cast<unsigned int>(mImg->dim.y),

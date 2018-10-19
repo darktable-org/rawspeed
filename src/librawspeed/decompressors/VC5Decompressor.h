@@ -121,7 +121,7 @@ class VC5Decompressor final : public AbstractDecompressor {
       virtual void decode(const Wavelet& wavelet) = 0;
     };
     struct ReconstructableBand final : AbstractBand {
-      void decode(const Wavelet& wavelet) final;
+      void decode(const Wavelet& wavelet) noexcept final;
     };
     struct AbstractDecodeableBand : AbstractBand {
       ByteStream bs;
@@ -156,14 +156,15 @@ class VC5Decompressor final : public AbstractDecompressor {
 
     void reconstructPass(Array2DRef<int16_t> dst,
                          Array2DRef<const int16_t> high,
-                         Array2DRef<const int16_t> low) const;
+                         Array2DRef<const int16_t> low) const noexcept;
 
     void combineLowHighPass(Array2DRef<int16_t> dest,
                             Array2DRef<const int16_t> low,
                             Array2DRef<const int16_t> high, int descaleShift,
-                            bool clampUint /*= false*/) const;
+                            bool clampUint /*= false*/) const noexcept;
 
-    std::vector<int16_t> reconstructLowband(bool clampUint = false) const;
+    std::vector<int16_t> reconstructLowband(bool clampUint = false) const
+        noexcept;
 
     const Array2DRef<int16_t> bandAsArray2DRef(unsigned int iBand);
     const Array2DRef<const int16_t> bandAsArray2DRef(unsigned int iBand) const;
@@ -187,7 +188,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   void parseLargeCodeblock(const ByteStream& bs);
 
   // FIXME: this *should* be threadedable nicely.
-  void combineFinalLowpassBands() const;
+  void combineFinalLowpassBands() const noexcept;
 
   void parseVC5();
 
