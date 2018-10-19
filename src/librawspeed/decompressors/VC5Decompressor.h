@@ -21,14 +21,15 @@
 
 #pragma once
 
-#include "common/Array2DRef.h"                  // for Array2DRef
-#include "common/Common.h"                      // for uint32
-#include "common/RawImage.h"                    // for RawImageData
-#include "common/SimpleLUT.h"                   // for SimpleLUT
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/BitPumpMSB.h"                      // for BitPumpMSB
-#include "io/ByteStream.h"                      // for ByteStream
-#include <type_traits>                          // for underlying_type
+#include "common/Array2DRef.h" // for Array2DRef
+#include "common/Common.h"     // for uint32
+#include "common/RawImage.h"   // for RawImageData
+#include "common/SimpleLUT.h"  // for SimpleLUT
+#include "decompressors/AbstractParallelizedDecompressor.h"
+#include "io/BitPumpMSB.h" // for BitPumpMSB
+#include "io/ByteStream.h" // for ByteStream
+#include <functional>      // for reference_wrapper
+#include <type_traits>     // for underlying_type
 
 namespace rawspeed {
 
@@ -83,8 +84,7 @@ inline VC5Tag operator-(VC5Tag tag) {
   return static_cast<VC5Tag>(-static_cast<value_type>(tag));
 }
 
-class VC5Decompressor final : public AbstractDecompressor {
-  RawImage mRaw;
+class VC5Decompressor final : public AbstractParallelizedDecompressor {
   ByteStream mBs;
 
   static constexpr auto VC5_LOG_TABLE_BITWIDTH = 12;
@@ -97,7 +97,9 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   static constexpr int numWaveletLevels = 3;
   static constexpr int numHighPassBands = 3;
-  static constexpr int numSubbands = 1 + numHighPassBands * numWaveletLevels;
+  static constexpr int numLowPassBands = 1;
+  static constexpr int numSubbands =
+      numLowPassBands + numHighPassBands * numWaveletLevels;
 
   struct {
     ushort16 iChannel = 0; // FIXME: we need this before we get this.
@@ -181,7 +183,17 @@ class VC5Decompressor final : public AbstractDecompressor {
   };
 
   static constexpr int numChannels = 4;
+  static constexpr int numSubbandsTotal = numSubbands * numChannels;
   std::array<Channel, numChannels> channels;
+
+  struct DecodeableBand {
+    Wavelet::AbstractDecodeableBand* band;
+    const Wavelet& wavelet;
+    DecodeableBand(Wavelet::AbstractDecodeableBand* band_,
+                   const Wavelet& wavelet_)
+        : band(band_), wavelet(wavelet_) {}
+  };
+  std::vector<DecodeableBand> allDecodeableBands;
 
   static void getRLV(BitPumpMSB* bits, int* value, unsigned int* count);
 
@@ -191,6 +203,10 @@ class VC5Decompressor final : public AbstractDecompressor {
   void combineFinalLowpassBands() const noexcept;
 
   void parseVC5();
+
+  void decompressThreaded(const RawDecompressorThread* t) const final;
+
+  void decompress() const final;
 
 public:
   VC5Decompressor(ByteStream bs, const RawImage& img);

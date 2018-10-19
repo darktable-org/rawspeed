@@ -268,7 +268,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::decode(
 }
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
-    : AbstractDecompressor(), mRaw(img), mBs(std::move(bs)) {
+    : AbstractParallelizedDecompressor(img), mBs(std::move(bs)) {
   if (!mRaw->dim.hasPositiveArea())
     ThrowRDE("Bad image dimensions.");
 
@@ -573,6 +573,17 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
   }
 }
 
+void VC5Decompressor::decompressThreaded(const RawDecompressorThread* t) const {
+  for (size_t i = t->start; i < t->end && i < allDecodeableBands.size(); i++) {
+    const DecodeableBand& b = allDecodeableBands[i];
+    b.band->decode(b.wavelet);
+  }
+}
+
+void VC5Decompressor::decompress() const {
+  startThreading(allDecodeableBands.size());
+}
+
 void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
                              unsigned int width, unsigned int height) {
   if (offsetX || offsetY || mRaw->dim != iPoint2D(width, height))
@@ -580,22 +591,29 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 
   initVC5LogTable();
 
-  // For every channel, decode low-pass band of the smallest wavelet.
+  allDecodeableBands.reserve(numSubbandsTotal);
   for (Channel& channel : channels) {
-    Wavelet& smallestWavelet = channel.wavelets.back();
-    auto& decodeableLowPassBand = smallestWavelet.bands[0];
-    decodeableLowPassBand->decode(smallestWavelet);
-  }
-
-  // Now, decode all high-pass bands for every wavelet level for every channel.
-  for (Channel& channel : channels) {
+    // FIXME: the workload is likely suboptimal here.
+    {
+      // Low-pass band of the smallest wavelet.
+      Wavelet& smallestWavelet = channel.wavelets.back();
+      auto* decodeableLowPassBand =
+          dynamic_cast<Wavelet::LowPassBand*>(smallestWavelet.bands[0].get());
+      allDecodeableBands.emplace_back(decodeableLowPassBand, smallestWavelet);
+    }
     for (Wavelet& wavelet : channel.wavelets) {
+      // All the high-pass bands for all wavelets.
       for (int bandId = 1; bandId <= numHighPassBands; bandId++) {
-        auto& decodeableHighPassBand = wavelet.bands[bandId];
-        decodeableHighPassBand->decode(wavelet);
+        auto* decodeableHighPassBand =
+            dynamic_cast<Wavelet::HighPassBand*>(wavelet.bands[bandId].get());
+        allDecodeableBands.emplace_back(decodeableHighPassBand, wavelet);
       }
     }
   }
+  assert(allDecodeableBands.size() == numSubbandsTotal);
+
+  // We have to decode those bands via pthreads, due to exception safety.
+  decompress();
 
   // And now, for every channel, recursively reconstruct the low-pass bands.
   for (Channel& channel : channels) {
