@@ -18,6 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "io/Buffer.h"          // for Buffer
 #include "io/FileIOException.h" // for FileIOException
 #include "io/FileReader.h"      // for FileReader
@@ -27,7 +28,7 @@
 #include <memory>               // for unique_ptr
 #include <string>               // for operator==, string
 
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
 #include <omp.h>
 #endif
 
@@ -60,7 +61,7 @@ int main(int argc, char** argv) {
   if (1 == argc || (2 == argc && std::string("-help=1") == argv[1]))
     return usage();
 
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
   const auto corpusCount = argc - 1;
   auto chunkSize = (corpusCount / (10 * omp_get_num_threads()));
   if (chunkSize <= 1)

@@ -42,12 +42,12 @@
 #include <iomanip> // for operator<<, setw
 #endif
 
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
 #include <omp.h>
 #endif
 
 // define this function, it is only declared in rawspeed:
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
 extern "C" int rawspeed_get_number_of_processor_cores() {
   return omp_get_max_threads();
 }
@@ -346,7 +346,7 @@ size_t process(const string& filename, const CameraMetaData* metadata,
   ifstream hf(hashfile);
   if (hf.good() == o.create && !o.force) {
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
 #pragma omp critical(io)
 #endif
     cout << left << setw(55) << filename << ": hash "
@@ -357,7 +357,7 @@ size_t process(const string& filename, const CameraMetaData* metadata,
 
 // to narrow down the list of files that could have causes the crash
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
 #pragma omp critical(io)
 #endif
   cout << left << setw(55) << filename << ": starting decoding ... " << endl;
@@ -384,7 +384,7 @@ size_t process(const string& filename, const CameraMetaData* metadata,
 
   auto time = t();
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
 #pragma omp critical(io)
 #endif
   cout << left << setw(55) << filename << ": " << internal << setw(3)
@@ -532,7 +532,7 @@ int main(int argc, char **argv) {
 
   size_t time = 0;
   map<string, string> failedTests;
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
 #pragma omp parallel for default(shared) schedule(dynamic, 1) reduction(+ : time)
 #endif
   for (int i = 1; i < argc; ++i) {
@@ -547,7 +547,7 @@ int main(int argc, char **argv) {
         throw;
       }
     } catch (RawspeedException& e) {
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
 #pragma omp critical(io)
 #endif
       {

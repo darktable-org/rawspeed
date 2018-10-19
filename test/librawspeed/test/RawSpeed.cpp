@@ -18,14 +18,15 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "common/Common.h" // IWYU pragma: keep
 
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
 #include <omp.h>
 #endif
 
 // define this function, it is only declared in rawspeed:
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
 extern "C" int rawspeed_get_number_of_processor_cores() {
   return omp_get_max_threads();
 }
