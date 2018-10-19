@@ -25,7 +25,7 @@
 #include "common/Common.h"     // for uint32
 #include "common/RawImage.h"   // for RawImageData
 #include "common/SimpleLUT.h"  // for SimpleLUT
-#include "decompressors/AbstractParallelizedDecompressor.h"
+#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/BitPumpMSB.h" // for BitPumpMSB
 #include "io/ByteStream.h" // for ByteStream
 #include <functional>      // for reference_wrapper
@@ -84,7 +84,8 @@ inline VC5Tag operator-(VC5Tag tag) {
   return static_cast<VC5Tag>(-static_cast<value_type>(tag));
 }
 
-class VC5Decompressor final : public AbstractParallelizedDecompressor {
+class VC5Decompressor final : public AbstractDecompressor {
+  RawImage mRaw;
   ByteStream mBs;
 
   static constexpr auto VC5_LOG_TABLE_BITWIDTH = 12;
@@ -193,7 +194,6 @@ class VC5Decompressor final : public AbstractParallelizedDecompressor {
                    const Wavelet& wavelet_)
         : band(band_), wavelet(wavelet_) {}
   };
-  std::vector<DecodeableBand> allDecodeableBands;
 
   static void getRLV(BitPumpMSB* bits, int* value, unsigned int* count);
 
@@ -203,10 +203,6 @@ class VC5Decompressor final : public AbstractParallelizedDecompressor {
   void combineFinalLowpassBands() const noexcept;
 
   void parseVC5();
-
-  void decompressThreaded(const RawDecompressorThread* t) const final;
-
-  void decompress() const final;
 
 public:
   VC5Decompressor(ByteStream bs, const RawImage& img);

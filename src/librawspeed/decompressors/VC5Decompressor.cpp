@@ -268,7 +268,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::decode(
 }
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
-    : AbstractParallelizedDecompressor(img), mBs(std::move(bs)) {
+    : mRaw(img), mBs(std::move(bs)) {
   if (!mRaw->dim.hasPositiveArea())
     ThrowRDE("Bad image dimensions.");
 
@@ -573,17 +573,6 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
   }
 }
 
-void VC5Decompressor::decompressThreaded(const RawDecompressorThread* t) const {
-  for (size_t i = t->start; i < t->end && i < allDecodeableBands.size(); i++) {
-    const DecodeableBand& b = allDecodeableBands[i];
-    b.band->decode(b.wavelet);
-  }
-}
-
-void VC5Decompressor::decompress() const {
-  startThreading(allDecodeableBands.size());
-}
-
 void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
                              unsigned int width, unsigned int height) {
   if (offsetX || offsetY || mRaw->dim != iPoint2D(width, height))
@@ -591,6 +580,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 
   initVC5LogTable();
 
+  std::vector<DecodeableBand> allDecodeableBands;
   allDecodeableBands.reserve(numSubbandsTotal);
   for (Channel& channel : channels) {
     // FIXME: the workload is likely suboptimal here.
@@ -612,12 +602,33 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
   }
   assert(allDecodeableBands.size() == numSubbandsTotal);
 
-  // We have to decode those bands via pthreads, due to exception safety.
-  decompress();
+#ifdef HAVE_OPENMP
+  bool exceptionThrown = false;
+#pragma omp parallel default(none) shared(exceptionThrown)
+  {
+#endif
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (auto decodeableBand = allDecodeableBands.begin();
+         decodeableBand < allDecodeableBands.end(); ++decodeableBand) {
+      try {
+        decodeableBand->band->decode(decodeableBand->wavelet);
+      } catch (RawspeedException& err) {
+        // Propagate the exception out of OpenMP magic.
+        mRaw->setError(err.what());
+#ifdef HAVE_OPENMP
+#pragma omp atomic write
+        exceptionThrown = true;
+#pragma omp cancel for
+#else
+        throw;
+#endif
+      }
+    }
 
 #ifdef HAVE_OPENMP
-#pragma omp parallel default(none)
-  {
+#pragma omp cancel parallel if (exceptionThrown)
 #endif
 
     // And now, for every channel, recursively reconstruct the low-pass bands.
@@ -652,6 +663,15 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
     combineFinalLowpassBands();
 
 #ifdef HAVE_OPENMP
+  }
+
+  std::string firstErr;
+  if (mRaw->isTooManyErrors(1, &firstErr)) {
+    assert(exceptionThrown);
+    ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
+             firstErr.c_str());
+  } else {
+    assert(!exceptionThrown);
   }
 #endif
 }
