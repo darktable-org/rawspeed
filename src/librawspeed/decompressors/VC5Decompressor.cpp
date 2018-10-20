@@ -315,6 +315,9 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     }
   }
 
+  if (img->whitePoint <= 0 || img->whitePoint > int(((1U << 16U) - 1U)))
+    ThrowRDE("Bad white level %i", img->whitePoint);
+
   outputBits = 0;
   for (int wp = img->whitePoint; wp != 0; wp >>= 1)
     ++outputBits;
