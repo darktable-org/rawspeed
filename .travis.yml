@@ -65,16 +65,14 @@ jobs:
   include:
   - stage: test
     os: linux
+    dist: trusty
     sudo: required
-    dist: xenial
-    edge: true
     services:
       - docker
     env: CC=gcc-8 CXX=g++-8
   - os: linux
+    dist: trusty
     sudo: required
-    dist: xenial
-    edge: true
     services:
       - docker
     env: CC=gcc-8 CXX=g++-8 GCOV=gcov-8 FLAVOR=Coverage ECO="-DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON" EXTRA_OPTS="$DOCKER_RPUU"
@@ -86,23 +84,20 @@ jobs:
   #- os: osx
   #  env: CC=cc CXX=c++ FLAVOR=Coverage
   - os: linux
+    dist: trusty
     sudo: required
-    dist: xenial
-    edge: true
     services:
       - docker
     env: CC=clang-6.0 CXX=clang++-6.0 TARGET=STATICANALYSIS ECO="-DUSE_CLANG_TIDY=ON"
   - os: linux
+    dist: trusty
     sudo: required
-    dist: xenial
-    edge: true
     services:
       - docker
     env: CC=clang-6.0 CXX=clang++-6.0 ECO="-DWITH_PTHREADS=OFF"
   - os: linux
+    dist: trusty
     sudo: required
-    dist: xenial
-    edge: true
     env: CC=gcc-5 CXX=g++-5 EXTRA=NODOCKER
   - stage: deploy
     os: linux
@@ -119,9 +114,8 @@ jobs:
         - '$HOME/$RPUU_DST'
         - '$HOME/.sonar/cache'
   - os: linux
+    dist: trusty
     sudo: required
-    dist: xenial
-    edge: true
     services:
       - docker
     env: CC=clang-6.0 CXX=clang++-6.0 TARGET=WWW
