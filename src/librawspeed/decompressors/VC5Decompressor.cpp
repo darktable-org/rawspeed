@@ -630,7 +630,8 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 
 #ifdef HAVE_OPENMP
   bool exceptionThrown = false;
-#pragma omp parallel default(none) shared(exceptionThrown)
+#pragma omp parallel default(none) shared(exceptionThrown)                     \
+    num_threads(rawspeed_get_number_of_processor_cores())
   {
 #endif
 #ifdef HAVE_OPENMP
