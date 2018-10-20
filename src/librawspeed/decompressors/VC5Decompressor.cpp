@@ -293,6 +293,12 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     ThrowRDE("Height %u is not a multiple of %u", mRaw->dim.y,
              mVC5.patternHeight);
 
+  if (mRaw->dim.x > std::numeric_limits<decltype(Channel::width)>::max())
+    ThrowRDE("Width %u is too large", mRaw->dim.x);
+
+  if (mRaw->dim.y > std::numeric_limits<decltype(Channel::height)>::max())
+    ThrowRDE("Height %u is too large", mRaw->dim.y);
+
   // Initialize wavelet sizes.
   for (Channel& channel : channels) {
     channel.width = mRaw->dim.x / mVC5.patternWidth;
