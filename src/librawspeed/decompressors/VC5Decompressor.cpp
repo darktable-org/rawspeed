@@ -477,8 +477,10 @@ void VC5Decompressor::parseVC5() {
         chunkSize = 0;
       }
 
-      if (!optional)
-        ThrowRDE("Unknown (unhandled) non-optional Tag 0x%04hx", tag);
+      if (!optional) {
+        ThrowRDE("Unknown (unhandled) non-optional Tag 0x%04hx",
+                 static_cast<std::underlying_type<VC5Tag>::type>(tag));
+      }
 
       if (chunkSize)
         mBs.skipBytes(chunkSize, 4);
