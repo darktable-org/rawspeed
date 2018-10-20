@@ -7,6 +7,8 @@
  { include: ["<bits/stdint-uintn.h>", "private", "<cstdint>", "public"] },
  { include: ["<bits/exception.h>", "private", "<exception>", "public"] },
  { include: ["<bits/types/clock_t.h>", "private", "<ctime>", "public"] },
+ { include: ["<bits/std_function.h>", "private", "<functional>", "public"] },
+ { include: ["<bits/stdint-intn.h>", "private", "<cstdint>", "public"] },
  { include: ["@<gtest/.*>", "private", "<gtest/gtest.h>", "public"] },
  { include: ["@<gmock/.*>", "private", "<gmock/gmock.h>", "public"] },
  { include: ["<ThreadSafetyAnalysis.h>", "private", "\"ThreadSafetyAnalysis.h\"", "public"] }

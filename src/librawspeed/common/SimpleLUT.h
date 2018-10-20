@@ -23,9 +23,10 @@
 
 #include "common/Common.h" // for clampBits
 #include <algorithm>       // for generate_n
+#include <cassert>         // for assert
 #include <functional>      // for function
-#include <iterator>        // for back_insert_iterator
-#include <type_traits>     // for enable_if
+#include <iterator>        // for back_inserter
+#include <type_traits>     // for enable_if, is_convertible
 #include <vector>          // for vector
 
 namespace rawspeed {

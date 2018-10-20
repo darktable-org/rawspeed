@@ -27,13 +27,20 @@
   implementation.
  */
 
+#include "rawspeedconfig.h"
 #include "decompressors/VC5Decompressor.h"
 #include "common/Array2DRef.h"            // for Array2DRef
-#include "common/SimpleLUT.h"             // for SimpleLUT
+#include "common/Point.h"                 // for iPoint2D
+#include "common/RawspeedException.h"     // for RawspeedException
+#include "common/SimpleLUT.h"             // for SimpleLUT, SimpleLUT<>::va...
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include <cmath>
-#include <limits> // for numeric_limits
-#include <utility>
+#include "io/Endianness.h"                // for Endianness, Endianness::big
+#include <cassert>                        // for assert
+#include <cmath>                          // for pow
+#include <initializer_list>               // for initializer_list
+#include <limits>                         // for numeric_limits
+#include <string>                         // for string
+#include <utility>                        // for move
 
 namespace {
 

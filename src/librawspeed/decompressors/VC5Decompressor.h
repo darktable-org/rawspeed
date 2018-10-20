@@ -21,22 +21,23 @@
 
 #pragma once
 
-#include "common/Array2DRef.h" // for Array2DRef
-#include "common/Common.h"     // for uint32
-#include "common/RawImage.h"   // for RawImageData
-#include "common/SimpleLUT.h"  // for SimpleLUT
+#include "common/Array2DRef.h"                  // for Array2DRef
+#include "common/Common.h"                      // for ushort16, short16
+#include "common/RawImage.h"                    // for RawImage
+#include "common/SimpleLUT.h"                   // for SimpleLUT, SimpleLUT...
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/BitPumpMSB.h" // for BitPumpMSB
-#include "io/ByteStream.h" // for ByteStream
-#include <functional>      // for reference_wrapper
-#include <type_traits>     // for underlying_type
+#include "io/BitPumpMSB.h"                      // for BitPumpMSB
+#include "io/ByteStream.h"                      // for ByteStream
+#include <array>                                // for array
+#include <cstdint>                              // for int16_t, uint16_t
+#include <memory>                               // for unique_ptr
+#include <type_traits>                          // for underlying_type, und...
+#include <utility>                              // for move
+#include <vector>                               // for vector
 
 namespace rawspeed {
 
 const int MAX_NUM_PRESCALE = 8;
-
-class ByteStream;
-class RawImage;
 
 // Decompresses VC-5 as used by GoPro
 
