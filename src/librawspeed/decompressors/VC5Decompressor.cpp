@@ -605,8 +605,8 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
   initVC5LogTable();
 
   const std::vector<DecodeableBand> allDecodeableBands = [&]() {
-    std::vector<DecodeableBand> allDecodeableBands;
-    allDecodeableBands.reserve(numSubbandsTotal);
+    std::vector<DecodeableBand> bands;
+    bands.reserve(numSubbandsTotal);
     // All the high-pass bands for all wavelets,
     // in this specific order of decreasing worksize.
     for (int waveletLevel = 0; waveletLevel < numWaveletLevels;
@@ -618,7 +618,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
           auto* band = wavelet.bands[bandId].get();
           auto* decodeableHighPassBand =
               dynamic_cast<Wavelet::HighPassBand*>(band);
-          allDecodeableBands.emplace_back(decodeableHighPassBand, wavelet);
+          bands.emplace_back(decodeableHighPassBand, wavelet);
         }
       }
     }
@@ -629,10 +629,10 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
       Wavelet& smallestWavelet = channel.wavelets.back();
       auto* decodeableLowPassBand =
           dynamic_cast<Wavelet::LowPassBand*>(smallestWavelet.bands[0].get());
-      allDecodeableBands.emplace_back(decodeableLowPassBand, smallestWavelet);
+      bands.emplace_back(decodeableLowPassBand, smallestWavelet);
     }
     assert(allDecodeableBands.size() == numSubbandsTotal);
-    return allDecodeableBands;
+    return bands;
   }();
 
 #ifdef HAVE_OPENMP
