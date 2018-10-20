@@ -125,8 +125,13 @@ class VC5Decompressor final : public AbstractDecompressor {
     };
     struct ReconstructableBand final : AbstractBand {
       bool clampUint;
+      std::vector<int16_t> lowpass_storage;
+      std::vector<int16_t> highpass_storage;
       explicit ReconstructableBand(bool clampUint_ = false)
           : clampUint(clampUint_) {}
+      void processLow(const Wavelet& wavelet) noexcept;
+      void processHigh(const Wavelet& wavelet) noexcept;
+      void combine(const Wavelet& wavelet) noexcept;
       void decode(const Wavelet& wavelet) noexcept final;
     };
     struct AbstractDecodeableBand : AbstractBand {
@@ -168,8 +173,6 @@ class VC5Decompressor final : public AbstractDecompressor {
                             Array2DRef<const int16_t> low,
                             Array2DRef<const int16_t> high, int descaleShift,
                             bool clampUint /*= false*/) const noexcept;
-
-    std::vector<int16_t> reconstructLowband(bool clampUint) const noexcept;
 
     const Array2DRef<int16_t> bandAsArray2DRef(unsigned int iBand);
     const Array2DRef<const int16_t> bandAsArray2DRef(unsigned int iBand) const;

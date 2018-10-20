@@ -225,47 +225,59 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
   }
 }
 
-std::vector<int16_t>
-VC5Decompressor::Wavelet::reconstructLowband(const bool clampUint) const
-    noexcept {
-  int16_t descaleShift = (prescale == 2 ? 2 : 0);
+void VC5Decompressor::Wavelet::ReconstructableBand::processLow(
+    const Wavelet& wavelet) noexcept {
+  lowpass_storage =
+      Array2DRef<int16_t>::create(wavelet.width, 2 * wavelet.height);
 
-  std::vector<int16_t> lowpass_storage =
-      Array2DRef<int16_t>::create(width, 2 * height);
-  std::vector<int16_t> highpass_storage =
-      Array2DRef<int16_t>::create(width, 2 * height);
+  const Array2DRef<int16_t> lowpass(lowpass_storage.data(), wavelet.width,
+                                    2 * wavelet.height);
 
-  const Array2DRef<int16_t> lowpass(lowpass_storage.data(), width, 2 * height);
-  const Array2DRef<int16_t> highpass(highpass_storage.data(), width,
-                                     2 * height);
+  const Array2DRef<const int16_t> highlow = wavelet.bandAsArray2DRef(2);
+  const Array2DRef<const int16_t> lowlow = wavelet.bandAsArray2DRef(0);
 
-  {
-    const Array2DRef<const int16_t> lowlow = bandAsArray2DRef(0);
-    const Array2DRef<const int16_t> lowhigh = bandAsArray2DRef(1);
-    const Array2DRef<const int16_t> highlow = bandAsArray2DRef(2);
-    const Array2DRef<const int16_t> highhigh = bandAsArray2DRef(3);
+  // Reconstruct the "immediates", the actual low pass ...
+  wavelet.reconstructPass(lowpass, highlow, lowlow);
+}
 
-    // Reconstruct the "immediates", the actual low pass ...
-    reconstructPass(lowpass, highlow, lowlow);
-    // ... and high pass.
-    reconstructPass(highpass, highhigh, lowhigh);
-  }
+void VC5Decompressor::Wavelet::ReconstructableBand::processHigh(
+    const Wavelet& wavelet) noexcept {
+  highpass_storage =
+      Array2DRef<int16_t>::create(wavelet.width, 2 * wavelet.height);
 
-  std::vector<int16_t> dest_storage =
-      Array2DRef<int16_t>::create(2 * width, 2 * height);
-  const Array2DRef<int16_t> dest(dest_storage.data(), 2 * width, 2 * height);
+  const Array2DRef<int16_t> highpass(highpass_storage.data(), wavelet.width,
+                                     2 * wavelet.height);
+
+  const Array2DRef<const int16_t> highhigh = wavelet.bandAsArray2DRef(3);
+  const Array2DRef<const int16_t> lowhigh = wavelet.bandAsArray2DRef(1);
+
+  wavelet.reconstructPass(highpass, highhigh, lowhigh);
+}
+
+void VC5Decompressor::Wavelet::ReconstructableBand::combine(
+    const Wavelet& wavelet) noexcept {
+  int16_t descaleShift = (wavelet.prescale == 2 ? 2 : 0);
+
+  data = Array2DRef<int16_t>::create(2 * wavelet.width, 2 * wavelet.height);
+  const Array2DRef<int16_t> dest(data.data(), 2 * wavelet.width,
+                                 2 * wavelet.height);
+
+  const Array2DRef<int16_t> lowpass(lowpass_storage.data(), wavelet.width,
+                                    2 * wavelet.height);
+  const Array2DRef<int16_t> highpass(highpass_storage.data(), wavelet.width,
+                                     2 * wavelet.height);
 
   // And finally, combine the low pass, and high pass.
-  combineLowHighPass(dest, lowpass, highpass, descaleShift, clampUint);
-
-  return dest_storage;
+  wavelet.combineLowHighPass(dest, lowpass, highpass, descaleShift, clampUint);
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::decode(
     const Wavelet& wavelet) noexcept {
   assert(wavelet.allBandsValid());
   assert(data.empty());
-  data = wavelet.reconstructLowband(clampUint);
+  processLow(wavelet);
+  processHigh(wavelet);
+  combine(wavelet);
 }
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
