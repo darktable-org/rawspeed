@@ -28,6 +28,7 @@
 #include "decompressors/JpegDecompressor.h"         // for JpegDecompressor
 #include "decompressors/LJpegDecompressor.h"        // for LJpegDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "decompressors/VC5Decompressor.h"          // for VC5Decompressor
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, Endi...
 #include "io/IOException.h"                         // for IOException, Thr...
@@ -128,6 +129,19 @@ void AbstractDngDecompressor::decompressThreaded(
     "ZLIB is not present! Deflate compression will not be supported!"
     ThrowRDE("deflate support is disabled.");
 #endif
+    /* VC-5 */
+  } else if (compression == 9) {
+    for (size_t i = t->start; i < t->end && i < slices.size(); i++) {
+      auto e = &slices[i];
+      VC5Decompressor d(e->bs, mRaw);
+      try {
+        d.decode(e->offX, e->offY, e->width, e->height);
+      } catch (RawDecoderException& err) {
+        mRaw->setError(err.what());
+      } catch (IOException& err) {
+        mRaw->setError(err.what());
+      }
+    }
     /* Lossy DNG */
   } else if (compression == 0x884c) {
 #ifdef HAVE_JPEG

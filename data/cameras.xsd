@@ -25,6 +25,7 @@
       <xs:enumeration value="Epson"/>
       <xs:enumeration value="Fujifilm"/>
       <xs:enumeration value="GITUP"/>
+      <xs:enumeration value="GoPro"/>
       <xs:enumeration value="Hasselblad"/>
       <xs:enumeration value="Kodak"/>
       <xs:enumeration value="LG"/>
@@ -375,6 +376,7 @@
       <xs:enumeration value="Foculus"/>
       <xs:enumeration value="GITUP"/>
       <xs:enumeration value="Generic"/>
+      <xs:enumeration value="GoPro"/>
       <xs:enumeration value="Hasselblad"/>
       <xs:enumeration value="KODAK"/>
       <xs:enumeration value="KONICA MINOLTA"/>

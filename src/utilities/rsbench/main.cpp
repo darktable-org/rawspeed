@@ -29,7 +29,7 @@
 #include <sys/time.h>            // for CLOCKS_PER_SEC
 #include <vector>                // for vector
 
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
 #include <omp.h>
 #endif
 
@@ -173,7 +173,7 @@ int main(int argc, char** argv) {
 
   bool threading = hasFlag("-t");
 
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
   const auto threadsMax = omp_get_max_threads();
 #else
   const auto threadsMax = 1;

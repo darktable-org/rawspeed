@@ -1,4 +1,5 @@
 FILE(GLOB SOURCES
+  "Array2DRef.h"
   "ChecksumFile.cpp"
   "ChecksumFile.h"
   "Common.cpp"
@@ -19,6 +20,7 @@ FILE(GLOB SOURCES
   "RawImageDataFloat.cpp"
   "RawImageDataU16.cpp"
   "RawspeedException.h"
+  "SimpleLUT.h"
   "Spline.h"
   "TableLookUp.cpp"
   "TableLookUp.h"

@@ -53,7 +53,7 @@ else()
 endif()
 option(RAWSPEED_ENABLE_DEBUG_INFO "Whether to generate debug info or not." ON)
 option(WITH_PTHREADS "Enable threading support through pthread. Highly recommended" ON)
-option(WITH_OPENMP "Enable OpenMP support. Only used for tools, not the library itself." ON)
+option(WITH_OPENMP "Enable OpenMP support." ON)
 option(WITH_PUGIXML "Enable XML support for cameras.xml reading" ON)
 if(WITH_PUGIXML)
   option(USE_BUNDLED_PUGIXML "Build and use pugixml in-tree" OFF)
@@ -186,8 +186,6 @@ if(BUILD_BENCHMARKING)
 endif()
 
 add_subdirectory(src)
-
-include(OpenMP)
 
 if(BUILD_TESTING)
   add_subdirectory(test)

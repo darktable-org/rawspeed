@@ -36,12 +36,12 @@
 #include <Windows.h>
 #endif
 
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
 #include <omp.h>
 #endif
 
 // define this function, it is only declared in rawspeed:
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
 extern "C" int rawspeed_get_number_of_processor_cores() {
   return omp_get_max_threads();
 }
@@ -260,7 +260,7 @@ int main(int argc, char* argv[]) { // NOLINT
     fprintf(stdout, "pixel_aspect_ratio: %f\n", r->metadata.pixelAspectRatio);
 
     double sum = 0.0F;
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
 #pragma omp parallel for default(none) schedule(static) reduction(+ : sum)
 #endif
     for (int y = 0; y < dimUncropped.y; ++y) {
@@ -276,7 +276,7 @@ int main(int argc, char* argv[]) { // NOLINT
     if (r->getDataType() == TYPE_FLOAT32) {
       sum = 0.0F;
 
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
 #pragma omp parallel for default(none) schedule(static) reduction(+ : sum)
 #endif
       for (int y = 0; y < dimUncropped.y; ++y) {
@@ -293,7 +293,7 @@ int main(int argc, char* argv[]) { // NOLINT
     } else if (r->getDataType() == TYPE_USHORT16) {
       sum = 0.0F;
 
-#ifdef _OPENMP
+#ifdef HAVE_OPENMP
 #pragma omp parallel for default(none) schedule(static) reduction(+ : sum)
 #endif
       for (int y = 0; y < dimUncropped.y; ++y) {

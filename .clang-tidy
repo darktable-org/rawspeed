@@ -8,7 +8,7 @@ CheckOptions:
   - key:             readability-braces-around-statements.ShortStatementLines
     value:           '3'
   - key:             readability-function-size.BranchThreshold
-    value:           '26'
+    value:           '27'
   - key:             readability-function-size.LineThreshold
     value:           '167'
   - key:             readability-function-size.StatementThreshold
@@ -18,7 +18,7 @@ CheckOptions:
   - key:             readability-function-size.NestingThreshold
     value:           '6'
   - key:             readability-function-size.VariableThreshold
-    value:           '30'
+    value:           '32'
   - key:             readability-simplify-boolean-expr.ChainedConditionalAssignment
     value:           '1'
   - key:             readability-simplify-boolean-expr.ChainedConditionalReturn
@@ -39,4 +39,6 @@ CheckOptions:
     value:           lower_case
   - key:             google-runtime-references.WhiteListTypes
     value:           'benchmark::State'
+  - key:             modernize-use-default-member-init.UseAssignment
+    value:           1
 ...

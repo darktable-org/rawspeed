@@ -28,6 +28,7 @@ set(DECOMPRESSORS
   "SamsungV2Decompressor"
   "SonyArw1Decompressor"
   "SonyArw2Decompressor"
+  "VC5Decompressor"
 )
 
 foreach(decompressor IN LISTS DECOMPRESSORS)

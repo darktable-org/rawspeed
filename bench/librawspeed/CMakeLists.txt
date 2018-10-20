@@ -9,10 +9,6 @@ target_link_libraries(rawspeed_bench PUBLIC rawspeed)
 target_link_libraries(rawspeed_bench PUBLIC benchmark)
 target_include_directories(rawspeed_bench PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
-if(WITH_OPENMP AND OPENMP_FOUND AND TARGET OpenMP::OpenMP)
-  target_link_libraries(rawspeed_bench PUBLIC OpenMP::OpenMP)
-endif()
-
 function(add_rs_bench src)
   get_filename_component(BENCHNAME ${src} NAME_WE)
   add_executable(${BENCHNAME} ${src})

@@ -109,6 +109,7 @@ void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
 #ifdef HAVE_ZLIB
     case 8: // deflate
 #endif
+    case 9: // VC-5 as used by GoPro
 #ifdef HAVE_JPEG
     case 0x884c: // lossy JPEG
 #endif
@@ -279,6 +280,13 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
   uint32 predictor = -1;
   if (raw->hasEntry(PREDICTOR))
     predictor = raw->getEntry(PREDICTOR)->getU32();
+
+  // Some decompressors (such as VC5) may depend on the white point
+  if (raw->hasEntry(WHITELEVEL)) {
+    TiffEntry* whitelevel = raw->getEntry(WHITELEVEL);
+    if (whitelevel->isInt())
+      mRaw->whitePoint = whitelevel->getU32();
+  }
 
   AbstractDngDecompressor slices(mRaw, getTilingDescription(raw), compression,
                                  mFixLjpeg, bps, predictor);
