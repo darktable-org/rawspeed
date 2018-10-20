@@ -604,31 +604,36 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 
   initVC5LogTable();
 
-  std::vector<DecodeableBand> allDecodeableBands;
-  allDecodeableBands.reserve(numSubbandsTotal);
-  // All the high-pass bands for all wavelets,
-  // in this specific order of decreasing worksize.
-  for (int waveletLevel = 0; waveletLevel < numWaveletLevels; waveletLevel++) {
-    for (auto channelId = 0; channelId < numChannels; channelId++) {
-      for (int bandId = 1; bandId <= numHighPassBands; bandId++) {
-        auto& channel = channels[channelId];
-        auto& wavelet = channel.wavelets[waveletLevel];
-        auto* band = wavelet.bands[bandId].get();
-        auto* decodeableHighPassBand =
-            dynamic_cast<Wavelet::HighPassBand*>(band);
-        allDecodeableBands.emplace_back(decodeableHighPassBand, wavelet);
+  const std::vector<DecodeableBand> allDecodeableBands = [&]() {
+    std::vector<DecodeableBand> allDecodeableBands;
+    allDecodeableBands.reserve(numSubbandsTotal);
+    // All the high-pass bands for all wavelets,
+    // in this specific order of decreasing worksize.
+    for (int waveletLevel = 0; waveletLevel < numWaveletLevels;
+         waveletLevel++) {
+      for (auto channelId = 0; channelId < numChannels; channelId++) {
+        for (int bandId = 1; bandId <= numHighPassBands; bandId++) {
+          auto& channel = channels[channelId];
+          auto& wavelet = channel.wavelets[waveletLevel];
+          auto* band = wavelet.bands[bandId].get();
+          auto* decodeableHighPassBand =
+              dynamic_cast<Wavelet::HighPassBand*>(band);
+          allDecodeableBands.emplace_back(decodeableHighPassBand, wavelet);
+        }
       }
     }
-  }
-  // The low-pass bands at the end. I'm guessing they should be fast to decode.
-  for (Channel& channel : channels) {
-    // Low-pass band of the smallest wavelet.
-    Wavelet& smallestWavelet = channel.wavelets.back();
-    auto* decodeableLowPassBand =
-        dynamic_cast<Wavelet::LowPassBand*>(smallestWavelet.bands[0].get());
-    allDecodeableBands.emplace_back(decodeableLowPassBand, smallestWavelet);
-  }
-  assert(allDecodeableBands.size() == numSubbandsTotal);
+    // The low-pass bands at the end. I'm guessing they should be fast to
+    // decode.
+    for (Channel& channel : channels) {
+      // Low-pass band of the smallest wavelet.
+      Wavelet& smallestWavelet = channel.wavelets.back();
+      auto* decodeableLowPassBand =
+          dynamic_cast<Wavelet::LowPassBand*>(smallestWavelet.bands[0].get());
+      allDecodeableBands.emplace_back(decodeableLowPassBand, smallestWavelet);
+    }
+    assert(allDecodeableBands.size() == numSubbandsTotal);
+    return allDecodeableBands;
+  }();
 
 #ifdef HAVE_OPENMP
   bool exceptionThrown = false;
