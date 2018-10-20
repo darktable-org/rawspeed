@@ -51,7 +51,7 @@ struct RLV {
     const uint32_t length;                                                     \
     const RLV entries[n];                                                      \
   } constexpr
-#include "common/table17.inc"
+#include "gopro/vc5/table17.inc"
 
 } // namespace
 

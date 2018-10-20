@@ -22,7 +22,6 @@ FILE(GLOB SOURCES
   "RawspeedException.h"
   "SimpleLUT.h"
   "Spline.h"
-  "table17.inc"
   "TableLookUp.cpp"
   "TableLookUp.h"
   "Threading.h"
