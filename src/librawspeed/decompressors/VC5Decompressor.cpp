@@ -225,8 +225,9 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
   }
 }
 
-std::vector<int16_t> VC5Decompressor::Wavelet::reconstructLowband(
-    const bool clampUint /* = false */) const noexcept {
+std::vector<int16_t>
+VC5Decompressor::Wavelet::reconstructLowband(const bool clampUint) const
+    noexcept {
   int16_t descaleShift = (prescale == 2 ? 2 : 0);
 
   std::vector<int16_t> lowpass_storage =
@@ -264,7 +265,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::decode(
     const Wavelet& wavelet) noexcept {
   assert(wavelet.allBandsValid());
   assert(data.empty());
-  data = wavelet.reconstructLowband();
+  data = wavelet.reconstructLowband(clampUint);
 }
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
@@ -659,7 +660,9 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 #endif
     for (auto channel = channels.begin(); channel < channels.end(); ++channel) {
       Wavelet& wavelet = channel->wavelets.front();
-      channel->data = wavelet.reconstructLowband(true);
+      Wavelet::ReconstructableBand band(/*clampUint*/ true);
+      band.decode(wavelet);
+      channel->data = std::move(band.data);
       wavelet.clear(); // we no longer need it.
     }
 
