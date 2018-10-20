@@ -672,10 +672,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 #endif
     for (auto channel = channels.begin(); channel < channels.end(); ++channel) {
       Wavelet& wavelet = channel->wavelets.front();
-      Wavelet::ReconstructableBand band(/*clampUint*/ true);
-      band.decode(wavelet);
-      channel->data = std::move(band.data);
-      wavelet.clear(); // we no longer need it.
+      channel->band.decode(wavelet);
     }
 
     // And finally!
@@ -705,13 +702,13 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
   const unsigned int height = out.height / 2;
 
   const Array2DRef<const int16_t> lowbands0 = Array2DRef<const int16_t>(
-      channels[0].data.data(), channels[0].width, channels[0].height);
+      channels[0].band.data.data(), channels[0].width, channels[0].height);
   const Array2DRef<const int16_t> lowbands1 = Array2DRef<const int16_t>(
-      channels[1].data.data(), channels[1].width, channels[1].height);
+      channels[1].band.data.data(), channels[1].width, channels[1].height);
   const Array2DRef<const int16_t> lowbands2 = Array2DRef<const int16_t>(
-      channels[2].data.data(), channels[2].width, channels[2].height);
+      channels[2].band.data.data(), channels[2].width, channels[2].height);
   const Array2DRef<const int16_t> lowbands3 = Array2DRef<const int16_t>(
-      channels[3].data.data(), channels[3].width, channels[3].height);
+      channels[3].band.data.data(), channels[3].width, channels[3].height);
 
   // Convert to RGGB output
 #ifdef HAVE_OPENMP

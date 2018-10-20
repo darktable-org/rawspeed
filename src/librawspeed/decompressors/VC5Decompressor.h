@@ -184,7 +184,8 @@ class VC5Decompressor final : public AbstractDecompressor {
   struct Channel {
     std::array<Wavelet, numWaveletLevels> wavelets;
 
-    std::vector<int16_t> data; // the final lowband.
+    Wavelet::ReconstructableBand band{/*clampUint*/ true};
+    // the final lowband.
     uint16_t width, height;
   };
 
