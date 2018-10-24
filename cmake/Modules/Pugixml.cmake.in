@@ -33,8 +33,8 @@ else()
     message(WARNING "Did not find pugixml sources! Fetching from web...")
     ExternalProject_Add(
       pugixml
-      URL               https://github.com/zeux/pugixml/releases/download/v1.9/pugixml-1.9.zip
-      URL_HASH          SHA512=f97941941d98a1a056087edc0dde6376bf2cc12ce4523b67a2f2ec5ae0895c2a2e55da32fcca6a997f1a0d918c5f39564167da0a07ce0d7da92880ad8631c31e
+      URL               https://github.com/zeux/pugixml/releases/download/v1.9/pugixml-1.9.tar.gz
+      URL_HASH          SHA512=853a9d985aae537391c6524d5413ef4de237d99d96cc58ea7fe7152f786df1e408cdacd2e4387697e23c3e67cdc1d42b29de554501309eae16d86edd0e24785f
       PREFIX            "${CMAKE_BINARY_DIR}/pugixml"
       SOURCE_DIR        "${CMAKE_BINARY_DIR}/pugixml-src"
       BINARY_DIR        "${CMAKE_BINARY_DIR}/pugixml-build"
