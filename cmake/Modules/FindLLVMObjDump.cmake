@@ -1,4 +1,4 @@
-find_program(LLVMOBJDUMP_EXECUTABLE NAMES llvm-objdump llvm-objdump-6.0 llvm-objdump-5.0 llvm-objdump-4.0)
+find_program(LLVMOBJDUMP_EXECUTABLE NAMES llvm-objdump llvm-objdump-7 llvm-objdump-6.0 llvm-objdump-5.0 llvm-objdump-4.0 llvm-objdump-3.9)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LLVMObjDump

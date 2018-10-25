@@ -1,5 +1,5 @@
 find_program(LLVMCXXFilt_EXECUTABLE
-  NAMES llvm-cxxfilt llvm-cxxfilt-6.0 llvm-cxxfilt-5.0 llvm-cxxfilt-4.0
+  NAMES llvm-cxxfilt llvm-cxxfilt-7 llvm-cxxfilt-6.0 llvm-cxxfilt-5.0 llvm-cxxfilt-4.0 llvm-cxxfilt-3.9
   DOC "The llvm-cxxfilt executable"
   )
 
