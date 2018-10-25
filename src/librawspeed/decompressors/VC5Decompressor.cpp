@@ -455,7 +455,7 @@ void VC5Decompressor::parseVC5() {
       // FIXME: something is wrong. We get this before VC5Tag::ChannelNumber.
       // Defaulting to 'mVC5.iChannel=0' seems to work *for existing samples*.
       for (int iWavelet = 0; iWavelet < numWaveletLevels; ++iWavelet) {
-        auto& channel = channels[mVC5.iChannel.getValue()];
+        auto& channel = channels[mVC5.iChannel];
         auto& wavelet = channel.wavelets[iWavelet];
         wavelet.prescale = (val >> (14 - 2 * iWavelet)) & 0x03;
       }
@@ -574,26 +574,35 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
     return bands;
   }();
 
+  if (!mVC5.iSubband.hasValue())
+    ThrowRDE("Did not see VC5Tag::SubbandNumber yet");
+
   const int idx = subband_wavelet_index[mVC5.iSubband.getValue()];
   const int band = subband_band_index[mVC5.iSubband.getValue()];
 
-  auto& wavelets = channels[mVC5.iChannel.getValue()].wavelets;
+  auto& wavelets = channels[mVC5.iChannel].wavelets;
 
   Wavelet& wavelet = wavelets[idx];
   if (wavelet.isBandValid(band)) {
     ThrowRDE("Band %u for wavelet %u on channel %u was already seen", band, idx,
-             mVC5.iChannel.getValue());
+             mVC5.iChannel);
   }
 
   std::unique_ptr<Wavelet::AbstractBand>& dstBand = wavelet.bands[band];
   if (mVC5.iSubband.getValue() == 0) {
     assert(band == 0);
     // low-pass band, only one, for the smallest wavelet, per channel per image
+    if (!mVC5.lowpassPrecision.hasValue())
+      ThrowRDE("Did not see VC5Tag::LowpassPrecision yet");
     dstBand = std::make_unique<Wavelet::LowPassBand>(
         bs, mVC5.lowpassPrecision.getValue());
+    mVC5.lowpassPrecision.reset();
   } else {
+    if (!mVC5.quantization.hasValue())
+      ThrowRDE("Did not see VC5Tag::Quantization yet");
     dstBand = std::make_unique<Wavelet::HighPassBand>(
         bs, mVC5.quantization.getValue());
+    mVC5.quantization.reset();
   }
   wavelet.setBandValid(band);
 
@@ -605,6 +614,8 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
     nextWavelet.bands[0] = std::make_unique<Wavelet::ReconstructableBand>();
     nextWavelet.setBandValid(0);
   }
+
+  mVC5.iSubband.reset();
 }
 
 void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,

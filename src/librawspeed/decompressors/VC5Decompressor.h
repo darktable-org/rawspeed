@@ -105,7 +105,7 @@ class VC5Decompressor final : public AbstractDecompressor {
       numLowPassBands + numHighPassBands * numWaveletLevels;
 
   struct {
-    Optional<ushort16> iChannel{0}; // 0'th channel is the default
+    ushort16 iChannel = 0; // 0'th channel is the default
     Optional<ushort16> iSubband;
     Optional<ushort16> lowpassPrecision;
     Optional<short16> quantization;

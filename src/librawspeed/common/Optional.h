@@ -41,6 +41,8 @@ public:
 
   bool hasValue() const { return hasData; }
 
+  void reset() { hasData = false; }
+
   T getValue() const {
     assert(hasValue());
     return data;
