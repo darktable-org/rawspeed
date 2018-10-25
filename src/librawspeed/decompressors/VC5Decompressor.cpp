@@ -30,6 +30,7 @@
 #include "rawspeedconfig.h"
 #include "decompressors/VC5Decompressor.h"
 #include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Optional.h"              // for Optional
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawspeedException.h"     // for RawspeedException
 #include "common/SimpleLUT.h"             // for SimpleLUT, SimpleLUT<>::va...
@@ -454,7 +455,7 @@ void VC5Decompressor::parseVC5() {
       // FIXME: something is wrong. We get this before VC5Tag::ChannelNumber.
       // Defaulting to 'mVC5.iChannel=0' seems to work *for existing samples*.
       for (int iWavelet = 0; iWavelet < numWaveletLevels; ++iWavelet) {
-        auto& channel = channels[mVC5.iChannel];
+        auto& channel = channels[mVC5.iChannel.getValue()];
         auto& wavelet = channel.wavelets[iWavelet];
         wavelet.prescale = (val >> (14 - 2 * iWavelet)) & 0x03;
       }
@@ -573,24 +574,26 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
     return bands;
   }();
 
-  const int idx = subband_wavelet_index[mVC5.iSubband];
-  const int band = subband_band_index[mVC5.iSubband];
+  const int idx = subband_wavelet_index[mVC5.iSubband.getValue()];
+  const int band = subband_band_index[mVC5.iSubband.getValue()];
 
-  auto& wavelets = channels[mVC5.iChannel].wavelets;
+  auto& wavelets = channels[mVC5.iChannel.getValue()].wavelets;
 
   Wavelet& wavelet = wavelets[idx];
   if (wavelet.isBandValid(band)) {
     ThrowRDE("Band %u for wavelet %u on channel %u was already seen", band, idx,
-             mVC5.iChannel);
+             mVC5.iChannel.getValue());
   }
 
   std::unique_ptr<Wavelet::AbstractBand>& dstBand = wavelet.bands[band];
-  if (mVC5.iSubband == 0) {
+  if (mVC5.iSubband.getValue() == 0) {
     assert(band == 0);
     // low-pass band, only one, for the smallest wavelet, per channel per image
-    dstBand = std::make_unique<Wavelet::LowPassBand>(bs, mVC5.lowpassPrecision);
+    dstBand = std::make_unique<Wavelet::LowPassBand>(
+        bs, mVC5.lowpassPrecision.getValue());
   } else {
-    dstBand = std::make_unique<Wavelet::HighPassBand>(bs, mVC5.quantization);
+    dstBand = std::make_unique<Wavelet::HighPassBand>(
+        bs, mVC5.quantization.getValue());
   }
   wavelet.setBandValid(band);
 

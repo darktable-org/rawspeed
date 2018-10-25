@@ -23,6 +23,7 @@
 
 #include "common/Array2DRef.h"                  // for Array2DRef
 #include "common/Common.h"                      // for ushort16, short16
+#include "common/Optional.h"                    // for Optional
 #include "common/RawImage.h"                    // for RawImage
 #include "common/SimpleLUT.h"                   // for SimpleLUT, SimpleLUT...
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
@@ -104,14 +105,15 @@ class VC5Decompressor final : public AbstractDecompressor {
       numLowPassBands + numHighPassBands * numWaveletLevels;
 
   struct {
-    ushort16 iChannel = 0; // FIXME: we need this before we get this.
-    ushort16 iSubband;
+    Optional<ushort16> iChannel{0}; // 0'th channel is the default
+    Optional<ushort16> iSubband;
+    Optional<ushort16> lowpassPrecision;
+    Optional<short16> quantization;
+
     const ushort16 imgFormat = 4;
     const ushort16 patternWidth = 2;
     const ushort16 patternHeight = 2;
     const ushort16 cps = 1;
-    ushort16 lowpassPrecision;
-    short16 quantization;
   } mVC5;
 
   class Wavelet {
