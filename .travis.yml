@@ -88,13 +88,13 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=clang-6.0 CXX=clang++-6.0 TARGET=STATICANALYSIS ECO="-DUSE_CLANG_TIDY=ON"
+    env: CC=clang-7 CXX=clang++-7 TARGET=STATICANALYSIS ECO="-DUSE_CLANG_TIDY=ON"
   - os: linux
     dist: trusty
     sudo: required
     services:
       - docker
-    env: CC=clang-6.0 CXX=clang++-6.0 ECO="-DWITH_PTHREADS=OFF"
+    env: CC=clang-7 CXX=clang++-7 ECO="-DWITH_PTHREADS=OFF"
   - os: linux
     dist: trusty
     sudo: required
@@ -118,7 +118,7 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=clang-6.0 CXX=clang++-6.0 TARGET=WWW
+    env: CC=clang-7 CXX=clang++-7 TARGET=WWW
 
 # linux clang Coverage build OOM's in gcov during final codecov report collection
 # OSX gcc Coverage build produces invalid .gcno files
@@ -147,7 +147,7 @@ script:
       export CMD="$SRC_DIR/.ci/ci-script.sh";
       if [[ "$TARGET" == "STATICANALYSIS" ]]; then
         export TARGET="build";
-        export CMD="scan-build-6.0 --use-cc=\"$CC\" --use-c++=\"$CXX\" --force-analyze-debug-code --status-bugs -disable-checker deadcode.DeadStores $CMD";
+        export CMD="scan-build-7 --use-cc=\"$CC\" --use-c++=\"$CXX\" --force-analyze-debug-code --status-bugs -disable-checker deadcode.DeadStores $CMD";
       fi;
       if [[ "$TARGET" == "SONARQUBE" ]]; then
         export TARGET="build";
