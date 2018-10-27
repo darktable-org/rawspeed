@@ -58,6 +58,10 @@ const uchar8 NikonDecompressor::nikon_tree[][2][16] = {
 std::vector<ushort16> NikonDecompressor::createCurve(ByteStream* metadata,
                                                      uint32 bitsPS, uint32 v0,
                                                      uint32 v1, uint32* split) {
+  // Nikon Z7 12/14 bit compressed hack.
+  if (v0 == 68 && v1 == 64)
+    bitsPS -= 2;
+
   // 'curve' will hold a peace wise linearly interpolated function.
   // there are 'csize' segments, each is 'step' values long.
   // the very last value is not part of the used table but necessary
@@ -74,7 +78,7 @@ std::vector<ushort16> NikonDecompressor::createCurve(ByteStream* metadata,
   if (csize > 1)
     step = curve.size() / (csize - 1);
 
-  if (v0 == 68 && v1 == 32 && step > 0) {
+  if (v0 == 68 && (v1 == 32 || v1 == 64) && step > 0) {
     if ((csize - 1) * step != curve.size() - 1)
       ThrowRDE("Bad curve segment count (%u)", csize);
 
