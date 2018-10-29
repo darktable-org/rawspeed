@@ -55,6 +55,300 @@ const uchar8 NikonDecompressor::nikon_tree[][2][16] = {
 
 };
 
+namespace {
+
+const uint32 bitMask[] = {
+    0xffffffff, 0x7fffffff, 0x3fffffff, 0x1fffffff, 0x0fffffff, 0x07ffffff,
+    0x03ffffff, 0x01ffffff, 0x00ffffff, 0x007fffff, 0x003fffff, 0x001fffff,
+    0x000fffff, 0x0007ffff, 0x0003ffff, 0x0001ffff, 0x0000ffff, 0x00007fff,
+    0x00003fff, 0x00001fff, 0x00000fff, 0x000007ff, 0x000003ff, 0x000001ff,
+    0x000000ff, 0x0000007f, 0x0000003f, 0x0000001f, 0x0000000f, 0x00000007,
+    0x00000003, 0x00000001};
+
+class NikonLASDecompressor {
+  bool mUseBigtable = true;
+  bool mDNGCompatible = false;
+
+  struct HuffmanTable {
+    /*
+     * These two fields directly represent the contents of a JPEG DHT
+     * marker
+     */
+    uint32 bits[17];
+    uint32 huffval[256];
+
+    /*
+     * The remaining fields are computed from the above to allow more
+     * efficient coding and decoding.  These fields should be considered
+     * private to the Huffman compression & decompression modules.
+     */
+
+    ushort16 mincode[17];
+    int maxcode[18];
+    short valptr[17];
+    uint32 numbits[256];
+    std::vector<int> bigTable;
+    bool initialized;
+  } dctbl1;
+
+  void createHuffmanTable() {
+    int p, i, l, lastp, si;
+    char huffsize[257];
+    ushort16 huffcode[257];
+    ushort16 code;
+    int size;
+    int value, ll, ul;
+
+    /*
+     * Figure C.1: make table of Huffman code length for each symbol
+     * Note that this is in code-length order.
+     */
+    p = 0;
+    for (l = 1; l <= 16; l++) {
+      for (i = 1; i <= static_cast<int>(dctbl1.bits[l]); i++) {
+        huffsize[p++] = static_cast<char>(l);
+        if (p > 256)
+          ThrowRDE("LJpegDecompressor::createHuffmanTable: Code length too "
+                   "long. Corrupt data.");
+      }
+    }
+    huffsize[p] = 0;
+    lastp = p;
+
+    /*
+     * Figure C.2: generate the codes themselves
+     * Note that this is in code-length order.
+     */
+    code = 0;
+    si = huffsize[0];
+    p = 0;
+    while (huffsize[p]) {
+      while ((static_cast<int>(huffsize[p])) == si) {
+        huffcode[p++] = code;
+        code++;
+      }
+      code <<= 1;
+      si++;
+      if (p > 256)
+        ThrowRDE("createHuffmanTable: Code length too long. Corrupt data.");
+    }
+
+    /*
+     * Figure F.15: generate decoding tables
+     */
+    dctbl1.mincode[0] = 0;
+    dctbl1.maxcode[0] = 0;
+    p = 0;
+    for (l = 1; l <= 16; l++) {
+      if (dctbl1.bits[l]) {
+        dctbl1.valptr[l] = p;
+        dctbl1.mincode[l] = huffcode[p];
+        p += dctbl1.bits[l];
+        dctbl1.maxcode[l] = huffcode[p - 1];
+      } else {
+        dctbl1.valptr[l] =
+            0xff; // This check must be present to avoid crash on junk
+        dctbl1.maxcode[l] = -1;
+      }
+      if (p > 256)
+        ThrowRDE("createHuffmanTable: Code length too long. Corrupt data.");
+    }
+
+    /*
+     * We put in this value to ensure HuffDecode terminates.
+     */
+    dctbl1.maxcode[17] = 0xFFFFFL;
+
+    /*
+     * Build the numbits, value lookup tables.
+     * These table allow us to gather 8 bits from the bits stream,
+     * and immediately lookup the size and value of the huffman codes.
+     * If size is zero, it means that more than 8 bits are in the huffman
+     * code (this happens about 3-4% of the time).
+     */
+    memset(dctbl1.numbits, 0, sizeof(dctbl1.numbits));
+    for (p = 0; p < lastp; p++) {
+      size = huffsize[p];
+      if (size <= 8) {
+        value = dctbl1.huffval[p];
+        code = huffcode[p];
+        ll = code << (8 - size);
+        if (size < 8) {
+          ul = ll | bitMask[24 + size];
+        } else {
+          ul = ll;
+        }
+        if (ul > 256 || ll > ul)
+          ThrowRDE("createHuffmanTable: Code length too long. Corrupt data.");
+        for (i = ll; i <= ul; i++) {
+          dctbl1.numbits[i] = size | (value << 4);
+        }
+      }
+    }
+    if (mUseBigtable)
+      createBigTable();
+    dctbl1.initialized = true;
+  }
+
+  /************************************
+   * Bitable creation
+   *
+   * This is expanding the concept of fast lookups
+   *
+   * A complete table for 14 arbitrary bits will be
+   * created that enables fast lookup of number of bits used,
+   * and final delta result.
+   * Hit rate is about 90-99% for typical LJPEGS, usually about 98%
+   *
+   ************************************/
+
+  void createBigTable() {
+    const uint32 bits =
+        14; // HuffDecode functions must be changed, if this is modified.
+    const uint32 size = 1 << bits;
+    int rv = 0;
+    int temp;
+    uint32 l;
+
+    dctbl1.bigTable.resize(size);
+    for (uint32 i = 0; i < size; i++) {
+      ushort16 input = i << 2; // Calculate input value
+      int code = input >> 8;   // Get 8 bits
+      uint32 val = dctbl1.numbits[code];
+      l = val & 15;
+      if (l) {
+        rv = val >> 4;
+      } else {
+        l = 8;
+        while (code > dctbl1.maxcode[l]) {
+          temp = input >> (15 - l) & 1;
+          code = (code << 1) | temp;
+          l++;
+        }
+
+        /*
+         * With garbage input we may reach the sentinel value l = 17.
+         */
+
+        if (l > 16 || dctbl1.valptr[l] == 0xff) {
+          dctbl1.bigTable[i] = 0xff;
+          continue;
+        }
+        rv = dctbl1.huffval[dctbl1.valptr[l] + (code - dctbl1.mincode[l])];
+      }
+
+      if (rv == 16) {
+        if (mDNGCompatible)
+          dctbl1.bigTable[i] = (-(32768 << 8)) | (16 + l);
+        else
+          dctbl1.bigTable[i] = (-(32768 << 8)) | l;
+        continue;
+      }
+
+      if (rv + l > bits) {
+        dctbl1.bigTable[i] = 0xff;
+        continue;
+      }
+
+      if (rv) {
+        int x = input >> (16 - l - rv) & ((1 << rv) - 1);
+        if ((x & (1 << (rv - 1))) == 0)
+          x -= (1 << rv) - 1;
+        dctbl1.bigTable[i] = (static_cast<unsigned>(x) << 8) | (l + rv);
+      } else {
+        dctbl1.bigTable[i] = l;
+      }
+    }
+  }
+
+public:
+  uint32 setNCodesPerLength(const Buffer& data) {
+    uint32 acc = 0;
+    for (uint32 i = 0; i < 16; i++) {
+      dctbl1.bits[i + 1] = data[i];
+      acc += dctbl1.bits[i + 1];
+    }
+    dctbl1.bits[0] = 0;
+    return acc;
+  }
+
+  void setCodeValues(const Buffer& data) {
+    for (uint32 i = 0; i < data.getSize(); i++)
+      dctbl1.huffval[i] = data[i];
+  }
+
+  void setup(bool fullDecode_, bool fixDNGBug16_) { createHuffmanTable(); }
+
+  /*
+   *--------------------------------------------------------------
+   *
+   * HuffDecode --
+   *
+   * Taken from Figure F.16: extract next coded symbol from
+   * input stream.  This should becode a macro.
+   *
+   * Results:
+   * Next coded symbol
+   *
+   * Side effects:
+   * Bitstream is parsed.
+   *
+   *--------------------------------------------------------------
+   */
+  int decodeNext(BitPumpMSB& bits) { // NOLINT: google-runtime-references
+    int rv;
+    int l, temp;
+    int code, val;
+
+    bits.fill();
+    code = bits.peekBitsNoFill(14);
+    val = dctbl1.bigTable[code];
+    if ((val & 0xff) != 0xff) {
+      bits.skipBitsNoFill(val & 0xff);
+      return val >> 8;
+    }
+
+    rv = 0;
+    code = bits.peekBitsNoFill(8);
+    val = dctbl1.numbits[code];
+    l = val & 15;
+    if (l) {
+      bits.skipBitsNoFill(l);
+      rv = val >> 4;
+    } else {
+      bits.skipBits(8);
+      l = 8;
+      while (code > dctbl1.maxcode[l]) {
+        temp = bits.getBitsNoFill(1);
+        code = (code << 1) | temp;
+        l++;
+      }
+
+      if (l > 16) {
+        ThrowRDE("Corrupt JPEG data: bad Huffman code:%u\n", l);
+      } else {
+        rv = dctbl1.huffval[dctbl1.valptr[l] + (code - dctbl1.mincode[l])];
+      }
+    }
+
+    if (rv == 16)
+      return -32768;
+
+    /*
+     * Section F.2.2.1: decode the difference and
+     * Figure F.12: extend sign bit
+     */
+    uint32 len = rv & 15;
+    uint32 shl = rv >> 4;
+    int diff = ((bits.getBits(len - shl) << 1) + 1) << shl >> 1;
+    if ((diff & (1 << (len - 1))) == 0)
+      diff -= (1 << len) - !shl;
+    return diff;
+  }
+};
+
+} // namespace
+
 std::vector<ushort16> NikonDecompressor::createCurve(ByteStream* metadata,
                                                      uint32 bitsPS, uint32 v0,
                                                      uint32 v1, uint32* split) {
@@ -171,9 +465,6 @@ NikonDecompressor::NikonDecompressor(const RawImage& raw, ByteStream metadata,
   // If the 'split' happens outside of the image, it does not actually happen.
   if (split >= static_cast<unsigned>(mRaw->dim.y))
     split = 0;
-
-  if (split)
-    ThrowRDE("Nikon %i-bit lossy-after-split raws are still broken.", bitsPS);
 }
 
 template <typename Huffman>
@@ -229,9 +520,15 @@ void NikonDecompressor::decompress(const ByteStream& data,
 
   random = bits.peekBits(24);
 
-  assert(!split);
+  assert(split == 0 || split < static_cast<unsigned>(mRaw->dim.y));
 
-  decompress<HuffmanTable>(&bits, 0, mRaw->dim.y);
+  if (!split) {
+    decompress<HuffmanTable>(&bits, 0, mRaw->dim.y);
+  } else {
+    decompress<HuffmanTable>(&bits, 0, split);
+    huffSelect += 1;
+    decompress<NikonLASDecompressor>(&bits, split, mRaw->dim.y);
+  }
 }
 
 } // namespace rawspeed
