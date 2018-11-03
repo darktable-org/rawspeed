@@ -260,7 +260,8 @@ class NikonLASDecompressor {
         int x = input >> (16 - l - rv) & ((1 << rv) - 1);
         if ((x & (1 << (rv - 1))) == 0)
           x -= (1 << rv) - 1;
-        dctbl1.bigTable[i] = (static_cast<unsigned>(x) << 8) | (l + rv);
+        dctbl1.bigTable[i] =
+            static_cast<int>((static_cast<unsigned>(x) << 8) | (l + rv));
       } else {
         dctbl1.bigTable[i] = l;
       }
@@ -306,14 +307,14 @@ public:
     int l;
     int temp;
     int code;
-    int val;
+    unsigned val;
 
     bits.fill();
     code = bits.peekBitsNoFill(14);
-    val = dctbl1.bigTable[code];
+    val = static_cast<unsigned>(dctbl1.bigTable[code]);
     if ((val & 0xff) != 0xff) {
       bits.skipBitsNoFill(val & 0xff);
-      return val >> 8;
+      return static_cast<int>(val) >> 8;
     }
 
     rv = 0;
@@ -322,7 +323,7 @@ public:
     l = val & 15;
     if (l) {
       bits.skipBitsNoFill(l);
-      rv = val >> 4;
+      rv = static_cast<int>(val) >> 4;
     } else {
       bits.skipBits(8);
       l = 8;
