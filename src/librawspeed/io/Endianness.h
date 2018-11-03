@@ -67,25 +67,35 @@ inline Endianness getHostEndianness() {
 #define BSWAP64(A) __builtin_bswap64(A)
 #endif
 
-inline short16 getByteSwapped(short16 v) { return BSWAP16(v); }
-inline ushort16 getByteSwapped(ushort16 v) { return BSWAP16(v); }
-inline int32 getByteSwapped(int32 v) { return BSWAP32(v); }
-inline uint32 getByteSwapped(uint32 v) { return BSWAP32(v); }
-inline uint64 getByteSwapped(uint64 v) { return BSWAP64(v); }
+inline short16 getByteSwapped(short16 v) {
+  return static_cast<short16>(BSWAP16(static_cast<ushort16>(v)));
+}
+inline ushort16 getByteSwapped(ushort16 v) {
+  return static_cast<ushort16>(BSWAP16(v));
+}
+inline int32 getByteSwapped(int32 v) {
+  return static_cast<int32>(BSWAP32(static_cast<uint32>(v)));
+}
+inline uint32 getByteSwapped(uint32 v) {
+  return static_cast<uint32>(BSWAP32(v));
+}
+inline uint64 getByteSwapped(uint64 v) {
+  return BSWAP64(static_cast<uint64>(v));
+}
 
 // the float/double versions use two memcpy which guarantee strict aliasing
 // and are compiled into the same assembly as the popular union trick.
 inline float getByteSwapped(float f) {
   uint32 i;
   memcpy(&i, &f, sizeof(i));
-  i = BSWAP32(i);
+  i = getByteSwapped(i);
   memcpy(&f, &i, sizeof(i));
   return f;
 }
 inline double getByteSwapped(double d) {
   uint64 i;
   memcpy(&i, &d, sizeof(i));
-  i = BSWAP64(i);
+  i = getByteSwapped(i);
   memcpy(&d, &i, sizeof(i));
   return d;
 }
