@@ -92,12 +92,18 @@ class NikonLASDecompressor {
   } dctbl1;
 
   void createHuffmanTable() {
-    int p, i, l, lastp, si;
+    int p;
+    int i;
+    int l;
+    int lastp;
+    int si;
     char huffsize[257];
     ushort16 huffcode[257];
     ushort16 code;
     int size;
-    int value, ll, ul;
+    int value;
+    int ll;
+    int ul;
 
     /*
      * Figure C.1: make table of Huffman code length for each symbol
@@ -297,8 +303,10 @@ public:
    */
   int decodeNext(BitPumpMSB& bits) { // NOLINT: google-runtime-references
     int rv;
-    int l, temp;
-    int code, val;
+    int l;
+    int temp;
+    int code;
+    int val;
 
     bits.fill();
     code = bits.peekBitsNoFill(14);

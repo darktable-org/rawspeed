@@ -119,7 +119,8 @@ auto convolute = [](unsigned x, unsigned y, std::array<int, 4> muls,
 void VC5Decompressor::Wavelet::reconstructPass(
     const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> high,
     const Array2DRef<const int16_t> low) const noexcept {
-  unsigned int x, y;
+  unsigned int x;
+  unsigned int y;
 
   auto convolution = [&x, &y, high](std::array<int, 4> muls, auto lowGetter) {
     return convolute(x, y, muls, high, lowGetter, /*DescaleShift*/ 0);
@@ -171,7 +172,8 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
     const Array2DRef<int16_t> dest, const Array2DRef<const int16_t> low,
     const Array2DRef<const int16_t> high, int descaleShift,
     bool clampUint = false) const noexcept {
-  unsigned int x, y;
+  unsigned int x;
+  unsigned int y;
 
   auto convolution = [&x, &y, high, descaleShift](std::array<int, 4> muls,
                                                   auto lowGetter) {
