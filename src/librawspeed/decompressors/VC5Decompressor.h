@@ -177,8 +177,7 @@ class VC5Decompressor final : public AbstractDecompressor {
                             Array2DRef<const int16_t> high, int descaleShift,
                             bool clampUint /*= false*/) const noexcept;
 
-    const Array2DRef<int16_t> bandAsArray2DRef(unsigned int iBand);
-    const Array2DRef<const int16_t> bandAsArray2DRef(unsigned int iBand) const;
+    Array2DRef<const int16_t> bandAsArray2DRef(unsigned int iBand) const;
 
   protected:
     uint32 mDecodedBandMask = 0;

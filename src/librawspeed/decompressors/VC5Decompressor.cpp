@@ -82,12 +82,7 @@ bool VC5Decompressor::Wavelet::allBandsValid() const {
   return mDecodedBandMask == static_cast<uint32>((1 << numBands) - 1);
 }
 
-const Array2DRef<int16_t>
-VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) {
-  return {bands[iBand]->data.data(), width, height};
-}
-
-const Array2DRef<const int16_t>
+Array2DRef<const int16_t>
 VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) const {
   return {bands[iBand]->data.data(), width, height};
 }
