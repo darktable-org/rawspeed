@@ -109,7 +109,7 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
   std::array<int, 2> len;
   auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, strip.n));
   for (uint32 col = 0; col < width; col++) {
-    if (col >= (width & -8))
+    if (col >= (width & ~7U)) // last 'width % 8' pixels.
       len[0] = len[1] = 14;
     else if ((col & 7) == 0) {
       for (int& i : len) {
