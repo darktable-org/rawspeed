@@ -101,7 +101,7 @@ KodakDecompressor::decodeSegment(const uint32 bsize) {
     bitbuf >>= len;
     bits -= len;
 
-    out[i] = len != 0 ? HuffmanTable::signExtended(diff, len) : diff;
+    out[i] = len != 0 ? HuffmanTable::signExtended(diff, len) : int(diff);
   }
 
   return out;
