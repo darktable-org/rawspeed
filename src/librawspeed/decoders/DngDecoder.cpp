@@ -277,7 +277,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
              "JPEG-compressed data.");
   }
 
-  uint32 predictor = -1;
+  uint32 predictor = ~0U;
   if (raw->hasEntry(PREDICTOR))
     predictor = raw->getEntry(PREDICTOR)->getU32();
 
