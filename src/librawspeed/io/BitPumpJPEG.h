@@ -68,7 +68,7 @@ inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uchar8* input)
         // Normally we would rewind the pos to the FF byte, but in order to
         // prevent potential endless loop on corrupt lossless jpeg, let's not.
 
-        cache.cache &= ~0xFF;
+        cache.cache &= ~0xFFULL; // clear low 8 bits.
         cache.cache <<= 64 - cache.fillLevel;
         cache.fillLevel = 64;
         break;

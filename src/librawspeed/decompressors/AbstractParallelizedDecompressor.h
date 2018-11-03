@@ -73,7 +73,7 @@ public:
     return nullptr;
   }
 
-  uint32 taskNo = -1;
+  uint32 taskNo = ~0U;
   const uint32 tasksTotal;
 
   uint32 start = 0;

@@ -196,7 +196,7 @@ public:
 
     uint32 code = bs.peekBitsNoFill(LookupDepth);
     assert(code < decodeLookup.size());
-    int val = decodeLookup[code];
+    auto val = static_cast<unsigned>(decodeLookup[code]);
     int len = val & LenMask;
     assert(len >= 0);
     assert(len <= 16);
@@ -205,12 +205,12 @@ public:
     bs.skipBitsNoFill(len);
     if (FULL_DECODE && val & FlagMask) {
       // if the flag bit is set, the payload is the already sign extended difference
-      return val >> PayloadShift;
+      return static_cast<int>(val) >> PayloadShift;
     }
 
     if (len) {
       // if the flag bit is not set but len != 0, the payload is the number of bits to sign extend and return
-      const int l_diff = val >> PayloadShift;
+      const int l_diff = static_cast<int>(val) >> PayloadShift;
       assert((FULL_DECODE && (len + l_diff <= 32)) || !FULL_DECODE);
       if (FULL_DECODE && l_diff == 16) {
         if (fixDNGBug16)

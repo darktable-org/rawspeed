@@ -115,15 +115,15 @@ struct JpegComponentInfo {
   * These values are fixed over the whole image.
   * They are read from the SOF marker.
   */
-  uint32 componentId = -1;		/* identifier for this component (0..255) */
+  uint32 componentId = ~0U; /* identifier for this component (0..255) */
 
   /*
   * Huffman table selector (0..3). The value may vary
   * between scans. It is read from the SOS marker.
   */
-  uint32 dcTblNo = -1;
-  uint32 superH = -1; // Horizontal Supersampling
-  uint32 superV = -1; // Vertical Supersampling
+  uint32 dcTblNo = ~0U;
+  uint32 superH = ~0U; // Horizontal Supersampling
+  uint32 superV = ~0U; // Vertical Supersampling
 };
 
 class SOFInfo {
