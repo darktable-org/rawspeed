@@ -206,7 +206,7 @@ protected:
   void doLookup(int start_y, int end_y) override;
 
   RawImageDataU16();
-  explicit RawImageDataU16(const iPoint2D& dim, uint32 cpp = 1);
+  explicit RawImageDataU16(const iPoint2D& dim_, uint32 cpp_ = 1);
   friend class RawImage;
 };
 
@@ -221,7 +221,7 @@ protected:
   void fixBadPixel(uint32 x, uint32 y, int component = 0) override;
   [[noreturn]] void doLookup(int start_y, int end_y) override;
   RawImageDataFloat();
-  explicit RawImageDataFloat(const iPoint2D& dim, uint32 cpp = 1);
+  explicit RawImageDataFloat(const iPoint2D& dim_, uint32 cpp_ = 1);
   friend class RawImage;
 };
 

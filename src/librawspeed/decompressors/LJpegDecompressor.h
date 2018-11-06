@@ -47,7 +47,7 @@ public:
   LJpegDecompressor(const ByteStream& bs, const RawImage& img);
 
   void decode(uint32 offsetX, uint32 offsetY, uint32 width, uint32 height,
-              bool fixDng16Bug);
+              bool fixDng16Bug_);
 };
 
 } // namespace rawspeed

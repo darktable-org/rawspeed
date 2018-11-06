@@ -225,12 +225,12 @@ public:
 
   // special factory function to set up internal buffer with copy of passed data.
   // only necessary to create 'fake' TiffEntries (see e.g. RAF)
-  static ByteStream createCopy(void* data, size_type size) {
+  static ByteStream createCopy(void* data_, size_type size_) {
     ByteStream bs;
-    auto* new_data = alignedMalloc<uchar8, 8>(roundUp(size, 8));
-    memcpy(new_data, data, size);
+    auto* new_data = alignedMalloc<uchar8, 8>(roundUp(size_, 8));
+    memcpy(new_data, data_, size_);
     bs.data = new_data;
-    bs.size = size;
+    bs.size = size_;
     bs.isOwner = true;
     return bs; // hint: copy elision or move will happen
   }
