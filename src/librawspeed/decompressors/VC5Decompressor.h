@@ -143,9 +143,8 @@ class VC5Decompressor final : public AbstractDecompressor {
     };
     struct LowPassBand final : AbstractDecodeableBand {
       ushort16 lowpassPrecision;
-      LowPassBand(ByteStream bs_, ushort16 lowpassPrecision_)
-          : AbstractDecodeableBand(std::move(bs_)),
-            lowpassPrecision(lowpassPrecision_) {}
+      LowPassBand(const Wavelet& wavelet, ByteStream bs_,
+                  ushort16 lowpassPrecision_);
       void decode(const Wavelet& wavelet) final;
     };
     struct HighPassBand final : AbstractDecodeableBand {

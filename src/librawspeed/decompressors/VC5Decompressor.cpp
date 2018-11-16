@@ -503,6 +503,20 @@ void VC5Decompressor::parseVC5() {
   }
 }
 
+VC5Decompressor::Wavelet::LowPassBand::LowPassBand(const Wavelet& wavelet,
+                                                   ByteStream bs_,
+                                                   ushort16 lowpassPrecision_)
+    : AbstractDecodeableBand(std::move(bs_)),
+      lowpassPrecision(lowpassPrecision_) {
+  // Low-pass band is a uncompressed version of the image, hugely downscaled.
+  // It consists of width * height pixels, `lowpassPrecision` each.
+  // We can easily check that we have sufficient amount of bits to decode it.
+  const auto waveletArea = iPoint2D(wavelet.width, wavelet.height).area();
+  const auto bitsTotal = waveletArea * lowpassPrecision;
+  const auto bytesTotal = roundUpDivision(bitsTotal, 8);
+  bs = bs.getStream(bytesTotal); // And clamp the size while we are at it.
+}
+
 void VC5Decompressor::Wavelet::LowPassBand::decode(const Wavelet& wavelet) {
   data = Array2DRef<int16_t>::create(wavelet.width, wavelet.height);
   const Array2DRef<int16_t> dst(data.data(), wavelet.width, wavelet.height);
@@ -592,7 +606,7 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
     if (!mVC5.lowpassPrecision.hasValue())
       ThrowRDE("Did not see VC5Tag::LowpassPrecision yet");
     dstBand = std::make_unique<Wavelet::LowPassBand>(
-        bs, mVC5.lowpassPrecision.getValue());
+        wavelet, bs, mVC5.lowpassPrecision.getValue());
     mVC5.lowpassPrecision.reset();
   } else {
     if (!mVC5.quantization.hasValue())
