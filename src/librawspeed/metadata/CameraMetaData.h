@@ -21,11 +21,12 @@
 #pragma once
 
 #include "rawspeedconfig.h"
-#include "common/Common.h" // for uint32
-#include <map>             // for map
-#include <memory>          // for unique_ptr
-#include <string>          // for string
-#include <tuple>           // for tuple
+#include "common/Common.h"   // for uint32
+#include "metadata/Camera.h" // for Camera
+#include <map>               // for map
+#include <memory>            // for unique_ptr
+#include <string>            // for string
+#include <tuple>             // for tuple
 
 namespace rawspeed {
 
