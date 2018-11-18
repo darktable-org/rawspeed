@@ -544,7 +544,7 @@ void VC5Decompressor::Wavelet::HighPassBand::decode(const Wavelet& wavelet) {
   for (int iPixel = 0; iPixel < nPixels;) {
     getRLV(&bits, &pixelValue, &count);
     for (; count > 0; --count) {
-      if (iPixel > nPixels)
+      if (iPixel >= nPixels)
         ThrowRDE("Buffer overflow");
       data[iPixel] = dequantize(pixelValue);
       ++iPixel;
