@@ -550,11 +550,9 @@ void VC5Decompressor::Wavelet::HighPassBand::decode(const Wavelet& wavelet) {
       ++iPixel;
     }
   }
-  if (bits.getPosition() < bits.getSize()) {
-    getRLV(&bits, &pixelValue, &count);
-    if (pixelValue != MARKER_BAND_END || count != 0)
-      ThrowRDE("EndOfBand marker not found");
-  }
+  getRLV(&bits, &pixelValue, &count);
+  if (pixelValue != MARKER_BAND_END || count != 0)
+    ThrowRDE("EndOfBand marker not found");
 }
 
 void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
