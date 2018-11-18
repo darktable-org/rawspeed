@@ -1,7 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
-project(zlib NONE)
-
 # Download and unpack zlib at configure time
 configure_file(${RAWSPEED_SOURCE_DIR}/cmake/Modules/Zlib.cmake.in ${CMAKE_BINARY_DIR}/zlib/CMakeLists.txt @ONLY)
 

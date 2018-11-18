@@ -1,7 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
-project(pugixml NONE)
-
 # Download and unpack pugixml at configure time
 configure_file(${RAWSPEED_SOURCE_DIR}/cmake/Modules/Pugixml.cmake.in ${CMAKE_BINARY_DIR}/pugixml/CMakeLists.txt @ONLY)
 

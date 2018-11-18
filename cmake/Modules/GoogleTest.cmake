@@ -1,7 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
-project(googletest NONE)
-
 # Download and unpack googletest at configure time
 configure_file(${RAWSPEED_SOURCE_DIR}/cmake/Modules/GoogleTest.cmake.in ${CMAKE_BINARY_DIR}/googletest/CMakeLists.txt @ONLY)
 
