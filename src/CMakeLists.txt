@@ -1,7 +1,3 @@
-add_library(rawspeed STATIC)
-
-include(src-dependencies)
-
 include(memory-align-alloc)
 include(thread-local)
 

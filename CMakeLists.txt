@@ -189,6 +189,10 @@ if(BUILD_BENCHMARKING)
   add_custom_target(benchmarks ALL)
 endif()
 
+add_library(rawspeed STATIC)
+
+include(src-dependencies)
+
 add_subdirectory(src)
 
 if(BUILD_TESTING)
