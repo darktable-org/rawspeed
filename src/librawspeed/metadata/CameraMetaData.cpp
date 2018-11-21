@@ -62,7 +62,7 @@ CameraMetaData::CameraMetaData(const char *docname) {
       continue;
 
     // Create cameras for aliases.
-    for (uint32 i = 0; i < cam->aliases.size(); i++) {
+    for (auto i = 0UL; i < cam->aliases.size(); i++) {
       addCamera(std::make_unique<Camera>(cam, i));
     }
   }

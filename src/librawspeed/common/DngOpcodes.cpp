@@ -321,9 +321,9 @@ public:
 
     // Create lookup
     lookup.resize(65536);
-    for (auto i = 0U; i < lookup.size(); ++i) {
+    for (auto i = 0UL; i < lookup.size(); ++i) {
       double val = polynomial[0];
-      for (auto j = 1U; j < polynomial.size(); ++j)
+      for (auto j = 1UL; j < polynomial.size(); ++j)
         val += polynomial[j] * pow(i / 65536.0, j);
       lookup[i] = (clampBits(static_cast<int>(val * 65535.5), 16));
     }

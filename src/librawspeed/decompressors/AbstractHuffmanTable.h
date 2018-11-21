@@ -106,8 +106,8 @@ protected:
 
     // No two symbols should have the same prefix (high bytes)
     // Only analyze the lower triangular matrix, excluding diagonal
-    for (auto sId = 0U; sId < symbols.size(); sId++) {
-      for (auto pId = 0U; pId < sId; pId++)
+    for (auto sId = 0UL; sId < symbols.size(); sId++) {
+      for (auto pId = 0UL; pId < sId; pId++)
         assert(!CodeSymbol::HaveCommonPrefix(symbols[sId], symbols[pId]));
     }
   }
@@ -175,21 +175,21 @@ public:
     // We are at the Root node, len is 1, there are two possible child Nodes
     unsigned maxCodes = 2;
 
-    for (auto codeLen = 1U; codeLen < nCodesPerLength.size(); codeLen++) {
+    for (auto codeLen = 1UL; codeLen < nCodesPerLength.size(); codeLen++) {
       // we have codeLen bits. make sure that that code count can actually fit
       // E.g. for len 1 we could have two codes: 0b0 and 0b1
       // (but in that case there can be no other codes (with higher lenghts))
       const auto maxCodesInCurrLen = (1U << codeLen);
       const auto nCodes = nCodesPerLength[codeLen];
       if (nCodes > maxCodesInCurrLen) {
-        ThrowRDE("Corrupt Huffman. Can never have %u codes in %u-bit len",
+        ThrowRDE("Corrupt Huffman. Can never have %u codes in %lu-bit len",
                  nCodes, codeLen);
       }
 
       // Also, check that we actually can have this much leafs for this lenght
       if (nCodes > maxCodes) {
         ThrowRDE(
-            "Corrupt Huffman. Can only fit %u out of %u codes in %u-bit len",
+            "Corrupt Huffman. Can only fit %u out of %u codes in %lu-bit len",
             maxCodes, nCodes, codeLen);
       }
 

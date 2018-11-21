@@ -228,7 +228,7 @@ void RawDecoder::setMetaData(const CameraMetaData* meta, const string& make,
   if (mRaw->blackAreas.empty() && !sensor->mBlackLevelSeparate.empty()) {
     auto cfaArea = mRaw->cfa.getSize().area();
     if (mRaw->isCFA && cfaArea <= sensor->mBlackLevelSeparate.size()) {
-      for (uint32 i = 0; i < cfaArea; i++) {
+      for (auto i = 0UL; i < cfaArea; i++) {
         mRaw->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
       }
     } else if (!mRaw->isCFA && mRaw->getCpp() <= sensor->mBlackLevelSeparate.size()) {

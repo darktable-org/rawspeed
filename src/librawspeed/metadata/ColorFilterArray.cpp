@@ -78,7 +78,7 @@ void ColorFilterArray::setCFA( iPoint2D in_size, ... )
   }
   va_list arguments;
   va_start(arguments, in_size);
-  for (uint32 i = 0; i <  size.area(); i++ ) {
+  for (auto i = 0UL; i < size.area(); i++) {
     cfa[i] = static_cast<CFAColor>(va_arg(arguments, int));
   }
   va_end (arguments);

@@ -46,7 +46,7 @@ protected:
                   "This BitStream specialization is not marked as usable here");
 
     CodeSymbol partial;
-    unsigned codeId;
+    unsigned long codeId;
 
     // Read bits until either find the code or detect the uncorrect code
     for (partial.code = 0, partial.code_len = 1;; ++partial.code_len) {
@@ -102,7 +102,7 @@ public:
 
     extrCodeIdForLen.reserve(1U + nCodesPerLength.size());
     extrCodeIdForLen.resize(2); // for len 0 and 1, the min code id is always 0
-    for (auto codeLen = 1U; codeLen < nCodesPerLength.size(); codeLen++) {
+    for (auto codeLen = 1UL; codeLen < nCodesPerLength.size(); codeLen++) {
       auto minCodeId = extrCodeIdForLen.back();
       minCodeId += nCodesPerLength[codeLen];
       extrCodeIdForLen.emplace_back(minCodeId);

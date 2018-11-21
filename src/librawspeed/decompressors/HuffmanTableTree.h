@@ -96,12 +96,12 @@ public:
     assert(codeValues.size() == maxCodesCount());
 
     auto currValue = codeValues.cbegin();
-    for (unsigned codeLen = 1; codeLen < nCodesPerLength.size(); codeLen++) {
+    for (auto codeLen = 1UL; codeLen < nCodesPerLength.size(); codeLen++) {
       const auto nCodesForCurrLen = nCodesPerLength[codeLen];
 
       auto nodes = tree.getAllVacantNodesAtDepth(codeLen);
       if (nodes.size() < nCodesForCurrLen) {
-        ThrowRDE("Got too many (%u) codes for len %u, can only have %zu codes",
+        ThrowRDE("Got too many (%u) codes for len %lu, can only have %zu codes",
                  nCodesForCurrLen, codeLen, nodes.size());
       }
 
