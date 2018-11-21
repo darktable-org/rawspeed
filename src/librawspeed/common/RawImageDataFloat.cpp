@@ -293,8 +293,7 @@ void RawImageDataFloat::fixBadPixel( uint32 x, uint32 y, int component )
 {
   std::array<float, 4> values;
   values.fill(-1);
-  std::array<float, 4> dist;
-  values.fill(0);
+  std::array<float, 4> dist = {{}};
   std::array<float, 4> weight;
 
   uchar8* bad_line = &mBadPixelMap[y*mBadPixelMapPitch];
