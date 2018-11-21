@@ -156,8 +156,9 @@ public:
 
           if (diff_l) {
             uint32 diff = (c >> (LookupDepth - code_l - diff_l)) & ((1 << diff_l) - 1);
-            decodeLookup[c] |= static_cast<uint32>(signExtended(diff, diff_l))
-                               << PayloadShift;
+            decodeLookup[c] |= static_cast<int32>(
+                static_cast<uint32>(signExtended(diff, diff_l))
+                << PayloadShift);
           }
         }
       }

@@ -511,7 +511,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
         std::array<uchar8, 14 + 8> buf;
         for (unsigned char& i : buf) {
-          cj += ci * ck;
+          cj = uchar8(cj + ci * ck); // modulo arithmetics.
           i = bs.getByte() ^ cj;
           ck++;
         }
