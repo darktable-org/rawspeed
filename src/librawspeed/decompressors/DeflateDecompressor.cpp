@@ -39,7 +39,10 @@ static inline void decodeFPDeltaRow(unsigned char* src, unsigned char* dst,
                                     unsigned int bytesps, int factor) {
   // DecodeDeltaBytes
   for (size_t col = factor; col < realTileWidth * bytesps; ++col) {
-    src[col] += src[col - factor];
+    // Yes, this is correct, and is symmetrical with EncodeDeltaBytes in
+    // hdrmerge, and they both combined are lossless.
+    // This is indeed working in modulo-2^n arighmetics.
+    src[col] = static_cast<unsigned char>(src[col] + src[col - factor]);
   }
   // Reorder bytes into the image
   // 16 and 32-bit versions depend on local architecture, 24-bit does not
