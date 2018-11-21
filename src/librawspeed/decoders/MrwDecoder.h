@@ -40,7 +40,7 @@ class MrwDecoder final : public RawDecoder {
   Buffer imageData;
   uint32 bpp = 0;
   uint32 packed = 0;
-  float wb_coeffs[4] = {NAN, NAN, NAN, NAN};
+  std::array<float, 4> wb_coeffs = {{NAN, NAN, NAN, NAN}};
 
 public:
   explicit MrwDecoder(const Buffer* file);

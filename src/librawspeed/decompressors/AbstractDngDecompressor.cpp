@@ -110,7 +110,7 @@ void AbstractDngDecompressor::decompressThreaded(
     /* Deflate compression */
   } else if (compression == 8) {
 #ifdef HAVE_ZLIB
-    std::unique_ptr<unsigned char[]> uBuffer;
+    std::unique_ptr<unsigned char[]> uBuffer; // NOLINT
     for (size_t i = t->start; i < t->end && i < slices.size(); i++) {
       auto e = &slices[i];
 

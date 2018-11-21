@@ -47,10 +47,11 @@
 namespace rawspeed {
 
 bool RafDecoder::isRAF(const Buffer* input) {
-  static const char magic[] = "FUJIFILMCCD-RAW ";
-  static const size_t magic_size = sizeof(magic) - 1; // excluding \0
-  const unsigned char* data = input->getData(0, magic_size);
-  return 0 == memcmp(&data[0], magic, magic_size);
+  static const std::array<char, 16> magic = {{'F', 'U', 'J', 'I', 'F', 'I', 'L',
+                                              'M', 'C', 'C', 'D', '-', 'R', 'A',
+                                              'W', ' '}};
+  const unsigned char* data = input->getData(0, magic.size());
+  return 0 == memcmp(data, magic.data(), magic.size());
 }
 
 bool RafDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,

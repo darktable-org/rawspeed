@@ -42,12 +42,9 @@ class CameraMetaData;
 MrwDecoder::MrwDecoder(const Buffer* file) : RawDecoder(file) { parseHeader(); }
 
 int MrwDecoder::isMRW(const Buffer* input) {
-  static const char magic[] = {0x00, 'M', 'R', 'M'};
-  static const size_t magic_size = sizeof(magic);
-  static_assert(4 == magic_size, "wrong magic size");
-
-  const unsigned char* data = input->getData(0, magic_size);
-  return 0 == memcmp(&data[0], magic, magic_size);
+  static const std::array<char, 4> magic = {{0x00, 'M', 'R', 'M'}};
+  const unsigned char* data = input->getData(0, magic.size());
+  return 0 == memcmp(data, magic.data(), magic.size());
 }
 
 void MrwDecoder::parseHeader() {

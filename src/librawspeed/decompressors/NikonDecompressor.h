@@ -37,8 +37,8 @@ class NikonDecompressor final : public AbstractDecompressor {
   uint32 huffSelect = 0;
   uint32 split = 0;
 
-  int pUp1[2];
-  int pUp2[2];
+  std::array<int, 2> pUp1;
+  std::array<int, 2> pUp2;
 
   std::vector<ushort16> curve;
 
@@ -50,7 +50,7 @@ public:
   void decompress(const ByteStream& data, bool uncorrectedRawValues);
 
 private:
-  static const uchar8 nikon_tree[][2][16];
+  static const std::array<std::array<std::array<uchar8, 16>, 2>, 6> nikon_tree;
   static std::vector<ushort16> createCurve(ByteStream* metadata, uint32 bitsPS,
                                            uint32 v0, uint32 v1, uint32* split);
 

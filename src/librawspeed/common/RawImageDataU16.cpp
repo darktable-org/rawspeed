@@ -339,8 +339,8 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
 
   // Not SSE2
   int gw = dim.x * cpp;
-  int mul[4];
-  int sub[4];
+  std::array<int, 4> mul;
+  std::array<int, 4> sub;
   for (int i = 0; i < 4; i++) {
     int v = i;
     if ((mOffset.x & 1) != 0)

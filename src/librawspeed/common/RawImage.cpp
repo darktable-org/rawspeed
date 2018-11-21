@@ -38,7 +38,6 @@
 #include "AddressSanitizer.h" // for ASan::...
 #endif
 
-using std::fill_n;
 using std::string;
 
 namespace rawspeed {
@@ -64,7 +63,7 @@ ImageMetaData::ImageMetaData() {
   isoSpeed = 0;
   pixelAspectRatio = 1;
   fujiRotationPos = 0;
-  fill_n(wbCoeffs, 4, NAN);
+  wbCoeffs.fill(NAN);
 }
 
 RawImageData::~RawImageData() {

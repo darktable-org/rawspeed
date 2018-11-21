@@ -44,7 +44,7 @@ private:
   static HuffmanTable SetupHuffmanTable_Modern(ByteStream stream);
   static HuffmanTable SetupHuffmanTable(ByteStream* metaData);
 
-  static const uchar8 pentax_tree[][2][16];
+  static const std::array<std::array<std::array<uchar8, 16>, 2>, 1> pentax_tree;
 };
 
 } // namespace rawspeed

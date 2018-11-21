@@ -196,7 +196,7 @@ RawImage ArwDecoder::decodeRawInternal() {
 
   std::vector<ushort16> curve(0x4001);
   TiffEntry *c = raw->getEntry(SONY_CURVE);
-  uint32 sony_curve[] = { 0, 0, 0, 0, 0, 4095 };
+  std::array<uint32, 6> sony_curve = {{0, 0, 0, 0, 0, 4095}};
 
   for (uint32 i = 0; i < 4; i++)
     sony_curve[i+1] = (c->getU16(i) >> 2) & 0xfff;
@@ -320,8 +320,8 @@ void ArwDecoder::ParseA100WB() {
 
     bs.skipBytes(4);
 
-    ushort16 tmp[4];
     bs.setByteOrder(Endianness::little);
+    std::array<ushort16, 4> tmp;
     for (auto& coeff : tmp)
       coeff = bs.getU16();
 
@@ -367,7 +367,7 @@ void ArwDecoder::SonyDecrypt(const uint32* ibuf, uint32* obuf, uint32 len,
   if (0 == len)
     return;
 
-  uint32 pad[128];
+  std::array<uint32, 128> pad;
 
   // Initialize the decryption pad from the key
   for (int p=0; p < 4; p++)
@@ -384,7 +384,7 @@ void ArwDecoder::SonyDecrypt(const uint32* ibuf, uint32* obuf, uint32 len,
     pad[p & 127] = pad[(p+1) & 127] ^ pad[(p+1+64) & 127];
 
     uint32 pv;
-    memcpy(&pv, pad + (p & 127), sizeof(uint32));
+    memcpy(&pv, &(pad[p & 127]), sizeof(uint32));
 
     uint32 bv;
     memcpy(&bv, ibuf, sizeof(uint32));

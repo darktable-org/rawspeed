@@ -162,7 +162,7 @@ void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         // check for nulltermination of string inside bounds
         if (!memchr(bs.peekData(bs.getRemainSize()), 0, bs.getRemainSize()))
           break;
-        uint32 tmp[4] = {0};
+        std::array<uint32, 4> tmp = {{}};
         std::istringstream iss(bs.peekString());
         iss >> tmp[0] >> tmp[1] >> tmp[2] >> tmp[3];
         if (!iss.fail() && tmp[0] > 0 && tmp[1] > 0 && tmp[2] > 0 &&

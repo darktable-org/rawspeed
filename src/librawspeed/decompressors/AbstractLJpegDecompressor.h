@@ -128,7 +128,7 @@ struct JpegComponentInfo {
 
 class SOFInfo {
 public:
-  JpegComponentInfo compInfo[4];
+  std::array<JpegComponentInfo, 4> compInfo;
   uint32 w = 0;    // Width
   uint32 h = 0;    // Height
   uint32 cps = 0;  // Components

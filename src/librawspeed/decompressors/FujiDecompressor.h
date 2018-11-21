@@ -115,7 +115,7 @@ protected:
     explicit fuji_compressed_params(const FujiDecompressor& d);
 
     std::vector<char> q_table; /* quantization table */
-    int q_point[5]; /* quantization points */
+    std::array<int, 5> q_point; /* quantization points */
     int max_bits;
     int min_value;
     int raw_bits;
@@ -158,10 +158,12 @@ protected:
 
     void reset(const fuji_compressed_params* params);
 
-    int_pair grad_even[3][41]; // tables of gradients
-    int_pair grad_odd[3][41];
+    // tables of gradients
+    std::array<std::array<int_pair, 41>, 3> grad_even;
+    std::array<std::array<int_pair, 41>, 3> grad_odd;
+
     std::vector<ushort16> linealloc;
-    ushort16* linebuf[_ltotal];
+    std::array<ushort16*, _ltotal> linebuf;
   };
 
 private:
@@ -189,21 +191,24 @@ private:
   template <typename T1, typename T2>
   int fuji_decode_sample(T1&& func_0, T2&& func_1, fuji_compressed_block* info,
                          BitPumpMSB* pump, ushort16* line_buf, int* pos,
-                         int_pair* grads) const;
+                         std::array<int_pair, 41>* grads) const;
   int fuji_decode_sample_even(fuji_compressed_block* info, BitPumpMSB* pump,
                               ushort16* line_buf, int* pos,
-                              int_pair* grads) const;
+                              std::array<int_pair, 41>* grads) const;
   int fuji_decode_sample_odd(fuji_compressed_block* info, BitPumpMSB* pump,
                              ushort16* line_buf, int* pos,
-                             int_pair* grads) const;
+                             std::array<int_pair, 41>* grads) const;
 
   void fuji_decode_interpolation_even(int line_width, ushort16* line_buf,
                                       int* pos) const;
-  void fuji_extend_generic(ushort16* linebuf[_ltotal], int line_width,
-                           int start, int end) const;
-  void fuji_extend_red(ushort16* linebuf[_ltotal], int line_width) const;
-  void fuji_extend_green(ushort16* linebuf[_ltotal], int line_width) const;
-  void fuji_extend_blue(ushort16* linebuf[_ltotal], int line_width) const;
+  void fuji_extend_generic(std::array<ushort16*, _ltotal> linebuf,
+                           int line_width, int start, int end) const;
+  void fuji_extend_red(std::array<ushort16*, _ltotal> linebuf,
+                       int line_width) const;
+  void fuji_extend_green(std::array<ushort16*, _ltotal> linebuf,
+                         int line_width) const;
+  void fuji_extend_blue(std::array<ushort16*, _ltotal> linebuf,
+                        int line_width) const;
   void xtrans_decode_block(fuji_compressed_block* info,
                            BitPumpMSB* pump, int cur_line) const;
   void fuji_bayer_decode_block(fuji_compressed_block* info,

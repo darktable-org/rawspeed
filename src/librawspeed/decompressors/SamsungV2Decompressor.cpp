@@ -202,7 +202,7 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
   // By default we are not scaling values at all
   int32 scale = 0;
 
-  uint32 diffBitsMode[3][2] = {{0}};
+  std::array<std::array<int, 2>, 3> diffBitsMode = {{}};
   for (auto& i : diffBitsMode)
     i[0] = i[1] = (row == 0 || row == 1) ? 7 : 4;
 
@@ -210,7 +210,7 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
   assert(width % 16 == 0);
   for (uint32 col = 0; col < width; col += 16) {
     if (!(optflags & OptFlags::QP) && !(col & 63)) {
-      static constexpr int32 scalevals[] = {0, -2, 2};
+      static constexpr std::array<int32, 3> scalevals = {{0, -2, 2}};
       uint32 i = pump.getBits(2);
       scale = i < 3 ? scale + scalevals[i] : pump.getBits(12);
     }
@@ -236,8 +236,10 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
         ThrowRDE(
             "Got a previous line lookup on first two lines. File corrupted?");
 
-      static constexpr int32 motionOffset[7] = {-4, -2, -2, 0, 0, 2, 4};
-      static constexpr int32 motionDoAverage[7] = {0, 0, 1, 0, 1, 0, 0};
+      static constexpr std::array<int32, 7> motionOffset = {-4, -2, -2, 0,
+                                                            0,  2,  4};
+      static constexpr std::array<int32, 7> motionDoAverage = {0, 0, 1, 0,
+                                                               1, 0, 0};
 
       int32 slideOffset = motionOffset[motion];
       int32 doAverage = motionDoAverage[motion];
@@ -273,9 +275,9 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
     }
 
     // Figure out how many difference bits we have to read for each pixel
-    uint32 diffBits[4] = {0};
+    std::array<uint32, 4> diffBits = {};
     if (optflags & OptFlags::SKIP || !pump.getBits(1)) {
-      uint32 flags[4];
+      std::array<uint32, 4> flags;
       for (unsigned int& flag : flags)
         flag = pump.getBits(2);
 

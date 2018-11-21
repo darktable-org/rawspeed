@@ -50,12 +50,11 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool CrwDecoder::isCRW(const Buffer* input) {
-  static const char magic[] = "HEAPCCDR";
+  static const std::array<char, 8> magic = {
+      {'H', 'E', 'A', 'P', 'C', 'C', 'D', 'R'}};
   static const size_t magic_offset = 6;
-  static const size_t magic_size = sizeof(magic) - 1; // excluding \0
-  static_assert(magic_size == 8, "Wrong magic size!");
-  const unsigned char* data = input->getData(magic_offset, magic_size);
-  return 0 == memcmp(&data[0], magic, magic_size);
+  const unsigned char* data = input->getData(magic_offset, magic.size());
+  return 0 == memcmp(data, magic.data(), magic.size());
 }
 
 CrwDecoder::CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD,
@@ -169,7 +168,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         // correct offset for most cameras
         int offset = hints.get("wb_offset", 120);
 
-        ushort16 key[] = { 0x410, 0x45f3 };
+        std::array<ushort16, 2> key = {{0x410, 0x45f3}};
         if (! hints.has("wb_mangle"))
           key[0] = key[1] = 0;
 

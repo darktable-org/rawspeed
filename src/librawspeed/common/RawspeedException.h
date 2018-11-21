@@ -24,6 +24,7 @@
 #include "rawspeedconfig.h"
 
 #include "common/Common.h"
+#include <array>
 #include <cstdarg>
 #include <cstdio>
 #include <stdexcept>
@@ -36,7 +37,7 @@ template <typename T>
 ThrowException(const char* fmt, ...) {
   static constexpr size_t bufSize = 8192;
 #if defined(HAVE_CXX_THREAD_LOCAL)
-  static thread_local char buf[bufSize];
+  static thread_local std::array<char, bufSize> buf;
 #elif defined(HAVE_GCC_THREAD_LOCAL)
   static __thread char buf[bufSize];
 #else
@@ -47,10 +48,10 @@ ThrowException(const char* fmt, ...) {
 
   va_list val;
   va_start(val, fmt);
-  vsnprintf(buf, sizeof(buf), fmt, val);
+  vsnprintf(buf.data(), sizeof(buf), fmt, val);
   va_end(val);
-  writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s", buf);
-  throw T(buf);
+  writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s", buf.data());
+  throw T(buf.data());
 }
 
 class RawspeedException : public std::runtime_error {

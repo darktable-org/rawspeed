@@ -96,9 +96,10 @@ static void jpeg_mem_src_int(j_decompress_ptr cinfo,
 #endif
 
 [[noreturn]] METHODDEF(void) my_error_throw(j_common_ptr cinfo) {
-  char buf[JMSG_LENGTH_MAX] = {0};
-  (*cinfo->err->format_message)(cinfo, buf);
-  ThrowRDE("JPEG decoder error: %s", buf);
+  std::array<char, JMSG_LENGTH_MAX> buf;
+  buf.fill(0);
+  (*cinfo->err->format_message)(cinfo, buf.data());
+  ThrowRDE("JPEG decoder error: %s", buf.data());
 }
 
 struct JpegDecompressor::JpegDecompressStruct : jpeg_decompress_struct {
@@ -130,9 +131,11 @@ void JpegDecompressor::decode(uint32 offX,
     ThrowRDE("Component count doesn't match");
   int row_stride = dinfo.output_width * dinfo.output_components;
 
-  unique_ptr<uchar8[], decltype(&alignedFree)> complete_buffer(
-      alignedMallocArray<uchar8, 16>(dinfo.output_height, row_stride),
-      &alignedFree);
+  unique_ptr<uchar8[], // NOLINT
+             decltype(&alignedFree)>
+      complete_buffer(
+          alignedMallocArray<uchar8, 16>(dinfo.output_height, row_stride),
+          &alignedFree);
   while (dinfo.output_scanline < dinfo.output_height) {
     buffer[0] = static_cast<JSAMPROW>(
         &complete_buffer[static_cast<size_t>(dinfo.output_scanline) *

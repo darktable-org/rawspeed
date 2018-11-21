@@ -45,7 +45,8 @@ RawImageDataFloat::RawImageDataFloat() {
 
 
   void RawImageDataFloat::calculateBlackAreas() {
-    float accPixels[4] = {0,0,0,0};
+    std::array<float, 4> accPixels;
+    accPixels.fill(0);
     int totalpixels = 0;
 
     for (auto area : blackAreas) {
@@ -259,8 +260,8 @@ RawImageDataFloat::RawImageDataFloat() {
 
   void RawImageDataFloat::scaleValues(int start_y, int end_y) {
     int gw = dim.x * cpp;
-    float mul[4];
-    float sub[4];
+    std::array<float, 4> mul;
+    std::array<float, 4> sub;
     for (int i = 0; i < 4; i++) {
       int v = i;
       if ((mOffset.x&1) != 0)
@@ -290,12 +291,12 @@ RawImageDataFloat::RawImageDataFloat() {
 
 void RawImageDataFloat::fixBadPixel( uint32 x, uint32 y, int component )
 {
-  float values[4];
-  float dist[4];
-  float weight[4];
+  std::array<float, 4> values;
+  values.fill(-1);
+  std::array<float, 4> dist;
+  values.fill(0);
+  std::array<float, 4> weight;
 
-  values[0] = values[1] = values[2] = values[3] = -1;
-  dist[0] = dist[1] = dist[2] = dist[3] = 0;
   uchar8* bad_line = &mBadPixelMap[y*mBadPixelMapPitch];
 
   // Find pixel to the left

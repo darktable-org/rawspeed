@@ -33,37 +33,37 @@
 
 namespace rawspeed {
 
-const uchar8 NikonDecompressor::nikon_tree[][2][16] = {
-    {/* 12-bit lossy */
-     {0, 1, 5, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0},
-     {5, 4, 3, 6, 2, 7, 1, 0, 8, 9, 11, 10, 12}},
-    {/* 12-bit lossy after split */
-     {0, 1, 5, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0},
-     {0x39, 0x5a, 0x38, 0x27, 0x16, 5, 4, 3, 2, 1, 0, 11, 12, 12}},
-    {/* 12-bit lossless */
-     {0, 1, 4, 2, 3, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-     {5, 4, 6, 3, 7, 2, 8, 1, 9, 0, 10, 11, 12}},
-    {/* 14-bit lossy */
-     {0, 1, 4, 3, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0},
-     {5, 6, 4, 7, 8, 3, 9, 2, 1, 0, 10, 11, 12, 13, 14}},
-    {/* 14-bit lossy after split */
-     {0, 1, 5, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0},
-     {8, 0x5c, 0x4b, 0x3a, 0x29, 7, 6, 5, 4, 3, 2, 1, 0, 13, 14}},
-    {/* 14-bit lossless */
-     {0, 1, 4, 2, 2, 3, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0},
-     {7, 6, 8, 5, 9, 4, 10, 3, 11, 12, 2, 0, 1, 13, 14}},
-
-};
+const std::array<std::array<std::array<uchar8, 16>, 2>, 6>
+    NikonDecompressor::nikon_tree = {{
+        {{/* 12-bit lossy */
+          {0, 1, 5, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0},
+          {5, 4, 3, 6, 2, 7, 1, 0, 8, 9, 11, 10, 12}}},
+        {{/* 12-bit lossy after split */
+          {0, 1, 5, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0},
+          {0x39, 0x5a, 0x38, 0x27, 0x16, 5, 4, 3, 2, 1, 0, 11, 12, 12}}},
+        {{/* 12-bit lossless */
+          {0, 1, 4, 2, 3, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+          {5, 4, 6, 3, 7, 2, 8, 1, 9, 0, 10, 11, 12}}},
+        {{/* 14-bit lossy */
+          {0, 1, 4, 3, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0},
+          {5, 6, 4, 7, 8, 3, 9, 2, 1, 0, 10, 11, 12, 13, 14}}},
+        {{/* 14-bit lossy after split */
+          {0, 1, 5, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0},
+          {8, 0x5c, 0x4b, 0x3a, 0x29, 7, 6, 5, 4, 3, 2, 1, 0, 13, 14}}},
+        {{/* 14-bit lossless */
+          {0, 1, 4, 2, 2, 3, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0},
+          {7, 6, 8, 5, 9, 4, 10, 3, 11, 12, 2, 0, 1, 13, 14}}},
+    }};
 
 namespace {
 
-const uint32 bitMask[] = {
-    0xffffffff, 0x7fffffff, 0x3fffffff, 0x1fffffff, 0x0fffffff, 0x07ffffff,
-    0x03ffffff, 0x01ffffff, 0x00ffffff, 0x007fffff, 0x003fffff, 0x001fffff,
-    0x000fffff, 0x0007ffff, 0x0003ffff, 0x0001ffff, 0x0000ffff, 0x00007fff,
-    0x00003fff, 0x00001fff, 0x00000fff, 0x000007ff, 0x000003ff, 0x000001ff,
-    0x000000ff, 0x0000007f, 0x0000003f, 0x0000001f, 0x0000000f, 0x00000007,
-    0x00000003, 0x00000001};
+const std::array<uint32, 32> bitMask = {
+    {0xffffffff, 0x7fffffff, 0x3fffffff, 0x1fffffff, 0x0fffffff, 0x07ffffff,
+     0x03ffffff, 0x01ffffff, 0x00ffffff, 0x007fffff, 0x003fffff, 0x001fffff,
+     0x000fffff, 0x0007ffff, 0x0003ffff, 0x0001ffff, 0x0000ffff, 0x00007fff,
+     0x00003fff, 0x00001fff, 0x00000fff, 0x000007ff, 0x000003ff, 0x000001ff,
+     0x000000ff, 0x0000007f, 0x0000003f, 0x0000001f, 0x0000000f, 0x00000007,
+     0x00000003, 0x00000001}};
 
 class NikonLASDecompressor {
   bool mUseBigtable = true;
@@ -74,8 +74,8 @@ class NikonLASDecompressor {
      * These two fields directly represent the contents of a JPEG DHT
      * marker
      */
-    uint32 bits[17];
-    uint32 huffval[256];
+    std::array<uint32, 17> bits;
+    std::array<uint32, 256> huffval;
 
     /*
      * The remaining fields are computed from the above to allow more
@@ -83,10 +83,10 @@ class NikonLASDecompressor {
      * private to the Huffman compression & decompression modules.
      */
 
-    ushort16 mincode[17];
-    int maxcode[18];
-    short valptr[17];
-    uint32 numbits[256];
+    std::array<ushort16, 17> mincode;
+    std::array<int, 18> maxcode;
+    std::array<short, 17> valptr;
+    std::array<uint32, 256> numbits;
     std::vector<int> bigTable;
     bool initialized;
   } dctbl1;
@@ -97,8 +97,8 @@ class NikonLASDecompressor {
     int l;
     int lastp;
     int si;
-    char huffsize[257];
-    ushort16 huffcode[257];
+    std::array<char, 257> huffsize;
+    std::array<ushort16, 257> huffcode;
     ushort16 code;
     int size;
     int value;
@@ -172,7 +172,7 @@ class NikonLASDecompressor {
      * If size is zero, it means that more than 8 bits are in the huffman
      * code (this happens about 3-4% of the time).
      */
-    memset(dctbl1.numbits, 0, sizeof(dctbl1.numbits));
+    dctbl1.numbits.fill(0);
     for (p = 0; p < lastp; p++) {
       size = huffsize[p];
       if (size <= 8) {
@@ -425,8 +425,9 @@ std::vector<ushort16> NikonDecompressor::createCurve(ByteStream* metadata,
 template <typename Huffman>
 Huffman NikonDecompressor::createHuffmanTable(uint32 huffSelect) {
   Huffman ht;
-  uint32 count = ht.setNCodesPerLength(Buffer(nikon_tree[huffSelect][0], 16));
-  ht.setCodeValues(Buffer(nikon_tree[huffSelect][1], count));
+  uint32 count =
+      ht.setNCodesPerLength(Buffer(nikon_tree[huffSelect][0].data(), 16));
+  ht.setCodeValues(Buffer(nikon_tree[huffSelect][1].data(), count));
   ht.setup(true, false);
   return ht;
 }

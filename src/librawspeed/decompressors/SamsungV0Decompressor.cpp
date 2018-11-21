@@ -117,7 +117,7 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
 
   BitPumpMSB32 bits(bs);
 
-  int len[4];
+  std::array<int, 4> len;
   for (int& i : len)
     i = y < 2 ? 7 : 4;
 
@@ -134,7 +134,7 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
     bits.fill();
     bool dir = !!bits.getBitsNoFill(1);
 
-    int op[4];
+    std::array<int, 4> op;
     for (int& i : op)
       i = bits.getBitsNoFill(2);
 

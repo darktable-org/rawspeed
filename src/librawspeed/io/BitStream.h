@@ -113,15 +113,17 @@ private:
   inline void fillSafe() {
     assert(data);
     if (pos + BitStreamCacheBase::MaxProcessBytes <= size) {
-      uchar8 tmp[BitStreamCacheBase::MaxProcessBytes] = {0};
+      std::array<uchar8, BitStreamCacheBase::MaxProcessBytes> tmp;
+      tmp.fill(0);
       assert(!(size - pos < BitStreamCacheBase::MaxProcessBytes));
-      memcpy(tmp, data + pos, BitStreamCacheBase::MaxProcessBytes);
-      pos += fillCache(tmp);
+      memcpy(tmp.data(), data + pos, BitStreamCacheBase::MaxProcessBytes);
+      pos += fillCache(tmp.data());
     } else if (pos < size) {
-      uchar8 tmp[BitStreamCacheBase::MaxProcessBytes] = {0};
+      std::array<uchar8, BitStreamCacheBase::MaxProcessBytes> tmp;
+      tmp.fill(0);
       assert(size - pos < BitStreamCacheBase::MaxProcessBytes);
-      memcpy(tmp, data + pos, size - pos);
-      pos += fillCache(tmp);
+      memcpy(tmp.data(), data + pos, size - pos);
+      pos += fillCache(tmp.data());
     } else if (pos < size + Cache::MaxGetBits / 8) {
       // yes, this case needs to continue using Cache::MaxGetBits
       // assert(size <= pos);

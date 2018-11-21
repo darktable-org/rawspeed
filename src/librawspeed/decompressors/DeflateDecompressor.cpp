@@ -183,13 +183,15 @@ static inline void expandFP24(unsigned char* dst, int width) {
   }
 }
 
-void DeflateDecompressor::decode(std::unique_ptr<unsigned char[]>* uBuffer,
-                                 int tileWidthMax, int tileHeightMax, int width,
-                                 int height, uint32 offX, uint32 offY) {
+void DeflateDecompressor::decode(
+    std::unique_ptr<unsigned char[]>* uBuffer, // NOLINT
+    int tileWidthMax, int tileHeightMax, int width, int height, uint32 offX,
+    uint32 offY) {
   uLongf dstLen = sizeof(float) * tileWidthMax * tileHeightMax;
 
   if (!uBuffer->get())
-    *uBuffer = std::unique_ptr<unsigned char[]>(new unsigned char[dstLen]);
+    *uBuffer =
+        std::unique_ptr<unsigned char[]>(new unsigned char[dstLen]); // NOLINT
 
   const auto cSize = input.getRemainSize();
   const unsigned char* cBuffer = input.getData(cSize);

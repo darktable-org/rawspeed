@@ -173,9 +173,9 @@ template <typename T>
 void FujiDecompressor::copy_line(fuji_compressed_block* info,
                                  const FujiStrip& strip, int cur_line,
                                  T&& idx) const {
-  ushort16* lineBufB[3];
-  ushort16* lineBufG[6];
-  ushort16* lineBufR[3];
+  std::array<ushort16*, 3> lineBufB;
+  std::array<ushort16*, 6> lineBufG;
+  std::array<ushort16*, 3> lineBufR;
 
   for (int i = 0; i < 3; i++) {
     lineBufR[i] = info->linebuf[_R2 + i] + 1;
@@ -266,10 +266,9 @@ FujiDecompressor::bitDiff(int value1, int value2) const {
 }
 
 template <typename T1, typename T2>
-int FujiDecompressor::fuji_decode_sample(T1&& func_0, T2&& func_1,
-                                         fuji_compressed_block* info,
-                                         BitPumpMSB* pump, ushort16* line_buf,
-                                         int* pos, int_pair* grads) const {
+int FujiDecompressor::fuji_decode_sample(
+    T1&& func_0, T2&& func_1, fuji_compressed_block* info, BitPumpMSB* pump,
+    ushort16* line_buf, int* pos, std::array<int_pair, 41>* grads) const {
   int interp_val = 0;
   int errcnt = 0;
 
@@ -285,7 +284,7 @@ int FujiDecompressor::fuji_decode_sample(T1&& func_0, T2&& func_1,
   fuji_zerobits(pump, &sample);
 
   if (sample < common_info.max_bits - common_info.raw_bits - 1) {
-    int decBits = bitDiff(grads[gradient].value1, grads[gradient].value2);
+    int decBits = bitDiff((*grads)[gradient].value1, (*grads)[gradient].value2);
     code = pump->getBits(decBits);
     code += sample << decBits;
   } else {
@@ -303,14 +302,14 @@ int FujiDecompressor::fuji_decode_sample(T1&& func_0, T2&& func_1,
     code /= 2;
   }
 
-  grads[gradient].value1 += std::abs(code);
+  (*grads)[gradient].value1 += std::abs(code);
 
-  if (grads[gradient].value2 == common_info.min_value) {
-    grads[gradient].value1 >>= 1;
-    grads[gradient].value2 >>= 1;
+  if ((*grads)[gradient].value2 == common_info.min_value) {
+    (*grads)[gradient].value1 >>= 1;
+    (*grads)[gradient].value2 >>= 1;
   }
 
-  grads[gradient].value2++;
+  (*grads)[gradient].value2++;
 
   interp_val = func_1(grad, interp_val, code);
 
@@ -334,10 +333,9 @@ int FujiDecompressor::fuji_decode_sample(T1&& func_0, T2&& func_1,
 #define fuji_quant_gradient(v1, v2)                                            \
   (9 * ci.q_table[ci.q_point[4] + (v1)] + ci.q_table[ci.q_point[4] + (v2)])
 
-int FujiDecompressor::fuji_decode_sample_even(fuji_compressed_block* info,
-                                              BitPumpMSB* pump,
-                                              ushort16* line_buf, int* pos,
-                                              int_pair* grads) const {
+int FujiDecompressor::fuji_decode_sample_even(
+    fuji_compressed_block* info, BitPumpMSB* pump, ushort16* line_buf, int* pos,
+    std::array<int_pair, 41>* grads) const {
   const auto& ci = common_info;
   return fuji_decode_sample(
       [&ci](const ushort16* line_buf_cur, int* interp_val, int* grad,
@@ -377,10 +375,9 @@ int FujiDecompressor::fuji_decode_sample_even(fuji_compressed_block* info,
       info, pump, line_buf, pos, grads);
 }
 
-int FujiDecompressor::fuji_decode_sample_odd(fuji_compressed_block* info,
-                                             BitPumpMSB* pump,
-                                             ushort16* line_buf, int* pos,
-                                             int_pair* grads) const {
+int FujiDecompressor::fuji_decode_sample_odd(
+    fuji_compressed_block* info, BitPumpMSB* pump, ushort16* line_buf, int* pos,
+    std::array<int_pair, 41>* grads) const {
   const auto& ci = common_info;
   return fuji_decode_sample(
       [&ci](const ushort16* line_buf_cur, int* interp_val, int* grad,
@@ -437,26 +434,26 @@ void FujiDecompressor::fuji_decode_interpolation_even(int line_width,
   *pos += 2;
 }
 
-void FujiDecompressor::fuji_extend_generic(ushort16* linebuf[_ltotal],
-                                           int line_width, int start,
-                                           int end) const {
+void FujiDecompressor::fuji_extend_generic(
+    std::array<ushort16*, _ltotal> linebuf, int line_width, int start,
+    int end) const {
   for (int i = start; i <= end; i++) {
     linebuf[i][0] = linebuf[i - 1][1];
     linebuf[i][line_width + 1] = linebuf[i - 1][line_width];
   }
 }
 
-void FujiDecompressor::fuji_extend_red(ushort16* linebuf[_ltotal],
+void FujiDecompressor::fuji_extend_red(std::array<ushort16*, _ltotal> linebuf,
                                        int line_width) const {
   fuji_extend_generic(linebuf, line_width, _R2, _R4);
 }
 
-void FujiDecompressor::fuji_extend_green(ushort16* linebuf[_ltotal],
+void FujiDecompressor::fuji_extend_green(std::array<ushort16*, _ltotal> linebuf,
                                          int line_width) const {
   fuji_extend_generic(linebuf, line_width, _G2, _G7);
 }
 
-void FujiDecompressor::fuji_extend_blue(ushort16* linebuf[_ltotal],
+void FujiDecompressor::fuji_extend_blue(std::array<ushort16*, _ltotal> linebuf,
                                         int line_width) const {
   fuji_extend_generic(linebuf, line_width, _B2, _B4);
 }
@@ -494,9 +491,9 @@ void FujiDecompressor::xtrans_decode_block(fuji_compressed_block* info,
 
       if (g.even > 8) {
         errcnt += fuji_decode_sample_odd(info, pump, info->linebuf[c0] + 1,
-                                         &c0_pos.odd, info->grad_odd[grad]);
+                                         &c0_pos.odd, &(info->grad_odd[grad]));
         errcnt += fuji_decode_sample_odd(info, pump, info->linebuf[c1] + 1,
-                                         &c1_pos.odd, info->grad_odd[grad]);
+                                         &c1_pos.odd, &(info->grad_odd[grad]));
       }
     }
   };
@@ -506,8 +503,9 @@ void FujiDecompressor::xtrans_decode_block(fuji_compressed_block* info,
           ColorPos& c1_pos) {
         fuji_decode_interpolation_even(line_width, info->linebuf[c0] + 1,
                                        &c0_pos.even);
-        errcnt += fuji_decode_sample_even(info, pump, info->linebuf[c1] + 1,
-                                          &c1_pos.even, info->grad_even[grad]);
+        errcnt +=
+            fuji_decode_sample_even(info, pump, info->linebuf[c1] + 1,
+                                    &c1_pos.even, &(info->grad_even[grad]));
       },
       _R2, _G2, 0, r, g);
 
@@ -519,8 +517,9 @@ void FujiDecompressor::xtrans_decode_block(fuji_compressed_block* info,
   pass(
       [&](_xt_lines c0, _xt_lines c1, int grad, ColorPos& c0_pos,
           ColorPos& c1_pos) {
-        errcnt += fuji_decode_sample_even(info, pump, info->linebuf[c0] + 1,
-                                          &c0_pos.even, info->grad_even[grad]);
+        errcnt +=
+            fuji_decode_sample_even(info, pump, info->linebuf[c0] + 1,
+                                    &c0_pos.even, &(info->grad_even[grad]));
         fuji_decode_interpolation_even(line_width, info->linebuf[c1] + 1,
                                        &c1_pos.even);
       },
@@ -538,7 +537,7 @@ void FujiDecompressor::xtrans_decode_block(fuji_compressed_block* info,
         if (c0_pos.even & 3) {
           errcnt +=
               fuji_decode_sample_even(info, pump, info->linebuf[c0] + 1,
-                                      &c0_pos.even, info->grad_even[grad]);
+                                      &c0_pos.even, &(info->grad_even[grad]));
         } else {
           fuji_decode_interpolation_even(line_width, info->linebuf[c0] + 1,
                                          &c0_pos.even);
@@ -558,8 +557,9 @@ void FujiDecompressor::xtrans_decode_block(fuji_compressed_block* info,
   pass(
       [&](_xt_lines c0, _xt_lines c1, int grad, ColorPos& c0_pos,
           ColorPos& c1_pos) {
-        errcnt += fuji_decode_sample_even(info, pump, info->linebuf[c0] + 1,
-                                          &c0_pos.even, info->grad_even[grad]);
+        errcnt +=
+            fuji_decode_sample_even(info, pump, info->linebuf[c0] + 1,
+                                    &c0_pos.even, &(info->grad_even[grad]));
 
         if ((c1_pos.even & 3) == 2) {
           fuji_decode_interpolation_even(line_width, info->linebuf[c1] + 1,
@@ -567,7 +567,7 @@ void FujiDecompressor::xtrans_decode_block(fuji_compressed_block* info,
         } else {
           errcnt +=
               fuji_decode_sample_even(info, pump, info->linebuf[c1] + 1,
-                                      &c1_pos.even, info->grad_even[grad]);
+                                      &c1_pos.even, &(info->grad_even[grad]));
         }
       },
       _G5, _B3, 0, g, b);
@@ -587,11 +587,12 @@ void FujiDecompressor::xtrans_decode_block(fuji_compressed_block* info,
         } else {
           errcnt +=
               fuji_decode_sample_even(info, pump, info->linebuf[c0] + 1,
-                                      &c0_pos.even, info->grad_even[grad]);
+                                      &c0_pos.even, &(info->grad_even[grad]));
         }
 
-        errcnt += fuji_decode_sample_even(info, pump, info->linebuf[c1] + 1,
-                                          &c1_pos.even, info->grad_even[grad]);
+        errcnt +=
+            fuji_decode_sample_even(info, pump, info->linebuf[c1] + 1,
+                                    &c1_pos.even, &(info->grad_even[grad]));
       },
       _R4, _G6, 1, r, g);
 
@@ -610,7 +611,7 @@ void FujiDecompressor::xtrans_decode_block(fuji_compressed_block* info,
         if (c1_pos.even & 3) {
           errcnt +=
               fuji_decode_sample_even(info, pump, info->linebuf[c1] + 1,
-                                      &c1_pos.even, info->grad_even[grad]);
+                                      &c1_pos.even, &(info->grad_even[grad]));
         } else {
           fuji_decode_interpolation_even(line_width, info->linebuf[c1] + 1,
                                          &c1_pos.even);
@@ -650,17 +651,19 @@ void FujiDecompressor::fuji_bayer_decode_block(fuji_compressed_block* info,
                   ColorPos& c1_pos) {
     while (g.even < line_width || g.odd < line_width) {
       if (g.even < line_width) {
-        errcnt += fuji_decode_sample_even(info, pump, info->linebuf[c0] + 1,
-                                          &c0_pos.even, info->grad_even[grad]);
-        errcnt += fuji_decode_sample_even(info, pump, info->linebuf[c1] + 1,
-                                          &c1_pos.even, info->grad_even[grad]);
+        errcnt +=
+            fuji_decode_sample_even(info, pump, info->linebuf[c0] + 1,
+                                    &c0_pos.even, &(info->grad_even[grad]));
+        errcnt +=
+            fuji_decode_sample_even(info, pump, info->linebuf[c1] + 1,
+                                    &c1_pos.even, &(info->grad_even[grad]));
       }
 
       if (g.even > 8) {
         errcnt += fuji_decode_sample_odd(info, pump, info->linebuf[c0] + 1,
-                                         &c0_pos.odd, info->grad_odd[grad]);
+                                         &c0_pos.odd, &(info->grad_odd[grad]));
         errcnt += fuji_decode_sample_odd(info, pump, info->linebuf[c1] + 1,
-                                         &c1_pos.odd, info->grad_odd[grad]);
+                                         &c1_pos.odd, &(info->grad_odd[grad]));
       }
     }
   };
@@ -720,9 +723,9 @@ void FujiDecompressor::fuji_decode_strip(
     int b;
   };
 
-  const i_pair mtable[6] = {{_R0, _R3}, {_R1, _R4}, {_G0, _G6},
-                            {_G1, _G7}, {_B0, _B3}, {_B1, _B4}};
-  const i_pair ztable[3] = {{_R2, 3}, {_G2, 6}, {_B2, 3}};
+  const std::array<i_pair, 6> mtable = {
+      {{_R0, _R3}, {_R1, _R4}, {_G0, _G6}, {_G1, _G7}, {_B0, _B3}, {_B1, _B4}}};
+  const std::array<i_pair, 3> ztable = {{{_R2, 3}, {_G2, 6}, {_B2, 3}}};
 
   for (int cur_line = 0; cur_line < strip.height(); cur_line++) {
     if (header.raw_type == 16) {

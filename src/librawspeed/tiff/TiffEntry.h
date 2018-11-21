@@ -112,7 +112,7 @@ public:
   const DataBuffer& getRootIfdData() const;
 
 protected:
-  static const uint32 datashifts[];
+  static const std::array<uint32, 14> datashifts;
 };
 
 } // namespace rawspeed

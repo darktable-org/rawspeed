@@ -34,10 +34,11 @@ namespace rawspeed {
 
 // 16 entries of codes per bit length
 // 13 entries of code values
-const uchar8 PentaxDecompressor::pentax_tree[][2][16] = {
-    {{0, 2, 3, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0},
-     {3, 4, 2, 5, 1, 6, 0, 7, 8, 9, 10, 11, 12}},
-};
+const std::array<std::array<std::array<uchar8, 16>, 2>, 1>
+    PentaxDecompressor::pentax_tree = {{
+        {{{0, 2, 3, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0},
+          {3, 4, 2, 5, 1, 6, 0, 7, 8, 9, 10, 11, 12}}},
+    }};
 
 PentaxDecompressor::PentaxDecompressor(const RawImage& img,
                                        ByteStream* metaData)
@@ -57,9 +58,9 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable_Legacy() {
   HuffmanTable ht;
 
   /* Initialize with legacy data */
-  auto nCodes = ht.setNCodesPerLength(Buffer(pentax_tree[0][0], 16));
+  auto nCodes = ht.setNCodesPerLength(Buffer(pentax_tree[0][0].data(), 16));
   assert(nCodes == 13); // see pentax_tree definition
-  ht.setCodeValues(Buffer(pentax_tree[0][1], nCodes));
+  ht.setCodeValues(Buffer(pentax_tree[0][1].data(), nCodes));
 
   return ht;
 }
@@ -73,8 +74,8 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
 
   stream.skipBytes(12);
 
-  uint32 v0[16];
-  uint32 v1[16];
+  std::array<uint32, 16> v0;
+  std::array<uint32, 16> v1;
   for (uint32 i = 0; i < depth; i++)
     v0[i] = stream.getU16();
   for (uint32 i = 0; i < depth; i++) {
@@ -87,7 +88,7 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
   std::vector<uchar8> nCodesPerLength;
   nCodesPerLength.resize(17);
 
-  uint32 v2[16];
+  std::array<uint32, 16> v2;
   /* Calculate codes and store bitcounts */
   for (uint32 c = 0; c < depth; c++) {
     v2[c] = v0[c] >> (12 - v1[c]);
@@ -143,8 +144,8 @@ void PentaxDecompressor::decompress(const ByteStream& data) const {
   assert(mRaw->dim.x > 0);
   assert(mRaw->dim.x % 2 == 0);
 
-  int pUp1[2] = {0, 0};
-  int pUp2[2] = {0, 0};
+  std::array<int, 2> pUp1 = {{}};
+  std::array<int, 2> pUp2 = {{}};
 
   for (int y = 0; y < mRaw->dim.y && mRaw->dim.x >= 2; y++) {
     auto* dest = reinterpret_cast<ushort16*>(&draw[y * mRaw->pitch]);

@@ -608,7 +608,7 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       mRaw->metadata.wbCoeffs[2] =
           1 - mRaw->metadata.wbCoeffs[0] - mRaw->metadata.wbCoeffs[1];
 
-      const float d65_white[3] = {0.950456, 1, 1.088754};
+      const std::array<float, 3> d65_white = {{0.950456, 1, 1.088754}};
       for (uint32 i = 0; i < 3; i++)
         mRaw->metadata.wbCoeffs[i] /= d65_white[i];
     }
@@ -730,7 +730,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) {
     TiffEntry *blackleveldeltav = raw->getEntry(BLACKLEVELDELTAV);
     if (static_cast<int>(blackleveldeltav->count) < mRaw->dim.y)
       ThrowRDE("BLACKLEVELDELTAV array is too small");
-    float black_sum[2] = {0.0F, 0.0F};
+    std::array<float, 2> black_sum = {{}};
     for (int i = 0; i < mRaw->dim.y; i++)
       black_sum[i&1] += blackleveldeltav->getFloat(i);
 
@@ -751,7 +751,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) {
     TiffEntry *blackleveldeltah = raw->getEntry(BLACKLEVELDELTAH);
     if (static_cast<int>(blackleveldeltah->count) < mRaw->dim.x)
       ThrowRDE("BLACKLEVELDELTAH array is too small");
-    float black_sum[2] = {0.0F, 0.0F};
+    std::array<float, 2> black_sum = {{}};
     for (int i = 0; i < mRaw->dim.x; i++)
       black_sum[i&1] += blackleveldeltah->getFloat(i);
 

@@ -89,7 +89,7 @@ void OlympusDecompressor::decompress(ByteStream input) const {
   int pitch = mRaw->pitch;
 
   /* Build a table to quickly look up "high" value */
-  std::unique_ptr<char[]> bittable(new char[4096]);
+  std::unique_ptr<char[]> bittable(new char[4096]); // NOLINT
 
   for (i = 0; i < 4096; i++) {
     int b = i;

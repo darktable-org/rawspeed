@@ -509,7 +509,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         ByteStream bs = wb->getData();
         bs.skipBytes(version == 0x204 ? 284 : 4);
 
-        uchar8 buf[14+8];
+        std::array<uchar8, 14 + 8> buf;
         for (unsigned char& i : buf) {
           cj += ci * ck;
           i = bs.getByte() ^ cj;
@@ -519,11 +519,11 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         // Finally set the WB coeffs
         uint32 off = (version == 0x204) ? 6 : 14;
         mRaw->metadata.wbCoeffs[0] =
-            static_cast<float>(getU16BE(buf + off + 0));
+            static_cast<float>(getU16BE(buf.data() + off + 0));
         mRaw->metadata.wbCoeffs[1] =
-            static_cast<float>(getU16BE(buf + off + 2));
+            static_cast<float>(getU16BE(buf.data() + off + 2));
         mRaw->metadata.wbCoeffs[2] =
-            static_cast<float>(getU16BE(buf + off + 6));
+            static_cast<float>(getU16BE(buf.data() + off + 6));
       }
     }
   } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x0014))) {
@@ -697,8 +697,8 @@ std::vector<ushort16> NefDecoder::gammaCurve(double pwr, double ts, int mode,
   std::vector<ushort16> curve(65536);
 
   int i;
-  double g[6];
-  double bnd[2] = {0, 0};
+  std::array<double, 6> g;
+  std::array<double, 2> bnd = {{}};
   double r;
   g[0] = pwr;
   g[1] = ts;

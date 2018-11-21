@@ -162,14 +162,14 @@ md5::md5_state imgDataHash(const RawImage& raw) {
 
 static void __attribute__((format(printf, 2, 3)))
 APPEND(ostringstream* oss, const char* format, ...) {
-  char line[1024];
+  std::array<char, 1024> line;
 
   va_list args;
   va_start(args, format);
-  vsnprintf(line, sizeof(line), format, args);
+  vsnprintf(line.data(), sizeof(line), format, args);
   va_end(args);
 
-  *oss << line;
+  *oss << line.data();
 }
 
 string img_hash(const RawImage& r) {

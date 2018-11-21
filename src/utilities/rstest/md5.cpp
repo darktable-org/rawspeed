@@ -38,10 +38,10 @@ namespace rawspeed {
 namespace md5 {
 
 // hashes 64 bytes at once
-static void md5_compress(md5_state* state, const uint8_t block[64]);
+static void md5_compress(md5_state* state, const uint8_t* block);
 
-static void md5_compress(md5_state* state, const uint8_t block[64]) {
-  uint32_t schedule[16] = {};
+static void md5_compress(md5_state* state, const uint8_t* block) {
+  std::array<uint32_t, 16> schedule = {{}};
 
   auto LOADSCHEDULE = [&block, &schedule](int i) {
     for (int k = 3; k >= 0; k--)
@@ -167,9 +167,9 @@ void md5_hash(const uint8_t* message, size_t len, md5_state* hash) {
   for (i = 0; len - i >= 64; i += 64)
     md5_compress(hash, &message[i]);
 
-  uint8_t block[64];
+  std::array<uint8_t, 64> block;
   size_t rem = len - i;
-  memcpy(block, &message[i], rem);
+  memcpy(block.data(), &message[i], rem);
 
   block[rem] = 0x80;
   rem++;
@@ -177,8 +177,8 @@ void md5_hash(const uint8_t* message, size_t len, md5_state* hash) {
     memset(&block[rem], 0, 56 - rem);
   else {
     memset(&block[rem], 0, 64 - rem);
-    md5_compress(hash, block);
-    memset(block, 0, 56);
+    md5_compress(hash, block.data());
+    memset(block.data(), 0, 56);
   }
 
   block[64 - 8] = static_cast<uint8_t>((len & 0x1FU) << 3);
@@ -187,16 +187,16 @@ void md5_hash(const uint8_t* message, size_t len, md5_state* hash) {
     block[64 - 8 + i] = static_cast<uint8_t>(len);
     len >>= 8;
   }
-  md5_compress(hash, block);
+  md5_compress(hash, block.data());
 }
 
 std::string hash_to_string(const md5_state& hash) {
-  char res[2 * sizeof(hash) + 1];
+  std::array<char, 2 * sizeof(hash) + 1> res;
   auto* h = reinterpret_cast<const uint8_t*>(&hash[0]);
   for (int i = 0; i < static_cast<int>(sizeof(hash)); ++i)
-    snprintf(res + 2 * i, 3, "%02x", h[i]);
+    snprintf(&res[2 * i], 3, "%02x", h[i]);
   res[32] = 0;
-  return res;
+  return res.data();
 }
 
 std::string md5_hash(const uint8_t* message, size_t len) {
