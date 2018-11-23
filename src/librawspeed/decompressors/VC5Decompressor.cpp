@@ -783,9 +783,8 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
   }
 }
 
-// static
-void VC5Decompressor::getRLV(BitPumpMSB* bits, int* value,
-                             unsigned int* count) {
+inline void VC5Decompressor::getRLV(BitPumpMSB* bits, int* value,
+                                    unsigned int* count) {
   unsigned int iTab;
 
   static constexpr auto maxBits = 1 + table17.entries[table17.length - 1].size;

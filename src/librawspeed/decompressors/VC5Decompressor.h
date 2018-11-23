@@ -202,7 +202,7 @@ class VC5Decompressor final : public AbstractDecompressor {
         : band(band_), wavelet(wavelet_) {}
   };
 
-  static void getRLV(BitPumpMSB* bits, int* value, unsigned int* count);
+  static inline void getRLV(BitPumpMSB* bits, int* value, unsigned int* count);
 
   void parseLargeCodeblock(const ByteStream& bs);
 
