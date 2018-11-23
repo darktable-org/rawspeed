@@ -99,20 +99,20 @@ jobs:
     dist: trusty
     sudo: required
     env: CC=gcc-5 CXX=g++-5 EXTRA=NODOCKER
-  - stage: deploy
-    os: linux
-    sudo: required
-    dist: xenial
-    edge: true
-    services:
-      - docker
-    env: CC=gcc-8 CXX=g++-8 GCOV=gcov-8 TARGET=SONARQUBE FLAVOR=Coverage ECO="-DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON" EXTRA_OPTS="--tmpfs /root/.sonar --volume $HOME/.sonar/cache:/root/.sonar/cache $DOCKER_RPUU"
-    git:
-      depth: 9999999
-    cache:
-      directories:
-        - '$HOME/$RPUU_DST'
-        - '$HOME/.sonar/cache'
+  #- stage: deploy
+  #  os: linux
+  #  sudo: required
+  #  dist: xenial
+  #  edge: true
+  #  services:
+  #    - docker
+  #  env: CC=gcc-8 CXX=g++-8 GCOV=gcov-8 TARGET=SONARQUBE FLAVOR=Coverage ECO="-DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON" EXTRA_OPTS="--tmpfs /root/.sonar --volume $HOME/.sonar/cache:/root/.sonar/cache $DOCKER_RPUU"
+  #  git:
+  #    depth: 9999999
+  #  cache:
+  #    directories:
+  #      - '$HOME/$RPUU_DST'
+  #      - '$HOME/.sonar/cache'
   - os: linux
     dist: trusty
     sudo: required
