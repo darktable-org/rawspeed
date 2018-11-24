@@ -28,7 +28,8 @@ using rawspeed::iPoint2D;
 using rawspeed::roundUp;
 using std::sqrt;
 
-iPoint2D __attribute__((const)) areaToRectangle(size_t area, iPoint2D aspect) {
+iPoint2D __attribute__((const, visibility("default")))
+areaToRectangle(size_t area, iPoint2D aspect) {
   double sqSide = sqrt(area);
   double sqARatio =
       sqrt(static_cast<double>(aspect.x) / static_cast<double>(aspect.y));

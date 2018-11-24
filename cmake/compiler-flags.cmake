@@ -38,6 +38,15 @@ elseif(NOT (CMAKE_BUILD_TYPE STREQUAL "RELWITHDEBINFO" OR CMAKE_BUILD_TYPE STREQ
   add_definitions(-D_GLIBCXX_SANITIZE_VECTOR)
 endif()
 
+set(CMAKE_C_FLAGS
+    "${CMAKE_C_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden"
+    CACHE STRING "Flags used by the C compiler during all builds."
+    FORCE )
+set(CMAKE_CXX_FLAGS
+    "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden"
+    CACHE STRING "Flags used by the C++ compiler during all builds."
+    FORCE )
+
 IF(NOT APPLE)
   set(linkerflags "-Wl,--as-needed")
 ELSE()
