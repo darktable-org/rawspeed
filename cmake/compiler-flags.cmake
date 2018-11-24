@@ -70,7 +70,7 @@ MARK_AS_ADVANCED(
 if(RAWSPEED_ENABLE_LTO)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     include(llvm-toolchain)
-    set(lto_compile "-flto=thin")
+    set(lto_compile "-flto=thin -fforce-emit-vtables -fwhole-program-vtables -fstrict-vtable-pointers")
     set(lto_link "-flto=thin -fuse-ld=\"${LLVMLLD_EXECUTABLE}\" ${LLVMLLD_INCREMENTAL_LDFLAGS}")
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     include(gcc-toolchain)
