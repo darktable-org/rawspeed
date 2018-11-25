@@ -119,7 +119,7 @@ VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) const {
 }
 
 namespace {
-auto convolute = [](unsigned x, unsigned y, std::array<int, 4> muls,
+auto convolute = [](int x, int y, std::array<int, 4> muls,
                     const Array2DRef<const int16_t> high, auto lowGetter,
                     int DescaleShift = 0) {
   auto highCombined = muls[0] * high(x, y);
@@ -145,8 +145,8 @@ auto convolute = [](unsigned x, unsigned y, std::array<int, 4> muls,
 void VC5Decompressor::Wavelet::reconstructPass(
     const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> high,
     const Array2DRef<const int16_t> low) const noexcept {
-  unsigned int x;
-  unsigned int y;
+  int x;
+  int y;
 
   auto convolution = [&x, &y, high](std::array<int, 4> muls, auto lowGetter) {
     return convolute(x, y, muls, high, lowGetter, /*DescaleShift*/ 0);
@@ -198,8 +198,8 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
     const Array2DRef<int16_t> dest, const Array2DRef<const int16_t> low,
     const Array2DRef<const int16_t> high, int descaleShift,
     bool clampUint = false) const noexcept {
-  unsigned int x;
-  unsigned int y;
+  int x;
+  int y;
 
   auto convolution = [&x, &y, high, descaleShift](std::array<int, 4> muls,
                                                   auto lowGetter) {
@@ -321,12 +321,6 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
   if (mRaw->dim.y % mVC5.patternHeight != 0)
     ThrowRDE("Height %u is not a multiple of %u", mRaw->dim.y,
              mVC5.patternHeight);
-
-  if (mRaw->dim.x > std::numeric_limits<decltype(Channel::width)>::max())
-    ThrowRDE("Width %u is too large", mRaw->dim.x);
-
-  if (mRaw->dim.y > std::numeric_limits<decltype(Channel::height)>::max())
-    ThrowRDE("Height %u is too large", mRaw->dim.y);
 
   // Initialize wavelet sizes.
   for (Channel& channel : channels) {
@@ -529,8 +523,8 @@ void VC5Decompressor::Wavelet::LowPassBand::decode(const Wavelet& wavelet) {
       Array2DRef<int16_t>::create(&data, wavelet.width, wavelet.height);
 
   BitPumpMSB bits(bs);
-  for (auto row = 0U; row < dst.height; ++row) {
-    for (auto col = 0U; col < dst.width; ++col)
+  for (auto row = 0; row < dst.height; ++row) {
+    for (auto col = 0; col < dst.width; ++col)
       dst(col, row) = static_cast<int16_t>(bits.getBits(lowpassPrecision));
   }
 }
@@ -748,12 +742,11 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 
 void VC5Decompressor::combineFinalLowpassBands() const noexcept {
   const Array2DRef<uint16_t> out(reinterpret_cast<uint16_t*>(mRaw->getData()),
-                                 static_cast<unsigned int>(mRaw->dim.x),
-                                 static_cast<unsigned int>(mRaw->dim.y),
+                                 mRaw->dim.x, mRaw->dim.y,
                                  mRaw->pitch / sizeof(uint16_t));
 
-  const unsigned int width = out.width / 2;
-  const unsigned int height = out.height / 2;
+  const int width = out.width / 2;
+  const int height = out.height / 2;
 
   const Array2DRef<const int16_t> lowbands0 = Array2DRef<const int16_t>(
       channels[0].band.data.data(), channels[0].width, channels[0].height);
@@ -768,8 +761,8 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static) collapse(2)
 #endif
-  for (unsigned int row = 0; row < height; ++row) {
-    for (unsigned int col = 0; col < width; ++col) {
+  for (int row = 0; row < height; ++row) {
+    for (int col = 0; col < width; ++col) {
       const int mid = 2048;
 
       int gs = lowbands0(col, row);

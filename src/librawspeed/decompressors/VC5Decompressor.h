@@ -117,7 +117,7 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   class Wavelet {
   public:
-    uint16_t width, height;
+    int width, height;
     int16_t prescale;
 
     struct AbstractBand {
@@ -188,7 +188,7 @@ class VC5Decompressor final : public AbstractDecompressor {
 
     Wavelet::ReconstructableBand band{/*clampUint*/ true};
     // the final lowband.
-    uint16_t width, height;
+    int width, height;
   };
 
   static constexpr int numChannels = 4;

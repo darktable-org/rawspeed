@@ -28,7 +28,7 @@
 namespace rawspeed {
 
 template <class T> class Array2DRef {
-  unsigned int _pitch = 0;
+  int _pitch = 0;
   T* _data = nullptr;
 
   friend Array2DRef<const T>; // We need to be able to convert to const version.
@@ -37,12 +37,12 @@ public:
   using value_type = T;
   using cvless_value_type = typename std::remove_cv<value_type>::type;
 
-  unsigned int width = 0, height = 0;
+  int width = 0, height = 0;
 
   Array2DRef() = default;
 
-  Array2DRef(T* data, unsigned int dataWidth, unsigned int dataHeight,
-             unsigned int dataPitch = 0);
+  Array2DRef(T* data, const int dataWidth, const int dataHeight,
+             const int dataPitch = 0);
 
   // Conversion from Array2DRef<T> to Array2DRef<const T>.
   template <class T2, typename = std::enable_if_t<std::is_same<
@@ -57,26 +57,29 @@ public:
   template <typename AllocatorType =
                 typename std::vector<cvless_value_type>::allocator_type>
   static Array2DRef<T>
-  create(std::vector<cvless_value_type, AllocatorType>* storage,
-         unsigned int width, unsigned int height) {
+  create(std::vector<cvless_value_type, AllocatorType>* storage, int width,
+         int height) {
     storage->resize(width * height);
     return {storage->data(), width, height};
   }
 
-  inline T& operator()(unsigned int x, unsigned int y) const;
+  inline T& operator()(int x, int y) const;
 };
 
 template <class T>
-Array2DRef<T>::Array2DRef(T* data, const unsigned int dataWidth,
-                          const unsigned int dataHeight,
-                          const unsigned int dataPitch /* = 0 */)
+Array2DRef<T>::Array2DRef(T* data, const int dataWidth, const int dataHeight,
+                          const int dataPitch /* = 0 */)
     : _data(data), width(dataWidth), height(dataHeight) {
+  assert(width >= 0);
+  assert(height >= 0);
   _pitch = (dataPitch == 0 ? dataWidth : dataPitch);
 }
 
 template <class T>
-T& Array2DRef<T>::operator()(const unsigned int x, const unsigned int y) const {
+T& Array2DRef<T>::operator()(const int x, const int y) const {
   assert(_data);
+  assert(x >= 0);
+  assert(y >= 0);
   assert(x < width);
   assert(y < height);
   return _data[y * _pitch + x];
