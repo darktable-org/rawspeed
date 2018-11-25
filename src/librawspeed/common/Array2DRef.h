@@ -34,6 +34,9 @@ template <class T> class Array2DRef {
   friend Array2DRef<const T>; // We need to be able to convert to const version.
 
 public:
+  using value_type = T;
+  using cvless_value_type = typename std::remove_cv<value_type>::type;
+
   unsigned int width = 0, height = 0;
 
   Array2DRef() = default;
@@ -51,7 +54,12 @@ public:
     height = RHS.height;
   }
 
-  static std::vector<T> create(unsigned int width, unsigned int height);
+  template <typename AllocatorType =
+                typename std::vector<cvless_value_type>::allocator_type>
+  static void create(std::vector<cvless_value_type, AllocatorType>* storage,
+                     unsigned int width, unsigned int height) {
+    storage->resize(width * height);
+  }
 
   inline T& operator()(unsigned int x, unsigned int y) const;
 };
@@ -62,15 +70,6 @@ Array2DRef<T>::Array2DRef(T* data, const unsigned int dataWidth,
                           const unsigned int dataPitch /* = 0 */)
     : _data(data), width(dataWidth), height(dataHeight) {
   _pitch = (dataPitch == 0 ? dataWidth : dataPitch);
-}
-
-// static
-template <class T>
-std::vector<T> Array2DRef<T>::create(const unsigned int width,
-                                     const unsigned int height) {
-  std::vector<T> data;
-  data.resize(width * height);
-  return data;
 }
 
 template <class T>

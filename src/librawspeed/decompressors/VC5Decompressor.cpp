@@ -232,8 +232,8 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
 
 void VC5Decompressor::Wavelet::ReconstructableBand::processLow(
     const Wavelet& wavelet) noexcept {
-  lowpass_storage =
-      Array2DRef<int16_t>::create(wavelet.width, 2 * wavelet.height);
+  Array2DRef<int16_t>::create(&lowpass_storage, wavelet.width,
+                              2 * wavelet.height);
 
   const Array2DRef<int16_t> lowpass(lowpass_storage.data(), wavelet.width,
                                     2 * wavelet.height);
@@ -247,8 +247,8 @@ void VC5Decompressor::Wavelet::ReconstructableBand::processLow(
 
 void VC5Decompressor::Wavelet::ReconstructableBand::processHigh(
     const Wavelet& wavelet) noexcept {
-  highpass_storage =
-      Array2DRef<int16_t>::create(wavelet.width, 2 * wavelet.height);
+  Array2DRef<int16_t>::create(&highpass_storage, wavelet.width,
+                              2 * wavelet.height);
 
   const Array2DRef<int16_t> highpass(highpass_storage.data(), wavelet.width,
                                      2 * wavelet.height);
@@ -263,7 +263,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::combine(
     const Wavelet& wavelet) noexcept {
   int16_t descaleShift = (wavelet.prescale == 2 ? 2 : 0);
 
-  data = Array2DRef<int16_t>::create(2 * wavelet.width, 2 * wavelet.height);
+  Array2DRef<int16_t>::create(&data, 2 * wavelet.width, 2 * wavelet.height);
   const Array2DRef<int16_t> dest(data.data(), 2 * wavelet.width,
                                  2 * wavelet.height);
 
@@ -518,7 +518,7 @@ VC5Decompressor::Wavelet::LowPassBand::LowPassBand(const Wavelet& wavelet,
 }
 
 void VC5Decompressor::Wavelet::LowPassBand::decode(const Wavelet& wavelet) {
-  data = Array2DRef<int16_t>::create(wavelet.width, wavelet.height);
+  Array2DRef<int16_t>::create(&data, wavelet.width, wavelet.height);
   const Array2DRef<int16_t> dst(data.data(), wavelet.width, wavelet.height);
 
   BitPumpMSB bits(bs);
@@ -533,7 +533,7 @@ void VC5Decompressor::Wavelet::HighPassBand::decode(const Wavelet& wavelet) {
     return mVC5DecompandingTable[uint16_t(val)] * quant;
   };
 
-  data = Array2DRef<int16_t>::create(wavelet.width, wavelet.height);
+  Array2DRef<int16_t>::create(&data, wavelet.width, wavelet.height);
   const Array2DRef<int16_t> dst(data.data(), wavelet.width, wavelet.height);
 
   BitPumpMSB bits(bs);

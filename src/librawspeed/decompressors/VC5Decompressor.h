@@ -23,6 +23,7 @@
 
 #include "common/Array2DRef.h"                  // for Array2DRef
 #include "common/Common.h"                      // for ushort16, short16
+#include "common/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorA...
 #include "common/Optional.h"                    // for Optional
 #include "common/RawImage.h"                    // for RawImage
 #include "common/SimpleLUT.h"                   // for SimpleLUT, SimpleLUT...
@@ -122,14 +123,16 @@ class VC5Decompressor final : public AbstractDecompressor {
     int16_t prescale;
 
     struct AbstractBand {
-      std::vector<int16_t> data;
+      std::vector<int16_t, DefaultInitAllocatorAdaptor<int16_t>> data;
       virtual ~AbstractBand() = default;
       virtual void decode(const Wavelet& wavelet) = 0;
     };
     struct ReconstructableBand final : AbstractBand {
       bool clampUint;
-      std::vector<int16_t> lowpass_storage;
-      std::vector<int16_t> highpass_storage;
+      std::vector<int16_t, DefaultInitAllocatorAdaptor<int16_t>>
+          lowpass_storage;
+      std::vector<int16_t, DefaultInitAllocatorAdaptor<int16_t>>
+          highpass_storage;
       explicit ReconstructableBand(bool clampUint_ = false)
           : clampUint(clampUint_) {}
       void processLow(const Wavelet& wavelet) noexcept;
