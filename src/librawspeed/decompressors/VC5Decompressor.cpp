@@ -61,6 +61,17 @@ struct RLV {
   } constexpr
 #include "gopro/vc5/table17.inc"
 
+constexpr int16_t decompand(int16_t val) {
+  double c = val;
+  // Invert companding curve
+  c += (c * c * c * 768) / (255. * 255. * 255.);
+  if (c > std::numeric_limits<int16_t>::max())
+    return std::numeric_limits<int16_t>::max();
+  if (c < std::numeric_limits<int16_t>::min())
+    return std::numeric_limits<int16_t>::min();
+  return c;
+}
+
 } // namespace
 
 #define PRECISION_MIN 8
@@ -349,20 +360,9 @@ void VC5Decompressor::initVC5LogTable() {
 }
 
 const SimpleLUT<int16_t, 16> VC5Decompressor::mVC5DecompandingTable = []() {
-  auto dequantize = [](int16_t val) -> int16_t {
-    double c = val;
-    // Invert companding curve
-    c += (c * c * c * 768) / (255. * 255. * 255.);
-    if (c > std::numeric_limits<int16_t>::max())
-      return std::numeric_limits<int16_t>::max();
-    if (c < std::numeric_limits<int16_t>::min())
-      return std::numeric_limits<int16_t>::min();
-    return c;
-  };
-  return decltype(mVC5DecompandingTable)(
-      [dequantize](unsigned i, unsigned tableSize) {
-        return dequantize(int16_t(uint16_t(i)));
-      });
+  return decltype(mVC5DecompandingTable)([](unsigned i, unsigned tableSize) {
+    return decompand(int16_t(uint16_t(i)));
+  });
 }();
 
 void VC5Decompressor::parseVC5() {
