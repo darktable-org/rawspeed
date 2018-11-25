@@ -49,10 +49,10 @@ namespace {
 // Taken from
 // https://github.com/gopro/gpr/blob/a513701afce7b03173213a2f67dfd9dd28fa1868/source/lib/vc5_decoder/vlc.h
 struct RLV {
-  const uint_fast8_t size; //!< Size of code word in bits
-  const uint32_t bits;     //!< Code word bits right justified
-  const uint16_t count;    //!< Run length
-  const uint8_t value;     //!< Run value (unsigned)
+  uint_fast8_t size; //!< Size of code word in bits
+  uint32_t bits;     //!< Code word bits right justified
+  uint16_t count;    //!< Run length
+  uint16_t value;    //!< Run value (unsigned)
 };
 #define RLVTABLE(n)                                                            \
   struct {                                                                     \
@@ -82,6 +82,15 @@ int ignore = []() {
   return 0;
 }();
 #endif
+
+const std::array<RLV, table17.length> decompandedTable17 = []() {
+  std::array<RLV, table17.length> d;
+  for (auto i = 0U; i < table17.length; i++) {
+    d[i] = table17.entries[i];
+    d[i].value = decompand(table17.entries[i].value);
+  }
+  return d;
+}();
 
 } // namespace
 
@@ -370,12 +379,6 @@ void VC5Decompressor::initVC5LogTable() {
       });
 }
 
-const SimpleLUT<int16_t, 16> VC5Decompressor::mVC5DecompandingTable = []() {
-  return decltype(mVC5DecompandingTable)([](unsigned i, unsigned tableSize) {
-    return decompand(int16_t(uint16_t(i)));
-  });
-}();
-
 void VC5Decompressor::parseVC5() {
   mBs.setByteOrder(Endianness::big);
 
@@ -534,7 +537,7 @@ void VC5Decompressor::Wavelet::LowPassBand::decode(const Wavelet& wavelet) {
 
 void VC5Decompressor::Wavelet::HighPassBand::decode(const Wavelet& wavelet) {
   auto dequantize = [quant = quant](int16_t val) -> int16_t {
-    return mVC5DecompandingTable[uint16_t(val)] * quant;
+    return val * quant;
   };
 
   Array2DRef<int16_t>::create(&data, wavelet.width, wavelet.height);
@@ -554,6 +557,7 @@ void VC5Decompressor::Wavelet::HighPassBand::decode(const Wavelet& wavelet) {
     }
   }
   getRLV(&bits, &pixelValue, &count);
+  static_assert(decompand(MARKER_BAND_END) == MARKER_BAND_END, "passthrought");
   if (pixelValue != MARKER_BAND_END || count != 0)
     ThrowRDE("EndOfBand marker not found");
 }
@@ -796,16 +800,16 @@ inline void VC5Decompressor::getRLV(BitPumpMSB* bits, int* value,
   // possible.
   bits->fill(maxBits);
   for (iTab = 0; iTab < table17.length; ++iTab) {
-    if (table17.entries[iTab].bits ==
-        bits->peekBitsNoFill(table17.entries[iTab].size))
+    if (decompandedTable17[iTab].bits ==
+        bits->peekBitsNoFill(decompandedTable17[iTab].size))
       break;
   }
   if (iTab >= table17.length)
     ThrowRDE("Code not found in codebook");
 
-  bits->skipBitsNoFill(table17.entries[iTab].size);
-  *value = table17.entries[iTab].value;
-  *count = table17.entries[iTab].count;
+  bits->skipBitsNoFill(decompandedTable17[iTab].size);
+  *value = decompandedTable17[iTab].value;
+  *count = decompandedTable17[iTab].count;
   if (*value != 0) {
     if (bits->getBitsNoFill(1))
       *value = -(*value);

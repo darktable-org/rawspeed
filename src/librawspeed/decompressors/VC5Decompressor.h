@@ -97,8 +97,6 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   void initVC5LogTable();
 
-  static const SimpleLUT<int16_t, 16> mVC5DecompandingTable;
-
   static constexpr int numWaveletLevels = 3;
   static constexpr int numHighPassBands = 3;
   static constexpr int numLowPassBands = 1;
