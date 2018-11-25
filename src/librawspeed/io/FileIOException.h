@@ -34,6 +34,6 @@ public:
 };
 
 #define ThrowFIE(...)                                                          \
-  ThrowExceptionHelper(rawspeed::FileIOException, __VA_ARGS__);
+  ThrowExceptionHelper(rawspeed::FileIOException, __VA_ARGS__)
 
 } // namespace rawspeed

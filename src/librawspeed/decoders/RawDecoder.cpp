@@ -87,7 +87,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
     break;
   default:
     ThrowRDE("Unexpected bits per pixel: %u.", bitPerPixel);
-  };
+  }
 
   vector<RawSlice> slices;
   slices.reserve(counts->count);

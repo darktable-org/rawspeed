@@ -130,8 +130,10 @@ void registerPump(const char* byteOrder, const char* pumpName) {
   }
 }
 
-#define REG_PUMP_2(BO, PUMP) registerPump<BO, PUMP>(#BO, #PUMP);
-#define REGISTER_PUMP(PUMP) REG_PUMP_2(Big, PUMP) REG_PUMP_2(Little, PUMP)
+#define REG_PUMP_2(BO, PUMP) registerPump<BO, PUMP>(#BO, #PUMP)
+#define REGISTER_PUMP(PUMP)                                                    \
+  REG_PUMP_2(Big, PUMP);                                                       \
+  REG_PUMP_2(Little, PUMP)
 
 int main(int argc, char** argv) {
   REGISTER_PUMP(BitPumpLSB);
