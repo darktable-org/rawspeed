@@ -72,6 +72,17 @@ constexpr int16_t decompand(int16_t val) {
   return c;
 }
 
+#ifndef NDEBUG
+int ignore = []() {
+  for (const RLV& entry : table17.entries) {
+    assert(((-decompand(entry.value)) == decompand(-int16_t(entry.value))) &&
+           "negation of decompanded value is the same as decompanding of "
+           "negated value");
+  }
+  return 0;
+}();
+#endif
+
 } // namespace
 
 #define PRECISION_MIN 8
