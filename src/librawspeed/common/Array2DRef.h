@@ -41,8 +41,7 @@ public:
 
   Array2DRef() = default;
 
-  Array2DRef(T* data, const int dataWidth, const int dataHeight,
-             const int dataPitch = 0);
+  Array2DRef(T* data, int dataWidth, int dataHeight, int dataPitch = 0);
 
   // Conversion from Array2DRef<T> to Array2DRef<const T>.
   template <class T2, typename = std::enable_if_t<std::is_same<
