@@ -56,9 +56,11 @@ public:
 
   template <typename AllocatorType =
                 typename std::vector<cvless_value_type>::allocator_type>
-  static void create(std::vector<cvless_value_type, AllocatorType>* storage,
-                     unsigned int width, unsigned int height) {
+  static Array2DRef<T>
+  create(std::vector<cvless_value_type, AllocatorType>* storage,
+         unsigned int width, unsigned int height) {
     storage->resize(width * height);
+    return {storage->data(), width, height};
   }
 
   inline T& operator()(unsigned int x, unsigned int y) const;
