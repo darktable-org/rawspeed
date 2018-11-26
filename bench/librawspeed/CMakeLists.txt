@@ -19,6 +19,7 @@ function(add_rs_bench src)
 endfunction()
 
 add_subdirectory(bench)
+add_subdirectory(common)
 add_subdirectory(decompressors)
 add_subdirectory(interpolators)
 add_subdirectory(io)
