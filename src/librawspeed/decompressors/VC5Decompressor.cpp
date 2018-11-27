@@ -182,11 +182,11 @@ void VC5Decompressor::Wavelet::reconstructPass(
   }
   // last row
   for (x = 0; x < width; ++x) {
-    auto getter = [&x, &y, low](int delta) { return low(x, y - delta); };
+    auto getter = [&x, &y, low](int delta) { return low(x, y - 2 + delta); };
 
-    static constexpr std::array<int, 4> even_muls = {+1, +5, +4, -1};
+    static constexpr std::array<int, 4> even_muls = {+1, -1, +4, +5};
     int even = convolution(even_muls, getter);
-    static constexpr std::array<int, 4> odd_muls = {-1, +11, -4, +1};
+    static constexpr std::array<int, 4> odd_muls = {-1, +1, -4, +11};
     int odd = convolution(odd_muls, getter);
 
     dst(x, 2 * y) = static_cast<int16_t>(even);
@@ -245,11 +245,13 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
 
     // last col
 
-    auto getter_last = [&x, &y, low](int delta) { return low(x - delta, y); };
+    auto getter_last = [&x, &y, low](int delta) {
+      return low(x - 2 + delta, y);
+    };
 
-    static constexpr std::array<int, 4> last_even_muls = {+1, +5, +4, -1};
+    static constexpr std::array<int, 4> last_even_muls = {+1, -1, +4, +5};
     even = convolution(last_even_muls, getter_last);
-    static constexpr std::array<int, 4> last_odd_muls = {-1, +11, -4, +1};
+    static constexpr std::array<int, 4> last_odd_muls = {-1, +1, -4, +11};
     odd = convolution(last_odd_muls, getter_last);
 
     if (clampUint) {
