@@ -2252,6 +2252,28 @@
 		<Crop x="0" y="0" width="-32" height="-8"/>
 		<Sensor black="0" white="3880"/>
 	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON D2Xs" mode="12bit-compressed">
+		<ID make="Nikon" model="D2Xs">Nikon D2Xs</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-8" height="0"/>
+		<Sensor black="0" white="3880"/>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON D2Xs" mode="12bit-uncompressed">
+		<ID make="Nikon" model="D2Xs">Nikon D2Xs</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-8" height="0"/>
+		<Sensor black="0" white="3880"/>
+	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON D3" mode="14bit-compressed">
 		<ID make="Nikon" model="D3">Nikon D3</ID>
 		<CFA width="2" height="2">
