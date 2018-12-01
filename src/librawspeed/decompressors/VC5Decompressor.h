@@ -172,7 +172,7 @@ class VC5Decompressor final : public AbstractDecompressor {
                          Array2DRef<const int16_t> high,
                          Array2DRef<const int16_t> low) const noexcept;
 
-    void combineLowHighPass(Array2DRef<int16_t> dest,
+    void combineLowHighPass(Array2DRef<int16_t> dst,
                             Array2DRef<const int16_t> low,
                             Array2DRef<const int16_t> high, int descaleShift,
                             bool clampUint /*= false*/) const noexcept;

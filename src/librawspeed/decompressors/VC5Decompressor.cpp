@@ -207,7 +207,7 @@ void VC5Decompressor::Wavelet::reconstructPass(
 }
 
 void VC5Decompressor::Wavelet::combineLowHighPass(
-    const Array2DRef<int16_t> dest, const Array2DRef<const int16_t> low,
+    const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> low,
     const Array2DRef<const int16_t> high, int descaleShift,
     bool clampUint = false) const noexcept {
   int x;
@@ -218,7 +218,7 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
     return convolute(x, y, muls, high, lowGetter, descaleShift);
   };
 
-  auto process = [&x, &y, low, convolution, clampUint, dest](auto segment) {
+  auto process = [&x, &y, low, convolution, clampUint, dst](auto segment) {
     auto lowGetter = [&x, &y, low](int delta) {
       return low(x + decltype(segment)::coord_shift + delta, y);
     };
@@ -230,12 +230,12 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
       even = clampBits(even, 14);
       odd = clampBits(odd, 14);
     }
-    dest(2 * x, y) = static_cast<int16_t>(even);
-    dest(2 * x + 1, y) = static_cast<int16_t>(odd);
+    dst(2 * x, y) = static_cast<int16_t>(even);
+    dst(2 * x + 1, y) = static_cast<int16_t>(odd);
   };
 
   // Horizontal reconstruction
-  for (y = 0; y < dest.height; ++y) {
+  for (y = 0; y < dst.height; ++y) {
     // First col
     x = 0;
     process(ConvolutionParams::First);
