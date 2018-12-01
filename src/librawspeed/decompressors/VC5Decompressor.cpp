@@ -147,18 +147,21 @@ struct ConvolutionParams {
     static constexpr std::array<int, 4> mul_odd = {-1, +5, +4, -1};
     static constexpr int coord_shift = 0;
   };
+  static constexpr First First{};
 
   struct Middle {
     static constexpr std::array<int, 4> mul_even = {+1, +1, +8, -1};
     static constexpr std::array<int, 4> mul_odd = {-1, -1, +8, +1};
     static constexpr int coord_shift = -1;
   };
+  static constexpr Middle Middle{};
 
   struct Last {
     static constexpr std::array<int, 4> mul_even = {+1, -1, +4, +5};
     static constexpr std::array<int, 4> mul_odd = {-1, +1, -4, +11};
     static constexpr int coord_shift = -2;
   };
+  static constexpr Last Last{};
 };
 
 } // namespace
@@ -173,6 +176,14 @@ void VC5Decompressor::Wavelet::reconstructPass(
     return convolute(x, y, muls, high, lowGetter, /*DescaleShift*/ 0);
   };
 
+  auto process = [&x, &y, convolution, dst](auto segment, auto lowGetter) {
+    int even = convolution(decltype(segment)::mul_even, lowGetter);
+    int odd = convolution(decltype(segment)::mul_odd, lowGetter);
+
+    dst(x, 2 * y) = static_cast<int16_t>(even);
+    dst(x, 2 * y + 1) = static_cast<int16_t>(odd);
+  };
+
   // Vertical reconstruction
   // 1st row
   y = 0;
@@ -181,11 +192,7 @@ void VC5Decompressor::Wavelet::reconstructPass(
       return low(x, y + ConvolutionParams::First::coord_shift + delta);
     };
 
-    int even = convolution(ConvolutionParams::First::mul_even, getter);
-    int odd = convolution(ConvolutionParams::First::mul_odd, getter);
-
-    dst(x, 2 * y) = static_cast<int16_t>(even);
-    dst(x, 2 * y + 1) = static_cast<int16_t>(odd);
+    process(ConvolutionParams::First, getter);
   }
   // middle rows
   for (y = 1; y + 1 < height; ++y) {
@@ -194,11 +201,7 @@ void VC5Decompressor::Wavelet::reconstructPass(
         return low(x, y + ConvolutionParams::Middle::coord_shift + delta);
       };
 
-      int even = convolution(ConvolutionParams::Middle::mul_even, getter);
-      int odd = convolution(ConvolutionParams::Middle::mul_odd, getter);
-
-      dst(x, 2 * y) = static_cast<int16_t>(even);
-      dst(x, 2 * y + 1) = static_cast<int16_t>(odd);
+      process(ConvolutionParams::Middle, getter);
     }
   }
   // last row
@@ -207,11 +210,7 @@ void VC5Decompressor::Wavelet::reconstructPass(
       return low(x, y + ConvolutionParams::Last::coord_shift + delta);
     };
 
-    int even = convolution(ConvolutionParams::Last::mul_even, getter);
-    int odd = convolution(ConvolutionParams::Last::mul_odd, getter);
-
-    dst(x, 2 * y) = static_cast<int16_t>(even);
-    dst(x, 2 * y + 1) = static_cast<int16_t>(odd);
+    process(ConvolutionParams::Last, getter);
   }
 }
 
@@ -227,6 +226,19 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
     return convolute(x, y, muls, high, lowGetter, descaleShift);
   };
 
+  auto process = [&x, &y, convolution, clampUint, dest](auto segment,
+                                                        auto lowGetter) {
+    int even = convolution(decltype(segment)::mul_even, lowGetter);
+    int odd = convolution(decltype(segment)::mul_odd, lowGetter);
+
+    if (clampUint) {
+      even = clampBits(even, 14);
+      odd = clampBits(odd, 14);
+    }
+    dest(2 * x, y) = static_cast<int16_t>(even);
+    dest(2 * x + 1, y) = static_cast<int16_t>(odd);
+  };
+
   // Horizontal reconstruction
   for (y = 0; y < dest.height; ++y) {
     x = 0;
@@ -238,15 +250,7 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
         return low(x + ConvolutionParams::First::coord_shift + delta, y);
       };
 
-      int even = convolution(ConvolutionParams::First::mul_even, getter);
-      int odd = convolution(ConvolutionParams::First::mul_odd, getter);
-
-      if (clampUint) {
-        even = clampBits(even, 14);
-        odd = clampBits(odd, 14);
-      }
-      dest(2 * x, y) = static_cast<int16_t>(even);
-      dest(2 * x + 1, y) = static_cast<int16_t>(odd);
+      process(ConvolutionParams::First, getter);
     }
 
     // middle cols
@@ -255,15 +259,7 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
         return low(x + ConvolutionParams::Middle::coord_shift + delta, y);
       };
 
-      int even = convolution(ConvolutionParams::Middle::mul_even, getter);
-      int odd = convolution(ConvolutionParams::Middle::mul_odd, getter);
-
-      if (clampUint) {
-        even = clampBits(even, 14);
-        odd = clampBits(odd, 14);
-      }
-      dest(2 * x, y) = static_cast<int16_t>(even);
-      dest(2 * x + 1, y) = static_cast<int16_t>(odd);
+      process(ConvolutionParams::Middle, getter);
     }
 
     {
@@ -273,15 +269,7 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
         return low(x + ConvolutionParams::Last::coord_shift + delta, y);
       };
 
-      int even = convolution(ConvolutionParams::Last::mul_even, getter);
-      int odd = convolution(ConvolutionParams::Last::mul_odd, getter);
-
-      if (clampUint) {
-        even = clampBits(even, 14);
-        odd = clampBits(odd, 14);
-      }
-      dest(2 * x, y) = static_cast<int16_t>(even);
-      dest(2 * x + 1, y) = static_cast<int16_t>(odd);
+      process(ConvolutionParams::Last, getter);
     }
   }
 }
