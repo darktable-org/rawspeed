@@ -144,12 +144,15 @@ auto convolute = [](int x, int y, std::array<int, 4> muls,
 struct ConvolutionMuls {
   static constexpr std::array<int, 4> first_even = {+1, +11, -4, +1};
   static constexpr std::array<int, 4> first_odd = {-1, +5, +4, -1};
+  static constexpr int first_coord_shift = 0;
 
   static constexpr std::array<int, 4> middle_even = {+1, +1, +8, -1};
   static constexpr std::array<int, 4> middle_odd = {-1, -1, +8, +1};
+  static constexpr int middle_coord_shift = -1;
 
   static constexpr std::array<int, 4> last_even = {+1, -1, +4, +5};
   static constexpr std::array<int, 4> last_odd = {-1, +1, -4, +11};
+  static constexpr int last_coord_shift = -2;
 };
 
 } // namespace
@@ -168,7 +171,9 @@ void VC5Decompressor::Wavelet::reconstructPass(
   // 1st row
   y = 0;
   for (x = 0; x < width; ++x) {
-    auto getter = [&x, &y, low](int delta) { return low(x, y + delta); };
+    auto getter = [&x, &y, low](int delta) {
+      return low(x, y + ConvolutionMuls::first_coord_shift + delta);
+    };
 
     int even = convolution(ConvolutionMuls::first_even, getter);
     int odd = convolution(ConvolutionMuls::first_odd, getter);
@@ -179,7 +184,9 @@ void VC5Decompressor::Wavelet::reconstructPass(
   // middle rows
   for (y = 1; y + 1 < height; ++y) {
     for (x = 0; x < width; ++x) {
-      auto getter = [&x, &y, low](int delta) { return low(x, y - 1 + delta); };
+      auto getter = [&x, &y, low](int delta) {
+        return low(x, y + ConvolutionMuls::middle_coord_shift + delta);
+      };
 
       int even = convolution(ConvolutionMuls::middle_even, getter);
       int odd = convolution(ConvolutionMuls::middle_odd, getter);
@@ -190,7 +197,9 @@ void VC5Decompressor::Wavelet::reconstructPass(
   }
   // last row
   for (x = 0; x < width; ++x) {
-    auto getter = [&x, &y, low](int delta) { return low(x, y - 2 + delta); };
+    auto getter = [&x, &y, low](int delta) {
+      return low(x, y + ConvolutionMuls::last_coord_shift + delta);
+    };
 
     int even = convolution(ConvolutionMuls::last_even, getter);
     int odd = convolution(ConvolutionMuls::last_odd, getter);
@@ -219,7 +228,9 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
     {
       // First col
 
-      auto getter = [&x, &y, low](int delta) { return low(x + delta, y); };
+      auto getter = [&x, &y, low](int delta) {
+        return low(x + ConvolutionMuls::first_coord_shift + delta, y);
+      };
 
       int even = convolution(ConvolutionMuls::first_even, getter);
       int odd = convolution(ConvolutionMuls::first_odd, getter);
@@ -234,7 +245,9 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
 
     // middle cols
     for (x = 1; x + 1 < width; ++x) {
-      auto getter = [&x, &y, low](int delta) { return low(x - 1 + delta, y); };
+      auto getter = [&x, &y, low](int delta) {
+        return low(x + ConvolutionMuls::middle_coord_shift + delta, y);
+      };
 
       int even = convolution(ConvolutionMuls::middle_even, getter);
       int odd = convolution(ConvolutionMuls::middle_odd, getter);
@@ -250,7 +263,9 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
     {
       // last col
 
-      auto getter = [&x, &y, low](int delta) { return low(x - 2 + delta, y); };
+      auto getter = [&x, &y, low](int delta) {
+        return low(x + ConvolutionMuls::last_coord_shift + delta, y);
+      };
 
       int even = convolution(ConvolutionMuls::last_even, getter);
       int odd = convolution(ConvolutionMuls::last_odd, getter);
