@@ -140,6 +140,30 @@ auto convolute = [](int x, int y, std::array<int, 4> muls,
   total >>= 1;
   return total;
 };
+
+struct ConvolutionParams {
+  struct First {
+    static constexpr std::array<int, 4> mul_even = {+1, +11, -4, +1};
+    static constexpr std::array<int, 4> mul_odd = {-1, +5, +4, -1};
+    static constexpr int coord_shift = 0;
+  };
+  static constexpr First First{};
+
+  struct Middle {
+    static constexpr std::array<int, 4> mul_even = {+1, +1, +8, -1};
+    static constexpr std::array<int, 4> mul_odd = {-1, -1, +8, +1};
+    static constexpr int coord_shift = -1;
+  };
+  static constexpr Middle Middle{};
+
+  struct Last {
+    static constexpr std::array<int, 4> mul_even = {+1, -1, +4, +5};
+    static constexpr std::array<int, 4> mul_odd = {-1, +1, -4, +11};
+    static constexpr int coord_shift = -2;
+  };
+  static constexpr Last Last{};
+};
+
 } // namespace
 
 void VC5Decompressor::Wavelet::reconstructPass(
@@ -152,50 +176,38 @@ void VC5Decompressor::Wavelet::reconstructPass(
     return convolute(x, y, muls, high, lowGetter, /*DescaleShift*/ 0);
   };
 
+  auto process = [&x, &y, low, convolution, dst](auto segment) {
+    auto lowGetter = [&x, &y, low](int delta) {
+      return low(x, y + decltype(segment)::coord_shift + delta);
+    };
+
+    int even = convolution(decltype(segment)::mul_even, lowGetter);
+    int odd = convolution(decltype(segment)::mul_odd, lowGetter);
+
+    dst(x, 2 * y) = static_cast<int16_t>(even);
+    dst(x, 2 * y + 1) = static_cast<int16_t>(odd);
+  };
+
   // Vertical reconstruction
   // 1st row
   y = 0;
   for (x = 0; x < width; ++x) {
-    auto getter = [&x, &y, low](int delta) { return low(x, y + delta); };
-
-    static constexpr std::array<int, 4> even_muls = {+1, +11, -4, +1};
-    int even = convolution(even_muls, getter);
-    static constexpr std::array<int, 4> odd_muls = {-1, +5, +4, -1};
-    int odd = convolution(odd_muls, getter);
-
-    dst(x, 2 * y) = static_cast<int16_t>(even);
-    dst(x, 2 * y + 1) = static_cast<int16_t>(odd);
+    process(ConvolutionParams::First);
   }
   // middle rows
   for (y = 1; y + 1 < height; ++y) {
     for (x = 0; x < width; ++x) {
-      auto getter = [&x, &y, low](int delta) { return low(x, y - 1 + delta); };
-
-      static constexpr std::array<int, 4> even_muls = {+1, +1, +8, -1};
-      int even = convolution(even_muls, getter);
-      static constexpr std::array<int, 4> odd_muls = {-1, -1, +8, +1};
-      int odd = convolution(odd_muls, getter);
-
-      dst(x, 2 * y) = static_cast<int16_t>(even);
-      dst(x, 2 * y + 1) = static_cast<int16_t>(odd);
+      process(ConvolutionParams::Middle);
     }
   }
   // last row
   for (x = 0; x < width; ++x) {
-    auto getter = [&x, &y, low](int delta) { return low(x, y - 2 + delta); };
-
-    static constexpr std::array<int, 4> even_muls = {+1, -1, +4, +5};
-    int even = convolution(even_muls, getter);
-    static constexpr std::array<int, 4> odd_muls = {-1, +1, -4, +11};
-    int odd = convolution(odd_muls, getter);
-
-    dst(x, 2 * y) = static_cast<int16_t>(even);
-    dst(x, 2 * y + 1) = static_cast<int16_t>(odd);
+    process(ConvolutionParams::Last);
   }
 }
 
 void VC5Decompressor::Wavelet::combineLowHighPass(
-    const Array2DRef<int16_t> dest, const Array2DRef<const int16_t> low,
+    const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> low,
     const Array2DRef<const int16_t> high, int descaleShift,
     bool clampUint = false) const noexcept {
   int x;
@@ -206,60 +218,33 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
     return convolute(x, y, muls, high, lowGetter, descaleShift);
   };
 
-  // Horizontal reconstruction
-  for (y = 0; y < dest.height; ++y) {
-    x = 0;
-
-    // First col
-
-    auto getter_first = [&x, &y, low](int delta) { return low(x + delta, y); };
-
-    static constexpr std::array<int, 4> even_muls = {+1, +11, -4, +1};
-    int even = convolution(even_muls, getter_first);
-    static constexpr std::array<int, 4> odd_muls = {-1, +5, +4, -1};
-    int odd = convolution(odd_muls, getter_first);
-
-    if (clampUint) {
-      even = clampBits(even, 14);
-      odd = clampBits(odd, 14);
-    }
-    dest(2 * x, y) = static_cast<int16_t>(even);
-    dest(2 * x + 1, y) = static_cast<int16_t>(odd);
-
-    // middle cols
-    for (x = 1; x + 1 < width; ++x) {
-      auto getter = [&x, &y, low](int delta) { return low(x - 1 + delta, y); };
-
-      static constexpr std::array<int, 4> middle_even_muls = {+1, +1, +8, -1};
-      even = convolution(middle_even_muls, getter);
-      static constexpr std::array<int, 4> middle_odd_muls = {-1, -1, +8, +1};
-      odd = convolution(middle_odd_muls, getter);
-
-      if (clampUint) {
-        even = clampBits(even, 14);
-        odd = clampBits(odd, 14);
-      }
-      dest(2 * x, y) = static_cast<int16_t>(even);
-      dest(2 * x + 1, y) = static_cast<int16_t>(odd);
-    }
-
-    // last col
-
-    auto getter_last = [&x, &y, low](int delta) {
-      return low(x - 2 + delta, y);
+  auto process = [&x, &y, low, convolution, clampUint, dst](auto segment) {
+    auto lowGetter = [&x, &y, low](int delta) {
+      return low(x + decltype(segment)::coord_shift + delta, y);
     };
 
-    static constexpr std::array<int, 4> last_even_muls = {+1, -1, +4, +5};
-    even = convolution(last_even_muls, getter_last);
-    static constexpr std::array<int, 4> last_odd_muls = {-1, +1, -4, +11};
-    odd = convolution(last_odd_muls, getter_last);
+    int even = convolution(decltype(segment)::mul_even, lowGetter);
+    int odd = convolution(decltype(segment)::mul_odd, lowGetter);
 
     if (clampUint) {
       even = clampBits(even, 14);
       odd = clampBits(odd, 14);
     }
-    dest(2 * x, y) = static_cast<int16_t>(even);
-    dest(2 * x + 1, y) = static_cast<int16_t>(odd);
+    dst(2 * x, y) = static_cast<int16_t>(even);
+    dst(2 * x + 1, y) = static_cast<int16_t>(odd);
+  };
+
+  // Horizontal reconstruction
+  for (y = 0; y < dst.height; ++y) {
+    // First col
+    x = 0;
+    process(ConvolutionParams::First);
+    // middle cols
+    for (x = 1; x + 1 < width; ++x) {
+      process(ConvolutionParams::Middle);
+    }
+    // last col
+    process(ConvolutionParams::Last);
   }
 }
 
