@@ -216,26 +216,13 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
   for (y = 0; y < dest.height; ++y) {
     x = 0;
 
-    // First col
+    {
+      // First col
 
-    auto getter_first = [&x, &y, low](int delta) { return low(x + delta, y); };
+      auto getter = [&x, &y, low](int delta) { return low(x + delta, y); };
 
-    int even = convolution(ConvolutionMuls::first_even, getter_first);
-    int odd = convolution(ConvolutionMuls::first_odd, getter_first);
-
-    if (clampUint) {
-      even = clampBits(even, 14);
-      odd = clampBits(odd, 14);
-    }
-    dest(2 * x, y) = static_cast<int16_t>(even);
-    dest(2 * x + 1, y) = static_cast<int16_t>(odd);
-
-    // middle cols
-    for (x = 1; x + 1 < width; ++x) {
-      auto getter = [&x, &y, low](int delta) { return low(x - 1 + delta, y); };
-
-      even = convolution(ConvolutionMuls::middle_even, getter);
-      odd = convolution(ConvolutionMuls::middle_odd, getter);
+      int even = convolution(ConvolutionMuls::first_even, getter);
+      int odd = convolution(ConvolutionMuls::first_odd, getter);
 
       if (clampUint) {
         even = clampBits(even, 14);
@@ -245,21 +232,36 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
       dest(2 * x + 1, y) = static_cast<int16_t>(odd);
     }
 
-    // last col
+    // middle cols
+    for (x = 1; x + 1 < width; ++x) {
+      auto getter = [&x, &y, low](int delta) { return low(x - 1 + delta, y); };
 
-    auto getter_last = [&x, &y, low](int delta) {
-      return low(x - 2 + delta, y);
-    };
+      int even = convolution(ConvolutionMuls::middle_even, getter);
+      int odd = convolution(ConvolutionMuls::middle_odd, getter);
 
-    even = convolution(ConvolutionMuls::last_even, getter_last);
-    odd = convolution(ConvolutionMuls::last_odd, getter_last);
-
-    if (clampUint) {
-      even = clampBits(even, 14);
-      odd = clampBits(odd, 14);
+      if (clampUint) {
+        even = clampBits(even, 14);
+        odd = clampBits(odd, 14);
+      }
+      dest(2 * x, y) = static_cast<int16_t>(even);
+      dest(2 * x + 1, y) = static_cast<int16_t>(odd);
     }
-    dest(2 * x, y) = static_cast<int16_t>(even);
-    dest(2 * x + 1, y) = static_cast<int16_t>(odd);
+
+    {
+      // last col
+
+      auto getter = [&x, &y, low](int delta) { return low(x - 2 + delta, y); };
+
+      int even = convolution(ConvolutionMuls::last_even, getter);
+      int odd = convolution(ConvolutionMuls::last_odd, getter);
+
+      if (clampUint) {
+        even = clampBits(even, 14);
+        odd = clampBits(odd, 14);
+      }
+      dest(2 * x, y) = static_cast<int16_t>(even);
+      dest(2 * x + 1, y) = static_cast<int16_t>(odd);
+    }
   }
 }
 
