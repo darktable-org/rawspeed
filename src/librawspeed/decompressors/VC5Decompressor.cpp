@@ -236,22 +236,15 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
 
   // Horizontal reconstruction
   for (y = 0; y < dest.height; ++y) {
+    // First col
     x = 0;
-
-    {
-      // First col
-      process(ConvolutionParams::First);
-    }
-
+    process(ConvolutionParams::First);
     // middle cols
     for (x = 1; x + 1 < width; ++x) {
       process(ConvolutionParams::Middle);
     }
-
-    {
-      // last col
-      process(ConvolutionParams::Last);
-    }
+    // last col
+    process(ConvolutionParams::Last);
   }
 }
 
