@@ -164,6 +164,15 @@ struct ConvolutionParams {
   static constexpr Last Last{};
 };
 
+constexpr std::array<int, 4> ConvolutionParams::First::mul_even;
+constexpr std::array<int, 4> ConvolutionParams::First::mul_odd;
+
+constexpr std::array<int, 4> ConvolutionParams::Middle::mul_even;
+constexpr std::array<int, 4> ConvolutionParams::Middle::mul_odd;
+
+constexpr std::array<int, 4> ConvolutionParams::Last::mul_even;
+constexpr std::array<int, 4> ConvolutionParams::Last::mul_odd;
+
 } // namespace
 
 void VC5Decompressor::Wavelet::reconstructPass(
