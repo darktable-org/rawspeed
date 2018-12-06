@@ -46,13 +46,17 @@ if(WITH_OPENMP)
     message(STATUS "Looking for OpenMP - found")
     set(HAVE_OPENMP 1)
 
-    if(NOT TARGET OpenMP::OpenMP)
-      add_library(OpenMP::OpenMP INTERFACE IMPORTED)
-      set_property(TARGET OpenMP::OpenMP PROPERTY INTERFACE_COMPILE_OPTIONS "${OpenMP_CXX_FLAGS}")
-      set_property(TARGET OpenMP::OpenMP PROPERTY INTERFACE_LINK_LIBRARIES "${OpenMP_CXX_FLAGS}")
+    if(NOT TARGET OpenMP::OpenMP_CXX)
+      add_library(OpenMP::OpenMP_CXX INTERFACE IMPORTED)
+      if(OpenMP_CXX_FLAGS)
+        set_property(TARGET OpenMP::OpenMP_CXX PROPERTY INTERFACE_COMPILE_OPTIONS ${OpenMP_CXX_FLAGS})
+      endif()
+      if(OpenMP_CXX_LIBRARIES)
+        set_property(TARGET OpenMP::OpenMP_CXX PROPERTY INTERFACE_LINK_LIBRARIES ${OpenMP_CXX_LIBRARIES})
+      endif()
     endif()
 
-    target_link_libraries(rawspeed PUBLIC OpenMP::OpenMP)
+    target_link_libraries(rawspeed PUBLIC OpenMP::OpenMP_CXX)
     set_package_properties(OpenMP PROPERTIES
                            TYPE RECOMMENDED
                            URL https://www.openmp.org/
