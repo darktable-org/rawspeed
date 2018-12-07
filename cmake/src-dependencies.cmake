@@ -48,11 +48,14 @@ if(WITH_OPENMP)
     message(STATUS "Looking for OpenMP - found")
     set(HAVE_OPENMP 1)
 
+    # FIXME: OpenMP::OpenMP_CXX target, and ${OpenMP_CXX_LIBRARIES} were both
+    # added in cmake-3.9. Until then, this is correct:
     if(NOT TARGET OpenMP::OpenMP_CXX)
       add_library(OpenMP::OpenMP_CXX INTERFACE IMPORTED)
       if(OpenMP_CXX_FLAGS)
         set_property(TARGET OpenMP::OpenMP_CXX PROPERTY INTERFACE_COMPILE_OPTIONS ${OpenMP_CXX_FLAGS})
         set_property(TARGET OpenMP::OpenMP_CXX PROPERTY INTERFACE_LINK_LIBRARIES ${OpenMP_CXX_FLAGS})
+        # Yes, both of them to the same value.
       endif()
     endif()
 
