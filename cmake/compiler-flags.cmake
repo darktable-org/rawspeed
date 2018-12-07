@@ -71,6 +71,9 @@ if(RAWSPEED_ENABLE_LTO)
     include(gcc-toolchain)
     set(lto_compile "-flto")
     set(lto_link "-flto")
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    set(lto_compile "-flto=thin -fstrict-vtable-pointers")
+    set(lto_link "-flto=thin")
   endif()
 
   set(CMAKE_C_FLAGS
