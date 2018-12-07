@@ -88,13 +88,13 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=clang-7 CXX=clang++-7 TARGET=STATICANALYSIS ECO="-DUSE_CLANG_TIDY=ON -DWITH_OPENMP=OFF"
+    env: CC=clang-7 CXX=clang++-7 TARGET=STATICANALYSIS ECO="-DUSE_CLANG_TIDY=ON"
   - os: linux
     dist: trusty
     sudo: required
     services:
       - docker
-    env: CC=clang-7 CXX=clang++-7 ECO="-DWITH_PTHREADS=OFF -DWITH_OPENMP=OFF"
+    env: CC=clang-7 CXX=clang++-7 ECO="-DWITH_PTHREADS=OFF"
   - os: linux
     dist: trusty
     sudo: required
