@@ -185,7 +185,7 @@ private:
   void copy_line_to_bayer(fuji_compressed_block* info, const FujiStrip& strip,
                           int cur_line) const;
 
-  void fuji_zerobits(BitPumpMSB* pump, int* count) const;
+  inline void fuji_zerobits(BitPumpMSB* pump, int* count) const;
   int bitDiff(int value1, int value2) const;
 
   template <typename T1, typename T2>
