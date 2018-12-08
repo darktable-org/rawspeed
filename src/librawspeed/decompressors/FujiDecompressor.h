@@ -189,15 +189,15 @@ private:
   int bitDiff(int value1, int value2) const;
 
   template <typename T1, typename T2>
-  int fuji_decode_sample(T1&& func_0, T2&& func_1, fuji_compressed_block* info,
-                         BitPumpMSB* pump, ushort16* line_buf, int* pos,
-                         std::array<int_pair, 41>* grads) const;
-  int fuji_decode_sample_even(fuji_compressed_block* info, BitPumpMSB* pump,
+  void fuji_decode_sample(T1&& func_0, T2&& func_1, fuji_compressed_block* info,
+                          BitPumpMSB* pump, ushort16* line_buf, int* pos,
+                          std::array<int_pair, 41>* grads) const;
+  void fuji_decode_sample_even(fuji_compressed_block* info, BitPumpMSB* pump,
+                               ushort16* line_buf, int* pos,
+                               std::array<int_pair, 41>* grads) const;
+  void fuji_decode_sample_odd(fuji_compressed_block* info, BitPumpMSB* pump,
                               ushort16* line_buf, int* pos,
                               std::array<int_pair, 41>* grads) const;
-  int fuji_decode_sample_odd(fuji_compressed_block* info, BitPumpMSB* pump,
-                             ushort16* line_buf, int* pos,
-                             std::array<int_pair, 41>* grads) const;
 
   void fuji_decode_interpolation_even(int line_width, ushort16* line_buf,
                                       int* pos) const;
