@@ -1,3 +1,5 @@
+include(FeatureSummary)
+
 if(BUILD_TESTING)
   # want GTEST_ADD_TESTS() macro. NOT THE ACTUAL MODULE!
   include(GTEST_ADD_TESTS)
@@ -42,30 +44,44 @@ unset(HAVE_OPENMP)
 if(WITH_OPENMP)
   message(STATUS "Looking for OpenMP")
   find_package(OpenMP)
+
   if(NOT OPENMP_FOUND)
-    message(SEND_ERROR "Did not find OpenMP! Either make it find OpenMP, or pass -DWITH_OPENMP=OFF to disable OpenMP support.")
+    message(SEND_ERROR "Did not find OpenMP! Either make it find OpenMP, "
+                       "or pass -DWITH_OPENMP=OFF to disable OpenMP support.")
   else()
-    message(STATUS "Looking for OpenMP - found")
-    set(HAVE_OPENMP 1)
-
-    # FIXME: OpenMP::OpenMP_CXX target, and ${OpenMP_CXX_LIBRARIES} were both
-    # added in cmake-3.9. Until then, this is correct:
-    if(NOT TARGET OpenMP::OpenMP_CXX)
-      add_library(OpenMP::OpenMP_CXX INTERFACE IMPORTED)
-      if(OpenMP_CXX_FLAGS)
-        set_property(TARGET OpenMP::OpenMP_CXX PROPERTY INTERFACE_COMPILE_OPTIONS ${OpenMP_CXX_FLAGS})
-        set_property(TARGET OpenMP::OpenMP_CXX PROPERTY INTERFACE_LINK_LIBRARIES ${OpenMP_CXX_FLAGS})
-        # Yes, both of them to the same value.
-      endif()
-    endif()
-
-    target_link_libraries(rawspeed PUBLIC OpenMP::OpenMP_CXX)
-    set_package_properties(OpenMP PROPERTIES
-                           TYPE RECOMMENDED
-                           URL https://www.openmp.org/
-                           DESCRIPTION "Open Multi-Processing"
-                           PURPOSE "Marginally used for parallelization the library")
+    message(STATUS "Looking for OpenMP - found (system)")
   endif()
+
+  # FIXME: OpenMP::OpenMP_CXX target, and ${OpenMP_CXX_LIBRARIES} were both
+  # added in cmake-3.9. Until then, this is correct:
+  if(NOT TARGET OpenMP::OpenMP_CXX)
+    add_library(OpenMP::OpenMP_CXX INTERFACE IMPORTED)
+    if(OpenMP_CXX_FLAGS)
+      set_property(TARGET OpenMP::OpenMP_CXX PROPERTY INTERFACE_COMPILE_OPTIONS ${OpenMP_CXX_FLAGS})
+      set_property(TARGET OpenMP::OpenMP_CXX PROPERTY INTERFACE_LINK_LIBRARIES ${OpenMP_CXX_FLAGS})
+      # Yes, both of them to the same value.
+    endif()
+  endif()
+
+  if(NOT USE_BUNDLED_LLVMOPENMP)
+    target_link_libraries(rawspeed PUBLIC OpenMP::OpenMP_CXX)
+  else()
+    include(LLVMOpenMP)
+
+    message(STATUS "Looking for OpenMP - found 'in-tree' runtime library")
+
+    add_dependencies(dependencies omp)
+    target_compile_options(rawspeed PUBLIC $<TARGET_PROPERTY:OpenMP::OpenMP_CXX,INTERFACE_COMPILE_OPTIONS>) # compile time only!
+    target_link_libraries(rawspeed PUBLIC omp) # newly built runtime library
+  endif()
+
+  set(HAVE_OPENMP 1)
+
+  set_package_properties(OpenMP PROPERTIES
+                         TYPE RECOMMENDED
+                         URL https://www.openmp.org/
+                         DESCRIPTION "Open Multi-Processing"
+                         PURPOSE "Marginally used for parallelization the library")
 else()
   message(STATUS "OpenMP is disabled")
 endif()

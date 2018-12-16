@@ -1,0 +1,52 @@
+cmake_minimum_required(VERSION 3.4.0)
+
+project(llvm-openmp-download NONE)
+
+# Enable ExternalProject CMake module
+include(ExternalProject)
+
+option(ALLOW_DOWNLOADING_LLVMOPENMP "If LLVM OpenMP runtime library src tree is not found in location specified by LLVMOPENMP_PATH, do fetch the archive from internet" OFF)
+set(LLVMOPENMP_PATH "/usr/src/openmp" CACHE PATH "Path to the LLVM OpenMP runtime library root tree.")
+
+# Download and install LLVM OpenMP runtime library
+
+message(STATUS "Looking for LLVM OpenMP runtime library sources")
+message(STATUS "Looking for LLVM OpenMP runtime library sources in ${LLVMOPENMP_PATH}")
+if(EXISTS "${LLVMOPENMP_PATH}" AND IS_DIRECTORY "${LLVMOPENMP_PATH}" AND EXISTS "${LLVMOPENMP_PATH}/CMakeLists.txt")
+  message(STATUS "Found LLVM OpenMP runtime library in ${LLVMOPENMP_PATH}")
+
+  ExternalProject_Add(
+    llvm-openmp
+    PREFIX            "${CMAKE_BINARY_DIR}/llvm-openmp"
+    SOURCE_DIR        "${LLVMOPENMP_PATH}" # use existing src dir.
+    BINARY_DIR        "${CMAKE_BINARY_DIR}/llvm-openmp-build"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND     ""
+    INSTALL_COMMAND   ""
+    TEST_COMMAND      ""
+  )
+else()
+  if(NOT ALLOW_DOWNLOADING_LLVMOPENMP)
+    message(SEND_ERROR "Did not find LLVM OpenMP runtime library sources! Either pass correct path in LLVMOPENMP_PATH, or enable ALLOW_DOWNLOADING_LLVMOPENMP, or disable USE_BUNDLED_LLVMOPENMP, or disable WITH_OPENMP.")
+  else()
+    message(WARNING "Did not find LLVM OpenMP runtime library sources! Fetching from web...")
+    ExternalProject_Add(
+      llvm-openmp
+      URL               https://releases.llvm.org/7.0.0/openmp-7.0.0.src.tar.xz
+      URL_HASH          SHA512=bda383d62c822db41504d7774974809cd2af042b03a0b4ca450cc1478c5977682f5c646734801c1b7a16233141d62359c17e87e1435c48a222e159a8763f8857
+      PREFIX            "${CMAKE_BINARY_DIR}/llvm-openmp"
+      SOURCE_DIR        "${CMAKE_BINARY_DIR}/llvm-openmp-src"
+      BINARY_DIR        "${CMAKE_BINARY_DIR}/llvm-openmp-build"
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND     ""
+      INSTALL_COMMAND   ""
+      TEST_COMMAND      ""
+    )
+  endif()
+endif()
+
+ExternalProject_Get_Property(llvm-openmp SOURCE_DIR BINARY_DIR)
+file(WRITE llvm-openmp-paths.cmake
+"set(LLVMOPENMP_SOURCE_DIR \"${SOURCE_DIR}\")
+set(LLVMOPENMP_BINARY_DIR \"${BINARY_DIR}\")
+")
