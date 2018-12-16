@@ -39,10 +39,12 @@ set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE_SAVE "${CMAKE_CXX_INCLUDE_WHAT_YOU_USE}")
 unset(CMAKE_CXX_CLANG_TIDY)
 unset(CMAKE_CXX_INCLUDE_WHAT_YOU_USE)
 
+include(${CMAKE_BINARY_DIR}/pugixml/pugixml-paths.cmake)
+
 # Add pugixml directly to our build. This defines
 # the gtest and gtest_main targets.
-add_subdirectory(${CMAKE_BINARY_DIR}/pugixml/pugixml-src
-                 ${CMAKE_BINARY_DIR}/pugixml/pugixml-build)
+add_subdirectory(${PUGIXML_SOURCE_DIR}
+                 ${PUGIXML_BINARY_DIR})
 
 set_target_properties(pugixml PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:pugixml,INTERFACE_INCLUDE_DIRECTORIES>)
 

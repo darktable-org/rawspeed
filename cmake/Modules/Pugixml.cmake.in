@@ -17,9 +17,8 @@ if(EXISTS "${PUGIXML_PATH}" AND IS_DIRECTORY "${PUGIXML_PATH}" AND EXISTS "${PUG
 
   ExternalProject_Add(
     pugixml
-    URL               "${PUGIXML_PATH}"
     PREFIX            "${CMAKE_BINARY_DIR}/pugixml"
-    SOURCE_DIR        "${CMAKE_BINARY_DIR}/pugixml-src"
+    SOURCE_DIR        "${PUGIXML_PATH}" # use existing src dir.
     BINARY_DIR        "${CMAKE_BINARY_DIR}/pugixml-build"
     CONFIGURE_COMMAND ""
     BUILD_COMMAND     ""
@@ -45,3 +44,9 @@ else()
     )
   endif()
 endif()
+
+ExternalProject_Get_Property(pugixml SOURCE_DIR BINARY_DIR)
+file(WRITE pugixml-paths.cmake
+"set(PUGIXML_SOURCE_DIR \"${SOURCE_DIR}\")
+set(PUGIXML_BINARY_DIR \"${BINARY_DIR}\")
+")
