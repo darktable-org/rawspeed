@@ -45,10 +45,12 @@ set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE_SAVE "${CMAKE_CXX_INCLUDE_WHAT_YOU_USE}")
 unset(CMAKE_CXX_CLANG_TIDY)
 unset(CMAKE_CXX_INCLUDE_WHAT_YOU_USE)
 
+include(${CMAKE_BINARY_DIR}/googletest/googletest-paths.cmake)
+
 # Add googletest directly to our build. This defines
 # the gtest and gtest_main targets.
-add_subdirectory(${CMAKE_BINARY_DIR}/googletest/googletest-src
-                 ${CMAKE_BINARY_DIR}/googletest/googletest-build
+add_subdirectory(${GOOGLETEST_SOURCE_DIR}
+                 ${GOOGLETEST_BINARY_DIR}
                  EXCLUDE_FROM_ALL)
 
 set_target_properties(gtest PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:gtest,INTERFACE_INCLUDE_DIRECTORIES>)

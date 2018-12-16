@@ -20,9 +20,8 @@ if(EXISTS "${GOOGLETEST_PATH}"            AND IS_DIRECTORY "${GOOGLETEST_PATH}" 
 
   ExternalProject_Add(
     googletest
-    URL               "${GOOGLETEST_PATH}"
     PREFIX            "${CMAKE_BINARY_DIR}/googletest"
-    SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src"
+    SOURCE_DIR        "${GOOGLETEST_PATH}" # use existing src dir.
     BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build"
     CONFIGURE_COMMAND ""
     BUILD_COMMAND     ""
@@ -48,3 +47,9 @@ else()
     )
   endif()
 endif()
+
+ExternalProject_Get_Property(googletest SOURCE_DIR BINARY_DIR)
+file(WRITE googletest-paths.cmake
+"set(GOOGLETEST_SOURCE_DIR \"${SOURCE_DIR}\")
+set(GOOGLETEST_BINARY_DIR \"${BINARY_DIR}\")
+")
