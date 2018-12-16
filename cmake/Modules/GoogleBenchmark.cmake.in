@@ -17,11 +17,9 @@ if(EXISTS "${GOOGLEBENCHMARK_PATH}" AND IS_DIRECTORY "${GOOGLEBENCHMARK_PATH}" A
 
   ExternalProject_Add(
     googlebenchmark
-    URL               "${GOOGLEBENCHMARK_PATH}"
     PREFIX            "${CMAKE_BINARY_DIR}/googlebenchmark"
-    SOURCE_DIR        "${CMAKE_BINARY_DIR}/googlebenchmark-src"
+    SOURCE_DIR        "${GOOGLEBENCHMARK_PATH}" # use existing src dir.
     BINARY_DIR        "${CMAKE_BINARY_DIR}/googlebenchmark-build"
-    # PATCH_COMMAND   patch -p1 -i "@rawspeed_SOURCE_DIR@/cmake/Modules/GoogleBenchmark-fixes.patch"
     CONFIGURE_COMMAND ""
     BUILD_COMMAND     ""
     INSTALL_COMMAND   ""
@@ -39,7 +37,6 @@ else()
       PREFIX            "${CMAKE_BINARY_DIR}/googlebenchmark"
       SOURCE_DIR        "${CMAKE_BINARY_DIR}/googlebenchmark-src"
       BINARY_DIR        "${CMAKE_BINARY_DIR}/googlebenchmark-build"
-      # PATCH_COMMAND   patch -p1 -i "@rawspeed_SOURCE_DIR@/cmake/Modules/GoogleBenchmark-fixes.patch"
       CONFIGURE_COMMAND ""
       BUILD_COMMAND     ""
       INSTALL_COMMAND   ""
@@ -47,3 +44,9 @@ else()
     )
   endif()
 endif()
+
+ExternalProject_Get_Property(googlebenchmark SOURCE_DIR BINARY_DIR)
+file(WRITE googlebenchmark-paths.cmake
+"set(GOOGLEBENCHMARK_SOURCE_DIR \"${SOURCE_DIR}\")
+set(GOOGLEBENCHMARK_BINARY_DIR \"${BINARY_DIR}\")
+")

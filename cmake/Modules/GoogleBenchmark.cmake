@@ -40,9 +40,11 @@ set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE_SAVE "${CMAKE_CXX_INCLUDE_WHAT_YOU_USE}")
 unset(CMAKE_CXX_CLANG_TIDY)
 unset(CMAKE_CXX_INCLUDE_WHAT_YOU_USE)
 
+include(${CMAKE_BINARY_DIR}/googlebenchmark/googlebenchmark-paths.cmake)
+
 # Add googlebenchmark directly to our build. This defines the benchmark target.
-add_subdirectory(${CMAKE_BINARY_DIR}/googlebenchmark/googlebenchmark-src
-                 ${CMAKE_BINARY_DIR}/googlebenchmark/googlebenchmark-build
+add_subdirectory(${GOOGLEBENCHMARK_SOURCE_DIR}
+                 ${GOOGLEBENCHMARK_BINARY_DIR}
                  EXCLUDE_FROM_ALL)
 
 set_target_properties(benchmark PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:benchmark,INTERFACE_INCLUDE_DIRECTORIES>)
