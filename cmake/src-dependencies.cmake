@@ -42,6 +42,13 @@ add_feature_info("PThread-based threading" HAVE_PTHREAD "used for parallelized i
 
 unset(HAVE_OPENMP)
 if(WITH_OPENMP)
+  if(NOT HAVE_PTHREAD)
+    message(SEND_ERROR "POSIX locking API is used, but the POSIX Threads "
+                       "weren't found, thus can not enable OpenMP support. "
+                       "Either make it find PThreads, or pass "
+                       "-DWITH_OPENMP=OFF to disable OpenMP support.")
+  endif()
+
   message(STATUS "Looking for OpenMP")
   find_package(OpenMP)
 
