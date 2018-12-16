@@ -36,6 +36,8 @@ set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE_SAVE "${CMAKE_CXX_INCLUDE_WHAT_YOU_USE}")
 unset(CMAKE_CXX_CLANG_TIDY)
 unset(CMAKE_CXX_INCLUDE_WHAT_YOU_USE)
 
+include(${CMAKE_BINARY_DIR}/zlib/zlib-paths.cmake)
+
 # XXX make sure that zlib is using it's own headers
 # see https://github.com/madler/zlib/issues/218
 include_directories(BEFORE SYSTEM ${CMAKE_BINARY_DIR}/zlib/zlib-src)
@@ -43,8 +45,8 @@ include_directories(BEFORE SYSTEM ${CMAKE_BINARY_DIR}/zlib/zlib-build)
 
 # Add zlib directly to our build. This defines
 # the gtest and gtest_main targets.
-add_subdirectory(${CMAKE_BINARY_DIR}/zlib/zlib-src
-                 ${CMAKE_BINARY_DIR}/zlib/zlib-build)
+add_subdirectory(${ZLIB_SOURCE_DIR}
+                 ${ZLIB_BINARY_DIR})
 
 set(_zlib_lib zlib)       # shared
 set(_zlib_lib zlibstatic) # static

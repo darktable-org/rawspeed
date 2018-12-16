@@ -17,9 +17,8 @@ if(EXISTS "${ZLIB_PATH}" AND IS_DIRECTORY "${ZLIB_PATH}" AND EXISTS "${ZLIB_PATH
 
   ExternalProject_Add(
     zlib
-    URL               "${ZLIB_PATH}"
     PREFIX            "${CMAKE_BINARY_DIR}/zlib"
-    SOURCE_DIR        "${CMAKE_BINARY_DIR}/zlib-src"
+    SOURCE_DIR        "${ZLIB_PATH}" # use existing src dir.
     BINARY_DIR        "${CMAKE_BINARY_DIR}/zlib-build"
     CONFIGURE_COMMAND ""
     BUILD_COMMAND     ""
@@ -45,3 +44,9 @@ else()
     )
   endif()
 endif()
+
+ExternalProject_Get_Property(zlib SOURCE_DIR BINARY_DIR)
+file(WRITE zlib-paths.cmake
+"set(ZLIB_SOURCE_DIR \"${SOURCE_DIR}\")
+set(ZLIB_BINARY_DIR \"${BINARY_DIR}\")
+")
