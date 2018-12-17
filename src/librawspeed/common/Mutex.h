@@ -39,6 +39,11 @@ class CAPABILITY("mutex") Mutex final {
 public:
   explicit Mutex() { omp_init_lock(&mutex); }
 
+  Mutex(const Mutex&) = delete;
+  Mutex(Mutex&&) = delete;
+  Mutex& operator=(const Mutex&) = delete;
+  Mutex& operator=(Mutex&&) = delete;
+
   ~Mutex() { omp_destroy_lock(&mutex); }
 
   // Acquire/lock this mutex exclusively.  Only one thread can have exclusive
@@ -60,6 +65,15 @@ public:
 
 class CAPABILITY("mutex") Mutex final {
 public:
+  explicit Mutex() = default;
+
+  Mutex(const Mutex&) = delete;
+  Mutex(Mutex&&) = delete;
+  Mutex& operator=(const Mutex&) = delete;
+  Mutex& operator=(Mutex&&) = delete;
+
+  ~Mutex() = default;
+
   // Acquire/lock this mutex exclusively.  Only one thread can have exclusive
   // access at any one time.  Write operations to guarded data require an
   // exclusive lock.
@@ -91,6 +105,12 @@ class SCOPED_CAPABILITY MutexLocker final {
 
 public:
   explicit MutexLocker(Mutex* mu) ACQUIRE(mu) : mut(mu) { mu->Lock(); }
+
+  MutexLocker(const MutexLocker&) = delete;
+  MutexLocker(MutexLocker&&) = delete;
+  MutexLocker& operator=(const MutexLocker&) = delete;
+  MutexLocker& operator=(MutexLocker&&) = delete;
+
   ~MutexLocker() RELEASE() { mut->Unlock(); }
 };
 
