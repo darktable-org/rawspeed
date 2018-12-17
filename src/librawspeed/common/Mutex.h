@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2017-2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -23,34 +23,34 @@
 #include "rawspeedconfig.h"
 #include "ThreadSafetyAnalysis.h"
 
-#ifdef HAVE_PTHREAD
-#include <pthread.h>
+#ifdef HAVE_OPENMP
+#include <omp.h>
 #endif
 
 namespace rawspeed {
 
 // Defines an annotated interface for mutexes.
 // These methods can be implemented to use any internal mutex implementation.
-#ifdef HAVE_PTHREAD
+#ifdef HAVE_OPENMP
 
 class CAPABILITY("mutex") Mutex final {
-  pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+  omp_lock_t mutex;
 
 public:
-  ~Mutex() { pthread_mutex_destroy(&mutex); }
+  explicit Mutex() { omp_init_lock(&mutex); }
+
+  ~Mutex() { omp_destroy_lock(&mutex); }
 
   // Acquire/lock this mutex exclusively.  Only one thread can have exclusive
   // access at any one time.  Write operations to guarded data require an
   // exclusive lock.
-  void Lock() ACQUIRE() { pthread_mutex_lock(&mutex); }
+  void Lock() ACQUIRE() { omp_set_lock(&mutex); }
 
   // Release/unlock an exclusive mutex.
-  void Unlock() RELEASE() { pthread_mutex_unlock(&mutex); }
+  void Unlock() RELEASE() { omp_unset_lock(&mutex); }
 
   // Try to acquire the mutex.  Returns true on success, and false on failure.
-  bool TryLock() TRY_ACQUIRE(true) {
-    return pthread_mutex_trylock(&mutex) == 0;
-  }
+  bool TryLock() TRY_ACQUIRE(true) { return omp_test_lock(&mutex); }
 
   // For negative capabilities.
   const Mutex& operator!() const { return *this; }
