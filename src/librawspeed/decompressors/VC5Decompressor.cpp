@@ -178,40 +178,39 @@ constexpr std::array<int, 4> ConvolutionParams::Last::mul_odd;
 void VC5Decompressor::Wavelet::reconstructPass(
     const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> high,
     const Array2DRef<const int16_t> low) const noexcept {
-  int x;
-  int y;
-
-  auto convolution = [&x, &y, high](std::array<int, 4> muls, auto lowGetter) {
-    return convolute(x, y, muls, high, lowGetter, /*DescaleShift*/ 0);
-  };
-
-  auto process = [&x, &y, low, convolution, dst](auto segment) {
+  auto process = [low, high, dst](auto segment, int x, int y) {
     auto lowGetter = [&x, &y, low](int delta) {
       return low(x, y + decltype(segment)::coord_shift + delta);
     };
+    auto convolution = [&x, &y, high, lowGetter](std::array<int, 4> muls) {
+      return convolute(x, y, muls, high, lowGetter, /*DescaleShift*/ 0);
+    };
 
-    int even = convolution(decltype(segment)::mul_even, lowGetter);
-    int odd = convolution(decltype(segment)::mul_odd, lowGetter);
+    int even = convolution(decltype(segment)::mul_even);
+    int odd = convolution(decltype(segment)::mul_odd);
 
     dst(x, 2 * y) = static_cast<int16_t>(even);
     dst(x, 2 * y + 1) = static_cast<int16_t>(odd);
   };
 
   // Vertical reconstruction
-  // 1st row
-  y = 0;
-  for (x = 0; x < width; ++x) {
-    process(ConvolutionParams::First);
-  }
-  // middle rows
-  for (y = 1; y + 1 < height; ++y) {
-    for (x = 0; x < width; ++x) {
-      process(ConvolutionParams::Middle);
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+  for (int y = 0; y < height; ++y) {
+    if (y == 0) {
+      // 1st row
+      for (int x = 0; x < width; ++x)
+        process(ConvolutionParams::First, x, y);
+    } else if (y + 1 < height) {
+      // middle rows
+      for (int x = 0; x < width; ++x)
+        process(ConvolutionParams::Middle, x, y);
+    } else {
+      // last row
+      for (int x = 0; x < width; ++x)
+        process(ConvolutionParams::Last, x, y);
     }
-  }
-  // last row
-  for (x = 0; x < width; ++x) {
-    process(ConvolutionParams::Last);
   }
 }
 
@@ -219,21 +218,18 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
     const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> low,
     const Array2DRef<const int16_t> high, int descaleShift,
     bool clampUint = false) const noexcept {
-  int x;
-  int y;
-
-  auto convolution = [&x, &y, high, descaleShift](std::array<int, 4> muls,
-                                                  auto lowGetter) {
-    return convolute(x, y, muls, high, lowGetter, descaleShift);
-  };
-
-  auto process = [&x, &y, low, convolution, clampUint, dst](auto segment) {
+  auto process = [low, high, descaleShift, clampUint, dst](auto segment, int x,
+                                                           int y) {
     auto lowGetter = [&x, &y, low](int delta) {
       return low(x + decltype(segment)::coord_shift + delta, y);
     };
+    auto convolution = [&x, &y, high, lowGetter,
+                        descaleShift](std::array<int, 4> muls) {
+      return convolute(x, y, muls, high, lowGetter, descaleShift);
+    };
 
-    int even = convolution(decltype(segment)::mul_even, lowGetter);
-    int odd = convolution(decltype(segment)::mul_odd, lowGetter);
+    int even = convolution(decltype(segment)::mul_even);
+    int odd = convolution(decltype(segment)::mul_odd);
 
     if (clampUint) {
       even = clampBits(even, 14);
@@ -244,23 +240,30 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
   };
 
   // Horizontal reconstruction
-  for (y = 0; y < dst.height; ++y) {
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+  for (int y = 0; y < dst.height; ++y) {
     // First col
-    x = 0;
-    process(ConvolutionParams::First);
+    int x = 0;
+    process(ConvolutionParams::First, x, y);
     // middle cols
     for (x = 1; x + 1 < width; ++x) {
-      process(ConvolutionParams::Middle);
+      process(ConvolutionParams::Middle, x, y);
     }
     // last col
-    process(ConvolutionParams::Last);
+    process(ConvolutionParams::Last, x, y);
   }
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::processLow(
     const Wavelet& wavelet) noexcept {
-  const auto lowpass = Array2DRef<int16_t>::create(
-      &lowpass_storage, wavelet.width, 2 * wavelet.height);
+  Array2DRef<int16_t> lowpass;
+#ifdef HAVE_OPENMP
+#pragma omp single copyprivate(lowpass)
+#endif
+  lowpass = Array2DRef<int16_t>::create(&lowpass_storage, wavelet.width,
+                                        2 * wavelet.height);
 
   const Array2DRef<const int16_t> highlow = wavelet.bandAsArray2DRef(2);
   const Array2DRef<const int16_t> lowlow = wavelet.bandAsArray2DRef(0);
@@ -271,8 +274,12 @@ void VC5Decompressor::Wavelet::ReconstructableBand::processLow(
 
 void VC5Decompressor::Wavelet::ReconstructableBand::processHigh(
     const Wavelet& wavelet) noexcept {
-  const auto highpass = Array2DRef<int16_t>::create(
-      &highpass_storage, wavelet.width, 2 * wavelet.height);
+  Array2DRef<int16_t> highpass;
+#ifdef HAVE_OPENMP
+#pragma omp single copyprivate(highpass)
+#endif
+  highpass = Array2DRef<int16_t>::create(&highpass_storage, wavelet.width,
+                                         2 * wavelet.height);
 
   const Array2DRef<const int16_t> highhigh = wavelet.bandAsArray2DRef(3);
   const Array2DRef<const int16_t> lowhigh = wavelet.bandAsArray2DRef(1);
@@ -284,7 +291,11 @@ void VC5Decompressor::Wavelet::ReconstructableBand::combine(
     const Wavelet& wavelet) noexcept {
   int16_t descaleShift = (wavelet.prescale == 2 ? 2 : 0);
 
-  const auto dest =
+  Array2DRef<int16_t> dest;
+#ifdef HAVE_OPENMP
+#pragma omp single copyprivate(dest)
+#endif
+  dest =
       Array2DRef<int16_t>::create(&data, 2 * wavelet.width, 2 * wavelet.height);
 
   const Array2DRef<int16_t> lowpass(lowpass_storage.data(), wavelet.width,
@@ -695,9 +706,6 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
     // And now, for every channel, recursively reconstruct the low-pass bands.
     for (int waveletLevel = numWaveletLevels - 1; waveletLevel > 0;
          waveletLevel--) {
-#ifdef HAVE_OPENMP
-#pragma omp for schedule(static)
-#endif
       for (auto channel = channels.begin(); channel < channels.end();
            ++channel) {
         Wavelet& wavelet = channel->wavelets[waveletLevel];
@@ -706,14 +714,14 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
         auto& reconstructableBand = nextWavelet.bands[0];
         reconstructableBand->decode(wavelet);
 
+#ifdef HAVE_OPENMP
+#pragma omp single
+#endif
         wavelet.clear(); // we no longer need it.
       }
     }
 
     // Finally, for each channel, reconstruct the final lowpass band.
-#ifdef HAVE_OPENMP
-#pragma omp for schedule(static)
-#endif
     for (auto channel = channels.begin(); channel < channels.end(); ++channel) {
       Wavelet& wavelet = channel->wavelets.front();
       channel->band.decode(wavelet);
