@@ -219,21 +219,18 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
     const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> low,
     const Array2DRef<const int16_t> high, int descaleShift,
     bool clampUint = false) const noexcept {
-  int x;
-  int y;
-
-  auto convolution = [&x, &y, high, descaleShift](std::array<int, 4> muls,
-                                                  auto lowGetter) {
-    return convolute(x, y, muls, high, lowGetter, descaleShift);
-  };
-
-  auto process = [&x, &y, low, convolution, clampUint, dst](auto segment) {
+  auto process = [low, high, descaleShift, clampUint, dst](auto segment, int x,
+                                                           int y) {
     auto lowGetter = [&x, &y, low](int delta) {
       return low(x + decltype(segment)::coord_shift + delta, y);
     };
+    auto convolution = [&x, &y, high, lowGetter,
+                        descaleShift](std::array<int, 4> muls) {
+      return convolute(x, y, muls, high, lowGetter, descaleShift);
+    };
 
-    int even = convolution(decltype(segment)::mul_even, lowGetter);
-    int odd = convolution(decltype(segment)::mul_odd, lowGetter);
+    int even = convolution(decltype(segment)::mul_even);
+    int odd = convolution(decltype(segment)::mul_odd);
 
     if (clampUint) {
       even = clampBits(even, 14);
@@ -244,16 +241,16 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
   };
 
   // Horizontal reconstruction
-  for (y = 0; y < dst.height; ++y) {
+  for (int y = 0; y < dst.height; ++y) {
     // First col
-    x = 0;
-    process(ConvolutionParams::First);
+    int x = 0;
+    process(ConvolutionParams::First, x, y);
     // middle cols
     for (x = 1; x + 1 < width; ++x) {
-      process(ConvolutionParams::Middle);
+      process(ConvolutionParams::Middle, x, y);
     }
     // last col
-    process(ConvolutionParams::Last);
+    process(ConvolutionParams::Last, x, y);
   }
 }
 
