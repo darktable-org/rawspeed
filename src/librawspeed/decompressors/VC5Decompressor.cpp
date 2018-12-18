@@ -178,40 +178,36 @@ constexpr std::array<int, 4> ConvolutionParams::Last::mul_odd;
 void VC5Decompressor::Wavelet::reconstructPass(
     const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> high,
     const Array2DRef<const int16_t> low) const noexcept {
-  int x;
-  int y;
-
-  auto convolution = [&x, &y, high](std::array<int, 4> muls, auto lowGetter) {
-    return convolute(x, y, muls, high, lowGetter, /*DescaleShift*/ 0);
-  };
-
-  auto process = [&x, &y, low, convolution, dst](auto segment) {
+  auto process = [low, high, dst](auto segment, int x, int y) {
     auto lowGetter = [&x, &y, low](int delta) {
       return low(x, y + decltype(segment)::coord_shift + delta);
     };
+    auto convolution = [&x, &y, high, lowGetter](std::array<int, 4> muls) {
+      return convolute(x, y, muls, high, lowGetter, /*DescaleShift*/ 0);
+    };
 
-    int even = convolution(decltype(segment)::mul_even, lowGetter);
-    int odd = convolution(decltype(segment)::mul_odd, lowGetter);
+    int even = convolution(decltype(segment)::mul_even);
+    int odd = convolution(decltype(segment)::mul_odd);
 
     dst(x, 2 * y) = static_cast<int16_t>(even);
     dst(x, 2 * y + 1) = static_cast<int16_t>(odd);
   };
 
   // Vertical reconstruction
-  // 1st row
-  y = 0;
-  for (x = 0; x < width; ++x) {
-    process(ConvolutionParams::First);
-  }
-  // middle rows
-  for (y = 1; y + 1 < height; ++y) {
-    for (x = 0; x < width; ++x) {
-      process(ConvolutionParams::Middle);
+  for (int y = 0; y < height; ++y) {
+    if (y == 0) {
+      // 1st row
+      for (int x = 0; x < width; ++x)
+        process(ConvolutionParams::First, x, y);
+    } else if (y + 1 < height) {
+      // middle rows
+      for (int x = 0; x < width; ++x)
+        process(ConvolutionParams::Middle, x, y);
+    } else {
+      // last row
+      for (int x = 0; x < width; ++x)
+        process(ConvolutionParams::Last, x, y);
     }
-  }
-  // last row
-  for (x = 0; x < width; ++x) {
-    process(ConvolutionParams::Last);
   }
 }
 
