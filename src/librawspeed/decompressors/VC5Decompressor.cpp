@@ -704,10 +704,9 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 #endif
 
     // And now, for every channel, recursively reconstruct the low-pass bands.
-    for (int waveletLevel = numWaveletLevels - 1; waveletLevel > 0;
-         waveletLevel--) {
-      for (auto channel = channels.begin(); channel < channels.end();
-           ++channel) {
+    for (auto channel = channels.begin(); channel < channels.end(); ++channel) {
+      for (int waveletLevel = numWaveletLevels - 1; waveletLevel > 0;
+           waveletLevel--) {
         Wavelet& wavelet = channel->wavelets[waveletLevel];
         Wavelet& nextWavelet = channel->wavelets[waveletLevel - 1];
 
