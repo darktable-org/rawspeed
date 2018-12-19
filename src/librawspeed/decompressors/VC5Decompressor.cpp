@@ -718,10 +718,8 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 #endif
         wavelet.clear(); // we no longer need it.
       }
-    }
 
-    // Finally, for each channel, reconstruct the final lowpass band.
-    for (auto channel = channels.begin(); channel < channels.end(); ++channel) {
+      // Finally, reconstruct the final lowpass band.
       Wavelet& wavelet = channel->wavelets.front();
       channel->band.decode(wavelet);
 
