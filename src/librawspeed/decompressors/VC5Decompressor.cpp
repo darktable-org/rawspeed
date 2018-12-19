@@ -714,7 +714,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
         reconstructableBand->decode(wavelet);
 
 #ifdef HAVE_OPENMP
-#pragma omp single
+#pragma omp single nowait
 #endif
         wavelet.clear(); // we no longer need it.
       }
@@ -726,7 +726,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
       channel->band.decode(wavelet);
 
 #ifdef HAVE_OPENMP
-#pragma omp single
+#pragma omp single nowait
 #endif
       wavelet.clear(); // we no longer need it.
     }
