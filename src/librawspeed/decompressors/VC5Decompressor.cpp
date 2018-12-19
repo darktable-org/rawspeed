@@ -724,22 +724,26 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 
 #ifdef HAVE_OPENMP
 #pragma omp cancel parallel if (exceptionThrown)
-#endif
 
-    // And now, reconstruct the low-pass bands.
-    for (const ReconstructionStep& step : reconstructionSteps) {
-      step.band.decode(step.wavelet);
+    // Parallel region termination is usually disabled by default,
+    // thus we can't just rely on it. Proceed only if decoding did not fail.
+    if (!exceptionThrown) {
+#endif
+      // And now, reconstruct the low-pass bands.
+      for (const ReconstructionStep& step : reconstructionSteps) {
+        step.band.decode(step.wavelet);
 
 #ifdef HAVE_OPENMP
 #pragma omp single nowait
 #endif
-      step.wavelet.clear(); // we no longer need it.
-    }
+        step.wavelet.clear(); // we no longer need it.
+      }
 
-    // And finally!
-    combineFinalLowpassBands();
+      // And finally!
+      combineFinalLowpassBands();
 
 #ifdef HAVE_OPENMP
+    }
   }
 
   std::string firstErr;
