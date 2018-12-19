@@ -193,6 +193,7 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   static constexpr int numChannels = 4;
   static constexpr int numSubbandsTotal = numSubbands * numChannels;
+  static constexpr int numLowPassBandsTotal = numWaveletLevels * numChannels;
   std::array<Channel, numChannels> channels;
 
   struct DecodeableBand {
@@ -201,6 +202,12 @@ class VC5Decompressor final : public AbstractDecompressor {
     DecodeableBand(Wavelet::AbstractDecodeableBand* band_,
                    const Wavelet& wavelet_)
         : band(band_), wavelet(wavelet_) {}
+  };
+  struct ReconstructionStep {
+    Wavelet& wavelet;
+    Wavelet::ReconstructableBand& band;
+    ReconstructionStep(Wavelet* wavelet_, Wavelet::ReconstructableBand* band_)
+        : wavelet(*wavelet_), band(*band_) {}
   };
 
   static inline void getRLV(BitPumpMSB* bits, int* value, unsigned int* count);

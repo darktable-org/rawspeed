@@ -673,6 +673,29 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
     return bands;
   }();
 
+  const std::vector<ReconstructionStep> reconstructionSteps = [&]() {
+    std::vector<ReconstructionStep> steps;
+    steps.reserve(numLowPassBandsTotal);
+    // For every channel, recursively reconstruct the low-pass bands.
+    for (auto& channel : channels) {
+      // Reconstruct the intermediate lowpass bands.
+      for (int waveletLevel = numWaveletLevels - 1; waveletLevel > 0;
+           waveletLevel--) {
+        Wavelet* wavelet = &(channel.wavelets[waveletLevel]);
+        Wavelet& nextWavelet = channel.wavelets[waveletLevel - 1];
+
+        auto* band = dynamic_cast<Wavelet::ReconstructableBand*>(
+            nextWavelet.bands[0].get());
+        steps.emplace_back(wavelet, band);
+      }
+      // Finally, reconstruct the final lowpass band.
+      Wavelet* wavelet = &(channel.wavelets.front());
+      steps.emplace_back(wavelet, &(channel.band));
+    }
+    assert(steps.size() == numLowPassBandsTotal);
+    return steps;
+  }();
+
 #ifdef HAVE_OPENMP
   bool exceptionThrown = false;
 #pragma omp parallel default(none) shared(exceptionThrown)                     \
@@ -703,30 +726,14 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 #pragma omp cancel parallel if (exceptionThrown)
 #endif
 
-    // And now, for every channel, recursively reconstruct the low-pass bands.
-    for (auto channel = channels.begin(); channel < channels.end(); ++channel) {
-      for (int waveletLevel = numWaveletLevels - 1; waveletLevel > 0;
-           waveletLevel--) {
-        Wavelet& wavelet = channel->wavelets[waveletLevel];
-        Wavelet& nextWavelet = channel->wavelets[waveletLevel - 1];
-
-        auto& reconstructableBand = nextWavelet.bands[0];
-        reconstructableBand->decode(wavelet);
+    // And now, reconstruct the low-pass bands.
+    for (const ReconstructionStep& step : reconstructionSteps) {
+      step.band.decode(step.wavelet);
 
 #ifdef HAVE_OPENMP
 #pragma omp single nowait
 #endif
-        wavelet.clear(); // we no longer need it.
-      }
-
-      // Finally, reconstruct the final lowpass band.
-      Wavelet& wavelet = channel->wavelets.front();
-      channel->band.decode(wavelet);
-
-#ifdef HAVE_OPENMP
-#pragma omp single nowait
-#endif
-      wavelet.clear(); // we no longer need it.
+      step.wavelet.clear(); // we no longer need it.
     }
 
     // And finally!
