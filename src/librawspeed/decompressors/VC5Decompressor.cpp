@@ -724,6 +724,11 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
     for (auto channel = channels.begin(); channel < channels.end(); ++channel) {
       Wavelet& wavelet = channel->wavelets.front();
       channel->band.decode(wavelet);
+
+#ifdef HAVE_OPENMP
+#pragma omp single
+#endif
+      wavelet.clear(); // we no longer need it.
     }
 
     // And finally!
