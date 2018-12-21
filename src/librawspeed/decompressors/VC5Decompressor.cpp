@@ -730,14 +730,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
     if (!exceptionThrown) {
 #endif
       // And now, reconstruct the low-pass bands.
-      for (const ReconstructionStep& step : reconstructionSteps) {
-        step.band.decode(step.wavelet);
-
-#ifdef HAVE_OPENMP
-#pragma omp single nowait
-#endif
-        step.wavelet.clear(); // we no longer need it.
-      }
+      reconstructLowpassBands(reconstructionSteps);
 
       // And finally!
       combineFinalLowpassBands();
@@ -755,6 +748,18 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
     assert(!exceptionThrown);
   }
 #endif
+}
+
+void VC5Decompressor::reconstructLowpassBands(
+    const std::vector<ReconstructionStep>& reconstructionSteps) const noexcept {
+  for (const ReconstructionStep& step : reconstructionSteps) {
+    step.band.decode(step.wavelet);
+
+#ifdef HAVE_OPENMP
+#pragma omp single nowait
+#endif
+    step.wavelet.clear(); // we no longer need it.
+  }
 }
 
 void VC5Decompressor::combineFinalLowpassBands() const noexcept {
