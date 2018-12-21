@@ -702,25 +702,14 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
     num_threads(rawspeed_get_number_of_processor_cores())
   {
 #endif
+
+    // Decode all the existing bands. May fail.
+    decodeBands(allDecodeableBands
 #ifdef HAVE_OPENMP
-#pragma omp for schedule(dynamic, 1)
+                ,
+                &exceptionThrown
 #endif
-    for (auto decodeableBand = allDecodeableBands.begin();
-         decodeableBand < allDecodeableBands.end(); ++decodeableBand) {
-      try {
-        decodeableBand->band->decode(decodeableBand->wavelet);
-      } catch (RawspeedException& err) {
-        // Propagate the exception out of OpenMP magic.
-        mRaw->setError(err.what());
-#ifdef HAVE_OPENMP
-#pragma omp atomic write
-        exceptionThrown = true;
-#pragma omp cancel for
-#else
-        throw;
-#endif
-      }
-    }
+    );
 
 #ifdef HAVE_OPENMP
 #pragma omp cancel parallel if (exceptionThrown)
@@ -748,6 +737,34 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
     assert(!exceptionThrown);
   }
 #endif
+}
+
+void VC5Decompressor::decodeBands(
+    const std::vector<DecodeableBand>& allDecodeableBands
+#ifdef HAVE_OPENMP
+    ,
+    bool* exceptionThrown
+#endif
+    ) const noexcept(HAVE_OPENMP) {
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(dynamic, 1)
+#endif
+  for (auto decodeableBand = allDecodeableBands.begin();
+       decodeableBand < allDecodeableBands.end(); ++decodeableBand) {
+#ifdef HAVE_OPENMP
+    try {
+#endif
+      decodeableBand->band->decode(decodeableBand->wavelet);
+#ifdef HAVE_OPENMP
+    } catch (RawspeedException& err) {
+      // Propagate the exception out of OpenMP magic.
+      mRaw->setError(err.what());
+#pragma omp atomic write
+      *exceptionThrown = true;
+#pragma omp cancel for
+    }
+#endif
+  }
 }
 
 void VC5Decompressor::reconstructLowpassBands(

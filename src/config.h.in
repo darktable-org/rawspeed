@@ -30,7 +30,7 @@
 
 #cmakedefine HAVE_PTHREAD
 
-#cmakedefine HAVE_OPENMP
+#cmakedefine01 HAVE_OPENMP
 
 #cmakedefine HAVE_PUGIXML
 

@@ -214,6 +214,13 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   void parseLargeCodeblock(const ByteStream& bs);
 
+  void decodeBands(const std::vector<DecodeableBand>& allDecodeableBands
+#ifdef HAVE_OPENMP
+                   ,
+                   bool* exceptionThrown
+#endif
+                   ) const noexcept(HAVE_OPENMP);
+
   void reconstructLowpassBands(
       const std::vector<ReconstructionStep>& reconstructionSteps) const
       noexcept;
