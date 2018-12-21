@@ -746,7 +746,11 @@ void VC5Decompressor::decodeBands(
 #ifdef HAVE_OPENMP
     bool* exceptionThrown
 #endif
-    ) const noexcept(HAVE_OPENMP) {
+    ) const
+#ifdef HAVE_OPENMP
+    noexcept
+#endif
+{
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(dynamic, 1)
 #endif
