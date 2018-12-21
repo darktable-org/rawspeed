@@ -635,6 +635,62 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
   mVC5.iSubband.reset();
 }
 
+void VC5Decompressor::prepareBandDecodingPlan() {
+  assert(allDecodeableBands.empty());
+  allDecodeableBands.reserve(numSubbandsTotal);
+  // All the high-pass bands for all wavelets,
+  // in this specific order of decreasing worksize.
+  for (int waveletLevel = 0; waveletLevel < numWaveletLevels; waveletLevel++) {
+    for (auto channelId = 0; channelId < numChannels; channelId++) {
+      for (int bandId = 1; bandId <= numHighPassBands; bandId++) {
+        auto& channel = channels[channelId];
+        auto& wavelet = channel.wavelets[waveletLevel];
+        auto* band = wavelet.bands[bandId].get();
+        auto* decodeableHighPassBand =
+            dynamic_cast<Wavelet::HighPassBand*>(band);
+        allDecodeableBands.emplace_back(decodeableHighPassBand, wavelet);
+      }
+    }
+  }
+  // The low-pass bands at the end. I'm guessing they should be fast to
+  // decode.
+  for (Channel& channel : channels) {
+    // Low-pass band of the smallest wavelet.
+    Wavelet& smallestWavelet = channel.wavelets.back();
+    auto* decodeableLowPassBand =
+        dynamic_cast<Wavelet::LowPassBand*>(smallestWavelet.bands[0].get());
+    allDecodeableBands.emplace_back(decodeableLowPassBand, smallestWavelet);
+  }
+  assert(allDecodeableBands.size() == numSubbandsTotal);
+}
+
+void VC5Decompressor::prepareBandReconstruction() {
+  assert(reconstructionSteps.empty());
+  reconstructionSteps.reserve(numLowPassBandsTotal);
+  // For every channel, recursively reconstruct the low-pass bands.
+  for (auto& channel : channels) {
+    // Reconstruct the intermediate lowpass bands.
+    for (int waveletLevel = numWaveletLevels - 1; waveletLevel > 0;
+         waveletLevel--) {
+      Wavelet* wavelet = &(channel.wavelets[waveletLevel]);
+      Wavelet& nextWavelet = channel.wavelets[waveletLevel - 1];
+
+      auto* band = dynamic_cast<Wavelet::ReconstructableBand*>(
+          nextWavelet.bands[0].get());
+      reconstructionSteps.emplace_back(wavelet, band);
+    }
+    // Finally, reconstruct the final lowpass band.
+    Wavelet* wavelet = &(channel.wavelets.front());
+    reconstructionSteps.emplace_back(wavelet, &(channel.band));
+  }
+  assert(steps.size() == numLowPassBandsTotal);
+}
+
+void VC5Decompressor::prepareDecodingPlan() {
+  prepareBandDecodingPlan();
+  prepareBandReconstruction();
+}
+
 void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
                              unsigned int width, unsigned int height) {
   if (offsetX || offsetY || mRaw->dim != iPoint2D(width, height))
@@ -642,59 +698,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 
   initVC5LogTable();
 
-  const std::vector<DecodeableBand> allDecodeableBands = [&]() {
-    std::vector<DecodeableBand> bands;
-    bands.reserve(numSubbandsTotal);
-    // All the high-pass bands for all wavelets,
-    // in this specific order of decreasing worksize.
-    for (int waveletLevel = 0; waveletLevel < numWaveletLevels;
-         waveletLevel++) {
-      for (auto channelId = 0; channelId < numChannels; channelId++) {
-        for (int bandId = 1; bandId <= numHighPassBands; bandId++) {
-          auto& channel = channels[channelId];
-          auto& wavelet = channel.wavelets[waveletLevel];
-          auto* band = wavelet.bands[bandId].get();
-          auto* decodeableHighPassBand =
-              dynamic_cast<Wavelet::HighPassBand*>(band);
-          bands.emplace_back(decodeableHighPassBand, wavelet);
-        }
-      }
-    }
-    // The low-pass bands at the end. I'm guessing they should be fast to
-    // decode.
-    for (Channel& channel : channels) {
-      // Low-pass band of the smallest wavelet.
-      Wavelet& smallestWavelet = channel.wavelets.back();
-      auto* decodeableLowPassBand =
-          dynamic_cast<Wavelet::LowPassBand*>(smallestWavelet.bands[0].get());
-      bands.emplace_back(decodeableLowPassBand, smallestWavelet);
-    }
-    assert(allDecodeableBands.size() == numSubbandsTotal);
-    return bands;
-  }();
-
-  const std::vector<ReconstructionStep> reconstructionSteps = [&]() {
-    std::vector<ReconstructionStep> steps;
-    steps.reserve(numLowPassBandsTotal);
-    // For every channel, recursively reconstruct the low-pass bands.
-    for (auto& channel : channels) {
-      // Reconstruct the intermediate lowpass bands.
-      for (int waveletLevel = numWaveletLevels - 1; waveletLevel > 0;
-           waveletLevel--) {
-        Wavelet* wavelet = &(channel.wavelets[waveletLevel]);
-        Wavelet& nextWavelet = channel.wavelets[waveletLevel - 1];
-
-        auto* band = dynamic_cast<Wavelet::ReconstructableBand*>(
-            nextWavelet.bands[0].get());
-        steps.emplace_back(wavelet, band);
-      }
-      // Finally, reconstruct the final lowpass band.
-      Wavelet* wavelet = &(channel.wavelets.front());
-      steps.emplace_back(wavelet, &(channel.band));
-    }
-    assert(steps.size() == numLowPassBandsTotal);
-    return steps;
-  }();
+  prepareDecodingPlan();
 
 #ifdef HAVE_OPENMP
   bool exceptionThrown = false;
@@ -704,10 +708,9 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 #endif
 
     // Decode all the existing bands. May fail.
-    decodeBands(allDecodeableBands
+    decodeBands(
 #ifdef HAVE_OPENMP
-                ,
-                &exceptionThrown
+        &exceptionThrown
 #endif
     );
 
@@ -719,7 +722,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
     if (!exceptionThrown) {
 #endif
       // And now, reconstruct the low-pass bands.
-      reconstructLowpassBands(reconstructionSteps);
+      reconstructLowpassBands();
 
       // And finally!
       combineFinalLowpassBands();
@@ -740,9 +743,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 }
 
 void VC5Decompressor::decodeBands(
-    const std::vector<DecodeableBand>& allDecodeableBands
 #ifdef HAVE_OPENMP
-    ,
     bool* exceptionThrown
 #endif
     ) const noexcept(HAVE_OPENMP) {
@@ -767,8 +768,7 @@ void VC5Decompressor::decodeBands(
   }
 }
 
-void VC5Decompressor::reconstructLowpassBands(
-    const std::vector<ReconstructionStep>& reconstructionSteps) const noexcept {
+void VC5Decompressor::reconstructLowpassBands() const noexcept {
   for (const ReconstructionStep& step : reconstructionSteps) {
     step.band.decode(step.wavelet);
 

@@ -203,27 +203,31 @@ class VC5Decompressor final : public AbstractDecompressor {
                    const Wavelet& wavelet_)
         : band(band_), wavelet(wavelet_) {}
   };
+  std::vector<DecodeableBand> allDecodeableBands;
+
   struct ReconstructionStep {
     Wavelet& wavelet;
     Wavelet::ReconstructableBand& band;
     ReconstructionStep(Wavelet* wavelet_, Wavelet::ReconstructableBand* band_)
         : wavelet(*wavelet_), band(*band_) {}
   };
+  std::vector<ReconstructionStep> reconstructionSteps;
 
   static inline void getRLV(BitPumpMSB* bits, int* value, unsigned int* count);
 
   void parseLargeCodeblock(const ByteStream& bs);
 
-  void decodeBands(const std::vector<DecodeableBand>& allDecodeableBands
-#ifdef HAVE_OPENMP
-                   ,
-                   bool* exceptionThrown
-#endif
-                   ) const noexcept(HAVE_OPENMP);
+  void prepareBandDecodingPlan();
+  void prepareBandReconstruction();
+  void prepareDecodingPlan();
 
-  void reconstructLowpassBands(
-      const std::vector<ReconstructionStep>& reconstructionSteps) const
-      noexcept;
+  void decodeBands(
+#ifdef HAVE_OPENMP
+      bool* exceptionThrown
+#endif
+      ) const noexcept(HAVE_OPENMP);
+
+  void reconstructLowpassBands() const noexcept;
 
   void combineFinalLowpassBands() const noexcept;
 
