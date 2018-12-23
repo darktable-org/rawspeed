@@ -683,7 +683,7 @@ void VC5Decompressor::prepareBandReconstruction() {
     Wavelet* wavelet = &(channel.wavelets.front());
     reconstructionSteps.emplace_back(wavelet, &(channel.band));
   }
-  assert(steps.size() == numLowPassBandsTotal);
+  assert(reconstructionSteps.size() == numLowPassBandsTotal);
 }
 
 void VC5Decompressor::prepareDecodingPlan() {
