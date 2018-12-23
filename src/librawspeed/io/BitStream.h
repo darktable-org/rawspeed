@@ -135,6 +135,11 @@ private:
     }
   }
 
+  // In non-DEBUG builds, fillSafe() will be called at most once
+  // per the life-time of the BitStream  therefore it should *NOT* be inlined
+  // into the normal codepath.
+  inline void __attribute__((noinline, cold)) fillSafeNoinline() { fillSafe(); }
+
 public:
   inline void fill(uint32 nbits = Cache::MaxGetBits) {
     assert(data);
@@ -152,7 +157,7 @@ public:
       if (pos + BitStreamCacheBase::MaxProcessBytes <= size)
         pos += fillCache(data + pos);
       else
-        fillSafe();
+        fillSafeNoinline();
 #endif
     }
   }
