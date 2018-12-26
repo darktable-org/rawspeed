@@ -151,6 +151,8 @@ public:
 #elif BUFFER_PADDING >= 8
       static_assert(BitStreamCacheBase::MaxProcessBytes == 8,
                     "update these too");
+      // FIXME: this looks very wrong. We don't check pos at all here.
+      // I suspect this should be:  if (pos <= size)
       pos += fillCache(data + pos);
 #else
       // disabling this run-time bounds check saves about 1% on intel x86-64
