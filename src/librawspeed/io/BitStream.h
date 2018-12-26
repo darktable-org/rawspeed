@@ -124,11 +124,10 @@ private:
       assert(size - pos < BitStreamCacheBase::MaxProcessBytes);
       memcpy(tmp.data(), data + pos, size - pos);
       pos += fillCache(tmp.data());
-    } else if (pos < size + Cache::MaxGetBits / 8) {
-      // yes, this case needs to continue using Cache::MaxGetBits
-      // assert(size <= pos);
-      cache.push(0, Cache::MaxGetBits);
-      pos += Cache::MaxGetBits / 8;
+    } else if (pos <= size + BitStreamCacheBase::MaxProcessBytes) {
+      std::array<uchar8, BitStreamCacheBase::MaxProcessBytes> tmp;
+      tmp.fill(0);
+      pos += fillCache(tmp.data());
     } else {
       // assert(size < pos);
       ThrowIOE("Buffer overflow read in BitStream");
