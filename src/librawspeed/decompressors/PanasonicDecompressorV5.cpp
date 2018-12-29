@@ -20,6 +20,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "decompressors/PanasonicDecompressorV5.h"
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
@@ -57,7 +58,7 @@ constexpr PanasonicDecompressorV5::PacketDsc
 PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
                                                  const ByteStream& input_,
                                                  uint32 bps_)
-    : AbstractParallelizedDecompressor(img), bps(bps_) {
+    : mRaw(img), bps(bps_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
@@ -225,31 +226,26 @@ void PanasonicDecompressorV5::processBlock(const Block& block) const {
 }
 
 template <const PanasonicDecompressorV5::PacketDsc& dsc>
-void PanasonicDecompressorV5::decompressThreadedInternal(
-    const RawDecompressorThread* t) const {
-  assert(t->start < t->end);
-  assert(t->end <= blocks.size());
-  for (size_t i = t->start; i < t->end; i++)
-    processBlock<dsc>(blocks[i]);
+void PanasonicDecompressorV5::decompressInternal() const {
+#ifdef HAVE_OPENMP
+#pragma omp parallel for num_threads(rawspeed_get_number_of_processor_cores()) \
+    schedule(static) default(none)
+#endif
+  for (auto block = blocks.cbegin(); block < blocks.cend(); ++block)
+    processBlock<dsc>(*block);
 }
 
-void PanasonicDecompressorV5::decompressThreaded(
-    const RawDecompressorThread* t) const {
+void PanasonicDecompressorV5::decompress() const {
   switch (bps) {
   case 12:
-    decompressThreadedInternal<TwelveBitPacket>(t);
+    decompressInternal<TwelveBitPacket>();
     break;
   case 14:
-    decompressThreadedInternal<FourteenBitPacket>(t);
+    decompressInternal<FourteenBitPacket>();
     break;
   default:
     __builtin_unreachable();
   }
-}
-
-void PanasonicDecompressorV5::decompress() const {
-  assert(blocks.size() == numBlocks);
-  startThreading(blocks.size());
 }
 
 } // namespace rawspeed
