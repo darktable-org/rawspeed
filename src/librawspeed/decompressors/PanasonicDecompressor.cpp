@@ -156,7 +156,7 @@ public:
     parseBlock();
   }
 
-  uint32 getBits(int nbits) {
+  uint32 getBits(int nbits) noexcept {
     vbits = (vbits - nbits) & 0x1ffff;
     int byte = vbits >> 3 ^ 0x3ff0;
     return (buf[byte] | buf[byte + 1UL] << 8) >> (vbits & 7) & ~(-(1 << nbits));
@@ -165,7 +165,7 @@ public:
 
 void PanasonicDecompressor::processPixelPacket(
     ProxyStream* bits, int y, ushort16* dest, int xbegin,
-    std::vector<uint32>* zero_pos) const {
+    std::vector<uint32>* zero_pos) const noexcept {
   int sh = 0;
 
   std::array<int, 2> pred;
@@ -209,7 +209,8 @@ void PanasonicDecompressor::processPixelPacket(
 }
 
 void PanasonicDecompressor::processBlock(const Block& block,
-                                         std::vector<uint32>* zero_pos) const {
+                                         std::vector<uint32>* zero_pos) const
+    noexcept {
   ProxyStream bits(block.bs, section_split_offset);
 
   for (int y = block.beginCoord.y; y <= block.endCoord.y; y++) {
@@ -237,7 +238,7 @@ void PanasonicDecompressor::processBlock(const Block& block,
   }
 }
 
-void PanasonicDecompressor::decompressThread() const {
+void PanasonicDecompressor::decompressThread() const noexcept {
   std::vector<uint32> zero_pos;
 
   assert(!blocks.empty());
@@ -255,7 +256,7 @@ void PanasonicDecompressor::decompressThread() const {
   }
 }
 
-void PanasonicDecompressor::decompress() const {
+void PanasonicDecompressor::decompress() const noexcept {
   assert(!blocks.empty());
 #ifdef HAVE_OPENMP
 #pragma omp parallel default(none)                                             \

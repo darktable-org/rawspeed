@@ -74,17 +74,18 @@ class PanasonicDecompressor final : public AbstractDecompressor {
   void chopInputIntoBlocks();
 
   void processPixelPacket(ProxyStream* bits, int y, ushort16* dest, int xbegin,
-                          std::vector<uint32>* zero_pos) const;
+                          std::vector<uint32>* zero_pos) const noexcept;
 
-  void processBlock(const Block& block, std::vector<uint32>* zero_pos) const;
+  void processBlock(const Block& block, std::vector<uint32>* zero_pos) const
+      noexcept;
 
-  void decompressThread() const;
+  void decompressThread() const noexcept;
 
 public:
   PanasonicDecompressor(const RawImage& img, const ByteStream& input_,
                         bool zero_is_not_bad, uint32 section_split_offset_);
 
-  void decompress() const;
+  void decompress() const noexcept;
 };
 
 } // namespace rawspeed
