@@ -226,7 +226,7 @@ void PanasonicDecompressorV5::processBlock(const Block& block) const {
 }
 
 template <const PanasonicDecompressorV5::PacketDsc& dsc>
-void PanasonicDecompressorV5::decompressInternal() const {
+void PanasonicDecompressorV5::decompressInternal() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp parallel for num_threads(rawspeed_get_number_of_processor_cores()) \
     schedule(static) default(none)
@@ -235,7 +235,7 @@ void PanasonicDecompressorV5::decompressInternal() const {
     processBlock<dsc>(*block);
 }
 
-void PanasonicDecompressorV5::decompress() const {
+void PanasonicDecompressorV5::decompress() const noexcept {
   switch (bps) {
   case 12:
     decompressInternal<TwelveBitPacket>();

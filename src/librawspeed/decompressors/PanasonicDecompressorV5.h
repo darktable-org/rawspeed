@@ -95,13 +95,13 @@ class PanasonicDecompressorV5 final : public AbstractDecompressor {
 
   template <const PacketDsc& dsc> void processBlock(const Block& block) const;
 
-  template <const PacketDsc& dsc> void decompressInternal() const;
+  template <const PacketDsc& dsc> void decompressInternal() const noexcept;
 
 public:
   PanasonicDecompressorV5(const RawImage& img, const ByteStream& input_,
                           uint32 bps_);
 
-  void decompress() const;
+  void decompress() const noexcept;
 };
 
 } // namespace rawspeed
