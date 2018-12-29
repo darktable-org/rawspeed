@@ -29,14 +29,14 @@ namespace rawspeed {
 class RawImage;
 
 class SonyArw2Decompressor final : public AbstractDecompressor {
-  void decompressThread() const;
+  void decompressThread() const noexcept;
 
   RawImage mRaw;
   ByteStream input;
 
 public:
   SonyArw2Decompressor(const RawImage& img, const ByteStream& input);
-  void decompress() const;
+  void decompress() const noexcept;
 };
 
 } // namespace rawspeed

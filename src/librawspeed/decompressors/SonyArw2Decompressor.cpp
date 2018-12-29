@@ -48,7 +48,7 @@ SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
   input = input_.peekStream(mRaw->dim.x * mRaw->dim.y);
 }
 
-void SonyArw2Decompressor::decompressThread() const {
+void SonyArw2Decompressor::decompressThread() const noexcept {
   uchar8* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
   int32 w = mRaw->dim.x;
@@ -100,7 +100,7 @@ void SonyArw2Decompressor::decompressThread() const {
   }
 }
 
-void SonyArw2Decompressor::decompress() const {
+void SonyArw2Decompressor::decompress() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp parallel default(none)                                             \
     num_threads(rawspeed_get_number_of_processor_cores())
