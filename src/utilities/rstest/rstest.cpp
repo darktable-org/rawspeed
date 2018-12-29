@@ -504,14 +504,16 @@ using rawspeed::rstest::process;
 using rawspeed::rstest::results;
 
 int main(int argc, char **argv) {
+  int remaining_argc = argc;
 
-  auto hasFlag = [argc, argv](string flag) {
+  auto hasFlag = [argc, &remaining_argc, argv](string flag) {
     bool found = false;
     for (int i = 1; i < argc; ++i) {
       if (!argv[i] || argv[i] != flag)
         continue;
       found = true;
       argv[i] = nullptr;
+      remaining_argc--;
     }
     return found;
   };
@@ -533,7 +535,8 @@ int main(int argc, char **argv) {
   size_t time = 0;
   map<string, string> failedTests;
 #ifdef HAVE_OPENMP
-#pragma omp parallel for default(shared) schedule(dynamic, 1) reduction(+ : time)
+#pragma omp parallel for default(shared) schedule(dynamic, 1) \
+  reduction(+ : time) if(remaining_argc > 2)
 #endif
   for (int i = 1; i < argc; ++i) {
     if (!argv[i])
