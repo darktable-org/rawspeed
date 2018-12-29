@@ -115,6 +115,9 @@ struct DngSliceElement final {
 };
 
 class AbstractDngDecompressor final : public AbstractParallelizedDecompressor {
+  template <int compression>
+  void decompressThreaded(const RawDecompressorThread* t) const;
+
   void decompressThreaded(const RawDecompressorThread* t) const final;
 
 public:
