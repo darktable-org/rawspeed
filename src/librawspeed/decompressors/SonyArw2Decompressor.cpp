@@ -20,20 +20,20 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "decompressors/SonyArw2Decompressor.h"
-#include "common/Common.h"                                  // for uint32
-#include "common/Point.h"                                   // for iPoint2D
-#include "common/RawImage.h"                                // for RawImage
-#include "decoders/RawDecoderException.h"                   // for ThrowRDE
-#include "decompressors/AbstractParallelizedDecompressor.h" // for RawDecom...
-#include "io/BitPumpLSB.h"                                  // for BitPumpLSB
-#include <cassert>                                          // for assert
+#include "common/Common.h"                // for uint32
+#include "common/Point.h"                 // for iPoint2D
+#include "common/RawImage.h"              // for RawImage
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/BitPumpLSB.h"                // for BitPumpLSB
+#include <cassert>                        // for assert
 
 namespace rawspeed {
 
 SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
                                            const ByteStream& input_)
-    : AbstractParallelizedDecompressor(img) {
+    : mRaw(img) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
@@ -48,8 +48,7 @@ SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
   input = input_.peekStream(mRaw->dim.x * mRaw->dim.y);
 }
 
-void SonyArw2Decompressor::decompressThreaded(
-    const RawDecompressorThread* t) const {
+void SonyArw2Decompressor::decompressThread() const {
   uchar8* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
   int32 w = mRaw->dim.x;
@@ -59,7 +58,11 @@ void SonyArw2Decompressor::decompressThreaded(
   assert(mRaw->dim.y > 0);
 
   BitPumpLSB bits(input);
-  for (uint32 y = t->start; y < t->end; y++) {
+
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+  for (int y = 0; y < mRaw->dim.y; y++) {
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
     // Realign
     bits.setBufferPosition(w * y);
@@ -95,6 +98,14 @@ void SonyArw2Decompressor::decompressThreaded(
       x += ((x & 1) != 0) ? 31 : 1; // Skip to next 32 pixels
     }
   }
+}
+
+void SonyArw2Decompressor::decompress() const {
+#ifdef HAVE_OPENMP
+#pragma omp parallel default(none)                                             \
+    num_threads(rawspeed_get_number_of_processor_cores())
+#endif
+  decompressThread();
 }
 
 } // namespace rawspeed
