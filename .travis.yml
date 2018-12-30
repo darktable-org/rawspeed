@@ -94,7 +94,7 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=clang-7 CXX=clang++-7 TARGET=STATICANALYSIS ECO="-DUSE_CLANG_TIDY=ON -DWITH_OPENMP=OFF"
+    env: CC=clang-7 CXX=clang++-7 TARGET=STATICANALYSIS ECO="-DUSE_CLANG_TIDY=ON"
   - os: linux
     dist: trusty
     sudo: required
@@ -124,7 +124,7 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=clang-7 CXX=clang++-7 TARGET=WWW ECO="-DWITH_OPENMP=OFF"
+    env: CC=clang-7 CXX=clang++-7 TARGET=WWW
 
 # linux clang Coverage build OOM's in gcov during final codecov report collection
 # OSX gcc Coverage build produces invalid .gcno files
