@@ -75,6 +75,12 @@ jobs:
     sudo: required
     services:
       - docker
+    env: CC=clang-7 CXX=clang++-7
+  - os: linux
+    dist: trusty
+    sudo: required
+    services:
+      - docker
     env: CC=gcc-8 CXX=g++-8 GCOV=gcov-8 FLAVOR=Coverage ECO="-DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON" EXTRA_OPTS="$DOCKER_RPUU"
     cache:
       directories:
