@@ -2,6 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017-2018 Roman Lebeedv
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,13 +21,14 @@
 
 #pragma once
 
-#include "common/Common.h"                                  // for uint32
-#include "common/Point.h"                                   // for iPoint2D
-#include "decompressors/AbstractParallelizedDecompressor.h" // for Abstract...
-#include "io/ByteStream.h"                                  // for ByteStream
-#include <cassert>                                          // for assert
-#include <utility>                                          // for move
-#include <vector>                                           // for vector
+#include "common/Common.h"                      // for uint32
+#include "common/Point.h"                       // for iPoint2D
+#include "common/RawImage.h"                    // for RawImage
+#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "io/ByteStream.h"                      // for ByteStream
+#include <cassert>                              // for assert
+#include <utility>                              // for move
+#include <vector>                               // for vector
 
 namespace rawspeed {
 
@@ -114,21 +116,21 @@ struct DngSliceElement final {
   }
 };
 
-class AbstractDngDecompressor final : public AbstractParallelizedDecompressor {
-  template <int compression>
-  void decompressThreaded(const RawDecompressorThread* t) const;
+class AbstractDngDecompressor final : public AbstractDecompressor {
+  RawImage mRaw;
 
-  void decompressThreaded(const RawDecompressorThread* t) const final;
+  template <int compression> void decompressThread() const noexcept;
+
+  void decompressThread() const noexcept;
 
 public:
   AbstractDngDecompressor(const RawImage& img, DngTilingDescription dsc_,
                           int compression_, bool mFixLjpeg_, uint32 mBps_,
                           uint32 mPredictor_)
-      : AbstractParallelizedDecompressor(img), dsc(dsc_),
-        compression(compression_), mFixLjpeg(mFixLjpeg_), mBps(mBps_),
-        mPredictor(mPredictor_) {}
+      : mRaw(img), dsc(dsc_), compression(compression_), mFixLjpeg(mFixLjpeg_),
+        mBps(mBps_), mPredictor(mPredictor_) {}
 
-  void decompress() const final;
+  void decompress() const;
 
   const DngTilingDescription dsc;
 

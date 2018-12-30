@@ -2,6 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017-2018 Roman Lebeedv
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,7 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_JPEG, HAVE_...
+#include "rawspeedconfig.h"
 #include "decompressors/AbstractDngDecompressor.h"
 #include "common/Common.h"                          // for BitOrder_LSB
 #include "common/Point.h"                           // for iPoint2D
@@ -40,16 +41,11 @@
 
 namespace rawspeed {
 
-void AbstractDngDecompressor::decompress() const {
-  startThreading(slices.size());
-}
-
-template <>
-void AbstractDngDecompressor::decompressThreaded<1>(
-    const RawDecompressorThread* t) const {
-  for (size_t i = t->start; i < t->end && i < slices.size(); i++) {
-    auto e = &slices[i];
-
+template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+  for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
     UncompressedDecompressor decompressor(e->bs, mRaw);
 
     iPoint2D tileSize(e->width, e->height);
@@ -91,11 +87,11 @@ void AbstractDngDecompressor::decompressThreaded<1>(
   }
 }
 
-template <>
-void AbstractDngDecompressor::decompressThreaded<7>(
-    const RawDecompressorThread* t) const {
-  for (size_t i = t->start; i < t->end && i < slices.size(); i++) {
-    auto e = &slices[i];
+template <> void AbstractDngDecompressor::decompressThread<7>() const noexcept {
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+  for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
     LJpegDecompressor d(e->bs, mRaw);
     try {
       d.decode(e->offX, e->offY, e->width, e->height, mFixLjpeg);
@@ -108,13 +104,13 @@ void AbstractDngDecompressor::decompressThreaded<7>(
 }
 
 #ifdef HAVE_ZLIB
-template <>
-void AbstractDngDecompressor::decompressThreaded<8>(
-    const RawDecompressorThread* t) const {
+template <> void AbstractDngDecompressor::decompressThread<8>() const noexcept {
   std::unique_ptr<unsigned char[]> uBuffer; // NOLINT
-  for (size_t i = t->start; i < t->end && i < slices.size(); i++) {
-    auto e = &slices[i];
 
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+  for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
     DeflateDecompressor z(e->bs, mRaw, mPredictor, mBps);
     try {
       z.decode(&uBuffer, e->dsc.tileW, e->dsc.tileH, e->width, e->height,
@@ -128,11 +124,11 @@ void AbstractDngDecompressor::decompressThreaded<8>(
 }
 #endif
 
-template <>
-void AbstractDngDecompressor::decompressThreaded<9>(
-    const RawDecompressorThread* t) const {
-  for (size_t i = t->start; i < t->end && i < slices.size(); i++) {
-    auto e = &slices[i];
+template <> void AbstractDngDecompressor::decompressThread<9>() const noexcept {
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+  for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
     VC5Decompressor d(e->bs, mRaw);
     try {
       d.decode(e->offX, e->offY, e->width, e->height);
@@ -146,11 +142,11 @@ void AbstractDngDecompressor::decompressThreaded<9>(
 
 #ifdef HAVE_JPEG
 template <>
-void AbstractDngDecompressor::decompressThreaded<0x884c>(
-    const RawDecompressorThread* t) const {
-  /* Each slice is a JPEG image */
-  for (size_t i = t->start; i < t->end && i < slices.size(); i++) {
-    auto e = &slices[i];
+void AbstractDngDecompressor::decompressThread<0x884c>() const noexcept {
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+  for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
     JpegDecompressor j(e->bs, mRaw);
     try {
       j.decode(e->offX, e->offY);
@@ -163,9 +159,7 @@ void AbstractDngDecompressor::decompressThreaded<0x884c>(
 }
 #endif
 
-void AbstractDngDecompressor::decompressThreaded(
-    const RawDecompressorThread* t) const {
-  assert(t);
+void AbstractDngDecompressor::decompressThread() const noexcept {
   assert(mRaw->dim.x > 0);
   assert(mRaw->dim.y > 0);
   assert(mRaw->getCpp() > 0 && mRaw->getCpp() <= 4);
@@ -173,32 +167,46 @@ void AbstractDngDecompressor::decompressThreaded(
 
   if (compression == 1) {
     /* Uncompressed */
-    decompressThreaded<1>(t);
+    decompressThread<1>();
   } else if (compression == 7) {
     /* Lossless JPEG */
-    decompressThreaded<7>(t);
+    decompressThread<7>();
   } else if (compression == 8) {
     /* Deflate compression */
 #ifdef HAVE_ZLIB
-    decompressThreaded<8>(t);
+    decompressThread<8>();
 #else
 #pragma message                                                                \
     "ZLIB is not present! Deflate compression will not be supported!"
-    ThrowRDE("deflate support is disabled.");
+    mRaw->setError("deflate support is disabled.");
 #endif
   } else if (compression == 9) {
     /* GOPRO VC-5 */
-    decompressThreaded<9>(t);
+    decompressThread<9>();
   } else if (compression == 0x884c) {
     /* Lossy DNG */
 #ifdef HAVE_JPEG
-    decompressThreaded<0x884c>(t);
+    decompressThread<0x884c>();
 #else
 #pragma message "JPEG is not present! Lossy JPEG DNG will not be supported!"
-    ThrowRDE("jpeg support is disabled.");
+    mRaw->setError("jpeg support is disabled.");
 #endif
   } else
     mRaw->setError("AbstractDngDecompressor: Unknown compression");
+}
+
+void AbstractDngDecompressor::decompress() const {
+#ifdef HAVE_OPENMP
+#pragma omp parallel default(none) num_threads(                                \
+    rawspeed_get_number_of_processor_cores()) if (slices.size() > 1)
+#endif
+  decompressThread();
+
+  std::string firstErr;
+  if (mRaw->isTooManyErrors(1, &firstErr)) {
+    ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
+             firstErr.c_str());
+  }
 }
 
 } // namespace rawspeed
