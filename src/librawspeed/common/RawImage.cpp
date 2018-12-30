@@ -384,39 +384,28 @@ void RawImageData::fixBadPixels()
 
 }
 
-void RawImageData::startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped )
-{
-  int height = (cropped) ? dim.y : uncropped_dim.y;
-  if (task & RawImageWorker::FULL_IMAGE) {
-    height = uncropped_dim.y;
-  }
+void RawImageData::startWorker(const RawImageWorker::RawImageWorkerTask task,
+                               bool cropped) {
+  const int height = [&]() {
+    int h = (cropped) ? dim.y : uncropped_dim.y;
+    if (task & RawImageWorker::FULL_IMAGE) {
+      h = uncropped_dim.y;
+    }
+    return h;
+  }();
 
-  int threads = getThreadCount();
-  if (threads <= 1) {
-    RawImageWorker worker(this, task, 0, height);
-    worker.performTask();
-    return;
-  }
+  const int threads = getThreadCount();
+  const int y_per_thread = (height + threads - 1) / threads;
 
-#ifdef HAVE_PTHREAD
-  std::vector<RawImageWorker> workers;
-  workers.reserve(threads);
-
-  int y_per_thread = (height + threads - 1) / threads;
-
+#ifdef HAVE_OPENMP
+#pragma omp parallel for default(none) num_threads(threads) schedule(static)
+#endif
   for (int i = 0; i < threads; i++) {
     int y_offset = std::min(i * y_per_thread, height);
     int y_end = std::min((i + 1) * y_per_thread, height);
 
-    workers.emplace_back(this, task, y_offset, y_end);
-    workers.back().startThread();
+    RawImageWorker worker(this, task, y_offset, y_end);
   }
-
-  for (auto& worker : workers)
-    worker.waitForThread();
-#else
-  ThrowRDE("Unreachable");
-#endif
 }
 
 void RawImageData::fixBadPixelsThread(int start_y, int end_y) {
@@ -538,41 +527,13 @@ RawImage& RawImage::operator=(const RawImage& rhs) noexcept {
   return *this;
 }
 
-void *RawImageWorkerThread(void *_this) {
-  auto* me = static_cast<RawImageWorker*>(_this);
-  me->performTask();
-  return nullptr;
-}
-
 RawImageWorker::RawImageWorker(RawImageData* _img, RawImageWorkerTask _task,
-                               int _start_y, int _end_y)
+                               int _start_y, int _end_y) noexcept
     : data(_img), task(_task), start_y(_start_y), end_y(_end_y) {
-#ifdef HAVE_PTHREAD
-  pthread_attr_init(&attr);
-  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-#endif
+  performTask();
 }
 
-#ifdef HAVE_PTHREAD
-RawImageWorker::~RawImageWorker() { pthread_attr_destroy(&attr); }
-#endif
-
-#ifdef HAVE_PTHREAD
-void RawImageWorker::startThread()
-{
-  /* Initialize and set thread detached attribute */
-  pthread_create(&threadid, &attr, RawImageWorkerThread, this);
-}
-
-void RawImageWorker::waitForThread()
-{
-  void *status;
-  pthread_join(threadid, &status);
-}
-#endif
-
-void RawImageWorker::performTask()
-{
+void RawImageWorker::performTask() noexcept {
   try {
     switch(task)
     {
