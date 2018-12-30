@@ -402,16 +402,14 @@ void RawImageData::startWorker(RawImageWorker::RawImageWorkerTask task, bool cro
   std::vector<RawImageWorker> workers;
   workers.reserve(threads);
 
-  int y_offset = 0;
   int y_per_thread = (height + threads - 1) / threads;
 
   for (int i = 0; i < threads; i++) {
-    int y_end = std::min(y_offset + y_per_thread, height);
+    int y_offset = std::min(i * y_per_thread, height);
+    int y_end = std::min((i + 1) * y_per_thread, height);
 
     workers.emplace_back(this, task, y_offset, y_end);
     workers.back().startThread();
-
-    y_offset = y_end;
   }
 
   for (auto& worker : workers)
