@@ -21,22 +21,25 @@
 
 #pragma once
 
-#include "common/Common.h"                                  // for ushort16
-#include "decompressors/AbstractParallelizedDecompressor.h" // for Abstract...
-#include "io/BitPumpMSB.h"                                  // for BitPumpMSB
-#include "io/ByteStream.h"                                  // for ByteStream
-#include "metadata/ColorFilterArray.h"                      // for CFAColor
-#include <array>                                            // for array
-#include <cassert>                                          // for assert
-#include <utility>                                          // for move
-#include <vector>                                           // for vector
+#include "common/Common.h"                      // for ushort16
+#include "common/RawImage.h"                    // for RawImage
+#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "io/BitPumpMSB.h"                      // for BitPumpMSB
+#include "io/ByteStream.h"                      // for ByteStream
+#include "metadata/ColorFilterArray.h"          // for CFAColor
+#include <array>                                // for array
+#include <cassert>                              // for assert
+#include <utility>                              // for move
+#include <vector>                               // for vector
 
 namespace rawspeed {
 
 class RawImage;
 
-class FujiDecompressor final : public AbstractParallelizedDecompressor {
-  void decompressThreaded(const RawDecompressorThread* t) const final;
+class FujiDecompressor final : public AbstractDecompressor {
+  RawImage mRaw;
+
+  void decompressThread() const;
 
 public:
   struct FujiHeader {
@@ -106,7 +109,7 @@ public:
 
   void fuji_compressed_load_raw();
 
-  void decompress() const final;
+  void decompress() const;
 
 protected:
   struct fuji_compressed_params {

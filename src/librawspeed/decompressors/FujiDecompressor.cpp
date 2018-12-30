@@ -21,23 +21,23 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "decompressors/FujiDecompressor.h"
-#include "common/Common.h"                                  // for ushort16
-#include "common/Point.h"                                   // for iPoint2D
-#include "common/RawImage.h"                                // for RawImage
-#include "decoders/RawDecoderException.h"                   // for ThrowRDE
-#include "decompressors/AbstractParallelizedDecompressor.h" // for RawDecom...
-#include "io/Endianness.h"                                  // for Endianness
-#include "metadata/ColorFilterArray.h"                      // for CFA_BLUE
-#include <algorithm>                                        // for fill, min
-#include <cmath>                                            // for abs
-#include <cstdlib>                                          // for abs, size_t
-#include <cstring>                                          // for memcpy
+#include "common/Common.h"                // for ushort16
+#include "common/Point.h"                 // for iPoint2D
+#include "common/RawImage.h"              // for RawImage
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/Endianness.h"                // for Endianness
+#include "metadata/ColorFilterArray.h"    // for CFA_BLUE
+#include <algorithm>                      // for fill, min
+#include <cmath>                          // for abs
+#include <cstdlib>                        // for abs, size_t
+#include <cstring>                        // for memcpy
 
 namespace rawspeed {
 
 FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
-    : AbstractParallelizedDecompressor(img), input(std::move(input_)) {
+    : mRaw(img), input(std::move(input_)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
@@ -758,18 +758,41 @@ void FujiDecompressor::fuji_compressed_load_raw() {
   }
 }
 
-void FujiDecompressor::decompress() const {
-  startThreading(header.blocks_in_row);
-}
-
-void FujiDecompressor::decompressThreaded(
-    const RawDecompressorThread* t) const {
+void FujiDecompressor::decompressThread() const {
   fuji_compressed_block block_info;
 
-  for (size_t i = t->start; i < t->end && i < strips.size(); i++) {
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+  for (auto strip = strips.cbegin(); strip < strips.cend(); ++strip) {
     block_info.reset(&common_info);
-    fuji_decode_strip(&block_info, strips[i]);
+#ifdef HAVE_OPENMP
+    try {
+#endif
+      fuji_decode_strip(&block_info, *strip);
+#ifdef HAVE_OPENMP
+    } catch (RawspeedException& err) {
+      // Propagate the exception out of OpenMP magic.
+      mRaw->setError(err.what());
+    }
+#endif
   }
+}
+
+void FujiDecompressor::decompress() const {
+#ifdef HAVE_OPENMP
+#pragma omp parallel default(none)                                             \
+    num_threads(rawspeed_get_number_of_processor_cores())
+#endif
+  decompressThread();
+
+#ifdef HAVE_OPENMP
+  std::string firstErr;
+  if (mRaw->isTooManyErrors(1, &firstErr)) {
+    ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
+             firstErr.c_str());
+  }
+#endif
 }
 
 FujiDecompressor::FujiHeader::FujiHeader(ByteStream* bs) {

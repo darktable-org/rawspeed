@@ -21,20 +21,19 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32
-#include "common/Point.h"  // for iPoint2D
-#include "decompressors/AbstractParallelizedDecompressor.h"
-#include "io/BitPumpLSB.h" // for BitPumpLSB
-#include "io/ByteStream.h" // for ByteStream
-#include <cstddef>         // for size_t
-#include <utility>         // for move
-#include <vector>          // for vector
+#include "common/Common.h"                      // for uint32
+#include "common/Point.h"                       // for iPoint2D
+#include "common/RawImage.h"                    // for RawImage
+#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "io/BitPumpLSB.h"                      // for BitPumpLSB
+#include "io/ByteStream.h"                      // for ByteStream
+#include <cstddef>                              // for size_t
+#include <utility>                              // for move
+#include <vector>                               // for vector
 
 namespace rawspeed {
 
-class RawImage;
-
-class PanasonicDecompressorV5 final : public AbstractParallelizedDecompressor {
+class PanasonicDecompressorV5 final : public AbstractDecompressor {
   // The RW2 raw image buffer consists of individual blocks,
   // each one BlockSize bytes in size.
   static constexpr uint32 BlockSize = 0x4000;
@@ -63,6 +62,8 @@ class PanasonicDecompressorV5 final : public AbstractParallelizedDecompressor {
 
   // Takes care of unsplitting&swapping back the block at sectionSplitOffset.
   class ProxyStream;
+
+  RawImage mRaw;
 
   // The full input buffer, containing all the blocks.
   ByteStream input;
@@ -94,16 +95,13 @@ class PanasonicDecompressorV5 final : public AbstractParallelizedDecompressor {
 
   template <const PacketDsc& dsc> void processBlock(const Block& block) const;
 
-  template <const PacketDsc& dsc>
-  void decompressThreadedInternal(const RawDecompressorThread* t) const;
-
-  void decompressThreaded(const RawDecompressorThread* t) const final;
+  template <const PacketDsc& dsc> void decompressInternal() const noexcept;
 
 public:
   PanasonicDecompressorV5(const RawImage& img, const ByteStream& input_,
                           uint32 bps_);
 
-  void decompress() const final;
+  void decompress() const noexcept;
 };
 
 } // namespace rawspeed

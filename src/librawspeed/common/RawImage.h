@@ -21,7 +21,6 @@
 #pragma once
 
 #include "rawspeedconfig.h"
-
 #include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
 #include "common/Common.h"             // for uint32, uchar8, ushort16, wri...
 #include "common/ErrorLog.h"           // for ErrorLog
@@ -34,10 +33,6 @@
 #include <memory>                      // for unique_ptr, operator==
 #include <string>                      // for string
 #include <vector>                      // for vector
-
-#ifdef HAVE_PTHREAD
-#include <pthread.h>
-#endif
 
 namespace rawspeed {
 
@@ -54,27 +49,17 @@ public:
   };
 
 private:
-#ifdef HAVE_PTHREAD
-  pthread_t threadid;
-  pthread_attr_t attr;
-#endif
   RawImageData* data;
   RawImageWorkerTask task;
   int start_y;
   int end_y;
 
+  void performTask() noexcept;
+
 public:
   RawImageWorker(RawImageData* img, RawImageWorkerTask task, int start_y,
-                 int end_y);
-#ifdef HAVE_PTHREAD
-  ~RawImageWorker();
-  void startThread();
-  void waitForThread();
-#endif
-  void performTask();
+                 int end_y) noexcept;
 };
-
-void* RawImageWorkerThread(void* _this);
 
 class ImageMetaData {
 public:

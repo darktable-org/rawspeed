@@ -75,6 +75,12 @@ jobs:
     sudo: required
     services:
       - docker
+    env: CC=clang-7 CXX=clang++-7
+  - os: linux
+    dist: trusty
+    sudo: required
+    services:
+      - docker
     env: CC=gcc-8 CXX=g++-8 GCOV=gcov-8 FLAVOR=Coverage ECO="-DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON" EXTRA_OPTS="$DOCKER_RPUU"
     cache:
       directories:
@@ -88,13 +94,13 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=clang-7 CXX=clang++-7 TARGET=STATICANALYSIS ECO="-DUSE_CLANG_TIDY=ON -DWITH_OPENMP=OFF"
+    env: CC=clang-7 CXX=clang++-7 TARGET=STATICANALYSIS ECO="-DUSE_CLANG_TIDY=ON"
   - os: linux
     dist: trusty
     sudo: required
     services:
       - docker
-    env: CC=clang-7 CXX=clang++-7 ECO="-DWITH_PTHREADS=OFF -DWITH_OPENMP=OFF"
+    env: CC=clang-7 CXX=clang++-7 ECO="-DWITH_OPENMP=OFF"
   - os: linux
     dist: trusty
     sudo: required
@@ -113,12 +119,13 @@ jobs:
   #    directories:
   #      - '$HOME/$RPUU_DST'
   #      - '$HOME/.sonar/cache'
-  - os: linux
+  - stage: deploy
+    os: linux
     dist: trusty
     sudo: required
     services:
       - docker
-    env: CC=clang-7 CXX=clang++-7 TARGET=WWW ECO="-DWITH_OPENMP=OFF"
+    env: CC=clang-7 CXX=clang++-7 TARGET=WWW
 
 # linux clang Coverage build OOM's in gcov during final codecov report collection
 # OSX gcc Coverage build produces invalid .gcno files

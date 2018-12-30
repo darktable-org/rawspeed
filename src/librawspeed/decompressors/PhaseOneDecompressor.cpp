@@ -20,6 +20,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "decompressors/PhaseOneDecompressor.h"
 #include "common/Common.h"                // for int32, uint32, ushort16
 #include "common/Point.h"                 // for iPoint2D
@@ -37,7 +38,7 @@ namespace rawspeed {
 
 PhaseOneDecompressor::PhaseOneDecompressor(const RawImage& img,
                                            std::vector<PhaseOneStrip>&& strips_)
-    : AbstractParallelizedDecompressor(img), strips(std::move(strips_)) {
+    : mRaw(img), strips(std::move(strips_)) {
   if (mRaw->getDataType() != TYPE_USHORT16)
     ThrowRDE("Unexpected data type");
 
@@ -143,10 +144,38 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
   }
 }
 
-void PhaseOneDecompressor::decompressThreaded(
-    const RawDecompressorThread* t) const {
-  for (size_t i = t->start; i < t->end && i < strips.size(); i++)
-    decompressStrip(strips[i]);
+void PhaseOneDecompressor::decompressThread() const {
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+  for (auto strip = strips.cbegin(); strip < strips.cend(); ++strip) {
+#ifdef HAVE_OPENMP
+    try {
+#endif
+      decompressStrip(*strip);
+#ifdef HAVE_OPENMP
+    } catch (RawspeedException& err) {
+      // Propagate the exception out of OpenMP magic.
+      mRaw->setError(err.what());
+    }
+#endif
+  }
+}
+
+void PhaseOneDecompressor::decompress() const {
+#ifdef HAVE_OPENMP
+#pragma omp parallel default(none)                                             \
+    num_threads(rawspeed_get_number_of_processor_cores())
+#endif
+  decompressThread();
+
+#ifdef HAVE_OPENMP
+  std::string firstErr;
+  if (mRaw->isTooManyErrors(1, &firstErr)) {
+    ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
+             firstErr.c_str());
+  }
+#endif
 }
 
 } // namespace rawspeed

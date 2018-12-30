@@ -7,7 +7,6 @@ FILE(GLOB RAWSPEED_TEST_SOURCES
   "PointTest.cpp"
   "RangeTest.cpp"
   "SplineTest.cpp"
-  "ThreadingTest.cpp"
 )
 
 foreach(IN ${RAWSPEED_TEST_SOURCES})

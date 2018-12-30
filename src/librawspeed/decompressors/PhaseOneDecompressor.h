@@ -22,10 +22,11 @@
 
 #pragma once
 
-#include "decompressors/AbstractParallelizedDecompressor.h" // for Abstract...
-#include "io/ByteStream.h"                                  // for ByteStream
-#include <utility>                                          // for move
-#include <vector>                                           // for vector
+#include "common/RawImage.h"                    // for RawImage
+#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "io/ByteStream.h"                      // for ByteStream
+#include <utility>                              // for move
+#include <vector>                               // for vector
 
 namespace rawspeed {
 
@@ -38,18 +39,22 @@ struct PhaseOneStrip {
   PhaseOneStrip(int block, ByteStream bs_) : n(block), bs(std::move(bs_)) {}
 };
 
-class PhaseOneDecompressor final : public AbstractParallelizedDecompressor {
+class PhaseOneDecompressor final : public AbstractDecompressor {
+  RawImage mRaw;
+
   std::vector<PhaseOneStrip> strips;
 
   void decompressStrip(const PhaseOneStrip& strip) const;
 
-  void decompressThreaded(const RawDecompressorThread* t) const final;
+  void decompressThread() const;
 
   void validateStrips() const;
 
 public:
   PhaseOneDecompressor(const RawImage& img,
                        std::vector<PhaseOneStrip>&& strips_);
+
+  void decompress() const;
 };
 
 } // namespace rawspeed

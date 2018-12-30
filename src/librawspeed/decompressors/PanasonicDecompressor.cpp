@@ -20,6 +20,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "decompressors/PanasonicDecompressor.h"
 #include "common/Mutex.h"                 // for MutexLocker
 #include "common/Point.h"                 // for iPoint2D
@@ -44,7 +45,7 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
                                              const ByteStream& input_,
                                              bool zero_is_not_bad,
                                              uint32 section_split_offset_)
-    : AbstractParallelizedDecompressor(img), zero_is_bad(!zero_is_not_bad),
+    : mRaw(img), zero_is_bad(!zero_is_not_bad),
       section_split_offset(section_split_offset_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
@@ -155,7 +156,7 @@ public:
     parseBlock();
   }
 
-  uint32 getBits(int nbits) {
+  uint32 getBits(int nbits) noexcept {
     vbits = (vbits - nbits) & 0x1ffff;
     int byte = vbits >> 3 ^ 0x3ff0;
     return (buf[byte] | buf[byte + 1UL] << 8) >> (vbits & 7) & ~(-(1 << nbits));
@@ -164,7 +165,7 @@ public:
 
 void PanasonicDecompressor::processPixelPacket(
     ProxyStream* bits, int y, ushort16* dest, int xbegin,
-    std::vector<uint32>* zero_pos) const {
+    std::vector<uint32>* zero_pos) const noexcept {
   int sh = 0;
 
   std::array<int, 2> pred;
@@ -208,7 +209,8 @@ void PanasonicDecompressor::processPixelPacket(
 }
 
 void PanasonicDecompressor::processBlock(const Block& block,
-                                         std::vector<uint32>* zero_pos) const {
+                                         std::vector<uint32>* zero_pos) const
+    noexcept {
   ProxyStream bits(block.bs, section_split_offset);
 
   for (int y = block.beginCoord.y; y <= block.endCoord.y; y++) {
@@ -236,15 +238,16 @@ void PanasonicDecompressor::processBlock(const Block& block,
   }
 }
 
-void PanasonicDecompressor::decompressThreaded(
-    const RawDecompressorThread* t) const {
+void PanasonicDecompressor::decompressThread() const noexcept {
   std::vector<uint32> zero_pos;
 
   assert(!blocks.empty());
-  assert(t->start < t->end);
-  assert(t->end <= blocks.size());
-  for (size_t i = t->start; i < t->end; i++)
-    processBlock(blocks[i], &zero_pos);
+
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+  for (auto block = blocks.cbegin(); block < blocks.cend(); ++block)
+    processBlock(*block, &zero_pos);
 
   if (zero_is_bad && !zero_pos.empty()) {
     MutexLocker guard(&mRaw->mBadPixelMutex);
@@ -253,9 +256,13 @@ void PanasonicDecompressor::decompressThreaded(
   }
 }
 
-void PanasonicDecompressor::decompress() const {
+void PanasonicDecompressor::decompress() const noexcept {
   assert(!blocks.empty());
-  startThreading(blocks.size());
+#ifdef HAVE_OPENMP
+#pragma omp parallel default(none)                                             \
+    num_threads(rawspeed_get_number_of_processor_cores())
+#endif
+  decompressThread();
 }
 
 } // namespace rawspeed
