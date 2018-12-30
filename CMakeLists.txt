@@ -48,7 +48,6 @@ else()
 endif()
 option(RAWSPEED_ENABLE_DEBUG_INFO "Whether to generate debug info or not." ON)
 option(RAWSPEED_ENABLE_WERROR "Stop and fail the build, if a compiler warning is triggered." ON)
-option(WITH_PTHREADS "Enable threading support through pthread. Highly recommended" ON)
 
 option(WITH_OPENMP "Enable OpenMP support." ON)
 if(WITH_OPENMP)

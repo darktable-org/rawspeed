@@ -2,9 +2,9 @@
 
 ## Include files
 
-All needed headers are available by including “RawSpeed-API.h”. You must have the pthread library and headers installed and available.
+All needed headers are available by including “RawSpeed-API.h”.
 
-RawSpeed uses pthreads, libjpeg ~~and libxml2~~, which is the only external requirements beside standard C/C++ libraries. As of v2, libxml is no longer required.
+RawSpeed uses OpenMP, pugixml, zlib and libjpeg, which is the only external requirements beside standard C/C++ libraries.
 
 You must implement a single function: “int rawspeed_get_number_of_processor_cores();”, which should return the maximum number of threads that should be used for decoding, if multithreaded decoding is possible.
 

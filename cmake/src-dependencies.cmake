@@ -19,36 +19,8 @@ if(BUILD_BENCHMARKING)
   add_dependencies(dependencies benchmark)
 endif()
 
-unset(HAVE_PTHREAD)
-if(WITH_PTHREADS)
-  message(STATUS "Looking for PThreads")
-  set(CMAKE_THREAD_PREFER_PTHREAD 1)
-  find_package(Threads)
-  if(NOT CMAKE_USE_PTHREADS_INIT)
-    message(SEND_ERROR "Did not find POSIX Threads! Either make it find PThreads, or pass -DWITH_PTHREADS=OFF to disable threading.")
-  else()
-    message(STATUS "Looking for PThreads - found")
-    set(HAVE_PTHREAD 1)
-    target_link_libraries(rawspeed PUBLIC Threads::Threads)
-    set_package_properties(Threads PROPERTIES
-                           TYPE RECOMMENDED
-                           DESCRIPTION "POSIX Threads"
-                           PURPOSE "Used for the main parallelization of the library")
-  endif()
-else()
-  message(STATUS "PThread-based threading is disabled. Not searching for PThreads")
-endif()
-add_feature_info("PThread-based threading" HAVE_PTHREAD "used for parallelized image decoding")
-
 unset(HAVE_OPENMP)
 if(WITH_OPENMP)
-  if(NOT HAVE_PTHREAD)
-    message(SEND_ERROR "POSIX locking API is used, but the POSIX Threads "
-                       "weren't found, thus can not enable OpenMP support. "
-                       "Either make it find PThreads, or pass "
-                       "-DWITH_OPENMP=OFF to disable OpenMP support.")
-  endif()
-
   message(STATUS "Looking for OpenMP")
   find_package(OpenMP)
 
@@ -88,11 +60,11 @@ if(WITH_OPENMP)
                          TYPE RECOMMENDED
                          URL https://www.openmp.org/
                          DESCRIPTION "Open Multi-Processing"
-                         PURPOSE "Marginally used for parallelization the library")
+                         PURPOSE "Used for parallelization of the library")
 else()
   message(STATUS "OpenMP is disabled")
 endif()
-add_feature_info("OpenMP-based threading" HAVE_OPENMP "used for parallelized image decoding")
+add_feature_info("OpenMP-based threading" HAVE_OPENMP "used for parallelization of the library")
 
 unset(HAVE_PUGIXML)
 if(WITH_PUGIXML)

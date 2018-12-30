@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_PTHREAD
+#include "rawspeedconfig.h"
 #include "common/RawImage.h"
 #include "MemorySanitizer.h"              // for MSan
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
