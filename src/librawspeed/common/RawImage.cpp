@@ -394,7 +394,7 @@ void RawImageData::startWorker(const RawImageWorker::RawImageWorkerTask task,
     return h;
   }();
 
-  const int threads = getThreadCount();
+  const int threads = rawspeed_get_number_of_processor_cores();
   const int y_per_thread = (height + threads - 1) / threads;
 
 #ifdef HAVE_OPENMP
