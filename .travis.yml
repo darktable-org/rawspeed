@@ -99,7 +99,7 @@ jobs:
     dist: trusty
     sudo: required
     env: CC=gcc-5 CXX=g++-5 EXTRA=NODOCKER
-  #- stage: deploy
+  - stage: deploy
   #  os: linux
   #  sudo: required
   #  dist: xenial
