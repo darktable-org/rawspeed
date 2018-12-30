@@ -33,7 +33,6 @@
 
 using rawspeed::clampBits;
 using rawspeed::copyPixels;
-using rawspeed::getThreadCount;
 using rawspeed::isAligned;
 using rawspeed::isIn;
 using rawspeed::isPowerOfTwo;
@@ -407,10 +406,6 @@ TEST(UnrollLoopTest, IsMonotonicallyPositiveTest) {
   UnrollLoopTestIsMonotonicallyPositiveTest<2>();
   UnrollLoopTestIsMonotonicallyPositiveTest<3>();
   UnrollLoopTestIsMonotonicallyPositiveTest<4>();
-}
-
-TEST(GetThreadCountTest, Test) {
-  ASSERT_NO_THROW({ ASSERT_GE(getThreadCount(), 1); });
 }
 
 TEST(MakeUniqueTest, Test) {

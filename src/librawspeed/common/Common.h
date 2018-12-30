@@ -128,17 +128,6 @@ isIn(const T value, const std::initializer_list<T2>& list) {
   return false;
 }
 
-inline uint32 getThreadCount()
-{
-#ifndef HAVE_PTHREAD
-  return 1;
-#elif defined(WIN32)
-  return pthread_num_processors_np();
-#else
-  return rawspeed_get_number_of_processor_cores();
-#endif
-}
-
 // Clamps the given unsigned value to the range 0 .. 2^n-1, with n <= 16
 template <class T>
 inline constexpr __attribute__((const)) ushort16 clampBits(
