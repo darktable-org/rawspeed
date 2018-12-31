@@ -46,7 +46,7 @@ class PhaseOneDecompressor final : public AbstractDecompressor {
 
   void decompressStrip(const PhaseOneStrip& strip) const;
 
-  void decompressThread() const;
+  void decompressThread() const noexcept;
 
   void validateStrips() const;
 

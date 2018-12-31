@@ -144,21 +144,17 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
   }
 }
 
-void PhaseOneDecompressor::decompressThread() const {
+void PhaseOneDecompressor::decompressThread() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
   for (auto strip = strips.cbegin(); strip < strips.cend(); ++strip) {
-#ifdef HAVE_OPENMP
     try {
-#endif
       decompressStrip(*strip);
-#ifdef HAVE_OPENMP
     } catch (RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
     }
-#endif
   }
 }
 
@@ -169,13 +165,11 @@ void PhaseOneDecompressor::decompress() const {
 #endif
   decompressThread();
 
-#ifdef HAVE_OPENMP
   std::string firstErr;
   if (mRaw->isTooManyErrors(1, &firstErr)) {
     ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
              firstErr.c_str());
   }
-#endif
 }
 
 } // namespace rawspeed
