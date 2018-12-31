@@ -92,8 +92,8 @@ template <> void AbstractDngDecompressor::decompressThread<7>() const noexcept {
 #pragma omp for schedule(static)
 #endif
   for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
-    LJpegDecompressor d(e->bs, mRaw);
     try {
+      LJpegDecompressor d(e->bs, mRaw);
       d.decode(e->offX, e->offY, e->width, e->height, mFixLjpeg);
     } catch (RawDecoderException& err) {
       mRaw->setError(err.what());
