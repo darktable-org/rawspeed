@@ -758,7 +758,7 @@ void FujiDecompressor::fuji_compressed_load_raw() {
   }
 }
 
-void FujiDecompressor::decompressThread() const {
+void FujiDecompressor::decompressThread() const noexcept {
   fuji_compressed_block block_info;
 
 #ifdef HAVE_OPENMP
@@ -766,16 +766,12 @@ void FujiDecompressor::decompressThread() const {
 #endif
   for (auto strip = strips.cbegin(); strip < strips.cend(); ++strip) {
     block_info.reset(&common_info);
-#ifdef HAVE_OPENMP
     try {
-#endif
       fuji_decode_strip(&block_info, *strip);
-#ifdef HAVE_OPENMP
     } catch (RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
     }
-#endif
   }
 }
 
@@ -786,13 +782,11 @@ void FujiDecompressor::decompress() const {
 #endif
   decompressThread();
 
-#ifdef HAVE_OPENMP
   std::string firstErr;
   if (mRaw->isTooManyErrors(1, &firstErr)) {
     ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
              firstErr.c_str());
   }
-#endif
 }
 
 FujiDecompressor::FujiHeader::FujiHeader(ByteStream* bs) {

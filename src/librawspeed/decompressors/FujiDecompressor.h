@@ -39,7 +39,7 @@ class RawImage;
 class FujiDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
 
-  void decompressThread() const;
+  void decompressThread() const noexcept;
 
 public:
   struct FujiHeader {
