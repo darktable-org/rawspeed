@@ -695,12 +695,7 @@ void VC5Decompressor::decodeThread(bool* exceptionThrown) const noexcept {
   // Decode all the existing bands. May fail.
   decodeBands(exceptionThrown);
 
-#ifdef HAVE_OPENMP
-#pragma omp cancel parallel if (*exceptionThrown)
-#endif
-
-  // Parallel region termination is usually disabled by default,
-  // thus we can't just rely on it. Proceed only if decoding did not fail.
+  // Proceed only if decoding did not fail.
   if (*exceptionThrown)
     return;
 
