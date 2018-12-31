@@ -227,6 +227,8 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   void combineFinalLowpassBands() const noexcept;
 
+  void decodeThread(bool* exceptionThrown) const noexcept;
+
   void parseVC5();
 
 public:

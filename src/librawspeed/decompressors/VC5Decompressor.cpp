@@ -691,6 +691,26 @@ void VC5Decompressor::prepareDecodingPlan() {
   prepareBandReconstruction();
 }
 
+void VC5Decompressor::decodeThread(bool* exceptionThrown) const noexcept {
+  // Decode all the existing bands. May fail.
+  decodeBands(exceptionThrown);
+
+#ifdef HAVE_OPENMP
+#pragma omp cancel parallel if (*exceptionThrown)
+#endif
+
+  // Parallel region termination is usually disabled by default,
+  // thus we can't just rely on it. Proceed only if decoding did not fail.
+  if (*exceptionThrown)
+    return;
+
+  // And now, reconstruct the low-pass bands.
+  reconstructLowpassBands();
+
+  // And finally!
+  combineFinalLowpassBands();
+}
+
 void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
                              unsigned int width, unsigned int height) {
   if (offsetX || offsetY || mRaw->dim != iPoint2D(width, height))
@@ -704,28 +724,8 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 #ifdef HAVE_OPENMP
 #pragma omp parallel default(none) shared(exceptionThrown)                     \
     num_threads(rawspeed_get_number_of_processor_cores())
-  {
 #endif
-
-    // Decode all the existing bands. May fail.
-    decodeBands(&exceptionThrown);
-
-#ifdef HAVE_OPENMP
-#pragma omp cancel parallel if (exceptionThrown)
-#endif
-
-    // Parallel region termination is usually disabled by default,
-    // thus we can't just rely on it. Proceed only if decoding did not fail.
-    if (!exceptionThrown) {
-      // And now, reconstruct the low-pass bands.
-      reconstructLowpassBands();
-
-      // And finally!
-      combineFinalLowpassBands();
-    }
-#ifdef HAVE_OPENMP
-  }
-#endif
+  decodeThread(&exceptionThrown);
 
   std::string firstErr;
   if (mRaw->isTooManyErrors(1, &firstErr)) {
