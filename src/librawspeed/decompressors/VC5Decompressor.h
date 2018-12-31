@@ -221,15 +221,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   void prepareBandReconstruction();
   void prepareDecodingPlan();
 
-  void decodeBands(
-#ifdef HAVE_OPENMP
-      bool* exceptionThrown
-#endif
-      ) const
-#ifdef HAVE_OPENMP
-      noexcept
-#endif
-      ;
+  void decodeBands(bool* exceptionThrown) const noexcept;
 
   void reconstructLowpassBands() const noexcept;
 

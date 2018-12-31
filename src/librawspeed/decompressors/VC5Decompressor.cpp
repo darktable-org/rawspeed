@@ -700,36 +700,32 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 
   prepareDecodingPlan();
 
-#ifdef HAVE_OPENMP
   bool exceptionThrown = false;
+#ifdef HAVE_OPENMP
 #pragma omp parallel default(none) shared(exceptionThrown)                     \
     num_threads(rawspeed_get_number_of_processor_cores())
   {
 #endif
 
     // Decode all the existing bands. May fail.
-    decodeBands(
-#ifdef HAVE_OPENMP
-        &exceptionThrown
-#endif
-    );
+    decodeBands(&exceptionThrown);
 
 #ifdef HAVE_OPENMP
 #pragma omp cancel parallel if (exceptionThrown)
+#endif
 
     // Parallel region termination is usually disabled by default,
     // thus we can't just rely on it. Proceed only if decoding did not fail.
     if (!exceptionThrown) {
-#endif
       // And now, reconstruct the low-pass bands.
       reconstructLowpassBands();
 
       // And finally!
       combineFinalLowpassBands();
-
-#ifdef HAVE_OPENMP
     }
+#ifdef HAVE_OPENMP
   }
+#endif
 
   std::string firstErr;
   if (mRaw->isTooManyErrors(1, &firstErr)) {
@@ -739,36 +735,27 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
   } else {
     assert(!exceptionThrown);
   }
-#endif
 }
 
-void VC5Decompressor::decodeBands(
-#ifdef HAVE_OPENMP
-    bool* exceptionThrown
-#endif
-    ) const
-#ifdef HAVE_OPENMP
-    noexcept
-#endif
-{
+void VC5Decompressor::decodeBands(bool* exceptionThrown) const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(dynamic, 1)
 #endif
   for (auto decodeableBand = allDecodeableBands.begin();
        decodeableBand < allDecodeableBands.end(); ++decodeableBand) {
-#ifdef HAVE_OPENMP
     try {
-#endif
       decodeableBand->band->decode(decodeableBand->wavelet);
-#ifdef HAVE_OPENMP
     } catch (RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
+#ifdef HAVE_OPENMP
 #pragma omp atomic write
-      *exceptionThrown = true;
-#pragma omp cancel for
-    }
 #endif
+      *exceptionThrown = true;
+#ifdef HAVE_OPENMP
+#pragma omp cancel for
+#endif
+    }
   }
 }
 
