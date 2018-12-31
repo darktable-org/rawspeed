@@ -129,8 +129,8 @@ template <> void AbstractDngDecompressor::decompressThread<9>() const noexcept {
 #pragma omp for schedule(static)
 #endif
   for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
-    VC5Decompressor d(e->bs, mRaw);
     try {
+      VC5Decompressor d(e->bs, mRaw);
       d.decode(e->offX, e->offY, e->width, e->height);
     } catch (RawDecoderException& err) {
       mRaw->setError(err.what());
