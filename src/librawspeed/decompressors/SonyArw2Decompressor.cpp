@@ -48,11 +48,56 @@ SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
   input = input_.peekStream(mRaw->dim.x * mRaw->dim.y);
 }
 
-void SonyArw2Decompressor::decompressThread() const noexcept {
+void SonyArw2Decompressor::decompressRow(int row) const {
   uchar8* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
   int32 w = mRaw->dim.x;
 
+  assert(mRaw->dim.x > 0);
+  assert(mRaw->dim.x % 32 == 0);
+
+  auto* dest = reinterpret_cast<ushort16*>(&data[row * pitch]);
+
+  ByteStream rowBs = input;
+  rowBs.skipBytes(row * mRaw->dim.x);
+  rowBs = rowBs.peekStream(mRaw->dim.x);
+
+  BitPumpLSB bits(rowBs);
+
+  uint32 random = bits.peekBits(24);
+
+  // Process 32 pixels (16x2) per loop.
+  for (int32 x = 0; x < w - 30;) {
+    int _max = bits.getBits(11);
+    int _min = bits.getBits(11);
+    int _imax = bits.getBits(4);
+    int _imin = bits.getBits(4);
+
+    int sh = 0;
+    while ((sh < 4) && ((0x80 << sh) <= (_max - _min)))
+      sh++;
+
+    for (int i = 0; i < 16; i++) {
+      int p;
+      if (i == _imax)
+        p = _max;
+      else {
+        if (i == _imin)
+          p = _min;
+        else {
+          p = (bits.getBits(7) << sh) + _min;
+          if (p > 0x7ff)
+            p = 0x7ff;
+        }
+      }
+      mRaw->setWithLookUp(p << 1, reinterpret_cast<uchar8*>(&dest[x + i * 2]),
+                          &random);
+    }
+    x += ((x & 1) != 0) ? 31 : 1; // Skip to next 32 pixels
+  }
+}
+
+void SonyArw2Decompressor::decompressThread() const noexcept {
   assert(mRaw->dim.x > 0);
   assert(mRaw->dim.x % 32 == 0);
   assert(mRaw->dim.y > 0);
@@ -60,47 +105,8 @@ void SonyArw2Decompressor::decompressThread() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
-  for (int y = 0; y < mRaw->dim.y; y++) {
-    auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
-
-    ByteStream rowBs = input;
-    rowBs.skipBytes(y * mRaw->dim.x);
-    rowBs = rowBs.peekStream(mRaw->dim.x);
-
-    BitPumpLSB bits(rowBs);
-
-    uint32 random = bits.peekBits(24);
-
-    // Process 32 pixels (16x2) per loop.
-    for (int32 x = 0; x < w - 30;) {
-      int _max = bits.getBits(11);
-      int _min = bits.getBits(11);
-      int _imax = bits.getBits(4);
-      int _imin = bits.getBits(4);
-
-      int sh = 0;
-      while ((sh < 4) && ((0x80 << sh) <= (_max - _min)))
-        sh++;
-
-      for (int i = 0; i < 16; i++) {
-        int p;
-        if (i == _imax)
-          p = _max;
-        else {
-          if (i == _imin)
-            p = _min;
-          else {
-            p = (bits.getBits(7) << sh) + _min;
-            if (p > 0x7ff)
-              p = 0x7ff;
-          }
-        }
-        mRaw->setWithLookUp(p << 1, reinterpret_cast<uchar8*>(&dest[x + i * 2]),
-                            &random);
-      }
-      x += ((x & 1) != 0) ? 31 : 1; // Skip to next 32 pixels
-    }
-  }
+  for (int y = 0; y < mRaw->dim.y; y++)
+    decompressRow(y);
 }
 
 void SonyArw2Decompressor::decompress() const noexcept {
