@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2017-2019 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -29,6 +29,7 @@ namespace rawspeed {
 class RawImage;
 
 class SonyArw2Decompressor final : public AbstractDecompressor {
+  void decompressRow(int row) const;
   void decompressThread() const noexcept;
 
   RawImage mRaw;
@@ -36,7 +37,7 @@ class SonyArw2Decompressor final : public AbstractDecompressor {
 
 public:
   SonyArw2Decompressor(const RawImage& img, const ByteStream& input);
-  void decompress() const noexcept;
+  void decompress() const;
 };
 
 } // namespace rawspeed
