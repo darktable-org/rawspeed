@@ -57,15 +57,18 @@ void SonyArw2Decompressor::decompressThread() const noexcept {
   assert(mRaw->dim.x % 32 == 0);
   assert(mRaw->dim.y > 0);
 
-  BitPumpLSB bits(input);
-
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
   for (int y = 0; y < mRaw->dim.y; y++) {
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
-    // Realign
-    bits.setBufferPosition(w * y);
+
+    ByteStream rowBs = input;
+    rowBs.skipBytes(y * mRaw->dim.x);
+    rowBs = rowBs.peekStream(mRaw->dim.x);
+
+    BitPumpLSB bits(rowBs);
+
     uint32 random = bits.peekBits(24);
 
     // Process 32 pixels (16x2) per loop.
