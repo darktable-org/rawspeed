@@ -67,7 +67,7 @@ void SonyArw2Decompressor::decompressRow(int row) const {
   uint32 random = bits.peekBits(24);
 
   // Process 32 pixels (16x2) per loop.
-  for (int32 x = 0; x < w - 30;) {
+  for (int32 x = 0; x < w;) {
     int _max = bits.getBits(11);
     int _min = bits.getBits(11);
     int _imax = bits.getBits(4);
