@@ -66,12 +66,19 @@ void SonyArw2Decompressor::decompressRow(int row) const {
 
   uint32 random = bits.peekBits(24);
 
-  // Process 32 pixels (16x2) per loop.
+  // Each loop iteration processes 16 pixels, consuming 128 bits of input.
   for (int32 x = 0; x < w;) {
+    // 30 bits.
     int _max = bits.getBits(11);
     int _min = bits.getBits(11);
     int _imax = bits.getBits(4);
     int _imin = bits.getBits(4);
+
+    // 128-30 = 98 bits remaining, still need to decode 16 pixels...
+    // Each full pixel consumes 7 bits, thus we can only have 14 full pixels.
+    // So we lack 2 pixels. That is where _imin and _imax come into play,
+    // values of those pixels were already specified in _min and _max.
+    // But what that means is, _imin and _imax must not be equal!
 
     int sh = 0;
     while ((sh < 4) && ((0x80 << sh) <= (_max - _min)))
