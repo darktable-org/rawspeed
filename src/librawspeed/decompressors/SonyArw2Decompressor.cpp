@@ -114,16 +114,31 @@ void SonyArw2Decompressor::decompressThread() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
-  for (int y = 0; y < mRaw->dim.y; y++)
-    decompressRow(y);
+  for (int y = 0; y < mRaw->dim.y; y++) {
+    try {
+      decompressRow(y);
+    } catch (RawspeedException& err) {
+      // Propagate the exception out of OpenMP magic.
+      mRaw->setError(err.what());
+#ifdef HAVE_OPENMP
+#pragma omp cancel for
+#endif
+    }
+  }
 }
 
-void SonyArw2Decompressor::decompress() const noexcept {
+void SonyArw2Decompressor::decompress() const {
 #ifdef HAVE_OPENMP
 #pragma omp parallel default(none)                                             \
     num_threads(rawspeed_get_number_of_processor_cores())
 #endif
   decompressThread();
+
+  std::string firstErr;
+  if (mRaw->isTooManyErrors(1, &firstErr)) {
+    ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
+             firstErr.c_str());
+  }
 }
 
 } // namespace rawspeed
