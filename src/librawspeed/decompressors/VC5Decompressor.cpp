@@ -2,7 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2018 Stefan Löffler
-    Copyright (C) 2018 Roman Lebedev
+    Copyright (C) 2018-2019 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -95,7 +95,7 @@ const std::array<RLV, table17.length> decompandedTable17 = []() {
 } // namespace
 
 #define PRECISION_MIN 8
-#define PRECISION_MAX 32
+#define PRECISION_MAX 16
 
 #define MARKER_BAND_END 1
 
