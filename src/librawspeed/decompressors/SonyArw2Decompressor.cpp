@@ -79,6 +79,8 @@ void SonyArw2Decompressor::decompressRow(int row) const {
     // So we lack 2 pixels. That is where _imin and _imax come into play,
     // values of those pixels were already specified in _min and _max.
     // But what that means is, _imin and _imax must not be equal!
+    if (_imax == _imin)
+      ThrowRDE("ARW2 invariant failed, same pixel is both min and max");
 
     int sh = 0;
     while ((sh < 4) && ((0x80 << sh) <= (_max - _min)))
