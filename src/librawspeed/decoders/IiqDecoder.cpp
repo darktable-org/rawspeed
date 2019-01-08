@@ -239,6 +239,9 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
     const uint32 offset = entries.getU32();
 
     switch (tag) {
+    case 0x400: // Sensor Defects
+      correctSensorDefects(meta_data.getSubStream(offset, len), len)
+      break;
     case 0x431:
       if (QuadrantMultipliersSeen)
         ThrowRDE("Second quadrant multipliers entry seen. Unexpected.");
@@ -339,6 +342,35 @@ void IiqDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   if (black_level)
     mRaw->blackLevel = black_level;
+}
+
+void IiqDecoder::correctSensorDefects(ByteStream data, uint32 len) {
+  while((len -= 8) >= 0) {
+    const uint16 col = data.getU16();
+    const uint16 row = data.getU16();
+    const uint16 type = data.getU16();
+    data.getU16(); // Advance to the next defect tag.
+
+    if (col >= mRaw->dim.x) // Value for col is outside the raw image.
+      continue;
+    switch(type) {
+    case 131: // bad column
+    case 137: // bad column
+      // Correct bad column.
+      break;
+    case 129: // bad pixel, not implemented yet.
+      break;
+    default: //Oooh, a sensor defect not in dcraw! :D
+      break;
+    }
+
+    // mRaw->dim.x == image width
+    // mRaw->dim.y == image height
+
+  }
+}
+
+void IiqDecoder::correctBadColumn() {
 }
 
 } // namespace rawspeed
