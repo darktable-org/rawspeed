@@ -231,6 +231,8 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
   ByteStream entries(meta_data.getStream(entries_count, 12));
   meta_data.setPosition(0);
 
+  bool QuadrantMultipliersSeen = false;
+
   for (uint32 entry = 0; entry < entries_count; entry++) {
     const uint32 tag = entries.getU32();
     const uint32 len = entries.getU32();
@@ -238,9 +240,12 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
 
     switch (tag) {
     case 0x431:
+      if (QuadrantMultipliersSeen)
+        ThrowRDE("Second quadrant multipliers entry seen. Unexpected.");
       if (iiq.quadrantMultipliers)
         CorrectQuadrantMultipliersCombined(meta_data.getSubStream(offset, len),
                                          split_row, split_col);
+      QuadrantMultipliersSeen = true;
       break;
     default:
       break;
