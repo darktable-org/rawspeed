@@ -238,12 +238,10 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
 
     switch (tag) {
     case 0x431:
-      if (!iiq.quadrantMultipliers)
-        return;
-
-      CorrectQuadrantMultipliersCombined(meta_data.getSubStream(offset, len),
+      if (iiq.quadrantMultipliers)
+        CorrectQuadrantMultipliersCombined(meta_data.getSubStream(offset, len),
                                          split_row, split_col);
-      return;
+      break;
     default:
       break;
     }
