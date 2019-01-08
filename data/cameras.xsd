@@ -210,7 +210,7 @@
       </xs:simpleType>
       <xs:simpleType>
         <xs:restriction base="xs:short">
-          <xs:minInclusive value="-936"/>
+          <xs:minInclusive value="-938"/>
           <xs:maxInclusive value="0"/>
         </xs:restriction>
       </xs:simpleType>
