@@ -69,7 +69,7 @@ OlympusDecompressor::OlympusDecompressor(const RawImage& img) : mRaw(img) {
  * is based on the output of all previous pixel (bar the first four)
  */
 
-inline __attribute__((always_inline)) std::pair<int, int>
+inline __attribute__((always_inline)) int
 OlympusDecompressor::parseCarry(BitPumpMSB* bits,
                                 std::array<int, 3>* carry) const {
   bits->fill();
@@ -96,7 +96,7 @@ OlympusDecompressor::parseCarry(BitPumpMSB* bits,
   (*carry)[1] = (diff * 3 + (*carry)[1]) >> 5;
   (*carry)[2] = (*carry)[0] > 16 ? 0 : (*carry)[2] + 1;
 
-  return std::make_pair(diff, low);
+  return (diff * 4) | low;
 }
 
 void OlympusDecompressor::decompressRow(BitPumpMSB* bits, int row) const {
@@ -115,9 +115,7 @@ void OlympusDecompressor::decompressRow(BitPumpMSB* bits, int row) const {
 
     std::array<int, 3>& carry = acarry[c];
 
-    int diff;
-    int low;
-    std::tie(diff, low) = parseCarry(bits, &carry);
+    int diff = parseCarry(bits, &carry);
 
     auto getLeft = [dest]() { return dest[-2]; };
     auto getUp = [up_ptr]() { return up_ptr[0]; };
@@ -149,7 +147,7 @@ void OlympusDecompressor::decompressRow(BitPumpMSB* bits, int row) const {
         pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left : up;
     }
 
-    *dest = pred + ((diff * 4) | low);
+    *dest = pred + diff;
     dest++;
     up_ptr++;
   }
