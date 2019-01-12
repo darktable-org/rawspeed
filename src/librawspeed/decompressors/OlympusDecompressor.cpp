@@ -79,7 +79,7 @@ void OlympusDecompressor::decompressRow(BitPumpMSB* bits, int row) const {
   std::array<std::array<int, 3>, 2> acarry{{}};
 
   auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, row));
-  auto* up_ptr = row > 0 ? &dest[-pitch] : &dest[0];
+  const auto* up_ptr = row > 0 ? &dest[-pitch] : &dest[0];
   for (uint32 x = 0; x < static_cast<uint32>(mRaw->dim.x); x++) {
     int c = x & 1;
 
