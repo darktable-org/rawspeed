@@ -32,7 +32,6 @@
 #include <cassert>                        // for assert
 #include <cmath>                          // for abs
 #include <cstdlib>                        // for abs
-#include <memory>                         // for unique_ptr
 #include <type_traits>                    // for enable_if_t, is_integral
 
 namespace {
@@ -76,18 +75,6 @@ void OlympusDecompressor::decompress(ByteStream input) const {
   assert(mRaw->dim.x % 2 == 0);
 
   int pitch = mRaw->pitch;
-
-  /* Build a table to quickly look up "high" value */
-  std::unique_ptr<char[]> bittable(new char[4096]); // NOLINT
-
-  for (int i = 0; i < 4096; i++) {
-    int b = i;
-    int high;
-    for (high = 0; high < 12; high++)
-      if ((b >> (11 - high)) & 1)
-        break;
-    bittable[i] = std::min(12, high);
-  }
 
   input.skipBytes(7);
   BitPumpMSB bits(input);

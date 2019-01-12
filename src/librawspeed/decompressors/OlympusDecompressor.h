@@ -21,6 +21,7 @@
 #pragma once
 
 #include "common/RawImage.h"                    // for RawImage
+#include "common/SimpleLUT.h"                   // for SimpleLUT
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 
 namespace rawspeed {
@@ -29,6 +30,16 @@ class ByteStream;
 
 class OlympusDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
+
+  // A table to quickly look up "high" value
+  const SimpleLUT<char, 12> bittable{[](unsigned i, unsigned tableSize) {
+    int b = i;
+    int high;
+    for (high = 0; high < 12; high++)
+      if ((b >> (11 - high)) & 1)
+        break;
+    return std::min(12, high);
+  }};
 
 public:
   explicit OlympusDecompressor(const RawImage& img);
