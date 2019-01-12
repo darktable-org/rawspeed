@@ -145,7 +145,7 @@ void OlympusDecompressor::decompressRow(BitPumpMSB* bits, int row) const {
 
   auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, row));
   const auto* up_ptr = row > 0 ? &dest[-pitch] : &dest[0];
-  for (uint32 x = 0; x < static_cast<uint32>(mRaw->dim.x); x++) {
+  for (int x = 0; x < mRaw->dim.x; x++) {
     int c = x & 1;
 
     std::array<int, 3>& carry = acarry[c];
@@ -167,7 +167,7 @@ void OlympusDecompressor::decompress(ByteStream input) const {
   input.skipBytes(7);
   BitPumpMSB bits(input);
 
-  for (uint32 y = 0; y < static_cast<uint32>(mRaw->dim.y); y++)
+  for (int y = 0; y < mRaw->dim.y; y++)
     decompressRow(&bits, y);
 }
 
