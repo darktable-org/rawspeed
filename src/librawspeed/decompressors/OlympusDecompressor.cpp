@@ -99,7 +99,7 @@ void OlympusDecompressor::decompressRow(BitPumpMSB* bits, int row) const {
     // Skip bytes used above or read bits
     if (high == 12) {
       bits->skipBitsNoFill(15);
-      high = bits->getBits(16 - nbits) >> 1;
+      high = bits->getBitsNoFill(16 - nbits) >> 1;
     } else
       bits->skipBitsNoFill(high + 1 + 3);
 
