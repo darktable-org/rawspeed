@@ -161,6 +161,8 @@ protected:
 
     void reset(const fuji_compressed_params* params);
 
+    BitPumpMSB pump;
+
     // tables of gradients
     std::array<std::array<int_pair, 41>, 3> grad_even;
     std::array<std::array<int_pair, 41>, 3> grad_odd;
@@ -193,14 +195,12 @@ private:
 
   template <typename T1, typename T2>
   void fuji_decode_sample(T1&& func_0, T2&& func_1, fuji_compressed_block* info,
-                          BitPumpMSB* pump, ushort16* line_buf, int* pos,
+                          ushort16* line_buf, int* pos,
                           std::array<int_pair, 41>* grads) const;
-  void fuji_decode_sample_even(fuji_compressed_block* info, BitPumpMSB* pump,
-                               ushort16* line_buf, int* pos,
-                               std::array<int_pair, 41>* grads) const;
-  void fuji_decode_sample_odd(fuji_compressed_block* info, BitPumpMSB* pump,
-                              ushort16* line_buf, int* pos,
-                              std::array<int_pair, 41>* grads) const;
+  void fuji_decode_sample_even(fuji_compressed_block* info, ushort16* line_buf,
+                               int* pos, std::array<int_pair, 41>* grads) const;
+  void fuji_decode_sample_odd(fuji_compressed_block* info, ushort16* line_buf,
+                              int* pos, std::array<int_pair, 41>* grads) const;
 
   void fuji_decode_interpolation_even(int line_width, ushort16* line_buf,
                                       int* pos) const;
@@ -212,10 +212,8 @@ private:
                          int line_width) const;
   void fuji_extend_blue(std::array<ushort16*, _ltotal> linebuf,
                         int line_width) const;
-  void xtrans_decode_block(fuji_compressed_block* info,
-                           BitPumpMSB* pump, int cur_line) const;
-  void fuji_bayer_decode_block(fuji_compressed_block* info,
-                               BitPumpMSB* pump, int cur_line) const;
+  void xtrans_decode_block(fuji_compressed_block* info, int cur_line) const;
+  void fuji_bayer_decode_block(fuji_compressed_block* info, int cur_line) const;
 };
 
 } // namespace rawspeed
