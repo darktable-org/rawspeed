@@ -113,8 +113,8 @@ template <> void AbstractDngDecompressor::decompressThread<8>() const noexcept {
   for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
     DeflateDecompressor z(e->bs, mRaw, mPredictor, mBps);
     try {
-      z.decode(&uBuffer, e->dsc.tileW, e->dsc.tileH, e->width, e->height,
-               e->offX, e->offY);
+      z.decode(&uBuffer, iPoint2D(e->dsc.tileW, e->dsc.tileH),
+               iPoint2D(e->width, e->height), iPoint2D(e->offX, e->offY));
     } catch (RawDecoderException& err) {
       mRaw->setError(err.what());
     } catch (IOException& err) {

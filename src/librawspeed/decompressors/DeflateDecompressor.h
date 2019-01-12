@@ -25,6 +25,7 @@
 #ifdef HAVE_ZLIB
 
 #include "common/Common.h"                      // for uint32
+#include "common/Point.h"                       // for iPoint2D
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/ByteStream.h"                      // for ByteStream
@@ -45,8 +46,7 @@ public:
       : input(std::move(bs)), mRaw(img), predictor(predictor_), bps(bps_) {}
 
   void decode(std::unique_ptr<unsigned char[]>* uBuffer, // NOLINT
-              int tileWidthMax, int tileHeightMax, int width, int height,
-              uint32 offX, uint32 offY);
+              iPoint2D maxDim, iPoint2D dim, iPoint2D off);
 };
 
 } // namespace rawspeed

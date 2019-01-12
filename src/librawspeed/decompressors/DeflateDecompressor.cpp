@@ -188,9 +188,8 @@ static inline void expandFP24(unsigned char* dst, int width) {
 
 void DeflateDecompressor::decode(
     std::unique_ptr<unsigned char[]>* uBuffer, // NOLINT
-    int tileWidthMax, int tileHeightMax, int width, int height, uint32 offX,
-    uint32 offY) {
-  uLongf dstLen = sizeof(float) * tileWidthMax * tileHeightMax;
+    iPoint2D maxDim, iPoint2D dim, iPoint2D off) {
+  uLongf dstLen = sizeof(float) * maxDim.area();
 
   if (!uBuffer->get())
     *uBuffer =
@@ -222,22 +221,22 @@ void DeflateDecompressor::decode(
 
   int bytesps = bps / 8;
 
-  for (auto row = 0; row < height; ++row) {
-    unsigned char* src = uBuffer->get() + row * tileWidthMax * bytesps;
+  for (auto row = 0; row < dim.y; ++row) {
+    unsigned char* src = uBuffer->get() + row * maxDim.x * bytesps;
     unsigned char* dst =
         static_cast<unsigned char*>(mRaw->getData()) +
-        ((offY + row) * mRaw->pitch + offX * sizeof(float) * mRaw->getCpp());
+        ((off.y + row) * mRaw->pitch + off.x * sizeof(float) * mRaw->getCpp());
 
     if (predFactor)
-      decodeFPDeltaRow(src, dst, width, tileWidthMax, bytesps, predFactor);
+      decodeFPDeltaRow(src, dst, dim.x, maxDim.x, bytesps, predFactor);
 
     assert(bytesps >= 2 && bytesps <= 4);
     switch (bytesps) {
     case 2:
-      expandFP16(dst, width);
+      expandFP16(dst, dim.x);
       break;
     case 3:
-      expandFP24(dst, width);
+      expandFP24(dst, dim.x);
       break;
     case 4:
       // No need to expand FP32
