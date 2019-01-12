@@ -69,6 +69,36 @@ OlympusDecompressor::OlympusDecompressor(const RawImage& img) : mRaw(img) {
  * is based on the output of all previous pixel (bar the first four)
  */
 
+inline __attribute__((always_inline)) std::pair<int, int>
+OlympusDecompressor::parseCarry(BitPumpMSB* bits,
+                                std::array<int, 3>* carry) const {
+  bits->fill();
+  int i = 2 * ((*carry)[2] < 3);
+  int nbits;
+  for (nbits = 2 + i; static_cast<ushort16>((*carry)[0]) >> (nbits + i);
+       nbits++)
+    ;
+
+  int b = bits->peekBitsNoFill(15);
+  int sign = (b >> 14) * -1;
+  int low = (b >> 12) & 3;
+  int high = bittable[b & 4095];
+
+  // Skip bytes used above or read bits
+  if (high == 12) {
+    bits->skipBitsNoFill(15);
+    high = bits->getBitsNoFill(16 - nbits) >> 1;
+  } else
+    bits->skipBitsNoFill(high + 1 + 3);
+
+  (*carry)[0] = (high << nbits) | bits->getBitsNoFill(nbits);
+  int diff = ((*carry)[0] ^ sign) + (*carry)[1];
+  (*carry)[1] = (diff * 3 + (*carry)[1]) >> 5;
+  (*carry)[2] = (*carry)[0] > 16 ? 0 : (*carry)[2] + 1;
+
+  return std::make_pair(diff, low);
+}
+
 void OlympusDecompressor::decompressRow(BitPumpMSB* bits, int row) const {
   assert(mRaw->dim.y > 0);
   assert(mRaw->dim.x > 0);
@@ -85,28 +115,9 @@ void OlympusDecompressor::decompressRow(BitPumpMSB* bits, int row) const {
 
     std::array<int, 3>& carry = acarry[c];
 
-    bits->fill();
-    int i = 2 * (carry[2] < 3);
-    int nbits;
-    for (nbits = 2 + i; static_cast<ushort16>(carry[0]) >> (nbits + i); nbits++)
-      ;
-
-    int b = bits->peekBitsNoFill(15);
-    int sign = (b >> 14) * -1;
-    int low = (b >> 12) & 3;
-    int high = bittable[b & 4095];
-
-    // Skip bytes used above or read bits
-    if (high == 12) {
-      bits->skipBitsNoFill(15);
-      high = bits->getBitsNoFill(16 - nbits) >> 1;
-    } else
-      bits->skipBitsNoFill(high + 1 + 3);
-
-    carry[0] = (high << nbits) | bits->getBitsNoFill(nbits);
-    int diff = (carry[0] ^ sign) + carry[1];
-    carry[1] = (diff * 3 + carry[1]) >> 5;
-    carry[2] = carry[0] > 16 ? 0 : carry[2] + 1;
+    int diff;
+    int low;
+    std::tie(diff, low) = parseCarry(bits, &carry);
 
     auto getLeft = [dest]() { return dest[-2]; };
     auto getUp = [up_ptr]() { return up_ptr[0]; };

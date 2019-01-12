@@ -24,6 +24,8 @@
 #include "common/SimpleLUT.h"                   // for SimpleLUT
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/BitPumpMSB.h"                      // for BitPumpMSB
+#include <array>                                // for array, array<>::value...
+#include <utility>                              // for pair
 
 namespace rawspeed {
 
@@ -41,6 +43,9 @@ class OlympusDecompressor final : public AbstractDecompressor {
         break;
     return std::min(12, high);
   }};
+
+  inline __attribute__((always_inline)) std::pair<int, int>
+  parseCarry(BitPumpMSB* bits, std::array<int, 3>* carry) const;
 
   void decompressRow(BitPumpMSB* bits, int row) const;
 
