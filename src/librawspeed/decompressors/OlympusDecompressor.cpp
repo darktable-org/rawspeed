@@ -99,6 +99,41 @@ OlympusDecompressor::parseCarry(BitPumpMSB* bits,
   return (diff * 4) | low;
 }
 
+inline int OlympusDecompressor::getPred(int row, int x, ushort16* dest,
+                                        const ushort16* up_ptr) const {
+  auto getLeft = [dest]() { return dest[-2]; };
+  auto getUp = [up_ptr]() { return up_ptr[0]; };
+  auto getLeftUp = [up_ptr]() { return up_ptr[-2]; };
+
+  int pred;
+  if (row < 2 && x < 2)
+    pred = 0;
+  else if (row < 2)
+    pred = getLeft();
+  else if (x < 2)
+    pred = getUp();
+  else {
+    int left = getLeft();
+    int up = getUp();
+    int leftUp = getLeftUp();
+
+    int leftMinusNw = left - leftUp;
+    int upMinusNw = up - leftUp;
+
+    // Check if sign is different, and they are both not zero
+    if ((SignBit(leftMinusNw) ^ SignBit(upMinusNw)) &&
+        (leftMinusNw != 0 && upMinusNw != 0)) {
+      if (std::abs(leftMinusNw) > 32 || std::abs(upMinusNw) > 32)
+        pred = left + upMinusNw;
+      else
+        pred = (left + up) >> 1;
+    } else
+      pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left : up;
+  }
+
+  return pred;
+}
+
 void OlympusDecompressor::decompressRow(BitPumpMSB* bits, int row) const {
   assert(mRaw->dim.y > 0);
   assert(mRaw->dim.x > 0);
@@ -116,36 +151,7 @@ void OlympusDecompressor::decompressRow(BitPumpMSB* bits, int row) const {
     std::array<int, 3>& carry = acarry[c];
 
     int diff = parseCarry(bits, &carry);
-
-    auto getLeft = [dest]() { return dest[-2]; };
-    auto getUp = [up_ptr]() { return up_ptr[0]; };
-    auto getLeftUp = [up_ptr]() { return up_ptr[-2]; };
-
-    int pred;
-    if (row < 2 && x < 2)
-      pred = 0;
-    else if (row < 2)
-      pred = getLeft();
-    else if (x < 2)
-      pred = getUp();
-    else {
-      int left = getLeft();
-      int up = getUp();
-      int leftUp = getLeftUp();
-
-      int leftMinusNw = left - leftUp;
-      int upMinusNw = up - leftUp;
-
-      // Check if sign is different, and they are both not zero
-      if ((SignBit(leftMinusNw) ^ SignBit(upMinusNw)) &&
-          (leftMinusNw != 0 && upMinusNw != 0)) {
-        if (std::abs(leftMinusNw) > 32 || std::abs(upMinusNw) > 32)
-          pred = left + upMinusNw;
-        else
-          pred = (left + up) >> 1;
-      } else
-        pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left : up;
-    }
+    int pred = getPred(row, x, dest, up_ptr);
 
     *dest = pred + diff;
     dest++;
