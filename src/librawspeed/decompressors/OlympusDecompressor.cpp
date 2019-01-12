@@ -69,85 +69,91 @@ OlympusDecompressor::OlympusDecompressor(const RawImage& img) : mRaw(img) {
  * is based on the output of all previous pixel (bar the first four)
  */
 
-void OlympusDecompressor::decompress(ByteStream input) const {
+void OlympusDecompressor::decompressRow(BitPumpMSB* bits, int row) const {
   assert(mRaw->dim.y > 0);
   assert(mRaw->dim.x > 0);
   assert(mRaw->dim.x % 2 == 0);
 
   int pitch = mRaw->pitch;
 
+  std::array<std::array<int, 3>, 2> acarry{{}};
+
+  auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, row));
+  auto* up_ptr = row > 0 ? &dest[-pitch] : &dest[0];
+  for (uint32 x = 0; x < static_cast<uint32>(mRaw->dim.x); x++) {
+    int c = x & 1;
+
+    std::array<int, 3>& carry = acarry[c];
+
+    bits->fill();
+    int i = 2 * (carry[2] < 3);
+    int nbits;
+    for (nbits = 2 + i; static_cast<ushort16>(carry[0]) >> (nbits + i); nbits++)
+      ;
+
+    int b = bits->peekBitsNoFill(15);
+    int sign = (b >> 14) * -1;
+    int low = (b >> 12) & 3;
+    int high = bittable[b & 4095];
+
+    // Skip bytes used above or read bits
+    if (high == 12) {
+      bits->skipBitsNoFill(15);
+      high = bits->getBits(16 - nbits) >> 1;
+    } else
+      bits->skipBitsNoFill(high + 1 + 3);
+
+    carry[0] = (high << nbits) | bits->getBits(nbits);
+    int diff = (carry[0] ^ sign) + carry[1];
+    carry[1] = (diff * 3 + carry[1]) >> 5;
+    carry[2] = carry[0] > 16 ? 0 : carry[2] + 1;
+
+    auto getLeft = [dest]() { return dest[-2]; };
+    auto getUp = [up_ptr]() { return up_ptr[0]; };
+    auto getLeftUp = [up_ptr]() { return up_ptr[-2]; };
+
+    int pred;
+    if (row < 2 && x < 2)
+      pred = 0;
+    else if (row < 2)
+      pred = getLeft();
+    else if (x < 2)
+      pred = getUp();
+    else {
+      int left = getLeft();
+      int up = getUp();
+      int leftUp = getLeftUp();
+
+      int leftMinusNw = left - leftUp;
+      int upMinusNw = up - leftUp;
+
+      // Check if sign is different, and they are both not zero
+      if ((SignBit(leftMinusNw) ^ SignBit(upMinusNw)) &&
+          (leftMinusNw != 0 && upMinusNw != 0)) {
+        if (std::abs(leftMinusNw) > 32 || std::abs(upMinusNw) > 32)
+          pred = left + upMinusNw;
+        else
+          pred = (left + up) >> 1;
+      } else
+        pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left : up;
+    }
+
+    *dest = pred + ((diff * 4) | low);
+    dest++;
+    up_ptr++;
+  }
+}
+
+void OlympusDecompressor::decompress(ByteStream input) const {
+  assert(mRaw->dim.y > 0);
+  assert(mRaw->dim.x > 0);
+  assert(mRaw->dim.x % 2 == 0);
+
   input.skipBytes(7);
   BitPumpMSB bits(input);
 
-  for (uint32 y = 0; y < static_cast<uint32>(mRaw->dim.y); y++) {
-    std::array<std::array<int, 3>, 2> acarry{{}};
-
-    auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
-    auto* up_ptr = y > 0 ? &dest[-pitch] : &dest[0];
-    for (uint32 x = 0; x < static_cast<uint32>(mRaw->dim.x); x++) {
-      int c = x & 1;
-
-      std::array<int, 3>& carry = acarry[c];
-
-      bits.fill();
-      int i = 2 * (carry[2] < 3);
-      int nbits;
-      for (nbits = 2 + i; static_cast<ushort16>(carry[0]) >> (nbits + i);
-           nbits++)
-        ;
-
-      int b = bits.peekBitsNoFill(15);
-      int sign = (b >> 14) * -1;
-      int low = (b >> 12) & 3;
-      int high = bittable[b & 4095];
-
-      // Skip bytes used above or read bits
-      if (high == 12) {
-        bits.skipBitsNoFill(15);
-        high = bits.getBits(16 - nbits) >> 1;
-      } else
-        bits.skipBitsNoFill(high + 1 + 3);
-
-      carry[0] = (high << nbits) | bits.getBits(nbits);
-      int diff = (carry[0] ^ sign) + carry[1];
-      carry[1] = (diff * 3 + carry[1]) >> 5;
-      carry[2] = carry[0] > 16 ? 0 : carry[2] + 1;
-
-      auto getLeft = [dest]() { return dest[-2]; };
-      auto getUp = [up_ptr]() { return up_ptr[0]; };
-      auto getLeftUp = [up_ptr]() { return up_ptr[-2]; };
-
-      int pred;
-      if (y < 2 && x < 2)
-        pred = 0;
-      else if (y < 2)
-        pred = getLeft();
-      else if (x < 2)
-        pred = getUp();
-      else {
-        int left = getLeft();
-        int up = getUp();
-        int leftUp = getLeftUp();
-
-        int leftMinusNw = left - leftUp;
-        int upMinusNw = up - leftUp;
-
-        // Check if sign is different, and they are both not zero
-        if ((SignBit(leftMinusNw) ^ SignBit(upMinusNw)) &&
-            (leftMinusNw != 0 && upMinusNw != 0)) {
-          if (std::abs(leftMinusNw) > 32 || std::abs(upMinusNw) > 32)
-            pred = left + upMinusNw;
-          else
-            pred = (left + up) >> 1;
-        } else
-          pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left : up;
-      }
-
-      *dest = pred + ((diff * 4) | low);
-      dest++;
-      up_ptr++;
-    }
-  }
+  for (uint32 y = 0; y < static_cast<uint32>(mRaw->dim.y); y++)
+    decompressRow(&bits, y);
 }
 
 } // namespace rawspeed

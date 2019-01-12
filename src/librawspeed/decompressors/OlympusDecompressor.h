@@ -23,6 +23,7 @@
 #include "common/RawImage.h"                    // for RawImage
 #include "common/SimpleLUT.h"                   // for SimpleLUT
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include "io/BitPumpMSB.h"                      // for BitPumpMSB
 
 namespace rawspeed {
 
@@ -40,6 +41,8 @@ class OlympusDecompressor final : public AbstractDecompressor {
         break;
     return std::min(12, high);
   }};
+
+  void decompressRow(BitPumpMSB* bits, int row) const;
 
 public:
   explicit OlympusDecompressor(const RawImage& img);
