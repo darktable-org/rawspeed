@@ -75,7 +75,6 @@ void OlympusDecompressor::decompress(ByteStream input) const {
   assert(mRaw->dim.x > 0);
   assert(mRaw->dim.x % 2 == 0);
 
-  uchar8* data = mRaw->getData();
   int pitch = mRaw->pitch;
 
   /* Build a table to quickly look up "high" value */
@@ -96,7 +95,7 @@ void OlympusDecompressor::decompress(ByteStream input) const {
   for (uint32 y = 0; y < static_cast<uint32>(mRaw->dim.y); y++) {
     std::array<std::array<int, 3>, 2> acarry{{}};
 
-    auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
+    auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
     auto* up_ptr = y > 0 ? &dest[-pitch] : &dest[0];
     for (uint32 x = 0; x < static_cast<uint32>(mRaw->dim.x); x++) {
       int c = x & 1;
