@@ -103,7 +103,7 @@ void OlympusDecompressor::decompressRow(BitPumpMSB* bits, int row) const {
     } else
       bits->skipBitsNoFill(high + 1 + 3);
 
-    carry[0] = (high << nbits) | bits->getBits(nbits);
+    carry[0] = (high << nbits) | bits->getBitsNoFill(nbits);
     int diff = (carry[0] ^ sign) + carry[1];
     carry[1] = (diff * 3 + carry[1]) >> 5;
     carry[2] = carry[0] > 16 ? 0 : carry[2] + 1;
