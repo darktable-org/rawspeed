@@ -3,7 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014-2015 Pedro Côrte-Real
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2017-2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -32,7 +32,6 @@
 #include <cassert>                        // for assert
 #include <cmath>                          // for abs
 #include <cstdlib>                        // for abs
-#include <memory>                         // for unique_ptr
 #include <type_traits>                    // for enable_if_t, is_integral
 
 namespace {
@@ -43,7 +42,7 @@ namespace {
 // in a horrible code. So let's just provide our own signbit(). It compiles to
 // the exact same code as the std::signbit(int).
 template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-constexpr __attribute__((const)) bool SignBit(T x) {
+inline constexpr __attribute__((const)) bool SignBit(T x) {
   return x < 0;
 }
 
@@ -70,173 +69,106 @@ OlympusDecompressor::OlympusDecompressor(const RawImage& img) : mRaw(img) {
  * is based on the output of all previous pixel (bar the first four)
  */
 
+inline __attribute__((always_inline)) int
+OlympusDecompressor::parseCarry(BitPumpMSB* bits,
+                                std::array<int, 3>* carry) const {
+  bits->fill();
+  int i = 2 * ((*carry)[2] < 3);
+  int nbits;
+  for (nbits = 2 + i; static_cast<ushort16>((*carry)[0]) >> (nbits + i);
+       nbits++)
+    ;
+
+  int b = bits->peekBitsNoFill(15);
+  int sign = (b >> 14) * -1;
+  int low = (b >> 12) & 3;
+  int high = bittable[b & 4095];
+
+  // Skip bytes used above or read bits
+  if (high == 12) {
+    bits->skipBitsNoFill(15);
+    high = bits->getBitsNoFill(16 - nbits) >> 1;
+  } else
+    bits->skipBitsNoFill(high + 1 + 3);
+
+  (*carry)[0] = (high << nbits) | bits->getBitsNoFill(nbits);
+  int diff = ((*carry)[0] ^ sign) + (*carry)[1];
+  (*carry)[1] = (diff * 3 + (*carry)[1]) >> 5;
+  (*carry)[2] = (*carry)[0] > 16 ? 0 : (*carry)[2] + 1;
+
+  return (diff * 4) | low;
+}
+
+inline int OlympusDecompressor::getPred(int row, int x, ushort16* dest,
+                                        const ushort16* up_ptr) const {
+  auto getLeft = [dest]() { return dest[-2]; };
+  auto getUp = [up_ptr]() { return up_ptr[0]; };
+  auto getLeftUp = [up_ptr]() { return up_ptr[-2]; };
+
+  int pred;
+  if (row < 2 && x < 2)
+    pred = 0;
+  else if (row < 2)
+    pred = getLeft();
+  else if (x < 2)
+    pred = getUp();
+  else {
+    int left = getLeft();
+    int up = getUp();
+    int leftUp = getLeftUp();
+
+    int leftMinusNw = left - leftUp;
+    int upMinusNw = up - leftUp;
+
+    // Check if sign is different, and they are both not zero
+    if ((SignBit(leftMinusNw) ^ SignBit(upMinusNw)) &&
+        (leftMinusNw != 0 && upMinusNw != 0)) {
+      if (std::abs(leftMinusNw) > 32 || std::abs(upMinusNw) > 32)
+        pred = left + upMinusNw;
+      else
+        pred = (left + up) >> 1;
+    } else
+      pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left : up;
+  }
+
+  return pred;
+}
+
+void OlympusDecompressor::decompressRow(BitPumpMSB* bits, int row) const {
+  assert(mRaw->dim.y > 0);
+  assert(mRaw->dim.x > 0);
+  assert(mRaw->dim.x % 2 == 0);
+
+  int pitch = mRaw->pitch;
+
+  std::array<std::array<int, 3>, 2> acarry{{}};
+
+  auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, row));
+  const auto* up_ptr = row > 0 ? &dest[-pitch] : &dest[0];
+  for (int x = 0; x < mRaw->dim.x; x++) {
+    int c = x & 1;
+
+    std::array<int, 3>& carry = acarry[c];
+
+    int diff = parseCarry(bits, &carry);
+    int pred = getPred(row, x, dest, up_ptr);
+
+    *dest = pred + diff;
+    dest++;
+    up_ptr++;
+  }
+}
+
 void OlympusDecompressor::decompress(ByteStream input) const {
   assert(mRaw->dim.y > 0);
   assert(mRaw->dim.x > 0);
   assert(mRaw->dim.x % 2 == 0);
 
-  int nbits;
-  int sign;
-  int low;
-  int high;
-  int i;
-  std::array<int, 2> left{{}};
-  std::array<int, 2> nw{{}};
-  int pred;
-  int diff;
-
-  uchar8* data = mRaw->getData();
-  int pitch = mRaw->pitch;
-
-  /* Build a table to quickly look up "high" value */
-  std::unique_ptr<char[]> bittable(new char[4096]); // NOLINT
-
-  for (i = 0; i < 4096; i++) {
-    int b = i;
-    for (high = 0; high < 12; high++)
-      if ((b >> (11 - high)) & 1)
-        break;
-    bittable[i] = std::min(12, high);
-  }
-
   input.skipBytes(7);
   BitPumpMSB bits(input);
 
-  for (uint32 y = 0; y < static_cast<uint32>(mRaw->dim.y); y++) {
-    std::array<std::array<int, 3>, 2> acarry{{}};
-
-    auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
-    bool y_border = y < 2;
-    bool border = true;
-    for (uint32 x = 0; x < static_cast<uint32>(mRaw->dim.x); x++) {
-      int c = 0;
-
-      bits.fill();
-      i = 2 * (acarry[c][2] < 3);
-      for (nbits = 2 + i; static_cast<ushort16>(acarry[c][0]) >> (nbits + i);
-           nbits++)
-        ;
-
-      int b = bits.peekBitsNoFill(15);
-      sign = (b >> 14) * -1;
-      low = (b >> 12) & 3;
-      high = bittable[b & 4095];
-
-      // Skip bytes used above or read bits
-      if (high == 12) {
-        bits.skipBitsNoFill(15);
-        high = bits.getBits(16 - nbits) >> 1;
-      } else
-        bits.skipBitsNoFill(high + 1 + 3);
-
-      acarry[c][0] = (high << nbits) | bits.getBits(nbits);
-      diff = (acarry[c][0] ^ sign) + acarry[c][1];
-      acarry[c][1] = (diff * 3 + acarry[c][1]) >> 5;
-      acarry[c][2] = acarry[c][0] > 16 ? 0 : acarry[c][2] + 1;
-
-      if (border) {
-        if (y_border && x < 2)
-          pred = 0;
-        else {
-          if (y_border)
-            pred = left[c];
-          else {
-            pred = dest[-pitch + (static_cast<int>(x))];
-            nw[c] = pred;
-          }
-        }
-        // Set predictor
-        left[c] = pred + ((diff * 4) | low);
-        // Set the pixel
-        dest[x] = left[c];
-      } else {
-        // Have local variables for values used several tiles
-        // (having a "ushort16 *dst_up" that caches dest[-pitch+((int)x)] is
-        // actually slower, probably stack spill or aliasing)
-        int up = dest[-pitch + (static_cast<int>(x))];
-        int leftMinusNw = left[c] - nw[c];
-        int upMinusNw = up - nw[c];
-        // Check if sign is different, and they are both not zero
-        if ((SignBit(leftMinusNw) ^ SignBit(upMinusNw)) &&
-            (leftMinusNw != 0 && upMinusNw != 0)) {
-          if (std::abs(leftMinusNw) > 32 || std::abs(upMinusNw) > 32)
-            pred = left[c] + upMinusNw;
-          else
-            pred = (left[c] + up) >> 1;
-        } else
-          pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left[c] : up;
-
-        // Set predictors
-        left[c] = pred + ((diff * 4) | low);
-        nw[c] = up;
-        // Set the pixel
-        dest[x] = left[c];
-      }
-
-      // ODD PIXELS
-      x += 1;
-      c = 1;
-      bits.fill();
-      i = 2 * (acarry[c][2] < 3);
-      for (nbits = 2 + i; static_cast<ushort16>(acarry[c][0]) >> (nbits + i);
-           nbits++)
-        ;
-      b = bits.peekBitsNoFill(15);
-      sign = (b >> 14) * -1;
-      low = (b >> 12) & 3;
-      high = bittable[b & 4095];
-
-      // Skip bytes used above or read bits
-      if (high == 12) {
-        bits.skipBitsNoFill(15);
-        high = bits.getBits(16 - nbits) >> 1;
-      } else
-        bits.skipBitsNoFill(high + 1 + 3);
-
-      acarry[c][0] = (high << nbits) | bits.getBits(nbits);
-      diff = (acarry[c][0] ^ sign) + acarry[c][1];
-      acarry[c][1] = (diff * 3 + acarry[c][1]) >> 5;
-      acarry[c][2] = acarry[c][0] > 16 ? 0 : acarry[c][2] + 1;
-
-      if (border) {
-        if (y_border && x < 2)
-          pred = 0;
-        else {
-          if (y_border)
-            pred = left[c];
-          else {
-            pred = dest[-pitch + (static_cast<int>(x))];
-            nw[c] = pred;
-          }
-        }
-        // Set predictor
-        left[c] = pred + ((diff * 4) | low);
-        // Set the pixel
-        dest[x] = left[c];
-      } else {
-        int up = dest[-pitch + (static_cast<int>(x))];
-        int leftMinusNw = left[c] - nw[c];
-        int upMinusNw = up - nw[c];
-
-        // Check if sign is different, and they are both not zero
-        if ((SignBit(leftMinusNw) ^ SignBit(upMinusNw)) &&
-            (leftMinusNw != 0 && upMinusNw != 0)) {
-          if (std::abs(leftMinusNw) > 32 || std::abs(upMinusNw) > 32)
-            pred = left[c] + upMinusNw;
-          else
-            pred = (left[c] + up) >> 1;
-        } else
-          pred = std::abs(leftMinusNw) > std::abs(upMinusNw) ? left[c] : up;
-
-        // Set predictors
-        left[c] = pred + ((diff * 4) | low);
-        nw[c] = up;
-        // Set the pixel
-        dest[x] = left[c];
-      }
-      border = y_border;
-    }
-  }
+  for (int y = 0; y < mRaw->dim.y; y++)
+    decompressRow(&bits, y);
 }
 
 } // namespace rawspeed
