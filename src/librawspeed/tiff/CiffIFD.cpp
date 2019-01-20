@@ -211,7 +211,8 @@ const CiffEntry* CiffIFD::getEntryRecursiveIf(CiffTag tag,
 
 vector<const CiffIFD*> CiffIFD::getIFDsWithTag(CiffTag tag) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
-  return getIFDsWithTagIf(tag, [](const CiffEntry*) { return true; });
+  return getIFDsWithTagIf(tag,
+                          [](const CiffEntry* /*unused*/) { return true; });
 }
 
 vector<const CiffIFD*> CiffIFD::getIFDsWithTagWhere(CiffTag tag,
@@ -262,7 +263,8 @@ const CiffEntry* CiffIFD::getEntry(CiffTag tag) const {
 
 const CiffEntry* CiffIFD::getEntryRecursive(CiffTag tag) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
-  return getEntryRecursiveIf(tag, [](const CiffEntry*) { return true; });
+  return getEntryRecursiveIf(tag,
+                             [](const CiffEntry* /*unused*/) { return true; });
 }
 
 const CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag,
