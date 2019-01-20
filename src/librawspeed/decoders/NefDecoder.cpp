@@ -263,7 +263,9 @@ void NefDecoder::DecodeUncompressed() {
         readCoolpixSplitRaw(in, size, pos, width * bitPerPixel / 8);
       else {
         UncompressedDecompressor u(in, mRaw);
-        u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, bitPerPixel,
+        assert(in.getSize() % size.y == 0);
+        const auto inputPitchBytes = in.getSize() / size.y;
+        u.readUncompressedRaw(size, pos, inputPitchBytes, bitPerPixel,
                               bitorder ? BitOrder_MSB : BitOrder_LSB);
       }
     }
