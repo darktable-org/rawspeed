@@ -103,7 +103,7 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
 }
 
 void PanasonicDecompressorV5::chopInputIntoBlocks(const PacketDsc& dsc) {
-  auto pixelToCoordinate = [width = mRaw->dim.x](unsigned pixel) -> iPoint2D {
+  auto pixelToCoordinate = [width = mRaw->dim.x](unsigned pixel) {
     return iPoint2D(pixel % width, pixel / width);
   };
 
