@@ -3,7 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014 Pedro Côrte-Real
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2017-2019 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -38,15 +38,15 @@ using std::min;
 
 namespace rawspeed {
 
-void UncompressedDecompressor::sanityCheck(const uint32* h, int bpl) {
+void UncompressedDecompressor::sanityCheck(const uint32* h, int bytesPerLine) {
   assert(h != nullptr);
   assert(*h > 0);
-  assert(bpl > 0);
+  assert(bytesPerLine > 0);
   assert(input.getSize() > 0);
 
   // How many multiples of bpl are there in the input buffer?
   // The remainder is ignored/discarded.
-  const auto fullRows = input.getRemainSize() / bpl;
+  const auto fullRows = input.getRemainSize() / bytesPerLine;
 
   // If more than the output height, we are all good.
   if (fullRows >= *h)
@@ -92,10 +92,10 @@ int UncompressedDecompressor::bytesPerLine(int w, bool skips) {
 
 void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
                                                    const iPoint2D& offset,
-                                                   int inputPitch,
+                                                   int inputPitchBytes,
                                                    int bitPerPixel,
                                                    BitOrder order) {
-  assert(inputPitch > 0);
+  assert(inputPitchBytes > 0);
   assert(bitPerPixel > 0);
 
   uchar8* data = mRaw->getData();
@@ -106,7 +106,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
   uint64 ox = offset.x;
   uint64 oy = offset.y;
 
-  sanityCheck(&h, inputPitch);
+  sanityCheck(&h, inputPitchBytes);
 
   if (bitPerPixel > 16 && mRaw->getDataType() == TYPE_USHORT16)
     ThrowRDE("Unsupported bit depth");
@@ -122,7 +122,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
 
   const int outPixelBytes = outPixelBits / 8;
 
-  uint32 skipBits = inputPitch - outPixelBytes; // Skip per line
+  uint32 skipBytes = inputPitchBytes - outPixelBytes; // Skip per line
   if (oy > static_cast<uint64>(mRaw->dim.y))
     ThrowRDE("Invalid y offset");
   if (ox + size.x > static_cast<uint64>(mRaw->dim.x))
@@ -135,7 +135,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
     if (bitPerPixel != 32)
       ThrowRDE("Only 32 bit float point supported");
     copyPixels(&data[offset.x * sizeof(float) * cpp + y * outPitch], outPitch,
-               input.getData(inputPitch * (h - y)), inputPitch,
+               input.getData(inputPitchBytes * (h - y)), inputPitchBytes,
                w * mRaw->getBpp(), h - y);
     return;
   }
@@ -150,7 +150,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
       }
-      bits.skipBits(skipBits);
+      bits.skipBits(skipBytes); // FIXME: clearly wrong
     }
   } else if (BitOrder_MSB16 == order) {
     BitPumpMSB16 bits(input);
@@ -162,7 +162,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
       }
-      bits.skipBits(skipBits);
+      bits.skipBits(skipBytes); // FIXME: clearly wrong
     }
   } else if (BitOrder_MSB32 == order) {
     BitPumpMSB32 bits(input);
@@ -174,16 +174,16 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
       }
-      bits.skipBits(skipBits);
+      bits.skipBits(skipBytes); // FIXME: clearly wrong
     }
   } else {
     if (bitPerPixel == 16 && getHostEndianness() == Endianness::little) {
       copyPixels(&data[offset.x * sizeof(ushort16) * cpp + y * outPitch],
-                 outPitch, input.getData(inputPitch * (h - y)), inputPitch,
-                 w * mRaw->getBpp(), h - y);
+                 outPitch, input.getData(inputPitchBytes * (h - y)),
+                 inputPitchBytes, w * mRaw->getBpp(), h - y);
       return;
     }
-    if (bitPerPixel == 12 && static_cast<int>(w) == inputPitch * 8 / 12 &&
+    if (bitPerPixel == 12 && static_cast<int>(w) == inputPitchBytes * 8 / 12 &&
         getHostEndianness() == Endianness::little) {
       decode12BitRaw<Endianness::little>(w, h);
       return;
@@ -197,7 +197,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
       }
-      bits.skipBits(skipBits);
+      bits.skipBits(skipBytes); // FIXME: clearly wrong
     }
   }
 }
