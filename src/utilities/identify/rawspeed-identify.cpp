@@ -105,7 +105,7 @@ std::string find_cameras_xml(const char *argv0) {
 #ifndef __APPLE__
     fprintf(stderr, "ERROR: Couldn't find cameras.xml in '%s'\n",
             found_camfile.c_str());
-    return nullptr;
+    return std::string();
 #else
     fprintf(stderr, "WARNING: Couldn't find cameras.xml in '%s'\n",
             found_camfile.c_str());
@@ -114,7 +114,7 @@ std::string find_cameras_xml(const char *argv0) {
     if (stat(found_camfile.c_str(), &statbuf)) {
       fprintf(stderr, "ERROR: Couldn't find cameras.xml in '%s'\n",
               found_camfile.c_str());
-      return nullptr;
+      return std::string();
     }
 #endif
   }
