@@ -150,7 +150,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
       }
-      bits.skipBits(skipBytes); // FIXME: clearly wrong
+      bits.skipBytes(skipBytes);
     }
   } else if (BitOrder_MSB16 == order) {
     BitPumpMSB16 bits(input);
@@ -162,7 +162,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
       }
-      bits.skipBits(skipBytes); // FIXME: clearly wrong
+      bits.skipBytes(skipBytes);
     }
   } else if (BitOrder_MSB32 == order) {
     BitPumpMSB32 bits(input);
@@ -174,7 +174,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
       }
-      bits.skipBits(skipBytes); // FIXME: clearly wrong
+      bits.skipBytes(skipBytes);
     }
   } else {
     if (bitPerPixel == 16 && getHostEndianness() == Endianness::little) {
@@ -197,7 +197,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
       }
-      bits.skipBits(skipBytes); // FIXME: clearly wrong
+      bits.skipBytes(skipBytes);
     }
   }
 }
