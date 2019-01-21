@@ -147,17 +147,40 @@ bool NefDecoder::D100IsCompressed(uint32 offset) {
    as if they were compressed. For those cases we set uncompressed mode
    by figuring out that the image is the size of uncompressed packing */
 bool NefDecoder::NEFIsUncompressed(const TiffIFD* raw) {
-  TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
+  TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
   uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
 
-  const uint64 bitCount = uint64(8) * counts->getU32(0);
-  if (!bitPerPixel || bitCount % bitPerPixel != 0)
+  if (!bitPerPixel)
     return false;
 
-  const auto pixelCount = bitCount / bitPerPixel;
-  return pixelCount == iPoint2D(width, height).area();
+  const auto avaliableInputBytes = counts->getU32(0);
+  const auto requiredPixels = iPoint2D(width, height).area();
+
+  // Now, there can be three situations.
+
+  // We might have not enough input to produce the requested image size.
+  const uint64 avaliableInputBits = uint64(8) * avaliableInputBytes;
+  const auto avaliablePixels = avaliableInputBits / bitPerPixel; // round down!
+  if (avaliablePixels < requiredPixels)
+    return false;
+
+  // We might have exactly enough input with no padding whatsoever.
+  if (avaliablePixels == requiredPixels)
+    return true;
+
+  // Or, we might have too much input. And sadly this is the worst case.
+  // We can't just accept this. Some *compressed* NEF's also pass this check :(
+  // Thus, let's accept *some* *small* padding.
+  const auto requiredInputBits = bitPerPixel * requiredPixels;
+  const auto requiredInputBytes = roundUpDivision(requiredInputBits, 8);
+  assert(avaliableInputBytes > requiredInputBytes);
+  const auto totalPadding = avaliableInputBytes - requiredInputBytes;
+  if (totalPadding % height != 0)
+    return false; // Inconsistent padding makes no sense here.
+  const auto perRowPadding = totalPadding / height;
+  return perRowPadding < 16;
 }
 
 /* At least the D810 has a broken firmware that tags uncompressed images
