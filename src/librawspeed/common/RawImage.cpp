@@ -398,7 +398,9 @@ void RawImageData::startWorker(const RawImageWorker::RawImageWorkerTask task,
   const int y_per_thread = (height + threads - 1) / threads;
 
 #ifdef HAVE_OPENMP
-#pragma omp parallel for default(none) num_threads(threads) schedule(static)
+#pragma omp parallel for default(none)                                         \
+    firstprivate(threads, y_per_thread, height, task) num_threads(threads)     \
+        schedule(static)
 #endif
   for (int i = 0; i < threads; i++) {
     int y_offset = std::min(i * y_per_thread, height);
