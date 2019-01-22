@@ -22,7 +22,19 @@ endif()
 unset(HAVE_OPENMP)
 if(WITH_OPENMP)
   message(STATUS "Looking for OpenMP")
-  find_package(OpenMP)
+
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
+     CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    # Clang has an option to specify the OpenMP standard to use. Specify it.
+    set(OPENMP_VERSION_SPECIFIER "-fopenmp-version=40")
+  endif()
+
+  set(CMAKE_CXX_FLAGS_SAVE "${CMAKE_CXX_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPENMP_VERSION_SPECIFIER}")
+
+  find_package(OpenMP 4.0)
+
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_SAVE}")
 
   if(NOT OPENMP_FOUND)
     message(SEND_ERROR "Did not find OpenMP! Either make it find OpenMP, "
@@ -44,6 +56,7 @@ if(WITH_OPENMP)
 
   if(NOT USE_BUNDLED_LLVMOPENMP)
     target_link_libraries(rawspeed PUBLIC OpenMP::OpenMP_CXX)
+    target_compile_options(rawspeed PUBLIC ${OPENMP_VERSION_SPECIFIER})
   else()
     include(LLVMOpenMP)
 
@@ -51,6 +64,7 @@ if(WITH_OPENMP)
 
     add_dependencies(dependencies omp)
     target_compile_options(rawspeed PUBLIC $<TARGET_PROPERTY:OpenMP::OpenMP_CXX,INTERFACE_COMPILE_OPTIONS>) # compile time only!
+    target_compile_options(rawspeed PUBLIC ${OPENMP_VERSION_SPECIFIER})
     target_link_libraries(rawspeed PUBLIC omp) # newly built runtime library
   endif()
 
