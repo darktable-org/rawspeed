@@ -9,7 +9,10 @@ target_compile_definitions(${rsidentify}
 )
 
 target_link_libraries(${rsidentify} rawspeed)
-target_link_libraries(${rsidentify} RawSpeed::OpenMP_CXX)
+
+if(TARGET RawSpeed::OpenMP_CXX)
+  target_link_libraries(${rsidentify} RawSpeed::OpenMP_CXX)
+endif()
 
 if(BUILD_TESTING)
   add_test(NAME utilities/${rsidentify} COMMAND ${rsidentify})
