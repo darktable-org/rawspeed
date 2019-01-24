@@ -183,7 +183,7 @@ if (WITH_ZLIB)
       set_property(TARGET ZLIB::ZLIB PROPERTY INTERFACE_LINK_LIBRARIES "${ZLIB_LIBRARIES}")
     endif()
 
-    target_link_libraries(rawspeed PUBLIC ZLIB::ZLIB)
+    target_link_libraries(rawspeed PRIVATE ZLIB::ZLIB)
     set_package_properties(ZLIB PROPERTIES
                            TYPE RECOMMENDED
                            DESCRIPTION "software library used for data compression"
