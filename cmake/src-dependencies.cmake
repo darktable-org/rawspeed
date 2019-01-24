@@ -112,7 +112,7 @@ if(WITH_PUGIXML)
       set_property(TARGET Pugixml::Pugixml PROPERTY INTERFACE_LINK_LIBRARIES "${Pugixml_LIBRARIES}")
     endif()
 
-    target_link_libraries(rawspeed PUBLIC Pugixml::Pugixml)
+    target_link_libraries(rawspeed PRIVATE Pugixml::Pugixml)
     set_package_properties(Pugixml PROPERTIES
                            TYPE REQUIRED
                            URL http://pugixml.org/
