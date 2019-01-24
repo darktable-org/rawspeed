@@ -4,6 +4,7 @@ endif()
 
 add_executable(rstest rstest.cpp md5.cpp)
 target_link_libraries(rstest rawspeed)
+target_link_libraries(rstest RawSpeed::OpenMP_CXX)
 
 if(BUILD_TESTING)
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-suggest-attribute=const)

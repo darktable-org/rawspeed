@@ -57,19 +57,24 @@ if(WITH_OPENMP)
     endif()
   endif()
 
+  # The wrapper library that *actually* should be linked to.
+  add_library(RawSpeed::OpenMP_CXX INTERFACE IMPORTED)
+  set_property(TARGET RawSpeed::OpenMP_CXX        PROPERTY INTERFACE_COMPILE_OPTIONS $<TARGET_PROPERTY:OpenMP::OpenMP_CXX,INTERFACE_COMPILE_OPTIONS>)
+  set_property(TARGET RawSpeed::OpenMP_CXX APPEND PROPERTY INTERFACE_COMPILE_OPTIONS ${OPENMP_VERSION_SPECIFIER})
   if(NOT USE_BUNDLED_LLVMOPENMP)
-    target_link_libraries(rawspeed PUBLIC OpenMP::OpenMP_CXX)
-    target_compile_options(rawspeed PUBLIC ${OPENMP_VERSION_SPECIFIER})
+    set_property(TARGET RawSpeed::OpenMP_CXX      PROPERTY INTERFACE_LINK_LIBRARIES  $<TARGET_PROPERTY:OpenMP::OpenMP_CXX,INTERFACE_LINK_LIBRARIES>)
   else()
     include(LLVMOpenMP)
 
     message(STATUS "Looking for OpenMP - found 'in-tree' runtime library")
 
+    add_dependencies(RawSpeed::OpenMP_CXX omp)
     add_dependencies(dependencies omp)
-    target_compile_options(rawspeed PUBLIC $<TARGET_PROPERTY:OpenMP::OpenMP_CXX,INTERFACE_COMPILE_OPTIONS>) # compile time only!
-    target_compile_options(rawspeed PUBLIC ${OPENMP_VERSION_SPECIFIER})
-    target_link_libraries(rawspeed PUBLIC omp) # newly built runtime library
+
+    set_property(TARGET RawSpeed::OpenMP_CXX PROPERTY INTERFACE_LINK_LIBRARIES omp)
   endif()
+
+  target_link_libraries(rawspeed PRIVATE RawSpeed::OpenMP_CXX)
 
   set(HAVE_OPENMP 1)
 

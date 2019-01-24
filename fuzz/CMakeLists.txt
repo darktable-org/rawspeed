@@ -29,6 +29,8 @@ if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_BUILD_TYPE STREQUAL "FU
     "${CMAKE_CURRENT_SOURCE_DIR}/libFuzzer_dummy_main.cpp"
   )
 
+  target_link_libraries(rawspeed_fuzz PRIVATE RawSpeed::OpenMP_CXX)
+
   macro(add_fuzz_target fuzzer)
     add_fuzz_target__base(${fuzzer})
   endmacro()
