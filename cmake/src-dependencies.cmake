@@ -140,7 +140,7 @@ if(WITH_JPEG)
       set_property(TARGET JPEG::JPEG PROPERTY INTERFACE_LINK_LIBRARIES "${JPEG_LIBRARIES}")
     endif()
 
-    target_link_libraries(rawspeed PUBLIC JPEG::JPEG)
+    target_link_libraries(rawspeed PRIVATE JPEG::JPEG)
     set_package_properties(JPEG PROPERTIES
                            TYPE RECOMMENDED
                            DESCRIPTION "free library for handling the JPEG image data format, implements a JPEG codec"
