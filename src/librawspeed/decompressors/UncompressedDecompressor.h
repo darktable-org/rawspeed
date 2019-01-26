@@ -3,7 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014 Pedro Côrte-Real
-    Copyright (C) 2016-2017 Roman Lebedev
+    Copyright (C) 2016-2019 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -39,7 +39,7 @@ class UncompressedDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
 
   // check buffer size, throw, or compute minimal height that can be decoded
-  void sanityCheck(const uint32* h, int bpl);
+  void sanityCheck(const uint32* h, int bytesPerLine);
 
   // check buffer size, throw, or compute minimal height that can be decoded
   void sanityCheck(uint32 w, const uint32* h, int bpp);
@@ -70,7 +70,8 @@ public:
   /* bitPerPixel: Number of bits to read for each input pixel. */
   /* order: Order of the bits - see Common.h for possibilities. */
   void readUncompressedRaw(const iPoint2D& size, const iPoint2D& offset,
-                           int inputPitch, int bitPerPixel, BitOrder order);
+                           int inputPitchBytes, int bitPerPixel,
+                           BitOrder order);
 
   /* Faster versions for unpacking 8 bit data */
   template <bool uncorrectedRawValues> void decode8BitRaw(uint32 w, uint32 h);

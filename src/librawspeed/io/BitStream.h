@@ -3,7 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2017 Axel Waggershauser
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2017-2019 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -211,6 +211,21 @@ public:
     if (nbits > cache.fillLevel)
       ThrowIOE("skipBits overflow");
     cache.skip(nbits);
+  }
+
+  // This may be used to skip arbitrarily large number of *bytes*,
+  // not limited by the fill level.
+  inline void skipBytes(uint32 nbytes) {
+    uint32 remainingBitsToSkip = 8 * nbytes;
+    for (; remainingBitsToSkip >= Cache::MaxGetBits;
+         remainingBitsToSkip -= Cache::MaxGetBits) {
+      fill(Cache::MaxGetBits);
+      skipBitsNoFill(Cache::MaxGetBits);
+    }
+    if (remainingBitsToSkip > 0) {
+      fill(remainingBitsToSkip);
+      skipBitsNoFill(remainingBitsToSkip);
+    }
   }
 };
 
