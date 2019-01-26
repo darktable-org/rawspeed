@@ -48,6 +48,31 @@ bool KdcDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   return make == "EASTMAN KODAK COMPANY";
 }
 
+Buffer KdcDecoder::getInputBuffer() {
+  TiffEntry* offset = mRootIFD->getEntryRecursive(KODAK_KDC_OFFSET);
+  if (!offset || offset->count < 13)
+    ThrowRDE("Couldn't find the KDC offset");
+
+  assert(offset != nullptr);
+  uint64 off = uint64(offset->getU32(4)) + uint64(offset->getU32(12));
+  if (off > std::numeric_limits<uint32>::max())
+    ThrowRDE("Offset is too large.");
+
+  // Offset hardcoding gotten from dcraw
+  if (hints.has("easyshare_offset_hack"))
+    off = off < 0x15000 ? 0x15000 : 0x17000;
+
+  if (off > mFile->getSize())
+    ThrowRDE("offset is out of bounds");
+
+  const auto area = mRaw->dim.area();
+  const auto bits = 12 * area;
+  assert(bits % 8 == 0);
+  const auto bytes = bits / 8;
+
+  return mFile->getSubView(off, bytes);
+}
+
 RawImage KdcDecoder::decodeRawInternal() {
   if (!mRootIFD->hasEntryRecursive(COMPRESSION))
     ThrowRDE("Couldn't find compression setting");
@@ -76,26 +101,13 @@ RawImage KdcDecoder::decodeRawInternal() {
   } else
     ThrowRDE("Unable to retrieve image size");
 
-  TiffEntry *offset = mRootIFD->getEntryRecursive(KODAK_KDC_OFFSET);
-  if (!offset || offset->count < 13)
-    ThrowRDE("Couldn't find the KDC offset");
-
-  assert(offset != nullptr);
-  uint64 off = uint64(offset->getU32(4)) + uint64(offset->getU32(12));
-  if (off > std::numeric_limits<uint32>::max())
-    ThrowRDE("Offset is too large.");
-
-  // Offset hardcoding gotten from dcraw
-  if (hints.has("easyshare_offset_hack"))
-    off = off < 0x15000 ? 0x15000 : 0x17000;
-
-  if (off > mFile->getSize())
-    ThrowRDE("offset is out of bounds");
-
   mRaw->dim = iPoint2D(width, height);
+
+  const Buffer inputBuffer = KdcDecoder::getInputBuffer();
+
   mRaw->createData();
 
-  UncompressedDecompressor u(*mFile, off, mRaw);
+  UncompressedDecompressor u(inputBuffer, mRaw);
 
   u.decode12BitRaw<Endianness::big>(width, height);
 

@@ -23,6 +23,7 @@
 
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
+#include "io/Buffer.h"                    // for Buffer
 #include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
 #include <utility>                        // for move
 
@@ -34,6 +35,8 @@ class CameraMetaData;
 
 class KdcDecoder final : public AbstractTiffDecoder
 {
+  Buffer getInputBuffer();
+
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                    const Buffer* file);
