@@ -67,7 +67,8 @@ Buffer KdcDecoder::getInputBuffer() {
 
   const auto area = mRaw->dim.area();
   const auto bits = 12 * area;
-  assert(bits % 8 == 0);
+  if (bits % 8 != 0)
+    ThrowRDE("Bad combination of image dims and bpp, bit count %% 8 != 0");
   const auto bytes = bits / 8;
 
   return mFile->getSubView(off, bytes);
