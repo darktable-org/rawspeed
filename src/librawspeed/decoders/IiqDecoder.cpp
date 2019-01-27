@@ -348,8 +348,7 @@ void IiqDecoder::correctSensorDefects(ByteStream data, uint32 len) {
   int32 slen = len;
   while ((slen -= 8) >= 0) {
     const ushort16 col = data.getU16();
-    // const ushort16 row = data.getU16();
-    data.getU16(); // Skip storing row, as it's unused currently.
+    const ushort16 row = data.getU16();
     const ushort16 type = data.getU16();
     data.getU16(); // Advance to the next defect tag.
 
@@ -360,7 +359,9 @@ void IiqDecoder::correctSensorDefects(ByteStream data, uint32 len) {
     case 137: // bad column
       correctBadColumn(col);
       break;
-    case 129: // bad pixel, not implemented yet.
+    case 129: // bad pixel
+      mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
+                                      ((uint32)row << 16) + col);
       break;
     default: // Oooh, a sensor defect not in dcraw!
       break;
