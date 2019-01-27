@@ -286,7 +286,8 @@ void NefDecoder::DecodeUncompressed() {
         readCoolpixSplitRaw(in, size, pos, width * bitPerPixel / 8);
       else {
         UncompressedDecompressor u(in, mRaw);
-        assert(in.getSize() % size.y == 0);
+        if (in.getSize() % size.y != 0)
+          ThrowRDE("Inconsistent row size");
         const auto inputPitchBytes = in.getSize() / size.y;
         u.readUncompressedRaw(size, pos, inputPitchBytes, bitPerPixel,
                               bitorder ? BitOrder_MSB : BitOrder_LSB);
