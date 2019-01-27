@@ -78,7 +78,7 @@ RawImage KdcDecoder::decodeRawInternal() {
   if (!mRootIFD->hasEntryRecursive(COMPRESSION))
     ThrowRDE("Couldn't find compression setting");
 
-  int compression = mRootIFD->getEntryRecursive(COMPRESSION)->getU32();
+  auto compression = mRootIFD->getEntryRecursive(COMPRESSION)->getU32();
   if (7 != compression)
     ThrowRDE("Unsupported compression %d", compression);
 
