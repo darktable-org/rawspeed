@@ -247,7 +247,7 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
         ThrowRDE("Second quadrant multipliers entry seen. Unexpected.");
       if (iiq.quadrantMultipliers)
         CorrectQuadrantMultipliersCombined(meta_data.getSubStream(offset, len),
-                                         split_row, split_col);
+                                           split_row, split_col);
       QuadrantMultipliersSeen = true;
       break;
     default:
@@ -345,8 +345,8 @@ void IiqDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 }
 
 void IiqDecoder::correctSensorDefects(ByteStream data, uint32 len) {
-  int32 slen = len ;
-  while((slen -= 8) >= 0) {
+  int32 slen = len;
+  while ((slen -= 8) >= 0) {
     const ushort16 col = data.getU16();
     // const ushort16 row = data.getU16();
     data.getU16(); // Skip storing row, as it's unused currently.
@@ -355,7 +355,7 @@ void IiqDecoder::correctSensorDefects(ByteStream data, uint32 len) {
 
     if (col >= mRaw->dim.x) // Value for col is outside the raw image.
       continue;
-    switch(type) {
+    switch (type) {
     case 131: // bad column
     case 137: // bad column
       correctBadColumn(col);
@@ -363,39 +363,42 @@ void IiqDecoder::correctSensorDefects(ByteStream data, uint32 len) {
       break;
     case 129: // bad pixel, not implemented yet.
       break;
-    default: //Oooh, a sensor defect not in dcraw! :D
+    default: // Oooh, a sensor defect not in dcraw! :D
       break;
     }
 
     // mRaw->dim.x == image width
     // mRaw->dim.y == image height
-
   }
 }
 
 void IiqDecoder::correctBadColumn(const ushort16 col) {
-  for ( int row = 0; row < mRaw->dim.y; row++){
-    if ( mRaw->cfa.getColorAt(row, col) == CFA_GREEN ) {
-      int max ;
-      ushort16 val[4], dev[4] ; 
-      uint32 sum = 0 ; 
-      sum += val[0] = *mRaw->getData(col-1, row-1);
-      sum += val[1] = *mRaw->getData(col-1, row+1);
-      sum += val[2] = *mRaw->getData(col+1, row-1);
-      sum += val[3] = *mRaw->getData(col+1, row+1);
-      for ( int i = 0 ; i < 4 ; i++ ){
-        dev[i] = abs((val[i] * 4) - sum) ;
-        if ( dev[max] < dev[i] )
-          max = i ;
+  for (int row = 0; row < mRaw->dim.y; row++) {
+    if (mRaw->cfa.getColorAt(row, col) == CFA_GREEN) {
+      int max;
+      ushort16 val[4], dev[4];
+      uint32 sum = 0;
+      sum += val[0] = *mRaw->getData(col - 1, row - 1);
+      sum += val[1] = *mRaw->getData(col - 1, row + 1);
+      sum += val[2] = *mRaw->getData(col + 1, row - 1);
+      sum += val[3] = *mRaw->getData(col + 1, row + 1);
+      for (int i = 0; i < 4; i++) {
+        dev[i] = abs((val[i] * 4) - sum);
+        if (dev[max] < dev[i])
+          max = i;
       }
-      *mRaw->getData(col,row) = (sum - val[max]) / 3.0 + 0.5 ;
-    }
-    else { // do non-green pixels
-      uint32 diags = *mRaw->getData(col-2, row+2) + *mRaw->getData(col-2, row-2) + *mRaw->getData(col+2, row+2) + *mRaw->getData(col+2, row-2);
-      uint32 horiz = *mRaw->getData(col-2, row) + *mRaw->getData(col+2, row);
+      *mRaw->getData(col, row) = (sum - val[max]) / 3.0 + 0.5;
+    } else { // do non-green pixels
+      uint32 diags =
+          *mRaw->getData(col - 2, row + 2) + *mRaw->getData(col - 2, row - 2) +
+          *mRaw->getData(col + 2, row + 2) + *mRaw->getData(col + 2, row - 2);
+      uint32 horiz =
+          *mRaw->getData(col - 2, row) + *mRaw->getData(col + 2, row);
 
-      // The type truncation should be safe as the value should not be possible to get outside the range of a ushort16, though the intermediates might be larger.
-      *mRaw->getData(col,row) = diags*0.0732233 + horiz*0.3535534 + 0.5 ;
+      // The type truncation should be safe as the value should not be possible
+      // to get outside the range of a ushort16, though the intermediates might
+      // be larger.
+      *mRaw->getData(col, row) = diags * 0.0732233 + horiz * 0.3535534 + 0.5;
     }
   }
 }
