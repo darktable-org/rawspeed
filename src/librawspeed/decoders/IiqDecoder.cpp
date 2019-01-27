@@ -359,16 +359,12 @@ void IiqDecoder::correctSensorDefects(ByteStream data, uint32 len) {
     case 131: // bad column
     case 137: // bad column
       correctBadColumn(col);
-      // Correct bad column.
       break;
     case 129: // bad pixel, not implemented yet.
       break;
-    default: // Oooh, a sensor defect not in dcraw! :D
+    default: // Oooh, a sensor defect not in dcraw!
       break;
     }
-
-    // mRaw->dim.x == image width
-    // mRaw->dim.y == image height
   }
 }
 
