@@ -261,7 +261,7 @@ int main(int argc, char* argv[]) { // NOLINT
 
     double sum = 0.0F;
 #ifdef HAVE_OPENMP
-#pragma omp parallel for default(none) firstprivate(dimUncropped, raw, bpp) schedule(static) reduction(+ : sum)
+#pragma omp parallel for default(none) OMPFIRSTPRIVATECLAUSE(dimUncropped, raw, bpp) schedule(static) reduction(+ : sum)
 #endif
     for (int y = 0; y < dimUncropped.y; ++y) {
       uchar8* const data = (*raw)->getDataUncropped(0, y);
@@ -277,7 +277,7 @@ int main(int argc, char* argv[]) { // NOLINT
       sum = 0.0F;
 
 #ifdef HAVE_OPENMP
-#pragma omp parallel for default(none) firstprivate(dimUncropped, raw, cpp) schedule(static) reduction(+ : sum)
+#pragma omp parallel for default(none) OMPFIRSTPRIVATECLAUSE(dimUncropped, raw, cpp) schedule(static) reduction(+ : sum)
 #endif
       for (int y = 0; y < dimUncropped.y; ++y) {
         auto* const data =
@@ -294,7 +294,7 @@ int main(int argc, char* argv[]) { // NOLINT
       sum = 0.0F;
 
 #ifdef HAVE_OPENMP
-#pragma omp parallel for default(none) firstprivate(dimUncropped, raw, cpp) schedule(static) reduction(+ : sum)
+#pragma omp parallel for default(none) OMPFIRSTPRIVATECLAUSE(dimUncropped, raw, cpp) schedule(static) reduction(+ : sum)
 #endif
       for (int y = 0; y < dimUncropped.y; ++y) {
         auto* const data =

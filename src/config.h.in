@@ -55,6 +55,19 @@
 // the CMAKE_SOURCE_DIR, because that would affect the reproducible builds.
 #endif
 
+#undef OPENMP_FIRSTPRIVATE_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES
+#ifdef HAVE_OPENMP
+#cmakedefine OPENMP_FIRSTPRIVATE_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES
+#ifdef OPENMP_FIRSTPRIVATE_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES
+// See https://bugs.llvm.org/show_bug.cgi?id=35873
+//     https://redmine.darktable.org/issues/12568
+#define OMPFIRSTPRIVATECLAUSE(...)
+#else
+#define OMPFIRSTPRIVATECLAUSE(...) firstprivate(__VA_ARGS__)
+#endif
+#undef OPENMP_FIRSTPRIVATE_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES
+#endif // HAVE_OPENMP
+
 // see http://clang.llvm.org/docs/LanguageExtensions.html
 #ifndef __has_feature      // Optional of course.
 #define __has_feature(x) 0 // Compatibility with non-clang compilers.
