@@ -106,8 +106,6 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
   uint64 ox = offset.x;
   uint64 oy = offset.y;
 
-  sanityCheck(&h, inputPitchBytes);
-
   if (bitPerPixel > 16 && mRaw->getDataType() == TYPE_USHORT16)
     ThrowRDE("Unsupported bit depth");
 
@@ -122,7 +120,17 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
 
   const int outPixelBytes = outPixelBits / 8;
 
+  // The input pitch might be larger than needed (i.e. have some padding),
+  // but it can *not* be smaller than needed.
+  if (inputPitchBytes < outPixelBytes)
+    ThrowRDE("Specified pitch is smaller than minimally-required pitch");
+
+  // Check the specified pitch, not the minimally-required pitch.
+  sanityCheck(&h, inputPitchBytes);
+
+  assert(inputPitchBytes >= outPixelBytes);
   uint32 skipBytes = inputPitchBytes - outPixelBytes; // Skip per line
+
   if (oy > static_cast<uint64>(mRaw->dim.y))
     ThrowRDE("Invalid y offset");
   if (ox + size.x > static_cast<uint64>(mRaw->dim.x))
