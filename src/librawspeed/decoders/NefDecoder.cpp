@@ -152,7 +152,7 @@ bool NefDecoder::NEFIsUncompressed(const TiffIFD* raw) {
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
   uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
 
-  if (!bitPerPixel)
+  if (!width || !height || !bitPerPixel)
     return false;
 
   const auto avaliableInputBytes = counts->getU32(0);
