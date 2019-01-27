@@ -64,7 +64,7 @@ bool NefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 
 RawImage NefDecoder::decodeRawInternal() {
   auto raw = mRootIFD->getIFDWithTag(CFAPATTERN);
-  int compression = raw->getEntry(COMPRESSION)->getU32();
+  auto compression = raw->getEntry(COMPRESSION)->getU32();
 
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
