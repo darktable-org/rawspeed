@@ -240,7 +240,7 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
 
     switch (tag) {
     case 0x400: // Sensor Defects
-      correctSensorDefects(meta_data.getSubStream(offset, len), len)
+      correctSensorDefects(meta_data.getSubStream(offset, len), len);
       break;
     case 0x431:
       if (QuadrantMultipliersSeen)
@@ -345,10 +345,12 @@ void IiqDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 }
 
 void IiqDecoder::correctSensorDefects(ByteStream data, uint32 len) {
-  while((len -= 8) >= 0) {
-    const uint16 col = data.getU16();
-    const uint16 row = data.getU16();
-    const uint16 type = data.getU16();
+  int32 slen = len ;
+  while((slen -= 8) >= 0) {
+    const ushort16 col = data.getU16();
+    // const ushort16 row = data.getU16();
+    data.getU16(); // Skip storing row, as it's unused currently.
+    const ushort16 type = data.getU16();
     data.getU16(); // Advance to the next defect tag.
 
     if (col >= mRaw->dim.x) // Value for col is outside the raw image.
@@ -356,6 +358,7 @@ void IiqDecoder::correctSensorDefects(ByteStream data, uint32 len) {
     switch(type) {
     case 131: // bad column
     case 137: // bad column
+      correctBadColumn(col);
       // Correct bad column.
       break;
     case 129: // bad pixel, not implemented yet.
@@ -370,7 +373,31 @@ void IiqDecoder::correctSensorDefects(ByteStream data, uint32 len) {
   }
 }
 
-void IiqDecoder::correctBadColumn() {
+void IiqDecoder::correctBadColumn(const ushort16 col) {
+  for ( int row = 0; row < mRaw->dim.y; row++){
+    if ( mRaw->cfa.getColorAt(row, col) == CFA_GREEN ) {
+      int max ;
+      ushort16 val[4], dev[4] ; 
+      uint32 sum = 0 ; 
+      sum += val[0] = *mRaw->getData(col-1, row-1);
+      sum += val[1] = *mRaw->getData(col-1, row+1);
+      sum += val[2] = *mRaw->getData(col+1, row-1);
+      sum += val[3] = *mRaw->getData(col+1, row+1);
+      for ( int i = 0 ; i < 4 ; i++ ){
+        dev[i] = abs((val[i] * 4) - sum) ;
+        if ( dev[max] < dev[i] )
+          max = i ;
+      }
+      *mRaw->getData(col,row) = (sum - val[max]) / 3.0 + 0.5 ;
+    }
+    else { // do non-green pixels
+      uint32 diags = *mRaw->getData(col-2, row+2) + *mRaw->getData(col-2, row-2) + *mRaw->getData(col+2, row+2) + *mRaw->getData(col+2, row-2);
+      uint32 horiz = *mRaw->getData(col-2, row) + *mRaw->getData(col+2, row);
+
+      // The type truncation should be safe as the value should not be possible to get outside the range of a ushort16, though the intermediates might be larger.
+      *mRaw->getData(col,row) = diags*0.0732233 + horiz*0.3535534 + 0.5 ;
+    }
+  }
 }
 
 } // namespace rawspeed
