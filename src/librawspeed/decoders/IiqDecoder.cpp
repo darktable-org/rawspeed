@@ -380,13 +380,13 @@ void IiqDecoder::correctBadColumn(const ushort16 col) {
     if (mRaw->cfa.getColorAt(row, col) == CFA_GREEN) {
       int max = 0;
       ushort16 val[4];
-      uint32 sum = 0, dev[4];
+      int32 sum = 0, dev[4];
       sum += val[0] = *mRaw->getData(col - 1, row - 1);
       sum += val[1] = *mRaw->getData(col - 1, row + 1);
       sum += val[2] = *mRaw->getData(col + 1, row - 1);
       sum += val[3] = *mRaw->getData(col + 1, row + 1);
       for (int i = 0; i < 4; i++) {
-        dev[i] = abs(((int)(val[i] * 4) - sum));
+        dev[i] = std::abs(((int)(val[i] * 4) - sum));
         if (dev[max] < dev[i])
           max = i;
       }
