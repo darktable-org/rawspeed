@@ -175,7 +175,10 @@ bool NefDecoder::NEFIsUncompressed(const TiffIFD* raw) {
   // Thus, let's accept *some* *small* padding.
   const auto requiredInputBits = bitPerPixel * requiredPixels;
   const auto requiredInputBytes = roundUpDivision(requiredInputBits, 8);
-  assert(avaliableInputBytes > requiredInputBytes);
+  // While we might have more *pixels* than needed, it does not nessesairly mean
+  // that we have more input *bytes*. We might be off by a few pixels, and with
+  // small image dimensions and bpp, we might still be in the same byte.
+  assert(avaliableInputBytes >= requiredInputBytes);
   const auto totalPadding = avaliableInputBytes - requiredInputBytes;
   if (totalPadding % height != 0)
     return false; // Inconsistent padding makes no sense here.
