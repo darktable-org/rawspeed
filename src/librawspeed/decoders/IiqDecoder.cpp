@@ -372,9 +372,9 @@ void IiqDecoder::correctSensorDefects(ByteStream data, uint32 len) {
 void IiqDecoder::correctBadColumn(const ushort16 col) {
   for (int row = 0; row < mRaw->dim.y; row++) {
     if (mRaw->cfa.getColorAt(row, col) == CFA_GREEN) {
-      int max;
-      ushort16 val[4], dev[4];
-      uint32 sum = 0;
+      int max = 0;
+      ushort16 val[4];
+      uint32 sum = 0, dev[4];
       sum += val[0] = *mRaw->getData(col - 1, row - 1);
       sum += val[1] = *mRaw->getData(col - 1, row + 1);
       sum += val[2] = *mRaw->getData(col + 1, row - 1);
