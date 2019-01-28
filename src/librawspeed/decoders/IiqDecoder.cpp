@@ -372,7 +372,7 @@ void IiqDecoder::correctSensorDefects(ByteStream data, uint32 len) {
 void IiqDecoder::handleBadPixel(const ushort16 col, const ushort16 row) {
   MutexLocker guard(&mRaw->mBadPixelMutex);
   mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
-                                  ((uint32)row << 16) + col);
+                                  (static_cast<uint32>(row) << 16) + col);
 }
 
 void IiqDecoder::correctBadColumn(const ushort16 col) {
@@ -386,7 +386,7 @@ void IiqDecoder::correctBadColumn(const ushort16 col) {
       sum += val[2] = *mRaw->getData(col + 1, row - 1);
       sum += val[3] = *mRaw->getData(col + 1, row + 1);
       for (int i = 0; i < 4; i++) {
-        dev[i] = std::abs(((int)(val[i] * 4) - sum));
+        dev[i] = std::abs((val[i] * 4) - sum);
         if (dev[max] < dev[i])
           max = i;
       }
