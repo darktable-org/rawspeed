@@ -30,6 +30,7 @@
 #include "io/Buffer.h"                          // for Buffer, DataBuffer
 #include "io/ByteStream.h"                      // for ByteStream
 #include "io/Endianness.h"                      // for Endianness, Endianne...
+#include "metadata/CameraMetaData.h"            // for CameraMetaData for CFA
 #include "tiff/TiffIFD.h"                       // for TiffRootIFD, TiffID
 #include <algorithm>                            // for adjacent_find, gener...
 #include <array>                                // for array, array<>::cons...
@@ -337,6 +338,13 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
 
 void IiqDecoder::checkSupportInternal(const CameraMetaData* meta) {
   checkCameraSupported(meta, mRootIFD->getID(), "");
+
+  auto id = mRootIFD->getID();
+  const Camera* cam = meta->getCamera(id.make, id.model, mRaw->metadata.mode);
+  if (!cam)
+    ThrowRDE("Couldn't find camera %s %s", id.make.c_str(), id.model.c_str());
+
+  mRaw->cfa = cam->cfa;
 }
 
 void IiqDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
@@ -377,7 +385,7 @@ void IiqDecoder::handleBadPixel(const ushort16 col, const ushort16 row) {
 }
 
 void IiqDecoder::correctBadColumn(const ushort16 col) {
-  for (int row = 0; row < mRaw->dim.y; row++) {
+  for (int row = 2; row < mRaw->dim.y - 2; row++) {
     if (mRaw->cfa.getColorAt(row, col) == CFA_GREEN) {
       int max = 0;
       ushort16 val[4];
