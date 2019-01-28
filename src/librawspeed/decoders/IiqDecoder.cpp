@@ -385,7 +385,7 @@ void IiqDecoder::correctBadColumn(const ushort16 col) {
       sum += val[2] = *mRaw->getData(col + 1, row - 1);
       sum += val[3] = *mRaw->getData(col + 1, row + 1);
       for (int i = 0; i < 4; i++) {
-        dev[i] = abs((val[i] * 4) - sum);
+        dev[i] = abs(((int)(val[i] * 4) - sum));
         if (dev[max] < dev[i])
           max = i;
       }
