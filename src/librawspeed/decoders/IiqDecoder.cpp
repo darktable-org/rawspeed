@@ -34,6 +34,7 @@
 #include <algorithm>                            // for adjacent_find, gener...
 #include <array>                                // for array, array<>::cons...
 #include <cassert>                              // for assert
+#include <cmath>                                // for lround()
 #include <cstdlib>                              // for int abs(int)
 #include <functional>                           // for greater_equal
 #include <iterator>                             // for advance, next, begin
@@ -390,7 +391,7 @@ void IiqDecoder::correctBadColumn(const ushort16 col) {
         if (dev[max] < dev[i])
           max = i;
       }
-      *mRaw->getData(col, row) = (sum - val[max]) / 3.0 + 0.5;
+      *mRaw->getData(col, row) = std::lround((sum - val[max]) / 3.0);
     } else { // do non-green pixels
       uint32 diags =
           *mRaw->getData(col - 2, row + 2) + *mRaw->getData(col - 2, row - 2) +
@@ -401,7 +402,8 @@ void IiqDecoder::correctBadColumn(const ushort16 col) {
       // The type truncation should be safe as the value should not be possible
       // to get outside the range of a ushort16, though the intermediates might
       // be larger.
-      *mRaw->getData(col, row) = diags * 0.0732233 + horiz * 0.3535534 + 0.5;
+      *mRaw->getData(col, row) =
+          std::lround(diags * 0.0732233 + horiz * 0.3535534);
     }
   }
 }
