@@ -66,6 +66,9 @@ Buffer KdcDecoder::getInputBuffer() {
     ThrowRDE("offset is out of bounds");
 
   const auto area = mRaw->dim.area();
+  if (area > std::numeric_limits<decltype(area)>::max() / 12) // round down
+    ThrowRDE("Image dimensions are way too large, potential for overflow");
+
   const auto bits = 12 * area;
   if (bits % 8 != 0)
     ThrowRDE("Bad combination of image dims and bpp, bit count %% 8 != 0");
