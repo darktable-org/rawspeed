@@ -69,6 +69,8 @@ protected:
                                           uint32 split_col);
   void correctSensorDefects(ByteStream data, uint32 len);
   void correctBadColumn(const ushort16 col);
+  void handleBadPixel(const ushort16 col, const ushort16 row);
+
 };
 
 } // namespace rawspeed

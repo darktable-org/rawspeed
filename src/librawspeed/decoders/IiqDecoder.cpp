@@ -360,13 +360,18 @@ void IiqDecoder::correctSensorDefects(ByteStream data, uint32 len) {
       correctBadColumn(col);
       break;
     case 129: // bad pixel
-      mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
-                                      ((uint32)row << 16) + col);
+      handleBadPixel(col, row);
       break;
     default: // Oooh, a sensor defect not in dcraw!
       break;
     }
   }
+}
+
+void IiqDecoder::handleBadPixel(const ushort16 col, const ushort16 row){
+      MutexLocker guard(&mRaw->mBadPixelMutex);
+      mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
+                                      ((uint32)row << 16) + col);
 }
 
 void IiqDecoder::correctBadColumn(const ushort16 col) {
