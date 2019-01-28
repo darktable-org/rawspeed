@@ -34,6 +34,7 @@
 #include <algorithm>                            // for adjacent_find, gener...
 #include <array>                                // for array, array<>::cons...
 #include <cassert>                              // for assert
+#include <cstdlib>                              // for int abs(int)
 #include <functional>                           // for greater_equal
 #include <iterator>                             // for advance, next, begin
 #include <memory>                               // for unique_ptr
@@ -368,10 +369,10 @@ void IiqDecoder::correctSensorDefects(ByteStream data, uint32 len) {
   }
 }
 
-void IiqDecoder::handleBadPixel(const ushort16 col, const ushort16 row){
-      MutexLocker guard(&mRaw->mBadPixelMutex);
-      mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
-                                      ((uint32)row << 16) + col);
+void IiqDecoder::handleBadPixel(const ushort16 col, const ushort16 row) {
+  MutexLocker guard(&mRaw->mBadPixelMutex);
+  mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
+                                  ((uint32)row << 16) + col);
 }
 
 void IiqDecoder::correctBadColumn(const ushort16 col) {
