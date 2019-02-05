@@ -23,6 +23,7 @@ endif()
 
 include(GNUInstallDirs)
 include(FeatureSummary)
+include(CheckCXXCompilerFlag)
 
 project(rawspeed CXX)
 
@@ -46,7 +47,27 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL
 else()
   set(RAWSPEED_USE_LIBCXX OFF CACHE BOOL "(Clang only) Build using libc++ as the standard library." FORCE)
 endif()
-option(RAWSPEED_ENABLE_DEBUG_INFO "Whether to generate debug info or not." ON)
+
+set(CMAKE_REQUIRED_FLAGS_ORIG "${CMAKE_REQUIRED_FLAGS}")
+set(CMAKE_REQUIRED_FLAGS "-c -std=c++14 -g")
+# see https://bugs.llvm.org/show_bug.cgi?id=16091
+# see https://reviews.llvm.org/rL221704
+CHECK_CXX_SOURCE_COMPILES(
+"struct foo {
+  static auto func();
+};
+
+foo f;
+
+auto foo::func() {
+  return 1;
+}"
+  RAWSPEED_CXX_DEBUG_INFO_FOR_AUTO_IS_SUPPORTED
+)
+set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_ORIG}")
+
+option(RAWSPEED_ENABLE_DEBUG_INFO "Whether to generate debug info or not." ${RAWSPEED_CXX_DEBUG_INFO_FOR_AUTO_IS_SUPPORTED})
+
 option(RAWSPEED_ENABLE_WERROR "Stop and fail the build, if a compiler warning is triggered." ON)
 
 option(WITH_OPENMP "Enable OpenMP support." ON)

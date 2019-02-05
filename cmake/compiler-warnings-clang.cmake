@@ -51,6 +51,58 @@ if(NOT CLANG_CXX_FLAG_UNREACHABLE_CODE_WORKS)
   list(APPEND CLANG_DISABLED_WARNING_FLAGS "unreachable-code")
 endif()
 
+set(CMAKE_REQUIRED_FLAGS_ORIG "${CMAKE_REQUIRED_FLAGS}")
+set(CMAKE_REQUIRED_FLAGS "-c -Wmissing-braces -Werror=missing-braces")
+# see https://bugs.llvm.org/show_bug.cgi?id=21629
+CHECK_CXX_SOURCE_COMPILES(
+"#include <array>
+const std::array<int, 2> test = {0, 0};"
+  CLANG_CXX_FLAG_MISSING_BRACES_WORKS
+)
+set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_ORIG}")
+
+if(NOT CLANG_CXX_FLAG_MISSING_BRACES_WORKS)
+  list(APPEND CLANG_DISABLED_WARNING_FLAGS "missing-braces")
+endif()
+
+set(CMAKE_REQUIRED_FLAGS_ORIG "${CMAKE_REQUIRED_FLAGS}")
+set(CMAKE_REQUIRED_FLAGS "-c -Wthread-safety-analysis -Werror=thread-safety-analysis")
+CHECK_CXX_SOURCE_COMPILES(
+"// Enable thread safety attributes only with clang.
+// The attributes can be safely erased when compiling with other compilers.
+#if defined(__clang__) && (!defined(SWIG))
+#define THREAD_ANNOTATION_ATTRIBUTE__(x) __attribute__((x))
+#else
+#define THREAD_ANNOTATION_ATTRIBUTE__(x) // no-op
+#endif
+
+#define CAPABILITY(x) THREAD_ANNOTATION_ATTRIBUTE__(capability(x))
+#define REQUIRES(...) THREAD_ANNOTATION_ATTRIBUTE__(requires_capability(__VA_ARGS__))
+
+class CAPABILITY(\"mutex\") Mutex {
+public:
+  const Mutex& operator!() const { return *this; }
+};
+
+class ErrorLog {
+public:
+  Mutex mutex;
+
+  void test() REQUIRES(!mutex);
+};
+
+void test(ErrorLog e) {
+    e.test();
+}
+"
+  CLANG_CXX_THREAD_SAFETY_ANALYSIS_NEGATIVE_CAPABILITIES_WORK
+)
+set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_ORIG}")
+
+if(NOT CLANG_CXX_THREAD_SAFETY_ANALYSIS_NEGATIVE_CAPABILITIES_WORK)
+  list(APPEND CLANG_DISABLED_WARNING_FLAGS "thread-safety-analysis")
+endif()
+
 if(NOT (UNIX OR APPLE))
   # bogus warnings about std functions...
   list(APPEND CLANG_DISABLED_WARNING_FLAGS "used-but-marked-unused")
