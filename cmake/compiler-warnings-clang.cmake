@@ -51,6 +51,20 @@ if(NOT CLANG_CXX_FLAG_UNREACHABLE_CODE_WORKS)
   list(APPEND CLANG_DISABLED_WARNING_FLAGS "unreachable-code")
 endif()
 
+set(CMAKE_REQUIRED_FLAGS_ORIG "${CMAKE_REQUIRED_FLAGS}")
+set(CMAKE_REQUIRED_FLAGS "-c -Wmissing-braces -Werror=missing-braces")
+# see https://bugs.llvm.org/show_bug.cgi?id=21629
+CHECK_CXX_SOURCE_COMPILES(
+"#include <array>
+const std::array<int, 2> test = {0, 0};"
+  CLANG_CXX_FLAG_MISSING_BRACES_WORKS
+)
+set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_ORIG}")
+
+if(NOT CLANG_CXX_FLAG_MISSING_BRACES_WORKS)
+  list(APPEND CLANG_DISABLED_WARNING_FLAGS "missing-braces")
+endif()
+
 if(NOT (UNIX OR APPLE))
   # bogus warnings about std functions...
   list(APPEND CLANG_DISABLED_WARNING_FLAGS "used-but-marked-unused")
