@@ -30,7 +30,7 @@ install:
       echo "oracle-java9-installer hold" | sudo dpkg --set-selections;
       travis_retry sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y;
       travis_retry sudo apt-get update -q;
-      travis_retry sudo apt-get install -y -q -f --fix-missing cmake g++-5 git libjpeg-dev libpugixml-dev libxml2-utils make ninja-build zlib1g-dev;
+      travis_retry sudo apt-get install -y -q -f --fix-missing clang-3.9 cmake g++-5 git libiomp-dev libjpeg-dev libpugixml-dev libxml2-utils make ninja-build zlib1g-dev;
     fi;
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       travis_retry brew update > /dev/null && brew tap Homebrew/bundle && cd .ci && brew bundle --verbose;
@@ -105,6 +105,10 @@ jobs:
     dist: trusty
     sudo: required
     env: CC=gcc-5 CXX=g++-5 EXTRA=NODOCKER
+  - os: linux
+    dist: trusty
+    sudo: required
+    env: CC=clang-3.9 CXX=clang++-3.9 EXTRA=NODOCKER
   #- stage: deploy
   #  os: linux
   #  sudo: required
