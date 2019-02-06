@@ -363,7 +363,7 @@ void IiqDecoder::correctSensorDefects(ByteStream data) {
     const ushort16 col = data.getU16();
     const ushort16 row = data.getU16();
     const ushort16 type = data.getU16();
-    data.getU16(); // Advance to the next defect tag.
+    data.skipBytes(2); // Ignore uknown/unused bits.
 
     if (col >= mRaw->dim.x) // Value for col is outside the raw image.
       continue;
