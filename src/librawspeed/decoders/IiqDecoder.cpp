@@ -21,6 +21,7 @@
 */
 
 #include "decoders/IiqDecoder.h"
+#include "common/Array2DRef.h"                  // for Array2DRef
 #include "common/Common.h"                      // for uint32, ushort16
 #include "common/Point.h"                       // for iPoint2D
 #include "common/Spline.h"                      // for Spline, Spline<>::va...
@@ -388,39 +389,37 @@ void IiqDecoder::handleBadPixel(const ushort16 col, const ushort16 row) {
 }
 
 void IiqDecoder::correctBadColumn(const ushort16 col) {
+  const Array2DRef<uint16_t> img(reinterpret_cast<uint16_t*>(mRaw->getData()),
+                                 mRaw->dim.x, mRaw->dim.y,
+                                 mRaw->pitch / sizeof(uint16_t));
+
   for (int row = 2; row < mRaw->dim.y - 2; row++) {
     if (mRaw->cfa.getColorAt(col, row) == CFA_GREEN) {
       int max = 0;
       std::array<ushort16, 4> val;
       std::array<int32, 4> dev;
       int32 sum = 0;
-      sum += val[0] = *getPixelPtr(col - 1, row - 1);
-      sum += val[1] = *getPixelPtr(col - 1, row + 1);
-      sum += val[2] = *getPixelPtr(col + 1, row - 1);
-      sum += val[3] = *getPixelPtr(col + 1, row + 1);
+      sum += val[0] = img(col - 1, row - 1);
+      sum += val[1] = img(col - 1, row + 1);
+      sum += val[2] = img(col + 1, row - 1);
+      sum += val[3] = img(col + 1, row + 1);
       for (int i = 0; i < 4; i++) {
         dev[i] = std::abs((val[i] * 4) - sum);
         if (dev[max] < dev[i])
           max = i;
       }
-      *getPixelPtr(col, row) = std::lround((sum - val[max]) / 3.0);
+      img(col, row) = std::lround((sum - val[max]) / 3.0);
     } else { // do non-green pixels
-      uint32 diags =
-          *getPixelPtr(col - 2, row + 2) + *getPixelPtr(col - 2, row - 2) +
-          *getPixelPtr(col + 2, row + 2) + *getPixelPtr(col + 2, row - 2);
-      uint32 horiz = *getPixelPtr(col - 2, row) + *getPixelPtr(col + 2, row);
+      uint32 diags = img(col - 2, row + 2) + img(col - 2, row - 2) +
+                     img(col + 2, row + 2) + img(col + 2, row - 2);
+      uint32 horiz = img(col - 2, row) + img(col + 2, row);
 
       // The type truncation should be safe as the value should not be possible
       // to get outside the range of a ushort16, though the intermediates might
       // be larger.
-      *getPixelPtr(col, row) =
-          std::lround(diags * 0.0732233 + horiz * 0.3535534);
+      img(col, row) = std::lround(diags * 0.0732233 + horiz * 0.3535534);
     }
   }
-}
-
-ushort16* IiqDecoder::getPixelPtr(const uint32 col, const uint32 row) {
-  return reinterpret_cast<ushort16*>(mRaw->getData(col, row));
 }
 
 } // namespace rawspeed

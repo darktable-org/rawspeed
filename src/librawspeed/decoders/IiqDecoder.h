@@ -70,7 +70,6 @@ protected:
   void correctSensorDefects(ByteStream data);
   void correctBadColumn(ushort16 col);
   void handleBadPixel(ushort16 col, ushort16 row);
-  ushort16* getPixelPtr(uint32 col, uint32 row);
 };
 
 } // namespace rawspeed
