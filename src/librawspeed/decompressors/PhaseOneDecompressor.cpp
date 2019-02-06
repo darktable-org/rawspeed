@@ -46,7 +46,7 @@ PhaseOneDecompressor::PhaseOneDecompressor(const RawImage& img,
     ThrowRDE("Unexpected cpp: %u", mRaw->getCpp());
 
   if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 2 != 0 ||
-      mRaw->dim.x > 11608 || mRaw->dim.y > 8708) {
+      mRaw->dim.x > 11976 || mRaw->dim.y > 8852) {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);
   }
