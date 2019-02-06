@@ -30,10 +30,13 @@
 #include "io/Buffer.h"                          // for Buffer, DataBuffer
 #include "io/ByteStream.h"                      // for ByteStream
 #include "io/Endianness.h"                      // for Endianness, Endianne...
+#include "metadata/CameraMetaData.h"            // for CameraMetaData for CFA
 #include "tiff/TiffIFD.h"                       // for TiffRootIFD, TiffID
 #include <algorithm>                            // for adjacent_find, gener...
 #include <array>                                // for array, array<>::cons...
 #include <cassert>                              // for assert
+#include <cmath>                                // for lround()
+#include <cstdlib>                              // for int abs(int)
 #include <functional>                           // for greater_equal
 #include <iterator>                             // for advance, next, begin
 #include <memory>                               // for unique_ptr
@@ -239,12 +242,15 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
     const uint32 offset = entries.getU32();
 
     switch (tag) {
+    case 0x400: // Sensor Defects
+      correctSensorDefects(meta_data.getSubStream(offset, len), len);
+      break;
     case 0x431:
       if (QuadrantMultipliersSeen)
         ThrowRDE("Second quadrant multipliers entry seen. Unexpected.");
       if (iiq.quadrantMultipliers)
         CorrectQuadrantMultipliersCombined(meta_data.getSubStream(offset, len),
-                                         split_row, split_col);
+                                           split_row, split_col);
       QuadrantMultipliersSeen = true;
       break;
     default:
@@ -332,6 +338,13 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
 
 void IiqDecoder::checkSupportInternal(const CameraMetaData* meta) {
   checkCameraSupported(meta, mRootIFD->getID(), "");
+
+  auto id = mRootIFD->getID();
+  const Camera* cam = meta->getCamera(id.make, id.model, mRaw->metadata.mode);
+  if (!cam)
+    ThrowRDE("Couldn't find camera %s %s", id.make.c_str(), id.model.c_str());
+
+  mRaw->cfa = cam->cfa;
 }
 
 void IiqDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
@@ -339,6 +352,71 @@ void IiqDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   if (black_level)
     mRaw->blackLevel = black_level;
+}
+
+void IiqDecoder::correctSensorDefects(ByteStream data, uint32 len) {
+  int32 slen = len;
+  while ((slen -= 8) >= 0) {
+    const ushort16 col = data.getU16();
+    const ushort16 row = data.getU16();
+    const ushort16 type = data.getU16();
+    data.getU16(); // Advance to the next defect tag.
+
+    if (col >= mRaw->dim.x) // Value for col is outside the raw image.
+      continue;
+    switch (type) {
+    case 131: // bad column
+    case 137: // bad column
+      correctBadColumn(col);
+      break;
+    case 129: // bad pixel
+      handleBadPixel(col, row);
+      break;
+    default: // Oooh, a sensor defect not in dcraw!
+      break;
+    }
+  }
+}
+
+void IiqDecoder::handleBadPixel(const ushort16 col, const ushort16 row) {
+  MutexLocker guard(&mRaw->mBadPixelMutex);
+  mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
+                                  (static_cast<uint32>(row) << 16) + col);
+}
+
+void IiqDecoder::correctBadColumn(const ushort16 col) {
+  for (int row = 2; row < mRaw->dim.y - 2; row++) {
+    if (mRaw->cfa.getColorAt(col, row) == CFA_GREEN) {
+      int max = 0;
+      ushort16 val[4];
+      int32 sum = 0, dev[4];
+      sum += val[0] = *getPixelPtr(col - 1, row - 1);
+      sum += val[1] = *getPixelPtr(col - 1, row + 1);
+      sum += val[2] = *getPixelPtr(col + 1, row - 1);
+      sum += val[3] = *getPixelPtr(col + 1, row + 1);
+      for (int i = 0; i < 4; i++) {
+        dev[i] = std::abs((val[i] * 4) - sum);
+        if (dev[max] < dev[i])
+          max = i;
+      }
+      *getPixelPtr(col, row) = std::lround((sum - val[max]) / 3.0);
+    } else { // do non-green pixels
+      uint32 diags =
+          *getPixelPtr(col - 2, row + 2) + *getPixelPtr(col - 2, row - 2) +
+          *getPixelPtr(col + 2, row + 2) + *getPixelPtr(col + 2, row - 2);
+      uint32 horiz = *getPixelPtr(col - 2, row) + *getPixelPtr(col + 2, row);
+
+      // The type truncation should be safe as the value should not be possible
+      // to get outside the range of a ushort16, though the intermediates might
+      // be larger.
+      *getPixelPtr(col, row) =
+          std::lround(diags * 0.0732233 + horiz * 0.3535534);
+    }
+  }
+}
+
+ushort16* IiqDecoder::getPixelPtr(const uint32 col, const uint32 row) {
+  return reinterpret_cast<ushort16*>(mRaw->getData(col, row));
 }
 
 } // namespace rawspeed

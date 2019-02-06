@@ -67,6 +67,10 @@ protected:
                         uint32 split_col);
   void CorrectQuadrantMultipliersCombined(ByteStream data, uint32 split_row,
                                           uint32 split_col);
+  void correctSensorDefects(ByteStream data, uint32 len);
+  void correctBadColumn(ushort16 col);
+  void handleBadPixel(ushort16 col, ushort16 row);
+  ushort16* getPixelPtr(uint32 col, uint32 row);
 };
 
 } // namespace rawspeed
