@@ -3,7 +3,8 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2014-2015 Pedro Côrte-Real
-    Copyright (C) 2017-2018 Roman Lebedev
+    Copyright (C) 2017-2019 Roman Lebedev
+    Copyright (C) 2019 Robert Bridge
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -21,6 +22,7 @@
 */
 
 #include "decoders/IiqDecoder.h"
+#include "common/Array2DRef.h"                  // for Array2DRef
 #include "common/Common.h"                      // for uint32, ushort16
 #include "common/Point.h"                       // for iPoint2D
 #include "common/Spline.h"                      // for Spline, Spline<>::va...
@@ -30,10 +32,13 @@
 #include "io/Buffer.h"                          // for Buffer, DataBuffer
 #include "io/ByteStream.h"                      // for ByteStream
 #include "io/Endianness.h"                      // for Endianness, Endianne...
+#include "metadata/CameraMetaData.h"            // for CameraMetaData for CFA
 #include "tiff/TiffIFD.h"                       // for TiffRootIFD, TiffID
 #include <algorithm>                            // for adjacent_find, gener...
 #include <array>                                // for array, array<>::cons...
 #include <cassert>                              // for assert
+#include <cmath>                                // for lround()
+#include <cstdlib>                              // for int abs(int)
 #include <functional>                           // for greater_equal
 #include <iterator>                             // for advance, next, begin
 #include <memory>                               // for unique_ptr
@@ -232,6 +237,7 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
   meta_data.setPosition(0);
 
   bool QuadrantMultipliersSeen = false;
+  bool SensorDefectsSeen = false;
 
   for (uint32 entry = 0; entry < entries_count; entry++) {
     const uint32 tag = entries.getU32();
@@ -239,12 +245,18 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
     const uint32 offset = entries.getU32();
 
     switch (tag) {
+    case 0x400: // Sensor Defects
+      if (SensorDefectsSeen)
+        ThrowRDE("Second sensor defects entry seen. Unexpected.");
+      correctSensorDefects(meta_data.getSubStream(offset, len));
+      SensorDefectsSeen = true;
+      break;
     case 0x431:
       if (QuadrantMultipliersSeen)
         ThrowRDE("Second quadrant multipliers entry seen. Unexpected.");
       if (iiq.quadrantMultipliers)
         CorrectQuadrantMultipliersCombined(meta_data.getSubStream(offset, len),
-                                         split_row, split_col);
+                                           split_row, split_col);
       QuadrantMultipliersSeen = true;
       break;
     default:
@@ -332,6 +344,13 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
 
 void IiqDecoder::checkSupportInternal(const CameraMetaData* meta) {
   checkCameraSupported(meta, mRootIFD->getID(), "");
+
+  auto id = mRootIFD->getID();
+  const Camera* cam = meta->getCamera(id.make, id.model, mRaw->metadata.mode);
+  if (!cam)
+    ThrowRDE("Couldn't find camera %s %s", id.make.c_str(), id.model.c_str());
+
+  mRaw->cfa = cam->cfa;
 }
 
 void IiqDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
@@ -339,6 +358,86 @@ void IiqDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   if (black_level)
     mRaw->blackLevel = black_level;
+}
+
+void IiqDecoder::correctSensorDefects(ByteStream data) {
+  while (data.getRemainSize() != 0) {
+    const ushort16 col = data.getU16();
+    const ushort16 row = data.getU16();
+    const ushort16 type = data.getU16();
+    data.skipBytes(2); // Ignore uknown/unused bits.
+
+    if (col >= mRaw->dim.x) // Value for col is outside the raw image.
+      continue;
+    switch (type) {
+    case 131: // bad column
+    case 137: // bad column
+      correctBadColumn(col);
+      break;
+    case 129: // bad pixel
+      handleBadPixel(col, row);
+      break;
+    default: // Oooh, a sensor defect not in dcraw!
+      break;
+    }
+  }
+}
+
+void IiqDecoder::handleBadPixel(const ushort16 col, const ushort16 row) {
+  MutexLocker guard(&mRaw->mBadPixelMutex);
+  mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
+                                  (static_cast<uint32>(row) << 16) + col);
+}
+
+void IiqDecoder::correctBadColumn(const ushort16 col) {
+  const Array2DRef<uint16_t> img(reinterpret_cast<uint16_t*>(mRaw->getData()),
+                                 mRaw->dim.x, mRaw->dim.y,
+                                 mRaw->pitch / sizeof(uint16_t));
+
+  for (int row = 2; row < mRaw->dim.y - 2; row++) {
+    if (mRaw->cfa.getColorAt(col, row) == CFA_GREEN) {
+      /* Do green pixels. Let's pretend we are in "G" pixel, in the middle:
+       *   G=G
+       *   BGB
+       *   G0G
+       * We accumulate the values 4 "G" pixels form diagonals, then check which
+       * of 4 values is most distant from the mean of those 4 values, subtract
+       * it from the sum, average (divide by 3) and round to nearest int.
+       */
+      int max = 0;
+      std::array<ushort16, 4> val;
+      std::array<int32, 4> dev;
+      int32 sum = 0;
+      sum += val[0] = img(col - 1, row - 1);
+      sum += val[1] = img(col - 1, row + 1);
+      sum += val[2] = img(col + 1, row - 1);
+      sum += val[3] = img(col + 1, row + 1);
+      for (int i = 0; i < 4; i++) {
+        dev[i] = std::abs((val[i] * 4) - sum);
+        if (dev[max] < dev[i])
+          max = i;
+      }
+      const int three_pixels = sum - val[max];
+      // This is `std::lround(three_pixels / 3.0)`, but without FP.
+      img(col, row) = (three_pixels + 1) / 3;
+    } else {
+      /*
+       * Do non-green pixels. Let's pretend we are in "R" pixel, in the middle:
+       *   RG=GR
+       *   GB=BG
+       *   RGRGR
+       *   GB0BG
+       *   RG0GR
+       * We have 6 other "R" pixels - 2 by horizontal, 4 by diagonals.
+       * We need to combine them, to get the value of the pixel we are in.
+       */
+      uint32 diags = img(col - 2, row + 2) + img(col - 2, row - 2) +
+                     img(col + 2, row + 2) + img(col + 2, row - 2);
+      uint32 horiz = img(col - 2, row) + img(col + 2, row);
+      // But this is not just averaging, we bias towards the horizontal pixels.
+      img(col, row) = std::lround(diags * 0.0732233 + horiz * 0.3535534);
+    }
+  }
 }
 
 } // namespace rawspeed
