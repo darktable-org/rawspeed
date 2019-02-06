@@ -235,6 +235,7 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
   meta_data.setPosition(0);
 
   bool QuadrantMultipliersSeen = false;
+  bool SensorDefectsSeen = false;
 
   for (uint32 entry = 0; entry < entries_count; entry++) {
     const uint32 tag = entries.getU32();
@@ -243,7 +244,10 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
 
     switch (tag) {
     case 0x400: // Sensor Defects
+      if (SensorDefectsSeen)
+        ThrowRDE("Second sensor defects entry seen. Unexpected.");
       correctSensorDefects(meta_data.getSubStream(offset, len), len);
+      SensorDefectsSeen = true;
       break;
     case 0x431:
       if (QuadrantMultipliersSeen)
