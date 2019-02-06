@@ -408,12 +408,13 @@ void IiqDecoder::correctBadColumn(const ushort16 col) {
         if (dev[max] < dev[i])
           max = i;
       }
-      img(col, row) = std::lround((sum - val[max]) / 3.0);
+      const int three_pixels = sum - val[max];
+      // This is `std::lround(three_pixels / 3.0)`, but without FP.
+      img(col, row) = (three_pixels + 1) / 3;
     } else { // do non-green pixels
       uint32 diags = img(col - 2, row + 2) + img(col - 2, row - 2) +
                      img(col + 2, row + 2) + img(col + 2, row - 2);
       uint32 horiz = img(col - 2, row) + img(col + 2, row);
-
       // The type truncation should be safe as the value should not be possible
       // to get outside the range of a ushort16, though the intermediates might
       // be larger.
