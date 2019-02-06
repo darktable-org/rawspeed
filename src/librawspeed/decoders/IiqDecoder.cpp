@@ -246,7 +246,7 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
     case 0x400: // Sensor Defects
       if (SensorDefectsSeen)
         ThrowRDE("Second sensor defects entry seen. Unexpected.");
-      correctSensorDefects(meta_data.getSubStream(offset, len), len);
+      correctSensorDefects(meta_data.getSubStream(offset, len));
       SensorDefectsSeen = true;
       break;
     case 0x431:
@@ -358,9 +358,8 @@ void IiqDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     mRaw->blackLevel = black_level;
 }
 
-void IiqDecoder::correctSensorDefects(ByteStream data, uint32 len) {
-  int32 slen = len;
-  while ((slen -= 8) >= 0) {
+void IiqDecoder::correctSensorDefects(ByteStream data) {
+  while (data.getRemainSize() != 0) {
     const ushort16 col = data.getU16();
     const ushort16 row = data.getU16();
     const ushort16 type = data.getU16();
