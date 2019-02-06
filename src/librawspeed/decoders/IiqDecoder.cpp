@@ -395,6 +395,14 @@ void IiqDecoder::correctBadColumn(const ushort16 col) {
 
   for (int row = 2; row < mRaw->dim.y - 2; row++) {
     if (mRaw->cfa.getColorAt(col, row) == CFA_GREEN) {
+      /* Do green pixels. Let's pretend we are in "G" pixel, in the middle:
+       *   G=G
+       *   BGB
+       *   G0G
+       * We accumulate the values 4 "G" pixels form diagonals, then check which
+       * of 4 values is most distant from the mean of those 4 values, subtract
+       * it from the sum, average (divide by 3) and round to nearest int.
+       */
       int max = 0;
       std::array<ushort16, 4> val;
       std::array<int32, 4> dev;
@@ -411,13 +419,21 @@ void IiqDecoder::correctBadColumn(const ushort16 col) {
       const int three_pixels = sum - val[max];
       // This is `std::lround(three_pixels / 3.0)`, but without FP.
       img(col, row) = (three_pixels + 1) / 3;
-    } else { // do non-green pixels
+    } else {
+      /*
+       * Do non-green pixels. Let's pretend we are in "R" pixel, in the middle:
+       *   RG=GR
+       *   GB=BG
+       *   RGRGR
+       *   GB0BG
+       *   RG0GR
+       * We have 6 other "R" pixels - 2 by horizontal, 4 by diagonals.
+       * We need to combine them, to get the value of the pixel we are in.
+       */
       uint32 diags = img(col - 2, row + 2) + img(col - 2, row - 2) +
                      img(col + 2, row + 2) + img(col + 2, row - 2);
       uint32 horiz = img(col - 2, row) + img(col + 2, row);
-      // The type truncation should be safe as the value should not be possible
-      // to get outside the range of a ushort16, though the intermediates might
-      // be larger.
+      // But this is not just averaging, we bias towards the horizontal pixels.
       img(col, row) = std::lround(diags * 0.0732233 + horiz * 0.3535534);
     }
   }
