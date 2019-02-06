@@ -388,8 +388,9 @@ void IiqDecoder::correctBadColumn(const ushort16 col) {
   for (int row = 2; row < mRaw->dim.y - 2; row++) {
     if (mRaw->cfa.getColorAt(col, row) == CFA_GREEN) {
       int max = 0;
-      ushort16 val[4];
-      int32 sum = 0, dev[4];
+      std::array<ushort16, 4> val;
+      std::array<int32, 4> dev;
+      int32 sum = 0;
       sum += val[0] = *getPixelPtr(col - 1, row - 1);
       sum += val[1] = *getPixelPtr(col - 1, row + 1);
       sum += val[2] = *getPixelPtr(col + 1, row - 1);
