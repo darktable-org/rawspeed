@@ -35,8 +35,12 @@ namespace rawspeed {
 
 // coverity[+alloc]
 void* alignedMalloc(size_t size, size_t alignment)
+#if defined(__ICC) || defined(__ICL) 
+    __attribute__((malloc, warn_unused_result, alloc_size(1)));
+#else
     __attribute__((malloc, warn_unused_result, alloc_size(1), alloc_align(2),
                    deprecated("use alignedMalloc<alignment>(size)")));
+#endif
 
 template <typename T, size_t alignment>
 // coverity[+alloc]

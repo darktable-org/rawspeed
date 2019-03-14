@@ -36,24 +36,12 @@
 
 namespace rawspeed {
 
-struct PanasonicDecompressorV5::PacketDsc {
-  int bps;
-  int pixelsPerPacket;
+// There are two variants. Which one is to be used depends on image's bps.
+static constexpr PanasonicDecompressorV5::PacketDsc TwelveBitPacket =
+  PanasonicDecompressorV5::PacketDsc(/*bps=*/12);
+static constexpr PanasonicDecompressorV5::PacketDsc FourteenBitPacket =
+  PanasonicDecompressorV5::PacketDsc(/*bps=*/14);
 
-  constexpr PacketDsc();
-  explicit constexpr PacketDsc(int bps_)
-      : bps(bps_),
-        pixelsPerPacket(PanasonicDecompressorV5::bitsPerPacket / bps) {
-    // NOTE: the division is truncating. There may be some padding bits left.
-  }
-};
-
-constexpr PanasonicDecompressorV5::PacketDsc
-    PanasonicDecompressorV5::TwelveBitPacket =
-        PanasonicDecompressorV5::PacketDsc(/*bps=*/12);
-constexpr PanasonicDecompressorV5::PacketDsc
-    PanasonicDecompressorV5::FourteenBitPacket =
-        PanasonicDecompressorV5::PacketDsc(/*bps=*/14);
 
 PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
                                                  const ByteStream& input_,

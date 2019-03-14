@@ -147,6 +147,20 @@ public:
 
   std::vector<Segment> getSegments() const { return segments; }
 
+private:
+  template<typename U>
+  typename std::enable_if<std::is_floating_point<U>::value, double>::type clamp(double x) const {
+    return x;
+  }
+
+  template<typename U>
+  typename std::enable_if<not std::is_floating_point<U>::value, double>::type clamp(double x) const {
+     x = std::max(x, double(std::numeric_limits<value_type>::min()));
+     x = std::min(x, double(std::numeric_limits<value_type>::max()));
+    return x;
+  }
+
+public:
   std::vector<value_type> calculateCurve() const {
     std::vector<value_type> curve(65536);
 
@@ -160,14 +174,7 @@ public:
 
         double interpolated = s.a + s.b * diff + s.c * diff_2 + s.d * diff_3;
 
-        if (!std::is_floating_point<value_type>::value) {
-          interpolated = std::max(
-              interpolated, double(std::numeric_limits<value_type>::min()));
-          interpolated = std::min(
-              interpolated, double(std::numeric_limits<value_type>::max()));
-        }
-
-        curve[x] = interpolated;
+        curve[x] = clamp<value_type>(interpolated);
       }
     }
 
