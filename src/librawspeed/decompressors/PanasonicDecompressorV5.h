@@ -31,7 +31,6 @@
 #include <utility>                              // for move
 #include <vector>                               // for vector
 
-
 namespace rawspeed {
 
 class PanasonicDecompressorV5 final : public AbstractDecompressor {
@@ -54,20 +53,15 @@ class PanasonicDecompressorV5 final : public AbstractDecompressor {
   static_assert(BlockSize % bytesPerPacket == 0, "");
   static constexpr uint32 PacketsPerBlock = BlockSize / bytesPerPacket;
 
-public:
   // Contains the decoding recepie for the packet,
-  struct PacketDsc {
-    int bps;
-    int pixelsPerPacket;
+  struct PacketDsc;
 
-    explicit constexpr PacketDsc(int bps_)
-      : bps(bps_),
-      pixelsPerPacket(PanasonicDecompressorV5::bitsPerPacket / bps) {
-	// NOTE: the division is truncating. There may be some padding bits left.
-      }
-  };
+  template<int bps>
+  struct getPacketDsc;
 
- private:
+  template <int>
+  friend struct PanasonicDecompressorV5::getPacketDsc;
+
   // Takes care of unsplitting&swapping back the block at sectionSplitOffset.
   class ProxyStream;
 
@@ -98,12 +92,12 @@ public:
 
   void chopInputIntoBlocks(const PacketDsc& dsc);
 
-  template <const PacketDsc& dsc>
+  template <int bps>
   void processPixelPacket(BitPumpLSB* bs, ushort16* dest) const;
 
-  template <const PacketDsc& dsc> void processBlock(const Block& block) const;
+  template <int bps> void processBlock(const Block& block) const;
 
-  template <const PacketDsc& dsc> void decompressInternal() const noexcept;
+  template <int bps> void decompressInternal() const noexcept;
 
 public:
   PanasonicDecompressorV5(const RawImage& img, const ByteStream& input_,

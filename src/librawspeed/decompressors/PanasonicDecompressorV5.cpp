@@ -36,12 +36,28 @@
 
 namespace rawspeed {
 
-// There are two variants. Which one is to be used depends on image's bps.
-static constexpr PanasonicDecompressorV5::PacketDsc TwelveBitPacket =
-  PanasonicDecompressorV5::PacketDsc(/*bps=*/12);
-static constexpr PanasonicDecompressorV5::PacketDsc FourteenBitPacket =
-  PanasonicDecompressorV5::PacketDsc(/*bps=*/14);
+struct PanasonicDecompressorV5::PacketDsc {
+  const int bps;
+  const int pixelsPerPacket;
 
+  explicit constexpr PacketDsc(int bps_)
+      : bps(bps_),
+        pixelsPerPacket(PanasonicDecompressorV5::bitsPerPacket / bps) {
+    // NOTE: the division is truncating. There may be some padding bits left.
+  }
+};
+
+template<>
+struct PanasonicDecompressorV5::getPacketDsc<12> {
+  static constexpr PanasonicDecompressorV5::PacketDsc dsc =
+    PanasonicDecompressorV5::PacketDsc(/*bps=*/12);
+};
+
+template<>
+struct PanasonicDecompressorV5::getPacketDsc<14> {
+  static constexpr PanasonicDecompressorV5::PacketDsc dsc =
+    PanasonicDecompressorV5::PacketDsc(/*bps=*/14);
+};
 
 PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
                                                  const ByteStream& input_,
@@ -51,26 +67,19 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
 
-  const PacketDsc* dsc = nullptr;
-  switch (bps) {
-  case 12:
-    dsc = &TwelveBitPacket;
-    break;
-  case 14:
-    dsc = &FourteenBitPacket;
-    break;
-  default:
+  if (bps != 12 and bps !=14)
     ThrowRDE("Unsupported bps: %u", bps);
-  }
 
-  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % dsc->pixelsPerPacket != 0) {
+  const PacketDsc dsc(bps);
+
+  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % dsc.pixelsPerPacket != 0) {
     ThrowRDE("Unexpected image dimensions found: (%i; %i)", mRaw->dim.x,
              mRaw->dim.y);
   }
 
   // How many pixel packets does the specified pixel count require?
-  assert(mRaw->dim.area() % dsc->pixelsPerPacket == 0);
-  const auto numPackets = mRaw->dim.area() / dsc->pixelsPerPacket;
+  assert(mRaw->dim.area() % dsc.pixelsPerPacket == 0);
+  const auto numPackets = mRaw->dim.area() / dsc.pixelsPerPacket;
   assert(numPackets > 0);
 
   // And how many blocks that would be? Last block may not be full, pad it.
@@ -87,7 +96,7 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
   // We only want those blocks we need, no extras.
   input = input_.peekStream(numBlocks, BlockSize);
 
-  chopInputIntoBlocks(*dsc);
+  chopInputIntoBlocks(dsc);
 }
 
 void PanasonicDecompressorV5::chopInputIntoBlocks(const PacketDsc& dsc) {
@@ -160,29 +169,29 @@ public:
   }
 };
 
-template <const PanasonicDecompressorV5::PacketDsc& dsc>
+template <int bps>
 void PanasonicDecompressorV5::processPixelPacket(BitPumpLSB* bs,
                                                  ushort16* dest) const {
-  static_assert(dsc.pixelsPerPacket > 0, "dsc should be compile-time const");
-  static_assert(dsc.bps > 0 && dsc.bps <= 16, "");
+  static_assert(getPacketDsc<bps>::dsc.pixelsPerPacket > 0, "dsc should be compile-time const");
+  static_assert(getPacketDsc<bps>::dsc.bps > 0 && getPacketDsc<bps>::dsc.bps <= 16, "");
 
   assert(bs->getFillLevel() == 0);
 
-  const ushort16* const endDest = dest + dsc.pixelsPerPacket;
+  const ushort16* const endDest = dest + getPacketDsc<bps>::dsc.pixelsPerPacket;
   for (; dest != endDest;) {
     bs->fill();
-    for (; bs->getFillLevel() >= dsc.bps; dest++) {
+    for (; bs->getFillLevel() >= getPacketDsc<bps>::dsc.bps; dest++) {
       assert(dest != endDest);
 
-      *dest = bs->getBitsNoFill(dsc.bps);
+      *dest = bs->getBitsNoFill(getPacketDsc<bps>::dsc.bps);
     }
   }
   bs->skipBitsNoFill(bs->getFillLevel()); // get rid of padding.
 }
 
-template <const PanasonicDecompressorV5::PacketDsc& dsc>
+template <int bps>
 void PanasonicDecompressorV5::processBlock(const Block& block) const {
-  static_assert(dsc.pixelsPerPacket > 0, "dsc should be compile-time const");
+  static_assert(getPacketDsc<bps>::dsc.pixelsPerPacket > 0, "dsc should be compile-time const");
   static_assert(BlockSize % bytesPerPacket == 0, "");
 
   ProxyStream proxy(block.bs);
@@ -201,35 +210,35 @@ void PanasonicDecompressorV5::processBlock(const Block& block) const {
 
     auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(x, y));
 
-    assert(x % dsc.pixelsPerPacket == 0);
-    assert(endx % dsc.pixelsPerPacket == 0);
+    assert(x % getPacketDsc<bps>::dsc.pixelsPerPacket == 0);
+    assert(endx % getPacketDsc<bps>::dsc.pixelsPerPacket == 0);
 
     for (; x < endx;) {
-      processPixelPacket<dsc>(&bs, dest);
+      processPixelPacket<bps>(&bs, dest);
 
-      x += dsc.pixelsPerPacket;
-      dest += dsc.pixelsPerPacket;
+      x += getPacketDsc<bps>::dsc.pixelsPerPacket;
+      dest += getPacketDsc<bps>::dsc.pixelsPerPacket;
     }
   }
 }
 
-template <const PanasonicDecompressorV5::PacketDsc& dsc>
+template <int bps>
 void PanasonicDecompressorV5::decompressInternal() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp parallel for num_threads(rawspeed_get_number_of_processor_cores()) \
     schedule(static) default(none)
 #endif
   for (auto block = blocks.cbegin(); block < blocks.cend(); ++block)
-    processBlock<dsc>(*block);
+    processBlock<bps>(*block);
 }
 
 void PanasonicDecompressorV5::decompress() const noexcept {
   switch (bps) {
   case 12:
-    decompressInternal<TwelveBitPacket>();
+    decompressInternal<12>();
     break;
   case 14:
-    decompressInternal<FourteenBitPacket>();
+    decompressInternal<14>();
     break;
   default:
     __builtin_unreachable();
