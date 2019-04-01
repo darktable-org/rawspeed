@@ -20,6 +20,6 @@ macro (check_xml XML XSD)
     DEPENDS "${XML}"
   )
 
-  add_dependencies(check ${TMPNAME})
+  add_dependencies(check-rawspeed ${TMPNAME})
   add_dependencies(rawspeed ${TMPNAME})
 endmacro (check_xml)

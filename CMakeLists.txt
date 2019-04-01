@@ -203,7 +203,7 @@ endif()
 include(compiler-versions)
 include(compiler-flags)
 
-add_custom_target(check ALL)
+add_custom_target(check-rawspeed ALL)
 add_custom_target(dependencies ALL)
 add_custom_target(tests ALL)
 
