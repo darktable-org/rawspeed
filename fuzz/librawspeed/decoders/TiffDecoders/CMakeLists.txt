@@ -4,7 +4,7 @@ add_dependencies(fuzzers TiffBasedDecoderFuzzers)
 function(add_decoder {decoder})
   set(fuzzer "TiffDecoderFuzzer-${decoder}")
 
-  add_executable(${fuzzer} main.cpp)
+  rawspeed_add_executable(${fuzzer} main.cpp)
   target_compile_definitions(${fuzzer}
     PRIVATE
       -DDECODER=${decoder}

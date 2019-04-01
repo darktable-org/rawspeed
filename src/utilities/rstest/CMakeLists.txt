@@ -2,7 +2,7 @@ if(NOT BUILD_TESTING)
   set_directory_properties(PROPERTIES EXCLUDE_FROM_ALL ON)
 endif()
 
-add_executable(rstest rstest.cpp md5.cpp)
+rawspeed_add_executable(rstest rstest.cpp md5.cpp)
 target_link_libraries(rstest rawspeed)
 
 if(TARGET RawSpeed::OpenMP_CXX)
@@ -31,7 +31,7 @@ if(BUILD_TESTING)
 
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-c99-extensions)
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-missing-variable-declarations)
-  add_executable(MD5Test md5.cpp MD5Test.cpp)
+  rawspeed_add_executable(MD5Test md5.cpp MD5Test.cpp)
   target_link_libraries(MD5Test gtest_main)
   add_test(NAME utilities/rstest/md5 COMMAND MD5Test --gtest_output=xml:${UNITTEST_REPORT_PATH})
   add_dependencies(tests MD5Test)
@@ -40,7 +40,7 @@ if(BUILD_TESTING)
 endif()
 
 if(BUILD_BENCHMARKING)
-  add_executable(MD5Benchmark md5.cpp MD5Benchmark.cpp)
+  rawspeed_add_executable(MD5Benchmark md5.cpp MD5Benchmark.cpp)
   target_link_libraries(MD5Benchmark benchmark)
 
   add_dependencies(benchmarks MD5Benchmark)

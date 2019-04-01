@@ -5,9 +5,9 @@ set(ALL_FUZZERS "" CACHE INTERNAL "" FORCE)
 
 if(CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
   # want all the symbols.
-  add_library(rawspeed_fuzz STATIC) # SHARED, but crashes due to global constructors/destructors
+  rawspeed_add_library(rawspeed_fuzz STATIC) # SHARED, but crashes due to global constructors/destructors
 else()
-  add_library(rawspeed_fuzz STATIC)
+  rawspeed_add_library(rawspeed_fuzz STATIC)
 endif()
 
 target_link_libraries(rawspeed_fuzz PUBLIC rawspeed)

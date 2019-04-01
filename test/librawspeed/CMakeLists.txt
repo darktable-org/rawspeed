@@ -1,8 +1,8 @@
 if(CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
   # want all the symbols.
-  add_library(rawspeed_test SHARED)
+  rawspeed_add_library(rawspeed_test SHARED)
 else()
-  add_library(rawspeed_test STATIC)
+  rawspeed_add_library(rawspeed_test STATIC)
 endif()
 
 target_link_libraries(rawspeed_test PUBLIC rawspeed)
@@ -16,7 +16,7 @@ file(MAKE_DIRECTORY "${UNITTEST_REPORT_PATH}")
 
 function(add_rs_test src)
   get_filename_component(TESTNAME ${src} NAME_WE)
-  add_executable(${TESTNAME} ${src})
+  rawspeed_add_executable(${TESTNAME} ${src})
   target_link_libraries(${TESTNAME} rawspeed)
   target_link_libraries(${TESTNAME} rawspeed_test)
   # GTEST_ADD_TESTS(${TESTNAME} "" AUTO)

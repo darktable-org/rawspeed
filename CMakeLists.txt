@@ -178,6 +178,8 @@ else()
   endif()
 endif()
 
+include(cmake-command-wrappers)
+
 include(build-type)
 
 if(RAWSPEED_USE_LIBCXX)
@@ -217,7 +219,7 @@ if(BUILD_BENCHMARKING)
   add_custom_target(benchmarks ALL)
 endif()
 
-add_library(rawspeed STATIC)
+rawspeed_add_library(rawspeed STATIC)
 
 include(src-dependencies)
 
