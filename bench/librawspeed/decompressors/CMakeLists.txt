@@ -7,3 +7,5 @@ if(HAVE_ZLIB)
     add_rs_bench(${IN})
   endforeach()
 endif()
+
+target_link_libraries(DeflateDecompressorBenchmark PRIVATE rawspeed_get_number_of_processor_cores)

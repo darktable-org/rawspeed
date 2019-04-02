@@ -40,17 +40,6 @@
 #include <omp.h>
 #endif
 
-// define this function, it is only declared in rawspeed:
-#ifdef HAVE_OPENMP
-extern "C" int rawspeed_get_number_of_processor_cores() {
-  return omp_get_max_threads();
-}
-#else
-extern "C" int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
-  return 1;
-}
-#endif
-
 namespace rawspeed {
 
 namespace identify {

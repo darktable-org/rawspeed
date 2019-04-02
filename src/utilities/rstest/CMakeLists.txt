@@ -9,6 +9,8 @@ if(TARGET RawSpeed::OpenMP_CXX)
   target_link_libraries(rstest RawSpeed::OpenMP_CXX)
 endif()
 
+target_link_libraries(rstest rawspeed_get_number_of_processor_cores)
+
 if(BUILD_TESTING)
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-suggest-attribute=const)
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-suggest-override)
@@ -36,7 +38,8 @@ if(BUILD_TESTING)
   rawspeed_add_test(NAME utilities/rstest/md5 COMMAND MD5Test --gtest_output=xml:${UNITTEST_REPORT_PATH})
   add_dependencies(tests MD5Test)
 
-  rawspeed_add_test(NAME utilities/rstest COMMAND rstest)
+  rawspeed_add_test(NAME utilities/rstest COMMAND rstest
+                    WORKING_DIRECTORY "$<TARGET_PROPERTY:rawspeed_get_number_of_processor_cores,BINARY_DIR>")
 endif()
 
 if(BUILD_BENCHMARKING)
