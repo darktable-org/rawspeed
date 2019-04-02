@@ -11,3 +11,11 @@ if(NOT COMMAND rawspeed_add_library)
     add_library(${target} ${ARGN})
   endfunction()
 endif() # NOT COMMAND rawspeed_add_library
+
+# Creates test. Use this instead of `add_test`.
+# WARNING: do NOT create multiple tests for same COMMAND that only differ in arg
+if(NOT COMMAND rawspeed_add_test)
+  function(rawspeed_add_test)
+    add_test(${ARGN})
+  endfunction()
+endif() # NOT COMMAND rawspeed_add_test

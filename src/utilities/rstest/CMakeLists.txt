@@ -33,10 +33,10 @@ if(BUILD_TESTING)
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-missing-variable-declarations)
   rawspeed_add_executable(MD5Test md5.cpp MD5Test.cpp)
   target_link_libraries(MD5Test gtest_main)
-  add_test(NAME utilities/rstest/md5 COMMAND MD5Test --gtest_output=xml:${UNITTEST_REPORT_PATH})
+  rawspeed_add_test(NAME utilities/rstest/md5 COMMAND MD5Test --gtest_output=xml:${UNITTEST_REPORT_PATH})
   add_dependencies(tests MD5Test)
 
-  add_test(NAME utilities/rstest COMMAND rstest)
+  rawspeed_add_test(NAME utilities/rstest COMMAND rstest)
 endif()
 
 if(BUILD_BENCHMARKING)

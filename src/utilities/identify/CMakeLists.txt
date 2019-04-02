@@ -15,7 +15,7 @@ if(TARGET RawSpeed::OpenMP_CXX)
 endif()
 
 if(BUILD_TESTING)
-  add_test(NAME utilities/${rsidentify} COMMAND ${rsidentify})
+  rawspeed_add_test(NAME utilities/${rsidentify} COMMAND ${rsidentify})
 endif()
 
 install(TARGETS ${rsidentify} DESTINATION ${CMAKE_INSTALL_BINDIR})

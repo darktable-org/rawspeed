@@ -19,7 +19,7 @@ macro(add_fuzz_target__base fuzzer)
   list(APPEND ALL_FUZZERS "${fuzzer}")
   set(ALL_FUZZERS "${ALL_FUZZERS}" CACHE INTERNAL "" FORCE)
 
-  add_test(NAME fuzzers/${fuzzer} COMMAND ${fuzzer} -help=1)
+  rawspeed_add_test(NAME fuzzers/${fuzzer} COMMAND ${fuzzer} -help=1)
 endmacro()
 
 if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_BUILD_TYPE STREQUAL "FUZZ"))
