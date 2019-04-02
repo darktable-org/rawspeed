@@ -45,6 +45,7 @@ endif()
 if(BUILD_BENCHMARKING)
   rawspeed_add_executable(MD5Benchmark md5.cpp MD5Benchmark.cpp)
   target_link_libraries(MD5Benchmark benchmark)
+  rawspeed_add_test(NAME benchmarks/rstest/MD5Benchmark COMMAND MD5Benchmark --help)
 
   add_dependencies(benchmarks MD5Benchmark)
 endif()
