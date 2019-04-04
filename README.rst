@@ -74,6 +74,12 @@ You can get access to the lastest version using `from here <rawspeed_>`_. You wi
 
 CMake-based build system is provided.
 
+Integration into LLVM LNT / Test-Suite
+--------------------------------------
+It is possible to natively integrate the RawSpeed into LLVM test-suite, and use
+`LLVM LNT <http://llvm.org/docs/lnt/>`_ to do testing, benchmarking, performance tracking.
+For quick overview please see `LLVM LNT / Test-Suite Integration <lnt>`_
+
 Background of RawSpeed
 ----------------------
 The main objectives were to make a very fast loader that worked for 75% of the cameras out there, and was able to decode a RAW file at close to the optimal speed. The last 25% of the cameras out there could be serviced by a more generic loader, or convert their images to DNG – which as a sidenote usually compresses better than your camera.
