@@ -28,7 +28,8 @@ static const rawspeed::CameraMetaData metadata{};
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
-  // static const CameraMetaData metadata(CMAKE_SOURCE_DIR "/data/cameras.xml");
+  // static const CameraMetaData metadata(RAWSPEED_SOURCE_DIR
+  // "/data/cameras.xml");
 
   try {
     const rawspeed::Buffer buffer(Data, Size);

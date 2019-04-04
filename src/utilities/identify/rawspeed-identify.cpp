@@ -87,7 +87,7 @@ std::string find_cameras_xml(const char *argv0) {
 
 #ifdef RAWSPEED_STANDALONE_BUILD
   // running from build dir?
-  found_camfile = std::string(CMAKE_SOURCE_DIR "/data/cameras.xml");
+  found_camfile = std::string(RAWSPEED_SOURCE_DIR "/data/cameras.xml");
 #endif
 
   if (stat(found_camfile.c_str(), &statbuf)) {
