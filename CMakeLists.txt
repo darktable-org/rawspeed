@@ -14,10 +14,8 @@ endif(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 # if rawspeed is added as a submodule to another build,
 # this CMakeLists.txt should be added via add_subdirectory().
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
-  set(RAWSPEED_SOURCE_DIR "${CMAKE_SOURCE_DIR}" CACHE PATH "" FORCE)
   set(RAWSPEED_STANDALONE_BUILD TRUE CACHE BOOL "" FORCE)
 else()
-  set(RAWSPEED_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE PATH "" FORCE)
   set(RAWSPEED_STANDALONE_BUILD FALSE CACHE BOOL "" FORCE)
 endif()
 
@@ -26,6 +24,8 @@ include(FeatureSummary)
 include(CheckCXXCompilerFlag)
 
 project(rawspeed CXX)
+
+set(RAWSPEED_SOURCE_DIR "${PROJECT_SOURCE_DIR}" CACHE PATH "" FORCE)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/" ${CMAKE_MODULE_PATH})
