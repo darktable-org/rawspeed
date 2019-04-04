@@ -11,21 +11,22 @@ If(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   message(FATAL_ERROR "In-source builds are not permitted. Make a separate folder for building:\nmkdir build; cd build; cmake ..\nBefore that, remove the files already created:\nrm -rf CMakeCache.txt CMakeFiles")
 endif(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 
-# if rawspeed is added as a submodule to another build,
-# this CMakeLists.txt should be added via add_subdirectory().
-if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
-  set(RAWSPEED_STANDALONE_BUILD TRUE CACHE BOOL "" FORCE)
-else()
-  set(RAWSPEED_STANDALONE_BUILD FALSE CACHE BOOL "" FORCE)
-endif()
-
 include(GNUInstallDirs)
 include(FeatureSummary)
 include(CheckCXXCompilerFlag)
 
+# NOTE: if rawspeed is being added as a submodule to another build,
+# this CMakeLists.txt should be added via add_subdirectory().
+
 project(rawspeed CXX)
 
 set(RAWSPEED_SOURCE_DIR "${PROJECT_SOURCE_DIR}" CACHE PATH "" FORCE)
+
+if("${CMAKE_SOURCE_DIR}" STREQUAL "${RAWSPEED_SOURCE_DIR}")
+  set(RAWSPEED_STANDALONE_BUILD TRUE CACHE BOOL "" FORCE)
+else()
+  set(RAWSPEED_STANDALONE_BUILD FALSE CACHE BOOL "" FORCE)
+endif()
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/" ${CMAKE_MODULE_PATH})
