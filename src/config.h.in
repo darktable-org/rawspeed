@@ -49,7 +49,7 @@
 
 #cmakedefine RAWSPEED_STANDALONE_BUILD
 #ifdef RAWSPEED_STANDALONE_BUILD
-#define RAWSPEED_SOURCE_DIR "@CMAKE_SOURCE_DIR@"
+#define RAWSPEED_SOURCE_DIR "@RAWSPEED_SOURCE_DIR@"
 #else
 // If rawspeed is being built as part of some larger build, we can not retain
 // the RAWSPEED_SOURCE_DIR, because that would affect the reproducible builds.
