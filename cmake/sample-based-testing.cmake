@@ -15,15 +15,24 @@ set(REFERENCE_SAMPLE_HASHES)
 
 foreach(STR ${_REFERENCE_SAMPLES})
   # There are two schemes:
-  #   <hash><space><space><filename>      <- read in text mode
-  #   <hash><space><asterisk><filename>   <- read in binary mode
-  # Which for our purpose means:
-  #   <40 chars><char><char><filename>    <- i.e. we just skip first 42 chars.
+  #   <40-char SHA1><space><space><filename>      <- read in text mode
+  #   <40-char SHA1><space><asterisk><filename>   <- read in binary mode
+  # We ignore read mode, so it becomes:
+  #   <40-char SHA1><char><char><filename>
+  string(SUBSTRING "${STR}" 0 40 SAMPLEHASH)
   string(SUBSTRING "${STR}" 42 -1 SAMPLENAME)
   set(SAMPLENAME "${RAWSPEED_REFERENCE_SAMPLE_ARCHIVE}/${SAMPLENAME}")
 
   if(NOT EXISTS "${SAMPLENAME}")
     message(SEND_ERROR "The sample \"${SAMPLENAME}\" does not exist!")
+  endif()
+
+  # Check the hash.
+  file(SHA1 "${SAMPLENAME}" ACTUALSAMPLEHASH)
+  string(COMPARE EQUAL "${ACTUALSAMPLEHASH}" "${SAMPLEHASH}" DOHASHESMATCH)
+  if(NOT "${DOHASHESMATCH}")
+    message(SEND_ERROR "SHA1 hash for sample \"${SAMPLENAME}\" mismatch!")
+    message(SEND_ERROR "${ACTUALSAMPLEHASH} instead of ${SAMPLEHASH}")
   endif()
 
   list(APPEND REFERENCE_SAMPLES "${SAMPLENAME}")
