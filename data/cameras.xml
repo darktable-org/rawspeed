@@ -8962,6 +8962,17 @@
 			<Hint name="double_width_unpacked" value=""/>
 		</Hints>
 	</Camera>
+	<Camera make="FUJIFILM" model="FinePix F770EXR">
+		<ID make="Fujifilm" model="FinePix F770EXR">Fujifilm FinePix F770EXR</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="38" y="0" width="-34" height="0"/>
+		<Sensor black="256" white="3900"/>
+	</Camera>
 	<Camera make="FUJIFILM" model="FinePix F900EXR">
 		<ID make="Fujifilm" model="FinePix F900EXR">Fujifilm FinePix F900EXR</ID>
 		<CFA width="2" height="2">
