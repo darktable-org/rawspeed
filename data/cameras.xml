@@ -6233,7 +6233,29 @@
 			<Alias>DMC-LX10</Alias>
 		</Aliases>
 	</Camera>
-	<Camera make="LEICA" model="DIGILUX 2" decoder_version="2">
+	<Camera make="LEICA" model="C (Typ 112)">
+		<ID make="Leica" model="C (Typ 112)">Leica C (Typ 112)</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-130" height="0"/>
+		<Sensor black="146" white="3956"/>
+	</Camera>
+	<Camera make="LEICA" model="C (Typ 112)" mode="4:3">
+		<ID make="Leica" model="C (Typ 112)">Leica C (Typ 112)</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-130" height="0"/>
+		<Sensor black="146" white="3956"/>
+	</Camera>
+	<Camera make="LEICA" model="DIGILUX 2" mode="4:3" decoder_version="2">
 		<ID make="Leica" model="Digilux 2">Leica Digilux 2</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
