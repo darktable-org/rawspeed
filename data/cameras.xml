@@ -4230,6 +4230,11 @@
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="255" white="4095"/>
 	</Camera>
+	<Camera make="OLYMPUS CORPORATION" model="E-M1X">
+		<ID make="Olympus" model="E-M1X">Olympus E-M1X</ID>
+		<Crop x="0" y="0" width="-22" height="0"/>
+		<Sensor black="252" white="4000"/>
+	</Camera>
 	<Camera make="OLYMPUS CORPORATION" model="E-M1MarkII">
 		<ID make="Olympus" model="E-M1MarkII">Olympus E-M1 Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
