@@ -1,9 +1,6 @@
 include(FeatureSummary)
 
 if(BUILD_TESTING)
-  # want GTEST_ADD_TESTS() macro. NOT THE ACTUAL MODULE!
-  include(GTEST_ADD_TESTS)
-
   # for the actual gtest:
 
   # at least in debian, they are the package only installs their source code,

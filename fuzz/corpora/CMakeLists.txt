@@ -13,7 +13,7 @@ foreach(TOP_CORPORA_DIR ${CORPORA_ROOTS})
         file(GLOB_RECURSE CORPUSES RELATIVE "${CORPORA}" FOLLOW_SYMLINKS "${CORPORA}/*")
 
         set(test "corpora/${dirname}")
-        add_test(NAME ${test}
+        rawspeed_add_test(NAME ${test}
           COMMAND ${dirname} ${CORPUSES}
           WORKING_DIRECTORY "${CORPORA}")
         set_tests_properties(${test} PROPERTIES DEPENDS ${dirname})

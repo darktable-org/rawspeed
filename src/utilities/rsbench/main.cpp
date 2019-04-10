@@ -100,7 +100,7 @@ static inline void BM_RawSpeed(benchmark::State& state, const char* fileName,
   currThreadCount = threads;
 
 #ifdef HAVE_PUGIXML
-  static const CameraMetaData metadata(CMAKE_SOURCE_DIR "/data/cameras.xml");
+  static const CameraMetaData metadata(RAWSPEED_SOURCE_DIR "/data/cameras.xml");
 #else
   static const CameraMetaData metadata{};
 #endif

@@ -5,9 +5,9 @@ set(ALL_FUZZERS "" CACHE INTERNAL "" FORCE)
 
 if(CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
   # want all the symbols.
-  add_library(rawspeed_fuzz STATIC) # SHARED, but crashes due to global constructors/destructors
+  rawspeed_add_library(rawspeed_fuzz STATIC) # SHARED, but crashes due to global constructors/destructors
 else()
-  add_library(rawspeed_fuzz STATIC)
+  rawspeed_add_library(rawspeed_fuzz STATIC)
 endif()
 
 target_link_libraries(rawspeed_fuzz PUBLIC rawspeed)
@@ -19,7 +19,7 @@ macro(add_fuzz_target__base fuzzer)
   list(APPEND ALL_FUZZERS "${fuzzer}")
   set(ALL_FUZZERS "${ALL_FUZZERS}" CACHE INTERNAL "" FORCE)
 
-  add_test(NAME fuzzers/${fuzzer} COMMAND ${fuzzer} -help=1)
+  rawspeed_add_test(NAME fuzzers/${fuzzer} COMMAND ${fuzzer} -help=1)
 endmacro()
 
 if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_BUILD_TYPE STREQUAL "FUZZ"))

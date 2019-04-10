@@ -46,17 +46,6 @@
 #include <omp.h>
 #endif
 
-// define this function, it is only declared in rawspeed:
-#ifdef HAVE_OPENMP
-extern "C" int rawspeed_get_number_of_processor_cores() {
-  return omp_get_max_threads();
-}
-#else
-extern "C" int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
-  return 1;
-}
-#endif
-
 using std::chrono::steady_clock;
 using std::string;
 using std::ostringstream;
@@ -527,7 +516,7 @@ int main(int argc, char **argv) {
   o.dump = hasFlag("-d");
 
 #ifdef HAVE_PUGIXML
-  const CameraMetaData metadata(CMAKE_SOURCE_DIR "/data/cameras.xml");
+  const CameraMetaData metadata(RAWSPEED_SOURCE_DIR "/data/cameras.xml");
 #else
   const CameraMetaData metadata{};
 #endif

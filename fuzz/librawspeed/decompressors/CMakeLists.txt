@@ -1,6 +1,6 @@
 macro(add_simple_fuzzer name)
   set(TheFuzzer "${name}Fuzzer")
-  add_executable(${TheFuzzer} "${name}.cpp")
+  rawspeed_add_executable(${TheFuzzer} "${name}.cpp")
 
   add_fuzz_target(${TheFuzzer})
 

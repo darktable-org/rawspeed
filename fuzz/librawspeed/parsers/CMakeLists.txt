@@ -3,7 +3,7 @@ add_dependencies(fuzzers ParserFuzzers)
 
 function(add_parser_fuzzer parser variant boolvar boolvar2)
   set(fuzzer "${parser}Fuzzer${variant}")
-  add_executable(${fuzzer} main.cpp)
+  rawspeed_add_executable(${fuzzer} main.cpp)
   target_compile_definitions(${fuzzer}
     PRIVATE
       -DPARSER=${parser}

@@ -2,12 +2,14 @@ if(NOT BUILD_TESTING)
   set_directory_properties(PROPERTIES EXCLUDE_FROM_ALL ON)
 endif()
 
-add_executable(rstest rstest.cpp md5.cpp)
+rawspeed_add_executable(rstest rstest.cpp md5.cpp)
 target_link_libraries(rstest rawspeed)
 
 if(TARGET RawSpeed::OpenMP_CXX)
   target_link_libraries(rstest RawSpeed::OpenMP_CXX)
 endif()
+
+target_link_libraries(rstest rawspeed_get_number_of_processor_cores)
 
 if(BUILD_TESTING)
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-suggest-attribute=const)
@@ -31,17 +33,19 @@ if(BUILD_TESTING)
 
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-c99-extensions)
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-missing-variable-declarations)
-  add_executable(MD5Test md5.cpp MD5Test.cpp)
+  rawspeed_add_executable(MD5Test md5.cpp MD5Test.cpp)
   target_link_libraries(MD5Test gtest_main)
-  add_test(NAME utilities/rstest/md5 COMMAND MD5Test --gtest_output=xml:${UNITTEST_REPORT_PATH})
+  rawspeed_add_test(NAME utilities/rstest/md5 COMMAND MD5Test --gtest_output=xml:${UNITTEST_REPORT_PATH})
   add_dependencies(tests MD5Test)
 
-  add_test(NAME utilities/rstest COMMAND rstest)
+  rawspeed_add_test(NAME utilities/rstest COMMAND rstest
+                    WORKING_DIRECTORY "$<TARGET_PROPERTY:rawspeed_get_number_of_processor_cores,BINARY_DIR>")
 endif()
 
 if(BUILD_BENCHMARKING)
-  add_executable(MD5Benchmark md5.cpp MD5Benchmark.cpp)
+  rawspeed_add_executable(MD5Benchmark md5.cpp MD5Benchmark.cpp)
   target_link_libraries(MD5Benchmark benchmark)
+  rawspeed_add_test(NAME benchmarks/rstest/MD5Benchmark COMMAND MD5Benchmark --help)
 
   add_dependencies(benchmarks MD5Benchmark)
 endif()

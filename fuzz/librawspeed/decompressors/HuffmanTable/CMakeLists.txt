@@ -7,7 +7,7 @@ set(NoFullDecode false)
 function(add_ht_solo_fuzzer impl pump decode)
   set(fuzzer "HuffmanTable${impl}Fuzzer-${pump}-${decode}")
 
-  add_executable(${fuzzer} Solo.cpp)
+  rawspeed_add_executable(${fuzzer} Solo.cpp)
   target_compile_definitions(${fuzzer}
     PRIVATE
       -DIMPL=HuffmanTable${impl}
@@ -23,7 +23,7 @@ endfunction()
 function(add_ht_dual_fuzzer impl0 impl1 pump decode)
   set(fuzzer "HuffmanTableFuzzer-${impl0}Vs${impl1}-${pump}-${decode}")
 
-  add_executable(${fuzzer} Dual.cpp)
+  rawspeed_add_executable(${fuzzer} Dual.cpp)
   target_compile_definitions(${fuzzer}
     PRIVATE
     -DIMPL0=HuffmanTable${impl0}

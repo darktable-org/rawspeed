@@ -40,17 +40,6 @@
 #include <omp.h>
 #endif
 
-// define this function, it is only declared in rawspeed:
-#ifdef HAVE_OPENMP
-extern "C" int rawspeed_get_number_of_processor_cores() {
-  return omp_get_max_threads();
-}
-#else
-extern "C" int __attribute__((const)) rawspeed_get_number_of_processor_cores() {
-  return 1;
-}
-#endif
-
 namespace rawspeed {
 
 namespace identify {
@@ -98,7 +87,7 @@ std::string find_cameras_xml(const char *argv0) {
 
 #ifdef RAWSPEED_STANDALONE_BUILD
   // running from build dir?
-  found_camfile = std::string(CMAKE_SOURCE_DIR "/data/cameras.xml");
+  found_camfile = std::string(RAWSPEED_SOURCE_DIR "/data/cameras.xml");
 #endif
 
   if (stat(found_camfile.c_str(), &statbuf)) {

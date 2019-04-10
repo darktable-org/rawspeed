@@ -19,7 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for CMAKE_SOURCE_DIR
+#include "rawspeedconfig.h" // for RAWSPEED_SOURCE_DIR
 
 #include "metadata/Camera.h"         // for Camera
 #include "metadata/CameraMetaData.h" // for CameraMetaData
@@ -34,7 +34,7 @@ namespace rawspeed_test {
 
 #ifdef HAVE_PUGIXML
 
-static const std::string camfile(CMAKE_SOURCE_DIR "/data/cameras.xml");
+static const std::string camfile(RAWSPEED_SOURCE_DIR "/data/cameras.xml");
 
 TEST(CameraMetaDataTest, CamerasXml) {
   ASSERT_NO_THROW({ CameraMetaData Data(camfile.c_str()); });

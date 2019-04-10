@@ -31,3 +31,22 @@ FILE(GLOB SOURCES
 target_sources(rawspeed PRIVATE
   ${SOURCES}
 )
+
+# Provide naive implementation of rawspeed_get_number_of_processor_cores().
+
+if(CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
+  # want all the symbols.
+  rawspeed_add_library(rawspeed_get_number_of_processor_cores SHARED)
+else()
+  rawspeed_add_library(rawspeed_get_number_of_processor_cores STATIC)
+endif()
+
+FILE(GLOB SOURCES
+  "GetNumberOfProcessorCores.cpp"
+)
+
+target_sources(rawspeed_get_number_of_processor_cores PRIVATE
+  ${SOURCES}
+)
+
+target_link_libraries(rawspeed_get_number_of_processor_cores PRIVATE rawspeed)

@@ -28,7 +28,7 @@
 #endif
 
 static constexpr const char* const CAMERASXML =
-    CMAKE_SOURCE_DIR "/data/cameras.xml";
+    RAWSPEED_SOURCE_DIR "/data/cameras.xml";
 
 static void BM_pugixml_load_cameras_xml(benchmark::State& state) {
   for (auto _ : state) {
