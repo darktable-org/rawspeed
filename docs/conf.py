@@ -46,7 +46,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'RawSpeed'
-copyright = '2009-2016 Klaus Post, 2016-2017 Roman Lebedev'
+copyright = '2009-2016 Klaus Post, 2016-2019 Roman Lebedev'
 author = '(c) Authors'
 
 # The version info for the project you're documenting, acts as replacement for

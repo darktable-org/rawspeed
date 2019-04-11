@@ -13,6 +13,7 @@ Welcome to RawSpeed's documentation!
    self
    CameraSupport
    Doxygen
+   lnt/index.rst
 
 .. include:: ../README.rst
 
