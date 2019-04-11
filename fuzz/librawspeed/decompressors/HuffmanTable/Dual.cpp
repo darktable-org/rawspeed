@@ -57,7 +57,20 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   assert(Data);
 
   try {
-    const rawspeed::Buffer b(Data, Size);
+    // There is an inherent problem with truncated inputs, they may be ambiguous
+    // which is not good since we are trying to check that different
+    // implementations agree with each other. This problem only exists for the
+    // last code, therefore lets just force-disambiguate it, by appending zeros.
+    // First, create a copy of input data in strictly larger buffer.
+    const size_t SizeWithPadding =
+        Size + rawspeed::BitStreamCacheBase::MaxProcessBytes;
+    auto BufferWithPadding = rawspeed::Buffer::Create(SizeWithPadding);
+    std::copy(Data, Data + Size, BufferWithPadding.get());
+    // And zero-fill the leftover padding bytes.
+    std::fill(BufferWithPadding.get() + Size,
+              BufferWithPadding.get() + SizeWithPadding, 0);
+
+    const rawspeed::Buffer b(std::move(BufferWithPadding), SizeWithPadding);
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
 
     rawspeed::ByteStream bs0(db);
