@@ -75,7 +75,21 @@ function(rawspeed_add_test)
   llvm_add_test_for_target(${RAWSPEED_ADD_TEST_EXECUTABLE})
 endfunction()
 
-add_subdirectory("${RAWSPEED_SOURCE_DIR}" build ${EXCLUDE_FROM_ALL})
+set(RAWSPEED_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/build")
+add_subdirectory("${RAWSPEED_SOURCE_DIR}" "${RAWSPEED_BINARY_DIR}" ${EXCLUDE_FROM_ALL})
+
+# Collect compile/link time, compiler stats globally.
+# We have to do this here, once, at the top-level, because normally we'd do
+# this per test that was run, and that would be overly optimistic since it would
+# only look in the test's dir and lower. Which is not correct for us because of
+# all this nice tree dir structure.
+# Oh, also we need to at least try to produce different exe every time,
+# so that LNT will always consider this test as changed..
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/RawSpeed.c" "extern const char* const unique_hash __attribute__ ((visibility (\"default\"))) = __TIMESTAMP__;
+int main(int argc, char* argv[]) { return 0; }")
+try_compile(IGNORED_RESULT_VAR "${CMAKE_CURRENT_BINARY_DIR}/RawSpeed.c.tmp" "${CMAKE_CURRENT_BINARY_DIR}/RawSpeed.c" COPY_FILE "${CMAKE_CURRENT_BINARY_DIR}/RawSpeed")
+llvm_test_run(WORKDIR "${CMAKE_CURRENT_BINARY_DIR}")
+llvm_add_test("${CMAKE_CURRENT_BINARY_DIR}/RawSpeed.test" "${CMAKE_CURRENT_BINARY_DIR}/RawSpeed")
 
 if(RAWSPEED_ENABLE_SAMPLE_BASED_TESTING)
   add_subdirectory(raw-sample-archive)
@@ -107,3 +121,6 @@ endif()
 
 file(COPY lit.local.cfg DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 file(COPY litsupport_rawspeed DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+
+file(COPY build-lit.local.cfg DESTINATION "${RAWSPEED_BINARY_DIR}")
+file(RENAME "${RAWSPEED_BINARY_DIR}/build-lit.local.cfg" "${RAWSPEED_BINARY_DIR}/lit.local.cfg")
