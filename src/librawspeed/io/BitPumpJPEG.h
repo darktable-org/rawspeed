@@ -38,8 +38,9 @@ template <> struct BitStreamTraits<BitPumpJPEG> final {
 };
 
 template <>
-inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uchar8* input)
-{
+inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uchar8* input,
+                                                     size_type bufferSize,
+                                                     size_type* bufPos) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
 
   // short-cut path for the most common case (no FF marker in the next 4 bytes)
@@ -63,15 +64,18 @@ inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uchar8* input)
       const int c1 = input[p++];
       if (c1 != 0) {
         // Found FF/xx with xx != 00. This is the end of stream marker.
-        // Fill the cache with zeros and keep on doing that from now on.
 
-        // Normally we would rewind the pos to the FF byte, but in order to
-        // prevent potential endless loop on corrupt lossless jpeg, let's not.
-
-        cache.cache &= ~0xFFULL; // clear low 8 bits.
+        // Clear low 8 bits (0xFF, from c0) that we optimistically pushed.
+        // We should not pop() them, to avoid issues with fillLevel becoming 0.
+        cache.cache &= ~0xFFULL;
+        // And fully fill the empty space in cache with zeros.
         cache.cache <<= 64 - cache.fillLevel;
         cache.fillLevel = 64;
-        break;
+
+        // No further reading from this buffer shall happen.
+        // Do signal that by stating that we are at the end of the buffer.
+        *bufPos = bufferSize;
+        return 0;
       }
     }
   }

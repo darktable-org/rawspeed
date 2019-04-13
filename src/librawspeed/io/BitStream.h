@@ -73,6 +73,7 @@ struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
 {
   inline void push(uint64 bits, uint32 count) noexcept {
     assert(count + fillLevel <= Size);
+    assert(count < BitStreamCacheBase::Size);
     cache = cache << count | bits;
     fillLevel += count;
   }
@@ -97,7 +98,8 @@ class BitStream final : public ByteStream {
   // this method hase to be implemented in the concrete BitStream template
   // specializations. It will return the number of bytes processed. It needs
   // to process up to BitStreamCacheBase::MaxProcessBytes bytes of input.
-  size_type fillCache(const uchar8* input);
+  size_type fillCache(const uchar8* input, size_type bufferSize,
+                      size_type* bufPos);
 
 public:
   BitStream() = default;
@@ -117,17 +119,17 @@ private:
       tmp.fill(0);
       assert(!(size - pos < BitStreamCacheBase::MaxProcessBytes));
       memcpy(tmp.data(), data + pos, BitStreamCacheBase::MaxProcessBytes);
-      pos += fillCache(tmp.data());
+      pos += fillCache(tmp.data(), size, &pos);
     } else if (pos < size) {
       std::array<uchar8, BitStreamCacheBase::MaxProcessBytes> tmp;
       tmp.fill(0);
       assert(size - pos < BitStreamCacheBase::MaxProcessBytes);
       memcpy(tmp.data(), data + pos, size - pos);
-      pos += fillCache(tmp.data());
+      pos += fillCache(tmp.data(), size, &pos);
     } else if (pos <= size + BitStreamCacheBase::MaxProcessBytes) {
       std::array<uchar8, BitStreamCacheBase::MaxProcessBytes> tmp;
       tmp.fill(0);
-      pos += fillCache(tmp.data());
+      pos += fillCache(tmp.data(), size, &pos);
     } else {
       // assert(size < pos);
       ThrowIOE("Buffer overflow read in BitStream");
@@ -152,11 +154,11 @@ public:
                     "update these too");
       // FIXME: this looks very wrong. We don't check pos at all here.
       // I suspect this should be:  if (pos <= size)
-      pos += fillCache(data + pos);
+      pos += fillCache(data + pos, size, &pos);
 #else
       // disabling this run-time bounds check saves about 1% on intel x86-64
       if (pos + BitStreamCacheBase::MaxProcessBytes <= size)
-        pos += fillCache(data + pos);
+        pos += fillCache(data + pos, size, &pos);
       else
         fillSafeNoinline();
 #endif

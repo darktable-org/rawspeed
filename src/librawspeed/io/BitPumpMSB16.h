@@ -35,8 +35,9 @@ struct MSB16BitPumpTag;
 using BitPumpMSB16 = BitStream<MSB16BitPumpTag, BitStreamCacheRightInLeftOut>;
 
 template <>
-inline BitPumpMSB16::size_type BitPumpMSB16::fillCache(const uchar8* input)
-{
+inline BitPumpMSB16::size_type BitPumpMSB16::fillCache(const uchar8* input,
+                                                       size_type bufferSize,
+                                                       size_type* bufPos) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
 
   for (size_type i = 0; i < 4; i += sizeof(ushort16))
