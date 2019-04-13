@@ -1,10 +1,11 @@
 # Download and unpack googletest at configure time
-configure_file(${RAWSPEED_SOURCE_DIR}/cmake/Modules/GoogleTest.cmake.in ${CMAKE_BINARY_DIR}/googletest/CMakeLists.txt @ONLY)
+set(GOOGLETEST_PREFIX "${RAWSPEED_BINARY_DIR}/src/external/googletest")
+configure_file(${RAWSPEED_SOURCE_DIR}/cmake/Modules/GoogleTest.cmake.in ${GOOGLETEST_PREFIX}/CMakeLists.txt @ONLY)
 
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}"
   -DALLOW_DOWNLOADING_GOOGLETEST=${ALLOW_DOWNLOADING_GOOGLETEST} -DGOOGLETEST_PATH:PATH=${GOOGLETEST_PATH} .
   RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest
+  WORKING_DIRECTORY ${GOOGLETEST_PREFIX}
 )
 
 if(result)
@@ -14,7 +15,7 @@ endif()
 execute_process(
   COMMAND ${CMAKE_COMMAND} --build .
   RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest
+  WORKING_DIRECTORY ${GOOGLETEST_PREFIX}
 )
 
 if(result)
@@ -45,7 +46,7 @@ set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE_SAVE "${CMAKE_CXX_INCLUDE_WHAT_YOU_USE}")
 unset(CMAKE_CXX_CLANG_TIDY)
 unset(CMAKE_CXX_INCLUDE_WHAT_YOU_USE)
 
-include(${CMAKE_BINARY_DIR}/googletest/googletest-paths.cmake)
+include(${GOOGLETEST_PREFIX}/googletest-paths.cmake)
 
 # Add googletest directly to our build. This defines
 # the gtest and gtest_main targets.

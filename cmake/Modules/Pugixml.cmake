@@ -1,11 +1,12 @@
 # Download and unpack pugixml at configure time
-configure_file(${RAWSPEED_SOURCE_DIR}/cmake/Modules/Pugixml.cmake.in ${CMAKE_BINARY_DIR}/pugixml/CMakeLists.txt @ONLY)
+set(PUGIXML_PREFIX "${RAWSPEED_BINARY_DIR}/src/external/pugixml")
+configure_file(${RAWSPEED_SOURCE_DIR}/cmake/Modules/Pugixml.cmake.in ${PUGIXML_PREFIX}/CMakeLists.txt @ONLY)
 
 execute_process(
   COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}"
   -DALLOW_DOWNLOADING_PUGIXML=${ALLOW_DOWNLOADING_PUGIXML} -DPUGIXML_PATH:PATH=${PUGIXML_PATH} .
   RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/pugixml
+  WORKING_DIRECTORY ${PUGIXML_PREFIX}
 )
 
 if(result)
@@ -15,7 +16,7 @@ endif()
 execute_process(
   COMMAND ${CMAKE_COMMAND} --build .
   RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/pugixml
+  WORKING_DIRECTORY ${PUGIXML_PREFIX}
 )
 
 if(result)
@@ -39,7 +40,7 @@ set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE_SAVE "${CMAKE_CXX_INCLUDE_WHAT_YOU_USE}")
 unset(CMAKE_CXX_CLANG_TIDY)
 unset(CMAKE_CXX_INCLUDE_WHAT_YOU_USE)
 
-include(${CMAKE_BINARY_DIR}/pugixml/pugixml-paths.cmake)
+include(${PUGIXML_PREFIX}/pugixml-paths.cmake)
 
 # Add pugixml directly to our build. This defines
 # the gtest and gtest_main targets.

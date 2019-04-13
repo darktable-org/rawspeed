@@ -1,10 +1,11 @@
 # Download and unpack googlebenchmark at configure time
-configure_file(${RAWSPEED_SOURCE_DIR}/cmake/Modules/GoogleBenchmark.cmake.in ${CMAKE_BINARY_DIR}/googlebenchmark/CMakeLists.txt @ONLY)
+set(GOOGLEBENCHMARK_PREFIX "${RAWSPEED_BINARY_DIR}/src/external/googlebenchmark")
+configure_file(${RAWSPEED_SOURCE_DIR}/cmake/Modules/GoogleBenchmark.cmake.in ${GOOGLEBENCHMARK_PREFIX}/CMakeLists.txt @ONLY)
 
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}"
   -DALLOW_DOWNLOADING_GOOGLEBENCHMARK=${ALLOW_DOWNLOADING_GOOGLEBENCHMARK} -DGOOGLEBENCHMARK_PATH:PATH=${GOOGLEBENCHMARK_PATH} .
   RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googlebenchmark
+  WORKING_DIRECTORY ${GOOGLEBENCHMARK_PREFIX}
 )
 
 if(result)
@@ -14,7 +15,7 @@ endif()
 execute_process(
   COMMAND ${CMAKE_COMMAND} --build .
   RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googlebenchmark
+  WORKING_DIRECTORY ${GOOGLEBENCHMARK_PREFIX}
 )
 
 if(result)
@@ -40,7 +41,7 @@ set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE_SAVE "${CMAKE_CXX_INCLUDE_WHAT_YOU_USE}")
 unset(CMAKE_CXX_CLANG_TIDY)
 unset(CMAKE_CXX_INCLUDE_WHAT_YOU_USE)
 
-include(${CMAKE_BINARY_DIR}/googlebenchmark/googlebenchmark-paths.cmake)
+include(${GOOGLEBENCHMARK_PREFIX}/googlebenchmark-paths.cmake)
 
 # Add googlebenchmark directly to our build. This defines the benchmark target.
 add_subdirectory(${GOOGLEBENCHMARK_SOURCE_DIR}

@@ -17,9 +17,10 @@ if(EXISTS "${GOOGLEBENCHMARK_PATH}" AND IS_DIRECTORY "${GOOGLEBENCHMARK_PATH}" A
 
   ExternalProject_Add(
     googlebenchmark
-    PREFIX            "${CMAKE_BINARY_DIR}/googlebenchmark"
+    PREFIX            "${CMAKE_BINARY_DIR}"
+    DOWNLOAD_DIR      "${CMAKE_BINARY_DIR}/download"
     SOURCE_DIR        "${GOOGLEBENCHMARK_PATH}" # use existing src dir.
-    BINARY_DIR        "${CMAKE_BINARY_DIR}/googlebenchmark-build"
+    BINARY_DIR        "${CMAKE_BINARY_DIR}/build"
     CONFIGURE_COMMAND ""
     BUILD_COMMAND     ""
     INSTALL_COMMAND   ""
@@ -34,9 +35,10 @@ else()
       googlebenchmark
       URL               https://github.com/google/benchmark/archive/v1.4.1.tar.gz
       URL_HASH          SHA512=e9d71b4679cb4e4d755f7bb4101e131b37e209b6aebd0853e0c63eb11c42b75faa5da4ff8c265149808a475f3a1cfb140c5b49f877acfda908a4bb7add983aae
-      PREFIX            "${CMAKE_BINARY_DIR}/googlebenchmark"
-      SOURCE_DIR        "${CMAKE_BINARY_DIR}/googlebenchmark-src"
-      BINARY_DIR        "${CMAKE_BINARY_DIR}/googlebenchmark-build"
+      PREFIX            "${CMAKE_BINARY_DIR}"
+      DOWNLOAD_DIR      "${CMAKE_BINARY_DIR}/download"
+      SOURCE_DIR        "${CMAKE_BINARY_DIR}/src"
+      BINARY_DIR        "${CMAKE_BINARY_DIR}/build"
       CONFIGURE_COMMAND ""
       BUILD_COMMAND     ""
       INSTALL_COMMAND   ""

@@ -17,9 +17,10 @@ if(EXISTS "${LLVMOPENMP_PATH}" AND IS_DIRECTORY "${LLVMOPENMP_PATH}" AND EXISTS 
 
   ExternalProject_Add(
     llvm-openmp
-    PREFIX            "${CMAKE_BINARY_DIR}/llvm-openmp"
+    PREFIX            "${CMAKE_BINARY_DIR}"
+    DOWNLOAD_DIR      "${CMAKE_BINARY_DIR}/download"
     SOURCE_DIR        "${LLVMOPENMP_PATH}" # use existing src dir.
-    BINARY_DIR        "${CMAKE_BINARY_DIR}/llvm-openmp-build"
+    BINARY_DIR        "${CMAKE_BINARY_DIR}/build"
     CONFIGURE_COMMAND ""
     BUILD_COMMAND     ""
     INSTALL_COMMAND   ""
@@ -34,9 +35,10 @@ else()
       llvm-openmp
       URL               https://releases.llvm.org/7.0.0/openmp-7.0.0.src.tar.xz
       URL_HASH          SHA512=bda383d62c822db41504d7774974809cd2af042b03a0b4ca450cc1478c5977682f5c646734801c1b7a16233141d62359c17e87e1435c48a222e159a8763f8857
-      PREFIX            "${CMAKE_BINARY_DIR}/llvm-openmp"
-      SOURCE_DIR        "${CMAKE_BINARY_DIR}/llvm-openmp-src"
-      BINARY_DIR        "${CMAKE_BINARY_DIR}/llvm-openmp-build"
+      PREFIX            "${CMAKE_BINARY_DIR}"
+      DOWNLOAD_DIR      "${CMAKE_BINARY_DIR}/download"
+      SOURCE_DIR        "${CMAKE_BINARY_DIR}/src"
+      BINARY_DIR        "${CMAKE_BINARY_DIR}/build"
       CONFIGURE_COMMAND ""
       BUILD_COMMAND     ""
       INSTALL_COMMAND   ""

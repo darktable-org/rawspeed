@@ -1,10 +1,11 @@
 # Download and unpack LLVM OpenMP runtime library at configure time
-configure_file(${RAWSPEED_SOURCE_DIR}/cmake/Modules/LLVMOpenMP.cmake.in ${CMAKE_BINARY_DIR}/llvm-openmp/CMakeLists.txt @ONLY)
+set(LLVMOPENMP_PREFIX "${RAWSPEED_BINARY_DIR}/src/external/llvm-openmp")
+configure_file(${RAWSPEED_SOURCE_DIR}/cmake/Modules/LLVMOpenMP.cmake.in ${LLVMOPENMP_PREFIX}/CMakeLists.txt @ONLY)
 
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}"
   -DALLOW_DOWNLOADING_LLVMOPENMP=${ALLOW_DOWNLOADING_LLVMOPENMP} -DLLVMOPENMP_PATH:PATH=${LLVMOPENMP_PATH} .
   RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/llvm-openmp
+  WORKING_DIRECTORY ${LLVMOPENMP_PREFIX}
 )
 
 if(result)
@@ -14,7 +15,7 @@ endif()
 execute_process(
   COMMAND ${CMAKE_COMMAND} --build .
   RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/llvm-openmp
+  WORKING_DIRECTORY ${LLVMOPENMP_PREFIX}
 )
 
 if(result)
@@ -51,7 +52,7 @@ set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE_SAVE "${CMAKE_CXX_INCLUDE_WHAT_YOU_USE}")
 unset(CMAKE_CXX_CLANG_TIDY)
 unset(CMAKE_CXX_INCLUDE_WHAT_YOU_USE)
 
-include(${CMAKE_BINARY_DIR}/llvm-openmp/llvm-openmp-paths.cmake)
+include(${LLVMOPENMP_PREFIX}/llvm-openmp-paths.cmake)
 
 # Add llvm openmp directly to our build. This defines the omp target.
 add_subdirectory(${LLVMOPENMP_SOURCE_DIR}
