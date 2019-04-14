@@ -36,6 +36,7 @@ else()
       URL               https://github.com/google/benchmark/archive/v1.4.1.tar.gz
       URL_HASH          SHA512=e9d71b4679cb4e4d755f7bb4101e131b37e209b6aebd0853e0c63eb11c42b75faa5da4ff8c265149808a475f3a1cfb140c5b49f877acfda908a4bb7add983aae
       PREFIX            "${CMAKE_BINARY_DIR}"
+      STAMP_DIR         "${CMAKE_BINARY_DIR}/stamp"
       DOWNLOAD_DIR      "${CMAKE_BINARY_DIR}/download"
       SOURCE_DIR        "${CMAKE_BINARY_DIR}/src"
       BINARY_DIR        "${CMAKE_BINARY_DIR}/build"

@@ -36,6 +36,7 @@ else()
       URL               https://github.com/zeux/pugixml/releases/download/v1.9/pugixml-1.9.tar.gz
       URL_HASH          SHA512=853a9d985aae537391c6524d5413ef4de237d99d96cc58ea7fe7152f786df1e408cdacd2e4387697e23c3e67cdc1d42b29de554501309eae16d86edd0e24785f
       PREFIX            "${CMAKE_BINARY_DIR}"
+      STAMP_DIR         "${CMAKE_BINARY_DIR}/stamp"
       DOWNLOAD_DIR      "${CMAKE_BINARY_DIR}/download"
       SOURCE_DIR        "${CMAKE_BINARY_DIR}/src"
       BINARY_DIR        "${CMAKE_BINARY_DIR}/build"
