@@ -7232,6 +7232,7 @@
 			<Alias>DMC-ZS110</Alias>
 			<Alias>DMC-TZ101</Alias>
 			<Alias>DMC-TZ110</Alias>
+			<Alias>DMC-TX1</Alias>
 		</Aliases>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-TZ100" mode="3:2">
@@ -7249,6 +7250,7 @@
 			<Alias>DMC-ZS110</Alias>
 			<Alias>DMC-TZ101</Alias>
 			<Alias>DMC-TZ110</Alias>
+			<Alias>DMC-TX1</Alias>
 		</Aliases>
 	</Camera>
 	<Camera make="Panasonic" model="DC-FZ82">

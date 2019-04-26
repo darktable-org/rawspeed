@@ -306,7 +306,7 @@
   </xs:complexType>
   <xs:complexType name="AliasesType">
     <xs:sequence>
-      <xs:element type="AliasType" name="Alias" minOccurs="1" maxOccurs="4"/>
+      <xs:element type="AliasType" name="Alias" minOccurs="1" maxOccurs="5"/>
     </xs:sequence>
   </xs:complexType>
   <xs:simpleType name="HintTypeNameType">
