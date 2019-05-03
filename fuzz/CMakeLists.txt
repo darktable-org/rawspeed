@@ -37,15 +37,8 @@ if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_BUILD_TYPE STREQUAL "FU
     add_fuzz_target__base(${fuzzer})
   endmacro()
 else()
-  if(NOT LIB_FUZZING_ENGINE)
-    # specialhandling: oss-fuzz provides all the needed flags already.
-    target_compile_options(rawspeed_fuzz INTERFACE "-fsanitize=fuzzer")
-    target_link_libraries (rawspeed_fuzz INTERFACE "-fsanitize=fuzzer")
-  else()
-    message(STATUS "LIB_FUZZING_ENGINE override option is passed, not setting special compiler flags.")
-    find_package(LibFuzzingEngine REQUIRED)
-    target_link_libraries(rawspeed_fuzz PUBLIC LibFuzzingEngine)
-  endif()
+  find_package(LibFuzzingEngine REQUIRED)
+  target_link_libraries(rawspeed_fuzz PUBLIC LibFuzzingEngine)
 
   add_feature_info("Fuzzing" ON "will be actually able to do the fuzzing")
 
