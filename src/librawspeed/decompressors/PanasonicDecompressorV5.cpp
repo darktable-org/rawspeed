@@ -228,6 +228,7 @@ void PanasonicDecompressorV5::processBlock(const Block& block) const {
 template <const PanasonicDecompressorV5::PacketDsc& dsc>
 void PanasonicDecompressorV5::decompressInternal() const noexcept {
 #ifdef HAVE_OPENMP
+  // NOLINTNEXTLINE(openmp-exception-escape): we have checked size already.
 #pragma omp parallel for num_threads(rawspeed_get_number_of_processor_cores()) \
     schedule(static) default(none)
 #endif
