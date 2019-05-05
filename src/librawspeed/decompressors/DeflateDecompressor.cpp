@@ -191,7 +191,7 @@ void DeflateDecompressor::decode(
     iPoint2D maxDim, iPoint2D dim, iPoint2D off) {
   uLongf dstLen = sizeof(float) * maxDim.area();
 
-  if (!uBuffer->get())
+  if (!*uBuffer)
     *uBuffer =
         std::unique_ptr<unsigned char[]>(new unsigned char[dstLen]); // NOLINT
 
