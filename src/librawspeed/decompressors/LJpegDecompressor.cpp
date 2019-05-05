@@ -187,10 +187,14 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
 
     unsigned x = 0;
 
+    // FIXME: predictor may have value outside of the ushort16.
+    // https://github.com/darktable-org/rawspeed/issues/175
+
     // For x, we first process all full pixel blocks within the image buffer ...
     for (; x < fullBlocks; ++x) {
       unroll_loop<N_COMP>([&](int i) {
-        *dest++ = pred[i] += ht[i]->decodeNext(bitStream);
+        pred[i] = ushort16(pred[i] + ht[i]->decodeNext(bitStream));
+        *dest++ = pred[i];
       });
     }
 
@@ -205,7 +209,8 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
       assert(trailingPixels < N_COMP);
       unsigned c = 0;
       for (; c < trailingPixels; ++c) {
-        *dest++ = pred[c] += ht[c]->decodeNext(bitStream);
+        pred[c] = ushort16(pred[c] + ht[c]->decodeNext(bitStream));
+        *dest++ = pred[c];
       }
       // Discard the rest of the block.
       assert(c < N_COMP);
