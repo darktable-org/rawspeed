@@ -8150,7 +8150,7 @@
 			<Color x="0" y="1">BLUE</Color>
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
-		<Crop x="0" y="0" width="0" height="0"/>
+		<Crop x="0" y="0" width="-16" height="-16"/>
 		<Sensor black="1024" white="16100" iso_min="51200"/>
 		<Sensor black="512" white="16100" iso_min="8000" iso_max="25600"/>
 		<Sensor black="128" white="16100"/>
@@ -8163,7 +8163,7 @@
 			<Color x="0" y="1">BLUE</Color>
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
-		<Crop x="0" y="0" width="0" height="0"/>
+		<Crop x="0" y="0" width="-16" height="-16"/>
 		<Sensor black="128" white="4000" iso_min="8000"/>
 		<Sensor black="32" white="4000"/>
 	</Camera>
