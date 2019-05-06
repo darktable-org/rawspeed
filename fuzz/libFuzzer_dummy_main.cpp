@@ -66,8 +66,8 @@ int main(int argc, char** argv) {
   auto chunkSize = (corpusCount / (10 * omp_get_num_threads()));
   if (chunkSize <= 1)
     chunkSize = 1;
-#pragma omp parallel for default(none)                                         \
-    OMPFIRSTPRIVATECLAUSE(argc, argv, chunkSize) schedule(dynamic, chunkSize)
+#pragma omp parallel for default(none) firstprivate(argc, argv, chunkSize)     \
+    schedule(dynamic, chunkSize)
 #endif
   for (int i = 1; i < argc; ++i)
     process(argv[i]);
