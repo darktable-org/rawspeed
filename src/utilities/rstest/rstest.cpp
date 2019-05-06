@@ -525,8 +525,8 @@ int main(int argc, char **argv) {
   map<string, string> failedTests;
 #ifdef HAVE_OPENMP
 #pragma omp parallel for default(none) OMPFIRSTPRIVATECLAUSE(argc, argv, o) \
-    shared(metadata, cerr, failedTests) schedule(dynamic, 1) reduction(+ : time) \
-    if(remaining_argc > 2)
+    OMPSHAREDCLAUSE(metadata) shared(cerr, failedTests) schedule(dynamic, 1) \
+    reduction(+ : time) if(remaining_argc > 2)
 #endif
   for (int i = 1; i < argc; ++i) {
     if (!argv[i])
