@@ -85,11 +85,13 @@ add_subdirectory("${RAWSPEED_SOURCE_DIR}" "${RAWSPEED_BINARY_DIR}" ${EXCLUDE_FRO
 # all this nice tree dir structure.
 # Oh, also we need to at least try to produce different exe every time,
 # so that LNT will always consider this test as changed..
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/RawSpeed.c" "extern const char* const unique_hash __attribute__ ((visibility (\"default\"))) = __TIMESTAMP__;
-int main(int argc, char* argv[]) { return 0; }")
-try_compile(IGNORED_RESULT_VAR "${CMAKE_CURRENT_BINARY_DIR}/RawSpeed.c.tmp" "${CMAKE_CURRENT_BINARY_DIR}/RawSpeed.c" COPY_FILE "${CMAKE_CURRENT_BINARY_DIR}/RawSpeed")
+rawspeed_add_executable(RawSpeed "${RAWSPEED_LNT_SOURCE_DIR}/RawSpeed.cpp")
+add_custom_target(RawSpeed-touch
+  COMMAND "${CMAKE_COMMAND}" -E touch "${RAWSPEED_LNT_SOURCE_DIR}/RawSpeed.cpp"
+  COMMENT "Touching RawSpeed.cpp" VERBATIM USES_TERMINAL)
+add_dependencies(RawSpeed RawSpeed-touch)
 llvm_test_run(WORKDIR "${CMAKE_CURRENT_BINARY_DIR}")
-llvm_add_test("${CMAKE_CURRENT_BINARY_DIR}/RawSpeed.test" "${CMAKE_CURRENT_BINARY_DIR}/RawSpeed")
+llvm_add_test_for_target(RawSpeed)
 
 if(RAWSPEED_ENABLE_SAMPLE_BASED_TESTING)
   add_subdirectory(raw-sample-archive)
