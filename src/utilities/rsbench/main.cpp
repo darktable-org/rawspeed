@@ -134,15 +134,25 @@ static inline void BM_RawSpeed(benchmark::State& state, const char* fileName,
 
   // For each iteration:
   state.counters.insert({
-      {"CPUTime,s", CPUTime / state.iterations()},
-      {"WallTime,s", WallTime / state.iterations()},
+      {"CPUTime,s",
+       benchmark::Counter(CPUTime, benchmark::Counter::Flags::kAvgIterations)},
+      {"WallTime,s",
+       benchmark::Counter(WallTime, benchmark::Counter::Flags::kAvgIterations)},
       {"CPUTime/WallTime", CPUTime / WallTime}, // 'Threading factor'
       {"Pixels", pixels},
-      {"Pixels/CPUTime", (state.iterations() * pixels) / CPUTime},
-      {"Pixels/WallTime", (state.iterations() * pixels) / WallTime},
+      {"Pixels/CPUTime",
+       benchmark::Counter(pixels / CPUTime,
+                          benchmark::Counter::Flags::kIsIterationInvariant)},
+      {"Pixels/WallTime",
+       benchmark::Counter(pixels / WallTime,
+                          benchmark::Counter::Flags::kIsIterationInvariant)},
       /* {"Raws", 1}, */
-      {"Raws/CPUTime", state.iterations() / CPUTime},
-      {"Raws/WallTime", state.iterations() / WallTime},
+      {"Raws/CPUTime",
+       benchmark::Counter(1.0 / CPUTime,
+                          benchmark::Counter::Flags::kIsIterationInvariant)},
+      {"Raws/WallTime",
+       benchmark::Counter(1.0 / WallTime,
+                          benchmark::Counter::Flags::kIsIterationInvariant)},
   });
   // Could also have counters wrt. the filesize,
   // but i'm not sure they are interesting.
@@ -155,6 +165,7 @@ static void addBench(const char* fName, std::string tName, int threads) {
       benchmark::RegisterBenchmark(tName.c_str(), &BM_RawSpeed, fName, threads);
   b->Unit(benchmark::kMillisecond);
   b->UseRealTime();
+  b->MeasureProcessCPUTime();
 }
 
 int main(int argc, char** argv) {
