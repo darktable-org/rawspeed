@@ -77,18 +77,27 @@ struct BitStreamCacheLeftInRightOut : BitStreamCacheBase
 struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
 {
   inline void push(uint64_t bits, uint32_t count) noexcept {
-    assert(count + fillLevel <= bitwidth(cache));
-    assert(count < bitwidth(cache));
-    cache = cache << count | bits;
+    assert(count + fillLevel <= Size);
+    assert(count != 0);
+    // If the maximal size of the cache is BitStreamCacheBase::Size, and we
+    // have fillLevel [high] bits set, how many empty [low] bits do we have?
+    const uint32_t vacantBits = BitStreamCacheBase::Size - fillLevel;
+    // If we just directly 'or' these low bits into the cache right now,
+    // how many unfilled bits of a gap will there be in the middle of a cache?
+    const uint32_t emptyBitsGap = vacantBits - count;
+    // So just shift the new bits so that there is no gap in the middle.
+    cache |= bits << emptyBitsGap;
     fillLevel += count;
   }
 
   inline uint32_t peek(uint32_t count) const noexcept {
-    return extractHighBits(cache, count, /*effectiveBitwidth=*/fillLevel) &
-           ((1U << count) - 1U);
+    return extractHighBits(cache, count, /*effectiveBitwidth=*/BitStreamCacheBase::Size);
   }
 
-  inline void skip(uint32_t count) noexcept { fillLevel -= count; }
+  inline void skip(uint32_t count) noexcept {
+    fillLevel -= count;
+    cache <<= count;
+  }
 };
 
 struct BitStreamReplenisherBase {
