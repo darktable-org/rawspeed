@@ -37,7 +37,7 @@
 namespace rawspeed {
 
 struct PanasonicDecompressorV5::PacketDsc {
-  int bps;
+  Buffer::size_type bps;
   int pixelsPerPacket;
 
   constexpr PacketDsc();
