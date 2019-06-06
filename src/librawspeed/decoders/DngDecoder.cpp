@@ -72,10 +72,8 @@ DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file)
 //  if (v[1] > 4)
 //    ThrowRDE("Not a supported DNG image format: v%u.%u.%u.%u", (int)v[0], (int)v[1], (int)v[2], (int)v[3]);
 
-  if ((v[0] <= 1) && (v[1] < 1))  // Prior to v1.1.xxx  fix LJPEG encoding bug
-    mFixLjpeg = true;
-  else
-    mFixLjpeg = false;
+  // Prior to v1.1.xxx  fix LJPEG encoding bug
+  mFixLjpeg = (v[0] <= 1) && (v[1] < 1);
 }
 
 void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
