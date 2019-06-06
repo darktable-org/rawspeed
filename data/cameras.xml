@@ -10009,6 +10009,17 @@
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="16191"/>
 	</Camera>
+	<Camera make="Leaf" model="Leaf Aptus 22(LF10043    )/Mamiya 645 AFD">
+		<ID make="Leaf" model="Aptus 22">Leaf Aptus 22</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="16191"/>
+	</Camera>
 	<Camera make="Leaf" model="Leaf Aptus 75(LI400146   )/Large Format" supported="no">
 		<ID make="Leaf" model="Aptus 75">Leaf Aptus 75</ID>
 		<CFA width="2" height="2">
