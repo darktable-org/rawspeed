@@ -33,7 +33,7 @@ Getting it done
   git clone https://github.com/llvm/llvm-lnt.git /build/lnt
   git clone https://github.com/llvm/llvm-test-suite.git /build/test-suite
   # 'Add' RawSpeed into test-suite.
-  ln -s /home/lebedevri/rawspeed /build/test-suite/RawSpeed
+  ln -s /home/lebedevri/rawspeed/lnt /build/test-suite/RawSpeed
   # Prepare 'chroot'.
   export SANDBOX=/tmp/mysandbox
   export BUILDSANDBOX=/tmp/mybuildsandbox
