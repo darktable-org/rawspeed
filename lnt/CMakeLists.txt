@@ -65,8 +65,8 @@ function(rawspeed_add_test)
     set(RAWSPEED_ADD_TEST_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${RAWSPEED_ADD_TEST_EXECUTABLE}>")
   endif()
 
-  if(TEST_SUITE_BENCHMARKING_ONLY)
-    # Don't add tests if we only want benchmarks.
+  if(TEST_SUITE_BENCHMARKING_ONLY AND NOT "${RAWSPEED_ADD_TEST_EXECUTABLE}" STREQUAL "rsbench")
+    # Don't add tests if we only want benchmarks. Include rsbench though.
     return()
   endif()
 
