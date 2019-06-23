@@ -186,26 +186,6 @@ public:
     return reinterpret_cast<const char*>(&data[start]);
   }
 
-  // recalculate the internal data/position information such that current position
-  // i.e. getData() before == getData() after but getPosition() after == newPosition
-  // this is only used for DNGPRIVATEDATA handling to restore the original offset
-  // in case the private data / maker note has been moved within in the file
-  // TODO: could add a lower bound check later if required.
-  void rebase(const size_type newPosition, const size_type newSize) {
-    const uchar8* const oldData = getData(newSize);
-
-    pos = newPosition;
-    size = pos + newSize;
-    data = oldData - pos;
-
-#ifndef NDEBUG
-    // check that all the assumptions still hold, and we rebased correctly
-    assert(getData(0) == oldData);
-    assert(getPosition() == newPosition);
-    assert(getRemainSize() == newSize);
-#endif
-  }
-
   // special factory function to set up internal buffer with copy of passed data.
   // only necessary to create 'fake' TiffEntries (see e.g. RAF)
   static ByteStream createCopy(void* data_, size_type size_) {
