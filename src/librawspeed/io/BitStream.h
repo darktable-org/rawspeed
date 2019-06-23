@@ -210,7 +210,7 @@ public:
   inline void skipBits(uint32 nbits) {
     if (nbits > cache.fillLevel)
       ThrowIOE("skipBits overflow");
-    cache.skip(nbits);
+    skipBitsNoFill(nbits);
   }
 
   // This may be used to skip arbitrarily large number of *bytes*,
