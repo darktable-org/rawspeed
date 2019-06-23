@@ -325,7 +325,7 @@ public:
       bits.skipBitsNoFill(l);
       rv = static_cast<int>(val) >> 4;
     } else {
-      bits.skipBits(8);
+      bits.skipBitsNoFill(8);
       l = 8;
       while (code > dctbl1.maxcode[l]) {
         temp = bits.getBitsNoFill(1);
