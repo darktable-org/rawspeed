@@ -180,6 +180,7 @@ public:
   void setBufferPosition(size_type newPos);
 
   inline uint32 __attribute__((pure)) peekBitsNoFill(uint32 nbits) {
+    assert(nbits != 0);
     assert(nbits <= Cache::MaxGetBits);
     assert(nbits <= cache.fillLevel);
     return cache.peek(nbits);
