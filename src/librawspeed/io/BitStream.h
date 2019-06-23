@@ -185,16 +185,16 @@ public:
     return cache.peek(nbits);
   }
 
-  inline uint32 getBitsNoFill(uint32 nbits) {
-    uint32 ret = peekBitsNoFill(nbits);
-    cache.skip(nbits);
-    return ret;
-  }
-
   inline void skipBitsNoFill(uint32 nbits) {
     assert(nbits <= Cache::MaxGetBits);
     assert(nbits <= cache.fillLevel);
     cache.skip(nbits);
+  }
+
+  inline uint32 getBitsNoFill(uint32 nbits) {
+    uint32 ret = peekBitsNoFill(nbits);
+    skipBitsNoFill(nbits);
+    return ret;
   }
 
   inline uint32 peekBits(uint32 nbits) {
