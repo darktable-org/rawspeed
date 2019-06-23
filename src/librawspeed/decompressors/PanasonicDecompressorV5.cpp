@@ -159,7 +159,8 @@ class PanasonicDecompressorV5::ProxyStream {
     assert(block.getRemainSize() == 0);
 
     // And reset the clock.
-    input = ByteStream(DataBuffer(Buffer(buf.data(), buf.size())));
+    input = ByteStream(
+        DataBuffer(Buffer(buf.data(), buf.size()), Endianness::little));
     // input.setByteOrder(Endianness::big); // does not seem to matter?!
   }
 

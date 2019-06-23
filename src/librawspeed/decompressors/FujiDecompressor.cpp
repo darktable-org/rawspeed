@@ -285,7 +285,9 @@ void FujiDecompressor::fuji_decode_sample(
 
   if (sample < common_info.max_bits - common_info.raw_bits - 1) {
     int decBits = bitDiff((*grads)[gradient].value1, (*grads)[gradient].value2);
-    code = info->pump.getBits(decBits);
+    code = 0;
+    if (decBits)
+      code = info->pump.getBits(decBits);
     code += sample << decBits;
   } else {
     code = info->pump.getBits(common_info.raw_bits);

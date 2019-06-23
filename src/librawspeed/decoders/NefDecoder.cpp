@@ -118,7 +118,9 @@ RawImage NefDecoder::decodeRawInternal() {
     meta = raw->getEntry(static_cast<TiffTag>(0x8c)); // Fall back
   }
 
-  ByteStream rawData(mFile, offsets->getU32(), counts->getU32());
+  ByteStream rawData(
+      DataBuffer(mFile->getSubView(offsets->getU32(), counts->getU32()),
+                 Endianness::little));
 
   NikonDecompressor n(mRaw, meta->getData(), bitPerPixel);
   mRaw->createData();
@@ -276,7 +278,8 @@ void NefDecoder::DecodeUncompressed() {
 
   offY = 0;
   for (const NefSlice& slice : slices) {
-    ByteStream in(mFile, slice.offset, slice.count);
+    ByteStream in(DataBuffer(mFile->getSubView(slice.offset, slice.count),
+                             Endianness::little));
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
 
@@ -374,7 +377,7 @@ void NefDecoder::DecodeSNefUncompressed() {
   mRaw->isCFA = false;
   mRaw->createData();
 
-  ByteStream in(mFile, offset);
+  ByteStream in(DataBuffer(mFile->getSubView(offset), Endianness::little));
 
   DecodeNikonSNef(&in, width, height);
 }

@@ -66,11 +66,11 @@ int32 SamsungV1Decompressor::samsungDiff(BitPumpMSB* pump,
   pump->getBits(tbl[c].encLen);
   // Read the number of bits the table tells me
   int32 len = tbl[c].diffLen;
+  if (len == 0)
+    return 0;
   int32 diff = pump->getBits(len);
-
   // If the first bit is 0 we need to turn this into a negative number
-  diff = len != 0 ? HuffmanTable::signExtended(diff, len) : diff;
-
+  diff = HuffmanTable::signExtended(diff, len);
   return diff;
 }
 

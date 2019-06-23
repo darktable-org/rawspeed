@@ -53,7 +53,7 @@ void DcrDecoder::checkImageDimensions() {
 RawImage DcrDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
-  ByteStream input(mFile, off);
+  ByteStream input(DataBuffer(mFile->getSubView(off), Endianness::little));
 
   int compression = raw->getEntry(COMPRESSION)->getU32();
   if (65000 != compression)

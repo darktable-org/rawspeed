@@ -71,7 +71,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
     offset = ifd->getEntry(STRIPOFFSETS)->getU32();
   }
 
-  ByteStream b(mFile, offset, Endianness::big);
+  ByteStream b(DataBuffer(mFile->getSubView(offset), Endianness::big));
   b.skipBytes(41);
   int height = b.getU16();
   int width = b.getU16();
@@ -86,7 +86,8 @@ RawImage Cr2Decoder::decodeOldFormat() {
 
   mRaw->dim = {width, height};
 
-  const ByteStream bs(mFile->getSubView(offset), 0);
+  const ByteStream bs(
+      DataBuffer(mFile->getSubView(offset), Endianness::little));
 
   Cr2Decompressor l(bs, mRaw);
   mRaw->createData();
@@ -166,7 +167,8 @@ RawImage Cr2Decoder::decodeNewFormat() {
   const uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
   const uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
 
-  const ByteStream bs(mFile->getSubView(offset, count), 0);
+  const ByteStream bs(
+      DataBuffer(mFile->getSubView(offset, count), Endianness::little));
 
   Cr2Decompressor d(bs, mRaw);
   mRaw->createData();

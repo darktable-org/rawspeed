@@ -22,6 +22,7 @@
 
 #include "common/Common.h"                             // for uint32
 #include "decompressors/AbstractSamsungDecompressor.h" // for AbstractSamsu...
+#include "io/BitPumpMSB32.h"                           // for BitPumpMSB32
 #include "io/ByteStream.h"                             // for ByteStream
 
 namespace rawspeed {
@@ -43,6 +44,8 @@ protected:
   uint32 initVal;
 
   ByteStream data;
+
+  static int32 getDiff(BitPumpMSB32* pump, uint32 len);
 
   template <OptFlags optflags> void decompressRow(uint32 row);
 

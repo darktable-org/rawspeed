@@ -122,7 +122,7 @@ RawImage ArwDecoder::decodeRawInternal() {
 
       mRaw->dim = iPoint2D(width, height);
 
-      ByteStream input(mFile, off);
+      ByteStream input(DataBuffer(mFile->getSubView(off), Endianness::little));
       SonyArw1Decompressor a(mRaw);
       mRaw->createData();
       a.decompress(input);
@@ -219,7 +219,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   if (!mFile->isValid(off, c2))
     c2 = mFile->getSize() - off;
 
-  ByteStream input(mFile, off, c2);
+  ByteStream input(DataBuffer(mFile->getSubView(off, c2), Endianness::little));
 
   if (arw1) {
     SonyArw1Decompressor a(mRaw);
@@ -289,7 +289,7 @@ void ArwDecoder::ParseA100WB() {
   bs.setByteOrder(Endianness::little);
   const uint32 off = bs.getU32();
 
-  bs = ByteStream(*mFile, off);
+  bs = ByteStream(DataBuffer(mFile->getSubView(off), Endianness::little));
 
   // MRW style, see MrwDecoder
 

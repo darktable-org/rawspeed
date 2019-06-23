@@ -105,11 +105,9 @@ public:
   BitStream() = default;
 
   explicit BitStream(const ByteStream& s)
-      : ByteStream(s.getSubStream(s.getPosition(), s.getRemainSize())) {}
-
-  // deprecated:
-  BitStream(const Buffer* f, size_type offset)
-      : ByteStream(DataBuffer(f->getSubView(offset))) {}
+      : ByteStream(s.getSubStream(s.getPosition(), s.getRemainSize())) {
+    setByteOrder(Endianness::unknown);
+  }
 
 private:
   inline void fillSafe() {
@@ -182,21 +180,22 @@ public:
   void setBufferPosition(size_type newPos);
 
   inline uint32 __attribute__((pure)) peekBitsNoFill(uint32 nbits) {
-    assert(nbits <= Cache::MaxGetBits);
+    assert(nbits != 0);
+    assert(nbits < Cache::MaxGetBits);
     assert(nbits <= cache.fillLevel);
     return cache.peek(nbits);
-  }
-
-  inline uint32 getBitsNoFill(uint32 nbits) {
-    uint32 ret = peekBitsNoFill(nbits);
-    cache.skip(nbits);
-    return ret;
   }
 
   inline void skipBitsNoFill(uint32 nbits) {
     assert(nbits <= Cache::MaxGetBits);
     assert(nbits <= cache.fillLevel);
     cache.skip(nbits);
+  }
+
+  inline uint32 getBitsNoFill(uint32 nbits) {
+    uint32 ret = peekBitsNoFill(nbits);
+    skipBitsNoFill(nbits);
+    return ret;
   }
 
   inline uint32 peekBits(uint32 nbits) {
@@ -207,12 +206,6 @@ public:
   inline uint32 getBits(uint32 nbits) {
     fill(nbits);
     return getBitsNoFill(nbits);
-  }
-
-  inline void skipBits(uint32 nbits) {
-    if (nbits > cache.fillLevel)
-      ThrowIOE("skipBits overflow");
-    cache.skip(nbits);
   }
 
   // This may be used to skip arbitrarily large number of *bytes*,

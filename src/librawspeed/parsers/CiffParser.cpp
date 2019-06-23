@@ -42,8 +42,7 @@ namespace rawspeed {
 CiffParser::CiffParser(const Buffer* inputData) : RawParser(inputData) {}
 
 void CiffParser::parseData() {
-  ByteStream bs(*mInput, 0);
-  bs.setByteOrder(Endianness::little);
+  ByteStream bs(DataBuffer(*mInput, Endianness::little));
 
   const ushort16 byteOrder = bs.getU16();
   if (byteOrder != 0x4949) // "II" / little-endian

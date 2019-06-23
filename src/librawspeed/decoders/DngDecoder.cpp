@@ -311,8 +311,8 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
     if (count < 1)
       ThrowRDE("Tile %u is empty", n);
 
-    ByteStream bs(mFile->getSubView(offset, count), 0,
-                  mRootIFD->rootBuffer.getByteOrder());
+    ByteStream bs(DataBuffer(mFile->getSubView(offset, count),
+                             mRootIFD->rootBuffer.getByteOrder()));
 
     if (!tilesLegality.emplace(bs).second)
       ThrowTPE("Two tiles overlap. Raw corrupt!");

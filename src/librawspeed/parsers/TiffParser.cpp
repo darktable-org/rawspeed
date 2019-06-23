@@ -62,7 +62,7 @@ std::unique_ptr<RawDecoder> TiffParser::getDecoder(const CameraMetaData* meta) {
 }
 
 TiffRootIFDOwner TiffParser::parse(TiffIFD* parent, const Buffer& data) {
-  ByteStream bs(data, 0);
+  ByteStream bs(DataBuffer(data, Endianness::unknown));
   bs.setByteOrder(getTiffByteOrder(bs, 0, "TIFF header"));
   bs.skipBytes(2);
 

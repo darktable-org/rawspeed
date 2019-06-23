@@ -93,7 +93,8 @@ void FiffParser::parseData() {
     // differences:
     //   a) no type info and b) data is always stored in place.
     // 4b: # of entries, for each entry: 2b tag, 2b len, xb data
-    ByteStream bytes(mInput, third_ifd, Endianness::big);
+    ByteStream bytes(
+        DataBuffer(mInput->getSubView(third_ifd), Endianness::big));
     uint32 entries = bytes.getU32();
 
     if (entries > 255)

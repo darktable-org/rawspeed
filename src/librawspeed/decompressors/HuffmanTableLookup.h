@@ -158,7 +158,7 @@ public:
 
     if (diff_l == 16) {
       if (fixDNGBug16)
-        bs.skipBits(16);
+        bs.skipBitsNoFill(16);
       return -32768;
     }
 

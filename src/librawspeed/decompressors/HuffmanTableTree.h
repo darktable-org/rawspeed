@@ -56,7 +56,7 @@ protected:
       assert(partial.code_len <= 16);
 
       // Read one more bit
-      const bool bit = bs.getBits(1);
+      const bool bit = bs.getBitsNoFill(1);
 
       partial.code <<= 1;
       partial.code |= bit;
@@ -145,6 +145,8 @@ public:
                   "This BitStream specialization is not marked as usable here");
     assert(FULL_DECODE == fullDecode);
 
+    bs.fill(32);
+
     const auto codeValue = getValue(bs);
 
     const int diff_l = codeValue;
@@ -154,11 +156,11 @@ public:
 
     if (diff_l == 16) {
       if (fixDNGBug16)
-        bs.skipBits(16);
+        bs.skipBitsNoFill(16);
       return -32768;
     }
 
-    return diff_l ? signExtended(bs.getBits(diff_l), diff_l) : 0;
+    return diff_l ? signExtended(bs.getBitsNoFill(diff_l), diff_l) : 0;
   }
 };
 

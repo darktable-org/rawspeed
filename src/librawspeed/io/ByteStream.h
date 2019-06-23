@@ -40,34 +40,17 @@ protected:
 
 public:
   ByteStream() = default;
-  explicit ByteStream(const DataBuffer& buffer) : DataBuffer(buffer) {}
-  ByteStream(const Buffer& buffer, size_type offset, size_type size_,
-             Endianness endianness_ = Endianness::little)
-      : DataBuffer(buffer.getSubView(offset, size_), endianness_) {
-    check(0);
-  }
-  ByteStream(const Buffer& buffer, size_type offset,
-             Endianness endianness_ = Endianness::little)
-      : DataBuffer(buffer, endianness_), pos(offset) {
-    check(0);
-  }
 
-  // deprecated:
-  ByteStream(const Buffer* f, size_type offset, size_type size_,
-             Endianness endianness_ = Endianness::little)
-      : ByteStream(*f, offset, size_, endianness_) {}
-  ByteStream(const Buffer* f, size_type offset,
-             Endianness endianness_ = Endianness::little)
-      : ByteStream(*f, offset, endianness_) {}
+  explicit ByteStream(const DataBuffer& buffer) : DataBuffer(buffer) {}
 
   // return ByteStream that starts at given offset
   // i.e. this->data + offset == getSubStream(offset).data
   ByteStream getSubStream(size_type offset, size_type size_) const {
-    return ByteStream(getSubView(offset, size_), 0, getByteOrder());
+    return ByteStream(DataBuffer(getSubView(offset, size_), getByteOrder()));
   }
 
   ByteStream getSubStream(size_type offset) const {
-    return ByteStream(getSubView(offset), 0, getByteOrder());
+    return ByteStream(DataBuffer(getSubView(offset), getByteOrder()));
   }
 
   inline size_type check(size_type bytes) const {
@@ -201,26 +184,6 @@ public:
       pos++;
     } while (!isNullTerminator);
     return reinterpret_cast<const char*>(&data[start]);
-  }
-
-  // recalculate the internal data/position information such that current position
-  // i.e. getData() before == getData() after but getPosition() after == newPosition
-  // this is only used for DNGPRIVATEDATA handling to restore the original offset
-  // in case the private data / maker note has been moved within in the file
-  // TODO: could add a lower bound check later if required.
-  void rebase(const size_type newPosition, const size_type newSize) {
-    const uchar8* const oldData = getData(newSize);
-
-    pos = newPosition;
-    size = pos + newSize;
-    data = oldData - pos;
-
-#ifndef NDEBUG
-    // check that all the assumptions still hold, and we rebased correctly
-    assert(getData(0) == oldData);
-    assert(getPosition() == newPosition);
-    assert(getRemainSize() == newSize);
-#endif
   }
 
   // special factory function to set up internal buffer with copy of passed data.

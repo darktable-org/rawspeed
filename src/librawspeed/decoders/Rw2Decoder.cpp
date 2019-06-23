@@ -86,7 +86,9 @@ RawImage Rw2Decoder::decodeRawInternal() {
 
     uint32 size = mFile->getSize() - offset;
 
-    UncompressedDecompressor u(ByteStream(mFile, offset), mRaw);
+    UncompressedDecompressor u(
+        ByteStream(DataBuffer(mFile->getSubView(offset), Endianness::little)),
+        mRaw);
 
     if (size >= width*height*2) {
       // It's completely unpacked little-endian
@@ -98,9 +100,10 @@ RawImage Rw2Decoder::decodeRawInternal() {
       u.decode12BitRaw<Endianness::little, false, true>(width, height);
     } else {
       uint32 section_split_offset = 0;
-      PanasonicDecompressor p(mRaw, ByteStream(mFile, offset),
-                              hints.has("zero_is_not_bad"),
-                              section_split_offset);
+      PanasonicDecompressor p(
+          mRaw,
+          ByteStream(DataBuffer(mFile->getSubView(offset), Endianness::little)),
+          hints.has("zero_is_not_bad"), section_split_offset);
       mRaw->createData();
       p.decompress();
     }
@@ -115,7 +118,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
 
     uint32 offset = offsets->getU32();
 
-    ByteStream bs(mFile, offset);
+    ByteStream bs(DataBuffer(mFile->getSubView(offset), Endianness::little));
 
     bool v5Processing = raw->hasEntry(PANASONIC_RAWFORMAT) &&
                         raw->getEntry(PANASONIC_RAWFORMAT)->getU16() == 5;

@@ -106,7 +106,8 @@ RawImage SrwDecoder::decodeRawInternal() {
   {
     uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
     uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
-    const ByteStream bs(mFile, offset, count);
+    const ByteStream bs(
+        DataBuffer(mFile->getSubView(offset, count), Endianness::little));
 
     SamsungV1Decompressor s1(mRaw, &bs, bits);
 
@@ -120,7 +121,8 @@ RawImage SrwDecoder::decodeRawInternal() {
   {
     uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
     uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
-    const ByteStream bs(mFile, offset, count);
+    const ByteStream bs(
+        DataBuffer(mFile->getSubView(offset, count), Endianness::little));
 
     SamsungV2Decompressor s2(mRaw, bs, bits);
 

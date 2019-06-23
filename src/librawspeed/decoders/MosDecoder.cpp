@@ -121,8 +121,7 @@ RawImage MosDecoder::decodeRawInternal() {
 
   int compression = raw->getEntry(COMPRESSION)->getU32();
   if (1 == compression) {
-    const DataBuffer db(*mFile);
-    const ByteStream bs(db);
+    const ByteStream bs(DataBuffer(*mFile, Endianness::little));
     const Endianness endianness = getTiffByteOrder(bs, 0);
 
     if (Endianness::big == endianness)

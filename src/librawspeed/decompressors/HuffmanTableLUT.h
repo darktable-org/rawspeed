@@ -215,7 +215,7 @@ public:
       assert((FULL_DECODE && (len + l_diff <= 32)) || !FULL_DECODE);
       if (FULL_DECODE && l_diff == 16) {
         if (fixDNGBug16)
-          bs.skipBits(16);
+          bs.skipBitsNoFill(16);
         return -32768;
       }
       return FULL_DECODE ? signExtended(bs.getBitsNoFill(l_diff), l_diff) : l_diff;
@@ -244,7 +244,7 @@ public:
 
     if (diff_l == 16) {
       if (fixDNGBug16)
-        bs.skipBits(16);
+        bs.skipBitsNoFill(16);
       return -32768;
     }
 
