@@ -107,10 +107,6 @@ public:
   explicit BitStream(const ByteStream& s)
       : ByteStream(s.getSubStream(s.getPosition(), s.getRemainSize())) {}
 
-  // deprecated:
-  BitStream(const Buffer* f, size_type offset)
-      : ByteStream(DataBuffer(f->getSubView(offset))) {}
-
 private:
   inline void fillSafe() {
     assert(data);
