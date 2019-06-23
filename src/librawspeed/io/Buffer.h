@@ -187,8 +187,7 @@ class DataBuffer : public Buffer {
 public:
   DataBuffer() = default;
 
-  explicit DataBuffer(const Buffer& data_,
-                      Endianness endianness_ = Endianness::little)
+  explicit DataBuffer(const Buffer& data_, Endianness endianness_)
       : Buffer(data_), endianness(endianness_) {}
 
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap

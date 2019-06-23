@@ -40,34 +40,17 @@ protected:
 
 public:
   ByteStream() = default;
-  explicit ByteStream(const DataBuffer& buffer) : DataBuffer(buffer) {}
-  ByteStream(const Buffer& buffer, size_type offset, size_type size_,
-             Endianness endianness_ = Endianness::little)
-      : DataBuffer(buffer.getSubView(offset, size_), endianness_) {
-    check(0);
-  }
-  ByteStream(const Buffer& buffer, size_type offset,
-             Endianness endianness_ = Endianness::little)
-      : DataBuffer(buffer, endianness_), pos(offset) {
-    check(0);
-  }
 
-  // deprecated:
-  ByteStream(const Buffer* f, size_type offset, size_type size_,
-             Endianness endianness_ = Endianness::little)
-      : ByteStream(*f, offset, size_, endianness_) {}
-  ByteStream(const Buffer* f, size_type offset,
-             Endianness endianness_ = Endianness::little)
-      : ByteStream(*f, offset, endianness_) {}
+  explicit ByteStream(const DataBuffer& buffer) : DataBuffer(buffer) {}
 
   // return ByteStream that starts at given offset
   // i.e. this->data + offset == getSubStream(offset).data
   ByteStream getSubStream(size_type offset, size_type size_) const {
-    return ByteStream(getSubView(offset, size_), 0, getByteOrder());
+    return ByteStream(DataBuffer(getSubView(offset, size_), getByteOrder()));
   }
 
   ByteStream getSubStream(size_type offset) const {
-    return ByteStream(getSubView(offset), 0, getByteOrder());
+    return ByteStream(DataBuffer(getSubView(offset), getByteOrder()));
   }
 
   inline size_type check(size_type bytes) const {

@@ -55,7 +55,7 @@ RawImage ThreefrDecoder::decodeRawInternal() {
   uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
   // STRIPBYTECOUNTS is strange/invalid for the existing 3FR samples...
 
-  const ByteStream bs(mFile->getSubView(off), 0);
+  const ByteStream bs(DataBuffer(mFile->getSubView(off), Endianness::little));
 
   mRaw->dim = iPoint2D(width, height);
 

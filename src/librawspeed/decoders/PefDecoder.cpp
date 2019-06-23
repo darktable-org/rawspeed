@@ -70,7 +70,9 @@ RawImage PefDecoder::decodeRawInternal() {
         "Byte count number does not match strip size: count:%u, strips:%u ",
         counts->count, offsets->count);
   }
-  ByteStream bs(mFile, offsets->getU32(), counts->getU32());
+  ByteStream bs(
+      DataBuffer(mFile->getSubView(offsets->getU32(), counts->getU32()),
+                 Endianness::little));
 
   uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32 height = raw->getEntry(IMAGELENGTH)->getU32();

@@ -53,14 +53,20 @@ public:
 
   UncompressedDecompressor(const Buffer& data, Buffer::size_type offset,
                            Buffer::size_type size, const RawImage& img)
-      : UncompressedDecompressor(ByteStream(data, offset, size), img) {}
+      : UncompressedDecompressor(
+            ByteStream(
+                DataBuffer(data.getSubView(offset, size), Endianness::little)),
+            img) {}
 
   UncompressedDecompressor(const Buffer& data, Buffer::size_type offset,
                            const RawImage& img)
-      : UncompressedDecompressor(ByteStream(data, offset), img) {}
+      : UncompressedDecompressor(
+            ByteStream(DataBuffer(data.getSubView(offset), Endianness::little)),
+            img) {}
 
   UncompressedDecompressor(const Buffer& data, const RawImage& img)
-      : UncompressedDecompressor(data, 0, img) {}
+      : UncompressedDecompressor(
+            ByteStream(DataBuffer(data, Endianness::little)), img) {}
 
   /* Helper function for decoders, that will unpack uncompressed image data */
   /* input: Input image, positioned at first pixel */
