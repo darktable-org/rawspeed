@@ -50,8 +50,10 @@ HasselbladDecompressor::HasselbladDecompressor(const ByteStream& bs,
 // Returns len bits as a signed value.
 // Highest bit is a sign bit
 inline int HasselbladDecompressor::getBits(BitPumpMSB32* bs, int len) {
+  if (!len)
+    return 0;
   int diff = bs->getBits(len);
-  diff = len > 0 ? HuffmanTable::signExtended(diff, len) : diff;
+  diff = HuffmanTable::signExtended(diff, len);
   if (diff == 65535)
     return -32768;
   return diff;
