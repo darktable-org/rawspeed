@@ -71,6 +71,16 @@ constexpr bool operator&(SamsungV2Decompressor::OptFlags lhs,
                  rhs));
 }
 
+int32 SamsungV2Decompressor::getDiff(BitPumpMSB32* pump, uint32 len) {
+  if (len == 0)
+    return 0;
+  int32 diff = pump->getBits(len);
+  // If the first bit is 1 we need to turn this into a negative number
+  if (diff >> (len - 1))
+    diff -= (1 << len);
+  return diff;
+}
+
 SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
                                              const ByteStream& bs, int bit)
     : AbstractSamsungDecompressor(image), bits(bit) {
@@ -316,11 +326,7 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
     // Actually read the differences and write them to the pixels
     for (uint32 i = 0; i < 16; i++) {
       uint32 len = diffBits[i >> 2];
-      int32 diff = pump.getBits(len);
-
-      // If the first bit is 1 we need to turn this into a negative number
-      if (len != 0 && diff >> (len - 1))
-        diff -= (1 << len);
+      int32 diff = getDiff(&pump, len);
 
       ushort16* value = nullptr;
       // Apply the diff to pixels 0 2 4 6 8 10 12 14 1 3 5 7 9 11 13 15
