@@ -127,51 +127,6 @@ TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
   nextIFD = bs.getU32();
 }
 
-TiffRootIFDOwner TiffIFD::parseDngPrivateData(NORangesSet<Buffer>* ifds,
-                                              TiffEntry* t) {
-  assert(ifds);
-
-  /*
-  1. Six bytes containing the zero-terminated string "Adobe".
-     (The DNG specification calls for the DNGPrivateData tag to start with an
-      ASCII string identifying the creator/format).
-  2. 4 bytes: an ASCII string ("MakN" for a Makernote), indicating what sort of
-     data is being stored here.
-     Note that this is not zero-terminated.
-  3. A four-byte count (number of data bytes following);
-     This is the length of the original MakerNote data.
-     (This is always in "most significant byte first" format).
-  4. 2 bytes: the byte-order indicator from the original file
-     (the usual 'MM'/4D4D or 'II'/4949).
-  5. 4 bytes: the original file offset for the MakerNote tag data
-     (stored according to the byte order given above).
-  6. The contents of the MakerNote tag.
-     This is a simple byte-for-byte copy, with no modification.
-  */
-  ByteStream& bs = t->getData();
-  if (!bs.skipPrefix("Adobe", 6))
-    ThrowTPE("Not Adobe Private data");
-
-  if (!bs.skipPrefix("MakN", 4))
-    ThrowTPE("Not Makernote");
-
-  bs.setByteOrder(Endianness::big);
-  uint32 makerNoteSize = bs.getU32();
-  if (makerNoteSize > bs.getRemainSize())
-    ThrowTPE("Error reading TIFF structure (invalid size). File Corrupt");
-
-  bs.setByteOrder(getTiffByteOrder(bs, 0, "DNG makernote"));
-  bs.skipBytes(2);
-
-  uint32 makerNoteOffset = bs.getU32();
-  makerNoteSize -= 6; // update size of orinial maker note, we skipped 2+4 bytes
-
-  // Update the underlying buffer of t, such that the maker note data starts at its original offset
-  bs.rebase(makerNoteOffset, makerNoteSize);
-
-  return parseMakerNote(ifds, t);
-}
-
 /* This will attempt to parse makernotes and return it as an IFD */
 TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
                                          TiffEntry* t) {
