@@ -207,12 +207,6 @@ public:
     return getBitsNoFill(nbits);
   }
 
-  inline void skipBits(uint32 nbits) {
-    if (nbits > cache.fillLevel)
-      ThrowIOE("skipBits overflow");
-    skipBitsNoFill(nbits);
-  }
-
   // This may be used to skip arbitrarily large number of *bytes*,
   // not limited by the fill level.
   inline void skipBytes(uint32 nbytes) {
