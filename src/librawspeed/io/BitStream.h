@@ -105,7 +105,9 @@ public:
   BitStream() = default;
 
   explicit BitStream(const ByteStream& s)
-      : ByteStream(s.getSubStream(s.getPosition(), s.getRemainSize())) {}
+      : ByteStream(s.getSubStream(s.getPosition(), s.getRemainSize())) {
+    setByteOrder(Endianness::unknown);
+  }
 
 private:
   inline void fillSafe() {
