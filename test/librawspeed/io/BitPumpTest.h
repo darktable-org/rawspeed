@@ -66,7 +66,7 @@ template <typename T> struct BitPumpPatternTest<T, TestPeekBitsTag> {
   template <typename L> static void Test(PumpT* pump, L gen) {
     for (int len = 1; len <= 7; len++) {
       ASSERT_EQ(pump->peekBits(len), gen(len)) << "     Where len: " << len;
-      pump->skipBits(len);
+      pump->skipBitsNoFill(len);
     }
   }
 };
