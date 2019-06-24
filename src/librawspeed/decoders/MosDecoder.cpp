@@ -117,13 +117,16 @@ RawImage MosDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  UncompressedDecompressor u(
-      ByteStream(DataBuffer(mFile->getSubView(off), Endianness::little)), mRaw);
+  const ByteStream bs(DataBuffer(mFile->getSubView(off), Endianness::little));
+  if (bs.getRemainSize() == 0)
+    ThrowRDE("Input buffer is empty");
+
+  UncompressedDecompressor u(bs, mRaw);
 
   int compression = raw->getEntry(COMPRESSION)->getU32();
   if (1 == compression) {
-    const ByteStream bs(DataBuffer(*mFile, Endianness::little));
-    const Endianness endianness = getTiffByteOrder(bs, 0);
+    const Endianness endianness =
+        getTiffByteOrder(ByteStream(DataBuffer(*mFile, Endianness::little)), 0);
 
     if (Endianness::big == endianness)
       u.decodeRawUnpacked<16, Endianness::big>(width, height);
