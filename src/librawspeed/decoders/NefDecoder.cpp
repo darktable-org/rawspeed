@@ -357,7 +357,9 @@ void NefDecoder::DecodeD100Uncompressed() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  UncompressedDecompressor u(*mFile, offset, mRaw);
+  UncompressedDecompressor u(
+      ByteStream(DataBuffer(mFile->getSubView(offset), Endianness::little)),
+      mRaw);
 
   u.decode12BitRaw<Endianness::big, false, true>(width, height);
 }

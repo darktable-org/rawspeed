@@ -60,7 +60,9 @@ RawImage DcsDecoder::decodeRawInternal() {
 
   RawImageCurveGuard curveHandler(&mRaw, table, uncorrectedRawValues);
 
-  UncompressedDecompressor u(*mFile, off, c2, mRaw);
+  UncompressedDecompressor u(
+      ByteStream(DataBuffer(mFile->getSubView(off, c2), Endianness::little)),
+      mRaw);
 
   if (uncorrectedRawValues)
     u.decode8BitRaw<true>(width, height);

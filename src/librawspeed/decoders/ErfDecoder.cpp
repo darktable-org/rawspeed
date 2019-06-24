@@ -51,7 +51,9 @@ void ErfDecoder::checkImageDimensions() {
 RawImage ErfDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
-  UncompressedDecompressor u(*mFile, off, c2, mRaw);
+  UncompressedDecompressor u(
+      ByteStream(DataBuffer(mFile->getSubView(off, c2), Endianness::little)),
+      mRaw);
 
   u.decode12BitRaw<Endianness::big, false, true>(width, height);
 

@@ -51,23 +51,6 @@ public:
   UncompressedDecompressor(ByteStream input_, const RawImage& img)
       : input(std::move(input_)), mRaw(img) {}
 
-  UncompressedDecompressor(const Buffer& data, Buffer::size_type offset,
-                           Buffer::size_type size, const RawImage& img)
-      : UncompressedDecompressor(
-            ByteStream(
-                DataBuffer(data.getSubView(offset, size), Endianness::little)),
-            img) {}
-
-  UncompressedDecompressor(const Buffer& data, Buffer::size_type offset,
-                           const RawImage& img)
-      : UncompressedDecompressor(
-            ByteStream(DataBuffer(data.getSubView(offset), Endianness::little)),
-            img) {}
-
-  UncompressedDecompressor(const Buffer& data, const RawImage& img)
-      : UncompressedDecompressor(
-            ByteStream(DataBuffer(data, Endianness::little)), img) {}
-
   /* Helper function for decoders, that will unpack uncompressed image data */
   /* input: Input image, positioned at first pixel */
   /* size: Size of the image to decode in pixels */

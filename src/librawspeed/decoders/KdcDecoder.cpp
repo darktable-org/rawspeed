@@ -111,7 +111,8 @@ RawImage KdcDecoder::decodeRawInternal() {
 
   mRaw->createData();
 
-  UncompressedDecompressor u(inputBuffer, mRaw);
+  UncompressedDecompressor u(
+      ByteStream(DataBuffer(inputBuffer, Endianness::little)), mRaw);
 
   u.decode12BitRaw<Endianness::big>(width, height);
 

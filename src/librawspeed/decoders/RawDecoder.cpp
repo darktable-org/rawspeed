@@ -127,7 +127,10 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
 
   offY = 0;
   for (const RawSlice& slice : slices) {
-    UncompressedDecompressor u(*mFile, slice.offset, slice.count, mRaw);
+    UncompressedDecompressor u(
+        ByteStream(DataBuffer(mFile->getSubView(slice.offset, slice.count),
+                              Endianness::little)),
+        mRaw);
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
     bitPerPixel = static_cast<int>(
