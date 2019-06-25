@@ -71,7 +71,7 @@ constexpr bool operator&(SamsungV2Decompressor::OptFlags lhs,
                  rhs));
 }
 
-int32 SamsungV2Decompressor::getDiff(BitPumpMSB32* pump, uint32 len) {
+inline int32 SamsungV2Decompressor::getDiff(BitPumpMSB32* pump, uint32 len) {
   if (len == 0)
     return 0;
   int32 diff = pump->getBits(len);

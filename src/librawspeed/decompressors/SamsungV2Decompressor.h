@@ -45,7 +45,7 @@ protected:
 
   ByteStream data;
 
-  static int32 getDiff(BitPumpMSB32* pump, uint32 len);
+  static inline int32 getDiff(BitPumpMSB32* pump, uint32 len);
 
   template <OptFlags optflags> void decompressRow(uint32 row);
 
