@@ -43,7 +43,7 @@ SonyArw1Decompressor::SonyArw1Decompressor(const RawImage& img) : mRaw(img) {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", w, h);
 }
 
-int SonyArw1Decompressor::getDiff(BitPumpMSB* bs, uint32 len) {
+inline int SonyArw1Decompressor::getDiff(BitPumpMSB* bs, uint32 len) {
   if (len == 0)
     return 0;
   int diff = bs->getBits(len);
