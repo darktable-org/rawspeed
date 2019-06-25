@@ -110,6 +110,7 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
   std::array<int, 2> len;
   auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, strip.n));
   for (uint32 col = 0; col < width; col++) {
+    pump.fill(32);
     if (col >= (width & ~7U)) // last 'width % 8' pixels.
       len[0] = len[1] = 14;
     else if ((col & 7) == 0) {
@@ -117,7 +118,7 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
         int j = 0;
 
         for (; j < 5; j++) {
-          if (pump.getBits(1) != 0) {
+          if (pump.getBitsNoFill(1) != 0) {
             if (col == 0)
               ThrowRDE("Can not initialize lengths. Data is corrupt.");
 
@@ -128,16 +129,16 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
 
         assert((col == 0 && j > 0) || col != 0);
         if (j > 0)
-          i = length[2 * (j - 1) + pump.getBits(1)];
+          i = length[2 * (j - 1) + pump.getBitsNoFill(1)];
       }
     }
 
     int i = len[col & 1];
     if (i == 14)
-      img[col] = pred[col & 1] = pump.getBits(16);
+      img[col] = pred[col & 1] = pump.getBitsNoFill(16);
     else {
       pred[col & 1] +=
-          static_cast<signed>(pump.getBits(i)) + 1 - (1 << (i - 1));
+          static_cast<signed>(pump.getBitsNoFill(i)) + 1 - (1 << (i - 1));
       // FIXME: is the truncation the right solution here?
       img[col] = ushort16(pred[col & 1]);
     }
