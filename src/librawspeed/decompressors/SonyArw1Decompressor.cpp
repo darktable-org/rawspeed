@@ -46,7 +46,7 @@ SonyArw1Decompressor::SonyArw1Decompressor(const RawImage& img) : mRaw(img) {
 inline int SonyArw1Decompressor::getDiff(BitPumpMSB* bs, uint32 len) {
   if (len == 0)
     return 0;
-  int diff = bs->getBits(len);
+  int diff = bs->getBitsNoFill(len);
   return HuffmanTable::signExtended(diff, len);
 }
 
@@ -65,7 +65,7 @@ void SonyArw1Decompressor::decompress(const ByteStream& input) const {
   int sum = 0;
   for (int64 x = w - 1; x >= 0; x--) {
     for (uint32 y = 0; y < h + 1; y += 2) {
-      bits.fill();
+      bits.fill(32);
 
       if (y == h)
         y = 1;
