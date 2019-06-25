@@ -33,8 +33,9 @@ class RawImage;
 // Decoder for compressed srw files (NX3000 and later)
 class SamsungV1Decompressor final : public AbstractSamsungDecompressor {
   struct encTableItem;
-  static int32 samsungDiff(BitPumpMSB* pump,
-                           const std::vector<encTableItem>& tbl);
+
+  static inline int32 samsungDiff(BitPumpMSB* pump,
+                                  const std::vector<encTableItem>& tbl);
 
   const ByteStream* bs;
   int bits;

@@ -58,8 +58,9 @@ SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 }
 
-int32 SamsungV1Decompressor::samsungDiff(BitPumpMSB* pump,
-                                         const std::vector<encTableItem>& tbl) {
+inline int32
+SamsungV1Decompressor::samsungDiff(BitPumpMSB* pump,
+                                   const std::vector<encTableItem>& tbl) {
   // We read 10 bits to index into our table
   uint32 c = pump->peekBits(10);
   // Skip the bits that were used to encode this case
