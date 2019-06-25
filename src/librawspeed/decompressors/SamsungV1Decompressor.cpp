@@ -61,15 +61,16 @@ SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
 inline int32
 SamsungV1Decompressor::samsungDiff(BitPumpMSB* pump,
                                    const std::vector<encTableItem>& tbl) {
+  pump->fill(23); // That is the maximal number of bits we will need here.
   // We read 10 bits to index into our table
-  uint32 c = pump->peekBits(10);
+  uint32 c = pump->peekBitsNoFill(10);
   // Skip the bits that were used to encode this case
-  pump->getBits(tbl[c].encLen);
+  pump->skipBitsNoFill(tbl[c].encLen);
   // Read the number of bits the table tells me
   int32 len = tbl[c].diffLen;
   if (len == 0)
     return 0;
-  int32 diff = pump->getBits(len);
+  int32 diff = pump->getBitsNoFill(len);
   // If the first bit is 0 we need to turn this into a negative number
   diff = HuffmanTable::signExtended(diff, len);
   return diff;
