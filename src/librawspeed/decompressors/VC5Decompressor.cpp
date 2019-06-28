@@ -558,7 +558,7 @@ void VC5Decompressor::Wavelet::HighPassBand::decode(const Wavelet& wavelet) {
     }
   }
   getRLV(&bits, &pixelValue, &count);
-  static_assert(decompand(MARKER_BAND_END) == MARKER_BAND_END, "passthrought");
+  static_assert(decompand(MARKER_BAND_END) == MARKER_BAND_END, "passthrough");
   if (pixelValue != MARKER_BAND_END || count != 0)
     ThrowRDE("EndOfBand marker not found");
 }
