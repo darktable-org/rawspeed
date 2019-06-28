@@ -155,7 +155,7 @@ void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     ByteStream bs = mRootIFD->getEntryRecursive(LEAFMETADATA)->getData();
 
     // We need at least a couple of bytes:
-    // "NeutObj_neutrals" + 28 bytes binay + 4x uint as strings + 3x space + \0
+    // "NeutObj_neutrals" + 28 bytes binary + 4x uint as strings + 3x space + \0
     const uint32 minSize = 16+28+4+3+1;
 
     // dcraw does actual parsing, since we just want one field we bruteforce it

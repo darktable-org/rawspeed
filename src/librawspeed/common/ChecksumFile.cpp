@@ -32,7 +32,7 @@ namespace rawspeed {
 
 namespace {
 
-// The lenght of the sha1 digest (160-bit, 40 hexadecimal chars).
+// The length of the sha1 digest (160-bit, 40 hexadecimal chars).
 constexpr auto Sha1CheckSumLength = 40;
 // The separator after the digest and before filename.
 // Should be either "  " or " b".

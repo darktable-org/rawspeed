@@ -70,7 +70,7 @@ TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream* bs) : parent(parent_) {
       // limit access to range from 0 to data_offset+byte_size
       data = ByteStream(bs, data_offset, byte_size, bs.getByteOrder());
 #else
-      // allow access to whole file, necesary if offsets inside the maker note
+      // allow access to whole file, necessary if offsets inside the maker note
       // point to outside data, which is forbidden due to the TIFF/DNG spec but
       // may happen none the less (see e.g. "old" ORF files like EX-1, note:
       // the tags outside of the maker note area are currently not used anyway)

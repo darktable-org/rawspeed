@@ -454,7 +454,7 @@ void VC5Decompressor::parseVC5() {
       break;
     case VC5Tag::ComponentsPerSample:
       if (val != mVC5.cps)
-        ThrowRDE("Bad compnent per sample count %u, not %u", val, mVC5.cps);
+        ThrowRDE("Bad component per sample count %u, not %u", val, mVC5.cps);
       break;
     case VC5Tag::PrescaleShift:
       // FIXME: something is wrong. We get this before VC5Tag::ChannelNumber.

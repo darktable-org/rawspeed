@@ -74,7 +74,7 @@ TEST(AbstractHuffmanTableCodeSymbolTest, Equality) {
 }
 
 #ifndef NDEBUG
-TEST(CodeSymbolDeathTest, CodeSymbolLenght) {
+TEST(CodeSymbolDeathTest, CodeSymbolLength) {
   ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(0, 0); }, "code_len > 0");
   ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(1, 0); }, "code_len > 0");
   ASSERT_DEATH({ AbstractHuffmanTable::CodeSymbol(0, 17); }, "code_len <= 16");
@@ -204,7 +204,7 @@ TEST_P(CodeSymbolHaveCommonPrefixTest, CodeSymbolHaveCommonPrefixTest) {
   auto symbol_str = ::testing::PrintToString(symbol);
   auto partial_str = ::testing::PrintToString(partial);
   const auto len = std::min(symbol_str.length(), partial_str.length());
-  // Trim them to the same lenght (cut end chars)
+  // Trim them to the same length (cut end chars)
   symbol_str.resize(len);
   partial_str.resize(len);
   ASSERT_EQ(AbstractHuffmanTable::CodeSymbol::HaveCommonPrefix(symbol, partial),
@@ -334,7 +334,7 @@ TEST(AbstractHuffmanTableTest, setNCodesPerLengthTooManyCodesTotal) {
                rawspeed::RawDecoderException);
 }
 
-TEST(AbstractHuffmanTableTest, setNCodesPerLengthTooManyCodesForLenght) {
+TEST(AbstractHuffmanTableTest, setNCodesPerLengthTooManyCodesForLength) {
   for (int len = 1; len < 8; len++) {
     AbstractHuffmanTable ht;
     std::vector<uchar8> v(16, 0);
@@ -633,7 +633,7 @@ TEST_F(DummyHuffmanTableDeathTest, VerifyCodeSymbolsTest) {
                  "all code symbols are globally ordered");
   }
   {
-    // Code Lenghts are not decreasing
+    // Code Lengths are not decreasing
     std::vector<AbstractHuffmanTable::CodeSymbol> s{{0b0, 2}, {0b1, 1}};
     ASSERT_DEATH({ VerifyCodeSymbols(s); },
                  "all code symbols are globally ordered");

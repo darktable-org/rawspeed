@@ -67,7 +67,7 @@ TiffRootIFDOwner TiffParser::parse(TiffIFD* parent, const Buffer& data) {
   bs.skipBytes(2);
 
   ushort16 magic = bs.getU16();
-  if (magic != 42 && magic != 0x4f52 && magic != 0x5352 && magic != 0x55) // ORF has 0x4f52/0x5352, RW2 0x55 - Brillant!
+  if (magic != 42 && magic != 0x4f52 && magic != 0x5352 && magic != 0x55) // ORF has 0x4f52/0x5352, RW2 0x55 - Brilliant!
     ThrowTPE("Not a TIFF file (magic 42)");
 
   TiffRootIFDOwner root = std::make_unique<TiffRootIFD>(

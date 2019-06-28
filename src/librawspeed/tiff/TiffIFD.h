@@ -146,7 +146,7 @@ inline Endianness getTiffByteOrder(const ByteStream& bs, uint32 pos,
   if (bs.hasPatternAt("MM", 2, pos))
     return Endianness::big;
 
-  ThrowTPE("Failed to parse TIFF endianess information in %s.", context);
+  ThrowTPE("Failed to parse TIFF endianness information in %s.", context);
 }
 
 } // namespace rawspeed

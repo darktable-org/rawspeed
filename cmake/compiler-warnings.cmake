@@ -9,7 +9,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 if(NOT (UNIX OR APPLE))
-  # on windows, resuts in bogus false-positive varnings
+  # on windows, results in bogus false-positive warnings
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-format)
 endif()
 

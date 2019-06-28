@@ -42,7 +42,7 @@ template <typename T, size_t alignment>
 // coverity[+alloc]
 inline T* __attribute__((malloc, warn_unused_result, alloc_size(1)))
 alignedMalloc(size_t size) {
-  static_assert(alignment >= alignof(T), "unsufficient alignment");
+  static_assert(alignment >= alignof(T), "insufficient alignment");
   static_assert(isPowerOfTwo(alignment), "not power-of-two");
   static_assert(isAligned(alignment, sizeof(void*)),
                 "not multiple of sizeof(void*)");
@@ -84,8 +84,8 @@ inline T* __attribute__((malloc, warn_unused_result))
 alignedMallocArray(size_t nmemb) {
   static_assert(sizeof(T), "???");
   static_assert(sizeof(T2), "???");
-  static_assert(alignment >= alignof(T), "unsufficient alignment");
-  static_assert(alignment >= alignof(T2), "unsufficient alignment");
+  static_assert(alignment >= alignof(T), "insufficient alignment");
+  static_assert(alignment >= alignof(T2), "insufficient alignment");
   static_assert(isPowerOfTwo(sizeof(T2)), "not power-of-two");
 
   return alignedMallocArray<T, alignment, doRoundUp>(nmemb, sizeof(T2));

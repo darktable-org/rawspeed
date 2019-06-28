@@ -148,7 +148,7 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
   // helper function for easy setup of ByteStream buffer for the different maker note types
   // 'rebase' means position 0 of new stream equals current position
   // 'newPosition' is the position where the IFD starts
-  // 'byteOrderOffset' is the position wher the 2 magic bytes (II/MM) may be found
+  // 'byteOrderOffset' is the position where the 2 magic bytes (II/MM) may be found
   // 'context' is a string providing error information in case the byte order parsing should fail
   auto setup = [&bs](bool rebase, uint32 newPosition,
                      uint32 byteOrderOffset = 0,

@@ -70,7 +70,7 @@ Version 2, new cameras and features
 
 Getting Source Code
 --------------------------------------------------------------------------------
-You can get access to the lastest version using `from here <rawspeed_>`_. You will need to include the “RawSpeed” and “data” folder in your own project.
+You can get access to the latest version using `from here <rawspeed_>`_. You will need to include the “RawSpeed” and “data” folder in your own project.
 
 CMake-based build system is provided.
 

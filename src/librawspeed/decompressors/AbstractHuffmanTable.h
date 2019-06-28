@@ -90,7 +90,7 @@ protected:
   static void VerifyCodeSymbols(const std::vector<CodeSymbol>& symbols) {
 #ifndef NDEBUG
     // The code symbols are ordered so that all the code values are strictly
-    // increasing and code lenghts are not decreasing.
+    // increasing and code lengths are not decreasing.
     const auto symbolSort = [](const CodeSymbol& lhs,
                                const CodeSymbol& rhs) -> bool {
       return std::less<>()(lhs.code, rhs.code) &&
@@ -178,7 +178,7 @@ public:
     for (auto codeLen = 1UL; codeLen < nCodesPerLength.size(); codeLen++) {
       // we have codeLen bits. make sure that that code count can actually fit
       // E.g. for len 1 we could have two codes: 0b0 and 0b1
-      // (but in that case there can be no other codes (with higher lenghts))
+      // (but in that case there can be no other codes (with higher lengths))
       const auto maxCodesInCurrLen = (1U << codeLen);
       const auto nCodes = nCodesPerLength[codeLen];
       if (nCodes > maxCodesInCurrLen) {
@@ -186,7 +186,7 @@ public:
                  nCodes, codeLen);
       }
 
-      // Also, check that we actually can have this much leafs for this lenght
+      // Also, check that we actually can have this much leafs for this length
       if (nCodes > maxCodes) {
         ThrowRDE(
             "Corrupt Huffman. Can only fit %u out of %u codes in %lu-bit len",

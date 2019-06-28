@@ -51,7 +51,7 @@ protected:
 
     const auto* top = &(tree.root->getAsBranch());
 
-    // Read bits until either find the code or detect the uncorrect code
+    // Read bits until either find the code or detect the incorrect code
     for (partial.code = 0, partial.code_len = 1;; ++partial.code_len) {
       assert(partial.code_len <= 16);
 
@@ -82,7 +82,7 @@ protected:
       top = &(newNode->getAsBranch());
     }
 
-    // We have either returned the found symbol, or thrown on uncorrect symbol.
+    // We have either returned the found symbol, or thrown on incorrect symbol.
     __builtin_unreachable();
   }
 
