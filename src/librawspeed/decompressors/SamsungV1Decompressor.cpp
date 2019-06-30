@@ -131,7 +131,7 @@ void SamsungV1Decompressor::decompress() {
 
       int value = pred[col & 1];
       if (!isIntN(value, bits))
-        ThrowRDE("decoded value out of bounds at %d:%d", col, row);
+        ThrowRDE("decoded value out of bounds");
       out(row, col) = value;
     }
   }
