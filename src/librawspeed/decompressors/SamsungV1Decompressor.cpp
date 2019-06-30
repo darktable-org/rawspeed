@@ -39,7 +39,7 @@ struct SamsungV1Decompressor::encTableItem {
 
 SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
                                              const ByteStream* bs_, int bit)
-    : AbstractSamsungDecompressor(image), bs(bs_), bits(bit) {
+    : AbstractSamsungDecompressor(image), bs(bs_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");

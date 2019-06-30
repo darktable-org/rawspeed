@@ -38,7 +38,7 @@ class SamsungV1Decompressor final : public AbstractSamsungDecompressor {
                                     const std::vector<encTableItem>& tbl);
 
   const ByteStream* bs;
-  int bits;
+  static constexpr int bits = 12;
 
 public:
   SamsungV1Decompressor(const RawImage& image, const ByteStream* bs_, int bit);
