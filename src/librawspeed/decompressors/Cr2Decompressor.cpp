@@ -210,7 +210,7 @@ void Cr2Decompressor::decodeN_X_Y()
           ThrowRDE("Bad slice width / frame size / image size combination.");
         if (((sliceId + 1) == slicing.numSlices) &&
             ((destX + sliceWidth) < static_cast<unsigned>(mRaw->dim.x)))
-          ThrowRDE("Unsufficient slices - do not fill the entire image");
+          ThrowRDE("Insufficient slices - do not fill the entire image");
       } else {
         // FIXME.
       }

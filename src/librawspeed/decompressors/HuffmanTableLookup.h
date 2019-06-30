@@ -133,7 +133,7 @@ public:
     bs.fill(32);
 
     // for processors supporting bmi2 instructions, using
-    // maxCodePlusDiffLength() might be benifitial
+    // maxCodePlusDiffLength() might be beneficial
 
     uint32 code = 0;
     uint32 code_l = 0;

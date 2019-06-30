@@ -454,7 +454,7 @@ void VC5Decompressor::parseVC5() {
       break;
     case VC5Tag::ComponentsPerSample:
       if (val != mVC5.cps)
-        ThrowRDE("Bad compnent per sample count %u, not %u", val, mVC5.cps);
+        ThrowRDE("Bad component per sample count %u, not %u", val, mVC5.cps);
       break;
     case VC5Tag::PrescaleShift:
       // FIXME: something is wrong. We get this before VC5Tag::ChannelNumber.
@@ -558,7 +558,7 @@ void VC5Decompressor::Wavelet::HighPassBand::decode(const Wavelet& wavelet) {
     }
   }
   getRLV(&bits, &pixelValue, &count);
-  static_assert(decompand(MARKER_BAND_END) == MARKER_BAND_END, "passthrought");
+  static_assert(decompand(MARKER_BAND_END) == MARKER_BAND_END, "passthrough");
   if (pixelValue != MARKER_BAND_END || count != 0)
     ThrowRDE("EndOfBand marker not found");
 }

@@ -193,7 +193,7 @@ public:
     bs.fill(32);
 
     // for processors supporting bmi2 instructions, using maxCodePlusDiffLength()
-    // might be benifitial
+    // might be beneficial
 
     uint32 code = bs.peekBitsNoFill(LookupDepth);
     assert(code < decodeLookup.size());

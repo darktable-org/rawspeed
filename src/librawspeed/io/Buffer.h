@@ -32,7 +32,7 @@
 
 namespace rawspeed {
 
-// This allows to specify the nuber of bytes that each Buffer needs to
+// This allows to specify the number of bytes that each Buffer needs to
 // allocate additionally to be able to remove one runtime bounds check
 // in BitStream::fill. There are two sane choices:
 // 0 : allocate exactly as much data as required, or
@@ -46,7 +46,7 @@ namespace rawspeed {
 // else bound checks will malfunction => bad things can happen !!!
 
 /*************************************************************************
- * This is the buffer abstaction.
+ * This is the buffer abstraction.
  *
  * It allows access to some piece of memory, typically a whole or part
  * of a raw file. The underlying memory may be owned by the buffer or not.

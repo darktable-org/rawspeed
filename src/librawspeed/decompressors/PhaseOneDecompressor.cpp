@@ -57,7 +57,7 @@ PhaseOneDecompressor::PhaseOneDecompressor(const RawImage& img,
 void PhaseOneDecompressor::validateStrips() const {
   // The 'strips' vector should contain exactly one element per row of image.
 
-  // If the lenght is different, then the 'strips' vector is clearly incorrect.
+  // If the length is different, then the 'strips' vector is clearly incorrect.
   if (strips.size() != static_cast<decltype(strips)::size_type>(mRaw->dim.y)) {
     ThrowRDE("Height (%u) vs strip count %zu mismatch", mRaw->dim.y,
              strips.size());

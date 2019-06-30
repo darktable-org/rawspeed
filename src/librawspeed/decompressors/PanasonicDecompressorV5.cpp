@@ -94,7 +94,7 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
 
   // Does the input contain enough blocks?
   if (haveBlocks < numBlocks)
-    ThrowRDE("Unsufficient count of input blocks for a given image");
+    ThrowRDE("Insufficient count of input blocks for a given image");
 
   // We only want those blocks we need, no extras.
   input = input_.peekStream(numBlocks, BlockSize);

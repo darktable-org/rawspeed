@@ -259,7 +259,7 @@ JpegMarker AbstractLJpegDecompressor::getNextMarker(bool allowskip) {
   } while (allowskip && !(c0 == 0xFF && c1 != 0 && c1 != 0xFF));
 
   if (!(c0 == 0xFF && c1 != 0 && c1 != 0xFF))
-    ThrowRDE("(Noskip) Expected marker not found. Propably corrupt file.");
+    ThrowRDE("(Noskip) Expected marker not found. Probably corrupt file.");
 
   return static_cast<JpegMarker>(c1);
 }

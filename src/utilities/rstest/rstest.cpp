@@ -199,7 +199,7 @@ string img_hash(const RawImage& r) {
   APPEND(&oss, "cropOffset: %dx%d\n", cropTL.x, cropTL.y);
 
   // NOTE: pitch is internal property, a function of dimUncropped.x, bpp and
-  // some additional padding overhead, to align each line lenght to be a
+  // some additional padding overhead, to align each line length to be a
   // multiple of (currently) 16 bytes. And maybe with some additional
   // const offset. there is no point in showing it here, it may differ.
   // APPEND(&oss, "pitch: %d\n", r->pitch);
