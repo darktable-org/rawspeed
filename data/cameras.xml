@@ -10468,6 +10468,18 @@
 	<Camera make="LEICA CAMERA AG" model="LEICA X2" mode="dng">
 		<ID make="Leica" model="X2">LEICA X2</ID>
 	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA Q (Typ 116)" mode="dng">
+		<ID make="Leica" model="Q (Typ 116)">LEICA Q (Typ 116)</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA Q2" mode="dng">
+		<ID make="Leica" model="Q2">LEICA Q2</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA SL (Typ 601)" mode="dng">
+		<ID make="Leica" model="SL (Typ 601)">LEICA SL (Typ 601)</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA CL" mode="dng">
+		<ID make="Leica" model="CL">LEICA CL</ID>
+	</Camera>
 	<Camera make="RICOH IMAGING COMPANY, LTD." model="GR" mode="dng">
 		<ID make="Ricoh" model="GR">GR</ID>
 	</Camera>
