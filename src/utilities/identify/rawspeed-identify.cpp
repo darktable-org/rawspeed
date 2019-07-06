@@ -246,6 +246,7 @@ int main(int argc, char* argv[]) { // NOLINT
     fprintf(stdout, "cropOffset: %dx%d\n", cropTL.x, cropTL.y);
 
     fprintf(stdout, "fuji_rotation_pos: %d\n", r->metadata.fujiRotationPos);
+    fprintf(stdout, "fuji_exposure_bias: %f\n", r->metadata.fujiExposureBias);
     fprintf(stdout, "pixel_aspect_ratio: %f\n", r->metadata.pixelAspectRatio);
 
     double sum = 0.0F;

@@ -77,6 +77,9 @@ public:
   // corners are when the image is rotated 45 degrees in Fuji rotated sensors.
   uint32 fujiRotationPos;
 
+  // Fuji RAW exposure offset compared to camera-produced JPEGs.
+  float fujiExposureBias;
+
   iPoint2D subsampling;
   std::string make;
   std::string model;

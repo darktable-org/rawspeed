@@ -210,6 +210,7 @@ string img_hash(const RawImage& r) {
   APPEND(&oss, "\n");
 
   APPEND(&oss, "fuji_rotation_pos: %d\n", r->metadata.fujiRotationPos);
+  APPEND(&oss, "fuji_exposure_bias: %f\n", r->metadata.fujiExposureBias);
   APPEND(&oss, "pixel_aspect_ratio: %f\n", r->metadata.pixelAspectRatio);
 
   APPEND(&oss, "badPixelPositions: ");

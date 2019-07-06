@@ -46,6 +46,8 @@
 
 namespace rawspeed {
 
+const float BASE_RAW_EXPOSURE_BIAS = -0.72;
+
 bool RafDecoder::isRAF(const Buffer* input) {
   static const std::array<char, 16> magic = {{'F', 'U', 'J', 'I', 'F', 'I', 'L',
                                               'M', 'C', 'C', 'D', '-', 'R', 'A',
@@ -303,6 +305,13 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   mRaw->metadata.canonical_id = cam->canonical_id;
   mRaw->metadata.make = id.make;
   mRaw->metadata.model = id.model;
+
+  if (mRootIFD->hasEntryRecursive(FUJI_RAW_EXPOSURE_BIAS)) {
+    auto ratio = mRootIFD->getEntryRecursive(FUJI_RAW_EXPOSURE_BIAS);
+    auto actual_bias = static_cast<float>(ratio->getI16(0)) / ratio->getI16(1);
+
+    mRaw->metadata.fujiExposureBias = actual_bias - BASE_RAW_EXPOSURE_BIAS;
+  }
 
   if (mRootIFD->hasEntryRecursive(FUJI_WB_GRBLEVELS)) {
     TiffEntry *wb = mRootIFD->getEntryRecursive(FUJI_WB_GRBLEVELS);
