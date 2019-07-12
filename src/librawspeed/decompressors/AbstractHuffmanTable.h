@@ -84,7 +84,7 @@ protected:
   // 2. This is the actual huffman encoded data, i.e. the 'alphabet'. Each value
   // is the number of bits following the code that encode the difference to the
   // last pixel. Valid values are in the range 0..16.
-  // signExtended() is used to decode the difference bits to a signed int.
+  // extend() is used to decode the difference bits to a signed int.
   std::vector<uchar8> codeValues; // index is just sequential number
 
   static void VerifyCodeSymbols(const std::vector<CodeSymbol>& symbols) {
@@ -219,22 +219,13 @@ public:
     }
   }
 
+  // Figure F.12 – Extending the sign bit of a decoded value in V
+  // WARNING: this is *not* your normal 2's complement sign extension!
   // WARNING: the caller should check that len != 0 before calling the function
-  inline static int __attribute__((const))
-  signExtended(uint32 diff, uint32 len) {
+  inline static int __attribute__((const)) extend(uint32 diff, uint32 len) {
     int32 ret = diff;
-#if 0
-#define _X(x) (1 << x) - 1
-    constexpr static int offset[16] = {
-      0,     _X(1), _X(2),  _X(3),  _X(4),  _X(5),  _X(6),  _X(7),
-      _X(8), _X(9), _X(10), _X(11), _X(12), _X(13), _X(14), _X(15)};
-#undef _X
-    if ((diff & (1 << (len - 1))) == 0)
-      ret -= offset[len];
-#else
     if ((diff & (1 << (len - 1))) == 0)
       ret -= (1 << len) - 1;
-#endif
     return ret;
   }
 };

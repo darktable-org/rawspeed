@@ -164,7 +164,7 @@ public:
 
     assert(FULL_DECODE);
     assert((diff_l && (code_l + diff_l <= 32)) || !diff_l);
-    return diff_l ? signExtended(bs.getBitsNoFill(diff_l), diff_l) : 0;
+    return diff_l ? extend(bs.getBitsNoFill(diff_l), diff_l) : 0;
   }
 };
 

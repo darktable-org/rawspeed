@@ -235,7 +235,7 @@ inline void CrwDecompressor::decodeBlock(std::array<int, 64>* diffBuf,
     if (i >= 64)
       break;
 
-    diff = HuffmanTable::signExtended(diff, len);
+    diff = HuffmanTable::extend(diff, len);
 
     (*diffBuf)[i] = diff;
   }

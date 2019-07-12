@@ -527,7 +527,7 @@ static const SignExtendDataType signExtendData[]{
 INSTANTIATE_TEST_CASE_P(SignExtendTest, SignExtendTest,
                         ::testing::ValuesIn(signExtendData));
 TEST_P(SignExtendTest, SignExtendTest) {
-  ASSERT_EQ(AbstractHuffmanTable::signExtended(diff, len), value);
+  ASSERT_EQ(AbstractHuffmanTable::extend(diff, len), value);
 }
 
 using generateCodeSymbolsDataType =

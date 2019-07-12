@@ -157,8 +157,7 @@ public:
           if (diff_l) {
             uint32 diff = (c >> (LookupDepth - code_l - diff_l)) & ((1 << diff_l) - 1);
             decodeLookup[c] |= static_cast<int32>(
-                static_cast<uint32>(signExtended(diff, diff_l))
-                << PayloadShift);
+                static_cast<uint32>(extend(diff, diff_l)) << PayloadShift);
           }
         }
       }
@@ -218,7 +217,7 @@ public:
           bs.skipBitsNoFill(16);
         return -32768;
       }
-      return FULL_DECODE ? signExtended(bs.getBitsNoFill(l_diff), l_diff) : l_diff;
+      return FULL_DECODE ? extend(bs.getBitsNoFill(l_diff), l_diff) : l_diff;
     }
 
     uint32 code_l = LookupDepth;
@@ -250,7 +249,7 @@ public:
 
     assert(FULL_DECODE);
     assert((diff_l && (len + code_l + diff_l <= 32)) || !diff_l);
-    return diff_l ? signExtended(bs.getBitsNoFill(diff_l), diff_l) : 0;
+    return diff_l ? extend(bs.getBitsNoFill(diff_l), diff_l) : 0;
   }
 };
 

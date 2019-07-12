@@ -150,7 +150,7 @@ public:
       return -32768;
     }
 
-    return diff_l ? signExtended(bs.getBitsNoFill(diff_l), diff_l) : 0;
+    return diff_l ? extend(bs.getBitsNoFill(diff_l), diff_l) : 0;
   }
 };
 

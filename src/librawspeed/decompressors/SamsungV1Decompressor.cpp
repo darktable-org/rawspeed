@@ -72,7 +72,7 @@ SamsungV1Decompressor::samsungDiff(BitPumpMSB* pump,
     return 0;
   int32 diff = pump->getBitsNoFill(len);
   // If the first bit is 0 we need to turn this into a negative number
-  diff = HuffmanTable::signExtended(diff, len);
+  diff = HuffmanTable::extend(diff, len);
   return diff;
 }
 
