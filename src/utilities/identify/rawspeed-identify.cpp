@@ -119,7 +119,6 @@ using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
 using rawspeed::RawParser;
 using rawspeed::RawImage;
-using rawspeed::uchar8;
 using rawspeed::uint32;
 using rawspeed::iPoint2D;
 using rawspeed::TYPE_USHORT16;
@@ -253,7 +252,7 @@ int main(int argc, char* argv[]) { // NOLINT
 #pragma omp parallel for default(none) OMPFIRSTPRIVATECLAUSE(dimUncropped, raw, bpp) schedule(static) reduction(+ : sum)
 #endif
     for (int y = 0; y < dimUncropped.y; ++y) {
-      uchar8* const data = (*raw)->getDataUncropped(0, y);
+      uint8_t* const data = (*raw)->getDataUncropped(0, y);
 
       for (unsigned x = 0; x < bpp * dimUncropped.x; ++x)
         sum += static_cast<double>(data[x]);

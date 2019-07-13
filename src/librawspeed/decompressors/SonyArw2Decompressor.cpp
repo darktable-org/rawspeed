@@ -49,7 +49,7 @@ SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
 }
 
 void SonyArw2Decompressor::decompressRow(int row) const {
-  uchar8* data = mRaw->getData();
+  uint8_t* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
   int32_t w = mRaw->dim.x;
 
@@ -99,7 +99,7 @@ void SonyArw2Decompressor::decompressRow(int row) const {
             p = 0x7ff;
         }
       }
-      mRaw->setWithLookUp(p << 1, reinterpret_cast<uchar8*>(&dest[x + i * 2]),
+      mRaw->setWithLookUp(p << 1, reinterpret_cast<uint8_t*>(&dest[x + i * 2]),
                           &random);
     }
     x += ((x & 1) != 0) ? 31 : 1; // Skip to next 32 pixels

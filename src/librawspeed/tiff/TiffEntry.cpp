@@ -122,7 +122,7 @@ bool __attribute__((pure)) TiffEntry::isFloat() const {
   }
 }
 
-uchar8 TiffEntry::getByte(uint32 index) const {
+uint8_t TiffEntry::getByte(uint32 index) const {
   if (type != TIFF_BYTE && type != TIFF_UNDEFINED)
     ThrowTPE("Wrong type %u encountered. Expected Byte on 0x%x", type, tag);
 

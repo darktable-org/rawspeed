@@ -21,7 +21,7 @@
 */
 
 #include "decoders/CrwDecoder.h"
-#include "common/Common.h"                 // for ushort16, uchar8, uint32
+#include "common/Common.h"                 // for ushort16, uint8_t, uint32
 #include "common/Point.h"                  // for iPoint2D
 #include "common/RawspeedException.h"      // for RawspeedException
 #include "decoders/RawDecoderException.h"  // for ThrowRDE
@@ -152,8 +152,8 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       if (wb->type == CIFF_BYTE && wb->count == 768) {
         // We're in a D30 file, values are RGGB
         // This will probably not get used anyway as a 0x102c tag should exist
-        std::array<uchar8, 4> wbMuls{{wb->getByte(72), wb->getByte(73),
-                                      wb->getByte(74), wb->getByte(75)}};
+        std::array<uint8_t, 4> wbMuls{{wb->getByte(72), wb->getByte(73),
+                                       wb->getByte(74), wb->getByte(75)}};
         for (const auto& mul : wbMuls) {
           if (0 == mul)
             ThrowRDE("WB coeffient is zero!");

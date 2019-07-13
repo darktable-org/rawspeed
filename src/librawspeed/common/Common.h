@@ -36,7 +36,6 @@ extern "C" int rawspeed_get_number_of_processor_cores();
 
 namespace rawspeed {
 
-using uchar8 = unsigned char;
 using uint32 = unsigned int;
 using ushort16 = unsigned short;
 
@@ -50,9 +49,8 @@ enum DEBUG_PRIO {
 void writeLog(DEBUG_PRIO priority, const char* format, ...)
     __attribute__((format(printf, 2, 3)));
 
-inline void copyPixels(uchar8* dest, int dstPitch, const uchar8* src,
-                       int srcPitch, int rowSize, int height)
-{
+inline void copyPixels(uint8_t* dest, int dstPitch, const uint8_t* src,
+                       int srcPitch, int rowSize, int height) {
   if (height == 1 || (dstPitch == srcPitch && srcPitch == rowSize))
     memcpy(dest, src, static_cast<size_t>(rowSize) * height);
   else {

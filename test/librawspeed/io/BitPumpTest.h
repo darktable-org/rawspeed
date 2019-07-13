@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h" // for uchar8
+#include "common/Common.h" // for uint8_t
 #include "io/Buffer.h"     // for Buffer
 #include "io/ByteStream.h" // for ByteStream
 #include "io/Endianness.h" // for getHostEndianness, Endianness::big, Endia...
@@ -169,38 +169,36 @@ template <typename Pump, typename PatternTag> struct Pattern {};
 
 struct ZerosTag;
 template <typename Pump> struct Pattern<Pump, ZerosTag> {
-  static const std::array<rawspeed::uchar8, 4> Data;
+  static const std::array<uint8_t, 4> Data;
   static rawspeed::uint32 element(int index) { return 0U; }
   static rawspeed::uint32 data(int len) { return 0U; }
 };
 template <typename Pump>
-const std::array<rawspeed::uchar8, 4> Pattern<Pump, ZerosTag>::Data{
-    {/* zero-init */}};
+const std::array<uint8_t, 4> Pattern<Pump, ZerosTag>::Data{{/* zero-init */}};
 
 struct OnesTag;
 template <typename Pump> struct Pattern<Pump, OnesTag> {
-  static const std::array<rawspeed::uchar8, 4> Data;
+  static const std::array<uint8_t, 4> Data;
   static rawspeed::uint32 element(int index) { return 1U; }
   static rawspeed::uint32 data(int len);
 };
 
 struct InvOnesTag;
 template <typename Pump> struct Pattern<Pump, InvOnesTag> {
-  static const std::array<rawspeed::uchar8, 4> Data;
+  static const std::array<uint8_t, 4> Data;
   static rawspeed::uint32 element(int index) { return 1U << (index - 1U); }
   static rawspeed::uint32 data(int len);
 };
 
 struct SaturatedTag;
 template <typename Pump> struct Pattern<Pump, SaturatedTag> {
-  static const std::array<rawspeed::uchar8, 8> Data;
+  static const std::array<uint8_t, 8> Data;
   static rawspeed::uint32 element(int index) { return (1U << index) - 1U; }
   static rawspeed::uint32 data(int len) { return (1U << len) - 1U; }
 };
 template <typename Pump>
-const std::array<rawspeed::uchar8, 8> Pattern<Pump, SaturatedTag>::Data{
-    {rawspeed::uchar8(~0U), rawspeed::uchar8(~0U), rawspeed::uchar8(~0U),
-     rawspeed::uchar8(~0U)}};
+const std::array<uint8_t, 8> Pattern<Pump, SaturatedTag>::Data{
+    {uint8_t(~0U), uint8_t(~0U), uint8_t(~0U), uint8_t(~0U)}};
 
 auto GenOnesLE = [](int zerosToOutput,
                     int zerosOutputted) -> std::array<rawspeed::uint32, 29> {

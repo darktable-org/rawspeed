@@ -19,7 +19,7 @@
 */
 
 #include "io/BitPumpLSB.h"  // for BitPumpLSB
-#include "common/Common.h"  // for uchar8, uint32
+#include "common/Common.h"  // for uint8_t, uint32
 #include "io/BitPumpTest.h" // for Pattern, (anonymous), GenOnesLE, BitPump...
 #include <array>            // for array
 #include <gtest/gtest.h>    // for INSTANTIATE_TYPED_TEST_CASE_P, Types
@@ -32,7 +32,7 @@ struct InvOnesTag;
 struct OnesTag;
 
 template <>
-const std::array<rawspeed::uchar8, 4> Pattern<BitPumpLSB, OnesTag>::Data = {
+const std::array<uint8_t, 4> Pattern<BitPumpLSB, OnesTag>::Data = {
     {/* [Byte0 Byte1 Byte2 Byte3] */
      /* Byte: [Bit7 .. Bit0] */
      0b01001011, 0b10000100, 0b00100000, 0b11110000}};
@@ -42,7 +42,7 @@ template <> rawspeed::uint32 Pattern<BitPumpLSB, OnesTag>::data(int index) {
 }
 
 template <>
-const std::array<rawspeed::uchar8, 4> Pattern<BitPumpLSB, InvOnesTag>::Data = {
+const std::array<uint8_t, 4> Pattern<BitPumpLSB, InvOnesTag>::Data = {
     {0b00100101, 0b01000010, 0b00010000, 0b11111000}};
 template <> rawspeed::uint32 Pattern<BitPumpLSB, InvOnesTag>::data(int index) {
   const auto set = GenOnesLE(1, 0);

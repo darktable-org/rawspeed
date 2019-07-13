@@ -20,7 +20,7 @@
 */
 
 #include "decoders/ArwDecoder.h"
-#include "common/Common.h"                          // for uint32, uchar8
+#include "common/Common.h"                          // for uint32, uint8_t
 #include "common/Point.h"                           // for iPoint2D
 #include "common/RawspeedException.h"               // for RawspeedException
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
@@ -74,13 +74,13 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
   uint32 head_off = 164600;
 
   // Replicate the dcraw contortions to get the "decryption" key
-  const uchar8* keyData = mFile->getData(key_off, 1);
+  const uint8_t* keyData = mFile->getData(key_off, 1);
   uint32 offset = (*keyData) * 4;
   keyData = mFile->getData(key_off + offset, 4);
   uint32 key = getU32BE(keyData);
   static const size_t head_size = 40;
-  const uchar8* head_orig = mFile->getData(head_off, head_size);
-  vector<uchar8> head(head_size);
+  const uint8_t* head_orig = mFile->getData(head_off, head_size);
+  vector<uint8_t> head(head_size);
   SonyDecrypt(reinterpret_cast<const uint32*>(head_orig),
               reinterpret_cast<uint32*>(&head[0]), 10, key);
   for (int i = 26; i > 22; i--)

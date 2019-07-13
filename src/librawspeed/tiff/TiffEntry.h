@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32, uchar8, ushort16, int32_t, int16_t
+#include "common/Common.h" // for uint32, uint8_t, ushort16, int32_t, int16_t
 #include "io/ByteStream.h" // for ByteStream
 #include "tiff/TiffTag.h"  // for TiffTag
 #include <string>          // for string
@@ -83,7 +83,7 @@ public:
   bool __attribute__((pure)) isFloat() const;
   bool __attribute__((pure)) isInt() const;
   bool __attribute__((pure)) isString() const;
-  uchar8 getByte(uint32 index = 0) const;
+  uint8_t getByte(uint32 index = 0) const;
   uint32 getU32(uint32 index = 0) const;
   int32_t getI32(uint32 index = 0) const;
   ushort16 getU16(uint32 index = 0) const;
@@ -107,7 +107,7 @@ public:
   }
 
   ByteStream& getData() { return data; }
-  const uchar8* getData(uint32 size) { return data.getData(size); }
+  const uint8_t* getData(uint32 size) { return data.getData(size); }
 
   const DataBuffer& getRootIfdData() const;
 

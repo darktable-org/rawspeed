@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/UncompressedDecompressor.h"
-#include "common/Common.h"                // for uint32, uchar8, ushort16
+#include "common/Common.h"                // for uint32, uint8_t, ushort16
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpLSB.h"                // for BitPumpLSB
@@ -98,7 +98,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
   assert(inputPitchBytes > 0);
   assert(bitPerPixel > 0);
 
-  uchar8* data = mRaw->getData();
+  uint8_t* data = mRaw->getData();
   uint32 outPitch = mRaw->pitch;
   uint32 w = size.x;
   uint32 h = size.y;
@@ -214,9 +214,9 @@ template <bool uncorrectedRawValues>
 void UncompressedDecompressor::decode8BitRaw(uint32 w, uint32 h) {
   sanityCheck(w, &h, 1);
 
-  uchar8* data = mRaw->getData();
+  uint8_t* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
-  const uchar8* in = input.getData(w * h);
+  const uint8_t* in = input.getData(w * h);
   uint32 random = 0;
   for (uint32 y = 0; y < h; y++) {
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
@@ -224,7 +224,7 @@ void UncompressedDecompressor::decode8BitRaw(uint32 w, uint32 h) {
       if (uncorrectedRawValues)
         dest[x] = *in;
       else
-        mRaw->setWithLookUp(*in, reinterpret_cast<uchar8*>(&dest[x]), &random);
+        mRaw->setWithLookUp(*in, reinterpret_cast<uint8_t*>(&dest[x]), &random);
       in++;
     }
   }
@@ -252,11 +252,11 @@ void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
 
   sanityCheck(&h, perline);
 
-  uchar8* data = mRaw->getData();
+  uint8_t* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
 
   // FIXME: maybe check size of interlaced data?
-  const uchar8* in = input.peekData(perline * h);
+  const uint8_t* in = input.peekData(perline * h);
   uint32 half = (h + 1) >> 1;
   for (uint32 row = 0; row < h; row++) {
     uint32 y = !interlaced ? row : row % half * 2 + row / half;
@@ -316,9 +316,9 @@ void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(uint32 w,
 
   sanityCheck(w, &h, 2);
 
-  uchar8* data = mRaw->getData();
+  uint8_t* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
-  const uchar8* in = input.getData(w * h * 2);
+  const uint8_t* in = input.getData(w * h * 2);
 
   for (uint32 y = 0; y < h; y++) {
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
@@ -351,9 +351,9 @@ void UncompressedDecompressor::decodeRawUnpacked(uint32 w, uint32 h) {
 
   sanityCheck(w, &h, 2);
 
-  uchar8* data = mRaw->getData();
+  uint8_t* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
-  const uchar8* in = input.getData(w * h * 2);
+  const uint8_t* in = input.getData(w * h * 2);
 
   for (uint32 y = 0; y < h; y++) {
     auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);

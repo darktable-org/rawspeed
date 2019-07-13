@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/CrwDecompressor.h"
-#include "common/Common.h"                // for uint32, uchar8, ushort16
+#include "common/Common.h"                // for uint32, uint8_t, ushort16
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -67,8 +67,8 @@ CrwDecompressor::CrwDecompressor(const RawImage& img, uint32 dec_table,
   mHuff = initHuffTables(dec_table);
 }
 
-HuffmanTable CrwDecompressor::makeDecoder(const uchar8* ncpl,
-                                          const uchar8* values) {
+HuffmanTable CrwDecompressor::makeDecoder(const uint8_t* ncpl,
+                                          const uint8_t* values) {
   assert(ncpl);
 
   HuffmanTable ht;
@@ -84,32 +84,32 @@ CrwDecompressor::crw_hts CrwDecompressor::initHuffTables(uint32 table) {
     ThrowRDE("Wrong table number: %u", table);
 
   // NCodesPerLength
-  static const std::array<std::array<uchar8, 16>, 3> first_tree_ncpl = {{
+  static const std::array<std::array<uint8_t, 16>, 3> first_tree_ncpl = {{
       {0, 1, 4, 2, 3, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0},
       {0, 2, 2, 3, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0},
       {0, 0, 6, 3, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0},
   }};
 
-  static const std::array<std::array<uchar8, 13>, 3> first_tree_len = {{
+  static const std::array<std::array<uint8_t, 13>, 3> first_tree_len = {{
       {0x4, 0x3, 0x5, 0x6, 0x2, 0x7, 0x1, 0x8, 0x9, 0x0, 0xa, 0xb, 0xf},
       {0x3, 0x2, 0x4, 0x1, 0x5, 0x0, 0x6, 0x7, 0x9, 0x8, 0xa, 0xb, 0xf},
       {0x6, 0x5, 0x7, 0x4, 0x8, 0x3, 0x9, 0x2, 0x0, 0xa, 0x1, 0xb, 0xf},
   }};
 
-  static const std::array<std::array<uchar8, 13>, 3> first_tree_index = {{
+  static const std::array<std::array<uint8_t, 13>, 3> first_tree_index = {{
       {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf},
       {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf},
       {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf},
   }};
 
   // NCodesPerLength
-  static const std::array<std::array<uchar8, 16>, 3> second_tree_ncpl = {{
+  static const std::array<std::array<uint8_t, 16>, 3> second_tree_ncpl = {{
       {0, 2, 2, 2, 1, 4, 2, 1, 2, 5, 1, 1, 0, 0, 0, 139},
       {0, 2, 2, 1, 4, 1, 4, 1, 3, 3, 1, 0, 0, 0, 0, 140},
       {0, 0, 6, 2, 1, 3, 3, 2, 5, 1, 2, 2, 8, 10, 0, 117},
   }};
 
-  static const std::array<std::array<uchar8, 164>, 3> second_tree_len = {{
+  static const std::array<std::array<uint8_t, 164>, 3> second_tree_len = {{
       {0x3, 0x4, 0x2, 0x5, 0x1, 0x6, 0x7, 0x8, 0x2, 0x3, 0x1, 0x4, 0x9, 0x5,
        0x2, 0x0, 0x1, 0x6, 0xa, 0x0, 0x3, 0x7, 0x4, 0x1, 0x2, 0x8, 0x9, 0x3,
        0x5, 0x1, 0x4, 0x2, 0x5, 0x1, 0x6, 0x7, 0x8, 0x9, 0x9, 0x6, 0xa, 0x9,
@@ -148,7 +148,7 @@ CrwDecompressor::crw_hts CrwDecompressor::initHuffTables(uint32 table) {
        0x1, 0x3, 0x2, 0x1, 0x1, 0x3, 0x2, 0x1, 0xf, 0xf},
   }};
 
-  static const std::array<std::array<uchar8, 164>, 3> second_tree_index = {{
+  static const std::array<std::array<uint8_t, 164>, 3> second_tree_index = {{
       {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x0, 0x1,
        0x2, 0x0, 0x2, 0x1, 0x0, 0xf, 0x2, 0x1, 0x2, 0x3, 0x3, 0x1, 0x1, 0x3,
        0x2, 0x4, 0x3, 0x4, 0x3, 0x5, 0x3, 0x3, 0x3, 0x2, 0x7, 0x2, 0x1, 0x3,
@@ -314,7 +314,7 @@ void CrwDecompressor::decompress() {
 
       assert(width % 4 == 0);
       for (uint32 i = 0; i < width; /* NOTE: i += 4 */) {
-        const uchar8 c = lowbitInput.getByte();
+        const uint8_t c = lowbitInput.getByte();
         // LSB-packed: p3 << 6 | p2 << 4 | p1 << 2 | p0 << 0
 
         // We have read 8 bits, which is 4 pairs of 2 bits. So process 4 pixels.

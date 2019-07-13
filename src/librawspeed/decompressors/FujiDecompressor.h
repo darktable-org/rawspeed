@@ -49,14 +49,14 @@ public:
     explicit __attribute__((pure)) operator bool() const; // validity check
 
     ushort16 signature;
-    uchar8 version;
-    uchar8 raw_type;
-    uchar8 raw_bits;
+    uint8_t version;
+    uint8_t raw_type;
+    uint8_t raw_bits;
     ushort16 raw_height;
     ushort16 raw_rounded_width;
     ushort16 raw_width;
     ushort16 block_size;
-    uchar8 blocks_in_row;
+    uint8_t blocks_in_row;
     ushort16 total_lines;
   };
 

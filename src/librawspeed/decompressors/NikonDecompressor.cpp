@@ -33,7 +33,7 @@
 
 namespace rawspeed {
 
-const std::array<std::array<std::array<uchar8, 16>, 2>, 6>
+const std::array<std::array<std::array<uint8_t, 16>, 2>, 6>
     NikonDecompressor::nikon_tree = {{
         {{/* 12-bit lossy */
           {0, 1, 5, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0},
@@ -481,7 +481,7 @@ template <typename Huffman>
 void NikonDecompressor::decompress(BitPumpMSB* bits, int start_y, int end_y) {
   Huffman ht = createHuffmanTable<Huffman>(huffSelect);
 
-  uchar8* draw = mRaw->getData();
+  uint8_t* draw = mRaw->getData();
   uint32 pitch = mRaw->pitch;
 
   int pLeft1 = 0;
@@ -502,9 +502,9 @@ void NikonDecompressor::decompress(BitPumpMSB* bits, int start_y, int end_y) {
     pLeft2 = pUp2[y & 1];
 
     rawdata->setWithLookUp(clampBits(pLeft1, 15),
-                           reinterpret_cast<uchar8*>(dest + 0), &random);
+                           reinterpret_cast<uint8_t*>(dest + 0), &random);
     rawdata->setWithLookUp(clampBits(pLeft2, 15),
-                           reinterpret_cast<uchar8*>(dest + 1), &random);
+                           reinterpret_cast<uint8_t*>(dest + 1), &random);
 
     dest += 2;
 
@@ -513,9 +513,9 @@ void NikonDecompressor::decompress(BitPumpMSB* bits, int start_y, int end_y) {
       pLeft2 += ht.decodeNext(*bits);
 
       rawdata->setWithLookUp(clampBits(pLeft1, 15),
-                             reinterpret_cast<uchar8*>(dest + 0), &random);
+                             reinterpret_cast<uint8_t*>(dest + 0), &random);
       rawdata->setWithLookUp(clampBits(pLeft2, 15),
-                             reinterpret_cast<uchar8*>(dest + 1), &random);
+                             reinterpret_cast<uint8_t*>(dest + 1), &random);
 
       dest += 2;
     }

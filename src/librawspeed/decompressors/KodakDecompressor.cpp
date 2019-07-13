@@ -71,7 +71,7 @@ KodakDecompressor::decodeSegment(const uint32 bsize) {
                                             out.begin() + bsize);
 #endif
 
-  std::array<uchar8, 2 * segment_size> blen;
+  std::array<uint8_t, 2 * segment_size> blen;
   uint64_t bitbuf = 0;
   uint32 bits = 0;
 
@@ -108,7 +108,7 @@ KodakDecompressor::decodeSegment(const uint32 bsize) {
 }
 
 void KodakDecompressor::decompress() {
-  uchar8* data = mRaw->getData();
+  uint8_t* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
 
   uint32 random = 0;
@@ -133,7 +133,7 @@ void KodakDecompressor::decompress() {
         if (uncorrectedRawValues)
           dest[x + i] = value;
         else
-          mRaw->setWithLookUp(value, reinterpret_cast<uchar8*>(&dest[x + i]),
+          mRaw->setWithLookUp(value, reinterpret_cast<uint8_t*>(&dest[x + i]),
                               &random);
       }
     }

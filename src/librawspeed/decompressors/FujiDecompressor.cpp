@@ -236,7 +236,7 @@ void FujiDecompressor::copy_line_to_bayer(fuji_compressed_block* info,
 
 inline void FujiDecompressor::fuji_zerobits(BitPumpMSB* pump,
                                             int* count) const {
-  uchar8 zero = 0;
+  uint8_t zero = 0;
   *count = 0;
 
   while (zero == 0) {

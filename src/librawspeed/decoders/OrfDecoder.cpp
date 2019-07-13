@@ -21,7 +21,7 @@
 */
 
 #include "decoders/OrfDecoder.h"
-#include "common/Common.h"                          // for uint32, uchar8
+#include "common/Common.h"                          // for uint32, uint8_t
 #include "common/NORangesSet.h"                     // for set
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
@@ -188,7 +188,7 @@ void OrfDecoder::parseCFA() {
 
   mRaw->cfa.setSize(cfaSize);
 
-  auto int2enum = [](uchar8 i) -> CFAColor {
+  auto int2enum = [](uint8_t i) -> CFAColor {
     switch (i) {
     case 0:
       return CFA_RED;
@@ -203,7 +203,7 @@ void OrfDecoder::parseCFA() {
 
   for (int y = 0; y < cfaSize.y; y++) {
     for (int x = 0; x < cfaSize.x; x++) {
-      uchar8 c1 = CFA->getByte(4 + x + y * cfaSize.x);
+      uint8_t c1 = CFA->getByte(4 + x + y * cfaSize.x);
       CFAColor c2 = int2enum(c1);
       mRaw->cfa.setColorAt(iPoint2D(x, y), c2);
     }

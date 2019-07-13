@@ -32,7 +32,7 @@ enum class Endianness { little = 0xDEAD, big = 0xBEEF, unknown = 0x0BAD };
 
 inline Endianness getHostEndiannessRuntime() {
   ushort16 testvar = 0xfeff;
-  uint32 firstbyte = (reinterpret_cast<uchar8*>(&testvar))[0];
+  uint32 firstbyte = (reinterpret_cast<uint8_t*>(&testvar))[0];
   if (firstbyte == 0xff)
     return Endianness::little;
   if (firstbyte == 0xfe)

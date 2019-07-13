@@ -20,7 +20,7 @@
 
 #include "rawspeedconfig.h"               // for WITH_SSE2
 #include "common/RawImage.h"              // for RawImageDataU16, TableLookUp
-#include "common/Common.h"                // for ushort16, uint32, uchar8
+#include "common/Common.h"                // for ushort16, uint32, uint8_t
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D
 #include "common/TableLookUp.h"           // for TableLookUp
@@ -388,7 +388,7 @@ void RawImageDataU16::fixBadPixel( uint32 x, uint32 y, int component )
   dist.fill(0);
   weight.fill(0);
 
-  uchar8* bad_line = &mBadPixelMap[y*mBadPixelMapPitch];
+  uint8_t* bad_line = &mBadPixelMap[y * mBadPixelMapPitch];
   int step = isCFA ? 2 : 1;
 
   // Find pixel to the left

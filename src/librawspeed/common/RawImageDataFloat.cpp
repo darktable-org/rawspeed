@@ -19,7 +19,7 @@
 */
 
 #include "common/RawImage.h"              // for RawImageDataFloat, TYPE_FL...
-#include "common/Common.h"                // for uchar8, uint32, writeLog
+#include "common/Common.h"                // for uint8_t, uint32, writeLog
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea
@@ -296,7 +296,7 @@ void RawImageDataFloat::fixBadPixel( uint32 x, uint32 y, int component )
   std::array<float, 4> dist = {{}};
   std::array<float, 4> weight;
 
-  uchar8* bad_line = &mBadPixelMap[y*mBadPixelMapPitch];
+  uint8_t* bad_line = &mBadPixelMap[y * mBadPixelMapPitch];
 
   // Find pixel to the left
   int x_find = static_cast<int>(x) - 2;
@@ -380,7 +380,8 @@ void RawImageDataFloat::doLookup( int start_y, int end_y ) {
   ThrowRDE("Float point lookup tables not implemented");
 }
 
-void RawImageDataFloat::setWithLookUp(ushort16 value, uchar8* dst, uint32* random) {
+void RawImageDataFloat::setWithLookUp(ushort16 value, uint8_t* dst,
+                                      uint32* random) {
   auto* dest = reinterpret_cast<float*>(dst);
   if (table == nullptr) {
     *dest = static_cast<float>(value) * (1.0F / 65535);

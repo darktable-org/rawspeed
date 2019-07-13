@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uchar8, uint32
+#include "common/Common.h" // for uint8_t, uint32
 #include "io/BitStream.h"  // for BitStreamCacheRightInLeftOut, BitStream
 #include "io/Buffer.h"     // for Buffer::size_type
 #include "io/Endianness.h" // for getBE
@@ -38,7 +38,7 @@ template <> struct BitStreamTraits<BitPumpJPEG> final {
 };
 
 template <>
-inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uchar8* input,
+inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uint8_t* input,
                                                      size_type bufferSize,
                                                      size_type* bufPos) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");

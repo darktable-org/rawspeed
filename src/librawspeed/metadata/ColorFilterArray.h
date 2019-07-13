@@ -28,7 +28,7 @@
 
 namespace rawspeed {
 
-enum CFAColor : uchar8 {
+enum CFAColor : uint8_t {
   // see also DngDecoder
   CFA_RED = 0,
   CFA_GREEN = 1,

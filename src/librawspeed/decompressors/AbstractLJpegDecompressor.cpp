@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/AbstractLJpegDecompressor.h"
-#include "common/Common.h"                      // for uint32, uchar8
+#include "common/Common.h"                      // for uint32, uint8_t
 #include "common/Point.h"                       // for iPoint2D
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
@@ -251,8 +251,8 @@ void AbstractLJpegDecompressor::parseDHT(ByteStream dht) {
 }
 
 JpegMarker AbstractLJpegDecompressor::getNextMarker(bool allowskip) {
-  uchar8 c0;
-  uchar8 c1 = input.getByte();
+  uint8_t c0;
+  uint8_t c1 = input.getByte();
   do {
     c0 = c1;
     c1 = input.getByte();

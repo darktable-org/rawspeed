@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/Common.h"      // for uint32, uchar8, ushort16
+#include "common/Common.h"      // for uint32, uint8_t, ushort16
 #include "common/NORangesSet.h" // for set
 #include "io/ByteStream.h"      // for ByteStream
 #include "tiff/CiffTag.h"       // for CiffTag
@@ -60,7 +60,7 @@ public:
 
   const ByteStream& getData() const { return data; }
 
-  uchar8 getByte(uint32 num = 0) const;
+  uint8_t getByte(uint32 num = 0) const;
   uint32 getU32(uint32 num = 0) const;
   ushort16 getU16(uint32 num = 0) const;
 

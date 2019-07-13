@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/OlympusDecompressor.h"
-#include "common/Common.h"                // for uint32, ushort16, uchar8
+#include "common/Common.h"                // for uint32, ushort16, uint8_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE

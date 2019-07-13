@@ -19,7 +19,7 @@
 */
 
 #include "decompressors/HuffmanTable.h" // for HuffmanTableLUT, HuffmanTable
-#include "common/Common.h"              // for uchar8
+#include "common/Common.h"              // for uint8_t
 #include "io/BitPumpMSB.h"              // for BitPumpMSB, BitStream<>::fil...
 #include "io/Buffer.h"                  // for Buffer, DataBuffer
 #include "io/ByteStream.h"              // for ByteStream
@@ -40,14 +40,13 @@ using rawspeed::ByteStream;
 using rawspeed::DataBuffer;
 using rawspeed::Endianness;
 using rawspeed::HuffmanTable;
-using rawspeed::uchar8;
 
 namespace rawspeed_test {
 
 auto genHT =
-    [](std::initializer_list<uchar8>&& nCodesPerLength) -> HuffmanTable {
+    [](std::initializer_list<uint8_t>&& nCodesPerLength) -> HuffmanTable {
   HuffmanTable ht;
-  std::vector<uchar8> v(nCodesPerLength.begin(), nCodesPerLength.end());
+  std::vector<uint8_t> v(nCodesPerLength.begin(), nCodesPerLength.end());
   v.resize(16);
   Buffer b(v.data(), v.size());
   ht.setNCodesPerLength(b);
@@ -56,17 +55,17 @@ auto genHT =
 };
 
 auto genHTFull =
-    [](std::initializer_list<uchar8>&& nCodesPerLength,
-       std::initializer_list<uchar8>&& codeValues) -> HuffmanTable {
+    [](std::initializer_list<uint8_t>&& nCodesPerLength,
+       std::initializer_list<uint8_t>&& codeValues) -> HuffmanTable {
   auto ht = genHT(std::move(nCodesPerLength));
-  std::vector<uchar8> v(codeValues.begin(), codeValues.end());
+  std::vector<uint8_t> v(codeValues.begin(), codeValues.end());
   Buffer b(v.data(), v.size());
   ht.setCodeValues(b);
   return ht;
 };
 
 TEST(HuffmanTableTest, DecodeLengthIdentityTest) {
-  static const std::array<rawspeed::uchar8, 4> data{
+  static const std::array<uint8_t, 4> data{
       {0b01010101, 0b01010101, 0b01010101, 0b01010101}};
   const Buffer b(data.data(), data.size());
   const DataBuffer db(b, Endianness::little);
@@ -84,7 +83,7 @@ TEST(HuffmanTableTest, DecodeLengthIdentityTest) {
 }
 
 TEST(HuffmanTableTest, DecodeNextIdentityTest) {
-  static const std::array<rawspeed::uchar8, 4> data{
+  static const std::array<uint8_t, 4> data{
       {0b00000000, 0b11010101, 0b01010101, 0b01111111}};
   const Buffer b(data.data(), data.size());
   const DataBuffer db(b, Endianness::little);
@@ -101,7 +100,7 @@ TEST(HuffmanTableTest, DecodeNextIdentityTest) {
 }
 
 TEST(HuffmanTableTest, DecodeLengthBadCodeTest) {
-  static const std::array<rawspeed::uchar8, 4> data{{0b01000000}};
+  static const std::array<uint8_t, 4> data{{0b01000000}};
   const Buffer b(data.data(), data.size());
   const DataBuffer db(b, Endianness::little);
   const ByteStream bs(db);
@@ -116,7 +115,7 @@ TEST(HuffmanTableTest, DecodeLengthBadCodeTest) {
 }
 
 TEST(HuffmanTableTest, DecodeNextBadCodeTest) {
-  static const std::array<rawspeed::uchar8, 4> data{{0b00100000}};
+  static const std::array<uint8_t, 4> data{{0b00100000}};
   const Buffer b(data.data(), data.size());
   const DataBuffer db(b, Endianness::little);
   const ByteStream bs(db);

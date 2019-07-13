@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32, uchar8, uint64_t
+#include "common/Common.h" // for uint32, uint8_t, uint64_t
 #include "io/Buffer.h"     // for Buffer::size_type, BUFFER_PADDING
 #include "io/ByteStream.h"  // for ByteStream
 #include "io/IOException.h" // for IOException (ptr only), ThrowIOE
@@ -98,7 +98,7 @@ class BitStream final : public ByteStream {
   // this method hase to be implemented in the concrete BitStream template
   // specializations. It will return the number of bytes processed. It needs
   // to process up to BitStreamCacheBase::MaxProcessBytes bytes of input.
-  size_type fillCache(const uchar8* input, size_type bufferSize,
+  size_type fillCache(const uint8_t* input, size_type bufferSize,
                       size_type* bufPos);
 
 public:
@@ -113,19 +113,19 @@ private:
   inline void fillSafe() {
     assert(data);
     if (pos + BitStreamCacheBase::MaxProcessBytes <= size) {
-      std::array<uchar8, BitStreamCacheBase::MaxProcessBytes> tmp;
+      std::array<uint8_t, BitStreamCacheBase::MaxProcessBytes> tmp;
       tmp.fill(0);
       assert(!(size - pos < BitStreamCacheBase::MaxProcessBytes));
       memcpy(tmp.data(), data + pos, BitStreamCacheBase::MaxProcessBytes);
       pos += fillCache(tmp.data(), size, &pos);
     } else if (pos < size) {
-      std::array<uchar8, BitStreamCacheBase::MaxProcessBytes> tmp;
+      std::array<uint8_t, BitStreamCacheBase::MaxProcessBytes> tmp;
       tmp.fill(0);
       assert(size - pos < BitStreamCacheBase::MaxProcessBytes);
       memcpy(tmp.data(), data + pos, size - pos);
       pos += fillCache(tmp.data(), size, &pos);
     } else if (pos <= size + BitStreamCacheBase::MaxProcessBytes) {
-      std::array<uchar8, BitStreamCacheBase::MaxProcessBytes> tmp;
+      std::array<uint8_t, BitStreamCacheBase::MaxProcessBytes> tmp;
       tmp.fill(0);
       pos += fillCache(tmp.data(), size, &pos);
     } else {

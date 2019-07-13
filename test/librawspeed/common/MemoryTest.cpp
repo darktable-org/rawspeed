@@ -19,7 +19,7 @@
 */
 
 #include "common/Memory.h" // for alignedMallocArray, alignedFree, alignedM...
-#include "common/Common.h" // for uchar8, int64_t, int32_t, int16_t, uint32
+#include "common/Common.h" // for uint8_t, int64_t, int32_t, int16_t, uint32
 #include <cstddef>         // for size_t
 #include <cstdint>         // for SIZE_MAX, uintptr_t
 #include <cstdlib>         // for exit
@@ -30,7 +30,6 @@ using rawspeed::alignedFree;
 using rawspeed::alignedFreeConstPtr;
 using rawspeed::alignedMalloc;
 using rawspeed::alignedMallocArray;
-using rawspeed::uchar8;
 using rawspeed::uint32;
 using rawspeed::ushort16;
 using std::unique_ptr;
@@ -75,7 +74,7 @@ template <typename T>
 class AlignedMallocDeathTest : public AlignedMallocTest<T> {};
 
 using Classes =
-    testing::Types<int, unsigned int, int8_t, uchar8, int16_t, ushort16,
+    testing::Types<int, unsigned int, int8_t, uint8_t, int16_t, ushort16,
                    int32_t, uint32, int64_t, uint64_t, float, double>;
 
 TYPED_TEST_CASE(AlignedMallocTest, Classes);
@@ -243,7 +242,8 @@ TEST(AlignedMallocDeathTest, TemplateArraySizeAssertions) {
   // unlike TemplateArraySizeRoundUp, should fail
   ASSERT_DEATH(
       {
-        uchar8* ptr = (alignedMallocArray<uchar8, alloc_alignment, uchar8>(1));
+        uint8_t* ptr =
+            (alignedMallocArray<uint8_t, alloc_alignment, uint8_t>(1));
         alignedFree(ptr);
       },
       "isAligned\\(size\\, alignment\\)");
@@ -253,8 +253,8 @@ TEST(AlignedMallocDeathTest, TemplateArraySizeAssertions) {
 TEST(AlignedMallocTest, TemplateArraySizeRoundUp) {
   // unlike TemplateArraySizeAssertions, should NOT fail
   ASSERT_NO_THROW({
-    uchar8* ptr =
-        (alignedMallocArray<uchar8, alloc_alignment, uchar8, true>(1));
+    uint8_t* ptr =
+        (alignedMallocArray<uint8_t, alloc_alignment, uint8_t, true>(1));
     alignedFree(ptr);
   });
 }

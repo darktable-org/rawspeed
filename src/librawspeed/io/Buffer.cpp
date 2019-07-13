@@ -21,7 +21,7 @@
 
 #include "io/Buffer.h"
 #include "AddressSanitizer.h" // for ASan
-#include "common/Common.h"    // for uchar8, roundUp
+#include "common/Common.h"    // for uint8_t, roundUp
 #include "common/Memory.h"    // for alignedFree, alignedFreeConstPtr, alig...
 #include "io/IOException.h"   // for ThrowIOE
 #include <cassert>            // for assert
@@ -31,12 +31,12 @@ using std::unique_ptr;
 
 namespace rawspeed {
 
-unique_ptr<uchar8, decltype(&alignedFree)> Buffer::Create(size_type size) {
+unique_ptr<uint8_t, decltype(&alignedFree)> Buffer::Create(size_type size) {
   if (!size)
     ThrowIOE("Trying to allocate 0 bytes sized buffer.");
 
-  unique_ptr<uchar8, decltype(&alignedFree)> data(
-      alignedMalloc<uchar8, 16>(roundUp(size + BUFFER_PADDING, 16)),
+  unique_ptr<uint8_t, decltype(&alignedFree)> data(
+      alignedMalloc<uint8_t, 16>(roundUp(size + BUFFER_PADDING, 16)),
       &alignedFree);
   if (!data)
     ThrowIOE("Failed to allocate %uz bytes memory buffer.", size);
@@ -46,7 +46,7 @@ unique_ptr<uchar8, decltype(&alignedFree)> Buffer::Create(size_type size) {
   return data;
 }
 
-Buffer::Buffer(unique_ptr<uchar8, decltype(&alignedFree)> data_,
+Buffer::Buffer(unique_ptr<uint8_t, decltype(&alignedFree)> data_,
                size_type size_)
     : size(size_) {
   if (!size)

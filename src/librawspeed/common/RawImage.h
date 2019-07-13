@@ -22,7 +22,7 @@
 
 #include "rawspeedconfig.h"
 #include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
-#include "common/Common.h"             // for uint32, uchar8, ushort16, wri...
+#include "common/Common.h"             // for uint32, uint8_t, ushort16, wri...
 #include "common/ErrorLog.h"           // for ErrorLog
 #include "common/Mutex.h"              // for Mutex
 #include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
@@ -107,16 +107,17 @@ public:
   void blitFrom(const RawImage& src, const iPoint2D& srcPos,
                 const iPoint2D& size, const iPoint2D& destPos);
   rawspeed::RawImageType getDataType() const { return dataType; }
-  uchar8* getData() const;
-  uchar8* getData(uint32 x, uint32 y);    // Not super fast, but safe. Don't use per pixel.
-  uchar8* getDataUncropped(uint32 x, uint32 y);
+  uint8_t* getData() const;
+  uint8_t* getData(uint32 x,
+                   uint32 y); // Not super fast, but safe. Don't use per pixel.
+  uint8_t* getDataUncropped(uint32 x, uint32 y);
   void subFrame(iRectangle2D cropped);
-  void clearArea(iRectangle2D area, uchar8 value = 0);
+  void clearArea(iRectangle2D area, uint8_t value = 0);
   iPoint2D __attribute__((pure)) getUncroppedDim() const;
   iPoint2D __attribute__((pure)) getCropOffset() const;
   virtual void scaleBlackWhite() = 0;
   virtual void calculateBlackAreas() = 0;
-  virtual void setWithLookUp(ushort16 value, uchar8* dst, uint32* random) = 0;
+  virtual void setWithLookUp(ushort16 value, uint8_t* dst, uint32* random) = 0;
   void sixteenBitLookup();
   void transferBadPixelsToMap() REQUIRES(!mBadPixelMutex);
   void fixBadPixels() REQUIRES(!mBadPixelMutex);
@@ -144,7 +145,7 @@ public:
   /* Format is x | (y << 16), so maximum pixel position is 65535 */
   // Positions of zeroes that must be interpolated
   std::vector<uint32> mBadPixelPositions GUARDED_BY(mBadPixelMutex);
-  uchar8* mBadPixelMap = nullptr;
+  uint8_t* mBadPixelMap = nullptr;
   uint32 mBadPixelMapPitch = 0;
   bool mDitherScale =
       true; // Should upscaling be done with dither to minimize banding?
@@ -165,7 +166,7 @@ protected:
   virtual void fixBadPixel( uint32 x, uint32 y, int component = 0) = 0;
   void fixBadPixelsThread(int start_y, int end_y);
   void startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped );
-  uchar8* data = nullptr;
+  uint8_t* data = nullptr;
   uint32 cpp = 1; // Components per pixel
   uint32 bpp = 0; // Bytes per pixel.
   friend class RawImage;
@@ -179,7 +180,7 @@ class RawImageDataU16 final : public RawImageData {
 public:
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
-  void setWithLookUp(ushort16 value, uchar8* dst, uint32* random) override;
+  void setWithLookUp(ushort16 value, uint8_t* dst, uint32* random) override;
 
 protected:
   void scaleValues_plain(int start_y, int end_y);
@@ -199,7 +200,7 @@ class RawImageDataFloat final : public RawImageData {
 public:
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
-  void setWithLookUp(ushort16 value, uchar8 *dst, uint32 *random) override;
+  void setWithLookUp(ushort16 value, uint8_t* dst, uint32* random) override;
 
 protected:
   void scaleValues(int start_y, int end_y) override;
@@ -259,7 +260,8 @@ inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type, uint32 
 // You must supply the destination where the value should be written, and a pointer to
 // a value that will be used to store a random counter that can be reused between calls.
 // this needs to be inline to speed up tight decompressor loops
-inline void RawImageDataU16::setWithLookUp(ushort16 value, uchar8* dst, uint32* random) {
+inline void RawImageDataU16::setWithLookUp(ushort16 value, uint8_t* dst,
+                                           uint32* random) {
   auto* dest = reinterpret_cast<ushort16*>(dst);
   if (table == nullptr) {
     *dest = value;

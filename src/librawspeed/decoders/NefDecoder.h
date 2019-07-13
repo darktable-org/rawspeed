@@ -68,8 +68,8 @@ private:
   std::vector<ushort16> gammaCurve(double pwr, double ts, int mode, int imax);
 
   // We use this for the D50 and D2X whacky WB "encryption"
-  static const std::array<uchar8, 256> serialmap;
-  static const std::array<uchar8, 256> keymap;
+  static const std::array<uint8_t, 256> serialmap;
+  static const std::array<uint8_t, 256> keymap;
 };
 
 } // namespace rawspeed

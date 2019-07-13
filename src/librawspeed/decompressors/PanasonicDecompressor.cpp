@@ -122,7 +122,7 @@ void PanasonicDecompressor::chopInputIntoBlocks() {
 class PanasonicDecompressor::ProxyStream {
   ByteStream block;
   const uint32 section_split_offset;
-  std::vector<uchar8> buf;
+  std::vector<uint8_t> buf;
 
   int vbits = 0;
 

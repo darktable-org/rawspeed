@@ -61,7 +61,6 @@ using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
 using rawspeed::RawParser;
 using rawspeed::RawImage;
-using rawspeed::uchar8;
 using rawspeed::uint32;
 using rawspeed::iPoint2D;
 using rawspeed::TYPE_USHORT16;

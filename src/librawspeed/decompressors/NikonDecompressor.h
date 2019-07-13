@@ -50,7 +50,7 @@ public:
   void decompress(const ByteStream& data, bool uncorrectedRawValues);
 
 private:
-  static const std::array<std::array<std::array<uchar8, 16>, 2>, 6> nikon_tree;
+  static const std::array<std::array<std::array<uint8_t, 16>, 2>, 6> nikon_tree;
   static std::vector<ushort16> createCurve(ByteStream* metadata, uint32 bitsPS,
                                            uint32 v0, uint32 v1, uint32* split);
 

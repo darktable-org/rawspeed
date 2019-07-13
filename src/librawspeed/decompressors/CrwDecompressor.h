@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uchar8, uint32
+#include "common/Common.h"                      // for uint8_t, uint32
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable
@@ -49,7 +49,7 @@ public:
   void decompress();
 
 private:
-  static HuffmanTable makeDecoder(const uchar8* ncpl, const uchar8* values);
+  static HuffmanTable makeDecoder(const uint8_t* ncpl, const uint8_t* values);
   static crw_hts initHuffTables(uint32 table);
 
   inline static void decodeBlock(std::array<int, 64>* diffBuf,

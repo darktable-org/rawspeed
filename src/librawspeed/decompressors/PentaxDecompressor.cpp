@@ -19,7 +19,7 @@
 */
 
 #include "decompressors/PentaxDecompressor.h"
-#include "common/Common.h"                // for uint32, uchar8, ushort16
+#include "common/Common.h"                // for uint32, uint8_t, ushort16
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -34,7 +34,7 @@ namespace rawspeed {
 
 // 16 entries of codes per bit length
 // 13 entries of code values
-const std::array<std::array<std::array<uchar8, 16>, 2>, 1>
+const std::array<std::array<std::array<uint8_t, 16>, 2>, 1>
     PentaxDecompressor::pentax_tree = {{
         {{{0, 2, 3, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0},
           {3, 4, 2, 5, 1, 6, 0, 7, 8, 9, 10, 11, 12}}},
@@ -85,7 +85,7 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
       ThrowRDE("Data corrupt: v1[%i]=%i, expected [1..12]", depth, v1[i]);
   }
 
-  std::vector<uchar8> nCodesPerLength;
+  std::vector<uint8_t> nCodesPerLength;
   nCodesPerLength.resize(17);
 
   std::array<uint32, 16> v2;
@@ -100,7 +100,7 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
   auto nCodes = ht.setNCodesPerLength(Buffer(&nCodesPerLength[1], 16));
   assert(nCodes == depth);
 
-  std::vector<uchar8> codeValues;
+  std::vector<uint8_t> codeValues;
   codeValues.reserve(nCodes);
 
   /* Find smallest */
@@ -138,7 +138,7 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable(ByteStream* metaData) {
 
 void PentaxDecompressor::decompress(const ByteStream& data) const {
   BitPumpMSB bs(data);
-  uchar8* draw = mRaw->getData();
+  uint8_t* draw = mRaw->getData();
 
   assert(mRaw->dim.y > 0);
   assert(mRaw->dim.x > 0);

@@ -22,7 +22,7 @@
 #pragma once
 
 #include "AddressSanitizer.h" // for ASan
-#include "common/Common.h"    // for uchar8, uint64_t, uint32
+#include "common/Common.h"    // for uint8_t, uint64_t, uint32
 #include "common/Memory.h"    // for alignedFree
 #include "io/Endianness.h"    // for Endianness, Endianness::little, getHos...
 #include "io/IOException.h"   // for ThrowIOE
@@ -60,13 +60,14 @@ public:
   using size_type = uint32;
 
 protected:
-  const uchar8* data = nullptr;
+  const uint8_t* data = nullptr;
   size_type size = 0;
   bool isOwner = false;
 
 public:
   // allocates the databuffer, and returns owning non-const pointer.
-  static std::unique_ptr<uchar8, decltype(&alignedFree)> Create(size_type size);
+  static std::unique_ptr<uint8_t, decltype(&alignedFree)>
+  Create(size_type size);
 
   // constructs an empty buffer
   Buffer() = default;
@@ -77,11 +78,11 @@ public:
   }
 
   // creates buffer from owning unique_ptr
-  Buffer(std::unique_ptr<uchar8, decltype(&alignedFree)> data_,
+  Buffer(std::unique_ptr<uint8_t, decltype(&alignedFree)> data_,
          size_type size_);
 
   // Data already allocated
-  explicit Buffer(const uchar8* data_, size_type size_)
+  explicit Buffer(const uint8_t* data_, size_type size_)
       : data(data_), size(size_) {
     static_assert(BUFFER_PADDING == 0, "please do make sure that you do NOT "
                                        "call this function from YOUR code, and "
@@ -123,7 +124,7 @@ public:
   }
 
   // get pointer to memory at 'offset', make sure at least 'count' bytes are accessible
-  const uchar8* getData(size_type offset, size_type count) const {
+  const uint8_t* getData(size_type offset, size_type count) const {
     if (!isValid(offset, count))
       ThrowIOE("Buffer overflow: image file may be truncated");
 
@@ -134,17 +135,15 @@ public:
   }
 
   // convenience getter for single bytes
-  uchar8 operator[](size_type offset) const {
-    return *getData(offset, 1);
-  }
+  uint8_t operator[](size_type offset) const { return *getData(offset, 1); }
 
   // std begin/end iterators to allow for range loop
-  const uchar8* begin() const {
+  const uint8_t* begin() const {
     assert(data);
     assert(!ASan::RegionIsPoisoned(data, 0));
     return data;
   }
-  const uchar8* end() const {
+  const uint8_t* end() const {
     assert(data);
     assert(!ASan::RegionIsPoisoned(data, size));
     return data + size;

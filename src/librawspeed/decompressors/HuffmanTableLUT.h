@@ -93,7 +93,7 @@ class HuffmanTableLUT final : public AbstractHuffmanTable {
   static constexpr unsigned PayloadShift = 4;
   static constexpr unsigned FlagMask = 0;
   static constexpr unsigned LenMask = 0x0f;
-  std::vector<uchar8> decodeLookup;
+  std::vector<uint8_t> decodeLookup;
 #endif
 
   bool fullDecode = true;
@@ -133,7 +133,7 @@ public:
     // See definition of decodeLookup above
     decodeLookup.resize(1 << LookupDepth);
     for (size_t i = 0; i < symbols.size(); i++) {
-      uchar8 code_l = symbols[i].code_len;
+      uint8_t code_l = symbols[i].code_len;
       if (code_l > static_cast<int>(LookupDepth))
         break;
 

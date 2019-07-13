@@ -33,8 +33,8 @@
 namespace rawspeed {
 
 struct SamsungV1Decompressor::encTableItem {
-  uchar8 encLen;
-  uchar8 diffLen;
+  uint8_t encLen;
+  uint8_t diffLen;
 };
 
 SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
@@ -86,20 +86,20 @@ void SamsungV1Decompressor::decompress() {
   // encode, the second the number of bits that come after with the difference
   // The table has 14 entries because the difference can have between 0 (no
   // difference) and 13 bits (differences between 12 bits numbers can need 13)
-  static const std::array<std::array<uchar8, 2>, 14> tab = {{{3, 4},
-                                                             {3, 7},
-                                                             {2, 6},
-                                                             {2, 5},
-                                                             {4, 3},
-                                                             {6, 0},
-                                                             {7, 9},
-                                                             {8, 10},
-                                                             {9, 11},
-                                                             {10, 12},
-                                                             {10, 13},
-                                                             {5, 1},
-                                                             {4, 8},
-                                                             {4, 2}}};
+  static const std::array<std::array<uint8_t, 2>, 14> tab = {{{3, 4},
+                                                              {3, 7},
+                                                              {2, 6},
+                                                              {2, 5},
+                                                              {4, 3},
+                                                              {6, 0},
+                                                              {7, 9},
+                                                              {8, 10},
+                                                              {9, 11},
+                                                              {10, 12},
+                                                              {10, 13},
+                                                              {5, 1},
+                                                              {4, 8},
+                                                              {4, 2}}};
   std::vector<encTableItem> tbl(1024);
   std::array<std::array<ushort16, 2>, 2> vpred = {{}};
   std::array<ushort16, 2> hpred;

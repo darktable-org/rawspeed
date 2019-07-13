@@ -21,7 +21,7 @@
 */
 
 #include "tiff/CiffEntry.h"
-#include "common/Common.h"               // for uint32, uchar8, ushort16
+#include "common/Common.h"               // for uint32, uint8_t, ushort16
 #include "common/NORangesSet.h"          // for set
 #include "io/Buffer.h"                   // for Buffer
 #include "io/ByteStream.h"               // for ByteStream
@@ -128,11 +128,11 @@ ushort16 CiffEntry::getU16(uint32 num) const {
   return data.peek<ushort16>(num);
 }
 
-uchar8 CiffEntry::getByte(uint32 num) const {
+uint8_t CiffEntry::getByte(uint32 num) const {
   if (type != CIFF_BYTE)
     ThrowCPE("Wrong type 0x%x encountered. Expected Byte at 0x%x", type, tag);
 
-  return data.peek<uchar8>(num);
+  return data.peek<uint8_t>(num);
 }
 
 string CiffEntry::getString() const {

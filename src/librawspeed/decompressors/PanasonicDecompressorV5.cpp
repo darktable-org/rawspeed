@@ -135,7 +135,7 @@ void PanasonicDecompressorV5::chopInputIntoBlocks(const PacketDsc& dsc) {
 
 class PanasonicDecompressorV5::ProxyStream {
   ByteStream block;
-  std::vector<uchar8> buf;
+  std::vector<uint8_t> buf;
   ByteStream input;
 
   void parseBlock() {
