@@ -36,7 +36,6 @@ extern "C" int rawspeed_get_number_of_processor_cores();
 
 namespace rawspeed {
 
-using char8 = signed char;
 using uchar8 = unsigned char;
 using uint32 = unsigned int;
 using int64 = long long;

@@ -30,7 +30,6 @@ using rawspeed::alignedFree;
 using rawspeed::alignedFreeConstPtr;
 using rawspeed::alignedMalloc;
 using rawspeed::alignedMallocArray;
-using rawspeed::char8;
 using rawspeed::int32;
 using rawspeed::int64;
 using rawspeed::short16;
@@ -80,7 +79,7 @@ template <typename T>
 class AlignedMallocDeathTest : public AlignedMallocTest<T> {};
 
 using Classes =
-    testing::Types<int, unsigned int, char8, uchar8, short16, ushort16, int32,
+    testing::Types<int, unsigned int, int8_t, uchar8, short16, ushort16, int32,
                    uint32, int64, uint64, float, double>;
 
 TYPED_TEST_CASE(AlignedMallocTest, Classes);
