@@ -63,7 +63,7 @@ void SonyArw1Decompressor::decompress(const ByteStream& input) const {
   auto* dest = reinterpret_cast<ushort16*>(&data[0]);
   uint32 pitch = mRaw->pitch / sizeof(ushort16);
   int sum = 0;
-  for (int64 x = w - 1; x >= 0; x--) {
+  for (int64_t x = w - 1; x >= 0; x--) {
     for (uint32 y = 0; y < h + 1; y += 2) {
       bits.fill(32);
 
