@@ -19,7 +19,7 @@
 */
 
 #include "EndiannessTest.h"
-#include "common/Common.h" // for int32, short16, uint32, uint64, ushort16
+#include "common/Common.h" // for int32, int16_t, uint32, uint64, ushort16
 #include "io/Endianness.h" // for getHostEndianness, Endianness::big, Endia...
 #include <cstring>         // for memcpy, memcmp
 #include <gtest/gtest.h>   // for Message, AssertionResult, ASSERT_PRED_FOR...
@@ -38,7 +38,6 @@ using rawspeed::getU16LE;
 using rawspeed::getU32BE;
 using rawspeed::getU32LE;
 using rawspeed::int32;
-using rawspeed::short16;
 using std::setfill;
 using std::setw;
 
@@ -179,7 +178,7 @@ TEST_P(ushort16Test, getU16NOP) {
   }
 }
 
-class short16Test : public AbstractGetByteSwappedTest<ushort16TType, short16> {
+class short16Test : public AbstractGetByteSwappedTest<ushort16TType, int16_t> {
 };
 INSTANTIATE_TEST_CASE_P(short16Test, short16Test,
                         ::testing::Combine(::testing::ValuesIn(ushort16Values),

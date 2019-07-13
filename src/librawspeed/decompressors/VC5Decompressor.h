@@ -22,7 +22,7 @@
 #pragma once
 
 #include "common/Array2DRef.h"                  // for Array2DRef
-#include "common/Common.h"                      // for ushort16, short16
+#include "common/Common.h"                      // for ushort16, int16_t
 #include "common/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorA...
 #include "common/Optional.h"                    // for Optional
 #include "common/RawImage.h"                    // for RawImage
@@ -107,7 +107,7 @@ class VC5Decompressor final : public AbstractDecompressor {
     ushort16 iChannel = 0; // 0'th channel is the default
     Optional<ushort16> iSubband;
     Optional<ushort16> lowpassPrecision;
-    Optional<short16> quantization;
+    Optional<int16_t> quantization;
 
     const ushort16 imgFormat = 4;
     const ushort16 patternWidth = 2;

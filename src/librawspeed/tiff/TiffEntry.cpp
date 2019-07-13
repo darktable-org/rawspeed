@@ -21,7 +21,7 @@
 */
 
 #include "tiff/TiffEntry.h"
-#include "common/Common.h"               // for uint32, short16, ushort16
+#include "common/Common.h"               // for uint32, int16_t, ushort16
 #include "parsers/TiffParserException.h" // for ThrowTPE
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
 #include "tiff/TiffTag.h"                // for TiffTag, DNGPRIVATEDATA
@@ -137,12 +137,12 @@ ushort16 TiffEntry::getU16(uint32 index) const {
   return data.peek<ushort16>(index);
 }
 
-short16 TiffEntry::getI16(uint32 index) const {
+int16_t TiffEntry::getI16(uint32 index) const {
   if (type != TIFF_SSHORT && type != TIFF_UNDEFINED)
     ThrowTPE("Wrong type %u encountered. Expected Short or Undefined on 0x%x",
              type, tag);
 
-  return data.peek<short16>(index);
+  return data.peek<int16_t>(index);
 }
 
 uint32 TiffEntry::getU32(uint32 index) const {

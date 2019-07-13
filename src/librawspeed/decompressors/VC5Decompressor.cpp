@@ -450,7 +450,7 @@ void VC5Decompressor::parseVC5() {
       mVC5.iSubband = val;
       break;
     case VC5Tag::Quantization:
-      mVC5.quantization = static_cast<short16>(val);
+      mVC5.quantization = static_cast<int16_t>(val);
       break;
     case VC5Tag::ComponentsPerSample:
       if (val != mVC5.cps)

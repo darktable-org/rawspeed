@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32, ushort16, uint64, int32, short16
+#include "common/Common.h" // for uint32, ushort16, uint64, int32, int16_t
 #include <cassert>         // for assert
 #include <cstring>         // for memcpy
 // IWYU pragma: no_include "io/EndiannessTest.h"
@@ -67,8 +67,8 @@ inline Endianness getHostEndianness() {
 #define BSWAP64(A) __builtin_bswap64(A)
 #endif
 
-inline short16 getByteSwapped(short16 v) {
-  return static_cast<short16>(BSWAP16(static_cast<ushort16>(v)));
+inline int16_t getByteSwapped(int16_t v) {
+  return static_cast<int16_t>(BSWAP16(static_cast<ushort16>(v)));
 }
 inline ushort16 getByteSwapped(ushort16 v) {
   return static_cast<ushort16>(BSWAP16(v));

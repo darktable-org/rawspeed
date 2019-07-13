@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for int32, short16, uint32, uint64, ushort16
+#include "common/Common.h" // for int32, int16_t, uint32, uint64, ushort16
 #include <gmock/gmock.h>   // for make_tuple, tuple
 
 using rawspeed::uint32;

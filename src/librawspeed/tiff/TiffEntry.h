@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32, uchar8, ushort16, int32, short16
+#include "common/Common.h" // for uint32, uchar8, ushort16, int32, int16_t
 #include "io/ByteStream.h" // for ByteStream
 #include "tiff/TiffTag.h"  // for TiffTag
 #include <string>          // for string
@@ -87,7 +87,7 @@ public:
   uint32 getU32(uint32 index = 0) const;
   int32 getI32(uint32 index = 0) const;
   ushort16 getU16(uint32 index = 0) const;
-  short16 getI16(uint32 index = 0) const;
+  int16_t getI16(uint32 index = 0) const;
   float getFloat(uint32 index = 0) const;
   std::string getString() const;
 
