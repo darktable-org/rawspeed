@@ -119,7 +119,6 @@ using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
 using rawspeed::RawParser;
 using rawspeed::RawImage;
-using rawspeed::uint32;
 using rawspeed::iPoint2D;
 using rawspeed::TYPE_USHORT16;
 using rawspeed::TYPE_FLOAT32;
@@ -224,11 +223,11 @@ int main(int argc, char* argv[]) { // NOLINT
             r->metadata.wbCoeffs[3]);
 
     fprintf(stdout, "isCFA: %d\n", r->isCFA);
-    uint32 filters = r->cfa.getDcrawFilter();
+    uint32_t filters = r->cfa.getDcrawFilter();
     fprintf(stdout, "filters: %d (0x%x)\n", filters, filters);
-    const uint32 bpp = r->getBpp();
+    const uint32_t bpp = r->getBpp();
     fprintf(stdout, "bpp: %d\n", bpp);
-    const uint32 cpp = r->getCpp();
+    const uint32_t cpp = r->getCpp();
     fprintf(stdout, "cpp: %d\n", cpp);
     fprintf(stdout, "dataType: %d\n", r->getDataType());
 

@@ -19,7 +19,7 @@
 */
 
 #include "metadata/ColorFilterArray.h"
-#include "common/Common.h"                // for writeLog, uint32, DEBUG_PR...
+#include "common/Common.h"                // for writeLog, uint32_t, DEBUG_PR...
 #include "common/Point.h"                 // for iPoint2D, iPoint2D::value_...
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include <algorithm>                      // for fill
@@ -130,8 +130,7 @@ string ColorFilterArray::asString() const {
   return dst;
 }
 
-uint32 ColorFilterArray::shiftDcrawFilter(uint32 filter, int x, int y)
-{
+uint32_t ColorFilterArray::shiftDcrawFilter(uint32_t filter, int x, int y) {
   // filter is a series of 4 bytes that describe a 2x8 matrix. 2 is the width,
   // 8 is the height. each byte describes a 2x2 pixel block. so each pixel has
   // 2 bits of information. This allows to distinguish 4 different colors.
@@ -143,7 +142,7 @@ uint32 ColorFilterArray::shiftDcrawFilter(uint32 filter, int x, int y)
     for (int n = 0; n < 8; ++n) {
       int i = n * 4;
       int j = i + 2;
-      uint32 t = ((filter >> i) ^ (filter >> j)) & ((1U << 2) - 1);
+      uint32_t t = ((filter >> i) ^ (filter >> j)) & ((1U << 2) - 1);
       filter = filter ^ ((t << i) | (t << j));
     }
   }
@@ -183,8 +182,7 @@ void ColorFilterArray::setColorAt(iPoint2D pos, CFAColor c) {
   cfa[pos.x + static_cast<size_t>(pos.y) * size.x] = c;
 }
 
-static uint32 toDcrawColor( CFAColor c )
-{
+static uint32_t toDcrawColor(CFAColor c) {
   switch (c) {
   case CFA_FUJI_GREEN:
   case CFA_RED: return 0;
@@ -198,8 +196,7 @@ static uint32 toDcrawColor( CFAColor c )
   }
 }
 
-uint32 ColorFilterArray::getDcrawFilter() const
-{
+uint32_t ColorFilterArray::getDcrawFilter() const {
   //dcraw magic
   if (size.x == 6 && size.y == 6)
     return 9;
@@ -207,10 +204,10 @@ uint32 ColorFilterArray::getDcrawFilter() const
   if (cfa.empty() || size.x > 2 || size.y > 8 || !isPowerOfTwo(size.y))
     return 1;
 
-  uint32 ret = 0;
+  uint32_t ret = 0;
   for (int x = 0; x < 2; x++) {
     for (int y = 0; y < 8; y++) {
-      uint32 c = toDcrawColor(getColorAt(x,y));
+      uint32_t c = toDcrawColor(getColorAt(x, y));
       int g = (x >> 1) * 8;
       ret |= c << ((x&1)*2 + y*4 + g);
     }

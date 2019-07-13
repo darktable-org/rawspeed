@@ -20,7 +20,7 @@
 */
 
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray, CFAColor
-#include "common/Common.h"             // for uint32
+#include "common/Common.h"             // for uint32_t
 #include "common/Point.h"              // for iPoint2D
 #include <gtest/gtest.h>               // for AssertionResult, IsNullLitera...
 #include <iosfwd>                      // for ostream
@@ -36,7 +36,6 @@ using rawspeed::CFA_RED;
 using rawspeed::CFA_YELLOW;
 using rawspeed::ColorFilterArray;
 using rawspeed::iPoint2D;
-using rawspeed::uint32;
 using std::string;
 
 namespace rawspeed {
@@ -264,10 +263,10 @@ INSTANTIATE_TEST_CASE_P(CYGM, ColorFilterArrayShiftTest,
                                          testing::Range(-2, 2)));
 
 TEST(ColorFilterArrayTestBasic, shiftDcrawFilter) {
-  uint32 bggr = 0x16161616;
-  uint32 grbg = 0x61616161;
-  uint32 gbrg = 0x49494949;
-  uint32 rggb = 0x94949494;
+  uint32_t bggr = 0x16161616;
+  uint32_t grbg = 0x61616161;
+  uint32_t gbrg = 0x49494949;
+  uint32_t rggb = 0x94949494;
   ASSERT_NO_THROW({
     ASSERT_EQ(ColorFilterArray::shiftDcrawFilter(rggb, 0, 0), rggb);
     ASSERT_EQ(ColorFilterArray::shiftDcrawFilter(rggb, 1, 0), grbg);
@@ -289,12 +288,12 @@ TEST_P(ColorFilterArrayShiftTest, shiftEqualityTest) {
   ASSERT_NO_THROW({
     ColorFilterArray cfaOrig;
     setHelper(&cfaOrig, mat);
-    uint32 fo = cfaOrig.getDcrawFilter();
+    uint32_t fo = cfaOrig.getDcrawFilter();
 
     ColorFilterArray cfa = cfaOrig;
     cfa.shiftLeft(x);
     cfa.shiftDown(y);
-    uint32 f = cfa.getDcrawFilter();
+    uint32_t f = cfa.getDcrawFilter();
     ASSERT_EQ(f, ColorFilterArray::shiftDcrawFilter(fo, x, y));
 
     cfa = cfaOrig;

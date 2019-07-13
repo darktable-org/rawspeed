@@ -31,7 +31,7 @@ class ByteStream;
 class SonyArw1Decompressor final : public AbstractDecompressor {
   RawImage mRaw;
 
-  inline static int getDiff(BitPumpMSB* bs, uint32 len);
+  inline static int getDiff(BitPumpMSB* bs, uint32_t len);
 
 public:
   explicit SonyArw1Decompressor(const RawImage& img);

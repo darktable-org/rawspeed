@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"   // for uint32, BitOrder
+#include "common/Common.h"   // for uint32_t, BitOrder
 #include "common/RawImage.h" // for RawImage
 #include "metadata/Camera.h" // for Hints
 #include <string>            // for string
@@ -158,9 +158,9 @@ protected:
 };
 
 struct RawDecoder::RawSlice {
-  uint32 h = 0;
-  uint32 offset = 0;
-  uint32 count = 0;
+  uint32_t h = 0;
+  uint32_t offset = 0;
+  uint32_t count = 0;
 };
 
 } // namespace rawspeed

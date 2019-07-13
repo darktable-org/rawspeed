@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32
+#include "common/Common.h" // for uint32_t
 #include "common/Point.h"  // for iPoint2D
 #include <map>             // for map
 #include <string>          // for string
@@ -59,13 +59,13 @@ public:
   void shiftDown(int n = 1);
 
   CFAColor getColorAt(int x, int y) const;
-  uint32 getDcrawFilter() const;
+  uint32_t getDcrawFilter() const;
   std::string asString() const;
   iPoint2D getSize() const { return size; }
 
   static std::string colorToString(CFAColor c);
-  static uint32 __attribute__((const))
-  shiftDcrawFilter(uint32 filter, int x, int y);
+  static uint32_t __attribute__((const))
+  shiftDcrawFilter(uint32_t filter, int x, int y);
 
 protected:
   static const std::map<CFAColor, std::string> color2String;

@@ -20,7 +20,7 @@
 */
 
 #include "decompressors/HasselbladDecompressor.h"
-#include "common/Common.h"                // for uint32, uint16_t
+#include "common/Common.h"                // for uint32_t, uint16_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -75,11 +75,11 @@ void HasselbladDecompressor::decodeScan() {
   BitPumpMSB32 bitStream(input);
   // Pixels are packed two at a time, not like LJPEG:
   // [p1_length_as_huffman][p2_length_as_huffman][p0_diff_with_length][p1_diff_with_length]|NEXT PIXELS
-  for (uint32 y = 0; y < frame.h; y++) {
+  for (uint32_t y = 0; y < frame.h; y++) {
     auto* dest = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
     int p1 = 0x8000 + pixelBaseOffset;
     int p2 = 0x8000 + pixelBaseOffset;
-    for (uint32 x = 0; x < frame.w; x += 2) {
+    for (uint32_t x = 0; x < frame.w; x += 2) {
       int len1 = ht[0]->decodeLength(bitStream);
       int len2 = ht[0]->decodeLength(bitStream);
       p1 += getBits(&bitStream, len1);

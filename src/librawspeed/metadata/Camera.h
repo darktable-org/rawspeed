@@ -21,7 +21,7 @@
 #pragma once
 
 #include "rawspeedconfig.h"
-#include "common/Common.h"             // for uint32
+#include "common/Common.h"             // for uint32_t
 #include "common/Point.h"              // for iPoint2D
 #include "metadata/BlackArea.h"        // for BlackArea
 #include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
@@ -82,7 +82,7 @@ public:
   explicit Camera(const pugi::xml_node& camera);
 #endif
 
-  Camera(const Camera* camera, uint32 alias_num);
+  Camera(const Camera* camera, uint32_t alias_num);
   const CameraSensorInfo* getSensorInfo(int iso) const;
   std::string make;
   std::string model;

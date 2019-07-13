@@ -57,7 +57,7 @@ constexpr PanasonicDecompressorV5::PacketDsc
 
 PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
                                                  const ByteStream& input_,
-                                                 uint32 bps_)
+                                                 uint32_t bps_)
     : mRaw(img), bps(bps_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)

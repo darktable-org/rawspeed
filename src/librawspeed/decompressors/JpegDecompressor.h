@@ -24,7 +24,7 @@
 
 #ifdef HAVE_JPEG
 
-#include "common/Common.h"                      // for uint32
+#include "common/Common.h"                      // for uint32_t
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/ByteStream.h"                      // for ByteStream
@@ -44,7 +44,7 @@ public:
     input.setByteOrder(Endianness::big);
   }
 
-  void decode(uint32 offsetX, uint32 offsetY);
+  void decode(uint32_t offsetX, uint32_t offsetY);
 };
 
 } // namespace rawspeed

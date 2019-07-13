@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/SamsungV0Decompressor.h"
-#include "common/Common.h"                // for uint32, uint16_t, int32_t
+#include "common/Common.h"                // for uint32_t, uint16_t, int32_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -42,8 +42,8 @@ SamsungV0Decompressor::SamsungV0Decompressor(const RawImage& image,
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
 
-  const uint32 width = mRaw->dim.x;
-  const uint32 height = mRaw->dim.y;
+  const uint32_t width = mRaw->dim.x;
+  const uint32_t height = mRaw->dim.y;
 
   if (width == 0 || height == 0 || width < 16 || width > 5546 || height > 3714)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
@@ -53,11 +53,11 @@ SamsungV0Decompressor::SamsungV0Decompressor(const RawImage& image,
 
 // FIXME: this is very close to IiqDecoder::computeSripes()
 void SamsungV0Decompressor::computeStripes(ByteStream bso, ByteStream bsr) {
-  const uint32 height = mRaw->dim.y;
+  const uint32_t height = mRaw->dim.y;
 
-  std::vector<uint32> offsets;
+  std::vector<uint32_t> offsets;
   offsets.reserve(1 + height);
-  for (uint32 y = 0; y < height; y++)
+  for (uint32_t y = 0; y < height; y++)
     offsets.emplace_back(bso.getU32());
   offsets.emplace_back(bsr.getSize());
 
@@ -110,9 +110,9 @@ int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32* bits, int b) {
   return adj;
 }
 
-void SamsungV0Decompressor::decompressStrip(uint32 y,
+void SamsungV0Decompressor::decompressStrip(uint32_t y,
                                             const ByteStream& bs) const {
-  const uint32 width = mRaw->dim.x;
+  const uint32_t width = mRaw->dim.x;
   assert(width > 0);
 
   BitPumpMSB32 bits(bs);
@@ -130,7 +130,7 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
       mRaw->getData(0, std::max(0, static_cast<int>(y) - 2)));
 
   // Image is arranged in groups of 16 pixels horizontally
-  for (uint32 x = 0; x < width; x += 16) {
+  for (uint32_t x = 0; x < width; x += 16) {
     bits.fill();
     bool dir = !!bits.getBitsNoFill(1);
 

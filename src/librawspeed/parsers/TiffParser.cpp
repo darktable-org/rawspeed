@@ -22,7 +22,7 @@
 */
 
 #include "parsers/TiffParser.h"
-#include "common/Common.h"               // for uint32, uint16_t
+#include "common/Common.h"               // for uint32_t, uint16_t
 #include "common/NORangesSet.h"          // for set
 #include "decoders/ArwDecoder.h"         // for ArwDecoder
 #include "decoders/Cr2Decoder.h"         // for Cr2Decoder
@@ -76,7 +76,7 @@ TiffRootIFDOwner TiffParser::parse(TiffIFD* parent, const Buffer& data) {
 
   NORangesSet<Buffer> ifds;
 
-  for (uint32 IFDOffset = bs.getU32(); IFDOffset;
+  for (uint32_t IFDOffset = bs.getU32(); IFDOffset;
        IFDOffset = root->getSubIFDs().back()->getNextIFD()) {
     root->add(std::make_unique<TiffIFD>(root.get(), &ifds, bs, IFDOffset));
   }

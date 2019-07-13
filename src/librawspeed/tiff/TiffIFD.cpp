@@ -22,7 +22,7 @@
 */
 
 #include "tiff/TiffIFD.h"
-#include "common/Common.h"            // for trimSpaces, uint32
+#include "common/Common.h"            // for trimSpaces, uint32_t
 #include "common/NORangesSet.h"       // for set
 #include "common/RawspeedException.h" // for RawspeedException
 #include "io/IOException.h"           // for IOException
@@ -77,7 +77,7 @@ void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream* bs) {
     case FUJI_RAW_IFD:
     case SUBIFDS:
     case EXIFIFDPOINTER:
-      for (uint32 j = 0; j < t->count; j++)
+      for (uint32_t j = 0; j < t->count; j++)
         add(std::make_unique<TiffIFD>(this, ifds, *bs, t->getU32(j)));
       break;
 
@@ -98,7 +98,7 @@ TiffIFD::TiffIFD(TiffIFD* parent_) : parent(parent_) {
 }
 
 TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
-                 const DataBuffer& data, uint32 offset)
+                 const DataBuffer& data, uint32_t offset)
     : TiffIFD(parent_) {
   // see TiffParser::parse: UINT32_MAX is used to mark the "virtual" top level
   // TiffRootIFD in a tiff file
@@ -121,7 +121,7 @@ TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
   if (!ifds->emplace(IFDBuf).second)
     ThrowTPE("Two IFD's overlap. Raw corrupt!");
 
-  for (uint32 i = 0; i < numEntries; i++)
+  for (uint32_t i = 0; i < numEntries; i++)
     parseIFDEntry(ifds, &bs);
 
   nextIFD = bs.getU32();
@@ -150,9 +150,9 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
   // 'newPosition' is the position where the IFD starts
   // 'byteOrderOffset' is the position where the 2 magic bytes (II/MM) may be found
   // 'context' is a string providing error information in case the byte order parsing should fail
-  auto setup = [&bs](bool rebase, uint32 newPosition,
-                     uint32 byteOrderOffset = 0,
-                     const char *context = nullptr) {
+  auto setup = [&bs](bool rebase, uint32_t newPosition,
+                     uint32_t byteOrderOffset = 0,
+                     const char* context = nullptr) {
     if (rebase)
       bs = bs.getSubStream(bs.getPosition(), bs.getRemainSize());
     if (context)
@@ -214,8 +214,7 @@ std::vector<const TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) const {
   return matchingIFDs;
 }
 
-const TiffIFD* TiffIFD::getIFDWithTag(TiffTag tag, uint32 index) const
-{
+const TiffIFD* TiffIFD::getIFDWithTag(TiffTag tag, uint32_t index) const {
   auto ifds = getIFDsWithTag(tag);
   if (index >= ifds.size())
     ThrowTPE("failed to find %u ifs with tag 0x%04x", index + 1, tag);

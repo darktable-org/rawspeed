@@ -41,9 +41,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(&bs));
 
-    const auto bitsPS = bs.get<rawspeed::uint32>();
-    const auto uncorrectedRawValues = bs.get<rawspeed::uint32>();
-    const auto medataLength = bs.get<rawspeed::uint32>();
+    const auto bitsPS = bs.get<uint32_t>();
+    const auto uncorrectedRawValues = bs.get<uint32_t>();
+    const auto medataLength = bs.get<uint32_t>();
     rawspeed::ByteStream metaData = bs.getStream(medataLength);
     rawspeed::ByteStream rawData = bs.getStream(bs.getRemainSize());
 

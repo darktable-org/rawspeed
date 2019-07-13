@@ -20,7 +20,7 @@
 */
 
 #include "decoders/Rw2Decoder.h"
-#include "common/Common.h"                          // for writeLog, uint32
+#include "common/Common.h"                          // for writeLog, uint32_t
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/PanasonicDecompressor.h"    // for PanasonicDecompr...
@@ -66,8 +66,8 @@ RawImage Rw2Decoder::decodeRawInternal() {
   else
     raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
 
-  uint32 height = raw->getEntry(static_cast<TiffTag>(3))->getU16();
-  uint32 width = raw->getEntry(static_cast<TiffTag>(2))->getU16();
+  uint32_t height = raw->getEntry(static_cast<TiffTag>(3))->getU16();
+  uint32_t width = raw->getEntry(static_cast<TiffTag>(2))->getU16();
 
   if (isOldPanasonic) {
     if (width == 0 || height == 0 || width > 4330 || height > 2751)
@@ -78,13 +78,13 @@ RawImage Rw2Decoder::decodeRawInternal() {
     if (offsets->count != 1) {
       ThrowRDE("Multiple Strips found: %u", offsets->count);
     }
-    uint32 offset = offsets->getU32();
+    uint32_t offset = offsets->getU32();
     if (!mFile->isValid(offset))
       ThrowRDE("Invalid image data offset, cannot decode.");
 
     mRaw->dim = iPoint2D(width, height);
 
-    uint32 size = mFile->getSize() - offset;
+    uint32_t size = mFile->getSize() - offset;
 
     UncompressedDecompressor u(
         ByteStream(DataBuffer(mFile->getSubView(offset), Endianness::little)),
@@ -99,7 +99,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       mRaw->createData();
       u.decode12BitRaw<Endianness::little, false, true>(width, height);
     } else {
-      uint32 section_split_offset = 0;
+      uint32_t section_split_offset = 0;
       PanasonicDecompressor p(
           mRaw,
           ByteStream(DataBuffer(mFile->getSubView(offset), Endianness::little)),
@@ -116,7 +116,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       ThrowRDE("Multiple Strips found: %u", offsets->count);
     }
 
-    uint32 offset = offsets->getU32();
+    uint32_t offset = offsets->getU32();
 
     ByteStream bs(DataBuffer(mFile->getSubView(offset), Endianness::little));
 
@@ -133,7 +133,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       mRaw->createData();
       v5.decompress();
     } else {
-      uint32 section_split_offset = 0x1FF8;
+      uint32_t section_split_offset = 0x1FF8;
       PanasonicDecompressor p(mRaw, bs, hints.has("zero_is_not_bad"),
                               section_split_offset);
       mRaw->createData();

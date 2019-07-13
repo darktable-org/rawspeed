@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint8_t, uint32
+#include "common/Common.h"                      // for uint8_t, uint32_t
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable
@@ -43,14 +43,14 @@ class CrwDecompressor final : public AbstractDecompressor {
   ByteStream rawInput;
 
 public:
-  CrwDecompressor(const RawImage& img, uint32 dec_table_, bool lowbits_,
+  CrwDecompressor(const RawImage& img, uint32_t dec_table_, bool lowbits_,
                   ByteStream rawData);
 
   void decompress();
 
 private:
   static HuffmanTable makeDecoder(const uint8_t* ncpl, const uint8_t* values);
-  static crw_hts initHuffTables(uint32 table);
+  static crw_hts initHuffTables(uint32_t table);
 
   inline static void decodeBlock(std::array<int, 64>* diffBuf,
                                  const crw_hts& mHuff, BitPumpJPEG* lPump,

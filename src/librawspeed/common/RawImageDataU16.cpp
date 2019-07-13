@@ -20,7 +20,7 @@
 
 #include "rawspeedconfig.h"               // for WITH_SSE2
 #include "common/RawImage.h"              // for RawImageDataU16, TableLookUp
-#include "common/Common.h"                // for uint16_t, uint32, uint8_t
+#include "common/Common.h"                // for uint16_t, uint32_t, uint8_t
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D
 #include "common/TableLookUp.h"           // for TableLookUp
@@ -50,11 +50,10 @@ RawImageDataU16::RawImageDataU16() {
   bpp = 2;
 }
 
-RawImageDataU16::RawImageDataU16(const iPoint2D &_dim, uint32 _cpp)
+RawImageDataU16::RawImageDataU16(const iPoint2D& _dim, uint32_t _cpp)
     : RawImageData(_dim, 2, _cpp) {
   dataType = TYPE_USHORT16;
 }
-
 
 void RawImageDataU16::calculateBlackAreas() {
   vector<unsigned int> histogram(4 * 65536);
@@ -72,7 +71,7 @@ void RawImageDataU16::calculateBlackAreas() {
       if (static_cast<int>(area.offset) + static_cast<int>(area.size) >
           uncropped_dim.y)
         ThrowRDE("Offset + size is larger than height of image");
-      for (uint32 y = area.offset; y < area.offset+area.size; y++) {
+      for (uint32_t y = area.offset; y < area.offset + area.size; y++) {
         auto* pixel =
             reinterpret_cast<uint16_t*>(getDataUncropped(mOffset.x, y));
         auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
@@ -93,7 +92,7 @@ void RawImageDataU16::calculateBlackAreas() {
         auto* pixel =
             reinterpret_cast<uint16_t*>(getDataUncropped(area.offset, y));
         auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
-        for (uint32 x = area.offset; x < area.size+area.offset; x++) {
+        for (uint32_t x = area.offset; x < area.size + area.offset; x++) {
           const auto hBin = ((x & 1) << 16) + *pixel;
           localhist[hBin]++;
         }
@@ -206,15 +205,15 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   __m128i sse_full_scale_fp;
   __m128i sse_half_scale_fp;
 
-  auto* sub_mul = alignedMallocArray<uint32, 16, __m128i>(4);
+  auto* sub_mul = alignedMallocArray<uint32_t, 16, __m128i>(4);
   if (!sub_mul)
     ThrowRDE("Out of memory, failed to allocate 128 bytes");
 
   assert(sub_mul != nullptr);
 
-  uint32 gw = pitch / 16;
+  uint32_t gw = pitch / 16;
   // 10 bit fraction
-  uint32 mul = static_cast<int>(
+  uint32_t mul = static_cast<int>(
       1024.0F * 65535.0F /
       static_cast<float>(whitePoint - blackLevelSeparate[mOffset.x & 1]));
   mul |= (static_cast<int>(
@@ -222,8 +221,8 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
              static_cast<float>(whitePoint -
                                 blackLevelSeparate[(mOffset.x + 1) & 1])))
          << 16;
-  uint32 b = blackLevelSeparate[mOffset.x & 1] |
-             (blackLevelSeparate[(mOffset.x + 1) & 1] << 16);
+  uint32_t b = blackLevelSeparate[mOffset.x & 1] |
+               (blackLevelSeparate[(mOffset.x + 1) & 1] << 16);
 
   for (int i = 0; i < 4; i++) {
     sub_mul[i] = b;       // Subtract even lines
@@ -279,7 +278,7 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
       ssescale = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[12]));
     }
 
-    for (uint32 x = 0; x < gw; x++) {
+    for (uint32_t x = 0; x < gw; x++) {
       __m128i pix_high;
       __m128i temp;
       _mm_prefetch(reinterpret_cast<char*>(pixel + 1), _MM_HINT_T0);
@@ -378,8 +377,7 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
 /* the horizontal and vertical direction. Pixels found further away */
 /* are weighed less */
 
-void RawImageDataU16::fixBadPixel( uint32 x, uint32 y, int component )
-{
+void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
   array<int, 4> values;
   array<int, 4> dist;
   array<int, 4> weight;
@@ -477,17 +475,17 @@ void RawImageDataU16::doLookup( int start_y, int end_y )
   if (table->ntables == 1) {
     if (table->dither) {
       int gw = uncropped_dim.x * cpp;
-      auto* t = reinterpret_cast<uint32*>(table->getTable(0));
+      auto* t = reinterpret_cast<uint32_t*>(table->getTable(0));
       for (int y = start_y; y < end_y; y++) {
-        uint32 v = (uncropped_dim.x + y * 13) ^ 0x45694584;
+        uint32_t v = (uncropped_dim.x + y * 13) ^ 0x45694584;
         auto* pixel = reinterpret_cast<uint16_t*>(getDataUncropped(0, y));
         for (int x = 0 ; x < gw; x++) {
           uint16_t p = *pixel;
-          uint32 lookup = t[p];
-          uint32 base = lookup & 0xffff;
-          uint32 delta = lookup >> 16;
+          uint32_t lookup = t[p];
+          uint32_t base = lookup & 0xffff;
+          uint32_t delta = lookup >> 16;
           v = 15700 *(v & 65535) + (v >> 16);
-          uint32 pix = base + ((delta * (v & 2047) + 1024) >> 12);
+          uint32_t pix = base + ((delta * (v & 2047) + 1024) >> 12);
           *pixel = clampBits(pix, 16);
           pixel++;
         }

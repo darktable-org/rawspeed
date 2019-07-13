@@ -57,7 +57,7 @@ KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
 }
 
 KodakDecompressor::segment
-KodakDecompressor::decodeSegment(const uint32 bsize) {
+KodakDecompressor::decodeSegment(const uint32_t bsize) {
   assert(bsize > 0);
   assert(bsize % 4 == 0);
   assert(bsize <= segment_size);
@@ -73,9 +73,9 @@ KodakDecompressor::decodeSegment(const uint32 bsize) {
 
   std::array<uint8_t, 2 * segment_size> blen;
   uint64_t bitbuf = 0;
-  uint32 bits = 0;
+  uint32_t bits = 0;
 
-  for (uint32 i = 0; i < bsize; i += 2) {
+  for (uint32_t i = 0; i < bsize; i += 2) {
     // One byte per two pixels
     blen[i] = input.peekByte() & 15;
     blen[i + 1] = input.getByte() >> 4;
@@ -85,19 +85,19 @@ KodakDecompressor::decodeSegment(const uint32 bsize) {
     bitbuf += (static_cast<int>(input.getByte()));
     bits = 16;
   }
-  for (uint32 i = 0; i < bsize; i++) {
-    uint32 len = blen[i];
+  for (uint32_t i = 0; i < bsize; i++) {
+    uint32_t len = blen[i];
     assert(len < 16);
 
     if (bits < len) {
-      for (uint32 j = 0; j < 32; j += 8) {
+      for (uint32_t j = 0; j < 32; j += 8) {
         bitbuf += static_cast<long long>(static_cast<int>(input.getByte()))
                   << (bits + (j ^ 8));
       }
       bits += 32;
     }
 
-    uint32 diff = static_cast<uint32>(bitbuf) & (0xffff >> (16 - len));
+    uint32_t diff = static_cast<uint32_t>(bitbuf) & (0xffff >> (16 - len));
     bitbuf >>= len;
     bits -= len;
 
@@ -109,21 +109,21 @@ KodakDecompressor::decodeSegment(const uint32 bsize) {
 
 void KodakDecompressor::decompress() {
   uint8_t* data = mRaw->getData();
-  uint32 pitch = mRaw->pitch;
+  uint32_t pitch = mRaw->pitch;
 
-  uint32 random = 0;
+  uint32_t random = 0;
   for (auto y = 0; y < mRaw->dim.y; y++) {
     auto* dest = reinterpret_cast<uint16_t*>(&data[y * pitch]);
 
     for (auto x = 0; x < mRaw->dim.x; x += segment_size) {
-      const uint32 len = std::min(segment_size, mRaw->dim.x - x);
+      const uint32_t len = std::min(segment_size, mRaw->dim.x - x);
 
       const segment buf = decodeSegment(len);
 
       std::array<int, 2> pred;
       pred.fill(0);
 
-      for (uint32 i = 0; i < len; i++) {
+      for (uint32_t i = 0; i < len; i++) {
         pred[i & 1] += buf[i];
 
         int value = pred[i & 1];

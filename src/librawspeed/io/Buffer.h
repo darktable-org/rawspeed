@@ -22,7 +22,7 @@
 #pragma once
 
 #include "AddressSanitizer.h" // for ASan
-#include "common/Common.h"    // for uint8_t, uint64_t, uint32
+#include "common/Common.h"    // for uint8_t, uint64_t, uint32_t
 #include "common/Memory.h"    // for alignedFree
 #include "io/Endianness.h"    // for Endianness, Endianness::little, getHos...
 #include "io/IOException.h"   // for ThrowIOE
@@ -57,7 +57,7 @@ namespace rawspeed {
 class Buffer
 {
 public:
-  using size_type = uint32;
+  using size_type = uint32_t;
 
 protected:
   const uint8_t* data = nullptr;

@@ -46,7 +46,7 @@ RawImageData::RawImageData() : cfa(iPoint2D(0, 0)) {
   blackLevelSeparate.fill(-1);
 }
 
-RawImageData::RawImageData(const iPoint2D& _dim, uint32 _bpc, uint32 _cpp)
+RawImageData::RawImageData(const iPoint2D& _dim, uint32_t _bpc, uint32_t _cpp)
     : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), cpp(_cpp) {
   assert(_bpc > 0);
 
@@ -200,7 +200,7 @@ void RawImageData::destroyData() {
   mBadPixelMap = nullptr;
 }
 
-void RawImageData::setCpp(uint32 val) {
+void RawImageData::setCpp(uint32_t val) {
   if (data)
     ThrowRDE("Attempted to set Components per pixel after data allocation");
   if (val > 4) {
@@ -220,7 +220,7 @@ uint8_t* RawImageData::getData() const {
   return &data[mOffset.y*pitch+mOffset.x*bpp];
 }
 
-uint8_t* RawImageData::getData(uint32 x, uint32 y) {
+uint8_t* RawImageData::getData(uint32_t x, uint32_t y) {
   if (x >= static_cast<unsigned>(uncropped_dim.x))
     ThrowRDE("X Position outside image requested.");
   if (y >= static_cast<unsigned>(uncropped_dim.y))
@@ -235,7 +235,7 @@ uint8_t* RawImageData::getData(uint32 x, uint32 y) {
   return &data[static_cast<size_t>(y) * pitch + x * bpp];
 }
 
-uint8_t* RawImageData::getDataUncropped(uint32 x, uint32 y) {
+uint8_t* RawImageData::getDataUncropped(uint32_t x, uint32_t y) {
   if (x >= static_cast<unsigned>(uncropped_dim.x))
     ThrowRDE("X Position outside image requested.");
   if (y >= static_cast<unsigned>(uncropped_dim.y))
@@ -359,15 +359,18 @@ void RawImageData::fixBadPixels()
 
 #else  // EMULATE_DCRAW_BAD_PIXELS - not recommended, testing purposes only
 
-  for (vector<uint32>::iterator i=mBadPixelPositions.begin(); i != mBadPixelPositions.end(); ++i) {
-    uint32 pos = *i;
-    uint32 pos_x = pos&0xffff;
-    uint32 pos_y = pos>>16;
-    uint32 total = 0;
-    uint32 div = 0;
+  for (vector<uint32_t>::iterator i = mBadPixelPositions.begin();
+       i != mBadPixelPositions.end(); ++i) {
+    uint32_t pos = *i;
+    uint32_t pos_x = pos & 0xffff;
+    uint32_t pos_y = pos >> 16;
+    uint32_t total = 0;
+    uint32_t div = 0;
     // 0 side covered by unsignedness.
-    for (uint32 r=pos_x-2; r<=pos_x+2 && r<(uint32)uncropped_dim.x; r+=2) {
-      for (uint32 c=pos_y-2; c<=pos_y+2 && c<(uint32)uncropped_dim.y; c+=2) {
+    for (uint32_t r = pos_x - 2;
+         r <= pos_x + 2 && r < (uint32_t)uncropped_dim.x; r += 2) {
+      for (uint32_t c = pos_y - 2;
+           c <= pos_y + 2 && c < (uint32_t)uncropped_dim.y; c += 2) {
         uint16_t* pix = (uint16_t*)getDataUncropped(r, c);
         if (*pix) {
           total += *pix;
@@ -415,7 +418,7 @@ void RawImageData::fixBadPixelsThread(int start_y, int end_y) {
 
   for (int y = start_y; y < end_y; y++) {
     auto* bad_map =
-        reinterpret_cast<const uint32*>(&mBadPixelMap[y * mBadPixelMapPitch]);
+        reinterpret_cast<const uint32_t*>(&mBadPixelMap[y * mBadPixelMapPitch]);
     for (int x = 0; x < gw; x++) {
       // Test if there is a bad pixel within these 32 pixels
       if (bad_map[x] == 0)
@@ -460,7 +463,7 @@ void RawImageData::expandBorder(iRectangle2D validData)
       uint8_t* src_pos = getData(validData.pos.x, y);
       uint8_t* dst_pos = getData(validData.pos.x - 1, y);
       for (int x = validData.pos.x; x >= 0; x--) {
-        for (uint32 i = 0; i < bpp; i++) {
+        for (uint32_t i = 0; i < bpp; i++) {
           dst_pos[i] = src_pos[i];
         }
         dst_pos -= bpp;
@@ -474,7 +477,7 @@ void RawImageData::expandBorder(iRectangle2D validData)
       uint8_t* src_pos = getData(pos - 1, y);
       uint8_t* dst_pos = getData(pos, y);
       for (int x = pos; x < dim.x; x++) {
-        for (uint32 i = 0; i < bpp; i++) {
+        for (uint32_t i = 0; i < bpp; i++) {
           dst_pos[i] = src_pos[i];
         }
         dst_pos += bpp;

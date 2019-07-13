@@ -112,7 +112,7 @@ Buffer* Buffer::clone() {
 }
 
 Buffer* Buffer::cloneRandomSize() {
-  uint32 new_size = (rand() | (rand() << 15)) % size;
+  uint32_t new_size = (rand() | (rand() << 15)) % size;
   Buffer *new_map = new Buffer(new_size);
   memcpy(new_map->data, data, new_size);
   return new_map;
@@ -120,7 +120,7 @@ Buffer* Buffer::cloneRandomSize() {
 
 void Buffer::corrupt(int errors) {
   for (int i = 0; i < errors; i++) {
-    uint32 pos = (rand() | (rand() << 15)) % size;
+    uint32_t pos = (rand() | (rand() << 15)) % size;
     data[pos] = rand() & 0xff;
   }
 }

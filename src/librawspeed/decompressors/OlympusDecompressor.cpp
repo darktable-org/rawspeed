@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/OlympusDecompressor.h"
-#include "common/Common.h"                // for uint32, uint16_t, uint8_t
+#include "common/Common.h"                // for uint32_t, uint16_t, uint8_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -55,8 +55,8 @@ OlympusDecompressor::OlympusDecompressor(const RawImage& img) : mRaw(img) {
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
 
-  const uint32 w = mRaw->dim.x;
-  const uint32 h = mRaw->dim.y;
+  const uint32_t w = mRaw->dim.x;
+  const uint32_t h = mRaw->dim.y;
 
   if (w == 0 || h == 0 || w % 2 != 0 || w > 10400 || h > 7792)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", w, h);

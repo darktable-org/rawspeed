@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/Common.h"      // for uint32
+#include "common/Common.h"      // for uint32_t
 #include "common/NORangesSet.h" // for set
 #include "tiff/CiffEntry.h"     // IWYU pragma: keep
 #include "tiff/CiffTag.h"       // for CiffTag
@@ -92,7 +92,7 @@ public:
   std::vector<const CiffIFD*> __attribute__((pure))
   getIFDsWithTag(CiffTag tag) const;
   std::vector<const CiffIFD*> __attribute__((pure))
-  getIFDsWithTagWhere(CiffTag tag, uint32 isValue) const;
+  getIFDsWithTagWhere(CiffTag tag, uint32_t isValue) const;
   std::vector<const CiffIFD*> __attribute__((pure))
   getIFDsWithTagWhere(CiffTag tag, const std::string& isValue) const;
 
@@ -102,7 +102,7 @@ public:
   const CiffEntry* __attribute__((pure)) getEntry(CiffTag tag) const;
   const CiffEntry* __attribute__((pure)) getEntryRecursive(CiffTag tag) const;
   const CiffEntry* __attribute__((pure))
-  getEntryRecursiveWhere(CiffTag tag, uint32 isValue) const;
+  getEntryRecursiveWhere(CiffTag tag, uint32_t isValue) const;
   const CiffEntry* __attribute__((pure))
   getEntryRecursiveWhere(CiffTag tag, const std::string& isValue) const;
 };

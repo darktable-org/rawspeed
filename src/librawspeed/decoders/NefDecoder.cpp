@@ -20,7 +20,7 @@
 */
 
 #include "decoders/NefDecoder.h"
-#include "common/Common.h"                          // for uint32, uint8_t
+#include "common/Common.h"                          // for uint32_t, uint8_t
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/NikonDecompressor.h"        // for NikonDecompressor
@@ -103,9 +103,9 @@ RawImage NefDecoder::decodeRawInternal() {
   if (34713 != compression)
     ThrowRDE("Unsupported compression");
 
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
-  uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
+  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32_t bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
 
   mRaw->dim = iPoint2D(width, height);
 
@@ -134,7 +134,7 @@ Figure out if a NEF file is compressed.  These fancy heuristics
 are only needed for the D100, thanks to a bug in some cameras
 that tags all images as "compressed".
 */
-bool NefDecoder::D100IsCompressed(uint32 offset) {
+bool NefDecoder::D100IsCompressed(uint32_t offset) {
   const uint8_t* test = mFile->getData(offset, 256);
   int i;
 
@@ -150,9 +150,9 @@ bool NefDecoder::D100IsCompressed(uint32 offset) {
    by figuring out that the image is the size of uncompressed packing */
 bool NefDecoder::NEFIsUncompressed(const TiffIFD* raw) {
   TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
-  uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
+  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32_t bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
 
   if (!width || !height || !bitPerPixel)
     return false;
@@ -192,9 +192,9 @@ bool NefDecoder::NEFIsUncompressed(const TiffIFD* raw) {
    as if they were compressed. For those cases we set uncompressed mode
    by figuring out that the image is the size of uncompressed packing */
 bool NefDecoder::NEFIsUncompressedRGB(const TiffIFD* raw) {
-  uint32 byteCount = raw->getEntry(STRIPBYTECOUNTS)->getU32(0);
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32_t byteCount = raw->getEntry(STRIPBYTECOUNTS)->getU32(0);
+  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
 
   if (byteCount % 3 != 0)
     return false;
@@ -206,10 +206,10 @@ void NefDecoder::DecodeUncompressed() {
   auto raw = getIFDWithLargestImage(CFAPATTERN);
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
-  uint32 yPerSlice = raw->getEntry(ROWSPERSTRIP)->getU32();
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
-  uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
+  uint32_t yPerSlice = raw->getEntry(ROWSPERSTRIP)->getU32();
+  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32_t bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
 
   mRaw->dim = iPoint2D(width, height);
 
@@ -222,7 +222,7 @@ void NefDecoder::DecodeUncompressed() {
              counts->count, offsets->count);
   }
 
-  if (yPerSlice == 0 || yPerSlice > static_cast<uint32>(mRaw->dim.y) ||
+  if (yPerSlice == 0 || yPerSlice > static_cast<uint32_t>(mRaw->dim.y) ||
       roundUpDivision(mRaw->dim.y, yPerSlice) != counts->count) {
     ThrowRDE("Invalid y per slice %u or strip count %u (height = %u)",
              yPerSlice, counts->count, mRaw->dim.y);
@@ -230,9 +230,9 @@ void NefDecoder::DecodeUncompressed() {
 
   vector<NefSlice> slices;
   slices.reserve(counts->count);
-  uint32 offY = 0;
+  uint32_t offY = 0;
 
-  for (uint32 s = 0; s < counts->count; s++) {
+  for (uint32_t s = 0; s < counts->count; s++) {
     NefSlice slice;
     slice.offset = offsets->getU32(s);
     slice.count = counts->getU32(s);
@@ -308,10 +308,10 @@ void NefDecoder::readCoolpixSplitRaw(const ByteStream& input,
                                      const iPoint2D& size,
                                      const iPoint2D& offset, int inputPitch) {
   uint8_t* data = mRaw->getData();
-  uint32 outPitch = mRaw->pitch;
-  uint32 w = size.x;
-  uint32 h = size.y;
-  uint32 cpp = mRaw->getCpp();
+  uint32_t outPitch = mRaw->pitch;
+  uint32_t w = size.x;
+  uint32_t h = size.y;
+  uint32_t cpp = mRaw->getCpp();
   if (input.getRemainSize() < (inputPitch*h)) {
     if (static_cast<int>(input.getRemainSize()) > inputPitch)
       h = input.getRemainSize() / inputPitch - 1;
@@ -325,22 +325,23 @@ void NefDecoder::readCoolpixSplitRaw(const ByteStream& input,
   if (offset.x + size.x > mRaw->dim.x)
     ThrowRDE("Invalid x offset");
 
-  uint32 y = offset.y;
-  h = min(h + static_cast<uint32>(offset.y), static_cast<uint32>(mRaw->dim.y));
+  uint32_t y = offset.y;
+  h = min(h + static_cast<uint32_t>(offset.y),
+          static_cast<uint32_t>(mRaw->dim.y));
   w *= cpp;
   h /= 2;
   BitPumpMSB in(input);
   for (; y < h; y++) {
     auto* dest = reinterpret_cast<uint16_t*>(
         &data[offset.x * sizeof(uint16_t) * cpp + y * 2 * outPitch]);
-    for (uint32 x = 0 ; x < w; x++) {
+    for (uint32_t x = 0; x < w; x++) {
       dest[x] =  in.getBits(12);
     }
   }
   for (y = offset.y; y < h; y++) {
     auto* dest = reinterpret_cast<uint16_t*>(
         &data[offset.x * sizeof(uint16_t) * cpp + (y * 2 + 1) * outPitch]);
-    for (uint32 x = 0 ; x < w; x++) {
+    for (uint32_t x = 0; x < w; x++) {
       dest[x] =  in.getBits(12);
     }
   }
@@ -349,10 +350,10 @@ void NefDecoder::readCoolpixSplitRaw(const ByteStream& input,
 void NefDecoder::DecodeD100Uncompressed() {
   auto ifd = mRootIFD->getIFDWithTag(STRIPOFFSETS, 1);
 
-  uint32 offset = ifd->getEntry(STRIPOFFSETS)->getU32();
+  uint32_t offset = ifd->getEntry(STRIPOFFSETS)->getU32();
   // Hardcode the sizes as at least the width is not correctly reported
-  uint32 width = 3040;
-  uint32 height = 2024;
+  uint32_t width = 3040;
+  uint32_t height = 2024;
 
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
@@ -366,9 +367,9 @@ void NefDecoder::DecodeD100Uncompressed() {
 
 void NefDecoder::DecodeSNefUncompressed() {
   auto raw = getIFDWithLargestImage(CFAPATTERN);
-  uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32_t offset = raw->getEntry(STRIPOFFSETS)->getU32();
+  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
 
   if (width == 0 || height == 0 || width % 2 != 0 || width > 3680 ||
       height > 2456)
@@ -399,7 +400,7 @@ string NefDecoder::getMode() {
   ostringstream mode;
   auto raw = getIFDWithLargestImage(CFAPATTERN);
   int compression = raw->getEntry(COMPRESSION)->getU32();
-  uint32 bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
+  uint32_t bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
 
   if (NEFIsUncompressedRGB(raw))
     mode << "sNEF-uncompressed";
@@ -416,8 +417,8 @@ string NefDecoder::getExtendedMode(const string &mode) {
   ostringstream extended_mode;
 
   auto ifd = mRootIFD->getIFDWithTag(CFAPATTERN);
-  uint32 width = ifd->getEntry(IMAGEWIDTH)->getU32();
-  uint32 height = ifd->getEntry(IMAGELENGTH)->getU32();
+  uint32_t width = ifd->getEntry(IMAGEWIDTH)->getU32();
+  uint32_t height = ifd->getEntry(IMAGELENGTH)->getU32();
 
   extended_mode << width << "x" << height << "-" << mode;
   return extended_mode.str();
@@ -495,8 +496,8 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x0097))) {
     TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x0097));
     if (wb->count > 4) {
-      uint32 version = 0;
-      for (uint32 i = 0; i < 4; i++) {
+      uint32_t version = 0;
+      for (uint32_t i = 0; i < 4; i++) {
         const auto v = wb->getByte(i);
         if (v < '0' || v > '9')
           ThrowRDE("Bad version component: %c - not a digit", v);
@@ -521,7 +522,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
                 ->getString();
         if (serial.length() > 9)
           ThrowRDE("Serial number is too long (%zu)", serial.length());
-        uint32 serialno = 0;
+        uint32_t serialno = 0;
         for (unsigned char c : serial) {
           if (c >= '0' && c <= '9')
             serialno = serialno*10 + c-'0';
@@ -533,7 +534,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         TiffEntry* key =
             mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x00a7));
         const uint8_t* keydata = key->getData(4);
-        uint32 keyno = keydata[0]^keydata[1]^keydata[2]^keydata[3];
+        uint32_t keyno = keydata[0] ^ keydata[1] ^ keydata[2] ^ keydata[3];
 
         // "Decrypt" the block using the serial and key
         uint8_t ci = serialmap[serialno & 0xff];
@@ -551,7 +552,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         }
 
         // Finally set the WB coeffs
-        uint32 off = (version == 0x204) ? 6 : 14;
+        uint32_t off = (version == 0x204) ? 6 : 14;
         mRaw->metadata.wbCoeffs[0] =
             static_cast<float>(getU16BE(buf.data() + off + 0));
         mRaw->metadata.wbCoeffs[1] =
@@ -570,7 +571,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       mRaw->metadata.wbCoeffs[1] = 1.0F;
       mRaw->metadata.wbCoeffs[2] = static_cast<float>(bs.getU16()) / 256.0;
     } else if (bs.hasPatternAt("NRW ", 4, 0)) {
-      uint32 offset = 0;
+      uint32_t offset = 0;
       if (!bs.hasPatternAt("0100", 4, 4) && wb->count > 72)
         offset = 56;
       else if (wb->count > 1572)
@@ -614,7 +615,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 // We un-apply the whitebalance, so output matches lossless.
 // Note that values are scaled. See comment below on details.
 // OPTME: It would be trivial to run this multithreaded.
-void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h) {
+void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32_t w, uint32_t h) {
   if (w < 6)
     ThrowIOE("got a %u wide sNEF, aborting", w);
 
@@ -661,19 +662,19 @@ void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h) {
   auto* tmpch = reinterpret_cast<uint8_t*>(&tmp);
 
   uint8_t* data = mRaw->getData();
-  uint32 pitch = mRaw->pitch;
+  uint32_t pitch = mRaw->pitch;
   const uint8_t* in = input->getData(w * h * 3);
 
-  for (uint32 y = 0; y < h; y++) {
+  for (uint32_t y = 0; y < h; y++) {
     auto* dest = reinterpret_cast<uint16_t*>(&data[y * pitch]);
-    uint32 random = in[0] + (in[1] << 8) +  (in[2] << 16);
-    for (uint32 x = 0 ; x < w*3; x += 6) {
-      uint32 g1 = in[0];
-      uint32 g2 = in[1];
-      uint32 g3 = in[2];
-      uint32 g4 = in[3];
-      uint32 g5 = in[4];
-      uint32 g6 = in[5];
+    uint32_t random = in[0] + (in[1] << 8) + (in[2] << 16);
+    for (uint32_t x = 0; x < w * 3; x += 6) {
+      uint32_t g1 = in[0];
+      uint32_t g2 = in[1];
+      uint32_t g3 = in[2];
+      uint32_t g4 = in[3];
+      uint32_t g5 = in[4];
+      uint32_t g6 = in[5];
 
       in+=6;
       auto y1 = static_cast<float>(g1 | ((g2 & 0x0f) << 8));

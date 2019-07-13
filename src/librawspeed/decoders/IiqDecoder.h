@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"                // for uint32
+#include "common/Common.h"                // for uint32_t
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
@@ -37,16 +37,16 @@ struct PhaseOneStrip;
 
 class IiqDecoder final : public AbstractTiffDecoder {
   struct IiqOffset {
-    uint32 n;
-    uint32 offset;
+    uint32_t n;
+    uint32_t offset;
 
     IiqOffset() = default;
-    IiqOffset(uint32 block, uint32 offset_) : n(block), offset(offset_) {}
+    IiqOffset(uint32_t block, uint32_t offset_) : n(block), offset(offset_) {}
   };
 
   std::vector<PhaseOneStrip> computeSripes(const Buffer& raw_data,
                                            std::vector<IiqOffset>&& offsets,
-                                           uint32 height) const;
+                                           uint32_t height) const;
 
 public:
   static bool isAppropriateDecoder(const Buffer* file);
@@ -62,11 +62,11 @@ public:
 
 protected:
   int getDecoderVersion() const override { return 0; }
-  uint32 black_level = 0;
-  void CorrectPhaseOneC(ByteStream meta_data, uint32 split_row,
-                        uint32 split_col);
-  void CorrectQuadrantMultipliersCombined(ByteStream data, uint32 split_row,
-                                          uint32 split_col);
+  uint32_t black_level = 0;
+  void CorrectPhaseOneC(ByteStream meta_data, uint32_t split_row,
+                        uint32_t split_col);
+  void CorrectQuadrantMultipliersCombined(ByteStream data, uint32_t split_row,
+                                          uint32_t split_col);
   void correctSensorDefects(ByteStream data);
   void correctBadColumn(uint16_t col);
   void handleBadPixel(uint16_t col, uint16_t row);

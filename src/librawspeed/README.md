@@ -163,15 +163,15 @@ RawDecoder.interpolateBadPixels = false;
 Before calling the decoder. This will disable the automatic interpolation of bad pixels. You can retrieve the bad pixels by using:
 
 ```cpp
-std::vector<uint32> RawImage->mBadPixelPositions;
+std::vector<uint32_t> RawImage->mBadPixelPositions;
 ```
 
 This is a vector that contains the positions of the detected bad pixels in the image. The positions are stored as x | (y << 16), so maximum pixel position is 65535, which also corresponds with the limit of the image sizes within RawSpeed. you can loop through all bad pixels with a loop like this:
 
 ```cpp
-for (vector<uint32>::iterator i=mBadPixelPositions.begin(); i != mBadPixelPositions.end(); i++)  {
-    uint32 pos_x = (*i)&0xffff;
-    uint32 pos_y = (*i)>>16;
+for (vector<uint32_t>::iterator i=mBadPixelPositions.begin(); i != mBadPixelPositions.end(); i++)  {
+    uint32_t pos_x = (*i)&0xffff;
+    uint32_t pos_y = (*i)>>16;
     uint16_t* pix = (uint16_t*)getDataUncropped(pos_x, pos_y);
 }
 ```

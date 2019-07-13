@@ -21,7 +21,7 @@
 */
 
 #include "common/DngOpcodes.h"
-#include "common/Common.h"                // for uint32, uint16_t, clampBits
+#include "common/Common.h"                // for uint32_t, uint16_t, clampBits
 #include "common/Mutex.h"                 // for MutexLocker
 #include "common/Point.h"                 // for iRectangle2D, iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
@@ -62,7 +62,7 @@ public:
 // ****************************************************************************
 
 class DngOpcodes::FixBadPixelsConstant final : public DngOpcodes::DngOpcode {
-  uint32 value;
+  uint32_t value;
 
 public:
   explicit FixBadPixelsConstant(const RawImage& ri, ByteStream* bs) {
@@ -82,7 +82,7 @@ public:
   void apply(const RawImage& ri) override {
     MutexLocker guard(&ri->mBadPixelMutex);
     iPoint2D crop = ri->getCropOffset();
-    uint32 offset = crop.x | (crop.y << 16);
+    uint32_t offset = crop.x | (crop.y << 16);
     for (auto y = 0; y < ri->dim.y; ++y) {
       auto* src = reinterpret_cast<uint16_t*>(ri->getData(0, y));
       for (auto x = 0; x < ri->dim.x; ++x) {
@@ -104,10 +104,10 @@ protected:
         minusOne ? iRectangle2D(0, 0, ri->dim.x - 1, ri->dim.y - 1)
                  : iRectangle2D(0, 0, ri->dim.x, ri->dim.y);
 
-    uint32 top = bs->getU32();
-    uint32 left = bs->getU32();
-    uint32 bottom = bs->getU32();
-    uint32 right = bs->getU32();
+    uint32_t top = bs->getU32();
+    uint32_t left = bs->getU32();
+    uint32_t bottom = bs->getU32();
+    uint32_t right = bs->getU32();
 
     const iPoint2D topLeft(left, top);
     const iPoint2D bottomRight(right, bottom);
@@ -149,7 +149,7 @@ public:
 // ****************************************************************************
 
 class DngOpcodes::FixBadPixelsList final : public DngOpcodes::DngOpcode {
-  std::vector<uint32> badPixels;
+  std::vector<uint32_t> badPixels;
 
 public:
   explicit FixBadPixelsList(const RawImage& ri, ByteStream* bs) {
@@ -216,10 +216,10 @@ public:
 // ****************************************************************************
 
 class DngOpcodes::PixelOpcode : public ROIOpcode {
-  uint32 firstPlane;
-  uint32 planes;
-  uint32 rowPitch;
-  uint32 colPitch;
+  uint32_t firstPlane;
+  uint32_t planes;
+  uint32_t rowPitch;
+  uint32_t colPitch;
 
 protected:
   explicit PixelOpcode(const RawImage& ri, ByteStream* bs)
@@ -238,8 +238,8 @@ protected:
 
     const iRectangle2D& ROI = getRoi();
 
-    if (rowPitch < 1 || rowPitch > static_cast<uint32>(ROI.getHeight()) ||
-        colPitch < 1 || colPitch > static_cast<uint32>(ROI.getWidth()))
+    if (rowPitch < 1 || rowPitch > static_cast<uint32_t>(ROI.getHeight()) ||
+        colPitch < 1 || colPitch > static_cast<uint32_t>(ROI.getWidth()))
       ThrowRDE("Invalid pitch");
   }
 
@@ -280,7 +280,7 @@ protected:
 
   void apply(const RawImage& ri) override {
     applyOP<uint16_t>(
-        ri, [this](uint32 x, uint32 y, uint16_t v) { return lookup[v]; });
+        ri, [this](uint32_t x, uint32_t y, uint16_t v) { return lookup[v]; });
   }
 };
 
@@ -335,11 +335,11 @@ public:
 class DngOpcodes::DeltaRowOrColBase : public PixelOpcode {
 public:
   struct SelectX {
-    static inline uint32 select(uint32 x, uint32 /*y*/) { return x; }
+    static inline uint32_t select(uint32_t x, uint32_t /*y*/) { return x; }
   };
 
   struct SelectY {
-    static inline uint32 select(uint32 /*x*/, uint32 y) { return y; }
+    static inline uint32_t select(uint32_t /*x*/, uint32_t y) { return y; }
   };
 
 protected:
@@ -419,13 +419,14 @@ public:
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {
       this->template applyOP<uint16_t>(
-          ri, [this](uint32 x, uint32 y, uint16_t v) {
+          ri, [this](uint32_t x, uint32_t y, uint16_t v) {
             return clampBits(this->deltaI[S::select(x, y)] + v, 16);
           });
     } else {
-      this->template applyOP<float>(ri, [this](uint32 x, uint32 y, float v) {
-        return this->deltaF[S::select(x, y)] + v;
-      });
+      this->template applyOP<float>(ri,
+                                    [this](uint32_t x, uint32_t y, float v) {
+                                      return this->deltaF[S::select(x, y)] + v;
+                                    });
     }
   }
 };
@@ -455,14 +456,15 @@ public:
 
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {
-      this->template applyOP<uint16_t>(ri, [this](uint32 x, uint32 y,
+      this->template applyOP<uint16_t>(ri, [this](uint32_t x, uint32_t y,
                                                   uint16_t v) {
         return clampBits((this->deltaI[S::select(x, y)] * v + 512) >> 10, 16);
       });
     } else {
-      this->template applyOP<float>(ri, [this](uint32 x, uint32 y, float v) {
-        return this->deltaF[S::select(x, y)] * v;
-      });
+      this->template applyOP<float>(ri,
+                                    [this](uint32_t x, uint32_t y, float v) {
+                                      return this->deltaF[S::select(x, y)] * v;
+                                    });
     }
   }
 };
@@ -549,7 +551,7 @@ DngOpcodes::constructor(const RawImage& ri, ByteStream* bs) {
 
 // ALL opcodes specified in DNG Specification MUST be listed here.
 // however, some of them might not be implemented.
-const std::map<uint32, std::pair<const char*, DngOpcodes::constructor_t>>
+const std::map<uint32_t, std::pair<const char*, DngOpcodes::constructor_t>>
     DngOpcodes::Map = {
         {1U, make_pair("WarpRectilinear", nullptr)},
         {2U, make_pair("WarpFisheye", nullptr)},

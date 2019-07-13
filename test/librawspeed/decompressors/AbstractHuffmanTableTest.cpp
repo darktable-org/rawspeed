@@ -19,7 +19,7 @@
 */
 
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
-#include "common/Common.h"                      // for uint8_t, uint32
+#include "common/Common.h"                      // for uint8_t, uint32_t
 #include "io/Buffer.h"                          // for Buffer
 #include <algorithm>                            // for min
 #include <bitset>                               // for bitset
@@ -255,7 +255,7 @@ auto genHT = [](std::initializer_list<uint8_t>&& nCodesPerLength)
 };
 
 auto genHTCount =
-    [](std::initializer_list<uint8_t>&& nCodesPerLength) -> rawspeed::uint32 {
+    [](std::initializer_list<uint8_t>&& nCodesPerLength) -> uint32_t {
   AbstractHuffmanTable ht;
   std::vector<uint8_t> v(nCodesPerLength.begin(), nCodesPerLength.end());
   v.resize(16);
@@ -434,7 +434,7 @@ TEST(AbstractHuffmanTableTest, EqualCompareAndTrimming) {
   ASSERT_NE(genHTFull({1, 0}, {0}), genHTFull({1}, {1}));
 }
 
-using SignExtendDataType = std::tuple<rawspeed::uint32, rawspeed::uint32, int>;
+using SignExtendDataType = std::tuple<uint32_t, uint32_t, int>;
 class SignExtendTest : public ::testing::TestWithParam<SignExtendDataType> {
 protected:
   SignExtendTest() = default;
@@ -446,8 +446,8 @@ protected:
     value = std::get<2>(p);
   }
 
-  rawspeed::uint32 diff;
-  rawspeed::uint32 len;
+  uint32_t diff;
+  uint32_t len;
   int value;
 };
 

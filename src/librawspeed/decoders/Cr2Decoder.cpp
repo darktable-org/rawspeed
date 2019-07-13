@@ -21,7 +21,7 @@
 */
 
 #include "decoders/Cr2Decoder.h"
-#include "common/Common.h"                     // for uint32, uint16_t
+#include "common/Common.h"                     // for uint32_t, uint16_t
 #include "common/Point.h"                      // for iPoint2D
 #include "common/RawspeedException.h"          // for RawspeedException
 #include "decoders/RawDecoderException.h"      // for ThrowRDE
@@ -59,7 +59,7 @@ bool Cr2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 RawImage Cr2Decoder::decodeOldFormat() {
-  uint32 offset = 0;
+  uint32_t offset = 0;
   if (mRootIFD->getEntryRecursive(CANON_RAW_DATA_OFFSET))
     offset = mRootIFD->getEntryRecursive(CANON_RAW_DATA_OFFSET)->getU32();
   else {
@@ -164,8 +164,8 @@ RawImage Cr2Decoder::decodeNewFormat() {
     }
   } // EOS 20D, EOS-1D Mark II, let Cr2Decompressor guess.
 
-  const uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
-  const uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
+  const uint32_t offset = raw->getEntry(STRIPOFFSETS)->getU32();
+  const uint32_t count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
 
   const ByteStream bs(
       DataBuffer(mFile->getSubView(offset, count), Endianness::little));
@@ -270,7 +270,7 @@ int Cr2Decoder::getHue() {
   if (!mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x10))) {
     return 0;
   }
-  uint32 model_id =
+  uint32_t model_id =
       mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x10))->getU32();
   if (model_id >= 0x80000281 || model_id == 0x80000218 || (hints.has("force_new_sraw_hue")))
     return ((mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x) - 1) >> 1;
@@ -285,7 +285,7 @@ void Cr2Decoder::sRawInterpolate() {
     ThrowRDE("Unable to locate WB info.");
 
   // Offset to sRaw coefficients used to reconstruct uncorrected RGB data.
-  uint32 offset = 78;
+  uint32_t offset = 78;
 
   std::array<int, 3> sraw_coeffs;
 

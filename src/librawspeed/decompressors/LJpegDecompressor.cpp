@@ -20,7 +20,7 @@
 */
 
 #include "decompressors/LJpegDecompressor.h"
-#include "common/Common.h"                // for unroll_loop, uint32, uint16_t
+#include "common/Common.h"                // for unroll_loop, uint32_t, uint16_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -53,8 +53,9 @@ LJpegDecompressor::LJpegDecompressor(const ByteStream& bs, const RawImage& img)
 #endif
 }
 
-void LJpegDecompressor::decode(uint32 offsetX, uint32 offsetY, uint32 width,
-                               uint32 height, bool fixDng16Bug_) {
+void LJpegDecompressor::decode(uint32_t offsetX, uint32_t offsetY,
+                               uint32_t width, uint32_t height,
+                               bool fixDng16Bug_) {
   if (offsetX >= static_cast<unsigned>(mRaw->dim.x))
     ThrowRDE("X offset outside of image");
   if (offsetY >= static_cast<unsigned>(mRaw->dim.y))
@@ -87,7 +88,7 @@ void LJpegDecompressor::decodeScan()
   if (predictorMode != 1)
     ThrowRDE("Unsupported predictor mode: %u", predictorMode);
 
-  for (uint32 i = 0; i < frame.cps;  i++)
+  for (uint32_t i = 0; i < frame.cps; i++)
     if (frame.compInfo[i].superH != 1 || frame.compInfo[i].superV != 1)
       ThrowRDE("Unsupported subsampling");
 

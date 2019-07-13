@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32, uint16_t, int32_t
+#include "common/Common.h" // for uint32_t, uint16_t, int32_t
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
 #include "io/BitStream.h"                       // for BitStreamTraits
@@ -68,7 +68,7 @@ class HuffmanTableLUT final : public AbstractHuffmanTable {
   // private fields calculated from codesPerBits and codeValues
   // they are index '1' based, so we can directly lookup the value
   // for code length l without decrementing
-  std::vector<uint32> maxCodeOL;      // index is length of code
+  std::vector<uint32_t> maxCodeOL;    // index is length of code
   std::vector<uint16_t> codeOffsetOL; // index is length of code
 
   // The code can be compiled with two different decode lookup table layouts.
@@ -155,9 +155,10 @@ public:
           decodeLookup[c] = (code_l + diff_l) | FlagMask;
 
           if (diff_l) {
-            uint32 diff = (c >> (LookupDepth - code_l - diff_l)) & ((1 << diff_l) - 1);
+            uint32_t diff =
+                (c >> (LookupDepth - code_l - diff_l)) & ((1 << diff_l) - 1);
             decodeLookup[c] |= static_cast<int32_t>(
-                static_cast<uint32>(extend(diff, diff_l)) << PayloadShift);
+                static_cast<uint32_t>(extend(diff, diff_l)) << PayloadShift);
           }
         }
       }
@@ -194,7 +195,7 @@ public:
     // for processors supporting bmi2 instructions, using maxCodePlusDiffLength()
     // might be beneficial
 
-    uint32 code = bs.peekBitsNoFill(LookupDepth);
+    uint32_t code = bs.peekBitsNoFill(LookupDepth);
     assert(code < decodeLookup.size());
     auto val = static_cast<unsigned>(decodeLookup[code]);
     int len = val & LenMask;
@@ -220,11 +221,11 @@ public:
       return FULL_DECODE ? extend(bs.getBitsNoFill(l_diff), l_diff) : l_diff;
     }
 
-    uint32 code_l = LookupDepth;
+    uint32_t code_l = LookupDepth;
     bs.skipBitsNoFill(code_l);
     while (code_l < maxCodeOL.size() &&
            (0xFFFFFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l])) {
-      uint32 temp = bs.getBitsNoFill(1);
+      uint32_t temp = bs.getBitsNoFill(1);
       code = (code << 1) | temp;
       code_l++;
     }

@@ -21,7 +21,7 @@
 */
 
 #include "decoders/CrwDecoder.h"
-#include "common/Common.h"                 // for uint16_t, uint8_t, uint32
+#include "common/Common.h"                 // for uint16_t, uint8_t, uint32_t
 #include "common/Point.h"                  // for iPoint2D
 #include "common/RawspeedException.h"      // for RawspeedException
 #include "decoders/RawDecoderException.h"  // for ThrowRDE
@@ -71,8 +71,8 @@ RawImage CrwDecoder::decodeRawInternal() {
     ThrowRDE("Couldn't find image sensor info");
 
   assert(sensorInfo != nullptr);
-  uint32 width = sensorInfo->getU16(1);
-  uint32 height = sensorInfo->getU16(2);
+  uint32_t width = sensorInfo->getU16(1);
+  uint32_t height = sensorInfo->getU16(2);
   mRaw->dim = iPoint2D(width, height);
 
   const CiffEntry* decTable = mRootIFD->getEntryRecursive(CIFF_DECODERTABLE);
@@ -80,7 +80,7 @@ RawImage CrwDecoder::decodeRawInternal() {
     ThrowRDE("Couldn't find decoder table");
 
   assert(decTable != nullptr);
-  uint32 dec_table = decTable->getU32();
+  uint32_t dec_table = decTable->getU32();
 
   bool lowbits = ! hints.has("no_decompressed_lowbits");
 

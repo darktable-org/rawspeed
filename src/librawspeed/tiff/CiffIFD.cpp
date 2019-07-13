@@ -21,7 +21,7 @@
 */
 
 #include "tiff/CiffIFD.h"
-#include "common/Common.h"               // for isIn, uint32, uint16_t
+#include "common/Common.h"               // for isIn, uint32_t, uint16_t
 #include "common/NORangesSet.h"          // for set
 #include "io/ByteStream.h"               // for ByteStream
 #include "parsers/CiffParserException.h" // for ThrowCPE
@@ -81,7 +81,7 @@ CiffIFD::CiffIFD(CiffIFD* const parent_, ByteStream directory)
     ThrowCPE("CIFF directory is too short.");
 
   directory.setPosition(directory.getSize() - 4);
-  const uint32 valueDataSize = directory.getU32();
+  const uint32_t valueDataSize = directory.getU32();
 
   // The Recursion. Directory entries store data here. May contain IFDs.
   directory.setPosition(0);
@@ -100,7 +100,7 @@ CiffIFD::CiffIFD(CiffIFD* const parent_, ByteStream directory)
   // In that area, no two entries may overlap.
   NORangesSet<Buffer> valueDatas;
 
-  for (uint32 i = 0; i < entryCount; i++)
+  for (uint32_t i = 0; i < entryCount; i++)
     parseIFDEntry(&valueDatas, &valueData, &dirEntries);
 
   assert(valueDatas.size() <= entryCount);
@@ -216,7 +216,7 @@ vector<const CiffIFD*> CiffIFD::getIFDsWithTag(CiffTag tag) const {
 }
 
 vector<const CiffIFD*> CiffIFD::getIFDsWithTagWhere(CiffTag tag,
-                                                    uint32 isValue) const {
+                                                    uint32_t isValue) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
   return getIFDsWithTagIf(tag, [&isValue](const CiffEntry* entry) {
     return entry->isInt() && entry->getU32() == isValue;
@@ -268,7 +268,7 @@ const CiffEntry* CiffIFD::getEntryRecursive(CiffTag tag) const {
 }
 
 const CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag,
-                                                 uint32 isValue) const {
+                                                 uint32_t isValue) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
   return getEntryRecursiveIf(tag, [&isValue](const CiffEntry* entry) {
     return entry->isInt() && entry->getU32() == isValue;

@@ -20,7 +20,7 @@
 */
 
 #include "decoders/RafDecoder.h"
-#include "common/Common.h"                          // for uint32, uint16_t
+#include "common/Common.h"                          // for uint32_t, uint16_t
 #include "common/Point.h"                           // for iPoint2D, iRecta...
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/FujiDecompressor.h"         // for FujiDecompressor
@@ -66,8 +66,8 @@ bool RafDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 
 RawImage RafDecoder::decodeRawInternal() {
   auto raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
-  uint32 height = 0;
-  uint32 width = 0;
+  uint32_t height = 0;
+  uint32_t width = 0;
 
   if (raw->hasEntry(FUJI_RAWIMAGEFULLHEIGHT)) {
     height = raw->getEntry(FUJI_RAWIMAGEFULLHEIGHT)->getU32();
@@ -146,7 +146,7 @@ RawImage RafDecoder::decodeRawInternal() {
   }
 
   double_width = hints.has("double_width_unpacked");
-  const uint32 real_width = double_width ? 2U * width : width;
+  const uint32_t real_width = double_width ? 2U * width : width;
 
   mRaw->dim = iPoint2D(real_width, height);
   mRaw->createData();
@@ -225,8 +225,8 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   // Rotate 45 degrees - could be multithreaded.
   if (rotate && !this->uncorrectedRawValues) {
     // Calculate the 45 degree rotated size;
-    uint32 rotatedsize;
-    uint32 rotationPos;
+    uint32_t rotatedsize;
+    uint32_t rotationPos;
     if (alt_layout) {
       rotatedsize = new_size.y+new_size.x/2;
       rotationPos = new_size.x/2 - 1;
@@ -323,8 +323,8 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
 int RafDecoder::isCompressed() {
   auto raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
-  uint32 height = 0;
-  uint32 width = 0;
+  uint32_t height = 0;
+  uint32_t width = 0;
 
   if (raw->hasEntry(FUJI_RAWIMAGEFULLHEIGHT)) {
     height = raw->getEntry(FUJI_RAWIMAGEFULLHEIGHT)->getU32();
@@ -339,7 +339,7 @@ int RafDecoder::isCompressed() {
   if (width == 0 || height == 0 || width > 9216 || height > 6210)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-  uint32 count = raw->getEntry(FUJI_STRIPBYTECOUNTS)->getU32();
+  uint32_t count = raw->getEntry(FUJI_STRIPBYTECOUNTS)->getU32();
 
   // The uncompressed raf's can be 12/14 bpp, so if it is less than that,
   // then we are likely in compressed raf.

@@ -19,7 +19,7 @@
 */
 
 #include "common/RawImage.h"              // for RawImageDataFloat, TYPE_FL...
-#include "common/Common.h"                // for uint8_t, uint32, writeLog
+#include "common/Common.h"                // for uint8_t, uint32_t, writeLog
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea
@@ -38,11 +38,10 @@ RawImageDataFloat::RawImageDataFloat() {
   dataType = TYPE_FLOAT32;
   }
 
-  RawImageDataFloat::RawImageDataFloat(const iPoint2D &_dim, uint32 _cpp)
+  RawImageDataFloat::RawImageDataFloat(const iPoint2D& _dim, uint32_t _cpp)
       : RawImageData(_dim, 4, _cpp) {
     dataType = TYPE_FLOAT32;
   }
-
 
   void RawImageDataFloat::calculateBlackAreas() {
     std::array<float, 4> accPixels;
@@ -59,7 +58,7 @@ RawImageDataFloat::RawImageDataFloat() {
         if (static_cast<int>(area.offset) + static_cast<int>(area.size) >
             uncropped_dim.y)
           ThrowRDE("Offset + size is larger than height of image");
-        for (uint32 y = area.offset; y < area.offset+area.size; y++) {
+        for (uint32_t y = area.offset; y < area.offset + area.size; y++) {
           auto* pixel =
               reinterpret_cast<float*>(getDataUncropped(mOffset.x, y));
 
@@ -80,7 +79,7 @@ RawImageDataFloat::RawImageDataFloat() {
           auto* pixel =
               reinterpret_cast<float*>(getDataUncropped(area.offset, y));
 
-          for (uint32 x = area.offset; x < area.size + area.offset; x++) {
+          for (uint32_t x = area.offset; x < area.size + area.offset; x++) {
             accPixels[((y & 1) << 1) | (x & 1)] += *pixel;
             pixel++;
           }
@@ -162,15 +161,15 @@ RawImageDataFloat::RawImageDataFloat() {
       __m128i sseround;
       __m128i ssesub2;
       __m128i ssesign;
-      auto* sub_mul = alignedMallocArray<uint32, 16, __m128i>(4);
+      auto* sub_mul = alignedMallocArray<uint32_t, 16, __m128i>(4);
 	  if (!sub_mul)
 		ThrowRDE("Out of memory, failed to allocate 128 bytes");
 
-      uint32 gw = pitch / 16;
+      uint32_t gw = pitch / 16;
       // 10 bit fraction
-      uint32 mul = (int)(1024.0F * 65535.0F / (float)(whitePoint - blackLevelSeparate[mOffset.x&1]));
+      uint32_t mul = (int)(1024.0F * 65535.0F / (float)(whitePoint - blackLevelSeparate[mOffset.x&1]));
       mul |= ((int)(1024.0F * 65535.0F / (float)(whitePoint - blackLevelSeparate[(mOffset.x+1)&1])))<<16;
-      uint32 b = blackLevelSeparate[mOffset.x&1] | (blackLevelSeparate[(mOffset.x+1)&1]<<16);
+      uint32_t b = blackLevelSeparate[mOffset.x&1] | (blackLevelSeparate[(mOffset.x+1)&1]<<16);
 
       for (int i = 0; i< 4; i++) {
         sub_mul[i] = b;     // Subtract even lines
@@ -201,7 +200,7 @@ RawImageDataFloat::RawImageDataFloat() {
           ssescale = _mm_load_si128((__m128i*)&sub_mul[12]);
         }
 
-        for (uint32 x = 0 ; x < gw; x++) {
+        for (uint32_t x = 0 ; x < gw; x++) {
           __m128i pix_high;
           __m128i temp;
           _mm_prefetch((char*)(pixel+1), _MM_HINT_T0);
@@ -289,8 +288,7 @@ RawImageDataFloat::RawImageDataFloat() {
   /* the horizontal and vertical direction. Pixels found further away */
   /* are weighed less */
 
-void RawImageDataFloat::fixBadPixel( uint32 x, uint32 y, int component )
-{
+void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   std::array<float, 4> values;
   values.fill(-1);
   std::array<float, 4> dist = {{}};
@@ -372,16 +370,14 @@ void RawImageDataFloat::fixBadPixel( uint32 x, uint32 y, int component )
   if (cpp > 1 && component == 0)
     for (int i = 1; i < static_cast<int>(cpp); i++)
       fixBadPixel(x,y,i);
-
 }
-
 
 void RawImageDataFloat::doLookup( int start_y, int end_y ) {
   ThrowRDE("Float point lookup tables not implemented");
 }
 
 void RawImageDataFloat::setWithLookUp(uint16_t value, uint8_t* dst,
-                                      uint32* random) {
+                                      uint32_t* random) {
   auto* dest = reinterpret_cast<float*>(dst);
   if (table == nullptr) {
     *dest = static_cast<float>(value) * (1.0F / 65535);

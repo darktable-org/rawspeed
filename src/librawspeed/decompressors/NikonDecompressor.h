@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32, uint16_t
+#include "common/Common.h"                      // for uint32_t, uint16_t
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/BitPumpMSB.h"                      // for BitPumpMSB
@@ -32,33 +32,34 @@ class ByteStream;
 
 class NikonDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
-  uint32 bitsPS;
+  uint32_t bitsPS;
 
-  uint32 huffSelect = 0;
-  uint32 split = 0;
+  uint32_t huffSelect = 0;
+  uint32_t split = 0;
 
   std::array<int, 2> pUp1;
   std::array<int, 2> pUp2;
 
   std::vector<uint16_t> curve;
 
-  uint32 random;
+  uint32_t random;
 
 public:
-  NikonDecompressor(const RawImage& raw, ByteStream metadata, uint32 bitsPS);
+  NikonDecompressor(const RawImage& raw, ByteStream metadata, uint32_t bitsPS);
 
   void decompress(const ByteStream& data, bool uncorrectedRawValues);
 
 private:
   static const std::array<std::array<std::array<uint8_t, 16>, 2>, 6> nikon_tree;
-  static std::vector<uint16_t> createCurve(ByteStream* metadata, uint32 bitsPS,
-                                           uint32 v0, uint32 v1, uint32* split);
+  static std::vector<uint16_t> createCurve(ByteStream* metadata,
+                                           uint32_t bitsPS, uint32_t v0,
+                                           uint32_t v1, uint32_t* split);
 
   template <typename Huffman>
   void decompress(BitPumpMSB* bits, int start_y, int end_y);
 
   template <typename Huffman>
-  static Huffman createHuffmanTable(uint32 huffSelect);
+  static Huffman createHuffmanTable(uint32_t huffSelect);
 };
 
 } // namespace rawspeed

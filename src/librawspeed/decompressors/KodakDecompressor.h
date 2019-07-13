@@ -39,7 +39,7 @@ class KodakDecompressor final : public AbstractDecompressor {
   static constexpr int segment_size = 256; // pixels
   using segment = std::array<int16_t, segment_size>;
 
-  segment decodeSegment(uint32 bsize);
+  segment decodeSegment(uint32_t bsize);
 
 public:
   KodakDecompressor(const RawImage& img, ByteStream bs, int bps,

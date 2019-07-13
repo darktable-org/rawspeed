@@ -21,7 +21,7 @@
 */
 
 #include "tiff/TiffEntry.h"
-#include "common/Common.h"               // for uint32, int16_t, uint16_t
+#include "common/Common.h"               // for uint32_t, int16_t, uint16_t
 #include "parsers/TiffParserException.h" // for ThrowTPE
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
 #include "tiff/TiffTag.h"                // for TiffTag, DNGPRIVATEDATA
@@ -39,8 +39,8 @@ namespace rawspeed {
 class DataBuffer;
 
 // order see TiffDataType
-const std::array<uint32, 14> TiffEntry::datashifts = {0, 0, 0, 1, 2, 3, 0,
-                                                      0, 1, 2, 3, 2, 3, 2};
+const std::array<uint32_t, 14> TiffEntry::datashifts = {0, 0, 0, 1, 2, 3, 0,
+                                                        0, 1, 2, 3, 2, 3, 2};
 //                                  0-1-2-3-4-5-6-7-8-9-10-11-12-13
 
 TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream* bs) : parent(parent_) {
@@ -55,8 +55,8 @@ TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream* bs) : parent(parent_) {
   if (count > UINT32_MAX >> datashifts[type])
     ThrowTPE("integer overflow in size calculation.");
 
-  uint32 byte_size = count << datashifts[type];
-  uint32 data_offset = UINT32_MAX;
+  uint32_t byte_size = count << datashifts[type];
+  uint32_t data_offset = UINT32_MAX;
 
   if (byte_size <= 4) {
     data_offset = bs->getPosition();
@@ -85,14 +85,14 @@ TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream* bs) : parent(parent_) {
 }
 
 TiffEntry::TiffEntry(TiffIFD* parent_, TiffTag tag_, TiffDataType type_,
-                     uint32 count_, ByteStream&& data_)
+                     uint32_t count_, ByteStream&& data_)
     : parent(parent_), data(std::move(data_)), tag(tag_), type(type_),
       count(count_) {
   // check for count << datashift overflow
   if (count > UINT32_MAX >> datashifts[type])
     ThrowTPE("integer overflow in size calculation.");
 
-  uint32 bytesize = count << datashifts[type];
+  uint32_t bytesize = count << datashifts[type];
 
   if (data.getSize() != bytesize)
     ThrowTPE("data set larger than entry size given");
@@ -122,14 +122,14 @@ bool __attribute__((pure)) TiffEntry::isFloat() const {
   }
 }
 
-uint8_t TiffEntry::getByte(uint32 index) const {
+uint8_t TiffEntry::getByte(uint32_t index) const {
   if (type != TIFF_BYTE && type != TIFF_UNDEFINED)
     ThrowTPE("Wrong type %u encountered. Expected Byte on 0x%x", type, tag);
 
   return data.peekByte(index);
 }
 
-uint16_t TiffEntry::getU16(uint32 index) const {
+uint16_t TiffEntry::getU16(uint32_t index) const {
   if (type != TIFF_SHORT && type != TIFF_UNDEFINED)
     ThrowTPE("Wrong type %u encountered. Expected Short or Undefined on 0x%x",
              type, tag);
@@ -137,7 +137,7 @@ uint16_t TiffEntry::getU16(uint32 index) const {
   return data.peek<uint16_t>(index);
 }
 
-int16_t TiffEntry::getI16(uint32 index) const {
+int16_t TiffEntry::getI16(uint32_t index) const {
   if (type != TIFF_SSHORT && type != TIFF_UNDEFINED)
     ThrowTPE("Wrong type %u encountered. Expected Short or Undefined on 0x%x",
              type, tag);
@@ -145,7 +145,7 @@ int16_t TiffEntry::getI16(uint32 index) const {
   return data.peek<int16_t>(index);
 }
 
-uint32 TiffEntry::getU32(uint32 index) const {
+uint32_t TiffEntry::getU32(uint32_t index) const {
   if (type == TIFF_SHORT)
     return getU16(index);
 
@@ -163,10 +163,10 @@ uint32 TiffEntry::getU32(uint32 index) const {
              type, tag);
   }
 
-  return data.peek<uint32>(index);
+  return data.peek<uint32_t>(index);
 }
 
-int32_t TiffEntry::getI32(uint32 index) const {
+int32_t TiffEntry::getI32(uint32_t index) const {
   if (type == TIFF_SSHORT)
     return getI16(index);
   if (!(type == TIFF_SLONG || type == TIFF_UNDEFINED))
@@ -176,7 +176,7 @@ int32_t TiffEntry::getI32(uint32 index) const {
   return data.peek<int32_t>(index);
 }
 
-float TiffEntry::getFloat(uint32 index) const {
+float TiffEntry::getFloat(uint32_t index) const {
   if (!isFloat()) {
     ThrowTPE("Wrong type 0x%x encountered. Expected Float or something "
              "convertible on 0x%x",
@@ -193,8 +193,8 @@ float TiffEntry::getFloat(uint32 index) const {
   case TIFF_SSHORT:
     return static_cast<float>(getI32(index));
   case TIFF_RATIONAL: {
-    uint32 a = getU32(index*2);
-    uint32 b = getU32(index*2+1);
+    uint32_t a = getU32(index * 2);
+    uint32_t b = getU32(index * 2 + 1);
     return b != 0 ? static_cast<float>(a) / b : 0.0F;
   }
   case TIFF_SRATIONAL: {

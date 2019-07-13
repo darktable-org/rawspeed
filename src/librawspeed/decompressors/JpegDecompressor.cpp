@@ -25,7 +25,7 @@
 
 #include "decompressors/JpegDecompressor.h"
 
-#include "common/Common.h"                // for uint8_t, uint32, uint16_t
+#include "common/Common.h"                // for uint8_t, uint32_t, uint16_t
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -113,8 +113,8 @@ struct JpegDecompressor::JpegDecompressStruct : jpeg_decompress_struct {
   ~JpegDecompressStruct() { jpeg_destroy_decompress(this); }
 };
 
-void JpegDecompressor::decode(uint32 offX,
-                              uint32 offY) { /* Each slice is a JPEG image */
+void JpegDecompressor::decode(uint32_t offX,
+                              uint32_t offY) { /* Each slice is a JPEG image */
   struct JpegDecompressStruct dinfo;
 
   vector<JSAMPROW> buffer(1);

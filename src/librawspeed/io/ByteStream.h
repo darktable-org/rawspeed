@@ -22,7 +22,7 @@
 #pragma once
 
 #include "AddressSanitizer.h" // for ASan::RegionIsPoisoned
-#include "common/Common.h"    // for uint8_t, int32_t, uint32, uint16_t, roundUp
+#include "common/Common.h" // for uint8_t, int32_t, uint32_t, uint16_t, roundUp
 #include "common/Memory.h"    // for alignedMalloc
 #include "io/Buffer.h"        // for Buffer::size_type, Buffer, DataBuffer
 #include "io/Endianness.h"    // for Endianness, Endianness::little
@@ -162,7 +162,7 @@ public:
 
   inline uint16_t getU16() { return get<uint16_t>(); }
   inline int32_t getI32() { return get<int32_t>(); }
-  inline uint32 getU32() { return get<uint32>(); }
+  inline uint32_t getU32() { return get<uint32_t>(); }
   inline float getFloat() { return get<float>(); }
 
   const char* peekString() const {

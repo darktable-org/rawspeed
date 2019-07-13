@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/SamsungV2Decompressor.h"
-#include "common/Common.h"                // for uint32, uint16_t, int32_t
+#include "common/Common.h"                // for uint32_t, uint16_t, int32_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -39,7 +39,7 @@ namespace rawspeed {
 // in contact and Loring von Palleske (Samsung) for pointing to the open-source
 // code of Samsung's DNG converter at http://opensource.samsung.com/
 
-enum struct SamsungV2Decompressor::OptFlags : uint32 {
+enum struct SamsungV2Decompressor::OptFlags : uint32_t {
   NONE = 0U,       // no flags
   SKIP = 1U << 0U, // Skip checking if we need differences from previous line
   MV = 1U << 1U,   // Simplify motion vector definition
@@ -71,7 +71,8 @@ constexpr bool operator&(SamsungV2Decompressor::OptFlags lhs,
                  rhs));
 }
 
-inline int32_t SamsungV2Decompressor::getDiff(BitPumpMSB32* pump, uint32 len) {
+inline int32_t SamsungV2Decompressor::getDiff(BitPumpMSB32* pump,
+                                              uint32_t len) {
   if (len == 0)
     return 0;
   int32_t diff = pump->getBits(len);
@@ -115,8 +116,8 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
 
   // The format includes an optimization code that sets 3 flags to change the
   // decoding parameters
-  const uint32 optflags = startpump.getBits(4);
-  if (optflags > static_cast<uint32>(OptFlags::ALL))
+  const uint32_t optflags = startpump.getBits(4);
+  if (optflags > static_cast<uint32_t>(OptFlags::ALL))
     ThrowRDE("Invalid opt flags %x", optflags);
   _flags = static_cast<OptFlags>(optflags);
 
@@ -132,8 +133,8 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
       height > 4336)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-  if (width != static_cast<uint32>(mRaw->dim.x) ||
-      height != static_cast<uint32>(mRaw->dim.y))
+  if (width != static_cast<uint32_t>(mRaw->dim.x) ||
+      height != static_cast<uint32_t>(mRaw->dim.y))
     ThrowRDE("EXIF image dimensions do not match dimensions from raw header");
 
   data = startpump.getStream(startpump.getRemainSize());
@@ -142,40 +143,40 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
 void SamsungV2Decompressor::decompress() {
   switch (_flags) {
   case OptFlags::NONE:
-    for (uint32 row = 0; row < height; row++)
+    for (uint32_t row = 0; row < height; row++)
       decompressRow<OptFlags::NONE>(row);
     break;
   case OptFlags::ALL:
-    for (uint32 row = 0; row < height; row++)
+    for (uint32_t row = 0; row < height; row++)
       decompressRow<OptFlags::ALL>(row);
     break;
 
   case OptFlags::SKIP:
-    for (uint32 row = 0; row < height; row++)
+    for (uint32_t row = 0; row < height; row++)
       decompressRow<OptFlags::SKIP>(row);
     break;
   case OptFlags::MV:
-    for (uint32 row = 0; row < height; row++)
+    for (uint32_t row = 0; row < height; row++)
       decompressRow<OptFlags::MV>(row);
     break;
   case OptFlags::QP:
-    for (uint32 row = 0; row < height; row++)
+    for (uint32_t row = 0; row < height; row++)
       decompressRow<OptFlags::QP>(row);
     break;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch"
   case OptFlags::SKIP | OptFlags::MV:
-    for (uint32 row = 0; row < height; row++)
+    for (uint32_t row = 0; row < height; row++)
       decompressRow<OptFlags::SKIP | OptFlags::MV>(row);
     break;
   case OptFlags::SKIP | OptFlags::QP:
-    for (uint32 row = 0; row < height; row++)
+    for (uint32_t row = 0; row < height; row++)
       decompressRow<OptFlags::SKIP | OptFlags::QP>(row);
     break;
 
   case OptFlags::MV | OptFlags::QP:
-    for (uint32 row = 0; row < height; row++)
+    for (uint32_t row = 0; row < height; row++)
       decompressRow<OptFlags::MV | OptFlags::QP>(row);
     break;
 #pragma GCC diagnostic pop
@@ -193,7 +194,7 @@ void SamsungV2Decompressor::decompress() {
 // the actual difference bits
 
 template <SamsungV2Decompressor::OptFlags optflags>
-void SamsungV2Decompressor::decompressRow(uint32 row) {
+void SamsungV2Decompressor::decompressRow(uint32_t row) {
   // Align pump to 16byte boundary
   const auto line_offset = data.getPosition();
   if ((line_offset & 0xf) != 0)
@@ -208,7 +209,7 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
       mRaw->getData(0, std::max(0, static_cast<int>(row) - 2)));
 
   // Initialize the motion and diff modes at the start of the line
-  uint32 motion = 7;
+  uint32_t motion = 7;
   // By default we are not scaling values at all
   int32_t scale = 0;
 
@@ -218,10 +219,10 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
 
   assert(width >= 16);
   assert(width % 16 == 0);
-  for (uint32 col = 0; col < width; col += 16) {
+  for (uint32_t col = 0; col < width; col += 16) {
     if (!(optflags & OptFlags::QP) && !(col & 63)) {
       static constexpr std::array<int32_t, 3> scalevals = {{0, -2, 2}};
-      uint32 i = pump.getBits(2);
+      uint32_t i = pump.getBits(2);
       scale = i < 3 ? scale + scalevals[i] : pump.getBits(12);
     }
 
@@ -237,7 +238,7 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
     if (motion == 7) {
       // The base case, just set all pixels to the previous ones on the same
       // line If we're at the left edge we just start at the initial value
-      for (uint32 i = 0; i < 16; i++)
+      for (uint32_t i = 0; i < 16; i++)
         img[i] = (col == 0) ? initVal : *(img + i - 2);
     } else {
       // The complex case, we now need to actually lookup one or two lines
@@ -254,7 +255,7 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
       int32_t slideOffset = motionOffset[motion];
       int32_t doAverage = motionDoAverage[motion];
 
-      for (uint32 i = 0; i < 16; i++) {
+      for (uint32_t i = 0; i < 16; i++) {
         uint16_t* line;
         uint16_t* refpixel;
 
@@ -285,15 +286,15 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
     }
 
     // Figure out how many difference bits we have to read for each pixel
-    std::array<uint32, 4> diffBits = {};
+    std::array<uint32_t, 4> diffBits = {};
     if (optflags & OptFlags::SKIP || !pump.getBits(1)) {
-      std::array<uint32, 4> flags;
+      std::array<uint32_t, 4> flags;
       for (unsigned int& flag : flags)
         flag = pump.getBits(2);
 
-      for (uint32 i = 0; i < 4; i++) {
+      for (uint32_t i = 0; i < 4; i++) {
         // The color is 0-Green 1-Blue 2-Red
-        uint32 colornum = (row % 2 != 0) ? i >> 1 : ((i >> 1) + 2) % 3;
+        uint32_t colornum = (row % 2 != 0) ? i >> 1 : ((i >> 1) + 2) % 3;
 
         assert(flags[i] <= 3);
         switch (flags[i]) {
@@ -324,8 +325,8 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
     }
 
     // Actually read the differences and write them to the pixels
-    for (uint32 i = 0; i < 16; i++) {
-      uint32 len = diffBits[i >> 2];
+    for (uint32_t i = 0; i < 16; i++) {
+      uint32_t len = diffBits[i >> 2];
       int32_t diff = getDiff(&pump, len);
 
       uint16_t* value = nullptr;

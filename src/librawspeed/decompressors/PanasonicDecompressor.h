@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32
+#include "common/Common.h"                      // for uint32_t
 #include "common/Point.h"                       // for iPoint2D
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
@@ -31,15 +31,15 @@
 namespace rawspeed {
 
 class PanasonicDecompressor final : public AbstractDecompressor {
-  static constexpr uint32 BlockSize = 0x4000;
+  static constexpr uint32_t BlockSize = 0x4000;
 
   static constexpr int PixelsPerPacket = 14;
 
-  static constexpr uint32 BytesPerPacket = 16;
+  static constexpr uint32_t BytesPerPacket = 16;
 
-  static constexpr uint32 PacketsPerBlock = BlockSize / BytesPerPacket;
+  static constexpr uint32_t PacketsPerBlock = BlockSize / BytesPerPacket;
 
-  static constexpr uint32 PixelsPerBlock = PixelsPerPacket * PacketsPerBlock;
+  static constexpr uint32_t PixelsPerBlock = PixelsPerPacket * PacketsPerBlock;
 
   class ProxyStream;
 
@@ -53,7 +53,7 @@ class PanasonicDecompressor final : public AbstractDecompressor {
   //     bytes: [0..section_split_offset-1][section_split_offset..BufSize-1]
   //     pixels: [a..b][0..a-1]
   //   I.e. these two parts need to be swapped around.
-  uint32 section_split_offset;
+  uint32_t section_split_offset;
 
   struct Block {
     ByteStream bs;
@@ -74,16 +74,16 @@ class PanasonicDecompressor final : public AbstractDecompressor {
   void chopInputIntoBlocks();
 
   void processPixelPacket(ProxyStream* bits, int y, uint16_t* dest, int xbegin,
-                          std::vector<uint32>* zero_pos) const noexcept;
+                          std::vector<uint32_t>* zero_pos) const noexcept;
 
-  void processBlock(const Block& block, std::vector<uint32>* zero_pos) const
+  void processBlock(const Block& block, std::vector<uint32_t>* zero_pos) const
       noexcept;
 
   void decompressThread() const noexcept;
 
 public:
   PanasonicDecompressor(const RawImage& img, const ByteStream& input_,
-                        bool zero_is_not_bad, uint32 section_split_offset_);
+                        bool zero_is_not_bad, uint32_t section_split_offset_);
 
   void decompress() const noexcept;
 };

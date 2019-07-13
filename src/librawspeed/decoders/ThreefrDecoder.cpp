@@ -20,7 +20,7 @@
 */
 
 #include "decoders/ThreefrDecoder.h"
-#include "common/Common.h"                        // for uint32
+#include "common/Common.h"                        // for uint32_t
 #include "common/Point.h"                         // for iPoint2D
 #include "decoders/RawDecoderException.h"         // for ThrowRDE
 #include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompre...
@@ -50,9 +50,9 @@ bool ThreefrDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 
 RawImage ThreefrDecoder::decodeRawInternal() {
   auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS, 1);
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
-  uint32 off = raw->getEntry(STRIPOFFSETS)->getU32();
+  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32_t off = raw->getEntry(STRIPOFFSETS)->getU32();
   // STRIPBYTECOUNTS is strange/invalid for the existing 3FR samples...
 
   const ByteStream bs(DataBuffer(mFile->getSubView(off), Endianness::little));
@@ -77,7 +77,7 @@ void ThreefrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(ASSHOTNEUTRAL)) {
     TiffEntry *wb = mRootIFD->getEntryRecursive(ASSHOTNEUTRAL);
     if (wb->count == 3) {
-      for (uint32 i = 0; i < 3; i++) {
+      for (uint32_t i = 0; i < 3; i++) {
         const float div = wb->getFloat(i);
         if (div == 0.0F)
           ThrowRDE("Can not decode WB, multiplier is zero/");

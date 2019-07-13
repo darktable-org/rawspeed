@@ -36,8 +36,6 @@ extern "C" int rawspeed_get_number_of_processor_cores();
 
 namespace rawspeed {
 
-using uint32 = unsigned int;
-
 enum DEBUG_PRIO {
   DEBUG_PRIO_ERROR = 0x10,
   DEBUG_PRIO_WARNING = 0x100,

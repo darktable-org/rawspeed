@@ -180,7 +180,7 @@ class VC5Decompressor final : public AbstractDecompressor {
     Array2DRef<const int16_t> bandAsArray2DRef(unsigned int iBand) const;
 
   protected:
-    uint32 mDecodedBandMask = 0;
+    uint32_t mDecodedBandMask = 0;
   };
 
   struct Channel {

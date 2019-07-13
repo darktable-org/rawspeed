@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"                // for uint32
+#include "common/Common.h"                // for uint32_t
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "io/ByteStream.h"                // for ByteStream
@@ -50,9 +50,11 @@ protected:
 
   int getDecoderVersion() const override { return 1; }
   RawImage decodeSRF(const TiffIFD* raw);
-  void DecodeARW2(const ByteStream& input, uint32 w, uint32 h, uint32 bpp);
+  void DecodeARW2(const ByteStream& input, uint32_t w, uint32_t h,
+                  uint32_t bpp);
   void DecodeUncompressed(const TiffIFD* raw);
-  void SonyDecrypt(const uint32* ibuf, uint32* obuf, uint32 len, uint32 key);
+  void SonyDecrypt(const uint32_t* ibuf, uint32_t* obuf, uint32_t len,
+                   uint32_t key);
   void GetWB();
   ByteStream in;
   int mShiftDownScale = 0;

@@ -19,7 +19,7 @@
 */
 
 #include "io/BitPumpJPEG.h" // for BitPumpJPEG, BitStream<>::fillCache
-#include "common/Common.h"  // for uint8_t, uint32
+#include "common/Common.h"  // for uint8_t, uint32_t
 #include "io/BitPumpTest.h" // for Endianness, Pattern, (anonymous), Buffer
 #include "io/Buffer.h"      // for Buffer, DataBuffer
 #include "io/ByteStream.h"  // for ByteStream
@@ -45,7 +45,7 @@ const std::array<uint8_t, 4> Pattern<BitPumpJPEG, OnesTag>::Data = {
     {/* [Byte0 Byte1 Byte2 Byte3] */
      /* Byte: [Bit0 .. Bit7] */
      0b10100100, 0b01000010, 0b00001000, 0b00011111}};
-template <> rawspeed::uint32 Pattern<BitPumpJPEG, OnesTag>::data(int index) {
+template <> uint32_t Pattern<BitPumpJPEG, OnesTag>::data(int index) {
   const auto set = GenOnesBE(1, 0);
   return set[index];
 }
@@ -53,7 +53,7 @@ template <> rawspeed::uint32 Pattern<BitPumpJPEG, OnesTag>::data(int index) {
 template <>
 const std::array<uint8_t, 4> Pattern<BitPumpJPEG, InvOnesTag>::Data = {
     {0b11010010, 0b00100001, 0b00000100, 0b00001111}};
-template <> rawspeed::uint32 Pattern<BitPumpJPEG, InvOnesTag>::data(int index) {
+template <> uint32_t Pattern<BitPumpJPEG, InvOnesTag>::data(int index) {
   const auto set = GenOnesBE(0, -1);
   return set[index];
 }

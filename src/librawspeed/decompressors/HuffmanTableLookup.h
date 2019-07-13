@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32, uint16_t
+#include "common/Common.h"                      // for uint32_t, uint16_t
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
 #include "io/BitStream.h"                       // for BitStreamTraits
@@ -67,7 +67,7 @@ class HuffmanTableLookup final : public AbstractHuffmanTable {
   // private fields calculated from codesPerBits and codeValues
   // they are index '1' based, so we can directly lookup the value
   // for code length l without decrementing
-  std::vector<uint32> maxCodeOL;      // index is length of code
+  std::vector<uint32_t> maxCodeOL;    // index is length of code
   std::vector<uint16_t> codeOffsetOL; // index is length of code
 
   bool fullDecode = true;
@@ -135,11 +135,11 @@ public:
     // for processors supporting bmi2 instructions, using
     // maxCodePlusDiffLength() might be beneficial
 
-    uint32 code = 0;
-    uint32 code_l = 0;
+    uint32_t code = 0;
+    uint32_t code_l = 0;
     while (code_l < maxCodeOL.size() &&
            (0xFFFFFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l])) {
-      uint32 temp = bs.getBitsNoFill(1);
+      uint32_t temp = bs.getBitsNoFill(1);
       code = (code << 1) | temp;
       code_l++;
     }

@@ -19,7 +19,7 @@
 */
 
 #include "EndiannessTest.h"
-#include "common/Common.h" // for int32_t, int16_t, uint32, uint64_t, uint16_t
+#include "common/Common.h" // for int32_t, int16_t, uint32_t, uint64_t, uint16_t
 #include "io/Endianness.h" // for getHostEndianness, Endianness::big, Endia...
 #include <cstring>         // for memcpy, memcmp
 #include <gtest/gtest.h>   // for Message, AssertionResult, ASSERT_PRED_FOR...
@@ -209,7 +209,7 @@ TEST_P(short16Test, getNOP) {
 /*
 B=4 # sizeof, bytes
 */
-class uint32Test : public AbstractGetByteSwappedTest<uint32TType, uint32> {};
+class uint32Test : public AbstractGetByteSwappedTest<uint32TType, uint32_t> {};
 INSTANTIATE_TEST_CASE_P(uint32Test, uint32Test,
                         ::testing::Combine(::testing::ValuesIn(uint32Values),
                                            ::testing::Bool()));

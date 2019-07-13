@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/SamsungV1Decompressor.h"
-#include "common/Common.h"                // for uint32, uint16_t, int32_t
+#include "common/Common.h"                // for uint32_t, uint16_t, int32_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -51,8 +51,8 @@ SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
     ThrowRDE("Unexpected bit per pixel (%u)", bit);
   }
 
-  const uint32 width = mRaw->dim.x;
-  const uint32 height = mRaw->dim.y;
+  const uint32_t width = mRaw->dim.x;
+  const uint32_t height = mRaw->dim.y;
 
   if (width == 0 || height == 0 || width > 5664 || height > 3714)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
@@ -63,7 +63,7 @@ SamsungV1Decompressor::samsungDiff(BitPumpMSB* pump,
                                    const std::vector<encTableItem>& tbl) {
   pump->fill(23); // That is the maximal number of bits we will need here.
   // We read 10 bits to index into our table
-  uint32 c = pump->peekBitsNoFill(10);
+  uint32_t c = pump->peekBitsNoFill(10);
   // Skip the bits that were used to encode this case
   pump->skipBitsNoFill(tbl[c].encLen);
   // Read the number of bits the table tells me
@@ -77,8 +77,8 @@ SamsungV1Decompressor::samsungDiff(BitPumpMSB* pump,
 }
 
 void SamsungV1Decompressor::decompress() {
-  const uint32 width = mRaw->dim.x;
-  const uint32 height = mRaw->dim.y;
+  const uint32_t width = mRaw->dim.x;
+  const uint32_t height = mRaw->dim.y;
 
   // This format has a variable length encoding of how many bits are needed
   // to encode the difference between pixels, we use a table to process it
@@ -111,7 +111,7 @@ void SamsungV1Decompressor::decompress() {
   // we know the next 4 bits are the difference. We read 10 bits because that is
   // the maximum number of bits used in the variable encoding (for the 12 and
   // 13 cases)
-  uint32 n = 0;
+  uint32_t n = 0;
   for (auto i : tab) {
     for (int32_t c = 0; c < (1024 >> i[0]); c++) {
       tbl[n].encLen = i[0];
@@ -121,9 +121,9 @@ void SamsungV1Decompressor::decompress() {
   }
 
   BitPumpMSB pump(*bs);
-  for (uint32 y = 0; y < height; y++) {
+  for (uint32_t y = 0; y < height; y++) {
     auto* img = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
-    for (uint32 x = 0; x < width; x++) {
+    for (uint32_t x = 0; x < width; x++) {
       int32_t diff = samsungDiff(&pump, tbl);
       if (x < 2)
         hpred[x] = vpred[y & 1][x] += diff;

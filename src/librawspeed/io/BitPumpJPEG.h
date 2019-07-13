@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint8_t, uint32
+#include "common/Common.h" // for uint8_t, uint32_t
 #include "io/BitStream.h"  // for BitStreamCacheRightInLeftOut, BitStream
 #include "io/Buffer.h"     // for Buffer::size_type
 #include "io/Endianness.h" // for getBE
@@ -50,7 +50,7 @@ inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uint8_t* input,
       input[1] != 0xFF &&
       input[2] != 0xFF &&
       input[3] != 0xFF ) {
-    cache.push(getBE<uint32>(input), 32);
+    cache.push(getBE<uint32_t>(input), 32);
     return 4;
   }
 

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32, uint8_t
+#include "common/Common.h" // for uint32_t, uint8_t
 #include "io/BitStream.h"  // for BitStream, BitStreamCacheRightInLeftOut
 #include "io/Endianness.h" // for getLE
 
@@ -43,7 +43,7 @@ inline BitPumpMSB32::size_type BitPumpMSB32::fillCache(const uint8_t* input,
                                                        size_type* bufPos) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
 
-  cache.push(getLE<uint32>(input), 32);
+  cache.push(getLE<uint32_t>(input), 32);
   return 4;
 }
 

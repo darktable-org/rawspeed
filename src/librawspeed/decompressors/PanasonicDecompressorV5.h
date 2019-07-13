@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32
+#include "common/Common.h"                      // for uint32_t
 #include "common/Point.h"                       // for iPoint2D
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
@@ -36,7 +36,7 @@ namespace rawspeed {
 class PanasonicDecompressorV5 final : public AbstractDecompressor {
   // The RW2 raw image buffer consists of individual blocks,
   // each one BlockSize bytes in size.
-  static constexpr uint32 BlockSize = 0x4000;
+  static constexpr uint32_t BlockSize = 0x4000;
 
   // These blocks themselves comprise of two sections,
   // split and swapped at section_split_offset:
@@ -44,14 +44,14 @@ class PanasonicDecompressorV5 final : public AbstractDecompressor {
   //   pixels: [a..b][0..a-1]
   // When reading, these two sections need to be swapped to enable linear
   // processing..
-  static constexpr uint32 sectionSplitOffset = 0x1FF8;
+  static constexpr uint32_t sectionSplitOffset = 0x1FF8;
 
   // The blocks themselves consist of packets with fixed size of bytesPerPacket,
   // and each packet decodes to pixelsPerPacket pixels, which depends on bps.
-  static constexpr uint32 bytesPerPacket = 16;
-  static constexpr uint32 bitsPerPacket = 8 * bytesPerPacket;
+  static constexpr uint32_t bytesPerPacket = 16;
+  static constexpr uint32_t bitsPerPacket = 8 * bytesPerPacket;
   static_assert(BlockSize % bytesPerPacket == 0, "");
-  static constexpr uint32 PacketsPerBlock = BlockSize / bytesPerPacket;
+  static constexpr uint32_t PacketsPerBlock = BlockSize / bytesPerPacket;
 
   // Contains the decoding recepie for the packet,
   struct PacketDsc;
@@ -68,7 +68,7 @@ class PanasonicDecompressorV5 final : public AbstractDecompressor {
   // The full input buffer, containing all the blocks.
   ByteStream input;
 
-  const uint32 bps;
+  const uint32_t bps;
 
   size_t numBlocks;
 
@@ -99,7 +99,7 @@ class PanasonicDecompressorV5 final : public AbstractDecompressor {
 
 public:
   PanasonicDecompressorV5(const RawImage& img, const ByteStream& input_,
-                          uint32 bps_);
+                          uint32_t bps_);
 
   void decompress() const noexcept;
 };

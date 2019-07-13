@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"                // for uint8_t, uint32, uint16_t
+#include "common/Common.h"                // for uint8_t, uint32_t, uint16_t
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/Buffer.h"                    // for Buffer
 #include <algorithm>                      // for copy, adjacent_find, max_e...
@@ -126,7 +126,7 @@ protected:
 
     // Figure C.1: make table of Huffman code length for each symbol
     // Figure C.2: generate the codes themselves
-    uint32 code = 0;
+    uint32_t code = 0;
     for (unsigned int l = 1; l <= maxCodeLength; ++l) {
       for (unsigned int i = 0; i < nCodesPerLength[l]; ++i) {
         assert(code <= 0xffff);
@@ -150,7 +150,7 @@ public:
            codeValues == other.codeValues;
   }
 
-  uint32 setNCodesPerLength(const Buffer& data) {
+  uint32_t setNCodesPerLength(const Buffer& data) {
     assert(data.getSize() == 16);
 
     nCodesPerLength.resize(17, 0);
@@ -222,7 +222,7 @@ public:
   // Figure F.12 – Extending the sign bit of a decoded value in V
   // WARNING: this is *not* your normal 2's complement sign extension!
   // WARNING: the caller should check that len != 0 before calling the function
-  inline static int __attribute__((const)) extend(uint32 diff, uint32 len) {
+  inline static int __attribute__((const)) extend(uint32_t diff, uint32_t len) {
     int32_t ret = diff;
     if ((diff & (1 << (len - 1))) == 0)
       ret -= (1 << len) - 1;

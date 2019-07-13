@@ -61,7 +61,6 @@ using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
 using rawspeed::RawParser;
 using rawspeed::RawImage;
-using rawspeed::uint32;
 using rawspeed::iPoint2D;
 using rawspeed::TYPE_USHORT16;
 using rawspeed::TYPE_FLOAT32;
@@ -214,7 +213,7 @@ string img_hash(const RawImage& r) {
   APPEND(&oss, "badPixelPositions: ");
   {
     MutexLocker guard(&r->mBadPixelMutex);
-    for (uint32 p : r->mBadPixelPositions)
+    for (uint32_t p : r->mBadPixelPositions)
       APPEND(&oss, "%d, ", p);
   }
 

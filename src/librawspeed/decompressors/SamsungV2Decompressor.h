@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h"                             // for uint32
+#include "common/Common.h"                             // for uint32_t
 #include "decompressors/AbstractSamsungDecompressor.h" // for AbstractSamsu...
 #include "io/BitPumpMSB32.h"                           // for BitPumpMSB32
 #include "io/ByteStream.h"                             // for ByteStream
@@ -32,22 +32,22 @@ class RawImage;
 // Decoder for third generation compressed SRW files (NX1)
 class SamsungV2Decompressor final : public AbstractSamsungDecompressor {
 public:
-  enum struct OptFlags : uint32;
+  enum struct OptFlags : uint32_t;
 
 protected:
   int bits;
 
-  uint32 bitDepth;
-  uint32 width;
-  uint32 height;
+  uint32_t bitDepth;
+  uint32_t width;
+  uint32_t height;
   OptFlags _flags;
-  uint32 initVal;
+  uint32_t initVal;
 
   ByteStream data;
 
-  static inline int32_t getDiff(BitPumpMSB32* pump, uint32 len);
+  static inline int32_t getDiff(BitPumpMSB32* pump, uint32_t len);
 
-  template <OptFlags optflags> void decompressRow(uint32 row);
+  template <OptFlags optflags> void decompressRow(uint32_t row);
 
 public:
   SamsungV2Decompressor(const RawImage& image, const ByteStream& bs, int bit);

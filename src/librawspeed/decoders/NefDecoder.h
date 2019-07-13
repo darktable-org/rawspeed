@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h"                // for uint32, uint16_t
+#include "common/Common.h"                // for uint32_t, uint16_t
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "decoders/RawDecoder.h"          // for RawDecoder::RawSlice
@@ -54,7 +54,7 @@ protected:
 
 private:
   int getDecoderVersion() const override { return 5; }
-  bool D100IsCompressed(uint32 offset);
+  bool D100IsCompressed(uint32_t offset);
   bool NEFIsUncompressed(const TiffIFD* raw);
   bool NEFIsUncompressedRGB(const TiffIFD* raw);
   void DecodeUncompressed();
@@ -62,7 +62,7 @@ private:
   void DecodeSNefUncompressed();
   void readCoolpixSplitRaw(const ByteStream& input, const iPoint2D& size,
                            const iPoint2D& offset, int inputPitch);
-  void DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h);
+  void DecodeNikonSNef(ByteStream* input, uint32_t w, uint32_t h);
   std::string getMode();
   std::string getExtendedMode(const std::string &mode);
   std::vector<uint16_t> gammaCurve(double pwr, double ts, int mode, int imax);

@@ -110,7 +110,7 @@ bool VC5Decompressor::Wavelet::isBandValid(const int band) const {
 }
 
 bool VC5Decompressor::Wavelet::allBandsValid() const {
-  return mDecodedBandMask == static_cast<uint32>((1 << numBands) - 1);
+  return mDecodedBandMask == static_cast<uint32_t>((1 << numBands) - 1);
 }
 
 Array2DRef<const int16_t>

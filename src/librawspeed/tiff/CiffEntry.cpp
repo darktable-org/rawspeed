@@ -21,7 +21,7 @@
 */
 
 #include "tiff/CiffEntry.h"
-#include "common/Common.h"               // for uint32, uint8_t, uint16_t
+#include "common/Common.h"               // for uint32_t, uint8_t, uint16_t
 #include "common/NORangesSet.h"          // for set
 #include "io/Buffer.h"                   // for Buffer
 #include "io/ByteStream.h"               // for ByteStream
@@ -43,8 +43,8 @@ CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas,
   uint16_t datalocation = (p & 0xc000);
   type = static_cast<CiffDataType>(p & 0x3800);
 
-  uint32 data_offset;
-  uint32 bytesize;
+  uint32_t data_offset;
+  uint32_t bytesize;
 
   switch (datalocation) {
   case 0x0000:
@@ -70,7 +70,7 @@ CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas,
   count = bytesize >> getElementShift();
 }
 
-uint32 __attribute__((pure)) CiffEntry::getElementShift() const {
+uint32_t __attribute__((pure)) CiffEntry::getElementShift() const {
   switch (type) {
     case CIFF_SHORT:
       return 1;
@@ -85,7 +85,7 @@ uint32 __attribute__((pure)) CiffEntry::getElementShift() const {
   }
 }
 
-uint32 __attribute__((pure)) CiffEntry::getElementSize() const {
+uint32_t __attribute__((pure)) CiffEntry::getElementSize() const {
   switch (type) {
     case CIFF_BYTE:
     case CIFF_ASCII:
@@ -106,7 +106,7 @@ bool __attribute__((pure)) CiffEntry::isInt() const {
   return (type == CIFF_LONG || type == CIFF_SHORT || type ==  CIFF_BYTE);
 }
 
-uint32 CiffEntry::getU32(uint32 num) const {
+uint32_t CiffEntry::getU32(uint32_t num) const {
   if (!isInt()) {
     ThrowCPE(
         "Wrong type 0x%x encountered. Expected Long, Short or Byte at 0x%x",
@@ -118,17 +118,17 @@ uint32 CiffEntry::getU32(uint32 num) const {
   if (type == CIFF_SHORT)
     return getU16(num);
 
-  return data.peek<uint32>(num);
+  return data.peek<uint32_t>(num);
 }
 
-uint16_t CiffEntry::getU16(uint32 num) const {
+uint16_t CiffEntry::getU16(uint32_t num) const {
   if (type != CIFF_SHORT && type != CIFF_BYTE)
     ThrowCPE("Wrong type 0x%x encountered. Expected Short at 0x%x", type, tag);
 
   return data.peek<uint16_t>(num);
 }
 
-uint8_t CiffEntry::getByte(uint32 num) const {
+uint8_t CiffEntry::getByte(uint32_t num) const {
   if (type != CIFF_BYTE)
     ThrowCPE("Wrong type 0x%x encountered. Expected Byte at 0x%x", type, tag);
 
@@ -153,8 +153,8 @@ vector<string> CiffEntry::getStrings() const {
 
   vector<string> strs;
 
-  uint32 start = 0;
-  for (uint32 i = 0; i < count; i++) {
+  uint32_t start = 0;
+  for (uint32_t i = 0; i < count; i++) {
     if (str[i] != 0)
       continue;
 

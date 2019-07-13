@@ -19,7 +19,7 @@
 */
 
 #include "fuzz/Common.h"
-#include "common/Common.h"             // for uint32
+#include "common/Common.h"             // for uint32_t
 #include "common/Point.h"              // for iPoint2D
 #include "common/RawImage.h"           // for RawImage, RawImageData, RawIm...
 #include "common/RawspeedException.h"  // for ThrowRSE
@@ -32,11 +32,11 @@
 rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs) {
   assert(bs);
 
-  const rawspeed::uint32 width = bs->getU32();
-  const rawspeed::uint32 height = bs->getU32();
-  const rawspeed::uint32 type = bs->getU32();
-  const rawspeed::uint32 cpp = bs->getU32();
-  const rawspeed::uint32 isCFA = bs->getU32();
+  const uint32_t width = bs->getU32();
+  const uint32_t height = bs->getU32();
+  const uint32_t type = bs->getU32();
+  const uint32_t cpp = bs->getU32();
+  const uint32_t isCFA = bs->getU32();
 
   if (type != rawspeed::TYPE_USHORT16 && type != rawspeed::TYPE_FLOAT32)
     ThrowRSE("Unknown image type: %u", type);
@@ -54,8 +54,8 @@ rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs) {
 rawspeed::ColorFilterArray CreateCFA(rawspeed::ByteStream* bs) {
   assert(bs);
 
-  const rawspeed::uint32 cfaWidth = bs->getU32();
-  const rawspeed::uint32 cfaHeight = bs->getU32();
+  const uint32_t cfaWidth = bs->getU32();
+  const uint32_t cfaHeight = bs->getU32();
 
   rawspeed::ColorFilterArray cfa;
 
@@ -68,8 +68,8 @@ rawspeed::ColorFilterArray CreateCFA(rawspeed::ByteStream* bs) {
 
   for (auto x = 0U; x < cfaWidth; x++) {
     for (auto y = 0U; y < cfaHeight; y++) {
-      const rawspeed::uint32 color = bs->getU32();
-      if (color >= static_cast<rawspeed::uint32>(rawspeed::CFA_END))
+      const uint32_t color = bs->getU32();
+      if (color >= static_cast<uint32_t>(rawspeed::CFA_END))
         ThrowRSE("Unknown color: %u", color);
 
       cfa.setColorAt(rawspeed::iPoint2D(x, y), rawspeed::CFAColor(color));

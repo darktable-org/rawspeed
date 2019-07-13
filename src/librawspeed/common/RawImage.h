@@ -22,7 +22,7 @@
 
 #include "rawspeedconfig.h"
 #include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
-#include "common/Common.h"             // for uint32, uint8_t, uint16_t, wri...
+#include "common/Common.h" // for uint32_t, uint8_t, uint16_t, wri...
 #include "common/ErrorLog.h"           // for ErrorLog
 #include "common/Mutex.h"              // for Mutex
 #include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
@@ -75,7 +75,7 @@ public:
 
   // How many pixels far down the left edge and far up the right edge the image
   // corners are when the image is rotated 45 degrees in Fuji rotated sensors.
-  uint32 fujiRotationPos;
+  uint32_t fujiRotationPos;
 
   iPoint2D subsampling;
   std::string make;
@@ -95,9 +95,9 @@ class RawImageData : public ErrorLog {
   friend class RawImageWorker;
 public:
   virtual ~RawImageData();
-  uint32 getCpp() const { return cpp; }
-  uint32 getBpp() const { return bpp; }
-  void setCpp(uint32 val);
+  uint32_t getCpp() const { return cpp; }
+  uint32_t getBpp() const { return bpp; }
+  void setCpp(uint32_t val);
   void createData();
   void poisonPadding();
   void unpoisonPadding();
@@ -108,16 +108,18 @@ public:
                 const iPoint2D& size, const iPoint2D& destPos);
   rawspeed::RawImageType getDataType() const { return dataType; }
   uint8_t* getData() const;
-  uint8_t* getData(uint32 x,
-                   uint32 y); // Not super fast, but safe. Don't use per pixel.
-  uint8_t* getDataUncropped(uint32 x, uint32 y);
+  uint8_t*
+  getData(uint32_t x,
+          uint32_t y); // Not super fast, but safe. Don't use per pixel.
+  uint8_t* getDataUncropped(uint32_t x, uint32_t y);
   void subFrame(iRectangle2D cropped);
   void clearArea(iRectangle2D area, uint8_t value = 0);
   iPoint2D __attribute__((pure)) getUncroppedDim() const;
   iPoint2D __attribute__((pure)) getCropOffset() const;
   virtual void scaleBlackWhite() = 0;
   virtual void calculateBlackAreas() = 0;
-  virtual void setWithLookUp(uint16_t value, uint8_t* dst, uint32* random) = 0;
+  virtual void setWithLookUp(uint16_t value, uint8_t* dst,
+                             uint32_t* random) = 0;
   void sixteenBitLookup();
   void transferBadPixelsToMap() REQUIRES(!mBadPixelMutex);
   void fixBadPixels() REQUIRES(!mBadPixelMutex);
@@ -128,11 +130,11 @@ public:
   bool isAllocated() {return !!data;}
   void createBadPixelMap();
   iPoint2D dim;
-  uint32 pitch = 0;
+  uint32_t pitch = 0;
 
   // padding is the size of the area after last pixel of line n
   // and before the first pixel of line n+1
-  uint32 padding = 0;
+  uint32_t padding = 0;
 
   bool isCFA{true};
   ColorFilterArray cfa;
@@ -144,9 +146,9 @@ public:
   /* Vector containing the positions of bad pixels */
   /* Format is x | (y << 16), so maximum pixel position is 65535 */
   // Positions of zeroes that must be interpolated
-  std::vector<uint32> mBadPixelPositions GUARDED_BY(mBadPixelMutex);
+  std::vector<uint32_t> mBadPixelPositions GUARDED_BY(mBadPixelMutex);
   uint8_t* mBadPixelMap = nullptr;
-  uint32 mBadPixelMapPitch = 0;
+  uint32_t mBadPixelMapPitch = 0;
   bool mDitherScale =
       true; // Should upscaling be done with dither to minimize banding?
   ImageMetaData metadata;
@@ -155,20 +157,20 @@ public:
                         // than 1 thread is accessing vector
 
 private:
-  uint32 dataRefCount GUARDED_BY(mymutex) = 0;
+  uint32_t dataRefCount GUARDED_BY(mymutex) = 0;
 
 protected:
   RawImageType dataType;
   RawImageData();
-  RawImageData(const iPoint2D &dim, uint32 bpp, uint32 cpp = 1);
+  RawImageData(const iPoint2D& dim, uint32_t bpp, uint32_t cpp = 1);
   virtual void scaleValues(int start_y, int end_y) = 0;
   virtual void doLookup(int start_y, int end_y) = 0;
-  virtual void fixBadPixel( uint32 x, uint32 y, int component = 0) = 0;
+  virtual void fixBadPixel(uint32_t x, uint32_t y, int component = 0) = 0;
   void fixBadPixelsThread(int start_y, int end_y);
   void startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped );
   uint8_t* data = nullptr;
-  uint32 cpp = 1; // Components per pixel
-  uint32 bpp = 0; // Bytes per pixel.
+  uint32_t cpp = 1; // Components per pixel
+  uint32_t bpp = 0; // Bytes per pixel.
   friend class RawImage;
   iPoint2D mOffset;
   iPoint2D uncropped_dim;
@@ -180,7 +182,7 @@ class RawImageDataU16 final : public RawImageData {
 public:
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
-  void setWithLookUp(uint16_t value, uint8_t* dst, uint32* random) override;
+  void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
 
 protected:
   void scaleValues_plain(int start_y, int end_y);
@@ -188,11 +190,11 @@ protected:
   void scaleValues_SSE2(int start_y, int end_y);
 #endif
   void scaleValues(int start_y, int end_y) override;
-  void fixBadPixel(uint32 x, uint32 y, int component = 0) override;
+  void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
   void doLookup(int start_y, int end_y) override;
 
   RawImageDataU16();
-  explicit RawImageDataU16(const iPoint2D& dim_, uint32 cpp_ = 1);
+  explicit RawImageDataU16(const iPoint2D& dim_, uint32_t cpp_ = 1);
   friend class RawImage;
 };
 
@@ -200,23 +202,23 @@ class RawImageDataFloat final : public RawImageData {
 public:
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
-  void setWithLookUp(uint16_t value, uint8_t* dst, uint32* random) override;
+  void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
 
 protected:
   void scaleValues(int start_y, int end_y) override;
-  void fixBadPixel(uint32 x, uint32 y, int component = 0) override;
+  void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
   [[noreturn]] void doLookup(int start_y, int end_y) override;
   RawImageDataFloat();
-  explicit RawImageDataFloat(const iPoint2D& dim_, uint32 cpp_ = 1);
+  explicit RawImageDataFloat(const iPoint2D& dim_, uint32_t cpp_ = 1);
   friend class RawImage;
 };
 
  class RawImage {
  public:
    static RawImage create(RawImageType type = TYPE_USHORT16);
-   static RawImage create(const iPoint2D &dim,
+   static RawImage create(const iPoint2D& dim,
                           RawImageType type = TYPE_USHORT16,
-                          uint32 componentsPerPixel = 1);
+                          uint32_t componentsPerPixel = 1);
    RawImageData* operator->() const { return p_; }
    RawImageData& operator*() const { return *p_; }
    explicit RawImage(RawImageData* p); // p must not be NULL
@@ -244,7 +246,8 @@ inline RawImage RawImage::create(RawImageType type)  {
   }
 }
 
-inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type, uint32 componentsPerPixel) {
+inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type,
+                                 uint32_t componentsPerPixel) {
   switch (type) {
   case TYPE_USHORT16:
     return RawImage(new RawImageDataU16(dim, componentsPerPixel));
@@ -261,20 +264,20 @@ inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type, uint32 
 // a value that will be used to store a random counter that can be reused between calls.
 // this needs to be inline to speed up tight decompressor loops
 inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
-                                           uint32* random) {
+                                           uint32_t* random) {
   auto* dest = reinterpret_cast<uint16_t*>(dst);
   if (table == nullptr) {
     *dest = value;
     return;
   }
   if (table->dither) {
-    auto* t = reinterpret_cast<const uint32*>(table->tables.data());
-    uint32 lookup = t[value];
-    uint32 base = lookup & 0xffff;
-    uint32 delta = lookup >> 16;
-    uint32 r = *random;
+    auto* t = reinterpret_cast<const uint32_t*>(table->tables.data());
+    uint32_t lookup = t[value];
+    uint32_t base = lookup & 0xffff;
+    uint32_t delta = lookup >> 16;
+    uint32_t r = *random;
 
-    uint32 pix = base + ((delta * (r&2047) + 1024) >> 12);
+    uint32_t pix = base + ((delta * (r & 2047) + 1024) >> 12);
     *random = 15700 *(r & 65535) + (r >> 16);
     *dest = pix;
     return;

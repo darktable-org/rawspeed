@@ -20,7 +20,7 @@
 */
 
 #include "decoders/KdcDecoder.h"
-#include "common/Common.h"                          // for uint32, uint16_t
+#include "common/Common.h"                          // for uint32_t, uint16_t
 #include "common/NORangesSet.h"                     // for NORangesSet
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
@@ -55,7 +55,7 @@ Buffer KdcDecoder::getInputBuffer() {
 
   assert(offset != nullptr);
   uint64_t off = uint64_t(offset->getU32(4)) + uint64_t(offset->getU32(12));
-  if (off > std::numeric_limits<uint32>::max())
+  if (off > std::numeric_limits<uint32_t>::max())
     ThrowRDE("Offset is too large.");
 
   // Offset hardcoding gotten from dcraw
@@ -95,8 +95,8 @@ RawImage KdcDecoder::decodeRawInternal() {
   TiffRootIFD kodakifd(nullptr, &ifds, ifdoffset->getRootIfdData(),
                        ifdoffset->getU32());
 
-  uint32 width = 0;
-  uint32 height = 0;
+  uint32_t width = 0;
+  uint32_t height = 0;
   TiffEntry* ew = kodakifd.getEntryRecursive(KODAK_KDC_SENSOR_WIDTH);
   TiffEntry* eh = kodakifd.getEntryRecursive(KODAK_KDC_SENSOR_HEIGHT);
   if (ew && eh) {

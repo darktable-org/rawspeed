@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h"                             // for int32_t, uint32
+#include "common/Common.h"                             // for int32_t, uint32_t
 #include "decompressors/AbstractSamsungDecompressor.h" // for AbstractSamsu...
 #include "io/BitPumpMSB32.h"                           // for BitPumpMSB32
 #include "io/ByteStream.h"                             // for ByteStream
@@ -36,7 +36,7 @@ class SamsungV0Decompressor final : public AbstractSamsungDecompressor {
 
   void computeStripes(ByteStream bso, ByteStream bsr);
 
-  void decompressStrip(uint32 y, const ByteStream& bs) const;
+  void decompressStrip(uint32_t y, const ByteStream& bs) const;
 
   static int32_t calcAdj(BitPumpMSB32* bits, int b);
 
