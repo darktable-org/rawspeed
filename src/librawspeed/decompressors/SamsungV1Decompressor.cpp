@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/SamsungV1Decompressor.h"
-#include "common/Common.h"                // for uint32, ushort16, int32
+#include "common/Common.h"                // for uint32, ushort16, int32_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -58,7 +58,7 @@ SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 }
 
-inline int32
+inline int32_t
 SamsungV1Decompressor::samsungDiff(BitPumpMSB* pump,
                                    const std::vector<encTableItem>& tbl) {
   pump->fill(23); // That is the maximal number of bits we will need here.
@@ -67,10 +67,10 @@ SamsungV1Decompressor::samsungDiff(BitPumpMSB* pump,
   // Skip the bits that were used to encode this case
   pump->skipBitsNoFill(tbl[c].encLen);
   // Read the number of bits the table tells me
-  int32 len = tbl[c].diffLen;
+  int32_t len = tbl[c].diffLen;
   if (len == 0)
     return 0;
-  int32 diff = pump->getBitsNoFill(len);
+  int32_t diff = pump->getBitsNoFill(len);
   // If the first bit is 0 we need to turn this into a negative number
   diff = HuffmanTable::extend(diff, len);
   return diff;
@@ -113,7 +113,7 @@ void SamsungV1Decompressor::decompress() {
   // 13 cases)
   uint32 n = 0;
   for (auto i : tab) {
-    for (int32 c = 0; c < (1024 >> i[0]); c++) {
+    for (int32_t c = 0; c < (1024 >> i[0]); c++) {
       tbl[n].encLen = i[0];
       tbl[n].diffLen = i[1];
       n++;
@@ -124,7 +124,7 @@ void SamsungV1Decompressor::decompress() {
   for (uint32 y = 0; y < height; y++) {
     auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
     for (uint32 x = 0; x < width; x++) {
-      int32 diff = samsungDiff(&pump, tbl);
+      int32_t diff = samsungDiff(&pump, tbl);
       if (x < 2)
         hpred[x] = vpred[y & 1][x] += diff;
       else

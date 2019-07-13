@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/SamsungV0Decompressor.h"
-#include "common/Common.h"                // for uint32, ushort16, int32
+#include "common/Common.h"                // for uint32, ushort16, int32_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -103,10 +103,10 @@ void SamsungV0Decompressor::decompress() const {
   }
 }
 
-int32 SamsungV0Decompressor::calcAdj(BitPumpMSB32* bits, int b) {
-  int32 adj = 0;
+int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32* bits, int b) {
+  int32_t adj = 0;
   if (b)
-    adj = (static_cast<int32>(bits->getBits(b)) << (32 - b) >> (32 - b));
+    adj = (static_cast<int32_t>(bits->getBits(b)) << (32 - b) >> (32 - b));
   return adj;
 }
 
@@ -174,7 +174,7 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
       // First we decode even pixels
       for (int c = 0; c < 16; c += 2) {
         int b = len[c >> 3];
-        int32 adj = calcAdj(&bits, b);
+        int32_t adj = calcAdj(&bits, b);
 
         img[c] = adj + img_up[c];
       }
@@ -184,7 +184,7 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
       // is beyond me, it will hurt compression a deal.
       for (int c = 1; c < 16; c += 2) {
         int b = len[2 | (c >> 3)];
-        int32 adj = calcAdj(&bits, b);
+        int32_t adj = calcAdj(&bits, b);
 
         img[c] = adj + img_up2[c];
       }
@@ -194,7 +194,7 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
       int pred_left = x != 0 ? img[-2] : 128;
       for (int c = 0; c < 16; c += 2) {
         int b = len[c >> 3];
-        int32 adj = calcAdj(&bits, b);
+        int32_t adj = calcAdj(&bits, b);
 
         if (img + c < past_last)
           img[c] = adj + pred_left;
@@ -204,7 +204,7 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
       pred_left = x != 0 ? img[-1] : 128;
       for (int c = 1; c < 16; c += 2) {
         int b = len[2 | (c >> 3)];
-        int32 adj = calcAdj(&bits, b);
+        int32_t adj = calcAdj(&bits, b);
 
         if (img + c < past_last)
           img[c] = adj + pred_left;

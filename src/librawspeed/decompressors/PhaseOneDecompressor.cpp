@@ -22,7 +22,7 @@
 
 #include "rawspeedconfig.h"
 #include "decompressors/PhaseOneDecompressor.h"
-#include "common/Common.h"                // for int32, uint32, ushort16
+#include "common/Common.h"                // for int32_t, uint32, ushort16
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -105,7 +105,7 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
 
   BitPumpMSB32 pump(strip.bs);
 
-  std::array<int32, 2> pred;
+  std::array<int32_t, 2> pred;
   pred.fill(0);
   std::array<int, 2> len;
   auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, strip.n));

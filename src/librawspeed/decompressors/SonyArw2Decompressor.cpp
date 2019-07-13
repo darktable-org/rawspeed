@@ -51,7 +51,7 @@ SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
 void SonyArw2Decompressor::decompressRow(int row) const {
   uchar8* data = mRaw->getData();
   uint32 pitch = mRaw->pitch;
-  int32 w = mRaw->dim.x;
+  int32_t w = mRaw->dim.x;
 
   assert(mRaw->dim.x > 0);
   assert(mRaw->dim.x % 32 == 0);
@@ -67,7 +67,7 @@ void SonyArw2Decompressor::decompressRow(int row) const {
   uint32 random = bits.peekBits(24);
 
   // Each loop iteration processes 16 pixels, consuming 128 bits of input.
-  for (int32 x = 0; x < w;) {
+  for (int32_t x = 0; x < w;) {
     // 30 bits.
     int _max = bits.getBits(11);
     int _min = bits.getBits(11);

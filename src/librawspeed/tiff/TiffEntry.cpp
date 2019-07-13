@@ -166,14 +166,14 @@ uint32 TiffEntry::getU32(uint32 index) const {
   return data.peek<uint32>(index);
 }
 
-int32 TiffEntry::getI32(uint32 index) const {
+int32_t TiffEntry::getI32(uint32 index) const {
   if (type == TIFF_SSHORT)
     return getI16(index);
   if (!(type == TIFF_SLONG || type == TIFF_UNDEFINED))
     ThrowTPE("Wrong type %u encountered. Expected SLong or Undefined on 0x%x",
              type, tag);
 
-  return data.peek<int32>(index);
+  return data.peek<int32_t>(index);
 }
 
 float TiffEntry::getFloat(uint32 index) const {

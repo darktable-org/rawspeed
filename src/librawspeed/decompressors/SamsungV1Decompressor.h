@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h"                             // for int32
+#include "common/Common.h"                             // for int32_t
 #include "decompressors/AbstractSamsungDecompressor.h" // for AbstractSamsu...
 #include "io/BitPumpMSB.h"                             // for BitPumpMSB
 #include <vector>                                      // for vector
@@ -34,8 +34,8 @@ class RawImage;
 class SamsungV1Decompressor final : public AbstractSamsungDecompressor {
   struct encTableItem;
 
-  static inline int32 samsungDiff(BitPumpMSB* pump,
-                                  const std::vector<encTableItem>& tbl);
+  static inline int32_t samsungDiff(BitPumpMSB* pump,
+                                    const std::vector<encTableItem>& tbl);
 
   const ByteStream* bs;
   int bits;

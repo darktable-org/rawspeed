@@ -38,7 +38,6 @@ namespace rawspeed {
 
 using uchar8 = unsigned char;
 using uint32 = unsigned int;
-using int32 = signed int;
 using ushort16 = unsigned short;
 
 enum DEBUG_PRIO {

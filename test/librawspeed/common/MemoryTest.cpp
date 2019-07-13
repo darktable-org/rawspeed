@@ -19,7 +19,7 @@
 */
 
 #include "common/Memory.h" // for alignedMallocArray, alignedFree, alignedM...
-#include "common/Common.h" // for uchar8, int64_t, int32, int16_t, uint32
+#include "common/Common.h" // for uchar8, int64_t, int32_t, int16_t, uint32
 #include <cstddef>         // for size_t
 #include <cstdint>         // for SIZE_MAX, uintptr_t
 #include <cstdlib>         // for exit
@@ -30,7 +30,6 @@ using rawspeed::alignedFree;
 using rawspeed::alignedFreeConstPtr;
 using rawspeed::alignedMalloc;
 using rawspeed::alignedMallocArray;
-using rawspeed::int32;
 using rawspeed::uchar8;
 using rawspeed::uint32;
 using rawspeed::ushort16;
@@ -76,8 +75,8 @@ template <typename T>
 class AlignedMallocDeathTest : public AlignedMallocTest<T> {};
 
 using Classes =
-    testing::Types<int, unsigned int, int8_t, uchar8, int16_t, ushort16, int32,
-                   uint32, int64_t, uint64_t, float, double>;
+    testing::Types<int, unsigned int, int8_t, uchar8, int16_t, ushort16,
+                   int32_t, uint32, int64_t, uint64_t, float, double>;
 
 TYPED_TEST_CASE(AlignedMallocTest, Classes);
 

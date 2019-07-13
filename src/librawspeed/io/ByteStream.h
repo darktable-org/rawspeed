@@ -22,7 +22,7 @@
 #pragma once
 
 #include "AddressSanitizer.h" // for ASan::RegionIsPoisoned
-#include "common/Common.h"    // for uchar8, int32, uint32, ushort16, roundUp
+#include "common/Common.h"    // for uchar8, int32_t, uint32, ushort16, roundUp
 #include "common/Memory.h"    // for alignedMalloc
 #include "io/Buffer.h"        // for Buffer::size_type, Buffer, DataBuffer
 #include "io/Endianness.h"    // for Endianness, Endianness::little
@@ -161,7 +161,7 @@ public:
   }
 
   inline ushort16 getU16() { return get<ushort16>(); }
-  inline int32 getI32() { return get<int32>(); }
+  inline int32_t getI32() { return get<int32_t>(); }
   inline uint32 getU32() { return get<uint32>(); }
   inline float getFloat() { return get<float>(); }
 

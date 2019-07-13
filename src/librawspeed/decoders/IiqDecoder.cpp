@@ -406,8 +406,8 @@ void IiqDecoder::correctBadColumn(const ushort16 col) {
        */
       int max = 0;
       std::array<ushort16, 4> val;
-      std::array<int32, 4> dev;
-      int32 sum = 0;
+      std::array<int32_t, 4> dev;
+      int32_t sum = 0;
       sum += val[0] = img(col - 1, row - 1);
       sum += val[1] = img(col - 1, row + 1);
       sum += val[2] = img(col + 1, row - 1);

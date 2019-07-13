@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/SamsungV2Decompressor.h"
-#include "common/Common.h"                // for uint32, ushort16, int32
+#include "common/Common.h"                // for uint32, ushort16, int32_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -71,10 +71,10 @@ constexpr bool operator&(SamsungV2Decompressor::OptFlags lhs,
                  rhs));
 }
 
-inline int32 SamsungV2Decompressor::getDiff(BitPumpMSB32* pump, uint32 len) {
+inline int32_t SamsungV2Decompressor::getDiff(BitPumpMSB32* pump, uint32 len) {
   if (len == 0)
     return 0;
-  int32 diff = pump->getBits(len);
+  int32_t diff = pump->getBits(len);
   // If the first bit is 1 we need to turn this into a negative number
   if (diff >> (len - 1))
     diff -= (1 << len);
@@ -210,7 +210,7 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
   // Initialize the motion and diff modes at the start of the line
   uint32 motion = 7;
   // By default we are not scaling values at all
-  int32 scale = 0;
+  int32_t scale = 0;
 
   std::array<std::array<int, 2>, 3> diffBitsMode = {{}};
   for (auto& i : diffBitsMode)
@@ -220,7 +220,7 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
   assert(width % 16 == 0);
   for (uint32 col = 0; col < width; col += 16) {
     if (!(optflags & OptFlags::QP) && !(col & 63)) {
-      static constexpr std::array<int32, 3> scalevals = {{0, -2, 2}};
+      static constexpr std::array<int32_t, 3> scalevals = {{0, -2, 2}};
       uint32 i = pump.getBits(2);
       scale = i < 3 ? scale + scalevals[i] : pump.getBits(12);
     }
@@ -246,13 +246,13 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
         ThrowRDE(
             "Got a previous line lookup on first two lines. File corrupted?");
 
-      static constexpr std::array<int32, 7> motionOffset = {-4, -2, -2, 0,
-                                                            0,  2,  4};
-      static constexpr std::array<int32, 7> motionDoAverage = {0, 0, 1, 0,
-                                                               1, 0, 0};
+      static constexpr std::array<int32_t, 7> motionOffset = {-4, -2, -2, 0,
+                                                              0,  2,  4};
+      static constexpr std::array<int32_t, 7> motionDoAverage = {0, 0, 1, 0,
+                                                                 1, 0, 0};
 
-      int32 slideOffset = motionOffset[motion];
-      int32 doAverage = motionDoAverage[motion];
+      int32_t slideOffset = motionOffset[motion];
+      int32_t doAverage = motionDoAverage[motion];
 
       for (uint32 i = 0; i < 16; i++) {
         ushort16* line;
@@ -326,7 +326,7 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
     // Actually read the differences and write them to the pixels
     for (uint32 i = 0; i < 16; i++) {
       uint32 len = diffBits[i >> 2];
-      int32 diff = getDiff(&pump, len);
+      int32_t diff = getDiff(&pump, len);
 
       ushort16* value = nullptr;
       // Apply the diff to pixels 0 2 4 6 8 10 12 14 1 3 5 7 9 11 13 15

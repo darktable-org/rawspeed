@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32, ushort16, int32
+#include "common/Common.h"                      // for uint32, ushort16, int32_t
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
 #include "io/BitStream.h"                       // for BitStreamTraits
@@ -85,7 +85,7 @@ class HuffmanTableLUT final : public AbstractHuffmanTable {
   static constexpr unsigned FlagMask = 0x100;
   static constexpr unsigned LenMask = 0xff;
   static constexpr unsigned LookupDepth = 11;
-  std::vector<int32> decodeLookup;
+  std::vector<int32_t> decodeLookup;
 #else
   // lookup table containing 2 fields: payload:4|len:4
   // the payload is the length of the diff, len is the length of the code
@@ -156,7 +156,7 @@ public:
 
           if (diff_l) {
             uint32 diff = (c >> (LookupDepth - code_l - diff_l)) & ((1 << diff_l) - 1);
-            decodeLookup[c] |= static_cast<int32>(
+            decodeLookup[c] |= static_cast<int32_t>(
                 static_cast<uint32>(extend(diff, diff_l)) << PayloadShift);
           }
         }
