@@ -37,6 +37,7 @@
 #include <algorithm>                            // for adjacent_find, gener...
 #include <array>                                // for array, array<>::cons...
 #include <cassert>                              // for assert
+#include <cinttypes>                            // for PRIu64
 #include <cmath>                                // for lround()
 #include <cstdlib>                              // for int abs(int)
 #include <functional>                           // for greater_equal
@@ -304,7 +305,7 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
         const uint64_t y_coord =
             (uint64_t(data.getU32()) * shared_x_coords[i]) / 10000ULL;
         if (y_coord > 65535)
-          ThrowRDE("The Y coordinate %lu is too large", y_coord);
+          ThrowRDE("The Y coordinate %" PRIu64 " is too large", y_coord);
         quadrant.emplace_back(shared_x_coords[i], y_coord);
       }
 
