@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/SonyArw1Decompressor.h"
-#include "common/Common.h"                // for uint32, uchar8, ushort16
+#include "common/Common.h"                // for uint32_t, uint8_t, uint16_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -36,14 +36,14 @@ SonyArw1Decompressor::SonyArw1Decompressor(const RawImage& img) : mRaw(img) {
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
 
-  const uint32 w = mRaw->dim.x;
-  const uint32 h = mRaw->dim.y;
+  const uint32_t w = mRaw->dim.x;
+  const uint32_t h = mRaw->dim.y;
 
   if (w == 0 || h == 0 || h % 2 != 0 || w > 4600 || h > 3072)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", w, h);
 }
 
-inline int SonyArw1Decompressor::getDiff(BitPumpMSB* bs, uint32 len) {
+inline int SonyArw1Decompressor::getDiff(BitPumpMSB* bs, uint32_t len) {
   if (len == 0)
     return 0;
   int diff = bs->getBitsNoFill(len);
@@ -51,26 +51,26 @@ inline int SonyArw1Decompressor::getDiff(BitPumpMSB* bs, uint32 len) {
 }
 
 void SonyArw1Decompressor::decompress(const ByteStream& input) const {
-  const uint32 w = mRaw->dim.x;
-  const uint32 h = mRaw->dim.y;
+  const uint32_t w = mRaw->dim.x;
+  const uint32_t h = mRaw->dim.y;
 
   assert(w > 0);
   assert(h > 0);
   assert(h % 2 == 0);
 
   BitPumpMSB bits(input);
-  uchar8* data = mRaw->getData();
-  auto* dest = reinterpret_cast<ushort16*>(&data[0]);
-  uint32 pitch = mRaw->pitch / sizeof(ushort16);
+  uint8_t* data = mRaw->getData();
+  auto* dest = reinterpret_cast<uint16_t*>(&data[0]);
+  uint32_t pitch = mRaw->pitch / sizeof(uint16_t);
   int sum = 0;
-  for (int64 x = w - 1; x >= 0; x--) {
-    for (uint32 y = 0; y < h + 1; y += 2) {
+  for (int64_t x = w - 1; x >= 0; x--) {
+    for (uint32_t y = 0; y < h + 1; y += 2) {
       bits.fill(32);
 
       if (y == h)
         y = 1;
 
-      uint32 len = 4 - bits.getBitsNoFill(2);
+      uint32_t len = 4 - bits.getBitsNoFill(2);
 
       if (len == 3 && bits.getBitsNoFill(1))
         len = 0;

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"       // for uint32
+#include "common/Common.h"       // for uint32_t
 #include "common/RawImage.h"     // for RawImage
 #include "decoders/RawDecoder.h" // for RawDecoder
 #include "io/Buffer.h"           // for Buffer
@@ -35,11 +35,11 @@ class CameraMetaData;
 class MrwDecoder final : public RawDecoder {
   TiffRootIFDOwner rootIFD;
 
-  uint32 raw_width = 0;
-  uint32 raw_height = 0;
+  uint32_t raw_width = 0;
+  uint32_t raw_height = 0;
   Buffer imageData;
-  uint32 bpp = 0;
-  uint32 packed = 0;
+  uint32_t bpp = 0;
+  uint32_t packed = 0;
   std::array<float, 4> wb_coeffs = {{NAN, NAN, NAN, NAN}};
 
 public:

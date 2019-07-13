@@ -44,9 +44,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     rawspeed::ByteStream* metaData = nullptr;
     rawspeed::ByteStream metaDataStream;
 
-    const bool haveMetadata = bs.get<rawspeed::uint32>();
+    const bool haveMetadata = bs.get<uint32_t>();
     if (haveMetadata) {
-      const auto medataLength = bs.get<rawspeed::uint32>();
+      const auto medataLength = bs.get<uint32_t>();
       metaDataStream = bs.getStream(medataLength);
       metaData = &metaDataStream;
     }

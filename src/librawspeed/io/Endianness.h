@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32, ushort16, uint64, int32, short16
+#include "common/Common.h" // for uint32_t, uint16_t, uint64_t, int32_t, int16_t
 #include <cassert>         // for assert
 #include <cstring>         // for memcpy
 // IWYU pragma: no_include "io/EndiannessTest.h"
@@ -31,8 +31,8 @@ namespace rawspeed {
 enum class Endianness { little = 0xDEAD, big = 0xBEEF, unknown = 0x0BAD };
 
 inline Endianness getHostEndiannessRuntime() {
-  ushort16 testvar = 0xfeff;
-  uint32 firstbyte = (reinterpret_cast<uchar8*>(&testvar))[0];
+  uint16_t testvar = 0xfeff;
+  uint32_t firstbyte = (reinterpret_cast<uint8_t*>(&testvar))[0];
   if (firstbyte == 0xff)
     return Endianness::little;
   if (firstbyte == 0xfe)
@@ -67,33 +67,33 @@ inline Endianness getHostEndianness() {
 #define BSWAP64(A) __builtin_bswap64(A)
 #endif
 
-inline short16 getByteSwapped(short16 v) {
-  return static_cast<short16>(BSWAP16(static_cast<ushort16>(v)));
+inline int16_t getByteSwapped(int16_t v) {
+  return static_cast<int16_t>(BSWAP16(static_cast<uint16_t>(v)));
 }
-inline ushort16 getByteSwapped(ushort16 v) {
-  return static_cast<ushort16>(BSWAP16(v));
+inline uint16_t getByteSwapped(uint16_t v) {
+  return static_cast<uint16_t>(BSWAP16(v));
 }
-inline int32 getByteSwapped(int32 v) {
-  return static_cast<int32>(BSWAP32(static_cast<uint32>(v)));
+inline int32_t getByteSwapped(int32_t v) {
+  return static_cast<int32_t>(BSWAP32(static_cast<uint32_t>(v)));
 }
-inline uint32 getByteSwapped(uint32 v) {
-  return static_cast<uint32>(BSWAP32(v));
+inline uint32_t getByteSwapped(uint32_t v) {
+  return static_cast<uint32_t>(BSWAP32(v));
 }
-inline uint64 getByteSwapped(uint64 v) {
-  return BSWAP64(static_cast<uint64>(v));
+inline uint64_t getByteSwapped(uint64_t v) {
+  return BSWAP64(static_cast<uint64_t>(v));
 }
 
 // the float/double versions use two memcpy which guarantee strict aliasing
 // and are compiled into the same assembly as the popular union trick.
 inline float getByteSwapped(float f) {
-  uint32 i;
+  uint32_t i;
   memcpy(&i, &f, sizeof(i));
   i = getByteSwapped(i);
   memcpy(&f, &i, sizeof(i));
   return f;
 }
 inline double getByteSwapped(double d) {
-  uint64 i;
+  uint64_t i;
   memcpy(&i, &d, sizeof(i));
   i = getByteSwapped(i);
   memcpy(&d, &i, sizeof(i));
@@ -124,10 +124,10 @@ template <typename T> inline T getLE(const void* data) {
   return getByteSwapped<T>(data, getHostEndianness() == Endianness::big);
 }
 
-inline ushort16 getU16BE(const void* data) { return getBE<ushort16>(data); }
-inline ushort16 getU16LE(const void* data) { return getLE<ushort16>(data); }
-inline uint32 getU32BE(const void* data) { return getBE<uint32>(data); }
-inline uint32 getU32LE(const void* data) { return getLE<uint32>(data); }
+inline uint16_t getU16BE(const void* data) { return getBE<uint16_t>(data); }
+inline uint16_t getU16LE(const void* data) { return getLE<uint16_t>(data); }
+inline uint32_t getU32BE(const void* data) { return getBE<uint32_t>(data); }
+inline uint32_t getU32LE(const void* data) { return getLE<uint32_t>(data); }
 
 #undef BSWAP64
 #undef BSWAP32

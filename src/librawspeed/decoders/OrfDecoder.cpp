@@ -21,7 +21,7 @@
 */
 
 #include "decoders/OrfDecoder.h"
-#include "common/Common.h"                          // for uint32, uchar8
+#include "common/Common.h"                          // for uint32_t, uint8_t
 #include "common/NORangesSet.h"                     // for set
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
@@ -65,11 +65,11 @@ ByteStream OrfDecoder::handleSlices() const {
         counts->count, offsets->count);
   }
 
-  const uint32 off = offsets->getU32(0);
-  uint32 size = counts->getU32(0);
-  auto end = [&off, &size]() -> uint32 { return off + size; };
+  const uint32_t off = offsets->getU32(0);
+  uint32_t size = counts->getU32(0);
+  auto end = [&off, &size]() -> uint32_t { return off + size; };
 
-  for (uint32 i = 0; i < counts->count; i++) {
+  for (uint32_t i = 0; i < counts->count; i++) {
     const auto offset = offsets->getU32(i);
     const auto count = counts->getU32(i);
     if (!mFile->isValid(offset, count))
@@ -87,7 +87,7 @@ ByteStream OrfDecoder::handleSlices() const {
     // Now, everything would be great, but some uncompressed raws
     // (packed_with_control i believe) have "padding" between at least
     // the first two slices, and we need to account for it.
-    const uint32 padding = offset - end();
+    const uint32_t padding = offset - end();
 
     size += padding;
     size += count;
@@ -106,8 +106,8 @@ RawImage OrfDecoder::decodeRawInternal() {
   if (1 != compression)
     ThrowRDE("Unsupported compression");
 
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
 
   if (!width || !height || width % 2 != 0 || width > 10400 || height > 7796)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
@@ -130,8 +130,8 @@ RawImage OrfDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-bool OrfDecoder::decodeUncompressed(const ByteStream& s, uint32 w, uint32 h,
-                                    uint32 size) {
+bool OrfDecoder::decodeUncompressed(const ByteStream& s, uint32_t w, uint32_t h,
+                                    uint32_t size) {
   UncompressedDecompressor u(s, mRaw);
   // FIXME: most of this logic should be in UncompressedDecompressor,
   // one way or another.
@@ -188,7 +188,7 @@ void OrfDecoder::parseCFA() {
 
   mRaw->cfa.setSize(cfaSize);
 
-  auto int2enum = [](uchar8 i) -> CFAColor {
+  auto int2enum = [](uint8_t i) -> CFAColor {
     switch (i) {
     case 0:
       return CFA_RED;
@@ -203,7 +203,7 @@ void OrfDecoder::parseCFA() {
 
   for (int y = 0; y < cfaSize.y; y++) {
     for (int x = 0; x < cfaSize.x; x++) {
-      uchar8 c1 = CFA->getByte(4 + x + y * cfaSize.x);
+      uint8_t c1 = CFA->getByte(4 + x + y * cfaSize.x);
       CFAColor c2 = int2enum(c1);
       mRaw->cfa.setColorAt(iPoint2D(x, y), c2);
     }

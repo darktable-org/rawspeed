@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/AbstractLJpegDecompressor.h"
-#include "common/Common.h"                      // for uint32, uchar8
+#include "common/Common.h"                      // for uint32_t, uint8_t
 #include "common/Point.h"                       // for iPoint2D
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
@@ -132,7 +132,7 @@ void AbstractLJpegDecompressor::parseSOF(ByteStream sofInput, SOFInfo* sof) {
              sof->cps, mRaw->getCpp());
   }
 
-  if (sof->cps > static_cast<uint32>(mRaw->dim.x)) {
+  if (sof->cps > static_cast<uint32_t>(mRaw->dim.x)) {
     ThrowRDE("Component count should be no greater than row length (%u vs %u).",
              sof->cps, mRaw->dim.x);
   }
@@ -140,10 +140,10 @@ void AbstractLJpegDecompressor::parseSOF(ByteStream sofInput, SOFInfo* sof) {
   if (sofInput.getRemainSize() != 3 * sof->cps)
     ThrowRDE("Header size mismatch.");
 
-  for (uint32 i = 0; i < sof->cps; i++) {
+  for (uint32_t i = 0; i < sof->cps; i++) {
     sof->compInfo[i].componentId = sofInput.getByte();
 
-    uint32 subs = sofInput.getByte();
+    uint32_t subs = sofInput.getByte();
     frame.compInfo[i].superV = subs & 0xf;
     frame.compInfo[i].superH = subs >> 4;
 
@@ -153,7 +153,7 @@ void AbstractLJpegDecompressor::parseSOF(ByteStream sofInput, SOFInfo* sof) {
     if (frame.compInfo[i].superH < 1 || frame.compInfo[i].superH > 4)
       ThrowRDE("Horizontal sampling factor is invalid.");
 
-    uint32 Tq = sofInput.getByte();
+    uint32_t Tq = sofInput.getByte();
     if (Tq != 0)
       ThrowRDE("Quantized components not supported.");
   }
@@ -170,19 +170,19 @@ void AbstractLJpegDecompressor::parseSOS(ByteStream sos) {
   if (sos.getRemainSize() != 1 + 2 * frame.cps + 3)
     ThrowRDE("Invalid SOS header length.");
 
-  uint32 soscps = sos.getByte();
+  uint32_t soscps = sos.getByte();
   if (frame.cps != soscps)
     ThrowRDE("Component number mismatch.");
 
-  for (uint32 i = 0; i < frame.cps; i++) {
-    uint32 cs = sos.getByte();
-    uint32 td = sos.getByte() >> 4;
+  for (uint32_t i = 0; i < frame.cps; i++) {
+    uint32_t cs = sos.getByte();
+    uint32_t td = sos.getByte() >> 4;
 
     if (td >= huff.size() || !huff[td])
       ThrowRDE("Invalid Huffman table selection.");
 
     int ciIndex = -1;
-    for (uint32 j = 0; j < frame.cps; ++j) {
+    for (uint32_t j = 0; j < frame.cps; ++j) {
       if (frame.compInfo[j].componentId == cs)
         ciIndex = j;
     }
@@ -212,13 +212,13 @@ void AbstractLJpegDecompressor::parseSOS(ByteStream sos) {
 
 void AbstractLJpegDecompressor::parseDHT(ByteStream dht) {
   while (dht.getRemainSize() > 0) {
-    uint32 b = dht.getByte();
+    uint32_t b = dht.getByte();
 
-    uint32 htClass = b >> 4;
+    uint32_t htClass = b >> 4;
     if (htClass != 0)
       ThrowRDE("Unsupported Table class.");
 
-    uint32 htIndex = b & 0xf;
+    uint32_t htIndex = b & 0xf;
     if (htIndex >= huff.size())
       ThrowRDE("Invalid huffman table destination id.");
 
@@ -226,7 +226,7 @@ void AbstractLJpegDecompressor::parseDHT(ByteStream dht) {
       ThrowRDE("Duplicate table definition");
 
     // copy 16 bytes from input stream to number of codes per length table
-    uint32 nCodes = ht_.setNCodesPerLength(dht.getBuffer(16));
+    uint32_t nCodes = ht_.setNCodesPerLength(dht.getBuffer(16));
 
     // spec says 16 different codes is max but Hasselblad violates that -> 17
     if (nCodes > 17)
@@ -251,8 +251,8 @@ void AbstractLJpegDecompressor::parseDHT(ByteStream dht) {
 }
 
 JpegMarker AbstractLJpegDecompressor::getNextMarker(bool allowskip) {
-  uchar8 c0;
-  uchar8 c1 = input.getByte();
+  uint8_t c0;
+  uint8_t c1 = input.getByte();
   do {
     c0 = c1;
     c1 = input.getByte();

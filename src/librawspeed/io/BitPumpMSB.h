@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32, uchar8
+#include "common/Common.h" // for uint32_t, uint8_t
 #include "io/BitStream.h"  // for BitStream, BitStreamCacheRightInLeftOut
 #include "io/Endianness.h" // for getBE
 
@@ -38,12 +38,12 @@ template <> struct BitStreamTraits<BitPumpMSB> final {
 };
 
 template <>
-inline BitPumpMSB::size_type BitPumpMSB::fillCache(const uchar8* input,
+inline BitPumpMSB::size_type BitPumpMSB::fillCache(const uint8_t* input,
                                                    size_type bufferSize,
                                                    size_type* bufPos) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
 
-  cache.push(getBE<uint32>(input), 32);
+  cache.push(getBE<uint32_t>(input), 32);
   return 4;
 }
 

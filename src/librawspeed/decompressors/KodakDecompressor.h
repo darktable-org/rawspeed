@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for ushort16
+#include "common/Common.h"                      // for uint16_t
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/ByteStream.h"                      // for ByteStream
@@ -37,9 +37,9 @@ class KodakDecompressor final : public AbstractDecompressor {
   bool uncorrectedRawValues;
 
   static constexpr int segment_size = 256; // pixels
-  using segment = std::array<short16, segment_size>;
+  using segment = std::array<int16_t, segment_size>;
 
-  segment decodeSegment(uint32 bsize);
+  segment decodeSegment(uint32_t bsize);
 
 public:
   KodakDecompressor(const RawImage& img, ByteStream bs, int bps,

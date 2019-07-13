@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32, ushort16
+#include "common/Common.h"                      // for uint32_t, uint16_t
 #include "common/RawImage.h"                    // for RawImage
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
@@ -115,24 +115,24 @@ struct JpegComponentInfo {
   * These values are fixed over the whole image.
   * They are read from the SOF marker.
   */
-  uint32 componentId = ~0U; /* identifier for this component (0..255) */
+  uint32_t componentId = ~0U; /* identifier for this component (0..255) */
 
   /*
   * Huffman table selector (0..3). The value may vary
   * between scans. It is read from the SOS marker.
   */
-  uint32 dcTblNo = ~0U;
-  uint32 superH = ~0U; // Horizontal Supersampling
-  uint32 superV = ~0U; // Vertical Supersampling
+  uint32_t dcTblNo = ~0U;
+  uint32_t superH = ~0U; // Horizontal Supersampling
+  uint32_t superV = ~0U; // Vertical Supersampling
 };
 
 class SOFInfo {
 public:
   std::array<JpegComponentInfo, 4> compInfo;
-  uint32 w = 0;    // Width
-  uint32 h = 0;    // Height
-  uint32 cps = 0;  // Components
-  uint32 prec = 0; // Precision
+  uint32_t w = 0;    // Width
+  uint32_t h = 0;    // Height
+  uint32_t cps = 0;  // Components
+  uint32_t prec = 0; // Precision
   bool initialized = false;
 };
 
@@ -141,7 +141,7 @@ class AbstractLJpegDecompressor : public AbstractDecompressor {
   std::vector<std::unique_ptr<HuffmanTable>> huffmanTableStore;
   HuffmanTable ht_;      // temporary table, used
 
-  uint32 Pt = 0;
+  uint32_t Pt = 0;
   std::array<HuffmanTable*, 4> huff{{}}; // 4 pointers into the store
 
 public:
@@ -176,9 +176,9 @@ protected:
   }
 
   template <int N_COMP>
-  __attribute__((pure)) std::array<ushort16, N_COMP>
+  __attribute__((pure)) std::array<uint16_t, N_COMP>
   getInitialPredictors() const {
-    std::array<ushort16, N_COMP> pred;
+    std::array<uint16_t, N_COMP> pred;
     if (frame.prec < (Pt + 1)) {
       ThrowRDE("Invalid precision (%u) and point transform (%u) combination!",
                frame.prec, Pt);
@@ -193,7 +193,7 @@ protected:
   RawImage mRaw;
 
   SOFInfo frame;
-  uint32 predictorMode = 0;
+  uint32_t predictorMode = 0;
 };
 
 } // namespace rawspeed

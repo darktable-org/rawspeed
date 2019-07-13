@@ -20,7 +20,7 @@
 */
 
 #include "decoders/SrwDecoder.h"
-#include "common/Common.h"                       // for uint32, BitOrder_LSB
+#include "common/Common.h"                       // for uint32_t, BitOrder_LSB
 #include "common/Point.h"                        // for iPoint2D
 #include "decoders/RawDecoderException.h"        // for ThrowRDE
 #include "decompressors/SamsungV0Decompressor.h" // for SamsungV0Decompressor
@@ -63,7 +63,7 @@ RawImage SrwDecoder::decodeRawInternal() {
   if (32769 != compression && 32770 != compression && 32772 != compression && 32773 != compression)
     ThrowRDE("Unsupported compression");
 
-  uint32 nslices = raw->getEntry(STRIPOFFSETS)->count;
+  uint32_t nslices = raw->getEntry(STRIPOFFSETS)->count;
   if (nslices != 1)
     ThrowRDE("Only one slice supported, found %u", nslices);
 
@@ -75,8 +75,8 @@ RawImage SrwDecoder::decodeRawInternal() {
     return mRaw;
   }
 
-  const uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-  const uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+  const uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
+  const uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
   mRaw->dim = iPoint2D(width, height);
 
   if (32770 == compression)
@@ -89,8 +89,8 @@ RawImage SrwDecoder::decodeRawInternal() {
     bso.skipBytes(sliceOffsets->getU32());
     bso = bso.getStream(height, 4);
 
-    const uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
-    const uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
+    const uint32_t offset = raw->getEntry(STRIPOFFSETS)->getU32();
+    const uint32_t count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
     Buffer rbuf(mFile->getSubView(offset, count));
     ByteStream bsr(DataBuffer(rbuf, Endianness::little));
 
@@ -104,8 +104,8 @@ RawImage SrwDecoder::decodeRawInternal() {
   }
   if (32772 == compression)
   {
-    uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
-    uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
+    uint32_t offset = raw->getEntry(STRIPOFFSETS)->getU32();
+    uint32_t count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
     const ByteStream bs(
         DataBuffer(mFile->getSubView(offset, count), Endianness::little));
 
@@ -119,8 +119,8 @@ RawImage SrwDecoder::decodeRawInternal() {
   }
   if (32773 == compression)
   {
-    uint32 offset = raw->getEntry(STRIPOFFSETS)->getU32();
-    uint32 count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
+    uint32_t offset = raw->getEntry(STRIPOFFSETS)->getU32();
+    uint32_t count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
     const ByteStream bs(
         DataBuffer(mFile->getSubView(offset, count), Endianness::little));
 

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for ushort16, uchar8
+#include "common/Common.h" // for uint16_t, uint8_t
 #include "io/BitStream.h"  // for BitStream, BitStreamCacheRightInLeftOut
 #include "io/Buffer.h"     // for Buffer::size_type
 #include "io/Endianness.h" // for getLE
@@ -35,13 +35,13 @@ struct MSB16BitPumpTag;
 using BitPumpMSB16 = BitStream<MSB16BitPumpTag, BitStreamCacheRightInLeftOut>;
 
 template <>
-inline BitPumpMSB16::size_type BitPumpMSB16::fillCache(const uchar8* input,
+inline BitPumpMSB16::size_type BitPumpMSB16::fillCache(const uint8_t* input,
                                                        size_type bufferSize,
                                                        size_type* bufPos) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
 
-  for (size_type i = 0; i < 4; i += sizeof(ushort16))
-    cache.push(getLE<ushort16>(input + i), 16);
+  for (size_type i = 0; i < 4; i += sizeof(uint16_t))
+    cache.push(getLE<uint16_t>(input + i), 16);
   return 4;
 }
 

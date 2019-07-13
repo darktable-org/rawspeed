@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"                           // for ushort16
+#include "common/Common.h"                           // for uint16_t
 #include "decoders/RawDecoderException.h"            // for ThrowRDE
 #include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
 #include <cassert>                                   // for assert
@@ -41,8 +41,8 @@ class Cr2Slicing {
 public:
   Cr2Slicing() = default;
 
-  Cr2Slicing(ushort16 numSlices_, ushort16 sliceWidth_,
-             ushort16 lastSliceWidth_)
+  Cr2Slicing(uint16_t numSlices_, uint16_t sliceWidth_,
+             uint16_t lastSliceWidth_)
       : numSlices(numSlices_), sliceWidth(sliceWidth_),
         lastSliceWidth(lastSliceWidth_) {
     if (numSlices < 1)

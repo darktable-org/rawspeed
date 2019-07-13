@@ -30,7 +30,7 @@ namespace rawspeed {
 class iPoint2D {
 public:
   using value_type = int;
-  using area_type = unsigned long long;
+  using area_type = size_t;
 
   constexpr iPoint2D() = default;
   constexpr iPoint2D(value_type a, value_type b) : x(a), y(b) {}

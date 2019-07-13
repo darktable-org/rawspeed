@@ -110,7 +110,7 @@ bool VC5Decompressor::Wavelet::isBandValid(const int band) const {
 }
 
 bool VC5Decompressor::Wavelet::allBandsValid() const {
-  return mDecodedBandMask == static_cast<uint32>((1 << numBands) - 1);
+  return mDecodedBandMask == static_cast<uint32_t>((1 << numBands) - 1);
 }
 
 Array2DRef<const int16_t>
@@ -365,7 +365,7 @@ void VC5Decompressor::initVC5LogTable() {
         };
 
         auto normalizeI = [tableSize](auto x) { return x / (tableSize - 1.0); };
-        auto denormalizeY = [maxVal = std::numeric_limits<ushort16>::max()](
+        auto denormalizeY = [maxVal = std::numeric_limits<uint16_t>::max()](
                                 auto y) { return maxVal * y; };
         // Adjust for output whitelevel bitdepth.
         auto rescaleY = [outputBits](auto y) {
@@ -393,7 +393,7 @@ void VC5Decompressor::parseVC5() {
   bool done = false;
   while (!done) {
     auto tag = static_cast<VC5Tag>(mBs.getU16());
-    ushort16 val = mBs.getU16();
+    uint16_t val = mBs.getU16();
 
     bool optional = matches(tag, VC5Tag::Optional);
     if (optional)
@@ -450,7 +450,7 @@ void VC5Decompressor::parseVC5() {
       mVC5.iSubband = val;
       break;
     case VC5Tag::Quantization:
-      mVC5.quantization = static_cast<short16>(val);
+      mVC5.quantization = static_cast<int16_t>(val);
       break;
     case VC5Tag::ComponentsPerSample:
       if (val != mVC5.cps)
@@ -513,7 +513,7 @@ void VC5Decompressor::parseVC5() {
 
 VC5Decompressor::Wavelet::LowPassBand::LowPassBand(const Wavelet& wavelet,
                                                    ByteStream bs_,
-                                                   ushort16 lowpassPrecision_)
+                                                   uint16_t lowpassPrecision_)
     : AbstractDecodeableBand(std::move(bs_)),
       lowpassPrecision(lowpassPrecision_) {
   // Low-pass band is a uncompressed version of the image, hugely downscaled.

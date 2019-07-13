@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32, ushort16, int32
+#include "common/Common.h" // for uint32_t, uint16_t, int32_t
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
 #include "io/BitStream.h"                       // for BitStreamTraits
@@ -68,8 +68,8 @@ class HuffmanTableLUT final : public AbstractHuffmanTable {
   // private fields calculated from codesPerBits and codeValues
   // they are index '1' based, so we can directly lookup the value
   // for code length l without decrementing
-  std::vector<uint32> maxCodeOL;      // index is length of code
-  std::vector<ushort16> codeOffsetOL; // index is length of code
+  std::vector<uint32_t> maxCodeOL;    // index is length of code
+  std::vector<uint16_t> codeOffsetOL; // index is length of code
 
   // The code can be compiled with two different decode lookup table layouts.
   // The idea is that different CPU architectures may perform better with
@@ -85,7 +85,7 @@ class HuffmanTableLUT final : public AbstractHuffmanTable {
   static constexpr unsigned FlagMask = 0x100;
   static constexpr unsigned LenMask = 0xff;
   static constexpr unsigned LookupDepth = 11;
-  std::vector<int32> decodeLookup;
+  std::vector<int32_t> decodeLookup;
 #else
   // lookup table containing 2 fields: payload:4|len:4
   // the payload is the length of the diff, len is the length of the code
@@ -93,7 +93,7 @@ class HuffmanTableLUT final : public AbstractHuffmanTable {
   static constexpr unsigned PayloadShift = 4;
   static constexpr unsigned FlagMask = 0;
   static constexpr unsigned LenMask = 0x0f;
-  std::vector<uchar8> decodeLookup;
+  std::vector<uint8_t> decodeLookup;
 #endif
 
   bool fullDecode = true;
@@ -133,14 +133,14 @@ public:
     // See definition of decodeLookup above
     decodeLookup.resize(1 << LookupDepth);
     for (size_t i = 0; i < symbols.size(); i++) {
-      uchar8 code_l = symbols[i].code_len;
+      uint8_t code_l = symbols[i].code_len;
       if (code_l > static_cast<int>(LookupDepth))
         break;
 
-      ushort16 ll = symbols[i].code << (LookupDepth - code_l);
-      ushort16 ul = ll | ((1 << (LookupDepth - code_l)) - 1);
-      ushort16 diff_l = codeValues[i];
-      for (ushort16 c = ll; c <= ul; c++) {
+      uint16_t ll = symbols[i].code << (LookupDepth - code_l);
+      uint16_t ul = ll | ((1 << (LookupDepth - code_l)) - 1);
+      uint16_t diff_l = codeValues[i];
+      for (uint16_t c = ll; c <= ul; c++) {
         if (!(c < decodeLookup.size()))
           ThrowRDE("Corrupt Huffman");
 
@@ -155,9 +155,10 @@ public:
           decodeLookup[c] = (code_l + diff_l) | FlagMask;
 
           if (diff_l) {
-            uint32 diff = (c >> (LookupDepth - code_l - diff_l)) & ((1 << diff_l) - 1);
-            decodeLookup[c] |= static_cast<int32>(
-                static_cast<uint32>(extend(diff, diff_l)) << PayloadShift);
+            uint32_t diff =
+                (c >> (LookupDepth - code_l - diff_l)) & ((1 << diff_l) - 1);
+            decodeLookup[c] |= static_cast<int32_t>(
+                static_cast<uint32_t>(extend(diff, diff_l)) << PayloadShift);
           }
         }
       }
@@ -194,7 +195,7 @@ public:
     // for processors supporting bmi2 instructions, using maxCodePlusDiffLength()
     // might be beneficial
 
-    uint32 code = bs.peekBitsNoFill(LookupDepth);
+    uint32_t code = bs.peekBitsNoFill(LookupDepth);
     assert(code < decodeLookup.size());
     auto val = static_cast<unsigned>(decodeLookup[code]);
     int len = val & LenMask;
@@ -220,11 +221,11 @@ public:
       return FULL_DECODE ? extend(bs.getBitsNoFill(l_diff), l_diff) : l_diff;
     }
 
-    uint32 code_l = LookupDepth;
+    uint32_t code_l = LookupDepth;
     bs.skipBitsNoFill(code_l);
     while (code_l < maxCodeOL.size() &&
            (0xFFFFFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l])) {
-      uint32 temp = bs.getBitsNoFill(1);
+      uint32_t temp = bs.getBitsNoFill(1);
       code = (code << 1) | temp;
       code_l++;
     }

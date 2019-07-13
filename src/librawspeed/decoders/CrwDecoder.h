@@ -44,7 +44,7 @@ public:
 
 protected:
   int getDecoderVersion() const override { return 0; }
-  static float canonEv(long in);
+  static float canonEv(int64_t in);
 };
 
 } // namespace rawspeed

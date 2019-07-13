@@ -19,7 +19,7 @@
 */
 
 #include "decoders/AbstractTiffDecoder.h"
-#include "common/Common.h"                // for uint32
+#include "common/Common.h"                // for uint32_t
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "tiff/TiffEntry.h"               // for TiffEntry
 #include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD, Tiff...
@@ -35,7 +35,7 @@ const TiffIFD* AbstractTiffDecoder::getIFDWithLargestImage(TiffTag filter) const
     ThrowRDE("No suitable IFD with tag 0x%04x found.", filter);
 
   auto res = ifds[0];
-  uint32 width = res->getEntry(IMAGEWIDTH)->getU32();
+  uint32_t width = res->getEntry(IMAGEWIDTH)->getU32();
   for (auto ifd : ifds) {
     TiffEntry* widthE = ifd->getEntry(IMAGEWIDTH);
     // guard against random maker note entries with the same tag

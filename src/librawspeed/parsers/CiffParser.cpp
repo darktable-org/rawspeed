@@ -21,7 +21,7 @@
 */
 
 #include "parsers/CiffParser.h"
-#include "common/Common.h"               // for trimSpaces, uint32, ushort16
+#include "common/Common.h"               // for trimSpaces, uint32_t, uint16_t
 #include "decoders/CrwDecoder.h"         // for CrwDecoder
 #include "decoders/RawDecoder.h"         // for RawDecoder
 #include "io/ByteStream.h"               // for ByteStream
@@ -44,12 +44,12 @@ CiffParser::CiffParser(const Buffer* inputData) : RawParser(inputData) {}
 void CiffParser::parseData() {
   ByteStream bs(DataBuffer(*mInput, Endianness::little));
 
-  const ushort16 byteOrder = bs.getU16();
+  const uint16_t byteOrder = bs.getU16();
   if (byteOrder != 0x4949) // "II" / little-endian
     ThrowCPE("Not a CIFF file (endianness)");
 
   // Offset to the beginning of the CIFF
-  const uint32 headerLength = bs.getU32();
+  const uint32_t headerLength = bs.getU32();
 
   // 8 bytes of Signature
   if (!CrwDecoder::isCRW(mInput))

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"                // for uint32
+#include "common/Common.h"                // for uint32_t
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "io/ByteStream.h"                // for ByteStream
@@ -50,7 +50,8 @@ private:
   void parseCFA();
 
   int getDecoderVersion() const override { return 3; }
-  bool decodeUncompressed(const ByteStream& s, uint32 w, uint32 h, uint32 size);
+  bool decodeUncompressed(const ByteStream& s, uint32_t w, uint32_t h,
+                          uint32_t size);
 };
 
 } // namespace rawspeed

@@ -22,7 +22,7 @@
 #pragma once
 
 #include "AddressSanitizer.h" // for ASan::RegionIsPoisoned
-#include "common/Common.h"    // for uchar8, int32, uint32, ushort16, roundUp
+#include "common/Common.h" // for uint8_t, int32_t, uint32_t, uint16_t, roundUp
 #include "common/Memory.h"    // for alignedMalloc
 #include "io/Buffer.h"        // for Buffer::size_type, Buffer, DataBuffer
 #include "io/Endianness.h"    // for Endianness, Endianness::little
@@ -54,7 +54,7 @@ public:
   }
 
   inline size_type check(size_type bytes) const {
-    if (static_cast<uint64>(pos) + bytes > size)
+    if (static_cast<uint64_t>(pos) + bytes > size)
       ThrowIOE("Out of bounds access in ByteStream");
     assert(!ASan::RegionIsPoisoned(data + pos, bytes));
     return bytes;
@@ -80,11 +80,11 @@ public:
     check(0);
     return size - pos;
   }
-  inline const uchar8* peekData(size_type count) const {
+  inline const uint8_t* peekData(size_type count) const {
     return Buffer::getData(pos, count);
   }
-  inline const uchar8* getData(size_type count) {
-    const uchar8* ret = Buffer::getData(pos, count);
+  inline const uint8_t* getData(size_type count) {
+    const uint8_t* ret = Buffer::getData(pos, count);
     pos += count;
     return ret;
   }
@@ -112,7 +112,7 @@ public:
     return getStream(nmemb * size_);
   }
 
-  inline uchar8 peekByte(size_type i = 0) const {
+  inline uint8_t peekByte(size_type i = 0) const {
     assert(data);
     check(i+1);
     return data[pos+i];
@@ -142,7 +142,7 @@ public:
     return has_prefix;
   }
 
-  inline uchar8 getByte() {
+  inline uint8_t getByte() {
     assert(data);
     check(1);
     return data[pos++];
@@ -152,7 +152,7 @@ public:
     return DataBuffer::get<T>(pos, i);
   }
 
-  inline ushort16 peekU16() { return peek<ushort16>(); }
+  inline uint16_t peekU16() { return peek<uint16_t>(); }
 
   template<typename T> inline T get() {
     auto ret = peek<T>();
@@ -160,9 +160,9 @@ public:
     return ret;
   }
 
-  inline ushort16 getU16() { return get<ushort16>(); }
-  inline int32 getI32() { return get<int32>(); }
-  inline uint32 getU32() { return get<uint32>(); }
+  inline uint16_t getU16() { return get<uint16_t>(); }
+  inline int32_t getI32() { return get<int32_t>(); }
+  inline uint32_t getU32() { return get<uint32_t>(); }
   inline float getFloat() { return get<float>(); }
 
   const char* peekString() const {
@@ -190,7 +190,7 @@ public:
   // only necessary to create 'fake' TiffEntries (see e.g. RAF)
   static ByteStream createCopy(void* data_, size_type size_) {
     ByteStream bs;
-    auto* new_data = alignedMalloc<uchar8, 8>(roundUp(size_, 8));
+    auto* new_data = alignedMalloc<uint8_t, 8>(roundUp(size_, 8));
     memcpy(new_data, data_, size_);
     bs.data = new_data;
     bs.size = size_;

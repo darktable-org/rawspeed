@@ -45,7 +45,7 @@ template <size_t N> using BPS = std::integral_constant<size_t, N>;
 template <int N> using Pf = std::integral_constant<int, N>;
 
 template <typename BPS>
-static std::unique_ptr<rawspeed::uchar8, decltype(&rawspeed::alignedFree)>
+static std::unique_ptr<uint8_t, decltype(&rawspeed::alignedFree)>
 compressChunk(const rawspeed::RawImage& mRaw, uLong* bufSize) {
   static_assert(BPS::value > 0, "bad bps");
   static_assert(rawspeed::isAligned(BPS::value, 8), "not byte count");

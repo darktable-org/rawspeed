@@ -57,7 +57,7 @@ constexpr PanasonicDecompressorV5::PacketDsc
 
 PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
                                                  const ByteStream& input_,
-                                                 uint32 bps_)
+                                                 uint32_t bps_)
     : mRaw(img), bps(bps_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
@@ -135,7 +135,7 @@ void PanasonicDecompressorV5::chopInputIntoBlocks(const PacketDsc& dsc) {
 
 class PanasonicDecompressorV5::ProxyStream {
   ByteStream block;
-  std::vector<uchar8> buf;
+  std::vector<uint8_t> buf;
   ByteStream input;
 
   void parseBlock() {
@@ -175,13 +175,13 @@ public:
 
 template <const PanasonicDecompressorV5::PacketDsc& dsc>
 void PanasonicDecompressorV5::processPixelPacket(BitPumpLSB* bs,
-                                                 ushort16* dest) const {
+                                                 uint16_t* dest) const {
   static_assert(dsc.pixelsPerPacket > 0, "dsc should be compile-time const");
   static_assert(dsc.bps > 0 && dsc.bps <= 16, "");
 
   assert(bs->getFillLevel() == 0);
 
-  const ushort16* const endDest = dest + dsc.pixelsPerPacket;
+  const uint16_t* const endDest = dest + dsc.pixelsPerPacket;
   for (; dest != endDest;) {
     bs->fill();
     for (; bs->getFillLevel() >= dsc.bps; dest++) {
@@ -212,7 +212,7 @@ void PanasonicDecompressorV5::processBlock(const Block& block) const {
     if (block.endCoord.y == y)
       endx = block.endCoord.x;
 
-    auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(x, y));
+    auto* dest = reinterpret_cast<uint16_t*>(mRaw->getData(x, y));
 
     assert(x % dsc.pixelsPerPacket == 0);
     assert(endx % dsc.pixelsPerPacket == 0);

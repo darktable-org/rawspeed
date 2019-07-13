@@ -20,7 +20,7 @@
 
 #include "rawspeedconfig.h" // for HAVE_JPEG, HAVE_ZLIB
 #include "decoders/DngDecoder.h"
-#include "common/Common.h"                         // for uint32, roundUpDi...
+#include "common/Common.h"                         // for uint32_t, roundUpDi...
 #include "common/DngOpcodes.h"                     // for DngOpcodes
 #include "common/NORangesSet.h"                    // for set
 #include "common/Point.h"                          // for iPoint2D, iRectan...
@@ -65,7 +65,7 @@ DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file)
   if (!mRootIFD->hasEntryRecursive(DNGVERSION))
     ThrowRDE("DNG, but version tag is missing. Will not guess.");
 
-  const uchar8* v = mRootIFD->getEntryRecursive(DNGVERSION)->getData(4);
+  const uint8_t* v = mRootIFD->getEntryRecursive(DNGVERSION)->getData(4);
 
   if (v[0] != 1)
     ThrowRDE("Not a supported DNG image format: v%u.%u.%u.%u", (int)v[0], (int)v[1], (int)v[2], (int)v[3]);
@@ -86,7 +86,7 @@ void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
 
     if (ifd->hasEntry(NEWSUBFILETYPE) &&
         ifd->getEntry(NEWSUBFILETYPE)->isInt()) {
-      const uint32 NewSubFileType = (*i)->getEntry(NEWSUBFILETYPE)->getU32();
+      const uint32_t NewSubFileType = (*i)->getEntry(NEWSUBFILETYPE)->getU32();
 
       // bit 0 is on if image is subsampled.
       // the value itself can be either 1, or 0x10001.
@@ -166,14 +166,14 @@ void DngDecoder::parseCFA(const TiffIFD* raw) {
 
   mRaw->cfa.setSize(cfaSize);
 
-  static const map<uint32, CFAColor> int2enum = {
+  static const map<uint32_t, CFAColor> int2enum = {
       {0, CFA_RED},     {1, CFA_GREEN},  {2, CFA_BLUE},  {3, CFA_CYAN},
       {4, CFA_MAGENTA}, {5, CFA_YELLOW}, {6, CFA_WHITE},
   };
 
   for (int y = 0; y < cfaSize.y; y++) {
     for (int x = 0; x < cfaSize.x; x++) {
-      uint32 c1 = cPat->getByte(x + y * cfaSize.x);
+      uint32_t c1 = cPat->getByte(x + y * cfaSize.x);
       CFAColor c2 = CFA_UNKNOWN;
 
       try {
@@ -209,19 +209,19 @@ void DngDecoder::parseCFA(const TiffIFD* raw) {
 
 DngTilingDescription DngDecoder::getTilingDescription(const TiffIFD* raw) {
   if (raw->hasEntry(TILEOFFSETS)) {
-    const uint32 tilew = raw->getEntry(TILEWIDTH)->getU32();
-    const uint32 tileh = raw->getEntry(TILELENGTH)->getU32();
+    const uint32_t tilew = raw->getEntry(TILEWIDTH)->getU32();
+    const uint32_t tileh = raw->getEntry(TILELENGTH)->getU32();
 
     if (!(tilew > 0 && tileh > 0))
       ThrowRDE("Invalid tile size: (%u, %u)", tilew, tileh);
 
     assert(tilew > 0);
-    const uint32 tilesX = roundUpDivision(mRaw->dim.x, tilew);
+    const uint32_t tilesX = roundUpDivision(mRaw->dim.x, tilew);
     if (!tilesX)
       ThrowRDE("Zero tiles horizontally");
 
     assert(tileh > 0);
-    const uint32 tilesY = roundUpDivision(mRaw->dim.y, tileh);
+    const uint32_t tilesY = roundUpDivision(mRaw->dim.y, tileh);
     if (!tilesY)
       ThrowRDE("Zero tiles vertically");
 
@@ -252,20 +252,20 @@ DngTilingDescription DngDecoder::getTilingDescription(const TiffIFD* raw) {
              counts->count, offsets->count);
   }
 
-  uint32 yPerSlice = raw->hasEntry(ROWSPERSTRIP)
-                         ? raw->getEntry(ROWSPERSTRIP)->getU32()
-                         : mRaw->dim.y;
+  uint32_t yPerSlice = raw->hasEntry(ROWSPERSTRIP)
+                           ? raw->getEntry(ROWSPERSTRIP)->getU32()
+                           : mRaw->dim.y;
 
-  if (yPerSlice == 0 || yPerSlice > static_cast<uint32>(mRaw->dim.y) ||
+  if (yPerSlice == 0 || yPerSlice > static_cast<uint32_t>(mRaw->dim.y) ||
       roundUpDivision(mRaw->dim.y, yPerSlice) != counts->count) {
     ThrowRDE("Invalid y per slice %u or strip count %u (height = %u)",
              yPerSlice, counts->count, mRaw->dim.y);
   }
 
-  return {mRaw->dim, static_cast<uint32>(mRaw->dim.x), yPerSlice};
+  return {mRaw->dim, static_cast<uint32_t>(mRaw->dim.x), yPerSlice};
 }
 
-void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
+void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) {
   if (compression == 8 && sample_format != 3) {
     ThrowRDE("Only float format is supported for "
              "deflate-compressed data.");
@@ -275,7 +275,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32 sample_format) {
              "JPEG-compressed data.");
   }
 
-  uint32 predictor = ~0U;
+  uint32_t predictor = ~0U;
   if (raw->hasEntry(PREDICTOR))
     predictor = raw->getEntry(PREDICTOR)->getU32();
 
@@ -352,7 +352,7 @@ RawImage DngDecoder::decodeRawInternal() {
   if (bps < 1 || bps > 32)
     ThrowRDE("Unsupported bit per sample count: %u.", bps);
 
-  uint32 sample_format = 1;
+  uint32_t sample_format = 1;
   if (raw->hasEntry(SAMPLEFORMAT))
     sample_format = raw->getEntry(SAMPLEFORMAT)->getU32();
 
@@ -402,7 +402,7 @@ RawImage DngDecoder::decodeRawInternal() {
   if (mRaw->isCFA)
     parseCFA(raw);
 
-  uint32 cpp = raw->getEntry(SAMPLESPERPIXEL)->getU32();
+  uint32_t cpp = raw->getEntry(SAMPLESPERPIXEL)->getU32();
 
   if (cpp < 1 || cpp > 4)
     ThrowRDE("Unsupported samples per pixel count: %u.", cpp);
@@ -593,7 +593,7 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(ASSHOTNEUTRAL)) {
     TiffEntry* as_shot_neutral = mRootIFD->getEntryRecursive(ASSHOTNEUTRAL);
     if (as_shot_neutral->count == 3) {
-      for (uint32 i = 0; i < 3; i++) {
+      for (uint32_t i = 0; i < 3; i++) {
         float c = as_shot_neutral->getFloat(i);
         mRaw->metadata.wbCoeffs[i] = (c > 0.0F) ? (1.0F / c) : 0.0F;
       }
@@ -607,7 +607,7 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           1 - mRaw->metadata.wbCoeffs[0] - mRaw->metadata.wbCoeffs[1];
 
       const std::array<float, 3> d65_white = {{0.950456, 1, 1.088754}};
-      for (uint32 i = 0; i < 3; i++)
+      for (uint32_t i = 0; i < 3; i++)
         mRaw->metadata.wbCoeffs[i] /= d65_white[i];
     }
   }
@@ -639,7 +639,7 @@ bool DngDecoder::decodeMaskedAreas(const TiffIFD* raw) {
   if (masked->type != TIFF_SHORT && masked->type != TIFF_LONG)
     return false;
 
-  uint32 nrects = masked->count/4;
+  uint32_t nrects = masked->count / 4;
   if (0 == nrects)
     return false;
 
@@ -650,7 +650,7 @@ bool DngDecoder::decodeMaskedAreas(const TiffIFD* raw) {
                                mRaw->getUncroppedDim().y);
   const iPoint2D top = mRaw->getCropOffset();
 
-  for (uint32 i = 0; i < nrects; i++) {
+  for (uint32_t i = 0; i < nrects; i++) {
     iPoint2D topleft = iPoint2D(rects[i * 4UL + 1UL], rects[i * 4UL]);
     iPoint2D bottomright = iPoint2D(rects[i * 4UL + 3UL], rects[i * 4UL + 2UL]);
 

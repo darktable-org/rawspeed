@@ -20,7 +20,7 @@
 */
 
 #include "metadata/Camera.h"
-#include "common/Common.h"                    // for split_string, uint32
+#include "common/Common.h"                    // for split_string, uint32_t
 #include "common/Point.h"                     // for iPoint2D
 #include "metadata/CameraMetadataException.h" // for ThrowCME
 #include <cctype>                             // for tolower
@@ -64,8 +64,7 @@ Camera::Camera(const pugi::xml_node& camera) : cfa(iPoint2D(0, 0)) {
 }
 #endif
 
-Camera::Camera(const Camera* camera, uint32 alias_num) : cfa(iPoint2D(0,0))
-{
+Camera::Camera(const Camera* camera, uint32_t alias_num) : cfa(iPoint2D(0, 0)) {
   if (alias_num >= camera->aliases.size())
     ThrowCME("Internal error, alias number out of range specified.");
 

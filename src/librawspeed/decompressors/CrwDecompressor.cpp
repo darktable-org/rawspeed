@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/CrwDecompressor.h"
-#include "common/Common.h"                // for uint32, uchar8, ushort16
+#include "common/Common.h"                // for uint32_t, uint8_t, uint16_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -36,15 +36,15 @@ using std::array;
 
 namespace rawspeed {
 
-CrwDecompressor::CrwDecompressor(const RawImage& img, uint32 dec_table,
+CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
                                  bool lowbits_, ByteStream rawData)
     : mRaw(img), lowbits(lowbits_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
 
-  const uint32 width = mRaw->dim.x;
-  const uint32 height = mRaw->dim.y;
+  const uint32_t width = mRaw->dim.x;
+  const uint32_t height = mRaw->dim.y;
 
   if (width == 0 || height == 0 || width % 4 != 0 || width > 4104 ||
       height > 3048 || (height * width) % 64 != 0)
@@ -67,8 +67,8 @@ CrwDecompressor::CrwDecompressor(const RawImage& img, uint32 dec_table,
   mHuff = initHuffTables(dec_table);
 }
 
-HuffmanTable CrwDecompressor::makeDecoder(const uchar8* ncpl,
-                                          const uchar8* values) {
+HuffmanTable CrwDecompressor::makeDecoder(const uint8_t* ncpl,
+                                          const uint8_t* values) {
   assert(ncpl);
 
   HuffmanTable ht;
@@ -79,37 +79,37 @@ HuffmanTable CrwDecompressor::makeDecoder(const uchar8* ncpl,
   return ht;
 }
 
-CrwDecompressor::crw_hts CrwDecompressor::initHuffTables(uint32 table) {
+CrwDecompressor::crw_hts CrwDecompressor::initHuffTables(uint32_t table) {
   if (table > 2)
     ThrowRDE("Wrong table number: %u", table);
 
   // NCodesPerLength
-  static const std::array<std::array<uchar8, 16>, 3> first_tree_ncpl = {{
+  static const std::array<std::array<uint8_t, 16>, 3> first_tree_ncpl = {{
       {0, 1, 4, 2, 3, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0},
       {0, 2, 2, 3, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0},
       {0, 0, 6, 3, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0},
   }};
 
-  static const std::array<std::array<uchar8, 13>, 3> first_tree_len = {{
+  static const std::array<std::array<uint8_t, 13>, 3> first_tree_len = {{
       {0x4, 0x3, 0x5, 0x6, 0x2, 0x7, 0x1, 0x8, 0x9, 0x0, 0xa, 0xb, 0xf},
       {0x3, 0x2, 0x4, 0x1, 0x5, 0x0, 0x6, 0x7, 0x9, 0x8, 0xa, 0xb, 0xf},
       {0x6, 0x5, 0x7, 0x4, 0x8, 0x3, 0x9, 0x2, 0x0, 0xa, 0x1, 0xb, 0xf},
   }};
 
-  static const std::array<std::array<uchar8, 13>, 3> first_tree_index = {{
+  static const std::array<std::array<uint8_t, 13>, 3> first_tree_index = {{
       {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf},
       {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf},
       {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf},
   }};
 
   // NCodesPerLength
-  static const std::array<std::array<uchar8, 16>, 3> second_tree_ncpl = {{
+  static const std::array<std::array<uint8_t, 16>, 3> second_tree_ncpl = {{
       {0, 2, 2, 2, 1, 4, 2, 1, 2, 5, 1, 1, 0, 0, 0, 139},
       {0, 2, 2, 1, 4, 1, 4, 1, 3, 3, 1, 0, 0, 0, 0, 140},
       {0, 0, 6, 2, 1, 3, 3, 2, 5, 1, 2, 2, 8, 10, 0, 117},
   }};
 
-  static const std::array<std::array<uchar8, 164>, 3> second_tree_len = {{
+  static const std::array<std::array<uint8_t, 164>, 3> second_tree_len = {{
       {0x3, 0x4, 0x2, 0x5, 0x1, 0x6, 0x7, 0x8, 0x2, 0x3, 0x1, 0x4, 0x9, 0x5,
        0x2, 0x0, 0x1, 0x6, 0xa, 0x0, 0x3, 0x7, 0x4, 0x1, 0x2, 0x8, 0x9, 0x3,
        0x5, 0x1, 0x4, 0x2, 0x5, 0x1, 0x6, 0x7, 0x8, 0x9, 0x9, 0x6, 0xa, 0x9,
@@ -148,7 +148,7 @@ CrwDecompressor::crw_hts CrwDecompressor::initHuffTables(uint32 table) {
        0x1, 0x3, 0x2, 0x1, 0x1, 0x3, 0x2, 0x1, 0xf, 0xf},
   }};
 
-  static const std::array<std::array<uchar8, 164>, 3> second_tree_index = {{
+  static const std::array<std::array<uint8_t, 164>, 3> second_tree_index = {{
       {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x0, 0x1,
        0x2, 0x0, 0x2, 0x1, 0x0, 0xf, 0x2, 0x1, 0x2, 0x3, 0x3, 0x1, 0x1, 0x3,
        0x2, 0x4, 0x3, 0x4, 0x3, 0x5, 0x3, 0x3, 0x3, 0x2, 0x7, 0x2, 0x1, 0x3,
@@ -243,8 +243,8 @@ inline void CrwDecompressor::decodeBlock(std::array<int, 64>* diffBuf,
 
 // FIXME: this function is horrible.
 void CrwDecompressor::decompress() {
-  const uint32 height = mRaw->dim.y;
-  const uint32 width = mRaw->dim.x;
+  const uint32_t height = mRaw->dim.y;
+  const uint32_t width = mRaw->dim.x;
 
   {
     assert(width > 0);
@@ -263,9 +263,9 @@ void CrwDecompressor::decompress() {
     int carry = 0;
     std::array<int, 2> base;
 
-    uint32 j = 0;
-    ushort16* dest = nullptr;
-    uint32 i = 0;
+    uint32_t j = 0;
+    uint16_t* dest = nullptr;
+    uint32_t i = 0;
 
     for (unsigned block = 0; block < hBlocks; block++) {
       array<int, 64> diffBuf = {{}};
@@ -276,12 +276,12 @@ void CrwDecompressor::decompress() {
       diffBuf[0] += carry;
       carry = diffBuf[0];
 
-      for (uint32 k = 0; k < 64; k++) {
+      for (uint32_t k = 0; k < 64; k++) {
         if (i % width == 0) {
           // new line. sadly, does not always happen when k == 0.
           i = 0;
 
-          dest = reinterpret_cast<ushort16*>(mRaw->getData(0, j));
+          dest = reinterpret_cast<uint16_t*>(mRaw->getData(0, j));
 
           j++;
           base[0] = base[1] = 512;
@@ -309,18 +309,18 @@ void CrwDecompressor::decompress() {
     assert(width % 4 == 0);
     assert(height > 0);
 
-    for (uint32 j = 0; j < height; j++) {
-      auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, j));
+    for (uint32_t j = 0; j < height; j++) {
+      auto* dest = reinterpret_cast<uint16_t*>(mRaw->getData(0, j));
 
       assert(width % 4 == 0);
-      for (uint32 i = 0; i < width; /* NOTE: i += 4 */) {
-        const uchar8 c = lowbitInput.getByte();
+      for (uint32_t i = 0; i < width; /* NOTE: i += 4 */) {
+        const uint8_t c = lowbitInput.getByte();
         // LSB-packed: p3 << 6 | p2 << 4 | p1 << 2 | p0 << 0
 
         // We have read 8 bits, which is 4 pairs of 2 bits. So process 4 pixels.
-        for (uint32 p = 0; p < 4; p++) {
-          ushort16 low = (c >> (2 * p)) & 0b11;
-          ushort16 val = (*dest << 2) | low;
+        for (uint32_t p = 0; p < 4; p++) {
+          uint16_t low = (c >> (2 * p)) & 0b11;
+          uint16_t val = (*dest << 2) | low;
 
           if (width == 2672 && val < 512)
             val += 2; // No idea why this is needed

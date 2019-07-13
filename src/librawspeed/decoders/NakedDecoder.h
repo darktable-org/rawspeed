@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"       // for uint32, BitOrder::BitOrder_MSB16
+#include "common/Common.h"       // for uint32_t, BitOrder::BitOrder_MSB16
 #include "common/RawImage.h"     // for RawImage
 #include "decoders/RawDecoder.h" // for RawDecoder
 #include <map>                   // for map
@@ -36,11 +36,11 @@ class Buffer;
 class NakedDecoder final : public RawDecoder {
   const Camera* cam;
 
-  uint32 width{0};
-  uint32 height{0};
-  uint32 filesize{0};
-  uint32 bits{0};
-  uint32 offset{0};
+  uint32_t width{0};
+  uint32_t height{0};
+  uint32_t filesize{0};
+  uint32_t bits{0};
+  uint32_t offset{0};
   BitOrder bo{BitOrder_MSB16};
 
   static const std::map<std::string, BitOrder> order2enum;

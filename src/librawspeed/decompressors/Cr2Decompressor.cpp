@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/Cr2Decompressor.h"
-#include "common/Common.h"                // for unroll_loop, uint32, ushort16
+#include "common/Common.h"                // for unroll_loop, uint32_t, uint16_t
 #include "common/Point.h"                 // for iPoint2D, iPoint2D::area_type
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -67,7 +67,7 @@ void Cr2Decompressor::decodeScan()
   }
 
   bool isSubSampled = false;
-  for (uint32 i = 0; i < frame.cps;  i++)
+  for (uint32_t i = 0; i < frame.cps; i++)
     isSubSampled = isSubSampled || frame.compInfo[i].superH != 1 ||
                    frame.compInfo[i].superV != 1;
 
@@ -87,7 +87,7 @@ void Cr2Decompressor::decodeScan()
     isSupported = isSupported && (frame.compInfo[0].superV == 1 ||
                                   frame.compInfo[0].superV == 2);
 
-    for (uint32 i = 1; i < frame.cps; i++)
+    for (uint32_t i = 1; i < frame.cps; i++)
       isSupported = isSupported && frame.compInfo[i].superH == 1 &&
                     frame.compInfo[i].superV == 1;
 
@@ -149,11 +149,11 @@ void Cr2Decompressor::decodeN_X_Y()
 
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
-  auto predNext = reinterpret_cast<ushort16*>(mRaw->getDataUncropped(0, 0));
+  auto predNext = reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(0, 0));
 
   BitPumpJPEG bitStream(input);
 
-  uint32 pixelPitch = mRaw->pitch / 2; // Pitch in pixel
+  uint32_t pixelPitch = mRaw->pitch / 2; // Pitch in pixel
   if (frame.cps != 3 && frame.w * frame.cps > 2 * frame.h) {
     // Fix Canon double height issue where Canon doubled the width and halfed
     // the height (e.g. with 5Ds), ask Canon. frame.w needs to stay as is here
@@ -202,7 +202,7 @@ void Cr2Decompressor::decodeN_X_Y()
       if (destX >= static_cast<unsigned>(mRaw->dim.x))
         break;
       auto dest =
-          reinterpret_cast<ushort16*>(mRaw->getDataUncropped(destX, destY));
+          reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(destX, destY));
 
       assert(sliceWidth % xStepSize == 0);
       if (X_S_F == 1) {

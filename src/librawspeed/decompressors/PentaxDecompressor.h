@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uchar8
+#include "common/Common.h"                      // for uint8_t
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable
@@ -44,7 +44,8 @@ private:
   static HuffmanTable SetupHuffmanTable_Modern(ByteStream stream);
   static HuffmanTable SetupHuffmanTable(ByteStream* metaData);
 
-  static const std::array<std::array<std::array<uchar8, 16>, 2>, 1> pentax_tree;
+  static const std::array<std::array<std::array<uint8_t, 16>, 2>, 1>
+      pentax_tree;
 };
 
 } // namespace rawspeed

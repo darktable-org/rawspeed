@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32
+#include "common/Common.h" // for uint32_t
 
 namespace rawspeed {
 
@@ -28,8 +28,8 @@ class BlackArea final {
 public:
   BlackArea(int offset_, int size_, bool isVertical_)
       : offset(offset_), size(size_), isVertical(isVertical_) {}
-  uint32 offset; // Offset in bayer pixels.
-  uint32 size;   // Size in bayer pixels.
+  uint32_t offset;  // Offset in bayer pixels.
+  uint32_t size;    // Size in bayer pixels.
   bool isVertical;  // Otherwise horizontal
 };
 

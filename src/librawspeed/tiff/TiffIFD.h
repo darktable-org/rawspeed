@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/Common.h"               // for uint32, ushort16
+#include "common/Common.h"               // for uint32_t, uint16_t
 #include "common/NORangesSet.h"          // for NORangesSet
 #include "io/Buffer.h"                   // for Buffer (ptr only), DataBuffer
 #include "io/ByteStream.h"               // for ByteStream
@@ -47,7 +47,7 @@ using TiffEntryOwner = std::unique_ptr<TiffEntry>;
 
 class TiffIFD
 {
-  uint32 nextIFD = 0;
+  uint32_t nextIFD = 0;
 
   TiffIFD* const parent;
 
@@ -97,7 +97,7 @@ public:
   explicit TiffIFD(TiffIFD* parent);
 
   TiffIFD(TiffIFD* parent, NORangesSet<Buffer>* ifds, const DataBuffer& data,
-          uint32 offset);
+          uint32_t offset);
 
   virtual ~TiffIFD() = default;
 
@@ -106,9 +106,9 @@ public:
   TiffIFD(const TiffIFD&) = delete;
   TiffIFD& operator=(const TiffIFD&) = delete;
 
-  uint32 getNextIFD() const {return nextIFD;}
+  uint32_t getNextIFD() const { return nextIFD; }
   std::vector<const TiffIFD*> getIFDsWithTag(TiffTag tag) const;
-  const TiffIFD* getIFDWithTag(TiffTag tag, uint32 index = 0) const;
+  const TiffIFD* getIFDWithTag(TiffTag tag, uint32_t index = 0) const;
   TiffEntry* getEntry(TiffTag tag) const;
   TiffEntry* __attribute__((pure)) getEntryRecursive(TiffTag tag) const;
   bool __attribute__((pure)) hasEntry(TiffTag tag) const {
@@ -131,7 +131,7 @@ public:
   const DataBuffer rootBuffer;
 
   TiffRootIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
-              const DataBuffer& data, uint32 offset)
+              const DataBuffer& data, uint32_t offset)
       : TiffIFD(parent_, ifds, data, offset), rootBuffer(data) {}
 
   // find the MAKE and MODEL tags identifying the camera
@@ -139,7 +139,7 @@ public:
   TiffID getID() const;
 };
 
-inline Endianness getTiffByteOrder(const ByteStream& bs, uint32 pos,
+inline Endianness getTiffByteOrder(const ByteStream& bs, uint32_t pos,
                                    const char* context = "") {
   if (bs.hasPatternAt("II", 2, pos))
     return Endianness::little;

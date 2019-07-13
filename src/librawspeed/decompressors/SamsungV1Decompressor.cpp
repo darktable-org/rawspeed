@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/SamsungV1Decompressor.h"
-#include "common/Common.h"                // for uint32, ushort16, int32
+#include "common/Common.h"                // for uint32_t, uint16_t, int32_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -33,8 +33,8 @@
 namespace rawspeed {
 
 struct SamsungV1Decompressor::encTableItem {
-  uchar8 encLen;
-  uchar8 diffLen;
+  uint8_t encLen;
+  uint8_t diffLen;
 };
 
 SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
@@ -51,34 +51,34 @@ SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
     ThrowRDE("Unexpected bit per pixel (%u)", bit);
   }
 
-  const uint32 width = mRaw->dim.x;
-  const uint32 height = mRaw->dim.y;
+  const uint32_t width = mRaw->dim.x;
+  const uint32_t height = mRaw->dim.y;
 
   if (width == 0 || height == 0 || width > 5664 || height > 3714)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 }
 
-inline int32
+inline int32_t
 SamsungV1Decompressor::samsungDiff(BitPumpMSB* pump,
                                    const std::vector<encTableItem>& tbl) {
   pump->fill(23); // That is the maximal number of bits we will need here.
   // We read 10 bits to index into our table
-  uint32 c = pump->peekBitsNoFill(10);
+  uint32_t c = pump->peekBitsNoFill(10);
   // Skip the bits that were used to encode this case
   pump->skipBitsNoFill(tbl[c].encLen);
   // Read the number of bits the table tells me
-  int32 len = tbl[c].diffLen;
+  int32_t len = tbl[c].diffLen;
   if (len == 0)
     return 0;
-  int32 diff = pump->getBitsNoFill(len);
+  int32_t diff = pump->getBitsNoFill(len);
   // If the first bit is 0 we need to turn this into a negative number
   diff = HuffmanTable::extend(diff, len);
   return diff;
 }
 
 void SamsungV1Decompressor::decompress() {
-  const uint32 width = mRaw->dim.x;
-  const uint32 height = mRaw->dim.y;
+  const uint32_t width = mRaw->dim.x;
+  const uint32_t height = mRaw->dim.y;
 
   // This format has a variable length encoding of how many bits are needed
   // to encode the difference between pixels, we use a table to process it
@@ -86,23 +86,23 @@ void SamsungV1Decompressor::decompress() {
   // encode, the second the number of bits that come after with the difference
   // The table has 14 entries because the difference can have between 0 (no
   // difference) and 13 bits (differences between 12 bits numbers can need 13)
-  static const std::array<std::array<uchar8, 2>, 14> tab = {{{3, 4},
-                                                             {3, 7},
-                                                             {2, 6},
-                                                             {2, 5},
-                                                             {4, 3},
-                                                             {6, 0},
-                                                             {7, 9},
-                                                             {8, 10},
-                                                             {9, 11},
-                                                             {10, 12},
-                                                             {10, 13},
-                                                             {5, 1},
-                                                             {4, 8},
-                                                             {4, 2}}};
+  static const std::array<std::array<uint8_t, 2>, 14> tab = {{{3, 4},
+                                                              {3, 7},
+                                                              {2, 6},
+                                                              {2, 5},
+                                                              {4, 3},
+                                                              {6, 0},
+                                                              {7, 9},
+                                                              {8, 10},
+                                                              {9, 11},
+                                                              {10, 12},
+                                                              {10, 13},
+                                                              {5, 1},
+                                                              {4, 8},
+                                                              {4, 2}}};
   std::vector<encTableItem> tbl(1024);
-  std::array<std::array<ushort16, 2>, 2> vpred = {{}};
-  std::array<ushort16, 2> hpred;
+  std::array<std::array<uint16_t, 2>, 2> vpred = {{}};
+  std::array<uint16_t, 2> hpred;
 
   // We generate a 1024 entry table (to be addressed by reading 10 bits) by
   // consecutively filling in 2^(10-N) positions where N is the variable number
@@ -111,9 +111,9 @@ void SamsungV1Decompressor::decompress() {
   // we know the next 4 bits are the difference. We read 10 bits because that is
   // the maximum number of bits used in the variable encoding (for the 12 and
   // 13 cases)
-  uint32 n = 0;
+  uint32_t n = 0;
   for (auto i : tab) {
-    for (int32 c = 0; c < (1024 >> i[0]); c++) {
+    for (int32_t c = 0; c < (1024 >> i[0]); c++) {
       tbl[n].encLen = i[0];
       tbl[n].diffLen = i[1];
       n++;
@@ -121,10 +121,10 @@ void SamsungV1Decompressor::decompress() {
   }
 
   BitPumpMSB pump(*bs);
-  for (uint32 y = 0; y < height; y++) {
-    auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
-    for (uint32 x = 0; x < width; x++) {
-      int32 diff = samsungDiff(&pump, tbl);
+  for (uint32_t y = 0; y < height; y++) {
+    auto* img = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
+    for (uint32_t x = 0; x < width; x++) {
+      int32_t diff = samsungDiff(&pump, tbl);
       if (x < 2)
         hpred[x] = vpred[y & 1][x] += diff;
       else

@@ -25,7 +25,7 @@
 
 #include "decompressors/JpegDecompressor.h"
 
-#include "common/Common.h"                // for uchar8, uint32, ushort16
+#include "common/Common.h"                // for uint8_t, uint32_t, uint16_t
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -113,8 +113,8 @@ struct JpegDecompressor::JpegDecompressStruct : jpeg_decompress_struct {
   ~JpegDecompressStruct() { jpeg_destroy_decompress(this); }
 };
 
-void JpegDecompressor::decode(uint32 offX,
-                              uint32 offY) { /* Each slice is a JPEG image */
+void JpegDecompressor::decode(uint32_t offX,
+                              uint32_t offY) { /* Each slice is a JPEG image */
   struct JpegDecompressStruct dinfo;
 
   vector<JSAMPROW> buffer(1);
@@ -131,10 +131,10 @@ void JpegDecompressor::decode(uint32 offX,
     ThrowRDE("Component count doesn't match");
   int row_stride = dinfo.output_width * dinfo.output_components;
 
-  unique_ptr<uchar8[], // NOLINT
+  unique_ptr<uint8_t[], // NOLINT
              decltype(&alignedFree)>
       complete_buffer(
-          alignedMallocArray<uchar8, 16>(dinfo.output_height, row_stride),
+          alignedMallocArray<uint8_t, 16>(dinfo.output_height, row_stride),
           &alignedFree);
   while (dinfo.output_scanline < dinfo.output_height) {
     buffer[0] = static_cast<JSAMPROW>(
@@ -149,8 +149,8 @@ void JpegDecompressor::decode(uint32 offX,
   int copy_w = min(mRaw->dim.x - offX, dinfo.output_width);
   int copy_h = min(mRaw->dim.y - offY, dinfo.output_height);
   for (int y = 0; y < copy_h; y++) {
-    uchar8* src = &complete_buffer[static_cast<size_t>(row_stride) * y];
-    auto* dst = reinterpret_cast<ushort16*>(mRaw->getData(offX, y + offY));
+    uint8_t* src = &complete_buffer[static_cast<size_t>(row_stride) * y];
+    auto* dst = reinterpret_cast<uint16_t*>(mRaw->getData(offX, y + offY));
     for (int x = 0; x < copy_w; x++) {
       for (int c = 0; c < dinfo.output_components; c++) {
         *dst = *src;

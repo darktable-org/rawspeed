@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32, uchar8, uint64
+#include "common/Common.h" // for uint32_t, uint8_t, uint64_t
 #include "io/Buffer.h"     // for Buffer::size_type, BUFFER_PADDING
 #include "io/ByteStream.h"  // for ByteStream
 #include "io/IOException.h" // for IOException (ptr only), ThrowIOE
@@ -39,7 +39,7 @@ namespace rawspeed {
 
 struct BitStreamCacheBase
 {
-  uint64 cache = 0; // the actual bits stored in the cache
+  uint64_t cache = 0;         // the actual bits stored in the cache
   unsigned int fillLevel = 0; // bits left in cache
   static constexpr unsigned Size = sizeof(cache)*8;
 
@@ -53,17 +53,17 @@ struct BitStreamCacheBase
 
 struct BitStreamCacheLeftInRightOut : BitStreamCacheBase
 {
-  inline void push(uint64 bits, uint32 count) noexcept {
+  inline void push(uint64_t bits, uint32_t count) noexcept {
     assert(count + fillLevel <= Size);
     cache |= bits << fillLevel;
     fillLevel += count;
   }
 
-  inline uint32 peek(uint32 count) const noexcept {
+  inline uint32_t peek(uint32_t count) const noexcept {
     return cache & ((1U << count) - 1U);
   }
 
-  inline void skip(uint32 count) noexcept {
+  inline void skip(uint32_t count) noexcept {
     cache >>= count;
     fillLevel -= count;
   }
@@ -71,20 +71,18 @@ struct BitStreamCacheLeftInRightOut : BitStreamCacheBase
 
 struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
 {
-  inline void push(uint64 bits, uint32 count) noexcept {
+  inline void push(uint64_t bits, uint32_t count) noexcept {
     assert(count + fillLevel <= Size);
     assert(count < BitStreamCacheBase::Size);
     cache = cache << count | bits;
     fillLevel += count;
   }
 
-  inline uint32 peek(uint32 count) const noexcept {
+  inline uint32_t peek(uint32_t count) const noexcept {
     return (cache >> (fillLevel - count)) & ((1U << count) - 1U);
   }
 
-  inline void skip(uint32 count) noexcept {
-    fillLevel -= count;
-  }
+  inline void skip(uint32_t count) noexcept { fillLevel -= count; }
 };
 
 template <typename BIT_STREAM> struct BitStreamTraits final {
@@ -98,7 +96,7 @@ class BitStream final : public ByteStream {
   // this method hase to be implemented in the concrete BitStream template
   // specializations. It will return the number of bytes processed. It needs
   // to process up to BitStreamCacheBase::MaxProcessBytes bytes of input.
-  size_type fillCache(const uchar8* input, size_type bufferSize,
+  size_type fillCache(const uint8_t* input, size_type bufferSize,
                       size_type* bufPos);
 
 public:
@@ -113,19 +111,19 @@ private:
   inline void fillSafe() {
     assert(data);
     if (pos + BitStreamCacheBase::MaxProcessBytes <= size) {
-      std::array<uchar8, BitStreamCacheBase::MaxProcessBytes> tmp;
+      std::array<uint8_t, BitStreamCacheBase::MaxProcessBytes> tmp;
       tmp.fill(0);
       assert(!(size - pos < BitStreamCacheBase::MaxProcessBytes));
       memcpy(tmp.data(), data + pos, BitStreamCacheBase::MaxProcessBytes);
       pos += fillCache(tmp.data(), size, &pos);
     } else if (pos < size) {
-      std::array<uchar8, BitStreamCacheBase::MaxProcessBytes> tmp;
+      std::array<uint8_t, BitStreamCacheBase::MaxProcessBytes> tmp;
       tmp.fill(0);
       assert(size - pos < BitStreamCacheBase::MaxProcessBytes);
       memcpy(tmp.data(), data + pos, size - pos);
       pos += fillCache(tmp.data(), size, &pos);
     } else if (pos <= size + BitStreamCacheBase::MaxProcessBytes) {
-      std::array<uchar8, BitStreamCacheBase::MaxProcessBytes> tmp;
+      std::array<uint8_t, BitStreamCacheBase::MaxProcessBytes> tmp;
       tmp.fill(0);
       pos += fillCache(tmp.data(), size, &pos);
     } else {
@@ -140,7 +138,7 @@ private:
   inline void __attribute__((noinline, cold)) fillSafeNoinline() { fillSafe(); }
 
 public:
-  inline void fill(uint32 nbits = Cache::MaxGetBits) {
+  inline void fill(uint32_t nbits = Cache::MaxGetBits) {
     assert(data);
     assert(nbits <= Cache::MaxGetBits);
     if (cache.fillLevel < nbits) {
@@ -179,39 +177,39 @@ public:
 
   void setBufferPosition(size_type newPos);
 
-  inline uint32 __attribute__((pure)) peekBitsNoFill(uint32 nbits) {
+  inline uint32_t __attribute__((pure)) peekBitsNoFill(uint32_t nbits) {
     assert(nbits != 0);
     assert(nbits < Cache::MaxGetBits);
     assert(nbits <= cache.fillLevel);
     return cache.peek(nbits);
   }
 
-  inline void skipBitsNoFill(uint32 nbits) {
+  inline void skipBitsNoFill(uint32_t nbits) {
     assert(nbits <= Cache::MaxGetBits);
     assert(nbits <= cache.fillLevel);
     cache.skip(nbits);
   }
 
-  inline uint32 getBitsNoFill(uint32 nbits) {
-    uint32 ret = peekBitsNoFill(nbits);
+  inline uint32_t getBitsNoFill(uint32_t nbits) {
+    uint32_t ret = peekBitsNoFill(nbits);
     skipBitsNoFill(nbits);
     return ret;
   }
 
-  inline uint32 peekBits(uint32 nbits) {
+  inline uint32_t peekBits(uint32_t nbits) {
     fill(nbits);
     return peekBitsNoFill(nbits);
   }
 
-  inline uint32 getBits(uint32 nbits) {
+  inline uint32_t getBits(uint32_t nbits) {
     fill(nbits);
     return getBitsNoFill(nbits);
   }
 
   // This may be used to skip arbitrarily large number of *bytes*,
   // not limited by the fill level.
-  inline void skipBytes(uint32 nbytes) {
-    uint32 remainingBitsToSkip = 8 * nbytes;
+  inline void skipBytes(uint32_t nbytes) {
+    uint32_t remainingBitsToSkip = 8 * nbytes;
     for (; remainingBitsToSkip >= Cache::MaxGetBits;
          remainingBitsToSkip -= Cache::MaxGetBits) {
       fill(Cache::MaxGetBits);

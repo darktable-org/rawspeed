@@ -21,7 +21,7 @@
 */
 
 #include "decoders/MrwDecoder.h"
-#include "common/Common.h"                          // for uint32
+#include "common/Common.h"                          // for uint32_t
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
@@ -71,8 +71,8 @@ void MrwDecoder::parseHeader() {
 
   bool foundPRD = false;
   while (bs.getRemainSize() > 0) {
-    uint32 tag = bs.getU32();
-    uint32 len = bs.getU32();
+    uint32_t tag = bs.getU32();
+    uint32_t len = bs.getU32();
     bs.check(len);
     if (!len)
       ThrowRDE("Found entry of zero length, MRW is corrupt.");

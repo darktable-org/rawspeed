@@ -61,8 +61,6 @@ using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
 using rawspeed::RawParser;
 using rawspeed::RawImage;
-using rawspeed::uchar8;
-using rawspeed::uint32;
 using rawspeed::iPoint2D;
 using rawspeed::TYPE_USHORT16;
 using rawspeed::TYPE_FLOAT32;
@@ -215,7 +213,7 @@ string img_hash(const RawImage& r) {
   APPEND(&oss, "badPixelPositions: ");
   {
     MutexLocker guard(&r->mBadPixelMutex);
-    for (uint32 p : r->mBadPixelPositions)
+    for (uint32_t p : r->mBadPixelPositions)
       APPEND(&oss, "%d, ", p);
   }
 
@@ -251,7 +249,7 @@ void writePPM(const RawImage& raw, const string& fn) {
 
   // Write pixels
   for (int y = 0; y < height; ++y) {
-    auto* row = reinterpret_cast<unsigned short*>(raw->getDataUncropped(0, y));
+    auto* row = reinterpret_cast<uint16_t*>(raw->getDataUncropped(0, y));
     // PPM is big-endian
     for (int x = 0; x < width; ++x)
       row[x] = getU16BE(row + x);

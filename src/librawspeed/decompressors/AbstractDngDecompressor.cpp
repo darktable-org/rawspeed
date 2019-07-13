@@ -58,7 +58,7 @@ template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
       big_endian = true;
 
     try {
-      const uint32 inputPixelBits = mRaw->getCpp() * mBps;
+      const uint32_t inputPixelBits = mRaw->getCpp() * mBps;
 
       if (e->dsc.tileW > std::numeric_limits<int>::max() / inputPixelBits)
         ThrowIOE("Integer overflow when calculating input pitch");

@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32, uchar8, ushort16, int32, short16
+#include "common/Common.h" // for uint32_t, uint8_t, uint16_t, int32_t, int16_t
 #include "io/ByteStream.h" // for ByteStream
 #include "tiff/TiffTag.h"  // for TiffTag
 #include <string>          // for string
@@ -63,10 +63,10 @@ class TiffEntry
 
   friend class TiffIFD;
 
-  template <typename T, T (TiffEntry::*getter)(uint32 index) const>
-  std::vector<T> getArray(uint32 count_) const {
+  template <typename T, T (TiffEntry::*getter)(uint32_t index) const>
+  std::vector<T> getArray(uint32_t count_) const {
     std::vector<T> res(count_);
-    for (uint32 i = 0; i < count_; ++i)
+    for (uint32_t i = 0; i < count_; ++i)
       res[i] = (this->*getter)(i);
     return res;
   }
@@ -74,45 +74,42 @@ class TiffEntry
 public:
   TiffTag tag;
   TiffDataType type;
-  uint32 count;
+  uint32_t count;
 
-  TiffEntry(TiffIFD* parent, TiffTag tag, TiffDataType type, uint32 count,
+  TiffEntry(TiffIFD* parent, TiffTag tag, TiffDataType type, uint32_t count,
             ByteStream&& data);
   TiffEntry(TiffIFD* parent, ByteStream* bs);
 
   bool __attribute__((pure)) isFloat() const;
   bool __attribute__((pure)) isInt() const;
   bool __attribute__((pure)) isString() const;
-  uchar8 getByte(uint32 index = 0) const;
-  uint32 getU32(uint32 index = 0) const;
-  int32 getI32(uint32 index = 0) const;
-  ushort16 getU16(uint32 index = 0) const;
-  short16 getI16(uint32 index = 0) const;
-  float getFloat(uint32 index = 0) const;
+  uint8_t getByte(uint32_t index = 0) const;
+  uint32_t getU32(uint32_t index = 0) const;
+  int32_t getI32(uint32_t index = 0) const;
+  uint16_t getU16(uint32_t index = 0) const;
+  int16_t getI16(uint32_t index = 0) const;
+  float getFloat(uint32_t index = 0) const;
   std::string getString() const;
 
-  inline std::vector<ushort16> getU16Array(uint32 count_) const
-  {
-    return getArray<ushort16, &TiffEntry::getU16>(count_);
+  inline std::vector<uint16_t> getU16Array(uint32_t count_) const {
+    return getArray<uint16_t, &TiffEntry::getU16>(count_);
   }
 
-  inline std::vector<uint32> getU32Array(uint32 count_) const
-  {
-    return getArray<uint32, &TiffEntry::getU32>(count_);
+  inline std::vector<uint32_t> getU32Array(uint32_t count_) const {
+    return getArray<uint32_t, &TiffEntry::getU32>(count_);
   }
 
-  inline std::vector<float> getFloatArray(uint32 count_) const
-  {
+  inline std::vector<float> getFloatArray(uint32_t count_) const {
     return getArray<float, &TiffEntry::getFloat>(count_);
   }
 
   ByteStream& getData() { return data; }
-  const uchar8* getData(uint32 size) { return data.getData(size); }
+  const uint8_t* getData(uint32_t size) { return data.getData(size); }
 
   const DataBuffer& getRootIfdData() const;
 
 protected:
-  static const std::array<uint32, 14> datashifts;
+  static const std::array<uint32_t, 14> datashifts;
 };
 
 } // namespace rawspeed

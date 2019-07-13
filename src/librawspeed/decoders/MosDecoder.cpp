@@ -20,7 +20,7 @@
 */
 
 #include "decoders/MosDecoder.h"
-#include "common/Common.h"                          // for uint32, uchar8
+#include "common/Common.h"                          // for uint32_t, uint8_t
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/IiqDecoder.h"                    // for IiqDecoder::isAppr...
 #include "decoders/RawDecoder.h"                    // for RawDecoder
@@ -95,7 +95,7 @@ string MosDecoder::getXMPTag(const string &xmp, const string &tag) {
 }
 
 RawImage MosDecoder::decodeRawInternal() {
-  uint32 off = 0;
+  uint32_t off = 0;
 
   const TiffIFD *raw = nullptr;
 
@@ -107,8 +107,8 @@ RawImage MosDecoder::decodeRawInternal() {
     off = raw->getEntry(STRIPOFFSETS)->getU32();
   }
 
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
 
   // FIXME: could be wrong. max "active pixels" - "80 MP"
   if (width == 0 || height == 0 || width > 10328 || height > 7760)
@@ -156,7 +156,7 @@ void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
     // We need at least a couple of bytes:
     // "NeutObj_neutrals" + 28 bytes binary + 4x uint as strings + 3x space + \0
-    const uint32 minSize = 16+28+4+3+1;
+    const uint32_t minSize = 16 + 28 + 4 + 3 + 1;
 
     // dcraw does actual parsing, since we just want one field we bruteforce it
     while (bs.getRemainSize() > minSize) {
@@ -165,7 +165,7 @@ void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         // check for nulltermination of string inside bounds
         if (!memchr(bs.peekData(bs.getRemainSize()), 0, bs.getRemainSize()))
           break;
-        std::array<uint32, 4> tmp = {{}};
+        std::array<uint32_t, 4> tmp = {{}};
         std::istringstream iss(bs.peekString());
         iss >> tmp[0] >> tmp[1] >> tmp[2] >> tmp[3];
         if (!iss.fail() && tmp[0] > 0 && tmp[1] > 0 && tmp[2] > 0 &&

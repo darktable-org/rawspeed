@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32
+#include "common/Common.h" // for uint32_t
 #include <map>             // for map
 #include <memory>          // for unique_ptr
 #include <utility>         // for pair
@@ -67,7 +67,7 @@ protected:
 
   using constructor_t = std::unique_ptr<DngOpcode> (*)(const RawImage& ri,
                                                        ByteStream* bs);
-  static const std::map<uint32, std::pair<const char*, constructor_t>> Map;
+  static const std::map<uint32_t, std::pair<const char*, constructor_t>> Map;
 };
 
 } // namespace rawspeed

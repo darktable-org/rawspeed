@@ -23,7 +23,7 @@
 
 #include "rawspeedconfig.h"
 #include "decompressors/FujiDecompressor.h"
-#include "common/Common.h"                // for ushort16
+#include "common/Common.h"                // for uint16_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -173,9 +173,9 @@ template <typename T>
 void FujiDecompressor::copy_line(fuji_compressed_block* info,
                                  const FujiStrip& strip, int cur_line,
                                  T&& idx) const {
-  std::array<ushort16*, 3> lineBufB;
-  std::array<ushort16*, 6> lineBufG;
-  std::array<ushort16*, 3> lineBufR;
+  std::array<uint16_t*, 3> lineBufB;
+  std::array<uint16_t*, 6> lineBufG;
+  std::array<uint16_t*, 3> lineBufR;
 
   for (int i = 0; i < 3; i++) {
     lineBufR[i] = info->linebuf[_R2 + i] + 1;
@@ -187,11 +187,11 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info,
   }
 
   for (int row_count = 0; row_count < FujiStrip::lineHeight(); row_count++) {
-    auto* const raw_block_data = reinterpret_cast<ushort16*>(
+    auto* const raw_block_data = reinterpret_cast<uint16_t*>(
         mRaw->getData(strip.offsetX(), strip.offsetY(cur_line) + row_count));
 
     for (int pixel_count = 0; pixel_count < strip.width(); pixel_count++) {
-      ushort16* line_buf = nullptr;
+      uint16_t* line_buf = nullptr;
 
       switch (CFA[row_count][pixel_count % 6]) {
       case CFA_RED: // red
@@ -236,7 +236,7 @@ void FujiDecompressor::copy_line_to_bayer(fuji_compressed_block* info,
 
 inline void FujiDecompressor::fuji_zerobits(BitPumpMSB* pump,
                                             int* count) const {
-  uchar8 zero = 0;
+  uint8_t zero = 0;
   *count = 0;
 
   while (zero == 0) {
@@ -268,13 +268,13 @@ FujiDecompressor::bitDiff(int value1, int value2) const {
 
 template <typename T1, typename T2>
 void FujiDecompressor::fuji_decode_sample(
-    T1&& func_0, T2&& func_1, fuji_compressed_block* info, ushort16* line_buf,
+    T1&& func_0, T2&& func_1, fuji_compressed_block* info, uint16_t* line_buf,
     int* pos, std::array<int_pair, 41>* grads) const {
   int interp_val = 0;
 
   int sample = 0;
   int code = 0;
-  ushort16* line_buf_cur = line_buf + *pos;
+  uint16_t* line_buf_cur = line_buf + *pos;
 
   int grad;
   int gradient;
@@ -334,11 +334,11 @@ void FujiDecompressor::fuji_decode_sample(
   (9 * ci.q_table[ci.q_point[4] + (v1)] + ci.q_table[ci.q_point[4] + (v2)])
 
 void FujiDecompressor::fuji_decode_sample_even(
-    fuji_compressed_block* info, ushort16* line_buf, int* pos,
+    fuji_compressed_block* info, uint16_t* line_buf, int* pos,
     std::array<int_pair, 41>* grads) const {
   const auto& ci = common_info;
   fuji_decode_sample(
-      [&ci](const ushort16* line_buf_cur, int* interp_val, int* grad,
+      [&ci](const uint16_t* line_buf_cur, int* interp_val, int* grad,
             int* gradient) {
         int Rb = line_buf_cur[-2 - ci.line_width];
         int Rc = line_buf_cur[-3 - ci.line_width];
@@ -376,11 +376,11 @@ void FujiDecompressor::fuji_decode_sample_even(
 }
 
 void FujiDecompressor::fuji_decode_sample_odd(
-    fuji_compressed_block* info, ushort16* line_buf, int* pos,
+    fuji_compressed_block* info, uint16_t* line_buf, int* pos,
     std::array<int_pair, 41>* grads) const {
   const auto& ci = common_info;
   fuji_decode_sample(
-      [&ci](const ushort16* line_buf_cur, int* interp_val, int* grad,
+      [&ci](const uint16_t* line_buf_cur, int* interp_val, int* grad,
             int* gradient) {
         int Ra = line_buf_cur[-1];
         int Rb = line_buf_cur[-2 - ci.line_width];
@@ -412,9 +412,9 @@ void FujiDecompressor::fuji_decode_sample_odd(
 #undef fuji_quant_gradient
 
 void FujiDecompressor::fuji_decode_interpolation_even(int line_width,
-                                                      ushort16* line_buf,
+                                                      uint16_t* line_buf,
                                                       int* pos) const {
-  ushort16* line_buf_cur = line_buf + *pos;
+  uint16_t* line_buf_cur = line_buf + *pos;
   int Rb = line_buf_cur[-2 - line_width];
   int Rc = line_buf_cur[-3 - line_width];
   int Rd = line_buf_cur[-1 - line_width];
@@ -435,7 +435,7 @@ void FujiDecompressor::fuji_decode_interpolation_even(int line_width,
 }
 
 void FujiDecompressor::fuji_extend_generic(
-    std::array<ushort16*, _ltotal> linebuf, int line_width, int start,
+    std::array<uint16_t*, _ltotal> linebuf, int line_width, int start,
     int end) const {
   for (int i = start; i <= end; i++) {
     linebuf[i][0] = linebuf[i - 1][1];
@@ -443,17 +443,17 @@ void FujiDecompressor::fuji_extend_generic(
   }
 }
 
-void FujiDecompressor::fuji_extend_red(std::array<ushort16*, _ltotal> linebuf,
+void FujiDecompressor::fuji_extend_red(std::array<uint16_t*, _ltotal> linebuf,
                                        int line_width) const {
   fuji_extend_generic(linebuf, line_width, _R2, _R4);
 }
 
-void FujiDecompressor::fuji_extend_green(std::array<ushort16*, _ltotal> linebuf,
+void FujiDecompressor::fuji_extend_green(std::array<uint16_t*, _ltotal> linebuf,
                                          int line_width) const {
   fuji_extend_generic(linebuf, line_width, _G2, _G7);
 }
 
-void FujiDecompressor::fuji_extend_blue(std::array<ushort16*, _ltotal> linebuf,
+void FujiDecompressor::fuji_extend_blue(std::array<uint16_t*, _ltotal> linebuf,
                                         int line_width) const {
   fuji_extend_generic(linebuf, line_width, _B2, _B4);
 }
@@ -694,7 +694,7 @@ void FujiDecompressor::fuji_decode_strip(
     fuji_compressed_block* info_block, const FujiStrip& strip) const {
   BitPumpMSB pump(strip.bs);
 
-  const unsigned line_size = sizeof(ushort16) * (common_info.line_width + 2);
+  const unsigned line_size = sizeof(uint16_t) * (common_info.line_width + 2);
 
   struct i_pair {
     int a;
@@ -736,13 +736,13 @@ void FujiDecompressor::fuji_compressed_load_raw() {
   common_info = fuji_compressed_params(*this);
 
   // read block sizes
-  std::vector<uint32> block_sizes;
+  std::vector<uint32_t> block_sizes;
   block_sizes.resize(header.blocks_in_row);
   for (auto& block_size : block_sizes)
     block_size = input.getU32();
 
   // some padding?
-  const uint64 raw_offset = sizeof(uint32) * header.blocks_in_row;
+  const uint64_t raw_offset = sizeof(uint32_t) * header.blocks_in_row;
   if (raw_offset & 0xC) {
     const int padding = 0x10 - (raw_offset & 0xC);
     input.skipBytes(padding);

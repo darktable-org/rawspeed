@@ -21,7 +21,7 @@
 */
 
 #include "decoders/CrwDecoder.h"
-#include "common/Common.h"                 // for ushort16, uchar8, uint32
+#include "common/Common.h"                 // for uint16_t, uint8_t, uint32_t
 #include "common/Point.h"                  // for iPoint2D
 #include "common/RawspeedException.h"      // for RawspeedException
 #include "decoders/RawDecoderException.h"  // for ThrowRDE
@@ -71,8 +71,8 @@ RawImage CrwDecoder::decodeRawInternal() {
     ThrowRDE("Couldn't find image sensor info");
 
   assert(sensorInfo != nullptr);
-  uint32 width = sensorInfo->getU16(1);
-  uint32 height = sensorInfo->getU16(2);
+  uint32_t width = sensorInfo->getU16(1);
+  uint32_t height = sensorInfo->getU16(2);
   mRaw->dim = iPoint2D(width, height);
 
   const CiffEntry* decTable = mRootIFD->getEntryRecursive(CIFF_DECODERTABLE);
@@ -80,7 +80,7 @@ RawImage CrwDecoder::decodeRawInternal() {
     ThrowRDE("Couldn't find decoder table");
 
   assert(decTable != nullptr);
-  uint32 dec_table = decTable->getU32();
+  uint32_t dec_table = decTable->getU32();
 
   bool lowbits = ! hints.has("no_decompressed_lowbits");
 
@@ -105,11 +105,11 @@ void CrwDecoder::checkSupportInternal(const CameraMetaData* meta) {
 }
 
 // based on exiftool's Image::ExifTool::Canon::CanonEv
-float __attribute__((const)) CrwDecoder::canonEv(const long in) {
+float __attribute__((const)) CrwDecoder::canonEv(const int64_t in) {
   // remove sign
-  long val = abs(in);
+  int64_t val = abs(in);
   // remove fraction
-  long frac = val & 0x1f;
+  int64_t frac = val & 0x1f;
   val -= frac;
   // convert 1/3 (0x0c) and 2/3 (0x14) codes
   if (frac == 0x0c) {
@@ -138,9 +138,9 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const CiffEntry* shot_info = mRootIFD->getEntryRecursive(CIFF_SHOTINFO);
     if (shot_info->type == CIFF_SHORT && shot_info->count >= 2) {
       // os << exp(canonEv(value.toLong()) * log(2.0)) * 100.0 / 32.0;
-      ushort16 iso_index = shot_info->getU16(2);
-      iso = expf(canonEv(static_cast<long>(iso_index)) * logf(2.0)) * 100.0F /
-            32.0F;
+      uint16_t iso_index = shot_info->getU16(2);
+      iso = expf(canonEv(static_cast<int64_t>(iso_index)) * logf(2.0)) *
+            100.0F / 32.0F;
     }
   }
 
@@ -152,8 +152,8 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       if (wb->type == CIFF_BYTE && wb->count == 768) {
         // We're in a D30 file, values are RGGB
         // This will probably not get used anyway as a 0x102c tag should exist
-        std::array<uchar8, 4> wbMuls{{wb->getByte(72), wb->getByte(73),
-                                      wb->getByte(74), wb->getByte(75)}};
+        std::array<uint8_t, 4> wbMuls{{wb->getByte(72), wb->getByte(73),
+                                       wb->getByte(74), wb->getByte(75)}};
         for (const auto& mul : wbMuls) {
           if (0 == mul)
             ThrowRDE("WB coeffient is zero!");
@@ -168,7 +168,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         // correct offset for most cameras
         int offset = hints.get("wb_offset", 120);
 
-        std::array<ushort16, 2> key = {{0x410, 0x45f3}};
+        std::array<uint16_t, 2> key = {{0x410, 0x45f3}};
         if (! hints.has("wb_mangle"))
           key[0] = key[1] = 0;
 
@@ -201,7 +201,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     }
     if (mRootIFD->hasEntryRecursive(CIFF_SHOTINFO) && mRootIFD->hasEntryRecursive(CIFF_WHITEBALANCE)) {
       const CiffEntry* shot_info = mRootIFD->getEntryRecursive(CIFF_SHOTINFO);
-      ushort16 wb_index = shot_info->getU16(7);
+      uint16_t wb_index = shot_info->getU16(7);
       const CiffEntry* wb_data = mRootIFD->getEntryRecursive(CIFF_WHITEBALANCE);
       /* CANON EOS D60, CANON EOS 10D, CANON EOS 300D */
       if (wb_index > 9)

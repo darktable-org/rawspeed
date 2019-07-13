@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/SamsungV0Decompressor.h"
-#include "common/Common.h"                // for uint32, ushort16, int32
+#include "common/Common.h"                // for uint32_t, uint16_t, int32_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -42,8 +42,8 @@ SamsungV0Decompressor::SamsungV0Decompressor(const RawImage& image,
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
 
-  const uint32 width = mRaw->dim.x;
-  const uint32 height = mRaw->dim.y;
+  const uint32_t width = mRaw->dim.x;
+  const uint32_t height = mRaw->dim.y;
 
   if (width == 0 || height == 0 || width < 16 || width > 5546 || height > 3714)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
@@ -53,11 +53,11 @@ SamsungV0Decompressor::SamsungV0Decompressor(const RawImage& image,
 
 // FIXME: this is very close to IiqDecoder::computeSripes()
 void SamsungV0Decompressor::computeStripes(ByteStream bso, ByteStream bsr) {
-  const uint32 height = mRaw->dim.y;
+  const uint32_t height = mRaw->dim.y;
 
-  std::vector<uint32> offsets;
+  std::vector<uint32_t> offsets;
   offsets.reserve(1 + height);
-  for (uint32 y = 0; y < height; y++)
+  for (uint32_t y = 0; y < height; y++)
     offsets.emplace_back(bso.getU32());
   offsets.emplace_back(bsr.getSize());
 
@@ -89,11 +89,11 @@ void SamsungV0Decompressor::decompress() const {
 
   // Swap red and blue pixels to get the final CFA pattern
   for (int y = 0; y < mRaw->dim.y - 1; y += 2) {
-    auto* topline = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
-    auto* bottomline = reinterpret_cast<ushort16*>(mRaw->getData(0, y + 1));
+    auto* topline = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
+    auto* bottomline = reinterpret_cast<uint16_t*>(mRaw->getData(0, y + 1));
 
     for (int x = 0; x < mRaw->dim.x - 1; x += 2) {
-      ushort16 temp = topline[1];
+      uint16_t temp = topline[1];
       topline[1] = bottomline[0];
       bottomline[0] = temp;
 
@@ -103,16 +103,16 @@ void SamsungV0Decompressor::decompress() const {
   }
 }
 
-int32 SamsungV0Decompressor::calcAdj(BitPumpMSB32* bits, int b) {
-  int32 adj = 0;
+int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32* bits, int b) {
+  int32_t adj = 0;
   if (b)
-    adj = (static_cast<int32>(bits->getBits(b)) << (32 - b) >> (32 - b));
+    adj = (static_cast<int32_t>(bits->getBits(b)) << (32 - b) >> (32 - b));
   return adj;
 }
 
-void SamsungV0Decompressor::decompressStrip(uint32 y,
+void SamsungV0Decompressor::decompressStrip(uint32_t y,
                                             const ByteStream& bs) const {
-  const uint32 width = mRaw->dim.x;
+  const uint32_t width = mRaw->dim.x;
   assert(width > 0);
 
   BitPumpMSB32 bits(bs);
@@ -121,16 +121,16 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
   for (int& i : len)
     i = y < 2 ? 7 : 4;
 
-  auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
+  auto* img = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
   const auto* const past_last =
-      reinterpret_cast<ushort16*>(mRaw->getData(width - 1, y) + mRaw->getBpp());
-  ushort16* img_up = reinterpret_cast<ushort16*>(
+      reinterpret_cast<uint16_t*>(mRaw->getData(width - 1, y) + mRaw->getBpp());
+  uint16_t* img_up = reinterpret_cast<uint16_t*>(
       mRaw->getData(0, std::max(0, static_cast<int>(y) - 1)));
-  ushort16* img_up2 = reinterpret_cast<ushort16*>(
+  uint16_t* img_up2 = reinterpret_cast<uint16_t*>(
       mRaw->getData(0, std::max(0, static_cast<int>(y) - 2)));
 
   // Image is arranged in groups of 16 pixels horizontally
-  for (uint32 x = 0; x < width; x += 16) {
+  for (uint32_t x = 0; x < width; x += 16) {
     bits.fill();
     bool dir = !!bits.getBitsNoFill(1);
 
@@ -174,7 +174,7 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
       // First we decode even pixels
       for (int c = 0; c < 16; c += 2) {
         int b = len[c >> 3];
-        int32 adj = calcAdj(&bits, b);
+        int32_t adj = calcAdj(&bits, b);
 
         img[c] = adj + img_up[c];
       }
@@ -184,7 +184,7 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
       // is beyond me, it will hurt compression a deal.
       for (int c = 1; c < 16; c += 2) {
         int b = len[2 | (c >> 3)];
-        int32 adj = calcAdj(&bits, b);
+        int32_t adj = calcAdj(&bits, b);
 
         img[c] = adj + img_up2[c];
       }
@@ -194,7 +194,7 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
       int pred_left = x != 0 ? img[-2] : 128;
       for (int c = 0; c < 16; c += 2) {
         int b = len[c >> 3];
-        int32 adj = calcAdj(&bits, b);
+        int32_t adj = calcAdj(&bits, b);
 
         if (img + c < past_last)
           img[c] = adj + pred_left;
@@ -204,7 +204,7 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
       pred_left = x != 0 ? img[-1] : 128;
       for (int c = 1; c < 16; c += 2) {
         int b = len[2 | (c >> 3)];
-        int32 adj = calcAdj(&bits, b);
+        int32_t adj = calcAdj(&bits, b);
 
         if (img + c < past_last)
           img[c] = adj + pred_left;

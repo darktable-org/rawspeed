@@ -20,12 +20,8 @@
 
 #pragma once
 
-#include "common/Common.h" // for int32, short16, uint32, uint64, ushort16
+#include "common/Common.h" // for int32_t, int16_t, uint32_t, uint64_t, uint16_t
 #include <gmock/gmock.h>   // for make_tuple, tuple
-
-using rawspeed::uint32;
-using rawspeed::uint64;
-using rawspeed::ushort16;
 
 namespace rawspeed_test {
 
@@ -34,7 +30,7 @@ template <typename T> struct intPair {
   T second;
 };
 
-using ushort16Type = intPair<ushort16>;
+using ushort16Type = intPair<uint16_t>;
 using ushort16TType = std::tuple<ushort16Type, bool>;
 static const ushort16Type ushort16Values[] = {
     {0x01cd, 0xcd01}, {0x024e, 0x4e02}, {0x0726, 0x2607}, {0x07e3, 0xe307},
@@ -103,7 +99,7 @@ static const ushort16Type ushort16Values[] = {
     {0xf9d1, 0xd1f9}, {0xfbbf, 0xbffb}, {0xfd7d, 0x7dfd}, {0xffd4, 0xd4ff},
 };
 
-using uint32Type = intPair<uint32>;
+using uint32Type = intPair<uint32_t>;
 using uint32TType = std::tuple<uint32Type, bool>;
 static const uint32Type uint32Values[] = {
     {0x017c2230, 0x30227c01}, {0x03b26f3a, 0x3a6fb203},
@@ -236,7 +232,7 @@ static const uint32Type uint32Values[] = {
     {0xfdb0eefe, 0xfeeeb0fd}, {0xff3ebb92, 0x92bb3eff},
 };
 
-using uint64Type = intPair<uint64>;
+using uint64Type = intPair<uint64_t>;
 using uint64TType = std::tuple<uint64Type, bool>;
 static const uint64Type uint64Values[] = {
     {0x01a4f185910d9936, 0x36990d9185f1a401},

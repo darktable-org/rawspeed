@@ -36,15 +36,6 @@ extern "C" int rawspeed_get_number_of_processor_cores();
 
 namespace rawspeed {
 
-using char8 = signed char;
-using uchar8 = unsigned char;
-using uint32 = unsigned int;
-using int64 = long long;
-using uint64 = unsigned long long;
-using int32 = signed int;
-using ushort16 = unsigned short;
-using short16 = signed short;
-
 enum DEBUG_PRIO {
   DEBUG_PRIO_ERROR = 0x10,
   DEBUG_PRIO_WARNING = 0x100,
@@ -55,9 +46,8 @@ enum DEBUG_PRIO {
 void writeLog(DEBUG_PRIO priority, const char* format, ...)
     __attribute__((format(printf, 2, 3)));
 
-inline void copyPixels(uchar8* dest, int dstPitch, const uchar8* src,
-                       int srcPitch, int rowSize, int height)
-{
+inline void copyPixels(uint8_t* dest, int dstPitch, const uint8_t* src,
+                       int srcPitch, int rowSize, int height) {
   if (height == 1 || (dstPitch == srcPitch && srcPitch == rowSize))
     memcpy(dest, src, static_cast<size_t>(rowSize) * height);
   else {
@@ -130,13 +120,13 @@ isIn(const T value, const std::initializer_list<T2>& list) {
 
 // Clamps the given unsigned value to the range 0 .. 2^n-1, with n <= 16
 template <class T>
-inline constexpr __attribute__((const)) ushort16 clampBits(
+inline constexpr __attribute__((const)) uint16_t clampBits(
     T value, unsigned int nBits,
     typename std::enable_if<std::is_unsigned<T>::value>::type* /*unused*/ =
         nullptr) {
-  // We expect to produce ushort16.
+  // We expect to produce uint16_t.
   assert(nBits <= 16);
-  // Check that the clamp is not a no-op. Not of ushort16 to 16 bits e.g.
+  // Check that the clamp is not a no-op. Not of uint16_t to 16 bits e.g.
   // (Well, not really, if we are called from clampBits<signed>, it's ok..).
   constexpr auto BitWidthOfT = CHAR_BIT * sizeof(T);
   (void)BitWidthOfT;
@@ -147,7 +137,7 @@ inline constexpr __attribute__((const)) ushort16 clampBits(
 
 // Clamps the given signed value to the range 0 .. 2^n-1, with n <= 16
 template <typename T>
-inline constexpr ushort16 __attribute__((const))
+inline constexpr uint16_t __attribute__((const))
 clampBits(T value, unsigned int nBits,
           typename std::enable_if<std::is_signed<T>::value>::type* /*unused*/ =
               nullptr) {

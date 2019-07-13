@@ -41,7 +41,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(&bs));
 
-    const auto bit = bs.get<rawspeed::uint32>();
+    const auto bit = bs.get<uint32_t>();
     rawspeed::ByteStream rawData = bs.getStream(bs.getRemainSize());
 
     rawspeed::SamsungV1Decompressor p(mRaw, &rawData, bit);

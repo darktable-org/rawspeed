@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for ushort16
+#include "common/Common.h" // for uint16_t
 #include "common/Point.h"  // for iPoint2D
 #include <algorithm>       // for max, min, adjacent_find, for_each
 #include <cassert>         // for assert
@@ -37,7 +37,7 @@ namespace rawspeed {
 // See https://en.wikipedia.org/wiki/Spline_(mathematics)
 // section "Algorithm for computing natural cubic splines"
 
-template <typename T = ushort16,
+template <typename T = uint16_t,
           typename = std::enable_if_t<std::is_arithmetic<T>::value>>
 class Spline final {
 public:

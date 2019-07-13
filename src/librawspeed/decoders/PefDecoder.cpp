@@ -20,7 +20,7 @@
 */
 
 #include "decoders/PefDecoder.h"
-#include "common/Common.h"                    // for uint32, BitOrder_MSB
+#include "common/Common.h"                    // for uint32_t, BitOrder_MSB
 #include "common/Point.h"                     // for iPoint2D
 #include "decoders/RawDecoderException.h"     // for ThrowRDE
 #include "decompressors/PentaxDecompressor.h" // for PentaxDecompressor
@@ -74,8 +74,8 @@ RawImage PefDecoder::decodeRawInternal() {
       DataBuffer(mFile->getSubView(offsets->getU32(), counts->getU32()),
                  Endianness::little));
 
-  uint32 width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32 height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
 
   mRaw->dim = iPoint2D(width, height);
 

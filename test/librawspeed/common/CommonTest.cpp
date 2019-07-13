@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h"  // for uchar8, clampBits, roundUp, isIn, isPowe...
+#include "common/Common.h" // for uint8_t, clampBits, roundUp, isIn, isPowe...
 #include <algorithm>        // for fill, min, equal, generate_n
 #include <cassert>          // for assert
 #include <cstddef>          // for size_t
@@ -41,9 +41,7 @@ using rawspeed::roundUp;
 using rawspeed::roundUpDivision;
 using rawspeed::splitString;
 using rawspeed::trimSpaces;
-using rawspeed::uchar8;
 using rawspeed::unroll_loop;
-using rawspeed::ushort16;
 using std::make_tuple;
 using std::min;
 using std::numeric_limits;
@@ -226,7 +224,7 @@ TEST_P(IsInTest, IsInTest) {
   ASSERT_EQ(isIn(in, {"foo", "foo2", "bar", "baz"}), expected);
 }
 
-using ClampBitsType = std::tuple<int, int, ushort16>;
+using ClampBitsType = std::tuple<int, int, uint16_t>;
 class ClampBitsTest : public ::testing::TestWithParam<ClampBitsType> {
 protected:
   ClampBitsTest() = default;
@@ -238,7 +236,7 @@ protected:
 
   int in; // input
   int n;
-  ushort16 expected; // expected output
+  uint16_t expected; // expected output
 };
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -281,7 +279,7 @@ TEST(ClampBitsDeathTest, Only16Bit) {
 
 TEST(ClampBitsUnsignedDeathTest, NoNopClamps) {
 #ifndef NDEBUG
-  ASSERT_DEATH({ ASSERT_EQ(clampBits<ushort16>(0, 16), 0); },
+  ASSERT_DEATH({ ASSERT_EQ(clampBits<uint16_t>(0, 16), 0); },
                "BitWidthOfT > nBits");
 #endif
 }
@@ -429,8 +427,8 @@ protected:
     rowSize = min(min(std::get<2>(GetParam()), srcPitch), dstPitch);
     height = std::get<3>(GetParam());
 
-    assert(srcPitch * height < numeric_limits<uchar8>::max());
-    assert(dstPitch * height < numeric_limits<uchar8>::max());
+    assert(srcPitch * height < numeric_limits<uint8_t>::max());
+    assert(dstPitch * height < numeric_limits<uint8_t>::max());
 
     src.resize((size_t)srcPitch * height);
     dst.resize((size_t)dstPitch * height);
@@ -439,7 +437,7 @@ protected:
     fill(dst.begin(), dst.end(), static_cast<decltype(dst)::value_type>(-1));
   }
   void generate() {
-    uchar8 v = 0;
+    uint8_t v = 0;
 
     for (int y = 0; y < height; y++) {
       for (int x = 0; x < rowSize; x++, v++) {
@@ -461,8 +459,8 @@ protected:
     }
   }
 
-  vector<uchar8> src;
-  vector<uchar8> dst;
+  vector<uint8_t> src;
+  vector<uint8_t> dst;
   int dstPitch;
   int srcPitch;
   int rowSize;

@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/Common.h"      // for uint32, uchar8, ushort16
+#include "common/Common.h"      // for uint32_t, uint8_t, uint16_t
 #include "common/NORangesSet.h" // for set
 #include "io/ByteStream.h"      // for ByteStream
 #include "tiff/CiffTag.h"       // for CiffTag
@@ -60,20 +60,20 @@ public:
 
   const ByteStream& getData() const { return data; }
 
-  uchar8 getByte(uint32 num = 0) const;
-  uint32 getU32(uint32 num = 0) const;
-  ushort16 getU16(uint32 num = 0) const;
+  uint8_t getByte(uint32_t num = 0) const;
+  uint32_t getU32(uint32_t num = 0) const;
+  uint16_t getU16(uint32_t num = 0) const;
 
   std::string getString() const;
   std::vector<std::string> getStrings() const;
 
-  uint32 __attribute__((pure)) getElementSize() const;
-  uint32 __attribute__((pure)) getElementShift() const;
+  uint32_t __attribute__((pure)) getElementSize() const;
+  uint32_t __attribute__((pure)) getElementShift() const;
 
   // variables:
   CiffTag tag;
   CiffDataType type;
-  uint32 count;
+  uint32_t count;
 
   bool __attribute__((pure)) isInt() const;
   bool __attribute__((pure)) isString() const;

@@ -22,7 +22,7 @@
 
 #include "rawspeedconfig.h"
 #include "decompressors/SonyArw2Decompressor.h"
-#include "common/Common.h"                // for uint32
+#include "common/Common.h"                // for uint32_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -38,8 +38,8 @@ SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
 
-  const uint32 w = mRaw->dim.x;
-  const uint32 h = mRaw->dim.y;
+  const uint32_t w = mRaw->dim.x;
+  const uint32_t h = mRaw->dim.y;
 
   if (w == 0 || h == 0 || w % 32 != 0 || w > 8000 || h > 5320)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", w, h);
@@ -49,14 +49,14 @@ SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
 }
 
 void SonyArw2Decompressor::decompressRow(int row) const {
-  uchar8* data = mRaw->getData();
-  uint32 pitch = mRaw->pitch;
-  int32 w = mRaw->dim.x;
+  uint8_t* data = mRaw->getData();
+  uint32_t pitch = mRaw->pitch;
+  int32_t w = mRaw->dim.x;
 
   assert(mRaw->dim.x > 0);
   assert(mRaw->dim.x % 32 == 0);
 
-  auto* dest = reinterpret_cast<ushort16*>(&data[row * pitch]);
+  auto* dest = reinterpret_cast<uint16_t*>(&data[row * pitch]);
 
   ByteStream rowBs = input;
   rowBs.skipBytes(row * mRaw->dim.x);
@@ -64,10 +64,10 @@ void SonyArw2Decompressor::decompressRow(int row) const {
 
   BitPumpLSB bits(rowBs);
 
-  uint32 random = bits.peekBits(24);
+  uint32_t random = bits.peekBits(24);
 
   // Each loop iteration processes 16 pixels, consuming 128 bits of input.
-  for (int32 x = 0; x < w;) {
+  for (int32_t x = 0; x < w;) {
     // 30 bits.
     int _max = bits.getBits(11);
     int _min = bits.getBits(11);
@@ -99,7 +99,7 @@ void SonyArw2Decompressor::decompressRow(int row) const {
             p = 0x7ff;
         }
       }
-      mRaw->setWithLookUp(p << 1, reinterpret_cast<uchar8*>(&dest[x + i * 2]),
+      mRaw->setWithLookUp(p << 1, reinterpret_cast<uint8_t*>(&dest[x + i * 2]),
                           &random);
     }
     x += ((x & 1) != 0) ? 31 : 1; // Skip to next 32 pixels

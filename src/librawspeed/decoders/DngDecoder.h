@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h"                // for uint32
+#include "common/Common.h"                // for uint32_t
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
@@ -51,7 +51,7 @@ protected:
   void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
   void parseCFA(const TiffIFD* raw);
   DngTilingDescription getTilingDescription(const TiffIFD* raw);
-  void decodeData(const TiffIFD* raw, uint32 sample_format);
+  void decodeData(const TiffIFD* raw, uint32_t sample_format);
   void handleMetadata(const TiffIFD* raw);
   bool decodeMaskedAreas(const TiffIFD* raw);
   bool decodeBlackLevels(const TiffIFD* raw);

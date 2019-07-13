@@ -20,7 +20,7 @@
 */
 
 #include "decoders/KdcDecoder.h"
-#include "common/Common.h"                          // for uint32, ushort16
+#include "common/Common.h"                          // for uint32_t, uint16_t
 #include "common/NORangesSet.h"                     // for NORangesSet
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
@@ -54,8 +54,8 @@ Buffer KdcDecoder::getInputBuffer() {
     ThrowRDE("Couldn't find the KDC offset");
 
   assert(offset != nullptr);
-  uint64 off = uint64(offset->getU32(4)) + uint64(offset->getU32(12));
-  if (off > std::numeric_limits<uint32>::max())
+  uint64_t off = uint64_t(offset->getU32(4)) + uint64_t(offset->getU32(12));
+  if (off > std::numeric_limits<uint32_t>::max())
     ThrowRDE("Offset is too large.");
 
   // Offset hardcoding gotten from dcraw
@@ -95,8 +95,8 @@ RawImage KdcDecoder::decodeRawInternal() {
   TiffRootIFD kodakifd(nullptr, &ifds, ifdoffset->getRootIfdData(),
                        ifdoffset->getU32());
 
-  uint32 width = 0;
-  uint32 height = 0;
+  uint32_t width = 0;
+  uint32_t height = 0;
   TiffEntry* ew = kodakifd.getEntryRecursive(KODAK_KDC_SENSOR_WIDTH);
   TiffEntry* eh = kodakifd.getEntryRecursive(KODAK_KDC_SENSOR_HEIGHT);
   if (ew && eh) {
@@ -149,12 +149,12 @@ void KdcDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     TiffEntry *wb = mRootIFD->getEntryRecursive(KODAKWB);
     if (wb->count == 734 || wb->count == 1502) {
       mRaw->metadata.wbCoeffs[0] =
-          static_cast<float>(((static_cast<ushort16>(wb->getByte(148))) << 8) |
+          static_cast<float>(((static_cast<uint16_t>(wb->getByte(148))) << 8) |
                              wb->getByte(149)) /
           256.0F;
       mRaw->metadata.wbCoeffs[1] = 1.0F;
       mRaw->metadata.wbCoeffs[2] =
-          static_cast<float>(((static_cast<ushort16>(wb->getByte(150))) << 8) |
+          static_cast<float>(((static_cast<uint16_t>(wb->getByte(150))) << 8) |
                              wb->getByte(151)) /
           256.0F;
     }

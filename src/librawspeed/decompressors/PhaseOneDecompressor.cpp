@@ -22,7 +22,7 @@
 
 #include "rawspeedconfig.h"
 #include "decompressors/PhaseOneDecompressor.h"
-#include "common/Common.h"                // for int32, uint32, ushort16
+#include "common/Common.h"                // for int32_t, uint32_t, uint16_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -97,7 +97,7 @@ void PhaseOneDecompressor::validateStrips() const {
 }
 
 void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
-  uint32 width = mRaw->dim.x;
+  uint32_t width = mRaw->dim.x;
   assert(width % 2 == 0);
 
   static constexpr std::array<const int, 10> length = {8,  7, 6,  9,  11,
@@ -105,11 +105,11 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
 
   BitPumpMSB32 pump(strip.bs);
 
-  std::array<int32, 2> pred;
+  std::array<int32_t, 2> pred;
   pred.fill(0);
   std::array<int, 2> len;
-  auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, strip.n));
-  for (uint32 col = 0; col < width; col++) {
+  auto* img = reinterpret_cast<uint16_t*>(mRaw->getData(0, strip.n));
+  for (uint32_t col = 0; col < width; col++) {
     pump.fill(32);
     if (col >= (width & ~7U)) // last 'width % 8' pixels.
       len[0] = len[1] = 14;
@@ -140,7 +140,7 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
       pred[col & 1] +=
           static_cast<signed>(pump.getBitsNoFill(i)) + 1 - (1 << (i - 1));
       // FIXME: is the truncation the right solution here?
-      img[col] = ushort16(pred[col & 1]);
+      img[col] = uint16_t(pred[col & 1]);
     }
   }
 }

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h"                           // for uint32
+#include "common/Common.h"                           // for uint32_t
 #include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
 
 namespace rawspeed {
@@ -35,19 +35,19 @@ class LJpegDecompressor final : public AbstractLJpegDecompressor
   void decodeScan() override;
   template <int N_COMP, bool WeirdWidth = false> void decodeN();
 
-  uint32 offX = 0;
-  uint32 offY = 0;
-  uint32 w = 0;
-  uint32 h = 0;
+  uint32_t offX = 0;
+  uint32_t offY = 0;
+  uint32_t w = 0;
+  uint32_t h = 0;
 
-  uint32 fullBlocks = 0;
-  uint32 trailingPixels = 0;
+  uint32_t fullBlocks = 0;
+  uint32_t trailingPixels = 0;
 
 public:
   LJpegDecompressor(const ByteStream& bs, const RawImage& img);
 
-  void decode(uint32 offsetX, uint32 offsetY, uint32 width, uint32 height,
-              bool fixDng16Bug_);
+  void decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
+              uint32_t height, bool fixDng16Bug_);
 };
 
 } // namespace rawspeed
