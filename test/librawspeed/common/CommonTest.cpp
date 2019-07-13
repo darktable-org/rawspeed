@@ -42,7 +42,6 @@ using rawspeed::roundUpDivision;
 using rawspeed::splitString;
 using rawspeed::trimSpaces;
 using rawspeed::unroll_loop;
-using rawspeed::ushort16;
 using std::make_tuple;
 using std::min;
 using std::numeric_limits;
@@ -225,7 +224,7 @@ TEST_P(IsInTest, IsInTest) {
   ASSERT_EQ(isIn(in, {"foo", "foo2", "bar", "baz"}), expected);
 }
 
-using ClampBitsType = std::tuple<int, int, ushort16>;
+using ClampBitsType = std::tuple<int, int, uint16_t>;
 class ClampBitsTest : public ::testing::TestWithParam<ClampBitsType> {
 protected:
   ClampBitsTest() = default;
@@ -237,7 +236,7 @@ protected:
 
   int in; // input
   int n;
-  ushort16 expected; // expected output
+  uint16_t expected; // expected output
 };
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -280,7 +279,7 @@ TEST(ClampBitsDeathTest, Only16Bit) {
 
 TEST(ClampBitsUnsignedDeathTest, NoNopClamps) {
 #ifndef NDEBUG
-  ASSERT_DEATH({ ASSERT_EQ(clampBits<ushort16>(0, 16), 0); },
+  ASSERT_DEATH({ ASSERT_EQ(clampBits<uint16_t>(0, 16), 0); },
                "BitWidthOfT > nBits");
 #endif
 }

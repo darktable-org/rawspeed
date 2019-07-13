@@ -331,15 +331,15 @@ void NefDecoder::readCoolpixSplitRaw(const ByteStream& input,
   h /= 2;
   BitPumpMSB in(input);
   for (; y < h; y++) {
-    auto* dest = reinterpret_cast<ushort16*>(
-        &data[offset.x * sizeof(ushort16) * cpp + y * 2 * outPitch]);
+    auto* dest = reinterpret_cast<uint16_t*>(
+        &data[offset.x * sizeof(uint16_t) * cpp + y * 2 * outPitch]);
     for (uint32 x = 0 ; x < w; x++) {
       dest[x] =  in.getBits(12);
     }
   }
   for (y = offset.y; y < h; y++) {
-    auto* dest = reinterpret_cast<ushort16*>(
-        &data[offset.x * sizeof(ushort16) * cpp + (y * 2 + 1) * outPitch]);
+    auto* dest = reinterpret_cast<uint16_t*>(
+        &data[offset.x * sizeof(uint16_t) * cpp + (y * 2 + 1) * outPitch]);
     for (uint32 x = 0 ; x < w; x++) {
       dest[x] =  in.getBits(12);
     }
@@ -657,7 +657,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h) {
 
   RawImageCurveGuard curveHandler(&mRaw, curve, false);
 
-  ushort16 tmp;
+  uint16_t tmp;
   auto* tmpch = reinterpret_cast<uint8_t*>(&tmp);
 
   uint8_t* data = mRaw->getData();
@@ -665,7 +665,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h) {
   const uint8_t* in = input->getData(w * h * 3);
 
   for (uint32 y = 0; y < h; y++) {
-    auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
+    auto* dest = reinterpret_cast<uint16_t*>(&data[y * pitch]);
     uint32 random = in[0] + (in[1] << 8) +  (in[2] << 16);
     for (uint32 x = 0 ; x < w*3; x += 6) {
       uint32 g1 = in[0];
@@ -726,9 +726,9 @@ void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h) {
 
 // From:  dcraw.c -- Dave Coffin's raw photo decoder
 #define SQR(x) ((x)*(x))
-std::vector<ushort16> NefDecoder::gammaCurve(double pwr, double ts, int mode,
+std::vector<uint16_t> NefDecoder::gammaCurve(double pwr, double ts, int mode,
                                              int imax) {
-  std::vector<ushort16> curve(65536);
+  std::vector<uint16_t> curve(65536);
 
   int i;
   std::array<double, 6> g;
@@ -768,7 +768,7 @@ std::vector<ushort16> NefDecoder::gammaCurve(double pwr, double ts, int mode,
   for (i=0; i < 0x10000; i++) {
     curve[i] = 0xffff;
     if ((r = static_cast<double>(i) / imax) < 1) {
-      curve[i] = static_cast<ushort16>(
+      curve[i] = static_cast<uint16_t>(
           0x10000 *
           (mode ? (r < g[3] ? r * g[1]
                             : (g[0] ? pow(r, g[0]) * (1 + g[4]) - g[4]

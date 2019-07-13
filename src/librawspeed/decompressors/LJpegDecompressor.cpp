@@ -20,7 +20,7 @@
 */
 
 #include "decompressors/LJpegDecompressor.h"
-#include "common/Common.h"                // for unroll_loop, uint32, ushort16
+#include "common/Common.h"                // for unroll_loop, uint32, uint16_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -179,7 +179,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   for (unsigned y = 0; y < h; ++y) {
     auto destY = offY + y;
     auto dest =
-        reinterpret_cast<ushort16*>(mRaw->getDataUncropped(offX, destY));
+        reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(offX, destY));
 
     copy_n(predNext, N_COMP, pred.data());
     // the predictor for the next line is the start of this line
@@ -187,13 +187,13 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
 
     unsigned x = 0;
 
-    // FIXME: predictor may have value outside of the ushort16.
+    // FIXME: predictor may have value outside of the uint16_t.
     // https://github.com/darktable-org/rawspeed/issues/175
 
     // For x, we first process all full pixel blocks within the image buffer ...
     for (; x < fullBlocks; ++x) {
       unroll_loop<N_COMP>([&](int i) {
-        pred[i] = ushort16(pred[i] + ht[i]->decodeNext(bitStream));
+        pred[i] = uint16_t(pred[i] + ht[i]->decodeNext(bitStream));
         *dest++ = pred[i];
       });
     }
@@ -209,7 +209,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
       assert(trailingPixels < N_COMP);
       unsigned c = 0;
       for (; c < trailingPixels; ++c) {
-        pred[c] = ushort16(pred[c] + ht[c]->decodeNext(bitStream));
+        pred[c] = uint16_t(pred[c] + ht[c]->decodeNext(bitStream));
         *dest++ = pred[c];
       }
       // Discard the rest of the block.

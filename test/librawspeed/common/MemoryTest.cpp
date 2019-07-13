@@ -31,7 +31,6 @@ using rawspeed::alignedFreeConstPtr;
 using rawspeed::alignedMalloc;
 using rawspeed::alignedMallocArray;
 using rawspeed::uint32;
-using rawspeed::ushort16;
 using std::unique_ptr;
 
 namespace rawspeed_test {
@@ -74,7 +73,7 @@ template <typename T>
 class AlignedMallocDeathTest : public AlignedMallocTest<T> {};
 
 using Classes =
-    testing::Types<int, unsigned int, int8_t, uint8_t, int16_t, ushort16,
+    testing::Types<int, unsigned int, int8_t, uint8_t, int16_t, uint16_t,
                    int32_t, uint32, int64_t, uint64_t, float, double>;
 
 TYPED_TEST_CASE(AlignedMallocTest, Classes);

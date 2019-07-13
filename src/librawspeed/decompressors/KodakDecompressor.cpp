@@ -113,7 +113,7 @@ void KodakDecompressor::decompress() {
 
   uint32 random = 0;
   for (auto y = 0; y < mRaw->dim.y; y++) {
-    auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
+    auto* dest = reinterpret_cast<uint16_t*>(&data[y * pitch]);
 
     for (auto x = 0; x < mRaw->dim.x; x += segment_size) {
       const uint32 len = std::min(segment_size, mRaw->dim.x - x);

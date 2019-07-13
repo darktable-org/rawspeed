@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/SonyArw1Decompressor.h"
-#include "common/Common.h"                // for uint32, uint8_t, ushort16
+#include "common/Common.h"                // for uint32, uint8_t, uint16_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -60,8 +60,8 @@ void SonyArw1Decompressor::decompress(const ByteStream& input) const {
 
   BitPumpMSB bits(input);
   uint8_t* data = mRaw->getData();
-  auto* dest = reinterpret_cast<ushort16*>(&data[0]);
-  uint32 pitch = mRaw->pitch / sizeof(ushort16);
+  auto* dest = reinterpret_cast<uint16_t*>(&data[0]);
+  uint32 pitch = mRaw->pitch / sizeof(uint16_t);
   int sum = 0;
   for (int64_t x = w - 1; x >= 0; x--) {
     for (uint32 y = 0; y < h + 1; y += 2) {

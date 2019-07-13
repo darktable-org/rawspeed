@@ -172,7 +172,7 @@ This is a vector that contains the positions of the detected bad pixels in the i
 for (vector<uint32>::iterator i=mBadPixelPositions.begin(); i != mBadPixelPositions.end(); i++)  {
     uint32 pos_x = (*i)&0xffff;
     uint32 pos_y = (*i)>>16;
-    ushort16* pix = (ushort16*)getDataUncropped(pos_x, pos_y);
+    uint16_t* pix = (uint16_t*)getDataUncropped(pos_x, pos_y);
 }
 ```
 

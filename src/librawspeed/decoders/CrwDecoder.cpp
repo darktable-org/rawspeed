@@ -21,7 +21,7 @@
 */
 
 #include "decoders/CrwDecoder.h"
-#include "common/Common.h"                 // for ushort16, uint8_t, uint32
+#include "common/Common.h"                 // for uint16_t, uint8_t, uint32
 #include "common/Point.h"                  // for iPoint2D
 #include "common/RawspeedException.h"      // for RawspeedException
 #include "decoders/RawDecoderException.h"  // for ThrowRDE
@@ -138,7 +138,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const CiffEntry* shot_info = mRootIFD->getEntryRecursive(CIFF_SHOTINFO);
     if (shot_info->type == CIFF_SHORT && shot_info->count >= 2) {
       // os << exp(canonEv(value.toLong()) * log(2.0)) * 100.0 / 32.0;
-      ushort16 iso_index = shot_info->getU16(2);
+      uint16_t iso_index = shot_info->getU16(2);
       iso = expf(canonEv(static_cast<long>(iso_index)) * logf(2.0)) * 100.0F /
             32.0F;
     }
@@ -168,7 +168,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         // correct offset for most cameras
         int offset = hints.get("wb_offset", 120);
 
-        std::array<ushort16, 2> key = {{0x410, 0x45f3}};
+        std::array<uint16_t, 2> key = {{0x410, 0x45f3}};
         if (! hints.has("wb_mangle"))
           key[0] = key[1] = 0;
 
@@ -201,7 +201,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     }
     if (mRootIFD->hasEntryRecursive(CIFF_SHOTINFO) && mRootIFD->hasEntryRecursive(CIFF_WHITEBALANCE)) {
       const CiffEntry* shot_info = mRootIFD->getEntryRecursive(CIFF_SHOTINFO);
-      ushort16 wb_index = shot_info->getU16(7);
+      uint16_t wb_index = shot_info->getU16(7);
       const CiffEntry* wb_data = mRootIFD->getEntryRecursive(CIFF_WHITEBALANCE);
       /* CANON EOS D60, CANON EOS 10D, CANON EOS 300D */
       if (wb_index > 9)

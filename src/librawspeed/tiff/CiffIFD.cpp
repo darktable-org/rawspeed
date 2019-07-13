@@ -21,7 +21,7 @@
 */
 
 #include "tiff/CiffIFD.h"
-#include "common/Common.h"               // for isIn, uint32, ushort16
+#include "common/Common.h"               // for isIn, uint32, uint16_t
 #include "common/NORangesSet.h"          // for set
 #include "io/ByteStream.h"               // for ByteStream
 #include "parsers/CiffParserException.h" // for ThrowCPE
@@ -88,7 +88,7 @@ CiffIFD::CiffIFD(CiffIFD* const parent_, ByteStream directory)
   const ByteStream valueData(directory.getStream(valueDataSize));
 
   // count of the Directory entries in this IFD
-  const ushort16 entryCount = directory.getU16();
+  const uint16_t entryCount = directory.getU16();
 
   // each entry is 10 bytes
   ByteStream dirEntries(directory.getStream(entryCount, 10));

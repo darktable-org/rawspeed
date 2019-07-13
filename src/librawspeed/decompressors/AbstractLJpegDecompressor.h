@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32, ushort16
+#include "common/Common.h"                      // for uint32, uint16_t
 #include "common/RawImage.h"                    // for RawImage
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
@@ -176,9 +176,9 @@ protected:
   }
 
   template <int N_COMP>
-  __attribute__((pure)) std::array<ushort16, N_COMP>
+  __attribute__((pure)) std::array<uint16_t, N_COMP>
   getInitialPredictors() const {
-    std::array<ushort16, N_COMP> pred;
+    std::array<uint16_t, N_COMP> pred;
     if (frame.prec < (Pt + 1)) {
       ThrowRDE("Invalid precision (%u) and point transform (%u) combination!",
                frame.prec, Pt);

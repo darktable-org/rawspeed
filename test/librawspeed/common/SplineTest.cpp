@@ -19,7 +19,7 @@
 */
 
 #include "common/Spline.h" // for Spline, Spline<>::value_type
-#include "common/Common.h" // for ushort16
+#include "common/Common.h" // for uint16_t
 #include "common/Point.h"  // for iPoint2D, iPoint2D::value_type
 #include <algorithm>       // for generate_n
 #include <array>           // for array
@@ -47,7 +47,7 @@ namespace rawspeed {
 namespace rawspeed_test {
 
 TEST(SplineStaticTest, DefaultIsUshort16) {
-  static_assert(std::is_same<Spline<>::value_type, rawspeed::ushort16>::value,
+  static_assert(std::is_same<Spline<>::value_type, uint16_t>::value,
                 "wrong default type");
 }
 
@@ -146,7 +146,7 @@ TEST(SplineDeathTest, ClampUshort16Min) {
                     {65535, 65535}});
         s.calculateCurve();
         // for x = 484, this used to compute -1.0046832758220527,
-        // which is unrepresentable in ushort16.
+        // which is unrepresentable in uint16_t.
         exit(0);
       },
       ::testing::ExitedWithCode(0), "");
@@ -165,7 +165,7 @@ TEST(SplineDeathTest, ClampUshort16Max) {
                     {65535, 65535}});
         s.calculateCurve();
         // for x = 65535, this used to compute 65535.000000000007,
-        // which is unrepresentable in ushort16.
+        // which is unrepresentable in uint16_t.
         exit(0);
       },
       ::testing::ExitedWithCode(0), "");
@@ -215,7 +215,7 @@ static const identityType identityValues[] = {
         std::array<rawspeed::iPoint2D, 2>{{{0, 65535}, {65535, 0}}},
         std::vector<std::array<double, 4>>{{{65535.0, -1.0, 0.0, 0.0}}})};
 
-using IntegerIdentityTest = IdentityTest<rawspeed::ushort16>;
+using IntegerIdentityTest = IdentityTest<uint16_t>;
 INSTANTIATE_TEST_CASE_P(IntegerIdentityTest, IntegerIdentityTest,
                         ::testing::ValuesIn(identityValues));
 TEST_P(IntegerIdentityTest, ValuesAreLinearlyInterpolated) {
@@ -404,7 +404,7 @@ static const auto constantValues =
     ::testing::Combine(::testing::ValuesIn(calculateSteps(NumExtraSteps)),
                        ::testing::Range(0, 1 + NumExtraSteps));
 
-using IntegerConstantTest = ConstantTest<rawspeed::ushort16>;
+using IntegerConstantTest = ConstantTest<uint16_t>;
 INSTANTIATE_TEST_CASE_P(IntegerConstantTest, IntegerConstantTest,
                         constantValues);
 TEST_P(IntegerConstantTest, AllValuesAreEqual) {

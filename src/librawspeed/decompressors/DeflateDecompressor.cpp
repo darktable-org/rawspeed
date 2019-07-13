@@ -22,12 +22,12 @@
 
 #ifdef HAVE_ZLIB
 
-#include "decompressors/DeflateDecompressor.h"
-#include "common/Common.h"                // for uint32, ushort16
+#include "common/Common.h"                // for uint32, uint16_t
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/Endianness.h"                // for getHostEndianness, Endiann...
-#include <cassert>                        // for assert
-#include <cstdio>                         // for size_t
+#include "decompressors/DeflateDecompressor.h"
+#include "io/Endianness.h" // for getHostEndianness, Endiann...
+#include <cassert>         // for assert
+#include <cstdio>          // for size_t
 #include <zlib.h>
 
 namespace rawspeed {
@@ -68,7 +68,7 @@ static inline void decodeFPDeltaRow(unsigned char* src, unsigned char* dst,
   }
 }
 
-static inline uint32 __attribute__((const)) fp16ToFloat(ushort16 fp16) {
+static inline uint32 __attribute__((const)) fp16ToFloat(uint16_t fp16) {
   // IEEE-754-2008: binary16:
   // bit 15 - sign
   // bits 14-10 - exponent (5 bit)
@@ -170,7 +170,7 @@ static inline uint32 __attribute__((const)) fp24ToFloat(uint32 fp24) {
 }
 
 static inline void expandFP16(unsigned char* dst, int width) {
-  auto* dst16 = reinterpret_cast<ushort16*>(dst);
+  auto* dst16 = reinterpret_cast<uint16_t*>(dst);
   auto* dst32 = reinterpret_cast<uint32*>(dst);
 
   for (int x = width - 1; x >= 0; x--)

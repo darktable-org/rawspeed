@@ -22,7 +22,7 @@
 
 #include "rawspeedconfig.h"
 #include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
-#include "common/Common.h"             // for uint32, uint8_t, ushort16, wri...
+#include "common/Common.h"             // for uint32, uint8_t, uint16_t, wri...
 #include "common/ErrorLog.h"           // for ErrorLog
 #include "common/Mutex.h"              // for Mutex
 #include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
@@ -117,12 +117,12 @@ public:
   iPoint2D __attribute__((pure)) getCropOffset() const;
   virtual void scaleBlackWhite() = 0;
   virtual void calculateBlackAreas() = 0;
-  virtual void setWithLookUp(ushort16 value, uint8_t* dst, uint32* random) = 0;
+  virtual void setWithLookUp(uint16_t value, uint8_t* dst, uint32* random) = 0;
   void sixteenBitLookup();
   void transferBadPixelsToMap() REQUIRES(!mBadPixelMutex);
   void fixBadPixels() REQUIRES(!mBadPixelMutex);
   void expandBorder(iRectangle2D validData);
-  void setTable(const std::vector<ushort16>& table_, bool dither);
+  void setTable(const std::vector<uint16_t>& table_, bool dither);
   void setTable(std::unique_ptr<TableLookUp> t);
 
   bool isAllocated() {return !!data;}
@@ -180,7 +180,7 @@ class RawImageDataU16 final : public RawImageData {
 public:
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
-  void setWithLookUp(ushort16 value, uint8_t* dst, uint32* random) override;
+  void setWithLookUp(uint16_t value, uint8_t* dst, uint32* random) override;
 
 protected:
   void scaleValues_plain(int start_y, int end_y);
@@ -200,7 +200,7 @@ class RawImageDataFloat final : public RawImageData {
 public:
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
-  void setWithLookUp(ushort16 value, uint8_t* dst, uint32* random) override;
+  void setWithLookUp(uint16_t value, uint8_t* dst, uint32* random) override;
 
 protected:
   void scaleValues(int start_y, int end_y) override;
@@ -260,9 +260,9 @@ inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type, uint32 
 // You must supply the destination where the value should be written, and a pointer to
 // a value that will be used to store a random counter that can be reused between calls.
 // this needs to be inline to speed up tight decompressor loops
-inline void RawImageDataU16::setWithLookUp(ushort16 value, uint8_t* dst,
+inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
                                            uint32* random) {
-  auto* dest = reinterpret_cast<ushort16*>(dst);
+  auto* dest = reinterpret_cast<uint16_t*>(dst);
   if (table == nullptr) {
     *dest = value;
     return;
@@ -284,11 +284,11 @@ inline void RawImageDataU16::setWithLookUp(ushort16 value, uint8_t* dst,
 
 class RawImageCurveGuard final {
   RawImage* mRaw;
-  const std::vector<ushort16>& curve;
+  const std::vector<uint16_t>& curve;
   const bool uncorrectedRawValues;
 
 public:
-  RawImageCurveGuard(RawImage* raw, const std::vector<ushort16>& curve_,
+  RawImageCurveGuard(RawImage* raw, const std::vector<uint16_t>& curve_,
                      bool uncorrectedRawValues_)
       : mRaw(raw), curve(curve_), uncorrectedRawValues(uncorrectedRawValues_) {
     if (uncorrectedRawValues)

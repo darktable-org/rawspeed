@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/SamsungV0Decompressor.h"
-#include "common/Common.h"                // for uint32, ushort16, int32_t
+#include "common/Common.h"                // for uint32, uint16_t, int32_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -89,11 +89,11 @@ void SamsungV0Decompressor::decompress() const {
 
   // Swap red and blue pixels to get the final CFA pattern
   for (int y = 0; y < mRaw->dim.y - 1; y += 2) {
-    auto* topline = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
-    auto* bottomline = reinterpret_cast<ushort16*>(mRaw->getData(0, y + 1));
+    auto* topline = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
+    auto* bottomline = reinterpret_cast<uint16_t*>(mRaw->getData(0, y + 1));
 
     for (int x = 0; x < mRaw->dim.x - 1; x += 2) {
-      ushort16 temp = topline[1];
+      uint16_t temp = topline[1];
       topline[1] = bottomline[0];
       bottomline[0] = temp;
 
@@ -121,12 +121,12 @@ void SamsungV0Decompressor::decompressStrip(uint32 y,
   for (int& i : len)
     i = y < 2 ? 7 : 4;
 
-  auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
+  auto* img = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
   const auto* const past_last =
-      reinterpret_cast<ushort16*>(mRaw->getData(width - 1, y) + mRaw->getBpp());
-  ushort16* img_up = reinterpret_cast<ushort16*>(
+      reinterpret_cast<uint16_t*>(mRaw->getData(width - 1, y) + mRaw->getBpp());
+  uint16_t* img_up = reinterpret_cast<uint16_t*>(
       mRaw->getData(0, std::max(0, static_cast<int>(y) - 1)));
-  ushort16* img_up2 = reinterpret_cast<ushort16*>(
+  uint16_t* img_up2 = reinterpret_cast<uint16_t*>(
       mRaw->getData(0, std::max(0, static_cast<int>(y) - 2)));
 
   // Image is arranged in groups of 16 pixels horizontally

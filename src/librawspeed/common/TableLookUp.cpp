@@ -33,10 +33,10 @@ TableLookUp::TableLookUp(int _ntables, bool _dither)
   if (ntables < 1) {
     ThrowRDE("Cannot construct 0 tables");
   }
-  tables.resize(ntables * TABLE_SIZE, ushort16(0));
+  tables.resize(ntables * TABLE_SIZE, uint16_t(0));
 }
 
-void TableLookUp::setTable(int ntable, const std::vector<ushort16>& table) {
+void TableLookUp::setTable(int ntable, const std::vector<uint16_t>& table) {
   assert(!table.empty());
 
   const int nfilled = table.size();
@@ -46,7 +46,7 @@ void TableLookUp::setTable(int ntable, const std::vector<ushort16>& table) {
   if (ntable > ntables) {
     ThrowRDE("Table lookup with number greater than number of tables.");
   }
-  ushort16* t = &tables[ntable * TABLE_SIZE];
+  uint16_t* t = &tables[ntable * TABLE_SIZE];
   if (!dither) {
     for (int i = 0; i < 65536; i++) {
       t[i] = (i < nfilled) ? table[i] : table[nfilled - 1];
@@ -59,7 +59,7 @@ void TableLookUp::setTable(int ntable, const std::vector<ushort16>& table) {
     int upper = i < (nfilled - 1) ? table[i + 1] : center;
     int delta = upper - lower;
     t[i * 2] = clampBits(center - ((upper - lower + 2) / 4), 16);
-    t[i * 2 + 1] = ushort16(delta);
+    t[i * 2 + 1] = uint16_t(delta);
     // FIXME: this is completely broken when the curve is non-monotonic.
   }
 
@@ -71,7 +71,7 @@ void TableLookUp::setTable(int ntable, const std::vector<ushort16>& table) {
   t[TABLE_SIZE - 1] = t[TABLE_SIZE - 2];
 }
 
-ushort16* TableLookUp::getTable(int n) {
+uint16_t* TableLookUp::getTable(int n) {
   if (n > ntables) {
     ThrowRDE("Table lookup with number greater than number of tables.");
   }

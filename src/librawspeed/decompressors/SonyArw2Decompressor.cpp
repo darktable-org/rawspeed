@@ -56,7 +56,7 @@ void SonyArw2Decompressor::decompressRow(int row) const {
   assert(mRaw->dim.x > 0);
   assert(mRaw->dim.x % 32 == 0);
 
-  auto* dest = reinterpret_cast<ushort16*>(&data[row * pitch]);
+  auto* dest = reinterpret_cast<uint16_t*>(&data[row * pitch]);
 
   ByteStream rowBs = input;
   rowBs.skipBytes(row * mRaw->dim.x);

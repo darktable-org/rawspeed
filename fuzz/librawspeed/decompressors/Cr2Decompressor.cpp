@@ -41,7 +41,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(&bs));
 
-    using slice_type = rawspeed::ushort16;
+    using slice_type = uint16_t;
     const auto numSlices = bs.get<slice_type>();
     const auto sliceWidth = bs.get<slice_type>();
     const auto lastSliceWidth = bs.get<slice_type>();

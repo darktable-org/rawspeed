@@ -19,7 +19,7 @@
 */
 
 #include "decompressors/NikonDecompressor.h"
-#include "common/Common.h"                // for uint32, clampBits, ushort16
+#include "common/Common.h"                // for uint32, clampBits, uint16_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -83,7 +83,7 @@ class NikonLASDecompressor {
      * private to the Huffman compression & decompression modules.
      */
 
-    std::array<ushort16, 17> mincode;
+    std::array<uint16_t, 17> mincode;
     std::array<int, 18> maxcode;
     std::array<short, 17> valptr;
     std::array<uint32, 256> numbits;
@@ -98,8 +98,8 @@ class NikonLASDecompressor {
     int lastp;
     int si;
     std::array<char, 257> huffsize;
-    std::array<ushort16, 257> huffcode;
-    ushort16 code;
+    std::array<uint16_t, 257> huffcode;
+    uint16_t code;
     int size;
     int value;
     int ll;
@@ -218,7 +218,7 @@ class NikonLASDecompressor {
 
     dctbl1.bigTable.resize(size);
     for (uint32 i = 0; i < size; i++) {
-      ushort16 input = i << 2; // Calculate input value
+      uint16_t input = i << 2; // Calculate input value
       int code = input >> 8;   // Get 8 bits
       uint32 val = dctbl1.numbits[code];
       l = val & 15;
@@ -358,7 +358,7 @@ public:
 
 } // namespace
 
-std::vector<ushort16> NikonDecompressor::createCurve(ByteStream* metadata,
+std::vector<uint16_t> NikonDecompressor::createCurve(ByteStream* metadata,
                                                      uint32 bitsPS, uint32 v0,
                                                      uint32 v1, uint32* split) {
   // Nikon Z7 12/14 bit compressed hack.
@@ -370,7 +370,7 @@ std::vector<ushort16> NikonDecompressor::createCurve(ByteStream* metadata,
   // the very last value is not part of the used table but necessary
   // to linearly interpolate the last segment, therefore the '+1/-1'
   // size adjustments of 'curve'.
-  std::vector<ushort16> curve((1 << bitsPS & 0x7fff) + 1);
+  std::vector<uint16_t> curve((1 << bitsPS & 0x7fff) + 1);
   assert(curve.size() > 1);
 
   for (size_t i = 0; i < curve.size(); i++)
@@ -495,7 +495,7 @@ void NikonDecompressor::decompress(BitPumpMSB* bits, int start_y, int end_y) {
   assert(size.x >= 2);
   for (uint32 y = start_y; y < static_cast<uint32>(end_y); y++) {
     auto* dest =
-        reinterpret_cast<ushort16*>(&draw[y * pitch]); // Adjust destination
+        reinterpret_cast<uint16_t*>(&draw[y * pitch]); // Adjust destination
     pUp1[y & 1] += ht.decodeNext(*bits);
     pUp2[y & 1] += ht.decodeNext(*bits);
     pLeft1 = pUp1[y & 1];

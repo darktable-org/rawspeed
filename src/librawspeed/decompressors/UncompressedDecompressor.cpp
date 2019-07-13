@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/UncompressedDecompressor.h"
-#include "common/Common.h"                // for uint32, uint8_t, ushort16
+#include "common/Common.h"                // for uint32, uint8_t, uint16_t
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpLSB.h"                // for BitPumpLSB
@@ -152,8 +152,8 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
     BitPumpMSB bits(input);
     w *= cpp;
     for (; y < h; y++) {
-      auto* dest = reinterpret_cast<ushort16*>(
-          &data[offset.x * sizeof(ushort16) * cpp + y * outPitch]);
+      auto* dest = reinterpret_cast<uint16_t*>(
+          &data[offset.x * sizeof(uint16_t) * cpp + y * outPitch]);
       for (uint32 x = 0; x < w; x++) {
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
@@ -164,8 +164,8 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
     BitPumpMSB16 bits(input);
     w *= cpp;
     for (; y < h; y++) {
-      auto* dest = reinterpret_cast<ushort16*>(
-          &data[offset.x * sizeof(ushort16) * cpp + y * outPitch]);
+      auto* dest = reinterpret_cast<uint16_t*>(
+          &data[offset.x * sizeof(uint16_t) * cpp + y * outPitch]);
       for (uint32 x = 0; x < w; x++) {
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
@@ -176,8 +176,8 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
     BitPumpMSB32 bits(input);
     w *= cpp;
     for (; y < h; y++) {
-      auto* dest = reinterpret_cast<ushort16*>(
-          &data[offset.x * sizeof(ushort16) * cpp + y * outPitch]);
+      auto* dest = reinterpret_cast<uint16_t*>(
+          &data[offset.x * sizeof(uint16_t) * cpp + y * outPitch]);
       for (uint32 x = 0; x < w; x++) {
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
@@ -186,7 +186,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
     }
   } else {
     if (bitPerPixel == 16 && getHostEndianness() == Endianness::little) {
-      copyPixels(&data[offset.x * sizeof(ushort16) * cpp + y * outPitch],
+      copyPixels(&data[offset.x * sizeof(uint16_t) * cpp + y * outPitch],
                  outPitch, input.getData(inputPitchBytes * (h - y)),
                  inputPitchBytes, w * mRaw->getBpp(), h - y);
       return;
@@ -199,8 +199,8 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
     BitPumpLSB bits(input);
     w *= cpp;
     for (; y < h; y++) {
-      auto* dest = reinterpret_cast<ushort16*>(
-          &data[offset.x * sizeof(ushort16) + y * outPitch]);
+      auto* dest = reinterpret_cast<uint16_t*>(
+          &data[offset.x * sizeof(uint16_t) + y * outPitch]);
       for (uint32 x = 0; x < w; x++) {
         uint32 b = bits.getBits(bitPerPixel);
         dest[x] = b;
@@ -219,7 +219,7 @@ void UncompressedDecompressor::decode8BitRaw(uint32 w, uint32 h) {
   const uint8_t* in = input.getData(w * h);
   uint32 random = 0;
   for (uint32 y = 0; y < h; y++) {
-    auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
+    auto* dest = reinterpret_cast<uint16_t*>(&data[y * pitch]);
     for (uint32 x = 0; x < w; x++) {
       if (uncorrectedRawValues)
         dest[x] = *in;
@@ -260,7 +260,7 @@ void UncompressedDecompressor::decode12BitRaw(uint32 w, uint32 h) {
   uint32 half = (h + 1) >> 1;
   for (uint32 row = 0; row < h; row++) {
     uint32 y = !interlaced ? row : row % half * 2 + row / half;
-    auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
+    auto* dest = reinterpret_cast<uint16_t*>(&data[y * pitch]);
 
     if (interlaced && y == 1) {
       // The second field starts at a 2048 byte alignment
@@ -321,7 +321,7 @@ void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(uint32 w,
   const uint8_t* in = input.getData(w * h * 2);
 
   for (uint32 y = 0; y < h; y++) {
-    auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
+    auto* dest = reinterpret_cast<uint16_t*>(&data[y * pitch]);
     for (uint32 x = 0; x < w; x += 1, in += 2) {
       uint32 g1 = in[0];
       uint32 g2 = in[1];
@@ -356,7 +356,7 @@ void UncompressedDecompressor::decodeRawUnpacked(uint32 w, uint32 h) {
   const uint8_t* in = input.getData(w * h * 2);
 
   for (uint32 y = 0; y < h; y++) {
-    auto* dest = reinterpret_cast<ushort16*>(&data[y * pitch]);
+    auto* dest = reinterpret_cast<uint16_t*>(&data[y * pitch]);
     for (uint32 x = 0; x < w; x += 1, in += 2) {
       uint32 g1 = in[0];
       uint32 g2 = in[1];

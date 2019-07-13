@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/Common.h"               // for uint32, ushort16
+#include "common/Common.h"               // for uint32, uint16_t
 #include "common/NORangesSet.h"          // for NORangesSet
 #include "io/Buffer.h"                   // for Buffer (ptr only), DataBuffer
 #include "io/ByteStream.h"               // for ByteStream

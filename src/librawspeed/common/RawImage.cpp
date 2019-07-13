@@ -325,11 +325,11 @@ void RawImageData::transferBadPixelsToMap()
     createBadPixelMap();
 
   for (unsigned int pos : mBadPixelPositions) {
-    ushort16 pos_x = pos & 0xffff;
-    ushort16 pos_y = pos >> 16;
+    uint16_t pos_x = pos & 0xffff;
+    uint16_t pos_y = pos >> 16;
 
-    assert(pos_x < static_cast<ushort16>(uncropped_dim.x));
-    assert(pos_y < static_cast<ushort16>(uncropped_dim.y));
+    assert(pos_x < static_cast<uint16_t>(uncropped_dim.x));
+    assert(pos_y < static_cast<uint16_t>(uncropped_dim.y));
 
     mBadPixelMap[mBadPixelMapPitch * pos_y + (pos_x >> 3)] |= 1 << (pos_x&7);
   }
@@ -368,14 +368,14 @@ void RawImageData::fixBadPixels()
     // 0 side covered by unsignedness.
     for (uint32 r=pos_x-2; r<=pos_x+2 && r<(uint32)uncropped_dim.x; r+=2) {
       for (uint32 c=pos_y-2; c<=pos_y+2 && c<(uint32)uncropped_dim.y; c+=2) {
-        ushort16* pix = (ushort16*)getDataUncropped(r,c);
+        uint16_t* pix = (uint16_t*)getDataUncropped(r, c);
         if (*pix) {
           total += *pix;
           div++;
         }
       }
     }
-    ushort16* pix = (ushort16*)getDataUncropped(pos_x,pos_y);
+    uint16_t* pix = (uint16_t*)getDataUncropped(pos_x, pos_y);
     if (div) {
       pix[0] = total / div;
     }
@@ -570,7 +570,7 @@ void RawImageData::setTable(std::unique_ptr<TableLookUp> t) {
   table = std::move(t);
 }
 
-void RawImageData::setTable(const std::vector<ushort16>& table_, bool dither) {
+void RawImageData::setTable(const std::vector<uint16_t>& table_, bool dither) {
   assert(!table_.empty());
 
   auto t = std::make_unique<TableLookUp>(1, dither);

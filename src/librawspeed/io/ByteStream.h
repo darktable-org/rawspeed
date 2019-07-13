@@ -22,7 +22,7 @@
 #pragma once
 
 #include "AddressSanitizer.h" // for ASan::RegionIsPoisoned
-#include "common/Common.h"    // for uint8_t, int32_t, uint32, ushort16, roundUp
+#include "common/Common.h"    // for uint8_t, int32_t, uint32, uint16_t, roundUp
 #include "common/Memory.h"    // for alignedMalloc
 #include "io/Buffer.h"        // for Buffer::size_type, Buffer, DataBuffer
 #include "io/Endianness.h"    // for Endianness, Endianness::little
@@ -152,7 +152,7 @@ public:
     return DataBuffer::get<T>(pos, i);
   }
 
-  inline ushort16 peekU16() { return peek<ushort16>(); }
+  inline uint16_t peekU16() { return peek<uint16_t>(); }
 
   template<typename T> inline T get() {
     auto ret = peek<T>();
@@ -160,7 +160,7 @@ public:
     return ret;
   }
 
-  inline ushort16 getU16() { return get<ushort16>(); }
+  inline uint16_t getU16() { return get<uint16_t>(); }
   inline int32_t getI32() { return get<int32_t>(); }
   inline uint32 getU32() { return get<uint32>(); }
   inline float getFloat() { return get<float>(); }

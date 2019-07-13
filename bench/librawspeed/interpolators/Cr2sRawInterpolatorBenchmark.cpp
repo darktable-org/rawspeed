@@ -20,7 +20,7 @@
 
 #include "interpolators/Cr2sRawInterpolator.h" // for Cr2sRawInterpolator
 #include "bench/Common.h"                      // for areaToRectangle
-#include "common/Common.h"                     // for roundUp, ushort16
+#include "common/Common.h"                     // for roundUp, uint16_t
 #include "common/Point.h"                      // for iPoint2D
 #include "common/RawImage.h"                   // for RawImage, ImageMetaData
 #include <array>                               // for array
@@ -31,7 +31,6 @@ using rawspeed::Cr2sRawInterpolator;
 using rawspeed::iPoint2D;
 using rawspeed::RawImage;
 using rawspeed::TYPE_USHORT16;
-using rawspeed::ushort16;
 using std::array;
 using std::integral_constant;
 
@@ -53,7 +52,7 @@ static inline void BM_Cr2sRawInterpolator(benchmark::State& state) {
 
   state.SetComplexityN(dim.area());
   state.SetItemsProcessed(state.complexity_length_n() * state.iterations());
-  state.SetBytesProcessed(3UL * sizeof(ushort16) * state.items_processed());
+  state.SetBytesProcessed(3UL * sizeof(uint16_t) * state.items_processed());
 }
 
 static inline void CustomArguments(benchmark::internal::Benchmark* b) {

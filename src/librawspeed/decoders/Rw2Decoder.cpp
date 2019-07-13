@@ -123,7 +123,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
     bool v5Processing = raw->hasEntry(PANASONIC_RAWFORMAT) &&
                         raw->getEntry(PANASONIC_RAWFORMAT)->getU16() == 5;
 
-    rawspeed::ushort16 bitsPerSample = 12;
+    uint16_t bitsPerSample = 12;
     if (raw->hasEntry(PANASONIC_BITSPERSAMPLE)) {
       bitsPerSample = raw->getEntry(PANASONIC_BITSPERSAMPLE)->getU16();
     }

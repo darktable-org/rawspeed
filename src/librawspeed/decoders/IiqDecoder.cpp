@@ -23,7 +23,7 @@
 
 #include "decoders/IiqDecoder.h"
 #include "common/Array2DRef.h"                  // for Array2DRef
-#include "common/Common.h"                      // for uint32, ushort16
+#include "common/Common.h"                      // for uint32, uint16_t
 #include "common/Point.h"                       // for iPoint2D
 #include "common/Spline.h"                      // for Spline, Spline<>::va...
 #include "decoders/RawDecoder.h"                // for RawDecoder::(anonymous)
@@ -316,7 +316,7 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
   for (int quadRow = 0; quadRow < 2; quadRow++) {
     for (int quadCol = 0; quadCol < 2; quadCol++) {
       const Spline<> s(control_points[quadRow][quadCol]);
-      const std::vector<ushort16> curve = s.calculateCurve();
+      const std::vector<uint16_t> curve = s.calculateCurve();
 
       int row_start = quadRow == 0 ? 0 : split_row;
       int row_end = quadRow == 0 ? split_row : mRaw->dim.y;
@@ -325,7 +325,7 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
 
       for (int row = row_start; row < row_end; row++) {
         auto* pixel =
-            reinterpret_cast<ushort16*>(mRaw->getData(col_start, row));
+            reinterpret_cast<uint16_t*>(mRaw->getData(col_start, row));
         for (int col = col_start; col < col_end; col++, pixel++) {
           // This adjustment is expected to be made with the
           // black-level already subtracted from the pixel values.
@@ -334,7 +334,7 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
           // appropriate amount before indexing into the curve and
           // then add it back so that subtracting the black level
           // later will work as expected
-          const ushort16 diff = *pixel < black_level ? *pixel : black_level;
+          const uint16_t diff = *pixel < black_level ? *pixel : black_level;
           *pixel = curve[*pixel - diff] + diff;
         }
       }
@@ -362,9 +362,9 @@ void IiqDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
 void IiqDecoder::correctSensorDefects(ByteStream data) {
   while (data.getRemainSize() != 0) {
-    const ushort16 col = data.getU16();
-    const ushort16 row = data.getU16();
-    const ushort16 type = data.getU16();
+    const uint16_t col = data.getU16();
+    const uint16_t row = data.getU16();
+    const uint16_t type = data.getU16();
     data.skipBytes(2); // Ignore unknown/unused bits.
 
     if (col >= mRaw->dim.x) // Value for col is outside the raw image.
@@ -383,13 +383,13 @@ void IiqDecoder::correctSensorDefects(ByteStream data) {
   }
 }
 
-void IiqDecoder::handleBadPixel(const ushort16 col, const ushort16 row) {
+void IiqDecoder::handleBadPixel(const uint16_t col, const uint16_t row) {
   MutexLocker guard(&mRaw->mBadPixelMutex);
   mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
                                   (static_cast<uint32>(row) << 16) + col);
 }
 
-void IiqDecoder::correctBadColumn(const ushort16 col) {
+void IiqDecoder::correctBadColumn(const uint16_t col) {
   const Array2DRef<uint16_t> img(reinterpret_cast<uint16_t*>(mRaw->getData()),
                                  mRaw->dim.x, mRaw->dim.y,
                                  mRaw->pitch / sizeof(uint16_t));
@@ -405,7 +405,7 @@ void IiqDecoder::correctBadColumn(const ushort16 col) {
        * it from the sum, average (divide by 3) and round to nearest int.
        */
       int max = 0;
-      std::array<ushort16, 4> val;
+      std::array<uint16_t, 4> val;
       std::array<int32_t, 4> dev;
       int32_t sum = 0;
       sum += val[0] = img(col - 1, row - 1);

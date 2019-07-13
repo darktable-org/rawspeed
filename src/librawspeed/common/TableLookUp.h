@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for ushort16
+#include "common/Common.h" // for uint16_t
 #include <vector>          // for vector
 
 namespace rawspeed {
@@ -30,10 +30,10 @@ class TableLookUp {
 public:
   TableLookUp(int ntables, bool dither);
 
-  void setTable(int ntable, const std::vector<ushort16>& table);
-  ushort16* getTable(int n);
+  void setTable(int ntable, const std::vector<uint16_t>& table);
+  uint16_t* getTable(int n);
   const int ntables;
-  std::vector<ushort16> tables;
+  std::vector<uint16_t> tables;
   const bool dither;
 };
 

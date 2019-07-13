@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32, ushort16
+#include "common/Common.h"                      // for uint32, uint16_t
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
 #include "io/BitStream.h"                       // for BitStreamTraits
@@ -68,7 +68,7 @@ class HuffmanTableLookup final : public AbstractHuffmanTable {
   // they are index '1' based, so we can directly lookup the value
   // for code length l without decrementing
   std::vector<uint32> maxCodeOL;      // index is length of code
-  std::vector<ushort16> codeOffsetOL; // index is length of code
+  std::vector<uint16_t> codeOffsetOL; // index is length of code
 
   bool fullDecode = true;
   bool fixDNGBug16 = false;

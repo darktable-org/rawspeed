@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/Cr2Decompressor.h"
-#include "common/Common.h"                // for unroll_loop, uint32, ushort16
+#include "common/Common.h"                // for unroll_loop, uint32, uint16_t
 #include "common/Point.h"                 // for iPoint2D, iPoint2D::area_type
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -149,7 +149,7 @@ void Cr2Decompressor::decodeN_X_Y()
 
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
-  auto predNext = reinterpret_cast<ushort16*>(mRaw->getDataUncropped(0, 0));
+  auto predNext = reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(0, 0));
 
   BitPumpJPEG bitStream(input);
 
@@ -202,7 +202,7 @@ void Cr2Decompressor::decodeN_X_Y()
       if (destX >= static_cast<unsigned>(mRaw->dim.x))
         break;
       auto dest =
-          reinterpret_cast<ushort16*>(mRaw->getDataUncropped(destX, destY));
+          reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(destX, destY));
 
       assert(sliceWidth % xStepSize == 0);
       if (X_S_F == 1) {

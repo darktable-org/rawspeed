@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h"                // for uint32, ushort16
+#include "common/Common.h"                // for uint32, uint16_t
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "decoders/RawDecoder.h"          // for RawDecoder::RawSlice
@@ -65,7 +65,7 @@ private:
   void DecodeNikonSNef(ByteStream* input, uint32 w, uint32 h);
   std::string getMode();
   std::string getExtendedMode(const std::string &mode);
-  std::vector<ushort16> gammaCurve(double pwr, double ts, int mode, int imax);
+  std::vector<uint16_t> gammaCurve(double pwr, double ts, int mode, int imax);
 
   // We use this for the D50 and D2X whacky WB "encryption"
   static const std::array<uint8_t, 256> serialmap;

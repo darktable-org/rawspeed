@@ -246,7 +246,7 @@ RawImageDataFloat::RawImageDataFloat() {
         sub[i] = blackLevelSeparate[v];
       }
       for (int y = start_y; y < end_y; y++) {
-        ushort16 *pixel = (ushort16*)getData(0, y);
+        uint16_t *pixel = (uint16_t*)getData(0, y);
         int *mul_local = &mul[2*(y&1)];
         int *sub_local = &sub[2*(y&1)];
         for (int x = 0 ; x < gw; x++) {
@@ -380,7 +380,7 @@ void RawImageDataFloat::doLookup( int start_y, int end_y ) {
   ThrowRDE("Float point lookup tables not implemented");
 }
 
-void RawImageDataFloat::setWithLookUp(ushort16 value, uint8_t* dst,
+void RawImageDataFloat::setWithLookUp(uint16_t value, uint8_t* dst,
                                       uint32* random) {
   auto* dest = reinterpret_cast<float*>(dst);
   if (table == nullptr) {

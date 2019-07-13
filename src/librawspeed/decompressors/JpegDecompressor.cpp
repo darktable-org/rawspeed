@@ -25,7 +25,7 @@
 
 #include "decompressors/JpegDecompressor.h"
 
-#include "common/Common.h"                // for uint8_t, uint32, ushort16
+#include "common/Common.h"                // for uint8_t, uint32, uint16_t
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -150,7 +150,7 @@ void JpegDecompressor::decode(uint32 offX,
   int copy_h = min(mRaw->dim.y - offY, dinfo.output_height);
   for (int y = 0; y < copy_h; y++) {
     uint8_t* src = &complete_buffer[static_cast<size_t>(row_stride) * y];
-    auto* dst = reinterpret_cast<ushort16*>(mRaw->getData(offX, y + offY));
+    auto* dst = reinterpret_cast<uint16_t*>(mRaw->getData(offX, y + offY));
     for (int x = 0; x < copy_w; x++) {
       for (int c = 0; c < dinfo.output_components; c++) {
         *dst = *src;

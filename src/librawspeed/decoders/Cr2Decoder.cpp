@@ -21,7 +21,7 @@
 */
 
 #include "decoders/Cr2Decoder.h"
-#include "common/Common.h"                     // for uint32, ushort16
+#include "common/Common.h"                     // for uint32, uint16_t
 #include "common/Point.h"                      // for iPoint2D
 #include "common/RawspeedException.h"          // for RawspeedException
 #include "decoders/RawDecoderException.h"      // for ThrowRDE
@@ -119,8 +119,8 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
   assert(sensorInfoE != nullptr);
 
-  const ushort16 width = sensorInfoE->getU16(1);
-  const ushort16 height = sensorInfoE->getU16(2);
+  const uint16_t width = sensorInfoE->getU16(1);
+  const uint16_t height = sensorInfoE->getU16(2);
   mRaw->dim = {width, height};
 
   int componentsPerPixel = 1;
@@ -234,7 +234,7 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         TiffEntry *shot_info = mRootIFD->getEntryRecursive(CANONSHOTINFO);
         TiffEntry *g9_wb = mRootIFD->getEntryRecursive(CANONPOWERSHOTG9WB);
 
-        ushort16 wb_index = shot_info->getU16(7);
+        uint16_t wb_index = shot_info->getU16(7);
         int wb_offset = (wb_index < 18) ? "012347800000005896"[wb_index]-'0' : 0;
         wb_offset = wb_offset*8 + 2;
 

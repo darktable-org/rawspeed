@@ -21,7 +21,7 @@
 */
 
 #include "parsers/FiffParser.h"
-#include "common/Common.h"               // for uint32, ushort16
+#include "common/Common.h"               // for uint32, uint16_t
 #include "decoders/RafDecoder.h"         // for RafDecoder
 #include "decoders/RawDecoder.h"         // for RawDecoder
 #include "io/Buffer.h"                   // for Buffer, DataBuffer
@@ -101,8 +101,8 @@ void FiffParser::parseData() {
       ThrowFPE("Too many entries");
 
     for (uint32 i = 0; i < entries; i++) {
-      ushort16 tag = bytes.getU16();
-      ushort16 length = bytes.getU16();
+      uint16_t tag = bytes.getU16();
+      uint16_t length = bytes.getU16();
       TiffDataType type = TIFF_UNDEFINED;
 
       if (tag == IMAGEWIDTH || tag == FUJIOLDWB) // also 0x121?

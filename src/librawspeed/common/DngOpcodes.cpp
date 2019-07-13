@@ -21,7 +21,7 @@
 */
 
 #include "common/DngOpcodes.h"
-#include "common/Common.h"                // for uint32, ushort16, clampBits
+#include "common/Common.h"                // for uint32, uint16_t, clampBits
 #include "common/Mutex.h"                 // for MutexLocker
 #include "common/Point.h"                 // for iRectangle2D, iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
@@ -84,7 +84,7 @@ public:
     iPoint2D crop = ri->getCropOffset();
     uint32 offset = crop.x | (crop.y << 16);
     for (auto y = 0; y < ri->dim.y; ++y) {
-      auto* src = reinterpret_cast<ushort16*>(ri->getData(0, y));
+      auto* src = reinterpret_cast<uint16_t*>(ri->getData(0, y));
       for (auto x = 0; x < ri->dim.x; ++x) {
         if (src[x] == value)
           ri->mBadPixelPositions.push_back(offset + (y << 16 | x));
@@ -267,7 +267,7 @@ protected:
 
 class DngOpcodes::LookupOpcode : public PixelOpcode {
 protected:
-  vector<ushort16> lookup;
+  vector<uint16_t> lookup;
 
   explicit LookupOpcode(const RawImage& ri, ByteStream* bs)
       : PixelOpcode(ri, bs), lookup(65536) {}
@@ -279,8 +279,8 @@ protected:
   }
 
   void apply(const RawImage& ri) override {
-    applyOP<ushort16>(
-        ri, [this](uint32 x, uint32 y, ushort16 v) { return lookup[v]; });
+    applyOP<uint16_t>(
+        ri, [this](uint32 x, uint32 y, uint16_t v) { return lookup[v]; });
   }
 };
 
@@ -369,7 +369,7 @@ protected:
   vector<float> deltaF;
   vector<int> deltaI;
 
-  // only meaningful for ushort16 images!
+  // only meaningful for uint16_t images!
   virtual bool valueIsOk(float value) = 0;
 
   DeltaRowOrCol(const RawImage& ri, ByteStream* bs, float f2iScale_)
@@ -413,13 +413,13 @@ class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol<S> {
 public:
   explicit OffsetPerRowOrCol(const RawImage& ri, ByteStream* bs)
       : DeltaRowOrCol<S>(ri, bs, 65535.0F),
-        absLimit(double(std::numeric_limits<ushort16>::max()) /
+        absLimit(double(std::numeric_limits<uint16_t>::max()) /
                  this->f2iScale) {}
 
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {
-      this->template applyOP<ushort16>(
-          ri, [this](uint32 x, uint32 y, ushort16 v) {
+      this->template applyOP<uint16_t>(
+          ri, [this](uint32 x, uint32 y, uint16_t v) {
             return clampBits(this->deltaI[S::select(x, y)] + v, 16);
           });
     } else {
@@ -450,13 +450,13 @@ public:
   explicit ScalePerRowOrCol(const RawImage& ri, ByteStream* bs)
       : DeltaRowOrCol<S>(ri, bs, 1024.0F),
         maxLimit((double(std::numeric_limits<int>::max() - rounding) /
-                  double(std::numeric_limits<ushort16>::max())) /
+                  double(std::numeric_limits<uint16_t>::max())) /
                  this->f2iScale) {}
 
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == TYPE_USHORT16) {
-      this->template applyOP<ushort16>(ri, [this](uint32 x, uint32 y,
-                                                  ushort16 v) {
+      this->template applyOP<uint16_t>(ri, [this](uint32 x, uint32 y,
+                                                  uint16_t v) {
         return clampBits((this->deltaI[S::select(x, y)] * v + 512) >> 10, 16);
       });
     } else {

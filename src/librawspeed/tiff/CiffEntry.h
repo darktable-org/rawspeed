@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/Common.h"      // for uint32, uint8_t, ushort16
+#include "common/Common.h"      // for uint32, uint8_t, uint16_t
 #include "common/NORangesSet.h" // for set
 #include "io/ByteStream.h"      // for ByteStream
 #include "tiff/CiffTag.h"       // for CiffTag
@@ -62,7 +62,7 @@ public:
 
   uint8_t getByte(uint32 num = 0) const;
   uint32 getU32(uint32 num = 0) const;
-  ushort16 getU16(uint32 num = 0) const;
+  uint16_t getU16(uint32 num = 0) const;
 
   std::string getString() const;
   std::vector<std::string> getStrings() const;

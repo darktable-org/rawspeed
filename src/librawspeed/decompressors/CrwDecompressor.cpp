@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/CrwDecompressor.h"
-#include "common/Common.h"                // for uint32, uint8_t, ushort16
+#include "common/Common.h"                // for uint32, uint8_t, uint16_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -264,7 +264,7 @@ void CrwDecompressor::decompress() {
     std::array<int, 2> base;
 
     uint32 j = 0;
-    ushort16* dest = nullptr;
+    uint16_t* dest = nullptr;
     uint32 i = 0;
 
     for (unsigned block = 0; block < hBlocks; block++) {
@@ -281,7 +281,7 @@ void CrwDecompressor::decompress() {
           // new line. sadly, does not always happen when k == 0.
           i = 0;
 
-          dest = reinterpret_cast<ushort16*>(mRaw->getData(0, j));
+          dest = reinterpret_cast<uint16_t*>(mRaw->getData(0, j));
 
           j++;
           base[0] = base[1] = 512;
@@ -310,7 +310,7 @@ void CrwDecompressor::decompress() {
     assert(height > 0);
 
     for (uint32 j = 0; j < height; j++) {
-      auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, j));
+      auto* dest = reinterpret_cast<uint16_t*>(mRaw->getData(0, j));
 
       assert(width % 4 == 0);
       for (uint32 i = 0; i < width; /* NOTE: i += 4 */) {
@@ -319,8 +319,8 @@ void CrwDecompressor::decompress() {
 
         // We have read 8 bits, which is 4 pairs of 2 bits. So process 4 pixels.
         for (uint32 p = 0; p < 4; p++) {
-          ushort16 low = (c >> (2 * p)) & 0b11;
-          ushort16 val = (*dest << 2) | low;
+          uint16_t low = (c >> (2 * p)) & 0b11;
+          uint16_t val = (*dest << 2) | low;
 
           if (width == 2672 && val < 512)
             val += 2; // No idea why this is needed

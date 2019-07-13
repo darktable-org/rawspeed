@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32, ushort16, int32_t
+#include "common/Common.h"                      // for uint32, uint16_t, int32_t
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
 #include "io/BitStream.h"                       // for BitStreamTraits
@@ -69,7 +69,7 @@ class HuffmanTableLUT final : public AbstractHuffmanTable {
   // they are index '1' based, so we can directly lookup the value
   // for code length l without decrementing
   std::vector<uint32> maxCodeOL;      // index is length of code
-  std::vector<ushort16> codeOffsetOL; // index is length of code
+  std::vector<uint16_t> codeOffsetOL; // index is length of code
 
   // The code can be compiled with two different decode lookup table layouts.
   // The idea is that different CPU architectures may perform better with
@@ -137,10 +137,10 @@ public:
       if (code_l > static_cast<int>(LookupDepth))
         break;
 
-      ushort16 ll = symbols[i].code << (LookupDepth - code_l);
-      ushort16 ul = ll | ((1 << (LookupDepth - code_l)) - 1);
-      ushort16 diff_l = codeValues[i];
-      for (ushort16 c = ll; c <= ul; c++) {
+      uint16_t ll = symbols[i].code << (LookupDepth - code_l);
+      uint16_t ul = ll | ((1 << (LookupDepth - code_l)) - 1);
+      uint16_t diff_l = codeValues[i];
+      for (uint16_t c = ll; c <= ul; c++) {
         if (!(c < decodeLookup.size()))
           ThrowRDE("Corrupt Huffman");
 

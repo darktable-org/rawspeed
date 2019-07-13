@@ -21,7 +21,7 @@
 */
 
 #include "tiff/CiffEntry.h"
-#include "common/Common.h"               // for uint32, uint8_t, ushort16
+#include "common/Common.h"               // for uint32, uint8_t, uint16_t
 #include "common/NORangesSet.h"          // for set
 #include "io/Buffer.h"                   // for Buffer
 #include "io/ByteStream.h"               // for ByteStream
@@ -37,10 +37,10 @@ namespace rawspeed {
 
 CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas,
                      const ByteStream* valueData, ByteStream dirEntry) {
-  ushort16 p = dirEntry.getU16();
+  uint16_t p = dirEntry.getU16();
 
   tag = static_cast<CiffTag>(p & 0x3fff);
-  ushort16 datalocation = (p & 0xc000);
+  uint16_t datalocation = (p & 0xc000);
   type = static_cast<CiffDataType>(p & 0x3800);
 
   uint32 data_offset;
@@ -121,11 +121,11 @@ uint32 CiffEntry::getU32(uint32 num) const {
   return data.peek<uint32>(num);
 }
 
-ushort16 CiffEntry::getU16(uint32 num) const {
+uint16_t CiffEntry::getU16(uint32 num) const {
   if (type != CIFF_SHORT && type != CIFF_BYTE)
     ThrowCPE("Wrong type 0x%x encountered. Expected Short at 0x%x", type, tag);
 
-  return data.peek<ushort16>(num);
+  return data.peek<uint16_t>(num);
 }
 
 uint8_t CiffEntry::getByte(uint32 num) const {

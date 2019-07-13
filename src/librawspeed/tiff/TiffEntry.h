@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32, uint8_t, ushort16, int32_t, int16_t
+#include "common/Common.h" // for uint32, uint8_t, uint16_t, int32_t, int16_t
 #include "io/ByteStream.h" // for ByteStream
 #include "tiff/TiffTag.h"  // for TiffTag
 #include <string>          // for string
@@ -86,14 +86,13 @@ public:
   uint8_t getByte(uint32 index = 0) const;
   uint32 getU32(uint32 index = 0) const;
   int32_t getI32(uint32 index = 0) const;
-  ushort16 getU16(uint32 index = 0) const;
+  uint16_t getU16(uint32 index = 0) const;
   int16_t getI16(uint32 index = 0) const;
   float getFloat(uint32 index = 0) const;
   std::string getString() const;
 
-  inline std::vector<ushort16> getU16Array(uint32 count_) const
-  {
-    return getArray<ushort16, &TiffEntry::getU16>(count_);
+  inline std::vector<uint16_t> getU16Array(uint32 count_) const {
+    return getArray<uint16_t, &TiffEntry::getU16>(count_);
   }
 
   inline std::vector<uint32> getU32Array(uint32 count_) const

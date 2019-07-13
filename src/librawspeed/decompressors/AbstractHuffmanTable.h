@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"                // for uint8_t, uint32, ushort16
+#include "common/Common.h"                // for uint8_t, uint32, uint16_t
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/Buffer.h"                    // for Buffer
 #include <algorithm>                      // for copy, adjacent_find, max_e...
@@ -37,12 +37,12 @@ namespace rawspeed {
 class AbstractHuffmanTable {
 public:
   struct CodeSymbol final {
-    ushort16 code;   // the code (bit pattern found inside the stream)
+    uint16_t code;    // the code (bit pattern found inside the stream)
     uint8_t code_len; // the code length in bits, valid values are 1..16
 
     CodeSymbol() = default;
 
-    CodeSymbol(ushort16 code_, uint8_t code_len_)
+    CodeSymbol(uint16_t code_, uint8_t code_len_)
         : code(code_), code_len(code_len_) {
       assert(code_len > 0);
       assert(code_len <= 16);
@@ -53,7 +53,7 @@ public:
                                  const CodeSymbol& partial) {
       assert(partial.code_len <= symbol.code_len);
 
-      auto getNHighBits = [](const CodeSymbol& s, unsigned bits) -> ushort16 {
+      auto getNHighBits = [](const CodeSymbol& s, unsigned bits) -> uint16_t {
         const auto shift = s.code_len - bits;
         return s.code >> shift;
       };

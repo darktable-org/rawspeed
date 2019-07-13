@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/SamsungV2Decompressor.h"
-#include "common/Common.h"                // for uint32, ushort16, int32_t
+#include "common/Common.h"                // for uint32, uint16_t, int32_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -201,10 +201,10 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
 
   BitPumpMSB32 pump(data);
 
-  auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, row));
-  ushort16* img_up = reinterpret_cast<ushort16*>(
+  auto* img = reinterpret_cast<uint16_t*>(mRaw->getData(0, row));
+  uint16_t* img_up = reinterpret_cast<uint16_t*>(
       mRaw->getData(0, std::max(0, static_cast<int>(row) - 1)));
-  ushort16* img_up2 = reinterpret_cast<ushort16*>(
+  uint16_t* img_up2 = reinterpret_cast<uint16_t*>(
       mRaw->getData(0, std::max(0, static_cast<int>(row) - 2)));
 
   // Initialize the motion and diff modes at the start of the line
@@ -255,8 +255,8 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
       int32_t doAverage = motionDoAverage[motion];
 
       for (uint32 i = 0; i < 16; i++) {
-        ushort16* line;
-        ushort16* refpixel;
+        uint16_t* line;
+        uint16_t* refpixel;
 
         if ((row + i) & 0x1) {
           // Red or blue pixels use same color two lines up
@@ -328,7 +328,7 @@ void SamsungV2Decompressor::decompressRow(uint32 row) {
       uint32 len = diffBits[i >> 2];
       int32_t diff = getDiff(&pump, len);
 
-      ushort16* value = nullptr;
+      uint16_t* value = nullptr;
       // Apply the diff to pixels 0 2 4 6 8 10 12 14 1 3 5 7 9 11 13 15
       if (row % 2)
         value = &img[((i & 0x7) << 1) + 1 - (i >> 3)];

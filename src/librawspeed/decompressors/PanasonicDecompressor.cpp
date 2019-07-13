@@ -164,7 +164,7 @@ public:
 };
 
 void PanasonicDecompressor::processPixelPacket(
-    ProxyStream* bits, int y, ushort16* dest, int xbegin,
+    ProxyStream* bits, int y, uint16_t* dest, int xbegin,
     std::vector<uint32>* zero_pos) const noexcept {
   int sh = 0;
 
@@ -224,7 +224,7 @@ void PanasonicDecompressor::processBlock(const Block& block,
     if (block.endCoord.y == y)
       endx = block.endCoord.x;
 
-    auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(x, y));
+    auto* dest = reinterpret_cast<uint16_t*>(mRaw->getData(x, y));
 
     assert(x % PixelsPerPacket == 0);
     assert(endx % PixelsPerPacket == 0);

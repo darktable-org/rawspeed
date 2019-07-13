@@ -20,7 +20,7 @@
 */
 
 #include "decoders/RafDecoder.h"
-#include "common/Common.h"                          // for uint32, ushort16
+#include "common/Common.h"                          // for uint32, uint16_t
 #include "common/Point.h"                           // for iPoint2D, iRecta...
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/FujiDecompressor.h"         // for FujiDecompressor
@@ -243,10 +243,10 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     rotated->metadata.fujiRotationPos = rotationPos;
 
     int dest_pitch = static_cast<int>(rotated->pitch) / 2;
-    auto* dst = reinterpret_cast<ushort16*>(rotated->getData(0, 0));
+    auto* dst = reinterpret_cast<uint16_t*>(rotated->getData(0, 0));
 
     for (int y = 0; y < new_size.y; y++) {
-      auto* src = reinterpret_cast<ushort16*>(
+      auto* src = reinterpret_cast<uint16_t*>(
           mRaw->getData(crop_offset.x, crop_offset.y + y));
       for (int x = 0; x < new_size.x; x++) {
         int h;

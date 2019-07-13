@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32, ushort16, uint64_t, int32_t, int16_t
+#include "common/Common.h" // for uint32, uint16_t, uint64_t, int32_t, int16_t
 #include <cassert>         // for assert
 #include <cstring>         // for memcpy
 // IWYU pragma: no_include "io/EndiannessTest.h"
@@ -31,7 +31,7 @@ namespace rawspeed {
 enum class Endianness { little = 0xDEAD, big = 0xBEEF, unknown = 0x0BAD };
 
 inline Endianness getHostEndiannessRuntime() {
-  ushort16 testvar = 0xfeff;
+  uint16_t testvar = 0xfeff;
   uint32 firstbyte = (reinterpret_cast<uint8_t*>(&testvar))[0];
   if (firstbyte == 0xff)
     return Endianness::little;
@@ -68,10 +68,10 @@ inline Endianness getHostEndianness() {
 #endif
 
 inline int16_t getByteSwapped(int16_t v) {
-  return static_cast<int16_t>(BSWAP16(static_cast<ushort16>(v)));
+  return static_cast<int16_t>(BSWAP16(static_cast<uint16_t>(v)));
 }
-inline ushort16 getByteSwapped(ushort16 v) {
-  return static_cast<ushort16>(BSWAP16(v));
+inline uint16_t getByteSwapped(uint16_t v) {
+  return static_cast<uint16_t>(BSWAP16(v));
 }
 inline int32_t getByteSwapped(int32_t v) {
   return static_cast<int32_t>(BSWAP32(static_cast<uint32>(v)));
@@ -124,8 +124,8 @@ template <typename T> inline T getLE(const void* data) {
   return getByteSwapped<T>(data, getHostEndianness() == Endianness::big);
 }
 
-inline ushort16 getU16BE(const void* data) { return getBE<ushort16>(data); }
-inline ushort16 getU16LE(const void* data) { return getLE<ushort16>(data); }
+inline uint16_t getU16BE(const void* data) { return getBE<uint16_t>(data); }
+inline uint16_t getU16LE(const void* data) { return getLE<uint16_t>(data); }
 inline uint32 getU32BE(const void* data) { return getBE<uint32>(data); }
 inline uint32 getU32LE(const void* data) { return getLE<uint32>(data); }
 

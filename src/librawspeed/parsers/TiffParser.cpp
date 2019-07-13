@@ -22,7 +22,7 @@
 */
 
 #include "parsers/TiffParser.h"
-#include "common/Common.h"               // for uint32, ushort16
+#include "common/Common.h"               // for uint32, uint16_t
 #include "common/NORangesSet.h"          // for set
 #include "decoders/ArwDecoder.h"         // for ArwDecoder
 #include "decoders/Cr2Decoder.h"         // for Cr2Decoder
@@ -66,7 +66,7 @@ TiffRootIFDOwner TiffParser::parse(TiffIFD* parent, const Buffer& data) {
   bs.setByteOrder(getTiffByteOrder(bs, 0, "TIFF header"));
   bs.skipBytes(2);
 
-  ushort16 magic = bs.getU16();
+  uint16_t magic = bs.getU16();
   if (magic != 42 && magic != 0x4f52 && magic != 0x5352 && magic != 0x55) // ORF has 0x4f52/0x5352, RW2 0x55 - Brilliant!
     ThrowTPE("Not a TIFF file (magic 42)");
 

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32, ushort16
+#include "common/Common.h"                      // for uint32, uint16_t
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/BitPumpMSB.h"                      // for BitPumpMSB
@@ -40,7 +40,7 @@ class NikonDecompressor final : public AbstractDecompressor {
   std::array<int, 2> pUp1;
   std::array<int, 2> pUp2;
 
-  std::vector<ushort16> curve;
+  std::vector<uint16_t> curve;
 
   uint32 random;
 
@@ -51,7 +51,7 @@ public:
 
 private:
   static const std::array<std::array<std::array<uint8_t, 16>, 2>, 6> nikon_tree;
-  static std::vector<ushort16> createCurve(ByteStream* metadata, uint32 bitsPS,
+  static std::vector<uint16_t> createCurve(ByteStream* metadata, uint32 bitsPS,
                                            uint32 v0, uint32 v1, uint32* split);
 
   template <typename Huffman>

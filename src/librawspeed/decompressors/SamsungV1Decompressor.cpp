@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/SamsungV1Decompressor.h"
-#include "common/Common.h"                // for uint32, ushort16, int32_t
+#include "common/Common.h"                // for uint32, uint16_t, int32_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -101,8 +101,8 @@ void SamsungV1Decompressor::decompress() {
                                                               {4, 8},
                                                               {4, 2}}};
   std::vector<encTableItem> tbl(1024);
-  std::array<std::array<ushort16, 2>, 2> vpred = {{}};
-  std::array<ushort16, 2> hpred;
+  std::array<std::array<uint16_t, 2>, 2> vpred = {{}};
+  std::array<uint16_t, 2> hpred;
 
   // We generate a 1024 entry table (to be addressed by reading 10 bits) by
   // consecutively filling in 2^(10-N) positions where N is the variable number
@@ -122,7 +122,7 @@ void SamsungV1Decompressor::decompress() {
 
   BitPumpMSB pump(*bs);
   for (uint32 y = 0; y < height; y++) {
-    auto* img = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
+    auto* img = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
     for (uint32 x = 0; x < width; x++) {
       int32_t diff = samsungDiff(&pump, tbl);
       if (x < 2)

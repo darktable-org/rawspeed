@@ -195,7 +195,7 @@ RawImage ArwDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
 
-  std::vector<ushort16> curve(0x4001);
+  std::vector<uint16_t> curve(0x4001);
   TiffEntry *c = raw->getEntry(SONY_CURVE);
   std::array<uint32, 6> sony_curve = {{0, 0, 0, 0, 0, 4095}};
 
@@ -324,7 +324,7 @@ void ArwDecoder::ParseA100WB() {
     bs.skipBytes(4);
 
     bs.setByteOrder(Endianness::little);
-    std::array<ushort16, 4> tmp;
+    std::array<uint16_t, 4> tmp;
     for (auto& coeff : tmp)
       coeff = bs.getU16();
 

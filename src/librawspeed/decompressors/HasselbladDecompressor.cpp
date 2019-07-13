@@ -20,7 +20,7 @@
 */
 
 #include "decompressors/HasselbladDecompressor.h"
-#include "common/Common.h"                // for uint32, ushort16
+#include "common/Common.h"                // for uint32, uint16_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -76,7 +76,7 @@ void HasselbladDecompressor::decodeScan() {
   // Pixels are packed two at a time, not like LJPEG:
   // [p1_length_as_huffman][p2_length_as_huffman][p0_diff_with_length][p1_diff_with_length]|NEXT PIXELS
   for (uint32 y = 0; y < frame.h; y++) {
-    auto* dest = reinterpret_cast<ushort16*>(mRaw->getData(0, y));
+    auto* dest = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
     int p1 = 0x8000 + pixelBaseOffset;
     int p2 = 0x8000 + pixelBaseOffset;
     for (uint32 x = 0; x < frame.w; x += 2) {
@@ -86,8 +86,8 @@ void HasselbladDecompressor::decodeScan() {
       p2 += getBits(&bitStream, len2);
       // NOTE: this is rather unusual and weird, but appears to be correct.
       // clampBits(p, 16) results in completely garbled images.
-      dest[x] = ushort16(p1);
-      dest[x + 1] = ushort16(p2);
+      dest[x] = uint16_t(p1);
+      dest[x + 1] = uint16_t(p2);
     }
   }
   input.skipBytes(bitStream.getBufferPosition());

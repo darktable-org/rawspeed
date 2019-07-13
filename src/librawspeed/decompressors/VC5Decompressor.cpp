@@ -365,7 +365,7 @@ void VC5Decompressor::initVC5LogTable() {
         };
 
         auto normalizeI = [tableSize](auto x) { return x / (tableSize - 1.0); };
-        auto denormalizeY = [maxVal = std::numeric_limits<ushort16>::max()](
+        auto denormalizeY = [maxVal = std::numeric_limits<uint16_t>::max()](
                                 auto y) { return maxVal * y; };
         // Adjust for output whitelevel bitdepth.
         auto rescaleY = [outputBits](auto y) {
@@ -393,7 +393,7 @@ void VC5Decompressor::parseVC5() {
   bool done = false;
   while (!done) {
     auto tag = static_cast<VC5Tag>(mBs.getU16());
-    ushort16 val = mBs.getU16();
+    uint16_t val = mBs.getU16();
 
     bool optional = matches(tag, VC5Tag::Optional);
     if (optional)
@@ -513,7 +513,7 @@ void VC5Decompressor::parseVC5() {
 
 VC5Decompressor::Wavelet::LowPassBand::LowPassBand(const Wavelet& wavelet,
                                                    ByteStream bs_,
-                                                   ushort16 lowpassPrecision_)
+                                                   uint16_t lowpassPrecision_)
     : AbstractDecodeableBand(std::move(bs_)),
       lowpassPrecision(lowpassPrecision_) {
   // Low-pass band is a uncompressed version of the image, hugely downscaled.

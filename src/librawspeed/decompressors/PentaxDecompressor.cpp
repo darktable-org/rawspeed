@@ -19,7 +19,7 @@
 */
 
 #include "decompressors/PentaxDecompressor.h"
-#include "common/Common.h"                // for uint32, uint8_t, ushort16
+#include "common/Common.h"                // for uint32, uint8_t, uint16_t
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -148,7 +148,7 @@ void PentaxDecompressor::decompress(const ByteStream& data) const {
   std::array<int, 2> pUp2 = {{}};
 
   for (int y = 0; y < mRaw->dim.y && mRaw->dim.x >= 2; y++) {
-    auto* dest = reinterpret_cast<ushort16*>(&draw[y * mRaw->pitch]);
+    auto* dest = reinterpret_cast<uint16_t*>(&draw[y * mRaw->pitch]);
 
     pUp1[y & 1] += ht.decodeNext(bs);
     pUp2[y & 1] += ht.decodeNext(bs);

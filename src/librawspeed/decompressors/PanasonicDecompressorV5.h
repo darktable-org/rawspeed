@@ -91,7 +91,7 @@ class PanasonicDecompressorV5 final : public AbstractDecompressor {
   void chopInputIntoBlocks(const PacketDsc& dsc);
 
   template <const PacketDsc& dsc>
-  void processPixelPacket(BitPumpLSB* bs, ushort16* dest) const;
+  void processPixelPacket(BitPumpLSB* bs, uint16_t* dest) const;
 
   template <const PacketDsc& dsc> void processBlock(const Block& block) const;
 

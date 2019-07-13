@@ -20,11 +20,10 @@
 
 #pragma once
 
-#include "common/Common.h" // for int32_t, int16_t, uint32, uint64_t, ushort16
+#include "common/Common.h" // for int32_t, int16_t, uint32, uint64_t, uint16_t
 #include <gmock/gmock.h>   // for make_tuple, tuple
 
 using rawspeed::uint32;
-using rawspeed::ushort16;
 
 namespace rawspeed_test {
 
@@ -33,7 +32,7 @@ template <typename T> struct intPair {
   T second;
 };
 
-using ushort16Type = intPair<ushort16>;
+using ushort16Type = intPair<uint16_t>;
 using ushort16TType = std::tuple<ushort16Type, bool>;
 static const ushort16Type ushort16Values[] = {
     {0x01cd, 0xcd01}, {0x024e, 0x4e02}, {0x0726, 0x2607}, {0x07e3, 0xe307},

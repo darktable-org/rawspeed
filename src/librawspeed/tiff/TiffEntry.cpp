@@ -21,7 +21,7 @@
 */
 
 #include "tiff/TiffEntry.h"
-#include "common/Common.h"               // for uint32, int16_t, ushort16
+#include "common/Common.h"               // for uint32, int16_t, uint16_t
 #include "parsers/TiffParserException.h" // for ThrowTPE
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
 #include "tiff/TiffTag.h"                // for TiffTag, DNGPRIVATEDATA
@@ -45,7 +45,7 @@ const std::array<uint32, 14> TiffEntry::datashifts = {0, 0, 0, 1, 2, 3, 0,
 
 TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream* bs) : parent(parent_) {
   tag = static_cast<TiffTag>(bs->getU16());
-  const ushort16 numType = bs->getU16();
+  const uint16_t numType = bs->getU16();
   if (numType > TIFF_OFFSET)
     ThrowTPE("Error reading TIFF structure. Unknown Type 0x%x encountered.", numType);
   type = static_cast<TiffDataType>(numType);
@@ -129,12 +129,12 @@ uint8_t TiffEntry::getByte(uint32 index) const {
   return data.peekByte(index);
 }
 
-ushort16 TiffEntry::getU16(uint32 index) const {
+uint16_t TiffEntry::getU16(uint32 index) const {
   if (type != TIFF_SHORT && type != TIFF_UNDEFINED)
     ThrowTPE("Wrong type %u encountered. Expected Short or Undefined on 0x%x",
              type, tag);
 
-  return data.peek<ushort16>(index);
+  return data.peek<uint16_t>(index);
 }
 
 int16_t TiffEntry::getI16(uint32 index) const {
