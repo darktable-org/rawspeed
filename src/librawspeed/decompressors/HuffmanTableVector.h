@@ -46,7 +46,7 @@ protected:
                   "This BitStream specialization is not marked as usable here");
 
     CodeSymbol partial;
-    unsigned long codeId;
+    uint64_t codeId;
 
     // Read bits until either find the code or detect the uncorrect code
     for (partial.code = 0, partial.code_len = 1;; ++partial.code_len) {

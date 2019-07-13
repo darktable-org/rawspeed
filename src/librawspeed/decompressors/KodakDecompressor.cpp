@@ -91,7 +91,7 @@ KodakDecompressor::decodeSegment(const uint32_t bsize) {
 
     if (bits < len) {
       for (uint32_t j = 0; j < 32; j += 8) {
-        bitbuf += static_cast<long long>(static_cast<int>(input.getByte()))
+        bitbuf += static_cast<int64_t>(static_cast<int>(input.getByte()))
                   << (bits + (j ^ 8));
       }
       bits += 32;

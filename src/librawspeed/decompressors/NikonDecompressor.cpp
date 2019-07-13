@@ -85,7 +85,7 @@ class NikonLASDecompressor {
 
     std::array<uint16_t, 17> mincode;
     std::array<int, 18> maxcode;
-    std::array<short, 17> valptr;
+    std::array<int16_t, 17> valptr;
     std::array<uint32_t, 256> numbits;
     std::vector<int> bigTable;
     bool initialized;

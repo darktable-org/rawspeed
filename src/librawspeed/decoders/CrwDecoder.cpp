@@ -105,11 +105,11 @@ void CrwDecoder::checkSupportInternal(const CameraMetaData* meta) {
 }
 
 // based on exiftool's Image::ExifTool::Canon::CanonEv
-float __attribute__((const)) CrwDecoder::canonEv(const long in) {
+float __attribute__((const)) CrwDecoder::canonEv(const int64_t in) {
   // remove sign
-  long val = abs(in);
+  int64_t val = abs(in);
   // remove fraction
-  long frac = val & 0x1f;
+  int64_t frac = val & 0x1f;
   val -= frac;
   // convert 1/3 (0x0c) and 2/3 (0x14) codes
   if (frac == 0x0c) {
@@ -139,8 +139,8 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     if (shot_info->type == CIFF_SHORT && shot_info->count >= 2) {
       // os << exp(canonEv(value.toLong()) * log(2.0)) * 100.0 / 32.0;
       uint16_t iso_index = shot_info->getU16(2);
-      iso = expf(canonEv(static_cast<long>(iso_index)) * logf(2.0)) * 100.0F /
-            32.0F;
+      iso = expf(canonEv(static_cast<int64_t>(iso_index)) * logf(2.0)) *
+            100.0F / 32.0F;
     }
   }
 
