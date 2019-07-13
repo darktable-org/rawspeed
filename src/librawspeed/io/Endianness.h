@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32, ushort16, uint64, int32, int16_t
+#include "common/Common.h" // for uint32, ushort16, uint64_t, int32, int16_t
 #include <cassert>         // for assert
 #include <cstring>         // for memcpy
 // IWYU pragma: no_include "io/EndiannessTest.h"
@@ -79,8 +79,8 @@ inline int32 getByteSwapped(int32 v) {
 inline uint32 getByteSwapped(uint32 v) {
   return static_cast<uint32>(BSWAP32(v));
 }
-inline uint64 getByteSwapped(uint64 v) {
-  return BSWAP64(static_cast<uint64>(v));
+inline uint64_t getByteSwapped(uint64_t v) {
+  return BSWAP64(static_cast<uint64_t>(v));
 }
 
 // the float/double versions use two memcpy which guarantee strict aliasing
@@ -93,7 +93,7 @@ inline float getByteSwapped(float f) {
   return f;
 }
 inline double getByteSwapped(double d) {
-  uint64 i;
+  uint64_t i;
   memcpy(&i, &d, sizeof(i));
   i = getByteSwapped(i);
   memcpy(&d, &i, sizeof(i));

@@ -33,7 +33,6 @@ using rawspeed::alignedMallocArray;
 using rawspeed::int32;
 using rawspeed::uchar8;
 using rawspeed::uint32;
-using rawspeed::uint64;
 using rawspeed::ushort16;
 using std::unique_ptr;
 
@@ -78,7 +77,7 @@ class AlignedMallocDeathTest : public AlignedMallocTest<T> {};
 
 using Classes =
     testing::Types<int, unsigned int, int8_t, uchar8, int16_t, ushort16, int32,
-                   uint32, int64_t, uint64, float, double>;
+                   uint32, int64_t, uint64_t, float, double>;
 
 TYPED_TEST_CASE(AlignedMallocTest, Classes);
 

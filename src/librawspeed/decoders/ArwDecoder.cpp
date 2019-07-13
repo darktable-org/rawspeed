@@ -189,7 +189,7 @@ RawImage ArwDecoder::decodeRawInternal() {
       height > 5320)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-  bool arw1 = uint64(counts->getU32()) * 8 != width * height * bitPerPixel;
+  bool arw1 = uint64_t(counts->getU32()) * 8 != width * height * bitPerPixel;
   if (arw1)
     height += 8;
 

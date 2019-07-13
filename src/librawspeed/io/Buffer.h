@@ -22,7 +22,7 @@
 #pragma once
 
 #include "AddressSanitizer.h" // for ASan
-#include "common/Common.h"    // for uchar8, uint64, uint32
+#include "common/Common.h"    // for uchar8, uint64_t, uint32
 #include "common/Memory.h"    // for alignedFree
 #include "io/Endianness.h"    // for Endianness, Endianness::little, getHos...
 #include "io/IOException.h"   // for ThrowIOE
@@ -164,8 +164,8 @@ public:
   }
 
   inline bool isValid(size_type offset, size_type count = 1) const {
-    return static_cast<uint64>(offset) + count <=
-           static_cast<uint64>(size) + BUFFER_PADDING;
+    return static_cast<uint64_t>(offset) + count <=
+           static_cast<uint64_t>(size) + BUFFER_PADDING;
   }
 
 //  Buffer* clone();

@@ -54,7 +54,7 @@ public:
   }
 
   inline size_type check(size_type bytes) const {
-    if (static_cast<uint64>(pos) + bytes > size)
+    if (static_cast<uint64_t>(pos) + bytes > size)
       ThrowIOE("Out of bounds access in ByteStream");
     assert(!ASan::RegionIsPoisoned(data + pos, bytes));
     return bytes;

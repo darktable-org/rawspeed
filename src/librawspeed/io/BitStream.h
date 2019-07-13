@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32, uchar8, uint64
+#include "common/Common.h" // for uint32, uchar8, uint64_t
 #include "io/Buffer.h"     // for Buffer::size_type, BUFFER_PADDING
 #include "io/ByteStream.h"  // for ByteStream
 #include "io/IOException.h" // for IOException (ptr only), ThrowIOE
@@ -39,7 +39,7 @@ namespace rawspeed {
 
 struct BitStreamCacheBase
 {
-  uint64 cache = 0; // the actual bits stored in the cache
+  uint64_t cache = 0;         // the actual bits stored in the cache
   unsigned int fillLevel = 0; // bits left in cache
   static constexpr unsigned Size = sizeof(cache)*8;
 
@@ -53,7 +53,7 @@ struct BitStreamCacheBase
 
 struct BitStreamCacheLeftInRightOut : BitStreamCacheBase
 {
-  inline void push(uint64 bits, uint32 count) noexcept {
+  inline void push(uint64_t bits, uint32 count) noexcept {
     assert(count + fillLevel <= Size);
     cache |= bits << fillLevel;
     fillLevel += count;
@@ -71,7 +71,7 @@ struct BitStreamCacheLeftInRightOut : BitStreamCacheBase
 
 struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
 {
-  inline void push(uint64 bits, uint32 count) noexcept {
+  inline void push(uint64_t bits, uint32 count) noexcept {
     assert(count + fillLevel <= Size);
     assert(count < BitStreamCacheBase::Size);
     cache = cache << count | bits;

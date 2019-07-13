@@ -72,7 +72,7 @@ KodakDecompressor::decodeSegment(const uint32 bsize) {
 #endif
 
   std::array<uchar8, 2 * segment_size> blen;
-  uint64 bitbuf = 0;
+  uint64_t bitbuf = 0;
   uint32 bits = 0;
 
   for (uint32 i = 0; i < bsize; i += 2) {
@@ -81,7 +81,7 @@ KodakDecompressor::decodeSegment(const uint32 bsize) {
     blen[i + 1] = input.getByte() >> 4;
   }
   if ((bsize & 7) == 4) {
-    bitbuf = (static_cast<uint64>(input.getByte())) << 8UL;
+    bitbuf = (static_cast<uint64_t>(input.getByte())) << 8UL;
     bitbuf += (static_cast<int>(input.getByte()));
     bits = 16;
   }

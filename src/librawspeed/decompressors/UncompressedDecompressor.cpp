@@ -103,8 +103,8 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
   uint32 w = size.x;
   uint32 h = size.y;
   uint32 cpp = mRaw->getCpp();
-  uint64 ox = offset.x;
-  uint64 oy = offset.y;
+  uint64_t ox = offset.x;
+  uint64_t oy = offset.y;
 
   if (bitPerPixel > 16 && mRaw->getDataType() == TYPE_USHORT16)
     ThrowRDE("Unsupported bit depth");
@@ -131,13 +131,13 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
   assert(inputPitchBytes >= outPixelBytes);
   uint32 skipBytes = inputPitchBytes - outPixelBytes; // Skip per line
 
-  if (oy > static_cast<uint64>(mRaw->dim.y))
+  if (oy > static_cast<uint64_t>(mRaw->dim.y))
     ThrowRDE("Invalid y offset");
-  if (ox + size.x > static_cast<uint64>(mRaw->dim.x))
+  if (ox + size.x > static_cast<uint64_t>(mRaw->dim.x))
     ThrowRDE("Invalid x offset");
 
-  uint64 y = oy;
-  h = min(h + oy, static_cast<uint64>(mRaw->dim.y));
+  uint64_t y = oy;
+  h = min(h + oy, static_cast<uint64_t>(mRaw->dim.y));
 
   if (mRaw->getDataType() == TYPE_FLOAT32) {
     if (bitPerPixel != 32)

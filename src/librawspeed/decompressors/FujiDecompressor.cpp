@@ -742,7 +742,7 @@ void FujiDecompressor::fuji_compressed_load_raw() {
     block_size = input.getU32();
 
   // some padding?
-  const uint64 raw_offset = sizeof(uint32) * header.blocks_in_row;
+  const uint64_t raw_offset = sizeof(uint32) * header.blocks_in_row;
   if (raw_offset & 0xC) {
     const int padding = 0x10 - (raw_offset & 0xC);
     input.skipBytes(padding);

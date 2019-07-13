@@ -54,7 +54,7 @@ Buffer KdcDecoder::getInputBuffer() {
     ThrowRDE("Couldn't find the KDC offset");
 
   assert(offset != nullptr);
-  uint64 off = uint64(offset->getU32(4)) + uint64(offset->getU32(12));
+  uint64_t off = uint64_t(offset->getU32(4)) + uint64_t(offset->getU32(12));
   if (off > std::numeric_limits<uint32>::max())
     ThrowRDE("Offset is too large.");
 

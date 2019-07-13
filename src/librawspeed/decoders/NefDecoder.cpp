@@ -163,7 +163,7 @@ bool NefDecoder::NEFIsUncompressed(const TiffIFD* raw) {
   // Now, there can be three situations.
 
   // We might have not enough input to produce the requested image size.
-  const uint64 avaliableInputBits = uint64(8) * avaliableInputBytes;
+  const uint64_t avaliableInputBits = uint64_t(8) * avaliableInputBytes;
   const auto avaliablePixels = avaliableInputBits / bitPerPixel; // round down!
   if (avaliablePixels < requiredPixels)
     return false;
