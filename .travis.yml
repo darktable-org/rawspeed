@@ -70,6 +70,13 @@ jobs:
     services:
       - docker
     env: CC=gcc-8 CXX=g++-8
+  - stage: test
+    os: linux
+    dist: trusty
+    sudo: required
+    services:
+      - docker
+    env: CC=gcc-8 CXX=g++-8 ECO="-DWITH_OPENMP=OFF"
   - os: linux
     dist: trusty
     sudo: required
