@@ -233,8 +233,8 @@ DngTilingDescription DngDecoder::getTilingDescription(const TiffIFD* raw) {
     }
 
     // tilesX * tilesY may overflow, but division is fine, so let's do that.
-    if (offsets->count / tilesX != tilesY ||
-        offsets->count / tilesY != tilesX) {
+    if ((offsets->count / tilesX != tilesY || (offsets->count % tilesX != 0)) ||
+        (offsets->count / tilesY != tilesX || (offsets->count % tilesY != 0))) {
       ThrowRDE("Tile X/Y count mismatch: total:%u X:%u, Y:%u", offsets->count,
                tilesX, tilesY);
     }
