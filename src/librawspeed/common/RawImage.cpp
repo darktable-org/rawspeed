@@ -64,6 +64,8 @@ ImageMetaData::ImageMetaData() {
   pixelAspectRatio = 1;
   fujiRotationPos = 0;
   wbCoeffs.fill(NAN);
+  UserCrops[0] = UserCrops[1] = 0;
+  UserCrops[2] = UserCrops[3] = 1;
 }
 
 RawImageData::~RawImageData() {

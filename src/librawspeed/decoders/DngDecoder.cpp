@@ -486,6 +486,24 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
   if (mRaw->dim.area() <= 0)
     ThrowRDE("No image left after crop");
 
+  if (raw->hasEntry(DEFAULTUSERCROP)) {
+    TiffEntry *usercrop = raw->getEntry(DEFAULTUSERCROP);
+    // DNG documentation requires these to be float
+    const auto borders = usercrop->getFloatArray(4);
+    // Order is: left top right bottom
+    if ((0 <= borders[0] <= 1) &
+        (0 <= borders[1] <= 1) &
+        (0 <= borders[2] <= 1) &
+        (0 <= borders[3] <= 1) &
+        (borders[2] - borders[0] > 0.05f) &
+        (borders[3] - borders[1] > 0.05f) ) {
+      mRaw->metadata.UserCrops[0] = borders[1];
+      mRaw->metadata.UserCrops[1] = borders[0];
+      mRaw->metadata.UserCrops[2] = borders[3];
+      mRaw->metadata.UserCrops[3] = borders[2];
+    }
+  }
+
   // Apply stage 1 opcodes
   if (applyStage1DngOpcodes && raw->hasEntry(OPCODELIST1)) {
     try {

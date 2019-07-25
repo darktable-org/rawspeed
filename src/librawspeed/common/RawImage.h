@@ -72,6 +72,9 @@ public:
 
   // White balance coefficients of the image
   std::array<float, 4> wbCoeffs;
+  // Some DNG files have information about a user defined crop (Examples from Leica Q/Q2)
+  // All are relative from top left: left, top, right, lower
+  std::array<float, 4> UserCrops;
 
   // How many pixels far down the left edge and far up the right edge the image
   // corners are when the image is rotated 45 degrees in Fuji rotated sensors.
