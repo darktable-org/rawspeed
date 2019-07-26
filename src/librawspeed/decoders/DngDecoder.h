@@ -48,7 +48,7 @@ public:
 protected:
   int getDecoderVersion() const override { return 0; }
   bool mFixLjpeg;
-  void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
+  static void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
   void parseCFA(const TiffIFD* raw);
   DngTilingDescription getTilingDescription(const TiffIFD* raw);
   void decodeData(const TiffIFD* raw, uint32_t sample_format);

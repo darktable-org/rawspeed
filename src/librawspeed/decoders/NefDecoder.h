@@ -55,8 +55,8 @@ protected:
 private:
   int getDecoderVersion() const override { return 5; }
   bool D100IsCompressed(uint32_t offset);
-  bool NEFIsUncompressed(const TiffIFD* raw);
-  bool NEFIsUncompressedRGB(const TiffIFD* raw);
+  static bool NEFIsUncompressed(const TiffIFD* raw);
+  static bool NEFIsUncompressedRGB(const TiffIFD* raw);
   void DecodeUncompressed();
   void DecodeD100Uncompressed();
   void DecodeSNefUncompressed();
@@ -65,7 +65,8 @@ private:
   void DecodeNikonSNef(ByteStream* input, uint32_t w, uint32_t h);
   std::string getMode();
   std::string getExtendedMode(const std::string &mode);
-  std::vector<uint16_t> gammaCurve(double pwr, double ts, int mode, int imax);
+  static std::vector<uint16_t> gammaCurve(double pwr, double ts, int mode,
+                                          int imax);
 
   // We use this for the D50 and D2X whacky WB "encryption"
   static const std::array<uint8_t, 256> serialmap;

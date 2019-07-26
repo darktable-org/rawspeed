@@ -122,8 +122,8 @@ protected:
   virtual void checkSupportInternal(const CameraMetaData* meta) = 0;
 
   /* Ask for sample submission, if makes sense */
-  void askForSamples(const CameraMetaData* meta, const std::string& make,
-                     const std::string& model, const std::string& mode) const;
+  static void askForSamples(const CameraMetaData* meta, const std::string& make,
+                            const std::string& model, const std::string& mode);
 
   /* Check the camera and mode against the camera database. */
   /* A RawDecoderException will be thrown if the camera isn't supported */

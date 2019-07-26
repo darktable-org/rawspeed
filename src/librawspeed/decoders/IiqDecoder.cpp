@@ -72,8 +72,7 @@ bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 // FIXME: this is very close to SamsungV0Decompressor::computeStripes()
 std::vector<PhaseOneStrip>
 IiqDecoder::computeSripes(const Buffer& raw_data,
-                          std::vector<IiqOffset>&& offsets,
-                          uint32_t height) const {
+                          std::vector<IiqOffset>&& offsets, uint32_t height) {
   assert(height > 0);
   assert(offsets.size() == (1 + height));
 

@@ -147,7 +147,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
 }
 
 void RawDecoder::askForSamples(const CameraMetaData* meta, const string& make,
-                               const string& model, const string& mode) const {
+                               const string& model, const string& mode) {
   if ("dng" == mode)
     return;
 

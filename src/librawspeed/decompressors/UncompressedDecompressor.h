@@ -45,7 +45,7 @@ class UncompressedDecompressor final : public AbstractDecompressor {
   void sanityCheck(uint32_t w, const uint32_t* h, int bpp);
 
   // for special packed formats
-  int bytesPerLine(int w, bool skips);
+  static int bytesPerLine(int w, bool skips);
 
 public:
   UncompressedDecompressor(ByteStream input_, const RawImage& img)

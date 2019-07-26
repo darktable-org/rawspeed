@@ -56,7 +56,7 @@ ThrowException(const char* fmt, ...) {
 
 class RawspeedException : public std::runtime_error {
 private:
-  void log(const char* msg) {
+  static void log(const char* msg) {
     writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s", msg);
   }
 
