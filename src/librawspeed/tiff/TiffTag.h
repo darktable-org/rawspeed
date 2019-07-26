@@ -276,7 +276,7 @@ enum TiffTag {
   DNGPRIVATEDATA                  = 0xC634, // IFD0
 
   MAKERNOTESAFETY                 = 0xC635, // IFD0
-  DEFAULTUSERCROP                 = 0XC7B5, // RAWIFD
+  DEFAULTUSERCROP                 = 0xC7B5, // RAWIFD
 
   // THE SPEC SAYS BESTQUALITYSCALE IS 0xC635 BUT IT APPEARS TO BE WRONG
   //BESTQUALITYSCALE                = 0xC635, // RAWIFD

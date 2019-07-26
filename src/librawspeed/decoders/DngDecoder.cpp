@@ -491,10 +491,10 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     // DNG documentation requires these to be float
     const auto borders = usercrop->getFloatArray(4);
     // Order is: left top right bottom
-    if ((0 <= borders[0] <= 1) &
-        (0 <= borders[1] <= 1) &
-        (0 <= borders[2] <= 1) &
-        (0 <= borders[3] <= 1) &
+    if ((0 <= borders[0]) & (borders[0] <= 1) &
+        (0 <= borders[1]) & (borders[1] <= 1) &
+        (0 <= borders[2]) & (borders[2] <= 1) &
+        (0 <= borders[3]) & (borders[3] <= 1) &
         (borders[2] - borders[0] > 0.05f) &
         (borders[3] - borders[1] > 0.05f) ) {
       mRaw->metadata.UserCrops[0] = borders[1];
