@@ -66,14 +66,14 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=gcc-8 CXX=g++-8
+    env: CC=gcc-9 CXX=g++-9
   - stage: test
     os: linux
     dist: trusty
     sudo: required
     services:
       - docker
-    env: CC=gcc-8 CXX=g++-8 ECO="-DWITH_OPENMP=OFF"
+    env: CC=gcc-9 CXX=g++-9 ECO="-DWITH_OPENMP=OFF"
   - os: linux
     dist: trusty
     sudo: required
@@ -85,7 +85,7 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=gcc-8 CXX=g++-8 GCOV=gcov-8 FLAVOR=Coverage ECO="-DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON" EXTRA_OPTS="$DOCKER_RPUU"
+    env: CC=gcc-9 CXX=g++-9 GCOV=gcov-9 FLAVOR=Coverage ECO="-DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON" EXTRA_OPTS="$DOCKER_RPUU"
     cache:
       directories:
         - '$HOME/$RPUU_DST'
