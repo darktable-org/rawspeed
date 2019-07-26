@@ -36,7 +36,7 @@ RUN echo 'APT::Get::Assume-Yes "true";' > /etc/apt/apt.conf.d/80forceyes
 # Fix broken packages
 RUN echo 'APT::Get::Fix-Missing "true";' > /etc/apt/apt.conf.d/80fixmissin
 
-ENV GCC_VER=8
+ENV GCC_VER=9
 ENV LLVM_VER=7
 
 # pls keep sorted :)
