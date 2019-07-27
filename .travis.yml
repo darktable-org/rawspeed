@@ -17,9 +17,6 @@ notifications:
 language: generic
 
 before_install:
-  - if [[ "$TARGET" == "SONARQUBE" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || ("$TRAVIS_BRANCH" != "develop" && "$TRAVIS_BRANCH" != "master")) ]]; then
-      exit;
-    fi;
   - if [[ "$TARGET" == "WWW" && ("$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_SECURE_ENV_VARS" != "true" || "$TRAVIS_BRANCH" != "develop") ]]; then
       exit;
     fi;
@@ -69,14 +66,14 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=gcc-8 CXX=g++-8
+    env: CC=gcc-9 CXX=g++-9
   - stage: test
     os: linux
     dist: trusty
     sudo: required
     services:
       - docker
-    env: CC=gcc-8 CXX=g++-8 ECO="-DWITH_OPENMP=OFF"
+    env: CC=gcc-9 CXX=g++-9 ECO="-DWITH_OPENMP=OFF"
   - os: linux
     dist: trusty
     sudo: required
@@ -88,7 +85,7 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=gcc-8 CXX=g++-8 GCOV=gcov-8 FLAVOR=Coverage ECO="-DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON" EXTRA_OPTS="$DOCKER_RPUU"
+    env: CC=gcc-9 CXX=g++-9 GCOV=gcov-9 FLAVOR=Coverage ECO="-DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON" EXTRA_OPTS="$DOCKER_RPUU"
     cache:
       directories:
         - '$HOME/$RPUU_DST'
@@ -128,13 +125,6 @@ jobs:
   #  edge: true
   #  services:
   #    - docker
-  #  env: CC=gcc-8 CXX=g++-8 GCOV=gcov-8 TARGET=SONARQUBE FLAVOR=Coverage ECO="-DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON" EXTRA_OPTS="--tmpfs /root/.sonar --volume $HOME/.sonar/cache:/root/.sonar/cache $DOCKER_RPUU"
-  #  git:
-  #    depth: 9999999
-  #  cache:
-  #    directories:
-  #      - '$HOME/$RPUU_DST'
-  #      - '$HOME/.sonar/cache'
   - stage: deploy
     os: linux
     dist: trusty
@@ -159,7 +149,7 @@ script:
     fi;
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$EXTRA" != "NODOCKER"  ]]; then
       mkdir "$TRAVIS_BUILD_DIR/build";
-      if [[ "$TARGET" == "SONARQUBE" || "$TARGET" == "WWW" ]]; then
+      if [[ "$TARGET" == "WWW" ]]; then
         export BUILD_DIR="$SRC_DIR/build";
       fi;
       if [[ "$TARGET" == "WWW" && "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_SECURE_ENV_VARS" == "true" && "$TRAVIS_BRANCH" == "develop" ]]; then
@@ -172,23 +162,14 @@ script:
         export TARGET="build";
         export CMD="scan-build-7 --use-cc=\"$CC\" --use-c++=\"$CXX\" --force-analyze-debug-code --status-bugs -disable-checker deadcode.DeadStores $CMD";
       fi;
-      if [[ "$TARGET" == "SONARQUBE" ]]; then
-        export TARGET="build";
-        export CMD="build-wrapper-linux-x86-64 --out-dir \"$BUILD_DIR/bw-output/\" $CMD";
-      fi;
 
       docker run --read-only --tmpfs /tmp --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $BUILD_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS $EXTRA_OPTS --env CC --env CXX --env GCOV --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR --env ECO darktable/rawspeed sh -c "$CMD";
-
-      if [[ "$TARGET2" == "SONARQUBE" ]]; then
-        export CMD="sonar-scanner -Dproject.settings=\"$SRC_DIR/.ci/sonar-project.properties\" -Dsonar.login=\"$SONAR_TOKEN\" -Dsonar.projectVersion=\"$TRAVIS_COMMIT\"";
-        docker run --read-only --tmpfs /tmp --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $SRC_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS $EXTRA_OPTS --env CC --env CXX --env GCOV --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR --env ECO darktable/rawspeed sh -c "$CMD";
-      fi;
 
       export TARGET="$TARGET2";
     fi;
 
 after_success:
-  - if [[ "$FLAVOR" == "Coverage" && "$TARGET" != "SONARQUBE" ]]; then
+  - if [[ "$FLAVOR" == "Coverage" ]]; then
       cd "$TRAVIS_BUILD_DIR";
       curl -s https://codecov.io/bash > codecov;
       chmod +x codecov;

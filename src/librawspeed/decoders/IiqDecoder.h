@@ -44,9 +44,9 @@ class IiqDecoder final : public AbstractTiffDecoder {
     IiqOffset(uint32_t block, uint32_t offset_) : n(block), offset(offset_) {}
   };
 
-  std::vector<PhaseOneStrip> computeSripes(const Buffer& raw_data,
-                                           std::vector<IiqOffset>&& offsets,
-                                           uint32_t height) const;
+  static std::vector<PhaseOneStrip>
+  computeSripes(const Buffer& raw_data, std::vector<IiqOffset>&& offsets,
+                uint32_t height);
 
 public:
   static bool isAppropriateDecoder(const Buffer* file);

@@ -45,7 +45,7 @@ public:
 protected:
   int getDecoderVersion() const override { return 0; }
   std::string make, model;
-  std::string getXMPTag(const std::string &xmp, const std::string &tag);
+  static std::string getXMPTag(const std::string& xmp, const std::string& tag);
 };
 
 } // namespace rawspeed

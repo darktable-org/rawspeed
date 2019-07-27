@@ -100,7 +100,7 @@ OlympusDecompressor::parseCarry(BitPumpMSB* bits,
 }
 
 inline int OlympusDecompressor::getPred(int row, int x, uint16_t* dest,
-                                        const uint16_t* up_ptr) const {
+                                        const uint16_t* up_ptr) {
   auto getLeft = [dest]() { return dest[-2]; };
   auto getUp = [up_ptr]() { return up_ptr[0]; };
   auto getLeftUp = [up_ptr]() { return up_ptr[-2]; };

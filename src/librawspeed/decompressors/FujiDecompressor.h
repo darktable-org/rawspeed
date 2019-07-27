@@ -190,8 +190,8 @@ private:
   void copy_line_to_bayer(fuji_compressed_block* info, const FujiStrip& strip,
                           int cur_line) const;
 
-  inline void fuji_zerobits(BitPumpMSB* pump, int* count) const;
-  int bitDiff(int value1, int value2) const;
+  static inline void fuji_zerobits(BitPumpMSB* pump, int* count);
+  static int bitDiff(int value1, int value2);
 
   template <typename T1, typename T2>
   void fuji_decode_sample(T1&& func_0, T2&& func_1, fuji_compressed_block* info,
@@ -202,16 +202,16 @@ private:
   void fuji_decode_sample_odd(fuji_compressed_block* info, uint16_t* line_buf,
                               int* pos, std::array<int_pair, 41>* grads) const;
 
-  void fuji_decode_interpolation_even(int line_width, uint16_t* line_buf,
-                                      int* pos) const;
-  void fuji_extend_generic(std::array<uint16_t*, _ltotal> linebuf,
-                           int line_width, int start, int end) const;
-  void fuji_extend_red(std::array<uint16_t*, _ltotal> linebuf,
-                       int line_width) const;
-  void fuji_extend_green(std::array<uint16_t*, _ltotal> linebuf,
-                         int line_width) const;
-  void fuji_extend_blue(std::array<uint16_t*, _ltotal> linebuf,
-                        int line_width) const;
+  static void fuji_decode_interpolation_even(int line_width, uint16_t* line_buf,
+                                             int* pos);
+  static void fuji_extend_generic(std::array<uint16_t*, _ltotal> linebuf,
+                                  int line_width, int start, int end);
+  static void fuji_extend_red(std::array<uint16_t*, _ltotal> linebuf,
+                              int line_width);
+  static void fuji_extend_green(std::array<uint16_t*, _ltotal> linebuf,
+                                int line_width);
+  static void fuji_extend_blue(std::array<uint16_t*, _ltotal> linebuf,
+                               int line_width);
   void xtrans_decode_block(fuji_compressed_block* info, int cur_line) const;
   void fuji_bayer_decode_block(fuji_compressed_block* info, int cur_line) const;
 };
