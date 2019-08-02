@@ -1,4 +1,4 @@
-find_program(LLVMRANLIB_EXECUTABLE NAMES llvm-ranlib llvm-ranlib-7 llvm-ranlib-6.0 llvm-ranlib-5.0 llvm-ranlib-4.0 llvm-ranlib-3.9)
+find_program(LLVMRANLIB_EXECUTABLE NAMES llvm-ranlib llvm-ranlib-8 llvm-ranlib-7 llvm-ranlib-6.0 llvm-ranlib-5.0 llvm-ranlib-4.0 llvm-ranlib-3.9)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LLVMRanLib

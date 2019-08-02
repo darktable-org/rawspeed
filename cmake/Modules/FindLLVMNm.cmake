@@ -1,4 +1,4 @@
-find_program(LLVMNM_EXECUTABLE NAMES llvm-nm llvm-nm-7 llvm-nm-6.0 llvm-nm-5.0 llvm-nm-4.0 llvm-nm-3.9)
+find_program(LLVMNM_EXECUTABLE NAMES llvm-nm llvm-nm-8 llvm-nm-7 llvm-nm-6.0 llvm-nm-5.0 llvm-nm-4.0 llvm-nm-3.9)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LLVMNm

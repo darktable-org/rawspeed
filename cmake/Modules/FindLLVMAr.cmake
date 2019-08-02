@@ -1,4 +1,4 @@
-find_program(LLVMAR_EXECUTABLE NAMES llvm-ar llvm-ar-7 llvm-ar-6.0 llvm-ar-5.0 llvm-ar-4.0 llvm-ar-3.9)
+find_program(LLVMAR_EXECUTABLE NAMES llvm-ar llvm-ar-8 llvm-ar-7 llvm-ar-6.0 llvm-ar-5.0 llvm-ar-4.0 llvm-ar-3.9)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LLVMAr
