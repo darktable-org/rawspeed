@@ -97,6 +97,7 @@ public:
 
     // where vertically does this block start?
     int offsetY(int line = 0) const {
+      (void)height(); // A note for NDEBUG builds that *this is used.
       assert(line >= 0 && line < height());
       return lineHeight() * line;
     }
