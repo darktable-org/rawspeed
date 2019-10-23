@@ -9269,6 +9269,18 @@
 			<Hint name="fuji_rotate" value=""/>
 		</Hints>
 	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S7000">
+		<ID make="Fujifilm" model="FinePix S7000">Fujifilm FinePix S7000</ID>
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">GB</ColorRow>
+			<ColorRow y="1">RG</ColorRow>
+		</CFA2>
+		<Crop x="6" y="4" width="0" height="0"/>
+		<Sensor black="0" white="15869"/>
+		<Hints>
+			<Hint name="fuji_rotate" value=""/>
+		</Hints>
+	</Camera>
 	<Camera make="FUJIFILM" model="FinePix S9500">
 		<ID make="Fujifilm" model="FinePix S9500">Fujifilm FinePix S9500</ID>
 		<CFA2 width="2" height="2">
