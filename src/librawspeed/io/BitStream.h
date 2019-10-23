@@ -110,26 +110,20 @@ public:
 private:
   inline void fillSafe() {
     assert(data);
-    if (pos + BitStreamCacheBase::MaxProcessBytes <= size) {
-      std::array<uint8_t, BitStreamCacheBase::MaxProcessBytes> tmp;
-      tmp.fill(0);
-      assert(!(size - pos < BitStreamCacheBase::MaxProcessBytes));
-      memcpy(tmp.data(), data + pos, BitStreamCacheBase::MaxProcessBytes);
-      pos += fillCache(tmp.data(), size, &pos);
-    } else if (pos < size) {
-      std::array<uint8_t, BitStreamCacheBase::MaxProcessBytes> tmp;
-      tmp.fill(0);
-      assert(size - pos < BitStreamCacheBase::MaxProcessBytes);
-      memcpy(tmp.data(), data + pos, size - pos);
-      pos += fillCache(tmp.data(), size, &pos);
-    } else if (pos <= size + BitStreamCacheBase::MaxProcessBytes) {
-      std::array<uint8_t, BitStreamCacheBase::MaxProcessBytes> tmp;
-      tmp.fill(0);
-      pos += fillCache(tmp.data(), size, &pos);
-    } else {
-      // assert(size < pos);
+
+    if (pos > size + BitStreamCacheBase::MaxProcessBytes)
       ThrowIOE("Buffer overflow read in BitStream");
-    }
+
+    std::array<uint8_t, BitStreamCacheBase::MaxProcessBytes> tmp;
+    tmp.fill(0);
+
+    Buffer::size_type bytesRemaining = (pos < size) ? size - pos : 0;
+    bytesRemaining =
+        std::min(BitStreamCacheBase::MaxProcessBytes, bytesRemaining);
+
+    memcpy(tmp.data(), data + pos, bytesRemaining);
+
+    pos += fillCache(tmp.data(), size, &pos);
   }
 
   // In non-DEBUG builds, fillSafe() will be called at most once
