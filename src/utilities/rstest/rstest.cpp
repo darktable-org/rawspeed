@@ -101,9 +101,8 @@ class RstestHashMismatch final : public rawspeed::RawspeedException {
 public:
   size_t time;
 
-  explicit RstestHashMismatch(const std::string& msg, size_t time_)
-      : RawspeedException(msg), time(time_) {}
-  explicit RstestHashMismatch(const char* msg, size_t time_)
+  explicit RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
+  RstestHashMismatch(const char* msg, size_t time_)
       : RawspeedException(msg), time(time_) {}
 };
 

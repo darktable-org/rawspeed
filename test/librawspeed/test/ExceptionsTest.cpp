@@ -47,7 +47,7 @@ using std::unique_ptr;
 
 namespace rawspeed_test {
 
-static const std::string msg("my very Smart error Message #1 !");
+static const char* msg = "my very Smart error Message #1 !";
 
 #define FMT "%s"
 
@@ -191,15 +191,15 @@ TYPED_TEST(ExceptionsTest, ThrowMessage) {
 }
 
 TYPED_TEST(ExceptionsTest, ThrowHelperTest) {
-  ASSERT_ANY_THROW(MetaHelper<TypeParam>(msg.c_str()));
-  EXPECT_THROW(MetaHelper<TypeParam>(msg.c_str()), std::runtime_error);
-  EXPECT_THROW(MetaHelper<TypeParam>(msg.c_str()), RawspeedException);
-  EXPECT_THROW(MetaHelper<TypeParam>(msg.c_str()), TypeParam);
+  ASSERT_ANY_THROW(MetaHelper<TypeParam>(msg));
+  EXPECT_THROW(MetaHelper<TypeParam>(msg), std::runtime_error);
+  EXPECT_THROW(MetaHelper<TypeParam>(msg), RawspeedException);
+  EXPECT_THROW(MetaHelper<TypeParam>(msg), TypeParam);
 }
 
 TYPED_TEST(ExceptionsTest, ThrowHelperTestMessage) {
   try {
-    MetaHelper<TypeParam>(msg.c_str());
+    MetaHelper<TypeParam>(msg);
   } catch (std::exception& ex) {
     ASSERT_THAT(ex.what(), testing::HasSubstr(msg));
   }
