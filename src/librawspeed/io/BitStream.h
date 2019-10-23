@@ -141,24 +141,25 @@ public:
   inline void fill(uint32_t nbits = Cache::MaxGetBits) {
     assert(data);
     assert(nbits <= Cache::MaxGetBits);
-    if (cache.fillLevel < nbits) {
+
+    if (cache.fillLevel >= nbits)
+      return;
+
 #if defined(DEBUG)
-      // really slow, but best way to check all the assumptions.
-      fillSafe();
+    // really slow, but best way to check all the assumptions.
+    fillSafe();
 #elif BUFFER_PADDING >= 8
-      static_assert(BitStreamCacheBase::MaxProcessBytes == 8,
-                    "update these too");
-      // FIXME: this looks very wrong. We don't check pos at all here.
-      // I suspect this should be:  if (pos <= size)
-      pos += fillCache(data + pos, size, &pos);
+    static_assert(BitStreamCacheBase::MaxProcessBytes == 8, "update these too");
+    // FIXME: this looks very wrong. We don't check pos at all here.
+    // I suspect this should be:  if (pos <= size)
+    pos += fillCache(data + pos, size, &pos);
 #else
-      // disabling this run-time bounds check saves about 1% on intel x86-64
-      if (pos + BitStreamCacheBase::MaxProcessBytes <= size)
-        pos += fillCache(data + pos, size, &pos);
-      else
-        fillSafeNoinline();
+    // disabling this run-time bounds check saves about 1% on intel x86-64
+    if (pos + BitStreamCacheBase::MaxProcessBytes <= size)
+      pos += fillCache(data + pos, size, &pos);
+    else
+      fillSafeNoinline();
 #endif
-    }
   }
 
   // these methods might be specialized by implementations that support it
