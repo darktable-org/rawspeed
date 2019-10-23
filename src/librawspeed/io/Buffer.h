@@ -32,19 +32,6 @@
 
 namespace rawspeed {
 
-// This allows to specify the number of bytes that each Buffer needs to
-// allocate additionally to be able to remove one runtime bounds check
-// in BitStream::fill. There are two sane choices:
-// 0 : allocate exactly as much data as required, or
-// set it to the value of  BitStreamCacheBase::MaxProcessBytes
-#define BUFFER_PADDING 0UL
-
-// if the padding is >= 4, bounds checking in BitStream::fill are not compiled,
-// which supposedly saves about 1% on modern CPUs
-// WARNING: if the padding is >= 4, do *NOT* create Buffer from
-// passed unowning pointer and size. Or, subtract BUFFER_PADDING from size.
-// else bound checks will malfunction => bad things can happen !!!
-
 /*************************************************************************
  * This is the buffer abstraction.
  *
@@ -72,7 +59,7 @@ public:
       ThrowIOE("Trying to allocate 0 bytes sized buffer.");
 
     std::unique_ptr<uint8_t, decltype(&alignedFree)> data(
-        alignedMalloc<uint8_t, 16>(roundUp(size + BUFFER_PADDING, 16)),
+        alignedMalloc<uint8_t, 16>(roundUp(size, 16)),
         &alignedFree);
     if (!data)
       ThrowIOE("Failed to allocate %uz bytes memory buffer.", size);
@@ -107,9 +94,6 @@ public:
   // Data already allocated
   explicit Buffer(const uint8_t* data_, size_type size_)
       : data(data_), size(size_) {
-    static_assert(BUFFER_PADDING == 0, "please do make sure that you do NOT "
-                                       "call this function from YOUR code, and "
-                                       "then comment-out this assert.");
     assert(!ASan::RegionIsPoisoned(data, size));
   }
 
@@ -221,8 +205,7 @@ public:
   }
 
   inline bool isValid(size_type offset, size_type count = 1) const {
-    return static_cast<uint64_t>(offset) + count <=
-           static_cast<uint64_t>(size) + BUFFER_PADDING;
+    return static_cast<uint64_t>(offset) + count <= static_cast<uint64_t>(size);
   }
 };
 

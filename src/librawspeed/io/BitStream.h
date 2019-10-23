@@ -23,7 +23,7 @@
 #pragma once
 
 #include "common/Common.h" // for uint32_t, uint8_t, uint64_t
-#include "io/Buffer.h"     // for Buffer::size_type, BUFFER_PADDING
+#include "io/Buffer.h"     // for Buffer::size_type
 #include "io/ByteStream.h"  // for ByteStream
 #include "io/IOException.h" // for IOException (ptr only), ThrowIOE
 #include <cassert>          // for assert
@@ -142,11 +142,6 @@ public:
 #if defined(DEBUG)
     // really slow, but best way to check all the assumptions.
     fillSafe();
-#elif BUFFER_PADDING >= 8
-    static_assert(BitStreamCacheBase::MaxProcessBytes == 8, "update these too");
-    // FIXME: this looks very wrong. We don't check pos at all here.
-    // I suspect this should be:  if (pos <= size)
-    pos += fillCache(data + pos, size, &pos);
 #else
     // disabling this run-time bounds check saves about 1% on intel x86-64
     if (pos + BitStreamCacheBase::MaxProcessBytes <= size)
