@@ -243,29 +243,26 @@ inline void CrwDecompressor::decodeBlock(std::array<int, 64>* diffBuf,
 
 // FIXME: this function is horrible.
 void CrwDecompressor::decompress() {
-  const uint32_t height = mRaw->dim.y;
-  const uint32_t width = mRaw->dim.x;
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  assert(out.width > 0);
+  assert(out.width % 4 == 0);
+  assert(out.height > 0);
 
   {
-    assert(width > 0);
-    assert(width % 4 == 0);
-    assert(height > 0);
-
     // Each block encodes 64 pixels
 
-    assert((height * width) % 64 == 0);
-    const unsigned hBlocks = height * width / 64;
+    assert((out.height * out.width) % 64 == 0);
+    const unsigned hBlocks = out.height * out.width / 64;
     assert(hBlocks > 0);
 
     BitPumpJPEG lPump(rawInput);
     BitPumpJPEG iPump(rawInput);
 
     int carry = 0;
-    std::array<int, 2> base;
+    std::array<int, 2> base = {512, 512}; // starting predictors
 
-    uint32_t j = 0;
-    uint16_t* dest = nullptr;
-    uint32_t i = 0;
+    int row = 0;
+    int col = 0;
 
     for (unsigned block = 0; block < hBlocks; block++) {
       array<int, 64> diffBuf = {{}};
@@ -276,58 +273,44 @@ void CrwDecompressor::decompress() {
       diffBuf[0] += carry;
       carry = diffBuf[0];
 
-      for (uint32_t k = 0; k < 64; k++) {
-        if (i % width == 0) {
+      for (uint32_t k = 0; k < 64; ++k, ++col) {
+        if (col == out.width) {
           // new line. sadly, does not always happen when k == 0.
-          i = 0;
-
-          dest = reinterpret_cast<uint16_t*>(mRaw->getData(0, j));
-
-          j++;
-          base[0] = base[1] = 512;
+          col = 0;
+          row++;
+          base = {512, 512}; // reinit.
         }
 
-        assert(dest != nullptr);
         base[k & 1] += diffBuf[k];
 
         if (base[k & 1] >> 10)
           ThrowRDE("Error decompressing");
 
-        *dest = base[k & 1];
-
-        i++;
-        dest++;
+        out(row, col) = base[k & 1];
       }
     }
-    assert(j == height);
-    assert(i == width);
+    assert(row == (out.height - 1));
+    assert(col == out.width);
   }
 
   // Add the uncompressed 2 low bits to the decoded 8 high bits
   if (lowbits) {
-    assert(width > 0);
-    assert(width % 4 == 0);
-    assert(height > 0);
-
-    for (uint32_t j = 0; j < height; j++) {
-      auto* dest = reinterpret_cast<uint16_t*>(mRaw->getData(0, j));
-
-      assert(width % 4 == 0);
-      for (uint32_t i = 0; i < width; /* NOTE: i += 4 */) {
+    for (int row = 0; row < out.height; row++) {
+      for (int col = 0; col < out.width; /* NOTE: col += 4 */) {
         const uint8_t c = lowbitInput.getByte();
         // LSB-packed: p3 << 6 | p2 << 4 | p1 << 2 | p0 << 0
 
         // We have read 8 bits, which is 4 pairs of 2 bits. So process 4 pixels.
-        for (uint32_t p = 0; p < 4; p++) {
-          uint16_t low = (c >> (2 * p)) & 0b11;
-          uint16_t val = (*dest << 2) | low;
+        for (uint32_t p = 0; p < 4; ++p, ++col) {
+          uint16_t& pixel = out(row, col);
 
-          if (width == 2672 && val < 512)
+          uint16_t low = (c >> (2 * p)) & 0b11;
+          uint16_t val = (pixel << 2) | low;
+
+          if (out.width == 2672 && val < 512)
             val += 2; // No idea why this is needed
 
-          *dest = val;
-          i++;
-          dest++;
+          pixel = val;
         }
       }
     }
