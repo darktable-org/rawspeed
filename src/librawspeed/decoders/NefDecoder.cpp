@@ -304,47 +304,41 @@ void NefDecoder::DecodeUncompressed() {
   }
 }
 
-void NefDecoder::readCoolpixSplitRaw(const ByteStream& input,
-                                     const iPoint2D& size,
+void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
                                      const iPoint2D& offset, int inputPitch) {
-  uint8_t* data = mRaw->getData();
-  uint32_t outPitch = mRaw->pitch;
-  uint32_t w = size.x;
-  uint32_t h = size.y;
-  uint32_t cpp = mRaw->getCpp();
-  if (input.getRemainSize() < (inputPitch*h)) {
-    if (static_cast<int>(input.getRemainSize()) > inputPitch)
-      h = input.getRemainSize() / inputPitch - 1;
-    else
-      ThrowIOE(
-          "Not enough data to decode a single line. Image file truncated.");
-  }
+  const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  if (offset.y > mRaw->dim.y)
-    ThrowRDE("Invalid y offset");
-  if (offset.x + size.x > mRaw->dim.x)
-    ThrowRDE("Invalid x offset");
+  if (size.y % 2 != 0)
+    ThrowRDE("Odd number of rows");
+  if (size.x % 8 != 0)
+    ThrowRDE("Column count isn't multiple of 8");
+  if (inputPitch != ((3 * size.x) / 2))
+    ThrowRDE("Unexpected input pitch");
 
-  uint32_t y = offset.y;
-  h = min(h + static_cast<uint32_t>(offset.y),
-          static_cast<uint32_t>(mRaw->dim.y));
-  w *= cpp;
-  h /= 2;
-  BitPumpMSB in(input);
-  for (; y < h; y++) {
-    auto* dest = reinterpret_cast<uint16_t*>(
-        &data[offset.x * sizeof(uint16_t) * cpp + y * 2 * outPitch]);
-    for (uint32_t x = 0; x < w; x++) {
-      dest[x] =  in.getBits(12);
-    }
+  // BitPumpMSB loads exactly 4 bytes at once, and we squeeze 12 bits each time.
+  // We produce 2 pixels per 3 bytes (24 bits). If we want to be smart and to
+  // know where the first input bit for first odd row is, the input slice width
+  // must be a multiple of 8 pixels.
+
+  if (offset.x > mRaw->dim.x || offset.y > mRaw->dim.y)
+    ThrowRDE("All pixels outside of image");
+  if (offset.x + size.x > mRaw->dim.x || offset.y + size.y > mRaw->dim.y)
+    ThrowRDE("Output is partailly out of image");
+
+  // The input bytes are laid out in the memory in the following way:
+  // First, all even (0-2-4-) rows, and then all odd (1-3-5-) rows.
+  BitPumpMSB even(input.getStream(size.y / 2, inputPitch));
+  BitPumpMSB odd(input.getStream(size.y / 2, inputPitch));
+  for (int row = offset.y; row < size.y;) {
+    for (int col = offset.x; col < size.x; ++col)
+      img(row, col) = even.getBits(12);
+    ++row;
+    for (int col = offset.x; col < size.x; ++col)
+      img(row, col) = odd.getBits(12);
+    ++row;
   }
-  for (y = offset.y; y < h; y++) {
-    auto* dest = reinterpret_cast<uint16_t*>(
-        &data[offset.x * sizeof(uint16_t) * cpp + (y * 2 + 1) * outPitch]);
-    for (uint32_t x = 0; x < w; x++) {
-      dest[x] =  in.getBits(12);
-    }
-  }
+  assert(even.getRemainSize() == 0 && odd.getRemainSize() == 0 &&
+         "Should have run out of input");
 }
 
 void NefDecoder::DecodeD100Uncompressed() {

@@ -60,7 +60,7 @@ private:
   void DecodeUncompressed();
   void DecodeD100Uncompressed();
   void DecodeSNefUncompressed();
-  void readCoolpixSplitRaw(const ByteStream& input, const iPoint2D& size,
+  void readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
                            const iPoint2D& offset, int inputPitch);
   void DecodeNikonSNef(ByteStream* input, uint32_t w, uint32_t h);
   std::string getMode();
