@@ -108,22 +108,19 @@ KodakDecompressor::decodeSegment(const uint32_t bsize) {
 }
 
 void KodakDecompressor::decompress() {
-  uint8_t* data = mRaw->getData();
-  uint32_t pitch = mRaw->pitch;
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   uint32_t random = 0;
-  for (auto y = 0; y < mRaw->dim.y; y++) {
-    auto* dest = reinterpret_cast<uint16_t*>(&data[y * pitch]);
-
-    for (auto x = 0; x < mRaw->dim.x; x += segment_size) {
-      const uint32_t len = std::min(segment_size, mRaw->dim.x - x);
+  for (int row = 0; row < out.height; row++) {
+    for (int col = 0; col < out.width;) {
+      const int len = std::min(segment_size, mRaw->dim.x - col);
 
       const segment buf = decodeSegment(len);
 
       std::array<int, 2> pred;
       pred.fill(0);
 
-      for (uint32_t i = 0; i < len; i++) {
+      for (int i = 0; i < len; ++i, ++col) {
         pred[i & 1] += buf[i];
 
         int value = pred[i & 1];
@@ -131,9 +128,9 @@ void KodakDecompressor::decompress() {
           ThrowRDE("Value out of bounds %d (bps = %i)", value, bps);
 
         if (uncorrectedRawValues)
-          dest[x + i] = value;
+          out(row, col) = value;
         else
-          mRaw->setWithLookUp(value, reinterpret_cast<uint8_t*>(&dest[x + i]),
+          mRaw->setWithLookUp(value, reinterpret_cast<uint8_t*>(&out(row, col)),
                               &random);
       }
     }
