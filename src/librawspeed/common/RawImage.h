@@ -130,7 +130,7 @@ public:
   bool isAllocated() {return !!data;}
   void createBadPixelMap();
   iPoint2D dim;
-  uint32_t pitch = 0;
+  int pitch = 0;
 
   // padding is the size of the area after last pixel of line n
   // and before the first pixel of line n+1
