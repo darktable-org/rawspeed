@@ -62,7 +62,7 @@ public:
     return {storage->data(), width, height};
   }
 
-  inline T& operator()(int x, int y) const;
+  inline T& operator()(int row, int col) const;
 };
 
 template <class T>
@@ -75,13 +75,13 @@ Array2DRef<T>::Array2DRef(T* data, const int dataWidth, const int dataHeight,
 }
 
 template <class T>
-T& Array2DRef<T>::operator()(const int x, const int y) const {
+T& Array2DRef<T>::operator()(const int row, const int col) const {
   assert(_data);
-  assert(x >= 0);
-  assert(y >= 0);
-  assert(x < width);
-  assert(y < height);
-  return _data[y * _pitch + x];
+  assert(col >= 0);
+  assert(row >= 0);
+  assert(col < width);
+  assert(row < height);
+  return _data[row * _pitch + col];
 }
 
 } // namespace rawspeed

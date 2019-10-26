@@ -408,10 +408,10 @@ void IiqDecoder::correctBadColumn(const uint16_t col) {
       std::array<uint16_t, 4> val;
       std::array<int32_t, 4> dev;
       int32_t sum = 0;
-      sum += val[0] = img(col - 1, row - 1);
-      sum += val[1] = img(col - 1, row + 1);
-      sum += val[2] = img(col + 1, row - 1);
-      sum += val[3] = img(col + 1, row + 1);
+      sum += val[0] = img(row - 1, col - 1);
+      sum += val[1] = img(row + 1, col - 1);
+      sum += val[2] = img(row - 1, col + 1);
+      sum += val[3] = img(row + 1, col + 1);
       for (int i = 0; i < 4; i++) {
         dev[i] = std::abs((val[i] * 4) - sum);
         if (dev[max] < dev[i])
@@ -419,7 +419,7 @@ void IiqDecoder::correctBadColumn(const uint16_t col) {
       }
       const int three_pixels = sum - val[max];
       // This is `std::lround(three_pixels / 3.0)`, but without FP.
-      img(col, row) = (three_pixels + 1) / 3;
+      img(row, col) = (three_pixels + 1) / 3;
     } else {
       /*
        * Do non-green pixels. Let's pretend we are in "R" pixel, in the middle:
@@ -431,11 +431,11 @@ void IiqDecoder::correctBadColumn(const uint16_t col) {
        * We have 6 other "R" pixels - 2 by horizontal, 4 by diagonals.
        * We need to combine them, to get the value of the pixel we are in.
        */
-      uint32_t diags = img(col - 2, row + 2) + img(col - 2, row - 2) +
-                       img(col + 2, row + 2) + img(col + 2, row - 2);
-      uint32_t horiz = img(col - 2, row) + img(col + 2, row);
+      uint32_t diags = img(row + 2, col - 2) + img(row - 2, col - 2) +
+                       img(row + 2, col + 2) + img(row - 2, col + 2);
+      uint32_t horiz = img(row, col - 2) + img(row, col + 2);
       // But this is not just averaging, we bias towards the horizontal pixels.
-      img(col, row) = std::lround(diags * 0.0732233 + horiz * 0.3535534);
+      img(row, col) = std::lround(diags * 0.0732233 + horiz * 0.3535534);
     }
   }
 }
