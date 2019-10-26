@@ -137,36 +137,37 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable(ByteStream* metaData) {
 }
 
 void PentaxDecompressor::decompress(const ByteStream& data) const {
-  BitPumpMSB bs(data);
-  uint8_t* draw = mRaw->getData();
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  assert(mRaw->dim.y > 0);
-  assert(mRaw->dim.x > 0);
-  assert(mRaw->dim.x % 2 == 0);
+  assert(out.height > 0);
+  assert(out.width > 0);
+  assert(out.width % 2 == 0);
 
   std::array<int, 2> pUp1 = {{}};
   std::array<int, 2> pUp2 = {{}};
 
-  for (int y = 0; y < mRaw->dim.y && mRaw->dim.x >= 2; y++) {
-    auto* dest = reinterpret_cast<uint16_t*>(&draw[y * mRaw->pitch]);
+  BitPumpMSB bs(data);
+  for (int row = 0; row < out.height; row++) {
+    int col = 0;
 
-    pUp1[y & 1] += ht.decodeNext(bs);
-    pUp2[y & 1] += ht.decodeNext(bs);
+    pUp1[row & 1] += ht.decodeNext(bs);
+    pUp2[row & 1] += ht.decodeNext(bs);
 
-    int pLeft1 = dest[0] = pUp1[y & 1];
-    int pLeft2 = dest[1] = pUp2[y & 1];
+    int pLeft1 = out(row, col) = pUp1[row & 1];
+    int pLeft2 = out(row, col + 1) = pUp2[row & 1];
+    col += 2;
 
-    for (int x = 2; x < mRaw->dim.x; x += 2) {
+    for (; col < out.width; col += 2) {
       pLeft1 += ht.decodeNext(bs);
       pLeft2 += ht.decodeNext(bs);
 
-      dest[x] = pLeft1;
-      dest[x + 1] = pLeft2;
+      out(row, col) = pLeft1;
+      out(row, col + 1) = pLeft2;
 
       if (pLeft1 < 0 || pLeft1 > 65535)
-        ThrowRDE("decoded value out of bounds at %d:%d", x, y);
+        ThrowRDE("decoded value out of bounds at %d:%d", col, row);
       if (pLeft2 < 0 || pLeft2 > 65535)
-        ThrowRDE("decoded value out of bounds at %d:%d", x, y);
+        ThrowRDE("decoded value out of bounds at %d:%d", col, row);
     }
   }
 }
