@@ -269,7 +269,7 @@ RawImageData::getU16DataAsUncroppedArray2DRef() const noexcept {
   assert(dataType == TYPE_USHORT16 &&
          "Attemping to access floating-point buffer as uint16_t.");
   assert(data && "Data not yet allocated.");
-  return {reinterpret_cast<uint16_t*>(data), dim.x, dim.y,
+  return {reinterpret_cast<uint16_t*>(data), cpp * dim.x, dim.y,
           static_cast<int>(pitch / sizeof(uint16_t))};
 }
 
