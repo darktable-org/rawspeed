@@ -167,15 +167,15 @@ private:
 protected:
   RawImageType dataType;
   RawImageData();
-  RawImageData(const iPoint2D& dim, uint32_t bpp, uint32_t cpp = 1);
+  RawImageData(const iPoint2D& dim, int bpp, int cpp = 1);
   virtual void scaleValues(int start_y, int end_y) = 0;
   virtual void doLookup(int start_y, int end_y) = 0;
   virtual void fixBadPixel(uint32_t x, uint32_t y, int component = 0) = 0;
   void fixBadPixelsThread(int start_y, int end_y);
   void startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped );
   uint8_t* data = nullptr;
-  uint32_t cpp = 1; // Components per pixel
-  uint32_t bpp = 0; // Bytes per pixel.
+  int cpp = 1; // Components per pixel
+  int bpp = 0; // Bytes per pixel.
   friend class RawImage;
   iPoint2D mOffset;
   iPoint2D uncropped_dim;
