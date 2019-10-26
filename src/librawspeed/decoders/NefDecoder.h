@@ -62,7 +62,7 @@ private:
   void DecodeSNefUncompressed();
   void readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
                            const iPoint2D& offset, int inputPitch);
-  void DecodeNikonSNef(ByteStream* input, uint32_t w, uint32_t h);
+  void DecodeNikonSNef(const ByteStream& input);
   std::string getMode();
   std::string getExtendedMode(const std::string &mode);
   static std::vector<uint16_t> gammaCurve(double pwr, double ts, int mode,
