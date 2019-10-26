@@ -390,9 +390,7 @@ void IiqDecoder::handleBadPixel(const uint16_t col, const uint16_t row) {
 }
 
 void IiqDecoder::correctBadColumn(const uint16_t col) {
-  const Array2DRef<uint16_t> img(reinterpret_cast<uint16_t*>(mRaw->getData()),
-                                 mRaw->dim.x, mRaw->dim.y,
-                                 mRaw->pitch / sizeof(uint16_t));
+  const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
   for (int row = 2; row < mRaw->dim.y - 2; row++) {
     if (mRaw->cfa.getColorAt(col, row) == CFA_GREEN) {

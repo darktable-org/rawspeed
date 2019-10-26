@@ -766,9 +766,7 @@ void VC5Decompressor::reconstructLowpassBands() const noexcept {
 }
 
 void VC5Decompressor::combineFinalLowpassBands() const noexcept {
-  const Array2DRef<uint16_t> out(reinterpret_cast<uint16_t*>(mRaw->getData()),
-                                 mRaw->dim.x, mRaw->dim.y,
-                                 mRaw->pitch / sizeof(uint16_t));
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   const int width = out.width / 2;
   const int height = out.height / 2;

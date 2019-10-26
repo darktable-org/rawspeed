@@ -21,18 +21,21 @@
 #pragma once
 
 #include "rawspeedconfig.h"
-#include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
-#include "common/Common.h" // for uint32_t, uint8_t, uint16_t, wri...
-#include "common/ErrorLog.h"           // for ErrorLog
-#include "common/Mutex.h"              // for Mutex
-#include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
-#include "common/TableLookUp.h"        // for TableLookUp
-#include "metadata/BlackArea.h"        // for BlackArea
-#include "metadata/ColorFilterArray.h" // for ColorFilterArray
-#include <array>                       // for array
-#include <memory>                      // for unique_ptr, operator==
-#include <string>                      // for string
-#include <vector>                      // for vector
+#include "ThreadSafetyAnalysis.h" // for GUARDED_BY, REQUIRES
+#include "common/Array2DRef.h"    // for Array2DRef
+#include "common/Common.h"        // for uint32_t, uint8_t, uint16_t, wri...
+#include "common/ErrorLog.h"      // for ErrorLog
+#include "common/Mutex.h"         // for Mutex
+#include "common/Point.h"         // for iPoint2D, iRectangle2D (ptr o...
+#include "common/TableLookUp.h"   // for TableLookUp
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "metadata/BlackArea.h"           // for BlackArea
+#include "metadata/ColorFilterArray.h"    // for ColorFilterArray
+#include <array>                          // for array
+#include <cassert>                        // for assert
+#include <memory>                         // for unique_ptr, operator==
+#include <string>                         // for string
+#include <vector>                         // for vector
 
 namespace rawspeed {
 
@@ -107,11 +110,13 @@ public:
   void blitFrom(const RawImage& src, const iPoint2D& srcPos,
                 const iPoint2D& size, const iPoint2D& destPos);
   rawspeed::RawImageType getDataType() const { return dataType; }
+  inline Array2DRef<uint16_t> getU16DataAsUncroppedArray2DRef() const noexcept;
   uint8_t* getData() const;
   uint8_t*
   getData(uint32_t x,
           uint32_t y); // Not super fast, but safe. Don't use per pixel.
   uint8_t* getDataUncropped(uint32_t x, uint32_t y);
+
   void subFrame(iRectangle2D cropped);
   void clearArea(iRectangle2D area, uint8_t value = 0);
   iPoint2D __attribute__((pure)) getUncroppedDim() const;
@@ -257,6 +262,15 @@ inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type,
     writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!");
     __builtin_unreachable();
   }
+}
+
+inline Array2DRef<uint16_t>
+RawImageData::getU16DataAsUncroppedArray2DRef() const noexcept {
+  assert(dataType == TYPE_USHORT16 &&
+         "Attemping to access floating-point buffer as uint16_t.");
+  assert(data && "Data not yet allocated.");
+  return {reinterpret_cast<uint16_t*>(data), dim.x, dim.y,
+          static_cast<int>(pitch / sizeof(uint16_t))};
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,
