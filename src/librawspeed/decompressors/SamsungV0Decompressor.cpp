@@ -88,18 +88,10 @@ void SamsungV0Decompressor::decompress() const {
     decompressStrip(y, stripes[y]);
 
   // Swap red and blue pixels to get the final CFA pattern
-  for (int y = 0; y < mRaw->dim.y - 1; y += 2) {
-    auto* topline = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
-    auto* bottomline = reinterpret_cast<uint16_t*>(mRaw->getData(0, y + 1));
-
-    for (int x = 0; x < mRaw->dim.x - 1; x += 2) {
-      uint16_t temp = topline[1];
-      topline[1] = bottomline[0];
-      bottomline[0] = temp;
-
-      topline += 2;
-      bottomline += 2;
-    }
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  for (int row = 0; row < out.height - 1; row += 2) {
+    for (int col = 0; col < out.width - 1; col += 2)
+      std::swap(out(row, col + 1), out(row + 1, col));
   }
 }
 
