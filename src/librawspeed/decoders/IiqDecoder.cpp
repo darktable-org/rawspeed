@@ -315,18 +315,19 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
 
   for (int quadRow = 0; quadRow < 2; quadRow++) {
     for (int quadCol = 0; quadCol < 2; quadCol++) {
+      const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
+
       const Spline<> s(control_points[quadRow][quadCol]);
       const std::vector<uint16_t> curve = s.calculateCurve();
 
       int row_start = quadRow == 0 ? 0 : split_row;
-      int row_end = quadRow == 0 ? split_row : mRaw->dim.y;
+      int row_end = quadRow == 0 ? split_row : img.height;
       int col_start = quadCol == 0 ? 0 : split_col;
-      int col_end = quadCol == 0 ? split_col : mRaw->dim.x;
+      int col_end = quadCol == 0 ? split_col : img.width;
 
       for (int row = row_start; row < row_end; row++) {
-        auto* pixel =
-            reinterpret_cast<uint16_t*>(mRaw->getData(col_start, row));
-        for (int col = col_start; col < col_end; col++, pixel++) {
+        for (int col = col_start; col < col_end; col++) {
+          uint16_t& pixel = img(row, col);
           // This adjustment is expected to be made with the
           // black-level already subtracted from the pixel values.
           // Because this is kept as metadata and not subtracted at
@@ -334,8 +335,8 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
           // appropriate amount before indexing into the curve and
           // then add it back so that subtracting the black level
           // later will work as expected
-          const uint16_t diff = *pixel < black_level ? *pixel : black_level;
-          *pixel = curve[*pixel - diff] + diff;
+          const uint16_t diff = pixel < black_level ? pixel : black_level;
+          pixel = curve[pixel - diff] + diff;
         }
       }
     }
