@@ -84,8 +84,8 @@ void SamsungV0Decompressor::computeStripes(ByteStream bso, ByteStream bsr) {
 }
 
 void SamsungV0Decompressor::decompress() const {
-  for (int y = 0; y < mRaw->dim.y; y++)
-    decompressStrip(y, stripes[y]);
+  for (int row = 0; row < mRaw->dim.y; row++)
+    decompressStrip(row, stripes[row]);
 
   // Swap red and blue pixels to get the final CFA pattern
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -102,27 +102,19 @@ int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32* bits, int b) {
   return adj;
 }
 
-void SamsungV0Decompressor::decompressStrip(uint32_t y,
+void SamsungV0Decompressor::decompressStrip(int row,
                                             const ByteStream& bs) const {
-  const uint32_t width = mRaw->dim.x;
-  assert(width > 0);
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  assert(out.width > 0);
 
   BitPumpMSB32 bits(bs);
 
   std::array<int, 4> len;
   for (int& i : len)
-    i = y < 2 ? 7 : 4;
-
-  auto* img = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
-  const auto* const past_last =
-      reinterpret_cast<uint16_t*>(mRaw->getData(width - 1, y) + mRaw->getBpp());
-  uint16_t* img_up = reinterpret_cast<uint16_t*>(
-      mRaw->getData(0, std::max(0, static_cast<int>(y) - 1)));
-  uint16_t* img_up2 = reinterpret_cast<uint16_t*>(
-      mRaw->getData(0, std::max(0, static_cast<int>(y) - 2)));
+    i = row < 2 ? 7 : 4;
 
   // Image is arranged in groups of 16 pixels horizontally
-  for (uint32_t x = 0; x < width; x += 16) {
+  for (int col = 0; col < out.width; col += 16) {
     bits.fill();
     bool dir = !!bits.getBitsNoFill(1);
 
@@ -157,10 +149,10 @@ void SamsungV0Decompressor::decompressStrip(uint32_t y,
     if (dir) {
       // Upward prediction
 
-      if (y < 2)
+      if (row < 2)
         ThrowRDE("Upward prediction for the first two rows. Raw corrupt");
 
-      if (x + 16 >= width)
+      if (col + 16 >= out.width)
         ThrowRDE("Upward prediction for the last block of pixels. Raw corrupt");
 
       // First we decode even pixels
@@ -168,7 +160,7 @@ void SamsungV0Decompressor::decompressStrip(uint32_t y,
         int b = len[c >> 3];
         int32_t adj = calcAdj(&bits, b);
 
-        img[c] = adj + img_up[c];
+        out(row, col + c) = adj + out(row - 1, col + c);
       }
 
       // Now we decode odd pixels
@@ -178,34 +170,30 @@ void SamsungV0Decompressor::decompressStrip(uint32_t y,
         int b = len[2 | (c >> 3)];
         int32_t adj = calcAdj(&bits, b);
 
-        img[c] = adj + img_up2[c];
+        out(row, col + c) = adj + out(row - 2, col + c);
       }
     } else {
       // Left to right prediction
       // First we decode even pixels
-      int pred_left = x != 0 ? img[-2] : 128;
+      int pred_left = col != 0 ? out(row, col - 2) : 128;
       for (int c = 0; c < 16; c += 2) {
         int b = len[c >> 3];
         int32_t adj = calcAdj(&bits, b);
 
-        if (img + c < past_last)
-          img[c] = adj + pred_left;
+        if (col + c < out.width)
+          out(row, col + c) = adj + pred_left;
       }
 
       // Now we decode odd pixels
-      pred_left = x != 0 ? img[-1] : 128;
+      pred_left = col != 0 ? out(row, col - 1) : 128;
       for (int c = 1; c < 16; c += 2) {
         int b = len[2 | (c >> 3)];
         int32_t adj = calcAdj(&bits, b);
 
-        if (img + c < past_last)
-          img[c] = adj + pred_left;
+        if (col + c < out.width)
+          out(row, col + c) = adj + pred_left;
       }
     }
-
-    img += 16;
-    img_up += 16;
-    img_up2 += 16;
   }
 }
 
