@@ -38,8 +38,8 @@ protected:
   int bits;
 
   uint32_t bitDepth;
-  uint32_t width;
-  uint32_t height;
+  int width;
+  int height;
   OptFlags _flags;
   uint32_t initVal;
 
@@ -47,7 +47,7 @@ protected:
 
   static inline int32_t getDiff(BitPumpMSB32* pump, uint32_t len);
 
-  template <OptFlags optflags> void decompressRow(uint32_t row);
+  template <OptFlags optflags> void decompressRow(int row);
 
 public:
   SamsungV2Decompressor(const RawImage& image, const ByteStream& bs, int bit);
