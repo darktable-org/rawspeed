@@ -71,8 +71,8 @@ constexpr bool operator&(SamsungV2Decompressor::OptFlags lhs,
                  rhs));
 }
 
-inline int32_t SamsungV2Decompressor::getDiff(BitPumpMSB32* pump,
-                                              uint32_t len) {
+inline __attribute__((always_inline)) int32_t
+SamsungV2Decompressor::getDiff(BitPumpMSB32* pump, uint32_t len) {
   if (len == 0)
     return 0;
   int32_t diff = pump->getBits(len);
@@ -193,7 +193,7 @@ void SamsungV2Decompressor::decompress() {
 // the actual difference bits
 
 template <SamsungV2Decompressor::OptFlags optflags>
-inline std::array<int, 16>
+inline __attribute__((always_inline)) std::array<int, 16>
 SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32* pump, int row,
                                              int col) {
   const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -267,7 +267,7 @@ SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32* pump, int row,
 }
 
 template <SamsungV2Decompressor::OptFlags optflags>
-inline std::array<uint32_t, 4>
+inline __attribute__((always_inline)) std::array<uint32_t, 4>
 SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32* pump, int row) {
   if (!(optflags & OptFlags::SKIP || !pump->getBits(1)))
     return {};
@@ -314,7 +314,7 @@ SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32* pump, int row) {
 }
 
 template <SamsungV2Decompressor::OptFlags optflags>
-inline std::array<int, 16>
+inline __attribute__((always_inline)) std::array<int, 16>
 SamsungV2Decompressor::decodeDifferences(BitPumpMSB32* pump, int row) {
   std::array<int, 16> diffs;
 
@@ -346,8 +346,7 @@ SamsungV2Decompressor::decodeDifferences(BitPumpMSB32* pump, int row) {
 }
 
 template <SamsungV2Decompressor::OptFlags optflags>
-inline void SamsungV2Decompressor::processBlock(BitPumpMSB32* pump, int row,
-                                                int col) {
+void SamsungV2Decompressor::processBlock(BitPumpMSB32* pump, int row, int col) {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   const std::array<int, 16> baseline =

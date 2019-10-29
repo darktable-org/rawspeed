@@ -49,20 +49,23 @@ protected:
   int scale;
   std::array<std::array<int, 2>, 3> diffBitsMode;
 
-  static inline int32_t getDiff(BitPumpMSB32* pump, uint32_t len);
+  static inline __attribute__((always_inline)) int32_t
+  getDiff(BitPumpMSB32* pump, uint32_t len);
 
   template <OptFlags optflags>
-  inline std::array<int, 16> prepareBaselineValues(BitPumpMSB32* pump, int row,
-                                                   int col);
+  inline __attribute__((always_inline)) std::array<int, 16>
+  prepareBaselineValues(BitPumpMSB32* pump, int row, int col);
 
   template <OptFlags optflags>
-  inline std::array<uint32_t, 4> decodeDiffLengths(BitPumpMSB32* pump, int row);
+  inline __attribute__((always_inline)) std::array<uint32_t, 4>
+  decodeDiffLengths(BitPumpMSB32* pump, int row);
 
   template <OptFlags optflags>
-  inline std::array<int, 16> decodeDifferences(BitPumpMSB32* pump, int row);
+  inline __attribute__((always_inline)) std::array<int, 16>
+  decodeDifferences(BitPumpMSB32* pump, int row);
 
   template <OptFlags optflags>
-  inline void processBlock(BitPumpMSB32* pump, int row, int col);
+  void processBlock(BitPumpMSB32* pump, int row, int col);
 
   template <OptFlags optflags> void decompressRow(int row);
 
