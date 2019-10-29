@@ -238,6 +238,34 @@ SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32* pump, int row) {
 }
 
 template <SamsungV2Decompressor::OptFlags optflags>
+inline std::array<int, 16>
+SamsungV2Decompressor::decodeDifferences(BitPumpMSB32* pump, int row) {
+  std::array<int, 16> diffs;
+
+  // Figure out how many difference bits we have to read for each pixel
+  const std::array<uint32_t, 4> diffBits =
+      decodeDiffLengths<optflags>(pump, row);
+
+  // Actually read the differences and reshuffle them.
+  for (int i = 0; i < 16; i++) {
+    uint32_t len = diffBits[i >> 2];
+    int32_t diff = getDiff(pump, len);
+
+    int p;
+    // The differences are stored interlaced:
+    // 0 2 4 6 8 10 12 14 1 3 5 7 9 11 13 15
+    if (row % 2)
+      p = ((i % 8) << 1) - (i >> 3) + 1;
+    else
+      p = ((i % 8) << 1) + (i >> 3);
+
+    diffs[p] = diff * (scale * 2 + 1) + scale;
+  }
+
+  return diffs;
+}
+
+template <SamsungV2Decompressor::OptFlags optflags>
 void SamsungV2Decompressor::decompressRow(int row) {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
@@ -251,7 +279,7 @@ void SamsungV2Decompressor::decompressRow(int row) {
   // Initialize the motion and diff modes at the start of the line
   uint32_t motion = 7;
   // By default we are not scaling values at all
-  int32_t scale = 0;
+  scale = 0;
 
   for (auto& i : diffBitsMode)
     i[0] = i[1] = (row == 0 || row == 1) ? 7 : 4;
@@ -321,23 +349,14 @@ void SamsungV2Decompressor::decompressRow(int row) {
     }
 
     // Figure out how many difference bits we have to read for each pixel
-    const std::array<uint32_t, 4> diffBits =
-        decodeDiffLengths<optflags>(&pump, row);
+    const std::array<int, 16> diffs = decodeDifferences<optflags>(&pump, row);
 
-    // Actually read the differences and write them to the pixels
+    // Actually apply the differences and write them to the pixels
     for (int i = 0; i < 16; i++) {
-      uint32_t len = diffBits[i >> 2];
-      int32_t diff = getDiff(&pump, len);
+      int diff = diffs[i];
 
-      uint16_t* value = nullptr;
-      // Apply the diff to pixels 0 2 4 6 8 10 12 14 1 3 5 7 9 11 13 15
-      if (row % 2)
-        value = &out(row, col + ((i % 8) << 1) - (i >> 3) + 1);
-      else
-        value = &out(row, col + ((i % 8) << 1) + (i >> 3));
-
-      diff = diff * (scale * 2 + 1) + scale;
-      *value = clampBits(static_cast<int>(*value) + diff, bits);
+      uint16_t& pixel = out(row, col + i);
+      pixel = clampBits(static_cast<int>(pixel) + diff, bits);
     }
   }
 
