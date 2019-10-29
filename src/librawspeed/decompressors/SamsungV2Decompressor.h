@@ -60,6 +60,9 @@ protected:
   template <OptFlags optflags>
   inline std::array<int, 16> decodeDifferences(BitPumpMSB32* pump, int row);
 
+  template <OptFlags optflags>
+  inline void processBlock(BitPumpMSB32* pump, int row, int col);
+
   template <OptFlags optflags> void decompressRow(int row);
 
 public:

@@ -334,8 +334,26 @@ SamsungV2Decompressor::decodeDifferences(BitPumpMSB32* pump, int row) {
 }
 
 template <SamsungV2Decompressor::OptFlags optflags>
-void SamsungV2Decompressor::decompressRow(int row) {
+inline void SamsungV2Decompressor::processBlock(BitPumpMSB32* pump, int row,
+                                                int col) {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+
+  prepareBaselineValues<optflags>(pump, row, col);
+
+  // Figure out how many difference bits we have to read for each pixel
+  const std::array<int, 16> diffs = decodeDifferences<optflags>(pump, row);
+
+  // Actually apply the differences and write them to the pixels
+  for (int i = 0; i < 16; ++i, ++col) {
+    int diff = diffs[i];
+
+    uint16_t& pixel = out(row, col);
+    pixel = clampBits(static_cast<int>(pixel) + diff, bits);
+  }
+}
+
+template <SamsungV2Decompressor::OptFlags optflags>
+void SamsungV2Decompressor::decompressRow(int row) {
 
   // Align pump to 16byte boundary
   const auto line_offset = data.getPosition();
@@ -354,20 +372,8 @@ void SamsungV2Decompressor::decompressRow(int row) {
 
   assert(width >= 16);
   assert(width % 16 == 0);
-  for (int col = 0; col < width; col += 16) {
-    prepareBaselineValues<optflags>(&pump, row, col);
-
-    // Figure out how many difference bits we have to read for each pixel
-    const std::array<int, 16> diffs = decodeDifferences<optflags>(&pump, row);
-
-    // Actually apply the differences and write them to the pixels
-    for (int i = 0; i < 16; i++) {
-      int diff = diffs[i];
-
-      uint16_t& pixel = out(row, col + i);
-      pixel = clampBits(static_cast<int>(pixel) + diff, bits);
-    }
-  }
+  for (int col = 0; col < width; col += 16)
+    processBlock<optflags>(&pump, row, col);
 
   data.skipBytes(pump.getBufferPosition());
 }
