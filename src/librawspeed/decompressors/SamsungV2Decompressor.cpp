@@ -335,8 +335,12 @@ SamsungV2Decompressor::decodeDifferences(BitPumpMSB32* pump, int row) {
     else
       p = ((i % 8) << 1) + (i >> 3);
 
-    diffs[p] = diff * (scale * 2 + 1) + scale;
+    diffs[p] = diff;
   }
+
+  // Scale the difference.
+  for (int& diff : diffs)
+    diff = diff * (scale * 2 + 1) + scale;
 
   return diffs;
 }
