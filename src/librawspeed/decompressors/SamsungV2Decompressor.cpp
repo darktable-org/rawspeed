@@ -217,45 +217,44 @@ inline void SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32* pump,
     // line If we're at the left edge we just start at the initial value
     for (int i = 0; i < 16; i++)
       out(row, col + i) = (col == 0) ? initVal : out(row, col + i - 2);
-  } else {
-    // The complex case, we now need to actually lookup one or two lines
-    // above
-    if (row < 2)
-      ThrowRDE(
-          "Got a previous line lookup on first two lines. File corrupted?");
+    return;
+  }
 
-    static constexpr std::array<int32_t, 7> motionOffset = {-4, -2, -2, 0,
-                                                            0,  2,  4};
-    static constexpr std::array<int32_t, 7> motionDoAverage = {0, 0, 1, 0,
-                                                               1, 0, 0};
+  // The complex case, we now need to actually lookup one or two lines above
+  if (row < 2)
+    ThrowRDE("Got a previous line lookup on first two lines. File corrupted?");
 
-    int32_t slideOffset = motionOffset[motion];
-    int32_t doAverage = motionDoAverage[motion];
+  static constexpr std::array<int32_t, 7> motionOffset = {-4, -2, -2, 0,
+                                                          0,  2,  4};
+  static constexpr std::array<int32_t, 7> motionDoAverage = {0, 0, 1, 0,
+                                                             1, 0, 0};
 
-    for (int i = 0; i < 16; i++) {
-      int refRow = row;
-      int refCol = col + i + slideOffset;
+  int32_t slideOffset = motionOffset[motion];
+  int32_t doAverage = motionDoAverage[motion];
 
-      if ((row + i) & 1) { // Red or blue pixels use same color two lines up
-        refRow -= 2;
-      } else { // Green pixel N uses Green pixel N from row above
-        refRow -= 1;
-        refCol += (i & 1) ? -1 : 1; // (top left or top right)
-      }
+  for (int i = 0; i < 16; i++) {
+    int refRow = row;
+    int refCol = col + i + slideOffset;
 
-      if (refCol < 0)
-        ThrowRDE("Bad motion %u at the beginning of the row", motion);
-      if ((refCol >= width) || (doAverage && (refCol + 2 >= width)))
-        ThrowRDE("Bad motion %u at the end of the row", motion);
-
-      // In some cases we use as reference interpolation of this pixel and
-      // the next
-      if (doAverage) {
-        out(row, col + i) =
-            (out(refRow, refCol) + out(refRow, refCol + 2) + 1) >> 1;
-      } else
-        out(row, col + i) = out(refRow, refCol);
+    if ((row + i) & 1) { // Red or blue pixels use same color two lines up
+      refRow -= 2;
+    } else { // Green pixel N uses Green pixel N from row above
+      refRow -= 1;
+      refCol += (i & 1) ? -1 : 1; // (top left or top right)
     }
+
+    if (refCol < 0)
+      ThrowRDE("Bad motion %u at the beginning of the row", motion);
+    if ((refCol >= width) || (doAverage && (refCol + 2 >= width)))
+      ThrowRDE("Bad motion %u at the end of the row", motion);
+
+    // In some cases we use as reference interpolation of this pixel and
+    // the next
+    if (doAverage) {
+      out(row, col + i) =
+          (out(refRow, refCol) + out(refRow, refCol + 2) + 1) >> 1;
+    } else
+      out(row, col + i) = out(refRow, refCol);
   }
 }
 
