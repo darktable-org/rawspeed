@@ -193,9 +193,12 @@ void SamsungV2Decompressor::decompress() {
 // the actual difference bits
 
 template <SamsungV2Decompressor::OptFlags optflags>
-inline void SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32* pump,
-                                                         int row, int col) {
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+inline std::array<int, 16>
+SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32* pump, int row,
+                                             int col) {
+  const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
+
+  std::array<int, 16> baseline;
 
   if (!(optflags & OptFlags::QP) && !(col & 63)) {
     static constexpr std::array<int32_t, 3> scalevals = {{0, -2, 2}};
@@ -215,9 +218,13 @@ inline void SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32* pump,
   if (motion == 7) {
     // The base case, just set all pixels to the previous ones on the same
     // line If we're at the left edge we just start at the initial value
+    if (col == 0) {
+      baseline.fill(initVal);
+      return baseline;
+    }
     for (int i = 0; i < 16; i++)
-      out(row, col + i) = (col == 0) ? initVal : out(row, col + i - 2);
-    return;
+      baseline[i] = (i < 2) ? img(row, col + i - 2) : baseline[i - 2];
+    return baseline;
   }
 
   // The complex case, we now need to actually lookup one or two lines above
@@ -251,11 +258,12 @@ inline void SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32* pump,
     // In some cases we use as reference interpolation of this pixel and
     // the next
     if (doAverage) {
-      out(row, col + i) =
-          (out(refRow, refCol) + out(refRow, refCol + 2) + 1) >> 1;
+      baseline[i] = (img(refRow, refCol) + img(refRow, refCol + 2) + 1) >> 1;
     } else
-      out(row, col + i) = out(refRow, refCol);
+      baseline[i] = img(refRow, refCol);
   }
+
+  return baseline;
 }
 
 template <SamsungV2Decompressor::OptFlags optflags>
@@ -338,18 +346,15 @@ inline void SamsungV2Decompressor::processBlock(BitPumpMSB32* pump, int row,
                                                 int col) {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  prepareBaselineValues<optflags>(pump, row, col);
+  const std::array<int, 16> baseline =
+      prepareBaselineValues<optflags>(pump, row, col);
 
   // Figure out how many difference bits we have to read for each pixel
   const std::array<int, 16> diffs = decodeDifferences<optflags>(pump, row);
 
   // Actually apply the differences and write them to the pixels
-  for (int i = 0; i < 16; ++i, ++col) {
-    int diff = diffs[i];
-
-    uint16_t& pixel = out(row, col);
-    pixel = clampBits(static_cast<int>(pixel) + diff, bits);
-  }
+  for (int i = 0; i < 16; ++i, ++col)
+    out(row, col) = clampBits(baseline[i] + diffs[i], bits);
 }
 
 template <SamsungV2Decompressor::OptFlags optflags>

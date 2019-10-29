@@ -52,7 +52,8 @@ protected:
   static inline int32_t getDiff(BitPumpMSB32* pump, uint32_t len);
 
   template <OptFlags optflags>
-  inline void prepareBaselineValues(BitPumpMSB32* pump, int row, int col);
+  inline std::array<int, 16> prepareBaselineValues(BitPumpMSB32* pump, int row,
+                                                   int col);
 
   template <OptFlags optflags>
   inline std::array<uint32_t, 4> decodeDiffLengths(BitPumpMSB32* pump, int row);
