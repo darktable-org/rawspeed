@@ -193,6 +193,73 @@ void SamsungV2Decompressor::decompress() {
 // the actual difference bits
 
 template <SamsungV2Decompressor::OptFlags optflags>
+inline void SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32* pump,
+                                                         int row, int col) {
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+
+  if (!(optflags & OptFlags::QP) && !(col & 63)) {
+    static constexpr std::array<int32_t, 3> scalevals = {{0, -2, 2}};
+    uint32_t i = pump->getBits(2);
+    scale = i < 3 ? scale + scalevals[i] : pump->getBits(12);
+  }
+
+  // First we figure out which reference pixels mode we're in
+  if (optflags & OptFlags::MV)
+    motion = pump->getBits(1) ? 3 : 7;
+  else if (!pump->getBits(1))
+    motion = pump->getBits(3);
+
+  if ((row == 0 || row == 1) && (motion != 7))
+    ThrowRDE("At start of image and motion isn't 7. File corrupted?");
+
+  if (motion == 7) {
+    // The base case, just set all pixels to the previous ones on the same
+    // line If we're at the left edge we just start at the initial value
+    for (int i = 0; i < 16; i++)
+      out(row, col + i) = (col == 0) ? initVal : out(row, col + i - 2);
+  } else {
+    // The complex case, we now need to actually lookup one or two lines
+    // above
+    if (row < 2)
+      ThrowRDE(
+          "Got a previous line lookup on first two lines. File corrupted?");
+
+    static constexpr std::array<int32_t, 7> motionOffset = {-4, -2, -2, 0,
+                                                            0,  2,  4};
+    static constexpr std::array<int32_t, 7> motionDoAverage = {0, 0, 1, 0,
+                                                               1, 0, 0};
+
+    int32_t slideOffset = motionOffset[motion];
+    int32_t doAverage = motionDoAverage[motion];
+
+    for (int i = 0; i < 16; i++) {
+      int refRow = row;
+      int refCol = col + i + slideOffset;
+
+      if ((row + i) & 1) { // Red or blue pixels use same color two lines up
+        refRow -= 2;
+      } else { // Green pixel N uses Green pixel N from row above
+        refRow -= 1;
+        refCol += (i & 1) ? -1 : 1; // (top left or top right)
+      }
+
+      if (refCol < 0)
+        ThrowRDE("Bad motion %u at the beginning of the row", motion);
+      if ((refCol >= width) || (doAverage && (refCol + 2 >= width)))
+        ThrowRDE("Bad motion %u at the end of the row", motion);
+
+      // In some cases we use as reference interpolation of this pixel and
+      // the next
+      if (doAverage) {
+        out(row, col + i) =
+            (out(refRow, refCol) + out(refRow, refCol + 2) + 1) >> 1;
+      } else
+        out(row, col + i) = out(refRow, refCol);
+    }
+  }
+}
+
+template <SamsungV2Decompressor::OptFlags optflags>
 inline std::array<uint32_t, 4>
 SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32* pump, int row) {
   // Figure out how many difference bits we have to read for each pixel
@@ -277,7 +344,7 @@ void SamsungV2Decompressor::decompressRow(int row) {
   BitPumpMSB32 pump(data);
 
   // Initialize the motion and diff modes at the start of the line
-  uint32_t motion = 7;
+  motion = 7;
   // By default we are not scaling values at all
   scale = 0;
 
@@ -287,66 +354,7 @@ void SamsungV2Decompressor::decompressRow(int row) {
   assert(width >= 16);
   assert(width % 16 == 0);
   for (int col = 0; col < width; col += 16) {
-    if (!(optflags & OptFlags::QP) && !(col & 63)) {
-      static constexpr std::array<int32_t, 3> scalevals = {{0, -2, 2}};
-      uint32_t i = pump.getBits(2);
-      scale = i < 3 ? scale + scalevals[i] : pump.getBits(12);
-    }
-
-    // First we figure out which reference pixels mode we're in
-    if (optflags & OptFlags::MV)
-      motion = pump.getBits(1) ? 3 : 7;
-    else if (!pump.getBits(1))
-      motion = pump.getBits(3);
-
-    if ((row == 0 || row == 1) && (motion != 7))
-      ThrowRDE("At start of image and motion isn't 7. File corrupted?");
-
-    if (motion == 7) {
-      // The base case, just set all pixels to the previous ones on the same
-      // line If we're at the left edge we just start at the initial value
-      for (int i = 0; i < 16; i++)
-        out(row, col + i) = (col == 0) ? initVal : out(row, col + i - 2);
-    } else {
-      // The complex case, we now need to actually lookup one or two lines
-      // above
-      if (row < 2)
-        ThrowRDE(
-            "Got a previous line lookup on first two lines. File corrupted?");
-
-      static constexpr std::array<int32_t, 7> motionOffset = {-4, -2, -2, 0,
-                                                              0,  2,  4};
-      static constexpr std::array<int32_t, 7> motionDoAverage = {0, 0, 1, 0,
-                                                                 1, 0, 0};
-
-      int32_t slideOffset = motionOffset[motion];
-      int32_t doAverage = motionDoAverage[motion];
-
-      for (int i = 0; i < 16; i++) {
-        int refRow = row;
-        int refCol = col + i + slideOffset;
-
-        if ((row + i) & 1) { // Red or blue pixels use same color two lines up
-          refRow -= 2;
-        } else { // Green pixel N uses Green pixel N from row above
-          refRow -= 1;
-          refCol += (i & 1) ? -1 : 1; // (top left or top right)
-        }
-
-        if (refCol < 0)
-          ThrowRDE("Bad motion %u at the beginning of the row", motion);
-        if ((refCol >= width) || (doAverage && (refCol + 2 >= width)))
-          ThrowRDE("Bad motion %u at the end of the row", motion);
-
-        // In some cases we use as reference interpolation of this pixel and
-        // the next
-        if (doAverage) {
-          out(row, col + i) =
-              (out(refRow, refCol) + out(refRow, refCol + 2) + 1) >> 1;
-        } else
-          out(row, col + i) = out(refRow, refCol);
-      }
-    }
+    prepareBaselineValues<optflags>(&pump, row, col);
 
     // Figure out how many difference bits we have to read for each pixel
     const std::array<int, 16> diffs = decodeDifferences<optflags>(&pump, row);
