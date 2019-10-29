@@ -261,43 +261,45 @@ inline void SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32* pump,
 template <SamsungV2Decompressor::OptFlags optflags>
 inline std::array<uint32_t, 4>
 SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32* pump, int row) {
+  if (!(optflags & OptFlags::SKIP || !pump->getBits(1)))
+    return {};
+
+  std::array<uint32_t, 4> diffBits;
+
   // Figure out how many difference bits we have to read for each pixel
-  std::array<uint32_t, 4> diffBits = {};
-  if (optflags & OptFlags::SKIP || !pump->getBits(1)) {
-    std::array<uint32_t, 4> flags;
-    for (unsigned int& flag : flags)
-      flag = pump->getBits(2);
+  std::array<uint32_t, 4> flags;
+  for (unsigned int& flag : flags)
+    flag = pump->getBits(2);
 
-    for (int i = 0; i < 4; i++) {
-      // The color is 0-Green 1-Blue 2-Red
-      uint32_t colornum = (row % 2 != 0) ? i >> 1 : ((i >> 1) + 2) % 3;
+  for (int i = 0; i < 4; i++) {
+    // The color is 0-Green 1-Blue 2-Red
+    uint32_t colornum = (row % 2 != 0) ? i >> 1 : ((i >> 1) + 2) % 3;
 
-      assert(flags[i] <= 3);
-      switch (flags[i]) {
-      case 0:
-        diffBits[i] = diffBitsMode[colornum][0];
-        break;
-      case 1:
-        diffBits[i] = diffBitsMode[colornum][0] + 1;
-        break;
-      case 2:
-        if (diffBitsMode[colornum][0] == 0)
-          ThrowRDE("Difference bits underflow. File corrupted?");
-        diffBits[i] = diffBitsMode[colornum][0] - 1;
-        break;
-      case 3:
-        diffBits[i] = pump->getBits(4);
-        break;
-      default:
-        __builtin_unreachable();
-      }
-
-      diffBitsMode[colornum][0] = diffBitsMode[colornum][1];
-      diffBitsMode[colornum][1] = diffBits[i];
-
-      if (diffBits[i] > bitDepth + 1)
-        ThrowRDE("Too many difference bits. File corrupted?");
+    assert(flags[i] <= 3);
+    switch (flags[i]) {
+    case 0:
+      diffBits[i] = diffBitsMode[colornum][0];
+      break;
+    case 1:
+      diffBits[i] = diffBitsMode[colornum][0] + 1;
+      break;
+    case 2:
+      if (diffBitsMode[colornum][0] == 0)
+        ThrowRDE("Difference bits underflow. File corrupted?");
+      diffBits[i] = diffBitsMode[colornum][0] - 1;
+      break;
+    case 3:
+      diffBits[i] = pump->getBits(4);
+      break;
+    default:
+      __builtin_unreachable();
     }
+
+    diffBitsMode[colornum][0] = diffBitsMode[colornum][1];
+    diffBitsMode[colornum][1] = diffBits[i];
+
+    if (diffBits[i] > bitDepth + 1)
+      ThrowRDE("Too many difference bits. File corrupted?");
   }
 
   return diffBits;
