@@ -327,18 +327,18 @@ SamsungV2Decompressor::decodeDifferences(BitPumpMSB32* pump, int row) {
   const std::array<uint32_t, 4> diffBits =
       decodeDiffLengths<optflags>(pump, row);
 
-  // Actually read the differences.
-  std::array<int, 16> diffs;
+  // Actually read the differences. We know these fit into 15-bit ints.
+  std::array<int16_t, 16> diffs;
   for (int i = 0; i < 16; i++) {
     uint32_t len = diffBits[i >> 2];
-    int32_t diff = getDiff(pump, len);
+    int16_t diff = getDiff(pump, len);
     diffs[i] = diff;
   }
 
-  // Scale and reshuffle the difference.
+  // Scale and reshuffle the difference. These may ocuppy
   std::array<int, 16> shuffled;
   for (int i = 0; i < 16; i++) {
-    int scaledDiff = diffs[i] * (scale * 2 + 1) + scale;
+    int scaledDiff = int(diffs[i]) * (scale * 2 + 1) + scale;
 
     int p;
     // The differences are stored interlaced:

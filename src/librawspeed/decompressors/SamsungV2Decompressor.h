@@ -49,7 +49,7 @@ protected:
   int scale;
   std::array<std::array<int, 2>, 3> diffBitsMode;
 
-  static inline __attribute__((always_inline)) int32_t
+  static inline __attribute__((always_inline)) int16_t
   getDiff(BitPumpMSB32* pump, uint32_t len);
 
   template <OptFlags optflags>
