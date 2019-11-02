@@ -51,24 +51,19 @@ inline int SonyArw1Decompressor::getDiff(BitPumpMSB* bs, uint32_t len) {
 }
 
 void SonyArw1Decompressor::decompress(const ByteStream& input) const {
-  const uint32_t w = mRaw->dim.x;
-  const uint32_t h = mRaw->dim.y;
-
-  assert(w > 0);
-  assert(h > 0);
-  assert(h % 2 == 0);
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  assert(out.width > 0);
+  assert(out.height > 0);
+  assert(out.height % 2 == 0);
 
   BitPumpMSB bits(input);
-  uint8_t* data = mRaw->getData();
-  auto* dest = reinterpret_cast<uint16_t*>(&data[0]);
-  uint32_t pitch = mRaw->pitch / sizeof(uint16_t);
-  int sum = 0;
-  for (int64_t x = w - 1; x >= 0; x--) {
-    for (uint32_t y = 0; y < h + 1; y += 2) {
+  int pred = 0;
+  for (int col = out.width - 1; col >= 0; col--) {
+    for (int row = 0; row < out.height + 1; row += 2) {
       bits.fill(32);
 
-      if (y == h)
-        y = 1;
+      if (row == out.height)
+        row = 1;
 
       uint32_t len = 4 - bits.getBitsNoFill(2);
 
@@ -80,13 +75,13 @@ void SonyArw1Decompressor::decompress(const ByteStream& input) const {
           len++;
 
       int diff = getDiff(&bits, len);
-      sum += diff;
+      pred += diff;
 
-      if (sum < 0 || (sum >> 12) > 0)
+      if (pred < 0 || (pred >> 12) > 0)
         ThrowRDE("Error decompressing");
 
-      if (y < h)
-        dest[x + y * pitch] = sum;
+      if (row < out.height)
+        out(row, col) = pred;
     }
   }
 }

@@ -21,18 +21,21 @@
 #pragma once
 
 #include "rawspeedconfig.h"
-#include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
-#include "common/Common.h" // for uint32_t, uint8_t, uint16_t, wri...
-#include "common/ErrorLog.h"           // for ErrorLog
-#include "common/Mutex.h"              // for Mutex
-#include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
-#include "common/TableLookUp.h"        // for TableLookUp
-#include "metadata/BlackArea.h"        // for BlackArea
-#include "metadata/ColorFilterArray.h" // for ColorFilterArray
-#include <array>                       // for array
-#include <memory>                      // for unique_ptr, operator==
-#include <string>                      // for string
-#include <vector>                      // for vector
+#include "ThreadSafetyAnalysis.h" // for GUARDED_BY, REQUIRES
+#include "common/Array2DRef.h"    // for Array2DRef
+#include "common/Common.h"        // for uint32_t, uint8_t, uint16_t, wri...
+#include "common/ErrorLog.h"      // for ErrorLog
+#include "common/Mutex.h"         // for Mutex
+#include "common/Point.h"         // for iPoint2D, iRectangle2D (ptr o...
+#include "common/TableLookUp.h"   // for TableLookUp
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "metadata/BlackArea.h"           // for BlackArea
+#include "metadata/ColorFilterArray.h"    // for ColorFilterArray
+#include <array>                          // for array
+#include <cassert>                        // for assert
+#include <memory>                         // for unique_ptr, operator==
+#include <string>                         // for string
+#include <vector>                         // for vector
 
 namespace rawspeed {
 
@@ -107,11 +110,13 @@ public:
   void blitFrom(const RawImage& src, const iPoint2D& srcPos,
                 const iPoint2D& size, const iPoint2D& destPos);
   rawspeed::RawImageType getDataType() const { return dataType; }
+  inline Array2DRef<uint16_t> getU16DataAsUncroppedArray2DRef() const noexcept;
   uint8_t* getData() const;
   uint8_t*
   getData(uint32_t x,
           uint32_t y); // Not super fast, but safe. Don't use per pixel.
   uint8_t* getDataUncropped(uint32_t x, uint32_t y);
+
   void subFrame(iRectangle2D cropped);
   void clearArea(iRectangle2D area, uint8_t value = 0);
   iPoint2D __attribute__((pure)) getUncroppedDim() const;
@@ -130,7 +135,7 @@ public:
   bool isAllocated() {return !!data;}
   void createBadPixelMap();
   iPoint2D dim;
-  uint32_t pitch = 0;
+  int pitch = 0;
 
   // padding is the size of the area after last pixel of line n
   // and before the first pixel of line n+1
@@ -162,15 +167,15 @@ private:
 protected:
   RawImageType dataType;
   RawImageData();
-  RawImageData(const iPoint2D& dim, uint32_t bpp, uint32_t cpp = 1);
+  RawImageData(const iPoint2D& dim, int bpp, int cpp = 1);
   virtual void scaleValues(int start_y, int end_y) = 0;
   virtual void doLookup(int start_y, int end_y) = 0;
   virtual void fixBadPixel(uint32_t x, uint32_t y, int component = 0) = 0;
   void fixBadPixelsThread(int start_y, int end_y);
   void startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped );
   uint8_t* data = nullptr;
-  uint32_t cpp = 1; // Components per pixel
-  uint32_t bpp = 0; // Bytes per pixel.
+  int cpp = 1; // Components per pixel
+  int bpp = 0; // Bytes per pixel.
   friend class RawImage;
   iPoint2D mOffset;
   iPoint2D uncropped_dim;
@@ -257,6 +262,15 @@ inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type,
     writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!");
     __builtin_unreachable();
   }
+}
+
+inline Array2DRef<uint16_t>
+RawImageData::getU16DataAsUncroppedArray2DRef() const noexcept {
+  assert(dataType == TYPE_USHORT16 &&
+         "Attemping to access floating-point buffer as uint16_t.");
+  assert(data && "Data not yet allocated.");
+  return {reinterpret_cast<uint16_t*>(data), cpp * dim.x, dim.y,
+          static_cast<int>(pitch / sizeof(uint16_t))};
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,

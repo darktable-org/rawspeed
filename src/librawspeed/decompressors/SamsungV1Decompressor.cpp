@@ -77,9 +77,6 @@ SamsungV1Decompressor::samsungDiff(BitPumpMSB* pump,
 }
 
 void SamsungV1Decompressor::decompress() {
-  const uint32_t width = mRaw->dim.x;
-  const uint32_t height = mRaw->dim.y;
-
   // This format has a variable length encoding of how many bits are needed
   // to encode the difference between pixels, we use a table to process it
   // that has two values, the first the number of bits that were used to
@@ -120,18 +117,18 @@ void SamsungV1Decompressor::decompress() {
     }
   }
 
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   BitPumpMSB pump(*bs);
-  for (uint32_t y = 0; y < height; y++) {
-    auto* img = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
-    for (uint32_t x = 0; x < width; x++) {
+  for (int row = 0; row < out.height; row++) {
+    for (int col = 0; col < out.width; col++) {
       int32_t diff = samsungDiff(&pump, tbl);
-      if (x < 2)
-        hpred[x] = vpred[y & 1][x] += diff;
+      if (col < 2)
+        hpred[col] = vpred[row & 1][col] += diff;
       else
-        hpred[x & 1] += diff;
-      img[x] = hpred[x & 1];
-      if (img[x] >> bits)
-        ThrowRDE("decoded value out of bounds at %d:%d", x, y);
+        hpred[col & 1] += diff;
+      out(row, col) = hpred[col & 1];
+      if (out(row, col) >> bits)
+        ThrowRDE("decoded value out of bounds at %d:%d", col, row);
     }
   }
 }

@@ -304,47 +304,41 @@ void NefDecoder::DecodeUncompressed() {
   }
 }
 
-void NefDecoder::readCoolpixSplitRaw(const ByteStream& input,
-                                     const iPoint2D& size,
+void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
                                      const iPoint2D& offset, int inputPitch) {
-  uint8_t* data = mRaw->getData();
-  uint32_t outPitch = mRaw->pitch;
-  uint32_t w = size.x;
-  uint32_t h = size.y;
-  uint32_t cpp = mRaw->getCpp();
-  if (input.getRemainSize() < (inputPitch*h)) {
-    if (static_cast<int>(input.getRemainSize()) > inputPitch)
-      h = input.getRemainSize() / inputPitch - 1;
-    else
-      ThrowIOE(
-          "Not enough data to decode a single line. Image file truncated.");
-  }
+  const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  if (offset.y > mRaw->dim.y)
-    ThrowRDE("Invalid y offset");
-  if (offset.x + size.x > mRaw->dim.x)
-    ThrowRDE("Invalid x offset");
+  if (size.y % 2 != 0)
+    ThrowRDE("Odd number of rows");
+  if (size.x % 8 != 0)
+    ThrowRDE("Column count isn't multiple of 8");
+  if (inputPitch != ((3 * size.x) / 2))
+    ThrowRDE("Unexpected input pitch");
 
-  uint32_t y = offset.y;
-  h = min(h + static_cast<uint32_t>(offset.y),
-          static_cast<uint32_t>(mRaw->dim.y));
-  w *= cpp;
-  h /= 2;
-  BitPumpMSB in(input);
-  for (; y < h; y++) {
-    auto* dest = reinterpret_cast<uint16_t*>(
-        &data[offset.x * sizeof(uint16_t) * cpp + y * 2 * outPitch]);
-    for (uint32_t x = 0; x < w; x++) {
-      dest[x] =  in.getBits(12);
-    }
+  // BitPumpMSB loads exactly 4 bytes at once, and we squeeze 12 bits each time.
+  // We produce 2 pixels per 3 bytes (24 bits). If we want to be smart and to
+  // know where the first input bit for first odd row is, the input slice width
+  // must be a multiple of 8 pixels.
+
+  if (offset.x > mRaw->dim.x || offset.y > mRaw->dim.y)
+    ThrowRDE("All pixels outside of image");
+  if (offset.x + size.x > mRaw->dim.x || offset.y + size.y > mRaw->dim.y)
+    ThrowRDE("Output is partailly out of image");
+
+  // The input bytes are laid out in the memory in the following way:
+  // First, all even (0-2-4-) rows, and then all odd (1-3-5-) rows.
+  BitPumpMSB even(input.getStream(size.y / 2, inputPitch));
+  BitPumpMSB odd(input.getStream(size.y / 2, inputPitch));
+  for (int row = offset.y; row < size.y;) {
+    for (int col = offset.x; col < size.x; ++col)
+      img(row, col) = even.getBits(12);
+    ++row;
+    for (int col = offset.x; col < size.x; ++col)
+      img(row, col) = odd.getBits(12);
+    ++row;
   }
-  for (y = offset.y; y < h; y++) {
-    auto* dest = reinterpret_cast<uint16_t*>(
-        &data[offset.x * sizeof(uint16_t) * cpp + (y * 2 + 1) * outPitch]);
-    for (uint32_t x = 0; x < w; x++) {
-      dest[x] =  in.getBits(12);
-    }
-  }
+  assert(even.getRemainSize() == 0 && odd.getRemainSize() == 0 &&
+         "Should have run out of input");
 }
 
 void NefDecoder::DecodeD100Uncompressed() {
@@ -381,8 +375,7 @@ void NefDecoder::DecodeSNefUncompressed() {
   mRaw->createData();
 
   ByteStream in(DataBuffer(mFile->getSubView(offset), Endianness::little));
-
-  DecodeNikonSNef(&in, width, height);
+  DecodeNikonSNef(in);
 }
 
 void NefDecoder::checkSupportInternal(const CameraMetaData* meta) {
@@ -615,12 +608,9 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 // We un-apply the whitebalance, so output matches lossless.
 // Note that values are scaled. See comment below on details.
 // OPTME: It would be trivial to run this multithreaded.
-void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32_t w, uint32_t h) {
-  if (w < 6)
-    ThrowIOE("got a %u wide sNEF, aborting", w);
-
-  if (input->getRemainSize() < (w * h * 3))
-    ThrowIOE("Not enough data to decode. Image file truncated.");
+void NefDecoder::DecodeNikonSNef(const ByteStream& input) {
+  if (mRaw->dim.x < 6)
+    ThrowIOE("got a %u wide sNEF, aborting", mRaw->dim.x);
 
   // We need to read the applied whitebalance, since we should return
   // data before whitebalance, so we "unapply" it.
@@ -661,14 +651,12 @@ void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32_t w, uint32_t h) {
   uint16_t tmp;
   auto* tmpch = reinterpret_cast<uint8_t*>(&tmp);
 
-  uint8_t* data = mRaw->getData();
-  uint32_t pitch = mRaw->pitch;
-  const uint8_t* in = input->getData(w * h * 3);
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  const uint8_t* in = input.peekData(out.width * out.height);
 
-  for (uint32_t y = 0; y < h; y++) {
-    auto* dest = reinterpret_cast<uint16_t*>(&data[y * pitch]);
+  for (int row = 0; row < out.height; row++) {
     uint32_t random = in[0] + (in[1] << 8) + (in[2] << 16);
-    for (uint32_t x = 0; x < w * 3; x += 6) {
+    for (int col = 0; col < out.width; col += 6) {
       uint32_t g1 = in[0];
       uint32_t g2 = in[1];
       uint32_t g3 = in[2];
@@ -685,7 +673,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32_t w, uint32_t h) {
       float cb2 = cb;
       float cr2 = cr;
       // Interpolate right pixel. We assume the sample is aligned with left pixel.
-      if ((x+6) < w*3) {
+      if ((col + 6) < out.width) {
         g4 = in[3];
         g5 = in[4];
         g6 = in[5];
@@ -700,27 +688,27 @@ void NefDecoder::DecodeNikonSNef(ByteStream* input, uint32_t w, uint32_t h) {
 
       mRaw->setWithLookUp(clampBits(static_cast<int>(y1 + 1.370705 * cr), 12),
                           tmpch, &random);
-      dest[x] = clampBits((inv_wb_r * tmp + (1<<9)) >> 10, 15);
+      out(row, col) = clampBits((inv_wb_r * tmp + (1 << 9)) >> 10, 15);
 
       mRaw->setWithLookUp(
           clampBits(static_cast<int>(y1 - 0.337633 * cb - 0.698001 * cr), 12),
-          reinterpret_cast<uint8_t*>(&dest[x + 1]), &random);
+          reinterpret_cast<uint8_t*>(&out(row, col + 1)), &random);
 
       mRaw->setWithLookUp(clampBits(static_cast<int>(y1 + 1.732446 * cb), 12),
                           tmpch, &random);
-      dest[x+2]   = clampBits((inv_wb_b * tmp + (1<<9)) >> 10, 15);
+      out(row, col + 2) = clampBits((inv_wb_b * tmp + (1 << 9)) >> 10, 15);
 
       mRaw->setWithLookUp(clampBits(static_cast<int>(y2 + 1.370705 * cr2), 12),
                           tmpch, &random);
-      dest[x+3] = clampBits((inv_wb_r * tmp + (1<<9)) >> 10, 15);
+      out(row, col + 3) = clampBits((inv_wb_r * tmp + (1 << 9)) >> 10, 15);
 
       mRaw->setWithLookUp(
           clampBits(static_cast<int>(y2 - 0.337633 * cb2 - 0.698001 * cr2), 12),
-          reinterpret_cast<uint8_t*>(&dest[x + 4]), &random);
+          reinterpret_cast<uint8_t*>(&out(row, col + 4)), &random);
 
       mRaw->setWithLookUp(clampBits(static_cast<int>(y2 + 1.732446 * cb2), 12),
                           tmpch, &random);
-      dest[x+5] = clampBits((inv_wb_b * tmp + (1<<9)) >> 10, 15);
+      out(row, col + 5) = clampBits((inv_wb_b * tmp + (1 << 9)) >> 10, 15);
     }
   }
 }

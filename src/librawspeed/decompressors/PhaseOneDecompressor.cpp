@@ -97,8 +97,10 @@ void PhaseOneDecompressor::validateStrips() const {
 }
 
 void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
-  uint32_t width = mRaw->dim.x;
-  assert(width % 2 == 0);
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+
+  assert(out.width > 0);
+  assert(out.width % 2 == 0);
 
   static constexpr std::array<const int, 10> length = {8,  7, 6,  9,  11,
                                                        10, 5, 12, 14, 13};
@@ -108,10 +110,11 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
   std::array<int32_t, 2> pred;
   pred.fill(0);
   std::array<int, 2> len;
-  auto* img = reinterpret_cast<uint16_t*>(mRaw->getData(0, strip.n));
-  for (uint32_t col = 0; col < width; col++) {
+  const int row = strip.n;
+  for (int col = 0; col < out.width; col++) {
     pump.fill(32);
-    if (col >= (width & ~7U)) // last 'width % 8' pixels.
+    if (static_cast<unsigned>(col) >=
+        (out.width & ~7U)) // last 'width % 8' pixels.
       len[0] = len[1] = 14;
     else if ((col & 7) == 0) {
       for (int& i : len) {
@@ -135,12 +138,12 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
 
     int i = len[col & 1];
     if (i == 14)
-      img[col] = pred[col & 1] = pump.getBitsNoFill(16);
+      out(row, col) = pred[col & 1] = pump.getBitsNoFill(16);
     else {
       pred[col & 1] +=
           static_cast<signed>(pump.getBitsNoFill(i)) + 1 - (1 << (i - 1));
       // FIXME: is the truncation the right solution here?
-      img[col] = uint16_t(pred[col & 1]);
+      out(row, col) = uint16_t(pred[col & 1]);
     }
   }
 }

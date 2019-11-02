@@ -71,30 +71,28 @@ constexpr bool operator&(SamsungV2Decompressor::OptFlags lhs,
                  rhs));
 }
 
-inline int32_t SamsungV2Decompressor::getDiff(BitPumpMSB32* pump,
-                                              uint32_t len) {
+inline __attribute__((always_inline)) int16_t
+SamsungV2Decompressor::getDiff(BitPumpMSB32* pump, uint32_t len) {
   if (len == 0)
     return 0;
-  int32_t diff = pump->getBits(len);
-  // If the first bit is 1 we need to turn this into a negative number
-  if (diff >> (len - 1))
-    diff -= (1 << len);
-  return diff;
+  assert(len <= 15 && "Difference occupies at most 15 bits.");
+  return signExtend(pump->getBits(len), len);
 }
 
 SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
-                                             const ByteStream& bs, int bit)
-    : AbstractSamsungDecompressor(image), bits(bit) {
+                                             const ByteStream& bs,
+                                             unsigned bits)
+    : AbstractSamsungDecompressor(image) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
 
-  switch (bit) {
+  switch (bits) {
   case 12:
   case 14:
     break;
   default:
-    ThrowRDE("Unexpected bit per pixel (%u)", bit);
+    ThrowRDE("Unexpected bit per pixel (%u)", bits);
   }
 
   static constexpr const auto headerSize = 16;
@@ -107,6 +105,8 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   startpump.getBits(16); // NLCVersion
   startpump.getBits(4);  // ImgFormat
   bitDepth = startpump.getBits(4) + 1;
+  if (bitDepth != bits)
+    ThrowRDE("Bit depth mismatch with container, %u vs %u", bitDepth, bits);
   startpump.getBits(4); // NumBlkInRCUnit
   startpump.getBits(4); // CompressionRatio
   width = startpump.getBits(16);
@@ -131,10 +131,9 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
 
   if (width == 0 || height == 0 || width % 16 != 0 || width > 6496 ||
       height > 4336)
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+    ThrowRDE("Unexpected image dimensions found: (%i; %i)", width, height);
 
-  if (width != static_cast<uint32_t>(mRaw->dim.x) ||
-      height != static_cast<uint32_t>(mRaw->dim.y))
+  if (width != mRaw->dim.x || height != mRaw->dim.y)
     ThrowRDE("EXIF image dimensions do not match dimensions from raw header");
 
   data = startpump.getStream(startpump.getRemainSize());
@@ -143,40 +142,40 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
 void SamsungV2Decompressor::decompress() {
   switch (_flags) {
   case OptFlags::NONE:
-    for (uint32_t row = 0; row < height; row++)
+    for (int row = 0; row < height; row++)
       decompressRow<OptFlags::NONE>(row);
     break;
   case OptFlags::ALL:
-    for (uint32_t row = 0; row < height; row++)
+    for (int row = 0; row < height; row++)
       decompressRow<OptFlags::ALL>(row);
     break;
 
   case OptFlags::SKIP:
-    for (uint32_t row = 0; row < height; row++)
+    for (int row = 0; row < height; row++)
       decompressRow<OptFlags::SKIP>(row);
     break;
   case OptFlags::MV:
-    for (uint32_t row = 0; row < height; row++)
+    for (int row = 0; row < height; row++)
       decompressRow<OptFlags::MV>(row);
     break;
   case OptFlags::QP:
-    for (uint32_t row = 0; row < height; row++)
+    for (int row = 0; row < height; row++)
       decompressRow<OptFlags::QP>(row);
     break;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch"
   case OptFlags::SKIP | OptFlags::MV:
-    for (uint32_t row = 0; row < height; row++)
+    for (int row = 0; row < height; row++)
       decompressRow<OptFlags::SKIP | OptFlags::MV>(row);
     break;
   case OptFlags::SKIP | OptFlags::QP:
-    for (uint32_t row = 0; row < height; row++)
+    for (int row = 0; row < height; row++)
       decompressRow<OptFlags::SKIP | OptFlags::QP>(row);
     break;
 
   case OptFlags::MV | OptFlags::QP:
-    for (uint32_t row = 0; row < height; row++)
+    for (int row = 0; row < height; row++)
       decompressRow<OptFlags::MV | OptFlags::QP>(row);
     break;
 #pragma GCC diagnostic pop
@@ -194,7 +193,189 @@ void SamsungV2Decompressor::decompress() {
 // the actual difference bits
 
 template <SamsungV2Decompressor::OptFlags optflags>
-void SamsungV2Decompressor::decompressRow(uint32_t row) {
+inline __attribute__((always_inline)) std::array<uint16_t, 16>
+SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32* pump, int row,
+                                             int col) {
+  const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
+
+  std::array<uint16_t, 16> baseline;
+
+  if (!(optflags & OptFlags::QP) && !(col & 63)) {
+    static constexpr std::array<int32_t, 3> scalevals = {{0, -2, 2}};
+    uint32_t i = pump->getBits(2);
+    scale = i < 3 ? scale + scalevals[i] : pump->getBits(12);
+  }
+
+  // First we figure out which reference pixels mode we're in
+  if (optflags & OptFlags::MV)
+    motion = pump->getBits(1) ? 3 : 7;
+  else if (!pump->getBits(1))
+    motion = pump->getBits(3);
+
+  if ((row == 0 || row == 1) && (motion != 7))
+    ThrowRDE("At start of image and motion isn't 7. File corrupted?");
+
+  if (motion == 7) {
+    // The base case.
+    // If we're at the left edge we just start at the initial value.
+    if (col == 0) {
+      baseline.fill(initVal);
+      return baseline;
+    }
+    // Else just set all pixels to the previous ones on the same line.
+    std::array<int, 2> prev;
+    for (int i = 0; i < 2; i++)
+      prev[i] = img(row, col + i - 2);
+    for (int i = 0; i < 16; i++)
+      baseline[i] = prev[i & 1];
+    return baseline;
+  }
+
+  // The complex case, we now need to actually lookup one or two lines above
+  if (row < 2)
+    ThrowRDE("Got a previous line lookup on first two lines. File corrupted?");
+
+  static constexpr std::array<int32_t, 7> motionOffset = {-4, -2, -2, 0,
+                                                          0,  2,  4};
+  static constexpr std::array<int32_t, 7> motionDoAverage = {0, 0, 1, 0,
+                                                             1, 0, 0};
+
+  int32_t slideOffset = motionOffset[motion];
+  int32_t doAverage = motionDoAverage[motion];
+
+  for (int i = 0; i < 16; i++) {
+    int refRow = row;
+    int refCol = col + i + slideOffset;
+
+    if ((row + i) & 1) { // Red or blue pixels use same color two lines up
+      refRow -= 2;
+    } else { // Green pixel N uses Green pixel N from row above
+      refRow -= 1;
+      refCol += (i & 1) ? -1 : 1; // (top left or top right)
+    }
+
+    if (refCol < 0)
+      ThrowRDE("Bad motion %u at the beginning of the row", motion);
+    if ((refCol >= width) || (doAverage && (refCol + 2 >= width)))
+      ThrowRDE("Bad motion %u at the end of the row", motion);
+
+    // In some cases we use as reference interpolation of this pixel and
+    // the next
+    if (doAverage) {
+      baseline[i] = (img(refRow, refCol) + img(refRow, refCol + 2) + 1) >> 1;
+    } else
+      baseline[i] = img(refRow, refCol);
+  }
+
+  return baseline;
+}
+
+template <SamsungV2Decompressor::OptFlags optflags>
+inline __attribute__((always_inline)) std::array<uint32_t, 4>
+SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32* pump, int row) {
+  if (!(optflags & OptFlags::SKIP || !pump->getBits(1)))
+    return {};
+
+  std::array<uint32_t, 4> diffBits;
+
+  // Figure out how many difference bits we have to read for each pixel
+  std::array<uint32_t, 4> flags;
+  for (unsigned int& flag : flags)
+    flag = pump->getBits(2);
+
+  for (int i = 0; i < 4; i++) {
+    // The color is 0-Green 1-Blue 2-Red
+    uint32_t colornum = (row % 2 != 0) ? i >> 1 : ((i >> 1) + 2) % 3;
+
+    assert(flags[i] <= 3);
+    switch (flags[i]) {
+    case 0:
+      diffBits[i] = diffBitsMode[colornum][0];
+      break;
+    case 1:
+      diffBits[i] = diffBitsMode[colornum][0] + 1;
+      break;
+    case 2:
+      if (diffBitsMode[colornum][0] == 0)
+        ThrowRDE("Difference bits underflow. File corrupted?");
+      diffBits[i] = diffBitsMode[colornum][0] - 1;
+      break;
+    case 3:
+      diffBits[i] = pump->getBits(4);
+      break;
+    default:
+      __builtin_unreachable();
+    }
+
+    diffBitsMode[colornum][0] = diffBitsMode[colornum][1];
+    diffBitsMode[colornum][1] = diffBits[i];
+
+    if (diffBits[i] > bitDepth + 1)
+      ThrowRDE("Too many difference bits (%u). File corrupted?", diffBits[i]);
+    assert(diffBits[i] <= 15 && "So any difference fits within uint16_t");
+  }
+
+  return diffBits;
+}
+
+template <SamsungV2Decompressor::OptFlags optflags>
+inline __attribute__((always_inline)) std::array<int, 16>
+SamsungV2Decompressor::decodeDifferences(BitPumpMSB32* pump, int row) {
+  // Figure out how many difference bits we have to read for each pixel
+  const std::array<uint32_t, 4> diffBits =
+      decodeDiffLengths<optflags>(pump, row);
+
+  // Actually read the differences. We know these fit into 15-bit ints.
+  std::array<int16_t, 16> diffs;
+  for (int i = 0; i < 16; i++) {
+    uint32_t len = diffBits[i >> 2];
+    int16_t diff = getDiff(pump, len);
+    diffs[i] = diff;
+  }
+
+  // Reshuffle the differences, while they still are only 16-bit.
+  std::array<int16_t, 16> shuffled;
+  for (int i = 0; i < 16; i++) {
+    int p;
+    // The differences are stored interlaced:
+    // 0 2 4 6 8 10 12 14 1 3 5 7 9 11 13 15
+    if (row % 2)
+      p = ((i % 8) << 1) - (i >> 3) + 1;
+    else
+      p = ((i % 8) << 1) + (i >> 3);
+
+    shuffled[p] = diffs[i];
+  }
+
+  // And finally widen and scale the differences.
+  std::array<int, 16> scaled;
+  for (int i = 0; i < 16; i++) {
+    int scaledDiff = int(shuffled[i]) * (scale * 2 + 1) + scale;
+    scaled[i] = scaledDiff;
+  }
+
+  return scaled;
+}
+
+template <SamsungV2Decompressor::OptFlags optflags>
+inline __attribute__((always_inline)) void
+SamsungV2Decompressor::processBlock(BitPumpMSB32* pump, int row, int col) {
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+
+  const std::array<uint16_t, 16> baseline =
+      prepareBaselineValues<optflags>(pump, row, col);
+
+  // Figure out how many difference bits we have to read for each pixel
+  const std::array<int, 16> diffs = decodeDifferences<optflags>(pump, row);
+
+  // Actually apply the differences and write them to the pixels
+  for (int i = 0; i < 16; ++i, ++col)
+    out(row, col) = clampBits(baseline[i] + diffs[i], bitDepth);
+}
+
+template <SamsungV2Decompressor::OptFlags optflags>
+void SamsungV2Decompressor::decompressRow(int row) {
+
   // Align pump to 16byte boundary
   const auto line_offset = data.getPosition();
   if ((line_offset & 0xf) != 0)
@@ -202,148 +383,18 @@ void SamsungV2Decompressor::decompressRow(uint32_t row) {
 
   BitPumpMSB32 pump(data);
 
-  auto* img = reinterpret_cast<uint16_t*>(mRaw->getData(0, row));
-  uint16_t* img_up = reinterpret_cast<uint16_t*>(
-      mRaw->getData(0, std::max(0, static_cast<int>(row) - 1)));
-  uint16_t* img_up2 = reinterpret_cast<uint16_t*>(
-      mRaw->getData(0, std::max(0, static_cast<int>(row) - 2)));
-
   // Initialize the motion and diff modes at the start of the line
-  uint32_t motion = 7;
+  motion = 7;
   // By default we are not scaling values at all
-  int32_t scale = 0;
+  scale = 0;
 
-  std::array<std::array<int, 2>, 3> diffBitsMode = {{}};
   for (auto& i : diffBitsMode)
     i[0] = i[1] = (row == 0 || row == 1) ? 7 : 4;
 
   assert(width >= 16);
   assert(width % 16 == 0);
-  for (uint32_t col = 0; col < width; col += 16) {
-    if (!(optflags & OptFlags::QP) && !(col & 63)) {
-      static constexpr std::array<int32_t, 3> scalevals = {{0, -2, 2}};
-      uint32_t i = pump.getBits(2);
-      scale = i < 3 ? scale + scalevals[i] : pump.getBits(12);
-    }
-
-    // First we figure out which reference pixels mode we're in
-    if (optflags & OptFlags::MV)
-      motion = pump.getBits(1) ? 3 : 7;
-    else if (!pump.getBits(1))
-      motion = pump.getBits(3);
-
-    if ((row == 0 || row == 1) && (motion != 7))
-      ThrowRDE("At start of image and motion isn't 7. File corrupted?");
-
-    if (motion == 7) {
-      // The base case, just set all pixels to the previous ones on the same
-      // line If we're at the left edge we just start at the initial value
-      for (uint32_t i = 0; i < 16; i++)
-        img[i] = (col == 0) ? initVal : *(img + i - 2);
-    } else {
-      // The complex case, we now need to actually lookup one or two lines
-      // above
-      if (row < 2)
-        ThrowRDE(
-            "Got a previous line lookup on first two lines. File corrupted?");
-
-      static constexpr std::array<int32_t, 7> motionOffset = {-4, -2, -2, 0,
-                                                              0,  2,  4};
-      static constexpr std::array<int32_t, 7> motionDoAverage = {0, 0, 1, 0,
-                                                                 1, 0, 0};
-
-      int32_t slideOffset = motionOffset[motion];
-      int32_t doAverage = motionDoAverage[motion];
-
-      for (uint32_t i = 0; i < 16; i++) {
-        uint16_t* line;
-        uint16_t* refpixel;
-
-        if ((row + i) & 0x1) {
-          // Red or blue pixels use same color two lines up
-          line = img_up2;
-          refpixel = line + i + slideOffset;
-        } else {
-          // Green pixel N uses Green pixel N from row above
-          // (top left or top right)
-          line = img_up;
-          refpixel = line + i + slideOffset + (((i % 2) != 0) ? -1 : 1);
-        }
-
-        if (col == 0 && line > refpixel)
-          ThrowRDE("Bad motion %u at the beginning of the row", motion);
-        if (col + 16 == width && ((refpixel >= line + 16) ||
-                                  (doAverage && (refpixel + 2 >= line + 16))))
-          ThrowRDE("Bad motion %u at the end of the row", motion);
-
-        // In some cases we use as reference interpolation of this pixel and
-        // the next
-        if (doAverage)
-          img[i] = (*refpixel + *(refpixel + 2) + 1) >> 1;
-        else
-          img[i] = *refpixel;
-      }
-    }
-
-    // Figure out how many difference bits we have to read for each pixel
-    std::array<uint32_t, 4> diffBits = {};
-    if (optflags & OptFlags::SKIP || !pump.getBits(1)) {
-      std::array<uint32_t, 4> flags;
-      for (unsigned int& flag : flags)
-        flag = pump.getBits(2);
-
-      for (uint32_t i = 0; i < 4; i++) {
-        // The color is 0-Green 1-Blue 2-Red
-        uint32_t colornum = (row % 2 != 0) ? i >> 1 : ((i >> 1) + 2) % 3;
-
-        assert(flags[i] <= 3);
-        switch (flags[i]) {
-        case 0:
-          diffBits[i] = diffBitsMode[colornum][0];
-          break;
-        case 1:
-          diffBits[i] = diffBitsMode[colornum][0] + 1;
-          break;
-        case 2:
-          if (diffBitsMode[colornum][0] == 0)
-            ThrowRDE("Difference bits underflow. File corrupted?");
-          diffBits[i] = diffBitsMode[colornum][0] - 1;
-          break;
-        case 3:
-          diffBits[i] = pump.getBits(4);
-          break;
-        default:
-          __builtin_unreachable();
-        }
-
-        diffBitsMode[colornum][0] = diffBitsMode[colornum][1];
-        diffBitsMode[colornum][1] = diffBits[i];
-
-        if (diffBits[i] > bitDepth + 1)
-          ThrowRDE("Too many difference bits. File corrupted?");
-      }
-    }
-
-    // Actually read the differences and write them to the pixels
-    for (uint32_t i = 0; i < 16; i++) {
-      uint32_t len = diffBits[i >> 2];
-      int32_t diff = getDiff(&pump, len);
-
-      uint16_t* value = nullptr;
-      // Apply the diff to pixels 0 2 4 6 8 10 12 14 1 3 5 7 9 11 13 15
-      if (row % 2)
-        value = &img[((i & 0x7) << 1) + 1 - (i >> 3)];
-      else
-        value = &img[((i & 0x7) << 1) + (i >> 3)];
-
-      diff = diff * (scale * 2 + 1) + scale;
-      *value = clampBits(static_cast<int>(*value) + diff, bits);
-    }
-
-    img += 16;
-    img_up += 16;
-    img_up2 += 16;
-  }
+  for (int col = 0; col < width; col += 16)
+    processBlock<optflags>(&pump, row, col);
 
   data.skipBytes(pump.getBufferPosition());
 }

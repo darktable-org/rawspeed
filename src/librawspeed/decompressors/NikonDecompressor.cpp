@@ -482,8 +482,7 @@ template <typename Huffman>
 void NikonDecompressor::decompress(BitPumpMSB* bits, int start_y, int end_y) {
   Huffman ht = createHuffmanTable<Huffman>(huffSelect);
 
-  uint8_t* draw = mRaw->getData();
-  uint32_t pitch = mRaw->pitch;
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   int pLeft1 = 0;
   int pLeft2 = 0;
@@ -491,34 +490,34 @@ void NikonDecompressor::decompress(BitPumpMSB* bits, int start_y, int end_y) {
   // allow gcc to devirtualize the calls below
   auto* rawdata = reinterpret_cast<RawImageDataU16*>(mRaw.get());
 
-  const iPoint2D& size = mRaw->dim;
-  assert(size.x % 2 == 0);
-  assert(size.x >= 2);
-  for (uint32_t y = start_y; y < static_cast<uint32_t>(end_y); y++) {
-    auto* dest =
-        reinterpret_cast<uint16_t*>(&draw[y * pitch]); // Adjust destination
-    pUp1[y & 1] += ht.decodeNext(*bits);
-    pUp2[y & 1] += ht.decodeNext(*bits);
-    pLeft1 = pUp1[y & 1];
-    pLeft2 = pUp2[y & 1];
+  assert(out.width % 2 == 0);
+  assert(out.width >= 2);
+  for (int row = start_y; row < end_y; row++) {
+    int col = 0;
+
+    pUp1[row & 1] += ht.decodeNext(*bits);
+    pUp2[row & 1] += ht.decodeNext(*bits);
+    pLeft1 = pUp1[row & 1];
+    pLeft2 = pUp2[row & 1];
 
     rawdata->setWithLookUp(clampBits(pLeft1, 15),
-                           reinterpret_cast<uint8_t*>(dest + 0), &random);
+                           reinterpret_cast<uint8_t*>(&out(row, col + 0)),
+                           &random);
     rawdata->setWithLookUp(clampBits(pLeft2, 15),
-                           reinterpret_cast<uint8_t*>(dest + 1), &random);
+                           reinterpret_cast<uint8_t*>(&out(row, col + 1)),
+                           &random);
+    col += 2;
 
-    dest += 2;
-
-    for (uint32_t x = 2; x < static_cast<uint32_t>(size.x); x += 2) {
+    for (; col < out.width; col += 2) {
       pLeft1 += ht.decodeNext(*bits);
       pLeft2 += ht.decodeNext(*bits);
 
       rawdata->setWithLookUp(clampBits(pLeft1, 15),
-                             reinterpret_cast<uint8_t*>(dest + 0), &random);
+                             reinterpret_cast<uint8_t*>(&out(row, col + 0)),
+                             &random);
       rawdata->setWithLookUp(clampBits(pLeft2, 15),
-                             reinterpret_cast<uint8_t*>(dest + 1), &random);
-
-      dest += 2;
+                             reinterpret_cast<uint8_t*>(&out(row, col + 1)),
+                             &random);
     }
   }
 }

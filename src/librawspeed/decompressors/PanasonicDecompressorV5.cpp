@@ -174,21 +174,19 @@ public:
 };
 
 template <const PanasonicDecompressorV5::PacketDsc& dsc>
-void PanasonicDecompressorV5::processPixelPacket(BitPumpLSB* bs,
-                                                 uint16_t* dest) const {
+inline void PanasonicDecompressorV5::processPixelPacket(BitPumpLSB* bs, int row,
+                                                        int col) const {
   static_assert(dsc.pixelsPerPacket > 0, "dsc should be compile-time const");
   static_assert(dsc.bps > 0 && dsc.bps <= 16, "");
 
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+
   assert(bs->getFillLevel() == 0);
 
-  const uint16_t* const endDest = dest + dsc.pixelsPerPacket;
-  for (; dest != endDest;) {
+  for (int p = 0; p < dsc.pixelsPerPacket;) {
     bs->fill();
-    for (; bs->getFillLevel() >= dsc.bps; dest++) {
-      assert(dest != endDest);
-
-      *dest = bs->getBitsNoFill(dsc.bps);
-    }
+    for (; bs->getFillLevel() >= dsc.bps; ++p, ++col)
+      out(row, col) = bs->getBitsNoFill(dsc.bps);
   }
   bs->skipBitsNoFill(bs->getFillLevel()); // get rid of padding.
 }
@@ -201,28 +199,22 @@ void PanasonicDecompressorV5::processBlock(const Block& block) const {
   ProxyStream proxy(block.bs);
   BitPumpLSB bs(proxy.getStream());
 
-  for (int y = block.beginCoord.y; y <= block.endCoord.y; y++) {
-    int x = 0;
+  for (int row = block.beginCoord.y; row <= block.endCoord.y; row++) {
+    int col = 0;
     // First row may not begin at the first column.
-    if (block.beginCoord.y == y)
-      x = block.beginCoord.x;
+    if (block.beginCoord.y == row)
+      col = block.beginCoord.x;
 
     int endx = mRaw->dim.x;
     // Last row may end before the last column.
-    if (block.endCoord.y == y)
+    if (block.endCoord.y == row)
       endx = block.endCoord.x;
 
-    auto* dest = reinterpret_cast<uint16_t*>(mRaw->getData(x, y));
-
-    assert(x % dsc.pixelsPerPacket == 0);
+    assert(col % dsc.pixelsPerPacket == 0);
     assert(endx % dsc.pixelsPerPacket == 0);
 
-    for (; x < endx;) {
-      processPixelPacket<dsc>(&bs, dest);
-
-      x += dsc.pixelsPerPacket;
-      dest += dsc.pixelsPerPacket;
-    }
+    for (; col < endx; col += dsc.pixelsPerPacket)
+      processPixelPacket<dsc>(&bs, row, col);
   }
 }
 

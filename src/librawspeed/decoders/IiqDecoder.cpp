@@ -315,18 +315,19 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
 
   for (int quadRow = 0; quadRow < 2; quadRow++) {
     for (int quadCol = 0; quadCol < 2; quadCol++) {
+      const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
+
       const Spline<> s(control_points[quadRow][quadCol]);
       const std::vector<uint16_t> curve = s.calculateCurve();
 
       int row_start = quadRow == 0 ? 0 : split_row;
-      int row_end = quadRow == 0 ? split_row : mRaw->dim.y;
+      int row_end = quadRow == 0 ? split_row : img.height;
       int col_start = quadCol == 0 ? 0 : split_col;
-      int col_end = quadCol == 0 ? split_col : mRaw->dim.x;
+      int col_end = quadCol == 0 ? split_col : img.width;
 
       for (int row = row_start; row < row_end; row++) {
-        auto* pixel =
-            reinterpret_cast<uint16_t*>(mRaw->getData(col_start, row));
-        for (int col = col_start; col < col_end; col++, pixel++) {
+        for (int col = col_start; col < col_end; col++) {
+          uint16_t& pixel = img(row, col);
           // This adjustment is expected to be made with the
           // black-level already subtracted from the pixel values.
           // Because this is kept as metadata and not subtracted at
@@ -334,8 +335,8 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
           // appropriate amount before indexing into the curve and
           // then add it back so that subtracting the black level
           // later will work as expected
-          const uint16_t diff = *pixel < black_level ? *pixel : black_level;
-          *pixel = curve[*pixel - diff] + diff;
+          const uint16_t diff = pixel < black_level ? pixel : black_level;
+          pixel = curve[pixel - diff] + diff;
         }
       }
     }
@@ -390,9 +391,7 @@ void IiqDecoder::handleBadPixel(const uint16_t col, const uint16_t row) {
 }
 
 void IiqDecoder::correctBadColumn(const uint16_t col) {
-  const Array2DRef<uint16_t> img(reinterpret_cast<uint16_t*>(mRaw->getData()),
-                                 mRaw->dim.x, mRaw->dim.y,
-                                 mRaw->pitch / sizeof(uint16_t));
+  const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
   for (int row = 2; row < mRaw->dim.y - 2; row++) {
     if (mRaw->cfa.getColorAt(col, row) == CFA_GREEN) {
@@ -408,10 +407,10 @@ void IiqDecoder::correctBadColumn(const uint16_t col) {
       std::array<uint16_t, 4> val;
       std::array<int32_t, 4> dev;
       int32_t sum = 0;
-      sum += val[0] = img(col - 1, row - 1);
-      sum += val[1] = img(col - 1, row + 1);
-      sum += val[2] = img(col + 1, row - 1);
-      sum += val[3] = img(col + 1, row + 1);
+      sum += val[0] = img(row - 1, col - 1);
+      sum += val[1] = img(row + 1, col - 1);
+      sum += val[2] = img(row - 1, col + 1);
+      sum += val[3] = img(row + 1, col + 1);
       for (int i = 0; i < 4; i++) {
         dev[i] = std::abs((val[i] * 4) - sum);
         if (dev[max] < dev[i])
@@ -419,7 +418,7 @@ void IiqDecoder::correctBadColumn(const uint16_t col) {
       }
       const int three_pixels = sum - val[max];
       // This is `std::lround(three_pixels / 3.0)`, but without FP.
-      img(col, row) = (three_pixels + 1) / 3;
+      img(row, col) = (three_pixels + 1) / 3;
     } else {
       /*
        * Do non-green pixels. Let's pretend we are in "R" pixel, in the middle:
@@ -431,11 +430,11 @@ void IiqDecoder::correctBadColumn(const uint16_t col) {
        * We have 6 other "R" pixels - 2 by horizontal, 4 by diagonals.
        * We need to combine them, to get the value of the pixel we are in.
        */
-      uint32_t diags = img(col - 2, row + 2) + img(col - 2, row - 2) +
-                       img(col + 2, row + 2) + img(col + 2, row - 2);
-      uint32_t horiz = img(col - 2, row) + img(col + 2, row);
+      uint32_t diags = img(row + 2, col - 2) + img(row - 2, col - 2) +
+                       img(row + 2, col + 2) + img(row - 2, col + 2);
+      uint32_t horiz = img(row, col - 2) + img(row, col + 2);
       // But this is not just averaging, we bias towards the horizontal pixels.
-      img(col, row) = std::lround(diags * 0.0732233 + horiz * 0.3535534);
+      img(row, col) = std::lround(diags * 0.0732233 + horiz * 0.3535534);
     }
   }
 }
