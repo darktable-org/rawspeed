@@ -63,7 +63,8 @@ protected:
   decodeDifferences(BitPumpMSB32* pump, int row);
 
   template <OptFlags optflags>
-  void processBlock(BitPumpMSB32* pump, int row, int col);
+  inline __attribute__((always_inline)) void processBlock(BitPumpMSB32* pump,
+                                                          int row, int col);
 
   template <OptFlags optflags> void decompressRow(int row);
 

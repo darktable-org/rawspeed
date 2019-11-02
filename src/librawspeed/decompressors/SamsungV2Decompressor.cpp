@@ -358,7 +358,8 @@ SamsungV2Decompressor::decodeDifferences(BitPumpMSB32* pump, int row) {
 }
 
 template <SamsungV2Decompressor::OptFlags optflags>
-void SamsungV2Decompressor::processBlock(BitPumpMSB32* pump, int row, int col) {
+inline __attribute__((always_inline)) void
+SamsungV2Decompressor::processBlock(BitPumpMSB32* pump, int row, int col) {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   const std::array<uint16_t, 16> baseline =
