@@ -35,8 +35,6 @@ public:
   enum struct OptFlags : uint32_t;
 
 protected:
-  int bits;
-
   uint32_t bitDepth;
   int width;
   int height;
@@ -70,7 +68,8 @@ protected:
   template <OptFlags optflags> void decompressRow(int row);
 
 public:
-  SamsungV2Decompressor(const RawImage& image, const ByteStream& bs, int bit);
+  SamsungV2Decompressor(const RawImage& image, const ByteStream& bs,
+                        unsigned bit);
 
   void decompress();
 };

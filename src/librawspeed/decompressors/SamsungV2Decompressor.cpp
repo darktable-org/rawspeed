@@ -80,18 +80,19 @@ SamsungV2Decompressor::getDiff(BitPumpMSB32* pump, uint32_t len) {
 }
 
 SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
-                                             const ByteStream& bs, int bit)
-    : AbstractSamsungDecompressor(image), bits(bit) {
+                                             const ByteStream& bs,
+                                             unsigned bits)
+    : AbstractSamsungDecompressor(image) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
 
-  switch (bit) {
+  switch (bits) {
   case 12:
   case 14:
     break;
   default:
-    ThrowRDE("Unexpected bit per pixel (%u)", bit);
+    ThrowRDE("Unexpected bit per pixel (%u)", bits);
   }
 
   static constexpr const auto headerSize = 16;
@@ -104,8 +105,8 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   startpump.getBits(16); // NLCVersion
   startpump.getBits(4);  // ImgFormat
   bitDepth = startpump.getBits(4) + 1;
-  if (bitDepth != 12 && bitDepth != 14)
-    ThrowRDE("Unexpected bit depth %u, expected 12 or 14.", bitDepth);
+  if (bitDepth != bits)
+    ThrowRDE("Bit depth mismatch with container, %u vs %u", bitDepth, bits);
   startpump.getBits(4); // NumBlkInRCUnit
   startpump.getBits(4); // CompressionRatio
   width = startpump.getBits(16);
@@ -368,7 +369,7 @@ void SamsungV2Decompressor::processBlock(BitPumpMSB32* pump, int row, int col) {
 
   // Actually apply the differences and write them to the pixels
   for (int i = 0; i < 16; ++i, ++col)
-    out(row, col) = clampBits(baseline[i] + diffs[i], bits);
+    out(row, col) = clampBits(baseline[i] + diffs[i], bitDepth);
 }
 
 template <SamsungV2Decompressor::OptFlags optflags>
