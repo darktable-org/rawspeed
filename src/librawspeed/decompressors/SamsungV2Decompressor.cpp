@@ -216,14 +216,18 @@ SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32* pump, int row,
     ThrowRDE("At start of image and motion isn't 7. File corrupted?");
 
   if (motion == 7) {
-    // The base case, just set all pixels to the previous ones on the same
-    // line If we're at the left edge we just start at the initial value
+    // The base case.
+    // If we're at the left edge we just start at the initial value.
     if (col == 0) {
       baseline.fill(initVal);
       return baseline;
     }
+    // Else just set all pixels to the previous ones on the same line.
+    std::array<int, 2> prev;
+    for (int i = 0; i < 2; i++)
+      prev[i] = img(row, col + i - 2);
     for (int i = 0; i < 16; i++)
-      baseline[i] = (i < 2) ? img(row, col + i - 2) : baseline[i - 2];
+      baseline[i] = prev[i & 1];
     return baseline;
   }
 
