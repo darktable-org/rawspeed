@@ -71,15 +71,12 @@ constexpr bool operator&(SamsungV2Decompressor::OptFlags lhs,
                  rhs));
 }
 
-inline __attribute__((always_inline)) int32_t
+inline __attribute__((always_inline)) int16_t
 SamsungV2Decompressor::getDiff(BitPumpMSB32* pump, uint32_t len) {
   if (len == 0)
     return 0;
-  int32_t diff = pump->getBits(len);
-  // If the first bit is 1 we need to turn this into a negative number
-  if (diff >> (len - 1))
-    diff -= (1 << len);
-  return diff;
+  assert(len <= 15 && "Difference occupies at most 15 bits.");
+  return signExtend(pump->getBits(len), len);
 }
 
 SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
