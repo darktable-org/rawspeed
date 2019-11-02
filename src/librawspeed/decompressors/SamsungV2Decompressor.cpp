@@ -107,6 +107,8 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   startpump.getBits(16); // NLCVersion
   startpump.getBits(4);  // ImgFormat
   bitDepth = startpump.getBits(4) + 1;
+  if (bitDepth != 12 && bitDepth != 14)
+    ThrowRDE("Unexpected bit depth %u, expected 12 or 14.", bitDepth);
   startpump.getBits(4); // NumBlkInRCUnit
   startpump.getBits(4); // CompressionRatio
   width = startpump.getBits(16);
@@ -311,7 +313,8 @@ SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32* pump, int row) {
     diffBitsMode[colornum][1] = diffBits[i];
 
     if (diffBits[i] > bitDepth + 1)
-      ThrowRDE("Too many difference bits. File corrupted?");
+      ThrowRDE("Too many difference bits (%u). File corrupted?", diffBits[i]);
+    assert(diffBits[i] <= 15 && "So any difference fits within uint16_t");
   }
 
   return diffBits;
