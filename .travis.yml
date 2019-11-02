@@ -62,26 +62,26 @@ jobs:
   include:
   - stage: test
     os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     services:
       - docker
     env: CC=gcc-9 CXX=g++-9
   - stage: test
     os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     services:
       - docker
     env: CC=gcc-9 CXX=g++-9 ECO="-DWITH_OPENMP=OFF"
   - os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     services:
       - docker
     env: CC=clang-9 CXX=clang++-9
   - os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     services:
       - docker
@@ -95,40 +95,40 @@ jobs:
   #- os: osx
   #  env: CC=cc CXX=c++ FLAVOR=Coverage
   - os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     services:
       - docker
     # Don't forget to ensure that FindLLVMClangTidy.cmake is also bumped
     env: CC=clang-9 CXX=clang++-9 TARGET=STATICANALYSIS ECO="-DUSE_CLANG_TIDY=ON"
   - os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     services:
       - docker
     env: CC=clang-9 CXX=clang++-9 ECO="-DWITH_OPENMP=OFF"
   - os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     env: CC=gcc-5 CXX=g++-5 EXTRA=NODOCKER
   - os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     env: CC=clang-3.5 CXX=clang++-3.5 EXTRA=NODOCKER ECO="-DWITH_OPENMP=OFF"
   - os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     env: CC=clang-3.9 CXX=clang++-3.9 EXTRA=NODOCKER
   #- stage: deploy
   #  os: linux
   #  sudo: required
-  #  dist: xenial
+  #  dist: bionic
   #  edge: true
   #  services:
   #    - docker
   - stage: deploy
     os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     services:
       - docker
