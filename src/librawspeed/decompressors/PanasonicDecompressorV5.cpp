@@ -174,8 +174,8 @@ public:
 };
 
 template <const PanasonicDecompressorV5::PacketDsc& dsc>
-void PanasonicDecompressorV5::processPixelPacket(BitPumpLSB* bs, int row,
-                                                 int col) const {
+inline void PanasonicDecompressorV5::processPixelPacket(BitPumpLSB* bs, int row,
+                                                        int col) const {
   static_assert(dsc.pixelsPerPacket > 0, "dsc should be compile-time const");
   static_assert(dsc.bps > 0 && dsc.bps <= 16, "");
 

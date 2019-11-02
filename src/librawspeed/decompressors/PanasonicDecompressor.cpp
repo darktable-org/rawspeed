@@ -163,7 +163,7 @@ public:
   }
 };
 
-void PanasonicDecompressor::processPixelPacket(
+inline void PanasonicDecompressor::processPixelPacket(
     ProxyStream* bits, int row, int col,
     std::vector<uint32_t>* zero_pos) const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
