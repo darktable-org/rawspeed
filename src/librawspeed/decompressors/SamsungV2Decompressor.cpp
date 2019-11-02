@@ -316,16 +316,22 @@ SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32* pump, int row) {
 template <SamsungV2Decompressor::OptFlags optflags>
 inline __attribute__((always_inline)) std::array<int, 16>
 SamsungV2Decompressor::decodeDifferences(BitPumpMSB32* pump, int row) {
-  std::array<int, 16> diffs;
-
   // Figure out how many difference bits we have to read for each pixel
   const std::array<uint32_t, 4> diffBits =
       decodeDiffLengths<optflags>(pump, row);
 
-  // Actually read the differences and reshuffle them.
+  // Actually read the differences.
+  std::array<int, 16> diffs;
   for (int i = 0; i < 16; i++) {
     uint32_t len = diffBits[i >> 2];
     int32_t diff = getDiff(pump, len);
+    diffs[i] = diff;
+  }
+
+  // Scale and reshuffle the difference.
+  std::array<int, 16> shuffled;
+  for (int i = 0; i < 16; i++) {
+    int scaledDiff = diffs[i] * (scale * 2 + 1) + scale;
 
     int p;
     // The differences are stored interlaced:
@@ -335,14 +341,10 @@ SamsungV2Decompressor::decodeDifferences(BitPumpMSB32* pump, int row) {
     else
       p = ((i % 8) << 1) + (i >> 3);
 
-    diffs[p] = diff;
+    shuffled[p] = scaledDiff;
   }
 
-  // Scale the difference.
-  for (int& diff : diffs)
-    diff = diff * (scale * 2 + 1) + scale;
-
-  return diffs;
+  return shuffled;
 }
 
 template <SamsungV2Decompressor::OptFlags optflags>
