@@ -193,12 +193,12 @@ void SamsungV2Decompressor::decompress() {
 // the actual difference bits
 
 template <SamsungV2Decompressor::OptFlags optflags>
-inline __attribute__((always_inline)) std::array<int, 16>
+inline __attribute__((always_inline)) std::array<uint16_t, 16>
 SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32* pump, int row,
                                              int col) {
   const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  std::array<int, 16> baseline;
+  std::array<uint16_t, 16> baseline;
 
   if (!(optflags & OptFlags::QP) && !(col & 63)) {
     static constexpr std::array<int32_t, 3> scalevals = {{0, -2, 2}};
@@ -355,7 +355,7 @@ template <SamsungV2Decompressor::OptFlags optflags>
 void SamsungV2Decompressor::processBlock(BitPumpMSB32* pump, int row, int col) {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  const std::array<int, 16> baseline =
+  const std::array<uint16_t, 16> baseline =
       prepareBaselineValues<optflags>(pump, row, col);
 
   // Figure out how many difference bits we have to read for each pixel

@@ -41,7 +41,7 @@ protected:
   int width;
   int height;
   OptFlags _flags;
-  uint32_t initVal;
+  uint16_t initVal;
 
   ByteStream data;
 
@@ -53,7 +53,7 @@ protected:
   getDiff(BitPumpMSB32* pump, uint32_t len);
 
   template <OptFlags optflags>
-  inline __attribute__((always_inline)) std::array<int, 16>
+  inline __attribute__((always_inline)) std::array<uint16_t, 16>
   prepareBaselineValues(BitPumpMSB32* pump, int row, int col);
 
   template <OptFlags optflags>
