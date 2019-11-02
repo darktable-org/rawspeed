@@ -332,11 +332,9 @@ SamsungV2Decompressor::decodeDifferences(BitPumpMSB32* pump, int row) {
     diffs[i] = diff;
   }
 
-  // Scale and reshuffle the difference. These may ocuppy
-  std::array<int, 16> shuffled;
+  // Reshuffle the differences, while they still are only 16-bit.
+  std::array<int16_t, 16> shuffled;
   for (int i = 0; i < 16; i++) {
-    int scaledDiff = int(diffs[i]) * (scale * 2 + 1) + scale;
-
     int p;
     // The differences are stored interlaced:
     // 0 2 4 6 8 10 12 14 1 3 5 7 9 11 13 15
@@ -345,10 +343,17 @@ SamsungV2Decompressor::decodeDifferences(BitPumpMSB32* pump, int row) {
     else
       p = ((i % 8) << 1) + (i >> 3);
 
-    shuffled[p] = scaledDiff;
+    shuffled[p] = diffs[i];
   }
 
-  return shuffled;
+  // And finally widen and scale the differences.
+  std::array<int, 16> scaled;
+  for (int i = 0; i < 16; i++) {
+    int scaledDiff = int(shuffled[i]) * (scale * 2 + 1) + scale;
+    scaled[i] = scaledDiff;
+  }
+
+  return scaled;
 }
 
 template <SamsungV2Decompressor::OptFlags optflags>
