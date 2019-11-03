@@ -5,7 +5,6 @@ FILE(GLOB SOURCES
   "BitPumpMSB16.h"
   "BitPumpMSB32.h"
   "BitStream.h"
-  "Buffer.cpp"
   "Buffer.h"
   "ByteStream.h"
   "Endianness.h"

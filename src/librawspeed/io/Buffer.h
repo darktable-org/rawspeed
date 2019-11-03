@@ -67,7 +67,20 @@ protected:
 public:
   // allocates the databuffer, and returns owning non-const pointer.
   static std::unique_ptr<uint8_t, decltype(&alignedFree)>
-  Create(size_type size);
+  Create(size_type size) {
+    if (!size)
+      ThrowIOE("Trying to allocate 0 bytes sized buffer.");
+
+    std::unique_ptr<uint8_t, decltype(&alignedFree)> data(
+        alignedMalloc<uint8_t, 16>(roundUp(size + BUFFER_PADDING, 16)),
+        &alignedFree);
+    if (!data)
+      ThrowIOE("Failed to allocate %uz bytes memory buffer.", size);
+
+    assert(!ASan::RegionIsPoisoned(data.get(), size));
+
+    return data;
+  }
 
   // constructs an empty buffer
   Buffer() = default;
@@ -79,7 +92,22 @@ public:
 
   // creates buffer from owning unique_ptr
   Buffer(std::unique_ptr<uint8_t, decltype(&alignedFree)> data_,
-         size_type size_);
+         size_type size_)
+      : size(size_) {
+    if (!size)
+      ThrowIOE("Buffer has zero size?");
+
+    if (data_.get_deleter() != &alignedFree)
+      ThrowIOE("Wrong deleter. Expected rawspeed::alignedFree()");
+
+    data = data_.release();
+    if (!data)
+      ThrowIOE("Memory buffer is nonexistent");
+
+    assert(!ASan::RegionIsPoisoned(data, size));
+
+    isOwner = true;
+  }
 
   // Data already allocated
   explicit Buffer(const uint8_t* data_, size_type size_)
@@ -103,10 +131,45 @@ public:
   }
 
   // Frees memory if owned
-  ~Buffer();
+  ~Buffer() {
+    if (isOwner) {
+      alignedFreeConstPtr(data);
+    }
+  }
 
-  Buffer& operator=(Buffer&& rhs) noexcept;
-  Buffer& operator=(const Buffer& rhs);
+  Buffer& operator=(Buffer&& rhs) noexcept {
+    if (this == &rhs) {
+      assert(!ASan::RegionIsPoisoned(data, size));
+      return *this;
+    }
+
+    if (isOwner)
+      alignedFreeConstPtr(data);
+
+    data = rhs.data;
+    size = rhs.size;
+    isOwner = rhs.isOwner;
+
+    assert(!ASan::RegionIsPoisoned(data, size));
+
+    rhs.isOwner = false;
+
+    return *this;
+  }
+
+  Buffer& operator=(const Buffer& rhs) {
+    if (this == &rhs) {
+      assert(!ASan::RegionIsPoisoned(data, size));
+      return *this;
+    }
+
+    Buffer unOwningTmp(rhs.data, rhs.size);
+    *this = std::move(unOwningTmp);
+    assert(!isOwner);
+    assert(!ASan::RegionIsPoisoned(data, size));
+
+    return *this;
+  }
 
   Buffer getSubView(size_type offset, size_type size_) const {
     if (!isValid(0, offset))
@@ -166,11 +229,6 @@ public:
     return static_cast<uint64_t>(offset) + count <=
            static_cast<uint64_t>(size) + BUFFER_PADDING;
   }
-
-//  Buffer* clone();
-//  /* For testing purposes */
-//  void corrupt(int errors);
-//  Buffer* cloneRandomSize();
 };
 
 /*
