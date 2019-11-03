@@ -85,11 +85,6 @@ public:
   // constructs an empty buffer
   Buffer() = default;
 
-  // Allocates the memory
-  explicit Buffer(size_type size_) : Buffer(Create(size_), size_) {
-    assert(!ASan::RegionIsPoisoned(data, size));
-  }
-
   // creates buffer from owning unique_ptr
   Buffer(std::unique_ptr<uint8_t, decltype(&alignedFree)> data_,
          size_type size_)
