@@ -108,15 +108,15 @@ jobs:
       - docker
     env: CC=clang-9 CXX=clang++-9 ECO="-DWITH_OPENMP=OFF"
   - os: linux
-    dist: bionic
+    dist: xenial
     sudo: required
     env: CC=gcc-5 CXX=g++-5 EXTRA=NODOCKER
   - os: linux
-    dist: bionic
+    dist: xenial
     sudo: required
     env: CC=clang-3.5 CXX=clang++-3.5 EXTRA=NODOCKER ECO="-DWITH_OPENMP=OFF"
   - os: linux
-    dist: bionic
+    dist: xenial
     sudo: required
     env: CC=clang-3.9 CXX=clang++-3.9 EXTRA=NODOCKER
   #- stage: deploy
