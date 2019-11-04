@@ -97,7 +97,7 @@ class BitStream final : public ByteStream {
   // in debug build to enforce lack of out-of-bounds reads, or when we are
   // nearing the end of the input buffer and can not just read MaxProcessBytes
   // from it, but have to read as much as we can and fill rest with zeros.
-  std::array<uint8_t, BitStreamCacheBase::MaxProcessBytes> tmp;
+  std::array<uint8_t, BitStreamCacheBase::MaxProcessBytes> tmp = {};
 
   // this method hase to be implemented in the concrete BitStream template
   // specializations. It will return the number of bytes processed. It needs
