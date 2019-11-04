@@ -145,7 +145,7 @@ add_feature_info("XML reading" HAVE_PUGIXML "used for loading of data/cameras.xm
 unset(HAVE_JPEG)
 if(WITH_JPEG)
   message(STATUS "Looking for JPEG")
-  find_package(JPEG 1.5.0) # libjpeg-turbo
+  find_package(JPEG)
   if(NOT JPEG_FOUND)
     message(SEND_ERROR "Did not find JPEG! Either make it find JPEG, or pass -DWITH_JPEG=OFF to disable JPEG.")
   else()
