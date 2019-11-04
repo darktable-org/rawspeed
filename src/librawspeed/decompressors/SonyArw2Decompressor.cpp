@@ -53,6 +53,9 @@ void SonyArw2Decompressor::decompressRow(int row) const {
   assert(out.width > 0);
   assert(out.width % 32 == 0);
 
+  // Allow compiler to devirtualize the calls below.
+  auto& rawdata = reinterpret_cast<RawImageDataU16&>(*mRaw);
+
   ByteStream rowBs = input;
   rowBs.skipBytes(row * out.width);
   rowBs = rowBs.peekStream(out.width);
@@ -94,7 +97,7 @@ void SonyArw2Decompressor::decompressRow(int row) const {
             p = 0x7ff;
         }
       }
-      mRaw->setWithLookUp(
+      rawdata.setWithLookUp(
           p << 1, reinterpret_cast<uint8_t*>(&out(row, col + i * 2)), &random);
     }
   }

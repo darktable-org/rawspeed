@@ -32,19 +32,6 @@
 
 namespace rawspeed {
 
-// This allows to specify the number of bytes that each Buffer needs to
-// allocate additionally to be able to remove one runtime bounds check
-// in BitStream::fill. There are two sane choices:
-// 0 : allocate exactly as much data as required, or
-// set it to the value of  BitStreamCacheBase::MaxProcessBytes
-#define BUFFER_PADDING 0UL
-
-// if the padding is >= 4, bounds checking in BitStream::fill are not compiled,
-// which supposedly saves about 1% on modern CPUs
-// WARNING: if the padding is >= 4, do *NOT* create Buffer from
-// passed unowning pointer and size. Or, subtract BUFFER_PADDING from size.
-// else bound checks will malfunction => bad things can happen !!!
-
 /*************************************************************************
  * This is the buffer abstraction.
  *
@@ -67,26 +54,46 @@ protected:
 public:
   // allocates the databuffer, and returns owning non-const pointer.
   static std::unique_ptr<uint8_t, decltype(&alignedFree)>
-  Create(size_type size);
+  Create(size_type size) {
+    if (!size)
+      ThrowIOE("Trying to allocate 0 bytes sized buffer.");
+
+    std::unique_ptr<uint8_t, decltype(&alignedFree)> data(
+        alignedMalloc<uint8_t, 16>(roundUp(size, 16)),
+        &alignedFree);
+    if (!data)
+      ThrowIOE("Failed to allocate %uz bytes memory buffer.", size);
+
+    assert(!ASan::RegionIsPoisoned(data.get(), size));
+
+    return data;
+  }
 
   // constructs an empty buffer
   Buffer() = default;
 
-  // Allocates the memory
-  explicit Buffer(size_type size_) : Buffer(Create(size_), size_) {
-    assert(!ASan::RegionIsPoisoned(data, size));
-  }
-
   // creates buffer from owning unique_ptr
   Buffer(std::unique_ptr<uint8_t, decltype(&alignedFree)> data_,
-         size_type size_);
+         size_type size_)
+      : size(size_) {
+    if (!size)
+      ThrowIOE("Buffer has zero size?");
+
+    if (data_.get_deleter() != &alignedFree)
+      ThrowIOE("Wrong deleter. Expected rawspeed::alignedFree()");
+
+    data = data_.release();
+    if (!data)
+      ThrowIOE("Memory buffer is nonexistent");
+
+    assert(!ASan::RegionIsPoisoned(data, size));
+
+    isOwner = true;
+  }
 
   // Data already allocated
   explicit Buffer(const uint8_t* data_, size_type size_)
       : data(data_), size(size_) {
-    static_assert(BUFFER_PADDING == 0, "please do make sure that you do NOT "
-                                       "call this function from YOUR code, and "
-                                       "then comment-out this assert.");
     assert(!ASan::RegionIsPoisoned(data, size));
   }
 
@@ -103,10 +110,45 @@ public:
   }
 
   // Frees memory if owned
-  ~Buffer();
+  ~Buffer() {
+    if (isOwner) {
+      alignedFreeConstPtr(data);
+    }
+  }
 
-  Buffer& operator=(Buffer&& rhs) noexcept;
-  Buffer& operator=(const Buffer& rhs);
+  Buffer& operator=(Buffer&& rhs) noexcept {
+    if (this == &rhs) {
+      assert(!ASan::RegionIsPoisoned(data, size));
+      return *this;
+    }
+
+    if (isOwner)
+      alignedFreeConstPtr(data);
+
+    data = rhs.data;
+    size = rhs.size;
+    isOwner = rhs.isOwner;
+
+    assert(!ASan::RegionIsPoisoned(data, size));
+
+    rhs.isOwner = false;
+
+    return *this;
+  }
+
+  Buffer& operator=(const Buffer& rhs) {
+    if (this == &rhs) {
+      assert(!ASan::RegionIsPoisoned(data, size));
+      return *this;
+    }
+
+    Buffer unOwningTmp(rhs.data, rhs.size);
+    *this = std::move(unOwningTmp);
+    assert(!isOwner);
+    assert(!ASan::RegionIsPoisoned(data, size));
+
+    return *this;
+  }
 
   Buffer getSubView(size_type offset, size_type size_) const {
     if (!isValid(0, offset))
@@ -163,14 +205,8 @@ public:
   }
 
   inline bool isValid(size_type offset, size_type count = 1) const {
-    return static_cast<uint64_t>(offset) + count <=
-           static_cast<uint64_t>(size) + BUFFER_PADDING;
+    return static_cast<uint64_t>(offset) + count <= static_cast<uint64_t>(size);
   }
-
-//  Buffer* clone();
-//  /* For testing purposes */
-//  void corrupt(int errors);
-//  Buffer* cloneRandomSize();
 };
 
 /*

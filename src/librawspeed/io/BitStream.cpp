@@ -1,8 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2009-2014 Klaus Post
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2019 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -19,23 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#pragma once
-
-#include "rawspeedconfig.h"
-#include "common/RawspeedException.h"     // for ThrowExceptionHelper
-#include "decoders/RawDecoderException.h" // for RawDecoderException
-#include <string>                         // for string
+#include "io/BitStream.h" // for BitStreamCacheBase
 
 namespace rawspeed {
 
-class FileIOException final : public RawDecoderException {
-public:
-  explicit RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
-  FileIOException(const char* msg)
-      : RawDecoderException(msg) {}
-};
-
-#define ThrowFIE(...)                                                          \
-  ThrowExceptionHelper(rawspeed::FileIOException, __VA_ARGS__)
+constexpr unsigned BitStreamCacheBase::MaxProcessBytes;
 
 } // namespace rawspeed
