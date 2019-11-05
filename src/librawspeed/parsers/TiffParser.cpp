@@ -72,7 +72,7 @@ TiffRootIFDOwner TiffParser::parse(TiffIFD* parent, const Buffer& data) {
 
   TiffRootIFDOwner root = std::make_unique<TiffRootIFD>(
       parent, nullptr, bs,
-      UINT32_MAX); // tell TiffIFD constructur not to parse bs as IFD
+      UINT32_MAX); // tell TiffIFD constructor not to parse bs as IFD
 
   NORangesSet<Buffer> ifds;
 

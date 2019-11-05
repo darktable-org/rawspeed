@@ -37,7 +37,7 @@ namespace rawspeed {
  *
  * It allows access to some piece of memory, typically a whole or part
  * of a raw file. The underlying memory may be owned by the buffer or not.
- * It supports move operations to properly deal with owneship transfer.
+ * It supports move operations to properly deal with ownership transfer.
  * It intentionally supports only read/const access to the underlying memory.
  *
  *************************************************************************/

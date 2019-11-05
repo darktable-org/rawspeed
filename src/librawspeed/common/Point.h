@@ -160,7 +160,7 @@ public:
   void setSize(const iPoint2D& size) { dim = size; }
   void setSize(iPoint2D&& size) { dim = size; }
 
-  /* Crop, so area is postitive, and return true, if there is any area left */
+  /* Crop, so area is positive, and return true, if there is any area left */
   /* This will ensure that bottomright is never on the left/top of the offset */
   bool cropArea() {
     dim.x = std::max(0, dim.x);
