@@ -60,7 +60,7 @@ void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream* bs) {
   try {
     switch (t->tag) {
     case DNGPRIVATEDATA:
-      // These are arbitrairly 'rebased', to preserve the offsets, but as it is
+      // These are arbitrarily 'rebased', to preserve the offsets, but as it is
       // implemented right now, that could trigger UB (pointer arithmetics,
       // creating pointer to unowned memory, etc). And since this is not even
       // used anywhere right now, let's not

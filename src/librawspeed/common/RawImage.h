@@ -267,7 +267,7 @@ inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type,
 inline Array2DRef<uint16_t>
 RawImageData::getU16DataAsUncroppedArray2DRef() const noexcept {
   assert(dataType == TYPE_USHORT16 &&
-         "Attemping to access floating-point buffer as uint16_t.");
+         "Attempting to access floating-point buffer as uint16_t.");
   assert(data && "Data not yet allocated.");
   return {reinterpret_cast<uint16_t*>(data), cpp * dim.x, dim.y,
           static_cast<int>(pitch / sizeof(uint16_t))};
