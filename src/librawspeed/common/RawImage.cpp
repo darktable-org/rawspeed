@@ -221,13 +221,13 @@ uint8_t* RawImageData::getData() const {
 }
 
 uint8_t* RawImageData::getData(uint32_t x, uint32_t y) {
+  x += mOffset.x;
+  y += mOffset.y;
+
   if (x >= static_cast<unsigned>(uncropped_dim.x))
     ThrowRDE("X Position outside image requested.");
   if (y >= static_cast<unsigned>(uncropped_dim.y))
     ThrowRDE("Y Position outside image requested.");
-
-  x += mOffset.x;
-  y += mOffset.y;
 
   if (!data)
     ThrowRDE("Data not yet allocated.");
