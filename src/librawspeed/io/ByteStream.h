@@ -152,7 +152,7 @@ public:
     return DataBuffer::get<T>(pos, i);
   }
 
-  inline uint16_t peekU16() { return peek<uint16_t>(); }
+  inline uint16_t peekU16() const { return peek<uint16_t>(); }
 
   template<typename T> inline T get() {
     auto ret = peek<T>();
