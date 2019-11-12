@@ -98,8 +98,6 @@ void SamsungV1Decompressor::decompress() {
                                                               {4, 8},
                                                               {4, 2}}};
   std::vector<encTableItem> tbl(1024);
-  std::array<std::array<uint16_t, 2>, 2> vpred = {{}};
-  std::array<uint16_t, 2> hpred;
 
   // We generate a 1024 entry table (to be addressed by reading 10 bits) by
   // consecutively filling in 2^(10-N) positions where N is the variable number
@@ -120,16 +118,18 @@ void SamsungV1Decompressor::decompress() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   BitPumpMSB pump(*bs);
   for (int row = 0; row < out.height; row++) {
+    std::array<int, 2> pred = {{}};
+    if (row >= 2)
+      pred = {out(row - 2, 0), out(row - 2, 1)};
+
     for (int col = 0; col < out.width; col++) {
       int32_t diff = samsungDiff(&pump, tbl);
-      if (col < 2)
-        hpred[col] = vpred[row & 1][col] += diff;
-      else
-        hpred[col & 1] += diff;
-      // FIXME: this is broken.
-      out(row, col) = hpred[col & 1];
-      if (out(row, col) >> bits)
+      pred[col & 1] += diff;
+
+      int value = pred[col & 1];
+      if (!isIntN(value, bits))
         ThrowRDE("decoded value out of bounds at %d:%d", col, row);
+      out(row, col) = value;
     }
   }
 }
