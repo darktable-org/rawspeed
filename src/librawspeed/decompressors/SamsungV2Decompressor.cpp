@@ -223,7 +223,7 @@ SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32* pump, int row,
       return baseline;
     }
     // Else just set all pixels to the previous ones on the same line.
-    std::array<int, 2> prev;
+    std::array<uint16_t, 2> prev;
     for (int i = 0; i < 2; i++)
       prev[i] = img(row, col + i - 2);
     for (int i = 0; i < 16; i++)
