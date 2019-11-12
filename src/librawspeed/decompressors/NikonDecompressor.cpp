@@ -466,10 +466,10 @@ NikonDecompressor::NikonDecompressor(const RawImage& raw, ByteStream metadata,
   if (bitsPS == 14)
     huffSelect += 3;
 
-  pUp1[0] = metadata.getU16();
-  pUp1[1] = metadata.getU16();
-  pUp2[0] = metadata.getU16();
-  pUp2[1] = metadata.getU16();
+  pUp[0][0] = metadata.getU16();
+  pUp[1][0] = metadata.getU16();
+  pUp[0][1] = metadata.getU16();
+  pUp[1][1] = metadata.getU16();
 
   curve = createCurve(&metadata, bitsPS, v0, v1, &split);
 
@@ -484,39 +484,19 @@ void NikonDecompressor::decompress(BitPumpMSB* bits, int start_y, int end_y) {
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  int pLeft1 = 0;
-  int pLeft2 = 0;
-
   // allow gcc to devirtualize the calls below
   auto* rawdata = reinterpret_cast<RawImageDataU16*>(mRaw.get());
 
   assert(out.width % 2 == 0);
   assert(out.width >= 2);
   for (int row = start_y; row < end_y; row++) {
-    int col = 0;
-
-    pUp1[row & 1] += ht.decodeNext(*bits);
-    pUp2[row & 1] += ht.decodeNext(*bits);
-    pLeft1 = pUp1[row & 1];
-    pLeft2 = pUp2[row & 1];
-
-    rawdata->setWithLookUp(clampBits(pLeft1, 15),
-                           reinterpret_cast<uint8_t*>(&out(row, col + 0)),
-                           &random);
-    rawdata->setWithLookUp(clampBits(pLeft2, 15),
-                           reinterpret_cast<uint8_t*>(&out(row, col + 1)),
-                           &random);
-    col += 2;
-
-    for (; col < out.width; col += 2) {
-      pLeft1 += ht.decodeNext(*bits);
-      pLeft2 += ht.decodeNext(*bits);
-
-      rawdata->setWithLookUp(clampBits(pLeft1, 15),
-                             reinterpret_cast<uint8_t*>(&out(row, col + 0)),
-                             &random);
-      rawdata->setWithLookUp(clampBits(pLeft2, 15),
-                             reinterpret_cast<uint8_t*>(&out(row, col + 1)),
+    std::array<int, 2> pred = pUp[row & 1];
+    for (int col = 0; col < out.width; col++) {
+      pred[col & 1] += ht.decodeNext(*bits);
+      if (col < 2)
+        pUp[row & 1][col & 1] = pred[col & 1];
+      rawdata->setWithLookUp(clampBits(pred[col & 1], 15),
+                             reinterpret_cast<uint8_t*>(&out(row, col)),
                              &random);
     }
   }
