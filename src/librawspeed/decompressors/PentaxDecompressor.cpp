@@ -143,31 +143,18 @@ void PentaxDecompressor::decompress(const ByteStream& data) const {
   assert(out.width > 0);
   assert(out.width % 2 == 0);
 
-  std::array<int, 2> pUp1 = {{}};
-  std::array<int, 2> pUp2 = {{}};
-
   BitPumpMSB bs(data);
   for (int row = 0; row < out.height; row++) {
-    int col = 0;
+    std::array<int, 2> pred = {{}};
+    if (row >= 2)
+      pred = {out(row - 2, 0), out(row - 2, 1)};
 
-    pUp1[row & 1] += ht.decodeNext(bs);
-    pUp2[row & 1] += ht.decodeNext(bs);
-
-    int pLeft1 = out(row, col) = pUp1[row & 1];
-    int pLeft2 = out(row, col + 1) = pUp2[row & 1];
-    col += 2;
-
-    for (; col < out.width; col += 2) {
-      pLeft1 += ht.decodeNext(bs);
-      pLeft2 += ht.decodeNext(bs);
-
-      out(row, col) = pLeft1;
-      out(row, col + 1) = pLeft2;
-
-      if (!isIntN(pLeft1, 16))
+    for (int col = 0; col < out.width; col++) {
+      pred[col & 1] += ht.decodeNext(bs);
+      int value = pred[col & 1];
+      if (!isIntN(value, 16))
         ThrowRDE("decoded value out of bounds at %d:%d", col, row);
-      if (!isIntN(pLeft2, 16))
-        ThrowRDE("decoded value out of bounds at %d:%d", col, row);
+      out(row, col) = value;
     }
   }
 }
