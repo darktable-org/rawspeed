@@ -18,6 +18,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#pragma once
+
 #include "io/Buffer.h"     // for Buffer
 #include "io/ByteStream.h" // for ByteStream
 
