@@ -283,7 +283,7 @@ void CrwDecompressor::decompress() {
 
         base[k & 1] += diffBuf[k];
 
-        if (base[k & 1] >> 10)
+        if (!isIntN(base[k & 1], 10))
           ThrowRDE("Error decompressing");
 
         out(row, col) = base[k & 1];

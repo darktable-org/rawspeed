@@ -126,6 +126,7 @@ void SamsungV1Decompressor::decompress() {
         hpred[col] = vpred[row & 1][col] += diff;
       else
         hpred[col & 1] += diff;
+      // FIXME: this is broken.
       out(row, col) = hpred[col & 1];
       if (out(row, col) >> bits)
         ThrowRDE("decoded value out of bounds at %d:%d", col, row);

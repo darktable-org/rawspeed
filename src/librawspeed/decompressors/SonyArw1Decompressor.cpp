@@ -77,7 +77,7 @@ void SonyArw1Decompressor::decompress(const ByteStream& input) const {
       int diff = getDiff(&bits, len);
       pred += diff;
 
-      if (pred < 0 || (pred >> 12) > 0)
+      if (!isIntN(pred, 12))
         ThrowRDE("Error decompressing");
 
       out(row, col) = pred;

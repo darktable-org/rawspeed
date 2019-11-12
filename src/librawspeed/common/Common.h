@@ -149,6 +149,17 @@ clampBits(T value, unsigned int nBits,
 }
 
 template <typename T>
+inline constexpr bool __attribute__((const))
+isIntN(T value, unsigned int nBits,
+       typename std::enable_if<std::is_arithmetic<T>::value>::type* /*unused*/ =
+           nullptr) {
+  assert(nBits < CHAR_BIT * sizeof(T) && "Check must not be tautological.");
+  using UnsignedT = typename std::make_unsigned<T>::type;
+  const auto highBits = static_cast<UnsignedT>(value) >> nBits;
+  return highBits == 0;
+}
+
+template <typename T>
 inline constexpr typename std::make_signed<T>::type __attribute__((const))
 signExtend(
     T value, unsigned int nBits,

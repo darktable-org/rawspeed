@@ -164,9 +164,9 @@ void PentaxDecompressor::decompress(const ByteStream& data) const {
       out(row, col) = pLeft1;
       out(row, col + 1) = pLeft2;
 
-      if (pLeft1 < 0 || pLeft1 > 65535)
+      if (!isIntN(pLeft1, 16))
         ThrowRDE("decoded value out of bounds at %d:%d", col, row);
-      if (pLeft2 < 0 || pLeft2 > 65535)
+      if (!isIntN(pLeft2, 16))
         ThrowRDE("decoded value out of bounds at %d:%d", col, row);
     }
   }

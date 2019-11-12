@@ -124,7 +124,7 @@ void KodakDecompressor::decompress() {
         pred[i & 1] += buf[i];
 
         int value = pred[i & 1];
-        if (unsigned(value) >= (1U << bps))
+        if (!isIntN(value, bps))
           ThrowRDE("Value out of bounds %d (bps = %i)", value, bps);
 
         if (uncorrectedRawValues)
