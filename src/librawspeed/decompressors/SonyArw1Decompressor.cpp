@@ -80,8 +80,7 @@ void SonyArw1Decompressor::decompress(const ByteStream& input) const {
       if (pred < 0 || (pred >> 12) > 0)
         ThrowRDE("Error decompressing");
 
-      if (row < out.height)
-        out(row, col) = pred;
+      out(row, col) = pred;
     }
   }
 }
