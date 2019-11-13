@@ -54,7 +54,8 @@ SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
   const uint32_t width = mRaw->dim.x;
   const uint32_t height = mRaw->dim.y;
 
-  if (width == 0 || height == 0 || width > 5664 || height > 3714)
+  if (width == 0 || height == 0 || width % 32 != 0 || height % 2 != 0 ||
+      width > 5664 || height > 3714)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 }
 
@@ -116,6 +117,8 @@ void SamsungV1Decompressor::decompress() {
   }
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  assert(out.width % 32 == 0 && "Should have even count of pixels per row.");
+  assert(out.height % 2 == 0 && "Should have even row count.");
   BitPumpMSB pump(*bs);
   for (int row = 0; row < out.height; row++) {
     std::array<int, 2> pred = {{}};
