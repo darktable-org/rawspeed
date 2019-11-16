@@ -77,15 +77,10 @@ public:
   area_type __attribute__((pure)) area() const {
     using signed_area = std::make_signed<area_type>::type;
 
-    if (x >= 0 && y >= 0)
-      return static_cast<area_type>(x) * static_cast<area_type>(y);
-    if (x >= 0 && y < 0)
-      return static_cast<area_type>(x) * (-1 * static_cast<signed_area>(y));
-    if (y >= 0 && x < 0)
-      return static_cast<area_type>(y) * (-1 * static_cast<signed_area>(x));
+    area_type x_abs = std::abs(static_cast<signed_area>(x));
+    area_type y_abs = std::abs(static_cast<signed_area>(y));
 
-    assert(x < 0 && y < 0);
-    return static_cast<signed_area>(x) * static_cast<signed_area>(y);
+    return x_abs * y_abs;
   }
 
   constexpr bool isThisInside(const iPoint2D& rhs) const {
@@ -93,7 +88,10 @@ public:
   }
 
   constexpr iPoint2D getSmallest(const iPoint2D& rhs) const {
-    return {x < rhs.x ? x : rhs.x, y < rhs.y ? y : rhs.y};
+    return {
+        std::min(x, rhs.x),
+        std::min(y, rhs.y),
+    };
   }
 
   value_type x = 0;
