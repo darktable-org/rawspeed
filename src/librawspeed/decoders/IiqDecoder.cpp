@@ -66,7 +66,7 @@ bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   const std::string& make = id.make;
 
   return IiqDecoder::isAppropriateDecoder(file) &&
-         (make == "Phase One A/S" || make == "Leaf");
+         (make == "Phase One A/S" || make == "Phase One" || make == "Leaf");
 }
 
 // FIXME: this is very close to SamsungV0Decompressor::computeStripes()
