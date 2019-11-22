@@ -187,7 +187,7 @@ RawImage IiqDecoder::decodeRawInternal() {
   }
 
   // FIXME: could be wrong. max "active pixels" in "Sensor+" mode - "101 MP"
-  if (width == 0 || height == 0 || width > 11976 || height > 8852)
+  if (width == 0 || height == 0 || width > 11976 || height > 8854)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   if (split_col > width || split_row > height)
