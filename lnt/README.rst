@@ -1,5 +1,7 @@
 .. _my-label: lnt
 
+.. _lnt:
+
 =================================
 LLVM LNT / Test-Suite Integration
 =================================
@@ -15,15 +17,16 @@ Prerequisites
   * all of the normal prerequisites for building **development** version of RawSpeed.
   * python's `virtualenv <https://packages.debian.org/unstable/virtualenv>`_
   * `llvm-size`, `llvm-lit <https://llvm.org/docs/CommandGuide/lit.html>`_ (from
-    `llvm <https://packages.debian.org/unstable/llvm-8>`_,
-    `llvm-tools <https://packages.debian.org/unstable/llvm-8-tools>`_ packages)
-  * A checkout of raw sample archive of you choice.
-
-    It is suggested to use `https://raw.pixls.us <https://raw.pixls.us>`_
-    masterset (see CI scripts for how to get it)
+    `llvm <https://packages.debian.org/unstable/llvm-9>`_,
+    `llvm-tools <https://packages.debian.org/unstable/llvm-9-tools>`_ packages)
+  * A checkout of raw sample archive of you choice. It is suggested to use
+    `https://raw.pixls.us <https://raw.pixls.us>`_ masterset.
+    Please see :ref:`RSA` page for details.
   * Reference hashes for the raws in the sampleset.
 
     Generate them via ``$ ninja rstest-create`` from your **trusted** (!) dev build.
+    Please see :ref:`integration_testing` and
+    :ref:`producing_trusted_reference_hashes` pages for details.
 
 Getting it done
 ---------------
@@ -55,8 +58,9 @@ Getting it done
   # View results.
   $SANDBOX/bin/lnt runserver $PERFDB
 
-See also
---------
+
+.. seealso::
+
   * https://llvm.org/docs/TestSuiteGuide.html#common-configuration-options
   * ``$ $SANDBOX/bin/lnt runtest test_suite --help``
   * ``$ $SANDBOX/bin/lnt --help``
