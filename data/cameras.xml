@@ -4275,6 +4275,17 @@
 		<Sensor black="220" white="4000" iso_min="12800" iso_max="25599"/>
 		<Sensor black="187" white="4000" iso_min="25600" iso_max="25600"/>
 	</Camera>
+	<Camera make="OLYMPUS CORPORATION" model="E-M5MarkIII">
+		<ID make="Olympus" model="E-M5 Mark III">Olympus E-M5 Mark III</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="257" white="4000"/>
+	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-P1">
 		<ID make="Olympus" model="E-P1">Olympus E-P1</ID>
 		<Crop x="0" y="0" width="4094" height="3082"/>
