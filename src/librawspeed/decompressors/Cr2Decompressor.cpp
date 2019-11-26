@@ -153,7 +153,6 @@ void Cr2Decompressor::decodeN_X_Y()
 
   BitPumpJPEG bitStream(input);
 
-  uint32_t pixelPitch = mRaw->pitch / 2; // Pitch in pixel
   if (frame.cps != 3 && frame.w * frame.cps > 2 * frame.h) {
     // Fix Canon double height issue where Canon doubled the width and halfed
     // the height (e.g. with 5Ds), ask Canon. frame.w needs to stay as is here
@@ -183,6 +182,7 @@ void Cr2Decompressor::decodeN_X_Y()
       mRaw->getCpp() * mRaw->dim.area())
     ThrowRDE("Incorrrect slice height / slice widths! Less than image size.");
 
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   unsigned processedPixels = 0;
   unsigned processedLineSlices = 0;
   for (auto sliceId = 0; sliceId < slicing.numSlices; sliceId++) {
@@ -195,8 +195,6 @@ void Cr2Decompressor::decodeN_X_Y()
                        slicing.widthOfSlice(0) / mRaw->getCpp();
       if (destX >= static_cast<unsigned>(mRaw->dim.x))
         break;
-      auto dest =
-          reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(destX, destY));
 
       assert(sliceWidth % xStepSize == 0);
       if (X_S_F == 1) {
@@ -209,6 +207,7 @@ void Cr2Decompressor::decodeN_X_Y()
         // FIXME.
       }
 
+      destX *= mRaw->getCpp();
       for (unsigned x = 0; x < sliceWidth;) {
         // check if we processed one full raw row worth of pixels
         if (processedPixels == frame.w) {
@@ -216,7 +215,7 @@ void Cr2Decompressor::decodeN_X_Y()
           // no matter where we are right now.
           // makes no sense from an image compression point of view, ask Canon.
           copy_n(predNext, N_COMP, pred.data());
-          predNext = dest;
+          predNext = &out(destY, destX);
           processedPixels = 0;
         }
 
@@ -226,21 +225,21 @@ void Cr2Decompressor::decodeN_X_Y()
         for (; x < std::min(sliceWidth, untilNextInputRow); x += xStepSize) {
           if (X_S_F == 1) { // will be optimized out
             unroll_loop<N_COMP>([&](int i) {
-              dest[i] = pred[i] += ht[i]->decodeNext(bitStream);
+              out(destY, destX + i) = pred[i] += ht[i]->decodeNext(bitStream);
             });
           } else {
             unroll_loop<Y_S_F>([&](int i) {
-              dest[0 + i * pixelPitch] = pred[0] +=
+              out(destY + i, destX + 0) = pred[0] +=
                   ht[0]->decodeNext(bitStream);
-              dest[3 + i * pixelPitch] = pred[0] +=
+              out(destY + i, destX + 3) = pred[0] +=
                   ht[0]->decodeNext(bitStream);
             });
 
-            dest[1] = pred[1] += ht[1]->decodeNext(bitStream);
-            dest[2] = pred[2] += ht[2]->decodeNext(bitStream);
+            out(destY, destX + 1) = pred[1] += ht[1]->decodeNext(bitStream);
+            out(destY, destX + 2) = pred[2] += ht[2]->decodeNext(bitStream);
           }
 
-          dest += xStepSize;
+          destX += xStepSize;
           processedPixels += X_S_F;
         }
       }
