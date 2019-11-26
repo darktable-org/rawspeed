@@ -190,12 +190,6 @@ void Cr2Decompressor::decodeN_X_Y()
 
     assert(frame.h % yStepSize == 0);
     for (unsigned y = 0; y < frame.h; y += yStepSize) {
-      // Fix for Canon 80D mraw format.
-      // In that format, `frame` is 4032x3402, while `mRaw` is 4536x3024.
-      // Consequently, the slices in `frame` wrap around plus there are few
-      // 'extra' sliced lines because sum(slicesW) * sliceH > mRaw->dim.area()
-      // Those would overflow, hence the break.
-      // see FIX_CANON_FRAME_VS_IMAGE_SIZE_MISMATCH
       unsigned destY = processedLineSlices % mRaw->dim.y;
       unsigned destX = processedLineSlices / mRaw->dim.y *
                        slicing.widthOfSlice(0) / mRaw->getCpp();
@@ -214,7 +208,8 @@ void Cr2Decompressor::decodeN_X_Y()
       } else {
         // FIXME.
       }
-      for (unsigned x = 0; x < sliceWidth; x += xStepSize) {
+
+      for (unsigned x = 0; x < sliceWidth;) {
         // check if we processed one full raw row worth of pixels
         if (processedPixels == frame.w) {
           // if yes -> update predictor by going back exactly one row,
@@ -225,22 +220,29 @@ void Cr2Decompressor::decodeN_X_Y()
           processedPixels = 0;
         }
 
-        if (X_S_F == 1) { // will be optimized out
-          unroll_loop<N_COMP>([&](int i) {
-            dest[i] = pred[i] += ht[i]->decodeNext(bitStream);
-          });
-        } else {
-          unroll_loop<Y_S_F>([&](int i) {
-            dest[0 + i*pixelPitch] = pred[0] += ht[0]->decodeNext(bitStream);
-            dest[3 + i*pixelPitch] = pred[0] += ht[0]->decodeNext(bitStream);
-          });
+        unsigned untilNextInputRow =
+            xStepSize * ((frame.w - processedPixels) / X_S_F);
 
-          dest[1] = pred[1] += ht[1]->decodeNext(bitStream);
-          dest[2] = pred[2] += ht[2]->decodeNext(bitStream);
+        for (; x < std::min(sliceWidth, untilNextInputRow); x += xStepSize) {
+          if (X_S_F == 1) { // will be optimized out
+            unroll_loop<N_COMP>([&](int i) {
+              dest[i] = pred[i] += ht[i]->decodeNext(bitStream);
+            });
+          } else {
+            unroll_loop<Y_S_F>([&](int i) {
+              dest[0 + i * pixelPitch] = pred[0] +=
+                  ht[0]->decodeNext(bitStream);
+              dest[3 + i * pixelPitch] = pred[0] +=
+                  ht[0]->decodeNext(bitStream);
+            });
+
+            dest[1] = pred[1] += ht[1]->decodeNext(bitStream);
+            dest[2] = pred[2] += ht[2]->decodeNext(bitStream);
+          }
+
+          dest += xStepSize;
+          processedPixels += X_S_F;
         }
-
-        dest += xStepSize;
-        processedPixels += X_S_F;
       }
 
       processedLineSlices += yStepSize;
