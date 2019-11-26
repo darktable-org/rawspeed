@@ -153,7 +153,6 @@ void Cr2Decompressor::decodeN_X_Y()
 
   BitPumpJPEG bitStream(input);
 
-  uint32_t pixelPitch = mRaw->pitch / 2; // Pitch in pixel
   if (frame.cps != 3 && frame.w * frame.cps > 2 * frame.h) {
     // Fix Canon double height issue where Canon doubled the width and halfed
     // the height (e.g. with 5Ds), ask Canon. frame.w needs to stay as is here
@@ -183,6 +182,7 @@ void Cr2Decompressor::decodeN_X_Y()
       mRaw->getCpp() * mRaw->dim.area())
     ThrowRDE("Incorrrect slice height / slice widths! Less than image size.");
 
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   unsigned processedPixels = 0;
   unsigned processedLineSlices = 0;
   for (auto sliceId = 0; sliceId < slicing.numSlices; sliceId++) {
@@ -190,19 +190,11 @@ void Cr2Decompressor::decodeN_X_Y()
 
     assert(frame.h % yStepSize == 0);
     for (unsigned y = 0; y < frame.h; y += yStepSize) {
-      // Fix for Canon 80D mraw format.
-      // In that format, `frame` is 4032x3402, while `mRaw` is 4536x3024.
-      // Consequently, the slices in `frame` wrap around plus there are few
-      // 'extra' sliced lines because sum(slicesW) * sliceH > mRaw->dim.area()
-      // Those would overflow, hence the break.
-      // see FIX_CANON_FRAME_VS_IMAGE_SIZE_MISMATCH
       unsigned destY = processedLineSlices % mRaw->dim.y;
       unsigned destX = processedLineSlices / mRaw->dim.y *
                        slicing.widthOfSlice(0) / mRaw->getCpp();
       if (destX >= static_cast<unsigned>(mRaw->dim.x))
         break;
-      auto dest =
-          reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(destX, destY));
 
       assert(sliceWidth % xStepSize == 0);
       if (X_S_F == 1) {
@@ -214,33 +206,41 @@ void Cr2Decompressor::decodeN_X_Y()
       } else {
         // FIXME.
       }
-      for (unsigned x = 0; x < sliceWidth; x += xStepSize) {
+
+      destX *= mRaw->getCpp();
+      for (unsigned x = 0; x < sliceWidth;) {
         // check if we processed one full raw row worth of pixels
         if (processedPixels == frame.w) {
           // if yes -> update predictor by going back exactly one row,
           // no matter where we are right now.
           // makes no sense from an image compression point of view, ask Canon.
           copy_n(predNext, N_COMP, pred.data());
-          predNext = dest;
+          predNext = &out(destY, destX);
           processedPixels = 0;
         }
 
-        if (X_S_F == 1) { // will be optimized out
-          unroll_loop<N_COMP>([&](int i) {
-            dest[i] = pred[i] += ht[i]->decodeNext(bitStream);
-          });
-        } else {
-          unroll_loop<Y_S_F>([&](int i) {
-            dest[0 + i*pixelPitch] = pred[0] += ht[0]->decodeNext(bitStream);
-            dest[3 + i*pixelPitch] = pred[0] += ht[0]->decodeNext(bitStream);
-          });
+        unsigned untilNextInputRow =
+            xStepSize * ((frame.w - processedPixels) / X_S_F);
 
-          dest[1] = pred[1] += ht[1]->decodeNext(bitStream);
-          dest[2] = pred[2] += ht[2]->decodeNext(bitStream);
+        for (; x < std::min(sliceWidth, untilNextInputRow); x += xStepSize) {
+          if (X_S_F == 1) { // will be optimized out
+            for (int i = 0; i < N_COMP; ++i, ++destX)
+              out(destY, destX) = pred[i] += ht[i]->decodeNext(bitStream);
+          } else {
+            for (int j = 0; j < Y_S_F; ++j) {
+              for (int i : {0, 3})
+                out(destY + j, destX + i) = pred[0] +=
+                    ht[0]->decodeNext(bitStream);
+            }
+
+            for (int i : {1, 2})
+              out(destY, destX + i) = pred[i] += ht[i]->decodeNext(bitStream);
+
+            destX += xStepSize;
+          }
+
+          processedPixels += X_S_F;
         }
-
-        dest += xStepSize;
-        processedPixels += X_S_F;
       }
 
       processedLineSlices += yStepSize;
