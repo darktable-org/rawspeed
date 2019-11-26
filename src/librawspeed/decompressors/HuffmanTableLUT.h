@@ -21,9 +21,10 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32_t, uint16_t, int32_t
+#include "common/Common.h"                      // for uint32_t, uint16_t, ...
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
+#include "decompressors/HuffmanTableLookup.h"   // for HuffmanTableLookup
 #include "io/BitStream.h"                       // for BitStreamTraits
 #include <cassert>                              // for assert
 #include <cstddef>                              // for size_t
@@ -64,13 +65,7 @@
 
 namespace rawspeed {
 
-class HuffmanTableLUT final : public AbstractHuffmanTable {
-  // private fields calculated from codesPerBits and codeValues
-  // they are index '1' based, so we can directly lookup the value
-  // for code length l without decrementing
-  std::vector<uint32_t> maxCodeOL;    // index is length of code
-  std::vector<uint16_t> codeOffsetOL; // index is length of code
-
+class HuffmanTableLUT final : public HuffmanTableLookup {
   // The code can be compiled with two different decode lookup table layouts.
   // The idea is that different CPU architectures may perform better with
   // one or the other, depending on the relative performance of their arithmetic
@@ -96,38 +91,10 @@ class HuffmanTableLUT final : public AbstractHuffmanTable {
   std::vector<uint8_t> decodeLookup;
 #endif
 
-  bool fullDecode = true;
-  bool fixDNGBug16 = false;
-
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    this->fullDecode = fullDecode_;
-    this->fixDNGBug16 = fixDNGBug16_;
-
-    assert(!nCodesPerLength.empty());
-    assert(maxCodesCount() > 0);
-
-    unsigned int maxCodeLength = nCodesPerLength.size() - 1U;
-    assert(codeValues.size() == maxCodesCount());
-
-    assert(maxCodePlusDiffLength() <= 32U);
-
-    // Figure C.1: make table of Huffman code length for each symbol
-    // Figure C.2: generate the codes themselves
-    const auto symbols = generateCodeSymbols();
-    assert(symbols.size() == maxCodesCount());
-
-    // Figure F.15: generate decoding tables
-    codeOffsetOL.resize(maxCodeLength + 1UL, 0xFFFF);
-    maxCodeOL.resize(maxCodeLength + 1UL, 0xFFFFFFFF);
-    int code_index = 0;
-    for (unsigned int l = 1U; l <= maxCodeLength; l++) {
-      if (nCodesPerLength[l]) {
-        codeOffsetOL[l] = symbols[code_index].code - code_index;
-        code_index += nCodesPerLength[l];
-        maxCodeOL[l] = symbols[code_index - 1].code;
-      }
-    }
+    const std::vector<CodeSymbol> symbols =
+        HuffmanTableLookup::setup(fullDecode_, fixDNGBug16_);
 
     // Generate lookup table for fast decoding lookup.
     // See definition of decodeLookup above

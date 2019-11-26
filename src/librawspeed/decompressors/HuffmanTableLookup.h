@@ -63,7 +63,8 @@
 
 namespace rawspeed {
 
-class HuffmanTableLookup final : public AbstractHuffmanTable {
+class HuffmanTableLookup : public AbstractHuffmanTable {
+protected:
   // private fields calculated from codesPerBits and codeValues
   // they are index '1' based, so we can directly lookup the value
   // for code length l without decrementing
@@ -74,7 +75,7 @@ class HuffmanTableLookup final : public AbstractHuffmanTable {
   bool fixDNGBug16 = false;
 
 public:
-  void setup(bool fullDecode_, bool fixDNGBug16_) {
+  std::vector<CodeSymbol> setup(bool fullDecode_, bool fixDNGBug16_) {
     this->fullDecode = fullDecode_;
     this->fixDNGBug16 = fixDNGBug16_;
 
@@ -88,7 +89,7 @@ public:
 
     // Figure C.1: make table of Huffman code length for each symbol
     // Figure C.2: generate the codes themselves
-    const auto symbols = generateCodeSymbols();
+    std::vector<CodeSymbol> symbols = generateCodeSymbols();
     assert(symbols.size() == maxCodesCount());
 
     // Figure F.15: generate decoding tables
@@ -102,6 +103,8 @@ public:
         maxCodeOL[l] = symbols[code_index - 1].code;
       }
     }
+
+    return symbols;
   }
 
   template <typename BIT_STREAM> inline int decodeLength(BIT_STREAM& bs) const {
