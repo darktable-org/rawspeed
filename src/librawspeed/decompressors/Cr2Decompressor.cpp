@@ -224,22 +224,21 @@ void Cr2Decompressor::decodeN_X_Y()
 
         for (; x < std::min(sliceWidth, untilNextInputRow); x += xStepSize) {
           if (X_S_F == 1) { // will be optimized out
-            unroll_loop<N_COMP>([&](int i) {
-              out(destY, destX + i) = pred[i] += ht[i]->decodeNext(bitStream);
-            });
+            for (int i = 0; i < N_COMP; ++i, ++destX)
+              out(destY, destX) = pred[i] += ht[i]->decodeNext(bitStream);
           } else {
-            unroll_loop<Y_S_F>([&](int i) {
-              out(destY + i, destX + 0) = pred[0] +=
-                  ht[0]->decodeNext(bitStream);
-              out(destY + i, destX + 3) = pred[0] +=
-                  ht[0]->decodeNext(bitStream);
-            });
+            for (int j = 0; j < Y_S_F; ++j) {
+              for (int i : {0, 3})
+                out(destY + j, destX + i) = pred[0] +=
+                    ht[0]->decodeNext(bitStream);
+            }
 
-            out(destY, destX + 1) = pred[1] += ht[1]->decodeNext(bitStream);
-            out(destY, destX + 2) = pred[2] += ht[2]->decodeNext(bitStream);
+            for (int i : {1, 2})
+              out(destY, destX + i) = pred[i] += ht[i]->decodeNext(bitStream);
+
+            destX += xStepSize;
           }
 
-          destX += xStepSize;
           processedPixels += X_S_F;
         }
       }
