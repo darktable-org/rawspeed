@@ -159,49 +159,39 @@ public:
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(FULL_DECODE == fullDecode);
-
-    // 32 is the absolute maximum combined length of code + diff
-    // assertion  maxCodePlusDiffLength() <= 32U  is already checked in setup()
     bs.fill(32);
-
-    // for processors supporting bmi2 instructions, using maxCodePlusDiffLength()
-    // might be beneficial
-
-    uint32_t code = bs.peekBitsNoFill(LookupDepth);
-    assert(code < decodeLookup.size());
-    auto val = static_cast<unsigned>(decodeLookup[code]);
-    int len = val & LenMask;
-    assert(len >= 0);
-    assert(len <= 16);
-
-    // if the code is invalid (bitstream corrupted) len will be 0
-    bs.skipBitsNoFill(len);
-    if (FULL_DECODE && val & FlagMask) {
-      // if the flag bit is set, the payload is the already sign extended difference
-      return static_cast<int>(val) >> PayloadShift;
-    }
-
-    if (len) {
-      // if the flag bit is not set but len != 0, the payload is the number of bits to sign extend and return
-      const int l_diff = static_cast<int>(val) >> PayloadShift;
-      assert(!FULL_DECODE || l_diff > 0);
-      assert((FULL_DECODE && (len + l_diff <= 32)) || !FULL_DECODE);
-      if (FULL_DECODE && l_diff == 16) {
-        if (fixDNGBug16)
-          bs.skipBitsNoFill(16);
-        return -32768;
-      }
-      return FULL_DECODE ? extend(bs.getBitsNoFill(l_diff), l_diff) : l_diff;
-    }
 
     CodeSymbol partial;
     partial.code_len = LookupDepth;
-    partial.code = code;
+    partial.code = bs.peekBitsNoFill(partial.code_len);
 
-    bs.skipBitsNoFill(partial.code_len);
+    assert(partial.code < decodeLookup.size());
+    auto lutEntry = static_cast<unsigned>(decodeLookup[partial.code]);
+    int payload = static_cast<int>(lutEntry) >> PayloadShift;
+    int len = lutEntry & LenMask;
+
+    // How far did reading of those LookupDepth bits *actually* move us forward?
+    bs.skipBitsNoFill(len);
+
+    // If the flag bit is set, then the 'len' was code_l+value,
+    // and payload is the already-extended difference.
+    if (FULL_DECODE && lutEntry & FlagMask)
+      return payload;
 
     int codeValue;
-    std::tie(partial, codeValue) = finishReadingPartialSymbol(bs, partial);
+    if (lutEntry) {
+      // If the flag is not set, but the entry is not empty,
+      // the payload is the code value for this symbol.
+      partial.code_len = len;
+      codeValue = payload;
+      assert(!FULL_DECODE || codeValue /*aka diff_l*/ > 0);
+    } else {
+      // No match in the lookup table, because either the code is longer
+      // than LookupDepth or the input is corrupt. Need to read more bits...
+      assert(len == 0);
+      bs.skipBitsNoFill(partial.code_len);
+      std::tie(partial, codeValue) = finishReadingPartialSymbol(bs, partial);
+    }
 
     return processSymbol<BIT_STREAM, FULL_DECODE>(bs, partial, codeValue);
   }
