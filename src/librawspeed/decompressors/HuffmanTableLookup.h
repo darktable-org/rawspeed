@@ -121,6 +121,31 @@ public:
     return decode<BIT_STREAM, true>(bs);
   }
 
+protected:
+  template <typename BIT_STREAM>
+  inline std::pair<CodeSymbol, int /*codeValue*/>
+  finishReadingPartialSymbol(BIT_STREAM& bs, CodeSymbol partial) const {
+    while (partial.code_len < maxCodeOL.size() &&
+           (0xFFFFFFFF == maxCodeOL[partial.code_len] ||
+            partial.code > maxCodeOL[partial.code_len])) {
+      uint32_t temp = bs.getBitsNoFill(1);
+      partial.code = (partial.code << 1) | temp;
+      partial.code_len++;
+    }
+
+    if (partial.code_len >= maxCodeOL.size() ||
+        (0xFFFFFFFF == maxCodeOL[partial.code_len] ||
+         partial.code > maxCodeOL[partial.code_len]) ||
+        partial.code < codeOffsetOL[partial.code_len])
+      ThrowRDE("bad Huffman code: %u (len: %u)", partial.code,
+               partial.code_len);
+
+    int codeValue = codeValues[partial.code - codeOffsetOL[partial.code_len]];
+
+    return {partial, codeValue};
+  }
+
+public:
   // The bool template paraeter is to enable two versions:
   // one returning only the length of the of diff bits (see Hasselblad),
   // one to return the fully decoded diff.
@@ -130,34 +155,25 @@ public:
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(FULL_DECODE == fullDecode);
-
-    // 32 is the absolute maximum combined length of code + diff
-    // assertion  maxCodePlusDiffLength() <= 32U  is already checked in setup()
     bs.fill(32);
 
-    // for processors supporting bmi2 instructions, using
-    // maxCodePlusDiffLength() might be beneficial
+    // Start from completely unknown symbol.
+    CodeSymbol partial;
+    partial.code_len = 0;
+    partial.code = 0;
 
-    uint32_t code = 0;
-    uint32_t code_l = 0;
-    while (code_l < maxCodeOL.size() &&
-           (0xFFFFFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l])) {
-      uint32_t temp = bs.getBitsNoFill(1);
-      code = (code << 1) | temp;
-      code_l++;
-    }
+    int codeValue;
+    std::tie(partial, codeValue) = finishReadingPartialSymbol(bs, partial);
+    assert(partial.code_len >= 0 && partial.code_len <= 16);
 
-    if (code_l >= maxCodeOL.size() ||
-        (0xFFFFFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l]))
-      ThrowRDE("bad Huffman code: %u (len: %u)", code, code_l);
-
-    if (code < codeOffsetOL[code_l])
-      ThrowRDE("likely corrupt Huffman code: %u (len: %u)", code, code_l);
-
-    int diff_l = codeValues[code - codeOffsetOL[code_l]];
-
+    // If we were only looking for symbol's code value, then just return it.
     if (!FULL_DECODE)
-      return diff_l;
+      return codeValue;
+
+    // Else, treat it as the length of following difference
+    // that we need to read and extend.
+    int diff_l = codeValue;
+    assert(diff_l >= 0 && diff_l <= 16);
 
     if (diff_l == 16) {
       if (fixDNGBug16)
@@ -165,8 +181,7 @@ public:
       return -32768;
     }
 
-    assert(FULL_DECODE);
-    assert((diff_l && (code_l + diff_l <= 32)) || !diff_l);
+    assert(partial.code_len + diff_l <= 32);
     return diff_l ? extend(bs.getBitsNoFill(diff_l), diff_l) : 0;
   }
 };
