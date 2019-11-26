@@ -165,14 +165,16 @@ public:
     }
   }
 
-  template<typename BIT_STREAM> inline int decodeLength(BIT_STREAM& bs) const {
+  template <typename BIT_STREAM>
+  inline __attribute__((always_inline)) int decodeLength(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(!fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
 
-  template<typename BIT_STREAM> inline int decodeNext(BIT_STREAM& bs) const {
+  template <typename BIT_STREAM>
+  inline __attribute__((always_inline)) int decodeNext(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(fullDecode);
@@ -183,7 +185,8 @@ public:
   // one returning only the length of the of diff bits (see Hasselblad),
   // one to return the fully decoded diff.
   // All ifs depending on this bool will be optimized out by the compiler
-  template<typename BIT_STREAM, bool FULL_DECODE> inline int decode(BIT_STREAM& bs) const {
+  template <typename BIT_STREAM, bool FULL_DECODE>
+  inline __attribute__((always_inline)) int decode(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(FULL_DECODE == fullDecode);
