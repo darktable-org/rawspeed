@@ -95,13 +95,13 @@ public:
     // Figure F.15: generate decoding tables
     codeOffsetOL.resize(maxCodeLength + 1UL, 0xFFFF);
     maxCodeOL.resize(maxCodeLength + 1UL, 0xFFFFFFFF);
-    int code_index = 0;
-    for (unsigned int l = 1U; l <= maxCodeLength; l++) {
-      if (nCodesPerLength[l]) {
-        codeOffsetOL[l] = symbols[code_index].code - code_index;
-        code_index += nCodesPerLength[l];
-        maxCodeOL[l] = symbols[code_index - 1].code;
-      }
+    for (unsigned int numCodesSoFar = 0, codeLen = 1; codeLen <= maxCodeLength;
+         codeLen++) {
+      if (!nCodesPerLength[codeLen])
+        continue;
+      codeOffsetOL[codeLen] = symbols[numCodesSoFar].code - numCodesSoFar;
+      numCodesSoFar += nCodesPerLength[codeLen];
+      maxCodeOL[codeLen] = symbols[numCodesSoFar - 1].code;
     }
 
     return symbols;
