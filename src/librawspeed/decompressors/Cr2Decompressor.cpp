@@ -190,7 +190,7 @@ void Cr2Decompressor::decodeN_X_Y()
 
     assert(frame.h % frameRowStep == 0);
     for (unsigned sliceFrameRow = 0; sliceFrameRow < frame.h;
-         sliceFrameRow += frameRowStep) {
+         sliceFrameRow += frameRowStep, globalFrameRow += frameRowStep) {
       unsigned row = globalFrameRow % mRaw->dim.y;
       unsigned col = globalFrameRow / mRaw->dim.y * slicing.widthOfSlice(0) /
                      mRaw->getCpp();
@@ -224,7 +224,7 @@ void Cr2Decompressor::decodeN_X_Y()
             sliceColStep * ((frame.w - globalFrameCol) / X_S_F);
 
         for (; sliceCol < std::min(sliceWidth, untilNextInputRow);
-             sliceCol += sliceColStep) {
+             sliceCol += sliceColStep, globalFrameCol += X_S_F) {
           if (X_S_F == 1) { // will be optimized out
             for (int c = 0; c < sliceColStep; ++c, ++col)
               out(row, col) = pred[c] += ht[c]->decodeNext(bs);
@@ -239,12 +239,8 @@ void Cr2Decompressor::decodeN_X_Y()
 
             col += sliceColStep;
           }
-
-          globalFrameCol += X_S_F;
         }
       }
-
-      globalFrameRow += frameRowStep;
     }
   }
 }
