@@ -218,13 +218,19 @@ void Cr2Decompressor::decodeN_X_Y()
           globalFrameCol = 0;
         }
 
-        unsigned untilNextInputRow =
-            sliceColStep * ((frame.w - globalFrameCol) / X_S_F);
-
+        // How many pixel can we decode until we finish the row of either
+        // the frame (i.e. predictor change time), or of the current slice?
         assert(frame.w % X_S_F == 0);
-        for (; sliceCol < std::min(sliceWidth, untilNextInputRow);
-             sliceCol += sliceColStep, globalFrameCol += X_S_F,
-             col += sliceColStep) {
+        unsigned sliceColsRemainingInThisFrameRow =
+            sliceColStep * ((frame.w - globalFrameCol) / X_S_F);
+        unsigned sliceColsRemainingInThisSliceRow = sliceWidth - sliceCol;
+        unsigned sliceColsRemaining = std::min(
+            sliceColsRemainingInThisSliceRow, sliceColsRemainingInThisFrameRow);
+        assert(sliceColsRemaining >= sliceColStep &&
+               (sliceColsRemaining % sliceColStep) == 0);
+        for (unsigned sliceColEnd = sliceCol + sliceColsRemaining;
+             sliceCol < sliceColEnd; sliceCol += sliceColStep,
+                      globalFrameCol += X_S_F, col += sliceColStep) {
           if (X_S_F == 1) { // will be optimized out
             for (int c = 0; c < sliceColStep; ++c)
               out(row, col + c) = pred[c] += ht[c]->decodeNext(bs);
