@@ -197,18 +197,16 @@ void Cr2Decompressor::decodeN_X_Y()
       if (col >= static_cast<unsigned>(mRaw->dim.x))
         break;
 
-      assert(sliceWidth % sliceColStep == 0);
-      if (X_S_F == 1) {
-        if (col + sliceWidth > static_cast<unsigned>(mRaw->dim.x))
-          ThrowRDE("Bad slice width / frame size / image size combination.");
-        if (((sliceId + 1) == slicing.numSlices) &&
-            ((col + sliceWidth) < static_cast<unsigned>(mRaw->dim.x)))
-          ThrowRDE("Insufficient slices - do not fill the entire image");
-      } else {
-        // FIXME.
-      }
+      assert(sliceWidth % mRaw->getCpp() == 0);
+      unsigned pixelsPerSliceRow = sliceWidth / mRaw->getCpp();
+      if (col + pixelsPerSliceRow > static_cast<unsigned>(mRaw->dim.x))
+        ThrowRDE("Bad slice width / frame size / image size combination.");
+      if (((sliceId + 1) == slicing.numSlices) &&
+          (col + pixelsPerSliceRow != static_cast<unsigned>(mRaw->dim.x)))
+        ThrowRDE("Insufficient slices - do not fill the entire image");
 
       col *= mRaw->getCpp();
+      assert(sliceWidth % sliceColStep == 0);
       for (unsigned sliceCol = 0; sliceCol < sliceWidth;) {
         // check if we processed one full raw row worth of pixels
         if (globalFrameCol == frame.w) {
@@ -223,11 +221,13 @@ void Cr2Decompressor::decodeN_X_Y()
         unsigned untilNextInputRow =
             sliceColStep * ((frame.w - globalFrameCol) / X_S_F);
 
+        assert(frame.w % X_S_F == 0);
         for (; sliceCol < std::min(sliceWidth, untilNextInputRow);
-             sliceCol += sliceColStep, globalFrameCol += X_S_F) {
+             sliceCol += sliceColStep, globalFrameCol += X_S_F,
+             col += sliceColStep) {
           if (X_S_F == 1) { // will be optimized out
-            for (int c = 0; c < sliceColStep; ++c, ++col)
-              out(row, col) = pred[c] += ht[c]->decodeNext(bs);
+            for (int c = 0; c < sliceColStep; ++c)
+              out(row, col + c) = pred[c] += ht[c]->decodeNext(bs);
           } else {
             for (int dstRow = 0; dstRow < Y_S_F; ++dstRow) {
               for (int c : {0, 3})
@@ -236,8 +236,6 @@ void Cr2Decompressor::decodeN_X_Y()
 
             for (int c : {1, 2})
               out(row, col + c) = pred[c] += ht[c]->decodeNext(bs);
-
-            col += sliceColStep;
           }
         }
       }
