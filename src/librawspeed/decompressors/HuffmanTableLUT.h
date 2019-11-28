@@ -210,20 +210,12 @@ public:
     if (code < codeOffsetOL[code_l])
       ThrowRDE("likely corrupt Huffman code: %u (len: %u)", code, code_l);
 
-    int diff_l = codeValues[code - codeOffsetOL[code_l]];
+    int codeValue = codeValues[code - codeOffsetOL[code_l]];
 
-    if (!FULL_DECODE)
-      return diff_l;
-
-    if (diff_l == 16) {
-      if (fixDNGBug16)
-        bs.skipBitsNoFill(16);
-      return -32768;
-    }
-
-    assert(FULL_DECODE);
-    assert((diff_l && (len + code_l + diff_l <= 32)) || !diff_l);
-    return diff_l ? extend(bs.getBitsNoFill(diff_l), diff_l) : 0;
+    CodeSymbol symbol;
+    symbol.code_len = code_l;
+    symbol.code = code;
+    return processSymbol<BIT_STREAM, FULL_DECODE>(bs, symbol, codeValue);
   }
 };
 

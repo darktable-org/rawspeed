@@ -33,9 +33,6 @@ namespace rawspeed {
 class HuffmanTableVector final : public AbstractHuffmanTable {
   std::vector<CodeSymbol> symbols;
 
-  bool fullDecode = true;
-  bool fixDNGBug16 = false;
-
   // Given this code len, which code id is the minimal?
   std::vector<unsigned int> extrCodeIdForLen; // index is length of code
 
@@ -141,18 +138,7 @@ public:
     int codeValue;
     std::tie(symbol, codeValue) = readSymbol(bs);
 
-    const int diff_l = codeValue;
-
-    if (!FULL_DECODE)
-      return diff_l;
-
-    if (diff_l == 16) {
-      if (fixDNGBug16)
-        bs.skipBitsNoFill(16);
-      return -32768;
-    }
-
-    return diff_l ? extend(bs.getBitsNoFill(diff_l), diff_l) : 0;
+    return processSymbol<BIT_STREAM, FULL_DECODE>(bs, symbol, codeValue);
   }
 };
 

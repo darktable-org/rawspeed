@@ -71,9 +71,6 @@ protected:
   std::vector<uint32_t> maxCodeOL;    // index is length of code
   std::vector<uint16_t> codeOffsetOL; // index is length of code
 
-  bool fullDecode = true;
-  bool fixDNGBug16 = false;
-
 public:
   std::vector<CodeSymbol> setup(bool fullDecode_, bool fixDNGBug16_) {
     this->fullDecode = fullDecode_;
@@ -171,25 +168,8 @@ public:
     CodeSymbol symbol;
     int codeValue;
     std::tie(symbol, codeValue) = readSymbol(bs);
-    assert(symbol.code_len >= 0 && symbol.code_len <= 16);
 
-    // If we were only looking for symbol's code value, then just return it.
-    if (!FULL_DECODE)
-      return codeValue;
-
-    // Else, treat it as the length of following difference
-    // that we need to read and extend.
-    int diff_l = codeValue;
-    assert(diff_l >= 0 && diff_l <= 16);
-
-    if (diff_l == 16) {
-      if (fixDNGBug16)
-        bs.skipBitsNoFill(16);
-      return -32768;
-    }
-
-    assert(symbol.code_len + diff_l <= 32);
-    return diff_l ? extend(bs.getBitsNoFill(diff_l), diff_l) : 0;
+    return processSymbol<BIT_STREAM, FULL_DECODE>(bs, symbol, codeValue);
   }
 };
 

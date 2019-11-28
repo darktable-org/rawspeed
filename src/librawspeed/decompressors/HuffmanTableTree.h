@@ -39,9 +39,6 @@ class HuffmanTableTree final : public AbstractHuffmanTable {
 
   BinaryHuffmanTree<ValueType> tree;
 
-  bool fullDecode = true;
-  bool fixDNGBug16 = false;
-
 protected:
   template <typename BIT_STREAM>
   inline std::pair<CodeSymbol, ValueType /*codeValue*/>
@@ -152,18 +149,7 @@ public:
     int codeValue;
     std::tie(symbol, codeValue) = readSymbol(bs);
 
-    const int diff_l = codeValue;
-
-    if (!FULL_DECODE)
-      return diff_l;
-
-    if (diff_l == 16) {
-      if (fixDNGBug16)
-        bs.skipBitsNoFill(16);
-      return -32768;
-    }
-
-    return diff_l ? extend(bs.getBitsNoFill(diff_l), diff_l) : 0;
+    return processSymbol<BIT_STREAM, FULL_DECODE>(bs, symbol, codeValue);
   }
 };
 
