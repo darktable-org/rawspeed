@@ -41,7 +41,8 @@ class HuffmanTableVector final : public AbstractHuffmanTable {
 
 protected:
   template <typename BIT_STREAM>
-  inline std::pair<CodeSymbol, unsigned> getSymbol(BIT_STREAM& bs) const {
+  inline std::pair<CodeSymbol, int /*codeValue*/>
+  readSymbol(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
 
@@ -63,7 +64,7 @@ protected:
            codeId < extrCodeIdForLen[1U + partial.code_len]; codeId++) {
         const CodeSymbol& symbol = symbols[codeId];
         if (symbol == partial) // yay, found?
-          return std::make_pair(symbol, codeId);
+          return {symbol, codeValues[codeId]};
       }
 
       // Ok, but does any symbol have this same prefix?
@@ -136,10 +137,11 @@ public:
 
     bs.fill(32);
 
-    const auto got = getSymbol(bs);
-    const unsigned codeId = got.second;
+    CodeSymbol symbol;
+    int codeValue;
+    std::tie(symbol, codeValue) = readSymbol(bs);
 
-    const int diff_l = codeValues[codeId];
+    const int diff_l = codeValue;
 
     if (!FULL_DECODE)
       return diff_l;
