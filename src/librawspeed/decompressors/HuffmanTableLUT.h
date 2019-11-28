@@ -194,28 +194,16 @@ public:
       return FULL_DECODE ? extend(bs.getBitsNoFill(l_diff), l_diff) : l_diff;
     }
 
-    uint32_t code_l = LookupDepth;
-    bs.skipBitsNoFill(code_l);
-    while (code_l < maxCodeOL.size() &&
-           (0xFFFFFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l])) {
-      uint32_t temp = bs.getBitsNoFill(1);
-      code = (code << 1) | temp;
-      code_l++;
-    }
+    CodeSymbol partial;
+    partial.code_len = LookupDepth;
+    partial.code = code;
 
-    if (code_l >= maxCodeOL.size() ||
-        (0xFFFFFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l]))
-      ThrowRDE("bad Huffman code: %u (len: %u)", code, code_l);
+    bs.skipBitsNoFill(partial.code_len);
 
-    if (code < codeOffsetOL[code_l])
-      ThrowRDE("likely corrupt Huffman code: %u (len: %u)", code, code_l);
+    int codeValue;
+    std::tie(partial, codeValue) = finishReadingPartialSymbol(bs, partial);
 
-    int codeValue = codeValues[code - codeOffsetOL[code_l]];
-
-    CodeSymbol symbol;
-    symbol.code_len = code_l;
-    symbol.code = code;
-    return processSymbol<BIT_STREAM, FULL_DECODE>(bs, symbol, codeValue);
+    return processSymbol<BIT_STREAM, FULL_DECODE>(bs, partial, codeValue);
   }
 };
 
