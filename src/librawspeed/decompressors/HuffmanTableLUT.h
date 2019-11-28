@@ -153,6 +153,7 @@ public:
         } else {
           // diff_l + code_l <= lookupDepth
           // The table bit depth is large enough to store both.
+          assert(diff_l != 16);
           decodeLookup[c] = (code_l + diff_l) | FlagMask;
 
           if (diff_l) {
