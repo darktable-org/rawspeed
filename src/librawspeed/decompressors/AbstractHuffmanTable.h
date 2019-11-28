@@ -221,8 +221,8 @@ public:
 
   // Figure F.12 – Extending the sign bit of a decoded value in V
   // WARNING: this is *not* your normal 2's complement sign extension!
-  // WARNING: the caller should check that len != 0 before calling the function
   inline static int __attribute__((const)) extend(uint32_t diff, uint32_t len) {
+    assert(len > 0);
     int32_t ret = diff;
     if ((diff & (1 << (len - 1))) == 0)
       ret -= (1 << len) - 1;
