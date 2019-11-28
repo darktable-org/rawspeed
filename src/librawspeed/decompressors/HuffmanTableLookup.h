@@ -145,6 +145,17 @@ protected:
     return {partial, codeValue};
   }
 
+  template <typename BIT_STREAM>
+  inline std::pair<CodeSymbol, int /*codeValue*/>
+  readSymbol(BIT_STREAM& bs) const {
+    // Start from completely unknown symbol.
+    CodeSymbol partial;
+    partial.code_len = 0;
+    partial.code = 0;
+
+    return finishReadingPartialSymbol(bs, partial);
+  }
+
 public:
   // The bool template paraeter is to enable two versions:
   // one returning only the length of the of diff bits (see Hasselblad),
@@ -157,14 +168,10 @@ public:
     assert(FULL_DECODE == fullDecode);
     bs.fill(32);
 
-    // Start from completely unknown symbol.
-    CodeSymbol partial;
-    partial.code_len = 0;
-    partial.code = 0;
-
+    CodeSymbol symbol;
     int codeValue;
-    std::tie(partial, codeValue) = finishReadingPartialSymbol(bs, partial);
-    assert(partial.code_len >= 0 && partial.code_len <= 16);
+    std::tie(symbol, codeValue) = readSymbol(bs);
+    assert(symbol.code_len >= 0 && symbol.code_len <= 16);
 
     // If we were only looking for symbol's code value, then just return it.
     if (!FULL_DECODE)
@@ -181,7 +188,7 @@ public:
       return -32768;
     }
 
-    assert(partial.code_len + diff_l <= 32);
+    assert(symbol.code_len + diff_l <= 32);
     return diff_l ? extend(bs.getBitsNoFill(diff_l), diff_l) : 0;
   }
 };
