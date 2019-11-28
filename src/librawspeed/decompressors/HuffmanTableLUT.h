@@ -148,6 +148,7 @@ public:
           // lookup bit depth is too small to fit both the encoded length
           // and the final difference value.
           // -> store only the length and do a normal sign extension later
+          assert(!fullDecode || diff_l > 0);
           decodeLookup[c] = diff_l << PayloadShift | code_l;
         } else {
           // diff_l + code_l <= lookupDepth
@@ -215,6 +216,7 @@ public:
     if (len) {
       // if the flag bit is not set but len != 0, the payload is the number of bits to sign extend and return
       const int l_diff = static_cast<int>(val) >> PayloadShift;
+      assert(!FULL_DECODE || l_diff > 0);
       assert((FULL_DECODE && (len + l_diff <= 32)) || !FULL_DECODE);
       if (FULL_DECODE && l_diff == 16) {
         if (fixDNGBug16)
