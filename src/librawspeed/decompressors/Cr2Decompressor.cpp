@@ -176,6 +176,10 @@ void Cr2Decompressor::decodeN_X_Y()
       ThrowRDE("Slice width (%u) should be multiple of pixel group size (%u)",
                width, sliceColStep);
     }
+    if (width % mRaw->getCpp() != 0) {
+      ThrowRDE("Slice width (%u) should be multiple of image cpp (%u)", width,
+               mRaw->getCpp());
+    }
   }
 
   if (iPoint2D::area_type(frame.h) * slicing.totalWidth() <
