@@ -63,18 +63,16 @@
 
 namespace rawspeed {
 
-class HuffmanTableLookup final : public AbstractHuffmanTable {
+class HuffmanTableLookup : public AbstractHuffmanTable {
+protected:
   // private fields calculated from codesPerBits and codeValues
   // they are index '1' based, so we can directly lookup the value
   // for code length l without decrementing
   std::vector<uint32_t> maxCodeOL;    // index is length of code
   std::vector<uint16_t> codeOffsetOL; // index is length of code
 
-  bool fullDecode = true;
-  bool fixDNGBug16 = false;
-
 public:
-  void setup(bool fullDecode_, bool fixDNGBug16_) {
+  std::vector<CodeSymbol> setup(bool fullDecode_, bool fixDNGBug16_) {
     this->fullDecode = fullDecode_;
     this->fixDNGBug16 = fixDNGBug16_;
 
@@ -88,20 +86,22 @@ public:
 
     // Figure C.1: make table of Huffman code length for each symbol
     // Figure C.2: generate the codes themselves
-    const auto symbols = generateCodeSymbols();
+    std::vector<CodeSymbol> symbols = generateCodeSymbols();
     assert(symbols.size() == maxCodesCount());
 
     // Figure F.15: generate decoding tables
     codeOffsetOL.resize(maxCodeLength + 1UL, 0xFFFF);
     maxCodeOL.resize(maxCodeLength + 1UL, 0xFFFFFFFF);
-    int code_index = 0;
-    for (unsigned int l = 1U; l <= maxCodeLength; l++) {
-      if (nCodesPerLength[l]) {
-        codeOffsetOL[l] = symbols[code_index].code - code_index;
-        code_index += nCodesPerLength[l];
-        maxCodeOL[l] = symbols[code_index - 1].code;
-      }
+    for (unsigned int numCodesSoFar = 0, codeLen = 1; codeLen <= maxCodeLength;
+         codeLen++) {
+      if (!nCodesPerLength[codeLen])
+        continue;
+      codeOffsetOL[codeLen] = symbols[numCodesSoFar].code - numCodesSoFar;
+      numCodesSoFar += nCodesPerLength[codeLen];
+      maxCodeOL[codeLen] = symbols[numCodesSoFar - 1].code;
     }
+
+    return symbols;
   }
 
   template <typename BIT_STREAM> inline int decodeLength(BIT_STREAM& bs) const {
@@ -118,6 +118,42 @@ public:
     return decode<BIT_STREAM, true>(bs);
   }
 
+protected:
+  template <typename BIT_STREAM>
+  inline std::pair<CodeSymbol, int /*codeValue*/>
+  finishReadingPartialSymbol(BIT_STREAM& bs, CodeSymbol partial) const {
+    while (partial.code_len < maxCodeOL.size() &&
+           (0xFFFFFFFF == maxCodeOL[partial.code_len] ||
+            partial.code > maxCodeOL[partial.code_len])) {
+      uint32_t temp = bs.getBitsNoFill(1);
+      partial.code = (partial.code << 1) | temp;
+      partial.code_len++;
+    }
+
+    if (partial.code_len >= maxCodeOL.size() ||
+        (0xFFFFFFFF == maxCodeOL[partial.code_len] ||
+         partial.code > maxCodeOL[partial.code_len]) ||
+        partial.code < codeOffsetOL[partial.code_len])
+      ThrowRDE("bad Huffman code: %u (len: %u)", partial.code,
+               partial.code_len);
+
+    int codeValue = codeValues[partial.code - codeOffsetOL[partial.code_len]];
+
+    return {partial, codeValue};
+  }
+
+  template <typename BIT_STREAM>
+  inline std::pair<CodeSymbol, int /*codeValue*/>
+  readSymbol(BIT_STREAM& bs) const {
+    // Start from completely unknown symbol.
+    CodeSymbol partial;
+    partial.code_len = 0;
+    partial.code = 0;
+
+    return finishReadingPartialSymbol(bs, partial);
+  }
+
+public:
   // The bool template paraeter is to enable two versions:
   // one returning only the length of the of diff bits (see Hasselblad),
   // one to return the fully decoded diff.
@@ -127,44 +163,13 @@ public:
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(FULL_DECODE == fullDecode);
-
-    // 32 is the absolute maximum combined length of code + diff
-    // assertion  maxCodePlusDiffLength() <= 32U  is already checked in setup()
     bs.fill(32);
 
-    // for processors supporting bmi2 instructions, using
-    // maxCodePlusDiffLength() might be beneficial
+    CodeSymbol symbol;
+    int codeValue;
+    std::tie(symbol, codeValue) = readSymbol(bs);
 
-    uint32_t code = 0;
-    uint32_t code_l = 0;
-    while (code_l < maxCodeOL.size() &&
-           (0xFFFFFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l])) {
-      uint32_t temp = bs.getBitsNoFill(1);
-      code = (code << 1) | temp;
-      code_l++;
-    }
-
-    if (code_l >= maxCodeOL.size() ||
-        (0xFFFFFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l]))
-      ThrowRDE("bad Huffman code: %u (len: %u)", code, code_l);
-
-    if (code < codeOffsetOL[code_l])
-      ThrowRDE("likely corrupt Huffman code: %u (len: %u)", code, code_l);
-
-    int diff_l = codeValues[code - codeOffsetOL[code_l]];
-
-    if (!FULL_DECODE)
-      return diff_l;
-
-    if (diff_l == 16) {
-      if (fixDNGBug16)
-        bs.skipBitsNoFill(16);
-      return -32768;
-    }
-
-    assert(FULL_DECODE);
-    assert((diff_l && (code_l + diff_l <= 32)) || !diff_l);
-    return diff_l ? extend(bs.getBitsNoFill(diff_l), diff_l) : 0;
+    return processSymbol<BIT_STREAM, FULL_DECODE>(bs, symbol, codeValue);
   }
 };
 

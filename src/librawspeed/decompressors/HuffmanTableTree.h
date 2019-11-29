@@ -39,12 +39,10 @@ class HuffmanTableTree final : public AbstractHuffmanTable {
 
   BinaryHuffmanTree<ValueType> tree;
 
-  bool fullDecode = true;
-  bool fixDNGBug16 = false;
-
 protected:
   template <typename BIT_STREAM>
-  inline ValueType getValue(BIT_STREAM& bs) const {
+  inline std::pair<CodeSymbol, ValueType /*codeValue*/>
+  readSymbol(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     CodeSymbol partial;
@@ -75,7 +73,7 @@ protected:
       if (static_cast<decltype(tree)::Node::Type>(*newNode) ==
           decltype(tree)::Node::Type::Leaf) {
         // Ok, great, hit a Leaf. This is it.
-        return newNode->getAsLeaf().value;
+        return {partial, newNode->getAsLeaf().value};
       }
 
       // Else, this is a branch, continue looking.
@@ -147,20 +145,11 @@ public:
 
     bs.fill(32);
 
-    const auto codeValue = getValue(bs);
+    CodeSymbol symbol;
+    int codeValue;
+    std::tie(symbol, codeValue) = readSymbol(bs);
 
-    const int diff_l = codeValue;
-
-    if (!FULL_DECODE)
-      return diff_l;
-
-    if (diff_l == 16) {
-      if (fixDNGBug16)
-        bs.skipBitsNoFill(16);
-      return -32768;
-    }
-
-    return diff_l ? extend(bs.getBitsNoFill(diff_l), diff_l) : 0;
+    return processSymbol<BIT_STREAM, FULL_DECODE>(bs, symbol, codeValue);
   }
 };
 

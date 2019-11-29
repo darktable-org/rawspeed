@@ -66,6 +66,9 @@ public:
   };
 
 protected:
+  bool fullDecode = true;
+  bool fixDNGBug16 = false;
+
   inline size_t __attribute__((pure)) maxCodePlusDiffLength() const {
     return nCodesPerLength.size() - 1 +
            *(std::max_element(codeValues.cbegin(), codeValues.cend()));
@@ -219,10 +222,34 @@ public:
     }
   }
 
+  template <typename BIT_STREAM, bool FULL_DECODE>
+  inline int processSymbol(BIT_STREAM& bs, CodeSymbol symbol,
+                           int codeValue) const {
+    assert(symbol.code_len >= 0 && symbol.code_len <= 16);
+
+    // If we were only looking for symbol's code value, then just return it.
+    if (!FULL_DECODE)
+      return codeValue;
+
+    // Else, treat it as the length of following difference
+    // that we need to read and extend.
+    int diff_l = codeValue;
+    assert(diff_l >= 0 && diff_l <= 16);
+
+    if (diff_l == 16) {
+      if (fixDNGBug16)
+        bs.skipBitsNoFill(16);
+      return -32768;
+    }
+
+    assert(symbol.code_len + diff_l <= 32);
+    return diff_l ? extend(bs.getBitsNoFill(diff_l), diff_l) : 0;
+  }
+
   // Figure F.12 – Extending the sign bit of a decoded value in V
   // WARNING: this is *not* your normal 2's complement sign extension!
-  // WARNING: the caller should check that len != 0 before calling the function
   inline static int __attribute__((const)) extend(uint32_t diff, uint32_t len) {
+    assert(len > 0);
     int32_t ret = diff;
     if ((diff & (1 << (len - 1))) == 0)
       ret -= (1 << len) - 1;
