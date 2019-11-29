@@ -50,3 +50,7 @@ target_sources(rawspeed_get_number_of_processor_cores PRIVATE
 )
 
 target_link_libraries(rawspeed_get_number_of_processor_cores PRIVATE rawspeed)
+
+if(TARGET RawSpeed::OpenMP_CXX)
+  target_link_libraries(rawspeed_get_number_of_processor_cores PRIVATE RawSpeed::OpenMP_CXX)
+endif()
