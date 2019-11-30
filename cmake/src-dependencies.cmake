@@ -43,21 +43,11 @@ if(WITH_OPENMP)
     message(STATUS "Looking for OpenMP - found (system)")
   endif()
 
-  # FIXME: OpenMP::OpenMP_CXX target, and ${OpenMP_CXX_LIBRARIES} were both
-  # added in cmake-3.9. Until then, this is correct:
-  if(NOT TARGET OpenMP::OpenMP_CXX)
-    add_library(OpenMP::OpenMP_CXX INTERFACE IMPORTED)
-    if(OpenMP_CXX_FLAGS)
-      set_property(TARGET OpenMP::OpenMP_CXX PROPERTY INTERFACE_COMPILE_OPTIONS ${OpenMP_CXX_FLAGS})
-      set_property(TARGET OpenMP::OpenMP_CXX PROPERTY INTERFACE_LINK_LIBRARIES ${OpenMP_CXX_FLAGS})
-      # Yes, both of them to the same value.
-    endif()
-  endif()
-
   # The wrapper library that *actually* should be linked to.
   add_library(RawSpeed::OpenMP_CXX INTERFACE IMPORTED)
   set_property(TARGET RawSpeed::OpenMP_CXX        PROPERTY INTERFACE_COMPILE_OPTIONS $<TARGET_PROPERTY:OpenMP::OpenMP_CXX,INTERFACE_COMPILE_OPTIONS>)
   set_property(TARGET RawSpeed::OpenMP_CXX APPEND PROPERTY INTERFACE_COMPILE_OPTIONS ${OPENMP_VERSION_SPECIFIER})
+  set_property(TARGET RawSpeed::OpenMP_CXX        PROPERTY INTERFACE_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:OpenMP::OpenMP_CXX,INTERFACE_INCLUDE_DIRECTORIES>)
   if(NOT USE_BUNDLED_LLVMOPENMP)
     set_property(TARGET RawSpeed::OpenMP_CXX      PROPERTY INTERFACE_LINK_LIBRARIES  $<TARGET_PROPERTY:OpenMP::OpenMP_CXX,INTERFACE_LINK_LIBRARIES>)
   else()
