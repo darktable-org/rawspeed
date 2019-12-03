@@ -36,7 +36,7 @@ class SamsungV0Decompressor final : public AbstractSamsungDecompressor {
 
   void computeStripes(ByteStream bso, ByteStream bsr);
 
-  void decompressStrip(uint32_t y, const ByteStream& bs) const;
+  void decompressStrip(int row, const ByteStream& bs) const;
 
   static int32_t calcAdj(BitPumpMSB32* bits, int b);
 

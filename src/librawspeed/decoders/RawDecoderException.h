@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
 #include "common/RawspeedException.h" // for ThrowException, RawspeedException
 #include <string>                     // for string
 
@@ -28,9 +29,9 @@ namespace rawspeed {
 
 class RawDecoderException : public RawspeedException {
 public:
-  explicit RawDecoderException(const std::string& msg)
+  explicit RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
+  RawDecoderException(const char* msg)
       : RawspeedException(msg) {}
-  explicit RawDecoderException(const char* msg) : RawspeedException(msg) {}
 };
 
 #define ThrowRDE(...)                                                          \

@@ -61,7 +61,8 @@ static inline void BM_BitStream(benchmark::State& state, Endianness endianness,
   assert((Step == 1) || rawspeed::isAligned(Step, 2));
   assert((fillSize == 1) || rawspeed::isAligned(fillSize, 2));
 
-  const rawspeed::Buffer b(state.range(0));
+  auto storage = rawspeed::Buffer::Create(state.range(0));
+  const rawspeed::Buffer b(storage.get(), state.range(0));
   assert(b.getSize() > 0);
   assert(b.getSize() == (size_t)state.range(0));
 

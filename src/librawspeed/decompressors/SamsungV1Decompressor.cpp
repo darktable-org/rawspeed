@@ -39,7 +39,7 @@ struct SamsungV1Decompressor::encTableItem {
 
 SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
                                              const ByteStream* bs_, int bit)
-    : AbstractSamsungDecompressor(image), bs(bs_), bits(bit) {
+    : AbstractSamsungDecompressor(image), bs(bs_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != 2)
     ThrowRDE("Unexpected component count / data type");
@@ -54,7 +54,8 @@ SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
   const uint32_t width = mRaw->dim.x;
   const uint32_t height = mRaw->dim.y;
 
-  if (width == 0 || height == 0 || width > 5664 || height > 3714)
+  if (width == 0 || height == 0 || width % 32 != 0 || height % 2 != 0 ||
+      width > 5664 || height > 3714)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 }
 
@@ -77,9 +78,6 @@ SamsungV1Decompressor::samsungDiff(BitPumpMSB* pump,
 }
 
 void SamsungV1Decompressor::decompress() {
-  const uint32_t width = mRaw->dim.x;
-  const uint32_t height = mRaw->dim.y;
-
   // This format has a variable length encoding of how many bits are needed
   // to encode the difference between pixels, we use a table to process it
   // that has two values, the first the number of bits that were used to
@@ -101,8 +99,6 @@ void SamsungV1Decompressor::decompress() {
                                                               {4, 8},
                                                               {4, 2}}};
   std::vector<encTableItem> tbl(1024);
-  std::array<std::array<uint16_t, 2>, 2> vpred = {{}};
-  std::array<uint16_t, 2> hpred;
 
   // We generate a 1024 entry table (to be addressed by reading 10 bits) by
   // consecutively filling in 2^(10-N) positions where N is the variable number
@@ -120,18 +116,23 @@ void SamsungV1Decompressor::decompress() {
     }
   }
 
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  assert(out.width % 32 == 0 && "Should have even count of pixels per row.");
+  assert(out.height % 2 == 0 && "Should have even row count.");
   BitPumpMSB pump(*bs);
-  for (uint32_t y = 0; y < height; y++) {
-    auto* img = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
-    for (uint32_t x = 0; x < width; x++) {
+  for (int row = 0; row < out.height; row++) {
+    std::array<int, 2> pred = {{}};
+    if (row >= 2)
+      pred = {out(row - 2, 0), out(row - 2, 1)};
+
+    for (int col = 0; col < out.width; col++) {
       int32_t diff = samsungDiff(&pump, tbl);
-      if (x < 2)
-        hpred[x] = vpred[y & 1][x] += diff;
-      else
-        hpred[x & 1] += diff;
-      img[x] = hpred[x & 1];
-      if (img[x] >> bits)
-        ThrowRDE("decoded value out of bounds at %d:%d", x, y);
+      pred[col & 1] += diff;
+
+      int value = pred[col & 1];
+      if (!isIntN(value, bits))
+        ThrowRDE("decoded value out of bounds");
+      out(row, col) = value;
     }
   }
 }

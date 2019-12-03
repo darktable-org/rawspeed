@@ -12,6 +12,8 @@ Welcome to RawSpeed's documentation!
 
    self
    CameraSupport
+   ReferenceSampleArchive
+   IntegrationTesting
    Doxygen
    lnt/index.rst
 

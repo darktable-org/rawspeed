@@ -33,6 +33,8 @@ template <class T> class Array2DRef {
 
   friend Array2DRef<const T>; // We need to be able to convert to const version.
 
+  inline T& operator[](int row) const;
+
 public:
   using value_type = T;
   using cvless_value_type = typename std::remove_cv<value_type>::type;
@@ -62,7 +64,7 @@ public:
     return {storage->data(), width, height};
   }
 
-  inline T& operator()(int x, int y) const;
+  inline T& operator()(int row, int col) const;
 };
 
 template <class T>
@@ -74,14 +76,18 @@ Array2DRef<T>::Array2DRef(T* data, const int dataWidth, const int dataHeight,
   _pitch = (dataPitch == 0 ? dataWidth : dataPitch);
 }
 
-template <class T>
-T& Array2DRef<T>::operator()(const int x, const int y) const {
+template <class T> T& Array2DRef<T>::operator[](const int row) const {
   assert(_data);
-  assert(x >= 0);
-  assert(y >= 0);
-  assert(x < width);
-  assert(y < height);
-  return _data[y * _pitch + x];
+  assert(row >= 0);
+  assert(row < height);
+  return _data[row * _pitch];
+}
+
+template <class T>
+T& Array2DRef<T>::operator()(const int row, const int col) const {
+  assert(col >= 0);
+  assert(col < width);
+  return (&(operator[](row)))[col];
 }
 
 } // namespace rawspeed

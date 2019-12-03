@@ -27,6 +27,8 @@
  *   Software.
  */
 
+#pragma once
+
 #include <array>   // for array
 #include <cstdint> // for uint8_t, uint32_t
 #include <cstdio>  // for size_t

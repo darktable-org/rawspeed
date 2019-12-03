@@ -33,8 +33,9 @@
 namespace rawspeed {
 
 template <typename T>
-[[noreturn]] void __attribute__((noreturn, noinline, format(printf, 1, 2)))
-ThrowException(const char* fmt, ...) {
+[[noreturn]] void RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
+    __attribute__((noreturn, format(printf, 1, 2)))
+    ThrowException(const char* fmt, ...) {
   static constexpr size_t bufSize = 8192;
 #if defined(HAVE_CXX_THREAD_LOCAL)
   static thread_local std::array<char, bufSize> buf;
@@ -56,15 +57,15 @@ ThrowException(const char* fmt, ...) {
 
 class RawspeedException : public std::runtime_error {
 private:
-  static void log(const char* msg) {
+  static void RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
+  log(const char* msg) {
     writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s", msg);
   }
 
 public:
-  explicit RawspeedException(const std::string& msg) : std::runtime_error(msg) {
-    log(msg.c_str());
-  }
-  explicit RawspeedException(const char* msg) : std::runtime_error(msg) {
+  explicit RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
+  RawspeedException(const char* msg)
+      : std::runtime_error(msg) {
     log(msg);
   }
 };

@@ -46,15 +46,15 @@ PhaseOneDecompressor::PhaseOneDecompressor(const RawImage& img,
     ThrowRDE("Unexpected cpp: %u", mRaw->getCpp());
 
   if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 2 != 0 ||
-      mRaw->dim.x > 11976 || mRaw->dim.y > 8852) {
+      mRaw->dim.x > 11976 || mRaw->dim.y > 8854) {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);
   }
 
-  validateStrips();
+  prepareStrips();
 }
 
-void PhaseOneDecompressor::validateStrips() const {
+void PhaseOneDecompressor::prepareStrips() {
   // The 'strips' vector should contain exactly one element per row of image.
 
   // If the length is different, then the 'strips' vector is clearly incorrect.
@@ -63,42 +63,26 @@ void PhaseOneDecompressor::validateStrips() const {
              strips.size());
   }
 
-  struct RowBin {
-    using value_type = unsigned char;
-    bool isEmpty() const { return data == 0; }
-    void fill() { data = 1; }
-    value_type data = 0;
-  };
-
   // Now, the strips in 'strips' vector aren't in order.
   // The 'decltype(strips)::value_type::n' is the row number of a strip.
   // We need to make sure that we have every row (0..mRaw->dim.y-1), once.
-
-  // There are many ways to do that. Here, we take the histogram of all the
-  // row numbers, and if any bin ends up not being '1' (one strip per row),
-  // then the input is bad.
-  std::vector<RowBin> histogram;
-  histogram.resize(strips.size());
-  int numBinsFilled = 0;
-  std::for_each(strips.begin(), strips.end(),
-                [y = mRaw->dim.y, &histogram,
-                 &numBinsFilled](const PhaseOneStrip& strip) {
-                  if (strip.n < 0 || strip.n >= y)
-                    ThrowRDE("Strip specifies out-of-bounds row %u", strip.n);
-                  RowBin& rowBin = histogram[strip.n];
-                  if (!rowBin.isEmpty())
-                    ThrowRDE("Duplicate row %u", strip.n);
-                  rowBin.fill();
-                  numBinsFilled++;
-                });
-  assert(histogram.size() == strips.size());
-  assert(numBinsFilled == mRaw->dim.y &&
-         "We should only get here if all the rows/bins got filled.");
+  // For that, first let's sort them to have monothonically increasting `n`.
+  // This will also serialize the per-line outputting.
+  std::sort(
+      strips.begin(), strips.end(),
+      [](const PhaseOneStrip& a, const PhaseOneStrip& b) { return a.n < b.n; });
+  // And now ensure that slice number matches the slice's row.
+  for (decltype(strips)::size_type i = 0; i < strips.size(); ++i)
+    if (static_cast<decltype(strips)::size_type>(strips[i].n) != i)
+      ThrowRDE("Strips validation issue.");
+  // All good.
 }
 
 void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
-  uint32_t width = mRaw->dim.x;
-  assert(width % 2 == 0);
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+
+  assert(out.width > 0);
+  assert(out.width % 2 == 0);
 
   static constexpr std::array<const int, 10> length = {8,  7, 6,  9,  11,
                                                        10, 5, 12, 14, 13};
@@ -108,10 +92,11 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
   std::array<int32_t, 2> pred;
   pred.fill(0);
   std::array<int, 2> len;
-  auto* img = reinterpret_cast<uint16_t*>(mRaw->getData(0, strip.n));
-  for (uint32_t col = 0; col < width; col++) {
+  const int row = strip.n;
+  for (int col = 0; col < out.width; col++) {
     pump.fill(32);
-    if (col >= (width & ~7U)) // last 'width % 8' pixels.
+    if (static_cast<unsigned>(col) >=
+        (out.width & ~7U)) // last 'width % 8' pixels.
       len[0] = len[1] = 14;
     else if ((col & 7) == 0) {
       for (int& i : len) {
@@ -135,12 +120,12 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
 
     int i = len[col & 1];
     if (i == 14)
-      img[col] = pred[col & 1] = pump.getBitsNoFill(16);
+      out(row, col) = pred[col & 1] = pump.getBitsNoFill(16);
     else {
       pred[col & 1] +=
           static_cast<signed>(pump.getBitsNoFill(i)) + 1 - (1 << (i - 1));
       // FIXME: is the truncation the right solution here?
-      img[col] = uint16_t(pred[col & 1]);
+      out(row, col) = uint16_t(pred[col & 1]);
     }
   }
 }

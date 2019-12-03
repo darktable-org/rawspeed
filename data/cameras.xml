@@ -4275,6 +4275,17 @@
 		<Sensor black="220" white="4000" iso_min="12800" iso_max="25599"/>
 		<Sensor black="187" white="4000" iso_min="25600" iso_max="25600"/>
 	</Camera>
+	<Camera make="OLYMPUS CORPORATION" model="E-M5MarkIII">
+		<ID make="Olympus" model="E-M5 Mark III">Olympus E-M5 Mark III</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="257" white="4000"/>
+	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-P1">
 		<ID make="Olympus" model="E-P1">Olympus E-P1</ID>
 		<Crop x="0" y="0" width="4094" height="3082"/>
@@ -8371,6 +8382,17 @@
 		<Crop x="0" y="0" width="-12" height="0"/>
 		<Sensor black="800" white="16300"/>
 	</Camera>
+	<Camera make="SONY" model="DSC-RX100M7">
+		<ID make="Sony" model="DSC-RX100M7">Sony DSC-RX100M7</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-12" height="0"/>
+		<Sensor black="800" white="16300"/>
+	</Camera>
 	<Camera make="SONY" model="DSC-RX1R">
 		<ID make="Sony" model="DSC-RX1R">Sony DSC-RX1R</ID>
 		<CFA width="2" height="2">
@@ -8782,6 +8804,17 @@
 		</CFA>
 		<Crop x="0" y="0" width="-28" height="0"/>
 		<Sensor black="512" white="16300"/>
+	</Camera>
+	<Camera make="SONY" model="ILCE-6600">
+		<ID make="Sony" model="ILCE-6600">Sony ILCE-6600</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-28" height="0"/>
+		<Sensor black="512" white="16383"/>
 	</Camera>
 	<Camera make="SONY" model="ILCE-7">
 		<ID make="Sony" model="ILCE-7">Sony ILCE-7</ID>
@@ -9697,6 +9730,20 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="1024" white="16383"/>
+		<Hints>
+			<Hint name="jpeg32_bitorder" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="FUJIFILM" model="X-A10">
+		<ID make="Fujifilm" model="X-A10">Fujifilm X-A10</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="256" white="4094"/>
 		<Hints>
 			<Hint name="jpeg32_bitorder" value=""/>
 		</Hints>

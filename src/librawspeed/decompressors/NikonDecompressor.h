@@ -37,8 +37,7 @@ class NikonDecompressor final : public AbstractDecompressor {
   uint32_t huffSelect = 0;
   uint32_t split = 0;
 
-  std::array<int, 2> pUp1;
-  std::array<int, 2> pUp2;
+  std::array<std::array<int, 2>, 2> pUp;
 
   std::vector<uint16_t> curve;
 

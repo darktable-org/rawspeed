@@ -99,18 +99,18 @@ OlympusDecompressor::parseCarry(BitPumpMSB* bits,
   return (diff * 4) | low;
 }
 
-inline int OlympusDecompressor::getPred(int row, int x, uint16_t* dest,
-                                        const uint16_t* up_ptr) {
-  auto getLeft = [dest]() { return dest[-2]; };
-  auto getUp = [up_ptr]() { return up_ptr[0]; };
-  auto getLeftUp = [up_ptr]() { return up_ptr[-2]; };
+inline int OlympusDecompressor::getPred(const Array2DRef<uint16_t> out, int row,
+                                        int col) {
+  auto getLeft = [&]() { return out(row, col - 2); };
+  auto getUp = [&]() { return out(row - 2, col); };
+  auto getLeftUp = [&]() { return out(row - 2, col - 2); };
 
   int pred;
-  if (row < 2 && x < 2)
+  if (row < 2 && col < 2)
     pred = 0;
   else if (row < 2)
     pred = getLeft();
-  else if (x < 2)
+  else if (col < 2)
     pred = getUp();
   else {
     int left = getLeft();
@@ -139,23 +139,19 @@ void OlympusDecompressor::decompressRow(BitPumpMSB* bits, int row) const {
   assert(mRaw->dim.x > 0);
   assert(mRaw->dim.x % 2 == 0);
 
-  int pitch = mRaw->pitch;
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   std::array<std::array<int, 3>, 2> acarry{{}};
 
-  auto* dest = reinterpret_cast<uint16_t*>(mRaw->getData(0, row));
-  const auto* up_ptr = row > 0 ? &dest[-pitch] : &dest[0];
-  for (int x = 0; x < mRaw->dim.x; x++) {
-    int c = x & 1;
+  for (int col = 0; col < out.width; col++) {
+    int c = col & 1;
 
     std::array<int, 3>& carry = acarry[c];
 
     int diff = parseCarry(bits, &carry);
-    int pred = getPred(row, x, dest, up_ptr);
+    int pred = getPred(out, row, col);
 
-    *dest = pred + diff;
-    dest++;
-    up_ptr++;
+    out(row, col) = pred + diff;
   }
 }
 

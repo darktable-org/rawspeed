@@ -35,22 +35,42 @@ public:
   enum struct OptFlags : uint32_t;
 
 protected:
-  int bits;
-
   uint32_t bitDepth;
-  uint32_t width;
-  uint32_t height;
+  int width;
+  int height;
   OptFlags _flags;
-  uint32_t initVal;
+  uint16_t initVal;
 
   ByteStream data;
 
-  static inline int32_t getDiff(BitPumpMSB32* pump, uint32_t len);
+  int motion;
+  int scale;
+  std::array<std::array<int, 2>, 3> diffBitsMode;
 
-  template <OptFlags optflags> void decompressRow(uint32_t row);
+  static inline __attribute__((always_inline)) int16_t
+  getDiff(BitPumpMSB32* pump, uint32_t len);
+
+  template <OptFlags optflags>
+  inline __attribute__((always_inline)) std::array<uint16_t, 16>
+  prepareBaselineValues(BitPumpMSB32* pump, int row, int col);
+
+  template <OptFlags optflags>
+  inline __attribute__((always_inline)) std::array<uint32_t, 4>
+  decodeDiffLengths(BitPumpMSB32* pump, int row);
+
+  template <OptFlags optflags>
+  inline __attribute__((always_inline)) std::array<int, 16>
+  decodeDifferences(BitPumpMSB32* pump, int row);
+
+  template <OptFlags optflags>
+  inline __attribute__((always_inline)) void processBlock(BitPumpMSB32* pump,
+                                                          int row, int col);
+
+  template <OptFlags optflags> void decompressRow(int row);
 
 public:
-  SamsungV2Decompressor(const RawImage& image, const ByteStream& bs, int bit);
+  SamsungV2Decompressor(const RawImage& image, const ByteStream& bs,
+                        unsigned bit);
 
   void decompress();
 };

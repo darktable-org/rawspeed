@@ -86,3 +86,6 @@
 #ifndef __has_extension
 #define __has_extension __has_feature // Compatibility with pre-3.0 compilers.
 #endif
+
+#define RAWSPEED_UNLIKELY_FUNCTION __attribute__((cold))
+#define RAWSPEED_NOINLINE __attribute__((noinline))

@@ -27,7 +27,14 @@ install:
       echo "oracle-java9-installer hold" | sudo dpkg --set-selections;
       travis_retry sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y;
       travis_retry sudo apt-get update -q;
-      travis_retry sudo apt-get install -y -q -f --fix-missing clang-3.5 clang-3.9 cmake g++-5 git libiomp-dev libjpeg-dev libpugixml-dev libxml2-utils make ninja-build zlib1g-dev;
+      travis_retry sudo apt-get install -y -q -f --fix-missing clang-3.9 cmake g++-5 git libiomp-dev libjpeg-dev libpugixml-dev libxml2-utils make ninja-build zlib1g-dev;
+    fi;
+  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$EXTRA" == "NODOCKER"  && "$TRAVIS_DIST" == "xenial" ]]; then
+      echo "oracle-java8-installer hold" | sudo dpkg --set-selections;
+      echo "oracle-java9-installer hold" | sudo dpkg --set-selections;
+      travis_retry sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y;
+      travis_retry sudo apt-get update -q;
+      travis_retry sudo apt-get install -y -q -f --fix-missing clang-3.5;
     fi;
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       travis_retry brew update > /dev/null && brew tap Homebrew/bundle && cd .ci && brew bundle --verbose;
@@ -62,26 +69,26 @@ jobs:
   include:
   - stage: test
     os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     services:
       - docker
     env: CC=gcc-9 CXX=g++-9
   - stage: test
     os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     services:
       - docker
     env: CC=gcc-9 CXX=g++-9 ECO="-DWITH_OPENMP=OFF"
   - os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     services:
       - docker
     env: CC=clang-9 CXX=clang++-9
   - os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     services:
       - docker
@@ -95,40 +102,40 @@ jobs:
   #- os: osx
   #  env: CC=cc CXX=c++ FLAVOR=Coverage
   - os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     services:
       - docker
     # Don't forget to ensure that FindLLVMClangTidy.cmake is also bumped
     env: CC=clang-9 CXX=clang++-9 TARGET=STATICANALYSIS ECO="-DUSE_CLANG_TIDY=ON"
   - os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     services:
       - docker
     env: CC=clang-9 CXX=clang++-9 ECO="-DWITH_OPENMP=OFF"
   - os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     env: CC=gcc-5 CXX=g++-5 EXTRA=NODOCKER
   - os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
-    env: CC=clang-3.5 CXX=clang++-3.5 EXTRA=NODOCKER ECO="-DWITH_OPENMP=OFF"
+    env: CC=clang-3.5 CXX=clang++-3.5 EXTRA=NODOCKER ECO="-DWITH_OPENMP=OFF -DWITH_ZLIB=OFF"
   - os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     env: CC=clang-3.9 CXX=clang++-3.9 EXTRA=NODOCKER
   #- stage: deploy
   #  os: linux
   #  sudo: required
-  #  dist: xenial
+  #  dist: bionic
   #  edge: true
   #  services:
   #    - docker
   - stage: deploy
     os: linux
-    dist: trusty
+    dist: bionic
     sudo: required
     services:
       - docker

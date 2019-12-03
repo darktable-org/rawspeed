@@ -163,9 +163,11 @@ public:
   }
 };
 
-void PanasonicDecompressor::processPixelPacket(
-    ProxyStream* bits, int y, uint16_t* dest, int xbegin,
+inline void PanasonicDecompressor::processPixelPacket(
+    ProxyStream* bits, int row, int col,
     std::vector<uint32_t>* zero_pos) const noexcept {
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+
   int sh = 0;
 
   std::array<int, 2> pred;
@@ -176,7 +178,7 @@ void PanasonicDecompressor::processPixelPacket(
 
   int u = 0;
 
-  for (int p = 0; p < PixelsPerPacket; p++) {
+  for (int p = 0; p < PixelsPerPacket; ++p, ++col) {
     const int c = p & 1;
 
     if (u == 2) {
@@ -198,13 +200,12 @@ void PanasonicDecompressor::processPixelPacket(
         pred[c] = nonz[c] << 4 | bits->getBits(4);
     }
 
-    *dest = pred[c];
+    out(row, col) = pred[c];
 
     if (zero_is_bad && 0 == pred[c])
-      zero_pos->push_back((y << 16) | (xbegin + p));
+      zero_pos->push_back((row << 16) | col);
 
     u++;
-    dest++;
   }
 }
 
@@ -213,28 +214,22 @@ void PanasonicDecompressor::processBlock(const Block& block,
     noexcept {
   ProxyStream bits(block.bs, section_split_offset);
 
-  for (int y = block.beginCoord.y; y <= block.endCoord.y; y++) {
-    int x = 0;
+  for (int row = block.beginCoord.y; row <= block.endCoord.y; row++) {
+    int col = 0;
     // First row may not begin at the first column.
-    if (block.beginCoord.y == y)
-      x = block.beginCoord.x;
+    if (block.beginCoord.y == row)
+      col = block.beginCoord.x;
 
-    int endx = mRaw->dim.x;
+    int endCol = mRaw->dim.x;
     // Last row may end before the last column.
-    if (block.endCoord.y == y)
-      endx = block.endCoord.x;
+    if (block.endCoord.y == row)
+      endCol = block.endCoord.x;
 
-    auto* dest = reinterpret_cast<uint16_t*>(mRaw->getData(x, y));
+    assert(col % PixelsPerPacket == 0);
+    assert(endCol % PixelsPerPacket == 0);
 
-    assert(x % PixelsPerPacket == 0);
-    assert(endx % PixelsPerPacket == 0);
-
-    for (; x < endx;) {
-      processPixelPacket(&bits, y, dest, x, zero_pos);
-
-      x += PixelsPerPacket;
-      dest += PixelsPerPacket;
-    }
+    for (; col < endCol; col += PixelsPerPacket)
+      processPixelPacket(&bits, row, col, zero_pos);
   }
 }
 

@@ -66,28 +66,29 @@ void HasselbladDecompressor::decodeScan() {
              frame.w, frame.h, mRaw->dim.x, mRaw->dim.y);
   }
 
-  assert(frame.h > 0);
-  assert(frame.w > 0);
-  assert(frame.w % 2 == 0);
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+
+  assert(out.height > 0);
+  assert(out.width > 0);
+  assert(out.width % 2 == 0);
 
   const auto ht = getHuffmanTables<1>();
 
   BitPumpMSB32 bitStream(input);
   // Pixels are packed two at a time, not like LJPEG:
   // [p1_length_as_huffman][p2_length_as_huffman][p0_diff_with_length][p1_diff_with_length]|NEXT PIXELS
-  for (uint32_t y = 0; y < frame.h; y++) {
-    auto* dest = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
+  for (int row = 0; row < out.height; row++) {
     int p1 = 0x8000 + pixelBaseOffset;
     int p2 = 0x8000 + pixelBaseOffset;
-    for (uint32_t x = 0; x < frame.w; x += 2) {
+    for (int col = 0; col < out.width; col += 2) {
       int len1 = ht[0]->decodeLength(bitStream);
       int len2 = ht[0]->decodeLength(bitStream);
       p1 += getBits(&bitStream, len1);
       p2 += getBits(&bitStream, len2);
       // NOTE: this is rather unusual and weird, but appears to be correct.
       // clampBits(p, 16) results in completely garbled images.
-      dest[x] = uint16_t(p1);
-      dest[x + 1] = uint16_t(p2);
+      out(row, col) = uint16_t(p1);
+      out(row, col + 1) = uint16_t(p2);
     }
   }
   input.skipBytes(bitStream.getBufferPosition());

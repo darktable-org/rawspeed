@@ -148,6 +148,29 @@ clampBits(T value, unsigned int nBits,
   return clampBits<UnsignedT>(value, nBits);
 }
 
+template <typename T>
+inline constexpr bool __attribute__((const))
+isIntN(T value, unsigned int nBits,
+       typename std::enable_if<std::is_arithmetic<T>::value>::type* /*unused*/ =
+           nullptr) {
+  assert(nBits < CHAR_BIT * sizeof(T) && "Check must not be tautological.");
+  using UnsignedT = typename std::make_unsigned<T>::type;
+  const auto highBits = static_cast<UnsignedT>(value) >> nBits;
+  return highBits == 0;
+}
+
+template <typename T>
+inline constexpr typename std::make_signed<T>::type __attribute__((const))
+signExtend(
+    T value, unsigned int nBits,
+    typename std::enable_if<std::is_unsigned<T>::value>::type* /*unused*/ =
+        nullptr) {
+  assert(nBits != 0 && "Only valid for non-zero bit count.");
+  const T SpareSignBits = CHAR_BIT * sizeof(T) - nBits;
+  using SignedT = typename std::make_signed<T>::type;
+  return static_cast<SignedT>(value << SpareSignBits) >> SpareSignBits;
+}
+
 // Trim both leading and trailing spaces from the string
 inline std::string trimSpaces(const std::string& str)
 {

@@ -21,9 +21,10 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32_t, uint16_t, int32_t
+#include "common/Common.h"                      // for uint32_t, uint16_t, ...
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
+#include "decompressors/HuffmanTableLookup.h"   // for HuffmanTableLookup
 #include "io/BitStream.h"                       // for BitStreamTraits
 #include <cassert>                              // for assert
 #include <cstddef>                              // for size_t
@@ -64,13 +65,7 @@
 
 namespace rawspeed {
 
-class HuffmanTableLUT final : public AbstractHuffmanTable {
-  // private fields calculated from codesPerBits and codeValues
-  // they are index '1' based, so we can directly lookup the value
-  // for code length l without decrementing
-  std::vector<uint32_t> maxCodeOL;    // index is length of code
-  std::vector<uint16_t> codeOffsetOL; // index is length of code
-
+class HuffmanTableLUT final : public HuffmanTableLookup {
   // The code can be compiled with two different decode lookup table layouts.
   // The idea is that different CPU architectures may perform better with
   // one or the other, depending on the relative performance of their arithmetic
@@ -96,38 +91,10 @@ class HuffmanTableLUT final : public AbstractHuffmanTable {
   std::vector<uint8_t> decodeLookup;
 #endif
 
-  bool fullDecode = true;
-  bool fixDNGBug16 = false;
-
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    this->fullDecode = fullDecode_;
-    this->fixDNGBug16 = fixDNGBug16_;
-
-    assert(!nCodesPerLength.empty());
-    assert(maxCodesCount() > 0);
-
-    unsigned int maxCodeLength = nCodesPerLength.size() - 1U;
-    assert(codeValues.size() == maxCodesCount());
-
-    assert(maxCodePlusDiffLength() <= 32U);
-
-    // Figure C.1: make table of Huffman code length for each symbol
-    // Figure C.2: generate the codes themselves
-    const auto symbols = generateCodeSymbols();
-    assert(symbols.size() == maxCodesCount());
-
-    // Figure F.15: generate decoding tables
-    codeOffsetOL.resize(maxCodeLength + 1UL, 0xFFFF);
-    maxCodeOL.resize(maxCodeLength + 1UL, 0xFFFFFFFF);
-    int code_index = 0;
-    for (unsigned int l = 1U; l <= maxCodeLength; l++) {
-      if (nCodesPerLength[l]) {
-        codeOffsetOL[l] = symbols[code_index].code - code_index;
-        code_index += nCodesPerLength[l];
-        maxCodeOL[l] = symbols[code_index - 1].code;
-      }
-    }
+    const std::vector<CodeSymbol> symbols =
+        HuffmanTableLookup::setup(fullDecode_, fixDNGBug16_);
 
     // Generate lookup table for fast decoding lookup.
     // See definition of decodeLookup above
@@ -148,10 +115,12 @@ public:
           // lookup bit depth is too small to fit both the encoded length
           // and the final difference value.
           // -> store only the length and do a normal sign extension later
+          assert(!fullDecode || diff_l > 0);
           decodeLookup[c] = diff_l << PayloadShift | code_l;
         } else {
           // diff_l + code_l <= lookupDepth
           // The table bit depth is large enough to store both.
+          assert(diff_l != 16);
           decodeLookup[c] = (code_l + diff_l) | FlagMask;
 
           if (diff_l) {
@@ -165,14 +134,16 @@ public:
     }
   }
 
-  template<typename BIT_STREAM> inline int decodeLength(BIT_STREAM& bs) const {
+  template <typename BIT_STREAM>
+  inline __attribute__((always_inline)) int decodeLength(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(!fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
 
-  template<typename BIT_STREAM> inline int decodeNext(BIT_STREAM& bs) const {
+  template <typename BIT_STREAM>
+  inline __attribute__((always_inline)) int decodeNext(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(fullDecode);
@@ -183,74 +154,46 @@ public:
   // one returning only the length of the of diff bits (see Hasselblad),
   // one to return the fully decoded diff.
   // All ifs depending on this bool will be optimized out by the compiler
-  template<typename BIT_STREAM, bool FULL_DECODE> inline int decode(BIT_STREAM& bs) const {
+  template <typename BIT_STREAM, bool FULL_DECODE>
+  inline __attribute__((always_inline)) int decode(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(FULL_DECODE == fullDecode);
-
-    // 32 is the absolute maximum combined length of code + diff
-    // assertion  maxCodePlusDiffLength() <= 32U  is already checked in setup()
     bs.fill(32);
 
-    // for processors supporting bmi2 instructions, using maxCodePlusDiffLength()
-    // might be beneficial
+    CodeSymbol partial;
+    partial.code_len = LookupDepth;
+    partial.code = bs.peekBitsNoFill(partial.code_len);
 
-    uint32_t code = bs.peekBitsNoFill(LookupDepth);
-    assert(code < decodeLookup.size());
-    auto val = static_cast<unsigned>(decodeLookup[code]);
-    int len = val & LenMask;
-    assert(len >= 0);
-    assert(len <= 16);
+    assert(partial.code < decodeLookup.size());
+    auto lutEntry = static_cast<unsigned>(decodeLookup[partial.code]);
+    int payload = static_cast<int>(lutEntry) >> PayloadShift;
+    int len = lutEntry & LenMask;
 
-    // if the code is invalid (bitstream corrupted) len will be 0
+    // How far did reading of those LookupDepth bits *actually* move us forward?
     bs.skipBitsNoFill(len);
-    if (FULL_DECODE && val & FlagMask) {
-      // if the flag bit is set, the payload is the already sign extended difference
-      return static_cast<int>(val) >> PayloadShift;
+
+    // If the flag bit is set, then the 'len' was code_l+value,
+    // and payload is the already-extended difference.
+    if (FULL_DECODE && lutEntry & FlagMask)
+      return payload;
+
+    int codeValue;
+    if (lutEntry) {
+      // If the flag is not set, but the entry is not empty,
+      // the payload is the code value for this symbol.
+      partial.code_len = len;
+      codeValue = payload;
+      assert(!FULL_DECODE || codeValue /*aka diff_l*/ > 0);
+    } else {
+      // No match in the lookup table, because either the code is longer
+      // than LookupDepth or the input is corrupt. Need to read more bits...
+      assert(len == 0);
+      bs.skipBitsNoFill(partial.code_len);
+      std::tie(partial, codeValue) = finishReadingPartialSymbol(bs, partial);
     }
 
-    if (len) {
-      // if the flag bit is not set but len != 0, the payload is the number of bits to sign extend and return
-      const int l_diff = static_cast<int>(val) >> PayloadShift;
-      assert((FULL_DECODE && (len + l_diff <= 32)) || !FULL_DECODE);
-      if (FULL_DECODE && l_diff == 16) {
-        if (fixDNGBug16)
-          bs.skipBitsNoFill(16);
-        return -32768;
-      }
-      return FULL_DECODE ? extend(bs.getBitsNoFill(l_diff), l_diff) : l_diff;
-    }
-
-    uint32_t code_l = LookupDepth;
-    bs.skipBitsNoFill(code_l);
-    while (code_l < maxCodeOL.size() &&
-           (0xFFFFFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l])) {
-      uint32_t temp = bs.getBitsNoFill(1);
-      code = (code << 1) | temp;
-      code_l++;
-    }
-
-    if (code_l >= maxCodeOL.size() ||
-        (0xFFFFFFFF == maxCodeOL[code_l] || code > maxCodeOL[code_l]))
-      ThrowRDE("bad Huffman code: %u (len: %u)", code, code_l);
-
-    if (code < codeOffsetOL[code_l])
-      ThrowRDE("likely corrupt Huffman code: %u (len: %u)", code, code_l);
-
-    int diff_l = codeValues[code - codeOffsetOL[code_l]];
-
-    if (!FULL_DECODE)
-      return diff_l;
-
-    if (diff_l == 16) {
-      if (fixDNGBug16)
-        bs.skipBitsNoFill(16);
-      return -32768;
-    }
-
-    assert(FULL_DECODE);
-    assert((diff_l && (len + code_l + diff_l <= 32)) || !diff_l);
-    return diff_l ? extend(bs.getBitsNoFill(diff_l), diff_l) : 0;
+    return processSymbol<BIT_STREAM, FULL_DECODE>(bs, partial, codeValue);
   }
 };
 

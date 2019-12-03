@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
 #include "common/RawspeedException.h"
 #include <string> // for string
 
@@ -28,9 +29,9 @@ namespace rawspeed {
 
 class CameraMetadataException final : public RawspeedException {
 public:
-  explicit CameraMetadataException(const std::string& msg)
+  explicit RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
+  CameraMetadataException(const char* msg)
       : RawspeedException(msg) {}
-  explicit CameraMetadataException(const char* msg) : RawspeedException(msg) {}
 };
 
 #define ThrowCME(...)                                                          \

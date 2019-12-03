@@ -144,16 +144,15 @@ void Cr2Decompressor::decodeN_X_Y()
   //  * for <3,2,1>: 6  = 3*2*1
   //  * for <3,2,2>: 12 = 3*2*2
   // and advances x by N_COMP*X_S_F and y by Y_S_F
-  constexpr int xStepSize = N_COMP * X_S_F;
-  constexpr int yStepSize = Y_S_F;
+  constexpr int sliceColStep = N_COMP * X_S_F;
+  constexpr int frameRowStep = Y_S_F;
 
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
   auto predNext = reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(0, 0));
 
-  BitPumpJPEG bitStream(input);
+  BitPumpJPEG bs(input);
 
-  uint32_t pixelPitch = mRaw->pitch / 2; // Pitch in pixel
   if (frame.cps != 3 && frame.w * frame.cps > 2 * frame.h) {
     // Fix Canon double height issue where Canon doubled the width and halfed
     // the height (e.g. with 5Ds), ask Canon. frame.w needs to stay as is here
@@ -173,9 +172,13 @@ void Cr2Decompressor::decodeN_X_Y()
   for (const auto& width : {slicing.sliceWidth, slicing.lastSliceWidth}) {
     if (width > mRaw->dim.x)
       ThrowRDE("Slice is longer than image's height, which is unsupported.");
-    if (width % xStepSize != 0) {
+    if (width % sliceColStep != 0) {
       ThrowRDE("Slice width (%u) should be multiple of pixel group size (%u)",
-               width, xStepSize);
+               width, sliceColStep);
+    }
+    if (width % mRaw->getCpp() != 0) {
+      ThrowRDE("Slice width (%u) should be multiple of image cpp (%u)", width,
+               mRaw->getCpp());
     }
   }
 
@@ -183,67 +186,69 @@ void Cr2Decompressor::decodeN_X_Y()
       mRaw->getCpp() * mRaw->dim.area())
     ThrowRDE("Incorrrect slice height / slice widths! Less than image size.");
 
-  unsigned processedPixels = 0;
-  unsigned processedLineSlices = 0;
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  unsigned globalFrameCol = 0;
+  unsigned globalFrameRow = 0;
   for (auto sliceId = 0; sliceId < slicing.numSlices; sliceId++) {
     const unsigned sliceWidth = slicing.widthOfSlice(sliceId);
 
-    assert(frame.h % yStepSize == 0);
-    for (unsigned y = 0; y < frame.h; y += yStepSize) {
-      // Fix for Canon 80D mraw format.
-      // In that format, `frame` is 4032x3402, while `mRaw` is 4536x3024.
-      // Consequently, the slices in `frame` wrap around plus there are few
-      // 'extra' sliced lines because sum(slicesW) * sliceH > mRaw->dim.area()
-      // Those would overflow, hence the break.
-      // see FIX_CANON_FRAME_VS_IMAGE_SIZE_MISMATCH
-      unsigned destY = processedLineSlices % mRaw->dim.y;
-      unsigned destX = processedLineSlices / mRaw->dim.y *
-                       slicing.widthOfSlice(0) / mRaw->getCpp();
-      if (destX >= static_cast<unsigned>(mRaw->dim.x))
+    assert(frame.h % frameRowStep == 0);
+    for (unsigned sliceFrameRow = 0; sliceFrameRow < frame.h;
+         sliceFrameRow += frameRowStep, globalFrameRow += frameRowStep) {
+      unsigned row = globalFrameRow % mRaw->dim.y;
+      unsigned col = globalFrameRow / mRaw->dim.y * slicing.widthOfSlice(0) /
+                     mRaw->getCpp();
+      if (col >= static_cast<unsigned>(mRaw->dim.x))
         break;
-      auto dest =
-          reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(destX, destY));
 
-      assert(sliceWidth % xStepSize == 0);
-      if (X_S_F == 1) {
-        if (destX + sliceWidth > static_cast<unsigned>(mRaw->dim.x))
-          ThrowRDE("Bad slice width / frame size / image size combination.");
-        if (((sliceId + 1) == slicing.numSlices) &&
-            ((destX + sliceWidth) < static_cast<unsigned>(mRaw->dim.x)))
-          ThrowRDE("Insufficient slices - do not fill the entire image");
-      } else {
-        // FIXME.
-      }
-      for (unsigned x = 0; x < sliceWidth; x += xStepSize) {
+      assert(sliceWidth % mRaw->getCpp() == 0);
+      unsigned pixelsPerSliceRow = sliceWidth / mRaw->getCpp();
+      if (col + pixelsPerSliceRow > static_cast<unsigned>(mRaw->dim.x))
+        ThrowRDE("Bad slice width / frame size / image size combination.");
+      if (((sliceId + 1) == slicing.numSlices) &&
+          (col + pixelsPerSliceRow != static_cast<unsigned>(mRaw->dim.x)))
+        ThrowRDE("Insufficient slices - do not fill the entire image");
+
+      col *= mRaw->getCpp();
+      assert(sliceWidth % sliceColStep == 0);
+      for (unsigned sliceCol = 0; sliceCol < sliceWidth;) {
         // check if we processed one full raw row worth of pixels
-        if (processedPixels == frame.w) {
+        if (globalFrameCol == frame.w) {
           // if yes -> update predictor by going back exactly one row,
           // no matter where we are right now.
           // makes no sense from an image compression point of view, ask Canon.
           copy_n(predNext, N_COMP, pred.data());
-          predNext = dest;
-          processedPixels = 0;
+          predNext = &out(row, col);
+          globalFrameCol = 0;
         }
 
-        if (X_S_F == 1) { // will be optimized out
-          unroll_loop<N_COMP>([&](int i) {
-            dest[i] = pred[i] += ht[i]->decodeNext(bitStream);
-          });
-        } else {
-          unroll_loop<Y_S_F>([&](int i) {
-            dest[0 + i*pixelPitch] = pred[0] += ht[0]->decodeNext(bitStream);
-            dest[3 + i*pixelPitch] = pred[0] += ht[0]->decodeNext(bitStream);
-          });
+        // How many pixel can we decode until we finish the row of either
+        // the frame (i.e. predictor change time), or of the current slice?
+        assert(frame.w % X_S_F == 0);
+        unsigned sliceColsRemainingInThisFrameRow =
+            sliceColStep * ((frame.w - globalFrameCol) / X_S_F);
+        unsigned sliceColsRemainingInThisSliceRow = sliceWidth - sliceCol;
+        unsigned sliceColsRemaining = std::min(
+            sliceColsRemainingInThisSliceRow, sliceColsRemainingInThisFrameRow);
+        assert(sliceColsRemaining >= sliceColStep &&
+               (sliceColsRemaining % sliceColStep) == 0);
+        for (unsigned sliceColEnd = sliceCol + sliceColsRemaining;
+             sliceCol < sliceColEnd; sliceCol += sliceColStep,
+                      globalFrameCol += X_S_F, col += sliceColStep) {
+          if (X_S_F == 1) { // will be optimized out
+            for (int c = 0; c < sliceColStep; ++c)
+              out(row, col + c) = pred[c] += ht[c]->decodeNext(bs);
+          } else {
+            for (int dstRow = 0; dstRow < Y_S_F; ++dstRow) {
+              for (int c : {0, 3})
+                out(row + dstRow, col + c) = pred[0] += ht[0]->decodeNext(bs);
+            }
 
-          dest[1] = pred[1] += ht[1]->decodeNext(bitStream);
-          dest[2] = pred[2] += ht[2]->decodeNext(bitStream);
+            for (int c : {1, 2})
+              out(row, col + c) = pred[c] += ht[c]->decodeNext(bs);
+          }
         }
-
-        dest += xStepSize;
-        processedPixels += X_S_F;
       }
-
-      processedLineSlices += yStepSize;
     }
   }
 }

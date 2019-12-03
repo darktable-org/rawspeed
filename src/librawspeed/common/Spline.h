@@ -97,7 +97,7 @@ private:
       s.d = (sn.c - s.c) / (3. * h[i]);
     }
 
-    // The last segment is nonsensical, and was only used to temporairly store
+    // The last segment is nonsensical, and was only used to temporarily store
     // the a and c to simplify calculations, so drop that 'segment' now
     segments.pop_back();
 

@@ -46,11 +46,11 @@ RawImageData::RawImageData() : cfa(iPoint2D(0, 0)) {
   blackLevelSeparate.fill(-1);
 }
 
-RawImageData::RawImageData(const iPoint2D& _dim, uint32_t _bpc, uint32_t _cpp)
+RawImageData::RawImageData(const iPoint2D& _dim, int _bpc, int _cpp)
     : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), cpp(_cpp) {
   assert(_bpc > 0);
 
-  if (cpp > std::numeric_limits<decltype(bpp)>::max() / _bpc)
+  if (cpp > std::numeric_limits<decltype(cpp)>::max() / _bpc)
     ThrowRDE("Components-per-pixel is too large.");
 
   bpp = _bpc * _cpp;
@@ -221,13 +221,13 @@ uint8_t* RawImageData::getData() const {
 }
 
 uint8_t* RawImageData::getData(uint32_t x, uint32_t y) {
+  x += mOffset.x;
+  y += mOffset.y;
+
   if (x >= static_cast<unsigned>(uncropped_dim.x))
     ThrowRDE("X Position outside image requested.");
   if (y >= static_cast<unsigned>(uncropped_dim.y))
     ThrowRDE("Y Position outside image requested.");
-
-  x += mOffset.x;
-  y += mOffset.y;
 
   if (!data)
     ThrowRDE("Data not yet allocated.");
@@ -463,7 +463,7 @@ void RawImageData::expandBorder(iRectangle2D validData)
       uint8_t* src_pos = getData(validData.pos.x, y);
       uint8_t* dst_pos = getData(validData.pos.x - 1, y);
       for (int x = validData.pos.x; x >= 0; x--) {
-        for (uint32_t i = 0; i < bpp; i++) {
+        for (int i = 0; i < bpp; i++) {
           dst_pos[i] = src_pos[i];
         }
         dst_pos -= bpp;
@@ -477,7 +477,7 @@ void RawImageData::expandBorder(iRectangle2D validData)
       uint8_t* src_pos = getData(pos - 1, y);
       uint8_t* dst_pos = getData(pos, y);
       for (int x = pos; x < dim.x; x++) {
-        for (uint32_t i = 0; i < bpp; i++) {
+        for (int i = 0; i < bpp; i++) {
           dst_pos[i] = src_pos[i];
         }
         dst_pos += bpp;

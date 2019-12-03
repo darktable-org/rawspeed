@@ -33,9 +33,10 @@ namespace rawspeed {
 class RawImage;
 
 struct PhaseOneStrip {
-  const int n;
-  const ByteStream bs;
+  int n;
+  ByteStream bs;
 
+  PhaseOneStrip() = default;
   PhaseOneStrip(int block, ByteStream bs_) : n(block), bs(std::move(bs_)) {}
 };
 
@@ -48,7 +49,7 @@ class PhaseOneDecompressor final : public AbstractDecompressor {
 
   void decompressThread() const noexcept;
 
-  void validateStrips() const;
+  void prepareStrips();
 
 public:
   PhaseOneDecompressor(const RawImage& img,

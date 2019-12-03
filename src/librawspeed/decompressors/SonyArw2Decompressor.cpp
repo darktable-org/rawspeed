@@ -49,25 +49,23 @@ SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
 }
 
 void SonyArw2Decompressor::decompressRow(int row) const {
-  uint8_t* data = mRaw->getData();
-  uint32_t pitch = mRaw->pitch;
-  int32_t w = mRaw->dim.x;
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  assert(out.width > 0);
+  assert(out.width % 32 == 0);
 
-  assert(mRaw->dim.x > 0);
-  assert(mRaw->dim.x % 32 == 0);
-
-  auto* dest = reinterpret_cast<uint16_t*>(&data[row * pitch]);
+  // Allow compiler to devirtualize the calls below.
+  auto& rawdata = reinterpret_cast<RawImageDataU16&>(*mRaw);
 
   ByteStream rowBs = input;
-  rowBs.skipBytes(row * mRaw->dim.x);
-  rowBs = rowBs.peekStream(mRaw->dim.x);
+  rowBs.skipBytes(row * out.width);
+  rowBs = rowBs.peekStream(out.width);
 
   BitPumpLSB bits(rowBs);
 
   uint32_t random = bits.peekBits(24);
 
   // Each loop iteration processes 16 pixels, consuming 128 bits of input.
-  for (int32_t x = 0; x < w;) {
+  for (int col = 0; col < out.width; col += ((col & 1) != 0) ? 31 : 1) {
     // 30 bits.
     int _max = bits.getBits(11);
     int _min = bits.getBits(11);
@@ -99,10 +97,9 @@ void SonyArw2Decompressor::decompressRow(int row) const {
             p = 0x7ff;
         }
       }
-      mRaw->setWithLookUp(p << 1, reinterpret_cast<uint8_t*>(&dest[x + i * 2]),
-                          &random);
+      rawdata.setWithLookUp(
+          p << 1, reinterpret_cast<uint8_t*>(&out(row, col + i * 2)), &random);
     }
-    x += ((x & 1) != 0) ? 31 : 1; // Skip to next 32 pixels
   }
 }
 

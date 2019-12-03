@@ -475,7 +475,8 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
       ThrowRDE("Error decoding default crop size");
 
     iPoint2D size(sz[0], sz[1]);
-    if ((size + cropped.pos).isThisInside(mRaw->dim))
+    if (size.isThisInside(mRaw->dim) &&
+        (size + cropped.pos).isThisInside(mRaw->dim))
       cropped.dim = size;
 
     if (!cropped.hasPositiveArea())

@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
 #include "common/RawspeedException.h"
 #include <string>
 
@@ -27,9 +28,9 @@ namespace rawspeed {
 
 class RawParserException : public RawspeedException {
 public:
-  explicit RawParserException(const std::string& msg)
+  explicit RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
+  RawParserException(const char* msg)
       : RawspeedException(msg) {}
-  explicit RawParserException(const char* msg) : RawspeedException(msg) {}
 };
 
 #define ThrowRPE(...)                                                          \

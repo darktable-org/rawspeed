@@ -33,15 +33,13 @@ namespace rawspeed {
 class HuffmanTableVector final : public AbstractHuffmanTable {
   std::vector<CodeSymbol> symbols;
 
-  bool fullDecode = true;
-  bool fixDNGBug16 = false;
-
   // Given this code len, which code id is the minimal?
   std::vector<unsigned int> extrCodeIdForLen; // index is length of code
 
 protected:
   template <typename BIT_STREAM>
-  inline std::pair<CodeSymbol, unsigned> getSymbol(BIT_STREAM& bs) const {
+  inline std::pair<CodeSymbol, int /*codeValue*/>
+  readSymbol(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
 
@@ -63,7 +61,7 @@ protected:
            codeId < extrCodeIdForLen[1U + partial.code_len]; codeId++) {
         const CodeSymbol& symbol = symbols[codeId];
         if (symbol == partial) // yay, found?
-          return std::make_pair(symbol, codeId);
+          return {symbol, codeValues[codeId]};
       }
 
       // Ok, but does any symbol have this same prefix?
@@ -136,21 +134,11 @@ public:
 
     bs.fill(32);
 
-    const auto got = getSymbol(bs);
-    const unsigned codeId = got.second;
+    CodeSymbol symbol;
+    int codeValue;
+    std::tie(symbol, codeValue) = readSymbol(bs);
 
-    const int diff_l = codeValues[codeId];
-
-    if (!FULL_DECODE)
-      return diff_l;
-
-    if (diff_l == 16) {
-      if (fixDNGBug16)
-        bs.skipBitsNoFill(16);
-      return -32768;
-    }
-
-    return diff_l ? extend(bs.getBitsNoFill(diff_l), diff_l) : 0;
+    return processSymbol<BIT_STREAM, FULL_DECODE>(bs, symbol, codeValue);
   }
 };
 

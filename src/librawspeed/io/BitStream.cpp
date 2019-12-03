@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2019 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,32 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#pragma once
-
-#include "common/Common.h"                             // for int32_t
-#include "decompressors/AbstractSamsungDecompressor.h" // for AbstractSamsu...
-#include "io/BitPumpMSB.h"                             // for BitPumpMSB
-#include <vector>                                      // for vector
+#include "io/BitStream.h" // for BitStreamCacheBase
 
 namespace rawspeed {
 
-class ByteStream;
-class RawImage;
-
-// Decoder for compressed srw files (NX3000 and later)
-class SamsungV1Decompressor final : public AbstractSamsungDecompressor {
-  struct encTableItem;
-
-  static inline int32_t samsungDiff(BitPumpMSB* pump,
-                                    const std::vector<encTableItem>& tbl);
-
-  const ByteStream* bs;
-  static constexpr int bits = 12;
-
-public:
-  SamsungV1Decompressor(const RawImage& image, const ByteStream* bs_, int bit);
-
-  void decompress();
-};
+constexpr unsigned BitStreamCacheBase::MaxProcessBytes;
 
 } // namespace rawspeed
