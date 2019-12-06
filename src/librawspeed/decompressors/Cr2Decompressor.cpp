@@ -237,15 +237,16 @@ void Cr2Decompressor::decodeN_X_Y()
                       globalFrameCol += X_S_F, col += sliceColStep) {
           if (X_S_F == 1) { // will be optimized out
             for (int c = 0; c < sliceColStep; ++c)
-              out(row, col + c) = pred[c] += ht[c]->decodeNext(bs);
+              out(row, col + c) = pred[c] += ht[c]->decodeDifference(bs);
           } else {
             for (int dstRow = 0; dstRow < Y_S_F; ++dstRow) {
               for (int c : {0, 3})
-                out(row + dstRow, col + c) = pred[0] += ht[0]->decodeNext(bs);
+                out(row + dstRow, col + c) = pred[0] +=
+                    ht[0]->decodeDifference(bs);
             }
 
             for (int c : {1, 2})
-              out(row, col + c) = pred[c] += ht[c]->decodeNext(bs);
+              out(row, col + c) = pred[c] += ht[c]->decodeDifference(bs);
           }
         }
       }

@@ -117,6 +117,9 @@ public:
           // -> store only the length and do a normal sign extension later
           assert(!fullDecode || diff_l > 0);
           decodeLookup[c] = diff_l << PayloadShift | code_l;
+
+          if (!fullDecode)
+            decodeLookup[c] |= FlagMask;
         } else {
           // diff_l + code_l <= lookupDepth
           // The table bit depth is large enough to store both.
@@ -135,7 +138,8 @@ public:
   }
 
   template <typename BIT_STREAM>
-  inline __attribute__((always_inline)) int decodeLength(BIT_STREAM& bs) const {
+  inline __attribute__((always_inline)) int
+  decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(!fullDecode);
@@ -143,7 +147,8 @@ public:
   }
 
   template <typename BIT_STREAM>
-  inline __attribute__((always_inline)) int decodeNext(BIT_STREAM& bs) const {
+  inline __attribute__((always_inline)) int
+  decodeDifference(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(fullDecode);
@@ -173,9 +178,9 @@ public:
     // How far did reading of those LookupDepth bits *actually* move us forward?
     bs.skipBitsNoFill(len);
 
-    // If the flag bit is set, then the 'len' was code_l+value,
-    // and payload is the already-extended difference.
-    if (FULL_DECODE && lutEntry & FlagMask)
+    // If the flag bit is set, then we have already skipped all the len bits
+    // we needed to skip, and payload is the answer we were looking for.
+    if (lutEntry & FlagMask)
       return payload;
 
     int codeValue;

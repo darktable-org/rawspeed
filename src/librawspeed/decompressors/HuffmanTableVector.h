@@ -86,12 +86,7 @@ protected:
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    this->fullDecode = fullDecode_;
-    this->fixDNGBug16 = fixDNGBug16_;
-
-    assert(!nCodesPerLength.empty());
-    assert(maxCodesCount() > 0);
-    assert(codeValues.size() == maxCodesCount());
+    AbstractHuffmanTable::setup(fullDecode_, fixDNGBug16_);
 
     // Figure C.1: make table of Huffman code length for each symbol
     // Figure C.2: generate the codes themselves
@@ -108,14 +103,16 @@ public:
     assert(extrCodeIdForLen.size() == 1U + nCodesPerLength.size());
   }
 
-  template <typename BIT_STREAM> inline int decodeLength(BIT_STREAM& bs) const {
+  template <typename BIT_STREAM>
+  inline int decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(!fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
 
-  template <typename BIT_STREAM> inline int decodeNext(BIT_STREAM& bs) const {
+  template <typename BIT_STREAM>
+  inline int decodeDifference(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(fullDecode);
