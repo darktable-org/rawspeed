@@ -214,8 +214,8 @@ inline void CrwDecompressor::decodeBlock(std::array<int, 64>* diffBuf,
     lPump->fill(32);
     iPump->fill(32);
 
-    const int len = mHuff[i > 0][0].decodeLength(*lPump);
-    const int index = mHuff[i > 0][1].decodeLength(*iPump);
+    const int len = mHuff[i > 0][0].decodeCodeValue(*lPump);
+    const int index = mHuff[i > 0][1].decodeCodeValue(*iPump);
     assert(len >= 0 && index >= 0);
 
     if (len == 0 && index == 0 && i)

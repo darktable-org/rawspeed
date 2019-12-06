@@ -150,7 +150,7 @@ void PentaxDecompressor::decompress(const ByteStream& data) const {
       pred = {out(row - 2, 0), out(row - 2, 1)};
 
     for (int col = 0; col < out.width; col++) {
-      pred[col & 1] += ht.decodeNext(bs);
+      pred[col & 1] += ht.decodeDifference(bs);
       int value = pred[col & 1];
       if (!isIntN(value, 16))
         ThrowRDE("decoded value out of bounds at %d:%d", col, row);

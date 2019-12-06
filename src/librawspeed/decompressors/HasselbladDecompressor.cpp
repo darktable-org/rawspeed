@@ -81,8 +81,8 @@ void HasselbladDecompressor::decodeScan() {
     int p1 = 0x8000 + pixelBaseOffset;
     int p2 = 0x8000 + pixelBaseOffset;
     for (int col = 0; col < out.width; col += 2) {
-      int len1 = ht[0]->decodeLength(bitStream);
-      int len2 = ht[0]->decodeLength(bitStream);
+      int len1 = ht[0]->decodeCodeValue(bitStream);
+      int len2 = ht[0]->decodeCodeValue(bitStream);
       p1 += getBits(&bitStream, len1);
       p2 += getBits(&bitStream, len2);
       // NOTE: this is rather unusual and weird, but appears to be correct.
