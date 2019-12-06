@@ -90,6 +90,18 @@ protected:
   // extend() is used to decode the difference bits to a signed int.
   std::vector<uint8_t> codeValues; // index is just sequential number
 
+  void setup(bool fullDecode_, bool fixDNGBug16_) {
+    this->fullDecode = fullDecode_;
+    this->fixDNGBug16 = fixDNGBug16_;
+
+    for (const auto cValue : codeValues) {
+      if (cValue > 16)
+        ThrowRDE("Corrupt Huffman. Code value %u is bigger than 16", cValue);
+    }
+
+    assert(maxCodePlusDiffLength() <= 32U);
+  }
+
   static void VerifyCodeSymbols(const std::vector<CodeSymbol>& symbols) {
 #ifndef NDEBUG
     // The code symbols are ordered so that all the code values are strictly
@@ -215,11 +227,6 @@ public:
     codeValues.reserve(maxCodesCount());
     std::copy(data.begin(), data.end(), std::back_inserter(codeValues));
     assert(codeValues.size() == maxCodesCount());
-
-    for (const auto cValue : codeValues) {
-      if (cValue > 16)
-        ThrowRDE("Corrupt Huffman. Code value %u is bigger than 16", cValue);
-    }
   }
 
   template <typename BIT_STREAM, bool FULL_DECODE>

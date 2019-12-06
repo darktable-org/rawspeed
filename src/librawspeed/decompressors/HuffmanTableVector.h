@@ -86,12 +86,7 @@ protected:
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    this->fullDecode = fullDecode_;
-    this->fixDNGBug16 = fixDNGBug16_;
-
-    assert(!nCodesPerLength.empty());
-    assert(maxCodesCount() > 0);
-    assert(codeValues.size() == maxCodesCount());
+    AbstractHuffmanTable::setup(fullDecode_, fixDNGBug16_);
 
     // Figure C.1: make table of Huffman code length for each symbol
     // Figure C.2: generate the codes themselves

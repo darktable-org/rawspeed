@@ -86,12 +86,7 @@ protected:
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    this->fullDecode = fullDecode_;
-    this->fixDNGBug16 = fixDNGBug16_;
-
-    assert(!nCodesPerLength.empty());
-    assert(maxCodesCount() > 0);
-    assert(codeValues.size() == maxCodesCount());
+    AbstractHuffmanTable::setup(fullDecode_, fixDNGBug16_);
 
     auto currValue = codeValues.cbegin();
     for (auto codeLen = 1UL; codeLen < nCodesPerLength.size(); codeLen++) {
