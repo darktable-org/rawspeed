@@ -159,7 +159,7 @@ CrwDecompressor::crw_hts CrwDecompressor::initHuffTables(uint32_t table) {
   return mHuff;
 }
 
-inline void CrwDecompressor::decodeBlock(std::array<int, 64>* diffBuf,
+inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
                                          const crw_hts& mHuff,
                                          BitPumpJPEG* bs) {
   assert(diffBuf);
@@ -219,7 +219,7 @@ void CrwDecompressor::decompress() {
     int col = 0;
 
     for (unsigned block = 0; block < hBlocks; block++) {
-      array<int, 64> diffBuf = {{}};
+      array<int16_t, 64> diffBuf = {{}};
       decodeBlock(&diffBuf, mHuff, &bs);
 
       // predict and output the block

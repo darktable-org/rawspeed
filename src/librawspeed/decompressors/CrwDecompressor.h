@@ -52,7 +52,7 @@ private:
   static HuffmanTable makeDecoder(const uint8_t* ncpl, const uint8_t* values);
   static crw_hts initHuffTables(uint32_t table);
 
-  inline static void decodeBlock(std::array<int, 64>* diffBuf,
+  inline static void decodeBlock(std::array<int16_t, 64>* diffBuf,
                                  const crw_hts& mHuff, BitPumpJPEG* bs);
 };
 
