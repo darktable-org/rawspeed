@@ -411,10 +411,7 @@ TEST(AbstractHuffmanTableTest, setCodeValuesValueLessThan16) {
   for (int i = 0; i < 256; i++) {
     v[0] = i;
     Buffer b(v.data(), v.size());
-    if (i <= 16)
-      ASSERT_NO_THROW(ht.setCodeValues(b););
-    else
-      ASSERT_THROW(ht.setCodeValues(b), rawspeed::RawDecoderException);
+    ASSERT_NO_THROW(ht.setCodeValues(b););
   }
 }
 
