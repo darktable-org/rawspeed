@@ -97,7 +97,8 @@ KodakDecompressor::decodeSegment(const uint32_t bsize) {
       bits += 32;
     }
 
-    uint32_t diff = static_cast<uint32_t>(bitbuf) & (0xffff >> (16 - len));
+    uint32_t diff = static_cast<uint32_t>(bitbuf) &
+                    extractHighBits(0xffffU, len, /*effectiveBitwidth=*/16);
     bitbuf >>= len;
     bits -= len;
 

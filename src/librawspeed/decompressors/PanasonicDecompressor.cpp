@@ -182,7 +182,7 @@ inline void PanasonicDecompressor::processPixelPacket(
     const int c = p & 1;
 
     if (u == 2) {
-      sh = 4 >> (3 - bits->getBits(2));
+      sh = extractHighBits(4U, bits->getBits(2), /*effectiveBitwidth=*/3);
       u = -1;
     }
 

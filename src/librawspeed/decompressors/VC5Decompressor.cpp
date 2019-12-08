@@ -462,7 +462,8 @@ void VC5Decompressor::parseVC5() {
       for (int iWavelet = 0; iWavelet < numWaveletLevels; ++iWavelet) {
         auto& channel = channels[mVC5.iChannel];
         auto& wavelet = channel.wavelets[iWavelet];
-        wavelet.prescale = (val >> (14 - 2 * iWavelet)) & 0x03;
+        wavelet.prescale =
+            extractHighBits(val, 2 * iWavelet, /*effectiveBitwidth=*/14) & 0x03;
       }
       break;
     default: { // A chunk.

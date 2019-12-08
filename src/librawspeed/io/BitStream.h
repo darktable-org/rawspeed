@@ -80,7 +80,8 @@ struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
   }
 
   inline uint32_t peek(uint32_t count) const noexcept {
-    return (cache >> (fillLevel - count)) & ((1U << count) - 1U);
+    return extractHighBits(cache, count, /*effectiveBitwidth=*/fillLevel) &
+           ((1U << count) - 1U);
   }
 
   inline void skip(uint32_t count) noexcept { fillLevel -= count; }

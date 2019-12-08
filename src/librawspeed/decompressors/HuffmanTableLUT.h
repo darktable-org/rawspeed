@@ -127,8 +127,9 @@ public:
           decodeLookup[c] = (code_l + diff_l) | FlagMask;
 
           if (diff_l) {
-            uint32_t diff =
-                (c >> (LookupDepth - code_l - diff_l)) & ((1 << diff_l) - 1);
+            uint32_t diff = extractHighBits(c, code_l + diff_l,
+                                            /*effectiveBitwidth=*/LookupDepth);
+            diff &= ((1 << diff_l) - 1);
             decodeLookup[c] |= static_cast<int32_t>(
                 static_cast<uint32_t>(extend(diff, diff_l)) << PayloadShift);
           }

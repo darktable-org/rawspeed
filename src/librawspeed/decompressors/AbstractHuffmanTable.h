@@ -53,12 +53,8 @@ public:
                                  const CodeSymbol& partial) {
       assert(partial.code_len <= symbol.code_len);
 
-      auto getNHighBits = [](const CodeSymbol& s, unsigned bits) -> uint16_t {
-        const auto shift = s.code_len - bits;
-        return s.code >> shift;
-      };
-
-      const auto s0 = getNHighBits(symbol, partial.code_len);
+      const auto s0 = extractHighBits(symbol.code, partial.code_len,
+                                      /*effectiveBitwidth=*/symbol.code_len);
       const auto s1 = partial.code;
 
       return s0 == s1;

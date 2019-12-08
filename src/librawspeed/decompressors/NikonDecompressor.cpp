@@ -227,7 +227,7 @@ class NikonLASDecompressor {
       } else {
         l = 8;
         while (code > dctbl1.maxcode[l]) {
-          temp = input >> (15 - l) & 1;
+          temp = extractHighBits(input, l, /*effectiveBitwidth=*/15) & 1;
           code = (code << 1) | temp;
           l++;
         }
@@ -257,7 +257,7 @@ class NikonLASDecompressor {
       }
 
       if (rv) {
-        int x = input >> (16 - l - rv) & ((1 << rv) - 1);
+        int x = extractHighBits(input, l + rv) & ((1 << rv) - 1);
         if ((x & (1 << (rv - 1))) == 0)
           x -= (1 << rv) - 1;
         dctbl1.bigTable[i] =

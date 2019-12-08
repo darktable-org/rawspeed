@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "common/Common.h"                      // for extractHighBits
 #include "common/RawImage.h"                    // for RawImage
 #include "common/SimpleLUT.h"                   // for SimpleLUT
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
@@ -35,10 +36,9 @@ class OlympusDecompressor final : public AbstractDecompressor {
 
   // A table to quickly look up "high" value
   const SimpleLUT<char, 12> bittable{[](unsigned i, unsigned tableSize) {
-    int b = i;
     int high;
     for (high = 0; high < 12; high++)
-      if ((b >> (11 - high)) & 1)
+      if (extractHighBits(i, high, /*effectiveBitwidth=*/11) & 1)
         break;
     return std::min(12, high);
   }};

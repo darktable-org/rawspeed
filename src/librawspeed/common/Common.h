@@ -161,6 +161,18 @@ isIntN(T value, unsigned int nBits,
   return highBits == 0;
 }
 
+template <class T>
+inline constexpr __attribute__((const)) T extractHighBits(
+    T value, unsigned nBits, unsigned effectiveBitwidth = bitwidth<T>(),
+    typename std::enable_if<std::is_unsigned<T>::value>::type* /*unused*/ =
+        nullptr) {
+  assert(effectiveBitwidth <= bitwidth<T>());
+  assert(nBits <= effectiveBitwidth);
+  auto numLowBitsToSkip = effectiveBitwidth - nBits;
+  assert(numLowBitsToSkip < bitwidth<T>());
+  return value >> numLowBitsToSkip;
+}
+
 template <typename T>
 inline constexpr typename std::make_signed<T>::type __attribute__((const))
 signExtend(
