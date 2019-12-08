@@ -41,10 +41,11 @@ struct BitStreamCacheBase
 {
   uint64_t cache = 0;         // the actual bits stored in the cache
   unsigned int fillLevel = 0; // bits left in cache
-  static constexpr unsigned Size = sizeof(cache)*8;
+
+  static constexpr unsigned Size = bitwidth<decltype(cache)>();
 
   // how many bits could be requested to be filled
-  static constexpr unsigned MaxGetBits = Size/2;
+  static constexpr unsigned MaxGetBits = bitwidth<uint32_t>();
 
   // maximal number of bytes the implementation may read.
   // NOTE: this is not the same as MaxGetBits/8 !!!
@@ -54,7 +55,7 @@ struct BitStreamCacheBase
 struct BitStreamCacheLeftInRightOut : BitStreamCacheBase
 {
   inline void push(uint64_t bits, uint32_t count) noexcept {
-    assert(count + fillLevel <= Size);
+    assert(count + fillLevel <= bitwidth(cache));
     cache |= bits << fillLevel;
     fillLevel += count;
   }
@@ -72,8 +73,8 @@ struct BitStreamCacheLeftInRightOut : BitStreamCacheBase
 struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
 {
   inline void push(uint64_t bits, uint32_t count) noexcept {
-    assert(count + fillLevel <= Size);
-    assert(count < BitStreamCacheBase::Size);
+    assert(count + fillLevel <= bitwidth(cache));
+    assert(count < bitwidth(cache));
     cache = cache << count | bits;
     fillLevel += count;
   }

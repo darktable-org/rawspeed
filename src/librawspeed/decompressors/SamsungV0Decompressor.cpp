@@ -95,11 +95,10 @@ void SamsungV0Decompressor::decompress() const {
   }
 }
 
-int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32* bits, int b) {
-  int32_t adj = 0;
-  if (b)
-    adj = (static_cast<int32_t>(bits->getBits(b)) << (32 - b) >> (32 - b));
-  return adj;
+int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32* bits, int nbits) {
+  if (!nbits)
+    return 0;
+  return signExtend(bits->getBits(nbits), nbits);
 }
 
 void SamsungV0Decompressor::decompressStrip(int row,

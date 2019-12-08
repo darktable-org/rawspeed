@@ -118,6 +118,10 @@ isIn(const T value, const std::initializer_list<T2>& list) {
   return false;
 }
 
+template <class T> inline constexpr unsigned bitwidth(T unused = {}) {
+  return CHAR_BIT * sizeof(T);
+}
+
 // Clamps the given unsigned value to the range 0 .. 2^n-1, with n <= 16
 template <class T>
 inline constexpr __attribute__((const)) uint16_t clampBits(
@@ -128,9 +132,7 @@ inline constexpr __attribute__((const)) uint16_t clampBits(
   assert(nBits <= 16);
   // Check that the clamp is not a no-op. Not of uint16_t to 16 bits e.g.
   // (Well, not really, if we are called from clampBits<signed>, it's ok..).
-  constexpr auto BitWidthOfT = CHAR_BIT * sizeof(T);
-  (void)BitWidthOfT;
-  assert(BitWidthOfT > nBits); // If nBits >= BitWidthOfT, then shift is UB.
+  assert(bitwidth<T>() > nBits); // If nBits >= bitwidth, then shift is UB.
   const T maxVal = (T(1) << nBits) - T(1);
   return std::min(value, maxVal);
 }
@@ -153,7 +155,7 @@ inline constexpr bool __attribute__((const))
 isIntN(T value, unsigned int nBits,
        typename std::enable_if<std::is_arithmetic<T>::value>::type* /*unused*/ =
            nullptr) {
-  assert(nBits < CHAR_BIT * sizeof(T) && "Check must not be tautological.");
+  assert(nBits < bitwidth<T>() && "Check must not be tautological.");
   using UnsignedT = typename std::make_unsigned<T>::type;
   const auto highBits = static_cast<UnsignedT>(value) >> nBits;
   return highBits == 0;
@@ -166,7 +168,7 @@ signExtend(
     typename std::enable_if<std::is_unsigned<T>::value>::type* /*unused*/ =
         nullptr) {
   assert(nBits != 0 && "Only valid for non-zero bit count.");
-  const T SpareSignBits = CHAR_BIT * sizeof(T) - nBits;
+  const T SpareSignBits = bitwidth<T>() - nBits;
   using SignedT = typename std::make_signed<T>::type;
   return static_cast<SignedT>(value << SpareSignBits) >> SpareSignBits;
 }

@@ -280,7 +280,7 @@ TEST(ClampBitsDeathTest, Only16Bit) {
 TEST(ClampBitsUnsignedDeathTest, NoNopClamps) {
 #ifndef NDEBUG
   ASSERT_DEATH({ ASSERT_EQ(clampBits<uint16_t>(0, 16), 0); },
-               "BitWidthOfT > nBits");
+               "bitwidth<T>\\(\\) > nBits");
 #endif
 }
 
