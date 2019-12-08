@@ -73,6 +73,7 @@ void HasselbladDecompressor::decodeScan() {
   assert(out.width % 2 == 0);
 
   const auto ht = getHuffmanTables<1>();
+  ht[0]->verifyCodeSymbolsAreValidDiffLenghts();
 
   BitPumpMSB32 bitStream(input);
   // Pixels are packed two at a time, not like LJPEG:

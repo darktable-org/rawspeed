@@ -61,6 +61,16 @@ public:
     }
   };
 
+  void verifyCodeSymbolsAreValidDiffLenghts() const {
+    for (const auto cValue : codeValues) {
+      if (cValue <= 16)
+        continue;
+      ThrowRDE("Corrupt Huffman code: difference length %u longer than 16",
+               cValue);
+    }
+    assert(maxCodePlusDiffLength() <= 32U);
+  }
+
 protected:
   bool fullDecode = true;
   bool fixDNGBug16 = false;
@@ -95,11 +105,7 @@ protected:
       // as bit length of the following difference, which incurs hard limit
       // of 16 (since we want to need to read at most 32 bits max for a symbol
       // plus difference). Though we could enforce it per-code instead?
-      for (const auto cValue : codeValues) {
-        if (cValue > 16)
-          ThrowRDE("Corrupt Huffman. Code value %u is bigger than 16", cValue);
-      }
-      assert(maxCodePlusDiffLength() <= 32U);
+      verifyCodeSymbolsAreValidDiffLenghts();
     }
   }
 
