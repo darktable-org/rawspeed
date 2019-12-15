@@ -1,4 +1,5 @@
 brew 'cmake'
+brew 'gcc@9'
 brew 'git'
 brew 'jpeg'
 brew 'ninja'

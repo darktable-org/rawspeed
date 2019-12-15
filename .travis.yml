@@ -97,10 +97,14 @@ jobs:
       directories:
         - '$HOME/$RPUU_DST'
   - os: osx
-    osx_image: xcode10
+    osx_image: xcode11.2
     env: CC=cc CXX=c++ ECO="-DWITH_OPENMP=OFF"
-  #- os: osx
-  #  env: CC=cc CXX=c++ FLAVOR=Coverage
+  - os: osx
+    osx_image: xcode11.2
+    env: CC=gcc-9 CXX=g++-9
+  - os: osx
+    osx_image: xcode11.2
+    env: CC=gcc-9 CXX=g++-9 FLAVOR=Coverage
   - os: linux
     dist: bionic
     sudo: required
