@@ -21,16 +21,18 @@
 */
 
 #include "decompressors/CrwDecompressor.h"
-#include "common/Common.h"                // for uint32_t, uint8_t, uint16_t
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for isIntN
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable, HuffmanTableLUT
 #include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
 #include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
-#include <array>                          // for array, array<>::value_type
+#include <array>                          // for array
 #include <cassert>                        // for assert
+#include <cstdint>                        // for uint8_t, int16_t, uint16_t
 
 using std::array;
 

@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint16_t, uint8_t
 #include "io/BitStream.h"  // for BitStream, BitStreamCacheRightInLeftOut
 #include "io/Buffer.h"     // for Buffer::size_type
 #include "io/Endianness.h" // for getLE
+#include <cstdint>         // for uint16_t, uint8_t
 
 namespace rawspeed {
 

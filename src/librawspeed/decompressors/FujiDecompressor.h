@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint16_t
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/BitPumpMSB.h"                      // for BitPumpMSB
@@ -29,12 +28,11 @@
 #include "metadata/ColorFilterArray.h"          // for CFAColor
 #include <array>                                // for array
 #include <cassert>                              // for assert
+#include <cstdint>                              // for uint16_t, uint8_t
 #include <utility>                              // for move
 #include <vector>                               // for vector
 
 namespace rawspeed {
-
-class RawImage;
 
 class FujiDecompressor final : public AbstractDecompressor {
   RawImage mRaw;

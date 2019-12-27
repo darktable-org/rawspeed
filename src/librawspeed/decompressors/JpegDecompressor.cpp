@@ -23,18 +23,16 @@
 
 #ifdef HAVE_JPEG
 
-#include "decompressors/JpegDecompressor.h"
-
-#include "common/Common.h"                // for uint8_t, uint32_t, uint16_t
+#include "common/Array2DRef.h"            // for Array2DRef
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for min
-#include <cstdio>                         // for size_t
-#include <jpeglib.h>                      // for jpeg
-#include <memory>                         // for unique_ptr
-#include <vector>                         // for vector
+#include "decompressors/JpegDecompressor.h"
+#include "io/ByteStream.h" // for ByteStream
+#include <algorithm>       // for min
+#include <array>           // for array
+#include <jpeglib.h>       // for jpeg_destroy_decompress
+#include <memory>          // for unique_ptr
 
 #ifndef HAVE_JPEG_MEM_SRC
 #include "io/IOException.h" // for ThrowIOE

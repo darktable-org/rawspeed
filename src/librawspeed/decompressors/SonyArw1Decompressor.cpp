@@ -21,7 +21,8 @@
 */
 
 #include "decompressors/SonyArw1Decompressor.h"
-#include "common/Common.h"                // for uint32_t, uint8_t, uint16_t
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for isIntN
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE

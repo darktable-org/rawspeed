@@ -19,7 +19,8 @@
 */
 
 #include "decompressors/NikonDecompressor.h"
-#include "common/Common.h"                // for uint32_t, clampBits, uint16_t
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for extractHighBits, clampBits
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -28,6 +29,7 @@
 #include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
 #include <cassert>                        // for assert
+#include <cstdint>                        // for uint32_t, uint16_t, int16_t
 #include <cstdio>                         // for size_t
 #include <vector>                         // for vector
 

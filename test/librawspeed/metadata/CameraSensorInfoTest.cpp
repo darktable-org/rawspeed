@@ -22,12 +22,13 @@
 #include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
 #include <algorithm>                   // for generate
 #include <cstdlib>                     // for rand, srand
-#include <gmock/gmock.h>               // for get, InitGoogleMock, tuple
-#include <gtest/gtest.h> // for IsNullLiteralHelper, AssertionResult
-#include <iostream>      // for operator<<, basic_ostream::operator<<
-#include <limits>        // for numeric_limits
-#include <memory>        // for unique_ptr
-#include <vector>        // for vector, allocator
+#include <gmock/gmock.h>               // for InitGoogleMock
+#include <gtest/gtest.h>               // for ParamIteratorInterface, Message
+#include <iostream>                    // for operator<<, basic_ostream::op...
+#include <limits>                      // for numeric_limits
+#include <memory>                      // for unique_ptr
+#include <tuple>                       // for get, tuple
+#include <vector>                      // for vector
 
 using rawspeed::CameraSensorInfo;
 using std::unique_ptr;

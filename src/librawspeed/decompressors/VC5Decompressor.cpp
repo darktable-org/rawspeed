@@ -27,9 +27,10 @@
   implementation.
  */
 
-#include "rawspeedconfig.h"
+#include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/VC5Decompressor.h"
 #include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for clampBits, roundUpDivision
 #include "common/Optional.h"              // for Optional
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawspeedException.h"     // for RawspeedException

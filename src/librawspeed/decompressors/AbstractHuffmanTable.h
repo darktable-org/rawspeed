@@ -21,12 +21,13 @@
 
 #pragma once
 
-#include "common/Common.h"                // for uint8_t, uint32_t, uint16_t
+#include "common/Common.h"                // for extractHighBits
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/Buffer.h"                    // for Buffer
-#include <algorithm>                      // for copy, adjacent_find, max_e...
+#include <algorithm>                      // for equal, copy, fill, max
 #include <cassert>                        // for assert
 #include <cstddef>                        // for size_t
+#include <cstdint>                        // for uint8_t, uint32_t, uint16_t
 #include <functional>                     // for less, less_equal
 #include <iterator>                       // for back_insert_iterator, back...
 #include <numeric>                        // for accumulate

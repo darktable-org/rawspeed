@@ -21,7 +21,6 @@
 */
 
 #include "decoders/CrwDecoder.h"
-#include "common/Common.h"                 // for uint16_t, uint8_t, uint32_t
 #include "common/Point.h"                  // for iPoint2D
 #include "common/RawspeedException.h"      // for RawspeedException
 #include "decoders/RawDecoderException.h"  // for ThrowRDE
@@ -34,7 +33,7 @@
 #include "tiff/CiffTag.h"                  // for CIFF_MAKEMODEL, CIFF_SHOT...
 #include <array>                           // for array
 #include <cassert>                         // for assert
-#include <cmath>                           // for abs, copysignf, expf, logf
+#include <cmath>                           // for copysignf, expf, logf
 #include <cstring>                         // for memcmp, size_t
 #include <memory>                          // for unique_ptr
 #include <string>                          // for string

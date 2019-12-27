@@ -19,17 +19,18 @@
 */
 
 #include "common/Spline.h" // for Spline, Spline<>::value_type
-#include "common/Common.h" // for uint16_t
 #include "common/Point.h"  // for iPoint2D, iPoint2D::value_type
-#include <algorithm>       // for generate_n
+#include <algorithm>       // for max, generate_n
 #include <array>           // for array
 #include <cassert>         // for assert
-#include <cmath>           // for lround, acos, sin
-#include <gtest/gtest.h>   // for make_tuple, ParamIteratorInterface, Message
+#include <cmath>           // for lround
+#include <cstdint>         // for uint16_t
+#include <cstdlib>         // for exit
+#include <gtest/gtest.h>   // for ParamIteratorInterface, Message, TestPart...
 #include <iterator>        // for begin, end, back_inserter
 #include <limits>          // for numeric_limits
 #include <ostream>         // for operator<<, basic_ostream::operator<<
-#include <stdlib.h>        // for exit
+#include <tuple>           // for make_tuple, get, tuple
 #include <type_traits>     // for __decay_and_strip<>::__type, enable_if_t
 #include <vector>          // for vector
 

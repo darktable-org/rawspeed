@@ -19,7 +19,8 @@
 */
 
 #include "decompressors/PentaxDecompressor.h"
-#include "common/Common.h"                // for uint32_t, uint8_t, uint16_t
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for extractHighBits, isIntN
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -28,6 +29,7 @@
 #include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
 #include <cassert>                        // for assert
+#include <cstdint>                        // for uint8_t, uint32_t, uint16_t
 #include <vector>                         // for vector
 
 namespace rawspeed {

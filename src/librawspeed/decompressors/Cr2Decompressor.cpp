@@ -21,12 +21,13 @@
 */
 
 #include "decompressors/Cr2Decompressor.h"
-#include "common/Common.h"                // for unroll_loop, uint32_t, uint16_t
+#include "common/Array2DRef.h"            // for Array2DRef
 #include "common/Point.h"                 // for iPoint2D, iPoint2D::area_type
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
-#include <algorithm>                      // for copy_n
+#include <algorithm>                      // for copy_n, min
+#include <array>                          // for array
 #include <cassert>                        // for assert
 #include <initializer_list>               // for initializer_list
 

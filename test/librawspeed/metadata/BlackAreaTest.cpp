@@ -20,8 +20,9 @@
 */
 
 #include "metadata/BlackArea.h" // for BlackArea
-#include <gtest/gtest.h> // for IsNullLiteralHelper, AssertionResult, gtest_ar
-#include <memory>        // for unique_ptr
+#include <gtest/gtest.h>        // for ParamIteratorInterface, Message, Tes...
+#include <memory>               // for unique_ptr
+#include <tuple>                // for get, tuple
 
 using rawspeed::BlackArea;
 using std::unique_ptr;

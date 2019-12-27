@@ -21,18 +21,21 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
+#include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/FujiDecompressor.h"
-#include "common/Common.h"                // for uint16_t
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/Point.h"                 // for iPoint2D
-#include "common/RawImage.h"              // for RawImage
+#include "common/RawImage.h"              // for RawImageData, RawImage
+#include "common/RawspeedException.h"     // for RawspeedException
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/Endianness.h"                // for Endianness
-#include "metadata/ColorFilterArray.h"    // for CFA_BLUE
-#include <algorithm>                      // for fill, min
-#include <cmath>                          // for abs
-#include <cstdlib>                        // for abs, size_t
-#include <cstring>                        // for memcpy
+#include "io/Endianness.h"                // for Endianness, Endianness::big
+#include "metadata/ColorFilterArray.h"    // for CFA_BLUE, CFA_GREEN, CFA_RED
+#include <algorithm>                      // for max, fill, min
+#include <cstdint>                        // for uint16_t, uint32_t, uint64_t
+#include <cstdlib>                        // for abs
+#include <cstring>                        // for memcpy, memset
+#include <string>                         // for string
 
 namespace rawspeed {
 

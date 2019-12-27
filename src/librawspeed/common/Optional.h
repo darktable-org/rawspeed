@@ -20,7 +20,8 @@
 
 #pragma once
 
-#include <utility> // for move
+#include <cassert> // for assert
+#include <utility> // IWYU pragma: keep
 
 namespace rawspeed {
 

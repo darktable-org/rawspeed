@@ -20,13 +20,13 @@
 */
 
 #include "interpolators/Cr2sRawInterpolator.h"
-#include "common/Common.h"                 // for uint16_t, clampBits
-#include "common/Point.h"                  // for iPoint2D
-#include "common/RawImage.h"               // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h"  // for RawDecoderException (ptr o...
-#include <array>                           // for array
-#include <cassert>                         // for assert
-#include <type_traits>                     // for is_pod
+#include "common/Common.h"                // for clampBits
+#include "common/Point.h"                 // for iPoint2D
+#include "common/RawImage.h"              // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include <array>                          // for array
+#include <cassert>                        // for assert
+#include <cstdint>                        // for uint16_t
 
 using std::array;
 

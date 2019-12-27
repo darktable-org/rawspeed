@@ -21,7 +21,6 @@
 */
 
 #include "decompressors/AbstractLJpegDecompressor.h"
-#include "common/Common.h"                      // for uint32_t, uint8_t
 #include "common/Point.h"                       // for iPoint2D
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable

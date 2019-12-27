@@ -19,10 +19,10 @@
 */
 
 #include "decoders/AbstractTiffDecoder.h"
-#include "common/Common.h"                // for uint32_t
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "tiff/TiffEntry.h"               // for TiffEntry
 #include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD, Tiff...
+#include <cstdint>                        // for uint32_t
 #include <vector>                         // for vector
 
 namespace rawspeed {

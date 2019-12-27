@@ -22,15 +22,14 @@
 */
 
 #include "tiff/TiffIFD.h"
-#include "common/Common.h"            // for trimSpaces, uint32_t
+#include "common/Common.h"            // for trimSpaces
 #include "common/NORangesSet.h"       // for set
 #include "common/RawspeedException.h" // for RawspeedException
 #include "io/IOException.h"           // for IOException
 #include "tiff/TiffEntry.h"           // for TiffEntry
 #include "tiff/TiffTag.h"             // for TiffTag, MAKE, DNGPRIVATEDATA
 #include <cassert>                    // for assert
-#include <cstdint>                    // for UINT32_MAX
-#include <map>                        // for map, _Rb_tree_const_iterator
+#include <map>                        // for map, operator!=, _Rb_tree_cons...
 #include <memory>                     // for unique_ptr, make_unique
 #include <string>                     // for string, operator==
 #include <utility>                    // for move, pair

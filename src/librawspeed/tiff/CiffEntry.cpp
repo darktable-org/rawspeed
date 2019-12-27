@@ -21,7 +21,6 @@
 */
 
 #include "tiff/CiffEntry.h"
-#include "common/Common.h"               // for uint32_t, uint8_t, uint16_t
 #include "common/NORangesSet.h"          // for set
 #include "io/Buffer.h"                   // for Buffer
 #include "io/ByteStream.h"               // for ByteStream

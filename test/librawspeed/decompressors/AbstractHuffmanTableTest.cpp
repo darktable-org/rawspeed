@@ -19,16 +19,17 @@
 */
 
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
-#include "common/Common.h"                      // for uint8_t, uint32_t
 #include "io/Buffer.h"                          // for Buffer
-#include <algorithm>                            // for min
+#include <algorithm>                            // for max, min
 #include <bitset>                               // for bitset
 #include <cassert>                              // for assert
+#include <cstdint>                              // for uint8_t, uint32_t
 #include <cstdlib>                              // for exit
-#include <gtest/gtest.h>                        // for make_tuple, Message
+#include <gtest/gtest.h>                        // for Message, TestPartResult
 #include <initializer_list>                     // for initializer_list<>::...
 #include <ostream>                              // for operator<<, ostream
 #include <string>                               // for basic_string, operat...
+#include <tuple>                                // for make_tuple, get, tuple
 #include <utility>                              // for move
 #include <vector>                               // for vector
 

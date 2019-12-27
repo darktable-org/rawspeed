@@ -19,13 +19,11 @@
 */
 
 #include "EndiannessTest.h"
-#include "common/Common.h" // for int32_t, int16_t, uint32_t, uint64_t, uint16_t
-#include "io/Endianness.h" // for getHostEndianness, Endianness::big, Endia...
+#include "io/Endianness.h" // for getHostEndianness, Endianness, getByteSwa...
 #include <cstring>         // for memcpy, memcmp
-#include <gtest/gtest.h>   // for Message, AssertionResult, ASSERT_PRED_FOR...
-#include <iomanip>         // for _Setw, setfill, setw, _Setfill
+#include <gtest/gtest.h>   // for ParamIteratorInterface, Message, TestPart...
+#include <iomanip>         // for setfill, setw, _Setw, _Setfill
 #include <iostream>        // for hex, endl, ostream
-#include <utility>         // for get
 
 using rawspeed::Endianness;
 using rawspeed::getBE;

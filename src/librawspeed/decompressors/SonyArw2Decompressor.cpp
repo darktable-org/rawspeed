@@ -20,14 +20,18 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
+#include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/SonyArw2Decompressor.h"
-#include "common/Common.h"                // for uint32_t
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/Point.h"                 // for iPoint2D
-#include "common/RawImage.h"              // for RawImage
+#include "common/RawImage.h"              // for RawImageData, RawImage
+#include "common/RawspeedException.h"     // for RawspeedException
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpLSB.h"                // for BitPumpLSB
 #include <cassert>                        // for assert
+#include <cstdint>                        // for uint16_t, uint32_t, uint8_t
+#include <string>                         // for string
 
 namespace rawspeed {
 

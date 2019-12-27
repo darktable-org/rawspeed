@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "common/Common.h"                           // for uint16_t
 #include "decoders/RawDecoderException.h"            // for ThrowRDE
 #include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
 #include <cassert>                                   // for assert
+#include <cstdint>                                   // for uint16_t
 
 namespace rawspeed {
 

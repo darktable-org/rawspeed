@@ -20,22 +20,22 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"
-#include "ThreadSafetyAnalysis.h" // for GUARDED_BY, REQUIRES
-#include "common/Array2DRef.h"    // for Array2DRef
-#include "common/Common.h"        // for uint32_t, uint8_t, uint16_t, wri...
-#include "common/ErrorLog.h"      // for ErrorLog
-#include "common/Mutex.h"         // for Mutex
-#include "common/Point.h"         // for iPoint2D, iRectangle2D (ptr o...
-#include "common/TableLookUp.h"   // for TableLookUp
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "metadata/BlackArea.h"           // for BlackArea
-#include "metadata/ColorFilterArray.h"    // for ColorFilterArray
-#include <array>                          // for array
-#include <cassert>                        // for assert
-#include <memory>                         // for unique_ptr, operator==
-#include <string>                         // for string
-#include <vector>                         // for vector
+#include "rawspeedconfig.h"            // for WITH_SSE2
+#include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
+#include "common/Array2DRef.h"         // for Array2DRef
+#include "common/Common.h"             // for writeLog, DEBUG_PRIO_ERROR
+#include "common/ErrorLog.h"           // for ErrorLog
+#include "common/Mutex.h"              // for Mutex
+#include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
+#include "common/TableLookUp.h"        // for TableLookUp
+#include "metadata/BlackArea.h"        // for BlackArea
+#include "metadata/ColorFilterArray.h" // for ColorFilterArray
+#include <array>                       // for array
+#include <cassert>                     // for assert
+#include <cstdint>                     // for uint32_t, uint16_t, uint8_t
+#include <memory>                      // for unique_ptr, operator==
+#include <string>                      // for string
+#include <vector>                      // for vector
 
 namespace rawspeed {
 

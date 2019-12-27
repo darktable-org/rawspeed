@@ -23,13 +23,15 @@
 
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
-#include "decompressors/BinaryHuffmanTree.h"    // IWYU pragma: export
+#include "decompressors/BinaryHuffmanTree.h"    // for BinaryHuffmanTree<>:...
 #include "io/BitStream.h"                       // for BitStreamTraits
 #include <algorithm>                            // for for_each
 #include <cassert>                              // for assert
 #include <initializer_list>                     // for initializer_list
 #include <iterator>                             // for advance, next
 #include <memory>                               // for unique_ptr, make_unique
+#include <tuple>                                // for tie
+#include <utility>                              // for pair
 #include <vector>                               // for vector, vector<>::co...
 
 namespace rawspeed {

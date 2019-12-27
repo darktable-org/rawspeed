@@ -23,7 +23,7 @@
 
 #include "decoders/IiqDecoder.h"
 #include "common/Array2DRef.h"                  // for Array2DRef
-#include "common/Common.h"                      // for uint32_t, uint16_t
+#include "common/Mutex.h"                       // for MutexLocker
 #include "common/Point.h"                       // for iPoint2D
 #include "common/Spline.h"                      // for Spline, Spline<>::va...
 #include "decoders/RawDecoder.h"                // for RawDecoder::(anonymous)
@@ -32,14 +32,16 @@
 #include "io/Buffer.h"                          // for Buffer, DataBuffer
 #include "io/ByteStream.h"                      // for ByteStream
 #include "io/Endianness.h"                      // for Endianness, Endianne...
-#include "metadata/CameraMetaData.h"            // for CameraMetaData for CFA
-#include "tiff/TiffIFD.h"                       // for TiffRootIFD, TiffID
+#include "metadata/Camera.h"                    // for Camera
+#include "metadata/CameraMetaData.h"            // for CameraMetaData
+#include "metadata/ColorFilterArray.h"          // for ColorFilterArray
+#include "tiff/TiffIFD.h"                       // for TiffID, TiffRootIFD
 #include <algorithm>                            // for adjacent_find, gener...
 #include <array>                                // for array, array<>::cons...
 #include <cassert>                              // for assert
 #include <cinttypes>                            // for PRIu64
-#include <cmath>                                // for lround()
-#include <cstdlib>                              // for int abs(int)
+#include <cmath>                                // for lround
+#include <cstdlib>                              // for abs
 #include <functional>                           // for greater_equal
 #include <iterator>                             // for advance, next, begin
 #include <memory>                               // for unique_ptr
@@ -48,8 +50,6 @@
 #include <vector>                               // for vector
 
 namespace rawspeed {
-
-class CameraMetaData;
 
 bool IiqDecoder::isAppropriateDecoder(const Buffer* file) {
   assert(file);

@@ -21,13 +21,13 @@
 */
 
 #include "tiff/CiffIFD.h"
-#include "common/Common.h"               // for isIn, uint32_t, uint16_t
+#include "common/Common.h"               // for isIn
 #include "common/NORangesSet.h"          // for set
 #include "io/ByteStream.h"               // for ByteStream
 #include "parsers/CiffParserException.h" // for ThrowCPE
 #include <cassert>                       // for assert
 #include <initializer_list>              // for initializer_list
-#include <map>                           // for map, _Rb_tree_const_iterator
+#include <map>                           // for map, operator!=, _Rb_tree_c...
 #include <memory>                        // for unique_ptr, make_unique
 #include <string>                        // for operator==, string
 #include <utility>                       // for move, pair

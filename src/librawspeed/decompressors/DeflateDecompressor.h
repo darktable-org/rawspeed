@@ -24,8 +24,6 @@
 
 #ifdef HAVE_ZLIB
 
-#include "common/Common.h"                      // for uint32_t
-#include "common/Point.h"                       // for iPoint2D
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/ByteStream.h"                      // for ByteStream
@@ -33,6 +31,8 @@
 #include <utility>                              // for move
 
 namespace rawspeed {
+
+class iPoint2D;
 
 class DeflateDecompressor final : public AbstractDecompressor {
   ByteStream input;

@@ -22,13 +22,13 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint8_t, uint32_t
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable
 #include "io/BitPumpJPEG.h"                     // for BitPumpJPEG
 #include "io/ByteStream.h"                      // for ByteStream
 #include <array>                                // for array
+#include <cstdint>                              // for uint32_t, uint8_t
 
 namespace rawspeed {
 

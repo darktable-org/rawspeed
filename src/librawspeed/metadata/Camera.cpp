@@ -20,14 +20,15 @@
 */
 
 #include "metadata/Camera.h"
-#include "common/Common.h"                    // for split_string, uint32_t
+#include "common/Common.h"                    // for splitString
 #include "common/Point.h"                     // for iPoint2D
 #include "metadata/CameraMetadataException.h" // for ThrowCME
+#include <algorithm>                          // for max
 #include <cctype>                             // for tolower
 #include <cstdio>                             // for size_t
 #include <map>                                // for map
 #include <stdexcept>                          // for out_of_range
-#include <string>                             // for string, allocator, ope...
+#include <string>                             // for string, operator==
 #include <vector>                             // for vector
 
 #ifdef HAVE_PUGIXML

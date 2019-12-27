@@ -21,10 +21,11 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint8_t
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable
+#include <array>                                // for array
+#include <cstdint>                              // for uint8_t
 
 namespace rawspeed {
 

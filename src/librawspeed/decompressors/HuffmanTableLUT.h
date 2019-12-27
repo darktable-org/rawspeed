@@ -21,15 +21,18 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32_t, uint16_t, ...
+#include "common/Common.h"                      // for extractHighBits
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
-#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
+#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
 #include "decompressors/HuffmanTableLookup.h"   // for HuffmanTableLookup
 #include "io/BitStream.h"                       // for BitStreamTraits
 #include <cassert>                              // for assert
 #include <cstddef>                              // for size_t
+#include <cstdint>                              // for int32_t, uint16_t
 #include <memory>                               // for allocator_traits<>::...
+#include <tuple>                                // for tie
 #include <vector>                               // for vector
+// IWYU pragma: no_include <algorithm>
 
 /*
 * The following code is inspired by the IJG JPEG library.

@@ -20,19 +20,21 @@
 
 #include "decompressors/DeflateDecompressor.h" // for DeflateDecompressor
 #include "bench/Common.h"                      // for areaToRectangle
-#include "common/Common.h"                     // for isAligned, isPowerOfTwo
+#include "common/Common.h"                     // for isAligned
 #include "common/Memory.h"                     // for alignedFree
 #include "common/Point.h"                      // for iPoint2D
 #include "common/RawImage.h"                   // for RawImage, RawImageData
-#include "io/Buffer.h"                         // for Buffer
+#include "io/Buffer.h"                         // for Buffer, Buffer::size_...
 #include "io/ByteStream.h"                     // for ByteStream
-#include <benchmark/benchmark.h>               // for Benchmark, BENCHMARK_...
+#include "io/Endianness.h"                     // for Endianness, Endiannes...
+#include <benchmark/benchmark.h>               // for State, Benchmark, BEN...
 #include <cassert>                             // for assert
 #include <cstddef>                             // for size_t
-#include <memory>                              // for unique_ptr
+#include <cstdint>                             // for uint8_t
+#include <memory>                              // for operator!=, unique_ptr
 #include <type_traits>                         // for integral_constant
 #include <utility>                             // for move
-#include <zlib.h>
+#include <zlib.h>                              // for compressBound, compress
 
 #ifndef NDEBUG
 #include <limits> // for numeric_limits

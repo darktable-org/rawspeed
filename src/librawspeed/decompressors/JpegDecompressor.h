@@ -24,11 +24,11 @@
 
 #ifdef HAVE_JPEG
 
-#include "common/Common.h"                      // for uint32_t
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/ByteStream.h"                      // for ByteStream
 #include "io/Endianness.h"                      // for Endianness, Endianne...
+#include <cstdint>                              // for uint32_t
 #include <utility>                              // for move
 
 namespace rawspeed {

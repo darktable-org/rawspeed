@@ -25,7 +25,9 @@
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
 #include "io/BitStream.h"                       // for BitStreamTraits
 #include <cassert>                              // for assert
-#include <utility>                              // for make_pair, pair
+#include <cstdint>                              // for uint64_t
+#include <tuple>                                // for tie
+#include <utility>                              // for pair
 #include <vector>                               // for vector
 
 namespace rawspeed {

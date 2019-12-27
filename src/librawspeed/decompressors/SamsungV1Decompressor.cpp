@@ -21,12 +21,15 @@
 */
 
 #include "decompressors/SamsungV1Decompressor.h"
-#include "common/Common.h"                // for uint32_t, uint16_t, int32_t
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for isIntN
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
+#include <array>                          // for array
+#include <cassert>                        // for assert
 #include <memory>                         // for allocator_traits<>::value_...
 #include <vector>                         // for vector
 

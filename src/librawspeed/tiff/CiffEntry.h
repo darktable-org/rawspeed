@@ -22,10 +22,10 @@
 
 #pragma once
 
-#include "common/Common.h"      // for uint32_t, uint8_t, uint16_t
 #include "common/NORangesSet.h" // for set
 #include "io/ByteStream.h"      // for ByteStream
 #include "tiff/CiffTag.h"       // for CiffTag
+#include <cstdint>              // for uint32_t, uint16_t, uint8_t
 #include <string>               // for string
 #include <vector>               // for vector
 

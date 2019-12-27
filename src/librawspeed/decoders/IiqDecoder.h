@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "common/Common.h"                // for uint32_t
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
+#include <cstdint>                        // for uint32_t, uint16_t
 #include <utility>                        // for move
 #include <vector>                         // for vector
 

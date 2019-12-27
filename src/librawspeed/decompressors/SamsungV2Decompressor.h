@@ -20,10 +20,11 @@
 
 #pragma once
 
-#include "common/Common.h"                             // for uint32_t
 #include "decompressors/AbstractSamsungDecompressor.h" // for AbstractSamsu...
 #include "io/BitPumpMSB32.h"                           // for BitPumpMSB32
 #include "io/ByteStream.h"                             // for ByteStream
+#include <array>                                       // for array
+#include <cstdint>                                     // for uint32_t, uin...
 
 namespace rawspeed {
 

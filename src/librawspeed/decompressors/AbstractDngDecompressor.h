@@ -21,18 +21,17 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32_t
+#include "common/Common.h"                      // for roundUpDivision
 #include "common/Point.h"                       // for iPoint2D
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/ByteStream.h"                      // for ByteStream
 #include <cassert>                              // for assert
+#include <cstdint>                              // for uint32_t
 #include <utility>                              // for move
 #include <vector>                               // for vector
 
 namespace rawspeed {
-
-class RawImage;
 
 struct DngTilingDescription final {
   // The dimensions of the whole image.

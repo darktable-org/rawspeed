@@ -22,11 +22,15 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32_t, uint8_t, uint64_t
-#include "io/Buffer.h"     // for Buffer::size_type
+#include "common/Common.h"  // for bitwidth, extractHighBits
+#include "io/Buffer.h"      // for Buffer::size_type, Buffer
 #include "io/ByteStream.h"  // for ByteStream
-#include "io/IOException.h" // for IOException (ptr only), ThrowIOE
+#include "io/Endianness.h"  // for Endianness, Endianness::unknown
+#include "io/IOException.h" // for ThrowIOE
+#include <algorithm>        // for min
+#include <array>            // for array
 #include <cassert>          // for assert
+#include <cstdint>          // for uint32_t, uint64_t, uint8_t
 #include <cstring>          // for memcpy
 
 namespace rawspeed {

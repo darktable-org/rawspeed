@@ -19,8 +19,8 @@
 */
 
 #include "rawspeedconfig.h"               // for WITH_SSE2
-#include "common/RawImage.h"              // for RawImageDataU16, TableLookUp
-#include "common/Common.h"                // for uint16_t, uint32_t, uint8_t
+#include "common/RawImage.h"              // for RawImageDataU16, TYPE_USHO...
+#include "common/Common.h"                // for clampBits, writeLog, DEBUG...
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D
 #include "common/TableLookUp.h"           // for TableLookUp
@@ -29,7 +29,8 @@
 #include <algorithm>                      // for fill, max, min
 #include <array>                          // for array
 #include <cassert>                        // for assert
-#include <memory>                         // for operator==, unique_ptr
+#include <cstdint>                        // for uint32_t, uint16_t, uint8_t
+#include <memory>                         // for unique_ptr
 #include <vector>                         // for vector
 
 #ifdef WITH_SSE2

@@ -20,8 +20,9 @@
 
 #pragma once
 
-#include <memory>
-#include <type_traits>
+#include <memory>      // for allocator, allocator_traits
+#include <new>         // for operator new
+#include <type_traits> // for enable_if_t, is_nothrow_default_constructible
 
 namespace rawspeed {
 

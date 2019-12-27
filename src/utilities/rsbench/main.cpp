@@ -18,9 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "RawSpeed-API.h"        // for RawDecoder, FileReader, RawImage
+#include "RawSpeed-API.h"        // for RawDecoder, FileReader, HAVE_OPENMP
 #include "common/ChecksumFile.h" // for ChecksumFileEntry, ReadChecksumFile
-#include <benchmark/benchmark.h> // for State, DoNotOptimize, Initialize
+#include <algorithm>             // for max
+#include <benchmark/benchmark.h> // for Counter, Counter::Flags, Counter::k...
 #include <chrono>                // for duration, high_resolution_clock
 #include <ctime>                 // for clock, clock_t
 #include <memory>                // for unique_ptr

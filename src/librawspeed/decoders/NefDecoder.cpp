@@ -20,13 +20,14 @@
 */
 
 #include "decoders/NefDecoder.h"
-#include "common/Common.h"                          // for uint32_t, uint8_t
+#include "common/Array2DRef.h"                      // for Array2DRef
+#include "common/Common.h"                          // for clampBits, round...
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/NikonDecompressor.h"        // for NikonDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/BitPumpMSB.h"                          // for BitPumpMSB
-#include "io/Buffer.h"                              // for Buffer
+#include "io/Buffer.h"                              // for Buffer, DataBuffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for getU16BE, Endian...
 #include "io/IOException.h"                         // for ThrowIOE

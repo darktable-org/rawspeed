@@ -19,10 +19,9 @@
 */
 
 #include "io/FileWriter.h"
-#include "common/Common.h"      // for uint32_t
 #include "io/Buffer.h"          // for Buffer
-#include "io/FileIOException.h" // for FileIOException
-#include <cstdio>               // for fclose, fopen, fwrite, FILE, NULL
+#include "io/FileIOException.h" // for ThrowFIE
+#include <cstdio>               // for fclose, fopen, fwrite, FILE, size_t
 
 #if !defined(__unix__) && !defined(__APPLE__)
 #ifndef NOMINMAX

@@ -20,16 +20,14 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"
-
 #include <algorithm>        // IWYU pragma: keep
 #include <cassert>          // for assert
 #include <climits>          // for CHAR_BIT
-#include <cstdint>          // for uintptr_t
+#include <cstdint>          // for uint8_t, uint16_t, uintptr_t
 #include <cstring>          // for size_t, memcpy
 #include <initializer_list> // for initializer_list
 #include <string>           // for string
-#include <type_traits>      // for enable_if, is_pointer, is_signed, is_uns...
+#include <type_traits>      // for enable_if, is_unsigned, is_pointer, make...
 #include <vector>           // for vector
 
 extern "C" int rawspeed_get_number_of_processor_cores();

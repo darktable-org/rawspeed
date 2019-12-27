@@ -22,12 +22,12 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32_t, BitOrder
+#include "common/Common.h"                      // for BitOrder
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/Buffer.h"                          // for Buffer, Buffer::size_type
 #include "io/ByteStream.h"                      // for ByteStream
 #include "io/Endianness.h"                      // for Endianness
+#include <cstdint>                              // for uint32_t
 #include <utility>                              // for move
 
 namespace rawspeed {

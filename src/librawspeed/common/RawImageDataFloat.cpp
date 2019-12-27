@@ -19,12 +19,13 @@
 */
 
 #include "common/RawImage.h"              // for RawImageDataFloat, TYPE_FL...
-#include "common/Common.h"                // for uint8_t, uint32_t, writeLog
+#include "common/Common.h"                // for writeLog, DEBUG_PRIO_INFO
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea
 #include <algorithm>                      // for max, min
 #include <array>                          // for array
+#include <cstdint>                        // for uint8_t, uint32_t, uint16_t
 #include <memory>                         // for operator==, unique_ptr
 #include <vector>                         // for vector
 

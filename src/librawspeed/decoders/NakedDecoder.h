@@ -21,11 +21,12 @@
 
 #pragma once
 
-#include "common/Common.h"       // for uint32_t, BitOrder::BitOrder_MSB16
+#include "common/Common.h"       // for BitOrder, BitOrder_MSB16
 #include "common/RawImage.h"     // for RawImage
 #include "decoders/RawDecoder.h" // for RawDecoder
+#include <cstdint>               // for uint32_t
 #include <map>                   // for map
-#include <string>                // for string, basic_st...
+#include <string>                // for string
 
 namespace rawspeed {
 

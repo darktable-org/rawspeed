@@ -20,7 +20,8 @@
 */
 
 #include "common/TableLookUp.h"
-#include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
+#include "common/Common.h"                // for clampBits
+#include "decoders/RawDecoderException.h" // for ThrowRDE
 #include <cassert>                        // for assert
 
 namespace rawspeed {

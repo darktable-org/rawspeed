@@ -21,15 +21,17 @@
 */
 
 #include "parsers/CiffParser.h"
-#include "common/Common.h"               // for trimSpaces, uint32_t, uint16_t
+#include "common/Common.h"               // for trimSpaces
 #include "decoders/CrwDecoder.h"         // for CrwDecoder
 #include "decoders/RawDecoder.h"         // for RawDecoder
+#include "io/Buffer.h"                   // for Buffer (ptr only), DataBuffer
 #include "io/ByteStream.h"               // for ByteStream
 #include "io/Endianness.h"               // for Endianness, Endianness::little
 #include "parsers/CiffParserException.h" // for ThrowCPE
 #include "tiff/CiffEntry.h"              // for CiffEntry
 #include "tiff/CiffIFD.h"                // for CiffIFD
 #include "tiff/CiffTag.h"                // for CIFF_MAKEMODEL
+#include <cstdint>                       // for uint16_t, uint32_t
 #include <memory>                        // for unique_ptr, make_unique
 #include <string>                        // for operator==, string
 #include <utility>                       // for move

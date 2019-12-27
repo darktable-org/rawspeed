@@ -19,12 +19,12 @@
 */
 
 #include "decompressors/HuffmanTable.h" // for HuffmanTableLUT, HuffmanTable
-#include "common/Common.h"              // for uint8_t
 #include "io/BitPumpMSB.h"              // for BitPumpMSB, BitStream<>::fil...
 #include "io/Buffer.h"                  // for Buffer, DataBuffer
 #include "io/ByteStream.h"              // for ByteStream
 #include "io/Endianness.h"              // for Endianness, Endianness::little
 #include <array>                        // for array
+#include <cstdint>                      // for uint8_t
 #include <gtest/gtest.h>                // for Test, Message, TestPartResult
 #include <initializer_list>             // for initializer_list<>::const_it...
 #include <utility>                      // for move

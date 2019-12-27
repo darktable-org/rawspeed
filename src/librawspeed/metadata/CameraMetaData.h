@@ -20,17 +20,15 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"
-#include "common/Common.h"   // for uint32_t
-#include "metadata/Camera.h" // for Camera
+#include "rawspeedconfig.h"  // for HAVE_PUGIXML
+#include "metadata/Camera.h" // IWYU pragma: keep
+#include <cstdint>           // for uint32_t
 #include <map>               // for map
 #include <memory>            // for unique_ptr
 #include <string>            // for string
-#include <tuple>             // for tuple
+#include <tuple>             // for tie, operator<, tuple
 
 namespace rawspeed {
-
-class Camera;
 
 struct CameraId {
   std::string make;
