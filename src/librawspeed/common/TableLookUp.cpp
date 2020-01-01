@@ -23,10 +23,14 @@
 #include "common/Common.h"                // for clampBits
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include <cassert>                        // for assert
+#include <cstdint>                        // for uint16_t
+#include <limits>                         // for numeric_limits
 
 namespace rawspeed {
 
-const int TABLE_SIZE = 65536 * 2;
+// How many different values can uint16_t represent?
+constexpr int TABLE_MAX_ELTS = std::numeric_limits<uint16_t>::max() + 1;
+constexpr int TABLE_SIZE = TABLE_MAX_ELTS * 2;
 
 // Creates n numre of tables.
 TableLookUp::TableLookUp(int _ntables, bool _dither)
@@ -41,7 +45,7 @@ void TableLookUp::setTable(int ntable, const std::vector<uint16_t>& table) {
   assert(!table.empty());
 
   const int nfilled = table.size();
-  if (nfilled > 65536)
+  if (nfilled > TABLE_MAX_ELTS)
     ThrowRDE("Table lookup with %i entries is unsupported", nfilled);
 
   if (ntable > ntables) {
@@ -49,7 +53,7 @@ void TableLookUp::setTable(int ntable, const std::vector<uint16_t>& table) {
   }
   uint16_t* t = &tables[ntable * TABLE_SIZE];
   if (!dither) {
-    for (int i = 0; i < 65536; i++) {
+    for (int i = 0; i < TABLE_MAX_ELTS; i++) {
       t[i] = (i < nfilled) ? table[i] : table[nfilled - 1];
     }
     return;
@@ -64,7 +68,7 @@ void TableLookUp::setTable(int ntable, const std::vector<uint16_t>& table) {
     // FIXME: this is completely broken when the curve is non-monotonic.
   }
 
-  for (int i = nfilled; i < 65536; i++) {
+  for (int i = nfilled; i < TABLE_MAX_ELTS; i++) {
     t[i * 2] = table[nfilled - 1];
     t[i * 2 + 1] = 0;
   }
