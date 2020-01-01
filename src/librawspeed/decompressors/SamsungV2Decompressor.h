@@ -39,7 +39,7 @@ protected:
   uint32_t bitDepth;
   int width;
   int height;
-  OptFlags _flags;
+  OptFlags optflags;
   uint16_t initVal;
 
   ByteStream data;
@@ -51,23 +51,19 @@ protected:
   static inline __attribute__((always_inline)) int16_t
   getDiff(BitPumpMSB32* pump, uint32_t len);
 
-  template <OptFlags optflags>
   inline __attribute__((always_inline)) std::array<uint16_t, 16>
   prepareBaselineValues(BitPumpMSB32* pump, int row, int col);
 
-  template <OptFlags optflags>
   inline __attribute__((always_inline)) std::array<uint32_t, 4>
   decodeDiffLengths(BitPumpMSB32* pump, int row);
 
-  template <OptFlags optflags>
   inline __attribute__((always_inline)) std::array<int, 16>
   decodeDifferences(BitPumpMSB32* pump, int row);
 
-  template <OptFlags optflags>
   inline __attribute__((always_inline)) void processBlock(BitPumpMSB32* pump,
                                                           int row, int col);
 
-  template <OptFlags optflags> void decompressRow(int row);
+  void decompressRow(int row);
 
 public:
   SamsungV2Decompressor(const RawImage& image, const ByteStream& bs,
