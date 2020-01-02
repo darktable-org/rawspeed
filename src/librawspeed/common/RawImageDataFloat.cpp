@@ -35,12 +35,12 @@ using std::max;
 namespace rawspeed {
 
 RawImageDataFloat::RawImageDataFloat() {
-  bpp = 4;
+  bpp = sizeof(float);
   dataType = TYPE_FLOAT32;
   }
 
   RawImageDataFloat::RawImageDataFloat(const iPoint2D& _dim, uint32_t _cpp)
-      : RawImageData(_dim, 4, _cpp) {
+      : RawImageData(_dim, sizeof(float), _cpp) {
     dataType = TYPE_FLOAT32;
   }
 

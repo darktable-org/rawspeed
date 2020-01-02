@@ -42,8 +42,8 @@ Cr2Decompressor::Cr2Decompressor(const ByteStream& bs, const RawImage& img)
   if (mRaw->getDataType() != TYPE_USHORT16)
     ThrowRDE("Unexpected data type");
 
-  if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == 2) ||
-        (mRaw->getCpp() == 3 && mRaw->getBpp() == 6)))
+  if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == sizeof(uint16_t)) ||
+        (mRaw->getCpp() == 3 && mRaw->getBpp() == 3 * sizeof(uint16_t))))
     ThrowRDE("Unexpected cpp: %u", mRaw->getCpp());
 
   if (!mRaw->dim.x || !mRaw->dim.y || mRaw->dim.x > 8896 ||

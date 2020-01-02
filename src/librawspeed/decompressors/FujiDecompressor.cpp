@@ -42,7 +42,7 @@ namespace rawspeed {
 FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
     : mRaw(img), input(std::move(input_)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
-      mRaw->getBpp() != 2)
+      mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
   input.setByteOrder(Endianness::big);

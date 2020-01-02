@@ -43,7 +43,7 @@ KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
     : mRaw(img), input(std::move(bs)), bps(bps_),
       uncorrectedRawValues(uncorrectedRawValues_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
-      mRaw->getBpp() != 2)
+      mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
   if (mRaw->dim.x == 0 || mRaw->dim.y == 0 || mRaw->dim.x % 4 != 0 ||

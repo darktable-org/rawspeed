@@ -50,7 +50,7 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
     : mRaw(img), zero_is_bad(!zero_is_not_bad),
       section_split_offset(section_split_offset_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
-      mRaw->getBpp() != 2)
+      mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
   if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % PixelsPerPacket != 0) {

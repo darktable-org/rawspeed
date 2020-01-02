@@ -439,7 +439,7 @@ NikonDecompressor::NikonDecompressor(const RawImage& raw, ByteStream metadata,
                                      uint32_t bitsPS_)
     : mRaw(raw), bitsPS(bitsPS_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
-      mRaw->getBpp() != 2)
+      mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
   if (mRaw->dim.x == 0 || mRaw->dim.y == 0 || mRaw->dim.x % 2 != 0 ||

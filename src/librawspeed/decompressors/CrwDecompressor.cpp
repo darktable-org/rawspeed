@@ -42,7 +42,7 @@ CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
                                  bool lowbits_, ByteStream rawData)
     : mRaw(img), lowbits(lowbits_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
-      mRaw->getBpp() != 2)
+      mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
   const uint32_t width = mRaw->dim.x;

@@ -46,7 +46,7 @@ PentaxDecompressor::PentaxDecompressor(const RawImage& img,
                                        ByteStream* metaData)
     : mRaw(img), ht(SetupHuffmanTable(metaData)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
-      mRaw->getBpp() != 2)
+      mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
   if (!mRaw->dim.x || !mRaw->dim.y || mRaw->dim.x % 2 != 0 ||

@@ -38,8 +38,8 @@ LJpegDecompressor::LJpegDecompressor(const ByteStream& bs, const RawImage& img)
   if (mRaw->getDataType() != TYPE_USHORT16)
     ThrowRDE("Unexpected data type (%u)", mRaw->getDataType());
 
-  if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == 2) ||
-        (mRaw->getCpp() == 3 && mRaw->getBpp() == 6)))
+  if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == sizeof(uint16_t)) ||
+        (mRaw->getCpp() == 3 && mRaw->getBpp() == 3 * sizeof(uint16_t))))
     ThrowRDE("Unexpected component count (%u)", mRaw->getCpp());
 
   if (mRaw->dim.x == 0 || mRaw->dim.y == 0)
