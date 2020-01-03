@@ -7572,6 +7572,7 @@
 		<Crop x="0" y="0" width="-64" height="0"/>
 		<Sensor black="139" white="4095"/>
 		<Aliases>
+			<Alias>DC-TZ91</Alias>
 			<Alias>DC-ZS70</Alias>
 			<Alias>DC-FZ91</Alias>
 			<Alias>DC-FZ92</Alias>
@@ -7589,6 +7590,7 @@
 		<Crop x="0" y="0" width="-64" height="0"/>
 		<Sensor black="139" white="4095"/>
 		<Aliases>
+			<Alias>DC-TZ91</Alias>
 			<Alias>DC-ZS70</Alias>
 			<Alias>DC-FZ91</Alias>
 			<Alias>DC-FZ92</Alias>
