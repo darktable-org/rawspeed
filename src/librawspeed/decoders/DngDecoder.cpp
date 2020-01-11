@@ -689,7 +689,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) {
   if (!raw->hasEntry(BLACKLEVEL))
     return true;
 
-  if (mRaw->getCpp() != 1)
+  if ((mRaw->getCpp() < 1) || (mRaw->getCpp() > 2))
     return false;
 
   TiffEntry* black_entry = raw->getEntry(BLACKLEVEL);
