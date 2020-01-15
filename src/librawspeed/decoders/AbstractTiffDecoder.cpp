@@ -34,9 +34,9 @@ const TiffIFD* AbstractTiffDecoder::getIFDWithLargestImage(TiffTag filter) const
   if (ifds.empty())
     ThrowRDE("No suitable IFD with tag 0x%04x found.", filter);
 
-  auto res = ifds[0];
+  const auto* res = ifds[0];
   uint32_t width = res->getEntry(IMAGEWIDTH)->getU32();
-  for (auto ifd : ifds) {
+  for (const auto* ifd : ifds) {
     TiffEntry* widthE = ifd->getEntry(IMAGEWIDTH);
     // guard against random maker note entries with the same tag
     if (widthE->count == 1 && widthE->getU32() > width) {

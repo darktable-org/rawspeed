@@ -64,7 +64,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
     offset = mRootIFD->getEntryRecursive(CANON_RAW_DATA_OFFSET)->getU32();
   else {
     // D2000 is oh so special...
-    auto ifd = mRootIFD->getIFDWithTag(CFAPATTERN);
+    const auto* ifd = mRootIFD->getIFDWithTag(CFAPATTERN);
     if (! ifd->hasEntry(STRIPOFFSETS))
       ThrowRDE("Couldn't find offset");
 

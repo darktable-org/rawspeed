@@ -65,7 +65,7 @@ bool RafDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 RawImage RafDecoder::decodeRawInternal() {
-  auto raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
+  const auto* raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
   uint32_t height = 0;
   uint32_t width = 0;
 
@@ -322,7 +322,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 }
 
 int RafDecoder::isCompressed() {
-  auto raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
+  const auto* raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
   uint32_t height = 0;
   uint32_t width = 0;
 

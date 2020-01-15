@@ -64,7 +64,7 @@ bool NefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 RawImage NefDecoder::decodeRawInternal() {
-  auto raw = mRootIFD->getIFDWithTag(CFAPATTERN);
+  const auto* raw = mRootIFD->getIFDWithTag(CFAPATTERN);
   auto compression = raw->getEntry(COMPRESSION)->getU32();
 
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
@@ -204,7 +204,7 @@ bool NefDecoder::NEFIsUncompressedRGB(const TiffIFD* raw) {
 }
 
 void NefDecoder::DecodeUncompressed() {
-  auto raw = getIFDWithLargestImage(CFAPATTERN);
+  const auto* raw = getIFDWithLargestImage(CFAPATTERN);
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
   uint32_t yPerSlice = raw->getEntry(ROWSPERSTRIP)->getU32();
@@ -343,7 +343,7 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
 }
 
 void NefDecoder::DecodeD100Uncompressed() {
-  auto ifd = mRootIFD->getIFDWithTag(STRIPOFFSETS, 1);
+  const auto* ifd = mRootIFD->getIFDWithTag(STRIPOFFSETS, 1);
 
   uint32_t offset = ifd->getEntry(STRIPOFFSETS)->getU32();
   // Hardcode the sizes as at least the width is not correctly reported
@@ -365,7 +365,7 @@ void NefDecoder::DecodeD100Uncompressed() {
 }
 
 void NefDecoder::DecodeSNefUncompressed() {
-  auto raw = getIFDWithLargestImage(CFAPATTERN);
+  const auto* raw = getIFDWithLargestImage(CFAPATTERN);
   uint32_t offset = raw->getEntry(STRIPOFFSETS)->getU32();
   uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
@@ -396,7 +396,7 @@ void NefDecoder::checkSupportInternal(const CameraMetaData* meta) {
 
 string NefDecoder::getMode() {
   ostringstream mode;
-  auto raw = getIFDWithLargestImage(CFAPATTERN);
+  const auto* raw = getIFDWithLargestImage(CFAPATTERN);
   int compression = raw->getEntry(COMPRESSION)->getU32();
   uint32_t bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
 
@@ -414,7 +414,7 @@ string NefDecoder::getMode() {
 string NefDecoder::getExtendedMode(const string &mode) {
   ostringstream extended_mode;
 
-  auto ifd = mRootIFD->getIFDWithTag(CFAPATTERN);
+  const auto* ifd = mRootIFD->getIFDWithTag(CFAPATTERN);
   uint32_t width = ifd->getEntry(IMAGEWIDTH)->getU32();
   uint32_t height = ifd->getEntry(IMAGELENGTH)->getU32();
 

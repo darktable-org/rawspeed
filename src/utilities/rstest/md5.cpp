@@ -192,7 +192,7 @@ void md5_hash(const uint8_t* message, size_t len, md5_state* hash) {
 
 std::string hash_to_string(const md5_state& hash) {
   std::array<char, 2 * sizeof(hash) + 1> res;
-  auto* h = reinterpret_cast<const uint8_t*>(&hash[0]);
+  const auto* h = reinterpret_cast<const uint8_t*>(&hash[0]);
   for (int i = 0; i < static_cast<int>(sizeof(hash)); ++i)
     snprintf(&res[2 * i], 3, "%02x", h[i]);
   res[32] = 0;

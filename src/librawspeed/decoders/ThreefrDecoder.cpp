@@ -51,7 +51,7 @@ bool ThreefrDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 RawImage ThreefrDecoder::decodeRawInternal() {
-  auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS, 1);
+  const auto* raw = mRootIFD->getIFDWithTag(STRIPOFFSETS, 1);
   uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
   uint32_t off = raw->getEntry(STRIPOFFSETS)->getU32();

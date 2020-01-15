@@ -417,13 +417,13 @@ void RawImageData::fixBadPixelsThread(int start_y, int end_y) {
   int gw = (uncropped_dim.x + 15) / 32;
 
   for (int y = start_y; y < end_y; y++) {
-    auto* bad_map =
+    const auto* bad_map =
         reinterpret_cast<const uint32_t*>(&mBadPixelMap[y * mBadPixelMapPitch]);
     for (int x = 0; x < gw; x++) {
       // Test if there is a bad pixel within these 32 pixels
       if (bad_map[x] == 0)
         continue;
-      auto* bad = reinterpret_cast<const uint8_t*>(&bad_map[x]);
+      const auto* bad = reinterpret_cast<const uint8_t*>(&bad_map[x]);
       // Go through each pixel
       for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 8; j++) {

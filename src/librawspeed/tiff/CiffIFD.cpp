@@ -175,7 +175,7 @@ std::vector<const CiffIFD*> CiffIFD::getIFDsWithTagIf(CiffTag tag,
 
   const auto found = mEntry.find(tag);
   if (found != mEntry.end()) {
-    const auto entry = found->second.get();
+    const auto* const entry = found->second.get();
     if (f(entry))
       matchingIFDs.push_back(this);
   }
@@ -195,7 +195,7 @@ const CiffEntry* CiffIFD::getEntryRecursiveIf(CiffTag tag,
 
   const auto found = mEntry.find(tag);
   if (found != mEntry.end()) {
-    const auto entry = found->second.get();
+    const auto* const entry = found->second.get();
     if (f(entry))
       return entry;
   }

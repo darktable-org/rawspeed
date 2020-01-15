@@ -69,7 +69,7 @@ std::unique_ptr<RawDecoder> CiffParser::getDecoder(const CameraMetaData* meta) {
   const auto potentials(mRootIFD->getIFDsWithTag(CIFF_MAKEMODEL));
 
   for (const auto& potential : potentials) {
-    const auto mm = potential->getEntry(CIFF_MAKEMODEL);
+    const auto* const mm = potential->getEntry(CIFF_MAKEMODEL);
     const string make = trimSpaces(mm->getString());
 
     if (make == "Canon")

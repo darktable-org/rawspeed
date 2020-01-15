@@ -204,7 +204,7 @@ int main(int argc, char* argv[]) { // NOLINT
     r = d->mRaw;
 
     const auto errors = r->getErrors();
-    for (auto& error : errors)
+    for (const auto& error : errors)
       fprintf(stderr, "WARNING: [rawspeed] %s\n", error.c_str());
 
     fprintf(stdout, "blackLevel: %d\n", r->blackLevel);

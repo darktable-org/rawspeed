@@ -162,7 +162,7 @@ inline void Cr2sRawInterpolator::interpolate_422(int w, int h) {
   assert(h > 0);
 
   for (int y = 0; y < h; y++) {
-    auto data = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
+    auto* data = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
 
     interpolate_422_row<version>(data, w);
   }

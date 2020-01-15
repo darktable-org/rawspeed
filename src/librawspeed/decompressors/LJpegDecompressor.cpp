@@ -181,7 +181,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   // For y, we can simply stop decoding when we reached the border.
   for (unsigned y = 0; y < h; ++y) {
     auto destY = offY + y;
-    auto dest =
+    auto* dest =
         reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(offX, destY));
 
     copy_n(predNext, N_COMP, pred.data());

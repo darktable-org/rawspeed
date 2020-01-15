@@ -54,7 +54,7 @@ bool OrfDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 ByteStream OrfDecoder::handleSlices() const {
-  auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
+  const auto* raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
 
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
@@ -100,7 +100,7 @@ ByteStream OrfDecoder::handleSlices() const {
 }
 
 RawImage OrfDecoder::decodeRawInternal() {
-  auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
+  const auto* raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
 
   int compression = raw->getEntry(COMPRESSION)->getU32();
   if (1 != compression)

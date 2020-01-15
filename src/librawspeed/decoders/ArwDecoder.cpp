@@ -88,7 +88,7 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
     key = key << 8 | head[i - 1];
 
   // "Decrypt" the whole image buffer
-  auto image_data = mFile->getData(off, len);
+  const auto* image_data = mFile->getData(off, len);
   auto image_decoded = Buffer::Create(len);
   SonyDecrypt(reinterpret_cast<const uint32_t*>(image_data),
               reinterpret_cast<uint32_t*>(image_decoded.get()), len / 4, key);

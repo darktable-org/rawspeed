@@ -54,7 +54,7 @@ bool SrwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 RawImage SrwDecoder::decodeRawInternal() {
-  auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
+  const auto* raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
 
   int compression = raw->getEntry(COMPRESSION)->getU32();
   const int bits = raw->getEntry(BITSPERSAMPLE)->getU32();

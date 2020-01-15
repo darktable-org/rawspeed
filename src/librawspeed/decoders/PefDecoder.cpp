@@ -50,7 +50,7 @@ bool PefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 RawImage PefDecoder::decodeRawInternal() {
-  auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
+  const auto* raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
 
   int compression = raw->getEntry(COMPRESSION)->getU32();
 
