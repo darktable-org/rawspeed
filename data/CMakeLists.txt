@@ -8,5 +8,6 @@ if(USE_XMLLINT AND XMLLINT_FOUND)
 endif()
 
 if(WITH_PUGIXML)
+  FILE(COPY cameras.xml showcameras.xsl DESTINATION ${DARKTABLE_DATADIR}/rawspeed)
   install(FILES cameras.xml showcameras.xsl DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/rawspeed)
 endif()
