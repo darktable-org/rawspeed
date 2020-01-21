@@ -19,7 +19,8 @@
 */
 
 #include "decompressors/NikonDecompressor.h"
-#include "common/Common.h"                // for uint32_t, clampBits, uint16_t
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for extractHighBits, clampBits
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -28,6 +29,7 @@
 #include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
 #include <cassert>                        // for assert
+#include <cstdint>                        // for uint32_t, uint16_t, int16_t
 #include <cstdio>                         // for size_t
 #include <vector>                         // for vector
 
@@ -227,7 +229,7 @@ class NikonLASDecompressor {
       } else {
         l = 8;
         while (code > dctbl1.maxcode[l]) {
-          temp = input >> (15 - l) & 1;
+          temp = extractHighBits(input, l, /*effectiveBitwidth=*/15) & 1;
           code = (code << 1) | temp;
           l++;
         }
@@ -257,7 +259,7 @@ class NikonLASDecompressor {
       }
 
       if (rv) {
-        int x = input >> (16 - l - rv) & ((1 << rv) - 1);
+        int x = extractHighBits(input, l + rv) & ((1 << rv) - 1);
         if ((x & (1 << (rv - 1))) == 0)
           x -= (1 << rv) - 1;
         dctbl1.bigTable[i] =
@@ -302,7 +304,7 @@ public:
    *
    *--------------------------------------------------------------
    */
-  int decodeNext(BitPumpMSB& bits) { // NOLINT: google-runtime-references
+  int decodeDifference(BitPumpMSB& bits) { // NOLINT: google-runtime-references
     int rv;
     int l;
     int temp;
@@ -437,7 +439,7 @@ NikonDecompressor::NikonDecompressor(const RawImage& raw, ByteStream metadata,
                                      uint32_t bitsPS_)
     : mRaw(raw), bitsPS(bitsPS_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
-      mRaw->getBpp() != 2)
+      mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
   if (mRaw->dim.x == 0 || mRaw->dim.y == 0 || mRaw->dim.x % 2 != 0 ||
@@ -492,7 +494,7 @@ void NikonDecompressor::decompress(BitPumpMSB* bits, int start_y, int end_y) {
   for (int row = start_y; row < end_y; row++) {
     std::array<int, 2> pred = pUp[row & 1];
     for (int col = 0; col < out.width; col++) {
-      pred[col & 1] += ht.decodeNext(*bits);
+      pred[col & 1] += ht.decodeDifference(*bits);
       if (col < 2)
         pUp[row & 1][col & 1] = pred[col & 1];
       rawdata->setWithLookUp(clampBits(pred[col & 1], 15),

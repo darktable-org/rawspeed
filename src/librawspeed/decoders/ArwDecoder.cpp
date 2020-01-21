@@ -20,7 +20,7 @@
 */
 
 #include "decoders/ArwDecoder.h"
-#include "common/Common.h"                          // for uint32_t, uint8_t
+#include "common/Common.h"                          // for roundDown
 #include "common/Point.h"                           // for iPoint2D
 #include "common/RawspeedException.h"               // for RawspeedException
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
@@ -35,6 +35,7 @@
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for DNGPRIVATEDATA
+#include <array>                                    // for array
 #include <cassert>                                  // for assert
 #include <cstring>                                  // for memcpy, size_t
 #include <memory>                                   // for unique_ptr
@@ -87,7 +88,7 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
     key = key << 8 | head[i - 1];
 
   // "Decrypt" the whole image buffer
-  auto image_data = mFile->getData(off, len);
+  const auto* image_data = mFile->getData(off, len);
   auto image_decoded = Buffer::Create(len);
   SonyDecrypt(reinterpret_cast<const uint32_t*>(image_data),
               reinterpret_cast<uint32_t*>(image_decoded.get()), len / 4, key);

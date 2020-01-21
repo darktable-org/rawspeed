@@ -19,7 +19,6 @@
 */
 
 #include "fuzz/Common.h"
-#include "common/Common.h"             // for uint32_t
 #include "common/Point.h"              // for iPoint2D
 #include "common/RawImage.h"           // for RawImage, RawImageData, RawIm...
 #include "common/RawspeedException.h"  // for ThrowRSE
@@ -27,6 +26,7 @@
 #include "io/IOException.h"            // for ThrowIOE
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray, CFAColor
 #include <cassert>                     // for assert
+#include <cstdint>                     // for uint32_t
 #include <limits>                      // for numeric_limits
 
 rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs) {

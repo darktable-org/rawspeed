@@ -23,6 +23,7 @@
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/BitPumpMSB.h"                      // for BitPumpMSB
+#include <cstdint>                              // for uint32_t
 
 namespace rawspeed {
 

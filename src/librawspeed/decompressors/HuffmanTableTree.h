@@ -23,13 +23,15 @@
 
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
-#include "decompressors/BinaryHuffmanTree.h"    // IWYU pragma: export
+#include "decompressors/BinaryHuffmanTree.h"    // for BinaryHuffmanTree<>:...
 #include "io/BitStream.h"                       // for BitStreamTraits
 #include <algorithm>                            // for for_each
 #include <cassert>                              // for assert
 #include <initializer_list>                     // for initializer_list
 #include <iterator>                             // for advance, next
 #include <memory>                               // for unique_ptr, make_unique
+#include <tuple>                                // for tie
+#include <utility>                              // for pair
 #include <vector>                               // for vector, vector<>::co...
 
 namespace rawspeed {
@@ -86,12 +88,7 @@ protected:
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    this->fullDecode = fullDecode_;
-    this->fixDNGBug16 = fixDNGBug16_;
-
-    assert(!nCodesPerLength.empty());
-    assert(maxCodesCount() > 0);
-    assert(codeValues.size() == maxCodesCount());
+    AbstractHuffmanTable::setup(fullDecode_, fixDNGBug16_);
 
     auto currValue = codeValues.cbegin();
     for (auto codeLen = 1UL; codeLen < nCodesPerLength.size(); codeLen++) {
@@ -119,14 +116,16 @@ public:
     tree.pruneLeaflessBranches();
   }
 
-  template <typename BIT_STREAM> inline int decodeLength(BIT_STREAM& bs) const {
+  template <typename BIT_STREAM>
+  inline int decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(!fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
 
-  template <typename BIT_STREAM> inline int decodeNext(BIT_STREAM& bs) const {
+  template <typename BIT_STREAM>
+  inline int decodeDifference(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(fullDecode);

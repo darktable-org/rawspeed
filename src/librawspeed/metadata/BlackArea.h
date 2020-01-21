@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32_t
+#include <cstdint> // for uint32_t
 
 namespace rawspeed {
 

@@ -18,14 +18,14 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "io/BitPumpJPEG.h" // for BitPumpJPEG, BitStream<>::fillCache
-#include "common/Common.h"  // for uint8_t, uint32_t
+#include "io/BitPumpJPEG.h" // for BitPumpJPEG
 #include "io/BitPumpTest.h" // for Endianness, Pattern, (anonymous), Buffer
 #include "io/Buffer.h"      // for Buffer, DataBuffer
 #include "io/ByteStream.h"  // for ByteStream
 #include "io/Endianness.h"  // for Endianness, Endianness::big, Endianness:...
 #include <array>            // for array
-#include <gtest/gtest.h>    // for Test, Message, TestInfo (ptr only), ASSE...
+#include <cstdint>          // for uint8_t, uint32_t
+#include <gtest/gtest.h>    // for Test, Message, SuiteApiResolver, TestInf...
 #include <initializer_list> // for initializer_list
 
 using rawspeed::BitPumpJPEG;

@@ -22,18 +22,18 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint8_t, uint32_t
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable
 #include "io/BitPumpJPEG.h"                     // for BitPumpJPEG
 #include "io/ByteStream.h"                      // for ByteStream
 #include <array>                                // for array
+#include <cstdint>                              // for uint32_t, uint8_t
 
 namespace rawspeed {
 
 class CrwDecompressor final : public AbstractDecompressor {
-  using crw_hts = std::array<std::array<HuffmanTable, 2>, 2>;
+  using crw_hts = std::array<HuffmanTable, 2>;
 
   RawImage mRaw;
   crw_hts mHuff;
@@ -52,9 +52,8 @@ private:
   static HuffmanTable makeDecoder(const uint8_t* ncpl, const uint8_t* values);
   static crw_hts initHuffTables(uint32_t table);
 
-  inline static void decodeBlock(std::array<int, 64>* diffBuf,
-                                 const crw_hts& mHuff, BitPumpJPEG* lPump,
-                                 BitPumpJPEG* iPump);
+  inline static void decodeBlock(std::array<int16_t, 64>* diffBuf,
+                                 const crw_hts& mHuff, BitPumpJPEG* bs);
 };
 
 } // namespace rawspeed

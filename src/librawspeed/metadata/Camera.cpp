@@ -20,14 +20,15 @@
 */
 
 #include "metadata/Camera.h"
-#include "common/Common.h"                    // for split_string, uint32_t
+#include "common/Common.h"                    // for splitString
 #include "common/Point.h"                     // for iPoint2D
 #include "metadata/CameraMetadataException.h" // for ThrowCME
+#include <algorithm>                          // for max
 #include <cctype>                             // for tolower
 #include <cstdio>                             // for size_t
 #include <map>                                // for map
 #include <stdexcept>                          // for out_of_range
-#include <string>                             // for string, allocator, ope...
+#include <string>                             // for string, operator==
 #include <vector>                             // for vector
 
 #ifdef HAVE_PUGIXML
@@ -140,7 +141,7 @@ void Camera::parseCFA(const xml_node &cur) {
                    make.c_str(), model.c_str());
         }
 
-        auto c1 = c.child_value();
+        const auto* c1 = c.child_value();
         CFAColor c2;
 
         try {
@@ -314,7 +315,7 @@ const CameraSensorInfo* Camera::getSensorInfo(int iso) const {
     return &sensorInfo.front();
 
   vector<const CameraSensorInfo*> candidates;
-  for (auto& i : sensorInfo) {
+  for (const auto& i : sensorInfo) {
     if (i.isIsoWithin(iso))
       candidates.push_back(&i);
   }
@@ -322,7 +323,7 @@ const CameraSensorInfo* Camera::getSensorInfo(int iso) const {
   if (candidates.size() == 1)
     return candidates.front();
 
-  for (auto i : candidates) {
+  for (const auto* i : candidates) {
     if (!i->isDefault())
       return i;
   }

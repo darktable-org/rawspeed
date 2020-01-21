@@ -20,9 +20,8 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"
-#include "common/RawspeedException.h"
-#include <string>
+#include "rawspeedconfig.h"           // for RAWSPEED_NOINLINE, RAWSPEED_UN...
+#include "common/RawspeedException.h" // for RawspeedException, ThrowExcept...
 
 namespace rawspeed {
 

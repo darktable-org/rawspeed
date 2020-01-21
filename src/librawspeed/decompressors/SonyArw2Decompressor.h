@@ -26,8 +26,6 @@
 
 namespace rawspeed {
 
-class RawImage;
-
 class SonyArw2Decompressor final : public AbstractDecompressor {
   void decompressRow(int row) const;
   void decompressThread() const noexcept;

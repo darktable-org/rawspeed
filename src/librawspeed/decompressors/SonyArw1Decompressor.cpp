@@ -21,7 +21,8 @@
 */
 
 #include "decompressors/SonyArw1Decompressor.h"
-#include "common/Common.h"                // for uint32_t, uint8_t, uint16_t
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for isIntN
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -33,7 +34,7 @@ namespace rawspeed {
 
 SonyArw1Decompressor::SonyArw1Decompressor(const RawImage& img) : mRaw(img) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
-      mRaw->getBpp() != 2)
+      mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
   const uint32_t w = mRaw->dim.x;

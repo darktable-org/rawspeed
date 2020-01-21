@@ -20,11 +20,11 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32_t
-#include "common/Point.h"  // for iPoint2D
-#include <map>             // for map
-#include <string>          // for string
-#include <vector>          // for vector
+#include "common/Point.h" // for iPoint2D
+#include <cstdint>        // for uint32_t
+#include <map>            // for map
+#include <string>         // for string
+#include <vector>         // for vector
 
 namespace rawspeed {
 

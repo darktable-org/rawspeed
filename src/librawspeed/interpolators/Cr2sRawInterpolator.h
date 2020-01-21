@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint16_t
-#include <array>           // for array
+#include <array>   // for array
+#include <cstdint> // for uint16_t
 
 namespace rawspeed {
 

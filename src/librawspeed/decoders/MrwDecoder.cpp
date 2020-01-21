@@ -21,7 +21,6 @@
 */
 
 #include "decoders/MrwDecoder.h"
-#include "common/Common.h"                          // for uint32_t
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
@@ -32,7 +31,7 @@
 #include "parsers/TiffParser.h"                     // for TiffParser
 #include "tiff/TiffIFD.h"                           // for TiffRootIFDOwner
 #include <cassert>                                  // for assert
-#include <cstring>                                  // for memcmp, size_t
+#include <cstring>                                  // for memcmp
 #include <memory>                                   // for unique_ptr
 
 namespace rawspeed {

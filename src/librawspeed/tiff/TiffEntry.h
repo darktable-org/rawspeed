@@ -22,9 +22,10 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32_t, uint8_t, uint16_t, int32_t, int16_t
 #include "io/ByteStream.h" // for ByteStream
 #include "tiff/TiffTag.h"  // for TiffTag
+#include <array>           // for array
+#include <cstdint>         // for uint32_t, uint16_t, uint8_t, int16_t, int...
 #include <string>          // for string
 #include <vector>          // for vector
 

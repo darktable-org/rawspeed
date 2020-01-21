@@ -21,10 +21,9 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"
+#include "rawspeedconfig.h"             // for RAWSPEED_NOINLINE, RAWSPEED_...
 #include "common/RawspeedException.h"   // for ThrowExceptionHelper
-#include "parsers/RawParserException.h" // for ThrowRPE, RawParserException
-#include <string>
+#include "parsers/RawParserException.h" // for RawParserException
 
 namespace rawspeed {
 

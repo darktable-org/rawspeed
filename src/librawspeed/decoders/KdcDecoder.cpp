@@ -20,19 +20,22 @@
 */
 
 #include "decoders/KdcDecoder.h"
-#include "common/Common.h"                          // for uint32_t, uint16_t
-#include "common/NORangesSet.h"                     // for NORangesSet
+#include "common/NORangesSet.h"                     // for set
 #include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
+#include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer
-#include "io/Endianness.h"                          // for Endianness
+#include "io/Buffer.h"                              // for Buffer, DataBuffer
+#include "io/ByteStream.h"                          // for ByteStream
+#include "io/Endianness.h"                          // for Endianness, Endi...
 #include "metadata/Camera.h"                        // for Hints
 #include "parsers/TiffParserException.h"            // for TiffParserException
 #include "tiff/TiffEntry.h"                         // for TiffEntry
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD
-#include "tiff/TiffTag.h"                           // for TiffTag::COMPRES...
+#include "tiff/TiffIFD.h"                           // for TiffRootIFD, TiffID
+#include "tiff/TiffTag.h"                           // for KODAK_IFD2, COMP...
+#include <array>                                    // for array
 #include <cassert>                                  // for assert
+#include <cstdint>                                  // for uint32_t, uint64_t
+#include <limits>                                   // for numeric_limits
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for operator==, string
 

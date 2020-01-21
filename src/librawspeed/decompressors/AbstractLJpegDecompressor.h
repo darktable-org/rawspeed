@@ -21,13 +21,13 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32_t, uint16_t
 #include "common/RawImage.h"                    // for RawImage
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable
 #include "io/ByteStream.h"                      // for ByteStream
 #include <array>                                // for array
+#include <cstdint>                              // for uint32_t, uint16_t
 #include <memory>                               // for unique_ptr
 #include <vector>                               // for vector
 

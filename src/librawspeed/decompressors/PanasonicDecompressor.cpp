@@ -20,17 +20,19 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
+#include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/PanasonicDecompressor.h"
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for extractHighBits, rawspeed_...
 #include "common/Mutex.h"                 // for MutexLocker
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/Buffer.h"                    // for Buffer, Buffer::size_type
-#include <algorithm>                      // for generate_n, min
+#include <algorithm>                      // for max, generate_n, min
 #include <array>                          // for array
 #include <cassert>                        // for assert
-#include <cstddef>                        // for size_t
+#include <cstdint>                        // for uint32_t, uint8_t, uint16_t
 #include <iterator>                       // for back_insert_iterator, back...
 #include <limits>                         // for numeric_limits
 #include <memory>                         // for allocator_traits<>::value_...
@@ -48,7 +50,7 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
     : mRaw(img), zero_is_bad(!zero_is_not_bad),
       section_split_offset(section_split_offset_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
-      mRaw->getBpp() != 2)
+      mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
   if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % PixelsPerPacket != 0) {
@@ -182,7 +184,7 @@ inline void PanasonicDecompressor::processPixelPacket(
     const int c = p & 1;
 
     if (u == 2) {
-      sh = 4 >> (3 - bits->getBits(2));
+      sh = extractHighBits(4U, bits->getBits(2), /*effectiveBitwidth=*/3);
       u = -1;
     }
 

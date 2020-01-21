@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include "common/Common.h"                // for uint32_t
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "io/ByteStream.h"                // for ByteStream
 #include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
+#include <cstdint>                        // for uint32_t
 #include <utility>                        // for move
 
 namespace rawspeed {

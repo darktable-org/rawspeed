@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint16_t
-#include <vector>          // for vector
+#include <cstdint> // for uint16_t
+#include <vector>  // for vector
 
 namespace rawspeed {
 

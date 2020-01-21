@@ -20,12 +20,12 @@
 
 #pragma once
 
-#include "common/Common.h"                // for uint32_t, uint16_t
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "decoders/RawDecoder.h"          // for RawDecoder::RawSlice
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
 #include <array>                          // for array
+#include <cstdint>                        // for uint8_t, uint16_t, uint32_t
 #include <string>                         // for string
 #include <utility>                        // for move
 #include <vector>                         // for vector

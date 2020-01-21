@@ -21,6 +21,8 @@
 */
 
 #include "decompressors/KodakDecompressor.h"
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for extractHighBits, isIntN
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -29,6 +31,7 @@
 #include <algorithm>                      // for min
 #include <array>                          // for array
 #include <cassert>                        // for assert
+#include <cstdint>                        // for uint32_t, uint8_t, uint16_t
 #include <utility>                        // for move
 
 namespace rawspeed {
@@ -40,7 +43,7 @@ KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
     : mRaw(img), input(std::move(bs)), bps(bps_),
       uncorrectedRawValues(uncorrectedRawValues_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
-      mRaw->getBpp() != 2)
+      mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
   if (mRaw->dim.x == 0 || mRaw->dim.y == 0 || mRaw->dim.x % 4 != 0 ||
@@ -97,7 +100,8 @@ KodakDecompressor::decodeSegment(const uint32_t bsize) {
       bits += 32;
     }
 
-    uint32_t diff = static_cast<uint32_t>(bitbuf) & (0xffff >> (16 - len));
+    uint32_t diff = static_cast<uint32_t>(bitbuf) &
+                    extractHighBits(0xffffU, len, /*effectiveBitwidth=*/16);
     bitbuf >>= len;
     bits -= len;
 

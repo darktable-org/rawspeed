@@ -20,10 +20,11 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint8_t, uint32_t
+#include "common/Common.h" // for bitwidth
 #include "io/BitStream.h"  // for BitStreamCacheRightInLeftOut, BitStream
 #include "io/Buffer.h"     // for Buffer::size_type
 #include "io/Endianness.h" // for getBE
+#include <cstdint>         // for uint8_t, uint32_t, uint64_t
 
 namespace rawspeed {
 
@@ -69,8 +70,8 @@ inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uint8_t* input,
         // We should not pop() them, to avoid issues with fillLevel becoming 0.
         cache.cache &= ~0xFFULL;
         // And fully fill the empty space in cache with zeros.
-        cache.cache <<= 64 - cache.fillLevel;
-        cache.fillLevel = 64;
+        cache.cache <<= bitwidth(cache.cache) - cache.fillLevel;
+        cache.fillLevel = bitwidth(cache.cache);
 
         // No further reading from this buffer shall happen.
         // Do signal that by stating that we are at the end of the buffer.

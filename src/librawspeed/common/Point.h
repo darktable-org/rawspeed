@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include <algorithm> // for max, min
-#include <cassert>   // for assert
-#include <type_traits> // for make_signed
+#include <algorithm>   // for max, min
+#include <cstddef>     // for size_t
+#include <type_traits> // for make_signed, make_signed<>::type
 
 namespace rawspeed {
 

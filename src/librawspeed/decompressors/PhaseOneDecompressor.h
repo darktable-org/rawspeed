@@ -30,8 +30,6 @@
 
 namespace rawspeed {
 
-class RawImage;
-
 struct PhaseOneStrip {
   int n;
   ByteStream bs;

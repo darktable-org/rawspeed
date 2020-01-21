@@ -22,13 +22,14 @@
 #pragma once
 
 #include "AddressSanitizer.h" // for ASan
-#include "common/Common.h"    // for uint8_t, uint64_t, uint32_t
-#include "common/Memory.h"    // for alignedFree
-#include "io/Endianness.h"    // for Endianness, Endianness::little, getHos...
+#include "common/Common.h"    // for roundUp
+#include "common/Memory.h"    // for alignedFree, alignedFreeConstPtr, alig...
+#include "io/Endianness.h"    // for Endianness, getHostEndianness, Endiann...
 #include "io/IOException.h"   // for ThrowIOE
 #include <cassert>            // for assert
+#include <cstdint>            // for uint8_t, uint64_t, uint32_t
 #include <memory>             // for unique_ptr
-#include <utility>            // for swap
+#include <utility>            // for move, swap
 
 namespace rawspeed {
 

@@ -17,11 +17,11 @@
     along with darktable.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "RawSpeed-API.h" // for RawImage, RawImageData, iPoint2D, ImageMet...
+#include "RawSpeed-API.h" // for RawImage, RawImageData, iPoint2D, CameraMe...
 
 #include <array>      // for array
 #include <cstddef>    // for size_t
-#include <cstdint>    // for uint16_t
+#include <cstdint>    // for uint32_t, uint8_t, uint16_t
 #include <cstdio>     // for fprintf, stdout, stderr
 #include <memory>     // for unique_ptr, make_unique
 #include <string>     // for string, operator+, basic_string
@@ -34,10 +34,6 @@
 #endif
 
 #include <Windows.h>
-#endif
-
-#ifdef HAVE_OPENMP
-#include <omp.h>
 #endif
 
 namespace rawspeed {
@@ -208,7 +204,7 @@ int main(int argc, char* argv[]) { // NOLINT
     r = d->mRaw;
 
     const auto errors = r->getErrors();
-    for (auto& error : errors)
+    for (const auto& error : errors)
       fprintf(stderr, "WARNING: [rawspeed] %s\n", error.c_str());
 
     fprintf(stdout, "blackLevel: %d\n", r->blackLevel);

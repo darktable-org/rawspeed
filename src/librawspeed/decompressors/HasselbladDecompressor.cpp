@@ -20,15 +20,16 @@
 */
 
 #include "decompressors/HasselbladDecompressor.h"
-#include "common/Common.h"                // for uint32_t, uint16_t
+#include "common/Array2DRef.h"            // for Array2DRef
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/BitPumpMSB32.h"              // for BitPumpMSB32, BitStream<>::f...
+#include "decompressors/HuffmanTable.h"   // for HuffmanTableLUT, HuffmanTable
+#include "io/BitPumpMSB32.h"              // for BitPumpMSB32, BitStream<>:...
 #include "io/ByteStream.h"                // for ByteStream
 #include <array>                          // for array
 #include <cassert>                        // for assert
+#include <cstdint>                        // for uint16_t
 
 namespace rawspeed {
 
@@ -36,7 +37,7 @@ HasselbladDecompressor::HasselbladDecompressor(const ByteStream& bs,
                                                const RawImage& img)
     : AbstractLJpegDecompressor(bs, img) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
-      mRaw->getBpp() != 2)
+      mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
   // FIXME: could be wrong. max "active pixels" - "100 MP"
@@ -73,6 +74,7 @@ void HasselbladDecompressor::decodeScan() {
   assert(out.width % 2 == 0);
 
   const auto ht = getHuffmanTables<1>();
+  ht[0]->verifyCodeSymbolsAreValidDiffLenghts();
 
   BitPumpMSB32 bitStream(input);
   // Pixels are packed two at a time, not like LJPEG:
@@ -81,8 +83,8 @@ void HasselbladDecompressor::decodeScan() {
     int p1 = 0x8000 + pixelBaseOffset;
     int p2 = 0x8000 + pixelBaseOffset;
     for (int col = 0; col < out.width; col += 2) {
-      int len1 = ht[0]->decodeLength(bitStream);
-      int len2 = ht[0]->decodeLength(bitStream);
+      int len1 = ht[0]->decodeCodeValue(bitStream);
+      int len2 = ht[0]->decodeCodeValue(bitStream);
       p1 += getBits(&bitStream, len1);
       p2 += getBits(&bitStream, len2);
       // NOTE: this is rather unusual and weird, but appears to be correct.

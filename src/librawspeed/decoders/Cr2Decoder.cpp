@@ -21,13 +21,12 @@
 */
 
 #include "decoders/Cr2Decoder.h"
-#include "common/Common.h"                     // for uint32_t, uint16_t
 #include "common/Point.h"                      // for iPoint2D
 #include "common/RawspeedException.h"          // for RawspeedException
 #include "decoders/RawDecoderException.h"      // for ThrowRDE
 #include "decompressors/Cr2Decompressor.h"     // for Cr2Decompressor, Cr2S...
 #include "interpolators/Cr2sRawInterpolator.h" // for Cr2sRawInterpolator
-#include "io/Buffer.h"                         // for Buffer
+#include "io/Buffer.h"                         // for Buffer, DataBuffer
 #include "io/ByteStream.h"                     // for ByteStream
 #include "io/Endianness.h"                     // for Endianness, Endiannes...
 #include "metadata/Camera.h"                   // for Hints
@@ -37,6 +36,7 @@
 #include "tiff/TiffTag.h"                      // for TiffTag, CANONCOLORDATA
 #include <array>                               // for array
 #include <cassert>                             // for assert
+#include <cstdint>                             // for uint32_t, uint16_t
 #include <memory>                              // for unique_ptr, allocator...
 #include <string>                              // for operator==, string
 #include <vector>                              // for vector
@@ -64,7 +64,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
     offset = mRootIFD->getEntryRecursive(CANON_RAW_DATA_OFFSET)->getU32();
   else {
     // D2000 is oh so special...
-    auto ifd = mRootIFD->getIFDWithTag(CFAPATTERN);
+    const auto* ifd = mRootIFD->getIFDWithTag(CFAPATTERN);
     if (! ifd->hasEntry(STRIPOFFSETS))
       ThrowRDE("Couldn't find offset");
 

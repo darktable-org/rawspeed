@@ -20,13 +20,13 @@
 */
 
 #include "interpolators/Cr2sRawInterpolator.h"
-#include "common/Common.h"                 // for uint16_t, clampBits
-#include "common/Point.h"                  // for iPoint2D
-#include "common/RawImage.h"               // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h"  // for RawDecoderException (ptr o...
-#include <array>                           // for array
-#include <cassert>                         // for assert
-#include <type_traits>                     // for is_pod
+#include "common/Common.h"                // for clampBits
+#include "common/Point.h"                 // for iPoint2D
+#include "common/RawImage.h"              // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include <array>                          // for array
+#include <cassert>                        // for assert
+#include <cstdint>                        // for uint16_t
 
 using std::array;
 
@@ -162,7 +162,7 @@ inline void Cr2sRawInterpolator::interpolate_422(int w, int h) {
   assert(h > 0);
 
   for (int y = 0; y < h; y++) {
-    auto data = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
+    auto* data = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
 
     interpolate_422_row<version>(data, w);
   }

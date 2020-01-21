@@ -22,11 +22,15 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32_t, uint8_t, uint64_t
-#include "io/Buffer.h"     // for Buffer::size_type
+#include "common/Common.h"  // for bitwidth, extractHighBits
+#include "io/Buffer.h"      // for Buffer::size_type, Buffer
 #include "io/ByteStream.h"  // for ByteStream
-#include "io/IOException.h" // for IOException (ptr only), ThrowIOE
+#include "io/Endianness.h"  // for Endianness, Endianness::unknown
+#include "io/IOException.h" // for ThrowIOE
+#include <algorithm>        // for min
+#include <array>            // for array
 #include <cassert>          // for assert
+#include <cstdint>          // for uint32_t, uint64_t, uint8_t
 #include <cstring>          // for memcpy
 
 namespace rawspeed {
@@ -41,10 +45,11 @@ struct BitStreamCacheBase
 {
   uint64_t cache = 0;         // the actual bits stored in the cache
   unsigned int fillLevel = 0; // bits left in cache
-  static constexpr unsigned Size = sizeof(cache)*8;
+
+  static constexpr unsigned Size = bitwidth<decltype(cache)>();
 
   // how many bits could be requested to be filled
-  static constexpr unsigned MaxGetBits = Size/2;
+  static constexpr unsigned MaxGetBits = bitwidth<uint32_t>();
 
   // maximal number of bytes the implementation may read.
   // NOTE: this is not the same as MaxGetBits/8 !!!
@@ -54,7 +59,7 @@ struct BitStreamCacheBase
 struct BitStreamCacheLeftInRightOut : BitStreamCacheBase
 {
   inline void push(uint64_t bits, uint32_t count) noexcept {
-    assert(count + fillLevel <= Size);
+    assert(count + fillLevel <= bitwidth(cache));
     cache |= bits << fillLevel;
     fillLevel += count;
   }
@@ -72,14 +77,15 @@ struct BitStreamCacheLeftInRightOut : BitStreamCacheBase
 struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
 {
   inline void push(uint64_t bits, uint32_t count) noexcept {
-    assert(count + fillLevel <= Size);
-    assert(count < BitStreamCacheBase::Size);
+    assert(count + fillLevel <= bitwidth(cache));
+    assert(count < bitwidth(cache));
     cache = cache << count | bits;
     fillLevel += count;
   }
 
   inline uint32_t peek(uint32_t count) const noexcept {
-    return (cache >> (fillLevel - count)) & ((1U << count) - 1U);
+    return extractHighBits(cache, count, /*effectiveBitwidth=*/fillLevel) &
+           ((1U << count) - 1U);
   }
 
   inline void skip(uint32_t count) noexcept { fillLevel -= count; }

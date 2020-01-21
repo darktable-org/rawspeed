@@ -24,6 +24,7 @@
 #include "common/RawImage.h"     // for RawImage
 #include "decoders/RawDecoder.h" // for RawDecoder
 #include "tiff/CiffIFD.h"        // for CiffIFD
+#include <cstdint>               // for int64_t
 #include <memory>                // for unique_ptr
 
 namespace rawspeed {

@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include "common/Common.h" // for int32_t, int16_t, uint32_t, uint64_t, uint16_t
-#include <gmock/gmock.h>   // for make_tuple, tuple
+#include <cstdint> // for uint16_t, uint32_t, uint64_t
+#include <tuple>   // for tuple
 
 namespace rawspeed_test {
 

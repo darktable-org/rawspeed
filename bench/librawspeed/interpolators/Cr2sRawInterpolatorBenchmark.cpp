@@ -20,11 +20,11 @@
 
 #include "interpolators/Cr2sRawInterpolator.h" // for Cr2sRawInterpolator
 #include "bench/Common.h"                      // for areaToRectangle
-#include "common/Common.h"                     // for roundUp, uint16_t
 #include "common/Point.h"                      // for iPoint2D
 #include "common/RawImage.h"                   // for RawImage, ImageMetaData
 #include <array>                               // for array
-#include <benchmark/benchmark.h>               // for Benchmark, State, BEN...
+#include <benchmark/benchmark.h>               // for State, Benchmark, BEN...
+#include <cstdint>                             // for uint16_t
 #include <type_traits>                         // for integral_constant
 
 using rawspeed::Cr2sRawInterpolator;

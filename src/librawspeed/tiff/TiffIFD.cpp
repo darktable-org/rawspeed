@@ -22,15 +22,14 @@
 */
 
 #include "tiff/TiffIFD.h"
-#include "common/Common.h"            // for trimSpaces, uint32_t
+#include "common/Common.h"            // for trimSpaces
 #include "common/NORangesSet.h"       // for set
 #include "common/RawspeedException.h" // for RawspeedException
 #include "io/IOException.h"           // for IOException
 #include "tiff/TiffEntry.h"           // for TiffEntry
 #include "tiff/TiffTag.h"             // for TiffTag, MAKE, DNGPRIVATEDATA
 #include <cassert>                    // for assert
-#include <cstdint>                    // for UINT32_MAX
-#include <map>                        // for map, _Rb_tree_const_iterator
+#include <map>                        // for map, operator!=, _Rb_tree_cons...
 #include <memory>                     // for unique_ptr, make_unique
 #include <string>                     // for string, operator==
 #include <utility>                    // for move, pair
@@ -207,7 +206,7 @@ std::vector<const TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) const {
   if (entries.find(tag) != entries.end()) {
     matchingIFDs.push_back(this);
   }
-  for (auto& i : subIFDs) {
+  for (const auto& i : subIFDs) {
     vector<const TiffIFD*> t = i->getIFDsWithTag(tag);
     matchingIFDs.insert(matchingIFDs.end(), t.begin(), t.end());
   }
@@ -226,7 +225,7 @@ TiffEntry* __attribute__((pure)) TiffIFD::getEntryRecursive(TiffTag tag) const {
   if (i != entries.end()) {
     return i->second.get();
   }
-  for (auto &j : subIFDs) {
+  for (const auto& j : subIFDs) {
     TiffEntry *entry = j->getEntryRecursive(tag);
     if (entry)
       return entry;
@@ -299,8 +298,8 @@ TiffEntry* TiffIFD::getEntry(TiffTag tag) const {
 TiffID TiffRootIFD::getID() const
 {
   TiffID id;
-  auto makeE = getEntryRecursive(MAKE);
-  auto modelE = getEntryRecursive(MODEL);
+  auto* makeE = getEntryRecursive(MAKE);
+  auto* modelE = getEntryRecursive(MODEL);
 
   if (!makeE)
     ThrowTPE("Failed to find MAKE entry.");

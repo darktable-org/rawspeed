@@ -22,8 +22,7 @@
 #pragma once
 
 #include "common/Array2DRef.h"                  // for Array2DRef
-#include "common/Common.h"                      // for uint16_t, int16_t
-#include "common/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorA...
+#include "common/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocator...
 #include "common/Optional.h"                    // for Optional
 #include "common/RawImage.h"                    // for RawImage
 #include "common/SimpleLUT.h"                   // for SimpleLUT, SimpleLUT...
@@ -33,7 +32,7 @@
 #include <array>                                // for array
 #include <cstdint>                              // for int16_t, uint16_t
 #include <memory>                               // for unique_ptr
-#include <type_traits>                          // for underlying_type, und...
+#include <type_traits>                          // for __underlying_type_im...
 #include <utility>                              // for move
 #include <vector>                               // for vector
 

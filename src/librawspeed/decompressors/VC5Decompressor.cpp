@@ -27,9 +27,10 @@
   implementation.
  */
 
-#include "rawspeedconfig.h"
+#include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/VC5Decompressor.h"
 #include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for clampBits, roundUpDivision
 #include "common/Optional.h"              // for Optional
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawspeedException.h"     // for RawspeedException
@@ -462,7 +463,8 @@ void VC5Decompressor::parseVC5() {
       for (int iWavelet = 0; iWavelet < numWaveletLevels; ++iWavelet) {
         auto& channel = channels[mVC5.iChannel];
         auto& wavelet = channel.wavelets[iWavelet];
-        wavelet.prescale = (val >> (14 - 2 * iWavelet)) & 0x03;
+        wavelet.prescale =
+            extractHighBits(val, 2 * iWavelet, /*effectiveBitwidth=*/14) & 0x03;
       }
       break;
     default: { // A chunk.

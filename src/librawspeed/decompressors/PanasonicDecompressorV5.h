@@ -21,13 +21,13 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32_t
 #include "common/Point.h"                       // for iPoint2D
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/BitPumpLSB.h"                      // for BitPumpLSB
 #include "io/ByteStream.h"                      // for ByteStream
 #include <cstddef>                              // for size_t
+#include <cstdint>                              // for uint32_t
 #include <utility>                              // for move
 #include <vector>                               // for vector
 

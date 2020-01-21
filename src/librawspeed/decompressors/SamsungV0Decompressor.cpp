@@ -21,15 +21,18 @@
 */
 
 #include "decompressors/SamsungV0Decompressor.h"
-#include "common/Common.h"                // for uint32_t, uint16_t, int32_t
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for signExtend
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
 #include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for max
+#include <array>                          // for array
 #include <cassert>                        // for assert
+#include <cstdint>                        // for uint32_t, uint16_t, int32_t
 #include <iterator>                       // for advance, begin, end, next
+#include <utility>                        // for swap
 #include <vector>                         // for vector
 
 namespace rawspeed {
@@ -39,7 +42,7 @@ SamsungV0Decompressor::SamsungV0Decompressor(const RawImage& image,
                                              const ByteStream& bsr)
     : AbstractSamsungDecompressor(image) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
-      mRaw->getBpp() != 2)
+      mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
   const uint32_t width = mRaw->dim.x;
@@ -95,11 +98,10 @@ void SamsungV0Decompressor::decompress() const {
   }
 }
 
-int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32* bits, int b) {
-  int32_t adj = 0;
-  if (b)
-    adj = (static_cast<int32_t>(bits->getBits(b)) << (32 - b) >> (32 - b));
-  return adj;
+int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32* bits, int nbits) {
+  if (!nbits)
+    return 0;
+  return signExtend(bits->getBits(nbits), nbits);
 }
 
 void SamsungV0Decompressor::decompressStrip(int row,

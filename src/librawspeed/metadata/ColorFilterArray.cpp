@@ -19,11 +19,10 @@
 */
 
 #include "metadata/ColorFilterArray.h"
-#include "common/Common.h"                // for writeLog, uint32_t, DEBUG_PR...
+#include "common/Common.h"                // for writeLog, DEBUG_PRIO_EXTRA
 #include "common/Point.h"                 // for iPoint2D, iPoint2D::value_...
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include <algorithm>                      // for fill
-#include <cmath>                          // for abs
 #include <cstdarg>                        // for va_arg, va_end, va_list
 #include <cstdlib>                        // for size_t, abs
 #include <map>                            // for map

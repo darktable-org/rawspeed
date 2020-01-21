@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include "common/Common.h"                // for uint32_t
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
+#include <cstdint>                        // for uint32_t
 #include <vector>                         // for vector
 
 namespace rawspeed {

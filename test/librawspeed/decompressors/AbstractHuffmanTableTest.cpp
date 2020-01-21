@@ -19,16 +19,17 @@
 */
 
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
-#include "common/Common.h"                      // for uint8_t, uint32_t
 #include "io/Buffer.h"                          // for Buffer
-#include <algorithm>                            // for min
+#include <algorithm>                            // for max, min
 #include <bitset>                               // for bitset
 #include <cassert>                              // for assert
+#include <cstdint>                              // for uint8_t, uint32_t
 #include <cstdlib>                              // for exit
-#include <gtest/gtest.h>                        // for make_tuple, Message
+#include <gtest/gtest.h>                        // for Message, TestPartResult
 #include <initializer_list>                     // for initializer_list<>::...
 #include <ostream>                              // for operator<<, ostream
 #include <string>                               // for basic_string, operat...
+#include <tuple>                                // for make_tuple, get, tuple
 #include <utility>                              // for move
 #include <vector>                               // for vector
 
@@ -411,10 +412,7 @@ TEST(AbstractHuffmanTableTest, setCodeValuesValueLessThan16) {
   for (int i = 0; i < 256; i++) {
     v[0] = i;
     Buffer b(v.data(), v.size());
-    if (i <= 16)
-      ASSERT_NO_THROW(ht.setCodeValues(b););
-    else
-      ASSERT_THROW(ht.setCodeValues(b), rawspeed::RawDecoderException);
+    ASSERT_NO_THROW(ht.setCodeValues(b););
   }
 }
 

@@ -21,14 +21,14 @@
 
 #pragma once
 
-#include "AddressSanitizer.h" // for ASan::RegionIsPoisoned
-#include "common/Common.h" // for uint8_t, int32_t, uint32_t, uint16_t, roundUp
+#include "AddressSanitizer.h" // for ASan
+#include "common/Common.h"    // for roundUp
 #include "common/Memory.h"    // for alignedMalloc
-#include "io/Buffer.h"        // for Buffer::size_type, Buffer, DataBuffer
-#include "io/Endianness.h"    // for Endianness, Endianness::little
-#include "io/IOException.h"   // for IOException (ptr only), ThrowIOE
+#include "io/Buffer.h"        // for Buffer::size_type, DataBuffer, Buffer
+#include "io/IOException.h"   // for ThrowIOE
 #include <cassert>            // for assert
-#include <cstring>            // for memcmp, memcpy
+#include <cstdint>            // for uint8_t, uint16_t, int32_t, uint32_t
+#include <cstring>            // for memchr, memcmp, memcpy
 #include <limits>             // for numeric_limits
 
 namespace rawspeed {

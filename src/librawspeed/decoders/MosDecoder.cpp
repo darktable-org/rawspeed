@@ -20,20 +20,22 @@
 */
 
 #include "decoders/MosDecoder.h"
-#include "common/Common.h"                          // for uint32_t, uint8_t
+#include "common/Common.h"                          // for trimSpaces
 #include "common/Point.h"                           // for iPoint2D
-#include "decoders/IiqDecoder.h"                    // for IiqDecoder::isAppr...
+#include "decoders/IiqDecoder.h"                    // for IiqDecoder
 #include "decoders/RawDecoder.h"                    // for RawDecoder
-#include "decoders/RawDecoderException.h"           // for RawDecoderExcept...
+#include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer
+#include "io/Buffer.h"                              // for DataBuffer, Buffer
 #include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for getU32LE, getLE
+#include "io/Endianness.h"                          // for Endianness, Endi...
 #include "parsers/TiffParserException.h"            // for TiffParserException
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag::TILEOFF...
+#include "tiff/TiffTag.h"                           // for TILEOFFSETS, LEA...
+#include <array>                                    // for array
 #include <cassert>                                  // for assert
+#include <cstdint>                                  // for uint32_t
 #include <cstring>                                  // for memchr
 #include <istream>                                  // for istringstream
 #include <memory>                                   // for unique_ptr

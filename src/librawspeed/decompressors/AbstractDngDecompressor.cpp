@@ -19,9 +19,9 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
+#include "rawspeedconfig.h" // for HAVE_OPENMP, HAV...
 #include "decompressors/AbstractDngDecompressor.h"
-#include "common/Common.h"                          // for BitOrder_LSB
+#include "common/Common.h"                          // for rawspeed_get_num...
 #include "common/Point.h"                           // for iPoint2D
 #include "common/RawImage.h"                        // for RawImageData
 #include "decoders/RawDecoderException.h"           // for RawDecoderException
@@ -34,9 +34,9 @@
 #include "io/Endianness.h"                          // for Endianness, Endi...
 #include "io/IOException.h"                         // for IOException, Thr...
 #include <cassert>                                  // for assert
-#include <cstdio>                                   // for size_t
 #include <limits>                                   // for numeric_limits
 #include <memory>                                   // for unique_ptr
+#include <string>                                   // for string
 #include <vector>                                   // for vector
 
 namespace rawspeed {

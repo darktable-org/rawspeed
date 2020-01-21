@@ -20,12 +20,13 @@
 */
 
 #include "decompressors/LJpegDecompressor.h"
-#include "common/Common.h"                // for unroll_loop, uint32_t, uint16_t
+#include "common/Common.h"                // for unroll_loop, roundUpDivision
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
 #include <algorithm>                      // for copy_n
+#include <array>                          // for array
 #include <cassert>                        // for assert
 
 using std::copy_n;
@@ -37,8 +38,9 @@ LJpegDecompressor::LJpegDecompressor(const ByteStream& bs, const RawImage& img)
   if (mRaw->getDataType() != TYPE_USHORT16)
     ThrowRDE("Unexpected data type (%u)", mRaw->getDataType());
 
-  if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == 2) ||
-        (mRaw->getCpp() == 3 && mRaw->getBpp() == 6)))
+  if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == sizeof(uint16_t)) ||
+        (mRaw->getCpp() == 2 && mRaw->getBpp() == 2 * sizeof(uint16_t)) ||
+        (mRaw->getCpp() == 3 && mRaw->getBpp() == 3 * sizeof(uint16_t))))
     ThrowRDE("Unexpected component count (%u)", mRaw->getCpp());
 
   if (mRaw->dim.x == 0 || mRaw->dim.y == 0)
@@ -179,7 +181,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   // For y, we can simply stop decoding when we reached the border.
   for (unsigned y = 0; y < h; ++y) {
     auto destY = offY + y;
-    auto dest =
+    auto* dest =
         reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(offX, destY));
 
     copy_n(predNext, N_COMP, pred.data());
@@ -194,7 +196,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
     // For x, we first process all full pixel blocks within the image buffer ...
     for (; x < fullBlocks; ++x) {
       unroll_loop<N_COMP>([&](int i) {
-        pred[i] = uint16_t(pred[i] + ht[i]->decodeNext(bitStream));
+        pred[i] = uint16_t(pred[i] + ht[i]->decodeDifference(bitStream));
         *dest++ = pred[i];
       });
     }
@@ -210,22 +212,20 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
       assert(trailingPixels < N_COMP);
       unsigned c = 0;
       for (; c < trailingPixels; ++c) {
-        pred[c] = uint16_t(pred[c] + ht[c]->decodeNext(bitStream));
+        pred[c] = uint16_t(pred[c] + ht[c]->decodeDifference(bitStream));
         *dest++ = pred[c];
       }
       // Discard the rest of the block.
       assert(c < N_COMP);
       for (; c < N_COMP; ++c) {
-        ht[c]->decodeNext(bitStream);
+        ht[c]->decodeDifference(bitStream);
       }
       ++x; // We did just process one more block.
     }
 
     // ... and discard the rest.
     for (; x < frame.w; ++x) {
-      unroll_loop<N_COMP>([&](int i) {
-        ht[i]->decodeNext(bitStream);
-      });
+      unroll_loop<N_COMP>([&](int i) { ht[i]->decodeDifference(bitStream); });
     }
   }
 }

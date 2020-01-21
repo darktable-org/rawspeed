@@ -22,15 +22,15 @@
 
 #pragma once
 
-#include "common/Common.h"               // for uint32_t, uint16_t
-#include "common/NORangesSet.h"          // for NORangesSet
+#include "common/NORangesSet.h"          // for set
 #include "io/Buffer.h"                   // for Buffer (ptr only), DataBuffer
 #include "io/ByteStream.h"               // for ByteStream
-#include "io/Endianness.h"               // for getHostEndianness, Endianne...
+#include "io/Endianness.h"               // for Endianness, Endianness::big
 #include "parsers/TiffParserException.h" // for ThrowTPE
 #include "tiff/TiffEntry.h"              // IWYU pragma: keep
 #include "tiff/TiffTag.h"                // for TiffTag
-#include <map>                           // for map, _Rb_tree_const_iterator
+#include <cstdint>                       // for uint32_t
+#include <map>                           // for map, operator!=, map<>::con...
 #include <memory>                        // for unique_ptr
 #include <string>                        // for string
 #include <vector>                        // for vector

@@ -21,12 +21,15 @@
 */
 
 #include "decompressors/SamsungV1Decompressor.h"
-#include "common/Common.h"                // for uint32_t, uint16_t, int32_t
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for isIntN
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
+#include <array>                          // for array
+#include <cassert>                        // for assert
 #include <memory>                         // for allocator_traits<>::value_...
 #include <vector>                         // for vector
 
@@ -41,7 +44,7 @@ SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
                                              const ByteStream* bs_, int bit)
     : AbstractSamsungDecompressor(image), bs(bs_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
-      mRaw->getBpp() != 2)
+      mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
   switch (bit) {

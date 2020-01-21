@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32_t
-#include <map>             // for map
-#include <memory>          // for unique_ptr
-#include <utility>         // for pair
-#include <vector>          // for vector
+#include <cstdint> // for uint32_t
+#include <map>     // for map
+#include <memory>  // for unique_ptr
+#include <utility> // for pair
+#include <vector>  // for vector
 
 namespace rawspeed {
 

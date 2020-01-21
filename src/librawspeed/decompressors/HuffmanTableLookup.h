@@ -21,13 +21,16 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for uint32_t, uint16_t
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
-#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
+#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
 #include "io/BitStream.h"                       // for BitStreamTraits
 #include <cassert>                              // for assert
+#include <cstdint>                              // for uint32_t, uint16_t
 #include <memory>                               // for allocator_traits<>::...
+#include <tuple>                                // for tie
+#include <utility>                              // for pair
 #include <vector>                               // for vector
+// IWYU pragma: no_include <algorithm>
 
 /*
  * The following code is inspired by the IJG JPEG library.
@@ -73,16 +76,7 @@ protected:
 
 public:
   std::vector<CodeSymbol> setup(bool fullDecode_, bool fixDNGBug16_) {
-    this->fullDecode = fullDecode_;
-    this->fixDNGBug16 = fixDNGBug16_;
-
-    assert(!nCodesPerLength.empty());
-    assert(maxCodesCount() > 0);
-
-    unsigned int maxCodeLength = nCodesPerLength.size() - 1U;
-    assert(codeValues.size() == maxCodesCount());
-
-    assert(maxCodePlusDiffLength() <= 32U);
+    AbstractHuffmanTable::setup(fullDecode_, fixDNGBug16_);
 
     // Figure C.1: make table of Huffman code length for each symbol
     // Figure C.2: generate the codes themselves
@@ -90,6 +84,7 @@ public:
     assert(symbols.size() == maxCodesCount());
 
     // Figure F.15: generate decoding tables
+    unsigned int maxCodeLength = nCodesPerLength.size() - 1U;
     codeOffsetOL.resize(maxCodeLength + 1UL, 0xFFFF);
     maxCodeOL.resize(maxCodeLength + 1UL, 0xFFFFFFFF);
     for (unsigned int numCodesSoFar = 0, codeLen = 1; codeLen <= maxCodeLength;
@@ -104,14 +99,16 @@ public:
     return symbols;
   }
 
-  template <typename BIT_STREAM> inline int decodeLength(BIT_STREAM& bs) const {
+  template <typename BIT_STREAM>
+  inline int decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(!fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
 
-  template <typename BIT_STREAM> inline int decodeNext(BIT_STREAM& bs) const {
+  template <typename BIT_STREAM>
+  inline int decodeDifference(BIT_STREAM& bs) const {
     static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
                   "This BitStream specialization is not marked as usable here");
     assert(fullDecode);

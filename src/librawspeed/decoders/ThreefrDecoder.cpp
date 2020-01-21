@@ -20,17 +20,19 @@
 */
 
 #include "decoders/ThreefrDecoder.h"
-#include "common/Common.h"                        // for uint32_t
 #include "common/Point.h"                         // for iPoint2D
 #include "decoders/RawDecoderException.h"         // for ThrowRDE
 #include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompre...
-#include "io/Buffer.h"                            // for Buffer
+#include "io/Buffer.h"                            // for Buffer, DataBuffer
 #include "io/ByteStream.h"                        // for ByteStream
+#include "io/Endianness.h"                        // for Endianness, Endian...
 #include "metadata/Camera.h"                      // for Hints
 #include "metadata/ColorFilterArray.h"            // for CFA_GREEN, CFA_BLUE
 #include "tiff/TiffEntry.h"                       // for TiffEntry
 #include "tiff/TiffIFD.h"                         // for TiffRootIFD, TiffIFD
 #include "tiff/TiffTag.h"                         // for ASSHOTNEUTRAL, STR...
+#include <array>                                  // for array
+#include <cstdint>                                // for uint32_t
 #include <memory>                                 // for unique_ptr
 #include <string>                                 // for operator==, string
 
@@ -49,7 +51,7 @@ bool ThreefrDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 RawImage ThreefrDecoder::decodeRawInternal() {
-  auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS, 1);
+  const auto* raw = mRootIFD->getIFDWithTag(STRIPOFFSETS, 1);
   uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
   uint32_t off = raw->getEntry(STRIPOFFSETS)->getU32();

@@ -21,12 +21,13 @@
 */
 
 #include "decompressors/Cr2Decompressor.h"
-#include "common/Common.h"                // for unroll_loop, uint32_t, uint16_t
+#include "common/Array2DRef.h"            // for Array2DRef
 #include "common/Point.h"                 // for iPoint2D, iPoint2D::area_type
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
-#include <algorithm>                      // for copy_n
+#include <algorithm>                      // for copy_n, min
+#include <array>                          // for array
 #include <cassert>                        // for assert
 #include <initializer_list>               // for initializer_list
 
@@ -41,8 +42,8 @@ Cr2Decompressor::Cr2Decompressor(const ByteStream& bs, const RawImage& img)
   if (mRaw->getDataType() != TYPE_USHORT16)
     ThrowRDE("Unexpected data type");
 
-  if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == 2) ||
-        (mRaw->getCpp() == 3 && mRaw->getBpp() == 6)))
+  if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == sizeof(uint16_t)) ||
+        (mRaw->getCpp() == 3 && mRaw->getBpp() == 3 * sizeof(uint16_t))))
     ThrowRDE("Unexpected cpp: %u", mRaw->getCpp());
 
   if (!mRaw->dim.x || !mRaw->dim.y || mRaw->dim.x > 8896 ||
@@ -149,7 +150,7 @@ void Cr2Decompressor::decodeN_X_Y()
 
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
-  auto predNext = reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(0, 0));
+  auto* predNext = reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(0, 0));
 
   BitPumpJPEG bs(input);
 
@@ -237,15 +238,16 @@ void Cr2Decompressor::decodeN_X_Y()
                       globalFrameCol += X_S_F, col += sliceColStep) {
           if (X_S_F == 1) { // will be optimized out
             for (int c = 0; c < sliceColStep; ++c)
-              out(row, col + c) = pred[c] += ht[c]->decodeNext(bs);
+              out(row, col + c) = pred[c] += ht[c]->decodeDifference(bs);
           } else {
             for (int dstRow = 0; dstRow < Y_S_F; ++dstRow) {
               for (int c : {0, 3})
-                out(row + dstRow, col + c) = pred[0] += ht[0]->decodeNext(bs);
+                out(row + dstRow, col + c) = pred[0] +=
+                    ht[0]->decodeDifference(bs);
             }
 
             for (int c : {1, 2})
-              out(row, col + c) = pred[c] += ht[c]->decodeNext(bs);
+              out(row, col + c) = pred[c] += ht[c]->decodeDifference(bs);
           }
         }
       }

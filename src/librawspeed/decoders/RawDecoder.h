@@ -21,9 +21,10 @@
 
 #pragma once
 
-#include "common/Common.h"   // for uint32_t, BitOrder
+#include "common/Common.h"   // for BitOrder
 #include "common/RawImage.h" // for RawImage
 #include "metadata/Camera.h" // for Hints
+#include <cstdint>           // for uint32_t
 #include <string>            // for string
 
 namespace rawspeed {

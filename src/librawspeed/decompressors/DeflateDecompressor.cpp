@@ -22,13 +22,14 @@
 
 #ifdef HAVE_ZLIB
 
-#include "common/Common.h"                // for uint32_t, uint16_t
+#include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "decompressors/DeflateDecompressor.h"
-#include "io/Endianness.h" // for getHostEndianness, Endiann...
+#include "io/Endianness.h" // for getHostEndianness, Endianness
 #include <cassert>         // for assert
+#include <cstdint>         // for uint32_t, uint16_t
 #include <cstdio>          // for size_t
-#include <zlib.h>
+#include <zlib.h>          // for uncompress, zError, Z_OK
 
 namespace rawspeed {
 

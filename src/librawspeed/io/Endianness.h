@@ -21,10 +21,9 @@
 
 #pragma once
 
-#include "common/Common.h" // for uint32_t, uint16_t, uint64_t, int32_t, int16_t
-#include <cassert>         // for assert
-#include <cstring>         // for memcpy
-// IWYU pragma: no_include "io/EndiannessTest.h"
+#include <cassert> // for assert
+#include <cstdint> // for uint32_t, uint16_t, uint64_t, int16_t, int32_t
+#include <cstring> // for memcpy
 
 namespace rawspeed {
 

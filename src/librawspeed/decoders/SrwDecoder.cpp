@@ -20,7 +20,7 @@
 */
 
 #include "decoders/SrwDecoder.h"
-#include "common/Common.h"                       // for uint32_t, BitOrder_LSB
+#include "common/Common.h"                       // for BitOrder_LSB, BitOr...
 #include "common/Point.h"                        // for iPoint2D
 #include "decoders/RawDecoderException.h"        // for ThrowRDE
 #include "decompressors/SamsungV0Decompressor.h" // for SamsungV0Decompressor
@@ -34,6 +34,8 @@
 #include "tiff/TiffEntry.h"                      // for TiffEntry, TIFF_LONG
 #include "tiff/TiffIFD.h"                        // for TiffRootIFD, TiffIFD
 #include "tiff/TiffTag.h"                        // for STRIPOFFSETS, BITSP...
+#include <array>                                 // for array
+#include <cstdint>                               // for uint32_t
 #include <memory>                                // for unique_ptr
 #include <sstream>                               // for operator<<, ostring...
 #include <string>                                // for string, operator==
@@ -52,7 +54,7 @@ bool SrwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 RawImage SrwDecoder::decodeRawInternal() {
-  auto raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
+  const auto* raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
 
   int compression = raw->getEntry(COMPRESSION)->getU32();
   const int bits = raw->getEntry(BITSPERSAMPLE)->getU32();

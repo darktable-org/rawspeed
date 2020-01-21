@@ -21,7 +21,6 @@
 */
 
 #include "parsers/FiffParser.h"
-#include "common/Common.h"               // for uint32_t, uint16_t
 #include "decoders/RafDecoder.h"         // for RafDecoder
 #include "decoders/RawDecoder.h"         // for RawDecoder
 #include "io/Buffer.h"                   // for Buffer, DataBuffer
@@ -34,6 +33,7 @@
 #include "tiff/TiffEntry.h"              // for TiffEntry, TIFF_SHORT, TIFF...
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFDOwner
 #include "tiff/TiffTag.h"                // for FUJIOLDWB, FUJI_STRIPBYTECO...
+#include <cstdint>                       // for uint32_t, uint16_t
 #include <limits>                        // for numeric_limits
 #include <memory>                        // for make_unique, unique_ptr
 #include <utility>                       // for move

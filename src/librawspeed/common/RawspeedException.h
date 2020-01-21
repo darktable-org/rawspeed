@@ -21,14 +21,13 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"
+#include "rawspeedconfig.h" // for RAWSPEED_NOINLINE, RAWSPEED_UNLIKELY_FUN...
 
-#include "common/Common.h"
-#include <array>
-#include <cstdarg>
-#include <cstdio>
-#include <stdexcept>
-#include <string>
+#include "common/Common.h" // for writeLog, DEBUG_PRIO_EXTRA
+#include <array>           // for array
+#include <cstdarg>         // for va_end, va_list, va_start
+#include <cstdio>          // for vsnprintf, size_t
+#include <stdexcept>       // for runtime_error
 
 namespace rawspeed {
 

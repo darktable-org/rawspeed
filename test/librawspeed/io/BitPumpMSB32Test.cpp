@@ -19,10 +19,10 @@
 */
 
 #include "io/BitPumpMSB32.h" // for BitPumpMSB32
-#include "common/Common.h"   // for uint8_t, uint32_t
 #include "io/BitPumpTest.h"  // for Pattern, (anonymous), GenOnesBE, BitPum...
 #include <array>             // for array
-#include <gtest/gtest.h>     // for INSTANTIATE_TYPED_TEST_CASE_P, Types
+#include <cstdint>           // for uint32_t, uint8_t
+#include <gtest/gtest.h>     // for Types, INSTANTIATE_TYPED_TEST_CASE_P
 
 using rawspeed::BitPumpMSB32;
 

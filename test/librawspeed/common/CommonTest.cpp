@@ -18,18 +18,20 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h" // for uint8_t, clampBits, roundUp, isIn, isPowe...
-#include <algorithm>        // for fill, min, equal, generate_n
+#include "common/Common.h" // for clampBits, unroll_loop, roundUp, copyPixels
+#include <algorithm>       // for fill, min, max, equal, generate_n
 #include <cassert>          // for assert
 #include <cstddef>          // for size_t
-#include <gtest/gtest.h>    // for make_tuple, get, ParamIteratorInterface
+#include <cstdint>          // for uint8_t, uint16_t
+#include <gtest/gtest.h>    // for ParamIteratorInterface, ParamGeneratorIn...
 #include <initializer_list> // for initializer_list
 #include <iterator>         // for back_inserter
 #include <limits>           // for numeric_limits
 #include <memory>           // for make_unique, unique_ptr
 #include <string>           // for string, operator==, basic_string
+#include <tuple>            // for make_tuple, get, tuple
 #include <type_traits>      // for __decay_and_strip<>::__type
-#include <vector>           // for vector
+#include <vector>           // for vector, vector<>::value_type
 
 using rawspeed::clampBits;
 using rawspeed::copyPixels;
@@ -280,7 +282,7 @@ TEST(ClampBitsDeathTest, Only16Bit) {
 TEST(ClampBitsUnsignedDeathTest, NoNopClamps) {
 #ifndef NDEBUG
   ASSERT_DEATH({ ASSERT_EQ(clampBits<uint16_t>(0, 16), 0); },
-               "BitWidthOfT > nBits");
+               "bitwidth<T>\\(\\) > nBits");
 #endif
 }
 

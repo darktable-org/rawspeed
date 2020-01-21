@@ -22,7 +22,6 @@
 */
 
 #include "parsers/TiffParser.h"
-#include "common/Common.h"               // for uint32_t, uint16_t
 #include "common/NORangesSet.h"          // for set
 #include "decoders/ArwDecoder.h"         // for ArwDecoder
 #include "decoders/Cr2Decoder.h"         // for Cr2Decoder
@@ -41,10 +40,12 @@
 #include "decoders/Rw2Decoder.h"         // for Rw2Decoder
 #include "decoders/SrwDecoder.h"         // for SrwDecoder
 #include "decoders/ThreefrDecoder.h"     // for ThreefrDecoder
+#include "io/Buffer.h"                   // for Buffer (ptr only), DataBuffer
 #include "io/ByteStream.h"               // for ByteStream
+#include "io/Endianness.h"               // for Endianness, Endianness::unk...
 #include "parsers/TiffParserException.h" // for ThrowTPE
 #include <cassert>                       // for assert
-#include <cstdint>                       // for UINT32_MAX
+#include <cstdint>                       // for UINT32_MAX, uint16_t, uint32_t
 #include <memory>                        // for make_unique, unique_ptr
 #include <string>                        // for string
 #include <tuple>                         // for tie, tuple

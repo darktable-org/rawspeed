@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include "common/Common.h"                           // for uint32_t
 #include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
+#include <cstdint>                                   // for uint32_t
 
 namespace rawspeed {
 

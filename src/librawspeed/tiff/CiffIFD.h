@@ -22,10 +22,10 @@
 
 #pragma once
 
-#include "common/Common.h"      // for uint32_t
 #include "common/NORangesSet.h" // for set
 #include "tiff/CiffEntry.h"     // IWYU pragma: keep
 #include "tiff/CiffTag.h"       // for CiffTag
+#include <cstdint>              // for uint32_t
 #include <map>                  // for map
 #include <memory>               // for unique_ptr
 #include <string>               // for string

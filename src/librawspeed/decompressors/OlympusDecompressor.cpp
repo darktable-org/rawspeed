@@ -21,16 +21,14 @@
 */
 
 #include "decompressors/OlympusDecompressor.h"
-#include "common/Common.h"                // for uint32_t, uint16_t, uint8_t
+#include "common/Array2DRef.h"            // for Array2DRef
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
 #include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for min
-#include <array>                          // for array, array<>::value_type
+#include <array>                          // for array
 #include <cassert>                        // for assert
-#include <cmath>                          // for abs
 #include <cstdlib>                        // for abs
 #include <type_traits>                    // for enable_if_t, is_integral
 
@@ -52,7 +50,7 @@ namespace rawspeed {
 
 OlympusDecompressor::OlympusDecompressor(const RawImage& img) : mRaw(img) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
-      mRaw->getBpp() != 2)
+      mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
   const uint32_t w = mRaw->dim.x;

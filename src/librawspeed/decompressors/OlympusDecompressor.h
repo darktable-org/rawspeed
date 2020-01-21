@@ -20,25 +20,29 @@
 
 #pragma once
 
+#include "common/Common.h"                      // for extractHighBits
 #include "common/RawImage.h"                    // for RawImage
-#include "common/SimpleLUT.h"                   // for SimpleLUT
+#include "common/SimpleLUT.h"                   // for SimpleLUT<>::value_type
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/BitPumpMSB.h"                      // for BitPumpMSB
-#include <array>                                // for array, array<>::value...
+#include <algorithm>                            // for min
+#include <array>                                // for array
+#include <cstdint>                              // for uint16_t
 
 namespace rawspeed {
 
 class ByteStream;
+
+template <class T> class Array2DRef;
 
 class OlympusDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
 
   // A table to quickly look up "high" value
   const SimpleLUT<char, 12> bittable{[](unsigned i, unsigned tableSize) {
-    int b = i;
     int high;
     for (high = 0; high < 12; high++)
-      if ((b >> (11 - high)) & 1)
+      if (extractHighBits(i, high, /*effectiveBitwidth=*/11) & 1)
         break;
     return std::min(12, high);
   }};

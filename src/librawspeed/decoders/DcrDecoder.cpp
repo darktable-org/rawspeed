@@ -23,10 +23,13 @@
 #include "common/NORangesSet.h"              // for set
 #include "decoders/RawDecoderException.h"    // for ThrowRDE
 #include "decompressors/KodakDecompressor.h" // for KodakDecompressor
+#include "io/Buffer.h"                       // for Buffer, DataBuffer
 #include "io/ByteStream.h"                   // for ByteStream
+#include "io/Endianness.h"                   // for Endianness, Endianness:...
 #include "tiff/TiffEntry.h"                  // for TiffEntry, TIFF_SHORT
 #include "tiff/TiffIFD.h"                    // for TiffRootIFD, TiffID
 #include "tiff/TiffTag.h"                    // for COMPRESSION, KODAK_IFD
+#include <array>                             // for array
 #include <cassert>                           // for assert
 #include <memory>                            // for unique_ptr
 #include <string>                            // for operator==, string

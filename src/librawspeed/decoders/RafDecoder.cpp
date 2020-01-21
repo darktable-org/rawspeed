@@ -20,7 +20,7 @@
 */
 
 #include "decoders/RafDecoder.h"
-#include "common/Common.h"                          // for uint32_t, uint16_t
+#include "common/Common.h"                          // for BitOrder_LSB
 #include "common/Point.h"                           // for iPoint2D, iRecta...
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/FujiDecompressor.h"         // for FujiDecompressor
@@ -38,7 +38,7 @@
 #include "tiff/TiffTag.h"                           // for FUJI_RAWIMAGEFUL...
 #include <array>                                    // for array
 #include <cassert>                                  // for assert
-#include <cstdio>                                   // for size_t
+#include <cstdint>                                  // for uint32_t, uint16_t
 #include <cstring>                                  // for memcmp
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for string, operator==
@@ -65,7 +65,7 @@ bool RafDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 RawImage RafDecoder::decodeRawInternal() {
-  auto raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
+  const auto* raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
   uint32_t height = 0;
   uint32_t width = 0;
 
@@ -322,7 +322,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 }
 
 int RafDecoder::isCompressed() {
-  auto raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
+  const auto* raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
   uint32_t height = 0;
   uint32_t width = 0;
 

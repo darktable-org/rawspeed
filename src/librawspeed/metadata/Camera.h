@@ -20,15 +20,15 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"
-#include "common/Common.h"             // for uint32_t
+#include "rawspeedconfig.h"            // for HAVE_PUGIXML
 #include "common/Point.h"              // for iPoint2D
 #include "metadata/BlackArea.h"        // for BlackArea
 #include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
-#include "metadata/ColorFilterArray.h" // for ColorFilterArray
-#include <map>                         // for map, _Rb_tree_const_iterator
-#include <sstream>                     // for istringstream, basic_istream
-#include <string>                      // for string, basic_string, operator>>
+#include "metadata/ColorFilterArray.h" // for ColorFilterArray, CFAColor
+#include <cstdint>                     // for uint32_t
+#include <map>                         // for map, operator!=, _Rb_tree_con...
+#include <sstream>                     // for istringstream
+#include <string>                      // for string, basic_string, operator==
 #include <utility>                     // for pair
 #include <vector>                      // for vector
 
