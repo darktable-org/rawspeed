@@ -245,7 +245,7 @@ if(BUILD_DOCS)
   add_subdirectory(docs)
 endif()
 
-if(BUILD_TESTING AND CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
+if(BUILD_TESTING AND RAWSPEED_COVERAGE_BUILD)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     include(llvm-profdata)
     include(llvm-cov)

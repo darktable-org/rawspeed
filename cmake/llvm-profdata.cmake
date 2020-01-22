@@ -2,7 +2,7 @@ if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   message(FATAL_ERROR "Compiler is not clang! Aborting...")
 endif()
 
-if(NOT CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
+if(NOT RAWSPEED_COVERAGE_BUILD)
   message(WARNING "Wrong build type, need COVERAGE.")
 endif()
 

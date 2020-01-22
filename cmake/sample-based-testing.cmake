@@ -42,7 +42,7 @@ endforeach()
 
 set(EXTRA_ENV "")
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
-   CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
+   RAWSPEED_COVERAGE_BUILD)
   message(WARNING "Warning: sample-based-testing; clang instrumentation profile"
                   " does not work with threading! Will be passing "
                   "OMP_NUM_THREADS=1 environment variable.")

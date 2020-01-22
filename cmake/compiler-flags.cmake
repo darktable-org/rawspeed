@@ -23,10 +23,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(debug-info)
 
-if(CMAKE_BUILD_TYPE STREQUAL "RELEASE")
+if(RAWSPEED_RELEASE_BUILD)
   # want assertions in all but Release build type.
   add_definitions(-DNDEBUG)
-elseif(NOT (CMAKE_BUILD_TYPE STREQUAL "RELWITHDEBINFO" OR CMAKE_BUILD_TYPE STREQUAL "FUZZ"))
+elseif(NOT (RAWSPEED_RELWITHDEBINFO_BUILD OR RAWSPEED_FUZZ_BUILD))
   # if not Release/RelWithDebInfo/Fuzz build, enable extra debug mode
   add_definitions(-DDEBUG)
 

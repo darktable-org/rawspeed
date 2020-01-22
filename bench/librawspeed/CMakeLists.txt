@@ -1,4 +1,4 @@
-if(CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
+if(RAWSPEED_COVERAGE_BUILD)
   # want all the symbols.
   rawspeed_add_library(rawspeed_bench SHARED)
 else()
