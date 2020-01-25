@@ -9570,15 +9570,41 @@
 		<Crop x="0" y="12" width="-16" height="-12"/>
 		<Sensor black="1024" white="16383"/>
 	</Camera>
+	<Camera make="FUJIFILM" model="X-Pro3">
+		<ID make="Fujifilm" model="X-Pro3">Fujifilm X-Pro3</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="12" width="-138" height="-12"/>
+		<Sensor black="1022" white="16383"/>
+	</Camera>
+	<Camera make="FUJIFILM" model="X-Pro3" mode="compressed">
+		<ID make="Fujifilm" model="X-Pro3">Fujifilm X-Pro3</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="12" width="-138" height="-12"/>
+		<Sensor black="1022" white="16383"/>
+	</Camera>
 	<Camera make="FUJIFILM" model="X70">
 		<ID make="Fujifilm" model="X70">Fujifilm X70</ID>
 		<CFA2 width="6" height="6">
-			<ColorRow y="0">RBGBRG</ColorRow>
-			<ColorRow y="1">GGRGGB</ColorRow>
-			<ColorRow y="2">GGBGGR</ColorRow>
-			<ColorRow y="3">BRGRBG</ColorRow>
-			<ColorRow y="4">GGBGGR</ColorRow>
-			<ColorRow y="5">GGRGGB</ColorRow>
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
 		<Crop x="4" y="0" width="-52" height="0"/>
 		<Sensor black="1024" white="16383"/>
