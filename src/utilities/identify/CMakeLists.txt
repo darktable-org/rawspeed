@@ -16,7 +16,7 @@ endif()
 
 target_link_libraries(${rsidentify} rawspeed_get_number_of_processor_cores)
 
-if(BUILD_TESTING)
+if(BUILD_RS_TESTING)
   rawspeed_add_test(NAME utilities/${rsidentify} COMMAND ${rsidentify}
                     WORKING_DIRECTORY "$<TARGET_PROPERTY:rawspeed_get_number_of_processor_cores,BINARY_DIR>")
 endif()

@@ -1,4 +1,4 @@
-if(NOT BUILD_TESTING)
+if(NOT BUILD_RS_TESTING)
   set_directory_properties(PROPERTIES EXCLUDE_FROM_ALL ON)
 endif()
 
@@ -11,7 +11,7 @@ endif()
 
 target_link_libraries(rstest rawspeed_get_number_of_processor_cores)
 
-if(BUILD_TESTING)
+if(BUILD_RS_TESTING)
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-suggest-attribute=const)
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-suggest-override)
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-missing-prototypes)

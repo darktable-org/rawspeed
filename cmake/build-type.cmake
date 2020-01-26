@@ -4,7 +4,7 @@ if(NOT CMAKE_BUILD_TYPE)
 
   set(default_build_type "RelWithDebInfo")
 
-  if(BUILD_TESTING)
+  if(BUILD_RS_TESTING)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
       set(default_build_type "Coverage")
     else()

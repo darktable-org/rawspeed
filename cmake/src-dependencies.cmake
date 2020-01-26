@@ -1,6 +1,6 @@
 include(FeatureSummary)
 
-if(BUILD_TESTING)
+if(BUILD_RS_TESTING)
   # for the actual gtest:
 
   # at least in debian, they are the package only installs their source code,

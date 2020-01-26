@@ -12,7 +12,7 @@ get_filename_component(RAWSPEED_SOURCE_DIR "${RAWSPEED_LNT_SOURCE_DIR}/../" REAL
 
 # By default, try to build everything we possibly can.
 set(BUILD_TOOLS ON CACHE BOOL "")
-set(BUILD_TESTING ON CACHE BOOL "")
+set(BUILD_RS_TESTING ON CACHE BOOL "")
 set(BUILD_FUZZERS ON CACHE BOOL "")
 set(BUILD_BENCHMARKING ON CACHE BOOL "")
 
@@ -21,7 +21,7 @@ set(BUILD_BENCHMARKING ON CACHE BOOL "")
 if(TEST_SUITE_BENCHMARKING_ONLY)
   set(BUILD_BENCHMARKING ON CACHE BOOL "" FORCE)
 
-  set(BUILD_TESTING OFF)
+  set(BUILD_RS_TESTING OFF)
   set(BUILD_FUZZERS OFF)
 
   # Only build stuff we will *REALLY* need.
@@ -114,7 +114,7 @@ test_suite_add_build_dependencies(dependencies)
 if(TARGET benchmark)
   test_suite_add_build_dependencies(benchmark)
 endif()
-if(BUILD_TESTING)
+if(BUILD_RS_TESTING)
   test_suite_add_build_dependencies(gtest)
   test_suite_add_build_dependencies(gtest_main)
   test_suite_add_build_dependencies(gmock)
