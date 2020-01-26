@@ -111,7 +111,8 @@ TYPED_TEST(AlignedMallocDeathTest, AlignedMallocAssertions) {
 #ifndef NDEBUG
   ASSERT_DEATH(
       {
-        TypeParam* ptr = (TypeParam*)alignedMalloc(this->alloc_size, 3);
+        int alignment = 3; // try to make it not be an immediate constant expr.
+        TypeParam* ptr = (TypeParam*)alignedMalloc(this->alloc_size, alignment);
         this->TheTest(ptr);
         alignedFree(ptr);
       },
