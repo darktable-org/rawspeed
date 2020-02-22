@@ -3,7 +3,7 @@ list(SORT ALL_EXPECTED_FUZZERS)
 
 set(ALL_FUZZERS "" CACHE INTERNAL "" FORCE)
 
-if(CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
+if(RAWSPEED_COVERAGE_BUILD)
   # want all the symbols.
   rawspeed_add_library(rawspeed_fuzz STATIC) # SHARED, but crashes due to global constructors/destructors
 else()
@@ -22,7 +22,7 @@ macro(add_fuzz_target__base fuzzer)
   rawspeed_add_test(NAME fuzzers/${fuzzer} COMMAND ${fuzzer} -help=1)
 endmacro()
 
-if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_BUILD_TYPE STREQUAL "FUZZ"))
+if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND RAWSPEED_FUZZ_BUILD))
   message(WARNING "For fuzzets to function, compiler must be Clang, and build type must be FUZZ.")
 
   target_sources(rawspeed_fuzz PRIVATE

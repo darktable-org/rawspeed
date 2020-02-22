@@ -183,6 +183,7 @@ inline void PanasonicDecompressor::processPixelPacket(
   for (int p = 0; p < PixelsPerPacket; ++p, ++col) {
     const int c = p & 1;
 
+    // FIXME: this is actually just `p % 3 == 2`, cleanup after perf is good.
     if (u == 2) {
       sh = extractHighBits(4U, bits->getBits(2), /*effectiveBitwidth=*/3);
       u = -1;

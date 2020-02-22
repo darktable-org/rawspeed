@@ -133,26 +133,26 @@ protected:
     int value2;
   };
 
-  enum _xt_lines {
-    _R0 = 0,
-    _R1,
-    _R2,
-    _R3,
-    _R4,
-    _G0,
-    _G1,
-    _G2,
-    _G3,
-    _G4,
-    _G5,
-    _G6,
-    _G7,
-    _B0,
-    _B1,
-    _B2,
-    _B3,
-    _B4,
-    _ltotal
+  enum xt_lines {
+    R0 = 0,
+    R1,
+    R2,
+    R3,
+    R4,
+    G0,
+    G1,
+    G2,
+    G3,
+    G4,
+    G5,
+    G6,
+    G7,
+    B0,
+    B1,
+    B2,
+    B3,
+    B4,
+    ltotal
   };
 
   struct fuji_compressed_block {
@@ -167,7 +167,7 @@ protected:
     std::array<std::array<int_pair, 41>, 3> grad_odd;
 
     std::vector<uint16_t> linealloc;
-    std::array<uint16_t*, _ltotal> linebuf;
+    std::array<uint16_t*, ltotal> linebuf;
   };
 
 private:
@@ -203,13 +203,13 @@ private:
 
   static void fuji_decode_interpolation_even(int line_width, uint16_t* line_buf,
                                              int* pos);
-  static void fuji_extend_generic(std::array<uint16_t*, _ltotal> linebuf,
+  static void fuji_extend_generic(std::array<uint16_t*, ltotal> linebuf,
                                   int line_width, int start, int end);
-  static void fuji_extend_red(std::array<uint16_t*, _ltotal> linebuf,
+  static void fuji_extend_red(std::array<uint16_t*, ltotal> linebuf,
                               int line_width);
-  static void fuji_extend_green(std::array<uint16_t*, _ltotal> linebuf,
+  static void fuji_extend_green(std::array<uint16_t*, ltotal> linebuf,
                                 int line_width);
-  static void fuji_extend_blue(std::array<uint16_t*, _ltotal> linebuf,
+  static void fuji_extend_blue(std::array<uint16_t*, ltotal> linebuf,
                                int line_width);
   void xtrans_decode_block(fuji_compressed_block* info, int cur_line) const;
   void fuji_bayer_decode_block(fuji_compressed_block* info, int cur_line) const;

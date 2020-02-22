@@ -7,7 +7,7 @@ elseif(NOT CMAKE_COMPILER_IS_GNUCXX)
   message(FATAL_ERROR "Compiler is not GNU gcc! Aborting...")
 endif()
 
-if(NOT CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
+if(NOT RAWSPEED_COVERAGE_BUILD)
   message(WARNING "Wrong build type, need COVERAGE.")
 endif()
 

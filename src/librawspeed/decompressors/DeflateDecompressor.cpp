@@ -219,14 +219,14 @@ void DeflateDecompressor::decode(
     predFactor = 0;
     break;
   }
+  predFactor *= mRaw->getCpp();
 
   int bytesps = bps / 8;
 
   for (auto row = 0; row < dim.y; ++row) {
     unsigned char* src = uBuffer->get() + row * maxDim.x * bytesps;
-    unsigned char* dst =
-        static_cast<unsigned char*>(mRaw->getData()) +
-        ((off.y + row) * mRaw->pitch + off.x * sizeof(float) * mRaw->getCpp());
+    unsigned char* dst = static_cast<unsigned char*>(mRaw->getData()) +
+                         ((off.y + row) * mRaw->pitch + off.x * sizeof(float));
 
     if (predFactor)
       decodeFPDeltaRow(src, dst, dim.x, maxDim.x, bytesps, predFactor);
