@@ -219,6 +219,7 @@ void DeflateDecompressor::decode(
     predFactor = 0;
     break;
   }
+  predFactor *= mRaw->getCpp();
 
   int bytesps = bps / 8;
 
