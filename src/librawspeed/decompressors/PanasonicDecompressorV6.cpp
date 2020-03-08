@@ -20,6 +20,7 @@
 */
 
 #include "decompressors/PanasonicDecompressorV6.h" // for PanasonicDecompre...
+#include "common/Array2DRef.h"                     // for Array2DRef
 #include "common/Point.h"                          // for iPoint2D
 #include "common/RawImage.h"                       // for RawImage, RawImag...
 #include "decoders/RawDecoderException.h"          // for ThrowRDE
@@ -91,14 +92,15 @@ PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
 
 void PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
                                               int col) const {
-  auto* rowptr = reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(0, row));
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+
   pana_cs6_page_decoder page(rowInput->getData(16), 16);
   page.read_page();
   std::array<unsigned int, 2> oddeven = {0, 0};
   std::array<unsigned int, 2> nonzero = {0, 0};
   unsigned pmul = 0;
   unsigned pixel_base = 0;
-  for (int pix = 0; pix < 11; pix++) {
+  for (int pix = 0; pix < 11; pix++, col++) {
     if (pix % 3 == 2) {
       unsigned base = page.nextpixel();
       if (base > 3)
@@ -123,10 +125,10 @@ void PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
     }
     auto spix = static_cast<unsigned>(static_cast<int>(epixel) - 0xf);
     if (spix <= 0xffff)
-      rowptr[col++] = spix & 0xffff;
+      out(row, col) = spix & 0xffff;
     else {
       epixel = static_cast<signed int>(epixel + 0x7ffffff1) >> 0x1f;
-      rowptr[col++] = epixel & 0x3fff;
+      out(row, col) = epixel & 0x3fff;
     }
   }
 }
