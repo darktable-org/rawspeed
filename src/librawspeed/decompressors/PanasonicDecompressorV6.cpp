@@ -39,26 +39,24 @@ struct pana_cs6_page_decoder {
   std::array<unsigned int, 14> pixelbuffer;
   unsigned char current = 0;
 
-  explicit pana_cs6_page_decoder(ByteStream bs) {
-    auto wbuffer = [&](int i) {
-      return static_cast<uint16_t>(bs.peekByte(15 - i));
-    };
-    pixelbuffer[0] = (wbuffer(0) << 6) | (wbuffer(1) >> 2); // 14 bit
-    pixelbuffer[1] =
-        (((wbuffer(1) & 0x3) << 12) | (wbuffer(2) << 4) | (wbuffer(3) >> 4)) &
-        0x3fff;
-    pixelbuffer[2] = (wbuffer(3) >> 2) & 0x3;
-    pixelbuffer[3] = ((wbuffer(3) & 0x3) << 8) | wbuffer(4);
-    pixelbuffer[4] = (wbuffer(5) << 2) | (wbuffer(6) >> 6);
-    pixelbuffer[5] = ((wbuffer(6) & 0x3f) << 4) | (wbuffer(7) >> 4);
-    pixelbuffer[6] = (wbuffer(7) >> 2) & 0x3;
-    pixelbuffer[7] = ((wbuffer(7) & 0x3) << 8) | wbuffer(8);
-    pixelbuffer[8] = ((wbuffer(9) << 2) & 0x3fc) | (wbuffer(10) >> 6);
-    pixelbuffer[9] = ((wbuffer(10) << 4) | (wbuffer(11) >> 4)) & 0x3ff;
-    pixelbuffer[10] = (wbuffer(11) >> 2) & 0x3;
-    pixelbuffer[11] = ((wbuffer(11) & 0x3) << 8) | wbuffer(12);
-    pixelbuffer[12] = (((wbuffer(13) << 2) & 0x3fc) | wbuffer(14) >> 6) & 0x3ff;
-    pixelbuffer[13] = ((wbuffer(14) << 4) | (wbuffer(15) >> 4)) & 0x3ff;
+  explicit pana_cs6_page_decoder(const ByteStream& bs) {
+    pixelbuffer[0] = (bs.peekByte(15) << 6) | (bs.peekByte(14) >> 2); // 14 bit
+    pixelbuffer[1] = (((bs.peekByte(14) & 0x3) << 12) | (bs.peekByte(13) << 4) |
+                      (bs.peekByte(12) >> 4)) &
+                     0x3fff;
+    pixelbuffer[2] = (bs.peekByte(12) >> 2) & 0x3;
+    pixelbuffer[3] = ((bs.peekByte(12) & 0x3) << 8) | bs.peekByte(11);
+    pixelbuffer[4] = (bs.peekByte(10) << 2) | (bs.peekByte(9) >> 6);
+    pixelbuffer[5] = ((bs.peekByte(9) & 0x3f) << 4) | (bs.peekByte(8) >> 4);
+    pixelbuffer[6] = (bs.peekByte(8) >> 2) & 0x3;
+    pixelbuffer[7] = ((bs.peekByte(8) & 0x3) << 8) | bs.peekByte(7);
+    pixelbuffer[8] = ((bs.peekByte(6) << 2) & 0x3fc) | (bs.peekByte(5) >> 6);
+    pixelbuffer[9] = ((bs.peekByte(5) << 4) | (bs.peekByte(4) >> 4)) & 0x3ff;
+    pixelbuffer[10] = (bs.peekByte(4) >> 2) & 0x3;
+    pixelbuffer[11] = ((bs.peekByte(4) & 0x3) << 8) | bs.peekByte(3);
+    pixelbuffer[12] =
+        (((bs.peekByte(2) << 2) & 0x3fc) | bs.peekByte(1) >> 6) & 0x3ff;
+    pixelbuffer[13] = ((bs.peekByte(1) << 4) | (bs.peekByte(0) >> 4)) & 0x3ff;
   }
 
   unsigned int nextpixel() { return pixelbuffer[current++]; }
