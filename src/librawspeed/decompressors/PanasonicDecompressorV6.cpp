@@ -84,50 +84,52 @@ PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
   }
 }
 
+void PanasonicDecompressorV6::decompressBlock(int row, int col) {
+  auto* rowptr = reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(0, row));
+  pana_cs6_page_decoder page(input.getData(16), 16);
+  page.read_page();
+  std::array<unsigned int, 2> oddeven = {0, 0};
+  std::array<unsigned int, 2> nonzero = {0, 0};
+  unsigned pmul = 0;
+  unsigned pixel_base = 0;
+  for (int pix = 0; pix < 11; pix++) {
+    if (pix % 3 == 2) {
+      unsigned base = page.nextpixel();
+      if (base > 3)
+        ThrowRDE("Invariant failure");
+      if (base == 3)
+        base = 4;
+      pixel_base = 0x200 << base;
+      pmul = 1 << base;
+    }
+    unsigned epixel = page.nextpixel();
+    if (oddeven[pix % 2]) {
+      epixel *= pmul;
+      if (pixel_base < 0x2000 && nonzero[pix % 2] > pixel_base)
+        epixel += nonzero[pix % 2] - pixel_base;
+      nonzero[pix % 2] = epixel;
+    } else {
+      oddeven[pix % 2] = epixel;
+      if (epixel)
+        nonzero[pix % 2] = epixel;
+      else
+        epixel = nonzero[pix % 2];
+    }
+    auto spix = static_cast<unsigned>(static_cast<int>(epixel) - 0xf);
+    if (spix <= 0xffff)
+      rowptr[col++] = spix & 0xffff;
+    else {
+      epixel = static_cast<signed int>(epixel + 0x7ffffff1) >> 0x1f;
+      rowptr[col++] = epixel & 0x3fff;
+    }
+  }
+}
+
 void PanasonicDecompressorV6::decompressRow(int row) {
   const int blocksperrow = mRaw->dim.x / 11;
 
-  int col = 0;
-  auto* rowptr = reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(0, row));
-  for (int rblock = 0; rblock < blocksperrow; rblock++) {
-    pana_cs6_page_decoder page(input.getData(16), 16);
-    page.read_page();
-    std::array<unsigned int, 2> oddeven = {0, 0};
-    std::array<unsigned int, 2> nonzero = {0, 0};
-    unsigned pmul = 0;
-    unsigned pixel_base = 0;
-    for (int pix = 0; pix < 11; pix++) {
-      if (pix % 3 == 2) {
-        unsigned base = page.nextpixel();
-        if (base > 3)
-          ThrowRDE("Invariant failure");
-        if (base == 3)
-          base = 4;
-        pixel_base = 0x200 << base;
-        pmul = 1 << base;
-      }
-      unsigned epixel = page.nextpixel();
-      if (oddeven[pix % 2]) {
-        epixel *= pmul;
-        if (pixel_base < 0x2000 && nonzero[pix % 2] > pixel_base)
-          epixel += nonzero[pix % 2] - pixel_base;
-        nonzero[pix % 2] = epixel;
-      } else {
-        oddeven[pix % 2] = epixel;
-        if (epixel)
-          nonzero[pix % 2] = epixel;
-        else
-          epixel = nonzero[pix % 2];
-      }
-      auto spix = static_cast<unsigned>(static_cast<int>(epixel) - 0xf);
-      if (spix <= 0xffff)
-        rowptr[col++] = spix & 0xffff;
-      else {
-        epixel = static_cast<signed int>(epixel + 0x7ffffff1) >> 0x1f;
-        rowptr[col++] = epixel & 0x3fff;
-      }
-    }
-  }
+  for (int rblock = 0, col = 0; rblock < blocksperrow; rblock++, col += 11)
+    decompressBlock(row, col);
 }
 
 void PanasonicDecompressorV6::decompress() {
