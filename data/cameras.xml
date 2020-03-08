@@ -7083,6 +7083,50 @@
 		<Crop x="4" y="0" width="-90" height="0"/>
 		<Sensor black="144" white="4095"/>
 	</Camera>
+	<Camera make="Panasonic" model="DC-S1">
+		<ID make="Panasonic" model="DC-S1">Panasonic DC-S1</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-50" height="0"/>
+		<Sensor black="511" white="16380"/>
+	</Camera>
+	<Camera make="Panasonic" model="DC-S1" mode="3:2">
+		<ID make="Panasonic" model="DC-S1">Panasonic DC-S1</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-50" height="0"/>
+		<Sensor black="511" white="16380"/>
+	</Camera>
+	<Camera make="Panasonic" model="DC-S1R">
+		<ID make="Panasonic" model="DC-S1R">Panasonic DC-S1R</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-58" height="0"/>
+		<Sensor black="510" white="16380"/>
+	</Camera>
+	<Camera make="Panasonic" model="DC-S1R" mode="3:2">
+		<ID make="Panasonic" model="DC-S1R">Panasonic DC-S1R</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-58" height="0"/>
+		<Sensor black="510" white="16380"/>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-TZ60">
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
