@@ -25,6 +25,7 @@
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/PanasonicDecompressor.h"    // for PanasonicDecompr...
 #include "decompressors/PanasonicDecompressorV5.h"  // for PanasonicDecompr...
+#include "decompressors/PanasonicDecompressorV6.h"  // for PanasonicDecompr...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer, DataBuffer
 #include "io/ByteStream.h"                          // for ByteStream
@@ -138,6 +139,12 @@ RawImage Rw2Decoder::decodeRawInternal() {
       PanasonicDecompressorV5 v5(mRaw, bs, bitsPerSample);
       mRaw->createData();
       v5.decompress();
+      return mRaw;
+    }
+    case 6: {
+      PanasonicDecompressorV6 v6(mRaw, bs, bitsPerSample);
+      mRaw->createData();
+      v6.decompress();
       return mRaw;
     }
     default:
