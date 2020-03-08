@@ -85,53 +85,48 @@ PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
 }
 
 void PanasonicDecompressorV6::decompress() {
-  const int rowstep = 16;
   const int blocksperrow = mRaw->dim.x / 11;
   const int rowbytes = blocksperrow * 16;
 
-  for (int row = 0; row < mRaw->dim.y - rowstep + 1; row += rowstep) {
-    int rowstoread = std::min(rowstep, mRaw->dim.y - row);
-    pana_cs6_page_decoder page(input.getData(rowbytes * rowstep),
-                               rowbytes * rowstoread);
-    for (int crow = 0, col = 0; crow < rowstoread; crow++, col = 0) {
-      auto* rowptr =
-          reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(0, row + crow));
-      for (int rblock = 0; rblock < blocksperrow; rblock++) {
-        page.read_page();
-        std::array<unsigned int, 2> oddeven = {0, 0};
-        std::array<unsigned int, 2> nonzero = {0, 0};
-        unsigned pmul = 0;
-        unsigned pixel_base = 0;
-        for (int pix = 0; pix < 11; pix++) {
-          if (pix % 3 == 2) {
-            unsigned base = page.nextpixel();
-            if (base > 3)
-              ThrowRDE("Invariant failure");
-            if (base == 3)
-              base = 4;
-            pixel_base = 0x200 << base;
-            pmul = 1 << base;
-          }
-          unsigned epixel = page.nextpixel();
-          if (oddeven[pix % 2]) {
-            epixel *= pmul;
-            if (pixel_base < 0x2000 && nonzero[pix % 2] > pixel_base)
-              epixel += nonzero[pix % 2] - pixel_base;
+  for (int row = 0; row < mRaw->dim.y; ++row) {
+    pana_cs6_page_decoder page(input.getData(rowbytes), rowbytes);
+    int col = 0;
+    auto* rowptr = reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(0, row));
+    for (int rblock = 0; rblock < blocksperrow; rblock++) {
+      page.read_page();
+      std::array<unsigned int, 2> oddeven = {0, 0};
+      std::array<unsigned int, 2> nonzero = {0, 0};
+      unsigned pmul = 0;
+      unsigned pixel_base = 0;
+      for (int pix = 0; pix < 11; pix++) {
+        if (pix % 3 == 2) {
+          unsigned base = page.nextpixel();
+          if (base > 3)
+            ThrowRDE("Invariant failure");
+          if (base == 3)
+            base = 4;
+          pixel_base = 0x200 << base;
+          pmul = 1 << base;
+        }
+        unsigned epixel = page.nextpixel();
+        if (oddeven[pix % 2]) {
+          epixel *= pmul;
+          if (pixel_base < 0x2000 && nonzero[pix % 2] > pixel_base)
+            epixel += nonzero[pix % 2] - pixel_base;
+          nonzero[pix % 2] = epixel;
+        } else {
+          oddeven[pix % 2] = epixel;
+          if (epixel)
             nonzero[pix % 2] = epixel;
-          } else {
-            oddeven[pix % 2] = epixel;
-            if (epixel)
-              nonzero[pix % 2] = epixel;
-            else
-              epixel = nonzero[pix % 2];
-          }
-          auto spix = static_cast<unsigned>(static_cast<int>(epixel) - 0xf);
-          if (spix <= 0xffff)
-            rowptr[col++] = spix & 0xffff;
-          else {
-            epixel = static_cast<signed int>(epixel + 0x7ffffff1) >> 0x1f;
-            rowptr[col++] = epixel & 0x3fff;
-          }
+          else
+            epixel = nonzero[pix % 2];
+        }
+        auto spix = static_cast<unsigned>(static_cast<int>(epixel) - 0xf);
+        if (spix <= 0xffff)
+          rowptr[col++] = spix & 0xffff;
+        else {
+          epixel = static_cast<signed int>(epixel + 0x7ffffff1) >> 0x1f;
+          rowptr[col++] = epixel & 0x3fff;
         }
       }
     }
