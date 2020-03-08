@@ -33,7 +33,7 @@ class PanasonicDecompressorV6 final : public AbstractDecompressor {
   ByteStream input;
 
 public:
-  PanasonicDecompressorV6(const RawImage& img, const ByteStream& input_,
+  PanasonicDecompressorV6(const RawImage& img, ByteStream input_,
                           uint32_t bps_);
 
   void decompress();
