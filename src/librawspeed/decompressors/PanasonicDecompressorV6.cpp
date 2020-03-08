@@ -36,7 +36,7 @@ constexpr int PanasonicDecompressorV6::BytesPerBlock;
 
 namespace {
 struct pana_cs6_page_decoder {
-  std::array<unsigned int, 14> pixelbuffer;
+  std::array<uint16_t, 14> pixelbuffer;
   unsigned char current = 0;
 
   explicit pana_cs6_page_decoder(const ByteStream& bs) {
@@ -59,7 +59,7 @@ struct pana_cs6_page_decoder {
     pixelbuffer[13] = ((bs.peekByte(1) << 4) | (bs.peekByte(0) >> 4)) & 0x3ff;
   }
 
-  unsigned int nextpixel() { return pixelbuffer[current++]; }
+  uint16_t nextpixel() { return pixelbuffer[current++]; }
 };
 } // namespace
 
@@ -89,14 +89,14 @@ void PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
   pana_cs6_page_decoder page(
       rowInput->getStream(PanasonicDecompressorV6::BytesPerBlock));
 
-  std::array<unsigned int, 2> oddeven = {0, 0};
-  std::array<unsigned int, 2> nonzero = {0, 0};
+  std::array<unsigned, 2> oddeven = {0, 0};
+  std::array<unsigned, 2> nonzero = {0, 0};
   unsigned pmul = 0;
   unsigned pixel_base = 0;
   for (int pix = 0; pix < PanasonicDecompressorV6::PixelsPerBlock;
        pix++, col++) {
     if (pix % 3 == 2) {
-      unsigned base = page.nextpixel();
+      uint16_t base = page.nextpixel();
       if (base > 3)
         ThrowRDE("Invariant failure");
       if (base == 3)
@@ -104,7 +104,7 @@ void PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
       pixel_base = 0x200 << base;
       pmul = 1 << base;
     }
-    unsigned epixel = page.nextpixel();
+    uint16_t epixel = page.nextpixel();
     if (oddeven[pix % 2]) {
       epixel *= pmul;
       if (pixel_base < 0x2000 && nonzero[pix % 2] > pixel_base)
@@ -121,7 +121,7 @@ void PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
     if (spix <= 0xffff)
       out(row, col) = spix & 0xffff;
     else {
-      epixel = static_cast<signed int>(epixel + 0x7ffffff1) >> 0x1f;
+      epixel = static_cast<int>(epixel + 0x7ffffff1) >> 0x1f;
       out(row, col) = epixel & 0x3fff;
     }
   }
