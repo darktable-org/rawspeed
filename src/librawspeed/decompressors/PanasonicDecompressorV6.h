@@ -32,14 +32,14 @@ class PanasonicDecompressorV6 final : public AbstractDecompressor {
 
   ByteStream input;
 
-  void decompressBlock(ByteStream* rowInput, int row, int col);
-  void decompressRow(int row);
+  void decompressBlock(ByteStream* rowInput, int row, int col) const;
+  void decompressRow(int row) const;
 
 public:
   PanasonicDecompressorV6(const RawImage& img, ByteStream input_,
                           uint32_t bps_);
 
-  void decompress();
+  void decompress() const;
 };
 
 } // namespace rawspeed
