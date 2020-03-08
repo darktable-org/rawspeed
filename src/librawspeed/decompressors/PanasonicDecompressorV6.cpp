@@ -90,7 +90,7 @@ void PanasonicDecompressorV6::decompress() {
     pana_cs6_page_decoder page(input.getData(rowbytes * rowstep),
                                rowbytes * rowstoread);
     for (int crow = 0, col = 0; crow < rowstoread; crow++, col = 0) {
-      uint16_t* rowptr =
+      auto* rowptr =
           reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(0, row + crow));
       for (int rblock = 0; rblock < blocksperrow; rblock++) {
         page.read_page();
@@ -119,7 +119,7 @@ void PanasonicDecompressorV6::decompress() {
             else
               epixel = nonzero[pix % 2];
           }
-          unsigned spix = (unsigned)((int)epixel - 0xf);
+          auto spix = (unsigned)((int)epixel - 0xf);
           if (spix <= 0xffff)
             rowptr[col++] = spix & 0xffff;
           else {
