@@ -121,11 +121,11 @@ void PanasonicDecompressorV6::decompress() {
             else
               epixel = nonzero[pix % 2];
           }
-          auto spix = (unsigned)((int)epixel - 0xf);
+          auto spix = static_cast<unsigned>(static_cast<int>(epixel) - 0xf);
           if (spix <= 0xffff)
             rowptr[col++] = spix & 0xffff;
           else {
-            epixel = (((signed int)(epixel + 0x7ffffff1)) >> 0x1f);
+            epixel = static_cast<signed int>(epixel + 0x7ffffff1) >> 0x1f;
             rowptr[col++] = epixel & 0x3fff;
           }
         }
