@@ -82,6 +82,11 @@ PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
     ThrowRDE("Unexpected image dimensions found: (%i; %i)", mRaw->dim.x,
              mRaw->dim.y);
   }
+
+  const int blocksperrow = mRaw->dim.x / 11;
+  const int bytesPerRow = 16 * blocksperrow;
+  const int bytesTotal = bytesPerRow * mRaw->dim.y;
+  input = input_.peekStream(bytesTotal);
 }
 
 void PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
