@@ -24,14 +24,16 @@
 #include "common/RawImage.h"                       // for RawImage, RawImag...
 #include "decoders/RawDecoderException.h"          // for ThrowRDE
 #include <algorithm>                               // for copy_n
-#include <cstdint>                                 // for uint16_t, uint32_t
-#include <cstdlib>                                 // for free, malloc
+#include <array>
+#include <cstdint> // for uint16_t, uint32_t
+#include <cstdlib> // for free, malloc
 
 namespace rawspeed {
 
 namespace {
 struct pana_cs6_page_decoder {
-  unsigned int pixelbuffer[14], lastoffset, maxoffset;
+  std::array<unsigned int, 14> pixelbuffer;
+  unsigned lastoffset, maxoffset;
   unsigned char current;
   const unsigned char* buffer;
   pana_cs6_page_decoder(const unsigned char* _buffer, unsigned int bsize)
@@ -96,8 +98,8 @@ void PanasonicDecompressorV6::decompress() {
           reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(0, row + crow));
       for (int rblock = 0; rblock < blocksperrow; rblock++) {
         page.read_page();
-        unsigned oddeven[2] = {0, 0};
-        unsigned nonzero[2] = {0, 0};
+        std::array<unsigned int, 2> oddeven = {0, 0};
+        std::array<unsigned int, 2> nonzero = {0, 0};
         unsigned pmul = 0;
         unsigned pixel_base = 0;
         for (int pix = 0; pix < 11; pix++) {
