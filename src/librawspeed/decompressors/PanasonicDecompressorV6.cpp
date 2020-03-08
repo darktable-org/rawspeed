@@ -70,7 +70,8 @@ PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
-  if (!mRaw->dim.hasPositiveArea()) {
+  if (!mRaw->dim.hasPositiveArea() ||
+      mRaw->dim.x % PanasonicDecompressorV6::PixelsPerBlock != 0) {
     ThrowRDE("Unexpected image dimensions found: (%i; %i)", mRaw->dim.x,
              mRaw->dim.y);
   }
@@ -128,6 +129,7 @@ void PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
 }
 
 void PanasonicDecompressorV6::decompressRow(int row) const {
+  assert(mRaw->dim.x % PanasonicDecompressorV6::PixelsPerBlock == 0);
   const int blocksperrow =
       mRaw->dim.x / PanasonicDecompressorV6::PixelsPerBlock;
   const int bytesPerRow = PanasonicDecompressorV6::BytesPerBlock * blocksperrow;
