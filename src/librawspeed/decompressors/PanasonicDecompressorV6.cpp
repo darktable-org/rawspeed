@@ -141,8 +141,24 @@ void PanasonicDecompressorV6::decompressRow(int row) const {
 }
 
 void PanasonicDecompressorV6::decompress() const {
-  for (int row = 0; row < mRaw->dim.y; ++row)
-    decompressRow(row);
+#ifdef HAVE_OPENMP
+#pragma omp parallel for num_threads(rawspeed_get_number_of_processor_cores()) \
+    schedule(static) default(none)
+#endif
+  for (int row = 0; row < mRaw->dim.y; ++row) {
+    try {
+      decompressRow(row);
+    } catch (RawspeedException& err) {
+      // Propagate the exception out of OpenMP magic.
+      mRaw->setError(err.what());
+    }
+  }
+
+  std::string firstErr;
+  if (mRaw->isTooManyErrors(1, &firstErr)) {
+    ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
+             firstErr.c_str());
+  }
 }
 
 } // namespace rawspeed
