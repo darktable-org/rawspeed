@@ -61,7 +61,7 @@ struct pana_cs6_page_decoder {
     pixelbuffer[13] = ((wbuffer(14) << 4) | (wbuffer(15) >> 4)) & 0x3ff;
   }
 
-  unsigned int nextpixel() { return current < 14 ? pixelbuffer[current++] : 0; }
+  unsigned int nextpixel() { return pixelbuffer[current++]; }
 };
 } // namespace
 
