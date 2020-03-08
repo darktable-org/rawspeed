@@ -72,8 +72,7 @@ void pana_cs6_page_decoder::read_page() {
 } // namespace
 
 PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
-                                                 ByteStream input_,
-                                                 uint32_t bps_)
+                                                 ByteStream input_)
     : mRaw(img), input(std::move(input_)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != sizeof(uint16_t))

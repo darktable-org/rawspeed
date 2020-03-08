@@ -142,7 +142,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       return mRaw;
     }
     case 6: {
-      PanasonicDecompressorV6 v6(mRaw, bs, bitsPerSample);
+      PanasonicDecompressorV6 v6(mRaw, bs);
       mRaw->createData();
       v6.decompress();
       return mRaw;
