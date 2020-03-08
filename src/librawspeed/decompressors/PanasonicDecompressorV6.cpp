@@ -32,8 +32,9 @@ namespace rawspeed {
 namespace {
 struct pana_cs6_page_decoder {
   unsigned int pixelbuffer[14], lastoffset, maxoffset;
-  unsigned char current, *buffer;
-  pana_cs6_page_decoder(unsigned char* _buffer, unsigned int bsize)
+  unsigned char current;
+  const unsigned char* buffer;
+  pana_cs6_page_decoder(const unsigned char* _buffer, unsigned int bsize)
       : lastoffset(0), maxoffset(bsize), current(0), buffer(_buffer) {}
   void read_page(); // will throw IO error if not enough space in buffer
   unsigned int nextpixel() { return current < 14 ? pixelbuffer[current++] : 0; }
@@ -83,12 +84,11 @@ void PanasonicDecompressorV6::decompress() {
   const int rowstep = 16;
   const int blocksperrow = mRaw->dim.x / 11;
   const int rowbytes = blocksperrow * 16;
-  unsigned char* iobuf = (unsigned char*)malloc(rowbytes * rowstep);
 
   for (int row = 0; row < mRaw->dim.y - rowstep + 1; row += rowstep) {
     int rowstoread = std::min(rowstep, mRaw->dim.y - row);
-    std::copy_n(input.getData(rowbytes * rowstep), rowbytes * rowstep, iobuf);
-    pana_cs6_page_decoder page(iobuf, rowbytes * rowstoread);
+    pana_cs6_page_decoder page(input.getData(rowbytes * rowstep),
+                               rowbytes * rowstoread);
     for (int crow = 0, col = 0; crow < rowstoread; crow++, col = 0) {
       uint16_t* rowptr =
           reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(0, row + crow));
@@ -130,7 +130,6 @@ void PanasonicDecompressorV6::decompress() {
       }
     }
   }
-  free(iobuf);
 }
 
 } // namespace rawspeed
