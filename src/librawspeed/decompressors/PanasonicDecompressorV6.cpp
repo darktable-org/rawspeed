@@ -44,7 +44,7 @@ void pana_cs6_page_decoder::read_page() {
   if (!buffer || (maxoffset - lastoffset < 16))
     ThrowRDE("Input failure");
   auto wbuffer = [&](int i) {
-    return static_cast<unsigned short>(buffer[lastoffset + 15 - i]);
+    return static_cast<uint16_t>(buffer[lastoffset + 15 - i]);
   };
   pixelbuffer[0] = (wbuffer(0) << 6) | (wbuffer(1) >> 2); // 14 bit
   pixelbuffer[1] =
