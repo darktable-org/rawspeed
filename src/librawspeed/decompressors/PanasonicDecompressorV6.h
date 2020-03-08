@@ -32,7 +32,7 @@ class PanasonicDecompressorV6 final : public AbstractDecompressor {
 
   ByteStream input;
 
-  void decompressBlock(int row, int col);
+  void decompressBlock(ByteStream* rowInput, int row, int col);
   void decompressRow(int row);
 
 public:

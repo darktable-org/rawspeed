@@ -84,9 +84,10 @@ PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
   }
 }
 
-void PanasonicDecompressorV6::decompressBlock(int row, int col) {
+void PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
+                                              int col) {
   auto* rowptr = reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(0, row));
-  pana_cs6_page_decoder page(input.getData(16), 16);
+  pana_cs6_page_decoder page(rowInput->getData(16), 16);
   page.read_page();
   std::array<unsigned int, 2> oddeven = {0, 0};
   std::array<unsigned int, 2> nonzero = {0, 0};
@@ -127,9 +128,11 @@ void PanasonicDecompressorV6::decompressBlock(int row, int col) {
 
 void PanasonicDecompressorV6::decompressRow(int row) {
   const int blocksperrow = mRaw->dim.x / 11;
+  const int bytesPerRow = 16 * blocksperrow;
 
+  ByteStream rowInput = input.getSubStream(bytesPerRow * row, bytesPerRow);
   for (int rblock = 0, col = 0; rblock < blocksperrow; rblock++, col += 11)
-    decompressBlock(row, col);
+    decompressBlock(&rowInput, row, col);
 }
 
 void PanasonicDecompressorV6::decompress() {
