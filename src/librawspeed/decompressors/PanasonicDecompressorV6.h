@@ -36,7 +36,7 @@ public:
   PanasonicDecompressorV6(const RawImage& img, const ByteStream& input_,
                           uint32_t bps_);
 
-  void decompress() const;
+  void decompress();
 };
 
 } // namespace rawspeed
