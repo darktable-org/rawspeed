@@ -94,8 +94,10 @@ void PanasonicDecompressorV6::decompress() {
           reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(0, row + crow));
       for (int rblock = 0; rblock < blocksperrow; rblock++) {
         page.read_page();
-        unsigned oddeven[2] = {0, 0}, nonzero[2] = {0, 0};
-        unsigned pmul = 0, pixel_base = 0;
+        unsigned oddeven[2] = {0, 0};
+        unsigned nonzero[2] = {0, 0};
+        unsigned pmul = 0;
+        unsigned pixel_base = 0;
         for (int pix = 0; pix < 11; pix++) {
           if (pix % 3 == 2) {
             unsigned base = page.nextpixel();
