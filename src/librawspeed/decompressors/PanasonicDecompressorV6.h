@@ -32,6 +32,9 @@ class PanasonicDecompressorV6 final : public AbstractDecompressor {
 
   ByteStream input;
 
+  static constexpr int PixelsPerBlock = 11;
+  static constexpr int BytesPerBlock = 16;
+
   void decompressBlock(ByteStream* rowInput, int row, int col) const;
   void decompressRow(int row) const;
 

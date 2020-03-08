@@ -31,6 +31,9 @@
 
 namespace rawspeed {
 
+constexpr int PanasonicDecompressorV6::PixelsPerBlock;
+constexpr int PanasonicDecompressorV6::BytesPerBlock;
+
 namespace {
 struct pana_cs6_page_decoder {
   std::array<unsigned int, 14> pixelbuffer;
@@ -74,8 +77,9 @@ PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
              mRaw->dim.y);
   }
 
-  const int blocksperrow = mRaw->dim.x / 11;
-  const int bytesPerRow = 16 * blocksperrow;
+  const int blocksperrow =
+      mRaw->dim.x / PanasonicDecompressorV6::PixelsPerBlock;
+  const int bytesPerRow = PanasonicDecompressorV6::BytesPerBlock * blocksperrow;
   const int bytesTotal = bytesPerRow * mRaw->dim.y;
   input = input_.peekStream(bytesTotal);
 }
@@ -84,13 +88,15 @@ void PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
                                               int col) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  pana_cs6_page_decoder page(rowInput->getStream(16));
+  pana_cs6_page_decoder page(
+      rowInput->getStream(PanasonicDecompressorV6::BytesPerBlock));
 
   std::array<unsigned int, 2> oddeven = {0, 0};
   std::array<unsigned int, 2> nonzero = {0, 0};
   unsigned pmul = 0;
   unsigned pixel_base = 0;
-  for (int pix = 0; pix < 11; pix++, col++) {
+  for (int pix = 0; pix < PanasonicDecompressorV6::PixelsPerBlock;
+       pix++, col++) {
     if (pix % 3 == 2) {
       unsigned base = page.nextpixel();
       if (base > 3)
@@ -124,11 +130,13 @@ void PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
 }
 
 void PanasonicDecompressorV6::decompressRow(int row) const {
-  const int blocksperrow = mRaw->dim.x / 11;
-  const int bytesPerRow = 16 * blocksperrow;
+  const int blocksperrow =
+      mRaw->dim.x / PanasonicDecompressorV6::PixelsPerBlock;
+  const int bytesPerRow = PanasonicDecompressorV6::BytesPerBlock * blocksperrow;
 
   ByteStream rowInput = input.getSubStream(bytesPerRow * row, bytesPerRow);
-  for (int rblock = 0, col = 0; rblock < blocksperrow; rblock++, col += 11)
+  for (int rblock = 0, col = 0; rblock < blocksperrow;
+       rblock++, col += PanasonicDecompressorV6::PixelsPerBlock)
     decompressBlock(&rowInput, row, col);
 }
 
