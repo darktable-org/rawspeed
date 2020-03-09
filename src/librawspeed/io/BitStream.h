@@ -163,7 +163,7 @@ public:
   }
 
   // these methods might be specialized by implementations that support it
-  inline size_type getBufferPosition() const {
+  inline size_type getStreamPosition() const {
     return pos - (cache.fillLevel >> 3);
   }
 

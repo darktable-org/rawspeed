@@ -93,7 +93,7 @@ void HasselbladDecompressor::decodeScan() {
       out(row, col + 1) = uint16_t(p2);
     }
   }
-  input.skipBytes(bitStream.getBufferPosition());
+  input.skipBytes(bitStream.getStreamPosition());
 }
 
 void HasselbladDecompressor::decode(int pixelBaseOffset_)

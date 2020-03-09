@@ -345,7 +345,7 @@ void SamsungV2Decompressor::decompressRow(int row) {
   for (int col = 0; col < width; col += 16)
     processBlock(&pump, row, col);
 
-  data.skipBytes(pump.getBufferPosition());
+  data.skipBytes(pump.getStreamPosition());
 }
 
 void SamsungV2Decompressor::decompress() {
