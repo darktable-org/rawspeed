@@ -108,8 +108,7 @@ class BitStream final : public ByteStream {
   // this method hase to be implemented in the concrete BitStream template
   // specializations. It will return the number of bytes processed. It needs
   // to process up to BitStreamCacheBase::MaxProcessBytes bytes of input.
-  size_type fillCache(const uint8_t* input, size_type bufferSize,
-                      size_type* bufPos);
+  size_type fillCache(const uint8_t* input);
 
 public:
   BitStream() = default;
@@ -159,7 +158,7 @@ public:
     if (cache.fillLevel >= nbits)
       return;
 
-    pos += fillCache(getInput(), size, &pos);
+    pos += fillCache(getInput());
   }
 
   // these methods might be specialized by implementations that support it

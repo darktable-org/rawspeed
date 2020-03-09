@@ -39,9 +39,7 @@ template <> struct BitStreamTraits<BitPumpMSB> final {
 };
 
 template <>
-inline BitPumpMSB::size_type BitPumpMSB::fillCache(const uint8_t* input,
-                                                   size_type bufferSize,
-                                                   size_type* bufPos) {
+inline BitPumpMSB::size_type BitPumpMSB::fillCache(const uint8_t* input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
 
   cache.push(getBE<uint32_t>(input), 32);

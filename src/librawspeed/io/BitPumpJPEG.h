@@ -39,9 +39,7 @@ template <> struct BitStreamTraits<BitPumpJPEG> final {
 };
 
 template <>
-inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uint8_t* input,
-                                                     size_type bufferSize,
-                                                     size_type* bufPos) {
+inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uint8_t* input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
 
   // short-cut path for the most common case (no FF marker in the next 4 bytes)
@@ -73,10 +71,9 @@ inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uint8_t* input,
         cache.cache <<= bitwidth(cache.cache) - cache.fillLevel;
         cache.fillLevel = bitwidth(cache.cache);
 
-        // No further reading from this buffer shall happen.
-        // Do signal that by stating that we are at the end of the buffer.
-        *bufPos = bufferSize;
-        return 0;
+        // No further reading from this buffer shall happen. Do signal that by
+        // claiming that we have consumed all the remaining bytes of the buffer.
+        return getRemainingSize();
       }
     }
   }
