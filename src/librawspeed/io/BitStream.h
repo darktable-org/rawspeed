@@ -169,13 +169,6 @@ public:
 
   inline size_type getFillLevel() const { return cache.fillLevel; }
 
-  // rewinds to the beginning of the buffer.
-  void resetBufferPosition() {
-    pos = 0;
-    cache.fillLevel = 0;
-    cache.cache = 0;
-  }
-
   void setBufferPosition(size_type newPos);
 
   inline uint32_t __attribute__((pure)) peekBitsNoFill(uint32_t nbits) {
