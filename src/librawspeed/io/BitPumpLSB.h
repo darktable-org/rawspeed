@@ -44,10 +44,4 @@ inline BitPumpLSB::size_type BitPumpLSB::fillCache(const uint8_t* input,
   return 4;
 }
 
-template <> inline void BitPumpLSB::setBufferPosition(size_type newPos) {
-  pos = newPos;
-  cache.fillLevel = 0;
-  cache.cache = 0;
-}
-
 } // namespace rawspeed

@@ -169,8 +169,6 @@ public:
 
   inline size_type getFillLevel() const { return cache.fillLevel; }
 
-  void setBufferPosition(size_type newPos);
-
   inline uint32_t __attribute__((pure)) peekBitsNoFill(uint32_t nbits) {
     assert(nbits != 0);
     assert(nbits < Cache::MaxGetBits);
