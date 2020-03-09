@@ -167,6 +167,8 @@ public:
     return pos - (cache.fillLevel >> 3);
   }
 
+  inline size_type getRemainingSize() const { return getRemainSize(); }
+
   inline size_type getFillLevel() const { return cache.fillLevel; }
 
   inline uint32_t __attribute__((pure)) peekBitsNoFill(uint32_t nbits) {

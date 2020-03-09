@@ -137,7 +137,7 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   if (width != mRaw->dim.x || height != mRaw->dim.y)
     ThrowRDE("EXIF image dimensions do not match dimensions from raw header");
 
-  data = startpump.getStream(startpump.getRemainSize());
+  data = startpump.getStream(startpump.getRemainingSize());
 }
 
 // The format is relatively straightforward. Each line gets encoded as a set

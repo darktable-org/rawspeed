@@ -338,7 +338,7 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
       img(row, col) = odd.getBits(12);
     ++row;
   }
-  assert(even.getRemainSize() == 0 && odd.getRemainSize() == 0 &&
+  assert(even.getRemainingSize() == 0 && odd.getRemainingSize() == 0 &&
          "Should have run out of input");
 }
 
