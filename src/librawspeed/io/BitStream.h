@@ -163,8 +163,11 @@ public:
   }
 
   // these methods might be specialized by implementations that support it
+  inline size_type getInputPosition() const { return pos; }
+
+  // these methods might be specialized by implementations that support it
   inline size_type getStreamPosition() const {
-    return pos - (cache.fillLevel >> 3);
+    return getInputPosition() - (cache.fillLevel >> 3);
   }
 
   inline size_type getRemainingSize() const { return getRemainSize(); }

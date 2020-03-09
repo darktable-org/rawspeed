@@ -87,7 +87,7 @@ template <>
 inline BitPumpJPEG::size_type BitPumpJPEG::getStreamPosition() const {
   // the current number of bytes we consumed -> at the end of the stream pos, it
   // points to the JPEG marker FF
-  return pos;
+  return getInputPosition();
 }
 
 } // namespace rawspeed

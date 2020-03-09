@@ -128,7 +128,7 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   startpump.getBits(2); // reserved
   initVal = startpump.getBits(14);
 
-  assert(startpump.getPosition() == headerSize);
+  assert(startpump.getInputPosition() == headerSize);
 
   if (width == 0 || height == 0 || width % 16 != 0 || width > 6496 ||
       height > 4336)
