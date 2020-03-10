@@ -19,15 +19,19 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/PanasonicDecompressorV6.h" // for PanasonicDecompre...
-#include "common/Array2DRef.h"                     // for Array2DRef
-#include "common/Point.h"                          // for iPoint2D
-#include "common/RawImage.h"                       // for RawImage, RawImag...
-#include "decoders/RawDecoderException.h"          // for ThrowRDE
-#include <algorithm>                               // for copy_n
-#include <array>
-#include <cstdint> // for uint16_t, uint32_t
-#include <cstdlib> // for free, malloc
+#include "rawspeedconfig.h" // for HAVE_OPENMP
+#include "decompressors/PanasonicDecompressorV6.h"
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for rawspeed_get_number_of_pro...
+#include "common/Point.h"                 // for iPoint2D
+#include "common/RawImage.h"              // for RawImageData, RawImage
+#include "common/RawspeedException.h"     // for RawspeedException
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include <array>                          // for array
+#include <cassert>                        // for assert
+#include <cstdint>                        // for uint16_t
+#include <string>                         // for string
+#include <utility>                        // for move
 
 namespace rawspeed {
 

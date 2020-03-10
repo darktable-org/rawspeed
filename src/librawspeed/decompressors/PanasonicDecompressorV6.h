@@ -23,7 +23,6 @@
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/ByteStream.h"                      // for ByteStream
-#include <cstdint>                              // for uint32_t
 
 namespace rawspeed {
 
