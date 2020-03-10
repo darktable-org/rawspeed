@@ -101,11 +101,18 @@ PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
              mRaw->dim.y);
   }
 
-  const int blocksperrow =
-      mRaw->dim.x / PanasonicDecompressorV6::PixelsPerBlock;
-  const int bytesPerRow = PanasonicDecompressorV6::BytesPerBlock * blocksperrow;
-  const int bytesTotal = bytesPerRow * mRaw->dim.y;
-  input = input_.peekStream(bytesTotal);
+  // How many blocks are needed for the given image size?
+  const auto numBlocks = mRaw->dim.area() / PixelsPerBlock;
+
+  // How many full blocks does the input contain? This is truncating division.
+  const auto haveBlocks = input_.getRemainSize() / BytesPerBlock;
+
+  // Does the input contain enough blocks?
+  if (haveBlocks < numBlocks)
+    ThrowRDE("Insufficient count of input blocks for a given image");
+
+  // We only want those blocks we need, no extras.
+  input = input_.peekStream(numBlocks, BytesPerBlock);
 }
 
 void PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
