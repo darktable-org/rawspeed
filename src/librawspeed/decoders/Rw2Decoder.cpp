@@ -25,6 +25,7 @@
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/PanasonicDecompressor.h"    // for PanasonicDecompr...
 #include "decompressors/PanasonicDecompressorV5.h"  // for PanasonicDecompr...
+#include "decompressors/PanasonicDecompressorV6.h"  // for PanasonicDecompr...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer, DataBuffer
 #include "io/ByteStream.h"                          // for ByteStream
@@ -121,24 +122,33 @@ RawImage Rw2Decoder::decodeRawInternal() {
 
     ByteStream bs(DataBuffer(mFile->getSubView(offset), Endianness::little));
 
-    bool v5Processing = raw->hasEntry(PANASONIC_RAWFORMAT) &&
-                        raw->getEntry(PANASONIC_RAWFORMAT)->getU16() == 5;
-
     uint16_t bitsPerSample = 12;
-    if (raw->hasEntry(PANASONIC_BITSPERSAMPLE)) {
+    if (raw->hasEntry(PANASONIC_BITSPERSAMPLE))
       bitsPerSample = raw->getEntry(PANASONIC_BITSPERSAMPLE)->getU16();
-    }
 
-    if (v5Processing) {
-      PanasonicDecompressorV5 v5(mRaw, bs, bitsPerSample);
-      mRaw->createData();
-      v5.decompress();
-    } else {
+    switch (uint16_t version = raw->getEntry(PANASONIC_RAWFORMAT)->getU16()) {
+    case 4: {
       uint32_t section_split_offset = 0x1FF8;
       PanasonicDecompressor p(mRaw, bs, hints.has("zero_is_not_bad"),
                               section_split_offset);
       mRaw->createData();
       p.decompress();
+      return mRaw;
+    }
+    case 5: {
+      PanasonicDecompressorV5 v5(mRaw, bs, bitsPerSample);
+      mRaw->createData();
+      v5.decompress();
+      return mRaw;
+    }
+    case 6: {
+      PanasonicDecompressorV6 v6(mRaw, bs);
+      mRaw->createData();
+      v6.decompress();
+      return mRaw;
+    }
+    default:
+      ThrowRDE("Version %i is unsupported", version);
     }
   }
 

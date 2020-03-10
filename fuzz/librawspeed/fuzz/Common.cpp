@@ -44,7 +44,9 @@ rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs) {
   rawspeed::RawImage mRaw(
       rawspeed::RawImage::create(rawspeed::RawImageType(type)));
 
-  mRaw->dim = rawspeed::iPoint2D(width, height);
+  mRaw->dim =
+      rawspeed::iPoint2D(static_cast<rawspeed::iPoint2D::value_type>(width),
+                         static_cast<rawspeed::iPoint2D::value_type>(height));
   mRaw->setCpp(cpp);
   mRaw->isCFA = isCFA;
 
