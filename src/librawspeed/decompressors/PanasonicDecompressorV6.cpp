@@ -40,23 +40,44 @@ struct pana_cs6_page_decoder {
   unsigned char current = 0;
 
   explicit pana_cs6_page_decoder(const ByteStream& bs) {
-    pixelbuffer[0] = (bs.peekByte(15) << 6) | (bs.peekByte(14) >> 2); // 14 bit
+    // The bit packing scheme here is actually just 128-bit little-endian int,
+    // that we consume from the high bits to low bits, with no padding.
+    // It is really tempting to refactor this using proper BitPump, but so far
+    // that results in disappointing performance, especially because those
+    // '2 bit' pixels aren't the 2-bit pixels we look for when `pix % 3 == 2`.
+
+    // 14 bits
+    pixelbuffer[0] = (bs.peekByte(15) << 6) | (bs.peekByte(14) >> 2);
+    // 14 bits
     pixelbuffer[1] = (((bs.peekByte(14) & 0x3) << 12) | (bs.peekByte(13) << 4) |
                       (bs.peekByte(12) >> 4)) &
                      0x3fff;
+    // 2 bits
     pixelbuffer[2] = (bs.peekByte(12) >> 2) & 0x3;
+    // 10 bits
     pixelbuffer[3] = ((bs.peekByte(12) & 0x3) << 8) | bs.peekByte(11);
+    // 10 bits
     pixelbuffer[4] = (bs.peekByte(10) << 2) | (bs.peekByte(9) >> 6);
+    // 10 bits
     pixelbuffer[5] = ((bs.peekByte(9) & 0x3f) << 4) | (bs.peekByte(8) >> 4);
+    // 2 bits
     pixelbuffer[6] = (bs.peekByte(8) >> 2) & 0x3;
+    // 10 bits
     pixelbuffer[7] = ((bs.peekByte(8) & 0x3) << 8) | bs.peekByte(7);
+    // 10 bits
     pixelbuffer[8] = ((bs.peekByte(6) << 2) & 0x3fc) | (bs.peekByte(5) >> 6);
+    // 10 bits
     pixelbuffer[9] = ((bs.peekByte(5) << 4) | (bs.peekByte(4) >> 4)) & 0x3ff;
+    // 2 bits
     pixelbuffer[10] = (bs.peekByte(4) >> 2) & 0x3;
+    // 10 bits
     pixelbuffer[11] = ((bs.peekByte(4) & 0x3) << 8) | bs.peekByte(3);
+    // 10 bits
     pixelbuffer[12] =
         (((bs.peekByte(2) << 2) & 0x3fc) | bs.peekByte(1) >> 6) & 0x3ff;
+    // 10 bits
     pixelbuffer[13] = ((bs.peekByte(1) << 4) | (bs.peekByte(0) >> 4)) & 0x3ff;
+    // 4 padding bits
   }
 
   uint16_t nextpixel() { return pixelbuffer[current++]; }
