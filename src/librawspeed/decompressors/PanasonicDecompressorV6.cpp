@@ -89,8 +89,8 @@ struct pana_cs6_page_decoder {
 } // namespace
 
 PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
-                                                 ByteStream input_)
-    : mRaw(img), input(std::move(input_)) {
+                                                 const ByteStream& input_)
+    : mRaw(img) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
