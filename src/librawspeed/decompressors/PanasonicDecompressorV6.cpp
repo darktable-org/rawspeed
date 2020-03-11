@@ -114,9 +114,10 @@ PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
   input = input_.peekStream(numBlocks, BytesPerBlock);
 }
 
+inline void __attribute__((always_inline))
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
-void PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
-                                              int col) const noexcept {
+PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
+                                         int col) const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   pana_cs6_page_decoder page(
