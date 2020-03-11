@@ -34,8 +34,10 @@ class PanasonicDecompressorV6 final : public AbstractDecompressor {
   static constexpr int PixelsPerBlock = 11;
   static constexpr int BytesPerBlock = 16;
 
-  void decompressBlock(ByteStream* rowInput, int row, int col) const;
-  void decompressRow(int row) const;
+  // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
+  void decompressBlock(ByteStream* rowInput, int row, int col) const noexcept;
+  // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
+  void decompressRow(int row) const noexcept;
 
 public:
   PanasonicDecompressorV6(const RawImage& img, const ByteStream& input_);

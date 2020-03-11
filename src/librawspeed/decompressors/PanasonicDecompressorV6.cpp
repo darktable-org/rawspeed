@@ -114,8 +114,9 @@ PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
   input = input_.peekStream(numBlocks, BytesPerBlock);
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
 void PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
-                                              int col) const {
+                                              int col) const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   pana_cs6_page_decoder page(
@@ -129,8 +130,6 @@ void PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
        pix++, col++) {
     if (pix % 3 == 2) {
       uint16_t base = page.nextpixel();
-      if (base > 3)
-        ThrowRDE("Invariant failure");
       if (base == 3)
         base = 4;
       pixel_base = 0x200 << base;
@@ -159,7 +158,8 @@ void PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
   }
 }
 
-void PanasonicDecompressorV6::decompressRow(int row) const {
+// NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
+void PanasonicDecompressorV6::decompressRow(int row) const noexcept {
   assert(mRaw->dim.x % PanasonicDecompressorV6::PixelsPerBlock == 0);
   const int blocksperrow =
       mRaw->dim.x / PanasonicDecompressorV6::PixelsPerBlock;
@@ -176,19 +176,10 @@ void PanasonicDecompressorV6::decompress() const {
 #pragma omp parallel for num_threads(rawspeed_get_number_of_processor_cores()) \
     schedule(static) default(none)
 #endif
-  for (int row = 0; row < mRaw->dim.y; ++row) {
-    try {
-      decompressRow(row);
-    } catch (RawspeedException& err) {
-      // Propagate the exception out of OpenMP magic.
-      mRaw->setError(err.what());
-    }
-  }
-
-  std::string firstErr;
-  if (mRaw->isTooManyErrors(1, &firstErr)) {
-    ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
-             firstErr.c_str());
+  for (int row = 0; row < mRaw->dim.y;
+       ++row) { // NOLINT(openmp-exception-escape): we know no exceptions will
+                // be thrown.
+    decompressRow(row);
   }
 }
 
