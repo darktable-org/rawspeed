@@ -47,8 +47,7 @@ struct pana_cs6_page_decoder {
     // The bit packing scheme here is actually just 128-bit little-endian int,
     // that we consume from the high bits to low bits, with no padding.
     // It is really tempting to refactor this using proper BitPump, but so far
-    // that results in disappointing performance, especially because those
-    // '2 bit' pixels aren't the 2-bit pixels we look for when `pix % 3 == 2`.
+    // that results in disappointing performance.
 
     // 14 bits
     pixelbuffer[0] = (bs.peekByte(15) << 6) | (bs.peekByte(14) >> 2);
