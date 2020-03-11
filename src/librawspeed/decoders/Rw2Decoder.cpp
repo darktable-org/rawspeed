@@ -23,7 +23,7 @@
 #include "common/Common.h"                          // for writeLog, DEBUG_...
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
-#include "decompressors/PanasonicDecompressor.h"    // for PanasonicDecompr...
+#include "decompressors/PanasonicDecompressorV4.h"  // for PanasonicDecompr...
 #include "decompressors/PanasonicDecompressorV5.h"  // for PanasonicDecompr...
 #include "decompressors/PanasonicDecompressorV6.h"  // for PanasonicDecompr...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
@@ -102,7 +102,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       u.decode12BitRaw<Endianness::little, false, true>(width, height);
     } else {
       uint32_t section_split_offset = 0;
-      PanasonicDecompressor p(
+      PanasonicDecompressorV4 p(
           mRaw,
           ByteStream(DataBuffer(mFile->getSubView(offset), Endianness::little)),
           hints.has("zero_is_not_bad"), section_split_offset);
@@ -129,8 +129,8 @@ RawImage Rw2Decoder::decodeRawInternal() {
     switch (uint16_t version = raw->getEntry(PANASONIC_RAWFORMAT)->getU16()) {
     case 4: {
       uint32_t section_split_offset = 0x1FF8;
-      PanasonicDecompressor p(mRaw, bs, hints.has("zero_is_not_bad"),
-                              section_split_offset);
+      PanasonicDecompressorV4 p(mRaw, bs, hints.has("zero_is_not_bad"),
+                                section_split_offset);
       mRaw->createData();
       p.decompress();
       return mRaw;

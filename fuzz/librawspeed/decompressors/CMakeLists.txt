@@ -19,7 +19,7 @@ set(DECOMPRESSORS
   "LJpegDecompressor"
   "NikonDecompressor"
   "OlympusDecompressor"
-  "PanasonicDecompressor"
+  "PanasonicDecompressorV4"
   "PanasonicDecompressorV5"
   "PanasonicDecompressorV6"
   "PentaxDecompressor"

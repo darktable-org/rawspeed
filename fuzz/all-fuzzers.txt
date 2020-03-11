@@ -71,7 +71,7 @@ KodakDecompressorFuzzer
 LJpegDecompressorFuzzer
 NikonDecompressorFuzzer
 OlympusDecompressorFuzzer
-PanasonicDecompressorFuzzer
+PanasonicDecompressorV4Fuzzer
 PanasonicDecompressorV5Fuzzer
 PanasonicDecompressorV6Fuzzer
 PentaxDecompressorFuzzer
