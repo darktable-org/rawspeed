@@ -21,7 +21,7 @@
 */
 
 #include "rawspeedconfig.h" // for HAVE_OPENMP
-#include "decompressors/PanasonicDecompressor.h"
+#include "decompressors/PanasonicDecompressorV4.h"
 #include "common/Array2DRef.h"            // for Array2DRef
 #include "common/Common.h"                // for extractHighBits, rawspeed_...
 #include "common/Mutex.h"                 // for MutexLocker
@@ -41,12 +41,12 @@
 
 namespace rawspeed {
 
-constexpr uint32_t PanasonicDecompressor::BlockSize;
+constexpr uint32_t PanasonicDecompressorV4::BlockSize;
 
-PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
-                                             const ByteStream& input_,
-                                             bool zero_is_not_bad,
-                                             uint32_t section_split_offset_)
+PanasonicDecompressorV4::PanasonicDecompressorV4(const RawImage& img,
+                                                 const ByteStream& input_,
+                                                 bool zero_is_not_bad,
+                                                 uint32_t section_split_offset_)
     : mRaw(img), zero_is_bad(!zero_is_not_bad),
       section_split_offset(section_split_offset_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
@@ -82,7 +82,7 @@ PanasonicDecompressor::PanasonicDecompressor(const RawImage& img,
   chopInputIntoBlocks();
 }
 
-void PanasonicDecompressor::chopInputIntoBlocks() {
+void PanasonicDecompressorV4::chopInputIntoBlocks() {
   auto pixelToCoordinate = [width = mRaw->dim.x](unsigned pixel) {
     return iPoint2D(pixel % width, pixel / width);
   };
@@ -121,7 +121,7 @@ void PanasonicDecompressor::chopInputIntoBlocks() {
   blocks.back().endCoord.y -= 1;
 }
 
-class PanasonicDecompressor::ProxyStream {
+class PanasonicDecompressorV4::ProxyStream {
   ByteStream block;
   const uint32_t section_split_offset;
   std::vector<uint8_t> buf;
@@ -165,7 +165,7 @@ public:
   }
 };
 
-inline void PanasonicDecompressor::processPixelPacket(
+inline void PanasonicDecompressorV4::processPixelPacket(
     ProxyStream* bits, int row, int col,
     std::vector<uint32_t>* zero_pos) const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -212,9 +212,8 @@ inline void PanasonicDecompressor::processPixelPacket(
   }
 }
 
-void PanasonicDecompressor::processBlock(const Block& block,
-                                         std::vector<uint32_t>* zero_pos) const
-    noexcept {
+void PanasonicDecompressorV4::processBlock(
+    const Block& block, std::vector<uint32_t>* zero_pos) const noexcept {
   ProxyStream bits(block.bs, section_split_offset);
 
   for (int row = block.beginCoord.y; row <= block.endCoord.y; row++) {
@@ -236,7 +235,7 @@ void PanasonicDecompressor::processBlock(const Block& block,
   }
 }
 
-void PanasonicDecompressor::decompressThread() const noexcept {
+void PanasonicDecompressorV4::decompressThread() const noexcept {
   std::vector<uint32_t> zero_pos;
 
   assert(!blocks.empty());
@@ -254,7 +253,7 @@ void PanasonicDecompressor::decompressThread() const noexcept {
   }
 }
 
-void PanasonicDecompressor::decompress() const noexcept {
+void PanasonicDecompressorV4::decompress() const noexcept {
   assert(!blocks.empty());
 #ifdef HAVE_OPENMP
 #pragma omp parallel default(none)                                             \

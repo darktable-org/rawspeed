@@ -4070,6 +4070,20 @@
 			<Hint name="real_bpp" value="16"/>
 		</Hints>
 	</Camera>
+	<Camera make="NIKON CORPORATION" model="COOLPIX P950" mode="12bit-uncompressed">
+		<ID make="Nikon" model="COOLPIX P950">Nikon Coolpix P950</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="200" white="4095"/>
+		<Hints>
+			<Hint name="coolpixmangled" value=""/>
+		</Hints>
+	</Camera>
 	<Camera make="NIKON CORPORATION" model="COOLPIX P1000" mode="12bit-uncompressed">
 		<ID make="Nikon" model="COOLPIX P1000">Nikon Coolpix P1000</ID>
 		<CFA width="2" height="2">
@@ -4266,6 +4280,11 @@
 		<ID make="Olympus" model="E-M1MarkII">Olympus E-M1 Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="254" white="4000"/>
+	</Camera>
+	<Camera make="OLYMPUS CORPORATION" model="E-M1MarkIII">
+		<ID make="Olympus" model="E-M1MarkIII">Olympus E-M1 Mark III</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="256" white="4000"/>
 	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-M10">
 		<ID make="Olympus" model="E-M10">Olympus E-M10</ID>
@@ -7083,6 +7102,50 @@
 		<Crop x="4" y="0" width="-90" height="0"/>
 		<Sensor black="144" white="4095"/>
 	</Camera>
+	<Camera make="Panasonic" model="DC-S1">
+		<ID make="Panasonic" model="DC-S1">Panasonic DC-S1</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-50" height="0"/>
+		<Sensor black="511" white="16380"/>
+	</Camera>
+	<Camera make="Panasonic" model="DC-S1" mode="3:2">
+		<ID make="Panasonic" model="DC-S1">Panasonic DC-S1</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-50" height="0"/>
+		<Sensor black="511" white="16380"/>
+	</Camera>
+	<Camera make="Panasonic" model="DC-S1R">
+		<ID make="Panasonic" model="DC-S1R">Panasonic DC-S1R</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-58" height="0"/>
+		<Sensor black="510" white="16380"/>
+	</Camera>
+	<Camera make="Panasonic" model="DC-S1R" mode="3:2">
+		<ID make="Panasonic" model="DC-S1R">Panasonic DC-S1R</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-58" height="0"/>
+		<Sensor black="510" white="16380"/>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-TZ60">
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -8400,7 +8463,7 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="0" y="0" width="0" height="0"/>
+		<Crop x="0" y="0" width="-10" height="0"/>
 		<Sensor black="800" white="16300"/>
 	</Camera>
 	<Camera make="SONY" model="DSC-RX100M5">
@@ -8817,6 +8880,17 @@
 	</Camera>
 	<Camera make="SONY" model="ILCE-6000">
 		<ID make="Sony" model="ILCE-6000">Sony ILCE-6000</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-28" height="0"/>
+		<Sensor black="512" white="16300"/>
+	</Camera>
+	<Camera make="SONY" model="ILCE-6100">
+		<ID make="Sony" model="ILCE-6100">Sony ILCE-6100</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
 			<Color x="1" y="0">GREEN</Color>
@@ -9531,6 +9605,28 @@
 		<Crop x="0" y="0" width="-938" height="-4"/>
 		<Sensor black="65" white="16383"/>
 	</Camera>
+	<Camera make="FUJIFILM" model="GFX 100">
+		<ID make="Fujifilm" model="GFX 100">Fujifilm GFX 100</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="4" width="-146" height="-6"/>
+		<Sensor black="63" white="16383"/>
+	</Camera>
+	<Camera make="FUJIFILM" model="GFX 100" mode="compressed">
+		<ID make="Fujifilm" model="GFX 100">Fujifilm GFX 100</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="4" width="-146" height="-6"/>
+		<Sensor black="62" white="16383"/>
+	</Camera>
 	<Camera make="FUJIFILM" model="X-Pro1">
 		<ID make="Fujifilm" model="X-Pro1">Fujifilm X-Pro1</ID>
 		<CFA2 width="6" height="6">
@@ -9724,6 +9820,32 @@
 		</CFA2>
 		<Crop x="4" y="0" width="-52" height="0"/>
 		<Sensor black="1024" white="16383"/>
+	</Camera>
+	<Camera make="FUJIFILM" model="X100V">
+		<ID make="Fujifilm" model="X100V">Fujifilm X100V</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="12" width="-138" height="0"/>
+		<Sensor black="1022" white="16383"/>
+	</Camera>
+	<Camera make="FUJIFILM" model="X100V" mode="compressed">
+		<ID make="Fujifilm" model="X100V">Fujifilm X100V</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="12" width="-138" height="0"/>
+		<Sensor black="1022" white="16383"/>
 	</Camera>
 	<Camera make="FUJIFILM" model="X-H1">
 		<ID make="Fujifilm" model="X-H1">Fujifilm X-H1</ID>
