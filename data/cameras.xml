@@ -9605,6 +9605,28 @@
 		<Crop x="0" y="0" width="-938" height="-4"/>
 		<Sensor black="65" white="16383"/>
 	</Camera>
+	<Camera make="FUJIFILM" model="GFX 100">
+		<ID make="Fujifilm" model="GFX 100">Fujifilm GFX 100</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="4" width="-146" height="-6"/>
+		<Sensor black="63" white="16383"/>
+	</Camera>
+	<Camera make="FUJIFILM" model="GFX 100" mode="compressed">
+		<ID make="Fujifilm" model="GFX 100">Fujifilm GFX 100</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="4" width="-146" height="-6"/>
+		<Sensor black="62" white="16383"/>
+	</Camera>
 	<Camera make="FUJIFILM" model="X-Pro1">
 		<ID make="Fujifilm" model="X-Pro1">Fujifilm X-Pro1</ID>
 		<CFA2 width="6" height="6">
