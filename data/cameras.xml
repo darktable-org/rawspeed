@@ -4281,6 +4281,11 @@
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="254" white="4000"/>
 	</Camera>
+	<Camera make="OLYMPUS CORPORATION" model="E-M1MarkIII">
+		<ID make="Olympus" model="E-M1MarkIII">Olympus E-M1 Mark III</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="256" white="4000"/>
+	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-M10">
 		<ID make="Olympus" model="E-M10">Olympus E-M10</ID>
 		<Crop x="8" y="8" width="-24" height="-8"/>
