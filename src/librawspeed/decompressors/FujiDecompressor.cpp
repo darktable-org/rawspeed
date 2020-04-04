@@ -87,7 +87,6 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
     ThrowRDE("fuji_block_checks");
   }
 
-  q_table.resize(32768);
 
   if (d.header.raw_type == 16) {
     line_width = (d.header.block_size * 2) / 3;
@@ -103,6 +102,7 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
   min_value = 0x40;
 
   cur_val = -q_point[4];
+  q_table.resize(2 * (1 << d.header.raw_bits));
 
   for (qt = &q_table[0]; cur_val <= q_point[4]; ++qt, ++cur_val) {
     if (cur_val <= -q_point[3]) {
@@ -127,7 +127,12 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
   }
 
   // populting gradients
-  if (q_point[4] == 0x3FFF) {
+  if (q_point[4] == 0xFFFF) { // (1 << d.header.raw_bits) - 1
+    total_values = 0x10000;   // 1 << d.header.raw_bits
+    raw_bits = 16;            // d.header.raw_bits
+    max_bits = 64;            // d.header.raw_bits * (64 / d.header.raw_bits)
+    maxDiff = 1024;           // 1 << (d.header.raw_bits - 6)
+  } else if (q_point[4] == 0x3FFF) {
     total_values = 0x4000;
     raw_bits = 14;
     max_bits = 56;
@@ -139,7 +144,7 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
     /* kept for future, once there is a sample.
      total_values = 4096;
      raw_bits = 12;
-     max_bits = 48;
+     max_bits = 48; // out-of-family, there's greater pattern at play.
      maxDiff = 64;
     */
   } else {
@@ -817,7 +822,8 @@ FujiDecompressor::FujiHeader::operator bool() const {
        blocks_in_row != roundUpDivision(raw_width, block_size) ||
        total_lines > 0x800 || total_lines == 0 ||
        total_lines != raw_height / FujiStrip::lineHeight() ||
-       (raw_bits != 12 && raw_bits != 14) || (raw_type != 16 && raw_type != 0));
+       (raw_bits != 12 && raw_bits != 14 && raw_bits != 16) ||
+       (raw_type != 16 && raw_type != 0));
 
   return !invalid;
 }
