@@ -7645,6 +7645,28 @@
 			<Alias>DC-GX850</Alias>
 		</Aliases>
 	</Camera>
+	<Camera make="Panasonic" model="DC-GX880">
+		<ID make="Panasonic" model="DC-GX880">Panasonic DC-GX880</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">BLUE</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">RED</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-210" height="0"/>
+		<Sensor black="143" white="4095"/>
+	</Camera>
+	<Camera make="Panasonic" model="DC-GX880" mode="4:3">
+		<ID make="Panasonic" model="DC-GX880">Panasonic DC-GX880</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">BLUE</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">RED</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-210" height="0"/>
+		<Sensor black="143" white="4095"/>
+	</Camera>
 	<Camera make="Panasonic" model="DC-GX9">
 		<ID make="Panasonic" model="DC-GX9">Panasonic DC-GX9</ID>
 		<CFA width="2" height="2">
