@@ -74,7 +74,7 @@ constexpr int16_t decompand(int16_t val) {
 }
 
 #ifndef NDEBUG
-int ignore = []() {
+const int ignore = []() {
   for (const RLV& entry : table17.entries) {
     assert(((-decompand(entry.value)) == decompand(-int16_t(entry.value))) &&
            "negation of decompanded value is the same as decompanding of "
@@ -120,9 +120,9 @@ VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) const {
 }
 
 namespace {
-auto convolute = [](int row, int col, std::array<int, 4> muls,
-                    const Array2DRef<const int16_t> high, auto lowGetter,
-                    int DescaleShift = 0) {
+const auto convolute = [](int row, int col, std::array<int, 4> muls,
+                          const Array2DRef<const int16_t> high, auto lowGetter,
+                          int DescaleShift = 0) {
   auto highCombined = muls[0] * high(row, col);
   auto lowsCombined = [muls, lowGetter]() {
     int lows = 0;

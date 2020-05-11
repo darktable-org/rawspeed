@@ -1,4 +1,4 @@
-find_program(LLVMOBJCOPY_EXECUTABLE NAMES llvm-objcopy llvm-objcopy-8 llvm-objcopy-7 llvm-objcopy-6.0 llvm-objcopy-5.0 llvm-objcopy-4.0 llvm-objcopy-3.9)
+find_program(LLVMOBJCOPY_EXECUTABLE NAMES llvm-objcopy llvm-objcopy-10 llvm-objcopy-9 llvm-objcopy-8 llvm-objcopy-7 llvm-objcopy-6.0 llvm-objcopy-5.0 llvm-objcopy-4.0 llvm-objcopy-3.9)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LLVMObjCopy

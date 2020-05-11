@@ -73,26 +73,26 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=gcc-9 CXX=g++-9
+    env: CC=gcc-10 CXX=g++-10
   - stage: test
     os: linux
     dist: bionic
     sudo: required
     services:
       - docker
-    env: CC=gcc-9 CXX=g++-9 ECO="-DWITH_OPENMP=OFF"
+    env: CC=gcc-10 CXX=g++-10 ECO="-DWITH_OPENMP=OFF"
   - os: linux
     dist: bionic
     sudo: required
     services:
       - docker
-    env: CC=clang-9 CXX=clang++-9
+    env: CC=clang-10 CXX=clang++-10
   - os: linux
     dist: bionic
     sudo: required
     services:
       - docker
-    env: CC=gcc-9 CXX=g++-9 GCOV=gcov-9 FLAVOR=Coverage ECO="-DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON" EXTRA_OPTS="$DOCKER_RPUU"
+    env: CC=gcc-10 CXX=g++-10 GCOV=gcov-10 FLAVOR=Coverage ECO="-DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON" EXTRA_OPTS="$DOCKER_RPUU"
     cache:
       directories:
         - '$HOME/$RPUU_DST'
@@ -106,13 +106,13 @@ jobs:
     services:
       - docker
     # Don't forget to ensure that FindLLVMClangTidy.cmake is also bumped
-    env: CC=clang-9 CXX=clang++-9 TARGET=STATICANALYSIS ECO="-DUSE_CLANG_TIDY=ON"
+    env: CC=clang-10 CXX=clang++-10 TARGET=STATICANALYSIS ECO="-DUSE_CLANG_TIDY=ON"
   - os: linux
     dist: bionic
     sudo: required
     services:
       - docker
-    env: CC=clang-9 CXX=clang++-9 ECO="-DWITH_OPENMP=OFF"
+    env: CC=clang-10 CXX=clang++-10 ECO="-DWITH_OPENMP=OFF"
   - os: linux
     dist: bionic
     sudo: required
@@ -138,7 +138,7 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=clang-9 CXX=clang++-9 TARGET=WWW
+    env: CC=clang-10 CXX=clang++-10 TARGET=WWW
 
 # linux clang Coverage build OOM's in gcov during final codecov report collection
 # OSX gcc Coverage build produces invalid .gcno files
@@ -167,7 +167,7 @@ script:
       export CMD="$SRC_DIR/.ci/ci-script.sh";
       if [[ "$TARGET" == "STATICANALYSIS" ]]; then
         export TARGET="build";
-        export CMD="scan-build-9 --use-cc=\"$CC\" --use-c++=\"$CXX\" --force-analyze-debug-code --status-bugs -disable-checker deadcode.DeadStores $CMD";
+        export CMD="scan-build-10 --use-cc=\"$CC\" --use-c++=\"$CXX\" --force-analyze-debug-code --status-bugs -disable-checker deadcode.DeadStores $CMD";
       fi;
 
       docker run --read-only --tmpfs /tmp --volume $TRAVIS_BUILD_DIR:$SRC_DIR:ro --volume "$TRAVIS_BUILD_DIR/build":$BUILD_DIR --workdir $BUILD_DIR --tmpfs $INSTALL_PREFIX $EXTRA_TMPFS $EXTRA_OPTS --env CC --env CXX --env GCOV --env CFLAGS --env CXXFLAGS --env SRC_DIR --env BUILD_DIR --env INSTALL_PREFIX --env TARGET --env FLAVOR --env ECO darktable/rawspeed sh -c "$CMD";

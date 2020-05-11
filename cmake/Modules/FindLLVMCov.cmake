@@ -1,4 +1,4 @@
-find_program(LLVMCOV_PATH NAMES llvm-cov llvm-cov-8 llvm-cov-7 llvm-cov-6.0 llvm-cov-5.0 llvm-cov-4.0 llvm-cov-3.9)
+find_program(LLVMCOV_PATH NAMES llvm-cov llvm-cov-10 llvm-cov-9 llvm-cov-8 llvm-cov-7 llvm-cov-6.0 llvm-cov-5.0 llvm-cov-4.0 llvm-cov-3.9)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LLVMCov
