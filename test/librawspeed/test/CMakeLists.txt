@@ -10,6 +10,6 @@ FILE(GLOB RAWSPEED_TESTS_SOURCES
   "ExceptionsTest.cpp"
 )
 
-foreach(IN ${RAWSPEED_TESTS_SOURCES})
-  add_rs_test(${IN})
+foreach(SRC ${RAWSPEED_TEST_SOURCES})
+  add_rs_test("${SRC}")
 endforeach()

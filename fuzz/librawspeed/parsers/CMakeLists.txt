@@ -23,7 +23,7 @@ set(PARSERS
   "Tiff"
 )
 
-foreach(parser IN LISTS PARSERS)
+foreach(parser ${PARSERS})
   set(parser "${parser}Parser")
   # add_parser_fuzzer(${parser} "" false false)
   add_parser_fuzzer(${parser} "-GetDecoder" true false)

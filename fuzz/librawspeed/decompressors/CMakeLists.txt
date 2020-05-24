@@ -32,6 +32,6 @@ set(DECOMPRESSORS
   "VC5Decompressor"
 )
 
-foreach(decompressor IN LISTS DECOMPRESSORS)
+foreach(decompressor ${DECOMPRESSORS})
   add_simple_fuzzer(${decompressor})
 endforeach()
