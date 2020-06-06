@@ -110,10 +110,8 @@ inline constexpr __attribute__((const)) bool isAligned(
 template <typename T, typename T2>
 bool __attribute__((pure))
 isIn(const T value, const std::initializer_list<T2>& list) {
-  for (auto t : list)
-    if (t == value)
-      return true;
-  return false;
+  return std::any_of(list.begin(), list.end(),
+                     [value](const T2& t) { return t == value; });
 }
 
 template <class T> inline constexpr unsigned bitwidth(T unused = {}) {
