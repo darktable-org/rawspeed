@@ -35,6 +35,6 @@ set(DECODERS
   "ThreefrDecoder"
 )
 
-foreach(decoder IN LISTS DECODERS)
+foreach(decoder ${DECODERS})
   add_decoder(${decoder})
 endforeach()

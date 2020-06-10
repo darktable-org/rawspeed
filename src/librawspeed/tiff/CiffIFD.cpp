@@ -243,12 +243,10 @@ bool __attribute__((pure)) CiffIFD::hasEntryRecursive(CiffTag tag) const {
   if (mEntry.count(tag) > 0)
     return true;
 
-  for (const auto& i : mSubIFD) {
-    if (i->hasEntryRecursive(tag))
-      return true;
-  }
-
-  return false;
+  return std::any_of(mSubIFD.begin(), mSubIFD.end(),
+                     [tag](const std::unique_ptr<const CiffIFD>& i) {
+                       return i->hasEntryRecursive(tag);
+                     });
 }
 
 const CiffEntry* CiffIFD::getEntry(CiffTag tag) const {
