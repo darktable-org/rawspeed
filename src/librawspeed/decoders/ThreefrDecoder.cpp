@@ -75,6 +75,18 @@ void ThreefrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   setMetaData(meta, "", 0);
 
+  if (mRootIFD->hasEntryRecursive(BLACKLEVEL)) {
+    TiffEntry* bl = mRootIFD->getEntryRecursive(BLACKLEVEL);
+    if (bl->count == 1)
+      mRaw->blackLevel = bl->getFloat();
+  }
+
+  if (mRootIFD->hasEntryRecursive(WHITELEVEL)) {
+    TiffEntry* wl = mRootIFD->getEntryRecursive(WHITELEVEL);
+    if (wl->count == 1)
+      mRaw->whitePoint = wl->getFloat();
+  }
+
   // Fetch the white balance
   if (mRootIFD->hasEntryRecursive(ASSHOTNEUTRAL)) {
     TiffEntry *wb = mRootIFD->getEntryRecursive(ASSHOTNEUTRAL);
