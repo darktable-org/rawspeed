@@ -4400,6 +4400,11 @@
 		<Crop x="8" y="8" width="-24" height="-8"/>
 		<Sensor black="248" white="4000"/>
 	</Camera>
+	<Camera make="OLYMPUS CORPORATION" model="E-PL10">
+		<ID make="Olympus" model="E-PL10">Olympus E-PL10</ID>
+		<Crop x="8" y="8" width="-24" height="-8"/>
+		<Sensor black="253" white="4000"/>
+	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-P5">
 		<ID make="Olympus" model="E-P5">Olympus E-P5</ID>
 		<Crop x="8" y="8" width="-24" height="-8"/>
