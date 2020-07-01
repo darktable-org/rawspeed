@@ -114,7 +114,8 @@ public:
         if (!(c < decodeLookup.size()))
           ThrowRDE("Corrupt Huffman");
 
-        if (!FlagMask || !fullDecode || diff_l + code_l > LookupDepth) {
+        if (!FlagMask || !fullDecode || code_l > LookupDepth ||
+            (code_l + diff_l > LookupDepth && diff_l != 16)) {
           // lookup bit depth is too small to fit both the encoded length
           // and the final difference value.
           // -> store only the length and do a normal sign extension later
@@ -124,15 +125,19 @@ public:
           if (!fullDecode)
             decodeLookup[c] |= FlagMask;
         } else {
-          // diff_l + code_l <= lookupDepth
-          // The table bit depth is large enough to store both.
-          assert(diff_l != 16);
-          decodeLookup[c] = (code_l + diff_l) | FlagMask;
+          // Lookup bit depth is sufficient to encode the final value.
+          decodeLookup[c] = FlagMask | code_l;
+          if (diff_l != 16 || fixDNGBug16)
+            decodeLookup[c] += diff_l;
 
           if (diff_l) {
-            uint32_t diff = extractHighBits(c, code_l + diff_l,
-                                            /*effectiveBitwidth=*/LookupDepth);
-            diff &= ((1 << diff_l) - 1);
+            uint32_t diff;
+            if (diff_l != 16) {
+              diff = extractHighBits(c, code_l + diff_l,
+                                     /*effectiveBitwidth=*/LookupDepth);
+              diff &= ((1 << diff_l) - 1);
+            } else
+              diff = -32768;
             decodeLookup[c] |= static_cast<int32_t>(
                 static_cast<uint32_t>(extend(diff, diff_l)) << PayloadShift);
           }
