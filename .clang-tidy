@@ -45,6 +45,8 @@ CheckOptions:
     value:           '0'
   - key:             readability-identifier-naming.NamespaceCase
     value:           lower_case
+  - key:             google-runtime-references.IncludedTypes
+    value:           'benchmark::State'
   - key:             google-runtime-references.WhiteListTypes
     value:           'benchmark::State'
   - key:             modernize-use-default-member-init.UseAssignment
