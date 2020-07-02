@@ -258,8 +258,6 @@ inline void FujiDecompressor::fuji_zerobits(BitPumpMSB* pump, int* count) {
     if (!allZeroes)
       break; // We're done!
   }
-
-  assert(*count <= 64);
 }
 
 int __attribute__((const)) FujiDecompressor::bitDiff(int value1, int value2) {
