@@ -137,7 +137,7 @@ public:
                                      /*effectiveBitwidth=*/LookupDepth);
               diff &= ((1 << diff_l) - 1);
             } else
-              diff = -32768;
+              diff = uint32_t(-32768);
             decodeLookup[c] |= static_cast<int32_t>(
                 static_cast<uint32_t>(extend(diff, diff_l)) << PayloadShift);
           }
