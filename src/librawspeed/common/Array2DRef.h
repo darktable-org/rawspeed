@@ -28,8 +28,8 @@
 namespace rawspeed {
 
 template <class T> class Array2DRef {
-  int _pitch = 0;
   T* _data = nullptr;
+  int _pitch = 0;
 
   friend Array2DRef<const T>; // We need to be able to convert to const version.
 
