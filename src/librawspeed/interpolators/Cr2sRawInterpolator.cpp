@@ -99,6 +99,9 @@ inline void Cr2sRawInterpolator::interpolate_422_row(int row) {
   assert(out.width >= 6);
   assert(out.width % 6 == 0);
 
+  int numPixels = out.width / 3;
+  auto outCol = [](int pixel) { return 3 * pixel; };
+
   // the format is:
   //   p0             p1             p2             p3
   //  [ Y1 Cb  Cr  ] [ Y2 ... ... ] [ Y1 Cb  Cr  ] [ Y2 ... ... ] ...
@@ -108,33 +111,33 @@ inline void Cr2sRawInterpolator::interpolate_422_row(int row) {
   // for last (odd) pixel of the line,  just keep Cb/Cr from previous pixel
   // see http://lclevy.free.fr/cr2/#sraw
 
-  int x;
-  for (x = 0; x < out.width - 6; x += 6) {
-    assert(x + 12 <= out.width);
-    assert(x % 6 == 0);
+  int pixel;
+  for (pixel = 0; pixel < numPixels - 2; pixel += 2) {
+    assert(pixel + 4 <= numPixels);
+    assert(pixel % 2 == 0);
 
     // load, process and output first pixel, which is full
     YCbCr p0;
-    YCbCr::LoadYCbCr(&p0, &out(row, x));
+    YCbCr::LoadYCbCr(&p0, &out(row, outCol(pixel)));
     p0.process(hue);
-    YUV_TO_RGB<version>(p0, &out(row, x));
+    YUV_TO_RGB<version>(p0, &out(row, outCol(pixel)));
 
     // load Y from second pixel, Cb/Cr need to be interpolated
     YCbCr p;
-    YCbCr::LoadY(&p, &out(row, x + 3));
+    YCbCr::LoadY(&p, &out(row, outCol(pixel + 1)));
 
     // load third pixel, which is full, process
     YCbCr p1;
-    YCbCr::LoadYCbCr(&p1, &out(row, x + 6));
+    YCbCr::LoadYCbCr(&p1, &out(row, outCol(pixel + 2)));
     p1.process(hue);
 
     // and finally, interpolate and output the middle pixel
     p.interpolate(p0, p1);
-    YUV_TO_RGB<version>(p, &out(row, x + 3));
+    YUV_TO_RGB<version>(p, &out(row, outCol(pixel + 1)));
   }
 
-  assert(x + 6 == out.width);
-  assert(x % 6 == 0);
+  assert(pixel + 2 == numPixels);
+  assert(pixel % 2 == 0);
 
   // Last two pixels, the format is:
   //      p0             p1
@@ -142,13 +145,13 @@ inline void Cr2sRawInterpolator::interpolate_422_row(int row) {
 
   // load, process and output first pixel, which is full
   YCbCr p;
-  YCbCr::LoadYCbCr(&p, &out(row, x));
+  YCbCr::LoadYCbCr(&p, &out(row, outCol(pixel)));
   p.process(hue);
-  YUV_TO_RGB<version>(p, &out(row, x));
+  YUV_TO_RGB<version>(p, &out(row, outCol(pixel)));
 
   // load Y from second pixel, keep Cb/Cr from previous pixel, and output
-  YCbCr::LoadY(&p, &out(row, x + 3));
-  YUV_TO_RGB<version>(p, &out(row, x + 3));
+  YCbCr::LoadY(&p, &out(row, outCol(pixel + 1)));
+  YUV_TO_RGB<version>(p, &out(row, outCol(pixel + 1)));
 }
 
 template <int version> inline void Cr2sRawInterpolator::interpolate_422() {
