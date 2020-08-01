@@ -46,8 +46,8 @@ protected:
 
   static inline void STORE_RGB(uint16_t* X, int r, int g, int b);
 
-  template <int version> inline void interpolate_422_row(uint16_t* data, int w);
-  template <int version> inline void interpolate_422(int w, int h);
+  template <int version> inline void interpolate_422_row(int row);
+  template <int version> inline void interpolate_422();
 
   template <int version>
   inline void interpolate_420_row(std::array<uint16_t*, 3> line, int w);
