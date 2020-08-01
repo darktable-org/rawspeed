@@ -446,7 +446,7 @@ public:
     return yMax * std::sin(x2arg * T(x));
   }
 
-  virtual ~SinReferenceTest() = default;
+  virtual ~SinReferenceTest() override = default;
 };
 
 using referenceType = std::tuple<int, long double>;
