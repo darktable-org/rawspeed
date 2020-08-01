@@ -127,9 +127,8 @@ inline void Cr2sRawInterpolator::interpolate_422_row(int row) {
     YCbCr p;
     YCbCr::LoadY(&p, &input(row, inCol(pixel) + 1));
 
-    // load third pixel, which is full, process
+    // load Cb/Cr from third pixel, which is full
     YCbCr p1;
-    YCbCr::LoadY(&p1, &input(row, inCol(pixel + 2) + 0));
     YCbCr::LoadCbCr(&p1, &input(row, inCol(pixel + 2) + 1));
     p1.process(hue);
 
