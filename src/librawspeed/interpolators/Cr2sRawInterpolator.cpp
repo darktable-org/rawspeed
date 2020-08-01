@@ -307,18 +307,20 @@ Cr2sRawInterpolator::interpolate_420_row(std::array<uint16_t*, 3> line, int w) {
 // NOTE: Not thread safe, since it writes inplace.
 template <int version>
 inline void Cr2sRawInterpolator::interpolate_420(int w, int h) {
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+
   assert(w >= 2);
   assert(w % 2 == 0);
 
   assert(h >= 2);
   assert(h % 2 == 0);
 
-  array<uint16_t*, 3> line;
-
   int y;
   for (y = 0; y < h - 2; y += 2) {
     assert(y + 4 <= h);
     assert(y % 2 == 0);
+
+    array<uint16_t*, 3> line;
 
     line[0] = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
     line[1] = reinterpret_cast<uint16_t*>(mRaw->getData(0, y + 1));
@@ -330,14 +332,6 @@ inline void Cr2sRawInterpolator::interpolate_420(int w, int h) {
   assert(y + 2 == h);
   assert(y % 2 == 0);
 
-  line[0] = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
-  line[1] = reinterpret_cast<uint16_t*>(mRaw->getData(0, y + 1));
-  line[2] = nullptr;
-
-  assert(line[0]);
-  assert(line[1]);
-  assert(line[2] == nullptr);
-
   // Last two lines, the format is:
   //          p0             p1             p2             p3
   //           .. .   .       .. .   .       .. .   .       .. .   .
@@ -345,53 +339,45 @@ inline void Cr2sRawInterpolator::interpolate_420(int w, int h) {
   //  row 1: [ Y3 ... ... ] [ Y4 ... ... ] [ Y3 ... ... ] [ Y4 ... ... ] ...
 
   int x;
-  for (x = 0; x < w - 2; x += 2) {
-    assert(x + 4 <= w);
-    assert(x % 2 == 0);
+  for (x = 0; x < out.width - 6; x += 6) {
+    assert(x + 12 <= out.width);
+    assert(x % 6 == 0);
 
     // load, process and output first pixel of first row, which is full
     YCbCr p0;
-    YCbCr::LoadYCbCr(&p0, line[0]);
+    YCbCr::LoadYCbCr(&p0, &out(y, x));
     p0.process(hue);
-    YUV_TO_RGB<version>(p0, line[0]);
-    line[0] += 3;
+    YUV_TO_RGB<version>(p0, &out(y, x));
 
     // load Y from second pixel of first row
     YCbCr ph;
-    YCbCr::LoadY(&ph, line[0]);
+    YCbCr::LoadY(&ph, &out(y, x + 3));
 
     // load Cb/Cr from third pixel of first row
     YCbCr p1;
-    YCbCr::LoadCbCr(&p1, line[0] + 3);
+    YCbCr::LoadCbCr(&p1, &out(y, x + 6));
     p1.process(hue);
 
     // and finally, interpolate and output the middle pixel of first row
     ph.interpolate(p0, p1);
-    YUV_TO_RGB<version>(ph, line[0]);
-    line[0] += 3;
+    YUV_TO_RGB<version>(ph, &out(y, x + 3));
 
     // keep Cb/Cr from first pixel of first row
     // load Y from first pixel of second row; and output
-    YCbCr::LoadY(&p0, line[1]);
-    YUV_TO_RGB<version>(p0, line[1]);
-    line[1] += 3;
+    YCbCr::LoadY(&p0, &out(y + 1, x));
+    YUV_TO_RGB<version>(p0, &out(y + 1, x));
 
     // keep Cb/Cr from second pixel of first row
     // load Y from second pixel of second row; and output
-    YCbCr::LoadY(&ph, line[1]);
-    YUV_TO_RGB<version>(ph, line[1]);
-    line[1] += 3;
+    YCbCr::LoadY(&ph, &out(y + 1, x + 3));
+    YUV_TO_RGB<version>(ph, &out(y + 1, x + 3));
   }
 
-  assert(line[0]);
-  assert(line[1]);
-  assert(line[2] == nullptr);
-
-  assert(y + 2 == h);
+  assert(y + 2 == out.height);
   assert(y % 2 == 0);
 
-  assert(x + 2 == w);
-  assert(x % 2 == 0);
+  assert(x + 6 == out.width);
+  assert(x % 6 == 0);
 
   // Last two pixels of last two lines, the format is:
   //               p0             p1
@@ -401,27 +387,23 @@ inline void Cr2sRawInterpolator::interpolate_420(int w, int h) {
 
   // load, process and output first pixel of first row, which is full
   YCbCr p;
-  YCbCr::LoadYCbCr(&p, line[0]);
+  YCbCr::LoadYCbCr(&p, &out(y, x));
   p.process(hue);
-  YUV_TO_RGB<version>(p, line[0]);
-  line[0] += 3;
+  YUV_TO_RGB<version>(p, &out(y, x));
 
   // rest keeps Cb/Cr from this original pixel, because rest only have Y
 
   // load Y from second pixel of first row, and output
-  YCbCr::LoadY(&p, line[0]);
-  YUV_TO_RGB<version>(p, line[0]);
-  line[0] += 3;
+  YCbCr::LoadY(&p, &out(y, x + 3));
+  YUV_TO_RGB<version>(p, &out(y, x + 3));
 
   // load Y from first pixel of second row, and output
-  YCbCr::LoadY(&p, line[1]);
-  YUV_TO_RGB<version>(p, line[1]);
-  line[1] += 3;
+  YCbCr::LoadY(&p, &out(y + 1, x));
+  YUV_TO_RGB<version>(p, &out(y + 1, x));
 
   // load Y from second pixel of second row, and output
-  YCbCr::LoadY(&p, line[1]);
-  YUV_TO_RGB<version>(p, line[1]);
-  line[1] += 3;
+  YCbCr::LoadY(&p, &out(y + 1, x + 3));
+  YUV_TO_RGB<version>(p, &out(y + 1, x + 3));
 }
 
 inline void Cr2sRawInterpolator::STORE_RGB(uint16_t* X, int r, int g, int b) {
