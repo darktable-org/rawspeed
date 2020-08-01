@@ -50,7 +50,7 @@ protected:
   template <int version> inline void interpolate_422();
 
   template <int version> inline void interpolate_420_row(int row);
-  template <int version> inline void interpolate_420(int w, int h);
+  template <int version> inline void interpolate_420();
 };
 
 } // namespace rawspeed
