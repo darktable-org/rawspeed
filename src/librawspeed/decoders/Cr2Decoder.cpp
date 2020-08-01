@@ -322,6 +322,25 @@ void Cr2Decoder::sRawInterpolate() {
 
     input = desparsed;
   }
+  if (mRaw->metadata.subsampling.y == 2 && mRaw->metadata.subsampling.x == 2) {
+    assert(input.width % 6 == 0);
+    assert(input.height % 2 == 0);
+    Array2DRef<uint16_t> desparsed = Array2DRef<uint16_t>::create(
+        &tmp_storage, input.width, input.height / 2);
+
+    for (int row = 0; row != input.height; row += 2) {
+      for (int col = 0; col != input.width; col += 6) {
+        desparsed(row / 2, col + 0) = input(row, col + 0);
+        desparsed(row / 2, col + 1) = input(row, col + 3);
+        desparsed(row / 2, col + 2) = input(row + 1, col + 0);
+        desparsed(row / 2, col + 3) = input(row + 1, col + 3);
+        desparsed(row / 2, col + 4) = input(row, col + 1);
+        desparsed(row / 2, col + 5) = input(row, col + 2);
+      }
+    }
+
+    input = desparsed;
+  }
 
   Cr2sRawInterpolator i(mRaw, input, sraw_coeffs, getHue());
 
