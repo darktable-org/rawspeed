@@ -306,7 +306,8 @@ void Cr2Decoder::sRawInterpolate() {
   bool isOldSraw = hints.has("sraw_40d");
   bool isNewSraw = hints.has("sraw_new");
 
-  Cr2sRawInterpolator i(mRaw, sraw_coeffs, getHue());
+  Cr2sRawInterpolator i(mRaw, mRaw->getU16DataAsUncroppedArray2DRef(),
+                        sraw_coeffs, getHue());
 
   int version;
   if (isOldSraw)

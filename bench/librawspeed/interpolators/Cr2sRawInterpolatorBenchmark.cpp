@@ -45,7 +45,8 @@ static inline void BM_Cr2sRawInterpolator(benchmark::State& state) {
   RawImage mRaw = RawImage::create(dim, TYPE_USHORT16, 3);
   mRaw->metadata.subsampling = subsampling;
 
-  Cr2sRawInterpolator i(mRaw, sraw_coeffs, hue);
+  Cr2sRawInterpolator i(mRaw, mRaw->getU16DataAsUncroppedArray2DRef(),
+                        sraw_coeffs, hue);
 
   for (auto _ : state)
     i.interpolate(version::value);
