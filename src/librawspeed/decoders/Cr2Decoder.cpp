@@ -302,12 +302,32 @@ void Cr2Decoder::sRawInterpolate() {
         1024.0F / (static_cast<float>(sraw_coeffs[2]) / 1024.0F));
   }
 
+  Array2DRef<uint16_t> input = mRaw->getU16DataAsUncroppedArray2DRef();
+
+  std::vector<uint16_t> tmp_storage;
+  if (mRaw->metadata.subsampling.y == 1 && mRaw->metadata.subsampling.x == 2) {
+    assert(input.width % 6 == 0);
+    Array2DRef<uint16_t> desparsed = Array2DRef<uint16_t>::create(
+        &tmp_storage, 4 * (input.width / 6), input.height);
+
+    for (int row = 0; row != input.height; ++row) {
+      for (int inCol = 0, outCol = 0; inCol != input.width;
+           inCol += 6, outCol += 4) {
+        desparsed(row, outCol + 0) = input(row, inCol + 0);
+        desparsed(row, outCol + 1) = input(row, inCol + 3);
+        desparsed(row, outCol + 2) = input(row, inCol + 1);
+        desparsed(row, outCol + 3) = input(row, inCol + 2);
+      }
+    }
+
+    input = desparsed;
+  }
+
+  Cr2sRawInterpolator i(mRaw, input, sraw_coeffs, getHue());
+
   /* Determine sRaw coefficients */
   bool isOldSraw = hints.has("sraw_40d");
   bool isNewSraw = hints.has("sraw_new");
-
-  Cr2sRawInterpolator i(mRaw, mRaw->getU16DataAsUncroppedArray2DRef(),
-                        sraw_coeffs, getHue());
 
   int version;
   if (isOldSraw)
