@@ -49,8 +49,7 @@ protected:
   template <int version> inline void interpolate_422_row(int row);
   template <int version> inline void interpolate_422();
 
-  template <int version>
-  inline void interpolate_420_row(std::array<uint16_t*, 3> line, int w);
+  template <int version> inline void interpolate_420_row(int row);
   template <int version> inline void interpolate_420(int w, int h);
 };
 
