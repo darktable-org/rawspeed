@@ -47,8 +47,8 @@ struct Cr2sRawInterpolator::YCbCr final {
     assert(p);
     assert(data);
 
-    p->Cb = data[1];
-    p->Cr = data[2];
+    p->Cb = data[0];
+    p->Cr = data[1];
   }
 
   YCbCr() = default;
@@ -119,7 +119,7 @@ inline void Cr2sRawInterpolator::interpolate_422_row(int row) {
     // load, process and output first pixel, which is full
     YCbCr p0;
     YCbCr::LoadY(&p0, &input(row, inCol(pixel) + 0));
-    YCbCr::LoadCbCr(&p0, &input(row, inCol(pixel) + 1));
+    YCbCr::LoadCbCr(&p0, &input(row, inCol(pixel) + 2));
     p0.process(hue);
     YUV_TO_RGB<version>(p0, &out(row, outCol(pixel)));
 
@@ -129,7 +129,7 @@ inline void Cr2sRawInterpolator::interpolate_422_row(int row) {
 
     // load Cb/Cr from third pixel, which is full
     YCbCr p1;
-    YCbCr::LoadCbCr(&p1, &input(row, inCol(pixel + 2) + 1));
+    YCbCr::LoadCbCr(&p1, &input(row, inCol(pixel + 2) + 2));
     p1.process(hue);
 
     // and finally, interpolate and output the middle pixel
@@ -150,7 +150,7 @@ inline void Cr2sRawInterpolator::interpolate_422_row(int row) {
   // load, process and output first pixel, which is full
   YCbCr p;
   YCbCr::LoadY(&p, &input(row, inCol(pixel) + 0));
-  YCbCr::LoadCbCr(&p, &input(row, inCol(pixel) + 1));
+  YCbCr::LoadCbCr(&p, &input(row, inCol(pixel) + 2));
   p.process(hue);
   YUV_TO_RGB<version>(p, &out(row, outCol(pixel)));
 
@@ -230,7 +230,7 @@ inline void Cr2sRawInterpolator::interpolate_420_row(int row) {
     // load, process and output first pixel of first row, which is full
     YCbCr p0;
     YCbCr::LoadY(&p0, &input(row / 2, inCol(pixel)));
-    YCbCr::LoadCbCr(&p0, &input(row / 2, inCol(pixel) + 3));
+    YCbCr::LoadCbCr(&p0, &input(row / 2, inCol(pixel) + 4));
     p0.process(hue);
     YUV_TO_RGB<version>(p0, &out(row, outCol(pixel)));
 
@@ -240,7 +240,7 @@ inline void Cr2sRawInterpolator::interpolate_420_row(int row) {
 
     // load Cb/Cr from third pixel of first row
     YCbCr p1;
-    YCbCr::LoadCbCr(&p1, &input(row / 2, inCol(pixel + 2) + 3));
+    YCbCr::LoadCbCr(&p1, &input(row / 2, inCol(pixel + 2) + 4));
     p1.process(hue);
 
     // and finally, interpolate and output the middle pixel of first row
@@ -253,7 +253,7 @@ inline void Cr2sRawInterpolator::interpolate_420_row(int row) {
 
     // load Cb/Cr from first pixel of third row
     YCbCr p2;
-    YCbCr::LoadCbCr(&p2, &input((row / 2) + 1, inCol(pixel) + 3));
+    YCbCr::LoadCbCr(&p2, &input((row / 2) + 1, inCol(pixel) + 4));
     p2.process(hue);
 
     // and finally, interpolate and output the first pixel of second row
@@ -266,7 +266,7 @@ inline void Cr2sRawInterpolator::interpolate_420_row(int row) {
 
     // load Cb/Cr from third pixel of third row
     YCbCr p3;
-    YCbCr::LoadCbCr(&p3, &input((row / 2) + 1, inCol(pixel + 2) + 3));
+    YCbCr::LoadCbCr(&p3, &input((row / 2) + 1, inCol(pixel + 2) + 4));
     p3.process(hue);
 
     // and finally, interpolate and output the second pixel of second row
@@ -295,7 +295,7 @@ inline void Cr2sRawInterpolator::interpolate_420_row(int row) {
   // load, process and output first pixel of first row, which is full
   YCbCr p0;
   YCbCr::LoadY(&p0, &input(row / 2, inCol(pixel)));
-  YCbCr::LoadCbCr(&p0, &input(row / 2, inCol(pixel) + 3));
+  YCbCr::LoadCbCr(&p0, &input(row / 2, inCol(pixel) + 4));
   p0.process(hue);
   YUV_TO_RGB<version>(p0, &out(row, outCol(pixel)));
 
@@ -310,7 +310,7 @@ inline void Cr2sRawInterpolator::interpolate_420_row(int row) {
 
   // load Cb/Cr from first pixel of third row
   YCbCr p2;
-  YCbCr::LoadCbCr(&p2, &input((row / 2) + 1, inCol(pixel) + 3));
+  YCbCr::LoadCbCr(&p2, &input((row / 2) + 1, inCol(pixel) + 4));
   p2.process(hue);
 
   // and finally, interpolate and output the first pixel of second row
@@ -365,7 +365,7 @@ template <int version> inline void Cr2sRawInterpolator::interpolate_420() {
     // load, process and output first pixel of first row, which is full
     YCbCr p0;
     YCbCr::LoadY(&p0, &input(row / 2, inCol(pixel)));
-    YCbCr::LoadCbCr(&p0, &input(row / 2, inCol(pixel) + 3));
+    YCbCr::LoadCbCr(&p0, &input(row / 2, inCol(pixel) + 4));
     p0.process(hue);
     YUV_TO_RGB<version>(p0, &out(row, outCol(pixel)));
 
@@ -375,7 +375,7 @@ template <int version> inline void Cr2sRawInterpolator::interpolate_420() {
 
     // load Cb/Cr from third pixel of first row
     YCbCr p1;
-    YCbCr::LoadCbCr(&p1, &input(row / 2, inCol(pixel + 2) + 3));
+    YCbCr::LoadCbCr(&p1, &input(row / 2, inCol(pixel + 2) + 4));
     p1.process(hue);
 
     // and finally, interpolate and output the middle pixel of first row
@@ -412,7 +412,7 @@ template <int version> inline void Cr2sRawInterpolator::interpolate_420() {
   // load, process and output first pixel of first row, which is full
   YCbCr p;
   YCbCr::LoadY(&p, &input(row / 2, inCol(pixel)));
-  YCbCr::LoadCbCr(&p, &input(row / 2, inCol(pixel) + 3));
+  YCbCr::LoadCbCr(&p, &input(row / 2, inCol(pixel) + 4));
   p.process(hue);
   YUV_TO_RGB<version>(p, &out(row, outCol(pixel)));
 
