@@ -141,7 +141,7 @@ void Cr2Decompressor::decodeN_X_Y()
   // https://github.com/lclevy/libcraw2/blob/master/docs/cr2_lossless.pdf?raw=true
 
   constexpr bool subSampled = X_S_F != 1 || Y_S_F != 1;
-  constexpr bool ZZZ_TMP = N_COMP == 3 && X_S_F == 2 && Y_S_F == 1;
+  constexpr bool ZZZ_TMP = N_COMP == 3;
 
   // inner loop decodes one group of pixels at a time
   //  * for <N,1,1>: N  = N*1*1 (full raw)
@@ -215,8 +215,10 @@ void Cr2Decompressor::decodeN_X_Y()
           (col + pixelsPerSliceRow != static_cast<unsigned>(mRaw->dim.x)))
         ThrowRDE("Insufficient slices - do not fill the entire image");
 
-      assert(!ZZZ_TMP || col % pixelsPerGroup == 0);
-      col = ZZZ_TMP ? groupSize * (col / pixelsPerGroup) : col * mRaw->getCpp();
+      row /= Y_S_F;
+
+      assert(!ZZZ_TMP || col % X_S_F == 0);
+      col = ZZZ_TMP ? groupSize * (col / X_S_F) : col * mRaw->getCpp();
       assert(sliceWidth % sliceColStep == 0);
       for (unsigned sliceCol = 0; sliceCol < sliceWidth;) {
         // check if we processed one full raw row worth of pixels

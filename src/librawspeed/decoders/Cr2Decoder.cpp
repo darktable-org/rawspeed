@@ -310,7 +310,7 @@ void Cr2Decoder::sRawInterpolate() {
     Array2DRef<uint16_t> desparsed = Array2DRef<uint16_t>::create(
         &tmp_storage, 4 * (input.width / 6), input.height);
 
-    for (int row = 0; row != input.height; ++row) {
+    for (int row = 0; row != desparsed.height; ++row) {
       for (int col = 0; col != desparsed.width; ++col)
         desparsed(row, col) = input(row, col);
     }
@@ -323,15 +323,9 @@ void Cr2Decoder::sRawInterpolate() {
     Array2DRef<uint16_t> desparsed = Array2DRef<uint16_t>::create(
         &tmp_storage, input.width, input.height / 2);
 
-    for (int row = 0; row != input.height; row += 2) {
-      for (int col = 0; col != input.width; col += 6) {
-        desparsed(row / 2, col + 0) = input(row, col + 0);
-        desparsed(row / 2, col + 1) = input(row, col + 3);
-        desparsed(row / 2, col + 2) = input(row + 1, col + 0);
-        desparsed(row / 2, col + 3) = input(row + 1, col + 3);
-        desparsed(row / 2, col + 4) = input(row, col + 1);
-        desparsed(row / 2, col + 5) = input(row, col + 2);
-      }
+    for (int row = 0; row != desparsed.height; ++row) {
+      for (int col = 0; col != desparsed.width; ++col)
+        desparsed(row, col) = input(row, col);
     }
 
     input = desparsed;
