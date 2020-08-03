@@ -311,8 +311,8 @@ void Cr2Decoder::sRawInterpolate() {
         &tmp_storage, 4 * (input.width / 6), input.height);
 
     for (int row = 0; row != input.height; ++row) {
-      for (int inCol = 0, outCol = 0; inCol != input.width;
-           inCol += 6, outCol += 4) {
+      for (int inCol = 0, outCol = 0; inCol != desparsed.width;
+           inCol += 4, outCol += 4) {
         desparsed(row, outCol + 0) = input(row, inCol + 0);
         desparsed(row, outCol + 1) = input(row, inCol + 3);
         desparsed(row, outCol + 2) = input(row, inCol + 1);

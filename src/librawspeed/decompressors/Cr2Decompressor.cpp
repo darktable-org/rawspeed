@@ -140,6 +140,9 @@ void Cr2Decompressor::decodeN_X_Y()
   // To understand the CR2 slice handling and sampling factor behavior, see
   // https://github.com/lclevy/libcraw2/blob/master/docs/cr2_lossless.pdf?raw=true
 
+  constexpr bool subSampled = X_S_F != 1 || Y_S_F != 1;
+  constexpr bool ZZZ_TMP = N_COMP == 3 && X_S_F == 2 && Y_S_F == 1;
+
   // inner loop decodes one group of pixels at a time
   //  * for <N,1,1>: N  = N*1*1 (full raw)
   //  * for <3,2,1>: 6  = 3*2*1
@@ -147,6 +150,8 @@ void Cr2Decompressor::decodeN_X_Y()
   // and advances x by N_COMP*X_S_F and y by Y_S_F
   constexpr int sliceColStep = N_COMP * X_S_F;
   constexpr int frameRowStep = Y_S_F;
+  constexpr int pixelsPerGroup = X_S_F * Y_S_F;
+  constexpr int groupSize = !subSampled ? N_COMP : 2 + pixelsPerGroup;
 
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
@@ -210,7 +215,8 @@ void Cr2Decompressor::decodeN_X_Y()
           (col + pixelsPerSliceRow != static_cast<unsigned>(mRaw->dim.x)))
         ThrowRDE("Insufficient slices - do not fill the entire image");
 
-      col *= mRaw->getCpp();
+      assert(!ZZZ_TMP || col % pixelsPerGroup == 0);
+      col = ZZZ_TMP ? groupSize * (col / pixelsPerGroup) : col * mRaw->getCpp();
       assert(sliceWidth % sliceColStep == 0);
       for (unsigned sliceCol = 0; sliceCol < sliceWidth;) {
         // check if we processed one full raw row worth of pixels
@@ -234,8 +240,9 @@ void Cr2Decompressor::decodeN_X_Y()
         assert(sliceColsRemaining >= sliceColStep &&
                (sliceColsRemaining % sliceColStep) == 0);
         for (unsigned sliceColEnd = sliceCol + sliceColsRemaining;
-             sliceCol < sliceColEnd; sliceCol += sliceColStep,
-                      globalFrameCol += X_S_F, col += sliceColStep) {
+             sliceCol < sliceColEnd;
+             sliceCol += sliceColStep, globalFrameCol += X_S_F,
+                      col += (ZZZ_TMP ? groupSize : sliceColStep)) {
           if (X_S_F == 1) { // will be optimized out
             for (int c = 0; c < sliceColStep; ++c)
               out(row, col + c) = pred[c] += ht[c]->decodeDifference(bs);
