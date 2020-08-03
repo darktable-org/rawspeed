@@ -224,7 +224,13 @@ void Cr2Decompressor::decodeN_X_Y()
           // if yes -> update predictor by going back exactly one row,
           // no matter where we are right now.
           // makes no sense from an image compression point of view, ask Canon.
-          copy_n(predNext, N_COMP, pred.data());
+          if (ZZZ_TMP) {
+            pred[0] = predNext[0];
+            pred[1] = predNext[groupSize - 2];
+            pred[2] = predNext[groupSize - 1];
+          } else {
+            copy_n(predNext, N_COMP, pred.data());
+          }
           predNext = &out(row, col);
           globalFrameCol = 0;
         }
@@ -246,6 +252,11 @@ void Cr2Decompressor::decodeN_X_Y()
           if (X_S_F == 1) { // will be optimized out
             for (int c = 0; c < sliceColStep; ++c)
               out(row, col + c) = pred[c] += ht[c]->decodeDifference(bs);
+          } else if (ZZZ_TMP) {
+            for (int p = 0; p < groupSize; ++p) {
+              int c = p < pixelsPerGroup ? 0 : p - pixelsPerGroup + 1;
+              out(row, col + p) = pred[c] += ht[c]->decodeDifference(bs);
+            }
           } else {
             for (int dstRow = 0; dstRow < Y_S_F; ++dstRow) {
               for (int c : {0, 3})
