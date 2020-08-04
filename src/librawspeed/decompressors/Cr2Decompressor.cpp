@@ -31,8 +31,6 @@
 #include <cassert>                        // for assert
 #include <initializer_list>               // for initializer_list
 
-using std::copy_n;
-
 namespace rawspeed {
 
 class ByteStream;
@@ -141,7 +139,6 @@ void Cr2Decompressor::decodeN_X_Y()
   // https://github.com/lclevy/libcraw2/blob/master/docs/cr2_lossless.pdf?raw=true
 
   constexpr bool subSampled = X_S_F != 1 || Y_S_F != 1;
-  constexpr bool ZZZ_TMP = N_COMP == 3;
 
   // inner loop decodes one group of pixels at a time
   //  * for <N,1,1>: N  = N*1*1 (full raw)
@@ -152,6 +149,7 @@ void Cr2Decompressor::decodeN_X_Y()
   constexpr int frameRowStep = Y_S_F;
   constexpr int pixelsPerGroup = X_S_F * Y_S_F;
   constexpr int groupSize = !subSampled ? N_COMP : 2 + pixelsPerGroup;
+  const int colsPerGroup = !subSampled ? mRaw->getCpp() : groupSize;
 
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
@@ -217,8 +215,9 @@ void Cr2Decompressor::decodeN_X_Y()
 
       row /= Y_S_F;
 
-      assert(!ZZZ_TMP || col % X_S_F == 0);
-      col = ZZZ_TMP ? groupSize * (col / X_S_F) : col * mRaw->getCpp();
+      assert(col % X_S_F == 0);
+      col /= X_S_F;
+      col *= colsPerGroup;
       assert(sliceWidth % sliceColStep == 0);
       for (unsigned sliceCol = 0; sliceCol < sliceWidth;) {
         // check if we processed one full raw row worth of pixels
@@ -226,13 +225,8 @@ void Cr2Decompressor::decodeN_X_Y()
           // if yes -> update predictor by going back exactly one row,
           // no matter where we are right now.
           // makes no sense from an image compression point of view, ask Canon.
-          if (ZZZ_TMP) {
-            pred[0] = predNext[0];
-            pred[1] = predNext[groupSize - 2];
-            pred[2] = predNext[groupSize - 1];
-          } else {
-            copy_n(predNext, N_COMP, pred.data());
-          }
+          for (int c = 0; c < N_COMP; ++c)
+            pred[c] = predNext[c == 0 ? c : groupSize - (N_COMP - c)];
           predNext = &out(row, col);
           globalFrameCol = 0;
         }
@@ -248,26 +242,11 @@ void Cr2Decompressor::decodeN_X_Y()
         assert(sliceColsRemaining >= sliceColStep &&
                (sliceColsRemaining % sliceColStep) == 0);
         for (unsigned sliceColEnd = sliceCol + sliceColsRemaining;
-             sliceCol < sliceColEnd;
-             sliceCol += sliceColStep, globalFrameCol += X_S_F,
-                      col += (ZZZ_TMP ? groupSize : sliceColStep)) {
-          if (X_S_F == 1) { // will be optimized out
-            for (int c = 0; c < sliceColStep; ++c)
-              out(row, col + c) = pred[c] += ht[c]->decodeDifference(bs);
-          } else if (ZZZ_TMP) {
-            for (int p = 0; p < groupSize; ++p) {
-              int c = p < pixelsPerGroup ? 0 : p - pixelsPerGroup + 1;
-              out(row, col + p) = pred[c] += ht[c]->decodeDifference(bs);
-            }
-          } else {
-            for (int dstRow = 0; dstRow < Y_S_F; ++dstRow) {
-              for (int c : {0, 3})
-                out(row + dstRow, col + c) = pred[0] +=
-                    ht[0]->decodeDifference(bs);
-            }
-
-            for (int c : {1, 2})
-              out(row, col + c) = pred[c] += ht[c]->decodeDifference(bs);
+             sliceCol < sliceColEnd; sliceCol += sliceColStep,
+                      globalFrameCol += X_S_F, col += groupSize) {
+          for (int p = 0; p < groupSize; ++p) {
+            int c = p < pixelsPerGroup ? 0 : p - pixelsPerGroup + 1;
+            out(row, col + p) = pred[c] += ht[c]->decodeDifference(bs);
           }
         }
       }
