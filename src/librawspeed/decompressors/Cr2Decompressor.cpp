@@ -40,11 +40,10 @@ Cr2Decompressor::Cr2Decompressor(const ByteStream& bs, const RawImage& img)
   if (mRaw->getDataType() != TYPE_USHORT16)
     ThrowRDE("Unexpected data type");
 
-  if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == sizeof(uint16_t)) ||
-        (mRaw->getCpp() == 3 && mRaw->getBpp() == 3 * sizeof(uint16_t))))
+  if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == sizeof(uint16_t))))
     ThrowRDE("Unexpected cpp: %u", mRaw->getCpp());
 
-  if (!mRaw->dim.x || !mRaw->dim.y || mRaw->dim.x > 8896 ||
+  if (!mRaw->dim.x || !mRaw->dim.y || mRaw->dim.x > 19440 ||
       mRaw->dim.y > 5920) {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);
@@ -73,9 +72,6 @@ void Cr2Decompressor::decodeScan()
   if (isSubSampled) {
     if (mRaw->isCFA)
       ThrowRDE("Cannot decode subsampled image to CFA data");
-
-    if (mRaw->getCpp() != frame.cps)
-      ThrowRDE("Subsampled component count does not match image.");
 
     if (frame.cps != 3)
       ThrowRDE("Unsupported number of subsampled components: %u", frame.cps);
@@ -149,7 +145,16 @@ void Cr2Decompressor::decodeN_X_Y()
   constexpr int frameRowStep = Y_S_F;
   constexpr int pixelsPerGroup = X_S_F * Y_S_F;
   constexpr int groupSize = !subSampled ? N_COMP : 2 + pixelsPerGroup;
-  const int colsPerGroup = !subSampled ? mRaw->getCpp() : groupSize;
+  const int cpp = !subSampled ? 1 : 3;
+  const int colsPerGroup = !subSampled ? cpp : groupSize;
+
+  iPoint2D realDim = mRaw->dim;
+  if (subSampled) {
+    assert(realDim.x % groupSize == 0);
+    realDim.x /= groupSize;
+  }
+  realDim.x *= X_S_F;
+  realDim.y *= Y_S_F;
 
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
@@ -174,20 +179,20 @@ void Cr2Decompressor::decodeN_X_Y()
   }
 
   for (const auto& width : {slicing.sliceWidth, slicing.lastSliceWidth}) {
-    if (width > mRaw->dim.x)
+    if (width > realDim.x)
       ThrowRDE("Slice is longer than image's height, which is unsupported.");
     if (width % sliceColStep != 0) {
       ThrowRDE("Slice width (%u) should be multiple of pixel group size (%u)",
                width, sliceColStep);
     }
-    if (width % mRaw->getCpp() != 0) {
+    if (width % cpp != 0) {
       ThrowRDE("Slice width (%u) should be multiple of image cpp (%u)", width,
-               mRaw->getCpp());
+               cpp);
     }
   }
 
   if (iPoint2D::area_type(frame.h) * slicing.totalWidth() <
-      mRaw->getCpp() * mRaw->dim.area())
+      cpp * realDim.area())
     ThrowRDE("Incorrrect slice height / slice widths! Less than image size.");
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -199,18 +204,17 @@ void Cr2Decompressor::decodeN_X_Y()
     assert(frame.h % frameRowStep == 0);
     for (unsigned sliceFrameRow = 0; sliceFrameRow < frame.h;
          sliceFrameRow += frameRowStep, globalFrameRow += frameRowStep) {
-      unsigned row = globalFrameRow % mRaw->dim.y;
-      unsigned col = globalFrameRow / mRaw->dim.y * slicing.widthOfSlice(0) /
-                     mRaw->getCpp();
-      if (col >= static_cast<unsigned>(mRaw->dim.x))
+      unsigned row = globalFrameRow % realDim.y;
+      unsigned col = globalFrameRow / realDim.y * slicing.widthOfSlice(0) / cpp;
+      if (col >= static_cast<unsigned>(realDim.x))
         break;
 
-      assert(sliceWidth % mRaw->getCpp() == 0);
-      unsigned pixelsPerSliceRow = sliceWidth / mRaw->getCpp();
-      if (col + pixelsPerSliceRow > static_cast<unsigned>(mRaw->dim.x))
+      assert(sliceWidth % cpp == 0);
+      unsigned pixelsPerSliceRow = sliceWidth / cpp;
+      if (col + pixelsPerSliceRow > static_cast<unsigned>(realDim.x))
         ThrowRDE("Bad slice width / frame size / image size combination.");
       if (((sliceId + 1) == slicing.numSlices) &&
-          (col + pixelsPerSliceRow != static_cast<unsigned>(mRaw->dim.x)))
+          (col + pixelsPerSliceRow != static_cast<unsigned>(realDim.x)))
         ThrowRDE("Insufficient slices - do not fill the entire image");
 
       row /= Y_S_F;

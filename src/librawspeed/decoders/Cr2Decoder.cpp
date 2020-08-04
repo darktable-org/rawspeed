@@ -119,17 +119,24 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
   assert(sensorInfoE != nullptr);
 
-  const uint16_t width = sensorInfoE->getU16(1);
-  const uint16_t height = sensorInfoE->getU16(2);
-  mRaw->dim = {width, height};
+  mRaw->dim = {sensorInfoE->getU16(1), sensorInfoE->getU16(2)};
+  mRaw->setCpp(1);
+  mRaw->isCFA = !isSubSampled();
 
-  int componentsPerPixel = 1;
+  if (isSubSampled()) {
+    iPoint2D subSampling = getSubSampling();
+    assert(subSampling.x > 1 || subSampling.y > 1);
+
+    assert(mRaw->dim.x % subSampling.x == 0);
+    mRaw->dim.x /= subSampling.x;
+
+    assert(mRaw->dim.y % subSampling.y == 0);
+    mRaw->dim.y /= subSampling.y;
+
+    mRaw->dim.x *= 2 + subSampling.x * subSampling.y;
+  }
+
   TiffIFD* raw = mRootIFD->getSubIFDs()[3].get();
-  if (isSubSampled())
-    componentsPerPixel = 3;
-
-  mRaw->setCpp(componentsPerPixel);
-  mRaw->isCFA = (mRaw->getCpp() == 1);
 
   Cr2Slicing slicing;
   // there are four cases:
@@ -331,36 +338,23 @@ void Cr2Decoder::sRawInterpolate() {
         1024.0F / (static_cast<float>(sraw_coeffs[2]) / 1024.0F));
   }
 
-  Array2DRef<uint16_t> input = mRaw->getU16DataAsUncroppedArray2DRef();
+  mRaw->checkMemIsInitialized();
+  RawImage subsampledRaw = mRaw;
+  int hue = getHue();
 
-  std::vector<uint16_t> tmp_storage;
-  if (mRaw->metadata.subsampling.y == 1 && mRaw->metadata.subsampling.x == 2) {
-    assert(input.width % 6 == 0);
-    Array2DRef<uint16_t> desparsed = Array2DRef<uint16_t>::create(
-        &tmp_storage, 4 * (input.width / 6), input.height);
+  iPoint2D interpolatedDims = {
+      subsampledRaw->metadata.subsampling.x *
+          (subsampledRaw->dim.x /
+           (2 + subsampledRaw->metadata.subsampling.x *
+                    subsampledRaw->metadata.subsampling.y)),
+      subsampledRaw->metadata.subsampling.y * subsampledRaw->dim.y};
 
-    for (int row = 0; row != desparsed.height; ++row) {
-      for (int col = 0; col != desparsed.width; ++col)
-        desparsed(row, col) = input(row, col);
-    }
+  mRaw = RawImage::create(interpolatedDims, TYPE_USHORT16, 3);
+  mRaw->metadata.subsampling = subsampledRaw->metadata.subsampling;
+  mRaw->isCFA = false;
 
-    input = desparsed;
-  }
-  if (mRaw->metadata.subsampling.y == 2 && mRaw->metadata.subsampling.x == 2) {
-    assert(input.width % 6 == 0);
-    assert(input.height % 2 == 0);
-    Array2DRef<uint16_t> desparsed = Array2DRef<uint16_t>::create(
-        &tmp_storage, input.width, input.height / 2);
-
-    for (int row = 0; row != desparsed.height; ++row) {
-      for (int col = 0; col != desparsed.width; ++col)
-        desparsed(row, col) = input(row, col);
-    }
-
-    input = desparsed;
-  }
-
-  Cr2sRawInterpolator i(mRaw, input, sraw_coeffs, getHue());
+  Cr2sRawInterpolator i(mRaw, subsampledRaw->getU16DataAsUncroppedArray2DRef(),
+                        sraw_coeffs, hue);
 
   /* Determine sRaw coefficients */
   bool isOldSraw = hints.has("sraw_40d");
