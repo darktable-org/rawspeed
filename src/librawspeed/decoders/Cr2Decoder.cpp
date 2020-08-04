@@ -173,6 +173,8 @@ RawImage Cr2Decoder::decodeNewFormat() {
   mRaw->createData();
   d.decode(slicing);
 
+  assert(getSubSampling() == mRaw->metadata.subsampling);
+
   if (mRaw->metadata.subsampling.x > 1 || mRaw->metadata.subsampling.y > 1)
     sRawInterpolate();
 
@@ -265,6 +267,29 @@ bool Cr2Decoder::isSubSampled() const {
   TiffEntry* typeE =
       mRootIFD->getSubIFDs()[3]->getEntryRecursive(CANON_SRAWTYPE);
   return typeE && typeE->getU32() == 4;
+}
+
+iPoint2D Cr2Decoder::getSubSampling() const {
+  TiffEntry* CCS = mRootIFD->getEntryRecursive(CANON_CAMERA_SETTINGS);
+  if (!CCS)
+    ThrowRDE("CanonCameraSettings entry not found.");
+
+  if (CCS->type != TIFF_SHORT)
+    ThrowRDE("Unexpected CanonCameraSettings entry type encountered ");
+
+  if (CCS->count < 47)
+    return {1, 1};
+
+  switch (uint16_t qual = CCS->getU16(46)) {
+  case 0:
+    return {1, 1};
+  case 1:
+    return {2, 2};
+  case 2:
+    return {2, 1};
+  default:
+    ThrowRDE("Unexpected SRAWQuality value found: %u", qual);
+  }
 }
 
 int Cr2Decoder::getHue() {
