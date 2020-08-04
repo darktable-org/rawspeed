@@ -48,6 +48,7 @@ protected:
   RawImage decodeOldFormat();
   RawImage decodeNewFormat();
   void sRawInterpolate();
+  bool isSubSampled() const;
   int getHue();
 };
 

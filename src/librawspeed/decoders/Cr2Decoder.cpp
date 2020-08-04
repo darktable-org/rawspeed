@@ -125,8 +125,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
   int componentsPerPixel = 1;
   TiffIFD* raw = mRootIFD->getSubIFDs()[3].get();
-  if (raw->hasEntry(CANON_SRAWTYPE) &&
-      raw->getEntry(CANON_SRAWTYPE)->getU32() == 4)
+  if (isSubSampled())
     componentsPerPixel = 3;
 
   mRaw->setCpp(componentsPerPixel);
@@ -190,12 +189,9 @@ RawImage Cr2Decoder::decodeRawInternal() {
 void Cr2Decoder::checkSupportInternal(const CameraMetaData* meta) {
   auto id = mRootIFD->getID();
   // Check for sRaw mode
-  if (mRootIFD->getSubIFDs().size() == 4) {
-    TiffEntry* typeE = mRootIFD->getSubIFDs()[3]->getEntryRecursive(CANON_SRAWTYPE);
-    if (typeE && typeE->getU32() == 4) {
-      checkCameraSupported(meta, id, "sRaw1");
-      return;
-    }
+  if (isSubSampled()) {
+    checkCameraSupported(meta, id, "sRaw1");
+    return;
   }
 
   checkCameraSupported(meta, id, "");
@@ -261,6 +257,14 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     // We caught an exception reading WB, just ignore it
   }
   setMetaData(meta, mode, iso);
+}
+
+bool Cr2Decoder::isSubSampled() const {
+  if (mRootIFD->getSubIFDs().size() != 4)
+    return false;
+  TiffEntry* typeE =
+      mRootIFD->getSubIFDs()[3]->getEntryRecursive(CANON_SRAWTYPE);
+  return typeE && typeE->getU32() == 4;
 }
 
 int Cr2Decoder::getHue() {
