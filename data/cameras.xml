@@ -9356,6 +9356,17 @@
 			<Alias id="SLT-A99">SLT-A99V</Alias>
 		</Aliases>
 	</Camera>
+	<Camera make="SONY" model="ZV-1">
+		<ID make="Sony" model="ZV-1">Sony DCZV1B</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-8" height="0"/>
+		<Sensor black="800" white="16300"/>
+	</Camera>
 	<Camera make="Sinar Photography AG" model="Sinar Hy6/ Sinarback eXact" mode="dng">
 		<ID make="Sinar" model="Hy6">Sinar Hy6</ID>
 		<CFA width="2" height="2">
