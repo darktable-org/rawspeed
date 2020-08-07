@@ -265,7 +265,7 @@ public:
   // WARNING: this is *not* your normal 2's complement sign extension!
   inline static int __attribute__((const)) extend(uint32_t diff, uint32_t len) {
     assert(len > 0);
-    int32_t ret = diff;
+    auto ret = static_cast<int32_t>(diff);
     if ((diff & (1 << (len - 1))) == 0)
       ret -= (1 << len) - 1;
     return ret;
