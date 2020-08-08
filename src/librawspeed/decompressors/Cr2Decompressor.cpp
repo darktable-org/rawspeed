@@ -131,6 +131,8 @@ void Cr2Decompressor::decode(const Cr2Slicing& slicing_) {
 template <int N_COMP, int X_S_F, int Y_S_F>
 void Cr2Decompressor::decodeN_X_Y()
 {
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+
   // To understand the CR2 slice handling and sampling factor behavior, see
   // https://github.com/lclevy/libcraw2/blob/master/docs/cr2_lossless.pdf?raw=true
 
@@ -158,7 +160,7 @@ void Cr2Decompressor::decodeN_X_Y()
 
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
-  auto* predNext = reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(0, 0));
+  auto* predNext = &out(0, 0);
 
   BitPumpJPEG bs(input);
 
@@ -195,7 +197,6 @@ void Cr2Decompressor::decodeN_X_Y()
       cpp * realDim.area())
     ThrowRDE("Incorrrect slice height / slice widths! Less than image size.");
 
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   unsigned globalFrameCol = 0;
   unsigned globalFrameRow = 0;
   for (auto sliceId = 0; sliceId < slicing.numSlices; sliceId++) {
