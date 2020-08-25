@@ -8,7 +8,7 @@ LLVM LNT / Test-Suite Integration
 
 Recommended reading materials
 -----------------------------
-  * http://blog.llvm.org/2016/06/using-lnt-to-track-performance.html
+  * https://blog.llvm.org/posts/2016-06-15-using-lnt-to-track-performance/
   * https://llvm.org/docs/lnt/quickstart.html
   * https://llvm.org/docs/TestSuiteGuide.html
 
