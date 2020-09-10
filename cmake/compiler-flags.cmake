@@ -50,17 +50,13 @@ ENDIF()
 # NOT CMAKE_STATIC_LINKER_FLAGS
 SET(CMAKE_SHARED_LINKER_FLAGS
     "${CMAKE_SHARED_LINKER_FLAGS} ${linkerflags}"
-    CACHE STRING "" FORCE )
+    )
 SET(CMAKE_EXE_LINKER_FLAGS
     "${CMAKE_EXE_LINKER_FLAGS} ${linkerflags}"
-    CACHE STRING "" FORCE )
+    )
 SET(CMAKE_MODULE_LINKER_FLAGS
     "${CMAKE_MODULE_LINKER_FLAGS} ${linkerflags}"
-    CACHE STRING "" FORCE )
-MARK_AS_ADVANCED(
-    CMAKE_SHARED_LINKER_FLAGS
-    CMAKE_EXE_LINKER_FLAGS
-    CMAKE_MODULE_LINKER_FLAGS )
+    )
 
 if(RAWSPEED_ENABLE_LTO)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -78,30 +74,19 @@ if(RAWSPEED_ENABLE_LTO)
 
   set(CMAKE_C_FLAGS
       "${CMAKE_C_FLAGS} ${lto_compile}"
-      CACHE STRING "Flags used by the C compiler during all builds."
-      FORCE )
+      )
   set(CMAKE_CXX_FLAGS
       "${CMAKE_CXX_FLAGS} ${lto_compile}"
-      CACHE STRING "Flags used by the C++ compiler during all builds."
-      FORCE )
+      )
   set(CMAKE_EXE_LINKER_FLAGS
       "${CMAKE_EXE_LINKER_FLAGS} ${lto_link}"
-      CACHE STRING "Flags used for linking binaries during all builds."
-      FORCE )
+      )
   set(CMAKE_SHARED_LINKER_FLAGS
       "${CMAKE_SHARED_LINKER_FLAGS} ${lto_link}"
-      CACHE STRING "Flags used by the shared libraries linker during all builds."
-      FORCE )
+      )
   set(CMAKE_MODULE_LINKER_FLAGS
       "${CMAKE_MODULE_LINKER_FLAGS} ${lto_link}"
-      CACHE STRING "Flags used by the module linker during all builds."
-      FORCE )
-  mark_as_advanced(
-      CMAKE_C_FLAGS
-      CMAKE_CXX_FLAGS
-      CMAKE_EXE_LINKER_FLAGS
-      CMAKE_SHARED_LINKER_FLAGS
-      CMAKE_MODULE_LINKER_FLAGS )
+      )
 endif()
 
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
