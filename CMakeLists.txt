@@ -226,7 +226,8 @@ rawspeed_add_library(rawspeed STATIC)
 # If LTO is enabled, we must advertise that by adding proper LTO link flags
 # to the (only externally visible/usable) rawspeed library.
 separate_arguments(lto_link UNIX_COMMAND "${lto_link}")
-target_link_options(rawspeed PUBLIC ${lto_link})
+# FIXME: once cmake-3.13 is required, use target_link_options()
+target_link_libraries(rawspeed PUBLIC ${lto_link})
 
 include(src-dependencies)
 
