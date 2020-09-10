@@ -125,7 +125,8 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
   if (isSubSampled()) {
     iPoint2D subSampling = getSubSampling();
-    assert(subSampling.x > 1 || subSampling.y > 1);
+    if (!(subSampling.x > 1 || subSampling.y > 1))
+      ThrowRDE("RAW is expected to be subsampled, but it's not");
 
     assert(mRaw->dim.x % subSampling.x == 0);
     mRaw->dim.x /= subSampling.x;
