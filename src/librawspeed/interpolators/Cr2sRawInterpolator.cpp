@@ -84,8 +84,7 @@ struct Cr2sRawInterpolator::YCbCr final {
   }
 };
 
-template <int version>
-inline void Cr2sRawInterpolator::interpolate_422_row(int row) {
+template <int version> void Cr2sRawInterpolator::interpolate_422_row(int row) {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   assert(out.width >= 6);
@@ -158,7 +157,7 @@ inline void Cr2sRawInterpolator::interpolate_422_row(int row) {
   YUV_TO_RGB<version>(p, &out(row, outCol(pixel + 1)));
 }
 
-template <int version> inline void Cr2sRawInterpolator::interpolate_422() {
+template <int version> void Cr2sRawInterpolator::interpolate_422() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   assert(out.width > 0);
   assert(out.height > 0);
@@ -167,8 +166,7 @@ template <int version> inline void Cr2sRawInterpolator::interpolate_422() {
     interpolate_422_row<version>(row);
 }
 
-template <int version>
-inline void Cr2sRawInterpolator::interpolate_420_row(int row) {
+template <int version> void Cr2sRawInterpolator::interpolate_420_row(int row) {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   assert(row + 4 <= out.height);
@@ -321,7 +319,7 @@ inline void Cr2sRawInterpolator::interpolate_420_row(int row) {
   YUV_TO_RGB<version>(pv, &out(row + 1, outCol(pixel + 1)));
 }
 
-template <int version> inline void Cr2sRawInterpolator::interpolate_420() {
+template <int version> void Cr2sRawInterpolator::interpolate_420() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   assert(out.width >= 6);
