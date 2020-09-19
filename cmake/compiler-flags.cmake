@@ -137,7 +137,7 @@ endif()
 
 set(ubsan "-fsanitize=undefined -fno-sanitize-recover=undefined")
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  set(ubsan "${ubsan} -fsanitize=integer -fno-sanitize-recover=integer")
+  set(ubsan "${ubsan} -fsanitize=integer -fno-sanitize-recover=integer -fno-sanitize=unsigned-shift-base")
 endif()
 
 SET(CMAKE_CXX_FLAGS_SANITIZE
