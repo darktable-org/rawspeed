@@ -84,7 +84,6 @@ struct Cr2sRawInterpolator::YCbCr final {
   }
 };
 
-// NOTE: Thread safe.
 template <int version>
 inline void Cr2sRawInterpolator::interpolate_422_row(int row) {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -168,7 +167,6 @@ template <int version> inline void Cr2sRawInterpolator::interpolate_422() {
     interpolate_422_row<version>(row);
 }
 
-// NOTE: Not thread safe, since it writes inplace.
 template <int version>
 inline void Cr2sRawInterpolator::interpolate_420_row(int row) {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -323,7 +321,6 @@ inline void Cr2sRawInterpolator::interpolate_420_row(int row) {
   YUV_TO_RGB<version>(pv, &out(row + 1, outCol(pixel + 1)));
 }
 
-// NOTE: Not thread safe, since it writes inplace.
 template <int version> inline void Cr2sRawInterpolator::interpolate_420() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
