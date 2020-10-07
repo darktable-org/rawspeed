@@ -7239,6 +7239,28 @@
 		<Crop x="0" y="0" width="-50" height="0"/>
 		<Sensor black="510" white="16380"/>
 	</Camera>
+	<Camera make="Panasonic" model="DC-S5">
+		<ID make="Panasonic" model="DC-S5">Panasonic DC-S5</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-50" height="0"/>
+		<Sensor black="510" white="16380"/>
+	</Camera>
+	<Camera make="Panasonic" model="DC-S5" mode="3:2">
+		<ID make="Panasonic" model="DC-S5">Panasonic DC-S5</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-50" height="0"/>
+		<Sensor black="510" white="16380"/>
+	</Camera>
 	<Camera make="Panasonic" model="DC-S1R">
 		<ID make="Panasonic" model="DC-S1R">Panasonic DC-S1R</ID>
 		<CFA width="2" height="2">
