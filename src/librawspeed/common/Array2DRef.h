@@ -48,12 +48,9 @@ public:
   // Conversion from Array2DRef<T> to Array2DRef<const T>.
   template <class T2, typename = std::enable_if_t<std::is_same<
                           typename std::remove_const<T>::type, T2>::value>>
-  Array2DRef(Array2DRef<T2> RHS) { // NOLINT google-explicit-constructor
-    _data = RHS._data;
-    _pitch = RHS._pitch;
-    width = RHS.width;
-    height = RHS.height;
-  }
+  Array2DRef(Array2DRef<T2> RHS) // NOLINT google-explicit-constructor
+      : _data(RHS._data), _pitch(RHS._pitch), width(RHS.width),
+        height(RHS.height) {}
 
   template <typename AllocatorType =
                 typename std::vector<cvless_value_type>::allocator_type>

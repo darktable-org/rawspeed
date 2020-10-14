@@ -32,6 +32,7 @@
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray
 #include <array>                       // for array
 #include <cassert>                     // for assert
+#include <cmath>                       // for NAN
 #include <cstdint>                     // for uint32_t, uint16_t, uint8_t
 #include <memory>                      // for unique_ptr, operator==
 #include <string>                      // for string
@@ -66,21 +67,19 @@ public:
 
 class ImageMetaData {
 public:
-  ImageMetaData();
-
   // Aspect ratio of the pixels, usually 1 but some cameras need scaling
   // <1 means the image needs to be stretched vertically, (0.5 means 2x)
   // >1 means the image needs to be stretched horizontally (2 mean 2x)
-  double pixelAspectRatio;
+  double pixelAspectRatio = 1;
 
   // White balance coefficients of the image
-  std::array<float, 4> wbCoeffs;
+  std::array<float, 4> wbCoeffs = {NAN, NAN, NAN, NAN};
 
   // How many pixels far down the left edge and far up the right edge the image
   // corners are when the image is rotated 45 degrees in Fuji rotated sensors.
-  uint32_t fujiRotationPos;
+  uint32_t fujiRotationPos = 0;
 
-  iPoint2D subsampling;
+  iPoint2D subsampling = {1, 1};
   std::string make;
   std::string model;
   std::string mode;
@@ -91,7 +90,7 @@ public:
   std::string canonical_id;
 
   // ISO speed. If known the value is set, otherwise it will be '0'.
-  int isoSpeed;
+  int isoSpeed = 0;
 };
 
 class RawImageData : public ErrorLog {

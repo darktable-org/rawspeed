@@ -65,8 +65,8 @@ class DngOpcodes::FixBadPixelsConstant final : public DngOpcodes::DngOpcode {
   uint32_t value;
 
 public:
-  explicit FixBadPixelsConstant(const RawImage& ri, ByteStream* bs) {
-    value = bs->getU32();
+  explicit FixBadPixelsConstant(const RawImage& ri, ByteStream* bs)
+      : value(bs->getU32()) {
     bs->getU32(); // Bayer Phase not used
   }
 
@@ -223,9 +223,8 @@ class DngOpcodes::PixelOpcode : public ROIOpcode {
 
 protected:
   explicit PixelOpcode(const RawImage& ri, ByteStream* bs)
-      : ROIOpcode(ri, bs, false) {
-    firstPlane = bs->getU32();
-    planes = bs->getU32();
+      : ROIOpcode(ri, bs, false), firstPlane(bs->getU32()),
+        planes(bs->getU32()) {
 
     if (planes == 0 || firstPlane > ri->getCpp() || planes > ri->getCpp() ||
         firstPlane + planes > ri->getCpp()) {
