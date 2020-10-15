@@ -73,7 +73,7 @@ public:
   double pixelAspectRatio = 1;
 
   // White balance coefficients of the image
-  std::array<float, 4> wbCoeffs = {NAN, NAN, NAN, NAN};
+  std::array<float, 4> wbCoeffs = {{NAN, NAN, NAN, NAN}};
 
   // How many pixels far down the left edge and far up the right edge the image
   // corners are when the image is rotated 45 degrees in Fuji rotated sensors.
