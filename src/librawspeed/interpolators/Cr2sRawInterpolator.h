@@ -49,11 +49,11 @@ protected:
 
   static inline void STORE_RGB(uint16_t* X, int r, int g, int b);
 
-  template <int version> inline void interpolate_422_row(int row);
-  template <int version> inline void interpolate_422();
+  template <int version> void interpolate_422_row(int row);
+  template <int version> void interpolate_422();
 
-  template <int version> inline void interpolate_420_row(int row);
-  template <int version> inline void interpolate_420();
+  template <int version> void interpolate_420_row(int row);
+  template <int version> void interpolate_420();
 };
 
 } // namespace rawspeed
