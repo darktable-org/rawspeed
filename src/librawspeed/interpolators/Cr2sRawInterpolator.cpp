@@ -33,9 +33,9 @@
 namespace rawspeed {
 
 struct Cr2sRawInterpolator::YCbCr final {
-  int Y;
-  int Cb;
-  int Cr;
+  int Y = 0;
+  int Cb = 0;
+  int Cr = 0;
 
   inline static void LoadY(YCbCr* p, const uint16_t* data) {
     assert(p);
