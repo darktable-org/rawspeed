@@ -193,7 +193,8 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="64" y="12" width="0" height="0"/>
-		<Sensor black="127" white="4000"/>
+		<Sensor black="130" white="4000"/>
+		<Sensor black="255" white="4000" iso_list="1600 3200"/>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS 20D">
 		<ID make="Canon" model="EOS 20D">Canon EOS 20D</ID>
@@ -894,8 +895,9 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="158" y="52" width="5202" height="3464"/>
-		<Sensor black="1025" white="8150" iso_min="12800" iso_max="12800"/>
-		<Sensor black="2050" white="16300"/>
+		<Sensor black="2049" white="15400"/>
+		<Sensor black="2048" white="13600" iso_list="100 125"/>
+		<Sensor black="2048" white="12600" iso_list="160 320 640 1250 2500"/>
 		<BlackAreas>
 			<Vertical x="8" width="156"/>
 			<Horizontal y="32" height="18"/>
@@ -904,14 +906,12 @@
 	<Camera make="Canon" model="Canon EOS 7D" mode="sRaw1">
 		<ID make="Canon" model="EOS 7D">Canon EOS 7D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="44200" iso_list="100 125 160 320 640 1250"/>
-		<Sensor black="0" white="54000"/>
+		<Sensor black="0" white="30000"/>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS 7D" mode="sRaw2">
 		<ID make="Canon" model="EOS 7D">Canon EOS 7D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="44200" iso_list="100 125 160 320 640 1250"/>
-		<Sensor black="0" white="54000"/>
+		<Sensor black="0" white="30000"/>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS 7D Mark II">
 		<ID make="Canon" model="EOS 7D Mark II">Canon EOS 7D Mark II</ID>
@@ -922,8 +922,11 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="72" y="38" width="0" height="0"/>
-		<Sensor black="2047" white="13400" iso_list="100 125 160 200 250 320"/>
-		<Sensor black="2047" white="15100"/>
+		<Sensor black="2048" white="15100"/>
+		<Sensor black="2047" white="13400" iso_list="100 125"/>
+		<Sensor black="2048" white="12400" iso_list="160 320 640 1250 2500 5000"/>
+		<Sensor black="2047" white="15300" iso_list="10000 12800 16000 25600"/>
+		<Sensor black="2040" white="16000" iso_list="51200"/>		
 		<BlackAreas>
 			<Vertical x="4" width="64"/>
 			<Horizontal y="24" height="8"/>
@@ -932,7 +935,7 @@
 	<Camera make="Canon" model="Canon EOS 7D Mark II" mode="sRaw1">
 		<ID make="Canon" model="EOS 7D Mark II">Canon EOS 7D Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="30000"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -941,7 +944,7 @@
 	<Camera make="Canon" model="Canon EOS 7D Mark II" mode="sRaw2">
 		<ID make="Canon" model="EOS 7D Mark II">Canon EOS 7D Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="30000"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
