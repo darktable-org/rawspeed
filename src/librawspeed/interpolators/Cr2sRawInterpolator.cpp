@@ -19,6 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "interpolators/Cr2sRawInterpolator.h"
 #include "common/Array2DRef.h"            // for Array2DRef
 #include "common/Common.h"                // for clampBits
@@ -179,6 +180,8 @@ template <int version> void Cr2sRawInterpolator::interpolate_422() {
   assert(out.width > 0);
   assert(out.height > 0);
 
+  // Benchmarking suggests that for real-world usage, it is not beneficial to
+  // parallelize this, and in fact leads to worse performance.
   for (int row = 0; row < out.height; row++)
     interpolate_422_row<version>(row);
 }
@@ -378,6 +381,11 @@ template <int version> void Cr2sRawInterpolator::interpolate_420() {
   };
 
   int row;
+#ifdef HAVE_OPENMP
+#pragma omp parallel for default(none) schedule(static)                        \
+    num_threads(rawspeed_get_number_of_processor_cores())                      \
+        OMPFIRSTPRIVATECLAUSE(out) lastprivate(row)
+#endif
   for (row = 0; row < input.height - 1; ++row)
     interpolate_420_row<version>(row);
 
