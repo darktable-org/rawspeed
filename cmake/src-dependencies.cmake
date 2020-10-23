@@ -61,7 +61,7 @@ if(WITH_OPENMP)
     set_property(TARGET RawSpeed::OpenMP_CXX PROPERTY INTERFACE_LINK_LIBRARIES omp)
   endif()
 
-  target_link_libraries(rawspeed PRIVATE RawSpeed::OpenMP_CXX)
+  target_link_libraries(rawspeed PUBLIC RawSpeed::OpenMP_CXX)
 
   set(HAVE_OPENMP 1)
 
