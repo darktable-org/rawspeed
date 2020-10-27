@@ -55,7 +55,7 @@ jobs:
           OS: windows
           ARCH: ${{ matrix.msys2.arch }}
           CXX: ${{ matrix.compiler.compiler }}
-          JOB_NAME: ${{ jobs.${{ github.job }}.name }}
+          JOB_NAME: ${{ matrix.os }}.${{ matrix.msys2.msystem }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
           SRC_DIR: ${{ github.workspace }}
           BUILD_DIR: ${{ github.workspace }}/build
         run: |
@@ -100,7 +100,7 @@ jobs:
           OS: macOS
           ARCH: x86_64
           CXX: AppleXcode
-          JOB_NAME: ${{ jobs.${{ github.job }}.name }}
+          JOB_NAME: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
           SRC_DIR: ${{ github.workspace }}
           BUILD_DIR: ${{ github.workspace }}/build
         run: |
