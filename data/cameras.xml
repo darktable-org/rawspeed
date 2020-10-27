@@ -4327,6 +4327,17 @@
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="254" white="4000"/>
 	</Camera>
+	<Camera make="OLYMPUS CORPORATION" model="E-M10MarkIV">
+		<ID make="Olympus" model="E-M10 Mark IV">Olympus E-M10 Mark IV</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="254" white="4000"/>
+	</Camera>
 	<Camera make="OLYMPUS IMAGING CORP." model="E-M5">
 		<ID make="Olympus" model="E-M5">Olympus E-M5</ID>
 		<Crop x="8" y="8" width="-24" height="-8"/>
