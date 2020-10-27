@@ -55,13 +55,13 @@ jobs:
           OS: windows
           ARCH: ${{ matrix.msys2.arch }}
           CXX: ${{ matrix.compiler.compiler }}
-          JOB_NAME: ${{ github.job }}
+          JOB_NAME: ${{ jobs.${{ github.job }}.name }}
           SRC_DIR: ${{ github.workspace }}
           BUILD_DIR: ${{ github.workspace }}/build
         run: |
           curl -s https://codecov.io/bash > codecov;
           chmod +x codecov;
-          ./codecov -e OS,ARCH,CXX -F unittests -n "${JOB_NAME}" -R "$(cygpath ${SRC_DIR})" -s "$(cygpath ${BUILD_DIR})/gcov-reports-unittest" -X gcov -Z;
+          ./codecov -e OS,ARCH,CXX -F unittests -n "${JOB_NAME}.Unittests" -R "$(cygpath ${SRC_DIR})" -s "$(cygpath ${BUILD_DIR})/gcov-reports-unittest" -X gcov -Z;
   macOS:
     name: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
     runs-on: ${{ matrix.os }}
@@ -100,10 +100,10 @@ jobs:
           OS: macOS
           ARCH: x86_64
           CXX: AppleXcode
-          JOB_NAME: ${{ github.job }}
+          JOB_NAME: ${{ jobs.${{ github.job }}.name }}
           SRC_DIR: ${{ github.workspace }}
           BUILD_DIR: ${{ github.workspace }}/build
         run: |
           curl -s https://codecov.io/bash > codecov;
           chmod +x codecov;
-          ./codecov -e OS,ARCH,CXX -F unittests -n "${JOB_NAME}" -R "${SRC_DIR}" -s "${BUILD_DIR}/gcov-reports-unittest" -X gcov -Z;
+          ./codecov -e OS,ARCH,CXX -F unittests -n "${JOB_NAME}.Unittests" -R "${SRC_DIR}" -s "${BUILD_DIR}/gcov-reports-unittest" -X gcov -Z;
