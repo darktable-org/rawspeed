@@ -36,9 +36,6 @@ install:
       travis_retry sudo apt-get update -q;
       travis_retry sudo apt-get install -y -q -f --fix-missing clang-3.5;
     fi;
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      travis_retry brew update > /dev/null && brew tap Homebrew/bundle && cd .ci && brew bundle --verbose;
-    fi;
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$FLAVOR" == "Coverage" ]]; then
       travis_retry sudo apt-get install -y -q -f --fix-missing rsync;
     fi;
@@ -96,10 +93,6 @@ jobs:
     cache:
       directories:
         - '$HOME/$RPUU_DST'
-  #- os: osx
-  #  env: CC=cc CXX=c++
-  #- os: osx
-  #  env: CC=cc CXX=c++ FLAVOR=Coverage
   - os: linux
     dist: bionic
     sudo: required
@@ -141,11 +134,10 @@ jobs:
     env: CC=clang-10 CXX=clang++-10 TARGET=WWW
 
 # linux clang Coverage build OOM's in gcov during final codecov report collection
-# OSX gcc Coverage build produces invalid .gcno files
 
 script:
   - set -e
-  - if [[ ("$TRAVIS_OS_NAME" == "linux" && "$EXTRA" == "NODOCKER") || "$TRAVIS_OS_NAME" == "osx" ]]; then
+  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$EXTRA" == "NODOCKER" ]]; then
       export SRC_DIR="$TRAVIS_BUILD_DIR";
       export BUILD_DIR="$SRC_DIR/build";
       export INSTALL_PREFIX="$SRC_DIR/install";
@@ -185,8 +177,6 @@ after_success:
         if [[ "$CC" == "cc" ]]; then
           export CXX=GCC;
         fi;
-      elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-        export CXX=AppleClang;
       fi;
       ./codecov -e PLATFORM,CXX -F unittests -X gcov -s "$TRAVIS_BUILD_DIR/build/gcov-reports-unittest" -Z;
       if [[ "$TRAVIS_OS_NAME" == "linux" && "$FLAVOR" == "Coverage" ]]; then

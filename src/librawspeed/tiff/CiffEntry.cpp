@@ -38,8 +38,10 @@ CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas,
                      const ByteStream* valueData, ByteStream dirEntry) {
   uint16_t p = dirEntry.getU16();
 
+  // NOLINTNEXTLINE cppcoreguidelines-prefer-member-initializer
   tag = static_cast<CiffTag>(p & 0x3fff);
   uint16_t datalocation = (p & 0xc000);
+  // NOLINTNEXTLINE cppcoreguidelines-prefer-member-initializer
   type = static_cast<CiffDataType>(p & 0x3800);
 
   uint32_t data_offset;

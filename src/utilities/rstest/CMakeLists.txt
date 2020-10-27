@@ -5,10 +5,6 @@ endif()
 rawspeed_add_executable(rstest rstest.cpp md5.cpp)
 target_link_libraries(rstest rawspeed)
 
-if(TARGET RawSpeed::OpenMP_CXX)
-  target_link_libraries(rstest RawSpeed::OpenMP_CXX)
-endif()
-
 target_link_libraries(rstest rawspeed_get_number_of_processor_cores)
 
 if(BUILD_TESTING)

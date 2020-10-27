@@ -119,18 +119,25 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
   assert(sensorInfoE != nullptr);
 
-  const uint16_t width = sensorInfoE->getU16(1);
-  const uint16_t height = sensorInfoE->getU16(2);
-  mRaw->dim = {width, height};
+  mRaw->dim = {sensorInfoE->getU16(1), sensorInfoE->getU16(2)};
+  mRaw->setCpp(1);
+  mRaw->isCFA = !isSubSampled();
 
-  int componentsPerPixel = 1;
+  if (isSubSampled()) {
+    iPoint2D subSampling = getSubSampling();
+    if (!(subSampling.x > 1 || subSampling.y > 1))
+      ThrowRDE("RAW is expected to be subsampled, but it's not");
+
+    assert(mRaw->dim.x % subSampling.x == 0);
+    mRaw->dim.x /= subSampling.x;
+
+    assert(mRaw->dim.y % subSampling.y == 0);
+    mRaw->dim.y /= subSampling.y;
+
+    mRaw->dim.x *= 2 + subSampling.x * subSampling.y;
+  }
+
   TiffIFD* raw = mRootIFD->getSubIFDs()[3].get();
-  if (raw->hasEntry(CANON_SRAWTYPE) &&
-      raw->getEntry(CANON_SRAWTYPE)->getU32() == 4)
-    componentsPerPixel = 3;
-
-  mRaw->setCpp(componentsPerPixel);
-  mRaw->isCFA = (mRaw->getCpp() == 1);
 
   Cr2Slicing slicing;
   // there are four cases:
@@ -174,6 +181,8 @@ RawImage Cr2Decoder::decodeNewFormat() {
   mRaw->createData();
   d.decode(slicing);
 
+  assert(getSubSampling() == mRaw->metadata.subsampling);
+
   if (mRaw->metadata.subsampling.x > 1 || mRaw->metadata.subsampling.y > 1)
     sRawInterpolate();
 
@@ -190,12 +199,9 @@ RawImage Cr2Decoder::decodeRawInternal() {
 void Cr2Decoder::checkSupportInternal(const CameraMetaData* meta) {
   auto id = mRootIFD->getID();
   // Check for sRaw mode
-  if (mRootIFD->getSubIFDs().size() == 4) {
-    TiffEntry* typeE = mRootIFD->getSubIFDs()[3]->getEntryRecursive(CANON_SRAWTYPE);
-    if (typeE && typeE->getU32() == 4) {
-      checkCameraSupported(meta, id, "sRaw1");
-      return;
-    }
+  if (isSubSampled()) {
+    checkCameraSupported(meta, id, "sRaw1");
+    return;
   }
 
   checkCameraSupported(meta, id, "");
@@ -263,6 +269,37 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, mode, iso);
 }
 
+bool Cr2Decoder::isSubSampled() const {
+  if (mRootIFD->getSubIFDs().size() != 4)
+    return false;
+  TiffEntry* typeE =
+      mRootIFD->getSubIFDs()[3]->getEntryRecursive(CANON_SRAWTYPE);
+  return typeE && typeE->getU32() == 4;
+}
+
+iPoint2D Cr2Decoder::getSubSampling() const {
+  TiffEntry* CCS = mRootIFD->getEntryRecursive(CANON_CAMERA_SETTINGS);
+  if (!CCS)
+    ThrowRDE("CanonCameraSettings entry not found.");
+
+  if (CCS->type != TIFF_SHORT)
+    ThrowRDE("Unexpected CanonCameraSettings entry type encountered ");
+
+  if (CCS->count < 47)
+    return {1, 1};
+
+  switch (uint16_t qual = CCS->getU16(46)) {
+  case 0:
+    return {1, 1};
+  case 1:
+    return {2, 2};
+  case 2:
+    return {2, 1};
+  default:
+    ThrowRDE("Unexpected SRAWQuality value found: %u", qual);
+  }
+}
+
 int Cr2Decoder::getHue() {
   if (hints.has("old_sraw_hue"))
     return (mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x);
@@ -302,11 +339,27 @@ void Cr2Decoder::sRawInterpolate() {
         1024.0F / (static_cast<float>(sraw_coeffs[2]) / 1024.0F));
   }
 
+  mRaw->checkMemIsInitialized();
+  RawImage subsampledRaw = mRaw;
+  int hue = getHue();
+
+  iPoint2D interpolatedDims = {
+      subsampledRaw->metadata.subsampling.x *
+          (subsampledRaw->dim.x /
+           (2 + subsampledRaw->metadata.subsampling.x *
+                    subsampledRaw->metadata.subsampling.y)),
+      subsampledRaw->metadata.subsampling.y * subsampledRaw->dim.y};
+
+  mRaw = RawImage::create(interpolatedDims, TYPE_USHORT16, 3);
+  mRaw->metadata.subsampling = subsampledRaw->metadata.subsampling;
+  mRaw->isCFA = false;
+
+  Cr2sRawInterpolator i(mRaw, subsampledRaw->getU16DataAsUncroppedArray2DRef(),
+                        sraw_coeffs, hue);
+
   /* Determine sRaw coefficients */
   bool isOldSraw = hints.has("sraw_40d");
   bool isNewSraw = hints.has("sraw_new");
-
-  Cr2sRawInterpolator i(mRaw, sraw_coeffs, getHue());
 
   int version;
   if (isOldSraw)

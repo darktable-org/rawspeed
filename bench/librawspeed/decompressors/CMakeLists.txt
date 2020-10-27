@@ -8,4 +8,5 @@ if(HAVE_ZLIB)
   endforeach()
 
   target_link_libraries(DeflateDecompressorBenchmark PRIVATE rawspeed_get_number_of_processor_cores)
+  target_link_libraries(DeflateDecompressorBenchmark PRIVATE ZLIB::ZLIB)
 endif()

@@ -58,14 +58,6 @@ RawImageData::RawImageData(const iPoint2D& _dim, int _bpc, int _cpp)
   createData();
 }
 
-ImageMetaData::ImageMetaData() {
-  subsampling.x = subsampling.y = 1;
-  isoSpeed = 0;
-  pixelAspectRatio = 1;
-  fujiRotationPos = 0;
-  wbCoeffs.fill(NAN);
-}
-
 RawImageData::~RawImageData() {
   assert(dataRefCount == 0);
   mOffset = iPoint2D(0, 0);

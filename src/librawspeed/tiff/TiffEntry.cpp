@@ -43,8 +43,8 @@ const std::array<uint32_t, 14> TiffEntry::datashifts = {0, 0, 0, 1, 2, 3, 0,
                                                         0, 1, 2, 3, 2, 3, 2};
 //                                  0-1-2-3-4-5-6-7-8-9-10-11-12-13
 
-TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream* bs) : parent(parent_) {
-  tag = static_cast<TiffTag>(bs->getU16());
+TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream* bs)
+    : parent(parent_), tag(static_cast<TiffTag>(bs->getU16())) {
   const uint16_t numType = bs->getU16();
   if (numType > TIFF_OFFSET)
     ThrowTPE("Error reading TIFF structure. Unknown Type 0x%x encountered.", numType);

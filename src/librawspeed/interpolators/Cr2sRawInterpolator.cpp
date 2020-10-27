@@ -19,7 +19,9 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "interpolators/Cr2sRawInterpolator.h"
+#include "common/Array2DRef.h"            // for Array2DRef
 #include "common/Common.h"                // for clampBits
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
@@ -28,14 +30,12 @@
 #include <cassert>                        // for assert
 #include <cstdint>                        // for uint16_t
 
-using std::array;
-
 namespace rawspeed {
 
 struct Cr2sRawInterpolator::YCbCr final {
-  int Y;
-  int Cb;
-  int Cr;
+  int Y = 0;
+  int Cb = 0;
+  int Cr = 0;
 
   inline static void LoadY(YCbCr* p, const uint16_t* data) {
     assert(p);
@@ -48,16 +48,15 @@ struct Cr2sRawInterpolator::YCbCr final {
     assert(p);
     assert(data);
 
-    p->Cb = data[1];
-    p->Cr = data[2];
+    p->Cb = data[0];
+    p->Cr = data[1];
   }
 
-  inline static void LoadYCbCr(YCbCr* p, const uint16_t* data) {
+  inline static void CopyCbCr(YCbCr* p, const YCbCr& pSrc) {
     assert(p);
-    assert(data);
 
-    LoadY(p, data);
-    LoadCbCr(p, data);
+    p->Cb = pSrc.Cb;
+    p->Cr = pSrc.Cr;
   }
 
   YCbCr() = default;
@@ -77,15 +76,15 @@ struct Cr2sRawInterpolator::YCbCr final {
     applyHue(hue_);
   }
 
-  inline void interpolate(const YCbCr& p0, const YCbCr& p2) {
+  inline void interpolateCbCr(const YCbCr& p0, const YCbCr& p2) {
     // Y is already good, need to interpolate Cb and Cr
     // FIXME: dcraw does +1 before >> 1
     Cb = (p0.Cb + p2.Cb) >> 1;
     Cr = (p0.Cr + p2.Cr) >> 1;
   }
 
-  inline void interpolate(const YCbCr& p0, const YCbCr& p1, const YCbCr& p2,
-                          const YCbCr& p3) {
+  inline void interpolateCbCr(const YCbCr& p0, const YCbCr& p1, const YCbCr& p2,
+                              const YCbCr& p3) {
     // Y is already good, need to interpolate Cb and Cr
     // FIXME: dcraw does +1 before >> 1
     Cb = (p0.Cb + p1.Cb + p2.Cb + p3.Cb) >> 2;
@@ -93,14 +92,42 @@ struct Cr2sRawInterpolator::YCbCr final {
   }
 };
 
-// NOTE: Thread safe.
-template <int version>
-inline void Cr2sRawInterpolator::interpolate_422_row(uint16_t* data, int w) {
-  assert(data);
-  assert(w >= 2);
-  assert(w % 2 == 0);
+template <int version> void Cr2sRawInterpolator::interpolate_422_row(int row) {
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  // the format is:
+  constexpr int InputComponentsPerMCU = 4;
+  constexpr int PixelsPerMCU = 2;
+  constexpr int YsPerMCU = PixelsPerMCU;
+  constexpr int ComponentsPerPixel = 3;
+  constexpr int OutputComponentsPerMCU = ComponentsPerPixel * PixelsPerMCU;
+
+  assert(input.width % InputComponentsPerMCU == 0);
+  int numMCUs = input.width / InputComponentsPerMCU;
+  assert(numMCUs > 1);
+
+  using MCUTy = std::array<YCbCr, PixelsPerMCU>;
+
+  auto LoadMCU = [&](int MCUIdx) {
+    MCUTy MCU;
+    for (int YIdx = 0; YIdx < PixelsPerMCU; ++YIdx)
+      YCbCr::LoadY(&MCU[YIdx],
+                   &input(row, InputComponentsPerMCU * MCUIdx + YIdx));
+    YCbCr::LoadCbCr(&MCU[0],
+                    &input(row, InputComponentsPerMCU * MCUIdx + YsPerMCU));
+    return MCU;
+  };
+  auto StoreMCU = [&](const MCUTy& MCU, int MCUIdx) {
+    for (int Pixel = 0; Pixel < PixelsPerMCU; ++Pixel) {
+      YUV_TO_RGB<version>(MCU[Pixel],
+                          &out(row, OutputComponentsPerMCU * MCUIdx +
+                                        ComponentsPerPixel * Pixel));
+    }
+  };
+
+  // The packed input format is:
+  //   p0 p1 p0 p0     p2 p3 p2 p2
+  //  [ Y1 Y2 Cb Cr ] [ Y1 Y2 Cb Cr ] ...
+  // in unpacked form that is:
   //   p0             p1             p2             p3
   //  [ Y1 Cb  Cr  ] [ Y2 ... ... ] [ Y1 Cb  Cr  ] [ Y2 ... ... ] ...
   // i.e. even pixels are full, odd pixels need interpolation:
@@ -109,74 +136,107 @@ inline void Cr2sRawInterpolator::interpolate_422_row(uint16_t* data, int w) {
   // for last (odd) pixel of the line,  just keep Cb/Cr from previous pixel
   // see http://lclevy.free.fr/cr2/#sraw
 
-  int x;
-  for (x = 0; x < w - 2; x += 2) {
-    assert(x + 4 <= w);
-    assert(x % 2 == 0);
+  int MCUIdx;
+  // Process all MCU's except the last one.
+  for (MCUIdx = 0; MCUIdx < numMCUs - 1; ++MCUIdx) {
+    assert(MCUIdx + 1 <= numMCUs);
 
-    // load, process and output first pixel, which is full
-    YCbCr p0;
-    YCbCr::LoadYCbCr(&p0, data);
-    p0.process(hue);
-    YUV_TO_RGB<version>(p0, data);
-    data += 3;
+    // For 4:2:2, one MCU encodes 2 pixels, and odd pixels need interpolation,
+    // so we need to load three pixels, and thus we must load 2 MCU's.
+    std::array<MCUTy, 2> MCUs;
+    for (size_t SubMCUIdx = 0; SubMCUIdx < MCUs.size(); ++SubMCUIdx)
+      MCUs[SubMCUIdx] = LoadMCU(MCUIdx + SubMCUIdx);
 
-    // load Y from second pixel, Cb/Cr need to be interpolated
-    YCbCr p;
-    YCbCr::LoadY(&p, data);
+    // Process first pixel, which is full
+    MCUs[0][0].process(hue);
+    // Process third pixel, which is, again, full
+    MCUs[1][0].process(hue);
+    // Interpolate the middle pixel, for which only the Y was known.
+    MCUs[0][1].interpolateCbCr(MCUs[0][0], MCUs[1][0]);
 
-    // load third pixel, which is full, process
-    YCbCr p1;
-    YCbCr::LoadYCbCr(&p1, data + 3);
-    p1.process(hue);
-
-    // and finally, interpolate and output the middle pixel
-    p.interpolate(p0, p1);
-    YUV_TO_RGB<version>(p, data);
-    data += 3;
+    // And finally, store the first MCU, i.e. first two pixels.
+    StoreMCU(MCUs[0], MCUIdx);
   }
 
-  assert(x + 2 == w);
-  assert(x % 2 == 0);
+  assert(MCUIdx + 1 == numMCUs);
 
-  // Last two pixels, the format is:
+  // Last two pixels, the packed input format is:
+  //      p0 p1 p0 p0
+  //  .. [ Y1 Y2 Cb Cr ]
+  // in unpacked form that is:
   //      p0             p1
   //  .. [ Y1 Cb  Cr  ] [ Y2 ... ... ]
 
-  // load, process and output first pixel, which is full
-  YCbCr p;
-  YCbCr::LoadYCbCr(&p, data);
-  p.process(hue);
-  YUV_TO_RGB<version>(p, data);
-  data += 3;
+  MCUTy MCU = LoadMCU(MCUIdx);
 
-  // load Y from second pixel, keep Cb/Cr from previous pixel, and output
-  YCbCr::LoadY(&p, data);
-  YUV_TO_RGB<version>(p, data);
-  data += 3;
+  MCU[0].process(hue);
+  YCbCr::CopyCbCr(&MCU[1], MCU[0]);
+
+  StoreMCU(MCU, MCUIdx);
 }
 
-template <int version>
-inline void Cr2sRawInterpolator::interpolate_422(int w, int h) {
-  assert(w > 0);
-  assert(h > 0);
+template <int version> void Cr2sRawInterpolator::interpolate_422() {
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  assert(out.width > 0);
+  assert(out.height > 0);
 
-  for (int y = 0; y < h; y++) {
-    auto* data = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
-
-    interpolate_422_row<version>(data, w);
-  }
+  // Benchmarking suggests that for real-world usage, it is not beneficial to
+  // parallelize this, and in fact leads to worse performance.
+  for (int row = 0; row < out.height; row++)
+    interpolate_422_row<version>(row);
 }
 
-// NOTE: Not thread safe, since it writes inplace.
-template <int version>
-inline void
-Cr2sRawInterpolator::interpolate_420_row(std::array<uint16_t*, 3> line, int w) {
-  assert(line[0]);
-  assert(line[1]);
-  assert(line[2]);
+template <int version> void Cr2sRawInterpolator::interpolate_420_row(int row) {
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  // the format is:
+  constexpr int X_S_F = 2;
+  constexpr int Y_S_F = 2;
+  constexpr int PixelsPerMCU = X_S_F * Y_S_F;
+  constexpr int InputComponentsPerMCU = 2 + PixelsPerMCU;
+
+  constexpr int YsPerMCU = PixelsPerMCU;
+  constexpr int ComponentsPerPixel = 3;
+  constexpr int OutputComponentsPerMCU = ComponentsPerPixel * PixelsPerMCU;
+
+  assert(input.width % InputComponentsPerMCU == 0);
+  int numMCUs = input.width / InputComponentsPerMCU;
+  assert(numMCUs > 1);
+
+  using MCUTy = std::array<std::array<YCbCr, X_S_F>, Y_S_F>;
+
+  auto LoadMCU = [&](int Row, int MCUIdx) __attribute__((always_inline)) {
+    MCUTy MCU;
+    for (int MCURow = 0; MCURow < Y_S_F; ++MCURow) {
+      for (int MCUCol = 0; MCUCol < X_S_F; ++MCUCol) {
+        YCbCr::LoadY(&MCU[MCURow][MCUCol],
+                     &input(Row, InputComponentsPerMCU * MCUIdx +
+                                     X_S_F * MCURow + MCUCol));
+      }
+    }
+    YCbCr::LoadCbCr(&MCU[0][0],
+                    &input(Row, InputComponentsPerMCU * MCUIdx + YsPerMCU));
+    return MCU;
+  };
+  auto StoreMCU = [&](const MCUTy& MCU, int MCUIdx, int Row)
+      __attribute__((always_inline)) {
+    for (int MCURow = 0; MCURow < Y_S_F; ++MCURow) {
+      for (int MCUCol = 0; MCUCol < X_S_F; ++MCUCol) {
+        YUV_TO_RGB<version>(
+            MCU[MCURow][MCUCol],
+            &out(2 * Row + MCURow, ((OutputComponentsPerMCU * MCUIdx) / Y_S_F) +
+                                       ComponentsPerPixel * MCUCol));
+      }
+    }
+  };
+
+  assert(row + 1 <= input.height);
+
+  // The packed input format is:
+  //          p0 p1 p2 p3 p0 p0     p4 p5 p6 p7 p4 p4
+  //  row 0: [ Y1 Y2 Y3 Y4 Cb Cr ] [ Y1 Y2 Y3 Y4 Cb Cr ] ...
+  //  row 1: [ Y1 Y2 Y3 Y4 Cb Cr ] [ Y1 Y2 Y3 Y4 Cb Cr ] ...
+  //           .. .. .. .. .  .      .. .. .. .. .  .
+  // in unpacked form that is:
   //          p0             p1             p2             p3
   //  row 0: [ Y1 Cb  Cr  ] [ Y2 ... ... ] [ Y1 Cb  Cr  ] [ Y2 ... ... ] ...
   //  row 1: [ Y3 ... ... ] [ Y4 ... ... ] [ Y3 ... ... ] [ Y4 ... ... ] ...
@@ -207,68 +267,54 @@ Cr2sRawInterpolator::interpolate_420_row(std::array<uint16_t*, 3> line, int w) {
   //           .. .   .       .. .   .       .. .   .
   // see http://lclevy.free.fr/cr2/#sraw
 
-  int x;
-  for (x = 0; x < w - 2; x += 2) {
-    assert(x + 4 <= w);
-    assert(x % 2 == 0);
+  int MCUIdx;
+  for (MCUIdx = 0; MCUIdx < numMCUs - 1; ++MCUIdx) {
+    assert(MCUIdx + 1 <= numMCUs);
 
-    // load, process and output first pixel of first row, which is full
-    YCbCr p0;
-    YCbCr::LoadYCbCr(&p0, line[0]);
-    p0.process(hue);
-    YUV_TO_RGB<version>(p0, line[0]);
-    line[0] += 3;
+    // For 4:2:0, one MCU encodes 4 pixels (2x2), and odd pixels need
+    // interpolation, so we need to load eight pixels,
+    // and thus we must load 4 MCU's.
+    std::array<std::array<MCUTy, 2>, 2> MCUs;
+    for (int Row = 0; Row < 2; ++Row)
+      for (int Col = 0; Col < 2; ++Col)
+        MCUs[Row][Col] = LoadMCU(row + Row, MCUIdx + Col);
 
-    // load Y from second pixel of first row
-    YCbCr ph;
-    YCbCr::LoadY(&ph, line[0]);
+    // Process first pixels of MCU's, which are full
+    for (int Row = 0; Row < 2; ++Row)
+      for (int Col = 0; Col < 2; ++Col)
+        MCUs[Row][Col][0][0].process(hue);
 
-    // load Cb/Cr from third pixel of first row
-    YCbCr p1;
-    YCbCr::LoadCbCr(&p1, line[0] + 3);
-    p1.process(hue);
+    // Interpolate the middle pixel of first row.
+    MCUs[0][0][0][1].interpolateCbCr(MCUs[0][0][0][0], MCUs[0][1][0][0]);
 
-    // and finally, interpolate and output the middle pixel of first row
-    ph.interpolate(p0, p1);
-    YUV_TO_RGB<version>(ph, line[0]);
-    line[0] += 3;
+    // Interpolate the first pixel of second row.
+    MCUs[0][0][1][0].interpolateCbCr(MCUs[0][0][0][0], MCUs[1][0][0][0]);
 
-    // load Y from first pixel of second row
-    YCbCr pv;
-    YCbCr::LoadY(&pv, line[1]);
+    // Interpolate the second pixel of second row.
+    MCUs[0][0][1][1].interpolateCbCr(MCUs[0][0][0][0], MCUs[0][1][0][0],
+                                     MCUs[1][0][0][0], MCUs[1][1][0][0]);
 
-    // load Cb/Cr from first pixel of third row
-    YCbCr p2;
-    YCbCr::LoadCbCr(&p2, line[2]);
-    p2.process(hue);
+    // FIXME: we should instead simply interpolate odd pixels on even rows
+    //        and then even pixels on odd rows, as specified in the standard.
+    // for (int Row = 0; Row < 2; ++Row)
+    //   MCUs[Row][0][0][1].interpolateCbCr(MCUs[Row][0][0][0],
+    //                                      MCUs[Row][1][0][0]);
+    // for (int Col = 0; Col < 2; ++Col)
+    //   MCUs[0][0][1][Col].interpolateCbCr(MCUs[0][0][0][Col],
+    //                                      MCUs[1][0][0][Col]);
 
-    // and finally, interpolate and output the first pixel of second row
-    pv.interpolate(p0, p2);
-    YUV_TO_RGB<version>(pv, line[1]);
-    line[1] += 3;
-    line[2] += 6;
-
-    // load Y from second pixel of second row
-    YCbCr p;
-    YCbCr::LoadY(&p, line[1]);
-
-    // load Cb/Cr from third pixel of third row
-    YCbCr p3;
-    YCbCr::LoadCbCr(&p3, line[2]);
-    p3.process(hue);
-
-    // and finally, interpolate and output the second pixel of second row
-    // NOTE: we interpolate 4 full pixels here, located on diagonals
-    // dcraw interpolates from already interpolated pixels
-    p.interpolate(p0, p1, p2, p3);
-    YUV_TO_RGB<version>(p, line[1]);
-    line[1] += 3;
+    // And finally, store the first MCU, i.e. first two pixels on two rows.
+    StoreMCU(MCUs[0][0], MCUIdx, row);
   }
 
-  assert(x + 2 == w);
-  assert(x % 2 == 0);
+  assert(MCUIdx + 1 == numMCUs);
 
-  // Last two pixels of the lines, the format is:
+  // Last two pixels of the lines, the packed input format is:
+  //              p0 p1 p2 p3 p0 p0
+  //  row 0: ... [ Y1 Y2 Y3 Y4 Cb Cr ]
+  //  row 1: ... [ Y1 Y2 Y3 Y4 Cb Cr ]
+  //               .. .. .. .. .  .
+  // in unpacked form that is:
   //              p0             p1
   //  row 0: ... [ Y1 Cb  Cr  ] [ Y2 ... ... ]
   //  row 1: ... [ Y3 ... ... ] [ Y4 ... ... ]
@@ -276,158 +322,136 @@ Cr2sRawInterpolator::interpolate_420_row(std::array<uint16_t*, 3> line, int w) {
   //  row 3: ... [ Y3 ... ... ] [ Y4 ... ... ]
   //               .. .   .       .. .   .
 
-  // load, process and output first pixel of first row, which is full
-  YCbCr p0;
-  YCbCr::LoadYCbCr(&p0, line[0]);
-  p0.process(hue);
-  YUV_TO_RGB<version>(p0, line[0]);
-  line[0] += 3;
+  std::array<MCUTy, 2> MCUs;
+  for (int Row = 0; Row < 2; ++Row)
+    MCUs[Row] = LoadMCU(row + Row, MCUIdx);
 
-  // keep Cb/Cr from first pixel of first row
-  // load Y from second pixel of first row, output
-  YCbCr::LoadY(&p0, line[0]);
-  YUV_TO_RGB<version>(p0, line[0]);
-  line[0] += 3;
+  for (int Row = 0; Row < 2; ++Row)
+    MCUs[Row][0][0].process(hue);
 
-  // load Y from first pixel of second row
-  YCbCr pv;
-  YCbCr::LoadY(&pv, line[1]);
+  MCUs[0][1][0].interpolateCbCr(MCUs[0][0][0], MCUs[1][0][0]);
 
-  // load Cb/Cr from first pixel of third row
-  YCbCr p2;
-  YCbCr::LoadCbCr(&p2, line[2]);
-  p2.process(hue);
+  for (int Row = 0; Row < 2; ++Row)
+    YCbCr::CopyCbCr(&MCUs[0][Row][1], MCUs[0][Row][0]);
 
-  // and finally, interpolate and output the first pixel of second row
-  pv.interpolate(p0, p2);
-  YUV_TO_RGB<version>(pv, line[1]);
-  line[1] += 3;
-
-  // keep Cb/Cr from first pixel of second row
-  // load Y from second pixel of second row, output
-  YCbCr::LoadY(&pv, line[1]);
-  YUV_TO_RGB<version>(pv, line[1]);
-  line[1] += 3;
+  StoreMCU(MCUs[0], MCUIdx, row);
 }
 
-// NOTE: Not thread safe, since it writes inplace.
-template <int version>
-inline void Cr2sRawInterpolator::interpolate_420(int w, int h) {
-  assert(w >= 2);
-  assert(w % 2 == 0);
+template <int version> void Cr2sRawInterpolator::interpolate_420() {
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  assert(h >= 2);
-  assert(h % 2 == 0);
+  constexpr int X_S_F = 2;
+  constexpr int Y_S_F = 2;
+  constexpr int PixelsPerMCU = X_S_F * Y_S_F;
+  constexpr int InputComponentsPerMCU = 2 + PixelsPerMCU;
 
-  array<uint16_t*, 3> line;
+  constexpr int YsPerMCU = PixelsPerMCU;
+  constexpr int ComponentsPerPixel = 3;
+  constexpr int OutputComponentsPerMCU = ComponentsPerPixel * PixelsPerMCU;
 
-  int y;
-  for (y = 0; y < h - 2; y += 2) {
-    assert(y + 4 <= h);
-    assert(y % 2 == 0);
+  assert(input.width % InputComponentsPerMCU == 0);
+  int numMCUs = input.width / InputComponentsPerMCU;
+  assert(numMCUs > 1);
 
-    line[0] = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
-    line[1] = reinterpret_cast<uint16_t*>(mRaw->getData(0, y + 1));
-    line[2] = reinterpret_cast<uint16_t*>(mRaw->getData(0, y + 2));
+  using MCUTy = std::array<std::array<YCbCr, X_S_F>, Y_S_F>;
 
-    interpolate_420_row<version>(line, w);
-  }
+  auto LoadMCU = [&](int Row, int MCUIdx) __attribute__((always_inline)) {
+    MCUTy MCU;
+    for (int MCURow = 0; MCURow < Y_S_F; ++MCURow) {
+      for (int MCUCol = 0; MCUCol < X_S_F; ++MCUCol) {
+        YCbCr::LoadY(&MCU[MCURow][MCUCol],
+                     &input(Row, InputComponentsPerMCU * MCUIdx +
+                                     X_S_F * MCURow + MCUCol));
+      }
+    }
+    YCbCr::LoadCbCr(&MCU[0][0],
+                    &input(Row, InputComponentsPerMCU * MCUIdx + YsPerMCU));
+    return MCU;
+  };
+  auto StoreMCU = [&](const MCUTy& MCU, int MCUIdx, int Row)
+      __attribute__((always_inline)) {
+    for (int MCURow = 0; MCURow < Y_S_F; ++MCURow) {
+      for (int MCUCol = 0; MCUCol < X_S_F; ++MCUCol) {
+        YUV_TO_RGB<version>(
+            MCU[MCURow][MCUCol],
+            &out(2 * Row + MCURow, ((OutputComponentsPerMCU * MCUIdx) / Y_S_F) +
+                                       ComponentsPerPixel * MCUCol));
+      }
+    }
+  };
 
-  assert(y + 2 == h);
-  assert(y % 2 == 0);
+  int row;
+#ifdef HAVE_OPENMP
+#pragma omp parallel for default(none) schedule(static)                        \
+    num_threads(rawspeed_get_number_of_processor_cores())                      \
+        OMPFIRSTPRIVATECLAUSE(out) lastprivate(row)
+#endif
+  for (row = 0; row < input.height - 1; ++row)
+    interpolate_420_row<version>(row);
 
-  line[0] = reinterpret_cast<uint16_t*>(mRaw->getData(0, y));
-  line[1] = reinterpret_cast<uint16_t*>(mRaw->getData(0, y + 1));
-  line[2] = nullptr;
+  assert(row + 1 == input.height);
 
-  assert(line[0]);
-  assert(line[1]);
-  assert(line[2] == nullptr);
-
-  // Last two lines, the format is:
+  // Last two lines, the packed input format is:
+  //          p0 p1 p2 p3 p0 p0     p4 p5 p6 p7 p4 p4
+  //           .. .. .. .. .  .      .. .. .. .. .  .
+  //  row 0: [ Y1 Y2 Y3 Y4 Cb Cr ] [ Y1 Y2 Y3 Y4 Cb Cr ] ...
+  // in unpacked form that is:
   //          p0             p1             p2             p3
   //           .. .   .       .. .   .       .. .   .       .. .   .
   //  row 0: [ Y1 Cb  Cr  ] [ Y2 ... ... ] [ Y1 Cb  Cr  ] [ Y2 ... ... ] ...
   //  row 1: [ Y3 ... ... ] [ Y4 ... ... ] [ Y3 ... ... ] [ Y4 ... ... ] ...
 
-  int x;
-  for (x = 0; x < w - 2; x += 2) {
-    assert(x + 4 <= w);
-    assert(x % 2 == 0);
+  int MCUIdx;
+  for (MCUIdx = 0; MCUIdx < numMCUs - 1; ++MCUIdx) {
+    assert(MCUIdx + 1 < numMCUs);
 
-    // load, process and output first pixel of first row, which is full
-    YCbCr p0;
-    YCbCr::LoadYCbCr(&p0, line[0]);
-    p0.process(hue);
-    YUV_TO_RGB<version>(p0, line[0]);
-    line[0] += 3;
+    // For 4:2:0, one MCU encodes 4 pixels (2x2), and odd pixels need
+    // interpolation, so we need to load eight pixels,
+    // and thus we must load 4 MCU's.
+    std::array<std::array<MCUTy, 2>, 1> MCUs;
+    for (int Row = 0; Row < 1; ++Row)
+      for (int Col = 0; Col < 2; ++Col)
+        MCUs[Row][Col] = LoadMCU(row + Row, MCUIdx + Col);
 
-    // load Y from second pixel of first row
-    YCbCr ph;
-    YCbCr::LoadY(&ph, line[0]);
+    // Process first pixels of MCU's, which are full
+    for (int Row = 0; Row < 1; ++Row)
+      for (int Col = 0; Col < 2; ++Col)
+        MCUs[Row][Col][0][0].process(hue);
 
-    // load Cb/Cr from third pixel of first row
-    YCbCr p1;
-    YCbCr::LoadCbCr(&p1, line[0] + 3);
-    p1.process(hue);
+    // Interpolate the middle pixel of first row.
+    MCUs[0][0][0][1].interpolateCbCr(MCUs[0][0][0][0], MCUs[0][1][0][0]);
 
-    // and finally, interpolate and output the middle pixel of first row
-    ph.interpolate(p0, p1);
-    YUV_TO_RGB<version>(ph, line[0]);
-    line[0] += 3;
+    // Copy Cb/Cr to the first two pixels of second row from the two pixels
+    // of first row.
+    for (int Col = 0; Col < 2; ++Col)
+      YCbCr::CopyCbCr(&MCUs[0][0][1][Col], MCUs[0][0][0][Col]);
 
-    // keep Cb/Cr from first pixel of first row
-    // load Y from first pixel of second row; and output
-    YCbCr::LoadY(&p0, line[1]);
-    YUV_TO_RGB<version>(p0, line[1]);
-    line[1] += 3;
-
-    // keep Cb/Cr from second pixel of first row
-    // load Y from second pixel of second row; and output
-    YCbCr::LoadY(&ph, line[1]);
-    YUV_TO_RGB<version>(ph, line[1]);
-    line[1] += 3;
+    // And finally, store the first MCU, i.e. first two pixels on two rows.
+    StoreMCU(MCUs[0][0], MCUIdx, row);
   }
 
-  assert(line[0]);
-  assert(line[1]);
-  assert(line[2] == nullptr);
+  assert(MCUIdx + 1 == numMCUs);
 
-  assert(y + 2 == h);
-  assert(y % 2 == 0);
-
-  assert(x + 2 == w);
-  assert(x % 2 == 0);
-
-  // Last two pixels of last two lines, the format is:
+  // Last two pixels of last two lines, the packed input format is:
+  //              p0 p1 p2 p3 p0 p0
+  //               .. .. .. .. .  .
+  //  row 0: ... [ Y1 Y2 Y3 Y4 Cb Cr ]
+  // in unpacked form that is:
   //               p0             p1
   //                .. .   .       .. .   .
   //  row 0:  ... [ Y1 Cb  Cr  ] [ Y2 ... ... ]
   //  row 1:  ... [ Y3 ... ... ] [ Y4 ... ... ]
 
-  // load, process and output first pixel of first row, which is full
-  YCbCr p;
-  YCbCr::LoadYCbCr(&p, line[0]);
-  p.process(hue);
-  YUV_TO_RGB<version>(p, line[0]);
-  line[0] += 3;
+  MCUTy MCU = LoadMCU(row, MCUIdx);
 
-  // rest keeps Cb/Cr from this original pixel, because rest only have Y
+  MCU[0][0].process(hue);
 
-  // load Y from second pixel of first row, and output
-  YCbCr::LoadY(&p, line[0]);
-  YUV_TO_RGB<version>(p, line[0]);
-  line[0] += 3;
+  // Distribute the same Cb/Cr to all four pixels.
+  for (int Row = 0; Row < 2; ++Row)
+    for (int Col = 0; Col < 2; ++Col)
+      YCbCr::CopyCbCr(&MCU[Row][Col], MCU[0][0]);
 
-  // load Y from first pixel of second row, and output
-  YCbCr::LoadY(&p, line[1]);
-  YUV_TO_RGB<version>(p, line[1]);
-  line[1] += 3;
-
-  // load Y from second pixel of second row, and output
-  YCbCr::LoadY(&p, line[1]);
-  YUV_TO_RGB<version>(p, line[1]);
-  line[1] += 3;
+  StoreMCU(MCU, MCUIdx, row);
 }
 
 inline void Cr2sRawInterpolator::STORE_RGB(uint16_t* X, int r, int g, int b) {
@@ -476,33 +500,27 @@ void Cr2sRawInterpolator::interpolate(int version) {
 
   const auto& subSampling = mRaw->metadata.subsampling;
   if (subSampling.y == 1 && subSampling.x == 2) {
-    int width = mRaw->dim.x;
-    int height = mRaw->dim.y;
-
     switch (version) {
     case 0:
-      interpolate_422<0>(width, height);
+      interpolate_422<0>();
       break;
     case 1:
-      interpolate_422<1>(width, height);
+      interpolate_422<1>();
       break;
     case 2:
-      interpolate_422<2>(width, height);
+      interpolate_422<2>();
       break;
     default:
       __builtin_unreachable();
     }
   } else if (subSampling.y == 2 && subSampling.x == 2) {
-    int width = mRaw->dim.x;
-    int height = mRaw->dim.y;
-
     switch (version) {
     // no known sraws with "version 0"
     case 1:
-      interpolate_420<1>(width, height);
+      interpolate_420<1>();
       break;
     case 2:
-      interpolate_420<2>(width, height);
+      interpolate_420<2>();
       break;
     default:
       __builtin_unreachable();

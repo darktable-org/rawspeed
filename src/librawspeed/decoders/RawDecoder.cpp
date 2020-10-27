@@ -50,14 +50,9 @@ using std::string;
 namespace rawspeed {
 
 RawDecoder::RawDecoder(const Buffer* file)
-    : mRaw(RawImage::create()), mFile(file) {
-  failOnUnknown = false;
-  interpolateBadPixels = true;
-  applyStage1DngOpcodes = true;
-  applyCrop = true;
-  uncorrectedRawValues = false;
-  fujiRotate = true;
-}
+    : mRaw(RawImage::create()), failOnUnknown(false),
+      interpolateBadPixels(true), applyStage1DngOpcodes(true), applyCrop(true),
+      uncorrectedRawValues(false), fujiRotate(true), mFile(file) {}
 
 void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
   TiffEntry *offsets = rawIFD->getEntry(STRIPOFFSETS);

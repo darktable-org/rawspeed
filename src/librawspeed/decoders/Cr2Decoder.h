@@ -48,6 +48,8 @@ protected:
   RawImage decodeOldFormat();
   RawImage decodeNewFormat();
   void sRawInterpolate();
+  bool isSubSampled() const;
+  iPoint2D getSubSampling() const;
   int getHue();
 };
 

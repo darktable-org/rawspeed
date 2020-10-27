@@ -29,6 +29,7 @@
 
 using rawspeed::Cr2sRawInterpolator;
 using rawspeed::iPoint2D;
+using rawspeed::roundUp;
 using rawspeed::RawImage;
 using rawspeed::TYPE_USHORT16;
 using std::array;
@@ -36,31 +37,53 @@ using std::integral_constant;
 
 template <int N> using v = integral_constant<int, N>;
 
-template <const iPoint2D& subsampling, typename version>
+template <const iPoint2D& subSampling, typename version>
 static inline void BM_Cr2sRawInterpolator(benchmark::State& state) {
   static const array<int, 3> sraw_coeffs = {{999, 1000, 1001}};
   static const int hue = 1269;
 
-  const auto dim = areaToRectangle(state.range(0));
-  RawImage mRaw = RawImage::create(dim, TYPE_USHORT16, 3);
-  mRaw->metadata.subsampling = subsampling;
+  iPoint2D interpolatedDims = areaToRectangle(state.range(0), {3, 2});
 
-  Cr2sRawInterpolator i(mRaw, sraw_coeffs, hue);
+  interpolatedDims.x = roundUp(interpolatedDims.x, 6);
+  if (subSampling.y == 2)
+    interpolatedDims.x = roundUp(interpolatedDims.x, 4);
+
+  iPoint2D subsampledDim = interpolatedDims;
+  subsampledDim.x /= subSampling.x;
+  subsampledDim.y /= subSampling.y;
+  subsampledDim.x *= 2 + subSampling.x * subSampling.y;
+
+  RawImage subsampledRaw = RawImage::create(subsampledDim, TYPE_USHORT16, 1);
+  subsampledRaw->metadata.subsampling = subSampling;
+
+  RawImage mRaw = RawImage::create(interpolatedDims, TYPE_USHORT16, 3);
+  mRaw->metadata.subsampling = subSampling;
+
+  Cr2sRawInterpolator i(mRaw, subsampledRaw->getU16DataAsUncroppedArray2DRef(),
+                        sraw_coeffs, hue);
 
   for (auto _ : state)
     i.interpolate(version::value);
 
-  state.SetComplexityN(dim.area());
-  state.SetItemsProcessed(state.complexity_length_n() * state.iterations());
-  state.SetBytesProcessed(3UL * sizeof(uint16_t) * state.items_processed());
+  state.SetComplexityN(interpolatedDims.area());
+  state.counters.insert(
+      {{"Pixels", benchmark::Counter(
+                      state.complexity_length_n(),
+                      benchmark::Counter::Flags::kIsIterationInvariantRate)},
+       {"Bytes",
+        benchmark::Counter(3UL * sizeof(uint16_t) * state.complexity_length_n(),
+                           benchmark::Counter::Flags::kIsIterationInvariantRate,
+                           benchmark::Counter::kIs1024)}});
 }
 
 static inline void CustomArguments(benchmark::internal::Benchmark* b) {
+  b->MeasureProcessCPUTime();
+  b->UseRealTime();
   b->RangeMultiplier(2);
 #if 1
-  b->Arg(256 << 20);
+  b->Arg(2 * 3 * 2 * 1'000'000);
 #else
-  b->Range(1, 1024 << 20)->Complexity(benchmark::oN);
+  b->Range(1, 256 << 20)->Complexity(benchmark::oN);
 #endif
   b->Unit(benchmark::kMillisecond);
 }
