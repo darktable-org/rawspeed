@@ -103,10 +103,13 @@ jobs:
           BUILD_DIR: ${{ github.workspace }}/build
           INSTALL_PREFIX: ${{ github.workspace }}/install
           RPUU_DST: ${{ env.RPUU_DST }}
-          ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON -DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON
+          ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON
           FLAVOR: ${{ matrix.flavor }}
           TARGET: build
         run: |
+          if [[ "$FLAVOR" == "Coverage") ]]; then
+            export ECO="${ECO} -DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON";
+          fi;
           cmake -E make_directory "${BUILD_DIR}";
           cmake -E make_directory "${INSTALL_PREFIX}";
           export ECO="${ECO} -DRAWSPEED_REFERENCE_SAMPLE_ARCHIVE=${RPUU_DST}";
