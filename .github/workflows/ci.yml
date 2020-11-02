@@ -19,7 +19,7 @@ jobs:
         os: [ linux ]
         compiler:
           - { compiler: GNU,  CC: gcc-10,   CXX: g++-10,     GCOV: gcov-10 }
-          #- { compiler: LLVM, CC: clang-10, CXX: clang++-10}
+          - { compiler: LLVM, CC: clang-10, CXX: clang++-10 }
         flavor: [ RelWithDebInfo, Coverage ]
         exclude:
           - os: linux
