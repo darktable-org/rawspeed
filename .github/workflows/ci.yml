@@ -86,7 +86,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ env.RPUU_DST }}
-          key: raw.pixls.us-masterset-${{ steps.fetch-rpuu-digest.outputs.rpuu-digest-hash }}-2
+          key: raw.pixls.us-masterset-${{ steps.fetch-rpuu-digest.outputs.rpuu-digest-hash }}
       - name: Fetch/update raw.pixls.us masterset
         if: matrix.flavor == 'Coverage'
         env:
@@ -125,7 +125,7 @@ jobs:
           chmod +x codecov;
           ./codecov -e OS,ARCH,CXX -F unittests -n "${JOB_NAME}.Unittests" -R "${SRC_DIR}" -s "${BUILD_DIR}/gcov-reports-unittest" -X gcov -Z;
           ./codecov -e OS,ARCH,CXX -F integration,rpu_u -n "${JOB_NAME}.Integration" -R "${SRC_DIR}" -s "${BUILD_DIR}/gcov-reports-rsa" -X gcov -Z;
-windows-msys2:
+  windows-msys2:
     name: ${{ matrix.os }}.${{ matrix.msys2.msystem }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
     runs-on: ${{ matrix.os }}
     strategy:
