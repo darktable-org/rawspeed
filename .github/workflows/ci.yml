@@ -107,7 +107,7 @@ jobs:
           FLAVOR: ${{ matrix.flavor }}
           TARGET: build
         run: |
-          if [[ "$FLAVOR" == "Coverage") ]]; then
+          if [[ "$FLAVOR" == "Coverage" ]]; then
             export ECO="${ECO} -DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON";
           fi;
           cmake -E make_directory "${BUILD_DIR}";
