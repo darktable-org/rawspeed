@@ -36,16 +36,8 @@ install:
       travis_retry sudo apt-get update -q;
       travis_retry sudo apt-get install -y -q -f --fix-missing clang-3.5;
     fi;
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$FLAVOR" == "Coverage" ]]; then
-      travis_retry sudo apt-get install -y -q -f --fix-missing rsync;
-    fi;
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$EXTRA" != "NODOCKER" ]]; then
       travis_retry travis_wait 5 docker pull darktable/rawspeed;
-    fi;
-
-before_script:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$FLAVOR" == "Coverage" ]]; then
-      travis_retry rsync -vvrLtW --preallocate --delete --compress --compress-level=1 --stats --progress rsync://raw.pixls.us/data-unique/ $HOME/$RPUU_DST && cd $HOME/$RPUU_DST && sha1sum -c --strict filelist.sha1;
     fi;
 
 env:
@@ -70,29 +62,7 @@ jobs:
     sudo: required
     services:
       - docker
-    env: CC=gcc-10 CXX=g++-10
-  - stage: test
-    os: linux
-    dist: bionic
-    sudo: required
-    services:
-      - docker
     env: CC=gcc-10 CXX=g++-10 ECO="-DWITH_OPENMP=OFF"
-  - os: linux
-    dist: bionic
-    sudo: required
-    services:
-      - docker
-    env: CC=clang-10 CXX=clang++-10
-  - os: linux
-    dist: bionic
-    sudo: required
-    services:
-      - docker
-    env: CC=gcc-10 CXX=g++-10 GCOV=gcov-10 FLAVOR=Coverage ECO="-DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON" EXTRA_OPTS="$DOCKER_RPUU"
-    cache:
-      directories:
-        - '$HOME/$RPUU_DST'
   - os: linux
     dist: bionic
     sudo: required
@@ -133,8 +103,6 @@ jobs:
       - docker
     env: CC=clang-10 CXX=clang++-10 TARGET=WWW
 
-# linux clang Coverage build OOM's in gcov during final codecov report collection
-
 script:
   - set -e
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$EXTRA" == "NODOCKER" ]]; then
@@ -168,21 +136,6 @@ script:
     fi;
 
 after_success:
-  - if [[ "$FLAVOR" == "Coverage" ]]; then
-      cd "$TRAVIS_BUILD_DIR";
-      curl -s https://codecov.io/bash > codecov;
-      chmod +x codecov;
-      export PLATFORM="$TRAVIS_OS_NAME";
-      if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-        if [[ "$CC" == "cc" ]]; then
-          export CXX=GCC;
-        fi;
-      fi;
-      ./codecov -e PLATFORM,CXX -F unittests -X gcov -s "$TRAVIS_BUILD_DIR/build/gcov-reports-unittest" -Z;
-      if [[ "$TRAVIS_OS_NAME" == "linux" && "$FLAVOR" == "Coverage" ]]; then
-        ./codecov -e PLATFORM,CXX -F integration,rpu_u -X gcov -s "$TRAVIS_BUILD_DIR/build/gcov-reports-rsa" -Z;
-      fi;
-    fi;
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TARGET" == "WWW" && "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_SECURE_ENV_VARS" == "true" && "$TRAVIS_BRANCH" == "develop" ]]; then
       "$TRAVIS_BUILD_DIR/.ci/www-finish.sh";
     fi;

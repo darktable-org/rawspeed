@@ -6,8 +6,126 @@ on:
   pull_request:
     branches: [ develop ]
 
+env:
+  RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
+
 jobs:
-  windows-msys2:
+  linux:
+    name: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ linux ]
+        compiler:
+          - { compiler: GNU,  CC: gcc-10,   CXX: g++-10,     GCOV: gcov-10 }
+          #- { compiler: LLVM, CC: clang-10, CXX: clang++-10}
+        flavor: [ Coverage ]
+        exclude:
+          - os: linux
+            compiler: { compiler: LLVM, CC: clang-10, CXX: clang++-10 }
+            flavor: Coverage
+    container: debian:testing-slim
+    steps:
+      - name: Configure APT
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          # Paper over occasional network flakiness of some mirrors.
+          echo 'Acquire::Retries "10";' > /etc/apt/apt.conf.d/80retry
+          # Do not install recommended packages
+          echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/80recommends
+          # Do not install suggested packages
+          echo 'APT::Install-Suggests "false";' > /etc/apt/apt.conf.d/80suggests
+          # Assume yes
+          echo 'APT::Get::Assume-Yes "true";' > /etc/apt/apt.conf.d/80forceyes
+          # Fix broken packages
+          echo 'APT::Get::Fix-Missing "true";' > /etc/apt/apt.conf.d/80fixmissing
+      - name: Install/Update necessary packages
+        run: |
+          rm -rf /var/lib/apt/lists/*;
+          apt-get update;
+          apt-get install clang++-10 \
+                          clang-tidy-10 \
+                          clang-tools-10 \
+                          cmake \
+                          curl \
+                          doxygen \
+                          g++-10 \
+                          git \
+                          googletest \
+                          graphviz \
+                          libc++-10-dev \
+                          libjpeg-dev \
+                          libomp-10-dev \
+                          libpugixml-dev \
+                          libxml2-utils \
+                          make \
+                          ninja-build \
+                          python3-sphinx \
+                          python3-sphinx-rtd-theme \
+                          rsync \
+                          unzip \
+                          zlib1g-dev;
+          apt-get clean;
+          rm -rf /var/lib/apt/lists/*;
+          dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld;
+          ln -s /usr/bin/ld.gold /usr/bin/ld
+      - uses: actions/checkout@v2
+      - name: Fetch raw.pixls.us masterset digest
+        if: matrix.flavor == 'Coverage'
+        env:
+          RPUU_DST: ${{ env.RPUU_DST }}
+        id: fetch-rpuu-digest
+        run: |
+          mkdir -p ${RPUU_DST}
+          rsync -vvrLcW --preallocate --delete --compress --compress-level=1 --stats --progress rsync://raw.pixls.us/data-unique/filelist.sha1 ${RPUU_DST}/;
+          echo "::set-output name=rpuu-digest-hash::$(sha512sum ${RPUU_DST}/filelist.sha1 | awk '{print $1}')"
+      - name: Cache raw.pixls.us masterset
+        if: matrix.flavor == 'Coverage'
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.RPUU_DST }}
+          key: raw.pixls.us-masterset-${{ steps.fetch-rpuu-digest.outputs.rpuu-digest-hash }}-2
+      - name: Fetch/update raw.pixls.us masterset
+        if: matrix.flavor == 'Coverage'
+        env:
+          RPUU_DST: ${{ env.RPUU_DST }}
+        run: |
+          rsync -vvrLcW --preallocate --delete --compress --compress-level=1 --stats --progress rsync://raw.pixls.us/data-unique/ ${RPUU_DST}/;
+          cd ${RPUU_DST} && sha1sum -c --strict filelist.sha1;
+      - name: Build And Test
+        env:
+          CC: ${{ matrix.compiler.CC }}
+          CXX: ${{ matrix.compiler.CXX }}
+          GCOV: ${{ matrix.compiler.GCOV }}
+          SRC_DIR: ${{ github.workspace }}
+          BUILD_DIR: ${{ github.workspace }}/build
+          INSTALL_PREFIX: ${{ github.workspace }}/install
+          RPUU_DST: ${{ env.RPUU_DST }}
+          ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON -DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=ON
+          FLAVOR: ${{ matrix.flavor }}
+          TARGET: build
+        run: |
+          cmake -E make_directory "${BUILD_DIR}";
+          cmake -E make_directory "${INSTALL_PREFIX}";
+          export ECO="${ECO} -DRAWSPEED_REFERENCE_SAMPLE_ARCHIVE=${RPUU_DST}";
+          ./.ci/ci-script.sh;
+      - if: matrix.flavor == 'Coverage'
+        name: Upload code coverage report
+        env:
+          OS: linux
+          ARCH: x86_64
+          CXX: ${{ matrix.compiler.compiler }}
+          JOB_NAME: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
+          SRC_DIR: ${{ github.workspace }}
+          BUILD_DIR: ${{ github.workspace }}/build
+        run: |
+          curl -s https://codecov.io/bash > codecov;
+          chmod +x codecov;
+          ./codecov -e OS,ARCH,CXX -F unittests -n "${JOB_NAME}.Unittests" -R "${SRC_DIR}" -s "${BUILD_DIR}/gcov-reports-unittest" -X gcov -Z;
+          ./codecov -e OS,ARCH,CXX -F integration,rpu_u -n "${JOB_NAME}.Integration" -R "${SRC_DIR}" -s "${BUILD_DIR}/gcov-reports-rsa" -X gcov -Z;
+windows-msys2:
     name: ${{ matrix.os }}.${{ matrix.msys2.msystem }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
     runs-on: ${{ matrix.os }}
     strategy:
