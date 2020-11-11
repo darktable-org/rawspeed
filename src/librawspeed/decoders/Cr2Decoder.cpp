@@ -119,6 +119,9 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
   assert(sensorInfoE != nullptr);
 
+  if (isSubSampled() != (getSubSampling() != iPoint2D{1, 1}))
+    ThrowTPE("Subsampling sanity check failed");
+
   mRaw->dim = {sensorInfoE->getU16(1), sensorInfoE->getU16(2)};
   mRaw->setCpp(1);
   mRaw->isCFA = !isSubSampled();
