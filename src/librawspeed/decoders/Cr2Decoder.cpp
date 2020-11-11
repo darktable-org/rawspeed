@@ -124,7 +124,8 @@ RawImage Cr2Decoder::decodeNewFormat() {
   mRaw->isCFA = !isSubSampled();
 
   if (isSubSampled()) {
-    iPoint2D subSampling = getSubSampling();
+    iPoint2D& subSampling = mRaw->metadata.subsampling;
+    subSampling = getSubSampling();
     if (!(subSampling.x > 1 || subSampling.y > 1))
       ThrowRDE("RAW is expected to be subsampled, but it's not");
 
