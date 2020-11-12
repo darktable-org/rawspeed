@@ -380,7 +380,7 @@ template <int version> void Cr2sRawInterpolator::interpolate_420() {
     }
   };
 
-  int row;
+  int row = 0;
 #ifdef HAVE_OPENMP
 #pragma omp parallel for default(none) schedule(static)                        \
     num_threads(rawspeed_get_number_of_processor_cores())                      \
