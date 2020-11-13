@@ -7,7 +7,7 @@ on:
     branches: [ develop ]
 
 env:
-  RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
+  RPUU_DST: ${{ github.workspace }}/../raw-camera-samples/raw.pixls.us-unique
 
 jobs:
   linux:
@@ -20,7 +20,7 @@ jobs:
         compiler:
           - { compiler: GNU,  CC: gcc-10,   CXX: g++-10,     GCOV: gcov-10 }
           - { compiler: LLVM, CC: clang-10, CXX: clang++-10 }
-        flavor: [ RelWithDebInfo, Coverage, ClangStaticAnalysis ]
+        flavor: [ RelWithDebInfo, Coverage, ClangStaticAnalysis, CodeQLAnalysis ]
         exclude:
           - os: linux
             compiler: { compiler: LLVM, CC: clang-10, CXX: clang++-10 }
@@ -28,6 +28,9 @@ jobs:
           - os: linux
             compiler: { compiler: GNU,  CC: gcc-10,   CXX: g++-10, GCOV: gcov-10 }
             flavor: ClangStaticAnalysis
+          - os: linux
+            compiler: { compiler: GNU,  CC: gcc-10,   CXX: g++-10, GCOV: gcov-10 }
+            flavor: CodeQLAnalysis
     container: debian:testing-slim
     steps:
       - name: Configure APT
@@ -76,14 +79,20 @@ jobs:
           dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld;
           ln -s /usr/bin/ld.gold /usr/bin/ld
       - uses: actions/checkout@v2
+        name: Fetch/Checkout RawSpeed git repo
         with:
-          path: 'rawspeed'
+          path: ''
       - if: matrix.flavor == 'ClangStaticAnalysis'
+        name: Fetch/Checkout CodeChecker git repo (for static analysis)
         uses: actions/checkout@v2
         with:
           repository: 'Ericsson/codechecker'
           path: 'codechecker'
           fetch-depth: '1'
+      - if: matrix.flavor == 'ClangStaticAnalysis'
+        name: Move CodeChecker git repo into right place
+        run: |
+          mv codechecker ..
       - if: matrix.flavor == 'ClangStaticAnalysis'
         name: Install CodeChecker (for static analysis)
         run: |
@@ -92,11 +101,16 @@ jobs:
           apt-get install python3-dev \
                           python3-virtualenv;
           apt-get clean;
-          cd codechecker
+          cd ../codechecker
           make venv
           . $PWD/venv/bin/activate
           BUILD_LOGGER_64_BIT_ONLY=YES BUILD_UI_DIST=NO make package
           export PATH="$PWD/build/CodeChecker/bin:$PATH"
+      - if: matrix.flavor == 'CodeQLAnalysis'
+        name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: cpp
       - name: Fetch raw.pixls.us masterset digest
         if: matrix.flavor == 'Coverage'
         env:
@@ -124,9 +138,9 @@ jobs:
           CC: ${{ matrix.compiler.CC }}
           CXX: ${{ matrix.compiler.CXX }}
           GCOV: ${{ matrix.compiler.GCOV }}
-          SRC_DIR: ${{ github.workspace }}/rawspeed
-          BUILD_DIR: ${{ github.workspace }}/build
-          INSTALL_PREFIX: ${{ github.workspace }}/install
+          SRC_DIR: ${{ github.workspace }}
+          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/../rawspeed-install
           RPUU_DST: ${{ env.RPUU_DST }}
           ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON
           FLAVOR: ${{ matrix.flavor }}
@@ -143,14 +157,17 @@ jobs:
           export ECO="${ECO} -DRAWSPEED_REFERENCE_SAMPLE_ARCHIVE=${RPUU_DST}";
           "${SRC_DIR}/.ci/ci-script.sh";
       - if: matrix.flavor == 'ClangStaticAnalysis'
-        name: Perform static analysis
+        name: Perform clang static analysis
         env:
-          SRC_DIR: ${{ github.workspace }}/rawspeed
-          BUILD_DIR: ${{ github.workspace }}/build
+          SRC_DIR: ${{ github.workspace }}
+          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
         run: |
-          . "$PWD/codechecker/venv/bin/activate"
-          export PATH="$PWD/codechecker/build/CodeChecker/bin:$PATH"
+          . "$PWD/../codechecker/venv/bin/activate"
+          export PATH="$PWD/../codechecker/build/CodeChecker/bin:$PATH"
           CodeChecker check --logfile "${BUILD_DIR}/compile_commands.json" --analyzers clangsa --jobs "$(nproc --all)" --file "${SRC_DIR}/*" --disable deadcode.DeadStores
+      - if: matrix.flavor == 'CodeQLAnalysis'
+        name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v1
       - if: matrix.flavor == 'Coverage'
         name: Upload code coverage report
         env:
@@ -158,8 +175,8 @@ jobs:
           ARCH: x86_64
           CXX: ${{ matrix.compiler.compiler }}
           JOB_NAME: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
-          SRC_DIR: ${{ github.workspace }}/rawspeed
-          BUILD_DIR: ${{ github.workspace }}/build
+          SRC_DIR: ${{ github.workspace }}
+          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
         run: |
           curl -s https://codecov.io/bash > codecov;
           chmod +x codecov;
@@ -188,6 +205,7 @@ jobs:
         shell: msys2 {0}
     steps:
       - uses: actions/checkout@v2
+        name: Fetch/Checkout RawSpeed git repo
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ matrix.msys2.msystem }}
@@ -198,8 +216,8 @@ jobs:
           CC: ${{ matrix.compiler.CC }}
           CXX: ${{ matrix.compiler.CXX }}
           SRC_DIR: ${{ github.workspace }}
-          BUILD_DIR: ${{ github.workspace }}/build
-          INSTALL_PREFIX: ${{ github.workspace }}/install
+          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/../rawspeed-install
           ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON
           FLAVOR: ${{ matrix.flavor }}
           TARGET: build
@@ -215,7 +233,7 @@ jobs:
           CXX: ${{ matrix.compiler.compiler }}
           JOB_NAME: ${{ matrix.os }}.${{ matrix.msys2.msystem }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
           SRC_DIR: ${{ github.workspace }}
-          BUILD_DIR: ${{ github.workspace }}/build
+          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
         run: |
           curl -s https://codecov.io/bash > codecov;
           chmod +x codecov;
@@ -232,6 +250,7 @@ jobs:
         flavor: [ RelWithDebInfo, Coverage ]
     steps:
       - uses: actions/checkout@v2
+        name: Fetch/Checkout RawSpeed git repo
       - name: Install Base Dependencies
         run: |
           brew update > /dev/null || true
@@ -243,8 +262,8 @@ jobs:
           CC: ${{ matrix.compiler.CC }}
           CXX: ${{ matrix.compiler.CXX }}
           SRC_DIR: ${{ github.workspace }}
-          BUILD_DIR: ${{ github.workspace }}/build
-          INSTALL_PREFIX: ${{ github.workspace }}/install
+          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/../rawspeed-install
           ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON
           FLAVOR: ${{ matrix.flavor }}
           TARGET: build
@@ -260,7 +279,7 @@ jobs:
           CXX: AppleXcode
           JOB_NAME: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
           SRC_DIR: ${{ github.workspace }}
-          BUILD_DIR: ${{ github.workspace }}/build
+          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
         run: |
           curl -s https://codecov.io/bash > codecov;
           chmod +x codecov;
