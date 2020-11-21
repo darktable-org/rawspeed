@@ -19,11 +19,11 @@ jobs:
         os: [ linux ]
         compiler:
           - { compiler: GNU,  CC: gcc-10,   CXX: g++-10,     GCOV: gcov-10 }
-          - { compiler: LLVM, CC: clang-10, CXX: clang++-10 }
+          - { compiler: LLVM, CC: clang-11, CXX: clang++-11 }
         flavor: [ RelWithDebInfo, Coverage, ClangStaticAnalysis, CodeQLAnalysis ]
         exclude:
           - os: linux
-            compiler: { compiler: LLVM, CC: clang-10, CXX: clang++-10 }
+            compiler: { compiler: LLVM, CC: clang-11, CXX: clang++-11 }
             flavor: Coverage
           - os: linux
             compiler: { compiler: GNU,  CC: gcc-10,   CXX: g++-10, GCOV: gcov-10 }
@@ -51,9 +51,9 @@ jobs:
         run: |
           rm -rf /var/lib/apt/lists/*;
           apt-get update;
-          apt-get install clang++-10 \
-                          clang-tidy-10 \
-                          clang-tools-10 \
+          apt-get install clang++-11 \
+                          clang-tidy-11 \
+                          clang-tools-11 \
                           cmake \
                           curl \
                           doxygen \
@@ -63,9 +63,9 @@ jobs:
                           git \
                           googletest \
                           graphviz \
-                          libc++-10-dev \
+                          libc++-11-dev \
                           libjpeg-dev \
-                          libomp-10-dev \
+                          libomp-11-dev \
                           libpugixml-dev \
                           libxml2-utils \
                           make \
@@ -78,6 +78,9 @@ jobs:
           apt-get clean;
           dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld;
           ln -s /usr/bin/ld.gold /usr/bin/ld
+          ln -s /usr/bin/clang-11 /usr/local/bin/clang
+          ln -s /usr/bin/clang++-11 /usr/local/bin/clang++
+          ln -s /usr/bin/clang-tidy-11 /usr/local/bin/clang-tidy
       - uses: actions/checkout@v2
         name: Fetch/Checkout RawSpeed git repo
         with:
