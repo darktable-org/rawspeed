@@ -194,7 +194,7 @@ jobs:
         os: [ windows-latest ]
         msys2:
           - { msystem: MINGW64, arch: x86_64 }
-          # - { msystem: MINGW32, arch: i686   } # FIXME
+          - { msystem: MINGW32, arch: i686   }
         compiler:
           - { compiler: GNU,  CC: gcc,   CXX: g++ }
           - { compiler: LLVM, CC: clang, CXX: clang++ }
