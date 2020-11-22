@@ -119,19 +119,25 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
   assert(sensorInfoE != nullptr);
 
+  if (isSubSampled() != (getSubSampling() != iPoint2D{1, 1}))
+    ThrowTPE("Subsampling sanity check failed");
+
   mRaw->dim = {sensorInfoE->getU16(1), sensorInfoE->getU16(2)};
   mRaw->setCpp(1);
   mRaw->isCFA = !isSubSampled();
 
   if (isSubSampled()) {
-    iPoint2D subSampling = getSubSampling();
+    iPoint2D& subSampling = mRaw->metadata.subsampling;
+    subSampling = getSubSampling();
     if (!(subSampling.x > 1 || subSampling.y > 1))
       ThrowRDE("RAW is expected to be subsampled, but it's not");
 
-    assert(mRaw->dim.x % subSampling.x == 0);
+    if (mRaw->dim.x % subSampling.x != 0)
+      ThrowRDE("Raw width is not a multiple of horizontal subsampling factor");
     mRaw->dim.x /= subSampling.x;
 
-    assert(mRaw->dim.y % subSampling.y == 0);
+    if (mRaw->dim.y % subSampling.y != 0)
+      ThrowRDE("Raw height is not a multiple of vertical subsampling factor");
     mRaw->dim.y /= subSampling.y;
 
     mRaw->dim.x *= 2 + subSampling.x * subSampling.y;

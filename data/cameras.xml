@@ -926,7 +926,7 @@
 		<Sensor black="2047" white="13400" iso_list="100 125"/>
 		<Sensor black="2048" white="12400" iso_list="160 320 640 1250 2500 5000"/>
 		<Sensor black="2047" white="15300" iso_list="10000 12800 16000 25600"/>
-		<Sensor black="2040" white="16000" iso_list="51200"/>		
+		<Sensor black="2040" white="16000" iso_list="51200"/>
 		<BlackAreas>
 			<Vertical x="4" width="64"/>
 			<Horizontal y="24" height="8"/>
@@ -7807,6 +7807,9 @@
 		</CFA>
 		<Crop x="0" y="0" width="-66" height="0"/>
 		<Sensor black="143" white="4095"/>
+		<Aliases>
+			<Alias>DC-GX7MK3</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="Panasonic" model="DC-GX9" mode="4:3">
 		<ID make="Panasonic" model="DC-GX9">Panasonic DC-GX9</ID>
@@ -7818,6 +7821,9 @@
 		</CFA>
 		<Crop x="0" y="0" width="-66" height="0"/>
 		<Sensor black="143" white="4095"/>
+		<Aliases>
+			<Alias>DC-GX7MK3</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="Panasonic" model="DC-TZ90">
 		<ID make="Panasonic" model="DC-TZ90">Panasonic DC-ZS70</ID>
@@ -9171,6 +9177,17 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="512" white="16300"/>
+	</Camera>
+	<Camera make="SONY" model="ILCE-7C">
+		<ID make="Sony" model="ILCE-7C">Sony ILCE-7C</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="512" white="16383"/>
 	</Camera>
 	<Camera make="SONY" model="ILCE-7R">
 		<ID make="Sony" model="ILCE-7R">Sony ILCE-7R</ID>

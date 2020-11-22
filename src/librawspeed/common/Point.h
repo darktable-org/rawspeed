@@ -22,15 +22,15 @@
 #pragma once
 
 #include <algorithm>   // for max, min
-#include <cstddef>     // for size_t
+#include <cstdint>     // for int32_t, uint64_t
 #include <type_traits> // for make_signed, make_signed<>::type
 
 namespace rawspeed {
 
 class iPoint2D {
 public:
-  using value_type = int;
-  using area_type = size_t;
+  using value_type = int32_t;
+  using area_type = uint64_t;
 
   constexpr iPoint2D() = default;
   constexpr iPoint2D(value_type a, value_type b) : x(a), y(b) {}

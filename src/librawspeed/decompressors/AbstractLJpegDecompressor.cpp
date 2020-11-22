@@ -157,10 +157,12 @@ void AbstractLJpegDecompressor::parseSOF(ByteStream sofInput, SOFInfo* sof) {
       ThrowRDE("Quantized components not supported.");
   }
 
-  sof->initialized = true;
+  if (static_cast<int>(sof->compInfo[0].superH) !=
+          mRaw->metadata.subsampling.x ||
+      static_cast<int>(sof->compInfo[0].superV) != mRaw->metadata.subsampling.y)
+    ThrowRDE("LJpeg's subsampling does not match image's subsampling.");
 
-  mRaw->metadata.subsampling.x = sof->compInfo[0].superH;
-  mRaw->metadata.subsampling.y = sof->compInfo[0].superV;
+  sof->initialized = true;
 }
 
 void AbstractLJpegDecompressor::parseSOS(ByteStream sos) {

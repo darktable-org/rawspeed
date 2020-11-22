@@ -23,6 +23,7 @@
 #include "common/Point.h"                 // for iPoint2D, iPoint2D::value_...
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include <algorithm>                      // for fill
+#include <cinttypes>                      // for PRId64
 #include <cstdarg>                        // for va_arg, va_end, va_list
 #include <cstdlib>                        // for size_t, abs
 #include <map>                            // for map
@@ -48,7 +49,7 @@ void ColorFilterArray::setSize(const iPoint2D& _size)
     // Bayer, FC() supports 2x8 pattern
     // X-Trans is 6x6 pattern
     // is there anything bigger?
-    ThrowRDE("if your CFA pattern is really %zu pixels "
+    ThrowRDE("if your CFA pattern is really %" PRId64 " pixels "
              "in area we may as well give up now",
              size.area());
   }
