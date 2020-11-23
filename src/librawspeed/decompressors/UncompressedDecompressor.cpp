@@ -177,6 +177,34 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
       }
       return;
     }
+    if (BitOrder_MSB == order && bitPerPixel == 24) {
+      BitPumpMSB bits(input);
+      w *= cpp;
+      for (; y < h; y++) {
+        auto* dest = reinterpret_cast<uint32_t*>(
+            &data[offset.x * sizeof(uint32_t) * cpp + y * outPitch]);
+        for (uint32_t x = 0; x < w; x++) {
+          uint32_t b = bits.getBits(bitPerPixel);
+          dest[x] = fp24ToFloat(b);
+        }
+        bits.skipBytes(skipBytes);
+      }
+      return;
+    }
+    if (BitOrder_LSB == order && bitPerPixel == 24) {
+      BitPumpLSB bits(input);
+      w *= cpp;
+      for (; y < h; y++) {
+        auto* dest = reinterpret_cast<uint32_t*>(
+            &data[offset.x * sizeof(uint32_t) * cpp + y * outPitch]);
+        for (uint32_t x = 0; x < w; x++) {
+          uint32_t b = bits.getBits(bitPerPixel);
+          dest[x] = fp24ToFloat(b);
+        }
+        bits.skipBytes(skipBytes);
+      }
+      return;
+    }
     ThrowRDE("Unsupported floating-point input bitwidth/bit packing: %u / %u",
              bitPerPixel, order);
   }
