@@ -53,9 +53,16 @@ template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
 
     bool big_endian = e->bs.getByteOrder() == Endianness::big;
 
-    // DNG spec says that if not 8 or 16 bit/sample, always use big endian
-    if (mBps != 8 && mBps != 16)
+    // DNG spec says that if not 8/16/32 bit/sample, always use big endian.
+    switch (mBps) {
+    case 8:
+    case 16:
+    case 32:
+      break;
+    default:
       big_endian = true;
+      break;
+    }
 
     try {
       const uint32_t inputPixelBits = mRaw->getCpp() * mBps;
