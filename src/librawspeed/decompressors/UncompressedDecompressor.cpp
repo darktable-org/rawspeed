@@ -22,6 +22,7 @@
 
 #include "decompressors/UncompressedDecompressor.h"
 #include "common/Common.h"                // for uint32_t, uint8_t, uint16_t
+#include "common/FloatingPoint.h"         // for fp16ToFloat
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpLSB.h"                // for BitPumpLSB
@@ -142,12 +143,70 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
   h = min(h + oy, static_cast<uint64_t>(mRaw->dim.y));
 
   if (mRaw->getDataType() == TYPE_FLOAT32) {
-    if (bitPerPixel != 32)
-      ThrowRDE("Only 32 bit float point supported");
-    copyPixels(&data[offset.x * sizeof(float) * cpp + y * outPitch], outPitch,
-               input.getData(inputPitchBytes * (h - y)), inputPitchBytes,
-               w * mRaw->getBpp(), h - y);
-    return;
+    if (bitPerPixel == 32) {
+      copyPixels(&data[offset.x * sizeof(float) * cpp + y * outPitch], outPitch,
+                 input.getData(inputPitchBytes * (h - y)), inputPitchBytes,
+                 w * mRaw->getBpp(), h - y);
+      return;
+    }
+    if (BitOrder_MSB == order && bitPerPixel == 16) {
+      BitPumpMSB bits(input);
+      w *= cpp;
+      for (; y < h; y++) {
+        auto* dest = reinterpret_cast<uint32_t*>(
+            &data[offset.x * sizeof(uint32_t) * cpp + y * outPitch]);
+        for (uint32_t x = 0; x < w; x++) {
+          uint16_t b = bits.getBits(bitPerPixel);
+          dest[x] = fp16ToFloat(b);
+        }
+        bits.skipBytes(skipBytes);
+      }
+      return;
+    }
+    if (BitOrder_LSB == order && bitPerPixel == 16) {
+      BitPumpLSB bits(input);
+      w *= cpp;
+      for (; y < h; y++) {
+        auto* dest = reinterpret_cast<uint32_t*>(
+            &data[offset.x * sizeof(uint32_t) * cpp + y * outPitch]);
+        for (uint32_t x = 0; x < w; x++) {
+          uint16_t b = bits.getBits(bitPerPixel);
+          dest[x] = fp16ToFloat(b);
+        }
+        bits.skipBytes(skipBytes);
+      }
+      return;
+    }
+    if (BitOrder_MSB == order && bitPerPixel == 24) {
+      BitPumpMSB bits(input);
+      w *= cpp;
+      for (; y < h; y++) {
+        auto* dest = reinterpret_cast<uint32_t*>(
+            &data[offset.x * sizeof(uint32_t) * cpp + y * outPitch]);
+        for (uint32_t x = 0; x < w; x++) {
+          uint32_t b = bits.getBits(bitPerPixel);
+          dest[x] = fp24ToFloat(b);
+        }
+        bits.skipBytes(skipBytes);
+      }
+      return;
+    }
+    if (BitOrder_LSB == order && bitPerPixel == 24) {
+      BitPumpLSB bits(input);
+      w *= cpp;
+      for (; y < h; y++) {
+        auto* dest = reinterpret_cast<uint32_t*>(
+            &data[offset.x * sizeof(uint32_t) * cpp + y * outPitch]);
+        for (uint32_t x = 0; x < w; x++) {
+          uint32_t b = bits.getBits(bitPerPixel);
+          dest[x] = fp24ToFloat(b);
+        }
+        bits.skipBytes(skipBytes);
+      }
+      return;
+    }
+    ThrowRDE("Unsupported floating-point input bitwidth/bit packing: %u / %u",
+             bitPerPixel, order);
   }
 
   if (BitOrder_MSB == order) {

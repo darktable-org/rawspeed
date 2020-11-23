@@ -382,8 +382,8 @@ RawImage DngDecoder::decodeRawInternal() {
   if (sample_format == 1 && bps > 16)
     ThrowRDE("Integer precision larger than 16 bits currently not supported.");
 
-  if (sample_format == 3 && bps != 32 && compression != 8)
-    ThrowRDE("Uncompressed float point must be 32 bits per sample.");
+  if (sample_format == 3 && bps != 16 && bps != 24 && bps != 32)
+    ThrowRDE("Floating point must be 16/24/32 bits per sample.");
 
   mRaw->dim.x = raw->getEntry(IMAGEWIDTH)->getU32();
   mRaw->dim.y = raw->getEntry(IMAGELENGTH)->getU32();

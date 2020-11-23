@@ -10,6 +10,7 @@ FILE(GLOB SOURCES
   "DngOpcodes.h"
   "ErrorLog.cpp"
   "ErrorLog.h"
+  "FloatingPoint.h"
   "Memory.cpp"
   "Memory.h"
   "Mutex.h"
