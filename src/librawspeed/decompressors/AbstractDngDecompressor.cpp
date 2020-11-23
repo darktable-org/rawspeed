@@ -54,13 +54,15 @@ template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
     bool big_endian = e->bs.getByteOrder() == Endianness::big;
 
     // DNG spec says that if not 8/16/32 bit/sample, always use big endian.
+    // It's not very obvious, but that does not appear to apply to FP.
     switch (mBps) {
     case 8:
     case 16:
     case 32:
       break;
     default:
-      big_endian = true;
+      if (mRaw->getDataType() == TYPE_USHORT16)
+        big_endian = true;
       break;
     }
 
