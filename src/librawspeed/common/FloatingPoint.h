@@ -23,107 +23,131 @@
 
 namespace rawspeed {
 
-// Expand IEEE-754-2008 binary16 into float32
-inline uint32_t fp16ToFloat(uint16_t fp16) {
-  // IEEE-754-2008: binary16:
-  // bit 15 - sign
-  // bits 14-10 - exponent (5 bit)
-  // bits 9-0 - fraction (10 bit)
-  //
-  // exp = 0, fract = +-0: zero
-  // exp = 0; fract != 0: subnormal numbers
-  //                      equation: -1 ^ sign * 2 ^ -14 * 0.fraction
-  // exp = 1..30: normalized value
-  //              equation: -1 ^ sign * 2 ^ (exponent - 15) * 1.fraction
-  // exp = 31, fract = +-0: +-infinity
-  // exp = 31, fract != 0: NaN
+namespace ieee_754_2008 {
 
-  uint32_t sign = (fp16 >> 15) & 1;
-  uint32_t fp16_exponent = (fp16 >> 10) & ((1 << 5) - 1);
-  uint32_t fp16_fraction = fp16 & ((1 << 10) - 1);
+// Refer to "3.6 Interchange format parameters",
+//          "Table 3.5—Binary interchange format parameters"
+
+// All formats are:
+// MSB [Sign bit] [Exponent bits] [Fraction bits] LSB
+
+template <int StorageWidth_, int FractionWidth_, int ExponentWidth_>
+struct BinaryN {
+  static constexpr uint32_t StorageWidth = StorageWidth_;
+
+  // FIXME: if we had compile-time log2/round, we'd only need StorageWidth.
+
+  static constexpr uint32_t FractionWidth = FractionWidth_;
+  static constexpr uint32_t ExponentWidth = ExponentWidth_;
+  // SignWidth is always 1.
+  static_assert(FractionWidth + ExponentWidth + 1 == StorageWidth, "");
+
+  static constexpr uint32_t Precision = FractionWidth + 1;
+
+  static constexpr uint32_t ExponentMax = (1 << (ExponentWidth - 1)) - 1;
+
+  static constexpr uint32_t Bias = ExponentMax;
+
+  // FractionPos is always 0.
+  static constexpr uint32_t ExponentPos = FractionWidth;
+  static constexpr uint32_t SignBitPos = StorageWidth - 1;
+};
+
+// IEEE-754-2008: binary16:
+// bits 9-0 - fraction (10 bit)
+// bits 14-10 - exponent (5 bit)
+// bit 15 - sign
+struct Binary16 : public BinaryN</*StorageWidth=*/16, /*FractionWidth=*/10,
+                                 /*ExponentWidth=*/5> {
+  static_assert(Precision == 11, "");
+  static_assert(ExponentMax == 15, "");
+  static_assert(ExponentPos == 10, "");
+  static_assert(SignBitPos == 15, "");
+};
+
+// IEEE-754-2008: binary24:
+// bits 15-0 - fraction (16 bit)
+// bits 22-16 - exponent (7 bit)
+// bit 23 - sign
+struct Binary24 : public BinaryN</*StorageWidth=*/24, /*FractionWidth=*/16,
+                                 /*ExponentWidth=*/7> {
+  static_assert(Precision == 17, "");
+  static_assert(ExponentMax == 63, "");
+  static_assert(ExponentPos == 16, "");
+  static_assert(SignBitPos == 23, "");
+};
+
+// IEEE-754-2008: binary32:
+// bits 22-0 - fraction (23 bit)
+// bits 30-23 - exponent (8 bit)
+// bit 31 - sign
+struct Binary32 : public BinaryN</*StorageWidth=*/32, /*FractionWidth=*/23,
+                                 /*ExponentWidth=*/8> {
+  static_assert(Precision == 24, "");
+  static_assert(ExponentMax == 127, "");
+  static_assert(ExponentPos == 23, "");
+  static_assert(SignBitPos == 31, "");
+};
+
+// exp = 0, fract  = +-0: zero
+// exp = 0; fract !=   0: subnormal numbers
+//                        equation: -1 ^ sign * 2 ^ (1 - Bias) * 0.fraction
+// exp = 1..(2^ExponentWidth - 2): normalized value
+//                     equation: -1 ^ sign * 2 ^ (exponent - Bias) * 1.fraction
+// exp = 2^ExponentWidth - 1, fract  = +-0: +-infinity
+// exp = 2^ExponentWidth - 1, fract !=   0: NaN
+
+} // namespace ieee_754_2008
+
+template <typename NarrowType, typename WideType>
+inline uint32_t extendBinaryFloatingPoint(uint32_t narrow) {
+  uint32_t sign = (narrow >> NarrowType::SignBitPos) & 1;
+  uint32_t narrow_exponent = (narrow >> NarrowType::ExponentPos) &
+                             ((1 << NarrowType::ExponentWidth) - 1);
+  uint32_t narrow_fraction = narrow & ((1 << NarrowType::FractionWidth) - 1);
 
   // Normalized or zero
-  // binary32 equation: -1 ^ sign * 2 ^ (exponent - 127) * 1.fraction
-  // => exponent32 - 127 = exponent16 - 15, exponent32 = exponent16 + 127 - 15
-  uint32_t fp32_exponent = fp16_exponent + 127 - 15;
-  uint32_t fp32_fraction = fp16_fraction
-                           << (23 - 10); // 23 is binary32 fraction size
+  uint32_t wide_exponent = narrow_exponent - NarrowType::Bias + WideType::Bias;
+  uint32_t wide_fraction =
+      narrow_fraction << (WideType::FractionWidth - NarrowType::FractionWidth);
 
-  if (fp16_exponent == 31) {
+  if (narrow_exponent == ((1 << NarrowType::ExponentWidth) - 1)) {
     // Infinity or NaN
-    fp32_exponent = 255;
-  } else if (fp16_exponent == 0) {
-    if (fp16_fraction == 0) {
+    wide_exponent = ((1 << WideType::ExponentWidth) - 1);
+    // Narrow fraction is kept/widened!
+  } else if (narrow_exponent == 0) {
+    if (narrow_fraction == 0) {
       // +-Zero
-      fp32_exponent = 0;
-      fp32_fraction = 0;
+      wide_exponent = 0;
+      wide_fraction = 0;
     } else {
       // Subnormal numbers
-      // binary32 equation: -1 ^ sign * 2 ^ (exponent - 127) * 1.fraction
-      // binary16 equation: -1 ^ sign * 2 ^ -14 * 0.fraction, we can represent
-      // it as a normalized value in binary32, we have to shift fraction until
-      // we get 1.new_fraction and decrement exponent for each shift
-      fp32_exponent = -14 + 127;
-      while (!(fp32_fraction & (1 << 23))) {
-        fp32_exponent -= 1;
-        fp32_fraction <<= 1;
+      // We can represent it as a normalized value in wider type,
+      // we have to shift fraction until we get 1.new_fraction
+      // and decrement exponent for each shift.
+      // FIXME; what is the implicit precondition here?
+      wide_exponent = 1 - NarrowType::Bias + WideType::Bias;
+      while (!(wide_fraction & (1 << (WideType::FractionWidth)))) {
+        wide_exponent -= 1;
+        wide_fraction <<= 1;
       }
-      fp32_fraction &= ((1 << 23) - 1);
+      wide_fraction &= ((1 << WideType::FractionWidth) - 1);
     }
   }
-  return (sign << 31) | (fp32_exponent << 23) | fp32_fraction;
+  return (sign << WideType::SignBitPos) |
+         (wide_exponent << WideType::ExponentPos) | wide_fraction;
 }
 
-// Expand binary24 (not part of IEEE-754-2008) into float32
+// Expand IEEE-754-2008 binary16 into float32
+inline uint32_t fp16ToFloat(uint16_t fp16) {
+  return extendBinaryFloatingPoint<ieee_754_2008::Binary16,
+                                   ieee_754_2008::Binary32>(fp16);
+}
+
+// Expand IEEE-754-2008 binary24 into float32
 inline uint32_t fp24ToFloat(uint32_t fp24) {
-  // binary24: Not a part of IEEE754-2008, but format is obvious,
-  // see https://en.wikipedia.org/wiki/Minifloat
-  // bit 23 - sign
-  // bits 22-16 - exponent (7 bit)
-  // bits 15-0 - fraction (16 bit)
-  //
-  // exp = 0, fract = +-0: zero
-  // exp = 0; fract != 0: subnormal numbers
-  //                      equation: -1 ^ sign * 2 ^ -62 * 0.fraction
-  // exp = 1..126: normalized value
-  //              equation: -1 ^ sign * 2 ^ (exponent - 63) * 1.fraction
-  // exp = 127, fract = +-0: +-infinity
-  // exp = 127, fract != 0: NaN
-
-  uint32_t sign = (fp24 >> 23) & 1;
-  uint32_t fp24_exponent = (fp24 >> 16) & ((1 << 7) - 1);
-  uint32_t fp24_fraction = fp24 & ((1 << 16) - 1);
-
-  // Normalized or zero
-  // binary32 equation: -1 ^ sign * 2 ^ (exponent - 127) * 1.fraction
-  // => exponent32 - 127 = exponent24 - 64, exponent32 = exponent16 + 127 - 63
-  uint32_t fp32_exponent = fp24_exponent + 127 - 63;
-  uint32_t fp32_fraction = fp24_fraction
-                           << (23 - 16); // 23 is binary 32 fraction size
-
-  if (fp24_exponent == 127) {
-    // Infinity or NaN
-    fp32_exponent = 255;
-  } else if (fp24_exponent == 0) {
-    if (fp24_fraction == 0) {
-      // +-Zero
-      fp32_exponent = 0;
-      fp32_fraction = 0;
-    } else {
-      // Subnormal numbers
-      // binary32 equation: -1 ^ sign * 2 ^ (exponent - 127) * 1.fraction
-      // binary24 equation: -1 ^ sign * 2 ^ -62 * 0.fraction, we can represent
-      // it as a normalized value in binary32, we have to shift fraction until
-      // we get 1.new_fraction and decrement exponent for each shift
-      fp32_exponent = -62 + 127;
-      while (!(fp32_fraction & (1 << 23))) {
-        fp32_exponent -= 1;
-        fp32_fraction <<= 1;
-      }
-      fp32_fraction &= ((1 << 23) - 1);
-    }
-  }
-  return (sign << 31) | (fp32_exponent << 23) | fp32_fraction;
+  return extendBinaryFloatingPoint<ieee_754_2008::Binary24,
+                                   ieee_754_2008::Binary32>(fp24);
 }
 
 } // namespace rawspeed
