@@ -46,7 +46,7 @@ struct BinaryN {
 
   static constexpr uint32_t ExponentMax = (1 << (ExponentWidth - 1)) - 1;
 
-  static constexpr uint32_t Bias = ExponentMax;
+  static constexpr int32_t Bias = ExponentMax;
 
   // FractionPos is always 0.
   static constexpr uint32_t ExponentPos = FractionWidth;
@@ -107,7 +107,8 @@ inline uint32_t extendBinaryFloatingPoint(uint32_t narrow) {
   uint32_t narrow_fraction = narrow & ((1 << NarrowType::FractionWidth) - 1);
 
   // Normalized or zero
-  uint32_t wide_exponent = narrow_exponent - NarrowType::Bias + WideType::Bias;
+  uint32_t wide_exponent =
+      static_cast<int32_t>(narrow_exponent) - NarrowType::Bias + WideType::Bias;
   uint32_t wide_fraction =
       narrow_fraction << (WideType::FractionWidth - NarrowType::FractionWidth);
 
