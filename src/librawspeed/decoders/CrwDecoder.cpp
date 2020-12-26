@@ -150,9 +150,9 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           mRootIFD->getEntryRecursive(static_cast<CiffTag>(0x0032));
       if (wb->type == CIFF_BYTE && wb->count == 768) {
         // We're in a D30 file, values are RGGB
-        // This will probably not get used anyway as a 0x102c tag should exist
-        std::array<uint8_t, 4> wbMuls{{wb->getByte(72), wb->getByte(73),
-                                       wb->getByte(74), wb->getByte(75)}};
+        // This, not 0x102c tag, should be used.
+        std::array<uint16_t, 4> wbMuls{
+            {wb->getU16(36), wb->getU16(37), wb->getU16(38), wb->getU16(39)}};
         for (const auto& mul : wbMuls) {
           if (0 == mul)
             ThrowRDE("WB coeffient is zero!");
@@ -189,7 +189,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         mRaw->metadata.wbCoeffs[1] = static_cast<float>(entry->getU16(63));
         mRaw->metadata.wbCoeffs[2] = static_cast<float>(entry->getU16(60));
         mRaw->metadata.wbCoeffs[3] = static_cast<float>(entry->getU16(61));
-      } else if (entry->type == CIFF_SHORT) {
+      } else if (entry->type == CIFF_SHORT && entry->getU16() != 276) {
         /* G2, S30, S40 */
         mRaw->metadata.wbCoeffs[0] = static_cast<float>(entry->getU16(51));
         mRaw->metadata.wbCoeffs[1] = (static_cast<float>(entry->getU16(50)) +
