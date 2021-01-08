@@ -2730,6 +2730,56 @@
 			<Hint name="msb_override" value=""/>
 		</Hints>
 	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON Z 6_2" mode="14bit-compressed">
+		<ID make="Nikon" model="Z 6_2">Nikon Z 6 2</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="1008" white="15520"/>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON Z 6_2" mode="14bit-uncompressed">
+		<ID make="Nikon" model="Z 6_2">Nikon Z 6 2</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="1008" white="15520"/>
+		<Hints>
+			<Hint name="msb_override" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON Z 6_2" mode="12bit-compressed">
+		<ID make="Nikon" model="Z 6_2">Nikon Z 6 2</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="251" white="3880"/>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON Z 6_2" mode="12bit-uncompressed">
+		<ID make="Nikon" model="Z 6_2">Nikon Z 6 2</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="251" white="3880"/>
+		<Hints>
+			<Hint name="msb_override" value=""/>
+		</Hints>
+	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON Z 7" mode="14bit-compressed">
 		<ID make="Nikon" model="Z 7">Nikon Z 7</ID>
 		<CFA width="2" height="2">
@@ -2776,6 +2826,56 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="252" white="3880"/>
+		<Hints>
+			<Hint name="msb_override" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON Z 7_2" mode="14bit-compressed">
+		<ID make="Nikon" model="Z 7_2">Nikon Z 7 2</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="1008" white="15520"/>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON Z 7_2" mode="14bit-uncompressed">
+		<ID make="Nikon" model="Z 7_2">Nikon Z 7 2</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="1008" white="15520"/>
+		<Hints>
+			<Hint name="msb_override" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON Z 7_2" mode="12bit-compressed">
+		<ID make="Nikon" model="Z 7_2">Nikon Z 7 2</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="251" white="3880"/>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON Z 7_2" mode="12bit-uncompressed">
+		<ID make="Nikon" model="Z 7_2">Nikon Z 7 2</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="251" white="3880"/>
 		<Hints>
 			<Hint name="msb_override" value=""/>
 		</Hints>
@@ -7785,6 +7885,10 @@
 		</CFA>
 		<Crop x="0" y="0" width="-210" height="0"/>
 		<Sensor black="143" white="4095"/>
+		<Aliases>
+			<Alias>GF10</Alias>
+			<Alias>GF90</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="Panasonic" model="DC-GX880" mode="4:3">
 		<ID make="Panasonic" model="DC-GX880">Panasonic DC-GX880</ID>
@@ -7796,6 +7900,10 @@
 		</CFA>
 		<Crop x="0" y="0" width="-210" height="0"/>
 		<Sensor black="143" white="4095"/>
+		<Aliases>
+			<Alias>GF10</Alias>
+			<Alias>GF90</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="Panasonic" model="DC-GX9">
 		<ID make="Panasonic" model="DC-GX9">Panasonic DC-GX9</ID>
@@ -10276,6 +10384,32 @@
 		<Crop x="4" y="0" width="-52" height="0"/>
 		<Sensor black="1024" white="16383"/>
         </Camera>
+	<Camera make="FUJIFILM" model="X-S10">
+		<ID make="Fujifilm" model="X-S10">Fujifilm X-S10</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="6" width="-132" height="-6"/>
+		<Sensor black="1022" white="16383"/>
+	</Camera>
+	<Camera make="FUJIFILM" model="X-S10" mode="compressed">
+		<ID make="Fujifilm" model="X-S10">Fujifilm X-S10</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="6" width="-132" height="-6"/>
+		<Sensor black="1022" white="16383"/>
+	</Camera>
 	<Camera make="FUJIFILM" model="X-T1">
 		<ID make="Fujifilm" model="X-T1">Fujifilm X-T1</ID>
 		<CFA2 width="6" height="6">
