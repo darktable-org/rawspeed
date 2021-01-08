@@ -285,8 +285,8 @@
   </xs:complexType>
   <xs:simpleType name="AliasTypeType">
     <xs:restriction base="xs:string">
-      <xs:pattern value="[a-zA-Z0-9 \-,]{6,27}"/>
-      <xs:minLength value="6"/>
+      <xs:pattern value="[a-zA-Z0-9 \-,]{4,27}"/>
+      <xs:minLength value="4"/>
       <xs:maxLength value="27"/>
     </xs:restriction>
   </xs:simpleType>
