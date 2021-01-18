@@ -212,6 +212,15 @@ jobs:
           - os: windows-latest
             compiler: { compiler: LLVM, CC: clang, CXX: clang++ }
             flavor: Coverage
+            # clang-based coverage builds don't work in general.
+          - os: windows-latest
+            compiler: { compiler: LLVM, CC: clang, CXX: clang++ }
+            # weird miscompiles.
+          - os: windows-latest
+            msys2: { msystem: MINGW32, arch: i686   }
+            compiler: { compiler: GNU,  CC: gcc,   CXX: g++ }
+            flavor: Coverage
+            # weird miscompiles.
     defaults:
       run:
         shell: msys2 {0}
