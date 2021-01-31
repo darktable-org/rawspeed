@@ -6404,7 +6404,7 @@
 		<Crop x="0" y="0" width="-210" height="0"/>
 		<Sensor black="143" white="4095"/>
 		<Aliases>
-			<Alias>GF10</Alias>
+			<Alias>DC-GF10</Alias>
 			<Alias>GF90</Alias>
 		</Aliases>
 	</Camera>
@@ -6413,7 +6413,7 @@
 		<Crop x="0" y="0" width="-210" height="0"/>
 		<Sensor black="143" white="4095"/>
 		<Aliases>
-			<Alias>GF10</Alias>
+			<Alias>DC-GF10</Alias>
 			<Alias>GF90</Alias>
 		</Aliases>
 	</Camera>
