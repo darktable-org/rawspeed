@@ -48,6 +48,7 @@ protected:
   int getDecoderVersion() const override { return 3; }
 
 private:
+  void parseCFA();
   std::string guessMode();
 };
 

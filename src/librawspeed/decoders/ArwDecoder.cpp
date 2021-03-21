@@ -146,7 +146,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   }
 
   if (32767 != compression)
-    ThrowRDE("Unsupported compression");
+    ThrowRDE("Unsupported compression %i", compression);
 
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);

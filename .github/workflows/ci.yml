@@ -101,8 +101,17 @@ jobs:
         run: |
           rm -rf /var/lib/apt/lists/*;
           apt-get update;
-          apt-get install python3-dev \
-                          python3-virtualenv;
+          apt-get install libxml2-dev \
+                          libxslt1-dev \
+                          python-pip-whl \
+                          python3-dev \
+                          python3-lxml \
+                          python3-portalocker \
+                          python3-psutil \
+                          python3-venv \
+                          python3-virtualenv \
+                          python3-wheel \
+                          python3-yaml;
           apt-get clean;
           cd ../codechecker
           make venv
@@ -203,6 +212,15 @@ jobs:
           - os: windows-latest
             compiler: { compiler: LLVM, CC: clang, CXX: clang++ }
             flavor: Coverage
+            # clang-based coverage builds don't work in general.
+          - os: windows-latest
+            compiler: { compiler: LLVM, CC: clang, CXX: clang++ }
+            # weird miscompiles.
+          - os: windows-latest
+            msys2: { msystem: MINGW32, arch: i686   }
+            compiler: { compiler: GNU,  CC: gcc,   CXX: g++ }
+            flavor: Coverage
+            # weird miscompiles.
     defaults:
       run:
         shell: msys2 {0}
@@ -256,6 +274,8 @@ jobs:
         name: Fetch/Checkout RawSpeed git repo
       - name: Install Base Dependencies
         run: |
+          # https://github.com/actions/virtual-environments/issues/2322#issuecomment-749211076
+          rm -rf /usr/local/bin/2to3
           brew update > /dev/null || true
           brew tap Homebrew/bundle
           cd .ci

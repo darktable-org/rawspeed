@@ -161,8 +161,36 @@ void Rw2Decoder::checkSupportInternal(const CameraMetaData* meta) {
     checkCameraSupported(meta, id, "");
 }
 
+void Rw2Decoder::parseCFA() {
+  if (!mRootIFD->hasEntryRecursive(PANASONIC_CFAPATTERN))
+    ThrowRDE("No PANASONIC_CFAPATTERN entry found!");
+
+  TiffEntry* CFA = mRootIFD->getEntryRecursive(PANASONIC_CFAPATTERN);
+  if (CFA->type != TiffDataType::TIFF_SHORT || CFA->count != 1) {
+    ThrowRDE("Bad PANASONIC_CFAPATTERN entry (type %u, count %u).", CFA->type,
+             CFA->count);
+  }
+
+  switch (auto i = CFA->getU16()) {
+  case 1:
+    mRaw->cfa.setCFA(iPoint2D(2, 2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
+    break;
+  case 2:
+    mRaw->cfa.setCFA(iPoint2D(2, 2), CFA_GREEN, CFA_RED, CFA_BLUE, CFA_GREEN);
+    break;
+  case 3:
+    mRaw->cfa.setCFA(iPoint2D(2, 2), CFA_GREEN, CFA_BLUE, CFA_RED, CFA_GREEN);
+    break;
+  case 4:
+    mRaw->cfa.setCFA(iPoint2D(2, 2), CFA_BLUE, CFA_GREEN, CFA_GREEN, CFA_RED);
+    break;
+  default:
+    ThrowRDE("Unexpected CFA pattern: %u", i);
+  }
+}
+
 void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
-  mRaw->cfa.setCFA(iPoint2D(2,2), CFA_BLUE, CFA_GREEN, CFA_GREEN, CFA_RED);
+  parseCFA();
 
   auto id = mRootIFD->getID();
   string mode = guessMode();
