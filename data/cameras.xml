@@ -6399,6 +6399,22 @@
 			<Alias>DC-GX850</Alias>
 		</Aliases>
 	</Camera>
+	<Camera make="Panasonic" model="DC-G100">
+		<ID make="Panasonic" model="DC-G100">Panasonic DC-G100</ID>
+		<Crop x="0" y="0" width="-64" height="0"/>
+		<Sensor black="144" white="4095"/>
+		<Aliases>
+			<Alias>DC-G110</Alias>
+		</Aliases>
+	</Camera>
+	<Camera make="Panasonic" model="DC-G100" mode="4:3">
+		<ID make="Panasonic" model="DC-G100">Panasonic DC-G100</ID>
+		<Crop x="0" y="0" width="-64" height="0"/>
+		<Sensor black="144" white="4095"/>
+		<Aliases>
+			<Alias>DC-G110</Alias>
+		</Aliases>
+	</Camera>
 	<Camera make="Panasonic" model="DC-GX880">
 		<ID make="Panasonic" model="DC-GX880">Panasonic DC-GX880</ID>
 		<Crop x="0" y="0" width="-210" height="0"/>
