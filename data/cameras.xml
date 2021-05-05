@@ -6951,6 +6951,32 @@
 		<Crop x="0" y="0" width="-144" height="0"/>
 		<Sensor black="143" white="4095"/>
 	</Camera>
+	<!-- LEICA D-LUX 7 is the same camera as Panasonic DC-LX100M2 -->
+	<Camera make="LEICA CAMERA AG" model="D-Lux 7">
+		<ID make="Leica" model="D-Lux 7">D-Lux 7</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="143" white="4095"/>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="D-Lux 7" mode="4:3">
+		<ID make="Leica" model="D-Lux 7">D-Lux 7</ID>
+		<Crop x="10" y="6" width="-60" height="-4"/>
+		<Sensor black="143" white="4095"/>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="D-Lux 7" mode="1:1">
+		<ID make="Leica" model="D-Lux 7">D-Lux 7</ID>
+		<Crop x="0" y="6" width="-130" height="-4"/>
+		<Sensor black="144" white="4095"/>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="D-Lux 7" mode="16:9">
+		<ID make="Leica" model="D-Lux 7">D-Lux 7</ID>
+		<Crop x="10" y="0" width="-90" height="0"/>
+		<Sensor black="144" white="4095"/>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="D-Lux 7" mode="3:2">
+		<ID make="Leica" model="D-Lux 7">D-Lux 7</ID>
+		<Crop x="4" y="0" width="-90" height="0"/>
+		<Sensor black="144" white="4095"/>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-LX1" mode="16:9">
 		<ID make="Panasonic" model="DMC-LX1">Panasonic DMC-LX1</ID>
 		<CFA width="2" height="2">

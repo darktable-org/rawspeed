@@ -54,7 +54,7 @@ bool Rw2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 
   // FIXME: magic
 
-  return make == "Panasonic" || make == "LEICA";
+  return make == "Panasonic" || make == "LEICA" || make == "LEICA CAMERA AG";
 }
 
 RawImage Rw2Decoder::decodeRawInternal() {
