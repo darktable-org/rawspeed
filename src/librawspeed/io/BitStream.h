@@ -3,7 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2017 Axel Waggershauser
-    Copyright (C) 2017-2019 Roman Lebedev
+    Copyright (C) 2017-2021 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -91,38 +91,36 @@ struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
   inline void skip(uint32_t count) noexcept { fillLevel -= count; }
 };
 
-template <typename BIT_STREAM> struct BitStreamTraits final {
-  static constexpr bool canUseWithHuffmanTable = false;
-};
+struct BitStreamReplenisherBase {
+  using size_type = uint32_t;
 
-template <typename Tag, typename Cache>
-class BitStream final : public ByteStream {
-  Cache cache;
+  const uint8_t* data;
+  size_type size;
+  unsigned pos = 0;
+
+  BitStreamReplenisherBase() = default;
+
+  explicit BitStreamReplenisherBase(const Buffer& input)
+      : data(input.getData(0, input.getSize())), size(input.getSize()) {}
 
   // A temporary intermediate buffer that may be used by fill() method either
   // in debug build to enforce lack of out-of-bounds reads, or when we are
   // nearing the end of the input buffer and can not just read MaxProcessBytes
   // from it, but have to read as much as we can and fill rest with zeros.
   std::array<uint8_t, BitStreamCacheBase::MaxProcessBytes> tmp = {};
+};
 
-  // this method hase to be implemented in the concrete BitStream template
-  // specializations. It will return the number of bytes processed. It needs
-  // to process up to BitStreamCacheBase::MaxProcessBytes bytes of input.
-  size_type fillCache(const uint8_t* input, size_type bufferSize,
-                      size_type* bufPos);
+struct BitStreamForwardSequentialReplenisher final : BitStreamReplenisherBase {
+  BitStreamForwardSequentialReplenisher() = default;
 
-public:
-  BitStream() = default;
+  explicit BitStreamForwardSequentialReplenisher(const Buffer& input)
+      : BitStreamReplenisherBase(input) {}
 
-  explicit BitStream(const ByteStream& s)
-      : ByteStream(s.getSubStream(s.getPosition(), s.getRemainSize())) {
-    setByteOrder(Endianness::unknown);
-  }
+  inline size_type getPos() const { return pos; }
+  inline size_type getRemainingSize() const { return size - getPos(); }
+  inline void markNumBytesAsConsumed(size_type numBytes) { pos += numBytes; }
 
-private:
   inline const uint8_t* getInput() {
-    assert(data);
-
 #if !defined(DEBUG)
     // Do we have MaxProcessBytes or more bytes left in the input buffer?
     // If so, then we can just read from said buffer.
@@ -142,7 +140,7 @@ private:
 
     // How many bytes are left in input buffer?
     // Since pos can be past-the-end we need to carefully handle overflow.
-    Buffer::size_type bytesRemaining = (pos < size) ? size - pos : 0;
+    size_type bytesRemaining = (pos < size) ? size - pos : 0;
     // And if we are not at the end of the input, we may have more than we need.
     bytesRemaining =
         std::min(BitStreamCacheBase::MaxProcessBytes, bytesRemaining);
@@ -150,33 +148,56 @@ private:
     memcpy(tmp.data(), data + pos, bytesRemaining);
     return tmp.data();
   }
+};
+
+template <typename BIT_STREAM> struct BitStreamTraits final {
+  static constexpr bool canUseWithHuffmanTable = false;
+};
+
+template <typename Tag, typename Cache,
+          typename Replenisher = BitStreamForwardSequentialReplenisher>
+class BitStream final {
+  Cache cache;
+
+  Replenisher replenisher;
+
+  using size_type = uint32_t;
+
+  // this method hase to be implemented in the concrete BitStream template
+  // specializations. It will return the number of bytes processed. It needs
+  // to process up to BitStreamCacheBase::MaxProcessBytes bytes of input.
+  size_type fillCache(const uint8_t* input);
 
 public:
+  BitStream() = default;
+
+  explicit BitStream(const Buffer& buf) : replenisher(buf) {}
+
+  explicit BitStream(const ByteStream& s)
+      : BitStream(s.getSubView(s.getPosition(), s.getRemainSize())) {}
+
   inline void fill(uint32_t nbits = Cache::MaxGetBits) {
-    assert(data);
     assert(nbits <= Cache::MaxGetBits);
 
     if (cache.fillLevel >= nbits)
       return;
 
-    pos += fillCache(getInput(), size, &pos);
+    replenisher.markNumBytesAsConsumed(fillCache(replenisher.getInput()));
   }
 
   // these methods might be specialized by implementations that support it
-  inline size_type getBufferPosition() const {
-    return pos - (cache.fillLevel >> 3);
+  inline size_type getInputPosition() const { return replenisher.getPos(); }
+
+  // these methods might be specialized by implementations that support it
+  inline size_type getStreamPosition() const {
+    return getInputPosition() - (cache.fillLevel >> 3);
+  }
+
+  inline size_type getRemainingSize() const {
+    return replenisher.getRemainingSize();
   }
 
   inline size_type getFillLevel() const { return cache.fillLevel; }
-
-  // rewinds to the beginning of the buffer.
-  void resetBufferPosition() {
-    pos = 0;
-    cache.fillLevel = 0;
-    cache.cache = 0;
-  }
-
-  void setBufferPosition(size_type newPos);
 
   inline uint32_t __attribute__((pure)) peekBitsNoFill(uint32_t nbits) {
     assert(nbits != 0);
