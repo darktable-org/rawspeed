@@ -2151,6 +2151,24 @@
 			<Hint name="wb_offset" value="71"/>
 		</Hints>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS M50">
+		<ID make="Canon" model="EOS M50">Canon EOS M50</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2053" white="14338"/>
+		<Sensor black="511" white="11892" iso_list="100 125"/>
+		<Sensor black="512" white="10749" iso_list="160"/>
+		<Sensor black="511" white="14338" iso_list="200 250"/>
+		<Sensor black="2050" white="10749" iso_list="320 640 1250 2500 5000"/>
+		<Sensor black="2048" white="14338" iso_list="16000 20000"/>
+		<Hints>
+			<Hint name="wb_offset" value="71"/>
+		</Hints>
+	</Camera>
 	<Camera make="Canon" model="Canon PowerShot Pro1">
 		<ID make="Canon" model="PowerShot Pro1">Canon PowerShot Pro1</ID>
 		<CFA width="2" height="2">
