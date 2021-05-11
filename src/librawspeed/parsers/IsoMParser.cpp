@@ -20,6 +20,7 @@
 */
 
 #include "parsers/IsoMParser.h"          // For IsoMParser
+#include "decoders/Cr3Decoder.h"         // for Cr3Decoder
 #include "decoders/RawDecoder.h"         // for RawDecoder
 #include "io/ByteStream.h"               // for ByteStream
 #include "io/Endianness.h"               // for Endianness::big
@@ -49,6 +50,8 @@ std::unique_ptr<RawDecoder> IsoMParser::getDecoder(const CameraMetaData* meta) {
   if (!rootBox)
     parseData();
 
+  if (Cr3Decoder::isAppropriateDecoder(*rootBox))
+    return std::make_unique<Cr3Decoder>(std::move(rootBox), mInput);
 
   ThrowIPE("No decoder found. Sorry.");
 }
