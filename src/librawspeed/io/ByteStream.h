@@ -164,6 +164,7 @@ public:
     return ret;
   }
 
+  inline uint16_t getI16() { return get<int16_t>(); }
   inline uint16_t getU16() { return get<uint16_t>(); }
   inline int32_t getI32() { return get<int32_t>(); }
   inline uint32_t getU32() { return get<uint32_t>(); }
