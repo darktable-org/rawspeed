@@ -2167,6 +2167,21 @@
 			<Hint name="wb_offset" value="85"/>
 		</Hints>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS R6">
+		<ID make="Canon" model="EOS R6">Canon EOS R6</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2048" white="16384"/>
+		<Sensor black="512" white="16384" iso_list="50 100 125 160 200 250"/>
+		<Sensor black="2040" white="16384" iso_list="204800"/>
+		<Hints>
+			<Hint name="wb_offset" value="85"/>
+		</Hints>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS M50">
 		<ID make="Canon" model="EOS M50">Canon EOS M50</ID>
 		<CFA width="2" height="2">
