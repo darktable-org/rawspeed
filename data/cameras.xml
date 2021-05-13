@@ -7741,7 +7741,7 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="12" y="12" width="8640" height="5760"/>
+		<Crop x="0" y="0" width="8662" height="5784"/>
 		<Sensor black="512" white="16383"/>
 	</Camera>
 	<Camera make="SONY" model="ILCE-7">
