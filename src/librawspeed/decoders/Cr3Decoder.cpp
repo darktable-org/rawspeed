@@ -422,7 +422,7 @@ IsoMCanonIad1Box::IsoMCanonIad1Box(const AbstractIsoMBox& base)
     sensorBlackAreaTop = data.get<uint16_t>();
   }
 
-  writeLog(DEBUG_PRIO_WARNING,
+  writeLog(DEBUG_PRIO_EXTRA,
            "IAD1 sensor width: %d, height: %d, crop: %u, %u, %u, %u, black "
            "area left: %u, top: %u",
            sensorWidth, sensorHeight, sensorLeftBorder, sensorTopBorder,
