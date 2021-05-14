@@ -205,7 +205,7 @@
       <xs:simpleType>
         <xs:restriction base="xs:unsignedShort">
           <xs:minInclusive value="1296"/>
-          <xs:maxInclusive value="6080"/>
+          <xs:maxInclusive value="8662"/>
         </xs:restriction>
       </xs:simpleType>
       <xs:simpleType>
