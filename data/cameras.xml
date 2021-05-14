@@ -2151,6 +2151,23 @@
 			<Hint name="wb_offset" value="71"/>
 		</Hints>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS RP">
+		<ID make="Canon" model="EOS RP">Canon EOS RP</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2049" white="14558"/>
+		<Sensor black="513" white="14558" iso_list="50 100 125 200 250"/>
+		<Sensor black="513" white="11062" iso_list="160"/>
+		<Sensor black="2049" white="11062" iso_list="320 640 1250 2500 5000 10000"/>
+		<Sensor black="2044" white="14558" iso_list="40000 51200 102400"/>
+		<Hints>
+			<Hint name="wb_offset" value="71"/>
+		</Hints>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS R5">
 		<ID make="Canon" model="EOS R5">Canon EOS R5</ID>
 		<CFA width="2" height="2">
