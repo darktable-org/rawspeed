@@ -4,6 +4,11 @@
     Copyright (C) 2018 Roman Lebedev
     Copyright (C) 2021 Daniel Vogelbacher
 
+    Information about CR3 file structure and BMFF boxes
+    provided by Laurent Clévy and contributors
+    via https://github.com/lclevy/canon_cr3
+
+
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
     License as published by the Free Software Foundation; either
