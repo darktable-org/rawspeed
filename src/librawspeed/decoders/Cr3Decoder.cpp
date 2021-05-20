@@ -417,31 +417,85 @@ IsoMCanonIad1Box::IsoMCanonIad1Box(const AbstractIsoMBox& base)
   reserved3 = data.get<uint16_t>();
 
   if (2 == ind) { // ind is 2 for big images
-    sensorLeftBorder = data.get<uint16_t>();
-    sensorTopBorder = data.get<uint16_t>();
-    sensorRightBorder = data.get<uint16_t>();
-    sensorBottomBorder = data.get<uint16_t>();
-    data.skipBytes(2 * sizeof(uint16_t));
-    sensorBlackAreaLeft = data.get<uint16_t>();
-    data.skipBytes(4 * sizeof(uint16_t));
-    sensorBlackAreaTop = data.get<uint16_t>();
+    cropLeftOffset = data.get<uint16_t>();
+    cropTopOffset = data.get<uint16_t>();
+    cropRightOffset = data.get<uint16_t>();
+    cropBottomOffset = data.get<uint16_t>();
+
+    leftOpticalBlackLeftOffset = data.get<uint16_t>();
+    leftOpticalBlackTopOffset = data.get<uint16_t>();
+    leftOpticalBlackRightOffset = data.get<uint16_t>();
+    leftOpticalBlackBottomOffset = data.get<uint16_t>();
+
+    topOpticalBlackLeftOffset = data.get<uint16_t>();
+    topOpticalBlackTopOffset = data.get<uint16_t>();
+    topOpticalBlackRightOffset = data.get<uint16_t>();
+    topOpticalBlackBottomOffset = data.get<uint16_t>();
+
+    activeAreaLeftOffset = data.get<uint16_t>();
+    activeAreaTopOffset = data.get<uint16_t>();
+    activeAreaRightOffset = data.get<uint16_t>();
+    activeAreaBottomOffset = data.get<uint16_t>();
+  } else {
+    // We hit a small image box?!
+    ThrowRDE("IAD1 box contains small image information, but big image expected");
   }
 
   writeLog(DEBUG_PRIO_EXTRA,
            "IAD1 sensor width: %d, height: %d, crop: %u, %u, %u, %u, black "
            "area left: %u, top: %u",
-           sensorWidth, sensorHeight, sensorLeftBorder, sensorTopBorder,
-           sensorRightBorder, sensorBottomBorder, sensorBlackAreaLeft,
-           sensorBlackAreaTop);
+           sensorWidth, sensorHeight, cropLeftOffset, cropTopOffset,
+           cropRightOffset, cropBottomOffset, leftOpticalBlackRightOffset,
+           topOpticalBlackBottomOffset);
 
   // Validate.
   operator bool();
 }
 
 IsoMCanonIad1Box::operator bool() const {
-  // No fields yet to validate, IAD1 is unused for decoding.
+  if(!sensorWidth || !sensorHeight)
+    ThrowIPE("IAD1 sensor size unknown");
+  if(!cropRect().isThisInside(sensorRect()))
+    ThrowIPE("IAD1 crop rect is outside sensor rect");
   return true; // OK!
 }
+
+iRectangle2D IsoMCanonIad1Box::sensorRect() const {
+  return iRectangle2D(0, 0, sensorWidth, sensorHeight);
+}
+
+iRectangle2D IsoMCanonIad1Box::cropRect() const {
+  return iRectangle2D(
+    cropLeftOffset,
+    cropTopOffset,
+    (cropRightOffset+1)-cropLeftOffset,
+    (cropBottomOffset+1)-cropTopOffset);
+}
+
+iRectangle2D IsoMCanonIad1Box::leftOpticalBlackRect() const {
+  return iRectangle2D(
+    leftOpticalBlackLeftOffset,
+    leftOpticalBlackTopOffset,
+    (leftOpticalBlackRightOffset+1)-leftOpticalBlackLeftOffset,
+    (leftOpticalBlackBottomOffset+1)-leftOpticalBlackTopOffset);
+}
+
+iRectangle2D IsoMCanonIad1Box::topOpticalBlackRect() const {
+  return iRectangle2D(
+    topOpticalBlackLeftOffset,
+    topOpticalBlackTopOffset,
+    (topOpticalBlackRightOffset+1)-topOpticalBlackLeftOffset,
+    (topOpticalBlackBottomOffset+1)-topOpticalBlackTopOffset);
+}
+
+iRectangle2D IsoMCanonIad1Box::activeArea() const {
+  return iRectangle2D(
+    activeAreaLeftOffset,
+    activeAreaTopOffset,
+    (activeAreaRightOffset+1)-activeAreaLeftOffset,
+    (activeAreaBottomOffset+1)-activeAreaTopOffset);
+}
+
 
 CanonTimedMetadata::CanonTimedMetadata::Record::Record(ByteStream* bs) {
   assert(bs->getByteOrder() == Endianness::little);
@@ -634,23 +688,34 @@ void Cr3Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 
   setMetaData(meta, camId.make, camId.model, mode, iso);
+  writeLog(DEBUG_PRIO_EXTRA, "blacklevel for ISO %d is %d", mRaw->metadata.isoSpeed, mRaw->blackLevel);
 
-  // IAD1 described sensor constraints
+  // IAD1 describes sensor constraints
   const auto& iad1 = crawBox->CDI1()->IAD1();
 
   if (mRaw->blackAreas.empty()) {
-    mRaw->blackAreas.push_back(BlackArea(0, iad1->sensorBlackAreaLeft, true));
-    mRaw->blackAreas.push_back(BlackArea(0, iad1->sensorBlackAreaTop, false));
+    // IAD1 stores the rectangles for black areas.
+    auto leftOpticalBlack = iad1->leftOpticalBlackRect();
+    auto topOpticalBlack = iad1->topOpticalBlackRect();
+    if(leftOpticalBlack.dim.x >= 12+4) {
+      // if left optical black has >= 12+4 pixels, we reduce them by 12 as some
+      // models (EOS RP is known) has white pixels in this area.
+      // Yes, this is hacky, but IAD1 reports offset=0 which is either wrong or the white pixels
+      // are a camera bug and must be resolved in software.
+      leftOpticalBlack.pos.x += 12;
+      leftOpticalBlack.dim.x -= 12;
+    }
+    if(topOpticalBlack.dim.y >= 12+4) {
+      // Same must be done for horizontal pixels
+      topOpticalBlack.pos.y += 12;
+      topOpticalBlack.dim.y -= 12;
+    }
+    mRaw->blackAreas.push_back(BlackArea(leftOpticalBlack.pos.x, leftOpticalBlack.dim.x, true));
+    mRaw->blackAreas.push_back(BlackArea(topOpticalBlack.pos.y, topOpticalBlack.pos.y, false));
   }
 
   if (applyCrop) {
-    // IAD1 sensor parameters always crop one more pixel as needed.
-    // We add back the missing pixels to match official specifications.
-    iRectangle2D new_area(iad1->sensorLeftBorder, iad1->sensorTopBorder,
-                          iad1->sensorRightBorder - iad1->sensorLeftBorder + 1,
-                          iad1->sensorBottomBorder - iad1->sensorTopBorder + 1);
-
-    mRaw->subFrame(new_area);
+    mRaw->subFrame(iad1->cropRect());
   }
 }
 

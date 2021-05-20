@@ -200,18 +200,40 @@ public:
   uint16_t ind; // 0 = small, 1 = big
   uint16_t reserved2;
   uint16_t reserved3;
-  // Big image flags (we ignore small flags, not needed for decoding)
-  uint16_t sensorLeftBorder;
-  uint16_t sensorTopBorder;
-  uint16_t sensorRightBorder;
-  uint16_t sensorBottomBorder;
-  // followed by more unknown fields
-  uint16_t sensorBlackAreaLeft;
-  // followed by more unknown fields
-  uint16_t sensorBlackAreaTop;
-  // followed by more unknown fields
+
+  // Big image fields (we ignore small image, not needed for decoding)
+
+  // Crop rectangle
+  uint16_t cropLeftOffset;
+  uint16_t cropTopOffset;
+  uint16_t cropRightOffset;
+  uint16_t cropBottomOffset;
+
+  // Left optical black rectangle
+  uint16_t leftOpticalBlackLeftOffset;
+  uint16_t leftOpticalBlackTopOffset;
+  uint16_t leftOpticalBlackRightOffset;
+  uint16_t leftOpticalBlackBottomOffset;
+
+  // Top optical black rectangle
+  uint16_t topOpticalBlackLeftOffset;
+  uint16_t topOpticalBlackTopOffset;
+  uint16_t topOpticalBlackRightOffset;
+  uint16_t topOpticalBlackBottomOffset;
+
+  // Active area rectangle
+  uint16_t activeAreaLeftOffset;
+  uint16_t activeAreaTopOffset;
+  uint16_t activeAreaRightOffset;
+  uint16_t activeAreaBottomOffset;
 
   explicit IsoMCanonIad1Box(const AbstractIsoMBox& base);
+
+  iRectangle2D sensorRect() const;
+  iRectangle2D cropRect() const;
+  iRectangle2D leftOpticalBlackRect() const;
+  iRectangle2D topOpticalBlackRect() const;
+  iRectangle2D activeArea() const;
 };
 
 
