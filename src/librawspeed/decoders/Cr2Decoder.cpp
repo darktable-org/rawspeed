@@ -227,6 +227,12 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
     iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();
+  if(65535 == iso) {
+    // ISOSPEEDRATINGS is a SHORT EXIF value. For larger values, we have to look
+    // at RECOMMENDEDEXPOSUREINDEX (maybe Canon specific).
+    if (mRootIFD->hasEntryRecursive(RECOMMENDEDEXPOSUREINDEX))
+      iso = mRootIFD->getEntryRecursive(RECOMMENDEDEXPOSUREINDEX)->getU32();
+  }
 
   // Fetch the white balance
   try{
