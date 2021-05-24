@@ -125,11 +125,11 @@ struct CrxSubband {
   int32_t bandSize;
   uint64_t dataSize;
   int64_t dataOffset;
-  short rowStartAddOn;
-  short rowEndAddOn;
-  short colStartAddOn;
-  short colEndAddOn;
-  short levelShift;
+  int16_t rowStartAddOn;
+  int16_t rowEndAddOn;
+  int16_t colStartAddOn;
+  int16_t colEndAddOn;
+  int16_t levelShift;
 };
 
 struct CrxPlaneComp {
@@ -190,7 +190,7 @@ enum TileFlags {
   E_HAS_TILES_ON_THE_TOP = 8
 };
 
-int32_t exCoefNumTbl[144] = {
+static int32_t exCoefNumTbl[144] = {
     1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
     1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
     1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 2, 2, 1, 0, 0, 1, 1, 1, 1, 0, 0,
@@ -198,14 +198,14 @@ int32_t exCoefNumTbl[144] = {
     1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 1,
     1, 1, 1, 2, 2, 1, 1, 0, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-int32_t q_step_tbl[8] = {0x28, 0x2D, 0x33, 0x39, 0x40, 0x48};
+static int32_t q_step_tbl[8] = {0x28, 0x2D, 0x33, 0x39, 0x40, 0x48};
 
-uint32_t JS[32] = {1,     1,     1,     1,     2,      2,      2,      2,
+static uint32_t JS[32] = {1,     1,     1,     1,     2,      2,      2,      2,
                    4,     4,     4,     4,     8,      8,      8,      8,
                    0x10,  0x10,  0x20,  0x20,  0x40,   0x40,   0x80,   0x80,
                    0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000};
 
-uint32_t J[32] = {0, 0, 0, 0, 1,    1,    1,    1,    2,    2,   2,
+static uint32_t J[32] = {0, 0, 0, 0, 1,    1,    1,    1,    2,    2,   2,
                   2, 3, 3, 3, 3,    4,    4,    5,    5,    6,   6,
                   7, 7, 8, 9, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
@@ -221,7 +221,7 @@ static inline void crxFillBuffer(CrxBitstream* bitStrm) {
 
     if (sub.getSize() >= bytesToRead) {
       auto data = sub.getData(0, bytesToRead);
-      assert(bitStrm->mdatBuf.size() > 0);
+      assert(!bitStrm->mdatBuf.empty());
       ::memcpy(bitStrm->mdatBuf.data(), data, bytesToRead);
       bitStrm->curBufSize = bytesToRead;
     }
@@ -238,20 +238,20 @@ inline int crxBitstreamGetZeros(CrxBitstream* bitStrm) {
   int32_t result = 0;
 
   if (bitStrm->bitData) {
-    _BitScanReverse((DWORD*)&nonZeroBit, (DWORD)bitStrm->bitData);
+    _BitScanReverse(static_cast<DWORD*>(&nonZeroBit), static_cast<DWORD>(bitStrm->bitData));
     result = 31 - nonZeroBit;
     bitStrm->bitData <<= 32 - nonZeroBit;
     bitStrm->bitsLeft -= 32 - nonZeroBit;
   } else {
     uint32_t bitsLeft = bitStrm->bitsLeft;
-    while (1) {
+    while (true) {
       while (bitStrm->curPos + 4 <= bitStrm->curBufSize) {
         nextData = getByteSwapped(
-            *(uint32_t*)(bitStrm->mdatBuf.data() + bitStrm->curPos));
+            *reinterpret_cast<uint32_t*>(bitStrm->mdatBuf.data() + bitStrm->curPos));
         bitStrm->curPos += 4;
         crxFillBuffer(bitStrm);
         if (nextData) {
-          _BitScanReverse((DWORD*)&nonZeroBit, (DWORD)nextData);
+          _BitScanReverse(static_cast<DWORD*>(&nonZeroBit), static_cast<DWORD>(nextData));
           result = bitsLeft + 31 - nonZeroBit;
           bitStrm->bitData = nextData << (32 - nonZeroBit);
           bitStrm->bitsLeft = nonZeroBit;
@@ -267,8 +267,8 @@ inline int crxBitstreamGetZeros(CrxBitstream* bitStrm) {
         break;
       bitsLeft += 8;
     }
-    _BitScanReverse((DWORD*)&nonZeroBit, (DWORD)nextData);
-    result = (uint32_t)(bitsLeft + 7 - nonZeroBit);
+    _BitScanReverse(static_cast<DWORD*>(&nonZeroBit), static_cast<DWORD>(nextData));
+    result = static_cast<uint32_t>(bitsLeft + 7 - nonZeroBit);
     bitStrm->bitData = nextData << (32 - nonZeroBit);
     bitStrm->bitsLeft = nonZeroBit;
   }
@@ -286,7 +286,7 @@ inline uint32_t crxBitstreamGetBits(CrxBitstream* bitStrm, int bits) {
     // get them from stream
     if (bitStrm->curPos + 4 <= bitStrm->curBufSize) {
       nextWord = getByteSwapped(
-          *(uint32_t*)(bitStrm->mdatBuf.data() + bitStrm->curPos));
+          *reinterpret_cast<uint32_t*>(bitStrm->mdatBuf.data() + bitStrm->curPos));
       bitStrm->curPos += 4;
       crxFillBuffer(bitStrm);
       bitStrm->bitsLeft = 32 - (bits - bitsLeft);
@@ -366,7 +366,7 @@ inline void crxDecodeSymbolL1(CrxBandParam* param, int32_t doMedianPrediction,
   ++param->lineBuf1;
 }
 
-int crxDecodeLine(CrxBandParam* param) {
+static int crxDecodeLine(CrxBandParam* param) {
   int length = param->subbandWidth;
 
   param->lineBuf1[0] = param->lineBuf0[1];
@@ -450,14 +450,15 @@ inline void crxDecodeSymbolL1Rounded(CrxBandParam* param, int32_t doSym = 1,
   param->lineBuf1[1] = param->roundedBitsMask * 2 * code + (code >> 31) + sym;
 
   if (doCode) {
-    if (param->lineBuf0[2] > param->lineBuf0[1])
+    if (param->lineBuf0[2] > param->lineBuf0[1]) {
       code = (param->lineBuf0[2] - param->lineBuf0[1] + param->roundedBitsMask -
               1) >>
              param->roundedBits;
-    else
+    } else {
       code = -(
           (param->lineBuf0[1] - param->lineBuf0[2] + param->roundedBitsMask) >>
           param->roundedBits);
+    }
 
     param->kParam = crxPredictKParameter(param->kParam,
                                          (bitCode + 2 * _abs(code)) >> 1, 15);
@@ -467,7 +468,7 @@ inline void crxDecodeSymbolL1Rounded(CrxBandParam* param, int32_t doSym = 1,
   ++param->lineBuf1;
 }
 
-int crxDecodeLineRounded(CrxBandParam* param) {
+static int crxDecodeLineRounded(CrxBandParam* param) {
   int32_t valueReached = 0;
 
   param->lineBuf0[0] = param->lineBuf0[1];
@@ -537,7 +538,7 @@ int crxDecodeLineRounded(CrxBandParam* param) {
   return 0;
 }
 
-int crxDecodeLineNoRefPrevLine(CrxBandParam* param) {
+static int crxDecodeLineNoRefPrevLine(CrxBandParam* param) {
   int32_t i = 0;
 
   for (; i < param->subbandWidth - 1; i++) {
@@ -635,7 +636,7 @@ int crxDecodeLineNoRefPrevLine(CrxBandParam* param) {
   return 0;
 }
 
-int crxDecodeTopLine(CrxBandParam* param) {
+static int crxDecodeTopLine(CrxBandParam* param) {
   param->lineBuf1[0] = 0;
 
   int32_t length = param->subbandWidth;
@@ -712,7 +713,7 @@ int crxDecodeTopLine(CrxBandParam* param) {
   return 0;
 }
 
-int crxDecodeTopLineRounded(CrxBandParam* param) {
+static int crxDecodeTopLineRounded(CrxBandParam* param) {
   param->lineBuf1[0] = 0;
 
   int32_t length = param->subbandWidth;
@@ -791,7 +792,7 @@ int crxDecodeTopLineRounded(CrxBandParam* param) {
   return 0;
 }
 
-int crxDecodeTopLineNoRefPrevLine(CrxBandParam* param) {
+static int crxDecodeTopLineNoRefPrevLine(CrxBandParam* param) {
   param->lineBuf0[0] = 0;
   param->lineBuf1[0] = 0;
   int32_t length = param->subbandWidth;
@@ -874,7 +875,7 @@ int crxDecodeTopLineNoRefPrevLine(CrxBandParam* param) {
   return 0;
 }
 
-int crxDecodeLine(CrxBandParam* param, uint8_t* bandBuf) {
+static int crxDecodeLine(CrxBandParam* param, uint8_t* bandBuf) {
   if (!param || !bandBuf)
     return -1;
   if (param->curLine >= param->subbandHeight)
@@ -887,7 +888,7 @@ int crxDecodeLine(CrxBandParam* param, uint8_t* bandBuf) {
     param->kParam = 0;
     if (param->supportsPartial) {
       if (param->roundedBitsMask <= 0) {
-        param->lineBuf0 = (int32_t*)param->paramData;
+        param->lineBuf0 = param->paramData;
         param->lineBuf1 = param->lineBuf0 + lineLength;
         int32_t* lineBuf = param->lineBuf1 + 1;
         if (crxDecodeTopLine(param))
@@ -900,7 +901,7 @@ int crxDecodeLine(CrxBandParam* param, uint8_t* bandBuf) {
           while (param->roundedBitsMask >> param->roundedBits)
             ++param->roundedBits;
         }
-        param->lineBuf0 = (int32_t*)param->paramData;
+        param->lineBuf0 = param->paramData;
         param->lineBuf1 = param->lineBuf0 + lineLength;
         int32_t* lineBuf = param->lineBuf1 + 1;
         if (crxDecodeTopLineRounded(param))
@@ -909,8 +910,8 @@ int crxDecodeLine(CrxBandParam* param, uint8_t* bandBuf) {
         ++param->curLine;
       }
     } else {
-      param->lineBuf2 = (int32_t*)param->nonProgrData;
-      param->lineBuf0 = (int32_t*)param->paramData;
+      param->lineBuf2 = param->nonProgrData;
+      param->lineBuf0 = param->paramData;
       param->lineBuf1 = param->lineBuf0 + lineLength;
       int32_t* lineBuf = param->lineBuf1 + 1;
       if (crxDecodeTopLineNoRefPrevLine(param))
@@ -920,12 +921,12 @@ int crxDecodeLine(CrxBandParam* param, uint8_t* bandBuf) {
     }
   } else if (!param->supportsPartial) {
     int32_t lineLength = param->subbandWidth + 2;
-    param->lineBuf2 = (int32_t*)param->nonProgrData;
+    param->lineBuf2 = param->nonProgrData;
     if (param->curLine & 1) {
-      param->lineBuf1 = (int32_t*)param->paramData;
+      param->lineBuf1 = param->paramData;
       param->lineBuf0 = param->lineBuf1 + lineLength;
     } else {
-      param->lineBuf0 = (int32_t*)param->paramData;
+      param->lineBuf0 = param->paramData;
       param->lineBuf1 = param->lineBuf0 + lineLength;
     }
     int32_t* lineBuf = param->lineBuf1 + 1;
@@ -936,10 +937,10 @@ int crxDecodeLine(CrxBandParam* param, uint8_t* bandBuf) {
   } else if (param->roundedBitsMask <= 0) {
     int32_t lineLength = param->subbandWidth + 2;
     if (param->curLine & 1) {
-      param->lineBuf1 = (int32_t*)param->paramData;
+      param->lineBuf1 = param->paramData;
       param->lineBuf0 = param->lineBuf1 + lineLength;
     } else {
-      param->lineBuf0 = (int32_t*)param->paramData;
+      param->lineBuf0 = param->paramData;
       param->lineBuf1 = param->lineBuf0 + lineLength;
     }
     int32_t* lineBuf = param->lineBuf1 + 1;
@@ -950,10 +951,10 @@ int crxDecodeLine(CrxBandParam* param, uint8_t* bandBuf) {
   } else {
     int32_t lineLength = param->subbandWidth + 2;
     if (param->curLine & 1) {
-      param->lineBuf1 = (int32_t*)param->paramData;
+      param->lineBuf1 = param->paramData;
       param->lineBuf0 = param->lineBuf1 + lineLength;
     } else {
-      param->lineBuf0 = (int32_t*)param->paramData;
+      param->lineBuf0 = param->paramData;
       param->lineBuf1 = param->lineBuf0 + lineLength;
     }
     int32_t* lineBuf = param->lineBuf1 + 1;
@@ -965,7 +966,7 @@ int crxDecodeLine(CrxBandParam* param, uint8_t* bandBuf) {
   return 0;
 }
 
-int crxUpdateQparam(CrxSubband* subband) {
+static int crxUpdateQparam(CrxSubband* subband) {
   uint32_t bitCode = crxBitstreamGetZeros(&subband->bandParam->bitStream);
   if (bitCode >= 23)
     bitCode = crxBitstreamGetBits(&subband->bandParam->bitStream, 8);
@@ -989,7 +990,8 @@ inline int getSubbandRow(CrxSubband* band, int row) {
                                           : band->height - band->rowEndAddOn -
                                                 band->rowStartAddOn - 1);
 }
-int crxDecodeLineWithIQuantization(CrxSubband* band, CrxQStep* qStep) {
+
+static int crxDecodeLineWithIQuantization(CrxSubband* band, CrxQStep* qStep) {
   if (!band->dataSize) {
     memset(band->bandBuf, 0, band->bandSize);
     return 0;
@@ -1004,7 +1006,7 @@ int crxDecodeLineWithIQuantization(CrxSubband* band, CrxQStep* qStep) {
     return 0;
 
   // update band buffers
-  int32_t* bandBuf = (int32_t*)band->bandBuf;
+  int32_t* bandBuf = reinterpret_cast<int32_t*>(band->bandBuf);
   if (qStep) {
     // new version
     uint32_t* qStepTblPtr =
@@ -1047,7 +1049,7 @@ int crxDecodeLineWithIQuantization(CrxSubband* band, CrxQStep* qStep) {
   return 0;
 }
 
-void crxHorizontal53(int32_t* lineBufLA, int32_t* lineBufLB,
+static void crxHorizontal53(int32_t* lineBufLA, int32_t* lineBufLB,
                      CrxWaveletTransform* wavelet, uint32_t tileFlag) {
   int32_t* band0Buf = wavelet->subband0Buf;
   int32_t* band1Buf = wavelet->subband1Buf;
@@ -1114,7 +1116,7 @@ void crxHorizontal53(int32_t* lineBufLA, int32_t* lineBufLB,
   }
 }
 
-int32_t* crxIdwt53FilterGetLine(CrxPlaneComp* comp, int32_t level) {
+static int32_t* crxIdwt53FilterGetLine(CrxPlaneComp* comp, int32_t level) {
   int32_t* result =
       comp->wvltTransform[level].lineBuf[(comp->wvltTransform[level].fltTapH -
                                           comp->wvltTransform[level].curH + 5) %
@@ -1124,12 +1126,12 @@ int32_t* crxIdwt53FilterGetLine(CrxPlaneComp* comp, int32_t level) {
   return result;
 }
 
-int crxIdwt53FilterDecode(CrxPlaneComp* comp, int32_t level, CrxQStep* qStep) {
+static int crxIdwt53FilterDecode(CrxPlaneComp* comp, int32_t level, CrxQStep* qStep) {
   if (comp->wvltTransform[level].curH)
     return 0;
 
   CrxSubband* sband = comp->subBands + 3 * level;
-  CrxQStep* qStepLevel = qStep ? qStep + level : 0;
+  CrxQStep* qStepLevel = qStep ? qStep + level : nullptr;
 
   if (comp->wvltTransform[level].height - 3 <=
           comp->wvltTransform[level].curLine &&
@@ -1160,7 +1162,7 @@ int crxIdwt53FilterDecode(CrxPlaneComp* comp, int32_t level, CrxQStep* qStep) {
   return 0;
 }
 
-int crxIdwt53FilterTransform(CrxPlaneComp* comp, uint32_t level) {
+static int crxIdwt53FilterTransform(CrxPlaneComp* comp, uint32_t level) {
   CrxWaveletTransform* wavelet = comp->wvltTransform + level;
 
   if (wavelet->curH)
@@ -1348,14 +1350,14 @@ int crxIdwt53FilterTransform(CrxPlaneComp* comp, uint32_t level) {
   return 0;
 }
 
-int crxIdwt53FilterInitialize(CrxPlaneComp* comp, int32_t level,
+static int crxIdwt53FilterInitialize(CrxPlaneComp* comp, int32_t level,
                               CrxQStep* qStep) {
   if (level == 0)
     return 0;
 
   for (int curLevel = 0, curBand = 0; curLevel < level;
        curLevel++, curBand += 3) {
-    CrxQStep* qStepLevel = qStep ? qStep + curLevel : 0;
+    CrxQStep* qStepLevel = qStep ? qStep + curLevel : nullptr;
     CrxWaveletTransform* wavelet = comp->wvltTransform + curLevel;
     if (curLevel)
       wavelet[0].subband0Buf = crxIdwt53FilterGetLine(comp, curLevel - 1);
@@ -1492,10 +1494,10 @@ int crxIdwt53FilterInitialize(CrxPlaneComp* comp, int32_t level,
   return 0;
 }
 
-void crxFreeSubbandData(CrxImage* image, CrxPlaneComp* comp) {
+static void crxFreeSubbandData(CrxImage* image, CrxPlaneComp* comp) {
   if (comp->compBuf) {
     free(comp->compBuf);
-    comp->compBuf = 0;
+    comp->compBuf = nullptr;
   }
 
   if (!comp->subBands)
@@ -1504,16 +1506,16 @@ void crxFreeSubbandData(CrxImage* image, CrxPlaneComp* comp) {
   for (int32_t i = 0; i < image->subbandCount; i++) {
     if (comp->subBands[i].bandParam) {
       free(comp->subBands[i].bandParam);
-      comp->subBands[i].bandParam = 0LL;
+      comp->subBands[i].bandParam = nullptr;
     }
 
-    comp->subBands[i].bandBuf = 0;
+    comp->subBands[i].bandBuf = nullptr;
     comp->subBands[i].bandSize = 0;
   }
 }
 
-void crxConvertPlaneLine(CrxImage* img, int imageRow, int imageCol = 0,
-                         int plane = 0, int32_t* lineData = 0,
+static void crxConvertPlaneLine(CrxImage* img, int imageRow, int imageCol = 0,
+                         int plane = 0, int32_t* lineData = nullptr,
                          int lineLength = 0) {
   if (lineData) {
     uint64_t rawOffset = 4 * img->planeWidth * imageRow + 2 * imageCol;
@@ -1581,13 +1583,13 @@ void crxConvertPlaneLine(CrxImage* img, int imageRow, int imageCol = 0,
   }
 }
 
-int crxParamInit(CrxImage* img, CrxBandParam** param,
+static int crxParamInit(CrxImage* img, CrxBandParam** param,
                  uint64_t subbandMdatOffset, uint64_t subbandDataSize,
                  uint32_t subbandWidth, uint32_t subbandHeight,
                  bool supportsPartial, uint32_t roundedBitsMask) {
   int32_t progrDataSize = supportsPartial ? 0 : sizeof(int32_t) * subbandWidth;
   int32_t paramLength = 2 * subbandWidth + 4;
-  uint8_t* paramBuf = 0;
+  uint8_t* paramBuf = nullptr;
 
   paramBuf = (uint8_t*)calloc(
       1, sizeof(CrxBandParam) + sizeof(int32_t) * paramLength + progrDataSize);
@@ -1595,13 +1597,13 @@ int crxParamInit(CrxImage* img, CrxBandParam** param,
   if (!paramBuf)
     return -1;
 
-  *param = (CrxBandParam*)paramBuf;
+  *param = reinterpret_cast<CrxBandParam*>(paramBuf);
 
   paramBuf += sizeof(CrxBandParam);
 
-  (*param)->paramData = (int32_t*)paramBuf;
+  (*param)->paramData = reinterpret_cast<int32_t*>(paramBuf);
   (*param)->nonProgrData =
-      progrDataSize ? (*param)->paramData + paramLength : 0;
+      progrDataSize ? (*param)->paramData + paramLength : nullptr;
   (*param)->subbandWidth = subbandWidth;
   (*param)->subbandHeight = subbandHeight;
   (*param)->roundedBits = 0;
@@ -1621,11 +1623,11 @@ int crxParamInit(CrxImage* img, CrxBandParam** param,
   return 0;
 }
 
-int crxSetupSubbandData(CrxImage* img, CrxPlaneComp* planeComp,
+static int crxSetupSubbandData(CrxImage* img, CrxPlaneComp* planeComp,
                         const CrxTile* tile, uint32_t mdatOffset) {
-  long compDataSize = 0;
-  long waveletDataOffset = 0;
-  long compCoeffDataOffset = 0;
+  int64_t compDataSize = 0;
+  int64_t waveletDataOffset = 0;
+  int64_t compCoeffDataOffset = 0;
   int32_t toSubbands = 3 * img->levels + 1;
   int32_t transformWidth = 0;
 
@@ -1646,12 +1648,14 @@ int crxSetupSubbandData(CrxImage* img, CrxPlaneComp* planeComp,
     compCoeffDataOffset = compDataSize;
 
     // calc wavelet line buffer sizes (always at one level up from current)
-    for (int level = 0; level < img->levels; ++level)
-      if (level < img->levels - 1)
+    for (int level = 0; level < img->levels; ++level) {
+      if (level < img->levels - 1) {
         compDataSize += 8 * sizeof(int32_t) *
                         planeComp->subBands[3 * (level + 1) + 2].width;
-      else
+      } else {
         compDataSize += 8 * sizeof(int32_t) * tile->width;
+      }
+    }
   }
 
   // buffer allocation
@@ -1673,12 +1677,12 @@ int crxSetupSubbandData(CrxImage* img, CrxPlaneComp* planeComp,
 
   // wavelet data initialisation
   if (img->levels) {
-    CrxWaveletTransform* waveletTransforms =
-        (CrxWaveletTransform*)(planeComp->compBuf + waveletDataOffset);
-    int32_t* paramData = (int32_t*)(planeComp->compBuf + compCoeffDataOffset);
+    auto waveletTransforms =
+        reinterpret_cast<CrxWaveletTransform*>(planeComp->compBuf + waveletDataOffset);
+    auto paramData = reinterpret_cast<int32_t*>(planeComp->compBuf + compCoeffDataOffset);
 
     planeComp->wvltTransform = waveletTransforms;
-    waveletTransforms[0].subband0Buf = (int32_t*)subbands->bandBuf;
+    waveletTransforms[0].subband0Buf = reinterpret_cast<int32_t*>(subbands->bandBuf);
 
     for (int level = 0; level < img->levels; ++level) {
       int32_t band = 3 * level + 1;
@@ -1709,11 +1713,11 @@ int crxSetupSubbandData(CrxImage* img, CrxPlaneComp* planeComp,
       waveletTransforms[level].curLine = 0;
       waveletTransforms[level].curH = 0;
       waveletTransforms[level].fltTapH = 0;
-      waveletTransforms[level].subband1Buf = (int32_t*)subbands[band].bandBuf;
+      waveletTransforms[level].subband1Buf = reinterpret_cast<int32_t*>(subbands[band].bandBuf);
       waveletTransforms[level].subband2Buf =
-          (int32_t*)subbands[band + 1].bandBuf;
+          reinterpret_cast<int32_t*>(subbands[band + 1].bandBuf);
       waveletTransforms[level].subband3Buf =
-          (int32_t*)subbands[band + 2].bandBuf;
+          reinterpret_cast<int32_t*>(subbands[band + 2].bandBuf);
 
       paramData = waveletTransforms[level].lineBuf[7] + transformWidth;
     }
@@ -1742,7 +1746,7 @@ int crxSetupSubbandData(CrxImage* img, CrxPlaneComp* planeComp,
 }
 
 int CrxDecompressor::crxDecodePlane(void* p, uint32_t planeNumber) {
-  CrxImage* img = (CrxImage*)p;
+  auto img = static_cast<CrxImage*>(p);
   int imageRow = 0;
   for (int tRow = 0; tRow < img->tileRows; tRow++) {
     int imageCol = 0;
@@ -1780,7 +1784,7 @@ int CrxDecompressor::crxDecodePlane(void* p, uint32_t planeNumber) {
           if (crxDecodeLine(planeComp->subBands->bandParam,
                             planeComp->subBands->bandBuf))
             return -1;
-          int32_t* lineData = (int32_t*)planeComp->subBands->bandBuf;
+          auto lineData = reinterpret_cast<int32_t*>(planeComp->subBands->bandBuf);
           crxConvertPlaneLine(img, imageRow + i, imageCol, planeNumber,
                               lineData, tile->width);
         }
@@ -1793,7 +1797,7 @@ int CrxDecompressor::crxDecodePlane(void* p, uint32_t planeNumber) {
   return 0;
 }
 
-uint32_t crxReadQP(CrxBitstream* bitStrm, int32_t kParam) {
+static uint32_t crxReadQP(CrxBitstream* bitStrm, int32_t kParam) {
   uint32_t qp = crxBitstreamGetZeros(bitStrm);
   if (qp >= 23)
     qp = crxBitstreamGetBits(bitStrm, 8);
@@ -1803,7 +1807,7 @@ uint32_t crxReadQP(CrxBitstream* bitStrm, int32_t kParam) {
   return qp;
 }
 
-void crxDecodeGolombTop(CrxBitstream* bitStrm, int32_t width, int32_t* lineBuf,
+static void crxDecodeGolombTop(CrxBitstream* bitStrm, int32_t width, int32_t* lineBuf,
                         int32_t* kParam) {
   lineBuf[0] = 0;
   while (width-- > 0) {
@@ -1816,7 +1820,7 @@ void crxDecodeGolombTop(CrxBitstream* bitStrm, int32_t width, int32_t* lineBuf,
   lineBuf[1] = lineBuf[0] + 1;
 }
 
-void crxDecodeGolombNormal(CrxBitstream* bitStrm, int32_t width,
+static void crxDecodeGolombNormal(CrxBitstream* bitStrm, int32_t width,
                            int32_t* lineBuf0, int32_t* lineBuf1,
                            int32_t* kParam) {
   lineBuf1[0] = lineBuf0[1];
@@ -1837,7 +1841,7 @@ void crxDecodeGolombNormal(CrxBitstream* bitStrm, int32_t width,
   lineBuf1[1] = lineBuf1[0] + 1;
 }
 
-int crxMakeQStep(CrxImage* img, CrxTile* tile, int32_t* qpTable,
+static int crxMakeQStep(CrxImage* img, CrxTile* tile, int32_t* qpTable,
                  uint32_t totalQP) {
   if (img->levels > 3 || img->levels < 1)
     return -1;
@@ -1856,7 +1860,7 @@ int crxMakeQStep(CrxImage* img, CrxTile* tile, int32_t* qpTable,
 
   if (!tile->qStep)
     return -1;
-  uint32_t* qStepTbl = (uint32_t*)(tile->qStep + img->levels);
+  auto qStepTbl = reinterpret_cast<uint32_t*>(tile->qStep + img->levels);
   CrxQStep* qStep = tile->qStep;
   uint8_t curr_level = img->levels;
   while (curr_level > 0) {
@@ -1911,13 +1915,15 @@ int crxMakeQStep(CrxImage* img, CrxTile* tile, int32_t* qpTable,
       qStep->qStepTbl = qStepTbl;
       qStep->width = qpWidth;
       qStep->height = qpHeight;
-      for (int qpRow = 0; qpRow < qpHeight; ++qpRow)
-        for (int qpCol = 0; qpCol < qpWidth; ++qpCol, ++qStepTbl, ++qpTable)
-          if (*qpTable / 6 >= 6)
+      for (int qpRow = 0; qpRow < qpHeight; ++qpRow) {
+        for (int qpCol = 0; qpCol < qpWidth; ++qpCol, ++qStepTbl, ++qpTable) {
+          if (*qpTable / 6 >= 6) {
             *qStepTbl = q_step_tbl[*qpTable % 6] * (1 << (*qpTable / 6 + 26));
-          else
+          } else {
             *qStepTbl = q_step_tbl[*qpTable % 6] >> (6 - *qpTable / 6);
-
+          }
+        }
+      }
       --curr_level;
       break;
     default:
@@ -1928,9 +1934,9 @@ int crxMakeQStep(CrxImage* img, CrxTile* tile, int32_t* qpTable,
 }
 
 inline void crxSetupSubbandIdx(const IsoMCanonCmp1Box* hdr, CrxImage* img,
-                               CrxSubband* band, int level, short colStartIdx,
-                               short bandWidthExCoef, short rowStartIdx,
-                               short bandHeightExCoef) {
+                               CrxSubband* band, int level, int16_t colStartIdx,
+                               int16_t bandWidthExCoef, int16_t rowStartIdx,
+                               int16_t bandHeightExCoef) {
   if (hdr->version == 0x200) {
     band->rowStartAddOn = rowStartIdx;
     band->rowEndAddOn = bandHeightExCoef;
@@ -1946,7 +1952,7 @@ inline void crxSetupSubbandIdx(const IsoMCanonCmp1Box* hdr, CrxImage* img,
   }
 }
 
-int crxProcessSubbands(const IsoMCanonCmp1Box* hdr, CrxImage* img,
+static int crxProcessSubbands(const IsoMCanonCmp1Box* hdr, CrxImage* img,
                        CrxTile* tile, CrxPlaneComp* comp) {
   CrxSubband* band = comp->subBands + img->subbandCount - 1; // set to last band
   uint32_t bandHeight = tile->height;
@@ -2027,7 +2033,7 @@ int crxProcessSubbands(const IsoMCanonCmp1Box* hdr, CrxImage* img,
   return 0;
 }
 
-int crxReadSubbandHeaders(const IsoMCanonCmp1Box* hdr, CrxImage* img,
+static int crxReadSubbandHeaders(const IsoMCanonCmp1Box* hdr, CrxImage* img,
                           CrxTile* tile, CrxPlaneComp* comp,
                           const uint8_t** subbandMdatPtr, int32_t* mdatSize) {
   if (!img->subbandCount)
@@ -2056,8 +2062,8 @@ int crxReadSubbandHeaders(const IsoMCanonCmp1Box* hdr, CrxImage* img,
 
     band->dataOffset = subbandOffset;
     band->kParam = 0;
-    band->bandParam = 0;
-    band->bandBuf = 0;
+    band->bandParam = nullptr;
+    band->bandBuf = nullptr;
     band->bandSize = 0;
 
     if (hdrSign == 0xFF03) {
@@ -2080,9 +2086,7 @@ int crxReadSubbandHeaders(const IsoMCanonCmp1Box* hdr, CrxImage* img,
       band->qParam = 0;
       band->dataSize = subbandSize - sgetn(2, *subbandMdatPtr + 16);
       band->qStepBase = sgetn(4, *subbandMdatPtr + 12);
-      ;
       band->qStepMult = sgetn(2, *subbandMdatPtr + 10);
-      ;
     }
 
     subbandOffset += subbandSize;
@@ -2094,26 +2098,26 @@ int crxReadSubbandHeaders(const IsoMCanonCmp1Box* hdr, CrxImage* img,
   return 0;
 }
 
-int crxReadImageHeaders(const IsoMCanonCmp1Box* hdr, CrxImage* img) {
+static int crxReadImageHeaders(const IsoMCanonCmp1Box* hdr, CrxImage* img) {
   int nTiles = img->tileRows * img->tileCols;
 
   if (!nTiles)
     ThrowRDE("Crx decompression error");
 
   if (!img->tiles) {
-    img->tiles = (CrxTile*)calloc(
+    img->tiles = static_cast<CrxTile*>(calloc(
         sizeof(CrxTile) * nTiles +
             sizeof(CrxPlaneComp) * nTiles * img->nPlanes +
             sizeof(CrxSubband) * nTiles * img->nPlanes * img->subbandCount,
-        1);
+        1));
 
     if (!img->tiles)
       ThrowRDE("Crx decompression error");
 
     // memory areas in allocated chunk
     CrxTile* tile = img->tiles;
-    CrxPlaneComp* comps = (CrxPlaneComp*)(tile + nTiles);
-    CrxSubband* bands = (CrxSubband*)(comps + img->nPlanes * nTiles);
+    auto comps = reinterpret_cast<CrxPlaneComp*>(tile + nTiles);
+    auto bands = reinterpret_cast<CrxSubband*>(comps + img->nPlanes * nTiles);
 
     for (int curTile = 0; curTile < nTiles; curTile++, tile++) {
       tile->tileFlag = 0; // tile neighbouring flags
@@ -2159,14 +2163,14 @@ int crxReadImageHeaders(const IsoMCanonCmp1Box* hdr, CrxImage* img) {
           comp->supportsPartial = true;
           comp->tileFlag = tile->tileFlag;
           comp->subBands = band;
-          comp->compBuf = 0;
-          comp->wvltTransform = 0;
+          comp->compBuf = nullptr;
+          comp->wvltTransform = nullptr;
           if (img->subbandCount) {
             for (int curBand = 0; curBand < img->subbandCount;
                  curBand++, band++) {
               band->supportsPartial = false;
               band->qParam = 4;
-              band->bandParam = 0;
+              band->bandParam = nullptr;
               band->dataSize = 0;
             }
           }
@@ -2202,7 +2206,7 @@ int crxReadImageHeaders(const IsoMCanonCmp1Box* hdr, CrxImage* img) {
 
     tile->tileSize = sgetn(4, dataPtr + 4);
     tile->dataOffset = tileOffset;
-    tile->qStep = 0;
+    tile->qStep = nullptr;
     if (hdrSize == 16) {
       // extended header data - terminated by 0 bytes
       if (sgetn(2, dataPtr + 18) != 0)
@@ -2278,9 +2282,9 @@ int crxReadImageHeaders(const IsoMCanonCmp1Box* hdr, CrxImage* img) {
 
       crxFillBuffer(&bitStrm);
 
-      unsigned int qpWidth = (tile->width >> 3) + ((tile->width & 7) != 0);
-      unsigned int qpHeight = (tile->height >> 1) + (tile->height & 1);
-      unsigned long totalQP = qpHeight * qpWidth;
+      uint32_t qpWidth = (tile->width >> 3) + ((tile->width & 7) != 0);
+      uint32_t qpHeight = (tile->height >> 1) + (tile->height & 1);
+      uint64_t totalQP = static_cast<uint64_t>(qpHeight) * static_cast<uint64_t>(qpWidth);
 
       try {
         std::vector<int32_t> qpTable(totalQP + 2 * (qpWidth + 2));
@@ -2313,7 +2317,7 @@ int crxReadImageHeaders(const IsoMCanonCmp1Box* hdr, CrxImage* img) {
   return 0;
 }
 
-int crxSetupImageData(const IsoMCanonCmp1Box* hdr, CrxImage* img,
+static int crxSetupImageData(const IsoMCanonCmp1Box* hdr, CrxImage* img,
                       int16_t* outBuf) {
   int IncrBitTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0};
 
@@ -2332,7 +2336,7 @@ int crxSetupImageData(const IsoMCanonCmp1Box* hdr, CrxImage* img,
       img->planeHeight - hdr->tileHeight * (img->tileRows - 1) < 0x16)
     ThrowRDE("Crx decompression error");
 
-  img->tiles = 0;
+  img->tiles = nullptr;
   img->levels = hdr->imageLevels;
   img->subbandCount = 3 * img->levels + 1; // 3 bands per level + one last LL
   img->nPlanes = hdr->nPlanes;
@@ -2341,8 +2345,8 @@ int crxSetupImageData(const IsoMCanonCmp1Box* hdr, CrxImage* img,
   img->samplePrecision = hdr->nBits + IncrBitTable[4 * hdr->encType + 2] + 1;
   img->mdatOffset = hdr->mdatHdrSize; // after header, plane data follows
   img->mdatHdrSize = hdr->mdatHdrSize;
-  img->planeBuf = 0;
-  img->outBufs[0] = img->outBufs[1] = img->outBufs[2] = img->outBufs[3] = 0;
+  img->planeBuf = nullptr;
+  img->outBufs[0] = img->outBufs[1] = img->outBufs[2] = img->outBufs[3] = nullptr;
 
   // The encoding type 3 needs all 4 planes to be decoded to generate row of
   // RGGB values. It seems to be using some other colour space for raw encoding
@@ -2402,7 +2406,7 @@ int crxSetupImageData(const IsoMCanonCmp1Box* hdr, CrxImage* img,
   return crxReadImageHeaders(hdr, img);
 }
 
-int crxFreeImageData(CrxImage* img) {
+static int crxFreeImageData(CrxImage* img) {
   CrxTile* tile = img->tiles;
   int nTiles = img->tileRows * img->tileCols;
 
@@ -2415,12 +2419,12 @@ int crxFreeImageData(CrxImage* img) {
         free(tile[curTile].qStep);
     }
     free(img->tiles);
-    img->tiles = 0;
+    img->tiles = nullptr;
   }
 
   if (img->planeBuf) {
     free(img->planeBuf);
-    img->planeBuf = 0;
+    img->planeBuf = nullptr;
   }
 
   return 0;
@@ -2475,7 +2479,7 @@ void CrxDecompressor::decode(const IsoMCanonCmp1Box& cmp1Box,
   auto storage = rawspeed::Buffer::Create(bufLen);
   const rawspeed::Buffer outBuf(storage.get(), bufLen);
 
-  if (crxSetupImageData(&hdr, &img, (int16_t*)storage.get())) {
+  if (crxSetupImageData(&hdr, &img, reinterpret_cast<int16_t*>(storage.get()))) {
     ThrowRDE("Crx image setup failed");
   }
   crxLoadDecodeLoop(&img, hdr.nPlanes);
