@@ -67,6 +67,12 @@ inline Endianness getHostEndianness() {
 #define BSWAP64(A) __builtin_bswap64(A)
 #endif
 
+inline int8_t getByteSwapped(int8_t v) {
+  return v;
+}
+inline uint8_t getByteSwapped(uint8_t v) {
+  return v;
+}
 inline int16_t getByteSwapped(int16_t v) {
   return static_cast<int16_t>(BSWAP16(static_cast<uint16_t>(v)));
 }

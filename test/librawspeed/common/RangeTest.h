@@ -71,6 +71,29 @@ template <typename T>
 }
 
 template <typename T>
+::testing::AssertionResult RangesNest(const char* m_expr, const char* n_expr,
+                                      const T& outer, const T& inner) {
+  if (RangesAreNested(outer, inner))
+    return ::testing::AssertionSuccess();
+
+  return ::testing::AssertionFailure()
+         << "Range " << m_expr << " (" << outer << ") does not contain range "
+         << n_expr << " (" << inner << ")";
+}
+
+template <typename T>
+::testing::AssertionResult RangesDontNest(const char* m_expr,
+                                          const char* n_expr, const T& outer,
+                                          const T& inner) {
+  if (!RangesAreNested(outer, inner))
+    return ::testing::AssertionSuccess();
+
+  return ::testing::AssertionFailure()
+         << "Range " << m_expr << " (" << outer << ") does contain range "
+         << n_expr << " (" << inner << ")";
+}
+
+template <typename T>
 ::testing::AssertionResult RangesOverlap(const char* m_expr, const char* n_expr,
                                          const T& lhs, const T& rhs) {
   if (!RangesOverlap(lhs, lhs) || !RangesOverlap(rhs, rhs))
@@ -139,5 +162,20 @@ static const std::set<twoRangesType> AllOverlapped{
     std::make_tuple(2, 2, 2, 0), std::make_tuple(2, 2, 2, 1),
     std::make_tuple(2, 2, 2, 2),
 };
+
+static const std::set<twoRangesType> AllNested{
+    std::make_tuple(0, 0, 0, 0), std::make_tuple(0, 1, 0, 0),
+    std::make_tuple(0, 1, 0, 1), std::make_tuple(0, 1, 1, 0),
+    std::make_tuple(0, 2, 0, 0), std::make_tuple(0, 2, 0, 1),
+    std::make_tuple(0, 2, 0, 2), std::make_tuple(0, 2, 1, 0),
+    std::make_tuple(0, 2, 1, 1), std::make_tuple(0, 2, 2, 0),
+    std::make_tuple(1, 0, 1, 0), std::make_tuple(1, 1, 1, 0),
+    std::make_tuple(1, 1, 1, 1), std::make_tuple(1, 1, 2, 0),
+    std::make_tuple(1, 2, 1, 0), std::make_tuple(1, 2, 1, 1),
+    std::make_tuple(1, 2, 1, 2), std::make_tuple(1, 2, 2, 0),
+    std::make_tuple(1, 2, 2, 1), std::make_tuple(2, 0, 2, 0),
+    std::make_tuple(2, 1, 2, 0), std::make_tuple(2, 1, 2, 1),
+    std::make_tuple(2, 2, 2, 0), std::make_tuple(2, 2, 2, 1),
+    std::make_tuple(2, 2, 2, 2)};
 
 } // namespace rawspeed_test

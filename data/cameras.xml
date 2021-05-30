@@ -437,6 +437,23 @@
 				<Hint name="invert_sraw_wb" value=""/>
 			</Hints>
 		</Camera>
+	<Camera make="Canon" model="Canon EOS 90D">
+		<ID make="Canon" model="EOS 90D">Canon EOS 90D</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2049" white="13660"/>
+		<Sensor black="512" white="13036" iso_list="100 125"/>
+		<Sensor black="512" white="10852" iso_list="160"/>
+		<Sensor black="512" white="13660" iso_list="200 250"/>
+		<Sensor black="2049" white="10852" iso_list="320 640 1250 2500 5000 10000 20000"/>
+		<Hints>
+			<Hint name="wb_offset" value="71"/>
+		</Hints>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS 700D">
 		<ID make="Canon" model="EOS 700D">Canon EOS 700D</ID>
 		<CFA width="2" height="2">
@@ -495,6 +512,26 @@
 			<Alias id="EOS REBEL T7i">Canon EOS REBEL T7i</Alias>
 			<Alias id="EOS Kiss X9i">Canon EOS Kiss X9i</Alias>
 		</Aliases>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS 850D">
+		<ID make="Canon" model="EOS 850D">Canon EOS 850D</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2049" white="14338"/>
+		<Sensor black="511" white="11606" iso_list="100 125"/>
+		<Sensor black="512" white="10439" iso_list="160"/>
+		<Sensor black="511" white="14338" iso_list="200 250"/>
+		<Sensor black="2048" white="10439" iso_list="320 640 1250 2500 5000"/>
+		<Aliases>
+			<Alias id="EOS Rebel T8i">Canon EOS Rebel T8i</Alias>
+		</Aliases>
+		<Hints>
+			<Hint name="wb_offset" value="71"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS 760D">
 		<ID make="Canon" model="EOS 760D">Canon EOS 760D</ID>
@@ -1448,6 +1485,110 @@
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS-1D X Mark III">
+		<ID make="Canon" model="EOS-1D X Mark III">Canon EOS-1D X Mark III</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2048" white="16050"/>
+		<Sensor black="512" white="16050" iso_list="50 100 125 160 200 250"/>
+		<Sensor black="2043" white="16050" iso_list="102400"/>
+		<Sensor black="2036" white="16050" iso_list="204800"/>
+		<Sensor black="2030" white="16050" iso_list="409600"/>
+		<Sensor black="2058" white="16050" iso_list="819200"/>
+		<Hints>
+			<Hint name="wb_offset" value="85"/>
+		</Hints>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R">
+		<ID make="Canon" model="EOS R">Canon EOS R</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2049" white="14448"/>
+		<Sensor black="511" white="14008" iso_list="50 100 125"/>
+		<Sensor black="511" white="10467" iso_list="160"/>
+		<Sensor black="511" white="14448" iso_list="200 250"/>
+		<Sensor black="2048" white="10467" iso_list="320 640 1250 2500 5000 10000 20000"/>
+		<Hints>
+			<Hint name="wb_offset" value="71"/>
+		</Hints>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS RP">
+		<ID make="Canon" model="EOS RP">Canon EOS RP</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2049" white="14558"/>
+		<Sensor black="513" white="14558" iso_list="50 100 125 200 250"/>
+		<Sensor black="513" white="11062" iso_list="160"/>
+		<Sensor black="2049" white="11062" iso_list="320 640 1250 2500 5000 10000"/>
+		<Sensor black="2044" white="14558" iso_list="40000 51200 102400"/>
+		<Hints>
+			<Hint name="wb_offset" value="71"/>
+		</Hints>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R5">
+		<ID make="Canon" model="EOS R5">Canon EOS R5</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2048" white="16384"/>
+		<Sensor black="512" white="16384" iso_list="50 100 125 160 200 250"/>
+		<Sensor black="2042" white="16384" iso_list="51200"/>
+		<Sensor black="2037" white="16384" iso_list="102400"/>
+		<Hints>
+			<Hint name="wb_offset" value="85"/>
+		</Hints>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R6">
+		<ID make="Canon" model="EOS R6">Canon EOS R6</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2048" white="16384"/>
+		<Sensor black="512" white="16384" iso_list="50 100 125 160 200 250"/>
+		<Sensor black="2040" white="16384" iso_list="204800"/>
+		<Hints>
+			<Hint name="wb_offset" value="85"/>
+		</Hints>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS M50">
+		<ID make="Canon" model="EOS M50">Canon EOS M50</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2053" white="14338"/>
+		<Sensor black="511" white="11892" iso_list="100 125"/>
+		<Sensor black="512" white="10749" iso_list="160"/>
+		<Sensor black="511" white="14338" iso_list="200 250"/>
+		<Sensor black="2050" white="10749" iso_list="320 640 1250 2500 5000"/>
+		<Sensor black="2048" white="14338" iso_list="16000 20000"/>
+		<Aliases>
+			<Alias id="EOS KISS M">Canon EOS KISS M</Alias>
+		</Aliases>
+		<Hints>
+			<Hint name="wb_offset" value="71"/>
 		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot Pro1">

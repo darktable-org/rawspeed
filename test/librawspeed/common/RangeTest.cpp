@@ -114,6 +114,16 @@ TEST(RangeTest, UnsignedZeroSizeContainsTest) {
   ASSERT_PRED_FORMAT2(RangeDoesntContain, r0, 4U);
 }
 
+// let's test nesting. the test is symmetrical.
+
+TEST_P(TwoRangesTest, NestingDataTest) {
+  if (AllNested.find(GetParam()) != AllNested.end()) {
+    ASSERT_PRED_FORMAT2(RangesNest, r0, r1);
+  } else {
+    ASSERT_PRED_FORMAT2(RangesDontNest, r0, r1);
+  }
+}
+
 // now let's test overlap. the test is symmetrical.
 
 TEST_P(TwoRangesTest, OverlapDataTest) {
