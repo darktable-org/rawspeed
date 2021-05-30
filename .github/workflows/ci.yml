@@ -31,7 +31,7 @@ jobs:
           - os: linux
             compiler: { compiler: GNU,  CC: gcc-10,   CXX: g++-10, GCOV: gcov-10 }
             flavor: CodeQLAnalysis
-    container: debian:testing-slim
+    container: debian:unstable-slim
     steps:
       - name: Configure APT
         env:
