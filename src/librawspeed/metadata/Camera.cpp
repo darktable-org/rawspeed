@@ -77,9 +77,7 @@ Camera::Camera(const Camera* camera, uint32_t alias_num) : cfa(iPoint2D(0, 0)) {
 }
 
 #ifdef HAVE_PUGIXML
-static string name(const xml_node &a) {
-  return string(a.name());
-}
+static string name(const xml_node& a) { return a.name(); }
 #endif
 
 const map<char, CFAColor> Camera::char2enum = {
