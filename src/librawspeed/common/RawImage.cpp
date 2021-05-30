@@ -543,6 +543,7 @@ void RawImageWorker::performTask() noexcept {
       data->doLookup(start_y, end_y);
       break;
     default:
+      // NOLINTNEXTLINE: https://bugs.llvm.org/show_bug.cgi?id=50532
       assert(false);
     }
   } catch (RawDecoderException &e) {

@@ -141,6 +141,7 @@ public:
   }
 
   [[noreturn]] void apply(const RawImage& ri) final {
+    // NOLINTNEXTLINE: https://bugs.llvm.org/show_bug.cgi?id=50532
     assert(false && "You should not be calling this.");
     __builtin_unreachable();
   }
