@@ -93,6 +93,56 @@ int UncompressedDecompressor::bytesPerLine(int w, bool skips) {
   return perline;
 }
 
+template <typename Pump>
+void UncompressedDecompressor::decode16BitFP(const iPoint2D& size,
+                                             const iPoint2D& offset,
+                                             uint32_t skipBytes, uint32_t h,
+                                             uint64_t y) {
+  assert(mRaw->getDataType() == TYPE_FLOAT32);
+
+  uint8_t* data = mRaw->getData();
+  uint32_t outPitch = mRaw->pitch;
+  uint32_t w = size.x;
+  uint32_t cpp = mRaw->getCpp();
+
+  Pump bits(input);
+  w *= cpp;
+  for (; y < h; y++) {
+    auto* dest = reinterpret_cast<uint32_t*>(
+        &data[offset.x * sizeof(uint32_t) * cpp + y * outPitch]);
+    for (uint32_t x = 0; x < w; x++) {
+      uint16_t b = bits.getBits(16);
+      dest[x] = fp16ToFloat(b);
+    }
+    bits.skipBytes(skipBytes);
+  }
+}
+
+template <typename Pump>
+void UncompressedDecompressor::decode24BitFP(const iPoint2D& size,
+                                             const iPoint2D& offset,
+                                             uint32_t skipBytes, uint32_t h,
+                                             uint64_t y) {
+  assert(mRaw->getDataType() == TYPE_FLOAT32);
+
+  uint8_t* data = mRaw->getData();
+  uint32_t outPitch = mRaw->pitch;
+  uint32_t w = size.x;
+  uint32_t cpp = mRaw->getCpp();
+
+  Pump bits(input);
+  w *= cpp;
+  for (; y < h; y++) {
+    auto* dest = reinterpret_cast<uint32_t*>(
+        &data[offset.x * sizeof(uint32_t) * cpp + y * outPitch]);
+    for (uint32_t x = 0; x < w; x++) {
+      uint32_t b = bits.getBits(24);
+      dest[x] = fp24ToFloat(b);
+    }
+    bits.skipBytes(skipBytes);
+  }
+}
+
 void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
                                                    const iPoint2D& offset,
                                                    int inputPitchBytes,
@@ -150,59 +200,19 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
       return;
     }
     if (BitOrder_MSB == order && bitPerPixel == 16) {
-      BitPumpMSB bits(input);
-      w *= cpp;
-      for (; y < h; y++) {
-        auto* dest = reinterpret_cast<uint32_t*>(
-            &data[offset.x * sizeof(uint32_t) * cpp + y * outPitch]);
-        for (uint32_t x = 0; x < w; x++) {
-          uint16_t b = bits.getBits(bitPerPixel);
-          dest[x] = fp16ToFloat(b);
-        }
-        bits.skipBytes(skipBytes);
-      }
+      decode16BitFP<BitPumpMSB>(size, offset, skipBytes, h, y);
       return;
     }
     if (BitOrder_LSB == order && bitPerPixel == 16) {
-      BitPumpLSB bits(input);
-      w *= cpp;
-      for (; y < h; y++) {
-        auto* dest = reinterpret_cast<uint32_t*>(
-            &data[offset.x * sizeof(uint32_t) * cpp + y * outPitch]);
-        for (uint32_t x = 0; x < w; x++) {
-          uint16_t b = bits.getBits(bitPerPixel);
-          dest[x] = fp16ToFloat(b);
-        }
-        bits.skipBytes(skipBytes);
-      }
+      decode16BitFP<BitPumpLSB>(size, offset, skipBytes, h, y);
       return;
     }
     if (BitOrder_MSB == order && bitPerPixel == 24) {
-      BitPumpMSB bits(input);
-      w *= cpp;
-      for (; y < h; y++) {
-        auto* dest = reinterpret_cast<uint32_t*>(
-            &data[offset.x * sizeof(uint32_t) * cpp + y * outPitch]);
-        for (uint32_t x = 0; x < w; x++) {
-          uint32_t b = bits.getBits(bitPerPixel);
-          dest[x] = fp24ToFloat(b);
-        }
-        bits.skipBytes(skipBytes);
-      }
+      decode24BitFP<BitPumpMSB>(size, offset, skipBytes, h, y);
       return;
     }
     if (BitOrder_LSB == order && bitPerPixel == 24) {
-      BitPumpLSB bits(input);
-      w *= cpp;
-      for (; y < h; y++) {
-        auto* dest = reinterpret_cast<uint32_t*>(
-            &data[offset.x * sizeof(uint32_t) * cpp + y * outPitch]);
-        for (uint32_t x = 0; x < w; x++) {
-          uint32_t b = bits.getBits(bitPerPixel);
-          dest[x] = fp24ToFloat(b);
-        }
-        bits.skipBytes(skipBytes);
-      }
+      decode24BitFP<BitPumpLSB>(size, offset, skipBytes, h, y);
       return;
     }
     ThrowRDE("Unsupported floating-point input bitwidth/bit packing: %u / %u",
