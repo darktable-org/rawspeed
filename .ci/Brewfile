@@ -1,3 +1,4 @@
+brew 'brew-pip'
 brew 'cmake'
 brew 'git'
 brew 'libomp'

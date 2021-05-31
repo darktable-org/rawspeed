@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ codecov-python ]
   pull_request:
-    branches: [ develop ]
+    branches: [ codecov-python ]
 
 env:
   RPUU_DST: ${{ github.workspace }}/../raw-camera-samples/raw.pixls.us-unique
@@ -181,6 +181,15 @@ jobs:
         name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v1
       - if: matrix.flavor == 'Coverage'
+        name: Install python pip (for codecov python-based uploader)
+        run: |
+          rm -rf /var/lib/apt/lists/*;
+          apt-get update;
+          apt-get install python3-pip \
+                          python-pip-whl \
+                          python3-wheel;
+          apt-get clean;
+      - if: matrix.flavor == 'Coverage'
         name: Upload code coverage report
         env:
           OS: linux
@@ -190,10 +199,9 @@ jobs:
           SRC_DIR: ${{ github.workspace }}
           BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
         run: |
-          curl -s https://codecov.io/bash > codecov;
-          chmod +x codecov;
-          ./codecov -e OS,ARCH,CXX -F unittests -n "${JOB_NAME}.Unittests" -R "${SRC_DIR}" -s "${BUILD_DIR}/gcov-reports-unittest" -X gcov -Z;
-          ./codecov -e OS,ARCH,CXX -F integration,rpu_u -n "${JOB_NAME}.Integration" -R "${SRC_DIR}" -s "${BUILD_DIR}/gcov-reports-rsa" -X gcov -Z;
+          pip install codecov
+          codecov -e OS,ARCH,CXX -F unittests -n "${JOB_NAME}.Unittests" -R "${SRC_DIR}" -s "${BUILD_DIR}/gcov-reports-unittest" -X gcov -Z;
+          codecov -e OS,ARCH,CXX -F integration,rpu_u -n "${JOB_NAME}.Integration" -R "${SRC_DIR}" -s "${BUILD_DIR}/gcov-reports-rsa" -X gcov -Z;
   windows-msys2:
     name: ${{ matrix.os }}.${{ matrix.msys2.msystem }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
     runs-on: ${{ matrix.os }}
@@ -230,7 +238,7 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ matrix.msys2.msystem }}
-          install: pacman-mirrors bash curl git base-devel mingw-w64-${{ matrix.msys2.arch }}-toolchain mingw-w64-${{ matrix.msys2.arch }}-gcc mingw-w64-${{ matrix.msys2.arch }}-clang mingw-w64-${{ matrix.msys2.arch }}-openmp mingw-w64-${{ matrix.msys2.arch }}-cmake mingw-w64-${{ matrix.msys2.arch }}-ninja mingw-w64-${{ matrix.msys2.arch }}-libxml2 mingw-w64-${{ matrix.msys2.arch }}-pugixml mingw-w64-${{ matrix.msys2.arch }}-libjpeg-turbo mingw-w64-${{ matrix.msys2.arch }}-zlib
+          install: pacman-mirrors bash curl git base-devel mingw-w64-${{ matrix.msys2.arch }}-toolchain mingw-w64-${{ matrix.msys2.arch }}-gcc mingw-w64-${{ matrix.msys2.arch }}-clang mingw-w64-${{ matrix.msys2.arch }}-openmp mingw-w64-${{ matrix.msys2.arch }}-cmake mingw-w64-${{ matrix.msys2.arch }}-ninja mingw-w64-${{ matrix.msys2.arch }}-libxml2 mingw-w64-${{ matrix.msys2.arch }}-pugixml mingw-w64-${{ matrix.msys2.arch }}-libjpeg-turbo mingw-w64-${{ matrix.msys2.arch }}-zlib mingw-w64-${{ matrix.msys2.arch }}-python-pip mingw-w64-${{ matrix.msys2.arch }}-python-wheel
           update: true
       - name: Build And Test
         env:
@@ -256,9 +264,8 @@ jobs:
           SRC_DIR: ${{ github.workspace }}
           BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
         run: |
-          curl -s https://codecov.io/bash > codecov;
-          chmod +x codecov;
-          ./codecov -e OS,ARCH,CXX -F unittests -n "${JOB_NAME}.Unittests" -R "$(cygpath ${SRC_DIR})" -s "$(cygpath ${BUILD_DIR})/gcov-reports-unittest" -X gcov -Z;
+          pip install codecov
+          codecov -e OS,ARCH,CXX -F unittests -n "${JOB_NAME}.Unittests" -R "$(cygpath ${SRC_DIR})" -s "$(cygpath ${BUILD_DIR})/gcov-reports-unittest" -X gcov -Z;
   macOS:
     name: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
     runs-on: ${{ matrix.os }}
@@ -304,6 +311,5 @@ jobs:
           SRC_DIR: ${{ github.workspace }}
           BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
         run: |
-          curl -s https://codecov.io/bash > codecov;
-          chmod +x codecov;
-          ./codecov -e OS,ARCH,CXX -F unittests -n "${JOB_NAME}.Unittests" -R "${SRC_DIR}" -s "${BUILD_DIR}/gcov-reports-unittest" -X gcov -Z;
+          brew pip 'codecov'
+          codecov -e OS,ARCH,CXX -F unittests -n "${JOB_NAME}.Unittests" -R "${SRC_DIR}" -s "${BUILD_DIR}/gcov-reports-unittest" -X gcov -Z;
