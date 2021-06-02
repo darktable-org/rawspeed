@@ -8667,7 +8667,7 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-138" height="0"/>
+		<Crop x="0" y="12" width="-138" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 	</Camera>
 	<Camera make="FUJIFILM" model="X100V" mode="compressed">
@@ -8680,7 +8680,7 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-138" height="0"/>
+		<Crop x="0" y="12" width="-138" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 	</Camera>
 	<Camera make="FUJIFILM" model="X-H1">
