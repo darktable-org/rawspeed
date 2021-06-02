@@ -679,7 +679,7 @@
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="44112" iso_list="160 320 640 1250 2500 5000 10000"/>
 		<Sensor black="0" white="50300" iso_list="100 20000"/>
-		<Sensor black="0" white="55128" iso_list="25600 51200 65535"/>
+		<Sensor black="0" white="55128" iso_list="25600 51200 102400"/>
 		<Sensor black="0" white="53220"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
@@ -691,7 +691,7 @@
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="44112" iso_list="160 320 640 1250 2500 5000 10000"/>
 		<Sensor black="0" white="51300" iso_list="250"/>
-		<Sensor black="0" white="55028" iso_list="25600 51200 65535"/>
+		<Sensor black="0" white="55028" iso_list="25600 51200 102400"/>
 		<Sensor black="0" white="53000"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
