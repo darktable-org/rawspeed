@@ -6755,6 +6755,17 @@
                 <Crop x="4" y="0" width="-36" height="0"/>
                 <Sensor black="1" white="15865"/>
         </Camera>
+        <Camera make="RICOH IMAGING COMPANY, LTD." model="PENTAX K-3 Mark III">
+                <ID make="Ricoh" model="PENTAX K-3 Mark III">PENTAX K-3 Mark III</ID>
+                <CFA width="2" height="2">
+                        <Color x="0" y="0">RED</Color>
+                        <Color x="1" y="0">GREEN</Color>
+                        <Color x="0" y="1">GREEN</Color>
+                        <Color x="1" y="1">BLUE</Color>
+                </CFA>
+                <Crop x="24" y="34" width="-28" height="-14"/>
+                <Sensor black="64" white="16315"/>
+        </Camera>
 	<Camera make="PENTAX" model="PENTAX K-5" decoder_version="2">
 		<ID make="Pentax" model="K-5">PENTAX K-5</ID>
 		<CFA width="2" height="2">
