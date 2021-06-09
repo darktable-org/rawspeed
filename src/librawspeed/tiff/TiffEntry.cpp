@@ -216,7 +216,7 @@ string TiffEntry::getString() const {
   const auto bufSize = data.getRemainSize();
   const auto* buf = data.peekData(bufSize);
   const auto* s = reinterpret_cast<const char*>(buf);
-  return string(s, strnlen(s, bufSize));
+  return {s, strnlen(s, bufSize)};
 }
 
 const DataBuffer &TiffEntry::getRootIfdData() const {

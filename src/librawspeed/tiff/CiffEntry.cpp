@@ -141,7 +141,7 @@ string CiffEntry::getString() const {
     ThrowCPE("Wrong type 0x%x encountered. Expected Ascii", type);
 
   if (count == 0)
-    return string("");
+    return "";
 
   return data.peekString();
 }

@@ -128,7 +128,7 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   startpump.getBits(2); // reserved
   initVal = startpump.getBits(14);
 
-  assert(startpump.getPosition() == headerSize);
+  assert(startpump.getInputPosition() == headerSize);
 
   if (width == 0 || height == 0 || width % 16 != 0 || width > 6496 ||
       height > 4336)
@@ -137,7 +137,8 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   if (width != mRaw->dim.x || height != mRaw->dim.y)
     ThrowRDE("EXIF image dimensions do not match dimensions from raw header");
 
-  data = startpump.getStream(startpump.getRemainSize());
+  data = bs.getSubStream(startpump.getInputPosition(),
+                         startpump.getRemainingSize());
 }
 
 // The format is relatively straightforward. Each line gets encoded as a set
@@ -345,7 +346,7 @@ void SamsungV2Decompressor::decompressRow(int row) {
   for (int col = 0; col < width; col += 16)
     processBlock(&pump, row, col);
 
-  data.skipBytes(pump.getBufferPosition());
+  data.skipBytes(pump.getStreamPosition());
 }
 
 void SamsungV2Decompressor::decompress() {

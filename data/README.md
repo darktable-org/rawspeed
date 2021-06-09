@@ -22,12 +22,12 @@ version is guaranteed to work.
     <Vertical x="0" width="60"/>
     <Horizontal y="2" height="46"/>
   </BlackAreas>
-  <Hints>
-    <Hint name="coolpixsplit" value=""/>
-  </Hints>
   <Aliases>
     <Alias id="DMC-FZ40">DMC-FZ40</Alias>
   </Aliases>
+  <Hints>
+    <Hint name="coolpixsplit" value=""/>
+  </Hints>
 </Camera>
 ```
 
@@ -117,16 +117,6 @@ All the areas are summed up in a histogram for each color component, and the med
 
 If any black areas are defined it will override any “black” value set in the Sensor definition.
 
-## Decoder Hints
-
-```xml
-  <Hints>
-    <Hint name="coolpixsplit" value=""/>
-  </Hints>
-```
-
-This may contain manufacturer-specific hints for decoding. This can result in the code taking a specific decoder path, or otherwise treat the image differently. This is mainly used when it isn’t possible to determine which way to decode the image directly from the image data.
-
 ## Camera Model Aliases
 
 ```xml
@@ -136,3 +126,13 @@ This may contain manufacturer-specific hints for decoding. This can result in th
 ```
 
 This is a possibility to add one or more model aliases for a camera, which may have different model names in different regions. The id attribute specifies the clean model name for this alias, if omitted defaults to alias value (so in this case is not really needed).
+
+## Decoder Hints
+
+```xml
+  <Hints>
+    <Hint name="coolpixsplit" value=""/>
+  </Hints>
+```
+
+This may contain manufacturer-specific hints for decoding. This can result in the code taking a specific decoder path, or otherwise treat the image differently. This is mainly used when it isn’t possible to determine which way to decode the image directly from the image data.

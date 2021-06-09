@@ -679,7 +679,7 @@
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="44112" iso_list="160 320 640 1250 2500 5000 10000"/>
 		<Sensor black="0" white="50300" iso_list="100 20000"/>
-		<Sensor black="0" white="55128" iso_list="25600 51200 65535"/>
+		<Sensor black="0" white="55128" iso_list="25600 51200 102400"/>
 		<Sensor black="0" white="53220"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
@@ -691,7 +691,7 @@
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="44112" iso_list="160 320 640 1250 2500 5000 10000"/>
 		<Sensor black="0" white="51300" iso_list="250"/>
-		<Sensor black="0" white="55028" iso_list="25600 51200 65535"/>
+		<Sensor black="0" white="55028" iso_list="25600 51200 102400"/>
 		<Sensor black="0" white="53000"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
@@ -6047,6 +6047,32 @@
 		<Crop x="0" y="0" width="-144" height="0"/>
 		<Sensor black="143" white="4095"/>
 	</Camera>
+	<!-- LEICA D-LUX 7 is the same camera as Panasonic DC-LX100M2 -->
+	<Camera make="LEICA CAMERA AG" model="D-Lux 7">
+		<ID make="Leica" model="D-Lux 7">D-Lux 7</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="143" white="4095"/>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="D-Lux 7" mode="4:3">
+		<ID make="Leica" model="D-Lux 7">D-Lux 7</ID>
+		<Crop x="10" y="6" width="-60" height="-4"/>
+		<Sensor black="143" white="4095"/>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="D-Lux 7" mode="1:1">
+		<ID make="Leica" model="D-Lux 7">D-Lux 7</ID>
+		<Crop x="0" y="6" width="-130" height="-4"/>
+		<Sensor black="144" white="4095"/>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="D-Lux 7" mode="16:9">
+		<ID make="Leica" model="D-Lux 7">D-Lux 7</ID>
+		<Crop x="10" y="0" width="-90" height="0"/>
+		<Sensor black="144" white="4095"/>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="D-Lux 7" mode="3:2">
+		<ID make="Leica" model="D-Lux 7">D-Lux 7</ID>
+		<Crop x="4" y="0" width="-90" height="0"/>
+		<Sensor black="144" white="4095"/>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-LX1" mode="16:9">
 		<ID make="Panasonic" model="DMC-LX1">Panasonic DMC-LX1</ID>
 		<Crop x="6" y="0" width="-16" height="0"/>
@@ -6729,6 +6755,17 @@
                 <Crop x="4" y="0" width="-36" height="0"/>
                 <Sensor black="1" white="15865"/>
         </Camera>
+	<Camera make="RICOH IMAGING COMPANY, LTD." model="PENTAX K-3 Mark III">
+		<ID make="Pentax" model="K-3 Mark III">PENTAX K-3 Mark III</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="34" y="42" width="-28" height="-16"/>
+		<Sensor black="64" white="16315"/>
+	</Camera>
 	<Camera make="PENTAX" model="PENTAX K-5" decoder_version="2">
 		<ID make="Pentax" model="K-5">PENTAX K-5</ID>
 		<CFA width="2" height="2">
@@ -7733,6 +7770,17 @@
 		<Crop x="0" y="0" width="-28" height="0"/>
 		<Sensor black="512" white="16383"/>
 	</Camera>
+	<Camera make="SONY" model="ILCE-1">
+		<ID make="Sony" model="ILCE-1">Sony ILCE-1</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-8" height="0"/>
+		<Sensor black="512" white="16383"/>
+	</Camera>
 	<Camera make="SONY" model="ILCE-7">
 		<ID make="Sony" model="ILCE-7">Sony ILCE-7</ID>
 		<CFA width="2" height="2">
@@ -7842,6 +7890,17 @@
 		</CFA>
 		<Crop x="0" y="0" width="-32" height="0"/>
 		<Sensor black="512" white="16300"/>
+	</Camera>
+	<Camera make="SONY" model="ILCE-7SM3">
+		<ID make="Sony" model="ILCE-7SM3">Sony ILCE-7SM3</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-28" height="0"/>
+		<Sensor black="512" white="16383"/>
 	</Camera>
 	<Camera make="SONY" model="ILCE-9">
 		<ID make="Sony" model="ILCE-9">Sony ILCE-9</ID>
@@ -8463,6 +8522,28 @@
 		<Crop x="0" y="4" width="-146" height="-6"/>
 		<Sensor black="62" white="16383"/>
 	</Camera>
+	<Camera make="FUJIFILM" model="GFX100S">
+		<ID make="Fujifilm" model="GFX100S">Fujifilm GFX100S</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="4" width="-146" height="-6"/>
+		<Sensor black="63" white="16383"/>
+	</Camera>
+	<Camera make="FUJIFILM" model="GFX100S" mode="compressed">
+		<ID make="Fujifilm" model="GFX100S">Fujifilm GFX100S</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="4" width="-146" height="-6"/>
+		<Sensor black="62" white="16383"/>
+	</Camera>
 	<Camera make="FUJIFILM" model="X-Pro1">
 		<ID make="Fujifilm" model="X-Pro1">Fujifilm X-Pro1</ID>
 		<CFA2 width="6" height="6">
@@ -8667,7 +8748,7 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-138" height="0"/>
+		<Crop x="0" y="12" width="-138" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 	</Camera>
 	<Camera make="FUJIFILM" model="X100V" mode="compressed">
@@ -8680,7 +8761,7 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-138" height="0"/>
+		<Crop x="0" y="12" width="-138" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 	</Camera>
 	<Camera make="FUJIFILM" model="X-H1">
@@ -8864,6 +8945,32 @@
 		<Crop x="4" y="0" width="-52" height="0"/>
 		<Sensor black="1024" white="16383"/>
         </Camera>
+	<Camera make="FUJIFILM" model="X-E4">
+		<ID make="Fujifilm" model="X-E4">Fujifilm X-E4</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="12" width="-132" height="-6"/>
+		<Sensor black="1022" white="16383"/>
+	</Camera>
+	<Camera make="FUJIFILM" model="X-E4" mode="compressed">
+		<ID make="Fujifilm" model="X-E4">Fujifilm X-E4</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="12" width="-132" height="-6"/>
+		<Sensor black="1022" white="16383"/>
+	</Camera>
 	<Camera make="FUJIFILM" model="X-S10">
 		<ID make="Fujifilm" model="X-S10">Fujifilm X-S10</ID>
 		<CFA2 width="6" height="6">
@@ -9771,6 +9878,9 @@
 	</Camera>
 	<Camera make="RICOH" model="GR DIGITAL 2" mode="dng">
 		<ID make="Ricoh" model="GR II">Ricoh GR DIGITAL 2</ID>
+	</Camera>
+	<Camera make="RICOH IMAGING COMPANY, LTD." model="RICOH GR III" mode="dng">
+		<ID make="Ricoh" model="GR III">Ricoh GR III</ID>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot A720 IS" mode="dng">
 		<ID make="Canon" model="PowerShot A720 IS">Canon PowerShot A720 IS</ID>

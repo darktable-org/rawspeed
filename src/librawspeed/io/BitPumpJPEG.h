@@ -39,9 +39,7 @@ template <> struct BitStreamTraits<BitPumpJPEG> final {
 };
 
 template <>
-inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uint8_t* input,
-                                                     size_type bufferSize,
-                                                     size_type* bufPos) {
+inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uint8_t* input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
 
   // short-cut path for the most common case (no FF marker in the next 4 bytes)
@@ -65,29 +63,36 @@ inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uint8_t* input,
       const int c1 = input[p++];
       if (c1 != 0) {
         // Found FF/xx with xx != 00. This is the end of stream marker.
+        // That means we shouldn't have pushed last 8 bits (0xFF, from c0).
+        // We need to "unpush" them, and fill the vacant cache bits with zeros.
 
-        // Clear low 8 bits (0xFF, from c0) that we optimistically pushed.
-        // We should not pop() them, to avoid issues with fillLevel becoming 0.
-        cache.cache &= ~0xFFULL;
-        // And fully fill the empty space in cache with zeros.
-        cache.cache <<= bitwidth(cache.cache) - cache.fillLevel;
-        cache.fillLevel = bitwidth(cache.cache);
+        // First, recover the cache fill level.
+        cache.fillLevel -= 8;
+        // Now, this code is incredibly underencapsulated, and the
+        // implementation details are leaking into here. Thus, we know that
+        // all the fillLevel bits in cache are all high bits. So to "unpush"
+        // the last 8 bits, and fill the vacant cache bits with zeros, we only
+        // need to keep the high fillLevel bits. So just create a mask with only
+        // high fillLevel bits set, and 'and' the cache with it.
+        // Caution, we know fillLevel won't be 64, but it may be 0,
+        // so pick the mask-creation idiom accordingly.
+        cache.cache &= ~((~0ULL) >> cache.fillLevel);
+        cache.fillLevel = 64;
 
-        // No further reading from this buffer shall happen.
-        // Do signal that by stating that we are at the end of the buffer.
-        *bufPos = bufferSize;
-        return 0;
+        // No further reading from this buffer shall happen. Do signal that by
+        // claiming that we have consumed all the remaining bytes of the buffer.
+        return getRemainingSize();
       }
     }
   }
   return p;
 }
 
-template <> inline BitPumpJPEG::size_type BitPumpJPEG::getBufferPosition() const
-{
+template <>
+inline BitPumpJPEG::size_type BitPumpJPEG::getStreamPosition() const {
   // the current number of bytes we consumed -> at the end of the stream pos, it
   // points to the JPEG marker FF
-  return pos;
+  return getInputPosition();
 }
 
 } // namespace rawspeed

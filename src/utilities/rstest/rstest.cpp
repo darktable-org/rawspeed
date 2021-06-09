@@ -441,6 +441,7 @@ static int results(const map<string, string>& failedTests, const options& o) {
     cmd += R"(" ")";
     cmd += newhash;
     cmd += R"(" >> rstest.log)";
+    // NOLINTNEXTLINE(concurrency-mt-unsafe): we are a single thread here only.
     if (system(cmd.c_str())) {
     }
   }

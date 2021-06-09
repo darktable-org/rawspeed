@@ -35,19 +35,11 @@ struct LSBBitPumpTag;
 using BitPumpLSB = BitStream<LSBBitPumpTag, BitStreamCacheLeftInRightOut>;
 
 template <>
-inline BitPumpLSB::size_type BitPumpLSB::fillCache(const uint8_t* input,
-                                                   size_type bufferSize,
-                                                   size_type* bufPos) {
+inline BitPumpLSB::size_type BitPumpLSB::fillCache(const uint8_t* input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
 
   cache.push(getLE<uint32_t>(input), 32);
   return 4;
-}
-
-template <> inline void BitPumpLSB::setBufferPosition(size_type newPos) {
-  pos = newPos;
-  cache.fillLevel = 0;
-  cache.cache = 0;
 }
 
 } // namespace rawspeed

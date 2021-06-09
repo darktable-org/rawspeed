@@ -90,13 +90,28 @@ template <typename Clock, typename period = std::ratio<1, 1>> struct Timer {
 
 } // namespace
 
+// Lazy cache for the referenced file's content - not actually read until
+// requested the first time.
+struct Entry {
+  rawspeed::ChecksumFileEntry Name;
+  std::unique_ptr<const rawspeed::Buffer> Content;
+
+  const rawspeed::Buffer* getFileContents() {
+    if (Content)
+      return Content.get();
+
+    Content = FileReader(Name.FullFileName.c_str()).readFile();
+    return Content.get();
+  }
+};
+
 static int currThreadCount;
 
 extern "C" int __attribute__((pure)) rawspeed_get_number_of_processor_cores() {
   return currThreadCount;
 }
 
-static inline void BM_RawSpeed(benchmark::State& state, const char* fileName,
+static inline void BM_RawSpeed(benchmark::State& state, Entry* entry,
                                int threads) {
   currThreadCount = threads;
 
@@ -106,15 +121,12 @@ static inline void BM_RawSpeed(benchmark::State& state, const char* fileName,
   static const CameraMetaData metadata{};
 #endif
 
-  FileReader reader(fileName);
-  const auto map(reader.readFile());
-
   Timer<ChooseClockType::type> WT;
   Timer<CPUClock> TT;
 
   unsigned pixels = 0;
   for (auto _ : state) {
-    RawParser parser(map.get());
+    RawParser parser(entry->getFileContents());
     auto decoder(parser.getDecoder(&metadata));
 
     decoder->failOnUnknown = false;
@@ -159,11 +171,11 @@ static inline void BM_RawSpeed(benchmark::State& state, const char* fileName,
   // but i'm not sure they are interesting.
 }
 
-static void addBench(const char* fName, std::string tName, int threads) {
+static void addBench(Entry* entry, std::string tName, int threads) {
   tName += std::to_string(threads);
 
   auto* b =
-      benchmark::RegisterBenchmark(tName.c_str(), &BM_RawSpeed, fName, threads);
+      benchmark::RegisterBenchmark(tName.c_str(), &BM_RawSpeed, entry, threads);
   b->Unit(benchmark::kMillisecond);
   b->UseRealTime();
   b->MeasureProcessCPUTime();
@@ -195,11 +207,18 @@ int main(int argc, char** argv) {
 
   // Were we told to use the repo (i.e. filelist.sha1 in that directory)?
   int useChecksumFile = hasFlag("-r");
-  std::vector<rawspeed::ChecksumFileEntry> ChecksumFileEntries;
+  std::vector<Entry> Worklist;
   if (useChecksumFile && useChecksumFile + 1 < argc) {
     char*& checksumFileRepo = argv[useChecksumFile + 1];
-    if (checksumFileRepo)
-      ChecksumFileEntries = rawspeed::ReadChecksumFile(checksumFileRepo);
+    if (checksumFileRepo) {
+      const auto readEntries = rawspeed::ReadChecksumFile(checksumFileRepo);
+      Worklist.reserve(readEntries.size());
+      for (const rawspeed::ChecksumFileEntry& entryName : readEntries) {
+        Entry Entry;
+        Entry.Name = entryName;
+        Worklist.emplace_back(std::move(Entry));
+      }
+    }
     checksumFileRepo = nullptr;
   }
 
@@ -208,23 +227,22 @@ int main(int argc, char** argv) {
     if (!argv[i])
       continue;
 
-    rawspeed::ChecksumFileEntry Entry;
+    Entry Entry;
     const char* fName = argv[i];
     // These are supposed to be either absolute paths, or relative the run dir.
     // We don't do any beautification.
-    Entry.FullFileName = fName;
-    Entry.RelFileName = fName;
-    ChecksumFileEntries.emplace_back(Entry);
+    Entry.Name.FullFileName = fName;
+    Entry.Name.RelFileName = fName;
+    Worklist.emplace_back(std::move(Entry));
   }
 
   // And finally, actually add the raws to be benchmarked.
-  for (const auto& Entry : ChecksumFileEntries) {
-    const char* fName = Entry.RelFileName.c_str();
-    std::string tName(fName);
+  for (Entry& entry : Worklist) {
+    std::string tName(entry.Name.RelFileName);
     tName += "/threads:";
 
     for (auto threads = threadsMin; threads <= threadsMax; threads++)
-      addBench(Entry.FullFileName.c_str(), tName, threads);
+      addBench(&entry, tName, threads);
   }
 
   benchmark::RunSpecifiedBenchmarks();
