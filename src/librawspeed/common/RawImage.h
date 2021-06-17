@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"            // for WITH_SSE2
+#include "rawspeedconfig.h"
 #include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
 #include "common/Array2DRef.h"         // for Array2DRef
 #include "common/Common.h"             // for writeLog, DEBUG_PRIO_ERROR

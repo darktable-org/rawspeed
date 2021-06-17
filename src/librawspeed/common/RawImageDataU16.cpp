@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"               // for WITH_SSE2
+#include "rawspeedconfig.h"
 #include "common/RawImage.h"              // for RawImageDataU16, TYPE_USHO...
 #include "common/Common.h"                // for clampBits, writeLog, DEBUG...
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
@@ -32,12 +32,6 @@
 #include <cstdint>                        // for uint32_t, uint16_t, uint8_t
 #include <memory>                         // for unique_ptr
 #include <vector>                         // for vector
-
-#ifdef WITH_SSE2
-#include "common/Cpuid.h" // for Cpuid
-#include <emmintrin.h> // for __m128i, _mm_load_si128
-#include <xmmintrin.h> // for _MM_HINT_T0, _mm_prefetch
-#endif
 
 using std::vector;
 using std::min;
@@ -177,7 +171,6 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
   // Half Scale in 18.14 fp
   auto half_scale_fp = static_cast<int>(app_scale * 4095.0F);
 
-  // Not SSE2
   int gw = dim.x * cpp;
   std::array<int, 4> mul;
   std::array<int, 4> sub;
@@ -310,7 +303,6 @@ void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
       fixBadPixel(x,y,i);
 }
 
-// TODO: Could be done with SSE2
 void RawImageDataU16::doLookup( int start_y, int end_y )
 {
   if (table->ntables == 1) {

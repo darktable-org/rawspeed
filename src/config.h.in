@@ -20,12 +20,6 @@
 
 #pragma once
 
-#if defined(__SSE2__)
-#cmakedefine WITH_SSE2
-#else
-/* #undef WITH_SSE2 */
-#endif
-
 #cmakedefine HAVE_PUGIXML
 
 #cmakedefine HAVE_OPENMP
