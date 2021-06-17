@@ -1,7 +1,6 @@
 FILE(GLOB RAWSPEED_TEST_SOURCES
   "ChecksumFileTest.cpp"
   "CommonTest.cpp"
-  "CpuidTest.cpp"
   "MemoryTest.cpp"
   "NORangesSetTest.cpp"
   "PointTest.cpp"

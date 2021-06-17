@@ -4,7 +4,6 @@ FILE(GLOB SOURCES
   "ChecksumFile.h"
   "Common.cpp"
   "Common.h"
-  "Cpuid.cpp"
   "DefaultInitAllocatorAdaptor.h"
   "DngOpcodes.cpp"
   "DngOpcodes.h"

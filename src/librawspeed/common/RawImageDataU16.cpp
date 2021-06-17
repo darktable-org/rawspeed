@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"               // for WITH_SSE2
+#include "rawspeedconfig.h"
 #include "common/RawImage.h"              // for RawImageDataU16, TYPE_USHO...
 #include "common/Common.h"                // for clampBits, writeLog, DEBUG...
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
@@ -32,12 +32,6 @@
 #include <cstdint>                        // for uint32_t, uint16_t, uint8_t
 #include <memory>                         // for unique_ptr
 #include <vector>                         // for vector
-
-#ifdef WITH_SSE2
-#include "common/Cpuid.h" // for Cpuid
-#include <emmintrin.h> // for __m128i, _mm_load_si128
-#include <xmmintrin.h> // for _MM_HINT_T0, _mm_prefetch
-#endif
 
 using std::vector;
 using std::min;
@@ -169,27 +163,6 @@ void RawImageDataU16::scaleBlackWhite() {
 }
 
 void RawImageDataU16::scaleValues(int start_y, int end_y) {
-#ifndef WITH_SSE2
-
-  return scaleValues_plain(start_y, end_y);
-
-#else
-
-  int depth_values = whitePoint - blackLevelSeparate[0];
-  float app_scale = 65535.0F / depth_values;
-
-  // Check SSE2
-  if (Cpuid::SSE2() && app_scale < 63) {
-    scaleValues_SSE2(start_y, end_y);
-  } else {
-    scaleValues_plain(start_y, end_y);
-  }
-
-#endif
-}
-
-#ifdef WITH_SSE2
-void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   int depth_values = whitePoint - blackLevelSeparate[0];
   float app_scale = 65535.0F / depth_values;
 
@@ -198,146 +171,6 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   // Half Scale in 18.14 fp
   auto half_scale_fp = static_cast<int>(app_scale * 4095.0F);
 
-  __m128i sseround;
-  __m128i ssesub2;
-  __m128i ssesign;
-  __m128i rand_mul;
-  __m128i rand_mask;
-  __m128i sse_full_scale_fp;
-  __m128i sse_half_scale_fp;
-
-  auto* sub_mul = alignedMallocArray<uint32_t, 16, __m128i>(4);
-  if (!sub_mul)
-    ThrowRDE("Out of memory, failed to allocate 128 bytes");
-
-  assert(sub_mul != nullptr);
-
-  uint32_t gw = pitch / 16;
-  // 10 bit fraction
-  uint32_t mul = static_cast<int>(
-      1024.0F * 65535.0F /
-      static_cast<float>(whitePoint - blackLevelSeparate[mOffset.x & 1]));
-  mul |= (static_cast<int>(
-             1024.0F * 65535.0F /
-             static_cast<float>(whitePoint -
-                                blackLevelSeparate[(mOffset.x + 1) & 1])))
-         << 16;
-  uint32_t b = blackLevelSeparate[mOffset.x & 1] |
-               (blackLevelSeparate[(mOffset.x + 1) & 1] << 16);
-
-  for (int i = 0; i < 4; i++) {
-    sub_mul[i] = b;       // Subtract even lines
-    sub_mul[4 + i] = mul; // Multiply even lines
-  }
-
-  mul = static_cast<int>(
-      1024.0F * 65535.0F /
-      static_cast<float>(whitePoint - blackLevelSeparate[2 + (mOffset.x & 1)]));
-  mul |= (static_cast<int>(
-             1024.0F * 65535.0F /
-             static_cast<float>(whitePoint -
-                                blackLevelSeparate[2 + ((mOffset.x + 1) & 1)])))
-         << 16;
-  b = blackLevelSeparate[2 + (mOffset.x & 1)] |
-      (blackLevelSeparate[2 + ((mOffset.x + 1) & 1)] << 16);
-
-  for (int i = 0; i < 4; i++) {
-    sub_mul[8 + i] = b;    // Subtract odd lines
-    sub_mul[12 + i] = mul; // Multiply odd lines
-  }
-
-  sseround = _mm_set_epi32(512, 512, 512, 512);
-  ssesub2 = _mm_set_epi32(32768, 32768, 32768, 32768);
-  ssesign = _mm_set_epi32(0x80008000, 0x80008000, 0x80008000, 0x80008000);
-  sse_full_scale_fp = _mm_set1_epi32(full_scale_fp | (full_scale_fp << 16));
-  sse_half_scale_fp = _mm_set1_epi32(half_scale_fp >> 4);
-
-  if (mDitherScale) {
-    rand_mul = _mm_set1_epi32(0x4d9f1d32);
-  } else {
-    rand_mul = _mm_set1_epi32(0);
-  }
-  rand_mask = _mm_set1_epi32(0x00ff00ff); // 8 random bits
-
-  for (int y = start_y; y < end_y; y++) {
-    __m128i sserandom;
-    if (mDitherScale) {
-      sserandom =
-          _mm_set_epi32(dim.x * 1676 + y * 18000, dim.x * 2342 + y * 34311,
-                        dim.x * 4272 + y * 12123, dim.x * 1234 + y * 23464);
-    } else {
-      sserandom = _mm_setzero_si128();
-    }
-    auto* pixel = reinterpret_cast<__m128i*>(&data[(mOffset.y + y) * pitch]);
-    __m128i ssescale;
-    __m128i ssesub;
-    if (((y + mOffset.y) & 1) == 0) {
-      ssesub = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[0]));
-      ssescale = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[4]));
-    } else {
-      ssesub = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[8]));
-      ssescale = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[12]));
-    }
-
-    for (uint32_t x = 0; x < gw; x++) {
-      __m128i pix_high;
-      __m128i temp;
-      _mm_prefetch(reinterpret_cast<char*>(pixel + 1), _MM_HINT_T0);
-      __m128i pix_low = _mm_load_si128(pixel);
-      // Subtract black
-      pix_low = _mm_subs_epu16(pix_low, ssesub);
-      // Multiply the two unsigned shorts and combine it to 32 bit result
-      pix_high = _mm_mulhi_epu16(pix_low, ssescale);
-      temp = _mm_mullo_epi16(pix_low, ssescale);
-      pix_low = _mm_unpacklo_epi16(temp, pix_high);
-      pix_high = _mm_unpackhi_epi16(temp, pix_high);
-      // Add rounder
-      pix_low = _mm_add_epi32(pix_low, sseround);
-      pix_high = _mm_add_epi32(pix_high, sseround);
-
-      sserandom = _mm_xor_si128(_mm_mulhi_epi16(sserandom, rand_mul),
-                                _mm_mullo_epi16(sserandom, rand_mul));
-      __m128i rand_masked =
-          _mm_and_si128(sserandom, rand_mask); // Get 8 random bits
-      rand_masked = _mm_mullo_epi16(rand_masked, sse_full_scale_fp);
-
-      __m128i zero = _mm_setzero_si128();
-      __m128i rand_lo = _mm_sub_epi32(sse_half_scale_fp,
-                                      _mm_unpacklo_epi16(rand_masked, zero));
-      __m128i rand_hi = _mm_sub_epi32(sse_half_scale_fp,
-                                      _mm_unpackhi_epi16(rand_masked, zero));
-
-      pix_low = _mm_add_epi32(pix_low, rand_lo);
-      pix_high = _mm_add_epi32(pix_high, rand_hi);
-
-      // Shift down
-      pix_low = _mm_srai_epi32(pix_low, 10);
-      pix_high = _mm_srai_epi32(pix_high, 10);
-      // Subtract to avoid clipping
-      pix_low = _mm_sub_epi32(pix_low, ssesub2);
-      pix_high = _mm_sub_epi32(pix_high, ssesub2);
-      // Pack
-      pix_low = _mm_packs_epi32(pix_low, pix_high);
-      // Shift sign off
-      pix_low = _mm_xor_si128(pix_low, ssesign);
-      _mm_store_si128(pixel, pix_low);
-      pixel++;
-    }
-  }
-  alignedFree(sub_mul);
-}
-#endif
-
-void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
-  int depth_values = whitePoint - blackLevelSeparate[0];
-  float app_scale = 65535.0F / depth_values;
-
-  // Scale in 30.2 fp
-  auto full_scale_fp = static_cast<int>(app_scale * 4.0F);
-  // Half Scale in 18.14 fp
-  auto half_scale_fp = static_cast<int>(app_scale * 4095.0F);
-
-  // Not SSE2
   int gw = dim.x * cpp;
   std::array<int, 4> mul;
   std::array<int, 4> sub;
@@ -470,7 +303,6 @@ void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
       fixBadPixel(x,y,i);
 }
 
-// TODO: Could be done with SSE2
 void RawImageDataU16::doLookup( int start_y, int end_y )
 {
   if (table->ntables == 1) {

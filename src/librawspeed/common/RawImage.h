@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"            // for WITH_SSE2
+#include "rawspeedconfig.h"
 #include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
 #include "common/Array2DRef.h"         // for Array2DRef
 #include "common/Common.h"             // for writeLog, DEBUG_PRIO_ERROR
@@ -189,10 +189,6 @@ public:
   void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
 
 protected:
-  void scaleValues_plain(int start_y, int end_y);
-#ifdef WITH_SSE2
-  void scaleValues_SSE2(int start_y, int end_y);
-#endif
   void scaleValues(int start_y, int end_y) override;
   void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
   void doLookup(int start_y, int end_y) override;
