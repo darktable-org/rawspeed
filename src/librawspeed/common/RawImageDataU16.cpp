@@ -329,6 +329,9 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
 #endif
 
 void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
+  const Array2DRef<uint16_t> img(getU16DataAsUncroppedArray2DRef());
+  const iPoint2D crop = getCropOffset();
+
   int depth_values = whitePoint - blackLevelSeparate[0];
   float app_scale = 65535.0F / depth_values;
 
@@ -354,7 +357,6 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
   }
   for (int y = start_y; y < end_y; y++) {
     int v = dim.x + y * 36969;
-    auto* pixel = reinterpret_cast<uint16_t*>(getData(0, y));
     int* mul_local = &mul[2 * (y & 1)];
     int* sub_local = &sub[2 * (y & 1)];
     for (int x = 0; x < gw; x++) {
@@ -365,9 +367,9 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
       } else {
         rand = 0;
       }
-      pixel[x] = clampBits(
-          ((pixel[x] - sub_local[x & 1]) * mul_local[x & 1] + 8192 + rand) >>
-              14,
+      uint16_t& pixel = img(y + crop.y, x + crop.x);
+      pixel = clampBits(
+          ((pixel - sub_local[x & 1]) * mul_local[x & 1] + 8192 + rand) >> 14,
           16);
     }
   }
