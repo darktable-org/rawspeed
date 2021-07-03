@@ -92,7 +92,7 @@ RawImage DcrDecoder::decodeRawInternal() {
     for (auto i = 0U; i < 3; i++) {
       const auto mul = blob->getU16(20 + i);
       if (0 == mul)
-        ThrowRDE("WB coeffient is zero!");
+        ThrowRDE("WB coefficient is zero!");
       mRaw->metadata.wbCoeffs[i] = 2048.0F / mul;
     }
   }
