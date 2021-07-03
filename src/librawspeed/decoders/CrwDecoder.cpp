@@ -155,7 +155,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
             {wb->getU16(36), wb->getU16(37), wb->getU16(38), wb->getU16(39)}};
         for (const auto& mul : wbMuls) {
           if (0 == mul)
-            ThrowRDE("WB coeffient is zero!");
+            ThrowRDE("WB coefficient is zero!");
         }
 
         mRaw->metadata.wbCoeffs[0] = static_cast<float>(1024.0 / wbMuls[0]);
