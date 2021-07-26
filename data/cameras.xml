@@ -154,6 +154,21 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS 250D">
+		<ID make="Canon" model="EOS 250D">Canon EOS 250D</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2049" white="14338"/>
+		<Sensor black="511" white="11606" iso_list="100"/>
+		<Sensor black="511" white="14338" iso_list="200"/>
+		<Hints>
+			<Hint name="wb_offset" value="71"/>
+		</Hints>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS 300D DIGITAL">
 		<ID make="Canon" model="EOS 300D">Canon EOS 300D</ID>
 		<CFA width="2" height="2">
@@ -1741,6 +1756,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS M6 Mark II">
+		<ID make="Canon" model="EOS M6 Mark II">Canon EOS M6 Mark II</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2049" white="13660"/>
+		<Sensor black="512" white="13036" iso_list="100 125"/>
+		<Sensor black="512" white="10852" iso_list="160"/>
+		<Sensor black="512" white="13660" iso_list="200 250"/>
+		<Sensor black="2049" white="10852" iso_list="320 640 1250 2500 5000 10000 20000"/>
+		<Sensor black="2042" white="13660" iso_list="51200"/>
+		<Hints>
+			<Hint name="wb_offset" value="71"/>
+		</Hints>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS M10">
 		<ID make="Canon" model="EOS M10">Canon EOS M10</ID>
 		<CFA width="2" height="2">
@@ -1793,6 +1826,23 @@
 				<ColorMatrixRow plane="2">-797 2424 7010</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS M200">
+		<ID make="Canon" model="EOS M200">Canon EOS M200</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2050" white="14338"/>
+		<Sensor black="511" white="11606" iso_list="100 125"/>
+		<Sensor black="511" white="10439" iso_list="160"/>
+		<Sensor black="511" white="14338" iso_list="200 250"/>
+		<Sensor black="2049" white="10439" iso_list="320 640 1250 2500 5000"/>
+		<Hints>
+			<Hint name="wb_offset" value="71"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS-1D" decoder_version="8">
 		<ID make="Canon" model="EOS-1D">Canon EOS-1D</ID>
@@ -2275,6 +2325,23 @@
 			<Hint name="wb_offset" value="71"/>
 		</Hints>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS M50m2">
+		<ID make="Canon" model="EOS M50m2">Canon EOS M50 Mark II</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2051" white="14338"/>
+		<Sensor black="511" white="11606" iso_list="100 125"/>
+		<Sensor black="512" white="10439" iso_list="160"/>
+		<Sensor black="511" white="14338" iso_list="200 250"/>
+		<Sensor black="2049" white="10439" iso_list="320 640 1250 2500 5000"/>
+		<Hints>
+			<Hint name="wb_offset" value="71"/>
+		</Hints>
+	</Camera>
 	<Camera make="Canon" model="Canon PowerShot Pro1">
 		<ID make="Canon" model="PowerShot Pro1">Canon PowerShot Pro1</ID>
 		<CFA width="2" height="2">
@@ -2451,6 +2518,19 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon PowerShot G5 X Mark II">
+		<ID make="Canon" model="PowerShot G5 X Mark II">Canon PowerShot G5 X Mark II</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2048" white="14335"/>
+		<Hints>
+			<Hint name="wb_offset" value="71"/>
+		</Hints>
+	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G6">
 		<ID make="Canon" model="PowerShot G6">Canon PowerShot G6</ID>
 		<CFA width="2" height="2">
@@ -2526,6 +2606,19 @@
 				<ColorMatrixRow plane="2">-407 1415 5049</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot G7 X Mark III">
+		<ID make="Canon" model="PowerShot G7 X Mark III">Canon PowerShot G7 X Mark III</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Sensor black="2048" white="14335"/>
+		<Hints>
+			<Hint name="wb_offset" value="71"/>
+		</Hints>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G1 X">
 		<ID make="Canon" model="PowerShot G1 X">Canon PowerShot G1 X</ID>
