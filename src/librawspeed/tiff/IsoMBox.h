@@ -73,7 +73,7 @@ struct IsoMMediaDataBox;
 
 // The most basic box.
 struct AbstractIsoMBox {
-  typedef std::array<uint8_t, 16> UuidType;
+  using UuidType = std::array<uint8_t, 16>;
 
   ByteStream data;
 

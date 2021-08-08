@@ -1855,8 +1855,9 @@ static int crxMakeQStep(CrxImage* img, CrxTile* tile, int32_t* qpTable,
   if (img->levels > 2)
     totalHeight += qpHeight8;
 
-  tile->qStep = (CrxQStep*)malloc(totalHeight * qpWidth * sizeof(uint32_t) +
-                                  img->levels * sizeof(CrxQStep));
+  size_t const qStepSize = totalHeight * size_t(qpWidth) * sizeof(uint32_t) +
+                           img->levels * sizeof(CrxQStep);
+  tile->qStep = (CrxQStep*)malloc(qStepSize);
 
   if (!tile->qStep)
     return -1;
@@ -2355,9 +2356,9 @@ static int crxSetupImageData(const IsoMCanonCmp1Box* hdr, CrxImage* img,
   // intermediate plane buffer. At the moment though it's too many changes so
   // left as is.
   if (img->encType == 3 && img->nPlanes == 4 && img->nBits > 8) {
-    img->planeBuf =
-        (int16_t*)malloc(img->planeHeight * img->planeWidth * img->nPlanes *
-                         ((img->samplePrecision + 7) >> 3));
+    size_t const planeBufSize = img->planeHeight * img->planeWidth * img->nPlanes *
+                                (size_t(img->samplePrecision + 7) >> 3);
+    img->planeBuf = (int16_t*)malloc(planeBufSize);
     if (!img->planeBuf)
       ThrowRDE("Crx decompression error");
   }
@@ -2466,7 +2467,7 @@ void CrxDecompressor::decode(const IsoMCanonCmp1Box& cmp1Box,
 
   // Bytes required for decompression output
   Buffer::size_type bufLen =
-      cmp1Box.f_height * cmp1Box.f_width * sizeof(uint16_t);
+      size_t(cmp1Box.f_height) * size_t(cmp1Box.f_width) * sizeof(uint16_t);
 
   // update sizes for the planes
   if (hdr.nPlanes == 4) {
