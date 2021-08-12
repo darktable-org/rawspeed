@@ -12,6 +12,7 @@ cscope.out
 *.sln
 *.vcproj
 *.vcxproj
+.vscode/
 
 # Compiled Object files
 *.slo
