@@ -40,11 +40,10 @@
 #cmakedefine HAVE_CXX_THREAD_LOCAL
 #cmakedefine HAVE_GCC_THREAD_LOCAL
 
-// which aligned memory allocation function is available, if any?
+// which aligned memory allocation function is available?
 // only the first one found will be enabled
-#cmakedefine HAVE_POSIX_MEMALIGN
 #cmakedefine HAVE_ALIGNED_ALLOC
-#cmakedefine HAVE_MM_MALLOC
+#cmakedefine HAVE_POSIX_MEMALIGN
 #cmakedefine HAVE_ALIGNED_MALLOC
 
 #cmakedefine RAWSPEED_STANDALONE_BUILD
