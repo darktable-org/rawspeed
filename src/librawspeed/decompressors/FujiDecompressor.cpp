@@ -485,12 +485,8 @@ void FujiDecompressor::xtrans_decode_block(fuji_compressed_block* info,
 
   const int line_width = common_info.line_width;
 
-  // FIXME: GCC5 sucks.
-  // https://github.com/darktable-org/rawspeed/issues/112
-  // https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=871250
-  // https://bugs.launchpad.net/linuxmint/+bug/1709234
-  auto pass = [&, line_width](auto&& even_func, xt_lines c0, xt_lines c1,
-                              int grad, ColorPos& c0_pos, ColorPos& c1_pos) {
+  auto pass = [&](auto&& even_func, xt_lines c0, xt_lines c1, int grad,
+                  ColorPos& c0_pos, ColorPos& c1_pos) {
     while (g.even < line_width || g.odd < line_width) {
       if (g.even < line_width)
         even_func(c0, c1, grad, c0_pos, c1_pos);
