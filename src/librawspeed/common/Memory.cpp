@@ -80,8 +80,9 @@ void alignedFree(void* ptr) {
 }
 
 void alignedFreeConstPtr(const void* ptr) {
-// an exception, specified by EXP05-C-EX1 and EXP55-CPP-EX1
-alignedFree(const_cast<void*>(ptr));
+  // an exception, specified by EXP05-C-EX1 and EXP55-CPP-EX1
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast): this is fine.
+  alignedFree(const_cast<void*>(ptr));
 }
 
 } // namespace rawspeed
