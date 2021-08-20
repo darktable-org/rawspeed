@@ -1,5 +1,7 @@
 message(STATUS "Trying to query CPU page size")
 
+unset(RAWSPEED_PAGESIZE)
+
 if(BINARY_PACKAGE_BUILD)
   message(STATUS "Performing binary package build, using hardcoded value.")
   set(RAWSPEED_PAGESIZE 64)
@@ -20,3 +22,7 @@ endif()
 
 message(STATUS "Deciding that the CPU page size is ${RAWSPEED_PAGESIZE} bytes")
 set(RAWSPEED_PAGESIZE ${RAWSPEED_PAGESIZE} PARENT_SCOPE)
+
+if(RAWSPEED_PAGESIZE EQUAL 0)
+  message(SEND_ERROR "Detected page size is zero!")
+endif()

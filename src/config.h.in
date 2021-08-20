@@ -27,7 +27,10 @@
 #endif
 
 static constexpr const auto RAWSPEED_CACHELINESIZE = @RAWSPEED_CACHELINESIZE@ULL;
+static_assert(RAWSPEED_CACHELINESIZE > 0 && ((RAWSPEED_CACHELINESIZE & (RAWSPEED_CACHELINESIZE - 1)) == 0), "Expected to know CPU L1d cache line size.");
+
 static constexpr const auto RAWSPEED_PAGESIZE = @RAWSPEED_PAGESIZE@ULL;
+static_assert(RAWSPEED_PAGESIZE > 0 && ((RAWSPEED_PAGESIZE & (RAWSPEED_PAGESIZE - 1)) == 0), "Expected to know (minimal) CPU page size.");
 
 #cmakedefine HAVE_PUGIXML
 

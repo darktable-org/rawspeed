@@ -1,8 +1,9 @@
 message(STATUS "Trying to query CPU L1d cache line size")
 
+unset(RAWSPEED_CACHELINESIZE)
+
 if(BINARY_PACKAGE_BUILD)
   message(STATUS "Performing binary package build, using hardcoded value.")
-  set(RAWSPEED_CACHELINESIZE 64)
 else()
   try_run(RAWSPEED_CACHELINESIZE_EXITCODE RAWSPEED_CACHELINESIZE_COMPILED
     "${CMAKE_BINARY_DIR}"
@@ -16,6 +17,15 @@ else()
   endif()
 
   string(STRIP "${RAWSPEED_CACHELINESIZE_RUN_OUTPUT}" RAWSPEED_CACHELINESIZE)
+
+  if(RAWSPEED_CACHELINESIZE EQUAL 0)
+    message(WARNING "Detected CPU L1d cache line size is zero! Falling back to hardcoded value.")
+    unset(RAWSPEED_CACHELINESIZE)
+  endif()
+endif()
+
+if(NOT DEFINED RAWSPEED_CACHELINESIZE)
+  set(RAWSPEED_CACHELINESIZE 64)
 endif()
 
 message(STATUS "Deciding that the CPU L1d cache line size is ${RAWSPEED_CACHELINESIZE} bytes")
