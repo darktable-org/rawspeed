@@ -26,6 +26,9 @@
 /* #undef WITH_SSE2 */
 #endif
 
+static constexpr const auto RAWSPEED_CACHELINESIZE = @RAWSPEED_CACHELINESIZE@ULL;
+static constexpr const auto RAWSPEED_PAGESIZE = @RAWSPEED_PAGESIZE@ULL;
+
 #cmakedefine HAVE_PUGIXML
 
 #cmakedefine HAVE_OPENMP
