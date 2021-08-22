@@ -24,6 +24,7 @@
 #include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
 #include "common/Array2DRef.h"         // for Array2DRef
 #include "common/Common.h"             // for writeLog, DEBUG_PRIO_ERROR
+#include "common/CroppedArray2DRef.h"  // for CroppedArray2DRef
 #include "common/ErrorLog.h"           // for ErrorLog
 #include "common/Mutex.h"              // for Mutex
 #include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
@@ -110,6 +111,8 @@ public:
                 const iPoint2D& size, const iPoint2D& destPos);
   rawspeed::RawImageType getDataType() const { return dataType; }
   inline Array2DRef<uint16_t> getU16DataAsUncroppedArray2DRef() const noexcept;
+  inline CroppedArray2DRef<uint16_t>
+  getU16DataAsCroppedArray2DRef() const noexcept;
   uint8_t* getData() const;
   uint8_t*
   getData(uint32_t x,
@@ -268,8 +271,14 @@ RawImageData::getU16DataAsUncroppedArray2DRef() const noexcept {
   assert(dataType == TYPE_USHORT16 &&
          "Attempting to access floating-point buffer as uint16_t.");
   assert(data && "Data not yet allocated.");
-  return {reinterpret_cast<uint16_t*>(data), cpp * dim.x, dim.y,
-          static_cast<int>(pitch / sizeof(uint16_t))};
+  return {reinterpret_cast<uint16_t*>(data), cpp * uncropped_dim.x,
+          uncropped_dim.y, static_cast<int>(pitch / sizeof(uint16_t))};
+}
+
+inline CroppedArray2DRef<uint16_t>
+RawImageData::getU16DataAsCroppedArray2DRef() const noexcept {
+  return {getU16DataAsUncroppedArray2DRef(), cpp * mOffset.x, mOffset.y,
+          cpp * dim.x, dim.y};
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,
