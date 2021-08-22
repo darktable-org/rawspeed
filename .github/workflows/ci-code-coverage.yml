@@ -18,7 +18,7 @@ jobs:
       matrix:
         os: [ linux ]
         compiler:
-          - { compiler: GNU10, CC: gcc-10, CXX: g++-10, GCOV: gcov-10 }
+          - { compiler: GNU11, CC: gcc-11, CXX: g++-11, GCOV: gcov-11 }
         flavor: [ Coverage ]
     container: debian:unstable-slim
     steps:
@@ -44,9 +44,9 @@ jobs:
           apt-get install ca-certificates \
                           cmake \
                           curl \
-                          g++-10 \
+                          g++-11 \
                           gcc \
-                          gcc-10 \
+                          gcc-11 \
                           git \
                           googletest \
                           libjpeg-dev \

@@ -15,7 +15,7 @@ jobs:
       matrix:
         os: [ linux ]
         compiler:
-          - { compiler: GNU10,  CC: gcc-10,   CXX: g++-10 }
+          - { compiler: GNU11,  CC: gcc-11,   CXX: g++-11 }
           - { compiler: LLVM12, CC: clang-12, CXX: clang++-12 }
         flavor: [ RelWithDebInfo, Release ]
     container: debian:unstable-slim
@@ -42,9 +42,9 @@ jobs:
           apt-get install ca-certificates \
                           clang++-12 \
                           cmake \
-                          g++-10 \
+                          g++-11 \
                           gcc \
-                          gcc-10 \
+                          gcc-11 \
                           git \
                           googletest \
                           libjpeg-dev \
