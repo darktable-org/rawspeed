@@ -5,6 +5,7 @@ FILE(GLOB SOURCES
   "Common.cpp"
   "Common.h"
   "Cpuid.cpp"
+  "CroppedArray2DRef.h"
   "DefaultInitAllocatorAdaptor.h"
   "DngOpcodes.cpp"
   "DngOpcodes.h"
