@@ -268,8 +268,8 @@ RawImageData::getU16DataAsUncroppedArray2DRef() const noexcept {
   assert(dataType == TYPE_USHORT16 &&
          "Attempting to access floating-point buffer as uint16_t.");
   assert(data && "Data not yet allocated.");
-  return {reinterpret_cast<uint16_t*>(data), cpp * dim.x, dim.y,
-          static_cast<int>(pitch / sizeof(uint16_t))};
+  return {reinterpret_cast<uint16_t*>(data), cpp * uncropped_dim.x,
+          uncropped_dim.y, static_cast<int>(pitch / sizeof(uint16_t))};
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,
