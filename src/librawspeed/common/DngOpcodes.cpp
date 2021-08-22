@@ -81,13 +81,13 @@ public:
 
   void apply(const RawImage& ri) override {
     MutexLocker guard(&ri->mBadPixelMutex);
+    const CroppedArray2DRef<uint16_t> img(ri->getU16DataAsCroppedArray2DRef());
     iPoint2D crop = ri->getCropOffset();
     uint32_t offset = crop.x | (crop.y << 16);
-    for (auto y = 0; y < ri->dim.y; ++y) {
-      auto* src = reinterpret_cast<uint16_t*>(ri->getData(0, y));
-      for (auto x = 0; x < ri->dim.x; ++x) {
-        if (src[x] == value)
-          ri->mBadPixelPositions.push_back(offset + (y << 16 | x));
+    for (auto row = 0; row < img.croppedHeight; ++row) {
+      for (auto col = 0; col < img.croppedWidth; ++col) {
+        if (img(row, col) == value)
+          ri->mBadPixelPositions.push_back(offset + (row << 16 | col));
       }
     }
   }
