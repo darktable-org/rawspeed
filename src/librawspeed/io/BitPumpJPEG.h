@@ -36,31 +36,36 @@ using BitPumpJPEG = BitStream<JPEGBitPumpTag, BitStreamCacheRightInLeftOut>;
 
 template <> struct BitStreamTraits<BitPumpJPEG> final {
   static constexpr bool canUseWithHuffmanTable = true;
+
+  // How many bytes can we read from the input per each fillCache(), at most?
+  // Normally, we want to read 4 bytes, but at worst each one of those can be
+  // an 0xFF byte, separated by 0x00 byte, signifying that 0xFF is a data byte.
+  static constexpr int MaxProcessBytes = 8;
 };
 
 template <>
 inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uint8_t* input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
 
+  std::array<uint8_t, BitStreamTraits<BitPumpJPEG>::MaxProcessBytes> prefetch;
+  std::copy_n(input, prefetch.size(), prefetch.begin());
+
   // short-cut path for the most common case (no FF marker in the next 4 bytes)
   // this is slightly faster than the else-case alone.
-  // TODO: investigate applicability of vector intrinsics to speed up if-cascade
-  if (input[0] != 0xFF &&
-      input[1] != 0xFF &&
-      input[2] != 0xFF &&
-      input[3] != 0xFF ) {
-    cache.push(getBE<uint32_t>(input), 32);
+  if (std::none_of(&prefetch[0], &prefetch[4],
+                   [](uint8_t byte) { return byte == 0xFF; })) {
+    cache.push(getBE<uint32_t>(prefetch.data()), 32);
     return 4;
   }
 
   size_type p = 0;
   for (size_type i = 0; i < 4; ++i) {
     // Pre-execute most common case, where next byte is 'normal'/non-FF
-    const int c0 = input[p++];
+    const int c0 = prefetch[p++];
     cache.push(c0, 8);
     if (c0 == 0xFF) {
       // Found FF -> pre-execute case of FF/00, which represents an FF data byte -> ignore the 00
-      const int c1 = input[p++];
+      const int c1 = prefetch[p++];
       if (c1 != 0) {
         // Found FF/xx with xx != 00. This is the end of stream marker.
         // That means we shouldn't have pushed last 8 bits (0xFF, from c0).
