@@ -195,10 +195,10 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
 
     // For x, we first process all full pixel blocks within the image buffer ...
     for (; x < fullBlocks; ++x) {
-      unroll_loop<N_COMP>([&](int i) {
+      for (int i = 0; i != N_COMP; ++i) {
         pred[i] = uint16_t(pred[i] + ht[i]->decodeDifference(bitStream));
         *dest++ = pred[i];
-      });
+      }
     }
 
     // Sometimes we also need to consume one more block, and produce part of it.
@@ -225,7 +225,8 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
 
     // ... and discard the rest.
     for (; x < frame.w; ++x) {
-      unroll_loop<N_COMP>([&](int i) { ht[i]->decodeDifference(bitStream); });
+      for (int i = 0; i != N_COMP; ++i)
+        ht[i]->decodeDifference(bitStream);
     }
   }
 }
