@@ -73,6 +73,9 @@ void LJpegDecompressor::decode(uint32_t offsetX, uint32_t offsetY,
   if (offsetY + height > static_cast<unsigned>(mRaw->dim.y))
     ThrowRDE("Tile overflows image vertically");
 
+  if (width == 0 || height == 0)
+    return; // We do not need anything from this tile.
+
   offX = offsetX;
   offY = offsetY;
   w = width;
