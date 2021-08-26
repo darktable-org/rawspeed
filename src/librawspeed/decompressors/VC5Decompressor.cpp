@@ -543,7 +543,7 @@ void VC5Decompressor::Wavelet::HighPassBand::decode(const Wavelet& wavelet) {
     BitPumpMSB bits;
     const int16_t quant;
 
-    int16_t pixelValue;
+    int16_t pixelValue = 0;
     unsigned int numPixelsLeft = 0;
 
     void decodeNextPixelGroup() {
