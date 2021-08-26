@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/CroppedArray2DRef.h"
+#include "common/Array2DRef.h"
 #include <cassert> // for assert
 #include <type_traits>
 
