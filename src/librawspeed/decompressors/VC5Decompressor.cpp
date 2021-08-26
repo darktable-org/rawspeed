@@ -808,7 +808,7 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
 
   // Convert to RGGB output
 #ifdef HAVE_OPENMP
-#pragma omp for schedule(static) collapse(2)
+#pragma omp for schedule(static)
 #endif
   for (int row = 0; row < height; ++row) {
     for (int col = 0; col < width; ++col) {
