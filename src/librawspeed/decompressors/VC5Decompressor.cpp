@@ -539,31 +539,54 @@ void VC5Decompressor::Wavelet::LowPassBand::decode(const Wavelet& wavelet) {
 }
 
 void VC5Decompressor::Wavelet::HighPassBand::decode(const Wavelet& wavelet) {
-  auto dequantize = [quant = quant](int16_t val) -> int16_t {
-    return val * quant;
+  class DeRLVer final {
+    BitPumpMSB bits;
+    const int16_t quant;
+
+    int16_t pixelValue;
+    unsigned int numPixelsLeft = 0;
+
+    void decodeNextPixelGroup() {
+      assert(numPixelsLeft == 0);
+      getRLV(&bits, &pixelValue, &numPixelsLeft);
+    }
+
+  public:
+    DeRLVer(const ByteStream& bs, int16_t quant_) : bits(bs), quant(quant_) {}
+
+    void verifyIsAtEnd() {
+      if (numPixelsLeft != 0)
+        ThrowRDE("Not all pixels consumed?");
+      decodeNextPixelGroup();
+      static_assert(decompand(MARKER_BAND_END) == MARKER_BAND_END,
+                    "passthrough");
+      if (pixelValue != MARKER_BAND_END || numPixelsLeft != 0)
+        ThrowRDE("EndOfBand marker not found");
+    }
+
+    int16_t decode() {
+      auto dequantize = [quant = quant](int16_t val) -> int16_t {
+        return val * quant;
+      };
+
+      if (numPixelsLeft == 0) {
+        decodeNextPixelGroup();
+        pixelValue = dequantize(pixelValue);
+      }
+
+      assert(numPixelsLeft > 0);
+      --numPixelsLeft;
+      return pixelValue;
+    }
   };
 
-  Array2DRef<int16_t>::create(&data, wavelet.width, wavelet.height);
-
-  BitPumpMSB bits(bs);
   // decode highpass band
-  int pixelValue = 0;
-  unsigned int count = 0;
-  int nPixels = wavelet.width * wavelet.height;
-  for (int iPixel = 0; iPixel < nPixels;) {
-    getRLV(&bits, &pixelValue, &count);
-    pixelValue = dequantize(pixelValue);
-    for (; count > 0; --count) {
-      if (iPixel >= nPixels)
-        ThrowRDE("Buffer overflow");
-      data[iPixel] = pixelValue;
-      ++iPixel;
-    }
-  }
-  getRLV(&bits, &pixelValue, &count);
-  static_assert(decompand(MARKER_BAND_END) == MARKER_BAND_END, "passthrough");
-  if (pixelValue != MARKER_BAND_END || count != 0)
-    ThrowRDE("EndOfBand marker not found");
+  DeRLVer d(bs, quant);
+  Array2DRef<int16_t>::create(&data, wavelet.width, wavelet.height);
+  for (int row = 0; row != wavelet.height; ++row)
+    for (int col = 0; col != wavelet.width; ++col)
+      data[row * wavelet.width + col] = d.decode();
+  d.verifyIsAtEnd();
 }
 
 void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
@@ -809,7 +832,7 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
   }
 }
 
-inline void VC5Decompressor::getRLV(BitPumpMSB* bits, int* value,
+inline void VC5Decompressor::getRLV(BitPumpMSB* bits, int16_t* value,
                                     unsigned int* count) {
   unsigned int iTab;
 
