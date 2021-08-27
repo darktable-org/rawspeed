@@ -73,9 +73,7 @@ using std::left;
 using std::internal;
 #endif
 
-namespace rawspeed {
-
-namespace rstest {
+namespace rawspeed::rstest {
 
 std::string img_hash(const rawspeed::RawImage& r);
 
@@ -479,9 +477,7 @@ static int usage(const char* progname) {
   return 0;
 }
 
-} // namespace rstest
-
-} // namespace rawspeed
+} // namespace rawspeed::rstest
 
 using rawspeed::rstest::usage;
 using rawspeed::rstest::options;

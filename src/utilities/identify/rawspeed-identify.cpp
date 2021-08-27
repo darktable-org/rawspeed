@@ -36,9 +36,7 @@
 #include <Windows.h>
 #endif
 
-namespace rawspeed {
-
-namespace identify {
+namespace rawspeed::identify {
 
 std::string find_cameras_xml(const char* argv0);
 
@@ -107,9 +105,7 @@ std::string find_cameras_xml(const char *argv0) {
   return found_camfile;
 }
 
-} // namespace identify
-
-} // namespace rawspeed
+} // namespace rawspeed::identify
 
 using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
