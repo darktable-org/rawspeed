@@ -65,17 +65,6 @@ if(WITH_OPENMP)
 
   set(HAVE_OPENMP 1)
 
-  if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
-      CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0) OR
-     (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND
-      CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0.3
-      # XCode 10 is broken. Maybe XCode 11 will be ok?
-     ))
-    # See https://bugs.llvm.org/show_bug.cgi?id=35873
-    #     https://redmine.darktable.org/issues/12568
-    set(OPENMP_FIRSTPRIVATE_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES TRUE)
-  endif()
-
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND
      CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
     # See https://godbolt.org/z/AiyuX9
