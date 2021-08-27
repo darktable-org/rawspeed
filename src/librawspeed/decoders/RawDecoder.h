@@ -150,7 +150,7 @@ protected:
   /* can be decoded, when a specific version of the code is needed */
   /* Higher number in camera xml file: Files for this camera will not be decoded */
   /* Higher number in code than xml: Image will be decoded. */
-  virtual int getDecoderVersion() const = 0;
+  [[nodiscard]] virtual int getDecoderVersion() const = 0;
 
   /* Hints set for the camera after checkCameraSupported has been called from the implementation*/
   Hints hints;

@@ -43,7 +43,7 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 protected:
-  int getDecoderVersion() const override { return 0; }
+  [[nodiscard]] int getDecoderVersion() const override { return 0; }
   std::string make, model;
   static std::string getXMPTag(const std::string& xmp, const std::string& tag);
 };

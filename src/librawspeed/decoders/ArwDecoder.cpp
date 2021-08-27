@@ -312,7 +312,7 @@ void ArwDecoder::ParseA100WB() {
     tag = bs.getU32();
     bs.setByteOrder(Endianness::little);
     len = bs.getU32();
-    bs.check(len);
+    (void)bs.check(len);
     if (!len)
       ThrowRDE("Found entry of zero length, corrupt.");
 

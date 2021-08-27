@@ -46,7 +46,7 @@ public:
   void checkSupportInternal(const CameraMetaData* meta) override;
 
 protected:
-  int getDecoderVersion() const override { return 0; }
+  [[nodiscard]] int getDecoderVersion() const override { return 0; }
   bool mFixLjpeg;
   static void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
   void parseCFA(const TiffIFD* raw);

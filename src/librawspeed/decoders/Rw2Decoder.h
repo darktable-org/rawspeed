@@ -45,7 +45,7 @@ public:
   void checkSupportInternal(const CameraMetaData* meta) override;
 
 protected:
-  int getDecoderVersion() const override { return 3; }
+  [[nodiscard]] int getDecoderVersion() const override { return 3; }
 
 private:
   void parseCFA();

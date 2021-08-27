@@ -79,10 +79,10 @@ public:
     static int lineHeight() { return 6; }
 
     // how many vertical lines does this block encode?
-    int height() const { return h.total_lines; }
+    [[nodiscard]] int height() const { return h.total_lines; }
 
     // how many horizontal pixels does this block encode?
-    int width() const {
+    [[nodiscard]] int width() const {
       // if this is not the last block, we are good.
       if ((n + 1) != h.blocks_in_row)
         return h.block_size;
@@ -94,14 +94,14 @@ public:
     }
 
     // where vertically does this block start?
-    int offsetY(int line = 0) const {
+    [[nodiscard]] int offsetY(int line = 0) const {
       (void)height(); // A note for NDEBUG builds that *this is used.
       assert(line >= 0 && line < height());
       return lineHeight() * line;
     }
 
     // where horizontally does this block start?
-    int offsetX() const { return h.block_size * n; }
+    [[nodiscard]] int offsetX() const { return h.block_size * n; }
   };
 
   FujiDecompressor(const RawImage& img, ByteStream input);

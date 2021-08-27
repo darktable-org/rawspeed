@@ -117,7 +117,7 @@ TEST(ColorFilterArrayTestBasic, ToDcraw) {
 TEST(ColorFilterArrayTestBasic, HandlesEmptyCFA) {
   ColorFilterArray cfa;
 
-  ASSERT_ANY_THROW({ cfa.getColorAt(0, 0); });
+  ASSERT_ANY_THROW({ (void)cfa.getColorAt(0, 0); });
 
   ASSERT_ANY_THROW({ cfa.shiftLeft(0); });
 
@@ -141,7 +141,7 @@ TEST(ColorFilterArrayTestBasic, HandlesOutOfBounds) {
 
   // ASSERT_ANY_THROW({ ColorFilterArray::colorToString((CFAColor)-1); });
 
-  ASSERT_ANY_THROW({ cfa.getDcrawFilter(); });
+  ASSERT_ANY_THROW({ (void)cfa.getDcrawFilter(); });
 }
 
 class ColorFilterArrayTest : public ::testing::TestWithParam<Bayer2x2> {
@@ -220,7 +220,7 @@ TEST_P(ColorFilterArrayTest, ToDcraw) {
   ASSERT_NO_THROW({
     ColorFilterArray cfa;
     setHelper(&cfa, param);
-    cfa.getDcrawFilter();
+    (void)cfa.getDcrawFilter();
   });
 }
 

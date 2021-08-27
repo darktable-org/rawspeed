@@ -58,10 +58,10 @@ public:
   void shiftLeft(int n = 1);
   void shiftDown(int n = 1);
 
-  CFAColor getColorAt(int x, int y) const;
-  uint32_t getDcrawFilter() const;
-  std::string asString() const;
-  iPoint2D getSize() const { return size; }
+  [[nodiscard]] CFAColor getColorAt(int x, int y) const;
+  [[nodiscard]] uint32_t getDcrawFilter() const;
+  [[nodiscard]] std::string asString() const;
+  [[nodiscard]] iPoint2D getSize() const { return size; }
 
   static std::string colorToString(CFAColor c);
   static uint32_t __attribute__((const))

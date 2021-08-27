@@ -44,7 +44,7 @@ public:
   void checkSupportInternal(const CameraMetaData* meta) override;
 
 private:
-  int getDecoderVersion() const override { return 3; }
+  [[nodiscard]] int getDecoderVersion() const override { return 3; }
   std::string getMode();
 };
 

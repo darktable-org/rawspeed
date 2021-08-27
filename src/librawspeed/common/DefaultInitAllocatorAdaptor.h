@@ -50,7 +50,9 @@ public:
 
   allocator_type allocator;
 
-  const allocator_type& get_allocator() const noexcept { return allocator; }
+  [[nodiscard]] const allocator_type& get_allocator() const noexcept {
+    return allocator;
+  }
 
   DefaultInitAllocatorAdaptor() noexcept = default;
 

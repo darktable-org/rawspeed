@@ -64,7 +64,8 @@ public:
     checkCameraSupported(meta, mRootIFD->getID(), "");
   }
 
-  const TiffIFD* getIFDWithLargestImage(TiffTag filter = IMAGEWIDTH) const;
+  [[nodiscard]] const TiffIFD*
+  getIFDWithLargestImage(TiffTag filter = IMAGEWIDTH) const;
 };
 
 } // namespace rawspeed

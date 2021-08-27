@@ -145,9 +145,9 @@ public:
     prepare();
   }
 
-  std::vector<Segment> getSegments() const { return segments; }
+  [[nodiscard]] std::vector<Segment> getSegments() const { return segments; }
 
-  std::vector<value_type> calculateCurve() const {
+  [[nodiscard]] std::vector<value_type> calculateCurve() const {
     std::vector<value_type> curve(65536);
 
     for (int i = 0; i < num_segments; i++) {

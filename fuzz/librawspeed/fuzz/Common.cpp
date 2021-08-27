@@ -64,7 +64,7 @@ rawspeed::ColorFilterArray CreateCFA(rawspeed::ByteStream* bs) {
   if (cfaHeight &&
       cfaWidth > std::numeric_limits<decltype(cfaWidth)>::max() / cfaHeight)
     ThrowIOE("Integer overflow when calculating CFA area");
-  bs->check(cfaWidth * cfaHeight, 4);
+  (void)bs->check(cfaWidth * cfaHeight, 4);
 
   cfa.setSize(rawspeed::iPoint2D(cfaWidth, cfaHeight));
 

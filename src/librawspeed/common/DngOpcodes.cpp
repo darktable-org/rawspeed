@@ -126,7 +126,9 @@ protected:
     assert(roi.isThisInside(fullImage));
   }
 
-  const iRectangle2D& __attribute__((pure)) getRoi() const { return roi; }
+  [[nodiscard]] const iRectangle2D& __attribute__((pure)) getRoi() const {
+    return roi;
+  }
 };
 
 // ****************************************************************************
@@ -136,7 +138,7 @@ public:
   explicit DummyROIOpcode(const RawImage& ri, ByteStream* bs)
       : ROIOpcode(ri, bs, true) {}
 
-  const iRectangle2D& __attribute__((pure)) getRoi() const {
+  [[nodiscard]] const iRectangle2D& __attribute__((pure)) getRoi() const {
     return ROIOpcode::getRoi();
   }
 
@@ -311,7 +313,7 @@ public:
     vector<double> polynomial;
 
     const auto polynomial_size = bs->getU32() + 1UL;
-    bs->check(8UL * polynomial_size);
+    (void)bs->check(8UL * polynomial_size);
     if (polynomial_size > 9)
       ThrowRDE("A polynomial with more than 8 degrees not allowed");
 
@@ -375,7 +377,7 @@ protected:
   DeltaRowOrCol(const RawImage& ri, ByteStream* bs, float f2iScale_)
       : DeltaRowOrColBase(ri, bs), f2iScale(f2iScale_) {
     const auto deltaF_count = bs->getU32();
-    bs->check(deltaF_count, 4);
+    (void)bs->check(deltaF_count, 4);
 
     // See PixelOpcode::applyOP(). We will access deltaF/deltaI up to (excl.)
     // either ROI.getRight() or ROI.getBottom() index. Thus, we need to have

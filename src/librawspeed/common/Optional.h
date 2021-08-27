@@ -40,11 +40,11 @@ public:
     return *this;
   }
 
-  bool hasValue() const { return hasData; }
+  [[nodiscard]] bool hasValue() const { return hasData; }
 
   void reset() { hasData = false; }
 
-  T getValue() const {
+  [[nodiscard]] T getValue() const {
     assert(hasValue());
     return data;
   }

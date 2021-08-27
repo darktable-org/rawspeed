@@ -65,7 +65,8 @@ class TiffEntry
   friend class TiffIFD;
 
   template <typename T, T (TiffEntry::*getter)(uint32_t index) const>
-  std::vector<T> getArray(uint32_t count_) const {
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] std::vector<T>
+  getArray(uint32_t count_) const {
     std::vector<T> res(count_);
     for (uint32_t i = 0; i < count_; ++i)
       res[i] = (this->*getter)(i);
@@ -81,33 +82,35 @@ public:
             ByteStream&& data);
   TiffEntry(TiffIFD* parent, ByteStream* bs);
 
-  bool __attribute__((pure)) isFloat() const;
-  bool __attribute__((pure)) isInt() const;
-  bool __attribute__((pure)) isString() const;
-  uint8_t getByte(uint32_t index = 0) const;
-  uint32_t getU32(uint32_t index = 0) const;
-  int32_t getI32(uint32_t index = 0) const;
-  uint16_t getU16(uint32_t index = 0) const;
-  int16_t getI16(uint32_t index = 0) const;
-  float getFloat(uint32_t index = 0) const;
-  std::string getString() const;
+  [[nodiscard]] bool __attribute__((pure)) isFloat() const;
+  [[nodiscard]] bool __attribute__((pure)) isInt() const;
+  [[nodiscard]] bool __attribute__((pure)) isString() const;
+  [[nodiscard]] uint8_t getByte(uint32_t index = 0) const;
+  [[nodiscard]] uint32_t getU32(uint32_t index = 0) const;
+  [[nodiscard]] int32_t getI32(uint32_t index = 0) const;
+  [[nodiscard]] uint16_t getU16(uint32_t index = 0) const;
+  [[nodiscard]] int16_t getI16(uint32_t index = 0) const;
+  [[nodiscard]] float getFloat(uint32_t index = 0) const;
+  [[nodiscard]] std::string getString() const;
 
-  inline std::vector<uint16_t> getU16Array(uint32_t count_) const {
+  [[nodiscard]] inline std::vector<uint16_t>
+  getU16Array(uint32_t count_) const {
     return getArray<uint16_t, &TiffEntry::getU16>(count_);
   }
 
-  inline std::vector<uint32_t> getU32Array(uint32_t count_) const {
+  [[nodiscard]] inline std::vector<uint32_t>
+  getU32Array(uint32_t count_) const {
     return getArray<uint32_t, &TiffEntry::getU32>(count_);
   }
 
-  inline std::vector<float> getFloatArray(uint32_t count_) const {
+  [[nodiscard]] inline std::vector<float> getFloatArray(uint32_t count_) const {
     return getArray<float, &TiffEntry::getFloat>(count_);
   }
 
   ByteStream& getData() { return data; }
   const uint8_t* getData(uint32_t size) { return data.getData(size); }
 
-  const DataBuffer& getRootIfdData() const;
+  [[nodiscard]] const DataBuffer& getRootIfdData() const;
 
 protected:
   static const std::array<uint32_t, 14> datashifts;

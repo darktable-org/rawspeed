@@ -48,7 +48,7 @@ public:
 protected:
   void ParseA100WB();
 
-  int getDecoderVersion() const override { return 1; }
+  [[nodiscard]] int getDecoderVersion() const override { return 1; }
   RawImage decodeSRF(const TiffIFD* raw);
   void DecodeARW2(const ByteStream& input, uint32_t w, uint32_t h,
                   uint32_t bpp);

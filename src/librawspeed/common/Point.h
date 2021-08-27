@@ -72,9 +72,9 @@ public:
     return x <= rhs.x && y <= rhs.y;
   }
 
-  bool hasPositiveArea() const { return operator>({0, 0}); }
+  [[nodiscard]] bool hasPositiveArea() const { return operator>({0, 0}); }
 
-  area_type __attribute__((pure)) area() const {
+  [[nodiscard]] area_type __attribute__((pure)) area() const {
     using signed_area = std::make_signed<area_type>::type;
 
     area_type x_abs = std::abs(static_cast<signed_area>(x));
@@ -83,11 +83,11 @@ public:
     return x_abs * y_abs;
   }
 
-  constexpr bool isThisInside(const iPoint2D& rhs) const {
+  [[nodiscard]] constexpr bool isThisInside(const iPoint2D& rhs) const {
     return operator<=(rhs);
   }
 
-  constexpr iPoint2D getSmallest(const iPoint2D& rhs) const {
+  [[nodiscard]] constexpr iPoint2D getSmallest(const iPoint2D& rhs) const {
     return {
         std::min(x, rhs.x),
         std::min(y, rhs.y),
@@ -111,26 +111,30 @@ public:
   constexpr iRectangle2D(int x_pos, int y_pos, int w, int h)
       : pos({x_pos, y_pos}), dim({w, h}) {}
 
-  constexpr int getTop() const { return pos.y; }
-  constexpr int getBottom() const { return pos.y + dim.y; }
-  constexpr int getLeft() const { return pos.x; }
-  constexpr int getRight() const { return pos.x + dim.x; }
-  constexpr int getWidth() const { return dim.x; }
-  constexpr int getHeight() const { return dim.y; }
-  constexpr iPoint2D getTopLeft() const { return pos; }
-  constexpr iPoint2D getBottomRight() const { return dim + pos; }
-  constexpr bool hasPositiveArea() const { return (dim.x > 0) && (dim.y > 0); }
+  [[nodiscard]] constexpr int getTop() const { return pos.y; }
+  [[nodiscard]] constexpr int getBottom() const { return pos.y + dim.y; }
+  [[nodiscard]] constexpr int getLeft() const { return pos.x; }
+  [[nodiscard]] constexpr int getRight() const { return pos.x + dim.x; }
+  [[nodiscard]] constexpr int getWidth() const { return dim.x; }
+  [[nodiscard]] constexpr int getHeight() const { return dim.y; }
+  [[nodiscard]] constexpr iPoint2D getTopLeft() const { return pos; }
+  [[nodiscard]] constexpr iPoint2D getBottomRight() const { return dim + pos; }
+  [[nodiscard]] constexpr bool hasPositiveArea() const {
+    return (dim.x > 0) && (dim.y > 0);
+  }
 
-  constexpr bool isThisInside(const iRectangle2D& otherPoint) const {
+  [[nodiscard]] constexpr bool
+  isThisInside(const iRectangle2D& otherPoint) const {
     return pos >= otherPoint.pos &&
            getBottomRight() <= otherPoint.getBottomRight();
   }
 
-  constexpr bool isPointInsideInclusive(const iPoint2D& checkPoint) const {
+  [[nodiscard]] constexpr bool
+  isPointInsideInclusive(const iPoint2D& checkPoint) const {
     return pos <= checkPoint && getBottomRight() >= checkPoint;
   }
 
-  unsigned int area() const { return dim.area(); }
+  [[nodiscard]] unsigned int area() const { return dim.area(); }
 
   void offset(const iPoint2D& offset_) { pos += offset_; }
 
@@ -183,7 +187,7 @@ public:
     return cropArea();
   }
 
-  iRectangle2D getOverlap(const iRectangle2D& other) const {
+  [[nodiscard]] iRectangle2D getOverlap(const iRectangle2D& other) const {
     iRectangle2D overlap;
     iPoint2D br1 = getBottomRight();
     iPoint2D br2 = other.getBottomRight();
@@ -193,7 +197,7 @@ public:
     return overlap;
   }
 
-  iRectangle2D combine(const iRectangle2D& other) const {
+  [[nodiscard]] iRectangle2D combine(const iRectangle2D& other) const {
     iRectangle2D combined;
     iPoint2D br1 = getBottomRight();
     iPoint2D br2 = other.getBottomRight();

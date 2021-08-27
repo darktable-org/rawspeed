@@ -44,12 +44,12 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 protected:
-  int getDecoderVersion() const override { return 9; }
+  [[nodiscard]] int getDecoderVersion() const override { return 9; }
   RawImage decodeOldFormat();
   RawImage decodeNewFormat();
   void sRawInterpolate();
-  bool isSubSampled() const;
-  iPoint2D getSubSampling() const;
+  [[nodiscard]] bool isSubSampled() const;
+  [[nodiscard]] iPoint2D getSubSampling() const;
   int getHue();
 };
 

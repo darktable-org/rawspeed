@@ -97,7 +97,7 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   }
 
   static constexpr const auto headerSize = 16;
-  bs.check(headerSize);
+  (void)bs.check(headerSize);
 
   BitPumpMSB32 startpump(bs);
 

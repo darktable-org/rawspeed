@@ -44,7 +44,7 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 protected:
-  int getDecoderVersion() const override { return 0; }
+  [[nodiscard]] int getDecoderVersion() const override { return 0; }
 };
 
 } // namespace rawspeed

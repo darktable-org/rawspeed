@@ -47,7 +47,7 @@ public:
   static bool isRAF(const Buffer* input);
 
 protected:
-  int getDecoderVersion() const override { return 1; }
+  [[nodiscard]] int getDecoderVersion() const override { return 1; }
 
 private:
   int isCompressed();

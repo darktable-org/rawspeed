@@ -44,7 +44,7 @@ public:
   static bool isCRW(const Buffer* input);
 
 protected:
-  int getDecoderVersion() const override { return 0; }
+  [[nodiscard]] int getDecoderVersion() const override { return 0; }
   static float canonEv(int64_t in);
 };
 

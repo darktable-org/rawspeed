@@ -56,7 +56,7 @@ KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
 
   // Lower estimate: this decompressor requires *at least* half a byte
   // per output pixel
-  input.check(mRaw->dim.area() / 2ULL);
+  (void)input.check(mRaw->dim.area() / 2ULL);
 }
 
 KodakDecompressor::segment

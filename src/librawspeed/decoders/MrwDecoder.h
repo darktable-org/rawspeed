@@ -51,7 +51,7 @@ public:
   static int isMRW(const Buffer* input);
 
 protected:
-  int getDecoderVersion() const override { return 0; }
+  [[nodiscard]] int getDecoderVersion() const override { return 0; }
   void parseHeader();
 };
 

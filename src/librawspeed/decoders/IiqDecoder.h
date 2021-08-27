@@ -61,7 +61,7 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 protected:
-  int getDecoderVersion() const override { return 0; }
+  [[nodiscard]] int getDecoderVersion() const override { return 0; }
   uint32_t black_level = 0;
   void CorrectPhaseOneC(ByteStream meta_data, uint32_t split_row,
                         uint32_t split_col);

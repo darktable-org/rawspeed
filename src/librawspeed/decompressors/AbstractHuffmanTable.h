@@ -76,7 +76,8 @@ protected:
   bool fullDecode = true;
   bool fixDNGBug16 = false;
 
-  inline size_t __attribute__((pure)) maxCodePlusDiffLength() const {
+  [[nodiscard]] inline size_t __attribute__((pure))
+  maxCodePlusDiffLength() const {
     return nCodesPerLength.size() - 1 +
            *(std::max_element(codeValues.cbegin(), codeValues.cend()));
   }
@@ -87,7 +88,8 @@ protected:
   // (there are always 0 codes of length 0)
   std::vector<unsigned int> nCodesPerLength; // index is length of code
 
-  inline unsigned int __attribute__((pure)) maxCodesCount() const {
+  [[nodiscard]] inline unsigned int __attribute__((pure))
+  maxCodesCount() const {
     return std::accumulate(nCodesPerLength.begin(), nCodesPerLength.end(), 0U);
   }
 
@@ -135,7 +137,7 @@ protected:
     }
   }
 
-  std::vector<CodeSymbol> generateCodeSymbols() const {
+  [[nodiscard]] std::vector<CodeSymbol> generateCodeSymbols() const {
     std::vector<CodeSymbol> symbols;
 
     assert(!nCodesPerLength.empty());

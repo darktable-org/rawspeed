@@ -58,7 +58,7 @@ void MrwDecoder::parseHeader() {
 
   // the size of the rest of the header, up to the image data
   const auto headerSize = bs.getU32();
-  bs.check(headerSize);
+  (void)bs.check(headerSize);
 
   // ... and offset to the image data at the same time
   const auto dataOffset = bs.getPosition() + headerSize;
@@ -72,7 +72,7 @@ void MrwDecoder::parseHeader() {
   while (bs.getRemainSize() > 0) {
     uint32_t tag = bs.getU32();
     uint32_t len = bs.getU32();
-    bs.check(len);
+    (void)bs.check(len);
     if (!len)
       ThrowRDE("Found entry of zero length, MRW is corrupt.");
 
