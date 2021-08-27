@@ -120,9 +120,8 @@ void PanasonicDecompressorV5::chopInputIntoBlocks(const PacketDsc& dsc) {
 
   unsigned currPixel = 0;
   std::generate_n(std::back_inserter(blocks), numBlocks,
-                  [input = &input, &currPixel, pixelToCoordinate,
-                   pixelsPerBlock]() -> Block {
-                    ByteStream bs = input->getStream(BlockSize);
+                  [&, pixelToCoordinate, pixelsPerBlock]() -> Block {
+                    ByteStream bs = input.getStream(BlockSize);
                     iPoint2D beginCoord = pixelToCoordinate(currPixel);
                     currPixel += pixelsPerBlock;
                     iPoint2D endCoord = pixelToCoordinate(currPixel);

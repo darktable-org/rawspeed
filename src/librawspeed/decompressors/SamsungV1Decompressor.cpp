@@ -41,7 +41,7 @@ struct SamsungV1Decompressor::encTableItem {
 };
 
 SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
-                                             const ByteStream* bs_, int bit)
+                                             const ByteStream& bs_, int bit)
     : AbstractSamsungDecompressor(image), bs(bs_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
@@ -122,7 +122,7 @@ void SamsungV1Decompressor::decompress() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   assert(out.width % 32 == 0 && "Should have even count of pixels per row.");
   assert(out.height % 2 == 0 && "Should have even row count.");
-  BitPumpMSB pump(*bs);
+  BitPumpMSB pump(bs);
   for (int row = 0; row < out.height; row++) {
     std::array<int, 2> pred = {{}};
     if (row >= 2)

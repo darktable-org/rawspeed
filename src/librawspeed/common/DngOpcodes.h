@@ -63,10 +63,10 @@ protected:
 
   template <class Opcode>
   static std::unique_ptr<DngOpcode> constructor(const RawImage& ri,
-                                                ByteStream* bs);
+                                                ByteStream& bs);
 
   using constructor_t = std::unique_ptr<DngOpcode> (*)(const RawImage& ri,
-                                                       ByteStream* bs);
+                                                       ByteStream& bs);
   static const std::map<uint32_t, std::pair<const char*, constructor_t>> Map;
 };
 

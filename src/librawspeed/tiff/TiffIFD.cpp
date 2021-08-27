@@ -40,19 +40,19 @@ using std::vector;
 
 namespace rawspeed {
 
-void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream* bs) {
+void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs) {
   assert(ifds);
 
   TiffEntryOwner t;
 
-  auto origPos = bs->getPosition();
+  auto origPos = bs.getPosition();
 
   try {
     t = std::make_unique<TiffEntry>(this, bs);
   } catch (IOException&) { // Ignore unparsable entry
     // fix probably broken position due to interruption by exception
     // i.e. setting it to the next entry.
-    bs->setPosition(origPos + 12);
+    bs.setPosition(origPos + 12);
     return;
   }
 
@@ -77,7 +77,7 @@ void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream* bs) {
     case SUBIFDS:
     case EXIFIFDPOINTER:
       for (uint32_t j = 0; j < t->count; j++)
-        add(std::make_unique<TiffIFD>(this, ifds, *bs, t->getU32(j)));
+        add(std::make_unique<TiffIFD>(this, ifds, bs, t->getU32(j)));
       break;
 
     default:
@@ -121,7 +121,7 @@ TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
     ThrowTPE("Two IFD's overlap. Raw corrupt!");
 
   for (uint32_t i = 0; i < numEntries; i++)
-    parseIFDEntry(ifds, &bs);
+    parseIFDEntry(ifds, bs);
 
   nextIFD = bs.getU32();
 }

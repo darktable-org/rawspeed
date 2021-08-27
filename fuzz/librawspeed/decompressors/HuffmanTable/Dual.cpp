@@ -70,12 +70,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     rawspeed::IMPL1 ht1;
 
     try {
-      ht0 = createHuffmanTable<rawspeed::IMPL0>(&bs0);
+      ht0 = createHuffmanTable<rawspeed::IMPL0>(bs0);
     } catch (rawspeed::RawspeedException&) {
       failure0 = true;
     }
     try {
-      ht1 = createHuffmanTable<rawspeed::IMPL1>(&bs1);
+      ht1 = createHuffmanTable<rawspeed::IMPL1>(bs1);
     } catch (rawspeed::RawspeedException&) {
       failure1 = true;
     }

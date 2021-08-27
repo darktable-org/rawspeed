@@ -111,7 +111,7 @@ RawImage SrwDecoder::decodeRawInternal() {
     const ByteStream bs(
         DataBuffer(mFile->getSubView(offset, count), Endianness::little));
 
-    SamsungV1Decompressor s1(mRaw, &bs, bits);
+    SamsungV1Decompressor s1(mRaw, bs, bits);
 
     mRaw->createData();
 

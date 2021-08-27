@@ -65,9 +65,9 @@ class DngOpcodes::FixBadPixelsConstant final : public DngOpcodes::DngOpcode {
   uint32_t value;
 
 public:
-  explicit FixBadPixelsConstant(const RawImage& ri, ByteStream* bs)
-      : value(bs->getU32()) {
-    bs->getU32(); // Bayer Phase not used
+  explicit FixBadPixelsConstant(const RawImage& ri, ByteStream& bs)
+      : value(bs.getU32()) {
+    bs.getU32(); // Bayer Phase not used
   }
 
   void setup(const RawImage& ri) override {
@@ -99,15 +99,15 @@ class DngOpcodes::ROIOpcode : public DngOpcodes::DngOpcode {
   iRectangle2D roi;
 
 protected:
-  explicit ROIOpcode(const RawImage& ri, ByteStream* bs, bool minusOne) {
+  explicit ROIOpcode(const RawImage& ri, ByteStream& bs, bool minusOne) {
     const iRectangle2D fullImage =
         minusOne ? iRectangle2D(0, 0, ri->dim.x - 1, ri->dim.y - 1)
                  : iRectangle2D(0, 0, ri->dim.x, ri->dim.y);
 
-    uint32_t top = bs->getU32();
-    uint32_t left = bs->getU32();
-    uint32_t bottom = bs->getU32();
-    uint32_t right = bs->getU32();
+    uint32_t top = bs.getU32();
+    uint32_t left = bs.getU32();
+    uint32_t bottom = bs.getU32();
+    uint32_t right = bs.getU32();
 
     const iPoint2D topLeft(left, top);
     const iPoint2D bottomRight(right, bottom);
@@ -135,7 +135,7 @@ protected:
 
 class DngOpcodes::DummyROIOpcode final : public ROIOpcode {
 public:
-  explicit DummyROIOpcode(const RawImage& ri, ByteStream* bs)
+  explicit DummyROIOpcode(const RawImage& ri, ByteStream& bs)
       : ROIOpcode(ri, bs, true) {}
 
   [[nodiscard]] const iRectangle2D& __attribute__((pure)) getRoi() const {
@@ -155,25 +155,25 @@ class DngOpcodes::FixBadPixelsList final : public DngOpcodes::DngOpcode {
   std::vector<uint32_t> badPixels;
 
 public:
-  explicit FixBadPixelsList(const RawImage& ri, ByteStream* bs) {
+  explicit FixBadPixelsList(const RawImage& ri, ByteStream& bs) {
     const iRectangle2D fullImage(0, 0, ri->getUncroppedDim().x - 1,
                                  ri->getUncroppedDim().y - 1);
 
-    bs->getU32(); // Skip phase - we don't care
-    auto badPointCount = bs->getU32();
-    auto badRectCount = bs->getU32();
+    bs.getU32(); // Skip phase - we don't care
+    auto badPointCount = bs.getU32();
+    auto badRectCount = bs.getU32();
 
     // first, check that we indeed have much enough data
-    const auto origPos = bs->getPosition();
-    bs->skipBytes(badPointCount, 2 * 4);
-    bs->skipBytes(badRectCount, 4 * 4);
-    bs->setPosition(origPos);
+    const auto origPos = bs.getPosition();
+    bs.skipBytes(badPointCount, 2 * 4);
+    bs.skipBytes(badRectCount, 4 * 4);
+    bs.setPosition(origPos);
 
     // Read points
     badPixels.reserve(badPixels.size() + badPointCount);
     for (auto i = 0U; i < badPointCount; ++i) {
-      auto y = bs->getU32();
-      auto x = bs->getU32();
+      auto y = bs.getU32();
+      auto x = bs.getU32();
 
       const iPoint2D badPoint(x, y);
       if (!fullImage.isPointInsideInclusive(badPoint))
@@ -210,7 +210,7 @@ public:
 
 class DngOpcodes::TrimBounds final : public ROIOpcode {
 public:
-  explicit TrimBounds(const RawImage& ri, ByteStream* bs)
+  explicit TrimBounds(const RawImage& ri, ByteStream& bs)
       : ROIOpcode(ri, bs, false) {}
 
   void apply(const RawImage& ri) override { ri->subFrame(getRoi()); }
@@ -225,9 +225,8 @@ class DngOpcodes::PixelOpcode : public ROIOpcode {
   uint32_t colPitch;
 
 protected:
-  explicit PixelOpcode(const RawImage& ri, ByteStream* bs)
-      : ROIOpcode(ri, bs, false), firstPlane(bs->getU32()),
-        planes(bs->getU32()) {
+  explicit PixelOpcode(const RawImage& ri, ByteStream& bs)
+      : ROIOpcode(ri, bs, false), firstPlane(bs.getU32()), planes(bs.getU32()) {
 
     if (planes == 0 || firstPlane > ri->getCpp() || planes > ri->getCpp() ||
         firstPlane + planes > ri->getCpp()) {
@@ -235,8 +234,8 @@ protected:
                firstPlane, planes, ri->getCpp());
     }
 
-    rowPitch = bs->getU32();
-    colPitch = bs->getU32();
+    rowPitch = bs.getU32();
+    colPitch = bs.getU32();
 
     const iRectangle2D& ROI = getRoi();
 
@@ -271,7 +270,7 @@ class DngOpcodes::LookupOpcode : public PixelOpcode {
 protected:
   vector<uint16_t> lookup;
 
-  explicit LookupOpcode(const RawImage& ri, ByteStream* bs)
+  explicit LookupOpcode(const RawImage& ri, ByteStream& bs)
       : PixelOpcode(ri, bs), lookup(65536) {}
 
   void setup(const RawImage& ri) override {
@@ -290,14 +289,14 @@ protected:
 
 class DngOpcodes::TableMap final : public LookupOpcode {
 public:
-  explicit TableMap(const RawImage& ri, ByteStream* bs) : LookupOpcode(ri, bs) {
-    auto count = bs->getU32();
+  explicit TableMap(const RawImage& ri, ByteStream& bs) : LookupOpcode(ri, bs) {
+    auto count = bs.getU32();
 
     if (count == 0 || count > 65536)
       ThrowRDE("Invalid size of lookup table");
 
     for (auto i = 0U; i < count; ++i)
-      lookup[i] = bs->getU16();
+      lookup[i] = bs.getU16();
 
     if (count < lookup.size())
       fill_n(&lookup[count], lookup.size() - count, lookup[count - 1]);
@@ -308,18 +307,18 @@ public:
 
 class DngOpcodes::PolynomialMap final : public LookupOpcode {
 public:
-  explicit PolynomialMap(const RawImage& ri, ByteStream* bs)
+  explicit PolynomialMap(const RawImage& ri, ByteStream& bs)
       : LookupOpcode(ri, bs) {
     vector<double> polynomial;
 
-    const auto polynomial_size = bs->getU32() + 1UL;
-    (void)bs->check(8UL * polynomial_size);
+    const auto polynomial_size = bs.getU32() + 1UL;
+    (void)bs.check(8UL * polynomial_size);
     if (polynomial_size > 9)
       ThrowRDE("A polynomial with more than 8 degrees not allowed");
 
     polynomial.reserve(polynomial_size);
     std::generate_n(std::back_inserter(polynomial), polynomial_size,
-                    [&bs]() { return bs->get<double>(); });
+                    [&bs]() { return bs.get<double>(); });
 
     // Create lookup
     lookup.resize(65536);
@@ -345,7 +344,7 @@ public:
   };
 
 protected:
-  DeltaRowOrColBase(const RawImage& ri, ByteStream* bs) : PixelOpcode(ri, bs) {}
+  DeltaRowOrColBase(const RawImage& ri, ByteStream& bs) : PixelOpcode(ri, bs) {}
 };
 
 template <typename S>
@@ -374,10 +373,10 @@ protected:
   // only meaningful for uint16_t images!
   virtual bool valueIsOk(float value) = 0;
 
-  DeltaRowOrCol(const RawImage& ri, ByteStream* bs, float f2iScale_)
+  DeltaRowOrCol(const RawImage& ri, ByteStream& bs, float f2iScale_)
       : DeltaRowOrColBase(ri, bs), f2iScale(f2iScale_) {
-    const auto deltaF_count = bs->getU32();
-    (void)bs->check(deltaF_count, 4);
+    const auto deltaF_count = bs.getU32();
+    (void)bs.check(deltaF_count, 4);
 
     // See PixelOpcode::applyOP(). We will access deltaF/deltaI up to (excl.)
     // either ROI.getRight() or ROI.getBottom() index. Thus, we need to have
@@ -392,7 +391,7 @@ protected:
 
     deltaF.reserve(deltaF_count);
     std::generate_n(std::back_inserter(deltaF), deltaF_count, [&bs]() {
-      const auto F = bs->get<float>();
+      const auto F = bs.get<float>();
       if (!std::isfinite(F))
         ThrowRDE("Got bad float %f.", F);
       return F;
@@ -413,7 +412,7 @@ class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol<S> {
   bool valueIsOk(float value) final { return std::abs(value) <= absLimit; }
 
 public:
-  explicit OffsetPerRowOrCol(const RawImage& ri, ByteStream* bs)
+  explicit OffsetPerRowOrCol(const RawImage& ri, ByteStream& bs)
       : DeltaRowOrCol<S>(ri, bs, 65535.0F),
         absLimit(double(std::numeric_limits<uint16_t>::max()) /
                  this->f2iScale) {}
@@ -450,7 +449,7 @@ class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol<S> {
   }
 
 public:
-  explicit ScalePerRowOrCol(const RawImage& ri, ByteStream* bs)
+  explicit ScalePerRowOrCol(const RawImage& ri, ByteStream& bs)
       : DeltaRowOrCol<S>(ri, bs, 1024.0F),
         maxLimit((double(std::numeric_limits<int>::max() - rounding) /
                   double(std::numeric_limits<uint16_t>::max())) /
@@ -516,7 +515,7 @@ DngOpcodes::DngOpcodes(const RawImage& ri, TiffEntry* entry) {
     }
 
     if (opConstructor != nullptr)
-      opcodes.emplace_back(opConstructor(ri, &opcode_bs));
+      opcodes.emplace_back(opConstructor(ri, opcode_bs));
     else {
 #ifndef DEBUG
       // Throw Error if not marked as optional
@@ -547,7 +546,7 @@ void DngOpcodes::applyOpCodes(const RawImage& ri) {
 
 template <class Opcode>
 std::unique_ptr<DngOpcodes::DngOpcode>
-DngOpcodes::constructor(const RawImage& ri, ByteStream* bs) {
+DngOpcodes::constructor(const RawImage& ri, ByteStream& bs) {
   return std::make_unique<Opcode>(ri, bs);
 }
 

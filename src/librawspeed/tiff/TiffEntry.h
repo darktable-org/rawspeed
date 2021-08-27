@@ -80,7 +80,7 @@ public:
 
   TiffEntry(TiffIFD* parent, TiffTag tag, TiffDataType type, uint32_t count,
             ByteStream&& data);
-  TiffEntry(TiffIFD* parent, ByteStream* bs);
+  TiffEntry(TiffIFD* parent, ByteStream& bs);
 
   [[nodiscard]] bool __attribute__((pure)) isFloat() const;
   [[nodiscard]] bool __attribute__((pure)) isInt() const;

@@ -35,7 +35,7 @@ using std::vector;
 namespace rawspeed {
 
 CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas,
-                     const ByteStream* valueData, ByteStream dirEntry) {
+                     const ByteStream& valueData, ByteStream dirEntry) {
   uint16_t p = dirEntry.getU16();
 
   // NOLINTNEXTLINE cppcoreguidelines-prefer-member-initializer
@@ -52,7 +52,7 @@ CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas,
     // Data is offset in value_data
     bytesize = dirEntry.getU32();
     data_offset = dirEntry.getU32();
-    data = valueData->getSubStream(data_offset, bytesize);
+    data = valueData.getSubStream(data_offset, bytesize);
     if (!valueDatas->emplace(data).second)
       ThrowCPE("Two valueData's overlap. Raw corrupt!");
     break;

@@ -47,7 +47,7 @@ FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
 
   input.setByteOrder(Endianness::big);
 
-  header = FujiHeader(&input);
+  header = FujiHeader(input);
   if (!header)
     ThrowRDE("compressed RAF header check");
 
@@ -795,12 +795,12 @@ void FujiDecompressor::decompress() const {
   }
 }
 
-FujiDecompressor::FujiHeader::FujiHeader(ByteStream* bs)
-    : signature(bs->getU16()), version(bs->getByte()), raw_type(bs->getByte()),
-      raw_bits(bs->getByte()), raw_height(bs->getU16()),
-      raw_rounded_width(bs->getU16()), raw_width(bs->getU16()),
-      block_size(bs->getU16()), blocks_in_row(bs->getByte()),
-      total_lines(bs->getU16()) {}
+FujiDecompressor::FujiHeader::FujiHeader(ByteStream& bs)
+    : signature(bs.getU16()), version(bs.getByte()), raw_type(bs.getByte()),
+      raw_bits(bs.getByte()), raw_height(bs.getU16()),
+      raw_rounded_width(bs.getU16()), raw_width(bs.getU16()),
+      block_size(bs.getU16()), blocks_in_row(bs.getByte()),
+      total_lines(bs.getU16()) {}
 
 FujiDecompressor::FujiHeader::operator bool() const {
   // general validation

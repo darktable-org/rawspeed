@@ -36,7 +36,7 @@ class PanasonicDecompressorV6 final : public AbstractDecompressor {
 
   inline void __attribute__((always_inline))
   // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
-  decompressBlock(ByteStream* rowInput, int row, int col) const noexcept;
+  decompressBlock(ByteStream& rowInput, int row, int col) const noexcept;
 
   // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
   void decompressRow(int row) const noexcept;

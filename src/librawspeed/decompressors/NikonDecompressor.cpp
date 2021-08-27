@@ -360,7 +360,7 @@ public:
 
 } // namespace
 
-std::vector<uint16_t> NikonDecompressor::createCurve(ByteStream* metadata,
+std::vector<uint16_t> NikonDecompressor::createCurve(ByteStream& metadata,
                                                      uint32_t bitsPS,
                                                      uint32_t v0, uint32_t v1,
                                                      uint32_t* split) {
@@ -380,7 +380,7 @@ std::vector<uint16_t> NikonDecompressor::createCurve(ByteStream* metadata,
     curve[i] = i;
 
   uint32_t step = 0;
-  uint32_t csize = metadata->getU16();
+  uint32_t csize = metadata.getU16();
   if (csize > 1)
     step = curve.size() / (csize - 1);
 
@@ -389,7 +389,7 @@ std::vector<uint16_t> NikonDecompressor::createCurve(ByteStream* metadata,
       ThrowRDE("Bad curve segment count (%u)", csize);
 
     for (size_t i = 0; i < csize; i++)
-      curve[i * step] = metadata->getU16();
+      curve[i * step] = metadata.getU16();
     for (size_t i = 0; i < curve.size() - 1; i++) {
       const uint32_t b_scale = i % step;
 
@@ -404,8 +404,8 @@ std::vector<uint16_t> NikonDecompressor::createCurve(ByteStream* metadata,
       curve[i] = (a_scale * curve[a_pos] + b_scale * curve[b_pos]) / step;
     }
 
-    metadata->setPosition(562);
-    *split = metadata->getU16();
+    metadata.setPosition(562);
+    *split = metadata.getU16();
   } else if (v0 != 70) {
     if (csize == 0 || csize > 0x4001)
       ThrowRDE("Don't know how to compute curve! csize = %u", csize);
@@ -414,7 +414,7 @@ std::vector<uint16_t> NikonDecompressor::createCurve(ByteStream* metadata,
     assert(curve.size() > 1);
 
     for (uint32_t i = 0; i < csize; i++) {
-      curve[i] = metadata->getU16();
+      curve[i] = metadata.getU16();
     }
   }
 
@@ -473,7 +473,7 @@ NikonDecompressor::NikonDecompressor(const RawImage& raw, ByteStream metadata,
   pUp[0][1] = metadata.getU16();
   pUp[1][1] = metadata.getU16();
 
-  curve = createCurve(&metadata, bitsPS, v0, v1, &split);
+  curve = createCurve(metadata, bitsPS, v0, v1, &split);
 
   // If the 'split' happens outside of the image, it does not actually happen.
   if (split >= static_cast<unsigned>(mRaw->dim.y))

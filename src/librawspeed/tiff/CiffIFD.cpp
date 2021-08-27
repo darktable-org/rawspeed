@@ -42,13 +42,11 @@ namespace rawspeed {
 class Buffer;
 
 void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* valueDatas,
-                            const ByteStream* valueData,
-                            ByteStream* dirEntries) {
+                            const ByteStream& valueData,
+                            ByteStream& dirEntries) {
   assert(valueDatas);
-  assert(valueData);
-  assert(dirEntries);
 
-  ByteStream dirEntry = dirEntries->getStream(10); // Entry is 10 bytes.
+  ByteStream dirEntry = dirEntries.getStream(10); // Entry is 10 bytes.
 
   auto t = std::make_unique<CiffEntry>(valueDatas, valueData, dirEntry);
 
@@ -101,7 +99,7 @@ CiffIFD::CiffIFD(CiffIFD* const parent_, ByteStream directory)
   NORangesSet<Buffer> valueDatas;
 
   for (uint32_t i = 0; i < entryCount; i++)
-    parseIFDEntry(&valueDatas, &valueData, &dirEntries);
+    parseIFDEntry(&valueDatas, valueData, dirEntries);
 
   assert(valueDatas.size() <= entryCount);
   assert(mEntry.size() <= CiffTagsWeCareAbout.size());

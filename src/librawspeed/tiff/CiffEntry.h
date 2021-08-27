@@ -56,7 +56,7 @@ class CiffEntry
 
 public:
   explicit CiffEntry(NORangesSet<Buffer>* valueDatas,
-                     const ByteStream* valueData, ByteStream dirEntry);
+                     const ByteStream& valueData, ByteStream dirEntry);
 
   [[nodiscard]] const ByteStream& getData() const { return data; }
 

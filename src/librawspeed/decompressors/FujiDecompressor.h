@@ -43,7 +43,7 @@ public:
   struct FujiHeader {
     FujiHeader() = default;
 
-    explicit FujiHeader(ByteStream* input_);
+    explicit FujiHeader(ByteStream& input_);
     explicit __attribute__((pure)) operator bool() const; // validity check
 
     uint16_t signature;
