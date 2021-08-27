@@ -213,7 +213,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   };
   std::vector<ReconstructionStep> reconstructionSteps;
 
-  static inline void getRLV(BitPumpMSB* bits, int16_t* value,
+  static inline void getRLV(BitPumpMSB& bits, int16_t* value,
                             unsigned int* count);
 
   void parseLargeCodeblock(const ByteStream& bs);

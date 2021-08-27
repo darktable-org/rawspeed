@@ -164,7 +164,7 @@ public:
 };
 
 inline void PanasonicDecompressorV4::processPixelPacket(
-    ProxyStream* bits, int row, int col,
+    ProxyStream& bits, int row, int col,
     std::vector<uint32_t>* zero_pos) const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
@@ -183,12 +183,12 @@ inline void PanasonicDecompressorV4::processPixelPacket(
 
     // FIXME: this is actually just `p % 3 == 2`, cleanup after perf is good.
     if (u == 2) {
-      sh = extractHighBits(4U, bits->getBits(2), /*effectiveBitwidth=*/3);
+      sh = extractHighBits(4U, bits.getBits(2), /*effectiveBitwidth=*/3);
       u = -1;
     }
 
     if (nonz[c]) {
-      int j = bits->getBits(8);
+      int j = bits.getBits(8);
       if (j) {
         pred[c] -= 0x80 << sh;
         if (pred[c] < 0 || sh == 4)
@@ -196,9 +196,9 @@ inline void PanasonicDecompressorV4::processPixelPacket(
         pred[c] += j << sh;
       }
     } else {
-      nonz[c] = bits->getBits(8);
+      nonz[c] = bits.getBits(8);
       if (nonz[c] || p > 11)
-        pred[c] = nonz[c] << 4 | bits->getBits(4);
+        pred[c] = nonz[c] << 4 | bits.getBits(4);
     }
 
     out(row, col) = pred[c];
@@ -229,7 +229,7 @@ void PanasonicDecompressorV4::processBlock(
     assert(endCol % PixelsPerPacket == 0);
 
     for (; col < endCol; col += PixelsPerPacket)
-      processPixelPacket(&bits, row, col, zero_pos);
+      processPixelPacket(bits, row, col, zero_pos);
   }
 }
 

@@ -34,7 +34,7 @@ class RawImage;
 class SamsungV1Decompressor final : public AbstractSamsungDecompressor {
   struct encTableItem;
 
-  static inline int32_t samsungDiff(BitPumpMSB* pump,
+  static inline int32_t samsungDiff(BitPumpMSB& pump,
                                     const std::vector<encTableItem>& tbl);
 
   const ByteStream* bs;

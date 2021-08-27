@@ -481,7 +481,7 @@ NikonDecompressor::NikonDecompressor(const RawImage& raw, ByteStream metadata,
 }
 
 template <typename Huffman>
-void NikonDecompressor::decompress(BitPumpMSB* bits, int start_y, int end_y) {
+void NikonDecompressor::decompress(BitPumpMSB& bits, int start_y, int end_y) {
   auto ht = createHuffmanTable<Huffman>(huffSelect);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -494,7 +494,7 @@ void NikonDecompressor::decompress(BitPumpMSB* bits, int start_y, int end_y) {
   for (int row = start_y; row < end_y; row++) {
     std::array<int, 2> pred = pUp[row & 1];
     for (int col = 0; col < out.width; col++) {
-      pred[col & 1] += ht.decodeDifference(*bits);
+      pred[col & 1] += ht.decodeDifference(bits);
       if (col < 2)
         pUp[row & 1][col & 1] = pred[col & 1];
       rawdata->setWithLookUp(clampBits(pred[col & 1], 15),
@@ -515,11 +515,11 @@ void NikonDecompressor::decompress(const ByteStream& data,
   assert(split == 0 || split < static_cast<unsigned>(mRaw->dim.y));
 
   if (!split) {
-    decompress<HuffmanTable>(&bits, 0, mRaw->dim.y);
+    decompress<HuffmanTable>(bits, 0, mRaw->dim.y);
   } else {
-    decompress<HuffmanTable>(&bits, 0, split);
+    decompress<HuffmanTable>(bits, 0, split);
     huffSelect += 1;
-    decompress<NikonLASDecompressor>(&bits, split, mRaw->dim.y);
+    decompress<NikonLASDecompressor>(bits, split, mRaw->dim.y);
   }
 }
 

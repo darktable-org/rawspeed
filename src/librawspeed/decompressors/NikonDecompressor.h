@@ -58,7 +58,7 @@ private:
                                            uint32_t v1, uint32_t* split);
 
   template <typename Huffman>
-  void decompress(BitPumpMSB* bits, int start_y, int end_y);
+  void decompress(BitPumpMSB& bits, int start_y, int end_y);
 
   template <typename Huffman>
   static Huffman createHuffmanTable(uint32_t huffSelect);

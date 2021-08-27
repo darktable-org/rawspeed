@@ -242,19 +242,19 @@ void FujiDecompressor::copy_line_to_bayer(fuji_compressed_block* info,
   copy_line(info, strip, cur_line, index);
 }
 
-inline void FujiDecompressor::fuji_zerobits(BitPumpMSB* pump, int* count) {
+inline void FujiDecompressor::fuji_zerobits(BitPumpMSB& pump, int* count) {
   *count = 0;
 
   // Count-and-skip all the leading `0`s.
   while (true) {
-    uint32_t batch = (pump->peekBits(31) << 1) | 0b1;
+    uint32_t batch = (pump.peekBits(31) << 1) | 0b1;
     int numZerosInThisBatch = __builtin_clz(batch);
     *count += numZerosInThisBatch;
     bool allZeroes = numZerosInThisBatch == 31;
     int numBitsToSkip = numZerosInThisBatch;
     if (!allZeroes)
       numBitsToSkip += 1; // Also skip the first `1`.
-    pump->skipBitsNoFill(numBitsToSkip);
+    pump.skipBitsNoFill(numBitsToSkip);
     if (!allZeroes)
       break; // We're done!
   }
@@ -291,7 +291,7 @@ void FujiDecompressor::fuji_decode_sample(
 
   func_0(line_buf_cur, &interp_val, &grad, &gradient);
 
-  fuji_zerobits(&(info->pump), &sample);
+  fuji_zerobits(info->pump, &sample);
 
   if (sample < common_info.max_bits - common_info.raw_bits - 1) {
     int decBits = bitDiff((*grads)[gradient].value1, (*grads)[gradient].value2);

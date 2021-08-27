@@ -49,18 +49,18 @@ protected:
   std::array<std::array<int, 2>, 3> diffBitsMode;
 
   static inline __attribute__((always_inline)) int16_t
-  getDiff(BitPumpMSB32* pump, uint32_t len);
+  getDiff(BitPumpMSB32& pump, uint32_t len);
 
   inline __attribute__((always_inline)) std::array<uint16_t, 16>
-  prepareBaselineValues(BitPumpMSB32* pump, int row, int col);
+  prepareBaselineValues(BitPumpMSB32& pump, int row, int col);
 
   inline __attribute__((always_inline)) std::array<uint32_t, 4>
-  decodeDiffLengths(BitPumpMSB32* pump, int row);
+  decodeDiffLengths(BitPumpMSB32& pump, int row);
 
   inline __attribute__((always_inline)) std::array<int, 16>
-  decodeDifferences(BitPumpMSB32* pump, int row);
+  decodeDifferences(BitPumpMSB32& pump, int row);
 
-  inline __attribute__((always_inline)) void processBlock(BitPumpMSB32* pump,
+  inline __attribute__((always_inline)) void processBlock(BitPumpMSB32& pump,
                                                           int row, int col);
 
   void decompressRow(int row);

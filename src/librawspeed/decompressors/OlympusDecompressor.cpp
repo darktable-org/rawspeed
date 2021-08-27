@@ -68,28 +68,28 @@ OlympusDecompressor::OlympusDecompressor(const RawImage& img) : mRaw(img) {
  */
 
 inline __attribute__((always_inline)) int
-OlympusDecompressor::parseCarry(BitPumpMSB* bits,
+OlympusDecompressor::parseCarry(BitPumpMSB& bits,
                                 std::array<int, 3>* carry) const {
-  bits->fill();
+  bits.fill();
   int i = 2 * ((*carry)[2] < 3);
   int nbits;
   for (nbits = 2 + i; static_cast<uint16_t>((*carry)[0]) >> (nbits + i);
        nbits++)
     ;
 
-  int b = bits->peekBitsNoFill(15);
+  int b = bits.peekBitsNoFill(15);
   int sign = (b >> 14) * -1;
   int low = (b >> 12) & 3;
   int high = bittable[b & 4095];
 
   // Skip bytes used above or read bits
   if (high == 12) {
-    bits->skipBitsNoFill(15);
-    high = bits->getBitsNoFill(16 - nbits) >> 1;
+    bits.skipBitsNoFill(15);
+    high = bits.getBitsNoFill(16 - nbits) >> 1;
   } else
-    bits->skipBitsNoFill(high + 1 + 3);
+    bits.skipBitsNoFill(high + 1 + 3);
 
-  (*carry)[0] = (high << nbits) | bits->getBitsNoFill(nbits);
+  (*carry)[0] = (high << nbits) | bits.getBitsNoFill(nbits);
   int diff = ((*carry)[0] ^ sign) + (*carry)[1];
   (*carry)[1] = (diff * 3 + (*carry)[1]) >> 5;
   (*carry)[2] = (*carry)[0] > 16 ? 0 : (*carry)[2] + 1;
@@ -132,7 +132,7 @@ inline int OlympusDecompressor::getPred(const Array2DRef<uint16_t> out, int row,
   return pred;
 }
 
-void OlympusDecompressor::decompressRow(BitPumpMSB* bits, int row) const {
+void OlympusDecompressor::decompressRow(BitPumpMSB& bits, int row) const {
   assert(mRaw->dim.y > 0);
   assert(mRaw->dim.x > 0);
   assert(mRaw->dim.x % 2 == 0);
@@ -162,7 +162,7 @@ void OlympusDecompressor::decompress(ByteStream input) const {
   BitPumpMSB bits(input);
 
   for (int y = 0; y < mRaw->dim.y; y++)
-    decompressRow(&bits, y);
+    decompressRow(bits, y);
 }
 
 } // namespace rawspeed

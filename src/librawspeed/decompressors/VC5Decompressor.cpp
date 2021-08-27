@@ -539,7 +539,7 @@ void VC5Decompressor::Wavelet::HighPassBand::decode(const Wavelet& wavelet) {
 
     void decodeNextPixelGroup() {
       assert(numPixelsLeft == 0);
-      getRLV(&bits, &pixelValue, &numPixelsLeft);
+      getRLV(bits, &pixelValue, &numPixelsLeft);
     }
 
   public:
@@ -825,7 +825,7 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
   }
 }
 
-inline void VC5Decompressor::getRLV(BitPumpMSB* bits, int16_t* value,
+inline void VC5Decompressor::getRLV(BitPumpMSB& bits, int16_t* value,
                                     unsigned int* count) {
   unsigned int iTab;
 
@@ -833,20 +833,20 @@ inline void VC5Decompressor::getRLV(BitPumpMSB* bits, int16_t* value,
 
   // Ensure the maximum number of bits are cached to make peekBits() as fast as
   // possible.
-  bits->fill(maxBits);
+  bits.fill(maxBits);
   for (iTab = 0; iTab < table17.length; ++iTab) {
     if (decompandedTable17[iTab].bits ==
-        bits->peekBitsNoFill(decompandedTable17[iTab].size))
+        bits.peekBitsNoFill(decompandedTable17[iTab].size))
       break;
   }
   if (iTab >= table17.length)
     ThrowRDE("Code not found in codebook");
 
-  bits->skipBitsNoFill(decompandedTable17[iTab].size);
+  bits.skipBitsNoFill(decompandedTable17[iTab].size);
   *value = decompandedTable17[iTab].value;
   *count = decompandedTable17[iTab].count;
   if (*value != 0) {
-    if (bits->getBitsNoFill(1))
+    if (bits.getBitsNoFill(1))
       *value = -(*value);
   }
 }

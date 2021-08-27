@@ -38,7 +38,7 @@ class SamsungV0Decompressor final : public AbstractSamsungDecompressor {
 
   void decompressStrip(int row, const ByteStream& bs) const;
 
-  static int32_t calcAdj(BitPumpMSB32* bits, int b);
+  static int32_t calcAdj(BitPumpMSB32& bits, int b);
 
 public:
   SamsungV0Decompressor(const RawImage& image, const ByteStream& bso,

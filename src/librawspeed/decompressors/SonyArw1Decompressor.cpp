@@ -44,10 +44,10 @@ SonyArw1Decompressor::SonyArw1Decompressor(const RawImage& img) : mRaw(img) {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", w, h);
 }
 
-inline int SonyArw1Decompressor::getDiff(BitPumpMSB* bs, uint32_t len) {
+inline int SonyArw1Decompressor::getDiff(BitPumpMSB& bs, uint32_t len) {
   if (len == 0)
     return 0;
-  int diff = bs->getBitsNoFill(len);
+  int diff = bs.getBitsNoFill(len);
   return HuffmanTable::extend(diff, len);
 }
 
@@ -75,7 +75,7 @@ void SonyArw1Decompressor::decompress(const ByteStream& input) const {
         while (len < 17 && !bits.getBitsNoFill(1))
           len++;
 
-      int diff = getDiff(&bits, len);
+      int diff = getDiff(bits, len);
       pred += diff;
 
       if (!isIntN(pred, 12))

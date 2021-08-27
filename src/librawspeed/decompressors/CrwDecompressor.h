@@ -53,7 +53,7 @@ private:
   static crw_hts initHuffTables(uint32_t table);
 
   inline static void decodeBlock(std::array<int16_t, 64>* diffBuf,
-                                 const crw_hts& mHuff, BitPumpJPEG* bs);
+                                 const crw_hts& mHuff, BitPumpJPEG& bs);
 };
 
 } // namespace rawspeed

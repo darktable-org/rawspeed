@@ -178,21 +178,21 @@ public:
 };
 
 template <const PanasonicDecompressorV5::PacketDsc& dsc>
-inline void PanasonicDecompressorV5::processPixelPacket(BitPumpLSB* bs, int row,
+inline void PanasonicDecompressorV5::processPixelPacket(BitPumpLSB& bs, int row,
                                                         int col) const {
   static_assert(dsc.pixelsPerPacket > 0, "dsc should be compile-time const");
   static_assert(dsc.bps > 0 && dsc.bps <= 16);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  assert(bs->getFillLevel() == 0);
+  assert(bs.getFillLevel() == 0);
 
   for (int p = 0; p < dsc.pixelsPerPacket;) {
-    bs->fill();
-    for (; bs->getFillLevel() >= dsc.bps; ++p, ++col)
-      out(row, col) = bs->getBitsNoFill(dsc.bps);
+    bs.fill();
+    for (; bs.getFillLevel() >= dsc.bps; ++p, ++col)
+      out(row, col) = bs.getBitsNoFill(dsc.bps);
   }
-  bs->skipBitsNoFill(bs->getFillLevel()); // get rid of padding.
+  bs.skipBitsNoFill(bs.getFillLevel()); // get rid of padding.
 }
 
 template <const PanasonicDecompressorV5::PacketDsc& dsc>
@@ -218,7 +218,7 @@ void PanasonicDecompressorV5::processBlock(const Block& block) const {
     assert(endx % dsc.pixelsPerPacket == 0);
 
     for (; col < endx; col += dsc.pixelsPerPacket)
-      processPixelPacket<dsc>(&bs, row, col);
+      processPixelPacket<dsc>(bs, row, col);
   }
 }
 
