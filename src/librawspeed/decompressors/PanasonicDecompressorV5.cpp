@@ -146,7 +146,7 @@ class PanasonicDecompressorV5::ProxyStream {
     assert(buf.empty());
     assert(block.getRemainSize() == BlockSize);
 
-    static_assert(BlockSize > sectionSplitOffset, "");
+    static_assert(BlockSize > sectionSplitOffset);
 
     Buffer FirstSection = block.getBuffer(sectionSplitOffset);
     Buffer SecondSection = block.getBuffer(block.getRemainSize());
@@ -181,7 +181,7 @@ template <const PanasonicDecompressorV5::PacketDsc& dsc>
 inline void PanasonicDecompressorV5::processPixelPacket(BitPumpLSB* bs, int row,
                                                         int col) const {
   static_assert(dsc.pixelsPerPacket > 0, "dsc should be compile-time const");
-  static_assert(dsc.bps > 0 && dsc.bps <= 16, "");
+  static_assert(dsc.bps > 0 && dsc.bps <= 16);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
@@ -198,7 +198,7 @@ inline void PanasonicDecompressorV5::processPixelPacket(BitPumpLSB* bs, int row,
 template <const PanasonicDecompressorV5::PacketDsc& dsc>
 void PanasonicDecompressorV5::processBlock(const Block& block) const {
   static_assert(dsc.pixelsPerPacket > 0, "dsc should be compile-time const");
-  static_assert(BlockSize % bytesPerPacket == 0, "");
+  static_assert(BlockSize % bytesPerPacket == 0);
 
   ProxyStream proxy(block.bs);
   BitPumpLSB bs(proxy.getStream());

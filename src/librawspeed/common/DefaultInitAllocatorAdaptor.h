@@ -38,7 +38,7 @@ public:
   using size_type = typename allocator_traits::size_type;
   using difference_type = typename allocator_traits::difference_type;
 
-  static_assert(std::is_same<T, value_type>::value, "");
+  static_assert(std::is_same<T, value_type>::value);
 
   template <class To> struct rebind {
     using other = DefaultInitAllocatorAdaptor<

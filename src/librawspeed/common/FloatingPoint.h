@@ -42,7 +42,7 @@ struct BinaryN {
   static constexpr uint32_t FractionWidth = FractionWidth_;
   static constexpr uint32_t ExponentWidth = ExponentWidth_;
   // SignWidth is always 1.
-  static_assert(FractionWidth + ExponentWidth + 1 == StorageWidth, "");
+  static_assert(FractionWidth + ExponentWidth + 1 == StorageWidth);
 
   static constexpr uint32_t Precision = FractionWidth + 1;
 
@@ -61,10 +61,10 @@ struct BinaryN {
 // bit 15 - sign
 struct Binary16 : public BinaryN</*StorageWidth=*/16, /*FractionWidth=*/10,
                                  /*ExponentWidth=*/5> {
-  static_assert(Precision == 11, "");
-  static_assert(ExponentMax == 15, "");
-  static_assert(ExponentPos == 10, "");
-  static_assert(SignBitPos == 15, "");
+  static_assert(Precision == 11);
+  static_assert(ExponentMax == 15);
+  static_assert(ExponentPos == 10);
+  static_assert(SignBitPos == 15);
 };
 
 // IEEE-754-2008: binary24:
@@ -73,10 +73,10 @@ struct Binary16 : public BinaryN</*StorageWidth=*/16, /*FractionWidth=*/10,
 // bit 23 - sign
 struct Binary24 : public BinaryN</*StorageWidth=*/24, /*FractionWidth=*/16,
                                  /*ExponentWidth=*/7> {
-  static_assert(Precision == 17, "");
-  static_assert(ExponentMax == 63, "");
-  static_assert(ExponentPos == 16, "");
-  static_assert(SignBitPos == 23, "");
+  static_assert(Precision == 17);
+  static_assert(ExponentMax == 63);
+  static_assert(ExponentPos == 16);
+  static_assert(SignBitPos == 23);
 };
 
 // IEEE-754-2008: binary32:
@@ -85,10 +85,10 @@ struct Binary24 : public BinaryN</*StorageWidth=*/24, /*FractionWidth=*/16,
 // bit 31 - sign
 struct Binary32 : public BinaryN</*StorageWidth=*/32, /*FractionWidth=*/23,
                                  /*ExponentWidth=*/8> {
-  static_assert(Precision == 24, "");
-  static_assert(ExponentMax == 127, "");
-  static_assert(ExponentPos == 23, "");
-  static_assert(SignBitPos == 31, "");
+  static_assert(Precision == 24);
+  static_assert(ExponentMax == 127);
+  static_assert(ExponentPos == 23);
+  static_assert(SignBitPos == 31);
 };
 
 // exp = 0, fract  = +-0: zero
