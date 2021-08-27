@@ -565,7 +565,9 @@ void VC5Decompressor::Wavelet::HighPassBand::decode(const Wavelet& wavelet) {
         pixelValue = dequantize(pixelValue);
       }
 
-      assert(numPixelsLeft > 0);
+      if (numPixelsLeft == 0)
+        ThrowRDE("Got EndOfBand marker while looking for next pixel");
+
       --numPixelsLeft;
       return pixelValue;
     }
