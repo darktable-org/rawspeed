@@ -74,7 +74,7 @@ constexpr int16_t decompand(int16_t val) {
 }
 
 #ifndef NDEBUG
-const int ignore = []() {
+[[maybe_unused]] const int ignore = []() {
   for (const RLV& entry : table17.entries) {
     assert(((-decompand(entry.value)) == decompand(-int16_t(entry.value))) &&
            "negation of decompanded value is the same as decompanding of "
