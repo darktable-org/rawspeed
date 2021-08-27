@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [ develop ]
 
+# FIXME: add no-openmp, and maybe -DCMAKE_BUILD_TYPE=Debug jobs
+
 jobs:
   linux:
     name: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
