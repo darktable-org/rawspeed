@@ -67,7 +67,7 @@ void FileWriter::writeFile(Buffer& filemap, uint32_t size) {
   }
 
   DWORD bytes_written;
-  if (!WriteFile(file_h, filemap->getData(0, filemap.getSize()),
+  if (!WriteFile(file_h, filemap.getData(0, filemap.getSize()),
                  size ? size : filemap.getSize(), &bytes_written, nullptr)) {
     CloseHandle(file_h);
     ThrowFIE("Could not read file.");
