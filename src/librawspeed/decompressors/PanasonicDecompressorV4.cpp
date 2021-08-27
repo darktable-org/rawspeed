@@ -41,8 +41,6 @@
 
 namespace rawspeed {
 
-constexpr uint32_t PanasonicDecompressorV4::BlockSize;
-
 PanasonicDecompressorV4::PanasonicDecompressorV4(const RawImage& img,
                                                  const ByteStream& input_,
                                                  bool zero_is_not_bad,

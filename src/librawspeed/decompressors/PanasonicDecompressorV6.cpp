@@ -35,9 +35,6 @@
 
 namespace rawspeed {
 
-constexpr int PanasonicDecompressorV6::PixelsPerBlock;
-constexpr int PanasonicDecompressorV6::BytesPerBlock;
-
 namespace {
 struct pana_cs6_page_decoder {
   std::array<uint16_t, 14> pixelbuffer;
