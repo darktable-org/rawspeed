@@ -36,8 +36,8 @@ class MefDecoder final : public SimpleTiffDecoder {
 
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer* file);
-  MefDecoder(TiffRootIFDOwner&& root, const Buffer* file)
+                                   const Buffer& file);
+  MefDecoder(TiffRootIFDOwner&& root, const Buffer& file)
       : SimpleTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;

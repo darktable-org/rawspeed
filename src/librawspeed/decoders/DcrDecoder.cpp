@@ -39,7 +39,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool DcrDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+                                      const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -56,7 +56,7 @@ void DcrDecoder::checkImageDimensions() {
 RawImage DcrDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
-  ByteStream input(DataBuffer(mFile->getSubView(off), Endianness::little));
+  ByteStream input(DataBuffer(mFile.getSubView(off), Endianness::little));
 
   int compression = raw->getEntry(COMPRESSION)->getU32();
   if (65000 != compression)

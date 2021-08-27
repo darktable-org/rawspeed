@@ -42,7 +42,7 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
   // We need some data.
   // For now it is 104 bytes for RAF/FUJIFIM images.
   // FIXME: each decoder/parser should check it on their own.
-  if (mInput->getSize() <=  104)
+  if (mInput.getSize() <= 104)
     ThrowRDE("File too small");
 
   // MRW images are easy to check for, let's try that first
@@ -78,8 +78,8 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
   }
 
   // Detect camera on filesize (CHDK).
-  if (meta != nullptr && meta->hasChdkCamera(mInput->getSize())) {
-    const Camera* c = meta->getChdkCamera(mInput->getSize());
+  if (meta != nullptr && meta->hasChdkCamera(mInput.getSize())) {
+    const Camera* c = meta->getChdkCamera(mInput.getSize());
 
     try {
       return std::make_unique<NakedDecoder>(mInput, c);

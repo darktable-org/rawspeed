@@ -37,7 +37,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool ErfDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+                                      const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -55,7 +55,7 @@ RawImage ErfDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
   UncompressedDecompressor u(
-      ByteStream(DataBuffer(mFile->getSubView(off, c2), Endianness::little)),
+      ByteStream(DataBuffer(mFile.getSubView(off, c2), Endianness::little)),
       mRaw);
 
   u.decode12BitRaw<Endianness::big, false, true>(width, height);

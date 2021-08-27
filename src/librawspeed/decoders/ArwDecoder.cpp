@@ -49,7 +49,7 @@ using std::string;
 namespace rawspeed {
 
 bool ArwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+                                      const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -75,12 +75,12 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
   uint32_t head_off = 164600;
 
   // Replicate the dcraw contortions to get the "decryption" key
-  const uint8_t* keyData = mFile->getData(key_off, 1);
+  const uint8_t* keyData = mFile.getData(key_off, 1);
   uint32_t offset = (*keyData) * 4;
-  keyData = mFile->getData(key_off + offset, 4);
+  keyData = mFile.getData(key_off + offset, 4);
   uint32_t key = getU32BE(keyData);
   static const size_t head_size = 40;
-  const uint8_t* head_orig = mFile->getData(head_off, head_size);
+  const uint8_t* head_orig = mFile.getData(head_off, head_size);
   vector<uint8_t> head(head_size);
   SonyDecrypt(reinterpret_cast<const uint32_t*>(head_orig),
               reinterpret_cast<uint32_t*>(&head[0]), 10, key);
@@ -88,7 +88,7 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
     key = key << 8 | head[i - 1];
 
   // "Decrypt" the whole image buffer
-  const auto* image_data = mFile->getData(off, len);
+  const auto* image_data = mFile.getData(off, len);
   auto image_decoded = Buffer::Create(len);
   SonyDecrypt(reinterpret_cast<const uint32_t*>(image_data),
               reinterpret_cast<uint32_t*>(image_decoded.get()), len / 4, key);
@@ -124,7 +124,7 @@ RawImage ArwDecoder::decodeRawInternal() {
 
       mRaw->dim = iPoint2D(width, height);
 
-      ByteStream input(DataBuffer(mFile->getSubView(off), Endianness::little));
+      ByteStream input(DataBuffer(mFile.getSubView(off), Endianness::little));
       SonyArw1Decompressor a(mRaw);
       mRaw->createData();
       a.decompress(input);
@@ -215,13 +215,13 @@ RawImage ArwDecoder::decodeRawInternal() {
   uint32_t c2 = counts->getU32();
   uint32_t off = offsets->getU32();
 
-  if (!mFile->isValid(off))
+  if (!mFile.isValid(off))
     ThrowRDE("Data offset after EOF, file probably truncated");
 
-  if (!mFile->isValid(off, c2))
-    c2 = mFile->getSize() - off;
+  if (!mFile.isValid(off, c2))
+    c2 = mFile.getSize() - off;
 
-  ByteStream input(DataBuffer(mFile->getSubView(off, c2), Endianness::little));
+  ByteStream input(DataBuffer(mFile.getSubView(off, c2), Endianness::little));
 
   if (arw1) {
     SonyArw1Decompressor a(mRaw);
@@ -247,7 +247,7 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) {
   if (c2 == 0)
     ThrowRDE("Strip is empty, nothing to decode!");
 
-  const Buffer buf(mFile->getSubView(off, c2));
+  const Buffer buf(mFile.getSubView(off, c2));
 
   mRaw->createData();
 
@@ -293,7 +293,7 @@ void ArwDecoder::ParseA100WB() {
   bs.setByteOrder(Endianness::little);
   const uint32_t off = bs.getU32();
 
-  bs = ByteStream(DataBuffer(mFile->getSubView(off), Endianness::little));
+  bs = ByteStream(DataBuffer(mFile.getSubView(off), Endianness::little));
 
   // MRW style, see MrwDecoder
 

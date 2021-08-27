@@ -348,11 +348,11 @@ size_t process(const string& filename, const CameraMetaData* metadata,
   FileReader reader(filename.c_str());
 
   auto map(reader.readFile());
-  // Buffer* map = readFile( argv[1] );
+  // Buffer& map = readFile( argv[1] );
 
   Timer t;
 
-  RawParser parser(map.get());
+  RawParser parser(*map);
   auto decoder(parser.getDecoder(metadata));
   // RawDecoder* decoder = parseRaw( map );
 

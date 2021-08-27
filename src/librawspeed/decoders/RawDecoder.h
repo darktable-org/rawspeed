@@ -43,7 +43,7 @@ public:
   /* The Buffer is not owned by this class, will not be deleted, and must remain
    */
   /* valid while this object exists */
-  explicit RawDecoder(const Buffer* file);
+  explicit RawDecoder(const Buffer& file);
   virtual ~RawDecoder() = default;
 
   /* Check if the decoder can decode the image from this camera */
@@ -109,10 +109,6 @@ public:
     explicit operator bool() const { return quadrantMultipliers /*|| ...*/; }
   } iiq;
 
-  /* Retrieve the main RAW chunk */
-  /* Returns NULL if unknown */
-  virtual Buffer* getCompressedData() { return nullptr; }
-
 protected:
   /* Attempt to decode the image */
   /* A RawDecoderException will be thrown if the image cannot be decoded, */
@@ -143,7 +139,7 @@ protected:
   void decodeUncompressed(const TiffIFD* rawIFD, BitOrder order);
 
   /* The Raw input file to be decoded */
-  const Buffer* mFile;
+  const Buffer& mFile;
 
   /* Decoder version */
   /* This can be used to avoid newer version of an xml file to indicate that a file */

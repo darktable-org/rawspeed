@@ -96,12 +96,12 @@ struct Entry {
   rawspeed::ChecksumFileEntry Name;
   std::unique_ptr<const rawspeed::Buffer> Content;
 
-  const rawspeed::Buffer* getFileContents() {
+  const rawspeed::Buffer& getFileContents() {
     if (Content)
-      return Content.get();
+      return *Content;
 
     Content = FileReader(Name.FullFileName.c_str()).readFile();
-    return Content.get();
+    return *Content;
   }
 };
 

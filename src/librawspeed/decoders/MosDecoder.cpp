@@ -49,7 +49,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool MosDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+                                      const Buffer& file) {
   try {
     const auto id = rootIFD->getID();
     const std::string& make = id.make;
@@ -69,7 +69,7 @@ bool MosDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   }
 }
 
-MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file)
+MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file)
     : AbstractTiffDecoder(move(rootIFD), file) {
   if (mRootIFD->getEntryRecursive(MAKE)) {
     auto id = mRootIFD->getID();
@@ -119,7 +119,7 @@ RawImage MosDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  const ByteStream bs(DataBuffer(mFile->getSubView(off), Endianness::little));
+  const ByteStream bs(DataBuffer(mFile.getSubView(off), Endianness::little));
   if (bs.getRemainSize() == 0)
     ThrowRDE("Input buffer is empty");
 
@@ -128,7 +128,7 @@ RawImage MosDecoder::decodeRawInternal() {
   int compression = raw->getEntry(COMPRESSION)->getU32();
   if (1 == compression) {
     const Endianness endianness =
-        getTiffByteOrder(ByteStream(DataBuffer(*mFile, Endianness::little)), 0);
+        getTiffByteOrder(ByteStream(DataBuffer(mFile, Endianness::little)), 0);
 
     if (Endianness::big == endianness)
       u.decodeRawUnpacked<16, Endianness::big>(width, height);
@@ -137,8 +137,8 @@ RawImage MosDecoder::decodeRawInternal() {
   }
   else if (99 == compression || 7 == compression) {
     ThrowRDE("Leaf LJpeg not yet supported");
-    //LJpegPlain l(mFile, mRaw);
-    //l.startDecoder(off, mFile->getSize()-off, 0, 0);
+    // LJpegPlain l(mFile, mRaw);
+    // l.startDecoder(off, mFile.getSize()-off, 0, 0);
   } else
     ThrowRDE("Unsupported compression: %d", compression);
 

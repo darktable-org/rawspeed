@@ -46,16 +46,16 @@
 
 namespace rawspeed {
 
-bool RafDecoder::isRAF(const Buffer* input) {
+bool RafDecoder::isRAF(const Buffer& input) {
   static const std::array<char, 16> magic = {{'F', 'U', 'J', 'I', 'F', 'I', 'L',
                                               'M', 'C', 'C', 'D', '-', 'R', 'A',
                                               'W', ' '}};
-  const unsigned char* data = input->getData(0, magic.size());
+  const unsigned char* data = input.getData(0, magic.size());
   return 0 == memcmp(data, magic.data(), magic.size());
 }
 
 bool RafDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+                                      const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 

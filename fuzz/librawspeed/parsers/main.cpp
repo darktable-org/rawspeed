@@ -63,7 +63,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   const rawspeed::Buffer buffer(Data, Size);
 
   try {
-    rawspeed::PARSER parser(&buffer);
+    rawspeed::PARSER parser(buffer);
 
 #if GETDECODER
 #if DECODE

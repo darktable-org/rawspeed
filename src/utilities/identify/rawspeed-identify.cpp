@@ -107,14 +107,15 @@ std::string find_cameras_xml(const char *argv0) {
 
 } // namespace rawspeed::identify
 
+using rawspeed::Buffer;
 using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
-using rawspeed::RawParser;
-using rawspeed::RawImage;
 using rawspeed::iPoint2D;
-using rawspeed::TYPE_USHORT16;
-using rawspeed::TYPE_FLOAT32;
+using rawspeed::RawImage;
+using rawspeed::RawParser;
 using rawspeed::RawspeedException;
+using rawspeed::TYPE_FLOAT32;
+using rawspeed::TYPE_USHORT16;
 using rawspeed::identify::find_cameras_xml;
 
 int main(int argc, char* argv[]) { // NOLINT
@@ -167,9 +168,9 @@ int main(int argc, char* argv[]) { // NOLINT
 
     FileReader f(imageFileName);
 
-    auto m(f.readFile());
+    std::unique_ptr<const Buffer> m(f.readFile());
 
-    RawParser t(m.get());
+    RawParser t(*m);
 
     auto d(t.getDecoder(meta.get()));
 

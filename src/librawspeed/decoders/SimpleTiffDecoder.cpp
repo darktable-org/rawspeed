@@ -38,7 +38,7 @@ void SimpleTiffDecoder::prepareForRawDecoding() {
   off = raw->getEntry(STRIPOFFSETS)->getU32();
   c2 = raw->getEntry(STRIPBYTECOUNTS)->getU32();
 
-  if (!mFile->isValid(off, c2))
+  if (!mFile.isValid(off, c2))
     ThrowRDE("Image is truncated.");
 
   if (c2 == 0)

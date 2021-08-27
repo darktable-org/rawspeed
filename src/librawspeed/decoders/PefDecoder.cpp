@@ -39,7 +39,7 @@
 namespace rawspeed {
 
 bool PefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+                                      const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -74,7 +74,7 @@ RawImage PefDecoder::decodeRawInternal() {
         counts->count, offsets->count);
   }
   ByteStream bs(
-      DataBuffer(mFile->getSubView(offsets->getU32(), counts->getU32()),
+      DataBuffer(mFile.getSubView(offsets->getU32(), counts->getU32()),
                  Endianness::little));
 
   uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();

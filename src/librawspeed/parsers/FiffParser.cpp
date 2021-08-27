@@ -42,10 +42,10 @@ using std::numeric_limits;
 
 namespace rawspeed {
 
-FiffParser::FiffParser(const Buffer* inputData) : RawParser(inputData) {}
+FiffParser::FiffParser(const Buffer& inputData) : RawParser(inputData) {}
 
 void FiffParser::parseData() {
-  ByteStream bs(DataBuffer(*mInput, Endianness::big));
+  ByteStream bs(DataBuffer(mInput, Endianness::big));
   bs.skipBytes(0x54);
 
   uint32_t first_ifd = bs.getU32();
@@ -59,15 +59,15 @@ void FiffParser::parseData() {
   bs.skipBytes(4);
   const uint32_t second_ifd = bs.getU32();
 
-  rootIFD = TiffParser::parse(nullptr, mInput->getSubView(first_ifd));
+  rootIFD = TiffParser::parse(nullptr, mInput.getSubView(first_ifd));
   TiffIFDOwner subIFD = std::make_unique<TiffIFD>(rootIFD.get());
 
-  if (mInput->isValid(second_ifd)) {
+  if (mInput.isValid(second_ifd)) {
     // RAW Tiff on newer models, pointer to raw data on older models
     // -> so we try parsing as Tiff first and add it as data if parsing fails
     try {
       rootIFD->add(
-          TiffParser::parse(rootIFD.get(), mInput->getSubView(second_ifd)));
+          TiffParser::parse(rootIFD.get(), mInput.getSubView(second_ifd)));
     } catch (TiffParserException&) {
       // the offset will be interpreted relative to the rootIFD where this
       // subIFD gets inserted
@@ -79,22 +79,21 @@ void FiffParser::parseData() {
       subIFD->add(std::make_unique<TiffEntry>(
           subIFD.get(), FUJI_STRIPOFFSETS, TIFF_OFFSET, 1,
           ByteStream::createCopy(&rawOffset, 4)));
-      uint32_t max_size = mInput->getSize() - second_ifd;
+      uint32_t max_size = mInput.getSize() - second_ifd;
       subIFD->add(std::make_unique<TiffEntry>(
           subIFD.get(), FUJI_STRIPBYTECOUNTS, TIFF_LONG, 1,
           ByteStream::createCopy(&max_size, 4)));
     }
   }
 
-  if (mInput->isValid(third_ifd)) {
+  if (mInput.isValid(third_ifd)) {
     // RAW information IFD on older
 
     // This Fuji directory structure is similar to a Tiff IFD but with two
     // differences:
     //   a) no type info and b) data is always stored in place.
     // 4b: # of entries, for each entry: 2b tag, 2b len, xb data
-    ByteStream bytes(
-        DataBuffer(mInput->getSubView(third_ifd), Endianness::big));
+    ByteStream bytes(DataBuffer(mInput.getSubView(third_ifd), Endianness::big));
     uint32_t entries = bytes.getU32();
 
     if (entries > 255)

@@ -39,7 +39,7 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-NakedDecoder::NakedDecoder(const Buffer* file, const Camera* c)
+NakedDecoder::NakedDecoder(const Buffer& file, const Camera* c)
     : RawDecoder(file), cam(c) {}
 
 const map<string, BitOrder> NakedDecoder::order2enum = {
@@ -93,7 +93,7 @@ RawImage NakedDecoder::decodeRawInternal() {
   mRaw->createData();
 
   UncompressedDecompressor u(
-      ByteStream(DataBuffer(mFile->getSubView(offset), Endianness::little)),
+      ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
       mRaw);
 
   iPoint2D pos(0, 0);

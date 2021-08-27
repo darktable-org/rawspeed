@@ -36,8 +36,8 @@ class Rw2Decoder final : public AbstractTiffDecoder
 {
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer* file);
-  Rw2Decoder(TiffRootIFDOwner&& root, const Buffer* file)
+                                   const Buffer& file);
+  Rw2Decoder(TiffRootIFDOwner&& root, const Buffer& file)
       : AbstractTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;

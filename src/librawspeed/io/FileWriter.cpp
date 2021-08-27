@@ -38,9 +38,9 @@ namespace rawspeed {
 
 FileWriter::FileWriter(const char *_filename) : mFilename(_filename) {}
 
-void FileWriter::writeFile(Buffer* filemap, uint32_t size) {
-  if (size > filemap->getSize())
-    size = filemap->getSize();
+void FileWriter::writeFile(Buffer& filemap, uint32_t size) {
+  if (size > filemap.getSize())
+    size = filemap.getSize();
 #if defined(__unix__) || defined(__APPLE__)
   size_t bytes_written = 0;
   FILE *file;
@@ -49,8 +49,8 @@ void FileWriter::writeFile(Buffer* filemap, uint32_t size) {
   if (file == nullptr)
     ThrowFIE("Could not open file.");
 
-  const auto* const src = filemap->getData(0, filemap->getSize());
-  bytes_written = fwrite(src, 1, size != 0 ? size : filemap->getSize(), file);
+  const auto* const src = filemap.getData(0, filemap.getSize());
+  bytes_written = fwrite(src, 1, size != 0 ? size : filemap.getSize(), file);
   fclose(file);
   if (size != bytes_written) {
     ThrowFIE("Could not write file.");
@@ -67,8 +67,8 @@ void FileWriter::writeFile(Buffer* filemap, uint32_t size) {
   }
 
   DWORD bytes_written;
-  if (!WriteFile(file_h, filemap->getData(0, filemap->getSize()),
-                 size ? size : filemap->getSize(), &bytes_written, nullptr)) {
+  if (!WriteFile(file_h, filemap->getData(0, filemap.getSize()),
+                 size ? size : filemap.getSize(), &bytes_written, nullptr)) {
     CloseHandle(file_h);
     ThrowFIE("Could not read file.");
   }

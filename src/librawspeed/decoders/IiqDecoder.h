@@ -49,11 +49,11 @@ class IiqDecoder final : public AbstractTiffDecoder {
                 uint32_t height);
 
 public:
-  static bool isAppropriateDecoder(const Buffer* file);
+  static bool isAppropriateDecoder(const Buffer& file);
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer* file);
+                                   const Buffer& file);
 
-  IiqDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file)
+  IiqDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file)
       : AbstractTiffDecoder(move(rootIFD), file) {}
 
   RawImage decodeRawInternal() override;

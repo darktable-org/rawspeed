@@ -39,8 +39,8 @@ class OrfDecoder final : public AbstractTiffDecoder
 
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer* file);
-  OrfDecoder(TiffRootIFDOwner&& root, const Buffer* file)
+                                   const Buffer& file);
+  OrfDecoder(TiffRootIFDOwner&& root, const Buffer& file)
       : AbstractTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;

@@ -47,7 +47,7 @@ using std::string;
 namespace rawspeed {
 
 bool Cr2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+                                      const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
   const std::string& model = id.model;
@@ -71,7 +71,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
     offset = ifd->getEntry(STRIPOFFSETS)->getU32();
   }
 
-  ByteStream b(DataBuffer(mFile->getSubView(offset), Endianness::big));
+  ByteStream b(DataBuffer(mFile.getSubView(offset), Endianness::big));
   b.skipBytes(41);
   int height = b.getU16();
   int width = b.getU16();
@@ -86,8 +86,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
 
   mRaw->dim = {width, height};
 
-  const ByteStream bs(
-      DataBuffer(mFile->getSubView(offset), Endianness::little));
+  const ByteStream bs(DataBuffer(mFile.getSubView(offset), Endianness::little));
 
   Cr2Decompressor l(bs, mRaw);
   mRaw->createData();
@@ -181,7 +180,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
   const uint32_t count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
 
   const ByteStream bs(
-      DataBuffer(mFile->getSubView(offset, count), Endianness::little));
+      DataBuffer(mFile.getSubView(offset, count), Endianness::little));
 
   Cr2Decompressor d(bs, mRaw);
   mRaw->createData();
