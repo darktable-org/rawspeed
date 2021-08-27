@@ -482,7 +482,7 @@ NikonDecompressor::NikonDecompressor(const RawImage& raw, ByteStream metadata,
 
 template <typename Huffman>
 void NikonDecompressor::decompress(BitPumpMSB* bits, int start_y, int end_y) {
-  Huffman ht = createHuffmanTable<Huffman>(huffSelect);
+  auto ht = createHuffmanTable<Huffman>(huffSelect);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
