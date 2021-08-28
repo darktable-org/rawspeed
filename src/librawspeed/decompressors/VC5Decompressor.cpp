@@ -531,7 +531,7 @@ void VC5Decompressor::Wavelet::HighPassBand::decode(const Wavelet& wavelet) {
 
     void decodeNextPixelGroup() {
       assert(numPixelsLeft == 0);
-      getRLV(bits, &pixelValue, &numPixelsLeft);
+      std::tie(pixelValue, numPixelsLeft) = getRLV(bits);
     }
 
   public:
@@ -816,8 +816,8 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
   }
 }
 
-inline void VC5Decompressor::getRLV(BitPumpMSB& bits, int16_t* value,
-                                    unsigned int* count) {
+inline std::pair<int16_t /*value*/, unsigned int /*count*/>
+VC5Decompressor::getRLV(BitPumpMSB& bits) {
   unsigned int iTab;
 
   static constexpr auto maxBits = 1 + table17.entries[table17.length - 1].size;
@@ -834,12 +834,14 @@ inline void VC5Decompressor::getRLV(BitPumpMSB& bits, int16_t* value,
     ThrowRDE("Code not found in codebook");
 
   bits.skipBitsNoFill(decompandedTable17[iTab].size);
-  *value = decompandedTable17[iTab].value;
-  *count = decompandedTable17[iTab].count;
-  if (*value != 0) {
+  int16_t value = decompandedTable17[iTab].value;
+  unsigned int count = decompandedTable17[iTab].count;
+  if (value != 0) {
     if (bits.getBitsNoFill(1))
-      *value = -(*value);
+      value = -(value);
   }
+
+  return {value, count};
 }
 
 } // namespace rawspeed
