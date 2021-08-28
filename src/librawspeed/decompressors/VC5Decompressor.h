@@ -121,6 +121,7 @@ class VC5Decompressor final : public AbstractDecompressor {
 
     struct AbstractBand {
       std::vector<int16_t, DefaultInitAllocatorAdaptor<int16_t>> data_storage;
+      Array2DRef<int16_t> data;
       virtual ~AbstractBand() = default;
       virtual void decode(const Wavelet& wavelet) = 0;
     };
@@ -128,8 +129,10 @@ class VC5Decompressor final : public AbstractDecompressor {
       bool clampUint;
       std::vector<int16_t, DefaultInitAllocatorAdaptor<int16_t>>
           lowpass_storage;
+      Array2DRef<int16_t> lowpass;
       std::vector<int16_t, DefaultInitAllocatorAdaptor<int16_t>>
           highpass_storage;
+      Array2DRef<int16_t> highpass;
       explicit ReconstructableBand(bool clampUint_ = false)
           : clampUint(clampUint_) {}
       void processLow(const Wavelet& wavelet) noexcept;
