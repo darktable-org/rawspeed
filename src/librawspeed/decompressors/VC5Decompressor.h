@@ -200,9 +200,9 @@ class VC5Decompressor final : public AbstractDecompressor {
   std::array<Channel, numChannels> channels;
 
   struct DecodeableBand {
-    Wavelet::AbstractDecodeableBand* band;
+    Wavelet::AbstractDecodeableBand& band;
     const Wavelet& wavelet;
-    DecodeableBand(Wavelet::AbstractDecodeableBand* band_,
+    DecodeableBand(Wavelet::AbstractDecodeableBand& band_,
                    const Wavelet& wavelet_)
         : band(band_), wavelet(wavelet_) {}
   };
@@ -211,8 +211,8 @@ class VC5Decompressor final : public AbstractDecompressor {
   struct ReconstructionStep {
     Wavelet& wavelet;
     Wavelet::ReconstructableBand& band;
-    ReconstructionStep(Wavelet* wavelet_, Wavelet::ReconstructableBand* band_)
-        : wavelet(*wavelet_), band(*band_) {}
+    ReconstructionStep(Wavelet& wavelet_, Wavelet::ReconstructableBand& band_)
+        : wavelet(wavelet_), band(band_) {}
   };
   std::vector<ReconstructionStep> reconstructionSteps;
 

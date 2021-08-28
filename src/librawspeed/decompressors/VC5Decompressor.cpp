@@ -657,9 +657,9 @@ void VC5Decompressor::prepareBandDecodingPlan() {
       for (int bandId = 1; bandId <= numHighPassBands; bandId++) {
         auto& channel = channels[channelId];
         auto& wavelet = channel.wavelets[waveletLevel];
-        auto* band = wavelet.bands[bandId].get();
-        auto* decodeableHighPassBand =
-            dynamic_cast<Wavelet::HighPassBand*>(band);
+        auto& band = *wavelet.bands[bandId];
+        auto& decodeableHighPassBand =
+            dynamic_cast<Wavelet::HighPassBand&>(band);
         allDecodeableBands.emplace_back(decodeableHighPassBand, wavelet);
       }
     }
@@ -669,8 +669,8 @@ void VC5Decompressor::prepareBandDecodingPlan() {
   for (Channel& channel : channels) {
     // Low-pass band of the smallest wavelet.
     Wavelet& smallestWavelet = channel.wavelets.back();
-    auto* decodeableLowPassBand =
-        dynamic_cast<Wavelet::LowPassBand*>(smallestWavelet.bands[0].get());
+    auto& decodeableLowPassBand =
+        dynamic_cast<Wavelet::LowPassBand&>(*smallestWavelet.bands[0]);
     allDecodeableBands.emplace_back(decodeableLowPassBand, smallestWavelet);
   }
   assert(allDecodeableBands.size() == numSubbandsTotal);
@@ -684,7 +684,7 @@ void VC5Decompressor::prepareBandReconstruction() {
     // Reconstruct the intermediate lowpass bands.
     for (int waveletLevel = numWaveletLevels - 1; waveletLevel >= 0;
          waveletLevel--) {
-      Wavelet* wavelet = &(channel.wavelets[waveletLevel]);
+      Wavelet& wavelet = channel.wavelets[waveletLevel];
 
       Wavelet::ReconstructableBand* band;
       if (waveletLevel > 0) {
@@ -694,7 +694,7 @@ void VC5Decompressor::prepareBandReconstruction() {
       } else
         band = &channel.band;
 
-      reconstructionSteps.emplace_back(wavelet, band);
+      reconstructionSteps.emplace_back(wavelet, *band);
     }
   }
   assert(reconstructionSteps.size() == numLowPassBandsTotal);
@@ -753,7 +753,7 @@ void VC5Decompressor::decodeBands(bool* exceptionThrown) const noexcept {
   for (auto decodeableBand = allDecodeableBands.begin();
        decodeableBand < allDecodeableBands.end(); ++decodeableBand) {
     try {
-      decodeableBand->band->decode(decodeableBand->wavelet);
+      decodeableBand->band.decode(decodeableBand->wavelet);
     } catch (RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
