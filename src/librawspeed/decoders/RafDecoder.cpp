@@ -242,10 +242,8 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     rotated->metadata = mRaw->metadata;
     rotated->metadata.fujiRotationPos = rotationPos;
 
-    int dest_pitch = static_cast<int>(rotated->pitch) / 2;
-    auto* dst = reinterpret_cast<uint16_t*>(rotated->getData(0, 0));
-
     auto srcImg = mRaw->getU16DataAsUncroppedArray2DRef();
+    auto dstImg = rotated->getU16DataAsUncroppedArray2DRef();
 
     for (int y = 0; y < new_size.y; y++) {
       for (int x = 0; x < new_size.x; x++) {
@@ -258,10 +256,9 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           h = new_size.x - 1 - x + (y >> 1);
           w = ((y+1) >> 1) + x;
         }
-        if (h < rotated->dim.y && w < rotated->dim.x) {
-          dst[w + h * dest_pitch] =
-              srcImg(crop_offset.y + y, crop_offset.x + x);
-        } else
+        if (h < rotated->dim.y && w < rotated->dim.x)
+          dstImg(h, w) = srcImg(crop_offset.y + y, crop_offset.x + x);
+        else
           ThrowRDE("Trying to write out of bounds");
       }
     }
