@@ -253,7 +253,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::processLow(
 #ifdef HAVE_OPENMP
 #pragma omp single
 #endif
-  lowpass = Array2DRef<int16_t>::create(&lowpass_storage, wavelet.width,
+  lowpass = Array2DRef<int16_t>::create(lowpass_storage, wavelet.width,
                                         2 * wavelet.height);
 
   const Array2DRef<const int16_t> highlow = wavelet.bandAsArray2DRef(2);
@@ -268,7 +268,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::processHigh(
 #ifdef HAVE_OPENMP
 #pragma omp single
 #endif
-  highpass = Array2DRef<int16_t>::create(&highpass_storage, wavelet.width,
+  highpass = Array2DRef<int16_t>::create(highpass_storage, wavelet.width,
                                          2 * wavelet.height);
 
   const Array2DRef<const int16_t> highhigh = wavelet.bandAsArray2DRef(3);
@@ -284,7 +284,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::combine(
 #ifdef HAVE_OPENMP
 #pragma omp single
 #endif
-  data = Array2DRef<int16_t>::create(&data_storage, 2 * wavelet.width,
+  data = Array2DRef<int16_t>::create(data_storage, 2 * wavelet.width,
                                      2 * wavelet.height);
 
   // And finally, combine the low pass, and high pass.
@@ -512,7 +512,7 @@ VC5Decompressor::Wavelet::LowPassBand::LowPassBand(const Wavelet& wavelet,
 
 void VC5Decompressor::Wavelet::LowPassBand::decode(const Wavelet& wavelet) {
   data =
-      Array2DRef<int16_t>::create(&data_storage, wavelet.width, wavelet.height);
+      Array2DRef<int16_t>::create(data_storage, wavelet.width, wavelet.height);
 
   BitPumpMSB bits(bs);
   for (auto row = 0; row < data.height; ++row) {
@@ -568,7 +568,7 @@ void VC5Decompressor::Wavelet::HighPassBand::decode(const Wavelet& wavelet) {
   // decode highpass band
   DeRLVer d(bs, quant);
   data =
-      Array2DRef<int16_t>::create(&data_storage, wavelet.width, wavelet.height);
+      Array2DRef<int16_t>::create(data_storage, wavelet.width, wavelet.height);
   for (int row = 0; row != wavelet.height; ++row)
     for (int col = 0; col != wavelet.width; ++col)
       data(row, col) = d.decode();
