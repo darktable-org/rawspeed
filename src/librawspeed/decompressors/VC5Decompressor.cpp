@@ -682,18 +682,20 @@ void VC5Decompressor::prepareBandReconstruction() {
   // For every channel, recursively reconstruct the low-pass bands.
   for (auto& channel : channels) {
     // Reconstruct the intermediate lowpass bands.
-    for (int waveletLevel = numWaveletLevels - 1; waveletLevel > 0;
+    for (int waveletLevel = numWaveletLevels - 1; waveletLevel >= 0;
          waveletLevel--) {
       Wavelet* wavelet = &(channel.wavelets[waveletLevel]);
-      Wavelet& nextWavelet = channel.wavelets[waveletLevel - 1];
 
-      auto* band = dynamic_cast<Wavelet::ReconstructableBand*>(
-          nextWavelet.bands[0].get());
+      Wavelet::ReconstructableBand* band;
+      if (waveletLevel > 0) {
+        Wavelet& nextWavelet = channel.wavelets[waveletLevel - 1];
+        band = dynamic_cast<Wavelet::ReconstructableBand*>(
+            nextWavelet.bands[0].get());
+      } else
+        band = &channel.band;
+
       reconstructionSteps.emplace_back(wavelet, band);
     }
-    // Finally, reconstruct the final lowpass band.
-    Wavelet* wavelet = &(channel.wavelets.front());
-    reconstructionSteps.emplace_back(wavelet, &(channel.band));
   }
   assert(reconstructionSteps.size() == numLowPassBandsTotal);
 }
