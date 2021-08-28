@@ -245,7 +245,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     int dest_pitch = static_cast<int>(rotated->pitch) / 2;
     auto* dst = reinterpret_cast<uint16_t*>(rotated->getData(0, 0));
 
-    auto srcImg = mRaw->getU16DataAsCroppedArray2DRef();
+    auto srcImg = mRaw->getU16DataAsUncroppedArray2DRef();
 
     for (int y = 0; y < new_size.y; y++) {
       for (int x = 0; x < new_size.x; x++) {
