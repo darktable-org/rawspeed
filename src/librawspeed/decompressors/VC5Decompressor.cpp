@@ -31,7 +31,6 @@
 #include "decompressors/VC5Decompressor.h"
 #include "common/Array2DRef.h"            // for Array2DRef
 #include "common/Common.h"                // for clampBits, roundUpDivision
-#include "common/Optional.h"              // for Optional
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawspeedException.h"     // for RawspeedException
 #include "common/SimpleLUT.h"             // for SimpleLUT, SimpleLUT<>::va...
@@ -41,6 +40,7 @@
 #include <cmath>                          // for pow
 #include <initializer_list>               // for initializer_list
 #include <limits>                         // for numeric_limits
+#include <optional>                       // for optional
 #include <string>                         // for string
 #include <utility>                        // for move
 
@@ -603,11 +603,11 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
     return bands;
   }();
 
-  if (!mVC5.iSubband.hasValue())
+  if (!mVC5.iSubband.has_value())
     ThrowRDE("Did not see VC5Tag::SubbandNumber yet");
 
-  const int idx = subband_wavelet_index[mVC5.iSubband.getValue()];
-  const int band = subband_band_index[mVC5.iSubband.getValue()];
+  const int idx = subband_wavelet_index[mVC5.iSubband.value()];
+  const int band = subband_band_index[mVC5.iSubband.value()];
 
   auto& wavelets = channels[mVC5.iChannel].wavelets;
 
@@ -618,19 +618,19 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
   }
 
   std::unique_ptr<Wavelet::AbstractBand>& dstBand = wavelet.bands[band];
-  if (mVC5.iSubband.getValue() == 0) {
+  if (mVC5.iSubband.value() == 0) {
     assert(band == 0);
     // low-pass band, only one, for the smallest wavelet, per channel per image
-    if (!mVC5.lowpassPrecision.hasValue())
+    if (!mVC5.lowpassPrecision.has_value())
       ThrowRDE("Did not see VC5Tag::LowpassPrecision yet");
     dstBand = std::make_unique<Wavelet::LowPassBand>(
-        wavelet, bs, mVC5.lowpassPrecision.getValue());
+        wavelet, bs, mVC5.lowpassPrecision.value());
     mVC5.lowpassPrecision.reset();
   } else {
-    if (!mVC5.quantization.hasValue())
+    if (!mVC5.quantization.has_value())
       ThrowRDE("Did not see VC5Tag::Quantization yet");
-    dstBand = std::make_unique<Wavelet::HighPassBand>(
-        bs, mVC5.quantization.getValue());
+    dstBand =
+        std::make_unique<Wavelet::HighPassBand>(bs, mVC5.quantization.value());
     mVC5.quantization.reset();
   }
   wavelet.setBandValid(band);

@@ -23,7 +23,6 @@
 
 #include "common/Array2DRef.h"                  // for Array2DRef
 #include "common/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocator...
-#include "common/Optional.h"                    // for Optional
 #include "common/RawImage.h"                    // for RawImage
 #include "common/SimpleLUT.h"                   // for SimpleLUT, SimpleLUT...
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
@@ -32,6 +31,7 @@
 #include <array>                                // for array
 #include <cstdint>                              // for int16_t, uint16_t
 #include <memory>                               // for unique_ptr
+#include <optional>                             // for optional
 #include <type_traits>                          // for __underlying_type_im...
 #include <utility>                              // for move
 #include <vector>                               // for vector
@@ -104,9 +104,9 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   struct {
     uint16_t iChannel = 0; // 0'th channel is the default
-    Optional<uint16_t> iSubband;
-    Optional<uint16_t> lowpassPrecision;
-    Optional<int16_t> quantization;
+    std::optional<uint16_t> iSubband;
+    std::optional<uint16_t> lowpassPrecision;
+    std::optional<int16_t> quantization;
 
     const uint16_t imgFormat = 4;
     const uint16_t patternWidth = 2;
