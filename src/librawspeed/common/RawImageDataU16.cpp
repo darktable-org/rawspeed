@@ -139,12 +139,12 @@ void RawImageDataU16::scaleBlackWhite() {
   if ((blackAreas.empty() && blackLevelSeparate[0] < 0 && blackLevel < 0) || whitePoint >= 65536) {  // Estimate
     int b = 65536;
     int m = 0;
+    auto img = getU16DataAsCroppedArray2DRef();
     for (int row = skipBorder; row < (dim.y - skipBorder);row++) {
-      auto* pixel = reinterpret_cast<uint16_t*>(getData(skipBorder, row));
       for (int col = skipBorder ; col < gw ; col++) {
-        b = min(static_cast<int>(*pixel), b);
-        m = max(static_cast<int>(*pixel), m);
-        pixel++;
+        uint16_t pixel = img(row, skipBorder + col);
+        b = min(static_cast<int>(pixel), b);
+        m = max(static_cast<int>(pixel), m);
       }
     }
     if (blackLevel < 0)
