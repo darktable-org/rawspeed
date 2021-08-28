@@ -111,7 +111,7 @@ bool VC5Decompressor::Wavelet::isBandValid(const int band) const {
 }
 
 bool VC5Decompressor::Wavelet::allBandsValid() const {
-  return mDecodedBandMask == static_cast<uint32_t>((1 << numBands) - 1);
+  return mDecodedBandMask == static_cast<uint32_t>((1 << maxBands) - 1);
 }
 
 Array2DRef<const int16_t>
@@ -315,17 +315,17 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
 
   // Initialize wavelet sizes.
   for (Channel& channel : channels) {
-    channel.width = mRaw->dim.x / mVC5.patternWidth;
-    channel.height = mRaw->dim.y / mVC5.patternHeight;
-
-    uint16_t waveletWidth = channel.width;
-    uint16_t waveletHeight = channel.height;
+    uint16_t waveletWidth = mRaw->dim.x;
+    uint16_t waveletHeight = mRaw->dim.y;
     for (Wavelet& wavelet : channel.wavelets) {
       // Pad dimensions as necessary and divide them by two for the next wavelet
       for (auto* dimension : {&waveletWidth, &waveletHeight})
         *dimension = roundUpDivision(*dimension, 2);
       wavelet.width = waveletWidth;
       wavelet.height = waveletHeight;
+
+      wavelet.bands.resize(&wavelet == channel.wavelets.begin() ? 1
+                                                                : numSubbands);
     }
   }
 
@@ -445,7 +445,7 @@ void VC5Decompressor::parseVC5() {
       // Defaulting to 'mVC5.iChannel=0' seems to work *for existing samples*.
       for (int iWavelet = 0; iWavelet < numWaveletLevels; ++iWavelet) {
         auto& channel = channels[mVC5.iChannel];
-        auto& wavelet = channel.wavelets[iWavelet];
+        auto& wavelet = channel.wavelets[1 + iWavelet];
         wavelet.prescale =
             extractHighBits(val, 2 * iWavelet, /*effectiveBitwidth=*/14) & 0x03;
       }
@@ -490,7 +490,7 @@ void VC5Decompressor::parseVC5() {
     done = true;
     for (int iChannel = 0; iChannel < numChannels && done; ++iChannel) {
       Wavelet& wavelet = channels[iChannel].wavelets[0];
-      if (!wavelet.allBandsValid())
+      if (!wavelet.isBandValid(0))
         done = false;
     }
   }
@@ -611,7 +611,7 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
 
   auto& wavelets = channels[mVC5.iChannel].wavelets;
 
-  Wavelet& wavelet = wavelets[idx];
+  Wavelet& wavelet = wavelets[1 + idx];
   if (wavelet.isBandValid(band)) {
     ThrowRDE("Band %u for wavelet %u on channel %u was already seen", band, idx,
              mVC5.iChannel);
@@ -637,10 +637,11 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
 
   // If this wavelet is fully specified, mark the low-pass band of the
   // next lower wavelet as specified.
-  if (idx > 0 && wavelet.allBandsValid()) {
-    Wavelet& nextWavelet = wavelets[idx - 1];
+  if (wavelet.allBandsValid()) {
+    Wavelet& nextWavelet = wavelets[idx];
     assert(!nextWavelet.isBandValid(0));
-    nextWavelet.bands[0] = std::make_unique<Wavelet::ReconstructableBand>();
+    nextWavelet.bands[0] = std::make_unique<Wavelet::ReconstructableBand>(
+        /*clampUint=*/idx == 0);
     nextWavelet.setBandValid(0);
   }
 
@@ -656,7 +657,7 @@ void VC5Decompressor::prepareBandDecodingPlan() {
     for (auto channelId = 0; channelId < numChannels; channelId++) {
       for (int bandId = 1; bandId <= numHighPassBands; bandId++) {
         auto& channel = channels[channelId];
-        auto& wavelet = channel.wavelets[waveletLevel];
+        auto& wavelet = channel.wavelets[1 + waveletLevel];
         auto& band = *wavelet.bands[bandId];
         auto& decodeableHighPassBand =
             dynamic_cast<Wavelet::HighPassBand&>(band);
@@ -682,19 +683,15 @@ void VC5Decompressor::prepareBandReconstruction() {
   // For every channel, recursively reconstruct the low-pass bands.
   for (auto& channel : channels) {
     // Reconstruct the intermediate lowpass bands.
-    for (int waveletLevel = numWaveletLevels - 1; waveletLevel >= 0;
+    for (int waveletLevel = channel.wavelets.size() - 1; waveletLevel > 0;
          waveletLevel--) {
       Wavelet& wavelet = channel.wavelets[waveletLevel];
 
-      Wavelet::ReconstructableBand* band;
-      if (waveletLevel > 0) {
-        Wavelet& nextWavelet = channel.wavelets[waveletLevel - 1];
-        band = dynamic_cast<Wavelet::ReconstructableBand*>(
-            nextWavelet.bands[0].get());
-      } else
-        band = &channel.band;
+      Wavelet& nextWavelet = channel.wavelets[waveletLevel - 1];
+      auto& band =
+          dynamic_cast<Wavelet::ReconstructableBand&>(*nextWavelet.bands[0]);
 
-      reconstructionSteps.emplace_back(wavelet, *band);
+      reconstructionSteps.emplace_back(wavelet, band);
     }
   }
   assert(reconstructionSteps.size() == numLowPassBandsTotal);
@@ -785,10 +782,14 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
   const int width = out.width / 2;
   const int height = out.height / 2;
 
-  const Array2DRef<const int16_t> lowbands0 = channels[0].band.data;
-  const Array2DRef<const int16_t> lowbands1 = channels[1].band.data;
-  const Array2DRef<const int16_t> lowbands2 = channels[2].band.data;
-  const Array2DRef<const int16_t> lowbands3 = channels[3].band.data;
+  const Array2DRef<const int16_t> lowbands0 =
+      channels[0].wavelets[0].bands[0]->data;
+  const Array2DRef<const int16_t> lowbands1 =
+      channels[1].wavelets[0].bands[0]->data;
+  const Array2DRef<const int16_t> lowbands2 =
+      channels[2].wavelets[0].bands[0]->data;
+  const Array2DRef<const int16_t> lowbands3 =
+      channels[3].wavelets[0].bands[0]->data;
 
   // Convert to RGGB output
 #ifdef HAVE_OPENMP

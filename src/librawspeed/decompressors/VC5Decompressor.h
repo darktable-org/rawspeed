@@ -157,8 +157,8 @@ class VC5Decompressor final : public AbstractDecompressor {
       void decode(const Wavelet& wavelet) final;
     };
 
-    static constexpr uint16_t numBands = 4;
-    std::array<std::unique_ptr<AbstractBand>, numBands> bands;
+    static constexpr uint16_t maxBands = 4;
+    std::vector<std::unique_ptr<AbstractBand>> bands;
 
     void clear() {
       for (auto& band : bands)
@@ -187,11 +187,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   };
 
   struct Channel {
-    std::array<Wavelet, numWaveletLevels> wavelets;
-
-    Wavelet::ReconstructableBand band{/*clampUint*/ true};
-    // the final lowband.
-    int width, height;
+    std::array<Wavelet, numWaveletLevels + 1> wavelets;
   };
 
   static constexpr int numChannels = 4;
