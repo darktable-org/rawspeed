@@ -120,10 +120,12 @@ class VC5Decompressor final : public AbstractDecompressor {
     int16_t prescale;
 
     struct AbstractBand {
+      const Wavelet& wavelet;
       std::vector<int16_t, DefaultInitAllocatorAdaptor<int16_t>> data_storage;
       Array2DRef<int16_t> data;
+      explicit AbstractBand(const Wavelet& wavelet_) : wavelet(wavelet_) {}
       virtual ~AbstractBand() = default;
-      virtual void decode(const Wavelet& wavelet) = 0;
+      virtual void decode() = 0;
     };
     struct ReconstructableBand final : AbstractBand {
       bool clampUint;
@@ -133,28 +135,30 @@ class VC5Decompressor final : public AbstractDecompressor {
       std::vector<int16_t, DefaultInitAllocatorAdaptor<int16_t>>
           highpass_storage;
       Array2DRef<int16_t> highpass;
-      explicit ReconstructableBand(bool clampUint_ = false)
-          : clampUint(clampUint_) {}
-      void processLow(const Wavelet& wavelet) noexcept;
-      void processHigh(const Wavelet& wavelet) noexcept;
-      void combine(const Wavelet& wavelet) noexcept;
-      void decode(const Wavelet& wavelet) noexcept final;
+      explicit ReconstructableBand(const Wavelet& wavelet_,
+                                   bool clampUint_ = false)
+          : AbstractBand(wavelet_), clampUint(clampUint_) {}
+      void processLow() noexcept;
+      void processHigh() noexcept;
+      void combine() noexcept;
+      void decode() noexcept final;
     };
     struct AbstractDecodeableBand : AbstractBand {
       ByteStream bs;
-      explicit AbstractDecodeableBand(ByteStream bs_) : bs(std::move(bs_)) {}
+      explicit AbstractDecodeableBand(const Wavelet& wavelet_, ByteStream bs_)
+          : AbstractBand(wavelet_), bs(std::move(bs_)) {}
     };
     struct LowPassBand final : AbstractDecodeableBand {
       uint16_t lowpassPrecision;
-      LowPassBand(const Wavelet& wavelet, ByteStream bs_,
+      LowPassBand(const Wavelet& wavelet_, ByteStream bs_,
                   uint16_t lowpassPrecision_);
-      void decode(const Wavelet& wavelet) final;
+      void decode() final;
     };
     struct HighPassBand final : AbstractDecodeableBand {
       int16_t quant;
-      HighPassBand(ByteStream bs_, int16_t quant_)
-          : AbstractDecodeableBand(std::move(bs_)), quant(quant_) {}
-      void decode(const Wavelet& wavelet) final;
+      HighPassBand(const Wavelet& wavelet_, ByteStream bs_, int16_t quant_)
+          : AbstractDecodeableBand(wavelet_, std::move(bs_)), quant(quant_) {}
+      void decode() final;
     };
 
     static constexpr uint16_t maxBands = 4;

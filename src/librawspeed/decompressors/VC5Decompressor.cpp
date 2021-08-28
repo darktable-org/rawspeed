@@ -248,8 +248,7 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
   }
 }
 
-void VC5Decompressor::Wavelet::ReconstructableBand::processLow(
-    const Wavelet& wavelet) noexcept {
+void VC5Decompressor::Wavelet::ReconstructableBand::processLow() noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp single
 #endif
@@ -263,8 +262,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::processLow(
   wavelet.reconstructPass(lowpass, highlow, lowlow);
 }
 
-void VC5Decompressor::Wavelet::ReconstructableBand::processHigh(
-    const Wavelet& wavelet) noexcept {
+void VC5Decompressor::Wavelet::ReconstructableBand::processHigh() noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp single
 #endif
@@ -277,8 +275,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::processHigh(
   wavelet.reconstructPass(highpass, highhigh, lowhigh);
 }
 
-void VC5Decompressor::Wavelet::ReconstructableBand::combine(
-    const Wavelet& wavelet) noexcept {
+void VC5Decompressor::Wavelet::ReconstructableBand::combine() noexcept {
   int16_t descaleShift = (wavelet.prescale == 2 ? 2 : 0);
 
 #ifdef HAVE_OPENMP
@@ -291,13 +288,12 @@ void VC5Decompressor::Wavelet::ReconstructableBand::combine(
   wavelet.combineLowHighPass(data, lowpass, highpass, descaleShift, clampUint);
 }
 
-void VC5Decompressor::Wavelet::ReconstructableBand::decode(
-    const Wavelet& wavelet) noexcept {
+void VC5Decompressor::Wavelet::ReconstructableBand::decode() noexcept {
   assert(wavelet.allBandsValid());
   assert(data_storage.empty());
-  processLow(wavelet);
-  processHigh(wavelet);
-  combine(wavelet);
+  processLow();
+  processHigh();
+  combine();
 }
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
@@ -496,10 +492,10 @@ void VC5Decompressor::parseVC5() {
   }
 }
 
-VC5Decompressor::Wavelet::LowPassBand::LowPassBand(const Wavelet& wavelet,
+VC5Decompressor::Wavelet::LowPassBand::LowPassBand(const Wavelet& wavelet_,
                                                    ByteStream bs_,
                                                    uint16_t lowpassPrecision_)
-    : AbstractDecodeableBand(std::move(bs_)),
+    : AbstractDecodeableBand(wavelet_, std::move(bs_)),
       lowpassPrecision(lowpassPrecision_) {
   // Low-pass band is a uncompressed version of the image, hugely downscaled.
   // It consists of width * height pixels, `lowpassPrecision` each.
@@ -510,7 +506,7 @@ VC5Decompressor::Wavelet::LowPassBand::LowPassBand(const Wavelet& wavelet,
   bs = bs.getStream(bytesTotal); // And clamp the size while we are at it.
 }
 
-void VC5Decompressor::Wavelet::LowPassBand::decode(const Wavelet& wavelet) {
+void VC5Decompressor::Wavelet::LowPassBand::decode() {
   data =
       Array2DRef<int16_t>::create(data_storage, wavelet.width, wavelet.height);
 
@@ -521,7 +517,7 @@ void VC5Decompressor::Wavelet::LowPassBand::decode(const Wavelet& wavelet) {
   }
 }
 
-void VC5Decompressor::Wavelet::HighPassBand::decode(const Wavelet& wavelet) {
+void VC5Decompressor::Wavelet::HighPassBand::decode() {
   class DeRLVer final {
     BitPumpMSB bits;
     const int16_t quant;
@@ -629,8 +625,8 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
   } else {
     if (!mVC5.quantization.has_value())
       ThrowRDE("Did not see VC5Tag::Quantization yet");
-    dstBand =
-        std::make_unique<Wavelet::HighPassBand>(bs, mVC5.quantization.value());
+    dstBand = std::make_unique<Wavelet::HighPassBand>(
+        wavelet, bs, mVC5.quantization.value());
     mVC5.quantization.reset();
   }
   wavelet.setBandValid(band);
@@ -640,8 +636,9 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
   if (wavelet.allBandsValid()) {
     Wavelet& nextWavelet = wavelets[idx];
     assert(!nextWavelet.isBandValid(0));
-    nextWavelet.bands[0] = std::make_unique<Wavelet::ReconstructableBand>(
-        /*clampUint=*/idx == 0);
+    nextWavelet.bands[0] =
+        std::make_unique<Wavelet::ReconstructableBand>(wavelet,
+                                                       /*clampUint=*/idx == 0);
     nextWavelet.setBandValid(0);
   }
 
@@ -750,7 +747,7 @@ void VC5Decompressor::decodeBands(bool* exceptionThrown) const noexcept {
   for (auto decodeableBand = allDecodeableBands.begin();
        decodeableBand < allDecodeableBands.end(); ++decodeableBand) {
     try {
-      decodeableBand->band.decode(decodeableBand->wavelet);
+      decodeableBand->band.decode();
     } catch (RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
@@ -767,7 +764,7 @@ void VC5Decompressor::decodeBands(bool* exceptionThrown) const noexcept {
 
 void VC5Decompressor::reconstructLowpassBands() const noexcept {
   for (const ReconstructionStep& step : reconstructionSteps) {
-    step.band.decode(step.wavelet);
+    step.band.decode();
 
 #ifdef HAVE_OPENMP
 #pragma omp single nowait
