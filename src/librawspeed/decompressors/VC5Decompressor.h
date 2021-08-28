@@ -120,7 +120,7 @@ class VC5Decompressor final : public AbstractDecompressor {
     int16_t prescale;
 
     struct AbstractBand {
-      std::vector<int16_t, DefaultInitAllocatorAdaptor<int16_t>> data;
+      std::vector<int16_t, DefaultInitAllocatorAdaptor<int16_t>> data_storage;
       virtual ~AbstractBand() = default;
       virtual void decode(const Wavelet& wavelet) = 0;
     };
