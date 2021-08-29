@@ -161,7 +161,7 @@ class VC5Decompressor final : public AbstractDecompressor {
       void decode() final;
     };
 
-    static constexpr uint16_t maxBands = 4;
+    static constexpr uint16_t maxBands = numLowPassBands + numHighPassBands;
     std::vector<std::unique_ptr<AbstractBand>> bands;
 
     void clear() {
