@@ -174,14 +174,15 @@ class VC5Decompressor final : public AbstractDecompressor {
     [[nodiscard]] uint32_t getValidBandMask() const { return mDecodedBandMask; }
     [[nodiscard]] bool allBandsValid() const;
 
-    void reconstructPass(Array2DRef<int16_t> dst,
-                         Array2DRef<const int16_t> high,
-                         Array2DRef<const int16_t> low) const noexcept;
+    static void reconstructPass(Array2DRef<int16_t> dst,
+                                Array2DRef<const int16_t> high,
+                                Array2DRef<const int16_t> low) noexcept;
 
-    void combineLowHighPass(Array2DRef<int16_t> dst,
-                            Array2DRef<const int16_t> low,
-                            Array2DRef<const int16_t> high, int descaleShift,
-                            bool clampUint /*= false*/) const noexcept;
+    static void combineLowHighPass(Array2DRef<int16_t> dst,
+                                   Array2DRef<const int16_t> low,
+                                   Array2DRef<const int16_t> high,
+                                   int descaleShift,
+                                   bool clampUint /*= false*/) noexcept;
 
     [[nodiscard]] Array2DRef<const int16_t>
     bandAsArray2DRef(unsigned int iBand) const;

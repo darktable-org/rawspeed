@@ -169,7 +169,7 @@ struct ConvolutionParams {
 
 void VC5Decompressor::Wavelet::reconstructPass(
     const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> high,
-    const Array2DRef<const int16_t> low) const noexcept {
+    const Array2DRef<const int16_t> low) noexcept {
   auto process = [low, high, dst](auto segment, int row, int col) {
     auto lowGetter = [&row, &col, low](int delta) {
       return low(row + decltype(segment)::coord_shift + delta, col);
@@ -189,18 +189,18 @@ void VC5Decompressor::Wavelet::reconstructPass(
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
-  for (int row = 0; row < height; ++row) {
+  for (int row = 0; row < dst.height / 2; ++row) {
     if (row == 0) {
       // 1st row
-      for (int col = 0; col < width; ++col)
+      for (int col = 0; col < dst.width; ++col)
         process(ConvolutionParams::First, row, col);
-    } else if (row + 1 < height) {
+    } else if (row + 1 < dst.height / 2) {
       // middle rows
-      for (int col = 0; col < width; ++col)
+      for (int col = 0; col < dst.width; ++col)
         process(ConvolutionParams::Middle, row, col);
     } else {
       // last row
-      for (int col = 0; col < width; ++col)
+      for (int col = 0; col < dst.width; ++col)
         process(ConvolutionParams::Last, row, col);
     }
   }
@@ -209,7 +209,7 @@ void VC5Decompressor::Wavelet::reconstructPass(
 void VC5Decompressor::Wavelet::combineLowHighPass(
     const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> low,
     const Array2DRef<const int16_t> high, int descaleShift,
-    bool clampUint = false) const noexcept {
+    bool clampUint = false) noexcept {
   auto process = [low, high, descaleShift, clampUint, dst](auto segment,
                                                            int row, int col) {
     auto lowGetter = [&row, &col, low](int delta) {
@@ -240,7 +240,7 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
     int col = 0;
     process(ConvolutionParams::First, row, col);
     // middle cols
-    for (col = 1; col + 1 < width; ++col) {
+    for (col = 1; col + 1 < dst.width / 2; ++col) {
       process(ConvolutionParams::Middle, row, col);
     }
     // last col
@@ -259,7 +259,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::processLow() noexcept {
   const Array2DRef<const int16_t> lowlow = wavelet.bandAsArray2DRef(0);
 
   // Reconstruct the "immediates", the actual low pass ...
-  wavelet.reconstructPass(lowpass, highlow, lowlow);
+  Wavelet::reconstructPass(lowpass, highlow, lowlow);
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::processHigh() noexcept {
@@ -272,7 +272,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::processHigh() noexcept {
   const Array2DRef<const int16_t> highhigh = wavelet.bandAsArray2DRef(3);
   const Array2DRef<const int16_t> lowhigh = wavelet.bandAsArray2DRef(1);
 
-  wavelet.reconstructPass(highpass, highhigh, lowhigh);
+  Wavelet::reconstructPass(highpass, highhigh, lowhigh);
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::combine() noexcept {
@@ -285,7 +285,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::combine() noexcept {
                                      2 * wavelet.height);
 
   // And finally, combine the low pass, and high pass.
-  wavelet.combineLowHighPass(data, lowpass, highpass, descaleShift, clampUint);
+  Wavelet::combineLowHighPass(data, lowpass, highpass, descaleShift, clampUint);
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::decode() noexcept {
