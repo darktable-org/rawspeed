@@ -134,8 +134,10 @@ class VC5Decompressor final : public AbstractDecompressor {
     };
     struct ReconstructableBand final : AbstractBand {
       bool clampUint;
-      BandData lowpass;
-      BandData highpass;
+      struct {
+        BandData lowpass;
+        BandData highpass;
+      } intermediates;
       explicit ReconstructableBand(Wavelet& wavelet_, bool clampUint_ = false)
           : AbstractBand(wavelet_), clampUint(clampUint_) {}
       void createLowpassReconstructionTask() noexcept;

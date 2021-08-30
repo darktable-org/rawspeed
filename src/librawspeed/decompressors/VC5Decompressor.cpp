@@ -243,12 +243,13 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
     createLowpassReconstructionTask() noexcept {
   auto& highlow = wavelet.bands[2]->data;
   auto& lowlow = wavelet.bands[0]->data;
+  auto& lowpass = intermediates.lowpass;
 
 #ifdef HAVE_OPENMP
-#pragma omp task untied default(none) shared(highlow, lowlow)                  \
+#pragma omp task untied default(none) shared(highlow, lowlow, lowpass)         \
     depend(in                                                                  \
            : highlow, lowlow) depend(out                                       \
-                                     : this->lowpass)
+                                     : lowpass)
 #endif
   {
     lowpass.description = Array2DRef<int16_t>::create(
@@ -264,12 +265,13 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
     createHighpassReconstructionTask() noexcept {
   auto& highhigh = wavelet.bands[3]->data;
   auto& lowhigh = wavelet.bands[1]->data;
+  auto& highpass = intermediates.highpass;
 
 #ifdef HAVE_OPENMP
-#pragma omp task untied default(none) shared(highhigh, lowhigh)                \
+#pragma omp task untied default(none) shared(highhigh, lowhigh, highpass)      \
     depend(in                                                                  \
            : highhigh, lowhigh) depend(out                                     \
-                                       : this->highpass)
+                                       : highpass)
 #endif
   {
     highpass.description = Array2DRef<int16_t>::create(
@@ -282,26 +284,32 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
     createLowHighPassCombiningTask() noexcept {
+  auto& lowpass = intermediates.lowpass;
+  auto& highpass = intermediates.highpass;
+  auto& reconstructedLowpass = data;
+
 #ifdef HAVE_OPENMP
-#pragma omp task untied default(none) depend(in : this->lowpass, this->highpass)
+#pragma omp task untied default(none) depend(in : lowpass, highpass)
 #endif
   wavelet.bands.clear();
 
 #ifdef HAVE_OPENMP
-#pragma omp task untied default(none) depend(in                                \
-                                             : this->lowpass, this->highpass)  \
-    depend(out                                                                 \
-           : this->data)
+#pragma omp task untied default(none)                                          \
+    shared(lowpass, highpass, reconstructedLowpass)                            \
+        depend(in                                                              \
+               : lowpass, highpass) depend(out                                 \
+                                           : reconstructedLowpass)
 #endif
   {
     int16_t descaleShift = (wavelet.prescale == 2 ? 2 : 0);
 
-    data.description = Array2DRef<int16_t>::create(
-        data.storage, 2 * wavelet.width, 2 * wavelet.height);
+    reconstructedLowpass.description = Array2DRef<int16_t>::create(
+        reconstructedLowpass.storage, 2 * wavelet.width, 2 * wavelet.height);
 
     // And finally, combine the low pass, and high pass.
-    Wavelet::combineLowHighPass(data.description, lowpass.description,
-                                highpass.description, descaleShift, clampUint);
+    Wavelet::combineLowHighPass(reconstructedLowpass.description,
+                                lowpass.description, highpass.description,
+                                descaleShift, clampUint);
   }
 }
 
@@ -512,10 +520,12 @@ void VC5Decompressor::parseVC5() {
 
 void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
     ErrorLog& errLog, bool& exceptionThrown) noexcept {
+  [[maybe_unused]] auto& decodedData = data;
+
 #ifdef HAVE_OPENMP
 #pragma omp task untied default(none) shared(errLog, exceptionThrown)          \
     depend(out                                                                 \
-           : this->data)
+           : decodedData)
 #endif
   {
     try {
