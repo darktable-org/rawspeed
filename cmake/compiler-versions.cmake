@@ -2,9 +2,9 @@
 
 # As per https://en.cppreference.com/w/cpp/compiler_support
 # For "C++17 core language features" this means:
-#   GCC 7, Clang 6, Apple XCode ???; MSVC 19.14 (VS 2017 15.7)
+#   GCC 7, Clang 6, Apple XCode 10.1; MSVC 19.14 (VS 2017 15.7)
 # For "C++17 library features" this means:
-#   GCC 7 (w/o C11 (GCC9), FS (GCC8)), Clang 7 (w/ C11, FS), Apple XCode ???; MSVC STL 19.14 (w/o std::is_aggregate)
+#   GCC 7 (w/o C11 (GCC9), FS (GCC8)), Clang 7 (w/ C11, FS), Apple XCode 10.3; MSVC STL 19.14 (w/o std::is_aggregate)
 
 # As per https://gcc.gnu.org/gcc-6/changes.html, GCC6 fully supports OpenMP 4.5.
 # OpenMP 5.0 support is partial even in GCC11, but perhaps all the interesting bits are already available earlier?
