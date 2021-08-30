@@ -125,49 +125,48 @@ class VC5Decompressor final : public AbstractDecompressor {
     int16_t prescale;
 
     struct AbstractBand {
-      const Wavelet& wavelet;
+      Wavelet& wavelet;
       BandData data;
-      explicit AbstractBand(const Wavelet& wavelet_) : wavelet(wavelet_) {}
+      explicit AbstractBand(Wavelet& wavelet_) : wavelet(wavelet_) {}
       virtual ~AbstractBand() = default;
-      virtual void decode() = 0;
+      virtual void createDecodingTasks(ErrorLog& errLog,
+                                       bool& exceptionThrown) noexcept = 0;
     };
     struct ReconstructableBand final : AbstractBand {
       bool clampUint;
       BandData lowpass;
       BandData highpass;
-      explicit ReconstructableBand(const Wavelet& wavelet_,
-                                   bool clampUint_ = false)
+      explicit ReconstructableBand(Wavelet& wavelet_, bool clampUint_ = false)
           : AbstractBand(wavelet_), clampUint(clampUint_) {}
-      void processLow() noexcept;
-      void processHigh() noexcept;
-      void combine() noexcept;
-      void decode() noexcept final;
+      void createLowpassReconstructionTask() noexcept;
+      void createHighpassReconstructionTask() noexcept;
+      void createLowHighPassCombiningTask() noexcept;
+      void createDecodingTasks(ErrorLog& errLog,
+                               bool& exceptionThrown) noexcept final;
     };
     struct AbstractDecodeableBand : AbstractBand {
       ByteStream bs;
-      explicit AbstractDecodeableBand(const Wavelet& wavelet_, ByteStream bs_)
+      explicit AbstractDecodeableBand(Wavelet& wavelet_, ByteStream bs_)
           : AbstractBand(wavelet_), bs(std::move(bs_)) {}
+      virtual void decode() = 0;
+      void createDecodingTasks(ErrorLog& errLog,
+                               bool& exceptionThrown) noexcept final;
     };
     struct LowPassBand final : AbstractDecodeableBand {
       uint16_t lowpassPrecision;
-      LowPassBand(const Wavelet& wavelet_, ByteStream bs_,
+      LowPassBand(Wavelet& wavelet_, ByteStream bs_,
                   uint16_t lowpassPrecision_);
       void decode() noexcept final;
     };
     struct HighPassBand final : AbstractDecodeableBand {
       int16_t quant;
-      HighPassBand(const Wavelet& wavelet_, ByteStream bs_, int16_t quant_)
+      HighPassBand(Wavelet& wavelet_, ByteStream bs_, int16_t quant_)
           : AbstractDecodeableBand(wavelet_, std::move(bs_)), quant(quant_) {}
       void decode() final;
     };
 
     static constexpr uint16_t maxBands = numLowPassBands + numHighPassBands;
     std::vector<std::unique_ptr<AbstractBand>> bands;
-
-    void clear() {
-      for (auto& band : bands)
-        band.reset();
-    }
 
     void setBandValid(int band);
     [[nodiscard]] bool isBandValid(int band) const;
@@ -197,39 +196,16 @@ class VC5Decompressor final : public AbstractDecompressor {
   static constexpr int numLowPassBandsTotal = numWaveletLevels * numChannels;
   std::array<Channel, numChannels> channels;
 
-  struct DecodeableBand {
-    Wavelet::AbstractDecodeableBand& band;
-    const Wavelet& wavelet;
-    DecodeableBand(Wavelet::AbstractDecodeableBand& band_,
-                   const Wavelet& wavelet_)
-        : band(band_), wavelet(wavelet_) {}
-  };
-  std::vector<DecodeableBand> allDecodeableBands;
-
-  struct ReconstructionStep {
-    Wavelet& wavelet;
-    Wavelet::ReconstructableBand& band;
-    ReconstructionStep(Wavelet& wavelet_, Wavelet::ReconstructableBand& band_)
-        : wavelet(wavelet_), band(band_) {}
-  };
-  std::vector<ReconstructionStep> reconstructionSteps;
-
   static inline std::pair<int16_t /*value*/, unsigned int /*count*/>
   getRLV(BitPumpMSB& bits);
 
   void parseLargeCodeblock(const ByteStream& bs);
 
-  void prepareBandDecodingPlan();
-  void prepareBandReconstruction();
-  void prepareDecodingPlan();
-
-  void decodeBands(bool* exceptionThrown) const noexcept;
-
-  void reconstructLowpassBands() const noexcept;
-
   void combineFinalLowpassBands() const noexcept;
 
-  void decodeThread(bool* exceptionThrown) const noexcept;
+  void createWaveletBandDecodingTasks(bool& exceptionThrown) const noexcept;
+
+  void decodeThread(bool& exceptionThrown) const noexcept;
 
   void parseVC5();
 

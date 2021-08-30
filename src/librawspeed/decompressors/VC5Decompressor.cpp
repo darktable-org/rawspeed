@@ -181,9 +181,7 @@ void VC5Decompressor::Wavelet::reconstructPass(
   };
 
   // Vertical reconstruction
-#ifdef HAVE_OPENMP
-#pragma omp for schedule(static)
-#endif
+  // Can be done in parallel,
   for (int row = 0; row < dst.height / 2; ++row) {
     if (row == 0) {
       // 1st row
@@ -227,9 +225,7 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
   };
 
   // Horizontal reconstruction
-#ifdef HAVE_OPENMP
-#pragma omp for schedule(static)
-#endif
+  // Can be done in parallel,
   for (int row = 0; row < dst.height; ++row) {
     // First col
     int col = 0;
@@ -243,53 +239,79 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
   }
 }
 
-void VC5Decompressor::Wavelet::ReconstructableBand::processLow() noexcept {
-#ifdef HAVE_OPENMP
-#pragma omp single
-#endif
-  lowpass.description = Array2DRef<int16_t>::create(
-      lowpass.storage, wavelet.width, 2 * wavelet.height);
-
-  const Array2DRef<const int16_t> highlow = wavelet.bands[2]->data.description;
-  const Array2DRef<const int16_t> lowlow = wavelet.bands[0]->data.description;
-
-  // Reconstruct the "immediates", the actual low pass ...
-  Wavelet::reconstructPass(lowpass.description, highlow, lowlow);
-}
-
-void VC5Decompressor::Wavelet::ReconstructableBand::processHigh() noexcept {
-#ifdef HAVE_OPENMP
-#pragma omp single
-#endif
-  highpass.description = Array2DRef<int16_t>::create(
-      highpass.storage, wavelet.width, 2 * wavelet.height);
-
-  const Array2DRef<const int16_t> highhigh = wavelet.bands[3]->data.description;
-  const Array2DRef<const int16_t> lowhigh = wavelet.bands[1]->data.description;
-
-  Wavelet::reconstructPass(highpass.description, highhigh, lowhigh);
-}
-
-void VC5Decompressor::Wavelet::ReconstructableBand::combine() noexcept {
-  int16_t descaleShift = (wavelet.prescale == 2 ? 2 : 0);
+void VC5Decompressor::Wavelet::ReconstructableBand::
+    createLowpassReconstructionTask() noexcept {
+  auto& highlow = wavelet.bands[2]->data;
+  auto& lowlow = wavelet.bands[0]->data;
 
 #ifdef HAVE_OPENMP
-#pragma omp single
+#pragma omp task untied default(none) shared(highlow, lowlow)                  \
+    depend(in                                                                  \
+           : highlow, lowlow) depend(out                                       \
+                                     : lowpass)
 #endif
-  data.description = Array2DRef<int16_t>::create(
-      data.storage, 2 * wavelet.width, 2 * wavelet.height);
+  {
+    lowpass.description = Array2DRef<int16_t>::create(
+        lowpass.storage, wavelet.width, 2 * wavelet.height);
 
-  // And finally, combine the low pass, and high pass.
-  Wavelet::combineLowHighPass(data.description, lowpass.description,
-                              highpass.description, descaleShift, clampUint);
+    // Reconstruct the "immediates", the actual low pass ...
+    Wavelet::reconstructPass(lowpass.description, highlow.description,
+                             lowlow.description);
+  }
 }
 
-void VC5Decompressor::Wavelet::ReconstructableBand::decode() noexcept {
+void VC5Decompressor::Wavelet::ReconstructableBand::
+    createHighpassReconstructionTask() noexcept {
+  auto& highhigh = wavelet.bands[3]->data;
+  auto& lowhigh = wavelet.bands[1]->data;
+
+#ifdef HAVE_OPENMP
+#pragma omp task untied default(none) shared(highhigh, lowhigh)                \
+    depend(in                                                                  \
+           : highhigh, lowhigh) depend(out                                     \
+                                       : highpass)
+#endif
+  {
+    highpass.description = Array2DRef<int16_t>::create(
+        highpass.storage, wavelet.width, 2 * wavelet.height);
+
+    Wavelet::reconstructPass(highpass.description, highhigh.description,
+                             lowhigh.description);
+  }
+}
+
+void VC5Decompressor::Wavelet::ReconstructableBand::
+    createLowHighPassCombiningTask() noexcept {
+#ifdef HAVE_OPENMP
+#pragma omp task untied default(none) depend(in : lowpass, highpass)
+#endif
+  wavelet.bands.clear();
+
+#ifdef HAVE_OPENMP
+#pragma omp task untied default(none) depend(in                                \
+                                             : lowpass, highpass)              \
+    depend(out                                                                 \
+           : data)
+#endif
+  {
+    int16_t descaleShift = (wavelet.prescale == 2 ? 2 : 0);
+
+    data.description = Array2DRef<int16_t>::create(
+        data.storage, 2 * wavelet.width, 2 * wavelet.height);
+
+    // And finally, combine the low pass, and high pass.
+    Wavelet::combineLowHighPass(data.description, lowpass.description,
+                                highpass.description, descaleShift, clampUint);
+  }
+}
+
+void VC5Decompressor::Wavelet::ReconstructableBand::createDecodingTasks(
+    ErrorLog& errLog, bool& exceptionThrow) noexcept {
   assert(wavelet.allBandsValid());
   assert(data.storage.empty());
-  processLow();
-  processHigh();
-  combine();
+  createLowpassReconstructionTask();
+  createHighpassReconstructionTask();
+  createLowHighPassCombiningTask();
 }
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
@@ -488,7 +510,28 @@ void VC5Decompressor::parseVC5() {
   }
 }
 
-VC5Decompressor::Wavelet::LowPassBand::LowPassBand(const Wavelet& wavelet_,
+void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
+    ErrorLog& errLog, bool& exceptionThrown) noexcept {
+#ifdef HAVE_OPENMP
+#pragma omp task untied default(none) shared(errLog, exceptionThrown)          \
+    depend(out                                                                 \
+           : data)
+#endif
+  {
+    try {
+      decode();
+    } catch (RawspeedException& err) {
+      // Propagate the exception out of OpenMP magic.
+      errLog.setError(err.what());
+#ifdef HAVE_OPENMP
+#pragma omp atomic write
+#endif
+      exceptionThrown = true;
+    }
+  }
+}
+
+VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
                                                    ByteStream bs_,
                                                    uint16_t lowpassPrecision_)
     : AbstractDecodeableBand(wavelet_, std::move(bs_)),
@@ -643,73 +686,38 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
   mVC5.iSubband.reset();
 }
 
-void VC5Decompressor::prepareBandDecodingPlan() {
-  assert(allDecodeableBands.empty());
-  allDecodeableBands.reserve(numSubbandsTotal);
-  // All the high-pass bands for all wavelets,
-  // in this specific order of decreasing worksize.
-  for (int waveletLevel = 0; waveletLevel < numWaveletLevels; waveletLevel++) {
-    for (auto channelId = 0; channelId < numChannels; channelId++) {
-      for (int bandId = 1; bandId <= numHighPassBands; bandId++) {
-        auto& channel = channels[channelId];
-        auto& wavelet = channel.wavelets[1 + waveletLevel];
-        auto& band = *wavelet.bands[bandId];
-        auto& decodeableHighPassBand =
-            dynamic_cast<Wavelet::HighPassBand&>(band);
-        allDecodeableBands.emplace_back(decodeableHighPassBand, wavelet);
+void VC5Decompressor::createWaveletBandDecodingTasks(
+    bool& exceptionThrown) const noexcept {
+  for (int waveletLevel = numWaveletLevels; waveletLevel >= 0; waveletLevel--) {
+    const int numBandsInCurrentWavelet =
+        waveletLevel == 0 ? 1 : Wavelet::maxBands;
+    for (int bandId = 0; bandId != numBandsInCurrentWavelet; ++bandId) {
+      for (const auto& channel : channels) {
+        channel.wavelets[waveletLevel].bands[bandId]->createDecodingTasks(
+            static_cast<ErrorLog&>(*mRaw), exceptionThrown);
       }
     }
   }
-  // The low-pass bands at the end. I'm guessing they should be fast to
-  // decode.
-  for (Channel& channel : channels) {
-    // Low-pass band of the smallest wavelet.
-    Wavelet& smallestWavelet = channel.wavelets.back();
-    auto& decodeableLowPassBand =
-        dynamic_cast<Wavelet::LowPassBand&>(*smallestWavelet.bands[0]);
-    allDecodeableBands.emplace_back(decodeableLowPassBand, smallestWavelet);
-  }
-  assert(allDecodeableBands.size() == numSubbandsTotal);
 }
 
-void VC5Decompressor::prepareBandReconstruction() {
-  assert(reconstructionSteps.empty());
-  reconstructionSteps.reserve(numLowPassBandsTotal);
-  // For every channel, recursively reconstruct the low-pass bands.
-  for (auto& channel : channels) {
-    // Reconstruct the intermediate lowpass bands.
-    for (int waveletLevel = channel.wavelets.size() - 1; waveletLevel > 0;
-         waveletLevel--) {
-      Wavelet& wavelet = channel.wavelets[waveletLevel];
+void VC5Decompressor::decodeThread(bool& exceptionThrown) const noexcept {
+#ifdef HAVE_OPENMP
+#pragma omp taskgroup
+#pragma omp single
+#endif
+  createWaveletBandDecodingTasks(exceptionThrown);
 
-      Wavelet& nextWavelet = channel.wavelets[waveletLevel - 1];
-      auto& band =
-          dynamic_cast<Wavelet::ReconstructableBand&>(*nextWavelet.bands[0]);
-
-      reconstructionSteps.emplace_back(wavelet, band);
-    }
-  }
-  assert(reconstructionSteps.size() == numLowPassBandsTotal);
-}
-
-void VC5Decompressor::prepareDecodingPlan() {
-  prepareBandDecodingPlan();
-  prepareBandReconstruction();
-}
-
-void VC5Decompressor::decodeThread(bool* exceptionThrown) const noexcept {
-  // Decode all the existing bands. May fail.
-  decodeBands(exceptionThrown);
+  bool wasExceptionThrown;
+#ifdef HAVE_OPENMP
+#pragma omp atomic read
+#endif
+  wasExceptionThrown = exceptionThrown;
 
   // Proceed only if decoding did not fail.
-  if (*exceptionThrown)
-    return;
-
-  // And now, reconstruct the low-pass bands.
-  reconstructLowpassBands();
-
-  // And finally!
-  combineFinalLowpassBands();
+  if (!wasExceptionThrown) {
+    // And finally!
+    combineFinalLowpassBands();
+  }
 }
 
 void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
@@ -719,14 +727,12 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 
   initVC5LogTable();
 
-  prepareDecodingPlan();
-
   bool exceptionThrown = false;
 #ifdef HAVE_OPENMP
 #pragma omp parallel default(none) shared(exceptionThrown)                     \
     num_threads(rawspeed_get_number_of_processor_cores())
 #endif
-  decodeThread(&exceptionThrown);
+  decodeThread(exceptionThrown);
 
   std::string firstErr;
   if (mRaw->isTooManyErrors(1, &firstErr)) {
@@ -735,39 +741,6 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
              firstErr.c_str());
   } else {
     assert(!exceptionThrown);
-  }
-}
-
-void VC5Decompressor::decodeBands(bool* exceptionThrown) const noexcept {
-#ifdef HAVE_OPENMP
-#pragma omp for schedule(dynamic, 1)
-#endif
-  for (auto decodeableBand = allDecodeableBands.begin();
-       decodeableBand < allDecodeableBands.end(); ++decodeableBand) {
-    try {
-      decodeableBand->band.decode();
-    } catch (RawspeedException& err) {
-      // Propagate the exception out of OpenMP magic.
-      mRaw->setError(err.what());
-#ifdef HAVE_OPENMP
-#pragma omp atomic write
-#endif
-      *exceptionThrown = true;
-#ifdef HAVE_OPENMP
-#pragma omp cancel for
-#endif
-    }
-  }
-}
-
-void VC5Decompressor::reconstructLowpassBands() const noexcept {
-  for (const ReconstructionStep& step : reconstructionSteps) {
-    step.band.decode();
-
-#ifdef HAVE_OPENMP
-#pragma omp single nowait
-#endif
-    step.wavelet.clear(); // we no longer need it.
   }
 }
 
