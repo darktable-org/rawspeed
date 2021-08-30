@@ -248,7 +248,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
 #pragma omp task untied default(none) shared(highlow, lowlow)                  \
     depend(in                                                                  \
            : highlow, lowlow) depend(out                                       \
-                                     : lowpass)
+                                     : this->lowpass)
 #endif
   {
     lowpass.description = Array2DRef<int16_t>::create(
@@ -269,7 +269,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
 #pragma omp task untied default(none) shared(highhigh, lowhigh)                \
     depend(in                                                                  \
            : highhigh, lowhigh) depend(out                                     \
-                                       : highpass)
+                                       : this->highpass)
 #endif
   {
     highpass.description = Array2DRef<int16_t>::create(
@@ -283,15 +283,15 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
 void VC5Decompressor::Wavelet::ReconstructableBand::
     createLowHighPassCombiningTask() noexcept {
 #ifdef HAVE_OPENMP
-#pragma omp task untied default(none) depend(in : lowpass, highpass)
+#pragma omp task untied default(none) depend(in : this->lowpass, this->highpass)
 #endif
   wavelet.bands.clear();
 
 #ifdef HAVE_OPENMP
 #pragma omp task untied default(none) depend(in                                \
-                                             : lowpass, highpass)              \
+                                             : this->lowpass, this->highpass)  \
     depend(out                                                                 \
-           : data)
+           : this->data)
 #endif
   {
     int16_t descaleShift = (wavelet.prescale == 2 ? 2 : 0);
@@ -515,7 +515,7 @@ void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
 #ifdef HAVE_OPENMP
 #pragma omp task untied default(none) shared(errLog, exceptionThrown)          \
     depend(out                                                                 \
-           : data)
+           : this->data)
 #endif
   {
     try {
