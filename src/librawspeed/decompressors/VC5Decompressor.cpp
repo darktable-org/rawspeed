@@ -114,11 +114,6 @@ bool VC5Decompressor::Wavelet::allBandsValid() const {
   return mDecodedBandMask == static_cast<uint32_t>((1 << maxBands) - 1);
 }
 
-Array2DRef<const int16_t>
-VC5Decompressor::Wavelet::bandAsArray2DRef(const unsigned int iBand) const {
-  return bands[iBand]->data.description;
-}
-
 namespace {
 const auto convolute = [](int row, int col, std::array<int, 4> muls,
                           const Array2DRef<const int16_t> high, auto lowGetter,
@@ -255,8 +250,8 @@ void VC5Decompressor::Wavelet::ReconstructableBand::processLow() noexcept {
   lowpass.description = Array2DRef<int16_t>::create(
       lowpass.storage, wavelet.width, 2 * wavelet.height);
 
-  const Array2DRef<const int16_t> highlow = wavelet.bandAsArray2DRef(2);
-  const Array2DRef<const int16_t> lowlow = wavelet.bandAsArray2DRef(0);
+  const Array2DRef<const int16_t> highlow = wavelet.bands[2]->data.description;
+  const Array2DRef<const int16_t> lowlow = wavelet.bands[0]->data.description;
 
   // Reconstruct the "immediates", the actual low pass ...
   Wavelet::reconstructPass(lowpass.description, highlow, lowlow);
@@ -269,8 +264,8 @@ void VC5Decompressor::Wavelet::ReconstructableBand::processHigh() noexcept {
   highpass.description = Array2DRef<int16_t>::create(
       highpass.storage, wavelet.width, 2 * wavelet.height);
 
-  const Array2DRef<const int16_t> highhigh = wavelet.bandAsArray2DRef(3);
-  const Array2DRef<const int16_t> lowhigh = wavelet.bandAsArray2DRef(1);
+  const Array2DRef<const int16_t> highhigh = wavelet.bands[3]->data.description;
+  const Array2DRef<const int16_t> lowhigh = wavelet.bands[1]->data.description;
 
   Wavelet::reconstructPass(highpass.description, highhigh, lowhigh);
 }

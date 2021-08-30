@@ -184,9 +184,6 @@ class VC5Decompressor final : public AbstractDecompressor {
                                    int descaleShift,
                                    bool clampUint /*= false*/) noexcept;
 
-    [[nodiscard]] Array2DRef<const int16_t>
-    bandAsArray2DRef(unsigned int iBand) const;
-
   protected:
     uint32_t mDecodedBandMask = 0;
   };
