@@ -507,7 +507,7 @@ VC5Decompressor::Wavelet::LowPassBand::LowPassBand(const Wavelet& wavelet_,
   bs = bs.getStream(bytesTotal); // And clamp the size while we are at it.
 }
 
-void VC5Decompressor::Wavelet::LowPassBand::decode() {
+void VC5Decompressor::Wavelet::LowPassBand::decode() noexcept {
   auto& band = data.description;
   band =
       Array2DRef<int16_t>::create(data.storage, wavelet.width, wavelet.height);

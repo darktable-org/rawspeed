@@ -152,7 +152,7 @@ class VC5Decompressor final : public AbstractDecompressor {
       uint16_t lowpassPrecision;
       LowPassBand(const Wavelet& wavelet_, ByteStream bs_,
                   uint16_t lowpassPrecision_);
-      void decode() final;
+      void decode() noexcept final;
     };
     struct HighPassBand final : AbstractDecodeableBand {
       int16_t quant;
