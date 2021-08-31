@@ -246,7 +246,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
   auto& lowpass = intermediates.lowpass;
 
 #ifdef HAVE_OPENMP
-#pragma omp task untied default(none) shared(highlow, lowlow, lowpass)         \
+#pragma omp task default(none) shared(highlow, lowlow, lowpass)                \
     depend(in                                                                  \
            : highlow, lowlow) depend(out                                       \
                                      : lowpass)
@@ -268,7 +268,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
   auto& highpass = intermediates.highpass;
 
 #ifdef HAVE_OPENMP
-#pragma omp task untied default(none) shared(highhigh, lowhigh, highpass)      \
+#pragma omp task default(none) shared(highhigh, lowhigh, highpass)             \
     depend(in                                                                  \
            : highhigh, lowhigh) depend(out                                     \
                                        : highpass)
@@ -289,16 +289,15 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
   auto& reconstructedLowpass = data;
 
 #ifdef HAVE_OPENMP
-#pragma omp task untied default(none) depend(in : lowpass, highpass)
+#pragma omp task default(none) depend(in : lowpass, highpass)
 #endif
   wavelet.bands.clear();
 
 #ifdef HAVE_OPENMP
-#pragma omp task untied default(none)                                          \
-    shared(lowpass, highpass, reconstructedLowpass)                            \
-        depend(in                                                              \
-               : lowpass, highpass) depend(out                                 \
-                                           : reconstructedLowpass)
+#pragma omp task default(none) shared(lowpass, highpass, reconstructedLowpass) \
+    depend(in                                                                  \
+           : lowpass, highpass) depend(out                                     \
+                                       : reconstructedLowpass)
 #endif
   {
     int16_t descaleShift = (wavelet.prescale == 2 ? 2 : 0);
@@ -523,7 +522,7 @@ void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
   [[maybe_unused]] auto& decodedData = data;
 
 #ifdef HAVE_OPENMP
-#pragma omp task untied default(none) shared(errLog, exceptionThrown)          \
+#pragma omp task default(none) shared(errLog, exceptionThrown)                 \
     depend(out                                                                 \
            : decodedData)
 #endif
