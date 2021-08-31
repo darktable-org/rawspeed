@@ -181,9 +181,15 @@ void VC5Decompressor::Wavelet::reconstructPass(
     dst(2 * row + 1, col) = static_cast<int16_t>(odd);
   };
 
-  // Vertical reconstruction
-  // Can be done in parallel,
+#pragma GCC diagnostic push
+// See https://bugs.llvm.org/show_bug.cgi?id=51666
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#ifdef HAVE_OPENMP
+#pragma omp taskloop default(none) firstprivate(dst, process) num_tasks(       \
+    roundUpDivision(rawspeed_get_number_of_processor_cores(), numChannels))
+#endif
   for (int row = 0; row < dst.height / 2; ++row) {
+#pragma GCC diagnostic pop
     if (row == 0) {
       // 1st row
       for (int col = 0; col < dst.width; ++col)
@@ -203,7 +209,7 @@ void VC5Decompressor::Wavelet::reconstructPass(
 void VC5Decompressor::Wavelet::combineLowHighPass(
     const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> low,
     const Array2DRef<const int16_t> high, int descaleShift,
-    bool clampUint = false) noexcept {
+    bool clampUint = false, bool finalWavelet = false) noexcept {
   auto process = [low, high, descaleShift, clampUint, dst](auto segment,
                                                            int row, int col) {
     auto lowGetter = [&row, &col, low](int delta) {
@@ -226,8 +232,17 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
   };
 
   // Horizontal reconstruction
-  // Can be done in parallel,
+#pragma GCC diagnostic push
+  // See https://bugs.llvm.org/show_bug.cgi?id=51666
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#ifdef HAVE_OPENMP
+#pragma omp taskloop if (finalWavelet) default(none) firstprivate(dst,         \
+                                                                  process)     \
+    num_tasks(roundUpDivision(rawspeed_get_number_of_processor_cores(), 2))    \
+        mergeable
+#endif
   for (int row = 0; row < dst.height; ++row) {
+#pragma GCC diagnostic pop
     // First col
     int col = 0;
     process(ConvolutionParams::First, row, col);
@@ -309,7 +324,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
     // And finally, combine the low pass, and high pass.
     Wavelet::combineLowHighPass(reconstructedLowpass.description,
                                 lowpass.description, highpass.description,
-                                descaleShift, clampUint);
+                                descaleShift, clampUint, finalWavelet);
   }
 }
 
@@ -687,9 +702,9 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
   if (wavelet.allBandsValid()) {
     Wavelet& nextWavelet = wavelets[idx];
     assert(!nextWavelet.isBandValid(0));
-    nextWavelet.bands[0] =
-        std::make_unique<Wavelet::ReconstructableBand>(wavelet,
-                                                       /*clampUint=*/idx == 0);
+    bool finalWavelet = idx == 0;
+    nextWavelet.bands[0] = std::make_unique<Wavelet::ReconstructableBand>(
+        wavelet, /*clampUint=*/finalWavelet, finalWavelet);
     nextWavelet.setBandValid(0);
   }
 

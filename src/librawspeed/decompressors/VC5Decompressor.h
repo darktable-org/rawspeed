@@ -134,12 +134,15 @@ class VC5Decompressor final : public AbstractDecompressor {
     };
     struct ReconstructableBand final : AbstractBand {
       bool clampUint;
+      bool finalWavelet;
       struct {
         BandData lowpass;
         BandData highpass;
       } intermediates;
-      explicit ReconstructableBand(Wavelet& wavelet_, bool clampUint_ = false)
-          : AbstractBand(wavelet_), clampUint(clampUint_) {}
+      explicit ReconstructableBand(Wavelet& wavelet_, bool clampUint_ = false,
+                                   bool finalWavelet_ = false)
+          : AbstractBand(wavelet_), clampUint(clampUint_),
+            finalWavelet(finalWavelet_) {}
       void createLowpassReconstructionTask() noexcept;
       void createHighpassReconstructionTask() noexcept;
       void createLowHighPassCombiningTask() noexcept;
@@ -182,8 +185,8 @@ class VC5Decompressor final : public AbstractDecompressor {
     static void combineLowHighPass(Array2DRef<int16_t> dst,
                                    Array2DRef<const int16_t> low,
                                    Array2DRef<const int16_t> high,
-                                   int descaleShift,
-                                   bool clampUint /*= false*/) noexcept;
+                                   int descaleShift, bool clampUint /*= false*/,
+                                   bool finalWavelet /*= false*/) noexcept;
 
   protected:
     uint32_t mDecodedBandMask = 0;
