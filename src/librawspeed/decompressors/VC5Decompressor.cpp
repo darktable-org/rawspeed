@@ -115,9 +115,10 @@ bool VC5Decompressor::Wavelet::allBandsValid() const {
 }
 
 namespace {
-const auto convolute = [](int row, int col, std::array<int, 4> muls,
-                          const Array2DRef<const int16_t> high, auto lowGetter,
-                          int DescaleShift = 0) {
+template <typename LowGetter>
+static inline auto convolute(int row, int col, std::array<int, 4> muls,
+                             const Array2DRef<const int16_t> high,
+                             LowGetter lowGetter, int DescaleShift = 0) {
   auto highCombined = muls[0] * high(row, col);
   auto lowsCombined = [muls, lowGetter]() {
     int lows = 0;
@@ -135,7 +136,7 @@ const auto convolute = [](int row, int col, std::array<int, 4> muls,
   // And average it.
   total >>= 1;
   return total;
-};
+}
 
 struct ConvolutionParams {
   struct First {
