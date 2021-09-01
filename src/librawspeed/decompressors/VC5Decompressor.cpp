@@ -144,21 +144,18 @@ struct ConvolutionParams {
     static constexpr std::array<int, 4> mul_odd = {-1, +5, +4, -1};
     static constexpr int coord_shift = 0;
   };
-  static constexpr First First{};
 
   struct Middle {
     static constexpr std::array<int, 4> mul_even = {+1, +1, +8, -1};
     static constexpr std::array<int, 4> mul_odd = {-1, -1, +8, +1};
     static constexpr int coord_shift = -1;
   };
-  static constexpr Middle Middle{};
 
   struct Last {
     static constexpr std::array<int, 4> mul_even = {+1, -1, +4, +5};
     static constexpr std::array<int, 4> mul_odd = {-1, +1, -4, +11};
     static constexpr int coord_shift = -2;
   };
-  static constexpr Last Last{};
 };
 
 } // namespace
@@ -193,15 +190,15 @@ void VC5Decompressor::Wavelet::reconstructPass(
     if (row == 0) {
       // 1st row
       for (int col = 0; col < dst.width; ++col)
-        process(ConvolutionParams::First, row, col);
+        process(ConvolutionParams::First(), row, col);
     } else if (row + 1 < dst.height / 2) {
       // middle rows
       for (int col = 0; col < dst.width; ++col)
-        process(ConvolutionParams::Middle, row, col);
+        process(ConvolutionParams::Middle(), row, col);
     } else {
       // last row
       for (int col = 0; col < dst.width; ++col)
-        process(ConvolutionParams::Last, row, col);
+        process(ConvolutionParams::Last(), row, col);
     }
   }
 }
@@ -245,13 +242,13 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
 #pragma GCC diagnostic pop
     // First col
     int col = 0;
-    process(ConvolutionParams::First, row, col);
+    process(ConvolutionParams::First(), row, col);
     // middle cols
     for (col = 1; col + 1 < dst.width / 2; ++col) {
-      process(ConvolutionParams::Middle, row, col);
+      process(ConvolutionParams::Middle(), row, col);
     }
     // last col
-    process(ConvolutionParams::Last, row, col);
+    process(ConvolutionParams::Last(), row, col);
   }
 }
 
