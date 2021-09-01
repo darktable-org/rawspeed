@@ -164,15 +164,16 @@ void VC5Decompressor::Wavelet::reconstructPass(
     const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> high,
     const Array2DRef<const int16_t> low) noexcept {
   auto process = [low, high, dst](auto segment, int row, int col) {
+    using SegmentTy = decltype(segment);
     auto lowGetter = [&row, &col, low](int delta) {
-      return low(row + decltype(segment)::coord_shift + delta, col);
+      return low(row + SegmentTy::coord_shift + delta, col);
     };
     auto convolution = [&row, &col, high, lowGetter](std::array<int, 4> muls) {
       return convolute(row, col, muls, high, lowGetter, /*DescaleShift*/ 0);
     };
 
-    int even = convolution(decltype(segment)::mul_even);
-    int odd = convolution(decltype(segment)::mul_odd);
+    int even = convolution(SegmentTy::mul_even);
+    int odd = convolution(SegmentTy::mul_odd);
 
     dst(2 * row, col) = static_cast<int16_t>(even);
     dst(2 * row + 1, col) = static_cast<int16_t>(odd);
@@ -209,16 +210,17 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
     bool clampUint = false, bool finalWavelet = false) noexcept {
   auto process = [low, high, descaleShift, clampUint, dst](auto segment,
                                                            int row, int col) {
+    using SegmentTy = decltype(segment);
     auto lowGetter = [&row, &col, low](int delta) {
-      return low(row, col + decltype(segment)::coord_shift + delta);
+      return low(row, col + SegmentTy::coord_shift + delta);
     };
     auto convolution = [&row, &col, high, lowGetter,
                         descaleShift](std::array<int, 4> muls) {
       return convolute(row, col, muls, high, lowGetter, descaleShift);
     };
 
-    int even = convolution(decltype(segment)::mul_even);
-    int odd = convolution(decltype(segment)::mul_odd);
+    int even = convolution(SegmentTy::mul_even);
+    int odd = convolution(SegmentTy::mul_odd);
 
     if (clampUint) {
       even = clampBits(even, 14);
