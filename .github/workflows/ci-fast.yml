@@ -123,8 +123,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ macos-10.15 ]
-        xcode: [ 12.4 ] # LLVM10
+        os: [ macos-11 ]
+        xcode: [ 12.5.1 ] # LLVM11
         compiler:
           - { compiler: XCode, CC: cc, CXX: c++ }
         flavor: [ RelWithDebInfo, Release ]

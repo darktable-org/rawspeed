@@ -14,8 +14,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ macos-10.15 ]
-        xcode: [  10.3, 11.3.1,  11.7 ]
-        #        LLVM7,  LLVM8, LLVM9
+        xcode: [  10.3, 11.3.1,  11.7,   12.4 ]
+        #        LLVM7,  LLVM8, LLVM9, LLVM10
         compiler:
           - { compiler: XCode, CC: cc, CXX: c++ }
         flavor: [ RelWithDebInfo, Release ]
@@ -38,7 +38,7 @@ jobs:
           SRC_DIR: ${{ github.workspace }}
           BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/../rawspeed-install
-          ECO: -DWITH_OPENMP=${{ matrix.xcode == 11.3.1 }} -DALLOW_DOWNLOADING_GOOGLETEST=ON
+          ECO: -DWITH_OPENMP=${{ matrix.xcode != 10.3 && matrix.xcode != 11.7 }} -DALLOW_DOWNLOADING_GOOGLETEST=ON
           FLAVOR: ${{ matrix.flavor }}
           TARGET: build
         run: |
