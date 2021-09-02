@@ -67,12 +67,12 @@ public:
           allocator_) noexcept
       : allocator(allocator_.get_allocator()) {}
 
-  pointer allocate(size_type n, const void* hint = nullptr) {
-    return allocator.allocate(n, hint);
+  pointer allocate(size_type n) {
+    return allocator_traits::allocate(allocator, n);
   }
 
   void deallocate(pointer p, size_type n) noexcept {
-    allocator.deallocate(p, n);
+    allocator_traits::deallocate(allocator, n);
   }
 
   template <typename U>
