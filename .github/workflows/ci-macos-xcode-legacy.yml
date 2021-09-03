@@ -24,8 +24,6 @@ jobs:
         name: Fetch/Checkout RawSpeed git repo
       - name: Install Base Dependencies
         run: |
-          # https://github.com/actions/virtual-environments/issues/2322#issuecomment-749211076
-          rm -rf /usr/local/bin/2to3
           brew update > /dev/null || true
           brew tap Homebrew/bundle
           cd .ci
