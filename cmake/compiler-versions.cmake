@@ -10,12 +10,10 @@
 # OpenMP 5.0 support is partial even in GCC11, but perhaps all the interesting bits are already available earlier?
 
 # As per https://releases.llvm.org/6.0.0/tools/clang/docs/OpenMPSupport.html / https://releases.llvm.org/7.0.0/tools/clang/docs/OpenMPSupport.html
-# Clang 7 is the first one with full OpenMP 4.5 support,
-# BUT it fails spectacularly to clang irgen certain openmp tasking constructs,
-# so Clang 8 it is.
+# Clang 7 is the first one with full OpenMP 4.5 support.
 
 # As per https://gcc.gnu.org/releases.html, GCC 7.1 was first released on May 2, 2017 (4+ years ago)
-# As per https://releases.llvm.org/, Clang 8 was first released on 20 Mar 2019 (~2.5 years ago)
+# As per https://releases.llvm.org/, Clang 7 was first released on 19 Sep 2018 (~3 years ago)
 
 
 # Baseline requirements.
@@ -27,19 +25,45 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_L
   message(FATAL_ERROR "GNU C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} is too old. Need 7+")
 endif()
 
-if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_C_COMPILER_VERSION VERSION_LESS 8)
-  message(FATAL_ERROR "LLVM Clang C compiler version ${CMAKE_C_COMPILER_VERSION} is too old. Need 8+")
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_C_COMPILER_VERSION VERSION_LESS 7)
+  message(FATAL_ERROR "LLVM Clang C compiler version ${CMAKE_C_COMPILER_VERSION} is too old. Need 7+")
 endif()
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8)
-  message(FATAL_ERROR "LLVM Clang C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} is too old. Need 8+")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7)
+  message(FATAL_ERROR "LLVM Clang C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} is too old. Need 7+")
 endif()
 
-# XCode 11.0 (apple clang 11.0.0) is based on LLVM8
-if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_LESS 11.0.0)
-  message(FATAL_ERROR "XCode (Apple clang) C compiler version ${CMAKE_C_COMPILER_VERSION} is too old. Need XCode version 11.0+")
+# XCode 10.3 (apple clang 10.0.1) is based on LLVM7
+if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_LESS 10.0.1)
+  message(FATAL_ERROR "XCode (Apple clang) C compiler version ${CMAKE_C_COMPILER_VERSION} is too old. Need version 10.0.1+ (XCode 10.3+)")
 endif()
-if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0.0)
-  message(FATAL_ERROR "XCode (Apple clang) C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} is too old. Need XCode version 11.0+")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.0.1)
+  message(FATAL_ERROR "XCode (Apple clang) C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} is too old. Need version 10.0.1+ (XCode 10.3+)")
+endif()
+
+if(WITH_OPENMP)
+  # OpenMP is not supported with LLVM7 / LLVM9.
+  if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND
+      ((CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 7 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 8) OR
+       (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 10)))
+    message(FATAL_ERROR "LLVM Clang C compiler version ${CMAKE_C_COMPILER_VERSION} is not supported in with-OpenMP build mode.")
+  endif()
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
+      ((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 7 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8) OR
+       (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 9 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10)))
+    message(FATAL_ERROR "LLVM Clang C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} is not supported in with-OpenMP build mode.")
+  endif()
+
+  # OpenMP is not supported with XCode 10.2-10.3 (based on LLVM7) / XCode 11.4-11.7 (based on LLVM9).
+  if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND
+      ((CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0.1 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 11.0.0) OR
+       (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 11.0.3 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 12.0.0)))
+    message(FATAL_ERROR "XCode (Apple clang) C compiler version ${CMAKE_C_COMPILER_VERSION} is not supported in with-OpenMP build mode.")
+  endif()
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND
+      ((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0.1 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0.0) OR
+       (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 11.0.3 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.0.0)))
+    message(FATAL_ERROR "XCode (Apple clang) C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} is not supported in with-OpenMP build mode.")
+  endif()
 endif()
 
 # The road forward.
@@ -51,17 +75,17 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_L
   message(WARNING "GNU C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} support is soft-deprecated and will be removed in the future. Version 10+ is recommended.")
 endif()
 
-if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_C_COMPILER_VERSION VERSION_LESS 11)
-  message(WARNING "LLVM Clang C compiler version ${CMAKE_C_COMPILER_VERSION} support is soft-deprecated and will be removed in the future. Version 11+ is recommended.")
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_C_COMPILER_VERSION VERSION_LESS 10)
+  message(WARNING "LLVM Clang C compiler version ${CMAKE_C_COMPILER_VERSION} support is soft-deprecated and will be removed in the future. Version 10+ is recommended.")
 endif()
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11)
-  message(WARNING "LLVM Clang C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} support is soft-deprecated and will be removed in the future. Version 11+ is recommended.")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10)
+  message(WARNING "LLVM Clang C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} support is soft-deprecated and will be removed in the future. Version 10+ is recommended.")
 endif()
 
-# XCode 12.5 (apple clang 12.0.5) is based on LLVM11
-if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_LESS 12.0.5)
-  message(WARNING "XCode (Apple clang) C compiler version ${CMAKE_C_COMPILER_VERSION} support is soft-deprecated and will be removed in the future. XCode version 12.5+ is recommended.")
+# XCode 12.0 (apple clang 12.0.0) is based on LLVM10
+if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_LESS 12.0.0)
+  message(WARNING "XCode (Apple clang) C compiler version ${CMAKE_C_COMPILER_VERSION} support is soft-deprecated and will be removed in the future. XCode version 12.0+ is recommended.")
 endif()
-if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.0.5)
-  message(WARNING "XCode (Apple clang) C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} support is soft-deprecated and will be removed in the future. XCode version 12.5+ is recommended.")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.0.0)
+  message(WARNING "XCode (Apple clang) C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} support is soft-deprecated and will be removed in the future. XCode version 12.0+ is recommended.")
 endif()

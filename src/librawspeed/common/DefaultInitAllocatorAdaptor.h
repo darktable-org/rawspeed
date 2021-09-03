@@ -33,10 +33,6 @@ public:
   using allocator_traits = std::allocator_traits<ActualAllocator>;
 
   using value_type = typename allocator_traits::value_type;
-  using pointer = typename allocator_traits::pointer;
-  using const_pointer = typename allocator_traits::const_pointer;
-  using size_type = typename allocator_traits::size_type;
-  using difference_type = typename allocator_traits::difference_type;
 
   static_assert(std::is_same<T, value_type>::value);
 
@@ -67,12 +63,12 @@ public:
           allocator_) noexcept
       : allocator(allocator_.get_allocator()) {}
 
-  pointer allocate(size_type n, const void* hint = nullptr) {
-    return allocator.allocate(n, hint);
+  T* allocate(std::size_t n) {
+    return allocator_traits::allocate(allocator, n);
   }
 
-  void deallocate(pointer p, size_type n) noexcept {
-    allocator.deallocate(p, n);
+  void deallocate(T* p, std::size_t n) noexcept {
+    allocator_traits::deallocate(allocator, p, n);
   }
 
   template <typename U>
