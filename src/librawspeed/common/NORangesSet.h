@@ -26,12 +26,26 @@
 
 namespace rawspeed {
 
-template <typename T> struct RangesOverlapCmp final {
-  constexpr bool operator()(const T& lhs, const T& rhs) const {
-    return !RangesOverlap(lhs, rhs);
-  }
+template <typename T> struct RangesSortCmp final {
+	constexpr bool operator()(const T& lhs, const T& rhs) const {
+		return lhs.begin() < rhs.begin();
+	}
 };
 
-template <typename T> using NORangesSet = std::set<T, RangesOverlapCmp<T>>;
+template <typename T> class NORangesSet : public std::set<T, RangesSortCmp<T>>
+{
+public:
+    std::pair<std::set<T, RangesSortCmp<T>>::iterator, bool> emplace(const T& a)
+    {
+        for (const auto& t : *this)
+        {
+            if (RangesOverlap(t, a))
+                return std::make_pair(this->end(), false);
+            if (t.begin() > a.end()) // std::set is sorted by t.begin(), so if t is completely on the right we may break comparison loop
+                break;
+        }
+        return std::set<T, RangesSortCmp<T>>::emplace(a);
+    }
+};
 
 } // namespace rawspeed
