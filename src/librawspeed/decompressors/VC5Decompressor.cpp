@@ -281,8 +281,12 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
                                      : lowpass)
 #endif
   {
+    assert(highlow.has_value() && lowlow.has_value() &&
+           "Failed to produce precursor bands?");
     // Reconstruct the "immediates", the actual low pass ...
-    lowpass = Wavelet::reconstructPass(highlow.description, lowlow.description);
+    assert(!lowpass.has_value() && "Combined this precursor band already?");
+    lowpass.emplace(
+        Wavelet::reconstructPass(highlow->description, lowlow->description));
   }
 }
 
@@ -299,8 +303,11 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
                                        : highpass)
 #endif
   {
-    highpass =
-        Wavelet::reconstructPass(highhigh.description, lowhigh.description);
+    assert(highhigh.has_value() && lowhigh.has_value() &&
+           "Failed to produce precursor bands?");
+    assert(!highpass.has_value() && "Combined this precursor band already?");
+    highpass.emplace(
+        Wavelet::reconstructPass(highhigh->description, lowhigh->description));
   }
 }
 
@@ -322,19 +329,22 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
                                        : reconstructedLowpass)
 #endif
   {
+    assert(lowpass.has_value() && highpass.has_value() &&
+           "Failed to combine precursor bands?");
+    assert(!data.has_value() && "Reconstructed this band already?");
+
     int16_t descaleShift = (wavelet.prescale == 2 ? 2 : 0);
 
     // And finally, combine the low pass, and high pass.
-    reconstructedLowpass =
-        Wavelet::combineLowHighPass(lowpass.description, highpass.description,
-                                    descaleShift, clampUint, finalWavelet);
+    reconstructedLowpass.emplace(
+        Wavelet::combineLowHighPass(lowpass->description, highpass->description,
+                                    descaleShift, clampUint, finalWavelet));
   }
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::createDecodingTasks(
     ErrorLog& errLog, bool& exceptionThrow) noexcept {
   assert(wavelet.allBandsValid());
-  assert(data.storage.empty());
   createLowpassReconstructionTask();
   createHighpassReconstructionTask();
   createLowHighPassCombiningTask();
@@ -547,6 +557,7 @@ void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
 #endif
   {
     try {
+      assert(!decodedData.has_value() && "Decoded this band already?");
       decodedData = decode();
     } catch (RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
@@ -785,14 +796,20 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
   const int width = out.width / 2;
   const int height = out.height / 2;
 
+  assert(channels[0].wavelets[0].bands[0]->data.has_value() &&
+         channels[1].wavelets[0].bands[0]->data.has_value() &&
+         channels[2].wavelets[0].bands[0]->data.has_value() &&
+         channels[3].wavelets[0].bands[0]->data.has_value() &&
+         "Failed to reconstruct all final lowpass bands?");
+
   const Array2DRef<const int16_t> lowbands0 =
-      channels[0].wavelets[0].bands[0]->data.description;
+      channels[0].wavelets[0].bands[0]->data->description;
   const Array2DRef<const int16_t> lowbands1 =
-      channels[1].wavelets[0].bands[0]->data.description;
+      channels[1].wavelets[0].bands[0]->data->description;
   const Array2DRef<const int16_t> lowbands2 =
-      channels[2].wavelets[0].bands[0]->data.description;
+      channels[2].wavelets[0].bands[0]->data->description;
   const Array2DRef<const int16_t> lowbands3 =
-      channels[3].wavelets[0].bands[0]->data.description;
+      channels[3].wavelets[0].bands[0]->data->description;
 
   // Convert to RGGB output
 #ifdef HAVE_OPENMP

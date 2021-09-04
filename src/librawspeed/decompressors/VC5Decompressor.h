@@ -126,7 +126,7 @@ class VC5Decompressor final : public AbstractDecompressor {
 
     struct AbstractBand {
       Wavelet& wavelet;
-      BandData data;
+      std::optional<BandData> data;
       explicit AbstractBand(Wavelet& wavelet_) : wavelet(wavelet_) {}
       virtual ~AbstractBand() = default;
       virtual void createDecodingTasks(ErrorLog& errLog,
@@ -136,8 +136,8 @@ class VC5Decompressor final : public AbstractDecompressor {
       bool clampUint;
       bool finalWavelet;
       struct {
-        BandData lowpass;
-        BandData highpass;
+        std::optional<BandData> lowpass;
+        std::optional<BandData> highpass;
       } intermediates;
       explicit ReconstructableBand(Wavelet& wavelet_, bool clampUint_ = false,
                                    bool finalWavelet_ = false)
