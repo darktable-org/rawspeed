@@ -41,7 +41,7 @@ struct CameraId {
   }
 };
 
-class CameraMetaData final {
+class CameraMetaData {
 public:
   CameraMetaData() = default;
 
