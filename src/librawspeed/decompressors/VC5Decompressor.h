@@ -181,11 +181,11 @@ class VC5Decompressor final : public AbstractDecompressor {
     static BandData reconstructPass(Array2DRef<const int16_t> high,
                                     Array2DRef<const int16_t> low) noexcept;
 
-    static void combineLowHighPass(Array2DRef<int16_t> dst,
-                                   Array2DRef<const int16_t> low,
-                                   Array2DRef<const int16_t> high,
-                                   int descaleShift, bool clampUint /*= false*/,
-                                   bool finalWavelet /*= false*/) noexcept;
+    static BandData combineLowHighPass(Array2DRef<const int16_t> low,
+                                       Array2DRef<const int16_t> high,
+                                       int descaleShift,
+                                       bool clampUint /*= false*/,
+                                       bool finalWavelet /*= false*/) noexcept;
 
   protected:
     uint32_t mDecodedBandMask = 0;
