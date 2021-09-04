@@ -160,9 +160,14 @@ struct ConvolutionParams {
 
 } // namespace
 
-void VC5Decompressor::Wavelet::reconstructPass(
-    const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> high,
+VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
+    const Array2DRef<const int16_t> high,
     const Array2DRef<const int16_t> low) noexcept {
+  BandData combined;
+  auto& dst = combined.description;
+  dst = Array2DRef<int16_t>::create(combined.storage, high.width,
+                                    2 * high.height);
+
   auto process = [low, high, dst](auto segment, int row, int col) {
     using SegmentTy = decltype(segment);
     auto lowGetter = [&row, &col, low](int delta) {
@@ -202,6 +207,8 @@ void VC5Decompressor::Wavelet::reconstructPass(
         process(ConvolutionParams::Last(), row, col);
     }
   }
+
+  return combined;
 }
 
 void VC5Decompressor::Wavelet::combineLowHighPass(
@@ -267,12 +274,8 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
                                      : lowpass)
 #endif
   {
-    lowpass.description = Array2DRef<int16_t>::create(
-        lowpass.storage, wavelet.width, 2 * wavelet.height);
-
     // Reconstruct the "immediates", the actual low pass ...
-    Wavelet::reconstructPass(lowpass.description, highlow.description,
-                             lowlow.description);
+    lowpass = Wavelet::reconstructPass(highlow.description, lowlow.description);
   }
 }
 
@@ -289,11 +292,8 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
                                        : highpass)
 #endif
   {
-    highpass.description = Array2DRef<int16_t>::create(
-        highpass.storage, wavelet.width, 2 * wavelet.height);
-
-    Wavelet::reconstructPass(highpass.description, highhigh.description,
-                             lowhigh.description);
+    highpass =
+        Wavelet::reconstructPass(highhigh.description, lowhigh.description);
   }
 }
 
