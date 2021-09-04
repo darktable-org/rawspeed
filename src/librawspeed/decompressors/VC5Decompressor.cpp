@@ -538,16 +538,16 @@ void VC5Decompressor::parseVC5() {
 
 void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
     ErrorLog& errLog, bool& exceptionThrown) noexcept {
-  [[maybe_unused]] auto& decodedData = data;
+  auto& decodedData = data;
 
 #ifdef HAVE_OPENMP
-#pragma omp task default(none) shared(errLog, exceptionThrown)                 \
+#pragma omp task default(none) shared(decodedData, errLog, exceptionThrown)    \
     depend(out                                                                 \
            : decodedData)
 #endif
   {
     try {
-      decode();
+      decodedData = decode();
     } catch (RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       errLog.setError(err.what());
@@ -573,19 +573,24 @@ VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
   bs = bs.getStream(bytesTotal); // And clamp the size while we are at it.
 }
 
-void VC5Decompressor::Wavelet::LowPassBand::decode() noexcept {
-  auto& band = data.description;
-  band =
-      Array2DRef<int16_t>::create(data.storage, wavelet.width, wavelet.height);
+VC5Decompressor::BandData
+VC5Decompressor::Wavelet::LowPassBand::decode() const noexcept {
+  BandData lowpass;
+  auto& band = lowpass.description;
+  band = Array2DRef<int16_t>::create(lowpass.storage, wavelet.width,
+                                     wavelet.height);
 
   BitPumpMSB bits(bs);
   for (auto row = 0; row < band.height; ++row) {
     for (auto col = 0; col < band.width; ++col)
       band(row, col) = static_cast<int16_t>(bits.getBits(lowpassPrecision));
   }
+
+  return lowpass;
 }
 
-void VC5Decompressor::Wavelet::HighPassBand::decode() {
+VC5Decompressor::BandData
+VC5Decompressor::Wavelet::HighPassBand::decode() const {
   class DeRLVer final {
     BitPumpMSB bits;
     const int16_t quant;
@@ -631,13 +636,15 @@ void VC5Decompressor::Wavelet::HighPassBand::decode() {
 
   // decode highpass band
   DeRLVer d(bs, quant);
-  auto& band = data.description;
-  band =
-      Array2DRef<int16_t>::create(data.storage, wavelet.width, wavelet.height);
+  BandData highpass;
+  auto& band = highpass.description;
+  band = Array2DRef<int16_t>::create(highpass.storage, wavelet.width,
+                                     wavelet.height);
   for (int row = 0; row != wavelet.height; ++row)
     for (int col = 0; col != wavelet.width; ++col)
       band(row, col) = d.decode();
   d.verifyIsAtEnd();
+  return highpass;
 }
 
 void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
