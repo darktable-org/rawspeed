@@ -93,6 +93,17 @@ const std::array<RLV, table17.length> decompandedTable17 = []() {
   return d;
 }();
 
+inline bool readValue(bool& storage) {
+  bool value;
+
+#ifdef HAVE_OPENMP
+#pragma omp atomic read
+#endif
+  value = storage;
+
+  return value;
+}
+
 } // namespace
 
 #define PRECISION_MIN 8
@@ -269,50 +280,58 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
-    createLowpassReconstructionTask() noexcept {
+    createLowpassReconstructionTask(bool& exceptionThrown) noexcept {
   auto& highlow = wavelet.bands[2]->data;
   auto& lowlow = wavelet.bands[0]->data;
   auto& lowpass = intermediates.lowpass;
 
 #ifdef HAVE_OPENMP
-#pragma omp task default(none) shared(highlow, lowlow, lowpass)                \
-    depend(in                                                                  \
-           : highlow, lowlow) depend(out                                       \
-                                     : lowpass)
+#pragma omp task default(none)                                                 \
+    shared(exceptionThrown, highlow, lowlow, lowpass)                          \
+        depend(in                                                              \
+               : highlow, lowlow) depend(out                                   \
+                                         : lowpass)
 #endif
   {
-    assert(highlow.has_value() && lowlow.has_value() &&
-           "Failed to produce precursor bands?");
-    // Reconstruct the "immediates", the actual low pass ...
-    assert(!lowpass.has_value() && "Combined this precursor band already?");
-    lowpass.emplace(
-        Wavelet::reconstructPass(highlow->description, lowlow->description));
+    // Proceed only if decoding did not fail.
+    if (!readValue(exceptionThrown)) {
+      assert(highlow.has_value() && lowlow.has_value() &&
+             "Failed to produce precursor bands?");
+      // Reconstruct the "immediates", the actual low pass ...
+      assert(!lowpass.has_value() && "Combined this precursor band already?");
+      lowpass.emplace(
+          Wavelet::reconstructPass(highlow->description, lowlow->description));
+    }
   }
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
-    createHighpassReconstructionTask() noexcept {
+    createHighpassReconstructionTask(bool& exceptionThrown) noexcept {
   auto& highhigh = wavelet.bands[3]->data;
   auto& lowhigh = wavelet.bands[1]->data;
   auto& highpass = intermediates.highpass;
 
 #ifdef HAVE_OPENMP
-#pragma omp task default(none) shared(highhigh, lowhigh, highpass)             \
-    depend(in                                                                  \
-           : highhigh, lowhigh) depend(out                                     \
-                                       : highpass)
+#pragma omp task default(none)                                                 \
+    shared(exceptionThrown, highhigh, lowhigh, highpass)                       \
+        depend(in                                                              \
+               : highhigh, lowhigh) depend(out                                 \
+                                           : highpass)
 #endif
   {
-    assert(highhigh.has_value() && lowhigh.has_value() &&
-           "Failed to produce precursor bands?");
-    assert(!highpass.has_value() && "Combined this precursor band already?");
-    highpass.emplace(
-        Wavelet::reconstructPass(highhigh->description, lowhigh->description));
+    // Proceed only if decoding did not fail.
+    if (!readValue(exceptionThrown)) {
+      assert(highhigh.has_value() && lowhigh.has_value() &&
+             "Failed to produce precursor bands?");
+      assert(!highpass.has_value() && "Combined this precursor band already?");
+      highpass.emplace(Wavelet::reconstructPass(highhigh->description,
+                                                lowhigh->description));
+    }
   }
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
-    createLowHighPassCombiningTask() noexcept {
+    createLowHighPassCombiningTask(bool& exceptionThrown) noexcept {
   auto& lowpass = intermediates.lowpass;
   auto& highpass = intermediates.highpass;
   auto& reconstructedLowpass = data;
@@ -323,31 +342,35 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
   wavelet.bands.clear();
 
 #ifdef HAVE_OPENMP
-#pragma omp task default(none) shared(lowpass, highpass, reconstructedLowpass) \
-    depend(in                                                                  \
-           : lowpass, highpass) depend(out                                     \
-                                       : reconstructedLowpass)
+#pragma omp task default(none)                                                 \
+    shared(exceptionThrown, lowpass, highpass, reconstructedLowpass)           \
+        depend(in                                                              \
+               : lowpass, highpass) depend(out                                 \
+                                           : reconstructedLowpass)
 #endif
   {
-    assert(lowpass.has_value() && highpass.has_value() &&
-           "Failed to combine precursor bands?");
-    assert(!data.has_value() && "Reconstructed this band already?");
+    // Proceed only if decoding did not fail.
+    if (!readValue(exceptionThrown)) {
+      assert(lowpass.has_value() && highpass.has_value() &&
+             "Failed to combine precursor bands?");
+      assert(!data.has_value() && "Reconstructed this band already?");
 
-    int16_t descaleShift = (wavelet.prescale == 2 ? 2 : 0);
+      int16_t descaleShift = (wavelet.prescale == 2 ? 2 : 0);
 
-    // And finally, combine the low pass, and high pass.
-    reconstructedLowpass.emplace(
-        Wavelet::combineLowHighPass(lowpass->description, highpass->description,
-                                    descaleShift, clampUint, finalWavelet));
+      // And finally, combine the low pass, and high pass.
+      reconstructedLowpass.emplace(Wavelet::combineLowHighPass(
+          lowpass->description, highpass->description, descaleShift, clampUint,
+          finalWavelet));
+    }
   }
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::createDecodingTasks(
     ErrorLog& errLog, bool& exceptionThrow) noexcept {
   assert(wavelet.allBandsValid());
-  createLowpassReconstructionTask();
-  createHighpassReconstructionTask();
-  createLowHighPassCombiningTask();
+  createLowpassReconstructionTask(exceptionThrow);
+  createHighpassReconstructionTask(exceptionThrow);
+  createLowHighPassCombiningTask(exceptionThrow);
 }
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
@@ -556,16 +579,19 @@ void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
            : decodedData)
 #endif
   {
-    try {
-      assert(!decodedData.has_value() && "Decoded this band already?");
-      decodedData = decode();
-    } catch (RawspeedException& err) {
-      // Propagate the exception out of OpenMP magic.
-      errLog.setError(err.what());
+    // Proceed only if decoding did not fail.
+    if (!readValue(exceptionThrown)) {
+      try {
+        assert(!decodedData.has_value() && "Decoded this band already?");
+        decodedData = decode();
+      } catch (RawspeedException& err) {
+        // Propagate the exception out of OpenMP magic.
+        errLog.setError(err.what());
 #ifdef HAVE_OPENMP
 #pragma omp atomic write
 #endif
       exceptionThrown = true;
+      }
     }
   }
 }
@@ -753,14 +779,8 @@ void VC5Decompressor::decodeThread(bool& exceptionThrown) const noexcept {
 #endif
   createWaveletBandDecodingTasks(exceptionThrown);
 
-  bool wasExceptionThrown;
-#ifdef HAVE_OPENMP
-#pragma omp atomic read
-#endif
-  wasExceptionThrown = exceptionThrown;
-
   // Proceed only if decoding did not fail.
-  if (!wasExceptionThrown) {
+  if (!readValue(exceptionThrown)) {
     // And finally!
     combineFinalLowpassBands();
   }
