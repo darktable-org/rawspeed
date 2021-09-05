@@ -793,7 +793,8 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
 
   initVC5LogTable();
 
-  bool exceptionThrown = false;
+  alignas(RAWSPEED_CACHELINESIZE) bool exceptionThrown = false;
+
 #ifdef HAVE_OPENMP
 #pragma omp parallel default(none) shared(exceptionThrown)                     \
     num_threads(rawspeed_get_number_of_processor_cores())
