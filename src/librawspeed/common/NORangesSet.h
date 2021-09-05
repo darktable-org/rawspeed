@@ -35,7 +35,7 @@ template <typename T> struct RangesSortCmp final {
 template <typename T> class NORangesSet : public std::set<T, RangesSortCmp<T>>
 {
 public:
-    std::pair<std::set<T, RangesSortCmp<T>>::iterator, bool> emplace(const T& a)
+	std::pair<typename std::set<T, RangesSortCmp<T>>::iterator, bool> emplace(const T& a)
     {
         for (const auto& t : *this)
         {
