@@ -57,7 +57,8 @@ public:
   static Array2DRef<T>
   create(std::vector<cvless_value_type, AllocatorType>& storage, int width,
          int height) {
-    storage.resize(width * height);
+    using VectorTy = typename std::remove_reference<decltype(storage)>::type;
+    storage = VectorTy(width * height);
     return {storage.data(), width, height};
   }
 

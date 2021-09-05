@@ -59,8 +59,6 @@ jobs:
           apt-get clean;
           dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld;
           ln -s /usr/bin/ld.gold /usr/bin/ld;
-          ln -s /usr/bin/clang-12 /usr/local/bin/clang;
-          ln -s /usr/bin/clang++-12 /usr/local/bin/clang++;
       - uses: actions/checkout@v2
         name: Fetch/Checkout RawSpeed git repo
         with:
@@ -133,8 +131,6 @@ jobs:
         name: Fetch/Checkout RawSpeed git repo
       - name: Install Base Dependencies
         run: |
-          # https://github.com/actions/virtual-environments/issues/2322#issuecomment-749211076
-          rm -rf /usr/local/bin/2to3
           brew update > /dev/null || true
           brew tap Homebrew/bundle
           cd .ci

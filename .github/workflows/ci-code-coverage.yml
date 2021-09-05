@@ -43,7 +43,6 @@ jobs:
           apt-get upgrade;
           apt-get install ca-certificates \
                           cmake \
-                          curl \
                           g++-11 \
                           gcc \
                           gcc-11 \
@@ -99,19 +98,34 @@ jobs:
           cmake -E make_directory "${INSTALL_PREFIX}";
           export ECO="${ECO} -DRAWSPEED_REFERENCE_SAMPLE_ARCHIVE=${RPUU_DST}";
           "${SRC_DIR}/.ci/ci-script.sh";
-      - name: Upload code coverage report
+      - name: Upload coverage to Codecov (unit tests)
+        uses: codecov/codecov-action@v2
         env:
           OS: linux
           ARCH: x86_64
           CXX: ${{ matrix.compiler.compiler }}
           JOB_NAME: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
-          SRC_DIR: ${{ github.workspace }}
-          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
-        run: |
-          curl -s https://codecov.io/bash > codecov;
-          chmod +x codecov;
-          ./codecov -e OS,ARCH,CXX -F unittests -n "${JOB_NAME}.Unittests" -R "${SRC_DIR}" -s "${BUILD_DIR}/gcov-reports-unittest" -X gcov -Z;
-          ./codecov -e OS,ARCH,CXX -F integration,rpu_u -n "${JOB_NAME}.Integration" -R "${SRC_DIR}" -s "${BUILD_DIR}/gcov-reports-rsa" -X gcov -Z;
+        with:
+          env_vars: OS,ARCH,CXX
+          flags: unittests
+          name: ${JOB_NAME}.Unittests
+          root_dir: ${{ github.workspace }}
+          directory: ${{ github.workspace }}/../rawspeed-build/gcov-reports-unittest
+          fail_ci_if_error: true
+      - name: Upload coverage to Codecov (integration)
+        uses: codecov/codecov-action@v2
+        env:
+          OS: linux
+          ARCH: x86_64
+          CXX: ${{ matrix.compiler.compiler }}
+          JOB_NAME: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
+        with:
+          env_vars: OS,ARCH,CXX
+          flags: integration,rpu_u
+          name: ${JOB_NAME}.Integration
+          root_dir: ${{ github.workspace }}
+          directory: ${{ github.workspace }}/../rawspeed-build/gcov-reports-rsa
+          fail_ci_if_error: true
   windows-msys2:
     name: ${{ matrix.os }}.${{ matrix.msys2.msystem }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
     runs-on: ${{ matrix.os }}
@@ -133,7 +147,7 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ matrix.msys2.msystem }}
-          install: pacman-mirrors bash curl git base-devel mingw-w64-${{ matrix.msys2.arch }}-toolchain mingw-w64-${{ matrix.msys2.arch }}-gcc mingw-w64-${{ matrix.msys2.arch }}-cmake mingw-w64-${{ matrix.msys2.arch }}-ninja mingw-w64-${{ matrix.msys2.arch }}-libxml2 mingw-w64-${{ matrix.msys2.arch }}-pugixml mingw-w64-${{ matrix.msys2.arch }}-libjpeg-turbo mingw-w64-${{ matrix.msys2.arch }}-zlib
+          install: pacman-mirrors bash git base-devel mingw-w64-${{ matrix.msys2.arch }}-toolchain mingw-w64-${{ matrix.msys2.arch }}-gcc mingw-w64-${{ matrix.msys2.arch }}-cmake mingw-w64-${{ matrix.msys2.arch }}-ninja mingw-w64-${{ matrix.msys2.arch }}-libxml2 mingw-w64-${{ matrix.msys2.arch }}-pugixml mingw-w64-${{ matrix.msys2.arch }}-libjpeg-turbo mingw-w64-${{ matrix.msys2.arch }}-zlib
           update: true
       - name: Build And Test
         env:
@@ -149,18 +163,20 @@ jobs:
           cmake -E make_directory "${BUILD_DIR}";
           cmake -E make_directory "${INSTALL_PREFIX}";
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh;
-      - name: Upload code coverage report
+      - name: Upload coverage to Codecov (unit tests)
+        uses: codecov/codecov-action@v2
         env:
           OS: windows
           ARCH: ${{ matrix.msys2.arch }}
           CXX: ${{ matrix.compiler.compiler }}
           JOB_NAME: ${{ matrix.os }}.${{ matrix.msys2.msystem }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
-          SRC_DIR: ${{ github.workspace }}
-          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
-        run: |
-          curl -s https://codecov.io/bash > codecov;
-          chmod +x codecov;
-          ./codecov -e OS,ARCH,CXX -F unittests -n "${JOB_NAME}.Unittests" -R "$(cygpath ${SRC_DIR})" -s "$(cygpath ${BUILD_DIR})/gcov-reports-unittest" -X gcov -Z;
+        with:
+          env_vars: OS,ARCH,CXX
+          flags: unittests
+          name: ${JOB_NAME}.Unittests
+          root_dir: ${{ github.workspace }}
+          directory: ${{ github.workspace }}\..\rawspeed-build\gcov-reports-unittest
+          fail_ci_if_error: true
   macOS:
     name: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
     runs-on: ${{ matrix.os }}
@@ -176,8 +192,6 @@ jobs:
         name: Fetch/Checkout RawSpeed git repo
       - name: Install Base Dependencies
         run: |
-          # https://github.com/actions/virtual-environments/issues/2322#issuecomment-749211076
-          rm -rf /usr/local/bin/2to3
           brew update > /dev/null || true
           brew tap Homebrew/bundle
           cd .ci
@@ -196,15 +210,17 @@ jobs:
           cmake -E make_directory "${BUILD_DIR}";
           cmake -E make_directory "${INSTALL_PREFIX}";
           ./.ci/ci-script.sh;
-      - name: Upload code coverage report
+      - name: Upload coverage to Codecov (unit tests)
+        uses: codecov/codecov-action@v2
         env:
           OS: macOS
           ARCH: x86_64
           CXX: AppleXcode
           JOB_NAME: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
-          SRC_DIR: ${{ github.workspace }}
-          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
-        run: |
-          curl -s https://codecov.io/bash > codecov;
-          chmod +x codecov;
-          ./codecov -e OS,ARCH,CXX -F unittests -n "${JOB_NAME}.Unittests" -R "${SRC_DIR}" -s "${BUILD_DIR}/gcov-reports-unittest" -X gcov -Z;
+        with:
+          env_vars: OS,ARCH,CXX
+          flags: unittests
+          name: ${JOB_NAME}.Unittests
+          root_dir: ${{ github.workspace }}
+          directory: ${{ github.workspace }}/../rawspeed-build/gcov-reports-unittest
+          fail_ci_if_error: true

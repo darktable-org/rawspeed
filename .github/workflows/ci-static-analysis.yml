@@ -15,7 +15,7 @@ jobs:
       matrix:
         os: [ linux ]
         compiler:
-          - { compiler: LLVM12, CC: clang-12, CXX: clang++-12 }
+          - { compiler: LLVM12, CC: clang-12, CXX: clang++-12, CLANG_TIDY: clang-tidy-12 }
         flavor: [ ClangStaticAnalysis, CodeQLAnalysis ]
     container: debian:unstable-slim
     steps:
@@ -57,9 +57,6 @@ jobs:
           ln -s /usr/bin/ld.gold /usr/bin/ld;
           ln -s /usr/bin/clang-12 /usr/local/bin/clang;
           ln -s /usr/bin/clang++-12 /usr/local/bin/clang++;
-          ln -s /usr/bin/clang-tidy-12 /usr/local/bin/clang-tidy
-          ln -s /usr/local/bin/clang /usr/local/bin/gcc;
-          ln -s /usr/local/bin/clang++ /usr/local/bin/g++;
       - uses: actions/checkout@v2
         name: Fetch/Checkout RawSpeed git repo
         with:
@@ -110,6 +107,7 @@ jobs:
         env:
           CC: ${{ matrix.compiler.CC }}
           CXX: ${{ matrix.compiler.CXX }}
+          CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
           SRC_DIR: ${{ github.workspace }}
           BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/../rawspeed-install
@@ -128,6 +126,8 @@ jobs:
         env:
           SRC_DIR: ${{ github.workspace }}
           BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
+          CC: ${{ matrix.compiler.CC }}
+          CXX: ${{ matrix.compiler.CXX }}
         run: |
           . "$PWD/../codechecker/venv/bin/activate"
           export PATH="$PWD/../codechecker/build/CodeChecker/bin:$PATH"

@@ -160,9 +160,14 @@ struct ConvolutionParams {
 
 } // namespace
 
-void VC5Decompressor::Wavelet::reconstructPass(
-    const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> high,
+VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
+    const Array2DRef<const int16_t> high,
     const Array2DRef<const int16_t> low) noexcept {
+  BandData combined;
+  auto& dst = combined.description;
+  dst = Array2DRef<int16_t>::create(combined.storage, high.width,
+                                    2 * high.height);
+
   auto process = [low, high, dst](auto segment, int row, int col) {
     using SegmentTy = decltype(segment);
     auto lowGetter = [&row, &col, low](int delta) {
@@ -202,12 +207,19 @@ void VC5Decompressor::Wavelet::reconstructPass(
         process(ConvolutionParams::Last(), row, col);
     }
   }
+
+  return combined;
 }
 
-void VC5Decompressor::Wavelet::combineLowHighPass(
-    const Array2DRef<int16_t> dst, const Array2DRef<const int16_t> low,
-    const Array2DRef<const int16_t> high, int descaleShift,
-    bool clampUint = false, bool finalWavelet = false) noexcept {
+VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
+    const Array2DRef<const int16_t> low, const Array2DRef<const int16_t> high,
+    int descaleShift, bool clampUint = false,
+    bool finalWavelet = false) noexcept {
+  BandData combined;
+  auto& dst = combined.description;
+  dst = Array2DRef<int16_t>::create(combined.storage, 2 * high.width,
+                                    high.height);
+
   auto process = [low, high, descaleShift, clampUint, dst](auto segment,
                                                            int row, int col) {
     using SegmentTy = decltype(segment);
@@ -252,6 +264,8 @@ void VC5Decompressor::Wavelet::combineLowHighPass(
     // last col
     process(ConvolutionParams::Last(), row, col);
   }
+
+  return combined;
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
@@ -267,12 +281,12 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
                                      : lowpass)
 #endif
   {
-    lowpass.description = Array2DRef<int16_t>::create(
-        lowpass.storage, wavelet.width, 2 * wavelet.height);
-
+    assert(highlow.has_value() && lowlow.has_value() &&
+           "Failed to produce precursor bands?");
     // Reconstruct the "immediates", the actual low pass ...
-    Wavelet::reconstructPass(lowpass.description, highlow.description,
-                             lowlow.description);
+    assert(!lowpass.has_value() && "Combined this precursor band already?");
+    lowpass.emplace(
+        Wavelet::reconstructPass(highlow->description, lowlow->description));
   }
 }
 
@@ -289,11 +303,11 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
                                        : highpass)
 #endif
   {
-    highpass.description = Array2DRef<int16_t>::create(
-        highpass.storage, wavelet.width, 2 * wavelet.height);
-
-    Wavelet::reconstructPass(highpass.description, highhigh.description,
-                             lowhigh.description);
+    assert(highhigh.has_value() && lowhigh.has_value() &&
+           "Failed to produce precursor bands?");
+    assert(!highpass.has_value() && "Combined this precursor band already?");
+    highpass.emplace(
+        Wavelet::reconstructPass(highhigh->description, lowhigh->description));
   }
 }
 
@@ -315,22 +329,22 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
                                        : reconstructedLowpass)
 #endif
   {
+    assert(lowpass.has_value() && highpass.has_value() &&
+           "Failed to combine precursor bands?");
+    assert(!data.has_value() && "Reconstructed this band already?");
+
     int16_t descaleShift = (wavelet.prescale == 2 ? 2 : 0);
 
-    reconstructedLowpass.description = Array2DRef<int16_t>::create(
-        reconstructedLowpass.storage, 2 * wavelet.width, 2 * wavelet.height);
-
     // And finally, combine the low pass, and high pass.
-    Wavelet::combineLowHighPass(reconstructedLowpass.description,
-                                lowpass.description, highpass.description,
-                                descaleShift, clampUint, finalWavelet);
+    reconstructedLowpass.emplace(
+        Wavelet::combineLowHighPass(lowpass->description, highpass->description,
+                                    descaleShift, clampUint, finalWavelet));
   }
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::createDecodingTasks(
     ErrorLog& errLog, bool& exceptionThrow) noexcept {
   assert(wavelet.allBandsValid());
-  assert(data.storage.empty());
   createLowpassReconstructionTask();
   createHighpassReconstructionTask();
   createLowHighPassCombiningTask();
@@ -534,16 +548,17 @@ void VC5Decompressor::parseVC5() {
 
 void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
     ErrorLog& errLog, bool& exceptionThrown) noexcept {
-  [[maybe_unused]] auto& decodedData = data;
+  auto& decodedData = data;
 
 #ifdef HAVE_OPENMP
-#pragma omp task default(none) shared(errLog, exceptionThrown)                 \
+#pragma omp task default(none) shared(decodedData, errLog, exceptionThrown)    \
     depend(out                                                                 \
            : decodedData)
 #endif
   {
     try {
-      decode();
+      assert(!decodedData.has_value() && "Decoded this band already?");
+      decodedData = decode();
     } catch (RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       errLog.setError(err.what());
@@ -569,19 +584,24 @@ VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
   bs = bs.getStream(bytesTotal); // And clamp the size while we are at it.
 }
 
-void VC5Decompressor::Wavelet::LowPassBand::decode() noexcept {
-  auto& band = data.description;
-  band =
-      Array2DRef<int16_t>::create(data.storage, wavelet.width, wavelet.height);
+VC5Decompressor::BandData
+VC5Decompressor::Wavelet::LowPassBand::decode() const noexcept {
+  BandData lowpass;
+  auto& band = lowpass.description;
+  band = Array2DRef<int16_t>::create(lowpass.storage, wavelet.width,
+                                     wavelet.height);
 
   BitPumpMSB bits(bs);
   for (auto row = 0; row < band.height; ++row) {
     for (auto col = 0; col < band.width; ++col)
       band(row, col) = static_cast<int16_t>(bits.getBits(lowpassPrecision));
   }
+
+  return lowpass;
 }
 
-void VC5Decompressor::Wavelet::HighPassBand::decode() {
+VC5Decompressor::BandData
+VC5Decompressor::Wavelet::HighPassBand::decode() const {
   class DeRLVer final {
     BitPumpMSB bits;
     const int16_t quant;
@@ -627,13 +647,15 @@ void VC5Decompressor::Wavelet::HighPassBand::decode() {
 
   // decode highpass band
   DeRLVer d(bs, quant);
-  auto& band = data.description;
-  band =
-      Array2DRef<int16_t>::create(data.storage, wavelet.width, wavelet.height);
+  BandData highpass;
+  auto& band = highpass.description;
+  band = Array2DRef<int16_t>::create(highpass.storage, wavelet.width,
+                                     wavelet.height);
   for (int row = 0; row != wavelet.height; ++row)
     for (int col = 0; col != wavelet.width; ++col)
       band(row, col) = d.decode();
   d.verifyIsAtEnd();
+  return highpass;
 }
 
 void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
@@ -774,14 +796,20 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
   const int width = out.width / 2;
   const int height = out.height / 2;
 
+  assert(channels[0].wavelets[0].bands[0]->data.has_value() &&
+         channels[1].wavelets[0].bands[0]->data.has_value() &&
+         channels[2].wavelets[0].bands[0]->data.has_value() &&
+         channels[3].wavelets[0].bands[0]->data.has_value() &&
+         "Failed to reconstruct all final lowpass bands?");
+
   const Array2DRef<const int16_t> lowbands0 =
-      channels[0].wavelets[0].bands[0]->data.description;
+      channels[0].wavelets[0].bands[0]->data->description;
   const Array2DRef<const int16_t> lowbands1 =
-      channels[1].wavelets[0].bands[0]->data.description;
+      channels[1].wavelets[0].bands[0]->data->description;
   const Array2DRef<const int16_t> lowbands2 =
-      channels[2].wavelets[0].bands[0]->data.description;
+      channels[2].wavelets[0].bands[0]->data->description;
   const Array2DRef<const int16_t> lowbands3 =
-      channels[3].wavelets[0].bands[0]->data.description;
+      channels[3].wavelets[0].bands[0]->data->description;
 
   // Convert to RGGB output
 #ifdef HAVE_OPENMP
