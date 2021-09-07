@@ -56,10 +56,10 @@ using std::string;
 
 namespace rawspeed {
 
-TiffParser::TiffParser(const Buffer* file) : RawParser(file) {}
+TiffParser::TiffParser(const Buffer& file) : RawParser(file) {}
 
 std::unique_ptr<RawDecoder> TiffParser::getDecoder(const CameraMetaData* meta) {
-  return TiffParser::makeDecoder(TiffParser::parse(nullptr, *mInput), *mInput);
+  return TiffParser::makeDecoder(TiffParser::parse(nullptr, mInput), mInput);
 }
 
 TiffRootIFDOwner TiffParser::parse(TiffIFD* parent, const Buffer& data) {
@@ -87,7 +87,6 @@ TiffRootIFDOwner TiffParser::parse(TiffIFD* parent, const Buffer& data) {
 
 std::unique_ptr<RawDecoder> TiffParser::makeDecoder(TiffRootIFDOwner root,
                                                     const Buffer& data) {
-  const Buffer* mInput = &data;
   if (!root)
     ThrowTPE("TiffIFD is null.");
 
@@ -100,10 +99,10 @@ std::unique_ptr<RawDecoder> TiffParser::makeDecoder(TiffRootIFDOwner root,
     assert(dChecker);
     assert(dConstructor);
 
-    if (!dChecker(root.get(), mInput))
+    if (!dChecker(root.get(), data))
       continue;
 
-    return dConstructor(move(root), mInput);
+    return dConstructor(move(root), data);
   }
 
   ThrowTPE("No decoder found. Sorry.");
@@ -111,7 +110,7 @@ std::unique_ptr<RawDecoder> TiffParser::makeDecoder(TiffRootIFDOwner root,
 
 template <class Decoder>
 std::unique_ptr<RawDecoder> TiffParser::constructor(TiffRootIFDOwner&& root,
-                                                    const Buffer* data) {
+                                                    const Buffer& data) {
   return std::make_unique<Decoder>(std::move(root), data);
 }
 

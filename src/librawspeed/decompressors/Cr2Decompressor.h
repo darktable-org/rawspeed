@@ -49,11 +49,11 @@ public:
       ThrowRDE("Bad slice count: %u", numSlices);
   }
 
-  bool empty() const {
+  [[nodiscard]] bool empty() const {
     return 0 == numSlices && 0 == sliceWidth && 0 == lastSliceWidth;
   }
 
-  unsigned widthOfSlice(int sliceId) const {
+  [[nodiscard]] unsigned widthOfSlice(int sliceId) const {
     assert(sliceId >= 0);
     assert(sliceId < numSlices);
     if ((sliceId + 1) == numSlices)
@@ -61,7 +61,7 @@ public:
     return sliceWidth;
   }
 
-  unsigned totalWidth() const {
+  [[nodiscard]] unsigned totalWidth() const {
     int width = 0;
     for (auto sliceId = 0; sliceId < numSlices; sliceId++)
       width += widthOfSlice(sliceId);

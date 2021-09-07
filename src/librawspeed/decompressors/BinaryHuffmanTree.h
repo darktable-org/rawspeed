@@ -62,10 +62,11 @@ public:
     std::unique_ptr<Node> zero;
     std::unique_ptr<Node> one;
 
-    template <typename Lambda> bool forEachNode(Lambda l) const;
+    template <typename Lambda>
+    [[nodiscard]] [[nodiscard]] [[nodiscard]] bool forEachNode(Lambda l) const;
     template <typename Lambda> bool forEachNode(Lambda l);
 
-    bool hasLeafs() const;
+    [[nodiscard]] bool hasLeafs() const;
 
     static bool pruneLeaflessBranches(std::unique_ptr<Node>* n);
   };

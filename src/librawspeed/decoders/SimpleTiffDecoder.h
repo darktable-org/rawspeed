@@ -35,7 +35,7 @@ class SimpleTiffDecoder : public AbstractTiffDecoder {
   virtual void checkImageDimensions() {}
 
 public:
-  SimpleTiffDecoder(TiffRootIFDOwner&& root, const Buffer* file)
+  SimpleTiffDecoder(TiffRootIFDOwner&& root, const Buffer& file)
       : AbstractTiffDecoder(move(root), file) {}
 
   void prepareForRawDecoding();

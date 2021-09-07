@@ -35,15 +35,15 @@ class MosDecoder final : public AbstractTiffDecoder
 {
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer* file);
-  MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file);
+                                   const Buffer& file);
+  MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file);
 
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 protected:
-  int getDecoderVersion() const override { return 0; }
+  [[nodiscard]] int getDecoderVersion() const override { return 0; }
   std::string make, model;
   static std::string getXMPTag(const std::string& xmp, const std::string& tag);
 };

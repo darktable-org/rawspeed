@@ -35,8 +35,8 @@ class Cr2Decoder final : public AbstractTiffDecoder
 {
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer* file);
-  Cr2Decoder(TiffRootIFDOwner&& root, const Buffer* file)
+                                   const Buffer& file);
+  Cr2Decoder(TiffRootIFDOwner&& root, const Buffer& file)
       : AbstractTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;
@@ -44,12 +44,12 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 protected:
-  int getDecoderVersion() const override { return 9; }
+  [[nodiscard]] int getDecoderVersion() const override { return 9; }
   RawImage decodeOldFormat();
   RawImage decodeNewFormat();
   void sRawInterpolate();
-  bool isSubSampled() const;
-  iPoint2D getSubSampling() const;
+  [[nodiscard]] bool isSubSampled() const;
+  [[nodiscard]] iPoint2D getSubSampling() const;
   int getHue();
 };
 

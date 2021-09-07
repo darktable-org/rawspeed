@@ -98,10 +98,10 @@ void SamsungV0Decompressor::decompress() const {
   }
 }
 
-int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32* bits, int nbits) {
+int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32& bits, int nbits) {
   if (!nbits)
     return 0;
-  return signExtend(bits->getBits(nbits), nbits);
+  return signExtend(bits.getBits(nbits), nbits);
 }
 
 void SamsungV0Decompressor::decompressStrip(int row,
@@ -160,7 +160,7 @@ void SamsungV0Decompressor::decompressStrip(int row,
       // First we decode even pixels
       for (int c = 0; c < 16; c += 2) {
         int b = len[c >> 3];
-        int32_t adj = calcAdj(&bits, b);
+        int32_t adj = calcAdj(bits, b);
 
         out(row, col + c) = adj + out(row - 1, col + c);
       }
@@ -170,7 +170,7 @@ void SamsungV0Decompressor::decompressStrip(int row,
       // is beyond me, it will hurt compression a deal.
       for (int c = 1; c < 16; c += 2) {
         int b = len[2 | (c >> 3)];
-        int32_t adj = calcAdj(&bits, b);
+        int32_t adj = calcAdj(bits, b);
 
         out(row, col + c) = adj + out(row - 2, col + c);
       }
@@ -180,7 +180,7 @@ void SamsungV0Decompressor::decompressStrip(int row,
       int pred_left = col != 0 ? out(row, col - 2) : 128;
       for (int c = 0; c < 16; c += 2) {
         int b = len[c >> 3];
-        int32_t adj = calcAdj(&bits, b);
+        int32_t adj = calcAdj(bits, b);
 
         if (col + c < out.width)
           out(row, col + c) = adj + pred_left;
@@ -190,7 +190,7 @@ void SamsungV0Decompressor::decompressStrip(int row,
       pred_left = col != 0 ? out(row, col - 1) : 128;
       for (int c = 1; c < 16; c += 2) {
         int b = len[2 | (c >> 3)];
-        int32_t adj = calcAdj(&bits, b);
+        int32_t adj = calcAdj(bits, b);
 
         if (col + c < out.width)
           out(row, col + c) = adj + pred_left;

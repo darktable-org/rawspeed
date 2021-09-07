@@ -44,14 +44,14 @@ class MrwDecoder final : public RawDecoder {
   std::array<float, 4> wb_coeffs = {{NAN, NAN, NAN, NAN}};
 
 public:
-  explicit MrwDecoder(const Buffer* file);
+  explicit MrwDecoder(const Buffer& file);
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
-  static int isMRW(const Buffer* input);
+  static int isMRW(const Buffer& input);
 
 protected:
-  int getDecoderVersion() const override { return 0; }
+  [[nodiscard]] int getDecoderVersion() const override { return 0; }
   void parseHeader();
 };
 

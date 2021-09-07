@@ -37,17 +37,17 @@ class RafDecoder final : public AbstractTiffDecoder
 
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer* file);
-  RafDecoder(TiffRootIFDOwner&& root, const Buffer* file)
+                                   const Buffer& file);
+  RafDecoder(TiffRootIFDOwner&& root, const Buffer& file)
       : AbstractTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void checkSupportInternal(const CameraMetaData* meta) override;
-  static bool isRAF(const Buffer* input);
+  static bool isRAF(const Buffer& input);
 
 protected:
-  int getDecoderVersion() const override { return 1; }
+  [[nodiscard]] int getDecoderVersion() const override { return 1; }
 
 private:
   int isCompressed();

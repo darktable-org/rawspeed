@@ -43,7 +43,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool OrfDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+                                      const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -72,7 +72,7 @@ ByteStream OrfDecoder::handleSlices() const {
   for (uint32_t i = 0; i < counts->count; i++) {
     const auto offset = offsets->getU32(i);
     const auto count = counts->getU32(i);
-    if (!mFile->isValid(offset, count))
+    if (!mFile.isValid(offset, count))
       ThrowRDE("Truncated file");
 
     if (count < 1)

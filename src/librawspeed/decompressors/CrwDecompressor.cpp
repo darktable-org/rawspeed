@@ -53,7 +53,7 @@ CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   if (lowbits) {
-    // If there are low bits, the first part (size is calculatable) is low bits
+    // If there are low bits, the first part (size is calculable) is low bits
     // Each block is 4 pairs of 2 bits, so we have 1 block per 4 pixels
     const unsigned lBlocks = 1 * height * width / 4;
     assert(lBlocks > 0);
@@ -163,15 +163,14 @@ CrwDecompressor::crw_hts CrwDecompressor::initHuffTables(uint32_t table) {
 
 inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
                                          const crw_hts& mHuff,
-                                         BitPumpJPEG* bs) {
+                                         BitPumpJPEG& bs) {
   assert(diffBuf);
-  assert(bs);
 
   // decode the block
   for (int i = 0; i < 64; i++) {
-    bs->fill(32);
+    bs.fill(32);
 
-    const uint8_t codeValue = mHuff[i > 0].decodeCodeValue(*bs);
+    const uint8_t codeValue = mHuff[i > 0].decodeCodeValue(bs);
     const int len = codeValue & 0b1111;
     const int index = codeValue >> 4;
     assert(len >= 0 && index >= 0);
@@ -187,7 +186,7 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
     if (len == 0)
       continue;
 
-    int diff = bs->getBitsNoFill(len);
+    int diff = bs.getBitsNoFill(len);
 
     if (i >= 64)
       break;
@@ -222,7 +221,7 @@ void CrwDecompressor::decompress() {
 
     for (unsigned block = 0; block < hBlocks; block++) {
       array<int16_t, 64> diffBuf = {{}};
-      decodeBlock(&diffBuf, mHuff, &bs);
+      decodeBlock(&diffBuf, mHuff, bs);
 
       // predict and output the block
 

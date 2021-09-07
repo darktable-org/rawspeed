@@ -53,12 +53,12 @@ public:
 
 private:
   static const std::array<std::array<std::array<uint8_t, 16>, 2>, 6> nikon_tree;
-  static std::vector<uint16_t> createCurve(ByteStream* metadata,
+  static std::vector<uint16_t> createCurve(ByteStream& metadata,
                                            uint32_t bitsPS, uint32_t v0,
                                            uint32_t v1, uint32_t* split);
 
   template <typename Huffman>
-  void decompress(BitPumpMSB* bits, int start_y, int end_y);
+  void decompress(BitPumpMSB& bits, int start_y, int end_y);
 
   template <typename Huffman>
   static Huffman createHuffmanTable(uint32_t huffSelect);

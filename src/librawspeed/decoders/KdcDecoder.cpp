@@ -42,7 +42,7 @@
 namespace rawspeed {
 
 bool KdcDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+                                      const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -65,7 +65,7 @@ Buffer KdcDecoder::getInputBuffer() {
   if (hints.has("easyshare_offset_hack"))
     off = off < 0x15000 ? 0x15000 : 0x17000;
 
-  if (off > mFile->getSize())
+  if (off > mFile.getSize())
     ThrowRDE("offset is out of bounds");
 
   const auto area = mRaw->dim.area();
@@ -77,7 +77,7 @@ Buffer KdcDecoder::getInputBuffer() {
     ThrowRDE("Bad combination of image dims and bpp, bit count %% 8 != 0");
   const auto bytes = bits / 8;
 
-  return mFile->getSubView(off, bytes);
+  return mFile.getSubView(off, bytes);
 }
 
 RawImage KdcDecoder::decodeRawInternal() {

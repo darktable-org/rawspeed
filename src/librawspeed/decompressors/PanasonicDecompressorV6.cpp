@@ -35,9 +35,6 @@
 
 namespace rawspeed {
 
-constexpr int PanasonicDecompressorV6::PixelsPerBlock;
-constexpr int PanasonicDecompressorV6::BytesPerBlock;
-
 namespace {
 struct pana_cs6_page_decoder {
   std::array<uint16_t, 14> pixelbuffer;
@@ -116,12 +113,12 @@ PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
 
 inline void __attribute__((always_inline))
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
-PanasonicDecompressorV6::decompressBlock(ByteStream* rowInput, int row,
+PanasonicDecompressorV6::decompressBlock(ByteStream& rowInput, int row,
                                          int col) const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   pana_cs6_page_decoder page(
-      rowInput->getStream(PanasonicDecompressorV6::BytesPerBlock));
+      rowInput.getStream(PanasonicDecompressorV6::BytesPerBlock));
 
   std::array<unsigned, 2> oddeven = {0, 0};
   std::array<unsigned, 2> nonzero = {0, 0};
@@ -169,7 +166,7 @@ void PanasonicDecompressorV6::decompressRow(int row) const noexcept {
   ByteStream rowInput = input.getSubStream(bytesPerRow * row, bytesPerRow);
   for (int rblock = 0, col = 0; rblock < blocksperrow;
        rblock++, col += PanasonicDecompressorV6::PixelsPerBlock)
-    decompressBlock(&rowInput, row, col);
+    decompressBlock(rowInput, row, col);
 }
 
 void PanasonicDecompressorV6::decompress() const {

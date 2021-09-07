@@ -230,32 +230,4 @@ enum BitOrder {
   BitOrder_MSB32, /* Same as above, but 32 bits at the time */
 };
 
-// little 'forced' loop unrolling helper tool, example:
-//   unroll_loop<N>([&](int i) {
-//     func(i);
-//   });
-// will translate to:
-//   func(0); func(1); func(2); ... func(N-1);
-
-template <typename Lambda, size_t N>
-struct unroll_loop_t {
-  inline static void repeat(const Lambda& f) {
-    unroll_loop_t<Lambda, N-1>::repeat(f);
-    f(N-1);
-  }
-};
-
-template <typename Lambda>
-struct unroll_loop_t<Lambda, 0> {
-  inline static void repeat(const Lambda& f) {
-    // this method is correctly empty.
-    // only needed as part of compile time 'manual' branch unrolling
-  }
-};
-
-template <size_t N, typename Lambda>
-inline void unroll_loop(const Lambda& f) {
-  unroll_loop_t<Lambda, N>::repeat(f);
-}
-
 } // namespace rawspeed

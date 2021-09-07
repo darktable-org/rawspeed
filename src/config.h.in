@@ -26,6 +26,12 @@
 /* #undef WITH_SSE2 */
 #endif
 
+static constexpr const auto RAWSPEED_CACHELINESIZE = @RAWSPEED_CACHELINESIZE@ULL;
+static_assert(RAWSPEED_CACHELINESIZE > 0 && ((RAWSPEED_CACHELINESIZE & (RAWSPEED_CACHELINESIZE - 1)) == 0), "Expected to know CPU L1d cache line size.");
+
+static constexpr const auto RAWSPEED_PAGESIZE = @RAWSPEED_PAGESIZE@ULL;
+static_assert(RAWSPEED_PAGESIZE > 0 && ((RAWSPEED_PAGESIZE & (RAWSPEED_PAGESIZE - 1)) == 0), "Expected to know (minimal) CPU page size.");
+
 #cmakedefine HAVE_PUGIXML
 
 #cmakedefine HAVE_OPENMP
@@ -40,11 +46,10 @@
 #cmakedefine HAVE_CXX_THREAD_LOCAL
 #cmakedefine HAVE_GCC_THREAD_LOCAL
 
-// which aligned memory allocation function is available, if any?
+// which aligned memory allocation function is available?
 // only the first one found will be enabled
-#cmakedefine HAVE_POSIX_MEMALIGN
 #cmakedefine HAVE_ALIGNED_ALLOC
-#cmakedefine HAVE_MM_MALLOC
+#cmakedefine HAVE_POSIX_MEMALIGN
 #cmakedefine HAVE_ALIGNED_MALLOC
 
 #cmakedefine RAWSPEED_STANDALONE_BUILD
@@ -55,20 +60,7 @@
 // the RAWSPEED_SOURCE_DIR, because that would affect the reproducible builds.
 #endif
 
-#undef OPENMP_FIRSTPRIVATE_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES
-#undef OPENMP_SHARED_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES
-
 #ifdef HAVE_OPENMP
-#cmakedefine OPENMP_FIRSTPRIVATE_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES
-#ifdef OPENMP_FIRSTPRIVATE_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES
-// See https://bugs.llvm.org/show_bug.cgi?id=35873
-//     https://redmine.darktable.org/issues/12568
-#define OMPFIRSTPRIVATECLAUSE(...)
-#else
-#define OMPFIRSTPRIVATECLAUSE(...) firstprivate(__VA_ARGS__)
-#endif
-#undef OPENMP_FIRSTPRIVATE_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES
-
 #cmakedefine OPENMP_SHARED_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES
 #ifdef OPENMP_SHARED_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES
 // See https://godbolt.org/z/AiyuX9

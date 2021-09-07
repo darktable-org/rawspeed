@@ -48,11 +48,11 @@ class OlympusDecompressor final : public AbstractDecompressor {
   }};
 
   inline __attribute__((always_inline)) int
-  parseCarry(BitPumpMSB* bits, std::array<int, 3>* carry) const;
+  parseCarry(BitPumpMSB& bits, std::array<int, 3>* carry) const;
 
   static inline int getPred(Array2DRef<uint16_t> out, int row, int col);
 
-  void decompressRow(BitPumpMSB* bits, int row) const;
+  void decompressRow(BitPumpMSB& bits, int row) const;
 
 public:
   explicit OlympusDecompressor(const RawImage& img);

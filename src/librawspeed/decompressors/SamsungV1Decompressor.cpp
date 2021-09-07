@@ -41,7 +41,7 @@ struct SamsungV1Decompressor::encTableItem {
 };
 
 SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
-                                             const ByteStream* bs_, int bit)
+                                             const ByteStream& bs_, int bit)
     : AbstractSamsungDecompressor(image), bs(bs_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
@@ -63,18 +63,18 @@ SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
 }
 
 inline int32_t
-SamsungV1Decompressor::samsungDiff(BitPumpMSB* pump,
+SamsungV1Decompressor::samsungDiff(BitPumpMSB& pump,
                                    const std::vector<encTableItem>& tbl) {
-  pump->fill(23); // That is the maximal number of bits we will need here.
+  pump.fill(23); // That is the maximal number of bits we will need here.
   // We read 10 bits to index into our table
-  uint32_t c = pump->peekBitsNoFill(10);
+  uint32_t c = pump.peekBitsNoFill(10);
   // Skip the bits that were used to encode this case
-  pump->skipBitsNoFill(tbl[c].encLen);
+  pump.skipBitsNoFill(tbl[c].encLen);
   // Read the number of bits the table tells me
   int32_t len = tbl[c].diffLen;
   if (len == 0)
     return 0;
-  int32_t diff = pump->getBitsNoFill(len);
+  int32_t diff = pump.getBitsNoFill(len);
   // If the first bit is 0 we need to turn this into a negative number
   diff = HuffmanTable::extend(diff, len);
   return diff;
@@ -122,14 +122,14 @@ void SamsungV1Decompressor::decompress() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   assert(out.width % 32 == 0 && "Should have even count of pixels per row.");
   assert(out.height % 2 == 0 && "Should have even row count.");
-  BitPumpMSB pump(*bs);
+  BitPumpMSB pump(bs);
   for (int row = 0; row < out.height; row++) {
     std::array<int, 2> pred = {{}};
     if (row >= 2)
       pred = {out(row - 2, 0), out(row - 2, 1)};
 
     for (int col = 0; col < out.width; col++) {
-      int32_t diff = samsungDiff(&pump, tbl);
+      int32_t diff = samsungDiff(pump, tbl);
       pred[col & 1] += diff;
 
       int value = pred[col & 1];

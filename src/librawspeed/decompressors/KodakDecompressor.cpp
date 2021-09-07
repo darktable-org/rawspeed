@@ -36,8 +36,6 @@
 
 namespace rawspeed {
 
-constexpr int KodakDecompressor::segment_size;
-
 KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
                                      int bps_, bool uncorrectedRawValues_)
     : mRaw(img), input(std::move(bs)), bps(bps_),
@@ -56,7 +54,7 @@ KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
 
   // Lower estimate: this decompressor requires *at least* half a byte
   // per output pixel
-  input.check(mRaw->dim.area() / 2ULL);
+  (void)input.check(mRaw->dim.area() / 2ULL);
 }
 
 KodakDecompressor::segment

@@ -64,9 +64,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     // ATM do not care if this is the appropriate decoder.
     // only check that the check does not crash.
-    (void)DECODER::isAppropriateDecoder(ifd.get(), &buffer);
+    (void)DECODER::isAppropriateDecoder(ifd.get(), buffer);
 
-    auto decoder = std::make_unique<DECODER>(std::move(ifd), &buffer);
+    auto decoder = std::make_unique<DECODER>(std::move(ifd), buffer);
 
     decoder->applyCrop = false;
     decoder->interpolateBadPixels = false;

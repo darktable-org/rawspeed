@@ -75,7 +75,7 @@ class CiffIFD final {
   void add(std::unique_ptr<CiffEntry> entry);
 
   void parseIFDEntry(NORangesSet<Buffer>* valueDatas,
-                     const ByteStream* valueData, ByteStream* dirEntries);
+                     const ByteStream& valueData, ByteStream& dirEntries);
 
   template <typename Lambda>
   std::vector<const CiffIFD*> __attribute__((pure))
@@ -89,21 +89,23 @@ public:
   explicit CiffIFD(CiffIFD* parent);
   CiffIFD(CiffIFD* parent, ByteStream directory);
 
-  std::vector<const CiffIFD*> __attribute__((pure))
+  [[nodiscard]] std::vector<const CiffIFD*> __attribute__((pure))
   getIFDsWithTag(CiffTag tag) const;
-  std::vector<const CiffIFD*> __attribute__((pure))
+  [[nodiscard]] std::vector<const CiffIFD*> __attribute__((pure))
   getIFDsWithTagWhere(CiffTag tag, uint32_t isValue) const;
-  std::vector<const CiffIFD*> __attribute__((pure))
+  [[nodiscard]] std::vector<const CiffIFD*> __attribute__((pure))
   getIFDsWithTagWhere(CiffTag tag, const std::string& isValue) const;
 
-  bool __attribute__((pure)) hasEntry(CiffTag tag) const;
-  bool __attribute__((pure)) hasEntryRecursive(CiffTag tag) const;
+  [[nodiscard]] bool __attribute__((pure)) hasEntry(CiffTag tag) const;
+  [[nodiscard]] bool __attribute__((pure)) hasEntryRecursive(CiffTag tag) const;
 
-  const CiffEntry* __attribute__((pure)) getEntry(CiffTag tag) const;
-  const CiffEntry* __attribute__((pure)) getEntryRecursive(CiffTag tag) const;
-  const CiffEntry* __attribute__((pure))
+  [[nodiscard]] const CiffEntry* __attribute__((pure))
+  getEntry(CiffTag tag) const;
+  [[nodiscard]] const CiffEntry* __attribute__((pure))
+  getEntryRecursive(CiffTag tag) const;
+  [[nodiscard]] const CiffEntry* __attribute__((pure))
   getEntryRecursiveWhere(CiffTag tag, uint32_t isValue) const;
-  const CiffEntry* __attribute__((pure))
+  [[nodiscard]] const CiffEntry* __attribute__((pure))
   getEntryRecursiveWhere(CiffTag tag, const std::string& isValue) const;
 };
 

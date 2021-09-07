@@ -57,19 +57,19 @@ TEST(SplineDeathTest, AtLeastTwoPoints) {
   ASSERT_DEATH(
       {
         Spline<> s({});
-        s.calculateCurve();
+        (void)s.calculateCurve();
       },
       "at least two points");
   ASSERT_DEATH(
       {
         Spline<> s({{0, 0}});
-        s.calculateCurve();
+        (void)s.calculateCurve();
       },
       "at least two points");
   ASSERT_EXIT(
       {
         Spline<> s({{0, {}}, {65535, {}}});
-        s.calculateCurve();
+        (void)s.calculateCurve();
         exit(0);
       },
       ::testing::ExitedWithCode(0), "");
@@ -79,13 +79,13 @@ TEST(SplineDeathTest, XIsFullRange) {
   ASSERT_DEATH(
       {
         Spline<> s({{1, {}}, {65535, {}}});
-        s.calculateCurve();
+        (void)s.calculateCurve();
       },
       "front.*0");
   ASSERT_DEATH(
       {
         Spline<> s({{0, {}}, {65534, {}}});
-        s.calculateCurve();
+        (void)s.calculateCurve();
       },
       "back.*65535");
 }
@@ -94,13 +94,13 @@ TEST(SplineDeathTest, YIsLimited) {
   ASSERT_DEATH(
       {
         Spline<> s({{0, {}}, {32767, -1}, {65535, {}}});
-        s.calculateCurve();
+        (void)s.calculateCurve();
       },
       "y >= .*min");
   ASSERT_DEATH(
       {
         Spline<> s({{0, {}}, {32767, 65536}, {65535, {}}});
-        s.calculateCurve();
+        (void)s.calculateCurve();
       },
       "y <= .*max");
 }
@@ -109,25 +109,25 @@ TEST(SplineDeathTest, XIsStrictlyIncreasing) {
   ASSERT_DEATH(
       {
         Spline<> s({{0, {}}, {0, {}}, {65535, {}}});
-        s.calculateCurve();
+        (void)s.calculateCurve();
       },
       "strictly increasing");
   ASSERT_DEATH(
       {
         Spline<> s({{0, {}}, {32767, {}}, {32767, {}}, {65535, {}}});
-        s.calculateCurve();
+        (void)s.calculateCurve();
       },
       "strictly increasing");
   ASSERT_DEATH(
       {
         Spline<> s({{0, {}}, {65535, {}}, {65535, {}}});
-        s.calculateCurve();
+        (void)s.calculateCurve();
       },
       "strictly increasing");
   ASSERT_DEATH(
       {
         Spline<> s({{0, {}}, {32767, {}}, {32766, {}}, {65535, {}}});
-        s.calculateCurve();
+        (void)s.calculateCurve();
       },
       "strictly increasing");
 }
@@ -145,7 +145,7 @@ TEST(SplineDeathTest, ClampUshort16Min) {
                     {32768, 0},
                     {57088, 0},
                     {65535, 65535}});
-        s.calculateCurve();
+        (void)s.calculateCurve();
         // for x = 484, this used to compute -1.0046832758220527,
         // which is unrepresentable in uint16_t.
         exit(0);
@@ -164,7 +164,7 @@ TEST(SplineDeathTest, ClampUshort16Max) {
                     {32768, 0},
                     {57088, 0},
                     {65535, 65535}});
-        s.calculateCurve();
+        (void)s.calculateCurve();
         // for x = 65535, this used to compute 65535.000000000007,
         // which is unrepresentable in uint16_t.
         exit(0);

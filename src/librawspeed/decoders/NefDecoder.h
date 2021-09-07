@@ -41,8 +41,8 @@ class NefDecoder final : public AbstractTiffDecoder
 {
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer* file);
-  NefDecoder(TiffRootIFDOwner&& root, const Buffer* file)
+                                   const Buffer& file);
+  NefDecoder(TiffRootIFDOwner&& root, const Buffer& file)
       : AbstractTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;
@@ -53,7 +53,7 @@ protected:
   struct NefSlice final : RawSlice {};
 
 private:
-  int getDecoderVersion() const override { return 5; }
+  [[nodiscard]] int getDecoderVersion() const override { return 5; }
   bool D100IsCompressed(uint32_t offset);
   static bool NEFIsUncompressed(const TiffIFD* raw);
   static bool NEFIsUncompressedRGB(const TiffIFD* raw);

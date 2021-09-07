@@ -41,7 +41,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool ThreefrDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                          const Buffer* file) {
+                                          const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -57,7 +57,7 @@ RawImage ThreefrDecoder::decodeRawInternal() {
   uint32_t off = raw->getEntry(STRIPOFFSETS)->getU32();
   // STRIPBYTECOUNTS is strange/invalid for the existing 3FR samples...
 
-  const ByteStream bs(DataBuffer(mFile->getSubView(off), Endianness::little));
+  const ByteStream bs(DataBuffer(mFile.getSubView(off), Endianness::little));
 
   mRaw->dim = iPoint2D(width, height);
 

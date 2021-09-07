@@ -50,10 +50,10 @@ HasselbladDecompressor::HasselbladDecompressor(const ByteStream& bs,
 
 // Returns len bits as a signed value.
 // Highest bit is a sign bit
-inline int HasselbladDecompressor::getBits(BitPumpMSB32* bs, int len) {
+inline int HasselbladDecompressor::getBits(BitPumpMSB32& bs, int len) {
   if (!len)
     return 0;
-  int diff = bs->getBits(len);
+  int diff = bs.getBits(len);
   diff = HuffmanTable::extend(diff, len);
   if (diff == 65535)
     return -32768;
@@ -85,8 +85,8 @@ void HasselbladDecompressor::decodeScan() {
     for (int col = 0; col < out.width; col += 2) {
       int len1 = ht[0]->decodeCodeValue(bitStream);
       int len2 = ht[0]->decodeCodeValue(bitStream);
-      p1 += getBits(&bitStream, len1);
-      p2 += getBits(&bitStream, len2);
+      p1 += getBits(bitStream, len1);
+      p2 += getBits(bitStream, len2);
       // NOTE: this is rather unusual and weird, but appears to be correct.
       // clampBits(p, 16) results in completely garbled images.
       out(row, col) = uint16_t(p1);

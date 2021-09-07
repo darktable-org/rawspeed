@@ -46,16 +46,16 @@
 
 namespace rawspeed {
 
-bool RafDecoder::isRAF(const Buffer* input) {
+bool RafDecoder::isRAF(const Buffer& input) {
   static const std::array<char, 16> magic = {{'F', 'U', 'J', 'I', 'F', 'I', 'L',
                                               'M', 'C', 'C', 'D', '-', 'R', 'A',
                                               'W', ' '}};
-  const unsigned char* data = input->getData(0, magic.size());
+  const unsigned char* data = input.getData(0, magic.size());
   return 0 == memcmp(data, magic.data(), magic.size());
 }
 
 bool RafDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+                                      const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -242,12 +242,10 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     rotated->metadata = mRaw->metadata;
     rotated->metadata.fujiRotationPos = rotationPos;
 
-    int dest_pitch = static_cast<int>(rotated->pitch) / 2;
-    auto* dst = reinterpret_cast<uint16_t*>(rotated->getData(0, 0));
+    auto srcImg = mRaw->getU16DataAsUncroppedArray2DRef();
+    auto dstImg = rotated->getU16DataAsUncroppedArray2DRef();
 
     for (int y = 0; y < new_size.y; y++) {
-      auto* src = reinterpret_cast<uint16_t*>(
-          mRaw->getData(crop_offset.x, crop_offset.y + y));
       for (int x = 0; x < new_size.x; x++) {
         int h;
         int w;
@@ -259,7 +257,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           w = ((y+1) >> 1) + x;
         }
         if (h < rotated->dim.y && w < rotated->dim.x)
-          dst[w + h * dest_pitch] = src[x];
+          dstImg(h, w) = srcImg(crop_offset.y + y, crop_offset.x + x);
         else
           ThrowRDE("Trying to write out of bounds");
       }

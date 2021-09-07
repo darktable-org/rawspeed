@@ -29,14 +29,12 @@
 #include <cstdint>                     // for uint32_t
 #include <limits>                      // for numeric_limits
 
-rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs) {
-  assert(bs);
-
-  const uint32_t width = bs->getU32();
-  const uint32_t height = bs->getU32();
-  const uint32_t type = bs->getU32();
-  const uint32_t cpp = bs->getU32();
-  const uint32_t isCFA = bs->getU32();
+rawspeed::RawImage CreateRawImage(rawspeed::ByteStream& bs) {
+  const uint32_t width = bs.getU32();
+  const uint32_t height = bs.getU32();
+  const uint32_t type = bs.getU32();
+  const uint32_t cpp = bs.getU32();
+  const uint32_t isCFA = bs.getU32();
 
   if (type != rawspeed::TYPE_USHORT16 && type != rawspeed::TYPE_FLOAT32)
     ThrowRSE("Unknown image type: %u", type);
@@ -53,24 +51,22 @@ rawspeed::RawImage CreateRawImage(rawspeed::ByteStream* bs) {
   return mRaw;
 }
 
-rawspeed::ColorFilterArray CreateCFA(rawspeed::ByteStream* bs) {
-  assert(bs);
-
-  const uint32_t cfaWidth = bs->getU32();
-  const uint32_t cfaHeight = bs->getU32();
+rawspeed::ColorFilterArray CreateCFA(rawspeed::ByteStream& bs) {
+  const uint32_t cfaWidth = bs.getU32();
+  const uint32_t cfaHeight = bs.getU32();
 
   rawspeed::ColorFilterArray cfa;
 
   if (cfaHeight &&
       cfaWidth > std::numeric_limits<decltype(cfaWidth)>::max() / cfaHeight)
     ThrowIOE("Integer overflow when calculating CFA area");
-  bs->check(cfaWidth * cfaHeight, 4);
+  (void)bs.check(cfaWidth * cfaHeight, 4);
 
   cfa.setSize(rawspeed::iPoint2D(cfaWidth, cfaHeight));
 
   for (auto x = 0U; x < cfaWidth; x++) {
     for (auto y = 0U; y < cfaHeight; y++) {
-      const uint32_t color = bs->getU32();
+      const uint32_t color = bs.getU32();
       if (color >= static_cast<uint32_t>(rawspeed::CFA_END))
         ThrowRSE("Unknown color: %u", color);
 

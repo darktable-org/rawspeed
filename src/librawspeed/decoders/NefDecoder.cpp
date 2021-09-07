@@ -54,7 +54,7 @@ using std::ostringstream;
 namespace rawspeed {
 
 bool NefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+                                      const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -71,7 +71,7 @@ RawImage NefDecoder::decodeRawInternal() {
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
 
   if (mRootIFD->getEntryRecursive(MODEL)->getString() == "NIKON D100 ") { /**Sigh**/
-    if (!mFile->isValid(offsets->getU32()))
+    if (!mFile.isValid(offsets->getU32()))
       ThrowRDE("Image data outside of file.");
     if (!D100IsCompressed(offsets->getU32())) {
       DecodeD100Uncompressed();
@@ -98,7 +98,7 @@ RawImage NefDecoder::decodeRawInternal() {
         "Byte count number does not match strip size: count:%u, strips:%u ",
         counts->count, offsets->count);
   }
-  if (!mFile->isValid(offsets->getU32(), counts->getU32()))
+  if (!mFile.isValid(offsets->getU32(), counts->getU32()))
     ThrowRDE("Invalid strip byte count. File probably truncated.");
 
   if (34713 != compression)
@@ -120,7 +120,7 @@ RawImage NefDecoder::decodeRawInternal() {
   }
 
   ByteStream rawData(
-      DataBuffer(mFile->getSubView(offsets->getU32(), counts->getU32()),
+      DataBuffer(mFile.getSubView(offsets->getU32(), counts->getU32()),
                  Endianness::little));
 
   NikonDecompressor n(mRaw, meta->getData(), bitPerPixel);
@@ -136,7 +136,7 @@ are only needed for the D100, thanks to a bug in some cameras
 that tags all images as "compressed".
 */
 bool NefDecoder::D100IsCompressed(uint32_t offset) {
-  const uint8_t* test = mFile->getData(offset, 256);
+  const uint8_t* test = mFile.getData(offset, 256);
   int i;
 
   for (i = 15; i < 256; i += 16)
@@ -248,7 +248,7 @@ void NefDecoder::DecodeUncompressed() {
 
     offY = min(height, offY + yPerSlice);
 
-    if (!mFile->isValid(slice.offset, slice.count))
+    if (!mFile.isValid(slice.offset, slice.count))
       ThrowRDE("Slice offset/count invalid");
 
     slices.push_back(slice);
@@ -279,7 +279,7 @@ void NefDecoder::DecodeUncompressed() {
 
   offY = 0;
   for (const NefSlice& slice : slices) {
-    ByteStream in(DataBuffer(mFile->getSubView(slice.offset, slice.count),
+    ByteStream in(DataBuffer(mFile.getSubView(slice.offset, slice.count),
                              Endianness::little));
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
@@ -353,12 +353,12 @@ void NefDecoder::DecodeD100Uncompressed() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  ByteStream bs(DataBuffer(mFile->getSubView(offset), Endianness::little));
+  ByteStream bs(DataBuffer(mFile.getSubView(offset), Endianness::little));
   if (bs.getRemainSize() == 0)
     ThrowRDE("No input to decode!");
 
   UncompressedDecompressor u(
-      ByteStream(DataBuffer(mFile->getSubView(offset), Endianness::little)),
+      ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
       mRaw);
 
   u.decode12BitRaw<Endianness::big, false, true>(width, height);
@@ -379,7 +379,7 @@ void NefDecoder::DecodeSNefUncompressed() {
   mRaw->isCFA = false;
   mRaw->createData();
 
-  ByteStream in(DataBuffer(mFile->getSubView(offset), Endianness::little));
+  ByteStream in(DataBuffer(mFile.getSubView(offset), Endianness::little));
   DecodeNikonSNef(in);
 }
 

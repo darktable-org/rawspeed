@@ -50,7 +50,7 @@ class PanasonicDecompressorV5 final : public AbstractDecompressor {
   // and each packet decodes to pixelsPerPacket pixels, which depends on bps.
   static constexpr uint32_t bytesPerPacket = 16;
   static constexpr uint32_t bitsPerPacket = 8 * bytesPerPacket;
-  static_assert(BlockSize % bytesPerPacket == 0, "");
+  static_assert(BlockSize % bytesPerPacket == 0);
   static constexpr uint32_t PacketsPerBlock = BlockSize / bytesPerPacket;
 
   // Contains the decoding recepie for the packet,
@@ -91,7 +91,7 @@ class PanasonicDecompressorV5 final : public AbstractDecompressor {
   void chopInputIntoBlocks(const PacketDsc& dsc);
 
   template <const PacketDsc& dsc>
-  inline void processPixelPacket(BitPumpLSB* bs, int row, int col) const;
+  inline void processPixelPacket(BitPumpLSB& bs, int row, int col) const;
 
   template <const PacketDsc& dsc> void processBlock(const Block& block) const;
 

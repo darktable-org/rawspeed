@@ -39,9 +39,9 @@ template <typename T> struct BitPumpPatternTest<T, TestGetBitsTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
 
-  template <typename L> static void Test(PumpT* pump, L gen) {
+  template <typename L> static void Test(PumpT& pump, L gen) {
     for (int len = 1; len <= 7; len++)
-      ASSERT_EQ(pump->getBits(len), gen(len)) << "     Where len: " << len;
+      ASSERT_EQ(pump.getBits(len), gen(len)) << "     Where len: " << len;
   }
 };
 
@@ -50,11 +50,10 @@ template <typename T> struct BitPumpPatternTest<T, TestGetBitsNoFillTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
 
-  template <typename L> static void Test(PumpT* pump, L gen) {
-    pump->fill(32); // Actually fills 32 bits
+  template <typename L> static void Test(PumpT& pump, L gen) {
+    pump.fill(32); // Actually fills 32 bits
     for (int len = 1; len <= 7; len++)
-      ASSERT_EQ(pump->getBitsNoFill(len), gen(len))
-          << "     Where len: " << len;
+      ASSERT_EQ(pump.getBitsNoFill(len), gen(len)) << "     Where len: " << len;
   }
 };
 
@@ -63,10 +62,10 @@ template <typename T> struct BitPumpPatternTest<T, TestPeekBitsTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
 
-  template <typename L> static void Test(PumpT* pump, L gen) {
+  template <typename L> static void Test(PumpT& pump, L gen) {
     for (int len = 1; len <= 7; len++) {
-      ASSERT_EQ(pump->peekBits(len), gen(len)) << "     Where len: " << len;
-      pump->skipBitsNoFill(len);
+      ASSERT_EQ(pump.peekBits(len), gen(len)) << "     Where len: " << len;
+      pump.skipBitsNoFill(len);
     }
   }
 };
@@ -76,12 +75,12 @@ template <typename T> struct BitPumpPatternTest<T, TestPeekBitsNoFillTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
 
-  template <typename L> static void Test(PumpT* pump, L gen) {
-    pump->fill(32); // Actually fills 32 bits
+  template <typename L> static void Test(PumpT& pump, L gen) {
+    pump.fill(32); // Actually fills 32 bits
     for (int len = 1; len <= 7; len++) {
-      ASSERT_EQ(pump->peekBitsNoFill(len), gen(len))
+      ASSERT_EQ(pump.peekBitsNoFill(len), gen(len))
           << "     Where len: " << len;
-      pump->skipBitsNoFill(len);
+      pump.skipBitsNoFill(len);
     }
   }
 };
@@ -92,10 +91,10 @@ struct BitPumpPatternTest<T, TestIncreasingPeekLengthTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
 
-  template <typename L> static void Test(PumpT* pump, L data) {
+  template <typename L> static void Test(PumpT& pump, L data) {
     static const auto MaxLen = 28;
     for (int len = 1; len <= MaxLen; len++)
-      ASSERT_EQ(pump->peekBits(len), data(len)) << "     Where len: " << len;
+      ASSERT_EQ(pump.peekBits(len), data(len)) << "     Where len: " << len;
   }
 };
 
@@ -105,11 +104,11 @@ struct BitPumpPatternTest<T, TestIncreasingPeekLengthNoFillTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
 
-  template <typename L> static void Test(PumpT* pump, L data) {
+  template <typename L> static void Test(PumpT& pump, L data) {
     static const auto MaxLen = 28;
-    pump->fill(MaxLen); // Actually fills 32 bits
+    pump.fill(MaxLen); // Actually fills 32 bits
     for (int len = 1; len <= MaxLen; len++)
-      ASSERT_EQ(pump->peekBitsNoFill(len), data(len))
+      ASSERT_EQ(pump.peekBitsNoFill(len), data(len))
           << "     Where len: " << len;
   }
 };
@@ -129,7 +128,7 @@ protected:
       const ByteStream bs(db);
 
       PumpT pump(bs);
-      BitPumpPatternTest<T, Tag>::Test(&pump, gen);
+      BitPumpPatternTest<T, Tag>::Test(pump, gen);
     }
   }
 };

@@ -1,0 +1,269 @@
+name: CI - GCC Legacy
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  linux-gcc7:
+    name: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ linux ]
+        compiler:
+          - { compiler: GNU7,  CC: gcc-7,   CXX: g++-7 }
+        flavor: [ RelWithDebInfo, Release ]
+    container: debian:buster-slim
+    steps:
+      - name: Configure APT
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          # Paper over occasional network flakiness of some mirrors.
+          echo 'Acquire::Retries "10";' > /etc/apt/apt.conf.d/80retry
+          # Do not install recommended packages
+          echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/80recommends
+          # Do not install suggested packages
+          echo 'APT::Install-Suggests "false";' > /etc/apt/apt.conf.d/80suggests
+          # Assume yes
+          echo 'APT::Get::Assume-Yes "true";' > /etc/apt/apt.conf.d/80forceyes
+          # Fix broken packages
+          echo 'APT::Get::Fix-Missing "true";' > /etc/apt/apt.conf.d/80fixmissing
+      - name: Install/Update necessary packages
+        run: |
+          rm -rf /var/lib/apt/lists/*;
+          apt-get update;
+          apt-get upgrade;
+          apt-get install ca-certificates \
+                          cmake \
+                          g++-7 \
+                          gcc \
+                          gcc-7 \
+                          git \
+                          googletest \
+                          libjpeg-dev \
+                          libpugixml-dev \
+                          libxml2-utils \
+                          make \
+                          ninja-build \
+                          zlib1g-dev;
+          apt-get clean;
+          dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld;
+          ln -s /usr/bin/ld.gold /usr/bin/ld;
+      - uses: actions/checkout@v2
+        name: Fetch/Checkout RawSpeed git repo
+        with:
+          path: ''
+      - name: Build And Test
+        env:
+          CC: ${{ matrix.compiler.CC }}
+          CXX: ${{ matrix.compiler.CXX }}
+          SRC_DIR: ${{ github.workspace }}
+          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/../rawspeed-install
+          ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON
+          FLAVOR: ${{ matrix.flavor }}
+          TARGET: build
+        run: |
+          cmake -E make_directory "${BUILD_DIR}";
+          cmake -E make_directory "${INSTALL_PREFIX}";
+          "${SRC_DIR}/.ci/ci-script.sh";
+  linux-gcc8:
+    name: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ linux ]
+        compiler:
+          - { compiler: GNU8,  CC: gcc-8,   CXX: g++-8 }
+        flavor: [ RelWithDebInfo, Release ]
+    container: debian:buster-slim
+    steps:
+      - name: Configure APT
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          # Paper over occasional network flakiness of some mirrors.
+          echo 'Acquire::Retries "10";' > /etc/apt/apt.conf.d/80retry
+          # Do not install recommended packages
+          echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/80recommends
+          # Do not install suggested packages
+          echo 'APT::Install-Suggests "false";' > /etc/apt/apt.conf.d/80suggests
+          # Assume yes
+          echo 'APT::Get::Assume-Yes "true";' > /etc/apt/apt.conf.d/80forceyes
+          # Fix broken packages
+          echo 'APT::Get::Fix-Missing "true";' > /etc/apt/apt.conf.d/80fixmissing
+      - name: Install/Update necessary packages
+        run: |
+          rm -rf /var/lib/apt/lists/*;
+          apt-get update;
+          apt-get upgrade;
+          apt-get install ca-certificates \
+                          cmake \
+                          g++-8 \
+                          gcc \
+                          gcc-8 \
+                          git \
+                          googletest \
+                          libjpeg-dev \
+                          libpugixml-dev \
+                          libxml2-utils \
+                          make \
+                          ninja-build \
+                          zlib1g-dev;
+          apt-get clean;
+          dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld;
+          ln -s /usr/bin/ld.gold /usr/bin/ld;
+      - uses: actions/checkout@v2
+        name: Fetch/Checkout RawSpeed git repo
+        with:
+          path: ''
+      - name: Build And Test
+        env:
+          CC: ${{ matrix.compiler.CC }}
+          CXX: ${{ matrix.compiler.CXX }}
+          SRC_DIR: ${{ github.workspace }}
+          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/../rawspeed-install
+          ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON
+          FLAVOR: ${{ matrix.flavor }}
+          TARGET: build
+        run: |
+          cmake -E make_directory "${BUILD_DIR}";
+          cmake -E make_directory "${INSTALL_PREFIX}";
+          "${SRC_DIR}/.ci/ci-script.sh";
+  linux-gcc9:
+    name: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ linux ]
+        compiler:
+          - { compiler: GNU9,  CC: gcc-9,   CXX: g++-9 }
+        flavor: [ RelWithDebInfo, Release ]
+    container: debian:bullseye-slim
+    steps:
+      - name: Configure APT
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          # Paper over occasional network flakiness of some mirrors.
+          echo 'Acquire::Retries "10";' > /etc/apt/apt.conf.d/90retry
+          # Do not install recommended packages
+          echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/90recommends
+          # Do not install suggested packages
+          echo 'APT::Install-Suggests "false";' > /etc/apt/apt.conf.d/90suggests
+          # Assume yes
+          echo 'APT::Get::Assume-Yes "true";' > /etc/apt/apt.conf.d/90forceyes
+          # Fix broken packages
+          echo 'APT::Get::Fix-Missing "true";' > /etc/apt/apt.conf.d/90fixmissing
+      - name: Install/Update necessary packages
+        run: |
+          rm -rf /var/lib/apt/lists/*;
+          apt-get update;
+          apt-get upgrade;
+          apt-get install ca-certificates \
+                          cmake \
+                          g++-9 \
+                          gcc \
+                          gcc-9 \
+                          git \
+                          googletest \
+                          libjpeg-dev \
+                          libpugixml-dev \
+                          libxml2-utils \
+                          make \
+                          ninja-build \
+                          zlib1g-dev;
+          apt-get clean;
+          dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld;
+          ln -s /usr/bin/ld.gold /usr/bin/ld;
+      - uses: actions/checkout@v2
+        name: Fetch/Checkout RawSpeed git repo
+        with:
+          path: ''
+      - name: Build And Test
+        env:
+          CC: ${{ matrix.compiler.CC }}
+          CXX: ${{ matrix.compiler.CXX }}
+          SRC_DIR: ${{ github.workspace }}
+          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/../rawspeed-install
+          ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON
+          FLAVOR: ${{ matrix.flavor }}
+          TARGET: build
+        run: |
+          cmake -E make_directory "${BUILD_DIR}";
+          cmake -E make_directory "${INSTALL_PREFIX}";
+          "${SRC_DIR}/.ci/ci-script.sh";
+  linux-gcc10:
+    name: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ linux ]
+        compiler:
+          - { compiler: GNU10,  CC: gcc-10,   CXX: g++-10 }
+        flavor: [ RelWithDebInfo, Release ]
+    container: debian:bullseye-slim
+    steps:
+      - name: Configure APT
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          # Paper over occasional network flakiness of some mirrors.
+          echo 'Acquire::Retries "10";' > /etc/apt/apt.conf.d/90retry
+          # Do not install recommended packages
+          echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/90recommends
+          # Do not install suggested packages
+          echo 'APT::Install-Suggests "false";' > /etc/apt/apt.conf.d/90suggests
+          # Assume yes
+          echo 'APT::Get::Assume-Yes "true";' > /etc/apt/apt.conf.d/90forceyes
+          # Fix broken packages
+          echo 'APT::Get::Fix-Missing "true";' > /etc/apt/apt.conf.d/90fixmissing
+      - name: Install/Update necessary packages
+        run: |
+          rm -rf /var/lib/apt/lists/*;
+          apt-get update;
+          apt-get upgrade;
+          apt-get install ca-certificates \
+                          cmake \
+                          g++-10 \
+                          gcc \
+                          gcc-10 \
+                          git \
+                          googletest \
+                          libjpeg-dev \
+                          libpugixml-dev \
+                          libxml2-utils \
+                          make \
+                          ninja-build \
+                          zlib1g-dev;
+          apt-get clean;
+          dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld;
+          ln -s /usr/bin/ld.gold /usr/bin/ld;
+      - uses: actions/checkout@v2
+        name: Fetch/Checkout RawSpeed git repo
+        with:
+          path: ''
+      - name: Build And Test
+        env:
+          CC: ${{ matrix.compiler.CC }}
+          CXX: ${{ matrix.compiler.CXX }}
+          SRC_DIR: ${{ github.workspace }}
+          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/../rawspeed-install
+          ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON
+          FLAVOR: ${{ matrix.flavor }}
+          TARGET: build
+        run: |
+          cmake -E make_directory "${BUILD_DIR}";
+          cmake -E make_directory "${INSTALL_PREFIX}";
+          "${SRC_DIR}/.ci/ci-script.sh";

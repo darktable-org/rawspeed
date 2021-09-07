@@ -47,15 +47,6 @@ alignedMalloc(size_t size) {
   static_assert(isAligned(alignment, sizeof(void*)),
                 "not multiple of sizeof(void*)");
 
-#if !(defined(HAVE_POSIX_MEMALIGN) || defined(HAVE_ALIGNED_ALLOC) ||           \
-      defined(HAVE_MM_MALLOC) || defined(HAVE_ALIGNED_MALLOC))
-  static_assert(alignment <= alignof(std::max_align_t), "too high alignment");
-#if defined(__APPLE__)
-  // apple malloc() aligns to 16 by default. can not expect any more
-  static_assert(alignment <= 16, "on OSX, plain malloc() aligns to 16");
-#endif
-#endif
-
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   return reinterpret_cast<T*>(alignedMalloc(size, alignment));
 }

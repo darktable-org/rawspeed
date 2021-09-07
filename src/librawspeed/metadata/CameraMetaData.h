@@ -53,17 +53,21 @@ public:
   std::map<uint32_t, Camera*> chdkCameras;
 
   // searches for camera with given make + model + mode
-  const Camera* getCamera(const std::string& make, const std::string& model,
-                          const std::string& mode) const;
+  [[nodiscard]] const Camera* getCamera(const std::string& make,
+                                        const std::string& model,
+                                        const std::string& mode) const;
 
   // searches for camera with given make + model, with ANY mode
-  const Camera* getCamera(const std::string& make,
-                          const std::string& model) const;
+  [[nodiscard]] const Camera* getCamera(const std::string& make,
+                                        const std::string& model) const;
 
-  bool hasCamera(const std::string& make, const std::string& model,
-                 const std::string& mode) const;
-  const Camera* __attribute__((pure)) getChdkCamera(uint32_t filesize) const;
-  bool __attribute__((pure)) hasChdkCamera(uint32_t filesize) const;
+  [[nodiscard]] bool hasCamera(const std::string& make,
+                               const std::string& model,
+                               const std::string& mode) const;
+  [[nodiscard]] const Camera* __attribute__((pure))
+  getChdkCamera(uint32_t filesize) const;
+  [[nodiscard]] bool __attribute__((pure))
+  hasChdkCamera(uint32_t filesize) const;
   void disableMake(const std::string &make);
   void disableCamera(const std::string &make, const std::string &model);
 

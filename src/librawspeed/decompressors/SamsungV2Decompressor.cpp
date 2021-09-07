@@ -73,11 +73,11 @@ constexpr bool operator&(SamsungV2Decompressor::OptFlags lhs,
 }
 
 inline __attribute__((always_inline)) int16_t
-SamsungV2Decompressor::getDiff(BitPumpMSB32* pump, uint32_t len) {
+SamsungV2Decompressor::getDiff(BitPumpMSB32& pump, uint32_t len) {
   if (len == 0)
     return 0;
   assert(len <= 15 && "Difference occupies at most 15 bits.");
-  return signExtend(pump->getBits(len), len);
+  return signExtend(pump.getBits(len), len);
 }
 
 SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
@@ -97,7 +97,7 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   }
 
   static constexpr const auto headerSize = 16;
-  bs.check(headerSize);
+  (void)bs.check(headerSize);
 
   BitPumpMSB32 startpump(bs);
 
@@ -149,7 +149,7 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
 // the actual difference bits
 
 inline __attribute__((always_inline)) std::array<uint16_t, 16>
-SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32* pump, int row,
+SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32& pump, int row,
                                              int col) {
   const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
@@ -158,15 +158,15 @@ SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32* pump, int row,
   if (!(optflags & OptFlags::QP) && (col % 64) == 0) {
     // Change scale every four 16-pixel blocks.
     static constexpr std::array<int32_t, 3> scalevals = {{0, -2, 2}};
-    uint32_t i = pump->getBits(2);
-    scale = i < 3 ? scale + scalevals[i] : pump->getBits(12);
+    uint32_t i = pump.getBits(2);
+    scale = i < 3 ? scale + scalevals[i] : pump.getBits(12);
   }
 
   // First we figure out which reference pixels mode we're in
   if (optflags & OptFlags::MV)
-    motion = pump->getBits(1) ? 3 : 7;
-  else if (!pump->getBits(1))
-    motion = pump->getBits(3);
+    motion = pump.getBits(1) ? 3 : 7;
+  else if (!pump.getBits(1))
+    motion = pump.getBits(3);
 
   if ((row == 0 || row == 1) && (motion != 7))
     ThrowRDE("At start of image and motion isn't 7. File corrupted?");
@@ -227,8 +227,8 @@ SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32* pump, int row,
 }
 
 inline __attribute__((always_inline)) std::array<uint32_t, 4>
-SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32* pump, int row) {
-  if (!(optflags & OptFlags::SKIP) && pump->getBits(1))
+SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32& pump, int row) {
+  if (!(optflags & OptFlags::SKIP) && pump.getBits(1))
     return {};
 
   std::array<uint32_t, 4> diffBits;
@@ -236,7 +236,7 @@ SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32* pump, int row) {
   // Figure out how many difference bits we have to read for each pixel
   std::array<uint32_t, 4> flags;
   for (unsigned int& flag : flags)
-    flag = pump->getBits(2);
+    flag = pump.getBits(2);
 
   for (int i = 0; i < 4; i++) {
     // The color is 0-Green 1-Blue 2-Red
@@ -256,7 +256,7 @@ SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32* pump, int row) {
       diffBits[i] = diffBitsMode[colornum][0] - 1;
       break;
     case 3:
-      diffBits[i] = pump->getBits(4);
+      diffBits[i] = pump.getBits(4);
       break;
     default:
       __builtin_unreachable();
@@ -274,7 +274,7 @@ SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32* pump, int row) {
 }
 
 inline __attribute__((always_inline)) std::array<int, 16>
-SamsungV2Decompressor::decodeDifferences(BitPumpMSB32* pump, int row) {
+SamsungV2Decompressor::decodeDifferences(BitPumpMSB32& pump, int row) {
   // Figure out how many difference bits we have to read for each pixel
   const std::array<uint32_t, 4> diffBits = decodeDiffLengths(pump, row);
 
@@ -311,7 +311,7 @@ SamsungV2Decompressor::decodeDifferences(BitPumpMSB32* pump, int row) {
 }
 
 inline __attribute__((always_inline)) void
-SamsungV2Decompressor::processBlock(BitPumpMSB32* pump, int row, int col) {
+SamsungV2Decompressor::processBlock(BitPumpMSB32& pump, int row, int col) {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   const std::array<uint16_t, 16> baseline =
@@ -344,7 +344,7 @@ void SamsungV2Decompressor::decompressRow(int row) {
   assert(width >= 16);
   assert(width % 16 == 0);
   for (int col = 0; col < width; col += 16)
-    processBlock(&pump, row, col);
+    processBlock(pump, row, col);
 
   data.skipBytes(pump.getStreamPosition());
 }

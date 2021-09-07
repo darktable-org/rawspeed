@@ -69,7 +69,7 @@ class TiffIFD
   void add(TiffIFDOwner subIFD);
   void add(TiffEntryOwner entry);
   TiffRootIFDOwner parseMakerNote(NORangesSet<Buffer>* ifds, TiffEntry* t);
-  void parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream* bs);
+  void parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs);
 
   // TIFF IFD are tree-like structure, with branches.
   // A branch (IFD) can have branches (IFDs) of it's own.
@@ -106,17 +106,23 @@ public:
   TiffIFD(const TiffIFD&) = delete;
   TiffIFD& operator=(const TiffIFD&) = delete;
 
-  uint32_t getNextIFD() const { return nextIFD; }
-  std::vector<const TiffIFD*> getIFDsWithTag(TiffTag tag) const;
-  const TiffIFD* getIFDWithTag(TiffTag tag, uint32_t index = 0) const;
-  TiffEntry* getEntry(TiffTag tag) const;
-  TiffEntry* __attribute__((pure)) getEntryRecursive(TiffTag tag) const;
-  bool __attribute__((pure)) hasEntry(TiffTag tag) const {
+  [[nodiscard]] uint32_t getNextIFD() const { return nextIFD; }
+  [[nodiscard]] std::vector<const TiffIFD*> getIFDsWithTag(TiffTag tag) const;
+  [[nodiscard]] const TiffIFD* getIFDWithTag(TiffTag tag,
+                                             uint32_t index = 0) const;
+  [[nodiscard]] TiffEntry* getEntry(TiffTag tag) const;
+  [[nodiscard]] TiffEntry* __attribute__((pure))
+  getEntryRecursive(TiffTag tag) const;
+  [[nodiscard]] bool __attribute__((pure)) hasEntry(TiffTag tag) const {
     return entries.find(tag) != entries.end();
   }
-  bool hasEntryRecursive(TiffTag tag) const { return getEntryRecursive(tag) != nullptr; }
+  [[nodiscard]] bool hasEntryRecursive(TiffTag tag) const {
+    return getEntryRecursive(tag) != nullptr;
+  }
 
-  const std::vector<TiffIFDOwner>& getSubIFDs() const { return subIFDs; }
+  [[nodiscard]] const std::vector<TiffIFDOwner>& getSubIFDs() const {
+    return subIFDs;
+  }
 //  const std::map<TiffTag, TiffEntry*>& getEntries() const { return entries; }
 };
 
@@ -136,7 +142,7 @@ public:
 
   // find the MAKE and MODEL tags identifying the camera
   // note: the returned strings are trimmed automatically
-  TiffID getID() const;
+  [[nodiscard]] TiffID getID() const;
 };
 
 inline Endianness getTiffByteOrder(const ByteStream& bs, uint32_t pos,

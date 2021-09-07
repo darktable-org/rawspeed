@@ -311,7 +311,7 @@ void UncompressedDecompressor::decode12BitRaw(uint32_t w, uint32_t h) {
   static constexpr const auto bits = 12;
 
   static_assert(e == Endianness::little || e == Endianness::big,
-                "unknown endiannes");
+                "unknown endianness");
 
   static constexpr const auto shift = 16 - bits;
   static constexpr const auto pack = 8 - shift;
@@ -385,7 +385,7 @@ UncompressedDecompressor::decode12BitRaw<Endianness::big, false, true>(
 template <Endianness e>
 void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(uint32_t w,
                                                                  uint32_t h) {
-  static_assert(e == Endianness::big, "unknown endiannes");
+  static_assert(e == Endianness::big, "unknown endianness");
 
   sanityCheck(w, &h, 2);
 
@@ -413,7 +413,7 @@ template <int bits, Endianness e>
 void UncompressedDecompressor::decodeRawUnpacked(uint32_t w, uint32_t h) {
   static_assert(bits == 12 || bits == 14 || bits == 16, "unhandled bitdepth");
   static_assert(e == Endianness::little || e == Endianness::big,
-                "unknown endiannes");
+                "unknown endianness");
 
   static constexpr const auto shift = 16 - bits;
   static constexpr const auto mask = (1 << (8 - shift)) - 1;

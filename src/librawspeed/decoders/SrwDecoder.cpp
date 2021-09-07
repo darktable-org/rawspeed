@@ -44,7 +44,7 @@
 namespace rawspeed {
 
 bool SrwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+                                      const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -87,13 +87,13 @@ RawImage SrwDecoder::decodeRawInternal() {
     if (sliceOffsets->type != TIFF_LONG || sliceOffsets->count != 1)
       ThrowRDE("Entry 40976 is corrupt");
 
-    ByteStream bso(DataBuffer(*mFile, Endianness::little));
+    ByteStream bso(DataBuffer(mFile, Endianness::little));
     bso.skipBytes(sliceOffsets->getU32());
     bso = bso.getStream(height, 4);
 
     const uint32_t offset = raw->getEntry(STRIPOFFSETS)->getU32();
     const uint32_t count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
-    Buffer rbuf(mFile->getSubView(offset, count));
+    Buffer rbuf(mFile.getSubView(offset, count));
     ByteStream bsr(DataBuffer(rbuf, Endianness::little));
 
     SamsungV0Decompressor s0(mRaw, bso, bsr);
@@ -109,9 +109,9 @@ RawImage SrwDecoder::decodeRawInternal() {
     uint32_t offset = raw->getEntry(STRIPOFFSETS)->getU32();
     uint32_t count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
     const ByteStream bs(
-        DataBuffer(mFile->getSubView(offset, count), Endianness::little));
+        DataBuffer(mFile.getSubView(offset, count), Endianness::little));
 
-    SamsungV1Decompressor s1(mRaw, &bs, bits);
+    SamsungV1Decompressor s1(mRaw, bs, bits);
 
     mRaw->createData();
 
@@ -124,7 +124,7 @@ RawImage SrwDecoder::decodeRawInternal() {
     uint32_t offset = raw->getEntry(STRIPOFFSETS)->getU32();
     uint32_t count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
     const ByteStream bs(
-        DataBuffer(mFile->getSubView(offset, count), Endianness::little));
+        DataBuffer(mFile.getSubView(offset, count), Endianness::little));
 
     SamsungV2Decompressor s2(mRaw, bs, bits);
 

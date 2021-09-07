@@ -57,7 +57,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
-    const rawspeed::IMPL ht = createHuffmanTable<rawspeed::IMPL>(&bs);
+    const auto ht = createHuffmanTable<rawspeed::IMPL>(bs);
 
     // should have consumed 16 bytes for n-codes-per-length,
     // at *least* 1 byte as code value, and 1 byte as 'fixDNGBug16' boolean

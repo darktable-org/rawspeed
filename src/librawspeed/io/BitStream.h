@@ -64,7 +64,7 @@ struct BitStreamCacheLeftInRightOut : BitStreamCacheBase
     fillLevel += count;
   }
 
-  inline uint32_t peek(uint32_t count) const noexcept {
+  [[nodiscard]] inline uint32_t peek(uint32_t count) const noexcept {
     return cache & ((1U << count) - 1U);
   }
 
@@ -90,7 +90,7 @@ struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
     fillLevel += count;
   }
 
-  inline uint32_t peek(uint32_t count) const noexcept {
+  [[nodiscard]] inline uint32_t peek(uint32_t count) const noexcept {
     return extractHighBits(cache, count, /*effectiveBitwidth=*/BitStreamCacheBase::Size);
   }
 
@@ -125,8 +125,10 @@ struct BitStreamForwardSequentialReplenisher final : BitStreamReplenisherBase {
   explicit BitStreamForwardSequentialReplenisher(const Buffer& input)
       : BitStreamReplenisherBase(input) {}
 
-  inline size_type getPos() const { return pos; }
-  inline size_type getRemainingSize() const { return size - getPos(); }
+  [[nodiscard]] inline size_type getPos() const { return pos; }
+  [[nodiscard]] inline size_type getRemainingSize() const {
+    return size - getPos();
+  }
   inline void markNumBytesAsConsumed(size_type numBytes) { pos += numBytes; }
 
   inline const uint8_t* getInput() {
@@ -195,18 +197,22 @@ public:
   }
 
   // these methods might be specialized by implementations that support it
-  inline size_type getInputPosition() const { return replenisher.getPos(); }
+  [[nodiscard]] inline size_type getInputPosition() const {
+    return replenisher.getPos();
+  }
 
   // these methods might be specialized by implementations that support it
-  inline size_type getStreamPosition() const {
+  [[nodiscard]] inline size_type getStreamPosition() const {
     return getInputPosition() - (cache.fillLevel >> 3);
   }
 
-  inline size_type getRemainingSize() const {
+  [[nodiscard]] inline size_type getRemainingSize() const {
     return replenisher.getRemainingSize();
   }
 
-  inline size_type getFillLevel() const { return cache.fillLevel; }
+  [[nodiscard]] inline size_type getFillLevel() const {
+    return cache.fillLevel;
+  }
 
   inline uint32_t __attribute__((pure)) peekBitsNoFill(uint32_t nbits) {
     assert(nbits != 0);

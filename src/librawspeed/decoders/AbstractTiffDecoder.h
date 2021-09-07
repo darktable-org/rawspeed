@@ -38,7 +38,7 @@ class AbstractTiffDecoder : public RawDecoder
 protected:
   TiffRootIFDOwner mRootIFD;
 public:
-  AbstractTiffDecoder(TiffRootIFDOwner&& root, const Buffer* file)
+  AbstractTiffDecoder(TiffRootIFDOwner&& root, const Buffer& file)
       : RawDecoder(file), mRootIFD(std::move(root)) {}
 
   TiffIFD* getRootIFD() final { return mRootIFD.get(); }
@@ -64,7 +64,8 @@ public:
     checkCameraSupported(meta, mRootIFD->getID(), "");
   }
 
-  const TiffIFD* getIFDWithLargestImage(TiffTag filter = IMAGEWIDTH) const;
+  [[nodiscard]] const TiffIFD*
+  getIFDWithLargestImage(TiffTag filter = IMAGEWIDTH) const;
 };
 
 } // namespace rawspeed

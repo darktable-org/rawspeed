@@ -73,6 +73,9 @@ void LJpegDecompressor::decode(uint32_t offsetX, uint32_t offsetY,
   if (offsetY + height > static_cast<unsigned>(mRaw->dim.y))
     ThrowRDE("Tile overflows image vertically");
 
+  if (width == 0 || height == 0)
+    return; // We do not need anything from this tile.
+
   offX = offsetX;
   offY = offsetY;
   w = width;
@@ -162,9 +165,13 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   assert(mRaw->dim.x >= N_COMP);
   assert((mRaw->getCpp() * (mRaw->dim.x - offX)) >= N_COMP);
 
+  const CroppedArray2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef(),
+                                        mRaw->getCpp() * offX, offY,
+                                        mRaw->getCpp() * w, h);
+
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
-  auto predNext = pred.data();
+  uint16_t* predNext = pred.data();
 
   BitPumpJPEG bitStream(input);
 
@@ -179,26 +186,22 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   assert(offX + w <= static_cast<unsigned>(mRaw->dim.x));
 
   // For y, we can simply stop decoding when we reached the border.
-  for (unsigned y = 0; y < h; ++y) {
-    auto destY = offY + y;
-    auto* dest =
-        reinterpret_cast<uint16_t*>(mRaw->getDataUncropped(offX, destY));
+  for (unsigned row = 0; row < h; ++row) {
+    unsigned col = 0;
 
     copy_n(predNext, N_COMP, pred.data());
     // the predictor for the next line is the start of this line
-    predNext = dest;
-
-    unsigned x = 0;
+    predNext = &img(row, col);
 
     // FIXME: predictor may have value outside of the uint16_t.
     // https://github.com/darktable-org/rawspeed/issues/175
 
     // For x, we first process all full pixel blocks within the image buffer ...
-    for (; x < fullBlocks; ++x) {
-      unroll_loop<N_COMP>([&](int i) {
+    for (; col < N_COMP * fullBlocks; col += N_COMP) {
+      for (int i = 0; i != N_COMP; ++i) {
         pred[i] = uint16_t(pred[i] + ht[i]->decodeDifference(bitStream));
-        *dest++ = pred[i];
-      });
+        img(row, col + i) = pred[i];
+      }
     }
 
     // Sometimes we also need to consume one more block, and produce part of it.
@@ -213,19 +216,19 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
       unsigned c = 0;
       for (; c < trailingPixels; ++c) {
         pred[c] = uint16_t(pred[c] + ht[c]->decodeDifference(bitStream));
-        *dest++ = pred[c];
+        img(row, col + c) = pred[c];
       }
       // Discard the rest of the block.
       assert(c < N_COMP);
       for (; c < N_COMP; ++c) {
         ht[c]->decodeDifference(bitStream);
       }
-      ++x; // We did just process one more block.
+      col += N_COMP; // We did just process one more block.
     }
 
     // ... and discard the rest.
-    for (; x < frame.w; ++x) {
-      unroll_loop<N_COMP>([&](int i) { ht[i]->decodeDifference(bitStream); });
+    for (; col < N_COMP * frame.w; col += N_COMP) {
+      for (int i = 0; i != N_COMP; ++i) ht[i]->decodeDifference(bitStream);
     }
   }
 }

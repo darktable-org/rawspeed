@@ -51,14 +51,12 @@ public:
     data.insert({key, value});
   }
 
-  bool has(const std::string& key) const
-  {
+  [[nodiscard]] bool has(const std::string& key) const {
     return data.find(key) != data.end();
   }
 
   template <typename T>
-  T get(const std::string& key, T defaultValue) const
-  {
+  [[nodiscard]] T get(const std::string& key, T defaultValue) const {
     auto hint = data.find(key);
     if (hint != data.end() && !hint->second.empty()) {
       std::istringstream iss(hint->second);
@@ -67,7 +65,7 @@ public:
     return defaultValue;
   }
 
-  bool get(const std::string& key, bool defaultValue) const {
+  [[nodiscard]] bool get(const std::string& key, bool defaultValue) const {
     auto hint = data.find(key);
     if (hint == data.end())
       return defaultValue;
@@ -83,7 +81,7 @@ public:
 #endif
 
   Camera(const Camera* camera, uint32_t alias_num);
-  const CameraSensorInfo* getSensorInfo(int iso) const;
+  [[nodiscard]] const CameraSensorInfo* getSensorInfo(int iso) const;
   std::string make;
   std::string model;
   std::string mode;

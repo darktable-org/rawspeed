@@ -23,17 +23,17 @@
 #include "io/Buffer.h"     // for Buffer
 #include "io/ByteStream.h" // for ByteStream
 
-template <typename T> static T createHuffmanTable(rawspeed::ByteStream* bs) {
+template <typename T> static T createHuffmanTable(rawspeed::ByteStream& bs) {
   T ht;
 
   // first 16 bytes are consumed as n-codes-per-length
-  const auto count = ht.setNCodesPerLength(bs->getBuffer(16));
+  const auto count = ht.setNCodesPerLength(bs.getBuffer(16));
 
   // and then count more bytes consumed as code values
-  ht.setCodeValues(bs->getBuffer(count));
+  ht.setCodeValues(bs.getBuffer(count));
 
   // and one more byte as 'fixDNGBug16' boolean
-  const auto bb = bs->getBuffer(1);
+  const auto bb = bs.getBuffer(1);
   const bool fixDNGBug16 = bb[0] != 0;
   ht.setup(FULLDECODE, fixDNGBug16);
 

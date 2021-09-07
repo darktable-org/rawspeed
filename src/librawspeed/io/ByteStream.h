@@ -45,42 +45,43 @@ public:
 
   // return ByteStream that starts at given offset
   // i.e. this->data + offset == getSubStream(offset).data
-  ByteStream getSubStream(size_type offset, size_type size_) const {
+  [[nodiscard]] ByteStream getSubStream(size_type offset,
+                                        size_type size_) const {
     return ByteStream(DataBuffer(getSubView(offset, size_), getByteOrder()));
   }
 
-  ByteStream getSubStream(size_type offset) const {
+  [[nodiscard]] ByteStream getSubStream(size_type offset) const {
     return ByteStream(DataBuffer(getSubView(offset), getByteOrder()));
   }
 
-  inline size_type check(size_type bytes) const {
+  [[nodiscard]] inline size_type check(size_type bytes) const {
     if (static_cast<uint64_t>(pos) + bytes > size)
       ThrowIOE("Out of bounds access in ByteStream");
     assert(!ASan::RegionIsPoisoned(data + pos, bytes));
     return bytes;
   }
 
-  inline size_type check(size_type nmemb, size_type size_) const {
+  [[nodiscard]] inline size_type check(size_type nmemb, size_type size_) const {
     if (size_ && nmemb > std::numeric_limits<size_type>::max() / size_)
       ThrowIOE("Integer overflow when calculating stream length");
     return check(nmemb * size_);
   }
 
-  inline size_type getPosition() const {
+  [[nodiscard]] inline size_type getPosition() const {
     assert(size >= pos);
-    check(0);
+    (void)check(0);
     return pos;
   }
   inline void setPosition(size_type newPos) {
     pos = newPos;
-    check(0);
+    (void)check(0);
   }
-  inline size_type getRemainSize() const {
+  [[nodiscard]] inline size_type getRemainSize() const {
     assert(size >= pos);
-    check(0);
+    (void)check(0);
     return size - pos;
   }
-  inline const uint8_t* peekData(size_type count) const {
+  [[nodiscard]] inline const uint8_t* peekData(size_type count) const {
     return Buffer::getData(pos, count);
   }
   inline const uint8_t* getData(size_type count) {
@@ -93,10 +94,11 @@ public:
     pos += size_;
     return ret;
   }
-  inline ByteStream peekStream(size_type size_) const {
+  [[nodiscard]] inline ByteStream peekStream(size_type size_) const {
     return getSubStream(pos, size_);
   }
-  inline ByteStream peekStream(size_type nmemb, size_type size_) const {
+  [[nodiscard]] inline ByteStream peekStream(size_type nmemb,
+                                             size_type size_) const {
     if (size_ && nmemb > std::numeric_limits<size_type>::max() / size_)
       ThrowIOE("Integer overflow when calculating stream length");
     return peekStream(nmemb * size_);
@@ -112,9 +114,9 @@ public:
     return getStream(nmemb * size_);
   }
 
-  inline uint8_t peekByte(size_type i = 0) const {
+  [[nodiscard]] inline uint8_t peekByte(size_type i = 0) const {
     assert(data);
-    check(i+1);
+    (void)check(i + 1);
     return data[pos+i];
   }
 
@@ -144,15 +146,17 @@ public:
 
   inline uint8_t getByte() {
     assert(data);
-    check(1);
+    (void)check(1);
     return data[pos++];
   }
 
-  template<typename T> inline T peek(size_type i = 0) const {
+  template <typename T>
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] inline T
+  peek(size_type i = 0) const {
     return DataBuffer::get<T>(pos, i);
   }
 
-  inline uint16_t peekU16() const { return peek<uint16_t>(); }
+  [[nodiscard]] inline uint16_t peekU16() const { return peek<uint16_t>(); }
 
   template<typename T> inline T get() {
     auto ret = peek<T>();
@@ -165,7 +169,7 @@ public:
   inline uint32_t getU32() { return get<uint32_t>(); }
   inline float getFloat() { return get<float>(); }
 
-  const char* peekString() const {
+  [[nodiscard]] const char* peekString() const {
     assert(data);
     if (memchr(peekData(getRemainSize()), 0, getRemainSize()) == nullptr)
       ThrowIOE("String is not null-terminated");
@@ -179,7 +183,7 @@ public:
     size_type start = pos;
     bool isNullTerminator = false;
     do {
-      check(1);
+      (void)check(1);
       isNullTerminator = (data[pos] == '\0');
       pos++;
     } while (!isNullTerminator);

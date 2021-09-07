@@ -34,15 +34,15 @@ class PefDecoder final : public AbstractTiffDecoder
 {
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer* file);
-  PefDecoder(TiffRootIFDOwner&& root, const Buffer* file)
+                                   const Buffer& file);
+  PefDecoder(TiffRootIFDOwner&& root, const Buffer& file)
       : AbstractTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 protected:
-  int getDecoderVersion() const override { return 3; }
+  [[nodiscard]] int getDecoderVersion() const override { return 3; }
 };
 
 } // namespace rawspeed

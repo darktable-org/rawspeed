@@ -38,11 +38,11 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-MrwDecoder::MrwDecoder(const Buffer* file) : RawDecoder(file) { parseHeader(); }
+MrwDecoder::MrwDecoder(const Buffer& file) : RawDecoder(file) { parseHeader(); }
 
-int MrwDecoder::isMRW(const Buffer* input) {
+int MrwDecoder::isMRW(const Buffer& input) {
   static const std::array<char, 4> magic = {{0x00, 'M', 'R', 'M'}};
-  const unsigned char* data = input->getData(0, magic.size());
+  const unsigned char* data = input.getData(0, magic.size());
   return 0 == memcmp(data, magic.data(), magic.size());
 }
 
@@ -50,7 +50,7 @@ void MrwDecoder::parseHeader() {
   if (!isMRW(mFile))
     ThrowRDE("This isn't actually a MRW file, why are you calling me?");
 
-  const DataBuffer db(*mFile, Endianness::big);
+  const DataBuffer db(mFile, Endianness::big);
   ByteStream bs(db);
 
   // magic
@@ -58,7 +58,7 @@ void MrwDecoder::parseHeader() {
 
   // the size of the rest of the header, up to the image data
   const auto headerSize = bs.getU32();
-  bs.check(headerSize);
+  (void)bs.check(headerSize);
 
   // ... and offset to the image data at the same time
   const auto dataOffset = bs.getPosition() + headerSize;
@@ -72,7 +72,7 @@ void MrwDecoder::parseHeader() {
   while (bs.getRemainSize() > 0) {
     uint32_t tag = bs.getU32();
     uint32_t len = bs.getU32();
-    bs.check(len);
+    (void)bs.check(len);
     if (!len)
       ThrowRDE("Found entry of zero length, MRW is corrupt.");
 

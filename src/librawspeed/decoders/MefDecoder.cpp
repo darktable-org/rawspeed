@@ -30,7 +30,7 @@
 namespace rawspeed {
 
 bool MefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+                                      const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -48,7 +48,7 @@ RawImage MefDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
   UncompressedDecompressor u(
-      ByteStream(DataBuffer(mFile->getSubView(off), Endianness::little)), mRaw);
+      ByteStream(DataBuffer(mFile.getSubView(off), Endianness::little)), mRaw);
 
   u.decode12BitRaw<Endianness::big>(width, height);
 

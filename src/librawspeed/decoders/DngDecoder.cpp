@@ -56,11 +56,11 @@ namespace rawspeed {
 
 bool __attribute__((pure))
 DngDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                 const Buffer* file) {
+                                 const Buffer& file) {
   return rootIFD->hasEntryRecursive(DNGVERSION);
 }
 
-DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file)
+DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file)
     : AbstractTiffDecoder(move(rootIFD), file) {
   if (!mRootIFD->hasEntryRecursive(DNGVERSION))
     ThrowRDE("DNG, but version tag is missing. Will not guess.");
@@ -311,7 +311,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) {
     if (count < 1)
       ThrowRDE("Tile %u is empty", n);
 
-    ByteStream bs(DataBuffer(mFile->getSubView(offset, count),
+    ByteStream bs(DataBuffer(mFile.getSubView(offset, count),
                              mRootIFD->rootBuffer.getByteOrder()));
 
     if (!tilesLegality.emplace(bs).second)

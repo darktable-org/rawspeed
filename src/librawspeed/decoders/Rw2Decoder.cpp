@@ -49,7 +49,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool Rw2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+                                      const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -81,15 +81,15 @@ RawImage Rw2Decoder::decodeRawInternal() {
       ThrowRDE("Multiple Strips found: %u", offsets->count);
     }
     uint32_t offset = offsets->getU32();
-    if (!mFile->isValid(offset))
+    if (!mFile.isValid(offset))
       ThrowRDE("Invalid image data offset, cannot decode.");
 
     mRaw->dim = iPoint2D(width, height);
 
-    uint32_t size = mFile->getSize() - offset;
+    uint32_t size = mFile.getSize() - offset;
 
     UncompressedDecompressor u(
-        ByteStream(DataBuffer(mFile->getSubView(offset), Endianness::little)),
+        ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
         mRaw);
 
     if (size >= width*height*2) {
@@ -104,7 +104,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       uint32_t section_split_offset = 0;
       PanasonicDecompressorV4 p(
           mRaw,
-          ByteStream(DataBuffer(mFile->getSubView(offset), Endianness::little)),
+          ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
           hints.has("zero_is_not_bad"), section_split_offset);
       mRaw->createData();
       p.decompress();
@@ -120,7 +120,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
 
     uint32_t offset = offsets->getU32();
 
-    ByteStream bs(DataBuffer(mFile->getSubView(offset), Endianness::little));
+    ByteStream bs(DataBuffer(mFile.getSubView(offset), Endianness::little));
 
     uint16_t bitsPerSample = 12;
     if (raw->hasEntry(PANASONIC_BITSPERSAMPLE))
@@ -214,17 +214,9 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (raw->hasEntry(static_cast<TiffTag>(0x1c)) &&
       raw->hasEntry(static_cast<TiffTag>(0x1d)) &&
       raw->hasEntry(static_cast<TiffTag>(0x1e))) {
-    const auto getBlack = [&raw](TiffTag t) -> int {
-      const auto val = raw->getEntry(t)->getU32();
-      int out;
-      if (__builtin_sadd_overflow(val, 15, &out))
-        ThrowRDE("Integer overflow when calculating black level");
-      return out;
-    };
-
-    const int blackRed = getBlack(static_cast<TiffTag>(0x1c));
-    const int blackGreen = getBlack(static_cast<TiffTag>(0x1d));
-    const int blackBlue = getBlack(static_cast<TiffTag>(0x1e));
+    const int blackRed = raw->getEntry(static_cast<TiffTag>(0x1c))->getU16();
+    const int blackGreen = raw->getEntry(static_cast<TiffTag>(0x1d))->getU16();
+    const int blackBlue = raw->getEntry(static_cast<TiffTag>(0x1e))->getU16();
 
     for(int i = 0; i < 2; i++) {
       for(int j = 0; j < 2; j++) {

@@ -49,7 +49,7 @@ using std::string;
 
 namespace rawspeed {
 
-RawDecoder::RawDecoder(const Buffer* file)
+RawDecoder::RawDecoder(const Buffer& file)
     : mRaw(RawImage::create()), failOnUnknown(false),
       interpolateBadPixels(true), applyStage1DngOpcodes(true), applyCrop(true),
       uncorrectedRawValues(false), fujiRotate(true), mFile(file) {}
@@ -106,7 +106,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
 
     offY += yPerSlice;
 
-    if (!mFile->isValid(slice.offset, slice.count))
+    if (!mFile.isValid(slice.offset, slice.count))
       ThrowRDE("Slice offset/count invalid");
 
     slices.push_back(slice);
@@ -126,7 +126,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
   offY = 0;
   for (const RawSlice& slice : slices) {
     UncompressedDecompressor u(
-        ByteStream(DataBuffer(mFile->getSubView(slice.offset, slice.count),
+        ByteStream(DataBuffer(mFile.getSubView(slice.offset, slice.count),
                               Endianness::little)),
         mRaw);
     iPoint2D size(width, slice.h);

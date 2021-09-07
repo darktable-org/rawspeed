@@ -37,7 +37,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool DcsDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+                                      const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -64,7 +64,7 @@ RawImage DcsDecoder::decodeRawInternal() {
   RawImageCurveGuard curveHandler(&mRaw, table, uncorrectedRawValues);
 
   UncompressedDecompressor u(
-      ByteStream(DataBuffer(mFile->getSubView(off, c2), Endianness::little)),
+      ByteStream(DataBuffer(mFile.getSubView(off, c2), Endianness::little)),
       mRaw);
 
   if (uncorrectedRawValues)

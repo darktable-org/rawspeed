@@ -36,7 +36,7 @@ class FiffParser final : public RawParser {
   TiffRootIFDOwner rootIFD;
 
 public:
-  explicit FiffParser(const Buffer* input);
+  explicit FiffParser(const Buffer& input);
 
   void parseData();
   std::unique_ptr<RawDecoder>

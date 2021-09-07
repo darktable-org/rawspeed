@@ -56,27 +56,27 @@ class CiffEntry
 
 public:
   explicit CiffEntry(NORangesSet<Buffer>* valueDatas,
-                     const ByteStream* valueData, ByteStream dirEntry);
+                     const ByteStream& valueData, ByteStream dirEntry);
 
-  const ByteStream& getData() const { return data; }
+  [[nodiscard]] const ByteStream& getData() const { return data; }
 
-  uint8_t getByte(uint32_t num = 0) const;
-  uint32_t getU32(uint32_t num = 0) const;
-  uint16_t getU16(uint32_t num = 0) const;
+  [[nodiscard]] uint8_t getByte(uint32_t num = 0) const;
+  [[nodiscard]] uint32_t getU32(uint32_t num = 0) const;
+  [[nodiscard]] uint16_t getU16(uint32_t num = 0) const;
 
-  std::string getString() const;
-  std::vector<std::string> getStrings() const;
+  [[nodiscard]] std::string getString() const;
+  [[nodiscard]] std::vector<std::string> getStrings() const;
 
-  uint32_t __attribute__((pure)) getElementSize() const;
-  uint32_t __attribute__((pure)) getElementShift() const;
+  [[nodiscard]] uint32_t __attribute__((pure)) getElementSize() const;
+  [[nodiscard]] uint32_t __attribute__((pure)) getElementShift() const;
 
   // variables:
   CiffTag tag;
   CiffDataType type;
   uint32_t count;
 
-  bool __attribute__((pure)) isInt() const;
-  bool __attribute__((pure)) isString() const;
+  [[nodiscard]] bool __attribute__((pure)) isInt() const;
+  [[nodiscard]] bool __attribute__((pure)) isString() const;
 };
 
 } // namespace rawspeed

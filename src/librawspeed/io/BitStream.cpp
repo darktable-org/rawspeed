@@ -19,9 +19,3 @@
 */
 
 #include "io/BitStream.h" // for BitStreamCacheBase
-
-namespace rawspeed {
-
-constexpr unsigned BitStreamCacheBase::MaxProcessBytes;
-
-} // namespace rawspeed

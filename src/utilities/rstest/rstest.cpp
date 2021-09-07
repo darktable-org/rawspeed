@@ -73,9 +73,7 @@ using std::left;
 using std::internal;
 #endif
 
-namespace rawspeed {
-
-namespace rstest {
+namespace rawspeed::rstest {
 
 std::string img_hash(const rawspeed::RawImage& r);
 
@@ -350,11 +348,11 @@ size_t process(const string& filename, const CameraMetaData* metadata,
   FileReader reader(filename.c_str());
 
   auto map(reader.readFile());
-  // Buffer* map = readFile( argv[1] );
+  // Buffer& map = readFile( argv[1] );
 
   Timer t;
 
-  RawParser parser(map.get());
+  RawParser parser(*map);
   auto decoder(parser.getDecoder(metadata));
   // RawDecoder* decoder = parseRaw( map );
 
@@ -479,9 +477,7 @@ static int usage(const char* progname) {
   return 0;
 }
 
-} // namespace rstest
-
-} // namespace rawspeed
+} // namespace rawspeed::rstest
 
 using rawspeed::rstest::usage;
 using rawspeed::rstest::options;

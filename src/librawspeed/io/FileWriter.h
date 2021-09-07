@@ -31,8 +31,8 @@ class FileWriter
 public:
   explicit FileWriter(const char* filename);
 
-  void writeFile(Buffer* fileMap, uint32_t size = 0);
-  const char* Filename() const { return mFilename; }
+  void writeFile(Buffer& fileMap, uint32_t size = 0);
+  [[nodiscard]] const char* Filename() const { return mFilename; }
   //  void Filename(const char * val) { mFilename = val; }
 
 private:

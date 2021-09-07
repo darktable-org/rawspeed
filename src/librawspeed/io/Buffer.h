@@ -151,14 +151,14 @@ public:
     return *this;
   }
 
-  Buffer getSubView(size_type offset, size_type size_) const {
+  [[nodiscard]] Buffer getSubView(size_type offset, size_type size_) const {
     if (!isValid(0, offset))
       ThrowIOE("Buffer overflow: image file may be truncated");
 
     return Buffer(getData(offset, size_), size_);
   }
 
-  Buffer getSubView(size_type offset) const {
+  [[nodiscard]] Buffer getSubView(size_type offset) const {
     if (!isValid(0, offset))
       ThrowIOE("Buffer overflow: image file may be truncated");
 
@@ -167,7 +167,8 @@ public:
   }
 
   // get pointer to memory at 'offset', make sure at least 'count' bytes are accessible
-  const uint8_t* getData(size_type offset, size_type count) const {
+  [[nodiscard]] const uint8_t* getData(size_type offset,
+                                       size_type count) const {
     if (!isValid(offset, count))
       ThrowIOE("Buffer overflow: image file may be truncated");
 
@@ -181,31 +182,34 @@ public:
   uint8_t operator[](size_type offset) const { return *getData(offset, 1); }
 
   // std begin/end iterators to allow for range loop
-  const uint8_t* begin() const {
+  [[nodiscard]] const uint8_t* begin() const {
     assert(data);
     assert(!ASan::RegionIsPoisoned(data, 0));
     return data;
   }
-  const uint8_t* end() const {
+  [[nodiscard]] const uint8_t* end() const {
     assert(data);
     assert(!ASan::RegionIsPoisoned(data, size));
     return data + size;
   }
 
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap byte order if required
-  template<typename T> inline T get(bool inNativeByteOrder, size_type offset, size_type index = 0) const {
+  template <typename T>
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] inline T
+  get(bool inNativeByteOrder, size_type offset, size_type index = 0) const {
     return getByteSwapped<T>(
         getData(offset + index * static_cast<size_type>(sizeof(T)),
                 static_cast<size_type>(sizeof(T))),
         !inNativeByteOrder);
   }
 
-  inline size_type getSize() const {
+  [[nodiscard]] inline size_type getSize() const {
     assert(!ASan::RegionIsPoisoned(data, size));
     return size;
   }
 
-  inline bool isValid(size_type offset, size_type count = 1) const {
+  [[nodiscard]] inline bool isValid(size_type offset,
+                                    size_type count = 1) const {
     return static_cast<uint64_t>(offset) + count <= static_cast<uint64_t>(size);
   }
 };
@@ -229,14 +233,15 @@ public:
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap
   // byte order if required
   template <typename T>
-  inline T get(size_type offset, size_type index = 0) const {
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] inline T
+  get(size_type offset, size_type index = 0) const {
     assert(Endianness::unknown != endianness);
     assert(Endianness::little == endianness || Endianness::big == endianness);
 
     return Buffer::get<T>(getHostEndianness() == endianness, offset, index);
   }
 
-  inline Endianness getByteOrder() const { return endianness; }
+  [[nodiscard]] inline Endianness getByteOrder() const { return endianness; }
 
   inline Endianness setByteOrder(Endianness endianness_) {
     std::swap(endianness, endianness_);

@@ -46,7 +46,7 @@ You need to have the file data in a Buffer object. This can either be created by
 
 ```cpp
 FileReader reader(filename);
-Buffer* map = nullptr;
+Buffer& map = nullptr;
 try {
   map = reader.readFile();
 } catch (FileIOException &e) {

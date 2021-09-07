@@ -51,17 +51,15 @@
 
 namespace rawspeed {
 
-bool IiqDecoder::isAppropriateDecoder(const Buffer* file) {
-  assert(file);
-
-  const DataBuffer db(*file, Endianness::little);
+bool IiqDecoder::isAppropriateDecoder(const Buffer& file) {
+  const DataBuffer db(file, Endianness::little);
 
   // The IIQ magic. Is present for all IIQ raws.
   return db.get<uint32_t>(8) == 0x49494949;
 }
 
 bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer* file) {
+                                      const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -114,7 +112,7 @@ IiqDecoder::computeSripes(const Buffer& raw_data,
 }
 
 RawImage IiqDecoder::decodeRawInternal() {
-  const Buffer buf(mFile->getSubView(8));
+  const Buffer buf(mFile.getSubView(8));
   const DataBuffer db(buf, Endianness::little);
   ByteStream bs(db);
 

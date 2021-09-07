@@ -23,7 +23,7 @@ if(WITH_OPENMP)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
      CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     # Clang has an option to specify the OpenMP standard to use. Specify it.
-    set(OPENMP_VERSION_SPECIFIER "-fopenmp-version=40")
+    set(OPENMP_VERSION_SPECIFIER "-fopenmp-version=45")
   endif()
 
   set(CMAKE_C_FLAGS_SAVE "${CMAKE_C_FLAGS}")
@@ -31,7 +31,7 @@ if(WITH_OPENMP)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPENMP_VERSION_SPECIFIER}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPENMP_VERSION_SPECIFIER}")
 
-  find_package(OpenMP 4.0)
+  find_package(OpenMP 4.5)
 
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_SAVE}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_SAVE}")
@@ -64,17 +64,6 @@ if(WITH_OPENMP)
   target_link_libraries(rawspeed PUBLIC RawSpeed::OpenMP_CXX)
 
   set(HAVE_OPENMP 1)
-
-  if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
-      CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0) OR
-     (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND
-      CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0.3
-      # XCode 10 is broken. Maybe XCode 11 will be ok?
-     ))
-    # See https://bugs.llvm.org/show_bug.cgi?id=35873
-    #     https://redmine.darktable.org/issues/12568
-    set(OPENMP_FIRSTPRIVATE_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES TRUE)
-  endif()
 
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND
      CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)

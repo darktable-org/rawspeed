@@ -1,0 +1,45 @@
+name: CI - XCode Legacy
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  macOS:
+    name: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.xcode }}.${{ matrix.flavor }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ macos-10.15 ]
+        xcode: [  10.3, 11.3.1,  11.7,   12.4 ]
+        #        LLVM7,  LLVM8, LLVM9, LLVM10
+        compiler:
+          - { compiler: XCode, CC: cc, CXX: c++ }
+        flavor: [ RelWithDebInfo, Release ]
+    steps:
+      - uses: actions/checkout@v2
+        name: Fetch/Checkout RawSpeed git repo
+      - name: Install Base Dependencies
+        run: |
+          brew update > /dev/null || true
+          brew tap Homebrew/bundle
+          cd .ci
+          brew bundle --verbose
+      - name: Build And Test
+        env:
+          DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
+          CC: ${{ matrix.compiler.CC }}
+          CXX: ${{ matrix.compiler.CXX }}
+          SRC_DIR: ${{ github.workspace }}
+          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/../rawspeed-install
+          ECO: -DWITH_OPENMP=${{ matrix.xcode != 10.3 && matrix.xcode != 11.7 }} -DALLOW_DOWNLOADING_GOOGLETEST=ON
+          FLAVOR: ${{ matrix.flavor }}
+          TARGET: build
+        run: |
+          cmake -E make_directory "${BUILD_DIR}";
+          cmake -E make_directory "${INSTALL_PREFIX}";
+          ./.ci/ci-script.sh;

@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h" // for clampBits, unroll_loop, roundUp, copyPixels
+#include "common/Common.h" // for clampBits, roundUp, copyPixels
 #include <algorithm>       // for fill, min, max, equal, generate_n
 #include <cassert>          // for assert
 #include <cstddef>          // for size_t
@@ -43,7 +43,6 @@ using rawspeed::roundUp;
 using rawspeed::roundUpDivision;
 using rawspeed::splitString;
 using rawspeed::trimSpaces;
-using rawspeed::unroll_loop;
 using std::make_tuple;
 using std::min;
 using std::numeric_limits;
@@ -349,63 +348,6 @@ TEST_P(SplitStringTest, SplitStringTest) {
   auto split = splitString(in, sep);
   ASSERT_EQ(split.size(), out.size());
   ASSERT_TRUE(std::equal(split.begin(), split.end(), out.begin()));
-}
-
-TEST(UnrollLoopTest, Test) {
-  ASSERT_NO_THROW({
-    int cnt = 0;
-    unroll_loop<0>([&](int i) { cnt++; });
-    ASSERT_EQ(cnt, 0);
-  });
-
-  ASSERT_NO_THROW({
-    int cnt = 0;
-    unroll_loop<3>([&](int i) { cnt++; });
-    ASSERT_EQ(cnt, 3);
-  });
-}
-
-template <int iterations>
-static void UnrollLoopTestIsMonotonicallyPositiveTest() {
-  static_assert(iterations >= 0, "negative iteration count makes no sense.");
-
-  int invocation = 0;
-
-  std::vector<int> expected;
-  expected.reserve(iterations);
-  invocation = 0;
-  std::generate_n(std::back_inserter(expected), iterations,
-                  [&invocation]() -> int { return invocation++; });
-  if (iterations > 0) {
-    ASSERT_EQ(expected.size(), iterations);
-    ASSERT_EQ(expected.front(), 0);
-    ASSERT_EQ(expected.back(), iterations - 1);
-  }
-
-  std::vector<int> data;
-  data.reserve(iterations);
-  invocation = 0;
-  unroll_loop<iterations>([&](int i) {
-    ASSERT_GE(invocation, 0);
-    ASSERT_GE(i, 0);
-    ASSERT_LT(invocation, iterations);
-    ASSERT_LT(i, iterations);
-    ASSERT_EQ(i, invocation);
-
-    data.emplace_back(i);
-    invocation++;
-  });
-
-  ASSERT_EQ(data.size(), expected.size());
-  ASSERT_EQ(data, expected);
-}
-
-TEST(UnrollLoopTest, IsMonotonicallyPositiveTest) {
-  UnrollLoopTestIsMonotonicallyPositiveTest<0>();
-  UnrollLoopTestIsMonotonicallyPositiveTest<1>();
-  UnrollLoopTestIsMonotonicallyPositiveTest<2>();
-  UnrollLoopTestIsMonotonicallyPositiveTest<3>();
-  UnrollLoopTestIsMonotonicallyPositiveTest<4>();
 }
 
 TEST(MakeUniqueTest, Test) {

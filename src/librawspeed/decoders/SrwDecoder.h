@@ -35,8 +35,8 @@ class SrwDecoder final : public AbstractTiffDecoder
 {
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer* file);
-  SrwDecoder(TiffRootIFDOwner&& root, const Buffer* file)
+                                   const Buffer& file);
+  SrwDecoder(TiffRootIFDOwner&& root, const Buffer& file)
       : AbstractTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;
@@ -44,7 +44,7 @@ public:
   void checkSupportInternal(const CameraMetaData* meta) override;
 
 private:
-  int getDecoderVersion() const override { return 3; }
+  [[nodiscard]] int getDecoderVersion() const override { return 3; }
   std::string getMode();
 };
 

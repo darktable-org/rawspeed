@@ -160,7 +160,8 @@ protected:
   JpegMarker getNextMarker(bool allowskip);
 
   template <int N_COMP>
-  std::array<HuffmanTable*, N_COMP> getHuffmanTables() const {
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] std::array<HuffmanTable*, N_COMP>
+  getHuffmanTables() const {
     std::array<HuffmanTable*, N_COMP> ht;
     for (int i = 0; i < N_COMP; ++i) {
       const unsigned dcTblNo = frame.compInfo[i].dcTblNo;
@@ -176,7 +177,8 @@ protected:
   }
 
   template <int N_COMP>
-  __attribute__((pure)) std::array<uint16_t, N_COMP>
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] __attribute__((pure))
+  std::array<uint16_t, N_COMP>
   getInitialPredictors() const {
     std::array<uint16_t, N_COMP> pred;
     if (frame.prec < (Pt + 1)) {

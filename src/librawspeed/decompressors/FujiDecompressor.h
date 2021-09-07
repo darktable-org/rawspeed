@@ -43,7 +43,7 @@ public:
   struct FujiHeader {
     FujiHeader() = default;
 
-    explicit FujiHeader(ByteStream* input_);
+    explicit FujiHeader(ByteStream& input_);
     explicit __attribute__((pure)) operator bool() const; // validity check
 
     uint16_t signature;
@@ -79,10 +79,10 @@ public:
     static int lineHeight() { return 6; }
 
     // how many vertical lines does this block encode?
-    int height() const { return h.total_lines; }
+    [[nodiscard]] int height() const { return h.total_lines; }
 
     // how many horizontal pixels does this block encode?
-    int width() const {
+    [[nodiscard]] int width() const {
       // if this is not the last block, we are good.
       if ((n + 1) != h.blocks_in_row)
         return h.block_size;
@@ -94,14 +94,14 @@ public:
     }
 
     // where vertically does this block start?
-    int offsetY(int line = 0) const {
+    [[nodiscard]] int offsetY(int line = 0) const {
       (void)height(); // A note for NDEBUG builds that *this is used.
       assert(line >= 0 && line < height());
       return lineHeight() * line;
     }
 
     // where horizontally does this block start?
-    int offsetX() const { return h.block_size * n; }
+    [[nodiscard]] int offsetX() const { return h.block_size * n; }
   };
 
   FujiDecompressor(const RawImage& img, ByteStream input);
@@ -189,7 +189,7 @@ private:
   void copy_line_to_bayer(fuji_compressed_block* info, const FujiStrip& strip,
                           int cur_line) const;
 
-  static inline void fuji_zerobits(BitPumpMSB* pump, int* count);
+  static inline void fuji_zerobits(BitPumpMSB& pump, int* count);
   static int bitDiff(int value1, int value2);
 
   template <typename T1, typename T2>

@@ -49,11 +49,11 @@ class IiqDecoder final : public AbstractTiffDecoder {
                 uint32_t height);
 
 public:
-  static bool isAppropriateDecoder(const Buffer* file);
+  static bool isAppropriateDecoder(const Buffer& file);
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer* file);
+                                   const Buffer& file);
 
-  IiqDecoder(TiffRootIFDOwner&& rootIFD, const Buffer* file)
+  IiqDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file)
       : AbstractTiffDecoder(move(rootIFD), file) {}
 
   RawImage decodeRawInternal() override;
@@ -61,7 +61,7 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 protected:
-  int getDecoderVersion() const override { return 0; }
+  [[nodiscard]] int getDecoderVersion() const override { return 0; }
   uint32_t black_level = 0;
   void CorrectPhaseOneC(ByteStream meta_data, uint32_t split_row,
                         uint32_t split_col);

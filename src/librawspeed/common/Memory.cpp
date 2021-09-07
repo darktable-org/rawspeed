@@ -29,15 +29,12 @@
 #include <cassert> // for assert
 #include <cstddef> // for size_t, uintptr_t
 
-#if defined(HAVE_MM_MALLOC)
-// for _mm_malloc, _mm_free
-#include <xmmintrin.h>
-#elif defined(HAVE_ALIGNED_MALLOC)
+#if defined(HAVE_ALIGNED_MALLOC)
 extern "C" {
 #include <malloc.h> // for _aligned_malloc, _aligned_free
 }
 #else
-#include <cstdlib> // for posix_memalign / aligned_alloc / malloc; free
+#include <cstdlib> // for aligned_alloc / posix_memalign; free
 #endif
 
 namespace rawspeed {
@@ -58,24 +55,15 @@ void* alignedMalloc(size_t size, size_t alignment) {
     return ptr;
 #endif
 
-#if defined(HAVE_POSIX_MEMALIGN)
+#if defined(HAVE_ALIGNED_ALLOC)
+  ptr = aligned_alloc(alignment, size);
+#elif defined(HAVE_POSIX_MEMALIGN)
   if (0 != posix_memalign(&ptr, alignment, size))
     return nullptr;
-#elif defined(HAVE_ALIGNED_ALLOC)
-  ptr = aligned_alloc(alignment, size);
-#elif defined(HAVE_MM_MALLOC)
-  ptr = _mm_malloc(size, alignment);
 #elif defined(HAVE_ALIGNED_MALLOC)
   ptr = _aligned_malloc(size, alignment);
 #else
-#pragma message "No aligned malloc() implementation available!"
-  assert(alignment <= alignof(std::max_align_t));
-#ifdef __APPLE__
-  // apple malloc() aligns to 16 by default
-  assert(alignment <= 16);
-#endif
-
-  ptr = malloc(size); // NOLINT
+#error "No aligned malloc() implementation available!"
 #endif
 
   assert(isAligned(ptr, alignment));
@@ -84,9 +72,7 @@ void* alignedMalloc(size_t size, size_t alignment) {
 }
 
 void alignedFree(void* ptr) {
-#if defined(HAVE_MM_MALLOC)
-  _mm_free(ptr);
-#elif defined(HAVE_ALIGNED_MALLOC)
+#if defined(HAVE_ALIGNED_MALLOC)
   _aligned_free(ptr);
 #else
   free(ptr);                    // NOLINT
@@ -94,14 +80,9 @@ void alignedFree(void* ptr) {
 }
 
 void alignedFreeConstPtr(const void* ptr) {
-// an exception, specified by EXP05-C-EX1 and EXP55-CPP-EX1
-#if defined(HAVE_MM_MALLOC)
-  _mm_free(const_cast<void*>(ptr));
-#elif defined(HAVE_ALIGNED_MALLOC)
-  _aligned_free(const_cast<void*>(ptr));
-#else
-  free(const_cast<void*>(ptr)); // NOLINT
-#endif
+  // an exception, specified by EXP05-C-EX1 and EXP55-CPP-EX1
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast): this is fine.
+  alignedFree(const_cast<void*>(ptr));
 }
 
 } // namespace rawspeed
