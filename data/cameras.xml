@@ -2658,6 +2658,56 @@
 			<Hint name="msb_override" value=""/>
 		</Hints>
 	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON D6" mode="14bit-compressed">
+		<ID make="Nikon" model="D6">Nikon D6</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="1008" white="15520"/>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON D6" mode="14bit-uncompressed">
+		<ID make="Nikon" model="D6">Nikon D6</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="1008" white="15520"/>
+		<Hints>
+			<Hint name="msb_override" value=""/>
+		</Hints>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON D6" mode="12bit-compressed">
+		<ID make="Nikon" model="D6">Nikon D6</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="252" white="3880"/>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON D6" mode="12bit-uncompressed">
+		<ID make="Nikon" model="D6">Nikon D6</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="252" white="3880"/>
+		<Hints>
+			<Hint name="msb_override" value=""/>
+		</Hints>
+	</Camera>
         <Camera make="NIKON CORPORATION" model="NIKON Z 5" mode="14bit-compressed">
                 <ID make="Nikon" model="Z 5">Nikon Z 5</ID>
                 <CFA width="2" height="2">
@@ -2901,6 +2951,28 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="1008" white="15520"/>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON Z fc" mode="14bit-compressed">
+		<ID make="Nikon" model="Z fc">Nikon Z fc</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="1008" white="15892"/>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON Z fc" mode="12bit-compressed">
+		<ID make="Nikon" model="Z fc">Nikon Z fc</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="251" white="3972"/>
 	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON Df" mode="14bit-compressed">
 		<ID make="Nikon" model="Df">Nikon Df</ID>
@@ -5562,6 +5634,28 @@
 		<Crop x="0" y="0" width="-130" height="0"/>
 		<Sensor black="146" white="3956"/>
 	</Camera>
+	<Camera make="LEICA CAMERA AG" model="C-Lux">
+		<ID make="Leica" model="C-Lux">Leica C-Lux</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="140" white="4095"/>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="C-Lux" mode="3:2">
+		<ID make="Leica" model="C-Lux">Leica C-Lux</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="140" white="4095"/>
+	</Camera>
 	<Camera make="LEICA" model="DIGILUX 2" decoder_version="2">
 		<ID make="Leica" model="Digilux 2">Leica Digilux 2</ID>
 		<CFA width="2" height="2">
@@ -7857,6 +7951,9 @@
 		</CFA>
 		<Crop x="0" y="0" width="-20" height="0"/>
 		<Sensor black="512" white="16383"/>
+		<Aliases>
+			<Alias id="ILCE-7RM3A">ILCE-7RM3A</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="SONY" model="ILCE-7RM4">
 		<ID make="Sony" model="ILCE-7RM4">Sony ILCE-7RM4</ID>
