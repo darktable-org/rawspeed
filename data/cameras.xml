@@ -5584,6 +5584,28 @@
 		<Crop x="0" y="0" width="-130" height="0"/>
 		<Sensor black="146" white="3956"/>
 	</Camera>
+	<Camera make="LEICA CAMERA AG" model="C-Lux">
+		<ID make="Leica" model="C-Lux">Leica C-Lux</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="140" white="4095"/>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="C-Lux" mode="3:2">
+		<ID make="Leica" model="C-Lux">Leica C-Lux</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="140" white="4095"/>
+	</Camera>
 	<Camera make="LEICA" model="DIGILUX 2" decoder_version="2">
 		<ID make="Leica" model="Digilux 2">Leica Digilux 2</ID>
 		<CFA width="2" height="2">
