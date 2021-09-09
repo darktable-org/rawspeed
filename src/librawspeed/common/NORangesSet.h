@@ -30,14 +30,39 @@ namespace rawspeed {
 template <typename T> class NORangesSet final {
   std::set<T> elts;
 
+  [[nodiscard]] bool
+  rangeIsOverlappingExistingElementOfSortedSet(const T& newElt) const {
+    // If there are no elements in set, then the new element
+    // does not overlap any existing elements.
+    if (elts.empty())
+      return false;
+
+    // Find the first element that is not less than the new element.
+    auto p =
+        std::partition_point(elts.begin(), elts.end(),
+                             [newElt](const T& elt) { return elt < newElt; });
+
+    // If there is such an element, we must not overlap with it.
+    if (p != elts.end() && RangesOverlap(newElt, *p))
+      return true;
+
+    // Now, is there an element before the element we found?
+    if (p == elts.begin())
+      return false;
+
+    // There is. We *also* must not overlap with that element too.
+    auto prevBeforeP = std::prev(p);
+    return RangesOverlap(newElt, *prevBeforeP);
+  }
+
 public:
   bool insert(const T& newElt) {
-    if (std::any_of(elts.begin(), elts.end(),
-                    [newElt](const auto& existingElt) {
-                      return RangesOverlap(newElt, existingElt);
-                    }))
+    if (rangeIsOverlappingExistingElementOfSortedSet(newElt))
       return false;
-    elts.insert(newElt);
+
+    auto i = elts.insert(newElt);
+    assert(i.second && "Did not insert after all?");
+    (void)i;
     return true;
   }
 
