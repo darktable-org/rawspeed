@@ -140,4 +140,25 @@ static const std::set<twoRangesType> AllOverlapped{
     std::make_tuple(2, 2, 2, 2),
 };
 
+using threeRangesType = std::tuple<int, unsigned, int, unsigned, int, unsigned>;
+class ThreeRangesTest : public ::testing::TestWithParam<threeRangesType> {
+protected:
+  ThreeRangesTest() = default;
+  virtual void SetUp() {
+    r0 = Range<int>(std::get<0>(GetParam()), std::get<1>(GetParam()));
+    r1 = Range<int>(std::get<2>(GetParam()), std::get<3>(GetParam()));
+    r2 = Range<int>(std::get<4>(GetParam()), std::get<5>(GetParam()));
+  }
+
+  Range<int> r0;
+  Range<int> r1;
+  Range<int> r2;
+};
+INSTANTIATE_TEST_CASE_P(
+    Unsigned, ThreeRangesTest,
+    testing::Combine(testing::Range(0, 3), testing::Range(0U, 3U),
+                     testing::Range(0, 3), testing::Range(0U, 3U),
+                     testing::Range(0, 3), testing::Range(0U, 3U)));
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ThreeRangesTest);
+
 } // namespace rawspeed_test

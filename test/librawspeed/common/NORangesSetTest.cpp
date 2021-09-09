@@ -82,4 +82,18 @@ TEST_P(TwoRangesTest, NORangesSetDataTest) {
   }
 }
 
+TEST_P(ThreeRangesTest, NORangesSetDataTest) {
+  NORangesSet<Range<int>> s;
+  auto res = s.insert(r0);
+  ASSERT_TRUE(res.second);
+
+  res = s.insert(r1);
+  ASSERT_EQ(res.second, !RangesOverlap(r1, r0));
+  if (!res.second)
+    return; // If we already have overlap don't proceed further.
+
+  res = s.insert(r2);
+  ASSERT_EQ(res.second, !RangesOverlap(r0, r2) && !RangesOverlap(r1, r2));
+}
+
 } // namespace rawspeed_test
