@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2017-2021 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -22,16 +22,26 @@
 
 #include "common/Range.h" // for RangesOverlap
 #include <set>            // IWYU pragma: export
+#include <utility>        // for pair
 // IWYU pragma: no_include <bits/stl_set.h>
 
 namespace rawspeed {
 
-template <typename T> struct RangesOverlapCmp final {
-  constexpr bool operator()(const T& lhs, const T& rhs) const {
-    return !RangesOverlap(lhs, rhs);
-  }
-};
+template <typename T> class NORangesSet final {
+  std::set<T> elts;
 
-template <typename T> using NORangesSet = std::set<T, RangesOverlapCmp<T>>;
+public:
+  bool insert(const T& newElt) {
+    if (std::any_of(elts.begin(), elts.end(),
+                    [newElt](const auto& existingElt) {
+                      return RangesOverlap(newElt, existingElt);
+                    }))
+      return false;
+    elts.insert(newElt);
+    return true;
+  }
+
+  [[nodiscard]] std::size_t size() const { return elts.size(); }
+};
 
 } // namespace rawspeed

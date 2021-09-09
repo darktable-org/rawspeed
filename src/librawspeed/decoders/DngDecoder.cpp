@@ -314,7 +314,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) {
     ByteStream bs(DataBuffer(mFile.getSubView(offset, count),
                              mRootIFD->rootBuffer.getByteOrder()));
 
-    if (!tilesLegality.emplace(bs).second)
+    if (!tilesLegality.insert(bs))
       ThrowTPE("Two tiles overlap. Raw corrupt!");
 
     slices.slices.emplace_back(slices.dsc, n, bs);

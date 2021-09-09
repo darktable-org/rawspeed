@@ -53,7 +53,7 @@ CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas,
     bytesize = dirEntry.getU32();
     data_offset = dirEntry.getU32();
     data = valueData.getSubStream(data_offset, bytesize);
-    if (!valueDatas->emplace(data).second)
+    if (!valueDatas->insert(data))
       ThrowCPE("Two valueData's overlap. Raw corrupt!");
     break;
   case 0x4000:
