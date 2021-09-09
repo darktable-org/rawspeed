@@ -7857,6 +7857,9 @@
 		</CFA>
 		<Crop x="0" y="0" width="-20" height="0"/>
 		<Sensor black="512" white="16383"/>
+		<Aliases>
+			<Alias id="ILCE-7RM3A">ILCE-7RM3A</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="SONY" model="ILCE-7RM4">
 		<ID make="Sony" model="ILCE-7RM4">Sony ILCE-7RM4</ID>
