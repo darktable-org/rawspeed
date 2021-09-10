@@ -366,7 +366,7 @@ class Cr3Decoder final : public RawDecoder {
 public:
   static bool isAppropriateDecoder(const IsoMRootBox& box);
 
-  Cr3Decoder(std::unique_ptr<const IsoMRootBox> rootBox_, const Buffer* file)
+  Cr3Decoder(std::unique_ptr<const IsoMRootBox> rootBox_, const Buffer& file)
       : RawDecoder(file), rootBox(std::move(rootBox_)) {}
 
   RawImage decodeRawInternal() override;

@@ -546,7 +546,7 @@ void IsoMMediaDataBox::parse(IsoMRootBox* root) {
         if (!RangesAreNested(mData, chunk))
           ThrowIPE("Chunk is not in the mdat box.");
         // Does it overlap with any previous chunk?
-        if (!clc.emplace(chunk).second)
+        if (!clc.insert(chunk))
           ThrowIPE("Two chunks overlap.");
         // OK!
         chunks.emplace_back(chunk);

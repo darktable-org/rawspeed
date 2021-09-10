@@ -39,7 +39,7 @@ class IsoMParser final : public RawParser {
   void parseData();
 
 public:
-  explicit IsoMParser(const Buffer* input);
+  explicit IsoMParser(const Buffer& input);
 
   std::unique_ptr<RawDecoder>
   getDecoder(const CameraMetaData* meta = nullptr) override;
