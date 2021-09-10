@@ -101,7 +101,6 @@ INSTANTIATE_TEST_CASE_P(
     testing::Combine(testing::Range(0, 3), testing::Range(0U, 3U),
                      testing::Range(0, 3), testing::Range(0U, 3U),
                      testing::Range(0, 3), testing::Range(0U, 3U)));
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ThreeRangesTest);
 
 TEST_P(ThreeRangesTest, NORangesSetDataTest) {
   NORangesSet<Range<int>> s;
