@@ -559,7 +559,8 @@ RawImage Cr3Decoder::decodeRawInternal() {
 }
 
 bool Cr3Decoder::isCodecSupported(const std::string& compressorVersion) const {
-  if (compressorVersion == "CanonHEIF001/10.00.00/00.00.00") {
+  if (compressorVersion == "CanonHEIF001/10.00.00/00.00.00"
+   || compressorVersion == "CanonHEIF001/10.00.01/00.00.00") {
     writeLog(DEBUG_PRIO_WARNING, "HEIF CNCV: '%s' is not supported",
              compressorVersion.c_str());
   }
@@ -576,10 +577,15 @@ bool Cr3Decoder::isCodecSupported(const std::string& compressorVersion) const {
              "CanonCR3_001/00.10.00/00.00.00" // EOS R5, R6 and 1DX Mark III
                                               // (raw)
          || compressorVersion ==
+                "CanonCR3_003/00.10.00/00.00.00" // R6 (craw with HDR preview),
+                                                 // R5 (craw HDR, FW 1.2.0)
+         || compressorVersion ==
                 "CanonCR3_002/00.10.00/00.00.00" // CR3 of 1DX Mark III (craw)
          || compressorVersion ==
+                "CanonCR3_001/01.09.00/00.00.00" // SX70 HS, G5 Mark II and G7 Mark III
+         || compressorVersion ==
                 "CanonCR3_001/00.09.00/00.00.00"; // EOS R, EOS RP, M50, 250D,
-                                                  // 90D, M6 Mark II, M200
+                                                  // 90D, M6 Mark II, M200,  M50m2 and 250D
 }
 
 void Cr3Decoder::checkSupportInternal(const CameraMetaData* meta) {
