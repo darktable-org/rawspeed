@@ -116,13 +116,14 @@ jobs:
           cmake -E make_directory "${INSTALL_PREFIX}";
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh;
   macOS:
-    name: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
+    name: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.xcode }}.targeting.OSX.${{ matrix.deployment_target }}.${{ matrix.flavor }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ macos-11 ]
         xcode: [ 12.5.1 ] # LLVM11
+        deployment_target: [ 12.5.1, 10.7 ]
         compiler:
           - { compiler: XCode, CC: cc, CXX: c++ }
         flavor: [ RelWithDebInfo, Release ]
@@ -138,8 +139,11 @@ jobs:
       - name: Build And Test
         env:
           DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
           CC: ${{ matrix.compiler.CC }}
           CXX: ${{ matrix.compiler.CXX }}
+          CFLAGS: -mmacosx-version-min=${{ matrix.deployment_target }}
+          CXXFLAGS: -mmacosx-version-min=${{ matrix.deployment_target }}
           SRC_DIR: ${{ github.workspace }}
           BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/../rawspeed-install
@@ -147,6 +151,9 @@ jobs:
           FLAVOR: ${{ matrix.flavor }}
           TARGET: build
         run: |
+          if [[ "$MACOSX_DEPLOYMENT_TARGET" == "10.7" ]]; then
+            export CXXFLAGS="$CXXFLAGS -stdlib=libc++";
+          fi
           cmake -E make_directory "${BUILD_DIR}";
           cmake -E make_directory "${INSTALL_PREFIX}";
           ./.ci/ci-script.sh;
