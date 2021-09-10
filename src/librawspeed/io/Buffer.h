@@ -216,7 +216,7 @@ public:
 
 // WARNING: both buffers must belong to the same allocation, else this is UB!
 inline bool operator<(const Buffer& lhs, const Buffer& rhs) {
-  return std::pair(lhs.begin(), lhs.end()) < std::pair(rhs.begin(), rhs.end());
+  return std::make_pair(lhs.begin(), lhs.end()) < std::make_pair(rhs.begin(), rhs.end());
 }
 
 /*
