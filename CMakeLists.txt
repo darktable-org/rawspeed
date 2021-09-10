@@ -195,7 +195,7 @@ add_custom_target(tests ALL)
 include(compiler-warnings)
 
 if(RAWSPEED_ENABLE_WERROR)
-  set_directory_properties(PROPERTIES COMPILE_OPTIONS "-Werror")
+  CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT("-Werror")
 endif()
 
 if(BUILD_BENCHMARKING)
