@@ -443,7 +443,7 @@ void ArwDecoder::GetWB() {
     Buffer decIFD(std::move(DecryptedBuffer), DecryptedBufferSize);
     const Buffer Padding(decIFD.getSubView(0, off));
     // The Decrypted Root Ifd can not point to preceding padding buffer.
-    ifds_decoded.emplace(Padding);
+    ifds_decoded.insert(Padding);
 
     DataBuffer dbIDD(decIFD, priv->getRootIfdData().getByteOrder());
     TiffRootIFD encryptedIFD(nullptr, &ifds_decoded, dbIDD, off);

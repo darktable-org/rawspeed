@@ -43,6 +43,10 @@ public:
   constexpr T __attribute__((const)) end() const { return base + T(size); }
 };
 
+template <typename T> bool operator<(const Range<T>& lhs, const Range<T>& rhs) {
+  return std::pair(lhs.begin(), lhs.end()) < std::pair(rhs.begin(), rhs.end());
+}
+
 template <typename Tr, typename Tv>
 inline constexpr bool __attribute__((const))
 RangeContains(const Tr& r, Tv pos) {

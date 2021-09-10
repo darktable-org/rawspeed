@@ -97,7 +97,9 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   set(coverage_link "")
 elseif(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
   set(coverage_compilation "-fprofile-arcs -ftest-coverage")
-  set(coverage_link "--coverage")
+  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    set(coverage_link "--coverage")
+  endif()
 endif()
 
 SET(CMAKE_CXX_FLAGS_COVERAGE
