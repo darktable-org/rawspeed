@@ -39,6 +39,9 @@ endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.0.1)
   message(FATAL_ERROR "XCode (Apple clang) C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} is too old. Need version 10.0.1+ (XCode 10.3+)")
 endif()
+if(CMAKE_OSX_DEPLOYMENT_TARGET AND CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.7)
+  message(FATAL_ERROR "Can not target OSX version ${CMAKE_OSX_DEPLOYMENT_TARGET}, which is older than 10.7")
+endif()
 
 if(WITH_OPENMP)
   # OpenMP is not supported with LLVM7 / LLVM9.
@@ -88,4 +91,8 @@ if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSIO
 endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.0.0)
   message(WARNING "XCode (Apple clang) C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} support is soft-deprecated and will be removed in the future. XCode version 12.0+ is recommended.")
+endif()
+
+if(CMAKE_OSX_DEPLOYMENT_TARGET AND CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.14)
+  message(WARNING "Targeting OSX version ${CMAKE_OSX_DEPLOYMENT_TARGET} older than 10.14 is deprecated")
 endif()
