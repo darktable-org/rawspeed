@@ -715,8 +715,8 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
   if (!mVC5.iSubband.has_value())
     ThrowRDE("Did not see VC5Tag::SubbandNumber yet");
 
-  const int idx = subband_wavelet_index[mVC5.iSubband.value()];
-  const int band = subband_band_index[mVC5.iSubband.value()];
+  const int idx = subband_wavelet_index[*mVC5.iSubband];
+  const int band = subband_band_index[*mVC5.iSubband];
 
   auto& wavelets = channels[mVC5.iChannel].wavelets;
 
@@ -727,19 +727,19 @@ void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
   }
 
   std::unique_ptr<Wavelet::AbstractBand>& dstBand = wavelet.bands[band];
-  if (mVC5.iSubband.value() == 0) {
+  if (mVC5.iSubband == 0) {
     assert(band == 0);
     // low-pass band, only one, for the smallest wavelet, per channel per image
     if (!mVC5.lowpassPrecision.has_value())
       ThrowRDE("Did not see VC5Tag::LowpassPrecision yet");
-    dstBand = std::make_unique<Wavelet::LowPassBand>(
-        wavelet, bs, mVC5.lowpassPrecision.value());
+    dstBand = std::make_unique<Wavelet::LowPassBand>(wavelet, bs,
+                                                     *mVC5.lowpassPrecision);
     mVC5.lowpassPrecision.reset();
   } else {
     if (!mVC5.quantization.has_value())
       ThrowRDE("Did not see VC5Tag::Quantization yet");
-    dstBand = std::make_unique<Wavelet::HighPassBand>(
-        wavelet, bs, mVC5.quantization.value());
+    dstBand = std::make_unique<Wavelet::HighPassBand>(wavelet, bs,
+                                                      *mVC5.quantization);
     mVC5.quantization.reset();
   }
   wavelet.setBandValid(band);
