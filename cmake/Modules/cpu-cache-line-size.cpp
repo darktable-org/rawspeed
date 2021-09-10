@@ -40,7 +40,7 @@ int main() {
   buffer = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION*)malloc(buffer_size);
   GetLogicalProcessorInformation(&buffer[0], &buffer_size);
 
-  for (int i = 0;
+  for (DWORD i = 0;
        i != buffer_size / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION); ++i) {
     if (buffer[i].Relationship == RelationCache && buffer[i].Cache.Level == 1 &&
         buffer[i].Cache.Type == CacheData) {
