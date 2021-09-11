@@ -16,6 +16,8 @@ if(BUILD_BENCHMARKING)
   add_dependencies(dependencies benchmark)
 endif()
 
+target_compile_features(rawspeed PUBLIC cxx_std_17)
+
 unset(HAVE_OPENMP)
 if(WITH_OPENMP)
   message(STATUS "Looking for OpenMP")
