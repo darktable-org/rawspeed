@@ -43,7 +43,7 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   static bool isCRW(const Buffer& input);
 
-protected:
+private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }
   static float canonEv(int64_t in);
 };

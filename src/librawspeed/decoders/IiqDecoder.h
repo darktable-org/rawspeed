@@ -60,7 +60,7 @@ public:
   void checkSupportInternal(const CameraMetaData* meta) override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
-protected:
+private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }
   uint32_t black_level = 0;
   void CorrectPhaseOneC(ByteStream meta_data, uint32_t split_row,

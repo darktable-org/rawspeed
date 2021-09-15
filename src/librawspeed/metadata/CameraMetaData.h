@@ -71,7 +71,7 @@ public:
   void disableMake(const std::string &make);
   void disableCamera(const std::string &make, const std::string &model);
 
-protected:
+private:
   const Camera* addCamera(std::unique_ptr<Camera> cam);
 };
 

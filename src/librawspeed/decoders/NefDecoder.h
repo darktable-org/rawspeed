@@ -49,10 +49,9 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void checkSupportInternal(const CameraMetaData* meta) override;
 
-protected:
+private:
   struct NefSlice final : RawSlice {};
 
-private:
   [[nodiscard]] int getDecoderVersion() const override { return 5; }
   bool D100IsCompressed(uint32_t offset);
   static bool NEFIsUncompressed(const TiffIFD* raw);

@@ -192,7 +192,7 @@ public:
   void calculateBlackAreas() override;
   void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
 
-protected:
+private:
   void scaleValues_plain(int start_y, int end_y);
 #ifdef WITH_SSE2
   void scaleValues_SSE2(int start_y, int end_y);
@@ -212,7 +212,7 @@ public:
   void calculateBlackAreas() override;
   void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
 
-protected:
+private:
   void scaleValues(int start_y, int end_y) override;
   void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
   [[noreturn]] void doLookup(int start_y, int end_y) override;

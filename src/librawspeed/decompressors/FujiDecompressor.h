@@ -110,7 +110,7 @@ public:
 
   void decompress() const;
 
-protected:
+private:
   struct fuji_compressed_params {
     fuji_compressed_params() = default;
 
@@ -170,7 +170,6 @@ protected:
     std::array<uint16_t*, ltotal> linebuf;
   };
 
-private:
   ByteStream input;
 
   std::array<std::array<CFAColor, 6>, 6> CFA;
