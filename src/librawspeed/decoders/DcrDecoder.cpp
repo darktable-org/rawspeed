@@ -103,8 +103,9 @@ RawImage DcrDecoder::decodeRawInternal() {
       return 10;
     case 4096:
       return 12;
+    default:
+      __builtin_unreachable();
     }
-    __builtin_unreachable();
   }();
 
   KodakDecompressor k(mRaw, input, bps, uncorrectedRawValues);
