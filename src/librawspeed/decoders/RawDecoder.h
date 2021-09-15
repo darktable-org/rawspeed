@@ -136,7 +136,7 @@ protected:
 
   /* Generic decompressor for uncompressed images */
   /* order: Order of the bits - see Common.h for possibilities. */
-  void decodeUncompressed(const TiffIFD* rawIFD, BitOrder order);
+  void decodeUncompressed(const TiffIFD* rawIFD, BitOrder order) const;
 
   /* The Raw input file to be decoded */
   const Buffer& mFile;

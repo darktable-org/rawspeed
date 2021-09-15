@@ -131,7 +131,7 @@ RawImage OrfDecoder::decodeRawInternal() {
 }
 
 bool OrfDecoder::decodeUncompressed(const ByteStream& s, uint32_t w, uint32_t h,
-                                    uint32_t size) {
+                                    uint32_t size) const {
   UncompressedDecompressor u(s, mRaw);
   // FIXME: most of this logic should be in UncompressedDecompressor,
   // one way or another.
@@ -172,7 +172,7 @@ bool OrfDecoder::decodeUncompressed(const ByteStream& s, uint32_t w, uint32_t h,
   return false;
 }
 
-void OrfDecoder::parseCFA() {
+void OrfDecoder::parseCFA() const {
   if (!mRootIFD->hasEntryRecursive(EXIFCFAPATTERN))
     ThrowRDE("No EXIFCFAPATTERN entry found!");
 

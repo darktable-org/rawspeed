@@ -537,7 +537,7 @@ DngOpcodes::DngOpcodes(const RawImage& ri, TiffEntry* entry) {
 // of the DngOpcode type in DngOpcodes.h
 DngOpcodes::~DngOpcodes() = default;
 
-void DngOpcodes::applyOpCodes(const RawImage& ri) {
+void DngOpcodes::applyOpCodes(const RawImage& ri) const {
   for (const auto& code : opcodes) {
     code->setup(ri);
     code->apply(ri);

@@ -273,7 +273,7 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32_t split_row,
 // curve's control points share the same seven X-coordinates.
 void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
                                                     uint32_t split_row,
-                                                    uint32_t split_col) {
+                                                    uint32_t split_col) const {
   std::array<uint32_t, 9> shared_x_coords;
 
   // Read the middle seven points from the file
@@ -382,13 +382,13 @@ void IiqDecoder::correctSensorDefects(ByteStream data) {
   }
 }
 
-void IiqDecoder::handleBadPixel(const uint16_t col, const uint16_t row) {
+void IiqDecoder::handleBadPixel(const uint16_t col, const uint16_t row) const {
   MutexLocker guard(&mRaw->mBadPixelMutex);
   mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
                                   (static_cast<uint32_t>(row) << 16) + col);
 }
 
-void IiqDecoder::correctBadColumn(const uint16_t col) {
+void IiqDecoder::correctBadColumn(const uint16_t col) const {
   const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
   for (int row = 2; row < mRaw->dim.y - 2; row++) {

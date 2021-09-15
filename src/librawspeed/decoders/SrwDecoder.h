@@ -45,7 +45,7 @@ public:
 
 private:
   [[nodiscard]] int getDecoderVersion() const override { return 3; }
-  std::string getMode();
+  [[nodiscard]] std::string getMode() const;
 };
 
 } // namespace rawspeed

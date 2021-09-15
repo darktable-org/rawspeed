@@ -40,7 +40,7 @@ using std::min;
 namespace rawspeed {
 
 void UncompressedDecompressor::sanityCheck(const uint32_t* h,
-                                           int bytesPerLine) {
+                                           int bytesPerLine) const {
   assert(h != nullptr);
   assert(*h > 0);
   assert(bytesPerLine > 0);
@@ -64,7 +64,7 @@ void UncompressedDecompressor::sanityCheck(const uint32_t* h,
 }
 
 void UncompressedDecompressor::sanityCheck(uint32_t w, const uint32_t* h,
-                                           int bpp) {
+                                           int bpp) const {
   assert(w > 0);
   assert(bpp > 0);
 
@@ -97,7 +97,7 @@ template <typename Pump>
 void UncompressedDecompressor::decode16BitFP(const iPoint2D& size,
                                              const iPoint2D& offset,
                                              uint32_t skipBytes, uint32_t h,
-                                             uint64_t y) {
+                                             uint64_t y) const {
   assert(mRaw->getDataType() == TYPE_FLOAT32);
 
   uint8_t* data = mRaw->getData();
@@ -122,7 +122,7 @@ template <typename Pump>
 void UncompressedDecompressor::decode24BitFP(const iPoint2D& size,
                                              const iPoint2D& offset,
                                              uint32_t skipBytes, uint32_t h,
-                                             uint64_t y) {
+                                             uint64_t y) const {
   assert(mRaw->getDataType() == TYPE_FLOAT32);
 
   uint8_t* data = mRaw->getData();

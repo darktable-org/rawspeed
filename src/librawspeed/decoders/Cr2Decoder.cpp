@@ -309,7 +309,7 @@ iPoint2D Cr2Decoder::getSubSampling() const {
   }
 }
 
-int Cr2Decoder::getHue() {
+int Cr2Decoder::getHue() const {
   if (hints.has("old_sraw_hue"))
     return (mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x);
 

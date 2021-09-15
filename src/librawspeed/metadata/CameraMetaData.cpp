@@ -144,7 +144,7 @@ const Camera* CameraMetaData::addCamera(std::unique_ptr<Camera> cam) {
   return cameras[id].get();
 }
 
-void CameraMetaData::disableMake(const std::string& make) {
+void CameraMetaData::disableMake(const std::string& make) const {
   for (const auto& cam : cameras) {
     if (cam.second->make == make)
       cam.second->supported = false;
@@ -152,7 +152,7 @@ void CameraMetaData::disableMake(const std::string& make) {
 }
 
 void CameraMetaData::disableCamera(const std::string& make,
-                                   const std::string& model) {
+                                   const std::string& model) const {
   for (const auto& cam : cameras) {
     if (cam.second->make == make && cam.second->model == model)
       cam.second->supported = false;

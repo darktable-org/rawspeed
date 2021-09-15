@@ -50,7 +50,7 @@ private:
   void sRawInterpolate();
   [[nodiscard]] bool isSubSampled() const;
   [[nodiscard]] iPoint2D getSubSampling() const;
-  int getHue();
+  [[nodiscard]] int getHue() const;
 };
 
 } // namespace rawspeed

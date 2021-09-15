@@ -66,10 +66,10 @@ private:
   void CorrectPhaseOneC(ByteStream meta_data, uint32_t split_row,
                         uint32_t split_col);
   void CorrectQuadrantMultipliersCombined(ByteStream data, uint32_t split_row,
-                                          uint32_t split_col);
+                                          uint32_t split_col) const;
   void correctSensorDefects(ByteStream data);
-  void correctBadColumn(uint16_t col);
-  void handleBadPixel(uint16_t col, uint16_t row);
+  void correctBadColumn(uint16_t col) const;
+  void handleBadPixel(uint16_t col, uint16_t row) const;
 };
 
 } // namespace rawspeed

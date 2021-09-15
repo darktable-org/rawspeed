@@ -102,10 +102,10 @@ public:
   [[nodiscard]] uint32_t getBpp() const { return bpp; }
   void setCpp(uint32_t val);
   void createData();
-  void poisonPadding();
-  void unpoisonPadding();
-  void checkRowIsInitialized(int row);
-  void checkMemIsInitialized();
+  void poisonPadding() const;
+  void unpoisonPadding() const;
+  void checkRowIsInitialized(int row) const;
+  void checkMemIsInitialized() const;
   void destroyData();
   void blitFrom(const RawImage& src, const iPoint2D& srcPos,
                 const iPoint2D& size, const iPoint2D& destPos);
@@ -118,7 +118,7 @@ public:
   uint8_t*
   getData(uint32_t x,
           uint32_t y); // Not super fast, but safe. Don't use per pixel.
-  uint8_t* getDataUncropped(uint32_t x, uint32_t y);
+  [[nodiscard]] uint8_t* getDataUncropped(uint32_t x, uint32_t y) const;
 
   void subFrame(iRectangle2D cropped);
   void clearArea(iRectangle2D area, uint8_t value = 0);
@@ -135,7 +135,7 @@ public:
   void setTable(const std::vector<uint16_t>& table_, bool dither);
   void setTable(std::unique_ptr<TableLookUp> t);
 
-  bool isAllocated() {return !!data;}
+  [[nodiscard]] bool isAllocated() const { return !!data; }
   void createBadPixelMap();
   iPoint2D dim;
   int pitch = 0;
@@ -309,7 +309,7 @@ inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
 }
 
 class RawImageCurveGuard final {
-  RawImage* mRaw;
+  const RawImage* mRaw;
   const std::vector<uint16_t>& curve;
   const bool uncorrectedRawValues;
 
@@ -320,7 +320,7 @@ public:
   RawImageCurveGuard& operator=(const RawImageCurveGuard&) noexcept = delete;
   RawImageCurveGuard& operator=(RawImageCurveGuard&&) noexcept = delete;
 
-  RawImageCurveGuard(RawImage* raw, const std::vector<uint16_t>& curve_,
+  RawImageCurveGuard(const RawImage* raw, const std::vector<uint16_t>& curve_,
                      bool uncorrectedRawValues_)
       : mRaw(raw), curve(curve_), uncorrectedRawValues(uncorrectedRawValues_) {
     if (uncorrectedRawValues)

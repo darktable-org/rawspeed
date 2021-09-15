@@ -143,7 +143,7 @@ void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
   }
 }
 
-void DngDecoder::parseCFA(const TiffIFD* raw) {
+void DngDecoder::parseCFA(const TiffIFD* raw) const {
 
   // Check if layout is OK, if present
   if (raw->hasEntry(CFALAYOUT) && raw->getEntry(CFALAYOUT)->getU16() != 1)
@@ -206,7 +206,8 @@ void DngDecoder::parseCFA(const TiffIFD* raw) {
   mRaw->cfa.shiftDown(aa[0]);
 }
 
-DngTilingDescription DngDecoder::getTilingDescription(const TiffIFD* raw) {
+DngTilingDescription
+DngDecoder::getTilingDescription(const TiffIFD* raw) const {
   if (raw->hasEntry(TILEOFFSETS)) {
     const uint32_t tilew = raw->getEntry(TILEWIDTH)->getU32();
     const uint32_t tileh = raw->getEntry(TILELENGTH)->getU32();
@@ -634,7 +635,7 @@ void DngDecoder::checkSupportInternal(const CameraMetaData* meta) {
 }
 
 /* Decodes DNG masked areas into blackareas in the image */
-bool DngDecoder::decodeMaskedAreas(const TiffIFD* raw) {
+bool DngDecoder::decodeMaskedAreas(const TiffIFD* raw) const {
   TiffEntry *masked = raw->getEntry(MASKEDAREAS);
 
   if (masked->type != TIFF_SHORT && masked->type != TIFF_LONG)
@@ -674,7 +675,7 @@ bool DngDecoder::decodeMaskedAreas(const TiffIFD* raw) {
   return !mRaw->blackAreas.empty();
 }
 
-bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) {
+bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
   iPoint2D blackdim(1,1);
   if (raw->hasEntry(BLACKLEVELREPEATDIM)) {
     TiffEntry *bleveldim = raw->getEntry(BLACKLEVELREPEATDIM);

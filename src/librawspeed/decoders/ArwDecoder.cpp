@@ -232,7 +232,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) {
+void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) const {
   uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
   uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
   uint32_t off = raw->getEntry(STRIPOFFSETS)->getU32();
@@ -282,7 +282,7 @@ void ArwDecoder::DecodeARW2(const ByteStream& input, uint32_t w, uint32_t h,
   ThrowRDE("Unsupported bit depth");
 }
 
-void ArwDecoder::ParseA100WB() {
+void ArwDecoder::ParseA100WB() const {
   if (!mRootIFD->hasEntryRecursive(DNGPRIVATEDATA))
     return;
 
@@ -402,7 +402,7 @@ void ArwDecoder::SonyDecrypt(const uint32_t* ibuf, uint32_t* obuf, uint32_t len,
   }
 }
 
-void ArwDecoder::GetWB() {
+void ArwDecoder::GetWB() const {
   // Set the whitebalance for all the modern ARW formats (everything after A100)
   if (mRootIFD->hasEntryRecursive(DNGPRIVATEDATA)) {
     NORangesSet<Buffer> ifds_undecoded;

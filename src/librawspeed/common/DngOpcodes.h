@@ -40,7 +40,7 @@ class DngOpcodes
 public:
   DngOpcodes(const RawImage& ri, TiffEntry* entry);
   ~DngOpcodes();
-  void applyOpCodes(const RawImage& ri);
+  void applyOpCodes(const RawImage& ri) const;
 
 private:
   class DngOpcode;

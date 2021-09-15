@@ -137,7 +137,7 @@ RawImage SrwDecoder::decodeRawInternal() {
   ThrowRDE("Unsupported compression");
 }
 
-std::string SrwDecoder::getMode() {
+std::string SrwDecoder::getMode() const {
   std::vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
   std::ostringstream mode;
   if (!data.empty() && data[0]->hasEntryRecursive(BITSPERSAMPLE)) {

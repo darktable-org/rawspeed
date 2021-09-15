@@ -117,7 +117,7 @@ void RawImageData::createData() {
 }
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
-void RawImageData::poisonPadding() {
+void RawImageData::poisonPadding() const {
   if (padding <= 0)
     return;
 
@@ -130,7 +130,7 @@ void RawImageData::poisonPadding() {
   }
 }
 #else
-void RawImageData::poisonPadding() {
+void RawImageData::poisonPadding() const {
   // if we are building without ASAN, then there is no need/way to poison.
   // however, i think it is better to have such an empty function rather
   // than making this whole function not exist in ASAN-less builds
@@ -138,7 +138,7 @@ void RawImageData::poisonPadding() {
 #endif
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
-void RawImageData::unpoisonPadding() {
+void RawImageData::unpoisonPadding() const {
   if (padding <= 0)
     return;
 
@@ -151,14 +151,14 @@ void RawImageData::unpoisonPadding() {
   }
 }
 #else
-void RawImageData::unpoisonPadding() {
+void RawImageData::unpoisonPadding() const {
   // if we are building without ASAN, then there is no need/way to poison.
   // however, i think it is better to have such an empty function rather
   // than making this whole function not exist in ASAN-less builds
 }
 #endif
 
-void RawImageData::checkRowIsInitialized(int row) {
+void RawImageData::checkRowIsInitialized(int row) const {
   const auto rowsize = bpp * uncropped_dim.x;
 
   const uint8_t* const curr_line = getDataUncropped(0, row);
@@ -169,12 +169,12 @@ void RawImageData::checkRowIsInitialized(int row) {
 }
 
 #if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
-void RawImageData::checkMemIsInitialized() {
+void RawImageData::checkMemIsInitialized() const {
   for (int j = 0; j < uncropped_dim.y; j++)
     checkRowIsInitialized(j);
 }
 #else
-void RawImageData::checkMemIsInitialized() {
+void RawImageData::checkMemIsInitialized() const {
   // While we could use the same version for non-MSAN build, even though it
   // does not do anything, i don't think it will be fully optimized away,
   // the getDataUncropped() call may still be there. To be re-evaluated.
@@ -225,7 +225,7 @@ uint8_t* RawImageData::getData(uint32_t x, uint32_t y) {
   return &data[static_cast<size_t>(y) * pitch + x * bpp];
 }
 
-uint8_t* RawImageData::getDataUncropped(uint32_t x, uint32_t y) {
+uint8_t* RawImageData::getDataUncropped(uint32_t x, uint32_t y) const {
   if (x >= static_cast<unsigned>(uncropped_dim.x))
     ThrowRDE("X Position outside image requested.");
   if (y >= static_cast<unsigned>(uncropped_dim.y))

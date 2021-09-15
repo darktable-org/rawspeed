@@ -49,12 +49,12 @@ private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }
   bool mFixLjpeg;
   static void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
-  void parseCFA(const TiffIFD* raw);
-  DngTilingDescription getTilingDescription(const TiffIFD* raw);
+  void parseCFA(const TiffIFD* raw) const;
+  DngTilingDescription getTilingDescription(const TiffIFD* raw) const;
   void decodeData(const TiffIFD* raw, uint32_t sample_format);
   void handleMetadata(const TiffIFD* raw);
-  bool decodeMaskedAreas(const TiffIFD* raw);
-  bool decodeBlackLevels(const TiffIFD* raw);
+  bool decodeMaskedAreas(const TiffIFD* raw) const;
+  bool decodeBlackLevels(const TiffIFD* raw) const;
   void setBlack(const TiffIFD* raw);
 
   int bps = -1;

@@ -160,7 +160,7 @@ void Rw2Decoder::checkSupportInternal(const CameraMetaData* meta) {
     checkCameraSupported(meta, id, "");
 }
 
-void Rw2Decoder::parseCFA() {
+void Rw2Decoder::parseCFA() const {
   if (!mRootIFD->hasEntryRecursive(PANASONIC_CFAPATTERN))
     ThrowRDE("No PANASONIC_CFAPATTERN entry found!");
 
@@ -269,7 +269,7 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 }
 
-std::string Rw2Decoder::guessMode() {
+std::string Rw2Decoder::guessMode() const {
   float ratio = 3.0F / 2.0F; // Default
 
   if (!mRaw->isAllocated())

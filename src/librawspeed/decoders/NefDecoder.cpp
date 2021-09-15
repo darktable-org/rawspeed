@@ -135,7 +135,7 @@ Figure out if a NEF file is compressed.  These fancy heuristics
 are only needed for the D100, thanks to a bug in some cameras
 that tags all images as "compressed".
 */
-bool NefDecoder::D100IsCompressed(uint32_t offset) {
+bool NefDecoder::D100IsCompressed(uint32_t offset) const {
   const uint8_t* test = mFile.getData(offset, 256);
   int i;
 
@@ -203,7 +203,7 @@ bool NefDecoder::NEFIsUncompressedRGB(const TiffIFD* raw) {
   return byteCount / 3 == iPoint2D(width, height).area();
 }
 
-void NefDecoder::DecodeUncompressed() {
+void NefDecoder::DecodeUncompressed() const {
   const auto* raw = getIFDWithLargestImage(CFAPATTERN);
   TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
   TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
@@ -306,7 +306,8 @@ void NefDecoder::DecodeUncompressed() {
 }
 
 void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
-                                     const iPoint2D& offset, int inputPitch) {
+                                     const iPoint2D& offset,
+                                     int inputPitch) const {
   const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
   if (size.y % 2 != 0)
@@ -342,7 +343,7 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
          "Should have run out of input");
 }
 
-void NefDecoder::DecodeD100Uncompressed() {
+void NefDecoder::DecodeD100Uncompressed() const {
   const auto* ifd = mRootIFD->getIFDWithTag(STRIPOFFSETS, 1);
 
   uint32_t offset = ifd->getEntry(STRIPOFFSETS)->getU32();
@@ -364,7 +365,7 @@ void NefDecoder::DecodeD100Uncompressed() {
   u.decode12BitRaw<Endianness::big, false, true>(width, height);
 }
 
-void NefDecoder::DecodeSNefUncompressed() {
+void NefDecoder::DecodeSNefUncompressed() const {
   const auto* raw = getIFDWithLargestImage(CFAPATTERN);
   uint32_t offset = raw->getEntry(STRIPOFFSETS)->getU32();
   uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
@@ -394,7 +395,7 @@ void NefDecoder::checkSupportInternal(const CameraMetaData* meta) {
     checkCameraSupported(meta, id, mode);
 }
 
-std::string NefDecoder::getMode() {
+std::string NefDecoder::getMode() const {
   ostringstream mode;
   const auto* raw = getIFDWithLargestImage(CFAPATTERN);
   int compression = raw->getEntry(COMPRESSION)->getU32();
@@ -411,7 +412,7 @@ std::string NefDecoder::getMode() {
   return mode.str();
 }
 
-std::string NefDecoder::getExtendedMode(const std::string& mode) {
+std::string NefDecoder::getExtendedMode(const std::string& mode) const {
   ostringstream extended_mode;
 
   const auto* ifd = mRootIFD->getIFDWithTag(CFAPATTERN);
@@ -613,7 +614,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 // We un-apply the whitebalance, so output matches lossless.
 // Note that values are scaled. See comment below on details.
 // OPTME: It would be trivial to run this multithreaded.
-void NefDecoder::DecodeNikonSNef(const ByteStream& input) {
+void NefDecoder::DecodeNikonSNef(const ByteStream& input) const {
   if (mRaw->dim.x < 6)
     ThrowIOE("got a %u wide sNEF, aborting", mRaw->dim.x);
 

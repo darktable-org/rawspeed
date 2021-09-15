@@ -80,7 +80,7 @@ SamsungV1Decompressor::samsungDiff(BitPumpMSB& pump,
   return diff;
 }
 
-void SamsungV1Decompressor::decompress() {
+void SamsungV1Decompressor::decompress() const {
   // This format has a variable length encoding of how many bits are needed
   // to encode the difference between pixels, we use a table to process it
   // that has two values, the first the number of bits that were used to

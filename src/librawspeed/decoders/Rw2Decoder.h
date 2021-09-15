@@ -48,8 +48,8 @@ protected:
   [[nodiscard]] int getDecoderVersion() const override { return 3; }
 
 private:
-  void parseCFA();
-  std::string guessMode();
+  void parseCFA() const;
+  [[nodiscard]] std::string guessMode() const;
 };
 
 } // namespace rawspeed

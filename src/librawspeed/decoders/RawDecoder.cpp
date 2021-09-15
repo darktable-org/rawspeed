@@ -53,7 +53,8 @@ RawDecoder::RawDecoder(const Buffer& file)
       interpolateBadPixels(true), applyStage1DngOpcodes(true), applyCrop(true),
       uncorrectedRawValues(false), fujiRotate(true), mFile(file) {}
 
-void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
+void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
+                                    BitOrder order) const {
   TiffEntry *offsets = rawIFD->getEntry(STRIPOFFSETS);
   TiffEntry *counts = rawIFD->getEntry(STRIPBYTECOUNTS);
   uint32_t yPerSlice = rawIFD->getEntry(ROWSPERSTRIP)->getU32();

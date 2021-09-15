@@ -51,7 +51,7 @@ bool KdcDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   return make == "EASTMAN KODAK COMPANY";
 }
 
-Buffer KdcDecoder::getInputBuffer() {
+Buffer KdcDecoder::getInputBuffer() const {
   TiffEntry* offset = mRootIFD->getEntryRecursive(KODAK_KDC_OFFSET);
   if (!offset || offset->count < 13)
     ThrowRDE("Couldn't find the KDC offset");
