@@ -314,6 +314,12 @@ class RawImageCurveGuard final {
   const bool uncorrectedRawValues;
 
 public:
+  RawImageCurveGuard() = delete;
+  RawImageCurveGuard(const RawImageCurveGuard&) = delete;
+  RawImageCurveGuard(RawImageCurveGuard&&) noexcept = delete;
+  RawImageCurveGuard& operator=(const RawImageCurveGuard&) noexcept = delete;
+  RawImageCurveGuard& operator=(RawImageCurveGuard&&) noexcept = delete;
+
   RawImageCurveGuard(RawImage* raw, const std::vector<uint16_t>& curve_,
                      bool uncorrectedRawValues_)
       : mRaw(raw), curve(curve_), uncorrectedRawValues(uncorrectedRawValues_) {
