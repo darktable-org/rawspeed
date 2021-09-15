@@ -10,13 +10,15 @@ jobs:
   linux:
     name: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
     runs-on: ubuntu-latest
+    env:
+      SONAR_SCANNER_VERSION: 4.4.0.2170
     strategy:
       fail-fast: false
       matrix:
         os: [ linux ]
         compiler:
           - { compiler: LLVM12, CC: clang-12, CXX: clang++-12, CLANG_TIDY: clang-tidy-12 }
-        flavor: [ ClangStaticAnalysis, CodeQLAnalysis ]
+        flavor: [ ClangStaticAnalysis, CodeQLAnalysis, SonarCloudStaticAnalysis ]
     container: debian:unstable-slim
     steps:
       - name: Configure APT
@@ -61,19 +63,20 @@ jobs:
         name: Fetch/Checkout RawSpeed git repo
         with:
           path: ''
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - if: matrix.flavor == 'ClangStaticAnalysis'
-        name: Fetch/Checkout CodeChecker git repo (for static analysis)
+        name: Fetch/Checkout CodeChecker git repo (for clang static analysis)
         uses: actions/checkout@v2
         with:
           repository: 'Ericsson/codechecker'
           path: 'codechecker'
           fetch-depth: '1'
       - if: matrix.flavor == 'ClangStaticAnalysis'
-        name: Move CodeChecker git repo into right place
+        name: Move CodeChecker git repo into right place (for clang static analysis)
         run: |
           mv codechecker ..
       - if: matrix.flavor == 'ClangStaticAnalysis'
-        name: Install CodeChecker (for static analysis)
+        name: Install CodeChecker (for clang static analysis)
         env:
           CC: ${{ matrix.compiler.CC }}
           CXX: ${{ matrix.compiler.CXX }}
@@ -99,10 +102,29 @@ jobs:
           BUILD_LOGGER_64_BIT_ONLY=YES BUILD_UI_DIST=NO make package
           export PATH="$PWD/build/CodeChecker/bin:$PATH"
       - if: matrix.flavor == 'CodeQLAnalysis'
-        name: Initialize CodeQL
+        name: Initialize CodeQL (for CodeQL static analysis)
         uses: github/codeql-action/init@v1
         with:
           languages: cpp
+      - if: matrix.flavor == 'SonarCloudStaticAnalysis'
+        name: Set up JDK 11 (for SonarCloud static analysis)
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - if: matrix.flavor == 'SonarCloudStaticAnalysis'
+        name: Download and set up sonar-scanner (for SonarCloud static analysis)
+        env:
+          SONAR_SCANNER_VERSION: 4.4.0.2170
+          SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-linux.zip
+        run: |
+          rm -rf /var/lib/apt/lists/*;
+          apt-get update;
+          apt-get install curl unzip;
+          apt-get clean;
+          mkdir -p $HOME/.sonar
+          curl -sSLo $HOME/.sonar/sonar-scanner.zip ${{ env.SONAR_SCANNER_DOWNLOAD_URL }}
+          unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+          echo "$HOME/.sonar/sonar-scanner-${{ env.SONAR_SCANNER_VERSION }}-linux/bin" >> $GITHUB_PATH
       - name: Build And Test
         env:
           CC: ${{ matrix.compiler.CC }}
@@ -117,6 +139,9 @@ jobs:
         run: |
           if [ ${FLAVOR} = "ClangStaticAnalysis" ]; then
             export ECO="${ECO} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DUSE_CLANG_TIDY=ON -DCMAKE_C_FLAGS_RELWITHDEBINFO=-UNDEBUG -DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-UNDEBUG";
+          fi;
+          if [ ${FLAVOR} = "SonarCloudStaticAnalysis" ]; then
+            export ECO="${ECO} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON";
           fi;
           cmake -E make_directory "${BUILD_DIR}";
           cmake -E make_directory "${INSTALL_PREFIX}";
@@ -133,5 +158,17 @@ jobs:
           export PATH="$PWD/../codechecker/build/CodeChecker/bin:$PATH"
           CodeChecker check --logfile "${BUILD_DIR}/compile_commands.json" --analyzers clangsa --jobs "$(nproc --all)" --file "${SRC_DIR}/*" --disable deadcode.DeadStores
       - if: matrix.flavor == 'CodeQLAnalysis'
-        name: Perform CodeQL analysis
+        name: Perform CodeQL static analysis
         uses: github/codeql-action/analyze@v1
+      - if: matrix.flavor == 'SonarCloudStaticAnalysis'
+        name: Perform SonarCloud static analysis
+        env:
+          SONAR_SERVER_URL: "https://sonarcloud.io"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+          SRC_DIR: ${{ github.workspace }}
+          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
+        run: |
+          sonar-scanner --define project.settings="${SRC_DIR}/.ci/sonar-project.properties" --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.projectKey="${{ env.SONAR_PROJECT_KEY }}" --define sonar.organization="${{ env.SONAR_ORGANIZATION }}" --define sonar.cfamily.compile-commands="${BUILD_DIR}/compile_commands.json" --define sonar.cfamily.threads="$(nproc --all)" --define sonar.cfamily.cache.enabled=false
