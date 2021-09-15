@@ -72,7 +72,7 @@ public:
 
     FujiStrip() = delete;
     FujiStrip(const FujiStrip&) = default;
-    FujiStrip(FujiStrip&&) noexcept = default;
+    FujiStrip(FujiStrip&&) = default;
     FujiStrip& operator=(const FujiStrip&) noexcept = delete;
     FujiStrip& operator=(FujiStrip&&) noexcept = delete;
 
