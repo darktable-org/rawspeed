@@ -57,7 +57,7 @@ protected:
 
 // Note: The MD5 standard specifies that uint32_t are serialized to/from bytes
 // in little endian
-static MD5Testcase testCases[] = {
+static const MD5Testcase testCases[] = {
     TESTCASE(0xD98C1DD4, 0x04B2008F, 0x980980E9, 0x7E42F8EC, ""),
     TESTCASE(0xB975C10C, 0xA8B6F1C0, 0xE299C331, 0x61267769, "a"),
     TESTCASE(0x98500190, 0xB04FD23C, 0x7D3F96D6, 0x727FE128, "abc"),
