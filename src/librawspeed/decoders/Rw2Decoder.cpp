@@ -217,6 +217,8 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const auto getBlack = [&raw](TiffTag t) -> int {
       const auto val = raw->getEntry(t)->getU32();
       int out;
+      // FIXME: for some cameras, black level specified in EXIF is wrong,
+      //        so this offset is actually needed. Are we reading wrong values?
       if (__builtin_sadd_overflow(val, 15, &out))
         ThrowRDE("Integer overflow when calculating black level");
       return out;
