@@ -104,12 +104,11 @@ inline bool readValue(bool& storage) {
   return value;
 }
 
+constexpr int PRECISION_MIN = 8;
+constexpr int PRECISION_MAX = 16;
+constexpr int MARKER_BAND_END = 1;
+
 } // namespace
-
-#define PRECISION_MIN 8
-#define PRECISION_MAX 16
-
-#define MARKER_BAND_END 1
 
 namespace rawspeed {
 
