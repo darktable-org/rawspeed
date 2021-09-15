@@ -41,7 +41,7 @@
 #include <vector>                          // for vector
 
 using std::vector;
-using std::string;
+
 using std::abs;
 
 namespace rawspeed {
@@ -94,11 +94,12 @@ void CrwDecoder::checkSupportInternal(const CameraMetaData* meta) {
   vector<const CiffIFD*> data = mRootIFD->getIFDsWithTag(CIFF_MAKEMODEL);
   if (data.empty())
     ThrowRDE("Model name not found");
-  vector<string> makemodel = data[0]->getEntry(CIFF_MAKEMODEL)->getStrings();
+  vector<std::string> makemodel =
+      data[0]->getEntry(CIFF_MAKEMODEL)->getStrings();
   if (makemodel.size() < 2)
     ThrowRDE("wrong number of strings for make/model");
-  string make = makemodel[0];
-  string model = makemodel[1];
+  std::string make = makemodel[0];
+  std::string model = makemodel[1];
 
   this->checkCameraSupported(meta, make, model, "");
 }
@@ -126,12 +127,13 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   vector<const CiffIFD*> data = mRootIFD->getIFDsWithTag(CIFF_MAKEMODEL);
   if (data.empty())
     ThrowRDE("Model name not found");
-  vector<string> makemodel = data[0]->getEntry(CIFF_MAKEMODEL)->getStrings();
+  vector<std::string> makemodel =
+      data[0]->getEntry(CIFF_MAKEMODEL)->getStrings();
   if (makemodel.size() < 2)
     ThrowRDE("wrong number of strings for make/model");
-  string make = makemodel[0];
-  string model = makemodel[1];
-  string mode;
+  std::string make = makemodel[0];
+  std::string model = makemodel[1];
+  std::string mode;
 
   if (mRootIFD->hasEntryRecursive(CIFF_SHOTINFO)) {
     const CiffEntry* shot_info = mRootIFD->getEntryRecursive(CIFF_SHOTINFO);

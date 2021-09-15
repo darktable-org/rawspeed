@@ -42,8 +42,6 @@
 #include <string>                                   // for string, allocator
 #include <utility>                                  // for move
 
-using std::string;
-
 namespace rawspeed {
 
 class CameraMetaData;
@@ -64,7 +62,7 @@ bool MosDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
     if (!softwareIFD)
       return false;
 
-    const string software = trimSpaces(softwareIFD->getString());
+    const std::string software = trimSpaces(softwareIFD->getString());
     return software == "Camera Library";
   }
 }
@@ -81,16 +79,17 @@ MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file)
       ThrowRDE("Couldn't find the XMP");
 
     assert(xmp != nullptr);
-    string xmpText = xmp->getString();
+    std::string xmpText = xmp->getString();
     make = getXMPTag(xmpText, "Make");
     model = getXMPTag(xmpText, "Model");
   }
 }
 
-string MosDecoder::getXMPTag(const string &xmp, const string &tag) {
-  string::size_type start = xmp.find("<tiff:"+tag+">");
-  string::size_type end = xmp.find("</tiff:"+tag+">");
-  if (start == string::npos || end == string::npos || end <= start)
+std::string MosDecoder::getXMPTag(const std::string& xmp,
+                                  const std::string& tag) {
+  std::string::size_type start = xmp.find("<tiff:" + tag + ">");
+  std::string::size_type end = xmp.find("</tiff:" + tag + ">");
+  if (start == std::string::npos || end == std::string::npos || end <= start)
     ThrowRDE("Couldn't find tag '%s' in the XMP", tag.c_str());
   int startlen = tag.size()+7;
   return xmp.substr(start+startlen, end-start-startlen);

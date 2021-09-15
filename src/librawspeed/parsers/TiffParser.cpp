@@ -52,8 +52,6 @@
 #include <vector>                        // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
-using std::string;
-
 namespace rawspeed {
 
 TiffParser::TiffParser(const Buffer& file) : RawParser(file) {}

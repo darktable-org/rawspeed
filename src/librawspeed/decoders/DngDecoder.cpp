@@ -50,7 +50,6 @@
 
 using std::vector;
 using std::map;
-using std::string;
 
 namespace rawspeed {
 
@@ -622,7 +621,8 @@ void DngDecoder::checkSupportInternal(const CameraMetaData* meta) {
   if (!(mRootIFD->hasEntryRecursive(MAKE) && mRootIFD->hasEntryRecursive(MODEL))) {
     // Check "Unique Camera Model" instead, uses this for both make + model.
     if (mRootIFD->hasEntryRecursive(UNIQUECAMERAMODEL)) {
-      string unique = mRootIFD->getEntryRecursive(UNIQUECAMERAMODEL)->getString();
+      std::string unique =
+          mRootIFD->getEntryRecursive(UNIQUECAMERAMODEL)->getString();
       checkCameraSupported(meta, {unique, unique}, "dng");
       return;
     }

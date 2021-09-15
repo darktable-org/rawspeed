@@ -44,7 +44,6 @@
 #include <vector>                                   // for vector
 
 using std::vector;
-using std::string;
 
 namespace rawspeed {
 
@@ -179,7 +178,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   data = mRootIFD->getIFDsWithTag(MAKE);
   if (data.size() > 1) {
     for (auto &i : data) {
-      string make = i->getEntry(MAKE)->getString();
+      std::string make = i->getEntry(MAKE)->getString();
       /* Check for maker "SONY" without spaces */
       if (make == "SONY")
         bitPerPixel = 8;

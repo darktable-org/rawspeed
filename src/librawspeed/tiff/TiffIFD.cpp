@@ -35,7 +35,6 @@
 #include <utility>                    // for move, pair
 #include <vector>                     // for vector
 
-using std::string;
 using std::vector;
 
 namespace rawspeed {
@@ -140,7 +139,8 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
     makeEntry = p->getEntryRecursive(MAKE);
     p = p->parent;
   } while (!makeEntry && p);
-  string make = makeEntry != nullptr ? trimSpaces(makeEntry->getString()) : "";
+  std::string make =
+      makeEntry != nullptr ? trimSpaces(makeEntry->getString()) : "";
 
   ByteStream bs = t->getData();
 

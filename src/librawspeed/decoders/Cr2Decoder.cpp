@@ -42,8 +42,6 @@
 #include <vector>                              // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
-using std::string;
-
 namespace rawspeed {
 
 bool Cr2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
@@ -216,7 +214,7 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
   mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
 
-  string mode;
+  std::string mode;
 
   if (mRaw->metadata.subsampling.y == 2 && mRaw->metadata.subsampling.x == 2)
     mode = "sRaw1";

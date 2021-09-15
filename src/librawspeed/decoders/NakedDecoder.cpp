@@ -33,7 +33,6 @@
 #include <string>                                   // for string, basic_st...
 
 using std::map;
-using std::string;
 
 namespace rawspeed {
 
@@ -42,7 +41,7 @@ class CameraMetaData;
 NakedDecoder::NakedDecoder(const Buffer& file, const Camera* c)
     : RawDecoder(file), cam(c) {}
 
-const map<string, BitOrder> NakedDecoder::order2enum = {
+const map<std::string, BitOrder> NakedDecoder::order2enum = {
     {"plain", BitOrder_LSB},
     {"jpeg", BitOrder_MSB},
     {"jpeg16", BitOrder_MSB16},
@@ -54,7 +53,7 @@ void NakedDecoder::parseHints() {
   const auto& make = cam->make.c_str();
   const auto& model = cam->model.c_str();
 
-  auto parseHint = [&cHints, &make, &model](const string& name) {
+  auto parseHint = [&cHints, &make, &model](const std::string& name) {
     if (!cHints.has(name))
       ThrowRDE("%s %s: couldn't find %s", make, model, name.c_str());
 
@@ -76,7 +75,7 @@ void NakedDecoder::parseHints() {
   if (bits == 0)
     ThrowRDE("%s %s: image bpp is invalid: %u", make, model, bits);
 
-  auto order = cHints.get("order", string());
+  auto order = cHints.get("order", std::string());
   if (!order.empty()) {
     try {
       bo = order2enum.at(order);

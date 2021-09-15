@@ -29,7 +29,6 @@
 #include <utility>                       // for pair
 #include <vector>                        // for vector
 
-using std::string;
 using std::vector;
 
 namespace rawspeed {
@@ -136,7 +135,7 @@ uint8_t CiffEntry::getByte(uint32_t num) const {
   return data.peek<uint8_t>(num);
 }
 
-string CiffEntry::getString() const {
+std::string CiffEntry::getString() const {
   if (type != CIFF_ASCII)
     ThrowCPE("Wrong type 0x%x encountered. Expected Ascii", type);
 
@@ -146,13 +145,14 @@ string CiffEntry::getString() const {
   return data.peekString();
 }
 
-vector<string> CiffEntry::getStrings() const {
+vector<std::string> CiffEntry::getStrings() const {
   if (type != CIFF_ASCII)
     ThrowCPE("Wrong type 0x%x encountered. Expected Ascii", type);
 
-  const string str(reinterpret_cast<const char*>(data.peekData(count)), count);
+  const std::string str(reinterpret_cast<const char*>(data.peekData(count)),
+                        count);
 
-  vector<string> strs;
+  vector<std::string> strs;
 
   uint32_t start = 0;
   for (uint32_t i = 0; i < count; i++) {

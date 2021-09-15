@@ -32,8 +32,6 @@
 #include <string>                        // for string
 #include <utility>                       // for move
 
-using std::string;
-
 namespace rawspeed {
 
 class DataBuffer;
@@ -208,7 +206,7 @@ float TiffEntry::getFloat(uint32_t index) const {
   }
 }
 
-string TiffEntry::getString() const {
+std::string TiffEntry::getString() const {
   if (type != TIFF_ASCII && type != TIFF_BYTE)
     ThrowTPE("Wrong type 0x%x encountered. Expected Ascii or Byte", type);
 

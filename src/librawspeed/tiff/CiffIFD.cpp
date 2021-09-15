@@ -33,7 +33,6 @@
 #include <utility>                       // for move, pair
 #include <vector>                        // for vector, vector<>::size_type
 
-using std::string;
 using std::vector;
 using std::unique_ptr;
 
@@ -222,7 +221,7 @@ vector<const CiffIFD*> CiffIFD::getIFDsWithTagWhere(CiffTag tag,
 }
 
 vector<const CiffIFD*>
-CiffIFD::getIFDsWithTagWhere(CiffTag tag, const string& isValue) const {
+CiffIFD::getIFDsWithTagWhere(CiffTag tag, const std::string& isValue) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
   return getIFDsWithTagIf(tag, [&isValue](const CiffEntry* entry) {
     return entry->isString() && isValue == entry->getString();
@@ -271,8 +270,8 @@ const CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag,
   });
 }
 
-const CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag,
-                                                 const string& isValue) const {
+const CiffEntry*
+CiffIFD::getEntryRecursiveWhere(CiffTag tag, const std::string& isValue) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
   return getEntryRecursiveIf(tag, [&isValue](const CiffEntry* entry) {
     return entry->isString() && isValue == entry->getString();

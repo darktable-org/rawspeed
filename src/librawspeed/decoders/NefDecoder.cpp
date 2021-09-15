@@ -47,7 +47,7 @@
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
 using std::vector;
-using std::string;
+
 using std::min;
 using std::ostringstream;
 
@@ -385,8 +385,8 @@ void NefDecoder::DecodeSNefUncompressed() {
 
 void NefDecoder::checkSupportInternal(const CameraMetaData* meta) {
   auto id = mRootIFD->getID();
-  string mode = getMode();
-  string extended_mode = getExtendedMode(mode);
+  std::string mode = getMode();
+  std::string extended_mode = getExtendedMode(mode);
 
   if (meta->hasCamera(id.make, id.model, extended_mode))
     checkCameraSupported(meta, id, extended_mode);
@@ -394,7 +394,7 @@ void NefDecoder::checkSupportInternal(const CameraMetaData* meta) {
     checkCameraSupported(meta, id, mode);
 }
 
-string NefDecoder::getMode() {
+std::string NefDecoder::getMode() {
   ostringstream mode;
   const auto* raw = getIFDWithLargestImage(CFAPATTERN);
   int compression = raw->getEntry(COMPRESSION)->getU32();
@@ -411,7 +411,7 @@ string NefDecoder::getMode() {
   return mode.str();
 }
 
-string NefDecoder::getExtendedMode(const string &mode) {
+std::string NefDecoder::getExtendedMode(const std::string& mode) {
   ostringstream extended_mode;
 
   const auto* ifd = mRootIFD->getIFDWithTag(CFAPATTERN);
@@ -515,7 +515,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
                  mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x001d)) &&
                  mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x00a7))) {
         // Get the serial number
-        string serial =
+        std::string serial =
             mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x001d))
                 ->getString();
         if (serial.length() > 9)
@@ -592,8 +592,8 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 
   auto id = mRootIFD->getID();
-  string mode = getMode();
-  string extended_mode = getExtendedMode(mode);
+  std::string mode = getMode();
+  std::string extended_mode = getExtendedMode(mode);
   if (meta->hasCamera(id.make, id.model, extended_mode)) {
     setMetaData(meta, id, extended_mode, iso);
   } else if (meta->hasCamera(id.make, id.model, mode)) {

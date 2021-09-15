@@ -35,8 +35,6 @@ using pugi::xml_document;
 using pugi::xml_parse_result;
 #endif
 
-using std::string;
-
 namespace rawspeed {
 
 #ifdef HAVE_PUGIXML
@@ -69,8 +67,8 @@ CameraMetaData::CameraMetaData(const char *docname) {
 }
 #endif
 
-static inline CameraId getId(const string& make, const string& model,
-                             const string& mode) {
+static inline CameraId getId(const std::string& make, const std::string& model,
+                             const std::string& mode) {
   CameraId id;
   id.make = trimSpaces(make);
   id.model = trimSpaces(model);
@@ -79,14 +77,15 @@ static inline CameraId getId(const string& make, const string& model,
   return id;
 }
 
-const Camera* CameraMetaData::getCamera(const string& make, const string& model,
-                                        const string& mode) const {
+const Camera* CameraMetaData::getCamera(const std::string& make,
+                                        const std::string& model,
+                                        const std::string& mode) const {
   auto camera = cameras.find(getId(make, model, mode));
   return camera == cameras.end() ? nullptr : camera->second.get();
 }
 
-const Camera* CameraMetaData::getCamera(const string& make,
-                                        const string& model) const {
+const Camera* CameraMetaData::getCamera(const std::string& make,
+                                        const std::string& model) const {
   auto id = getId(make, model, "");
 
   auto iter = find_if(cameras.cbegin(), cameras.cend(),
@@ -102,8 +101,9 @@ const Camera* CameraMetaData::getCamera(const string& make,
   return iter->second.get();
 }
 
-bool CameraMetaData::hasCamera(const string& make, const string& model,
-                               const string& mode) const {
+bool CameraMetaData::hasCamera(const std::string& make,
+                               const std::string& model,
+                               const std::string& mode) const {
   return getCamera(make, model, mode);
 }
 
@@ -129,8 +129,8 @@ const Camera* CameraMetaData::addCamera(std::unique_ptr<Camera> cam) {
   }
   cameras[id] = std::move(cam);
 
-  if (string::npos != cameras[id]->mode.find("chdk")) {
-    auto filesize_hint = cameras[id]->hints.get("filesize", string());
+  if (std::string::npos != cameras[id]->mode.find("chdk")) {
+    auto filesize_hint = cameras[id]->hints.get("filesize", std::string());
     if (filesize_hint.empty()) {
       writeLog(DEBUG_PRIO_WARNING,
                "CameraMetaData: CHDK camera: %s %s, no \"filesize\" hint set!",
@@ -144,14 +144,15 @@ const Camera* CameraMetaData::addCamera(std::unique_ptr<Camera> cam) {
   return cameras[id].get();
 }
 
-void CameraMetaData::disableMake(const string &make) {
+void CameraMetaData::disableMake(const std::string& make) {
   for (const auto& cam : cameras) {
     if (cam.second->make == make)
       cam.second->supported = false;
   }
 }
 
-void CameraMetaData::disableCamera(const string &make, const string &model) {
+void CameraMetaData::disableCamera(const std::string& make,
+                                   const std::string& model) {
   for (const auto& cam : cameras) {
     if (cam.second->make == make && cam.second->model == model)
       cam.second->supported = false;

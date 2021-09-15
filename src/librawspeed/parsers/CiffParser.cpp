@@ -37,8 +37,6 @@
 #include <utility>                       // for move
 #include <vector>                        // for vector
 
-using std::string;
-
 namespace rawspeed {
 
 CiffParser::CiffParser(const Buffer& inputData) : RawParser(inputData) {}
@@ -70,7 +68,7 @@ std::unique_ptr<RawDecoder> CiffParser::getDecoder(const CameraMetaData* meta) {
 
   for (const auto& potential : potentials) {
     const auto* const mm = potential->getEntry(CIFF_MAKEMODEL);
-    const string make = trimSpaces(mm->getString());
+    const std::string make = trimSpaces(mm->getString());
 
     if (make == "Canon")
       return std::make_unique<CrwDecoder>(move(mRootIFD), mInput);

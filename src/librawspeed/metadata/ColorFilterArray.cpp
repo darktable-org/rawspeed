@@ -31,7 +31,7 @@
 #include <string>                         // for string
 
 using std::vector;
-using std::string;
+
 using std::out_of_range;
 using std::map;
 
@@ -119,8 +119,8 @@ void ColorFilterArray::shiftDown(int n) {
   cfa = tmp;
 }
 
-string ColorFilterArray::asString() const {
-  string dst;
+std::string ColorFilterArray::asString() const {
+  std::string dst;
   for (int y = 0; y < size.y; y++) {
     for (int x = 0; x < size.x; x++) {
       dst += colorToString(getColorAt(x,y));
@@ -158,15 +158,14 @@ uint32_t ColorFilterArray::shiftDcrawFilter(uint32_t filter, int x, int y) {
   return filter;
 }
 
-const map<CFAColor, string> ColorFilterArray::color2String = {
+const map<CFAColor, std::string> ColorFilterArray::color2String = {
     {CFA_RED, "RED"},         {CFA_GREEN, "GREEN"},
     {CFA_BLUE, "BLUE"},       {CFA_CYAN, "CYAN"},
     {CFA_MAGENTA, "MAGENTA"}, {CFA_YELLOW, "YELLOW"},
     {CFA_WHITE, "WHITE"},     {CFA_FUJI_GREEN, "FUJIGREEN"},
     {CFA_UNKNOWN, "UNKNOWN"}};
 
-string ColorFilterArray::colorToString(CFAColor c)
-{
+std::string ColorFilterArray::colorToString(CFAColor c) {
   try {
     return color2String.at(c);
   } catch (std::out_of_range&) {

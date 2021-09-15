@@ -41,7 +41,6 @@
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for string, operator==
 
-using std::string;
 using std::fabs;
 
 namespace rawspeed {
@@ -193,7 +192,7 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   parseCFA();
 
   auto id = mRootIFD->getID();
-  string mode = guessMode();
+  std::string mode = guessMode();
   int iso = 0;
   if (mRootIFD->hasEntryRecursive(PANASONIC_ISO_SPEED))
     iso = mRootIFD->getEntryRecursive(PANASONIC_ISO_SPEED)->getU32();

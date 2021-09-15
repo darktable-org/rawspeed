@@ -37,7 +37,7 @@ using pugi::xml_node;
 #endif
 
 using std::vector;
-using std::string;
+
 using std::map;
 
 namespace rawspeed {
@@ -55,7 +55,8 @@ Camera::Camera(const pugi::xml_node& camera) : cfa(iPoint2D(0, 0)) {
 
   canonical_id = make + " " + model;
 
-  supported = camera.attribute("supported").as_string("yes") == string("yes");
+  supported =
+      camera.attribute("supported").as_string("yes") == std::string("yes");
   mode = camera.attribute("mode").as_string("");
   decoderVersion = camera.attribute("decoder_version").as_int(0);
 
@@ -77,7 +78,7 @@ Camera::Camera(const Camera* camera, uint32_t alias_num) : cfa(iPoint2D(0, 0)) {
 }
 
 #ifdef HAVE_PUGIXML
-static string name(const xml_node& a) { return a.name(); }
+static std::string name(const xml_node& a) { return a.name(); }
 #endif
 
 const map<char, CFAColor> Camera::char2enum = {
@@ -86,7 +87,7 @@ const map<char, CFAColor> Camera::char2enum = {
     {'y', CFA_YELLOW},
 };
 
-const map<string, CFAColor> Camera::str2enum = {
+const map<std::string, CFAColor> Camera::str2enum = {
     {"GREEN", CFA_GREEN},   {"RED", CFA_RED},
     {"BLUE", CFA_BLUE},     {"FUJI_GREEN", CFA_FUJI_GREEN},
     {"CYAN", CFA_CYAN},     {"MAGENTA", CFA_MAGENTA},
@@ -107,7 +108,7 @@ void Camera::parseCFA(const xml_node &cur) {
           ThrowCME("Invalid y coordinate in CFA array of camera %s %s",
                    make.c_str(), model.c_str());
         }
-        string key = c.child_value();
+        std::string key = c.child_value();
         if (static_cast<int>(key.size()) != cfa.getSize().x) {
           ThrowCME("Invalid number of colors in definition for row %d in "
                    "camera %s %s. Expected %d, found %zu.",
@@ -228,12 +229,12 @@ void Camera::parseHints(const xml_node &cur) {
     ThrowCME("Not an Hints node!");
 
   for (xml_node c : cur.children("Hint")) {
-    string name = c.attribute("name").as_string();
+    std::string name = c.attribute("name").as_string();
     if (name.empty())
       ThrowCME("Could not find name for hint for %s %s camera.", make.c_str(),
                model.c_str());
 
-    string value = c.attribute("value").as_string();
+    std::string value = c.attribute("value").as_string();
 
     hints.add(name, value);
   }
@@ -262,7 +263,8 @@ void Camera::parseSensor(const xml_node &cur) {
 
   auto stringToListOfInts = [&cur](const char* attribute) {
     vector<int> ret;
-    for (const string& s : splitString(cur.attribute(attribute).as_string()))
+    for (const std::string& s :
+         splitString(cur.attribute(attribute).as_string()))
       ret.push_back(stoi(s));
     return ret;
   };

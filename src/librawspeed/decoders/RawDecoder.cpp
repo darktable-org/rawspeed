@@ -45,7 +45,6 @@
 #include <vector>                                   // for vector
 
 using std::vector;
-using std::string;
 
 namespace rawspeed {
 
@@ -144,8 +143,10 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
   }
 }
 
-void RawDecoder::askForSamples(const CameraMetaData* meta, const string& make,
-                               const string& model, const string& mode) {
+void RawDecoder::askForSamples(const CameraMetaData* meta,
+                               const std::string& make,
+                               const std::string& model,
+                               const std::string& mode) {
   if ("dng" == mode)
     return;
 
@@ -157,8 +158,9 @@ void RawDecoder::askForSamples(const CameraMetaData* meta, const string& make,
 }
 
 bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
-                                      const string& make, const string& model,
-                                      const string& mode) {
+                                      const std::string& make,
+                                      const std::string& model,
+                                      const std::string& mode) {
   mRaw->metadata.make = make;
   mRaw->metadata.model = model;
   const Camera* cam = meta->getCamera(make, model, mode);
@@ -182,9 +184,9 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
   return true;
 }
 
-void RawDecoder::setMetaData(const CameraMetaData* meta, const string& make,
-                             const string& model, const string& mode,
-                             int iso_speed) {
+void RawDecoder::setMetaData(const CameraMetaData* meta,
+                             const std::string& make, const std::string& model,
+                             const std::string& mode, int iso_speed) {
   mRaw->metadata.isoSpeed = iso_speed;
   const Camera* cam = meta->getCamera(make, model, mode);
   if (!cam) {
@@ -243,9 +245,9 @@ void RawDecoder::setMetaData(const CameraMetaData* meta, const string& make,
   // (the same order as the in the CFA tag)
   // A hint could be:
   // <Hint name="override_cfa_black" value="10,20,30,20"/>
-  string cfa_black = hints.get("override_cfa_black", string());
+  std::string cfa_black = hints.get("override_cfa_black", std::string());
   if (!cfa_black.empty()) {
-    vector<string> v = splitString(cfa_black, ',');
+    vector<std::string> v = splitString(cfa_black, ',');
     if (v.size() != 4) {
       mRaw->setError("Expected 4 values '10,20,30,20' as values for override_cfa_black hint.");
     } else {

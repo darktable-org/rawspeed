@@ -38,8 +38,6 @@
 #include "AddressSanitizer.h" // for ASan::...
 #endif
 
-using std::string;
-
 namespace rawspeed {
 
 RawImageData::RawImageData() : cfa(iPoint2D(0, 0)) {
