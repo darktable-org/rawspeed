@@ -101,6 +101,13 @@ static void jpeg_mem_src_int(j_decompress_ptr cinfo,
 
 struct JpegDecompressor::JpegDecompressStruct : jpeg_decompress_struct {
   struct jpeg_error_mgr jerr;
+
+  JpegDecompressStruct(const JpegDecompressStruct&) = delete;
+  JpegDecompressStruct(JpegDecompressStruct&&) noexcept = delete;
+  JpegDecompressStruct&
+  operator=(const JpegDecompressStruct&) noexcept = delete;
+  JpegDecompressStruct& operator=(JpegDecompressStruct&&) noexcept = delete;
+
   JpegDecompressStruct() {
     jpeg_create_decompress(this);
 
