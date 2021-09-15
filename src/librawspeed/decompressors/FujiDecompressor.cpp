@@ -635,8 +635,8 @@ void FujiDecompressor::fuji_bayer_decode_block(fuji_compressed_block* info,
 
   const int line_width = common_info.line_width;
 
-  auto pass = [&](xt_lines c0, xt_lines c1, int grad, ColorPos& c0_pos,
-                  ColorPos& c1_pos) {
+  auto pass = [this, info, line_width, &g](xt_lines c0, xt_lines c1, int grad,
+                                           ColorPos& c0_pos, ColorPos& c1_pos) {
     while (g.even < line_width || g.odd < line_width) {
       if (g.even < line_width) {
         fuji_decode_sample_even(info, info->linebuf[c0] + 1, &c0_pos.even,
