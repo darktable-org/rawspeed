@@ -54,9 +54,9 @@ constexpr SamsungV2Decompressor::OptFlags
 operator|(SamsungV2Decompressor::OptFlags lhs,
           SamsungV2Decompressor::OptFlags rhs) {
   return static_cast<SamsungV2Decompressor::OptFlags>(
-      static_cast<std::underlying_type<SamsungV2Decompressor::OptFlags>::type>(
+      static_cast<std::underlying_type_t<SamsungV2Decompressor::OptFlags>>(
           lhs) |
-      static_cast<std::underlying_type<SamsungV2Decompressor::OptFlags>::type>(
+      static_cast<std::underlying_type_t<SamsungV2Decompressor::OptFlags>>(
           rhs));
 }
 
@@ -65,11 +65,9 @@ constexpr bool operator&(SamsungV2Decompressor::OptFlags lhs,
   return SamsungV2Decompressor::OptFlags::NONE !=
          static_cast<SamsungV2Decompressor::OptFlags>(
              static_cast<
-                 std::underlying_type<SamsungV2Decompressor::OptFlags>::type>(
-                 lhs) &
+                 std::underlying_type_t<SamsungV2Decompressor::OptFlags>>(lhs) &
              static_cast<
-                 std::underlying_type<SamsungV2Decompressor::OptFlags>::type>(
-                 rhs));
+                 std::underlying_type_t<SamsungV2Decompressor::OptFlags>>(rhs));
 }
 
 inline __attribute__((always_inline)) int16_t

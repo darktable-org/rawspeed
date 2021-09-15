@@ -37,7 +37,7 @@ template <class T> class Array2DRef {
 
 public:
   using value_type = T;
-  using cvless_value_type = typename std::remove_cv<value_type>::type;
+  using cvless_value_type = std::remove_cv_t<value_type>;
 
   int width = 0, height = 0;
 
@@ -46,8 +46,8 @@ public:
   Array2DRef(T* data, int dataWidth, int dataHeight, int dataPitch = 0);
 
   // Conversion from Array2DRef<T> to Array2DRef<const T>.
-  template <class T2, typename = std::enable_if_t<std::is_same<
-                          typename std::remove_const<T>::type, T2>::value>>
+  template <class T2, typename = std::enable_if_t<
+                          std::is_same_v<std::remove_const_t<T>, T2>>>
   Array2DRef(Array2DRef<T2> RHS) // NOLINT google-explicit-constructor
       : _data(RHS._data), _pitch(RHS._pitch), width(RHS.width),
         height(RHS.height) {}
@@ -57,7 +57,7 @@ public:
   static Array2DRef<T>
   create(std::vector<cvless_value_type, AllocatorType>& storage, int width,
          int height) {
-    using VectorTy = typename std::remove_reference<decltype(storage)>::type;
+    using VectorTy = std::remove_reference_t<decltype(storage)>;
     storage = VectorTy(width * height);
     return {storage.data(), width, height};
   }

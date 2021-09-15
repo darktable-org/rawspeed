@@ -38,7 +38,7 @@ namespace rawspeed {
 // section "Algorithm for computing natural cubic splines"
 
 template <typename T = uint16_t,
-          typename = std::enable_if_t<std::is_arithmetic<T>::value>>
+          typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 class Spline final {
 public:
   using value_type = T;

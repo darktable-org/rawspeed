@@ -75,7 +75,7 @@ public:
   [[nodiscard]] bool hasPositiveArea() const { return operator>({0, 0}); }
 
   [[nodiscard]] area_type __attribute__((pure)) area() const {
-    using signed_area = std::make_signed<area_type>::type;
+    using signed_area = std::make_signed_t<area_type>;
 
     area_type x_abs = std::abs(static_cast<signed_area>(x));
     area_type y_abs = std::abs(static_cast<signed_area>(y));

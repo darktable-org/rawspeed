@@ -68,7 +68,7 @@ enum class VC5Tag : int16_t {
   Optional = int16_t(0x8000U), // only signbit set
 };
 inline VC5Tag operator&(VC5Tag LHS, VC5Tag RHS) {
-  using value_type = std::underlying_type<VC5Tag>::type;
+  using value_type = std::underlying_type_t<VC5Tag>;
   return static_cast<VC5Tag>(static_cast<value_type>(LHS) &
                              static_cast<value_type>(RHS));
 }
@@ -81,7 +81,7 @@ inline bool is(VC5Tag LHS, VC5Tag RHS) {
   return (LHS & RHS) == RHS;
 }
 inline VC5Tag operator-(VC5Tag tag) {
-  using value_type = std::underlying_type<VC5Tag>::type;
+  using value_type = std::underlying_type_t<VC5Tag>;
   // Negate
   return static_cast<VC5Tag>(-static_cast<value_type>(tag));
 }

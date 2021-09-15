@@ -527,8 +527,7 @@ void VC5Decompressor::parseVC5() {
       unsigned int chunkSize = 0;
       if (matches(tag, VC5Tag::LARGE_CHUNK)) {
         chunkSize = static_cast<unsigned int>(
-            ((static_cast<std::underlying_type<VC5Tag>::type>(tag) & 0xff)
-             << 16) |
+            ((static_cast<std::underlying_type_t<VC5Tag>>(tag) & 0xff) << 16) |
             (val & 0xffff));
       } else if (matches(tag, VC5Tag::SMALL_CHUNK)) {
         chunkSize = (val & 0xffff);
@@ -550,7 +549,7 @@ void VC5Decompressor::parseVC5() {
 
       if (!optional) {
         ThrowRDE("Unknown (unhandled) non-optional Tag 0x%04hx",
-                 static_cast<std::underlying_type<VC5Tag>::type>(tag));
+                 static_cast<std::underlying_type_t<VC5Tag>>(tag));
       }
 
       if (chunkSize)

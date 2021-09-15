@@ -27,14 +27,14 @@
 namespace rawspeed {
 
 template <typename T, typename ActualAllocator = std::allocator<T>,
-          typename = std::enable_if_t<std::is_pod<T>::value>>
+          typename = std::enable_if_t<std::is_pod_v<T>>>
 class DefaultInitAllocatorAdaptor {
 public:
   using allocator_traits = std::allocator_traits<ActualAllocator>;
 
   using value_type = typename allocator_traits::value_type;
 
-  static_assert(std::is_same<T, value_type>::value);
+  static_assert(std::is_same_v<T, value_type>);
 
   template <class To> struct rebind {
     using other = DefaultInitAllocatorAdaptor<
@@ -72,8 +72,7 @@ public:
   }
 
   template <typename U>
-  void
-  construct(U* ptr) noexcept(std::is_nothrow_default_constructible<U>::value) {
+  void construct(U* ptr) noexcept(std::is_nothrow_default_constructible_v<U>) {
     ::new (static_cast<void*>(ptr)) U; // start the life-time, but do not init.
   }
 

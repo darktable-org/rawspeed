@@ -36,7 +36,7 @@ template <class T> class CroppedArray2DRef {
 
 public:
   using value_type = T;
-  using cvless_value_type = typename std::remove_cv<value_type>::type;
+  using cvless_value_type = std::remove_cv_t<value_type>;
 
   int offsetCols = 0, offsetRows = 0;
   int croppedWidth = 0, croppedHeight = 0;
@@ -47,8 +47,8 @@ public:
                     int croppedWidth_, int croppedHeight_);
 
   // Conversion from CroppedArray2DRef<T> to CroppedArray2DRef<const T>.
-  template <class T2, typename = std::enable_if_t<std::is_same<
-                          typename std::remove_const<T>::type, T2>::value>>
+  template <class T2, typename = std::enable_if_t<
+                          std::is_same_v<std::remove_const_t<T>, T2>>>
   CroppedArray2DRef( // NOLINT google-explicit-constructor
       CroppedArray2DRef<T2> RHS)
       : base(RHS.base), offsetCols(RHS.offsetCols), offsetRows(RHS.offsetRows),
