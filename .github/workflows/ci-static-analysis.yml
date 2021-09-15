@@ -137,12 +137,7 @@ jobs:
           FLAVOR: ${{ matrix.flavor }}
           TARGET: build
         run: |
-          if [ ${FLAVOR} = "ClangStaticAnalysis" ]; then
-            export ECO="${ECO} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DUSE_CLANG_TIDY=ON -DCMAKE_C_FLAGS_RELWITHDEBINFO=-UNDEBUG -DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-UNDEBUG";
-          fi;
-          if [ ${FLAVOR} = "SonarCloudStaticAnalysis" ]; then
-            export ECO="${ECO} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON";
-          fi;
+          export ECO="${ECO} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DUSE_CLANG_TIDY=ON -DCMAKE_C_FLAGS_RELWITHDEBINFO=-UNDEBUG -DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-UNDEBUG";
           cmake -E make_directory "${BUILD_DIR}";
           cmake -E make_directory "${INSTALL_PREFIX}";
           "${SRC_DIR}/.ci/ci-script.sh";
