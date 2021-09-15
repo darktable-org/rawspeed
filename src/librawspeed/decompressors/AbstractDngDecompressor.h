@@ -93,6 +93,12 @@ struct DngSliceElement final {
   const unsigned width;
   const unsigned height;
 
+  DngSliceElement() = delete;
+  DngSliceElement(const DngSliceElement&) = default;
+  DngSliceElement(DngSliceElement&&) noexcept = default;
+  DngSliceElement& operator=(const DngSliceElement&) noexcept = delete;
+  DngSliceElement& operator=(DngSliceElement&&) noexcept = delete;
+
   DngSliceElement(const DngTilingDescription& dsc_, unsigned n_, ByteStream bs_)
       : dsc(dsc_), n(n_), bs(std::move(bs_)), column(n % dsc.tilesX),
         row(n / dsc.tilesX), lastColumn((column + 1) == dsc.tilesX),

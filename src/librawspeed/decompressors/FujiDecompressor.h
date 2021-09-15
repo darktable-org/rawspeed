@@ -70,6 +70,12 @@ public:
     // the compressed data of this strip
     const ByteStream bs;
 
+    FujiStrip() = delete;
+    FujiStrip(const FujiStrip&) = default;
+    FujiStrip(FujiStrip&&) noexcept = default;
+    FujiStrip& operator=(const FujiStrip&) noexcept = delete;
+    FujiStrip& operator=(FujiStrip&&) noexcept = delete;
+
     FujiStrip(const FujiHeader& h_, int block, ByteStream bs_)
         : h(h_), n(block), bs(std::move(bs_)) {
       assert(n >= 0 && n < h.blocks_in_row);
