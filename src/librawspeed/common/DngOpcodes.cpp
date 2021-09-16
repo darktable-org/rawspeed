@@ -142,7 +142,7 @@ public:
     return ROIOpcode::getRoi();
   }
 
-  [[noreturn]] void apply(const RawImage& ri) final {
+  [[noreturn]] void apply(const RawImage& ri) override {
     // NOLINTNEXTLINE: https://bugs.llvm.org/show_bug.cgi?id=50532
     assert(false && "You should not be calling this.");
     __builtin_unreachable();
@@ -409,7 +409,7 @@ class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol<S> {
   // by f2iScale before applying, we need to divide by f2iScale here.
   const double absLimit;
 
-  bool valueIsOk(float value) final { return std::abs(value) <= absLimit; }
+  bool valueIsOk(float value) override { return std::abs(value) <= absLimit; }
 
 public:
   explicit OffsetPerRowOrCol(const RawImage& ri, ByteStream& bs)
@@ -444,7 +444,7 @@ class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol<S> {
   static constexpr int rounding = 512;
   const double maxLimit;
 
-  bool valueIsOk(float value) final {
+  bool valueIsOk(float value) override {
     return value >= minLimit && value <= maxLimit;
   }
 
