@@ -68,7 +68,8 @@ class TiffIFD
 
   void add(TiffIFDOwner subIFD);
   void add(TiffEntryOwner entry);
-  TiffRootIFDOwner parseMakerNote(NORangesSet<Buffer>* ifds, TiffEntry* t);
+  TiffRootIFDOwner parseMakerNote(NORangesSet<Buffer>* ifds,
+                                  const TiffEntry* t);
   void parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs);
 
   // TIFF IFD are tree-like structure, with branches.

@@ -128,7 +128,7 @@ TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
 
 /* This will attempt to parse makernotes and return it as an IFD */
 TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
-                                         TiffEntry* t) {
+                                         const TiffEntry* t) {
   assert(ifds);
 
   // go up the IFD tree and try to find the MAKE entry on each level.

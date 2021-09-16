@@ -143,7 +143,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
     mRaw->dim.x *= 2 + subSampling.x * subSampling.y;
   }
 
-  TiffIFD* raw = mRootIFD->getSubIFDs()[3].get();
+  const TiffIFD* raw = mRootIFD->getSubIFDs()[3].get();
 
   Cr2Slicing slicing;
   // there are four cases:
