@@ -67,7 +67,7 @@ ByteStream OrfDecoder::handleSlices() const {
 
   const uint32_t off = offsets->getU32(0);
   uint32_t size = counts->getU32(0);
-  auto end = [&off, &size]() -> uint32_t { return off + size; };
+  auto end = [&off, &size]() { return off + size; };
 
   for (uint32_t i = 0; i < counts->count; i++) {
     const auto offset = offsets->getU32(i);
@@ -188,7 +188,7 @@ void OrfDecoder::parseCFA() const {
 
   mRaw->cfa.setSize(cfaSize);
 
-  auto int2enum = [](uint8_t i) -> CFAColor {
+  auto int2enum = [](uint8_t i) {
     switch (i) {
     case 0:
       return CFAColor::RED;

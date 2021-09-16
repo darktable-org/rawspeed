@@ -98,7 +98,7 @@ RawImage DcrDecoder::decodeRawInternal() {
     }
   }
 
-  const int bps = [CurveSize = linearization->count]() -> int {
+  const int bps = [CurveSize = linearization->count]() {
     switch (CurveSize) {
     case 1024:
       return 10;

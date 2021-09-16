@@ -650,9 +650,7 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
     }
 
     int16_t decode() {
-      auto dequantize = [quant = quant](int16_t val) -> int16_t {
-        return val * quant;
-      };
+      auto dequantize = [quant = quant](int16_t val) { return val * quant; };
 
       if (numPixelsLeft == 0) {
         decodeNextPixelGroup();

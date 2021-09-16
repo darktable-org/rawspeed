@@ -125,7 +125,7 @@ public:
     if (!std::is_floating_point<value_type>::value) {
       // The Y coords must be limited to the range of value_type
       std::for_each(control_points.cbegin(), control_points.cend(),
-                    [](const iPoint2D& p) -> void {
+                    [](const iPoint2D& p) {
                       assert(p.y >= std::numeric_limits<value_type>::min());
                       assert(p.y <= std::numeric_limits<value_type>::max());
                     });

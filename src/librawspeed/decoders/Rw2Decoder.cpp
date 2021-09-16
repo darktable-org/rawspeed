@@ -220,7 +220,7 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (raw->hasEntry(static_cast<TiffTag>(0x1c)) &&
       raw->hasEntry(static_cast<TiffTag>(0x1d)) &&
       raw->hasEntry(static_cast<TiffTag>(0x1e))) {
-    const auto getBlack = [&raw](TiffTag t) -> int {
+    const auto getBlack = [&raw](TiffTag t) {
       const auto val = raw->getEntry(t)->getU32();
       int out;
       // FIXME: for some cameras, black level specified in EXIF is wrong,

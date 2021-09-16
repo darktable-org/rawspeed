@@ -93,7 +93,7 @@ void PanasonicDecompressorV4::chopInputIntoBlocks() {
 
   unsigned currPixel = 0;
   std::generate_n(std::back_inserter(blocks), blocksTotal,
-                  [&, pixelToCoordinate]() -> Block {
+                  [&, pixelToCoordinate]() {
                     assert(input.getRemainSize() != 0);
                     const auto blockSize =
                         std::min(input.getRemainSize(), BlockSize);
@@ -108,7 +108,7 @@ void PanasonicDecompressorV4::chopInputIntoBlocks() {
                     iPoint2D beginCoord = pixelToCoordinate(currPixel);
                     currPixel += pixels;
                     iPoint2D endCoord = pixelToCoordinate(currPixel);
-                    return {std::move(bs), beginCoord, endCoord};
+                    return Block(std::move(bs), beginCoord, endCoord);
                   });
   assert(blocks.size() == blocksTotal);
   assert(currPixel >= mRaw->dim.area());
