@@ -57,6 +57,13 @@ public:
   inline T& operator()(int row, int col) const;
 };
 
+// CTAD deduction guide
+template <typename T>
+explicit CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
+                           int offsetRows_, int croppedWidth_,
+                           int croppedHeight_)
+    -> CroppedArray2DRef<typename Array2DRef<T>::value_type>;
+
 template <class T>
 CroppedArray2DRef<T>::CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
                                         int offsetRows_, int croppedWidth_,

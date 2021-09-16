@@ -165,9 +165,9 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   assert(mRaw->dim.x >= N_COMP);
   assert((mRaw->getCpp() * (mRaw->dim.x - offX)) >= N_COMP);
 
-  const CroppedArray2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef(),
-                                        mRaw->getCpp() * offX, offY,
-                                        mRaw->getCpp() * w, h);
+  const CroppedArray2DRef img(mRaw->getU16DataAsUncroppedArray2DRef(),
+                              mRaw->getCpp() * offX, offY, mRaw->getCpp() * w,
+                              h);
 
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
