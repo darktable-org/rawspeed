@@ -91,7 +91,8 @@ class NikonLASDecompressor {
     std::array<uint32_t, 256> numbits;
     std::vector<int> bigTable;
     bool initialized;
-  } dctbl1;
+  };
+  HuffmanTable dctbl1;
 
   void createHuffmanTable() {
     int p;
