@@ -47,8 +47,7 @@ template <typename T> bool operator<(const Range<T>& lhs, const Range<T>& rhs) {
 }
 
 template <typename Tr, typename Tv>
-inline constexpr bool __attribute__((const))
-RangeContains(const Tr& r, Tv pos) {
+constexpr bool __attribute__((const)) RangeContains(const Tr& r, Tv pos) {
   if (pos < std::begin(r))
     return false;
 
@@ -57,7 +56,7 @@ RangeContains(const Tr& r, Tv pos) {
 }
 
 template <typename T>
-inline constexpr bool __attribute__((const))
+constexpr bool __attribute__((const))
 RangesOverlap(const T& lhs, const T& rhs) {
   if (&lhs == &rhs)
     return true;
