@@ -489,7 +489,7 @@ using rawspeed::rstest::results;
 int main(int argc, char **argv) {
   int remaining_argc = argc;
 
-  auto hasFlag = [argc, &remaining_argc, argv](const std::string& flag) {
+  auto hasFlag = [argc, &remaining_argc, argv](std::string_view flag) {
     bool found = false;
     for (int i = 1; i < argc; ++i) {
       if (!argv[i] || argv[i] != flag)

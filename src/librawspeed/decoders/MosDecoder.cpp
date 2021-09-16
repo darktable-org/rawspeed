@@ -85,14 +85,13 @@ MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file)
   }
 }
 
-std::string MosDecoder::getXMPTag(const std::string& xmp,
-                                  const std::string& tag) {
-  std::string::size_type start = xmp.find("<tiff:" + tag + ">");
-  std::string::size_type end = xmp.find("</tiff:" + tag + ">");
+std::string MosDecoder::getXMPTag(std::string_view xmp, std::string_view tag) {
+  std::string::size_type start = xmp.find("<tiff:" + std::string(tag) + ">");
+  std::string::size_type end = xmp.find("</tiff:" + std::string(tag) + ">");
   if (start == std::string::npos || end == std::string::npos || end <= start)
-    ThrowRDE("Couldn't find tag '%s' in the XMP", tag.c_str());
+    ThrowRDE("Couldn't find tag '%s' in the XMP", tag.data());
   int startlen = tag.size()+7;
-  return xmp.substr(start+startlen, end-start-startlen);
+  return std::string(xmp.substr(start + startlen, end - start - startlen));
 }
 
 RawImage MosDecoder::decodeRawInternal() {
