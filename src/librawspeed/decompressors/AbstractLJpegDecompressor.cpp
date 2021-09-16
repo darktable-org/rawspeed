@@ -56,7 +56,7 @@ void AbstractLJpegDecompressor::decode() {
   if (getNextMarker(false) != M_SOI)
     ThrowRDE("Image did not start with SOI. Probably not an LJPEG");
 
-  struct FoundMarkers {
+  struct {
     bool DHT = false;
     bool SOF = false;
     bool SOS = false;
