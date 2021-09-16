@@ -342,7 +342,7 @@ void UncompressedDecompressor::decode12BitRaw(uint32_t w, uint32_t h) {
       in = input.peekData(perline * (h - row));
     }
 
-    for (uint32_t x = 0; x < w; x += 2, in += 3) {
+    for (uint32_t x = 0; x < w; x += 2) {
       uint32_t g1 = in[0];
       uint32_t g2 = in[1];
 
@@ -358,6 +358,8 @@ void UncompressedDecompressor::decode12BitRaw(uint32_t w, uint32_t h) {
       g1 = in[2];
 
       process(x + 1, true, g1, g2);
+
+      in += 3;
 
       if (skips && ((x % 10) == 8))
         in++;

@@ -228,7 +228,7 @@ void CrwDecompressor::decompress() {
       diffBuf[0] += carry;
       carry = diffBuf[0];
 
-      for (uint32_t k = 0; k < 64; ++k, ++col) {
+      for (uint32_t k = 0; k < 64; ++k) {
         if (col == out.width) {
           // new line. sadly, does not always happen when k == 0.
           col = 0;
@@ -242,6 +242,7 @@ void CrwDecompressor::decompress() {
           ThrowRDE("Error decompressing");
 
         out(row, col) = base[k & 1];
+        ++col;
       }
     }
     assert(row == (out.height - 1));
