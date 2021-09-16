@@ -47,12 +47,8 @@ SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
-  switch (bit) {
-  case 12:
-    break;
-  default:
+  if (bit != 12)
     ThrowRDE("Unexpected bit per pixel (%u)", bit);
-  }
 
   const uint32_t width = mRaw->dim.x;
   const uint32_t height = mRaw->dim.y;
