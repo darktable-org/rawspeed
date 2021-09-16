@@ -116,30 +116,18 @@ template <class T> inline constexpr unsigned bitwidth(T unused = {}) {
   return CHAR_BIT * sizeof(T);
 }
 
-// Clamps the given unsigned value to the range 0 .. 2^n-1, with n <= 16
-template <class T>
-inline constexpr __attribute__((const)) uint16_t clampBits(
+// Clamps the given value to the range 0 .. 2^n-1, with n <= 16
+template <typename T>
+inline constexpr uint16_t __attribute__((const)) clampBits(
     T value, unsigned int nBits,
-    typename std::enable_if_t<std::is_unsigned_v<T>>* /*unused*/ = nullptr) {
+    typename std::enable_if_t<std::is_arithmetic_v<T>>* /*unused*/ = nullptr) {
   // We expect to produce uint16_t.
   assert(nBits <= 16);
   // Check that the clamp is not a no-op. Not of uint16_t to 16 bits e.g.
   // (Well, not really, if we are called from clampBits<signed>, it's ok..).
   assert(bitwidth<T>() > nBits); // If nBits >= bitwidth, then shift is UB.
   const T maxVal = (T(1) << nBits) - T(1);
-  return std::min(value, maxVal);
-}
-
-// Clamps the given signed value to the range 0 .. 2^n-1, with n <= 16
-template <typename T>
-inline constexpr uint16_t __attribute__((const)) clampBits(
-    T value, unsigned int nBits,
-    typename std::enable_if_t<std::is_signed_v<T>>* /*unused*/ = nullptr) {
-  // If the value is negative, clamp it to zero.
-  value = std::max(value, T(0));
-  // Now, let the unsigned case clamp to the upper limit.
-  using UnsignedT = std::make_unsigned_t<T>;
-  return clampBits<UnsignedT>(value, nBits);
+  return std::clamp(value, T(0), maxVal);
 }
 
 template <typename T>
