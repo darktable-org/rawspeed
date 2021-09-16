@@ -32,7 +32,7 @@ template <class T> class CroppedArray2DRef {
   // We need to be able to convert to const version.
   friend CroppedArray2DRef<const T>;
 
-  inline T& operator[](int row) const;
+  T& operator[](int row) const;
 
 public:
   using value_type = T;
@@ -54,7 +54,7 @@ public:
       : base(RHS.base), offsetCols(RHS.offsetCols), offsetRows(RHS.offsetRows),
         croppedWidth(RHS.croppedWidth), croppedHeight(RHS.croppedHeight) {}
 
-  inline T& operator()(int row, int col) const;
+  T& operator()(int row, int col) const;
 };
 
 // CTAD deduction guide
@@ -78,14 +78,15 @@ CroppedArray2DRef<T>::CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
   assert(offsetRows_ + croppedHeight_ <= base.height);
 }
 
-template <class T> T& CroppedArray2DRef<T>::operator[](const int row) const {
+template <class T>
+inline T& CroppedArray2DRef<T>::operator[](const int row) const {
   assert(row >= 0);
   assert(row < croppedHeight);
   return base.operator()(offsetRows + row, /*col=*/0);
 }
 
 template <class T>
-T& CroppedArray2DRef<T>::operator()(const int row, const int col) const {
+inline T& CroppedArray2DRef<T>::operator()(const int row, const int col) const {
   assert(col >= 0);
   assert(col < croppedWidth);
   return (&(operator[](row)))[offsetCols + col];

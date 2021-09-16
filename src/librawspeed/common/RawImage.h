@@ -110,9 +110,9 @@ public:
   void blitFrom(const RawImage& src, const iPoint2D& srcPos,
                 const iPoint2D& size, const iPoint2D& destPos);
   [[nodiscard]] rawspeed::RawImageType getDataType() const { return dataType; }
-  [[nodiscard]] inline Array2DRef<uint16_t>
+  [[nodiscard]] Array2DRef<uint16_t>
   getU16DataAsUncroppedArray2DRef() const noexcept;
-  [[nodiscard]] inline CroppedArray2DRef<uint16_t>
+  [[nodiscard]] CroppedArray2DRef<uint16_t>
   getU16DataAsCroppedArray2DRef() const noexcept;
   [[nodiscard]] uint8_t* getData() const;
   uint8_t*

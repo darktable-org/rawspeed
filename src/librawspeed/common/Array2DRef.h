@@ -33,7 +33,7 @@ template <class T> class Array2DRef {
 
   friend Array2DRef<const T>; // We need to be able to convert to const version.
 
-  inline T& operator[](int row) const;
+  T& operator[](int row) const;
 
 public:
   using value_type = T;
@@ -62,7 +62,7 @@ public:
     return {storage.data(), width, height};
   }
 
-  inline T& operator()(int row, int col) const;
+  T& operator()(int row, int col) const;
 };
 
 template <class T>
@@ -74,7 +74,7 @@ Array2DRef<T>::Array2DRef(T* data, const int dataWidth, const int dataHeight,
   _pitch = (dataPitch == 0 ? dataWidth : dataPitch);
 }
 
-template <class T> T& Array2DRef<T>::operator[](const int row) const {
+template <class T> inline T& Array2DRef<T>::operator[](const int row) const {
   assert(_data);
   assert(row >= 0);
   assert(row < height);
@@ -82,7 +82,7 @@ template <class T> T& Array2DRef<T>::operator[](const int row) const {
 }
 
 template <class T>
-T& Array2DRef<T>::operator()(const int row, const int col) const {
+inline T& Array2DRef<T>::operator()(const int row, const int col) const {
   assert(col >= 0);
   assert(col < width);
   return (&(operator[](row)))[col];
