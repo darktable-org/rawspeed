@@ -48,7 +48,7 @@ void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs) {
 
   try {
     t = std::make_unique<TiffEntry>(this, bs);
-  } catch (IOException&) { // Ignore unparsable entry
+  } catch (const IOException&) { // Ignore unparsable entry
     // fix probably broken position due to interruption by exception
     // i.e. setting it to the next entry.
     bs.setPosition(origPos + 12);
@@ -82,7 +82,8 @@ void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs) {
     default:
       add(move(t));
     }
-  } catch (RawspeedException&) { // Unparsable private data are added as entries
+  } catch (const RawspeedException&) { // Unparsable private data are added as
+                                       // entries
     add(move(t));
   }
 }
@@ -133,8 +134,8 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
   // go up the IFD tree and try to find the MAKE entry on each level.
   // we can not go all the way to the top first because this partial tree
   // is not yet added to the TiffRootIFD.
-  TiffIFD* p = this;
-  TiffEntry* makeEntry;
+  const TiffIFD* p = this;
+  const TiffEntry* makeEntry;
   do {
     makeEntry = p->getEntryRecursive(TiffTag::MAKE);
     p = p->parent;
@@ -298,8 +299,8 @@ TiffEntry* TiffIFD::getEntry(TiffTag tag) const {
 TiffID TiffRootIFD::getID() const
 {
   TiffID id;
-  auto* makeE = getEntryRecursive(TiffTag::MAKE);
-  auto* modelE = getEntryRecursive(TiffTag::MODEL);
+  const auto* makeE = getEntryRecursive(TiffTag::MAKE);
+  const auto* modelE = getEntryRecursive(TiffTag::MODEL);
 
   if (!makeE)
     ThrowTPE("Failed to find MAKE entry.");

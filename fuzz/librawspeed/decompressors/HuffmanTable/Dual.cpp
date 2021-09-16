@@ -71,12 +71,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     try {
       ht0 = createHuffmanTable<rawspeed::IMPL0>(bs0);
-    } catch (rawspeed::RawspeedException&) {
+    } catch (const rawspeed::RawspeedException&) {
       failure0 = true;
     }
     try {
       ht1 = createHuffmanTable<rawspeed::IMPL1>(bs1);
-    } catch (rawspeed::RawspeedException&) {
+    } catch (const rawspeed::RawspeedException&) {
       failure1 = true;
     }
 
@@ -101,18 +101,18 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
       try {
         decoded0 = ht0.decode<decltype(bits0), FULLDECODE>(bits0);
-      } catch (rawspeed::IOException&) {
+      } catch (const rawspeed::IOException&) {
         // For now, let's ignore stream depleteon issues.
         throw;
-      } catch (rawspeed::RawspeedException&) {
+      } catch (const rawspeed::RawspeedException&) {
         failure0 = true;
       }
       try {
         decoded1 = ht1.decode<decltype(bits1), FULLDECODE>(bits1);
-      } catch (rawspeed::IOException&) {
+      } catch (const rawspeed::IOException&) {
         // For now, let's ignore stream depleteon issues.
         throw;
-      } catch (rawspeed::RawspeedException&) {
+      } catch (const rawspeed::RawspeedException&) {
         failure1 = true;
       }
 
@@ -129,7 +129,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
       // They both should have decoded the same value.
       assert(decoded0 == decoded1);
     }
-  } catch (rawspeed::RawspeedException&) {
+  } catch (const rawspeed::RawspeedException&) {
     return 0;
   }
 

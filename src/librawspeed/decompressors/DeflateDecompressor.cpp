@@ -71,7 +71,7 @@ static inline void decodeFPDeltaRow(unsigned char* src, unsigned char* dst,
 }
 
 static inline void expandFP16(unsigned char* dst, int width) {
-  auto* dst16 = reinterpret_cast<uint16_t*>(dst);
+  const auto* dst16 = reinterpret_cast<uint16_t*>(dst);
   auto* dst32 = reinterpret_cast<uint32_t*>(dst);
 
   for (int x = width - 1; x >= 0; x--)

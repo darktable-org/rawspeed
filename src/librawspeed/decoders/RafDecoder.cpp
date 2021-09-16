@@ -73,7 +73,7 @@ RawImage RafDecoder::decodeRawInternal() {
     height = raw->getEntry(TiffTag::FUJI_RAWIMAGEFULLHEIGHT)->getU32();
     width = raw->getEntry(TiffTag::FUJI_RAWIMAGEFULLWIDTH)->getU32();
   } else if (raw->hasEntry(TiffTag::IMAGEWIDTH)) {
-    TiffEntry* e = raw->getEntry(TiffTag::IMAGEWIDTH);
+    const TiffEntry* e = raw->getEntry(TiffTag::IMAGEWIDTH);
     height = e->getU16(0);
     width = e->getU16(1);
   } else
@@ -83,12 +83,12 @@ RawImage RafDecoder::decodeRawInternal() {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   if (raw->hasEntry(TiffTag::FUJI_LAYOUT)) {
-    TiffEntry* e = raw->getEntry(TiffTag::FUJI_LAYOUT);
+    const TiffEntry* e = raw->getEntry(TiffTag::FUJI_LAYOUT);
     alt_layout = !(e->getByte(0) >> 7);
   }
 
-  TiffEntry* offsets = raw->getEntry(TiffTag::FUJI_STRIPOFFSETS);
-  TiffEntry* counts = raw->getEntry(TiffTag::FUJI_STRIPBYTECOUNTS);
+  const TiffEntry* offsets = raw->getEntry(TiffTag::FUJI_STRIPOFFSETS);
+  const TiffEntry* counts = raw->getEntry(TiffTag::FUJI_STRIPBYTECOUNTS);
 
   if (offsets->count != 1 || counts->count != 1)
     ThrowRDE("Multiple Strips found: %u %u", offsets->count, counts->count);
@@ -273,7 +273,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   // at least the (bayer sensor) X100 comes with a tag like this:
   if (mRootIFD->hasEntryRecursive(TiffTag::FUJI_BLACKLEVEL)) {
-    TiffEntry* sep_black =
+    const TiffEntry* sep_black =
         mRootIFD->getEntryRecursive(TiffTag::FUJI_BLACKLEVEL);
     if (sep_black->count == 4)
     {
@@ -305,14 +305,15 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   mRaw->metadata.model = id.model;
 
   if (mRootIFD->hasEntryRecursive(TiffTag::FUJI_WB_GRBLEVELS)) {
-    TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::FUJI_WB_GRBLEVELS);
+    const TiffEntry* wb =
+        mRootIFD->getEntryRecursive(TiffTag::FUJI_WB_GRBLEVELS);
     if (wb->count == 3) {
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(1);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(0);
       mRaw->metadata.wbCoeffs[2] = wb->getFloat(2);
     }
   } else if (mRootIFD->hasEntryRecursive(TiffTag::FUJIOLDWB)) {
-    TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::FUJIOLDWB);
+    const TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::FUJIOLDWB);
     if (wb->count == 8) {
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(1);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(0);
@@ -330,7 +331,7 @@ int RafDecoder::isCompressed() const {
     height = raw->getEntry(TiffTag::FUJI_RAWIMAGEFULLHEIGHT)->getU32();
     width = raw->getEntry(TiffTag::FUJI_RAWIMAGEFULLWIDTH)->getU32();
   } else if (raw->hasEntry(TiffTag::IMAGEWIDTH)) {
-    TiffEntry* e = raw->getEntry(TiffTag::IMAGEWIDTH);
+    const TiffEntry* e = raw->getEntry(TiffTag::IMAGEWIDTH);
     height = e->getU16(0);
     width = e->getU16(1);
   } else

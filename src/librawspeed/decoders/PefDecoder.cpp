@@ -62,8 +62,8 @@ RawImage PefDecoder::decodeRawInternal() {
   if (65535 != compression)
     ThrowRDE("Unsupported compression");
 
-  TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
-  TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
+  const TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
+  const TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
 
   if (offsets->count != 1) {
     ThrowRDE("Multiple Strips found: %u", offsets->count);
@@ -85,7 +85,8 @@ RawImage PefDecoder::decodeRawInternal() {
   std::optional<ByteStream> metaData;
   if (getRootIFD()->hasEntryRecursive(static_cast<TiffTag>(0x220))) {
     /* Attempt to read huffman table, if found in makernote */
-    TiffEntry* t = getRootIFD()->getEntryRecursive(static_cast<TiffTag>(0x220));
+    const TiffEntry* t =
+        getRootIFD()->getEntryRecursive(static_cast<TiffTag>(0x220));
     if (t->type != TiffDataType::UNDEFINED)
       ThrowRDE("Unknown Huffman table type.");
 
@@ -111,7 +112,8 @@ void PefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   // Read black level
   if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x200))) {
-    TiffEntry* black = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x200));
+    const TiffEntry* black =
+        mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x200));
     if (black->count == 4) {
       for (int i = 0; i < 4; i++)
         mRaw->blackLevelSeparate[i] = black->getU32(i);
@@ -120,7 +122,8 @@ void PefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   // Set the whitebalance
   if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x0201))) {
-    TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x0201));
+    const TiffEntry* wb =
+        mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x0201));
     if (wb->count == 4) {
       mRaw->metadata.wbCoeffs[0] = wb->getU32(0);
       mRaw->metadata.wbCoeffs[1] = wb->getU32(1);

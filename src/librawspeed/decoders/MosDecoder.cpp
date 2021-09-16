@@ -58,7 +58,8 @@ bool MosDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   } catch (const TiffParserException&) {
     // Last ditch effort to identify Leaf cameras that don't have a Tiff Make
     // set
-    TiffEntry* softwareIFD = rootIFD->getEntryRecursive(TiffTag::SOFTWARE);
+    const TiffEntry* softwareIFD =
+        rootIFD->getEntryRecursive(TiffTag::SOFTWARE);
     if (!softwareIFD)
       return false;
 
@@ -74,7 +75,7 @@ MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file)
     make = id.make;
     model = id.model;
   } else {
-    TiffEntry* xmp = mRootIFD->getEntryRecursive(TiffTag::XMP);
+    const TiffEntry* xmp = mRootIFD->getEntryRecursive(TiffTag::XMP);
     if (!xmp)
       ThrowRDE("Couldn't find the XMP");
 

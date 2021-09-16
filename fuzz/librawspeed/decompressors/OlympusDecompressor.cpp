@@ -48,7 +48,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     o.decompress(bs.getStream(bs.getRemainSize()));
 
     mRaw->checkMemIsInitialized();
-  } catch (rawspeed::RawspeedException&) {
+  } catch (const rawspeed::RawspeedException&) {
     // Exceptions are good, crashes are bad.
   }
 

@@ -62,7 +62,7 @@ RawImage DcrDecoder::decodeRawInternal() {
       65000 != compression)
     ThrowRDE("Unsupported compression %d", compression);
 
-  TiffEntry* ifdoffset = mRootIFD->getEntryRecursive(TiffTag::KODAK_IFD);
+  const TiffEntry* ifdoffset = mRootIFD->getEntryRecursive(TiffTag::KODAK_IFD);
   if (!ifdoffset)
     ThrowRDE("Couldn't find the Kodak IFD offset");
 
@@ -72,7 +72,7 @@ RawImage DcrDecoder::decodeRawInternal() {
   TiffRootIFD kodakifd(nullptr, &ifds, ifdoffset->getRootIfdData(),
                        ifdoffset->getU32());
 
-  TiffEntry* linearization =
+  const TiffEntry* linearization =
       kodakifd.getEntryRecursive(TiffTag::KODAK_LINEARIZATION);
   if (!linearization ||
       !(linearization->count == 1024 || linearization->count == 4096) ||
@@ -88,7 +88,7 @@ RawImage DcrDecoder::decodeRawInternal() {
   //        WB from what appear to be presets and calculate it in weird ways
   //        The only file I have only uses this method, if anybody careas look
   //        in dcraw.c parse_kodak_ifd() for all that weirdness
-  if (TiffEntry* blob =
+  if (const TiffEntry* blob =
           kodakifd.getEntryRecursive(static_cast<TiffTag>(0x03fd));
       blob && blob->count == 72) {
     for (auto i = 0U; i < 3; i++) {

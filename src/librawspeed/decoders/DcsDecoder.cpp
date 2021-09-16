@@ -54,7 +54,7 @@ void DcsDecoder::checkImageDimensions() {
 RawImage DcsDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
-  TiffEntry* linearization =
+  const TiffEntry* linearization =
       mRootIFD->getEntryRecursive(TiffTag::GRAYRESPONSECURVE);
   if (!linearization || linearization->count != 256 ||
       linearization->type != TiffDataType::SHORT)

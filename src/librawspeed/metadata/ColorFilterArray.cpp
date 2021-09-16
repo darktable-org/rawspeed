@@ -168,7 +168,7 @@ const map<CFAColor, std::string> ColorFilterArray::color2String = {
 std::string ColorFilterArray::colorToString(CFAColor c) {
   try {
     return color2String.at(c);
-  } catch (std::out_of_range&) {
+  } catch (const std::out_of_range&) {
     ThrowRDE("Unsupported CFA Color: %u", static_cast<unsigned>(c));
   }
 }

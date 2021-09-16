@@ -38,7 +38,7 @@ class ByteStream;
 class DngOpcodes
 {
 public:
-  DngOpcodes(const RawImage& ri, TiffEntry* entry);
+  DngOpcodes(const RawImage& ri, const TiffEntry* entry);
   ~DngOpcodes();
   void applyOpCodes(const RawImage& ri) const;
 

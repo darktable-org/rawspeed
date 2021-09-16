@@ -195,7 +195,7 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info,
 
   for (int row_count = 0; row_count < FujiStrip::lineHeight(); row_count++) {
     for (int pixel_count = 0; pixel_count < strip.width(); pixel_count++) {
-      uint16_t* line_buf = nullptr;
+      const uint16_t* line_buf = nullptr;
 
       switch (CFA[row_count][pixel_count % 6]) {
       case CFAColor::RED: // red
@@ -771,7 +771,7 @@ void FujiDecompressor::decompressThread() const noexcept {
     block_info.pump = BitPumpMSB(strip->bs);
     try {
       fuji_decode_strip(&block_info, *strip);
-    } catch (RawspeedException& err) {
+    } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
     }

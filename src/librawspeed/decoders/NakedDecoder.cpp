@@ -79,7 +79,7 @@ void NakedDecoder::parseHints() {
   if (!order.empty()) {
     try {
       bo = order2enum.at(order);
-    } catch (std::out_of_range&) {
+    } catch (const std::out_of_range&) {
       ThrowRDE("%s %s: unknown order: %s", make, model, order.c_str());
     }
   }

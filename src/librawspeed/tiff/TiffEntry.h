@@ -107,8 +107,7 @@ public:
     return getArray<float, &TiffEntry::getFloat>(count_);
   }
 
-  ByteStream& getData() { return data; }
-  const uint8_t* getData(uint32_t size) { return data.getData(size); }
+  [[nodiscard]] ByteStream getData() const { return data; }
 
   [[nodiscard]] const DataBuffer& getRootIfdData() const;
 

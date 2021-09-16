@@ -451,7 +451,7 @@ void RawImageData::expandBorder(iRectangle2D validData)
   validData = validData.getOverlap(iRectangle2D(0,0,dim.x, dim.y));
   if (validData.pos.x > 0) {
     for (int y = 0; y < dim.y; y++ ) {
-      uint8_t* src_pos = getData(validData.pos.x, y);
+      const uint8_t* src_pos = getData(validData.pos.x, y);
       uint8_t* dst_pos = getData(validData.pos.x - 1, y);
       for (int x = validData.pos.x; x >= 0; x--) {
         for (int i = 0; i < bpp; i++) {
@@ -465,7 +465,7 @@ void RawImageData::expandBorder(iRectangle2D validData)
   if (validData.getRight() < dim.x) {
     int pos = validData.getRight();
     for (int y = 0; y < dim.y; y++ ) {
-      uint8_t* src_pos = getData(pos - 1, y);
+      const uint8_t* src_pos = getData(pos - 1, y);
       uint8_t* dst_pos = getData(pos, y);
       for (int x = pos; x < dim.x; x++) {
         for (int i = 0; i < bpp; i++) {
@@ -477,14 +477,14 @@ void RawImageData::expandBorder(iRectangle2D validData)
   }
 
   if (validData.pos.y > 0) {
-    uint8_t* src_pos = getData(0, validData.pos.y);
+    const uint8_t* src_pos = getData(0, validData.pos.y);
     for (int y = 0; y < validData.pos.y; y++ ) {
       uint8_t* dst_pos = getData(0, y);
       memcpy(dst_pos, src_pos, static_cast<size_t>(dim.x) * bpp);
     }
   }
   if (validData.getBottom() < dim.y) {
-    uint8_t* src_pos = getData(0, validData.getBottom() - 1);
+    const uint8_t* src_pos = getData(0, validData.getBottom() - 1);
     for (int y = validData.getBottom(); y < dim.y; y++ ) {
       uint8_t* dst_pos = getData(0, y);
       memcpy(dst_pos, src_pos, static_cast<size_t>(dim.x) * bpp);
@@ -545,11 +545,11 @@ void RawImageWorker::performTask() noexcept {
       // NOLINTNEXTLINE: https://bugs.llvm.org/show_bug.cgi?id=50532
       assert(false);
     }
-  } catch (RawDecoderException &e) {
+  } catch (const RawDecoderException& e) {
     data->setError(e.what());
-  } catch (TiffParserException &e) {
+  } catch (const TiffParserException& e) {
     data->setError(e.what());
-  } catch (IOException &e) {
+  } catch (const IOException& e) {
     data->setError(e.what());
   }
 }

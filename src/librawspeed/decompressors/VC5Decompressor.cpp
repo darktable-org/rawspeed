@@ -580,7 +580,7 @@ void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
       try {
         assert(!decodedData.has_value() && "Decoded this band already?");
         decodedData = decode();
-      } catch (RawspeedException& err) {
+      } catch (const RawspeedException& err) {
         // Propagate the exception out of OpenMP magic.
         errLog.setError(err.what());
 #ifdef HAVE_OPENMP

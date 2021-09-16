@@ -81,16 +81,16 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     decoder->decodeRaw();
     decoder->decodeMetaData(&metadata);
 #endif
-  } catch (rawspeed::RawParserException&) {
+  } catch (const rawspeed::RawParserException&) {
     return 0;
 #if GETDECODER
-  } catch (rawspeed::RawDecoderException&) {
+  } catch (const rawspeed::RawDecoderException&) {
     return 0;
 #endif
-  } catch (rawspeed::IOException&) {
+  } catch (const rawspeed::IOException&) {
     return 0;
 #if DECODE
-  } catch (rawspeed::RawspeedException&) {
+  } catch (const rawspeed::RawspeedException&) {
     return 0;
 #endif
   }

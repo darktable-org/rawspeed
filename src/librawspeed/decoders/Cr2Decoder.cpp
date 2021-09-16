@@ -95,7 +95,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
   l.decode(slicing);
 
   // deal with D2000 GrayResponseCurve
-  if (TiffEntry* curve =
+  if (const TiffEntry* curve =
           mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x123));
       curve && curve->type == TiffDataType::SHORT && curve->count == 4096) {
     auto table = curve->getU16Array(curve->count);
@@ -112,7 +112,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
 // for technical details about Cr2 mRAW/sRAW, see http://lclevy.free.fr/cr2/
 
 RawImage Cr2Decoder::decodeNewFormat() {
-  TiffEntry* sensorInfoE =
+  const TiffEntry* sensorInfoE =
       mRootIFD->getEntryRecursive(TiffTag::CANON_SENSOR_INFO);
   if (!sensorInfoE)
     ThrowTPE("failed to get SensorInfo from MakerNote");
@@ -155,7 +155,8 @@ RawImage Cr2Decoder::decodeNewFormat() {
   // * there is a tag with not three components, the image is considered
   // corrupt. $ there is no tag, we let Cr2Decompressor guess it (it'll throw if
   // fails)
-  if (TiffEntry* cr2SliceEntry = raw->getEntryRecursive(TiffTag::CANONCR2SLICE);
+  if (const TiffEntry* cr2SliceEntry =
+          raw->getEntryRecursive(TiffTag::CANONCR2SLICE);
       cr2SliceEntry) {
     if (cr2SliceEntry->count != 3) {
       ThrowRDE("Found RawImageSegmentation tag with %d elements, should be 3.",
@@ -239,7 +240,8 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   // Fetch the white balance
   try{
     if (mRootIFD->hasEntryRecursive(TiffTag::CANONCOLORDATA)) {
-      TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::CANONCOLORDATA);
+      const TiffEntry* wb =
+          mRootIFD->getEntryRecursive(TiffTag::CANONCOLORDATA);
       // this entry is a big table, and different cameras store used WB in
       // different parts, so find the offset, default is the most common one
       int offset = hints.get("wb_offset", 126);
@@ -251,9 +253,9 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     } else {
       if (mRootIFD->hasEntryRecursive(TiffTag::CANONSHOTINFO) &&
           mRootIFD->hasEntryRecursive(TiffTag::CANONPOWERSHOTG9WB)) {
-        TiffEntry* shot_info =
+        const TiffEntry* shot_info =
             mRootIFD->getEntryRecursive(TiffTag::CANONSHOTINFO);
-        TiffEntry* g9_wb =
+        const TiffEntry* g9_wb =
             mRootIFD->getEntryRecursive(TiffTag::CANONPOWERSHOTG9WB);
 
         uint16_t wb_index = shot_info->getU16(7);
@@ -270,7 +272,8 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
             static_cast<float>(g9_wb->getU32(wb_offset + 2));
       } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0xa4))) {
         // WB for the old 1D and 1DS
-        TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0xa4));
+        const TiffEntry* wb =
+            mRootIFD->getEntryRecursive(static_cast<TiffTag>(0xa4));
         if (wb->count >= 3) {
           mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
           mRaw->metadata.wbCoeffs[1] = wb->getFloat(1);
@@ -278,7 +281,7 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         }
       }
     }
-  } catch (RawspeedException& e) {
+  } catch (const RawspeedException& e) {
     mRaw->setError(e.what());
     // We caught an exception reading WB, just ignore it
   }
@@ -288,13 +291,14 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 bool Cr2Decoder::isSubSampled() const {
   if (mRootIFD->getSubIFDs().size() != 4)
     return false;
-  TiffEntry* typeE =
+  const TiffEntry* typeE =
       mRootIFD->getSubIFDs()[3]->getEntryRecursive(TiffTag::CANON_SRAWTYPE);
   return typeE && typeE->getU32() == 4;
 }
 
 iPoint2D Cr2Decoder::getSubSampling() const {
-  TiffEntry* CCS = mRootIFD->getEntryRecursive(TiffTag::CANON_CAMERA_SETTINGS);
+  const TiffEntry* CCS =
+      mRootIFD->getEntryRecursive(TiffTag::CANON_CAMERA_SETTINGS);
   if (!CCS)
     ThrowRDE("CanonCameraSettings entry not found.");
 
@@ -334,7 +338,7 @@ int Cr2Decoder::getHue() const {
 
 // Interpolate and convert sRaw data.
 void Cr2Decoder::sRawInterpolate() {
-  TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::CANONCOLORDATA);
+  const TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::CANONCOLORDATA);
   if (!wb)
     ThrowRDE("Unable to locate WB info.");
 

@@ -77,20 +77,20 @@ void ThreefrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, "", 0);
 
   if (mRootIFD->hasEntryRecursive(TiffTag::BLACKLEVEL)) {
-    TiffEntry* bl = mRootIFD->getEntryRecursive(TiffTag::BLACKLEVEL);
+    const TiffEntry* bl = mRootIFD->getEntryRecursive(TiffTag::BLACKLEVEL);
     if (bl->count == 1)
       mRaw->blackLevel = bl->getFloat();
   }
 
   if (mRootIFD->hasEntryRecursive(TiffTag::WHITELEVEL)) {
-    TiffEntry* wl = mRootIFD->getEntryRecursive(TiffTag::WHITELEVEL);
+    const TiffEntry* wl = mRootIFD->getEntryRecursive(TiffTag::WHITELEVEL);
     if (wl->count == 1)
       mRaw->whitePoint = wl->getFloat();
   }
 
   // Fetch the white balance
   if (mRootIFD->hasEntryRecursive(TiffTag::ASSHOTNEUTRAL)) {
-    TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::ASSHOTNEUTRAL);
+    const TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::ASSHOTNEUTRAL);
     if (wb->count == 3) {
       for (uint32_t i = 0; i < 3; i++) {
         const float div = wb->getFloat(i);

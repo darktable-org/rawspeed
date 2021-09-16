@@ -226,10 +226,10 @@ std::string TiffEntry::getString() const {
 }
 
 const DataBuffer &TiffEntry::getRootIfdData() const {
-  TiffIFD* p = parent;
-  TiffRootIFD* r = nullptr;
+  const TiffIFD* p = parent;
+  const TiffRootIFD* r = nullptr;
   while (p) {
-    r = dynamic_cast<TiffRootIFD*>(p);
+    r = dynamic_cast<const TiffRootIFD*>(p);
     if (r)
       break;
     p = p->parent;

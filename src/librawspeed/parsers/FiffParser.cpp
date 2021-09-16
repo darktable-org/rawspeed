@@ -68,7 +68,7 @@ void FiffParser::parseData() {
     try {
       rootIFD->add(
           TiffParser::parse(rootIFD.get(), mInput.getSubView(second_ifd)));
-    } catch (TiffParserException&) {
+    } catch (const TiffParserException&) {
       // the offset will be interpreted relative to the rootIFD where this
       // subIFD gets inserted
 
@@ -132,7 +132,7 @@ std::unique_ptr<RawDecoder> FiffParser::getDecoder(const CameraMetaData* meta) {
       ThrowFPE("Not a FUJIFILM RAF FIFF.");
 
     return std::make_unique<RafDecoder>(std::move(rootIFD), mInput);
-  } catch (TiffParserException&) {
+  } catch (const TiffParserException&) {
     ThrowFPE("No decoder found. Sorry.");
   }
 }

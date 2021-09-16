@@ -56,8 +56,8 @@ bool OrfDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 ByteStream OrfDecoder::handleSlices() const {
   const auto* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
-  TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
-  TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
+  const TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
+  const TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
 
   if (counts->count != offsets->count) {
     ThrowRDE(
@@ -176,7 +176,7 @@ void OrfDecoder::parseCFA() const {
   if (!mRootIFD->hasEntryRecursive(TiffTag::EXIFCFAPATTERN))
     ThrowRDE("No EXIFCFAPATTERN entry found!");
 
-  TiffEntry* CFA = mRootIFD->getEntryRecursive(TiffTag::EXIFCFAPATTERN);
+  const TiffEntry* CFA = mRootIFD->getEntryRecursive(TiffTag::EXIFCFAPATTERN);
   if (CFA->type != TiffDataType::UNDEFINED || CFA->count != 8) {
     ThrowRDE("Bad EXIFCFAPATTERN entry (type %u, count %u).",
              static_cast<unsigned>(CFA->type), CFA->count);
@@ -229,7 +229,7 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         mRootIFD->getEntryRecursive(TiffTag::OLYMPUSBLUEMULTIPLIER)->getU16());
   } else if (mRootIFD->hasEntryRecursive(TiffTag::OLYMPUSIMAGEPROCESSING)) {
     // Newer cameras process the Image Processing SubIFD in the makernote
-    TiffEntry* img_entry =
+    const TiffEntry* img_entry =
         mRootIFD->getEntryRecursive(TiffTag::OLYMPUSIMAGEPROCESSING);
     // get makernote ifd with containing Buffer
     NORangesSet<Buffer> ifds;
@@ -239,7 +239,8 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
     // Get the WB
     if (image_processing.hasEntry(static_cast<TiffTag>(0x0100))) {
-      TiffEntry* wb = image_processing.getEntry(static_cast<TiffTag>(0x0100));
+      const TiffEntry* wb =
+          image_processing.getEntry(static_cast<TiffTag>(0x0100));
       if (wb->count == 2 || wb->count == 4) {
         mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
         mRaw->metadata.wbCoeffs[1] = 256.0F;
@@ -249,7 +250,7 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
     // Get the black levels
     if (image_processing.hasEntry(static_cast<TiffTag>(0x0600))) {
-      TiffEntry* blackEntry =
+      const TiffEntry* blackEntry =
           image_processing.getEntry(static_cast<TiffTag>(0x0600));
       // Order is assumed to be RGGB
       if (blackEntry->count == 4) {

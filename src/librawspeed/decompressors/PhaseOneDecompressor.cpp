@@ -141,7 +141,7 @@ void PhaseOneDecompressor::decompressThread() const noexcept {
   for (auto strip = strips.cbegin(); strip < strips.cend(); ++strip) {
     try {
       decompressStrip(*strip);
-    } catch (RawspeedException& err) {
+    } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
     }

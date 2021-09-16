@@ -123,7 +123,7 @@ md5::md5_state imgDataHash(const RawImage& raw) {
   line_hashes.resize(dimUncropped.y, md5::md5_init);
 
   for (int j = 0; j < dimUncropped.y; j++) {
-    auto* d = raw->getDataUncropped(0, j);
+    const auto* d = raw->getDataUncropped(0, j);
     md5::md5_hash(d, raw->pitch - raw->padding, &line_hashes[j]);
   }
 
@@ -525,11 +525,11 @@ int main(int argc, char **argv) {
     try {
       try {
         time += process(argv[i], &metadata, o);
-      } catch (rawspeed::rstest::RstestHashMismatch& e) {
+      } catch (const rawspeed::rstest::RstestHashMismatch& e) {
         time += e.time;
         throw;
       }
-    } catch (RawspeedException& e) {
+    } catch (const RawspeedException& e) {
 #ifdef HAVE_OPENMP
 #pragma omp critical(io)
 #endif

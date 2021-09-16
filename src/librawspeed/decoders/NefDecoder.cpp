@@ -67,8 +67,8 @@ RawImage NefDecoder::decodeRawInternal() {
   const auto* raw = mRootIFD->getIFDWithTag(TiffTag::CFAPATTERN);
   auto compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
 
-  TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
-  TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
+  const TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
+  const TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
 
   if (mRootIFD->getEntryRecursive(TiffTag::MODEL)->getString() ==
       "NIKON D100 ") { /**Sigh**/
@@ -113,7 +113,7 @@ RawImage NefDecoder::decodeRawInternal() {
 
   raw = mRootIFD->getIFDWithTag(static_cast<TiffTag>(0x8c));
 
-  TiffEntry *meta;
+  const TiffEntry* meta;
   if (raw->hasEntry(static_cast<TiffTag>(0x96))) {
     meta = raw->getEntry(static_cast<TiffTag>(0x96));
   } else {
@@ -149,7 +149,7 @@ bool NefDecoder::D100IsCompressed(uint32_t offset) const {
    as if they were compressed. For those cases we set uncompressed mode
    by figuring out that the image is the size of uncompressed packing */
 bool NefDecoder::NEFIsUncompressed(const TiffIFD* raw) {
-  TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
+  const TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
   uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
   uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
   uint32_t bitPerPixel = raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
@@ -204,8 +204,8 @@ bool NefDecoder::NEFIsUncompressedRGB(const TiffIFD* raw) {
 
 void NefDecoder::DecodeUncompressed() const {
   const auto* raw = getIFDWithLargestImage(TiffTag::CFAPATTERN);
-  TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
-  TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
+  const TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
+  const TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
   uint32_t yPerSlice = raw->getEntry(TiffTag::ROWSPERSTRIP)->getU32();
   uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
   uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
@@ -484,7 +484,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   // Read the whitebalance
 
   if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(12))) {
-    TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(12));
+    const TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(12));
     if (wb->count == 4) {
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(2);
@@ -493,7 +493,8 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         mRaw->metadata.wbCoeffs[1] = 1.0F;
     }
   } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x0097))) {
-    TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x0097));
+    const TiffEntry* wb =
+        mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x0097));
     if (wb->count > 4) {
       uint32_t version = 0;
       for (uint32_t i = 0; i < 4; i++) {
@@ -532,9 +533,9 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         }
 
         // Get the decryption key
-        TiffEntry* key =
+        const TiffEntry* key =
             mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x00a7));
-        const uint8_t* keydata = key->getData(4);
+        const uint8_t* keydata = key->getData().getData(4);
         uint32_t keyno = keydata[0] ^ keydata[1] ^ keydata[2] ^ keydata[3];
 
         // "Decrypt" the block using the serial and key
@@ -563,7 +564,8 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       }
     }
   } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x0014))) {
-    TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x0014));
+    const TiffEntry* wb =
+        mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x0014));
     ByteStream bs = wb->getData();
     if (wb->count == 2560 && wb->type == TiffDataType::UNDEFINED) {
       bs.skipBytes(1248);
@@ -621,7 +623,7 @@ void NefDecoder::DecodeNikonSNef(const ByteStream& input) const {
 
   // We need to read the applied whitebalance, since we should return
   // data before whitebalance, so we "unapply" it.
-  TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(12));
+  const TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(12));
   if (!wb)
     ThrowRDE("Unable to locate whitebalance needed for decompression");
 

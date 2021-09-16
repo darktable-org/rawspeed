@@ -160,7 +160,7 @@ void Cr2Decompressor::decodeN_X_Y()
 
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
-  auto* predNext = &out(0, 0);
+  const auto* predNext = &out(0, 0);
 
   BitPumpJPEG bs(input);
 

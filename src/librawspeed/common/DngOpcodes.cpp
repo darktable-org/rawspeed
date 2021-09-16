@@ -472,7 +472,7 @@ public:
 
 // ****************************************************************************
 
-DngOpcodes::DngOpcodes(const RawImage& ri, TiffEntry* entry) {
+DngOpcodes::DngOpcodes(const RawImage& ri, const TiffEntry* entry) {
   ByteStream bs = entry->getData();
 
   // DNG opcodes are always stored in big-endian byte order.
@@ -510,7 +510,7 @@ DngOpcodes::DngOpcodes(const RawImage& ri, TiffEntry* entry) {
     constructor_t opConstructor = nullptr;
     try {
       std::tie(opName, opConstructor) = Map.at(code);
-    } catch (std::out_of_range&) {
+    } catch (const std::out_of_range&) {
       ThrowRDE("Unknown unhandled Opcode: %d", code);
     }
 

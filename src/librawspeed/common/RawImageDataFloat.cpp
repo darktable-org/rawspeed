@@ -60,7 +60,7 @@ RawImageDataFloat::RawImageDataFloat() {
             uncropped_dim.y)
           ThrowRDE("Offset + size is larger than height of image");
         for (uint32_t y = area.offset; y < area.offset + area.size; y++) {
-          auto* pixel =
+          const auto* pixel =
               reinterpret_cast<float*>(getDataUncropped(mOffset.x, y));
 
           for (int x = mOffset.x; x < dim.x + mOffset.x; x++) {
@@ -77,7 +77,7 @@ RawImageDataFloat::RawImageDataFloat() {
             uncropped_dim.x)
           ThrowRDE("Offset + size is larger than width of image");
         for (int y = mOffset.y; y < dim.y+mOffset.y; y++) {
-          auto* pixel =
+          const auto* pixel =
               reinterpret_cast<float*>(getDataUncropped(area.offset, y));
 
           for (uint32_t x = area.offset; x < area.size + area.offset; x++) {
@@ -121,7 +121,7 @@ RawImageDataFloat::RawImageDataFloat() {
       float b = 100000000;
       float m = -10000000;
       for (int row = skipBorder*cpp;row < (dim.y - skipBorder);row++) {
-        auto* pixel = reinterpret_cast<float*>(getData(skipBorder, row));
+        const auto* pixel = reinterpret_cast<float*>(getData(skipBorder, row));
         for (int col = skipBorder ; col < gw ; col++) {
           b = min(*pixel, b);
           m = max(*pixel, m);
@@ -274,8 +274,8 @@ RawImageDataFloat::RawImageDataFloat() {
     }
     for (int y = start_y; y < end_y; y++) {
       auto* pixel = reinterpret_cast<float*>(getData(0, y));
-      float *mul_local = &mul[2*(y&1)];
-      float *sub_local = &sub[2*(y&1)];
+      const float* mul_local = &mul[2 * (y & 1)];
+      const float* sub_local = &sub[2 * (y & 1)];
       for (int x = 0 ; x < gw; x++) {
         pixel[x] = (pixel[x] - sub_local[x&1]) * mul_local[x&1];
       }
@@ -295,7 +295,7 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   std::array<float, 4> dist = {{}};
   std::array<float, 4> weight;
 
-  uint8_t* bad_line = &mBadPixelMap[y * mBadPixelMapPitch];
+  const uint8_t* bad_line = &mBadPixelMap[y * mBadPixelMapPitch];
   // We can have cfa or no-cfa for RawImageDataFloat
   int step = isCFA ? 2 : 1;
 

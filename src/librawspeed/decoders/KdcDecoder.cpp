@@ -52,7 +52,8 @@ bool KdcDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 Buffer KdcDecoder::getInputBuffer() const {
-  TiffEntry* offset = mRootIFD->getEntryRecursive(TiffTag::KODAK_KDC_OFFSET);
+  const TiffEntry* offset =
+      mRootIFD->getEntryRecursive(TiffTag::KODAK_KDC_OFFSET);
   if (!offset || offset->count < 13)
     ThrowRDE("Couldn't find the KDC offset");
 
@@ -89,7 +90,7 @@ RawImage KdcDecoder::decodeRawInternal() {
       7 != compression)
     ThrowRDE("Unsupported compression %d", compression);
 
-  TiffEntry* ifdoffset = mRootIFD->getEntryRecursive(TiffTag::KODAK_IFD2);
+  const TiffEntry* ifdoffset = mRootIFD->getEntryRecursive(TiffTag::KODAK_IFD2);
   if (!ifdoffset)
     ThrowRDE("Couldn't find the Kodak IFD offset");
 
@@ -101,7 +102,7 @@ RawImage KdcDecoder::decodeRawInternal() {
 
   uint32_t width = 0;
   uint32_t height = 0;
-  if (TiffEntry* ew =
+  if (const TiffEntry* ew =
           kodakifd.getEntryRecursive(TiffTag::KODAK_KDC_SENSOR_WIDTH),
       *eh = kodakifd.getEntryRecursive(TiffTag::KODAK_KDC_SENSOR_HEIGHT);
       ew && eh) {
@@ -129,7 +130,8 @@ void KdcDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   // Try the kodak hidden IFD for WB
   if (mRootIFD->hasEntryRecursive(TiffTag::KODAK_IFD2)) {
-    TiffEntry* ifdoffset = mRootIFD->getEntryRecursive(TiffTag::KODAK_IFD2);
+    const TiffEntry* ifdoffset =
+        mRootIFD->getEntryRecursive(TiffTag::KODAK_IFD2);
     try {
       NORangesSet<Buffer> ifds;
 
@@ -137,21 +139,21 @@ void KdcDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
                            ifdoffset->getU32());
 
       if (kodakifd.hasEntryRecursive(TiffTag::KODAK_KDC_WB)) {
-        TiffEntry* wb = kodakifd.getEntryRecursive(TiffTag::KODAK_KDC_WB);
+        const TiffEntry* wb = kodakifd.getEntryRecursive(TiffTag::KODAK_KDC_WB);
         if (wb->count == 3) {
           mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
           mRaw->metadata.wbCoeffs[1] = wb->getFloat(1);
           mRaw->metadata.wbCoeffs[2] = wb->getFloat(2);
         }
       }
-    } catch (TiffParserException &e) {
+    } catch (const TiffParserException& e) {
       mRaw->setError(e.what());
     }
   }
 
   // Use the normal WB if available
   if (mRootIFD->hasEntryRecursive(TiffTag::KODAKWB)) {
-    TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::KODAKWB);
+    const TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::KODAKWB);
     if (wb->count == 734 || wb->count == 1502) {
       mRaw->metadata.wbCoeffs[0] =
           static_cast<float>(((static_cast<uint16_t>(wb->getByte(148))) << 8) |

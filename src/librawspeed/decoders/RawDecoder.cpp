@@ -55,8 +55,8 @@ RawDecoder::RawDecoder(const Buffer& file)
 
 void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
                                     BitOrder order) const {
-  TiffEntry* offsets = rawIFD->getEntry(TiffTag::STRIPOFFSETS);
-  TiffEntry* counts = rawIFD->getEntry(TiffTag::STRIPBYTECOUNTS);
+  const TiffEntry* offsets = rawIFD->getEntry(TiffTag::STRIPOFFSETS);
+  const TiffEntry* counts = rawIFD->getEntry(TiffTag::STRIPBYTECOUNTS);
   uint32_t yPerSlice = rawIFD->getEntry(TiffTag::ROWSPERSTRIP)->getU32();
   uint32_t width = rawIFD->getEntry(TiffTag::IMAGEWIDTH)->getU32();
   uint32_t height = rawIFD->getEntry(TiffTag::IMAGELENGTH)->getU32();
@@ -271,11 +271,11 @@ rawspeed::RawImage RawDecoder::decodeRaw() {
     }
 
     return raw;
-  } catch (TiffParserException &e) {
+  } catch (const TiffParserException& e) {
     ThrowRDE("%s", e.what());
-  } catch (FileIOException &e) {
+  } catch (const FileIOException& e) {
     ThrowRDE("%s", e.what());
-  } catch (IOException &e) {
+  } catch (const IOException& e) {
     ThrowRDE("%s", e.what());
   }
 }
@@ -283,11 +283,11 @@ rawspeed::RawImage RawDecoder::decodeRaw() {
 void RawDecoder::decodeMetaData(const CameraMetaData* meta) {
   try {
     decodeMetaDataInternal(meta);
-  } catch (TiffParserException &e) {
+  } catch (const TiffParserException& e) {
     ThrowRDE("%s", e.what());
-  } catch (FileIOException &e) {
+  } catch (const FileIOException& e) {
     ThrowRDE("%s", e.what());
-  } catch (IOException &e) {
+  } catch (const IOException& e) {
     ThrowRDE("%s", e.what());
   }
 }
@@ -295,11 +295,11 @@ void RawDecoder::decodeMetaData(const CameraMetaData* meta) {
 void RawDecoder::checkSupport(const CameraMetaData* meta) {
   try {
     checkSupportInternal(meta);
-  } catch (TiffParserException &e) {
+  } catch (const TiffParserException& e) {
     ThrowRDE("%s", e.what());
-  } catch (FileIOException &e) {
+  } catch (const FileIOException& e) {
     ThrowRDE("%s", e.what());
-  } catch (IOException &e) {
+  } catch (const IOException& e) {
     ThrowRDE("%s", e.what());
   }
 }

@@ -242,7 +242,7 @@ int main(int argc, char* argv[]) { // NOLINT
 #pragma omp parallel for default(none) firstprivate(dimUncropped, raw, bpp) schedule(static) reduction(+ : sum)
 #endif
     for (int y = 0; y < dimUncropped.y; ++y) {
-      uint8_t* const data = (*raw)->getDataUncropped(0, y);
+      const uint8_t* const data = (*raw)->getDataUncropped(0, y);
 
       for (unsigned x = 0; x < bpp * dimUncropped.x; ++x)
         sum += static_cast<double>(data[x]);
@@ -258,7 +258,7 @@ int main(int argc, char* argv[]) { // NOLINT
 #pragma omp parallel for default(none) firstprivate(dimUncropped, raw, cpp) schedule(static) reduction(+ : sum)
 #endif
       for (int y = 0; y < dimUncropped.y; ++y) {
-        auto* const data =
+        const auto* const data =
             reinterpret_cast<float*>((*raw)->getDataUncropped(0, y));
 
         for (unsigned x = 0; x < cpp * dimUncropped.x; ++x)
@@ -275,7 +275,7 @@ int main(int argc, char* argv[]) { // NOLINT
 #pragma omp parallel for default(none) firstprivate(dimUncropped, raw, cpp) schedule(static) reduction(+ : sum)
 #endif
       for (int y = 0; y < dimUncropped.y; ++y) {
-        auto* const data =
+        const auto* const data =
             reinterpret_cast<uint16_t*>((*raw)->getDataUncropped(0, y));
 
         for (unsigned x = 0; x < cpp * dimUncropped.x; ++x)
@@ -286,7 +286,7 @@ int main(int argc, char* argv[]) { // NOLINT
       fprintf(stdout, "Image uint16_t avg: %lf\n",
               sum / static_cast<double>(dimUncropped.y * dimUncropped.x));
     }
-  } catch (RawspeedException& e) {
+  } catch (const RawspeedException& e) {
     fprintf(stderr, "ERROR: [rawspeed] %s\n", e.what());
 
     /* if an exception is raised lets not retry or handle the

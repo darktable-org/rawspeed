@@ -75,7 +75,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
     if (width == 0 || height == 0 || width > 4330 || height > 2751)
       ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-    TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
+    const TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
 
     if (offsets->count != 1) {
       ThrowRDE("Multiple Strips found: %u", offsets->count);
@@ -112,7 +112,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
   } else {
     mRaw->dim = iPoint2D(width, height);
 
-    TiffEntry* offsets = raw->getEntry(TiffTag::PANASONIC_STRIPOFFSET);
+    const TiffEntry* offsets = raw->getEntry(TiffTag::PANASONIC_STRIPOFFSET);
 
     if (offsets->count != 1) {
       ThrowRDE("Multiple Strips found: %u", offsets->count);
@@ -166,7 +166,8 @@ void Rw2Decoder::parseCFA() const {
   if (!mRootIFD->hasEntryRecursive(TiffTag::PANASONIC_CFAPATTERN))
     ThrowRDE("No PANASONIC_CFAPATTERN entry found!");
 
-  TiffEntry* CFA = mRootIFD->getEntryRecursive(TiffTag::PANASONIC_CFAPATTERN);
+  const TiffEntry* CFA =
+      mRootIFD->getEntryRecursive(TiffTag::PANASONIC_CFAPATTERN);
   if (CFA->type != TiffDataType::SHORT || CFA->count != 1) {
     ThrowRDE("Bad PANASONIC_CFAPATTERN entry (type %u, count %u).",
              static_cast<unsigned>(CFA->type), CFA->count);

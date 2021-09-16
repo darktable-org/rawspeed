@@ -172,9 +172,9 @@ void SrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   // Set the whitebalance
   if (mRootIFD->hasEntryRecursive(TiffTag::SAMSUNG_WB_RGGBLEVELSUNCORRECTED) &&
       mRootIFD->hasEntryRecursive(TiffTag::SAMSUNG_WB_RGGBLEVELSBLACK)) {
-    TiffEntry* wb_levels =
+    const TiffEntry* wb_levels =
         mRootIFD->getEntryRecursive(TiffTag::SAMSUNG_WB_RGGBLEVELSUNCORRECTED);
-    TiffEntry* wb_black =
+    const TiffEntry* wb_black =
         mRootIFD->getEntryRecursive(TiffTag::SAMSUNG_WB_RGGBLEVELSBLACK);
     if (wb_levels->count == 4 && wb_black->count == 4) {
       mRaw->metadata.wbCoeffs[0] = wb_levels->getFloat(0) - wb_black->getFloat(0);

@@ -110,7 +110,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(TiffTag::STRIPOFFSETS);
 
   if (data.empty()) {
-    if (TiffEntry* model = mRootIFD->getEntryRecursive(TiffTag::MODEL);
+    if (const TiffEntry* model = mRootIFD->getEntryRecursive(TiffTag::MODEL);
         model && model->getString() == "DSLR-A100") {
       // We've caught the elusive A100 in the wild, a transitional format
       // between the simple sanity of the MRW custom format and the wordly
@@ -146,8 +146,8 @@ RawImage ArwDecoder::decodeRawInternal() {
   if (32767 != compression)
     ThrowRDE("Unsupported compression %i", compression);
 
-  TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
-  TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
+  const TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
+  const TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
 
   if (offsets->count != 1) {
     ThrowRDE("Multiple Strips found: %u", offsets->count);
@@ -195,7 +195,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
 
   std::vector<uint16_t> curve(0x4001);
-  TiffEntry* c = raw->getEntry(TiffTag::SONY_CURVE);
+  const TiffEntry* c = raw->getEntry(TiffTag::SONY_CURVE);
   std::array<uint32_t, 6> sony_curve = {{0, 0, 0, 0, 0, 4095}};
 
   for (uint32_t i = 0; i < 4; i++)
@@ -286,7 +286,7 @@ void ArwDecoder::ParseA100WB() const {
     return;
 
   // only contains the offset, not the length!
-  TiffEntry* priv = mRootIFD->getEntryRecursive(TiffTag::DNGPRIVATEDATA);
+  const TiffEntry* priv = mRootIFD->getEntryRecursive(TiffTag::DNGPRIVATEDATA);
   ByteStream bs = priv->getData();
   bs.setByteOrder(Endianness::little);
   const uint32_t off = bs.getU32();
@@ -359,7 +359,7 @@ void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     } else { // Everything else but the A100
       GetWB();
     }
-  } catch (RawspeedException& e) {
+  } catch (const RawspeedException& e) {
     mRaw->setError(e.what());
     // We caught an exception reading WB, just ignore it
   }
@@ -407,15 +407,17 @@ void ArwDecoder::GetWB() const {
   if (mRootIFD->hasEntryRecursive(TiffTag::DNGPRIVATEDATA)) {
     NORangesSet<Buffer> ifds_undecoded;
 
-    TiffEntry* priv = mRootIFD->getEntryRecursive(TiffTag::DNGPRIVATEDATA);
+    const TiffEntry* priv =
+        mRootIFD->getEntryRecursive(TiffTag::DNGPRIVATEDATA);
     TiffRootIFD makerNoteIFD(nullptr, &ifds_undecoded, priv->getRootIfdData(),
                              priv->getU32());
 
-    TiffEntry* sony_offset =
+    const TiffEntry* sony_offset =
         makerNoteIFD.getEntryRecursive(TiffTag::SONY_OFFSET);
-    TiffEntry* sony_length =
+    const TiffEntry* sony_length =
         makerNoteIFD.getEntryRecursive(TiffTag::SONY_LENGTH);
-    TiffEntry* sony_key = makerNoteIFD.getEntryRecursive(TiffTag::SONY_KEY);
+    const TiffEntry* sony_key =
+        makerNoteIFD.getEntryRecursive(TiffTag::SONY_KEY);
     if(!sony_offset || !sony_length || !sony_key || sony_key->count != 4)
       ThrowRDE("couldn't find the correct metadata for WB decoding");
 
@@ -427,7 +429,7 @@ void ArwDecoder::GetWB() const {
     uint32_t len = roundDown(sony_length->getU32(), 4);
 
     assert(sony_key != nullptr);
-    uint32_t key = getU32LE(sony_key->getData(4));
+    uint32_t key = getU32LE(sony_key->getData().getData(4));
 
     // "Decrypt" IFD
     const auto& ifd_crypt = priv->getRootIfdData();
@@ -450,14 +452,14 @@ void ArwDecoder::GetWB() const {
     TiffRootIFD encryptedIFD(nullptr, &ifds_decoded, dbIDD, off);
 
     if (encryptedIFD.hasEntry(TiffTag::SONYGRBGLEVELS)) {
-      TiffEntry* wb = encryptedIFD.getEntry(TiffTag::SONYGRBGLEVELS);
+      const TiffEntry* wb = encryptedIFD.getEntry(TiffTag::SONYGRBGLEVELS);
       if (wb->count != 4)
         ThrowRDE("WB has %d entries instead of 4", wb->count);
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(1);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(0);
       mRaw->metadata.wbCoeffs[2] = wb->getFloat(2);
     } else if (encryptedIFD.hasEntry(TiffTag::SONYRGGBLEVELS)) {
-      TiffEntry* wb = encryptedIFD.getEntry(TiffTag::SONYRGGBLEVELS);
+      const TiffEntry* wb = encryptedIFD.getEntry(TiffTag::SONYRGGBLEVELS);
       if (wb->count != 4)
         ThrowRDE("WB has %d entries instead of 4", wb->count);
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);

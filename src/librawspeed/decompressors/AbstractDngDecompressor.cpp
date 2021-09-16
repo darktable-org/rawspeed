@@ -88,9 +88,9 @@ template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
       decompressor.readUncompressedRaw(tileSize, pos, inputPitch, mBps,
                                        big_endian ? BitOrder::MSB
                                                   : BitOrder::LSB);
-    } catch (RawDecoderException& err) {
+    } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
-    } catch (IOException& err) {
+    } catch (const IOException& err) {
       mRaw->setError(err.what());
     }
   }
@@ -104,9 +104,9 @@ template <> void AbstractDngDecompressor::decompressThread<7>() const noexcept {
     try {
       LJpegDecompressor d(e->bs, mRaw);
       d.decode(e->offX, e->offY, e->width, e->height, mFixLjpeg);
-    } catch (RawDecoderException& err) {
+    } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
-    } catch (IOException& err) {
+    } catch (const IOException& err) {
       mRaw->setError(err.what());
     }
   }
@@ -125,9 +125,9 @@ template <> void AbstractDngDecompressor::decompressThread<8>() const noexcept {
       z.decode(&uBuffer, iPoint2D(mRaw->getCpp() * e->dsc.tileW, e->dsc.tileH),
                iPoint2D(mRaw->getCpp() * e->width, e->height),
                iPoint2D(mRaw->getCpp() * e->offX, e->offY));
-    } catch (RawDecoderException& err) {
+    } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
-    } catch (IOException& err) {
+    } catch (const IOException& err) {
       mRaw->setError(err.what());
     }
   }
@@ -142,9 +142,9 @@ template <> void AbstractDngDecompressor::decompressThread<9>() const noexcept {
     try {
       VC5Decompressor d(e->bs, mRaw);
       d.decode(e->offX, e->offY, e->width, e->height);
-    } catch (RawDecoderException& err) {
+    } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
-    } catch (IOException& err) {
+    } catch (const IOException& err) {
       mRaw->setError(err.what());
     }
   }
@@ -160,9 +160,9 @@ void AbstractDngDecompressor::decompressThread<0x884c>() const noexcept {
     JpegDecompressor j(e->bs, mRaw);
     try {
       j.decode(e->offX, e->offY);
-    } catch (RawDecoderException& err) {
+    } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
-    } catch (IOException& err) {
+    } catch (const IOException& err) {
       mRaw->setError(err.what());
     }
   }

@@ -121,7 +121,7 @@ void Camera::parseCFA(const xml_node &cur) {
 
           try {
             c2 = char2enum.at(static_cast<char>(tolower(c1)));
-          } catch (std::out_of_range&) {
+          } catch (const std::out_of_range&) {
             ThrowCME("Invalid color in CFA array of camera %s %s: %c",
                      make.c_str(), model.c_str(), c1);
           }
@@ -146,7 +146,7 @@ void Camera::parseCFA(const xml_node &cur) {
 
         try {
           c2 = str2enum.at(c1);
-        } catch (std::out_of_range&) {
+        } catch (const std::out_of_range&) {
           ThrowCME("Invalid color in CFA array of camera %s %s: %s",
                    make.c_str(), model.c_str(), c1);
         }

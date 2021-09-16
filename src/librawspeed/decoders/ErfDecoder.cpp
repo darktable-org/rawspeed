@@ -67,7 +67,7 @@ void ErfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, "", 0);
 
   if (mRootIFD->hasEntryRecursive(TiffTag::EPSONWB)) {
-    TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::EPSONWB);
+    const TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::EPSONWB);
     if (wb->count == 256) {
       // Magic values taken directly from dcraw
       mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(24)) * 508.0F *

@@ -48,7 +48,7 @@ static void process(const char* filename) noexcept {
 
   try {
     buf = reader.readFile();
-  } catch (rawspeed::FileIOException&) {
+  } catch (const rawspeed::FileIOException&) {
     // failed to read the file for some reason.
     // just ignore it.
     return;
