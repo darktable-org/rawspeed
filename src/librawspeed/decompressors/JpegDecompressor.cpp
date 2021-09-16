@@ -144,7 +144,7 @@ void JpegDecompressor::decode(uint32_t offX,
                                 dinfo.output_height, row_stride);
 
   while (dinfo.output_scanline < dinfo.output_height) {
-    auto* rowOut = static_cast<JSAMPROW>(&tmp(dinfo.output_scanline, 0));
+    JSAMPROW rowOut = &tmp(dinfo.output_scanline, 0);
     if (0 == jpeg_read_scanlines(&dinfo, &rowOut, 1))
       ThrowRDE("JPEG Error while decompressing image.");
   }

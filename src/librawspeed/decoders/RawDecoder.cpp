@@ -131,9 +131,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
         mRaw);
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
-    bitPerPixel = static_cast<int>(
-        static_cast<uint64_t>(static_cast<uint64_t>(slice.count) * 8U) /
-        (slice.h * width));
+    bitPerPixel = (static_cast<uint64_t>(slice.count) * 8U) / (slice.h * width);
     const auto inputPitch = width * bitPerPixel / 8;
     if (!inputPitch)
       ThrowRDE("Bad input pitch. Can not decode anything.");

@@ -159,7 +159,7 @@ vector<std::string> CiffEntry::getStrings() const {
     if (str[i] != 0)
       continue;
 
-    strs.emplace_back(reinterpret_cast<const char*>(&str[start]));
+    strs.emplace_back(&str[start]);
     start = i + 1;
   }
 

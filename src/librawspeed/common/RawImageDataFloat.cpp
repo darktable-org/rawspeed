@@ -371,7 +371,7 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
 
   /* Process other pixels - could be done inline, since we have the weights */
   if (cpp > 1 && component == 0)
-    for (int i = 1; i < static_cast<int>(cpp); i++)
+    for (int i = 1; i < cpp; i++)
       fixBadPixel(x,y,i);
 }
 
