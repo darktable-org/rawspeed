@@ -44,7 +44,8 @@ public:
 
 private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }
-  std::string make, model;
+  std::string make;
+  std::string model;
   static std::string getXMPTag(const std::string& xmp, const std::string& tag);
 };
 

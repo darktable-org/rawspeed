@@ -121,7 +121,8 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   class Wavelet {
   public:
-    int width, height;
+    int width;
+    int height;
     int16_t prescale;
 
     struct AbstractBand {

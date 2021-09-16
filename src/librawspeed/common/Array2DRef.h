@@ -39,7 +39,8 @@ public:
   using value_type = T;
   using cvless_value_type = std::remove_cv_t<value_type>;
 
-  int width = 0, height = 0;
+  int width = 0;
+  int height = 0;
 
   Array2DRef() = default;
 

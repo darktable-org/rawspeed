@@ -38,8 +38,10 @@ public:
   using value_type = T;
   using cvless_value_type = std::remove_cv_t<value_type>;
 
-  int offsetCols = 0, offsetRows = 0;
-  int croppedWidth = 0, croppedHeight = 0;
+  int offsetCols = 0;
+  int offsetRows = 0;
+  int croppedWidth = 0;
+  int croppedHeight = 0;
 
   CroppedArray2DRef() = default;
 
