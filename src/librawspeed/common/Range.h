@@ -48,11 +48,11 @@ template <typename T> bool operator<(const Range<T>& lhs, const Range<T>& rhs) {
 
 template <typename Tr, typename Tv>
 constexpr bool __attribute__((const)) RangeContains(const Tr& r, Tv pos) {
-  if (pos < std::begin(r))
+  if (pos < r.begin())
     return false;
 
-  assert(pos >= std::begin(r));
-  return std::end(r) > pos;
+  assert(pos >= r.begin());
+  return r.end() > pos;
 }
 
 template <typename T>
@@ -61,17 +61,17 @@ RangesOverlap(const T& lhs, const T& rhs) {
   if (&lhs == &rhs)
     return true;
 
-  if (std::begin(lhs) == std::begin(rhs))
+  if (lhs.begin() == rhs.begin())
     return true;
 
   const std::pair<const T&, const T&> ordered =
       std::minmax(lhs, rhs, [](const T& r0, const T& r1) {
-        assert(std::begin(r0) != std::begin(r1));
-        return std::begin(r0) < std::begin(r1);
+        assert(r0.begin() != r1.begin());
+        return r0.begin() < r1.begin();
       });
 
-  assert(std::begin(ordered.first) < std::begin(ordered.second));
-  return RangeContains(ordered.first, std::begin(ordered.second));
+  assert(ordered.first.begin() < ordered.second.begin());
+  return RangeContains(ordered.first, ordered.second.begin());
 }
 
 } // namespace rawspeed

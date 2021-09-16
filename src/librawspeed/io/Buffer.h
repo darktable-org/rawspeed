@@ -214,10 +214,6 @@ public:
   }
 };
 
-// FIXME: to make std::begin()/end() work with pre-llvm9/gcc9.
-[[nodiscard]] inline const uint8_t* begin(const Buffer& b) { return b.begin(); }
-[[nodiscard]] inline const uint8_t* end(const Buffer& b) { return b.end(); }
-
 // WARNING: both buffers must belong to the same allocation, else this is UB!
 inline bool operator<(const Buffer& lhs, const Buffer& rhs) {
   return std::pair(lhs.begin(), lhs.end()) < std::pair(rhs.begin(), rhs.end());
