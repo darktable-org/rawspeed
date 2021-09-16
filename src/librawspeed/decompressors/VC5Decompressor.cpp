@@ -558,12 +558,10 @@ void VC5Decompressor::parseVC5() {
     }
     }
 
-    done = true;
-    for (int iChannel = 0; iChannel < numChannels && done; ++iChannel) {
-      Wavelet& wavelet = channels[iChannel].wavelets[0];
-      if (!wavelet.isBandValid(0))
-        done = false;
-    }
+    done = std::all_of(channels.begin(), channels.end(),
+                       [](const Channel& channel) {
+                         return channel.wavelets[0].isBandValid(0);
+                       });
   }
 }
 
