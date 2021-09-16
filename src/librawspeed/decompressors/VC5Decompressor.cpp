@@ -279,7 +279,7 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
-    createLowpassReconstructionTask(bool& exceptionThrown) noexcept {
+    createLowpassReconstructionTask(const bool& exceptionThrown) noexcept {
   auto& highlow = wavelet.bands[2]->data;
   auto& lowlow = wavelet.bands[0]->data;
   auto& lowpass = intermediates.lowpass;
@@ -305,7 +305,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
-    createHighpassReconstructionTask(bool& exceptionThrown) noexcept {
+    createHighpassReconstructionTask(const bool& exceptionThrown) noexcept {
   auto& highhigh = wavelet.bands[3]->data;
   auto& lowhigh = wavelet.bands[1]->data;
   auto& highpass = intermediates.highpass;
@@ -330,7 +330,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
-    createLowHighPassCombiningTask(bool& exceptionThrown) noexcept {
+    createLowHighPassCombiningTask(const bool& exceptionThrown) noexcept {
   auto& lowpass = intermediates.lowpass;
   auto& highpass = intermediates.highpass;
   auto& reconstructedLowpass = data;

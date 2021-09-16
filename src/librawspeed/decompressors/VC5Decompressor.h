@@ -144,9 +144,11 @@ class VC5Decompressor final : public AbstractDecompressor {
                                    bool finalWavelet_ = false)
           : AbstractBand(wavelet_), clampUint(clampUint_),
             finalWavelet(finalWavelet_) {}
-      void createLowpassReconstructionTask(bool& exceptionThrown) noexcept;
-      void createHighpassReconstructionTask(bool& exceptionThrown) noexcept;
-      void createLowHighPassCombiningTask(bool& exceptionThrown) noexcept;
+      void
+      createLowpassReconstructionTask(const bool& exceptionThrown) noexcept;
+      void
+      createHighpassReconstructionTask(const bool& exceptionThrown) noexcept;
+      void createLowHighPassCombiningTask(const bool& exceptionThrown) noexcept;
       void createDecodingTasks(ErrorLog& errLog,
                                bool& exceptionThrown) noexcept override;
     };
