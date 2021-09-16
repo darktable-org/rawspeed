@@ -26,6 +26,7 @@
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable
 #include <array>                                // for array
 #include <cstdint>                              // for uint8_t
+#include <optional>                             // for optional
 
 namespace rawspeed {
 
@@ -36,14 +37,14 @@ class PentaxDecompressor final : public AbstractDecompressor {
   const HuffmanTable ht;
 
 public:
-  PentaxDecompressor(const RawImage& img, ByteStream* metaData);
+  PentaxDecompressor(const RawImage& img, std::optional<ByteStream> metaData);
 
   void decompress(const ByteStream& data) const;
 
 private:
   static HuffmanTable SetupHuffmanTable_Legacy();
   static HuffmanTable SetupHuffmanTable_Modern(ByteStream stream);
-  static HuffmanTable SetupHuffmanTable(const ByteStream* metaData);
+  static HuffmanTable SetupHuffmanTable(std::optional<ByteStream> metaData);
 
   static const std::array<std::array<std::array<uint8_t, 16>, 2>, 1>
       pentax_tree;
