@@ -167,7 +167,7 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
   assert(diffBuf);
 
   // decode the block
-  for (int i = 0; i < 64; i++) {
+  for (int i = 0; i < 64;) {
     bs.fill(32);
 
     const uint8_t codeValue = mHuff[i > 0].decodeCodeValue(bs);
@@ -178,13 +178,17 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
     if (len == 0 && index == 0 && i)
       break;
 
-    if (len == 0xf && index == 0xf)
+    if (len == 0xf && index == 0xf) {
+      ++i;
       continue;
+    }
 
     i += index;
 
-    if (len == 0)
+    if (len == 0) {
+      ++i;
       continue;
+    }
 
     int diff = bs.getBitsNoFill(len);
 
@@ -194,6 +198,7 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
     diff = HuffmanTable::extend(diff, len);
 
     (*diffBuf)[i] = diff;
+    ++i;
   }
 }
 
