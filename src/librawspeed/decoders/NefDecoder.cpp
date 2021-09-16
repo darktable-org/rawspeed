@@ -353,8 +353,8 @@ void NefDecoder::DecodeD100Uncompressed() const {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
-  ByteStream bs(DataBuffer(mFile.getSubView(offset), Endianness::little));
-  if (bs.getRemainSize() == 0)
+  if (ByteStream bs(DataBuffer(mFile.getSubView(offset), Endianness::little));
+      bs.getRemainSize() == 0)
     ThrowRDE("No input to decode!");
 
   UncompressedDecompressor u(
@@ -595,9 +595,8 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 
   auto id = mRootIFD->getID();
-  std::string mode = getMode();
-  std::string extended_mode = getExtendedMode(mode);
-  if (meta->hasCamera(id.make, id.model, extended_mode)) {
+  if (std::string mode = getMode(), extended_mode = getExtendedMode(mode);
+      meta->hasCamera(id.make, id.model, extended_mode)) {
     setMetaData(meta, id, extended_mode, iso);
   } else if (meta->hasCamera(id.make, id.model, mode)) {
     setMetaData(meta, id, mode, iso);
@@ -634,8 +633,8 @@ void NefDecoder::DecodeNikonSNef(const ByteStream& input) const {
   float wb_b = wb->getFloat(1);
 
   // ((1024/x)*((1<<16)-1)+(1<<9))<=((1<<31)-1), x>0  gives: (0.0312495)
-  const float lower_limit = 13'421'568.0 / 429'496'627.0;
-  if (wb_r < lower_limit || wb_b < lower_limit || wb_r > 10.0F || wb_b > 10.0F)
+  if (const float lower_limit = 13'421'568.0 / 429'496'627.0;
+      wb_r < lower_limit || wb_b < lower_limit || wb_r > 10.0F || wb_b > 10.0F)
     ThrowRDE("Whitebalance has bad values (%f, %f)", wb_r, wb_b);
 
   mRaw->metadata.wbCoeffs[0] = wb_r;

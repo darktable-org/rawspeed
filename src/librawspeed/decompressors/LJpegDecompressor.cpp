@@ -106,8 +106,9 @@ void LJpegDecompressor::decodeScan()
   const auto tileRequiredWidth = mRaw->getCpp() * w;
 
   // How many full pixel blocks do we need to consume for that?
-  const auto blocksToConsume = roundUpDivision(tileRequiredWidth, frame.cps);
-  if (frame.w < blocksToConsume || frame.h < h) {
+  if (const auto blocksToConsume =
+          roundUpDivision(tileRequiredWidth, frame.cps);
+      frame.w < blocksToConsume || frame.h < h) {
     ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
              frame.cps * frame.w, frame.h, tileRequiredWidth, h);
   }

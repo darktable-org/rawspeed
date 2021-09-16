@@ -66,8 +66,8 @@ std::unique_ptr<const Buffer> FileReader::readFile() {
 
   auto dest = Buffer::Create(fileSize);
 
-  auto bytes_read = fread(dest.get(), 1, fileSize, file.get());
-  if (fileSize != bytes_read) {
+  if (auto bytes_read = fread(dest.get(), 1, fileSize, file.get());
+      fileSize != bytes_read) {
     ThrowFIE("Could not read file, %s.",
              feof(file.get()) ? "reached end-of-file"
                               : (ferror(file.get()) ? "file reading error"

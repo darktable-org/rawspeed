@@ -95,8 +95,9 @@ RawImage Cr2Decoder::decodeOldFormat() {
   l.decode(slicing);
 
   // deal with D2000 GrayResponseCurve
-  TiffEntry* curve = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x123));
-  if (curve && curve->type == TiffDataType::SHORT && curve->count == 4096) {
+  if (TiffEntry* curve =
+          mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x123));
+      curve && curve->type == TiffDataType::SHORT && curve->count == 4096) {
     auto table = curve->getU16Array(curve->count);
     RawImageCurveGuard curveHandler(&mRaw, table, uncorrectedRawValues);
 
@@ -154,8 +155,8 @@ RawImage Cr2Decoder::decodeNewFormat() {
   // * there is a tag with not three components, the image is considered
   // corrupt. $ there is no tag, we let Cr2Decompressor guess it (it'll throw if
   // fails)
-  TiffEntry* cr2SliceEntry = raw->getEntryRecursive(TiffTag::CANONCR2SLICE);
-  if (cr2SliceEntry) {
+  if (TiffEntry* cr2SliceEntry = raw->getEntryRecursive(TiffTag::CANONCR2SLICE);
+      cr2SliceEntry) {
     if (cr2SliceEntry->count != 3) {
       ThrowRDE("Found RawImageSegmentation tag with %d elements, should be 3.",
                cr2SliceEntry->count);
@@ -322,9 +323,10 @@ int Cr2Decoder::getHue() const {
   if (!mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x10))) {
     return 0;
   }
-  uint32_t model_id =
-      mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x10))->getU32();
-  if (model_id >= 0x80000281 || model_id == 0x80000218 || (hints.has("force_new_sraw_hue")))
+  if (uint32_t model_id =
+          mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x10))->getU32();
+      model_id >= 0x80000281 || model_id == 0x80000218 ||
+      (hints.has("force_new_sraw_hue")))
     return ((mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x) - 1) >> 1;
 
   return (mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x);

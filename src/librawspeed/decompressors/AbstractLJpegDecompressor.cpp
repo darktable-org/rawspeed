@@ -171,8 +171,7 @@ void AbstractLJpegDecompressor::parseSOS(ByteStream sos) {
   if (sos.getRemainSize() != 1 + 2 * frame.cps + 3)
     ThrowRDE("Invalid SOS header length.");
 
-  uint32_t soscps = sos.getByte();
-  if (frame.cps != soscps)
+  if (uint32_t soscps = sos.getByte(); frame.cps != soscps)
     ThrowRDE("Component number mismatch.");
 
   for (uint32_t i = 0; i < frame.cps; i++) {
@@ -215,8 +214,7 @@ void AbstractLJpegDecompressor::parseDHT(ByteStream dht) {
   while (dht.getRemainSize() > 0) {
     uint32_t b = dht.getByte();
 
-    uint32_t htClass = b >> 4;
-    if (htClass != 0)
+    if (uint32_t htClass = b >> 4; htClass != 0)
       ThrowRDE("Unsupported Table class.");
 
     uint32_t htIndex = b & 0xf;

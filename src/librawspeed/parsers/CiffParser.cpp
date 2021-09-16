@@ -44,8 +44,8 @@ CiffParser::CiffParser(const Buffer& inputData) : RawParser(inputData) {}
 void CiffParser::parseData() {
   ByteStream bs(DataBuffer(mInput, Endianness::little));
 
-  const uint16_t byteOrder = bs.getU16();
-  if (byteOrder != 0x4949) // "II" / little-endian
+  if (const uint16_t byteOrder = bs.getU16();
+      byteOrder != 0x4949) // "II" / little-endian
     ThrowCPE("Not a CIFF file (endianness)");
 
   // Offset to the beginning of the CIFF

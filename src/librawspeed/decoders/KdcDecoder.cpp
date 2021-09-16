@@ -84,9 +84,9 @@ RawImage KdcDecoder::decodeRawInternal() {
   if (!mRootIFD->hasEntryRecursive(TiffTag::COMPRESSION))
     ThrowRDE("Couldn't find compression setting");
 
-  auto compression =
-      mRootIFD->getEntryRecursive(TiffTag::COMPRESSION)->getU32();
-  if (7 != compression)
+  if (auto compression =
+          mRootIFD->getEntryRecursive(TiffTag::COMPRESSION)->getU32();
+      7 != compression)
     ThrowRDE("Unsupported compression %d", compression);
 
   TiffEntry* ifdoffset = mRootIFD->getEntryRecursive(TiffTag::KODAK_IFD2);
@@ -101,9 +101,10 @@ RawImage KdcDecoder::decodeRawInternal() {
 
   uint32_t width = 0;
   uint32_t height = 0;
-  TiffEntry* ew = kodakifd.getEntryRecursive(TiffTag::KODAK_KDC_SENSOR_WIDTH);
-  TiffEntry* eh = kodakifd.getEntryRecursive(TiffTag::KODAK_KDC_SENSOR_HEIGHT);
-  if (ew && eh) {
+  if (TiffEntry* ew =
+          kodakifd.getEntryRecursive(TiffTag::KODAK_KDC_SENSOR_WIDTH),
+      *eh = kodakifd.getEntryRecursive(TiffTag::KODAK_KDC_SENSOR_HEIGHT);
+      ew && eh) {
     width = ew->getU32();
     height = eh->getU32();
   } else

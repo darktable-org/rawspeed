@@ -170,8 +170,7 @@ std::vector<const CiffIFD*> CiffIFD::getIFDsWithTagIf(CiffTag tag,
 
   std::vector<const CiffIFD*> matchingIFDs;
 
-  const auto found = mEntry.find(tag);
-  if (found != mEntry.end()) {
+  if (const auto found = mEntry.find(tag); found != mEntry.end()) {
     const auto* const entry = found->second.get();
     if (f(entry))
       matchingIFDs.push_back(this);
@@ -190,8 +189,7 @@ const CiffEntry* CiffIFD::getEntryRecursiveIf(CiffTag tag,
                                               const Lambda& f) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
 
-  const auto found = mEntry.find(tag);
-  if (found != mEntry.end()) {
+  if (const auto found = mEntry.find(tag); found != mEntry.end()) {
     const auto* const entry = found->second.get();
     if (f(entry))
       return entry;
@@ -249,8 +247,7 @@ bool __attribute__((pure)) CiffIFD::hasEntryRecursive(CiffTag tag) const {
 const CiffEntry* CiffIFD::getEntry(CiffTag tag) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
 
-  const auto found = mEntry.find(tag);
-  if (found != mEntry.end())
+  if (const auto found = mEntry.find(tag); found != mEntry.end())
     return found->second.get();
 
   ThrowCPE("Entry 0x%x not found.", static_cast<unsigned>(tag));

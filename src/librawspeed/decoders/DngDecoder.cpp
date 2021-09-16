@@ -230,8 +230,8 @@ DngDecoder::getTilingDescription(const TiffIFD* raw) const {
       ThrowRDE("Zero tiles vertically");
 
     TiffEntry* offsets = raw->getEntry(TiffTag::TILEOFFSETS);
-    TiffEntry* counts = raw->getEntry(TiffTag::TILEBYTECOUNTS);
-    if (offsets->count != counts->count) {
+    if (TiffEntry* counts = raw->getEntry(TiffTag::TILEBYTECOUNTS);
+        offsets->count != counts->count) {
       ThrowRDE("Tile count mismatch: offsets:%u count:%u", offsets->count,
                counts->count);
     }
@@ -467,8 +467,8 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
         }))
       ThrowRDE("Error decoding default crop origin");
 
-    iPoint2D cropOrigin(tl[0], tl[1]);
-    if (cropped.isPointInsideInclusive(cropOrigin))
+    if (iPoint2D cropOrigin(tl[0], tl[1]);
+        cropped.isPointInsideInclusive(cropOrigin))
       cropped = iRectangle2D(cropOrigin, {0, 0});
 
     cropped.dim = mRaw->dim - cropped.pos;
@@ -481,8 +481,8 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
         }))
       ThrowRDE("Error decoding default crop size");
 
-    iPoint2D size(sz[0], sz[1]);
-    if (size.isThisInside(mRaw->dim) &&
+    if (iPoint2D size(sz[0], sz[1]);
+        size.isThisInside(mRaw->dim) &&
         (size + cropped.pos).isThisInside(mRaw->dim))
       cropped.dim = size;
 

@@ -115,8 +115,8 @@ TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
   // each entry is 12 bytes
   // 4-byte offset to the next IFD at the end
   const auto IFDFullSize = 2 + 4 + 12 * numEntries;
-  const Buffer IFDBuf(data.getSubView(offset, IFDFullSize));
-  if (!ifds->insert(IFDBuf))
+  if (const Buffer IFDBuf(data.getSubView(offset, IFDFullSize));
+      !ifds->insert(IFDBuf))
     ThrowTPE("Two IFD's overlap. Raw corrupt!");
 
   for (uint32_t i = 0; i < numEntries; i++)
@@ -222,8 +222,7 @@ const TiffIFD* TiffIFD::getIFDWithTag(TiffTag tag, uint32_t index) const {
 }
 
 TiffEntry* __attribute__((pure)) TiffIFD::getEntryRecursive(TiffTag tag) const {
-  auto i = entries.find(tag);
-  if (i != entries.end()) {
+  if (auto i = entries.find(tag); i != entries.end()) {
     return i->second.get();
   }
   for (const auto& j : subIFDs) {

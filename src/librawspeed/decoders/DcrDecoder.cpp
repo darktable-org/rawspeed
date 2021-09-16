@@ -58,8 +58,8 @@ RawImage DcrDecoder::decodeRawInternal() {
 
   ByteStream input(DataBuffer(mFile.getSubView(off), Endianness::little));
 
-  int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
-  if (65000 != compression)
+  if (int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
+      65000 != compression)
     ThrowRDE("Unsupported compression %d", compression);
 
   TiffEntry* ifdoffset = mRootIFD->getEntryRecursive(TiffTag::KODAK_IFD);
@@ -88,8 +88,9 @@ RawImage DcrDecoder::decodeRawInternal() {
   //        WB from what appear to be presets and calculate it in weird ways
   //        The only file I have only uses this method, if anybody careas look
   //        in dcraw.c parse_kodak_ifd() for all that weirdness
-  TiffEntry* blob = kodakifd.getEntryRecursive(static_cast<TiffTag>(0x03fd));
-  if (blob && blob->count == 72) {
+  if (TiffEntry* blob =
+          kodakifd.getEntryRecursive(static_cast<TiffTag>(0x03fd));
+      blob && blob->count == 72) {
     for (auto i = 0U; i < 3; i++) {
       const auto mul = blob->getU16(20 + i);
       if (0 == mul)

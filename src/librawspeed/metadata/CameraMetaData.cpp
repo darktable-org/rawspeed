@@ -41,16 +41,18 @@ namespace rawspeed {
 CameraMetaData::CameraMetaData(const char *docname) {
   xml_document doc;
 
+  if (xml_parse_result result =
 #if defined(__unix__) || defined(__APPLE__)
-  xml_parse_result result = doc.load_file(docname);
+          doc.load_file(docname)
 #else
-  xml_parse_result result = doc.load_file(pugi::as_wide(docname).c_str());
+          doc.load_file(pugi::as_wide(docname).c_str())
 #endif
-
-  if (!result) {
-    ThrowCME(
-        "XML Document \"%s\" could not be parsed successfully. Error was: %s in %s",
-        docname, result.description(), doc.child("node").attribute("attr").value());
+          ;
+      !result) {
+    ThrowCME("XML Document \"%s\" could not be parsed successfully. Error was: "
+             "%s in %s",
+             docname, result.description(),
+             doc.child("node").attribute("attr").value());
   }
 
   for (xml_node camera : doc.child("Cameras").children("Camera")) {

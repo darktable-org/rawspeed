@@ -65,13 +65,13 @@ RawImage SrwDecoder::decodeRawInternal() {
   if (32769 != compression && 32770 != compression && 32772 != compression && 32773 != compression)
     ThrowRDE("Unsupported compression");
 
-  uint32_t nslices = raw->getEntry(TiffTag::STRIPOFFSETS)->count;
-  if (nslices != 1)
+  if (uint32_t nslices = raw->getEntry(TiffTag::STRIPOFFSETS)->count;
+      nslices != 1)
     ThrowRDE("Only one slice supported, found %u", nslices);
 
-  const auto wrongComp =
-      32770 == compression && !raw->hasEntry(static_cast<TiffTag>(40976));
-  if (32769 == compression || wrongComp) {
+  if (const auto wrongComp =
+          32770 == compression && !raw->hasEntry(static_cast<TiffTag>(40976));
+      32769 == compression || wrongComp) {
     bool bit_order = hints.get("msb_override", wrongComp ? bits == 12 : false);
     this->decodeUncompressed(raw, bit_order ? BitOrder::MSB : BitOrder::LSB);
     return mRaw;
@@ -164,8 +164,7 @@ void SrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
 
   auto id = mRootIFD->getID();
-  std::string mode = getMode();
-  if (meta->hasCamera(id.make, id.model, mode))
+  if (std::string mode = getMode(); meta->hasCamera(id.make, id.model, mode))
     setMetaData(meta, id, mode, iso);
   else
     setMetaData(meta, id, "", iso);

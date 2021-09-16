@@ -175,8 +175,8 @@ public:
       auto y = bs.getU32();
       auto x = bs.getU32();
 
-      const iPoint2D badPoint(x, y);
-      if (!fullImage.isPointInsideInclusive(badPoint))
+      if (const iPoint2D badPoint(x, y);
+          !fullImage.isPointInsideInclusive(badPoint))
         ThrowRDE("Bad point not inside image.");
 
       badPixels.emplace_back(y << 16 | x);
@@ -382,9 +382,9 @@ protected:
     // either ROI.getRight() or ROI.getBottom() index. Thus, we need to have
     // either ROI.getRight() or ROI.getBottom() elements in there.
     // FIXME: i guess not strictly true with pitch != 1.
-    const auto expectedSize =
-        S::select(getRoi().getRight(), getRoi().getBottom());
-    if (expectedSize != deltaF_count) {
+    if (const auto expectedSize =
+            S::select(getRoi().getRight(), getRoi().getBottom());
+        expectedSize != deltaF_count) {
       ThrowRDE("Got unexpected number of elements (%u), expected %u.",
                expectedSize, deltaF_count);
     }

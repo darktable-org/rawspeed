@@ -93,11 +93,10 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
   numBlocks = roundUpDivision(numPackets, PacketsPerBlock);
   assert(numBlocks > 0);
 
-  // How many full blocks does the input contain? This is truncating division.
-  const auto haveBlocks = input_.getRemainSize() / BlockSize;
-
   // Does the input contain enough blocks?
-  if (haveBlocks < numBlocks)
+  // How many full blocks does the input contain? This is truncating division.
+  if (const auto haveBlocks = input_.getRemainSize() / BlockSize;
+      haveBlocks < numBlocks)
     ThrowRDE("Insufficient count of input blocks for a given image");
 
   // We only want those blocks we need, no extras.

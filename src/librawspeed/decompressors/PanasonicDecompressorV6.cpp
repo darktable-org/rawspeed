@@ -100,11 +100,10 @@ PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
   // How many blocks are needed for the given image size?
   const auto numBlocks = mRaw->dim.area() / PixelsPerBlock;
 
-  // How many full blocks does the input contain? This is truncating division.
-  const auto haveBlocks = input_.getRemainSize() / BytesPerBlock;
-
   // Does the input contain enough blocks?
-  if (haveBlocks < numBlocks)
+  // How many full blocks does the input contain? This is truncating division.
+  if (const auto haveBlocks = input_.getRemainSize() / BytesPerBlock;
+      haveBlocks < numBlocks)
     ThrowRDE("Insufficient count of input blocks for a given image");
 
   // We only want those blocks we need, no extras.

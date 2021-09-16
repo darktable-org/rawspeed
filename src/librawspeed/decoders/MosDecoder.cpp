@@ -123,8 +123,8 @@ RawImage MosDecoder::decodeRawInternal() {
 
   UncompressedDecompressor u(bs, mRaw);
 
-  int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
-  if (1 == compression) {
+  if (int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
+      1 == compression) {
     const Endianness endianness =
         getTiffByteOrder(ByteStream(DataBuffer(mFile, Endianness::little)), 0);
 
@@ -132,8 +132,7 @@ RawImage MosDecoder::decodeRawInternal() {
       u.decodeRawUnpacked<16, Endianness::big>(width, height);
     else
       u.decodeRawUnpacked<16, Endianness::little>(width, height);
-  }
-  else if (99 == compression || 7 == compression) {
+  } else if (99 == compression || 7 == compression) {
     ThrowRDE("Leaf LJpeg not yet supported");
     // LJpegPlain l(mFile, mRaw);
     // l.startDecoder(off, mFile.getSize()-off, 0, 0);

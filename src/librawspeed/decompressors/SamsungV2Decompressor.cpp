@@ -325,8 +325,7 @@ SamsungV2Decompressor::processBlock(BitPumpMSB32& pump, int row, int col) {
 
 void SamsungV2Decompressor::decompressRow(int row) {
   // Align pump to 16byte boundary
-  const auto line_offset = data.getPosition();
-  if ((line_offset & 0xf) != 0)
+  if (const auto line_offset = data.getPosition(); (line_offset & 0xf) != 0)
     data.skipBytes(16 - (line_offset & 0xf));
 
   BitPumpMSB32 pump(data);

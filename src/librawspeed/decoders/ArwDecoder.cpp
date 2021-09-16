@@ -110,9 +110,8 @@ RawImage ArwDecoder::decodeRawInternal() {
   vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(TiffTag::STRIPOFFSETS);
 
   if (data.empty()) {
-    TiffEntry* model = mRootIFD->getEntryRecursive(TiffTag::MODEL);
-
-    if (model && model->getString() == "DSLR-A100") {
+    if (TiffEntry* model = mRootIFD->getEntryRecursive(TiffTag::MODEL);
+        model && model->getString() == "DSLR-A100") {
       // We've caught the elusive A100 in the wild, a transitional format
       // between the simple sanity of the MRW custom format and the wordly
       // wonderfullness of the Tiff-based ARW format, let's shoot from the hip

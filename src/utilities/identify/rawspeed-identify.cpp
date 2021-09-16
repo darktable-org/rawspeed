@@ -44,8 +44,8 @@ std::string find_cameras_xml(const char *argv0) {
   struct stat statbuf;
 
 #ifdef RS_CAMERAS_XML_PATH
-  static const char* set_camfile = RS_CAMERAS_XML_PATH;
-  if (stat(set_camfile, &statbuf)) {
+  if (static const char* set_camfile = RS_CAMERAS_XML_PATH;
+      stat(set_camfile, &statbuf)) {
     fprintf(stderr, "WARNING: Couldn't find cameras.xml in '%s'\n",
             set_camfile);
   } else {

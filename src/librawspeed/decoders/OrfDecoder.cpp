@@ -102,8 +102,8 @@ ByteStream OrfDecoder::handleSlices() const {
 RawImage OrfDecoder::decodeRawInternal() {
   const auto* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
-  int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
-  if (1 != compression)
+  if (int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
+      1 != compression)
     ThrowRDE("Unsupported compression");
 
   uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();

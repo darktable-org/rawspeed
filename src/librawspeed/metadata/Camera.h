@@ -57,8 +57,8 @@ public:
 
   template <typename T>
   [[nodiscard]] T get(const std::string& key, T defaultValue) const {
-    auto hint = data.find(key);
-    if (hint != data.end() && !hint->second.empty()) {
+    if (auto hint = data.find(key);
+        hint != data.end() && !hint->second.empty()) {
       std::istringstream iss(hint->second);
       iss >> defaultValue;
     }

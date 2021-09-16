@@ -99,8 +99,8 @@ void DeflateDecompressor::decode(
   const auto cSize = input.getRemainSize();
   const unsigned char* cBuffer = input.getData(cSize);
 
-  int err = uncompress(uBuffer->get(), &dstLen, cBuffer, cSize);
-  if (err != Z_OK) {
+  if (int err = uncompress(uBuffer->get(), &dstLen, cBuffer, cSize);
+      err != Z_OK) {
     ThrowRDE("failed to uncompress tile: %d (%s)", err, zError(err));
   }
 
