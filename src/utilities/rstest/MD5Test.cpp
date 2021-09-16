@@ -37,7 +37,7 @@ using MD5Testcase = std::pair<rawspeed::md5::md5_state, const uint8_t*>;
 class MD5Test : public ::testing::TestWithParam<MD5Testcase> {
 protected:
   MD5Test() = default;
-  virtual void SetUp() override {
+  void SetUp() final {
     auto p = GetParam();
 
     answer = p.first;
