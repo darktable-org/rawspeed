@@ -50,8 +50,8 @@ void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* valueDatas,
   auto t = std::make_unique<CiffEntry>(valueDatas, valueData, dirEntry);
 
   switch (t->type) {
-  case CIFF_SUB1:
-  case CIFF_SUB2: {
+  case CiffDataType::SUB1:
+  case CiffDataType::SUB2: {
     add(std::make_unique<CiffIFD>(this, t->data));
     break;
   }
@@ -253,7 +253,7 @@ const CiffEntry* CiffIFD::getEntry(CiffTag tag) const {
   if (found != mEntry.end())
     return found->second.get();
 
-  ThrowCPE("Entry 0x%x not found.", tag);
+  ThrowCPE("Entry 0x%x not found.", static_cast<unsigned>(tag));
 }
 
 const CiffEntry* CiffIFD::getEntryRecursive(CiffTag tag) const {

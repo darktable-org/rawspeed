@@ -46,26 +46,24 @@
 
 using std::chrono::steady_clock;
 
-using std::ostringstream;
-using std::vector;
-using std::ifstream;
-using std::istreambuf_iterator;
-using std::ofstream;
-using std::cout;
-using std::endl;
-using std::map;
-using std::cerr;
 using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
-using rawspeed::RawParser;
-using rawspeed::RawImage;
-using rawspeed::iPoint2D;
-using rawspeed::TYPE_USHORT16;
-using rawspeed::TYPE_FLOAT32;
 using rawspeed::getU16BE;
 using rawspeed::getU32LE;
-using rawspeed::roundUp;
+using rawspeed::iPoint2D;
+using rawspeed::RawImage;
+using rawspeed::RawParser;
 using rawspeed::RawspeedException;
+using rawspeed::roundUp;
+using std::cerr;
+using std::cout;
+using std::endl;
+using std::ifstream;
+using std::istreambuf_iterator;
+using std::map;
+using std::ofstream;
+using std::ostringstream;
+using std::vector;
 
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
 using std::setw;
@@ -183,7 +181,7 @@ std::string img_hash(const RawImage& r) {
   APPEND(&oss, "filters: 0x%x\n", r->cfa.getDcrawFilter());
   APPEND(&oss, "bpp: %d\n", r->getBpp());
   APPEND(&oss, "cpp: %d\n", r->getCpp());
-  APPEND(&oss, "dataType: %d\n", r->getDataType());
+  APPEND(&oss, "dataType: %u\n", static_cast<unsigned>(r->getDataType()));
 
   const iPoint2D dimUncropped = r->getUncroppedDim();
   APPEND(&oss, "dimUncropped: %dx%d\n", dimUncropped.x, dimUncropped.y);
@@ -306,10 +304,10 @@ void writePFM(const RawImage& raw, const std::string& fn) {
 
 void writeImage(const RawImage& raw, const std::string& fn) {
   switch (raw->getDataType()) {
-  case TYPE_USHORT16:
+  case RawImageType::UINT16:
     writePPM(raw, fn);
     break;
-  case TYPE_FLOAT32:
+  case RawImageType::F32:
     writePFM(raw, fn);
     break;
   default:

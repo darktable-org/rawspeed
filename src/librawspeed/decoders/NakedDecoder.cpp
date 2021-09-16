@@ -42,10 +42,10 @@ NakedDecoder::NakedDecoder(const Buffer& file, const Camera* c)
     : RawDecoder(file), cam(c) {}
 
 const map<std::string, BitOrder> NakedDecoder::order2enum = {
-    {"plain", BitOrder_LSB},
-    {"jpeg", BitOrder_MSB},
-    {"jpeg16", BitOrder_MSB16},
-    {"jpeg32", BitOrder_MSB32},
+    {"plain", BitOrder::LSB},
+    {"jpeg", BitOrder::MSB},
+    {"jpeg16", BitOrder::MSB16},
+    {"jpeg32", BitOrder::MSB32},
 };
 
 void NakedDecoder::parseHints() {

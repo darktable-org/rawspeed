@@ -26,7 +26,7 @@
 #include "io/Buffer.h"                       // for Buffer, DataBuffer
 #include "io/ByteStream.h"                   // for ByteStream
 #include "io/Endianness.h"                   // for Endianness, Endianness:...
-#include "tiff/TiffEntry.h"                  // for TiffEntry, TIFF_SHORT
+#include "tiff/TiffEntry.h" // for TiffEntry, TiffDataType::SHORT
 #include "tiff/TiffIFD.h"                    // for TiffRootIFD, TiffID
 #include "tiff/TiffTag.h"                    // for COMPRESSION, KODAK_IFD
 #include <array>                             // for array
@@ -58,11 +58,11 @@ RawImage DcrDecoder::decodeRawInternal() {
 
   ByteStream input(DataBuffer(mFile.getSubView(off), Endianness::little));
 
-  int compression = raw->getEntry(COMPRESSION)->getU32();
+  int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
   if (65000 != compression)
     ThrowRDE("Unsupported compression %d", compression);
 
-  TiffEntry* ifdoffset = mRootIFD->getEntryRecursive(KODAK_IFD);
+  TiffEntry* ifdoffset = mRootIFD->getEntryRecursive(TiffTag::KODAK_IFD);
   if (!ifdoffset)
     ThrowRDE("Couldn't find the Kodak IFD offset");
 
@@ -72,10 +72,11 @@ RawImage DcrDecoder::decodeRawInternal() {
   TiffRootIFD kodakifd(nullptr, &ifds, ifdoffset->getRootIfdData(),
                        ifdoffset->getU32());
 
-  TiffEntry* linearization = kodakifd.getEntryRecursive(KODAK_LINEARIZATION);
+  TiffEntry* linearization =
+      kodakifd.getEntryRecursive(TiffTag::KODAK_LINEARIZATION);
   if (!linearization ||
       !(linearization->count == 1024 || linearization->count == 4096) ||
-      linearization->type != TIFF_SHORT)
+      linearization->type != TiffDataType::SHORT)
     ThrowRDE("Couldn't find the linearization table");
 
   assert(linearization != nullptr);

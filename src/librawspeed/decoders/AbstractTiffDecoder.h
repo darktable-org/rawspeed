@@ -65,7 +65,7 @@ public:
   }
 
   [[nodiscard]] const TiffIFD*
-  getIFDWithLargestImage(TiffTag filter = IMAGEWIDTH) const;
+  getIFDWithLargestImage(TiffTag filter = TiffTag::IMAGEWIDTH) const;
 };
 
 } // namespace rawspeed

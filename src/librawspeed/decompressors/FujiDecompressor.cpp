@@ -30,7 +30,7 @@
 #include "common/RawspeedException.h"     // for RawspeedException
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/Endianness.h"                // for Endianness, Endianness::big
-#include "metadata/ColorFilterArray.h"    // for CFA_BLUE, CFA_GREEN, CFA_RED
+#include "metadata/ColorFilterArray.h" // for CFAColor::BLUE, CFAColor::GREEN, CFAColor::RED
 #include <algorithm>                      // for max, fill, min
 #include <cstdint>                        // for uint16_t, uint32_t, uint64_t
 #include <cstdlib>                        // for abs
@@ -41,7 +41,7 @@ namespace rawspeed {
 
 FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
     : mRaw(img), input(std::move(input_)) {
-  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
@@ -63,13 +63,13 @@ FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
     for (int j = 0; j < 6; j++) {
       const CFAColor c = mRaw->cfa.getColorAt(j, i);
       switch (c) {
-      case CFA_RED:
-      case CFA_GREEN:
-      case CFA_BLUE:
+      case CFAColor::RED:
+      case CFAColor::GREEN:
+      case CFAColor::BLUE:
         CFA[i][j] = c;
         break;
       default:
-        ThrowRDE("Got unexpected color %u", c);
+        ThrowRDE("Got unexpected color %u", static_cast<unsigned>(c));
       }
     }
   }
@@ -200,15 +200,15 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info,
       uint16_t* line_buf = nullptr;
 
       switch (CFA[row_count][pixel_count % 6]) {
-      case CFA_RED: // red
+      case CFAColor::RED: // red
         line_buf = lineBufR[row_count >> 1];
         break;
 
-      case CFA_GREEN: // green
+      case CFAColor::GREEN: // green
         line_buf = lineBufG[row_count];
         break;
 
-      case CFA_BLUE: // blue
+      case CFAColor::BLUE: // blue
         line_buf = lineBufB[row_count >> 1];
         break;
 

@@ -72,7 +72,7 @@ public:
 
   void setup(const RawImage& ri) override {
     // These limitations are present within the DNG SDK as well.
-    if (ri->getDataType() != TYPE_USHORT16)
+    if (ri->getDataType() != RawImageType::UINT16)
       ThrowRDE("Only 16 bit images supported");
 
     if (ri->getCpp() > 1)
@@ -275,7 +275,7 @@ protected:
 
   void setup(const RawImage& ri) override {
     PixelOpcode::setup(ri);
-    if (ri->getDataType() != TYPE_USHORT16)
+    if (ri->getDataType() != RawImageType::UINT16)
       ThrowRDE("Only 16 bit images supported");
   }
 
@@ -354,7 +354,7 @@ public:
     PixelOpcode::setup(ri);
 
     // If we are working on a float image, no need to convert to int
-    if (ri->getDataType() != TYPE_USHORT16)
+    if (ri->getDataType() != RawImageType::UINT16)
       return;
 
     deltaI.reserve(deltaF.size());
@@ -418,7 +418,7 @@ public:
                  this->f2iScale) {}
 
   void apply(const RawImage& ri) override {
-    if (ri->getDataType() == TYPE_USHORT16) {
+    if (ri->getDataType() == RawImageType::UINT16) {
       this->template applyOP<uint16_t>(
           ri, [this](uint32_t x, uint32_t y, uint16_t v) {
             return clampBits(this->deltaI[S::select(x, y)] + v, 16);
@@ -456,7 +456,7 @@ public:
                  this->f2iScale) {}
 
   void apply(const RawImage& ri) override {
-    if (ri->getDataType() == TYPE_USHORT16) {
+    if (ri->getDataType() == RawImageType::UINT16) {
       this->template applyOP<uint16_t>(ri, [this](uint32_t x, uint32_t y,
                                                   uint16_t v) {
         return clampBits((this->deltaI[S::select(x, y)] * v + 512) >> 10, 16);

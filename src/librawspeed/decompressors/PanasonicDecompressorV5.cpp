@@ -63,7 +63,7 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
                                                  const ByteStream& input_,
                                                  uint32_t bps_)
     : mRaw(img), bps(bps_) {
-  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 

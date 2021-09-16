@@ -72,72 +72,76 @@ CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas,
 
 uint32_t __attribute__((pure)) CiffEntry::getElementShift() const {
   switch (type) {
-    case CIFF_SHORT:
-      return 1;
-    case CIFF_LONG:
-    case CIFF_MIX:
-    case CIFF_SUB1:
-    case CIFF_SUB2:
-      return 2;
-    default:
-      // e.g. CIFF_BYTE or CIFF_ASCII
-      return 0;
+  case CiffDataType::SHORT:
+    return 1;
+  case CiffDataType::LONG:
+  case CiffDataType::MIX:
+  case CiffDataType::SUB1:
+  case CiffDataType::SUB2:
+    return 2;
+  default:
+    // e.g. CiffDataType::BYTE or CiffDataType::ASCII
+    return 0;
   }
 }
 
 uint32_t __attribute__((pure)) CiffEntry::getElementSize() const {
   switch (type) {
-    case CIFF_BYTE:
-    case CIFF_ASCII:
-      return 1;
-    case CIFF_SHORT:
-      return 2;
-    case CIFF_LONG:
-    case CIFF_MIX:
-    case CIFF_SUB1:
-    case CIFF_SUB2:
-      return 4;
-    default:
-      return 0;
+  case CiffDataType::BYTE:
+  case CiffDataType::ASCII:
+    return 1;
+  case CiffDataType::SHORT:
+    return 2;
+  case CiffDataType::LONG:
+  case CiffDataType::MIX:
+  case CiffDataType::SUB1:
+  case CiffDataType::SUB2:
+    return 4;
+  default:
+    return 0;
   }
 }
 
 bool __attribute__((pure)) CiffEntry::isInt() const {
-  return (type == CIFF_LONG || type == CIFF_SHORT || type ==  CIFF_BYTE);
+  return (type == CiffDataType::LONG || type == CiffDataType::SHORT ||
+          type == CiffDataType::BYTE);
 }
 
 uint32_t CiffEntry::getU32(uint32_t num) const {
   if (!isInt()) {
     ThrowCPE(
         "Wrong type 0x%x encountered. Expected Long, Short or Byte at 0x%x",
-        type, tag);
+        static_cast<unsigned>(type), static_cast<unsigned>(tag));
   }
 
-  if (type == CIFF_BYTE)
+  if (type == CiffDataType::BYTE)
     return getByte(num);
-  if (type == CIFF_SHORT)
+  if (type == CiffDataType::SHORT)
     return getU16(num);
 
   return data.peek<uint32_t>(num);
 }
 
 uint16_t CiffEntry::getU16(uint32_t num) const {
-  if (type != CIFF_SHORT && type != CIFF_BYTE)
-    ThrowCPE("Wrong type 0x%x encountered. Expected Short at 0x%x", type, tag);
+  if (type != CiffDataType::SHORT && type != CiffDataType::BYTE)
+    ThrowCPE("Wrong type 0x%x encountered. Expected Short at 0x%x",
+             static_cast<unsigned>(type), static_cast<unsigned>(tag));
 
   return data.peek<uint16_t>(num);
 }
 
 uint8_t CiffEntry::getByte(uint32_t num) const {
-  if (type != CIFF_BYTE)
-    ThrowCPE("Wrong type 0x%x encountered. Expected Byte at 0x%x", type, tag);
+  if (type != CiffDataType::BYTE)
+    ThrowCPE("Wrong type 0x%x encountered. Expected Byte at 0x%x",
+             static_cast<unsigned>(type), static_cast<unsigned>(tag));
 
   return data.peek<uint8_t>(num);
 }
 
 std::string CiffEntry::getString() const {
-  if (type != CIFF_ASCII)
-    ThrowCPE("Wrong type 0x%x encountered. Expected Ascii", type);
+  if (type != CiffDataType::ASCII)
+    ThrowCPE("Wrong type 0x%x encountered. Expected Ascii",
+             static_cast<unsigned>(type));
 
   if (count == 0)
     return "";
@@ -146,8 +150,9 @@ std::string CiffEntry::getString() const {
 }
 
 vector<std::string> CiffEntry::getStrings() const {
-  if (type != CIFF_ASCII)
-    ThrowCPE("Wrong type 0x%x encountered. Expected Ascii", type);
+  if (type != CiffDataType::ASCII)
+    ThrowCPE("Wrong type 0x%x encountered. Expected Ascii",
+             static_cast<unsigned>(type));
 
   const std::string str(reinterpret_cast<const char*>(data.peekData(count)),
                         count);
@@ -167,7 +172,7 @@ vector<std::string> CiffEntry::getStrings() const {
 }
 
 bool __attribute__((pure)) CiffEntry::isString() const {
-  return (type == CIFF_ASCII);
+  return (type == CiffDataType::ASCII);
 }
 
 } // namespace rawspeed

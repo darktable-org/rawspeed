@@ -35,8 +35,9 @@ namespace rawspeed {
 
 LJpegDecompressor::LJpegDecompressor(const ByteStream& bs, const RawImage& img)
     : AbstractLJpegDecompressor(bs, img) {
-  if (mRaw->getDataType() != TYPE_USHORT16)
-    ThrowRDE("Unexpected data type (%u)", mRaw->getDataType());
+  if (mRaw->getDataType() != RawImageType::UINT16)
+    ThrowRDE("Unexpected data type (%u)",
+             static_cast<unsigned>(mRaw->getDataType()));
 
   if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == sizeof(uint16_t)) ||
         (mRaw->getCpp() == 2 && mRaw->getBpp() == 2 * sizeof(uint16_t)) ||

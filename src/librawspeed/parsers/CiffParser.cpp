@@ -30,7 +30,7 @@
 #include "parsers/CiffParserException.h" // for ThrowCPE
 #include "tiff/CiffEntry.h"              // for CiffEntry
 #include "tiff/CiffIFD.h"                // for CiffIFD
-#include "tiff/CiffTag.h"                // for CIFF_MAKEMODEL
+#include "tiff/CiffTag.h"                // for CiffTag::MAKEMODEL
 #include <cstdint>                       // for uint16_t, uint32_t
 #include <memory>                        // for unique_ptr, make_unique
 #include <string>                        // for operator==, string
@@ -64,10 +64,10 @@ std::unique_ptr<RawDecoder> CiffParser::getDecoder(const CameraMetaData* meta) {
   if (!mRootIFD)
     parseData();
 
-  const auto potentials(mRootIFD->getIFDsWithTag(CIFF_MAKEMODEL));
+  const auto potentials(mRootIFD->getIFDsWithTag(CiffTag::MAKEMODEL));
 
   for (const auto& potential : potentials) {
-    const auto* const mm = potential->getEntry(CIFF_MAKEMODEL);
+    const auto* const mm = potential->getEntry(CiffTag::MAKEMODEL);
     const std::string make = trimSpaces(mm->getString());
 
     if (make == "Canon")

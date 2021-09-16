@@ -23,7 +23,7 @@
 #include "rawspeedconfig.h"            // for WITH_SSE2
 #include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
 #include "common/Array2DRef.h"         // for Array2DRef
-#include "common/Common.h"             // for writeLog, DEBUG_PRIO_ERROR
+#include "common/Common.h"             // for writeLog, DEBUG_PRIO::ERROR
 #include "common/CroppedArray2DRef.h"  // for CroppedArray2DRef
 #include "common/ErrorLog.h"           // for ErrorLog
 #include "common/Mutex.h"              // for Mutex
@@ -45,12 +45,15 @@ class RawImage;
 
 class RawImageData;
 
-enum RawImageType { TYPE_USHORT16, TYPE_FLOAT32 };
+enum class RawImageType { UINT16, F32 };
 
 class RawImageWorker {
 public:
-  enum RawImageWorkerTask {
-    SCALE_VALUES = 1, FIX_BAD_PIXELS = 2, APPLY_LOOKUP = 3 | 0x1000, FULL_IMAGE = 0x1000
+  enum class RawImageWorkerTask {
+    SCALE_VALUES = 1,
+    FIX_BAD_PIXELS = 2,
+    APPLY_LOOKUP = 3 | 0x1000,
+    FULL_IMAGE = 0x1000
   };
 
 private:
@@ -223,9 +226,9 @@ private:
 
  class RawImage {
  public:
-   static RawImage create(RawImageType type = TYPE_USHORT16);
+   static RawImage create(RawImageType type = RawImageType::UINT16);
    static RawImage create(const iPoint2D& dim,
-                          RawImageType type = TYPE_USHORT16,
+                          RawImageType type = RawImageType::UINT16,
                           uint32_t componentsPerPixel = 1);
    RawImageData* operator->() const { return p_; }
    RawImageData& operator*() const { return *p_; }
@@ -243,33 +246,32 @@ private:
 inline RawImage RawImage::create(RawImageType type)  {
   switch (type)
   {
-    case TYPE_USHORT16:
-      return RawImage(new RawImageDataU16());
-    case TYPE_FLOAT32:
-      return RawImage(new RawImageDataFloat());
-    default:
-      writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!");
-      __builtin_unreachable();
-
+  case RawImageType::UINT16:
+    return RawImage(new RawImageDataU16());
+  case RawImageType::F32:
+    return RawImage(new RawImageDataFloat());
+  default:
+    writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
+    __builtin_unreachable();
   }
 }
 
 inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type,
                                  uint32_t componentsPerPixel) {
   switch (type) {
-  case TYPE_USHORT16:
+  case RawImageType::UINT16:
     return RawImage(new RawImageDataU16(dim, componentsPerPixel));
-  case TYPE_FLOAT32:
+  case RawImageType::F32:
     return RawImage(new RawImageDataFloat(dim, componentsPerPixel));
   default:
-    writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!");
+    writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
     __builtin_unreachable();
   }
 }
 
 inline Array2DRef<uint16_t>
 RawImageData::getU16DataAsUncroppedArray2DRef() const noexcept {
-  assert(dataType == TYPE_USHORT16 &&
+  assert(dataType == RawImageType::UINT16 &&
          "Attempting to access floating-point buffer as uint16_t.");
   assert(data && "Data not yet allocated.");
   return {reinterpret_cast<uint16_t*>(data), cpp * uncropped_dim.x,

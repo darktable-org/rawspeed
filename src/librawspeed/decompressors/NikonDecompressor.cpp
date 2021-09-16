@@ -439,7 +439,7 @@ Huffman NikonDecompressor::createHuffmanTable(uint32_t huffSelect) {
 NikonDecompressor::NikonDecompressor(const RawImage& raw, ByteStream metadata,
                                      uint32_t bitsPS_)
     : mRaw(raw), bitsPS(bitsPS_) {
-  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
@@ -459,7 +459,7 @@ NikonDecompressor::NikonDecompressor(const RawImage& raw, ByteStream metadata,
   uint32_t v0 = metadata.getByte();
   uint32_t v1 = metadata.getByte();
 
-  writeLog(DEBUG_PRIO_EXTRA, "Nef version v0:%u, v1:%u", v0, v1);
+  writeLog(DEBUG_PRIO::EXTRA, "Nef version v0:%u, v1:%u", v0, v1);
 
   if (v0 == 73 || v1 == 88)
     metadata.skipBytes(2110);

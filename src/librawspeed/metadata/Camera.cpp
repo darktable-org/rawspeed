@@ -82,16 +82,17 @@ static std::string name(const xml_node& a) { return a.name(); }
 #endif
 
 const map<char, CFAColor> Camera::char2enum = {
-    {'g', CFA_GREEN},      {'r', CFA_RED},  {'b', CFA_BLUE},
-    {'f', CFA_FUJI_GREEN}, {'c', CFA_CYAN}, {'m', CFA_MAGENTA},
-    {'y', CFA_YELLOW},
+    {'g', CFAColor::GREEN},  {'r', CFAColor::RED},
+    {'b', CFAColor::BLUE},   {'f', CFAColor::FUJI_GREEN},
+    {'c', CFAColor::CYAN},   {'m', CFAColor::MAGENTA},
+    {'y', CFAColor::YELLOW},
 };
 
 const map<std::string, CFAColor> Camera::str2enum = {
-    {"GREEN", CFA_GREEN},   {"RED", CFA_RED},
-    {"BLUE", CFA_BLUE},     {"FUJI_GREEN", CFA_FUJI_GREEN},
-    {"CYAN", CFA_CYAN},     {"MAGENTA", CFA_MAGENTA},
-    {"YELLOW", CFA_YELLOW},
+    {"GREEN", CFAColor::GREEN},   {"RED", CFAColor::RED},
+    {"BLUE", CFAColor::BLUE},     {"FUJI_GREEN", CFAColor::FUJI_GREEN},
+    {"CYAN", CFAColor::CYAN},     {"MAGENTA", CFAColor::MAGENTA},
+    {"YELLOW", CFAColor::YELLOW},
 };
 
 #ifdef HAVE_PUGIXML

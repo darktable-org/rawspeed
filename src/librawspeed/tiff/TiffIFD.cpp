@@ -57,7 +57,7 @@ void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs) {
 
   try {
     switch (t->tag) {
-    case DNGPRIVATEDATA:
+    case TiffTag::DNGPRIVATEDATA:
       // These are arbitrarily 'rebased', to preserve the offsets, but as it is
       // implemented right now, that could trigger UB (pointer arithmetics,
       // creating pointer to unowned memory, etc). And since this is not even
@@ -67,14 +67,14 @@ void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs) {
       add(move(t));
       break;
 
-    case MAKERNOTE:
-    case MAKERNOTE_ALT:
+    case TiffTag::MAKERNOTE:
+    case TiffTag::MAKERNOTE_ALT:
       add(parseMakerNote(ifds, t.get()));
       break;
 
-    case FUJI_RAW_IFD:
-    case SUBIFDS:
-    case EXIFIFDPOINTER:
+    case TiffTag::FUJI_RAW_IFD:
+    case TiffTag::SUBIFDS:
+    case TiffTag::EXIFIFDPOINTER:
       for (uint32_t j = 0; j < t->count; j++)
         add(std::make_unique<TiffIFD>(this, ifds, bs, t->getU32(j)));
       break;
@@ -136,7 +136,7 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
   TiffIFD* p = this;
   TiffEntry* makeEntry;
   do {
-    makeEntry = p->getEntryRecursive(MAKE);
+    makeEntry = p->getEntryRecursive(TiffTag::MAKE);
     p = p->parent;
   } while (!makeEntry && p);
   std::string make =
@@ -216,7 +216,8 @@ std::vector<const TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) const {
 const TiffIFD* TiffIFD::getIFDWithTag(TiffTag tag, uint32_t index) const {
   auto ifds = getIFDsWithTag(tag);
   if (index >= ifds.size())
-    ThrowTPE("failed to find %u ifs with tag 0x%04x", index + 1, tag);
+    ThrowTPE("failed to find %u ifs with tag 0x%04x", index + 1,
+             static_cast<unsigned>(tag));
   return ifds[index];
 }
 
@@ -291,15 +292,15 @@ void TiffIFD::add(TiffEntryOwner entry) {
 TiffEntry* TiffIFD::getEntry(TiffTag tag) const {
   auto i = entries.find(tag);
   if (i == entries.end())
-    ThrowTPE("Entry 0x%x not found.", tag);
+    ThrowTPE("Entry 0x%x not found.", static_cast<unsigned>(tag));
   return i->second.get();
 }
 
 TiffID TiffRootIFD::getID() const
 {
   TiffID id;
-  auto* makeE = getEntryRecursive(MAKE);
-  auto* modelE = getEntryRecursive(MODEL);
+  auto* makeE = getEntryRecursive(TiffTag::MAKE);
+  auto* modelE = getEntryRecursive(TiffTag::MODEL);
 
   if (!makeE)
     ThrowTPE("Failed to find MAKE entry.");

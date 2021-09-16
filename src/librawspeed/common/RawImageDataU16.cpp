@@ -47,13 +47,13 @@ using std::array;
 namespace rawspeed {
 
 RawImageDataU16::RawImageDataU16() {
-  dataType = TYPE_USHORT16;
+  dataType = RawImageType::UINT16;
   bpp = sizeof(uint16_t);
 }
 
 RawImageDataU16::RawImageDataU16(const iPoint2D& _dim, uint32_t _cpp)
     : RawImageData(_dim, sizeof(uint16_t), _cpp) {
-  dataType = TYPE_USHORT16;
+  dataType = RawImageType::UINT16;
 }
 
 void RawImageDataU16::calculateBlackAreas() {
@@ -151,7 +151,8 @@ void RawImageDataU16::scaleBlackWhite() {
       blackLevel = b;
     if (whitePoint >= 65536)
       whitePoint = m;
-    writeLog(DEBUG_PRIO_INFO, "ISO:%d, Estimated black:%d, Estimated white: %d",
+    writeLog(DEBUG_PRIO::INFO,
+             "ISO:%d, Estimated black:%d, Estimated white: %d",
              metadata.isoSpeed, blackLevel, whitePoint);
   }
 
@@ -165,7 +166,7 @@ void RawImageDataU16::scaleBlackWhite() {
   if (blackLevelSeparate[0] < 0)
     calculateBlackAreas();
 
-  startWorker(RawImageWorker::SCALE_VALUES, true);
+  startWorker(RawImageWorker::RawImageWorkerTask::SCALE_VALUES, true);
 }
 
 void RawImageDataU16::scaleValues(int start_y, int end_y) {

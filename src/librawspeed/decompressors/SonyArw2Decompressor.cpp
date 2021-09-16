@@ -38,7 +38,7 @@ namespace rawspeed {
 SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
                                            const ByteStream& input_)
     : mRaw(img) {
-  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 

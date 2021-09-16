@@ -33,7 +33,7 @@
 #include "io/IOException.h"                         // for ThrowIOE
 #include "metadata/Camera.h"                        // for Hints
 #include "metadata/CameraMetaData.h"                // for CameraMetaData
-#include "metadata/ColorFilterArray.h"              // for CFA_GREEN, CFA_BLUE
+#include "metadata/ColorFilterArray.h" // for CFAColor::GREEN, CFAColor::BLUE
 #include "tiff/TiffEntry.h"                         // for TiffEntry, TIFF_...
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag, IMAGELE...
@@ -64,13 +64,14 @@ bool NefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 RawImage NefDecoder::decodeRawInternal() {
-  const auto* raw = mRootIFD->getIFDWithTag(CFAPATTERN);
-  auto compression = raw->getEntry(COMPRESSION)->getU32();
+  const auto* raw = mRootIFD->getIFDWithTag(TiffTag::CFAPATTERN);
+  auto compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
 
-  TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
-  TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
+  TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
+  TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
 
-  if (mRootIFD->getEntryRecursive(MODEL)->getString() == "NIKON D100 ") { /**Sigh**/
+  if (mRootIFD->getEntryRecursive(TiffTag::MODEL)->getString() ==
+      "NIKON D100 ") { /**Sigh**/
     if (!mFile.isValid(offsets->getU32()))
       ThrowRDE("Image data outside of file.");
     if (!D100IsCompressed(offsets->getU32())) {
@@ -104,9 +105,9 @@ RawImage NefDecoder::decodeRawInternal() {
   if (34713 != compression)
     ThrowRDE("Unsupported compression");
 
-  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
-  uint32_t bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
+  uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
+  uint32_t bitPerPixel = raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
 
   mRaw->dim = iPoint2D(width, height);
 
@@ -148,10 +149,10 @@ bool NefDecoder::D100IsCompressed(uint32_t offset) const {
    as if they were compressed. For those cases we set uncompressed mode
    by figuring out that the image is the size of uncompressed packing */
 bool NefDecoder::NEFIsUncompressed(const TiffIFD* raw) {
-  TiffEntry* counts = raw->getEntry(STRIPBYTECOUNTS);
-  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
-  uint32_t bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
+  TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
+  uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
+  uint32_t bitPerPixel = raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
 
   if (!width || !height || !bitPerPixel)
     return false;
@@ -191,9 +192,9 @@ bool NefDecoder::NEFIsUncompressed(const TiffIFD* raw) {
    as if they were compressed. For those cases we set uncompressed mode
    by figuring out that the image is the size of uncompressed packing */
 bool NefDecoder::NEFIsUncompressedRGB(const TiffIFD* raw) {
-  uint32_t byteCount = raw->getEntry(STRIPBYTECOUNTS)->getU32(0);
-  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32_t byteCount = raw->getEntry(TiffTag::STRIPBYTECOUNTS)->getU32(0);
+  uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
 
   if (byteCount % 3 != 0)
     return false;
@@ -202,13 +203,13 @@ bool NefDecoder::NEFIsUncompressedRGB(const TiffIFD* raw) {
 }
 
 void NefDecoder::DecodeUncompressed() const {
-  const auto* raw = getIFDWithLargestImage(CFAPATTERN);
-  TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
-  TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
-  uint32_t yPerSlice = raw->getEntry(ROWSPERSTRIP)->getU32();
-  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
-  uint32_t bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
+  const auto* raw = getIFDWithLargestImage(TiffTag::CFAPATTERN);
+  TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
+  TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
+  uint32_t yPerSlice = raw->getEntry(TiffTag::ROWSPERSTRIP)->getU32();
+  uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
+  uint32_t bitPerPixel = raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
 
   mRaw->dim = iPoint2D(width, height);
 
@@ -285,7 +286,7 @@ void NefDecoder::DecodeUncompressed() const {
     if (hints.has("coolpixmangled")) {
       UncompressedDecompressor u(in, mRaw);
       u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, 12,
-                            BitOrder_MSB32);
+                            BitOrder::MSB32);
     } else {
       if (hints.has("coolpixsplit"))
         readCoolpixSplitRaw(in, size, pos, width * bitPerPixel / 8);
@@ -295,7 +296,7 @@ void NefDecoder::DecodeUncompressed() const {
           ThrowRDE("Inconsistent row size");
         const auto inputPitchBytes = in.getSize() / size.y;
         u.readUncompressedRaw(size, pos, inputPitchBytes, bitPerPixel,
-                              bitorder ? BitOrder_MSB : BitOrder_LSB);
+                              bitorder ? BitOrder::MSB : BitOrder::LSB);
       }
     }
 
@@ -342,9 +343,9 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
 }
 
 void NefDecoder::DecodeD100Uncompressed() const {
-  const auto* ifd = mRootIFD->getIFDWithTag(STRIPOFFSETS, 1);
+  const auto* ifd = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS, 1);
 
-  uint32_t offset = ifd->getEntry(STRIPOFFSETS)->getU32();
+  uint32_t offset = ifd->getEntry(TiffTag::STRIPOFFSETS)->getU32();
   // Hardcode the sizes as at least the width is not correctly reported
   uint32_t width = 3040;
   uint32_t height = 2024;
@@ -364,10 +365,10 @@ void NefDecoder::DecodeD100Uncompressed() const {
 }
 
 void NefDecoder::DecodeSNefUncompressed() const {
-  const auto* raw = getIFDWithLargestImage(CFAPATTERN);
-  uint32_t offset = raw->getEntry(STRIPOFFSETS)->getU32();
-  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
+  const auto* raw = getIFDWithLargestImage(TiffTag::CFAPATTERN);
+  uint32_t offset = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
+  uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
 
   if (width == 0 || height == 0 || width % 2 != 0 || width > 3680 ||
       height > 2456)
@@ -395,9 +396,9 @@ void NefDecoder::checkSupportInternal(const CameraMetaData* meta) {
 
 std::string NefDecoder::getMode() const {
   ostringstream mode;
-  const auto* raw = getIFDWithLargestImage(CFAPATTERN);
-  int compression = raw->getEntry(COMPRESSION)->getU32();
-  uint32_t bitPerPixel = raw->getEntry(BITSPERSAMPLE)->getU32();
+  const auto* raw = getIFDWithLargestImage(TiffTag::CFAPATTERN);
+  int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
+  uint32_t bitPerPixel = raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
 
   if (NEFIsUncompressedRGB(raw))
     mode << "sNEF-uncompressed";
@@ -413,9 +414,9 @@ std::string NefDecoder::getMode() const {
 std::string NefDecoder::getExtendedMode(const std::string& mode) const {
   ostringstream extended_mode;
 
-  const auto* ifd = mRootIFD->getIFDWithTag(CFAPATTERN);
-  uint32_t width = ifd->getEntry(IMAGEWIDTH)->getU32();
-  uint32_t height = ifd->getEntry(IMAGELENGTH)->getU32();
+  const auto* ifd = mRootIFD->getIFDWithTag(TiffTag::CFAPATTERN);
+  uint32_t width = ifd->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  uint32_t height = ifd->getEntry(TiffTag::IMAGELENGTH)->getU32();
 
   extended_mode << width << "x" << height << "-" << mode;
   return extended_mode.str();
@@ -471,13 +472,14 @@ const std::array<uint8_t, 256> NefDecoder::keymap = {
 
 void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
-  mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
+  mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
+                   CFAColor::GREEN, CFAColor::BLUE);
 
   int white = mRaw->whitePoint;
   int black = mRaw->blackLevel;
 
-  if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
-    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();
+  if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
+    iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
 
   // Read the whitebalance
 
@@ -501,11 +503,13 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         version = (version << 4) + v - '0';
       }
 
-      if (version == 0x100 && wb->count >= 80 && wb->type == TIFF_UNDEFINED) {
+      if (version == 0x100 && wb->count >= 80 &&
+          wb->type == TiffDataType::UNDEFINED) {
         mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(36));
         mRaw->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(37));
         mRaw->metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(38));
-      } else if (version == 0x103 && wb->count >= 26 && wb->type == TIFF_UNDEFINED) {
+      } else if (version == 0x103 && wb->count >= 26 &&
+                 wb->type == TiffDataType::UNDEFINED) {
         mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(10));
         mRaw->metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(11));
         mRaw->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(12));
@@ -561,7 +565,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x0014))) {
     TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x0014));
     ByteStream bs = wb->getData();
-    if (wb->count == 2560 && wb->type == TIFF_UNDEFINED) {
+    if (wb->count == 2560 && wb->type == TiffDataType::UNDEFINED) {
       bs.skipBytes(1248);
       bs.setByteOrder(Endianness::big);
       mRaw->metadata.wbCoeffs[0] = static_cast<float>(bs.getU16()) / 256.0;
@@ -623,7 +627,7 @@ void NefDecoder::DecodeNikonSNef(const ByteStream& input) const {
     ThrowRDE("Unable to locate whitebalance needed for decompression");
 
   assert(wb != nullptr);
-  if (wb->count != 4 || wb->type != TIFF_RATIONAL)
+  if (wb->count != 4 || wb->type != TiffDataType::RATIONAL)
     ThrowRDE("Whitebalance has unknown count or type");
 
   float wb_r = wb->getFloat(0);

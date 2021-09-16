@@ -38,72 +38,82 @@
 
 namespace rawspeed {
 
-enum JpegMarker { /* JPEG marker codes			*/
-  M_STUFF = 0x00,
-  M_SOF0  = 0xc0,	/* baseline DCT				*/
-  M_SOF1  = 0xc1,	/* extended sequential DCT		*/
-  M_SOF2  = 0xc2,	/* progressive DCT			*/
-  M_SOF3  = 0xc3,	/* lossless (sequential)		*/
+enum class JpegMarker { /* JPEG marker codes			*/
+                        STUFF = 0x00,
+                        SOF0 = 0xc0, /* baseline DCT */
+                        SOF1 = 0xc1, /* extended sequential DCT		*/
+                        SOF2 = 0xc2, /* progressive DCT			*/
+                        SOF3 = 0xc3, /* lossless (sequential)		*/
 
-  M_SOF5  = 0xc5,	/* differential sequential DCT		*/
-  M_SOF6  = 0xc6,	/* differential progressive DCT		*/
-  M_SOF7  = 0xc7,	/* differential lossless		*/
+                        SOF5 = 0xc5, /* differential sequential DCT
+                                      */
+                        SOF6 = 0xc6, /* differential progressive DCT
+                                      */
+                        SOF7 = 0xc7, /* differential lossless		*/
 
-  M_JPG   = 0xc8,	/* JPEG extensions			*/
-  M_SOF9  = 0xc9,	/* extended sequential DCT		*/
-  M_SOF10 = 0xca,	/* progressive DCT			*/
-  M_SOF11 = 0xcb,	/* lossless (sequential)		*/
+                        JPG = 0xc8,   /* JPEG extensions			*/
+                        SOF9 = 0xc9,  /* extended sequential DCT		*/
+                        SOF10 = 0xca, /* progressive DCT */
+                        SOF11 = 0xcb, /* lossless (sequential)		*/
 
-  M_SOF13 = 0xcd,	/* differential sequential DCT		*/
-  M_SOF14 = 0xce,	/* differential progressive DCT		*/
-  M_SOF15 = 0xcf,	/* differential lossless		*/
+                        SOF13 = 0xcd, /* differential sequential DCT
+                                       */
+                        SOF14 = 0xce, /* differential progressive DCT
+                                       */
+                        SOF15 = 0xcf, /* differential lossless		*/
 
-  M_DHT   = 0xc4,	/* define Huffman tables		*/
+                        DHT = 0xc4, /* define Huffman tables		*/
 
-  M_DAC   = 0xcc,	/* define arithmetic conditioning table	*/
+                        DAC = 0xcc, /* define arithmetic conditioning table
+                                     */
 
-  M_RST0  = 0xd0,	/* restart				*/
-  M_RST1  = 0xd1,	/* restart				*/
-  M_RST2  = 0xd2,	/* restart				*/
-  M_RST3  = 0xd3,	/* restart				*/
-  M_RST4  = 0xd4,	/* restart				*/
-  M_RST5  = 0xd5,	/* restart				*/
-  M_RST6  = 0xd6,	/* restart				*/
-  M_RST7  = 0xd7,	/* restart				*/
+                        RST0 = 0xd0, /* restart				*/
+                        RST1 = 0xd1, /* restart				*/
+                        RST2 = 0xd2, /* restart				*/
+                        RST3 = 0xd3, /* restart				*/
+                        RST4 = 0xd4, /* restart				*/
+                        RST5 = 0xd5, /* restart				*/
+                        RST6 = 0xd6, /* restart				*/
+                        RST7 = 0xd7, /* restart				*/
 
-  M_SOI   = 0xd8,	/* start of image			*/
-  M_EOI   = 0xd9,	/* end of image				*/
-  M_SOS   = 0xda,	/* start of scan			*/
-  M_DQT   = 0xdb,	/* define quantization tables		*/
-  M_DNL   = 0xdc,	/* define number of lines		*/
-  M_DRI   = 0xdd,	/* define restart interval		*/
-  M_DHP   = 0xde,	/* define hierarchical progression	*/
-  M_EXP   = 0xdf,	/* expand reference image(s)		*/
+                        SOI = 0xd8, /* start of image			*/
+                        EOI = 0xd9, /* end of image */
+                        SOS = 0xda, /* start of scan			*/
+                        DQT =
+                            0xdb,   /* define quantization tables		*/
+                        DNL = 0xdc, /* define number of lines		*/
+                        DRI = 0xdd, /* define restart interval		*/
+                        DHP = 0xde, /* define hierarchical progression	*/
+                        EXP =
+                            0xdf, /* expand reference image(s)		*/
 
-  M_APP0  = 0xe0,	/* application marker, used for JFIF	*/
-  M_APP1  = 0xe1,	/* application marker			*/
-  M_APP2  = 0xe2,	/* application marker			*/
-  M_APP3  = 0xe3,	/* application marker			*/
-  M_APP4  = 0xe4,	/* application marker			*/
-  M_APP5  = 0xe5,	/* application marker			*/
-  M_APP6  = 0xe6,	/* application marker			*/
-  M_APP7  = 0xe7,	/* application marker			*/
-  M_APP8  = 0xe8,	/* application marker			*/
-  M_APP9  = 0xe9,	/* application marker			*/
-  M_APP10 = 0xea,	/* application marker			*/
-  M_APP11 = 0xeb,	/* application marker			*/
-  M_APP12 = 0xec,	/* application marker			*/
-  M_APP13 = 0xed,	/* application marker			*/
-  M_APP14 = 0xee,	/* application marker, used by Adobe	*/
-  M_APP15 = 0xef,	/* application marker			*/
+                        APP0 =
+                            0xe0,     /* application marker, used for JFIF	*/
+                        APP1 = 0xe1,  /* application marker  */
+                        APP2 = 0xe2,  /* application marker  */
+                        APP3 = 0xe3,  /* application marker  */
+                        APP4 = 0xe4,  /* application marker  */
+                        APP5 = 0xe5,  /* application marker  */
+                        APP6 = 0xe6,  /* application marker  */
+                        APP7 = 0xe7,  /* application marker  */
+                        APP8 = 0xe8,  /* application marker  */
+                        APP9 = 0xe9,  /* application marker  */
+                        APP10 = 0xea, /* application marker */
+                        APP11 = 0xeb, /* application marker */
+                        APP12 = 0xec, /* application marker */
+                        APP13 = 0xed, /* application marker */
+                        APP14 =
+                            0xee,     /* application marker, used by Adobe	*/
+                        APP15 = 0xef, /* application marker */
 
-  M_JPG0  = 0xf0,	/* reserved for JPEG extensions		*/
-  M_JPG13 = 0xfd,	/* reserved for JPEG extensions		*/
-  M_COM   = 0xfe,	/* comment				*/
+                        JPG0 = 0xf0,  /* reserved for JPEG extensions
+                                       */
+                        JPG13 = 0xfd, /* reserved for JPEG extensions
+                                       */
+                        COM = 0xfe,   /* comment				*/
 
-  M_TEM   = 0x01,	/* temporary use			*/
-  M_FILL  = 0xFF
-
+                        TEM = 0x01, /* temporary use			*/
+                        FILL = 0xFF
 
 };
 

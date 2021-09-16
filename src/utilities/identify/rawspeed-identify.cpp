@@ -114,8 +114,6 @@ using rawspeed::iPoint2D;
 using rawspeed::RawImage;
 using rawspeed::RawParser;
 using rawspeed::RawspeedException;
-using rawspeed::TYPE_FLOAT32;
-using rawspeed::TYPE_USHORT16;
 using rawspeed::identify::find_cameras_xml;
 
 int main(int argc, char* argv[]) { // NOLINT
@@ -222,7 +220,7 @@ int main(int argc, char* argv[]) { // NOLINT
     fprintf(stdout, "bpp: %d\n", bpp);
     const uint32_t cpp = r->getCpp();
     fprintf(stdout, "cpp: %d\n", cpp);
-    fprintf(stdout, "dataType: %d\n", r->getDataType());
+    fprintf(stdout, "dataType: %u\n", static_cast<unsigned>(r->getDataType()));
 
     // dimensions of uncropped image
     const iPoint2D dimUncropped = r->getUncroppedDim();
@@ -253,7 +251,7 @@ int main(int argc, char* argv[]) { // NOLINT
     fprintf(stdout, "Image byte avg: %lf\n",
             sum / static_cast<double>(dimUncropped.y * dimUncropped.x * bpp));
 
-    if (r->getDataType() == TYPE_FLOAT32) {
+    if (r->getDataType() == rawspeed::RawImageType::F32) {
       sum = 0.0F;
 
 #ifdef HAVE_OPENMP
@@ -270,7 +268,7 @@ int main(int argc, char* argv[]) { // NOLINT
       fprintf(stdout, "Image float sum: %lf\n", sum);
       fprintf(stdout, "Image float avg: %lf\n",
               sum / static_cast<double>(dimUncropped.y * dimUncropped.x));
-    } else if (r->getDataType() == TYPE_USHORT16) {
+    } else if (r->getDataType() == rawspeed::RawImageType::UINT16) {
       sum = 0.0F;
 
 #ifdef HAVE_OPENMP

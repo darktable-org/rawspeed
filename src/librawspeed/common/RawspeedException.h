@@ -23,7 +23,7 @@
 
 #include "rawspeedconfig.h" // for RAWSPEED_NOINLINE, RAWSPEED_UNLIKELY_FUN...
 
-#include "common/Common.h" // for writeLog, DEBUG_PRIO_EXTRA
+#include "common/Common.h" // for writeLog, DEBUG_PRIO::EXTRA
 #include <array>           // for array
 #include <cstdarg>         // for va_end, va_list, va_start
 #include <cstdio>          // for vsnprintf, size_t
@@ -50,7 +50,7 @@ template <typename T>
   va_start(val, fmt);
   vsnprintf(buf.data(), sizeof(buf), fmt, val);
   va_end(val);
-  writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s", buf.data());
+  writeLog(DEBUG_PRIO::EXTRA, "EXCEPTION: %s", buf.data());
   throw T(buf.data());
 }
 
@@ -58,7 +58,7 @@ class RawspeedException : public std::runtime_error {
 private:
   static void RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
   log(const char* msg) {
-    writeLog(DEBUG_PRIO_EXTRA, "EXCEPTION: %s", msg);
+    writeLog(DEBUG_PRIO::EXTRA, "EXCEPTION: %s", msg);
   }
 
 public:

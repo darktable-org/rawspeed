@@ -43,7 +43,7 @@ namespace rawspeed {
 PhaseOneDecompressor::PhaseOneDecompressor(const RawImage& img,
                                            std::vector<PhaseOneStrip>&& strips_)
     : mRaw(img), strips(std::move(strips_)) {
-  if (mRaw->getDataType() != TYPE_USHORT16)
+  if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
 
   if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == sizeof(uint16_t))))

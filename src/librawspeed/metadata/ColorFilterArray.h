@@ -28,18 +28,18 @@
 
 namespace rawspeed {
 
-enum CFAColor : uint8_t {
+enum class CFAColor : uint8_t {
   // see also DngDecoder
-  CFA_RED = 0,
-  CFA_GREEN = 1,
-  CFA_BLUE = 2,
-  CFA_CYAN = 3,
-  CFA_MAGENTA = 4,
-  CFA_YELLOW = 5,
-  CFA_WHITE = 6,
-  CFA_FUJI_GREEN = 7,
-  CFA_END, // keep it last!
-  CFA_UNKNOWN = 255,
+  RED = 0,
+  GREEN = 1,
+  BLUE = 2,
+  CYAN = 3,
+  MAGENTA = 4,
+  YELLOW = 5,
+  WHITE = 6,
+  FUJI_GREEN = 7,
+  END, // keep it last!
+  UNKNOWN = 255,
 
 };
 

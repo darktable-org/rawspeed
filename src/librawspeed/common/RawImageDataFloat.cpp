@@ -19,7 +19,7 @@
 */
 
 #include "common/RawImage.h"              // for RawImageDataFloat, TYPE_FL...
-#include "common/Common.h"                // for writeLog, DEBUG_PRIO_INFO
+#include "common/Common.h"                // for writeLog, DEBUG_PRIO::INFO
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea
@@ -36,12 +36,12 @@ namespace rawspeed {
 
 RawImageDataFloat::RawImageDataFloat() {
   bpp = sizeof(float);
-  dataType = TYPE_FLOAT32;
+  dataType = RawImageType::F32;
   }
 
   RawImageDataFloat::RawImageDataFloat(const iPoint2D& _dim, uint32_t _cpp)
       : RawImageData(_dim, sizeof(float), _cpp) {
-    dataType = TYPE_FLOAT32;
+    dataType = RawImageType::F32;
   }
 
   void RawImageDataFloat::calculateBlackAreas() {
@@ -132,7 +132,7 @@ RawImageDataFloat::RawImageDataFloat() {
         blackLevel = static_cast<int>(b);
       if (whitePoint == 65536)
         whitePoint = static_cast<int>(m);
-      writeLog(DEBUG_PRIO_INFO, "Estimated black:%d, Estimated white: %d",
+      writeLog(DEBUG_PRIO::INFO, "Estimated black:%d, Estimated white: %d",
                blackLevel, whitePoint);
     }
 
@@ -140,7 +140,7 @@ RawImageDataFloat::RawImageDataFloat() {
     if (blackLevelSeparate[0] < 0)
       calculateBlackAreas();
 
-    startWorker(RawImageWorker::SCALE_VALUES, true);
+    startWorker(RawImageWorker::RawImageWorkerTask::SCALE_VALUES, true);
 }
 
 #if 0 // def WITH_SSE2

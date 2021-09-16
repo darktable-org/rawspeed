@@ -20,15 +20,15 @@
 */
 
 #include "decoders/PefDecoder.h"
-#include "common/Common.h"                    // for BitOrder_MSB
+#include "common/Common.h"                    // for BitOrder::MSB
 #include "common/Point.h"                     // for iPoint2D
 #include "decoders/RawDecoderException.h"     // for ThrowRDE
 #include "decompressors/PentaxDecompressor.h" // for PentaxDecompressor
 #include "io/Buffer.h"                        // for Buffer, DataBuffer
 #include "io/ByteStream.h"                    // for ByteStream
 #include "io/Endianness.h"                    // for Endianness, Endianness...
-#include "metadata/ColorFilterArray.h"        // for CFA_GREEN, CFA_BLUE
-#include "tiff/TiffEntry.h"                   // for TiffEntry, TIFF_UNDEFINED
+#include "metadata/ColorFilterArray.h" // for CFAColor::GREEN, CFAColor::BLUE
+#include "tiff/TiffEntry.h"            // for TiffEntry, TiffDataType::UNDEFINED
 #include "tiff/TiffIFD.h"                     // for TiffRootIFD, TiffIFD
 #include "tiff/TiffTag.h"                     // for TiffTag, ISOSPEEDRATINGS
 #include <array>                              // for array
@@ -50,20 +50,20 @@ bool PefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 RawImage PefDecoder::decodeRawInternal() {
-  const auto* raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
+  const auto* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
-  int compression = raw->getEntry(COMPRESSION)->getU32();
+  int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
 
   if (1 == compression || compression == 32773) {
-    decodeUncompressed(raw, BitOrder_MSB);
+    decodeUncompressed(raw, BitOrder::MSB);
     return mRaw;
   }
 
   if (65535 != compression)
     ThrowRDE("Unsupported compression");
 
-  TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
-  TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
+  TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
+  TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
 
   if (offsets->count != 1) {
     ThrowRDE("Multiple Strips found: %u", offsets->count);
@@ -77,8 +77,8 @@ RawImage PefDecoder::decodeRawInternal() {
       DataBuffer(mFile.getSubView(offsets->getU32(), counts->getU32()),
                  Endianness::little));
 
-  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
 
   mRaw->dim = iPoint2D(width, height);
 
@@ -87,7 +87,7 @@ RawImage PefDecoder::decodeRawInternal() {
   if (getRootIFD()->hasEntryRecursive(static_cast<TiffTag>(0x220))) {
     /* Attempt to read huffman table, if found in makernote */
     TiffEntry* t = getRootIFD()->getEntryRecursive(static_cast<TiffTag>(0x220));
-    if (t->type != TIFF_UNDEFINED)
+    if (t->type != TiffDataType::UNDEFINED)
       ThrowRDE("Unknown Huffman table type.");
 
     stream = t->getData();
@@ -103,10 +103,11 @@ RawImage PefDecoder::decodeRawInternal() {
 
 void PefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
-  mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
+  mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
+                   CFAColor::GREEN, CFAColor::BLUE);
 
-  if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
-    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();
+  if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
+    iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
 
   setMetaData(meta, "", iso);
 

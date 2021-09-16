@@ -54,10 +54,10 @@ bool OrfDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 ByteStream OrfDecoder::handleSlices() const {
-  const auto* raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
+  const auto* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
-  TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
-  TiffEntry *counts = raw->getEntry(STRIPBYTECOUNTS);
+  TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
+  TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
 
   if (counts->count != offsets->count) {
     ThrowRDE(
@@ -100,14 +100,14 @@ ByteStream OrfDecoder::handleSlices() const {
 }
 
 RawImage OrfDecoder::decodeRawInternal() {
-  const auto* raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
+  const auto* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
-  int compression = raw->getEntry(COMPRESSION)->getU32();
+  int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
   if (1 != compression)
     ThrowRDE("Unsupported compression");
 
-  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
+  uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
 
   if (!width || !height || width % 2 != 0 || width > 10400 || height > 7796)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
@@ -119,9 +119,9 @@ RawImage OrfDecoder::decodeRawInternal() {
   if (decodeUncompressed(input, width, height, input.getSize()))
     return mRaw;
 
-  if (raw->getEntry(STRIPOFFSETS)->count != 1)
+  if (raw->getEntry(TiffTag::STRIPOFFSETS)->count != 1)
     ThrowRDE("%u stripes, and not uncompressed. Unsupported.",
-             raw->getEntry(STRIPOFFSETS)->count);
+             raw->getEntry(TiffTag::STRIPOFFSETS)->count);
 
   OlympusDecompressor o(mRaw);
   mRaw->createData();
@@ -147,7 +147,7 @@ bool OrfDecoder::decodeUncompressed(const ByteStream& s, uint32_t w, uint32_t h,
     iPoint2D dimensions(w, h);
     iPoint2D pos(0, 0);
     mRaw->createData();
-    u.readUncompressedRaw(dimensions, pos, w * 12 / 8, 12, BitOrder_MSB32);
+    u.readUncompressedRaw(dimensions, pos, w * 12 / 8, 12, BitOrder::MSB32);
     return true;
   }
 
@@ -173,13 +173,13 @@ bool OrfDecoder::decodeUncompressed(const ByteStream& s, uint32_t w, uint32_t h,
 }
 
 void OrfDecoder::parseCFA() const {
-  if (!mRootIFD->hasEntryRecursive(EXIFCFAPATTERN))
+  if (!mRootIFD->hasEntryRecursive(TiffTag::EXIFCFAPATTERN))
     ThrowRDE("No EXIFCFAPATTERN entry found!");
 
-  TiffEntry* CFA = mRootIFD->getEntryRecursive(EXIFCFAPATTERN);
-  if (CFA->type != TiffDataType::TIFF_UNDEFINED || CFA->count != 8) {
-    ThrowRDE("Bad EXIFCFAPATTERN entry (type %u, count %u).", CFA->type,
-             CFA->count);
+  TiffEntry* CFA = mRootIFD->getEntryRecursive(TiffTag::EXIFCFAPATTERN);
+  if (CFA->type != TiffDataType::UNDEFINED || CFA->count != 8) {
+    ThrowRDE("Bad EXIFCFAPATTERN entry (type %u, count %u).",
+             static_cast<unsigned>(CFA->type), CFA->count);
   }
 
   iPoint2D cfaSize(CFA->getU16(0), CFA->getU16(1));
@@ -191,11 +191,11 @@ void OrfDecoder::parseCFA() const {
   auto int2enum = [](uint8_t i) -> CFAColor {
     switch (i) {
     case 0:
-      return CFA_RED;
+      return CFAColor::RED;
     case 1:
-      return CFA_GREEN;
+      return CFAColor::GREEN;
     case 2:
-      return CFA_BLUE;
+      return CFAColor::BLUE;
     default:
       ThrowRDE("Unexpected CFA color: %u", i);
     }
@@ -213,23 +213,24 @@ void OrfDecoder::parseCFA() const {
 void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
 
-  if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
-    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();
+  if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
+    iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
 
   parseCFA();
 
   setMetaData(meta, "", iso);
 
-  if (mRootIFD->hasEntryRecursive(OLYMPUSREDMULTIPLIER) &&
-      mRootIFD->hasEntryRecursive(OLYMPUSBLUEMULTIPLIER)) {
+  if (mRootIFD->hasEntryRecursive(TiffTag::OLYMPUSREDMULTIPLIER) &&
+      mRootIFD->hasEntryRecursive(TiffTag::OLYMPUSBLUEMULTIPLIER)) {
     mRaw->metadata.wbCoeffs[0] = static_cast<float>(
-        mRootIFD->getEntryRecursive(OLYMPUSREDMULTIPLIER)->getU16());
+        mRootIFD->getEntryRecursive(TiffTag::OLYMPUSREDMULTIPLIER)->getU16());
     mRaw->metadata.wbCoeffs[1] = 256.0F;
     mRaw->metadata.wbCoeffs[2] = static_cast<float>(
-        mRootIFD->getEntryRecursive(OLYMPUSBLUEMULTIPLIER)->getU16());
-  } else if (mRootIFD->hasEntryRecursive(OLYMPUSIMAGEPROCESSING)) {
+        mRootIFD->getEntryRecursive(TiffTag::OLYMPUSBLUEMULTIPLIER)->getU16());
+  } else if (mRootIFD->hasEntryRecursive(TiffTag::OLYMPUSIMAGEPROCESSING)) {
     // Newer cameras process the Image Processing SubIFD in the makernote
-    TiffEntry* img_entry = mRootIFD->getEntryRecursive(OLYMPUSIMAGEPROCESSING);
+    TiffEntry* img_entry =
+        mRootIFD->getEntryRecursive(TiffTag::OLYMPUSIMAGEPROCESSING);
     // get makernote ifd with containing Buffer
     NORangesSet<Buffer> ifds;
 
@@ -256,17 +257,17 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           auto c = mRaw->cfa.getColorAt(i & 1, i >> 1);
           int j;
           switch (c) {
-          case CFA_RED:
+          case CFAColor::RED:
             j = 0;
             break;
-          case CFA_GREEN:
+          case CFAColor::GREEN:
             j = i < 2 ? 1 : 2;
             break;
-          case CFA_BLUE:
+          case CFAColor::BLUE:
             j = 3;
             break;
           default:
-            ThrowRDE("Unexpected CFA color: %u", c);
+            ThrowRDE("Unexpected CFA color: %u", static_cast<unsigned>(c));
           }
 
           mRaw->blackLevelSeparate[i] = blackEntry->getU16(j);

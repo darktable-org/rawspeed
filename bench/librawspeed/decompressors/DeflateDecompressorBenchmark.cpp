@@ -82,7 +82,7 @@ static inline void BM_DeflateDecompressor(benchmark::State& state) {
   static_assert(rawspeed::isAligned(BPS::value, 8), "not byte count");
 
   const auto dim = areaToRectangle(state.range(0));
-  auto mRaw = rawspeed::RawImage::create(dim, rawspeed::TYPE_FLOAT32, 1);
+  auto mRaw = rawspeed::RawImage::create(dim, rawspeed::RawImageType::F32, 1);
 
   uLong cBufSize;
   auto cBuf = compressChunk<BPS>(mRaw, &cBufSize);

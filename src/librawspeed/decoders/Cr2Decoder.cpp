@@ -30,9 +30,9 @@
 #include "io/ByteStream.h"                     // for ByteStream
 #include "io/Endianness.h"                     // for Endianness, Endiannes...
 #include "metadata/Camera.h"                   // for Hints
-#include "metadata/ColorFilterArray.h"         // for CFA_GREEN, CFA_BLUE
+#include "metadata/ColorFilterArray.h" // for CFAColor::GREEN, CFAColor::BLUE
 #include "parsers/TiffParserException.h"       // for ThrowTPE
-#include "tiff/TiffEntry.h"                    // for TiffEntry, TIFF_SHORT
+#include "tiff/TiffEntry.h" // for TiffEntry, TiffDataType::SHORT
 #include "tiff/TiffTag.h"                      // for TiffTag, CANONCOLORDATA
 #include <array>                               // for array
 #include <cassert>                             // for assert
@@ -58,15 +58,16 @@ bool Cr2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 
 RawImage Cr2Decoder::decodeOldFormat() {
   uint32_t offset = 0;
-  if (mRootIFD->getEntryRecursive(CANON_RAW_DATA_OFFSET))
-    offset = mRootIFD->getEntryRecursive(CANON_RAW_DATA_OFFSET)->getU32();
-  else {
+  if (mRootIFD->getEntryRecursive(TiffTag::CANON_RAW_DATA_OFFSET)) {
+    offset =
+        mRootIFD->getEntryRecursive(TiffTag::CANON_RAW_DATA_OFFSET)->getU32();
+  } else {
     // D2000 is oh so special...
-    const auto* ifd = mRootIFD->getIFDWithTag(CFAPATTERN);
-    if (! ifd->hasEntry(STRIPOFFSETS))
+    const auto* ifd = mRootIFD->getIFDWithTag(TiffTag::CFAPATTERN);
+    if (!ifd->hasEntry(TiffTag::STRIPOFFSETS))
       ThrowRDE("Couldn't find offset");
 
-    offset = ifd->getEntry(STRIPOFFSETS)->getU32();
+    offset = ifd->getEntry(TiffTag::STRIPOFFSETS)->getU32();
   }
 
   ByteStream b(DataBuffer(mFile.getSubView(offset), Endianness::big));
@@ -95,7 +96,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
 
   // deal with D2000 GrayResponseCurve
   TiffEntry* curve = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x123));
-  if (curve && curve->type == TIFF_SHORT && curve->count == 4096) {
+  if (curve && curve->type == TiffDataType::SHORT && curve->count == 4096) {
     auto table = curve->getU16Array(curve->count);
     RawImageCurveGuard curveHandler(&mRaw, table, uncorrectedRawValues);
 
@@ -110,7 +111,8 @@ RawImage Cr2Decoder::decodeOldFormat() {
 // for technical details about Cr2 mRAW/sRAW, see http://lclevy.free.fr/cr2/
 
 RawImage Cr2Decoder::decodeNewFormat() {
-  TiffEntry* sensorInfoE = mRootIFD->getEntryRecursive(CANON_SENSOR_INFO);
+  TiffEntry* sensorInfoE =
+      mRootIFD->getEntryRecursive(TiffTag::CANON_SENSOR_INFO);
   if (!sensorInfoE)
     ThrowTPE("failed to get SensorInfo from MakerNote");
 
@@ -152,7 +154,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
   // * there is a tag with not three components, the image is considered
   // corrupt. $ there is no tag, we let Cr2Decompressor guess it (it'll throw if
   // fails)
-  TiffEntry* cr2SliceEntry = raw->getEntryRecursive(CANONCR2SLICE);
+  TiffEntry* cr2SliceEntry = raw->getEntryRecursive(TiffTag::CANONCR2SLICE);
   if (cr2SliceEntry) {
     if (cr2SliceEntry->count != 3) {
       ThrowRDE("Found RawImageSegmentation tag with %d elements, should be 3.",
@@ -174,8 +176,8 @@ RawImage Cr2Decoder::decodeNewFormat() {
     }
   } // EOS 20D, EOS-1D Mark II, let Cr2Decompressor guess.
 
-  const uint32_t offset = raw->getEntry(STRIPOFFSETS)->getU32();
-  const uint32_t count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
+  const uint32_t offset = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
+  const uint32_t count = raw->getEntry(TiffTag::STRIPBYTECOUNTS)->getU32();
 
   const ByteStream bs(
       DataBuffer(mFile.getSubView(offset, count), Endianness::little));
@@ -212,7 +214,8 @@ void Cr2Decoder::checkSupportInternal(const CameraMetaData* meta) {
 
 void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
-  mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
+  mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
+                   CFAColor::GREEN, CFAColor::BLUE);
 
   std::string mode;
 
@@ -222,19 +225,20 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRaw->metadata.subsampling.y == 1 && mRaw->metadata.subsampling.x == 2)
     mode = "sRaw2";
 
-  if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
-    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();
+  if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
+    iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
   if(65535 == iso) {
     // ISOSPEEDRATINGS is a SHORT EXIF value. For larger values, we have to look
     // at RECOMMENDEDEXPOSUREINDEX (maybe Canon specific).
-    if (mRootIFD->hasEntryRecursive(RECOMMENDEDEXPOSUREINDEX))
-      iso = mRootIFD->getEntryRecursive(RECOMMENDEDEXPOSUREINDEX)->getU32();
+    if (mRootIFD->hasEntryRecursive(TiffTag::RECOMMENDEDEXPOSUREINDEX))
+      iso = mRootIFD->getEntryRecursive(TiffTag::RECOMMENDEDEXPOSUREINDEX)
+                ->getU32();
   }
 
   // Fetch the white balance
   try{
-    if (mRootIFD->hasEntryRecursive(CANONCOLORDATA)) {
-      TiffEntry *wb = mRootIFD->getEntryRecursive(CANONCOLORDATA);
+    if (mRootIFD->hasEntryRecursive(TiffTag::CANONCOLORDATA)) {
+      TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::CANONCOLORDATA);
       // this entry is a big table, and different cameras store used WB in
       // different parts, so find the offset, default is the most common one
       int offset = hints.get("wb_offset", 126);
@@ -244,10 +248,12 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       mRaw->metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(offset + 1));
       mRaw->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(offset + 3));
     } else {
-      if (mRootIFD->hasEntryRecursive(CANONSHOTINFO) &&
-          mRootIFD->hasEntryRecursive(CANONPOWERSHOTG9WB)) {
-        TiffEntry *shot_info = mRootIFD->getEntryRecursive(CANONSHOTINFO);
-        TiffEntry *g9_wb = mRootIFD->getEntryRecursive(CANONPOWERSHOTG9WB);
+      if (mRootIFD->hasEntryRecursive(TiffTag::CANONSHOTINFO) &&
+          mRootIFD->hasEntryRecursive(TiffTag::CANONPOWERSHOTG9WB)) {
+        TiffEntry* shot_info =
+            mRootIFD->getEntryRecursive(TiffTag::CANONSHOTINFO);
+        TiffEntry* g9_wb =
+            mRootIFD->getEntryRecursive(TiffTag::CANONPOWERSHOTG9WB);
 
         uint16_t wb_index = shot_info->getU16(7);
         int wb_offset = (wb_index < 18) ? "012347800000005896"[wb_index]-'0' : 0;
@@ -282,16 +288,16 @@ bool Cr2Decoder::isSubSampled() const {
   if (mRootIFD->getSubIFDs().size() != 4)
     return false;
   TiffEntry* typeE =
-      mRootIFD->getSubIFDs()[3]->getEntryRecursive(CANON_SRAWTYPE);
+      mRootIFD->getSubIFDs()[3]->getEntryRecursive(TiffTag::CANON_SRAWTYPE);
   return typeE && typeE->getU32() == 4;
 }
 
 iPoint2D Cr2Decoder::getSubSampling() const {
-  TiffEntry* CCS = mRootIFD->getEntryRecursive(CANON_CAMERA_SETTINGS);
+  TiffEntry* CCS = mRootIFD->getEntryRecursive(TiffTag::CANON_CAMERA_SETTINGS);
   if (!CCS)
     ThrowRDE("CanonCameraSettings entry not found.");
 
-  if (CCS->type != TIFF_SHORT)
+  if (CCS->type != TiffDataType::SHORT)
     ThrowRDE("Unexpected CanonCameraSettings entry type encountered ");
 
   if (CCS->count < 47)
@@ -326,7 +332,7 @@ int Cr2Decoder::getHue() const {
 
 // Interpolate and convert sRaw data.
 void Cr2Decoder::sRawInterpolate() {
-  TiffEntry* wb = mRootIFD->getEntryRecursive(CANONCOLORDATA);
+  TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::CANONCOLORDATA);
   if (!wb)
     ThrowRDE("Unable to locate WB info.");
 
@@ -359,7 +365,7 @@ void Cr2Decoder::sRawInterpolate() {
                     subsampledRaw->metadata.subsampling.y)),
       subsampledRaw->metadata.subsampling.y * subsampledRaw->dim.y};
 
-  mRaw = RawImage::create(interpolatedDims, TYPE_USHORT16, 3);
+  mRaw = RawImage::create(interpolatedDims, RawImageType::UINT16, 3);
   mRaw->metadata.subsampling = subsampledRaw->metadata.subsampling;
   mRaw->isCFA = false;
 

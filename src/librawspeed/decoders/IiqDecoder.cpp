@@ -392,7 +392,7 @@ void IiqDecoder::correctBadColumn(const uint16_t col) const {
   const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
   for (int row = 2; row < mRaw->dim.y - 2; row++) {
-    if (mRaw->cfa.getColorAt(col, row) == CFA_GREEN) {
+    if (mRaw->cfa.getColorAt(col, row) == CFAColor::GREEN) {
       /* Do green pixels. Let's pretend we are in "G" pixel, in the middle:
        *   G=G
        *   BGB

@@ -47,7 +47,7 @@ PanasonicDecompressorV4::PanasonicDecompressorV4(const RawImage& img,
                                                  uint32_t section_split_offset_)
     : mRaw(img), zero_is_bad(!zero_is_not_bad),
       section_split_offset(section_split_offset_) {
-  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 

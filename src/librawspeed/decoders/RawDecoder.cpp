@@ -55,12 +55,12 @@ RawDecoder::RawDecoder(const Buffer& file)
 
 void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
                                     BitOrder order) const {
-  TiffEntry *offsets = rawIFD->getEntry(STRIPOFFSETS);
-  TiffEntry *counts = rawIFD->getEntry(STRIPBYTECOUNTS);
-  uint32_t yPerSlice = rawIFD->getEntry(ROWSPERSTRIP)->getU32();
-  uint32_t width = rawIFD->getEntry(IMAGEWIDTH)->getU32();
-  uint32_t height = rawIFD->getEntry(IMAGELENGTH)->getU32();
-  uint32_t bitPerPixel = rawIFD->getEntry(BITSPERSAMPLE)->getU32();
+  TiffEntry* offsets = rawIFD->getEntry(TiffTag::STRIPOFFSETS);
+  TiffEntry* counts = rawIFD->getEntry(TiffTag::STRIPBYTECOUNTS);
+  uint32_t yPerSlice = rawIFD->getEntry(TiffTag::ROWSPERSTRIP)->getU32();
+  uint32_t width = rawIFD->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  uint32_t height = rawIFD->getEntry(TiffTag::IMAGELENGTH)->getU32();
+  uint32_t bitPerPixel = rawIFD->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
 
   if (width == 0 || height == 0 || width > 5632 || height > 3720)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
@@ -149,7 +149,7 @@ void RawDecoder::askForSamples(const CameraMetaData* meta,
   if ("dng" == mode)
     return;
 
-  writeLog(DEBUG_PRIO_WARNING,
+  writeLog(DEBUG_PRIO::WARNING,
            "Unable to find camera in database: '%s' '%s' "
            "'%s'\nPlease consider providing samples on "
            "<https://raw.pixls.us/>, thanks!",
@@ -248,7 +248,8 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
   if (!cfa_black.empty()) {
     vector<std::string> v = splitString(cfa_black, ',');
     if (v.size() != 4) {
-      mRaw->setError("Expected 4 values '10,20,30,20' as values for override_cfa_black hint.");
+      mRaw->setError("Expected 4 values '10,20,30,20' as values for "
+                     "override_cfa_black hint.");
     } else {
       for (int i = 0; i < 4; i++) {
         mRaw->blackLevelSeparate[i] = stoi(v[i]);

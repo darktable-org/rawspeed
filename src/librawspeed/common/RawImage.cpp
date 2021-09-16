@@ -247,14 +247,14 @@ iPoint2D __attribute__((pure)) RawImageData::getCropOffset() const {
 
 void RawImageData::subFrame(iRectangle2D crop) {
   if (!crop.dim.isThisInside(dim - crop.pos)) {
-    writeLog(DEBUG_PRIO_WARNING, "WARNING: RawImageData::subFrame - Attempted "
-                                 "to create new subframe larger than original "
-                                 "size. Crop skipped.");
+    writeLog(DEBUG_PRIO::WARNING, "WARNING: RawImageData::subFrame - Attempted "
+                                  "to create new subframe larger than original "
+                                  "size. Crop skipped.");
     return;
   }
   if (crop.pos.x < 0 || crop.pos.y < 0 || !crop.hasPositiveArea()) {
-    writeLog(DEBUG_PRIO_WARNING, "WARNING: RawImageData::subFrame - Negative "
-                                 "crop offset. Crop skipped.");
+    writeLog(DEBUG_PRIO::WARNING, "WARNING: RawImageData::subFrame - Negative "
+                                  "crop offset. Crop skipped.");
     return;
   }
 
@@ -345,7 +345,7 @@ void RawImageData::fixBadPixels()
 
   /* Process bad pixels, if any */
   if (mBadPixelMap)
-    startWorker(RawImageWorker::FIX_BAD_PIXELS, false);
+    startWorker(RawImageWorker::RawImageWorkerTask::FIX_BAD_PIXELS, false);
 
 #else  // EMULATE_DCRAW_BAD_PIXELS - not recommended, testing purposes only
 
@@ -381,7 +381,8 @@ void RawImageData::startWorker(const RawImageWorker::RawImageWorkerTask task,
                                bool cropped) {
   const int height = [&]() {
     int h = (cropped) ? dim.y : uncropped_dim.y;
-    if (task & RawImageWorker::FULL_IMAGE) {
+    if (static_cast<uint32_t>(task) &
+        static_cast<uint32_t>(RawImageWorker::RawImageWorkerTask::FULL_IMAGE)) {
       h = uncropped_dim.y;
     }
     return h;
@@ -531,13 +532,13 @@ void RawImageWorker::performTask() noexcept {
   try {
     switch(task)
     {
-    case SCALE_VALUES:
+    case RawImageWorkerTask::SCALE_VALUES:
       data->scaleValues(start_y, end_y);
       break;
-    case FIX_BAD_PIXELS:
+    case RawImageWorkerTask::FIX_BAD_PIXELS:
       data->fixBadPixelsThread(start_y, end_y);
       break;
-    case APPLY_LOOKUP:
+    case RawImageWorkerTask::APPLY_LOOKUP:
       data->doLookup(start_y, end_y);
       break;
     default:
@@ -557,7 +558,7 @@ void RawImageData::sixteenBitLookup() {
   if (table == nullptr) {
     return;
   }
-  startWorker(RawImageWorker::APPLY_LOOKUP, true);
+  startWorker(RawImageWorker::RawImageWorkerTask::APPLY_LOOKUP, true);
 }
 
 void RawImageData::setTable(std::unique_ptr<TableLookUp> t) {

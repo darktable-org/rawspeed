@@ -30,7 +30,7 @@
 #include "parsers/RawParser.h"           // for RawParser
 #include "parsers/TiffParser.h"          // for TiffParser
 #include "parsers/TiffParserException.h" // for TiffParserException
-#include "tiff/TiffEntry.h"              // for TiffEntry, TIFF_SHORT, TIFF...
+#include "tiff/TiffEntry.h" // for TiffEntry, TiffDataType::SHORT, TIFF...
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFDOwner
 #include "tiff/TiffTag.h"                // for FUJIOLDWB, FUJI_STRIPBYTECO...
 #include <cstdint>                       // for uint32_t, uint16_t
@@ -77,11 +77,11 @@ void FiffParser::parseData() {
 
       uint32_t rawOffset = second_ifd - first_ifd;
       subIFD->add(std::make_unique<TiffEntry>(
-          subIFD.get(), FUJI_STRIPOFFSETS, TIFF_OFFSET, 1,
+          subIFD.get(), TiffTag::FUJI_STRIPOFFSETS, TiffDataType::OFFSET, 1,
           ByteStream::createCopy(&rawOffset, 4)));
       uint32_t max_size = mInput.getSize() - second_ifd;
       subIFD->add(std::make_unique<TiffEntry>(
-          subIFD.get(), FUJI_STRIPBYTECOUNTS, TIFF_LONG, 1,
+          subIFD.get(), TiffTag::FUJI_STRIPBYTECOUNTS, TiffDataType::LONG, 1,
           ByteStream::createCopy(&max_size, 4)));
     }
   }
@@ -100,16 +100,17 @@ void FiffParser::parseData() {
       ThrowFPE("Too many entries");
 
     for (uint32_t i = 0; i < entries; i++) {
-      uint16_t tag = bytes.getU16();
+      auto tag = static_cast<TiffTag>(bytes.getU16());
       uint16_t length = bytes.getU16();
-      TiffDataType type = TIFF_UNDEFINED;
+      TiffDataType type = TiffDataType::UNDEFINED;
 
-      if (tag == IMAGEWIDTH || tag == FUJIOLDWB) // also 0x121?
-        type = TIFF_SHORT;
+      if (tag == TiffTag::IMAGEWIDTH ||
+          tag == TiffTag::FUJIOLDWB) // also 0x121?
+        type = TiffDataType::SHORT;
 
-      uint32_t count = type == TIFF_SHORT ? length / 2 : length;
+      uint32_t count = type == TiffDataType::SHORT ? length / 2 : length;
       subIFD->add(std::make_unique<TiffEntry>(
-          subIFD.get(), static_cast<TiffTag>(tag), type, count,
+          subIFD.get(), tag, type, count,
           bytes.getSubStream(bytes.getPosition(), length)));
 
       bytes.skipBytes(length);

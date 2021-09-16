@@ -29,9 +29,9 @@
 
 using rawspeed::Cr2sRawInterpolator;
 using rawspeed::iPoint2D;
-using rawspeed::roundUp;
 using rawspeed::RawImage;
-using rawspeed::TYPE_USHORT16;
+using rawspeed::RawImageType;
+using rawspeed::roundUp;
 using std::array;
 using std::integral_constant;
 
@@ -53,10 +53,11 @@ static inline void BM_Cr2sRawInterpolator(benchmark::State& state) {
   subsampledDim.y /= subSampling.y;
   subsampledDim.x *= 2 + subSampling.x * subSampling.y;
 
-  RawImage subsampledRaw = RawImage::create(subsampledDim, TYPE_USHORT16, 1);
+  RawImage subsampledRaw =
+      RawImage::create(subsampledDim, RawImageType::UINT16, 1);
   subsampledRaw->metadata.subsampling = subSampling;
 
-  RawImage mRaw = RawImage::create(interpolatedDims, TYPE_USHORT16, 3);
+  RawImage mRaw = RawImage::create(interpolatedDims, RawImageType::UINT16, 3);
   mRaw->metadata.subsampling = subSampling;
 
   Cr2sRawInterpolator i(mRaw, subsampledRaw->getU16DataAsUncroppedArray2DRef(),

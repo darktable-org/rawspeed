@@ -34,11 +34,11 @@ extern "C" int rawspeed_get_number_of_processor_cores();
 
 namespace rawspeed {
 
-enum DEBUG_PRIO {
-  DEBUG_PRIO_ERROR = 0x10,
-  DEBUG_PRIO_WARNING = 0x100,
-  DEBUG_PRIO_INFO = 0x1000,
-  DEBUG_PRIO_EXTRA = 0x10000
+enum class DEBUG_PRIO {
+  ERROR = 0x10,
+  WARNING = 0x100,
+  INFO = 0x1000,
+  EXTRA = 0x10000
 };
 
 void writeLog(DEBUG_PRIO priority, const char* format, ...)
@@ -215,12 +215,12 @@ inline std::vector<std::string> splitString(const std::string& input,
   return result;
 }
 
-enum BitOrder {
-  BitOrder_LSB,   /* Memory order */
-  BitOrder_MSB,   /* Input is added to stack byte by byte, and output is lifted
+enum class BitOrder {
+  LSB,   /* Memory order */
+  MSB,   /* Input is added to stack byte by byte, and output is lifted
                      from top */
-  BitOrder_MSB16, /* Same as above, but 16 bits at the time */
-  BitOrder_MSB32, /* Same as above, but 32 bits at the time */
+  MSB16, /* Same as above, but 16 bits at the time */
+  MSB32, /* Same as above, but 32 bits at the time */
 };
 
 } // namespace rawspeed

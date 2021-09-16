@@ -27,7 +27,7 @@
 #include "io/ByteStream.h"                        // for ByteStream
 #include "io/Endianness.h"                        // for Endianness, Endian...
 #include "metadata/Camera.h"                      // for Hints
-#include "metadata/ColorFilterArray.h"            // for CFA_GREEN, CFA_BLUE
+#include "metadata/ColorFilterArray.h" // for CFAColor::GREEN, CFAColor::BLUE
 #include "tiff/TiffEntry.h"                       // for TiffEntry
 #include "tiff/TiffIFD.h"                         // for TiffRootIFD, TiffIFD
 #include "tiff/TiffTag.h"                         // for ASSHOTNEUTRAL, STR...
@@ -51,10 +51,10 @@ bool ThreefrDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 RawImage ThreefrDecoder::decodeRawInternal() {
-  const auto* raw = mRootIFD->getIFDWithTag(STRIPOFFSETS, 1);
-  uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
-  uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
-  uint32_t off = raw->getEntry(STRIPOFFSETS)->getU32();
+  const auto* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS, 1);
+  uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
+  uint32_t off = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
   // STRIPBYTECOUNTS is strange/invalid for the existing 3FR samples...
 
   const ByteStream bs(DataBuffer(mFile.getSubView(off), Endianness::little));
@@ -71,25 +71,26 @@ RawImage ThreefrDecoder::decodeRawInternal() {
 }
 
 void ThreefrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
-  mRaw->cfa.setCFA(iPoint2D(2,2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
+  mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
+                   CFAColor::GREEN, CFAColor::BLUE);
 
   setMetaData(meta, "", 0);
 
-  if (mRootIFD->hasEntryRecursive(BLACKLEVEL)) {
-    TiffEntry* bl = mRootIFD->getEntryRecursive(BLACKLEVEL);
+  if (mRootIFD->hasEntryRecursive(TiffTag::BLACKLEVEL)) {
+    TiffEntry* bl = mRootIFD->getEntryRecursive(TiffTag::BLACKLEVEL);
     if (bl->count == 1)
       mRaw->blackLevel = bl->getFloat();
   }
 
-  if (mRootIFD->hasEntryRecursive(WHITELEVEL)) {
-    TiffEntry* wl = mRootIFD->getEntryRecursive(WHITELEVEL);
+  if (mRootIFD->hasEntryRecursive(TiffTag::WHITELEVEL)) {
+    TiffEntry* wl = mRootIFD->getEntryRecursive(TiffTag::WHITELEVEL);
     if (wl->count == 1)
       mRaw->whitePoint = wl->getFloat();
   }
 
   // Fetch the white balance
-  if (mRootIFD->hasEntryRecursive(ASSHOTNEUTRAL)) {
-    TiffEntry *wb = mRootIFD->getEntryRecursive(ASSHOTNEUTRAL);
+  if (mRootIFD->hasEntryRecursive(TiffTag::ASSHOTNEUTRAL)) {
+    TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::ASSHOTNEUTRAL);
     if (wb->count == 3) {
       for (uint32_t i = 0; i < 3; i++) {
         const float div = wb->getFloat(i);

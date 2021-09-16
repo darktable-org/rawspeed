@@ -122,7 +122,7 @@ const Camera* CameraMetaData::addCamera(std::unique_ptr<Camera> cam) {
   auto id = getId(cam->make, cam->model, cam->mode);
   if (cameras.end() != cameras.find(id)) {
     writeLog(
-        DEBUG_PRIO_WARNING,
+        DEBUG_PRIO::WARNING,
         "CameraMetaData: Duplicate entry found for camera: %s %s, Skipping!",
         cam->make.c_str(), cam->model.c_str());
     return nullptr;
@@ -132,12 +132,12 @@ const Camera* CameraMetaData::addCamera(std::unique_ptr<Camera> cam) {
   if (std::string::npos != cameras[id]->mode.find("chdk")) {
     auto filesize_hint = cameras[id]->hints.get("filesize", std::string());
     if (filesize_hint.empty()) {
-      writeLog(DEBUG_PRIO_WARNING,
+      writeLog(DEBUG_PRIO::WARNING,
                "CameraMetaData: CHDK camera: %s %s, no \"filesize\" hint set!",
                cameras[id]->make.c_str(), cameras[id]->model.c_str());
     } else {
       chdkCameras[stoi(filesize_hint)] = cameras[id].get();
-      // writeLog(DEBUG_PRIO_WARNING, "CHDK camera: %s %s size:%u",
+      // writeLog(DEBUG_PRIO::WARNING, "CHDK camera: %s %s size:%u",
       // cameras[id]->make.c_str(), cameras[id]->model.c_str(), size);
     }
   }

@@ -37,7 +37,7 @@ class ByteStream;
 
 Cr2Decompressor::Cr2Decompressor(const ByteStream& bs, const RawImage& img)
     : AbstractLJpegDecompressor(bs, img) {
-  if (mRaw->getDataType() != TYPE_USHORT16)
+  if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
 
   if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == sizeof(uint16_t))))

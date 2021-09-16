@@ -53,7 +53,7 @@ AbstractLJpegDecompressor::AbstractLJpegDecompressor(ByteStream bs,
 }
 
 void AbstractLJpegDecompressor::decode() {
-  if (getNextMarker(false) != M_SOI)
+  if (getNextMarker(false) != JpegMarker::SOI)
     ThrowRDE("Image did not start with SOI. Probably not an LJPEG");
 
   struct {
@@ -66,14 +66,14 @@ void AbstractLJpegDecompressor::decode() {
   do {
     m = getNextMarker(true);
 
-    if (m == M_EOI)
+    if (m == JpegMarker::EOI)
       break;
 
     ByteStream data(input.getStream(input.peekU16()));
     data.skipBytes(2); // headerLength
 
     switch (m) {
-    case M_DHT:
+    case JpegMarker::DHT:
       if (FoundMarkers.SOS)
         ThrowRDE("Found second DHT marker after SOS");
       // there can be more than one DHT markers.
@@ -81,7 +81,7 @@ void AbstractLJpegDecompressor::decode() {
       parseDHT(data);
       FoundMarkers.DHT = true;
       break;
-    case M_SOF3:
+    case JpegMarker::SOF3:
       if (FoundMarkers.SOS)
         ThrowRDE("Found second SOF marker after SOS");
       if (FoundMarkers.SOF)
@@ -90,7 +90,7 @@ void AbstractLJpegDecompressor::decode() {
       parseSOF(data, &frame);
       FoundMarkers.SOF = true;
       break;
-    case M_SOS:
+    case JpegMarker::SOS:
       if (FoundMarkers.SOS)
         ThrowRDE("Found second SOS marker");
       if (!FoundMarkers.DHT)
@@ -100,12 +100,12 @@ void AbstractLJpegDecompressor::decode() {
       parseSOS(data);
       FoundMarkers.SOS = true;
       break;
-    case M_DQT:
+    case JpegMarker::DQT:
       ThrowRDE("Not a valid RAW file.");
     default: // Just let it skip to next marker
       break;
     }
-  } while (m != M_EOI);
+  } while (m != JpegMarker::EOI);
 
   if (!FoundMarkers.SOS)
     ThrowRDE("Did not find SOS marker.");

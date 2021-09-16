@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"       // for BitOrder, BitOrder_MSB16
+#include "common/Common.h"       // for BitOrder, BitOrder::MSB16
 #include "common/RawImage.h"     // for RawImage
 #include "decoders/RawDecoder.h" // for RawDecoder
 #include <cstdint>               // for uint32_t
@@ -42,7 +42,7 @@ class NakedDecoder final : public RawDecoder {
   uint32_t filesize{0};
   uint32_t bits{0};
   uint32_t offset{0};
-  BitOrder bo{BitOrder_MSB16};
+  BitOrder bo{BitOrder::MSB16};
 
   static const std::map<std::string, BitOrder> order2enum;
   void parseHints();

@@ -28,13 +28,6 @@
 #include <tuple>                       // for get, make_tuple, tuple
 
 using rawspeed::CFAColor;
-using rawspeed::CFA_BLUE;
-using rawspeed::CFA_CYAN;
-using rawspeed::CFA_FUJI_GREEN;
-using rawspeed::CFA_GREEN;
-using rawspeed::CFA_MAGENTA;
-using rawspeed::CFA_RED;
-using rawspeed::CFA_YELLOW;
 using rawspeed::ColorFilterArray;
 using rawspeed::iPoint2D;
 using std::string;
@@ -127,17 +120,17 @@ TEST(ColorFilterArrayTestBasic, HandlesEmptyCFA) {
 TEST(ColorFilterArrayTestBasic, HandlesOutOfBounds) {
   ColorFilterArray cfa(square);
 
-  ASSERT_ANY_THROW({ cfa.setColorAt({0, -1}, CFA_RED); });
+  ASSERT_ANY_THROW({ cfa.setColorAt({0, -1}, CFAColor::RED); });
 
-  ASSERT_ANY_THROW({ cfa.setColorAt({-1, 0}, CFA_RED); });
+  ASSERT_ANY_THROW({ cfa.setColorAt({-1, 0}, CFAColor::RED); });
 
-  ASSERT_ANY_THROW({ cfa.setColorAt({-1, -1}, CFA_RED); });
+  ASSERT_ANY_THROW({ cfa.setColorAt({-1, -1}, CFAColor::RED); });
 
-  ASSERT_ANY_THROW({ cfa.setColorAt({0, 2}, CFA_RED); });
+  ASSERT_ANY_THROW({ cfa.setColorAt({0, 2}, CFAColor::RED); });
 
-  ASSERT_ANY_THROW({ cfa.setColorAt({2, 0}, CFA_RED); });
+  ASSERT_ANY_THROW({ cfa.setColorAt({2, 0}, CFAColor::RED); });
 
-  ASSERT_ANY_THROW({ cfa.setColorAt({2, 2}, CFA_RED); });
+  ASSERT_ANY_THROW({ cfa.setColorAt({2, 2}, CFAColor::RED); });
 
   // ASSERT_ANY_THROW({ ColorFilterArray::colorToString((CFAColor)-1); });
 
@@ -152,9 +145,10 @@ protected:
   Bayer2x2 param;
 };
 
-static const auto Bayer_RGB = ::testing::Values(CFA_RED, CFA_GREEN, CFA_BLUE);
-static const auto Bayer_CYGM =
-    ::testing::Values(CFA_CYAN, CFA_MAGENTA, CFA_YELLOW, CFA_FUJI_GREEN);
+static const auto Bayer_RGB =
+    ::testing::Values(CFAColor::RED, CFAColor::GREEN, CFAColor::BLUE);
+static const auto Bayer_CYGM = ::testing::Values(
+    CFAColor::CYAN, CFAColor::MAGENTA, CFAColor::YELLOW, CFAColor::FUJI_GREEN);
 
 INSTANTIATE_TEST_CASE_P(RGGB, ColorFilterArrayTest,
                         testing::Combine(Bayer_RGB, Bayer_RGB, Bayer_RGB,

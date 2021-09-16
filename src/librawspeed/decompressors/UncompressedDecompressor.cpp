@@ -98,7 +98,7 @@ void UncompressedDecompressor::decode16BitFP(const iPoint2D& size,
                                              const iPoint2D& offset,
                                              uint32_t skipBytes, uint32_t h,
                                              uint64_t y) const {
-  assert(mRaw->getDataType() == TYPE_FLOAT32);
+  assert(mRaw->getDataType() == RawImageType::F32);
 
   uint8_t* data = mRaw->getData();
   uint32_t outPitch = mRaw->pitch;
@@ -123,7 +123,7 @@ void UncompressedDecompressor::decode24BitFP(const iPoint2D& size,
                                              const iPoint2D& offset,
                                              uint32_t skipBytes, uint32_t h,
                                              uint64_t y) const {
-  assert(mRaw->getDataType() == TYPE_FLOAT32);
+  assert(mRaw->getDataType() == RawImageType::F32);
 
   uint8_t* data = mRaw->getData();
   uint32_t outPitch = mRaw->pitch;
@@ -159,7 +159,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
   uint64_t ox = offset.x;
   uint64_t oy = offset.y;
 
-  if (bitPerPixel > 16 && mRaw->getDataType() == TYPE_USHORT16)
+  if (bitPerPixel > 16 && mRaw->getDataType() == RawImageType::UINT16)
     ThrowRDE("Unsupported bit depth");
 
   const int outPixelBits = w * cpp * bitPerPixel;
@@ -192,34 +192,34 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
   uint64_t y = oy;
   h = min(h + oy, static_cast<uint64_t>(mRaw->dim.y));
 
-  if (mRaw->getDataType() == TYPE_FLOAT32) {
+  if (mRaw->getDataType() == RawImageType::F32) {
     if (bitPerPixel == 32) {
       copyPixels(&data[offset.x * sizeof(float) * cpp + y * outPitch], outPitch,
                  input.getData(inputPitchBytes * (h - y)), inputPitchBytes,
                  w * mRaw->getBpp(), h - y);
       return;
     }
-    if (BitOrder_MSB == order && bitPerPixel == 16) {
+    if (BitOrder::MSB == order && bitPerPixel == 16) {
       decode16BitFP<BitPumpMSB>(size, offset, skipBytes, h, y);
       return;
     }
-    if (BitOrder_LSB == order && bitPerPixel == 16) {
+    if (BitOrder::LSB == order && bitPerPixel == 16) {
       decode16BitFP<BitPumpLSB>(size, offset, skipBytes, h, y);
       return;
     }
-    if (BitOrder_MSB == order && bitPerPixel == 24) {
+    if (BitOrder::MSB == order && bitPerPixel == 24) {
       decode24BitFP<BitPumpMSB>(size, offset, skipBytes, h, y);
       return;
     }
-    if (BitOrder_LSB == order && bitPerPixel == 24) {
+    if (BitOrder::LSB == order && bitPerPixel == 24) {
       decode24BitFP<BitPumpLSB>(size, offset, skipBytes, h, y);
       return;
     }
     ThrowRDE("Unsupported floating-point input bitwidth/bit packing: %u / %u",
-             bitPerPixel, order);
+             bitPerPixel, static_cast<unsigned>(order));
   }
 
-  if (BitOrder_MSB == order) {
+  if (BitOrder::MSB == order) {
     BitPumpMSB bits(input);
     w *= cpp;
     for (; y < h; y++) {
@@ -231,7 +231,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
       }
       bits.skipBytes(skipBytes);
     }
-  } else if (BitOrder_MSB16 == order) {
+  } else if (BitOrder::MSB16 == order) {
     BitPumpMSB16 bits(input);
     w *= cpp;
     for (; y < h; y++) {
@@ -243,7 +243,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
       }
       bits.skipBytes(skipBytes);
     }
-  } else if (BitOrder_MSB32 == order) {
+  } else if (BitOrder::MSB32 == order) {
     BitPumpMSB32 bits(input);
     w *= cpp;
     for (; y < h; y++) {
