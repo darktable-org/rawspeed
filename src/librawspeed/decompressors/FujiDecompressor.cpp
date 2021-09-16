@@ -137,15 +137,13 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
     max_bits = 56;
     maxDiff = 256;
   } else if (q_point[4] == 0xFFF) {
+    total_values = 4096;
+    raw_bits = 12;
+    max_bits = 48; // out-of-family, there's greater pattern at play.
+    maxDiff = 64;
+
     ThrowRDE("Aha, finally, a 12-bit compressed RAF! Please consider providing "
              "samples on <https://raw.pixls.us/>, thanks!");
-
-    /* kept for future, once there is a sample.
-     total_values = 4096;
-     raw_bits = 12;
-     max_bits = 48; // out-of-family, there's greater pattern at play.
-     maxDiff = 64;
-    */
   } else {
     ThrowRDE("FUJI q_point");
   }
