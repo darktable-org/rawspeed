@@ -28,9 +28,7 @@ namespace rawspeed {
 
 class IOException final : public RawspeedException {
 public:
-  explicit RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
-  IOException(const char* msg)
-      : RawspeedException(msg) {}
+  using RawspeedException::RawspeedException;
 };
 
 #define ThrowIOE(...) ThrowExceptionHelper(rawspeed::IOException, __VA_ARGS__)

@@ -28,9 +28,7 @@ namespace rawspeed {
 
 class CameraMetadataException final : public RawspeedException {
 public:
-  explicit RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
-  CameraMetadataException(const char* msg)
-      : RawspeedException(msg) {}
+  using RawspeedException::RawspeedException;
 };
 
 #define ThrowCME(...)                                                          \

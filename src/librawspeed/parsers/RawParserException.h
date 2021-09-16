@@ -27,9 +27,7 @@ namespace rawspeed {
 
 class RawParserException : public RawspeedException {
 public:
-  explicit RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
-  RawParserException(const char* msg)
-      : RawspeedException(msg) {}
+  using RawspeedException::RawspeedException;
 };
 
 #define ThrowRPE(...)                                                          \

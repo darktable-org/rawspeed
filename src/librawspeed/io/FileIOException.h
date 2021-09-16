@@ -29,9 +29,7 @@ namespace rawspeed {
 
 class FileIOException final : public RawDecoderException {
 public:
-  explicit RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
-  FileIOException(const char* msg)
-      : RawDecoderException(msg) {}
+  using RawDecoderException::RawDecoderException;
 };
 
 #define ThrowFIE(...)                                                          \
