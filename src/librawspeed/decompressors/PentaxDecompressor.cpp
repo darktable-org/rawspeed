@@ -125,7 +125,7 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
   return ht;
 }
 
-HuffmanTable PentaxDecompressor::SetupHuffmanTable(ByteStream* metaData) {
+HuffmanTable PentaxDecompressor::SetupHuffmanTable(const ByteStream* metaData) {
   HuffmanTable ht;
 
   if (metaData)

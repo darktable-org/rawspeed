@@ -43,7 +43,7 @@ public:
 private:
   static HuffmanTable SetupHuffmanTable_Legacy();
   static HuffmanTable SetupHuffmanTable_Modern(ByteStream stream);
-  static HuffmanTable SetupHuffmanTable(ByteStream* metaData);
+  static HuffmanTable SetupHuffmanTable(const ByteStream* metaData);
 
   static const std::array<std::array<std::array<uint8_t, 16>, 2>, 1>
       pentax_tree;

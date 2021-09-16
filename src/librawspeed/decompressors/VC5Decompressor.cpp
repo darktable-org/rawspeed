@@ -93,7 +93,7 @@ const std::array<RLV, table17.length> decompandedTable17 = []() {
   return d;
 }();
 
-inline bool readValue(bool& storage) {
+inline bool readValue(const bool& storage) {
   bool value;
 
 #ifdef HAVE_OPENMP

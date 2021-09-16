@@ -192,7 +192,7 @@ public:
 
   // special factory function to set up internal buffer with copy of passed data.
   // only necessary to create 'fake' TiffEntries (see e.g. RAF)
-  static ByteStream createCopy(void* data_, size_type size_) {
+  static ByteStream createCopy(const void* data_, size_type size_) {
     ByteStream bs;
     auto* new_data = alignedMalloc<uint8_t, 8>(roundUp(size_, 8));
     memcpy(new_data, data_, size_);
