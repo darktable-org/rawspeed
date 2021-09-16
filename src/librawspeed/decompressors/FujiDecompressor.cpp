@@ -80,7 +80,6 @@ FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
 FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
     const FujiDecompressor& d) {
   int cur_val;
-  char* qt;
 
   if ((d.header.block_size % 3 && d.header.raw_type == 16) ||
       (d.header.block_size & 1 && d.header.raw_type == 0)) {
@@ -104,7 +103,7 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
   cur_val = -q_point[4];
   q_table.resize(2 * (1 << d.header.raw_bits));
 
-  for (qt = &q_table[0]; cur_val <= q_point[4]; ++qt, ++cur_val) {
+  for (char* qt = &q_table[0]; cur_val <= q_point[4]; ++qt, ++cur_val) {
     if (cur_val <= -q_point[3]) {
       *qt = -4;
     } else if (cur_val <= -q_point[2]) {
