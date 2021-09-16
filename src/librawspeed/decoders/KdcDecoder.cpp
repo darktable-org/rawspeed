@@ -100,16 +100,15 @@ RawImage KdcDecoder::decodeRawInternal() {
   TiffRootIFD kodakifd(nullptr, &ifds, ifdoffset->getRootIfdData(),
                        ifdoffset->getU32());
 
-  uint32_t width = 0;
-  uint32_t height = 0;
-  if (const TiffEntry* ew =
-          kodakifd.getEntryRecursive(TiffTag::KODAK_KDC_SENSOR_WIDTH),
-      *eh = kodakifd.getEntryRecursive(TiffTag::KODAK_KDC_SENSOR_HEIGHT);
-      ew && eh) {
-    width = ew->getU32();
-    height = eh->getU32();
-  } else
+  const TiffEntry* ew =
+      kodakifd.getEntryRecursive(TiffTag::KODAK_KDC_SENSOR_WIDTH);
+  const TiffEntry* eh =
+      kodakifd.getEntryRecursive(TiffTag::KODAK_KDC_SENSOR_HEIGHT);
+  if (!ew || !eh)
     ThrowRDE("Unable to retrieve image size");
+
+  uint32_t width = ew->getU32();
+  uint32_t height = eh->getU32();
 
   mRaw->dim = iPoint2D(width, height);
 

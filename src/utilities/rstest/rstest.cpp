@@ -425,8 +425,7 @@ static int results(const map<std::string, std::string>& failedTests,
     const std::string newhash(oldhash + ".failed");
 
     // if neither hashes exist, nothing to append...
-    if (ifstream oldfile(oldhash), newfile(newhash);
-        !(oldfile.good() || newfile.good()))
+    if (!(ifstream(oldhash).good() || ifstream(newhash).good()))
       continue;
 
     rstestlog = true;

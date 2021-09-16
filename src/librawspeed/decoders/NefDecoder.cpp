@@ -597,8 +597,9 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 
   auto id = mRootIFD->getID();
-  if (std::string mode = getMode(), extended_mode = getExtendedMode(mode);
-      meta->hasCamera(id.make, id.model, extended_mode)) {
+  std::string mode = getMode();
+  std::string extended_mode = getExtendedMode(mode);
+  if (meta->hasCamera(id.make, id.model, extended_mode)) {
     setMetaData(meta, id, extended_mode, iso);
   } else if (meta->hasCamera(id.make, id.model, mode)) {
     setMetaData(meta, id, mode, iso);
