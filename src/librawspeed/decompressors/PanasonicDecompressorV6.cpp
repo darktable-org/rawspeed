@@ -150,6 +150,8 @@ PanasonicDecompressorV6::decompressBlock(ByteStream& rowInput, int row,
     if (spix <= 0xffff)
       out(row, col) = spix & 0xffff;
     else {
+      // FIXME: this is a convoluted way to compute zero.
+      // What was this code trying to do, actually?
       epixel = static_cast<int>(epixel + 0x7ffffff1) >> 0x1f;
       out(row, col) = epixel & 0x3fff;
     }
