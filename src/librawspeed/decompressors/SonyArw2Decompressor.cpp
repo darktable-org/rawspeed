@@ -42,7 +42,7 @@ SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
-  if (mRaw->dim.x == 0 || mRaw->dim.y == 0 || mRaw->dim.x % 32 != 0 ||
+  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 32 != 0 ||
       mRaw->dim.x > 9600 || mRaw->dim.y > 6376)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);
