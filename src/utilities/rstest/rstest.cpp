@@ -401,8 +401,9 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 
 #pragma GCC diagnostic pop
 
-static int results(const map<std::string, std::string>& failedTests,
-                   const options& o) {
+static int
+results(const map<std::string, std::string, std::less<>>& failedTests,
+        const options& o) {
   if (failedTests.empty()) {
     cout << "All good, ";
     if (!o.create)
@@ -509,7 +510,7 @@ int main(int argc, char **argv) {
 #endif
 
   size_t time = 0;
-  map<std::string, std::string> failedTests;
+  map<std::string, std::string, std::less<>> failedTests;
 #ifdef HAVE_OPENMP
 #pragma omp parallel for default(none) firstprivate(argc, argv, o) \
     OMPSHAREDCLAUSE(metadata) shared(cerr, failedTests) schedule(dynamic, 1) \
