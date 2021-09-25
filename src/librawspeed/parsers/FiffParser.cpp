@@ -60,7 +60,7 @@ void FiffParser::parseData() {
   const uint32_t second_ifd = bs.getU32();
 
   rootIFD = TiffParser::parse(nullptr, mInput.getSubView(first_ifd));
-  TiffIFDOwner subIFD = std::make_unique<TiffIFD>(rootIFD.get());
+  auto subIFD = std::make_unique<TiffIFD>(rootIFD.get());
 
   if (mInput.isValid(second_ifd)) {
     // RAW Tiff on newer models, pointer to raw data on older models
