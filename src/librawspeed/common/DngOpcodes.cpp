@@ -65,8 +65,7 @@ class DngOpcodes::FixBadPixelsConstant final : public DngOpcodes::DngOpcode {
   uint32_t value;
 
 public:
-  explicit FixBadPixelsConstant([[maybe_unused]] const RawImage& ri,
-                                ByteStream& bs)
+  explicit FixBadPixelsConstant(const RawImage& ri, ByteStream& bs)
       : value(bs.getU32()) {
     bs.getU32(); // Bayer Phase not used
   }
