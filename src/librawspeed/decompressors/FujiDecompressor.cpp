@@ -442,25 +442,26 @@ void FujiDecompressor::fuji_decode_interpolation_even(int line_width,
 }
 
 void FujiDecompressor::fuji_extend_generic(
-    std::array<uint16_t*, ltotal> linebuf, int line_width, int start, int end) {
+    const std::array<uint16_t*, ltotal>& linebuf, int line_width, int start,
+    int end) {
   for (int i = start; i <= end; i++) {
     linebuf[i][0] = linebuf[i - 1][1];
     linebuf[i][line_width + 1] = linebuf[i - 1][line_width];
   }
 }
 
-void FujiDecompressor::fuji_extend_red(std::array<uint16_t*, ltotal> linebuf,
-                                       int line_width) {
+void FujiDecompressor::fuji_extend_red(
+    const std::array<uint16_t*, ltotal>& linebuf, int line_width) {
   fuji_extend_generic(linebuf, line_width, R2, R4);
 }
 
-void FujiDecompressor::fuji_extend_green(std::array<uint16_t*, ltotal> linebuf,
-                                         int line_width) {
+void FujiDecompressor::fuji_extend_green(
+    const std::array<uint16_t*, ltotal>& linebuf, int line_width) {
   fuji_extend_generic(linebuf, line_width, G2, G7);
 }
 
-void FujiDecompressor::fuji_extend_blue(std::array<uint16_t*, ltotal> linebuf,
-                                        int line_width) {
+void FujiDecompressor::fuji_extend_blue(
+    const std::array<uint16_t*, ltotal>& linebuf, int line_width) {
   fuji_extend_generic(linebuf, line_width, B2, B4);
 }
 
