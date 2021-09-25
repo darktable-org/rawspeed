@@ -45,7 +45,7 @@ class IiqDecoder final : public AbstractTiffDecoder {
   };
 
   static std::vector<PhaseOneStrip>
-  computeSripes(const Buffer& raw_data, std::vector<IiqOffset>&& offsets,
+  computeSripes(const Buffer& raw_data, std::vector<IiqOffset> offsets,
                 uint32_t height);
 
 public:
