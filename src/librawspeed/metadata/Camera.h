@@ -48,7 +48,7 @@ class Hints
 public:
   void add(const std::string& key, const std::string& value)
   {
-    data.insert({key, value});
+    data.try_emplace(key, value);
   }
 
   [[nodiscard]] bool has(const std::string& key) const {
