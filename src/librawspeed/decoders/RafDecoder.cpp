@@ -205,7 +205,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   assert(cam != nullptr);
 
   iPoint2D new_size(mRaw->dim);
-  iPoint2D crop_offset = iPoint2D(0,0);
+  iPoint2D crop_offset(0, 0);
 
   if (applyCrop) {
     new_size = cam->cropSize;

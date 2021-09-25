@@ -665,8 +665,8 @@ bool DngDecoder::decodeMaskedAreas(const TiffIFD* raw) const {
   const iPoint2D top = mRaw->getCropOffset();
 
   for (uint32_t i = 0; i < nrects; i++) {
-    iPoint2D topleft = iPoint2D(rects[i * 4UL + 1UL], rects[i * 4UL]);
-    iPoint2D bottomright = iPoint2D(rects[i * 4UL + 3UL], rects[i * 4UL + 2UL]);
+    iPoint2D topleft(rects[i * 4UL + 1UL], rects[i * 4UL]);
+    iPoint2D bottomright(rects[i * 4UL + 3UL], rects[i * 4UL + 2UL]);
 
     if (!(fullImage.isPointInsideInclusive(topleft) &&
           fullImage.isPointInsideInclusive(bottomright) &&
