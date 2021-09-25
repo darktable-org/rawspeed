@@ -38,7 +38,7 @@ class MD5Test : public ::testing::TestWithParam<MD5Testcase> {
 protected:
   MD5Test() = default;
   void SetUp() final {
-    auto p = GetParam();
+    const MD5Testcase& p = GetParam();
 
     answer = p.first;
     message = p.second;
