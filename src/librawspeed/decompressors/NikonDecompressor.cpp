@@ -115,7 +115,8 @@ class NikonLASDecompressor {
     p = 0;
     for (l = 1; l <= 16; l++) {
       for (i = 1; i <= static_cast<int>(dctbl1.bits[l]); i++) {
-        huffsize[p++] = static_cast<char>(l);
+        huffsize[p] = static_cast<char>(l);
+        ++p;
         if (p > 256)
           ThrowRDE("LJpegDecompressor::createHuffmanTable: Code length too "
                    "long. Corrupt data.");
@@ -133,7 +134,8 @@ class NikonLASDecompressor {
     p = 0;
     while (huffsize[p]) {
       while ((static_cast<int>(huffsize[p])) == si) {
-        huffcode[p++] = code;
+        huffcode[p] = code;
+        ++p;
         code++;
       }
       code <<= 1;

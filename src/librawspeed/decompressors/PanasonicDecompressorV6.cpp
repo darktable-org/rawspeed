@@ -80,7 +80,11 @@ struct pana_cs6_page_decoder {
     // 4 padding bits
   }
 
-  uint16_t nextpixel() { return pixelbuffer[current++]; }
+  uint16_t nextpixel() {
+    uint16_t currPixel = pixelbuffer[current];
+    ++current;
+    return currPixel;
+  }
 };
 } // namespace
 
