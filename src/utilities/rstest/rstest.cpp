@@ -537,7 +537,7 @@ int main(int argc, char **argv) {
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
         cerr << msg << endl;
 #endif
-        failedTests.emplace(argv[i], msg);
+        failedTests.try_emplace(argv[i], msg);
       }
     }
   }
