@@ -147,17 +147,17 @@ const Camera* CameraMetaData::addCamera(std::unique_ptr<Camera> cam) {
 }
 
 void CameraMetaData::disableMake(std::string_view make) const {
-  for (const auto& [key, value] : cameras) {
-    if (value->make == make)
-      value->supported = false;
+  for (const auto& cam : cameras) {
+    if (cam.second->make == make)
+      cam.second->supported = false;
   }
 }
 
 void CameraMetaData::disableCamera(std::string_view make,
                                    std::string_view model) const {
-  for (const auto& [key, value] : cameras) {
-    if (value->make == make && value->model == model)
-      value->supported = false;
+  for (const auto& cam : cameras) {
+    if (cam.second->make == make && cam.second->model == model)
+      cam.second->supported = false;
   }
 }
 
