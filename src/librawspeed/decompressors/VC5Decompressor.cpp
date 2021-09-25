@@ -872,10 +872,8 @@ VC5Decompressor::getRLV(BitPumpMSB& bits) {
   bits.skipBitsNoFill(decompandedTable17[iTab].size);
   int16_t value = decompandedTable17[iTab].value;
   unsigned int count = decompandedTable17[iTab].count;
-  if (value != 0) {
-    if (bits.getBitsNoFill(1))
-      value = -(value);
-  }
+  if (value != 0 && bits.getBitsNoFill(1))
+    value = -(value);
 
   return {value, count};
 }
