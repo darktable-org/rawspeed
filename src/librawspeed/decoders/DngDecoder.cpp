@@ -269,7 +269,7 @@ DngDecoder::getTilingDescription(const TiffIFD* raw) const {
   return {mRaw->dim, static_cast<uint32_t>(mRaw->dim.x), yPerSlice};
 }
 
-void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) {
+void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
   if (compression == 8 && sample_format != 3) {
     ThrowRDE("Only float format is supported for "
              "deflate-compressed data.");
@@ -784,7 +784,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
   return true;
 }
 
-void DngDecoder::setBlack(const TiffIFD* raw) {
+void DngDecoder::setBlack(const TiffIFD* raw) const {
 
   if (raw->hasEntry(TiffTag::MASKEDAREAS) && decodeMaskedAreas(raw))
     return;

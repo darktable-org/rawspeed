@@ -359,7 +359,7 @@ void IiqDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     mRaw->blackLevel = black_level;
 }
 
-void IiqDecoder::correctSensorDefects(ByteStream data) {
+void IiqDecoder::correctSensorDefects(ByteStream data) const {
   while (data.getRemainSize() != 0) {
     const uint16_t col = data.getU16();
     const uint16_t row = data.getU16();
