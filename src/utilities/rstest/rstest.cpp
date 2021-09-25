@@ -220,8 +220,6 @@ std::string img_hash(const RawImage& r) {
   for (const std::string& e : errors)
     APPEND(&oss, "WARNING: [rawspeed] %s\n", e.c_str());
 
-#undef APPEND
-
   return oss.str();
 }
 
