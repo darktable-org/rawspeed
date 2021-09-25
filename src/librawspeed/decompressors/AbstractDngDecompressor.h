@@ -129,7 +129,7 @@ class AbstractDngDecompressor final : public AbstractDecompressor {
   void decompressThread() const noexcept;
 
 public:
-  AbstractDngDecompressor(const RawImage& img, DngTilingDescription dsc_,
+  AbstractDngDecompressor(const RawImage& img, const DngTilingDescription& dsc_,
                           int compression_, bool mFixLjpeg_, uint32_t mBps_,
                           uint32_t mPredictor_)
       : mRaw(img), dsc(dsc_), compression(compression_), mFixLjpeg(mFixLjpeg_),
