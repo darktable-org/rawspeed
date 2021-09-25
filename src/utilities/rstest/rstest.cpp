@@ -416,10 +416,10 @@ static int results(const map<std::string, std::string>& failedTests,
        << " tests have failed:\n";
 
   bool rstestlog = false;
-  for (const auto& i : failedTests) {
-    cerr << i.second << "\n";
+  for (const auto& [test, msg] : failedTests) {
+    cerr << msg << "\n";
 #ifndef WIN32
-    const std::string oldhash(i.first + ".hash");
+    const std::string oldhash(test + ".hash");
     const std::string newhash(oldhash + ".failed");
 
     // if neither hashes exist, nothing to append...
