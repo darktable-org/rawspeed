@@ -224,7 +224,7 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
 VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
     const Array2DRef<const int16_t> low, const Array2DRef<const int16_t> high,
     int descaleShift, bool clampUint = false,
-    bool finalWavelet = false) noexcept {
+    [[maybe_unused]] bool finalWavelet = false) noexcept {
   BandData combined;
   auto& dst = combined.description;
   dst = Array2DRef<int16_t>::create(combined.storage, 2 * high.width,

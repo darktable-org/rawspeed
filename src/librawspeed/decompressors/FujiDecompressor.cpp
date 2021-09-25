@@ -465,8 +465,8 @@ void FujiDecompressor::fuji_extend_blue(
   fuji_extend_generic(linebuf, line_width, B2, B4);
 }
 
-void FujiDecompressor::xtrans_decode_block(fuji_compressed_block* info,
-                                           int cur_line) const {
+void FujiDecompressor::xtrans_decode_block(
+    fuji_compressed_block* info, [[maybe_unused]] int cur_line) const {
   struct ColorPos {
     int even = 0;
     int odd = 1;
@@ -615,8 +615,8 @@ void FujiDecompressor::xtrans_decode_block(fuji_compressed_block* info,
   fuji_extend_blue(info->linebuf, line_width);
 }
 
-void FujiDecompressor::fuji_bayer_decode_block(fuji_compressed_block* info,
-                                               int cur_line) const {
+void FujiDecompressor::fuji_bayer_decode_block(
+    fuji_compressed_block* info, [[maybe_unused]] int cur_line) const {
   struct ColorPos {
     int even = 0;
     int odd = 1;

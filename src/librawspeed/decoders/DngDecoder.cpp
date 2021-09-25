@@ -55,7 +55,7 @@ namespace rawspeed {
 
 bool __attribute__((pure))
 DngDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                 const Buffer& file) {
+                                 [[maybe_unused]] const Buffer& file) {
   return rootIFD->hasEntryRecursive(TiffTag::DNGVERSION);
 }
 

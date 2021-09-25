@@ -289,7 +289,10 @@ public:
       dctbl1.huffval[i] = data[i];
   }
 
-  void setup(bool fullDecode_, bool fixDNGBug16_) { createHuffmanTable(); }
+  void setup([[maybe_unused]] bool fullDecode_,
+             [[maybe_unused]] bool fixDNGBug16_) {
+    createHuffmanTable();
+  }
 
   /*
    *--------------------------------------------------------------

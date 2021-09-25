@@ -142,7 +142,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
   }
 }
 
-void RawDecoder::askForSamples(const CameraMetaData* meta,
+void RawDecoder::askForSamples([[maybe_unused]] const CameraMetaData* meta,
                                const std::string& make,
                                const std::string& model,
                                const std::string& mode) {

@@ -56,8 +56,9 @@ inline void MSan::CheckMemIsInitialized(const volatile void* addr,
   __msan_check_mem_is_initialized(addr, size);
 }
 #else
-inline void MSan::CheckMemIsInitialized(const volatile void* addr,
-                                        size_t size) {
+inline void
+MSan::CheckMemIsInitialized([[maybe_unused]] const volatile void* addr,
+                            [[maybe_unused]] size_t size) {
   // If we are building without MSAN, then there is no way to have a non-empty
   // body of this function. It's better than to have a macros, or to use
   // preprocessor in every place it is called.

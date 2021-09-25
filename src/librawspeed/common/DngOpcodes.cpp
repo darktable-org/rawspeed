@@ -65,7 +65,8 @@ class DngOpcodes::FixBadPixelsConstant final : public DngOpcodes::DngOpcode {
   uint32_t value;
 
 public:
-  explicit FixBadPixelsConstant(const RawImage& ri, ByteStream& bs)
+  explicit FixBadPixelsConstant([[maybe_unused]] const RawImage& ri,
+                                ByteStream& bs)
       : value(bs.getU32()) {
     bs.getU32(); // Bayer Phase not used
   }
@@ -280,8 +281,9 @@ protected:
   }
 
   void apply(const RawImage& ri) override {
-    applyOP<uint16_t>(
-        ri, [this](uint32_t x, uint32_t y, uint16_t v) { return lookup[v]; });
+    applyOP<uint16_t>(ri, [this]([[maybe_unused]] uint32_t x,
+                                 [[maybe_unused]] uint32_t y,
+                                 uint16_t v) { return lookup[v]; });
   }
 };
 
