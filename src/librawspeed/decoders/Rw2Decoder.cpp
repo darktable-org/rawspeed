@@ -217,7 +217,7 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           ? mRootIFD->getIFDWithTag(TiffTag::PANASONIC_STRIPOFFSET)
           : mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
-  const auto uint16_t version = 
+  const uint16_t version = 
       raw->getEntry(TiffTag::PANASONIC_RAWFORMAT)->getU16();
 
   // Read blacklevels
