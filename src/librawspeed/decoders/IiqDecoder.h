@@ -45,7 +45,7 @@ class IiqDecoder final : public AbstractTiffDecoder {
   };
 
   static std::vector<PhaseOneStrip>
-  computeSripes(const Buffer& raw_data, std::vector<IiqOffset>&& offsets,
+  computeSripes(const Buffer& raw_data, std::vector<IiqOffset> offsets,
                 uint32_t height);
 
 public:
@@ -67,7 +67,7 @@ private:
                         uint32_t split_col);
   void CorrectQuadrantMultipliersCombined(ByteStream data, uint32_t split_row,
                                           uint32_t split_col) const;
-  void correctSensorDefects(ByteStream data);
+  void correctSensorDefects(ByteStream data) const;
   void correctBadColumn(uint16_t col) const;
   void handleBadPixel(uint16_t col, uint16_t row) const;
 };

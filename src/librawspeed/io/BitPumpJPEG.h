@@ -61,11 +61,13 @@ inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uint8_t* input) {
   size_type p = 0;
   for (size_type i = 0; i < 4; ++i) {
     // Pre-execute most common case, where next byte is 'normal'/non-FF
-    const int c0 = prefetch[p++];
+    const int c0 = prefetch[p];
+    ++p;
     cache.push(c0, 8);
     if (c0 == 0xFF) {
       // Found FF -> pre-execute case of FF/00, which represents an FF data byte -> ignore the 00
-      const int c1 = prefetch[p++];
+      const int c1 = prefetch[p];
+      ++p;
       if (c1 != 0) {
         // Found FF/xx with xx != 00. This is the end of stream marker.
         // That means we shouldn't have pushed last 8 bits (0xFF, from c0).

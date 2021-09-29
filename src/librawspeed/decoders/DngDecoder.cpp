@@ -55,7 +55,7 @@ namespace rawspeed {
 
 bool __attribute__((pure))
 DngDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                 const Buffer& file) {
+                                 [[maybe_unused]] const Buffer& file) {
   return rootIFD->hasEntryRecursive(TiffTag::DNGVERSION);
 }
 
@@ -269,7 +269,7 @@ DngDecoder::getTilingDescription(const TiffIFD* raw) const {
   return {mRaw->dim, static_cast<uint32_t>(mRaw->dim.x), yPerSlice};
 }
 
-void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) {
+void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
   if (compression == 8 && sample_format != 3) {
     ThrowRDE("Only float format is supported for "
              "deflate-compressed data.");
@@ -665,8 +665,8 @@ bool DngDecoder::decodeMaskedAreas(const TiffIFD* raw) const {
   const iPoint2D top = mRaw->getCropOffset();
 
   for (uint32_t i = 0; i < nrects; i++) {
-    iPoint2D topleft = iPoint2D(rects[i * 4UL + 1UL], rects[i * 4UL]);
-    iPoint2D bottomright = iPoint2D(rects[i * 4UL + 3UL], rects[i * 4UL + 2UL]);
+    iPoint2D topleft(rects[i * 4UL + 1UL], rects[i * 4UL]);
+    iPoint2D bottomright(rects[i * 4UL + 3UL], rects[i * 4UL + 2UL]);
 
     if (!(fullImage.isPointInsideInclusive(topleft) &&
           fullImage.isPointInsideInclusive(bottomright) &&
@@ -784,7 +784,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
   return true;
 }
 
-void DngDecoder::setBlack(const TiffIFD* raw) {
+void DngDecoder::setBlack(const TiffIFD* raw) const {
 
   if (raw->hasEntry(TiffTag::MASKEDAREAS) && decodeMaskedAreas(raw))
     return;

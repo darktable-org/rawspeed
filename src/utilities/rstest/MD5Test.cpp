@@ -37,27 +37,21 @@ using MD5Testcase = std::pair<rawspeed::md5::md5_state, const uint8_t*>;
 class MD5Test : public ::testing::TestWithParam<MD5Testcase> {
 protected:
   MD5Test() = default;
-  void SetUp() final {
-    auto p = GetParam();
-
-    answer = p.first;
-    message = p.second;
-  }
+  void SetUp() final { std::tie(answer, message) = GetParam(); }
 
   rawspeed::md5::md5_state answer;
   const uint8_t* message = nullptr;
 };
 
 #define TESTCASE(a, b, c, d, msg)                                              \
-  {                                                                            \
-    std::make_pair((rawspeed::md5::md5_state){{UINT32_C(a), UINT32_C(b),       \
-                                               UINT32_C(c), UINT32_C(d)}},     \
-                   (const uint8_t*)(msg))                                      \
+  (MD5Testcase) {                                                              \
+    {UINT32_C(a), UINT32_C(b), UINT32_C(c), UINT32_C(d)},                      \
+        (const uint8_t*)(msg)                                                  \
   }
 
 // Note: The MD5 standard specifies that uint32_t are serialized to/from bytes
 // in little endian
-static const MD5Testcase testCases[] = {
+static const std::array<MD5Testcase, 7> testCases = {
     TESTCASE(0xD98C1DD4, 0x04B2008F, 0x980980E9, 0x7E42F8EC, ""),
     TESTCASE(0xB975C10C, 0xA8B6F1C0, 0xE299C331, 0x61267769, "a"),
     TESTCASE(0x98500190, 0xB04FD23C, 0x7D3F96D6, 0x727FE128, "abc"),

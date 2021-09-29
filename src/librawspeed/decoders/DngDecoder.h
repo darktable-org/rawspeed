@@ -51,11 +51,11 @@ private:
   static void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
   void parseCFA(const TiffIFD* raw) const;
   DngTilingDescription getTilingDescription(const TiffIFD* raw) const;
-  void decodeData(const TiffIFD* raw, uint32_t sample_format);
+  void decodeData(const TiffIFD* raw, uint32_t sample_format) const;
   void handleMetadata(const TiffIFD* raw);
   bool decodeMaskedAreas(const TiffIFD* raw) const;
   bool decodeBlackLevels(const TiffIFD* raw) const;
-  void setBlack(const TiffIFD* raw);
+  void setBlack(const TiffIFD* raw) const;
 
   int bps = -1;
   int compression = -1;

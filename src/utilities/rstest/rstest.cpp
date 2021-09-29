@@ -220,8 +220,6 @@ std::string img_hash(const RawImage& r) {
   for (const std::string& e : errors)
     APPEND(&oss, "WARNING: [rawspeed] %s\n", e.c_str());
 
-#undef APPEND
-
   return oss.str();
 }
 
@@ -403,8 +401,9 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 
 #pragma GCC diagnostic pop
 
-static int results(const map<std::string, std::string>& failedTests,
-                   const options& o) {
+static int
+results(const map<std::string, std::string, std::less<>>& failedTests,
+        const options& o) {
   if (failedTests.empty()) {
     cout << "All good, ";
     if (!o.create)
@@ -418,10 +417,10 @@ static int results(const map<std::string, std::string>& failedTests,
        << " tests have failed:\n";
 
   bool rstestlog = false;
-  for (const auto& i : failedTests) {
-    cerr << i.second << "\n";
+  for (const auto& [test, msg] : failedTests) {
+    cerr << msg << "\n";
 #ifndef WIN32
-    const std::string oldhash(i.first + ".hash");
+    const std::string oldhash(test + ".hash");
     const std::string newhash(oldhash + ".failed");
 
     // if neither hashes exist, nothing to append...
@@ -511,7 +510,7 @@ int main(int argc, char **argv) {
 #endif
 
   size_t time = 0;
-  map<std::string, std::string> failedTests;
+  map<std::string, std::string, std::less<>> failedTests;
 #ifdef HAVE_OPENMP
 #pragma omp parallel for default(none) firstprivate(argc, argv, o) \
     OMPSHAREDCLAUSE(metadata) shared(cerr, failedTests) schedule(dynamic, 1) \
@@ -537,7 +536,7 @@ int main(int argc, char **argv) {
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
         cerr << msg << endl;
 #endif
-        failedTests.emplace(argv[i], msg);
+        failedTests.try_emplace(argv[i], msg);
       }
     }
   }

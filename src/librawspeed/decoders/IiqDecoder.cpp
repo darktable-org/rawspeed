@@ -70,7 +70,7 @@ bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 // FIXME: this is very close to SamsungV0Decompressor::computeStripes()
 std::vector<PhaseOneStrip>
 IiqDecoder::computeSripes(const Buffer& raw_data,
-                          std::vector<IiqOffset>&& offsets, uint32_t height) {
+                          std::vector<IiqOffset> offsets, uint32_t height) {
   assert(height > 0);
   assert(offsets.size() == (1 + height));
 
@@ -359,7 +359,7 @@ void IiqDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     mRaw->blackLevel = black_level;
 }
 
-void IiqDecoder::correctSensorDefects(ByteStream data) {
+void IiqDecoder::correctSensorDefects(ByteStream data) const {
   while (data.getRemainSize() != 0) {
     const uint16_t col = data.getU16();
     const uint16_t row = data.getU16();

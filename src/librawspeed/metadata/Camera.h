@@ -44,11 +44,12 @@ namespace rawspeed {
 
 class Hints
 {
-  std::map<std::string, std::string> data;
+  std::map<std::string, std::string, std::less<>> data;
+
 public:
   void add(const std::string& key, const std::string& value)
   {
-    data.insert({key, value});
+    data.try_emplace(key, value);
   }
 
   [[nodiscard]] bool has(const std::string& key) const {
@@ -101,7 +102,7 @@ public:
   Hints hints;
 protected:
   static const std::map<char, CFAColor> char2enum;
-  static const std::map<std::string, CFAColor> str2enum;
+  static const std::map<std::string, CFAColor, std::less<>> str2enum;
 
 #ifdef HAVE_PUGIXML
   void parseCFA(const pugi::xml_node &node);

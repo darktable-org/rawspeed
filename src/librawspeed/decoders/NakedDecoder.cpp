@@ -41,7 +41,7 @@ class CameraMetaData;
 NakedDecoder::NakedDecoder(const Buffer& file, const Camera* c)
     : RawDecoder(file), cam(c) {}
 
-const map<std::string, BitOrder> NakedDecoder::order2enum = {
+const map<std::string, BitOrder, std::less<>> NakedDecoder::order2enum = {
     {"plain", BitOrder::LSB},
     {"jpeg", BitOrder::MSB},
     {"jpeg16", BitOrder::MSB16},

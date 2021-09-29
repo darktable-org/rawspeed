@@ -44,7 +44,7 @@ class NakedDecoder final : public RawDecoder {
   uint32_t offset{0};
   BitOrder bo{BitOrder::MSB16};
 
-  static const std::map<std::string, BitOrder> order2enum;
+  static const std::map<std::string, BitOrder, std::less<>> order2enum;
   void parseHints();
 
 public:

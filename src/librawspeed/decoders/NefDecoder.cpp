@@ -54,7 +54,7 @@ using std::ostringstream;
 namespace rawspeed {
 
 bool NefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer& file) {
+                                      [[maybe_unused]] const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 

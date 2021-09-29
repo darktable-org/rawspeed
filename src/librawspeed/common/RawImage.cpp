@@ -380,7 +380,7 @@ void RawImageData::fixBadPixels()
 void RawImageData::startWorker(const RawImageWorker::RawImageWorkerTask task,
                                bool cropped) {
   const int height = [&]() {
-    int h = (cropped) ? dim.y : uncropped_dim.y;
+    int h = cropped ? dim.y : uncropped_dim.y;
     if (static_cast<uint32_t>(task) &
         static_cast<uint32_t>(RawImageWorker::RawImageWorkerTask::FULL_IMAGE)) {
       h = uncropped_dim.y;

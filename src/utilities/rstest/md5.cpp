@@ -57,7 +57,7 @@ static void md5_compress(md5_state* state, const uint8_t* block) {
   auto ROUND_TAIL = [ROTL32, &schedule](uint32_t& a, uint32_t b, uint32_t expr,
                                         uint32_t k, uint32_t s, uint32_t t) {
     a = uint32_t(0UL + a + expr + t + schedule[k]);
-    (a) = uint32_t(0UL + b + ROTL32(a, s));
+    a = uint32_t(0UL + b + ROTL32(a, s));
   };
 
   auto ROUND0 = [ROUND_TAIL](uint32_t& a, uint32_t b, uint32_t c, uint32_t d,

@@ -130,7 +130,7 @@ inline uint32_t extendBinaryFloatingPoint(uint32_t narrow) {
       // and decrement exponent for each shift.
       // FIXME; what is the implicit precondition here?
       wide_exponent = 1 - NarrowType::Bias + WideType::Bias;
-      while (!(wide_fraction & (1 << (WideType::FractionWidth)))) {
+      while (!(wide_fraction & (1 << WideType::FractionWidth))) {
         wide_exponent -= 1;
         wide_fraction <<= 1;
       }

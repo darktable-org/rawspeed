@@ -130,7 +130,7 @@ inline auto convolute(int row, int col, std::array<int, 4> muls,
                       const Array2DRef<const int16_t> high, LowGetter lowGetter,
                       int DescaleShift = 0) {
   auto highCombined = muls[0] * high(row, col);
-  auto lowsCombined = [muls, lowGetter]() {
+  auto lowsCombined = [muls, &lowGetter]() {
     int lows = 0;
     for (int i = 0; i < 3; i++)
       lows += muls[1 + i] * lowGetter(i);
@@ -183,7 +183,7 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
     auto lowGetter = [&row, &col, low](int delta) {
       return low(row + SegmentTy::coord_shift + delta, col);
     };
-    auto convolution = [&row, &col, high, lowGetter](std::array<int, 4> muls) {
+    auto convolution = [&row, &col, high, &lowGetter](std::array<int, 4> muls) {
       return convolute(row, col, muls, high, lowGetter, /*DescaleShift*/ 0);
     };
 
@@ -224,7 +224,7 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
 VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
     const Array2DRef<const int16_t> low, const Array2DRef<const int16_t> high,
     int descaleShift, bool clampUint = false,
-    bool finalWavelet = false) noexcept {
+    [[maybe_unused]] bool finalWavelet = false) noexcept {
   BandData combined;
   auto& dst = combined.description;
   dst = Array2DRef<int16_t>::create(combined.storage, 2 * high.width,
@@ -236,7 +236,7 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
     auto lowGetter = [&row, &col, low](int delta) {
       return low(row, col + SegmentTy::coord_shift + delta);
     };
-    auto convolution = [&row, &col, high, lowGetter,
+    auto convolution = [&row, &col, high, &lowGetter,
                         descaleShift](std::array<int, 4> muls) {
       return convolute(row, col, muls, high, lowGetter, descaleShift);
     };
@@ -872,10 +872,8 @@ VC5Decompressor::getRLV(BitPumpMSB& bits) {
   bits.skipBitsNoFill(decompandedTable17[iTab].size);
   int16_t value = decompandedTable17[iTab].value;
   unsigned int count = decompandedTable17[iTab].count;
-  if (value != 0) {
-    if (bits.getBitsNoFill(1))
-      value = -(value);
-  }
+  if (value != 0 && bits.getBitsNoFill(1))
+    value = -value;
 
   return {value, count};
 }

@@ -111,7 +111,7 @@ isIn(const T value, const std::initializer_list<T2>& list) {
                      [value](const T2& t) { return t == value; });
 }
 
-template <class T> constexpr unsigned bitwidth(T unused = {}) {
+template <class T> constexpr unsigned bitwidth([[maybe_unused]] T unused = {}) {
   return CHAR_BIT * sizeof(T);
 }
 

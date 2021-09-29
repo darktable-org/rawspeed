@@ -39,13 +39,14 @@ class OlympusDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
 
   // A table to quickly look up "high" value
-  const SimpleLUT<char, 12> bittable{[](unsigned i, unsigned tableSize) {
-    int high;
-    for (high = 0; high < 12; high++)
-      if (extractHighBits(i, high, /*effectiveBitwidth=*/11) & 1)
-        break;
-    return std::min(12, high);
-  }};
+  const SimpleLUT<char, 12> bittable{
+      [](unsigned i, [[maybe_unused]] unsigned tableSize) {
+        int high;
+        for (high = 0; high < 12; high++)
+          if (extractHighBits(i, high, /*effectiveBitwidth=*/11) & 1)
+            break;
+        return std::min(12, high);
+      }};
 
   inline __attribute__((always_inline)) int
   parseCarry(BitPumpMSB& bits, std::array<int, 3>* carry) const;

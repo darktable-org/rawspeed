@@ -69,10 +69,14 @@ public:
   }
 };
 
+#ifdef XSTR
 #undef XSTR
+#endif
 #define XSTR(a) #a
 
+#ifdef STR
 #undef STR
+#endif
 #define STR(a) XSTR(a)
 
 #ifndef DEBUG

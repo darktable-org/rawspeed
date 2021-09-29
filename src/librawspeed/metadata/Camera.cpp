@@ -88,7 +88,7 @@ const map<char, CFAColor> Camera::char2enum = {
     {'y', CFAColor::YELLOW},
 };
 
-const map<std::string, CFAColor> Camera::str2enum = {
+const map<std::string, CFAColor, std::less<>> Camera::str2enum = {
     {"GREEN", CFAColor::GREEN},   {"RED", CFAColor::RED},
     {"BLUE", CFAColor::BLUE},     {"FUJI_GREEN", CFAColor::FUJI_GREEN},
     {"CYAN", CFAColor::CYAN},     {"MAGENTA", CFAColor::MAGENTA},
