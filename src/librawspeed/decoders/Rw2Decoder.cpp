@@ -217,18 +217,25 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           ? mRootIFD->getIFDWithTag(TiffTag::PANASONIC_STRIPOFFSET)
           : mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
+  const auto uint16_t version = 
+      raw->getEntry(TiffTag::PANASONIC_RAWFORMAT)->getU16();
+
   // Read blacklevels
   if (raw->hasEntry(static_cast<TiffTag>(0x1c)) &&
       raw->hasEntry(static_cast<TiffTag>(0x1d)) &&
       raw->hasEntry(static_cast<TiffTag>(0x1e))) {
     const auto getBlack = [&raw](TiffTag t) {
-      const auto val = raw->getEntry(t)->getU32();
-      int out;
-      // FIXME: for some cameras, black level specified in EXIF is wrong,
-      //        so this offset is actually needed. Are we reading wrong values?
-      if (__builtin_sadd_overflow(val, 15, &out))
-        ThrowRDE("Integer overflow when calculating black level");
-      return out;
+      const uint32_t val = raw->getEntry(t)->getU16();
+      // After version 4 the black levels appears to be correct.
+      // Continue adding 15 for older raw versions.
+      if(version > 4) {
+        return val;
+      } else {
+        int out;
+        if (__builtin_sadd_overflow(val, 15, &out))
+          ThrowRDE("Integer overflow when calculating black level");
+        return out;
+      }
     };
 
     const int blackRed = getBlack(static_cast<TiffTag>(0x1c));
