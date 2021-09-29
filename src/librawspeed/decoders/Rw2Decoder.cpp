@@ -225,7 +225,7 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       raw->hasEntry(static_cast<TiffTag>(0x1d)) &&
       raw->hasEntry(static_cast<TiffTag>(0x1e))) {
     const auto getBlack = [&raw, version](TiffTag t) {
-      const uint32_t val = raw->getEntry(t)->getU16();
+      const int val = raw->getEntry(t)->getU16();
       // After version 4 the black levels appears to be correct.
       // Continue adding 15 for older raw versions.
       if(version > 4) {
