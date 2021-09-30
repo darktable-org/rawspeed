@@ -826,7 +826,8 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
   const Array2DRef<const int16_t> lowbands3 =
       channels[3].wavelets[0].bands[0]->data->description;
 
-  // Convert to RGGB output
+  // Convert to RGGB or GBRG output
+  bool rggb = mRaw->cfa.getDcrawFilter() == 0x94949494;
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
@@ -844,10 +845,17 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
       int g1 = gs + gd;
       int g2 = gs - gd;
 
-      out(2 * row + 0, 2 * col + 0) = static_cast<uint16_t>(mVC5LogTable[r]);
-      out(2 * row + 0, 2 * col + 1) = static_cast<uint16_t>(mVC5LogTable[g1]);
-      out(2 * row + 1, 2 * col + 0) = static_cast<uint16_t>(mVC5LogTable[g2]);
-      out(2 * row + 1, 2 * col + 1) = static_cast<uint16_t>(mVC5LogTable[b]);
+      if(rggb) {
+        out(2 * row + 0, 2 * col + 0) = static_cast<uint16_t>(mVC5LogTable[r]);
+        out(2 * row + 0, 2 * col + 1) = static_cast<uint16_t>(mVC5LogTable[g1]);
+        out(2 * row + 1, 2 * col + 0) = static_cast<uint16_t>(mVC5LogTable[g2]);
+        out(2 * row + 1, 2 * col + 1) = static_cast<uint16_t>(mVC5LogTable[b]);
+      } else {
+        out(2 * row + 0, 2 * col + 0) = static_cast<uint16_t>(mVC5LogTable[g1]);
+        out(2 * row + 0, 2 * col + 1) = static_cast<uint16_t>(mVC5LogTable[b]);
+        out(2 * row + 1, 2 * col + 0) = static_cast<uint16_t>(mVC5LogTable[r]);
+        out(2 * row + 1, 2 * col + 1) = static_cast<uint16_t>(mVC5LogTable[g2]);
+      }
     }
   }
 }
