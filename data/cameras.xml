@@ -9415,6 +9415,9 @@
 		</CFA>
 		<Crop x="10" y="0" width="-20" height="-10"/>
 		<Sensor black="800" white="16300"/>
+		<Aliases>
+			<Alias>DSC-HX95</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="SONY" model="DSC-R1">
 		<ID make="Sony" model="DSC-R1">Sony DSC-R1</ID>
