@@ -36,7 +36,7 @@ int main() {
   DWORD buffer_size = 0;
   SYSTEM_LOGICAL_PROCESSOR_INFORMATION* buffer = nullptr;
 
-  GetLogicalProcessorInformation(0, &buffer_size);
+  GetLogicalProcessorInformation(nullptr, &buffer_size);
   buffer = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION*)malloc(buffer_size);
   GetLogicalProcessorInformation(&buffer[0], &buffer_size);
 
