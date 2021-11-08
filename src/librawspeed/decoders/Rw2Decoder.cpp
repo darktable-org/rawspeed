@@ -217,7 +217,7 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           ? mRootIFD->getIFDWithTag(TiffTag::PANASONIC_STRIPOFFSET)
           : mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
-  const uint16_t version = 
+  const uint16_t version =
       raw->getEntry(TiffTag::PANASONIC_RAWFORMAT)->getU16();
 
   // Read blacklevels
@@ -226,15 +226,13 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       raw->hasEntry(static_cast<TiffTag>(0x1e))) {
     const auto getBlack = [&raw, version](TiffTag t) {
       const int val = raw->getEntry(t)->getU16();
-      int out;
       // After version 4 the black levels appears to be correct.
+      if (version > 4)
+        return val;
       // Continue adding 15 for older raw versions.
-      if(version > 4) {
-        out = val;
-      } else {
-        if (__builtin_sadd_overflow(val, 15, &out))
-          ThrowRDE("Integer overflow when calculating black level");
-      }
+      int out;
+      if (__builtin_sadd_overflow(val, 15, &out))
+        ThrowRDE("Integer overflow when calculating black level");
       return out;
     };
 
