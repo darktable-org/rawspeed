@@ -11,13 +11,13 @@ jobs:
     name: ${{ matrix.os }}.${{ matrix.compiler.compiler }}.${{ matrix.flavor }}
     runs-on: ubuntu-latest
     env:
-      SONAR_SCANNER_VERSION: 4.4.0.2170
+      SONAR_SCANNER_VERSION: 4.6.2.2472
     strategy:
       fail-fast: false
       matrix:
         os: [ linux ]
         compiler:
-          - { compiler: LLVM12, CC: clang-12, CXX: clang++-12, CLANG_TIDY: clang-tidy-12 }
+          - { compiler: LLVM13, CC: clang-13, CXX: clang++-13, CLANG_TIDY: clang-tidy-13 }
         flavor: [ ClangStaticAnalysis, CodeQLAnalysis, SonarCloudStaticAnalysis ]
     container: debian:unstable-slim
     steps:
@@ -41,14 +41,14 @@ jobs:
           apt-get update;
           apt-get upgrade;
           apt-get install ca-certificates \
-                          clang++-12 \
-                          clang-tidy-12 \
-                          clang-tools-12 \
+                          clang++-13 \
+                          clang-tidy-13 \
+                          clang-tools-13 \
                           cmake \
                           git \
                           googletest \
                           libjpeg-dev \
-                          libomp-12-dev \
+                          libomp-13-dev \
                           libpugixml-dev \
                           libxml2-utils \
                           make \
@@ -57,8 +57,8 @@ jobs:
           apt-get clean;
           dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld;
           ln -s /usr/bin/ld.gold /usr/bin/ld;
-          ln -s /usr/bin/clang-12 /usr/local/bin/clang;
-          ln -s /usr/bin/clang++-12 /usr/local/bin/clang++;
+          ln -s /usr/bin/clang-13 /usr/local/bin/clang;
+          ln -s /usr/bin/clang++-13 /usr/local/bin/clang++;
       - uses: actions/checkout@v2
         name: Fetch/Checkout RawSpeed git repo
         with:
@@ -114,7 +114,6 @@ jobs:
       - if: matrix.flavor == 'SonarCloudStaticAnalysis'
         name: Download and set up sonar-scanner (for SonarCloud static analysis)
         env:
-          SONAR_SCANNER_VERSION: 4.4.0.2170
           SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-linux.zip
         run: |
           rm -rf /var/lib/apt/lists/*;
