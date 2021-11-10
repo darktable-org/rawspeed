@@ -5868,6 +5868,17 @@
 		<Crop x="0" y="0" width="-11" height="-1"/>
 		<Sensor black="0" white="3986"/>
 	</Camera>
+	<!-- Leica Digilux 3 is the same camera as L1 -->
+	<Camera make="LEICA" model="DIGILUX 3" decoder_version="2">
+		<ID make="Leica" model="Digilux 3">Leica DIGILUX 3</ID>
+		<Crop x="0" y="0" width="-11" height="-1"/>
+		<Sensor black="0" white="3986"/>
+	</Camera>
+	<Camera make="LEICA" model="DIGILUX 3" mode="4:3" decoder_version="2">
+		<ID make="Panasonic" model="Digilux 3">Leica DIGILUX 3</ID>
+		<Crop x="0" y="0" width="-11" height="-1"/>
+		<Sensor black="0" white="3986"/>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-LX2" decoder_version="2">
 		<ID make="Panasonic" model="DMC-LX2">Panasonic DMC-LX2</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
@@ -5878,7 +5889,7 @@
 		<Crop x="4" y="0" width="-38" height="-3"/>
 		<Sensor black="0" white="3986"/>
 	</Camera>
-	<!-- Leica D-Lux 4 is the same camera as LX-3 -->
+	<!-- Leica D-LUX 4 is the same camera as LX3 -->
 	<Camera make="LEICA" model = "D-LUX 4">
 		<ID make="Leica" model="D-LUX 4">Leica D-LUX 4</ID>
 		<CFA width="2" height="2">
