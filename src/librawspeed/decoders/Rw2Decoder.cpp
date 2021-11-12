@@ -217,17 +217,23 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           ? mRootIFD->getIFDWithTag(TiffTag::PANASONIC_STRIPOFFSET)
           : mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
-  const uint16_t version =
-      raw->getEntry(TiffTag::PANASONIC_RAWFORMAT)->getU16();
-
   // Read blacklevels
   if (raw->hasEntry(static_cast<TiffTag>(0x1c)) &&
       raw->hasEntry(static_cast<TiffTag>(0x1d)) &&
       raw->hasEntry(static_cast<TiffTag>(0x1e))) {
-    const auto getBlack = [&raw, version](TiffTag t) {
-      const int val = raw->getEntry(t)->getU16();
+    auto blackLevelsNeedOffsetting = [&]() {
+      bool isOldPanasonic =
+          !mRootIFD->hasEntryRecursive(TiffTag::PANASONIC_STRIPOFFSET);
+      if (isOldPanasonic)
+        return true;
+      const uint16_t version =
+          raw->getEntry(TiffTag::PANASONIC_RAWFORMAT)->getU16();
       // After version 4 the black levels appears to be correct.
-      if (version > 4)
+      return version <= 4;
+    };
+    const auto getBlack = [&raw, blackLevelsNeedOffsetting](TiffTag t) {
+      const int val = raw->getEntry(t)->getU16();
+      if (!blackLevelsNeedOffsetting())
         return val;
       // Continue adding 15 for older raw versions.
       int out;
