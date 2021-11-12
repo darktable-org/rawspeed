@@ -5875,7 +5875,7 @@
 		<Sensor black="0" white="3986"/>
 	</Camera>
 	<Camera make="LEICA" model="DIGILUX 3" mode="4:3" decoder_version="2">
-		<ID make="Panasonic" model="Digilux 3">Leica DIGILUX 3</ID>
+		<ID make="Leica" model="Digilux 3">Leica DIGILUX 3</ID>
 		<Crop x="0" y="0" width="-11" height="-1"/>
 		<Sensor black="0" white="3986"/>
 	</Camera>
