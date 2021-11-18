@@ -43,9 +43,9 @@ const std::array<std::array<std::array<uint8_t, 16>, 2>, 1>
     }};
 
 PentaxDecompressor::PentaxDecompressor(const RawImage& img,
-                                       ByteStream* metaData)
-    : mRaw(img), ht(SetupHuffmanTable(metaData)) {
-  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+                                       std::optional<ByteStream> metaData)
+    : mRaw(img), ht(SetupHuffmanTable(std::move(metaData))) {
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
@@ -125,7 +125,8 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
   return ht;
 }
 
-HuffmanTable PentaxDecompressor::SetupHuffmanTable(ByteStream* metaData) {
+HuffmanTable
+PentaxDecompressor::SetupHuffmanTable(std::optional<ByteStream> metaData) {
   HuffmanTable ht;
 
   if (metaData)

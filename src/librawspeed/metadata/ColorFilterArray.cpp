@@ -19,7 +19,7 @@
 */
 
 #include "metadata/ColorFilterArray.h"
-#include "common/Common.h"                // for writeLog, DEBUG_PRIO_EXTRA
+#include "common/Common.h"                // for writeLog, DEBUG_PRIO::EXTRA
 #include "common/Point.h"                 // for iPoint2D, iPoint2D::value_...
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include <algorithm>                      // for fill
@@ -31,7 +31,7 @@
 #include <string>                         // for string
 
 using std::vector;
-using std::string;
+
 using std::out_of_range;
 using std::map;
 
@@ -56,7 +56,7 @@ void ColorFilterArray::setSize(const iPoint2D& _size)
   if (size.area() <= 0)
     return;
   cfa.resize(size.area());
-  fill(cfa.begin(), cfa.end(), CFA_UNKNOWN);
+  fill(cfa.begin(), cfa.end(), CFAColor::UNKNOWN);
 }
 
 CFAColor ColorFilterArray::getColorAt( int x, int y ) const
@@ -88,7 +88,7 @@ void ColorFilterArray::shiftLeft(int n) {
   if (cfa.empty())
     ThrowRDE("No CFA size set (or set to zero)");
 
-  writeLog(DEBUG_PRIO_EXTRA, "Shift left:%d", n);
+  writeLog(DEBUG_PRIO::EXTRA, "Shift left:%d", n);
   n %= size.x;
   if (n == 0)
     return;
@@ -106,7 +106,7 @@ void ColorFilterArray::shiftDown(int n) {
   if (cfa.empty())
     ThrowRDE("No CFA size set (or set to zero)");
 
-  writeLog(DEBUG_PRIO_EXTRA, "Shift down:%d", n);
+  writeLog(DEBUG_PRIO::EXTRA, "Shift down:%d", n);
   n %= size.y;
   if (n == 0)
     return;
@@ -119,8 +119,8 @@ void ColorFilterArray::shiftDown(int n) {
   cfa = tmp;
 }
 
-string ColorFilterArray::asString() const {
-  string dst;
+std::string ColorFilterArray::asString() const {
+  std::string dst;
   for (int y = 0; y < size.y; y++) {
     for (int x = 0; x < size.x; x++) {
       dst += colorToString(getColorAt(x,y));
@@ -158,19 +158,18 @@ uint32_t ColorFilterArray::shiftDcrawFilter(uint32_t filter, int x, int y) {
   return filter;
 }
 
-const map<CFAColor, string> ColorFilterArray::color2String = {
-    {CFA_RED, "RED"},         {CFA_GREEN, "GREEN"},
-    {CFA_BLUE, "BLUE"},       {CFA_CYAN, "CYAN"},
-    {CFA_MAGENTA, "MAGENTA"}, {CFA_YELLOW, "YELLOW"},
-    {CFA_WHITE, "WHITE"},     {CFA_FUJI_GREEN, "FUJIGREEN"},
-    {CFA_UNKNOWN, "UNKNOWN"}};
+const map<CFAColor, std::string> ColorFilterArray::color2String = {
+    {CFAColor::RED, "RED"},         {CFAColor::GREEN, "GREEN"},
+    {CFAColor::BLUE, "BLUE"},       {CFAColor::CYAN, "CYAN"},
+    {CFAColor::MAGENTA, "MAGENTA"}, {CFAColor::YELLOW, "YELLOW"},
+    {CFAColor::WHITE, "WHITE"},     {CFAColor::FUJI_GREEN, "FUJIGREEN"},
+    {CFAColor::UNKNOWN, "UNKNOWN"}};
 
-string ColorFilterArray::colorToString(CFAColor c)
-{
+std::string ColorFilterArray::colorToString(CFAColor c) {
   try {
     return color2String.at(c);
-  } catch (std::out_of_range&) {
-    ThrowRDE("Unsupported CFA Color: %u", c);
+  } catch (const std::out_of_range&) {
+    ThrowRDE("Unsupported CFA Color: %u", static_cast<unsigned>(c));
   }
 }
 
@@ -184,13 +183,17 @@ void ColorFilterArray::setColorAt(iPoint2D pos, CFAColor c) {
 
 static uint32_t toDcrawColor(CFAColor c) {
   switch (c) {
-  case CFA_FUJI_GREEN:
-  case CFA_RED: return 0;
-  case CFA_MAGENTA:
-  case CFA_GREEN: return 1;
-  case CFA_CYAN:
-  case CFA_BLUE: return 2;
-  case CFA_YELLOW: return 3;
+  case CFAColor::FUJI_GREEN:
+  case CFAColor::RED:
+    return 0;
+  case CFAColor::MAGENTA:
+  case CFAColor::GREEN:
+    return 1;
+  case CFAColor::CYAN:
+  case CFAColor::BLUE:
+    return 2;
+  case CFAColor::YELLOW:
+    return 3;
   default:
     throw out_of_range(ColorFilterArray::colorToString(c));
   }
@@ -213,8 +216,8 @@ uint32_t ColorFilterArray::getDcrawFilter() const {
     }
   }
 
-  writeLog(DEBUG_PRIO_EXTRA, "%s", asString().c_str());
-  writeLog(DEBUG_PRIO_EXTRA, "DCRAW filter:%x", ret);
+  writeLog(DEBUG_PRIO::EXTRA, "%s", asString().c_str());
+  writeLog(DEBUG_PRIO::EXTRA, "DCRAW filter:%x", ret);
 
   return ret;
 }

@@ -31,7 +31,7 @@
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, Endi...
 #include "metadata/Camera.h"                        // for Hints
-#include "metadata/ColorFilterArray.h"              // for CFA_GREEN, Color...
+#include "metadata/ColorFilterArray.h" // for CFAColor::GREEN, Color...
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffIFD, TiffRoo...
 #include "tiff/TiffTag.h"                           // for TiffTag, PANASON...
@@ -41,7 +41,6 @@
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for string, operator==
 
-using std::string;
 using std::fabs;
 
 namespace rawspeed {
@@ -49,7 +48,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool Rw2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer& file) {
+                                      [[maybe_unused]] const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -61,12 +60,13 @@ bool Rw2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 RawImage Rw2Decoder::decodeRawInternal() {
 
   const TiffIFD* raw = nullptr;
-  bool isOldPanasonic = ! mRootIFD->hasEntryRecursive(PANASONIC_STRIPOFFSET);
+  bool isOldPanasonic =
+      !mRootIFD->hasEntryRecursive(TiffTag::PANASONIC_STRIPOFFSET);
 
   if (! isOldPanasonic)
-    raw = mRootIFD->getIFDWithTag(PANASONIC_STRIPOFFSET);
+    raw = mRootIFD->getIFDWithTag(TiffTag::PANASONIC_STRIPOFFSET);
   else
-    raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
+    raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
   uint32_t height = raw->getEntry(static_cast<TiffTag>(3))->getU16();
   uint32_t width = raw->getEntry(static_cast<TiffTag>(2))->getU16();
@@ -75,7 +75,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
     if (width == 0 || height == 0 || width > 4330 || height > 2751)
       ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-    TiffEntry *offsets = raw->getEntry(STRIPOFFSETS);
+    const TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
 
     if (offsets->count != 1) {
       ThrowRDE("Multiple Strips found: %u", offsets->count);
@@ -112,7 +112,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
   } else {
     mRaw->dim = iPoint2D(width, height);
 
-    TiffEntry *offsets = raw->getEntry(PANASONIC_STRIPOFFSET);
+    const TiffEntry* offsets = raw->getEntry(TiffTag::PANASONIC_STRIPOFFSET);
 
     if (offsets->count != 1) {
       ThrowRDE("Multiple Strips found: %u", offsets->count);
@@ -123,10 +123,11 @@ RawImage Rw2Decoder::decodeRawInternal() {
     ByteStream bs(DataBuffer(mFile.getSubView(offset), Endianness::little));
 
     uint16_t bitsPerSample = 12;
-    if (raw->hasEntry(PANASONIC_BITSPERSAMPLE))
-      bitsPerSample = raw->getEntry(PANASONIC_BITSPERSAMPLE)->getU16();
+    if (raw->hasEntry(TiffTag::PANASONIC_BITSPERSAMPLE))
+      bitsPerSample = raw->getEntry(TiffTag::PANASONIC_BITSPERSAMPLE)->getU16();
 
-    switch (uint16_t version = raw->getEntry(PANASONIC_RAWFORMAT)->getU16()) {
+    switch (uint16_t version =
+                raw->getEntry(TiffTag::PANASONIC_RAWFORMAT)->getU16()) {
     case 4: {
       uint32_t section_split_offset = 0x1FF8;
       PanasonicDecompressorV4 p(mRaw, bs, hints.has("zero_is_not_bad"),
@@ -161,28 +162,33 @@ void Rw2Decoder::checkSupportInternal(const CameraMetaData* meta) {
     checkCameraSupported(meta, id, "");
 }
 
-void Rw2Decoder::parseCFA() {
-  if (!mRootIFD->hasEntryRecursive(PANASONIC_CFAPATTERN))
+void Rw2Decoder::parseCFA() const {
+  if (!mRootIFD->hasEntryRecursive(TiffTag::PANASONIC_CFAPATTERN))
     ThrowRDE("No PANASONIC_CFAPATTERN entry found!");
 
-  TiffEntry* CFA = mRootIFD->getEntryRecursive(PANASONIC_CFAPATTERN);
-  if (CFA->type != TiffDataType::TIFF_SHORT || CFA->count != 1) {
-    ThrowRDE("Bad PANASONIC_CFAPATTERN entry (type %u, count %u).", CFA->type,
-             CFA->count);
+  const TiffEntry* CFA =
+      mRootIFD->getEntryRecursive(TiffTag::PANASONIC_CFAPATTERN);
+  if (CFA->type != TiffDataType::SHORT || CFA->count != 1) {
+    ThrowRDE("Bad PANASONIC_CFAPATTERN entry (type %u, count %u).",
+             static_cast<unsigned>(CFA->type), CFA->count);
   }
 
   switch (auto i = CFA->getU16()) {
   case 1:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFA_RED, CFA_GREEN, CFA_GREEN, CFA_BLUE);
+    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
+                     CFAColor::GREEN, CFAColor::BLUE);
     break;
   case 2:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFA_GREEN, CFA_RED, CFA_BLUE, CFA_GREEN);
+    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::GREEN, CFAColor::RED,
+                     CFAColor::BLUE, CFAColor::GREEN);
     break;
   case 3:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFA_GREEN, CFA_BLUE, CFA_RED, CFA_GREEN);
+    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::GREEN, CFAColor::BLUE,
+                     CFAColor::RED, CFAColor::GREEN);
     break;
   case 4:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFA_BLUE, CFA_GREEN, CFA_GREEN, CFA_RED);
+    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::BLUE, CFAColor::GREEN,
+                     CFAColor::GREEN, CFAColor::RED);
     break;
   default:
     ThrowRDE("Unexpected CFA pattern: %u", i);
@@ -193,48 +199,70 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   parseCFA();
 
   auto id = mRootIFD->getID();
-  string mode = guessMode();
+  std::string mode = guessMode();
   int iso = 0;
-  if (mRootIFD->hasEntryRecursive(PANASONIC_ISO_SPEED))
-    iso = mRootIFD->getEntryRecursive(PANASONIC_ISO_SPEED)->getU32();
+  if (mRootIFD->hasEntryRecursive(TiffTag::PANASONIC_ISO_SPEED))
+    iso = mRootIFD->getEntryRecursive(TiffTag::PANASONIC_ISO_SPEED)->getU32();
 
   if (this->checkCameraSupported(meta, id, mode)) {
     setMetaData(meta, id, mode, iso);
   } else {
     mRaw->metadata.mode = mode;
-    writeLog(DEBUG_PRIO_EXTRA, "Mode not found in DB: %s", mode.c_str());
+    writeLog(DEBUG_PRIO::EXTRA, "Mode not found in DB: %s", mode.c_str());
     setMetaData(meta, id, "", iso);
   }
 
-  const TiffIFD* raw = mRootIFD->hasEntryRecursive(PANASONIC_STRIPOFFSET)
-                           ? mRootIFD->getIFDWithTag(PANASONIC_STRIPOFFSET)
-                           : mRootIFD->getIFDWithTag(STRIPOFFSETS);
+  const TiffIFD* raw =
+      mRootIFD->hasEntryRecursive(TiffTag::PANASONIC_STRIPOFFSET)
+          ? mRootIFD->getIFDWithTag(TiffTag::PANASONIC_STRIPOFFSET)
+          : mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
   // Read blacklevels
   if (raw->hasEntry(static_cast<TiffTag>(0x1c)) &&
       raw->hasEntry(static_cast<TiffTag>(0x1d)) &&
       raw->hasEntry(static_cast<TiffTag>(0x1e))) {
-    const int blackRed = raw->getEntry(static_cast<TiffTag>(0x1c))->getU16();
-    const int blackGreen = raw->getEntry(static_cast<TiffTag>(0x1d))->getU16();
-    const int blackBlue = raw->getEntry(static_cast<TiffTag>(0x1e))->getU16();
+    auto blackLevelsNeedOffsetting = [&]() {
+      bool isOldPanasonic =
+          !mRootIFD->hasEntryRecursive(TiffTag::PANASONIC_STRIPOFFSET);
+      if (isOldPanasonic)
+        return true;
+      const uint16_t version =
+          raw->getEntry(TiffTag::PANASONIC_RAWFORMAT)->getU16();
+      // After version 4 the black levels appears to be correct.
+      return version <= 4;
+    };
+    const auto getBlack = [&raw, blackLevelsNeedOffsetting](TiffTag t) {
+      const int val = raw->getEntry(t)->getU16();
+      if (!blackLevelsNeedOffsetting())
+        return val;
+      // Continue adding 15 for older raw versions.
+      int out;
+      if (__builtin_sadd_overflow(val, 15, &out))
+        ThrowRDE("Integer overflow when calculating black level");
+      return out;
+    };
+
+    const int blackRed = getBlack(static_cast<TiffTag>(0x1c));
+    const int blackGreen = getBlack(static_cast<TiffTag>(0x1d));
+    const int blackBlue = getBlack(static_cast<TiffTag>(0x1e));
 
     for(int i = 0; i < 2; i++) {
       for(int j = 0; j < 2; j++) {
         const int k = i + 2 * j;
         const CFAColor c = mRaw->cfa.getColorAt(i, j);
         switch (c) {
-          case CFA_RED:
-            mRaw->blackLevelSeparate[k] = blackRed;
-            break;
-          case CFA_GREEN:
-            mRaw->blackLevelSeparate[k] = blackGreen;
-            break;
-          case CFA_BLUE:
-            mRaw->blackLevelSeparate[k] = blackBlue;
-            break;
-          default:
-            ThrowRDE("Unexpected CFA color %s.",
-                     ColorFilterArray::colorToString(c).c_str());
+        case CFAColor::RED:
+          mRaw->blackLevelSeparate[k] = blackRed;
+          break;
+        case CFAColor::GREEN:
+          mRaw->blackLevelSeparate[k] = blackGreen;
+          break;
+        case CFAColor::BLUE:
+          mRaw->blackLevelSeparate[k] = blackBlue;
+          break;
+        default:
+          ThrowRDE("Unexpected CFA color %s.",
+                   ColorFilterArray::colorToString(c).c_str());
         }
       }
     }
@@ -260,7 +288,7 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 }
 
-std::string Rw2Decoder::guessMode() {
+std::string Rw2Decoder::guessMode() const {
   float ratio = 3.0F / 2.0F; // Default
 
   if (!mRaw->isAllocated())
@@ -288,7 +316,7 @@ std::string Rw2Decoder::guessMode() {
     closest_match = "1:1";
     min_diff  = t;
   }
-  writeLog(DEBUG_PRIO_EXTRA, "Mode guess: '%s'", closest_match.c_str());
+  writeLog(DEBUG_PRIO::EXTRA, "Mode guess: '%s'", closest_match.c_str());
   return closest_match;
 }
 

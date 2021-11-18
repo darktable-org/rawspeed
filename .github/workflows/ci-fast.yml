@@ -18,7 +18,7 @@ jobs:
         os: [ linux ]
         compiler:
           - { compiler: GNU11,  CC: gcc-11,   CXX: g++-11 }
-          - { compiler: LLVM12, CC: clang-12, CXX: clang++-12 }
+          - { compiler: LLVM13, CC: clang-13, CXX: clang++-13 }
         flavor: [ RelWithDebInfo, Release ]
     container: debian:unstable-slim
     steps:
@@ -42,7 +42,7 @@ jobs:
           apt-get update;
           apt-get upgrade;
           apt-get install ca-certificates \
-                          clang++-12 \
+                          clang++-13 \
                           cmake \
                           g++-11 \
                           gcc \
@@ -50,7 +50,7 @@ jobs:
                           git \
                           googletest \
                           libjpeg-dev \
-                          libomp-12-dev \
+                          libomp-13-dev \
                           libpugixml-dev \
                           libxml2-utils \
                           make \
@@ -85,11 +85,23 @@ jobs:
       matrix:
         os: [ windows-latest ]
         msys2:
-          - { msystem: MINGW64, arch: x86_64 }
-          - { msystem: MINGW32, arch: i686   }
+          - { msystem: MINGW64, arch: x86_64       }
+          - { msystem: MINGW32, arch: i686         }
+          - { msystem: CLANG64, arch: clang-x86_64 }
         compiler:
-          - { compiler: GNU, CC: gcc, CXX: g++ }
+          - { compiler: GNU,  CC: gcc,   CXX: g++ }
+          - { compiler: LLVM, CC: clang, CXX: clang++ }
         flavor: [ RelWithDebInfo, Release ]
+        exclude:
+          - os: windows-latest
+            compiler: { compiler: LLVM, CC: clang, CXX: clang++ }
+            msys2: { msystem: MINGW64, arch: x86_64       }
+          - os: windows-latest
+            compiler: { compiler: LLVM, CC: clang, CXX: clang++ }
+            msys2: { msystem: MINGW32, arch: i686         }
+          - os: windows-latest
+            compiler: { compiler: GNU,  CC: gcc,   CXX: g++ }
+            msys2: { msystem: CLANG64, arch: clang-x86_64 }
     defaults:
       run:
         shell: msys2 {0}
@@ -99,7 +111,7 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ matrix.msys2.msystem }}
-          install: pacman-mirrors bash git base-devel mingw-w64-${{ matrix.msys2.arch }}-toolchain mingw-w64-${{ matrix.msys2.arch }}-gcc mingw-w64-${{ matrix.msys2.arch }}-cmake mingw-w64-${{ matrix.msys2.arch }}-ninja mingw-w64-${{ matrix.msys2.arch }}-libxml2 mingw-w64-${{ matrix.msys2.arch }}-pugixml mingw-w64-${{ matrix.msys2.arch }}-libjpeg-turbo mingw-w64-${{ matrix.msys2.arch }}-zlib
+          install: pacman-mirrors bash git base-devel mingw-w64-${{ matrix.msys2.arch }}-toolchain mingw-w64-${{ matrix.msys2.arch }}-cmake mingw-w64-${{ matrix.msys2.arch }}-ninja mingw-w64-${{ matrix.msys2.arch }}-libxml2 mingw-w64-${{ matrix.msys2.arch }}-pugixml mingw-w64-${{ matrix.msys2.arch }}-libjpeg-turbo mingw-w64-${{ matrix.msys2.arch }}-zlib
           update: true
       - name: Build And Test
         env:

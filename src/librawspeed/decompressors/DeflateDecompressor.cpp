@@ -71,7 +71,7 @@ static inline void decodeFPDeltaRow(unsigned char* src, unsigned char* dst,
 }
 
 static inline void expandFP16(unsigned char* dst, int width) {
-  auto* dst16 = reinterpret_cast<uint16_t*>(dst);
+  const auto* dst16 = reinterpret_cast<uint16_t*>(dst);
   auto* dst32 = reinterpret_cast<uint32_t*>(dst);
 
   for (int x = width - 1; x >= 0; x--)
@@ -99,8 +99,8 @@ void DeflateDecompressor::decode(
   const auto cSize = input.getRemainSize();
   const unsigned char* cBuffer = input.getData(cSize);
 
-  int err = uncompress(uBuffer->get(), &dstLen, cBuffer, cSize);
-  if (err != Z_OK) {
+  if (int err = uncompress(uBuffer->get(), &dstLen, cBuffer, cSize);
+      err != Z_OK) {
     ThrowRDE("failed to uncompress tile: %d (%s)", err, zError(err));
   }
 
@@ -125,8 +125,8 @@ void DeflateDecompressor::decode(
 
   for (auto row = 0; row < dim.y; ++row) {
     unsigned char* src = uBuffer->get() + row * maxDim.x * bytesps;
-    unsigned char* dst = static_cast<unsigned char*>(mRaw->getData()) +
-                         ((off.y + row) * mRaw->pitch + off.x * sizeof(float));
+    unsigned char* dst =
+        mRaw->getData() + ((off.y + row) * mRaw->pitch + off.x * sizeof(float));
 
     if (predFactor)
       decodeFPDeltaRow(src, dst, dim.x, maxDim.x, bytesps, predFactor);

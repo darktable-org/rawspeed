@@ -40,21 +40,21 @@ class TiffIFD;
  *
  * Note: RATIONALs are the ratio of two 32-bit integer values.
  */
-enum TiffDataType {
-  TIFF_NOTYPE    = 0, /* placeholder */
-  TIFF_BYTE      = 1, /* 8-bit unsigned integer */
-  TIFF_ASCII     = 2, /* 8-bit bytes w/ last byte null */
-  TIFF_SHORT     = 3, /* 16-bit unsigned integer */
-  TIFF_LONG      = 4, /* 32-bit unsigned integer */
-  TIFF_RATIONAL  = 5, /* 64-bit unsigned fraction */
-  TIFF_SBYTE     = 6, /* !8-bit signed integer */
-  TIFF_UNDEFINED = 7, /* !8-bit untyped data */
-  TIFF_SSHORT    = 8, /* !16-bit signed integer */
-  TIFF_SLONG     = 9, /* !32-bit signed integer */
-  TIFF_SRATIONAL = 10, /* !64-bit signed fraction */
-  TIFF_FLOAT     = 11, /* !32-bit IEEE floating point */
-  TIFF_DOUBLE    = 12, /* !64-bit IEEE floating point */
-  TIFF_OFFSET    = 13, /* 32-bit unsigned offset used for IFD and other offsets */
+enum class TiffDataType {
+  NOTYPE = 0,     /* placeholder */
+  BYTE = 1,       /* 8-bit unsigned integer */
+  ASCII = 2,      /* 8-bit bytes w/ last byte null */
+  SHORT = 3,      /* 16-bit unsigned integer */
+  LONG = 4,       /* 32-bit unsigned integer */
+  RATIONAL = 5,   /* 64-bit unsigned fraction */
+  SBYTE = 6,      /* !8-bit signed integer */
+  UNDEFINED = 7,  /* !8-bit untyped data */
+  SSHORT = 8,     /* !16-bit signed integer */
+  SLONG = 9,      /* !32-bit signed integer */
+  SRATIONAL = 10, /* !64-bit signed fraction */
+  FLOAT = 11,     /* !32-bit IEEE floating point */
+  DOUBLE = 12,    /* !64-bit IEEE floating point */
+  OFFSET = 13,    /* 32-bit unsigned offset used for IFD and other offsets */
 };
 
 class TiffEntry
@@ -107,8 +107,7 @@ public:
     return getArray<float, &TiffEntry::getFloat>(count_);
   }
 
-  ByteStream& getData() { return data; }
-  const uint8_t* getData(uint32_t size) { return data.getData(size); }
+  [[nodiscard]] ByteStream getData() const { return data; }
 
   [[nodiscard]] const DataBuffer& getRootIfdData() const;
 

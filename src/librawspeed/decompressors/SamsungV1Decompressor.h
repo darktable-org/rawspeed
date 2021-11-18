@@ -43,7 +43,7 @@ class SamsungV1Decompressor final : public AbstractSamsungDecompressor {
 public:
   SamsungV1Decompressor(const RawImage& image, const ByteStream& bs_, int bit);
 
-  void decompress();
+  void decompress() const;
 };
 
 } // namespace rawspeed

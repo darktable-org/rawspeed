@@ -19,7 +19,7 @@
 */
 
 #include "common/RawImage.h"              // for RawImageDataFloat, TYPE_FL...
-#include "common/Common.h"                // for writeLog, DEBUG_PRIO_INFO
+#include "common/Common.h"                // for writeLog, DEBUG_PRIO::INFO
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea
@@ -36,12 +36,12 @@ namespace rawspeed {
 
 RawImageDataFloat::RawImageDataFloat() {
   bpp = sizeof(float);
-  dataType = TYPE_FLOAT32;
+  dataType = RawImageType::F32;
   }
 
   RawImageDataFloat::RawImageDataFloat(const iPoint2D& _dim, uint32_t _cpp)
       : RawImageData(_dim, sizeof(float), _cpp) {
-    dataType = TYPE_FLOAT32;
+    dataType = RawImageType::F32;
   }
 
   void RawImageDataFloat::calculateBlackAreas() {
@@ -60,7 +60,7 @@ RawImageDataFloat::RawImageDataFloat() {
             uncropped_dim.y)
           ThrowRDE("Offset + size is larger than height of image");
         for (uint32_t y = area.offset; y < area.offset + area.size; y++) {
-          auto* pixel =
+          const auto* pixel =
               reinterpret_cast<float*>(getDataUncropped(mOffset.x, y));
 
           for (int x = mOffset.x; x < dim.x + mOffset.x; x++) {
@@ -77,7 +77,7 @@ RawImageDataFloat::RawImageDataFloat() {
             uncropped_dim.x)
           ThrowRDE("Offset + size is larger than width of image");
         for (int y = mOffset.y; y < dim.y+mOffset.y; y++) {
-          auto* pixel =
+          const auto* pixel =
               reinterpret_cast<float*>(getDataUncropped(area.offset, y));
 
           for (uint32_t x = area.offset; x < area.size + area.offset; x++) {
@@ -121,7 +121,7 @@ RawImageDataFloat::RawImageDataFloat() {
       float b = 100000000;
       float m = -10000000;
       for (int row = skipBorder*cpp;row < (dim.y - skipBorder);row++) {
-        auto* pixel = reinterpret_cast<float*>(getData(skipBorder, row));
+        const auto* pixel = reinterpret_cast<float*>(getData(skipBorder, row));
         for (int col = skipBorder ; col < gw ; col++) {
           b = min(*pixel, b);
           m = max(*pixel, m);
@@ -132,7 +132,7 @@ RawImageDataFloat::RawImageDataFloat() {
         blackLevel = static_cast<int>(b);
       if (whitePoint == 65536)
         whitePoint = static_cast<int>(m);
-      writeLog(DEBUG_PRIO_INFO, "Estimated black:%d, Estimated white: %d",
+      writeLog(DEBUG_PRIO::INFO, "Estimated black:%d, Estimated white: %d",
                blackLevel, whitePoint);
     }
 
@@ -140,7 +140,7 @@ RawImageDataFloat::RawImageDataFloat() {
     if (blackLevelSeparate[0] < 0)
       calculateBlackAreas();
 
-    startWorker(RawImageWorker::SCALE_VALUES, true);
+    startWorker(RawImageWorker::RawImageWorkerTask::SCALE_VALUES, true);
 }
 
 #if 0 // def WITH_SSE2
@@ -274,8 +274,8 @@ RawImageDataFloat::RawImageDataFloat() {
     }
     for (int y = start_y; y < end_y; y++) {
       auto* pixel = reinterpret_cast<float*>(getData(0, y));
-      float *mul_local = &mul[2*(y&1)];
-      float *sub_local = &sub[2*(y&1)];
+      const float* mul_local = &mul[2 * (y & 1)];
+      const float* sub_local = &sub[2 * (y & 1)];
       for (int x = 0 ; x < gw; x++) {
         pixel[x] = (pixel[x] - sub_local[x&1]) * mul_local[x&1];
       }
@@ -295,7 +295,7 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   std::array<float, 4> dist = {{}};
   std::array<float, 4> weight;
 
-  uint8_t* bad_line = &mBadPixelMap[y * mBadPixelMapPitch];
+  const uint8_t* bad_line = &mBadPixelMap[y * mBadPixelMapPitch];
   // We can have cfa or no-cfa for RawImageDataFloat
   int step = isCFA ? 2 : 1;
 
@@ -352,13 +352,11 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   }
 
   // Find y weights
-  float total_dist_y = dist[2] + dist[3];
-  if (total_dist_y) {
+  if (float total_dist_y = dist[2] + dist[3]; total_dist_y) {
     weight[2] = dist[2] > 0.0F ? (total_dist_y - dist[2]) / total_dist_y : 0;
     weight[3] = 1.0F - weight[2];
     total_div += 1;
   }
-
 
   float total_pixel = 0;
   for (int i = 0; i < 4; i++)
@@ -371,7 +369,7 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
 
   /* Process other pixels - could be done inline, since we have the weights */
   if (cpp > 1 && component == 0)
-    for (int i = 1; i < static_cast<int>(cpp); i++)
+    for (int i = 1; i < cpp; i++)
       fixBadPixel(x,y,i);
 }
 

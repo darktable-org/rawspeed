@@ -20,7 +20,7 @@
 */
 
 #include "decoders/RafDecoder.h"
-#include "common/Common.h"                          // for BitOrder_LSB
+#include "common/Common.h"                          // for BitOrder::LSB
 #include "common/Point.h"                           // for iPoint2D, iRecta...
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/FujiDecompressor.h"         // for FujiDecompressor
@@ -55,7 +55,7 @@ bool RafDecoder::isRAF(const Buffer& input) {
 }
 
 bool RafDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer& file) {
+                                      [[maybe_unused]] const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -65,15 +65,15 @@ bool RafDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 RawImage RafDecoder::decodeRawInternal() {
-  const auto* raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
+  const auto* raw = mRootIFD->getIFDWithTag(TiffTag::FUJI_STRIPOFFSETS);
   uint32_t height = 0;
   uint32_t width = 0;
 
-  if (raw->hasEntry(FUJI_RAWIMAGEFULLHEIGHT)) {
-    height = raw->getEntry(FUJI_RAWIMAGEFULLHEIGHT)->getU32();
-    width = raw->getEntry(FUJI_RAWIMAGEFULLWIDTH)->getU32();
-  } else if (raw->hasEntry(IMAGEWIDTH)) {
-    TiffEntry *e = raw->getEntry(IMAGEWIDTH);
+  if (raw->hasEntry(TiffTag::FUJI_RAWIMAGEFULLHEIGHT)) {
+    height = raw->getEntry(TiffTag::FUJI_RAWIMAGEFULLHEIGHT)->getU32();
+    width = raw->getEntry(TiffTag::FUJI_RAWIMAGEFULLWIDTH)->getU32();
+  } else if (raw->hasEntry(TiffTag::IMAGEWIDTH)) {
+    const TiffEntry* e = raw->getEntry(TiffTag::IMAGEWIDTH);
     height = e->getU16(0);
     width = e->getU16(1);
   } else
@@ -82,13 +82,13 @@ RawImage RafDecoder::decodeRawInternal() {
   if (width == 0 || height == 0 || width > 11808 || height > 8754)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-  if (raw->hasEntry(FUJI_LAYOUT)) {
-    TiffEntry *e = raw->getEntry(FUJI_LAYOUT);
+  if (raw->hasEntry(TiffTag::FUJI_LAYOUT)) {
+    const TiffEntry* e = raw->getEntry(TiffTag::FUJI_LAYOUT);
     alt_layout = !(e->getByte(0) >> 7);
   }
 
-  TiffEntry *offsets = raw->getEntry(FUJI_STRIPOFFSETS);
-  TiffEntry *counts = raw->getEntry(FUJI_STRIPBYTECOUNTS);
+  const TiffEntry* offsets = raw->getEntry(TiffTag::FUJI_STRIPOFFSETS);
+  const TiffEntry* counts = raw->getEntry(TiffTag::FUJI_STRIPBYTECOUNTS);
 
   if (offsets->count != 1 || counts->count != 1)
     ThrowRDE("Multiple Strips found: %u %u", offsets->count, counts->count);
@@ -163,9 +163,10 @@ RawImage RafDecoder::decodeRawInternal() {
     iPoint2D pos(0, 0);
     if (hints.has("jpeg32_bitorder")) {
       u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
-                            BitOrder_MSB32);
+                            BitOrder::MSB32);
     } else {
-      u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps, BitOrder_LSB);
+      u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
+                            BitOrder::LSB);
     }
   }
 
@@ -190,8 +191,8 @@ void RafDecoder::checkSupportInternal(const CameraMetaData* meta) {
 
 void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
-  if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
-    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();
+  if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
+    iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
   mRaw->metadata.isoSpeed = iso;
 
   // This is where we'd normally call setMetaData but since we may still need
@@ -204,7 +205,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   assert(cam != nullptr);
 
   iPoint2D new_size(mRaw->dim);
-  iPoint2D crop_offset = iPoint2D(0,0);
+  iPoint2D crop_offset(0, 0);
 
   if (applyCrop) {
     new_size = cam->cropSize;
@@ -237,7 +238,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     }
 
     iPoint2D final_size(rotatedsize, rotatedsize-1);
-    RawImage rotated = RawImage::create(final_size, TYPE_USHORT16, 1);
+    RawImage rotated = RawImage::create(final_size, RawImageType::UINT16, 1);
     rotated->clearArea(iRectangle2D(iPoint2D(0,0), rotated->dim));
     rotated->metadata = mRaw->metadata;
     rotated->metadata.fujiRotationPos = rotationPos;
@@ -271,8 +272,9 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   mRaw->blackLevel = sensor->mBlackLevel;
 
   // at least the (bayer sensor) X100 comes with a tag like this:
-  if (mRootIFD->hasEntryRecursive(FUJI_BLACKLEVEL)) {
-    TiffEntry* sep_black = mRootIFD->getEntryRecursive(FUJI_BLACKLEVEL);
+  if (mRootIFD->hasEntryRecursive(TiffTag::FUJI_BLACKLEVEL)) {
+    const TiffEntry* sep_black =
+        mRootIFD->getEntryRecursive(TiffTag::FUJI_BLACKLEVEL);
     if (sep_black->count == 4)
     {
       for(int k=0;k<4;k++)
@@ -302,15 +304,16 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   mRaw->metadata.make = id.make;
   mRaw->metadata.model = id.model;
 
-  if (mRootIFD->hasEntryRecursive(FUJI_WB_GRBLEVELS)) {
-    TiffEntry *wb = mRootIFD->getEntryRecursive(FUJI_WB_GRBLEVELS);
+  if (mRootIFD->hasEntryRecursive(TiffTag::FUJI_WB_GRBLEVELS)) {
+    const TiffEntry* wb =
+        mRootIFD->getEntryRecursive(TiffTag::FUJI_WB_GRBLEVELS);
     if (wb->count == 3) {
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(1);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(0);
       mRaw->metadata.wbCoeffs[2] = wb->getFloat(2);
     }
-  } else if (mRootIFD->hasEntryRecursive(FUJIOLDWB)) {
-    TiffEntry *wb = mRootIFD->getEntryRecursive(FUJIOLDWB);
+  } else if (mRootIFD->hasEntryRecursive(TiffTag::FUJIOLDWB)) {
+    const TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::FUJIOLDWB);
     if (wb->count == 8) {
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(1);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(0);
@@ -319,16 +322,16 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 }
 
-int RafDecoder::isCompressed() {
-  const auto* raw = mRootIFD->getIFDWithTag(FUJI_STRIPOFFSETS);
+int RafDecoder::isCompressed() const {
+  const auto* raw = mRootIFD->getIFDWithTag(TiffTag::FUJI_STRIPOFFSETS);
   uint32_t height = 0;
   uint32_t width = 0;
 
-  if (raw->hasEntry(FUJI_RAWIMAGEFULLHEIGHT)) {
-    height = raw->getEntry(FUJI_RAWIMAGEFULLHEIGHT)->getU32();
-    width = raw->getEntry(FUJI_RAWIMAGEFULLWIDTH)->getU32();
-  } else if (raw->hasEntry(IMAGEWIDTH)) {
-    TiffEntry* e = raw->getEntry(IMAGEWIDTH);
+  if (raw->hasEntry(TiffTag::FUJI_RAWIMAGEFULLHEIGHT)) {
+    height = raw->getEntry(TiffTag::FUJI_RAWIMAGEFULLHEIGHT)->getU32();
+    width = raw->getEntry(TiffTag::FUJI_RAWIMAGEFULLWIDTH)->getU32();
+  } else if (raw->hasEntry(TiffTag::IMAGEWIDTH)) {
+    const TiffEntry* e = raw->getEntry(TiffTag::IMAGEWIDTH);
     height = e->getU16(0);
     width = e->getU16(1);
   } else
@@ -337,7 +340,7 @@ int RafDecoder::isCompressed() {
   if (width == 0 || height == 0 || width > 11808 || height > 8754)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-  uint32_t count = raw->getEntry(FUJI_STRIPBYTECOUNTS)->getU32();
+  uint32_t count = raw->getEntry(TiffTag::FUJI_STRIPBYTECOUNTS)->getU32();
 
   // The uncompressed raf's can be 12/14 bpp, so if it is less than that,
   // then we are likely in compressed raf.

@@ -70,6 +70,12 @@ public:
     // the compressed data of this strip
     const ByteStream bs;
 
+    FujiStrip() = delete;
+    FujiStrip(const FujiStrip&) = default;
+    FujiStrip(FujiStrip&&) = default;
+    FujiStrip& operator=(const FujiStrip&) noexcept = delete;
+    FujiStrip& operator=(FujiStrip&&) noexcept = delete;
+
     FujiStrip(const FujiHeader& h_, int block, ByteStream bs_)
         : h(h_), n(block), bs(std::move(bs_)) {
       assert(n >= 0 && n < h.blocks_in_row);
@@ -110,7 +116,7 @@ public:
 
   void decompress() const;
 
-protected:
+private:
   struct fuji_compressed_params {
     fuji_compressed_params() = default;
 
@@ -170,7 +176,6 @@ protected:
     std::array<uint16_t*, ltotal> linebuf;
   };
 
-private:
   ByteStream input;
 
   std::array<std::array<CFAColor, 6>, 6> CFA;
@@ -203,13 +208,13 @@ private:
 
   static void fuji_decode_interpolation_even(int line_width, uint16_t* line_buf,
                                              int* pos);
-  static void fuji_extend_generic(std::array<uint16_t*, ltotal> linebuf,
+  static void fuji_extend_generic(const std::array<uint16_t*, ltotal>& linebuf,
                                   int line_width, int start, int end);
-  static void fuji_extend_red(std::array<uint16_t*, ltotal> linebuf,
+  static void fuji_extend_red(const std::array<uint16_t*, ltotal>& linebuf,
                               int line_width);
-  static void fuji_extend_green(std::array<uint16_t*, ltotal> linebuf,
+  static void fuji_extend_green(const std::array<uint16_t*, ltotal>& linebuf,
                                 int line_width);
-  static void fuji_extend_blue(std::array<uint16_t*, ltotal> linebuf,
+  static void fuji_extend_blue(const std::array<uint16_t*, ltotal>& linebuf,
                                int line_width);
   void xtrans_decode_block(fuji_compressed_block* info, int cur_line) const;
   void fuji_bayer_decode_block(fuji_compressed_block* info, int cur_line) const;

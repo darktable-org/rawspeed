@@ -54,9 +54,9 @@ constexpr SamsungV2Decompressor::OptFlags
 operator|(SamsungV2Decompressor::OptFlags lhs,
           SamsungV2Decompressor::OptFlags rhs) {
   return static_cast<SamsungV2Decompressor::OptFlags>(
-      static_cast<std::underlying_type<SamsungV2Decompressor::OptFlags>::type>(
+      static_cast<std::underlying_type_t<SamsungV2Decompressor::OptFlags>>(
           lhs) |
-      static_cast<std::underlying_type<SamsungV2Decompressor::OptFlags>::type>(
+      static_cast<std::underlying_type_t<SamsungV2Decompressor::OptFlags>>(
           rhs));
 }
 
@@ -65,11 +65,9 @@ constexpr bool operator&(SamsungV2Decompressor::OptFlags lhs,
   return SamsungV2Decompressor::OptFlags::NONE !=
          static_cast<SamsungV2Decompressor::OptFlags>(
              static_cast<
-                 std::underlying_type<SamsungV2Decompressor::OptFlags>::type>(
-                 lhs) &
+                 std::underlying_type_t<SamsungV2Decompressor::OptFlags>>(lhs) &
              static_cast<
-                 std::underlying_type<SamsungV2Decompressor::OptFlags>::type>(
-                 rhs));
+                 std::underlying_type_t<SamsungV2Decompressor::OptFlags>>(rhs));
 }
 
 inline __attribute__((always_inline)) int16_t
@@ -84,7 +82,7 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
                                              const ByteStream& bs,
                                              unsigned bits)
     : AbstractSamsungDecompressor(image) {
-  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
@@ -327,8 +325,7 @@ SamsungV2Decompressor::processBlock(BitPumpMSB32& pump, int row, int col) {
 
 void SamsungV2Decompressor::decompressRow(int row) {
   // Align pump to 16byte boundary
-  const auto line_offset = data.getPosition();
-  if ((line_offset & 0xf) != 0)
+  if (const auto line_offset = data.getPosition(); (line_offset & 0xf) != 0)
     data.skipBytes(16 - (line_offset & 0xf));
 
   BitPumpMSB32 pump(data);

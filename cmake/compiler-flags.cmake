@@ -44,7 +44,7 @@ set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
-IF(NOT APPLE)
+IF(NOT APPLE AND NOT WIN32)
   set(linkerflags "-Wl,--as-needed")
 ELSE()
   set(linkerflags "")

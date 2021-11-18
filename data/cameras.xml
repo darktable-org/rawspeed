@@ -5634,6 +5634,17 @@
 		<Crop x="0" y="0" width="-130" height="0"/>
 		<Sensor black="146" white="3956"/>
 	</Camera>
+	<Camera make="LEICA" model="C (Typ 112)" mode="3:2">
+		<ID make="Leica" model="C (Typ 112)">Leica C (Typ 112)</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-130" height="0"/>
+		<Sensor black="146" white="3956"/>
+	</Camera>
 	<Camera make="LEICA CAMERA AG" model="C-Lux">
 		<ID make="Leica" model="C-Lux">Leica C-Lux</ID>
 		<CFA width="2" height="2">
@@ -5868,6 +5879,17 @@
 		<Crop x="0" y="0" width="-11" height="-1"/>
 		<Sensor black="0" white="3986"/>
 	</Camera>
+	<!-- Leica Digilux 3 is the same camera as L1 -->
+	<Camera make="LEICA" model="DIGILUX 3" decoder_version="2">
+		<ID make="Leica" model="Digilux 3">Leica DIGILUX 3</ID>
+		<Crop x="0" y="0" width="-11" height="-1"/>
+		<Sensor black="0" white="3986"/>
+	</Camera>
+	<Camera make="LEICA" model="DIGILUX 3" mode="4:3" decoder_version="2">
+		<ID make="Leica" model="Digilux 3">Leica DIGILUX 3</ID>
+		<Crop x="0" y="0" width="-11" height="-1"/>
+		<Sensor black="0" white="3986"/>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-LX2" decoder_version="2">
 		<ID make="Panasonic" model="DMC-LX2">Panasonic DMC-LX2</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
@@ -5878,7 +5900,7 @@
 		<Crop x="4" y="0" width="-38" height="-3"/>
 		<Sensor black="0" white="3986"/>
 	</Camera>
-	<!-- Leica D-Lux 4 is the same camera as LX-3 -->
+	<!-- Leica D-LUX 4 is the same camera as LX3 -->
 	<Camera make="LEICA" model = "D-LUX 4">
 		<ID make="Leica" model="D-LUX 4">Leica D-LUX 4</ID>
 		<CFA width="2" height="2">
@@ -9415,6 +9437,9 @@
 		</CFA>
 		<Crop x="10" y="0" width="-20" height="-10"/>
 		<Sensor black="800" white="16300"/>
+		<Aliases>
+			<Alias>DSC-HX95</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="SONY" model="DSC-R1">
 		<ID make="Sony" model="DSC-R1">Sony DSC-R1</ID>
@@ -9955,6 +9980,9 @@
 	<Camera make="Leica Camera AG" model="M8 Digital Camera" mode="dng">
 		<ID make="Leica" model="M8">M8 Digital Camera</ID>
 	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA M10" mode="dng">
+		<ID make="Leica" model="M10">LEICA M10</ID>
+	</Camera>
 	<Camera make="Leica Camera AG" model="LEICA M (Typ 240)" mode="dng">
 		<ID make="Leica" model="M (Typ 240)">LEICA M (Typ 240)</ID>
 	</Camera>
@@ -9979,6 +10007,9 @@
 	<Camera make="RICOH" model="GR DIGITAL 2" mode="dng">
 		<ID make="Ricoh" model="GR II">Ricoh GR DIGITAL 2</ID>
 	</Camera>
+	<Camera make="RICOH IMAGING COMPANY, LTD." model="GR II" mode="dng">
+		<ID make="Ricoh" model="GR II">Ricoh GR II</ID>
+ 	</Camera>
 	<Camera make="RICOH IMAGING COMPANY, LTD." model="RICOH GR III" mode="dng">
 		<ID make="Ricoh" model="GR III">Ricoh GR III</ID>
 	</Camera>

@@ -44,7 +44,7 @@ public:
 
   void interpolate(int version);
 
-protected:
+private:
   template <int version> inline void YUV_TO_RGB(const YCbCr& p, uint16_t* X);
 
   static inline void STORE_RGB(uint16_t* X, int r, int g, int b);

@@ -43,16 +43,12 @@ struct SamsungV1Decompressor::encTableItem {
 SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
                                              const ByteStream& bs_, int bit)
     : AbstractSamsungDecompressor(image), bs(bs_) {
-  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
-  switch (bit) {
-  case 12:
-    break;
-  default:
+  if (bit != 12)
     ThrowRDE("Unexpected bit per pixel (%u)", bit);
-  }
 
   const uint32_t width = mRaw->dim.x;
   const uint32_t height = mRaw->dim.y;
@@ -80,7 +76,7 @@ SamsungV1Decompressor::samsungDiff(BitPumpMSB& pump,
   return diff;
 }
 
-void SamsungV1Decompressor::decompress() {
+void SamsungV1Decompressor::decompress() const {
   // This format has a variable length encoding of how many bits are needed
   // to encode the difference between pixels, we use a table to process it
   // that has two values, the first the number of bits that were used to

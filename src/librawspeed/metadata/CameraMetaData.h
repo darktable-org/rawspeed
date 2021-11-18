@@ -68,10 +68,10 @@ public:
   getChdkCamera(uint32_t filesize) const;
   [[nodiscard]] bool __attribute__((pure))
   hasChdkCamera(uint32_t filesize) const;
-  void disableMake(const std::string &make);
-  void disableCamera(const std::string &make, const std::string &model);
+  void disableMake(std::string_view make) const;
+  void disableCamera(std::string_view make, std::string_view model) const;
 
-protected:
+private:
   const Camera* addCamera(std::unique_ptr<Camera> cam);
 };
 

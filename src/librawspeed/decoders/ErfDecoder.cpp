@@ -37,7 +37,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool ErfDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer& file) {
+                                      [[maybe_unused]] const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -66,8 +66,8 @@ RawImage ErfDecoder::decodeRawInternal() {
 void ErfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, "", 0);
 
-  if (mRootIFD->hasEntryRecursive(EPSONWB)) {
-    TiffEntry *wb = mRootIFD->getEntryRecursive(EPSONWB);
+  if (mRootIFD->hasEntryRecursive(TiffTag::EPSONWB)) {
+    const TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::EPSONWB);
     if (wb->count == 256) {
       // Magic values taken directly from dcraw
       mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(24)) * 508.0F *

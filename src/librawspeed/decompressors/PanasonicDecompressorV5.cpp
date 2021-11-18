@@ -63,7 +63,7 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
                                                  const ByteStream& input_,
                                                  uint32_t bps_)
     : mRaw(img), bps(bps_) {
-  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
@@ -93,11 +93,10 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
   numBlocks = roundUpDivision(numPackets, PacketsPerBlock);
   assert(numBlocks > 0);
 
-  // How many full blocks does the input contain? This is truncating division.
-  const auto haveBlocks = input_.getRemainSize() / BlockSize;
-
   // Does the input contain enough blocks?
-  if (haveBlocks < numBlocks)
+  // How many full blocks does the input contain? This is truncating division.
+  if (const auto haveBlocks = input_.getRemainSize() / BlockSize;
+      haveBlocks < numBlocks)
     ThrowRDE("Insufficient count of input blocks for a given image");
 
   // We only want those blocks we need, no extras.
@@ -120,12 +119,12 @@ void PanasonicDecompressorV5::chopInputIntoBlocks(const PacketDsc& dsc) {
 
   unsigned currPixel = 0;
   std::generate_n(std::back_inserter(blocks), numBlocks,
-                  [&, pixelToCoordinate, pixelsPerBlock]() -> Block {
+                  [&, pixelToCoordinate, pixelsPerBlock]() {
                     ByteStream bs = input.getStream(BlockSize);
                     iPoint2D beginCoord = pixelToCoordinate(currPixel);
                     currPixel += pixelsPerBlock;
                     iPoint2D endCoord = pixelToCoordinate(currPixel);
-                    return {std::move(bs), beginCoord, endCoord};
+                    return Block(std::move(bs), beginCoord, endCoord);
                   });
   assert(blocks.size() == numBlocks);
   assert(currPixel >= mRaw->dim.area());

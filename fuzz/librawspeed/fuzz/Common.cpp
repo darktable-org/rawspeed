@@ -36,11 +36,12 @@ rawspeed::RawImage CreateRawImage(rawspeed::ByteStream& bs) {
   const uint32_t cpp = bs.getU32();
   const uint32_t isCFA = bs.getU32();
 
-  if (type != rawspeed::TYPE_USHORT16 && type != rawspeed::TYPE_FLOAT32)
+  if (type != static_cast<uint32_t>(rawspeed::RawImageType::UINT16) &&
+      type != static_cast<uint32_t>(rawspeed::RawImageType::F32))
     ThrowRSE("Unknown image type: %u", type);
 
   rawspeed::RawImage mRaw(
-      rawspeed::RawImage::create(rawspeed::RawImageType(type)));
+      rawspeed::RawImage::create(static_cast<rawspeed::RawImageType>(type)));
 
   mRaw->dim =
       rawspeed::iPoint2D(static_cast<rawspeed::iPoint2D::value_type>(width),
@@ -67,10 +68,11 @@ rawspeed::ColorFilterArray CreateCFA(rawspeed::ByteStream& bs) {
   for (auto x = 0U; x < cfaWidth; x++) {
     for (auto y = 0U; y < cfaHeight; y++) {
       const uint32_t color = bs.getU32();
-      if (color >= static_cast<uint32_t>(rawspeed::CFA_END))
+      if (color >= static_cast<uint32_t>(rawspeed::CFAColor::END))
         ThrowRSE("Unknown color: %u", color);
 
-      cfa.setColorAt(rawspeed::iPoint2D(x, y), rawspeed::CFAColor(color));
+      cfa.setColorAt(rawspeed::iPoint2D(x, y),
+                     static_cast<rawspeed::CFAColor>(color));
     }
   }
 

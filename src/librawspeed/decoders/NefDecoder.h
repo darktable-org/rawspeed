@@ -49,22 +49,21 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void checkSupportInternal(const CameraMetaData* meta) override;
 
-protected:
+private:
   struct NefSlice final : RawSlice {};
 
-private:
   [[nodiscard]] int getDecoderVersion() const override { return 5; }
-  bool D100IsCompressed(uint32_t offset);
+  [[nodiscard]] bool D100IsCompressed(uint32_t offset) const;
   static bool NEFIsUncompressed(const TiffIFD* raw);
   static bool NEFIsUncompressedRGB(const TiffIFD* raw);
-  void DecodeUncompressed();
-  void DecodeD100Uncompressed();
-  void DecodeSNefUncompressed();
+  void DecodeUncompressed() const;
+  void DecodeD100Uncompressed() const;
+  void DecodeSNefUncompressed() const;
   void readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
-                           const iPoint2D& offset, int inputPitch);
-  void DecodeNikonSNef(const ByteStream& input);
-  std::string getMode();
-  std::string getExtendedMode(const std::string &mode);
+                           const iPoint2D& offset, int inputPitch) const;
+  void DecodeNikonSNef(const ByteStream& input) const;
+  [[nodiscard]] std::string getMode() const;
+  [[nodiscard]] std::string getExtendedMode(const std::string& mode) const;
   static std::vector<uint16_t> gammaCurve(double pwr, double ts, int mode,
                                           int imax);
 

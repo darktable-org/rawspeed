@@ -67,17 +67,21 @@ inline bool ASan::RegionIsPoisoned(void const volatile* addr, size_t size) {
   return nullptr != __asan_region_is_poisoned(beg, size);
 }
 #else
-inline void ASan::PoisonMemoryRegion(void const volatile* addr, size_t size) {
+inline void ASan::PoisonMemoryRegion([[maybe_unused]] void const volatile* addr,
+                                     [[maybe_unused]] size_t size) {
   // If we are building without ASan, then there is no way to have a non-empty
   // body of this function. It's better than to have a macros, or to use
   // preprocessor in every place it is called.
 }
-inline void ASan::UnPoisonMemoryRegion(void const volatile* addr, size_t size) {
+inline void
+ASan::UnPoisonMemoryRegion([[maybe_unused]] void const volatile* addr,
+                           [[maybe_unused]] size_t size) {
   // If we are building without ASan, then there is no way to have a non-empty
   // body of this function. It's better than to have a macros, or to use
   // preprocessor in every place it is called.
 }
-inline bool ASan::RegionIsPoisoned(void const volatile* addr, size_t size) {
+inline bool ASan::RegionIsPoisoned([[maybe_unused]] void const volatile* addr,
+                                   [[maybe_unused]] size_t size) {
   // If we are building without ASan, then there is no way to have a poisoned
   // memory region.
   return false;

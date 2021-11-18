@@ -50,7 +50,7 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   static int isMRW(const Buffer& input);
 
-protected:
+private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }
   void parseHeader();
 };

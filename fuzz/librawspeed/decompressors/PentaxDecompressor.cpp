@@ -41,14 +41,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(bs));
 
-    rawspeed::ByteStream* metaData = nullptr;
-    rawspeed::ByteStream metaDataStream;
+    std::optional<rawspeed::ByteStream> metaData;
 
     const bool haveMetadata = bs.get<uint32_t>();
     if (haveMetadata) {
       const auto medataLength = bs.get<uint32_t>();
-      metaDataStream = bs.getStream(medataLength);
-      metaData = &metaDataStream;
+      metaData = bs.getStream(medataLength);
     }
 
     rawspeed::ByteStream rawData = bs.getStream(bs.getRemainSize());
@@ -58,7 +56,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     p.decompress(rawData);
 
     mRaw->checkMemIsInitialized();
-  } catch (rawspeed::RawspeedException&) {
+  } catch (const rawspeed::RawspeedException&) {
     // Exceptions are good, crashes are bad.
   }
 

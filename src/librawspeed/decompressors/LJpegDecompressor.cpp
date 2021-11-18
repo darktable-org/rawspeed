@@ -35,8 +35,9 @@ namespace rawspeed {
 
 LJpegDecompressor::LJpegDecompressor(const ByteStream& bs, const RawImage& img)
     : AbstractLJpegDecompressor(bs, img) {
-  if (mRaw->getDataType() != TYPE_USHORT16)
-    ThrowRDE("Unexpected data type (%u)", mRaw->getDataType());
+  if (mRaw->getDataType() != RawImageType::UINT16)
+    ThrowRDE("Unexpected data type (%u)",
+             static_cast<unsigned>(mRaw->getDataType()));
 
   if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == sizeof(uint16_t)) ||
         (mRaw->getCpp() == 2 && mRaw->getBpp() == 2 * sizeof(uint16_t)) ||
@@ -105,8 +106,9 @@ void LJpegDecompressor::decodeScan()
   const auto tileRequiredWidth = mRaw->getCpp() * w;
 
   // How many full pixel blocks do we need to consume for that?
-  const auto blocksToConsume = roundUpDivision(tileRequiredWidth, frame.cps);
-  if (frame.w < blocksToConsume || frame.h < h) {
+  if (const auto blocksToConsume =
+          roundUpDivision(tileRequiredWidth, frame.cps);
+      frame.w < blocksToConsume || frame.h < h) {
     ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
              frame.cps * frame.w, frame.h, tileRequiredWidth, h);
   }
@@ -165,9 +167,9 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   assert(mRaw->dim.x >= N_COMP);
   assert((mRaw->getCpp() * (mRaw->dim.x - offX)) >= N_COMP);
 
-  const CroppedArray2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef(),
-                                        mRaw->getCpp() * offX, offY,
-                                        mRaw->getCpp() * w, h);
+  const CroppedArray2DRef img(mRaw->getU16DataAsUncroppedArray2DRef(),
+                              mRaw->getCpp() * offX, offY, mRaw->getCpp() * w,
+                              h);
 
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();

@@ -93,6 +93,12 @@ struct DngSliceElement final {
   const unsigned width;
   const unsigned height;
 
+  DngSliceElement() = delete;
+  DngSliceElement(const DngSliceElement&) = default;
+  DngSliceElement(DngSliceElement&&) = default;
+  DngSliceElement& operator=(const DngSliceElement&) noexcept = delete;
+  DngSliceElement& operator=(DngSliceElement&&) noexcept = delete;
+
   DngSliceElement(const DngTilingDescription& dsc_, unsigned n_, ByteStream bs_)
       : dsc(dsc_), n(n_), bs(std::move(bs_)), column(n % dsc.tilesX),
         row(n / dsc.tilesX), lastColumn((column + 1) == dsc.tilesX),
@@ -123,7 +129,7 @@ class AbstractDngDecompressor final : public AbstractDecompressor {
   void decompressThread() const noexcept;
 
 public:
-  AbstractDngDecompressor(const RawImage& img, DngTilingDescription dsc_,
+  AbstractDngDecompressor(const RawImage& img, const DngTilingDescription& dsc_,
                           int compression_, bool mFixLjpeg_, uint32_t mBps_,
                           uint32_t mPredictor_)
       : mRaw(img), dsc(dsc_), compression(compression_), mFixLjpeg(mFixLjpeg_),

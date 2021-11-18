@@ -33,7 +33,7 @@ class CameraMetaData;
 
 class KdcDecoder final : public AbstractTiffDecoder
 {
-  Buffer getInputBuffer();
+  [[nodiscard]] Buffer getInputBuffer() const;
 
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
@@ -44,7 +44,7 @@ public:
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
-protected:
+private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }
 };
 

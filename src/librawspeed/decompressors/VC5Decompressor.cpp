@@ -93,7 +93,7 @@ const std::array<RLV, table17.length> decompandedTable17 = []() {
   return d;
 }();
 
-inline bool readValue(bool& storage) {
+inline bool readValue(const bool& storage) {
   bool value;
 
 #ifdef HAVE_OPENMP
@@ -104,12 +104,11 @@ inline bool readValue(bool& storage) {
   return value;
 }
 
+constexpr int PRECISION_MIN = 8;
+constexpr int PRECISION_MAX = 16;
+constexpr int MARKER_BAND_END = 1;
+
 } // namespace
-
-#define PRECISION_MIN 8
-#define PRECISION_MAX 16
-
-#define MARKER_BAND_END 1
 
 namespace rawspeed {
 
@@ -127,11 +126,11 @@ bool VC5Decompressor::Wavelet::allBandsValid() const {
 
 namespace {
 template <typename LowGetter>
-static inline auto convolute(int row, int col, std::array<int, 4> muls,
-                             const Array2DRef<const int16_t> high,
-                             LowGetter lowGetter, int DescaleShift = 0) {
+inline auto convolute(int row, int col, std::array<int, 4> muls,
+                      const Array2DRef<const int16_t> high, LowGetter lowGetter,
+                      int DescaleShift = 0) {
   auto highCombined = muls[0] * high(row, col);
-  auto lowsCombined = [muls, lowGetter]() {
+  auto lowsCombined = [muls, &lowGetter]() {
     int lows = 0;
     for (int i = 0; i < 3; i++)
       lows += muls[1 + i] * lowGetter(i);
@@ -184,7 +183,7 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
     auto lowGetter = [&row, &col, low](int delta) {
       return low(row + SegmentTy::coord_shift + delta, col);
     };
-    auto convolution = [&row, &col, high, lowGetter](std::array<int, 4> muls) {
+    auto convolution = [&row, &col, high, &lowGetter](std::array<int, 4> muls) {
       return convolute(row, col, muls, high, lowGetter, /*DescaleShift*/ 0);
     };
 
@@ -225,7 +224,7 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
 VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
     const Array2DRef<const int16_t> low, const Array2DRef<const int16_t> high,
     int descaleShift, bool clampUint = false,
-    bool finalWavelet = false) noexcept {
+    [[maybe_unused]] bool finalWavelet = false) noexcept {
   BandData combined;
   auto& dst = combined.description;
   dst = Array2DRef<int16_t>::create(combined.storage, 2 * high.width,
@@ -237,7 +236,7 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
     auto lowGetter = [&row, &col, low](int delta) {
       return low(row, col + SegmentTy::coord_shift + delta);
     };
-    auto convolution = [&row, &col, high, lowGetter,
+    auto convolution = [&row, &col, high, &lowGetter,
                         descaleShift](std::array<int, 4> muls) {
       return convolute(row, col, muls, high, lowGetter, descaleShift);
     };
@@ -280,7 +279,7 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
-    createLowpassReconstructionTask(bool& exceptionThrown) noexcept {
+    createLowpassReconstructionTask(const bool& exceptionThrown) noexcept {
   auto& highlow = wavelet.bands[2]->data;
   auto& lowlow = wavelet.bands[0]->data;
   auto& lowpass = intermediates.lowpass;
@@ -306,7 +305,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
-    createHighpassReconstructionTask(bool& exceptionThrown) noexcept {
+    createHighpassReconstructionTask(const bool& exceptionThrown) noexcept {
   auto& highhigh = wavelet.bands[3]->data;
   auto& lowhigh = wavelet.bands[1]->data;
   auto& highpass = intermediates.highpass;
@@ -331,7 +330,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
 }
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
-    createLowHighPassCombiningTask(bool& exceptionThrown) noexcept {
+    createLowHighPassCombiningTask(const bool& exceptionThrown) noexcept {
   auto& lowpass = intermediates.lowpass;
   auto& highpass = intermediates.highpass;
   auto& reconstructedLowpass = data;
@@ -527,8 +526,7 @@ void VC5Decompressor::parseVC5() {
       unsigned int chunkSize = 0;
       if (matches(tag, VC5Tag::LARGE_CHUNK)) {
         chunkSize = static_cast<unsigned int>(
-            ((static_cast<std::underlying_type<VC5Tag>::type>(tag) & 0xff)
-             << 16) |
+            ((static_cast<std::underlying_type_t<VC5Tag>>(tag) & 0xff) << 16) |
             (val & 0xffff));
       } else if (matches(tag, VC5Tag::SMALL_CHUNK)) {
         chunkSize = (val & 0xffff);
@@ -550,7 +548,7 @@ void VC5Decompressor::parseVC5() {
 
       if (!optional) {
         ThrowRDE("Unknown (unhandled) non-optional Tag 0x%04hx",
-                 static_cast<std::underlying_type<VC5Tag>::type>(tag));
+                 static_cast<std::underlying_type_t<VC5Tag>>(tag));
       }
 
       if (chunkSize)
@@ -560,12 +558,10 @@ void VC5Decompressor::parseVC5() {
     }
     }
 
-    done = true;
-    for (int iChannel = 0; iChannel < numChannels && done; ++iChannel) {
-      Wavelet& wavelet = channels[iChannel].wavelets[0];
-      if (!wavelet.isBandValid(0))
-        done = false;
-    }
+    done = std::all_of(channels.begin(), channels.end(),
+                       [](const Channel& channel) {
+                         return channel.wavelets[0].isBandValid(0);
+                       });
   }
 }
 
@@ -584,7 +580,7 @@ void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
       try {
         assert(!decodedData.has_value() && "Decoded this band already?");
         decodedData = decode();
-      } catch (RawspeedException& err) {
+      } catch (const RawspeedException& err) {
         // Propagate the exception out of OpenMP magic.
         errLog.setError(err.what());
 #ifdef HAVE_OPENMP
@@ -654,9 +650,7 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
     }
 
     int16_t decode() {
-      auto dequantize = [quant = quant](int16_t val) -> int16_t {
-        return val * quant;
-      };
+      auto dequantize = [quant = quant](int16_t val) { return val * quant; };
 
       if (numPixelsLeft == 0) {
         decodeNextPixelGroup();
@@ -878,10 +872,8 @@ VC5Decompressor::getRLV(BitPumpMSB& bits) {
   bits.skipBitsNoFill(decompandedTable17[iTab].size);
   int16_t value = decompandedTable17[iTab].value;
   unsigned int count = decompandedTable17[iTab].count;
-  if (value != 0) {
-    if (bits.getBitsNoFill(1))
-      value = -(value);
-  }
+  if (value != 0 && bits.getBitsNoFill(1))
+    value = -value;
 
   return {value, count};
 }

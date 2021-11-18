@@ -50,7 +50,7 @@ protected:
   [[nodiscard]] int getDecoderVersion() const override { return 1; }
 
 private:
-  int isCompressed();
+  [[nodiscard]] int isCompressed() const;
 };
 
 } // namespace rawspeed

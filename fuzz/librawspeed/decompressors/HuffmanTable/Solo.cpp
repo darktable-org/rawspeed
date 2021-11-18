@@ -67,7 +67,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     while (true)
       ht.decode<decltype(bits), FULLDECODE>(bits);
-  } catch (rawspeed::RawspeedException&) {
+  } catch (const rawspeed::RawspeedException&) {
     return 0;
   }
 

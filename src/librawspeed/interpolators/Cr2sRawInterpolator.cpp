@@ -107,7 +107,7 @@ template <int version> void Cr2sRawInterpolator::interpolate_422_row(int row) {
 
   using MCUTy = std::array<YCbCr, PixelsPerMCU>;
 
-  auto LoadMCU = [&](int MCUIdx) {
+  auto LoadMCU = [input = input, row](int MCUIdx) {
     MCUTy MCU;
     for (int YIdx = 0; YIdx < PixelsPerMCU; ++YIdx)
       YCbCr::LoadY(&MCU[YIdx],
@@ -116,7 +116,7 @@ template <int version> void Cr2sRawInterpolator::interpolate_422_row(int row) {
                     &input(row, InputComponentsPerMCU * MCUIdx + YsPerMCU));
     return MCU;
   };
-  auto StoreMCU = [&](const MCUTy& MCU, int MCUIdx) {
+  auto StoreMCU = [this, out, row](const MCUTy& MCU, int MCUIdx) {
     for (int Pixel = 0; Pixel < PixelsPerMCU; ++Pixel) {
       YUV_TO_RGB<version>(MCU[Pixel],
                           &out(row, OutputComponentsPerMCU * MCUIdx +
@@ -204,7 +204,8 @@ template <int version> void Cr2sRawInterpolator::interpolate_420_row(int row) {
 
   using MCUTy = std::array<std::array<YCbCr, X_S_F>, Y_S_F>;
 
-  auto LoadMCU = [&](int Row, int MCUIdx) __attribute__((always_inline)) {
+  auto LoadMCU = [input = input](int Row, int MCUIdx)
+      __attribute__((always_inline)) {
     MCUTy MCU;
     for (int MCURow = 0; MCURow < Y_S_F; ++MCURow) {
       for (int MCUCol = 0; MCUCol < X_S_F; ++MCUCol) {
@@ -217,7 +218,7 @@ template <int version> void Cr2sRawInterpolator::interpolate_420_row(int row) {
                     &input(Row, InputComponentsPerMCU * MCUIdx + YsPerMCU));
     return MCU;
   };
-  auto StoreMCU = [&](const MCUTy& MCU, int MCUIdx, int Row)
+  auto StoreMCU = [ this, out ](const MCUTy& MCU, int MCUIdx, int Row)
       __attribute__((always_inline)) {
     for (int MCURow = 0; MCURow < Y_S_F; ++MCURow) {
       for (int MCUCol = 0; MCUCol < X_S_F; ++MCUCol) {
@@ -355,7 +356,8 @@ template <int version> void Cr2sRawInterpolator::interpolate_420() {
 
   using MCUTy = std::array<std::array<YCbCr, X_S_F>, Y_S_F>;
 
-  auto LoadMCU = [&](int Row, int MCUIdx) __attribute__((always_inline)) {
+  auto LoadMCU = [input = input](int Row, int MCUIdx)
+      __attribute__((always_inline)) {
     MCUTy MCU;
     for (int MCURow = 0; MCURow < Y_S_F; ++MCURow) {
       for (int MCUCol = 0; MCUCol < X_S_F; ++MCUCol) {
@@ -368,7 +370,7 @@ template <int version> void Cr2sRawInterpolator::interpolate_420() {
                     &input(Row, InputComponentsPerMCU * MCUIdx + YsPerMCU));
     return MCU;
   };
-  auto StoreMCU = [&](const MCUTy& MCU, int MCUIdx, int Row)
+  auto StoreMCU = [ this, out ](const MCUTy& MCU, int MCUIdx, int Row)
       __attribute__((always_inline)) {
     for (int MCURow = 0; MCURow < Y_S_F; ++MCURow) {
       for (int MCUCol = 0; MCUCol < X_S_F; ++MCUCol) {

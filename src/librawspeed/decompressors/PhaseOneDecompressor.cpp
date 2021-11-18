@@ -43,10 +43,10 @@ namespace rawspeed {
 PhaseOneDecompressor::PhaseOneDecompressor(const RawImage& img,
                                            std::vector<PhaseOneStrip>&& strips_)
     : mRaw(img), strips(std::move(strips_)) {
-  if (mRaw->getDataType() != TYPE_USHORT16)
+  if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
 
-  if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == sizeof(uint16_t))))
+  if (!(mRaw->getCpp() == 1 && mRaw->getBpp() == sizeof(uint16_t)))
     ThrowRDE("Unexpected cpp: %u", mRaw->getCpp());
 
   if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 2 != 0 ||
@@ -141,7 +141,7 @@ void PhaseOneDecompressor::decompressThread() const noexcept {
   for (auto strip = strips.cbegin(); strip < strips.cend(); ++strip) {
     try {
       decompressStrip(*strip);
-    } catch (RawspeedException& err) {
+    } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
     }

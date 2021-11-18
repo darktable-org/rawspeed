@@ -68,7 +68,7 @@ enum class VC5Tag : int16_t {
   Optional = int16_t(0x8000U), // only signbit set
 };
 inline VC5Tag operator&(VC5Tag LHS, VC5Tag RHS) {
-  using value_type = std::underlying_type<VC5Tag>::type;
+  using value_type = std::underlying_type_t<VC5Tag>;
   return static_cast<VC5Tag>(static_cast<value_type>(LHS) &
                              static_cast<value_type>(RHS));
 }
@@ -81,7 +81,7 @@ inline bool is(VC5Tag LHS, VC5Tag RHS) {
   return (LHS & RHS) == RHS;
 }
 inline VC5Tag operator-(VC5Tag tag) {
-  using value_type = std::underlying_type<VC5Tag>::type;
+  using value_type = std::underlying_type_t<VC5Tag>;
   // Negate
   return static_cast<VC5Tag>(-static_cast<value_type>(tag));
 }
@@ -121,7 +121,8 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   class Wavelet {
   public:
-    int width, height;
+    int width;
+    int height;
     int16_t prescale;
 
     struct AbstractBand {
@@ -143,11 +144,13 @@ class VC5Decompressor final : public AbstractDecompressor {
                                    bool finalWavelet_ = false)
           : AbstractBand(wavelet_), clampUint(clampUint_),
             finalWavelet(finalWavelet_) {}
-      void createLowpassReconstructionTask(bool& exceptionThrown) noexcept;
-      void createHighpassReconstructionTask(bool& exceptionThrown) noexcept;
-      void createLowHighPassCombiningTask(bool& exceptionThrown) noexcept;
+      void
+      createLowpassReconstructionTask(const bool& exceptionThrown) noexcept;
+      void
+      createHighpassReconstructionTask(const bool& exceptionThrown) noexcept;
+      void createLowHighPassCombiningTask(const bool& exceptionThrown) noexcept;
       void createDecodingTasks(ErrorLog& errLog,
-                               bool& exceptionThrown) noexcept final;
+                               bool& exceptionThrown) noexcept override;
     };
     struct AbstractDecodeableBand : AbstractBand {
       ByteStream bs;
@@ -161,13 +164,13 @@ class VC5Decompressor final : public AbstractDecompressor {
       uint16_t lowpassPrecision;
       LowPassBand(Wavelet& wavelet_, ByteStream bs_,
                   uint16_t lowpassPrecision_);
-      [[nodiscard]] BandData decode() const noexcept final;
+      [[nodiscard]] BandData decode() const noexcept override;
     };
     struct HighPassBand final : AbstractDecodeableBand {
       int16_t quant;
       HighPassBand(Wavelet& wavelet_, ByteStream bs_, int16_t quant_)
           : AbstractDecodeableBand(wavelet_, std::move(bs_)), quant(quant_) {}
-      [[nodiscard]] BandData decode() const final;
+      [[nodiscard]] BandData decode() const override;
     };
 
     static constexpr uint16_t maxBands = numLowPassBands + numHighPassBands;

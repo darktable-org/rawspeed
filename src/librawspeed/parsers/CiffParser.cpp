@@ -30,14 +30,12 @@
 #include "parsers/CiffParserException.h" // for ThrowCPE
 #include "tiff/CiffEntry.h"              // for CiffEntry
 #include "tiff/CiffIFD.h"                // for CiffIFD
-#include "tiff/CiffTag.h"                // for CIFF_MAKEMODEL
+#include "tiff/CiffTag.h"                // for CiffTag::MAKEMODEL
 #include <cstdint>                       // for uint16_t, uint32_t
 #include <memory>                        // for unique_ptr, make_unique
 #include <string>                        // for operator==, string
 #include <utility>                       // for move
 #include <vector>                        // for vector
-
-using std::string;
 
 namespace rawspeed {
 
@@ -46,8 +44,8 @@ CiffParser::CiffParser(const Buffer& inputData) : RawParser(inputData) {}
 void CiffParser::parseData() {
   ByteStream bs(DataBuffer(mInput, Endianness::little));
 
-  const uint16_t byteOrder = bs.getU16();
-  if (byteOrder != 0x4949) // "II" / little-endian
+  if (const uint16_t byteOrder = bs.getU16();
+      byteOrder != 0x4949) // "II" / little-endian
     ThrowCPE("Not a CIFF file (endianness)");
 
   // Offset to the beginning of the CIFF
@@ -66,11 +64,11 @@ std::unique_ptr<RawDecoder> CiffParser::getDecoder(const CameraMetaData* meta) {
   if (!mRootIFD)
     parseData();
 
-  const auto potentials(mRootIFD->getIFDsWithTag(CIFF_MAKEMODEL));
+  const auto potentials(mRootIFD->getIFDsWithTag(CiffTag::MAKEMODEL));
 
   for (const auto& potential : potentials) {
-    const auto* const mm = potential->getEntry(CIFF_MAKEMODEL);
-    const string make = trimSpaces(mm->getString());
+    const auto* const mm = potential->getEntry(CiffTag::MAKEMODEL);
+    const std::string make = trimSpaces(mm->getString());
 
     if (make == "Canon")
       return std::make_unique<CrwDecoder>(move(mRootIFD), mInput);

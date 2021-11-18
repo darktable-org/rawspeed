@@ -45,27 +45,25 @@
 #endif
 
 using std::chrono::steady_clock;
-using std::string;
-using std::ostringstream;
-using std::vector;
-using std::ifstream;
-using std::istreambuf_iterator;
-using std::ofstream;
-using std::cout;
-using std::endl;
-using std::map;
-using std::cerr;
+
 using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
-using rawspeed::RawParser;
-using rawspeed::RawImage;
-using rawspeed::iPoint2D;
-using rawspeed::TYPE_USHORT16;
-using rawspeed::TYPE_FLOAT32;
 using rawspeed::getU16BE;
 using rawspeed::getU32LE;
-using rawspeed::roundUp;
+using rawspeed::iPoint2D;
+using rawspeed::RawImage;
+using rawspeed::RawParser;
 using rawspeed::RawspeedException;
+using rawspeed::roundUp;
+using std::cerr;
+using std::cout;
+using std::endl;
+using std::ifstream;
+using std::istreambuf_iterator;
+using std::map;
+using std::ofstream;
+using std::ostringstream;
+using std::vector;
 
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
 using std::setw;
@@ -125,7 +123,7 @@ md5::md5_state imgDataHash(const RawImage& raw) {
   line_hashes.resize(dimUncropped.y, md5::md5_init);
 
   for (int j = 0; j < dimUncropped.y; j++) {
-    auto* d = raw->getDataUncropped(0, j);
+    const auto* d = raw->getDataUncropped(0, j);
     md5::md5_hash(d, raw->pitch - raw->padding, &line_hashes[j]);
   }
 
@@ -154,7 +152,7 @@ APPEND(ostringstream* oss, const char* format, ...) {
   *oss << line.data();
 }
 
-string img_hash(const RawImage& r) {
+std::string img_hash(const RawImage& r) {
   ostringstream oss;
 
   APPEND(&oss, "make: %s\n", r->metadata.make.c_str());
@@ -183,7 +181,7 @@ string img_hash(const RawImage& r) {
   APPEND(&oss, "filters: 0x%x\n", r->cfa.getDcrawFilter());
   APPEND(&oss, "bpp: %d\n", r->getBpp());
   APPEND(&oss, "cpp: %d\n", r->getCpp());
-  APPEND(&oss, "dataType: %d\n", r->getDataType());
+  APPEND(&oss, "dataType: %u\n", static_cast<unsigned>(r->getDataType()));
 
   const iPoint2D dimUncropped = r->getUncroppedDim();
   APPEND(&oss, "dimUncropped: %dx%d\n", dimUncropped.x, dimUncropped.y);
@@ -219,23 +217,21 @@ string img_hash(const RawImage& r) {
          rawspeed::md5::hash_to_string(hash_of_line_hashes).c_str());
 
   const auto errors = r->getErrors();
-  for (const string& e : errors)
+  for (const std::string& e : errors)
     APPEND(&oss, "WARNING: [rawspeed] %s\n", e.c_str());
-
-#undef APPEND
 
   return oss.str();
 }
 
 using file_ptr = std::unique_ptr<FILE, decltype(&fclose)>;
 
-void writePPM(const RawImage& raw, const string& fn) {
+void writePPM(const RawImage& raw, const std::string& fn) {
   file_ptr f(fopen((fn + ".ppm").c_str(), "wb"), &fclose);
 
   const iPoint2D dimUncropped = raw->getUncroppedDim();
   int width = dimUncropped.x;
   int height = dimUncropped.y;
-  string format = raw->getCpp() == 1 ? "P5" : "P6";
+  std::string format = raw->getCpp() == 1 ? "P5" : "P6";
 
   // Write PPM header
   fprintf(f.get(), "%s\n%d %d\n65535\n", format.c_str(), width, height);
@@ -253,13 +249,13 @@ void writePPM(const RawImage& raw, const string& fn) {
   }
 }
 
-void writePFM(const RawImage& raw, const string& fn) {
+void writePFM(const RawImage& raw, const std::string& fn) {
   file_ptr f(fopen((fn + ".pfm").c_str(), "wb"), &fclose);
 
   const iPoint2D dimUncropped = raw->getUncroppedDim();
   int width = dimUncropped.x;
   int height = dimUncropped.y;
-  string format = raw->getCpp() == 1 ? "Pf" : "PF";
+  std::string format = raw->getCpp() == 1 ? "Pf" : "PF";
 
   // Write PFM header. if scale < 0, it is little-endian, if >= 0 - big-endian
   int len = fprintf(f.get(), "%s\n%d %d\n-1.0", format.c_str(), width, height);
@@ -304,12 +300,12 @@ void writePFM(const RawImage& raw, const string& fn) {
   }
 }
 
-void writeImage(const RawImage& raw, const string& fn) {
+void writeImage(const RawImage& raw, const std::string& fn) {
   switch (raw->getDataType()) {
-  case TYPE_USHORT16:
+  case RawImageType::UINT16:
     writePPM(raw, fn);
     break;
-  case TYPE_FLOAT32:
+  case RawImageType::F32:
     writePFM(raw, fn);
     break;
   default:
@@ -317,10 +313,10 @@ void writeImage(const RawImage& raw, const string& fn) {
   }
 }
 
-size_t process(const string& filename, const CameraMetaData* metadata,
+size_t process(const std::string& filename, const CameraMetaData* metadata,
                const options& o) {
 
-  const string hashfile(filename + ".hash");
+  const std::string hashfile(filename + ".hash");
 
   // if creating hash and hash exists -> skip current file
   // if not creating and hash is missing -> skip as well
@@ -382,14 +378,15 @@ size_t process(const string& filename, const CameraMetaData* metadata,
       writeImage(raw, filename);
   } else {
     // do generate the hash string regardless.
-    string h = img_hash(raw);
+    std::string h = img_hash(raw);
 
     // normally, here we would compare the old hash with the new one
     // but if the force is set, and the hash does not exist, do nothing.
     if (!hf.good() && o.force)
       return time;
 
-    string truth((istreambuf_iterator<char>(hf)), istreambuf_iterator<char>());
+    std::string truth((istreambuf_iterator<char>(hf)),
+                      istreambuf_iterator<char>());
     if (h != truth) {
       ofstream f(filename + ".hash.failed");
       f << h;
@@ -404,7 +401,9 @@ size_t process(const string& filename, const CameraMetaData* metadata,
 
 #pragma GCC diagnostic pop
 
-static int results(const map<string, string>& failedTests, const options& o) {
+static int
+results(const map<std::string, std::string, std::less<>>& failedTests,
+        const options& o) {
   if (failedTests.empty()) {
     cout << "All good, ";
     if (!o.create)
@@ -418,23 +417,20 @@ static int results(const map<string, string>& failedTests, const options& o) {
        << " tests have failed:\n";
 
   bool rstestlog = false;
-  for (const auto& i : failedTests) {
-    cerr << i.second << "\n";
+  for (const auto& [test, msg] : failedTests) {
+    cerr << msg << "\n";
 #ifndef WIN32
-    const string oldhash(i.first + ".hash");
-    const string newhash(oldhash + ".failed");
-
-    ifstream oldfile(oldhash);
-    ifstream newfile(newhash);
+    const std::string oldhash(test + ".hash");
+    const std::string newhash(oldhash + ".failed");
 
     // if neither hashes exist, nothing to append...
-    if (!(oldfile.good() || newfile.good()))
+    if (!(ifstream(oldhash).good() || ifstream(newhash).good()))
       continue;
 
     rstestlog = true;
 
     // DIFF(1): -N, --new-file  treat absent files as empty
-    string cmd(R"(diff -N -u0 ")");
+    std::string cmd(R"(diff -N -u0 ")");
     cmd += oldhash;
     cmd += R"(" ")";
     cmd += newhash;
@@ -487,7 +483,7 @@ using rawspeed::rstest::results;
 int main(int argc, char **argv) {
   int remaining_argc = argc;
 
-  auto hasFlag = [argc, &remaining_argc, argv](const string& flag) {
+  auto hasFlag = [argc, &remaining_argc, argv](std::string_view flag) {
     bool found = false;
     for (int i = 1; i < argc; ++i) {
       if (!argv[i] || argv[i] != flag)
@@ -514,7 +510,7 @@ int main(int argc, char **argv) {
 #endif
 
   size_t time = 0;
-  map<string, string> failedTests;
+  map<std::string, std::string, std::less<>> failedTests;
 #ifdef HAVE_OPENMP
 #pragma omp parallel for default(none) firstprivate(argc, argv, o) \
     OMPSHAREDCLAUSE(metadata) shared(cerr, failedTests) schedule(dynamic, 1) \
@@ -527,20 +523,20 @@ int main(int argc, char **argv) {
     try {
       try {
         time += process(argv[i], &metadata, o);
-      } catch (rawspeed::rstest::RstestHashMismatch& e) {
+      } catch (const rawspeed::rstest::RstestHashMismatch& e) {
         time += e.time;
         throw;
       }
-    } catch (RawspeedException& e) {
+    } catch (const RawspeedException& e) {
 #ifdef HAVE_OPENMP
 #pragma omp critical(io)
 #endif
       {
-        string msg = string(argv[i]) + " failed: " + e.what();
+        std::string msg = std::string(argv[i]) + " failed: " + e.what();
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
         cerr << msg << endl;
 #endif
-        failedTests.emplace(argv[i], msg);
+        failedTests.try_emplace(argv[i], msg);
       }
     }
   }

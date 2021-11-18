@@ -116,8 +116,7 @@ protected:
 #ifndef NDEBUG
     // The code symbols are ordered so that all the code values are strictly
     // increasing and code lengths are not decreasing.
-    const auto symbolSort = [](const CodeSymbol& lhs,
-                               const CodeSymbol& rhs) -> bool {
+    const auto symbolSort = [](const CodeSymbol& lhs, const CodeSymbol& rhs) {
       return std::less<>()(lhs.code, rhs.code) &&
              std::less_equal<>()(lhs.code_len, rhs.code_len);
     };

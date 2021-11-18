@@ -29,9 +29,7 @@ namespace rawspeed {
 
 class TiffParserException final : public RawParserException {
 public:
-  explicit RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
-  TiffParserException(const char* msg)
-      : RawParserException(msg) {}
+  using RawParserException::RawParserException;
 };
 
 #define ThrowTPE(...)                                                          \

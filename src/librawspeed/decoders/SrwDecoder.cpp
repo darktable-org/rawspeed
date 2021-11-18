@@ -20,7 +20,7 @@
 */
 
 #include "decoders/SrwDecoder.h"
-#include "common/Common.h"                       // for BitOrder_LSB, BitOr...
+#include "common/Common.h"                       // for BitOrder::LSB, BitOr...
 #include "common/Point.h"                        // for iPoint2D
 #include "decoders/RawDecoderException.h"        // for ThrowRDE
 #include "decompressors/SamsungV0Decompressor.h" // for SamsungV0Decompressor
@@ -31,7 +31,7 @@
 #include "io/Endianness.h"                       // for Endianness, Endiann...
 #include "metadata/Camera.h"                     // for Hints
 #include "metadata/CameraMetaData.h"             // for CameraMetaData
-#include "tiff/TiffEntry.h"                      // for TiffEntry, TIFF_LONG
+#include "tiff/TiffEntry.h" // for TiffEntry, TiffDataType::LONG
 #include "tiff/TiffIFD.h"                        // for TiffRootIFD, TiffIFD
 #include "tiff/TiffTag.h"                        // for STRIPOFFSETS, BITSP...
 #include <array>                                 // for array
@@ -44,7 +44,7 @@
 namespace rawspeed {
 
 bool SrwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer& file) {
+                                      [[maybe_unused]] const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -54,10 +54,10 @@ bool SrwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 RawImage SrwDecoder::decodeRawInternal() {
-  const auto* raw = mRootIFD->getIFDWithTag(STRIPOFFSETS);
+  const auto* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
-  int compression = raw->getEntry(COMPRESSION)->getU32();
-  const int bits = raw->getEntry(BITSPERSAMPLE)->getU32();
+  int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
+  const int bits = raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
 
   if (12 != bits && 14 != bits)
     ThrowRDE("Unsupported bits per sample");
@@ -65,34 +65,34 @@ RawImage SrwDecoder::decodeRawInternal() {
   if (32769 != compression && 32770 != compression && 32772 != compression && 32773 != compression)
     ThrowRDE("Unsupported compression");
 
-  uint32_t nslices = raw->getEntry(STRIPOFFSETS)->count;
-  if (nslices != 1)
+  if (uint32_t nslices = raw->getEntry(TiffTag::STRIPOFFSETS)->count;
+      nslices != 1)
     ThrowRDE("Only one slice supported, found %u", nslices);
 
-  const auto wrongComp =
-      32770 == compression && !raw->hasEntry(static_cast<TiffTag>(40976));
-  if (32769 == compression || wrongComp) {
+  if (const auto wrongComp =
+          32770 == compression && !raw->hasEntry(static_cast<TiffTag>(40976));
+      32769 == compression || wrongComp) {
     bool bit_order = hints.get("msb_override", wrongComp ? bits == 12 : false);
-    this->decodeUncompressed(raw, bit_order ? BitOrder_MSB : BitOrder_LSB);
+    this->decodeUncompressed(raw, bit_order ? BitOrder::MSB : BitOrder::LSB);
     return mRaw;
   }
 
-  const uint32_t width = raw->getEntry(IMAGEWIDTH)->getU32();
-  const uint32_t height = raw->getEntry(IMAGELENGTH)->getU32();
+  const uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  const uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
   mRaw->dim = iPoint2D(width, height);
 
   if (32770 == compression)
   {
     const TiffEntry* sliceOffsets = raw->getEntry(static_cast<TiffTag>(40976));
-    if (sliceOffsets->type != TIFF_LONG || sliceOffsets->count != 1)
+    if (sliceOffsets->type != TiffDataType::LONG || sliceOffsets->count != 1)
       ThrowRDE("Entry 40976 is corrupt");
 
     ByteStream bso(DataBuffer(mFile, Endianness::little));
     bso.skipBytes(sliceOffsets->getU32());
     bso = bso.getStream(height, 4);
 
-    const uint32_t offset = raw->getEntry(STRIPOFFSETS)->getU32();
-    const uint32_t count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
+    const uint32_t offset = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
+    const uint32_t count = raw->getEntry(TiffTag::STRIPBYTECOUNTS)->getU32();
     Buffer rbuf(mFile.getSubView(offset, count));
     ByteStream bsr(DataBuffer(rbuf, Endianness::little));
 
@@ -106,8 +106,8 @@ RawImage SrwDecoder::decodeRawInternal() {
   }
   if (32772 == compression)
   {
-    uint32_t offset = raw->getEntry(STRIPOFFSETS)->getU32();
-    uint32_t count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
+    uint32_t offset = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
+    uint32_t count = raw->getEntry(TiffTag::STRIPBYTECOUNTS)->getU32();
     const ByteStream bs(
         DataBuffer(mFile.getSubView(offset, count), Endianness::little));
 
@@ -121,8 +121,8 @@ RawImage SrwDecoder::decodeRawInternal() {
   }
   if (32773 == compression)
   {
-    uint32_t offset = raw->getEntry(STRIPOFFSETS)->getU32();
-    uint32_t count = raw->getEntry(STRIPBYTECOUNTS)->getU32();
+    uint32_t offset = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
+    uint32_t count = raw->getEntry(TiffTag::STRIPBYTECOUNTS)->getU32();
     const ByteStream bs(
         DataBuffer(mFile.getSubView(offset, count), Endianness::little));
 
@@ -137,11 +137,13 @@ RawImage SrwDecoder::decodeRawInternal() {
   ThrowRDE("Unsupported compression");
 }
 
-std::string SrwDecoder::getMode() {
-  std::vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(CFAPATTERN);
+std::string SrwDecoder::getMode() const {
+  std::vector<const TiffIFD*> data =
+      mRootIFD->getIFDsWithTag(TiffTag::CFAPATTERN);
   std::ostringstream mode;
-  if (!data.empty() && data[0]->hasEntryRecursive(BITSPERSAMPLE)) {
-    mode << data[0]->getEntryRecursive(BITSPERSAMPLE)->getU32() << "bit";
+  if (!data.empty() && data[0]->hasEntryRecursive(TiffTag::BITSPERSAMPLE)) {
+    mode << data[0]->getEntryRecursive(TiffTag::BITSPERSAMPLE)->getU32()
+         << "bit";
     return mode.str();
   }
   return "";
@@ -158,21 +160,22 @@ void SrwDecoder::checkSupportInternal(const CameraMetaData* meta) {
 
 void SrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
-  if (mRootIFD->hasEntryRecursive(ISOSPEEDRATINGS))
-    iso = mRootIFD->getEntryRecursive(ISOSPEEDRATINGS)->getU32();
+  if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
+    iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
 
   auto id = mRootIFD->getID();
-  std::string mode = getMode();
-  if (meta->hasCamera(id.make, id.model, mode))
+  if (std::string mode = getMode(); meta->hasCamera(id.make, id.model, mode))
     setMetaData(meta, id, mode, iso);
   else
     setMetaData(meta, id, "", iso);
 
   // Set the whitebalance
-  if (mRootIFD->hasEntryRecursive(SAMSUNG_WB_RGGBLEVELSUNCORRECTED) &&
-      mRootIFD->hasEntryRecursive(SAMSUNG_WB_RGGBLEVELSBLACK)) {
-    TiffEntry *wb_levels = mRootIFD->getEntryRecursive(SAMSUNG_WB_RGGBLEVELSUNCORRECTED);
-    TiffEntry *wb_black = mRootIFD->getEntryRecursive(SAMSUNG_WB_RGGBLEVELSBLACK);
+  if (mRootIFD->hasEntryRecursive(TiffTag::SAMSUNG_WB_RGGBLEVELSUNCORRECTED) &&
+      mRootIFD->hasEntryRecursive(TiffTag::SAMSUNG_WB_RGGBLEVELSBLACK)) {
+    const TiffEntry* wb_levels =
+        mRootIFD->getEntryRecursive(TiffTag::SAMSUNG_WB_RGGBLEVELSUNCORRECTED);
+    const TiffEntry* wb_black =
+        mRootIFD->getEntryRecursive(TiffTag::SAMSUNG_WB_RGGBLEVELSBLACK);
     if (wb_levels->count == 4 && wb_black->count == 4) {
       mRaw->metadata.wbCoeffs[0] = wb_levels->getFloat(0) - wb_black->getFloat(0);
       mRaw->metadata.wbCoeffs[1] = wb_levels->getFloat(1) - wb_black->getFloat(1);

@@ -45,7 +45,6 @@
 #include <vector>                                   // for vector
 
 using std::vector;
-using std::string;
 
 namespace rawspeed {
 
@@ -54,13 +53,14 @@ RawDecoder::RawDecoder(const Buffer& file)
       interpolateBadPixels(true), applyStage1DngOpcodes(true), applyCrop(true),
       uncorrectedRawValues(false), fujiRotate(true), mFile(file) {}
 
-void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
-  TiffEntry *offsets = rawIFD->getEntry(STRIPOFFSETS);
-  TiffEntry *counts = rawIFD->getEntry(STRIPBYTECOUNTS);
-  uint32_t yPerSlice = rawIFD->getEntry(ROWSPERSTRIP)->getU32();
-  uint32_t width = rawIFD->getEntry(IMAGEWIDTH)->getU32();
-  uint32_t height = rawIFD->getEntry(IMAGELENGTH)->getU32();
-  uint32_t bitPerPixel = rawIFD->getEntry(BITSPERSAMPLE)->getU32();
+void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
+                                    BitOrder order) const {
+  const TiffEntry* offsets = rawIFD->getEntry(TiffTag::STRIPOFFSETS);
+  const TiffEntry* counts = rawIFD->getEntry(TiffTag::STRIPBYTECOUNTS);
+  uint32_t yPerSlice = rawIFD->getEntry(TiffTag::ROWSPERSTRIP)->getU32();
+  uint32_t width = rawIFD->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  uint32_t height = rawIFD->getEntry(TiffTag::IMAGELENGTH)->getU32();
+  uint32_t bitPerPixel = rawIFD->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
 
   if (width == 0 || height == 0 || width > 5632 || height > 3720)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
@@ -131,9 +131,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
         mRaw);
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
-    bitPerPixel = static_cast<int>(
-        static_cast<uint64_t>(static_cast<uint64_t>(slice.count) * 8U) /
-        (slice.h * width));
+    bitPerPixel = (static_cast<uint64_t>(slice.count) * 8U) / (slice.h * width);
     const auto inputPitch = width * bitPerPixel / 8;
     if (!inputPitch)
       ThrowRDE("Bad input pitch. Can not decode anything.");
@@ -144,12 +142,14 @@ void RawDecoder::decodeUncompressed(const TiffIFD *rawIFD, BitOrder order) {
   }
 }
 
-void RawDecoder::askForSamples(const CameraMetaData* meta, const string& make,
-                               const string& model, const string& mode) {
+void RawDecoder::askForSamples([[maybe_unused]] const CameraMetaData* meta,
+                               const std::string& make,
+                               const std::string& model,
+                               const std::string& mode) {
   if ("dng" == mode)
     return;
 
-  writeLog(DEBUG_PRIO_WARNING,
+  writeLog(DEBUG_PRIO::WARNING,
            "Unable to find camera in database: '%s' '%s' "
            "'%s'\nPlease consider providing samples on "
            "<https://raw.pixls.us/>, thanks!",
@@ -157,8 +157,9 @@ void RawDecoder::askForSamples(const CameraMetaData* meta, const string& make,
 }
 
 bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
-                                      const string& make, const string& model,
-                                      const string& mode) {
+                                      const std::string& make,
+                                      const std::string& model,
+                                      const std::string& mode) {
   mRaw->metadata.make = make;
   mRaw->metadata.model = model;
   const Camera* cam = meta->getCamera(make, model, mode);
@@ -182,9 +183,9 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
   return true;
 }
 
-void RawDecoder::setMetaData(const CameraMetaData* meta, const string& make,
-                             const string& model, const string& mode,
-                             int iso_speed) {
+void RawDecoder::setMetaData(const CameraMetaData* meta,
+                             const std::string& make, const std::string& model,
+                             const std::string& mode, int iso_speed) {
   mRaw->metadata.isoSpeed = iso_speed;
   const Camera* cam = meta->getCamera(make, model, mode);
   if (!cam) {
@@ -243,11 +244,12 @@ void RawDecoder::setMetaData(const CameraMetaData* meta, const string& make,
   // (the same order as the in the CFA tag)
   // A hint could be:
   // <Hint name="override_cfa_black" value="10,20,30,20"/>
-  string cfa_black = hints.get("override_cfa_black", string());
+  std::string cfa_black = hints.get("override_cfa_black", std::string());
   if (!cfa_black.empty()) {
-    vector<string> v = splitString(cfa_black, ',');
+    vector<std::string> v = splitString(cfa_black, ',');
     if (v.size() != 4) {
-      mRaw->setError("Expected 4 values '10,20,30,20' as values for override_cfa_black hint.");
+      mRaw->setError("Expected 4 values '10,20,30,20' as values for "
+                     "override_cfa_black hint.");
     } else {
       for (int i = 0; i < 4; i++) {
         mRaw->blackLevelSeparate[i] = stoi(v[i]);
@@ -269,11 +271,11 @@ rawspeed::RawImage RawDecoder::decodeRaw() {
     }
 
     return raw;
-  } catch (TiffParserException &e) {
+  } catch (const TiffParserException& e) {
     ThrowRDE("%s", e.what());
-  } catch (FileIOException &e) {
+  } catch (const FileIOException& e) {
     ThrowRDE("%s", e.what());
-  } catch (IOException &e) {
+  } catch (const IOException& e) {
     ThrowRDE("%s", e.what());
   }
 }
@@ -281,11 +283,11 @@ rawspeed::RawImage RawDecoder::decodeRaw() {
 void RawDecoder::decodeMetaData(const CameraMetaData* meta) {
   try {
     decodeMetaDataInternal(meta);
-  } catch (TiffParserException &e) {
+  } catch (const TiffParserException& e) {
     ThrowRDE("%s", e.what());
-  } catch (FileIOException &e) {
+  } catch (const FileIOException& e) {
     ThrowRDE("%s", e.what());
-  } catch (IOException &e) {
+  } catch (const IOException& e) {
     ThrowRDE("%s", e.what());
   }
 }
@@ -293,11 +295,11 @@ void RawDecoder::decodeMetaData(const CameraMetaData* meta) {
 void RawDecoder::checkSupport(const CameraMetaData* meta) {
   try {
     checkSupportInternal(meta);
-  } catch (TiffParserException &e) {
+  } catch (const TiffParserException& e) {
     ThrowRDE("%s", e.what());
-  } catch (FileIOException &e) {
+  } catch (const FileIOException& e) {
     ThrowRDE("%s", e.what());
-  } catch (IOException &e) {
+  } catch (const IOException& e) {
     ThrowRDE("%s", e.what());
   }
 }

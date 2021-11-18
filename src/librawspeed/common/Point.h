@@ -75,7 +75,7 @@ public:
   [[nodiscard]] bool hasPositiveArea() const { return operator>({0, 0}); }
 
   [[nodiscard]] area_type __attribute__((pure)) area() const {
-    using signed_area = std::make_signed<area_type>::type;
+    using signed_area = std::make_signed_t<area_type>;
 
     area_type x_abs = std::abs(static_cast<signed_area>(x));
     area_type y_abs = std::abs(static_cast<signed_area>(y));
@@ -103,8 +103,6 @@ class iRectangle2D {
 public:
   constexpr iRectangle2D() = default;
   constexpr iRectangle2D(const iPoint2D& pos_, const iPoint2D& dim_)
-      : pos(pos_), dim(dim_) {}
-  constexpr iRectangle2D(iPoint2D&& pos_, iPoint2D&& dim_)
       : pos(pos_), dim(dim_) {}
 
   constexpr iRectangle2D(int w, int h) : dim({w, h}) {}
@@ -140,7 +138,6 @@ public:
 
   /* Retains size */
   void setTopLeft(const iPoint2D& top_left) { pos = top_left; }
-  void setTopLeft(iPoint2D&& top_left) { pos = top_left; }
 
   /* Set BR  */
   void setBottomRightAbsolute(const iPoint2D& bottom_right) {
@@ -151,16 +148,11 @@ public:
     pos = top_left;
     setBottomRightAbsolute(bottom_right);
   }
-  void setAbsolute(iPoint2D&& top_left, iPoint2D&& bottom_right) {
-    pos = top_left;
-    setBottomRightAbsolute(bottom_right);
-  }
   void setAbsolute(int x1, int y1, int x2, int y2) {
     setAbsolute({x1, y1}, {x2, y2});
   }
 
   void setSize(const iPoint2D& size) { dim = size; }
-  void setSize(iPoint2D&& size) { dim = size; }
 
   /* Crop, so area is positive, and return true, if there is any area left */
   /* This will ensure that bottomright is never on the left/top of the offset */

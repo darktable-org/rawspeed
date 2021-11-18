@@ -47,11 +47,11 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 private:
-  void parseCFA();
+  void parseCFA() const;
 
   [[nodiscard]] int getDecoderVersion() const override { return 3; }
-  bool decodeUncompressed(const ByteStream& s, uint32_t w, uint32_t h,
-                          uint32_t size);
+  [[nodiscard]] bool decodeUncompressed(const ByteStream& s, uint32_t w,
+                                        uint32_t h, uint32_t size) const;
 };
 
 } // namespace rawspeed

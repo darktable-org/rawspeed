@@ -23,7 +23,7 @@
 #include "rawspeedconfig.h"            // for WITH_SSE2
 #include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
 #include "common/Array2DRef.h"         // for Array2DRef
-#include "common/Common.h"             // for writeLog, DEBUG_PRIO_ERROR
+#include "common/Common.h"             // for writeLog, DEBUG_PRIO::ERROR
 #include "common/CroppedArray2DRef.h"  // for CroppedArray2DRef
 #include "common/ErrorLog.h"           // for ErrorLog
 #include "common/Mutex.h"              // for Mutex
@@ -45,12 +45,15 @@ class RawImage;
 
 class RawImageData;
 
-enum RawImageType { TYPE_USHORT16, TYPE_FLOAT32 };
+enum class RawImageType { UINT16, F32 };
 
 class RawImageWorker {
 public:
-  enum RawImageWorkerTask {
-    SCALE_VALUES = 1, FIX_BAD_PIXELS = 2, APPLY_LOOKUP = 3 | 0x1000, FULL_IMAGE = 0x1000
+  enum class RawImageWorkerTask {
+    SCALE_VALUES = 1,
+    FIX_BAD_PIXELS = 2,
+    APPLY_LOOKUP = 3 | 0x1000,
+    FULL_IMAGE = 0x1000
   };
 
 private:
@@ -102,23 +105,23 @@ public:
   [[nodiscard]] uint32_t getBpp() const { return bpp; }
   void setCpp(uint32_t val);
   void createData();
-  void poisonPadding();
-  void unpoisonPadding();
-  void checkRowIsInitialized(int row);
-  void checkMemIsInitialized();
+  void poisonPadding() const;
+  void unpoisonPadding() const;
+  void checkRowIsInitialized(int row) const;
+  void checkMemIsInitialized() const;
   void destroyData();
   void blitFrom(const RawImage& src, const iPoint2D& srcPos,
                 const iPoint2D& size, const iPoint2D& destPos);
   [[nodiscard]] rawspeed::RawImageType getDataType() const { return dataType; }
-  [[nodiscard]] inline Array2DRef<uint16_t>
+  [[nodiscard]] Array2DRef<uint16_t>
   getU16DataAsUncroppedArray2DRef() const noexcept;
-  [[nodiscard]] inline CroppedArray2DRef<uint16_t>
+  [[nodiscard]] CroppedArray2DRef<uint16_t>
   getU16DataAsCroppedArray2DRef() const noexcept;
   [[nodiscard]] uint8_t* getData() const;
   uint8_t*
   getData(uint32_t x,
           uint32_t y); // Not super fast, but safe. Don't use per pixel.
-  uint8_t* getDataUncropped(uint32_t x, uint32_t y);
+  [[nodiscard]] uint8_t* getDataUncropped(uint32_t x, uint32_t y) const;
 
   void subFrame(iRectangle2D cropped);
   void clearArea(iRectangle2D area, uint8_t value = 0);
@@ -135,7 +138,7 @@ public:
   void setTable(const std::vector<uint16_t>& table_, bool dither);
   void setTable(std::unique_ptr<TableLookUp> t);
 
-  bool isAllocated() {return !!data;}
+  [[nodiscard]] bool isAllocated() const { return !!data; }
   void createBadPixelMap();
   iPoint2D dim;
   int pitch = 0;
@@ -192,7 +195,7 @@ public:
   void calculateBlackAreas() override;
   void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
 
-protected:
+private:
   void scaleValues_plain(int start_y, int end_y);
 #ifdef WITH_SSE2
   void scaleValues_SSE2(int start_y, int end_y);
@@ -212,7 +215,7 @@ public:
   void calculateBlackAreas() override;
   void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
 
-protected:
+private:
   void scaleValues(int start_y, int end_y) override;
   void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
   [[noreturn]] void doLookup(int start_y, int end_y) override;
@@ -223,9 +226,9 @@ protected:
 
  class RawImage {
  public:
-   static RawImage create(RawImageType type = TYPE_USHORT16);
+   static RawImage create(RawImageType type = RawImageType::UINT16);
    static RawImage create(const iPoint2D& dim,
-                          RawImageType type = TYPE_USHORT16,
+                          RawImageType type = RawImageType::UINT16,
                           uint32_t componentsPerPixel = 1);
    RawImageData* operator->() const { return p_; }
    RawImageData& operator*() const { return *p_; }
@@ -243,33 +246,32 @@ protected:
 inline RawImage RawImage::create(RawImageType type)  {
   switch (type)
   {
-    case TYPE_USHORT16:
-      return RawImage(new RawImageDataU16());
-    case TYPE_FLOAT32:
-      return RawImage(new RawImageDataFloat());
-    default:
-      writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!");
-      __builtin_unreachable();
-
+  case RawImageType::UINT16:
+    return RawImage(new RawImageDataU16());
+  case RawImageType::F32:
+    return RawImage(new RawImageDataFloat());
+  default:
+    writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
+    __builtin_unreachable();
   }
 }
 
 inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type,
                                  uint32_t componentsPerPixel) {
   switch (type) {
-  case TYPE_USHORT16:
+  case RawImageType::UINT16:
     return RawImage(new RawImageDataU16(dim, componentsPerPixel));
-  case TYPE_FLOAT32:
+  case RawImageType::F32:
     return RawImage(new RawImageDataFloat(dim, componentsPerPixel));
   default:
-    writeLog(DEBUG_PRIO_ERROR, "RawImage::create: Unknown Image type!");
+    writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
     __builtin_unreachable();
   }
 }
 
 inline Array2DRef<uint16_t>
 RawImageData::getU16DataAsUncroppedArray2DRef() const noexcept {
-  assert(dataType == TYPE_USHORT16 &&
+  assert(dataType == RawImageType::UINT16 &&
          "Attempting to access floating-point buffer as uint16_t.");
   assert(data && "Data not yet allocated.");
   return {reinterpret_cast<uint16_t*>(data), cpp * uncropped_dim.x,
@@ -309,12 +311,18 @@ inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
 }
 
 class RawImageCurveGuard final {
-  RawImage* mRaw;
+  const RawImage* mRaw;
   const std::vector<uint16_t>& curve;
   const bool uncorrectedRawValues;
 
 public:
-  RawImageCurveGuard(RawImage* raw, const std::vector<uint16_t>& curve_,
+  RawImageCurveGuard() = delete;
+  RawImageCurveGuard(const RawImageCurveGuard&) = delete;
+  RawImageCurveGuard(RawImageCurveGuard&&) noexcept = delete;
+  RawImageCurveGuard& operator=(const RawImageCurveGuard&) noexcept = delete;
+  RawImageCurveGuard& operator=(RawImageCurveGuard&&) noexcept = delete;
+
+  RawImageCurveGuard(const RawImage* raw, const std::vector<uint16_t>& curve_,
                      bool uncorrectedRawValues_)
       : mRaw(raw), curve(curve_), uncorrectedRawValues(uncorrectedRawValues_) {
     if (uncorrectedRawValues)

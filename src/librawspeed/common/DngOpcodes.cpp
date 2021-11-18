@@ -72,7 +72,7 @@ public:
 
   void setup(const RawImage& ri) override {
     // These limitations are present within the DNG SDK as well.
-    if (ri->getDataType() != TYPE_USHORT16)
+    if (ri->getDataType() != RawImageType::UINT16)
       ThrowRDE("Only 16 bit images supported");
 
     if (ri->getCpp() > 1)
@@ -142,7 +142,7 @@ public:
     return ROIOpcode::getRoi();
   }
 
-  [[noreturn]] void apply(const RawImage& ri) final {
+  [[noreturn]] void apply(const RawImage& ri) override {
     // NOLINTNEXTLINE: https://bugs.llvm.org/show_bug.cgi?id=50532
     assert(false && "You should not be calling this.");
     __builtin_unreachable();
@@ -175,8 +175,8 @@ public:
       auto y = bs.getU32();
       auto x = bs.getU32();
 
-      const iPoint2D badPoint(x, y);
-      if (!fullImage.isPointInsideInclusive(badPoint))
+      if (const iPoint2D badPoint(x, y);
+          !fullImage.isPointInsideInclusive(badPoint))
         ThrowRDE("Bad point not inside image.");
 
       badPixels.emplace_back(y << 16 | x);
@@ -275,13 +275,14 @@ protected:
 
   void setup(const RawImage& ri) override {
     PixelOpcode::setup(ri);
-    if (ri->getDataType() != TYPE_USHORT16)
+    if (ri->getDataType() != RawImageType::UINT16)
       ThrowRDE("Only 16 bit images supported");
   }
 
   void apply(const RawImage& ri) override {
-    applyOP<uint16_t>(
-        ri, [this](uint32_t x, uint32_t y, uint16_t v) { return lookup[v]; });
+    applyOP<uint16_t>(ri, [this]([[maybe_unused]] uint32_t x,
+                                 [[maybe_unused]] uint32_t y,
+                                 uint16_t v) { return lookup[v]; });
   }
 };
 
@@ -354,7 +355,7 @@ public:
     PixelOpcode::setup(ri);
 
     // If we are working on a float image, no need to convert to int
-    if (ri->getDataType() != TYPE_USHORT16)
+    if (ri->getDataType() != RawImageType::UINT16)
       return;
 
     deltaI.reserve(deltaF.size());
@@ -382,9 +383,9 @@ protected:
     // either ROI.getRight() or ROI.getBottom() index. Thus, we need to have
     // either ROI.getRight() or ROI.getBottom() elements in there.
     // FIXME: i guess not strictly true with pitch != 1.
-    const auto expectedSize =
-        S::select(getRoi().getRight(), getRoi().getBottom());
-    if (expectedSize != deltaF_count) {
+    if (const auto expectedSize =
+            S::select(getRoi().getRight(), getRoi().getBottom());
+        expectedSize != deltaF_count) {
       ThrowRDE("Got unexpected number of elements (%u), expected %u.",
                expectedSize, deltaF_count);
     }
@@ -409,7 +410,7 @@ class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol<S> {
   // by f2iScale before applying, we need to divide by f2iScale here.
   const double absLimit;
 
-  bool valueIsOk(float value) final { return std::abs(value) <= absLimit; }
+  bool valueIsOk(float value) override { return std::abs(value) <= absLimit; }
 
 public:
   explicit OffsetPerRowOrCol(const RawImage& ri, ByteStream& bs)
@@ -418,7 +419,7 @@ public:
                  this->f2iScale) {}
 
   void apply(const RawImage& ri) override {
-    if (ri->getDataType() == TYPE_USHORT16) {
+    if (ri->getDataType() == RawImageType::UINT16) {
       this->template applyOP<uint16_t>(
           ri, [this](uint32_t x, uint32_t y, uint16_t v) {
             return clampBits(this->deltaI[S::select(x, y)] + v, 16);
@@ -444,7 +445,7 @@ class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol<S> {
   static constexpr int rounding = 512;
   const double maxLimit;
 
-  bool valueIsOk(float value) final {
+  bool valueIsOk(float value) override {
     return value >= minLimit && value <= maxLimit;
   }
 
@@ -456,7 +457,7 @@ public:
                  this->f2iScale) {}
 
   void apply(const RawImage& ri) override {
-    if (ri->getDataType() == TYPE_USHORT16) {
+    if (ri->getDataType() == RawImageType::UINT16) {
       this->template applyOP<uint16_t>(ri, [this](uint32_t x, uint32_t y,
                                                   uint16_t v) {
         return clampBits((this->deltaI[S::select(x, y)] * v + 512) >> 10, 16);
@@ -472,7 +473,7 @@ public:
 
 // ****************************************************************************
 
-DngOpcodes::DngOpcodes(const RawImage& ri, TiffEntry* entry) {
+DngOpcodes::DngOpcodes(const RawImage& ri, const TiffEntry* entry) {
   ByteStream bs = entry->getData();
 
   // DNG opcodes are always stored in big-endian byte order.
@@ -510,7 +511,7 @@ DngOpcodes::DngOpcodes(const RawImage& ri, TiffEntry* entry) {
     constructor_t opConstructor = nullptr;
     try {
       std::tie(opName, opConstructor) = Map.at(code);
-    } catch (std::out_of_range&) {
+    } catch (const std::out_of_range&) {
       ThrowRDE("Unknown unhandled Opcode: %d", code);
     }
 
@@ -537,7 +538,7 @@ DngOpcodes::DngOpcodes(const RawImage& ri, TiffEntry* entry) {
 // of the DngOpcode type in DngOpcodes.h
 DngOpcodes::~DngOpcodes() = default;
 
-void DngOpcodes::applyOpCodes(const RawImage& ri) {
+void DngOpcodes::applyOpCodes(const RawImage& ri) const {
   for (const auto& code : opcodes) {
     code->setup(ri);
     code->apply(ri);

@@ -44,8 +44,8 @@ std::string find_cameras_xml(const char *argv0) {
   struct stat statbuf;
 
 #ifdef RS_CAMERAS_XML_PATH
-  static const char* set_camfile = RS_CAMERAS_XML_PATH;
-  if (stat(set_camfile, &statbuf)) {
+  if (static const char* set_camfile = RS_CAMERAS_XML_PATH;
+      stat(set_camfile, &statbuf)) {
     fprintf(stderr, "WARNING: Couldn't find cameras.xml in '%s'\n",
             set_camfile);
   } else {
@@ -114,8 +114,6 @@ using rawspeed::iPoint2D;
 using rawspeed::RawImage;
 using rawspeed::RawParser;
 using rawspeed::RawspeedException;
-using rawspeed::TYPE_FLOAT32;
-using rawspeed::TYPE_USHORT16;
 using rawspeed::identify::find_cameras_xml;
 
 int main(int argc, char* argv[]) { // NOLINT
@@ -222,7 +220,7 @@ int main(int argc, char* argv[]) { // NOLINT
     fprintf(stdout, "bpp: %d\n", bpp);
     const uint32_t cpp = r->getCpp();
     fprintf(stdout, "cpp: %d\n", cpp);
-    fprintf(stdout, "dataType: %d\n", r->getDataType());
+    fprintf(stdout, "dataType: %u\n", static_cast<unsigned>(r->getDataType()));
 
     // dimensions of uncropped image
     const iPoint2D dimUncropped = r->getUncroppedDim();
@@ -244,7 +242,7 @@ int main(int argc, char* argv[]) { // NOLINT
 #pragma omp parallel for default(none) firstprivate(dimUncropped, raw, bpp) schedule(static) reduction(+ : sum)
 #endif
     for (int y = 0; y < dimUncropped.y; ++y) {
-      uint8_t* const data = (*raw)->getDataUncropped(0, y);
+      const uint8_t* const data = (*raw)->getDataUncropped(0, y);
 
       for (unsigned x = 0; x < bpp * dimUncropped.x; ++x)
         sum += static_cast<double>(data[x]);
@@ -253,14 +251,14 @@ int main(int argc, char* argv[]) { // NOLINT
     fprintf(stdout, "Image byte avg: %lf\n",
             sum / static_cast<double>(dimUncropped.y * dimUncropped.x * bpp));
 
-    if (r->getDataType() == TYPE_FLOAT32) {
+    if (r->getDataType() == rawspeed::RawImageType::F32) {
       sum = 0.0F;
 
 #ifdef HAVE_OPENMP
 #pragma omp parallel for default(none) firstprivate(dimUncropped, raw, cpp) schedule(static) reduction(+ : sum)
 #endif
       for (int y = 0; y < dimUncropped.y; ++y) {
-        auto* const data =
+        const auto* const data =
             reinterpret_cast<float*>((*raw)->getDataUncropped(0, y));
 
         for (unsigned x = 0; x < cpp * dimUncropped.x; ++x)
@@ -270,14 +268,14 @@ int main(int argc, char* argv[]) { // NOLINT
       fprintf(stdout, "Image float sum: %lf\n", sum);
       fprintf(stdout, "Image float avg: %lf\n",
               sum / static_cast<double>(dimUncropped.y * dimUncropped.x));
-    } else if (r->getDataType() == TYPE_USHORT16) {
+    } else if (r->getDataType() == rawspeed::RawImageType::UINT16) {
       sum = 0.0F;
 
 #ifdef HAVE_OPENMP
 #pragma omp parallel for default(none) firstprivate(dimUncropped, raw, cpp) schedule(static) reduction(+ : sum)
 #endif
       for (int y = 0; y < dimUncropped.y; ++y) {
-        auto* const data =
+        const auto* const data =
             reinterpret_cast<uint16_t*>((*raw)->getDataUncropped(0, y));
 
         for (unsigned x = 0; x < cpp * dimUncropped.x; ++x)
@@ -288,7 +286,7 @@ int main(int argc, char* argv[]) { // NOLINT
       fprintf(stdout, "Image uint16_t avg: %lf\n",
               sum / static_cast<double>(dimUncropped.y * dimUncropped.x));
     }
-  } catch (RawspeedException& e) {
+  } catch (const RawspeedException& e) {
     fprintf(stderr, "ERROR: [rawspeed] %s\n", e.what());
 
     /* if an exception is raised lets not retry or handle the

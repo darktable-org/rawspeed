@@ -35,7 +35,7 @@ class SamsungV2Decompressor final : public AbstractSamsungDecompressor {
 public:
   enum struct OptFlags : uint32_t;
 
-protected:
+private:
   uint32_t bitDepth;
   int width;
   int height;

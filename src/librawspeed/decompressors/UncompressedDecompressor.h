@@ -39,21 +39,21 @@ class UncompressedDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
 
   // check buffer size, throw, or compute minimal height that can be decoded
-  void sanityCheck(const uint32_t* h, int bytesPerLine);
+  void sanityCheck(const uint32_t* h, int bytesPerLine) const;
 
   // check buffer size, throw, or compute minimal height that can be decoded
-  void sanityCheck(uint32_t w, const uint32_t* h, int bpp);
+  void sanityCheck(uint32_t w, const uint32_t* h, int bpp) const;
 
   // for special packed formats
   static int bytesPerLine(int w, bool skips);
 
   template <typename Pump>
   void decode16BitFP(const iPoint2D& size, const iPoint2D& offset,
-                     uint32_t skipBytes, uint32_t h, uint64_t y);
+                     uint32_t skipBytes, uint32_t h, uint64_t y) const;
 
   template <typename Pump>
   void decode24BitFP(const iPoint2D& size, const iPoint2D& offset,
-                     uint32_t skipBytes, uint32_t h, uint64_t y);
+                     uint32_t skipBytes, uint32_t h, uint64_t y) const;
 
 public:
   UncompressedDecompressor(ByteStream input_, const RawImage& img)

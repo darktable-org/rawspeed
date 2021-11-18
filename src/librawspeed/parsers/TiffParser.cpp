@@ -52,8 +52,6 @@
 #include <vector>                        // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
-using std::string;
-
 namespace rawspeed {
 
 TiffParser::TiffParser(const Buffer& file) : RawParser(file) {}
@@ -67,11 +65,12 @@ TiffRootIFDOwner TiffParser::parse(TiffIFD* parent, const Buffer& data) {
   bs.setByteOrder(getTiffByteOrder(bs, 0, "TIFF header"));
   bs.skipBytes(2);
 
-  uint16_t magic = bs.getU16();
-  if (magic != 42 && magic != 0x4f52 && magic != 0x5352 && magic != 0x55) // ORF has 0x4f52/0x5352, RW2 0x55 - Brilliant!
+  if (uint16_t magic = bs.getU16();
+      magic != 42 && magic != 0x4f52 && magic != 0x5352 &&
+      magic != 0x55) // ORF has 0x4f52/0x5352, RW2 0x55 - Brilliant!
     ThrowTPE("Not a TIFF file (magic 42)");
 
-  TiffRootIFDOwner root = std::make_unique<TiffRootIFD>(
+  auto root = std::make_unique<TiffRootIFD>(
       parent, nullptr, bs,
       UINT32_MAX); // tell TiffIFD constructor not to parse bs as IFD
 

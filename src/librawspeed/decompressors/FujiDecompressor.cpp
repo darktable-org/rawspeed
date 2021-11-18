@@ -30,7 +30,7 @@
 #include "common/RawspeedException.h"     // for RawspeedException
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/Endianness.h"                // for Endianness, Endianness::big
-#include "metadata/ColorFilterArray.h"    // for CFA_BLUE, CFA_GREEN, CFA_RED
+#include "metadata/ColorFilterArray.h" // for CFAColor::BLUE, CFAColor::GREEN, CFAColor::RED
 #include <algorithm>                      // for max, fill, min
 #include <cstdint>                        // for uint16_t, uint32_t, uint64_t
 #include <cstdlib>                        // for abs
@@ -41,7 +41,7 @@ namespace rawspeed {
 
 FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
     : mRaw(img), input(std::move(input_)) {
-  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
@@ -63,13 +63,13 @@ FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
     for (int j = 0; j < 6; j++) {
       const CFAColor c = mRaw->cfa.getColorAt(j, i);
       switch (c) {
-      case CFA_RED:
-      case CFA_GREEN:
-      case CFA_BLUE:
+      case CFAColor::RED:
+      case CFAColor::GREEN:
+      case CFAColor::BLUE:
         CFA[i][j] = c;
         break;
       default:
-        ThrowRDE("Got unexpected color %u", c);
+        ThrowRDE("Got unexpected color %u", static_cast<unsigned>(c));
       }
     }
   }
@@ -80,7 +80,6 @@ FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
 FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
     const FujiDecompressor& d) {
   int cur_val;
-  char* qt;
 
   if ((d.header.block_size % 3 && d.header.raw_type == 16) ||
       (d.header.block_size & 1 && d.header.raw_type == 0)) {
@@ -104,7 +103,7 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
   cur_val = -q_point[4];
   q_table.resize(2 * (1 << d.header.raw_bits));
 
-  for (qt = &q_table[0]; cur_val <= q_point[4]; ++qt, ++cur_val) {
+  for (char* qt = &q_table[0]; cur_val <= q_point[4]; ++qt, ++cur_val) {
     if (cur_val <= -q_point[3]) {
       *qt = -4;
     } else if (cur_val <= -q_point[2]) {
@@ -138,15 +137,13 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
     max_bits = 56;
     maxDiff = 256;
   } else if (q_point[4] == 0xFFF) {
+    total_values = 4096;
+    raw_bits = 12;
+    max_bits = 48; // out-of-family, there's greater pattern at play.
+    maxDiff = 64;
+
     ThrowRDE("Aha, finally, a 12-bit compressed RAF! Please consider providing "
              "samples on <https://raw.pixls.us/>, thanks!");
-
-    /* kept for future, once there is a sample.
-     total_values = 4096;
-     raw_bits = 12;
-     max_bits = 48; // out-of-family, there's greater pattern at play.
-     maxDiff = 64;
-    */
   } else {
     ThrowRDE("FUJI q_point");
   }
@@ -198,18 +195,18 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info,
 
   for (int row_count = 0; row_count < FujiStrip::lineHeight(); row_count++) {
     for (int pixel_count = 0; pixel_count < strip.width(); pixel_count++) {
-      uint16_t* line_buf = nullptr;
+      const uint16_t* line_buf = nullptr;
 
       switch (CFA[row_count][pixel_count % 6]) {
-      case CFA_RED: // red
+      case CFAColor::RED: // red
         line_buf = lineBufR[row_count >> 1];
         break;
 
-      case CFA_GREEN: // green
+      case CFAColor::GREEN: // green
         line_buf = lineBufG[row_count];
         break;
 
-      case CFA_BLUE: // blue
+      case CFAColor::BLUE: // blue
         line_buf = lineBufB[row_count >> 1];
         break;
 
@@ -445,30 +442,31 @@ void FujiDecompressor::fuji_decode_interpolation_even(int line_width,
 }
 
 void FujiDecompressor::fuji_extend_generic(
-    std::array<uint16_t*, ltotal> linebuf, int line_width, int start, int end) {
+    const std::array<uint16_t*, ltotal>& linebuf, int line_width, int start,
+    int end) {
   for (int i = start; i <= end; i++) {
     linebuf[i][0] = linebuf[i - 1][1];
     linebuf[i][line_width + 1] = linebuf[i - 1][line_width];
   }
 }
 
-void FujiDecompressor::fuji_extend_red(std::array<uint16_t*, ltotal> linebuf,
-                                       int line_width) {
+void FujiDecompressor::fuji_extend_red(
+    const std::array<uint16_t*, ltotal>& linebuf, int line_width) {
   fuji_extend_generic(linebuf, line_width, R2, R4);
 }
 
-void FujiDecompressor::fuji_extend_green(std::array<uint16_t*, ltotal> linebuf,
-                                         int line_width) {
+void FujiDecompressor::fuji_extend_green(
+    const std::array<uint16_t*, ltotal>& linebuf, int line_width) {
   fuji_extend_generic(linebuf, line_width, G2, G7);
 }
 
-void FujiDecompressor::fuji_extend_blue(std::array<uint16_t*, ltotal> linebuf,
-                                        int line_width) {
+void FujiDecompressor::fuji_extend_blue(
+    const std::array<uint16_t*, ltotal>& linebuf, int line_width) {
   fuji_extend_generic(linebuf, line_width, B2, B4);
 }
 
-void FujiDecompressor::xtrans_decode_block(fuji_compressed_block* info,
-                                           int cur_line) const {
+void FujiDecompressor::xtrans_decode_block(
+    fuji_compressed_block* info, [[maybe_unused]] int cur_line) const {
   struct ColorPos {
     int even = 0;
     int odd = 1;
@@ -617,8 +615,8 @@ void FujiDecompressor::xtrans_decode_block(fuji_compressed_block* info,
   fuji_extend_blue(info->linebuf, line_width);
 }
 
-void FujiDecompressor::fuji_bayer_decode_block(fuji_compressed_block* info,
-                                               int cur_line) const {
+void FujiDecompressor::fuji_bayer_decode_block(
+    fuji_compressed_block* info, [[maybe_unused]] int cur_line) const {
   struct ColorPos {
     int even = 0;
     int odd = 1;
@@ -635,8 +633,8 @@ void FujiDecompressor::fuji_bayer_decode_block(fuji_compressed_block* info,
 
   const int line_width = common_info.line_width;
 
-  auto pass = [&](xt_lines c0, xt_lines c1, int grad, ColorPos& c0_pos,
-                  ColorPos& c1_pos) {
+  auto pass = [this, info, line_width, &g](xt_lines c0, xt_lines c1, int grad,
+                                           ColorPos& c0_pos, ColorPos& c1_pos) {
     while (g.even < line_width || g.odd < line_width) {
       if (g.even < line_width) {
         fuji_decode_sample_even(info, info->linebuf[c0] + 1, &c0_pos.even,
@@ -747,8 +745,8 @@ void FujiDecompressor::fuji_compressed_load_raw() {
     block_size = input.getU32();
 
   // some padding?
-  const uint64_t raw_offset = sizeof(uint32_t) * header.blocks_in_row;
-  if (raw_offset & 0xC) {
+  if (const uint64_t raw_offset = sizeof(uint32_t) * header.blocks_in_row;
+      raw_offset & 0xC) {
     const int padding = 0x10 - (raw_offset & 0xC);
     input.skipBytes(padding);
   }
@@ -774,7 +772,7 @@ void FujiDecompressor::decompressThread() const noexcept {
     block_info.pump = BitPumpMSB(strip->bs);
     try {
       fuji_decode_strip(&block_info, *strip);
-    } catch (RawspeedException& err) {
+    } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
     }

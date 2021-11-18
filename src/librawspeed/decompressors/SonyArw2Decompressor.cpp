@@ -38,15 +38,14 @@ namespace rawspeed {
 SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
                                            const ByteStream& input_)
     : mRaw(img) {
-  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
-  const uint32_t w = mRaw->dim.x;
-  const uint32_t h = mRaw->dim.y;
-
-  if (w == 0 || h == 0 || w % 32 != 0 || w > 9600 || h > 6376)
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", w, h);
+  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 32 != 0 ||
+      mRaw->dim.x > 9600 || mRaw->dim.y > 6376)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+             mRaw->dim.y);
 
   // 1 byte per pixel
   input = input_.peekStream(mRaw->dim.x * mRaw->dim.y);
@@ -118,7 +117,7 @@ void SonyArw2Decompressor::decompressThread() const noexcept {
   for (int y = 0; y < mRaw->dim.y; y++) {
     try {
       decompressRow(y);
-    } catch (RawspeedException& err) {
+    } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
 #ifdef HAVE_OPENMP

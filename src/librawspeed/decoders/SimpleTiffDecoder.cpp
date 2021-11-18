@@ -33,10 +33,10 @@ namespace rawspeed {
 
 void SimpleTiffDecoder::prepareForRawDecoding() {
   raw = getIFDWithLargestImage();
-  width = raw->getEntry(IMAGEWIDTH)->getU32();
-  height = raw->getEntry(IMAGELENGTH)->getU32();
-  off = raw->getEntry(STRIPOFFSETS)->getU32();
-  c2 = raw->getEntry(STRIPBYTECOUNTS)->getU32();
+  width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
+  off = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
+  c2 = raw->getEntry(TiffTag::STRIPBYTECOUNTS)->getU32();
 
   if (!mFile.isValid(off, c2))
     ThrowRDE("Image is truncated.");

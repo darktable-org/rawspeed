@@ -70,18 +70,12 @@ inline Endianness getHostEndianness() {
 inline int16_t getByteSwapped(int16_t v) {
   return static_cast<int16_t>(BSWAP16(static_cast<uint16_t>(v)));
 }
-inline uint16_t getByteSwapped(uint16_t v) {
-  return static_cast<uint16_t>(BSWAP16(v));
-}
+inline uint16_t getByteSwapped(uint16_t v) { return BSWAP16(v); }
 inline int32_t getByteSwapped(int32_t v) {
   return static_cast<int32_t>(BSWAP32(static_cast<uint32_t>(v)));
 }
-inline uint32_t getByteSwapped(uint32_t v) {
-  return static_cast<uint32_t>(BSWAP32(v));
-}
-inline uint64_t getByteSwapped(uint64_t v) {
-  return BSWAP64(static_cast<uint64_t>(v));
-}
+inline uint32_t getByteSwapped(uint32_t v) { return BSWAP32(v); }
+inline uint64_t getByteSwapped(uint64_t v) { return BSWAP64(v); }
 
 // the float/double versions use two memcpy which guarantee strict aliasing
 // and are compiled into the same assembly as the popular union trick.

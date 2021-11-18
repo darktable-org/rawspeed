@@ -38,8 +38,6 @@
 #include "AddressSanitizer.h" // for ASan::...
 #endif
 
-using std::string;
-
 namespace rawspeed {
 
 RawImageData::RawImageData() : cfa(iPoint2D(0, 0)) {
@@ -119,7 +117,7 @@ void RawImageData::createData() {
 }
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
-void RawImageData::poisonPadding() {
+void RawImageData::poisonPadding() const {
   if (padding <= 0)
     return;
 
@@ -132,7 +130,7 @@ void RawImageData::poisonPadding() {
   }
 }
 #else
-void RawImageData::poisonPadding() {
+void RawImageData::poisonPadding() const {
   // if we are building without ASAN, then there is no need/way to poison.
   // however, i think it is better to have such an empty function rather
   // than making this whole function not exist in ASAN-less builds
@@ -140,7 +138,7 @@ void RawImageData::poisonPadding() {
 #endif
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
-void RawImageData::unpoisonPadding() {
+void RawImageData::unpoisonPadding() const {
   if (padding <= 0)
     return;
 
@@ -153,14 +151,14 @@ void RawImageData::unpoisonPadding() {
   }
 }
 #else
-void RawImageData::unpoisonPadding() {
+void RawImageData::unpoisonPadding() const {
   // if we are building without ASAN, then there is no need/way to poison.
   // however, i think it is better to have such an empty function rather
   // than making this whole function not exist in ASAN-less builds
 }
 #endif
 
-void RawImageData::checkRowIsInitialized(int row) {
+void RawImageData::checkRowIsInitialized(int row) const {
   const auto rowsize = bpp * uncropped_dim.x;
 
   const uint8_t* const curr_line = getDataUncropped(0, row);
@@ -171,12 +169,12 @@ void RawImageData::checkRowIsInitialized(int row) {
 }
 
 #if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
-void RawImageData::checkMemIsInitialized() {
+void RawImageData::checkMemIsInitialized() const {
   for (int j = 0; j < uncropped_dim.y; j++)
     checkRowIsInitialized(j);
 }
 #else
-void RawImageData::checkMemIsInitialized() {
+void RawImageData::checkMemIsInitialized() const {
   // While we could use the same version for non-MSAN build, even though it
   // does not do anything, i don't think it will be fully optimized away,
   // the getDataUncropped() call may still be there. To be re-evaluated.
@@ -227,7 +225,7 @@ uint8_t* RawImageData::getData(uint32_t x, uint32_t y) {
   return &data[static_cast<size_t>(y) * pitch + x * bpp];
 }
 
-uint8_t* RawImageData::getDataUncropped(uint32_t x, uint32_t y) {
+uint8_t* RawImageData::getDataUncropped(uint32_t x, uint32_t y) const {
   if (x >= static_cast<unsigned>(uncropped_dim.x))
     ThrowRDE("X Position outside image requested.");
   if (y >= static_cast<unsigned>(uncropped_dim.y))
@@ -249,14 +247,14 @@ iPoint2D __attribute__((pure)) RawImageData::getCropOffset() const {
 
 void RawImageData::subFrame(iRectangle2D crop) {
   if (!crop.dim.isThisInside(dim - crop.pos)) {
-    writeLog(DEBUG_PRIO_WARNING, "WARNING: RawImageData::subFrame - Attempted "
-                                 "to create new subframe larger than original "
-                                 "size. Crop skipped.");
+    writeLog(DEBUG_PRIO::WARNING, "WARNING: RawImageData::subFrame - Attempted "
+                                  "to create new subframe larger than original "
+                                  "size. Crop skipped.");
     return;
   }
   if (crop.pos.x < 0 || crop.pos.y < 0 || !crop.hasPositiveArea()) {
-    writeLog(DEBUG_PRIO_WARNING, "WARNING: RawImageData::subFrame - Negative "
-                                 "crop offset. Crop skipped.");
+    writeLog(DEBUG_PRIO::WARNING, "WARNING: RawImageData::subFrame - Negative "
+                                  "crop offset. Crop skipped.");
     return;
   }
 
@@ -347,7 +345,7 @@ void RawImageData::fixBadPixels()
 
   /* Process bad pixels, if any */
   if (mBadPixelMap)
-    startWorker(RawImageWorker::FIX_BAD_PIXELS, false);
+    startWorker(RawImageWorker::RawImageWorkerTask::FIX_BAD_PIXELS, false);
 
 #else  // EMULATE_DCRAW_BAD_PIXELS - not recommended, testing purposes only
 
@@ -382,8 +380,9 @@ void RawImageData::fixBadPixels()
 void RawImageData::startWorker(const RawImageWorker::RawImageWorkerTask task,
                                bool cropped) {
   const int height = [&]() {
-    int h = (cropped) ? dim.y : uncropped_dim.y;
-    if (task & RawImageWorker::FULL_IMAGE) {
+    int h = cropped ? dim.y : uncropped_dim.y;
+    if (static_cast<uint32_t>(task) &
+        static_cast<uint32_t>(RawImageWorker::RawImageWorkerTask::FULL_IMAGE)) {
       h = uncropped_dim.y;
     }
     return h;
@@ -452,7 +451,7 @@ void RawImageData::expandBorder(iRectangle2D validData)
   validData = validData.getOverlap(iRectangle2D(0,0,dim.x, dim.y));
   if (validData.pos.x > 0) {
     for (int y = 0; y < dim.y; y++ ) {
-      uint8_t* src_pos = getData(validData.pos.x, y);
+      const uint8_t* src_pos = getData(validData.pos.x, y);
       uint8_t* dst_pos = getData(validData.pos.x - 1, y);
       for (int x = validData.pos.x; x >= 0; x--) {
         for (int i = 0; i < bpp; i++) {
@@ -466,7 +465,7 @@ void RawImageData::expandBorder(iRectangle2D validData)
   if (validData.getRight() < dim.x) {
     int pos = validData.getRight();
     for (int y = 0; y < dim.y; y++ ) {
-      uint8_t* src_pos = getData(pos - 1, y);
+      const uint8_t* src_pos = getData(pos - 1, y);
       uint8_t* dst_pos = getData(pos, y);
       for (int x = pos; x < dim.x; x++) {
         for (int i = 0; i < bpp; i++) {
@@ -478,14 +477,14 @@ void RawImageData::expandBorder(iRectangle2D validData)
   }
 
   if (validData.pos.y > 0) {
-    uint8_t* src_pos = getData(0, validData.pos.y);
+    const uint8_t* src_pos = getData(0, validData.pos.y);
     for (int y = 0; y < validData.pos.y; y++ ) {
       uint8_t* dst_pos = getData(0, y);
       memcpy(dst_pos, src_pos, static_cast<size_t>(dim.x) * bpp);
     }
   }
   if (validData.getBottom() < dim.y) {
-    uint8_t* src_pos = getData(0, validData.getBottom() - 1);
+    const uint8_t* src_pos = getData(0, validData.getBottom() - 1);
     for (int y = validData.getBottom(); y < dim.y; y++ ) {
       uint8_t* dst_pos = getData(0, y);
       memcpy(dst_pos, src_pos, static_cast<size_t>(dim.x) * bpp);
@@ -533,24 +532,24 @@ void RawImageWorker::performTask() noexcept {
   try {
     switch(task)
     {
-    case SCALE_VALUES:
+    case RawImageWorkerTask::SCALE_VALUES:
       data->scaleValues(start_y, end_y);
       break;
-    case FIX_BAD_PIXELS:
+    case RawImageWorkerTask::FIX_BAD_PIXELS:
       data->fixBadPixelsThread(start_y, end_y);
       break;
-    case APPLY_LOOKUP:
+    case RawImageWorkerTask::APPLY_LOOKUP:
       data->doLookup(start_y, end_y);
       break;
     default:
       // NOLINTNEXTLINE: https://bugs.llvm.org/show_bug.cgi?id=50532
       assert(false);
     }
-  } catch (RawDecoderException &e) {
+  } catch (const RawDecoderException& e) {
     data->setError(e.what());
-  } catch (TiffParserException &e) {
+  } catch (const TiffParserException& e) {
     data->setError(e.what());
-  } catch (IOException &e) {
+  } catch (const IOException& e) {
     data->setError(e.what());
   }
 }
@@ -559,7 +558,7 @@ void RawImageData::sixteenBitLookup() {
   if (table == nullptr) {
     return;
   }
-  startWorker(RawImageWorker::APPLY_LOOKUP, true);
+  startWorker(RawImageWorker::RawImageWorkerTask::APPLY_LOOKUP, true);
 }
 
 void RawImageData::setTable(std::unique_ptr<TableLookUp> t) {

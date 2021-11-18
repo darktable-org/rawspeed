@@ -122,8 +122,7 @@ struct BitStreamReplenisherBase {
 struct BitStreamForwardSequentialReplenisher final : BitStreamReplenisherBase {
   BitStreamForwardSequentialReplenisher() = default;
 
-  explicit BitStreamForwardSequentialReplenisher(const Buffer& input)
-      : BitStreamReplenisherBase(input) {}
+  using BitStreamReplenisherBase::BitStreamReplenisherBase;
 
   [[nodiscard]] inline size_type getPos() const { return pos; }
   [[nodiscard]] inline size_type getRemainingSize() const {

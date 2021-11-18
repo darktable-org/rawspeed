@@ -37,7 +37,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool DcsDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer& file) {
+                                      [[maybe_unused]] const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -54,8 +54,10 @@ void DcsDecoder::checkImageDimensions() {
 RawImage DcsDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
-  TiffEntry *linearization = mRootIFD->getEntryRecursive(GRAYRESPONSECURVE);
-  if (!linearization || linearization->count != 256 || linearization->type != TIFF_SHORT)
+  const TiffEntry* linearization =
+      mRootIFD->getEntryRecursive(TiffTag::GRAYRESPONSECURVE);
+  if (!linearization || linearization->count != 256 ||
+      linearization->type != TiffDataType::SHORT)
     ThrowRDE("Couldn't find the linearization table");
 
   assert(linearization != nullptr);

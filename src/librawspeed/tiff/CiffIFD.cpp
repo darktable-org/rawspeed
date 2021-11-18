@@ -33,7 +33,6 @@
 #include <utility>                       // for move, pair
 #include <vector>                        // for vector, vector<>::size_type
 
-using std::string;
 using std::vector;
 using std::unique_ptr;
 
@@ -51,8 +50,8 @@ void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* valueDatas,
   auto t = std::make_unique<CiffEntry>(valueDatas, valueData, dirEntry);
 
   switch (t->type) {
-  case CIFF_SUB1:
-  case CIFF_SUB2: {
+  case CiffDataType::SUB1:
+  case CiffDataType::SUB2: {
     add(std::make_unique<CiffIFD>(this, t->data));
     break;
   }
@@ -171,8 +170,7 @@ std::vector<const CiffIFD*> CiffIFD::getIFDsWithTagIf(CiffTag tag,
 
   std::vector<const CiffIFD*> matchingIFDs;
 
-  const auto found = mEntry.find(tag);
-  if (found != mEntry.end()) {
+  if (const auto found = mEntry.find(tag); found != mEntry.end()) {
     const auto* const entry = found->second.get();
     if (f(entry))
       matchingIFDs.push_back(this);
@@ -191,8 +189,7 @@ const CiffEntry* CiffIFD::getEntryRecursiveIf(CiffTag tag,
                                               const Lambda& f) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
 
-  const auto found = mEntry.find(tag);
-  if (found != mEntry.end()) {
+  if (const auto found = mEntry.find(tag); found != mEntry.end()) {
     const auto* const entry = found->second.get();
     if (f(entry))
       return entry;
@@ -222,7 +219,7 @@ vector<const CiffIFD*> CiffIFD::getIFDsWithTagWhere(CiffTag tag,
 }
 
 vector<const CiffIFD*>
-CiffIFD::getIFDsWithTagWhere(CiffTag tag, const string& isValue) const {
+CiffIFD::getIFDsWithTagWhere(CiffTag tag, const std::string& isValue) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
   return getIFDsWithTagIf(tag, [&isValue](const CiffEntry* entry) {
     return entry->isString() && isValue == entry->getString();
@@ -250,11 +247,10 @@ bool __attribute__((pure)) CiffIFD::hasEntryRecursive(CiffTag tag) const {
 const CiffEntry* CiffIFD::getEntry(CiffTag tag) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
 
-  const auto found = mEntry.find(tag);
-  if (found != mEntry.end())
+  if (const auto found = mEntry.find(tag); found != mEntry.end())
     return found->second.get();
 
-  ThrowCPE("Entry 0x%x not found.", tag);
+  ThrowCPE("Entry 0x%x not found.", static_cast<unsigned>(tag));
 }
 
 const CiffEntry* CiffIFD::getEntryRecursive(CiffTag tag) const {
@@ -271,8 +267,8 @@ const CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag,
   });
 }
 
-const CiffEntry* CiffIFD::getEntryRecursiveWhere(CiffTag tag,
-                                                 const string& isValue) const {
+const CiffEntry*
+CiffIFD::getEntryRecursiveWhere(CiffTag tag, const std::string& isValue) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
   return getEntryRecursiveIf(tag, [&isValue](const CiffEntry* entry) {
     return entry->isString() && isValue == entry->getString();

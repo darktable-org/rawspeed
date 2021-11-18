@@ -80,14 +80,18 @@ struct pana_cs6_page_decoder {
     // 4 padding bits
   }
 
-  uint16_t nextpixel() { return pixelbuffer[current++]; }
+  uint16_t nextpixel() {
+    uint16_t currPixel = pixelbuffer[current];
+    ++current;
+    return currPixel;
+  }
 };
 } // namespace
 
 PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
                                                  const ByteStream& input_)
     : mRaw(img) {
-  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
@@ -100,11 +104,10 @@ PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
   // How many blocks are needed for the given image size?
   const auto numBlocks = mRaw->dim.area() / PixelsPerBlock;
 
-  // How many full blocks does the input contain? This is truncating division.
-  const auto haveBlocks = input_.getRemainSize() / BytesPerBlock;
-
   // Does the input contain enough blocks?
-  if (haveBlocks < numBlocks)
+  // How many full blocks does the input contain? This is truncating division.
+  if (const auto haveBlocks = input_.getRemainSize() / BytesPerBlock;
+      haveBlocks < numBlocks)
     ThrowRDE("Insufficient count of input blocks for a given image");
 
   // We only want those blocks we need, no extras.
@@ -150,6 +153,8 @@ PanasonicDecompressorV6::decompressBlock(ByteStream& rowInput, int row,
     if (spix <= 0xffff)
       out(row, col) = spix & 0xffff;
     else {
+      // FIXME: this is a convoluted way to compute zero.
+      // What was this code trying to do, actually?
       epixel = static_cast<int>(epixel + 0x7ffffff1) >> 0x1f;
       out(row, col) = epixel & 0x3fff;
     }

@@ -41,7 +41,7 @@ public:
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
-protected:
+private:
   [[nodiscard]] int getDecoderVersion() const override { return 3; }
 };
 

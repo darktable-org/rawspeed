@@ -32,14 +32,16 @@ template <class T> class CroppedArray2DRef {
   // We need to be able to convert to const version.
   friend CroppedArray2DRef<const T>;
 
-  inline T& operator[](int row) const;
+  T& operator[](int row) const;
 
 public:
   using value_type = T;
-  using cvless_value_type = typename std::remove_cv<value_type>::type;
+  using cvless_value_type = std::remove_cv_t<value_type>;
 
-  int offsetCols = 0, offsetRows = 0;
-  int croppedWidth = 0, croppedHeight = 0;
+  int offsetCols = 0;
+  int offsetRows = 0;
+  int croppedWidth = 0;
+  int croppedHeight = 0;
 
   CroppedArray2DRef() = default;
 
@@ -47,15 +49,22 @@ public:
                     int croppedWidth_, int croppedHeight_);
 
   // Conversion from CroppedArray2DRef<T> to CroppedArray2DRef<const T>.
-  template <class T2, typename = std::enable_if_t<std::is_same<
-                          typename std::remove_const<T>::type, T2>::value>>
+  template <class T2, typename = std::enable_if_t<
+                          std::is_same_v<std::remove_const_t<T>, T2>>>
   CroppedArray2DRef( // NOLINT google-explicit-constructor
       CroppedArray2DRef<T2> RHS)
       : base(RHS.base), offsetCols(RHS.offsetCols), offsetRows(RHS.offsetRows),
         croppedWidth(RHS.croppedWidth), croppedHeight(RHS.croppedHeight) {}
 
-  inline T& operator()(int row, int col) const;
+  T& operator()(int row, int col) const;
 };
+
+// CTAD deduction guide
+template <typename T>
+explicit CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
+                           int offsetRows_, int croppedWidth_,
+                           int croppedHeight_)
+    -> CroppedArray2DRef<typename Array2DRef<T>::value_type>;
 
 template <class T>
 CroppedArray2DRef<T>::CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
@@ -71,14 +80,15 @@ CroppedArray2DRef<T>::CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
   assert(offsetRows_ + croppedHeight_ <= base.height);
 }
 
-template <class T> T& CroppedArray2DRef<T>::operator[](const int row) const {
+template <class T>
+inline T& CroppedArray2DRef<T>::operator[](const int row) const {
   assert(row >= 0);
   assert(row < croppedHeight);
   return base.operator()(offsetRows + row, /*col=*/0);
 }
 
 template <class T>
-T& CroppedArray2DRef<T>::operator()(const int row, const int col) const {
+inline T& CroppedArray2DRef<T>::operator()(const int row, const int col) const {
   assert(col >= 0);
   assert(col < croppedWidth);
   return (&(operator[](row)))[offsetCols + col];

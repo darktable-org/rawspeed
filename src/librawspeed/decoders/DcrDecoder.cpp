@@ -26,7 +26,7 @@
 #include "io/Buffer.h"                       // for Buffer, DataBuffer
 #include "io/ByteStream.h"                   // for ByteStream
 #include "io/Endianness.h"                   // for Endianness, Endianness:...
-#include "tiff/TiffEntry.h"                  // for TiffEntry, TIFF_SHORT
+#include "tiff/TiffEntry.h" // for TiffEntry, TiffDataType::SHORT
 #include "tiff/TiffIFD.h"                    // for TiffRootIFD, TiffID
 #include "tiff/TiffTag.h"                    // for COMPRESSION, KODAK_IFD
 #include <array>                             // for array
@@ -39,7 +39,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool DcrDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer& file) {
+                                      [[maybe_unused]] const Buffer& file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -58,11 +58,11 @@ RawImage DcrDecoder::decodeRawInternal() {
 
   ByteStream input(DataBuffer(mFile.getSubView(off), Endianness::little));
 
-  int compression = raw->getEntry(COMPRESSION)->getU32();
-  if (65000 != compression)
+  if (int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
+      65000 != compression)
     ThrowRDE("Unsupported compression %d", compression);
 
-  TiffEntry* ifdoffset = mRootIFD->getEntryRecursive(KODAK_IFD);
+  const TiffEntry* ifdoffset = mRootIFD->getEntryRecursive(TiffTag::KODAK_IFD);
   if (!ifdoffset)
     ThrowRDE("Couldn't find the Kodak IFD offset");
 
@@ -72,10 +72,11 @@ RawImage DcrDecoder::decodeRawInternal() {
   TiffRootIFD kodakifd(nullptr, &ifds, ifdoffset->getRootIfdData(),
                        ifdoffset->getU32());
 
-  TiffEntry* linearization = kodakifd.getEntryRecursive(KODAK_LINEARIZATION);
+  const TiffEntry* linearization =
+      kodakifd.getEntryRecursive(TiffTag::KODAK_LINEARIZATION);
   if (!linearization ||
       !(linearization->count == 1024 || linearization->count == 4096) ||
-      linearization->type != TIFF_SHORT)
+      linearization->type != TiffDataType::SHORT)
     ThrowRDE("Couldn't find the linearization table");
 
   assert(linearization != nullptr);
@@ -87,8 +88,9 @@ RawImage DcrDecoder::decodeRawInternal() {
   //        WB from what appear to be presets and calculate it in weird ways
   //        The only file I have only uses this method, if anybody careas look
   //        in dcraw.c parse_kodak_ifd() for all that weirdness
-  TiffEntry* blob = kodakifd.getEntryRecursive(static_cast<TiffTag>(0x03fd));
-  if (blob && blob->count == 72) {
+  if (const TiffEntry* blob =
+          kodakifd.getEntryRecursive(static_cast<TiffTag>(0x03fd));
+      blob && blob->count == 72) {
     for (auto i = 0U; i < 3; i++) {
       const auto mul = blob->getU16(20 + i);
       if (0 == mul)
@@ -97,14 +99,15 @@ RawImage DcrDecoder::decodeRawInternal() {
     }
   }
 
-  const int bps = [CurveSize = linearization->count]() -> int {
+  const int bps = [CurveSize = linearization->count]() {
     switch (CurveSize) {
     case 1024:
       return 10;
     case 4096:
       return 12;
+    default:
+      __builtin_unreachable();
     }
-    __builtin_unreachable();
   }();
 
   KodakDecompressor k(mRaw, input, bps, uncorrectedRawValues);

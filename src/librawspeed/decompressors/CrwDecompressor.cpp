@@ -41,7 +41,7 @@ namespace rawspeed {
 CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
                                  bool lowbits_, ByteStream rawData)
     : mRaw(img), lowbits(lowbits_) {
-  if (mRaw->getCpp() != 1 || mRaw->getDataType() != TYPE_USHORT16 ||
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
@@ -167,7 +167,7 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
   assert(diffBuf);
 
   // decode the block
-  for (int i = 0; i < 64; i++) {
+  for (int i = 0; i < 64;) {
     bs.fill(32);
 
     const uint8_t codeValue = mHuff[i > 0].decodeCodeValue(bs);
@@ -178,13 +178,17 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
     if (len == 0 && index == 0 && i)
       break;
 
-    if (len == 0xf && index == 0xf)
+    if (len == 0xf && index == 0xf) {
+      ++i;
       continue;
+    }
 
     i += index;
 
-    if (len == 0)
+    if (len == 0) {
+      ++i;
       continue;
+    }
 
     int diff = bs.getBitsNoFill(len);
 
@@ -194,6 +198,7 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
     diff = HuffmanTable::extend(diff, len);
 
     (*diffBuf)[i] = diff;
+    ++i;
   }
 }
 
@@ -228,7 +233,7 @@ void CrwDecompressor::decompress() {
       diffBuf[0] += carry;
       carry = diffBuf[0];
 
-      for (uint32_t k = 0; k < 64; ++k, ++col) {
+      for (uint32_t k = 0; k < 64; ++k) {
         if (col == out.width) {
           // new line. sadly, does not always happen when k == 0.
           col = 0;
@@ -242,6 +247,7 @@ void CrwDecompressor::decompress() {
           ThrowRDE("Error decompressing");
 
         out(row, col) = base[k & 1];
+        ++col;
       }
     }
     assert(row == (out.height - 1));

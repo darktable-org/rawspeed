@@ -101,6 +101,13 @@ static void jpeg_mem_src_int(j_decompress_ptr cinfo,
 
 struct JpegDecompressor::JpegDecompressStruct : jpeg_decompress_struct {
   struct jpeg_error_mgr jerr;
+
+  JpegDecompressStruct(const JpegDecompressStruct&) = delete;
+  JpegDecompressStruct(JpegDecompressStruct&&) noexcept = delete;
+  JpegDecompressStruct&
+  operator=(const JpegDecompressStruct&) noexcept = delete;
+  JpegDecompressStruct& operator=(JpegDecompressStruct&&) noexcept = delete;
+
   JpegDecompressStruct() {
     jpeg_create_decompress(this);
 
@@ -137,7 +144,7 @@ void JpegDecompressor::decode(uint32_t offX,
                                 dinfo.output_height, row_stride);
 
   while (dinfo.output_scanline < dinfo.output_height) {
-    auto* rowOut = static_cast<JSAMPROW>(&tmp(dinfo.output_scanline, 0));
+    JSAMPROW rowOut = &tmp(dinfo.output_scanline, 0);
     if (0 == jpeg_read_scanlines(&dinfo, &rowOut, 1))
       ThrowRDE("JPEG Error while decompressing image.");
   }

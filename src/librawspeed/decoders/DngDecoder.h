@@ -45,19 +45,18 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void checkSupportInternal(const CameraMetaData* meta) override;
 
-protected:
+private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }
   bool mFixLjpeg;
   static void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
-  void parseCFA(const TiffIFD* raw);
-  DngTilingDescription getTilingDescription(const TiffIFD* raw);
-  void decodeData(const TiffIFD* raw, uint32_t sample_format);
+  void parseCFA(const TiffIFD* raw) const;
+  DngTilingDescription getTilingDescription(const TiffIFD* raw) const;
+  void decodeData(const TiffIFD* raw, uint32_t sample_format) const;
   void handleMetadata(const TiffIFD* raw);
-  bool decodeMaskedAreas(const TiffIFD* raw);
-  bool decodeBlackLevels(const TiffIFD* raw);
-  void setBlack(const TiffIFD* raw);
+  bool decodeMaskedAreas(const TiffIFD* raw) const;
+  bool decodeBlackLevels(const TiffIFD* raw) const;
+  void setBlack(const TiffIFD* raw) const;
 
-private:
   int bps = -1;
   int compression = -1;
 };
