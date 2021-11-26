@@ -1,0 +1,32 @@
+on:
+  workflow_call:
+    inputs:
+      sanitizer:
+        required: true
+        type: string
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: (OSS-FUZZ) Building with ${{ inputs.sanitizer }} sanitizer
+        id: build
+        uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@master
+        with:
+          oss-fuzz-project-name: 'librawspeed'
+          dry-run: false
+          language: c++
+          sanitizer: ${{ inputs.sanitizer }}
+      - name: (OSS-FUZZ) Running ${{ inputs.sanitizer }}-sanitized fuzzers
+        uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@master
+        with:
+          oss-fuzz-project-name: 'librawspeed'
+          fuzz-seconds: 600
+          dry-run: false
+          sanitizer: ${{ inputs.sanitizer }}
+      - name: Upload Crash
+        uses: actions/upload-artifact@v1
+        if: failure() && steps.build.outcome == 'success'
+        with:
+          name: artifacts
+          path: ./out/artifacts
