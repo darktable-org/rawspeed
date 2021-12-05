@@ -8588,6 +8588,10 @@
 		</CFA>
 		<Crop x="0" y="0" width="-938" height="-4"/>
 		<Sensor black="65" white="16383"/>
+		<Aliases>
+			<Alias>GFX 50S II</Alias>
+			<Alias>GFX50S II</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="FUJIFILM" model="GFX 50S" mode="compressed">
 		<ID make="Fujifilm" model="GFX 50S">Fujifilm GFX 50S</ID>
@@ -8599,6 +8603,10 @@
 		</CFA>
 		<Crop x="0" y="0" width="-938" height="-4"/>
 		<Sensor black="65" white="16383"/>
+		<Aliases>
+			<Alias>GFX 50S II</Alias>
+			<Alias>GFX50S II</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="FUJIFILM" model="GFX 50R">
 		<ID make="Fujifilm" model="GFX 50R">Fujifilm GFX 50R</ID>
