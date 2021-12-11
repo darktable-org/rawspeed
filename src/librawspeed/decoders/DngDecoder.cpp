@@ -623,6 +623,27 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         mRaw->metadata.wbCoeffs[i] /= d65_white[i];
     }
   }
+
+  if (mRootIFD->hasEntryRecursive(TiffTag::COLORMATRIX2) &&
+      mRootIFD->hasEntryRecursive(TiffTag::CALIBRATIONILLUMINANT2)) {
+    const TiffEntry* illuminant =
+        mRootIFD->getEntryRecursive(TiffTag::CALIBRATIONILLUMINANT2);
+    if (illuminant->getU16() == 21) { // D65
+      const TiffEntry* mat = mRootIFD->getEntryRecursive(TiffTag::COLORMATRIX2);
+      const auto srat_vals = mat->getSRationalArray(mat->count);
+      bool Success = true;
+      mRaw->metadata.colorMatrix.reserve(mat->count);
+      for (auto& val : srat_vals) {
+        // FIXME: introduce proper rational type.
+        Success &= val.second == 10'000;
+        if (!Success)
+          break;
+        mRaw->metadata.colorMatrix.emplace_back(val.first);
+      }
+      if (!Success)
+        mRaw->metadata.colorMatrix.clear();
+    }
+  }
 }
 
 /* DNG Images are assumed to be decodable unless explicitly set so */

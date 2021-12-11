@@ -124,6 +124,15 @@ bool __attribute__((pure)) TiffEntry::isFloat() const {
   }
 }
 
+bool __attribute__((pure)) TiffEntry::isSRational() const {
+  switch (type) {
+  case TiffDataType::SRATIONAL:
+    return true;
+  default:
+    return false;
+  }
+}
+
 uint8_t TiffEntry::getByte(uint32_t index) const {
   if (type != TiffDataType::BYTE && type != TiffDataType::UNDEFINED)
     ThrowTPE("Wrong type %u encountered. Expected Byte on 0x%x",
@@ -179,6 +188,16 @@ int32_t TiffEntry::getI32(uint32_t index) const {
   return data.peek<int32_t>(index);
 }
 
+std::pair<int, int> TiffEntry::getSRational(uint32_t index) const {
+  if (!isSRational()) {
+    ThrowTPE("Wrong type 0x%x encountered. Expected SRational",
+             static_cast<unsigned>(type));
+  }
+  auto a = static_cast<int>(getU32(index * 2));
+  auto b = static_cast<int>(getU32(index * 2 + 1));
+  return {a, b};
+}
+
 float TiffEntry::getFloat(uint32_t index) const {
   if (!isFloat()) {
     ThrowTPE("Wrong type 0x%x encountered. Expected Float or something "
@@ -203,8 +222,7 @@ float TiffEntry::getFloat(uint32_t index) const {
     return b != 0 ? static_cast<float>(a) / b : 0.0F;
   }
   case TiffDataType::SRATIONAL: {
-    auto a = static_cast<int>(getU32(index * 2));
-    auto b = static_cast<int>(getU32(index * 2 + 1));
+    auto [a, b] = getSRational(index);
     return b ? static_cast<float>(a) / b : 0.0F;
   }
   default:

@@ -297,6 +297,8 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   mRaw->whitePoint = sensor->mWhiteLevel;
   mRaw->blackAreas = cam->blackAreas;
   mRaw->cfa = cam->cfa;
+  if (!cam->color_matrix.empty())
+    mRaw->metadata.colorMatrix = cam->color_matrix;
   mRaw->metadata.canonical_make = cam->canonical_make;
   mRaw->metadata.canonical_model = cam->canonical_model;
   mRaw->metadata.canonical_alias = cam->canonical_alias;
