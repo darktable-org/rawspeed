@@ -83,6 +83,7 @@ public:
   TiffEntry(TiffIFD* parent, ByteStream& bs);
 
   [[nodiscard]] bool __attribute__((pure)) isFloat() const;
+  [[nodiscard]] bool __attribute__((pure)) isSRational() const;
   [[nodiscard]] bool __attribute__((pure)) isInt() const;
   [[nodiscard]] bool __attribute__((pure)) isString() const;
   [[nodiscard]] uint8_t getByte(uint32_t index = 0) const;
@@ -90,6 +91,7 @@ public:
   [[nodiscard]] int32_t getI32(uint32_t index = 0) const;
   [[nodiscard]] uint16_t getU16(uint32_t index = 0) const;
   [[nodiscard]] int16_t getI16(uint32_t index = 0) const;
+  [[nodiscard]] std::pair<int, int> getSRational(uint32_t index = 0) const;
   [[nodiscard]] float getFloat(uint32_t index = 0) const;
   [[nodiscard]] std::string getString() const;
 
@@ -105,6 +107,11 @@ public:
 
   [[nodiscard]] inline std::vector<float> getFloatArray(uint32_t count_) const {
     return getArray<float, &TiffEntry::getFloat>(count_);
+  }
+
+  [[nodiscard]] inline std::vector<std::pair<int, int>>
+  getSRationalArray(uint32_t count_) const {
+    return getArray<std::pair<int, int>, &TiffEntry::getSRational>(count_);
   }
 
   [[nodiscard]] ByteStream getData() const { return data; }

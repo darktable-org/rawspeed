@@ -355,6 +355,53 @@
       <xs:element type="HintType" name="Hint" minOccurs="1" maxOccurs="4"/>
     </xs:sequence>
   </xs:complexType>
+  <xs:simpleType name="ColorMatrixRowTypeTypeEltType">
+    <xs:list itemType="xs:short"/>
+  </xs:simpleType>
+  <xs:simpleType name="ColorMatrixRowTypeType">
+    <xs:restriction base="ColorMatrixRowTypeTypeEltType">
+      <xs:minLength value="3"/>
+      <xs:maxLength value="3"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ColorMatrixRowTypePlaneType">
+    <xs:restriction base="xs:unsignedByte">
+      <xs:pattern value="[0-3]{1,1}"/>
+      <xs:minInclusive value="0"/>
+      <xs:maxInclusive value="3"/>
+      <xs:enumeration value="0"/>
+      <xs:enumeration value="1"/>
+      <xs:enumeration value="2"/>
+      <xs:enumeration value="3"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ColorMatrixRowType">
+    <xs:simpleContent>
+      <xs:extension base="ColorMatrixRowTypeType">
+        <xs:attribute type="ColorMatrixRowTypePlaneType" name="plane" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:simpleType name="ColorMatrixTypePlanesType">
+    <xs:restriction base="xs:unsignedByte">
+      <xs:pattern value="[3-4]{1,1}"/>
+      <xs:minInclusive value="3"/>
+      <xs:maxInclusive value="4"/>
+      <xs:enumeration value="3"/>
+      <xs:enumeration value="4"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ColorMatrixType">
+    <xs:sequence>
+      <xs:element type="ColorMatrixRowType" name="ColorMatrixRow" minOccurs="3" maxOccurs="4"/>
+    </xs:sequence>
+    <xs:attribute type="ColorMatrixTypePlanesType" name="planes"/>
+  </xs:complexType>
+  <xs:complexType name="ColorMatricesType">
+    <xs:sequence>
+      <xs:element type="ColorMatrixType" name="ColorMatrix" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
   <xs:simpleType name="CameraMakeType">
     <xs:restriction base="xs:string">
       <xs:pattern value="[a-zA-Z \-,./]{3,27}"/>
@@ -482,6 +529,7 @@
       <xs:element type="BlackAreasType" name="BlackAreas" minOccurs="0" maxOccurs="1"/>
       <xs:element type="AliasesType" name="Aliases" minOccurs="0" maxOccurs="1"/>
       <xs:element type="HintsType" name="Hints" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="ColorMatricesType" name="ColorMatrices" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="CameraMakeType" name="make" use="required"/>
     <xs:attribute type="CameraModelType" name="model" use="required"/>

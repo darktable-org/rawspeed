@@ -189,21 +189,7 @@ void RafDecoder::checkSupportInternal(const CameraMetaData* meta) {
   }
 }
 
-void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
-  int iso = 0;
-  if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
-    iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
-  mRaw->metadata.isoSpeed = iso;
-
-  // This is where we'd normally call setMetaData but since we may still need
-  // to rotate the image for SuperCCD cameras we do everything ourselves
-  auto id = mRootIFD->getID();
-  const Camera* cam = meta->getCamera(id.make, id.model, mRaw->metadata.mode);
-  if (!cam)
-    ThrowRDE("Couldn't find camera");
-
-  assert(cam != nullptr);
-
+void RafDecoder::applyCorrections(const Camera* cam) {
   iPoint2D new_size(mRaw->dim);
   iPoint2D crop_offset(0, 0);
 
@@ -267,6 +253,24 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   } else if (applyCrop) {
     mRaw->subFrame(iRectangle2D(crop_offset, new_size));
   }
+}
+
+void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
+  int iso = 0;
+  if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
+    iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
+  mRaw->metadata.isoSpeed = iso;
+
+  // This is where we'd normally call setMetaData but since we may still need
+  // to rotate the image for SuperCCD cameras we do everything ourselves
+  auto id = mRootIFD->getID();
+  const Camera* cam = meta->getCamera(id.make, id.model, mRaw->metadata.mode);
+  if (!cam)
+    ThrowRDE("Couldn't find camera");
+
+  assert(cam != nullptr);
+
+  applyCorrections(cam);
 
   const CameraSensorInfo *sensor = cam->getSensorInfo(iso);
   mRaw->blackLevel = sensor->mBlackLevel;
@@ -297,6 +301,8 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   mRaw->whitePoint = sensor->mWhiteLevel;
   mRaw->blackAreas = cam->blackAreas;
   mRaw->cfa = cam->cfa;
+  if (!cam->color_matrix.empty())
+    mRaw->metadata.colorMatrix = cam->color_matrix;
   mRaw->metadata.canonical_make = cam->canonical_make;
   mRaw->metadata.canonical_model = cam->canonical_model;
   mRaw->metadata.canonical_alias = cam->canonical_alias;

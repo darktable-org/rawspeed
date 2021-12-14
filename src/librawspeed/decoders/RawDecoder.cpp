@@ -202,6 +202,9 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
   if (cam->cfa.getSize().area() > 0)
     mRaw->cfa = cam->cfa;
 
+  if (!cam->color_matrix.empty())
+    mRaw->metadata.colorMatrix = cam->color_matrix;
+
   mRaw->metadata.canonical_make = cam->canonical_make;
   mRaw->metadata.canonical_model = cam->canonical_model;
   mRaw->metadata.canonical_alias = cam->canonical_alias;

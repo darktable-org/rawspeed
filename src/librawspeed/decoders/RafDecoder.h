@@ -42,6 +42,7 @@ public:
       : AbstractTiffDecoder(move(root), file) {}
 
   RawImage decodeRawInternal() override;
+  void applyCorrections(const Camera* cam);
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void checkSupportInternal(const CameraMetaData* meta) override;
   static bool isRAF(const Buffer& input);

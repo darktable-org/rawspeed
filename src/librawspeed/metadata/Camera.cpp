@@ -286,6 +286,46 @@ void Camera::parseSensor(const xml_node &cur) {
   }
 }
 
+void Camera::parseColorMatrix(const xml_node& cur) {
+  if (name(cur) != "ColorMatrix")
+    ThrowCME("Not an ColorMatrix node!");
+
+  unsigned planes = cur.attribute("planes").as_uint(~0U);
+  if (planes == ~0U)
+    ThrowCME("Color matrix has unknown number of planes!");
+
+  static constexpr int NumColsPerPlane = 3;
+  color_matrix.resize(NumColsPerPlane * planes, 0);
+
+  for (xml_node ColorMatrixRow : cur.children("ColorMatrixRow")) {
+    if (name(ColorMatrixRow) != "ColorMatrixRow")
+      ThrowCME("Not an ColorMatrixRow node!");
+
+    auto plane = ColorMatrixRow.attribute("plane").as_uint(~0U);
+    if (plane == ~0U || plane >= planes)
+      ThrowCME("Color matrix row is for unknown plane!");
+
+    const std::vector<std::string> ColsOfRow =
+        splitString(ColorMatrixRow.text().as_string());
+
+    if (ColsOfRow.size() != NumColsPerPlane)
+      ThrowCME("Color matrix row has incorrect number of columns!");
+
+    std::transform(
+        ColsOfRow.begin(), ColsOfRow.end(),
+        color_matrix.begin() + NumColsPerPlane * plane,
+        [](const std::string& Col) -> int { return std::stoi(Col); });
+  }
+}
+
+void Camera::parseColorMatrices(const xml_node& cur) {
+  if (name(cur) != "ColorMatrices")
+    ThrowCME("Not an ColorMatrices node!");
+
+  for (xml_node ColorMatrix : cur.children("ColorMatrix"))
+    parseColorMatrix(ColorMatrix);
+}
+
 void Camera::parseCameraChild(const xml_node &cur) {
   if (name(cur) == "CFA" || name(cur) == "CFA2") {
     parseCFA(cur);
@@ -301,6 +341,8 @@ void Camera::parseCameraChild(const xml_node &cur) {
     parseID(cur);
   } else if (name(cur) == "Sensor") {
     parseSensor(cur);
+  } else if (name(cur) == "ColorMatrices") {
+    parseColorMatrices(cur);
   }
 }
 #endif

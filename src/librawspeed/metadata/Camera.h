@@ -100,6 +100,8 @@ public:
   std::vector<CameraSensorInfo> sensorInfo;
   int decoderVersion;
   Hints hints;
+  std::vector<int> color_matrix;
+
 protected:
   static const std::map<char, CFAColor> char2enum;
   static const std::map<std::string, CFAColor, std::less<>> str2enum;
@@ -112,6 +114,8 @@ protected:
   void parseHints(const pugi::xml_node &node);
   void parseID(const pugi::xml_node &node);
   void parseSensor(const pugi::xml_node &node);
+  void parseColorMatrix(const pugi::xml_node& node);
+  void parseColorMatrices(const pugi::xml_node& node);
 
   void parseCameraChild(const pugi::xml_node &node);
 #endif

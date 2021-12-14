@@ -176,6 +176,15 @@ std::string img_hash(const RawImage& r) {
          r->metadata.wbCoeffs[1], r->metadata.wbCoeffs[2],
          r->metadata.wbCoeffs[3]);
 
+  APPEND(&oss, "colorMatrix:");
+  if (r->metadata.colorMatrix.empty())
+    APPEND(&oss, " (none)");
+  else {
+    for (int e : r->metadata.colorMatrix)
+      APPEND(&oss, " %i", e);
+  }
+  APPEND(&oss, "\n");
+
   APPEND(&oss, "isCFA: %d\n", r->isCFA);
   APPEND(&oss, "cfa: %s\n", r->cfa.asString().c_str());
   APPEND(&oss, "filters: 0x%x\n", r->cfa.getDcrawFilter());
