@@ -633,7 +633,7 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       const auto srat_vals = mat->getSRationalArray(mat->count);
       bool Success = true;
       mRaw->metadata.colorMatrix.reserve(mat->count);
-      for (auto& val : srat_vals) {
+      for (const auto& val : srat_vals) {
         // FIXME: introduce proper rational type.
         Success &= val.second == 10'000;
         if (!Success)
