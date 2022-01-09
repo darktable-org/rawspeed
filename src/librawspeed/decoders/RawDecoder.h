@@ -109,6 +109,10 @@ public:
     explicit operator bool() const { return quadrantMultipliers /*|| ...*/; }
   } iiq;
 
+  // Indicate if the cameras.xml says that the camera support status is unknown
+  // due to the lack of RPU samples
+  bool noSamples = false;
+
 protected:
   /* Attempt to decode the image */
   /* A RawDecoderException will be thrown if the image cannot be decoded, */
