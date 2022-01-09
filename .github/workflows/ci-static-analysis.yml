@@ -2,9 +2,9 @@ name: CI - Static Analysis
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ stable ]
   pull_request:
-    branches: [ develop ]
+    branches: [ stable ]
 
 jobs:
   linux:
@@ -18,7 +18,7 @@ jobs:
         os: [ linux ]
         compiler:
           - { compiler: LLVM13, CC: clang-13, CXX: clang++-13, CLANG_TIDY: clang-tidy-13 }
-        flavor: [ ClangStaticAnalysis, CodeQLAnalysis, SonarCloudStaticAnalysis ]
+        flavor: [ ClangStaticAnalysis, CodeQLAnalysis ]
     container: debian:unstable-slim
     steps:
       - name: Configure APT

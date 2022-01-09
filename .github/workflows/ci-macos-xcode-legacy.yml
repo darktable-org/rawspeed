@@ -2,9 +2,9 @@ name: CI - XCode Legacy
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ stable ]
   pull_request:
-    branches: [ develop ]
+    branches: [ stable ]
 
 jobs:
   macOS:
