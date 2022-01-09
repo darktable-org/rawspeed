@@ -173,8 +173,20 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
     return false;
   }
 
-  if (!cam->supported)
+  switch (cam->supportStatus) {
+  case Camera::SupportStatus::Supported:
+    break; // Yay us!
+  case Camera::SupportStatus::Unsupported:
     ThrowRDE("Camera not supported (explicit). Sorry.");
+  case Camera::SupportStatus::NoSamples:
+    noSamples = true;
+    writeLog(DEBUG_PRIO::WARNING,
+             "Camera support status is unknown: '%s' '%s' '%s'\n"
+             "Please consider providing samples on <https://raw.pixls.us/> "
+             "if you wish for the support to not be discontinued, thanks!",
+             make.c_str(), model.c_str(), mode.c_str());
+    break; // WYSIWYG.
+  }
 
   if (cam->decoderVersion > getDecoderVersion())
     ThrowRDE("Camera not supported in this version. Update RawSpeed for support.");
