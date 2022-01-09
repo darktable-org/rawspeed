@@ -152,9 +152,11 @@ APPEND(ostringstream* oss, const char* format, ...) {
   *oss << line.data();
 }
 
-std::string img_hash(const RawImage& r) {
+std::string img_hash(const RawImage& r, bool noSamples) {
   ostringstream oss;
 
+  if (noSamples)
+    APPEND(&oss, "camera support status is unknown due to lack of samples\n");
   APPEND(&oss, "make: %s\n", r->metadata.make.c_str());
   APPEND(&oss, "model: %s\n", r->metadata.model.c_str());
   APPEND(&oss, "mode: %s\n", r->metadata.mode.c_str());
@@ -363,6 +365,7 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 
   decoder->failOnUnknown = false;
   decoder->checkSupport(metadata);
+  bool noSamples = decoder->noSamples;
 
   decoder->decodeRaw();
   decoder->decodeMetaData(metadata);
@@ -382,12 +385,12 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
   if (o.create) {
     // write the hash. if force is set, then we are potentially overwriting here
     ofstream f(hashfile);
-    f << img_hash(raw);
+    f << img_hash(raw, noSamples);
     if (o.dump)
       writeImage(raw, filename);
   } else {
     // do generate the hash string regardless.
-    std::string h = img_hash(raw);
+    std::string h = img_hash(raw, noSamples);
 
     // normally, here we would compare the old hash with the new one
     // but if the force is set, and the hash does not exist, do nothing.

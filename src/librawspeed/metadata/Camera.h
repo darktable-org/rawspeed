@@ -77,6 +77,12 @@ public:
 class Camera
 {
 public:
+  enum class SupportStatus {
+    Unsupported,
+    Supported,
+    NoSamples,
+  };
+
 #ifdef HAVE_PUGIXML
   explicit Camera(const pugi::xml_node& camera);
 #endif
@@ -93,7 +99,7 @@ public:
   std::vector<std::string> aliases;
   std::vector<std::string> canonical_aliases;
   ColorFilterArray cfa;
-  bool supported;
+  SupportStatus supportStatus;
   iPoint2D cropSize;
   iPoint2D cropPos;
   std::vector<BlackArea> blackAreas;

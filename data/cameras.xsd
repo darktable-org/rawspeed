@@ -511,10 +511,11 @@
   </xs:simpleType>
   <xs:simpleType name="CameraTypeSupportedType">
     <xs:restriction base="xs:string">
-      <xs:pattern value="no"/>
+      <xs:pattern value="(no|no-samples)"/>
       <xs:minLength value="2"/>
-      <xs:maxLength value="2"/>
+      <xs:maxLength value="10"/>
       <xs:enumeration value="no"/>
+      <xs:enumeration value="no-samples"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:complexType name="CameraType">

@@ -55,8 +55,16 @@ Camera::Camera(const pugi::xml_node& camera) : cfa(iPoint2D(0, 0)) {
 
   canonical_id = make + " " + model;
 
-  supported =
-      camera.attribute("supported").as_string("yes") == std::string("yes");
+  supportStatus = [&camera]() {
+    const std::string_view v = camera.attribute("supported").as_string("yes");
+    if (v == "yes")
+      return Camera::SupportStatus::Supported;
+    if (v == "no")
+      return Camera::SupportStatus::Unsupported;
+    if (v == "no-samples")
+      return Camera::SupportStatus::NoSamples;
+    ThrowCME("Attribute 'supported' has unknown value.");
+  }();
   mode = camera.attribute("mode").as_string("");
   decoderVersion = camera.attribute("decoder_version").as_int(0);
 

@@ -2,9 +2,9 @@ name: CI - Fast
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ stable ]
   pull_request:
-    branches: [ develop ]
+    branches: [ stable ]
 
 # FIXME: add no-openmp, and maybe -DCMAKE_BUILD_TYPE=Debug jobs
 

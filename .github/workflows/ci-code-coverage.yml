@@ -2,9 +2,9 @@ name: CI - Code Coverage
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ stable ]
   pull_request:
-    branches: [ develop ]
+    branches: [ stable ]
 
 env:
   RPUU_DST: ${{ github.workspace }}/../raw-camera-samples/raw.pixls.us-unique
