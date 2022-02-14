@@ -13,7 +13,7 @@ set (GCC_WARNING_FLAGS
   "extra-semi"
   "format=2"
 #  "missing-prototypes"
-  "old-style-casts"
+  "old-style-cast"
   "pointer-arith"
 #  "strict-prototypes"
 #  "suggest-attribute=const"
