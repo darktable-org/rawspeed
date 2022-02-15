@@ -2500,7 +2500,7 @@ void CrxDecompressor::decode(const IsoMCanonCmp1Box& cmp1Box,
 
 CrxDecompressor::CrxDecompressor(const RawImage& img)
     : AbstractDecompressor(), mRaw(img) {
-  if (mRaw->getDataType() != TYPE_USHORT16)
+  if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
 
   if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == sizeof(uint16_t))))

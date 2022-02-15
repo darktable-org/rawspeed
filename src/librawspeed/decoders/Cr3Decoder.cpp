@@ -441,7 +441,7 @@ IsoMCanonIad1Box::IsoMCanonIad1Box(const AbstractIsoMBox& base)
     ThrowRDE("IAD1 box contains small image information, but big image expected");
   }
 
-  writeLog(DEBUG_PRIO_EXTRA,
+  writeLog(DEBUG_PRIO::EXTRA,
            "IAD1 sensor width: %d, height: %d, crop: %u, %u, %u, %u, black "
            "area left: %u, top: %u",
            sensorWidth, sensorHeight, cropLeftOffset, cropTopOffset,
@@ -561,15 +561,15 @@ RawImage Cr3Decoder::decodeRawInternal() {
 bool Cr3Decoder::isCodecSupported(const std::string& compressorVersion) const {
   if (compressorVersion == "CanonHEIF001/10.00.00/00.00.00"
    || compressorVersion == "CanonHEIF001/10.00.01/00.00.00") {
-    writeLog(DEBUG_PRIO_WARNING, "HEIF CNCV: '%s' is not supported",
+    writeLog(DEBUG_PRIO::WARNING, "HEIF CNCV: '%s' is not supported",
              compressorVersion.c_str());
   }
   if (compressorVersion == "CanonCR3_001/01.09.00/01.00.00") {
-    writeLog(DEBUG_PRIO_WARNING, "Raw-burst roll CNCV: '%s' is not supported",
+    writeLog(DEBUG_PRIO::WARNING, "Raw-burst roll CNCV: '%s' is not supported",
              compressorVersion.c_str());
   }
   if (compressorVersion == "CanonCRM0001/02.09.00/00.00.00") {
-    writeLog(DEBUG_PRIO_WARNING, "CRM movies CNCV: '%s' is not supported",
+    writeLog(DEBUG_PRIO::WARNING, "CRM movies CNCV: '%s' is not supported",
              compressorVersion.c_str());
   }
 
@@ -596,7 +596,7 @@ void Cr3Decoder::checkSupportInternal(const CameraMetaData* meta) {
 
   // Check compressor version string
   auto compressorVersion = canonBox->CNCV()->compressorVersion;
-  writeLog(DEBUG_PRIO_EXTRA, "Compressor Version: %s",
+  writeLog(DEBUG_PRIO::ERROR, "Compressor Version: %s",
            compressorVersion.c_str());
   if (!isCodecSupported(compressorVersion)) {
     ThrowRDE("CR3 compressor version (CNCV: %s) is not supported",
@@ -605,8 +605,8 @@ void Cr3Decoder::checkSupportInternal(const CameraMetaData* meta) {
 
   // CMT1 contains a TIFF file with EXIF information
   auto camId = canonBox->CMT1()->mRootIFD0->getID();
-  writeLog(DEBUG_PRIO_EXTRA, "CMT1 EXIF make: %s", camId.make.c_str());
-  writeLog(DEBUG_PRIO_EXTRA, "CMT1 EXIF model: %s", camId.model.c_str());
+  writeLog(DEBUG_PRIO::EXTRA, "CMT1 EXIF make: %s", camId.make.c_str());
+  writeLog(DEBUG_PRIO::EXTRA, "CMT1 EXIF model: %s", camId.model.c_str());
 
   // Load CRAW box
   auto& stsd = rootBox->moov()->tracks[2].mdia->minf->stbl->stsd;
@@ -619,17 +619,17 @@ void Cr3Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   const auto camId = canonBox->CMT1()->mRootIFD0->getID();
 
   uint32_t iso = 0;
-  if (canonBox->CMT2()->mRootIFD0->hasEntryRecursive(ISOSPEEDRATINGS)) {
+  if (canonBox->CMT2()->mRootIFD0->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS)) {
     iso = canonBox->CMT2()
-              ->mRootIFD0->getEntryRecursive(ISOSPEEDRATINGS)
+              ->mRootIFD0->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)
               ->getU32();
   }
   if(65535 == iso) {
     // ISOSPEEDRATINGS is a SHORT EXIF value. For larger values, we have to look
     // at RECOMMENDED_EXPOSURE_INDEX (maybe Canon specific).
-    if (canonBox->CMT2()->mRootIFD0->hasEntryRecursive(RECOMMENDEDEXPOSUREINDEX))
+    if (canonBox->CMT2()->mRootIFD0->hasEntryRecursive(TiffTag::RECOMMENDEDEXPOSUREINDEX))
       iso = canonBox->CMT2()
-              ->mRootIFD0->getEntryRecursive(RECOMMENDEDEXPOSUREINDEX)
+              ->mRootIFD0->getEntryRecursive(TiffTag::RECOMMENDEDEXPOSUREINDEX)
               ->getU32();
   }
 
@@ -663,8 +663,8 @@ void Cr3Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   TiffRootIFD IFD_ctmd_rec8(nullptr, &rs, DataBuffer(rec8, Endianness::little),
                             8); // skip TIFF header
 
-  if (IFD_ctmd_rec8.hasEntryRecursive(CANONCOLORDATA)) {
-    TiffEntry* wb = IFD_ctmd_rec8.getEntryRecursive(CANONCOLORDATA);
+  if (IFD_ctmd_rec8.hasEntryRecursive(TiffTag::CANONCOLORDATA)) {
+    TiffEntry* wb = IFD_ctmd_rec8.getEntryRecursive(TiffTag::CANONCOLORDATA);
     // this entry is a big table, and different cameras store used WB in
     // different parts, so find the offset, default is the most common one.
     // The wb_offset values in cameras.xml are extracted from:
@@ -676,11 +676,11 @@ void Cr3Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     wb_coeffs[2] = 0; // GG
     wb_coeffs[3] = static_cast<float>(wb->getU16(offset + 3)) / 1024.0;
 
-    writeLog(DEBUG_PRIO_EXTRA, "wb_coeffs:, 0: %f, 1: %f, 2: %f, 3: %f\n",
+    writeLog(DEBUG_PRIO::EXTRA, "wb_coeffs:, 0: %f, 1: %f, 2: %f, 3: %f\n",
              wb_coeffs[0], wb_coeffs[1], wb_coeffs[2], wb_coeffs[3]);
 
   } else {
-    writeLog(DEBUG_PRIO_EXTRA, "no wb_coeffs found");
+    writeLog(DEBUG_PRIO::EXTRA, "no wb_coeffs found");
   }
 
   // No CR3 camera has swapped_wb so far, but who knows...
@@ -695,7 +695,7 @@ void Cr3Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 
   setMetaData(meta, camId.make, camId.model, mode, iso);
-  writeLog(DEBUG_PRIO_EXTRA, "blacklevel for ISO %d is %d", mRaw->metadata.isoSpeed, mRaw->blackLevel);
+  writeLog(DEBUG_PRIO::EXTRA, "blacklevel for ISO %d is %d", mRaw->metadata.isoSpeed, mRaw->blackLevel);
 
   // IAD1 describes sensor constraints
   const auto& iad1 = crawBox->CDI1()->IAD1();
