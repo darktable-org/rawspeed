@@ -39,25 +39,22 @@
 #include <initializer_list>                         // for initializer_list
 
 // this should be divisible by 4
-#define CRX_BUF_SIZE 0x10000
+#define CRX_BUF_SIZE (uint64_t)0x10000
 
-// Definitions copied from libraw
-#ifdef _abs
-#undef _abs
-#undef _min
-#undef _constrain
-#endif
-#define _abs(x) (((x) ^ ((int32_t)(x) >> 31)) - ((int32_t)(x) >> 31))
-#define _min(a, b) ((a) < (b) ? (a) : (b))
-#define _constrain(x, l, u) ((x) < (l) ? (l) : ((x) > (u) ? (u) : (x)))
+#define crx_constrain(x, l, u) ((x) < (l) ? (l) : ((x) > (u) ? (u) : (x)))
 
 #if !defined(_WIN32) ||                                                        \
     (defined(__GNUC__) && !defined(__INTRINSIC_SPECIAL__BitScanReverse))
 /* __INTRINSIC_SPECIAL__BitScanReverse found in MinGW32-W64 v7.30 headers, may
  * be there is a better solution? */
 typedef uint32_t DWORD;
-inline void _BitScanReverse(DWORD* Index, unsigned long Mask) {
+inline void crx_BitScanReverse(DWORD* Index, unsigned long Mask) {
   *Index = sizeof(unsigned long) * 8 - 1 - __builtin_clzl(Mask);
+}
+#else
+typedef uint32_t DWORD;
+inline void crx_BitScanReverse(DWORD* Index, unsigned long Mask) {
+  _BitScanReverse(Index, Mask);
 }
 #endif
 
@@ -217,7 +214,7 @@ static inline void crxFillBuffer(CrxBitstream* bitStrm) {
     auto sub = bitStrm->crxRawData.getSubView(bitStrm->curBufOffset);
 
     bitStrm->mdatBuf.resize(CRX_BUF_SIZE);
-    auto bytesToRead = _min(bitStrm->mdatSize, CRX_BUF_SIZE);
+    auto bytesToRead = std::min(bitStrm->mdatSize, CRX_BUF_SIZE);
 
     if (sub.getSize() >= bytesToRead) {
       auto data = sub.getData(0, bytesToRead);
@@ -238,7 +235,7 @@ inline int crxBitstreamGetZeros(CrxBitstream* bitStrm) {
   int32_t result = 0;
 
   if (bitStrm->bitData) {
-    _BitScanReverse(static_cast<DWORD*>(&nonZeroBit), static_cast<DWORD>(bitStrm->bitData));
+    crx_BitScanReverse(static_cast<DWORD*>(&nonZeroBit), static_cast<DWORD>(bitStrm->bitData));
     result = 31 - nonZeroBit;
     bitStrm->bitData <<= 32 - nonZeroBit;
     bitStrm->bitsLeft -= 32 - nonZeroBit;
@@ -251,7 +248,7 @@ inline int crxBitstreamGetZeros(CrxBitstream* bitStrm) {
         bitStrm->curPos += 4;
         crxFillBuffer(bitStrm);
         if (nextData) {
-          _BitScanReverse(static_cast<DWORD*>(&nonZeroBit), static_cast<DWORD>(nextData));
+          crx_BitScanReverse(static_cast<DWORD*>(&nonZeroBit), static_cast<DWORD>(nextData));
           result = bitsLeft + 31 - nonZeroBit;
           bitStrm->bitData = nextData << (32 - nonZeroBit);
           bitStrm->bitsLeft = nonZeroBit;
@@ -267,7 +264,7 @@ inline int crxBitstreamGetZeros(CrxBitstream* bitStrm) {
         break;
       bitsLeft += 8;
     }
-    _BitScanReverse(static_cast<DWORD*>(&nonZeroBit), static_cast<DWORD>(nextData));
+    crx_BitScanReverse(static_cast<DWORD*>(&nonZeroBit), static_cast<DWORD>(nextData));
     result = static_cast<uint32_t>(bitsLeft + 7 - nonZeroBit);
     bitStrm->bitData = nextData << (32 - nonZeroBit);
     bitStrm->bitsLeft = nonZeroBit;
@@ -356,7 +353,7 @@ inline void crxDecodeSymbolL1(CrxBandParam* param, int32_t doMedianPrediction,
   // for not end of the line - use one symbol ahead to estimate next K
   if (notEOL) {
     int32_t nextDelta = (param->lineBuf0[2] - param->lineBuf0[1]) << 1;
-    bitCode = (bitCode + _abs(nextDelta)) >> 1;
+    bitCode = (bitCode + std::abs(nextDelta)) >> 1;
     ++param->lineBuf0;
   }
 
@@ -461,7 +458,7 @@ inline void crxDecodeSymbolL1Rounded(CrxBandParam* param, int32_t doSym = 1,
     }
 
     param->kParam = crxPredictKParameter(param->kParam,
-                                         (bitCode + 2 * _abs(code)) >> 1, 15);
+                                         (bitCode + 2 * std::abs(code)) >> 1, 15);
   } else
     param->kParam = crxPredictKParameter(param->kParam, bitCode, 15);
 
@@ -476,12 +473,12 @@ static int crxDecodeLineRounded(CrxBandParam* param) {
   int32_t length = param->subbandWidth;
 
   for (; length > 1; --length) {
-    if (_abs(param->lineBuf0[2] - param->lineBuf0[1]) >
+    if (std::abs(param->lineBuf0[2] - param->lineBuf0[1]) >
         param->roundedBitsMask) {
       crxDecodeSymbolL1Rounded(param);
       ++param->lineBuf0;
       valueReached = 1;
-    } else if (valueReached || _abs(param->lineBuf0[0] - param->lineBuf1[0]) >
+    } else if (valueReached || std::abs(param->lineBuf0[0] - param->lineBuf1[0]) >
                                    param->roundedBitsMask) {
       crxDecodeSymbolL1Rounded(param);
       ++param->lineBuf0;
@@ -524,7 +521,7 @@ static int crxDecodeLineRounded(CrxBandParam* param) {
       if (length > 1) {
         crxDecodeSymbolL1Rounded(param, 0);
         ++param->lineBuf0;
-        valueReached = _abs(param->lineBuf0[1] - param->lineBuf0[0]) >
+        valueReached = std::abs(param->lineBuf0[1] - param->lineBuf0[0]) >
                        param->roundedBitsMask;
       } else if (length == 1)
         crxDecodeSymbolL1Rounded(param, 0, 0);
@@ -720,7 +717,7 @@ static int crxDecodeTopLineRounded(CrxBandParam* param) {
 
   // read the line from bitstream
   for (; length > 1; --length) {
-    if (_abs(param->lineBuf1[0]) > param->roundedBitsMask)
+    if (std::abs(param->lineBuf1[0]) > param->roundedBitsMask)
       param->lineBuf1[1] = param->lineBuf1[0];
     else {
       int nSyms = 0;
@@ -1016,7 +1013,7 @@ static int crxDecodeLineWithIQuantization(CrxSubband* band, CrxQStep* qStep) {
     for (int i = 0; i < band->colStartAddOn; ++i) {
       uint32_t quantVal =
           band->qStepBase + ((qStepTblPtr[0] * band->qStepMult) >> 3);
-      bandBuf[i] *= _constrain(quantVal, 1, 0x168000);
+      bandBuf[i] *= crx_constrain(quantVal, 1, 0x168000);
     }
 
     for (int i = band->colStartAddOn; i < band->width - band->colEndAddOn;
@@ -1026,14 +1023,14 @@ static int crxDecodeLineWithIQuantization(CrxSubband* band, CrxQStep* qStep) {
           ((qStepTblPtr[(i - band->colStartAddOn) >> band->levelShift] *
             band->qStepMult) >>
            3);
-      bandBuf[i] *= _constrain(quantVal, 1, 0x168000);
+      bandBuf[i] *= crx_constrain(quantVal, 1, 0x168000);
     }
     int lastIdx = (band->width - band->colEndAddOn - band->colStartAddOn - 1) >>
                   band->levelShift;
     for (int i = band->width - band->colEndAddOn; i < band->width; ++i) {
       uint32_t quantVal =
           band->qStepBase + ((qStepTblPtr[lastIdx] * band->qStepMult) >> 3);
-      bandBuf[i] *= _constrain(quantVal, 1, 0x168000);
+      bandBuf[i] *= crx_constrain(quantVal, 1, 0x168000);
     }
   } else {
     // prev. version
@@ -1525,7 +1522,7 @@ static void crxConvertPlaneLine(CrxImage* img, int imageRow, int imageCol = 0,
       --maxVal;
       for (int i = 0; i < lineLength; i++)
         img->outBufs[plane][rawOffset + 2 * i] =
-            _constrain(lineData[i], minVal, maxVal);
+            crx_constrain(lineData[i], minVal, maxVal);
     } else if (img->encType == 3) {
       // copy to intermediate planeBuf
       rawOffset = plane * img->planeWidth * img->planeHeight +
@@ -1537,14 +1534,14 @@ static void crxConvertPlaneLine(CrxImage* img, int imageRow, int imageCol = 0,
       int32_t maxVal = (1 << img->nBits) - 1;
       for (int i = 0; i < lineLength; i++)
         img->outBufs[plane][rawOffset + 2 * i] =
-            _constrain(median + lineData[i], 0, maxVal);
+            crx_constrain(median + lineData[i], 0, maxVal);
     } else if (img->nPlanes == 1) {
       int32_t maxVal = (1 << img->nBits) - 1;
       int32_t median = 1 << (img->nBits - 1);
       rawOffset = img->planeWidth * imageRow + imageCol;
       for (int i = 0; i < lineLength; i++)
         img->outBufs[0][rawOffset + i] =
-            _constrain(median + lineData[i], 0, maxVal);
+            crx_constrain(median + lineData[i], 0, maxVal);
     }
   } else if (img->encType == 3 && img->planeBuf) {
     int32_t planeSize = img->planeWidth * img->planeHeight;
@@ -1563,22 +1560,22 @@ static void crxConvertPlaneLine(CrxImage* img, int imageRow, int imageCol = 0,
           median + (plane0[i] << 10) - 168 * plane1[i] - 585 * plane3[i];
       int32_t val = 0;
       if (gr < 0)
-        gr = -(((_abs(gr) + 512) >> 9) & ~1);
+        gr = -(((std::abs(gr) + 512) >> 9) & ~1);
       else
-        gr = ((_abs(gr) + 512) >> 9) & ~1;
+        gr = ((std::abs(gr) + 512) >> 9) & ~1;
 
       // Essentially R = round(median + P0 + 1.474*P3)
       val = (median + (plane0[i] << 10) + 1510 * plane3[i] + 512) >> 10;
-      img->outBufs[0][rawLineOffset + 2 * i] = _constrain(val, 0, maxVal);
+      img->outBufs[0][rawLineOffset + 2 * i] = crx_constrain(val, 0, maxVal);
       // Essentially G1 = round(median + P0 + P2 - 0.164*P1 - 0.571*P3)
       val = (plane2[i] + gr + 1) >> 1;
-      img->outBufs[1][rawLineOffset + 2 * i] = _constrain(val, 0, maxVal);
+      img->outBufs[1][rawLineOffset + 2 * i] = crx_constrain(val, 0, maxVal);
       // Essentially G2 = round(median + P0 - P2 - 0.164*P1 - 0.571*P3)
       val = (gr - plane2[i] + 1) >> 1;
-      img->outBufs[2][rawLineOffset + 2 * i] = _constrain(val, 0, maxVal);
+      img->outBufs[2][rawLineOffset + 2 * i] = crx_constrain(val, 0, maxVal);
       // Essentially B = round(median + P0 + 1.881*P1)
       val = (median + (plane0[i] << 10) + 1927 * plane1[i] + 512) >> 10;
-      img->outBufs[3][rawLineOffset + 2 * i] = _constrain(val, 0, maxVal);
+      img->outBufs[3][rawLineOffset + 2 * i] = crx_constrain(val, 0, maxVal);
     }
   }
 }
@@ -1832,7 +1829,7 @@ static void crxDecodeGolombNormal(CrxBitstream* bitStrm, int32_t width,
     lineBuf1[1] += -(qp & 1) ^ (qp >> 1);
     if (width) {
       deltaH = lineBuf0[2] - lineBuf0[1];
-      *kParam = crxPredictKParameter(*kParam, (qp + 2 * _abs(deltaH)) >> 1, 7);
+      *kParam = crxPredictKParameter(*kParam, (qp + 2 * std::abs(deltaH)) >> 1, 7);
       ++lineBuf0;
     } else
       *kParam = crxPredictKParameter(*kParam, qp, 7);
@@ -1871,10 +1868,10 @@ static int crxMakeQStep(CrxImage* img, CrxTile* tile, int32_t* qpTable,
       qStep->width = qpWidth;
       qStep->height = qpHeight8;
       for (int qpRow = 0; qpRow < qpHeight8; ++qpRow) {
-        int row0Idx = qpWidth * _min(4 * qpRow, qpHeight - 1);
-        int row1Idx = qpWidth * _min(4 * qpRow + 1, qpHeight - 1);
-        int row2Idx = qpWidth * _min(4 * qpRow + 2, qpHeight - 1);
-        int row3Idx = qpWidth * _min(4 * qpRow + 3, qpHeight - 1);
+        int row0Idx = qpWidth * std::min(4 * qpRow, qpHeight - 1);
+        int row1Idx = qpWidth * std::min(4 * qpRow + 1, qpHeight - 1);
+        int row2Idx = qpWidth * std::min(4 * qpRow + 2, qpHeight - 1);
+        int row3Idx = qpWidth * std::min(4 * qpRow + 3, qpHeight - 1);
 
         for (int qpCol = 0; qpCol < qpWidth; ++qpCol, ++qStepTbl) {
           int32_t quantVal = qpTable[row0Idx++] + qpTable[row1Idx++] +
@@ -1897,8 +1894,8 @@ static int crxMakeQStep(CrxImage* img, CrxTile* tile, int32_t* qpTable,
       qStep->width = qpWidth;
       qStep->height = qpHeight4;
       for (int qpRow = 0; qpRow < qpHeight4; ++qpRow) {
-        int row0Idx = qpWidth * _min(2 * qpRow, qpHeight - 1);
-        int row1Idx = qpWidth * _min(2 * qpRow + 1, qpHeight - 1);
+        int row0Idx = qpWidth * std::min(2 * qpRow, qpHeight - 1);
+        int row1Idx = qpWidth * std::min(2 * qpRow + 1, qpHeight - 1);
 
         for (int qpCol = 0; qpCol < qpWidth; ++qpCol, ++qStepTbl) {
           int32_t quantVal = (qpTable[row0Idx++] + qpTable[row1Idx++]) / 2;

@@ -217,7 +217,7 @@ IsoMSampleToChunkBox::IsoMSampleToChunkBox(const AbstractIsoMBox& base)
     : IsoMFullBox(base) {
   const auto entryCount = data.getU32();
 
-  data.check(entryCount, 3 * 4);
+  (void)data.check(entryCount, 3 * 4);
   dscs.reserve(entryCount);
   std::generate_n(std::back_inserter(dscs), entryCount, [this]() {
     Dsc d;
@@ -278,7 +278,7 @@ IsoMChunkLargeOffsetBox::operator bool() const {
 IsoMChunkLargeOffsetBox::IsoMChunkLargeOffsetBox(const AbstractIsoMBox& base)
     : IsoMFullBox(base) {
   const auto entryCount = data.getU32();
-  data.check(entryCount, 8);
+  (void)data.check(entryCount, 8);
 
   if (entryCount != 1)
     ThrowIPE("Don't know how to handle co64 box with %u entries", entryCount);
