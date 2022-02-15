@@ -168,6 +168,13 @@
 		<Hints>
 			<Hint name="wb_offset" value="71"/>
 		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9079 -1923 -1236</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4677 12454 2492</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-922 2319 5565</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS 300D DIGITAL">
 		<ID make="Canon" model="EOS 300D">Canon EOS 300D</ID>
@@ -752,6 +759,13 @@
 		<Hints>
 			<Hint name="wb_offset" value="71"/>
 		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9079 -1923 -1236 </ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4677 12454 2492</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-922 2319 5565</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS 760D">
 		<ID make="Canon" model="EOS 760D">Canon EOS 760D</ID>
@@ -1773,6 +1787,13 @@
 		<Hints>
 			<Hint name="wb_offset" value="71"/>
 		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11498 -3759 -1516</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-5073 12954 2349</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-892 1867 6118</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS M10">
 		<ID make="Canon" model="EOS M10">Canon EOS M10</ID>
@@ -1843,6 +1864,13 @@
 		<Hints>
 			<Hint name="wb_offset" value="71"/>
 		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10463 -2173 -1437</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4856 12635 2482</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1216 2915 7237</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS-1D" decoder_version="8">
 		<ID make="Canon" model="EOS-1D">Canon EOS-1D</ID>
@@ -2238,6 +2266,13 @@
 		<Hints>
 			<Hint name="wb_offset" value="85"/>
 		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8971 -2022 -1242</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-5405 13249 2380</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1280 2483 6072</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS R">
 		<ID make="Canon" model="EOS R">Canon EOS R</ID>
@@ -2255,6 +2290,13 @@
 		<Hints>
 			<Hint name="wb_offset" value="71"/>
 		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8293 -1789 -1094</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-5025 12925 2327</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1199 2769 6108</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS RP">
 		<ID make="Canon" model="EOS RP">Canon EOS RP</ID>
@@ -2272,6 +2314,13 @@
 		<Hints>
 			<Hint name="wb_offset" value="71"/>
 		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8608 -2097 -1178</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-5425 13265 2383</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1149 2238 5680</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS R5">
 		<ID make="Canon" model="EOS R5">Canon EOS R5</ID>
@@ -2288,6 +2337,13 @@
 		<Hints>
 			<Hint name="wb_offset" value="85"/>
 		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9766 -2953 -1254</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4276 12116 2433</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-437 1336 5131</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS R6">
 		<ID make="Canon" model="EOS R6">Canon EOS R6</ID>
@@ -2303,6 +2359,13 @@
 		<Hints>
 			<Hint name="wb_offset" value="85"/>
 		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8293 -1611 -1132</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4759 12711 2275</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1013 2415 5509</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS M50">
 		<ID make="Canon" model="EOS M50">Canon EOS M50</ID>
@@ -2324,6 +2387,13 @@
 		<Hints>
 			<Hint name="wb_offset" value="71"/>
 		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8532 -701 -1167</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4095 11879 2508</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-797 2424 7010</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS M50m2">
 		<ID make="Canon" model="EOS M50m2">Canon EOS M50 Mark II</ID>
@@ -2341,6 +2411,13 @@
 		<Hints>
 			<Hint name="wb_offset" value="71"/>
 		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10463 -2173 -1437</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4856 12635 2482</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1216 2915 7237</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot Pro1">
 		<ID make="Canon" model="PowerShot Pro1">Canon PowerShot Pro1</ID>
@@ -2530,6 +2607,13 @@
 		<Hints>
 			<Hint name="wb_offset" value="71"/>
 		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11629 -5713 -914</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2706 11090 1842</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-206 1225 5515</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G6">
 		<ID make="Canon" model="PowerShot G6">Canon PowerShot G6</ID>
@@ -2619,6 +2703,13 @@
 		<Hints>
 			<Hint name="wb_offset" value="71"/>
 		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11629 -5713 -914</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2706 11090 1842</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-206 1225 5515</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G1 X">
 		<ID make="Canon" model="PowerShot G1 X">Canon PowerShot G1 X</ID>
