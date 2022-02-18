@@ -4,7 +4,7 @@ unset(RAWSPEED_PAGESIZE)
 
 if(BINARY_PACKAGE_BUILD)
   message(STATUS "Performing binary package build, using hardcoded value.")
-  set(RAWSPEED_PAGESIZE 64)
+  set(RAWSPEED_PAGESIZE 4096)
 else()
   try_run(RAWSPEED_PAGESIZE_EXITCODE RAWSPEED_PAGESIZE_COMPILED
     "${CMAKE_BINARY_DIR}"
