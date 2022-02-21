@@ -4379,6 +4379,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON Z 9" mode="14bit-compressed">
+		<ID make="Nikon" model="Z 9">Nikon Z 9</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="1008" white="15892"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">13389 -6049 -1441</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4544 12757 1969</ColorMatrixRow>
+				<ColorMatrixRow plane="2">229 498 7390</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON Z 50" mode="12bit-compressed">
 		<ID make="Nikon" model="Z 50">Nikon Z 50</ID>
 		<CFA width="2" height="2">
