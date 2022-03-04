@@ -60,7 +60,7 @@ void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* valueDatas,
     // Will we ever look for this entry?
     if (!isIn(t->tag, CiffTagsWeCareAbout))
       return;
-    add(move(t));
+    add(std::move(t));
   }
 }
 
@@ -154,12 +154,12 @@ void CiffIFD::add(std::unique_ptr<CiffIFD> subIFD) {
   // We are good, and actually can add this sub-IFD, right?
   subIFD->recursivelyCheckSubIFDs(0);
 
-  mSubIFD.push_back(move(subIFD));
+  mSubIFD.push_back(std::move(subIFD));
 }
 
 void CiffIFD::add(std::unique_ptr<CiffEntry> entry) {
   assert(isIn(entry->tag, CiffTagsWeCareAbout));
-  mEntry[entry->tag] = move(entry);
+  mEntry[entry->tag] = std::move(entry);
   assert(mEntry.size() <= CiffTagsWeCareAbout.size());
 }
 

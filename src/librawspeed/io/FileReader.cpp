@@ -114,7 +114,7 @@ std::unique_ptr<const Buffer> FileReader::readFile() {
 
 #endif // __unix__
 
-  return std::make_unique<Buffer>(move(dest), fileSize);
+  return std::make_unique<Buffer>(std::move(dest), fileSize);
 }
 
 } // namespace rawspeed

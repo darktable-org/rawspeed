@@ -117,7 +117,7 @@ void FiffParser::parseData() {
     }
   }
 
-  rootIFD->add(move(subIFD));
+  rootIFD->add(std::move(subIFD));
 }
 
 std::unique_ptr<RawDecoder> FiffParser::getDecoder(const CameraMetaData* meta) {

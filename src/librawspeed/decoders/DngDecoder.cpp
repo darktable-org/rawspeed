@@ -60,7 +60,7 @@ DngDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 }
 
 DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file)
-    : AbstractTiffDecoder(move(rootIFD), file) {
+    : AbstractTiffDecoder(std::move(rootIFD), file) {
   if (!mRootIFD->hasEntryRecursive(TiffTag::DNGVERSION))
     ThrowRDE("DNG, but version tag is missing. Will not guess.");
 

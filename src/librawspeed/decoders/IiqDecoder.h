@@ -54,7 +54,7 @@ public:
                                    const Buffer& file);
 
   IiqDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file)
-      : AbstractTiffDecoder(move(rootIFD), file) {}
+      : AbstractTiffDecoder(std::move(rootIFD), file) {}
 
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;

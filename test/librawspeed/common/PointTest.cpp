@@ -80,13 +80,13 @@ TEST(PointTest, Constructor) {
   });
   ASSERT_NO_THROW({
     const iPoint2D a(x, y);
-    iPoint2D b(move(a));
+    iPoint2D b(std::move(a));
     ASSERT_EQ(b.x, x);
     ASSERT_EQ(b.y, y);
   });
   ASSERT_NO_THROW({
     iPoint2D a(x, y);
-    iPoint2D b(move(a));
+    iPoint2D b(std::move(a));
     ASSERT_EQ(b.x, x);
     ASSERT_EQ(b.y, y);
   });
@@ -111,14 +111,14 @@ TEST(PointTest, AssignmentConstructor) {
   ASSERT_NO_THROW({
     iPoint2D a(x, y);
     iPoint2D b(666, 777);
-    b = move(a);
+    b = std::move(a);
     ASSERT_EQ(b.x, x);
     ASSERT_EQ(b.y, y);
   });
   ASSERT_NO_THROW({
     const iPoint2D a(x, y);
     iPoint2D b(666, 777);
-    b = move(a);
+    b = std::move(a);
     ASSERT_EQ(b.x, x);
     ASSERT_EQ(b.y, y);
   });

@@ -39,7 +39,7 @@ public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                    const Buffer& file);
   DcrDecoder(TiffRootIFDOwner&& root, const Buffer& file)
-      : SimpleTiffDecoder(move(root), file) {}
+      : SimpleTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
