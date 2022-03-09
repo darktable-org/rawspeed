@@ -50,7 +50,7 @@ bool OrfDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   // FIXME: magic
 
   return make == "OLYMPUS IMAGING CORP." || make == "OLYMPUS CORPORATION" ||
-         make == "OLYMPUS OPTICAL CO.,LTD";
+         make == "OLYMPUS OPTICAL CO.,LTD" || make == "OM Digital Solutions";
 }
 
 ByteStream OrfDecoder::handleSlices() const {
