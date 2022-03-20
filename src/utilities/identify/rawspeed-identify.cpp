@@ -111,7 +111,6 @@ using rawspeed::Buffer;
 using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
 using rawspeed::iPoint2D;
-using rawspeed::RawImage;
 using rawspeed::RawParser;
 using rawspeed::RawspeedException;
 using rawspeed::identify::find_cameras_xml;
@@ -179,70 +178,69 @@ int main(int argc, char* argv[]) { // NOLINT
 
     d->applyCrop = false;
     d->failOnUnknown = true;
-    RawImage r = d->mRaw;
-    const RawImage* const raw = &r;
+    auto raw = d->mRaw;
 
     d->decodeMetaData(meta.get());
 
-    fprintf(stdout, "make: %s\n", r->metadata.make.c_str());
-    fprintf(stdout, "model: %s\n", r->metadata.model.c_str());
+    fprintf(stdout, "make: %s\n", raw->metadata.make.c_str());
+    fprintf(stdout, "model: %s\n", raw->metadata.model.c_str());
 
-    fprintf(stdout, "canonical_make: %s\n", r->metadata.canonical_make.c_str());
+    fprintf(stdout, "canonical_make: %s\n", raw->metadata.canonical_make.c_str());
     fprintf(stdout, "canonical_model: %s\n",
-            r->metadata.canonical_model.c_str());
+            raw->metadata.canonical_model.c_str());
     fprintf(stdout, "canonical_alias: %s\n",
-            r->metadata.canonical_alias.c_str());
+            raw->metadata.canonical_alias.c_str());
 
     d->checkSupport(meta.get());
     d->decodeRaw();
     d->decodeMetaData(meta.get());
-    r = d->mRaw;
+    raw = d->mRaw;
 
-    const auto errors = r->getErrors();
+    const auto errors = raw->getErrors();
     for (const auto& error : errors)
       fprintf(stderr, "WARNING: [rawspeed] %s\n", error.c_str());
 
-    fprintf(stdout, "blackLevel: %d\n", r->blackLevel);
-    fprintf(stdout, "whitePoint: %d\n", r->whitePoint);
+    fprintf(stdout, "blackLevel: %d\n", raw->blackLevel);
+    fprintf(stdout, "whitePoint: %d\n", raw->whitePoint);
 
     fprintf(stdout, "blackLevelSeparate: %d %d %d %d\n",
-            r->blackLevelSeparate[0], r->blackLevelSeparate[1],
-            r->blackLevelSeparate[2], r->blackLevelSeparate[3]);
+            raw->blackLevelSeparate[0], raw->blackLevelSeparate[1],
+            raw->blackLevelSeparate[2], raw->blackLevelSeparate[3]);
 
-    fprintf(stdout, "wbCoeffs: %f %f %f %f\n", r->metadata.wbCoeffs[0],
-            r->metadata.wbCoeffs[1], r->metadata.wbCoeffs[2],
-            r->metadata.wbCoeffs[3]);
+    fprintf(stdout, "wbCoeffs: %f %f %f %f\n", raw->metadata.wbCoeffs[0],
+            raw->metadata.wbCoeffs[1], raw->metadata.wbCoeffs[2],
+            raw->metadata.wbCoeffs[3]);
 
-    fprintf(stdout, "isCFA: %d\n", r->isCFA);
-    uint32_t filters = r->cfa.getDcrawFilter();
+    fprintf(stdout, "isCFA: %d\n", raw->isCFA);
+    uint32_t filters = raw->cfa.getDcrawFilter();
     fprintf(stdout, "filters: %d (0x%x)\n", filters, filters);
-    const uint32_t bpp = r->getBpp();
+    const uint32_t bpp = raw->getBpp();
     fprintf(stdout, "bpp: %d\n", bpp);
-    const uint32_t cpp = r->getCpp();
+    const uint32_t cpp = raw->getCpp();
     fprintf(stdout, "cpp: %d\n", cpp);
-    fprintf(stdout, "dataType: %u\n", static_cast<unsigned>(r->getDataType()));
+    fprintf(stdout, "dataType: %u\n", static_cast<unsigned>(raw->getDataType()));
 
     // dimensions of uncropped image
-    const iPoint2D dimUncropped = r->getUncroppedDim();
+    const iPoint2D dimUncropped = raw->getUncroppedDim();
     fprintf(stdout, "dimUncropped: %dx%d\n", dimUncropped.x, dimUncropped.y);
 
     // dimensions of cropped image
-    iPoint2D dimCropped = r->dim;
+    iPoint2D dimCropped = raw->dim;
     fprintf(stdout, "dimCropped: %dx%d\n", dimCropped.x, dimCropped.y);
 
     // crop - Top,Left corner
-    iPoint2D cropTL = r->getCropOffset();
+    iPoint2D cropTL = raw->getCropOffset();
     fprintf(stdout, "cropOffset: %dx%d\n", cropTL.x, cropTL.y);
 
-    fprintf(stdout, "fuji_rotation_pos: %d\n", r->metadata.fujiRotationPos);
-    fprintf(stdout, "pixel_aspect_ratio: %f\n", r->metadata.pixelAspectRatio);
+    fprintf(stdout, "fuji_rotation_pos: %d\n", raw->metadata.fujiRotationPos);
+    fprintf(stdout, "pixel_aspect_ratio: %f\n", raw->metadata.pixelAspectRatio);
 
     double sum = 0.0F;
 #ifdef HAVE_OPENMP
 #pragma omp parallel for default(none) firstprivate(dimUncropped, raw, bpp) schedule(static) reduction(+ : sum)
 #endif
     for (int y = 0; y < dimUncropped.y; ++y) {
-      const uint8_t* const data = (*raw)->getDataUncropped(0, y);
+      const uint8_t* const data = raw->getDataUncropped(0, y);
 
       for (unsigned x = 0; x < bpp * dimUncropped.x; ++x)
         sum += static_cast<double>(data[x]);
@@ -251,7 +249,7 @@ int main(int argc, char* argv[]) { // NOLINT
     fprintf(stdout, "Image byte avg: %lf\n",
             sum / static_cast<double>(dimUncropped.y * dimUncropped.x * bpp));
 
-    if (r->getDataType() == rawspeed::RawImageType::F32) {
+    if (raw->getDataType() == rawspeed::RawImageType::F32) {
       sum = 0.0F;
 
 #ifdef HAVE_OPENMP
@@ -259,7 +257,7 @@ int main(int argc, char* argv[]) { // NOLINT
 #endif
       for (int y = 0; y < dimUncropped.y; ++y) {
         const auto* const data =
-            reinterpret_cast<float*>((*raw)->getDataUncropped(0, y));
+            reinterpret_cast<float*>(raw->getDataUncropped(0, y));
 
         for (unsigned x = 0; x < cpp * dimUncropped.x; ++x)
           sum += static_cast<double>(data[x]);
@@ -268,7 +266,7 @@ int main(int argc, char* argv[]) { // NOLINT
       fprintf(stdout, "Image float sum: %lf\n", sum);
       fprintf(stdout, "Image float avg: %lf\n",
               sum / static_cast<double>(dimUncropped.y * dimUncropped.x));
-    } else if (r->getDataType() == rawspeed::RawImageType::UINT16) {
+    } else if (raw->getDataType() == rawspeed::RawImageType::UINT16) {
       sum = 0.0F;
 
 #ifdef HAVE_OPENMP
@@ -276,7 +274,7 @@ int main(int argc, char* argv[]) { // NOLINT
 #endif
       for (int y = 0; y < dimUncropped.y; ++y) {
         const auto* const data =
-            reinterpret_cast<uint16_t*>((*raw)->getDataUncropped(0, y));
+            reinterpret_cast<uint16_t*>(raw->getDataUncropped(0, y));
 
         for (unsigned x = 0; x < cpp * dimUncropped.x; ++x)
           sum += static_cast<double>(data[x]);

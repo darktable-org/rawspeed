@@ -51,12 +51,12 @@ public:
 
   // Will be called once before processing.
   // Can be used for preparing pre-calculated values, etc.
-  virtual void setup(const RawImage& ri) {
+  virtual void setup(RawImageData* ri) {
     // NOP by default. child class shall override this if needed.
   }
 
   // Will be called for actual processing.
-  virtual void apply(const RawImage& ri) = 0;
+  virtual void apply(RawImageData* ri) = 0;
 };
 
 // ****************************************************************************
@@ -65,12 +65,12 @@ class DngOpcodes::FixBadPixelsConstant final : public DngOpcodes::DngOpcode {
   uint32_t value;
 
 public:
-  explicit FixBadPixelsConstant(const RawImage& ri, ByteStream& bs)
+  explicit FixBadPixelsConstant(RawImageData* ri, ByteStream& bs)
       : value(bs.getU32()) {
     bs.getU32(); // Bayer Phase not used
   }
 
-  void setup(const RawImage& ri) override {
+  void setup(RawImageData* ri) override {
     // These limitations are present within the DNG SDK as well.
     if (ri->getDataType() != RawImageType::UINT16)
       ThrowRDE("Only 16 bit images supported");
@@ -79,7 +79,7 @@ public:
       ThrowRDE("Only 1 component images supported");
   }
 
-  void apply(const RawImage& ri) override {
+  void apply(RawImageData* ri) override {
     MutexLocker guard(&ri->mBadPixelMutex);
     const CroppedArray2DRef<uint16_t> img(ri->getU16DataAsCroppedArray2DRef());
     iPoint2D crop = ri->getCropOffset();
@@ -99,7 +99,7 @@ class DngOpcodes::ROIOpcode : public DngOpcodes::DngOpcode {
   iRectangle2D roi;
 
 protected:
-  explicit ROIOpcode(const RawImage& ri, ByteStream& bs, bool minusOne) {
+  explicit ROIOpcode(RawImageData* ri, ByteStream& bs, bool minusOne) {
     const iRectangle2D fullImage =
         minusOne ? iRectangle2D(0, 0, ri->dim.x - 1, ri->dim.y - 1)
                  : iRectangle2D(0, 0, ri->dim.x, ri->dim.y);
@@ -135,14 +135,14 @@ protected:
 
 class DngOpcodes::DummyROIOpcode final : public ROIOpcode {
 public:
-  explicit DummyROIOpcode(const RawImage& ri, ByteStream& bs)
+  explicit DummyROIOpcode(RawImageData* ri, ByteStream& bs)
       : ROIOpcode(ri, bs, true) {}
 
   [[nodiscard]] const iRectangle2D& __attribute__((pure)) getRoi() const {
     return ROIOpcode::getRoi();
   }
 
-  [[noreturn]] void apply(const RawImage& ri) override {
+  [[noreturn]] void apply(RawImageData* ri) override {
     // NOLINTNEXTLINE: https://bugs.llvm.org/show_bug.cgi?id=50532
     assert(false && "You should not be calling this.");
     __builtin_unreachable();
@@ -155,7 +155,7 @@ class DngOpcodes::FixBadPixelsList final : public DngOpcodes::DngOpcode {
   std::vector<uint32_t> badPixels;
 
 public:
-  explicit FixBadPixelsList(const RawImage& ri, ByteStream& bs) {
+  explicit FixBadPixelsList(RawImageData* ri, ByteStream& bs) {
     const iRectangle2D fullImage(0, 0, ri->getUncroppedDim().x - 1,
                                  ri->getUncroppedDim().y - 1);
 
@@ -199,7 +199,7 @@ public:
     }
   }
 
-  void apply(const RawImage& ri) override {
+  void apply(RawImageData* ri) override {
     MutexLocker guard(&ri->mBadPixelMutex);
     ri->mBadPixelPositions.insert(ri->mBadPixelPositions.begin(),
                                   badPixels.begin(), badPixels.end());
@@ -210,10 +210,10 @@ public:
 
 class DngOpcodes::TrimBounds final : public ROIOpcode {
 public:
-  explicit TrimBounds(const RawImage& ri, ByteStream& bs)
+  explicit TrimBounds(RawImageData* ri, ByteStream& bs)
       : ROIOpcode(ri, bs, false) {}
 
-  void apply(const RawImage& ri) override { ri->subFrame(getRoi()); }
+  void apply(RawImageData* ri) override { ri->subFrame(getRoi()); }
 };
 
 // ****************************************************************************
@@ -225,7 +225,7 @@ class DngOpcodes::PixelOpcode : public ROIOpcode {
   uint32_t colPitch;
 
 protected:
-  explicit PixelOpcode(const RawImage& ri, ByteStream& bs)
+  explicit PixelOpcode(RawImageData* ri, ByteStream& bs)
       : ROIOpcode(ri, bs, false), firstPlane(bs.getU32()), planes(bs.getU32()) {
 
     if (planes == 0 || firstPlane > ri->getCpp() || planes > ri->getCpp() ||
@@ -247,7 +247,7 @@ protected:
   // traverses the current ROI and applies the operation OP to each pixel,
   // i.e. each pixel value v is replaced by op(x, y, v), where x/y are the
   // coordinates of the pixel value v.
-  template <typename T, typename OP> void applyOP(const RawImage& ri, OP op) {
+  template <typename T, typename OP> void applyOP(RawImageData* ri, OP op) {
     int cpp = ri->getCpp();
     const iRectangle2D& ROI = getRoi();
     for (auto y = ROI.getTop(); y < ROI.getBottom(); y += rowPitch) {
@@ -270,16 +270,16 @@ class DngOpcodes::LookupOpcode : public PixelOpcode {
 protected:
   vector<uint16_t> lookup;
 
-  explicit LookupOpcode(const RawImage& ri, ByteStream& bs)
+  explicit LookupOpcode(RawImageData* ri, ByteStream& bs)
       : PixelOpcode(ri, bs), lookup(65536) {}
 
-  void setup(const RawImage& ri) override {
+  void setup(RawImageData* ri) override {
     PixelOpcode::setup(ri);
     if (ri->getDataType() != RawImageType::UINT16)
       ThrowRDE("Only 16 bit images supported");
   }
 
-  void apply(const RawImage& ri) override {
+  void apply(RawImageData* ri) override {
     applyOP<uint16_t>(ri, [this]([[maybe_unused]] uint32_t x,
                                  [[maybe_unused]] uint32_t y,
                                  uint16_t v) { return lookup[v]; });
@@ -290,7 +290,7 @@ protected:
 
 class DngOpcodes::TableMap final : public LookupOpcode {
 public:
-  explicit TableMap(const RawImage& ri, ByteStream& bs) : LookupOpcode(ri, bs) {
+  explicit TableMap(RawImageData* ri, ByteStream& bs) : LookupOpcode(ri, bs) {
     auto count = bs.getU32();
 
     if (count == 0 || count > 65536)
@@ -308,7 +308,7 @@ public:
 
 class DngOpcodes::PolynomialMap final : public LookupOpcode {
 public:
-  explicit PolynomialMap(const RawImage& ri, ByteStream& bs)
+  explicit PolynomialMap(RawImageData* ri, ByteStream& bs)
       : LookupOpcode(ri, bs) {
     vector<double> polynomial;
 
@@ -345,13 +345,13 @@ public:
   };
 
 protected:
-  DeltaRowOrColBase(const RawImage& ri, ByteStream& bs) : PixelOpcode(ri, bs) {}
+  DeltaRowOrColBase(RawImageData* ri, ByteStream& bs) : PixelOpcode(ri, bs) {}
 };
 
 template <typename S>
 class DngOpcodes::DeltaRowOrCol : public DeltaRowOrColBase {
 public:
-  void setup(const RawImage& ri) override {
+  void setup(RawImageData* ri) override {
     PixelOpcode::setup(ri);
 
     // If we are working on a float image, no need to convert to int
@@ -374,7 +374,7 @@ protected:
   // only meaningful for uint16_t images!
   virtual bool valueIsOk(float value) = 0;
 
-  DeltaRowOrCol(const RawImage& ri, ByteStream& bs, float f2iScale_)
+  DeltaRowOrCol(RawImageData* ri, ByteStream& bs, float f2iScale_)
       : DeltaRowOrColBase(ri, bs), f2iScale(f2iScale_) {
     const auto deltaF_count = bs.getU32();
     (void)bs.check(deltaF_count, 4);
@@ -413,12 +413,12 @@ class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol<S> {
   bool valueIsOk(float value) override { return std::abs(value) <= absLimit; }
 
 public:
-  explicit OffsetPerRowOrCol(const RawImage& ri, ByteStream& bs)
+  explicit OffsetPerRowOrCol(RawImageData* ri, ByteStream& bs)
       : DeltaRowOrCol<S>(ri, bs, 65535.0F),
         absLimit(double(std::numeric_limits<uint16_t>::max()) /
                  this->f2iScale) {}
 
-  void apply(const RawImage& ri) override {
+  void apply(RawImageData* ri) override {
     if (ri->getDataType() == RawImageType::UINT16) {
       this->template applyOP<uint16_t>(
           ri, [this](uint32_t x, uint32_t y, uint16_t v) {
@@ -450,13 +450,13 @@ class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol<S> {
   }
 
 public:
-  explicit ScalePerRowOrCol(const RawImage& ri, ByteStream& bs)
+  explicit ScalePerRowOrCol(RawImageData* ri, ByteStream& bs)
       : DeltaRowOrCol<S>(ri, bs, 1024.0F),
         maxLimit((double(std::numeric_limits<int>::max() - rounding) /
                   double(std::numeric_limits<uint16_t>::max())) /
                  this->f2iScale) {}
 
-  void apply(const RawImage& ri) override {
+  void apply(RawImageData* ri) override {
     if (ri->getDataType() == RawImageType::UINT16) {
       this->template applyOP<uint16_t>(ri, [this](uint32_t x, uint32_t y,
                                                   uint16_t v) {
@@ -473,7 +473,7 @@ public:
 
 // ****************************************************************************
 
-DngOpcodes::DngOpcodes(const RawImage& ri, const TiffEntry* entry) {
+DngOpcodes::DngOpcodes(RawImageData *ri, const TiffEntry* entry) {
   ByteStream bs = entry->getData();
 
   // DNG opcodes are always stored in big-endian byte order.
@@ -538,7 +538,7 @@ DngOpcodes::DngOpcodes(const RawImage& ri, const TiffEntry* entry) {
 // of the DngOpcode type in DngOpcodes.h
 DngOpcodes::~DngOpcodes() = default;
 
-void DngOpcodes::applyOpCodes(const RawImage& ri) const {
+void DngOpcodes::applyOpCodes(RawImageData *ri) const {
   for (const auto& code : opcodes) {
     code->setup(ri);
     code->apply(ri);
@@ -547,7 +547,7 @@ void DngOpcodes::applyOpCodes(const RawImage& ri) const {
 
 template <class Opcode>
 std::unique_ptr<DngOpcodes::DngOpcode>
-DngOpcodes::constructor(const RawImage& ri, ByteStream& bs) {
+DngOpcodes::constructor(RawImageData* ri, ByteStream& bs) {
   return std::make_unique<Opcode>(ri, bs);
 }
 

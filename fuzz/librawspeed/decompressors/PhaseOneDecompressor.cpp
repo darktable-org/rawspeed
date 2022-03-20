@@ -41,7 +41,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
-    rawspeed::RawImage mRaw(CreateRawImage(bs));
+    auto mRaw(CreateRawImage(bs));
 
     const auto numStrips = bs.getU32();
     std::vector<rawspeed::PhaseOneStrip> strips;
@@ -53,7 +53,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
                     });
     assert(strips.size() == numStrips);
 
-    rawspeed::PhaseOneDecompressor f(mRaw, std::move(strips));
+    rawspeed::PhaseOneDecompressor f(mRaw.get(), std::move(strips));
     mRaw->createData();
     f.decompress();
 

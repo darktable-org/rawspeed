@@ -36,7 +36,7 @@ class iPoint2D;
 
 class UncompressedDecompressor final : public AbstractDecompressor {
   ByteStream input;
-  RawImage mRaw;
+  RawImageData* mRaw;
 
   // check buffer size, throw, or compute minimal height that can be decoded
   void sanityCheck(const uint32_t* h, int bytesPerLine) const;
@@ -56,7 +56,7 @@ class UncompressedDecompressor final : public AbstractDecompressor {
                      uint32_t skipBytes, uint32_t h, uint64_t y) const;
 
 public:
-  UncompressedDecompressor(ByteStream input_, const RawImage& img)
+  UncompressedDecompressor(ByteStream input_, RawImageData* img)
       : input(std::move(input_)), mRaw(img) {}
 
   /* Helper function for decoders, that will unpack uncompressed image data */

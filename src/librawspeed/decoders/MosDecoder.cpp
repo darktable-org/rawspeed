@@ -122,7 +122,7 @@ void MosDecoder::decodeRawInternal() {
   if (bs.getRemainSize() == 0)
     ThrowRDE("Input buffer is empty");
 
-  UncompressedDecompressor u(bs, mRaw);
+  UncompressedDecompressor u(bs, mRaw.get());
 
   if (int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
       1 == compression) {

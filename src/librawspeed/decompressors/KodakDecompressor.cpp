@@ -36,7 +36,7 @@
 
 namespace rawspeed {
 
-KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
+KodakDecompressor::KodakDecompressor(RawImageData *img, ByteStream bs,
                                      int bps_, bool uncorrectedRawValues_)
     : mRaw(img), input(std::move(bs)), bps(bps_),
       uncorrectedRawValues(uncorrectedRawValues_) {

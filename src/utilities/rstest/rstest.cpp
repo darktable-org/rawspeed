@@ -51,7 +51,6 @@ using rawspeed::FileReader;
 using rawspeed::getU16BE;
 using rawspeed::getU32LE;
 using rawspeed::iPoint2D;
-using rawspeed::RawImage;
 using rawspeed::RawParser;
 using rawspeed::RawspeedException;
 using rawspeed::roundUp;
@@ -73,14 +72,14 @@ using std::internal;
 
 namespace rawspeed::rstest {
 
-std::string img_hash(const rawspeed::RawImage& r);
+std::string img_hash(rawspeed::RawImageData* r);
 
-void writePPM(const rawspeed::RawImage& raw, const std::string& fn);
-void writePFM(const rawspeed::RawImage& raw, const std::string& fn);
+void writePPM(rawspeed::RawImageData* raw, const std::string& fn);
+void writePFM(rawspeed::RawImageData* raw, const std::string& fn);
 
-md5::md5_state imgDataHash(const rawspeed::RawImage& raw);
+md5::md5_state imgDataHash(rawspeed::RawImageData* raw);
 
-void writeImage(const rawspeed::RawImage& raw, const std::string& fn);
+void writeImage(rawspeed::RawImageData* raw, const std::string& fn);
 
 struct options {
   bool create;
@@ -114,7 +113,7 @@ struct Timer {
 
 // yes, this is not cool. but i see no way to compute the hash of the
 // full image, without duplicating image, and copying excluding padding
-md5::md5_state imgDataHash(const RawImage& raw) {
+md5::md5_state imgDataHash(RawImageData* raw) {
   md5::md5_state ret = md5::md5_init;
 
   const iPoint2D dimUncropped = raw->getUncroppedDim();
@@ -152,7 +151,7 @@ APPEND(ostringstream* oss, const char* format, ...) {
   *oss << line.data();
 }
 
-std::string img_hash(const RawImage& r, bool noSamples) {
+std::string img_hash(RawImageData* r, bool noSamples) {
   ostringstream oss;
 
   if (noSamples)
@@ -236,7 +235,7 @@ std::string img_hash(const RawImage& r, bool noSamples) {
 
 using file_ptr = std::unique_ptr<FILE, decltype(&fclose)>;
 
-void writePPM(const RawImage& raw, const std::string& fn) {
+void writePPM(RawImageData* raw, const std::string& fn) {
   file_ptr f(fopen((fn + ".ppm").c_str(), "wb"), &fclose);
 
   const iPoint2D dimUncropped = raw->getUncroppedDim();
@@ -260,7 +259,7 @@ void writePPM(const RawImage& raw, const std::string& fn) {
   }
 }
 
-void writePFM(const RawImage& raw, const std::string& fn) {
+void writePFM(RawImageData* raw, const std::string& fn) {
   file_ptr f(fopen((fn + ".pfm").c_str(), "wb"), &fclose);
 
   const iPoint2D dimUncropped = raw->getUncroppedDim();
@@ -311,7 +310,7 @@ void writePFM(const RawImage& raw, const std::string& fn) {
   }
 }
 
-void writeImage(const RawImage& raw, const std::string& fn) {
+void writeImage(RawImageData *raw, const std::string& fn) {
   switch (raw->getDataType()) {
   case RawImageType::UINT16:
     writePPM(raw, fn);
@@ -369,7 +368,7 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 
   decoder->decodeRaw();
   decoder->decodeMetaData(metadata);
-  RawImage raw = decoder->mRaw;
+  auto raw = decoder->mRaw.get();
   // RawImage raw = decoder->decode();
 
   auto time = t();

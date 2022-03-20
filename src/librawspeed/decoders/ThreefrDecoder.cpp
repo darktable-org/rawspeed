@@ -61,7 +61,7 @@ void ThreefrDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
 
-  HasselbladDecompressor l(bs, mRaw);
+  HasselbladDecompressor l(bs, mRaw.get());
   mRaw->createData();
 
   int pixelBaseOffset = hints.get("pixelBaseOffset", 0);

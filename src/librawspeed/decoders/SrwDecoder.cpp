@@ -96,7 +96,7 @@ void SrwDecoder::decodeRawInternal() {
     Buffer rbuf(mFile.getSubView(offset, count));
     ByteStream bsr(DataBuffer(rbuf, Endianness::little));
 
-    SamsungV0Decompressor s0(mRaw, bso, bsr);
+    SamsungV0Decompressor s0(mRaw.get(), bso, bsr);
 
     mRaw->createData();
 
@@ -110,7 +110,7 @@ void SrwDecoder::decodeRawInternal() {
     const ByteStream bs(
         DataBuffer(mFile.getSubView(offset, count), Endianness::little));
 
-    SamsungV1Decompressor s1(mRaw, bs, bits);
+    SamsungV1Decompressor s1(mRaw.get(), bs, bits);
 
     mRaw->createData();
 
@@ -124,7 +124,7 @@ void SrwDecoder::decodeRawInternal() {
     const ByteStream bs(
         DataBuffer(mFile.getSubView(offset, count), Endianness::little));
 
-    SamsungV2Decompressor s2(mRaw, bs, bits);
+    SamsungV2Decompressor s2(mRaw.get(), bs, bits);
 
     mRaw->createData();
 

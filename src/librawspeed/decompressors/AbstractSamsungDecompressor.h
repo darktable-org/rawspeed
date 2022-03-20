@@ -27,10 +27,10 @@ namespace rawspeed {
 
 class AbstractSamsungDecompressor : public AbstractDecompressor {
 protected:
-  RawImage mRaw;
+  RawImageData* mRaw;
 
 public:
-  explicit AbstractSamsungDecompressor(const RawImage& raw) : mRaw(raw) {}
+  explicit AbstractSamsungDecompressor(RawImageData* raw) : mRaw(raw) {}
 };
 
 } // namespace rawspeed

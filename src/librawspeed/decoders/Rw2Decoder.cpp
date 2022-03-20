@@ -90,7 +90,7 @@ void Rw2Decoder::decodeRawInternal() {
 
     UncompressedDecompressor u(
         ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-        mRaw);
+        mRaw.get());
 
     if (size >= width * height * 2) {
       // It's completely unpacked little-endian
@@ -103,7 +103,7 @@ void Rw2Decoder::decodeRawInternal() {
     } else {
       uint32_t section_split_offset = 0;
       PanasonicV4Decompressor p(
-          mRaw,
+          mRaw.get(),
           ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
           hints.has("zero_is_not_bad"), section_split_offset);
       mRaw->createData();
@@ -130,20 +130,20 @@ void Rw2Decoder::decodeRawInternal() {
                 raw->getEntry(TiffTag::PANASONIC_RAWFORMAT)->getU16()) {
     case 4: {
       uint32_t section_split_offset = 0x1FF8;
-      PanasonicV4Decompressor p(mRaw, bs, hints.has("zero_is_not_bad"),
+      PanasonicV4Decompressor p(mRaw.get(), bs, hints.has("zero_is_not_bad"),
                                 section_split_offset);
       mRaw->createData();
       p.decompress();
       return;
     }
     case 5: {
-      PanasonicV5Decompressor v5(mRaw, bs, bitsPerSample);
+      PanasonicV5Decompressor v5(mRaw.get(), bs, bitsPerSample);
       mRaw->createData();
       v5.decompress();
       return;
     }
     case 6: {
-      PanasonicV6Decompressor v6(mRaw, bs);
+      PanasonicV6Decompressor v6(mRaw.get(), bs);
       mRaw->createData();
       v6.decompress();
       return;

@@ -39,7 +39,7 @@
 
 namespace rawspeed {
 
-FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
+FujiDecompressor::FujiDecompressor(RawImageData *img, ByteStream input_)
     : mRaw(img), input(std::move(input_)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))

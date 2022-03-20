@@ -35,7 +35,7 @@
 
 namespace rawspeed {
 
-SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
+SonyArw2Decompressor::SonyArw2Decompressor(RawImageData *img,
                                            const ByteStream& input_)
     : mRaw(img) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||

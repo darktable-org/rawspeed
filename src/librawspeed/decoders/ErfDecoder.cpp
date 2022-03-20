@@ -56,7 +56,7 @@ void ErfDecoder::decodeRawInternal() {
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(mFile.getSubView(off, c2), Endianness::little)),
-      mRaw);
+      mRaw.get());
 
   u.decode12BitRaw<Endianness::big, false, true>(width, height);
 }

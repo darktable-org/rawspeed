@@ -36,10 +36,10 @@ namespace rawspeed {
 class JpegDecompressor final : public AbstractDecompressor {
   struct JpegDecompressStruct;
   ByteStream input;
-  RawImage mRaw;
+  RawImageData* mRaw;
 
 public:
-  JpegDecompressor(ByteStream bs, const RawImage& img)
+  JpegDecompressor(ByteStream bs, RawImageData* img)
       : input(std::move(bs)), mRaw(img) {
     input.setByteOrder(Endianness::big);
   }

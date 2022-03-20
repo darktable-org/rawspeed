@@ -49,9 +49,9 @@ using std::vector;
 namespace rawspeed {
 
 RawDecoder::RawDecoder(const Buffer& file)
-    : mRaw(RawImage::create()), failOnUnknown(false),
-      interpolateBadPixels(true), applyStage1DngOpcodes(true), applyCrop(true),
-      uncorrectedRawValues(false), fujiRotate(true), mFile(file) {}
+    : failOnUnknown(false), interpolateBadPixels(true),
+      applyStage1DngOpcodes(true), applyCrop(true), uncorrectedRawValues(false),
+      fujiRotate(true), mFile(file) {}
 
 void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
                                     BitOrder order) const {
@@ -128,7 +128,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
     UncompressedDecompressor u(
         ByteStream(DataBuffer(mFile.getSubView(slice.offset, slice.count),
                               Endianness::little)),
-        mRaw);
+        mRaw.get());
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
     bitPerPixel = (static_cast<uint64_t>(slice.count) * 8U) / (slice.h * width);

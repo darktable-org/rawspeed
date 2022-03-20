@@ -40,7 +40,7 @@ struct SamsungV1Decompressor::encTableItem {
   uint8_t diffLen;
 };
 
-SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
+SamsungV1Decompressor::SamsungV1Decompressor(RawImageData *image,
                                              const ByteStream& bs_, int bit)
     : AbstractSamsungDecompressor(image), bs(bs_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||

@@ -87,7 +87,7 @@ void Cr2Decoder::decodeOldFormat() {
 
   const ByteStream bs(DataBuffer(mFile.getSubView(offset), Endianness::little));
 
-  Cr2Decompressor l(bs, mRaw);
+  Cr2Decompressor l(bs, mRaw.get());
   mRaw->createData();
 
   Cr2Slicing slicing(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
@@ -99,7 +99,7 @@ void Cr2Decoder::decodeOldFormat() {
           mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x123));
       curve && curve->type == TiffDataType::SHORT && curve->count == 4096) {
     auto table = curve->getU16Array(curve->count);
-    RawImageCurveGuard curveHandler(&mRaw, table, uncorrectedRawValues);
+    RawImageCurveGuard curveHandler(mRaw.get(), table, uncorrectedRawValues);
 
     // Apply table
     if (!uncorrectedRawValues)
@@ -182,7 +182,7 @@ void Cr2Decoder::decodeNewFormat() {
   const ByteStream bs(
       DataBuffer(mFile.getSubView(offset, count), Endianness::little));
 
-  Cr2Decompressor d(bs, mRaw);
+  Cr2Decompressor d(bs, mRaw.get());
   mRaw->createData();
   d.decode(slicing);
 
@@ -357,7 +357,7 @@ void Cr2Decoder::sRawInterpolate() {
   }
 
   mRaw->checkMemIsInitialized();
-  RawImage subsampledRaw = mRaw;
+  auto subsampledRaw = mRaw;
   int hue = getHue();
 
   iPoint2D interpolatedDims = {
@@ -367,11 +367,12 @@ void Cr2Decoder::sRawInterpolate() {
                     subsampledRaw->metadata.subsampling.y)),
       subsampledRaw->metadata.subsampling.y * subsampledRaw->dim.y};
 
-  mRaw = RawImage::create(interpolatedDims, RawImageType::UINT16, 3);
+  mRaw = std::make_shared<RawImageDataU16>(interpolatedDims, 3);
   mRaw->metadata.subsampling = subsampledRaw->metadata.subsampling;
   mRaw->isCFA = false;
 
-  Cr2sRawInterpolator i(mRaw, subsampledRaw->getU16DataAsUncroppedArray2DRef(),
+  Cr2sRawInterpolator i(mRaw.get(),
+                        subsampledRaw->getU16DataAsUncroppedArray2DRef(),
                         sraw_coeffs, hue);
 
   /* Determine sRaw coefficients */

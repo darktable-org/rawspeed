@@ -157,7 +157,7 @@ void MrwDecoder::decodeRawInternal() {
 
   DataBuffer db(imageData, Endianness::big);
   ByteStream bs(db);
-  UncompressedDecompressor u(bs, mRaw);
+  UncompressedDecompressor u(bs, mRaw.get());
 
   if (packed)
     u.decode12BitRaw<Endianness::big>(raw_width, raw_height);

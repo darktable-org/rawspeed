@@ -39,11 +39,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
-    rawspeed::RawImage mRaw(CreateRawImage(bs));
+    auto mRaw(CreateRawImage(bs));
 
     const auto pixelBaseOffset = bs.get<int>();
 
-    rawspeed::HasselbladDecompressor h(bs, mRaw);
+    rawspeed::HasselbladDecompressor h(bs, mRaw.get());
     mRaw->createData();
     h.decode(pixelBaseOffset);
 

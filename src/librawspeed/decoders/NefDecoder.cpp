@@ -124,7 +124,7 @@ void NefDecoder::decodeRawInternal() {
       DataBuffer(mFile.getSubView(offsets->getU32(), counts->getU32()),
                  Endianness::little));
 
-  NikonDecompressor n(mRaw, meta->getData(), bitPerPixel);
+  NikonDecompressor n(mRaw.get(), meta->getData(), bitPerPixel);
   mRaw->createData();
   n.decompress(rawData, uncorrectedRawValues);
 }
@@ -282,14 +282,14 @@ void NefDecoder::DecodeUncompressed() const {
     iPoint2D pos(0, offY);
 
     if (hints.has("coolpixmangled")) {
-      UncompressedDecompressor u(in, mRaw);
+      UncompressedDecompressor u(in, mRaw.get());
       u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, 12,
                             BitOrder::MSB32);
     } else {
       if (hints.has("coolpixsplit"))
         readCoolpixSplitRaw(in, size, pos, width * bitPerPixel / 8);
       else {
-        UncompressedDecompressor u(in, mRaw);
+        UncompressedDecompressor u(in, mRaw.get());
         if (in.getSize() % size.y != 0)
           ThrowRDE("Inconsistent row size");
         const auto inputPitchBytes = in.getSize() / size.y;
@@ -357,7 +357,7 @@ void NefDecoder::DecodeD100Uncompressed() const {
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-      mRaw);
+      mRaw.get());
 
   u.decode12BitRaw<Endianness::big, false, true>(width, height);
 }
@@ -654,7 +654,7 @@ void NefDecoder::DecodeNikonSNef(const ByteStream& input) const {
 
   curve.resize(4095);
 
-  RawImageCurveGuard curveHandler(&mRaw, curve, false);
+  RawImageCurveGuard curveHandler(mRaw.get(), curve, false);
 
   uint16_t tmp;
   auto* tmpch = reinterpret_cast<uint8_t*>(&tmp);

@@ -441,7 +441,7 @@ Huffman NikonDecompressor::createHuffmanTable(uint32_t huffSelect) {
   return ht;
 }
 
-NikonDecompressor::NikonDecompressor(const RawImage& raw, ByteStream metadata,
+NikonDecompressor::NikonDecompressor(RawImageData *raw, ByteStream metadata,
                                      uint32_t bitsPS_)
     : mRaw(raw), bitsPS(bitsPS_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
@@ -492,8 +492,8 @@ void NikonDecompressor::decompress(BitPumpMSB& bits, int start_y, int end_y) {
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  // allow gcc to devirtualize the calls below
-  auto* rawdata = reinterpret_cast<RawImageDataU16*>(mRaw.get());
+  auto* rawdata = dynamic_cast<RawImageDataU16*>(mRaw);
+  assert(rawdata);
 
   assert(out.width % 2 == 0);
   assert(out.width >= 2);
@@ -512,7 +512,7 @@ void NikonDecompressor::decompress(BitPumpMSB& bits, int start_y, int end_y) {
 
 void NikonDecompressor::decompress(const ByteStream& data,
                                    bool uncorrectedRawValues) {
-  RawImageCurveGuard curveHandler(&mRaw, curve, uncorrectedRawValues);
+  RawImageCurveGuard curveHandler(mRaw, curve, uncorrectedRawValues);
 
   BitPumpMSB bits(data);
 

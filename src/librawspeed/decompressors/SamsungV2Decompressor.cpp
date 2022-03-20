@@ -78,7 +78,7 @@ SamsungV2Decompressor::getDiff(BitPumpMSB32& pump, uint32_t len) {
   return signExtend(pump.getBits(len), len);
 }
 
-SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
+SamsungV2Decompressor::SamsungV2Decompressor(RawImageData *image,
                                              const ByteStream& bs,
                                              unsigned bits)
     : AbstractSamsungDecompressor(image) {

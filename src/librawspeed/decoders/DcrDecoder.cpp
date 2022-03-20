@@ -82,7 +82,7 @@ void DcrDecoder::decodeRawInternal() {
   assert(linearization != nullptr);
   auto linTable = linearization->getU16Array(linearization->count);
 
-  RawImageCurveGuard curveHandler(&mRaw, linTable, uncorrectedRawValues);
+  RawImageCurveGuard curveHandler(mRaw.get(), linTable, uncorrectedRawValues);
 
   // FIXME: dcraw does all sorts of crazy things besides this to fetch
   //        WB from what appear to be presets and calculate it in weird ways
@@ -110,7 +110,7 @@ void DcrDecoder::decodeRawInternal() {
     }
   }();
 
-  KodakDecompressor k(mRaw, input, bps, uncorrectedRawValues);
+  KodakDecompressor k(mRaw.get(), input, bps, uncorrectedRawValues);
   k.decompress();
 }
 

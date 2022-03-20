@@ -48,7 +48,7 @@ void MefDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
   UncompressedDecompressor u(
-      ByteStream(DataBuffer(mFile.getSubView(off), Endianness::little)), mRaw);
+      ByteStream(DataBuffer(mFile.getSubView(off), Endianness::little)), mRaw.get());
 
   u.decode12BitRaw<Endianness::big>(width, height);
 }

@@ -59,7 +59,7 @@ constexpr PanasonicV5Decompressor::PacketDsc
     PanasonicV5Decompressor::FourteenBitPacket =
         PanasonicV5Decompressor::PacketDsc(/*bps=*/14);
 
-PanasonicV5Decompressor::PanasonicV5Decompressor(const RawImage& img,
+PanasonicV5Decompressor::PanasonicV5Decompressor(RawImageData *img,
                                                  const ByteStream& input_,
                                                  uint32_t bps_)
     : mRaw(img), bps(bps_) {

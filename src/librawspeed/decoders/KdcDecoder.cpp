@@ -117,7 +117,7 @@ void KdcDecoder::decodeRawInternal() {
   mRaw->createData();
 
   UncompressedDecompressor u(
-      ByteStream(DataBuffer(inputBuffer, Endianness::little)), mRaw);
+      ByteStream(DataBuffer(inputBuffer, Endianness::little)), mRaw.get());
 
   u.decode12BitRaw<Endianness::big>(width, height);
 }

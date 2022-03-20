@@ -41,7 +41,7 @@
 
 namespace rawspeed {
 
-PanasonicV4Decompressor::PanasonicV4Decompressor(const RawImage& img,
+PanasonicV4Decompressor::PanasonicV4Decompressor(RawImageData* img,
                                                  const ByteStream& input_,
                                                  bool zero_is_not_bad,
                                                  uint32_t section_split_offset_)

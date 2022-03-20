@@ -38,7 +38,7 @@ using std::array;
 
 namespace rawspeed {
 
-CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
+CrwDecompressor::CrwDecompressor(RawImageData* img, uint32_t dec_table,
                                  bool lowbits_, ByteStream rawData)
     : mRaw(img), lowbits(lowbits_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||

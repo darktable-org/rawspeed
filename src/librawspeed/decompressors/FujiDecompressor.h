@@ -35,7 +35,7 @@
 namespace rawspeed {
 
 class FujiDecompressor final : public AbstractDecompressor {
-  RawImage mRaw;
+  RawImageData* mRaw;
 
   void decompressThread() const noexcept;
 
@@ -110,7 +110,7 @@ public:
     [[nodiscard]] int offsetX() const { return h.block_size * n; }
   };
 
-  FujiDecompressor(const RawImage& img, ByteStream input);
+  FujiDecompressor(RawImageData* img, ByteStream input);
 
   void fuji_compressed_load_raw();
 

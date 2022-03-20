@@ -115,7 +115,7 @@ public:
   void checkRowIsInitialized(int row) const;
   void checkMemIsInitialized() const;
   void destroyData();
-  void blitFrom(const RawImage& src, const iPoint2D& srcPos,
+  void blitFrom(RawImageData *src, const iPoint2D& srcPos,
                 const iPoint2D& size, const iPoint2D& destPos);
   [[nodiscard]] rawspeed::RawImageType getDataType() const { return dataType; }
   [[nodiscard]] Array2DRef<uint16_t>
@@ -193,6 +193,8 @@ protected:
 
 class RawImageDataU16 final : public RawImageData {
 public:
+  RawImageDataU16();
+  explicit RawImageDataU16(const iPoint2D& dim_, uint32_t cpp_ = 1);
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
   void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
@@ -206,13 +208,13 @@ private:
   void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
   void doLookup(int start_y, int end_y) override;
 
-  RawImageDataU16();
-  explicit RawImageDataU16(const iPoint2D& dim_, uint32_t cpp_ = 1);
   friend class RawImage;
 };
 
 class RawImageDataFloat final : public RawImageData {
 public:
+  RawImageDataFloat();
+  explicit RawImageDataFloat(const iPoint2D& dim_, uint32_t cpp_ = 1);
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
   void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
@@ -221,54 +223,8 @@ private:
   void scaleValues(int start_y, int end_y) override;
   void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
   [[noreturn]] void doLookup(int start_y, int end_y) override;
-  RawImageDataFloat();
-  explicit RawImageDataFloat(const iPoint2D& dim_, uint32_t cpp_ = 1);
   friend class RawImage;
 };
-
- class RawImage {
- public:
-   static RawImage create(RawImageType type = RawImageType::UINT16);
-   static RawImage create(const iPoint2D& dim,
-                          RawImageType type = RawImageType::UINT16,
-                          uint32_t componentsPerPixel = 1);
-   RawImageData* operator->() const { return p_.operator->(); }
-   RawImageData& operator*() const { return p_.operator*(); }
-   explicit RawImage(RawImageData* p); // p must not be NULL
-   RawImage(const RawImage& p);
-   RawImage& operator=(const RawImage& p) noexcept;
-   RawImage& operator=(RawImage&& p) noexcept;
-
-   RawImageData* get() { return p_.get(); }
- private:
-   std::shared_ptr<RawImageData> p_;    // p_ is never NULL
- };
-
-inline RawImage RawImage::create(RawImageType type)  {
-  switch (type)
-  {
-  case RawImageType::UINT16:
-    return RawImage(new RawImageDataU16());
-  case RawImageType::F32:
-    return RawImage(new RawImageDataFloat());
-  default:
-    writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
-    __builtin_unreachable();
-  }
-}
-
-inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type,
-                                 uint32_t componentsPerPixel) {
-  switch (type) {
-  case RawImageType::UINT16:
-    return RawImage(new RawImageDataU16(dim, componentsPerPixel));
-  case RawImageType::F32:
-    return RawImage(new RawImageDataFloat(dim, componentsPerPixel));
-  default:
-    writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
-    __builtin_unreachable();
-  }
-}
 
 inline Array2DRef<uint16_t>
 RawImageData::getU16DataAsUncroppedArray2DRef() const noexcept {
@@ -312,7 +268,7 @@ inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
 }
 
 class RawImageCurveGuard final {
-  const RawImage* mRaw;
+  RawImageData* mRaw;
   const std::vector<uint16_t>& curve;
   const bool uncorrectedRawValues;
 
@@ -323,21 +279,21 @@ public:
   RawImageCurveGuard& operator=(const RawImageCurveGuard&) noexcept = delete;
   RawImageCurveGuard& operator=(RawImageCurveGuard&&) noexcept = delete;
 
-  RawImageCurveGuard(const RawImage* raw, const std::vector<uint16_t>& curve_,
+  RawImageCurveGuard(RawImageData* raw, const std::vector<uint16_t>& curve_,
                      bool uncorrectedRawValues_)
       : mRaw(raw), curve(curve_), uncorrectedRawValues(uncorrectedRawValues_) {
     if (uncorrectedRawValues)
       return;
 
-    (*mRaw)->setTable(curve, true);
+    mRaw->setTable(curve, true);
   }
 
   ~RawImageCurveGuard() {
     // Set the table, if it should be needed later.
     if (uncorrectedRawValues)
-      (*mRaw)->setTable(curve, false);
+      mRaw->setTable(curve, false);
     else
-      (*mRaw)->setTable(nullptr);
+      mRaw->setTable(nullptr);
   }
 };
 

@@ -33,11 +33,11 @@ namespace rawspeed {
 class ByteStream;
 
 class PentaxDecompressor final : public AbstractDecompressor {
-  RawImage mRaw;
+  RawImageData* mRaw;
   const HuffmanTable ht;
 
 public:
-  PentaxDecompressor(const RawImage& img, std::optional<ByteStream> metaData);
+  PentaxDecompressor(RawImageData* img, std::optional<ByteStream> metaData);
 
   void decompress(const ByteStream& data) const;
 

@@ -42,7 +42,7 @@ const std::array<std::array<std::array<uint8_t, 16>, 2>, 1>
           {3, 4, 2, 5, 1, 6, 0, 7, 8, 9, 10, 11, 12}}},
     }};
 
-PentaxDecompressor::PentaxDecompressor(const RawImage& img,
+PentaxDecompressor::PentaxDecompressor(RawImageData *img,
                                        std::optional<ByteStream> metaData)
     : mRaw(img), ht(SetupHuffmanTable(std::move(metaData))) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||

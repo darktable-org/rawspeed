@@ -209,7 +209,7 @@ void IiqDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
 
-  PhaseOneDecompressor p(mRaw, std::move(strips));
+  PhaseOneDecompressor p(mRaw.get(), std::move(strips));
   mRaw->createData();
   p.decompress();
 

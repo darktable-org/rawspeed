@@ -88,7 +88,7 @@ struct pana_cs6_page_decoder {
 };
 } // namespace
 
-PanasonicV6Decompressor::PanasonicV6Decompressor(const RawImage& img,
+PanasonicV6Decompressor::PanasonicV6Decompressor(RawImageData *img,
                                                  const ByteStream& input_)
     : mRaw(img) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||

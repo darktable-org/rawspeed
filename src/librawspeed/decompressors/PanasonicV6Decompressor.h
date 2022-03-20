@@ -27,7 +27,7 @@
 namespace rawspeed {
 
 class PanasonicV6Decompressor final : public AbstractDecompressor {
-  RawImage mRaw;
+  RawImageData* mRaw;
 
   ByteStream input;
 
@@ -42,7 +42,7 @@ class PanasonicV6Decompressor final : public AbstractDecompressor {
   void decompressRow(int row) const noexcept;
 
 public:
-  PanasonicV6Decompressor(const RawImage& img, const ByteStream& input_);
+  PanasonicV6Decompressor(RawImageData* img, const ByteStream& input_);
 
   void decompress() const;
 };

@@ -39,7 +39,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
-    rawspeed::RawImage mRaw(CreateRawImage(bs));
+    auto mRaw(CreateRawImage(bs));
 
     std::optional<rawspeed::ByteStream> metaData;
 
@@ -51,7 +51,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::ByteStream rawData = bs.getStream(bs.getRemainSize());
 
-    rawspeed::PentaxDecompressor p(mRaw, metaData);
+    rawspeed::PentaxDecompressor p(mRaw.get(), metaData);
     mRaw->createData();
     p.decompress(rawData);
 

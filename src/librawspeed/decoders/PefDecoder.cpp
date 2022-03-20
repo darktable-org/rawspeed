@@ -93,7 +93,7 @@ void PefDecoder::decodeRawInternal() {
     metaData = t->getData();
   }
 
-  PentaxDecompressor p(mRaw, metaData);
+  PentaxDecompressor p(mRaw.get(), metaData);
   mRaw->createData();
   p.decompress(bs);
 }

@@ -28,7 +28,6 @@
 namespace rawspeed {
 
 class ByteStream;
-class RawImage;
 
 // Decoder for compressed srw files (NX3000 and later)
 class SamsungV1Decompressor final : public AbstractSamsungDecompressor {
@@ -41,7 +40,7 @@ class SamsungV1Decompressor final : public AbstractSamsungDecompressor {
   static constexpr int bits = 12;
 
 public:
-  SamsungV1Decompressor(const RawImage& image, const ByteStream& bs_, int bit);
+  SamsungV1Decompressor(RawImageData* image, const ByteStream& bs_, int bit);
 
   void decompress() const;
 };

@@ -33,7 +33,7 @@ using std::copy_n;
 
 namespace rawspeed {
 
-LJpegDecompressor::LJpegDecompressor(const ByteStream& bs, const RawImage& img)
+LJpegDecompressor::LJpegDecompressor(const ByteStream& bs, RawImageData* img)
     : AbstractLJpegDecompressor(bs, img) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",

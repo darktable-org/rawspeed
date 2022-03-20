@@ -86,7 +86,7 @@ void CrwDecoder::decodeRawInternal() {
 
   bool lowbits = !hints.has("no_decompressed_lowbits");
 
-  CrwDecompressor c(mRaw, dec_table, lowbits, rawData->getData());
+  CrwDecompressor c(mRaw.get(), dec_table, lowbits, rawData->getData());
   mRaw->createData();
   c.decompress();
 }

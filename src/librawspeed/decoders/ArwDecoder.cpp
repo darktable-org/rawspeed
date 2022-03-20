@@ -99,7 +99,8 @@ void ArwDecoder::decodeSRF(const TiffIFD* raw) {
   mRaw->createData();
 
   UncompressedDecompressor u(
-      ByteStream(DataBuffer(di.getSubView(0, len), Endianness::little)), mRaw);
+      ByteStream(DataBuffer(di.getSubView(0, len), Endianness::little)),
+      mRaw.get());
   u.decodeRawUnpacked<16, Endianness::big>(width, height);
 }
 
@@ -121,7 +122,7 @@ void ArwDecoder::decodeRawInternal() {
       mRaw->dim = iPoint2D(width, height);
 
       ByteStream input(DataBuffer(mFile.getSubView(off), Endianness::little));
-      SonyArw1Decompressor a(mRaw);
+      SonyArw1Decompressor a(mRaw.get());
       mRaw->createData();
       a.decompress(input);
 
@@ -208,7 +209,7 @@ void ArwDecoder::decodeRawInternal() {
     for (uint32_t j = sony_curve[i] + 1; j <= sony_curve[i + 1]; j++)
       curve[j] = curve[j - 1] + (1 << i);
 
-  RawImageCurveGuard curveHandler(&mRaw, curve, uncorrectedRawValues);
+  RawImageCurveGuard curveHandler(mRaw.get(), curve, uncorrectedRawValues);
 
   uint32_t c2 = counts->getU32();
   uint32_t off = offsets->getU32();
@@ -222,7 +223,7 @@ void ArwDecoder::decodeRawInternal() {
   ByteStream input(DataBuffer(mFile.getSubView(off, c2), Endianness::little));
 
   if (arw1) {
-    SonyArw1Decompressor a(mRaw);
+    SonyArw1Decompressor a(mRaw.get());
     mRaw->createData();
     a.decompress(input);
   } else
@@ -248,7 +249,7 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) const {
   mRaw->createData();
 
   UncompressedDecompressor u(ByteStream(DataBuffer(buf, Endianness::little)),
-                             mRaw);
+                             mRaw.get());
 
   if (hints.has("sr2_format"))
     u.decodeRawUnpacked<14, Endianness::big>(width, height);
@@ -260,7 +261,7 @@ void ArwDecoder::DecodeARW2(const ByteStream& input, uint32_t w, uint32_t h,
                             uint32_t bpp) {
 
   if (bpp == 8) {
-    SonyArw2Decompressor a2(mRaw, input);
+    SonyArw2Decompressor a2(mRaw.get(), input);
     mRaw->createData();
     a2.decompress();
     return;
@@ -269,7 +270,7 @@ void ArwDecoder::DecodeARW2(const ByteStream& input, uint32_t w, uint32_t h,
   if (bpp == 12) {
     mRaw->createData();
     UncompressedDecompressor u(
-        ByteStream(DataBuffer(input, Endianness::little)), mRaw);
+        ByteStream(DataBuffer(input, Endianness::little)), mRaw.get());
     u.decode12BitRaw<Endianness::little>(w, h);
 
     // Shift scales, since black and white are the same as compressed precision

@@ -290,7 +290,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
       mRaw->whitePoint = whitelevel->getU32();
   }
 
-  AbstractDngDecompressor slices(mRaw, getTilingDescription(raw), compression,
+  AbstractDngDecompressor slices(mRaw.get(), getTilingDescription(raw), compression,
                                  mFixLjpeg, bps, predictor);
 
   slices.slices.reserve(slices.dsc.numTiles);
@@ -365,10 +365,10 @@ void DngDecoder::decodeRawInternal() {
 
   switch (sample_format) {
   case 1:
-    mRaw = RawImage::create(RawImageType::UINT16);
+    mRaw = std::make_shared<RawImageDataU16>();
     break;
   case 3:
-    mRaw = RawImage::create(RawImageType::F32);
+    mRaw = std::make_shared<RawImageDataFloat>();
     break;
   default:
     ThrowRDE("Only 16 bit unsigned or float point data supported. Sample "
@@ -498,8 +498,8 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
       const TiffEntry* opcodes = raw->getEntry(TiffTag::OPCODELIST1);
       // The entry might exist, but it might be empty, which means no opcodes
       if (opcodes->count > 0) {
-        DngOpcodes codes(mRaw, opcodes);
-        codes.applyOpCodes(mRaw);
+        DngOpcodes codes(mRaw.get(), opcodes);
+        codes.applyOpCodes(mRaw.get());
       }
     } catch (const RawDecoderException& e) {
       // We push back errors from the opcode parser, since the image may still
@@ -513,7 +513,7 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
       raw->getEntry(TiffTag::LINEARIZATIONTABLE)->count > 0) {
     const TiffEntry* lintable = raw->getEntry(TiffTag::LINEARIZATIONTABLE);
     auto table = lintable->getU16Array(lintable->count);
-    RawImageCurveGuard curveHandler(&mRaw, table, uncorrectedRawValues);
+    RawImageCurveGuard curveHandler(mRaw.get(), table, uncorrectedRawValues);
     if (!uncorrectedRawValues)
       mRaw->sixteenBitLookup();
   }
@@ -542,8 +542,8 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
 
     // Apply stage 2 codes
     try {
-      DngOpcodes codes(mRaw, raw->getEntry(TiffTag::OPCODELIST2));
-      codes.applyOpCodes(mRaw);
+      DngOpcodes codes(mRaw.get(), raw->getEntry(TiffTag::OPCODELIST2));
+      codes.applyOpCodes(mRaw.get());
     } catch (const RawDecoderException& e) {
       // We push back errors from the opcode parser, since the image may still
       // be usable

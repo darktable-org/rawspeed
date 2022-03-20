@@ -72,7 +72,7 @@ public:
 
   /* The decoded image - undefined if image has not or could not be decoded. */
   /* Remember this is automatically refcounted, so a reference is retained until this class is destroyed */
-  RawImage mRaw;
+  std::shared_ptr<RawImageData> mRaw;
 
   /* You can set this if you do not want Rawspeed to attempt to decode images, */
   /* where it does not have reliable information about CFA, cropping, black and white point */

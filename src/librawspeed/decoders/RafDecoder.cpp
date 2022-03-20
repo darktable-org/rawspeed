@@ -101,7 +101,7 @@ void RafDecoder::decodeRawInternal() {
 
     mRaw->dim = iPoint2D(width, height);
 
-    FujiDecompressor f(mRaw, input);
+    FujiDecompressor f(mRaw.get(), input);
 
     mRaw->createData();
 
@@ -151,7 +151,7 @@ void RafDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(real_width, height);
   mRaw->createData();
 
-  UncompressedDecompressor u(input, mRaw);
+  UncompressedDecompressor u(input, mRaw.get());
 
   if (double_width) {
     u.decodeRawUnpacked<16, Endianness::little>(width * 2, height);
@@ -222,7 +222,8 @@ void RafDecoder::applyCorrections(const Camera* cam) {
     }
 
     iPoint2D final_size(rotatedsize, rotatedsize-1);
-    RawImage rotated = RawImage::create(final_size, RawImageType::UINT16, 1);
+    std::shared_ptr<RawImageData> rotated =
+        std::make_shared<RawImageDataU16>(final_size, 1);
     rotated->clearArea(iRectangle2D(iPoint2D(0,0), rotated->dim));
     rotated->metadata = mRaw->metadata;
     rotated->metadata.fujiRotationPos = rotationPos;

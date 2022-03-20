@@ -43,7 +43,7 @@ class PanasonicV4Decompressor final : public AbstractDecompressor {
 
   class ProxyStream;
 
-  RawImage mRaw;
+  RawImageData* mRaw;
   ByteStream input;
   bool zero_is_bad;
 
@@ -83,7 +83,7 @@ class PanasonicV4Decompressor final : public AbstractDecompressor {
   void decompressThread() const noexcept;
 
 public:
-  PanasonicV4Decompressor(const RawImage& img, const ByteStream& input_,
+  PanasonicV4Decompressor(RawImageData* img, const ByteStream& input_,
                           bool zero_is_not_bad, uint32_t section_split_offset_);
 
   void decompress() const noexcept;

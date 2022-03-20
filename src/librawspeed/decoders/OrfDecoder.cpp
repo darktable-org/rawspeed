@@ -123,14 +123,14 @@ void OrfDecoder::decodeRawInternal() {
     ThrowRDE("%u stripes, and not uncompressed. Unsupported.",
              raw->getEntry(TiffTag::STRIPOFFSETS)->count);
 
-  OlympusDecompressor o(mRaw);
+  OlympusDecompressor o(mRaw.get());
   mRaw->createData();
   o.decompress(std::move(input));
 }
 
 bool OrfDecoder::decodeUncompressed(const ByteStream& s, uint32_t w, uint32_t h,
                                     uint32_t size) const {
-  UncompressedDecompressor u(s, mRaw);
+  UncompressedDecompressor u(s, mRaw.get());
   // FIXME: most of this logic should be in UncompressedDecompressor,
   // one way or another.
 

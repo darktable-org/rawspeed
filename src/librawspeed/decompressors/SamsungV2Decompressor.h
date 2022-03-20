@@ -28,7 +28,6 @@
 
 namespace rawspeed {
 
-class RawImage;
 
 // Decoder for third generation compressed SRW files (NX1)
 class SamsungV2Decompressor final : public AbstractSamsungDecompressor {
@@ -66,7 +65,7 @@ private:
   void decompressRow(int row);
 
 public:
-  SamsungV2Decompressor(const RawImage& image, const ByteStream& bs,
+  SamsungV2Decompressor(RawImageData* image, const ByteStream& bs,
                         unsigned bit);
 
   void decompress();

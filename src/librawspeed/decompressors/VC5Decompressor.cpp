@@ -372,7 +372,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::createDecodingTasks(
   createLowHighPassCombiningTask(exceptionThrow);
 }
 
-VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
+VC5Decompressor::VC5Decompressor(ByteStream bs, RawImageData* img)
     : mRaw(img), mBs(std::move(bs)) {
   if (!mRaw->dim.hasPositiveArea())
     ThrowRDE("Bad image dimensions.");

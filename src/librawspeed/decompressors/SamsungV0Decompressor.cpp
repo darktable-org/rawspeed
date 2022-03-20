@@ -37,7 +37,7 @@
 
 namespace rawspeed {
 
-SamsungV0Decompressor::SamsungV0Decompressor(const RawImage& image,
+SamsungV0Decompressor::SamsungV0Decompressor(RawImageData *image,
                                              const ByteStream& bso,
                                              const ByteStream& bsr)
     : AbstractSamsungDecompressor(image) {

@@ -36,7 +36,7 @@ class ByteStream;
 template <class T> class Array2DRef;
 
 class OlympusDecompressor final : public AbstractDecompressor {
-  RawImage mRaw;
+  RawImageData* mRaw;
 
   // A table to quickly look up "high" value
   const SimpleLUT<char, 12> bittable{
@@ -56,7 +56,7 @@ class OlympusDecompressor final : public AbstractDecompressor {
   void decompressRow(BitPumpMSB& bits, int row) const;
 
 public:
-  explicit OlympusDecompressor(const RawImage& img);
+  explicit OlympusDecompressor(RawImageData* img);
   void decompress(ByteStream input) const;
 };
 
