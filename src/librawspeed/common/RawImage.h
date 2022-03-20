@@ -118,10 +118,6 @@ public:
   void blitFrom(RawImageData *src, const iPoint2D& srcPos,
                 const iPoint2D& size, const iPoint2D& destPos);
   [[nodiscard]] rawspeed::RawImageType getDataType() const { return dataType; }
-  [[nodiscard]] Array2DRef<uint16_t>
-  getU16DataAsUncroppedArray2DRef() const noexcept;
-  [[nodiscard]] CroppedArray2DRef<uint16_t>
-  getU16DataAsCroppedArray2DRef() const noexcept;
   [[nodiscard]] uint8_t* getData() const;
   uint8_t*
   getData(uint32_t x,
@@ -198,6 +194,10 @@ public:
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
   void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
+  [[nodiscard]] Array2DRef<uint16_t>
+  getU16DataAsUncroppedArray2DRef() const noexcept;
+  [[nodiscard]] CroppedArray2DRef<uint16_t>
+  getU16DataAsCroppedArray2DRef() const noexcept;
 
 private:
   void scaleValues_plain(int start_y, int end_y);
@@ -226,25 +226,11 @@ private:
   friend class RawImage;
 };
 
-inline Array2DRef<uint16_t>
-RawImageData::getU16DataAsUncroppedArray2DRef() const noexcept {
-  assert(dataType == RawImageType::UINT16 &&
-         "Attempting to access floating-point buffer as uint16_t.");
-  assert(data && "Data not yet allocated.");
-  return {reinterpret_cast<uint16_t*>(data), cpp * uncropped_dim.x,
-          uncropped_dim.y, static_cast<int>(pitch / sizeof(uint16_t))};
-}
-
-inline CroppedArray2DRef<uint16_t>
-RawImageData::getU16DataAsCroppedArray2DRef() const noexcept {
-  return {getU16DataAsUncroppedArray2DRef(), cpp * mOffset.x, mOffset.y,
-          cpp * dim.x, dim.y};
-}
-
 // setWithLookUp will set a single pixel by using the lookup table if supplied,
-// You must supply the destination where the value should be written, and a pointer to
-// a value that will be used to store a random counter that can be reused between calls.
-// this needs to be inline to speed up tight decompressor loops
+// You must supply the destination where the value should be written, and a
+// pointer to a value that will be used to store a random counter that can be
+// reused between calls. this needs to be inline to speed up tight decompressor
+// loops
 inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
                                            uint32_t* random) {
   auto* dest = reinterpret_cast<uint16_t*>(dst);
@@ -265,6 +251,19 @@ inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
     return;
   }
   *dest = table->tables[value];
+}
+
+inline Array2DRef<uint16_t>
+RawImageDataU16::getU16DataAsUncroppedArray2DRef() const noexcept {
+  assert(data && "Data not yet allocated.");
+  return {reinterpret_cast<uint16_t*>(data), cpp * uncropped_dim.x,
+          uncropped_dim.y, static_cast<int>(pitch / sizeof(uint16_t))};
+}
+
+inline CroppedArray2DRef<uint16_t>
+RawImageDataU16::getU16DataAsCroppedArray2DRef() const noexcept {
+  return {getU16DataAsUncroppedArray2DRef(), cpp * mOffset.x, mOffset.y,
+          cpp * dim.x, dim.y};
 }
 
 class RawImageCurveGuard final {

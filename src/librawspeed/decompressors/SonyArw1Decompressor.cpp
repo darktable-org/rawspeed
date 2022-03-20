@@ -52,7 +52,9 @@ inline int SonyArw1Decompressor::getDiff(BitPumpMSB& bs, uint32_t len) {
 }
 
 void SonyArw1Decompressor::decompress(const ByteStream& input) const {
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  assert(rawU16);
+  const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
   assert(out.width > 0);
   assert(out.height > 0);
   assert(out.height % 2 == 0);

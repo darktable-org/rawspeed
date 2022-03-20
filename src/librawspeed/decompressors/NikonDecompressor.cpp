@@ -490,7 +490,9 @@ template <typename Huffman>
 void NikonDecompressor::decompress(BitPumpMSB& bits, int start_y, int end_y) {
   auto ht = createHuffmanTable<Huffman>(huffSelect);
 
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  assert(rawU16);
+  const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
 
   auto* rawdata = dynamic_cast<RawImageDataU16*>(mRaw);
   assert(rawdata);

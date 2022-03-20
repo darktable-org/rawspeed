@@ -228,8 +228,12 @@ void RafDecoder::applyCorrections(const Camera* cam) {
     rotated->metadata = mRaw->metadata;
     rotated->metadata.fujiRotationPos = rotationPos;
 
-    auto srcImg = mRaw->getU16DataAsUncroppedArray2DRef();
-    auto dstImg = rotated->getU16DataAsUncroppedArray2DRef();
+    auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get());
+    assert(rawU16);
+    auto srcImg = rawU16->getU16DataAsUncroppedArray2DRef();
+    auto rotatedU16 = dynamic_cast<RawImageDataU16*>(rotated.get());
+    assert(rotatedU16);
+    auto dstImg = rotatedU16->getU16DataAsUncroppedArray2DRef();
 
     for (int y = 0; y < new_size.y; y++) {
       for (int x = 0; x < new_size.x; x++) {

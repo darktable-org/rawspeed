@@ -81,7 +81,10 @@ public:
 
   void apply(RawImageData* ri) override {
     MutexLocker guard(&ri->mBadPixelMutex);
-    const CroppedArray2DRef<uint16_t> img(ri->getU16DataAsCroppedArray2DRef());
+    auto rawU16 = dynamic_cast<RawImageDataU16*>(ri);
+    assert(rawU16);
+    const CroppedArray2DRef<uint16_t> img(
+        rawU16->getU16DataAsCroppedArray2DRef());
     iPoint2D crop = ri->getCropOffset();
     uint32_t offset = crop.x | (crop.y << 16);
     for (auto row = 0; row < img.croppedHeight; ++row) {

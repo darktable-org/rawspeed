@@ -167,7 +167,9 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   assert(mRaw->dim.x >= N_COMP);
   assert((mRaw->getCpp() * (mRaw->dim.x - offX)) >= N_COMP);
 
-  const CroppedArray2DRef img(mRaw->getU16DataAsUncroppedArray2DRef(),
+  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  assert(rawU16);
+  const CroppedArray2DRef img(rawU16->getU16DataAsUncroppedArray2DRef(),
                               mRaw->getCpp() * offX, offY, mRaw->getCpp() * w,
                               h);
 

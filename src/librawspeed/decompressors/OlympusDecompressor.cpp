@@ -137,7 +137,9 @@ void OlympusDecompressor::decompressRow(BitPumpMSB& bits, int row) const {
   assert(mRaw->dim.x > 0);
   assert(mRaw->dim.x % 2 == 0);
 
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  assert(rawU16);
+  const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
 
   std::array<std::array<int, 3>, 2> acarry{{}};
 

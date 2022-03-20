@@ -154,7 +154,9 @@ void JpegDecompressor::decode(uint32_t offX,
   int copy_w = min(mRaw->dim.x - offX, dinfo.output_width);
   int copy_h = min(mRaw->dim.y - offY, dinfo.output_height);
 
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  assert(rawU16);
+  const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
   for (int row = 0; row < copy_h; row++) {
     for (int col = 0; col < dinfo.output_components * copy_w; col++)
       out(row + offY, dinfo.output_components * offX + col) = tmp(row, col);

@@ -131,7 +131,9 @@ void Cr2Decompressor::decode(const Cr2Slicing& slicing_) {
 template <int N_COMP, int X_S_F, int Y_S_F>
 void Cr2Decompressor::decodeN_X_Y()
 {
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  assert(rawU16);
+  const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
 
   // To understand the CR2 slice handling and sampling factor behavior, see
   // https://github.com/lclevy/libcraw2/blob/master/docs/cr2_lossless.pdf?raw=true

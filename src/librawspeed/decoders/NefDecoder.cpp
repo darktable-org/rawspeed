@@ -305,7 +305,9 @@ void NefDecoder::DecodeUncompressed() const {
 void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
                                      const iPoint2D& offset,
                                      int inputPitch) const {
-  const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get());
+  assert(rawU16);
+  const Array2DRef<uint16_t> img(rawU16->getU16DataAsUncroppedArray2DRef());
 
   if (size.y % 2 != 0)
     ThrowRDE("Odd number of rows");
@@ -659,7 +661,9 @@ void NefDecoder::DecodeNikonSNef(const ByteStream& input) const {
   uint16_t tmp;
   auto* tmpch = reinterpret_cast<uint8_t*>(&tmp);
 
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get());
+  assert(rawU16);
+  const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
   const uint8_t* in = input.peekData(out.width * out.height);
 
   for (int row = 0; row < out.height; row++) {

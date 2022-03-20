@@ -149,7 +149,9 @@ SamsungV2Decompressor::SamsungV2Decompressor(RawImageData *image,
 inline __attribute__((always_inline)) std::array<uint16_t, 16>
 SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32& pump, int row,
                                              int col) {
-  const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  assert(rawU16);
+  const Array2DRef<uint16_t> img(rawU16->getU16DataAsUncroppedArray2DRef());
 
   std::array<uint16_t, 16> baseline;
 
@@ -310,7 +312,9 @@ SamsungV2Decompressor::decodeDifferences(BitPumpMSB32& pump, int row) {
 
 inline __attribute__((always_inline)) void
 SamsungV2Decompressor::processBlock(BitPumpMSB32& pump, int row, int col) {
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  assert(rawU16);
+  const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
 
   const std::array<uint16_t, 16> baseline =
       prepareBaselineValues(pump, row, col);

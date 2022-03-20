@@ -311,7 +311,9 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
 
   for (int quadRow = 0; quadRow < 2; quadRow++) {
     for (int quadCol = 0; quadCol < 2; quadCol++) {
-      const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
+      auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get());
+      assert(rawU16);
+      const Array2DRef<uint16_t> img(rawU16->getU16DataAsUncroppedArray2DRef());
 
       const Spline<> s(control_points[quadRow][quadCol]);
       const std::vector<uint16_t> curve = s.calculateCurve();
@@ -387,7 +389,9 @@ void IiqDecoder::handleBadPixel(const uint16_t col, const uint16_t row) const {
 }
 
 void IiqDecoder::correctBadColumn(const uint16_t col) const {
-  const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get());
+  assert(rawU16);
+  const Array2DRef<uint16_t> img(rawU16->getU16DataAsUncroppedArray2DRef());
 
   for (int row = 2; row < mRaw->dim.y - 2; row++) {
     if (mRaw->cfa.getColorAt(col, row) == CFAColor::GREEN) {

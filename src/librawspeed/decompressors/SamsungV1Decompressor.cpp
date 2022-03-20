@@ -115,7 +115,9 @@ void SamsungV1Decompressor::decompress() const {
     }
   }
 
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  assert(rawU16);
+  const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
   assert(out.width % 32 == 0 && "Should have even count of pixels per row.");
   assert(out.height % 2 == 0 && "Should have even row count.");
   BitPumpMSB pump(bs);
