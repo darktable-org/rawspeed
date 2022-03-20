@@ -53,7 +53,7 @@ void DcrDecoder::checkImageDimensions() {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 }
 
-RawImage DcrDecoder::decodeRawInternal() {
+void DcrDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
   ByteStream input(DataBuffer(mFile.getSubView(off), Endianness::little));
@@ -112,8 +112,6 @@ RawImage DcrDecoder::decodeRawInternal() {
 
   KodakDecompressor k(mRaw, input, bps, uncorrectedRawValues);
   k.decompress();
-
-  return mRaw;
 }
 
 void DcrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {

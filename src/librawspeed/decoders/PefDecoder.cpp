@@ -49,14 +49,14 @@ bool PefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
          make == "RICOH IMAGING COMPANY, LTD." || make == "PENTAX";
 }
 
-RawImage PefDecoder::decodeRawInternal() {
+void PefDecoder::decodeRawInternal() {
   const auto* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
   int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
 
   if (1 == compression || compression == 32773) {
     decodeUncompressed(raw, BitOrder::MSB);
-    return mRaw;
+    return;
   }
 
   if (65535 != compression)
@@ -96,8 +96,6 @@ RawImage PefDecoder::decodeRawInternal() {
   PentaxDecompressor p(mRaw, metaData);
   mRaw->createData();
   p.decompress(bs);
-
-  return mRaw;
 }
 
 void PefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {

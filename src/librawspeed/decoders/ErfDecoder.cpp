@@ -51,7 +51,7 @@ void ErfDecoder::checkImageDimensions() {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 }
 
-RawImage ErfDecoder::decodeRawInternal() {
+void ErfDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
   UncompressedDecompressor u(
@@ -59,8 +59,6 @@ RawImage ErfDecoder::decodeRawInternal() {
       mRaw);
 
   u.decode12BitRaw<Endianness::big, false, true>(width, height);
-
-  return mRaw;
 }
 
 void ErfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {

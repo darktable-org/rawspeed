@@ -41,7 +41,7 @@ public:
                                    const Buffer& file);
   DngDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file);
 
-  RawImage decodeRawInternal() override;
+  void decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void checkSupportInternal(const CameraMetaData* meta) override;
 

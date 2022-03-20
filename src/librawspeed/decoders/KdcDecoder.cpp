@@ -81,7 +81,7 @@ Buffer KdcDecoder::getInputBuffer() const {
   return mFile.getSubView(off, bytes);
 }
 
-RawImage KdcDecoder::decodeRawInternal() {
+void KdcDecoder::decodeRawInternal() {
   if (!mRootIFD->hasEntryRecursive(TiffTag::COMPRESSION))
     ThrowRDE("Couldn't find compression setting");
 
@@ -120,8 +120,6 @@ RawImage KdcDecoder::decodeRawInternal() {
       ByteStream(DataBuffer(inputBuffer, Endianness::little)), mRaw);
 
   u.decode12BitRaw<Endianness::big>(width, height);
-
-  return mRaw;
 }
 
 void KdcDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {

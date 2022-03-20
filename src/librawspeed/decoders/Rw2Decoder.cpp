@@ -57,13 +57,13 @@ bool Rw2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   return make == "Panasonic" || make == "LEICA" || make == "LEICA CAMERA AG";
 }
 
-RawImage Rw2Decoder::decodeRawInternal() {
+void Rw2Decoder::decodeRawInternal() {
 
   const TiffIFD* raw = nullptr;
   bool isOldPanasonic =
       !mRootIFD->hasEntryRecursive(TiffTag::PANASONIC_STRIPOFFSET);
 
-  if (! isOldPanasonic)
+  if (!isOldPanasonic)
     raw = mRootIFD->getIFDWithTag(TiffTag::PANASONIC_STRIPOFFSET);
   else
     raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
@@ -92,11 +92,11 @@ RawImage Rw2Decoder::decodeRawInternal() {
         ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
         mRaw);
 
-    if (size >= width*height*2) {
+    if (size >= width * height * 2) {
       // It's completely unpacked little-endian
       mRaw->createData();
       u.decodeRawUnpacked<12, Endianness::little>(width, height);
-    } else if (size >= width*height*3/2) {
+    } else if (size >= width * height * 3 / 2) {
       // It's a packed format
       mRaw->createData();
       u.decode12BitRaw<Endianness::little, false, true>(width, height);
@@ -134,26 +134,24 @@ RawImage Rw2Decoder::decodeRawInternal() {
                                 section_split_offset);
       mRaw->createData();
       p.decompress();
-      return mRaw;
+      return;
     }
     case 5: {
       PanasonicV5Decompressor v5(mRaw, bs, bitsPerSample);
       mRaw->createData();
       v5.decompress();
-      return mRaw;
+      return;
     }
     case 6: {
       PanasonicV6Decompressor v6(mRaw, bs);
       mRaw->createData();
       v6.decompress();
-      return mRaw;
+      return;
     }
     default:
       ThrowRDE("Version %i is unsupported", version);
     }
   }
-
-  return mRaw;
 }
 
 void Rw2Decoder::checkSupportInternal(const CameraMetaData* meta) {

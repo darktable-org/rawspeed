@@ -335,7 +335,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
   slices.decompress();
 }
 
-RawImage DngDecoder::decodeRawInternal() {
+void DngDecoder::decodeRawInternal() {
   vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(TiffTag::COMPRESSION);
 
   if (data.empty())
@@ -419,8 +419,6 @@ RawImage DngDecoder::decodeRawInternal() {
   decodeData(raw, sample_format);
 
   handleMetadata(raw);
-
-  return mRaw;
 }
 
 void DngDecoder::handleMetadata(const TiffIFD* raw) {

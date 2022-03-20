@@ -55,7 +55,7 @@ public:
   /* Attempt to decode the image */
   /* A RawDecoderException will be thrown if the image cannot be decoded, */
   /* and there will not be any data in the mRaw image. */
-  RawImage decodeRaw();
+  void decodeRaw();
 
   /* This will apply metadata information from the camera database, */
   /* such as crop, black+white level, etc. */
@@ -118,7 +118,7 @@ protected:
   /* A RawDecoderException will be thrown if the image cannot be decoded, */
   /* and there will not be any data in the mRaw image. */
   /* This function must be overridden by actual decoders. */
-  virtual RawImage decodeRawInternal() = 0;
+  virtual void decodeRawInternal() = 0;
   virtual void decodeMetaDataInternal(const CameraMetaData* meta) = 0;
   virtual void checkSupportInternal(const CameraMetaData* meta) = 0;
 

@@ -64,7 +64,7 @@ bool RafDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   return make == "FUJIFILM";
 }
 
-RawImage RafDecoder::decodeRawInternal() {
+void RafDecoder::decodeRawInternal() {
   const auto* raw = mRootIFD->getIFDWithTag(TiffTag::FUJI_STRIPOFFSETS);
   uint32_t height = 0;
   uint32_t width = 0;
@@ -107,7 +107,7 @@ RawImage RafDecoder::decodeRawInternal() {
 
     f.decompress();
 
-    return mRaw;
+    return;
   }
 
   // x-trans sensors report 14bpp, but data isn't packed
@@ -169,8 +169,6 @@ RawImage RafDecoder::decodeRawInternal() {
                             BitOrder::LSB);
     }
   }
-
-  return mRaw;
 }
 
 void RafDecoder::checkSupportInternal(const CameraMetaData* meta) {

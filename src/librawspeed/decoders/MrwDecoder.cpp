@@ -151,7 +151,7 @@ void MrwDecoder::parseHeader() {
   imageData = db.getSubView(bs.getPosition(), imageBits / 8);
 }
 
-RawImage MrwDecoder::decodeRawInternal() {
+void MrwDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(raw_width, raw_height);
   mRaw->createData();
 
@@ -163,8 +163,6 @@ RawImage MrwDecoder::decodeRawInternal() {
     u.decode12BitRaw<Endianness::big>(raw_width, raw_height);
   else
     u.decodeRawUnpacked<12, Endianness::big>(raw_width, raw_height);
-
-  return mRaw;
 }
 
 void MrwDecoder::checkSupportInternal(const CameraMetaData* meta) {

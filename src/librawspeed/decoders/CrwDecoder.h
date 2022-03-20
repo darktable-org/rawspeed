@@ -38,7 +38,7 @@ class CrwDecoder final : public RawDecoder {
 
 public:
   CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD, const Buffer& file);
-  RawImage decodeRawInternal() override;
+  void decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   static bool isCRW(const Buffer& input);

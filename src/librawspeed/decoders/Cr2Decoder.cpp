@@ -56,7 +56,7 @@ bool Cr2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
          (make == "Kodak" && (model == "DCS520C" || model == "DCS560C"));
 }
 
-RawImage Cr2Decoder::decodeOldFormat() {
+void Cr2Decoder::decodeOldFormat() {
   uint32_t offset = 0;
   if (mRootIFD->getEntryRecursive(TiffTag::CANON_RAW_DATA_OFFSET)) {
     offset =
@@ -77,7 +77,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
 
   // some old models (1D/1DS/D2000C) encode two lines as one
   // see: FIX_CANON_HALF_HEIGHT_DOUBLE_WIDTH
-  if (width > 2*height) {
+  if (width > 2 * height) {
     height *= 2;
     width /= 2;
   }
@@ -105,13 +105,11 @@ RawImage Cr2Decoder::decodeOldFormat() {
     if (!uncorrectedRawValues)
       mRaw->sixteenBitLookup();
   }
-
-  return mRaw;
 }
 
 // for technical details about Cr2 mRAW/sRAW, see http://lclevy.free.fr/cr2/
 
-RawImage Cr2Decoder::decodeNewFormat() {
+void Cr2Decoder::decodeNewFormat() {
   const TiffEntry* sensorInfoE =
       mRootIFD->getEntryRecursive(TiffTag::CANON_SENSOR_INFO);
   if (!sensorInfoE)
@@ -192,15 +190,13 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
   if (mRaw->metadata.subsampling.x > 1 || mRaw->metadata.subsampling.y > 1)
     sRawInterpolate();
-
-  return mRaw;
 }
 
-RawImage Cr2Decoder::decodeRawInternal() {
+void Cr2Decoder::decodeRawInternal() {
   if (mRootIFD->getSubIFDs().size() < 4)
-    return decodeOldFormat();
+    decodeOldFormat();
   else // NOLINT ok, here it make sense
-    return decodeNewFormat();
+    decodeNewFormat();
 }
 
 void Cr2Decoder::checkSupportInternal(const CameraMetaData* meta) {

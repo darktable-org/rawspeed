@@ -95,10 +95,10 @@ std::string MosDecoder::getXMPTag(std::string_view xmp, std::string_view tag) {
   return std::string(xmp.substr(start + startlen, end - start - startlen));
 }
 
-RawImage MosDecoder::decodeRawInternal() {
+void MosDecoder::decodeRawInternal() {
   uint32_t off = 0;
 
-  const TiffIFD *raw = nullptr;
+  const TiffIFD* raw = nullptr;
 
   if (mRootIFD->hasEntryRecursive(TiffTag::TILEOFFSETS)) {
     raw = mRootIFD->getIFDWithTag(TiffTag::TILEOFFSETS);
@@ -139,8 +139,6 @@ RawImage MosDecoder::decodeRawInternal() {
     // l.startDecoder(off, mFile.getSize()-off, 0, 0);
   } else
     ThrowRDE("Unsupported compression: %d", compression);
-
-  return mRaw;
 }
 
 void MosDecoder::checkSupportInternal(const CameraMetaData* meta) {

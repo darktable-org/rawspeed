@@ -60,7 +60,7 @@ CrwDecoder::CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD,
                        const Buffer& file)
     : RawDecoder(file), mRootIFD(std::move(rootIFD)) {}
 
-RawImage CrwDecoder::decodeRawInternal() {
+void CrwDecoder::decodeRawInternal() {
   const CiffEntry* rawData = mRootIFD->getEntry(CiffTag::RAWDATA);
   if (!rawData)
     ThrowRDE("Couldn't find the raw data chunk");
@@ -84,13 +84,11 @@ RawImage CrwDecoder::decodeRawInternal() {
   assert(decTable != nullptr);
   uint32_t dec_table = decTable->getU32();
 
-  bool lowbits = ! hints.has("no_decompressed_lowbits");
+  bool lowbits = !hints.has("no_decompressed_lowbits");
 
   CrwDecompressor c(mRaw, dec_table, lowbits, rawData->getData());
   mRaw->createData();
   c.decompress();
-
-  return mRaw;
 }
 
 void CrwDecoder::checkSupportInternal(const CameraMetaData* meta) {

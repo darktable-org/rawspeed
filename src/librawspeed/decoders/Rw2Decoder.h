@@ -40,7 +40,7 @@ public:
   Rw2Decoder(TiffRootIFDOwner&& root, const Buffer& file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
-  RawImage decodeRawInternal() override;
+  void decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void checkSupportInternal(const CameraMetaData* meta) override;
 

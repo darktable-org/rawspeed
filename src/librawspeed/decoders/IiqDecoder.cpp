@@ -111,7 +111,7 @@ IiqDecoder::computeSripes(const Buffer& raw_data,
   return slices;
 }
 
-RawImage IiqDecoder::decodeRawInternal() {
+void IiqDecoder::decodeRawInternal() {
   const Buffer buf(mFile.getSubView(8));
   const DataBuffer db(buf, Endianness::little);
   ByteStream bs(db);
@@ -218,8 +218,6 @@ RawImage IiqDecoder::decodeRawInternal() {
 
   for (int i = 0; i < 3; i++)
     mRaw->metadata.wbCoeffs[i] = wb.getFloat();
-
-  return mRaw;
 }
 
 void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32_t split_row,

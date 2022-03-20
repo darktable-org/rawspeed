@@ -85,7 +85,7 @@ void NakedDecoder::parseHints() {
   }
 }
 
-RawImage NakedDecoder::decodeRawInternal() {
+void NakedDecoder::decodeRawInternal() {
   parseHints();
 
   mRaw->dim = iPoint2D(width, height);
@@ -97,8 +97,6 @@ RawImage NakedDecoder::decodeRawInternal() {
 
   iPoint2D pos(0, 0);
   u.readUncompressedRaw(mRaw->dim, pos, width * bits / 8, bits, bo);
-
-  return mRaw;
 }
 
 void NakedDecoder::checkSupportInternal(const CameraMetaData* meta) {

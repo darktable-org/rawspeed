@@ -51,7 +51,7 @@ void DcsDecoder::checkImageDimensions() {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 }
 
-RawImage DcsDecoder::decodeRawInternal() {
+void DcsDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
   const TiffEntry* linearization =
@@ -73,8 +73,6 @@ RawImage DcsDecoder::decodeRawInternal() {
     u.decode8BitRaw<true>(width, height);
   else
     u.decode8BitRaw<false>(width, height);
-
-  return mRaw;
 }
 
 void DcsDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {

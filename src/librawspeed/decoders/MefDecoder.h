@@ -40,7 +40,7 @@ public:
   MefDecoder(TiffRootIFDOwner&& root, const Buffer& file)
       : SimpleTiffDecoder(std::move(root), file) {}
 
-  RawImage decodeRawInternal() override;
+  void decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 private:

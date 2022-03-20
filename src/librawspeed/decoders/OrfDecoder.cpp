@@ -99,7 +99,7 @@ ByteStream OrfDecoder::handleSlices() const {
   return input.getStream(size);
 }
 
-RawImage OrfDecoder::decodeRawInternal() {
+void OrfDecoder::decodeRawInternal() {
   const auto* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
   if (int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
@@ -117,7 +117,7 @@ RawImage OrfDecoder::decodeRawInternal() {
   ByteStream input(handleSlices());
 
   if (decodeUncompressed(input, width, height, input.getSize()))
-    return mRaw;
+    return;
 
   if (raw->getEntry(TiffTag::STRIPOFFSETS)->count != 1)
     ThrowRDE("%u stripes, and not uncompressed. Unsupported.",
@@ -126,8 +126,6 @@ RawImage OrfDecoder::decodeRawInternal() {
   OlympusDecompressor o(mRaw);
   mRaw->createData();
   o.decompress(std::move(input));
-
-  return mRaw;
 }
 
 bool OrfDecoder::decodeUncompressed(const ByteStream& s, uint32_t w, uint32_t h,

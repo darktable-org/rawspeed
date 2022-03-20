@@ -63,7 +63,7 @@ bool NefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   return make == "NIKON CORPORATION" || make == "NIKON";
 }
 
-RawImage NefDecoder::decodeRawInternal() {
+void NefDecoder::decodeRawInternal() {
   const auto* raw = mRootIFD->getIFDWithTag(TiffTag::CFAPATTERN);
   auto compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
 
@@ -76,19 +76,19 @@ RawImage NefDecoder::decodeRawInternal() {
       ThrowRDE("Image data outside of file.");
     if (!D100IsCompressed(offsets->getU32())) {
       DecodeD100Uncompressed();
-      return mRaw;
+      return;
     }
   }
 
   if (compression == 1 || (hints.has("force_uncompressed")) ||
       NEFIsUncompressed(raw)) {
     DecodeUncompressed();
-    return mRaw;
+    return;
   }
 
   if (NEFIsUncompressedRGB(raw)) {
     DecodeSNefUncompressed();
-    return mRaw;
+    return;
   }
 
   if (offsets->count != 1) {
@@ -127,8 +127,6 @@ RawImage NefDecoder::decodeRawInternal() {
   NikonDecompressor n(mRaw, meta->getData(), bitPerPixel);
   mRaw->createData();
   n.decompress(rawData, uncorrectedRawValues);
-
-  return mRaw;
 }
 
 /*

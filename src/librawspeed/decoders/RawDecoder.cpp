@@ -273,19 +273,19 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
   }
 }
 
-rawspeed::RawImage RawDecoder::decodeRaw() {
+void RawDecoder::decodeRaw() {
   try {
-    RawImage raw = decodeRawInternal();
-    raw->checkMemIsInitialized();
+    decodeRawInternal();
+    mRaw->checkMemIsInitialized();
 
-    raw->metadata.pixelAspectRatio =
-        hints.get("pixel_aspect_ratio", raw->metadata.pixelAspectRatio);
+    mRaw->metadata.pixelAspectRatio =
+        hints.get("pixel_aspect_ratio", mRaw->metadata.pixelAspectRatio);
     if (interpolateBadPixels) {
-      raw->fixBadPixels();
-      raw->checkMemIsInitialized();
+      mRaw->fixBadPixels();
+      mRaw->checkMemIsInitialized();
     }
 
-    return raw;
+
   } catch (const TiffParserException& e) {
     ThrowRDE("%s", e.what());
   } catch (const FileIOException& e) {

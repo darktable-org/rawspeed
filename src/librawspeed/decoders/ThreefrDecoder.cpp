@@ -50,7 +50,7 @@ bool ThreefrDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   return make == "Hasselblad";
 }
 
-RawImage ThreefrDecoder::decodeRawInternal() {
+void ThreefrDecoder::decodeRawInternal() {
   const auto* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS, 1);
   uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
   uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
@@ -66,8 +66,6 @@ RawImage ThreefrDecoder::decodeRawInternal() {
 
   int pixelBaseOffset = hints.get("pixelBaseOffset", 0);
   l.decode(pixelBaseOffset);
-
-  return mRaw;
 }
 
 void ThreefrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {

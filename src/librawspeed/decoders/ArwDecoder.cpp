@@ -57,7 +57,7 @@ bool ArwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   return make == "SONY";
 }
 
-RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
+void ArwDecoder::decodeSRF(const TiffIFD* raw) {
   raw = mRootIFD->getIFDWithTag(TiffTag::IMAGEWIDTH);
 
   uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
@@ -101,11 +101,9 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
   UncompressedDecompressor u(
       ByteStream(DataBuffer(di.getSubView(0, len), Endianness::little)), mRaw);
   u.decodeRawUnpacked<16, Endianness::big>(width, height);
-
-  return mRaw;
 }
 
-RawImage ArwDecoder::decodeRawInternal() {
+void ArwDecoder::decodeRawInternal() {
   const TiffIFD* raw = nullptr;
   vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(TiffTag::STRIPOFFSETS);
 
@@ -127,11 +125,13 @@ RawImage ArwDecoder::decodeRawInternal() {
       mRaw->createData();
       a.decompress(input);
 
-      return mRaw;
+      return;
     }
 
-    if (hints.has("srf_format"))
-      return decodeSRF(raw);
+    if (hints.has("srf_format")) {
+      decodeSRF(raw);
+      return;
+    }
 
     ThrowRDE("No image data found");
   }
@@ -140,7 +140,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
   if (1 == compression) {
     DecodeUncompressed(raw);
-    return mRaw;
+    return;
   }
 
   if (32767 != compression)
@@ -176,7 +176,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   // to detect it this way in the future.
   data = mRootIFD->getIFDsWithTag(TiffTag::MAKE);
   if (data.size() > 1) {
-    for (auto &i : data) {
+    for (auto& i : data) {
       std::string make = i->getEntry(TiffTag::MAKE)->getString();
       /* Check for maker "SONY" without spaces */
       if (make == "SONY")
@@ -199,14 +199,14 @@ RawImage ArwDecoder::decodeRawInternal() {
   std::array<uint32_t, 6> sony_curve = {{0, 0, 0, 0, 0, 4095}};
 
   for (uint32_t i = 0; i < 4; i++)
-    sony_curve[i+1] = (c->getU16(i) >> 2) & 0xfff;
+    sony_curve[i + 1] = (c->getU16(i) >> 2) & 0xfff;
 
   for (uint32_t i = 0; i < 0x4001; i++)
     curve[i] = i;
 
   for (uint32_t i = 0; i < 5; i++)
     for (uint32_t j = sony_curve[i] + 1; j <= sony_curve[i + 1]; j++)
-      curve[j] = curve[j-1] + (1 << i);
+      curve[j] = curve[j - 1] + (1 << i);
 
   RawImageCurveGuard curveHandler(&mRaw, curve, uncorrectedRawValues);
 
@@ -227,8 +227,6 @@ RawImage ArwDecoder::decodeRawInternal() {
     a.decompress(input);
   } else
     DecodeARW2(input, width, height, bitPerPixel);
-
-  return mRaw;
 }
 
 void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) const {
