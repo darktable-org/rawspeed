@@ -172,8 +172,6 @@ public:
   Mutex mBadPixelMutex; // Mutex for 'mBadPixelPositions, must be used if more
                         // than 1 thread is accessing vector
 
-private:
-  uint32_t dataRefCount GUARDED_BY(mymutex) = 0;
 
 protected:
   RawImageType dataType;
@@ -191,7 +189,6 @@ protected:
   iPoint2D mOffset;
   iPoint2D uncropped_dim;
   std::unique_ptr<TableLookUp> table;
-  Mutex mymutex;
 };
 
 class RawImageDataU16 final : public RawImageData {
@@ -235,17 +232,16 @@ private:
    static RawImage create(const iPoint2D& dim,
                           RawImageType type = RawImageType::UINT16,
                           uint32_t componentsPerPixel = 1);
-   RawImageData* operator->() const { return p_; }
-   RawImageData& operator*() const { return *p_; }
+   RawImageData* operator->() const { return p_.operator->(); }
+   RawImageData& operator*() const { return p_.operator*(); }
    explicit RawImage(RawImageData* p); // p must not be NULL
-   ~RawImage();
    RawImage(const RawImage& p);
    RawImage& operator=(const RawImage& p) noexcept;
    RawImage& operator=(RawImage&& p) noexcept;
 
-   RawImageData* get() { return p_; }
+   RawImageData* get() { return p_.get(); }
  private:
-   RawImageData* p_;    // p_ is never NULL
+   std::shared_ptr<RawImageData> p_;    // p_ is never NULL
  };
 
 inline RawImage RawImage::create(RawImageType type)  {

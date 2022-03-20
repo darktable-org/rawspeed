@@ -57,7 +57,6 @@ RawImageData::RawImageData(const iPoint2D& _dim, int _bpc, int _cpp)
 }
 
 RawImageData::~RawImageData() {
-  assert(dataRefCount == 0);
   mOffset = iPoint2D(0, 0);
 
   destroyData();
@@ -282,28 +281,14 @@ void RawImageData::createBadPixelMap()
 }
 
 RawImage::RawImage(RawImageData* p) : p_(p) {
-  MutexLocker guard(&p_->mymutex);
-  ++p_->dataRefCount;
+
 }
 
 RawImage::RawImage(const RawImage& p) : p_(p.p_) {
-  MutexLocker guard(&p_->mymutex);
-  ++p_->dataRefCount;
+
 }
 
-RawImage::~RawImage() {
-  p_->mymutex.Lock();
 
-  --p_->dataRefCount;
-
-  if (p_->dataRefCount == 0) {
-    p_->mymutex.Unlock();
-    delete p_;
-    return;
-  }
-
-  p_->mymutex.Unlock();
-}
 
 void RawImageData::transferBadPixelsToMap()
 {
