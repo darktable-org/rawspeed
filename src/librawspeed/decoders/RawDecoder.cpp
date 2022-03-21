@@ -51,7 +51,7 @@ namespace rawspeed {
 RawDecoder::RawDecoder(const Buffer& file)
     : failOnUnknown(false), interpolateBadPixels(true),
       applyStage1DngOpcodes(true), applyCrop(true), uncorrectedRawValues(false),
-      fujiRotate(true), mFile(file) {mRaw.appendFrame(new RawImageDataU16());}
+      fujiRotate(true), mFile(file) {mRaw.appendFrame(std::make_shared<RawImageDataU16>());}
 
 void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
                                     BitOrder order) const {

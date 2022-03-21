@@ -369,7 +369,7 @@ void Cr2Decoder::sRawInterpolate() {
 
   mRaw.clear();
   //mRaw = std::make_shared<RawImageDataU16>(interpolatedDims, 3);
-  mRaw.appendFrame(new RawImageDataU16(interpolatedDims,3));
+  mRaw.appendFrame(std::make_shared<RawImageDataU16>(interpolatedDims,3));
   mRaw.get(0)->metadata.subsampling = subsampledRaw->metadata.subsampling;
   mRaw.get(0)->isCFA = false;
 

@@ -223,7 +223,7 @@ void RafDecoder::applyCorrections(const Camera* cam) {
 
     iPoint2D final_size(rotatedsize, rotatedsize-1);
     auto rotated =
-        new RawImageDataU16(final_size, 1);
+        std::make_shared<RawImageDataU16>(final_size, 1);
     rotated->clearArea(iRectangle2D(iPoint2D(0,0), rotated->dim));
     rotated->metadata = mRaw.get(0)->metadata;
     rotated->metadata.fujiRotationPos = rotationPos;

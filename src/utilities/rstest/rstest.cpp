@@ -368,8 +368,6 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 
   decoder->decodeRaw();
   decoder->decodeMetaData(metadata);
-  auto raw = decoder->mRaw.get(0).get();
-  // RawImage raw = decoder->decode();
 
   auto time = t();
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
@@ -384,12 +382,18 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
   if (o.create) {
     // write the hash. if force is set, then we are potentially overwriting here
     ofstream f(hashfile);
-    f << img_hash(raw, noSamples);
+    for (auto frame : decoder->mRaw)
+      f << img_hash(frame.get(), noSamples);
     if (o.dump)
-      writeImage(raw, filename);
+      ///TODO modify to handle multiframe images
+      writeImage(decoder->mRaw.get(0).get(), filename);
   } else {
     // do generate the hash string regardless.
-    std::string h = img_hash(raw, noSamples);
+    std::stringstream s;
+    for (auto frame : decoder->mRaw) {
+      std::string h = img_hash(frame.get(), noSamples);
+      s << h;
+    }
 
     // normally, here we would compare the old hash with the new one
     // but if the force is set, and the hash does not exist, do nothing.
@@ -398,11 +402,12 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 
     std::string truth((istreambuf_iterator<char>(hf)),
                       istreambuf_iterator<char>());
-    if (h != truth) {
+    if (s.str() != truth) {
       ofstream f(filename + ".hash.failed");
-      f << h;
+      f << s.str();
       if (o.dump)
-        writeImage(raw, filename + ".failed");
+        ///TODO modify to handle multiframe images
+        writeImage(decoder->mRaw.get(0).get(), filename + ".failed");
       throw RstestHashMismatch("hash/metadata mismatch", time);
     }
   }

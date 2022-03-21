@@ -49,14 +49,17 @@ private:
   bool mFixLjpeg;
   static void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
   static void parseCFA(const TiffIFD* raw, RawImage::frame_ptr_t frame);
-  DngTilingDescription getTilingDescription(const TiffIFD* raw) const;
+  static DngTilingDescription getTilingDescription(const TiffIFD* raw,
+                                                   RawImage::frame_ptr_t frame);
   void decodeData(const TiffIFD* raw, uint32_t sample_format, int compression,
                   int bps, RawImage::frame_ptr_t frame);
   void handleMetadata(const TiffIFD* raw, int compression, int bps,
                       RawImage::frame_ptr_t frame);
-  bool decodeMaskedAreas(const TiffIFD* raw) const;
-  bool decodeBlackLevels(const TiffIFD* raw) const;
-  void setBlack(const TiffIFD* raw) const;
+  static bool decodeMaskedAreas(const TiffIFD* raw,
+                                RawImage::frame_ptr_t frame);
+  static bool decodeBlackLevels(const TiffIFD* raw,
+                                RawImage::frame_ptr_t frame);
+  static void setBlack(const TiffIFD* raw, RawImage::frame_ptr_t frame);
 };
 
 } // namespace rawspeed

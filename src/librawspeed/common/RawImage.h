@@ -237,7 +237,9 @@ public:
   }
   [[nodiscard]] storage_t::size_type numFrames() const { return data.size(); }
   void clear() { data.clear(); }
-  void appendFrame(RawImageData* frame) { data.emplace_back(frame); }
+  void appendFrame(std::shared_ptr<RawImageData> frame) {
+    data.emplace_back(frame);
+  }
 
   const_iterator begin() const { return data.begin(); }
   const_iterator end() const { return data.end(); }
