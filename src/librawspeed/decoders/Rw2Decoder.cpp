@@ -84,33 +84,33 @@ void Rw2Decoder::decodeRawInternal() {
     if (!mFile.isValid(offset))
       ThrowRDE("Invalid image data offset, cannot decode.");
 
-    mRaw->dim = iPoint2D(width, height);
+    mRaw.get(0)->dim = iPoint2D(width, height);
 
     uint32_t size = mFile.getSize() - offset;
 
     UncompressedDecompressor u(
         ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-        mRaw.get());
+        mRaw.get(0).get());
 
     if (size >= width * height * 2) {
       // It's completely unpacked little-endian
-      mRaw->createData();
+      mRaw.get(0)->createData();
       u.decodeRawUnpacked<12, Endianness::little>(width, height);
     } else if (size >= width * height * 3 / 2) {
       // It's a packed format
-      mRaw->createData();
+      mRaw.get(0)->createData();
       u.decode12BitRaw<Endianness::little, false, true>(width, height);
     } else {
       uint32_t section_split_offset = 0;
       PanasonicV4Decompressor p(
-          mRaw.get(),
+          mRaw.get(0).get(),
           ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
           hints.has("zero_is_not_bad"), section_split_offset);
-      mRaw->createData();
+      mRaw.get(0)->createData();
       p.decompress();
     }
   } else {
-    mRaw->dim = iPoint2D(width, height);
+    mRaw.get(0)->dim = iPoint2D(width, height);
 
     const TiffEntry* offsets = raw->getEntry(TiffTag::PANASONIC_STRIPOFFSET);
 
@@ -130,21 +130,21 @@ void Rw2Decoder::decodeRawInternal() {
                 raw->getEntry(TiffTag::PANASONIC_RAWFORMAT)->getU16()) {
     case 4: {
       uint32_t section_split_offset = 0x1FF8;
-      PanasonicV4Decompressor p(mRaw.get(), bs, hints.has("zero_is_not_bad"),
+      PanasonicV4Decompressor p(mRaw.get(0).get(), bs, hints.has("zero_is_not_bad"),
                                 section_split_offset);
-      mRaw->createData();
+      mRaw.get(0)->createData();
       p.decompress();
       return;
     }
     case 5: {
-      PanasonicV5Decompressor v5(mRaw.get(), bs, bitsPerSample);
-      mRaw->createData();
+      PanasonicV5Decompressor v5(mRaw.get(0).get(), bs, bitsPerSample);
+      mRaw.get(0)->createData();
       v5.decompress();
       return;
     }
     case 6: {
-      PanasonicV6Decompressor v6(mRaw.get(), bs);
-      mRaw->createData();
+      PanasonicV6Decompressor v6(mRaw.get(0).get(), bs);
+      mRaw.get(0)->createData();
       v6.decompress();
       return;
     }
@@ -173,19 +173,19 @@ void Rw2Decoder::parseCFA() const {
 
   switch (auto i = CFA->getU16()) {
   case 1:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
+    mRaw.get(0)->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
                      CFAColor::GREEN, CFAColor::BLUE);
     break;
   case 2:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::GREEN, CFAColor::RED,
+    mRaw.get(0)->cfa.setCFA(iPoint2D(2, 2), CFAColor::GREEN, CFAColor::RED,
                      CFAColor::BLUE, CFAColor::GREEN);
     break;
   case 3:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::GREEN, CFAColor::BLUE,
+    mRaw.get(0)->cfa.setCFA(iPoint2D(2, 2), CFAColor::GREEN, CFAColor::BLUE,
                      CFAColor::RED, CFAColor::GREEN);
     break;
   case 4:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::BLUE, CFAColor::GREEN,
+    mRaw.get(0)->cfa.setCFA(iPoint2D(2, 2), CFAColor::BLUE, CFAColor::GREEN,
                      CFAColor::GREEN, CFAColor::RED);
     break;
   default:
@@ -205,7 +205,7 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (this->checkCameraSupported(meta, id, mode)) {
     setMetaData(meta, id, mode, iso);
   } else {
-    mRaw->metadata.mode = mode;
+    mRaw.get(0)->metadata.mode = mode;
     writeLog(DEBUG_PRIO::EXTRA, "Mode not found in DB: %s", mode.c_str());
     setMetaData(meta, id, "", iso);
   }
@@ -247,16 +247,16 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     for(int i = 0; i < 2; i++) {
       for(int j = 0; j < 2; j++) {
         const int k = i + 2 * j;
-        const CFAColor c = mRaw->cfa.getColorAt(i, j);
+        const CFAColor c = mRaw.get(0)->cfa.getColorAt(i, j);
         switch (c) {
         case CFAColor::RED:
-          mRaw->blackLevelSeparate[k] = blackRed;
+          mRaw.get(0)->blackLevelSeparate[k] = blackRed;
           break;
         case CFAColor::GREEN:
-          mRaw->blackLevelSeparate[k] = blackGreen;
+          mRaw.get(0)->blackLevelSeparate[k] = blackGreen;
           break;
         case CFAColor::BLUE:
-          mRaw->blackLevelSeparate[k] = blackBlue;
+          mRaw.get(0)->blackLevelSeparate[k] = blackBlue;
           break;
         default:
           ThrowRDE("Unexpected CFA color %s.",
@@ -270,18 +270,18 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (raw->hasEntry(static_cast<TiffTag>(0x0024)) &&
       raw->hasEntry(static_cast<TiffTag>(0x0025)) &&
       raw->hasEntry(static_cast<TiffTag>(0x0026))) {
-    mRaw->metadata.wbCoeffs[0] = static_cast<float>(
+    mRaw.get(0)->metadata.wbCoeffs[0] = static_cast<float>(
         raw->getEntry(static_cast<TiffTag>(0x0024))->getU16());
-    mRaw->metadata.wbCoeffs[1] = static_cast<float>(
+    mRaw.get(0)->metadata.wbCoeffs[1] = static_cast<float>(
         raw->getEntry(static_cast<TiffTag>(0x0025))->getU16());
-    mRaw->metadata.wbCoeffs[2] = static_cast<float>(
+    mRaw.get(0)->metadata.wbCoeffs[2] = static_cast<float>(
         raw->getEntry(static_cast<TiffTag>(0x0026))->getU16());
   } else if (raw->hasEntry(static_cast<TiffTag>(0x0011)) &&
              raw->hasEntry(static_cast<TiffTag>(0x0012))) {
-    mRaw->metadata.wbCoeffs[0] = static_cast<float>(
+    mRaw.get(0)->metadata.wbCoeffs[0] = static_cast<float>(
         raw->getEntry(static_cast<TiffTag>(0x0011))->getU16());
-    mRaw->metadata.wbCoeffs[1] = 256.0F;
-    mRaw->metadata.wbCoeffs[2] = static_cast<float>(
+    mRaw.get(0)->metadata.wbCoeffs[1] = 256.0F;
+    mRaw.get(0)->metadata.wbCoeffs[2] = static_cast<float>(
         raw->getEntry(static_cast<TiffTag>(0x0012))->getU16());
   }
 }
@@ -289,10 +289,10 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 std::string Rw2Decoder::guessMode() const {
   float ratio = 3.0F / 2.0F; // Default
 
-  if (!mRaw->isAllocated())
+  if (!mRaw.get(0)->isAllocated())
     return "";
 
-  ratio = static_cast<float>(mRaw->dim.x) / static_cast<float>(mRaw->dim.y);
+  ratio = static_cast<float>(mRaw.get(0)->dim.x) / static_cast<float>(mRaw.get(0)->dim.y);
 
   float min_diff = fabs(ratio - 16.0F / 9.0F);
   std::string closest_match = "16:9";

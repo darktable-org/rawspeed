@@ -207,17 +207,17 @@ void IiqDecoder::decodeRawInternal() {
   std::vector<PhaseOneStrip> strips(
       computeSripes(raw_data, std::move(offsets), height));
 
-  mRaw->dim = iPoint2D(width, height);
+  mRaw.get(0)->dim = iPoint2D(width, height);
 
-  PhaseOneDecompressor p(mRaw.get(), std::move(strips));
-  mRaw->createData();
+  PhaseOneDecompressor p(mRaw.get(0).get(), std::move(strips));
+  mRaw.get(0)->createData();
   p.decompress();
 
   if (correction_meta_data.getSize() != 0 && iiq)
     CorrectPhaseOneC(correction_meta_data, split_row, split_col);
 
   for (int i = 0; i < 3; i++)
-    mRaw->metadata.wbCoeffs[i] = wb.getFloat();
+    mRaw.get(0)->metadata.wbCoeffs[i] = wb.getFloat();
 }
 
 void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32_t split_row,
@@ -311,7 +311,7 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
 
   for (int quadRow = 0; quadRow < 2; quadRow++) {
     for (int quadCol = 0; quadCol < 2; quadCol++) {
-      auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get());
+      auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get(0).get());
       assert(rawU16);
       const Array2DRef<uint16_t> img(rawU16->getU16DataAsUncroppedArray2DRef());
 
@@ -345,18 +345,18 @@ void IiqDecoder::checkSupportInternal(const CameraMetaData* meta) {
   checkCameraSupported(meta, mRootIFD->getID(), "");
 
   auto id = mRootIFD->getID();
-  const Camera* cam = meta->getCamera(id.make, id.model, mRaw->metadata.mode);
+  const Camera* cam = meta->getCamera(id.make, id.model, mRaw.get(0)->metadata.mode);
   if (!cam)
     ThrowRDE("Couldn't find camera %s %s", id.make.c_str(), id.model.c_str());
 
-  mRaw->cfa = cam->cfa;
+  mRaw.get(0)->cfa = cam->cfa;
 }
 
 void IiqDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, "", 0);
 
   if (black_level)
-    mRaw->blackLevel = black_level;
+    mRaw.get(0)->blackLevel = black_level;
 }
 
 void IiqDecoder::correctSensorDefects(ByteStream data) const {
@@ -366,7 +366,7 @@ void IiqDecoder::correctSensorDefects(ByteStream data) const {
     const uint16_t type = data.getU16();
     data.skipBytes(2); // Ignore unknown/unused bits.
 
-    if (col >= mRaw->dim.x) // Value for col is outside the raw image.
+    if (col >= mRaw.get(0)->dim.x) // Value for col is outside the raw image.
       continue;
     switch (type) {
     case 131: // bad column
@@ -383,18 +383,18 @@ void IiqDecoder::correctSensorDefects(ByteStream data) const {
 }
 
 void IiqDecoder::handleBadPixel(const uint16_t col, const uint16_t row) const {
-  MutexLocker guard(&mRaw->mBadPixelMutex);
-  mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
+  MutexLocker guard(&mRaw.get(0)->mBadPixelMutex);
+  mRaw.get(0)->mBadPixelPositions.insert(mRaw.get(0)->mBadPixelPositions.end(),
                                   (static_cast<uint32_t>(row) << 16) + col);
 }
 
 void IiqDecoder::correctBadColumn(const uint16_t col) const {
-  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get());
+  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get(0).get());
   assert(rawU16);
   const Array2DRef<uint16_t> img(rawU16->getU16DataAsUncroppedArray2DRef());
 
-  for (int row = 2; row < mRaw->dim.y - 2; row++) {
-    if (mRaw->cfa.getColorAt(col, row) == CFAColor::GREEN) {
+  for (int row = 2; row < mRaw.get(0)->dim.y - 2; row++) {
+    if (mRaw.get(0)->cfa.getColorAt(col, row) == CFAColor::GREEN) {
       /* Do green pixels. Let's pretend we are in "G" pixel, in the middle:
        *   G=G
        *   BGB

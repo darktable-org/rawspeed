@@ -74,7 +74,7 @@ void CrwDecoder::decodeRawInternal() {
   assert(sensorInfo != nullptr);
   uint32_t width = sensorInfo->getU16(1);
   uint32_t height = sensorInfo->getU16(2);
-  mRaw->dim = iPoint2D(width, height);
+  mRaw.get(0)->dim = iPoint2D(width, height);
 
   const CiffEntry* decTable =
       mRootIFD->getEntryRecursive(CiffTag::DECODERTABLE);
@@ -86,8 +86,8 @@ void CrwDecoder::decodeRawInternal() {
 
   bool lowbits = !hints.has("no_decompressed_lowbits");
 
-  CrwDecompressor c(mRaw.get(), dec_table, lowbits, rawData->getData());
-  mRaw->createData();
+  CrwDecompressor c(mRaw.get(0).get(), dec_table, lowbits, rawData->getData());
+  mRaw.get(0)->createData();
   c.decompress();
 }
 
@@ -124,7 +124,7 @@ float __attribute__((const)) CrwDecoder::canonEv(const int64_t in) {
 
 void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
-  mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
+  mRaw.get(0)->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
                    CFAColor::GREEN, CFAColor::BLUE);
   vector<const CiffIFD*> data = mRootIFD->getIFDsWithTag(CiffTag::MAKEMODEL);
   if (data.empty())
@@ -162,11 +162,11 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
             ThrowRDE("WB coefficient is zero!");
         }
 
-        mRaw->metadata.wbCoeffs[0] = static_cast<float>(1024.0 / wbMuls[0]);
-        mRaw->metadata.wbCoeffs[1] =
+        mRaw.get(0)->metadata.wbCoeffs[0] = static_cast<float>(1024.0 / wbMuls[0]);
+        mRaw.get(0)->metadata.wbCoeffs[1] =
             static_cast<float>((1024.0 / wbMuls[1]) + (1024.0 / wbMuls[2])) /
             2.0F;
-        mRaw->metadata.wbCoeffs[2] = static_cast<float>(1024.0 / wbMuls[3]);
+        mRaw.get(0)->metadata.wbCoeffs[2] = static_cast<float>(1024.0 / wbMuls[3]);
       } else if (wb->type == CiffDataType::BYTE &&
                  wb->count > 768) { // Other G series and S series cameras
         // correct offset for most cameras
@@ -177,11 +177,11 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           key[0] = key[1] = 0;
 
         offset /= 2;
-        mRaw->metadata.wbCoeffs[0] =
+        mRaw.get(0)->metadata.wbCoeffs[0] =
             static_cast<float>(wb->getU16(offset + 1) ^ key[1]);
-        mRaw->metadata.wbCoeffs[1] =
+        mRaw.get(0)->metadata.wbCoeffs[1] =
             static_cast<float>(wb->getU16(offset + 0) ^ key[0]);
-        mRaw->metadata.wbCoeffs[2] =
+        mRaw.get(0)->metadata.wbCoeffs[2] =
             static_cast<float>(wb->getU16(offset + 2) ^ key[0]);
       }
     }
@@ -190,17 +190,17 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           mRootIFD->getEntryRecursive(static_cast<CiffTag>(0x102c));
       if (entry->type == CiffDataType::SHORT && entry->getU16() > 512) {
         // G1/Pro90 CYGM pattern
-        mRaw->metadata.wbCoeffs[0] = static_cast<float>(entry->getU16(62));
-        mRaw->metadata.wbCoeffs[1] = static_cast<float>(entry->getU16(63));
-        mRaw->metadata.wbCoeffs[2] = static_cast<float>(entry->getU16(60));
-        mRaw->metadata.wbCoeffs[3] = static_cast<float>(entry->getU16(61));
+        mRaw.get(0)->metadata.wbCoeffs[0] = static_cast<float>(entry->getU16(62));
+        mRaw.get(0)->metadata.wbCoeffs[1] = static_cast<float>(entry->getU16(63));
+        mRaw.get(0)->metadata.wbCoeffs[2] = static_cast<float>(entry->getU16(60));
+        mRaw.get(0)->metadata.wbCoeffs[3] = static_cast<float>(entry->getU16(61));
       } else if (entry->type == CiffDataType::SHORT && entry->getU16() != 276) {
         /* G2, S30, S40 */
-        mRaw->metadata.wbCoeffs[0] = static_cast<float>(entry->getU16(51));
-        mRaw->metadata.wbCoeffs[1] = (static_cast<float>(entry->getU16(50)) +
+        mRaw.get(0)->metadata.wbCoeffs[0] = static_cast<float>(entry->getU16(51));
+        mRaw.get(0)->metadata.wbCoeffs[1] = (static_cast<float>(entry->getU16(50)) +
                                       static_cast<float>(entry->getU16(53))) /
                                      2.0F;
-        mRaw->metadata.wbCoeffs[2] = static_cast<float>(entry->getU16(52));
+        mRaw.get(0)->metadata.wbCoeffs[2] = static_cast<float>(entry->getU16(52));
       }
     }
     if (mRootIFD->hasEntryRecursive(CiffTag::SHOTINFO) &&
@@ -214,12 +214,12 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       if (wb_index > 9)
         ThrowRDE("Invalid white balance index");
       int wb_offset = 1 + ("0134567028"[wb_index]-'0') * 4;
-      mRaw->metadata.wbCoeffs[0] = wb_data->getU16(wb_offset + 0);
-      mRaw->metadata.wbCoeffs[1] = wb_data->getU16(wb_offset + 1);
-      mRaw->metadata.wbCoeffs[2] = wb_data->getU16(wb_offset + 3);
+      mRaw.get(0)->metadata.wbCoeffs[0] = wb_data->getU16(wb_offset + 0);
+      mRaw.get(0)->metadata.wbCoeffs[1] = wb_data->getU16(wb_offset + 1);
+      mRaw.get(0)->metadata.wbCoeffs[2] = wb_data->getU16(wb_offset + 3);
     }
   } catch (const RawspeedException& e) {
-    mRaw->setError(e.what());
+    mRaw.get(0)->setError(e.what());
     // We caught an exception reading WB, just ignore it
   }
 

@@ -41,8 +41,6 @@
 
 namespace rawspeed {
 
-class RawImage;
-
 class RawImageData;
 
 enum class RawImageType { UINT16, F32 };
@@ -224,6 +222,27 @@ private:
   void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
   [[noreturn]] void doLookup(int start_y, int end_y) override;
   friend class RawImage;
+};
+
+class RawImageAbstract
+{
+
+};
+
+class RawImage {
+  using storage_t = std::vector<std::shared_ptr<RawImageData>>;
+
+public:
+  [[nodiscard]] std::shared_ptr<RawImageData>
+  get(storage_t::size_type pos) const {
+    return data.at(pos);
+  }
+  [[nodiscard]] storage_t::size_type numFrames() const { return data.size(); }
+  void clear() { data.clear(); }
+  void appendFrame(RawImageData* frame) { data.emplace_back(frame); }
+
+private:
+  std::vector<std::shared_ptr<RawImageData>> data;
 };
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,

@@ -49,9 +49,9 @@ using std::vector;
 namespace rawspeed {
 
 RawDecoder::RawDecoder(const Buffer& file)
-    : mRaw(new RawImageDataU16()), failOnUnknown(false), interpolateBadPixels(true),
+    : failOnUnknown(false), interpolateBadPixels(true),
       applyStage1DngOpcodes(true), applyCrop(true), uncorrectedRawValues(false),
-      fujiRotate(true), mFile(file) {}
+      fujiRotate(true), mFile(file) {mRaw.appendFrame(new RawImageDataU16());}
 
 void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
                                     BitOrder order) const {
@@ -65,7 +65,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
   if (width == 0 || height == 0 || width > 5632 || height > 3720)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-  mRaw->dim = iPoint2D(width, height);
+  mRaw.get(0)->dim = iPoint2D(width, height);
 
   if (counts->count != offsets->count) {
     ThrowRDE("Byte count number does not match strip size: "
@@ -73,10 +73,10 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
              counts->count, offsets->count);
   }
 
-  if (yPerSlice == 0 || yPerSlice > static_cast<uint32_t>(mRaw->dim.y) ||
-      roundUpDivision(mRaw->dim.y, yPerSlice) != counts->count) {
+  if (yPerSlice == 0 || yPerSlice > static_cast<uint32_t>(mRaw.get(0)->dim.y) ||
+      roundUpDivision(mRaw.get(0)->dim.y, yPerSlice) != counts->count) {
     ThrowRDE("Invalid y per slice %u or strip count %u (height = %u)",
-             yPerSlice, counts->count, mRaw->dim.y);
+             yPerSlice, counts->count, mRaw.get(0)->dim.y);
   }
 
   switch (bitPerPixel) {
@@ -118,17 +118,17 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
   assert(height <= offY);
   assert(slices.size() == counts->count);
 
-  mRaw->createData();
+  mRaw.get(0)->createData();
 
   // Default white level is (2 ** BitsPerSample) - 1
-  mRaw->whitePoint = (1UL << bitPerPixel) - 1UL;
+  mRaw.get(0)->whitePoint = (1UL << bitPerPixel) - 1UL;
 
   offY = 0;
   for (const RawSlice& slice : slices) {
     UncompressedDecompressor u(
         ByteStream(DataBuffer(mFile.getSubView(slice.offset, slice.count),
                               Endianness::little)),
-        mRaw.get());
+        mRaw.get(0).get());
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
     bitPerPixel = (static_cast<uint64_t>(slice.count) * 8U) / (slice.h * width);
@@ -160,8 +160,8 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
                                       const std::string& make,
                                       const std::string& model,
                                       const std::string& mode) {
-  mRaw->metadata.make = make;
-  mRaw->metadata.model = model;
+  mRaw.get(0)->metadata.make = make;
+  mRaw.get(0)->metadata.model = model;
   const Camera* cam = meta->getCamera(make, model, mode);
   if (!cam) {
     askForSamples(meta, make, model, mode);
@@ -198,7 +198,7 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
 void RawDecoder::setMetaData(const CameraMetaData* meta,
                              const std::string& make, const std::string& model,
                              const std::string& mode, int iso_speed) {
-  mRaw->metadata.isoSpeed = iso_speed;
+  mRaw.get(0)->metadata.isoSpeed = iso_speed;
   const Camera* cam = meta->getCamera(make, model, mode);
   if (!cam) {
     askForSamples(meta, make, model, mode);
@@ -212,45 +212,45 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
   // Only override CFA with the data from cameras.xml if it actually contained
   // the CFA.
   if (cam->cfa.getSize().area() > 0)
-    mRaw->cfa = cam->cfa;
+    mRaw.get(0)->cfa = cam->cfa;
 
   if (!cam->color_matrix.empty())
-    mRaw->metadata.colorMatrix = cam->color_matrix;
+    mRaw.get(0)->metadata.colorMatrix = cam->color_matrix;
 
-  mRaw->metadata.canonical_make = cam->canonical_make;
-  mRaw->metadata.canonical_model = cam->canonical_model;
-  mRaw->metadata.canonical_alias = cam->canonical_alias;
-  mRaw->metadata.canonical_id = cam->canonical_id;
-  mRaw->metadata.make = make;
-  mRaw->metadata.model = model;
-  mRaw->metadata.mode = mode;
+  mRaw.get(0)->metadata.canonical_make = cam->canonical_make;
+  mRaw.get(0)->metadata.canonical_model = cam->canonical_model;
+  mRaw.get(0)->metadata.canonical_alias = cam->canonical_alias;
+  mRaw.get(0)->metadata.canonical_id = cam->canonical_id;
+  mRaw.get(0)->metadata.make = make;
+  mRaw.get(0)->metadata.model = model;
+  mRaw.get(0)->metadata.mode = mode;
 
   if (applyCrop) {
     iPoint2D new_size = cam->cropSize;
 
     // If crop size is negative, use relative cropping
     if (new_size.x <= 0)
-      new_size.x = mRaw->dim.x - cam->cropPos.x + new_size.x;
+      new_size.x = mRaw.get(0)->dim.x - cam->cropPos.x + new_size.x;
 
     if (new_size.y <= 0)
-      new_size.y = mRaw->dim.y - cam->cropPos.y + new_size.y;
+      new_size.y = mRaw.get(0)->dim.y - cam->cropPos.y + new_size.y;
 
-    mRaw->subFrame(iRectangle2D(cam->cropPos, new_size));
+    mRaw.get(0)->subFrame(iRectangle2D(cam->cropPos, new_size));
   }
 
   const CameraSensorInfo *sensor = cam->getSensorInfo(iso_speed);
-  mRaw->blackLevel = sensor->mBlackLevel;
-  mRaw->whitePoint = sensor->mWhiteLevel;
-  mRaw->blackAreas = cam->blackAreas;
-  if (mRaw->blackAreas.empty() && !sensor->mBlackLevelSeparate.empty()) {
-    auto cfaArea = mRaw->cfa.getSize().area();
-    if (mRaw->isCFA && cfaArea <= sensor->mBlackLevelSeparate.size()) {
+  mRaw.get(0)->blackLevel = sensor->mBlackLevel;
+  mRaw.get(0)->whitePoint = sensor->mWhiteLevel;
+  mRaw.get(0)->blackAreas = cam->blackAreas;
+  if (mRaw.get(0)->blackAreas.empty() && !sensor->mBlackLevelSeparate.empty()) {
+    auto cfaArea = mRaw.get(0)->cfa.getSize().area();
+    if (mRaw.get(0)->isCFA && cfaArea <= sensor->mBlackLevelSeparate.size()) {
       for (auto i = 0UL; i < cfaArea; i++) {
-        mRaw->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
+        mRaw.get(0)->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
       }
-    } else if (!mRaw->isCFA && mRaw->getCpp() <= sensor->mBlackLevelSeparate.size()) {
-      for (uint32_t i = 0; i < mRaw->getCpp(); i++) {
-        mRaw->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
+    } else if (!mRaw.get(0)->isCFA && mRaw.get(0)->getCpp() <= sensor->mBlackLevelSeparate.size()) {
+      for (uint32_t i = 0; i < mRaw.get(0)->getCpp(); i++) {
+        mRaw.get(0)->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
       }
     }
   }
@@ -263,11 +263,11 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
   if (!cfa_black.empty()) {
     vector<std::string> v = splitString(cfa_black, ',');
     if (v.size() != 4) {
-      mRaw->setError("Expected 4 values '10,20,30,20' as values for "
+      mRaw.get(0)->setError("Expected 4 values '10,20,30,20' as values for "
                      "override_cfa_black hint.");
     } else {
       for (int i = 0; i < 4; i++) {
-        mRaw->blackLevelSeparate[i] = stoi(v[i]);
+        mRaw.get(0)->blackLevelSeparate[i] = stoi(v[i]);
       }
     }
   }
@@ -276,13 +276,13 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
 void RawDecoder::decodeRaw() {
   try {
     decodeRawInternal();
-    mRaw->checkMemIsInitialized();
+    mRaw.get(0)->checkMemIsInitialized();
 
-    mRaw->metadata.pixelAspectRatio =
-        hints.get("pixel_aspect_ratio", mRaw->metadata.pixelAspectRatio);
+    mRaw.get(0)->metadata.pixelAspectRatio =
+        hints.get("pixel_aspect_ratio", mRaw.get(0)->metadata.pixelAspectRatio);
     if (interpolateBadPixels) {
-      mRaw->fixBadPixels();
-      mRaw->checkMemIsInitialized();
+      mRaw.get(0)->fixBadPixels();
+      mRaw.get(0)->checkMemIsInitialized();
     }
 
 

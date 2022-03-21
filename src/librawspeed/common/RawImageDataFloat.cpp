@@ -141,7 +141,7 @@ RawImageDataFloat::RawImageDataFloat() {
       calculateBlackAreas();
 
     startWorker(RawImageWorker::RawImageWorkerTask::SCALE_VALUES, true);
-}
+  }
 
 #if 0 // def WITH_SSE2
 

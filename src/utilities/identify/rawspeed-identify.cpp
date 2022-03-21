@@ -178,7 +178,7 @@ int main(int argc, char* argv[]) { // NOLINT
 
     d->applyCrop = false;
     d->failOnUnknown = true;
-    auto raw = d->mRaw;
+    auto raw = d->mRaw.get(0);
 
     d->decodeMetaData(meta.get());
 
@@ -194,7 +194,7 @@ int main(int argc, char* argv[]) { // NOLINT
     d->checkSupport(meta.get());
     d->decodeRaw();
     d->decodeMetaData(meta.get());
-    raw = d->mRaw;
+    raw = d->mRaw.get(0);
 
     const auto errors = raw->getErrors();
     for (const auto& error : errors)

@@ -368,7 +368,7 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 
   decoder->decodeRaw();
   decoder->decodeMetaData(metadata);
-  auto raw = decoder->mRaw.get();
+  auto raw = decoder->mRaw.get(0).get();
   // RawImage raw = decoder->decode();
 
   auto time = t();

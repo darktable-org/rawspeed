@@ -49,8 +49,8 @@ void SimpleTiffDecoder::prepareForRawDecoding() {
 
   checkImageDimensions();
 
-  mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
+  mRaw.get(0)->dim = iPoint2D(width, height);
+  mRaw.get(0)->createData();
 }
 
 } // namespace rawspeed

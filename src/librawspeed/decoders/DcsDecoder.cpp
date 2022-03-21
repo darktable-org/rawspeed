@@ -63,11 +63,11 @@ void DcsDecoder::decodeRawInternal() {
   assert(linearization != nullptr);
   auto table = linearization->getU16Array(256);
 
-  RawImageCurveGuard curveHandler(mRaw.get(), table, uncorrectedRawValues);
+  RawImageCurveGuard curveHandler(mRaw.get(0).get(), table, uncorrectedRawValues);
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(mFile.getSubView(off, c2), Endianness::little)),
-      mRaw.get());
+      mRaw.get(0).get());
 
   if (uncorrectedRawValues)
     u.decode8BitRaw<true>(width, height);

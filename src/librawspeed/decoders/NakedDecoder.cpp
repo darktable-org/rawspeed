@@ -88,15 +88,15 @@ void NakedDecoder::parseHints() {
 void NakedDecoder::decodeRawInternal() {
   parseHints();
 
-  mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
+  mRaw.get(0)->dim = iPoint2D(width, height);
+  mRaw.get(0)->createData();
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-      mRaw.get());
+      mRaw.get(0).get());
 
   iPoint2D pos(0, 0);
-  u.readUncompressedRaw(mRaw->dim, pos, width * bits / 8, bits, bo);
+  u.readUncompressedRaw(mRaw.get(0)->dim, pos, width * bits / 8, bits, bo);
 }
 
 void NakedDecoder::checkSupportInternal(const CameraMetaData* meta) {

@@ -80,7 +80,7 @@ void SrwDecoder::decodeRawInternal() {
 
   const uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
   const uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
-  mRaw->dim = iPoint2D(width, height);
+  mRaw.get(0)->dim = iPoint2D(width, height);
 
   if (32770 == compression) {
     const TiffEntry* sliceOffsets = raw->getEntry(static_cast<TiffTag>(40976));
@@ -96,9 +96,9 @@ void SrwDecoder::decodeRawInternal() {
     Buffer rbuf(mFile.getSubView(offset, count));
     ByteStream bsr(DataBuffer(rbuf, Endianness::little));
 
-    SamsungV0Decompressor s0(mRaw.get(), bso, bsr);
+    SamsungV0Decompressor s0(mRaw.get(0).get(), bso, bsr);
 
-    mRaw->createData();
+    mRaw.get(0)->createData();
 
     s0.decompress();
 
@@ -110,9 +110,9 @@ void SrwDecoder::decodeRawInternal() {
     const ByteStream bs(
         DataBuffer(mFile.getSubView(offset, count), Endianness::little));
 
-    SamsungV1Decompressor s1(mRaw.get(), bs, bits);
+    SamsungV1Decompressor s1(mRaw.get(0).get(), bs, bits);
 
-    mRaw->createData();
+    mRaw.get(0)->createData();
 
     s1.decompress();
 
@@ -124,9 +124,9 @@ void SrwDecoder::decodeRawInternal() {
     const ByteStream bs(
         DataBuffer(mFile.getSubView(offset, count), Endianness::little));
 
-    SamsungV2Decompressor s2(mRaw.get(), bs, bits);
+    SamsungV2Decompressor s2(mRaw.get(0).get(), bs, bits);
 
-    mRaw->createData();
+    mRaw.get(0)->createData();
 
     s2.decompress();
 
@@ -175,9 +175,9 @@ void SrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const TiffEntry* wb_black =
         mRootIFD->getEntryRecursive(TiffTag::SAMSUNG_WB_RGGBLEVELSBLACK);
     if (wb_levels->count == 4 && wb_black->count == 4) {
-      mRaw->metadata.wbCoeffs[0] = wb_levels->getFloat(0) - wb_black->getFloat(0);
-      mRaw->metadata.wbCoeffs[1] = wb_levels->getFloat(1) - wb_black->getFloat(1);
-      mRaw->metadata.wbCoeffs[2] = wb_levels->getFloat(3) - wb_black->getFloat(3);
+      mRaw.get(0)->metadata.wbCoeffs[0] = wb_levels->getFloat(0) - wb_black->getFloat(0);
+      mRaw.get(0)->metadata.wbCoeffs[1] = wb_levels->getFloat(1) - wb_black->getFloat(1);
+      mRaw.get(0)->metadata.wbCoeffs[2] = wb_levels->getFloat(3) - wb_black->getFloat(3);
     }
   }
 }

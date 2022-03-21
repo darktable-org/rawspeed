@@ -97,13 +97,13 @@ void RafDecoder::decodeRawInternal() {
   input = input.getSubStream(offsets->getU32(), counts->getU32());
 
   if (isCompressed()) {
-    mRaw->metadata.mode = "compressed";
+    mRaw.get(0)->metadata.mode = "compressed";
 
-    mRaw->dim = iPoint2D(width, height);
+    mRaw.get(0)->dim = iPoint2D(width, height);
 
-    FujiDecompressor f(mRaw.get(), input);
+    FujiDecompressor f(mRaw.get(0).get(), input);
 
-    mRaw->createData();
+    mRaw.get(0)->createData();
 
     f.decompress();
 
@@ -148,10 +148,10 @@ void RafDecoder::decodeRawInternal() {
   double_width = hints.has("double_width_unpacked");
   const uint32_t real_width = double_width ? 2U * width : width;
 
-  mRaw->dim = iPoint2D(real_width, height);
-  mRaw->createData();
+  mRaw.get(0)->dim = iPoint2D(real_width, height);
+  mRaw.get(0)->createData();
 
-  UncompressedDecompressor u(input, mRaw.get());
+  UncompressedDecompressor u(input, mRaw.get(0).get());
 
   if (double_width) {
     u.decodeRawUnpacked<16, Endianness::little>(width * 2, height);
@@ -162,10 +162,10 @@ void RafDecoder::decodeRawInternal() {
   } else {
     iPoint2D pos(0, 0);
     if (hints.has("jpeg32_bitorder")) {
-      u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
+      u.readUncompressedRaw(mRaw.get(0)->dim, pos, width * bps / 8, bps,
                             BitOrder::MSB32);
     } else {
-      u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
+      u.readUncompressedRaw(mRaw.get(0)->dim, pos, width * bps / 8, bps,
                             BitOrder::LSB);
     }
   }
@@ -176,19 +176,19 @@ void RafDecoder::checkSupportInternal(const CameraMetaData* meta) {
     ThrowRDE("Unknown camera. Will not guess.");
 
   if (isCompressed()) {
-    mRaw->metadata.mode = "compressed";
+    mRaw.get(0)->metadata.mode = "compressed";
 
     auto id = mRootIFD->getID();
-    const Camera* cam = meta->getCamera(id.make, id.model, mRaw->metadata.mode);
+    const Camera* cam = meta->getCamera(id.make, id.model, mRaw.get(0)->metadata.mode);
     if (!cam)
       ThrowRDE("Couldn't find camera %s %s", id.make.c_str(), id.model.c_str());
 
-    mRaw->cfa = cam->cfa;
+    mRaw.get(0)->cfa = cam->cfa;
   }
 }
 
 void RafDecoder::applyCorrections(const Camera* cam) {
-  iPoint2D new_size(mRaw->dim);
+  iPoint2D new_size(mRaw.get(0)->dim);
   iPoint2D crop_offset(0, 0);
 
   if (applyCrop) {
@@ -197,11 +197,11 @@ void RafDecoder::applyCorrections(const Camera* cam) {
     bool double_width = hints.has("double_width_unpacked");
     // If crop size is negative, use relative cropping
     if (new_size.x <= 0)
-      new_size.x = mRaw->dim.x / (double_width ? 2 : 1) - cam->cropPos.x + new_size.x;
+      new_size.x = mRaw.get(0)->dim.x / (double_width ? 2 : 1) - cam->cropPos.x + new_size.x;
     else
       new_size.x /= (double_width ? 2 : 1);
     if (new_size.y <= 0)
-      new_size.y = mRaw->dim.y - cam->cropPos.y + new_size.y;
+      new_size.y = mRaw.get(0)->dim.y - cam->cropPos.y + new_size.y;
   }
 
   bool rotate = hints.has("fuji_rotate");
@@ -222,18 +222,16 @@ void RafDecoder::applyCorrections(const Camera* cam) {
     }
 
     iPoint2D final_size(rotatedsize, rotatedsize-1);
-    std::shared_ptr<RawImageData> rotated =
-        std::make_shared<RawImageDataU16>(final_size, 1);
+    auto rotated =
+        new RawImageDataU16(final_size, 1);
     rotated->clearArea(iRectangle2D(iPoint2D(0,0), rotated->dim));
-    rotated->metadata = mRaw->metadata;
+    rotated->metadata = mRaw.get(0)->metadata;
     rotated->metadata.fujiRotationPos = rotationPos;
 
-    auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get());
+    auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get(0).get());
     assert(rawU16);
     auto srcImg = rawU16->getU16DataAsUncroppedArray2DRef();
-    auto rotatedU16 = dynamic_cast<RawImageDataU16*>(rotated.get());
-    assert(rotatedU16);
-    auto dstImg = rotatedU16->getU16DataAsUncroppedArray2DRef();
+    auto dstImg = rotated->getU16DataAsUncroppedArray2DRef();
 
     for (int y = 0; y < new_size.y; y++) {
       for (int x = 0; x < new_size.x; x++) {
@@ -252,9 +250,10 @@ void RafDecoder::applyCorrections(const Camera* cam) {
           ThrowRDE("Trying to write out of bounds");
       }
     }
-    mRaw = rotated;
+    mRaw.clear();
+    mRaw.appendFrame(rotated);
   } else if (applyCrop) {
-    mRaw->subFrame(iRectangle2D(crop_offset, new_size));
+    mRaw.get(0)->subFrame(iRectangle2D(crop_offset, new_size));
   }
 }
 
@@ -262,12 +261,12 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
   if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
     iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
-  mRaw->metadata.isoSpeed = iso;
+  mRaw.get(0)->metadata.isoSpeed = iso;
 
   // This is where we'd normally call setMetaData but since we may still need
   // to rotate the image for SuperCCD cameras we do everything ourselves
   auto id = mRootIFD->getID();
-  const Camera* cam = meta->getCamera(id.make, id.model, mRaw->metadata.mode);
+  const Camera* cam = meta->getCamera(id.make, id.model, mRaw.get(0)->metadata.mode);
   if (!cam)
     ThrowRDE("Couldn't find camera");
 
@@ -276,7 +275,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   applyCorrections(cam);
 
   const CameraSensorInfo *sensor = cam->getSensorInfo(iso);
-  mRaw->blackLevel = sensor->mBlackLevel;
+  mRaw.get(0)->blackLevel = sensor->mBlackLevel;
 
   // at least the (bayer sensor) X100 comes with a tag like this:
   if (mRootIFD->hasEntryRecursive(TiffTag::FUJI_BLACKLEVEL)) {
@@ -285,48 +284,48 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     if (sep_black->count == 4)
     {
       for(int k=0;k<4;k++)
-        mRaw->blackLevelSeparate[k] = sep_black->getU32(k);
+        mRaw.get(0)->blackLevelSeparate[k] = sep_black->getU32(k);
     } else if (sep_black->count == 36) {
-      for (int& k : mRaw->blackLevelSeparate)
+      for (int& k : mRaw.get(0)->blackLevelSeparate)
         k = 0;
 
       for (int y = 0; y < 6; y++) {
         for (int x = 0; x < 6; x++)
-          mRaw->blackLevelSeparate[2 * (y % 2) + (x % 2)] +=
+          mRaw.get(0)->blackLevelSeparate[2 * (y % 2) + (x % 2)] +=
               sep_black->getU32(6 * y + x);
       }
 
-      for (int& k : mRaw->blackLevelSeparate)
+      for (int& k : mRaw.get(0)->blackLevelSeparate)
         k /= 9;
     }
   }
 
-  mRaw->whitePoint = sensor->mWhiteLevel;
-  mRaw->blackAreas = cam->blackAreas;
-  mRaw->cfa = cam->cfa;
+  mRaw.get(0)->whitePoint = sensor->mWhiteLevel;
+  mRaw.get(0)->blackAreas = cam->blackAreas;
+  mRaw.get(0)->cfa = cam->cfa;
   if (!cam->color_matrix.empty())
-    mRaw->metadata.colorMatrix = cam->color_matrix;
-  mRaw->metadata.canonical_make = cam->canonical_make;
-  mRaw->metadata.canonical_model = cam->canonical_model;
-  mRaw->metadata.canonical_alias = cam->canonical_alias;
-  mRaw->metadata.canonical_id = cam->canonical_id;
-  mRaw->metadata.make = id.make;
-  mRaw->metadata.model = id.model;
+    mRaw.get(0)->metadata.colorMatrix = cam->color_matrix;
+  mRaw.get(0)->metadata.canonical_make = cam->canonical_make;
+  mRaw.get(0)->metadata.canonical_model = cam->canonical_model;
+  mRaw.get(0)->metadata.canonical_alias = cam->canonical_alias;
+  mRaw.get(0)->metadata.canonical_id = cam->canonical_id;
+  mRaw.get(0)->metadata.make = id.make;
+  mRaw.get(0)->metadata.model = id.model;
 
   if (mRootIFD->hasEntryRecursive(TiffTag::FUJI_WB_GRBLEVELS)) {
     const TiffEntry* wb =
         mRootIFD->getEntryRecursive(TiffTag::FUJI_WB_GRBLEVELS);
     if (wb->count == 3) {
-      mRaw->metadata.wbCoeffs[0] = wb->getFloat(1);
-      mRaw->metadata.wbCoeffs[1] = wb->getFloat(0);
-      mRaw->metadata.wbCoeffs[2] = wb->getFloat(2);
+      mRaw.get(0)->metadata.wbCoeffs[0] = wb->getFloat(1);
+      mRaw.get(0)->metadata.wbCoeffs[1] = wb->getFloat(0);
+      mRaw.get(0)->metadata.wbCoeffs[2] = wb->getFloat(2);
     }
   } else if (mRootIFD->hasEntryRecursive(TiffTag::FUJIOLDWB)) {
     const TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::FUJIOLDWB);
     if (wb->count == 8) {
-      mRaw->metadata.wbCoeffs[0] = wb->getFloat(1);
-      mRaw->metadata.wbCoeffs[1] = wb->getFloat(0);
-      mRaw->metadata.wbCoeffs[2] = wb->getFloat(3);
+      mRaw.get(0)->metadata.wbCoeffs[0] = wb->getFloat(1);
+      mRaw.get(0)->metadata.wbCoeffs[1] = wb->getFloat(0);
+      mRaw.get(0)->metadata.wbCoeffs[2] = wb->getFloat(3);
     }
   }
 }

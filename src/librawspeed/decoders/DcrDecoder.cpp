@@ -82,7 +82,7 @@ void DcrDecoder::decodeRawInternal() {
   assert(linearization != nullptr);
   auto linTable = linearization->getU16Array(linearization->count);
 
-  RawImageCurveGuard curveHandler(mRaw.get(), linTable, uncorrectedRawValues);
+  RawImageCurveGuard curveHandler(mRaw.get(0).get(), linTable, uncorrectedRawValues);
 
   // FIXME: dcraw does all sorts of crazy things besides this to fetch
   //        WB from what appear to be presets and calculate it in weird ways
@@ -95,7 +95,7 @@ void DcrDecoder::decodeRawInternal() {
       const auto mul = blob->getU16(20 + i);
       if (0 == mul)
         ThrowRDE("WB coefficient is zero!");
-      mRaw->metadata.wbCoeffs[i] = 2048.0F / mul;
+      mRaw.get(0)->metadata.wbCoeffs[i] = 2048.0F / mul;
     }
   }
 
@@ -110,7 +110,7 @@ void DcrDecoder::decodeRawInternal() {
     }
   }();
 
-  KodakDecompressor k(mRaw.get(), input, bps, uncorrectedRawValues);
+  KodakDecompressor k(mRaw.get(0).get(), input, bps, uncorrectedRawValues);
   k.decompress();
 }
 

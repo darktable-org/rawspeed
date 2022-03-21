@@ -115,14 +115,14 @@ void MosDecoder::decodeRawInternal() {
   if (width == 0 || height == 0 || width > 10328 || height > 7760)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-  mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
+  mRaw.get(0)->dim = iPoint2D(width, height);
+  mRaw.get(0)->createData();
 
   const ByteStream bs(DataBuffer(mFile.getSubView(off), Endianness::little));
   if (bs.getRemainSize() == 0)
     ThrowRDE("Input buffer is empty");
 
-  UncompressedDecompressor u(bs, mRaw.get());
+  UncompressedDecompressor u(bs, mRaw.get(0).get());
 
   if (int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
       1 == compression) {
@@ -169,9 +169,9 @@ void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         iss >> tmp[0] >> tmp[1] >> tmp[2] >> tmp[3];
         if (!iss.fail() && tmp[0] > 0 && tmp[1] > 0 && tmp[2] > 0 &&
             tmp[3] > 0) {
-          mRaw->metadata.wbCoeffs[0] = static_cast<float>(tmp[0]) / tmp[1];
-          mRaw->metadata.wbCoeffs[1] = static_cast<float>(tmp[0]) / tmp[2];
-          mRaw->metadata.wbCoeffs[2] = static_cast<float>(tmp[0]) / tmp[3];
+          mRaw.get(0)->metadata.wbCoeffs[0] = static_cast<float>(tmp[0]) / tmp[1];
+          mRaw.get(0)->metadata.wbCoeffs[1] = static_cast<float>(tmp[0]) / tmp[2];
+          mRaw.get(0)->metadata.wbCoeffs[2] = static_cast<float>(tmp[0]) / tmp[3];
         }
         break;
       }
