@@ -34,8 +34,7 @@ class Buffer;
 
 struct DngTilingDescription;
 
-class DngDecoder final : public AbstractTiffDecoder
-{
+class DngDecoder final : public AbstractTiffDecoder {
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                    const Buffer& file);
@@ -49,16 +48,15 @@ private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }
   bool mFixLjpeg;
   static void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
-  void parseCFA(const TiffIFD* raw) const;
+  static void parseCFA(const TiffIFD* raw, RawImage::frame_ptr_t frame);
   DngTilingDescription getTilingDescription(const TiffIFD* raw) const;
-  void decodeData(const TiffIFD* raw, uint32_t sample_format) const;
-  void handleMetadata(const TiffIFD* raw);
+  void decodeData(const TiffIFD* raw, uint32_t sample_format, int compression,
+                  int bps, RawImage::frame_ptr_t frame);
+  void handleMetadata(const TiffIFD* raw, int compression, int bps,
+                      RawImage::frame_ptr_t frame);
   bool decodeMaskedAreas(const TiffIFD* raw) const;
   bool decodeBlackLevels(const TiffIFD* raw) const;
   void setBlack(const TiffIFD* raw) const;
-
-  int bps = -1;
-  int compression = -1;
 };
 
 } // namespace rawspeed

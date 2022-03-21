@@ -224,13 +224,11 @@ private:
   friend class RawImage;
 };
 
-class RawImageAbstract
-{
-
-};
-
 class RawImage {
-  using storage_t = std::vector<std::shared_ptr<RawImageData>>;
+public:
+  using frame_ptr_t = std::shared_ptr<RawImageData>;
+  using storage_t = std::vector<frame_ptr_t>;
+  using const_iterator = storage_t::const_iterator;
 
 public:
   [[nodiscard]] std::shared_ptr<RawImageData>
@@ -241,8 +239,11 @@ public:
   void clear() { data.clear(); }
   void appendFrame(RawImageData* frame) { data.emplace_back(frame); }
 
+  const_iterator begin() const { return data.begin(); }
+  const_iterator end() const { return data.end(); }
+
 private:
-  std::vector<std::shared_ptr<RawImageData>> data;
+  storage_t data;
 };
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,

@@ -145,7 +145,7 @@ void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
   }
 }
 
-void DngDecoder::parseCFA(const TiffIFD* raw) const {
+void DngDecoder::parseCFA(const TiffIFD* raw, RawImage::frame_ptr_t frame) {
 
   // Check if layout is OK, if present
   if (raw->hasEntry(TiffTag::CFALAYOUT) &&
@@ -166,7 +166,7 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
              cPat->count);
   }
 
-  mRaw.get(0)->cfa.setSize(cfaSize);
+  frame->cfa.setSize(cfaSize);
 
   static const map<uint32_t, CFAColor> int2enum = {
       {0, CFAColor::RED},   {1, CFAColor::GREEN},   {2, CFAColor::BLUE},
@@ -185,7 +185,7 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
         ThrowRDE("Unsupported CFA Color: %u", c1);
       }
 
-      mRaw.get(0)->cfa.setColorAt(iPoint2D(x, y), c2);
+      frame->cfa.setColorAt(iPoint2D(x, y), c2);
     }
   }
 
@@ -206,8 +206,8 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
       }))
     ThrowRDE("Error decoding active area");
 
-  mRaw.get(0)->cfa.shiftLeft(aa[1]);
-  mRaw.get(0)->cfa.shiftDown(aa[0]);
+  frame->cfa.shiftLeft(aa[1]);
+  frame->cfa.shiftDown(aa[0]);
 }
 
 DngTilingDescription
@@ -269,7 +269,9 @@ DngDecoder::getTilingDescription(const TiffIFD* raw) const {
   return {mRaw.get(0)->dim, static_cast<uint32_t>(mRaw.get(0)->dim.x), yPerSlice};
 }
 
-void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
+void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format,
+                            int compression, int bps,
+                            RawImage::frame_ptr_t frame) {
   if (compression == 8 && sample_format != 3) {
     ThrowRDE("Only float format is supported for "
              "deflate-compressed data.");
@@ -287,11 +289,11 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
   if (raw->hasEntry(TiffTag::WHITELEVEL)) {
     const TiffEntry* whitelevel = raw->getEntry(TiffTag::WHITELEVEL);
     if (whitelevel->isInt())
-      mRaw.get(0)->whitePoint = whitelevel->getU32();
+      frame->whitePoint = whitelevel->getU32();
   }
 
-  AbstractDngDecompressor slices(mRaw.get(0).get(), getTilingDescription(raw), compression,
-                                 mFixLjpeg, bps, predictor);
+  AbstractDngDecompressor slices(frame.get(), getTilingDescription(raw),
+                                 compression, mFixLjpeg, bps, predictor);
 
   slices.slices.reserve(slices.dsc.numTiles);
 
@@ -330,7 +332,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
 
   // FIXME: should we sort the tiles, to linearize the input reading?
 
-  mRaw.get(0)->createData();
+  frame->createData();
 
   slices.decompress();
 }
@@ -346,90 +348,88 @@ void DngDecoder::decodeRawInternal() {
   if (data.empty())
     ThrowRDE("No RAW chunks found");
 
-  if (data.size() > 1) {
-    writeLog(DEBUG_PRIO::EXTRA,
-             "Multiple RAW chunks found - using first only!");
-  }
+  /// TODO paralelize?
+  for (const auto* raw : data) {
+    int bps = raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
+    if (bps < 1 || bps > 32)
+      ThrowRDE("Unsupported bit per sample count: %u.", bps);
 
-  const TiffIFD* raw = data[0];
+    uint32_t sample_format = 1;
+    if (raw->hasEntry(TiffTag::SAMPLEFORMAT))
+      sample_format = raw->getEntry(TiffTag::SAMPLEFORMAT)->getU32();
 
-  bps = raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
-  if (bps < 1 || bps > 32)
-    ThrowRDE("Unsupported bit per sample count: %u.", bps);
+    int compression = raw->getEntry(TiffTag::COMPRESSION)->getU16();
 
-  uint32_t sample_format = 1;
-  if (raw->hasEntry(TiffTag::SAMPLEFORMAT))
-    sample_format = raw->getEntry(TiffTag::SAMPLEFORMAT)->getU32();
+    mRaw.clear();
+    switch (sample_format) {
+    case 1:
+      mRaw.appendFrame(new RawImageDataU16());
+      break;
+    case 3:
+      mRaw.appendFrame(new RawImageDataFloat());
+      break;
+    default:
+      ThrowRDE("Only 16 bit unsigned or float point data supported. Sample "
+               "format %u is not supported.",
+               sample_format);
+    }
 
-  compression = raw->getEntry(TiffTag::COMPRESSION)->getU16();
+    mRaw.get(0)->isCFA =
+        (raw->getEntry(TiffTag::PHOTOMETRICINTERPRETATION)->getU16() == 32803);
 
-  mRaw.clear();
-  switch (sample_format) {
-  case 1:
-    mRaw.appendFrame(new RawImageDataU16());
-    break;
-  case 3:
-    mRaw.appendFrame(new RawImageDataFloat());
-    break;
-  default:
-    ThrowRDE("Only 16 bit unsigned or float point data supported. Sample "
-             "format %u is not supported.",
-             sample_format);
-  }
+    if (mRaw.get(0)->isCFA)
+      writeLog(DEBUG_PRIO::EXTRA, "This is a CFA image");
+    else {
+      writeLog(DEBUG_PRIO::EXTRA, "This is NOT a CFA image");
+    }
 
-  mRaw.get(0)->isCFA =
-      (raw->getEntry(TiffTag::PHOTOMETRICINTERPRETATION)->getU16() == 32803);
+    if (sample_format == 1 && bps > 16)
+      ThrowRDE(
+          "Integer precision larger than 16 bits currently not supported.");
 
-  if (mRaw.get(0)->isCFA)
-    writeLog(DEBUG_PRIO::EXTRA, "This is a CFA image");
-  else {
-    writeLog(DEBUG_PRIO::EXTRA, "This is NOT a CFA image");
-  }
+    if (sample_format == 3 && bps != 16 && bps != 24 && bps != 32)
+      ThrowRDE("Floating point must be 16/24/32 bits per sample.");
 
-  if (sample_format == 1 && bps > 16)
-    ThrowRDE("Integer precision larger than 16 bits currently not supported.");
+    mRaw.get(0)->dim.x = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+    mRaw.get(0)->dim.y = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
 
-  if (sample_format == 3 && bps != 16 && bps != 24 && bps != 32)
-    ThrowRDE("Floating point must be 16/24/32 bits per sample.");
-
-  mRaw.get(0)->dim.x = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
-  mRaw.get(0)->dim.y = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
-
-  if (!mRaw.get(0)->dim.hasPositiveArea())
-    ThrowRDE("Image has zero size");
+    if (!mRaw.get(0)->dim.hasPositiveArea())
+      ThrowRDE("Image has zero size");
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
-  // Yeah, sure, here it would be just dumb to leave this for production :)
-  if (mRaw.get(0)->dim.x > 7424 || mRaw.get(0)->dim.y > 5552) {
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw.get(0)->dim.x,
-             mRaw.get(0)->dim.y);
-  }
+    // Yeah, sure, here it would be just dumb to leave this for production :)
+    if (mRaw.get(0)->dim.x > 7424 || mRaw.get(0)->dim.y > 5552) {
+      ThrowRDE("Unexpected image dimensions found: (%u; %u)",
+               mRaw.get(0)->dim.x, mRaw.get(0)->dim.y);
+    }
 #endif
 
-  if (mRaw.get(0)->isCFA)
-    parseCFA(raw);
+    if (mRaw.get(0)->isCFA)
+      parseCFA(raw, mRaw.get(0));
 
-  uint32_t cpp = raw->getEntry(TiffTag::SAMPLESPERPIXEL)->getU32();
+    uint32_t cpp = raw->getEntry(TiffTag::SAMPLESPERPIXEL)->getU32();
 
-  if (cpp < 1 || cpp > 4)
-    ThrowRDE("Unsupported samples per pixel count: %u.", cpp);
+    if (cpp < 1 || cpp > 4)
+      ThrowRDE("Unsupported samples per pixel count: %u.", cpp);
 
-  mRaw.get(0)->setCpp(cpp);
+    mRaw.get(0)->setCpp(cpp);
 
-  // Now load the image
-  decodeData(raw, sample_format);
+    // Now load the image
+    decodeData(raw, sample_format, compression, bps, mRaw.get(0));
 
-  handleMetadata(raw);
+    handleMetadata(raw, compression, bps, mRaw.get(0));
+  }
 }
 
-void DngDecoder::handleMetadata(const TiffIFD* raw) {
+void DngDecoder::handleMetadata(const TiffIFD* raw, int compression, int bps,
+                                RawImage::frame_ptr_t frame) {
   // Crop
   if (raw->hasEntry(TiffTag::ACTIVEAREA)) {
     const TiffEntry* active_area = raw->getEntry(TiffTag::ACTIVEAREA);
     if (active_area->count != 4)
       ThrowRDE("active area has %d values instead of 4", active_area->count);
 
-    const iRectangle2D fullImage(0, 0, mRaw.get(0)->dim.x, mRaw.get(0)->dim.y);
+    const iRectangle2D fullImage(0, 0, frame->dim.x, frame->dim.y);
 
     const auto corners = active_area->getU32Array(4);
     const iPoint2D topLeft(corners[1], corners[0]);
@@ -449,12 +449,12 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     crop.setBottomRightAbsolute(bottomRight);
     assert(fullImage.isThisInside(fullImage));
 
-    mRaw.get(0)->subFrame(crop);
+    frame->subFrame(crop);
   }
 
   if (raw->hasEntry(TiffTag::DEFAULTCROPORIGIN) &&
       raw->hasEntry(TiffTag::DEFAULTCROPSIZE)) {
-    iRectangle2D cropped(0, 0, mRaw.get(0)->dim.x, mRaw.get(0)->dim.y);
+    iRectangle2D cropped(0, 0, frame->dim.x, frame->dim.y);
     const TiffEntry* origin_entry = raw->getEntry(TiffTag::DEFAULTCROPORIGIN);
     const TiffEntry* size_entry = raw->getEntry(TiffTag::DEFAULTCROPSIZE);
 
@@ -470,7 +470,7 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
         cropped.isPointInsideInclusive(cropOrigin))
       cropped = iRectangle2D(cropOrigin, {0, 0});
 
-    cropped.dim = mRaw.get(0)->dim - cropped.pos;
+    cropped.dim = frame->dim - cropped.pos;
 
     /* Read size (sometimes is rational so use float) */
     const auto sz = size_entry->getFloatArray(2);
@@ -481,16 +481,16 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
       ThrowRDE("Error decoding default crop size");
 
     if (iPoint2D size(sz[0], sz[1]);
-        size.isThisInside(mRaw.get(0)->dim) &&
-        (size + cropped.pos).isThisInside(mRaw.get(0)->dim))
+        size.isThisInside(frame->dim) &&
+        (size + cropped.pos).isThisInside(frame->dim))
       cropped.dim = size;
 
     if (!cropped.hasPositiveArea())
       ThrowRDE("No positive crop area");
 
-    mRaw.get(0)->subFrame(cropped);
+    frame->subFrame(cropped);
   }
-  if (mRaw.get(0)->dim.area() <= 0)
+  if (frame->dim.area() <= 0)
     ThrowRDE("No image left after crop");
 
   // Apply stage 1 opcodes
@@ -499,13 +499,13 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
       const TiffEntry* opcodes = raw->getEntry(TiffTag::OPCODELIST1);
       // The entry might exist, but it might be empty, which means no opcodes
       if (opcodes->count > 0) {
-        DngOpcodes codes(mRaw.get(0).get(), opcodes);
-        codes.applyOpCodes(mRaw.get(0).get());
+        DngOpcodes codes(frame.get(), opcodes);
+        codes.applyOpCodes(frame.get());
       }
     } catch (const RawDecoderException& e) {
       // We push back errors from the opcode parser, since the image may still
       // be usable
-      mRaw.get(0)->setError(e.what());
+      frame->setError(e.what());
     }
   }
 
@@ -514,23 +514,23 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
       raw->getEntry(TiffTag::LINEARIZATIONTABLE)->count > 0) {
     const TiffEntry* lintable = raw->getEntry(TiffTag::LINEARIZATIONTABLE);
     auto table = lintable->getU16Array(lintable->count);
-    RawImageCurveGuard curveHandler(mRaw.get(0).get(), table, uncorrectedRawValues);
+    RawImageCurveGuard curveHandler(frame.get(), table, uncorrectedRawValues);
     if (!uncorrectedRawValues)
-      mRaw.get(0)->sixteenBitLookup();
+      frame->sixteenBitLookup();
   }
 
-  if (mRaw.get(0)->getDataType() == RawImageType::UINT16) {
+  if (frame->getDataType() == RawImageType::UINT16) {
     // Default white level is (2 ** BitsPerSample) - 1
-    mRaw.get(0)->whitePoint = (1UL << bps) - 1UL;
-  } else if (mRaw.get(0)->getDataType() == RawImageType::F32) {
+    frame->whitePoint = (1UL << bps) - 1UL;
+  } else if (frame->getDataType() == RawImageType::F32) {
     // Default white level is 1.0f. But we can't represent that here.
-    mRaw.get(0)->whitePoint = 65535;
+    frame->whitePoint = 65535;
   }
 
   if (raw->hasEntry(TiffTag::WHITELEVEL)) {
     const TiffEntry* whitelevel = raw->getEntry(TiffTag::WHITELEVEL);
     if (whitelevel->isInt())
-      mRaw.get(0)->whitePoint = whitelevel->getU32();
+      frame->whitePoint = whitelevel->getU32();
   }
   // Set black
   setBlack(raw);
@@ -539,22 +539,22 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
   if (compression == 0x884c && !uncorrectedRawValues &&
       raw->hasEntry(TiffTag::OPCODELIST2)) {
     // We must apply black/white scaling
-    mRaw.get(0)->scaleBlackWhite();
+    frame->scaleBlackWhite();
 
     // Apply stage 2 codes
     try {
-      DngOpcodes codes(mRaw.get(0).get(), raw->getEntry(TiffTag::OPCODELIST2));
-      codes.applyOpCodes(mRaw.get(0).get());
+      DngOpcodes codes(frame.get(), raw->getEntry(TiffTag::OPCODELIST2));
+      codes.applyOpCodes(frame.get());
     } catch (const RawDecoderException& e) {
       // We push back errors from the opcode parser, since the image may still
       // be usable
-      mRaw.get(0)->setError(e.what());
+      frame->setError(e.what());
     }
-    mRaw.get(0)->blackAreas.clear();
-    mRaw.get(0)->blackLevel = 0;
-    mRaw.get(0)->blackLevelSeparate[0] = mRaw.get(0)->blackLevelSeparate[1] =
-        mRaw.get(0)->blackLevelSeparate[2] = mRaw.get(0)->blackLevelSeparate[3] = 0;
-    mRaw.get(0)->whitePoint = 65535;
+    frame->blackAreas.clear();
+    frame->blackLevel = 0;
+    frame->blackLevelSeparate[0] = frame->blackLevelSeparate[1] =
+        frame->blackLevelSeparate[2] = frame->blackLevelSeparate[3] = 0;
+    frame->whitePoint = 65535;
   }
 }
 
