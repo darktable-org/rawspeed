@@ -49,7 +49,7 @@ using std::vector;
 namespace rawspeed {
 
 RawDecoder::RawDecoder(const Buffer& file)
-    : failOnUnknown(false), interpolateBadPixels(true),
+    : mRaw(new RawImageDataU16()), failOnUnknown(false), interpolateBadPixels(true),
       applyStage1DngOpcodes(true), applyCrop(true), uncorrectedRawValues(false),
       fujiRotate(true), mFile(file) {}
 
