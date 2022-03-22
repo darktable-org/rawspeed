@@ -175,9 +175,9 @@ void SrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const TiffEntry* wb_black =
         mRootIFD->getEntryRecursive(TiffTag::SAMSUNG_WB_RGGBLEVELSBLACK);
     if (wb_levels->count == 4 && wb_black->count == 4) {
-      mRaw.get(0)->metadata.wbCoeffs[0] = wb_levels->getFloat(0) - wb_black->getFloat(0);
-      mRaw.get(0)->metadata.wbCoeffs[1] = wb_levels->getFloat(1) - wb_black->getFloat(1);
-      mRaw.get(0)->metadata.wbCoeffs[2] = wb_levels->getFloat(3) - wb_black->getFloat(3);
+      mRaw.metadata.wbCoeffs[0] = wb_levels->getFloat(0) - wb_black->getFloat(0);
+      mRaw.metadata.wbCoeffs[1] = wb_levels->getFloat(1) - wb_black->getFloat(1);
+      mRaw.metadata.wbCoeffs[2] = wb_levels->getFloat(3) - wb_black->getFloat(3);
     }
   }
 }

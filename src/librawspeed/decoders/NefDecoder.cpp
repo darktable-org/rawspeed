@@ -364,7 +364,7 @@ void NefDecoder::DecodeD100Uncompressed() const {
   u.decode12BitRaw<Endianness::big, false, true>(width, height);
 }
 
-void NefDecoder::DecodeSNefUncompressed() const {
+void NefDecoder::DecodeSNefUncompressed() {
   const auto* raw = getIFDWithLargestImage(TiffTag::CFAPATTERN);
   uint32_t offset = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
   uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
@@ -486,11 +486,11 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(12))) {
     const TiffEntry* wb = mRootIFD->getEntryRecursive(static_cast<TiffTag>(12));
     if (wb->count == 4) {
-      mRaw.get(0)->metadata.wbCoeffs[0] = wb->getFloat(0);
-      mRaw.get(0)->metadata.wbCoeffs[1] = wb->getFloat(2);
-      mRaw.get(0)->metadata.wbCoeffs[2] = wb->getFloat(1);
-      if (mRaw.get(0)->metadata.wbCoeffs[1] <= 0.0F)
-        mRaw.get(0)->metadata.wbCoeffs[1] = 1.0F;
+      mRaw.metadata.wbCoeffs[0] = wb->getFloat(0);
+      mRaw.metadata.wbCoeffs[1] = wb->getFloat(2);
+      mRaw.metadata.wbCoeffs[2] = wb->getFloat(1);
+      if (mRaw.metadata.wbCoeffs[1] <= 0.0F)
+        mRaw.metadata.wbCoeffs[1] = 1.0F;
     }
   } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x0097))) {
     const TiffEntry* wb =
@@ -506,14 +506,14 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
       if (version == 0x100 && wb->count >= 80 &&
           wb->type == TiffDataType::UNDEFINED) {
-        mRaw.get(0)->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(36));
-        mRaw.get(0)->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(37));
-        mRaw.get(0)->metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(38));
+        mRaw.metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(36));
+        mRaw.metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(37));
+        mRaw.metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(38));
       } else if (version == 0x103 && wb->count >= 26 &&
                  wb->type == TiffDataType::UNDEFINED) {
-        mRaw.get(0)->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(10));
-        mRaw.get(0)->metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(11));
-        mRaw.get(0)->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(12));
+        mRaw.metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(10));
+        mRaw.metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(11));
+        mRaw.metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(12));
       } else if (((version == 0x204 && wb->count >= 564) ||
                   (version == 0x205 && wb->count >= 284)) &&
                  mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x001d)) &&
@@ -555,11 +555,11 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
         // Finally set the WB coeffs
         uint32_t off = (version == 0x204) ? 6 : 14;
-        mRaw.get(0)->metadata.wbCoeffs[0] =
+        mRaw.metadata.wbCoeffs[0] =
             static_cast<float>(getU16BE(buf.data() + off + 0));
-        mRaw.get(0)->metadata.wbCoeffs[1] =
+        mRaw.metadata.wbCoeffs[1] =
             static_cast<float>(getU16BE(buf.data() + off + 2));
-        mRaw.get(0)->metadata.wbCoeffs[2] =
+        mRaw.metadata.wbCoeffs[2] =
             static_cast<float>(getU16BE(buf.data() + off + 6));
       }
     }
@@ -570,9 +570,9 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     if (wb->count == 2560 && wb->type == TiffDataType::UNDEFINED) {
       bs.skipBytes(1248);
       bs.setByteOrder(Endianness::big);
-      mRaw.get(0)->metadata.wbCoeffs[0] = static_cast<float>(bs.getU16()) / 256.0;
-      mRaw.get(0)->metadata.wbCoeffs[1] = 1.0F;
-      mRaw.get(0)->metadata.wbCoeffs[2] = static_cast<float>(bs.getU16()) / 256.0;
+      mRaw.metadata.wbCoeffs[0] = static_cast<float>(bs.getU16()) / 256.0;
+      mRaw.metadata.wbCoeffs[1] = 1.0F;
+      mRaw.metadata.wbCoeffs[2] = static_cast<float>(bs.getU16()) / 256.0;
     } else if (bs.hasPatternAt("NRW ", 4, 0)) {
       uint32_t offset = 0;
       if (!bs.hasPatternAt("0100", 4, 4) && wb->count > 72)
@@ -583,17 +583,17 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       if (offset) {
         bs.skipBytes(offset);
         bs.setByteOrder(Endianness::little);
-        mRaw.get(0)->metadata.wbCoeffs[0] = 4.0 * bs.getU32();
-        mRaw.get(0)->metadata.wbCoeffs[1] = bs.getU32();
-        mRaw.get(0)->metadata.wbCoeffs[1] += bs.getU32();
-        mRaw.get(0)->metadata.wbCoeffs[2] = 4.0 * bs.getU32();
+        mRaw.metadata.wbCoeffs[0] = 4.0 * bs.getU32();
+        mRaw.metadata.wbCoeffs[1] = bs.getU32();
+        mRaw.metadata.wbCoeffs[1] += bs.getU32();
+        mRaw.metadata.wbCoeffs[2] = 4.0 * bs.getU32();
       }
     }
   }
 
   if (hints.has("nikon_wb_adjustment")) {
-    mRaw.get(0)->metadata.wbCoeffs[0] *= 256/527.0;
-    mRaw.get(0)->metadata.wbCoeffs[2] *= 256/317.0;
+    mRaw.metadata.wbCoeffs[0] *= 256/527.0;
+    mRaw.metadata.wbCoeffs[2] *= 256/317.0;
   }
 
   auto id = mRootIFD->getID();
@@ -618,7 +618,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 // We un-apply the whitebalance, so output matches lossless.
 // Note that values are scaled. See comment below on details.
 // OPTME: It would be trivial to run this multithreaded.
-void NefDecoder::DecodeNikonSNef(const ByteStream& input) const {
+void NefDecoder::DecodeNikonSNef(const ByteStream& input) {
   if (mRaw.get(0)->dim.x < 6)
     ThrowIOE("got a %u wide sNEF, aborting", mRaw.get(0)->dim.x);
 
@@ -640,9 +640,9 @@ void NefDecoder::DecodeNikonSNef(const ByteStream& input) const {
       wb_r < lower_limit || wb_b < lower_limit || wb_r > 10.0F || wb_b > 10.0F)
     ThrowRDE("Whitebalance has bad values (%f, %f)", wb_r, wb_b);
 
-  mRaw.get(0)->metadata.wbCoeffs[0] = wb_r;
-  mRaw.get(0)->metadata.wbCoeffs[1] = 1.0F;
-  mRaw.get(0)->metadata.wbCoeffs[2] = wb_b;
+  mRaw.metadata.wbCoeffs[0] = wb_r;
+  mRaw.metadata.wbCoeffs[1] = 1.0F;
+  mRaw.metadata.wbCoeffs[2] = wb_b;
 
   auto inv_wb_r = static_cast<int>(1024.0 / wb_r);
   auto inv_wb_b = static_cast<int>(1024.0 / wb_b);

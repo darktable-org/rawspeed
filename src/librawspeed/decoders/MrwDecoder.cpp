@@ -184,13 +184,13 @@ void MrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, id.make, id.model, "", iso);
 
   if (hints.has("swapped_wb")) {
-    mRaw.get(0)->metadata.wbCoeffs[0] = wb_coeffs[2];
-    mRaw.get(0)->metadata.wbCoeffs[1] = wb_coeffs[0];
-    mRaw.get(0)->metadata.wbCoeffs[2] = wb_coeffs[1];
+    mRaw.metadata.wbCoeffs[0] = wb_coeffs[2];
+    mRaw.metadata.wbCoeffs[1] = wb_coeffs[0];
+    mRaw.metadata.wbCoeffs[2] = wb_coeffs[1];
   } else {
-    mRaw.get(0)->metadata.wbCoeffs[0] = wb_coeffs[0];
-    mRaw.get(0)->metadata.wbCoeffs[1] = wb_coeffs[1];
-    mRaw.get(0)->metadata.wbCoeffs[2] = wb_coeffs[3];
+    mRaw.metadata.wbCoeffs[0] = wb_coeffs[0];
+    mRaw.metadata.wbCoeffs[1] = wb_coeffs[1];
+    mRaw.metadata.wbCoeffs[2] = wb_coeffs[3];
   }
 }
 

@@ -125,7 +125,7 @@ void Cr2Decoder::decodeNewFormat() {
   mRaw.get(0)->isCFA = !isSubSampled();
 
   if (isSubSampled()) {
-    iPoint2D& subSampling = mRaw.get(0)->metadata.subsampling;
+    iPoint2D& subSampling = mRaw.get(0)->subsampling;
     subSampling = getSubSampling();
     if (!(subSampling.x > 1 || subSampling.y > 1))
       ThrowRDE("RAW is expected to be subsampled, but it's not");
@@ -186,9 +186,9 @@ void Cr2Decoder::decodeNewFormat() {
   mRaw.get(0)->createData();
   d.decode(slicing);
 
-  assert(getSubSampling() == mRaw.get(0)->metadata.subsampling);
+  assert(getSubSampling() == mRaw.get(0)->subsampling);
 
-  if (mRaw.get(0)->metadata.subsampling.x > 1 || mRaw.get(0)->metadata.subsampling.y > 1)
+  if (mRaw.get(0)->subsampling.x > 1 || mRaw.get(0)->subsampling.y > 1)
     sRawInterpolate();
 }
 
@@ -217,10 +217,10 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   std::string mode;
 
-  if (mRaw.get(0)->metadata.subsampling.y == 2 && mRaw.get(0)->metadata.subsampling.x == 2)
+  if (mRaw.get(0)->subsampling.y == 2 && mRaw.get(0)->subsampling.x == 2)
     mode = "sRaw1";
 
-  if (mRaw.get(0)->metadata.subsampling.y == 1 && mRaw.get(0)->metadata.subsampling.x == 2)
+  if (mRaw.get(0)->subsampling.y == 1 && mRaw.get(0)->subsampling.x == 2)
     mode = "sRaw2";
 
   if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
@@ -243,9 +243,9 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       int offset = hints.get("wb_offset", 126);
 
       offset /= 2;
-      mRaw.get(0)->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(offset + 0));
-      mRaw.get(0)->metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(offset + 1));
-      mRaw.get(0)->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(offset + 3));
+      mRaw.metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(offset + 0));
+      mRaw.metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(offset + 1));
+      mRaw.metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(offset + 3));
     } else {
       if (mRootIFD->hasEntryRecursive(TiffTag::CANONSHOTINFO) &&
           mRootIFD->hasEntryRecursive(TiffTag::CANONPOWERSHOTG9WB)) {
@@ -258,22 +258,22 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         int wb_offset = (wb_index < 18) ? "012347800000005896"[wb_index]-'0' : 0;
         wb_offset = wb_offset*8 + 2;
 
-        mRaw.get(0)->metadata.wbCoeffs[0] =
+        mRaw.metadata.wbCoeffs[0] =
             static_cast<float>(g9_wb->getU32(wb_offset + 1));
-        mRaw.get(0)->metadata.wbCoeffs[1] =
+        mRaw.metadata.wbCoeffs[1] =
             (static_cast<float>(g9_wb->getU32(wb_offset + 0)) +
              static_cast<float>(g9_wb->getU32(wb_offset + 3))) /
             2.0F;
-        mRaw.get(0)->metadata.wbCoeffs[2] =
+        mRaw.metadata.wbCoeffs[2] =
             static_cast<float>(g9_wb->getU32(wb_offset + 2));
       } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0xa4))) {
         // WB for the old 1D and 1DS
         const TiffEntry* wb =
             mRootIFD->getEntryRecursive(static_cast<TiffTag>(0xa4));
         if (wb->count >= 3) {
-          mRaw.get(0)->metadata.wbCoeffs[0] = wb->getFloat(0);
-          mRaw.get(0)->metadata.wbCoeffs[1] = wb->getFloat(1);
-          mRaw.get(0)->metadata.wbCoeffs[2] = wb->getFloat(2);
+          mRaw.metadata.wbCoeffs[0] = wb->getFloat(0);
+          mRaw.metadata.wbCoeffs[1] = wb->getFloat(1);
+          mRaw.metadata.wbCoeffs[2] = wb->getFloat(2);
         }
       }
     }
@@ -318,7 +318,7 @@ iPoint2D Cr2Decoder::getSubSampling() const {
 
 int Cr2Decoder::getHue() const {
   if (hints.has("old_sraw_hue"))
-    return (mRaw.get(0)->metadata.subsampling.y * mRaw.get(0)->metadata.subsampling.x);
+    return (mRaw.get(0)->subsampling.y * mRaw.get(0)->subsampling.x);
 
   if (!mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x10))) {
     return 0;
@@ -327,9 +327,9 @@ int Cr2Decoder::getHue() const {
           mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x10))->getU32();
       model_id >= 0x80000281 || model_id == 0x80000218 ||
       (hints.has("force_new_sraw_hue")))
-    return ((mRaw.get(0)->metadata.subsampling.y * mRaw.get(0)->metadata.subsampling.x) - 1) >> 1;
+    return ((mRaw.get(0)->subsampling.y * mRaw.get(0)->subsampling.x) - 1) >> 1;
 
-  return (mRaw.get(0)->metadata.subsampling.y * mRaw.get(0)->metadata.subsampling.x);
+  return (mRaw.get(0)->subsampling.y * mRaw.get(0)->subsampling.x);
 }
 
 // Interpolate and convert sRaw data.
@@ -361,16 +361,16 @@ void Cr2Decoder::sRawInterpolate() {
   int hue = getHue();
 
   iPoint2D interpolatedDims = {
-      subsampledRaw->metadata.subsampling.x *
+      subsampledRaw->subsampling.x *
           (subsampledRaw->dim.x /
-           (2 + subsampledRaw->metadata.subsampling.x *
-                    subsampledRaw->metadata.subsampling.y)),
-      subsampledRaw->metadata.subsampling.y * subsampledRaw->dim.y};
+           (2 + subsampledRaw->subsampling.x *
+                    subsampledRaw->subsampling.y)),
+      subsampledRaw->subsampling.y * subsampledRaw->dim.y};
 
   mRaw.clear();
   //mRaw = std::make_shared<RawImageDataU16>(interpolatedDims, 3);
   mRaw.appendFrame(std::make_shared<RawImageDataU16>(interpolatedDims,3));
-  mRaw.get(0)->metadata.subsampling = subsampledRaw->metadata.subsampling;
+  mRaw.get(0)->subsampling = subsampledRaw->subsampling;
   mRaw.get(0)->isCFA = false;
 
   auto rawU16 = dynamic_cast<RawImageDataU16*>(subsampledRaw.get());

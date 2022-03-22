@@ -160,8 +160,8 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
                                       const std::string& make,
                                       const std::string& model,
                                       const std::string& mode) {
-  mRaw.get(0)->metadata.make = make;
-  mRaw.get(0)->metadata.model = model;
+  mRaw.metadata.make = make;
+  mRaw.metadata.model = model;
   const Camera* cam = meta->getCamera(make, model, mode);
   if (!cam) {
     askForSamples(meta, make, model, mode);
@@ -198,7 +198,7 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
 void RawDecoder::setMetaData(const CameraMetaData* meta,
                              const std::string& make, const std::string& model,
                              const std::string& mode, int iso_speed) {
-  mRaw.get(0)->metadata.isoSpeed = iso_speed;
+  mRaw.metadata.isoSpeed = iso_speed;
   const Camera* cam = meta->getCamera(make, model, mode);
   if (!cam) {
     askForSamples(meta, make, model, mode);
@@ -215,15 +215,15 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
     mRaw.get(0)->cfa = cam->cfa;
 
   if (!cam->color_matrix.empty())
-    mRaw.get(0)->metadata.colorMatrix = cam->color_matrix;
+    mRaw.metadata.colorMatrix = cam->color_matrix;
 
-  mRaw.get(0)->metadata.canonical_make = cam->canonical_make;
-  mRaw.get(0)->metadata.canonical_model = cam->canonical_model;
-  mRaw.get(0)->metadata.canonical_alias = cam->canonical_alias;
-  mRaw.get(0)->metadata.canonical_id = cam->canonical_id;
-  mRaw.get(0)->metadata.make = make;
-  mRaw.get(0)->metadata.model = model;
-  mRaw.get(0)->metadata.mode = mode;
+  mRaw.metadata.canonical_make = cam->canonical_make;
+  mRaw.metadata.canonical_model = cam->canonical_model;
+  mRaw.metadata.canonical_alias = cam->canonical_alias;
+  mRaw.metadata.canonical_id = cam->canonical_id;
+  mRaw.metadata.make = make;
+  mRaw.metadata.model = model;
+  mRaw.metadata.mode = mode;
 
   if (applyCrop) {
     iPoint2D new_size = cam->cropSize;
@@ -276,17 +276,17 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
 void RawDecoder::decodeRaw() {
   try {
     decodeRawInternal();
-    ///TODO paralelize?
+    /// TODO paralelize?
     for (auto raw : mRaw) {
       mRaw.get(0)->checkMemIsInitialized();
 
-      mRaw.get(0)->metadata.pixelAspectRatio = hints.get(
-          "pixel_aspect_ratio", mRaw.get(0)->metadata.pixelAspectRatio);
       if (interpolateBadPixels) {
         mRaw.get(0)->fixBadPixels();
         mRaw.get(0)->checkMemIsInitialized();
       }
     }
+    mRaw.metadata.pixelAspectRatio =
+        hints.get("pixel_aspect_ratio", mRaw.metadata.pixelAspectRatio);
 
   } catch (const TiffParserException& e) {
     ThrowRDE("%s", e.what());

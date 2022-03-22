@@ -158,8 +158,8 @@ void AbstractLJpegDecompressor::parseSOF(ByteStream sofInput, SOFInfo* sof) {
   }
 
   if (static_cast<int>(sof->compInfo[0].superH) !=
-          mRaw->metadata.subsampling.x ||
-      static_cast<int>(sof->compInfo[0].superV) != mRaw->metadata.subsampling.y)
+          mRaw->subsampling.x ||
+      static_cast<int>(sof->compInfo[0].superV) != mRaw->subsampling.y)
     ThrowRDE("LJpeg's subsampling does not match image's subsampling.");
 
   sof->initialized = true;

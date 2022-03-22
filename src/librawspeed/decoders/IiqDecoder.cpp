@@ -217,7 +217,7 @@ void IiqDecoder::decodeRawInternal() {
     CorrectPhaseOneC(correction_meta_data, split_row, split_col);
 
   for (int i = 0; i < 3; i++)
-    mRaw.get(0)->metadata.wbCoeffs[i] = wb.getFloat();
+    mRaw.metadata.wbCoeffs[i] = wb.getFloat();
 }
 
 void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32_t split_row,
@@ -345,7 +345,7 @@ void IiqDecoder::checkSupportInternal(const CameraMetaData* meta) {
   checkCameraSupported(meta, mRootIFD->getID(), "");
 
   auto id = mRootIFD->getID();
-  const Camera* cam = meta->getCamera(id.make, id.model, mRaw.get(0)->metadata.mode);
+  const Camera* cam = meta->getCamera(id.make, id.model, mRaw.metadata.mode);
   if (!cam)
     ThrowRDE("Couldn't find camera %s %s", id.make.c_str(), id.model.c_str());
 

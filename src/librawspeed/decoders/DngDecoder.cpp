@@ -567,7 +567,7 @@ void DngDecoder::handleMetadata(const TiffIFD* raw, int compression, int bps,
 
 void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
-    mRaw.get(0)->metadata.isoSpeed =
+    mRaw.metadata.isoSpeed =
         mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
 
   TiffID id;
@@ -581,8 +581,8 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 
   // Set the make and model
-  mRaw.get(0)->metadata.make = id.make;
-  mRaw.get(0)->metadata.model = id.model;
+  mRaw.metadata.make = id.make;
+  mRaw.metadata.model = id.model;
 
   const Camera* cam = meta->getCamera(id.make, id.model, "dng");
   if (!cam) // Also look for non-DNG cameras in case it's a converted file
@@ -590,19 +590,18 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (!cam) // Worst case scenario, look for any such camera.
     cam = meta->getCamera(id.make, id.model);
   if (cam) {
-    mRaw.get(0)->metadata.canonical_make = cam->canonical_make;
-    mRaw.get(0)->metadata.canonical_model = cam->canonical_model;
-    mRaw.get(0)->metadata.canonical_alias = cam->canonical_alias;
-    mRaw.get(0)->metadata.canonical_id = cam->canonical_id;
+    mRaw.metadata.canonical_make = cam->canonical_make;
+    mRaw.metadata.canonical_model = cam->canonical_model;
+    mRaw.metadata.canonical_alias = cam->canonical_alias;
+    mRaw.metadata.canonical_id = cam->canonical_id;
   } else {
-    mRaw.get(0)->metadata.canonical_make = id.make;
-    mRaw.get(0)->metadata.canonical_model =
-        mRaw.get(0)->metadata.canonical_alias = id.model;
+    mRaw.metadata.canonical_make = id.make;
+    mRaw.metadata.canonical_model = mRaw.metadata.canonical_alias = id.model;
     if (mRootIFD->hasEntryRecursive(TiffTag::UNIQUECAMERAMODEL)) {
-      mRaw.get(0)->metadata.canonical_id =
+      mRaw.metadata.canonical_id =
           mRootIFD->getEntryRecursive(TiffTag::UNIQUECAMERAMODEL)->getString();
     } else {
-      mRaw.get(0)->metadata.canonical_id = id.make + " " + id.model;
+      mRaw.metadata.canonical_id = id.make + " " + id.model;
     }
   }
 
@@ -613,22 +612,21 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     if (as_shot_neutral->count == 3) {
       for (uint32_t i = 0; i < 3; i++) {
         float c = as_shot_neutral->getFloat(i);
-        mRaw.get(0)->metadata.wbCoeffs[i] = (c > 0.0F) ? (1.0F / c) : 0.0F;
+        mRaw.metadata.wbCoeffs[i] = (c > 0.0F) ? (1.0F / c) : 0.0F;
       }
     }
   } else if (mRootIFD->hasEntryRecursive(TiffTag::ASSHOTWHITEXY)) {
     const TiffEntry* as_shot_white_xy =
         mRootIFD->getEntryRecursive(TiffTag::ASSHOTWHITEXY);
     if (as_shot_white_xy->count == 2) {
-      mRaw.get(0)->metadata.wbCoeffs[0] = as_shot_white_xy->getFloat(0);
-      mRaw.get(0)->metadata.wbCoeffs[1] = as_shot_white_xy->getFloat(1);
-      mRaw.get(0)->metadata.wbCoeffs[2] = 1 -
-                                          mRaw.get(0)->metadata.wbCoeffs[0] -
-                                          mRaw.get(0)->metadata.wbCoeffs[1];
+      mRaw.metadata.wbCoeffs[0] = as_shot_white_xy->getFloat(0);
+      mRaw.metadata.wbCoeffs[1] = as_shot_white_xy->getFloat(1);
+      mRaw.metadata.wbCoeffs[2] =
+          1 - mRaw.metadata.wbCoeffs[0] - mRaw.metadata.wbCoeffs[1];
 
       const std::array<float, 3> d65_white = {{0.950456, 1, 1.088754}};
       for (uint32_t i = 0; i < 3; i++)
-        mRaw.get(0)->metadata.wbCoeffs[i] /= d65_white[i];
+        mRaw.metadata.wbCoeffs[i] /= d65_white[i];
     }
   }
 
@@ -640,16 +638,16 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       const TiffEntry* mat = mRootIFD->getEntryRecursive(TiffTag::COLORMATRIX2);
       const auto srat_vals = mat->getSRationalArray(mat->count);
       bool Success = true;
-      mRaw.get(0)->metadata.colorMatrix.reserve(mat->count);
+      mRaw.metadata.colorMatrix.reserve(mat->count);
       for (const auto& val : srat_vals) {
         // FIXME: introduce proper rational type.
         Success &= val.second == 10'000;
         if (!Success)
           break;
-        mRaw.get(0)->metadata.colorMatrix.emplace_back(val.first);
+        mRaw.metadata.colorMatrix.emplace_back(val.first);
       }
       if (!Success)
-        mRaw.get(0)->metadata.colorMatrix.clear();
+        mRaw.metadata.colorMatrix.clear();
     }
   }
 }

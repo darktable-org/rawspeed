@@ -58,10 +58,10 @@ private:
   static bool NEFIsUncompressedRGB(const TiffIFD* raw);
   void DecodeUncompressed() const;
   void DecodeD100Uncompressed() const;
-  void DecodeSNefUncompressed() const;
+  void DecodeSNefUncompressed();
   void readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
                            const iPoint2D& offset, int inputPitch) const;
-  void DecodeNikonSNef(const ByteStream& input) const;
+  void DecodeNikonSNef(const ByteStream& input);
   [[nodiscard]] std::string getMode() const;
   [[nodiscard]] std::string getExtendedMode(const std::string& mode) const;
   static std::vector<uint16_t> gammaCurve(double pwr, double ts, int mode,

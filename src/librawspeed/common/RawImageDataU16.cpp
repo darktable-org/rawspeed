@@ -152,8 +152,8 @@ void RawImageDataU16::scaleBlackWhite() {
     if (whitePoint >= 65536)
       whitePoint = m;
     writeLog(DEBUG_PRIO::INFO,
-             "ISO:%d, Estimated black:%d, Estimated white: %d",
-             metadata.isoSpeed, blackLevel, whitePoint);
+             "Estimated black:%d, Estimated white: %d",
+             blackLevel, whitePoint);
   }
 
   /* Skip, if not needed */

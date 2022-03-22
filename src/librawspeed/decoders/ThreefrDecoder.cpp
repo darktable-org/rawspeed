@@ -95,7 +95,7 @@ void ThreefrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         if (div == 0.0F)
           ThrowRDE("Can not decode WB, multiplier is zero/");
 
-        mRaw.get(0)->metadata.wbCoeffs[i] = 1.0F / div;
+        mRaw.metadata.wbCoeffs[i] = 1.0F / div;
       }
     }
   }

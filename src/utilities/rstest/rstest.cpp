@@ -151,85 +151,87 @@ APPEND(ostringstream* oss, const char* format, ...) {
   *oss << line.data();
 }
 
-std::string img_hash(RawImageData* r, bool noSamples) {
+std::string img_hash(const RawImage& r, bool noSamples) {
   ostringstream oss;
 
   if (noSamples)
     APPEND(&oss, "camera support status is unknown due to lack of samples\n");
-  APPEND(&oss, "make: %s\n", r->metadata.make.c_str());
-  APPEND(&oss, "model: %s\n", r->metadata.model.c_str());
-  APPEND(&oss, "mode: %s\n", r->metadata.mode.c_str());
+  APPEND(&oss, "make: %s\n", r.metadata.make.c_str());
+  APPEND(&oss, "model: %s\n", r.metadata.model.c_str());
+  APPEND(&oss, "mode: %s\n", r.metadata.mode.c_str());
 
-  APPEND(&oss, "canonical_make: %s\n", r->metadata.canonical_make.c_str());
-  APPEND(&oss, "canonical_model: %s\n", r->metadata.canonical_model.c_str());
-  APPEND(&oss, "canonical_alias: %s\n", r->metadata.canonical_alias.c_str());
-  APPEND(&oss, "canonical_id: %s\n", r->metadata.canonical_id.c_str());
+  APPEND(&oss, "canonical_make: %s\n", r.metadata.canonical_make.c_str());
+  APPEND(&oss, "canonical_model: %s\n", r.metadata.canonical_model.c_str());
+  APPEND(&oss, "canonical_alias: %s\n", r.metadata.canonical_alias.c_str());
+  APPEND(&oss, "canonical_id: %s\n", r.metadata.canonical_id.c_str());
 
-  APPEND(&oss, "isoSpeed: %d\n", r->metadata.isoSpeed);
-  APPEND(&oss, "blackLevel: %d\n", r->blackLevel);
-  APPEND(&oss, "whitePoint: %d\n", r->whitePoint);
+  for (auto frame : r) {
 
-  APPEND(&oss, "blackLevelSeparate: %d %d %d %d\n", r->blackLevelSeparate[0],
-         r->blackLevelSeparate[1], r->blackLevelSeparate[2],
-         r->blackLevelSeparate[3]);
+    APPEND(&oss, "isoSpeed: %d\n", r.metadata.isoSpeed);
+    APPEND(&oss, "blackLevel: %d\n", frame->blackLevel);
+    APPEND(&oss, "whitePoint: %d\n", frame->whitePoint);
 
-  APPEND(&oss, "wbCoeffs: %f %f %f %f\n", r->metadata.wbCoeffs[0],
-         r->metadata.wbCoeffs[1], r->metadata.wbCoeffs[2],
-         r->metadata.wbCoeffs[3]);
+    APPEND(&oss, "blackLevelSeparate: %d %d %d %d\n",
+           frame->blackLevelSeparate[0], frame->blackLevelSeparate[1],
+           frame->blackLevelSeparate[2], frame->blackLevelSeparate[3]);
 
-  APPEND(&oss, "colorMatrix:");
-  if (r->metadata.colorMatrix.empty())
-    APPEND(&oss, " (none)");
-  else {
-    for (int e : r->metadata.colorMatrix)
-      APPEND(&oss, " %i", e);
+    APPEND(&oss, "wbCoeffs: %f %f %f %f\n", r.metadata.wbCoeffs[0],
+           r.metadata.wbCoeffs[1], r.metadata.wbCoeffs[2],
+           r.metadata.wbCoeffs[3]);
+
+    APPEND(&oss, "colorMatrix:");
+    if (r.metadata.colorMatrix.empty())
+      APPEND(&oss, " (none)");
+    else {
+      for (int e : r.metadata.colorMatrix)
+        APPEND(&oss, " %i", e);
+    }
+    APPEND(&oss, "\n");
+
+    APPEND(&oss, "isCFA: %d\n", frame->isCFA);
+    APPEND(&oss, "cfa: %s\n", frame->cfa.asString().c_str());
+    APPEND(&oss, "filters: 0x%x\n", frame->cfa.getDcrawFilter());
+    APPEND(&oss, "bpp: %d\n", frame->getBpp());
+    APPEND(&oss, "cpp: %d\n", frame->getCpp());
+    APPEND(&oss, "dataType: %u\n", static_cast<unsigned>(frame->getDataType()));
+
+    const iPoint2D dimUncropped = frame->getUncroppedDim();
+    APPEND(&oss, "dimUncropped: %dx%d\n", dimUncropped.x, dimUncropped.y);
+    APPEND(&oss, "dimCropped: %dx%d\n", frame->dim.x, frame->dim.y);
+    const iPoint2D cropTL = frame->getCropOffset();
+    APPEND(&oss, "cropOffset: %dx%d\n", cropTL.x, cropTL.y);
+
+    // NOTE: pitch is internal property, a function of dimUncropped.x, bpp and
+    // some additional padding overhead, to align each line length to be a
+    // multiple of (currently) 16 bytes. And maybe with some additional
+    // const offset. there is no point in showing it here, it may differ.
+    // APPEND(&oss, "pitch: %d\n", r->pitch);
+
+    APPEND(&oss, "blackAreas: ");
+    for (auto ba : frame->blackAreas)
+      APPEND(&oss, "%d:%dx%d, ", ba.isVertical, ba.offset, ba.size);
+    APPEND(&oss, "\n");
+
+    APPEND(&oss, "fuji_rotation_pos: %d\n", r.metadata.fujiRotationPos);
+    APPEND(&oss, "pixel_aspect_ratio: %f\n", r.metadata.pixelAspectRatio);
+
+    APPEND(&oss, "badPixelPositions: ");
+    {
+      MutexLocker guard(&frame->mBadPixelMutex);
+      for (uint32_t p : frame->mBadPixelPositions)
+        APPEND(&oss, "%d, ", p);
+    }
+
+    APPEND(&oss, "\n");
+
+    rawspeed::md5::md5_state hash_of_line_hashes = imgDataHash(frame.get());
+    APPEND(&oss, "md5sum of per-line md5sums: %s\n",
+           rawspeed::md5::hash_to_string(hash_of_line_hashes).c_str());
+
+    const auto errors = frame->getErrors();
+    for (const std::string& e : errors)
+      APPEND(&oss, "WARNING: [rawspeed] %s\n", e.c_str());
   }
-  APPEND(&oss, "\n");
-
-  APPEND(&oss, "isCFA: %d\n", r->isCFA);
-  APPEND(&oss, "cfa: %s\n", r->cfa.asString().c_str());
-  APPEND(&oss, "filters: 0x%x\n", r->cfa.getDcrawFilter());
-  APPEND(&oss, "bpp: %d\n", r->getBpp());
-  APPEND(&oss, "cpp: %d\n", r->getCpp());
-  APPEND(&oss, "dataType: %u\n", static_cast<unsigned>(r->getDataType()));
-
-  const iPoint2D dimUncropped = r->getUncroppedDim();
-  APPEND(&oss, "dimUncropped: %dx%d\n", dimUncropped.x, dimUncropped.y);
-  APPEND(&oss, "dimCropped: %dx%d\n", r->dim.x, r->dim.y);
-  const iPoint2D cropTL = r->getCropOffset();
-  APPEND(&oss, "cropOffset: %dx%d\n", cropTL.x, cropTL.y);
-
-  // NOTE: pitch is internal property, a function of dimUncropped.x, bpp and
-  // some additional padding overhead, to align each line length to be a
-  // multiple of (currently) 16 bytes. And maybe with some additional
-  // const offset. there is no point in showing it here, it may differ.
-  // APPEND(&oss, "pitch: %d\n", r->pitch);
-
-  APPEND(&oss, "blackAreas: ");
-  for (auto ba : r->blackAreas)
-    APPEND(&oss, "%d:%dx%d, ", ba.isVertical, ba.offset, ba.size);
-  APPEND(&oss, "\n");
-
-  APPEND(&oss, "fuji_rotation_pos: %d\n", r->metadata.fujiRotationPos);
-  APPEND(&oss, "pixel_aspect_ratio: %f\n", r->metadata.pixelAspectRatio);
-
-  APPEND(&oss, "badPixelPositions: ");
-  {
-    MutexLocker guard(&r->mBadPixelMutex);
-    for (uint32_t p : r->mBadPixelPositions)
-      APPEND(&oss, "%d, ", p);
-  }
-
-  APPEND(&oss, "\n");
-
-  rawspeed::md5::md5_state hash_of_line_hashes = imgDataHash(r);
-  APPEND(&oss, "md5sum of per-line md5sums: %s\n",
-         rawspeed::md5::hash_to_string(hash_of_line_hashes).c_str());
-
-  const auto errors = r->getErrors();
-  for (const std::string& e : errors)
-    APPEND(&oss, "WARNING: [rawspeed] %s\n", e.c_str());
-
   return oss.str();
 }
 
@@ -382,18 +384,13 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
   if (o.create) {
     // write the hash. if force is set, then we are potentially overwriting here
     ofstream f(hashfile);
-    for (auto frame : decoder->mRaw)
-      f << img_hash(frame.get(), noSamples);
+    f << img_hash(decoder->mRaw, noSamples);
     if (o.dump)
-      ///TODO modify to handle multiframe images
+      /// TODO modify to handle multiframe images
       writeImage(decoder->mRaw.get(0).get(), filename);
   } else {
     // do generate the hash string regardless.
-    std::stringstream s;
-    for (auto frame : decoder->mRaw) {
-      std::string h = img_hash(frame.get(), noSamples);
-      s << h;
-    }
+    std::string h = img_hash(decoder->mRaw, noSamples);
 
     // normally, here we would compare the old hash with the new one
     // but if the force is set, and the hash does not exist, do nothing.
@@ -402,11 +399,11 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 
     std::string truth((istreambuf_iterator<char>(hf)),
                       istreambuf_iterator<char>());
-    if (s.str() != truth) {
+    if (h!= truth) {
       ofstream f(filename + ".hash.failed");
-      f << s.str();
+      f << h;
       if (o.dump)
-        ///TODO modify to handle multiframe images
+        /// TODO modify to handle multiframe images
         writeImage(decoder->mRaw.get(0).get(), filename + ".failed");
       throw RstestHashMismatch("hash/metadata mismatch", time);
     }

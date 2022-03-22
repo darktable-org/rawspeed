@@ -508,7 +508,7 @@ inline void Cr2sRawInterpolator::YUV_TO_RGB<2>(const YCbCr& p, uint16_t* X) {
 void Cr2sRawInterpolator::interpolate(int version) {
   assert(version >= 0 && version <= 2);
 
-  const auto& subSampling = mRaw->metadata.subsampling;
+  const auto& subSampling = mRaw->subsampling;
   if (subSampling.y == 1 && subSampling.x == 2) {
     switch (version) {
     case 0:

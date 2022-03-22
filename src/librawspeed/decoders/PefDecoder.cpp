@@ -123,9 +123,9 @@ void PefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const TiffEntry* wb =
         mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x0201));
     if (wb->count == 4) {
-      mRaw.get(0)->metadata.wbCoeffs[0] = wb->getU32(0);
-      mRaw.get(0)->metadata.wbCoeffs[1] = wb->getU32(1);
-      mRaw.get(0)->metadata.wbCoeffs[2] = wb->getU32(3);
+      mRaw.metadata.wbCoeffs[0] = wb->getU32(0);
+      mRaw.metadata.wbCoeffs[1] = wb->getU32(1);
+      mRaw.metadata.wbCoeffs[2] = wb->getU32(3);
     }
   }
 }

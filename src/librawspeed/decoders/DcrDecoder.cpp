@@ -95,7 +95,7 @@ void DcrDecoder::decodeRawInternal() {
       const auto mul = blob->getU16(20 + i);
       if (0 == mul)
         ThrowRDE("WB coefficient is zero!");
-      mRaw.get(0)->metadata.wbCoeffs[i] = 2048.0F / mul;
+      mRaw.metadata.wbCoeffs[i] = 2048.0F / mul;
     }
   }
 

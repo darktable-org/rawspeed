@@ -86,7 +86,6 @@ public:
   // corners are when the image is rotated 45 degrees in Fuji rotated sensors.
   uint32_t fujiRotationPos = 0;
 
-  iPoint2D subsampling = {1, 1};
   std::string make;
   std::string model;
   std::string mode;
@@ -161,8 +160,7 @@ public:
   uint32_t mBadPixelMapPitch = 0;
   bool mDitherScale =
       true; // Should upscaling be done with dither to minimize banding?
-  ImageMetaData metadata;
-
+  iPoint2D subsampling = {1, 1};
   Mutex mBadPixelMutex; // Mutex for 'mBadPixelPositions, must be used if more
                         // than 1 thread is accessing vector
 
@@ -237,12 +235,15 @@ public:
   }
   [[nodiscard]] storage_t::size_type numFrames() const { return data.size(); }
   void clear() { data.clear(); }
-  void appendFrame(std::shared_ptr<RawImageData> frame) {
+  void appendFrame(const std::shared_ptr<RawImageData>& frame) {
     data.emplace_back(frame);
   }
+  [[nodiscard]] storage_t::size_type size() const { return data.size(); }
 
-  const_iterator begin() const { return data.begin(); }
-  const_iterator end() const { return data.end(); }
+  [[nodiscard]] const_iterator begin() const { return data.begin(); }
+  [[nodiscard]] const_iterator end() const { return data.end(); }
+
+  ImageMetaData metadata;
 
 private:
   storage_t data;

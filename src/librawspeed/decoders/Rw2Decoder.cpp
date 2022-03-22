@@ -205,7 +205,7 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (this->checkCameraSupported(meta, id, mode)) {
     setMetaData(meta, id, mode, iso);
   } else {
-    mRaw.get(0)->metadata.mode = mode;
+    mRaw.metadata.mode = mode;
     writeLog(DEBUG_PRIO::EXTRA, "Mode not found in DB: %s", mode.c_str());
     setMetaData(meta, id, "", iso);
   }
@@ -270,18 +270,18 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (raw->hasEntry(static_cast<TiffTag>(0x0024)) &&
       raw->hasEntry(static_cast<TiffTag>(0x0025)) &&
       raw->hasEntry(static_cast<TiffTag>(0x0026))) {
-    mRaw.get(0)->metadata.wbCoeffs[0] = static_cast<float>(
+    mRaw.metadata.wbCoeffs[0] = static_cast<float>(
         raw->getEntry(static_cast<TiffTag>(0x0024))->getU16());
-    mRaw.get(0)->metadata.wbCoeffs[1] = static_cast<float>(
+    mRaw.metadata.wbCoeffs[1] = static_cast<float>(
         raw->getEntry(static_cast<TiffTag>(0x0025))->getU16());
-    mRaw.get(0)->metadata.wbCoeffs[2] = static_cast<float>(
+    mRaw.metadata.wbCoeffs[2] = static_cast<float>(
         raw->getEntry(static_cast<TiffTag>(0x0026))->getU16());
   } else if (raw->hasEntry(static_cast<TiffTag>(0x0011)) &&
              raw->hasEntry(static_cast<TiffTag>(0x0012))) {
-    mRaw.get(0)->metadata.wbCoeffs[0] = static_cast<float>(
+    mRaw.metadata.wbCoeffs[0] = static_cast<float>(
         raw->getEntry(static_cast<TiffTag>(0x0011))->getU16());
-    mRaw.get(0)->metadata.wbCoeffs[1] = 256.0F;
-    mRaw.get(0)->metadata.wbCoeffs[2] = static_cast<float>(
+    mRaw.metadata.wbCoeffs[1] = 256.0F;
+    mRaw.metadata.wbCoeffs[2] = static_cast<float>(
         raw->getEntry(static_cast<TiffTag>(0x0012))->getU16());
   }
 }

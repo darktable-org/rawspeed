@@ -46,7 +46,7 @@ public:
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 private:
-  void ParseA100WB() const;
+  void ParseA100WB();
 
   [[nodiscard]] int getDecoderVersion() const override { return 1; }
   void decodeSRF(const TiffIFD* raw);
@@ -55,7 +55,7 @@ private:
   void DecodeUncompressed(const TiffIFD* raw) const;
   static void SonyDecrypt(const uint32_t* ibuf, uint32_t* obuf, uint32_t len,
                           uint32_t key);
-  void GetWB() const;
+  void GetWB();
   ByteStream in;
   int mShiftDownScale = 0;
 };

@@ -280,7 +280,7 @@ void ArwDecoder::DecodeARW2(const ByteStream& input, uint32_t w, uint32_t h,
   ThrowRDE("Unsupported bit depth");
 }
 
-void ArwDecoder::ParseA100WB() const {
+void ArwDecoder::ParseA100WB() {
   if (!mRootIFD->hasEntryRecursive(TiffTag::DNGPRIVATEDATA))
     return;
 
@@ -326,9 +326,9 @@ void ArwDecoder::ParseA100WB() const {
     for (auto& coeff : tmp)
       coeff = bs.getU16();
 
-    mRaw.get(0)->metadata.wbCoeffs[0] = static_cast<float>(tmp[0]);
-    mRaw.get(0)->metadata.wbCoeffs[1] = static_cast<float>(tmp[1]);
-    mRaw.get(0)->metadata.wbCoeffs[2] = static_cast<float>(tmp[3]);
+    mRaw.metadata.wbCoeffs[0] = static_cast<float>(tmp[0]);
+    mRaw.metadata.wbCoeffs[1] = static_cast<float>(tmp[1]);
+    mRaw.metadata.wbCoeffs[2] = static_cast<float>(tmp[3]);
 
     // only need this one block, no need to process any further
     break;
@@ -401,7 +401,7 @@ void ArwDecoder::SonyDecrypt(const uint32_t* ibuf, uint32_t* obuf, uint32_t len,
   }
 }
 
-void ArwDecoder::GetWB() const {
+void ArwDecoder::GetWB() {
   // Set the whitebalance for all the modern ARW formats (everything after A100)
   if (mRootIFD->hasEntryRecursive(TiffTag::DNGPRIVATEDATA)) {
     NORangesSet<Buffer> ifds_undecoded;
@@ -454,16 +454,16 @@ void ArwDecoder::GetWB() const {
       const TiffEntry* wb = encryptedIFD.getEntry(TiffTag::SONYGRBGLEVELS);
       if (wb->count != 4)
         ThrowRDE("WB has %d entries instead of 4", wb->count);
-      mRaw.get(0)->metadata.wbCoeffs[0] = wb->getFloat(1);
-      mRaw.get(0)->metadata.wbCoeffs[1] = wb->getFloat(0);
-      mRaw.get(0)->metadata.wbCoeffs[2] = wb->getFloat(2);
+      mRaw.metadata.wbCoeffs[0] = wb->getFloat(1);
+      mRaw.metadata.wbCoeffs[1] = wb->getFloat(0);
+      mRaw.metadata.wbCoeffs[2] = wb->getFloat(2);
     } else if (encryptedIFD.hasEntry(TiffTag::SONYRGGBLEVELS)) {
       const TiffEntry* wb = encryptedIFD.getEntry(TiffTag::SONYRGGBLEVELS);
       if (wb->count != 4)
         ThrowRDE("WB has %d entries instead of 4", wb->count);
-      mRaw.get(0)->metadata.wbCoeffs[0] = wb->getFloat(0);
-      mRaw.get(0)->metadata.wbCoeffs[1] = wb->getFloat(1);
-      mRaw.get(0)->metadata.wbCoeffs[2] = wb->getFloat(3);
+      mRaw.metadata.wbCoeffs[0] = wb->getFloat(0);
+      mRaw.metadata.wbCoeffs[1] = wb->getFloat(1);
+      mRaw.metadata.wbCoeffs[2] = wb->getFloat(3);
     }
   }
 }
