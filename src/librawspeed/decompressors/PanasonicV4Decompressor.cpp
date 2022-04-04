@@ -166,7 +166,7 @@ public:
 inline void PanasonicV4Decompressor::processPixelPacket(
     ProxyStream& bits, int row, int col,
     std::vector<uint32_t>* zero_pos) const noexcept {
-  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
   assert(rawU16);
   const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
 

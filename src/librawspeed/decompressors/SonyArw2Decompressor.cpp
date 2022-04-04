@@ -52,7 +52,7 @@ SonyArw2Decompressor::SonyArw2Decompressor(RawImageData *img,
 }
 
 void SonyArw2Decompressor::decompressRow(int row) const {
-  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
   assert(rawU16);
   const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
   assert(out.width > 0);

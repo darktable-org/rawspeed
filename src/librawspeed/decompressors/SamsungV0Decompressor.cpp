@@ -91,7 +91,7 @@ void SamsungV0Decompressor::decompress() const {
     decompressStrip(row, stripes[row]);
 
   // Swap red and blue pixels to get the final CFA pattern
-  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
   assert(rawU16);
   const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
   for (int row = 0; row < out.height - 1; row += 2) {
@@ -108,7 +108,7 @@ int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32& bits, int nbits) {
 
 void SamsungV0Decompressor::decompressStrip(int row,
                                             const ByteStream& bs) const {
-  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
   assert(rawU16);
   const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
   assert(out.width > 0);

@@ -305,7 +305,7 @@ void NefDecoder::DecodeUncompressed() const {
 void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
                                      const iPoint2D& offset,
                                      int inputPitch) const {
-  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get(0).get());
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get(0).get());
   assert(rawU16);
   const Array2DRef<uint16_t> img(rawU16->getU16DataAsUncroppedArray2DRef());
 
@@ -661,7 +661,7 @@ void NefDecoder::DecodeNikonSNef(const ByteStream& input) {
   uint16_t tmp;
   auto* tmpch = reinterpret_cast<uint8_t*>(&tmp);
 
-  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get(0).get());
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get(0).get());
   assert(rawU16);
   const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
   const uint8_t* in = input.peekData(out.width * out.height);

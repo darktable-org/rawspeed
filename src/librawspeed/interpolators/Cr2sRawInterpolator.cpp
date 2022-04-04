@@ -93,7 +93,7 @@ struct Cr2sRawInterpolator::YCbCr final {
 };
 
 template <int version> void Cr2sRawInterpolator::interpolate_422_row(int row) {
-  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
   assert(rawU16);
   const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
 
@@ -178,7 +178,7 @@ template <int version> void Cr2sRawInterpolator::interpolate_422_row(int row) {
 }
 
 template <int version> void Cr2sRawInterpolator::interpolate_422() {
-  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
   assert(rawU16);
   const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
   assert(out.width > 0);
@@ -191,7 +191,7 @@ template <int version> void Cr2sRawInterpolator::interpolate_422() {
 }
 
 template <int version> void Cr2sRawInterpolator::interpolate_420_row(int row) {
-  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
   assert(rawU16);
   const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
 
@@ -345,7 +345,7 @@ template <int version> void Cr2sRawInterpolator::interpolate_420_row(int row) {
 }
 
 template <int version> void Cr2sRawInterpolator::interpolate_420() {
-  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
   assert(rawU16);
   const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
 

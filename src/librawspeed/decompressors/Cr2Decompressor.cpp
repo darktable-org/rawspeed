@@ -131,7 +131,7 @@ void Cr2Decompressor::decode(const Cr2Slicing& slicing_) {
 template <int N_COMP, int X_S_F, int Y_S_F>
 void Cr2Decompressor::decodeN_X_Y()
 {
-  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
   assert(rawU16);
   const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
 

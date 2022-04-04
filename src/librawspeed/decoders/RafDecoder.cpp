@@ -227,7 +227,7 @@ void RafDecoder::applyCorrections(const Camera* cam) {
     rotated->clearArea(iRectangle2D(iPoint2D(0,0), rotated->dim));
     mRaw.metadata.fujiRotationPos = rotationPos;
 
-    auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get(0).get());
+    auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get(0).get());
     assert(rawU16);
     auto srcImg = rawU16->getU16DataAsUncroppedArray2DRef();
     auto dstImg = rotated->getU16DataAsUncroppedArray2DRef();

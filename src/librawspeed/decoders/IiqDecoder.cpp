@@ -311,7 +311,7 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
 
   for (int quadRow = 0; quadRow < 2; quadRow++) {
     for (int quadCol = 0; quadCol < 2; quadCol++) {
-      auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get(0).get());
+      auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get(0).get());
       assert(rawU16);
       const Array2DRef<uint16_t> img(rawU16->getU16DataAsUncroppedArray2DRef());
 
@@ -389,7 +389,7 @@ void IiqDecoder::handleBadPixel(const uint16_t col, const uint16_t row) const {
 }
 
 void IiqDecoder::correctBadColumn(const uint16_t col) const {
-  auto rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get(0).get());
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw.get(0).get());
   assert(rawU16);
   const Array2DRef<uint16_t> img(rawU16->getU16DataAsUncroppedArray2DRef());
 

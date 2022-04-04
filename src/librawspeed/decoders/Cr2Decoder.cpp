@@ -373,7 +373,7 @@ void Cr2Decoder::sRawInterpolate() {
   mRaw.get(0)->subsampling = subsampledRaw->subsampling;
   mRaw.get(0)->isCFA = false;
 
-  auto rawU16 = dynamic_cast<RawImageDataU16*>(subsampledRaw.get());
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(subsampledRaw.get());
   assert(rawU16);
   Cr2sRawInterpolator i(mRaw.get(0).get(),
                         rawU16->getU16DataAsUncroppedArray2DRef(),
