@@ -56,8 +56,6 @@ CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas,
       ThrowCPE("Two valueData's overlap. Raw corrupt!");
     break;
   case 0x4000:
-    // Data is stored directly in entry
-    data_offset = dirEntry.getPosition();
     // Maximum of 8 bytes of data (the size and offset fields)
     bytesize = 8;
     data = dirEntry.getStream(bytesize);
