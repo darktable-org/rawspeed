@@ -140,7 +140,7 @@ TEST(ColorFilterArrayTestBasic, HandlesOutOfBounds) {
 class ColorFilterArrayTest : public ::testing::TestWithParam<Bayer2x2> {
 protected:
   ColorFilterArrayTest() = default;
-  virtual void SetUp() { param = GetParam(); }
+  void SetUp() override { param = GetParam(); }
 
   Bayer2x2 param;
 };
@@ -234,7 +234,7 @@ class ColorFilterArrayShiftTest
           std::tuple<CFAColor, CFAColor, CFAColor, CFAColor, int, int>> {
 protected:
   ColorFilterArrayShiftTest() = default;
-  virtual void SetUp() {
+  void SetUp() override {
     auto param = GetParam();
     mat = std::make_tuple(std::get<0>(param), std::get<1>(param),
                           std::get<2>(param), std::get<3>(param));
