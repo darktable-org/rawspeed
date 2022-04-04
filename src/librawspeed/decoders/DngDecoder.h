@@ -48,18 +48,18 @@ private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }
   bool mFixLjpeg;
   static void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
-  static void parseCFA(const TiffIFD* raw, RawImage::frame_ptr_t frame);
+  static void parseCFA(const TiffIFD* raw, const RawImage::frame_ptr_t &frame);
   static DngTilingDescription getTilingDescription(const TiffIFD* raw,
-                                                   RawImage::frame_ptr_t frame);
+                                                   const RawImage::frame_ptr_t &frame);
   void decodeData(const TiffIFD* raw, uint32_t sample_format, int compression,
-                  int bps, RawImage::frame_ptr_t frame);
+                  int bps, const RawImage::frame_ptr_t &frame);
   void handleMetadata(const TiffIFD* raw, int compression, int bps,
-                      RawImage::frame_ptr_t frame);
+                      const RawImage::frame_ptr_t &frame);
   static bool decodeMaskedAreas(const TiffIFD* raw,
-                                RawImage::frame_ptr_t frame);
+                                const RawImage::frame_ptr_t &frame);
   static bool decodeBlackLevels(const TiffIFD* raw,
-                                RawImage::frame_ptr_t frame);
-  static void setBlack(const TiffIFD* raw, RawImage::frame_ptr_t frame);
+                                const RawImage::frame_ptr_t &frame);
+  static void setBlack(const TiffIFD* raw, const RawImage::frame_ptr_t &frame);
 };
 
 } // namespace rawspeed

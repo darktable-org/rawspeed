@@ -147,7 +147,7 @@ void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
   }
 }
 
-void DngDecoder::parseCFA(const TiffIFD* raw, RawImage::frame_ptr_t frame) {
+void DngDecoder::parseCFA(const TiffIFD* raw, const RawImage::frame_ptr_t &frame) {
 
   // Check if layout is OK, if present
   if (raw->hasEntry(TiffTag::CFALAYOUT) &&
@@ -214,7 +214,7 @@ void DngDecoder::parseCFA(const TiffIFD* raw, RawImage::frame_ptr_t frame) {
 
 DngTilingDescription
 DngDecoder::getTilingDescription(const TiffIFD* raw,
-                                 RawImage::frame_ptr_t frame) {
+                                 const RawImage::frame_ptr_t &frame) {
   if (raw->hasEntry(TiffTag::TILEOFFSETS)) {
     const uint32_t tilew = raw->getEntry(TiffTag::TILEWIDTH)->getU32();
     const uint32_t tileh = raw->getEntry(TiffTag::TILELENGTH)->getU32();
@@ -274,7 +274,7 @@ DngDecoder::getTilingDescription(const TiffIFD* raw,
 
 void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format,
                             int compression, int bps,
-                            RawImage::frame_ptr_t frame) {
+                            const RawImage::frame_ptr_t &frame) {
   if (compression == 8 && sample_format != 3) {
     ThrowRDE("Only float format is supported for "
              "deflate-compressed data.");
@@ -429,7 +429,7 @@ void DngDecoder::decodeRawInternal() {
 }
 
 void DngDecoder::handleMetadata(const TiffIFD* raw, int compression, int bps,
-                                RawImage::frame_ptr_t frame) {
+                                const RawImage::frame_ptr_t &frame) {
   // Crop
   if (raw->hasEntry(TiffTag::ACTIVEAREA)) {
     const TiffEntry* active_area = raw->getEntry(TiffTag::ACTIVEAREA);
@@ -675,7 +675,7 @@ void DngDecoder::checkSupportInternal(const CameraMetaData* meta) {
 
 /* Decodes DNG masked areas into blackareas in the image */
 bool DngDecoder::decodeMaskedAreas(const TiffIFD* raw,
-                                   RawImage::frame_ptr_t frame) {
+                                   const RawImage::frame_ptr_t &frame) {
   const TiffEntry* masked = raw->getEntry(TiffTag::MASKEDAREAS);
 
   if (masked->type != TiffDataType::SHORT && masked->type != TiffDataType::LONG)
@@ -718,7 +718,7 @@ bool DngDecoder::decodeMaskedAreas(const TiffIFD* raw,
 }
 
 bool DngDecoder::decodeBlackLevels(const TiffIFD* raw,
-                                   RawImage::frame_ptr_t frame) {
+                                   const RawImage::frame_ptr_t &frame) {
   iPoint2D blackdim(1, 1);
   if (raw->hasEntry(TiffTag::BLACKLEVELREPEATDIM)) {
     const TiffEntry* bleveldim = raw->getEntry(TiffTag::BLACKLEVELREPEATDIM);
@@ -815,7 +815,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw,
   return true;
 }
 
-void DngDecoder::setBlack(const TiffIFD* raw, RawImage::frame_ptr_t frame) {
+void DngDecoder::setBlack(const TiffIFD* raw, const RawImage::frame_ptr_t &frame) {
 
   if (raw->hasEntry(TiffTag::MASKEDAREAS) && decodeMaskedAreas(raw, frame))
     return;

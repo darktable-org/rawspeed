@@ -277,12 +277,12 @@ void RawDecoder::decodeRaw() {
   try {
     decodeRawInternal();
     /// TODO paralelize?
-    for (auto raw : mRaw) {
-      mRaw.get(0)->checkMemIsInitialized();
+    for (const auto &raw : mRaw) {
+      raw->checkMemIsInitialized();
 
       if (interpolateBadPixels) {
-        mRaw.get(0)->fixBadPixels();
-        mRaw.get(0)->checkMemIsInitialized();
+        raw->fixBadPixels();
+        raw->checkMemIsInitialized();
       }
     }
     mRaw.metadata.pixelAspectRatio =
