@@ -121,17 +121,14 @@ void RafDecoder::decodeRawInternal() {
 
   assert(!isCompressed());
 
-  if (8UL * counts->getU32() >= 2UL * 16UL * width * height) {
+  if ((8UL * counts->getU32() >= 2UL * 16UL * width * height)
+      || (8UL * counts->getU32() >= 16UL * width * height)) {
     bps = 16;
-  } else if (8UL * counts->getU32() >= 2UL * 14UL * width * height) {
+  } else if ((8UL * counts->getU32() >= 2UL * 14UL * width * height)
+             || (8UL * counts->getU32() >= 14UL * width * height)) {
     bps = 14;
-  } else if (8UL * counts->getU32() >= 2UL * 12UL * width * height) {
-    bps = 12;
-  } else if (8UL * counts->getU32() >= 16UL * width * height) {
-    bps = 16;
-  } else if (8UL * counts->getU32() >= 14UL * width * height) {
-    bps = 14;
-  } else if (8UL * counts->getU32() >= 12UL * width * height) {
+  } else if ((8UL * counts->getU32() >= 2UL * 12UL * width * height)
+             || (8UL * counts->getU32() >= 12UL * width * height)) {
     bps = 12;
   } else {
     ThrowRDE("Can not detect bitdepth. StripByteCounts = %u, width = %u, "
