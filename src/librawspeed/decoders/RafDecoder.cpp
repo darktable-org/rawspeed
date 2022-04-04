@@ -123,22 +123,16 @@ void RafDecoder::decodeRawInternal() {
 
   if (8UL * counts->getU32() >= 2UL * 16UL * width * height) {
     bps = 16;
-    double_width = true;
   } else if (8UL * counts->getU32() >= 2UL * 14UL * width * height) {
     bps = 14;
-    double_width = true;
   } else if (8UL * counts->getU32() >= 2UL * 12UL * width * height) {
     bps = 12;
-    double_width = true;
   } else if (8UL * counts->getU32() >= 16UL * width * height) {
     bps = 16;
-    double_width = false;
   } else if (8UL * counts->getU32() >= 14UL * width * height) {
     bps = 14;
-    double_width = false;
   } else if (8UL * counts->getU32() >= 12UL * width * height) {
     bps = 12;
-    double_width = false;
   } else {
     ThrowRDE("Can not detect bitdepth. StripByteCounts = %u, width = %u, "
              "height = %u",
