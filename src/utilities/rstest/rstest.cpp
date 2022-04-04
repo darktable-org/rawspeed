@@ -386,8 +386,12 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
     ofstream f(hashfile);
     f << img_hash(decoder->mRaw, noSamples);
     if (o.dump)
-      /// TODO modify to handle multiframe images
-      writeImage(decoder->mRaw.get(0).get(), filename);
+      for (rawspeed::RawImage::storage_t::size_type i = 0;
+           i < decoder->mRaw.size(); ++i) {
+        std::stringstream s;
+        s << filename << "." << i;
+        writeImage(decoder->mRaw.get(i).get(), s.str());
+      }
   } else {
     // do generate the hash string regardless.
     std::string h = img_hash(decoder->mRaw, noSamples);
@@ -403,8 +407,12 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
       ofstream f(filename + ".hash.failed");
       f << h;
       if (o.dump)
-        /// TODO modify to handle multiframe images
-        writeImage(decoder->mRaw.get(0).get(), filename + ".failed");
+        for (rawspeed::RawImage::storage_t::size_type i = 0;
+             i < decoder->mRaw.size(); ++i) {
+          std::stringstream s;
+          s << filename << "." << i << ".failed";
+          writeImage(decoder->mRaw.get(i).get(), s.str());
+        }
       throw RstestHashMismatch("hash/metadata mismatch", time);
     }
   }
