@@ -228,7 +228,6 @@ public:
   using storage_t = std::vector<frame_ptr_t>;
   using const_iterator = storage_t::const_iterator;
 
-public:
   [[nodiscard]] std::shared_ptr<RawImageData>
   get(storage_t::size_type pos) const {
     return data.at(pos);

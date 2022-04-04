@@ -81,7 +81,7 @@ public:
 
   void apply(RawImageData* ri) override {
     MutexLocker guard(&ri->mBadPixelMutex);
-    auto rawU16 = dynamic_cast<RawImageDataU16*>(ri);
+    auto *rawU16 = dynamic_cast<RawImageDataU16*>(ri);
     assert(rawU16);
     const CroppedArray2DRef<uint16_t> img(
         rawU16->getU16DataAsCroppedArray2DRef());
