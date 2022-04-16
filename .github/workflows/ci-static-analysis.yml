@@ -133,6 +133,7 @@ jobs:
           CC: ${{ matrix.compiler.CC }}
           CXX: ${{ matrix.compiler.CXX }}
           CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
+          USE_CLANG_TIDY: ${{ matrix.flavor == 'ClangStaticAnalysis' }}
           SRC_DIR: ${{ github.workspace }}
           BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/../rawspeed-install
@@ -140,7 +141,7 @@ jobs:
           FLAVOR: ${{ matrix.flavor }}
           TARGET: build
         run: |
-          export ECO="${ECO} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DUSE_CLANG_TIDY=ON -DCMAKE_C_FLAGS_RELWITHDEBINFO=-UNDEBUG -DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-UNDEBUG";
+          export ECO="${ECO} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DUSE_CLANG_TIDY=${USE_CLANG_TIDY} -DCMAKE_C_FLAGS_RELWITHDEBINFO=-UNDEBUG -DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-UNDEBUG";
           cmake -E make_directory "${BUILD_DIR}";
           cmake -E make_directory "${INSTALL_PREFIX}";
           "${SRC_DIR}/.ci/ci-script.sh";
