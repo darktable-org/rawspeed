@@ -58,6 +58,7 @@ protected:
       // Read one more bit
       const bool bit = bs.getBitsNoFill(1);
 
+      // codechecker_false_positive [core.uninitialized.Assign]
       partial.code <<= 1;
       partial.code |= bit;
 
