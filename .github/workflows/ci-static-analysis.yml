@@ -59,6 +59,10 @@ jobs:
           ln -s /usr/bin/ld.gold /usr/bin/ld;
           ln -s /usr/bin/clang-13 /usr/local/bin/clang;
           ln -s /usr/bin/clang++-13 /usr/local/bin/clang++;
+          ln -s /usr/local/bin/clang /usr/local/bin/gcc;
+          ln -s /usr/local/bin/clang++ /usr/local/bin/g++;
+          ln -s /usr/local/bin/clang /usr/local/bin/x86_64-linux-gnu-gcc;
+          ln -s /usr/local/bin/clang++ /usr/local/bin/x86_64-linux-gnu-g++;
       - uses: actions/checkout@v2
         name: Fetch/Checkout RawSpeed git repo
         with:
@@ -86,7 +90,7 @@ jobs:
           apt-get install curl \
                           libxml2-dev \
                           libxslt1-dev \
-                          python-pip-whl \
+                          python3-pip-whl \
                           python3-dev \
                           python3-lxml \
                           python3-portalocker \
