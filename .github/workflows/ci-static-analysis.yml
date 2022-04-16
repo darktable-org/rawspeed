@@ -106,12 +106,12 @@ jobs:
         uses: github/codeql-action/init@v1
         with:
           languages: cpp
-      - if: matrix.flavor == 'SonarCloudStaticAnalysis'
+      - if: matrix.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == 'develop'
         name: Set up JDK 11 (for SonarCloud static analysis)
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - if: matrix.flavor == 'SonarCloudStaticAnalysis'
+      - if: matrix.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == 'develop'
         name: Download and set up sonar-scanner (for SonarCloud static analysis)
         env:
           SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-linux.zip
@@ -154,7 +154,7 @@ jobs:
       - if: matrix.flavor == 'CodeQLAnalysis'
         name: Perform CodeQL static analysis
         uses: github/codeql-action/analyze@v1
-      - if: matrix.flavor == 'SonarCloudStaticAnalysis'
+      - if: matrix.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == 'develop'
         name: Perform SonarCloud static analysis
         env:
           SONAR_SERVER_URL: "https://sonarcloud.io"
