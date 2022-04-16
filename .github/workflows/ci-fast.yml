@@ -134,8 +134,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ macos-11 ]
-        xcode: [ 12.5.1 ] # LLVM11
-        deployment_target: [ 12.5.1, 10.7 ]
+        xcode: [ 13.2.1 ] # LLVM12
+        deployment_target: [ 13.2.1, 10.7 ]
         compiler:
           - { compiler: XCode, CC: cc, CXX: c++ }
         flavor: [ RelWithDebInfo, Release ]
