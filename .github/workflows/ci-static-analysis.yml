@@ -18,7 +18,7 @@ jobs:
         os: [ linux ]
         compiler:
           - { compiler: LLVM14, CC: clang-14, CXX: clang++-14, CLANG_TIDY: clang-tidy-14 }
-        flavor: [ ClangStaticAnalysis, CodeQLAnalysis, SonarCloudStaticAnalysis ]
+        flavor: [ ClangTidy, ClangStaticAnalysis, CodeQLAnalysis, SonarCloudStaticAnalysis ]
     container: debian:unstable-slim
     steps:
       - name: Configure APT
@@ -133,7 +133,7 @@ jobs:
           CC: ${{ matrix.compiler.CC }}
           CXX: ${{ matrix.compiler.CXX }}
           CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
-          USE_CLANG_TIDY: ${{ matrix.flavor == 'ClangStaticAnalysis' }}
+          USE_CLANG_TIDY: ${{ matrix.flavor == 'ClangTidy' }}
           SRC_DIR: ${{ github.workspace }}
           BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/../rawspeed-install
