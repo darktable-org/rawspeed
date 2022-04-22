@@ -177,6 +177,8 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
     setup(true, 12);
   } else if (bs.hasPrefix("OLYMP", 5)) {   // old Olympus
     setup(true, 8);
+  } else if (bs.hasPrefix("OM SYSTEM", 9)) { // ex Olympus
+    setup(true, 16);
   } else if (bs.hasPrefix("EPSON", 5)) {
     setup(false, 8);
   } else if (bs.hasPatternAt("Exif", 4, 6)) {

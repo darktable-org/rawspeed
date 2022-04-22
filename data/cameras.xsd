@@ -36,6 +36,7 @@
       <xs:enumeration value="Nikon"/>
       <xs:enumeration value="Nokia"/>
       <xs:enumeration value="Olympus"/>
+      <xs:enumeration value="OM"/>
       <xs:enumeration value="OnePlus"/>
       <xs:enumeration value="Panasonic"/>
       <xs:enumeration value="Paralenz"/>
@@ -448,6 +449,8 @@
       <xs:enumeration value="OLYMPUS IMAGING CORP."/>
       <xs:enumeration value="OLYMPUS OPTICAL CO.,LTD"/>
       <xs:enumeration value="Olympus"/>
+      <xs:enumeration value="OM Digital Solutions"/>
+      <xs:enumeration value="OM"/>
       <xs:enumeration value="OnePlus"/>
       <xs:enumeration value="PENTAX Corporation"/>
       <xs:enumeration value="PENTAX RICOH IMAGING"/>
