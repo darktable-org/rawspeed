@@ -21,7 +21,7 @@
 */
 
 #include "rawspeedconfig.h" // for HAVE_OPENMP
-#include "decompressors/PanasonicDecompressorV4.h"
+#include "decompressors/PanasonicV4Decompressor.h"
 #include "common/Array2DRef.h"            // for Array2DRef
 #include "common/Common.h"                // for extractHighBits, rawspeed_...
 #include "common/Mutex.h"                 // for MutexLocker
@@ -41,7 +41,7 @@
 
 namespace rawspeed {
 
-PanasonicDecompressorV4::PanasonicDecompressorV4(const RawImage& img,
+PanasonicV4Decompressor::PanasonicV4Decompressor(const RawImage& img,
                                                  const ByteStream& input_,
                                                  bool zero_is_not_bad,
                                                  uint32_t section_split_offset_)
@@ -80,7 +80,7 @@ PanasonicDecompressorV4::PanasonicDecompressorV4(const RawImage& img,
   chopInputIntoBlocks();
 }
 
-void PanasonicDecompressorV4::chopInputIntoBlocks() {
+void PanasonicV4Decompressor::chopInputIntoBlocks() {
   auto pixelToCoordinate = [width = mRaw->dim.x](unsigned pixel) {
     return iPoint2D(pixel % width, pixel / width);
   };
@@ -119,7 +119,7 @@ void PanasonicDecompressorV4::chopInputIntoBlocks() {
   blocks.back().endCoord.y -= 1;
 }
 
-class PanasonicDecompressorV4::ProxyStream {
+class PanasonicV4Decompressor::ProxyStream {
   ByteStream block;
   const uint32_t section_split_offset;
   std::vector<uint8_t> buf;
@@ -163,7 +163,7 @@ public:
   }
 };
 
-inline void PanasonicDecompressorV4::processPixelPacket(
+inline void PanasonicV4Decompressor::processPixelPacket(
     ProxyStream& bits, int row, int col,
     std::vector<uint32_t>* zero_pos) const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -210,7 +210,7 @@ inline void PanasonicDecompressorV4::processPixelPacket(
   }
 }
 
-void PanasonicDecompressorV4::processBlock(
+void PanasonicV4Decompressor::processBlock(
     const Block& block, std::vector<uint32_t>* zero_pos) const noexcept {
   ProxyStream bits(block.bs, section_split_offset);
 
@@ -233,7 +233,7 @@ void PanasonicDecompressorV4::processBlock(
   }
 }
 
-void PanasonicDecompressorV4::decompressThread() const noexcept {
+void PanasonicV4Decompressor::decompressThread() const noexcept {
   std::vector<uint32_t> zero_pos;
 
   assert(!blocks.empty());
@@ -251,7 +251,7 @@ void PanasonicDecompressorV4::decompressThread() const noexcept {
   }
 }
 
-void PanasonicDecompressorV4::decompress() const noexcept {
+void PanasonicV4Decompressor::decompress() const noexcept {
   assert(!blocks.empty());
 #ifdef HAVE_OPENMP
 #pragma omp parallel default(none)                                             \

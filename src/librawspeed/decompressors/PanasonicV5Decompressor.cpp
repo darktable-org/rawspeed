@@ -21,7 +21,7 @@
 */
 
 #include "rawspeedconfig.h" // for HAVE_OPENMP
-#include "decompressors/PanasonicDecompressorV5.h"
+#include "decompressors/PanasonicV5Decompressor.h"
 #include "common/Array2DRef.h"            // for Array2DRef
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/Point.h"                 // for iPoint2D
@@ -40,26 +40,26 @@
 
 namespace rawspeed {
 
-struct PanasonicDecompressorV5::PacketDsc {
+struct PanasonicV5Decompressor::PacketDsc {
   Buffer::size_type bps;
   int pixelsPerPacket;
 
   constexpr PacketDsc();
   explicit constexpr PacketDsc(int bps_)
       : bps(bps_),
-        pixelsPerPacket(PanasonicDecompressorV5::bitsPerPacket / bps) {
+        pixelsPerPacket(PanasonicV5Decompressor::bitsPerPacket / bps) {
     // NOTE: the division is truncating. There may be some padding bits left.
   }
 };
 
-constexpr PanasonicDecompressorV5::PacketDsc
-    PanasonicDecompressorV5::TwelveBitPacket =
-        PanasonicDecompressorV5::PacketDsc(/*bps=*/12);
-constexpr PanasonicDecompressorV5::PacketDsc
-    PanasonicDecompressorV5::FourteenBitPacket =
-        PanasonicDecompressorV5::PacketDsc(/*bps=*/14);
+constexpr PanasonicV5Decompressor::PacketDsc
+    PanasonicV5Decompressor::TwelveBitPacket =
+        PanasonicV5Decompressor::PacketDsc(/*bps=*/12);
+constexpr PanasonicV5Decompressor::PacketDsc
+    PanasonicV5Decompressor::FourteenBitPacket =
+        PanasonicV5Decompressor::PacketDsc(/*bps=*/14);
 
-PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
+PanasonicV5Decompressor::PanasonicV5Decompressor(const RawImage& img,
                                                  const ByteStream& input_,
                                                  uint32_t bps_)
     : mRaw(img), bps(bps_) {
@@ -105,7 +105,7 @@ PanasonicDecompressorV5::PanasonicDecompressorV5(const RawImage& img,
   chopInputIntoBlocks(*dsc);
 }
 
-void PanasonicDecompressorV5::chopInputIntoBlocks(const PacketDsc& dsc) {
+void PanasonicV5Decompressor::chopInputIntoBlocks(const PacketDsc& dsc) {
   auto pixelToCoordinate = [width = mRaw->dim.x](unsigned pixel) {
     return iPoint2D(pixel % width, pixel / width);
   };
@@ -135,7 +135,7 @@ void PanasonicDecompressorV5::chopInputIntoBlocks(const PacketDsc& dsc) {
   blocks.back().endCoord.y -= 1;
 }
 
-class PanasonicDecompressorV5::ProxyStream {
+class PanasonicV5Decompressor::ProxyStream {
   ByteStream block;
   std::vector<uint8_t> buf;
   ByteStream input;
@@ -175,8 +175,8 @@ public:
   }
 };
 
-template <const PanasonicDecompressorV5::PacketDsc& dsc>
-inline void PanasonicDecompressorV5::processPixelPacket(BitPumpLSB& bs, int row,
+template <const PanasonicV5Decompressor::PacketDsc& dsc>
+inline void PanasonicV5Decompressor::processPixelPacket(BitPumpLSB& bs, int row,
                                                         int col) const {
   static_assert(dsc.pixelsPerPacket > 0, "dsc should be compile-time const");
   static_assert(dsc.bps > 0 && dsc.bps <= 16);
@@ -193,8 +193,8 @@ inline void PanasonicDecompressorV5::processPixelPacket(BitPumpLSB& bs, int row,
   bs.skipBitsNoFill(bs.getFillLevel()); // get rid of padding.
 }
 
-template <const PanasonicDecompressorV5::PacketDsc& dsc>
-void PanasonicDecompressorV5::processBlock(const Block& block) const {
+template <const PanasonicV5Decompressor::PacketDsc& dsc>
+void PanasonicV5Decompressor::processBlock(const Block& block) const {
   static_assert(dsc.pixelsPerPacket > 0, "dsc should be compile-time const");
   static_assert(BlockSize % bytesPerPacket == 0);
 
@@ -220,8 +220,8 @@ void PanasonicDecompressorV5::processBlock(const Block& block) const {
   }
 }
 
-template <const PanasonicDecompressorV5::PacketDsc& dsc>
-void PanasonicDecompressorV5::decompressInternal() const noexcept {
+template <const PanasonicV5Decompressor::PacketDsc& dsc>
+void PanasonicV5Decompressor::decompressInternal() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp parallel for num_threads(rawspeed_get_number_of_processor_cores()) \
     schedule(static) default(none)
@@ -233,7 +233,7 @@ void PanasonicDecompressorV5::decompressInternal() const noexcept {
   }
 }
 
-void PanasonicDecompressorV5::decompress() const noexcept {
+void PanasonicV5Decompressor::decompress() const noexcept {
   switch (bps) {
   case 12:
     decompressInternal<TwelveBitPacket>();
