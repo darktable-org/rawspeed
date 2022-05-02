@@ -20,7 +20,7 @@
 */
 
 #include "rawspeedconfig.h" // for HAVE_OPENMP
-#include "decompressors/PanasonicDecompressorV6.h"
+#include "decompressors/PanasonicV6Decompressor.h"
 #include "common/Array2DRef.h"            // for Array2DRef
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/Point.h"                 // for iPoint2D
@@ -88,7 +88,7 @@ struct pana_cs6_page_decoder {
 };
 } // namespace
 
-PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
+PanasonicV6Decompressor::PanasonicV6Decompressor(const RawImage& img,
                                                  const ByteStream& input_)
     : mRaw(img) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
@@ -96,7 +96,7 @@ PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
     ThrowRDE("Unexpected component count / data type");
 
   if (!mRaw->dim.hasPositiveArea() ||
-      mRaw->dim.x % PanasonicDecompressorV6::PixelsPerBlock != 0) {
+      mRaw->dim.x % PanasonicV6Decompressor::PixelsPerBlock != 0) {
     ThrowRDE("Unexpected image dimensions found: (%i; %i)", mRaw->dim.x,
              mRaw->dim.y);
   }
@@ -116,18 +116,18 @@ PanasonicDecompressorV6::PanasonicDecompressorV6(const RawImage& img,
 
 inline void __attribute__((always_inline))
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
-PanasonicDecompressorV6::decompressBlock(ByteStream& rowInput, int row,
+PanasonicV6Decompressor::decompressBlock(ByteStream& rowInput, int row,
                                          int col) const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   pana_cs6_page_decoder page(
-      rowInput.getStream(PanasonicDecompressorV6::BytesPerBlock));
+      rowInput.getStream(PanasonicV6Decompressor::BytesPerBlock));
 
   std::array<unsigned, 2> oddeven = {0, 0};
   std::array<unsigned, 2> nonzero = {0, 0};
   unsigned pmul = 0;
   unsigned pixel_base = 0;
-  for (int pix = 0; pix < PanasonicDecompressorV6::PixelsPerBlock;
+  for (int pix = 0; pix < PanasonicV6Decompressor::PixelsPerBlock;
        pix++, col++) {
     if (pix % 3 == 2) {
       uint16_t base = page.nextpixel();
@@ -162,19 +162,19 @@ PanasonicDecompressorV6::decompressBlock(ByteStream& rowInput, int row,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
-void PanasonicDecompressorV6::decompressRow(int row) const noexcept {
-  assert(mRaw->dim.x % PanasonicDecompressorV6::PixelsPerBlock == 0);
+void PanasonicV6Decompressor::decompressRow(int row) const noexcept {
+  assert(mRaw->dim.x % PanasonicV6Decompressor::PixelsPerBlock == 0);
   const int blocksperrow =
-      mRaw->dim.x / PanasonicDecompressorV6::PixelsPerBlock;
-  const int bytesPerRow = PanasonicDecompressorV6::BytesPerBlock * blocksperrow;
+      mRaw->dim.x / PanasonicV6Decompressor::PixelsPerBlock;
+  const int bytesPerRow = PanasonicV6Decompressor::BytesPerBlock * blocksperrow;
 
   ByteStream rowInput = input.getSubStream(bytesPerRow * row, bytesPerRow);
   for (int rblock = 0, col = 0; rblock < blocksperrow;
-       rblock++, col += PanasonicDecompressorV6::PixelsPerBlock)
+       rblock++, col += PanasonicV6Decompressor::PixelsPerBlock)
     decompressBlock(rowInput, row, col);
 }
 
-void PanasonicDecompressorV6::decompress() const {
+void PanasonicV6Decompressor::decompress() const {
 #ifdef HAVE_OPENMP
 #pragma omp parallel for num_threads(rawspeed_get_number_of_processor_cores()) \
     schedule(static) default(none)

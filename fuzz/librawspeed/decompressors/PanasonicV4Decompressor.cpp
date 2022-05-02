@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/PanasonicDecompressorV4.h" // for PanasonicDecompressor
+#include "decompressors/PanasonicV4Decompressor.h" // for PanasonicDecompressor
 #include "common/RawImage.h"                       // for RawImage
 #include "common/RawspeedException.h"              // for RawspeedException
 #include "fuzz/Common.h"                           // for CreateRawImage
@@ -45,7 +45,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const auto section_split_offset = bs.get<uint32_t>();
     rawspeed::ByteStream rawData = bs.getStream(bs.getRemainSize());
 
-    rawspeed::PanasonicDecompressorV4 p(mRaw, rawData, zero_is_not_bad,
+    rawspeed::PanasonicV4Decompressor p(mRaw, rawData, zero_is_not_bad,
                                         section_split_offset);
     mRaw->createData();
     p.decompress();

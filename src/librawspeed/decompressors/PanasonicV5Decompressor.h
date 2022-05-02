@@ -33,7 +33,7 @@
 
 namespace rawspeed {
 
-class PanasonicDecompressorV5 final : public AbstractDecompressor {
+class PanasonicV5Decompressor final : public AbstractDecompressor {
   // The RW2 raw image buffer consists of individual blocks,
   // each one BlockSize bytes in size.
   static constexpr uint32_t BlockSize = 0x4000;
@@ -98,7 +98,7 @@ class PanasonicDecompressorV5 final : public AbstractDecompressor {
   template <const PacketDsc& dsc> void decompressInternal() const noexcept;
 
 public:
-  PanasonicDecompressorV5(const RawImage& img, const ByteStream& input_,
+  PanasonicV5Decompressor(const RawImage& img, const ByteStream& input_,
                           uint32_t bps_);
 
   void decompress() const noexcept;
