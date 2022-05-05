@@ -30,6 +30,7 @@
 #include <array>                                // for array
 #include <cassert>                              // for assert
 #include <memory>                               // for unique_ptr, make_unique
+#include <optional>                             // for optional
 #include <utility>                              // for move
 #include <vector>                               // for vector
 
@@ -250,17 +251,28 @@ void AbstractLJpegDecompressor::parseDHT(ByteStream dht) {
 }
 
 JpegMarker AbstractLJpegDecompressor::getNextMarker(bool allowskip) {
-  uint8_t c0;
-  uint8_t c1 = input.getByte();
-  do {
-    c0 = c1;
-    c1 = input.getByte();
-  } while (allowskip && !(c0 == 0xFF && c1 != 0 && c1 != 0xFF));
+  auto peekMarker = [&]() -> std::optional<JpegMarker> {
+    uint8_t c0 = input.peekByte(0);
+    uint8_t c1 = input.peekByte(1);
 
-  if (!(c0 == 0xFF && c1 != 0 && c1 != 0xFF))
-    ThrowRDE("(Noskip) Expected marker not found. Probably corrupt file.");
+    if (c0 == 0xFF && c1 != 0 && c1 != 0xFF)
+      return static_cast<JpegMarker>(c1);
+    return {};
+  };
 
-  return static_cast<JpegMarker>(c1);
+  while (input.getRemainSize() >= 2) {
+    if (std::optional<JpegMarker> m = peekMarker()) {
+      input.skipBytes(2); // Skip the bytes we've just consumed.
+      return *m;
+    }
+    // Marker not found. Might there be leading padding bytes?
+    if (!allowskip)
+      break; // Nope, give up.
+    // Advance by a single(!) byte and try again.
+    input.skipBytes(1);
+  }
+
+  ThrowRDE("(Noskip) Expected marker not found. Probably corrupt file.");
 }
 
 } // namespace rawspeed
