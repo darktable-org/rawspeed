@@ -494,6 +494,14 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
   if (mRaw->dim.area() <= 0)
     ThrowRDE("No image left after crop");
 
+  // Adapt DNG DefaultScale to aspect-ratio
+  if (raw->hasEntry(TiffTag::DEFAULTSCALE)) {
+    const TiffEntry* default_scale = raw->getEntry(TiffTag::DEFAULTSCALE);
+    const auto scales = default_scale->getFloatArray(2);
+    // entry 1 is horizontal scale, entry 2 is vertical scale
+    mRaw->metadata.pixelAspectRatio = scales[0] / scales[1];
+  }
+
   // Apply stage 1 opcodes
   if (applyStage1DngOpcodes && raw->hasEntry(TiffTag::OPCODELIST1)) {
     try {
