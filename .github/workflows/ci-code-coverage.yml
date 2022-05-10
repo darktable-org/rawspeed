@@ -195,6 +195,7 @@ jobs:
           brew update > /dev/null || true
           brew tap Homebrew/bundle
           cd .ci
+          brew unlink git@2.35.1
           brew bundle --verbose
       - name: Build And Test
         env:
