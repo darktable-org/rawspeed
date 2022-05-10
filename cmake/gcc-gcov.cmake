@@ -21,12 +21,21 @@ if(NOT APPLE)
   set(GCOV_OPTS ${GCOV_OPTS} -aflu)
 endif()
 
+# Find all *.gcno files and run gcov on them, but ignore stdout of gcov.
+# While you'd normally just "> /dev/null", there are edge cases where that does not work.
+file(WRITE "${CMAKE_BINARY_DIR}/run-gcov-wrapper.cmake"
+"execute_process(
+  COMMAND \"${FIND_PATH}\" \"${CMAKE_BINARY_DIR}\" -type f -name *.gcno -exec \"${GCOV_PATH}\" ${GCOV_OPTS} {} +
+  WORKING_DIRECTORY \"${CMAKE_BINARY_DIR}\"
+  OUTPUT_QUIET
+  COMMAND_ECHO STDOUT
+)
+")
 add_custom_target(
   gcov
-  COMMAND "${FIND_PATH}" "${CMAKE_BINARY_DIR}" -type f -name '*.gcno' -exec "${GCOV_PATH}" ${GCOV_OPTS} {} \\\\; > /dev/null
+  COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/run-gcov-wrapper.cmake"
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
   COMMENT "Running gcov tool on all the *.gcno files to produce *.gcov files"
-  USES_TERMINAL
 )
 
 # DON'T remove *.gcno/*.gcov files here!
