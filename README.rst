@@ -1,7 +1,7 @@
 rawspeed |github actions| |travis-ci| OBS_ |codecov| |oss-fuzz|
 
-.. |github actions| image:: https://github.com/darktable-org/rawspeed/workflows/CI/badge.svg
-    :target: https://github.com/darktable-org/rawspeed/actions?query=workflow%3ACI
+.. |github actions| image:: https://github.com/darktable-org/rawspeed/actions/workflows/CI.yml/badge.svg
+    :target: https://github.com/darktable-org/rawspeed/actions/workflows/CI.yml
 
 .. |travis-ci| image:: https://travis-ci.com/darktable-org/rawspeed.svg?branch=develop
     :target: https://travis-ci.com/darktable-org/rawspeed
