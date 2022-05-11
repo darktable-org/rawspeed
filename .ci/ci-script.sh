@@ -19,7 +19,6 @@ KEEPGOING="-k0"
 case "$FLAVOR" in
   "Coverage")
     CMAKE_BUILD_TYPE="Coverage"
-    G="Unix Makefiles"
     ;;
   *)
     ;;
@@ -27,7 +26,6 @@ esac
 
 case "$TARGET" in
   "WWW")
-    G="Unix Makefiles"
     ECO="${ECO} -DBUILD_DOCS=ON"
     ;;
   *)
@@ -39,26 +37,20 @@ then
   GENERATOR="$G"
 fi
 
-if [ "$GENERATOR" = "Unix Makefiles" ];
-then
-  VERBOSE="VERBOSE=1";
-  KEEPGOING="-k"
-fi;
-
 if [ -z "${MAKEFLAGS+x}" ];
 then
-  MAKEFLAGS="-j2 $VERBOSE"
+  MAKEFLAGS="$VERBOSE $KEEPGOING"
 fi
 
 target_build()
 {
   # to get as much of the issues into the log as possible
-  cmake --build "$BUILD_DIR" -- $MAKEFLAGS || cmake --build "$BUILD_DIR" -- -j1 $VERBOSE $KEEPGOING
+  cmake --build "$BUILD_DIR" -- $MAKEFLAGS || cmake --build "$BUILD_DIR" -- -j1 $MAKEFLAGS
 
   ctest --output-on-failure || ctest --rerun-failed -V -VV
 
   # and now check that it installs where told and only there.
-  cmake --build "$BUILD_DIR" --target install -- $MAKEFLAGS || cmake --build "$BUILD_DIR" --target install -- -j1 $VERBOSE $KEEPGOING
+  cmake --build "$BUILD_DIR" --target install -- $MAKEFLAGS || cmake --build "$BUILD_DIR" --target install -- -j1 $MAKEFLAGS
 }
 
 target_www()
@@ -70,6 +62,8 @@ handle_coverage_data()
 {
   cmake --build "$BUILD_DIR" --target gcov
   mkdir "$BUILD_DIR/gcov-reports-unittest"
+  # Can't use \+ because OSX's mv does not have --target-directory, and \+ must
+  # come right after {} (the target directory can not be specified inbetween)
   find "$BUILD_DIR" -maxdepth 1 -iname '*.gcov' -exec mv "{}" "$BUILD_DIR/gcov-reports-unittest" \;
 }
 
@@ -79,6 +73,8 @@ handle_sample_coverage_data()
   cmake --build "$BUILD_DIR" --target rstest-check
   cmake --build "$BUILD_DIR" --target gcov
   mkdir "$BUILD_DIR/gcov-reports-rsa"
+  # Can't use \+ because OSX's mv does not have --target-directory, and \+ must
+  # come right after {} (the target directory can not be specified inbetween)
   find "$BUILD_DIR" -maxdepth 1 -iname '*.gcov' -exec mv "{}" "$BUILD_DIR/gcov-reports-rsa" \;
 }
 
