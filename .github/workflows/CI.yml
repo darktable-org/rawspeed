@@ -7,7 +7,7 @@ on:
     branches: [ develop ]
 
 env:
-  RPUU_DST: ${{ github.workspace }}/../raw-camera-samples/raw.pixls.us-unique
+  RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
 
 # FIXME: add no-openmp, and maybe -DCMAKE_BUILD_TYPE=Debug jobs
 
@@ -46,29 +46,46 @@ jobs:
             compiler: { distro: "debian:unstable", family: LLVM, version: 14, CC: clang-14, CXX: clang++-14 }
             flavor: SonarCloudStaticAnalysis
     name: ${{ matrix.os }}.${{ matrix.compiler.distro }}.${{ matrix.compiler.family }}${{ matrix.compiler.version }}.${{ matrix.flavor }}
-    container: ${{ matrix.compiler.distro }}-slim
+    container:
+      image: ${{ matrix.compiler.distro }}-slim
+      options: --tmpfs /tmp:exec --tmpfs /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}:exec
     steps:
       - name: Configure APT
         run: |
-          # Paper over occasional network flakiness of some mirrors.
-          echo 'Acquire::Retries "10";' > /etc/apt/apt.conf.d/90retry
-          # Do not install recommended packages
-          echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/90recommends
-          # Do not install suggested packages
-          echo 'APT::Install-Suggests "false";' > /etc/apt/apt.conf.d/90suggests
-          # Assume yes
-          echo 'APT::Get::Assume-Yes "true";' > /etc/apt/apt.conf.d/90forceyes
-          # Fix broken packages
-          echo 'APT::Get::Fix-Missing "true";' > /etc/apt/apt.conf.d/90fixmissing
+          set -xe
+          tee /etc/dpkg/dpkg.cfg.d/force-unsafe-io > /dev/null <<EOT
+          force-unsafe-io
+          EOT
+          tee /etc/apt/apt.conf.d/tmpfs > /dev/null <<EOT
+          Dir::Cache::Archives "/tmp/apt/archives";
+          APT::ExtractTemplates::TempDir "/tmp/apt/temp";
+          EOT
+          mkdir -p /tmp/apt/archives
+          tee /etc/apt/apt.conf.d/80retry > /dev/null <<EOT
+          Acquire::Retries "10";
+          EOT
+          tee /etc/apt/apt.conf.d/80recommends > /dev/null <<EOT
+          APT::Install-Recommends "false";
+          EOT
+          tee /etc/apt/apt.conf.d/80suggests > /dev/null <<EOT
+          APT::Install-Suggests "false";
+          EOT
+          tee /etc/apt/apt.conf.d/80forceyes > /dev/null <<EOT
+          APT::Get::Assume-Yes "true";
+          EOT
+          tee /etc/apt/apt.conf.d/80fixmissing > /dev/null <<EOT
+          APT::Get::Fix-Missing "true";
+          EOT
       - name: Install/Update necessary packages
         env:
           DEBIAN_FRONTEND: noninteractive
           COMPILER_FAMILY: ${{ matrix.compiler.family }}
           FLAVOR: ${{ matrix.flavor }}
         run: |
-          rm -rf /var/lib/apt/lists/*;
-          apt-get update;
-          apt-get upgrade;
+          set -xe
+          rm -rf /var/lib/apt/lists/*
+          apt-get update
+          apt-get upgrade
           apt-get install ca-certificates \
                           cmake \
                           git \
@@ -77,21 +94,21 @@ jobs:
                           libpugixml-dev \
                           libxml2-utils \
                           ninja-build \
-                          zlib1g-dev;
+                          zlib1g-dev
           if [ "$COMPILER_FAMILY" = "GNU" ]; then
             apt-get install g++-${{ matrix.compiler.version }} \
                             gcc \
-                            gcc-${{ matrix.compiler.version }};
+                            gcc-${{ matrix.compiler.version }}
           fi
           if [ "$COMPILER_FAMILY" = "LLVM" ]; then
             apt-get install clang-${{ matrix.compiler.version }} \
-                            libomp-${{ matrix.compiler.version }}-dev;
+                            libomp-${{ matrix.compiler.version }}-dev
           fi
           if [ "$FLAVOR" = "Coverage" ]; then
-            apt-get install rsync;
+            apt-get install rsync
           fi
           if [ "$FLAVOR" = "ClangTidy" ]; then
-            apt-get install clang-tidy-${{ matrix.compiler.version }};
+            apt-get install clang-tidy-${{ matrix.compiler.version }}
           fi
           if [ "$FLAVOR" = "ClangStaticAnalysis" ]; then
             apt-get install curl \
@@ -106,26 +123,27 @@ jobs:
                             python3-venv \
                             python3-virtualenv \
                             python3-wheel \
-                            python3-yaml;
+                            python3-yaml
           fi
-          apt-get clean;
-          dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld;
+          apt-get clean
+          dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld
           if [ "$FLAVOR" = "ClangStaticAnalysis" ]; then
-            ln -s /usr/bin/${{ matrix.compiler.CC  }} /usr/local/bin/clang;
-            ln -s /usr/bin/${{ matrix.compiler.CXX }} /usr/local/bin/clang++;
-            ln -s /usr/bin/${{ matrix.compiler.CC  }} /usr/local/bin/gcc;
-            ln -s /usr/bin/${{ matrix.compiler.CXX }} /usr/local/bin/g++;
-            ln -s /usr/bin/${{ matrix.compiler.CC  }} /usr/local/bin/x86_64-linux-gnu-gcc;
-            ln -s /usr/bin/${{ matrix.compiler.CXX }} /usr/local/bin/x86_64-linux-gnu-g++;
+            ln -s /usr/bin/${{ matrix.compiler.CC  }} /usr/local/bin/clang
+            ln -s /usr/bin/${{ matrix.compiler.CXX }} /usr/local/bin/clang++
+            ln -s /usr/bin/${{ matrix.compiler.CC  }} /usr/local/bin/gcc
+            ln -s /usr/bin/${{ matrix.compiler.CXX }} /usr/local/bin/g++
+            ln -s /usr/bin/${{ matrix.compiler.CC  }} /usr/local/bin/x86_64-linux-gnu-gcc
+            ln -s /usr/bin/${{ matrix.compiler.CXX }} /usr/local/bin/x86_64-linux-gnu-g++
           fi
-          ln -s /usr/bin/ld.gold /usr/bin/ld;
+          ln -s /usr/bin/ld.gold /usr/bin/ld
       - name: Configure git
         run: |
+          set -xe
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - uses: actions/checkout@v2
         name: Fetch/Checkout RawSpeed git repo
         with:
-          path: ''
+          path: 'rawspeed'
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - if: matrix.flavor == 'Coverage'
         name: Fetch raw.pixls.us masterset digest
@@ -133,8 +151,9 @@ jobs:
           RPUU_DST: ${{ env.RPUU_DST }}
         id: fetch-rpuu-digest
         run: |
+          set -xe
           mkdir -p ${RPUU_DST}
-          rsync -vvrLcW --preallocate --delete --compress --compress-level=1 --stats --progress rsync://raw.pixls.us/data-unique/filelist.sha1 ${RPUU_DST}/;
+          rsync -vvrLcW --preallocate --delete --compress --compress-level=1 --stats --progress rsync://raw.pixls.us/data-unique/filelist.sha1 ${RPUU_DST}/
           echo "::set-output name=rpuu-digest-hash::$(sha512sum ${RPUU_DST}/filelist.sha1 | awk '{print $1}')"
       - if: matrix.flavor == 'Coverage'
         name: Cache raw.pixls.us masterset
@@ -147,8 +166,9 @@ jobs:
         env:
           RPUU_DST: ${{ env.RPUU_DST }}
         run: |
-          rsync -vvrLcW --preallocate --delete --compress --compress-level=1 --stats --progress rsync://raw.pixls.us/data-unique/ ${RPUU_DST}/;
-          cd ${RPUU_DST} && sha1sum -c --strict filelist.sha1;
+          set -xe
+          rsync -vvrLcW --preallocate --delete --compress --compress-level=1 --stats --progress rsync://raw.pixls.us/data-unique/ ${RPUU_DST}/
+          cd ${RPUU_DST} && sha1sum -c --strict filelist.sha1
       - if: matrix.flavor == 'ClangStaticAnalysis'
         name: Fetch/Checkout CodeChecker git repo (for clang static analysis)
         uses: actions/checkout@v2
@@ -157,16 +177,13 @@ jobs:
           path: 'codechecker'
           fetch-depth: '1'
       - if: matrix.flavor == 'ClangStaticAnalysis'
-        name: Move CodeChecker git repo into right place (for clang static analysis)
-        run: |
-          mv codechecker ..
-      - if: matrix.flavor == 'ClangStaticAnalysis'
         name: Install CodeChecker (for clang static analysis)
         env:
           CC: ${{ matrix.compiler.CC }}
           CXX: ${{ matrix.compiler.CXX }}
         run: |
-          cd ../codechecker
+          set -xe
+          cd codechecker
           make venv
           . $PWD/venv/bin/activate
           BUILD_LOGGER_64_BIT_ONLY=YES BUILD_UI_DIST=NO make package
@@ -186,10 +203,11 @@ jobs:
         env:
           SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-linux.zip
         run: |
-          rm -rf /var/lib/apt/lists/*;
-          apt-get update;
-          apt-get install curl unzip;
-          apt-get clean;
+          set -xe
+          rm -rf /var/lib/apt/lists/*
+          apt-get update
+          apt-get install curl unzip
+          apt-get clean
           mkdir -p $HOME/.sonar
           curl -sSLo $HOME/.sonar/sonar-scanner.zip ${{ env.SONAR_SCANNER_DOWNLOAD_URL }}
           unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
@@ -200,31 +218,33 @@ jobs:
           CXX: ${{ matrix.compiler.CXX }}
           CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
           GCOV: ${{ matrix.compiler.GCOV }}
-          SRC_DIR: ${{ github.workspace }}
-          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
-          INSTALL_PREFIX: ${{ github.workspace }}/../rawspeed-install
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
           RPUU_DST: ${{ env.RPUU_DST }}
           ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=${{ matrix.flavor == 'ClangStaticAnalysis' || matrix.flavor == 'SonarCloudStaticAnalysis' }} -DUSE_CLANG_TIDY=${{ matrix.flavor == 'ClangTidy' }} -DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=${{ matrix.flavor == 'Coverage' }}
           FLAVOR: ${{ matrix.flavor }}
           TARGET: build
         run: |
-          cmake -E make_directory "${BUILD_DIR}";
-          cmake -E make_directory "${INSTALL_PREFIX}";
-          export ECO="${ECO} -DRAWSPEED_REFERENCE_SAMPLE_ARCHIVE=${RPUU_DST}";
+          set -xe
+          cmake -E make_directory "${BUILD_DIR}"
+          cmake -E make_directory "${INSTALL_PREFIX}"
+          export ECO="${ECO} -DRAWSPEED_REFERENCE_SAMPLE_ARCHIVE=${RPUU_DST}"
           if [ "$FLAVOR" = "ClangTidy" -o "$FLAVOR" = "ClangStaticAnalysis" -o "$FLAVOR" = "CodeQLAnalysis" -o "$FLAVOR" = "SonarCloudStaticAnalysis" ]; then
-            export ECO="${ECO} -DCMAKE_C_FLAGS_RELWITHDEBINFO=-UNDEBUG -DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-UNDEBUG";
+            export ECO="${ECO} -DCMAKE_C_FLAGS_RELWITHDEBINFO=-UNDEBUG -DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-UNDEBUG"
           fi
-          "${SRC_DIR}/.ci/ci-script.sh";
+          "${SRC_DIR}/.ci/ci-script.sh"
       - if: matrix.flavor == 'ClangStaticAnalysis'
         name: Perform clang static analysis
         env:
-          SRC_DIR: ${{ github.workspace }}
-          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           CC: ${{ matrix.compiler.CC }}
           CXX: ${{ matrix.compiler.CXX }}
         run: |
-          . "$PWD/../codechecker/venv/bin/activate"
-          export PATH="$PWD/../codechecker/build/CodeChecker/bin:$PATH"
+          set -xe
+          . "$PWD//codechecker/venv/bin/activate"
+          export PATH="$PWD//codechecker/build/CodeChecker/bin:$PATH"
           CodeChecker check --logfile "${BUILD_DIR}/compile_commands.json" --analyzers clangsa --jobs "$(nproc --all)" --file "${SRC_DIR}/*" --disable deadcode.DeadStores
       - if: matrix.flavor == 'CodeQLAnalysis'
         name: Perform CodeQL static analysis
@@ -237,9 +257,10 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
           SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
-          SRC_DIR: ${{ github.workspace }}
-          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
         run: |
+          set -xe
           sonar-scanner --define project.settings="${SRC_DIR}/.ci/sonar-project.properties" --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.projectKey="${{ env.SONAR_PROJECT_KEY }}" --define sonar.organization="${{ env.SONAR_ORGANIZATION }}" --define sonar.cfamily.compile-commands="${BUILD_DIR}/compile_commands.json" --define sonar.cfamily.threads="$(nproc --all)" --define sonar.cfamily.cache.enabled=false
       - if: matrix.flavor == 'Coverage'
         name: Upload coverage to Codecov (unit tests)
@@ -253,8 +274,8 @@ jobs:
           env_vars: OS,ARCH,CXX
           flags: unittests
           name: ${JOB_NAME}.Unittests
-          root_dir: ${{ github.workspace }}
-          directory: ${{ github.workspace }}/../rawspeed-build/gcov-reports-unittest
+          root_dir: ${{ github.workspace }}/rawspeed
+          directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-unittest
           fail_ci_if_error: true
       - if: matrix.flavor == 'Coverage'
         name: Upload coverage to Codecov (integration)
@@ -268,8 +289,8 @@ jobs:
           env_vars: OS,ARCH,CXX
           flags: integration,rpu_u
           name: ${JOB_NAME}.Integration
-          root_dir: ${{ github.workspace }}
-          directory: ${{ github.workspace }}/../rawspeed-build/gcov-reports-rsa
+          root_dir: ${{ github.workspace }}/rawspeed
+          directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-rsa
           fail_ci_if_error: true
   windows-msys2:
     name: ${{ matrix.os }}.${{ matrix.msys2.msystem }}.${{ matrix.compiler.family }}.${{ matrix.flavor }}
@@ -307,6 +328,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         name: Fetch/Checkout RawSpeed git repo
+        with:
+          path: 'rawspeed'
+          fetch-depth: 1
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ matrix.msys2.msystem }}
@@ -327,16 +351,17 @@ jobs:
         env:
           CC: ${{ matrix.compiler.CC }}
           CXX: ${{ matrix.compiler.CXX }}
-          SRC_DIR: ${{ github.workspace }}
-          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
-          INSTALL_PREFIX: ${{ github.workspace }}/../rawspeed-install
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
           ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON
           FLAVOR: ${{ matrix.flavor }}
           TARGET: build
         run: |
-          cmake -E make_directory "${BUILD_DIR}";
-          cmake -E make_directory "${INSTALL_PREFIX}";
-          $(cygpath ${SRC_DIR})/.ci/ci-script.sh;
+          set -xe
+          cmake -E make_directory "${BUILD_DIR}"
+          cmake -E make_directory "${INSTALL_PREFIX}"
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
       - if: matrix.flavor == 'Coverage'
         name: Upload coverage to Codecov (unit tests)
         uses: codecov/codecov-action@v2
@@ -349,8 +374,8 @@ jobs:
           env_vars: OS,ARCH,CXX
           flags: unittests
           name: ${JOB_NAME}.Unittests
-          root_dir: ${{ github.workspace }}
-          directory: ${{ github.workspace }}\..\rawspeed-build\gcov-reports-unittest
+          root_dir: ${{ github.workspace }}/rawspeed
+          directory: ${{ github.workspace }}\rawspeed-build\gcov-reports-unittest
           fail_ci_if_error: true
   macOS:
     strategy:
@@ -371,11 +396,17 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         name: Fetch/Checkout RawSpeed git repo
+        with:
+          path: 'rawspeed'
+          fetch-depth: 1
       - name: Install Base Dependencies
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
         run: |
+          set -xe
           brew update > /dev/null || true
           brew tap Homebrew/bundle
-          cd .ci
+          cd "${SRC_DIR}/.ci/"
           brew unlink git@2.35.1
           brew bundle --verbose
       - name: Build And Test
@@ -386,19 +417,20 @@ jobs:
           CXX: ${{ matrix.compiler.CXX }}
           CFLAGS: -mmacosx-version-min=${{ matrix.compiler.deployment_target }}
           CXXFLAGS: -mmacosx-version-min=${{ matrix.compiler.deployment_target }}
-          SRC_DIR: ${{ github.workspace }}
-          BUILD_DIR: ${{ github.workspace }}/../rawspeed-build
-          INSTALL_PREFIX: ${{ github.workspace }}/../rawspeed-install
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
           ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON
           FLAVOR: ${{ matrix.flavor }}
           TARGET: build
         run: |
+          set -xe
           if [[ "$MACOSX_DEPLOYMENT_TARGET" == "10.7" ]]; then
-            export CXXFLAGS="$CXXFLAGS -stdlib=libc++";
+            export CXXFLAGS="$CXXFLAGS -stdlib=libc++"
           fi
-          cmake -E make_directory "${BUILD_DIR}";
-          cmake -E make_directory "${INSTALL_PREFIX}";
-          ./.ci/ci-script.sh;
+          cmake -E make_directory "${BUILD_DIR}"
+          cmake -E make_directory "${INSTALL_PREFIX}"
+          "${SRC_DIR}/.ci/ci-script.sh"
       - if: matrix.flavor == 'Coverage'
         name: Upload coverage to Codecov (unit tests)
         uses: codecov/codecov-action@v2
@@ -411,6 +443,6 @@ jobs:
           env_vars: OS,ARCH,CXX
           flags: unittests
           name: ${JOB_NAME}.Unittests
-          root_dir: ${{ github.workspace }}
-          directory: ${{ github.workspace }}/../rawspeed-build/gcov-reports-unittest
+          root_dir: ${{ github.workspace }}/rawspeed
+          directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-unittest
           fail_ci_if_error: true
