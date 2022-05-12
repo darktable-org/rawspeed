@@ -261,6 +261,7 @@ jobs:
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
         run: |
           set -xe
+          cd "${SRC_DIR}"
           sonar-scanner --define project.settings="${SRC_DIR}/.ci/sonar-project.properties" --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.projectKey="${{ env.SONAR_PROJECT_KEY }}" --define sonar.organization="${{ env.SONAR_ORGANIZATION }}" --define sonar.cfamily.compile-commands="${BUILD_DIR}/compile_commands.json" --define sonar.cfamily.threads="$(nproc --all)" --define sonar.cfamily.cache.enabled=false
       - if: matrix.flavor == 'Coverage'
         name: Upload coverage to Codecov (unit tests)
