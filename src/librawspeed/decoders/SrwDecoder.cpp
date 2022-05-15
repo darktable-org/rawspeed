@@ -53,7 +53,7 @@ bool SrwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   return make == "SAMSUNG";
 }
 
-RawImage SrwDecoder::decodeRawInternal() {
+void SrwDecoder::decodeRawInternal() {
   const auto* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
   int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
@@ -62,7 +62,8 @@ RawImage SrwDecoder::decodeRawInternal() {
   if (12 != bits && 14 != bits)
     ThrowRDE("Unsupported bits per sample");
 
-  if (32769 != compression && 32770 != compression && 32772 != compression && 32773 != compression)
+  if (32769 != compression && 32770 != compression && 32772 != compression &&
+      32773 != compression)
     ThrowRDE("Unsupported compression");
 
   if (uint32_t nslices = raw->getEntry(TiffTag::STRIPOFFSETS)->count;
@@ -74,15 +75,14 @@ RawImage SrwDecoder::decodeRawInternal() {
       32769 == compression || wrongComp) {
     bool bit_order = hints.get("msb_override", wrongComp ? bits == 12 : false);
     this->decodeUncompressed(raw, bit_order ? BitOrder::MSB : BitOrder::LSB);
-    return mRaw;
+    return;
   }
 
   const uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
   const uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
-  mRaw->dim = iPoint2D(width, height);
+  mRaw.get(0)->dim = iPoint2D(width, height);
 
-  if (32770 == compression)
-  {
+  if (32770 == compression) {
     const TiffEntry* sliceOffsets = raw->getEntry(static_cast<TiffTag>(40976));
     if (sliceOffsets->type != TiffDataType::LONG || sliceOffsets->count != 1)
       ThrowRDE("Entry 40976 is corrupt");
@@ -96,43 +96,41 @@ RawImage SrwDecoder::decodeRawInternal() {
     Buffer rbuf(mFile.getSubView(offset, count));
     ByteStream bsr(DataBuffer(rbuf, Endianness::little));
 
-    SamsungV0Decompressor s0(mRaw, bso, bsr);
+    SamsungV0Decompressor s0(mRaw.get(0).get(), bso, bsr);
 
-    mRaw->createData();
+    mRaw.get(0)->createData();
 
     s0.decompress();
 
-    return mRaw;
+    return;
   }
-  if (32772 == compression)
-  {
+  if (32772 == compression) {
     uint32_t offset = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
     uint32_t count = raw->getEntry(TiffTag::STRIPBYTECOUNTS)->getU32();
     const ByteStream bs(
         DataBuffer(mFile.getSubView(offset, count), Endianness::little));
 
-    SamsungV1Decompressor s1(mRaw, bs, bits);
+    SamsungV1Decompressor s1(mRaw.get(0).get(), bs, bits);
 
-    mRaw->createData();
+    mRaw.get(0)->createData();
 
     s1.decompress();
 
-    return mRaw;
+    return;
   }
-  if (32773 == compression)
-  {
+  if (32773 == compression) {
     uint32_t offset = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
     uint32_t count = raw->getEntry(TiffTag::STRIPBYTECOUNTS)->getU32();
     const ByteStream bs(
         DataBuffer(mFile.getSubView(offset, count), Endianness::little));
 
-    SamsungV2Decompressor s2(mRaw, bs, bits);
+    SamsungV2Decompressor s2(mRaw.get(0).get(), bs, bits);
 
-    mRaw->createData();
+    mRaw.get(0)->createData();
 
     s2.decompress();
 
-    return mRaw;
+    return;
   }
   ThrowRDE("Unsupported compression");
 }
@@ -177,9 +175,9 @@ void SrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const TiffEntry* wb_black =
         mRootIFD->getEntryRecursive(TiffTag::SAMSUNG_WB_RGGBLEVELSBLACK);
     if (wb_levels->count == 4 && wb_black->count == 4) {
-      mRaw->metadata.wbCoeffs[0] = wb_levels->getFloat(0) - wb_black->getFloat(0);
-      mRaw->metadata.wbCoeffs[1] = wb_levels->getFloat(1) - wb_black->getFloat(1);
-      mRaw->metadata.wbCoeffs[2] = wb_levels->getFloat(3) - wb_black->getFloat(3);
+      mRaw.metadata.wbCoeffs[0] = wb_levels->getFloat(0) - wb_black->getFloat(0);
+      mRaw.metadata.wbCoeffs[1] = wb_levels->getFloat(1) - wb_black->getFloat(1);
+      mRaw.metadata.wbCoeffs[2] = wb_levels->getFloat(3) - wb_black->getFloat(3);
     }
   }
 }

@@ -155,7 +155,7 @@ class AbstractLJpegDecompressor : public AbstractDecompressor {
   std::array<HuffmanTable*, 4> huff{{}}; // 4 pointers into the store
 
 public:
-  AbstractLJpegDecompressor(ByteStream bs, const RawImage& img);
+  AbstractLJpegDecompressor(ByteStream bs, RawImageData* img);
 
   virtual ~AbstractLJpegDecompressor() = default;
 
@@ -201,7 +201,7 @@ protected:
   virtual void decodeScan() = 0;
 
   ByteStream input;
-  RawImage mRaw;
+  RawImageData* mRaw;
 
   SOFInfo frame;
   uint32_t predictorMode = 0;

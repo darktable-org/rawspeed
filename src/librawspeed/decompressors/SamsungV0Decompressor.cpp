@@ -37,7 +37,7 @@
 
 namespace rawspeed {
 
-SamsungV0Decompressor::SamsungV0Decompressor(const RawImage& image,
+SamsungV0Decompressor::SamsungV0Decompressor(RawImageData *image,
                                              const ByteStream& bso,
                                              const ByteStream& bsr)
     : AbstractSamsungDecompressor(image) {
@@ -91,7 +91,9 @@ void SamsungV0Decompressor::decompress() const {
     decompressStrip(row, stripes[row]);
 
   // Swap red and blue pixels to get the final CFA pattern
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  assert(rawU16);
+  const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
   for (int row = 0; row < out.height - 1; row += 2) {
     for (int col = 0; col < out.width - 1; col += 2)
       std::swap(out(row, col + 1), out(row + 1, col));
@@ -106,7 +108,9 @@ int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32& bits, int nbits) {
 
 void SamsungV0Decompressor::decompressStrip(int row,
                                             const ByteStream& bs) const {
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  assert(rawU16);
+  const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
   assert(out.width > 0);
 
   BitPumpMSB32 bits(bs);

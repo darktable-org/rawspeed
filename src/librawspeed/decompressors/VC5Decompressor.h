@@ -87,7 +87,7 @@ inline VC5Tag operator-(VC5Tag tag) {
 }
 
 class VC5Decompressor final : public AbstractDecompressor {
-  RawImage mRaw;
+  RawImageData* mRaw;
   ByteStream mBs;
 
   static constexpr auto VC5_LOG_TABLE_BITWIDTH = 12;
@@ -217,7 +217,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   void parseVC5();
 
 public:
-  VC5Decompressor(ByteStream bs, const RawImage& img);
+  VC5Decompressor(ByteStream bs, RawImageData *img);
 
   void decode(unsigned int offsetX, unsigned int offsetY, unsigned int width,
               unsigned int height);

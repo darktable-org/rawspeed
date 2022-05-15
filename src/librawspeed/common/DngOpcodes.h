@@ -29,7 +29,7 @@
 
 namespace rawspeed {
 
-class RawImage;
+class RawImageData;
 
 class TiffEntry;
 
@@ -38,9 +38,9 @@ class ByteStream;
 class DngOpcodes
 {
 public:
-  DngOpcodes(const RawImage& ri, const TiffEntry* entry);
+  DngOpcodes(RawImageData* ri, const TiffEntry* entry);
   ~DngOpcodes();
-  void applyOpCodes(const RawImage& ri) const;
+  void applyOpCodes(RawImageData* ri) const;
 
 private:
   class DngOpcode;
@@ -62,10 +62,10 @@ protected:
   template <typename S> class ScalePerRowOrCol;
 
   template <class Opcode>
-  static std::unique_ptr<DngOpcode> constructor(const RawImage& ri,
+  static std::unique_ptr<DngOpcode> constructor(RawImageData* ri,
                                                 ByteStream& bs);
 
-  using constructor_t = std::unique_ptr<DngOpcode> (*)(const RawImage& ri,
+  using constructor_t = std::unique_ptr<DngOpcode> (*)(RawImageData* ri,
                                                        ByteStream& bs);
   static const std::map<uint32_t, std::pair<const char*, constructor_t>> Map;
 };

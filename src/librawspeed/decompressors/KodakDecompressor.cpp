@@ -36,7 +36,7 @@
 
 namespace rawspeed {
 
-KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
+KodakDecompressor::KodakDecompressor(RawImageData *img, ByteStream bs,
                                      int bps_, bool uncorrectedRawValues_)
     : mRaw(img), input(std::move(bs)), bps(bps_),
       uncorrectedRawValues(uncorrectedRawValues_) {
@@ -110,7 +110,9 @@ KodakDecompressor::decodeSegment(const uint32_t bsize) {
 }
 
 void KodakDecompressor::decompress() {
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  assert(rawU16);
+  const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
 
   uint32_t random = 0;
   for (int row = 0; row < out.height; row++) {

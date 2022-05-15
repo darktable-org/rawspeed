@@ -54,14 +54,12 @@ TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream& bs)
     ThrowTPE("integer overflow in size calculation.");
 
   uint32_t byte_size = count << datashifts[numType];
-  uint32_t data_offset = UINT32_MAX;
 
   if (byte_size <= 4) {
-    data_offset = bs.getPosition();
     data = bs.getSubStream(bs.getPosition(), byte_size);
     bs.skipBytes(4);
   } else {
-    data_offset = bs.getU32();
+    uint32_t data_offset = bs.getU32();
     if (type == TiffDataType::OFFSET ||
         isIn(tag, {TiffTag::DNGPRIVATEDATA, TiffTag::MAKERNOTE,
                    TiffTag::MAKERNOTE_ALT, TiffTag::FUJI_RAW_IFD,

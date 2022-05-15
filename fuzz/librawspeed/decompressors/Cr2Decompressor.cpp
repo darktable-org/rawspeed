@@ -39,7 +39,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
-    rawspeed::RawImage mRaw(CreateRawImage(bs));
+    auto mRaw(CreateRawImage(bs));
 
     using slice_type = uint16_t;
     const auto numSlices = bs.get<slice_type>();
@@ -48,7 +48,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     const rawspeed::Cr2Slicing slicing(numSlices, sliceWidth, lastSliceWidth);
 
-    rawspeed::Cr2Decompressor c(bs, mRaw);
+    rawspeed::Cr2Decompressor c(bs, mRaw.get());
     mRaw->createData();
     c.decode(slicing);
 

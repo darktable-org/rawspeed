@@ -34,14 +34,13 @@ class Buffer;
 
 struct DngTilingDescription;
 
-class DngDecoder final : public AbstractTiffDecoder
-{
+class DngDecoder final : public AbstractTiffDecoder {
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                    const Buffer& file);
   DngDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file);
 
-  RawImage decodeRawInternal() override;
+  void decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void checkSupportInternal(const CameraMetaData* meta) override;
 
@@ -49,16 +48,18 @@ private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }
   bool mFixLjpeg;
   static void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
-  void parseCFA(const TiffIFD* raw) const;
-  DngTilingDescription getTilingDescription(const TiffIFD* raw) const;
-  void decodeData(const TiffIFD* raw, uint32_t sample_format) const;
-  void handleMetadata(const TiffIFD* raw);
-  bool decodeMaskedAreas(const TiffIFD* raw) const;
-  bool decodeBlackLevels(const TiffIFD* raw) const;
-  void setBlack(const TiffIFD* raw) const;
-
-  int bps = -1;
-  int compression = -1;
+  static void parseCFA(const TiffIFD* raw, const RawImage::frame_ptr_t &frame);
+  static DngTilingDescription getTilingDescription(const TiffIFD* raw,
+                                                   const RawImage::frame_ptr_t &frame);
+  void decodeData(const TiffIFD* raw, uint32_t sample_format, int compression,
+                  int bps, const RawImage::frame_ptr_t &frame);
+  void handleMetadata(const TiffIFD* raw, int compression, int bps,
+                      const RawImage::frame_ptr_t &frame);
+  static bool decodeMaskedAreas(const TiffIFD* raw,
+                                const RawImage::frame_ptr_t &frame);
+  static bool decodeBlackLevels(const TiffIFD* raw,
+                                const RawImage::frame_ptr_t &frame);
+  static void setBlack(const TiffIFD* raw, const RawImage::frame_ptr_t &frame);
 };
 
 } // namespace rawspeed

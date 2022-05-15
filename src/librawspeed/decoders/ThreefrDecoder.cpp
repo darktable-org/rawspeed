@@ -50,7 +50,7 @@ bool ThreefrDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   return make == "Hasselblad";
 }
 
-RawImage ThreefrDecoder::decodeRawInternal() {
+void ThreefrDecoder::decodeRawInternal() {
   const auto* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS, 1);
   uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
   uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
@@ -59,19 +59,17 @@ RawImage ThreefrDecoder::decodeRawInternal() {
 
   const ByteStream bs(DataBuffer(mFile.getSubView(off), Endianness::little));
 
-  mRaw->dim = iPoint2D(width, height);
+  mRaw.get(0)->dim = iPoint2D(width, height);
 
-  HasselbladDecompressor l(bs, mRaw);
-  mRaw->createData();
+  HasselbladDecompressor l(bs, mRaw.get(0).get());
+  mRaw.get(0)->createData();
 
   int pixelBaseOffset = hints.get("pixelBaseOffset", 0);
   l.decode(pixelBaseOffset);
-
-  return mRaw;
 }
 
 void ThreefrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
-  mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
+  mRaw.get(0)->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
                    CFAColor::GREEN, CFAColor::BLUE);
 
   setMetaData(meta, "", 0);
@@ -79,13 +77,13 @@ void ThreefrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(TiffTag::BLACKLEVEL)) {
     const TiffEntry* bl = mRootIFD->getEntryRecursive(TiffTag::BLACKLEVEL);
     if (bl->count == 1)
-      mRaw->blackLevel = bl->getFloat();
+      mRaw.get(0)->blackLevel = bl->getFloat();
   }
 
   if (mRootIFD->hasEntryRecursive(TiffTag::WHITELEVEL)) {
     const TiffEntry* wl = mRootIFD->getEntryRecursive(TiffTag::WHITELEVEL);
     if (wl->count == 1)
-      mRaw->whitePoint = wl->getFloat();
+      mRaw.get(0)->whitePoint = wl->getFloat();
   }
 
   // Fetch the white balance
@@ -97,7 +95,7 @@ void ThreefrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         if (div == 0.0F)
           ThrowRDE("Can not decode WB, multiplier is zero/");
 
-        mRaw->metadata.wbCoeffs[i] = 1.0F / div;
+        mRaw.metadata.wbCoeffs[i] = 1.0F / div;
       }
     }
   }

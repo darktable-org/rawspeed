@@ -34,7 +34,7 @@ class ByteStream;
 namespace rawspeed {
 
 class NikonDecompressor final : public AbstractDecompressor {
-  RawImage mRaw;
+  RawImageData* mRaw;
   uint32_t bitsPS;
 
   uint32_t huffSelect = 0;
@@ -47,7 +47,7 @@ class NikonDecompressor final : public AbstractDecompressor {
   uint32_t random;
 
 public:
-  NikonDecompressor(const RawImage& raw, ByteStream metadata, uint32_t bitsPS);
+  NikonDecompressor(RawImageData* raw, ByteStream metadata, uint32_t bitsPS);
 
   void decompress(const ByteStream& data, bool uncorrectedRawValues);
 

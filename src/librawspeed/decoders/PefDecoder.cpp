@@ -49,14 +49,14 @@ bool PefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
          make == "RICOH IMAGING COMPANY, LTD." || make == "PENTAX";
 }
 
-RawImage PefDecoder::decodeRawInternal() {
+void PefDecoder::decodeRawInternal() {
   const auto* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
   int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
 
   if (1 == compression || compression == 32773) {
     decodeUncompressed(raw, BitOrder::MSB);
-    return mRaw;
+    return;
   }
 
   if (65535 != compression)
@@ -80,7 +80,7 @@ RawImage PefDecoder::decodeRawInternal() {
   uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
   uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
 
-  mRaw->dim = iPoint2D(width, height);
+  mRaw.get(0)->dim = iPoint2D(width, height);
 
   std::optional<ByteStream> metaData;
   if (getRootIFD()->hasEntryRecursive(static_cast<TiffTag>(0x220))) {
@@ -93,16 +93,14 @@ RawImage PefDecoder::decodeRawInternal() {
     metaData = t->getData();
   }
 
-  PentaxDecompressor p(mRaw, metaData);
-  mRaw->createData();
+  PentaxDecompressor p(mRaw.get(0).get(), metaData);
+  mRaw.get(0)->createData();
   p.decompress(bs);
-
-  return mRaw;
 }
 
 void PefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
-  mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
+  mRaw.get(0)->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
                    CFAColor::GREEN, CFAColor::BLUE);
 
   if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
@@ -116,7 +114,7 @@ void PefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x200));
     if (black->count == 4) {
       for (int i = 0; i < 4; i++)
-        mRaw->blackLevelSeparate[i] = black->getU32(i);
+        mRaw.get(0)->blackLevelSeparate[i] = black->getU32(i);
     }
   }
 
@@ -125,9 +123,9 @@ void PefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const TiffEntry* wb =
         mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x0201));
     if (wb->count == 4) {
-      mRaw->metadata.wbCoeffs[0] = wb->getU32(0);
-      mRaw->metadata.wbCoeffs[1] = wb->getU32(1);
-      mRaw->metadata.wbCoeffs[2] = wb->getU32(3);
+      mRaw.metadata.wbCoeffs[0] = wb->getU32(0);
+      mRaw.metadata.wbCoeffs[1] = wb->getU32(1);
+      mRaw.metadata.wbCoeffs[2] = wb->getU32(3);
     }
   }
 }

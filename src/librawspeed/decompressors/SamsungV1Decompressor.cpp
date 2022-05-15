@@ -40,7 +40,7 @@ struct SamsungV1Decompressor::encTableItem {
   uint8_t diffLen;
 };
 
-SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
+SamsungV1Decompressor::SamsungV1Decompressor(RawImageData *image,
                                              const ByteStream& bs_, int bit)
     : AbstractSamsungDecompressor(image), bs(bs_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
@@ -115,7 +115,9 @@ void SamsungV1Decompressor::decompress() const {
     }
   }
 
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  assert(rawU16);
+  const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
   assert(out.width % 32 == 0 && "Should have even count of pixels per row.");
   assert(out.height % 2 == 0 && "Should have even row count.");
   BitPumpMSB pump(bs);

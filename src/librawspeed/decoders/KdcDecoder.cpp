@@ -69,7 +69,7 @@ Buffer KdcDecoder::getInputBuffer() const {
   if (off > mFile.getSize())
     ThrowRDE("offset is out of bounds");
 
-  const auto area = mRaw->dim.area();
+  const auto area = mRaw.get(0)->dim.area();
   if (area > std::numeric_limits<decltype(area)>::max() / 12) // round down
     ThrowRDE("Image dimensions are way too large, potential for overflow");
 
@@ -81,7 +81,7 @@ Buffer KdcDecoder::getInputBuffer() const {
   return mFile.getSubView(off, bytes);
 }
 
-RawImage KdcDecoder::decodeRawInternal() {
+void KdcDecoder::decodeRawInternal() {
   if (!mRootIFD->hasEntryRecursive(TiffTag::COMPRESSION))
     ThrowRDE("Couldn't find compression setting");
 
@@ -110,18 +110,16 @@ RawImage KdcDecoder::decodeRawInternal() {
   uint32_t width = ew->getU32();
   uint32_t height = eh->getU32();
 
-  mRaw->dim = iPoint2D(width, height);
+  mRaw.get(0)->dim = iPoint2D(width, height);
 
   const Buffer inputBuffer = KdcDecoder::getInputBuffer();
 
-  mRaw->createData();
+  mRaw.get(0)->createData();
 
   UncompressedDecompressor u(
-      ByteStream(DataBuffer(inputBuffer, Endianness::little)), mRaw);
+      ByteStream(DataBuffer(inputBuffer, Endianness::little)), mRaw.get(0).get());
 
   u.decode12BitRaw<Endianness::big>(width, height);
-
-  return mRaw;
 }
 
 void KdcDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
@@ -140,13 +138,13 @@ void KdcDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       if (kodakifd.hasEntryRecursive(TiffTag::KODAK_KDC_WB)) {
         const TiffEntry* wb = kodakifd.getEntryRecursive(TiffTag::KODAK_KDC_WB);
         if (wb->count == 3) {
-          mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
-          mRaw->metadata.wbCoeffs[1] = wb->getFloat(1);
-          mRaw->metadata.wbCoeffs[2] = wb->getFloat(2);
+          mRaw.metadata.wbCoeffs[0] = wb->getFloat(0);
+          mRaw.metadata.wbCoeffs[1] = wb->getFloat(1);
+          mRaw.metadata.wbCoeffs[2] = wb->getFloat(2);
         }
       }
     } catch (const TiffParserException& e) {
-      mRaw->setError(e.what());
+      mRaw.get(0)->setError(e.what());
     }
   }
 
@@ -154,12 +152,12 @@ void KdcDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(TiffTag::KODAKWB)) {
     const TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::KODAKWB);
     if (wb->count == 734 || wb->count == 1502) {
-      mRaw->metadata.wbCoeffs[0] =
+      mRaw.metadata.wbCoeffs[0] =
           static_cast<float>(((static_cast<uint16_t>(wb->getByte(148))) << 8) |
                              wb->getByte(149)) /
           256.0F;
-      mRaw->metadata.wbCoeffs[1] = 1.0F;
-      mRaw->metadata.wbCoeffs[2] =
+      mRaw.metadata.wbCoeffs[1] = 1.0F;
+      mRaw.metadata.wbCoeffs[2] =
           static_cast<float>(((static_cast<uint16_t>(wb->getByte(150))) << 8) |
                              wb->getByte(151)) /
           256.0F;

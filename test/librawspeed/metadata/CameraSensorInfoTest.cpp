@@ -269,7 +269,7 @@ protected:
             std::rand(), // NOLINT do not need crypto-level randomness
             std::rand()  // NOLINT do not need crypto-level randomness
         }) {}
-  virtual void SetUp() override { data = GetParam(); }
+  void SetUp() override { data = GetParam(); }
 
   IsoExpectationsT data;
 

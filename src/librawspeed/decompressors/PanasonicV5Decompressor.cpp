@@ -59,7 +59,7 @@ constexpr PanasonicV5Decompressor::PacketDsc
     PanasonicV5Decompressor::FourteenBitPacket =
         PanasonicV5Decompressor::PacketDsc(/*bps=*/14);
 
-PanasonicV5Decompressor::PanasonicV5Decompressor(const RawImage& img,
+PanasonicV5Decompressor::PanasonicV5Decompressor(RawImageData *img,
                                                  const ByteStream& input_,
                                                  uint32_t bps_)
     : mRaw(img), bps(bps_) {
@@ -181,7 +181,9 @@ inline void PanasonicV5Decompressor::processPixelPacket(BitPumpLSB& bs, int row,
   static_assert(dsc.pixelsPerPacket > 0, "dsc should be compile-time const");
   static_assert(dsc.bps > 0 && dsc.bps <= 16);
 
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  assert(rawU16);
+  const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
 
   assert(bs.getFillLevel() == 0);
 

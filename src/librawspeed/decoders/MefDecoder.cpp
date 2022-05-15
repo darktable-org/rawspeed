@@ -44,15 +44,13 @@ void MefDecoder::checkImageDimensions() {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 }
 
-RawImage MefDecoder::decodeRawInternal() {
+void MefDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
   UncompressedDecompressor u(
-      ByteStream(DataBuffer(mFile.getSubView(off), Endianness::little)), mRaw);
+      ByteStream(DataBuffer(mFile.getSubView(off), Endianness::little)), mRaw.get(0).get());
 
   u.decode12BitRaw<Endianness::big>(width, height);
-
-  return mRaw;
 }
 
 void MefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {

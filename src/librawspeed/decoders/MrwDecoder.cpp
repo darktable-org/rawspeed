@@ -151,20 +151,18 @@ void MrwDecoder::parseHeader() {
   imageData = db.getSubView(bs.getPosition(), imageBits / 8);
 }
 
-RawImage MrwDecoder::decodeRawInternal() {
-  mRaw->dim = iPoint2D(raw_width, raw_height);
-  mRaw->createData();
+void MrwDecoder::decodeRawInternal() {
+  mRaw.get(0)->dim = iPoint2D(raw_width, raw_height);
+  mRaw.get(0)->createData();
 
   DataBuffer db(imageData, Endianness::big);
   ByteStream bs(db);
-  UncompressedDecompressor u(bs, mRaw);
+  UncompressedDecompressor u(bs, mRaw.get(0).get());
 
   if (packed)
     u.decode12BitRaw<Endianness::big>(raw_width, raw_height);
   else
     u.decodeRawUnpacked<12, Endianness::big>(raw_width, raw_height);
-
-  return mRaw;
 }
 
 void MrwDecoder::checkSupportInternal(const CameraMetaData* meta) {
@@ -186,13 +184,13 @@ void MrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   setMetaData(meta, id.make, id.model, "", iso);
 
   if (hints.has("swapped_wb")) {
-    mRaw->metadata.wbCoeffs[0] = wb_coeffs[2];
-    mRaw->metadata.wbCoeffs[1] = wb_coeffs[0];
-    mRaw->metadata.wbCoeffs[2] = wb_coeffs[1];
+    mRaw.metadata.wbCoeffs[0] = wb_coeffs[2];
+    mRaw.metadata.wbCoeffs[1] = wb_coeffs[0];
+    mRaw.metadata.wbCoeffs[2] = wb_coeffs[1];
   } else {
-    mRaw->metadata.wbCoeffs[0] = wb_coeffs[0];
-    mRaw->metadata.wbCoeffs[1] = wb_coeffs[1];
-    mRaw->metadata.wbCoeffs[2] = wb_coeffs[3];
+    mRaw.metadata.wbCoeffs[0] = wb_coeffs[0];
+    mRaw.metadata.wbCoeffs[1] = wb_coeffs[1];
+    mRaw.metadata.wbCoeffs[2] = wb_coeffs[3];
   }
 }
 

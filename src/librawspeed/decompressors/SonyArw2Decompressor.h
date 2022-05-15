@@ -30,11 +30,11 @@ class SonyArw2Decompressor final : public AbstractDecompressor {
   void decompressRow(int row) const;
   void decompressThread() const noexcept;
 
-  RawImage mRaw;
+  RawImageData* mRaw;
   ByteStream input;
 
 public:
-  SonyArw2Decompressor(const RawImage& img, const ByteStream& input);
+  SonyArw2Decompressor(RawImageData* img, const ByteStream& input);
   void decompress() const;
 };
 

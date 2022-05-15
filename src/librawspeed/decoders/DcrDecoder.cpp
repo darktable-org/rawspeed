@@ -53,7 +53,7 @@ void DcrDecoder::checkImageDimensions() {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 }
 
-RawImage DcrDecoder::decodeRawInternal() {
+void DcrDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
   ByteStream input(DataBuffer(mFile.getSubView(off), Endianness::little));
@@ -82,7 +82,7 @@ RawImage DcrDecoder::decodeRawInternal() {
   assert(linearization != nullptr);
   auto linTable = linearization->getU16Array(linearization->count);
 
-  RawImageCurveGuard curveHandler(&mRaw, linTable, uncorrectedRawValues);
+  RawImageCurveGuard curveHandler(mRaw.get(0).get(), linTable, uncorrectedRawValues);
 
   // FIXME: dcraw does all sorts of crazy things besides this to fetch
   //        WB from what appear to be presets and calculate it in weird ways
@@ -95,7 +95,7 @@ RawImage DcrDecoder::decodeRawInternal() {
       const auto mul = blob->getU16(20 + i);
       if (0 == mul)
         ThrowRDE("WB coefficient is zero!");
-      mRaw->metadata.wbCoeffs[i] = 2048.0F / mul;
+      mRaw.metadata.wbCoeffs[i] = 2048.0F / mul;
     }
   }
 
@@ -110,10 +110,8 @@ RawImage DcrDecoder::decodeRawInternal() {
     }
   }();
 
-  KodakDecompressor k(mRaw, input, bps, uncorrectedRawValues);
+  KodakDecompressor k(mRaw.get(0).get(), input, bps, uncorrectedRawValues);
   k.decompress();
-
-  return mRaw;
 }
 
 void DcrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {

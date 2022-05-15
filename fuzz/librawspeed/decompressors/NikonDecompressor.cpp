@@ -39,7 +39,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
-    rawspeed::RawImage mRaw(CreateRawImage(bs));
+    auto mRaw(CreateRawImage(bs));
 
     const auto bitsPS = bs.get<uint32_t>();
     const auto uncorrectedRawValues = bs.get<uint32_t>();
@@ -47,7 +47,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     rawspeed::ByteStream metaData = bs.getStream(medataLength);
     rawspeed::ByteStream rawData = bs.getStream(bs.getRemainSize());
 
-    rawspeed::NikonDecompressor n(mRaw, metaData, bitsPS);
+    rawspeed::NikonDecompressor n(mRaw.get(), metaData, bitsPS);
     mRaw->createData();
     n.decompress(rawData, uncorrectedRawValues);
 

@@ -45,7 +45,7 @@ public:
   NefDecoder(TiffRootIFDOwner&& root, const Buffer& file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
-  RawImage decodeRawInternal() override;
+  void decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void checkSupportInternal(const CameraMetaData* meta) override;
 
@@ -58,10 +58,10 @@ private:
   static bool NEFIsUncompressedRGB(const TiffIFD* raw);
   void DecodeUncompressed() const;
   void DecodeD100Uncompressed() const;
-  void DecodeSNefUncompressed() const;
+  void DecodeSNefUncompressed();
   void readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
                            const iPoint2D& offset, int inputPitch) const;
-  void DecodeNikonSNef(const ByteStream& input) const;
+  void DecodeNikonSNef(const ByteStream& input);
   [[nodiscard]] std::string getMode() const;
   [[nodiscard]] std::string getExtendedMode(const std::string& mode) const;
   static std::vector<uint16_t> gammaCurve(double pwr, double ts, int mode,

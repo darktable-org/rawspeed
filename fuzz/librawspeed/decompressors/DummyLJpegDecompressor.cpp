@@ -39,7 +39,7 @@ class DummyLJpegDecompressor final
 
 public:
   DummyLJpegDecompressor(const rawspeed::ByteStream& bs,
-                         const rawspeed::RawImage& img)
+                         rawspeed::RawImageData* img)
       : AbstractLJpegDecompressor(bs, img) {}
 
   void decode() { AbstractLJpegDecompressor::decode(); }
@@ -55,9 +55,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
-    rawspeed::RawImage mRaw(CreateRawImage(bs));
+    auto mRaw(CreateRawImage(bs));
 
-    DummyLJpegDecompressor d(bs, mRaw);
+    DummyLJpegDecompressor d(bs, mRaw.get());
     d.decode();
     mRaw->createData();
 

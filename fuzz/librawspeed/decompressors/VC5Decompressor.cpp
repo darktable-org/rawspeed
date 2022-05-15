@@ -39,7 +39,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
-    rawspeed::RawImage mRaw(CreateRawImage(bs));
+    auto mRaw(CreateRawImage(bs));
     mRaw->whitePoint = bs.getI32();
 
     const auto offsetX = bs.getU32();
@@ -47,7 +47,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const auto width = bs.getU32();
     const auto height = bs.getU32();
 
-    rawspeed::VC5Decompressor v(bs, mRaw);
+    rawspeed::VC5Decompressor v(bs, mRaw.get());
     mRaw->createData();
     v.decode(offsetX, offsetY, width, height);
 

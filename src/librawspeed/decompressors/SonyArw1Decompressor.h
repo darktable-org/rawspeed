@@ -30,12 +30,12 @@ namespace rawspeed {
 class ByteStream;
 
 class SonyArw1Decompressor final : public AbstractDecompressor {
-  RawImage mRaw;
+  RawImageData* mRaw;
 
   inline static int getDiff(BitPumpMSB& bs, uint32_t len);
 
 public:
-  explicit SonyArw1Decompressor(const RawImage& img);
+  explicit SonyArw1Decompressor(RawImageData* img);
   void decompress(const ByteStream& input) const;
 };
 

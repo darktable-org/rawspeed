@@ -51,7 +51,7 @@ void DcsDecoder::checkImageDimensions() {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 }
 
-RawImage DcsDecoder::decodeRawInternal() {
+void DcsDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
   const TiffEntry* linearization =
@@ -63,18 +63,16 @@ RawImage DcsDecoder::decodeRawInternal() {
   assert(linearization != nullptr);
   auto table = linearization->getU16Array(256);
 
-  RawImageCurveGuard curveHandler(&mRaw, table, uncorrectedRawValues);
+  RawImageCurveGuard curveHandler(mRaw.get(0).get(), table, uncorrectedRawValues);
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(mFile.getSubView(off, c2), Endianness::little)),
-      mRaw);
+      mRaw.get(0).get());
 
   if (uncorrectedRawValues)
     u.decode8BitRaw<true>(width, height);
   else
     u.decode8BitRaw<false>(width, height);
-
-  return mRaw;
 }
 
 void DcsDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {

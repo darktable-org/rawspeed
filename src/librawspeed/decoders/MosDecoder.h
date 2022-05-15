@@ -38,7 +38,7 @@ public:
                                    const Buffer& file);
   MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file);
 
-  RawImage decodeRawInternal() override;
+  void decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 

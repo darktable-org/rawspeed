@@ -36,12 +36,12 @@ class iPoint2D;
 
 class DeflateDecompressor final : public AbstractDecompressor {
   ByteStream input;
-  RawImage mRaw;
+  RawImageData* mRaw;
   int predictor;
   int bps;
 
 public:
-  DeflateDecompressor(ByteStream bs, const RawImage& img, int predictor_,
+  DeflateDecompressor(ByteStream bs, RawImageData* img, int predictor_,
                       int bps_)
       : input(std::move(bs)), mRaw(img), predictor(predictor_), bps(bps_) {}
 

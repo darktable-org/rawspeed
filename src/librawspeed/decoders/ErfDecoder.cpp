@@ -51,16 +51,14 @@ void ErfDecoder::checkImageDimensions() {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 }
 
-RawImage ErfDecoder::decodeRawInternal() {
+void ErfDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(mFile.getSubView(off, c2), Endianness::little)),
-      mRaw);
+      mRaw.get(0).get());
 
   u.decode12BitRaw<Endianness::big, false, true>(width, height);
-
-  return mRaw;
 }
 
 void ErfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
@@ -70,10 +68,10 @@ void ErfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::EPSONWB);
     if (wb->count == 256) {
       // Magic values taken directly from dcraw
-      mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(24)) * 508.0F *
+      mRaw.metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(24)) * 508.0F *
                                    1.078F / static_cast<float>(0x10000);
-      mRaw->metadata.wbCoeffs[1] = 1.0F;
-      mRaw->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(25)) * 382.0F *
+      mRaw.metadata.wbCoeffs[1] = 1.0F;
+      mRaw.metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(25)) * 382.0F *
                                    1.173F / static_cast<float>(0x10000);
     }
   }

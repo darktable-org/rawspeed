@@ -41,8 +41,6 @@
 
 namespace rawspeed {
 
-class RawImage;
-
 class RawImageData;
 
 enum class RawImageType { UINT16, F32 };
@@ -88,7 +86,6 @@ public:
   // corners are when the image is rotated 45 degrees in Fuji rotated sensors.
   uint32_t fujiRotationPos = 0;
 
-  iPoint2D subsampling = {1, 1};
   std::string make;
   std::string model;
   std::string mode;
@@ -115,13 +112,9 @@ public:
   void checkRowIsInitialized(int row) const;
   void checkMemIsInitialized() const;
   void destroyData();
-  void blitFrom(const RawImage& src, const iPoint2D& srcPos,
+  void blitFrom(RawImageData *src, const iPoint2D& srcPos,
                 const iPoint2D& size, const iPoint2D& destPos);
   [[nodiscard]] rawspeed::RawImageType getDataType() const { return dataType; }
-  [[nodiscard]] Array2DRef<uint16_t>
-  getU16DataAsUncroppedArray2DRef() const noexcept;
-  [[nodiscard]] CroppedArray2DRef<uint16_t>
-  getU16DataAsCroppedArray2DRef() const noexcept;
   [[nodiscard]] uint8_t* getData() const;
   uint8_t*
   getData(uint32_t x,
@@ -167,13 +160,10 @@ public:
   uint32_t mBadPixelMapPitch = 0;
   bool mDitherScale =
       true; // Should upscaling be done with dither to minimize banding?
-  ImageMetaData metadata;
-
+  iPoint2D subsampling = {1, 1};
   Mutex mBadPixelMutex; // Mutex for 'mBadPixelPositions, must be used if more
                         // than 1 thread is accessing vector
 
-private:
-  uint32_t dataRefCount GUARDED_BY(mymutex) = 0;
 
 protected:
   RawImageType dataType;
@@ -191,14 +181,19 @@ protected:
   iPoint2D mOffset;
   iPoint2D uncropped_dim;
   std::unique_ptr<TableLookUp> table;
-  Mutex mymutex;
 };
 
 class RawImageDataU16 final : public RawImageData {
 public:
+  RawImageDataU16();
+  explicit RawImageDataU16(const iPoint2D& dim_, uint32_t cpp_ = 1);
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
   void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
+  [[nodiscard]] Array2DRef<uint16_t>
+  getU16DataAsUncroppedArray2DRef() const noexcept;
+  [[nodiscard]] CroppedArray2DRef<uint16_t>
+  getU16DataAsCroppedArray2DRef() const noexcept;
 
 private:
   void scaleValues_plain(int start_y, int end_y);
@@ -209,13 +204,13 @@ private:
   void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
   void doLookup(int start_y, int end_y) override;
 
-  RawImageDataU16();
-  explicit RawImageDataU16(const iPoint2D& dim_, uint32_t cpp_ = 1);
   friend class RawImage;
 };
 
 class RawImageDataFloat final : public RawImageData {
 public:
+  RawImageDataFloat();
+  explicit RawImageDataFloat(const iPoint2D& dim_, uint32_t cpp_ = 1);
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
   void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
@@ -224,75 +219,40 @@ private:
   void scaleValues(int start_y, int end_y) override;
   void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
   [[noreturn]] void doLookup(int start_y, int end_y) override;
-  RawImageDataFloat();
-  explicit RawImageDataFloat(const iPoint2D& dim_, uint32_t cpp_ = 1);
   friend class RawImage;
 };
 
- class RawImage {
- public:
-   static RawImage create(RawImageType type = RawImageType::UINT16);
-   static RawImage create(const iPoint2D& dim,
-                          RawImageType type = RawImageType::UINT16,
-                          uint32_t componentsPerPixel = 1);
-   RawImageData* operator->() const { return p_; }
-   RawImageData& operator*() const { return *p_; }
-   explicit RawImage(RawImageData* p); // p must not be NULL
-   ~RawImage();
-   RawImage(const RawImage& p);
-   RawImage& operator=(const RawImage& p) noexcept;
-   RawImage& operator=(RawImage&& p) noexcept;
+class RawImage {
+public:
+  using frame_ptr_t = std::shared_ptr<RawImageData>;
+  using storage_t = std::vector<frame_ptr_t>;
+  using const_iterator = storage_t::const_iterator;
 
-   RawImageData* get() { return p_; }
- private:
-   RawImageData* p_;    // p_ is never NULL
- };
-
-inline RawImage RawImage::create(RawImageType type)  {
-  switch (type)
-  {
-  case RawImageType::UINT16:
-    return RawImage(new RawImageDataU16());
-  case RawImageType::F32:
-    return RawImage(new RawImageDataFloat());
-  default:
-    writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
-    __builtin_unreachable();
+  [[nodiscard]] std::shared_ptr<RawImageData>
+  get(storage_t::size_type pos) const {
+    return data.at(pos);
   }
-}
-
-inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type,
-                                 uint32_t componentsPerPixel) {
-  switch (type) {
-  case RawImageType::UINT16:
-    return RawImage(new RawImageDataU16(dim, componentsPerPixel));
-  case RawImageType::F32:
-    return RawImage(new RawImageDataFloat(dim, componentsPerPixel));
-  default:
-    writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
-    __builtin_unreachable();
+  [[nodiscard]] storage_t::size_type numFrames() const { return data.size(); }
+  void clear() { data.clear(); }
+  void appendFrame(const std::shared_ptr<RawImageData>& frame) {
+    data.emplace_back(frame);
   }
-}
+  [[nodiscard]] storage_t::size_type size() const { return data.size(); }
 
-inline Array2DRef<uint16_t>
-RawImageData::getU16DataAsUncroppedArray2DRef() const noexcept {
-  assert(dataType == RawImageType::UINT16 &&
-         "Attempting to access floating-point buffer as uint16_t.");
-  assert(data && "Data not yet allocated.");
-  return {reinterpret_cast<uint16_t*>(data), cpp * uncropped_dim.x,
-          uncropped_dim.y, static_cast<int>(pitch / sizeof(uint16_t))};
-}
+  [[nodiscard]] const_iterator begin() const { return data.begin(); }
+  [[nodiscard]] const_iterator end() const { return data.end(); }
 
-inline CroppedArray2DRef<uint16_t>
-RawImageData::getU16DataAsCroppedArray2DRef() const noexcept {
-  return {getU16DataAsUncroppedArray2DRef(), cpp * mOffset.x, mOffset.y,
-          cpp * dim.x, dim.y};
-}
+  ImageMetaData metadata;
+
+private:
+  storage_t data;
+};
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,
-// You must supply the destination where the value should be written, and a pointer to
-// a value that will be used to store a random counter that can be reused between calls.
-// this needs to be inline to speed up tight decompressor loops
+// You must supply the destination where the value should be written, and a
+// pointer to a value that will be used to store a random counter that can be
+// reused between calls. this needs to be inline to speed up tight decompressor
+// loops
 inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
                                            uint32_t* random) {
   auto* dest = reinterpret_cast<uint16_t*>(dst);
@@ -315,8 +275,21 @@ inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
   *dest = table->tables[value];
 }
 
+inline Array2DRef<uint16_t>
+RawImageDataU16::getU16DataAsUncroppedArray2DRef() const noexcept {
+  assert(data && "Data not yet allocated.");
+  return {reinterpret_cast<uint16_t*>(data), cpp * uncropped_dim.x,
+          uncropped_dim.y, static_cast<int>(pitch / sizeof(uint16_t))};
+}
+
+inline CroppedArray2DRef<uint16_t>
+RawImageDataU16::getU16DataAsCroppedArray2DRef() const noexcept {
+  return {getU16DataAsUncroppedArray2DRef(), cpp * mOffset.x, mOffset.y,
+          cpp * dim.x, dim.y};
+}
+
 class RawImageCurveGuard final {
-  const RawImage* mRaw;
+  RawImageData* mRaw;
   const std::vector<uint16_t>& curve;
   const bool uncorrectedRawValues;
 
@@ -327,21 +300,21 @@ public:
   RawImageCurveGuard& operator=(const RawImageCurveGuard&) noexcept = delete;
   RawImageCurveGuard& operator=(RawImageCurveGuard&&) noexcept = delete;
 
-  RawImageCurveGuard(const RawImage* raw, const std::vector<uint16_t>& curve_,
+  RawImageCurveGuard(RawImageData* raw, const std::vector<uint16_t>& curve_,
                      bool uncorrectedRawValues_)
       : mRaw(raw), curve(curve_), uncorrectedRawValues(uncorrectedRawValues_) {
     if (uncorrectedRawValues)
       return;
 
-    (*mRaw)->setTable(curve, true);
+    mRaw->setTable(curve, true);
   }
 
   ~RawImageCurveGuard() {
     // Set the table, if it should be needed later.
     if (uncorrectedRawValues)
-      (*mRaw)->setTable(curve, false);
+      mRaw->setTable(curve, false);
     else
-      (*mRaw)->setTable(nullptr);
+      mRaw->setTable(nullptr);
   }
 };
 

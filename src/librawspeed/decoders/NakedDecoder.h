@@ -49,7 +49,7 @@ class NakedDecoder final : public RawDecoder {
 
 public:
   NakedDecoder(const Buffer& file, const Camera* c);
-  RawImage decodeRawInternal() override;
+  void decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
 

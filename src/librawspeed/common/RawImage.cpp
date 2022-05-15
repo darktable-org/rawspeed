@@ -57,7 +57,6 @@ RawImageData::RawImageData(const iPoint2D& _dim, int _bpc, int _cpp)
 }
 
 RawImageData::~RawImageData() {
-  assert(dataRefCount == 0);
   mOffset = iPoint2D(0, 0);
 
   destroyData();
@@ -281,30 +280,6 @@ void RawImageData::createBadPixelMap()
     ThrowRDE("Memory Allocation failed.");
 }
 
-RawImage::RawImage(RawImageData* p) : p_(p) {
-  MutexLocker guard(&p_->mymutex);
-  ++p_->dataRefCount;
-}
-
-RawImage::RawImage(const RawImage& p) : p_(p.p_) {
-  MutexLocker guard(&p_->mymutex);
-  ++p_->dataRefCount;
-}
-
-RawImage::~RawImage() {
-  p_->mymutex.Lock();
-
-  --p_->dataRefCount;
-
-  if (p_->dataRefCount == 0) {
-    p_->mymutex.Unlock();
-    delete p_;
-    return;
-  }
-
-  p_->mymutex.Unlock();
-}
-
 void RawImageData::transferBadPixelsToMap()
 {
   MutexLocker guard(&mBadPixelMutex);
@@ -428,7 +403,7 @@ void RawImageData::fixBadPixelsThread(int start_y, int end_y) {
   }
 }
 
-void RawImageData::blitFrom(const RawImage& src, const iPoint2D& srcPos,
+void RawImageData::blitFrom(RawImageData* src, const iPoint2D& srcPos,
                             const iPoint2D& size, const iPoint2D& destPos) {
   iRectangle2D src_rect(srcPos, size);
   iRectangle2D dest_rect(destPos, size);
@@ -501,25 +476,6 @@ void RawImageData::clearArea(iRectangle2D area, uint8_t val /*= 0*/) {
   for (int y = area.getTop(); y < area.getBottom(); y++)
     memset(getData(area.getLeft(), y), val,
            static_cast<size_t>(area.getWidth()) * bpp);
-}
-
-RawImage& RawImage::operator=(RawImage&& rhs) noexcept {
-  if (this == &rhs)
-    return *this;
-
-  std::swap(p_, rhs.p_);
-
-  return *this;
-}
-
-RawImage& RawImage::operator=(const RawImage& rhs) noexcept {
-  if (this == &rhs)
-    return *this;
-
-  RawImage tmp(rhs);
-  *this = std::move(tmp);
-
-  return *this;
 }
 
 RawImageWorker::RawImageWorker(RawImageData* _img, RawImageWorkerTask _task,

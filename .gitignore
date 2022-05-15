@@ -13,6 +13,7 @@ cscope.out
 *.vcproj
 *.vcxproj
 .vscode/
+CMakeLists.txt.user
 
 # Compiled Object files
 *.slo

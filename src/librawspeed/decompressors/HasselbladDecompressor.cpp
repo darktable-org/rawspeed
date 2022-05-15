@@ -34,7 +34,7 @@
 namespace rawspeed {
 
 HasselbladDecompressor::HasselbladDecompressor(const ByteStream& bs,
-                                               const RawImage& img)
+                                               RawImageData* img)
     : AbstractLJpegDecompressor(bs, img) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
@@ -67,7 +67,9 @@ void HasselbladDecompressor::decodeScan() {
              frame.w, frame.h, mRaw->dim.x, mRaw->dim.y);
   }
 
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  auto *rawU16 = dynamic_cast<RawImageDataU16*>(mRaw);
+  assert(rawU16);
+  const Array2DRef<uint16_t> out(rawU16->getU16DataAsUncroppedArray2DRef());
 
   assert(out.height > 0);
   assert(out.width > 0);

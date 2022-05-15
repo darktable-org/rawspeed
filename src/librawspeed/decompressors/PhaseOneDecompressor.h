@@ -39,7 +39,7 @@ struct PhaseOneStrip {
 };
 
 class PhaseOneDecompressor final : public AbstractDecompressor {
-  RawImage mRaw;
+  RawImageData* mRaw;
 
   std::vector<PhaseOneStrip> strips;
 
@@ -50,7 +50,7 @@ class PhaseOneDecompressor final : public AbstractDecompressor {
   void prepareStrips();
 
 public:
-  PhaseOneDecompressor(const RawImage& img,
+  PhaseOneDecompressor(RawImageData* img,
                        std::vector<PhaseOneStrip>&& strips_);
 
   void decompress() const;

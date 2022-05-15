@@ -35,7 +35,7 @@ namespace rawspeed {
 class CrwDecompressor final : public AbstractDecompressor {
   using crw_hts = std::array<HuffmanTable, 2>;
 
-  RawImage mRaw;
+  RawImageData* mRaw;
   crw_hts mHuff;
   const bool lowbits;
 
@@ -43,7 +43,7 @@ class CrwDecompressor final : public AbstractDecompressor {
   ByteStream rawInput;
 
 public:
-  CrwDecompressor(const RawImage& img, uint32_t dec_table_, bool lowbits_,
+  CrwDecompressor(RawImageData *img, uint32_t dec_table_, bool lowbits_,
                   ByteStream rawData);
 
   void decompress();

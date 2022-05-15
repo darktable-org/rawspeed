@@ -99,7 +99,7 @@ ByteStream OrfDecoder::handleSlices() const {
   return input.getStream(size);
 }
 
-RawImage OrfDecoder::decodeRawInternal() {
+void OrfDecoder::decodeRawInternal() {
   const auto* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 
   if (int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
@@ -112,33 +112,31 @@ RawImage OrfDecoder::decodeRawInternal() {
   if (!width || !height || width % 2 != 0 || width > 10400 || height > 7796)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-  mRaw->dim = iPoint2D(width, height);
+  mRaw.get(0)->dim = iPoint2D(width, height);
 
   ByteStream input(handleSlices());
 
   if (decodeUncompressed(input, width, height, input.getSize()))
-    return mRaw;
+    return;
 
   if (raw->getEntry(TiffTag::STRIPOFFSETS)->count != 1)
     ThrowRDE("%u stripes, and not uncompressed. Unsupported.",
              raw->getEntry(TiffTag::STRIPOFFSETS)->count);
 
-  OlympusDecompressor o(mRaw);
-  mRaw->createData();
+  OlympusDecompressor o(mRaw.get(0).get());
+  mRaw.get(0)->createData();
   o.decompress(std::move(input));
-
-  return mRaw;
 }
 
 bool OrfDecoder::decodeUncompressed(const ByteStream& s, uint32_t w, uint32_t h,
                                     uint32_t size) const {
-  UncompressedDecompressor u(s, mRaw);
+  UncompressedDecompressor u(s, mRaw.get(0).get());
   // FIXME: most of this logic should be in UncompressedDecompressor,
   // one way or another.
 
   if (size == h * ((w * 12 / 8) + ((w + 2) / 10))) {
     // 12-bit  packed 'with control' raw
-    mRaw->createData();
+    mRaw.get(0)->createData();
     u.decode12BitRaw<Endianness::little, false, true>(w, h);
     return true;
   }
@@ -146,13 +144,13 @@ bool OrfDecoder::decodeUncompressed(const ByteStream& s, uint32_t w, uint32_t h,
   if (size == w * h * 12 / 8) { // We're in a 12-bit packed raw
     iPoint2D dimensions(w, h);
     iPoint2D pos(0, 0);
-    mRaw->createData();
+    mRaw.get(0)->createData();
     u.readUncompressedRaw(dimensions, pos, w * 12 / 8, 12, BitOrder::MSB32);
     return true;
   }
 
   if (size == w * h * 2) { // We're in an unpacked raw
-    mRaw->createData();
+    mRaw.get(0)->createData();
     // FIXME: seems fishy
     if (s.getByteOrder() == getHostEndianness())
       u.decodeRawUnpacked<12, Endianness::little>(w, h);
@@ -163,7 +161,7 @@ bool OrfDecoder::decodeUncompressed(const ByteStream& s, uint32_t w, uint32_t h,
 
   if (size >
       w * h * 3 / 2) { // We're in one of those weird interlaced packed raws
-    mRaw->createData();
+    mRaw.get(0)->createData();
     u.decode12BitRaw<Endianness::big, true>(w, h);
     return true;
   }
@@ -186,7 +184,7 @@ void OrfDecoder::parseCFA() const {
   if (cfaSize != iPoint2D{2, 2})
     ThrowRDE("Bad CFA size: (%i, %i)", cfaSize.x, cfaSize.y);
 
-  mRaw->cfa.setSize(cfaSize);
+  mRaw.get(0)->cfa.setSize(cfaSize);
 
   auto int2enum = [](uint8_t i) {
     switch (i) {
@@ -205,7 +203,7 @@ void OrfDecoder::parseCFA() const {
     for (int x = 0; x < cfaSize.x; x++) {
       uint8_t c1 = CFA->getByte(4 + x + y * cfaSize.x);
       CFAColor c2 = int2enum(c1);
-      mRaw->cfa.setColorAt(iPoint2D(x, y), c2);
+      mRaw.get(0)->cfa.setColorAt(iPoint2D(x, y), c2);
     }
   }
 }
@@ -222,10 +220,10 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   if (mRootIFD->hasEntryRecursive(TiffTag::OLYMPUSREDMULTIPLIER) &&
       mRootIFD->hasEntryRecursive(TiffTag::OLYMPUSBLUEMULTIPLIER)) {
-    mRaw->metadata.wbCoeffs[0] = static_cast<float>(
+    mRaw.metadata.wbCoeffs[0] = static_cast<float>(
         mRootIFD->getEntryRecursive(TiffTag::OLYMPUSREDMULTIPLIER)->getU16());
-    mRaw->metadata.wbCoeffs[1] = 256.0F;
-    mRaw->metadata.wbCoeffs[2] = static_cast<float>(
+    mRaw.metadata.wbCoeffs[1] = 256.0F;
+    mRaw.metadata.wbCoeffs[2] = static_cast<float>(
         mRootIFD->getEntryRecursive(TiffTag::OLYMPUSBLUEMULTIPLIER)->getU16());
   } else if (mRootIFD->hasEntryRecursive(TiffTag::OLYMPUSIMAGEPROCESSING)) {
     // Newer cameras process the Image Processing SubIFD in the makernote
@@ -242,9 +240,9 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       const TiffEntry* wb =
           image_processing.getEntry(static_cast<TiffTag>(0x0100));
       if (wb->count == 2 || wb->count == 4) {
-        mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
-        mRaw->metadata.wbCoeffs[1] = 256.0F;
-        mRaw->metadata.wbCoeffs[2] = wb->getFloat(1);
+        mRaw.metadata.wbCoeffs[0] = wb->getFloat(0);
+        mRaw.metadata.wbCoeffs[1] = 256.0F;
+        mRaw.metadata.wbCoeffs[2] = wb->getFloat(1);
       }
     }
 
@@ -255,7 +253,7 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       // Order is assumed to be RGGB
       if (blackEntry->count == 4) {
         for (int i = 0; i < 4; i++) {
-          auto c = mRaw->cfa.getColorAt(i & 1, i >> 1);
+          auto c = mRaw.get(0)->cfa.getColorAt(i & 1, i >> 1);
           int j;
           switch (c) {
           case CFAColor::RED:
@@ -271,11 +269,11 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
             ThrowRDE("Unexpected CFA color: %u", static_cast<unsigned>(c));
           }
 
-          mRaw->blackLevelSeparate[i] = blackEntry->getU16(j);
+          mRaw.get(0)->blackLevelSeparate[i] = blackEntry->getU16(j);
         }
         // Adjust whitelevel based on the read black (we assume the dynamic
         // range is the same)
-        mRaw->whitePoint -= (mRaw->blackLevel - mRaw->blackLevelSeparate[0]);
+        mRaw.get(0)->whitePoint -= (mRaw.get(0)->blackLevel - mRaw.get(0)->blackLevelSeparate[0]);
       }
     }
   }
