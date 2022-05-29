@@ -263,7 +263,7 @@ int __attribute__((const)) FujiDecompressor::bitDiff(int value1, int value2) {
   if (value2 >= value1)
     return decBits;
 
-  while (decBits <= 12) {
+  while (decBits <= 14) {
     ++decBits;
 
     if ((value2 << decBits) >= value1)
