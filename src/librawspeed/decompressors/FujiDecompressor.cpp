@@ -103,7 +103,7 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
   cur_val = -q_point[4];
   q_table.resize(2 * (1 << d.header.raw_bits));
 
-  for (char* qt = &q_table[0]; cur_val <= q_point[4]; ++qt, ++cur_val) {
+  for (int8_t* qt = &q_table[0]; cur_val <= q_point[4]; ++qt, ++cur_val) {
     if (cur_val <= -q_point[3]) {
       *qt = -4;
     } else if (cur_val <= -q_point[2]) {
@@ -263,7 +263,7 @@ int __attribute__((const)) FujiDecompressor::bitDiff(int value1, int value2) {
   if (value2 >= value1)
     return decBits;
 
-  while (decBits <= 12) {
+  while (decBits <= 14) {
     ++decBits;
 
     if ((value2 << decBits) >= value1)
