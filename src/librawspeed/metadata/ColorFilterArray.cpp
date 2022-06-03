@@ -89,8 +89,8 @@ void ColorFilterArray::shiftLeft(int n) {
     ThrowRDE("No CFA size set (or set to zero)");
 
   writeLog(DEBUG_PRIO::EXTRA, "Shift left:%d", n);
-  n %= size.x;
-  if (n == 0)
+  n = size.x - (n % size.x);
+  if (n == 0 || n == size.x)
     return;
 
   vector<CFAColor> tmp(size.area());
@@ -107,8 +107,8 @@ void ColorFilterArray::shiftDown(int n) {
     ThrowRDE("No CFA size set (or set to zero)");
 
   writeLog(DEBUG_PRIO::EXTRA, "Shift down:%d", n);
-  n %= size.y;
-  if (n == 0)
+  n = size.y - (n % size.y);
+  if (n == 0 || n == size.y)
     return;
   vector<CFAColor> tmp(size.area());
   for (int y = 0; y < size.y; ++y) {
