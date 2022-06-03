@@ -55,7 +55,10 @@ public:
   void setSize(const iPoint2D& size);
   void setColorAt(iPoint2D pos, CFAColor c);
   void setCFA(iPoint2D size, ...);
-  void shiftLeft(int n = 1);
+
+  // Compute the effective CFA after moving point-of-origin (element (0,0))
+  // inwards towards image center this many pixels.
+  void shiftRight(int n = 1);
   void shiftDown(int n = 1);
 
   [[nodiscard]] CFAColor getColorAt(int x, int y) const;

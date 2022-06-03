@@ -206,7 +206,7 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
       }))
     ThrowRDE("Error decoding active area");
 
-  mRaw->cfa.shiftLeft(aa[1]);
+  mRaw->cfa.shiftRight(aa[1]);
   mRaw->cfa.shiftDown(aa[0]);
 }
 

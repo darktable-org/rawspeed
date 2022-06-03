@@ -84,11 +84,11 @@ void ColorFilterArray::setCFA( iPoint2D in_size, ... )
   va_end (arguments);
 }
 
-void ColorFilterArray::shiftLeft(int n) {
+void ColorFilterArray::shiftRight(int n) {
   if (cfa.empty())
     ThrowRDE("No CFA size set (or set to zero)");
 
-  writeLog(DEBUG_PRIO::EXTRA, "Shift left:%d", n);
+  writeLog(DEBUG_PRIO::EXTRA, "Shift right:%d", n);
   n %= size.x;
   if (n == 0)
     return;
@@ -110,6 +110,7 @@ void ColorFilterArray::shiftDown(int n) {
   n %= size.y;
   if (n == 0)
     return;
+
   vector<CFAColor> tmp(size.area());
   for (int y = 0; y < size.y; ++y) {
     for (int x = 0; x < size.x; ++x) {

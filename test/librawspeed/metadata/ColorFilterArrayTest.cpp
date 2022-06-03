@@ -112,7 +112,7 @@ TEST(ColorFilterArrayTestBasic, HandlesEmptyCFA) {
 
   ASSERT_ANY_THROW({ (void)cfa.getColorAt(0, 0); });
 
-  ASSERT_ANY_THROW({ cfa.shiftLeft(0); });
+  ASSERT_ANY_THROW({ cfa.shiftRight(0); });
 
   ASSERT_ANY_THROW({ cfa.shiftDown(0); });
 }
@@ -279,6 +279,39 @@ TEST(ColorFilterArrayTestBasic, shiftDcrawFilter) {
   });
 }
 
+TEST(ColorFilterArrayTestBasic, shift3x3Filter) {
+  ColorFilterArray cfaOrig;
+  cfaOrig.setSize({3, 3});
+  cfaOrig.setColorAt({1, 1}, CFAColor::RED);
+
+  {
+    ColorFilterArray c = cfaOrig;
+    c.shiftRight(1);
+    ASSERT_EQ(c.getColorAt(0, 1), cfaOrig.getColorAt(1, 1));
+  }
+  {
+    ColorFilterArray c = cfaOrig;
+    c.shiftRight(-1);
+    ASSERT_EQ(c.getColorAt(2, 1), cfaOrig.getColorAt(1, 1));
+  }
+  {
+    ColorFilterArray c = cfaOrig;
+    c.shiftDown(1);
+    ASSERT_EQ(c.getColorAt(1, 0), cfaOrig.getColorAt(1, 1));
+  }
+  {
+    ColorFilterArray c = cfaOrig;
+    c.shiftDown(-1);
+    ASSERT_EQ(c.getColorAt(1, 2), cfaOrig.getColorAt(1, 1));
+  }
+  {
+    ColorFilterArray c = cfaOrig;
+    c.shiftRight(1);
+    c.shiftDown(1);
+    ASSERT_EQ(c.getColorAt(0, 0), cfaOrig.getColorAt(1, 1));
+  }
+}
+
 TEST_P(ColorFilterArrayShiftTest, shiftEqualityTest) {
   ASSERT_NO_THROW({
     ColorFilterArray cfaOrig;
@@ -286,14 +319,14 @@ TEST_P(ColorFilterArrayShiftTest, shiftEqualityTest) {
     uint32_t fo = cfaOrig.getDcrawFilter();
 
     ColorFilterArray cfa = cfaOrig;
-    cfa.shiftLeft(x);
+    cfa.shiftRight(x);
     cfa.shiftDown(y);
     uint32_t f = cfa.getDcrawFilter();
     ASSERT_EQ(f, ColorFilterArray::shiftDcrawFilter(fo, x, y));
 
     cfa = cfaOrig;
     iPoint2D p(x, y);
-    cfa.shiftLeft(p.x);
+    cfa.shiftRight(p.x);
     cfa.shiftDown(p.y);
     f = cfa.getDcrawFilter();
     ASSERT_EQ(f, ColorFilterArray::shiftDcrawFilter(fo, x, y));
