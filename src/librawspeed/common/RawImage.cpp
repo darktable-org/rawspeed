@@ -260,7 +260,7 @@ void RawImageData::subFrame(iRectangle2D crop) {
 
   // if CFA, and not X-Trans, adjust.
   if (isCFA && cfa.getDcrawFilter() != 1 && cfa.getDcrawFilter() != 9) {
-    cfa.shiftLeft(crop.pos.x);
+    cfa.shiftRight(crop.pos.x);
     cfa.shiftDown(crop.pos.y);
   }
 

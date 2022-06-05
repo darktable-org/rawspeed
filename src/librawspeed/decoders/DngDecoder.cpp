@@ -206,8 +206,10 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
       }))
     ThrowRDE("Error decoding active area");
 
-  mRaw->cfa.shiftLeft(aa[1]);
-  mRaw->cfa.shiftDown(aa[0]);
+  // To reverse the ActiveArea modifictions done earlier, we need to
+  // use the negated ActiveArea x/y values.
+  mRaw->cfa.shiftRight(-aa[1]);
+  mRaw->cfa.shiftDown(-aa[0]);
 }
 
 DngTilingDescription
