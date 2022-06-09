@@ -826,28 +826,54 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
   const Array2DRef<const int16_t> lowbands3 =
       channels[3].wavelets[0].bands[0]->data->description;
 
-  // Convert to RGGB output
+  // Convert to RGGB or GBRG output
+  if (mRaw->cfa.getColorAt(0, 0) == CFAColor::RED) {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
-  for (int row = 0; row < height; ++row) {
-    for (int col = 0; col < width; ++col) {
-      const int mid = 2048;
+    for (int row = 0; row < height; ++row) {
+      for (int col = 0; col < width; ++col) {
+        const int mid = 2048;
 
-      int gs = lowbands0(row, col);
-      int rg = lowbands1(row, col) - mid;
-      int bg = lowbands2(row, col) - mid;
-      int gd = lowbands3(row, col) - mid;
+        int gs = lowbands0(row, col);
+        int rg = lowbands1(row, col) - mid;
+        int bg = lowbands2(row, col) - mid;
+        int gd = lowbands3(row, col) - mid;
 
-      int r = gs + 2 * rg;
-      int b = gs + 2 * bg;
-      int g1 = gs + gd;
-      int g2 = gs - gd;
+        int r = gs + 2 * rg;
+        int b = gs + 2 * bg;
+        int g1 = gs + gd;
+        int g2 = gs - gd;
 
-      out(2 * row + 0, 2 * col + 0) = static_cast<uint16_t>(mVC5LogTable[r]);
-      out(2 * row + 0, 2 * col + 1) = static_cast<uint16_t>(mVC5LogTable[g1]);
-      out(2 * row + 1, 2 * col + 0) = static_cast<uint16_t>(mVC5LogTable[g2]);
-      out(2 * row + 1, 2 * col + 1) = static_cast<uint16_t>(mVC5LogTable[b]);
+        out(2 * row + 0, 2 * col + 0) = static_cast<uint16_t>(mVC5LogTable[r]);
+        out(2 * row + 0, 2 * col + 1) = static_cast<uint16_t>(mVC5LogTable[g1]);
+        out(2 * row + 1, 2 * col + 0) = static_cast<uint16_t>(mVC5LogTable[g2]);
+        out(2 * row + 1, 2 * col + 1) = static_cast<uint16_t>(mVC5LogTable[b]);
+      }
+    }
+  } else {
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (int row = 0; row < height; ++row) {
+      for (int col = 0; col < width; ++col) {
+        const int mid = 2048;
+
+        int gs = lowbands0(row, col);
+        int rg = lowbands1(row, col) - mid;
+        int bg = lowbands2(row, col) - mid;
+        int gd = lowbands3(row, col) - mid;
+
+        int r = gs + 2 * rg;
+        int b = gs + 2 * bg;
+        int g1 = gs + gd;
+        int g2 = gs - gd;
+
+        out(2 * row + 0, 2 * col + 0) = static_cast<uint16_t>(mVC5LogTable[g1]);
+        out(2 * row + 0, 2 * col + 1) = static_cast<uint16_t>(mVC5LogTable[b]);
+        out(2 * row + 1, 2 * col + 0) = static_cast<uint16_t>(mVC5LogTable[r]);
+        out(2 * row + 1, 2 * col + 1) = static_cast<uint16_t>(mVC5LogTable[g2]);
+      }
     }
   }
 }
