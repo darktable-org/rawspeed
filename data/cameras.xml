@@ -1784,7 +1784,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="3617"/>
 		<Sensor black="0" white="3500" iso_list="50"/>
 		<Sensor black="0" white="3615" iso_list="100"/>
 		<Sensor black="0" white="3614" iso_list="125"/>
@@ -1794,6 +1793,7 @@
 		<Sensor black="0" white="3625" iso_list="800"/>
 		<Sensor black="0" white="3623" iso_list="1000"/>
 		<Sensor black="0" white="3622" iso_list="1250"/>
+                <Sensor black="0" white="3617"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">3925 4060 -1739</ColorMatrixRow>
