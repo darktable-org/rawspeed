@@ -1784,12 +1784,21 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="3500"/>
+		<Sensor black="0" white="3500" iso_list="50"/>
+		<Sensor black="0" white="3615" iso_list="100"/>
+		<Sensor black="0" white="3614" iso_list="125"/>
+		<Sensor black="0" white="3611" iso_list="160"/>
+		<Sensor black="0" white="3616" iso_list="250 320"/>
+		<Sensor black="0" white="3621" iso_list="500"/>
+		<Sensor black="0" white="3625" iso_list="800"/>
+		<Sensor black="0" white="3623" iso_list="1000"/>
+		<Sensor black="0" white="3622" iso_list="1250"/>
+		<Sensor black="0" white="3617"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">4374 3631 -1743</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-7520 15212 2472</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-2892 3632 8161</ColorMatrixRow>
+				<ColorMatrixRow plane="0">3925 4060 -1739</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-8973 16552 2545</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-3287 3945 8243</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
