@@ -466,6 +466,23 @@ void ArwDecoder::GetWB() const {
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(1);
       mRaw->metadata.wbCoeffs[2] = wb->getFloat(3);
     }
+
+    if (encryptedIFD.hasEntry(TiffTag::SONYBLACKLEVEL)) {
+      const TiffEntry* bl = encryptedIFD.getEntry(TiffTag::SONYBLACKLEVEL);
+      if (bl->count != 4)
+        ThrowRDE("Black Level has %d entries instead of 4", bl->count);
+      mRaw->blackLevelSeparate[0] = bl->getU16(0);
+      mRaw->blackLevelSeparate[1] = bl->getU16(1);
+      mRaw->blackLevelSeparate[2] = bl->getU16(2);
+      mRaw->blackLevelSeparate[3] = bl->getU16(3);
+    }
+
+    if (encryptedIFD.hasEntry(TiffTag::SONYWHITELEVEL)) {
+      const TiffEntry* wl = encryptedIFD.getEntry(TiffTag::SONYWHITELEVEL);
+      if (wl->count != 3)
+        ThrowRDE("White Level has %d entries instead of 3", wl->count);
+      mRaw->whitePoint = wl->getU16(0);
+    }
   }
 }
 
