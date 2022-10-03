@@ -21,7 +21,6 @@
 
 #include "decompressors/LJpegDecompressor.h"
 #include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
-#include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for to_array, roundUpDivision
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
@@ -59,7 +58,7 @@ LJpegDecompressor::LJpegDecompressor(const ByteStream& bs, const RawImage& img)
 
 void LJpegDecompressor::decode(uint32_t offsetX, uint32_t offsetY,
                                uint32_t width, uint32_t height,
-                               bool fixDng16Bug_) {
+                               bool fixDng16Bug_, bool sonyArrange_) {
   if (offsetX >= static_cast<unsigned>(mRaw->dim.x))
     ThrowRDE("X offset outside of image");
   if (offsetY >= static_cast<unsigned>(mRaw->dim.y))
@@ -84,12 +83,12 @@ void LJpegDecompressor::decode(uint32_t offsetX, uint32_t offsetY,
   h = height;
 
   fixDng16Bug = fixDng16Bug_;
+  sonyArrange = sonyArrange_;
 
   AbstractLJpegDecompressor::decode();
 }
 
-void LJpegDecompressor::decodeScan()
-{
+void LJpegDecompressor::decodeScan() {
   assert(frame.cps > 0);
 
   if (predictorMode != 1)
@@ -104,14 +103,16 @@ void LJpegDecompressor::decodeScan()
     ThrowRDE("Got less pixels than the components per sample");
 
   // How many output pixels are we expected to produce, as per DNG tiling?
-  const auto tileRequiredWidth = mRaw->getCpp() * w;
+  const auto tileRequiredWidth = mRaw->getCpp() * w * (sonyArrange ? 2 : 1);
+  // How many of these rows do we need?
+  const auto numRows = h / (sonyArrange ? 2 : 1);
 
   // How many full pixel blocks do we need to consume for that?
   if (const auto blocksToConsume =
           roundUpDivision(tileRequiredWidth, frame.cps);
-      frame.w < blocksToConsume || frame.h < h) {
+      frame.w < blocksToConsume || frame.h < numRows) {
     ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
-             frame.cps * frame.w, frame.h, tileRequiredWidth, h);
+             frame.cps * frame.w, frame.h, tileRequiredWidth, numRows);
   }
 
   // How many full pixel blocks will we produce?
@@ -164,6 +165,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   assert(N_COMP > 0);
   assert(N_COMP >= mRaw->getCpp());
   assert((N_COMP / mRaw->getCpp()) > 0);
+  assert(N_COMP == 4 || !sonyArrange);
 
   assert(mRaw->dim.x >= N_COMP);
   assert((mRaw->getCpp() * (mRaw->dim.x - offX)) >= N_COMP);
@@ -188,13 +190,11 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   assert(offY + h <= static_cast<unsigned>(mRaw->dim.y));
   assert(offX + w <= static_cast<unsigned>(mRaw->dim.x));
 
-  // For y, we can simply stop decoding when we reached the border.
-  for (unsigned row = 0; row < h; ++row) {
-    unsigned col = 0;
+  const auto numRows = h / (sonyArrange ? 2 : 1);
 
-    copy_n(predNext, N_COMP, pred.data());
-    // the predictor for the next line is the start of this line
-    predNext = &img(row, col);
+  // For y, we can simply stop decoding when we reached the border.
+  for (unsigned row = 0; row < numRows; ++row) {
+    unsigned col = 0;
 
     // FIXME: predictor may have value outside of the uint16_t.
     // https://github.com/darktable-org/rawspeed/issues/175
@@ -203,7 +203,11 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
     for (; col < N_COMP * fullBlocks; col += N_COMP) {
       for (int i = 0; i != N_COMP; ++i) {
         pred[i] = uint16_t(pred[i] + ht[i]->decodeDifference(bitStream));
-        img(row, col + i) = pred[i];
+        if (sonyArrange) {
+          img((row * 2) + (i >> 1), (col / 2) + (i & 1)) = pred[i];
+        } else {
+          img(row, col + i) = pred[i];
+        }
       }
     }
 
@@ -231,7 +235,15 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
 
     // ... and discard the rest.
     for (; col < N_COMP * frame.w; col += N_COMP) {
-      for (int i = 0; i != N_COMP; ++i) ht[i]->decodeDifference(bitStream);
+      for (int i = 0; i != N_COMP; ++i)
+        ht[i]->decodeDifference(bitStream);
+    }
+
+    if (sonyArrange) {
+      copy_n(&img(row * 2, 0), 2, pred.data());
+      copy_n(&img(row * 2 + 1, 0), 2, pred.data() + 2);
+    } else {
+      copy_n(&img(row, 0), N_COMP, pred.data());
     }
   }
 }

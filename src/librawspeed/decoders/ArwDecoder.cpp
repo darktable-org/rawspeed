@@ -24,6 +24,9 @@
 #include "adt/Point.h"                              // for iPoint2D
 #include "common/Common.h"                          // for roundDown
 #include "decoders/RawDecoderException.h"           // for ThrowException
+#include "common/RawspeedException.h"               // for RawspeedException
+#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decompressors/LJpegDecompressor.h"        // for LJpegDecompressor
 #include "decompressors/SonyArw1Decompressor.h"     // for SonyArw1Decompre...
 #include "decompressors/SonyArw2Decompressor.h"     // for SonyArw2Decompre...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
@@ -139,6 +142,11 @@ RawImage ArwDecoder::decodeRawInternal() {
   int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
   if (1 == compression) {
     DecodeUncompressed(raw);
+    return mRaw;
+  }
+
+  if (7 == compression) {
+    DecodeLJpeg(raw);
     return mRaw;
   }
 
@@ -259,6 +267,78 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) const {
     u.decodeRawUnpacked<14, Endianness::big>(width, height);
   else
     u.decodeRawUnpacked<16, Endianness::little>(width, height);
+}
+
+void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) const {
+  uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
+  uint32_t bitPerPixel = raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
+
+  switch (bitPerPixel) {
+  case 8:
+  case 12:
+  case 14:
+    break;
+  default:
+    ThrowRDE("Unexpected bits per pixel: %u", bitPerPixel);
+  }
+
+  if (width == 0 || height == 0 || height % 2 != 0 || width > 9600 ||
+      height > 6376)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
+  mRaw->dim = iPoint2D(width, height);
+
+
+  const uint32_t tilew = raw->getEntry(TiffTag::TILEWIDTH)->getU32();
+  const uint32_t tileh = raw->getEntry(TiffTag::TILELENGTH)->getU32();
+
+  if (!(tilew > 0 && tileh > 0))
+    ThrowRDE("Invalid tile size: (%u, %u)", tilew, tileh);
+
+  assert(tilew > 0);
+  const uint32_t tilesX = roundUpDivision(mRaw->dim.x, tilew);
+  if (!tilesX)
+    ThrowRDE("Zero tiles horizontally");
+
+  assert(tileh > 0);
+  const uint32_t tilesY = roundUpDivision(mRaw->dim.y, tileh);
+  if (!tilesY)
+    ThrowRDE("Zero tiles vertically");
+
+  const TiffEntry* offsets = raw->getEntry(TiffTag::TILEOFFSETS);
+  const TiffEntry* counts = raw->getEntry(TiffTag::TILEBYTECOUNTS);
+  if (offsets->count != counts->count) {
+    ThrowRDE("Tile count mismatch: offsets:%u count:%u", offsets->count,
+             counts->count);
+  }
+
+  // tilesX * tilesY may overflow, but division is fine, so let's do that.
+  if ((offsets->count / tilesX != tilesY || (offsets->count % tilesX != 0)) ||
+      (offsets->count / tilesY != tilesX || (offsets->count % tilesY != 0))) {
+    ThrowRDE("Tile X/Y count mismatch: total:%u X:%u, Y:%u", offsets->count,
+             tilesX, tilesY);
+  }
+
+  mRaw->createData();
+  for (uint32_t tile = 0; tile < offsets->count; tile++) {
+    const uint32_t tileX = tile % tilesX;
+    const uint32_t tileY = tile / tilesX;
+    const uint32_t offset = offsets->getU32(tile);
+    const uint32_t length = counts->getU32(tile);
+    LJpegDecompressor decompressor(
+        ByteStream(
+            DataBuffer(mFile.getSubView(offset, length), Endianness::little)),
+        mRaw);
+    decompressor.decode(tileX * tilew, tileY * tileh, tilew, tileh, false,
+                        true);
+  }
+
+  const TiffEntry* origin_entry = raw->getEntry(TiffTag::DEFAULTCROPORIGIN);
+  const TiffEntry* size_entry = raw->getEntry(TiffTag::DEFAULTCROPSIZE);
+  iRectangle2D crop(origin_entry->getU32(0), origin_entry->getU32(1),
+                    size_entry->getU32(0), size_entry->getU32(1));
+  mRaw->subFrame(crop);
 }
 
 void ArwDecoder::DecodeARW2(const ByteStream& input, uint32_t w, uint32_t h,

@@ -164,6 +164,7 @@ public:
 protected:
   bool fixDng16Bug = false;  // DNG v1.0.x compatibility
   bool fullDecodeHT = true;  // FullDecode Huffman
+  bool sonyArrange = false;  // Rows are interleaved
 
   void decode();
   void parseSOF(ByteStream data, SOFInfo* i);
