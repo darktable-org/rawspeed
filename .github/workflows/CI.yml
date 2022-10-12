@@ -21,33 +21,35 @@ jobs:
       matrix:
         os: [ linux ]
         compiler:
-          - { distro: "debian:unstable", family: GNU,  version: 12, CC: gcc-12,   CXX: g++-12 }
-          - { distro: "debian:unstable", family: GNU,  version: 11, CC: gcc-11,   CXX: g++-11 }
-          - { distro: "debian:bullseye", family: GNU,  version: 10, CC: gcc-10,   CXX: g++-10 }
-          - { distro: "debian:unstable", family: LLVM, version: 14, CC: clang-14, CXX: clang++-14 }
-          - { distro: "debian:unstable", family: LLVM, version: 13, CC: clang-13, CXX: clang++-13 }
-          - { distro: "debian:bookworm", family: LLVM, version: 12, CC: clang-12, CXX: clang++-12 }
-          - { distro: "debian:bullseye", family: LLVM, version: 11, CC: clang-11, CXX: clang++-11 }
+          - { distro: "debian:unstable-slim", family: GNU,  version: 12, CC: gcc-12,   CXX: g++-12 }
+          - { distro: "debian:unstable-slim", family: GNU,  version: 11, CC: gcc-11,   CXX: g++-11 }
+          - { distro: "debian:bullseye-slim", family: GNU,  version: 10, CC: gcc-10,   CXX: g++-10 }
+          - { distro: "debian:unstable-slim", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15 }
+          - { distro: "debian:unstable-slim", family: LLVM, version: 14, CC: clang-14, CXX: clang++-14 }
+          - { distro: "debian:unstable-slim", family: LLVM, version: 13, CC: clang-13, CXX: clang++-13 }
+          - { distro: "ubuntu:jammy",         family: LLVM, version: 12, CC: clang-12, CXX: clang++-12 }
+          - { distro: "debian:bullseye-slim", family: LLVM, version: 11, CC: clang-11, CXX: clang++-11 }
+          - { distro: "ubuntu:focal",         family: LLVM, version: 10, CC: clang-10, CXX: clang++-10 }
         flavor: [ RelWithDebInfo, Release ]
         include:
           - os: linux
             compiler: { distro: "debian:unstable", family: GNU, version: 12, CC: gcc-12, CXX: g++-12, GCOV: gcov-12 }
             flavor: Coverage
           - os: linux
-            compiler: { distro: "debian:unstable", family: LLVM, version: 14, CC: clang-14, CXX: clang++-14, CLANG_TIDY: clang-tidy-14 }
+            compiler: { distro: "debian:unstable", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15, CLANG_TIDY: clang-tidy-15 }
             flavor: ClangTidy
           - os: linux
-            compiler: { distro: "debian:unstable", family: LLVM, version: 14, CC: clang-14, CXX: clang++-14 }
+            compiler: { distro: "debian:unstable", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15 }
             flavor: ClangStaticAnalysis
           - os: linux
-            compiler: { distro: "debian:unstable", family: LLVM, version: 14, CC: clang-14, CXX: clang++-14 }
+            compiler: { distro: "debian:unstable", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15 }
             flavor: CodeQLAnalysis
           - os: linux
-            compiler: { distro: "debian:unstable", family: LLVM, version: 14, CC: clang-14, CXX: clang++-14 }
+            compiler: { distro: "debian:unstable", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15 }
             flavor: SonarCloudStaticAnalysis
     name: ${{ matrix.os }}.${{ matrix.compiler.distro }}.${{ matrix.compiler.family }}${{ matrix.compiler.version }}.${{ matrix.flavor }}
     container:
-      image: ${{ matrix.compiler.distro }}-slim
+      image: ${{ matrix.compiler.distro }}
       options: --tmpfs /tmp:exec --tmpfs /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}:exec
     steps:
       - name: Configure APT
