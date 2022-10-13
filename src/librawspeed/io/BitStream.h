@@ -35,6 +35,10 @@
 
 namespace rawspeed {
 
+template <typename BIT_STREAM> struct BitStreamTraits final {
+  static constexpr bool canUseWithHuffmanTable = false;
+};
+
 // simple 64-bit wide cache implementation that acts like a FiFo.
 // There are two variants:
 //  * L->R: new bits are pushed in on the left and pulled out on the right
@@ -50,10 +54,6 @@ struct BitStreamCacheBase
 
   // how many bits could be requested to be filled
   static constexpr unsigned MaxGetBits = bitwidth<uint32_t>();
-
-  // maximal number of bytes the implementation may read.
-  // NOTE: this is not the same as MaxGetBits/8 !!!
-  static constexpr unsigned MaxProcessBytes = 8;
 };
 
 struct BitStreamCacheLeftInRightOut : BitStreamCacheBase
@@ -114,9 +114,10 @@ template <typename Tag> struct BitStreamReplenisherBase {
 
   // A temporary intermediate buffer that may be used by fill() method either
   // in debug build to enforce lack of out-of-bounds reads, or when we are
-  // nearing the end of the input buffer and can not just read MaxProcessBytes
-  // from it, but have to read as much as we can and fill rest with zeros.
-  std::array<uint8_t, BitStreamCacheBase::MaxProcessBytes> tmp = {};
+  // nearing the end of the input buffer and can not just read
+  // BitStreamTraits<Tag>::MaxProcessBytes from it, but have to read as much as
+  // we can and fill rest with zeros.
+  std::array<uint8_t, BitStreamTraits<Tag>::MaxProcessBytes> tmp = {};
 };
 
 template <typename Tag>
@@ -140,9 +141,9 @@ struct BitStreamForwardSequentialReplenisher final
 
   inline const uint8_t* getInput() {
 #if !defined(DEBUG)
-    // Do we have MaxProcessBytes or more bytes left in the input buffer?
-    // If so, then we can just read from said buffer.
-    if (Base::pos + BitStreamCacheBase::MaxProcessBytes <= Base::size)
+    // Do we have BitStreamTraits<Tag>::MaxProcessBytes or more bytes left in
+    // the input buffer? If so, then we can just read from said buffer.
+    if (Base::pos + BitStreamTraits<Tag>::MaxProcessBytes <= Base::size)
       return Base::data + Base::pos;
 #endif
 
@@ -151,7 +152,7 @@ struct BitStreamForwardSequentialReplenisher final
 
     // Note that in order to keep all fill-level invariants we must allow to
     // over-read past-the-end a bit.
-    if (Base::pos > Base::size + BitStreamCacheBase::MaxProcessBytes)
+    if (Base::pos > Base::size + 2 * BitStreamTraits<Tag>::MaxProcessBytes)
       ThrowIOE("Buffer overflow read in BitStream");
 
     Base::tmp.fill(0);
@@ -161,16 +162,12 @@ struct BitStreamForwardSequentialReplenisher final
     typename Base::size_type bytesRemaining =
         (Base::pos < Base::size) ? Base::size - Base::pos : 0;
     // And if we are not at the end of the input, we may have more than we need.
-    bytesRemaining =
-        std::min(BitStreamCacheBase::MaxProcessBytes, bytesRemaining);
+    bytesRemaining = std::min<typename Base::size_type>(
+        BitStreamTraits<Tag>::MaxProcessBytes, bytesRemaining);
 
     memcpy(Base::tmp.data(), Base::data + Base::pos, bytesRemaining);
     return Base::tmp.data();
   }
-};
-
-template <typename BIT_STREAM> struct BitStreamTraits final {
-  static constexpr bool canUseWithHuffmanTable = false;
 };
 
 template <typename Tag, typename Cache,
@@ -184,7 +181,7 @@ class BitStream final {
 
   // this method hase to be implemented in the concrete BitStream template
   // specializations. It will return the number of bytes processed. It needs
-  // to process up to BitStreamCacheBase::MaxProcessBytes bytes of input.
+  // to process up to BitStreamTraits<Tag>::MaxProcessBytes bytes of input.
   size_type fillCache(const uint8_t* input);
 
 public:
