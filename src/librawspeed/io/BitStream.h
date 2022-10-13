@@ -179,6 +179,8 @@ class BitStream final {
   size_type fillCache(const uint8_t* input);
 
 public:
+  using tag = Tag;
+
   BitStream() = default;
 
   explicit BitStream(const Buffer& buf) : replenisher(buf) {}

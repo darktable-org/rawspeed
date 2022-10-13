@@ -34,7 +34,7 @@ struct JPEGBitPumpTag;
 // i.e. we push into the cache from the right and read it from the left
 using BitPumpJPEG = BitStream<JPEGBitPumpTag, BitStreamCacheRightInLeftOut>;
 
-template <> struct BitStreamTraits<BitPumpJPEG> final {
+template <> struct BitStreamTraits<JPEGBitPumpTag> final {
   static constexpr bool canUseWithHuffmanTable = true;
 
   // How many bytes can we read from the input per each fillCache(), at most?
@@ -47,7 +47,8 @@ template <>
 inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uint8_t* input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
 
-  std::array<uint8_t, BitStreamTraits<BitPumpJPEG>::MaxProcessBytes> prefetch;
+  std::array<uint8_t, BitStreamTraits<JPEGBitPumpTag>::MaxProcessBytes>
+      prefetch;
   std::copy_n(input, prefetch.size(), prefetch.begin());
 
   // short-cut path for the most common case (no FF marker in the next 4 bytes)

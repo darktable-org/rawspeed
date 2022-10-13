@@ -34,7 +34,7 @@ struct MSBBitPumpTag;
 
 using BitPumpMSB = BitStream<MSBBitPumpTag, BitStreamCacheRightInLeftOut>;
 
-template <> struct BitStreamTraits<BitPumpMSB> final {
+template <> struct BitStreamTraits<MSBBitPumpTag> final {
   static constexpr bool canUseWithHuffmanTable = true;
 };
 

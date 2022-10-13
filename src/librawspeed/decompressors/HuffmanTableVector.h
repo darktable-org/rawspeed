@@ -42,8 +42,9 @@ protected:
   template <typename BIT_STREAM>
   inline std::pair<CodeSymbol, int /*codeValue*/>
   readSymbol(BIT_STREAM& bs) const {
-    static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
-                  "This BitStream specialization is not marked as usable here");
+    static_assert(
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        "This BitStream specialization is not marked as usable here");
 
     CodeSymbol partial;
     uint64_t codeId;
@@ -107,16 +108,18 @@ public:
 
   template <typename BIT_STREAM>
   inline int decodeCodeValue(BIT_STREAM& bs) const {
-    static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
-                  "This BitStream specialization is not marked as usable here");
+    static_assert(
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        "This BitStream specialization is not marked as usable here");
     assert(!fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
 
   template <typename BIT_STREAM>
   inline int decodeDifference(BIT_STREAM& bs) const {
-    static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
-                  "This BitStream specialization is not marked as usable here");
+    static_assert(
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        "This BitStream specialization is not marked as usable here");
     assert(fullDecode);
     return decode<BIT_STREAM, true>(bs);
   }
@@ -127,8 +130,9 @@ public:
   // All ifs depending on this bool will be optimized out by the compiler
   template <typename BIT_STREAM, bool FULL_DECODE>
   inline int decode(BIT_STREAM& bs) const {
-    static_assert(BitStreamTraits<BIT_STREAM>::canUseWithHuffmanTable,
-                  "This BitStream specialization is not marked as usable here");
+    static_assert(
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        "This BitStream specialization is not marked as usable here");
     assert(FULL_DECODE == fullDecode);
 
     bs.fill(32);
