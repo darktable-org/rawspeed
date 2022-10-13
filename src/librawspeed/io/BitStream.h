@@ -110,7 +110,10 @@ template <typename Tag> struct BitStreamReplenisherBase {
   BitStreamReplenisherBase() = default;
 
   explicit BitStreamReplenisherBase(const Buffer& input)
-      : data(input.getData(0, input.getSize())), size(input.getSize()) {}
+      : data(input.getData(0, input.getSize())), size(input.getSize()) {
+    if (size < BitStreamTraits<Tag>::MaxProcessBytes)
+      ThrowIOE("Bit stream size is smaller than MaxProcessBytes");
+  }
 
   // A temporary intermediate buffer that may be used by fill() method either
   // in debug build to enforce lack of out-of-bounds reads, or when we are
