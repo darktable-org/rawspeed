@@ -100,7 +100,7 @@ struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
   }
 };
 
-struct BitStreamReplenisherBase {
+template <typename Tag> struct BitStreamReplenisherBase {
   using size_type = uint32_t;
 
   const uint8_t* data;
@@ -119,23 +119,31 @@ struct BitStreamReplenisherBase {
   std::array<uint8_t, BitStreamCacheBase::MaxProcessBytes> tmp = {};
 };
 
-struct BitStreamForwardSequentialReplenisher final : BitStreamReplenisherBase {
+template <typename Tag>
+struct BitStreamForwardSequentialReplenisher final
+    : public BitStreamReplenisherBase<Tag> {
+  using Base = BitStreamReplenisherBase<Tag>;
+
   BitStreamForwardSequentialReplenisher() = default;
 
-  using BitStreamReplenisherBase::BitStreamReplenisherBase;
+  using Base::BitStreamReplenisherBase;
 
-  [[nodiscard]] inline size_type getPos() const { return pos; }
-  [[nodiscard]] inline size_type getRemainingSize() const {
-    return size - getPos();
+  [[nodiscard]] inline typename Base::size_type getPos() const {
+    return Base::pos;
   }
-  inline void markNumBytesAsConsumed(size_type numBytes) { pos += numBytes; }
+  [[nodiscard]] inline typename Base::size_type getRemainingSize() const {
+    return Base::size - getPos();
+  }
+  inline void markNumBytesAsConsumed(typename Base::size_type numBytes) {
+    Base::pos += numBytes;
+  }
 
   inline const uint8_t* getInput() {
 #if !defined(DEBUG)
     // Do we have MaxProcessBytes or more bytes left in the input buffer?
     // If so, then we can just read from said buffer.
-    if (pos + BitStreamCacheBase::MaxProcessBytes <= size)
-      return data + pos;
+    if (Base::pos + BitStreamCacheBase::MaxProcessBytes <= Base::size)
+      return Base::data + Base::pos;
 #endif
 
     // We have to use intermediate buffer, either because the input is running
@@ -143,20 +151,21 @@ struct BitStreamForwardSequentialReplenisher final : BitStreamReplenisherBase {
 
     // Note that in order to keep all fill-level invariants we must allow to
     // over-read past-the-end a bit.
-    if (pos > size + BitStreamCacheBase::MaxProcessBytes)
+    if (Base::pos > Base::size + BitStreamCacheBase::MaxProcessBytes)
       ThrowIOE("Buffer overflow read in BitStream");
 
-    tmp.fill(0);
+    Base::tmp.fill(0);
 
     // How many bytes are left in input buffer?
     // Since pos can be past-the-end we need to carefully handle overflow.
-    size_type bytesRemaining = (pos < size) ? size - pos : 0;
+    typename Base::size_type bytesRemaining =
+        (Base::pos < Base::size) ? Base::size - Base::pos : 0;
     // And if we are not at the end of the input, we may have more than we need.
     bytesRemaining =
         std::min(BitStreamCacheBase::MaxProcessBytes, bytesRemaining);
 
-    memcpy(tmp.data(), data + pos, bytesRemaining);
-    return tmp.data();
+    memcpy(Base::tmp.data(), Base::data + Base::pos, bytesRemaining);
+    return Base::tmp.data();
   }
 };
 
@@ -165,7 +174,7 @@ template <typename BIT_STREAM> struct BitStreamTraits final {
 };
 
 template <typename Tag, typename Cache,
-          typename Replenisher = BitStreamForwardSequentialReplenisher>
+          typename Replenisher = BitStreamForwardSequentialReplenisher<Tag>>
 class BitStream final {
   Cache cache;
 
