@@ -34,6 +34,11 @@ struct MSB16BitPumpTag;
 
 using BitPumpMSB16 = BitStream<MSB16BitPumpTag, BitStreamCacheRightInLeftOut>;
 
+template <> struct BitStreamTraits<MSB16BitPumpTag> final {
+  // How many bytes can we read from the input per each fillCache(), at most?
+  static constexpr int MaxProcessBytes = 4;
+};
+
 template <>
 inline BitPumpMSB16::size_type BitPumpMSB16::fillCache(const uint8_t* input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");

@@ -32,7 +32,7 @@ struct InvOnesTag;
 struct OnesTag;
 
 template <>
-const std::array<uint8_t, 4> Pattern<BitPumpMSB, OnesTag>::Data = {
+const std::array<uint8_t, 8> Pattern<BitPumpMSB, OnesTag>::Data = {
     {/* [Byte0 Byte1 Byte2 Byte3] */
      /* Byte: [Bit0 .. Bit7] */
      0b10100100, 0b01000010, 0b00001000, 0b00011111}};
@@ -42,7 +42,7 @@ template <> uint32_t Pattern<BitPumpMSB, OnesTag>::data(int index) {
 }
 
 template <>
-const std::array<uint8_t, 4> Pattern<BitPumpMSB, InvOnesTag>::Data = {
+const std::array<uint8_t, 8> Pattern<BitPumpMSB, InvOnesTag>::Data = {
     {0b11010010, 0b00100001, 0b00000100, 0b00001111}};
 template <> uint32_t Pattern<BitPumpMSB, InvOnesTag>::data(int index) {
   const auto set = GenOnesBE(0, -1);
