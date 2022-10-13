@@ -479,9 +479,14 @@ void ArwDecoder::GetWB() const {
 
     if (encryptedIFD.hasEntry(TiffTag::SONYWHITELEVEL)) {
       const TiffEntry* wl = encryptedIFD.getEntry(TiffTag::SONYWHITELEVEL);
-      if (wl->count != 3)
-        ThrowRDE("White Level has %d entries instead of 3", wl->count);
+      if (wl->count != 1 && wl->count != 3)
+        ThrowRDE("White Level has %d entries instead of 1 or 3", wl->count);
       mRaw->whitePoint = wl->getU16(0);
+      // Whitelevel is alawys specified as-if the data is 14-bit,
+      // so for 12-bit raws, which just so happen to coincide
+      // with specifying a single white level entry, we have to scale.
+      if (wl->count == 1)
+        mRaw->whitePoint >>= 2;
     }
   }
 }
