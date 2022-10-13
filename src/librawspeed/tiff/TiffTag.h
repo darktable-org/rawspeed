@@ -361,6 +361,8 @@ enum class TiffTag {
   KODAK_KDC_SENSOR_WIDTH = 0xFA13,
   KODAK_KDC_SENSOR_HEIGHT = 0xFA14,
   KODAK_IFD2 = 0xFE00,
+
+  NIKON_BLACKLEVEL = 0x003D,
 };
 
 } // namespace rawspeed

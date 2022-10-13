@@ -599,6 +599,20 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   auto id = mRootIFD->getID();
   std::string mode = getMode();
   std::string extended_mode = getExtendedMode(mode);
+
+  // Read black levels (seem to be recorded for 14bit always)
+  if (mRootIFD->hasEntryRecursive(TiffTag::NIKON_BLACKLEVEL)) {
+    const TiffEntry* bl =
+        mRootIFD->getEntryRecursive(TiffTag::NIKON_BLACKLEVEL);
+    if (bl->count != 4)
+      ThrowRDE("BlackLevel has %d entries instead of 4", bl->count);
+    const int sh = mode.rfind("12bit", 0) == 0 ? 2 : 0;
+    mRaw->blackLevelSeparate[0] = bl->getU16(0) >> sh;
+    mRaw->blackLevelSeparate[1] = bl->getU16(1) >> sh;
+    mRaw->blackLevelSeparate[2] = bl->getU16(2) >> sh;
+    mRaw->blackLevelSeparate[3] = bl->getU16(3) >> sh;
+  }
+
   if (meta->hasCamera(id.make, id.model, extended_mode)) {
     setMetaData(meta, id, extended_mode, iso);
   } else if (meta->hasCamera(id.make, id.model, mode)) {
