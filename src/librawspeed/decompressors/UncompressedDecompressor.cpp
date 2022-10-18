@@ -325,15 +325,13 @@ void UncompressedDecompressor::decode12BitRaw(uint32_t w, uint32_t h) {
 
   sanityCheck(&h, perline);
 
-  uint8_t* data = mRaw->getData();
-  uint32_t pitch = mRaw->pitch;
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   // FIXME: maybe check size of interlaced data?
   const uint8_t* in = input.peekData(perline * h);
   uint32_t half = (h + 1) >> 1;
   for (uint32_t row = 0; row < h; row++) {
     uint32_t y = !interlaced ? row : row % half * 2 + row / half;
-    auto* dest = reinterpret_cast<uint16_t*>(&data[y * pitch]);
 
     if (interlaced && y == 1) {
       // The second field starts at a 2048 byte alignment
@@ -346,11 +344,14 @@ void UncompressedDecompressor::decode12BitRaw(uint32_t w, uint32_t h) {
       uint32_t g1 = in[0];
       uint32_t g2 = in[1];
 
-      auto process = [dest](uint32_t i, bool invert, uint32_t p1, uint32_t p2) {
+      auto process = [out, y](uint32_t i, bool invert, uint32_t p1,
+                              uint32_t p2) {
+        uint16_t pix;
         if (!(invert ^ (e == Endianness::little)))
-          dest[i] = (p1 << pack) | (p2 >> pack);
+          pix = (p1 << pack) | (p2 >> pack);
         else
-          dest[i] = ((p2 & mask) << 8) | p1;
+          pix = ((p2 & mask) << 8) | p1;
+        out(y, i) = pix;
       };
 
       process(x, false, g1, g2);
