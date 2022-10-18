@@ -242,10 +242,11 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
       bits.skipBytes(skipBytes);
     }
   } else {
+    const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
     if (bitPerPixel == 16 && getHostEndianness() == Endianness::little) {
-      copyPixels(&data[offset.x * sizeof(uint16_t) * cpp + y * outPitch],
-                 outPitch, input.getData(inputPitchBytes * (h - y)),
-                 inputPitchBytes, w * mRaw->getBpp(), h - y);
+      copyPixels(reinterpret_cast<uint8_t*>(&out(y, offset.x * cpp)), outPitch,
+                 input.getData(inputPitchBytes * (h - y)), inputPitchBytes,
+                 w * mRaw->getBpp(), h - y);
       return;
     }
     if (bitPerPixel == 12 && static_cast<int>(w) == inputPitchBytes * 8 / 12 &&
@@ -254,7 +255,6 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
       return;
     }
     BitPumpLSB bits(input);
-    const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
     for (; y < h; y++) {
       for (uint32_t x = 0; x < w; x++) {
         out(y, x) = bits.getBits(bitPerPixel);
