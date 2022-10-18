@@ -391,18 +391,16 @@ void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(uint32_t w,
 
   sanityCheck(w, &h, 2);
 
-  uint8_t* data = mRaw->getData();
-  uint32_t pitch = mRaw->pitch;
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   const uint8_t* in = input.getData(w * h * 2);
 
-  for (uint32_t y = 0; y < h; y++) {
-    auto* dest = reinterpret_cast<uint16_t*>(&data[y * pitch]);
-    for (uint32_t x = 0; x < w; x += 1, in += 2) {
+  for (int row = 0; row < (int)h; row++) {
+    for (int col = 0; col < (int)w; col += 1, in += 2) {
       uint32_t g1 = in[0];
       uint32_t g2 = in[1];
 
       if (e == Endianness::big)
-        dest[x] = (((g1 << 8) | (g2 & 0xf0)) >> 4);
+        out(row, col) = (((g1 << 8) | (g2 & 0xf0)) >> 4);
     }
   }
 }
