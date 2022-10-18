@@ -114,23 +114,16 @@ void UncompressedDecompressor::decode16BitFP(const iPoint2D& size,
 template <typename Pump>
 void UncompressedDecompressor::decode24BitFP(const iPoint2D& size,
                                              const iPoint2D& offset,
-                                             uint32_t skipBytes, uint32_t h,
-                                             uint64_t y) const {
-  assert(mRaw->getDataType() == RawImageType::F32);
-
-  uint8_t* data = mRaw->getData();
-  uint32_t outPitch = mRaw->pitch;
-  uint32_t w = size.x;
-  uint32_t cpp = mRaw->getCpp();
-
+                                             uint32_t skipBytes, int rows,
+                                             int row) const {
+  const Array2DRef<float> out(mRaw->getF32DataAsUncroppedArray2DRef());
   Pump bits(input);
-  w *= cpp;
-  for (; y < h; y++) {
-    auto* dest = reinterpret_cast<uint32_t*>(
-        &data[offset.x * sizeof(uint32_t) * cpp + y * outPitch]);
-    for (uint32_t x = 0; x < w; x++) {
+
+  int cols = size.x * mRaw->getCpp();
+  for (; row < rows; row++) {
+    for (int col = 0; col < cols; col++) {
       uint32_t b = bits.getBits(24);
-      dest[x] = fp24ToFloat(b);
+      out(row, offset.x + col) = bit_cast<float>(fp24ToFloat(b));
     }
     bits.skipBytes(skipBytes);
   }

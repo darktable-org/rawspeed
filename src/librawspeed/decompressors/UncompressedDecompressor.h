@@ -53,7 +53,7 @@ class UncompressedDecompressor final : public AbstractDecompressor {
 
   template <typename Pump>
   void decode24BitFP(const iPoint2D& size, const iPoint2D& offset,
-                     uint32_t skipBytes, uint32_t h, uint64_t y) const;
+                     uint32_t skipBytes, int rows, int row) const;
 
 public:
   UncompressedDecompressor(ByteStream input_, const RawImage& img)
