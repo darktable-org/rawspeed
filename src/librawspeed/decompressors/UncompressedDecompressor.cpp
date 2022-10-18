@@ -218,14 +218,11 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
       bits.skipBytes(skipBytes);
     }
   } else if (BitOrder::MSB16 == order) {
+    const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
     BitPumpMSB16 bits(input);
-    w *= cpp;
     for (; y < h; y++) {
-      auto* dest = reinterpret_cast<uint16_t*>(
-          &data[offset.x * sizeof(uint16_t) * cpp + y * outPitch]);
       for (uint32_t x = 0; x < w; x++) {
-        uint32_t b = bits.getBits(bitPerPixel);
-        dest[x] = b;
+        out(y, x) = bits.getBits(bitPerPixel);
       }
       bits.skipBytes(skipBytes);
     }
