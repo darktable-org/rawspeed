@@ -113,6 +113,23 @@ void UncompressedDecompressor::decodePackedFP(const iPoint2D& size,
   }
 }
 
+template <typename Pump>
+void UncompressedDecompressor::decodePackedInt(const iPoint2D& size,
+                                               const iPoint2D& offset,
+                                               uint32_t skipBytes, int rows,
+                                               int row, int bitPerPixel) const {
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  Pump bits(input);
+
+  int cols = size.x * mRaw->getCpp();
+  for (; row < rows; row++) {
+    for (int x = 0; x < cols; x++) {
+      out(row, x) = bits.getBits(bitPerPixel);
+    }
+    bits.skipBytes(skipBytes);
+  }
+}
+
 void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
                                                    const iPoint2D& offset,
                                                    int inputPitchBytes,
@@ -194,35 +211,14 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
   }
 
   if (BitOrder::MSB == order) {
-    const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-    BitPumpMSB bits(input);
-    for (; y < h; y++) {
-      for (uint32_t x = 0; x < w; x++) {
-        out(y, x) = bits.getBits(bitPerPixel);
-      }
-      bits.skipBytes(skipBytes);
-    }
+    decodePackedInt<BitPumpMSB>(size, offset, skipBytes, h, y, bitPerPixel);
   } else if (BitOrder::MSB16 == order) {
-    const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-    BitPumpMSB16 bits(input);
-    for (; y < h; y++) {
-      for (uint32_t x = 0; x < w; x++) {
-        out(y, x) = bits.getBits(bitPerPixel);
-      }
-      bits.skipBytes(skipBytes);
-    }
+    decodePackedInt<BitPumpMSB16>(size, offset, skipBytes, h, y, bitPerPixel);
   } else if (BitOrder::MSB32 == order) {
-    const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-    BitPumpMSB32 bits(input);
-    for (; y < h; y++) {
-      for (uint32_t x = 0; x < w; x++) {
-        out(y, x) = bits.getBits(bitPerPixel);
-      }
-      bits.skipBytes(skipBytes);
-    }
+    decodePackedInt<BitPumpMSB32>(size, offset, skipBytes, h, y, bitPerPixel);
   } else {
-    const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
     if (bitPerPixel == 16 && getHostEndianness() == Endianness::little) {
+      const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
       copyPixels(reinterpret_cast<uint8_t*>(&out(y, offset.x * cpp)), outPitch,
                  input.getData(inputPitchBytes * (h - y)), inputPitchBytes,
                  w * mRaw->getBpp(), h - y);
@@ -233,13 +229,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
       decode12BitRaw<Endianness::little>(w, h);
       return;
     }
-    BitPumpLSB bits(input);
-    for (; y < h; y++) {
-      for (uint32_t x = 0; x < w; x++) {
-        out(y, x) = bits.getBits(bitPerPixel);
-      }
-      bits.skipBytes(skipBytes);
-    }
+    decodePackedInt<BitPumpLSB>(size, offset, skipBytes, h, y, bitPerPixel);
   }
 }
 

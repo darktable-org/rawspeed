@@ -51,6 +51,11 @@ class UncompressedDecompressor final : public AbstractDecompressor {
   void decodePackedFP(const iPoint2D& size, const iPoint2D& offset,
                       uint32_t skipBytes, int rows, int row) const;
 
+  template <typename Pump>
+  void decodePackedInt(const iPoint2D& size, const iPoint2D& offset,
+                       uint32_t skipBytes, int rows, int row,
+                       int bitPerPixel) const;
+
 public:
   UncompressedDecompressor(ByteStream input_, const RawImage& img)
       : input(std::move(input_)), mRaw(img) {}
