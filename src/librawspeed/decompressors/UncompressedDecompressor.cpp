@@ -93,37 +93,21 @@ int UncompressedDecompressor::bytesPerLine(int w, bool skips) {
   return perline;
 }
 
-template <typename Pump>
-void UncompressedDecompressor::decode16BitFP(const iPoint2D& size,
-                                             const iPoint2D& offset,
-                                             uint32_t skipBytes, int rows,
-                                             int row) const {
+template <typename Pump, typename NarrowFpType>
+void UncompressedDecompressor::decodePackedFP(const iPoint2D& size,
+                                              const iPoint2D& offset,
+                                              uint32_t skipBytes, int rows,
+                                              int row) const {
   const Array2DRef<float> out(mRaw->getF32DataAsUncroppedArray2DRef());
   Pump bits(input);
 
   int cols = size.x * mRaw->getCpp();
   for (; row < rows; row++) {
     for (int col = 0; col < cols; col++) {
-      uint16_t b = bits.getBits(16);
-      out(row, offset.x + col) = bit_cast<float>(fp16ToFloat(b));
-    }
-    bits.skipBytes(skipBytes);
-  }
-}
-
-template <typename Pump>
-void UncompressedDecompressor::decode24BitFP(const iPoint2D& size,
-                                             const iPoint2D& offset,
-                                             uint32_t skipBytes, int rows,
-                                             int row) const {
-  const Array2DRef<float> out(mRaw->getF32DataAsUncroppedArray2DRef());
-  Pump bits(input);
-
-  int cols = size.x * mRaw->getCpp();
-  for (; row < rows; row++) {
-    for (int col = 0; col < cols; col++) {
-      uint32_t b = bits.getBits(24);
-      out(row, offset.x + col) = bit_cast<float>(fp24ToFloat(b));
+      uint32_t b = bits.getBits(NarrowFpType::StorageWidth);
+      uint32_t f =
+          extendBinaryFloatingPoint<NarrowFpType, ieee_754_2008::Binary32>(b);
+      out(row, offset.x + col) = bit_cast<float>(f);
     }
     bits.skipBytes(skipBytes);
   }
@@ -186,19 +170,23 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
       return;
     }
     if (BitOrder::MSB == order && bitPerPixel == 16) {
-      decode16BitFP<BitPumpMSB>(size, offset, skipBytes, h, y);
+      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary16>(size, offset,
+                                                          skipBytes, h, y);
       return;
     }
     if (BitOrder::LSB == order && bitPerPixel == 16) {
-      decode16BitFP<BitPumpLSB>(size, offset, skipBytes, h, y);
+      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary16>(size, offset,
+                                                          skipBytes, h, y);
       return;
     }
     if (BitOrder::MSB == order && bitPerPixel == 24) {
-      decode24BitFP<BitPumpMSB>(size, offset, skipBytes, h, y);
+      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary24>(size, offset,
+                                                          skipBytes, h, y);
       return;
     }
     if (BitOrder::LSB == order && bitPerPixel == 24) {
-      decode24BitFP<BitPumpLSB>(size, offset, skipBytes, h, y);
+      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary24>(size, offset,
+                                                          skipBytes, h, y);
       return;
     }
     ThrowRDE("Unsupported floating-point input bitwidth/bit packing: %u / %u",
