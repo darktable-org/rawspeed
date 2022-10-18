@@ -213,7 +213,6 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
 
   assert(sub_mul != nullptr);
 
-  uint32_t gw = pitch / 16;
   // 10 bit fraction
   uint32_t mul = static_cast<int>(
       1024.0F * 65535.0F /
@@ -280,7 +279,8 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
       ssescale = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[12]));
     }
 
-    for (uint32_t x = 0; x < gw; x++) {
+    for (int x = 0; x < static_cast<int>(roundDown(uncropped_dim.x, 8));
+         x += 8) {
       __m128i pix_high;
       __m128i temp;
       _mm_prefetch(reinterpret_cast<char*>(pixel + 1), _MM_HINT_T0);
