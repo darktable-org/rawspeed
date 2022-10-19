@@ -57,6 +57,18 @@ inline void copyPixels(uint8_t* dest, int dstPitch, const uint8_t* src,
   }
 }
 
+template <
+    typename T_TO, typename T_FROM,
+    typename = std::enable_if_t<sizeof(T_TO) == sizeof(T_FROM)>,
+    typename = std::enable_if_t<std::is_trivially_constructible<T_TO>::value>,
+    typename = std::enable_if_t<std::is_trivially_copyable<T_TO>::value>,
+    typename = std::enable_if_t<std::is_trivially_copyable<T_FROM>::value>>
+inline T_TO bit_cast(const T_FROM& from) noexcept {
+  T_TO to;
+  memcpy(&to, &from, sizeof(T_TO));
+  return to;
+}
+
 // only works for positive values and zero
 template <typename T> constexpr bool isPowerOfTwo(T val) {
   return (val & (~val+1)) == val;
