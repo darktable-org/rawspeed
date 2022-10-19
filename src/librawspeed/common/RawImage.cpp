@@ -71,7 +71,7 @@ void RawImageData::createData() {
     ThrowRDE("Dimensions too large for allocation.");
   if (dim.x <= 0 || dim.y <= 0)
     ThrowRDE("Dimension of one sides is less than 1 - cannot allocate image.");
-  if (data)
+  if (isAllocated())
     ThrowRDE("Duplicate data allocation in createData.");
 
   // want each line to start at 16-byte aligned address
@@ -191,7 +191,7 @@ void RawImageData::destroyData() {
 }
 
 void RawImageData::setCpp(uint32_t val) {
-  if (data)
+  if (isAllocated())
     ThrowRDE("Attempted to set Components per pixel after data allocation");
   if (val > 4) {
     ThrowRDE(
@@ -204,12 +204,6 @@ void RawImageData::setCpp(uint32_t val) {
   bpp *= val;
 }
 
-uint8_t* RawImageData::getData() const {
-  if (!data)
-    ThrowRDE("Data not yet allocated.");
-  return &data[mOffset.y*pitch+mOffset.x*bpp];
-}
-
 uint8_t* RawImageData::getData(uint32_t x, uint32_t y) {
   x += mOffset.x;
   y += mOffset.y;
@@ -219,7 +213,7 @@ uint8_t* RawImageData::getData(uint32_t x, uint32_t y) {
   if (y >= static_cast<unsigned>(uncropped_dim.y))
     ThrowRDE("Y Position outside image requested.");
 
-  if (!data)
+  if (!isAllocated())
     ThrowRDE("Data not yet allocated.");
 
   return &data[static_cast<size_t>(y) * pitch + x * bpp];
@@ -231,7 +225,7 @@ uint8_t* RawImageData::getDataUncropped(uint32_t x, uint32_t y) const {
   if (y >= static_cast<unsigned>(uncropped_dim.y))
     ThrowRDE("Y Position outside image requested.");
 
-  if (!data)
+  if (!isAllocated())
     ThrowRDE("Data not yet allocated.");
 
   return &data[static_cast<size_t>(y) * pitch + x * bpp];

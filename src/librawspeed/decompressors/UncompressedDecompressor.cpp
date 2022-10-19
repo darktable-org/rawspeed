@@ -93,51 +93,38 @@ int UncompressedDecompressor::bytesPerLine(int w, bool skips) {
   return perline;
 }
 
-template <typename Pump>
-void UncompressedDecompressor::decode16BitFP(const iPoint2D& size,
-                                             const iPoint2D& offset,
-                                             uint32_t skipBytes, uint32_t h,
-                                             uint64_t y) const {
-  assert(mRaw->getDataType() == RawImageType::F32);
-
-  uint8_t* data = mRaw->getData();
-  uint32_t outPitch = mRaw->pitch;
-  uint32_t w = size.x;
-  uint32_t cpp = mRaw->getCpp();
-
+template <typename Pump, typename NarrowFpType>
+void UncompressedDecompressor::decodePackedFP(const iPoint2D& size,
+                                              const iPoint2D& offset,
+                                              uint32_t skipBytes, int rows,
+                                              int row) const {
+  const Array2DRef<float> out(mRaw->getF32DataAsUncroppedArray2DRef());
   Pump bits(input);
-  w *= cpp;
-  for (; y < h; y++) {
-    auto* dest = reinterpret_cast<uint32_t*>(
-        &data[offset.x * sizeof(uint32_t) * cpp + y * outPitch]);
-    for (uint32_t x = 0; x < w; x++) {
-      uint16_t b = bits.getBits(16);
-      dest[x] = fp16ToFloat(b);
+
+  int cols = size.x * mRaw->getCpp();
+  for (; row < rows; row++) {
+    for (int col = 0; col < cols; col++) {
+      uint32_t b = bits.getBits(NarrowFpType::StorageWidth);
+      uint32_t f =
+          extendBinaryFloatingPoint<NarrowFpType, ieee_754_2008::Binary32>(b);
+      out(row, offset.x + col) = bit_cast<float>(f);
     }
     bits.skipBytes(skipBytes);
   }
 }
 
 template <typename Pump>
-void UncompressedDecompressor::decode24BitFP(const iPoint2D& size,
-                                             const iPoint2D& offset,
-                                             uint32_t skipBytes, uint32_t h,
-                                             uint64_t y) const {
-  assert(mRaw->getDataType() == RawImageType::F32);
-
-  uint8_t* data = mRaw->getData();
-  uint32_t outPitch = mRaw->pitch;
-  uint32_t w = size.x;
-  uint32_t cpp = mRaw->getCpp();
-
+void UncompressedDecompressor::decodePackedInt(const iPoint2D& size,
+                                               const iPoint2D& offset,
+                                               uint32_t skipBytes, int rows,
+                                               int row, int bitPerPixel) const {
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   Pump bits(input);
-  w *= cpp;
-  for (; y < h; y++) {
-    auto* dest = reinterpret_cast<uint32_t*>(
-        &data[offset.x * sizeof(uint32_t) * cpp + y * outPitch]);
-    for (uint32_t x = 0; x < w; x++) {
-      uint32_t b = bits.getBits(24);
-      dest[x] = fp24ToFloat(b);
+
+  int cols = size.x * mRaw->getCpp();
+  for (; row < rows; row++) {
+    for (int x = 0; x < cols; x++) {
+      out(row, x) = bits.getBits(bitPerPixel);
     }
     bits.skipBytes(skipBytes);
   }
@@ -151,7 +138,6 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
   assert(inputPitchBytes > 0);
   assert(bitPerPixel > 0);
 
-  uint8_t* data = mRaw->getData();
   uint32_t outPitch = mRaw->pitch;
   uint32_t w = size.x;
   uint32_t h = size.y;
@@ -194,25 +180,30 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
 
   if (mRaw->getDataType() == RawImageType::F32) {
     if (bitPerPixel == 32) {
-      copyPixels(&data[offset.x * sizeof(float) * cpp + y * outPitch], outPitch,
+      const Array2DRef<float> out(mRaw->getF32DataAsUncroppedArray2DRef());
+      copyPixels(reinterpret_cast<uint8_t*>(&out(y, offset.x * cpp)), outPitch,
                  input.getData(inputPitchBytes * (h - y)), inputPitchBytes,
                  w * mRaw->getBpp(), h - y);
       return;
     }
     if (BitOrder::MSB == order && bitPerPixel == 16) {
-      decode16BitFP<BitPumpMSB>(size, offset, skipBytes, h, y);
+      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary16>(size, offset,
+                                                          skipBytes, h, y);
       return;
     }
     if (BitOrder::LSB == order && bitPerPixel == 16) {
-      decode16BitFP<BitPumpLSB>(size, offset, skipBytes, h, y);
+      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary16>(size, offset,
+                                                          skipBytes, h, y);
       return;
     }
     if (BitOrder::MSB == order && bitPerPixel == 24) {
-      decode24BitFP<BitPumpMSB>(size, offset, skipBytes, h, y);
+      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary24>(size, offset,
+                                                          skipBytes, h, y);
       return;
     }
     if (BitOrder::LSB == order && bitPerPixel == 24) {
-      decode24BitFP<BitPumpLSB>(size, offset, skipBytes, h, y);
+      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary24>(size, offset,
+                                                          skipBytes, h, y);
       return;
     }
     ThrowRDE("Unsupported floating-point input bitwidth/bit packing: %u / %u",
@@ -220,46 +211,17 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
   }
 
   if (BitOrder::MSB == order) {
-    BitPumpMSB bits(input);
-    w *= cpp;
-    for (; y < h; y++) {
-      auto* dest = reinterpret_cast<uint16_t*>(
-          &data[offset.x * sizeof(uint16_t) * cpp + y * outPitch]);
-      for (uint32_t x = 0; x < w; x++) {
-        uint32_t b = bits.getBits(bitPerPixel);
-        dest[x] = b;
-      }
-      bits.skipBytes(skipBytes);
-    }
+    decodePackedInt<BitPumpMSB>(size, offset, skipBytes, h, y, bitPerPixel);
   } else if (BitOrder::MSB16 == order) {
-    BitPumpMSB16 bits(input);
-    w *= cpp;
-    for (; y < h; y++) {
-      auto* dest = reinterpret_cast<uint16_t*>(
-          &data[offset.x * sizeof(uint16_t) * cpp + y * outPitch]);
-      for (uint32_t x = 0; x < w; x++) {
-        uint32_t b = bits.getBits(bitPerPixel);
-        dest[x] = b;
-      }
-      bits.skipBytes(skipBytes);
-    }
+    decodePackedInt<BitPumpMSB16>(size, offset, skipBytes, h, y, bitPerPixel);
   } else if (BitOrder::MSB32 == order) {
-    BitPumpMSB32 bits(input);
-    w *= cpp;
-    for (; y < h; y++) {
-      auto* dest = reinterpret_cast<uint16_t*>(
-          &data[offset.x * sizeof(uint16_t) * cpp + y * outPitch]);
-      for (uint32_t x = 0; x < w; x++) {
-        uint32_t b = bits.getBits(bitPerPixel);
-        dest[x] = b;
-      }
-      bits.skipBytes(skipBytes);
-    }
+    decodePackedInt<BitPumpMSB32>(size, offset, skipBytes, h, y, bitPerPixel);
   } else {
     if (bitPerPixel == 16 && getHostEndianness() == Endianness::little) {
-      copyPixels(&data[offset.x * sizeof(uint16_t) * cpp + y * outPitch],
-                 outPitch, input.getData(inputPitchBytes * (h - y)),
-                 inputPitchBytes, w * mRaw->getBpp(), h - y);
+      const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+      copyPixels(reinterpret_cast<uint8_t*>(&out(y, offset.x * cpp)), outPitch,
+                 input.getData(inputPitchBytes * (h - y)), inputPitchBytes,
+                 w * mRaw->getBpp(), h - y);
       return;
     }
     if (bitPerPixel == 12 && static_cast<int>(w) == inputPitchBytes * 8 / 12 &&
@@ -267,17 +229,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
       decode12BitRaw<Endianness::little>(w, h);
       return;
     }
-    BitPumpLSB bits(input);
-    w *= cpp;
-    for (; y < h; y++) {
-      auto* dest = reinterpret_cast<uint16_t*>(
-          &data[offset.x * sizeof(uint16_t) + y * outPitch]);
-      for (uint32_t x = 0; x < w; x++) {
-        uint32_t b = bits.getBits(bitPerPixel);
-        dest[x] = b;
-      }
-      bits.skipBytes(skipBytes);
-    }
+    decodePackedInt<BitPumpLSB>(size, offset, skipBytes, h, y, bitPerPixel);
   }
 }
 
@@ -285,17 +237,17 @@ template <bool uncorrectedRawValues>
 void UncompressedDecompressor::decode8BitRaw(uint32_t w, uint32_t h) {
   sanityCheck(w, &h, 1);
 
-  uint8_t* data = mRaw->getData();
-  uint32_t pitch = mRaw->pitch;
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+
   const uint8_t* in = input.getData(w * h);
   uint32_t random = 0;
-  for (uint32_t y = 0; y < h; y++) {
-    auto* dest = reinterpret_cast<uint16_t*>(&data[y * pitch]);
-    for (uint32_t x = 0; x < w; x++) {
+  for (uint32_t row = 0; row < h; row++) {
+    for (uint32_t col = 0; col < w; col++) {
       if (uncorrectedRawValues)
-        dest[x] = *in;
+        out(row, col) = *in;
       else
-        mRaw->setWithLookUp(*in, reinterpret_cast<uint8_t*>(&dest[x]), &random);
+        mRaw->setWithLookUp(*in, reinterpret_cast<uint8_t*>(&out(row, col)),
+                            &random);
       in++;
     }
   }
@@ -325,15 +277,13 @@ void UncompressedDecompressor::decode12BitRaw(uint32_t w, uint32_t h) {
 
   sanityCheck(&h, perline);
 
-  uint8_t* data = mRaw->getData();
-  uint32_t pitch = mRaw->pitch;
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   // FIXME: maybe check size of interlaced data?
   const uint8_t* in = input.peekData(perline * h);
   uint32_t half = (h + 1) >> 1;
   for (uint32_t row = 0; row < h; row++) {
     uint32_t y = !interlaced ? row : row % half * 2 + row / half;
-    auto* dest = reinterpret_cast<uint16_t*>(&data[y * pitch]);
 
     if (interlaced && y == 1) {
       // The second field starts at a 2048 byte alignment
@@ -346,11 +296,14 @@ void UncompressedDecompressor::decode12BitRaw(uint32_t w, uint32_t h) {
       uint32_t g1 = in[0];
       uint32_t g2 = in[1];
 
-      auto process = [dest](uint32_t i, bool invert, uint32_t p1, uint32_t p2) {
+      auto process = [out, y](uint32_t i, bool invert, uint32_t p1,
+                              uint32_t p2) {
+        uint16_t pix;
         if (!(invert ^ (e == Endianness::little)))
-          dest[i] = (p1 << pack) | (p2 >> pack);
+          pix = (p1 << pack) | (p2 >> pack);
         else
-          dest[i] = ((p2 & mask) << 8) | p1;
+          pix = ((p2 & mask) << 8) | p1;
+        out(y, i) = pix;
       };
 
       process(x, false, g1, g2);
@@ -391,18 +344,16 @@ void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(uint32_t w,
 
   sanityCheck(w, &h, 2);
 
-  uint8_t* data = mRaw->getData();
-  uint32_t pitch = mRaw->pitch;
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   const uint8_t* in = input.getData(w * h * 2);
 
-  for (uint32_t y = 0; y < h; y++) {
-    auto* dest = reinterpret_cast<uint16_t*>(&data[y * pitch]);
-    for (uint32_t x = 0; x < w; x += 1, in += 2) {
+  for (int row = 0; row < (int)h; row++) {
+    for (int col = 0; col < (int)w; col += 1, in += 2) {
       uint32_t g1 = in[0];
       uint32_t g2 = in[1];
 
       if (e == Endianness::big)
-        dest[x] = (((g1 << 8) | (g2 & 0xf0)) >> 4);
+        out(row, col) = (((g1 << 8) | (g2 & 0xf0)) >> 4);
     }
   }
 }
@@ -426,20 +377,20 @@ void UncompressedDecompressor::decodeRawUnpacked(uint32_t w, uint32_t h) {
 
   sanityCheck(w, &h, 2);
 
-  uint8_t* data = mRaw->getData();
-  uint32_t pitch = mRaw->pitch;
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   const uint8_t* in = input.getData(w * h * 2);
 
-  for (uint32_t y = 0; y < h; y++) {
-    auto* dest = reinterpret_cast<uint16_t*>(&data[y * pitch]);
-    for (uint32_t x = 0; x < w; x += 1, in += 2) {
+  for (int row = 0; row < (int)h; row++) {
+    for (int col = 0; col < (int)w; col += 1, in += 2) {
       uint32_t g1 = in[0];
       uint32_t g2 = in[1];
 
+      uint16_t pix;
       if (e == Endianness::little)
-        dest[x] = ((g2 << 8) | g1) >> shift;
+        pix = ((g2 << 8) | g1) >> shift;
       else
-        dest[x] = ((g1 & mask) << 8) | g2;
+        pix = ((g1 & mask) << 8) | g2;
+      out(row, col) = pix;
     }
   }
 }

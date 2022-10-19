@@ -124,7 +124,6 @@ public:
   getU16DataAsCroppedArray2DRef() const noexcept;
   [[nodiscard]] Array2DRef<float>
   getF32DataAsUncroppedArray2DRef() const noexcept;
-  [[nodiscard]] uint8_t* getData() const;
   uint8_t*
   getData(uint32_t x,
           uint32_t y); // Not super fast, but safe. Don't use per pixel.

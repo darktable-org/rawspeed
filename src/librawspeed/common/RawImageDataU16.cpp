@@ -213,7 +213,6 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
 
   assert(sub_mul != nullptr);
 
-  uint32_t gw = pitch / 16;
   // 10 bit fraction
   uint32_t mul = static_cast<int>(
       1024.0F * 65535.0F /
@@ -260,6 +259,8 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   }
   rand_mask = _mm_set1_epi32(0x00ff00ff); // 8 random bits
 
+  Array2DRef<uint16_t> out(getU16DataAsUncroppedArray2DRef());
+
   for (int y = start_y; y < end_y; y++) {
     __m128i sserandom;
     if (mDitherScale) {
@@ -269,7 +270,6 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
     } else {
       sserandom = _mm_setzero_si128();
     }
-    auto* pixel = reinterpret_cast<__m128i*>(&data[(mOffset.y + y) * pitch]);
     __m128i ssescale;
     __m128i ssesub;
     if (((y + mOffset.y) & 1) == 0) {
@@ -280,11 +280,12 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
       ssescale = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[12]));
     }
 
-    for (uint32_t x = 0; x < gw; x++) {
+    for (int x = 0; x < static_cast<int>(roundDown(uncropped_dim.x, 8));
+         x += 8) {
       __m128i pix_high;
       __m128i temp;
-      _mm_prefetch(reinterpret_cast<char*>(pixel + 1), _MM_HINT_T0);
-      __m128i pix_low = _mm_load_si128(pixel);
+      __m128i pix_low =
+          _mm_load_si128(reinterpret_cast<__m128i*>(&out(mOffset.y + y, x)));
       // Subtract black
       pix_low = _mm_subs_epu16(pix_low, ssesub);
       // Multiply the two unsigned shorts and combine it to 32 bit result
@@ -321,8 +322,8 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
       pix_low = _mm_packs_epi32(pix_low, pix_high);
       // Shift sign off
       pix_low = _mm_xor_si128(pix_low, ssesign);
-      _mm_store_si128(pixel, pix_low);
-      pixel++;
+      _mm_store_si128(reinterpret_cast<__m128i*>(&out(mOffset.y + y, x)),
+                      pix_low);
     }
   }
   alignedFree(sub_mul);
