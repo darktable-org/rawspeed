@@ -112,7 +112,10 @@ static inline void decodeFPDeltaRow(unsigned char* src, size_t realTileWidth,
 void DeflateDecompressor::decode(
     std::unique_ptr<unsigned char[]>* uBuffer, // NOLINT
     iPoint2D maxDim, iPoint2D dim, iPoint2D off) {
-  uLongf dstLen = sizeof(float) * maxDim.area();
+  int bytesps = bps / 8;
+  assert(bytesps >= 2 && bytesps <= 4);
+
+  uLongf dstLen = bytesps * maxDim.area();
 
   if (!*uBuffer)
     *uBuffer =
@@ -125,9 +128,6 @@ void DeflateDecompressor::decode(
       err != Z_OK) {
     ThrowRDE("failed to uncompress tile: %d (%s)", err, zError(err));
   }
-
-  int bytesps = bps / 8;
-  assert(bytesps >= 2 && bytesps <= 4);
 
   const CroppedArray2DRef<float> out =
       CroppedArray2DRef(mRaw->getF32DataAsUncroppedArray2DRef(),
