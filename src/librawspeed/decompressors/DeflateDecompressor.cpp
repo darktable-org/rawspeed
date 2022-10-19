@@ -46,34 +46,36 @@ static inline void decodeDeltaBytes(unsigned char* src, size_t realTileWidth,
   }
 }
 
-// decodeFPDeltaRow(): MIT License, copyright 2014 Javier Celaya
-// <jcelaya@gmail.com>
+template <typename T> struct StorageType {};
+template <> struct StorageType<ieee_754_2008::Binary16> {
+  using type = uint16_t;
+};
+template <> struct StorageType<ieee_754_2008::Binary24> {
+  using type = uint32_t;
+};
+template <> struct StorageType<ieee_754_2008::Binary32> {
+  using type = uint32_t;
+};
+
 template <typename T>
 static inline void decodeFPDeltaRow(unsigned char* src, unsigned char* dst,
                                     size_t tileWidth, size_t realTileWidth) {
-  unsigned bytesps = T::StorageWidth / 8;
+  constexpr unsigned bytesps = T::StorageWidth / 8;
 
-  // Reorder bytes into the image
-  // 16 and 32-bit versions depend on local architecture, 24-bit does not
-  if (bytesps == 3) {
-    for (size_t col = 0; col < tileWidth; ++col) {
-      dst[col * 3] = src[col];
-      dst[col * 3 + 1] = src[col + realTileWidth];
-      dst[col * 3 + 2] = src[col + realTileWidth * 2];
+  for (size_t col = 0; col < tileWidth; ++col) {
+    std::array<unsigned char, bytesps> bytes;
+    for (int c = 0; c != bytesps; ++c)
+      bytes[c] = src[col + c * realTileWidth];
+
+    // Reorder bytes into the image
+    // 16 and 32-bit versions depend on local architecture, 24-bit does not
+    if (bytesps != 3) {
+      auto tmp = getBE<typename StorageType<T>::type>(bytes.data());
+      memcpy(bytes.data(), &tmp, bytesps);
     }
-  } else {
-    if (getHostEndianness() == Endianness::little) {
-      for (size_t col = 0; col < tileWidth; ++col) {
-        for (size_t byte = 0; byte < bytesps; ++byte)
-          dst[col * bytesps + byte] =
-              src[col + realTileWidth * (bytesps - byte - 1)];
-      }
-    } else {
-      for (size_t col = 0; col < tileWidth; ++col) {
-        for (size_t byte = 0; byte < bytesps; ++byte)
-          dst[col * bytesps + byte] = src[col + realTileWidth * byte];
-      }
-    }
+
+    for (int c = 0; c != bytesps; ++c)
+      dst[col * bytesps + c] = bytes[c];
   }
 }
 
