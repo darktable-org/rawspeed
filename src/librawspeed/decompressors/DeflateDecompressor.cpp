@@ -74,7 +74,7 @@ static inline void expandFP16(unsigned char* src, unsigned char* dst,
                               int width) {
   const auto* src16 = reinterpret_cast<uint16_t*>(src);
   auto* dst32 = reinterpret_cast<uint32_t*>(dst);
-  for (int x = width - 1; x >= 0; x--)
+  for (int x = 0; x < width; x++)
     dst32[x] = fp16ToFloat(src16[x]);
 }
 
@@ -82,7 +82,7 @@ static inline void expandFP24(unsigned char* src, unsigned char* dst,
                               int width) {
   const auto* src8 = reinterpret_cast<uint8_t*>(src);
   auto* dst32 = reinterpret_cast<uint32_t*>(dst);
-  for (int x = width - 1; x >= 0; x--)
+  for (int x = 0; x < width; x++)
     dst32[x] = fp24ToFloat((src8[3 * x + 0] << 16) | (src8[3 * x + 1] << 8) |
                            src8[3 * x + 2]);
 }
