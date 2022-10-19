@@ -145,19 +145,12 @@ void DeflateDecompressor::decode(
   int bytesps = bps / 8;
   assert(bytesps >= 2 && bytesps <= 4);
 
-  std::vector<unsigned char> tmp_storage;
-  if (predFactor && bytesps != 4)
-    tmp_storage.resize(bytesps * dim.x);
-
   for (auto row = 0; row < dim.y; ++row) {
     unsigned char* src = uBuffer->get() + row * maxDim.x * bytesps;
     unsigned char* dst =
         mRaw->getData() + ((off.y + row) * mRaw->pitch + off.x * sizeof(float));
-    unsigned char* tmp = dst;
 
     if (predFactor) {
-      if (bytesps != 4)
-        tmp = tmp_storage.data();
       decodeDeltaBytes(src, maxDim.x, bytesps, predFactor);
 
       switch (bytesps) {
@@ -174,10 +167,10 @@ void DeflateDecompressor::decode(
     } else {
       switch (bytesps) {
       case 2:
-        expandFP16(tmp, dst, dim.x);
+        expandFP16(src, dst, dim.x);
         break;
       case 3:
-        expandFP24(tmp, dst, dim.x);
+        expandFP24(src, dst, dim.x);
         break;
       case 4:
         // No need to expand FP32
