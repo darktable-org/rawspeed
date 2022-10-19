@@ -34,56 +34,78 @@
 
 namespace rawspeed {
 
+DeflateDecompressor::DeflateDecompressor(ByteStream bs, const RawImage& img,
+                                         int predictor, int bps_)
+    : input(std::move(bs)), mRaw(img), bps(bps_) {
+  switch (predictor) {
+  case 3:
+    predFactor = 1;
+    break;
+  case 34894:
+    predFactor = 2;
+    break;
+  case 34895:
+    predFactor = 4;
+    break;
+  default:
+    ThrowRDE("Unsupported predictor %i", predictor);
+  }
+  predFactor *= mRaw->getCpp();
+}
+
 // decodeFPDeltaRow(): MIT License, copyright 2014 Javier Celaya
 // <jcelaya@gmail.com>
-static inline void decodeFPDeltaRow(unsigned char* src, unsigned char* dst,
-                                    size_t tileWidth, size_t realTileWidth,
+static inline void decodeDeltaBytes(unsigned char* src, size_t realTileWidth,
                                     unsigned int bytesps, int factor) {
-  // DecodeDeltaBytes
   for (size_t col = factor; col < realTileWidth * bytesps; ++col) {
     // Yes, this is correct, and is symmetrical with EncodeDeltaBytes in
     // hdrmerge, and they both combined are lossless.
     // This is indeed working in modulo-2^n arighmetics.
     src[col] = static_cast<unsigned char>(src[col] + src[col - factor]);
   }
-  // Reorder bytes into the image
-  // 16 and 32-bit versions depend on local architecture, 24-bit does not
-  if (bytesps == 3) {
-    for (size_t col = 0; col < tileWidth; ++col) {
-      dst[col * 3] = src[col];
-      dst[col * 3 + 1] = src[col + realTileWidth];
-      dst[col * 3 + 2] = src[col + realTileWidth * 2];
-    }
-  } else {
-    if (getHostEndianness() == Endianness::little) {
-      for (size_t col = 0; col < tileWidth; ++col) {
-        for (size_t byte = 0; byte < bytesps; ++byte)
-          dst[col * bytesps + byte] =
-              src[col + realTileWidth * (bytesps - byte - 1)];
-      }
-    } else {
-      for (size_t col = 0; col < tileWidth; ++col) {
-        for (size_t byte = 0; byte < bytesps; ++byte)
-          dst[col * bytesps + byte] = src[col + realTileWidth * byte];
-      }
-    }
-  }
 }
 
-static inline void expandFP16(unsigned char* dst, int width) {
-  const auto* dst16 = reinterpret_cast<uint16_t*>(dst);
-  auto* dst32 = reinterpret_cast<uint32_t*>(dst);
+template <typename T> struct StorageType {};
+template <> struct StorageType<ieee_754_2008::Binary16> {
+  using type = uint16_t;
+  static constexpr int padding_bytes = 0;
+};
+template <> struct StorageType<ieee_754_2008::Binary24> {
+  using type = uint32_t;
+  static constexpr int padding_bytes = 1;
+};
+template <> struct StorageType<ieee_754_2008::Binary32> {
+  using type = uint32_t;
+  static constexpr int padding_bytes = 0;
+};
 
-  for (int x = width - 1; x >= 0; x--)
-    dst32[x] = fp16ToFloat(dst16[x]);
-}
+template <typename T>
+static inline void decodeFPDeltaRow(unsigned char* src, size_t realTileWidth,
+                                    CroppedArray2DRef<float> out, int row) {
+  using storage_type = typename StorageType<T>::type;
+  constexpr unsigned storage_bytes = sizeof(storage_type);
+  constexpr unsigned bytesps = T::StorageWidth / 8;
 
-static inline void expandFP24(unsigned char* dst, int width) {
-  auto* dst32 = reinterpret_cast<uint32_t*>(dst);
-  dst += (width - 1) * 3;
-  for (int x = width - 1; x >= 0; x--) {
-    dst32[x] = fp24ToFloat((dst[0] << 16) | (dst[1] << 8) | dst[2]);
-    dst -= 3;
+  for (int col = 0; col < out.croppedWidth; ++col) {
+    std::array<unsigned char, storage_bytes> bytes;
+    for (int c = 0; c != bytesps; ++c)
+      bytes[c] = src[col + c * realTileWidth];
+
+    auto tmp = getBE<storage_type>(bytes.data());
+    tmp >>= CHAR_BIT * StorageType<T>::padding_bytes;
+
+    uint32_t tmp_expanded;
+    switch (bytesps) {
+    case 2:
+    case 3:
+      tmp_expanded = extendBinaryFloatingPoint<T, ieee_754_2008::Binary32>(tmp);
+      break;
+    case 4:
+      tmp_expanded = tmp;
+      break;
+    }
+
+    out(row, col) = bit_cast<float>(tmp_expanded);
   }
 }
 
@@ -104,46 +126,29 @@ void DeflateDecompressor::decode(
     ThrowRDE("failed to uncompress tile: %d (%s)", err, zError(err));
   }
 
-  int predFactor = 0;
-  switch (predictor) {
-  case 3:
-    predFactor = 1;
-    break;
-  case 34894:
-    predFactor = 2;
-    break;
-  case 34895:
-    predFactor = 4;
-    break;
-  default:
-    predFactor = 0;
-    break;
-  }
-  predFactor *= mRaw->getCpp();
-
   int bytesps = bps / 8;
+  assert(bytesps >= 2 && bytesps <= 4);
 
-  for (auto row = 0; row < dim.y; ++row) {
+  const CroppedArray2DRef<float> out =
+      CroppedArray2DRef(mRaw->getF32DataAsUncroppedArray2DRef(),
+                        /*offsetCols=*/off.x, /*offsetRows=*/off.y,
+                        /*croppedWidth=*/dim.x, /*croppedHeight=*/dim.y);
+
+  for (int row = 0; row < out.croppedHeight; ++row) {
     unsigned char* src = uBuffer->get() + row * maxDim.x * bytesps;
-    unsigned char* dst =
-        mRaw->getData() + ((off.y + row) * mRaw->pitch + off.x * sizeof(float));
 
-    if (predFactor)
-      decodeFPDeltaRow(src, dst, dim.x, maxDim.x, bytesps, predFactor);
+    decodeDeltaBytes(src, maxDim.x, bytesps, predFactor);
 
-    assert(bytesps >= 2 && bytesps <= 4);
     switch (bytesps) {
     case 2:
-      expandFP16(dst, dim.x);
+      decodeFPDeltaRow<ieee_754_2008::Binary16>(src, maxDim.x, out, row);
       break;
     case 3:
-      expandFP24(dst, dim.x);
+      decodeFPDeltaRow<ieee_754_2008::Binary24>(src, maxDim.x, out, row);
       break;
     case 4:
-      // No need to expand FP32
+      decodeFPDeltaRow<ieee_754_2008::Binary32>(src, maxDim.x, out, row);
       break;
-    default:
-      __builtin_unreachable();
     }
   }
 }

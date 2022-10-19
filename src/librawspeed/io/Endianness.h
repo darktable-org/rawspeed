@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "common/Common.h"
 #include <cassert> // for assert
 #include <cstdint> // for uint32_t, uint16_t, uint64_t, int16_t, int32_t
 #include <cstring> // for memcpy
@@ -80,18 +81,14 @@ inline uint64_t getByteSwapped(uint64_t v) { return BSWAP64(v); }
 // the float/double versions use two memcpy which guarantee strict aliasing
 // and are compiled into the same assembly as the popular union trick.
 inline float getByteSwapped(float f) {
-  uint32_t i;
-  memcpy(&i, &f, sizeof(i));
+  auto i = bit_cast<uint32_t>(f);
   i = getByteSwapped(i);
-  memcpy(&f, &i, sizeof(i));
-  return f;
+  return bit_cast<float>(i);
 }
 inline double getByteSwapped(double d) {
-  uint64_t i;
-  memcpy(&i, &d, sizeof(i));
+  auto i = bit_cast<uint64_t>(d);
   i = getByteSwapped(i);
-  memcpy(&d, &i, sizeof(i));
-  return d;
+  return bit_cast<double>(i);
 }
 
 template <typename T> inline T getByteSwapped(const void* data, bool bswap) {
