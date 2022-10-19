@@ -48,9 +48,11 @@ static inline void decodeDeltaBytes(unsigned char* src, size_t realTileWidth,
 
 // decodeFPDeltaRow(): MIT License, copyright 2014 Javier Celaya
 // <jcelaya@gmail.com>
+template <typename T>
 static inline void decodeFPDeltaRow(unsigned char* src, unsigned char* dst,
-                                    size_t tileWidth, size_t realTileWidth,
-                                    unsigned int bytesps) {
+                                    size_t tileWidth, size_t realTileWidth) {
+  unsigned bytesps = T::StorageWidth / 8;
+
   // Reorder bytes into the image
   // 16 and 32-bit versions depend on local architecture, 24-bit does not
   if (bytesps == 3) {
@@ -127,6 +129,7 @@ void DeflateDecompressor::decode(
   predFactor *= mRaw->getCpp();
 
   int bytesps = bps / 8;
+  assert(bytesps >= 2 && bytesps <= 4);
 
   std::vector<unsigned char> tmp_storage;
   if (predFactor && bytesps != 4)
@@ -142,10 +145,20 @@ void DeflateDecompressor::decode(
       if (bytesps != 4)
         tmp = tmp_storage.data();
       decodeDeltaBytes(src, maxDim.x, bytesps, predFactor);
-      decodeFPDeltaRow(src, tmp, dim.x, maxDim.x, bytesps);
+
+      switch (bytesps) {
+      case 2:
+        decodeFPDeltaRow<ieee_754_2008::Binary16>(src, tmp, dim.x, maxDim.x);
+        break;
+      case 3:
+        decodeFPDeltaRow<ieee_754_2008::Binary24>(src, tmp, dim.x, maxDim.x);
+        break;
+      case 4:
+        decodeFPDeltaRow<ieee_754_2008::Binary32>(src, tmp, dim.x, maxDim.x);
+        break;
+      }
     }
 
-    assert(bytesps >= 2 && bytesps <= 4);
     switch (bytesps) {
     case 2:
       expandFP16(tmp, dst, dim.x);
