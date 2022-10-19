@@ -70,21 +70,21 @@ static inline void decodeFPDeltaRow(unsigned char* src, unsigned char* dst,
   }
 }
 
-static inline void expandFP16(unsigned char* dst, int width) {
-  const auto* dst16 = reinterpret_cast<uint16_t*>(dst);
+static inline void expandFP16(unsigned char* src, unsigned char* dst,
+                              int width) {
+  const auto* src16 = reinterpret_cast<uint16_t*>(src);
   auto* dst32 = reinterpret_cast<uint32_t*>(dst);
-
   for (int x = width - 1; x >= 0; x--)
-    dst32[x] = fp16ToFloat(dst16[x]);
+    dst32[x] = fp16ToFloat(src16[x]);
 }
 
-static inline void expandFP24(unsigned char* dst, int width) {
+static inline void expandFP24(unsigned char* src, unsigned char* dst,
+                              int width) {
+  const auto* src8 = reinterpret_cast<uint8_t*>(src);
   auto* dst32 = reinterpret_cast<uint32_t*>(dst);
-  dst += (width - 1) * 3;
-  for (int x = width - 1; x >= 0; x--) {
-    dst32[x] = fp24ToFloat((dst[0] << 16) | (dst[1] << 8) | dst[2]);
-    dst -= 3;
-  }
+  for (int x = width - 1; x >= 0; x--)
+    dst32[x] = fp24ToFloat((src8[3 * x + 0] << 16) | (src8[3 * x + 1] << 8) |
+                           src8[3 * x + 2]);
 }
 
 void DeflateDecompressor::decode(
@@ -123,21 +123,29 @@ void DeflateDecompressor::decode(
 
   int bytesps = bps / 8;
 
+  std::vector<unsigned char> tmp_storage;
+  if (predFactor && bytesps != 4)
+    tmp_storage.resize(bytesps * dim.x);
+
   for (auto row = 0; row < dim.y; ++row) {
     unsigned char* src = uBuffer->get() + row * maxDim.x * bytesps;
     unsigned char* dst =
         mRaw->getData() + ((off.y + row) * mRaw->pitch + off.x * sizeof(float));
+    unsigned char* tmp = dst;
 
-    if (predFactor)
-      decodeFPDeltaRow(src, dst, dim.x, maxDim.x, bytesps, predFactor);
+    if (predFactor) {
+      if (bytesps != 4)
+        tmp = tmp_storage.data();
+      decodeFPDeltaRow(src, tmp, dim.x, maxDim.x, bytesps, predFactor);
+    }
 
     assert(bytesps >= 2 && bytesps <= 4);
     switch (bytesps) {
     case 2:
-      expandFP16(dst, dim.x);
+      expandFP16(tmp, dst, dim.x);
       break;
     case 3:
-      expandFP24(dst, dim.x);
+      expandFP24(tmp, dst, dim.x);
       break;
     case 4:
       // No need to expand FP32
