@@ -122,6 +122,8 @@ public:
   getU16DataAsUncroppedArray2DRef() const noexcept;
   [[nodiscard]] CroppedArray2DRef<uint16_t>
   getU16DataAsCroppedArray2DRef() const noexcept;
+  [[nodiscard]] Array2DRef<float>
+  getF32DataAsUncroppedArray2DRef() const noexcept;
   [[nodiscard]] uint8_t* getData() const;
   uint8_t*
   getData(uint32_t x,
@@ -287,6 +289,15 @@ inline CroppedArray2DRef<uint16_t>
 RawImageData::getU16DataAsCroppedArray2DRef() const noexcept {
   return {getU16DataAsUncroppedArray2DRef(), cpp * mOffset.x, mOffset.y,
           cpp * dim.x, dim.y};
+}
+
+inline Array2DRef<float>
+RawImageData::getF32DataAsUncroppedArray2DRef() const noexcept {
+  assert(dataType == RawImageType::F32 &&
+         "Attempting to access integer buffer as float.");
+  assert(data && "Data not yet allocated.");
+  return {reinterpret_cast<float*>(data), cpp * uncropped_dim.x,
+          uncropped_dim.y, static_cast<int>(pitch / sizeof(float))};
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,

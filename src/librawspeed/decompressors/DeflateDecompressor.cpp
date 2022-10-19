@@ -80,14 +80,13 @@ template <> struct StorageType<ieee_754_2008::Binary32> {
 };
 
 template <typename T>
-static inline void decodeFPDeltaRow(unsigned char* src, unsigned char* dst,
-                                    size_t tileWidth, size_t realTileWidth) {
+static inline void decodeFPDeltaRow(unsigned char* src, size_t realTileWidth,
+                                    CroppedArray2DRef<float> out, int row) {
   using storage_type = typename StorageType<T>::type;
   constexpr unsigned storage_bytes = sizeof(storage_type);
   constexpr unsigned bytesps = T::StorageWidth / 8;
-  auto* dst32 = reinterpret_cast<uint32_t*>(dst);
 
-  for (size_t col = 0; col < tileWidth; ++col) {
+  for (int col = 0; col < out.croppedWidth; ++col) {
     std::array<unsigned char, storage_bytes> bytes;
     for (int c = 0; c != bytesps; ++c)
       bytes[c] = src[col + c * realTileWidth];
@@ -106,7 +105,7 @@ static inline void decodeFPDeltaRow(unsigned char* src, unsigned char* dst,
       break;
     }
 
-    dst32[col] = tmp_expanded;
+    out(row, col) = bit_cast<float>(tmp_expanded);
   }
 }
 
@@ -130,22 +129,25 @@ void DeflateDecompressor::decode(
   int bytesps = bps / 8;
   assert(bytesps >= 2 && bytesps <= 4);
 
-  for (auto row = 0; row < dim.y; ++row) {
+  const CroppedArray2DRef<float> out =
+      CroppedArray2DRef(mRaw->getF32DataAsUncroppedArray2DRef(),
+                        /*offsetCols=*/off.x, /*offsetRows=*/off.y,
+                        /*croppedWidth=*/dim.x, /*croppedHeight=*/dim.y);
+
+  for (int row = 0; row < out.croppedHeight; ++row) {
     unsigned char* src = uBuffer->get() + row * maxDim.x * bytesps;
-    unsigned char* dst =
-        mRaw->getData() + ((off.y + row) * mRaw->pitch + off.x * sizeof(float));
 
     decodeDeltaBytes(src, maxDim.x, bytesps, predFactor);
 
     switch (bytesps) {
     case 2:
-      decodeFPDeltaRow<ieee_754_2008::Binary16>(src, dst, dim.x, maxDim.x);
+      decodeFPDeltaRow<ieee_754_2008::Binary16>(src, maxDim.x, out, row);
       break;
     case 3:
-      decodeFPDeltaRow<ieee_754_2008::Binary24>(src, dst, dim.x, maxDim.x);
+      decodeFPDeltaRow<ieee_754_2008::Binary24>(src, maxDim.x, out, row);
       break;
     case 4:
-      decodeFPDeltaRow<ieee_754_2008::Binary32>(src, dst, dim.x, maxDim.x);
+      decodeFPDeltaRow<ieee_754_2008::Binary32>(src, maxDim.x, out, row);
       break;
     }
   }
