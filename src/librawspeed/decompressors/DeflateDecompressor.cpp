@@ -49,33 +49,45 @@ static inline void decodeDeltaBytes(unsigned char* src, size_t realTileWidth,
 template <typename T> struct StorageType {};
 template <> struct StorageType<ieee_754_2008::Binary16> {
   using type = uint16_t;
+  static constexpr int padding_bytes = 0;
 };
 template <> struct StorageType<ieee_754_2008::Binary24> {
   using type = uint32_t;
+  static constexpr int padding_bytes = 1;
 };
 template <> struct StorageType<ieee_754_2008::Binary32> {
   using type = uint32_t;
+  static constexpr int padding_bytes = 0;
 };
 
 template <typename T>
 static inline void decodeFPDeltaRow(unsigned char* src, unsigned char* dst,
                                     size_t tileWidth, size_t realTileWidth) {
+  using storage_type = typename StorageType<T>::type;
+  constexpr unsigned storage_bytes = sizeof(storage_type);
   constexpr unsigned bytesps = T::StorageWidth / 8;
+  auto* dst32 = reinterpret_cast<uint32_t*>(dst);
 
   for (size_t col = 0; col < tileWidth; ++col) {
-    std::array<unsigned char, bytesps> bytes;
+    std::array<unsigned char, storage_bytes> bytes;
     for (int c = 0; c != bytesps; ++c)
       bytes[c] = src[col + c * realTileWidth];
 
-    // Reorder bytes into the image
-    // 16 and 32-bit versions depend on local architecture, 24-bit does not
-    if (bytesps != 3) {
-      auto tmp = getBE<typename StorageType<T>::type>(bytes.data());
-      memcpy(bytes.data(), &tmp, bytesps);
+    auto tmp = getBE<storage_type>(bytes.data());
+    tmp >>= CHAR_BIT * StorageType<T>::padding_bytes;
+
+    uint32_t tmp_expanded;
+    switch (bytesps) {
+    case 2:
+    case 3:
+      tmp_expanded = extendBinaryFloatingPoint<T, ieee_754_2008::Binary32>(tmp);
+      break;
+    case 4:
+      tmp_expanded = tmp;
+      break;
     }
 
-    for (int c = 0; c != bytesps; ++c)
-      dst[col * bytesps + c] = bytes[c];
+    dst32[col] = tmp_expanded;
   }
 }
 
@@ -150,29 +162,29 @@ void DeflateDecompressor::decode(
 
       switch (bytesps) {
       case 2:
-        decodeFPDeltaRow<ieee_754_2008::Binary16>(src, tmp, dim.x, maxDim.x);
+        decodeFPDeltaRow<ieee_754_2008::Binary16>(src, dst, dim.x, maxDim.x);
         break;
       case 3:
-        decodeFPDeltaRow<ieee_754_2008::Binary24>(src, tmp, dim.x, maxDim.x);
+        decodeFPDeltaRow<ieee_754_2008::Binary24>(src, dst, dim.x, maxDim.x);
         break;
       case 4:
-        decodeFPDeltaRow<ieee_754_2008::Binary32>(src, tmp, dim.x, maxDim.x);
+        decodeFPDeltaRow<ieee_754_2008::Binary32>(src, dst, dim.x, maxDim.x);
         break;
       }
-    }
-
-    switch (bytesps) {
-    case 2:
-      expandFP16(tmp, dst, dim.x);
-      break;
-    case 3:
-      expandFP24(tmp, dst, dim.x);
-      break;
-    case 4:
-      // No need to expand FP32
-      break;
-    default:
-      __builtin_unreachable();
+    } else {
+      switch (bytesps) {
+      case 2:
+        expandFP16(tmp, dst, dim.x);
+        break;
+      case 3:
+        expandFP24(tmp, dst, dim.x);
+        break;
+      case 4:
+        // No need to expand FP32
+        break;
+      default:
+        __builtin_unreachable();
+      }
     }
   }
 }
