@@ -138,7 +138,6 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
   assert(inputPitchBytes > 0);
   assert(bitPerPixel > 0);
 
-  uint8_t* data = mRaw->getData();
   uint32_t outPitch = mRaw->pitch;
   uint32_t w = size.x;
   uint32_t h = size.y;
@@ -181,7 +180,8 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
 
   if (mRaw->getDataType() == RawImageType::F32) {
     if (bitPerPixel == 32) {
-      copyPixels(&data[offset.x * sizeof(float) * cpp + y * outPitch], outPitch,
+      const Array2DRef<float> out(mRaw->getF32DataAsUncroppedArray2DRef());
+      copyPixels(reinterpret_cast<uint8_t*>(&out(y, offset.x * cpp)), outPitch,
                  input.getData(inputPitchBytes * (h - y)), inputPitchBytes,
                  w * mRaw->getBpp(), h - y);
       return;
