@@ -36,16 +36,21 @@ namespace rawspeed {
 
 // decodeFPDeltaRow(): MIT License, copyright 2014 Javier Celaya
 // <jcelaya@gmail.com>
-static inline void decodeFPDeltaRow(unsigned char* src, unsigned char* dst,
-                                    size_t tileWidth, size_t realTileWidth,
+static inline void decodeDeltaBytes(unsigned char* src, size_t realTileWidth,
                                     unsigned int bytesps, int factor) {
-  // DecodeDeltaBytes
   for (size_t col = factor; col < realTileWidth * bytesps; ++col) {
     // Yes, this is correct, and is symmetrical with EncodeDeltaBytes in
     // hdrmerge, and they both combined are lossless.
     // This is indeed working in modulo-2^n arighmetics.
     src[col] = static_cast<unsigned char>(src[col] + src[col - factor]);
   }
+}
+
+// decodeFPDeltaRow(): MIT License, copyright 2014 Javier Celaya
+// <jcelaya@gmail.com>
+static inline void decodeFPDeltaRow(unsigned char* src, unsigned char* dst,
+                                    size_t tileWidth, size_t realTileWidth,
+                                    unsigned int bytesps) {
   // Reorder bytes into the image
   // 16 and 32-bit versions depend on local architecture, 24-bit does not
   if (bytesps == 3) {
@@ -136,7 +141,8 @@ void DeflateDecompressor::decode(
     if (predFactor) {
       if (bytesps != 4)
         tmp = tmp_storage.data();
-      decodeFPDeltaRow(src, tmp, dim.x, maxDim.x, bytesps, predFactor);
+      decodeDeltaBytes(src, maxDim.x, bytesps, predFactor);
+      decodeFPDeltaRow(src, tmp, dim.x, maxDim.x, bytesps);
     }
 
     assert(bytesps >= 2 && bytesps <= 4);
