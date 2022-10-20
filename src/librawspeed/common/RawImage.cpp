@@ -103,11 +103,12 @@ void RawImageData::createData() {
   if (dim.y > 1) {
     // padding is the size of the area after last pixel of line n
     // and before the first pixel of line n+1
-    assert(getData(dim.x - 1, 0) + bpp + padding == getData(0, 1));
+    assert(getDataUncropped(dim.x - 1, 0) + bpp + padding ==
+           getDataUncropped(0, 1));
   }
 
   for (int j = 0; j < dim.y; j++) {
-    const uint8_t* const line = getData(0, j);
+    const uint8_t* const line = getDataUncropped(0, j);
     // each line is indeed 16-byte aligned
     assert(isAligned(line, alignment));
   }
