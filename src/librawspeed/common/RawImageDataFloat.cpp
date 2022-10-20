@@ -115,17 +115,18 @@ RawImageDataFloat::RawImageDataFloat() {
   }
 
   void RawImageDataFloat::scaleBlackWhite() {
+    const CroppedArray2DRef<float> img = getF32DataAsCroppedArray2DRef();
+
     const int skipBorder = 150;
     int gw = (dim.x - skipBorder) * cpp;
     if ((blackAreas.empty() && blackLevelSeparate[0] < 0 && blackLevel < 0) || whitePoint == 65536) {  // Estimate
       float b = 100000000;
       float m = -10000000;
-      for (int row = skipBorder*cpp;row < (dim.y - skipBorder);row++) {
-        const auto* pixel = reinterpret_cast<float*>(getData(skipBorder, row));
+      for (int row = skipBorder * cpp; row < (dim.y - skipBorder); row++) {
         for (int col = skipBorder ; col < gw ; col++) {
-          b = min(*pixel, b);
-          m = max(*pixel, m);
-          pixel++;
+          const float pixel = img(row, col);
+          b = min(pixel, b);
+          m = max(pixel, m);
         }
       }
       if (blackLevel < 0)
@@ -259,6 +260,7 @@ RawImageDataFloat::RawImageDataFloat() {
 #else
 
   void RawImageDataFloat::scaleValues(int start_y, int end_y) {
+    const CroppedArray2DRef<float> img = getF32DataAsCroppedArray2DRef();
     int gw = dim.x * cpp;
     std::array<float, 4> mul;
     std::array<float, 4> sub;
@@ -273,12 +275,10 @@ RawImageDataFloat::RawImageDataFloat() {
       sub[i] = static_cast<float>(blackLevelSeparate[v]);
     }
     for (int y = start_y; y < end_y; y++) {
-      auto* pixel = reinterpret_cast<float*>(getData(0, y));
       const float* mul_local = &mul[2 * (y & 1)];
       const float* sub_local = &sub[2 * (y & 1)];
-      for (int x = 0 ; x < gw; x++) {
-        pixel[x] = (pixel[x] - sub_local[x&1]) * mul_local[x&1];
-      }
+      for (int x = 0; x < gw; x++)
+        img(y, x) = (img(y, x) - sub_local[x & 1]) * mul_local[x & 1];
     }
   }
 

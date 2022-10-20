@@ -103,11 +103,12 @@ void RawImageData::createData() {
   if (dim.y > 1) {
     // padding is the size of the area after last pixel of line n
     // and before the first pixel of line n+1
-    assert(getData(dim.x - 1, 0) + bpp + padding == getData(0, 1));
+    assert(getDataUncropped(dim.x - 1, 0) + bpp + padding ==
+           getDataUncropped(0, 1));
   }
 
   for (int j = 0; j < dim.y; j++) {
-    const uint8_t* const line = getData(0, j);
+    const uint8_t* const line = getDataUncropped(0, j);
     // each line is indeed 16-byte aligned
     assert(isAligned(line, alignment));
   }
@@ -202,21 +203,6 @@ void RawImageData::setCpp(uint32_t val) {
   bpp /= cpp;
   cpp = val;
   bpp *= val;
-}
-
-uint8_t* RawImageData::getData(uint32_t x, uint32_t y) {
-  x += mOffset.x;
-  y += mOffset.y;
-
-  if (x >= static_cast<unsigned>(uncropped_dim.x))
-    ThrowRDE("X Position outside image requested.");
-  if (y >= static_cast<unsigned>(uncropped_dim.y))
-    ThrowRDE("Y Position outside image requested.");
-
-  if (!isAllocated())
-    ThrowRDE("Data not yet allocated.");
-
-  return &data[static_cast<size_t>(y) * pitch + x * bpp];
 }
 
 uint8_t* RawImageData::getDataUncropped(uint32_t x, uint32_t y) const {
@@ -422,79 +408,18 @@ void RawImageData::fixBadPixelsThread(int start_y, int end_y) {
   }
 }
 
-void RawImageData::blitFrom(const RawImage& src, const iPoint2D& srcPos,
-                            const iPoint2D& size, const iPoint2D& destPos) {
-  iRectangle2D src_rect(srcPos, size);
-  iRectangle2D dest_rect(destPos, size);
-  src_rect = src_rect.getOverlap(iRectangle2D(iPoint2D(0,0), src->dim));
-  dest_rect = dest_rect.getOverlap(iRectangle2D(iPoint2D(0,0), dim));
-
-  iPoint2D blitsize = src_rect.dim.getSmallest(dest_rect.dim);
-  if (blitsize.area() <= 0)
-    return;
-
-  // TODO: Move offsets after crop.
-  copyPixels(getData(dest_rect.pos.x, dest_rect.pos.y), pitch,
-             src->getData(src_rect.pos.x, src_rect.pos.y), src->pitch,
-             blitsize.x * bpp, blitsize.y);
-}
-
-/* Does not take cfa into consideration */
-void RawImageData::expandBorder(iRectangle2D validData)
-{
-  validData = validData.getOverlap(iRectangle2D(0,0,dim.x, dim.y));
-  if (validData.pos.x > 0) {
-    for (int y = 0; y < dim.y; y++ ) {
-      const uint8_t* src_pos = getData(validData.pos.x, y);
-      uint8_t* dst_pos = getData(validData.pos.x - 1, y);
-      for (int x = validData.pos.x; x >= 0; x--) {
-        for (int i = 0; i < bpp; i++) {
-          dst_pos[i] = src_pos[i];
-        }
-        dst_pos -= bpp;
-      }
-    }
-  }
-
-  if (validData.getRight() < dim.x) {
-    int pos = validData.getRight();
-    for (int y = 0; y < dim.y; y++ ) {
-      const uint8_t* src_pos = getData(pos - 1, y);
-      uint8_t* dst_pos = getData(pos, y);
-      for (int x = pos; x < dim.x; x++) {
-        for (int i = 0; i < bpp; i++) {
-          dst_pos[i] = src_pos[i];
-        }
-        dst_pos += bpp;
-      }
-    }
-  }
-
-  if (validData.pos.y > 0) {
-    const uint8_t* src_pos = getData(0, validData.pos.y);
-    for (int y = 0; y < validData.pos.y; y++ ) {
-      uint8_t* dst_pos = getData(0, y);
-      memcpy(dst_pos, src_pos, static_cast<size_t>(dim.x) * bpp);
-    }
-  }
-  if (validData.getBottom() < dim.y) {
-    const uint8_t* src_pos = getData(0, validData.getBottom() - 1);
-    for (int y = validData.getBottom(); y < dim.y; y++ ) {
-      uint8_t* dst_pos = getData(0, y);
-      memcpy(dst_pos, src_pos, static_cast<size_t>(dim.x) * bpp);
-    }
-  }
-}
-
-void RawImageData::clearArea(iRectangle2D area, uint8_t val /*= 0*/) {
+void RawImageData::clearArea(iRectangle2D area) const {
   area = area.getOverlap(iRectangle2D(iPoint2D(0,0), dim));
 
   if (area.area() <= 0)
     return;
 
-  for (int y = area.getTop(); y < area.getBottom(); y++)
-    memset(getData(area.getLeft(), y), val,
-           static_cast<size_t>(area.getWidth()) * bpp);
+  const CroppedArray2DRef<uint16_t> out = getU16DataAsCroppedArray2DRef();
+  for (int y = area.getTop(); y < area.getBottom(); y++) {
+    for (int x = area.getLeft(); x < area.getWidth() * cpp; ++x) {
+      out(y, x) = 0;
+    }
+  }
 }
 
 RawImage& RawImage::operator=(RawImage&& rhs) noexcept {

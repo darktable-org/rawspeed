@@ -115,8 +115,6 @@ public:
   void checkRowIsInitialized(int row) const;
   void checkMemIsInitialized() const;
   void destroyData();
-  void blitFrom(const RawImage& src, const iPoint2D& srcPos,
-                const iPoint2D& size, const iPoint2D& destPos);
   [[nodiscard]] rawspeed::RawImageType getDataType() const { return dataType; }
   [[nodiscard]] Array2DRef<uint16_t>
   getU16DataAsUncroppedArray2DRef() const noexcept;
@@ -124,13 +122,12 @@ public:
   getU16DataAsCroppedArray2DRef() const noexcept;
   [[nodiscard]] Array2DRef<float>
   getF32DataAsUncroppedArray2DRef() const noexcept;
-  uint8_t*
-  getData(uint32_t x,
-          uint32_t y); // Not super fast, but safe. Don't use per pixel.
+  [[nodiscard]] CroppedArray2DRef<float>
+  getF32DataAsCroppedArray2DRef() const noexcept;
   [[nodiscard]] uint8_t* getDataUncropped(uint32_t x, uint32_t y) const;
 
   void subFrame(iRectangle2D cropped);
-  void clearArea(iRectangle2D area, uint8_t value = 0);
+  void clearArea(iRectangle2D area) const;
   [[nodiscard]] iPoint2D __attribute__((pure)) getUncroppedDim() const;
   [[nodiscard]] iPoint2D __attribute__((pure)) getCropOffset() const;
   virtual void scaleBlackWhite() = 0;
@@ -140,7 +137,6 @@ public:
   void sixteenBitLookup();
   void transferBadPixelsToMap() REQUIRES(!mBadPixelMutex);
   void fixBadPixels() REQUIRES(!mBadPixelMutex);
-  void expandBorder(iRectangle2D validData);
   void setTable(const std::vector<uint16_t>& table_, bool dither);
   void setTable(std::unique_ptr<TableLookUp> t);
 
@@ -297,6 +293,12 @@ RawImageData::getF32DataAsUncroppedArray2DRef() const noexcept {
   assert(data && "Data not yet allocated.");
   return {reinterpret_cast<float*>(data), cpp * uncropped_dim.x,
           uncropped_dim.y, static_cast<int>(pitch / sizeof(float))};
+}
+
+inline CroppedArray2DRef<float>
+RawImageData::getF32DataAsCroppedArray2DRef() const noexcept {
+  return {getF32DataAsUncroppedArray2DRef(), cpp * mOffset.x, mOffset.y,
+          cpp * dim.x, dim.y};
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,

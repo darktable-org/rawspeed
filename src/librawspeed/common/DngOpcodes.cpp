@@ -244,21 +244,31 @@ protected:
       ThrowRDE("Invalid pitch");
   }
 
+  // FIXME: extract into `RawImage`?
+  template <typename T>
+  CroppedArray2DRef<T> getDataAsCroppedArray2DRef(const RawImage& ri) {
+    if constexpr (std::is_same<T, uint16_t>())
+      return ri->getU16DataAsCroppedArray2DRef();
+    if constexpr (std::is_same<T, float>())
+      return ri->getF32DataAsCroppedArray2DRef();
+    __builtin_unreachable();
+  }
+
   // traverses the current ROI and applies the operation OP to each pixel,
   // i.e. each pixel value v is replaced by op(x, y, v), where x/y are the
   // coordinates of the pixel value v.
   template <typename T, typename OP> void applyOP(const RawImage& ri, OP op) {
+    const CroppedArray2DRef<T> img = getDataAsCroppedArray2DRef<T>(ri);
     int cpp = ri->getCpp();
     const iRectangle2D& ROI = getRoi();
     for (auto y = ROI.getTop(); y < ROI.getBottom(); y += rowPitch) {
-      auto* src = reinterpret_cast<T*>(ri->getData(0, y));
-      // Add offset, so this is always first plane
-      src += firstPlane;
       // FIXME: is op() really supposed to receive global image coordinates,
       // and not [0..ROI.getHeight()-1][0..ROI.getWidth()-1] ?
       for (auto x = ROI.getLeft(); x < ROI.getRight(); x += colPitch) {
-        for (auto p = 0U; p < planes; ++p)
-          src[x * cpp + p] = op(x, y, src[x * cpp + p]);
+        for (auto p = 0U; p < planes; ++p) {
+          T& pixel = img(y, firstPlane + x * cpp + p);
+          pixel = op(x, y, pixel);
+        }
       }
     }
   }
