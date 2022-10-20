@@ -422,53 +422,6 @@ void RawImageData::fixBadPixelsThread(int start_y, int end_y) {
   }
 }
 
-/* Does not take cfa into consideration */
-void RawImageData::expandBorder(iRectangle2D validData)
-{
-  validData = validData.getOverlap(iRectangle2D(0,0,dim.x, dim.y));
-  if (validData.pos.x > 0) {
-    for (int y = 0; y < dim.y; y++ ) {
-      const uint8_t* src_pos = getData(validData.pos.x, y);
-      uint8_t* dst_pos = getData(validData.pos.x - 1, y);
-      for (int x = validData.pos.x; x >= 0; x--) {
-        for (int i = 0; i < bpp; i++) {
-          dst_pos[i] = src_pos[i];
-        }
-        dst_pos -= bpp;
-      }
-    }
-  }
-
-  if (validData.getRight() < dim.x) {
-    int pos = validData.getRight();
-    for (int y = 0; y < dim.y; y++ ) {
-      const uint8_t* src_pos = getData(pos - 1, y);
-      uint8_t* dst_pos = getData(pos, y);
-      for (int x = pos; x < dim.x; x++) {
-        for (int i = 0; i < bpp; i++) {
-          dst_pos[i] = src_pos[i];
-        }
-        dst_pos += bpp;
-      }
-    }
-  }
-
-  if (validData.pos.y > 0) {
-    const uint8_t* src_pos = getData(0, validData.pos.y);
-    for (int y = 0; y < validData.pos.y; y++ ) {
-      uint8_t* dst_pos = getData(0, y);
-      memcpy(dst_pos, src_pos, static_cast<size_t>(dim.x) * bpp);
-    }
-  }
-  if (validData.getBottom() < dim.y) {
-    const uint8_t* src_pos = getData(0, validData.getBottom() - 1);
-    for (int y = validData.getBottom(); y < dim.y; y++ ) {
-      uint8_t* dst_pos = getData(0, y);
-      memcpy(dst_pos, src_pos, static_cast<size_t>(dim.x) * bpp);
-    }
-  }
-}
-
 void RawImageData::clearArea(iRectangle2D area) const {
   area = area.getOverlap(iRectangle2D(iPoint2D(0,0), dim));
 

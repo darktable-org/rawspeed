@@ -140,7 +140,6 @@ public:
   void sixteenBitLookup();
   void transferBadPixelsToMap() REQUIRES(!mBadPixelMutex);
   void fixBadPixels() REQUIRES(!mBadPixelMutex);
-  void expandBorder(iRectangle2D validData);
   void setTable(const std::vector<uint16_t>& table_, bool dither);
   void setTable(std::unique_ptr<TableLookUp> t);
 
