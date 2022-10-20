@@ -124,9 +124,6 @@ public:
   getF32DataAsUncroppedArray2DRef() const noexcept;
   [[nodiscard]] CroppedArray2DRef<float>
   getF32DataAsCroppedArray2DRef() const noexcept;
-  uint8_t*
-  getData(uint32_t x,
-          uint32_t y); // Not super fast, but safe. Don't use per pixel.
   [[nodiscard]] uint8_t* getDataUncropped(uint32_t x, uint32_t y) const;
 
   void subFrame(iRectangle2D cropped);
