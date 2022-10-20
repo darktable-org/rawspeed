@@ -124,6 +124,8 @@ public:
   getU16DataAsCroppedArray2DRef() const noexcept;
   [[nodiscard]] Array2DRef<float>
   getF32DataAsUncroppedArray2DRef() const noexcept;
+  [[nodiscard]] CroppedArray2DRef<float>
+  getF32DataAsCroppedArray2DRef() const noexcept;
   uint8_t*
   getData(uint32_t x,
           uint32_t y); // Not super fast, but safe. Don't use per pixel.
@@ -297,6 +299,12 @@ RawImageData::getF32DataAsUncroppedArray2DRef() const noexcept {
   assert(data && "Data not yet allocated.");
   return {reinterpret_cast<float*>(data), cpp * uncropped_dim.x,
           uncropped_dim.y, static_cast<int>(pitch / sizeof(float))};
+}
+
+inline CroppedArray2DRef<float>
+RawImageData::getF32DataAsCroppedArray2DRef() const noexcept {
+  return {getF32DataAsUncroppedArray2DRef(), cpp * mOffset.x, mOffset.y,
+          cpp * dim.x, dim.y};
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,

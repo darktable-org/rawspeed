@@ -115,17 +115,18 @@ RawImageDataFloat::RawImageDataFloat() {
   }
 
   void RawImageDataFloat::scaleBlackWhite() {
+    const CroppedArray2DRef<float> img = getF32DataAsCroppedArray2DRef();
+
     const int skipBorder = 150;
     int gw = (dim.x - skipBorder) * cpp;
     if ((blackAreas.empty() && blackLevelSeparate[0] < 0 && blackLevel < 0) || whitePoint == 65536) {  // Estimate
       float b = 100000000;
       float m = -10000000;
-      for (int row = skipBorder*cpp;row < (dim.y - skipBorder);row++) {
-        const auto* pixel = reinterpret_cast<float*>(getData(skipBorder, row));
+      for (int row = skipBorder * cpp; row < (dim.y - skipBorder); row++) {
         for (int col = skipBorder ; col < gw ; col++) {
-          b = min(*pixel, b);
-          m = max(*pixel, m);
-          pixel++;
+          const float pixel = img(row, col);
+          b = min(pixel, b);
+          m = max(pixel, m);
         }
       }
       if (blackLevel < 0)
