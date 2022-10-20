@@ -260,6 +260,7 @@ RawImageDataFloat::RawImageDataFloat() {
 #else
 
   void RawImageDataFloat::scaleValues(int start_y, int end_y) {
+    const CroppedArray2DRef<float> img = getF32DataAsCroppedArray2DRef();
     int gw = dim.x * cpp;
     std::array<float, 4> mul;
     std::array<float, 4> sub;
@@ -274,12 +275,10 @@ RawImageDataFloat::RawImageDataFloat() {
       sub[i] = static_cast<float>(blackLevelSeparate[v]);
     }
     for (int y = start_y; y < end_y; y++) {
-      auto* pixel = reinterpret_cast<float*>(getData(0, y));
       const float* mul_local = &mul[2 * (y & 1)];
       const float* sub_local = &sub[2 * (y & 1)];
-      for (int x = 0 ; x < gw; x++) {
-        pixel[x] = (pixel[x] - sub_local[x&1]) * mul_local[x&1];
-      }
+      for (int x = 0; x < gw; x++)
+        img(y, x) = (img(y, x) - sub_local[x & 1]) * mul_local[x & 1];
     }
   }
 
