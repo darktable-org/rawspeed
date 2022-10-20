@@ -80,7 +80,8 @@ template <> struct StorageType<ieee_754_2008::Binary32> {
 };
 
 template <typename T>
-static inline void decodeFPDeltaRow(unsigned char* src, size_t realTileWidth,
+static inline void decodeFPDeltaRow(const unsigned char* src,
+                                    size_t realTileWidth,
                                     CroppedArray2DRef<float> out, int row) {
   using storage_type = typename StorageType<T>::type;
   constexpr unsigned storage_bytes = sizeof(storage_type);
