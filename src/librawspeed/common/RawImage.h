@@ -132,7 +132,7 @@ public:
   [[nodiscard]] uint8_t* getDataUncropped(uint32_t x, uint32_t y) const;
 
   void subFrame(iRectangle2D cropped);
-  void clearArea(iRectangle2D area, uint8_t value = 0);
+  void clearArea(iRectangle2D area) const;
   [[nodiscard]] iPoint2D __attribute__((pure)) getUncroppedDim() const;
   [[nodiscard]] iPoint2D __attribute__((pure)) getCropOffset() const;
   virtual void scaleBlackWhite() = 0;

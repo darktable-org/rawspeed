@@ -486,15 +486,18 @@ void RawImageData::expandBorder(iRectangle2D validData)
   }
 }
 
-void RawImageData::clearArea(iRectangle2D area, uint8_t val /*= 0*/) {
+void RawImageData::clearArea(iRectangle2D area) const {
   area = area.getOverlap(iRectangle2D(iPoint2D(0,0), dim));
 
   if (area.area() <= 0)
     return;
 
-  for (int y = area.getTop(); y < area.getBottom(); y++)
-    memset(getData(area.getLeft(), y), val,
-           static_cast<size_t>(area.getWidth()) * bpp);
+  const CroppedArray2DRef<uint16_t> out = getU16DataAsCroppedArray2DRef();
+  for (int y = area.getTop(); y < area.getBottom(); y++) {
+    for (int x = area.getLeft(); x < area.getWidth() * cpp; ++x) {
+      out(y, x) = 0;
+    }
+  }
 }
 
 RawImage& RawImage::operator=(RawImage&& rhs) noexcept {
