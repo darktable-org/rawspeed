@@ -115,8 +115,6 @@ public:
   void checkRowIsInitialized(int row) const;
   void checkMemIsInitialized() const;
   void destroyData();
-  void blitFrom(const RawImage& src, const iPoint2D& srcPos,
-                const iPoint2D& size, const iPoint2D& destPos);
   [[nodiscard]] rawspeed::RawImageType getDataType() const { return dataType; }
   [[nodiscard]] Array2DRef<uint16_t>
   getU16DataAsUncroppedArray2DRef() const noexcept;

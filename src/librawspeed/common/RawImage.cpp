@@ -422,23 +422,6 @@ void RawImageData::fixBadPixelsThread(int start_y, int end_y) {
   }
 }
 
-void RawImageData::blitFrom(const RawImage& src, const iPoint2D& srcPos,
-                            const iPoint2D& size, const iPoint2D& destPos) {
-  iRectangle2D src_rect(srcPos, size);
-  iRectangle2D dest_rect(destPos, size);
-  src_rect = src_rect.getOverlap(iRectangle2D(iPoint2D(0,0), src->dim));
-  dest_rect = dest_rect.getOverlap(iRectangle2D(iPoint2D(0,0), dim));
-
-  iPoint2D blitsize = src_rect.dim.getSmallest(dest_rect.dim);
-  if (blitsize.area() <= 0)
-    return;
-
-  // TODO: Move offsets after crop.
-  copyPixels(getData(dest_rect.pos.x, dest_rect.pos.y), pitch,
-             src->getData(src_rect.pos.x, src_rect.pos.y), src->pitch,
-             blitsize.x * bpp, blitsize.y);
-}
-
 /* Does not take cfa into consideration */
 void RawImageData::expandBorder(iRectangle2D validData)
 {
