@@ -45,6 +45,8 @@ RawImageDataFloat::RawImageDataFloat() {
   }
 
   void RawImageDataFloat::calculateBlackAreas() {
+    const Array2DRef<float> img = getF32DataAsUncroppedArray2DRef();
+
     std::array<float, 4> accPixels;
     accPixels.fill(0);
     int totalpixels = 0;
@@ -60,12 +62,8 @@ RawImageDataFloat::RawImageDataFloat() {
             uncropped_dim.y)
           ThrowRDE("Offset + size is larger than height of image");
         for (uint32_t y = area.offset; y < area.offset + area.size; y++) {
-          const auto* pixel =
-              reinterpret_cast<float*>(getDataUncropped(mOffset.x, y));
-
           for (int x = mOffset.x; x < dim.x + mOffset.x; x++) {
-            accPixels[((y & 1) << 1) | (x & 1)] += *pixel;
-            pixel++;
+            accPixels[((y & 1) << 1) | (x & 1)] += img(y, x);
           }
         }
         totalpixels += area.size * dim.x;
@@ -76,13 +74,9 @@ RawImageDataFloat::RawImageDataFloat() {
         if (static_cast<int>(area.offset) + static_cast<int>(area.size) >
             uncropped_dim.x)
           ThrowRDE("Offset + size is larger than width of image");
-        for (int y = mOffset.y; y < dim.y+mOffset.y; y++) {
-          const auto* pixel =
-              reinterpret_cast<float*>(getDataUncropped(area.offset, y));
-
+        for (int y = mOffset.y; y < dim.y + mOffset.y; y++) {
           for (uint32_t x = area.offset; x < area.size + area.offset; x++) {
-            accPixels[((y & 1) << 1) | (x & 1)] += *pixel;
-            pixel++;
+            accPixels[((y & 1) << 1) | (x & 1)] += img(y, x);
           }
         }
         totalpixels += area.size * dim.y;
