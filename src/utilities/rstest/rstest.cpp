@@ -298,16 +298,16 @@ void writePFM(const RawImage& raw, const std::string& fn) {
   width *= raw->getCpp();
 
   // Write pixels
+  const Array2DRef<float> img = raw->getF32DataAsUncroppedArray2DRef();
   for (int y = 0; y < height; ++y) {
     // NOTE: pfm has rows in reverse order
     const int row_in = height - 1 - y;
-    auto* row = reinterpret_cast<float*>(raw->getDataUncropped(0, row_in));
 
     // PFM can have any endiannes, let's write little-endian
     for (int x = 0; x < width; ++x)
-      row[x] = getU32LE(row + x);
+      img(row_in, x) = getU32LE(&img(row_in, x));
 
-    fwrite(row, sizeof(*row), width, f.get());
+    fwrite(&img(row_in, 0), sizeof(decltype(img)::value_type), width, f.get());
   }
 }
 
