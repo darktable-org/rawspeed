@@ -250,13 +250,13 @@ void writePPM(const RawImage& raw, const std::string& fn) {
   width *= raw->getCpp();
 
   // Write pixels
+  const Array2DRef<uint16_t> img = raw->getU16DataAsUncroppedArray2DRef();
   for (int y = 0; y < height; ++y) {
-    auto* row = reinterpret_cast<uint16_t*>(raw->getDataUncropped(0, y));
     // PPM is big-endian
     for (int x = 0; x < width; ++x)
-      row[x] = getU16BE(row + x);
+      img(y, x) = getU16BE(&img(y, x));
 
-    fwrite(row, sizeof(*row), width, f.get());
+    fwrite(&img(y, 0), sizeof(decltype(img)::value_type), width, f.get());
   }
 }
 
