@@ -305,7 +305,7 @@ void writePFM(const RawImage& raw, const std::string& fn) {
 
     // PFM can have any endiannes, let's write little-endian
     for (int x = 0; x < width; ++x)
-      img(row_in, x) = getU32LE(&img(row_in, x));
+      img(row_in, x) = bit_cast<float>(getU32LE(&img(row_in, x)));
 
     fwrite(&img(row_in, 0), sizeof(decltype(img)::value_type), width, f.get());
   }
