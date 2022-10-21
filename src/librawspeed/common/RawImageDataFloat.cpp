@@ -284,6 +284,8 @@ RawImageDataFloat::RawImageDataFloat() {
   /* are weighed less */
 
 void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
+  const Array2DRef<float> img = getF32DataAsUncroppedArray2DRef();
+
   std::array<float, 4> values;
   values.fill(-1);
   std::array<float, 4> dist = {{}};
@@ -298,7 +300,7 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   int curr = 0;
   while (x_find >= 0 && values[curr] < 0) {
     if (0 == ((bad_line[x_find>>3] >> (x_find&7)) & 1)) {
-      values[curr] = (reinterpret_cast<float*>(getDataUncropped(x_find, y)))[component];
+      values[curr] = img(y, x_find + component);
       dist[curr] = static_cast<float>(static_cast<int>(x) - x_find);
     }
     x_find -= step;
@@ -308,7 +310,7 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   curr = 1;
   while (x_find < uncropped_dim.x && values[curr] < 0) {
     if (0 == ((bad_line[x_find>>3] >> (x_find&7)) & 1)) {
-      values[curr] = (reinterpret_cast<float*>(getDataUncropped(x_find, y)))[component];
+      values[curr] = img(y, x_find + component);
       dist[curr] = static_cast<float>(x_find - static_cast<int>(x));
     }
     x_find += step;
@@ -320,7 +322,7 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   curr = 2;
   while (y_find >= 0 && values[curr] < 0) {
     if (0 == ((bad_line[y_find*mBadPixelMapPitch] >> (x&7)) & 1)) {
-      values[curr] = (reinterpret_cast<float*>(getDataUncropped(x, y_find)))[component];
+      values[curr] = img(y_find, x + component);
       dist[curr] = static_cast<float>(static_cast<int>(y) - y_find);
     }
     y_find -= step;
@@ -330,7 +332,7 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   curr = 3;
   while (y_find < uncropped_dim.y && values[curr] < 0) {
     if (0 == ((bad_line[y_find*mBadPixelMapPitch] >> (x&7)) & 1)) {
-      values[curr] = (reinterpret_cast<float*>(getDataUncropped(x, y_find)))[component];
+      values[curr] = img(y_find, x + component);
       dist[curr] = static_cast<float>(y_find - static_cast<int>(y));
     }
     y_find += step;
@@ -358,8 +360,7 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
       total_pixel += values[i] * weight[i];
 
   total_pixel /= total_div;
-  auto* pix = reinterpret_cast<float*>(getDataUncropped(x, y));
-  pix[component] = total_pixel;
+  img(y, x + component) = total_pixel;
 
   /* Process other pixels - could be done inline, since we have the weights */
   if (cpp > 1 && component == 0)
