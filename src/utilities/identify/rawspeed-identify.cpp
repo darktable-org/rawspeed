@@ -258,11 +258,10 @@ int main(int argc, char* argv[]) { // NOLINT
 #pragma omp parallel for default(none) firstprivate(dimUncropped, raw, cpp) schedule(static) reduction(+ : sum)
 #endif
       for (int y = 0; y < dimUncropped.y; ++y) {
-        const auto* const data =
-            reinterpret_cast<float*>((*raw)->getDataUncropped(0, y));
-
+        const rawspeed::Array2DRef<float> img =
+            (*raw)->getF32DataAsUncroppedArray2DRef();
         for (unsigned x = 0; x < cpp * dimUncropped.x; ++x)
-          sum += static_cast<double>(data[x]);
+          sum += static_cast<double>(img(y, x));
       }
 
       fprintf(stdout, "Image float sum: %lf\n", sum);
