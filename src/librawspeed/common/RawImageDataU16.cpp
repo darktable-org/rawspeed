@@ -57,6 +57,8 @@ RawImageDataU16::RawImageDataU16(const iPoint2D& _dim, uint32_t _cpp)
 }
 
 void RawImageDataU16::calculateBlackAreas() {
+  const Array2DRef<uint16_t> img = getU16DataAsUncroppedArray2DRef();
+
   vector<unsigned int> histogram(4 * 65536);
   fill(histogram.begin(), histogram.end(), 0);
 
@@ -73,11 +75,10 @@ void RawImageDataU16::calculateBlackAreas() {
           uncropped_dim.y)
         ThrowRDE("Offset + size is larger than height of image");
       for (uint32_t y = area.offset; y < area.offset + area.size; y++) {
-        const auto* pixel =
-            reinterpret_cast<uint16_t*>(getDataUncropped(mOffset.x, y));
         auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
         for (int x = mOffset.x; x < dim.x+mOffset.x; x++) {
-          const auto hBin = ((x & 1) << 16) + *pixel;
+          // FIXME: this only samples a single row, not an area.
+          const auto hBin = ((x & 1) << 16) + img(y, mOffset.x);
           localhist[hBin]++;
         }
       }
@@ -89,12 +90,11 @@ void RawImageDataU16::calculateBlackAreas() {
       if (static_cast<int>(area.offset) + static_cast<int>(area.size) >
           uncropped_dim.x)
         ThrowRDE("Offset + size is larger than width of image");
-      for (int y = mOffset.y; y < dim.y+mOffset.y; y++) {
-        const auto* pixel =
-            reinterpret_cast<uint16_t*>(getDataUncropped(area.offset, y));
+      for (int y = mOffset.y; y < dim.y + mOffset.y; y++) {
         auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
         for (uint32_t x = area.offset; x < area.size + area.offset; x++) {
-          const auto hBin = ((x & 1) << 16) + *pixel;
+          // FIXME: this only samples a single row, not an area.
+          const auto hBin = ((x & 1) << 16) + img(y, area.offset);
           localhist[hBin]++;
         }
       }
