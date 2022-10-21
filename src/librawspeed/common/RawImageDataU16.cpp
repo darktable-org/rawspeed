@@ -475,22 +475,22 @@ void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
 // TODO: Could be done with SSE2
 void RawImageDataU16::doLookup( int start_y, int end_y )
 {
+  const Array2DRef<uint16_t> img = getU16DataAsUncroppedArray2DRef();
+
   if (table->ntables == 1) {
     if (table->dither) {
       int gw = uncropped_dim.x * cpp;
       const auto* t = reinterpret_cast<uint32_t*>(table->getTable(0));
       for (int y = start_y; y < end_y; y++) {
         uint32_t v = (uncropped_dim.x + y * 13) ^ 0x45694584;
-        auto* pixel = reinterpret_cast<uint16_t*>(getDataUncropped(0, y));
         for (int x = 0 ; x < gw; x++) {
-          uint16_t p = *pixel;
+          uint16_t p = img(y, x);
           uint32_t lookup = t[p];
           uint32_t base = lookup & 0xffff;
           uint32_t delta = lookup >> 16;
           v = 15700 *(v & 65535) + (v >> 16);
           uint32_t pix = base + ((delta * (v & 2047) + 1024) >> 12);
-          *pixel = clampBits(pix, 16);
-          pixel++;
+          img(y, x) = clampBits(pix, 16);
         }
       }
       return;
@@ -499,10 +499,8 @@ void RawImageDataU16::doLookup( int start_y, int end_y )
     int gw = uncropped_dim.x * cpp;
     const uint16_t* t = table->getTable(0);
     for (int y = start_y; y < end_y; y++) {
-      auto* pixel = reinterpret_cast<uint16_t*>(getDataUncropped(0, y));
       for (int x = 0 ; x < gw; x++) {
-        *pixel = t[*pixel];
-        pixel ++;
+        img(y, x) = t[img(y, x)];
       }
     }
     return;
