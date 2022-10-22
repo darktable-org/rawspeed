@@ -131,8 +131,6 @@ public:
   [[nodiscard]] Array2DRef<std::byte>
   getByteDataAsUncroppedArray2DRef() const noexcept;
 
-  [[nodiscard]] uint8_t* getDataUncropped(uint32_t x, uint32_t y) const;
-
   void subFrame(iRectangle2D cropped);
   void clearArea(iRectangle2D area) const;
   [[nodiscard]] iPoint2D __attribute__((pure)) getUncroppedDim() const;
