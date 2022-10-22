@@ -242,10 +242,10 @@ int main(int argc, char* argv[]) { // NOLINT
 #pragma omp parallel for default(none) firstprivate(dimUncropped, raw, bpp) schedule(static) reduction(+ : sum)
 #endif
     for (int y = 0; y < dimUncropped.y; ++y) {
-      const uint8_t* const data = (*raw)->getDataUncropped(0, y);
-
+      const rawspeed::Array2DRef<std::byte> img =
+          (*raw)->getByteDataAsUncroppedArray2DRef();
       for (unsigned x = 0; x < bpp * dimUncropped.x; ++x)
-        sum += static_cast<double>(data[x]);
+        sum += static_cast<double>(img(y, x));
     }
     fprintf(stdout, "Image byte sum: %lf\n", sum);
     fprintf(stdout, "Image byte avg: %lf\n",
