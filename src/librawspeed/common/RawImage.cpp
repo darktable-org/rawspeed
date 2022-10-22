@@ -102,17 +102,17 @@ void RawImageData::createData() {
   uncropped_dim = dim;
 
 #ifndef NDEBUG
+  const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
+
   if (dim.y > 1) {
     // padding is the size of the area after last pixel of line n
     // and before the first pixel of line n+1
-    assert(getDataUncropped(dim.x - 1, 0) + bpp + padding ==
-           getDataUncropped(0, 1));
+    assert(&img(0, img.width - 1) + 1 + padding == &img(1, 0));
   }
 
   for (int j = 0; j < dim.y; j++) {
-    const uint8_t* const line = getDataUncropped(0, j);
     // each line is indeed 16-byte aligned
-    assert(isAligned(line, alignment));
+    assert(isAligned(&img(j, 0), alignment));
   }
 #endif
 
