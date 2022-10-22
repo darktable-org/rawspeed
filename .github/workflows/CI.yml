@@ -421,7 +421,7 @@ jobs:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
-          ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON
+          ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON -DWITH_OPENMP=OFF
           FLAVOR: ${{ matrix.flavor }}
           TARGET: build
         run: |
