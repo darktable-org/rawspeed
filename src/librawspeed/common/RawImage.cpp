@@ -124,12 +124,10 @@ void RawImageData::poisonPadding() const {
   if (padding <= 0)
     return;
 
+  const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
   for (int j = 0; j < uncropped_dim.y; j++) {
-    const uint8_t* const curr_line_end =
-        getDataUncropped(uncropped_dim.x - 1, j) + bpp;
-
     // and now poison the padding.
-    ASan::PoisonMemoryRegion(curr_line_end, padding);
+    ASan::PoisonMemoryRegion(&img(j, img.width - 1) + 1, padding);
   }
 }
 #else
