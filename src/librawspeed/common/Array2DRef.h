@@ -33,6 +33,10 @@ template <class T> class Array2DRef {
 
   friend Array2DRef<const T>; // We need to be able to convert to const version.
 
+  // We need to be able to convert to std::byte.
+  friend Array2DRef<std::byte>;
+  friend Array2DRef<const std::byte>;
+
   T& operator[](int row) const;
 
 public:
@@ -46,12 +50,53 @@ public:
 
   Array2DRef(T* data, int dataWidth, int dataHeight, int dataPitch = 0);
 
+  // Can not cast away constness.
+  template <
+      typename T2,
+      std::enable_if_t<std::conjunction_v<std::is_const<T2>,
+                                          std::negation<std::is_const<T>>>,
+                       bool> = true>
+  Array2DRef(Array2DRef<T2> RHS) = delete;
+
+  // Can not change type to non-byte.
+  template <
+      typename T2,
+      std::enable_if_t<
+          std::conjunction_v<
+              std::negation<std::conjunction<std::is_const<T2>,
+                                             std::negation<std::is_const<T>>>>,
+              std::negation<std::is_same<std::remove_const_t<T>,
+                                         std::remove_const_t<T2>>>,
+              std::negation<std::is_same<std::remove_const_t<T>, std::byte>>>,
+          bool> = true>
+  Array2DRef(Array2DRef<T2> RHS) = delete;
+
   // Conversion from Array2DRef<T> to Array2DRef<const T>.
-  template <class T2, typename = std::enable_if_t<
-                          std::is_same_v<std::remove_const_t<T>, T2>>>
+  template <
+      typename T2,
+      std::enable_if_t<
+          std::conjunction_v<
+              std::conjunction<std::negation<std::is_const<T2>>,
+                               std::is_const<T>>,
+              std::is_same<std::remove_const_t<T>, std::remove_const_t<T2>>>,
+          bool> = true>
   Array2DRef(Array2DRef<T2> RHS) // NOLINT google-explicit-constructor
       : _data(RHS._data), _pitch(RHS._pitch), width(RHS.width),
         height(RHS.height) {}
+
+  // Const-preserving conversion from Array2DRef<T> to Array2DRef<std::byte>.
+  template <typename T2,
+            std::enable_if_t<
+                std::conjunction_v<
+                    std::negation<std::conjunction<
+                        std::is_const<T2>, std::negation<std::is_const<T>>>>,
+                    std::negation<std::is_same<std::remove_const_t<T>,
+                                               std::remove_const_t<T2>>>,
+                    std::is_same<std::remove_const_t<T>, std::byte>>,
+                bool> = true>
+  Array2DRef(Array2DRef<T2> RHS) // NOLINT google-explicit-constructor
+      : _data(reinterpret_cast<T*>(RHS._data)), _pitch(sizeof(T2) * RHS._pitch),
+        width(sizeof(T2) * RHS.width), height(RHS.height) {}
 
   template <typename AllocatorType =
                 typename std::vector<cvless_value_type>::allocator_type>

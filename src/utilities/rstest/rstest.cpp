@@ -115,16 +115,17 @@ struct Timer {
 // yes, this is not cool. but i see no way to compute the hash of the
 // full image, without duplicating image, and copying excluding padding
 md5::md5_state imgDataHash(const RawImage& raw) {
+  const rawspeed::Array2DRef<std::byte> img =
+      raw->getByteDataAsUncroppedArray2DRef();
+
   md5::md5_state ret = md5::md5_init;
 
-  const iPoint2D dimUncropped = raw->getUncroppedDim();
-
   vector<md5::md5_state> line_hashes;
-  line_hashes.resize(dimUncropped.y, md5::md5_init);
+  line_hashes.resize(img.height, md5::md5_init);
 
-  for (int j = 0; j < dimUncropped.y; j++) {
-    const auto* d = raw->getDataUncropped(0, j);
-    md5::md5_hash(d, raw->pitch - raw->padding, &line_hashes[j]);
+  for (int j = 0; j < img.height; j++) {
+    md5::md5_hash(reinterpret_cast<const uint8_t*>(&img(j, 0)), img.width,
+                  &line_hashes[j]);
   }
 
   md5::md5_hash(reinterpret_cast<const uint8_t*>(&line_hashes[0]),
@@ -250,13 +251,13 @@ void writePPM(const RawImage& raw, const std::string& fn) {
   width *= raw->getCpp();
 
   // Write pixels
+  const Array2DRef<uint16_t> img = raw->getU16DataAsUncroppedArray2DRef();
   for (int y = 0; y < height; ++y) {
-    auto* row = reinterpret_cast<uint16_t*>(raw->getDataUncropped(0, y));
     // PPM is big-endian
     for (int x = 0; x < width; ++x)
-      row[x] = getU16BE(row + x);
+      img(y, x) = getU16BE(&img(y, x));
 
-    fwrite(row, sizeof(*row), width, f.get());
+    fwrite(&img(y, 0), sizeof(decltype(img)::value_type), width, f.get());
   }
 }
 
@@ -298,16 +299,16 @@ void writePFM(const RawImage& raw, const std::string& fn) {
   width *= raw->getCpp();
 
   // Write pixels
+  const Array2DRef<float> img = raw->getF32DataAsUncroppedArray2DRef();
   for (int y = 0; y < height; ++y) {
     // NOTE: pfm has rows in reverse order
     const int row_in = height - 1 - y;
-    auto* row = reinterpret_cast<float*>(raw->getDataUncropped(0, row_in));
 
     // PFM can have any endiannes, let's write little-endian
     for (int x = 0; x < width; ++x)
-      row[x] = getU32LE(row + x);
+      img(row_in, x) = bit_cast<float>(getU32LE(&img(row_in, x)));
 
-    fwrite(row, sizeof(*row), width, f.get());
+    fwrite(&img(row_in, 0), sizeof(decltype(img)::value_type), width, f.get());
   }
 }
 

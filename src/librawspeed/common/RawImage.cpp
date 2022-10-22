@@ -44,8 +44,10 @@ RawImageData::RawImageData() : cfa(iPoint2D(0, 0)) {
   blackLevelSeparate.fill(-1);
 }
 
-RawImageData::RawImageData(const iPoint2D& _dim, int _bpc, int _cpp)
-    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), cpp(_cpp) {
+RawImageData::RawImageData(RawImageType type, const iPoint2D& _dim, int _bpc,
+                           int _cpp)
+    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), dataType(type),
+      cpp(_cpp) {
   assert(_bpc > 0);
 
   if (cpp > std::numeric_limits<decltype(cpp)>::max() / _bpc)
@@ -100,17 +102,17 @@ void RawImageData::createData() {
   uncropped_dim = dim;
 
 #ifndef NDEBUG
+  const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
+
   if (dim.y > 1) {
     // padding is the size of the area after last pixel of line n
     // and before the first pixel of line n+1
-    assert(getDataUncropped(dim.x - 1, 0) + bpp + padding ==
-           getDataUncropped(0, 1));
+    assert(&img(0, img.width - 1) + 1 + padding == &img(1, 0));
   }
 
   for (int j = 0; j < dim.y; j++) {
-    const uint8_t* const line = getDataUncropped(0, j);
     // each line is indeed 16-byte aligned
-    assert(isAligned(line, alignment));
+    assert(isAligned(&img(j, 0), alignment));
   }
 #endif
 
@@ -122,12 +124,10 @@ void RawImageData::poisonPadding() const {
   if (padding <= 0)
     return;
 
+  const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
   for (int j = 0; j < uncropped_dim.y; j++) {
-    const uint8_t* const curr_line_end =
-        getDataUncropped(uncropped_dim.x - 1, j) + bpp;
-
     // and now poison the padding.
-    ASan::PoisonMemoryRegion(curr_line_end, padding);
+    ASan::PoisonMemoryRegion(&img(j, img.width - 1) + 1, padding);
   }
 }
 #else
@@ -143,12 +143,10 @@ void RawImageData::unpoisonPadding() const {
   if (padding <= 0)
     return;
 
+  const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
   for (int j = 0; j < uncropped_dim.y; j++) {
-    const uint8_t* const curr_line_end =
-        getDataUncropped(uncropped_dim.x - 1, j) + bpp;
-
     // and now unpoison the padding.
-    ASan::UnPoisonMemoryRegion(curr_line_end, padding);
+    ASan::UnPoisonMemoryRegion(&img(j, img.width - 1) + 1, padding);
   }
 }
 #else
@@ -160,13 +158,12 @@ void RawImageData::unpoisonPadding() const {
 #endif
 
 void RawImageData::checkRowIsInitialized(int row) const {
-  const auto rowsize = bpp * uncropped_dim.x;
-
-  const uint8_t* const curr_line = getDataUncropped(0, row);
+  const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
 
   // and check that image line is initialized.
   // do note that we are avoiding padding here.
-  MSan::CheckMemIsInitialized(curr_line, rowsize);
+  MSan::CheckMemIsInitialized(reinterpret_cast<const uint8_t*>(&img(row, 0)),
+                              img.width);
 }
 
 #if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
@@ -203,18 +200,6 @@ void RawImageData::setCpp(uint32_t val) {
   bpp /= cpp;
   cpp = val;
   bpp *= val;
-}
-
-uint8_t* RawImageData::getDataUncropped(uint32_t x, uint32_t y) const {
-  if (x >= static_cast<unsigned>(uncropped_dim.x))
-    ThrowRDE("X Position outside image requested.");
-  if (y >= static_cast<unsigned>(uncropped_dim.y))
-    ThrowRDE("Y Position outside image requested.");
-
-  if (!isAllocated())
-    ThrowRDE("Data not yet allocated.");
-
-  return &data[static_cast<size_t>(y) * pitch + x * bpp];
 }
 
 iPoint2D __attribute__((pure)) rawspeed::RawImageData::getUncroppedDim() const {
