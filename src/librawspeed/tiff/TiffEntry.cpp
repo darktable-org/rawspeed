@@ -181,7 +181,7 @@ uint32_t TiffEntry::getU32(uint32_t index) const {
 int32_t TiffEntry::getI32(uint32_t index) const {
   if (type == TiffDataType::SSHORT)
     return getI16(index);
-  if (!(type == TiffDataType::SLONG || type == TiffDataType::UNDEFINED))
+  if (type != TiffDataType::SLONG && type != TiffDataType::UNDEFINED)
     ThrowTPE("Wrong type %u encountered. Expected SLong or Undefined on 0x%x",
              static_cast<unsigned>(type), static_cast<unsigned>(tag));
 

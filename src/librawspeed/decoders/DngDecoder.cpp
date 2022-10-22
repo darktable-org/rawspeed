@@ -218,7 +218,7 @@ DngDecoder::getTilingDescription(const TiffIFD* raw) const {
     const uint32_t tilew = raw->getEntry(TiffTag::TILEWIDTH)->getU32();
     const uint32_t tileh = raw->getEntry(TiffTag::TILELENGTH)->getU32();
 
-    if (!(tilew > 0 && tileh > 0))
+    if (tilew <= 0 || tileh <= 0)
       ThrowRDE("Invalid tile size: (%u, %u)", tilew, tileh);
 
     assert(tilew > 0);
