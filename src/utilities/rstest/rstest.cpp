@@ -115,16 +115,17 @@ struct Timer {
 // yes, this is not cool. but i see no way to compute the hash of the
 // full image, without duplicating image, and copying excluding padding
 md5::md5_state imgDataHash(const RawImage& raw) {
+  const rawspeed::Array2DRef<std::byte> img =
+      raw->getByteDataAsUncroppedArray2DRef();
+
   md5::md5_state ret = md5::md5_init;
 
-  const iPoint2D dimUncropped = raw->getUncroppedDim();
-
   vector<md5::md5_state> line_hashes;
-  line_hashes.resize(dimUncropped.y, md5::md5_init);
+  line_hashes.resize(img.height, md5::md5_init);
 
-  for (int j = 0; j < dimUncropped.y; j++) {
-    const auto* d = raw->getDataUncropped(0, j);
-    md5::md5_hash(d, raw->pitch - raw->padding, &line_hashes[j]);
+  for (int j = 0; j < img.height; j++) {
+    md5::md5_hash(reinterpret_cast<const uint8_t*>(&img(j, 0)), img.width,
+                  &line_hashes[j]);
   }
 
   md5::md5_hash(reinterpret_cast<const uint8_t*>(&line_hashes[0]),
