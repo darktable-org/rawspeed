@@ -115,7 +115,9 @@ public:
   void checkRowIsInitialized(int row) const;
   void checkMemIsInitialized() const;
   void destroyData();
+
   [[nodiscard]] rawspeed::RawImageType getDataType() const { return dataType; }
+
   [[nodiscard]] Array2DRef<uint16_t>
   getU16DataAsUncroppedArray2DRef() const noexcept;
   [[nodiscard]] CroppedArray2DRef<uint16_t>
@@ -124,6 +126,11 @@ public:
   getF32DataAsUncroppedArray2DRef() const noexcept;
   [[nodiscard]] CroppedArray2DRef<float>
   getF32DataAsCroppedArray2DRef() const noexcept;
+
+  // WARNING: this is most certainly not what you want!
+  [[nodiscard]] Array2DRef<std::byte>
+  getByteDataAsUncroppedArray2DRef() const noexcept;
+
   [[nodiscard]] uint8_t* getDataUncropped(uint32_t x, uint32_t y) const;
 
   void subFrame(iRectangle2D cropped);
@@ -299,6 +306,18 @@ inline CroppedArray2DRef<float>
 RawImageData::getF32DataAsCroppedArray2DRef() const noexcept {
   return {getF32DataAsUncroppedArray2DRef(), cpp * mOffset.x, mOffset.y,
           cpp * dim.x, dim.y};
+}
+
+inline Array2DRef<std::byte>
+RawImageData::getByteDataAsUncroppedArray2DRef() const noexcept {
+  switch (dataType) {
+  case RawImageType::UINT16:
+    return getU16DataAsUncroppedArray2DRef();
+  case RawImageType::F32:
+    return getF32DataAsUncroppedArray2DRef();
+  default:
+    __builtin_unreachable();
+  }
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,
