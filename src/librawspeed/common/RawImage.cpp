@@ -160,13 +160,12 @@ void RawImageData::unpoisonPadding() const {
 #endif
 
 void RawImageData::checkRowIsInitialized(int row) const {
-  const auto rowsize = bpp * uncropped_dim.x;
-
-  const uint8_t* const curr_line = getDataUncropped(0, row);
+  const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
 
   // and check that image line is initialized.
   // do note that we are avoiding padding here.
-  MSan::CheckMemIsInitialized(curr_line, rowsize);
+  MSan::CheckMemIsInitialized(reinterpret_cast<const uint8_t*>(&img(row, 0)),
+                              img.width);
 }
 
 #if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
