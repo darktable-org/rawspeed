@@ -52,9 +52,7 @@ RawImageDataU16::RawImageDataU16() {
 }
 
 RawImageDataU16::RawImageDataU16(const iPoint2D& _dim, uint32_t _cpp)
-    : RawImageData(_dim, sizeof(uint16_t), _cpp) {
-  dataType = RawImageType::UINT16;
-}
+    : RawImageData(RawImageType::UINT16, _dim, sizeof(uint16_t), _cpp) {}
 
 void RawImageDataU16::calculateBlackAreas() {
   const Array2DRef<uint16_t> img = getU16DataAsUncroppedArray2DRef();

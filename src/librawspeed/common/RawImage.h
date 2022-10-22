@@ -182,7 +182,7 @@ private:
 protected:
   RawImageType dataType;
   RawImageData();
-  RawImageData(const iPoint2D& dim, int bpp, int cpp = 1);
+  RawImageData(RawImageType type, const iPoint2D& dim, int bpp, int cpp = 1);
   virtual void scaleValues(int start_y, int end_y) = 0;
   virtual void doLookup(int start_y, int end_y) = 0;
   virtual void fixBadPixel(uint32_t x, uint32_t y, int component = 0) = 0;

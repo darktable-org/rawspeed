@@ -40,9 +40,7 @@ RawImageDataFloat::RawImageDataFloat() {
   }
 
   RawImageDataFloat::RawImageDataFloat(const iPoint2D& _dim, uint32_t _cpp)
-      : RawImageData(_dim, sizeof(float), _cpp) {
-    dataType = RawImageType::F32;
-  }
+      : RawImageData(RawImageType::F32, _dim, sizeof(float), _cpp) {}
 
   void RawImageDataFloat::calculateBlackAreas() {
     const Array2DRef<float> img = getF32DataAsUncroppedArray2DRef();
