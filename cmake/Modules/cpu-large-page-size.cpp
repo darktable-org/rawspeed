@@ -4,6 +4,14 @@
 
 #include <cpuid.h> // for __get_cpuid
 
+/* Features in %edx for leaf 1 */
+#if !defined(bit_PSE)
+#define bit_PSE 0x00000008
+#endif
+#if !defined(bit_PAE)
+#define bit_PAE 0x00000040
+#endif
+
 int main() {
   unsigned int eax;
   unsigned int ebx;
