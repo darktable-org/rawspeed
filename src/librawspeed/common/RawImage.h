@@ -27,6 +27,7 @@
 #include "common/CroppedArray2DRef.h"  // for CroppedArray2DRef
 #include "common/ErrorLog.h"           // for ErrorLog
 #include "common/Mutex.h"              // for Mutex
+#include "common/NotARational.h"       // for NotARational
 #include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
 #include "common/TableLookUp.h"        // for TableLookUp
 #include "metadata/BlackArea.h"        // for BlackArea
@@ -79,10 +80,10 @@ public:
   // White balance coefficients of the image
   std::array<float, 4> wbCoeffs = {{NAN, NAN, NAN, NAN}};
 
-  // If not empty, a divisor-10'000 row-major color matrix,
+  // If not empty, a row-major color matrix,
   // that converts XYZ values to reference camera native color space values,
   // under calibration illuminant 21 (D65).
-  std::vector<int> colorMatrix;
+  std::vector<NotARational<int>> colorMatrix;
 
   // How many pixels far down the left edge and far up the right edge the image
   // corners are when the image is rotated 45 degrees in Fuji rotated sensors.

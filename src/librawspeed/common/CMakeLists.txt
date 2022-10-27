@@ -16,6 +16,7 @@ FILE(GLOB SOURCES
   "Memory.h"
   "Mutex.h"
   "NORangesSet.h"
+  "NotARational.h"
   "Point.h"
   "Range.h"
   "RawImage.cpp"

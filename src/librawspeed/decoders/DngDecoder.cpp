@@ -212,6 +212,39 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
   mRaw->cfa.shiftDown(-aa[0]);
 }
 
+void DngDecoder::parseColorMatrix() const {
+  // Look for D65 calibrated color matrix
+
+  auto impl = [this](TiffTag I, TiffTag M) -> TiffEntry* {
+    if (!mRootIFD->hasEntryRecursive(I))
+      return nullptr;
+    if (TiffEntry* illuminant = mRootIFD->getEntryRecursive(I);
+        illuminant->getU16() != 21 || // D65
+        !mRootIFD->hasEntryRecursive(M))
+      return nullptr;
+    return mRootIFD->getEntryRecursive(M);
+  };
+
+  TiffEntry* mat;
+  mat = impl(TiffTag::CALIBRATIONILLUMINANT1, TiffTag::COLORMATRIX1);
+  if (!mat)
+    mat = impl(TiffTag::CALIBRATIONILLUMINANT2, TiffTag::COLORMATRIX2);
+  if (!mat)
+    return;
+
+  const auto srat_vals = mat->getSRationalArray(mat->count);
+  bool Success = true;
+  mRaw->metadata.colorMatrix.reserve(mat->count);
+  for (const auto& val : srat_vals) {
+    Success &= val.second != 0;
+    if (!Success)
+      break;
+    mRaw->metadata.colorMatrix.emplace_back(val.first, val.second);
+  }
+  if (!Success)
+    mRaw->metadata.colorMatrix.clear();
+}
+
 DngTilingDescription
 DngDecoder::getTilingDescription(const TiffIFD* raw) const {
   if (raw->hasEntry(TiffTag::TILEOFFSETS)) {
@@ -637,26 +670,7 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     }
   }
 
-  if (mRootIFD->hasEntryRecursive(TiffTag::COLORMATRIX2) &&
-      mRootIFD->hasEntryRecursive(TiffTag::CALIBRATIONILLUMINANT2)) {
-    const TiffEntry* illuminant =
-        mRootIFD->getEntryRecursive(TiffTag::CALIBRATIONILLUMINANT2);
-    if (illuminant->getU16() == 21) { // D65
-      const TiffEntry* mat = mRootIFD->getEntryRecursive(TiffTag::COLORMATRIX2);
-      const auto srat_vals = mat->getSRationalArray(mat->count);
-      bool Success = true;
-      mRaw->metadata.colorMatrix.reserve(mat->count);
-      for (const auto& val : srat_vals) {
-        // FIXME: introduce proper rational type.
-        Success &= val.second == 10'000;
-        if (!Success)
-          break;
-        mRaw->metadata.colorMatrix.emplace_back(val.first);
-      }
-      if (!Success)
-        mRaw->metadata.colorMatrix.clear();
-    }
-  }
+  parseColorMatrix();
 }
 
 /* DNG Images are assumed to be decodable unless explicitly set so */
