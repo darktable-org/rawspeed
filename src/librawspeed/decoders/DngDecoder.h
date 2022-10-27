@@ -50,6 +50,7 @@ private:
   bool mFixLjpeg;
   static void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
   void parseCFA(const TiffIFD* raw) const;
+  void parseColorMatrix() const;
   DngTilingDescription getTilingDescription(const TiffIFD* raw) const;
   void decodeData(const TiffIFD* raw, uint32_t sample_format) const;
   void handleMetadata(const TiffIFD* raw);
