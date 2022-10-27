@@ -183,8 +183,8 @@ std::string img_hash(const RawImage& r, bool noSamples) {
   if (r->metadata.colorMatrix.empty())
     APPEND(&oss, " (none)");
   else {
-    for (int e : r->metadata.colorMatrix)
-      APPEND(&oss, " %i", e);
+    for (const NotARational<int>& e : r->metadata.colorMatrix)
+      APPEND(&oss, " %i/%i", e.num, e.den);
   }
   APPEND(&oss, "\n");
 

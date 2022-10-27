@@ -21,6 +21,7 @@
 #pragma once
 
 #include "rawspeedconfig.h"            // for HAVE_PUGIXML
+#include "common/NotARational.h"       // for NotARational
 #include "common/Point.h"              // for iPoint2D
 #include "metadata/BlackArea.h"        // for BlackArea
 #include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
@@ -106,7 +107,7 @@ public:
   std::vector<CameraSensorInfo> sensorInfo;
   int decoderVersion;
   Hints hints;
-  std::vector<int> color_matrix;
+  std::vector<NotARational<int>> color_matrix;
 
 protected:
   static const std::map<char, CFAColor> char2enum;
