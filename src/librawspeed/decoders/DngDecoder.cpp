@@ -214,36 +214,35 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
 
 void DngDecoder::parseColorMatrix() const {
   // Look for D65 calibrated color matrix
-  TiffEntry* illuminant;
-  TiffEntry* mat = nullptr;
-  if (mRootIFD->hasEntryRecursive(TiffTag::CALIBRATIONILLUMINANT1)) {
-    illuminant = mRootIFD->getEntryRecursive(TiffTag::CALIBRATIONILLUMINANT1);
-    if (illuminant->getU16() == 21 && // D65
-        mRootIFD->hasEntryRecursive(TiffTag::COLORMATRIX1)) {
-      mat = mRootIFD->getEntryRecursive(TiffTag::COLORMATRIX1);
-    }
-  }
-  if (mat == nullptr &&
-      mRootIFD->hasEntryRecursive(TiffTag::CALIBRATIONILLUMINANT2)) {
-    illuminant = mRootIFD->getEntryRecursive(TiffTag::CALIBRATIONILLUMINANT2);
-    if (illuminant->getU16() == 21 && // D65
-        mRootIFD->hasEntryRecursive(TiffTag::COLORMATRIX2)) {
-      mat = mRootIFD->getEntryRecursive(TiffTag::COLORMATRIX2);
-    }
-  }
-  if (mat != nullptr) {
-    const auto srat_vals = mat->getSRationalArray(mat->count);
-    bool Success = true;
-    mRaw->metadata.colorMatrix.reserve(mat->count);
-    for (const auto& val : srat_vals) {
-      Success &= val.second != 0;
-      if (!Success)
-        break;
-      mRaw->metadata.colorMatrix.emplace_back(val.first, val.second);
-    }
+
+  auto impl = [this](TiffTag I, TiffTag M) -> TiffEntry* {
+    if (!mRootIFD->hasEntryRecursive(I))
+      return nullptr;
+    if (TiffEntry* illuminant = mRootIFD->getEntryRecursive(I);
+        illuminant->getU16() != 21 || // D65
+        !mRootIFD->hasEntryRecursive(M))
+      return nullptr;
+    return mRootIFD->getEntryRecursive(M);
+  };
+
+  TiffEntry* mat;
+  mat = impl(TiffTag::CALIBRATIONILLUMINANT1, TiffTag::COLORMATRIX1);
+  if (!mat)
+    mat = impl(TiffTag::CALIBRATIONILLUMINANT2, TiffTag::COLORMATRIX2);
+  if (!mat)
+    return;
+
+  const auto srat_vals = mat->getSRationalArray(mat->count);
+  bool Success = true;
+  mRaw->metadata.colorMatrix.reserve(mat->count);
+  for (const auto& val : srat_vals) {
+    Success &= val.second != 0;
     if (!Success)
-      mRaw->metadata.colorMatrix.clear();
+      break;
+    mRaw->metadata.colorMatrix.emplace_back(val.first, val.second);
   }
+  if (!Success)
+    mRaw->metadata.colorMatrix.clear();
 }
 
 DngTilingDescription
