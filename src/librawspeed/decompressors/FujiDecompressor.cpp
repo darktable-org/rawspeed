@@ -769,8 +769,8 @@ void FujiDecompressor::decompressThread() const noexcept {
 #endif
   for (auto strip = strips.cbegin(); strip < strips.cend(); ++strip) {
     block_info.reset(&common_info);
-    block_info.pump = BitPumpMSB(strip->bs);
     try {
+      block_info.pump = BitPumpMSB(strip->bs);
       fuji_decode_strip(&block_info, *strip);
     } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
