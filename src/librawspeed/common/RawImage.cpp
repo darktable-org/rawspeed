@@ -73,6 +73,8 @@ void RawImageData::createData() {
     ThrowRDE("Dimensions too large for allocation.");
   if (dim.x <= 0 || dim.y <= 0)
     ThrowRDE("Dimension of one sides is less than 1 - cannot allocate image.");
+  if (cpp <= 0 || bpp <= 0)
+    ThrowRDE("Unspecified component count - cannot allocate image.");
   if (isAllocated())
     ThrowRDE("Duplicate data allocation in createData.");
 
