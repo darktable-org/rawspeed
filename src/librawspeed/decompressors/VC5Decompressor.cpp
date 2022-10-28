@@ -374,6 +374,10 @@ void VC5Decompressor::Wavelet::ReconstructableBand::createDecodingTasks(
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     : mRaw(img), mBs(std::move(bs)) {
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
+      mRaw->getBpp() != sizeof(uint16_t))
+    ThrowRDE("Unexpected component count / data type");
+
   if (!mRaw->dim.hasPositiveArea())
     ThrowRDE("Bad image dimensions.");
 
