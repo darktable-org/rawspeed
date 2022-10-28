@@ -16851,9 +16851,6 @@
 	<Camera make="RICOH IMAGING COMPANY, LTD." model="GR" mode="dng">
 		<ID make="Ricoh" model="GR">GR</ID>
 	</Camera>
-	<Camera make="RICOH" model="GR DIGITAL 2" mode="dng">
-		<ID make="Ricoh" model="GR II">Ricoh GR DIGITAL 2</ID>
-	</Camera>
 	<Camera make="RICOH IMAGING COMPANY, LTD." model="GR II" mode="dng">
 		<ID make="Ricoh" model="GR II">Ricoh GR II</ID>
 	</Camera>
