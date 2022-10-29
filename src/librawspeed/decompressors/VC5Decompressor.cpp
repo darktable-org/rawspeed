@@ -654,7 +654,11 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
     }
 
     int16_t decode() {
-      auto dequantize = [quant = quant](int16_t val) { return val * quant; };
+      auto dequantize = [quant = quant](int16_t val) {
+        if (__builtin_mul_overflow(val, quant, &val))
+          ThrowRDE("Impossible RLV value given current quantum");
+        return val;
+      };
 
       if (numPixelsLeft == 0) {
         decodeNextPixelGroup();
