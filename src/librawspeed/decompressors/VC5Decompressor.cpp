@@ -606,8 +606,12 @@ VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
   // We can easily check that we have sufficient amount of bits to decode it.
   const auto waveletArea = iPoint2D(wavelet.width, wavelet.height).area();
   const auto bitsTotal = waveletArea * lowpassPrecision;
-  const auto bytesTotal = roundUpDivision(bitsTotal, 8);
-  bs = bs.getStream(bytesTotal); // And clamp the size while we are at it.
+  constexpr int bytesPerChunk = 8; // FIXME: or is it 4?
+  constexpr int bitsPerChunk = 8 * bytesPerChunk;
+  const auto chunksTotal = roundUpDivision(bitsTotal, bitsPerChunk);
+  const auto bytesTotal = bytesPerChunk * chunksTotal;
+  // And clamp the size / verify sufficient input while we are at it.
+  bs = bs.getStream(bytesTotal);
 }
 
 VC5Decompressor::BandData
