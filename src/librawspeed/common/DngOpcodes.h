@@ -31,14 +31,12 @@ namespace rawspeed {
 
 class RawImage;
 
-class TiffEntry;
-
 class ByteStream;
 
 class DngOpcodes
 {
 public:
-  DngOpcodes(const RawImage& ri, const TiffEntry* entry);
+  DngOpcodes(const RawImage& ri, ByteStream bs);
   ~DngOpcodes();
   void applyOpCodes(const RawImage& ri) const;
 

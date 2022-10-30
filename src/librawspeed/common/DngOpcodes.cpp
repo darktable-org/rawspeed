@@ -483,9 +483,7 @@ public:
 
 // ****************************************************************************
 
-DngOpcodes::DngOpcodes(const RawImage& ri, const TiffEntry* entry) {
-  ByteStream bs = entry->getData();
-
+DngOpcodes::DngOpcodes(const RawImage& ri, ByteStream bs) {
   // DNG opcodes are always stored in big-endian byte order.
   bs.setByteOrder(Endianness::big);
 

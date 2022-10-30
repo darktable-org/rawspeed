@@ -539,7 +539,7 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
       const TiffEntry* opcodes = raw->getEntry(TiffTag::OPCODELIST1);
       // The entry might exist, but it might be empty, which means no opcodes
       if (opcodes->count > 0) {
-        DngOpcodes codes(mRaw, opcodes);
+        DngOpcodes codes(mRaw, opcodes->getData());
         codes.applyOpCodes(mRaw);
       }
     } catch (const RawDecoderException& e) {
@@ -583,7 +583,7 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
 
     // Apply stage 2 codes
     try {
-      DngOpcodes codes(mRaw, raw->getEntry(TiffTag::OPCODELIST2));
+      DngOpcodes codes(mRaw, raw->getEntry(TiffTag::OPCODELIST2)->getData());
       codes.applyOpCodes(mRaw);
     } catch (const RawDecoderException& e) {
       // We push back errors from the opcode parser, since the image may still
