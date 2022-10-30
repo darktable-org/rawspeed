@@ -489,13 +489,14 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     const TiffEntry* origin_entry = raw->getEntry(TiffTag::DEFAULTCROPORIGIN);
     const TiffEntry* size_entry = raw->getEntry(TiffTag::DEFAULTCROPSIZE);
 
-    /* Read crop position (sometimes is rational so use float) */
-    const auto tl = origin_entry->getFloatArray(2);
-    if (std::any_of(tl.cbegin(), tl.cend(), [](const auto v) {
-          return v < std::numeric_limits<iPoint2D::value_type>::min() ||
-                 v > std::numeric_limits<iPoint2D::value_type>::max();
-        }))
-      ThrowRDE("Error decoding default crop origin");
+    const auto tl_r = origin_entry->getRationalArray(2);
+    std::array<unsigned, 2> tl;
+    std::transform(tl_r.begin(), tl_r.end(), tl.begin(),
+                   [](const NotARational<unsigned>& r) {
+                     if (r.den == 0 || r.num % r.den != 0)
+                       ThrowRDE("Error decoding default crop origin");
+                     return r.num / r.den;
+                   });
 
     if (iPoint2D cropOrigin(tl[0], tl[1]);
         cropped.isPointInsideInclusive(cropOrigin))
@@ -503,13 +504,14 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
 
     cropped.dim = mRaw->dim - cropped.pos;
 
-    /* Read size (sometimes is rational so use float) */
-    const auto sz = size_entry->getFloatArray(2);
-    if (std::any_of(sz.cbegin(), sz.cend(), [](const auto v) {
-          return v < std::numeric_limits<iPoint2D::value_type>::min() ||
-                 v > std::numeric_limits<iPoint2D::value_type>::max();
-        }))
-      ThrowRDE("Error decoding default crop size");
+    const auto sz_r = size_entry->getRationalArray(2);
+    std::array<unsigned, 2> sz;
+    std::transform(sz_r.begin(), sz_r.end(), sz.begin(),
+                   [](const NotARational<unsigned>& r) {
+                     if (r.den == 0 || r.num % r.den != 0)
+                       ThrowRDE("Error decoding default crop size");
+                     return r.num / r.den;
+                   });
 
     if (iPoint2D size(sz[0], sz[1]);
         size.isThisInside(mRaw->dim) &&
