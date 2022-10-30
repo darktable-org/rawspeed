@@ -199,17 +199,12 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
   if (active_area->count != 4)
     ThrowRDE("active area has %d values instead of 4", active_area->count);
 
-  const auto aa = active_area->getFloatArray(2);
-  if (std::any_of(aa.cbegin(), aa.cend(), [](const auto v) {
-        return v < std::numeric_limits<iPoint2D::value_type>::min() ||
-               v > std::numeric_limits<iPoint2D::value_type>::max();
-      }))
-    ThrowRDE("Error decoding active area");
+  const auto aa = active_area->getU32Array(2);
 
   // To reverse the ActiveArea modifictions done earlier, we need to
   // use the negated ActiveArea x/y values.
-  mRaw->cfa.shiftRight(-aa[1]);
-  mRaw->cfa.shiftDown(-aa[0]);
+  mRaw->cfa.shiftRight(-int(aa[1]));
+  mRaw->cfa.shiftDown(-int(aa[0]));
 }
 
 void DngDecoder::parseColorMatrix() const {
