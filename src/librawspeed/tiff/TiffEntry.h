@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "common/NotARational.h"
 #include "io/ByteStream.h" // for ByteStream
 #include "tiff/TiffTag.h"  // for TiffTag
 #include <array>           // for array
@@ -91,7 +92,7 @@ public:
   [[nodiscard]] int32_t getI32(uint32_t index = 0) const;
   [[nodiscard]] uint16_t getU16(uint32_t index = 0) const;
   [[nodiscard]] int16_t getI16(uint32_t index = 0) const;
-  [[nodiscard]] std::pair<int, int> getSRational(uint32_t index = 0) const;
+  [[nodiscard]] NotARational<int> getSRational(uint32_t index = 0) const;
   [[nodiscard]] float getFloat(uint32_t index = 0) const;
   [[nodiscard]] std::string getString() const;
 
@@ -109,9 +110,9 @@ public:
     return getArray<float, &TiffEntry::getFloat>(count_);
   }
 
-  [[nodiscard]] inline std::vector<std::pair<int, int>>
+  [[nodiscard]] inline std::vector<NotARational<int>>
   getSRationalArray(uint32_t count_) const {
-    return getArray<std::pair<int, int>, &TiffEntry::getSRational>(count_);
+    return getArray<NotARational<int>, &TiffEntry::getSRational>(count_);
   }
 
   [[nodiscard]] ByteStream getData() const { return data; }

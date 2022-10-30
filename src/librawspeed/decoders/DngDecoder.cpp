@@ -236,10 +236,10 @@ void DngDecoder::parseColorMatrix() const {
   bool Success = true;
   mRaw->metadata.colorMatrix.reserve(mat->count);
   for (const auto& val : srat_vals) {
-    Success &= val.second != 0;
+    Success &= val.den != 0;
     if (!Success)
       break;
-    mRaw->metadata.colorMatrix.emplace_back(val.first, val.second);
+    mRaw->metadata.colorMatrix.emplace_back(val);
   }
   if (!Success)
     mRaw->metadata.colorMatrix.clear();

@@ -22,6 +22,7 @@
 
 #include "tiff/TiffEntry.h"
 #include "common/Common.h"               // for uint32_t, int16_t, uint16_t
+#include "common/NotARational.h"
 #include "parsers/TiffParserException.h" // for ThrowTPE
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
 #include "tiff/TiffTag.h"                // for TiffTag, DNGPRIVATEDATA
@@ -188,7 +189,7 @@ int32_t TiffEntry::getI32(uint32_t index) const {
   return data.peek<int32_t>(index);
 }
 
-std::pair<int, int> TiffEntry::getSRational(uint32_t index) const {
+NotARational<int> TiffEntry::getSRational(uint32_t index) const {
   if (!isSRational()) {
     ThrowTPE("Wrong type 0x%x encountered. Expected SRational",
              static_cast<unsigned>(type));
@@ -222,8 +223,8 @@ float TiffEntry::getFloat(uint32_t index) const {
     return b != 0 ? static_cast<float>(a) / b : 0.0F;
   }
   case TiffDataType::SRATIONAL: {
-    auto [a, b] = getSRational(index);
-    return b ? static_cast<float>(a) / b : 0.0F;
+    auto r = getSRational(index);
+    return r.den ? static_cast<float>(r) : 0.0F;
   }
   default:
     // unreachable
