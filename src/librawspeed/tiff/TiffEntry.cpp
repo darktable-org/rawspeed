@@ -127,6 +127,8 @@ bool __attribute__((pure)) TiffEntry::isFloat() const {
 
 bool __attribute__((pure)) TiffEntry::isRational() const {
   switch (type) {
+  case TiffDataType::SHORT:
+  case TiffDataType::LONG:
   case TiffDataType::RATIONAL:
     return true;
   default:
@@ -136,6 +138,8 @@ bool __attribute__((pure)) TiffEntry::isRational() const {
 
 bool __attribute__((pure)) TiffEntry::isSRational() const {
   switch (type) {
+  case TiffDataType::SSHORT:
+  case TiffDataType::SLONG:
   case TiffDataType::SRATIONAL:
     return true;
   default:
@@ -203,6 +207,10 @@ NotARational<unsigned> TiffEntry::getRational(uint32_t index) const {
     ThrowTPE("Wrong type 0x%x encountered. Expected Rational",
              static_cast<unsigned>(type));
   }
+
+  if (type != TiffDataType::RATIONAL)
+    return {getU32(index), 1};
+
   auto a = static_cast<unsigned>(getU32(index * 2));
   auto b = static_cast<unsigned>(getU32(index * 2 + 1));
   return {a, b};
@@ -213,6 +221,10 @@ NotARational<int> TiffEntry::getSRational(uint32_t index) const {
     ThrowTPE("Wrong type 0x%x encountered. Expected SRational",
              static_cast<unsigned>(type));
   }
+
+  if (type != TiffDataType::SRATIONAL)
+    return {getI32(index), 1};
+
   auto a = static_cast<int>(getU32(index * 2));
   auto b = static_cast<int>(getU32(index * 2 + 1));
   return {a, b};
