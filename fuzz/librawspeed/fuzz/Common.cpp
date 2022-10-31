@@ -53,20 +53,19 @@ rawspeed::RawImage CreateRawImage(rawspeed::ByteStream& bs) {
 }
 
 rawspeed::ColorFilterArray CreateCFA(rawspeed::ByteStream& bs) {
-  const uint32_t cfaWidth = bs.getU32();
-  const uint32_t cfaHeight = bs.getU32();
+  const int32_t cfaWidth = bs.getI32();
+  const int32_t cfaHeight = bs.getI32();
+
+  rawspeed::iPoint2D cfaSize(cfaWidth, cfaHeight);
+  if (!cfaSize.hasPositiveArea())
+    ThrowIOE("Bad CFA size.");
 
   rawspeed::ColorFilterArray cfa;
+  cfa.setSize(cfaSize);
+  (void)bs.check(cfaSize.area(), 4);
 
-  if (cfaHeight &&
-      cfaWidth > std::numeric_limits<decltype(cfaWidth)>::max() / cfaHeight)
-    ThrowIOE("Integer overflow when calculating CFA area");
-  (void)bs.check(cfaWidth * cfaHeight, 4);
-
-  cfa.setSize(rawspeed::iPoint2D(cfaWidth, cfaHeight));
-
-  for (auto x = 0U; x < cfaWidth; x++) {
-    for (auto y = 0U; y < cfaHeight; y++) {
+  for (auto x = 0; x < cfaWidth; x++) {
+    for (auto y = 0; y < cfaHeight; y++) {
       const uint32_t color = bs.getU32();
       if (color >= static_cast<uint32_t>(rawspeed::CFAColor::END))
         ThrowRSE("Unknown color: %u", color);
