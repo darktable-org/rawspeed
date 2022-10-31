@@ -158,6 +158,8 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
 
   // Does NOT contain dimensions as some documents state
   const TiffEntry* cPat = raw->getEntry(TiffTag::CFAPATTERN);
+  if (!cPat->count)
+    ThrowRDE("CFA pattern is empty!");
 
   iPoint2D cfaSize(cfadim->getU32(1), cfadim->getU32(0));
   if (cfaSize.area() != cPat->count) {
