@@ -276,7 +276,9 @@ class DngOpcodes::TrimBounds final : public ROIOpcode {
 public:
   explicit TrimBounds(const RawImage& ri, ByteStream& bs,
                       iRectangle2D& integrated_subimg_)
-      : ROIOpcode(ri, bs, integrated_subimg_, false) {}
+      : ROIOpcode(ri, bs, integrated_subimg_, false) {
+    integrated_subimg_ = getRoi();
+  }
 
   void apply(const RawImage& ri) override { ri->subFrame(getRoi()); }
 };
