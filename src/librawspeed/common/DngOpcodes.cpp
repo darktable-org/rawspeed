@@ -218,6 +218,9 @@ public:
   explicit FixBadPixelsList(const RawImage& ri, ByteStream& bs,
                             iRectangle2D& integrated_subimg_)
       : DngOpcodes::DngOpcode(integrated_subimg_) {
+    // Although it is not really obvious from the spec,
+    // the coordinates appear to be global/crop-independent,
+    // and apply to the source uncropped image.
     const iRectangle2D fullImage(0, 0, ri->getUncroppedDim().x - 1,
                                  ri->getUncroppedDim().y - 1);
 
