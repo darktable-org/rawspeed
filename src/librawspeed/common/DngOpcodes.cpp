@@ -161,7 +161,7 @@ protected:
   explicit ROIOpcode(const RawImage& ri, ByteStream& bs,
                      iRectangle2D& integrated_subimg_)
       : DngOpcodes::DngOpcode(integrated_subimg_) {
-    const iRectangle2D subImage = iRectangle2D(0, 0, ri->dim.x, ri->dim.y);
+    const iRectangle2D subImage = iRectangle2D({0, 0}, integrated_subimg_.dim);
 
     uint32_t top = bs.getU32();
     uint32_t left = bs.getU32();
