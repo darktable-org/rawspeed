@@ -161,7 +161,7 @@ protected:
   explicit ROIOpcode(const RawImage& ri, ByteStream& bs,
                      iRectangle2D& integrated_subimg_, bool minusOne)
       : DngOpcodes::DngOpcode(integrated_subimg_) {
-    const iRectangle2D fullImage =
+    const iRectangle2D subImage =
         minusOne ? iRectangle2D(0, 0, ri->dim.x - 1, ri->dim.y - 1)
                  : iRectangle2D(0, 0, ri->dim.x, ri->dim.y);
 
@@ -173,18 +173,18 @@ protected:
     const iPoint2D topLeft(left, top);
     const iPoint2D bottomRight(right, bottom);
 
-    if (!(fullImage.isPointInsideInclusive(topLeft) &&
-          fullImage.isPointInsideInclusive(bottomRight) &&
+    if (!(subImage.isPointInsideInclusive(topLeft) &&
+          subImage.isPointInsideInclusive(bottomRight) &&
           bottomRight >= topLeft)) {
       ThrowRDE("Rectangle (%u, %u, %u, %u) not inside image (%u, %u, %u, %u).",
                topLeft.x, topLeft.y, bottomRight.x, bottomRight.y,
-               fullImage.getTopLeft().x, fullImage.getTopLeft().y,
-               fullImage.getBottomRight().x, fullImage.getBottomRight().y);
+               subImage.getTopLeft().x, subImage.getTopLeft().y,
+               subImage.getBottomRight().x, subImage.getBottomRight().y);
     }
 
     roi.setTopLeft(topLeft);
     roi.setBottomRightAbsolute(bottomRight);
-    assert(roi.isThisInside(fullImage));
+    assert(roi.isThisInside(subImage));
   }
 
   [[nodiscard]] const iRectangle2D& __attribute__((pure)) getRoi() const {
