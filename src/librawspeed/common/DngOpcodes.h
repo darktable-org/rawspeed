@@ -33,8 +33,9 @@ class RawImage;
 
 class ByteStream;
 
-class DngOpcodes
-{
+class iRectangle2D;
+
+class DngOpcodes {
 public:
   DngOpcodes(const RawImage& ri, ByteStream bs);
   ~DngOpcodes();
@@ -60,11 +61,12 @@ protected:
   template <typename S> class ScalePerRowOrCol;
 
   template <class Opcode>
-  static std::unique_ptr<DngOpcode> constructor(const RawImage& ri,
-                                                ByteStream& bs);
+  static std::unique_ptr<DngOpcode>
+  constructor(const RawImage& ri, ByteStream& bs,
+              iRectangle2D& integrated_subimg);
 
-  using constructor_t = std::unique_ptr<DngOpcode> (*)(const RawImage& ri,
-                                                       ByteStream& bs);
+  using constructor_t = std::unique_ptr<DngOpcode> (*)(
+      const RawImage& ri, ByteStream& bs, iRectangle2D& integrated_subimg);
   static const std::map<uint32_t, std::pair<const char*, constructor_t>> Map;
 };
 
