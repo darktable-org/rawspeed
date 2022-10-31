@@ -39,6 +39,10 @@
 // IWYU pragma: no_include <ext/alloc_traits.h>
 // IWYU pragma: no_include <type_traits>
 
+#ifndef NDEBUG
+#include <exception>
+#endif
+
 using std::vector;
 using std::fill_n;
 using std::make_pair;
@@ -60,12 +64,27 @@ CroppedArray2DRef<T> getDataAsCroppedArray2DRef(const RawImage& ri) {
 } // namespace
 
 class DngOpcodes::DngOpcode {
+#ifndef NDEBUG
+  bool setup_was_called = false;
+#endif
+
 public:
-  virtual ~DngOpcode() = default;
+  DngOpcode() {
+    assert(std::uncaught_exceptions() == 0 &&
+           "Creating DngOpcode during call stack unwinding?");
+  }
+
+  virtual ~DngOpcode() {
+    assert((std::uncaught_exceptions() > 0 || setup_was_called) &&
+           "Derived classes did not call our setup()!");
+  }
 
   // Will be called once before processing.
   // Can be used for preparing pre-calculated values, etc.
   virtual void setup(const RawImage& ri) {
+#ifndef NDEBUG
+    setup_was_called = true;
+#endif
     // NOP by default. child class shall override this if needed.
   }
 
@@ -85,6 +104,8 @@ public:
   }
 
   void setup(const RawImage& ri) override {
+    DngOpcodes::DngOpcode::setup(ri);
+
     // These limitations are present within the DNG SDK as well.
     if (ri->getDataType() != RawImageType::UINT16)
       ThrowRDE("Only 16 bit images supported");
@@ -289,6 +310,7 @@ protected:
 
   void setup(const RawImage& ri) override {
     PixelOpcode::setup(ri);
+
     if (ri->getDataType() != RawImageType::UINT16)
       ThrowRDE("Only 16 bit images supported");
   }
