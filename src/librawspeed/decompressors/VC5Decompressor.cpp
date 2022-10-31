@@ -142,7 +142,8 @@ inline auto convolute(int row, int col, std::array<int, 4> muls,
   auto lowsRounded = lowsCombined >> 3;
   auto total = highCombined + lowsRounded;
   // Descale it.
-  total <<= DescaleShift;
+  // NOTE: left shift of negative value is UB until C++20.
+  total *= 1 << DescaleShift;
   // And average it.
   total >>= 1;
   return total;
