@@ -529,8 +529,9 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
   // Adapt DNG DefaultScale to aspect-ratio
   if (raw->hasEntry(TiffTag::DEFAULTSCALE)) {
     const TiffEntry* default_scale = raw->getEntry(TiffTag::DEFAULTSCALE);
-    const auto scales = default_scale->getRational();
-    mRaw->metadata.pixelAspectRatio = static_cast<double>(scales);
+    const auto scales = default_scale->getRationalArray(2);
+    mRaw->metadata.pixelAspectRatio =
+        static_cast<double>(scales[0]) / static_cast<double>(scales[1]);
   }
 
   // Apply stage 1 opcodes
