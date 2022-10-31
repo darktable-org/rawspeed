@@ -159,11 +159,9 @@ class DngOpcodes::ROIOpcode : public DngOpcodes::DngOpcode {
 
 protected:
   explicit ROIOpcode(const RawImage& ri, ByteStream& bs,
-                     iRectangle2D& integrated_subimg_, bool minusOne)
+                     iRectangle2D& integrated_subimg_)
       : DngOpcodes::DngOpcode(integrated_subimg_) {
-    const iRectangle2D subImage =
-        minusOne ? iRectangle2D(0, 0, ri->dim.x - 1, ri->dim.y - 1)
-                 : iRectangle2D(0, 0, ri->dim.x, ri->dim.y);
+    const iRectangle2D subImage = iRectangle2D(0, 0, ri->dim.x, ri->dim.y);
 
     uint32_t top = bs.getU32();
     uint32_t left = bs.getU32();
@@ -198,7 +196,7 @@ class DngOpcodes::DummyROIOpcode final : public ROIOpcode {
 public:
   explicit DummyROIOpcode(const RawImage& ri, ByteStream& bs,
                           iRectangle2D& integrated_subimg_)
-      : ROIOpcode(ri, bs, integrated_subimg_, true) {}
+      : ROIOpcode(ri, bs, integrated_subimg_) {}
 
   [[nodiscard]] const iRectangle2D& __attribute__((pure)) getRoi() const {
     return ROIOpcode::getRoi();
@@ -276,7 +274,7 @@ class DngOpcodes::TrimBounds final : public ROIOpcode {
 public:
   explicit TrimBounds(const RawImage& ri, ByteStream& bs,
                       iRectangle2D& integrated_subimg_)
-      : ROIOpcode(ri, bs, integrated_subimg_, false) {
+      : ROIOpcode(ri, bs, integrated_subimg_) {
     integrated_subimg_ = getRoi();
   }
 
@@ -294,7 +292,7 @@ class DngOpcodes::PixelOpcode : public ROIOpcode {
 protected:
   explicit PixelOpcode(const RawImage& ri, ByteStream& bs,
                        iRectangle2D& integrated_subimg_)
-      : ROIOpcode(ri, bs, integrated_subimg_, false), firstPlane(bs.getU32()),
+      : ROIOpcode(ri, bs, integrated_subimg_), firstPlane(bs.getU32()),
         planes(bs.getU32()) {
 
     if (planes == 0 || firstPlane > ri->getCpp() || planes > ri->getCpp() ||
