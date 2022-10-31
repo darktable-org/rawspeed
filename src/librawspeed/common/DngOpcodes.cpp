@@ -45,6 +45,20 @@ using std::make_pair;
 
 namespace rawspeed {
 
+namespace {
+
+// FIXME: extract into `RawImage`?
+template <typename T>
+CroppedArray2DRef<T> getDataAsCroppedArray2DRef(const RawImage& ri) {
+  if constexpr (std::is_same<T, uint16_t>())
+    return ri->getU16DataAsCroppedArray2DRef();
+  if constexpr (std::is_same<T, float>())
+    return ri->getF32DataAsCroppedArray2DRef();
+  __builtin_unreachable();
+}
+
+} // namespace
+
 class DngOpcodes::DngOpcode {
 public:
   virtual ~DngOpcode() = default;
@@ -242,16 +256,6 @@ protected:
     if (rowPitch < 1 || rowPitch > static_cast<uint32_t>(ROI.getHeight()) ||
         colPitch < 1 || colPitch > static_cast<uint32_t>(ROI.getWidth()))
       ThrowRDE("Invalid pitch");
-  }
-
-  // FIXME: extract into `RawImage`?
-  template <typename T>
-  CroppedArray2DRef<T> getDataAsCroppedArray2DRef(const RawImage& ri) {
-    if constexpr (std::is_same<T, uint16_t>())
-      return ri->getU16DataAsCroppedArray2DRef();
-    if constexpr (std::is_same<T, float>())
-      return ri->getF32DataAsCroppedArray2DRef();
-    __builtin_unreachable();
   }
 
   // traverses the current ROI and applies the operation OP to each pixel,
