@@ -43,6 +43,11 @@ ColorFilterArray::ColorFilterArray(const iPoint2D &_size) {
 
 void ColorFilterArray::setSize(const iPoint2D& _size)
 {
+  if (_size == iPoint2D(0, 0))
+    return;
+
+  assert(_size.hasPositiveArea() && "CFA must have positive size.");
+
   size = _size;
 
   if (size.area() > 36) {
