@@ -86,7 +86,7 @@ class DngOpcodes::DngOpcode {
 #endif
 
 public:
-  DngOpcode(const iRectangle2D& integrated_subimg_)
+  explicit DngOpcode(const iRectangle2D& integrated_subimg_)
 #ifndef NDEBUG
       : integrated_subimg(integrated_subimg_)
 #endif
@@ -317,7 +317,7 @@ protected:
       ThrowRDE("Invalid pitch");
   }
 
-  [[nodiscard]] const iPoint2D __attribute__((pure)) getPitch() const {
+  [[nodiscard]] iPoint2D __attribute__((pure)) getPitch() const {
     return {static_cast<int>(colPitch), static_cast<int>(rowPitch)};
   }
 
