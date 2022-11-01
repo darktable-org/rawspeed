@@ -325,12 +325,11 @@ protected:
     const CroppedArray2DRef<T> img = getDataAsCroppedArray2DRef<T>(ri);
     int cpp = ri->getCpp();
     const iRectangle2D& ROI = getRoi();
-    for (auto y = ROI.getTop(); y < ROI.getBottom(); y += rowPitch) {
-      // FIXME: is op() really supposed to receive global image coordinates,
-      // and not [0..ROI.getHeight()-1][0..ROI.getWidth()-1] ?
-      for (auto x = ROI.getLeft(); x < ROI.getRight(); x += colPitch) {
+    for (auto y = 0; y < ROI.getHeight(); y += rowPitch) {
+      for (auto x = 0; x < ROI.getWidth(); x += colPitch) {
         for (auto p = 0U; p < planes; ++p) {
-          T& pixel = img(y, firstPlane + x * cpp + p);
+          T& pixel =
+              img(ROI.getTop() + y, firstPlane + (ROI.getLeft() + x) * cpp + p);
           pixel = op(x, y, pixel);
         }
       }
@@ -462,10 +461,10 @@ protected:
     (void)bs.check(deltaF_count, 4);
 
     // See PixelOpcode::applyOP(). We will access deltaF/deltaI up to (excl.)
-    // either ROI.getRight() or ROI.getBottom() index. Thus, we need to have
+    // either ROI.getWidth() or ROI.getHeight() index. Thus, we need to have
     // either ROI.getRight() or ROI.getBottom() elements in there.
     if (const auto expectedSize = roundUpDivision(
-            S::select(getRoi().getRight(), getRoi().getBottom()),
+            S::select(getRoi().getWidth(), getRoi().getHeight()),
             S::select(getPitch().x, getPitch().y));
         expectedSize != deltaF_count) {
       ThrowRDE("Got unexpected number of elements (%lu), expected %u.",
