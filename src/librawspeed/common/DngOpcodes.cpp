@@ -64,6 +64,7 @@ iRectangle2D getImageCropAsRectangle(const RawImage& ri) {
   case RawImageType::F32:
     return getImageCropAsRectangle(ri->getF32DataAsCroppedArray2DRef());
   }
+  __builtin_unreachable();
 }
 
 // FIXME: extract into `RawImage`?
