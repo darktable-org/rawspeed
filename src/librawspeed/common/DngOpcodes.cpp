@@ -197,7 +197,9 @@ class DngOpcodes::DummyROIOpcode final : public ROIOpcode {
 public:
   explicit DummyROIOpcode(const RawImage& ri, ByteStream& bs,
                           iRectangle2D& integrated_subimg_)
-      : ROIOpcode(ri, bs, integrated_subimg_) {}
+      : ROIOpcode(ri, bs, integrated_subimg_) {
+    DummyROIOpcode::setup(ri);
+  }
 
   [[nodiscard]] const iRectangle2D& __attribute__((pure)) getRoi() const {
     return ROIOpcode::getRoi();
