@@ -314,6 +314,10 @@ protected:
       ThrowRDE("Invalid pitch");
   }
 
+  [[nodiscard]] const iPoint2D __attribute__((pure)) getPitch() const {
+    return {static_cast<int>(colPitch), static_cast<int>(rowPitch)};
+  }
+
   // traverses the current ROI and applies the operation OP to each pixel,
   // i.e. each pixel value v is replaced by op(x, y, v), where x/y are the
   // coordinates of the pixel value v.
@@ -460,11 +464,11 @@ protected:
     // See PixelOpcode::applyOP(). We will access deltaF/deltaI up to (excl.)
     // either ROI.getRight() or ROI.getBottom() index. Thus, we need to have
     // either ROI.getRight() or ROI.getBottom() elements in there.
-    // FIXME: i guess not strictly true with pitch != 1.
-    if (const auto expectedSize =
-            S::select(getRoi().getRight(), getRoi().getBottom());
+    if (const auto expectedSize = roundUpDivision(
+            S::select(getRoi().getRight(), getRoi().getBottom()),
+            S::select(getPitch().x, getPitch().y));
         expectedSize != deltaF_count) {
-      ThrowRDE("Got unexpected number of elements (%u), expected %u.",
+      ThrowRDE("Got unexpected number of elements (%lu), expected %u.",
                expectedSize, deltaF_count);
     }
 
