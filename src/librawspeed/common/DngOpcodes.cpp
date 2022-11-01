@@ -328,11 +328,13 @@ protected:
     const CroppedArray2DRef<T> img = getDataAsCroppedArray2DRef<T>(ri);
     int cpp = ri->getCpp();
     const iRectangle2D& ROI = getRoi();
-    for (auto y = 0; y < ROI.getHeight(); y += rowPitch) {
-      for (auto x = 0; x < ROI.getWidth(); x += colPitch) {
+    const iPoint2D numAffected(roundUpDivision(getRoi().dim.x, colPitch),
+                               roundUpDivision(getRoi().dim.y, rowPitch));
+    for (int y = 0; y < numAffected.y; ++y) {
+      for (int x = 0; x < numAffected.x; ++x) {
         for (auto p = 0U; p < planes; ++p) {
-          T& pixel =
-              img(ROI.getTop() + y, firstPlane + (ROI.getLeft() + x) * cpp + p);
+          T& pixel = img(ROI.getTop() + rowPitch * y,
+                         firstPlane + (ROI.getLeft() + colPitch * x) * cpp + p);
           pixel = op(x, y, pixel);
         }
       }
