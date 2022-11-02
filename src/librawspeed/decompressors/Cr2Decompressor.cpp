@@ -97,6 +97,9 @@ void Cr2Decompressor::decodeScan()
       decodeN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
     else {
       assert(frame.compInfo[0].superV == 1);
+      // fix the inconsistent slice width in sRaw mode, ask Canon.
+      for (auto* width : {&slicing.sliceWidth, &slicing.lastSliceWidth})
+        *width = (*width) * 3 / 2;
       decodeN_X_Y<3, 2, 1>(); // Cr2 sRaw2/sRaw
     }
   } else {
@@ -171,13 +174,6 @@ void Cr2Decompressor::decodeN_X_Y()
     // still the doubled width.
     // see: FIX_CANON_HALF_HEIGHT_DOUBLE_WIDTH
     frame.h *= 2;
-  }
-
-  if (X_S_F == 2 && Y_S_F == 1)
-  {
-    // fix the inconsistent slice width in sRaw mode, ask Canon.
-    for (auto* width : {&slicing.sliceWidth, &slicing.lastSliceWidth})
-      *width = (*width) * 3 / 2;
   }
 
   for (const auto& width : {slicing.sliceWidth, slicing.lastSliceWidth}) {
