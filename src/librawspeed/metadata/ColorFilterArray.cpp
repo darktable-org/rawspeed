@@ -200,10 +200,13 @@ static uint32_t toDcrawColor(CFAColor c) {
   case CFAColor::BLUE:
     return 2;
   case CFAColor::YELLOW:
+  case CFAColor::WHITE:
     return 3;
-  default:
+  case CFAColor::UNKNOWN:
+  case CFAColor::END:
     throw out_of_range(ColorFilterArray::colorToString(c));
   }
+  __builtin_unreachable();
 }
 
 uint32_t ColorFilterArray::getDcrawFilter() const {
@@ -213,6 +216,11 @@ uint32_t ColorFilterArray::getDcrawFilter() const {
 
   if (cfa.empty() || size.x > 2 || size.y > 8 || !isPowerOfTwo(size.y))
     return 1;
+
+  // FIXME: the idea here is that for a given CFA, there are at most 4 unique
+  // colors in CFA, *AND* `toDcrawColor()` returns an unique `0b??` pattern
+  // for each of these 4 *IN THE GIVEN CFA*.
+  // We don't validate that invariant presently.
 
   uint32_t ret = 0;
   for (int x = 0; x < 2; x++) {
