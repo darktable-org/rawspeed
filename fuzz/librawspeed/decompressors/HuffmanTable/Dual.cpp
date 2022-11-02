@@ -44,7 +44,7 @@
 #include "io/BitStream.h"                      // for BitStream
 #include "io/Buffer.h"                         // for Buffer, DataBuffer
 #include "io/ByteStream.h"                     // for ByteStream
-#include "io/Endianness.h"                     // for Endianness, Endiannes...
+#include "io/Endianness.h"                     // for Endianness, Endianness...
 #include "io/IOException.h"                    // for IOException
 #include <cassert>                             // for assert
 #include <cstdint>                             // for uint8_t

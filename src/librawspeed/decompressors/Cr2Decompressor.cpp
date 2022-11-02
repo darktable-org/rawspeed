@@ -195,7 +195,7 @@ void Cr2Decompressor::decodeN_X_Y()
 
   if (iPoint2D::area_type(frame.h) * slicing.totalWidth() <
       cpp * realDim.area())
-    ThrowRDE("Incorrrect slice height / slice widths! Less than image size.");
+    ThrowRDE("Incorrect slice height / slice widths! Less than image size.");
 
   unsigned globalFrameCol = 0;
   unsigned globalFrameRow = 0;
