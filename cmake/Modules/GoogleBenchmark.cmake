@@ -22,7 +22,7 @@ if(result)
   message(FATAL_ERROR "Build step for googlebenchmark failed: ${result}")
 endif()
 
-# shared googlebenchmark exibits varous spririous failures.
+# shared googlebenchmark exibits various spurious failures.
 # let's insist on static library.
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 

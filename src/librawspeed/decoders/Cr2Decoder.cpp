@@ -28,7 +28,7 @@
 #include "interpolators/Cr2sRawInterpolator.h" // for Cr2sRawInterpolator
 #include "io/Buffer.h"                         // for Buffer, DataBuffer
 #include "io/ByteStream.h"                     // for ByteStream
-#include "io/Endianness.h"                     // for Endianness, Endiannes...
+#include "io/Endianness.h"                     // for Endianness, Endianness...
 #include "metadata/Camera.h"                   // for Hints
 #include "metadata/ColorFilterArray.h" // for CFAColor::GREEN, CFAColor::BLUE
 #include "parsers/TiffParserException.h"       // for ThrowTPE

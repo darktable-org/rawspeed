@@ -304,7 +304,7 @@ void writePFM(const RawImage& raw, const std::string& fn) {
     // NOTE: pfm has rows in reverse order
     const int row_in = height - 1 - y;
 
-    // PFM can have any endiannes, let's write little-endian
+    // PFM can have any endianness, let's write little-endian
     for (int x = 0; x < width; ++x)
       img(row_in, x) = bit_cast<float>(getU32LE(&img(row_in, x)));
 

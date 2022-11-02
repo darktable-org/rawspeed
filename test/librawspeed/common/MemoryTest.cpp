@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Memory.h" // for alignedMallocArray, alignedMalloc, aligne...
+#include "common/Memory.h" // for alignedMallocArray, alignedMalloc, aligned...
 #include <cstddef>         // for size_t
 #include <cstdint>         // for uint8_t, int64_t, SIZE_MAX, int16_t, int32_t
 #include <cstdlib>         // for exit
