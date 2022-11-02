@@ -148,11 +148,11 @@ public:
 
 class AbstractLJpegDecompressor : public AbstractDecompressor {
   // std::vector of unique HTs, to not recreate HT, but cache them
-  std::vector<std::unique_ptr<HuffmanTable>> huffmanTableStore;
-  HuffmanTable ht_;      // temporary table, used
+  std::vector<std::unique_ptr<const HuffmanTable>> huffmanTableStore;
+  HuffmanTable ht_; // temporary table, used during parsing LJpeg.
 
   uint32_t Pt = 0;
-  std::array<HuffmanTable*, 4> huff{{}}; // 4 pointers into the store
+  std::array<const HuffmanTable*, 4> huff{{}}; // 4 pointers into the store
 
 public:
   AbstractLJpegDecompressor(ByteStream bs, const RawImage& img);
@@ -170,9 +170,10 @@ protected:
   JpegMarker getNextMarker(bool allowskip);
 
   template <int N_COMP>
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] std::array<HuffmanTable*, N_COMP>
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] std::array<const HuffmanTable*,
+                                                       N_COMP>
   getHuffmanTables() const {
-    std::array<HuffmanTable*, N_COMP> ht;
+    std::array<const HuffmanTable*, N_COMP> ht;
     for (int i = 0; i < N_COMP; ++i) {
       const unsigned dcTblNo = frame.compInfo[i].dcTblNo;
       if (const unsigned dcTbls = huff.size(); dcTblNo >= dcTbls) {
