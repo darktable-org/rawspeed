@@ -69,6 +69,15 @@ void Cr2Decompressor::decodeScan()
     isSubSampled = isSubSampled || frame.compInfo[i].superH != 1 ||
                    frame.compInfo[i].superV != 1;
 
+  if (frame.cps != 3 && frame.w * frame.cps > 2 * frame.h) {
+    // Fix Canon double height issue where Canon doubled the width and halfed
+    // the height (e.g. with 5Ds), ask Canon. frame.w needs to stay as is here
+    // because the number of pixels after which the predictor gets updated is
+    // still the doubled width.
+    // see: FIX_CANON_HALF_HEIGHT_DOUBLE_WIDTH
+    frame.h *= 2;
+  }
+
   if (isSubSampled) {
     if (mRaw->isCFA)
       ThrowRDE("Cannot decode subsampled image to CFA data");
@@ -166,15 +175,6 @@ void Cr2Decompressor::decodeN_X_Y()
   const auto* predNext = &out(0, 0);
 
   BitPumpJPEG bs(input);
-
-  if (frame.cps != 3 && frame.w * frame.cps > 2 * frame.h) {
-    // Fix Canon double height issue where Canon doubled the width and halfed
-    // the height (e.g. with 5Ds), ask Canon. frame.w needs to stay as is here
-    // because the number of pixels after which the predictor gets updated is
-    // still the doubled width.
-    // see: FIX_CANON_HALF_HEIGHT_DOUBLE_WIDTH
-    frame.h *= 2;
-  }
 
   for (const auto& width : {slicing.sliceWidth, slicing.lastSliceWidth}) {
     if (width > realDim.x)
