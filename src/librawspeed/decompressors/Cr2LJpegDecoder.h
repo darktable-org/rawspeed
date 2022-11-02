@@ -36,7 +36,7 @@ class Cr2Slicing {
   int sliceWidth = 0;
   int lastSliceWidth = 0;
 
-  friend class Cr2Decompressor;
+  friend class Cr2LJpegDecoder;
 
 public:
   Cr2Slicing() = default;
@@ -69,7 +69,7 @@ public:
   }
 };
 
-class Cr2Decompressor final : public AbstractLJpegDecompressor
+class Cr2LJpegDecoder final : public AbstractLJpegDecompressor
 {
   Cr2Slicing slicing;
 
@@ -81,7 +81,7 @@ class Cr2Decompressor final : public AbstractLJpegDecompressor
   void decompress();
 
 public:
-  Cr2Decompressor(const ByteStream& bs, const RawImage& img);
+  Cr2LJpegDecoder(const ByteStream& bs, const RawImage& img);
   void decode(const Cr2Slicing& slicing);
 };
 

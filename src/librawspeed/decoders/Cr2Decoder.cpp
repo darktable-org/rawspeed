@@ -24,7 +24,7 @@
 #include "common/Point.h"                      // for iPoint2D
 #include "common/RawspeedException.h"          // for RawspeedException
 #include "decoders/RawDecoderException.h"      // for ThrowRDE
-#include "decompressors/Cr2Decompressor.h"     // for Cr2Decompressor, Cr2S...
+#include "decompressors/Cr2LJpegDecoder.h"     // for Cr2LJpegDecoder, Cr2S...
 #include "interpolators/Cr2sRawInterpolator.h" // for Cr2sRawInterpolator
 #include "io/Buffer.h"                         // for Buffer, DataBuffer
 #include "io/ByteStream.h"                     // for ByteStream
@@ -87,7 +87,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
 
   const ByteStream bs(DataBuffer(mFile.getSubView(offset), Endianness::little));
 
-  Cr2Decompressor l(bs, mRaw);
+  Cr2LJpegDecoder l(bs, mRaw);
   mRaw->createData();
 
   Cr2Slicing slicing(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
@@ -150,10 +150,10 @@ RawImage Cr2Decoder::decodeNewFormat() {
   // * there is a tag with three components,
   //   $ last two components are non-zero: all fine then.
   //   $ first two components are zero, last component is non-zero
-  //     we let Cr2Decompressor guess it (it'll throw if fails)
+  //     we let Cr2LJpegDecoder guess it (it'll throw if fails)
   //   $ else the image is considered corrupt.
   // * there is a tag with not three components, the image is considered
-  // corrupt. $ there is no tag, we let Cr2Decompressor guess it (it'll throw if
+  // corrupt. $ there is no tag, we let Cr2LJpegDecoder guess it (it'll throw if
   // fails)
   if (const TiffEntry* cr2SliceEntry =
           raw->getEntryRecursive(TiffTag::CANONCR2SLICE);
@@ -170,13 +170,13 @@ RawImage Cr2Decoder::decodeNewFormat() {
                            /*lastSliceWidth=*/cr2SliceEntry->getU16(2));
     } else if (cr2SliceEntry->getU16(0) == 0 && cr2SliceEntry->getU16(1) == 0 &&
                cr2SliceEntry->getU16(2) != 0) {
-      // PowerShot G16, PowerShot S120, let Cr2Decompressor guess.
+      // PowerShot G16, PowerShot S120, let Cr2LJpegDecoder guess.
     } else {
       ThrowRDE("Strange RawImageSegmentation tag: (%d, %d, %d), image corrupt.",
                cr2SliceEntry->getU16(0), cr2SliceEntry->getU16(1),
                cr2SliceEntry->getU16(2));
     }
-  } // EOS 20D, EOS-1D Mark II, let Cr2Decompressor guess.
+  } // EOS 20D, EOS-1D Mark II, let Cr2LJpegDecoder guess.
 
   const uint32_t offset = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
   const uint32_t count = raw->getEntry(TiffTag::STRIPBYTECOUNTS)->getU32();
@@ -184,7 +184,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
   const ByteStream bs(
       DataBuffer(mFile.getSubView(offset, count), Endianness::little));
 
-  Cr2Decompressor d(bs, mRaw);
+  Cr2LJpegDecoder d(bs, mRaw);
   mRaw->createData();
   d.decode(slicing);
 

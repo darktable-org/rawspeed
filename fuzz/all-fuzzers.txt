@@ -1,6 +1,6 @@
 CiffParserFuzzer-GetDecoder
 CiffParserFuzzer-GetDecoder-Decode
-Cr2DecompressorFuzzer
+Cr2LJpegDecoderFuzzer
 CrwDecompressorFuzzer
 DngOpcodesFuzzer
 DummyLJpegDecompressorFuzzer

@@ -20,7 +20,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/Cr2Decompressor.h"
+#include "decompressors/Cr2LJpegDecoder.h"
 #include "common/Array2DRef.h"            // for Array2DRef
 #include "common/Point.h"                 // for iPoint2D, iPoint2D::area_type
 #include "common/RawImage.h"              // for RawImage, RawImageData
@@ -35,7 +35,7 @@ namespace rawspeed {
 
 class ByteStream;
 
-Cr2Decompressor::Cr2Decompressor(const ByteStream& bs, const RawImage& img)
+Cr2LJpegDecoder::Cr2LJpegDecoder(const ByteStream& bs, const RawImage& img)
     : AbstractLJpegDecompressor(bs, img) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
@@ -50,7 +50,7 @@ Cr2Decompressor::Cr2Decompressor(const ByteStream& bs, const RawImage& img)
   }
 }
 
-void Cr2Decompressor::decodeScan()
+void Cr2LJpegDecoder::decodeScan()
 {
   if (predictorMode != 1)
     ThrowRDE("Unsupported predictor mode.");
@@ -127,7 +127,7 @@ void Cr2Decompressor::decodeScan()
   decompress();
 }
 
-void Cr2Decompressor::decode(const Cr2Slicing& slicing_) {
+void Cr2LJpegDecoder::decode(const Cr2Slicing& slicing_) {
   slicing = slicing_;
   for (auto sliceId = 0; sliceId < slicing.numSlices; sliceId++) {
     const auto sliceWidth = slicing.widthOfSlice(sliceId);
@@ -143,7 +143,7 @@ void Cr2Decompressor::decode(const Cr2Slicing& slicing_) {
 // Y_S_F  == y/vertical   sampling factor (1 or 2)
 
 template <int N_COMP, int X_S_F, int Y_S_F>
-void Cr2Decompressor::decompressN_X_Y() {
+void Cr2LJpegDecoder::decompressN_X_Y() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   // To understand the CR2 slice handling and sampling factor behavior, see
@@ -256,7 +256,7 @@ void Cr2Decompressor::decompressN_X_Y() {
   }
 }
 
-void Cr2Decompressor::decompress() {
+void Cr2LJpegDecoder::decompress() {
   if (std::make_tuple(3, 2, 2) == format) {
     decompressN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
     return;

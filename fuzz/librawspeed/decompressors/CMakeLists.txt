@@ -10,7 +10,7 @@ endmacro()
 add_subdirectory(HuffmanTable)
 
 set(DECOMPRESSORS
-  "Cr2Decompressor"
+  "Cr2LJpegDecoder"
   "CrwDecompressor"
   "DummyLJpegDecompressor"
   "FujiDecompressor"

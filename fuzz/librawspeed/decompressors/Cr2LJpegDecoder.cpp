@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/Cr2Decompressor.h"
+#include "decompressors/Cr2LJpegDecoder.h"
 #include "common/RawImage.h"          // for RawImage, RawImageData
 #include "common/RawspeedException.h" // for RawspeedException
 #include "fuzz/Common.h"              // for CreateRawImage
@@ -48,7 +48,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     const rawspeed::Cr2Slicing slicing(numSlices, sliceWidth, lastSliceWidth);
 
-    rawspeed::Cr2Decompressor c(bs, mRaw);
+    rawspeed::Cr2LJpegDecoder c(bs, mRaw);
     mRaw->createData();
     c.decode(slicing);
 
