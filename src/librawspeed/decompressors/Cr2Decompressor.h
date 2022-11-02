@@ -73,8 +73,12 @@ class Cr2Decompressor final : public AbstractLJpegDecompressor
 {
   Cr2Slicing slicing;
 
+  std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format;
+
   void decodeScan() override;
-  template<int N_COMP, int X_S_F, int Y_S_F> void decodeN_X_Y();
+
+  template <int N_COMP, int X_S_F, int Y_S_F> void decompressN_X_Y();
+  void decompress();
 
 public:
   Cr2Decompressor(const ByteStream& bs, const RawImage& img);

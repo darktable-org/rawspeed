@@ -103,26 +103,28 @@ void Cr2Decompressor::decodeScan()
     }
 
     if (frame.compInfo[0].superV == 2)
-      decodeN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
+      format = {3, 2, 2}; // Cr2 sRaw1/mRaw
     else {
       assert(frame.compInfo[0].superV == 1);
       // fix the inconsistent slice width in sRaw mode, ask Canon.
       for (auto* width : {&slicing.sliceWidth, &slicing.lastSliceWidth})
         *width = (*width) * 3 / 2;
-      decodeN_X_Y<3, 2, 1>(); // Cr2 sRaw2/sRaw
+      format = {3, 2, 1}; // Cr2 sRaw2/sRaw
     }
   } else {
     switch (frame.cps) {
     case 2:
-      decodeN_X_Y<2, 1, 1>();
+      format = {2, 1, 1};
       break;
     case 4:
-      decodeN_X_Y<4, 1, 1>();
+      format = {4, 1, 1};
       break;
     default:
       ThrowRDE("Unsupported number of components: %u", frame.cps);
     }
   }
+
+  decompress();
 }
 
 void Cr2Decompressor::decode(const Cr2Slicing& slicing_) {
@@ -141,8 +143,7 @@ void Cr2Decompressor::decode(const Cr2Slicing& slicing_) {
 // Y_S_F  == y/vertical   sampling factor (1 or 2)
 
 template <int N_COMP, int X_S_F, int Y_S_F>
-void Cr2Decompressor::decodeN_X_Y()
-{
+void Cr2Decompressor::decompressN_X_Y() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   // To understand the CR2 slice handling and sampling factor behavior, see
@@ -253,6 +254,27 @@ void Cr2Decompressor::decodeN_X_Y()
       }
     }
   }
+}
+
+void Cr2Decompressor::decompress() {
+  if (std::make_tuple(3, 2, 2) == format) {
+    decompressN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
+    return;
+  }
+  if (std::make_tuple(3, 2, 1) == format) {
+    decompressN_X_Y<3, 2, 1>(); // Cr2 sRaw2/sRaw
+    return;
+  }
+  if (std::make_tuple(2, 1, 1) == format) {
+    decompressN_X_Y<2, 1, 1>();
+    return;
+  }
+  if (std::make_tuple(4, 1, 1) == format) {
+    decompressN_X_Y<4, 1, 1>();
+    return;
+  }
+  ThrowRDE("Unknown format <%i,%i,%i>", std::get<0>(format),
+           std::get<1>(format), std::get<2>(format));
 }
 
 } // namespace rawspeed
