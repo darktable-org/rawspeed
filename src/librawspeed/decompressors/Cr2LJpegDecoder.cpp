@@ -171,8 +171,8 @@ void Cr2LJpegDecoder::decompressN_X_Y() {
   realDim.x *= X_S_F;
   realDim.y *= Y_S_F;
 
-  const auto ht = getHuffmanTables<N_COMP>();
-  auto pred = getInitialPredictors<N_COMP>();
+  const auto ht = to_array<N_COMP>(getHuffmanTables(N_COMP));
+  auto pred = to_array<N_COMP>(getInitialPredictors(N_COMP));
   const auto* predNext = &out(0, 0);
 
   BitPumpJPEG bs(input);
