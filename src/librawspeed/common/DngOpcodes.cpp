@@ -281,7 +281,8 @@ public:
   explicit TrimBounds(const RawImage& ri, ByteStream& bs,
                       iRectangle2D& integrated_subimg_)
       : ROIOpcode(ri, bs, integrated_subimg_) {
-    integrated_subimg_ = getRoi();
+    integrated_subimg_.pos += getRoi().pos;
+    integrated_subimg_.dim = getRoi().dim;
   }
 
   void apply(const RawImage& ri) override { ri->subFrame(getRoi()); }
