@@ -171,7 +171,7 @@ void Cr2Decompressor::decompressN_X_Y() {
   realDim.x *= X_S_F;
   realDim.y *= Y_S_F;
 
-  auto ht = getHuffmanTables<N_COMP>();
+  const auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPredictors<N_COMP>();
   const auto* predNext = &out(0, 0);
 
