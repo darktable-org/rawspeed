@@ -219,7 +219,7 @@ void RawImageData::subFrame(iRectangle2D crop) {
                                   "size. Crop skipped.");
     return;
   }
-  if (crop.pos.x < 0 || crop.pos.y < 0 || !crop.hasPositiveArea()) {
+  if (crop.pos.x < 0 || crop.pos.y < 0 || crop.dim.x < 0 || crop.dim.y < 0) {
     writeLog(DEBUG_PRIO::WARNING, "WARNING: RawImageData::subFrame - Negative "
                                   "crop offset. Crop skipped.");
     return;
