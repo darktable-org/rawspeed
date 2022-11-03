@@ -141,7 +141,7 @@ jobs:
         run: |
           set -xe
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         name: Fetch/Checkout RawSpeed git repo
         with:
           path: 'rawspeed'
@@ -158,7 +158,7 @@ jobs:
           echo "::set-output name=rpuu-digest-hash::$(sha512sum ${RPUU_DST}/filelist.sha1 | awk '{print $1}')"
       - if: matrix.flavor == 'Coverage'
         name: Cache raw.pixls.us masterset
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ env.RPUU_DST }}
           key: raw.pixls.us-masterset-${{ steps.fetch-rpuu-digest.outputs.rpuu-digest-hash }}
@@ -172,7 +172,7 @@ jobs:
           cd ${RPUU_DST} && sha1sum -c --strict filelist.sha1
       - if: matrix.flavor == 'ClangStaticAnalysis'
         name: Fetch/Checkout CodeChecker git repo (for clang static analysis)
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: 'Ericsson/codechecker'
           path: 'codechecker'
@@ -196,8 +196,9 @@ jobs:
           languages: cpp
       - if: matrix.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == 'develop'
         name: Set up JDK 11 (for SonarCloud static analysis)
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
+          distribution: zulu
           java-version: 11
       - if: matrix.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == 'develop'
         name: Download and set up sonar-scanner (for SonarCloud static analysis)
@@ -302,9 +303,9 @@ jobs:
       matrix:
         os: [ windows-latest ]
         msys2:
-          - { msystem: MINGW64, arch: x86_64       }
-          - { msystem: MINGW32, arch: i686         }
-          - { msystem: CLANG64, arch: clang-x86_64 }
+          - { msystem: MINGW64, arch: x86_64 }
+          - { msystem: MINGW32, arch: i686   }
+          - { msystem: CLANG64, arch: x86_64 }
         compiler:
           - { family: GNU,  CC: gcc,   CXX: g++ }
           - { family: LLVM, CC: clang, CXX: clang++ }
@@ -312,13 +313,13 @@ jobs:
         exclude:
           - os: windows-latest
             compiler: { family: LLVM, CC: clang, CXX: clang++ }
-            msys2: { msystem: MINGW64, arch: x86_64       }
+            msys2: { msystem: MINGW64, arch: x86_64 }
           - os: windows-latest
             compiler: { family: LLVM, CC: clang, CXX: clang++ }
-            msys2: { msystem: MINGW32, arch: i686         }
+            msys2: { msystem: MINGW32, arch: i686   }
           - os: windows-latest
             compiler: { family: GNU,  CC: gcc,   CXX: g++ }
-            msys2: { msystem: CLANG64, arch: clang-x86_64 }
+            msys2: { msystem: CLANG64, arch: x86_64 }
         include:
           - os: windows-latest
             msys2: { msystem: MINGW64, arch: x86_64 }
@@ -328,7 +329,7 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         name: Fetch/Checkout RawSpeed git repo
         with:
           path: 'rawspeed'
@@ -338,17 +339,18 @@ jobs:
           msystem: ${{ matrix.msys2.msystem }}
           update: true
           install: >-
-            pacman-mirrors
-            bash
             git
             base-devel
-            mingw-w64-${{ matrix.msys2.arch }}-toolchain
-            mingw-w64-${{ matrix.msys2.arch }}-cmake
-            mingw-w64-${{ matrix.msys2.arch }}-ninja
-            mingw-w64-${{ matrix.msys2.arch }}-libxml2
-            mingw-w64-${{ matrix.msys2.arch }}-pugixml
-            mingw-w64-${{ matrix.msys2.arch }}-libjpeg-turbo
-            mingw-w64-${{ matrix.msys2.arch }}-zlib
+          pacboy: >-
+            cc:p
+            gcc-libs:p
+            omp:p
+            cmake:p
+            ninja:p
+            libxml2:p
+            pugixml:p
+            libjpeg-turbo:p
+            zlib:p
       - name: Build And Test
         env:
           CC: ${{ matrix.compiler.CC }}
@@ -396,7 +398,7 @@ jobs:
     name: ${{ matrix.compiler.os }}.${{ matrix.compiler.family }}.${{ matrix.compiler.version }}.targeting.OSX.${{ matrix.compiler.deployment_target }}.${{ matrix.flavor }}
     runs-on: ${{ matrix.compiler.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         name: Fetch/Checkout RawSpeed git repo
         with:
           path: 'rawspeed'
