@@ -1,7 +1,8 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2017-2018 Roman Lebedev
+    Copyright (C) 2017 Axel Waggershauser
+    Copyright (C) 2018 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,26 +21,25 @@
 
 #pragma once
 
-#include "io/Buffer.h"     // for Buffer
-#include "io/ByteStream.h" // for ByteStream
+#include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
+#include "decompressors/Cr2Decompressor.h"           // for Cr2Decompressor
+#include <cassert>                                   // for assert
+#include <cstdint>                                   // for uint16_t
 
-template <typename T> static T createHuffmanTable(rawspeed::ByteStream& bs) {
-  T ht;
+namespace rawspeed {
 
-  // first 16 bytes are consumed as n-codes-per-length
-  const auto count = ht.setNCodesPerLength(bs.getBuffer(16));
+class ByteStream;
+class RawImage;
 
-  // and then count more bytes consumed as code values
-  ht.setCodeValues(bs.getBuffer(count));
+class Cr2LJpegDecoder final : public AbstractLJpegDecompressor
+{
+  Cr2Slicing slicing;
 
-  // and one more byte as 'fixDNGBug16' boolean
-  const bool fixDNGBug16 = bs.getByte() != 0;
+  void decodeScan() override;
 
-#ifndef FULLDECODE
-  const bool FULLDECODE = bs.getByte() != 0;
-#endif
+public:
+  Cr2LJpegDecoder(const ByteStream& bs, const RawImage& img);
+  void decode(const Cr2Slicing& slicing);
+};
 
-  ht.setup(FULLDECODE, fixDNGBug16);
-
-  return ht;
-}
+} // namespace rawspeed

@@ -9,6 +9,8 @@ FILE(GLOB SOURCES
   "BinaryHuffmanTree.h"
   "Cr2Decompressor.cpp"
   "Cr2Decompressor.h"
+  "Cr2LJpegDecoder.cpp"
+  "Cr2LJpegDecoder.h"
   "CrwDecompressor.cpp"
   "CrwDecompressor.h"
   "DeflateDecompressor.cpp"

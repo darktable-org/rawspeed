@@ -171,8 +171,8 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
                               mRaw->getCpp() * offX, offY, mRaw->getCpp() * w,
                               h);
 
-  auto ht = getHuffmanTables<N_COMP>();
-  auto pred = getInitialPredictors<N_COMP>();
+  const auto ht = to_array<N_COMP>(getHuffmanTables(N_COMP));
+  auto pred = to_array<N_COMP>(getInitialPredictors(N_COMP));
   uint16_t* predNext = pred.data();
 
   BitPumpJPEG bitStream(input);

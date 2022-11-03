@@ -35,8 +35,14 @@ namespace rawspeed {
 
 class ByteStream;
 
-Cr2Decompressor::Cr2Decompressor(const ByteStream& bs, const RawImage& img)
-    : AbstractLJpegDecompressor(bs, img) {
+Cr2Decompressor::Cr2Decompressor(
+    const RawImage& mRaw_,
+    std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format_,
+    iPoint2D frame_, Cr2Slicing slicing_, std::vector<const HuffmanTable*> ht_,
+    std::vector<uint16_t> initPred_, ByteStream input_)
+    : mRaw(mRaw_), format(std::move(format_)), frame(frame_), slicing(slicing_),
+      ht(std::move(ht_)), initPred(std::move(initPred_)),
+      input(std::move(input_)) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
 
@@ -48,80 +54,24 @@ Cr2Decompressor::Cr2Decompressor(const ByteStream& bs, const RawImage& img)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);
   }
-}
 
-void Cr2Decompressor::decodeScan()
-{
-  if (predictorMode != 1)
-    ThrowRDE("Unsupported predictor mode.");
-
-  if (slicing.empty()) {
-    const int slicesWidth = frame.w * frame.cps;
-    if (slicesWidth > mRaw->dim.x)
-      ThrowRDE("Don't know slicing pattern, and failed to guess it.");
-
-    slicing = Cr2Slicing(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
-                         /*lastSliceWidth=*/slicesWidth);
-  }
-
-  bool isSubSampled = false;
-  for (uint32_t i = 0; i < frame.cps; i++)
-    isSubSampled = isSubSampled || frame.compInfo[i].superH != 1 ||
-                   frame.compInfo[i].superV != 1;
-
-  if (isSubSampled) {
-    if (mRaw->isCFA)
-      ThrowRDE("Cannot decode subsampled image to CFA data");
-
-    if (frame.cps != 3)
-      ThrowRDE("Unsupported number of subsampled components: %u", frame.cps);
-
-    // see http://lclevy.free.fr/cr2/#sraw for overview table
-    bool isSupported = frame.compInfo[0].superH == 2;
-
-    isSupported = isSupported && (frame.compInfo[0].superV == 1 ||
-                                  frame.compInfo[0].superV == 2);
-
-    for (uint32_t i = 1; i < frame.cps; i++)
-      isSupported = isSupported && frame.compInfo[i].superH == 1 &&
-                    frame.compInfo[i].superV == 1;
-
-    if (!isSupported) {
-      ThrowRDE("Unsupported subsampling ([[%u, %u], [%u, %u], [%u, %u]])",
-               frame.compInfo[0].superH, frame.compInfo[0].superV,
-               frame.compInfo[1].superH, frame.compInfo[1].superV,
-               frame.compInfo[2].superH, frame.compInfo[2].superV);
-    }
-
-    if (frame.compInfo[0].superV == 2)
-      decodeN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
-    else {
-      assert(frame.compInfo[0].superV == 1);
-      decodeN_X_Y<3, 2, 1>(); // Cr2 sRaw2/sRaw
-    }
-  } else {
-    switch (frame.cps) {
-    case 2:
-      decodeN_X_Y<2, 1, 1>();
-      break;
-    case 4:
-      decodeN_X_Y<4, 1, 1>();
-      break;
-    default:
-      ThrowRDE("Unsupported number of components: %u", frame.cps);
-    }
-  }
-}
-
-void Cr2Decompressor::decode(const Cr2Slicing& slicing_) {
-  slicing = slicing_;
   for (auto sliceId = 0; sliceId < slicing.numSlices; sliceId++) {
     const auto sliceWidth = slicing.widthOfSlice(sliceId);
     if (sliceWidth <= 0)
       ThrowRDE("Bad slice width: %i", sliceWidth);
   }
 
-  AbstractLJpegDecompressor::decode();
+  const bool isSubSampled =
+      std::get<1>(format) != 1 || std::get<2>(format) != 1;
+  if (isSubSampled == mRaw->isCFA)
+    ThrowRDE("Cannot decode subsampled image to CFA data or vice versa");
+
+  if (!((std::make_tuple(3, 2, 2) == format) ||
+        (std::make_tuple(3, 2, 1) == format) ||
+        (std::make_tuple(2, 1, 1) == format) ||
+        (std::make_tuple(4, 1, 1) == format)))
+    ThrowRDE("Unknown format <%i,%i,%i>", std::get<0>(format),
+             std::get<1>(format), std::get<2>(format));
 }
 
 // N_COMP == number of components (2, 3 or 4)
@@ -129,8 +79,7 @@ void Cr2Decompressor::decode(const Cr2Slicing& slicing_) {
 // Y_S_F  == y/vertical   sampling factor (1 or 2)
 
 template <int N_COMP, int X_S_F, int Y_S_F>
-void Cr2Decompressor::decodeN_X_Y()
-{
+void Cr2Decompressor::decompressN_X_Y() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   // To understand the CR2 slice handling and sampling factor behavior, see
@@ -158,27 +107,10 @@ void Cr2Decompressor::decodeN_X_Y()
   realDim.x *= X_S_F;
   realDim.y *= Y_S_F;
 
-  auto ht = getHuffmanTables<N_COMP>();
-  auto pred = getInitialPredictors<N_COMP>();
+  auto pred = to_array<N_COMP>(initPred);
   const auto* predNext = &out(0, 0);
 
   BitPumpJPEG bs(input);
-
-  if (frame.cps != 3 && frame.w * frame.cps > 2 * frame.h) {
-    // Fix Canon double height issue where Canon doubled the width and halfed
-    // the height (e.g. with 5Ds), ask Canon. frame.w needs to stay as is here
-    // because the number of pixels after which the predictor gets updated is
-    // still the doubled width.
-    // see: FIX_CANON_HALF_HEIGHT_DOUBLE_WIDTH
-    frame.h *= 2;
-  }
-
-  if (X_S_F == 2 && Y_S_F == 1)
-  {
-    // fix the inconsistent slice width in sRaw mode, ask Canon.
-    for (auto* width : {&slicing.sliceWidth, &slicing.lastSliceWidth})
-      *width = (*width) * 3 / 2;
-  }
 
   for (const auto& width : {slicing.sliceWidth, slicing.lastSliceWidth}) {
     if (width > realDim.x)
@@ -193,7 +125,7 @@ void Cr2Decompressor::decodeN_X_Y()
     }
   }
 
-  if (iPoint2D::area_type(frame.h) * slicing.totalWidth() <
+  if (iPoint2D::area_type((unsigned)frame.y) * slicing.totalWidth() <
       cpp * realDim.area())
     ThrowRDE("Incorrect slice height / slice widths! Less than image size.");
 
@@ -202,8 +134,8 @@ void Cr2Decompressor::decodeN_X_Y()
   for (auto sliceId = 0; sliceId < slicing.numSlices; sliceId++) {
     const unsigned sliceWidth = slicing.widthOfSlice(sliceId);
 
-    assert(frame.h % frameRowStep == 0);
-    for (unsigned sliceFrameRow = 0; sliceFrameRow < frame.h;
+    assert((unsigned)frame.y % frameRowStep == 0);
+    for (unsigned sliceFrameRow = 0; sliceFrameRow < (unsigned)frame.y;
          sliceFrameRow += frameRowStep, globalFrameRow += frameRowStep) {
       unsigned row = globalFrameRow % realDim.y;
       unsigned col = globalFrameRow / realDim.y * slicing.widthOfSlice(0) / cpp;
@@ -226,7 +158,7 @@ void Cr2Decompressor::decodeN_X_Y()
       assert(sliceWidth % sliceColStep == 0);
       for (unsigned sliceCol = 0; sliceCol < sliceWidth;) {
         // check if we processed one full raw row worth of pixels
-        if (globalFrameCol == frame.w) {
+        if (globalFrameCol == (unsigned)frame.x) {
           // if yes -> update predictor by going back exactly one row,
           // no matter where we are right now.
           // makes no sense from an image compression point of view, ask Canon.
@@ -238,9 +170,9 @@ void Cr2Decompressor::decodeN_X_Y()
 
         // How many pixel can we decode until we finish the row of either
         // the frame (i.e. predictor change time), or of the current slice?
-        assert(frame.w % X_S_F == 0);
+        assert((unsigned)frame.x % X_S_F == 0);
         unsigned sliceColsRemainingInThisFrameRow =
-            sliceColStep * ((frame.w - globalFrameCol) / X_S_F);
+            sliceColStep * (((unsigned)frame.x - globalFrameCol) / X_S_F);
         unsigned sliceColsRemainingInThisSliceRow = sliceWidth - sliceCol;
         unsigned sliceColsRemaining = std::min(
             sliceColsRemainingInThisSliceRow, sliceColsRemainingInThisFrameRow);
@@ -257,6 +189,26 @@ void Cr2Decompressor::decodeN_X_Y()
       }
     }
   }
+}
+
+void Cr2Decompressor::decompress() {
+  if (std::make_tuple(3, 2, 2) == format) {
+    decompressN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
+    return;
+  }
+  if (std::make_tuple(3, 2, 1) == format) {
+    decompressN_X_Y<3, 2, 1>(); // Cr2 sRaw2/sRaw
+    return;
+  }
+  if (std::make_tuple(2, 1, 1) == format) {
+    decompressN_X_Y<2, 1, 1>();
+    return;
+  }
+  if (std::make_tuple(4, 1, 1) == format) {
+    decompressN_X_Y<4, 1, 1>();
+    return;
+  }
+  __builtin_unreachable();
 }
 
 } // namespace rawspeed

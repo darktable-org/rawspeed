@@ -21,10 +21,11 @@
 
 #pragma once
 
-#include "decoders/RawDecoderException.h"            // for ThrowRDE
-#include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
-#include <cassert>                                   // for assert
-#include <cstdint>                                   // for uint16_t
+#include "common/RawImage.h"              // for RawImage
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable
+#include <cassert>                        // for assert
+#include <cstdint>                        // for uint16_t
 
 namespace rawspeed {
 
@@ -36,6 +37,7 @@ class Cr2Slicing {
   int sliceWidth = 0;
   int lastSliceWidth = 0;
 
+  friend class Cr2LJpegDecoder;
   friend class Cr2Decompressor;
 
 public:
@@ -69,16 +71,27 @@ public:
   }
 };
 
-class Cr2Decompressor final : public AbstractLJpegDecompressor
-{
-  Cr2Slicing slicing;
+class Cr2Decompressor final {
+  const RawImage mRaw;
+  const std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format;
+  const iPoint2D frame;
+  const Cr2Slicing slicing;
 
-  void decodeScan() override;
-  template<int N_COMP, int X_S_F, int Y_S_F> void decodeN_X_Y();
+  const std::vector<const HuffmanTable*> ht;
+  const std::vector<uint16_t> initPred;
+
+  const ByteStream input;
+
+  template <int N_COMP, int X_S_F, int Y_S_F> void decompressN_X_Y();
 
 public:
-  Cr2Decompressor(const ByteStream& bs, const RawImage& img);
-  void decode(const Cr2Slicing& slicing);
+  Cr2Decompressor(
+      const RawImage& mRaw,
+      std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format,
+      iPoint2D frame, Cr2Slicing slicing, std::vector<const HuffmanTable*> ht,
+      std::vector<uint16_t> initPred, ByteStream input);
+
+  void decompress();
 };
 
 } // namespace rawspeed

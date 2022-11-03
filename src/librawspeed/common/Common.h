@@ -21,6 +21,7 @@
 #pragma once
 
 #include <algorithm>        // IWYU pragma: keep
+#include <array>
 #include <cassert>          // for assert
 #include <climits>          // for CHAR_BIT
 #include <cstdint>          // for uint8_t, uint16_t, uintptr_t
@@ -211,6 +212,14 @@ inline std::vector<std::string> splitString(const std::string& input,
   }
 
   return result;
+}
+
+template <int N, typename T>
+inline std::array<T, N> to_array(const std::vector<T>& v) {
+  std::array<T, N> a;
+  assert(v.size() == N && "Size mismatch");
+  std::move(v.begin(), v.end(), a.begin());
+  return a;
 }
 
 enum class BitOrder {
