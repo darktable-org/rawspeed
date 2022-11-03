@@ -267,7 +267,7 @@ jobs:
           sonar-scanner --define project.settings="${SRC_DIR}/.ci/sonar-project.properties" --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.projectKey="${{ env.SONAR_PROJECT_KEY }}" --define sonar.organization="${{ env.SONAR_ORGANIZATION }}" --define sonar.cfamily.compile-commands="${BUILD_DIR}/compile_commands.json" --define sonar.cfamily.threads="$(nproc --all)" --define sonar.cfamily.cache.enabled=false
       - if: matrix.flavor == 'Coverage'
         name: Upload coverage to Codecov (unit tests)
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         env:
           OS: linux
           ARCH: x86_64
@@ -282,7 +282,7 @@ jobs:
           fail_ci_if_error: true
       - if: matrix.flavor == 'Coverage'
         name: Upload coverage to Codecov (integration)
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         env:
           OS: linux
           ARCH: x86_64
@@ -368,7 +368,7 @@ jobs:
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
       - if: matrix.flavor == 'Coverage'
         name: Upload coverage to Codecov (unit tests)
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         env:
           OS: windows
           ARCH: ${{ matrix.msys2.arch }}
@@ -436,7 +436,7 @@ jobs:
           "${SRC_DIR}/.ci/ci-script.sh"
       - if: matrix.flavor == 'Coverage'
         name: Upload coverage to Codecov (unit tests)
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         env:
           OS: macOS
           ARCH: x86_64
