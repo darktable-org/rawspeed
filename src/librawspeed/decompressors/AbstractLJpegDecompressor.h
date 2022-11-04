@@ -184,8 +184,7 @@ protected:
     return ht;
   }
 
-  [[nodiscard]] __attribute__((pure)) std::vector<uint16_t>
-  getInitialPredictors(int N_COMP) const {
+  [[nodiscard]] std::vector<uint16_t> getInitialPredictors(int N_COMP) const {
     std::vector<uint16_t> pred(N_COMP);
     if (frame.prec < (Pt + 1)) {
       ThrowRDE("Invalid precision (%u) and point transform (%u) combination!",
