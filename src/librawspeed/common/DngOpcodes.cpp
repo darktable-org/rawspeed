@@ -58,13 +58,20 @@ iRectangle2D getImageCropAsRectangle(const CroppedArray2DRef<T>& img) {
 }
 
 iRectangle2D getImageCropAsRectangle(const RawImage& ri) {
+  iRectangle2D rect;
   switch (ri->getDataType()) {
   case RawImageType::UINT16:
-    return getImageCropAsRectangle(ri->getU16DataAsCroppedArray2DRef());
+    rect = getImageCropAsRectangle(ri->getU16DataAsCroppedArray2DRef());
+    break;
   case RawImageType::F32:
-    return getImageCropAsRectangle(ri->getF32DataAsCroppedArray2DRef());
+    rect = getImageCropAsRectangle(ri->getF32DataAsCroppedArray2DRef());
+    break;
   }
-  __builtin_unreachable();
+  for (int* col : {&rect.pos.x, &rect.dim.x}) {
+    assert(*col % ri->getCpp() == 0 && "Column is width * cpp");
+    *col /= ri->getCpp();
+  }
+  return rect;
 }
 
 // FIXME: extract into `RawImage`?
