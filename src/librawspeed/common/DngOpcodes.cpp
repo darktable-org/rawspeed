@@ -231,8 +231,7 @@ public:
     // Although it is not really obvious from the spec,
     // the coordinates appear to be global/crop-independent,
     // and apply to the source uncropped image.
-    const iRectangle2D fullImage(0, 0, ri->getUncroppedDim().x - 1,
-                                 ri->getUncroppedDim().y - 1);
+    const iRectangle2D fullImage({0, 0}, ri->getUncroppedDim());
 
     bs.getU32(); // Skip phase - we don't care
     auto badPointCount = bs.getU32();
@@ -250,8 +249,7 @@ public:
       auto y = bs.getU32();
       auto x = bs.getU32();
 
-      if (const iPoint2D badPoint(x, y);
-          !fullImage.isPointInsideInclusive(badPoint))
+      if (const iPoint2D badPoint(x, y); !fullImage.isPointInside(badPoint))
         ThrowRDE("Bad point not inside image.");
 
       badPixels.emplace_back(y << 16 | x);
@@ -259,16 +257,18 @@ public:
 
     // Read rects
     for (auto i = 0U; i < badRectCount; ++i) {
-      const DummyROIOpcode dummy(ri, bs, integrated_subimg_);
+      iRectangle2D fullImage_ = fullImage;
+      const DummyROIOpcode dummy(ri, bs, fullImage_);
 
       const iRectangle2D badRect = dummy.getRoi();
       assert(badRect.isThisInside(fullImage));
 
-      auto area = (1 + badRect.getHeight()) * (1 + badRect.getWidth());
+      auto area = badRect.getHeight() * badRect.getWidth();
       badPixels.reserve(badPixels.size() + area);
-      for (auto y = badRect.getTop(); y <= badRect.getBottom(); ++y) {
-        for (auto x = badRect.getLeft(); x <= badRect.getRight(); ++x) {
-          badPixels.emplace_back(y << 16 | x);
+      for (auto y = 0; y < badRect.getHeight(); ++y) {
+        for (auto x = 0; x < badRect.getWidth(); ++x) {
+          badPixels.emplace_back((badRect.getTop() + y) << 16 |
+                                 (badRect.getLeft() + x));
         }
       }
     }

@@ -122,15 +122,19 @@ public:
     return (dim.x > 0) && (dim.y > 0);
   }
 
-  [[nodiscard]] constexpr bool
-  isThisInside(const iRectangle2D& otherPoint) const {
-    return pos >= otherPoint.pos &&
-           getBottomRight() <= otherPoint.getBottomRight();
+  [[nodiscard]] constexpr bool isPointInside(const iPoint2D& subPoint) const {
+    return subPoint >= getTopLeft() && subPoint < getBottomRight();
   }
 
   [[nodiscard]] constexpr bool
-  isPointInsideInclusive(const iPoint2D& checkPoint) const {
-    return pos <= checkPoint && getBottomRight() >= checkPoint;
+  isPointInsideInclusive(const iPoint2D& subPoint) const {
+    return subPoint >= getTopLeft() && subPoint <= getBottomRight();
+  }
+
+  [[nodiscard]] constexpr bool
+  isThisInside(const iRectangle2D& superRect) const {
+    return getTopLeft() >= superRect.getTopLeft() &&
+           getBottomRight() <= superRect.getBottomRight();
   }
 
   [[nodiscard]] unsigned int area() const { return dim.area(); }
