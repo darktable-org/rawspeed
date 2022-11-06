@@ -411,7 +411,9 @@ public:
       double val = polynomial[0];
       for (auto j = 1UL; j < polynomial.size(); ++j)
         val += polynomial[j] * pow(i / 65536.0, j);
-      lookup[i] = (clampBits(static_cast<int>(val * 65535.5), 16));
+      lookup[i] = std::clamp<double>(val * 65535.5,
+                                     std::numeric_limits<uint16_t>::min(),
+                                     std::numeric_limits<uint16_t>::max());
     }
   }
 };
