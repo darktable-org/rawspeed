@@ -533,7 +533,7 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     const TiffEntry* default_scale = raw->getEntry(TiffTag::DEFAULTSCALE);
     const auto scales = default_scale->getRationalArray(2);
     for (const auto& scale : scales) {
-      if (scale.den == 0)
+      if (scale.num == 0 || scale.den == 0)
         ThrowRDE("Error decoding default pixel scale");
     }
     mRaw->metadata.pixelAspectRatio =
