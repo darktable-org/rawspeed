@@ -73,7 +73,8 @@ Cr2Decompressor::Cr2Decompressor(
     ThrowRDE("Unknown format <%i,%i,%i>", std::get<0>(format),
              std::get<1>(format), std::get<2>(format));
 
-  if (static_cast<int>(initPred.size()) != std::get<0>(format))
+  if (initPred.size() != ht.size() ||
+      static_cast<int>(initPred.size()) != std::get<0>(format))
     ThrowRDE("Initial predictor count does not match component count");
 }
 
