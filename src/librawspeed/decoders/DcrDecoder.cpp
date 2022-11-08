@@ -75,7 +75,7 @@ RawImage DcrDecoder::decodeRawInternal() {
   const TiffEntry* linearization =
       kodakifd.getEntryRecursive(TiffTag::KODAK_LINEARIZATION);
   if (!linearization ||
-      !(linearization->count == 1024 || linearization->count == 4096) ||
+      (linearization->count != 1024 && linearization->count != 4096) ||
       linearization->type != TiffDataType::SHORT)
     ThrowRDE("Couldn't find the linearization table");
 

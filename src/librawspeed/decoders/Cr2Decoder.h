@@ -37,7 +37,7 @@ public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                    const Buffer& file);
   Cr2Decoder(TiffRootIFDOwner&& root, const Buffer& file)
-      : AbstractTiffDecoder(move(root), file) {}
+      : AbstractTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;

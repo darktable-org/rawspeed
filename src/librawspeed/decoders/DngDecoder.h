@@ -24,6 +24,7 @@
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
 #include <cstdint>                        // for uint32_t
+#include <optional>
 #include <vector>                         // for vector
 
 namespace rawspeed {
@@ -49,7 +50,9 @@ private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }
   bool mFixLjpeg;
   static void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
+  std::optional<iRectangle2D> parseACTIVEAREA(const TiffIFD* raw) const;
   void parseCFA(const TiffIFD* raw) const;
+  void parseColorMatrix() const;
   DngTilingDescription getTilingDescription(const TiffIFD* raw) const;
   void decodeData(const TiffIFD* raw, uint32_t sample_format) const;
   void handleMetadata(const TiffIFD* raw);

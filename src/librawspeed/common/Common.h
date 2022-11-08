@@ -21,6 +21,7 @@
 #pragma once
 
 #include <algorithm>        // IWYU pragma: keep
+#include <array>
 #include <cassert>          // for assert
 #include <climits>          // for CHAR_BIT
 #include <cstdint>          // for uint8_t, uint16_t, uintptr_t
@@ -55,6 +56,18 @@ inline void copyPixels(uint8_t* dest, int dstPitch, const uint8_t* src,
       src += srcPitch;
     }
   }
+}
+
+template <
+    typename T_TO, typename T_FROM,
+    typename = std::enable_if_t<sizeof(T_TO) == sizeof(T_FROM)>,
+    typename = std::enable_if_t<std::is_trivially_constructible<T_TO>::value>,
+    typename = std::enable_if_t<std::is_trivially_copyable<T_TO>::value>,
+    typename = std::enable_if_t<std::is_trivially_copyable<T_FROM>::value>>
+inline T_TO bit_cast(const T_FROM& from) noexcept {
+  T_TO to;
+  memcpy(&to, &from, sizeof(T_TO));
+  return to;
 }
 
 // only works for positive values and zero
@@ -199,6 +212,14 @@ inline std::vector<std::string> splitString(const std::string& input,
   }
 
   return result;
+}
+
+template <int N, typename T>
+inline std::array<T, N> to_array(const std::vector<T>& v) {
+  std::array<T, N> a;
+  assert(v.size() == N && "Size mismatch");
+  std::move(v.begin(), v.end(), a.begin());
+  return a;
 }
 
 enum class BitOrder {

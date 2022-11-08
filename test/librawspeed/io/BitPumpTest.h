@@ -168,23 +168,23 @@ template <typename Pump, typename PatternTag> struct Pattern {};
 
 struct ZerosTag;
 template <typename Pump> struct Pattern<Pump, ZerosTag> {
-  static const std::array<uint8_t, 4> Data;
+  static const std::array<uint8_t, 8> Data;
   static uint32_t element(int index) { return 0U; }
   static uint32_t data(int len) { return 0U; }
 };
 template <typename Pump>
-const std::array<uint8_t, 4> Pattern<Pump, ZerosTag>::Data{{/* zero-init */}};
+const std::array<uint8_t, 8> Pattern<Pump, ZerosTag>::Data{{/* zero-init */}};
 
 struct OnesTag;
 template <typename Pump> struct Pattern<Pump, OnesTag> {
-  static const std::array<uint8_t, 4> Data;
+  static const std::array<uint8_t, 8> Data;
   static uint32_t element(int index) { return 1U; }
   static uint32_t data(int len);
 };
 
 struct InvOnesTag;
 template <typename Pump> struct Pattern<Pump, InvOnesTag> {
-  static const std::array<uint8_t, 4> Data;
+  static const std::array<uint8_t, 8> Data;
   static uint32_t element(int index) { return 1U << (index - 1U); }
   static uint32_t data(int len);
 };

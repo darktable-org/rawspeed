@@ -58,7 +58,7 @@ bool CrwDecoder::isCRW(const Buffer& input) {
 
 CrwDecoder::CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD,
                        const Buffer& file)
-    : RawDecoder(file), mRootIFD(move(rootIFD)) {}
+    : RawDecoder(file), mRootIFD(std::move(rootIFD)) {}
 
 RawImage CrwDecoder::decodeRawInternal() {
   const CiffEntry* rawData = mRootIFD->getEntry(CiffTag::RAWDATA);

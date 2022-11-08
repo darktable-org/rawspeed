@@ -1600,7 +1600,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="Canon" model="Canon EOS M2" supported="no-samples">
+	<Camera make="Canon" model="Canon EOS M2">
 		<ID make="Canon" model="EOS M2">Canon EOS M2</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -3095,7 +3095,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="NIKON CORPORATION" model="NIKON D1H" mode="12bit-uncompressed" supported="no-samples">
+	<Camera make="NIKON CORPORATION" model="NIKON D1H" mode="12bit-uncompressed">
 		<ID make="Nikon" model="D1H">Nikon D1H</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">BLUE</Color>
@@ -3191,7 +3191,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="NIKON CORPORATION" model="NIKON D2H" mode="12bit-compressed" supported="no-samples">
+	<Camera make="NIKON CORPORATION" model="NIKON D2H" mode="12bit-compressed">
 		<ID make="Nikon" model="D2H">Nikon D2H</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
@@ -3209,7 +3209,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="NIKON CORPORATION" model="NIKON D2H" mode="12bit-uncompressed" supported="no-samples">
+	<Camera make="NIKON CORPORATION" model="NIKON D2H" mode="12bit-uncompressed">
 		<ID make="Nikon" model="D2H">Nikon D2H</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
@@ -3407,7 +3407,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="NIKON CORPORATION" model="NIKON D3S" mode="14bit-compressed" supported="no-samples">
+	<Camera make="NIKON CORPORATION" model="NIKON D3S" mode="14bit-compressed">
 		<ID make="Nikon" model="D3S">Nikon D3S</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -3425,7 +3425,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="NIKON CORPORATION" model="NIKON D3S" mode="14bit-uncompressed" supported="no-samples">
+	<Camera make="NIKON CORPORATION" model="NIKON D3S" mode="14bit-uncompressed">
 		<ID make="Nikon" model="D3S">Nikon D3S</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -3443,7 +3443,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="NIKON CORPORATION" model="NIKON D3S" mode="12bit-compressed" supported="no-samples">
+	<Camera make="NIKON CORPORATION" model="NIKON D3S" mode="12bit-compressed">
 		<ID make="Nikon" model="D3S">Nikon D3S</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -3461,7 +3461,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="NIKON CORPORATION" model="NIKON D3S" mode="12bit-uncompressed" supported="no-samples">
+	<Camera make="NIKON CORPORATION" model="NIKON D3S" mode="12bit-uncompressed">
 		<ID make="Nikon" model="D3S">Nikon D3S</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -6059,7 +6059,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="NIKON CORPORATION" model="NIKON 1 J4" mode="12bit-compressed" decoder_version="4" supported="no-samples">
+	<Camera make="NIKON CORPORATION" model="NIKON 1 J4" mode="12bit-compressed" decoder_version="4">
 		<ID make="Nikon" model="1 J4">Nikon 1 J4</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -6113,7 +6113,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="NIKON CORPORATION" model="NIKON 1 S1" mode="12bit-compressed" decoder_version="4" supported="no-samples">
+	<Camera make="NIKON CORPORATION" model="NIKON 1 S1" mode="12bit-compressed" decoder_version="4">
 		<ID make="Nikon" model="1 S1">Nikon 1 S1</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -6510,7 +6510,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="NIKON" model="COOLPIX P7700" mode="12bit-compressed" decoder_version="5" supported="no-samples">
+	<Camera make="NIKON" model="COOLPIX P7700" mode="12bit-compressed" decoder_version="5">
 		<ID make="Nikon" model="Coolpix P7700">Nikon Coolpix P7700</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -6950,7 +6950,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="OLYMPUS OPTICAL CO.,LTD" model="E-10" supported="no-samples">
+	<Camera make="OLYMPUS OPTICAL CO.,LTD" model="E-10">
 		<ID make="Olympus" model="E-10">Olympus E-10</ID>
 		<Crop x="0" y="0" width="2256" height="1684"/>
 		<Sensor black="32" white="1023"/>
@@ -7360,7 +7360,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="OLYMPUS IMAGING CORP." model="SP570UZ" supported="no-samples">
+	<Camera make="OLYMPUS IMAGING CORP." model="SP570UZ">
 		<ID make="Olympus" model="SP570UZ">Olympus SP570UZ</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="4095"/>
@@ -7717,7 +7717,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="Panasonic" model="DMC-G2" mode="4:3" supported="no-samples">
+	<Camera make="Panasonic" model="DMC-G2" mode="4:3">
 		<ID make="Panasonic" model="DMC-G2">Panasonic DMC-G2</ID>
 		<Crop x="0" y="0" width="-44" height="0"/>
 		<Sensor black="0" white="3900"/>
@@ -7729,7 +7729,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="Panasonic" model="DMC-G2" mode="3:2" supported="no-samples">
+	<Camera make="Panasonic" model="DMC-G2" mode="3:2">
 		<ID make="Panasonic" model="DMC-G2">Panasonic DMC-G2</ID>
 		<Crop x="0" y="0" width="-44" height="0"/>
 		<Sensor black="0" white="3900"/>
@@ -7741,7 +7741,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="Panasonic" model="DMC-G2" mode="16:9" supported="no-samples">
+	<Camera make="Panasonic" model="DMC-G2" mode="16:9">
 		<ID make="Panasonic" model="DMC-G2">Panasonic DMC-G2</ID>
 		<Crop x="0" y="0" width="-44" height="0"/>
 		<Sensor black="0" white="3900"/>
@@ -7753,7 +7753,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="Panasonic" model="DMC-G2" mode="1:1" supported="no-samples">
+	<Camera make="Panasonic" model="DMC-G2" mode="1:1">
 		<ID make="Panasonic" model="DMC-G2">Panasonic DMC-G2</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="3900"/>
@@ -7765,7 +7765,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="Panasonic" model="DMC-G2" supported="no-samples">
+	<Camera make="Panasonic" model="DMC-G2">
 		<ID make="Panasonic" model="DMC-G2">Panasonic DMC-G2</ID>
 		<Crop x="0" y="0" width="-44" height="0"/>
 		<Sensor black="0" white="3900"/>
@@ -10292,7 +10292,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="LEICA" model="D-LUX 6" supported="no-samples">
+	<Camera make="LEICA" model="D-LUX 6">
 		<ID make="Leica" model="D-LUX 6">Leica D-LUX 6</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
@@ -10310,7 +10310,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="LEICA" model="D-LUX 6" mode="4:3" supported="no-samples">
+	<Camera make="LEICA" model="D-LUX 6" mode="4:3">
 		<ID make="Leica" model="D-LUX 6">Leica D-LUX 6</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
@@ -10328,7 +10328,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="LEICA" model="D-LUX 6" mode="3:2" supported="no-samples">
+	<Camera make="LEICA" model="D-LUX 6" mode="3:2">
 		<ID make="Leica" model="D-LUX 6">Leica D-LUX 6</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
@@ -10346,7 +10346,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="LEICA" model="D-LUX 6" mode="16:9" supported="no-samples">
+	<Camera make="LEICA" model="D-LUX 6" mode="16:9">
 		<ID make="Leica" model="D-LUX 6">Leica D-LUX 6</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
@@ -10364,7 +10364,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="LEICA" model="D-LUX 6" mode="1:1" supported="no-samples">
+	<Camera make="LEICA" model="D-LUX 6" mode="1:1">
 		<ID make="Leica" model="D-LUX 6">Leica D-LUX 6</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
@@ -11672,7 +11672,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="PENTAX Corporation" model="PENTAX K200D" supported="no-samples">
+	<Camera make="PENTAX Corporation" model="PENTAX K200D">
 		<ID make="Pentax" model="K200D">Pentax K200D</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -12000,7 +12000,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="PENTAX" model="PENTAX K200D" supported="no-samples">
+	<Camera make="PENTAX" model="PENTAX K200D">
 		<ID make="Pentax" model="K200D">Pentax K200D</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -12018,7 +12018,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="PENTAX" model="PENTAX K2000" supported="no-samples">
+	<Camera make="PENTAX" model="PENTAX K2000">
 		<ID make="Pentax" model="K2000">Pentax K2000</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -12147,7 +12147,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="SAMSUNG" model="NX5" supported="no-samples">
+	<Camera make="SAMSUNG" model="NX5">
 		<ID make="Samsung" model="NX5">Samsung NX5</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">BLUE</Color>
@@ -12168,7 +12168,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="SAMSUNG" model="NX10" supported="no-samples">
+	<Camera make="SAMSUNG" model="NX10">
 		<ID make="Samsung" model="NX10">Samsung NX10</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">BLUE</Color>
@@ -12190,7 +12190,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="SAMSUNG" model="NX11" supported="no-samples">
+	<Camera make="SAMSUNG" model="NX11">
 		<ID make="Samsung" model="NX11">Samsung NX11</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">BLUE</Color>
@@ -12275,7 +12275,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="SAMSUNG" model="NX20" decoder_version="2" supported="no-samples">
+	<Camera make="SAMSUNG" model="NX20" decoder_version="2">
 		<ID make="Samsung" model="NX20">Samsung NX20</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
@@ -12338,7 +12338,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="SAMSUNG" model="NX2000" decoder_version="3" supported="no-samples">
+	<Camera make="SAMSUNG" model="NX2000" decoder_version="3">
 		<ID make="Samsung" model="NX2000">Samsung NX2000</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
@@ -12906,7 +12906,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="SONY" model="DSLR-A380" supported="no-samples">
+	<Camera make="SONY" model="DSLR-A380">
 		<ID make="Sony" model="DSLR-A380">Sony DSLR-A380</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
@@ -12996,7 +12996,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="SONY" model="DSLR-A560" supported="no-samples">
+	<Camera make="SONY" model="DSLR-A560">
 		<ID make="Sony" model="DSLR-A560">Sony DSLR-A560</ID>
 		<CFA width="2" height="2">
 			<Color x="1" y="1">BLUE</Color>
@@ -14043,7 +14043,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="FUJIFILM" model="FinePix S6000fd" supported="no-samples">
+	<Camera make="FUJIFILM" model="FinePix S6000fd">
 		<ID make="Fujifilm" model="FinePix S6000fd">Fujifilm FinePix S6000fd</ID>
 		<CFA2 width="2" height="2">
 			<ColorRow y="0">GB</ColorRow>
@@ -14515,7 +14515,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="FUJIFILM" model="FinePix HS50EXR" supported="no-samples">
+	<Camera make="FUJIFILM" model="FinePix HS50EXR">
 		<ID make="Fujifilm" model="FinePix HS50EXR">Fujifilm FinePix HS50EXR</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">BLUE</Color>
@@ -16823,6 +16823,9 @@
 	<Camera make="Leica Camera AG" model="LEICA M (Typ 240)" mode="dng">
 		<ID make="Leica" model="M (Typ 240)">LEICA M (Typ 240)</ID>
 	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA M MONOCHROM (Typ 246)" mode="dng">
+		<ID make="Leica" model="M Monochrom (Typ 246)">LEICA M MONOCHROM (Typ 246)</ID>
+	</Camera>
 	<Camera make="LEICA CAMERA AG" model="LEICA X2" mode="dng">
 		<ID make="Leica" model="X2">LEICA X2</ID>
 		<ColorMatrices>
@@ -16847,9 +16850,6 @@
 	</Camera>
 	<Camera make="RICOH IMAGING COMPANY, LTD." model="GR" mode="dng">
 		<ID make="Ricoh" model="GR">GR</ID>
-	</Camera>
-	<Camera make="RICOH" model="GR DIGITAL 2" mode="dng">
-		<ID make="Ricoh" model="GR II">Ricoh GR DIGITAL 2</ID>
 	</Camera>
 	<Camera make="RICOH IMAGING COMPANY, LTD." model="GR II" mode="dng">
 		<ID make="Ricoh" model="GR II">Ricoh GR II</ID>

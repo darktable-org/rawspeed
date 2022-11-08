@@ -64,7 +64,7 @@ void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs) {
       // used anywhere right now, let's not
       //   add(parseDngPrivateData(ifds, t.get()));
       // but just add them as entries. (e.g. ArwDecoder uses WB from them)
-      add(move(t));
+      add(std::move(t));
       break;
 
     case TiffTag::MAKERNOTE:
@@ -80,11 +80,11 @@ void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs) {
       break;
 
     default:
-      add(move(t));
+      add(std::move(t));
     }
   } catch (const RawspeedException&) { // Unparsable private data are added as
                                        // entries
-    add(move(t));
+    add(std::move(t));
   }
 }
 
@@ -281,12 +281,12 @@ void TiffIFD::add(TiffIFDOwner subIFD) {
   // We are good, and actually can add this sub-IFD, right?
   subIFD->recursivelyCheckSubIFDs(0);
 
-  subIFDs.push_back(move(subIFD));
+  subIFDs.push_back(std::move(subIFD));
 }
 
 void TiffIFD::add(TiffEntryOwner entry) {
   entry->parent = this;
-  entries[entry->tag] = move(entry);
+  entries[entry->tag] = std::move(entry);
 }
 
 TiffEntry* TiffIFD::getEntry(TiffTag tag) const {

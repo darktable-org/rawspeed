@@ -11,6 +11,7 @@ add_subdirectory(HuffmanTable)
 
 set(DECOMPRESSORS
   "Cr2Decompressor"
+  "Cr2LJpegDecoder"
   "CrwDecompressor"
   "DummyLJpegDecompressor"
   "FujiDecompressor"
@@ -19,9 +20,9 @@ set(DECOMPRESSORS
   "LJpegDecompressor"
   "NikonDecompressor"
   "OlympusDecompressor"
-  "PanasonicDecompressorV4"
-  "PanasonicDecompressorV5"
-  "PanasonicDecompressorV6"
+  "PanasonicV4Decompressor"
+  "PanasonicV5Decompressor"
+  "PanasonicV6Decompressor"
   "PentaxDecompressor"
   "PhaseOneDecompressor"
   "SamsungV0Decompressor"

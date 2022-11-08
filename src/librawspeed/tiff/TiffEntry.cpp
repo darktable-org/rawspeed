@@ -22,6 +22,7 @@
 
 #include "tiff/TiffEntry.h"
 #include "common/Common.h"               // for uint32_t, int16_t, uint16_t
+#include "common/NotARational.h"
 #include "parsers/TiffParserException.h" // for ThrowTPE
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
 #include "tiff/TiffTag.h"                // for TiffTag, DNGPRIVATEDATA
@@ -124,8 +125,21 @@ bool __attribute__((pure)) TiffEntry::isFloat() const {
   }
 }
 
+bool __attribute__((pure)) TiffEntry::isRational() const {
+  switch (type) {
+  case TiffDataType::SHORT:
+  case TiffDataType::LONG:
+  case TiffDataType::RATIONAL:
+    return true;
+  default:
+    return false;
+  }
+}
+
 bool __attribute__((pure)) TiffEntry::isSRational() const {
   switch (type) {
+  case TiffDataType::SSHORT:
+  case TiffDataType::SLONG:
   case TiffDataType::SRATIONAL:
     return true;
   default:
@@ -181,18 +195,36 @@ uint32_t TiffEntry::getU32(uint32_t index) const {
 int32_t TiffEntry::getI32(uint32_t index) const {
   if (type == TiffDataType::SSHORT)
     return getI16(index);
-  if (!(type == TiffDataType::SLONG || type == TiffDataType::UNDEFINED))
+  if (type != TiffDataType::SLONG && type != TiffDataType::UNDEFINED)
     ThrowTPE("Wrong type %u encountered. Expected SLong or Undefined on 0x%x",
              static_cast<unsigned>(type), static_cast<unsigned>(tag));
 
   return data.peek<int32_t>(index);
 }
 
-std::pair<int, int> TiffEntry::getSRational(uint32_t index) const {
+NotARational<unsigned> TiffEntry::getRational(uint32_t index) const {
+  if (!isRational()) {
+    ThrowTPE("Wrong type 0x%x encountered. Expected Rational",
+             static_cast<unsigned>(type));
+  }
+
+  if (type != TiffDataType::RATIONAL)
+    return {getU32(index), 1};
+
+  auto a = static_cast<unsigned>(getU32(index * 2));
+  auto b = static_cast<unsigned>(getU32(index * 2 + 1));
+  return {a, b};
+}
+
+NotARational<int> TiffEntry::getSRational(uint32_t index) const {
   if (!isSRational()) {
     ThrowTPE("Wrong type 0x%x encountered. Expected SRational",
              static_cast<unsigned>(type));
   }
+
+  if (type != TiffDataType::SRATIONAL)
+    return {getI32(index), 1};
+
   auto a = static_cast<int>(getU32(index * 2));
   auto b = static_cast<int>(getU32(index * 2 + 1));
   return {a, b};
@@ -217,13 +249,12 @@ float TiffEntry::getFloat(uint32_t index) const {
   case TiffDataType::SSHORT:
     return static_cast<float>(getI32(index));
   case TiffDataType::RATIONAL: {
-    uint32_t a = getU32(index * 2);
-    uint32_t b = getU32(index * 2 + 1);
-    return b != 0 ? static_cast<float>(a) / b : 0.0F;
+    auto r = getRational(index);
+    return r.den ? static_cast<float>(r) : 0.0F;
   }
   case TiffDataType::SRATIONAL: {
-    auto [a, b] = getSRational(index);
-    return b ? static_cast<float>(a) / b : 0.0F;
+    auto r = getSRational(index);
+    return r.den ? static_cast<float>(r) : 0.0F;
   }
   default:
     // unreachable

@@ -27,6 +27,7 @@
 #include "common/CroppedArray2DRef.h"  // for CroppedArray2DRef
 #include "common/ErrorLog.h"           // for ErrorLog
 #include "common/Mutex.h"              // for Mutex
+#include "common/NotARational.h"       // for NotARational
 #include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
 #include "common/TableLookUp.h"        // for TableLookUp
 #include "metadata/BlackArea.h"        // for BlackArea
@@ -79,10 +80,10 @@ public:
   // White balance coefficients of the image
   std::array<float, 4> wbCoeffs = {{NAN, NAN, NAN, NAN}};
 
-  // If not empty, a divisor-10'000 row-major color matrix,
+  // If not empty, a row-major color matrix,
   // that converts XYZ values to reference camera native color space values,
   // under calibration illuminant 21 (D65).
-  std::vector<int> colorMatrix;
+  std::vector<NotARational<int>> colorMatrix;
 
   // How many pixels far down the left edge and far up the right edge the image
   // corners are when the image is rotated 45 degrees in Fuji rotated sensors.
@@ -115,21 +116,24 @@ public:
   void checkRowIsInitialized(int row) const;
   void checkMemIsInitialized() const;
   void destroyData();
-  void blitFrom(const RawImage& src, const iPoint2D& srcPos,
-                const iPoint2D& size, const iPoint2D& destPos);
+
   [[nodiscard]] rawspeed::RawImageType getDataType() const { return dataType; }
+
   [[nodiscard]] Array2DRef<uint16_t>
   getU16DataAsUncroppedArray2DRef() const noexcept;
   [[nodiscard]] CroppedArray2DRef<uint16_t>
   getU16DataAsCroppedArray2DRef() const noexcept;
-  [[nodiscard]] uint8_t* getData() const;
-  uint8_t*
-  getData(uint32_t x,
-          uint32_t y); // Not super fast, but safe. Don't use per pixel.
-  [[nodiscard]] uint8_t* getDataUncropped(uint32_t x, uint32_t y) const;
+  [[nodiscard]] Array2DRef<float>
+  getF32DataAsUncroppedArray2DRef() const noexcept;
+  [[nodiscard]] CroppedArray2DRef<float>
+  getF32DataAsCroppedArray2DRef() const noexcept;
+
+  // WARNING: this is most certainly not what you want!
+  [[nodiscard]] Array2DRef<std::byte>
+  getByteDataAsUncroppedArray2DRef() const noexcept;
 
   void subFrame(iRectangle2D cropped);
-  void clearArea(iRectangle2D area, uint8_t value = 0);
+  void clearArea(iRectangle2D area) const;
   [[nodiscard]] iPoint2D __attribute__((pure)) getUncroppedDim() const;
   [[nodiscard]] iPoint2D __attribute__((pure)) getCropOffset() const;
   virtual void scaleBlackWhite() = 0;
@@ -139,7 +143,6 @@ public:
   void sixteenBitLookup();
   void transferBadPixelsToMap() REQUIRES(!mBadPixelMutex);
   void fixBadPixels() REQUIRES(!mBadPixelMutex);
-  void expandBorder(iRectangle2D validData);
   void setTable(const std::vector<uint16_t>& table_, bool dither);
   void setTable(std::unique_ptr<TableLookUp> t);
 
@@ -178,7 +181,7 @@ private:
 protected:
   RawImageType dataType;
   RawImageData();
-  RawImageData(const iPoint2D& dim, int bpp, int cpp = 1);
+  RawImageData(RawImageType type, const iPoint2D& dim, int bpp, int cpp = 1);
   virtual void scaleValues(int start_y, int end_y) = 0;
   virtual void doLookup(int start_y, int end_y) = 0;
   virtual void fixBadPixel(uint32_t x, uint32_t y, int component = 0) = 0;
@@ -287,6 +290,33 @@ inline CroppedArray2DRef<uint16_t>
 RawImageData::getU16DataAsCroppedArray2DRef() const noexcept {
   return {getU16DataAsUncroppedArray2DRef(), cpp * mOffset.x, mOffset.y,
           cpp * dim.x, dim.y};
+}
+
+inline Array2DRef<float>
+RawImageData::getF32DataAsUncroppedArray2DRef() const noexcept {
+  assert(dataType == RawImageType::F32 &&
+         "Attempting to access integer buffer as float.");
+  assert(data && "Data not yet allocated.");
+  return {reinterpret_cast<float*>(data), cpp * uncropped_dim.x,
+          uncropped_dim.y, static_cast<int>(pitch / sizeof(float))};
+}
+
+inline CroppedArray2DRef<float>
+RawImageData::getF32DataAsCroppedArray2DRef() const noexcept {
+  return {getF32DataAsUncroppedArray2DRef(), cpp * mOffset.x, mOffset.y,
+          cpp * dim.x, dim.y};
+}
+
+inline Array2DRef<std::byte>
+RawImageData::getByteDataAsUncroppedArray2DRef() const noexcept {
+  switch (dataType) {
+  case RawImageType::UINT16:
+    return getU16DataAsUncroppedArray2DRef();
+  case RawImageType::F32:
+    return getF32DataAsUncroppedArray2DRef();
+  default:
+    __builtin_unreachable();
+  }
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,

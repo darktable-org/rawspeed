@@ -39,19 +39,83 @@
 // IWYU pragma: no_include <ext/alloc_traits.h>
 // IWYU pragma: no_include <type_traits>
 
+#ifndef NDEBUG
+#include <exception>
+#endif
+
 using std::vector;
 using std::fill_n;
 using std::make_pair;
 
 namespace rawspeed {
 
+namespace {
+
+template <typename T>
+iRectangle2D getImageCropAsRectangle(const CroppedArray2DRef<T>& img) {
+  return {{img.offsetCols, img.offsetRows},
+          {img.croppedWidth, img.croppedHeight}};
+}
+
+iRectangle2D getImageCropAsRectangle(const RawImage& ri) {
+  iRectangle2D rect;
+  switch (ri->getDataType()) {
+  case RawImageType::UINT16:
+    rect = getImageCropAsRectangle(ri->getU16DataAsCroppedArray2DRef());
+    break;
+  case RawImageType::F32:
+    rect = getImageCropAsRectangle(ri->getF32DataAsCroppedArray2DRef());
+    break;
+  }
+  for (int* col : {&rect.pos.x, &rect.dim.x}) {
+    assert(*col % ri->getCpp() == 0 && "Column is width * cpp");
+    *col /= ri->getCpp();
+  }
+  return rect;
+}
+
+// FIXME: extract into `RawImage`?
+template <typename T>
+CroppedArray2DRef<T> getDataAsCroppedArray2DRef(const RawImage& ri) {
+  if constexpr (std::is_same<T, uint16_t>())
+    return ri->getU16DataAsCroppedArray2DRef();
+  if constexpr (std::is_same<T, float>())
+    return ri->getF32DataAsCroppedArray2DRef();
+  __builtin_unreachable();
+}
+
+} // namespace
+
 class DngOpcodes::DngOpcode {
+#ifndef NDEBUG
+  const iRectangle2D integrated_subimg;
+  bool setup_was_called = false;
+#endif
+
 public:
-  virtual ~DngOpcode() = default;
+  explicit DngOpcode(const iRectangle2D& integrated_subimg_)
+#ifndef NDEBUG
+      : integrated_subimg(integrated_subimg_)
+#endif
+  {
+    assert(std::uncaught_exceptions() == 0 &&
+           "Creating DngOpcode during call stack unwinding?");
+  }
+
+  virtual ~DngOpcode() {
+    assert((std::uncaught_exceptions() > 0 || setup_was_called) &&
+           "Derived classes did not call our setup()!");
+  }
 
   // Will be called once before processing.
   // Can be used for preparing pre-calculated values, etc.
   virtual void setup(const RawImage& ri) {
+#ifndef NDEBUG
+    setup_was_called = true;
+#endif
+    assert(integrated_subimg == getImageCropAsRectangle(ri) &&
+           "Current image sub-crop does not match the expected one!");
+
     // NOP by default. child class shall override this if needed.
   }
 
@@ -65,12 +129,15 @@ class DngOpcodes::FixBadPixelsConstant final : public DngOpcodes::DngOpcode {
   uint32_t value;
 
 public:
-  explicit FixBadPixelsConstant(const RawImage& ri, ByteStream& bs)
-      : value(bs.getU32()) {
+  explicit FixBadPixelsConstant(const RawImage& ri, ByteStream& bs,
+                                iRectangle2D& integrated_subimg_)
+      : DngOpcodes::DngOpcode(integrated_subimg_), value(bs.getU32()) {
     bs.getU32(); // Bayer Phase not used
   }
 
   void setup(const RawImage& ri) override {
+    DngOpcodes::DngOpcode::setup(ri);
+
     // These limitations are present within the DNG SDK as well.
     if (ri->getDataType() != RawImageType::UINT16)
       ThrowRDE("Only 16 bit images supported");
@@ -99,10 +166,10 @@ class DngOpcodes::ROIOpcode : public DngOpcodes::DngOpcode {
   iRectangle2D roi;
 
 protected:
-  explicit ROIOpcode(const RawImage& ri, ByteStream& bs, bool minusOne) {
-    const iRectangle2D fullImage =
-        minusOne ? iRectangle2D(0, 0, ri->dim.x - 1, ri->dim.y - 1)
-                 : iRectangle2D(0, 0, ri->dim.x, ri->dim.y);
+  explicit ROIOpcode(const RawImage& ri, ByteStream& bs,
+                     iRectangle2D& integrated_subimg_)
+      : DngOpcodes::DngOpcode(integrated_subimg_) {
+    const iRectangle2D subImage = iRectangle2D({0, 0}, integrated_subimg_.dim);
 
     uint32_t top = bs.getU32();
     uint32_t left = bs.getU32();
@@ -112,18 +179,18 @@ protected:
     const iPoint2D topLeft(left, top);
     const iPoint2D bottomRight(right, bottom);
 
-    if (!(fullImage.isPointInsideInclusive(topLeft) &&
-          fullImage.isPointInsideInclusive(bottomRight) &&
+    if (!(subImage.isPointInsideInclusive(topLeft) &&
+          subImage.isPointInsideInclusive(bottomRight) &&
           bottomRight >= topLeft)) {
       ThrowRDE("Rectangle (%u, %u, %u, %u) not inside image (%u, %u, %u, %u).",
                topLeft.x, topLeft.y, bottomRight.x, bottomRight.y,
-               fullImage.getTopLeft().x, fullImage.getTopLeft().y,
-               fullImage.getBottomRight().x, fullImage.getBottomRight().y);
+               subImage.getTopLeft().x, subImage.getTopLeft().y,
+               subImage.getBottomRight().x, subImage.getBottomRight().y);
     }
 
     roi.setTopLeft(topLeft);
     roi.setBottomRightAbsolute(bottomRight);
-    assert(roi.isThisInside(fullImage));
+    assert(roi.isThisInside(subImage));
   }
 
   [[nodiscard]] const iRectangle2D& __attribute__((pure)) getRoi() const {
@@ -135,8 +202,11 @@ protected:
 
 class DngOpcodes::DummyROIOpcode final : public ROIOpcode {
 public:
-  explicit DummyROIOpcode(const RawImage& ri, ByteStream& bs)
-      : ROIOpcode(ri, bs, true) {}
+  explicit DummyROIOpcode(const RawImage& ri, ByteStream& bs,
+                          iRectangle2D& integrated_subimg_)
+      : ROIOpcode(ri, bs, integrated_subimg_) {
+    DummyROIOpcode::setup(ri);
+  }
 
   [[nodiscard]] const iRectangle2D& __attribute__((pure)) getRoi() const {
     return ROIOpcode::getRoi();
@@ -155,9 +225,13 @@ class DngOpcodes::FixBadPixelsList final : public DngOpcodes::DngOpcode {
   std::vector<uint32_t> badPixels;
 
 public:
-  explicit FixBadPixelsList(const RawImage& ri, ByteStream& bs) {
-    const iRectangle2D fullImage(0, 0, ri->getUncroppedDim().x - 1,
-                                 ri->getUncroppedDim().y - 1);
+  explicit FixBadPixelsList(const RawImage& ri, ByteStream& bs,
+                            iRectangle2D& integrated_subimg_)
+      : DngOpcodes::DngOpcode(integrated_subimg_) {
+    // Although it is not really obvious from the spec,
+    // the coordinates appear to be global/crop-independent,
+    // and apply to the source uncropped image.
+    const iRectangle2D fullImage({0, 0}, ri->getUncroppedDim());
 
     bs.getU32(); // Skip phase - we don't care
     auto badPointCount = bs.getU32();
@@ -175,8 +249,7 @@ public:
       auto y = bs.getU32();
       auto x = bs.getU32();
 
-      if (const iPoint2D badPoint(x, y);
-          !fullImage.isPointInsideInclusive(badPoint))
+      if (const iPoint2D badPoint(x, y); !fullImage.isPointInside(badPoint))
         ThrowRDE("Bad point not inside image.");
 
       badPixels.emplace_back(y << 16 | x);
@@ -184,16 +257,18 @@ public:
 
     // Read rects
     for (auto i = 0U; i < badRectCount; ++i) {
-      const DummyROIOpcode dummy(ri, bs);
+      iRectangle2D fullImage_ = fullImage;
+      const DummyROIOpcode dummy(ri, bs, fullImage_);
 
       const iRectangle2D badRect = dummy.getRoi();
       assert(badRect.isThisInside(fullImage));
 
-      auto area = (1 + badRect.getHeight()) * (1 + badRect.getWidth());
+      auto area = badRect.getHeight() * badRect.getWidth();
       badPixels.reserve(badPixels.size() + area);
-      for (auto y = badRect.getTop(); y <= badRect.getBottom(); ++y) {
-        for (auto x = badRect.getLeft(); x <= badRect.getRight(); ++x) {
-          badPixels.emplace_back(y << 16 | x);
+      for (auto y = 0; y < badRect.getHeight(); ++y) {
+        for (auto x = 0; x < badRect.getWidth(); ++x) {
+          badPixels.emplace_back((badRect.getTop() + y) << 16 |
+                                 (badRect.getLeft() + x));
         }
       }
     }
@@ -210,8 +285,12 @@ public:
 
 class DngOpcodes::TrimBounds final : public ROIOpcode {
 public:
-  explicit TrimBounds(const RawImage& ri, ByteStream& bs)
-      : ROIOpcode(ri, bs, false) {}
+  explicit TrimBounds(const RawImage& ri, ByteStream& bs,
+                      iRectangle2D& integrated_subimg_)
+      : ROIOpcode(ri, bs, integrated_subimg_) {
+    integrated_subimg_.pos += getRoi().pos;
+    integrated_subimg_.dim = getRoi().dim;
+  }
 
   void apply(const RawImage& ri) override { ri->subFrame(getRoi()); }
 };
@@ -225,8 +304,10 @@ class DngOpcodes::PixelOpcode : public ROIOpcode {
   uint32_t colPitch;
 
 protected:
-  explicit PixelOpcode(const RawImage& ri, ByteStream& bs)
-      : ROIOpcode(ri, bs, false), firstPlane(bs.getU32()), planes(bs.getU32()) {
+  explicit PixelOpcode(const RawImage& ri, ByteStream& bs,
+                       iRectangle2D& integrated_subimg_)
+      : ROIOpcode(ri, bs, integrated_subimg_), firstPlane(bs.getU32()),
+        planes(bs.getU32()) {
 
     if (planes == 0 || firstPlane > ri->getCpp() || planes > ri->getCpp() ||
         firstPlane + planes > ri->getCpp()) {
@@ -244,21 +325,26 @@ protected:
       ThrowRDE("Invalid pitch");
   }
 
+  [[nodiscard]] iPoint2D __attribute__((pure)) getPitch() const {
+    return {static_cast<int>(colPitch), static_cast<int>(rowPitch)};
+  }
+
   // traverses the current ROI and applies the operation OP to each pixel,
   // i.e. each pixel value v is replaced by op(x, y, v), where x/y are the
   // coordinates of the pixel value v.
   template <typename T, typename OP> void applyOP(const RawImage& ri, OP op) {
+    const CroppedArray2DRef<T> img = getDataAsCroppedArray2DRef<T>(ri);
     int cpp = ri->getCpp();
     const iRectangle2D& ROI = getRoi();
-    for (auto y = ROI.getTop(); y < ROI.getBottom(); y += rowPitch) {
-      auto* src = reinterpret_cast<T*>(ri->getData(0, y));
-      // Add offset, so this is always first plane
-      src += firstPlane;
-      // FIXME: is op() really supposed to receive global image coordinates,
-      // and not [0..ROI.getHeight()-1][0..ROI.getWidth()-1] ?
-      for (auto x = ROI.getLeft(); x < ROI.getRight(); x += colPitch) {
-        for (auto p = 0U; p < planes; ++p)
-          src[x * cpp + p] = op(x, y, src[x * cpp + p]);
+    const iPoint2D numAffected(roundUpDivision(getRoi().dim.x, colPitch),
+                               roundUpDivision(getRoi().dim.y, rowPitch));
+    for (int y = 0; y < numAffected.y; ++y) {
+      for (int x = 0; x < numAffected.x; ++x) {
+        for (auto p = 0U; p < planes; ++p) {
+          T& pixel = img(ROI.getTop() + rowPitch * y,
+                         firstPlane + (ROI.getLeft() + colPitch * x) * cpp + p);
+          pixel = op(x, y, pixel);
+        }
       }
     }
   }
@@ -270,11 +356,13 @@ class DngOpcodes::LookupOpcode : public PixelOpcode {
 protected:
   vector<uint16_t> lookup;
 
-  explicit LookupOpcode(const RawImage& ri, ByteStream& bs)
-      : PixelOpcode(ri, bs), lookup(65536) {}
+  explicit LookupOpcode(const RawImage& ri, ByteStream& bs,
+                        iRectangle2D& integrated_subimg_)
+      : PixelOpcode(ri, bs, integrated_subimg_), lookup(65536) {}
 
   void setup(const RawImage& ri) override {
     PixelOpcode::setup(ri);
+
     if (ri->getDataType() != RawImageType::UINT16)
       ThrowRDE("Only 16 bit images supported");
   }
@@ -290,7 +378,9 @@ protected:
 
 class DngOpcodes::TableMap final : public LookupOpcode {
 public:
-  explicit TableMap(const RawImage& ri, ByteStream& bs) : LookupOpcode(ri, bs) {
+  explicit TableMap(const RawImage& ri, ByteStream& bs,
+                    iRectangle2D& integrated_subimg_)
+      : LookupOpcode(ri, bs, integrated_subimg_) {
     auto count = bs.getU32();
 
     if (count == 0 || count > 65536)
@@ -308,8 +398,9 @@ public:
 
 class DngOpcodes::PolynomialMap final : public LookupOpcode {
 public:
-  explicit PolynomialMap(const RawImage& ri, ByteStream& bs)
-      : LookupOpcode(ri, bs) {
+  explicit PolynomialMap(const RawImage& ri, ByteStream& bs,
+                         iRectangle2D& integrated_subimg_)
+      : LookupOpcode(ri, bs, integrated_subimg_) {
     vector<double> polynomial;
 
     const auto polynomial_size = bs.getU32() + 1UL;
@@ -327,7 +418,9 @@ public:
       double val = polynomial[0];
       for (auto j = 1UL; j < polynomial.size(); ++j)
         val += polynomial[j] * pow(i / 65536.0, j);
-      lookup[i] = (clampBits(static_cast<int>(val * 65535.5), 16));
+      lookup[i] = std::clamp<double>(val * 65535.5,
+                                     std::numeric_limits<uint16_t>::min(),
+                                     std::numeric_limits<uint16_t>::max());
     }
   }
 };
@@ -345,7 +438,9 @@ public:
   };
 
 protected:
-  DeltaRowOrColBase(const RawImage& ri, ByteStream& bs) : PixelOpcode(ri, bs) {}
+  DeltaRowOrColBase(const RawImage& ri, ByteStream& bs,
+                    iRectangle2D& integrated_subimg_)
+      : PixelOpcode(ri, bs, integrated_subimg_) {}
 };
 
 template <typename S>
@@ -374,19 +469,20 @@ protected:
   // only meaningful for uint16_t images!
   virtual bool valueIsOk(float value) = 0;
 
-  DeltaRowOrCol(const RawImage& ri, ByteStream& bs, float f2iScale_)
-      : DeltaRowOrColBase(ri, bs), f2iScale(f2iScale_) {
+  DeltaRowOrCol(const RawImage& ri, ByteStream& bs,
+                iRectangle2D& integrated_subimg_, float f2iScale_)
+      : DeltaRowOrColBase(ri, bs, integrated_subimg_), f2iScale(f2iScale_) {
     const auto deltaF_count = bs.getU32();
     (void)bs.check(deltaF_count, 4);
 
     // See PixelOpcode::applyOP(). We will access deltaF/deltaI up to (excl.)
-    // either ROI.getRight() or ROI.getBottom() index. Thus, we need to have
+    // either ROI.getWidth() or ROI.getHeight() index. Thus, we need to have
     // either ROI.getRight() or ROI.getBottom() elements in there.
-    // FIXME: i guess not strictly true with pitch != 1.
-    if (const auto expectedSize =
-            S::select(getRoi().getRight(), getRoi().getBottom());
+    if (const auto expectedSize = roundUpDivision(
+            S::select(getRoi().getWidth(), getRoi().getHeight()),
+            S::select(getPitch().x, getPitch().y));
         expectedSize != deltaF_count) {
-      ThrowRDE("Got unexpected number of elements (%u), expected %u.",
+      ThrowRDE("Got unexpected number of elements (%lu), expected %u.",
                expectedSize, deltaF_count);
     }
 
@@ -413,8 +509,9 @@ class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol<S> {
   bool valueIsOk(float value) override { return std::abs(value) <= absLimit; }
 
 public:
-  explicit OffsetPerRowOrCol(const RawImage& ri, ByteStream& bs)
-      : DeltaRowOrCol<S>(ri, bs, 65535.0F),
+  explicit OffsetPerRowOrCol(const RawImage& ri, ByteStream& bs,
+                             iRectangle2D& integrated_subimg_)
+      : DeltaRowOrCol<S>(ri, bs, integrated_subimg_, 65535.0F),
         absLimit(double(std::numeric_limits<uint16_t>::max()) /
                  this->f2iScale) {}
 
@@ -450,8 +547,9 @@ class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol<S> {
   }
 
 public:
-  explicit ScalePerRowOrCol(const RawImage& ri, ByteStream& bs)
-      : DeltaRowOrCol<S>(ri, bs, 1024.0F),
+  explicit ScalePerRowOrCol(const RawImage& ri, ByteStream& bs,
+                            iRectangle2D& integrated_subimg_)
+      : DeltaRowOrCol<S>(ri, bs, integrated_subimg_, 1024.0F),
         maxLimit((double(std::numeric_limits<int>::max() - rounding) /
                   double(std::numeric_limits<uint16_t>::max())) /
                  this->f2iScale) {}
@@ -473,9 +571,7 @@ public:
 
 // ****************************************************************************
 
-DngOpcodes::DngOpcodes(const RawImage& ri, const TiffEntry* entry) {
-  ByteStream bs = entry->getData();
-
+DngOpcodes::DngOpcodes(const RawImage& ri, ByteStream bs) {
   // DNG opcodes are always stored in big-endian byte order.
   bs.setByteOrder(Endianness::big);
 
@@ -495,6 +591,8 @@ DngOpcodes::DngOpcodes(const RawImage& ri, const TiffEntry* entry) {
 
   // okay, we may indeed have that many opcodes in here. now let's reserve
   opcodes.reserve(opcode_count);
+
+  iRectangle2D integrated_subimg = getImageCropAsRectangle(ri);
 
   for (auto i = 0U; i < opcode_count; i++) {
     auto code = bs.getU32();
@@ -516,7 +614,7 @@ DngOpcodes::DngOpcodes(const RawImage& ri, const TiffEntry* entry) {
     }
 
     if (opConstructor != nullptr)
-      opcodes.emplace_back(opConstructor(ri, opcode_bs));
+      opcodes.emplace_back(opConstructor(ri, opcode_bs, integrated_subimg));
     else {
 #ifndef DEBUG
       // Throw Error if not marked as optional
@@ -547,8 +645,9 @@ void DngOpcodes::applyOpCodes(const RawImage& ri) const {
 
 template <class Opcode>
 std::unique_ptr<DngOpcodes::DngOpcode>
-DngOpcodes::constructor(const RawImage& ri, ByteStream& bs) {
-  return std::make_unique<Opcode>(ri, bs);
+DngOpcodes::constructor(const RawImage& ri, ByteStream& bs,
+                        iRectangle2D& integrated_subimg) {
+  return std::make_unique<Opcode>(ri, bs, integrated_subimg);
 }
 
 // ALL opcodes specified in DNG Specification MUST be listed here.

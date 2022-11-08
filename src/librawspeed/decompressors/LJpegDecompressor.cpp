@@ -39,9 +39,9 @@ LJpegDecompressor::LJpegDecompressor(const ByteStream& bs, const RawImage& img)
     ThrowRDE("Unexpected data type (%u)",
              static_cast<unsigned>(mRaw->getDataType()));
 
-  if (!((mRaw->getCpp() == 1 && mRaw->getBpp() == sizeof(uint16_t)) ||
-        (mRaw->getCpp() == 2 && mRaw->getBpp() == 2 * sizeof(uint16_t)) ||
-        (mRaw->getCpp() == 3 && mRaw->getBpp() == 3 * sizeof(uint16_t))))
+  if ((mRaw->getCpp() != 1 || mRaw->getBpp() != sizeof(uint16_t)) &&
+      (mRaw->getCpp() != 2 || mRaw->getBpp() != 2 * sizeof(uint16_t)) &&
+      (mRaw->getCpp() != 3 || mRaw->getBpp() != 3 * sizeof(uint16_t)))
     ThrowRDE("Unexpected component count (%u)", mRaw->getCpp());
 
   if (mRaw->dim.x == 0 || mRaw->dim.y == 0)
@@ -171,8 +171,8 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
                               mRaw->getCpp() * offX, offY, mRaw->getCpp() * w,
                               h);
 
-  auto ht = getHuffmanTables<N_COMP>();
-  auto pred = getInitialPredictors<N_COMP>();
+  const auto ht = to_array<N_COMP>(getHuffmanTables(N_COMP));
+  auto pred = to_array<N_COMP>(getInitialPredictors(N_COMP));
   uint16_t* predNext = pred.data();
 
   BitPumpJPEG bitStream(input);

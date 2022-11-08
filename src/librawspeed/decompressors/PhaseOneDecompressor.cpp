@@ -46,7 +46,7 @@ PhaseOneDecompressor::PhaseOneDecompressor(const RawImage& img,
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
 
-  if (!(mRaw->getCpp() == 1 && mRaw->getBpp() == sizeof(uint16_t)))
+  if (mRaw->getCpp() != 1 || mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected cpp: %u", mRaw->getCpp());
 
   if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 2 != 0 ||

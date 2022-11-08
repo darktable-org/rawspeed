@@ -394,6 +394,11 @@ void NefDecoder::checkSupportInternal(const CameraMetaData* meta) {
     checkCameraSupported(meta, id, mode);
 }
 
+int NefDecoder::getBitPerSample() const {
+  const auto* raw = getIFDWithLargestImage(TiffTag::CFAPATTERN);
+  return raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
+}
+
 std::string NefDecoder::getMode() const {
   ostringstream mode;
   const auto* raw = getIFDWithLargestImage(TiffTag::CFAPATTERN);
@@ -599,6 +604,23 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   auto id = mRootIFD->getID();
   std::string mode = getMode();
   std::string extended_mode = getExtendedMode(mode);
+
+  // Read black levels (seem to be recorded for 14bit always)
+  if (mRootIFD->hasEntryRecursive(TiffTag::NIKON_BLACKLEVEL)) {
+    const TiffEntry* bl =
+        mRootIFD->getEntryRecursive(TiffTag::NIKON_BLACKLEVEL);
+    if (bl->count != 4)
+      ThrowRDE("BlackLevel has %d entries instead of 4", bl->count);
+    uint32_t bitPerPixel = getBitPerSample();
+    if (bitPerPixel != 12 && bitPerPixel != 14)
+      ThrowRDE("Bad bit per pixel: %i", bitPerPixel);
+    const int sh = 14 - bitPerPixel;
+    mRaw->blackLevelSeparate[0] = bl->getU16(0) >> sh;
+    mRaw->blackLevelSeparate[1] = bl->getU16(1) >> sh;
+    mRaw->blackLevelSeparate[2] = bl->getU16(2) >> sh;
+    mRaw->blackLevelSeparate[3] = bl->getU16(3) >> sh;
+  }
+
   if (meta->hasCamera(id.make, id.model, extended_mode)) {
     setMetaData(meta, id, extended_mode, iso);
   } else if (meta->hasCamera(id.make, id.model, mode)) {

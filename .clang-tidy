@@ -1,5 +1,5 @@
 ---
-Checks:          '*,-clang-analyzer-*,-clang-diagnostic-*,-cert-dcl50-cpp,-cert-env33-c,-cert-err58-cpp,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-constant-array-index,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-member-init,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-special-member-functions,-google-default-arguments,-google-readability-todo,-hicpp-member-init,-hicpp-special-member-functions,-llvm-header-guard,-llvm-include-order,-misc-unused-parameters,-readability-implicit-bool-cast,-readability-inconsistent-declaration-parameter-name,-android-*,-hicpp-braces-around-statements,-hicpp-function-size,-google-readability-braces-around-statements,-google-readability-function-size,-readability-implicit-bool-conversion,-hicpp-signed-bitwise,-hicpp-no-array-decay,-hicpp-vararg,-hicpp-multiway-paths-covered,-cppcoreguidelines-owning-memory,-fuchsia-*,-llvmlibc-*,-portability-simd-intrinsics,-bugprone-narrowing-conversions,-cppcoreguidelines-narrowing-conversions,-readability-magic-numbers,-cppcoreguidelines-avoid-magic-numbers,-misc-non-private-member-variables-in-classes,-cppcoreguidelines-non-private-member-variables-in-classes,-modernize-use-trailing-return-type,-cppcoreguidelines-init-variables,-bugprone-signed-char-misuse,-cert-str34-c,-cert-dcl37-c,-cert-dcl51-cpp,-misc-no-recursion,-cppcoreguidelines-avoid-non-const-global-variables,-abseil-string-find-str-contains,-altera-struct-pack-align,-google-runtime-references,-altera-unroll-loops,-altera-id-dependent-backward-branch,-bugprone-implicit-widening-of-multiplication-result,-bugprone-easily-swappable-parameters'
+Checks:          '*,-clang-analyzer-*,-clang-diagnostic-*,-cert-dcl50-cpp,-cert-env33-c,-cert-err58-cpp,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-constant-array-index,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-member-init,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-special-member-functions,-google-default-arguments,-google-readability-todo,-hicpp-member-init,-hicpp-special-member-functions,-llvm-header-guard,-llvm-include-order,-misc-unused-parameters,-readability-implicit-bool-cast,-readability-inconsistent-declaration-parameter-name,-android-*,-hicpp-braces-around-statements,-hicpp-function-size,-google-readability-braces-around-statements,-google-readability-function-size,-readability-implicit-bool-conversion,-hicpp-signed-bitwise,-hicpp-no-array-decay,-hicpp-vararg,-hicpp-multiway-paths-covered,-cppcoreguidelines-owning-memory,-fuchsia-*,-llvmlibc-*,-portability-simd-intrinsics,-bugprone-narrowing-conversions,-cppcoreguidelines-narrowing-conversions,-readability-magic-numbers,-cppcoreguidelines-avoid-magic-numbers,-misc-non-private-member-variables-in-classes,-cppcoreguidelines-non-private-member-variables-in-classes,-modernize-use-trailing-return-type,-cppcoreguidelines-init-variables,-bugprone-signed-char-misuse,-cert-str34-c,-cert-dcl37-c,-cert-dcl51-cpp,-misc-no-recursion,-cppcoreguidelines-avoid-non-const-global-variables,-abseil-string-find-str-contains,-altera-struct-pack-align,-google-runtime-references,-altera-unroll-loops,-altera-id-dependent-backward-branch,-bugprone-implicit-widening-of-multiplication-result,-bugprone-easily-swappable-parameters,-readability-identifier-length,-cert-err33-c,-google-readability-casting,-readability-container-data-pointer,-bugprone-exception-escape,-openmp-exception-escape,-modernize-use-default-member-init,-misc-unused-using-decls,-bugprone-assignment-in-if-condition,-bugprone-unchecked-optional-access,-cppcoreguidelines-avoid-const-or-ref-data-members,-misc-const-correctness'
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
 AnalyzeTemporaryDtors: false
@@ -16,13 +16,13 @@ CheckOptions:
   - key:             readability-braces-around-statements.ShortStatementLines
     value:           '3'
   - key:             readability-function-size.BranchThreshold
-    value:           '26'
+    value:           '29'
   - key:             readability-function-size.LineThreshold
-    value:           '152'
+    value:           '158'
   - key:             readability-function-size.StatementThreshold
-    value:           '125'
+    value:           '139'
   - key:             readability-function-size.ParameterThreshold
-    value:           '6'
+    value:           '7'
   - key:             readability-function-size.NestingThreshold
     value:           '7'
   - key:             readability-function-size.VariableThreshold

@@ -142,7 +142,8 @@ inline auto convolute(int row, int col, std::array<int, 4> muls,
   auto lowsRounded = lowsCombined >> 3;
   auto total = highCombined + lowsRounded;
   // Descale it.
-  total <<= DescaleShift;
+  // NOTE: left shift of negative value is UB until C++20.
+  total *= 1 << DescaleShift;
   // And average it.
   total >>= 1;
   return total;
@@ -374,6 +375,10 @@ void VC5Decompressor::Wavelet::ReconstructableBand::createDecodingTasks(
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     : mRaw(img), mBs(std::move(bs)) {
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
+      mRaw->getBpp() != sizeof(uint16_t))
+    ThrowRDE("Unexpected component count / data type");
+
   if (!mRaw->dim.hasPositiveArea())
     ThrowRDE("Bad image dimensions.");
 
@@ -602,8 +607,12 @@ VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
   // We can easily check that we have sufficient amount of bits to decode it.
   const auto waveletArea = iPoint2D(wavelet.width, wavelet.height).area();
   const auto bitsTotal = waveletArea * lowpassPrecision;
-  const auto bytesTotal = roundUpDivision(bitsTotal, 8);
-  bs = bs.getStream(bytesTotal); // And clamp the size while we are at it.
+  constexpr int bytesPerChunk = 8; // FIXME: or is it 4?
+  constexpr int bitsPerChunk = 8 * bytesPerChunk;
+  const auto chunksTotal = roundUpDivision(bitsTotal, bitsPerChunk);
+  const auto bytesTotal = bytesPerChunk * chunksTotal;
+  // And clamp the size / verify sufficient input while we are at it.
+  bs = bs.getStream(bytesTotal);
 }
 
 VC5Decompressor::BandData
@@ -650,7 +659,11 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
     }
 
     int16_t decode() {
-      auto dequantize = [quant = quant](int16_t val) { return val * quant; };
+      auto dequantize = [quant = quant](int16_t val) {
+        if (__builtin_mul_overflow(val, quant, &val))
+          ThrowRDE("Impossible RLV value given current quantum");
+        return val;
+      };
 
       if (numPixelsLeft == 0) {
         decodeNextPixelGroup();

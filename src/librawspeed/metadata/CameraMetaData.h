@@ -41,7 +41,8 @@ struct CameraId {
   }
 };
 
-class CameraMetaData final {
+// NOTE: *NOT* `final`, could be derived from by downstream.
+class CameraMetaData {
 public:
   CameraMetaData() = default;
 

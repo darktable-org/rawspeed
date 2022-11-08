@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2020 Roman Lebedev
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/PanasonicDecompressorV6.h"
+#include "decompressors/Cr2LJpegDecoder.h"
 #include "common/RawImage.h"          // for RawImage, RawImageData
 #include "common/RawspeedException.h" // for RawspeedException
 #include "fuzz/Common.h"              // for CreateRawImage
@@ -26,8 +26,8 @@
 #include "io/ByteStream.h"            // for ByteStream
 #include "io/Endianness.h"            // for Endianness, Endianness::little
 #include <cassert>                    // for assert
-#include <cstddef>                    // for size_t
-#include <cstdint>                    // for uint32_t, uint8_t
+#include <cstdint>                    // for uint8_t
+#include <cstdio>                     // for size_t
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -41,11 +41,16 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(bs));
 
-    rawspeed::ByteStream rawData = bs.getStream(bs.getRemainSize());
+    using slice_type = uint16_t;
+    const auto numSlices = bs.get<slice_type>();
+    const auto sliceWidth = bs.get<slice_type>();
+    const auto lastSliceWidth = bs.get<slice_type>();
 
-    rawspeed::PanasonicDecompressorV6 p(mRaw, rawData);
+    const rawspeed::Cr2Slicing slicing(numSlices, sliceWidth, lastSliceWidth);
+
+    rawspeed::Cr2LJpegDecoder c(bs, mRaw);
     mRaw->createData();
-    p.decompress();
+    c.decode(slicing);
 
     mRaw->checkMemIsInitialized();
   } catch (const rawspeed::RawspeedException&) {

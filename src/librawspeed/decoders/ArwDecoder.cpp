@@ -92,7 +92,7 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
   SonyDecrypt(reinterpret_cast<const uint32_t*>(image_data),
               reinterpret_cast<uint32_t*>(image_decoded.get()), len / 4, key);
 
-  Buffer di(move(image_decoded), len);
+  Buffer di(std::move(image_decoded), len);
 
   // And now decode as a normal 16bit raw
   mRaw->dim = iPoint2D(width, height);
@@ -465,6 +465,28 @@ void ArwDecoder::GetWB() const {
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(1);
       mRaw->metadata.wbCoeffs[2] = wb->getFloat(3);
+    }
+
+    if (encryptedIFD.hasEntry(TiffTag::SONYBLACKLEVEL)) {
+      const TiffEntry* bl = encryptedIFD.getEntry(TiffTag::SONYBLACKLEVEL);
+      if (bl->count != 4)
+        ThrowRDE("Black Level has %d entries instead of 4", bl->count);
+      mRaw->blackLevelSeparate[0] = bl->getU16(0);
+      mRaw->blackLevelSeparate[1] = bl->getU16(1);
+      mRaw->blackLevelSeparate[2] = bl->getU16(2);
+      mRaw->blackLevelSeparate[3] = bl->getU16(3);
+    }
+
+    if (encryptedIFD.hasEntry(TiffTag::SONYWHITELEVEL)) {
+      const TiffEntry* wl = encryptedIFD.getEntry(TiffTag::SONYWHITELEVEL);
+      if (wl->count != 1 && wl->count != 3)
+        ThrowRDE("White Level has %d entries instead of 1 or 3", wl->count);
+      mRaw->whitePoint = wl->getU16(0);
+      // Whitelevel is alawys specified as-if the data is 14-bit,
+      // so for 12-bit raws, which just so happen to coincide
+      // with specifying a single white level entry, we have to scale.
+      if (wl->count == 1)
+        mRaw->whitePoint >>= 2;
     }
   }
 }

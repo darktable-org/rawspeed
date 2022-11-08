@@ -31,6 +31,11 @@ static_assert(RAWSPEED_CACHELINESIZE > 0 && ((RAWSPEED_CACHELINESIZE & (RAWSPEED
 
 static constexpr const auto RAWSPEED_PAGESIZE = @RAWSPEED_PAGESIZE@ULL;
 static_assert(RAWSPEED_PAGESIZE > 0 && ((RAWSPEED_PAGESIZE & (RAWSPEED_PAGESIZE - 1)) == 0), "Expected to know (minimal) CPU page size.");
+static_assert(RAWSPEED_PAGESIZE >= RAWSPEED_CACHELINESIZE, "Expected that (minimal) CPU page size is not smaller than (minimal) CPU page size.");
+
+static constexpr const auto RAWSPEED_LARGEPAGESIZE = @RAWSPEED_LARGEPAGESIZE@ULL;
+static_assert(RAWSPEED_LARGEPAGESIZE > 0 && ((RAWSPEED_LARGEPAGESIZE & (RAWSPEED_LARGEPAGESIZE - 1)) == 0), "Expected to know CPU page size.");
+static_assert(RAWSPEED_LARGEPAGESIZE >= RAWSPEED_PAGESIZE, "Expected that CPU large page size is not smaller than (minimal) CPU page size.");
 
 #cmakedefine HAVE_PUGIXML
 

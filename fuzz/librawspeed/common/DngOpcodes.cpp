@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2018 Roman Lebedev
+    Copyright (C) 2022 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/PanasonicDecompressorV5.h"
+#include "common/DngOpcodes.h"
 #include "common/RawImage.h"          // for RawImage, RawImageData
 #include "common/RawspeedException.h" // for RawspeedException
 #include "fuzz/Common.h"              // for CreateRawImage
@@ -27,6 +27,7 @@
 #include "io/Endianness.h"            // for Endianness, Endianness::little
 #include <cassert>                    // for assert
 #include <cstdint>                    // for uint8_t
+#include <cstdio>                     // for size_t
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -40,14 +41,56 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(bs));
 
-    const auto bps = bs.get<uint32_t>();
-    rawspeed::ByteStream rawData = bs.getStream(bs.getRemainSize());
+    // Performance cut-off: don't bother with too large images.
+    if (!mRaw->getUncroppedDim().hasPositiveArea() ||
+        mRaw->getUncroppedDim().area() > 1'000'000)
+      ThrowIOE("Bad image size.");
 
-    rawspeed::PanasonicDecompressorV5 p(mRaw, rawData, bps);
+    if (mRaw->isCFA)
+      mRaw->cfa = CreateCFA(bs);
+
     mRaw->createData();
-    p.decompress();
+    switch (mRaw->getDataType()) {
+    case rawspeed::RawImageType::UINT16: {
+      rawspeed::Array2DRef<uint16_t> img =
+          mRaw->getU16DataAsUncroppedArray2DRef();
+      const uint16_t fill = bs.getU16();
+      for (auto row = 0; row < img.height; ++row) {
+        for (auto col = 0; col < img.width; ++col) {
+          img(row, col) = fill;
+        }
+      }
+      break;
+    }
+    case rawspeed::RawImageType::F32: {
+      rawspeed::Array2DRef<float> img = mRaw->getF32DataAsUncroppedArray2DRef();
+      const float fill = bs.getFloat();
+      for (auto row = 0; row < img.height; ++row) {
+        for (auto col = 0; col < img.width; ++col) {
+          img(row, col) = fill;
+        }
+      }
+      break;
+    }
+    }
 
+    if (bs.getByte()) {
+      rawspeed::iRectangle2D fullFrame({0, 0}, mRaw->getUncroppedDim());
+
+      int crop_pos_col = bs.getI32();
+      int crop_pos_row = bs.getI32();
+      int cropped_width = bs.getI32();
+      int cropped_height = bs.getI32();
+      rawspeed::iRectangle2D subFrame(crop_pos_col, crop_pos_row, cropped_width,
+                                      cropped_height);
+      mRaw->subFrame(subFrame);
+    }
+
+    rawspeed::DngOpcodes codes(mRaw, bs.getSubStream(/*offset=*/0));
+    codes.applyOpCodes(mRaw);
     mRaw->checkMemIsInitialized();
+
+    mRaw->transferBadPixelsToMap();
   } catch (const rawspeed::RawspeedException&) {
     // Exceptions are good, crashes are bad.
   }

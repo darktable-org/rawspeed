@@ -52,11 +52,11 @@ RawImageDataU16::RawImageDataU16() {
 }
 
 RawImageDataU16::RawImageDataU16(const iPoint2D& _dim, uint32_t _cpp)
-    : RawImageData(_dim, sizeof(uint16_t), _cpp) {
-  dataType = RawImageType::UINT16;
-}
+    : RawImageData(RawImageType::UINT16, _dim, sizeof(uint16_t), _cpp) {}
 
 void RawImageDataU16::calculateBlackAreas() {
+  const Array2DRef<uint16_t> img = getU16DataAsUncroppedArray2DRef();
+
   vector<unsigned int> histogram(4 * 65536);
   fill(histogram.begin(), histogram.end(), 0);
 
@@ -73,11 +73,10 @@ void RawImageDataU16::calculateBlackAreas() {
           uncropped_dim.y)
         ThrowRDE("Offset + size is larger than height of image");
       for (uint32_t y = area.offset; y < area.offset + area.size; y++) {
-        const auto* pixel =
-            reinterpret_cast<uint16_t*>(getDataUncropped(mOffset.x, y));
         auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
         for (int x = mOffset.x; x < dim.x+mOffset.x; x++) {
-          const auto hBin = ((x & 1) << 16) + *pixel;
+          // FIXME: this only samples a single row, not an area.
+          const auto hBin = ((x & 1) << 16) + img(y, mOffset.x);
           localhist[hBin]++;
         }
       }
@@ -89,12 +88,11 @@ void RawImageDataU16::calculateBlackAreas() {
       if (static_cast<int>(area.offset) + static_cast<int>(area.size) >
           uncropped_dim.x)
         ThrowRDE("Offset + size is larger than width of image");
-      for (int y = mOffset.y; y < dim.y+mOffset.y; y++) {
-        const auto* pixel =
-            reinterpret_cast<uint16_t*>(getDataUncropped(area.offset, y));
+      for (int y = mOffset.y; y < dim.y + mOffset.y; y++) {
         auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
         for (uint32_t x = area.offset; x < area.size + area.offset; x++) {
-          const auto hBin = ((x & 1) << 16) + *pixel;
+          // FIXME: this only samples a single row, not an area.
+          const auto hBin = ((x & 1) << 16) + img(y, area.offset);
           localhist[hBin]++;
         }
       }
@@ -213,7 +211,6 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
 
   assert(sub_mul != nullptr);
 
-  uint32_t gw = pitch / 16;
   // 10 bit fraction
   uint32_t mul = static_cast<int>(
       1024.0F * 65535.0F /
@@ -260,6 +257,8 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   }
   rand_mask = _mm_set1_epi32(0x00ff00ff); // 8 random bits
 
+  Array2DRef<uint16_t> out(getU16DataAsUncroppedArray2DRef());
+
   for (int y = start_y; y < end_y; y++) {
     __m128i sserandom;
     if (mDitherScale) {
@@ -269,7 +268,6 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
     } else {
       sserandom = _mm_setzero_si128();
     }
-    auto* pixel = reinterpret_cast<__m128i*>(&data[(mOffset.y + y) * pitch]);
     __m128i ssescale;
     __m128i ssesub;
     if (((y + mOffset.y) & 1) == 0) {
@@ -280,11 +278,12 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
       ssescale = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[12]));
     }
 
-    for (uint32_t x = 0; x < gw; x++) {
+    for (int x = 0; x < static_cast<int>(roundDown(uncropped_dim.x, 8));
+         x += 8) {
       __m128i pix_high;
       __m128i temp;
-      _mm_prefetch(reinterpret_cast<char*>(pixel + 1), _MM_HINT_T0);
-      __m128i pix_low = _mm_load_si128(pixel);
+      __m128i pix_low =
+          _mm_load_si128(reinterpret_cast<__m128i*>(&out(mOffset.y + y, x)));
       // Subtract black
       pix_low = _mm_subs_epu16(pix_low, ssesub);
       // Multiply the two unsigned shorts and combine it to 32 bit result
@@ -321,8 +320,8 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
       pix_low = _mm_packs_epi32(pix_low, pix_high);
       // Shift sign off
       pix_low = _mm_xor_si128(pix_low, ssesign);
-      _mm_store_si128(pixel, pix_low);
-      pixel++;
+      _mm_store_si128(reinterpret_cast<__m128i*>(&out(mOffset.y + y, x)),
+                      pix_low);
     }
   }
   alignedFree(sub_mul);
@@ -381,6 +380,8 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
 /* are weighed less */
 
 void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
+  const Array2DRef<uint16_t> img = getU16DataAsUncroppedArray2DRef();
+
   array<int, 4> values;
   array<int, 4> dist;
   array<int, 4> weight;
@@ -397,8 +398,7 @@ void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
   int curr = 0;
   while (x_find >= 0 && values[curr] < 0) {
     if (0 == ((bad_line[x_find>>3] >> (x_find&7)) & 1)) {
-      values[curr] =
-          (reinterpret_cast<uint16_t*>(getDataUncropped(x_find, y)))[component];
+      values[curr] = img(y, x_find + component);
       dist[curr] = static_cast<int>(x) - x_find;
     }
     x_find -= step;
@@ -408,8 +408,7 @@ void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
   curr = 1;
   while (x_find < uncropped_dim.x && values[curr] < 0) {
     if (0 == ((bad_line[x_find>>3] >> (x_find&7)) & 1)) {
-      values[curr] =
-          (reinterpret_cast<uint16_t*>(getDataUncropped(x_find, y)))[component];
+      values[curr] = img(y, x_find + component);
       dist[curr] = x_find - static_cast<int>(x);
     }
     x_find += step;
@@ -421,8 +420,7 @@ void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
   curr = 2;
   while (y_find >= 0 && values[curr] < 0) {
     if (0 == ((bad_line[y_find*mBadPixelMapPitch] >> (x&7)) & 1)) {
-      values[curr] =
-          (reinterpret_cast<uint16_t*>(getDataUncropped(x, y_find)))[component];
+      values[curr] = img(y_find, x + component);
       dist[curr] = static_cast<int>(y) - y_find;
     }
     y_find -= step;
@@ -432,8 +430,7 @@ void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
   curr = 3;
   while (y_find < uncropped_dim.y && values[curr] < 0) {
     if (0 == ((bad_line[y_find*mBadPixelMapPitch] >> (x&7)) & 1)) {
-      values[curr] =
-          (reinterpret_cast<uint16_t*>(getDataUncropped(x, y_find)))[component];
+      values[curr] = img(y_find, x + component);
       dist[curr] = y_find - static_cast<int>(y);
     }
     y_find += step;
@@ -462,8 +459,7 @@ void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
       total_pixel += values[i] * weight[i];
 
   total_pixel >>= total_shifts;
-  auto* pix = reinterpret_cast<uint16_t*>(getDataUncropped(x, y));
-  pix[component] = clampBits(total_pixel, 16);
+  img(y, x + component) = clampBits(total_pixel, 16);
 
   /* Process other pixels - could be done inline, since we have the weights */
   if (cpp > 1 && component == 0)
@@ -474,22 +470,22 @@ void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
 // TODO: Could be done with SSE2
 void RawImageDataU16::doLookup( int start_y, int end_y )
 {
+  const Array2DRef<uint16_t> img = getU16DataAsUncroppedArray2DRef();
+
   if (table->ntables == 1) {
     if (table->dither) {
       int gw = uncropped_dim.x * cpp;
       const auto* t = reinterpret_cast<uint32_t*>(table->getTable(0));
       for (int y = start_y; y < end_y; y++) {
         uint32_t v = (uncropped_dim.x + y * 13) ^ 0x45694584;
-        auto* pixel = reinterpret_cast<uint16_t*>(getDataUncropped(0, y));
         for (int x = 0 ; x < gw; x++) {
-          uint16_t p = *pixel;
+          uint16_t p = img(y, x);
           uint32_t lookup = t[p];
           uint32_t base = lookup & 0xffff;
           uint32_t delta = lookup >> 16;
           v = 15700 *(v & 65535) + (v >> 16);
           uint32_t pix = base + ((delta * (v & 2047) + 1024) >> 12);
-          *pixel = clampBits(pix, 16);
-          pixel++;
+          img(y, x) = clampBits(pix, 16);
         }
       }
       return;
@@ -498,10 +494,8 @@ void RawImageDataU16::doLookup( int start_y, int end_y )
     int gw = uncropped_dim.x * cpp;
     const uint16_t* t = table->getTable(0);
     for (int y = start_y; y < end_y; y++) {
-      auto* pixel = reinterpret_cast<uint16_t*>(getDataUncropped(0, y));
       for (int x = 0 ; x < gw; x++) {
-        *pixel = t[*pixel];
-        pixel ++;
+        img(y, x) = t[img(y, x)];
       }
     }
     return;

@@ -34,6 +34,11 @@ struct LSBBitPumpTag;
 
 using BitPumpLSB = BitStream<LSBBitPumpTag, BitStreamCacheLeftInRightOut>;
 
+template <> struct BitStreamTraits<LSBBitPumpTag> final {
+  // How many bytes can we read from the input per each fillCache(), at most?
+  static constexpr int MaxProcessBytes = 4;
+};
+
 template <>
 inline BitPumpLSB::size_type BitPumpLSB::fillCache(const uint8_t* input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");

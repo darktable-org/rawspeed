@@ -44,8 +44,10 @@ RawImageData::RawImageData() : cfa(iPoint2D(0, 0)) {
   blackLevelSeparate.fill(-1);
 }
 
-RawImageData::RawImageData(const iPoint2D& _dim, int _bpc, int _cpp)
-    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), cpp(_cpp) {
+RawImageData::RawImageData(RawImageType type, const iPoint2D& _dim, int _bpc,
+                           int _cpp)
+    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), dataType(type),
+      cpp(_cpp) {
   assert(_bpc > 0);
 
   if (cpp > std::numeric_limits<decltype(cpp)>::max() / _bpc)
@@ -71,7 +73,9 @@ void RawImageData::createData() {
     ThrowRDE("Dimensions too large for allocation.");
   if (dim.x <= 0 || dim.y <= 0)
     ThrowRDE("Dimension of one sides is less than 1 - cannot allocate image.");
-  if (data)
+  if (cpp <= 0 || bpp <= 0)
+    ThrowRDE("Unspecified component count - cannot allocate image.");
+  if (isAllocated())
     ThrowRDE("Duplicate data allocation in createData.");
 
   // want each line to start at 16-byte aligned address
@@ -100,16 +104,17 @@ void RawImageData::createData() {
   uncropped_dim = dim;
 
 #ifndef NDEBUG
+  const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
+
   if (dim.y > 1) {
     // padding is the size of the area after last pixel of line n
     // and before the first pixel of line n+1
-    assert(getData(dim.x - 1, 0) + bpp + padding == getData(0, 1));
+    assert(&img(0, img.width - 1) + 1 + padding == &img(1, 0));
   }
 
   for (int j = 0; j < dim.y; j++) {
-    const uint8_t* const line = getData(0, j);
     // each line is indeed 16-byte aligned
-    assert(isAligned(line, alignment));
+    assert(isAligned(&img(j, 0), alignment));
   }
 #endif
 
@@ -121,12 +126,10 @@ void RawImageData::poisonPadding() const {
   if (padding <= 0)
     return;
 
+  const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
   for (int j = 0; j < uncropped_dim.y; j++) {
-    const uint8_t* const curr_line_end =
-        getDataUncropped(uncropped_dim.x - 1, j) + bpp;
-
     // and now poison the padding.
-    ASan::PoisonMemoryRegion(curr_line_end, padding);
+    ASan::PoisonMemoryRegion(&img(j, img.width - 1) + 1, padding);
   }
 }
 #else
@@ -142,12 +145,10 @@ void RawImageData::unpoisonPadding() const {
   if (padding <= 0)
     return;
 
+  const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
   for (int j = 0; j < uncropped_dim.y; j++) {
-    const uint8_t* const curr_line_end =
-        getDataUncropped(uncropped_dim.x - 1, j) + bpp;
-
     // and now unpoison the padding.
-    ASan::UnPoisonMemoryRegion(curr_line_end, padding);
+    ASan::UnPoisonMemoryRegion(&img(j, img.width - 1) + 1, padding);
   }
 }
 #else
@@ -159,13 +160,12 @@ void RawImageData::unpoisonPadding() const {
 #endif
 
 void RawImageData::checkRowIsInitialized(int row) const {
-  const auto rowsize = bpp * uncropped_dim.x;
-
-  const uint8_t* const curr_line = getDataUncropped(0, row);
+  const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
 
   // and check that image line is initialized.
   // do note that we are avoiding padding here.
-  MSan::CheckMemIsInitialized(curr_line, rowsize);
+  MSan::CheckMemIsInitialized(reinterpret_cast<const uint8_t*>(&img(row, 0)),
+                              img.width);
 }
 
 #if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
@@ -191,7 +191,7 @@ void RawImageData::destroyData() {
 }
 
 void RawImageData::setCpp(uint32_t val) {
-  if (data)
+  if (isAllocated())
     ThrowRDE("Attempted to set Components per pixel after data allocation");
   if (val > 4) {
     ThrowRDE(
@@ -202,39 +202,6 @@ void RawImageData::setCpp(uint32_t val) {
   bpp /= cpp;
   cpp = val;
   bpp *= val;
-}
-
-uint8_t* RawImageData::getData() const {
-  if (!data)
-    ThrowRDE("Data not yet allocated.");
-  return &data[mOffset.y*pitch+mOffset.x*bpp];
-}
-
-uint8_t* RawImageData::getData(uint32_t x, uint32_t y) {
-  x += mOffset.x;
-  y += mOffset.y;
-
-  if (x >= static_cast<unsigned>(uncropped_dim.x))
-    ThrowRDE("X Position outside image requested.");
-  if (y >= static_cast<unsigned>(uncropped_dim.y))
-    ThrowRDE("Y Position outside image requested.");
-
-  if (!data)
-    ThrowRDE("Data not yet allocated.");
-
-  return &data[static_cast<size_t>(y) * pitch + x * bpp];
-}
-
-uint8_t* RawImageData::getDataUncropped(uint32_t x, uint32_t y) const {
-  if (x >= static_cast<unsigned>(uncropped_dim.x))
-    ThrowRDE("X Position outside image requested.");
-  if (y >= static_cast<unsigned>(uncropped_dim.y))
-    ThrowRDE("Y Position outside image requested.");
-
-  if (!data)
-    ThrowRDE("Data not yet allocated.");
-
-  return &data[static_cast<size_t>(y) * pitch + x * bpp];
 }
 
 iPoint2D __attribute__((pure)) rawspeed::RawImageData::getUncroppedDim() const {
@@ -252,7 +219,7 @@ void RawImageData::subFrame(iRectangle2D crop) {
                                   "size. Crop skipped.");
     return;
   }
-  if (crop.pos.x < 0 || crop.pos.y < 0 || !crop.hasPositiveArea()) {
+  if (crop.pos.x < 0 || crop.pos.y < 0 || crop.dim.x < 0 || crop.dim.y < 0) {
     writeLog(DEBUG_PRIO::WARNING, "WARNING: RawImageData::subFrame - Negative "
                                   "crop offset. Crop skipped.");
     return;
@@ -260,7 +227,7 @@ void RawImageData::subFrame(iRectangle2D crop) {
 
   // if CFA, and not X-Trans, adjust.
   if (isCFA && cfa.getDcrawFilter() != 1 && cfa.getDcrawFilter() != 9) {
-    cfa.shiftLeft(crop.pos.x);
+    cfa.shiftRight(crop.pos.x);
     cfa.shiftDown(crop.pos.y);
   }
 
@@ -428,79 +395,18 @@ void RawImageData::fixBadPixelsThread(int start_y, int end_y) {
   }
 }
 
-void RawImageData::blitFrom(const RawImage& src, const iPoint2D& srcPos,
-                            const iPoint2D& size, const iPoint2D& destPos) {
-  iRectangle2D src_rect(srcPos, size);
-  iRectangle2D dest_rect(destPos, size);
-  src_rect = src_rect.getOverlap(iRectangle2D(iPoint2D(0,0), src->dim));
-  dest_rect = dest_rect.getOverlap(iRectangle2D(iPoint2D(0,0), dim));
-
-  iPoint2D blitsize = src_rect.dim.getSmallest(dest_rect.dim);
-  if (blitsize.area() <= 0)
-    return;
-
-  // TODO: Move offsets after crop.
-  copyPixels(getData(dest_rect.pos.x, dest_rect.pos.y), pitch,
-             src->getData(src_rect.pos.x, src_rect.pos.y), src->pitch,
-             blitsize.x * bpp, blitsize.y);
-}
-
-/* Does not take cfa into consideration */
-void RawImageData::expandBorder(iRectangle2D validData)
-{
-  validData = validData.getOverlap(iRectangle2D(0,0,dim.x, dim.y));
-  if (validData.pos.x > 0) {
-    for (int y = 0; y < dim.y; y++ ) {
-      const uint8_t* src_pos = getData(validData.pos.x, y);
-      uint8_t* dst_pos = getData(validData.pos.x - 1, y);
-      for (int x = validData.pos.x; x >= 0; x--) {
-        for (int i = 0; i < bpp; i++) {
-          dst_pos[i] = src_pos[i];
-        }
-        dst_pos -= bpp;
-      }
-    }
-  }
-
-  if (validData.getRight() < dim.x) {
-    int pos = validData.getRight();
-    for (int y = 0; y < dim.y; y++ ) {
-      const uint8_t* src_pos = getData(pos - 1, y);
-      uint8_t* dst_pos = getData(pos, y);
-      for (int x = pos; x < dim.x; x++) {
-        for (int i = 0; i < bpp; i++) {
-          dst_pos[i] = src_pos[i];
-        }
-        dst_pos += bpp;
-      }
-    }
-  }
-
-  if (validData.pos.y > 0) {
-    const uint8_t* src_pos = getData(0, validData.pos.y);
-    for (int y = 0; y < validData.pos.y; y++ ) {
-      uint8_t* dst_pos = getData(0, y);
-      memcpy(dst_pos, src_pos, static_cast<size_t>(dim.x) * bpp);
-    }
-  }
-  if (validData.getBottom() < dim.y) {
-    const uint8_t* src_pos = getData(0, validData.getBottom() - 1);
-    for (int y = validData.getBottom(); y < dim.y; y++ ) {
-      uint8_t* dst_pos = getData(0, y);
-      memcpy(dst_pos, src_pos, static_cast<size_t>(dim.x) * bpp);
-    }
-  }
-}
-
-void RawImageData::clearArea(iRectangle2D area, uint8_t val /*= 0*/) {
+void RawImageData::clearArea(iRectangle2D area) const {
   area = area.getOverlap(iRectangle2D(iPoint2D(0,0), dim));
 
   if (area.area() <= 0)
     return;
 
-  for (int y = area.getTop(); y < area.getBottom(); y++)
-    memset(getData(area.getLeft(), y), val,
-           static_cast<size_t>(area.getWidth()) * bpp);
+  const CroppedArray2DRef<uint16_t> out = getU16DataAsCroppedArray2DRef();
+  for (int y = area.getTop(); y < area.getBottom(); y++) {
+    for (int x = area.getLeft(); x < area.getWidth() * cpp; ++x) {
+      out(y, x) = 0;
+    }
+  }
 }
 
 RawImage& RawImage::operator=(RawImage&& rhs) noexcept {
