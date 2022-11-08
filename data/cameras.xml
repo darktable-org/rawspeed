@@ -12128,6 +12128,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="SAMSUNG" model="NX mini">
+		<ID make="Samsung" model="NX mini">Samsung NX mini</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="132" y="40" width="-60" height="-22"/>
+		<Sensor black="0" white="4000"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">5222 -1196 -550</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-6540 14649 2009</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1666 2819 5657</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="SAMSUNG" model="NX1" mode="12bit">
 		<ID make="Samsung" model="NX1">Samsung NX1</ID>
 		<CFA width="2" height="2">
