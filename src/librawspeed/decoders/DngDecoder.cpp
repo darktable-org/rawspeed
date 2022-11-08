@@ -145,6 +145,40 @@ void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
   }
 }
 
+std::optional<iRectangle2D>
+DngDecoder::parseACTIVEAREA(const TiffIFD* raw) const {
+  if (!raw->hasEntry(TiffTag::ACTIVEAREA))
+    return {};
+
+  const TiffEntry* active_area = raw->getEntry(TiffTag::ACTIVEAREA);
+  if (active_area->count != 4)
+    ThrowRDE("active area has %d values instead of 4", active_area->count);
+
+  const iRectangle2D fullImage(0, 0, mRaw->dim.x, mRaw->dim.y);
+
+  const auto corners = active_area->getU32Array(4);
+  const iPoint2D topLeft(static_cast<int>(corners[1]),
+                         static_cast<int>(corners[0]));
+  const iPoint2D bottomRight(static_cast<int>(corners[3]),
+                             static_cast<int>(corners[2]));
+
+  if (!(fullImage.isPointInsideInclusive(topLeft) &&
+        fullImage.isPointInsideInclusive(bottomRight) &&
+        bottomRight >= topLeft)) {
+    ThrowRDE("Rectangle (%u, %u, %u, %u) not inside image (%u, %u, %u, %u).",
+             topLeft.x, topLeft.y, bottomRight.x, bottomRight.y,
+             fullImage.getTopLeft().x, fullImage.getTopLeft().y,
+             fullImage.getBottomRight().x, fullImage.getBottomRight().y);
+  }
+
+  iRectangle2D crop;
+  crop.setTopLeft(topLeft);
+  crop.setBottomRightAbsolute(bottomRight);
+  assert(fullImage.isThisInside(fullImage));
+
+  return crop;
+}
+
 void DngDecoder::parseCFA(const TiffIFD* raw) const {
 
   // Check if layout is OK, if present
@@ -194,19 +228,14 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
   // the cfa is specified relative to the ActiveArea. we want it relative (0,0)
   // Since in handleMetadata(), in subFrame() we unconditionally shift CFA by
   // activearea+DefaultCropOrigin; here we need to undo the 'ACTIVEAREA' part.
-  if (!raw->hasEntry(TiffTag::ACTIVEAREA))
+  const std::optional<iRectangle2D> aa = parseACTIVEAREA(raw);
+  if (!aa)
     return;
-
-  const TiffEntry* active_area = raw->getEntry(TiffTag::ACTIVEAREA);
-  if (active_area->count != 4)
-    ThrowRDE("active area has %d values instead of 4", active_area->count);
-
-  const auto aa = active_area->getU32Array(2);
 
   // To reverse the ActiveArea modifictions done earlier, we need to
   // use the negated ActiveArea x/y values.
-  mRaw->cfa.shiftRight(-int(aa[1]));
-  mRaw->cfa.shiftDown(-int(aa[0]));
+  mRaw->cfa.shiftRight(-int(aa->pos.x));
+  mRaw->cfa.shiftDown(-int(aa->pos.y));
 }
 
 void DngDecoder::parseColorMatrix() const {
@@ -457,33 +486,8 @@ RawImage DngDecoder::decodeRawInternal() {
 
 void DngDecoder::handleMetadata(const TiffIFD* raw) {
   // Crop
-  if (raw->hasEntry(TiffTag::ACTIVEAREA)) {
-    const TiffEntry* active_area = raw->getEntry(TiffTag::ACTIVEAREA);
-    if (active_area->count != 4)
-      ThrowRDE("active area has %d values instead of 4", active_area->count);
-
-    const iRectangle2D fullImage(0, 0, mRaw->dim.x, mRaw->dim.y);
-
-    const auto corners = active_area->getU32Array(4);
-    const iPoint2D topLeft(corners[1], corners[0]);
-    const iPoint2D bottomRight(corners[3], corners[2]);
-
-    if (!(fullImage.isPointInsideInclusive(topLeft) &&
-          fullImage.isPointInsideInclusive(bottomRight) &&
-          bottomRight >= topLeft)) {
-      ThrowRDE("Rectangle (%u, %u, %u, %u) not inside image (%u, %u, %u, %u).",
-               topLeft.x, topLeft.y, bottomRight.x, bottomRight.y,
-               fullImage.getTopLeft().x, fullImage.getTopLeft().y,
-               fullImage.getBottomRight().x, fullImage.getBottomRight().y);
-    }
-
-    iRectangle2D crop;
-    crop.setTopLeft(topLeft);
-    crop.setBottomRightAbsolute(bottomRight);
-    assert(fullImage.isThisInside(fullImage));
-
-    mRaw->subFrame(crop);
-  }
+  if (const std::optional<iRectangle2D> aa = parseACTIVEAREA(raw))
+    mRaw->subFrame(*aa);
 
   if (raw->hasEntry(TiffTag::DEFAULTCROPORIGIN) &&
       raw->hasEntry(TiffTag::DEFAULTCROPSIZE)) {
