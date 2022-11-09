@@ -35,7 +35,8 @@ namespace rawspeed {
 
 class ByteStream;
 
-Cr2Decompressor::Cr2Decompressor(
+template <typename HuffmanTable>
+Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
     const RawImage& mRaw_,
     std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format_,
     iPoint2D frame_, Cr2Slicing slicing_, std::vector<const HuffmanTable*> ht_,
@@ -82,8 +83,9 @@ Cr2Decompressor::Cr2Decompressor(
 // X_S_F  == x/horizontal sampling factor (1 or 2)
 // Y_S_F  == y/vertical   sampling factor (1 or 2)
 
+template <typename HuffmanTable>
 template <int N_COMP, int X_S_F, int Y_S_F>
-void Cr2Decompressor::decompressN_X_Y() {
+void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   // To understand the CR2 slice handling and sampling factor behavior, see
@@ -195,7 +197,8 @@ void Cr2Decompressor::decompressN_X_Y() {
   }
 }
 
-void Cr2Decompressor::decompress() {
+template <typename HuffmanTable>
+void Cr2Decompressor<HuffmanTable>::decompress() {
   if (std::make_tuple(3, 2, 2) == format) {
     decompressN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
     return;
@@ -214,5 +217,7 @@ void Cr2Decompressor::decompress() {
   }
   __builtin_unreachable();
 }
+
+template class Cr2Decompressor<HuffmanTable>;
 
 } // namespace rawspeed

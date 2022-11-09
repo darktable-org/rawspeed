@@ -38,7 +38,8 @@ class Cr2Slicing {
   int lastSliceWidth = 0;
 
   friend class Cr2LJpegDecoder;
-  friend class Cr2Decompressor;
+
+  template <typename HuffmanTable> friend class Cr2Decompressor;
 
 public:
   Cr2Slicing() = default;
@@ -71,7 +72,7 @@ public:
   }
 };
 
-class Cr2Decompressor final {
+template <typename HuffmanTable> class Cr2Decompressor final {
   const RawImage mRaw;
   const std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format;
   const iPoint2D frame;
@@ -93,5 +94,7 @@ public:
 
   void decompress();
 };
+
+extern template class Cr2Decompressor<HuffmanTable>;
 
 } // namespace rawspeed

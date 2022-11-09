@@ -81,8 +81,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     std::generate_n(std::back_inserter(initPred), num_pred,
                     [&bs]() { return bs.get<uint16_t>(); });
 
-    rawspeed::Cr2Decompressor d(mRaw, format, frame, slicing, hts, initPred,
-                                bs.getSubStream(/*offset=*/0));
+    rawspeed::Cr2Decompressor<rawspeed::HuffmanTable> d(
+        mRaw, format, frame, slicing, hts, initPred,
+        bs.getSubStream(/*offset=*/0));
     mRaw->createData();
     d.decompress();
 
