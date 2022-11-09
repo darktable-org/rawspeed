@@ -39,11 +39,10 @@ template <typename HuffmanTable>
 Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
     const RawImage& mRaw_,
     std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format_,
-    iPoint2D frame_, Cr2Slicing slicing_, std::vector<const HuffmanTable*> ht_,
-    std::vector<uint16_t> initPred_, ByteStream input_)
+    iPoint2D frame_, Cr2Slicing slicing_, std::vector<PerComponentRecipe> rec_,
+    ByteStream input_)
     : mRaw(mRaw_), format(std::move(format_)), frame(frame_), slicing(slicing_),
-      ht(std::move(ht_)), initPred(std::move(initPred_)),
-      input(std::move(input_)) {
+      rec(std::move(rec_)), input(std::move(input_)) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
 
@@ -74,9 +73,29 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
     ThrowRDE("Unknown format <%i,%i,%i>", std::get<0>(format),
              std::get<1>(format), std::get<2>(format));
 
-  if (initPred.size() != ht.size() ||
-      static_cast<int>(initPred.size()) != std::get<0>(format))
-    ThrowRDE("Initial predictor count does not match component count");
+  if (static_cast<int>(rec.size()) != std::get<0>(format))
+    ThrowRDE("HT/Initial predictor count does not match component count");
+}
+
+template <typename HuffmanTable>
+template <int N_COMP>
+std::array<const HuffmanTable*, N_COMP>
+Cr2Decompressor<HuffmanTable>::getHuffmanTables() const {
+  std::array<const HuffmanTable*, N_COMP> hts;
+  std::transform(rec.begin(), rec.end(), hts.begin(),
+                 [](const PerComponentRecipe& compRec) { return compRec.ht; });
+  return hts;
+}
+
+template <typename HuffmanTable>
+template <int N_COMP>
+std::array<uint16_t, N_COMP>
+Cr2Decompressor<HuffmanTable>::getInitialPreds() const {
+  std::array<uint16_t, N_COMP> preds;
+  std::transform(
+      rec.begin(), rec.end(), preds.begin(),
+      [](const PerComponentRecipe& compRec) { return compRec.initPred; });
+  return preds;
 }
 
 // N_COMP == number of components (2, 3 or 4)
@@ -113,7 +132,8 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
   realDim.x *= X_S_F;
   realDim.y *= Y_S_F;
 
-  auto pred = to_array<N_COMP>(initPred);
+  auto ht = getHuffmanTables<N_COMP>();
+  auto pred = getInitialPreds<N_COMP>();
   const auto* predNext = &out(0, 0);
 
   BitPumpJPEG bs(input);
