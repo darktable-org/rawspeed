@@ -20,14 +20,22 @@
 
 #pragma once
 
+#include "decompressors/DummyHuffmanTable.h"
 #include "io/Buffer.h"     // for Buffer
 #include "io/ByteStream.h" // for ByteStream
+
+template <typename T> static constexpr int getHuffmanTableMaxLength() {
+  if constexpr (std::is_same<T, rawspeed::DummyHuffmanTable>())
+    return 0;
+  return 16;
+}
 
 template <typename T> static T createHuffmanTable(rawspeed::ByteStream& bs) {
   T ht;
 
   // first 16 bytes are consumed as n-codes-per-length
-  const auto count = ht.setNCodesPerLength(bs.getBuffer(16));
+  const auto count =
+      ht.setNCodesPerLength(bs.getBuffer(getHuffmanTableMaxLength<T>()));
 
   // and then count more bytes consumed as code values
   ht.setCodeValues(bs.getBuffer(count));
