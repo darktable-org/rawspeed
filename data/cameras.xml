@@ -7405,24 +7405,6 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="OM Digital Solutions" model="OM-5">
-		<ID make="OM System" model="OM-5">OM Digital Solutions OM-5</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
-		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="254" white="4000"/>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">11896 -5110 -1076</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-3181 11378 2048</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-519 1224 5166</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
-	</Camera>
 	<Camera make="Panasonic" model="DMC-CM1">
 		<ID make="Panasonic" model="DMC-CM1">Panasonic DMC-CM1</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
