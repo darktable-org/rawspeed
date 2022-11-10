@@ -75,6 +75,11 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
 
   if (static_cast<int>(rec.size()) != std::get<0>(format))
     ThrowRDE("HT/Initial predictor count does not match component count");
+
+  for (const auto& recip : rec) {
+    if (!recip.ht.isFullDecode())
+      ThrowRDE("Huffman table is not of a full decoding variety");
+  }
 }
 
 template <typename HuffmanTable>

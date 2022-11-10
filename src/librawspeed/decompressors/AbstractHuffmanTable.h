@@ -169,6 +169,8 @@ protected:
   }
 
 public:
+  [[nodiscard]] bool isFullDecode() const { return fullDecode; }
+
   bool operator==(const AbstractHuffmanTable& other) const {
     return nCodesPerLength == other.nCodesPerLength &&
            codeValues == other.codeValues;

@@ -52,6 +52,8 @@ public:
     fixDNGBug16 = fixDNGBug16_;
   }
 
+  [[nodiscard]] bool isFullDecode() const { return fullDecode; }
+
   template <typename BIT_STREAM>
   inline int decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
