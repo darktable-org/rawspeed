@@ -106,7 +106,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
                         -> rawspeed::Cr2Decompressor<
                             rawspeed::HuffmanTableImpl>::PerComponentRecipe {
                       const int i = rec.size();
-                      return {hts[i], initPred[i]};
+                      return {*hts[i], initPred[i]};
                     });
 
     rawspeed::Cr2Decompressor<rawspeed::HuffmanTableImpl> d(

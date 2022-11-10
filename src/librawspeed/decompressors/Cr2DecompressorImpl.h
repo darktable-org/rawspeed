@@ -78,13 +78,19 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
 }
 
 template <typename HuffmanTable>
+template <int N_COMP, size_t... I>
+std::array<std::reference_wrapper<const HuffmanTable>, N_COMP>
+Cr2Decompressor<HuffmanTable>::getHuffmanTablesImpl(
+    std::index_sequence<I...> /*unused*/) const {
+  return std::array<std::reference_wrapper<const HuffmanTable>, N_COMP>{
+      std::cref(rec[I].ht)...};
+}
+
+template <typename HuffmanTable>
 template <int N_COMP>
-std::array<const HuffmanTable*, N_COMP>
+std::array<std::reference_wrapper<const HuffmanTable>, N_COMP>
 Cr2Decompressor<HuffmanTable>::getHuffmanTables() const {
-  std::array<const HuffmanTable*, N_COMP> hts;
-  std::transform(rec.begin(), rec.end(), hts.begin(),
-                 [](const PerComponentRecipe& compRec) { return compRec.ht; });
-  return hts;
+  return getHuffmanTablesImpl<N_COMP>(std::make_index_sequence<N_COMP>{});
 }
 
 template <typename HuffmanTable>
@@ -209,7 +215,8 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
                       globalFrameCol += X_S_F, col += groupSize) {
           for (int p = 0; p < groupSize; ++p) {
             int c = p < pixelsPerGroup ? 0 : p - pixelsPerGroup + 1;
-            out(row, col + p) = pred[c] += ht[c]->decodeDifference(bs);
+            out(row, col + p) = pred[c] +=
+                ((const HuffmanTable&)(ht[c])).decodeDifference(bs);
           }
         }
       }

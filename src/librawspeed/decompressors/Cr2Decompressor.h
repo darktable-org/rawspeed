@@ -75,7 +75,7 @@ public:
 template <typename HuffmanTable> class Cr2Decompressor final {
 public:
   struct PerComponentRecipe {
-    const HuffmanTable* ht;
+    const HuffmanTable& ht;
     const uint16_t initPred;
   };
 
@@ -89,8 +89,12 @@ private:
 
   const ByteStream input;
 
+  template <int N_COMP, size_t... I>
+  [[nodiscard]] std::array<std::reference_wrapper<const HuffmanTable>, N_COMP>
+      getHuffmanTablesImpl(std::index_sequence<I...> /*unused*/) const;
+
   template <int N_COMP>
-  [[nodiscard]] std::array<const HuffmanTable*, N_COMP>
+  [[nodiscard]] std::array<std::reference_wrapper<const HuffmanTable>, N_COMP>
   getHuffmanTables() const;
 
   template <int N_COMP>

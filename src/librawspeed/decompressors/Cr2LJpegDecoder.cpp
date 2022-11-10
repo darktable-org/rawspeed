@@ -135,7 +135,7 @@ void Cr2LJpegDecoder::decodeScan()
                    initPred = getInitialPredictors(N_COMP)]()
                       -> Cr2Decompressor<HuffmanTable>::PerComponentRecipe {
                     const int i = rec.size();
-                    return {hts[i], initPred[i]};
+                    return {*hts[i], initPred[i]};
                   });
 
   Cr2Decompressor<HuffmanTable> d(mRaw, format, iPoint2D(frame.w, frame.h),
