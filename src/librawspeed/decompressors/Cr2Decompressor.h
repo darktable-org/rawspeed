@@ -38,7 +38,8 @@ class Cr2Slicing {
   int lastSliceWidth = 0;
 
   friend class Cr2LJpegDecoder;
-  friend class Cr2Decompressor;
+
+  template <typename HuffmanTable> friend class Cr2Decompressor;
 
 public:
   Cr2Slicing() = default;
@@ -71,16 +72,33 @@ public:
   }
 };
 
-class Cr2Decompressor final {
+template <typename HuffmanTable> class Cr2Decompressor final {
+public:
+  struct PerComponentRecipe {
+    const HuffmanTable& ht;
+    const uint16_t initPred;
+  };
+
+private:
   const RawImage mRaw;
   const std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format;
   const iPoint2D frame;
   const Cr2Slicing slicing;
 
-  const std::vector<const HuffmanTable*> ht;
-  const std::vector<uint16_t> initPred;
+  const std::vector<PerComponentRecipe> rec;
 
   const ByteStream input;
+
+  template <int N_COMP, size_t... I>
+  [[nodiscard]] std::array<std::reference_wrapper<const HuffmanTable>, N_COMP>
+      getHuffmanTablesImpl(std::index_sequence<I...> /*unused*/) const;
+
+  template <int N_COMP>
+  [[nodiscard]] std::array<std::reference_wrapper<const HuffmanTable>, N_COMP>
+  getHuffmanTables() const;
+
+  template <int N_COMP>
+  [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
 
   template <int N_COMP, int X_S_F, int Y_S_F> void decompressN_X_Y();
 
@@ -88,10 +106,12 @@ public:
   Cr2Decompressor(
       const RawImage& mRaw,
       std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format,
-      iPoint2D frame, Cr2Slicing slicing, std::vector<const HuffmanTable*> ht,
-      std::vector<uint16_t> initPred, ByteStream input);
+      iPoint2D frame, Cr2Slicing slicing, std::vector<PerComponentRecipe> rec,
+      ByteStream input);
 
   void decompress();
 };
+
+extern template class Cr2Decompressor<HuffmanTable>;
 
 } // namespace rawspeed

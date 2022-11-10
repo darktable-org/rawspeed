@@ -18,18 +18,34 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#ifndef HuffmanTableImpl
+#error HuffmanTableImpl must be defined to one of rawspeeds huffman tables
+#endif
+
 #include "decompressors/Cr2Decompressor.h"
-#include "HuffmanTable/Common.h"        // for createHuffmanTable
-#include "common/RawImage.h"            // for RawImage, RawImageData
-#include "common/RawspeedException.h"   // for RawspeedException
-#include "decompressors/HuffmanTable.h" // for HuffmanTable
-#include "fuzz/Common.h"                // for CreateRawImage
-#include "io/Buffer.h"                  // for Buffer, DataBuffer
-#include "io/ByteStream.h"              // for ByteStream
-#include "io/Endianness.h"              // for Endianness, Endianness::little
-#include <cassert>                      // for assert
-#include <cstdint>                      // for uint8_t
-#include <cstdio>                       // for size_t
+#include "HuffmanTable/Common.h"             // for createHuffmanTableImpl
+#include "common/RawImage.h"                 // for RawImage, RawImageData
+#include "common/RawspeedException.h"        // for RawspeedException
+#include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
+#include "decompressors/HuffmanTable.h"      // for HuffmanTable
+#include "fuzz/Common.h"                     // for CreateRawImage
+#include "io/Buffer.h"                       // for Buffer, DataBuffer
+#include "io/ByteStream.h"                   // for ByteStream
+#include "io/Endianness.h"                   // for Endianness
+#include <cassert>                           // for assert
+#include <cstdint>                           // for uint8_t
+#include <cstdio>                            // for size_t
+
+#ifdef WITH_DummyHuffmanTable
+#include "decompressors/Cr2DecompressorImpl.h"
+
+namespace rawspeed {
+
+template class Cr2Decompressor<DummyHuffmanTable>;
+
+} // namespace rawspeed
+
+#endif // WITH_DummyHuffmanTable
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -60,29 +76,41 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     const rawspeed::Cr2Slicing slicing(numSlices, sliceWidth, lastSliceWidth);
 
+    const unsigned num_recips = bs.getU32();
+
     const unsigned num_unique_hts = bs.getU32();
-    std::vector<rawspeed::HuffmanTable> uniqueHts;
+    std::vector<rawspeed::HuffmanTableImpl> uniqueHts;
     std::generate_n(std::back_inserter(uniqueHts), num_unique_hts, [&bs]() {
-      return createHuffmanTable<rawspeed::HuffmanTable>(bs);
+      return createHuffmanTable<rawspeed::HuffmanTableImpl>(bs);
     });
 
-    const unsigned num_hts = bs.getU32();
-    std::vector<const rawspeed::HuffmanTable*> hts;
-    std::generate_n(std::back_inserter(hts), num_hts, [&bs, &uniqueHts]() {
+    std::vector<const rawspeed::HuffmanTableImpl*> hts;
+    std::generate_n(std::back_inserter(hts), num_recips, [&bs, &uniqueHts]() {
       if (unsigned uniq_ht_idx = bs.getU32(); uniq_ht_idx < uniqueHts.size())
         return &uniqueHts[uniq_ht_idx];
       ThrowRSE("Unknown unique huffman table");
     });
 
-    const unsigned num_pred = bs.getU32();
-    (void)bs.check(num_pred, sizeof(uint16_t));
+    (void)bs.check(num_recips, sizeof(uint16_t));
     std::vector<uint16_t> initPred;
-    initPred.reserve(num_pred);
-    std::generate_n(std::back_inserter(initPred), num_pred,
+    initPred.reserve(num_recips);
+    std::generate_n(std::back_inserter(initPred), num_recips,
                     [&bs]() { return bs.get<uint16_t>(); });
 
-    rawspeed::Cr2Decompressor d(mRaw, format, frame, slicing, hts, initPred,
-                                bs.getSubStream(/*offset=*/0));
+    std::vector<rawspeed::Cr2Decompressor<
+        rawspeed::HuffmanTableImpl>::PerComponentRecipe>
+        rec;
+    rec.reserve(num_recips);
+    std::generate_n(std::back_inserter(rec), num_recips,
+                    [&rec, hts, initPred]()
+                        -> rawspeed::Cr2Decompressor<
+                            rawspeed::HuffmanTableImpl>::PerComponentRecipe {
+                      const int i = rec.size();
+                      return {*hts[i], initPred[i]};
+                    });
+
+    rawspeed::Cr2Decompressor<rawspeed::HuffmanTableImpl> d(
+        mRaw, format, frame, slicing, rec, bs.getSubStream(/*offset=*/0));
     mRaw->createData();
     d.decompress();
 

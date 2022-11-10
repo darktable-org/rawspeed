@@ -128,9 +128,18 @@ void Cr2LJpegDecoder::decodeScan()
 
   int N_COMP = std::get<0>(format);
 
-  Cr2Decompressor d(mRaw, format, iPoint2D(frame.w, frame.h), slicing,
-                    getHuffmanTables(N_COMP), getInitialPredictors(N_COMP),
-                    input);
+  std::vector<Cr2Decompressor<HuffmanTable>::PerComponentRecipe> rec;
+  rec.reserve(N_COMP);
+  std::generate_n(std::back_inserter(rec), N_COMP,
+                  [&rec, hts = getHuffmanTables(N_COMP),
+                   initPred = getInitialPredictors(N_COMP)]()
+                      -> Cr2Decompressor<HuffmanTable>::PerComponentRecipe {
+                    const int i = rec.size();
+                    return {*hts[i], initPred[i]};
+                  });
+
+  Cr2Decompressor<HuffmanTable> d(mRaw, format, iPoint2D(frame.w, frame.h),
+                                  slicing, rec, input);
   d.decompress();
 }
 
