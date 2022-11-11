@@ -872,10 +872,13 @@ void VC5Decompressor::combineFinalLowpassBandsImpl() const noexcept {
 
       patData = applyStablePhaseShift(patData, basePhase, p);
 
-      out(2 * row + 0, 2 * col + 0) = static_cast<uint16_t>(patData[0]);
-      out(2 * row + 0, 2 * col + 1) = static_cast<uint16_t>(patData[1]);
-      out(2 * row + 1, 2 * col + 0) = static_cast<uint16_t>(patData[2]);
-      out(2 * row + 1, 2 * col + 1) = static_cast<uint16_t>(patData[3]);
+      const Array2DRef<const int> pat(patData.data(), 2, 2);
+      for (int patRow = 0; patRow < pat.height; ++patRow) {
+        for (int patCol = 0; patCol < pat.width; ++patCol) {
+          out(2 * row + patRow, 2 * col + patCol) =
+              static_cast<uint16_t>(pat(patRow, patCol));
+        }
+      }
     }
   }
 }
