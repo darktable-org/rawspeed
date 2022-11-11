@@ -390,6 +390,13 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     ThrowRDE("Height %u is not a multiple of %u", mRaw->dim.y,
              mVC5.patternHeight);
 
+  std::optional<BayerPhase> p = getAsBayerPhase(mRaw->cfa);
+  if (!p)
+    ThrowRDE("Image has invalid CFA.");
+  phase = *p;
+  if (phase != BayerPhase::RGGB && phase != BayerPhase::GBRG)
+    ThrowRDE("Unexpected bayer phase, please file a bug.");
+
   // Initialize wavelet sizes.
   for (Channel& channel : channels) {
     uint16_t waveletWidth = mRaw->dim.x;
@@ -818,7 +825,8 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
   }
 }
 
-void VC5Decompressor::combineFinalLowpassBands() const noexcept {
+template <BayerPhase p>
+void VC5Decompressor::combineFinalLowpassBandsImpl() const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   const int width = out.width / 2;
@@ -839,56 +847,51 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
   const Array2DRef<const int16_t> lowbands3 =
       channels[3].wavelets[0].bands[0]->data->description;
 
-  // Convert to RGGB or GBRG output
-  if (mRaw->cfa.getColorAt(0, 0) == CFAColor::RED) {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
-    for (int row = 0; row < height; ++row) {
-      for (int col = 0; col < width; ++col) {
-        const int mid = 2048;
+  for (int row = 0; row < height; ++row) {
+    for (int col = 0; col < width; ++col) {
+      const int mid = 2048;
 
-        int gs = lowbands0(row, col);
-        int rg = lowbands1(row, col) - mid;
-        int bg = lowbands2(row, col) - mid;
-        int gd = lowbands3(row, col) - mid;
+      int gs = lowbands0(row, col);
+      int rg = lowbands1(row, col) - mid;
+      int bg = lowbands2(row, col) - mid;
+      int gd = lowbands3(row, col) - mid;
 
-        int r = gs + 2 * rg;
-        int b = gs + 2 * bg;
-        int g1 = gs + gd;
-        int g2 = gs - gd;
+      int r = gs + 2 * rg;
+      int b = gs + 2 * bg;
+      int g1 = gs + gd;
+      int g2 = gs - gd;
 
-        out(2 * row + 0, 2 * col + 0) = static_cast<uint16_t>(mVC5LogTable[r]);
-        out(2 * row + 0, 2 * col + 1) = static_cast<uint16_t>(mVC5LogTable[g1]);
-        out(2 * row + 1, 2 * col + 0) = static_cast<uint16_t>(mVC5LogTable[g2]);
-        out(2 * row + 1, 2 * col + 1) = static_cast<uint16_t>(mVC5LogTable[b]);
-      }
-    }
-  } else {
-#ifdef HAVE_OPENMP
-#pragma omp for schedule(static)
-#endif
-    for (int row = 0; row < height; ++row) {
-      for (int col = 0; col < width; ++col) {
-        const int mid = 2048;
+      static constexpr BayerPhase basePhase = BayerPhase::RGGB;
+      std::array<int, 4> patData = {r, g1, g2, b};
+      patData = applyStablePhaseShift(patData, basePhase, p);
 
-        int gs = lowbands0(row, col);
-        int rg = lowbands1(row, col) - mid;
-        int bg = lowbands2(row, col) - mid;
-        int gd = lowbands3(row, col) - mid;
-
-        int r = gs + 2 * rg;
-        int b = gs + 2 * bg;
-        int g1 = gs + gd;
-        int g2 = gs - gd;
-
-        out(2 * row + 0, 2 * col + 0) = static_cast<uint16_t>(mVC5LogTable[g1]);
-        out(2 * row + 0, 2 * col + 1) = static_cast<uint16_t>(mVC5LogTable[b]);
-        out(2 * row + 1, 2 * col + 0) = static_cast<uint16_t>(mVC5LogTable[r]);
-        out(2 * row + 1, 2 * col + 1) = static_cast<uint16_t>(mVC5LogTable[g2]);
-      }
+      out(2 * row + 0, 2 * col + 0) =
+          static_cast<uint16_t>(mVC5LogTable[patData[0]]);
+      out(2 * row + 0, 2 * col + 1) =
+          static_cast<uint16_t>(mVC5LogTable[patData[1]]);
+      out(2 * row + 1, 2 * col + 0) =
+          static_cast<uint16_t>(mVC5LogTable[patData[2]]);
+      out(2 * row + 1, 2 * col + 1) =
+          static_cast<uint16_t>(mVC5LogTable[patData[3]]);
     }
   }
+}
+
+void VC5Decompressor::combineFinalLowpassBands() const noexcept {
+  switch (phase) {
+  case BayerPhase::RGGB:
+    combineFinalLowpassBandsImpl<BayerPhase::RGGB>();
+    return;
+  case BayerPhase::GBRG:
+    combineFinalLowpassBandsImpl<BayerPhase::GBRG>();
+    return;
+  default:
+    break;
+  }
+  __builtin_unreachable();
 }
 
 inline std::pair<int16_t /*value*/, unsigned int /*count*/>

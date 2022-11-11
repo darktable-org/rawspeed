@@ -1,5 +1,6 @@
 FILE(GLOB SOURCES
   "Array2DRef.h"
+  "BayerPhase.h"
   "ChecksumFile.cpp"
   "ChecksumFile.h"
   "Common.cpp"
