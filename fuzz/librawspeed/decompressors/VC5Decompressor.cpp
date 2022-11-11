@@ -40,6 +40,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     rawspeed::ByteStream bs(db);
 
     rawspeed::RawImage mRaw(CreateRawImage(bs));
+    mRaw->cfa = CreateCFA(bs);
     mRaw->whitePoint = bs.getI32();
 
     const auto offsetX = bs.getU32();

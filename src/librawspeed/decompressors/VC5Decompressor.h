@@ -22,6 +22,7 @@
 #pragma once
 
 #include "common/Array2DRef.h"                  // for Array2DRef
+#include "common/BayerPhase.h"                  // for BayerPhase
 #include "common/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocator...
 #include "common/RawImage.h"                    // for RawImage
 #include "common/SimpleLUT.h"                   // for SimpleLUT, SimpleLUT...
@@ -89,6 +90,8 @@ inline VC5Tag operator-(VC5Tag tag) {
 class VC5Decompressor final : public AbstractDecompressor {
   RawImage mRaw;
   ByteStream mBs;
+
+  BayerPhase phase;
 
   static constexpr auto VC5_LOG_TABLE_BITWIDTH = 12;
   int outputBits;
@@ -207,6 +210,8 @@ class VC5Decompressor final : public AbstractDecompressor {
   getRLV(BitPumpMSB& bits);
 
   void parseLargeCodeblock(const ByteStream& bs);
+
+  template <BayerPhase p> void combineFinalLowpassBandsImpl() const noexcept;
 
   void combineFinalLowpassBands() const noexcept;
 
