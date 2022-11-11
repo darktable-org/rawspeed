@@ -162,29 +162,29 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
     }
   }
 
-  if (iPoint2D::area_type((unsigned)frame.y) * slicing.totalWidth() <
+  if (iPoint2D::area_type(frame.y) * slicing.totalWidth() <
       cpp * realDim.area())
     ThrowRDE("Incorrect slice height / slice widths! Less than image size.");
 
-  unsigned globalFrameCol = 0;
-  unsigned globalFrameRow = 0;
+  int globalFrameCol = 0;
+  int globalFrameRow = 0;
   for (auto sliceId = 0; sliceId < slicing.numSlices; sliceId++) {
-    const unsigned sliceWidth = slicing.widthOfSlice(sliceId);
+    const int sliceWidth = slicing.widthOfSlice(sliceId);
 
-    assert((unsigned)frame.y % frameRowStep == 0);
-    for (unsigned sliceFrameRow = 0; sliceFrameRow < (unsigned)frame.y;
+    assert(frame.y % frameRowStep == 0);
+    for (int sliceFrameRow = 0; sliceFrameRow < frame.y;
          sliceFrameRow += frameRowStep, globalFrameRow += frameRowStep) {
-      unsigned row = globalFrameRow % realDim.y;
-      unsigned col = globalFrameRow / realDim.y * slicing.widthOfSlice(0) / cpp;
-      if (col >= static_cast<unsigned>(realDim.x))
+      int row = globalFrameRow % realDim.y;
+      int col = globalFrameRow / realDim.y * slicing.widthOfSlice(0) / cpp;
+      if (col >= static_cast<int>(realDim.x))
         break;
 
       assert(sliceWidth % cpp == 0);
-      unsigned pixelsPerSliceRow = sliceWidth / cpp;
-      if (col + pixelsPerSliceRow > static_cast<unsigned>(realDim.x))
+      int pixelsPerSliceRow = sliceWidth / cpp;
+      if (col + pixelsPerSliceRow > static_cast<int>(realDim.x))
         ThrowRDE("Bad slice width / frame size / image size combination.");
       if (((sliceId + 1) == slicing.numSlices) &&
-          (col + pixelsPerSliceRow != static_cast<unsigned>(realDim.x)))
+          (col + pixelsPerSliceRow != static_cast<int>(realDim.x)))
         ThrowRDE("Insufficient slices - do not fill the entire image");
 
       row /= Y_S_F;
@@ -193,9 +193,9 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
       col /= X_S_F;
       col *= colsPerGroup;
       assert(sliceWidth % sliceColStep == 0);
-      for (unsigned sliceCol = 0; sliceCol < sliceWidth;) {
+      for (int sliceCol = 0; sliceCol < sliceWidth;) {
         // check if we processed one full raw row worth of pixels
-        if (globalFrameCol == (unsigned)frame.x) {
+        if (globalFrameCol == frame.x) {
           // if yes -> update predictor by going back exactly one row,
           // no matter where we are right now.
           // makes no sense from an image compression point of view, ask Canon.
@@ -207,17 +207,17 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
 
         // How many pixel can we decode until we finish the row of either
         // the frame (i.e. predictor change time), or of the current slice?
-        assert((unsigned)frame.x % X_S_F == 0);
-        unsigned sliceColsRemainingInThisFrameRow =
-            sliceColStep * (((unsigned)frame.x - globalFrameCol) / X_S_F);
-        unsigned sliceColsRemainingInThisSliceRow = sliceWidth - sliceCol;
-        unsigned sliceColsRemaining = std::min(
-            sliceColsRemainingInThisSliceRow, sliceColsRemainingInThisFrameRow);
+        assert(frame.x % X_S_F == 0);
+        int sliceColsRemainingInThisFrameRow =
+            sliceColStep * ((frame.x - globalFrameCol) / X_S_F);
+        int sliceColsRemainingInThisSliceRow = sliceWidth - sliceCol;
+        int sliceColsRemaining = std::min(sliceColsRemainingInThisSliceRow,
+                                          sliceColsRemainingInThisFrameRow);
         assert(sliceColsRemaining >= sliceColStep &&
                (sliceColsRemaining % sliceColStep) == 0);
-        for (unsigned sliceColEnd = sliceCol + sliceColsRemaining;
+        for (int sliceColEnd = sliceCol + sliceColsRemaining;
              sliceCol < sliceColEnd; sliceCol += sliceColStep,
-                      globalFrameCol += X_S_F, col += groupSize) {
+                 globalFrameCol += X_S_F, col += groupSize) {
           for (int p = 0; p < groupSize; ++p) {
             int c = p < pixelsPerGroup ? 0 : p - pixelsPerGroup + 1;
             out(row, col + p) = pred[c] +=

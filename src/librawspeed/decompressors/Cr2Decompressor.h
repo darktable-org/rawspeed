@@ -56,7 +56,7 @@ public:
     return 0 == numSlices && 0 == sliceWidth && 0 == lastSliceWidth;
   }
 
-  [[nodiscard]] unsigned widthOfSlice(int sliceId) const {
+  [[nodiscard]] int widthOfSlice(int sliceId) const {
     assert(sliceId >= 0);
     assert(sliceId < numSlices);
     if ((sliceId + 1) == numSlices)
@@ -64,7 +64,7 @@ public:
     return sliceWidth;
   }
 
-  [[nodiscard]] unsigned totalWidth() const {
+  [[nodiscard]] int totalWidth() const {
     int width = 0;
     for (auto sliceId = 0; sliceId < numSlices; sliceId++)
       width += widthOfSlice(sliceId);
