@@ -55,6 +55,9 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
              mRaw->dim.y);
   }
 
+  if (!frame.hasPositiveArea())
+    ThrowRDE("LJPEG Frame size is wrong");
+
   for (auto sliceId = 0; sliceId < slicing.numSlices; sliceId++) {
     const auto sliceWidth = slicing.widthOfSlice(sliceId);
     if (sliceWidth <= 0)
