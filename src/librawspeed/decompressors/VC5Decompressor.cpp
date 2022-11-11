@@ -866,16 +866,16 @@ void VC5Decompressor::combineFinalLowpassBandsImpl() const noexcept {
 
       static constexpr BayerPhase basePhase = BayerPhase::RGGB;
       std::array<int, 4> patData = {r, g1, g2, b};
+
+      for (int& patElt : patData)
+        patElt = mVC5LogTable[patElt];
+
       patData = applyStablePhaseShift(patData, basePhase, p);
 
-      out(2 * row + 0, 2 * col + 0) =
-          static_cast<uint16_t>(mVC5LogTable[patData[0]]);
-      out(2 * row + 0, 2 * col + 1) =
-          static_cast<uint16_t>(mVC5LogTable[patData[1]]);
-      out(2 * row + 1, 2 * col + 0) =
-          static_cast<uint16_t>(mVC5LogTable[patData[2]]);
-      out(2 * row + 1, 2 * col + 1) =
-          static_cast<uint16_t>(mVC5LogTable[patData[3]]);
+      out(2 * row + 0, 2 * col + 0) = static_cast<uint16_t>(patData[0]);
+      out(2 * row + 0, 2 * col + 1) = static_cast<uint16_t>(patData[1]);
+      out(2 * row + 1, 2 * col + 0) = static_cast<uint16_t>(patData[2]);
+      out(2 * row + 1, 2 * col + 1) = static_cast<uint16_t>(patData[3]);
     }
   }
 }
