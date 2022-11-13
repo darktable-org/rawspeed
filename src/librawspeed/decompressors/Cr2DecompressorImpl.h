@@ -98,11 +98,6 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
       ThrowRDE("Bad slice width: %i", sliceWidth);
   }
 
-  const bool isSubSampled =
-      std::get<1>(format) != 1 || std::get<2>(format) != 1;
-  if (isSubSampled == mRaw->isCFA)
-    ThrowRDE("Cannot decode subsampled image to CFA data or vice versa");
-
   if (!((std::make_tuple(3, 2, 2) == format) ||
         (std::make_tuple(3, 2, 1) == format) ||
         (std::make_tuple(2, 1, 1) == format) ||
@@ -110,13 +105,43 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
     ThrowRDE("Unknown format <%i,%i,%i>", std::get<0>(format),
              std::get<1>(format), std::get<2>(format));
 
-  if (static_cast<int>(rec.size()) != std::get<0>(format))
+  const Dsc dsc(format);
+
+  if (dsc.subSampled == mRaw->isCFA)
+    ThrowRDE("Cannot decode subsampled image to CFA data or vice versa");
+
+  if (static_cast<int>(rec.size()) != dsc.N_COMP)
     ThrowRDE("HT/Initial predictor count does not match component count");
 
   for (const auto& recip : rec) {
     if (!recip.ht.isFullDecode())
       ThrowRDE("Huffman table is not of a full decoding variety");
   }
+
+  iPoint2D realDim = mRaw->dim;
+  if (dsc.subSampled) {
+    assert(realDim.x % dsc.groupSize == 0);
+    realDim.x /= dsc.groupSize;
+  }
+  realDim.x *= dsc.X_S_F;
+  realDim.y *= dsc.Y_S_F;
+
+  for (const auto& width : {slicing.sliceWidth, slicing.lastSliceWidth}) {
+    if (width > realDim.x)
+      ThrowRDE("Slice is longer than image's height, which is unsupported.");
+    if (width % dsc.sliceColStep != 0) {
+      ThrowRDE("Slice width (%u) should be multiple of pixel group size (%u)",
+               width, dsc.sliceColStep);
+    }
+    if (width % dsc.cpp != 0) {
+      ThrowRDE("Slice width (%u) should be multiple of image cpp (%u)", width,
+               dsc.cpp);
+    }
+  }
+
+  if (iPoint2D::area_type(frame.y) * slicing.totalWidth() <
+      dsc.cpp * realDim.area())
+    ThrowRDE("Incorrect slice height / slice widths! Less than image size.");
 }
 
 template <typename HuffmanTable>
@@ -179,23 +204,6 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
   const auto* predNext = &out(0, 0);
 
   BitPumpJPEG bs(input);
-
-  for (const auto& width : {slicing.sliceWidth, slicing.lastSliceWidth}) {
-    if (width > realDim.x)
-      ThrowRDE("Slice is longer than image's height, which is unsupported.");
-    if (width % dsc.sliceColStep != 0) {
-      ThrowRDE("Slice width (%u) should be multiple of pixel group size (%u)",
-               width, dsc.sliceColStep);
-    }
-    if (width % dsc.cpp != 0) {
-      ThrowRDE("Slice width (%u) should be multiple of image cpp (%u)", width,
-               dsc.cpp);
-    }
-  }
-
-  if (iPoint2D::area_type(frame.y) * slicing.totalWidth() <
-      dsc.cpp * realDim.area())
-    ThrowRDE("Incorrect slice height / slice widths! Less than image size.");
 
   int globalFrameCol = 0;
   int globalFrameRow = 0;
