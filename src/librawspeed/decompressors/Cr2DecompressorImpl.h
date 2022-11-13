@@ -126,20 +126,22 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
     realDim.y *= dsc.Y_S_F;
   }
 
-  for (const auto& width : {slicing.sliceWidth, slicing.lastSliceWidth}) {
-    if (width > realDim.x)
+  for (auto* width : {&slicing.sliceWidth, &slicing.lastSliceWidth}) {
+    if (*width > realDim.x)
       ThrowRDE("Slice is longer than image's height, which is unsupported.");
-    if (width % dsc.sliceColStep != 0) {
+    if (*width % dsc.sliceColStep != 0) {
       ThrowRDE("Slice width (%u) should be multiple of pixel group size (%u)",
-               width, dsc.sliceColStep);
+               *width, dsc.sliceColStep);
     }
-    if (width % dsc.cpp != 0) {
-      ThrowRDE("Slice width (%u) should be multiple of image cpp (%u)", width,
+    if (*width % dsc.cpp != 0) {
+      ThrowRDE("Slice width (%u) should be multiple of image cpp (%u)", *width,
                dsc.cpp);
     }
+    *width /= dsc.sliceColStep;
+    // NOTE: width is no longer guaranteed to be a multiple of cpp!
   }
 
-  if (iPoint2D::area_type(frame.y) * slicing.totalWidth() <
+  if (iPoint2D::area_type(frame.y) * dsc.sliceColStep * slicing.totalWidth() <
       dsc.cpp * realDim.area())
     ThrowRDE("Incorrect slice height / slice widths! Less than image size.");
 }
@@ -216,13 +218,13 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
     for (int sliceFrameRow = 0; sliceFrameRow < globalFrame.y;
          ++sliceFrameRow, ++globalFrameRow) {
       int row = globalFrameRow % realDim.y;
-      int col =
-          (globalFrameRow / realDim.y) * (slicing.widthOfSlice(0) / dsc.cpp);
+      int col = (globalFrameRow / realDim.y) *
+                ((dsc.sliceColStep * slicing.widthOfSlice(0)) / dsc.cpp);
       if (col >= static_cast<int>(realDim.x))
         break;
 
-      assert(sliceWidth % dsc.cpp == 0);
-      int pixelsPerSliceRow = sliceWidth / dsc.cpp;
+      assert((dsc.sliceColStep * sliceWidth) % dsc.cpp == 0);
+      int pixelsPerSliceRow = (dsc.sliceColStep * sliceWidth) / dsc.cpp;
       if (col + pixelsPerSliceRow > static_cast<int>(realDim.x))
         ThrowRDE("Bad slice width / frame size / image size combination.");
       if (((sliceId + 1) == slicing.numSlices) &&
@@ -232,7 +234,6 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
       assert(col % X_S_F == 0);
       col /= X_S_F;
       col *= dsc.colsPerGroup;
-      assert(sliceWidth % dsc.sliceColStep == 0);
       for (int sliceCol = 0; sliceCol < sliceWidth;) {
         // check if we processed one full raw row worth of pixels
         if (globalFrameCol == globalFrame.x) {
@@ -247,16 +248,13 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
 
         // How many pixel can we decode until we finish the row of either
         // the frame (i.e. predictor change time), or of the current slice?
-        int sliceColsRemainingInThisFrameRow =
-            dsc.sliceColStep * (globalFrame.x - globalFrameCol);
+        int sliceColsRemainingInThisFrameRow = globalFrame.x - globalFrameCol;
         int sliceColsRemainingInThisSliceRow = sliceWidth - sliceCol;
         int sliceColsRemaining = std::min(sliceColsRemainingInThisSliceRow,
                                           sliceColsRemainingInThisFrameRow);
-        assert(sliceColsRemaining >= dsc.sliceColStep &&
-               (sliceColsRemaining % dsc.sliceColStep) == 0);
         for (int sliceColEnd = sliceCol + sliceColsRemaining;
-             sliceCol < sliceColEnd; sliceCol += dsc.sliceColStep,
-                 ++globalFrameCol, col += dsc.groupSize) {
+             sliceCol < sliceColEnd;
+             ++sliceCol, ++globalFrameCol, col += dsc.groupSize) {
           for (int p = 0; p < dsc.groupSize; ++p) {
             int c = p < dsc.pixelsPerGroup ? 0 : p - dsc.pixelsPerGroup + 1;
             out(row, col + p) = pred[c] +=
