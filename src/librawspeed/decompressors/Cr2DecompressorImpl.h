@@ -196,7 +196,6 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
     assert(realDim.x % dsc.groupSize == 0);
     realDim.x /= dsc.groupSize;
     realDim.x *= X_S_F;
-    realDim.y *= Y_S_F;
   }
 
   assert(frame.x % X_S_F == 0);
@@ -216,9 +215,9 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
 
     for (int sliceFrameRow = 0; sliceFrameRow < globalFrame.y;
          ++sliceFrameRow, ++globalFrameRow) {
-      int row = (dsc.frameRowStep * globalFrameRow) % realDim.y;
-      int col = (dsc.frameRowStep * globalFrameRow) / realDim.y *
-                slicing.widthOfSlice(0) / dsc.cpp;
+      int row = globalFrameRow % realDim.y;
+      int col =
+          (globalFrameRow / realDim.y) * (slicing.widthOfSlice(0) / dsc.cpp);
       if (col >= static_cast<int>(realDim.x))
         break;
 
@@ -229,8 +228,6 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
       if (((sliceId + 1) == slicing.numSlices) &&
           (col + pixelsPerSliceRow != static_cast<int>(realDim.x)))
         ThrowRDE("Insufficient slices - do not fill the entire image");
-
-      row /= Y_S_F;
 
       assert(col % X_S_F == 0);
       col /= X_S_F;
