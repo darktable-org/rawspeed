@@ -122,9 +122,9 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
   if (dsc.subSampled) {
     assert(realDim.x % dsc.groupSize == 0);
     realDim.x /= dsc.groupSize;
+    realDim.x *= dsc.X_S_F;
+    realDim.y *= dsc.Y_S_F;
   }
-  realDim.x *= dsc.X_S_F;
-  realDim.y *= dsc.Y_S_F;
 
   for (const auto& width : {slicing.sliceWidth, slicing.lastSliceWidth}) {
     if (width > realDim.x)
@@ -195,9 +195,9 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
   if (dsc.subSampled) {
     assert(realDim.x % dsc.groupSize == 0);
     realDim.x /= dsc.groupSize;
+    realDim.x *= X_S_F;
+    realDim.y *= Y_S_F;
   }
-  realDim.x *= X_S_F;
-  realDim.y *= Y_S_F;
 
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPreds<N_COMP>();
