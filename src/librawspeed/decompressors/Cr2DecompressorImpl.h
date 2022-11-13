@@ -199,6 +199,10 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
     realDim.y *= Y_S_F;
   }
 
+  assert(frame.x % X_S_F == 0);
+  assert(frame.y % dsc.frameRowStep == 0);
+  const iPoint2D globalFrame(frame.x / X_S_F, frame.y / dsc.frameRowStep);
+
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPreds<N_COMP>();
   const auto* predNext = &out(0, 0);
@@ -210,12 +214,11 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
   for (auto sliceId = 0; sliceId < slicing.numSlices; sliceId++) {
     const int sliceWidth = slicing.widthOfSlice(sliceId);
 
-    assert(frame.y % dsc.frameRowStep == 0);
-    for (int sliceFrameRow = 0; sliceFrameRow < frame.y;
-         sliceFrameRow += dsc.frameRowStep,
-             globalFrameRow += dsc.frameRowStep) {
-      int row = globalFrameRow % realDim.y;
-      int col = globalFrameRow / realDim.y * slicing.widthOfSlice(0) / dsc.cpp;
+    for (int sliceFrameRow = 0; sliceFrameRow < globalFrame.y;
+         ++sliceFrameRow, ++globalFrameRow) {
+      int row = (dsc.frameRowStep * globalFrameRow) % realDim.y;
+      int col = (dsc.frameRowStep * globalFrameRow) / realDim.y *
+                slicing.widthOfSlice(0) / dsc.cpp;
       if (col >= static_cast<int>(realDim.x))
         break;
 
@@ -235,7 +238,7 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
       assert(sliceWidth % dsc.sliceColStep == 0);
       for (int sliceCol = 0; sliceCol < sliceWidth;) {
         // check if we processed one full raw row worth of pixels
-        if (globalFrameCol == frame.x) {
+        if (globalFrameCol == globalFrame.x) {
           // if yes -> update predictor by going back exactly one row,
           // no matter where we are right now.
           // makes no sense from an image compression point of view, ask Canon.
@@ -247,9 +250,8 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
 
         // How many pixel can we decode until we finish the row of either
         // the frame (i.e. predictor change time), or of the current slice?
-        assert(frame.x % X_S_F == 0);
         int sliceColsRemainingInThisFrameRow =
-            dsc.sliceColStep * ((frame.x - globalFrameCol) / X_S_F);
+            dsc.sliceColStep * (globalFrame.x - globalFrameCol);
         int sliceColsRemainingInThisSliceRow = sliceWidth - sliceCol;
         int sliceColsRemaining = std::min(sliceColsRemainingInThisSliceRow,
                                           sliceColsRemainingInThisFrameRow);
@@ -257,7 +259,7 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
                (sliceColsRemaining % dsc.sliceColStep) == 0);
         for (int sliceColEnd = sliceCol + sliceColsRemaining;
              sliceCol < sliceColEnd; sliceCol += dsc.sliceColStep,
-                 globalFrameCol += X_S_F, col += dsc.groupSize) {
+                 ++globalFrameCol, col += dsc.groupSize) {
           for (int p = 0; p < dsc.groupSize; ++p) {
             int c = p < dsc.pixelsPerGroup ? 0 : p - dsc.pixelsPerGroup + 1;
             out(row, col + p) = pred[c] +=
