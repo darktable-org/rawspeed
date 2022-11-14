@@ -24,12 +24,12 @@
 #include <iterator>                   // for cend, cbegin, pair
 #include <limits>                     // for numeric_limits
 #include <ostream>                    // for operator<<, basic_ostream::ope...
-#include <pstl/glue_algorithm_defs.h> // for move
 #include <string>                     // for allocator, basic_string
 #include <tuple>                      // for make_tuple, get, tuple
 #include <type_traits>                // for __strip_reference_wrapper<>::_...
 #include <utility>                    // for make_pair, pair, move
 #include <variant>                    // for tuple
+// IWYU pragma: no_include <pstl/glue_algorithm_defs.h>
 
 using rawspeed::iPoint2D;
 using std::make_pair;
