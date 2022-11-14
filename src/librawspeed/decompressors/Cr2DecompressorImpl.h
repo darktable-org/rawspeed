@@ -223,14 +223,6 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
       if (col >= static_cast<int>(realDim.x))
         break;
 
-      assert((dsc.sliceColStep * sliceWidth) % dsc.cpp == 0);
-      int pixelsPerSliceRow = (dsc.sliceColStep * sliceWidth) / dsc.cpp;
-      if (col + pixelsPerSliceRow > static_cast<int>(realDim.x))
-        ThrowRDE("Bad slice width / frame size / image size combination.");
-      if (((sliceId + 1) == slicing.numSlices) &&
-          (col + pixelsPerSliceRow != static_cast<int>(realDim.x)))
-        ThrowRDE("Insufficient slices - do not fill the entire image");
-
       assert(col % X_S_F == 0);
       col /= X_S_F;
       col *= dsc.colsPerGroup;
