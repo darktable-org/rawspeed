@@ -18,8 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
-
+#include "rawspeedconfig.h" // for HAVE_ALIGNED_ALLOC
 #include "common/Memory.h"
 
 #ifndef NDEBUG
@@ -27,14 +26,14 @@
 #endif
 
 #include <cassert> // for assert
-#include <cstddef> // for size_t, uintptr_t
+#include <cstddef> // for size_t
 
 #if defined(HAVE_ALIGNED_MALLOC)
 extern "C" {
 #include <malloc.h> // for _aligned_malloc, _aligned_free
 }
 #else
-#include <cstdlib> // for aligned_alloc / posix_memalign; free
+#include <cstdlib> // for aligned_alloc, free
 #endif
 
 namespace rawspeed {

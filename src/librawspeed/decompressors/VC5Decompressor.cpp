@@ -27,22 +27,25 @@
   implementation.
  */
 
-#include "rawspeedconfig.h" // for HAVE_OPENMP
+#include "rawspeedconfig.h" // for HAVE_OPENMP, RAWSPEED_CACH...
 #include "decompressors/VC5Decompressor.h"
 #include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Common.h"                // for clampBits, roundUpDivision
+#include "common/Common.h"                // for roundUpDivision, rawspeed_...
+#include "common/ErrorLog.h"              // for ErrorLog
 #include "common/Point.h"                 // for iPoint2D
-#include "common/RawspeedException.h"     // for RawspeedException
 #include "common/SimpleLUT.h"             // for SimpleLUT, SimpleLUT<>::va...
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Endianness.h"                // for Endianness, Endianness::big
+#include <algorithm>                      // for all_of, max
 #include <cassert>                        // for assert
 #include <cmath>                          // for pow
+#include <ext/alloc_traits.h>             // for __alloc_traits<>::value_type
 #include <initializer_list>               // for initializer_list
 #include <limits>                         // for numeric_limits
-#include <optional>                       // for optional
+#include <optional>                       // for optional, operator==
 #include <string>                         // for string
-#include <utility>                        // for move
+#include <tuple>                          // for tie, tuple
+#include <utility>                        // for move, pair
 
 namespace {
 
@@ -60,7 +63,7 @@ struct RLV {
     const uint32_t length;                                                     \
     const RLV entries[n];                                                      \
   } constexpr
-#include "gopro/vc5/table17.inc"
+#include "gopro/vc5/table17.inc" // for table17
 
 constexpr int16_t decompand(int16_t val) {
   double c = val;

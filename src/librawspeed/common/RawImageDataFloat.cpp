@@ -18,15 +18,17 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/RawImage.h"              // for RawImageDataFloat, TYPE_FL...
-#include "common/Common.h"                // for writeLog, DEBUG_PRIO::INFO
+#include "common/RawImage.h"              // for RawImageDataFloat, RawImag...
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for writeLog, DEBUG_PRIO, DEBU...
+#include "common/CroppedArray2DRef.h"     // for CroppedArray2DRef
 #include "common/Point.h"                 // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea
-#include <algorithm>                      // for max, min
+#include <algorithm>                      // for fill_n, max, min
 #include <array>                          // for array
 #include <cstdint>                        // for uint8_t, uint32_t, uint16_t
-#include <memory>                         // for operator==, unique_ptr
+#include <memory>                         // for operator==, default_delete
 #include <vector>                         // for vector
 
 using std::min;

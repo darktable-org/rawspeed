@@ -21,19 +21,19 @@
 
 #include "decoders/ThreefrDecoder.h"
 #include "common/Point.h"                         // for iPoint2D
-#include "decoders/RawDecoderException.h"         // for ThrowRDE
+#include "decoders/RawDecoderException.h"         // for ThrowException
 #include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompre...
 #include "io/Buffer.h"                            // for Buffer, DataBuffer
 #include "io/ByteStream.h"                        // for ByteStream
 #include "io/Endianness.h"                        // for Endianness, Endian...
 #include "metadata/Camera.h"                      // for Hints
-#include "metadata/ColorFilterArray.h" // for CFAColor::GREEN, CFAColor::BLUE
+#include "metadata/ColorFilterArray.h"            // for CFAColor, CFAColor...
 #include "tiff/TiffEntry.h"                       // for TiffEntry
 #include "tiff/TiffIFD.h"                         // for TiffRootIFD, TiffIFD
-#include "tiff/TiffTag.h"                         // for ASSHOTNEUTRAL, STR...
+#include "tiff/TiffTag.h"                         // for TiffTag, TiffTag::...
 #include <array>                                  // for array
 #include <cstdint>                                // for uint32_t
-#include <memory>                                 // for unique_ptr
+#include <memory>                                 // for unique_ptr, allocator
 #include <string>                                 // for operator==, string
 
 namespace rawspeed {

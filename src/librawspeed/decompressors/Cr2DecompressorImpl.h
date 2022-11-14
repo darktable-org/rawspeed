@@ -20,16 +20,25 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Point.h"                 // for iPoint2D, iPoint2D::area_type
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "decompressors/Cr2Decompressor.h"
-#include "io/BitPumpJPEG.h" // for BitPumpJPEG, BitStream<>::...
-#include <algorithm>        // for copy_n, min
-#include <array>            // for array
-#include <cassert>          // for assert
-#include <initializer_list> // for initializer_list
+#include "common/Array2DRef.h"               // for Array2DRef
+#include "common/Point.h"                    // for iPoint2D, iPoint2D::area_...
+#include "common/RawImage.h"                 // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
+#include "decompressors/Cr2Decompressor.h"   // for Cr2Decompressor, Cr2Slicing
+#include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
+#include "decompressors/HuffmanTableLUT.h"   // for HuffmanTableLUT
+#include "io/BitPumpJPEG.h"                  // for BitPumpJPEG, BitStream<>:...
+#include "io/ByteStream.h"                   // for ByteStream
+#include <algorithm>                         // for min, transform
+#include <array>                             // for array
+#include <cassert>                           // for assert
+#include <cstddef>                           // for size_t
+#include <cstdint>                           // for uint16_t
+#include <functional>                        // for cref, reference_wrapper
+#include <initializer_list>                  // for initializer_list
+#include <tuple>                             // for make_tuple, operator==, get
+#include <utility>                           // for move, index_sequence, mak...
+#include <vector>                            // for vector
 
 namespace rawspeed {
 

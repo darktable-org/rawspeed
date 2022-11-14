@@ -28,7 +28,7 @@
 #include "metadata/ColorFilterArray.h"          // for CFAColor
 #include <array>                                // for array
 #include <cassert>                              // for assert
-#include <cstdint>                              // for uint16_t, uint8_t
+#include <cstdint>                              // for int8_t, uint16_t
 #include <utility>                              // for move
 #include <vector>                               // for vector
 

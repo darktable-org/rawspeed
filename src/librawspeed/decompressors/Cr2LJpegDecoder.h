@@ -22,7 +22,7 @@
 #pragma once
 
 #include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
-#include "decompressors/Cr2Decompressor.h"           // for Cr2Decompressor
+#include "decompressors/Cr2Decompressor.h"           // for Cr2Slicing
 #include <cassert>                                   // for assert
 #include <cstdint>                                   // for uint16_t
 

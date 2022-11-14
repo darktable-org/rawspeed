@@ -21,15 +21,13 @@
 */
 
 #include "tiff/TiffEntry.h"
-#include "common/Common.h"               // for uint32_t, int16_t, uint16_t
-#include "common/NotARational.h"
-#include "parsers/TiffParserException.h" // for ThrowTPE
+#include "common/Common.h"               // for isIn
+#include "parsers/TiffParserException.h" // for ThrowException, ThrowTPE
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
-#include "tiff/TiffTag.h"                // for TiffTag, DNGPRIVATEDATA
+#include "tiff/TiffTag.h"                // for TiffTag, TiffTag::DNGPRIVAT...
 #include <cassert>                       // for assert
-#include <cstdint>                       // for UINT32_MAX
+#include <cstdint>                       // for uint32_t, int16_t, uint16_t
 #include <cstring>                       // for strnlen
-#include <initializer_list>              // for initializer_list
 #include <string>                        // for string
 #include <utility>                       // for move
 

@@ -21,15 +21,14 @@
 
 #pragma once
 
-#include "common/RawImage.h"              // for RawImage
-#include "decoders/SimpleTiffDecoder.h"   // for SimpleTiffDecoder
-#include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
-#include <utility>                        // for move
+#include "common/RawImage.h"            // for RawImage
+#include "decoders/SimpleTiffDecoder.h" // for SimpleTiffDecoder
+#include "tiff/TiffIFD.h"               // for TiffRootIFD (ptr only), Tiff...
+#include <utility>                      // for move
 
 namespace rawspeed {
 
 class Buffer;
-
 class CameraMetaData;
 
 class DcsDecoder final : public SimpleTiffDecoder {

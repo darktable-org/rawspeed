@@ -23,21 +23,23 @@
 #endif
 
 #include "decompressors/Cr2Decompressor.h"
-#include "HuffmanTable/Common.h"             // for createHuffmanTableImpl
+#include "HuffmanTable/Common.h"             // for createHuffmanTable
 #include "common/RawImage.h"                 // for RawImage, RawImageData
-#include "common/RawspeedException.h"        // for RawspeedException
+#include "common/RawspeedException.h"        // for ThrowException, Rawsp...
 #include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
 #include "decompressors/HuffmanTable.h"      // for HuffmanTable
 #include "fuzz/Common.h"                     // for CreateRawImage
 #include "io/Buffer.h"                       // for Buffer, DataBuffer
 #include "io/ByteStream.h"                   // for ByteStream
-#include "io/Endianness.h"                   // for Endianness
+#include "io/Endianness.h"                   // for Endianness, Endiannes...
+#include <algorithm>                         // for generate_n, copy
 #include <cassert>                           // for assert
-#include <cstdint>                           // for uint8_t
-#include <cstdio>                            // for size_t
+#include <cstdint>                           // for uint16_t, uint8_t
+#include <initializer_list>                  // for initializer_list
+#include <iterator>                          // for back_insert_iterator
 
 #ifdef WITH_DummyHuffmanTable
-#include "decompressors/Cr2DecompressorImpl.h"
+#include "decompressors/Cr2DecompressorImpl.h" // for Cr2Decompressor::Cr2D...
 
 namespace rawspeed {
 

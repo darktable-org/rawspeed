@@ -18,7 +18,9 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/Cr2DecompressorImpl.h"
+#include "decompressors/Cr2Decompressor.h"     // for Cr2Decompressor
+#include "decompressors/Cr2DecompressorImpl.h" // IWYU pragma: keep
+#include "decompressors/HuffmanTable.h"        // for HuffmanTable
 
 namespace rawspeed {
 

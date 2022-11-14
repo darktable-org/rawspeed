@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "io/BitStream.h"  // for BitStream, BitStreamCacheRightInLeftOut
+#include "io/BitStream.h" // for BitStreamCacheRightInLeftOut, BitStream
 #include "io/Buffer.h"     // for Buffer::size_type
 #include "io/Endianness.h" // for getLE
 #include <cstdint>         // for uint16_t, uint8_t

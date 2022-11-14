@@ -21,11 +21,21 @@
 
 #pragma once
 
-#include "common/RawImage.h"              // for RawImage
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint16_t
+#include "common/Point.h"                    // for iPoint2D
+#include "common/RawImage.h"                 // for RawImage
+#include "common/RawspeedException.h"        // for ThrowException
+#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
+#include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
+#include "decompressors/HuffmanTable.h" // for HuffmanTable, HuffmanTableLUT
+#include "io/ByteStream.h"              // for ByteStream
+#include <array>                        // for array
+#include <cassert>                      // for assert
+#include <cstddef>                      // for size_t
+#include <cstdint>                      // for uint16_t
+#include <functional>                   // for reference_wrapper
+#include <tuple>                        // for array, tuple
+#include <utility>                      // for index_sequence
+#include <vector>                       // for vector
 
 namespace rawspeed {
 

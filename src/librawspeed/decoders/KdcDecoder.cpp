@@ -20,7 +20,7 @@
 */
 
 #include "decoders/KdcDecoder.h"
-#include "common/NORangesSet.h"                     // for set
+#include "common/NORangesSet.h"                     // for NORangesSet
 #include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
@@ -28,15 +28,15 @@
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, Endi...
 #include "metadata/Camera.h"                        // for Hints
-#include "parsers/TiffParserException.h"            // for TiffParserException
+#include "parsers/TiffParserException.h"            // for ThrowException
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, TiffID
-#include "tiff/TiffTag.h"                           // for KODAK_IFD2, COMP...
+#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
 #include <array>                                    // for array
 #include <cassert>                                  // for assert
 #include <cstdint>                                  // for uint32_t, uint64_t
 #include <limits>                                   // for numeric_limits
-#include <memory>                                   // for unique_ptr
+#include <memory>                                   // for unique_ptr, allo...
 #include <string>                                   // for operator==, string
 
 namespace rawspeed {

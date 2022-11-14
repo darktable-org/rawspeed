@@ -30,9 +30,7 @@
 namespace rawspeed {
 
 class Buffer;
-
 class CameraMetaData;
-
 class TiffIFD;
 
 class RawDecoder

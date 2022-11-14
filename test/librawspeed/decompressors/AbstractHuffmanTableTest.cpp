@@ -20,16 +20,16 @@
 
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
 #include "io/Buffer.h"                          // for Buffer
-#include <algorithm>                            // for max, min
+#include <algorithm>                            // for copy, fill_n, max, min
 #include <bitset>                               // for bitset
 #include <cassert>                              // for assert
 #include <cstdint>                              // for uint8_t, uint32_t
-#include <cstdlib>                              // for exit
-#include <gtest/gtest.h>                        // for Message, TestPartResult
-#include <initializer_list>                     // for initializer_list<>::...
+#include <gtest/gtest.h>                        // for Test, ParamIteratorI...
+#include <initializer_list>                     // for initializer_list
 #include <ostream>                              // for operator<<, ostream
-#include <string>                               // for basic_string, operat...
+#include <string>                               // for allocator, basic_string
 #include <tuple>                                // for make_tuple, get, tuple
+#include <type_traits>                          // for __decay_and_strip
 #include <utility>                              // for move
 #include <vector>                               // for vector
 

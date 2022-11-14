@@ -22,18 +22,18 @@
 
 #pragma once
 
-#include "common/NotARational.h"
-#include "io/ByteStream.h" // for ByteStream
-#include "tiff/TiffTag.h"  // for TiffTag
-#include <array>           // for array
-#include <cstdint>         // for uint32_t, uint16_t, uint8_t, int16_t, int...
-#include <string>          // for string
-#include <vector>          // for vector
+#include "common/NotARational.h" // for NotARational
+#include "io/ByteStream.h"       // for ByteStream
+#include "tiff/TiffTag.h"        // for TiffTag
+#include <algorithm>             // for fill_n
+#include <array>                 // for array
+#include <cstdint>               // for uint32_t, uint16_t, int16_t, int32_t
+#include <string>                // for string
+#include <vector>                // for vector
 
 namespace rawspeed {
 
 class DataBuffer;
-
 class TiffIFD;
 
 /*

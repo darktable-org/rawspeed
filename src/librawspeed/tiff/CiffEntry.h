@@ -33,6 +33,8 @@ namespace rawspeed {
 
 class Buffer;
 class CiffIFD; // IWYU pragma: keep
+template <typename T> class NORangesSet;
+template <typename T> class NORangesSet;
 
 /*
  * Tag data type information.

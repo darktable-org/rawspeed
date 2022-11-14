@@ -22,17 +22,19 @@
 #include "metadata/Camera.h"
 #include "common/Common.h"                    // for splitString
 #include "common/Point.h"                     // for iPoint2D
-#include "metadata/CameraMetadataException.h" // for ThrowCME
-#include <algorithm>                          // for max
+#include "metadata/CameraMetadataException.h" // for ThrowException, ThrowCME
+#include <algorithm>                          // for max, fill, transform
 #include <cctype>                             // for tolower
 #include <cstdio>                             // for size_t
 #include <map>                                // for map
 #include <stdexcept>                          // for out_of_range
 #include <string>                             // for string, operator==
+#include <string_view>                        // for operator==, basic_stri...
 #include <vector>                             // for vector
 
 #ifdef HAVE_PUGIXML
 #include <pugixml.hpp> // for xml_node, xml_attribute
+
 using pugi::xml_node;
 #endif
 

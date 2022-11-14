@@ -19,13 +19,12 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for RAWSPEED_SOURCE_DIR
-
+#include "rawspeedconfig.h"          // for HAVE_PUGIXML, RAWSPEED_SOURCE_DIR
 #include "metadata/Camera.h"         // for Camera
 #include "metadata/CameraMetaData.h" // for CameraMetaData
-#include <gtest/gtest.h>             // for Test, ASSERT_NO_THROW, GetTestTypeId
-#include <memory>                    // for unique_ptr
-#include <string>                    // for string
+#include <gtest/gtest.h>             // for Test, Message, TestPartResult
+#include <memory>                    // for allocator, unique_ptr
+#include <string>                    // for string, basic_string
 
 using rawspeed::CameraMetaData;
 using std::unique_ptr;

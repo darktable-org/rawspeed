@@ -22,16 +22,17 @@
 #pragma once
 
 #include "common/Point.h" // for iPoint2D
-#include <algorithm>      // for max, min, adjacent_find, for_each
+#include <algorithm>      // for fill_n, max, copy, min
 #include <cassert>        // for assert
 #include <cstdint>        // for uint16_t
 #include <functional>     // for greater_equal
 #include <limits>         // for numeric_limits
 #include <memory>         // for allocator_traits<>::value_type
-#include <type_traits>    // for is_floating_point, enable_if_t, is_arithmetic
+#include <type_traits>    // for enable_if_t, is_floating_point
 #include <vector>         // for vector
 
 namespace rawspeed {
+class iPoint2D;
 
 // This is a Natural Cubic Spline. The second derivative at curve ends are zero.
 // See https://en.wikipedia.org/wiki/Spline_(mathematics)

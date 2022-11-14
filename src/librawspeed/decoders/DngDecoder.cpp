@@ -20,32 +20,33 @@
 
 #include "rawspeedconfig.h" // for HAVE_JPEG, HAVE_ZLIB
 #include "decoders/DngDecoder.h"
-#include "common/Common.h"                         // for uint32_t, roundUpDi...
+#include "common/Common.h"                         // for roundUpDivision
 #include "common/DngOpcodes.h"                     // for DngOpcodes
-#include "common/NORangesSet.h"                    // for set
+#include "common/NORangesSet.h"                    // for NORangesSet
+#include "common/NotARational.h"                   // for NotARational
 #include "common/Point.h"                          // for iPoint2D, iRectan...
-#include "common/RawspeedException.h"              // for RawspeedException
 #include "decoders/RawDecoderException.h"          // for ThrowRDE, RawDeco...
 #include "decompressors/AbstractDngDecompressor.h" // for DngSliceElement
-#include "io/Buffer.h"                             // for Buffer, DataBuffer
+#include "io/Buffer.h"                             // for Buffer, operator<
 #include "io/ByteStream.h"                         // for ByteStream
 #include "metadata/BlackArea.h"                    // for BlackArea
 #include "metadata/Camera.h"                       // for Camera
 #include "metadata/CameraMetaData.h"               // for CameraMetaData
 #include "metadata/ColorFilterArray.h"             // for CFAColor, ColorFi...
-#include "parsers/TiffParserException.h"           // for ThrowTPE
-#include "tiff/TiffEntry.h" // for TiffEntry, TiffDataType::LONG
+#include "parsers/TiffParserException.h"           // for ThrowException
+#include "tiff/TiffEntry.h"                        // for TiffEntry, TiffDa...
 #include "tiff/TiffIFD.h"                          // for TiffIFD, TiffRootIFD
-#include "tiff/TiffTag.h"                          // for ACTIVEAREA, TILEO...
-#include <algorithm>                               // for any_of
+#include "tiff/TiffTag.h"                          // for TiffTag, TiffTag:...
+#include <algorithm>                               // for transform, max
 #include <array>                                   // for array, array<>::v...
 #include <cassert>                                 // for assert
+#include <ext/alloc_traits.h>                      // for __alloc_traits<>:...
 #include <limits>                                  // for numeric_limits
 #include <map>                                     // for map
-#include <memory>                                  // for unique_ptr
+#include <memory>                                  // for unique_ptr, alloc...
 #include <stdexcept>                               // for out_of_range
-#include <string>                                  // for string, operator+
-#include <utility>                                 // for move, pair
+#include <string>                                  // for char_traits, string
+#include <utility>                                 // for move
 #include <vector>                                  // for vector, allocator
 
 using std::vector;

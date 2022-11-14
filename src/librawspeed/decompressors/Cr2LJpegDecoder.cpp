@@ -21,15 +21,18 @@
 */
 
 #include "decompressors/Cr2LJpegDecoder.h"
-#include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Point.h"                 // for iPoint2D, iPoint2D::area_type
+#include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
-#include <algorithm>                      // for copy_n, min
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable
+#include <algorithm>                      // for generate_n
 #include <array>                          // for array
 #include <cassert>                        // for assert
+#include <cstdint>                        // for uint16_t, uint32_t
 #include <initializer_list>               // for initializer_list
+#include <iterator>                       // for back_insert_iterator, back...
+#include <tuple>                          // for tuple, get
+#include <vector>                         // for vector
 
 namespace rawspeed {
 

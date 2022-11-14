@@ -29,10 +29,8 @@
 
 namespace rawspeed {
 
-class RawImage;
-
 class ByteStream;
-
+class RawImage;
 class iRectangle2D;
 
 class DngOpcodes {
@@ -43,19 +41,20 @@ public:
 
 private:
   class DngOpcode;
+
   std::vector<std::unique_ptr<DngOpcode>> opcodes;
 
 protected:
+  class DeltaRowOrColBase;
+  class DummyROIOpcode;
   class FixBadPixelsConstant;
   class FixBadPixelsList;
-  class ROIOpcode;
-  class DummyROIOpcode;
-  class TrimBounds;
-  class PixelOpcode;
   class LookupOpcode;
-  class TableMap;
+  class PixelOpcode;
   class PolynomialMap;
-  class DeltaRowOrColBase;
+  class ROIOpcode;
+  class TableMap;
+  class TrimBounds;
   template <typename S> class DeltaRowOrCol;
   template <typename S> class OffsetPerRowOrCol;
   template <typename S> class ScalePerRowOrCol;

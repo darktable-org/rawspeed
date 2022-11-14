@@ -24,17 +24,17 @@
 #include "common/Memory.h"                     // for alignedFree
 #include "common/Point.h"                      // for iPoint2D
 #include "common/RawImage.h"                   // for RawImage, RawImageData
-#include "io/Buffer.h"                         // for Buffer, Buffer::size_...
+#include "io/Buffer.h"                         // for Buffer, DataBuffer
 #include "io/ByteStream.h"                     // for ByteStream
-#include "io/Endianness.h"                     // for Endianness, Endianness...
+#include "io/Endianness.h"                     // for Endianness, Endiannes...
 #include <benchmark/benchmark.h>               // for State, Benchmark, BEN...
 #include <cassert>                             // for assert
 #include <cstddef>                             // for size_t
 #include <cstdint>                             // for uint8_t
-#include <memory>                              // for operator!=, unique_ptr
+#include <memory>                              // for unique_ptr
 #include <type_traits>                         // for integral_constant
 #include <utility>                             // for move
-#include <zlib.h>                              // for compressBound, compress
+#include <zlib.h>                              // for compress, compressBound
 
 #ifndef NDEBUG
 #include <limits> // for numeric_limits

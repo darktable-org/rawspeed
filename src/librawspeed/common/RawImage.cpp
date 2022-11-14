@@ -18,20 +18,18 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
+#include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "common/RawImage.h"
 #include "MemorySanitizer.h"              // for MSan
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
-#include "decoders/RawDecoderException.h" // for ThrowRDE, RawDecoderException
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/IOException.h"               // for IOException
 #include "parsers/TiffParserException.h"  // for TiffParserException
-#include <algorithm>                      // for fill_n, min
+#include <algorithm>                      // for min, fill_n
 #include <cassert>                        // for assert
-#include <cmath>                          // for NAN
-#include <cstdlib>                        // for size_t
-#include <cstring>                        // for memcpy, memset
+#include <cstring>                        // for memset
 #include <limits>                         // for numeric_limits
-#include <memory>                         // for unique_ptr, make_unique
+#include <memory>                         // for unique_ptr, allocator, mak...
 #include <utility>                        // for move, swap
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)

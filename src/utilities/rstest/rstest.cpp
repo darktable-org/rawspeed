@@ -18,26 +18,31 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "RawSpeed-API.h"
-
-#include "md5.h"     // for md5_state, md5_hash, hash_to_string, md5_init
-#include <algorithm> // for fill, max
-#include <array>     // for array
-#include <cassert>   // for assert
-#include <chrono>    // for milliseconds, steady_clock, duration_cast
-#include <cstdarg>   // for va_end, va_list, va_start
-#include <cstdint>   // for uint16_t, uint32_t, uint8_t
-#include <cstdio>    // for fprintf, fclose, fopen, ftell, fwrite, size_t
-#include <cstdlib>   // for system
-#include <fstream>   // IWYU pragma: keep
-#include <iostream>  // for cout, cerr
-#include <iterator>  // for istreambuf_iterator, operator!=
-#include <map>       // for map
-#include <memory>    // for allocator, unique_ptr
-#include <sstream>   // IWYU pragma: keep
-#include <string>    // for string, operator+, operator<<, char_traits
-#include <utility>   // for pair
-#include <vector>    // for vector
+#include "RawSpeed-API.h"        // for RawImage, RawImageData, ImageMetaData
+#include "common/Array2DRef.h"   // for Array2DRef, Array2DRef<>::value_type
+#include "common/NotARational.h" // for NotARational
+#include "md5.h"                 // for md5_state, md5_hash, hash_to_string
+#include <algorithm>             // for fill, copy, fill_n, max
+#include <array>                 // for array
+#include <cassert>               // for assert
+#include <chrono>                // for milliseconds, steady_clock, duratio...
+#include <cstdarg>               // for va_end, va_list, va_start
+#include <cstddef>               // for size_t, byte
+#include <cstdint>               // for uint16_t, uint8_t, uint32_t
+#include <cstdio>                // for fclose, fprintf, fopen, fwrite, vsn...
+#include <cstdlib>               // for system
+#include <fstream>               // for operator<<, basic_ostream, endl
+#include <functional>            // for less
+#include <iostream>              // for cout, cerr
+#include <iterator>              // for istreambuf_iterator, operator!=
+#include <map>                   // for map, operator!=, _Rb_tree_const_ite...
+#include <memory>                // for allocator, unique_ptr
+#include <sstream>               // for basic_ostringstream
+#include <string>                // for string, operator+, basic_string
+#include <string_view>           // for operator!=, string_view
+#include <type_traits>           // for __type_identity_t
+#include <utility>               // for tuple_element<>::type
+#include <vector>                // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)

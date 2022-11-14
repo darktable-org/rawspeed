@@ -30,9 +30,8 @@
 
 namespace rawspeed {
 
-class CameraMetaData;
-
 class Buffer;
+class CameraMetaData;
 
 class ArwDecoder final : public AbstractTiffDecoder
 {

@@ -39,14 +39,14 @@
 #include "decoders/RafDecoder.h"      // IWYU pragma: keep
 #include "decoders/Rw2Decoder.h"      // IWYU pragma: keep
 #include "decoders/SrwDecoder.h"      // IWYU pragma: keep
-#include "decoders/ThreefrDecoder.h"  // IWYU pragma: keep
-#include "io/Buffer.h"                // for Buffer, DataBuffer
+#include "decoders/ThreefrDecoder.h"  // for ThreefrDecoder
+#include "io/Buffer.h"                // for Buffer
 #include "metadata/CameraMetaData.h"  // for CameraMetaData
 #include "parsers/TiffParser.h"       // for TiffParser
 #include <cassert>                    // for assert
 #include <cstdint>                    // for uint8_t
 #include <cstdio>                     // for size_t
-#include <memory>                     // for unique_ptr
+#include <memory>                     // for unique_ptr, make_unique
 #include <utility>                    // for move
 
 static const rawspeed::CameraMetaData metadata{};

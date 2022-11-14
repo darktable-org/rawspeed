@@ -22,20 +22,20 @@
 
 #include "decoders/CrwDecoder.h"
 #include "common/Point.h"                  // for iPoint2D
-#include "common/RawspeedException.h"      // for RawspeedException
-#include "decoders/RawDecoderException.h"  // for ThrowRDE
+#include "decoders/RawDecoderException.h"  // for ThrowException, ThrowRDE
 #include "decompressors/CrwDecompressor.h" // for CrwDecompressor
 #include "io/Buffer.h"                     // for Buffer
 #include "metadata/Camera.h"               // for Hints
-#include "metadata/ColorFilterArray.h" // for CFAColor::GREEN, CFAColor::BLUE, CFAColor::RED
-#include "tiff/CiffEntry.h"            // for CiffEntry, CiffDataType::SHORT
+#include "metadata/ColorFilterArray.h"     // for CFAColor, CFAColor::GREEN
+#include "tiff/CiffEntry.h"                // for CiffEntry, CiffDataType
 #include "tiff/CiffIFD.h"                  // for CiffIFD
-#include "tiff/CiffTag.h" // for CiffTag::MAKEMODEL, CiffTag::SHOT...
+#include "tiff/CiffTag.h"                  // for CiffTag, CiffTag::MAKEMODEL
 #include <array>                           // for array
 #include <cassert>                         // for assert
-#include <cmath>                           // for copysignf, expf, logf
-#include <cstring>                         // for memcmp, size_t
-#include <memory>                          // for unique_ptr
+#include <cmath>                           // for abs, copysignf, expf, logf
+#include <cstdlib>                         // for abs, size_t
+#include <cstring>                         // for memcmp
+#include <memory>                          // for unique_ptr, allocator
 #include <string>                          // for string
 #include <utility>                         // for move
 #include <vector>                          // for vector

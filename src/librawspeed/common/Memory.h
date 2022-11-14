@@ -21,8 +21,7 @@
 #pragma once
 
 #include "rawspeedconfig.h"
-
-#include "common/Common.h" // for isPowerOfTwo
+#include "common/Common.h" // for isPowerOfTwo, isAligned, roundUp
 #include <cstddef>         // for size_t
 #include <cstdint>         // for SIZE_MAX
 

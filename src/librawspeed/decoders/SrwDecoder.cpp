@@ -20,9 +20,9 @@
 */
 
 #include "decoders/SrwDecoder.h"
-#include "common/Common.h"                       // for BitOrder::LSB, BitOr...
+#include "common/Common.h"                       // for BitOrder, BitOrder:...
 #include "common/Point.h"                        // for iPoint2D
-#include "decoders/RawDecoderException.h"        // for ThrowRDE
+#include "decoders/RawDecoderException.h"        // for ThrowException, Thr...
 #include "decompressors/SamsungV0Decompressor.h" // for SamsungV0Decompressor
 #include "decompressors/SamsungV1Decompressor.h" // for SamsungV1Decompressor
 #include "decompressors/SamsungV2Decompressor.h" // for SamsungV2Decompressor
@@ -31,14 +31,14 @@
 #include "io/Endianness.h"                       // for Endianness, Endiann...
 #include "metadata/Camera.h"                     // for Hints
 #include "metadata/CameraMetaData.h"             // for CameraMetaData
-#include "tiff/TiffEntry.h" // for TiffEntry, TiffDataType::LONG
+#include "tiff/TiffEntry.h"                      // for TiffEntry, TiffData...
 #include "tiff/TiffIFD.h"                        // for TiffRootIFD, TiffIFD
-#include "tiff/TiffTag.h"                        // for STRIPOFFSETS, BITSP...
+#include "tiff/TiffTag.h"                        // for TiffTag, TiffTag::S...
 #include <array>                                 // for array
 #include <cstdint>                               // for uint32_t
 #include <memory>                                // for unique_ptr
 #include <sstream>                               // for operator<<, ostring...
-#include <string>                                // for string, operator==
+#include <string>                                // for string, allocator
 #include <vector>                                // for vector
 
 namespace rawspeed {

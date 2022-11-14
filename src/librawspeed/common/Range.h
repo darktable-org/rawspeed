@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <algorithm>   // for min
+#include <algorithm>   // for minmax
 #include <cassert>     // for assert
-#include <type_traits> // for enable_if, is_pointer
+#include <type_traits> // for enable_if_t, make_unsigned_t
 #include <utility>     // for pair
 
 namespace rawspeed {

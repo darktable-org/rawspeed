@@ -23,11 +23,12 @@
 #pragma once
 
 #include "common/NORangesSet.h"          // for set
+#include "common/RawspeedException.h"    // for ThrowException
 #include "io/Buffer.h"                   // for Buffer (ptr only), DataBuffer
 #include "io/ByteStream.h"               // for ByteStream
 #include "io/Endianness.h"               // for Endianness, Endianness::big
-#include "parsers/TiffParserException.h" // for ThrowTPE
-#include "tiff/TiffEntry.h"              // IWYU pragma: keep
+#include "parsers/TiffParserException.h" // for ThrowException, ThrowTPE
+#include "tiff/TiffEntry.h"              // for TiffEntry
 #include "tiff/TiffTag.h"                // for TiffTag
 #include <cstdint>                       // for uint32_t
 #include <map>                           // for map, operator!=, map<>::con...
@@ -38,8 +39,8 @@
 namespace rawspeed {
 
 class TiffIFD;
-
 class TiffRootIFD;
+template <typename T> class NORangesSet;
 
 using TiffIFDOwner = std::unique_ptr<TiffIFD>;
 using TiffRootIFDOwner = std::unique_ptr<TiffRootIFD>;

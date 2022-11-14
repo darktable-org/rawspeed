@@ -25,7 +25,7 @@
 #include "common/Common.h"    // for roundUp
 #include "common/Memory.h"    // for alignedMalloc
 #include "io/Buffer.h"        // for Buffer::size_type, DataBuffer, Buffer
-#include "io/IOException.h"   // for ThrowIOE
+#include "io/IOException.h"   // for ThrowException, ThrowIOE
 #include <cassert>            // for assert
 #include <cstdint>            // for uint8_t, uint16_t, int32_t, uint32_t
 #include <cstring>            // for memchr, memcmp, memcpy

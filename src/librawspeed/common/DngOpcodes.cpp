@@ -21,18 +21,20 @@
 */
 
 #include "common/DngOpcodes.h"
-#include "common/Common.h"                // for uint32_t, uint16_t, clampBits
+#include "common/Common.h"                // for roundUpDivision, clampBits
+#include "common/CroppedArray2DRef.h"     // for CroppedArray2DRef
 #include "common/Mutex.h"                 // for MutexLocker
 #include "common/Point.h"                 // for iRectangle2D, iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/Endianness.h"                // for Endianness, Endianness::big
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include <algorithm>                      // for generate_n, fill_n
+#include <algorithm>                      // for generate_n, clamp, fill_n
 #include <cassert>                        // for assert
-#include <cmath>                          // for pow
-#include <iterator>                       // for back_insert_iterator
+#include <cmath>                          // for abs, isfinite, pow
+#include <cstdlib>                        // for abs
+#include <initializer_list>               // for initializer_list
+#include <iterator>                       // for back_insert_iterator, back...
 #include <limits>                         // for numeric_limits
 #include <stdexcept>                      // for out_of_range
 #include <tuple>                          // for tie, tuple

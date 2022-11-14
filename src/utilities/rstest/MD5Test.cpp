@@ -27,11 +27,14 @@
  *   Software.
  */
 
-#include "md5.h"         // for rawspeed::md5::state, md5_hash
+#include "md5.h"         // for md5_state, md5_hash
+#include <array>         // for array
 #include <cstdint>       // for UINT32_C, uint8_t
 #include <cstring>       // for strlen
-#include <gtest/gtest.h> // for AssertionResult, IsNullLiteralHelper, Param...
-#include <utility>       // for pair, make_pair
+#include <gtest/gtest.h> // for ParamIteratorInterface, ParamGeneratorInter...
+#include <string>        // for allocator, basic_string
+#include <tuple>         // for tie, tuple
+#include <utility>       // for pair
 
 using MD5Testcase = std::pair<rawspeed::md5::md5_state, const uint8_t*>;
 class MD5Test : public ::testing::TestWithParam<MD5Testcase> {

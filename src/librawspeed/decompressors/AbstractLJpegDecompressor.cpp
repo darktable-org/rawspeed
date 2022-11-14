@@ -22,6 +22,7 @@
 
 #include "decompressors/AbstractLJpegDecompressor.h"
 #include "common/Point.h"                       // for iPoint2D
+#include "common/RawspeedException.h"           // for ThrowException
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable, Huffma...

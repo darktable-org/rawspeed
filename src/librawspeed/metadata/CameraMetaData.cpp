@@ -19,17 +19,18 @@
 */
 
 #include "metadata/CameraMetaData.h"
-#include "common/Common.h"                    // for uint32_t, trimSpaces
-#include "metadata/Camera.h"                  // for Camera
-#include "metadata/CameraMetadataException.h" // for ThrowCME
+#include "common/Common.h"                    // for trimSpaces, writeLog
+#include "metadata/Camera.h"                  // for Camera, Camera::Suppor...
+#include "metadata/CameraMetadataException.h" // for ThrowException, ThrowCME
 #include <algorithm>                          // for find_if
-#include <map>                                // for _Rb_tree_iterator, map
+#include <map>                                // for map, map<>::const_iter...
 #include <string>                             // for string, operator==
-#include <utility>                            // for pair
+#include <utility>                            // for pair, move
 #include <vector>                             // for vector
 
 #ifdef HAVE_PUGIXML
 #include <pugixml.hpp> // for xml_document, xml_pars...
+
 using pugi::xml_node;
 using pugi::xml_document;
 using pugi::xml_parse_result;

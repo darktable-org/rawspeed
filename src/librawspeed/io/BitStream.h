@@ -23,14 +23,14 @@
 #pragma once
 
 #include "common/Common.h"  // for bitwidth, extractHighBits
-#include "io/Buffer.h"      // for Buffer::size_type, Buffer
+#include "io/Buffer.h"      // for Buffer
 #include "io/ByteStream.h"  // for ByteStream
 #include "io/Endianness.h"  // for Endianness, Endianness::unknown
 #include "io/IOException.h" // for ThrowIOE
-#include <algorithm>        // for min
+#include <algorithm>        // for fill_n, min
 #include <array>            // for array
 #include <cassert>          // for assert
-#include <cstdint>          // for uint32_t, uint64_t, uint8_t
+#include <cstdint>          // for uint32_t, uint8_t, uint64_t
 #include <cstring>          // for memcpy
 
 namespace rawspeed {

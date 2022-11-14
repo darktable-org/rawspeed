@@ -18,15 +18,20 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
+#include "rawspeedconfig.h"           // for HAVE_ZLIB
+#include "common/Common.h"            // for bit_cast
+#include "common/CroppedArray2DRef.h" // for CroppedArray2DRef
+#include <array>                      // for array
+#include <climits>                    // for CHAR_BIT
+#include <utility>                    // for move
 
 #ifdef HAVE_ZLIB
 
-#include "common/FloatingPoint.h"         // for fp16ToFloat, fp24ToFloat
+#include "common/FloatingPoint.h"         // for Binary32, Binary16, Binary24
 #include "common/Point.h"                 // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/DeflateDecompressor.h"
-#include "io/Endianness.h" // for getHostEndianness, Endianness
+#include "io/Endianness.h" // for getBE
 #include <cassert>         // for assert
 #include <cstdint>         // for uint32_t, uint16_t
 #include <cstdio>          // for size_t

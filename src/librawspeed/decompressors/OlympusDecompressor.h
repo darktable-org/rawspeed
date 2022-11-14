@@ -32,7 +32,6 @@
 namespace rawspeed {
 
 class ByteStream;
-
 template <class T> class Array2DRef;
 
 class OlympusDecompressor final : public AbstractDecompressor {

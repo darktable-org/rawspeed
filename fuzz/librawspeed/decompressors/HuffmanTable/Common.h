@@ -23,6 +23,11 @@
 #include "decompressors/DummyHuffmanTable.h"
 #include "io/Buffer.h"     // for Buffer
 #include "io/ByteStream.h" // for ByteStream
+#include <type_traits>     // for is_same
+
+namespace rawspeed {
+class DummyHuffmanTable;
+} // namespace rawspeed
 
 template <typename T> static constexpr int getHuffmanTableMaxLength() {
   if constexpr (std::is_same<T, rawspeed::DummyHuffmanTable>())

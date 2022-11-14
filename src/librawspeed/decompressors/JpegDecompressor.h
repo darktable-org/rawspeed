@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"
+#include "rawspeedconfig.h" // for HAVE_JPEG
 
 #ifdef HAVE_JPEG
 
@@ -35,6 +35,7 @@ namespace rawspeed {
 
 class JpegDecompressor final : public AbstractDecompressor {
   struct JpegDecompressStruct;
+
   ByteStream input;
   RawImage mRaw;
 

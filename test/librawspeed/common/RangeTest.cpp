@@ -20,8 +20,8 @@
 
 #include "common/Range.h"     // for Range
 #include "common/RangeTest.h" // for RangeDoesntContain, RangeContains
-#include <gtest/gtest.h>      // for TEST, ASSERT_EQ, ASSERT_TRUE, ASSERT_FALSE
-#include <set>                // for set
+#include <gtest/gtest.h> // for Message, TestPartResult, ASSERT_PRED_FORMAT2
+#include <set>           // for allocator, operator!=, set, set<>::const_i...
 
 using rawspeed::Range;
 

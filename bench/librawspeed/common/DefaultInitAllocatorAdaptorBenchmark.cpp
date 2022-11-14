@@ -18,10 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAd...
-#include <benchmark/benchmark.h>                // for Benchmark, BENCHMARK_...
-#include <memory>                               // for allocator
-#include <vector>                               // for vector
+#include "common/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocator...
+#include <benchmark/benchmark.h>                // for State, Benchmark
+#include <map>                                  // for map<>::mapped_type
+#include <vector>                               // for allocator, vector
 
 using Type = int;
 

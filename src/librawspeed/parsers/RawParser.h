@@ -25,9 +25,7 @@
 namespace rawspeed {
 
 class Buffer;
-
 class CameraMetaData;
-
 class RawDecoder;
 
 class RawParser {

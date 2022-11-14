@@ -22,7 +22,7 @@
 
 #include <cassert>          // for assert
 #include <initializer_list> // IWYU pragma: keep
-#include <memory>           // for unique_ptr
+#include <memory>           // for unique_ptr, make_unique
 #include <vector>           // for vector
 
 namespace rawspeed {

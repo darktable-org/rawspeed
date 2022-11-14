@@ -22,17 +22,16 @@
 
 #include "parsers/FiffParser.h"
 #include "decoders/RafDecoder.h"         // for RafDecoder
-#include "decoders/RawDecoder.h"         // for RawDecoder
 #include "io/Buffer.h"                   // for Buffer, DataBuffer
 #include "io/ByteStream.h"               // for ByteStream
 #include "io/Endianness.h"               // for Endianness, Endianness::big
 #include "parsers/FiffParserException.h" // for ThrowFPE
 #include "parsers/RawParser.h"           // for RawParser
 #include "parsers/TiffParser.h"          // for TiffParser
-#include "parsers/TiffParserException.h" // for TiffParserException
-#include "tiff/TiffEntry.h" // for TiffEntry, TiffDataType::SHORT, TIFF...
+#include "parsers/TiffParserException.h" // for ThrowException, TiffParserE...
+#include "tiff/TiffEntry.h"              // for TiffEntry, TiffDataType
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFDOwner
-#include "tiff/TiffTag.h"                // for FUJIOLDWB, FUJI_STRIPBYTECO...
+#include "tiff/TiffTag.h"                // for TiffTag, TiffTag::FUJIOLDWB
 #include <cstdint>                       // for uint32_t, uint16_t
 #include <limits>                        // for numeric_limits
 #include <memory>                        // for make_unique, unique_ptr

@@ -20,16 +20,16 @@
 
 #pragma once
 
+#include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
+#include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
 #include <utility>                        // for move
 
 namespace rawspeed {
 
-class CameraMetaData;
-
 class Buffer;
+class CameraMetaData;
 
 class Cr2Decoder final : public AbstractTiffDecoder
 {

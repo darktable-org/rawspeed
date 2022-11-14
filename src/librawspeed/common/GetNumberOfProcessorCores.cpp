@@ -22,7 +22,7 @@
 #include "common/Common.h"  // for rawspeed_get_number_of_processor_cores
 
 #ifdef HAVE_OPENMP
-#include <omp.h>
+#include <omp.h> // for omp_get_max_threads
 #endif
 
 // define this function, it is only declared in rawspeed:

@@ -19,12 +19,13 @@
 */
 
 #include "decompressors/VC5Decompressor.h" // for VC5Decompressor
-#include "common/RawImage.h"               // for RawImage
+#include "common/RawImage.h"               // for RawImage, RawImageData
 #include "common/RawspeedException.h"      // for RawspeedException
-#include "fuzz/Common.h"                   // for CreateRawImage
+#include "fuzz/Common.h"                   // for CreateCFA, CreateRawImage
 #include "io/Buffer.h"                     // for Buffer, DataBuffer
 #include "io/ByteStream.h"                 // for ByteStream
-#include "io/Endianness.h"                 // for Endianness, Endianne...
+#include "io/Endianness.h"                 // for Endianness, Endianness::little
+#include "metadata/ColorFilterArray.h"     // for ColorFilterArray
 #include <cassert>                         // for assert
 #include <cstdint>                         // for uint8_t
 #include <cstdio>                          // for size_t

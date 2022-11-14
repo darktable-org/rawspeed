@@ -20,10 +20,13 @@
 
 #pragma once
 
-#include "common/Range.h" // for RangesOverlap
+#include "common/Range.h" // for operator<, RangesOverlap
+#include <algorithm>      // for partition_point
+#include <cassert>        // for assert
+#include <cstddef>        // for size_t
+#include <iterator>       // for prev
 #include <set>            // IWYU pragma: export
 #include <utility>        // for pair
-// IWYU pragma: no_include <bits/stl_set.h>
 
 namespace rawspeed {
 

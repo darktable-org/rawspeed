@@ -19,7 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_OPENMP, HAVE...
+#include "rawspeedconfig.h" // for HAVE_OPENMP, HAV...
 #include "decompressors/AbstractDngDecompressor.h"
 #include "common/Common.h"                          // for rawspeed_get_num...
 #include "common/Point.h"                           // for iPoint2D
@@ -37,7 +37,7 @@
 #include <limits>                                   // for numeric_limits
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for string
-#include <vector>                                   // for vector
+#include <vector>                                   // for vector, allocator
 
 namespace rawspeed {
 

@@ -26,17 +26,16 @@
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImageData, RawImage
-#include "common/RawspeedException.h"     // for RawspeedException
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
-#include <algorithm>                      // for sort
+#include <algorithm>                      // for sort, fill_n
 #include <array>                          // for array
 #include <cassert>                        // for assert
 #include <cstdint>                        // for int32_t, uint16_t
 #include <memory>                         // for allocator_traits<>::value_...
 #include <string>                         // for string
 #include <utility>                        // for move
-#include <vector>                         // for vector, vector<>::size_type
+#include <vector>                         // for vector<>::iterator, vector
 
 namespace rawspeed {
 

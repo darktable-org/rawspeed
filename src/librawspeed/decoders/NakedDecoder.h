@@ -25,14 +25,15 @@
 #include "common/RawImage.h"     // for RawImage
 #include "decoders/RawDecoder.h" // for RawDecoder
 #include <cstdint>               // for uint32_t
+#include <functional>            // for less
 #include <map>                   // for map
 #include <string>                // for string
 
 namespace rawspeed {
 
+class Buffer;
 class Camera;
 class CameraMetaData;
-class Buffer;
 
 class NakedDecoder final : public RawDecoder {
   const Camera* cam;

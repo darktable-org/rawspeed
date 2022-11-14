@@ -24,12 +24,13 @@
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
 #include "io/BitStream.h"                       // for BitStreamTraits
 #include <cassert>                              // for assert
-#include <cstdint>                              // for uint64_t
+#include <cstdint>                              // for uint32_t
 #include <tuple>                                // for tie
 #include <utility>                              // for pair
 #include <vector>                               // for vector
 
 namespace rawspeed {
+class Buffer;
 
 class DummyHuffmanTable final {
   bool fullDecode = true;

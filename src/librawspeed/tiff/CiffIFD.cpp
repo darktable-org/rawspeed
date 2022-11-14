@@ -22,23 +22,22 @@
 
 #include "tiff/CiffIFD.h"
 #include "common/Common.h"               // for isIn
-#include "common/NORangesSet.h"          // for set
+#include "common/NORangesSet.h"          // for NORangesSet
+#include "io/Buffer.h"                   // for Buffer
 #include "io/ByteStream.h"               // for ByteStream
-#include "parsers/CiffParserException.h" // for ThrowCPE
+#include "parsers/CiffParserException.h" // for ThrowException, ThrowCPE
+#include "tiff/CiffEntry.h"              // for CiffEntry, CiffDataType
+#include <algorithm>                     // for copy, max, any_of
 #include <cassert>                       // for assert
-#include <initializer_list>              // for initializer_list
 #include <map>                           // for map, operator!=, _Rb_tree_c...
 #include <memory>                        // for unique_ptr, make_unique
 #include <string>                        // for operator==, string
 #include <utility>                       // for move, pair
-#include <vector>                        // for vector, vector<>::size_type
+#include <vector>                        // for vector, vector<>::const_ite...
 
 using std::vector;
-using std::unique_ptr;
 
 namespace rawspeed {
-
-class Buffer;
 
 void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* valueDatas,
                             const ByteStream& valueData,

@@ -21,9 +21,9 @@
 
 #include "decoders/ArwDecoder.h"
 #include "common/Common.h"                          // for roundDown
+#include "common/NORangesSet.h"                     // for NORangesSet
 #include "common/Point.h"                           // for iPoint2D
-#include "common/RawspeedException.h"               // for RawspeedException
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decoders/RawDecoderException.h"           // for ThrowException
 #include "decompressors/SonyArw1Decompressor.h"     // for SonyArw1Decompre...
 #include "decompressors/SonyArw2Decompressor.h"     // for SonyArw2Decompre...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
@@ -31,15 +31,14 @@
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, Endi...
 #include "metadata/Camera.h"                        // for Hints
-#include "metadata/ColorFilterArray.h" // for CFAColor::GREEN, CFAColor::BLUE
+#include "metadata/ColorFilterArray.h"              // for CFAColor, CFACol...
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for DNGPRIVATEDATA
+#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
 #include <array>                                    // for array
 #include <cassert>                                  // for assert
 #include <cstring>                                  // for memcpy, size_t
-#include <memory>                                   // for unique_ptr
-#include <set>                                      // for set
+#include <memory>                                   // for unique_ptr, allo...
 #include <string>                                   // for operator==, string
 #include <vector>                                   // for vector
 

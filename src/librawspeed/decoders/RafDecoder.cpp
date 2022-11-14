@@ -20,9 +20,11 @@
 */
 
 #include "decoders/RafDecoder.h"
-#include "common/Common.h"                          // for BitOrder::LSB
+#include "common/Array2DRef.h"                      // for Array2DRef
+#include "common/Common.h"                          // for BitOrder, BitOrd...
+#include "common/NotARational.h"                    // for NotARational
 #include "common/Point.h"                           // for iPoint2D, iRecta...
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decoders/RawDecoderException.h"           // for ThrowException
 #include "decompressors/FujiDecompressor.h"         // for FujiDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer
@@ -35,12 +37,12 @@
 #include "metadata/ColorFilterArray.h"              // for ColorFilterArray
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for FUJI_RAWIMAGEFUL...
+#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
 #include <array>                                    // for array
 #include <cassert>                                  // for assert
-#include <cstdint>                                  // for uint32_t, uint16_t
+#include <cstdint>                                  // for uint32_t
 #include <cstring>                                  // for memcmp
-#include <memory>                                   // for unique_ptr
+#include <memory>                                   // for unique_ptr, allo...
 #include <string>                                   // for string, operator==
 #include <vector>                                   // for vector
 

@@ -19,9 +19,10 @@
 */
 
 #include "rawspeedconfig.h" // IWYU pragma: keep
-#include "common/Cpuid.h" // for Cpuid
-#include <cstdlib>        // for exit
-#include <gtest/gtest.h>  // for AssertionResult, DeathTest, Test, AssertHe...
+#include "common/Cpuid.h"   // for Cpuid
+#include <cstdlib>          // for exit
+#include <gtest/gtest.h>    // for Test, AssertionResult, DeathTest, ExitedWi...
+#include <string>           // for allocator, string
 
 using rawspeed::Cpuid;
 

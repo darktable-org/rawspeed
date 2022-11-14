@@ -30,20 +30,20 @@
 #error DECODE must be defined as bool
 #endif
 
-#include "io/Buffer.h"                  // for Buffer, DataBuffer
-#include "io/IOException.h"             // for IOException
+#include "io/Buffer.h"                  // for Buffer
+#include "io/IOException.h"             // for IOException, RawspeedExcep...
 #include "parsers/CiffParser.h"         // IWYU pragma: keep
 #include "parsers/FiffParser.h"         // IWYU pragma: keep
 #include "parsers/RawParser.h"          // IWYU pragma: keep
 #include "parsers/RawParserException.h" // for RawParserException
-#include "parsers/TiffParser.h"         // IWYU pragma: keep
+#include "parsers/TiffParser.h"         // for TiffParser
 #include <cassert>                      // for assert
 #include <cstdint>                      // for uint8_t
 #include <cstdio>                       // for size_t
 
 #if GETDECODER
-#include "decoders/RawDecoder.h"          // IWYU pragma: keep
-#include "decoders/RawDecoderException.h" // for RawDecoderException, ThrowRDE
+#include "decoders/RawDecoder.h"          // for RawDecoder
+#include "decoders/RawDecoderException.h" // for RawDecoderException
 #if DECODE
 #include "common/RawspeedException.h" // for RawspeedException
 #include "metadata/CameraMetaData.h"  // for CameraMetaData

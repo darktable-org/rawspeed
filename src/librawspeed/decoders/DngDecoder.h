@@ -24,15 +24,15 @@
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
 #include <cstdint>                        // for uint32_t
-#include <optional>
+#include <optional>                       // for optional
 #include <vector>                         // for vector
 
 namespace rawspeed {
 
-class CameraMetaData;
-
 class Buffer;
-
+class CameraMetaData;
+class iRectangle2D;
+class iRectangle2D;
 struct DngTilingDescription;
 
 class DngDecoder final : public AbstractTiffDecoder

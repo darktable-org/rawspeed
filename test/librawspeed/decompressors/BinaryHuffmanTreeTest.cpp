@@ -19,10 +19,10 @@
 */
 
 #include "decompressors/BinaryHuffmanTree.h" // for BinaryHuffmanTree, Bina...
-#include <cstdlib>                           // for exit
-#include <gtest/gtest.h>                     // for AssertionResult, Message
+#include <gtest/gtest.h>                     // for AssertionResult, Test
 #include <initializer_list>                  // for initializer_list
-#include <memory>                            // for unique_ptr, make_unique
+#include <memory>                            // for unique_ptr, allocator
+#include <string>                            // for string
 #include <vector>                            // for vector
 
 using rawspeed::BinaryHuffmanTree;

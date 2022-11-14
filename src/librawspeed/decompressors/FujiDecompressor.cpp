@@ -27,12 +27,12 @@
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImageData, RawImage
-#include "common/RawspeedException.h"     // for RawspeedException
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Endianness.h"                // for Endianness, Endianness::big
-#include "metadata/ColorFilterArray.h" // for CFAColor::BLUE, CFAColor::GREEN, CFAColor::RED
-#include <algorithm>                      // for max, fill, min
-#include <cstdint>                        // for uint16_t, uint32_t, uint64_t
+#include "metadata/ColorFilterArray.h"    // for CFAColor, CFAColor::BLUE
+#include <algorithm>                      // for fill, min
+#include <cmath>                          // for abs
+#include <cstdint>                        // for uint16_t, uint32_t, int8_t
 #include <cstdlib>                        // for abs
 #include <cstring>                        // for memcpy, memset
 #include <string>                         // for string

@@ -19,15 +19,18 @@
 */
 
 #include "common/DngOpcodes.h"
-#include "common/RawImage.h"          // for RawImage, RawImageData
-#include "common/RawspeedException.h" // for RawspeedException
-#include "fuzz/Common.h"              // for CreateRawImage
-#include "io/Buffer.h"                // for Buffer, DataBuffer
-#include "io/ByteStream.h"            // for ByteStream
-#include "io/Endianness.h"            // for Endianness, Endianness::little
-#include <cassert>                    // for assert
-#include <cstdint>                    // for uint8_t
-#include <cstdio>                     // for size_t
+#include "common/Array2DRef.h"         // for Array2DRef
+#include "common/Point.h"              // for iPoint2D, iRectangle2D
+#include "common/RawImage.h"           // for RawImage, RawImageData, RawIm...
+#include "fuzz/Common.h"               // for CreateCFA, CreateRawImage
+#include "io/Buffer.h"                 // for Buffer, DataBuffer
+#include "io/ByteStream.h"             // for ByteStream
+#include "io/Endianness.h"             // for Endianness, Endianness::little
+#include "io/IOException.h"            // for ThrowException, RawspeedExcep...
+#include "metadata/ColorFilterArray.h" // for ColorFilterArray
+#include <cassert>                     // for assert
+#include <cstdint>                     // for uint16_t, uint8_t
+#include <cstdio>                      // for size_t
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 

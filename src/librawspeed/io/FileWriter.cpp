@@ -20,7 +20,7 @@
 
 #include "io/FileWriter.h"
 #include "io/Buffer.h"          // for Buffer
-#include "io/FileIOException.h" // for ThrowFIE
+#include "io/FileIOException.h" // for ThrowException, ThrowFIE
 #include <cstdio>               // for fclose, fopen, fwrite, FILE, size_t
 
 #if !defined(__unix__) && !defined(__APPLE__)

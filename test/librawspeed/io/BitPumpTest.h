@@ -18,12 +18,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h" // for uint8_t
-#include "io/Buffer.h"     // for Buffer
-#include "io/ByteStream.h" // for ByteStream
-#include "io/Endianness.h" // for getHostEndianness, Endianness::big, Endia...
-#include <array>           // for array
-#include <gtest/gtest.h>   // for Message, AssertionResult, ASSERT_PRED_FOR...
+#include "common/Common.h"  // for uint8_t
+#include "io/BitStream.h"   // for BitStream
+#include "io/Buffer.h"      // for Buffer, DataBuffer
+#include "io/ByteStream.h"  // for ByteStream
+#include "io/Endianness.h"  // for Endianness, Endianness::big, Endianness:...
+#include <array>            // for array
+#include <assert.h>         // for assert
+#include <cstdint>          // for uint8_t, uint32_t
+#include <gtest/gtest.h>    // for Message, TypedTestSuitePState, ASSERT_EQ
+#include <initializer_list> // for initializer_list
 
 using rawspeed::Buffer;
 using rawspeed::ByteStream;
@@ -35,6 +39,7 @@ namespace rawspeed_test {
 template <typename T, typename Tag> struct BitPumpPatternTest {};
 
 struct TestGetBitsTag;
+
 template <typename T> struct BitPumpPatternTest<T, TestGetBitsTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
@@ -46,6 +51,7 @@ template <typename T> struct BitPumpPatternTest<T, TestGetBitsTag> {
 };
 
 struct TestGetBitsNoFillTag;
+
 template <typename T> struct BitPumpPatternTest<T, TestGetBitsNoFillTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
@@ -58,6 +64,7 @@ template <typename T> struct BitPumpPatternTest<T, TestGetBitsNoFillTag> {
 };
 
 struct TestPeekBitsTag;
+
 template <typename T> struct BitPumpPatternTest<T, TestPeekBitsTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
@@ -71,6 +78,7 @@ template <typename T> struct BitPumpPatternTest<T, TestPeekBitsTag> {
 };
 
 struct TestPeekBitsNoFillTag;
+
 template <typename T> struct BitPumpPatternTest<T, TestPeekBitsNoFillTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
@@ -86,6 +94,7 @@ template <typename T> struct BitPumpPatternTest<T, TestPeekBitsNoFillTag> {
 };
 
 struct TestIncreasingPeekLengthTag;
+
 template <typename T>
 struct BitPumpPatternTest<T, TestIncreasingPeekLengthTag> {
   using PumpT = typename T::PumpT;
@@ -99,6 +108,7 @@ struct BitPumpPatternTest<T, TestIncreasingPeekLengthTag> {
 };
 
 struct TestIncreasingPeekLengthNoFillTag;
+
 template <typename T>
 struct BitPumpPatternTest<T, TestIncreasingPeekLengthNoFillTag> {
   using PumpT = typename T::PumpT;
@@ -167,6 +177,7 @@ REGISTER_TYPED_TEST_CASE_P(BitPumpTest, GetTest, GetNoFillTest, PeekTest,
 template <typename Pump, typename PatternTag> struct Pattern {};
 
 struct ZerosTag;
+
 template <typename Pump> struct Pattern<Pump, ZerosTag> {
   static const std::array<uint8_t, 8> Data;
   static uint32_t element(int index) { return 0U; }
@@ -176,6 +187,7 @@ template <typename Pump>
 const std::array<uint8_t, 8> Pattern<Pump, ZerosTag>::Data{{/* zero-init */}};
 
 struct OnesTag;
+
 template <typename Pump> struct Pattern<Pump, OnesTag> {
   static const std::array<uint8_t, 8> Data;
   static uint32_t element(int index) { return 1U; }
@@ -183,6 +195,7 @@ template <typename Pump> struct Pattern<Pump, OnesTag> {
 };
 
 struct InvOnesTag;
+
 template <typename Pump> struct Pattern<Pump, InvOnesTag> {
   static const std::array<uint8_t, 8> Data;
   static uint32_t element(int index) { return 1U << (index - 1U); }
@@ -190,6 +203,7 @@ template <typename Pump> struct Pattern<Pump, InvOnesTag> {
 };
 
 struct SaturatedTag;
+
 template <typename Pump> struct Pattern<Pump, SaturatedTag> {
   static const std::array<uint8_t, 8> Data;
   static uint32_t element(int index) { return (1U << index) - 1U; }

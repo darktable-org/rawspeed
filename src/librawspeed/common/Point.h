@@ -22,9 +22,11 @@
 #pragma once
 
 #include <algorithm>   // for max, min
+#include <cmath>       // for abs
 #include <cstdint>     // for int32_t, uint64_t
-#include <tuple>       // for tie
-#include <type_traits> // for make_signed, make_signed<>::type
+#include <cstdlib>     // for abs
+#include <tuple>       // for tie, operator==, tuple
+#include <type_traits> // for make_signed_t
 
 namespace rawspeed {
 

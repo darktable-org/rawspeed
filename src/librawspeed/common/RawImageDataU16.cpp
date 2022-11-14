@@ -19,24 +19,26 @@
 */
 
 #include "rawspeedconfig.h"               // for WITH_SSE2
-#include "common/RawImage.h"              // for RawImageDataU16, TYPE_USHO...
-#include "common/Common.h"                // for clampBits, writeLog, DEBUG...
+#include "common/RawImage.h"              // for RawImageDataU16, RawImageType
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for clampBits, roundDown, writ...
+#include "common/CroppedArray2DRef.h"     // for CroppedArray2DRef
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/Point.h"                 // for iPoint2D
 #include "common/TableLookUp.h"           // for TableLookUp
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea
-#include <algorithm>                      // for fill, max, min
+#include <algorithm>                      // for fill_n, fill, max, min
 #include <array>                          // for array
 #include <cassert>                        // for assert
-#include <cstdint>                        // for uint32_t, uint16_t, uint8_t
+#include <cstdint>                        // for uint16_t, uint32_t, uint8_t
 #include <memory>                         // for unique_ptr
+#include <tuple>                          // for array
 #include <vector>                         // for vector
 
 #ifdef WITH_SSE2
 #include "common/Cpuid.h" // for Cpuid
-#include <emmintrin.h> // for __m128i, _mm_load_si128
-#include <xmmintrin.h> // for _MM_HINT_T0, _mm_prefetch
+#include <emmintrin.h>    // for __m128i, _mm_load_si128
 #endif
 
 using std::vector;

@@ -23,7 +23,7 @@
 #include "rawspeedconfig.h"            // for WITH_SSE2
 #include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
 #include "common/Array2DRef.h"         // for Array2DRef
-#include "common/Common.h"             // for writeLog, DEBUG_PRIO::ERROR
+#include "common/Common.h"             // for writeLog, DEBUG_PRIO, DEBUG_P...
 #include "common/CroppedArray2DRef.h"  // for CroppedArray2DRef
 #include "common/ErrorLog.h"           // for ErrorLog
 #include "common/Mutex.h"              // for Mutex
@@ -35,15 +35,15 @@
 #include <array>                       // for array
 #include <cassert>                     // for assert
 #include <cmath>                       // for NAN
+#include <cstddef>                     // for byte
 #include <cstdint>                     // for uint32_t, uint16_t, uint8_t
-#include <memory>                      // for unique_ptr, operator==
+#include <memory>                      // for unique_ptr, operator==, defau...
 #include <string>                      // for string
 #include <vector>                      // for vector
 
 namespace rawspeed {
 
 class RawImage;
-
 class RawImageData;
 
 enum class RawImageType { UINT16, F32 };

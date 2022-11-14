@@ -33,11 +33,13 @@
 #include <cstdint>                              // for int16_t, uint16_t
 #include <memory>                               // for unique_ptr
 #include <optional>                             // for optional
-#include <type_traits>                          // for __underlying_type_im...
-#include <utility>                              // for move
+#include <type_traits>                          // for underlying_type_t
+#include <utility>                              // for move, pair
 #include <vector>                               // for vector
 
 namespace rawspeed {
+class ErrorLog;
+class ErrorLog;
 
 const int MAX_NUM_PRESCALE = 8;
 

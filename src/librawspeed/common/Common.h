@@ -20,15 +20,15 @@
 
 #pragma once
 
-#include <algorithm>        // IWYU pragma: keep
-#include <array>
+#include <algorithm>        // for max, clamp
+#include <array>            // for array
 #include <cassert>          // for assert
 #include <climits>          // for CHAR_BIT
-#include <cstdint>          // for uint8_t, uint16_t, uintptr_t
+#include <cstdint>          // for uint8_t, uintptr_t, uint16_t
 #include <cstring>          // for size_t, memcpy
 #include <initializer_list> // for initializer_list
-#include <string>           // for string
-#include <type_traits>      // for enable_if, is_unsigned, is_pointer, make...
+#include <string>           // for string, basic_string, allocator
+#include <type_traits>      // for enable_if_t, is_trivially_copyable, make...
 #include <vector>           // for vector
 
 extern "C" int rawspeed_get_number_of_processor_cores();

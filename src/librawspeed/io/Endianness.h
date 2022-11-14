@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "common/Common.h"
-#include <cassert> // for assert
-#include <cstdint> // for uint32_t, uint16_t, uint64_t, int16_t, int32_t
-#include <cstring> // for memcpy
+#include "common/Common.h" // for bit_cast
+#include <cassert>         // for assert
+#include <cstdint>         // for uint32_t, uint16_t, uint64_t, int16_t
+#include <cstring>         // for memcpy
 
 namespace rawspeed {
 
@@ -59,6 +59,7 @@ inline Endianness getHostEndianness() {
 
 #ifdef _MSC_VER
 #include <intrin.h>
+
 #define BSWAP16(A) _byteswap_ushort(A)
 #define BSWAP32(A) _byteswap_ulong(A)
 #define BSWAP64(A) _byteswap_uint64(A)

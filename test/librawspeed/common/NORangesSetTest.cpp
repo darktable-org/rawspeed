@@ -18,11 +18,13 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/NORangesSet.h" // for NORangesSet
-#include "common/Range.h"       // for Range
-#include "common/RangeTest.h"   // for RangeDoesntContain, RangeContains
-#include <gtest/gtest.h>        // for TEST, ASSERT_EQ, ASSERT_TRUE, ASSERT_F...
-#include <utility>              // for pair
+#include "common/NORangesSet.h" // for NORangesSet, operator!=, set, set<>:...
+#include "common/Range.h"       // for Range, RangesOverlap
+#include "common/RangeTest.h"   // for AllOverlapped, TwoRangesTest, twoRan...
+#include <gtest/gtest.h>        // for ParamIteratorInterface, AssertionResult
+#include <string>               // for string, allocator
+#include <tuple>                // for get, tuple
+#include <utility>              // for __tuple_element_t
 // IWYU pragma: no_forward_declare rawspeed::Range
 
 using rawspeed::NORangesSet;

@@ -20,18 +20,19 @@
 */
 
 #include "decoders/DcrDecoder.h"
-#include "common/NORangesSet.h"              // for set
-#include "decoders/RawDecoderException.h"    // for ThrowRDE
+#include "common/NORangesSet.h"              // for NORangesSet
+#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
 #include "decompressors/KodakDecompressor.h" // for KodakDecompressor
 #include "io/Buffer.h"                       // for Buffer, DataBuffer
 #include "io/ByteStream.h"                   // for ByteStream
 #include "io/Endianness.h"                   // for Endianness, Endianness:...
-#include "tiff/TiffEntry.h" // for TiffEntry, TiffDataType::SHORT
+#include "tiff/TiffEntry.h"                  // for TiffEntry, TiffDataType
 #include "tiff/TiffIFD.h"                    // for TiffRootIFD, TiffID
-#include "tiff/TiffTag.h"                    // for COMPRESSION, KODAK_IFD
+#include "tiff/TiffTag.h"                    // for TiffTag, TiffTag::COMPR...
 #include <array>                             // for array
 #include <cassert>                           // for assert
-#include <memory>                            // for unique_ptr
+#include <cstdint>                           // for uint32_t
+#include <memory>                            // for allocator, unique_ptr
 #include <string>                            // for operator==, string
 
 namespace rawspeed {

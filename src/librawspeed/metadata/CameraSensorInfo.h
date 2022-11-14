@@ -20,7 +20,8 @@
 
 #pragma once
 
-#include <vector> // for vector
+#include <algorithm> // for copy
+#include <vector>    // for vector
 
 namespace rawspeed {
 

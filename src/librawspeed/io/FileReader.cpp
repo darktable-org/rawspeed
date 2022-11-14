@@ -21,8 +21,8 @@
 
 #include "io/FileReader.h"
 #include "io/Buffer.h"          // for Buffer, Buffer::size_type
-#include "io/FileIOException.h" // for ThrowFIE
-#include <cstdio>               // for fseek, fclose, feof, ferror, fopen
+#include "io/FileIOException.h" // for ThrowException, ThrowFIE
+#include <cstdio>               // for fclose, fseek, feof, ferror, fopen
 #include <fcntl.h>              // for SEEK_END, SEEK_SET
 #include <limits>               // for numeric_limits
 #include <memory>               // for unique_ptr, make_unique, operator==

@@ -18,15 +18,18 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Point.h" // for iPoint2D, iPoint2D::area_type, iPoint2D::v...
-#include <algorithm>      // for find
-#include <gtest/gtest.h>  // for Message, TestPartResult, ParamIteratorInte...
-#include <iterator>       // for cend, cbegin
-#include <limits>         // for numeric_limits
-#include <ostream>        // for operator<<, basic_ostream::operator<<, ost...
-#include <tuple>          // for make_tuple, get, tuple
-#include <type_traits>    // for __decay_and_strip<>::__type
-#include <utility>        // for make_pair, pair, move
+#include "common/Point.h"             // for iPoint2D, iPoint2D::area_type
+#include <algorithm>                  // for find
+#include <gtest/gtest.h>              // for Message, TestPartResult, Param...
+#include <iterator>                   // for cend, cbegin, pair
+#include <limits>                     // for numeric_limits
+#include <ostream>                    // for operator<<, basic_ostream::ope...
+#include <pstl/glue_algorithm_defs.h> // for move
+#include <string>                     // for allocator, basic_string
+#include <tuple>                      // for make_tuple, get, tuple
+#include <type_traits>                // for __strip_reference_wrapper<>::_...
+#include <utility>                    // for make_pair, pair, move
+#include <variant>                    // for tuple
 
 using rawspeed::iPoint2D;
 using std::make_pair;

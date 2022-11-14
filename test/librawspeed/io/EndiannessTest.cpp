@@ -24,6 +24,7 @@
 #include <gtest/gtest.h>   // for ParamIteratorInterface, Message, TestPart...
 #include <iomanip>         // for setfill, setw, _Setw, _Setfill
 #include <iostream>        // for hex, endl, ostream
+#include <memory>          // for allocator
 
 using rawspeed::Endianness;
 using rawspeed::getBE;

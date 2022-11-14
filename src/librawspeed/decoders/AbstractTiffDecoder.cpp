@@ -19,7 +19,7 @@
 */
 
 #include "decoders/AbstractTiffDecoder.h"
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "tiff/TiffEntry.h"               // for TiffEntry
 #include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD, Tiff...
 #include <cstdint>                        // for uint32_t

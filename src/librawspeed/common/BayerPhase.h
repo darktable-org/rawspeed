@@ -21,10 +21,16 @@
 #pragma once
 
 #include "common/Array2DRef.h"         // for Array2DRef
-#include "metadata/ColorFilterArray.h" // for ColorFilterArray
-#include <array>                       // for array
+#include "common/Point.h"              // for iPoint2D
+#include "metadata/ColorFilterArray.h" // for CFAColor, CFAColor::GREEN
+#include <algorithm>                   // for find_if, equal
+#include <array>                       // for array, operator==
 #include <cassert>                     // for assert
+#include <cmath>                       // for abs
+#include <cstdlib>                     // for abs
+#include <iterator>                    // for distance
 #include <optional>                    // for optional
+#include <utility>                     // for swap
 
 namespace rawspeed {
 

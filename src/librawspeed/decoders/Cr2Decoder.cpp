@@ -21,28 +21,30 @@
 */
 
 #include "decoders/Cr2Decoder.h"
+#include "common/Array2DRef.h"                 // for Array2DRef
 #include "common/Point.h"                      // for iPoint2D
-#include "common/RawspeedException.h"          // for RawspeedException
 #include "decoders/RawDecoderException.h"      // for ThrowRDE
-#include "decompressors/Cr2LJpegDecoder.h"     // for Cr2LJpegDecoder, Cr2S...
+#include "decompressors/Cr2Decompressor.h"     // for Cr2Slicing
+#include "decompressors/Cr2LJpegDecoder.h"     // for Cr2LJpegDecoder
 #include "interpolators/Cr2sRawInterpolator.h" // for Cr2sRawInterpolator
 #include "io/Buffer.h"                         // for Buffer, DataBuffer
 #include "io/ByteStream.h"                     // for ByteStream
-#include "io/Endianness.h"                     // for Endianness, Endianness...
+#include "io/Endianness.h"                     // for Endianness, Endiannes...
 #include "metadata/Camera.h"                   // for Hints
-#include "metadata/ColorFilterArray.h" // for CFAColor::GREEN, CFAColor::BLUE
-#include "parsers/TiffParserException.h"       // for ThrowTPE
-#include "tiff/TiffEntry.h" // for TiffEntry, TiffDataType::SHORT
-#include "tiff/TiffTag.h"                      // for TiffTag, CANONCOLORDATA
+#include "metadata/ColorFilterArray.h"         // for CFAColor, CFAColor::G...
+#include "parsers/TiffParserException.h"       // for ThrowException, Rawsp...
+#include "tiff/TiffEntry.h"                    // for TiffEntry, TiffDataType
+#include "tiff/TiffTag.h"                      // for TiffTag, TiffTag::CAN...
 #include <array>                               // for array
 #include <cassert>                             // for assert
 #include <cstdint>                             // for uint32_t, uint16_t
-#include <memory>                              // for unique_ptr, allocator...
+#include <memory>                              // for unique_ptr, allocator
 #include <string>                              // for operator==, string
 #include <vector>                              // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
 namespace rawspeed {
+class CameraMetaData;
 
 bool Cr2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                       [[maybe_unused]] const Buffer& file) {

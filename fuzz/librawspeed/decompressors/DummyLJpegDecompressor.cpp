@@ -18,13 +18,13 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/RawImage.h"                         // for RawImage
+#include "common/RawImage.h"                         // for RawImage, RawIm...
 #include "common/RawspeedException.h"                // for RawspeedException
 #include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
 #include "fuzz/Common.h"                             // for CreateRawImage
 #include "io/Buffer.h"                               // for Buffer, DataBuffer
 #include "io/ByteStream.h"                           // for ByteStream
-#include "io/Endianness.h"                           // for Endianness, Endi...
+#include "io/Endianness.h"                           // for Endianness, End...
 #include <cassert>                                   // for assert
 #include <cstdint>                                   // for uint8_t
 #include <cstdio>                                    // for size_t

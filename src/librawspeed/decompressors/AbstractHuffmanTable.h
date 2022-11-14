@@ -22,16 +22,16 @@
 #pragma once
 
 #include "common/Common.h"                // for extractHighBits
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Buffer.h"                    // for Buffer
-#include <algorithm>                      // for equal, copy, fill, max
+#include <algorithm>                      // for copy, equal, fill, max
 #include <cassert>                        // for assert
 #include <cstddef>                        // for size_t
 #include <cstdint>                        // for uint8_t, uint32_t, uint16_t
 #include <functional>                     // for less, less_equal
 #include <iterator>                       // for back_insert_iterator, back...
 #include <numeric>                        // for accumulate
-#include <vector>                         // for vector, operator==
+#include <vector>                         // for vector, vector<>::const_it...
 
 namespace rawspeed {
 
