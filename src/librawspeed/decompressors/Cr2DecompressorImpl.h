@@ -209,6 +209,13 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
 
   int globalFrameCol = 0;
   int globalFrameRow = 0;
+
+  auto frameColsRemaining = [&]() {
+    int r = globalFrame.x - globalFrameCol;
+    assert(r >= 0);
+    return r;
+  };
+
   for (auto sliceId = 0; sliceId < slicing.numSlices; sliceId++) {
     const int sliceWidth = slicing.widthOfSlice(sliceId);
 
@@ -218,12 +225,24 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
       int col = globalFrameRow / realDim.y;
       col *= slicing.widthOfSlice(0);
 
-      if (col >= realDim.x)
+      auto colsRemaining = [&]() {
+        int r = realDim.x - col;
+        assert(r >= 0);
+        return r;
+      };
+      if (colsRemaining() == 0)
         break;
 
       for (int sliceCol = 0; sliceCol < sliceWidth;) {
+        auto sliceColsRemainingInThisSliceRow = [&]() {
+          int r = sliceWidth - sliceCol;
+          assert(r >= 0);
+          return r;
+        };
+        assert(colsRemaining() >= sliceColsRemainingInThisSliceRow());
+
         // check if we processed one full raw row worth of pixels
-        if (globalFrameCol == globalFrame.x) {
+        if (frameColsRemaining() == 0) {
           // if yes -> update predictor by going back exactly one row,
           // no matter where we are right now.
           // makes no sense from an image compression point of view, ask Canon.
@@ -235,11 +254,9 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
 
         // How many pixel can we decode until we finish the row of either
         // the frame (i.e. predictor change time), or of the current slice?
-        int sliceColsRemainingInThisFrameRow = globalFrame.x - globalFrameCol;
-        int sliceColsRemainingInThisSliceRow = sliceWidth - sliceCol;
-        int sliceColsRemaining = std::min(sliceColsRemainingInThisSliceRow,
-                                          sliceColsRemainingInThisFrameRow);
-        for (int sliceColEnd = sliceCol + sliceColsRemaining;
+        for (int sliceColsRemaining = std::min(
+                     sliceColsRemainingInThisSliceRow(), frameColsRemaining()),
+                 sliceColEnd = sliceCol + sliceColsRemaining;
              sliceCol < sliceColEnd; ++sliceCol, ++globalFrameCol, ++col) {
           for (int p = 0; p < dsc.groupSize; ++p) {
             int c = p < dsc.pixelsPerGroup ? 0 : p - dsc.pixelsPerGroup + 1;
