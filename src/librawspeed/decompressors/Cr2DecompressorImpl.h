@@ -234,6 +234,8 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
       assert(col % X_S_F == 0);
       col /= X_S_F;
       col *= dsc.colsPerGroup;
+      col /= dsc.groupSize;
+
       for (int sliceCol = 0; sliceCol < sliceWidth;) {
         // check if we processed one full raw row worth of pixels
         if (globalFrameCol == globalFrame.x) {
@@ -242,7 +244,7 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
           // makes no sense from an image compression point of view, ask Canon.
           for (int c = 0; c < N_COMP; ++c)
             pred[c] = predNext[c == 0 ? c : dsc.groupSize - (N_COMP - c)];
-          predNext = &out(row, col);
+          predNext = &out(row, dsc.groupSize * col);
           globalFrameCol = 0;
         }
 
@@ -253,11 +255,10 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
         int sliceColsRemaining = std::min(sliceColsRemainingInThisSliceRow,
                                           sliceColsRemainingInThisFrameRow);
         for (int sliceColEnd = sliceCol + sliceColsRemaining;
-             sliceCol < sliceColEnd;
-             ++sliceCol, ++globalFrameCol, col += dsc.groupSize) {
+             sliceCol < sliceColEnd; ++sliceCol, ++globalFrameCol, ++col) {
           for (int p = 0; p < dsc.groupSize; ++p) {
             int c = p < dsc.pixelsPerGroup ? 0 : p - dsc.pixelsPerGroup + 1;
-            out(row, col + p) = pred[c] +=
+            out(row, dsc.groupSize * col + p) = pred[c] +=
                 ((const HuffmanTable&)(ht[c])).decodeDifference(bs);
           }
         }
