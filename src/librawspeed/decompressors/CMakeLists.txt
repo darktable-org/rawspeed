@@ -13,6 +13,8 @@ FILE(GLOB SOURCES
   "Cr2LJpegDecoder.h"
   "CrwDecompressor.cpp"
   "CrwDecompressor.h"
+  "CrxDecompressor.cpp"
+  "CrxDecompressor.h"
   "DeflateDecompressor.cpp"
   "DeflateDecompressor.h"
   "FujiDecompressor.cpp"

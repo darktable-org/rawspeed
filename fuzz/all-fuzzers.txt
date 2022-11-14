@@ -70,6 +70,8 @@ HuffmanTableVectorFuzzer-BitPumpMSB-FullDecode
 HuffmanTableVectorFuzzer-BitPumpMSB-NoFullDecode
 HuffmanTableVectorFuzzer-BitPumpMSB32-FullDecode
 HuffmanTableVectorFuzzer-BitPumpMSB32-NoFullDecode
+IsoMParserFuzzer-GetDecoder
+IsoMParserFuzzer-GetDecoder-Decode
 KodakDecompressorFuzzer
 LJpegDecompressorFuzzer
 NikonDecompressorFuzzer

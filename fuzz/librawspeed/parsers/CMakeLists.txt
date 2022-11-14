@@ -19,6 +19,7 @@ endfunction()
 set(PARSERS
   "Ciff"
   "Fiff"
+  "IsoM"
   "Raw"
   "Tiff"
 )
