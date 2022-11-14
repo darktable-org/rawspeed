@@ -51,7 +51,6 @@ struct Dsc {
   //  * for <3,2,2>: 12 = 3*2*2
   // and advances x by N_COMP*X_S_F and y by Y_S_F
   const int sliceColStep;
-  const int frameRowStep;
   const int pixelsPerGroup;
   const int groupSize;
   const int cpp;
@@ -61,8 +60,7 @@ struct Dsc {
       std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format)
       : N_COMP(std::get<0>(format)), X_S_F(std::get<1>(format)),
         Y_S_F(std::get<2>(format)), subSampled(X_S_F != 1 || Y_S_F != 1),
-        sliceColStep(N_COMP * X_S_F), frameRowStep(Y_S_F),
-        pixelsPerGroup(X_S_F * Y_S_F),
+        sliceColStep(N_COMP * X_S_F), pixelsPerGroup(X_S_F * Y_S_F),
         groupSize(!subSampled ? N_COMP : 2 + pixelsPerGroup),
         cpp(!subSampled ? 1 : 3), colsPerGroup(!subSampled ? cpp : groupSize) {}
 };
@@ -200,8 +198,8 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
   }
 
   assert(frame.x % X_S_F == 0);
-  assert(frame.y % dsc.frameRowStep == 0);
-  const iPoint2D globalFrame(frame.x / X_S_F, frame.y / dsc.frameRowStep);
+  assert(frame.y % Y_S_F == 0);
+  const iPoint2D globalFrame(frame.x / X_S_F, frame.y / Y_S_F);
 
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPreds<N_COMP>();
