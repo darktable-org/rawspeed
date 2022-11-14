@@ -192,10 +192,8 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
   // and advances x by N_COMP*X_S_F and y by Y_S_F
 
   iPoint2D realDim = mRaw->dim;
-  if (dsc.subSampled) {
-    assert(realDim.x % dsc.groupSize == 0);
-    realDim.x /= dsc.groupSize;
-  }
+  assert(realDim.x % dsc.groupSize == 0);
+  realDim.x /= dsc.groupSize;
 
   assert(frame.x % X_S_F == 0);
   assert(frame.y % Y_S_F == 0);
