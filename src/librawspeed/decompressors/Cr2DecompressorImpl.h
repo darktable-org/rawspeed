@@ -220,7 +220,7 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
       int col = globalFrameRow / realDim.y;
       col *= slicing.widthOfSlice(0);
 
-      if (col >= static_cast<int>(realDim.x))
+      if (col >= realDim.x)
         break;
 
       for (int sliceCol = 0; sliceCol < sliceWidth;) {
