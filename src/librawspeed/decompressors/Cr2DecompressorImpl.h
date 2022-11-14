@@ -197,7 +197,6 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
   if (dsc.subSampled) {
     assert(realDim.x % dsc.groupSize == 0);
     realDim.x /= dsc.groupSize;
-    realDim.x *= X_S_F;
   }
 
   assert(frame.x % X_S_F == 0);
@@ -219,12 +218,10 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
          ++sliceFrameRow, ++globalFrameRow) {
       int row = globalFrameRow % realDim.y;
       int col = (globalFrameRow / realDim.y) *
-                ((dsc.sliceColStep * slicing.widthOfSlice(0)) / dsc.cpp);
+                ((N_COMP * slicing.widthOfSlice(0)) / dsc.cpp);
       if (col >= static_cast<int>(realDim.x))
         break;
 
-      assert(col % X_S_F == 0);
-      col /= X_S_F;
       col *= dsc.colsPerGroup;
       col /= dsc.groupSize;
 
