@@ -217,13 +217,11 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
     for (int sliceFrameRow = 0; sliceFrameRow < globalFrame.y;
          ++sliceFrameRow, ++globalFrameRow) {
       int row = globalFrameRow % realDim.y;
-      int col = (globalFrameRow / realDim.y) *
-                ((N_COMP * slicing.widthOfSlice(0)) / dsc.cpp);
+      int col = globalFrameRow / realDim.y;
+      col *= slicing.widthOfSlice(0);
+
       if (col >= static_cast<int>(realDim.x))
         break;
-
-      col *= dsc.colsPerGroup;
-      col /= dsc.groupSize;
 
       for (int sliceCol = 0; sliceCol < sliceWidth;) {
         // check if we processed one full raw row worth of pixels
