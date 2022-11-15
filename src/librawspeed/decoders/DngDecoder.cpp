@@ -40,7 +40,6 @@
 #include <algorithm>                               // for transform, max
 #include <array>                                   // for array, array<>::v...
 #include <cassert>                                 // for assert
-#include <ext/alloc_traits.h>                      // for __alloc_traits<>:...
 #include <limits>                                  // for numeric_limits
 #include <map>                                     // for map
 #include <memory>                                  // for unique_ptr, alloc...
@@ -48,6 +47,7 @@
 #include <string>                                  // for char_traits, string
 #include <utility>                                 // for move
 #include <vector>                                  // for vector, allocator
+// IWYU pragma: no_include <ext/alloc_traits.h>
 
 using std::vector;
 using std::map;

@@ -39,13 +39,13 @@
 #include <algorithm>                      // for all_of, max
 #include <cassert>                        // for assert
 #include <cmath>                          // for pow
-#include <ext/alloc_traits.h>             // for __alloc_traits<>::value_type
 #include <initializer_list>               // for initializer_list
 #include <limits>                         // for numeric_limits
 #include <optional>                       // for optional, operator==
 #include <string>                         // for string
 #include <tuple>                          // for tie, tuple
 #include <utility>                        // for move, pair
+// IWYU pragma: no_include <ext/alloc_traits.h>
 
 namespace {
 
