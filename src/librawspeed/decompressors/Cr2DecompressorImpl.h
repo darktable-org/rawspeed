@@ -120,6 +120,9 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
   if (static_cast<int>(rec.size()) != dsc.N_COMP)
     ThrowRDE("HT/Initial predictor count does not match component count");
 
+  if (mRaw->dim.x % dsc.groupSize != 0)
+    ThrowRDE("Unexpected image dimension multiplicity");
+
   for (const auto& recip : rec) {
     if (!recip.ht.isFullDecode())
       ThrowRDE("Huffman table is not of a full decoding variety");
