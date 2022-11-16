@@ -123,6 +123,9 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
   if (mRaw->dim.x % dsc.groupSize != 0)
     ThrowRDE("Unexpected image dimension multiplicity");
 
+  if (frame.x % dsc.X_S_F != 0 || frame.y % dsc.Y_S_F != 0)
+    ThrowRDE("Unexpected LJpeg frame dimension multiplicity");
+
   for (const auto& recip : rec) {
     if (!recip.ht.isFullDecode())
       ThrowRDE("Huffman table is not of a full decoding variety");
