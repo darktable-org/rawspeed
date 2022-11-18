@@ -15194,6 +15194,86 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="FUJIFILM" model="X-H2">
+		<ID make="Fujifilm" model="X-H2">Fujifilm X-H2</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="12" width="-120" height="-12"/>
+		<Sensor black="1020" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11809 -5358 -1141</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4248 12164 2343</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-514 1097 5848</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="X-H2" mode="compressed">
+		<ID make="Fujifilm" model="X-H2">Fujifilm X-H2</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="12" width="-120" height="-12"/>
+		<Sensor black="1020" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11809 -5358 -1141</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4248 12164 2343</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-514 1097 5848</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="X-H2S">
+		<ID make="Fujifilm" model="X-H2S">Fujifilm X-H2S</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="12" width="-78" height="-12"/>
+		<Sensor black="1024" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">12836 -5909 -1032</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3087 11132 2236</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-35 872 5330</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="X-H2S" mode="compressed">
+		<ID make="Fujifilm" model="X-H2S">Fujifilm X-H2S</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="12" width="-78" height="-12"/>
+		<Sensor black="1024" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">12836 -5909 -1032</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3087 11132 2236</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-35 872 5330</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="FUJIFILM" model="X-M1">
 		<ID make="Fujifilm" model="X-M1">Fujifilm X-M1</ID>
 		<CFA2 width="6" height="6">
