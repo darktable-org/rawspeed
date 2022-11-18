@@ -15705,6 +15705,46 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="FUJIFILM" model="X-T30 II">
+		<ID make="Fujifilm" model="X-T30 II">Fujifilm X-T30 II</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="12" width="-138" height="-6"/>
+		<Sensor black="1022" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">13426 -6334 -1177</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4244 12136 2371</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-580 1303 5980</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="X-T30 II" mode="compressed">
+		<ID make="Fujifilm" model="X-T30 II">Fujifilm X-T30 II</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Crop x="0" y="12" width="-138" height="-6"/>
+		<Sensor black="1022" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">13426 -6334 -1177</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4244 12136 2371</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-580 1303 5980</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="FUJIFILM" model="X-T100">
 		<ID make="Fujifilm" model="X-T100">Fujifilm X-T100</ID>
 		<CFA width="2" height="2">
