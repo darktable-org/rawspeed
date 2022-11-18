@@ -311,7 +311,7 @@ public:
    *
    *--------------------------------------------------------------
    */
-  int decodeDifference(BitPumpMSB& bits) { // NOLINT: google-runtime-references
+  int decodeDifference(BitPumpMSB& bits) {
     int rv;
     int l;
     int temp;

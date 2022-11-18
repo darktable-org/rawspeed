@@ -530,9 +530,9 @@ int main(int argc, char **argv) {
   size_t time = 0;
   map<std::string, std::string, std::less<>> failedTests;
 #ifdef HAVE_OPENMP
-#pragma omp parallel for default(none) firstprivate(argc, argv, o) \
-    OMPSHAREDCLAUSE(metadata) shared(cerr, failedTests) schedule(dynamic, 1) \
-    reduction(+ : time) if(remaining_argc > 2)
+#pragma omp parallel for default(none) firstprivate(argc, argv, o)             \
+    shared(metadata) shared(cerr, failedTests) schedule(dynamic, 1)            \
+    reduction(+ : time) if (remaining_argc > 2)
 #endif
   for (int i = 1; i < argc; ++i) {
     if (!argv[i])
