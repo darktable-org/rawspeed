@@ -7068,6 +7068,9 @@
 		<ID make="Olympus" model="E-M10 Mark III">Olympus E-M10 Mark III</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="254" white="4000"/>
+		<Aliases>
+			<Alias id="E-M10 Mark IIIs">E-M10MarkIIIS</Alias>
+		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8380 -2630 -639</ColorMatrixRow>
