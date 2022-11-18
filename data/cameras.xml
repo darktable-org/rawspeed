@@ -7330,6 +7330,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="OLYMPUS CORPORATION" model="E-P7">
+		<ID make="Olympus" model="E-P7">Olympus E-P7</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="255" white="4000"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9476 -3182 -765</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2613 10958 1893</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-449 1315 5268</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="OLYMPUS CORPORATION" model="PEN-F">
 		<ID make="Olympus" model="PEN-F">Olympus PEN-F</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
