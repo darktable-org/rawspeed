@@ -1,4 +1,5 @@
 FILE(GLOB RAWSPEED_TEST_SOURCES
+  "BayerPhaseTest.cpp"
   "ChecksumFileTest.cpp"
   "CommonTest.cpp"
   "CpuidTest.cpp"
