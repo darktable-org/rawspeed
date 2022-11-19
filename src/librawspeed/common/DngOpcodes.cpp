@@ -104,6 +104,12 @@ public:
            "Creating DngOpcode during call stack unwinding?");
   }
 
+  DngOpcode() = delete;
+  DngOpcode(const DngOpcode&) = delete;
+  DngOpcode(DngOpcode&&) noexcept = delete;
+  DngOpcode& operator=(const DngOpcode&) noexcept = delete;
+  DngOpcode& operator=(DngOpcode&&) noexcept = delete;
+
   virtual ~DngOpcode() {
     assert((std::uncaught_exceptions() > 0 || setup_was_called) &&
            "Derived classes did not call our setup()!");
