@@ -95,7 +95,7 @@ struct DngSliceElement final {
 
   DngSliceElement() = delete;
   DngSliceElement(const DngSliceElement&) = default;
-  DngSliceElement(DngSliceElement&&) = default;
+  DngSliceElement(DngSliceElement&&) noexcept = default;
   DngSliceElement& operator=(const DngSliceElement&) noexcept = delete;
   DngSliceElement& operator=(DngSliceElement&&) noexcept = delete;
 
