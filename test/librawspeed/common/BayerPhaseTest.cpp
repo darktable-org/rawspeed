@@ -49,6 +49,7 @@ namespace rawspeed {
   case BayerPhase::BGGR:
     return os << "BGGR";
   }
+  __builtin_unreachable();
 }
 
 } // namespace rawspeed
