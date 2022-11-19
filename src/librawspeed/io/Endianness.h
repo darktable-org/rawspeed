@@ -38,7 +38,6 @@ inline Endianness getHostEndiannessRuntime() {
   if (firstbyte == 0xfe)
     return Endianness::big;
 
-  // NOLINTNEXTLINE: https://bugs.llvm.org/show_bug.cgi?id=50532
   assert(false);
 
   // Return something to make compilers happy

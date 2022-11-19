@@ -34,37 +34,6 @@ set (CLANG_REENABLED_WARNING_FLAGS
 )
 
 set(CMAKE_REQUIRED_FLAGS_ORIG "${CMAKE_REQUIRED_FLAGS}")
-set(CMAKE_REQUIRED_FLAGS "-c -Wunreachable-code -Werror=unreachable-code")
-# see https://reviews.llvm.org/D25321
-# see https://github.com/darktable-org/rawspeed/issues/104
-CHECK_CXX_SOURCE_COMPILES(
-  "void foo() {
-  return;
-  __builtin_unreachable();
-}"
-  CLANG_CXX_FLAG_UNREACHABLE_CODE_WORKS
-)
-set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_ORIG}")
-
-if(NOT CLANG_CXX_FLAG_UNREACHABLE_CODE_WORKS)
-  list(APPEND CLANG_DISABLED_WARNING_FLAGS "unreachable-code")
-endif()
-
-set(CMAKE_REQUIRED_FLAGS_ORIG "${CMAKE_REQUIRED_FLAGS}")
-set(CMAKE_REQUIRED_FLAGS "-c -Wmissing-braces -Werror=missing-braces")
-# see https://bugs.llvm.org/show_bug.cgi?id=21629
-CHECK_CXX_SOURCE_COMPILES(
-"#include <array>
-const std::array<int, 2> test = {0, 0};"
-  CLANG_CXX_FLAG_MISSING_BRACES_WORKS
-)
-set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_ORIG}")
-
-if(NOT CLANG_CXX_FLAG_MISSING_BRACES_WORKS)
-  list(APPEND CLANG_DISABLED_WARNING_FLAGS "missing-braces")
-endif()
-
-set(CMAKE_REQUIRED_FLAGS_ORIG "${CMAKE_REQUIRED_FLAGS}")
 set(CMAKE_REQUIRED_FLAGS "-c -Wthread-safety-analysis -Werror=thread-safety-analysis")
 CHECK_CXX_SOURCE_COMPILES(
 "// Enable thread safety attributes only with clang.
