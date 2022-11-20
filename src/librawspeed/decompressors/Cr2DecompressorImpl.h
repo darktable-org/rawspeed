@@ -223,6 +223,8 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
   int globalFrameCol = 0;
   int globalFrameRow = 0;
 
+  int integratedFrameRow = 0;
+
   auto frameColsRemaining = [&]() {
     int r = globalFrame.x - globalFrameCol;
     assert(r >= 0);
@@ -233,9 +235,9 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
     const int sliceWidth = slicing.widthOfSlice(sliceId);
 
     for (int sliceFrameRow = 0; sliceFrameRow < globalFrame.y;
-         ++sliceFrameRow, ++globalFrameRow) {
-      int row = globalFrameRow % realDim.y;
-      int col = globalFrameRow / realDim.y;
+         ++sliceFrameRow, ++integratedFrameRow) {
+      int row = integratedFrameRow % realDim.y;
+      int col = integratedFrameRow / realDim.y;
       col *= slicing.widthOfSlice(0);
 
       auto colsRemaining = [&]() {
@@ -262,7 +264,9 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
           for (int c = 0; c < N_COMP; ++c)
             pred[c] = predNext[c == 0 ? c : dsc.groupSize - (N_COMP - c)];
           predNext = &out(row, dsc.groupSize * col);
+          ++globalFrameRow;
           globalFrameCol = 0;
+          assert(globalFrameRow < globalFrame.y && "Run out of frame");
         }
 
         // How many pixel can we decode until we finish the row of either
