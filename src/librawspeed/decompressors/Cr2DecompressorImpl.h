@@ -246,7 +246,7 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
         return r;
       };
       if (colsRemaining() == 0)
-        break;
+        return;
 
       for (int sliceCol = 0; sliceCol < sliceWidth;) {
         auto sliceColsRemainingInThisSliceRow = [&]() {
