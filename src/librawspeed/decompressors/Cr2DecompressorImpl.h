@@ -81,6 +81,8 @@ class Cr2SliceIterator final {
 
   int sliceId;
 
+  friend class Cr2SliceOutputTileIterator;
+
 public:
   using iterator_category = std::input_iterator_tag;
   using difference_type = std::ptrdiff_t;
@@ -103,6 +105,52 @@ public:
     return a.sliceId == b.sliceId;
   }
   friend bool operator!=(const Cr2SliceIterator& a, const Cr2SliceIterator& b) {
+    return !(a == b);
+  }
+};
+
+class Cr2SliceOutputTileIterator final {
+  const Cr2SliceIterator& slice;
+  const iPoint2D& dim;
+
+  int sliceRow = 0;
+
+public:
+  using iterator_category = std::input_iterator_tag;
+  using difference_type = std::ptrdiff_t;
+  using value_type = iRectangle2D;
+
+  Cr2SliceOutputTileIterator(const Cr2SliceIterator& slice_,
+                             const iPoint2D& dim_, int sliceRow_)
+      : slice(slice_), dim(dim_), sliceRow(sliceRow_) {}
+
+  value_type operator*() const {
+    iRectangle2D r;
+    const int integratedFrameRow = slice.frame.y * slice.sliceId + sliceRow;
+    int row = integratedFrameRow % dim.y;
+    int col = integratedFrameRow / dim.y;
+    col *= slice.slicing.widthOfSlice(0);
+    r.setTopLeft({col, row});
+    int rowsRemaining = dim.y - row;
+    assert(rowsRemaining >= 0);
+    int sliceRowsRemaining = (*slice).y - sliceRow;
+    assert(sliceRowsRemaining >= 0);
+    const int sliceHeight = std::min(rowsRemaining, sliceRowsRemaining);
+    r.setSize({(*slice).x, sliceHeight});
+    return r;
+  }
+  Cr2SliceOutputTileIterator& operator++() {
+    sliceRow += operator*().getHeight();
+    return *this;
+  }
+  friend bool operator==(const Cr2SliceOutputTileIterator& a,
+                         const Cr2SliceOutputTileIterator& b) {
+    assert(&a.slice == &b.slice && &a.dim == &b.dim &&
+           "Comparing unrelated iterators.");
+    return a.sliceRow == b.sliceRow;
+  }
+  friend bool operator!=(const Cr2SliceOutputTileIterator& a,
+                         const Cr2SliceOutputTileIterator& b) {
     return !(a == b);
   }
 };
@@ -262,56 +310,44 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
     return r;
   };
 
-  int integratedFrameRow = 0;
-  for (iPoint2D slice :
-       make_range(Cr2SliceIterator(slicing, globalFrame, /*sliceId=*/0),
-                  Cr2SliceIterator(slicing, globalFrame,
-                                   /*sliceId=*/slicing.numSlices))) {
-    for (int sliceFrameRow = 0; sliceFrameRow < slice.y;
-         ++sliceFrameRow, ++integratedFrameRow) {
-      int row = integratedFrameRow % realDim.y;
-      int col = integratedFrameRow / realDim.y;
-      col *= slicing.widthOfSlice(0);
-
-      auto colsRemaining = [&]() {
-        int r = realDim.x - col;
-        assert(r >= 0);
-        return r;
-      };
-      if (colsRemaining() == 0)
+  for (Cr2SliceIterator
+           sliceIter = Cr2SliceIterator(slicing, globalFrame, /*sliceId=*/0),
+           slice_end = Cr2SliceIterator(slicing, globalFrame,
+                                        /*sliceId=*/slicing.numSlices);
+       sliceIter != slice_end; ++sliceIter) {
+    for (iRectangle2D output : make_range(
+             Cr2SliceOutputTileIterator(sliceIter, realDim, /*sliceRow=*/0),
+             Cr2SliceOutputTileIterator(sliceIter, realDim,
+                                        /*sliceRow=*/(*sliceIter).y))) {
+      if (output.getLeft() == realDim.x)
         return;
+      for (int row = output.getTop(), rowEnd = output.getBottom();
+           row != rowEnd; ++row) {
+        for (int col = output.getLeft(), colEnd = output.getRight();
+             col != colEnd;) {
+          // check if we processed one full raw row worth of pixels
+          if (frameColsRemaining() == 0) {
+            // if yes -> update predictor by going back exactly one row,
+            // no matter where we are right now.
+            // makes no sense from an image compression point of view, ask
+            // Canon.
+            for (int c = 0; c < N_COMP; ++c)
+              pred[c] = predNext[c == 0 ? c : dsc.groupSize - (N_COMP - c)];
+            predNext = &out(row, dsc.groupSize * col);
+            ++globalFrameRow;
+            globalFrameCol = 0;
+            assert(globalFrameRow < globalFrame.y && "Run out of frame");
+          }
 
-      for (int sliceCol = 0; sliceCol < slice.x;) {
-        auto sliceColsRemainingInThisSliceRow = [&]() {
-          int r = slice.x - sliceCol;
-          assert(r >= 0);
-          return r;
-        };
-        assert(colsRemaining() >= sliceColsRemainingInThisSliceRow());
-
-        // check if we processed one full raw row worth of pixels
-        if (frameColsRemaining() == 0) {
-          // if yes -> update predictor by going back exactly one row,
-          // no matter where we are right now.
-          // makes no sense from an image compression point of view, ask Canon.
-          for (int c = 0; c < N_COMP; ++c)
-            pred[c] = predNext[c == 0 ? c : dsc.groupSize - (N_COMP - c)];
-          predNext = &out(row, dsc.groupSize * col);
-          ++globalFrameRow;
-          globalFrameCol = 0;
-          assert(globalFrameRow < globalFrame.y && "Run out of frame");
-        }
-
-        // How many pixel can we decode until we finish the row of either
-        // the frame (i.e. predictor change time), or of the current slice?
-        for (int sliceColsRemaining = std::min(
-                     sliceColsRemainingInThisSliceRow(), frameColsRemaining()),
-                 sliceColEnd = sliceCol + sliceColsRemaining;
-             sliceCol < sliceColEnd; ++sliceCol, ++globalFrameCol, ++col) {
-          for (int p = 0; p < dsc.groupSize; ++p) {
-            int c = p < dsc.pixelsPerGroup ? 0 : p - dsc.pixelsPerGroup + 1;
-            out(row, dsc.groupSize * col + p) = pred[c] +=
-                ((const HuffmanTable&)(ht[c])).decodeDifference(bs);
+          // How many pixel can we decode until we finish the row of either
+          // the frame (i.e. predictor change time), or of the current slice?
+          for (int colFrameEnd = std::min(colEnd, col + frameColsRemaining());
+               col != colFrameEnd; ++col, ++globalFrameCol) {
+            for (int p = 0; p < dsc.groupSize; ++p) {
+              int c = p < dsc.pixelsPerGroup ? 0 : p - dsc.pixelsPerGroup + 1;
+              out(row, dsc.groupSize * col + p) = pred[c] +=
+                  ((const HuffmanTable&)(ht[c])).decodeDifference(bs);
+            }
           }
         }
       }
