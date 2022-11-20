@@ -23,6 +23,7 @@
 #include "common/Array2DRef.h"               // for Array2DRef
 #include "common/Point.h"                    // for iPoint2D, iPoint2D::area_...
 #include "common/RawImage.h"                 // for RawImage, RawImageData
+#include "common/iterator_range.h"           // for iterator_range
 #include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
 #include "decompressors/Cr2Decompressor.h"   // for Cr2Decompressor, Cr2Slicing
 #include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
@@ -72,6 +73,38 @@ struct Dsc {
         sliceColStep(N_COMP * X_S_F), pixelsPerGroup(X_S_F * Y_S_F),
         groupSize(!subSampled ? N_COMP : 2 + pixelsPerGroup),
         cpp(!subSampled ? 1 : 3), colsPerGroup(!subSampled ? cpp : groupSize) {}
+};
+
+class Cr2SliceIterator final {
+  const Cr2Slicing& slicing;
+  const iPoint2D& frame;
+
+  int sliceId;
+
+public:
+  using iterator_category = std::input_iterator_tag;
+  using difference_type = std::ptrdiff_t;
+  using value_type = iPoint2D;
+
+  Cr2SliceIterator(const Cr2Slicing& slicing_, const iPoint2D& frame_,
+                   int sliceId_)
+      : slicing(slicing_), frame(frame_), sliceId(sliceId_) {}
+
+  value_type operator*() const {
+    return {slicing.widthOfSlice(sliceId), frame.y};
+  }
+  Cr2SliceIterator& operator++() {
+    sliceId++;
+    return *this;
+  }
+  friend bool operator==(const Cr2SliceIterator& a, const Cr2SliceIterator& b) {
+    assert(&a.slicing == &b.slicing && &a.frame == &b.frame &&
+           "Comparing unrelated iterators.");
+    return a.sliceId == b.sliceId;
+  }
+  friend bool operator!=(const Cr2SliceIterator& a, const Cr2SliceIterator& b) {
+    return !(a == b);
+  }
 };
 
 } // namespace
@@ -229,12 +262,13 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
     return r;
   };
 
-  for (auto sliceId = 0; sliceId < slicing.numSlices; sliceId++) {
-    const int sliceWidth = slicing.widthOfSlice(sliceId);
-
-    for (int sliceFrameRow = 0; sliceFrameRow < globalFrame.y;
-         ++sliceFrameRow) {
-      const int integratedFrameRow = globalFrame.y * sliceId + sliceFrameRow;
+  int integratedFrameRow = 0;
+  for (iPoint2D slice :
+       make_range(Cr2SliceIterator(slicing, globalFrame, /*sliceId=*/0),
+                  Cr2SliceIterator(slicing, globalFrame,
+                                   /*sliceId=*/slicing.numSlices))) {
+    for (int sliceFrameRow = 0; sliceFrameRow < slice.y;
+         ++sliceFrameRow, ++integratedFrameRow) {
       int row = integratedFrameRow % realDim.y;
       int col = integratedFrameRow / realDim.y;
       col *= slicing.widthOfSlice(0);
@@ -247,9 +281,9 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
       if (colsRemaining() == 0)
         return;
 
-      for (int sliceCol = 0; sliceCol < sliceWidth;) {
+      for (int sliceCol = 0; sliceCol < slice.x;) {
         auto sliceColsRemainingInThisSliceRow = [&]() {
-          int r = sliceWidth - sliceCol;
+          int r = slice.x - sliceCol;
           assert(r >= 0);
           return r;
         };

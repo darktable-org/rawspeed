@@ -29,6 +29,7 @@ FILE(GLOB SOURCES
   "Spline.h"
   "TableLookUp.cpp"
   "TableLookUp.h"
+  "iterator_range.h"
 )
 
 target_sources(rawspeed PRIVATE
