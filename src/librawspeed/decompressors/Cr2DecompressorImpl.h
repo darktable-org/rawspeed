@@ -267,6 +267,7 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
 
   int globalFrameCol = 0;
   int globalFrameRow = 0;
+  (void)globalFrameRow;
 
   auto frameColsRemaining = [&]() {
     int r = frame.x - globalFrameCol;
