@@ -173,8 +173,7 @@ constexpr typename std::make_signed_t<T> __attribute__((const)) signExtend(
 }
 
 // Trim both leading and trailing spaces from the string
-inline std::string trimSpaces(const std::string& str)
-{
+inline std::string trimSpaces(std::string_view str) {
   // Find the first character position after excluding leading blank spaces
   size_t startpos = str.find_first_not_of(" \t");
 
@@ -185,7 +184,8 @@ inline std::string trimSpaces(const std::string& str)
   if ((startpos == std::string::npos) || (endpos == std::string::npos))
     return "";
 
-  return str.substr(startpos, endpos - startpos + 1);
+  str = str.substr(startpos, endpos - startpos + 1);
+  return {str.begin(), str.end()};
 }
 
 inline std::vector<std::string> splitString(const std::string& input,
