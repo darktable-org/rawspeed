@@ -211,7 +211,7 @@ protected:
 class DngOpcodes::DummyROIOpcode final : public ROIOpcode {
 public:
   explicit DummyROIOpcode(const RawImage& ri, ByteStream& bs,
-                          iRectangle2D& integrated_subimg_)
+                          const iRectangle2D& integrated_subimg_)
       : ROIOpcode(ri, bs, integrated_subimg_) {
     DummyROIOpcode::setup(ri);
   }
@@ -312,7 +312,7 @@ class DngOpcodes::PixelOpcode : public ROIOpcode {
 
 protected:
   explicit PixelOpcode(const RawImage& ri, ByteStream& bs,
-                       iRectangle2D& integrated_subimg_)
+                       const iRectangle2D& integrated_subimg_)
       : ROIOpcode(ri, bs, integrated_subimg_), firstPlane(bs.getU32()),
         planes(bs.getU32()) {
 
@@ -364,7 +364,7 @@ protected:
   vector<uint16_t> lookup;
 
   explicit LookupOpcode(const RawImage& ri, ByteStream& bs,
-                        iRectangle2D& integrated_subimg_)
+                        const iRectangle2D& integrated_subimg_)
       : PixelOpcode(ri, bs, integrated_subimg_), lookup(65536) {}
 
   void setup(const RawImage& ri) override {
@@ -386,7 +386,7 @@ protected:
 class DngOpcodes::TableMap final : public LookupOpcode {
 public:
   explicit TableMap(const RawImage& ri, ByteStream& bs,
-                    iRectangle2D& integrated_subimg_)
+                    const iRectangle2D& integrated_subimg_)
       : LookupOpcode(ri, bs, integrated_subimg_) {
     auto count = bs.getU32();
 
@@ -406,7 +406,7 @@ public:
 class DngOpcodes::PolynomialMap final : public LookupOpcode {
 public:
   explicit PolynomialMap(const RawImage& ri, ByteStream& bs,
-                         iRectangle2D& integrated_subimg_)
+                         const iRectangle2D& integrated_subimg_)
       : LookupOpcode(ri, bs, integrated_subimg_) {
     vector<double> polynomial;
 
@@ -446,7 +446,7 @@ public:
 
 protected:
   DeltaRowOrColBase(const RawImage& ri, ByteStream& bs,
-                    iRectangle2D& integrated_subimg_)
+                    const iRectangle2D& integrated_subimg_)
       : PixelOpcode(ri, bs, integrated_subimg_) {}
 };
 
@@ -477,7 +477,7 @@ protected:
   virtual bool valueIsOk(float value) = 0;
 
   DeltaRowOrCol(const RawImage& ri, ByteStream& bs,
-                iRectangle2D& integrated_subimg_, float f2iScale_)
+                const iRectangle2D& integrated_subimg_, float f2iScale_)
       : DeltaRowOrColBase(ri, bs, integrated_subimg_), f2iScale(f2iScale_) {
     const auto deltaF_count = bs.getU32();
     (void)bs.check(deltaF_count, 4);
@@ -517,7 +517,7 @@ class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol<S> {
 
 public:
   explicit OffsetPerRowOrCol(const RawImage& ri, ByteStream& bs,
-                             iRectangle2D& integrated_subimg_)
+                             const iRectangle2D& integrated_subimg_)
       : DeltaRowOrCol<S>(ri, bs, integrated_subimg_, 65535.0F),
         absLimit(double(std::numeric_limits<uint16_t>::max()) /
                  this->f2iScale) {}
@@ -555,7 +555,7 @@ class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol<S> {
 
 public:
   explicit ScalePerRowOrCol(const RawImage& ri, ByteStream& bs,
-                            iRectangle2D& integrated_subimg_)
+                            const iRectangle2D& integrated_subimg_)
       : DeltaRowOrCol<S>(ri, bs, integrated_subimg_, 1024.0F),
         maxLimit((double(std::numeric_limits<int>::max() - rounding) /
                   double(std::numeric_limits<uint16_t>::max())) /
