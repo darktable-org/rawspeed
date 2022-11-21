@@ -24,6 +24,7 @@
 #include "common/Point.h"                    // for iPoint2D
 #include "common/RawImage.h"                 // for RawImage
 #include "common/RawspeedException.h"        // for ThrowException
+#include "common/iterator_range.h"           // for iterator_range
 #include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
 #include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
 #include "decompressors/HuffmanTable.h" // for HuffmanTable, HuffmanTableLUT
@@ -41,6 +42,7 @@ namespace rawspeed {
 
 class ByteStream;
 class RawImage;
+class Cr2OutputTileIterator;
 
 class Cr2Slicing {
   int numSlices = 0;
@@ -92,7 +94,8 @@ public:
 private:
   const RawImage mRaw;
   const std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format;
-  const iPoint2D frame;
+  iPoint2D dim;
+  iPoint2D frame;
   Cr2Slicing slicing;
 
   const std::vector<PerComponentRecipe> rec;
@@ -111,6 +114,8 @@ private:
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
 
   template <int N_COMP, int X_S_F, int Y_S_F> void decompressN_X_Y();
+
+  [[nodiscard]] iterator_range<Cr2OutputTileIterator> getOutputTiles();
 
 public:
   Cr2Decompressor(
