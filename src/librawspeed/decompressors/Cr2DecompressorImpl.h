@@ -75,6 +75,8 @@ struct Dsc {
         cpp(!subSampled ? 1 : 3), colsPerGroup(!subSampled ? cpp : groupSize) {}
 };
 
+} // namespace
+
 class Cr2OutputTileIterator final {
   const Cr2Slicing& slicing;
   const iPoint2D& frame;
@@ -123,8 +125,6 @@ public:
     return !(a == b);
   }
 };
-
-} // namespace
 
 template <typename HuffmanTable>
 Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
@@ -221,6 +221,16 @@ Cr2Decompressor<HuffmanTable>::getInitialPreds() const {
   return preds;
 }
 
+template <typename HuffmanTable>
+[[nodiscard]] iterator_range<Cr2OutputTileIterator>
+Cr2Decompressor<HuffmanTable>::getOutputTiles() {
+  return make_range(Cr2OutputTileIterator(slicing, frame, dim,
+                                          /*integratedFrameRow=*/0),
+                    Cr2OutputTileIterator(
+                        slicing, frame, dim,
+                        /*integratedFrameRow=*/slicing.numSlices * frame.y));
+}
+
 // N_COMP == number of components (2, 3 or 4)
 // X_S_F  == x/horizontal sampling factor (1 or 2)
 // Y_S_F  == y/vertical   sampling factor (1 or 2)
@@ -256,12 +266,7 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
     return r;
   };
 
-  for (iRectangle2D output :
-       make_range(Cr2OutputTileIterator(slicing, frame, dim,
-                                        /*integratedFrameRow=*/0),
-                  Cr2OutputTileIterator(
-                      slicing, frame, dim,
-                      /*integratedFrameRow=*/slicing.numSlices * frame.y))) {
+  for (iRectangle2D output : getOutputTiles()) {
     if (output.getLeft() == dim.x)
       return;
     for (int row = output.getTop(), rowEnd = output.getBottom(); row != rowEnd;
