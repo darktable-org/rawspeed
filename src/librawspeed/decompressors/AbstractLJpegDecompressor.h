@@ -169,6 +169,7 @@ protected:
   void parseSOF(ByteStream data, SOFInfo* i);
   void parseSOS(ByteStream data);
   void parseDHT(ByteStream data);
+  static void parseDRI(ByteStream dri);
   JpegMarker getNextMarker(bool allowskip);
 
   [[nodiscard]] std::vector<const HuffmanTable*>

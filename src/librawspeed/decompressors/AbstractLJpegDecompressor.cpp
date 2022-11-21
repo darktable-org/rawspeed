@@ -59,6 +59,7 @@ void AbstractLJpegDecompressor::decode() {
     ThrowRDE("Image did not start with SOI. Probably not an LJPEG");
 
   struct {
+    bool DRI = false;
     bool DHT = false;
     bool SOF = false;
     bool SOS = false;
@@ -104,6 +105,12 @@ void AbstractLJpegDecompressor::decode() {
       break;
     case JpegMarker::DQT:
       ThrowRDE("Not a valid RAW file.");
+    case JpegMarker::DRI:
+      if (FoundMarkers.DRI)
+        ThrowRDE("Found second DRI marker");
+      parseDRI(data);
+      FoundMarkers.DRI = true;
+      break;
     default: // Just let it skip to next marker
       break;
     }
@@ -249,6 +256,13 @@ void AbstractLJpegDecompressor::parseDHT(ByteStream dht) {
       huffmanTableStore.emplace_back(std::move(dHT));
     }
   }
+}
+
+void AbstractLJpegDecompressor::parseDRI(ByteStream dri) {
+  if (dri.getRemainSize() != 2)
+    ThrowRDE("Invalid DRI header length.");
+  if (uint16_t Ri = dri.getU16(); Ri != 0)
+    ThrowRDE("Non-zero restart interval not supported.");
 }
 
 JpegMarker AbstractLJpegDecompressor::getNextMarker(bool allowskip) {
