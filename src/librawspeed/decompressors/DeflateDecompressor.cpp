@@ -135,10 +135,9 @@ void DeflateDecompressor::decode(
     ThrowRDE("failed to uncompress tile: %d (%s)", err, zError(err));
   }
 
-  const CroppedArray2DRef<float> out =
-      CroppedArray2DRef(mRaw->getF32DataAsUncroppedArray2DRef(),
-                        /*offsetCols=*/off.x, /*offsetRows=*/off.y,
-                        /*croppedWidth=*/dim.x, /*croppedHeight=*/dim.y);
+  const auto out = CroppedArray2DRef(
+      mRaw->getF32DataAsUncroppedArray2DRef(), /*offsetCols=*/off.x,
+      /*offsetRows=*/off.y, /*croppedWidth=*/dim.x, /*croppedHeight=*/dim.y);
 
   for (int row = 0; row < out.croppedHeight; ++row) {
     unsigned char* src = uBuffer->get() + row * maxDim.x * bytesps;
