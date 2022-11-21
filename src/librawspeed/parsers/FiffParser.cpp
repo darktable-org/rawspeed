@@ -77,11 +77,13 @@ void FiffParser::parseData() {
       uint32_t rawOffset = second_ifd - first_ifd;
       subIFD->add(std::make_unique<TiffEntry>(
           subIFD.get(), TiffTag::FUJI_STRIPOFFSETS, TiffDataType::OFFSET, 1,
-          ByteStream::createCopy(&rawOffset, 4)));
+          ByteStream::createCopy(reinterpret_cast<const std::byte*>(&rawOffset),
+                                 4)));
       uint32_t max_size = mInput.getSize() - second_ifd;
       subIFD->add(std::make_unique<TiffEntry>(
           subIFD.get(), TiffTag::FUJI_STRIPBYTECOUNTS, TiffDataType::LONG, 1,
-          ByteStream::createCopy(&max_size, 4)));
+          ByteStream::createCopy(reinterpret_cast<const std::byte*>(&max_size),
+                                 4)));
     }
   }
 
