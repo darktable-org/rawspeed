@@ -179,7 +179,6 @@ uint32_t TiffEntry::getU32(uint32_t index) const {
   case TiffDataType::BYTE:
   case TiffDataType::UNDEFINED:
   case TiffDataType::RATIONAL:
-  case TiffDataType::SRATIONAL:
     break;
   default:
     ThrowTPE("Wrong type %u encountered. Expected Long, Offset, Rational or "
@@ -193,14 +192,15 @@ uint32_t TiffEntry::getU32(uint32_t index) const {
 int32_t TiffEntry::getI32(uint32_t index) const {
   if (type == TiffDataType::SSHORT)
     return getI16(index);
-  if (type != TiffDataType::SLONG && type != TiffDataType::UNDEFINED)
+  if (type != TiffDataType::SLONG && type != TiffDataType::SRATIONAL &&
+      type != TiffDataType::UNDEFINED)
     ThrowTPE("Wrong type %u encountered. Expected SLong or Undefined on 0x%x",
              static_cast<unsigned>(type), static_cast<unsigned>(tag));
 
   return data.peek<int32_t>(index);
 }
 
-NotARational<unsigned> TiffEntry::getRational(uint32_t index) const {
+NotARational<uint32_t> TiffEntry::getRational(uint32_t index) const {
   if (!isRational()) {
     ThrowTPE("Wrong type 0x%x encountered. Expected Rational",
              static_cast<unsigned>(type));
@@ -209,12 +209,12 @@ NotARational<unsigned> TiffEntry::getRational(uint32_t index) const {
   if (type != TiffDataType::RATIONAL)
     return {getU32(index), 1};
 
-  auto a = static_cast<unsigned>(getU32(index * 2));
-  auto b = static_cast<unsigned>(getU32(index * 2 + 1));
+  auto a = getU32(index * 2);
+  auto b = getU32(index * 2 + 1);
   return {a, b};
 }
 
-NotARational<int> TiffEntry::getSRational(uint32_t index) const {
+NotARational<int32_t> TiffEntry::getSRational(uint32_t index) const {
   if (!isSRational()) {
     ThrowTPE("Wrong type 0x%x encountered. Expected SRational",
              static_cast<unsigned>(type));
@@ -223,8 +223,8 @@ NotARational<int> TiffEntry::getSRational(uint32_t index) const {
   if (type != TiffDataType::SRATIONAL)
     return {getI32(index), 1};
 
-  auto a = static_cast<int>(getU32(index * 2));
-  auto b = static_cast<int>(getU32(index * 2 + 1));
+  auto a = getI32(index * 2);
+  auto b = getI32(index * 2 + 1);
   return {a, b};
 }
 
