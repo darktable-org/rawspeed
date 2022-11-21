@@ -177,6 +177,8 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
 
   if (frame.x % dsc.X_S_F != 0 || frame.y % dsc.Y_S_F != 0)
     ThrowRDE("Unexpected LJpeg frame dimension multiplicity");
+  frame.x /= dsc.X_S_F;
+  frame.y /= dsc.Y_S_F;
 
   for (const auto& recip : rec) {
     if (!recip.ht.isFullDecode())
@@ -239,10 +241,6 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
   //  * for <3,2,2>: 12 = 3*2*2
   // and advances x by N_COMP*X_S_F and y by Y_S_F
 
-  assert(frame.x % X_S_F == 0);
-  assert(frame.y % Y_S_F == 0);
-  const iPoint2D globalFrame(frame.x / X_S_F, frame.y / Y_S_F);
-
   auto ht = getHuffmanTables<N_COMP>();
   auto pred = getInitialPreds<N_COMP>();
   const auto* predNext = &out(0, 0);
@@ -253,17 +251,17 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
   int globalFrameRow = 0;
 
   auto frameColsRemaining = [&]() {
-    int r = globalFrame.x - globalFrameCol;
+    int r = frame.x - globalFrameCol;
     assert(r >= 0);
     return r;
   };
 
-  for (iRectangle2D output : make_range(
-           Cr2OutputTileIterator(slicing, globalFrame, dim,
-                                 /*integratedFrameRow=*/0),
-           Cr2OutputTileIterator(slicing, globalFrame, dim,
-                                 /*integratedFrameRow=*/slicing.numSlices *
-                                     globalFrame.y))) {
+  for (iRectangle2D output :
+       make_range(Cr2OutputTileIterator(slicing, frame, dim,
+                                        /*integratedFrameRow=*/0),
+                  Cr2OutputTileIterator(
+                      slicing, frame, dim,
+                      /*integratedFrameRow=*/slicing.numSlices * frame.y))) {
     if (output.getLeft() == dim.x)
       return;
     for (int row = output.getTop(), rowEnd = output.getBottom(); row != rowEnd;
@@ -281,7 +279,7 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
           predNext = &out(row, dsc.groupSize * col);
           ++globalFrameRow;
           globalFrameCol = 0;
-          assert(globalFrameRow < globalFrame.y && "Run out of frame");
+          assert(globalFrameRow < frame.y && "Run out of frame");
         }
 
         // How many pixel can we decode until we finish the row of either
