@@ -37,6 +37,7 @@
 #include <cstdint>                           // for uint16_t
 #include <functional>                        // for cref, reference_wrapper
 #include <initializer_list>                  // for initializer_list
+#include <optional>                          // for optional
 #include <tuple>                             // for make_tuple, operator==, get
 #include <utility>                           // for move, index_sequence, mak...
 #include <vector>                            // for vector
@@ -191,12 +192,17 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
   }
 
   const iRectangle2D fullImage({0, 0}, dim);
+  std::optional<iRectangle2D> lastTile;
   for (iRectangle2D output : getOutputTiles()) {
     if (output.getLeft() == dim.x)
       break;
+    lastTile = output;
     if (!output.isThisInside(fullImage))
       ThrowRDE("Output tile not inside of the image");
   }
+  assert(lastTile && "No tiles?");
+  if (lastTile->getBottomRight() != fullImage.getBottomRight())
+    ThrowRDE("Tiles do not cover the entire image area.");
 }
 
 template <typename HuffmanTable>
