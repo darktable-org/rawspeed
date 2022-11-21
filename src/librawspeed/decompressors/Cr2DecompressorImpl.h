@@ -192,6 +192,14 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
     }
     *width /= dsc.sliceColStep;
   }
+
+  const iRectangle2D fullImage({0, 0}, dim);
+  for (iRectangle2D output : getOutputTiles()) {
+    if (output.getLeft() == dim.x)
+      break;
+    if (!output.isThisInside(fullImage))
+      ThrowRDE("Output tile not inside of the image");
+  }
 }
 
 template <typename HuffmanTable>
