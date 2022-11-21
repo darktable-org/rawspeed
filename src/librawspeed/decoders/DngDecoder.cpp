@@ -245,14 +245,14 @@ void DngDecoder::parseColorMatrix() const {
   auto impl = [this](TiffTag I, TiffTag M) -> TiffEntry* {
     if (!mRootIFD->hasEntryRecursive(I))
       return nullptr;
-    if (TiffEntry* illuminant = mRootIFD->getEntryRecursive(I);
+    if (const TiffEntry* illuminant = mRootIFD->getEntryRecursive(I);
         illuminant->getU16() != 21 || // D65
         !mRootIFD->hasEntryRecursive(M))
       return nullptr;
     return mRootIFD->getEntryRecursive(M);
   };
 
-  TiffEntry* mat;
+  const TiffEntry* mat;
   mat = impl(TiffTag::CALIBRATIONILLUMINANT1, TiffTag::COLORMATRIX1);
   if (!mat)
     mat = impl(TiffTag::CALIBRATIONILLUMINANT2, TiffTag::COLORMATRIX2);
