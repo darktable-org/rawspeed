@@ -196,7 +196,8 @@
 		<Crop x="52" y="10" width="0" height="-6"/>
 		<Sensor black="126" white="4095"/>
 		<BlackAreas>
-			<Vertical x="0" width="46"/>
+			<Vertical x="0" width="48"/>
+			<Horizontal y="0" height="5"/>
 		</BlackAreas>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -217,8 +218,8 @@
 		<Crop x="68" y="18" width="-4" height="-4"/>
 		<Sensor black="127" white="4000"/>
 		<BlackAreas>
-			<Vertical x="0" width="60"/>
-			<Horizontal y="0" height="10"/>
+			<Vertical x="16" width="48"/>
+			<Horizontal y="12" height="0"/>
 		</BlackAreas>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
