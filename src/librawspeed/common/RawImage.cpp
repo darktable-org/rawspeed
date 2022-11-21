@@ -162,8 +162,7 @@ void RawImageData::checkRowIsInitialized(int row) const {
 
   // and check that image line is initialized.
   // do note that we are avoiding padding here.
-  MSan::CheckMemIsInitialized(reinterpret_cast<const uint8_t*>(&img(row, 0)),
-                              img.width);
+  MSan::CheckMemIsInitialized(&img(row, 0), img.width);
 }
 
 #if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
