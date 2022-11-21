@@ -32,7 +32,6 @@ namespace rawspeed {
 class Buffer;
 class CameraMetaData;
 class iRectangle2D;
-class iRectangle2D;
 struct DngTilingDescription;
 
 class DngDecoder final : public AbstractTiffDecoder

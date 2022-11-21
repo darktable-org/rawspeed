@@ -37,7 +37,6 @@ class Buffer;
 class ByteStream;
 class CiffEntry;
 template <typename T> class NORangesSet;
-template <typename T> class NORangesSet;
 
 class CiffIFD final {
   CiffIFD* const parent;

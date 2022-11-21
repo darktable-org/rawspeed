@@ -39,7 +39,6 @@
 
 namespace rawspeed {
 class ErrorLog;
-class ErrorLog;
 
 const int MAX_NUM_PRESCALE = 8;
 

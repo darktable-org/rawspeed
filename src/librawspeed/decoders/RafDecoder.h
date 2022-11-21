@@ -30,7 +30,6 @@ namespace rawspeed {
 
 class Buffer;
 class Camera;
-class Camera;
 class CameraMetaData;
 
 class RafDecoder final : public AbstractTiffDecoder
