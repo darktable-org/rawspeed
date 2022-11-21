@@ -181,32 +181,13 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
       ThrowRDE("Huffman table is not of a full decoding variety");
   }
 
-  iPoint2D realDim = mRaw->dim;
-  if (dsc.subSampled) {
-    assert(realDim.x % dsc.groupSize == 0);
-    realDim.x /= dsc.groupSize;
-    realDim.x *= dsc.X_S_F;
-    realDim.y *= dsc.Y_S_F;
-  }
-
   for (auto* width : {&slicing.sliceWidth, &slicing.lastSliceWidth}) {
-    if (*width > realDim.x)
-      ThrowRDE("Slice is longer than image's height, which is unsupported.");
     if (*width % dsc.sliceColStep != 0) {
       ThrowRDE("Slice width (%u) should be multiple of pixel group size (%u)",
                *width, dsc.sliceColStep);
     }
-    if (*width % dsc.cpp != 0) {
-      ThrowRDE("Slice width (%u) should be multiple of image cpp (%u)", *width,
-               dsc.cpp);
-    }
     *width /= dsc.sliceColStep;
-    // NOTE: width is no longer guaranteed to be a multiple of cpp!
   }
-
-  if (iPoint2D::area_type(frame.y) * dsc.sliceColStep * slicing.totalWidth() <
-      dsc.cpp * realDim.area())
-    ThrowRDE("Incorrect slice height / slice widths! Less than image size.");
 }
 
 template <typename HuffmanTable>
