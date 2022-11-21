@@ -138,7 +138,7 @@ class DngOpcodes::FixBadPixelsConstant final : public DngOpcodes::DngOpcode {
 
 public:
   explicit FixBadPixelsConstant(const RawImage& ri, ByteStream& bs,
-                                iRectangle2D& integrated_subimg_)
+                                const iRectangle2D& integrated_subimg_)
       : DngOpcodes::DngOpcode(integrated_subimg_), value(bs.getU32()) {
     bs.getU32(); // Bayer Phase not used
   }
@@ -175,7 +175,7 @@ class DngOpcodes::ROIOpcode : public DngOpcodes::DngOpcode {
 
 protected:
   explicit ROIOpcode(const RawImage& ri, ByteStream& bs,
-                     iRectangle2D& integrated_subimg_)
+                     const iRectangle2D& integrated_subimg_)
       : DngOpcodes::DngOpcode(integrated_subimg_) {
     const iRectangle2D subImage = iRectangle2D({0, 0}, integrated_subimg_.dim);
 
@@ -233,7 +233,7 @@ class DngOpcodes::FixBadPixelsList final : public DngOpcodes::DngOpcode {
 
 public:
   explicit FixBadPixelsList(const RawImage& ri, ByteStream& bs,
-                            iRectangle2D& integrated_subimg_)
+                            const iRectangle2D& integrated_subimg_)
       : DngOpcodes::DngOpcode(integrated_subimg_) {
     // Although it is not really obvious from the spec,
     // the coordinates appear to be global/crop-independent,
