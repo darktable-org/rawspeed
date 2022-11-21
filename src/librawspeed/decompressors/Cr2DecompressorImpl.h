@@ -170,8 +170,10 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
   if (static_cast<int>(rec.size()) != dsc.N_COMP)
     ThrowRDE("HT/Initial predictor count does not match component count");
 
-  if (mRaw->dim.x % dsc.groupSize != 0)
+  dim = mRaw->dim;
+  if (dim.x % dsc.groupSize != 0)
     ThrowRDE("Unexpected image dimension multiplicity");
+  dim.x /= dsc.groupSize;
 
   if (frame.x % dsc.X_S_F != 0 || frame.y % dsc.Y_S_F != 0)
     ThrowRDE("Unexpected LJpeg frame dimension multiplicity");
@@ -237,10 +239,6 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
   //  * for <3,2,2>: 12 = 3*2*2
   // and advances x by N_COMP*X_S_F and y by Y_S_F
 
-  iPoint2D realDim = mRaw->dim;
-  assert(realDim.x % dsc.groupSize == 0);
-  realDim.x /= dsc.groupSize;
-
   assert(frame.x % X_S_F == 0);
   assert(frame.y % Y_S_F == 0);
   const iPoint2D globalFrame(frame.x / X_S_F, frame.y / Y_S_F);
@@ -261,12 +259,12 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
   };
 
   for (iRectangle2D output : make_range(
-           Cr2OutputTileIterator(slicing, globalFrame, realDim,
+           Cr2OutputTileIterator(slicing, globalFrame, dim,
                                  /*integratedFrameRow=*/0),
-           Cr2OutputTileIterator(slicing, globalFrame, realDim,
+           Cr2OutputTileIterator(slicing, globalFrame, dim,
                                  /*integratedFrameRow=*/slicing.numSlices *
                                      globalFrame.y))) {
-    if (output.getLeft() == realDim.x)
+    if (output.getLeft() == dim.x)
       return;
     for (int row = output.getTop(), rowEnd = output.getBottom(); row != rowEnd;
          ++row) {

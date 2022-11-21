@@ -92,7 +92,8 @@ public:
 private:
   const RawImage mRaw;
   const std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format;
-  const iPoint2D frame;
+  iPoint2D dim;
+  iPoint2D frame;
   Cr2Slicing slicing;
 
   const std::vector<PerComponentRecipe> rec;
