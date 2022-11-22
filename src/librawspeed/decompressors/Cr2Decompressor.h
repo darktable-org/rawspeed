@@ -43,6 +43,7 @@ namespace rawspeed {
 class ByteStream;
 class RawImage;
 class Cr2OutputTileIterator;
+template <typename UnderlyingIterator> class CoalescingIterator;
 
 class Cr2Slicing {
   int numSlices = 0;
@@ -116,6 +117,8 @@ private:
   template <int N_COMP, int X_S_F, int Y_S_F> void decompressN_X_Y();
 
   [[nodiscard]] iterator_range<Cr2OutputTileIterator> getOutputTiles();
+  [[nodiscard]] iterator_range<CoalescingIterator<Cr2OutputTileIterator>>
+  getCoalescedOutputTiles();
 
 public:
   Cr2Decompressor(

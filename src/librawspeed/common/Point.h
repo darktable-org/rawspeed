@@ -119,7 +119,13 @@ public:
   [[nodiscard]] constexpr int getWidth() const { return dim.x; }
   [[nodiscard]] constexpr int getHeight() const { return dim.y; }
   [[nodiscard]] constexpr iPoint2D getTopLeft() const { return pos; }
-  [[nodiscard]] constexpr iPoint2D getBottomRight() const { return dim + pos; }
+  [[nodiscard]] constexpr iPoint2D getBottomRight() const { return pos + dim; }
+  [[nodiscard]] constexpr iPoint2D getTopRight() const {
+    return pos + iPoint2D(dim.x, 0);
+  }
+  [[nodiscard]] constexpr iPoint2D getBottomLeft() const {
+    return pos + iPoint2D(0, dim.y);
+  }
   [[nodiscard]] constexpr bool hasPositiveArea() const {
     return (dim.x > 0) && (dim.y > 0);
   }

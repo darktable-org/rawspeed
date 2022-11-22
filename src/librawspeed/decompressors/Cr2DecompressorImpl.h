@@ -89,6 +89,8 @@ public:
   using iterator_category = std::input_iterator_tag;
   using difference_type = std::ptrdiff_t;
   using value_type = iRectangle2D;
+  using pointer = const value_type*;   // Unusable, but must be here.
+  using reference = const value_type&; // Unusable, but must be here.
 
   Cr2OutputTileIterator(const Cr2Slicing& slicing_, const iPoint2D& frame_,
                         const iPoint2D& dim_, int integratedFrameRow_)
@@ -123,6 +125,63 @@ public:
   }
   friend bool operator!=(const Cr2OutputTileIterator& a,
                          const Cr2OutputTileIterator& b) {
+    return !(a == b);
+  }
+};
+
+template <typename UnderlyingIterator> class CoalescingIterator final {
+  UnderlyingIterator undelyingIter;
+  UnderlyingIterator undelyingIter_end;
+
+  [[nodiscard]] std::pair<iRectangle2D, int> coalesce() const {
+    UnderlyingIterator tmpIter = undelyingIter;
+    assert(tmpIter != undelyingIter_end && "Iterator overflow.");
+
+    iRectangle2D rect = *tmpIter;
+    int num = 1;
+
+    for (++tmpIter; tmpIter != undelyingIter_end; ++tmpIter) {
+      iRectangle2D nextRect = *tmpIter;
+      // Are these two are verically-adjacent rectangles of same width?
+      if (rect.getBottomLeft() == nextRect.getTopLeft() &&
+          rect.getBottomRight() == nextRect.getTopRight()) {
+        rect.dim.y += nextRect.dim.y;
+        ++num;
+        continue;
+      }
+      // Otherwise, the next rectangle should be the first row of next column.
+      assert(nextRect.getTop() == 0 && nextRect.getLeft() == rect.getRight());
+      break;
+    }
+
+    return {rect, num};
+  }
+
+public:
+  using iterator_category = std::input_iterator_tag;
+  using difference_type = std::ptrdiff_t;
+  using value_type = iRectangle2D;
+  using pointer = const value_type*;   // Unusable, but must be here.
+  using reference = const value_type&; // Unusable, but must be here.
+
+  CoalescingIterator(UnderlyingIterator&& undelyingIter_,
+                     UnderlyingIterator&& undelyingIter_end_)
+      : undelyingIter(std::move(undelyingIter_)),
+        undelyingIter_end(std::move(undelyingIter_end_)) {}
+
+  value_type operator*() const { return coalesce().first; }
+  CoalescingIterator& operator++() {
+    std::advance(undelyingIter, coalesce().second);
+    return *this;
+  }
+  friend bool operator==(const CoalescingIterator& a,
+                         const CoalescingIterator& b) {
+    assert(a.undelyingIter_end == b.undelyingIter_end &&
+           "Comparing unrelated iterators.");
+    return a.undelyingIter == b.undelyingIter;
+  }
+  friend bool operator!=(const CoalescingIterator& a,
+                         const CoalescingIterator& b) {
     return !(a == b);
   }
 };
@@ -242,6 +301,15 @@ Cr2Decompressor<HuffmanTable>::getOutputTiles() {
                         /*integratedFrameRow=*/slicing.numSlices * frame.y));
 }
 
+template <typename HuffmanTable>
+[[nodiscard]] iterator_range<CoalescingIterator<Cr2OutputTileIterator>>
+Cr2Decompressor<HuffmanTable>::getCoalescedOutputTiles() {
+  using Ty = CoalescingIterator<Cr2OutputTileIterator>;
+  auto r = getOutputTiles();
+  return make_range(Ty(std::begin(r), std::end(r)),
+                    Ty(std::end(r), std::end(r)));
+}
+
 // N_COMP == number of components (2, 3 or 4)
 // X_S_F  == x/horizontal sampling factor (1 or 2)
 // Y_S_F  == y/vertical   sampling factor (1 or 2)
@@ -278,7 +346,7 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
     return r;
   };
 
-  for (iRectangle2D output : getOutputTiles()) {
+  for (iRectangle2D output : getCoalescedOutputTiles()) {
     if (output.getLeft() == dim.x)
       return;
     for (int row = output.getTop(), rowEnd = output.getBottom(); row != rowEnd;
