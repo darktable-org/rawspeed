@@ -46,6 +46,200 @@ namespace rawspeed {
 
 class ByteStream;
 
+struct Cr2SliceIterator final {
+  const int frameHeight;
+
+  Cr2SliceWidthIterator widthIter;
+
+  using iterator_category = std::bidirectional_iterator_tag;
+  using difference_type = std::ptrdiff_t;
+  using value_type = iPoint2D;
+  using pointer = const value_type*;   // Unusable, but must be here.
+  using reference = const value_type&; // Unusable, but must be here.
+
+  Cr2SliceIterator(Cr2SliceWidthIterator sliceWidthIter_, const iPoint2D& frame)
+      : frameHeight(frame.y), widthIter(sliceWidthIter_) {}
+
+  value_type operator*() const { return {*widthIter, frameHeight}; }
+  Cr2SliceIterator& operator++() {
+    ++widthIter;
+    return *this;
+  }
+  Cr2SliceIterator& operator--() {
+    --widthIter;
+    return *this;
+  }
+  friend bool operator==(const Cr2SliceIterator& a, const Cr2SliceIterator& b) {
+    assert(a.frameHeight == b.frameHeight && "Unrelated iterators.");
+    return a.widthIter == b.widthIter;
+  }
+  friend bool operator!=(const Cr2SliceIterator& a, const Cr2SliceIterator& b) {
+    return !(a == b);
+  }
+};
+
+struct Cr2OutputTileIterator final {
+  const iPoint2D& imgDim;
+
+  Cr2SliceIterator sliceIter;
+  int sliceRow = 0;
+
+  [[nodiscard]] iPoint2D getOutPos() const {
+    const int integratedSlicesRow =
+        sliceIter.frameHeight * sliceIter.widthIter.sliceId + sliceRow;
+    int outRow = integratedSlicesRow % imgDim.y;
+    int outCol = integratedSlicesRow / imgDim.y;
+    outCol *= sliceIter.widthIter.slicing.widthOfSlice(0);
+    return {outCol, outRow};
+  }
+
+  using iterator_category = std::input_iterator_tag;
+  using difference_type = std::ptrdiff_t;
+  using value_type = iRectangle2D;
+  using pointer = const value_type*;   // Unusable, but must be here.
+  using reference = const value_type&; // Unusable, but must be here.
+
+  Cr2OutputTileIterator(Cr2SliceIterator sliceIter_, const iPoint2D& imgDim_)
+      : imgDim(imgDim_), sliceIter(sliceIter_) {}
+
+  value_type operator*() const {
+    // Positioning
+    iRectangle2D tile = {getOutPos(), *sliceIter};
+    // Clamping
+    int outRowsRemaining = imgDim.y - tile.getTop();
+    assert(outRowsRemaining >= 0);
+    int tileRowsRemaining = tile.getHeight() - sliceRow;
+    assert(tileRowsRemaining >= 0);
+    const int tileHeight = std::min(outRowsRemaining, tileRowsRemaining);
+    tile.dim.y = tileHeight;
+    return tile;
+  }
+  Cr2OutputTileIterator& operator++() {
+    sliceRow += operator*().getHeight();
+    assert(sliceRow >= 0 && sliceRow <= (*sliceIter).y && "Overflow");
+    if (sliceRow == (*sliceIter).y) {
+      ++sliceIter;
+      sliceRow = 0;
+    }
+    return *this;
+  }
+  Cr2OutputTileIterator& operator--() {
+    if (sliceRow == 0) {
+      --sliceIter;
+      sliceRow = (*sliceIter).y;
+    }
+    sliceRow -= std::min(sliceRow, imgDim.y);
+    return *this;
+  }
+  friend bool operator==(const Cr2OutputTileIterator& a,
+                         const Cr2OutputTileIterator& b) {
+    assert(&a.imgDim == &b.imgDim && "Unrelated iterators.");
+    return a.sliceIter == b.sliceIter && a.sliceRow == b.sliceRow;
+  }
+  friend bool operator!=(const Cr2OutputTileIterator& a,
+                         const Cr2OutputTileIterator& b) {
+    return !(a == b);
+  }
+};
+
+class Cr2VerticalOutputStripIterator final {
+  Cr2OutputTileIterator outputTileIterator;
+  Cr2OutputTileIterator outputTileIterator_end;
+
+  [[nodiscard]] std::pair<iRectangle2D, int> coalesce() const {
+    Cr2OutputTileIterator tmpIter = outputTileIterator;
+    assert(tmpIter != outputTileIterator_end && "Iterator overflow.");
+
+    iRectangle2D rect = *tmpIter;
+    int num = 1;
+
+    for (++tmpIter; tmpIter != outputTileIterator_end; ++tmpIter) {
+      iRectangle2D nextRect = *tmpIter;
+      // Are these two are verically-adjacent rectangles of same width?
+      if (rect.getBottomLeft() == nextRect.getTopLeft() &&
+          rect.getBottomRight() == nextRect.getTopRight()) {
+        rect.dim.y += nextRect.dim.y;
+        ++num;
+        continue;
+      }
+      // Otherwise, the next rectangle should be the first row of next column.
+      assert(nextRect.getTop() == 0 && nextRect.getLeft() == rect.getRight());
+      break;
+    }
+
+    return {rect, num};
+  }
+
+public:
+  using iterator_category = std::input_iterator_tag;
+  using difference_type = std::ptrdiff_t;
+  using value_type = iRectangle2D;
+  using pointer = const value_type*;   // Unusable, but must be here.
+  using reference = const value_type&; // Unusable, but must be here.
+
+  Cr2VerticalOutputStripIterator(
+      Cr2OutputTileIterator&& outputTileIterator_,
+      Cr2OutputTileIterator&& outputTileIterator_end_)
+      : outputTileIterator(outputTileIterator_),
+        outputTileIterator_end(outputTileIterator_end_) {}
+
+  value_type operator*() const { return coalesce().first; }
+  Cr2VerticalOutputStripIterator& operator++() {
+    std::advance(outputTileIterator, coalesce().second);
+    return *this;
+  }
+  friend bool operator==(const Cr2VerticalOutputStripIterator& a,
+                         const Cr2VerticalOutputStripIterator& b) {
+    assert(a.outputTileIterator_end == b.outputTileIterator_end &&
+           "Comparing unrelated iterators.");
+    return a.outputTileIterator == b.outputTileIterator;
+  }
+  friend bool operator!=(const Cr2VerticalOutputStripIterator& a,
+                         const Cr2VerticalOutputStripIterator& b) {
+    return !(a == b);
+  }
+};
+
+template <typename HuffmanTable>
+iterator_range<Cr2SliceIterator> Cr2Decompressor<HuffmanTable>::getSlices() {
+  return {Cr2SliceIterator(slicing.begin(), frame),
+          Cr2SliceIterator(slicing.end(), frame)};
+}
+
+template <typename HuffmanTable>
+iterator_range<Cr2OutputTileIterator>
+Cr2Decompressor<HuffmanTable>::getAllOutputTiles() {
+  auto slices = getSlices();
+  return {Cr2OutputTileIterator(std::begin(slices), dim),
+          Cr2OutputTileIterator(std::end(slices), dim)};
+}
+
+template <typename HuffmanTable>
+iterator_range<Cr2OutputTileIterator>
+Cr2Decompressor<HuffmanTable>::getOutputTiles() {
+  auto allOutputTiles = getAllOutputTiles();
+  auto b = allOutputTiles.begin();
+  auto e = allOutputTiles.end();
+  if (b != e) {
+    // Discard all tiles that, at least partially, are outside of the image.
+    --e;
+    while (b != e && (*e).getRight() != dim.x)
+      --e;
+    ++e;
+  }
+  return {b, e};
+}
+
+template <typename HuffmanTable>
+[[nodiscard]] iterator_range<Cr2VerticalOutputStripIterator>
+Cr2Decompressor<HuffmanTable>::getVerticalOutputStrips() {
+  auto outputTiles = getOutputTiles();
+  return {Cr2VerticalOutputStripIterator(std::begin(outputTiles),
+                                         std::end(outputTiles)),
+          Cr2VerticalOutputStripIterator(std::end(outputTiles),
+                                         std::end(outputTiles))};
+}
+
 // NOLINTNEXTLINE: this is not really a header, inline namespace is fine.
 namespace {
 
@@ -77,114 +271,6 @@ struct Dsc {
 };
 
 } // namespace
-
-class Cr2OutputTileIterator final {
-  const Cr2SliceWidths& slicing;
-  const iPoint2D& frame;
-  const iPoint2D& dim;
-
-  int integratedFrameRow;
-
-public:
-  using iterator_category = std::input_iterator_tag;
-  using difference_type = std::ptrdiff_t;
-  using value_type = iRectangle2D;
-  using pointer = const value_type*;   // Unusable, but must be here.
-  using reference = const value_type&; // Unusable, but must be here.
-
-  Cr2OutputTileIterator(const Cr2SliceWidths& slicing_, const iPoint2D& frame_,
-                        const iPoint2D& dim_, int integratedFrameRow_)
-      : slicing(slicing_), frame(frame_), dim(dim_),
-        integratedFrameRow(integratedFrameRow_) {}
-
-  value_type operator*() const {
-    int sliceRow = integratedFrameRow % frame.y;
-    int sliceId = integratedFrameRow / frame.y;
-    iRectangle2D r;
-    int row = integratedFrameRow % dim.y;
-    int col = integratedFrameRow / dim.y;
-    col *= slicing.widthOfSlice(0);
-    r.setTopLeft({col, row});
-    int rowsRemaining = dim.y - row;
-    assert(rowsRemaining >= 0);
-    int sliceRowsRemaining = frame.y - sliceRow;
-    assert(sliceRowsRemaining >= 0);
-    const int sliceHeight = std::min(rowsRemaining, sliceRowsRemaining);
-    r.setSize({slicing.widthOfSlice(sliceId), sliceHeight});
-    return r;
-  }
-  Cr2OutputTileIterator& operator++() {
-    integratedFrameRow += operator*().getHeight();
-    return *this;
-  }
-  friend bool operator==(const Cr2OutputTileIterator& a,
-                         const Cr2OutputTileIterator& b) {
-    assert(&a.slicing == &b.slicing && &a.frame == &b.frame &&
-           &a.dim == &b.dim && "Comparing unrelated iterators.");
-    return a.integratedFrameRow == b.integratedFrameRow;
-  }
-  friend bool operator!=(const Cr2OutputTileIterator& a,
-                         const Cr2OutputTileIterator& b) {
-    return !(a == b);
-  }
-};
-
-template <typename UnderlyingIterator> class CoalescingIterator final {
-  UnderlyingIterator undelyingIter;
-  UnderlyingIterator undelyingIter_end;
-
-  [[nodiscard]] std::pair<iRectangle2D, int> coalesce() const {
-    UnderlyingIterator tmpIter = undelyingIter;
-    assert(tmpIter != undelyingIter_end && "Iterator overflow.");
-
-    iRectangle2D rect = *tmpIter;
-    int num = 1;
-
-    for (++tmpIter; tmpIter != undelyingIter_end; ++tmpIter) {
-      iRectangle2D nextRect = *tmpIter;
-      // Are these two are verically-adjacent rectangles of same width?
-      if (rect.getBottomLeft() == nextRect.getTopLeft() &&
-          rect.getBottomRight() == nextRect.getTopRight()) {
-        rect.dim.y += nextRect.dim.y;
-        ++num;
-        continue;
-      }
-      // Otherwise, the next rectangle should be the first row of next column.
-      assert(nextRect.getTop() == 0 && nextRect.getLeft() == rect.getRight());
-      break;
-    }
-
-    return {rect, num};
-  }
-
-public:
-  using iterator_category = std::input_iterator_tag;
-  using difference_type = std::ptrdiff_t;
-  using value_type = iRectangle2D;
-  using pointer = const value_type*;   // Unusable, but must be here.
-  using reference = const value_type&; // Unusable, but must be here.
-
-  CoalescingIterator(UnderlyingIterator&& undelyingIter_,
-                     UnderlyingIterator&& undelyingIter_end_)
-      : undelyingIter(std::move(undelyingIter_)),
-        undelyingIter_end(std::move(undelyingIter_end_)) {}
-
-  value_type operator*() const { return coalesce().first; }
-  CoalescingIterator& operator++() {
-    std::advance(undelyingIter, coalesce().second);
-    return *this;
-  }
-  friend bool operator==(const CoalescingIterator& a,
-                         const CoalescingIterator& b) {
-    assert(a.undelyingIter_end == b.undelyingIter_end &&
-           "Comparing unrelated iterators.");
-    return a.undelyingIter == b.undelyingIter;
-  }
-  friend bool operator!=(const CoalescingIterator& a,
-                         const CoalescingIterator& b) {
-    return !(a == b);
-  }
-};
 
 template <typename HuffmanTable>
 Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
@@ -253,19 +339,22 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
   if (frame.area() < dim.area())
     ThrowRDE("Frame area smaller than the image area");
 
-  const iPoint2D completeSlice(slicing.totalWidth(), frame.y);
-  if (completeSlice.area() < dim.area())
-    ThrowRDE("Total slice area smaller than the image area");
-
-  const iRectangle2D fullImage({0, 0}, dim);
   std::optional<iRectangle2D> lastTile;
-  for (iRectangle2D output : getOutputTiles()) {
-    lastTile = output;
-    if (!output.isThisInside(fullImage))
-      ThrowRDE("Output tile not inside of the image");
+  for (iRectangle2D output : getAllOutputTiles()) {
+    if (lastTile && output.getTop() != 0 &&
+        output.getWidth() != lastTile->getWidth())
+      ThrowRDE("Tiles can not change width mid-column.");
+    if (output.getBottomRight() <= dim) {
+      lastTile = output;
+      continue; // Tile still inbounds of image.
+    }
+    if (output.getTopLeft() < dim)
+      ThrowRDE("Output tile partially outside of image");
+    break; // Skip the rest of the tiles - they do not contribute to the image.
   }
-  assert(lastTile && "No tiles?");
-  if (lastTile->getBottomRight() != fullImage.getBottomRight())
+  if (!lastTile)
+    ThrowRDE("No tiles are provided");
+  if (lastTile->getBottomRight() != dim)
     ThrowRDE("Tiles do not cover the entire image area.");
 }
 
@@ -294,25 +383,6 @@ Cr2Decompressor<HuffmanTable>::getInitialPreds() const {
       rec.begin(), rec.end(), preds.begin(),
       [](const PerComponentRecipe& compRec) { return compRec.initPred; });
   return preds;
-}
-
-template <typename HuffmanTable>
-[[nodiscard]] iterator_range<Cr2OutputTileIterator>
-Cr2Decompressor<HuffmanTable>::getOutputTiles() {
-  return make_range(
-      Cr2OutputTileIterator(slicing, frame, dim,
-                            /*integratedFrameRow=*/0),
-      Cr2OutputTileIterator(slicing, frame, dim,
-                            /*integratedFrameRow=*/slicing.numSlices * dim.y));
-}
-
-template <typename HuffmanTable>
-[[nodiscard]] iterator_range<CoalescingIterator<Cr2OutputTileIterator>>
-Cr2Decompressor<HuffmanTable>::getCoalescedOutputTiles() {
-  using Ty = CoalescingIterator<Cr2OutputTileIterator>;
-  auto r = getOutputTiles();
-  return make_range(Ty(std::begin(r), std::end(r)),
-                    Ty(std::end(r), std::end(r)));
 }
 
 // N_COMP == number of components (2, 3 or 4)
@@ -351,7 +421,7 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
     return r;
   };
 
-  for (iRectangle2D output : getCoalescedOutputTiles()) {
+  for (iRectangle2D output : getVerticalOutputStrips()) {
     for (int row = output.getTop(), rowEnd = output.getBottom(); row != rowEnd;
          ++row) {
       for (int col = output.getLeft(), colEnd = output.getRight();

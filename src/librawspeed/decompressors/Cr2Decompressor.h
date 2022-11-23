@@ -42,8 +42,11 @@ namespace rawspeed {
 
 class ByteStream;
 class RawImage;
-class Cr2OutputTileIterator;
-template <typename UnderlyingIterator> class CoalescingIterator;
+
+struct Cr2SliceWidthIterator;
+struct Cr2SliceIterator;
+struct Cr2OutputTileIterator;
+class Cr2VerticalOutputStripIterator;
 
 class Cr2SliceWidths {
   int numSlices = 0;
@@ -51,6 +54,7 @@ class Cr2SliceWidths {
   int lastSliceWidth = 0;
 
   friend class Cr2LJpegDecoder;
+  friend struct Cr2SliceWidthIterator;
 
   template <typename HuffmanTable> friend class Cr2Decompressor;
 
@@ -70,20 +74,61 @@ public:
   }
 
   [[nodiscard]] int widthOfSlice(int sliceId) const {
-    assert(sliceId >= 0);
-    assert(sliceId < numSlices);
+    assert(sliceId >= 0 && sliceId < numSlices);
     if ((sliceId + 1) == numSlices)
       return lastSliceWidth;
     return sliceWidth;
   }
 
-  [[nodiscard]] int totalWidth() const {
-    int width = 0;
-    for (auto sliceId = 0; sliceId < numSlices; sliceId++)
-      width += widthOfSlice(sliceId);
-    return width;
+  [[nodiscard]] Cr2SliceWidthIterator begin() const;
+  [[nodiscard]] Cr2SliceWidthIterator end() const;
+};
+
+struct Cr2SliceWidthIterator final {
+  const Cr2SliceWidths& slicing;
+
+  int sliceId;
+
+  using iterator_category = std::bidirectional_iterator_tag;
+  using difference_type = std::ptrdiff_t;
+  using value_type = int;
+  using pointer = const value_type*;   // Unusable, but must be here.
+  using reference = const value_type&; // Unusable, but must be here.
+
+  Cr2SliceWidthIterator(const Cr2SliceWidths& slicing_, int sliceId_)
+      : slicing(slicing_), sliceId(sliceId_) {
+    assert(sliceId >= 0 && sliceId <= slicing.numSlices && "Iterator overflow");
+  }
+
+  value_type operator*() const {
+    assert(sliceId >= 0 && sliceId < slicing.numSlices && "Iterator overflow");
+    return slicing.widthOfSlice(sliceId);
+  }
+  Cr2SliceWidthIterator& operator++() {
+    ++sliceId;
+    return *this;
+  }
+  Cr2SliceWidthIterator& operator--() {
+    --sliceId;
+    return *this;
+  }
+  friend bool operator==(const Cr2SliceWidthIterator& a,
+                         const Cr2SliceWidthIterator& b) {
+    assert(&a.slicing == &b.slicing && "Comparing unrelated iterators.");
+    return a.sliceId == b.sliceId;
+  }
+  friend bool operator!=(const Cr2SliceWidthIterator& a,
+                         const Cr2SliceWidthIterator& b) {
+    return !(a == b);
   }
 };
+
+inline Cr2SliceWidthIterator Cr2SliceWidths::begin() const {
+  return {*this, 0};
+}
+inline Cr2SliceWidthIterator Cr2SliceWidths::end() const {
+  return {*this, numSlices};
+}
 
 template <typename HuffmanTable> class Cr2Decompressor final {
 public:
@@ -116,9 +161,11 @@ private:
 
   template <int N_COMP, int X_S_F, int Y_S_F> void decompressN_X_Y();
 
+  [[nodiscard]] iterator_range<Cr2SliceIterator> getSlices();
+  [[nodiscard]] iterator_range<Cr2OutputTileIterator> getAllOutputTiles();
   [[nodiscard]] iterator_range<Cr2OutputTileIterator> getOutputTiles();
-  [[nodiscard]] iterator_range<CoalescingIterator<Cr2OutputTileIterator>>
-  getCoalescedOutputTiles();
+  [[nodiscard]] iterator_range<Cr2VerticalOutputStripIterator>
+  getVerticalOutputStrips();
 
 public:
   Cr2Decompressor(
