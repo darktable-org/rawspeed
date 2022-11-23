@@ -253,6 +253,10 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
   if (frame.area() < dim.area())
     ThrowRDE("Frame area smaller than the image area");
 
+  const iPoint2D completeSlice(slicing.totalWidth(), frame.y);
+  if (completeSlice.area() < dim.area())
+    ThrowRDE("Total slice area smaller than the image area");
+
   const iRectangle2D fullImage({0, 0}, dim);
   std::optional<iRectangle2D> lastTile;
   for (iRectangle2D output : getOutputTiles()) {
