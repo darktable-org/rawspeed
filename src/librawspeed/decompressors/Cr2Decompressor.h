@@ -45,7 +45,7 @@ class RawImage;
 class Cr2OutputTileIterator;
 template <typename UnderlyingIterator> class CoalescingIterator;
 
-class Cr2Slicing {
+class Cr2SliceWidths {
   int numSlices = 0;
   int sliceWidth = 0;
   int lastSliceWidth = 0;
@@ -55,10 +55,10 @@ class Cr2Slicing {
   template <typename HuffmanTable> friend class Cr2Decompressor;
 
 public:
-  Cr2Slicing() = default;
+  Cr2SliceWidths() = default;
 
-  Cr2Slicing(uint16_t numSlices_, uint16_t sliceWidth_,
-             uint16_t lastSliceWidth_)
+  Cr2SliceWidths(uint16_t numSlices_, uint16_t sliceWidth_,
+                 uint16_t lastSliceWidth_)
       : numSlices(numSlices_), sliceWidth(sliceWidth_),
         lastSliceWidth(lastSliceWidth_) {
     if (numSlices < 1)
@@ -97,7 +97,7 @@ private:
   const std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format;
   iPoint2D dim;
   iPoint2D frame;
-  Cr2Slicing slicing;
+  Cr2SliceWidths slicing;
 
   const std::vector<PerComponentRecipe> rec;
 
@@ -124,8 +124,8 @@ public:
   Cr2Decompressor(
       const RawImage& mRaw,
       std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format,
-      iPoint2D frame, Cr2Slicing slicing, std::vector<PerComponentRecipe> rec,
-      ByteStream input);
+      iPoint2D frame, Cr2SliceWidths slicing,
+      std::vector<PerComponentRecipe> rec, ByteStream input);
 
   void decompress();
 };

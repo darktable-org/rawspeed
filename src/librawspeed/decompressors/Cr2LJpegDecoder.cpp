@@ -63,8 +63,8 @@ void Cr2LJpegDecoder::decodeScan()
     if (slicesWidth > mRaw->dim.x)
       ThrowRDE("Don't know slicing pattern, and failed to guess it.");
 
-    slicing = Cr2Slicing(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
-                         /*lastSliceWidth=*/slicesWidth);
+    slicing = Cr2SliceWidths(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
+                             /*lastSliceWidth=*/slicesWidth);
   }
 
   bool isSubSampled = false;
@@ -146,7 +146,7 @@ void Cr2LJpegDecoder::decodeScan()
   d.decompress();
 }
 
-void Cr2LJpegDecoder::decode(const Cr2Slicing& slicing_) {
+void Cr2LJpegDecoder::decode(const Cr2SliceWidths& slicing_) {
   slicing = slicing_;
   for (auto sliceId = 0; sliceId < slicing.numSlices; sliceId++) {
     const auto sliceWidth = slicing.widthOfSlice(sliceId);

@@ -25,7 +25,7 @@
 #include "common/RawImage.h"                 // for RawImage, RawImageData
 #include "common/iterator_range.h"           // for iterator_range
 #include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
-#include "decompressors/Cr2Decompressor.h"   // for Cr2Decompressor, Cr2Slicing
+#include "decompressors/Cr2Decompressor.h" // for Cr2Decompressor, Cr2SliceWidths
 #include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
 #include "decompressors/HuffmanTableLUT.h"   // for HuffmanTableLUT
 #include "io/BitPumpJPEG.h"                  // for BitPumpJPEG, BitStream<>:...
@@ -79,7 +79,7 @@ struct Dsc {
 } // namespace
 
 class Cr2OutputTileIterator final {
-  const Cr2Slicing& slicing;
+  const Cr2SliceWidths& slicing;
   const iPoint2D& frame;
   const iPoint2D& dim;
 
@@ -92,7 +92,7 @@ public:
   using pointer = const value_type*;   // Unusable, but must be here.
   using reference = const value_type&; // Unusable, but must be here.
 
-  Cr2OutputTileIterator(const Cr2Slicing& slicing_, const iPoint2D& frame_,
+  Cr2OutputTileIterator(const Cr2SliceWidths& slicing_, const iPoint2D& frame_,
                         const iPoint2D& dim_, int integratedFrameRow_)
       : slicing(slicing_), frame(frame_), dim(dim_),
         integratedFrameRow(integratedFrameRow_) {}
@@ -190,8 +190,8 @@ template <typename HuffmanTable>
 Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
     const RawImage& mRaw_,
     std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format_,
-    iPoint2D frame_, Cr2Slicing slicing_, std::vector<PerComponentRecipe> rec_,
-    ByteStream input_)
+    iPoint2D frame_, Cr2SliceWidths slicing_,
+    std::vector<PerComponentRecipe> rec_, ByteStream input_)
     : mRaw(mRaw_), format(std::move(format_)), frame(frame_), slicing(slicing_),
       rec(std::move(rec_)), input(std::move(input_)) {
   if (mRaw->getDataType() != RawImageType::UINT16)

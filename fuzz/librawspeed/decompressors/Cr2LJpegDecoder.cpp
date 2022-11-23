@@ -46,7 +46,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const auto sliceWidth = bs.get<slice_type>();
     const auto lastSliceWidth = bs.get<slice_type>();
 
-    const rawspeed::Cr2Slicing slicing(numSlices, sliceWidth, lastSliceWidth);
+    const rawspeed::Cr2SliceWidths slicing(numSlices, sliceWidth,
+                                           lastSliceWidth);
 
     rawspeed::Cr2LJpegDecoder c(bs, mRaw);
     mRaw->createData();
