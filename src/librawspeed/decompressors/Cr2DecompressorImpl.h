@@ -260,8 +260,6 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
   const iRectangle2D fullImage({0, 0}, dim);
   std::optional<iRectangle2D> lastTile;
   for (iRectangle2D output : getOutputTiles()) {
-    if (output.getLeft() == dim.x)
-      break;
     lastTile = output;
     if (!output.isThisInside(fullImage))
       ThrowRDE("Output tile not inside of the image");
@@ -301,11 +299,11 @@ Cr2Decompressor<HuffmanTable>::getInitialPreds() const {
 template <typename HuffmanTable>
 [[nodiscard]] iterator_range<Cr2OutputTileIterator>
 Cr2Decompressor<HuffmanTable>::getOutputTiles() {
-  return make_range(Cr2OutputTileIterator(slicing, frame, dim,
-                                          /*integratedFrameRow=*/0),
-                    Cr2OutputTileIterator(
-                        slicing, frame, dim,
-                        /*integratedFrameRow=*/slicing.numSlices * frame.y));
+  return make_range(
+      Cr2OutputTileIterator(slicing, frame, dim,
+                            /*integratedFrameRow=*/0),
+      Cr2OutputTileIterator(slicing, frame, dim,
+                            /*integratedFrameRow=*/slicing.numSlices * dim.y));
 }
 
 template <typename HuffmanTable>
@@ -354,8 +352,6 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
   };
 
   for (iRectangle2D output : getCoalescedOutputTiles()) {
-    if (output.getLeft() == dim.x)
-      return;
     for (int row = output.getTop(), rowEnd = output.getBottom(); row != rowEnd;
          ++row) {
       for (int col = output.getLeft(), colEnd = output.getRight();
