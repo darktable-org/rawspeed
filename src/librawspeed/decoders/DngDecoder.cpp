@@ -461,7 +461,7 @@ RawImage DngDecoder::decodeRawInternal() {
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
   // Yeah, sure, here it would be just dumb to leave this for production :)
-  if (mRaw->dim.x > 7424 || mRaw->dim.y > 5552) {
+  if (mRaw->dim.x > 9280 || mRaw->dim.y > 7680) {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);
   }
