@@ -218,16 +218,14 @@ template <typename HuffmanTable>
 iterator_range<Cr2OutputTileIterator>
 Cr2Decompressor<HuffmanTable>::getOutputTiles() {
   auto allOutputTiles = getAllOutputTiles();
-  auto b = allOutputTiles.begin();
-  auto e = allOutputTiles.end();
-  if (b != e) {
-    // Discard all tiles that, at least partially, are outside of the image.
-    --e;
-    while (b != e && (*e).getRight() != dim.x)
-      --e;
-    ++e;
-  }
-  return {b, e};
+  auto first = allOutputTiles.begin();
+  auto end = allOutputTiles.end();
+  assert(first != end && "No tiles?");
+  auto final = first;
+  while (std::next(final) != end && (*final).getBottomRight() != dim)
+    ++final;
+  assert((*final).getBottomRight() == dim && "Bad tiling");
+  return {first, ++final};
 }
 
 template <typename HuffmanTable>
